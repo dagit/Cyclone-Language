@@ -52,6 +52,9 @@ Also, eventually I'd like to be able to do
 3. #defines
 In C, sonetimes #defined integer constants don't have parentheses around them.  This seems to confuse Cyclone, so put parentheses around them.  Blech.
 
+5/16/01
+In resnponse to Dan's request for more details, I looked around and couldn't find the exact place where this happens.  So, perhaps it went away, or perhaps it was some other problem.
+
 4. Warnings
 Don't be afraid to have warnings.  They just mean that Dan and Greg still have work to do.  In particular, use @ when it is appropriate, don't downgrade it to * just to get rid of warnings; warnings just meant that a check is happening that probably doesn't need to.
 
@@ -107,6 +110,10 @@ Anonymous structs are not supported yet, but when they are, maybe we could do:
   sp = new struct{.pref={prefix[0],prefix[1]},.suf=NULL,.next=statetab[h]};
 or, maybe we could use the defined type name.
 
+5/16/01 This now seems to work the way I think it should, that is, as follows:
+  sp = new _State{.pref={prefix[0],prefix[1]},.suf=NULL,.next=statetab[h]};
+
+
 7.  Standard library.
 Currently the standard library is not ported.  I assume part of the reason is that it has a lot of routines, like memmove, that are tricky to typecheck.  Too bad.  Every program in the universe uses the standard library.  Memmove is good.
 
@@ -141,13 +148,46 @@ and eventually we call
 
 I get the following type error:
 
+
 array2.cyc(14:2-14:8): actual argument has type char ?@{10}#66 but formal has type char ?*{10}
 
 This apears to be a bug, and programs that have this behavior cannot be ported until it is fixed.
 
 
-5/14/02: This seems to be almost fixed, but I still get the error:
+5/14/01: This seems to be almost fixed, but I still get the error:
 array2.cyc(14:2-14:8): actual argument has type char ?@{10}`main  but formal has type char ?*{10}
+
+5/16/01: The real problem appears to be that the function type
+  void f(string arr[10]);
+implicitly means "you must pass me an arr[10] that is allocated at the top level", that is, there's a hidden region parameter in the type.
+
+On the other hand, saying
+  string arr[10]; 
+inside "main" results in an array that is allocated in the `main region, thus 
+the above function cannot deal with it.
+
+The fix is to replace the above function type with
+  void f(string*{10}`r arr);
+This type says "this function expects an array of 10 strings which may come from an arbitrary region.  This type is more general than the original type.
+
+I have the following complaints about this situation:
+1. It requires explicit use of region stuff to do something simple that a large percentage of straight C programs actually do (namely, pass around arbitrary fixed-size arrays)
+2. Figuring out how to fix the problem required knowing that stack allocated stuff gets this hidden function-local region parameter which you can't (as far as I know) change.  I predict that normal C programmers, who are used to pointers being pointers no matter where they come from, will hate this.
+3. The hidden stuff seems to break the nice property that creating a function that takes a value of type t and then applying it to a value of (syntactically identical) type t actually is OK.
+
+Yes, I understand roughly why these things are the way they are, but nevertheless I formally complain.  Perhaps the real problem is that [] denotes something more restrictive in Cyclone than it does in C.  You can't (AFAIK) put a region variable on a [] array type in a function argument, ony a general {} type.  So (and I know this is not going to happen anytime soon) why not switch them?  C programmers are going to be used to [] denoting an arbitrary array, whereas {} doesn't mean anything so we are freer to make it mean something weird.  Secondly, why not make the default interpretation of 
+  void f(string*{10} arr)
+(or, equivalently I think, 
+  void f(string arr[10])
+)
+be 
+  void f(string*{10}`r arr)   /* where `r is an unused region variable */
+rather than 
+  void f(string*{10}`H arr)   /* that is, must be in the heap region */ 
+?
+
+It seems like if we're going to hide things in optional parameters, the least we could do is make what the optional parameters hide general enough so that you don't have to think about them.  
+
 
 
 10.  Anonymous structs.
@@ -166,4 +206,6 @@ In C, fgets returns NULL if there was an error, otherwise returns a pointer to t
 In Cyclone, fgets returns true (==1) if there was an error, false (== 0 == NULL) if the read succeeded.
 
 Why don't we want it to be the other way around?
+
+
 

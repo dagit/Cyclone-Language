@@ -13,7 +13,7 @@ using Character;
 
 void strings(string, FILE @);
 
-#define MINLEN (6)
+#define MINLEN 6
 
 /* strings main: find printable strings in files */
 int main(int argc, string ? argv)
