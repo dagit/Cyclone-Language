@@ -4,9 +4,6 @@ BUG FIXES and UNSOUNDNESSES:
 ----------------------------
 * FIX all of the FIX things.
 
-* seems to be a bug in definite assignment.  On line 490 of 
-  absynpp.cyc, delete the "s = " and the code type-checks...
-
 * are we treating void properly?
 
 * link-checking:  we need to spit out an internal interface for each

@@ -41,8 +41,8 @@ Cyc_Hashtable_table_t; extern struct Cyc_Hashtable_Table* Cyc_Hashtable_create(
 int sz, int(* cmp)( void*, void*), int(* hash)( void*)); extern void Cyc_Hashtable_insert(
 struct Cyc_Hashtable_Table* t, void* key, void* val); extern void* Cyc_Hashtable_lookup(
 struct Cyc_Hashtable_Table* t, void* key); extern int Cyc_Hashtable_hash_stringptr(
-struct _tagged_string* s); typedef void* Cyc_Fn_Function; extern const int Cyc_Fn_Fun_tag;
-struct Cyc_Fn_Fun_struct{ int tag; void*(* f1)( void*, void*); void* f2; } ;
+struct _tagged_string* s); typedef void* Cyc_Fn_Function; static const int Cyc_Fn_Fun_tag=
+0; struct Cyc_Fn_Fun_struct{ int tag; void*(* f1)( void*, void*); void* f2; } ;
 typedef void* Cyc_Fn_fn; extern void* Cyc_Fn_make_fn( void*(* f)( void*, void*),
 void* x); extern void* Cyc_Fn_fp2fn( void*(* f)( void*)); extern void* Cyc_Fn_apply(
 void* f, void* x); struct Cyc_PP_Ppstate; typedef struct Cyc_PP_Ppstate* Cyc_PP_ppstate_t;
@@ -71,55 +71,55 @@ Cyc_Xarray_xarray_t; extern int Cyc_Xarray_length( struct Cyc_Xarray_Xarray*);
 extern void* Cyc_Xarray_get( struct Cyc_Xarray_Xarray*, int); extern void Cyc_Xarray_set(
 struct Cyc_Xarray_Xarray*, int, void*); extern struct Cyc_Xarray_Xarray* Cyc_Xarray_create(
 int, void*); extern void Cyc_Xarray_add( struct Cyc_Xarray_Xarray*, void*);
-typedef void* Cyc_PP_Alist; const unsigned int Cyc_PP_Empty= 0; const int Cyc_PP_Single_tag=
-0; struct Cyc_PP_Single_struct{ int tag; void* f1; } ; const int Cyc_PP_Append_tag=
-1; struct Cyc_PP_Append_struct{ int tag; void* f1; void* f2; } ; typedef void*
-Cyc_PP_alist_t; void* Cyc_PP_append( void* a1, void* a2){ if( a1 ==( void*) Cyc_PP_Empty){
-return a2;} else{ if( a2 ==( void*) Cyc_PP_Empty){ return a1;} else{ return(
-void*)({ struct Cyc_PP_Append_struct* _temp0=( struct Cyc_PP_Append_struct*)
-GC_malloc( sizeof( struct Cyc_PP_Append_struct)); _temp0[ 0]=({ struct Cyc_PP_Append_struct
-_temp1; _temp1.tag= Cyc_PP_Append_tag; _temp1.f1=( void*) a1; _temp1.f2=( void*)
-a2; _temp1;}); _temp0;});}}} struct Cyc_List_List* Cyc_PP_list_of_alist_f( void*
-y, struct Cyc_List_List* l){ void* _temp2= y; void* _temp10; void* _temp12; void*
-_temp14; _LL4: if(( int) _temp2 == Cyc_PP_Empty){ goto _LL5;} else{ goto _LL6;}
-_LL6: if(( unsigned int) _temp2 > 1u?(( struct _tunion_struct*) _temp2)->tag ==
-Cyc_PP_Single_tag: 0){ _LL11: _temp10=( void*)(( struct Cyc_PP_Single_struct*)
-_temp2)->f1; goto _LL7;} else{ goto _LL8;} _LL8: if(( unsigned int) _temp2 > 1u?((
-struct _tunion_struct*) _temp2)->tag == Cyc_PP_Append_tag: 0){ _LL15: _temp14=(
-void*)(( struct Cyc_PP_Append_struct*) _temp2)->f1; goto _LL13; _LL13: _temp12=(
-void*)(( struct Cyc_PP_Append_struct*) _temp2)->f2; goto _LL9;} else{ goto _LL3;}
-_LL5: return l; _LL7: return({ struct Cyc_List_List* _temp16=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp16->hd=( void*) _temp10; _temp16->tl=
-l; _temp16;}); _LL9: return(( struct Cyc_List_List*(*)( void* y, struct Cyc_List_List*
-l)) Cyc_PP_list_of_alist_f)( _temp14,(( struct Cyc_List_List*(*)( void* y,
-struct Cyc_List_List* l)) Cyc_PP_list_of_alist_f)( _temp12, l)); _LL3:;} struct
-Cyc_List_List* Cyc_PP_list_of_alist( void* x){ return(( struct Cyc_List_List*(*)(
-void* y, struct Cyc_List_List* l)) Cyc_PP_list_of_alist_f)( x, 0);} struct Cyc_PP_Ppstate{
-int ci; int cc; int cl; int pw; int epw; } ; struct Cyc_PP_Out{ int newcc; int
-newcl; void* ppout; void* links; } ; struct Cyc_PP_Doc{ int mwo; int mw; void* f;
-} ; static void Cyc_PP_dump_out( struct Cyc_Stdio___sFILE* f, void* al){ struct
-Cyc_Xarray_Xarray* xarr=(( struct Cyc_Xarray_Xarray*(*)( int, void*)) Cyc_Xarray_create)(
-16, al);(( void(*)( struct Cyc_Xarray_Xarray*, void*)) Cyc_Xarray_add)( xarr, al);{
-int last= 0; while( last >= 0) { void* _temp17=(( void*(*)( struct Cyc_Xarray_Xarray*,
-int)) Cyc_Xarray_get)( xarr, last); struct _tagged_string* _temp25; void*
-_temp27; void* _temp29; _LL19: if(( int) _temp17 == Cyc_PP_Empty){ goto _LL20;}
-else{ goto _LL21;} _LL21: if(( unsigned int) _temp17 > 1u?(( struct
-_tunion_struct*) _temp17)->tag == Cyc_PP_Single_tag: 0){ _LL26: _temp25=( struct
-_tagged_string*)(( struct Cyc_PP_Single_struct*) _temp17)->f1; goto _LL22;}
-else{ goto _LL23;} _LL23: if(( unsigned int) _temp17 > 1u?(( struct
-_tunion_struct*) _temp17)->tag == Cyc_PP_Append_tag: 0){ _LL30: _temp29=( void*)((
-struct Cyc_PP_Append_struct*) _temp17)->f1; goto _LL28; _LL28: _temp27=( void*)((
-struct Cyc_PP_Append_struct*) _temp17)->f2; goto _LL24;} else{ goto _LL18;}
-_LL20: -- last; goto _LL18; _LL22: -- last;({ struct _tagged_string _temp31=*
-_temp25; fprintf( f,"%.*s", _temp31.last_plus_one - _temp31.curr, _temp31.curr);});
-goto _LL18; _LL24:(( void(*)( struct Cyc_Xarray_Xarray*, int, void*)) Cyc_Xarray_set)(
-xarr, last, _temp27); if( last ==(( int(*)( struct Cyc_Xarray_Xarray*)) Cyc_Xarray_length)(
-xarr) - 1){(( void(*)( struct Cyc_Xarray_Xarray*, void*)) Cyc_Xarray_add)( xarr,
-_temp29);} else{(( void(*)( struct Cyc_Xarray_Xarray*, int, void*)) Cyc_Xarray_set)(
-xarr, last + 1, _temp29);} ++ last; goto _LL18; _LL18:;}}} void Cyc_PP_file_of_doc(
-struct Cyc_PP_Doc* d, int w, struct Cyc_Stdio___sFILE* f){ struct Cyc_PP_Out* o=((
-struct Cyc_PP_Out*(*)( void* f, struct Cyc_PP_Ppstate* x)) Cyc_Fn_apply)(( void*)
-d->f,({ struct Cyc_PP_Ppstate* _temp32=( struct Cyc_PP_Ppstate*)
+typedef void* Cyc_PP_Alist; static const unsigned int Cyc_PP_Empty= 0; static
+const int Cyc_PP_Single_tag= 0; struct Cyc_PP_Single_struct{ int tag; void* f1;
+} ; static const int Cyc_PP_Append_tag= 1; struct Cyc_PP_Append_struct{ int tag;
+void* f1; void* f2; } ; typedef void* Cyc_PP_alist_t; void* Cyc_PP_append( void*
+a1, void* a2){ if( a1 ==( void*) Cyc_PP_Empty){ return a2;} else{ if( a2 ==(
+void*) Cyc_PP_Empty){ return a1;} else{ return( void*)({ struct Cyc_PP_Append_struct*
+_temp0=( struct Cyc_PP_Append_struct*) GC_malloc( sizeof( struct Cyc_PP_Append_struct));
+_temp0[ 0]=({ struct Cyc_PP_Append_struct _temp1; _temp1.tag= Cyc_PP_Append_tag;
+_temp1.f1=( void*) a1; _temp1.f2=( void*) a2; _temp1;}); _temp0;});}}} struct
+Cyc_List_List* Cyc_PP_list_of_alist_f( void* y, struct Cyc_List_List* l){ void*
+_temp2= y; void* _temp10; void* _temp12; void* _temp14; _LL4: if(( int) _temp2
+== Cyc_PP_Empty){ goto _LL5;} else{ goto _LL6;} _LL6: if(( unsigned int) _temp2
+> 1u?(( struct _tunion_struct*) _temp2)->tag == Cyc_PP_Single_tag: 0){ _LL11:
+_temp10=( void*)(( struct Cyc_PP_Single_struct*) _temp2)->f1; goto _LL7;} else{
+goto _LL8;} _LL8: if(( unsigned int) _temp2 > 1u?(( struct _tunion_struct*)
+_temp2)->tag == Cyc_PP_Append_tag: 0){ _LL15: _temp14=( void*)(( struct Cyc_PP_Append_struct*)
+_temp2)->f1; goto _LL13; _LL13: _temp12=( void*)(( struct Cyc_PP_Append_struct*)
+_temp2)->f2; goto _LL9;} else{ goto _LL3;} _LL5: return l; _LL7: return({ struct
+Cyc_List_List* _temp16=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp16->hd=( void*) _temp10; _temp16->tl= l; _temp16;}); _LL9: return(( struct
+Cyc_List_List*(*)( void* y, struct Cyc_List_List* l)) Cyc_PP_list_of_alist_f)(
+_temp14,(( struct Cyc_List_List*(*)( void* y, struct Cyc_List_List* l)) Cyc_PP_list_of_alist_f)(
+_temp12, l)); _LL3:;} struct Cyc_List_List* Cyc_PP_list_of_alist( void* x){
+return(( struct Cyc_List_List*(*)( void* y, struct Cyc_List_List* l)) Cyc_PP_list_of_alist_f)(
+x, 0);} struct Cyc_PP_Ppstate{ int ci; int cc; int cl; int pw; int epw; } ;
+struct Cyc_PP_Out{ int newcc; int newcl; void* ppout; void* links; } ; struct
+Cyc_PP_Doc{ int mwo; int mw; void* f; } ; static void Cyc_PP_dump_out( struct
+Cyc_Stdio___sFILE* f, void* al){ struct Cyc_Xarray_Xarray* xarr=(( struct Cyc_Xarray_Xarray*(*)(
+int, void*)) Cyc_Xarray_create)( 16, al);(( void(*)( struct Cyc_Xarray_Xarray*,
+void*)) Cyc_Xarray_add)( xarr, al);{ int last= 0; while( last >= 0) { void*
+_temp17=(( void*(*)( struct Cyc_Xarray_Xarray*, int)) Cyc_Xarray_get)( xarr,
+last); struct _tagged_string* _temp25; void* _temp27; void* _temp29; _LL19: if((
+int) _temp17 == Cyc_PP_Empty){ goto _LL20;} else{ goto _LL21;} _LL21: if((
+unsigned int) _temp17 > 1u?(( struct _tunion_struct*) _temp17)->tag == Cyc_PP_Single_tag:
+0){ _LL26: _temp25=( struct _tagged_string*)(( struct Cyc_PP_Single_struct*)
+_temp17)->f1; goto _LL22;} else{ goto _LL23;} _LL23: if(( unsigned int) _temp17
+> 1u?(( struct _tunion_struct*) _temp17)->tag == Cyc_PP_Append_tag: 0){ _LL30:
+_temp29=( void*)(( struct Cyc_PP_Append_struct*) _temp17)->f1; goto _LL28; _LL28:
+_temp27=( void*)(( struct Cyc_PP_Append_struct*) _temp17)->f2; goto _LL24;}
+else{ goto _LL18;} _LL20: -- last; goto _LL18; _LL22: -- last;({ struct
+_tagged_string _temp31=* _temp25; fprintf( f,"%.*s", _temp31.last_plus_one -
+_temp31.curr, _temp31.curr);}); goto _LL18; _LL24:(( void(*)( struct Cyc_Xarray_Xarray*,
+int, void*)) Cyc_Xarray_set)( xarr, last, _temp27); if( last ==(( int(*)( struct
+Cyc_Xarray_Xarray*)) Cyc_Xarray_length)( xarr) - 1){(( void(*)( struct Cyc_Xarray_Xarray*,
+void*)) Cyc_Xarray_add)( xarr, _temp29);} else{(( void(*)( struct Cyc_Xarray_Xarray*,
+int, void*)) Cyc_Xarray_set)( xarr, last + 1, _temp29);} ++ last; goto _LL18;
+_LL18:;}}} void Cyc_PP_file_of_doc( struct Cyc_PP_Doc* d, int w, struct Cyc_Stdio___sFILE*
+f){ struct Cyc_PP_Out* o=(( struct Cyc_PP_Out*(*)( void* f, struct Cyc_PP_Ppstate*
+x)) Cyc_Fn_apply)(( void*) d->f,({ struct Cyc_PP_Ppstate* _temp32=( struct Cyc_PP_Ppstate*)
 GC_malloc_atomic( sizeof( struct Cyc_PP_Ppstate)); _temp32->ci= 0; _temp32->cc=
 0; _temp32->cl= 1; _temp32->pw= w; _temp32->epw= w; _temp32;})); Cyc_PP_dump_out(
 f,( void*) o->ppout);} struct _tagged_string Cyc_PP_string_of_doc( struct Cyc_PP_Doc*

@@ -1143,47 +1143,29 @@ static type_t tcXTunion(tenv_t te, seg_t loc, type_t *`r topt,
                              qvar2string(ef->name)));
   return res;
 }
-static type_t tcMalloc(tenv_t te, seg_t loc, type_t *`r topt, mallocarg_t @ ma_ptr) {
-  switch (*ma_ptr) {
-  case &Typ_m(t):
-    check_type(loc,te,lookup_type_vars(te),MemKind,t);
-    // Avoid casts when we're passed down a nullable type
-    let ptr_maker = at_typ;
-    if(topt != null)
-      switch (compress(*topt)) {
-      case &PointerType(PtrInfo{_,_,n,_,_}): 
-	if(conref_val(n))
-	  ptr_maker = star_typ; 
-	break;
-      default: break;
-      }
-    return ptr_maker(t,HeapRgn,empty_tqual());
-  case &Unresolved_m(qv):
-    try switch(lookup_ordinary(te,loc,qv)) {
-    case &TunionRes(ed,ef): 
-      *ma_ptr = new Tunion_m(ed,ef);
-      return tcMalloc(te,loc,topt,ma_ptr);
-    case &XTunionRes(xed,ef):
-      *ma_ptr = new XTunion_m(xed,ef);
-      return tcMalloc(te,loc,topt,ma_ptr);
-    default: break;
-    } catch { case &Dict::Absent: break; }
-    terr(loc,xprintf("malloc argument %s is neither a type nor a variant",
-		     qvar2string(qv)));
-    if(topt != null)
-      return *topt;
-    return VoidType;
-  case &Tunion_m(ed,ef):  
-    terr(loc,"malloc of tunion variant not yet implemented");
-    // FIX: what about existential tyvars
-    let all_inst = List::map(make_inst_var,ed->tvs);
-    let all_typs = List::map(snd,all_inst);
-    return new TunionType(TunionInfo{ed->name->v, all_typs, HeapRgn, ed});
-  case &XTunion_m(xd,ef): 
-    terr(loc,"malloc of xtunion variant not yet implemented");
-    // FIX: what about existential tyvars
-    return new XTunionType(XTunionInfo{xd->name, HeapRgn, xd});
+static type_t tcMalloc(tenv_t te, seg_t loc, type_t *`r topt, type_t t) {
+  check_type(loc,te,lookup_type_vars(te),MemKind,t);
+  // Don't yet support existential types (to do it, add to TunionFieldInfo
+  // and XTunionFieldInfo and here generate fresh evars).
+  switch(t) {
+  case &TunionFieldType(TunionFieldInfo(_,_,_,_,tufd)): fallthru(tufd);
+  case &XTunionFieldType(XTunionFieldInfo(_,_,_,tufd)):
+    if(tufd->tvs != null)
+      terr(loc,"malloc with existential types not yet implemented");
+    break;
+  default: break;
   }
+  // Avoid casts when we're passed down a nullable type
+  let ptr_maker = at_typ;
+  if(topt != null)
+    switch (compress(*topt)) {
+    case &PointerType(PtrInfo{_,_,n,_,_}): 
+      if(conref_val(n))
+	ptr_maker = star_typ; 
+      break;
+    default: break;
+    }
+  return ptr_maker(t,HeapRgn,empty_tqual());
 }
 // ({ s })
 static type_t tcStmtExp(tenv_t te, seg_t loc, type_t *`r topt, stmt_t s) {
@@ -1494,8 +1476,8 @@ static void tcExpNoInst(tenv_t te, type_t *`r topt, exp_t e) {
     t = tcXTunion(te,loc,topt,exist_ref,es,xd,ef); break;
   case &Enum_e(q,ed,ef):
     t = new EnumType(ed->name,ed); break;
-  case &Malloc_e(*ma_ptr):
-    t = tcMalloc(te,loc,topt,ma_ptr); break;
+  case &Malloc_e(t2):
+    t = tcMalloc(te,loc,topt,t2); break;
   }
   e->topt = new Opt(t);
 }

@@ -105,7 +105,6 @@ namespace Absyn {
   extern xtunion StmtAnnot;
   extern tunion Attribute;
   extern struct Structfield;
-  extern tunion Mallocarg;
 
   typedef tunion Scope scope_t;
   typedef struct Tqual @tqual_t;
@@ -153,7 +152,6 @@ namespace Absyn {
   typedef tunion Attribute attribute_t;
   typedef list_t<attribute_t> attributes_t;
   typedef struct Structfield @structfield_t;
-  typedef tunion Mallocarg mallocarg_t;
 
   EXTERN_DEFINITION tunion Nmspace {
     Loc_n,                  // Local name
@@ -337,17 +335,6 @@ namespace Absyn {
 
   EXTERN_DEFINITION tunion Incrementor { PreInc, PostInc, PreDec, PostDec };
 
-  EXTERN_DEFINITION tunion Mallocarg { 
-    Typ_m(type_t);
-    Unresolved_m(qvar_t);
-    // for remaining cases, what about existential type variables???
-    // wait -- this doesn't work -- how will we assign the fields!
-    // need a type of the variant and then allow assign of fully init to the
-    // tunion type!
-    Tunion_m(tuniondecl_t,tunionfield_t); // instantiation irrelevant, I think
-    XTunion_m(xtuniondecl_t,tunionfield_t);// instantiation irrelevant, I think
-  };
-
   EXTERN_DEFINITION tunion Raw_exp {
     Const_e(cnst_t);
     Var_e(qvar_t,binding_t); 
@@ -382,7 +369,7 @@ namespace Absyn {
              tuniondecl_t,tunionfield_t);
     XTunion_e(opt_t<list_t<type_t>>,list_t<exp_t>,xtuniondecl_t,tunionfield_t);
     Enum_e(qvar_t,struct Enumdecl *,struct Enumfield *);
-    Malloc_e(mallocarg_t);
+    Malloc_e(type_t);
     UnresolvedMem_e(opt_t<typedef_name_t>,
                     list_t<$(list_t<designator_t>,exp_t)@>);
     StmtExp_e(stmt_t);

@@ -511,14 +511,9 @@ void dumpexp_prec(int inprec, exp_t e) {
 
   case &Enum_e(n,_,_): dumpqvar(n); break;
 
-  case &Malloc_e(ma):
+  case &Malloc_e(t):
     dump("malloc(sizeof(");
-    switch(ma) {
-    case &Typ_m(t):         dumptyp(t); break;
-    case &Tunion_m(_,ef):     fallthru(ef);
-    case &XTunion_m(_,ef):    fallthru(ef->name);
-    case &Unresolved_m(qv): dumpqvar(qv); break;
-    }
+    dumptyp(t); 
     dump("))");
     break;
 

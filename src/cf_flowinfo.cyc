@@ -31,7 +31,7 @@ static tunion PathInfo.LeafPI leaf_unesc_all_v = LeafPI(&unknownis_unes_allil);
 static tunion PathInfo.LeafPI leaf_esc_none_v = LeafPI(&unknownis_esc_noneil);
 static tunion PathInfo.LeafPI leaf_esc_this_v = LeafPI(&unknownis_esc_thisil);
 static tunion PathInfo.LeafPI leaf_esc_all_v = LeafPI(&unknownis_esc_allil);
-path_info_t leaf_unesc_none = &leaf_unesc_all_v;
+path_info_t leaf_unesc_none = &leaf_unesc_none_v;
 path_info_t leaf_unesc_this = &leaf_unesc_this_v;
 path_info_t leaf_unesc_all  = &leaf_unesc_all_v;
 path_info_t leaf_esc_none   = &leaf_esc_none_v;
@@ -84,6 +84,8 @@ int place_cmp(place_t p1, place_t p2) {
 //   (If we ever have memory kinds, then we either need to figure out field's
 //    instantiated types or not allow partial initialization of such fields.)
 // Note: We could memoize answers here, but it doesn't seem important.
+// Note: When tunionfields can be partially initialized, we'll need to support
+//       that too.
 path_info_t typ_to_unesc_none_pinfo(type_t t) {
   switch(Tcutil::compress(t)) {
   case &TupleType(tqts):

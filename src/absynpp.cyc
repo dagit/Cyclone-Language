@@ -826,17 +826,10 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &Enum_e(n,_,_):
     s = qvar2doc(n);
     break;
-  case &Malloc_e(ma):
+  case &Malloc_e(t):
     // Note: This is for Cyclone's malloc, not the mallocs introduced during
     //       translation to C, which are function calls.
-    doc_t inner_d;
-    switch(ma) {
-    case &Typ_m(t):         inner_d = typ2doc(t); break;
-    case &Tunion_m(_,ef):     fallthru(ef);
-    case &XTunion_m(_,ef):    fallthru(ef->name);
-    case &Unresolved_m(qv): inner_d = qvar2doc(qv); break;
-    }
-    s = cat3(text("malloc(sizeof("), inner_d, text("))"));
+    s = cat3(text("malloc(sizeof("), typ2doc(t), text("))"));
     break;
   case &UnresolvedMem_e(n,des):
     // Currently n is always null from the parser

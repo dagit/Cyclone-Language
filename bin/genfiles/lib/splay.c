@@ -21,12 +21,11 @@ extern char Cyc_List_List_empty_tag[ 11u]; struct Cyc_List_List_empty_struct{
 char* tag; } ; extern char Cyc_List_List_mismatch_tag[ 14u]; struct Cyc_List_List_mismatch_struct{
 char* tag; } ; extern char Cyc_List_Nth_tag[ 4u]; struct Cyc_List_Nth_struct{
 char* tag; } ; struct Cyc_Splay_node; struct Cyc_Splay_noderef{ struct Cyc_Splay_node*
-v; } ; typedef void* Cyc_Splay_tree; extern const unsigned int Cyc_Splay_Leaf;
-extern const int Cyc_Splay_Node_tag; struct Cyc_Splay_Node_struct{ int tag;
+v; } ; typedef void* Cyc_Splay_tree; static const unsigned int Cyc_Splay_Leaf= 0;
+static const int Cyc_Splay_Node_tag= 0; struct Cyc_Splay_Node_struct{ int tag;
 struct Cyc_Splay_noderef* f1; } ; struct Cyc_Splay_node{ void* key; void* data;
 void* left; void* right; } ; extern int Cyc_Splay_splay( int(* f)( void*, void*),
-void*, void*); const unsigned int Cyc_Splay_Leaf= 0; const int Cyc_Splay_Node_tag=
-0; typedef void* Cyc_Splay_direction; static const unsigned int Cyc_Splay_LEFT=
+void*, void*); typedef void* Cyc_Splay_direction; static const unsigned int Cyc_Splay_LEFT=
 0; static const unsigned int Cyc_Splay_RIGHT= 1; static void Cyc_Splay_rotate_left(
 struct Cyc_Splay_noderef* nr){ struct Cyc_Splay_node* n= nr->v; void* _temp0=(
 void*) n->left; struct Cyc_Splay_noderef* _temp6; _LL2: if(( unsigned int)

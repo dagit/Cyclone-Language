@@ -1873,12 +1873,10 @@ static void exp_to_c(env_t nv, exp_t e) {
 
   case &Enum_e(_,_,_): break;
 
-  case &Malloc_e(&Typ_m(t)): 
+  case &Malloc_e(t): 
     type_t t_c = typ_to_c(t);
     e->r = malloc_exp(t, sizeoftyp_exp(t_c,DL))->r;
     break;
-
-  case &Malloc_e(_): toc_impos("unimplemented Malloc_e form"); break;
 
   case &StmtExp_e(s): stmt_to_c(nv,s);  break;
   case &UnresolvedMem_e(_,_): toc_impos("UnresolvedMem"); break;
@@ -2641,7 +2639,7 @@ static list_t<decl_t> tuniondecl_to_c(tuniondecl_t ed, list_t<decl_t> res) {
     seen_before = true;
     if (dopt->v->fields == null) {
       seen_defn_before = false;
-      Dict::insert(tunions_so_far->v,(*n)[1],ed);
+      tunions_so_far->v = Dict::insert(tunions_so_far->v,(*n)[1],ed);
     } else
       seen_defn_before = true;
   }
@@ -2651,37 +2649,36 @@ static list_t<decl_t> tuniondecl_to_c(tuniondecl_t ed, list_t<decl_t> res) {
     let tdef = new Typedefdecl{.name=n,.tvs=null,.defn=void_star_typ()};
     res = new List(new_decl(new Typedef_d(tdef),DL),res);
   }
-  type_t t = new TypedefType(n,null,new Opt(void_star_typ()));
-  // counters for the tags
-  int tag_count = 0;
-  int box_count = 0;
-  for (let fields = (ed->fields == null) ? null : ed->fields->v;
-       fields != null; fields = fields->tl) {
-    tunionfield_t f = fields->hd;
-    if (f->typs == null) {
-      // Declare an integer constant for the unboxed field
-      exp_opt_t eopt = ((ed->sc == Extern) ? null : 
-                        signed_int_exp(tag_count++,DL));
-      let vd = new_vardecl(f->name, uint_t, eopt);
-      vd->sc = scope_to_c(ed->sc);
-      vd->tq = new Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
-      res = new List(new_decl(new Var_d(vd),DL),res);
-    } else {
-      // Declare an integer constant for the tag and a struct for the field
-      exp_opt_t eopt = ((ed->sc == Extern) ? null : 
-			signed_int_exp(box_count++,DL));
-      let vd = new_vardecl(collapse_qvar_tag(f->name,"_tag"), sint_t, eopt);
-      vd->sc = scope_to_c(ed->sc);
-      vd->tq = new Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
-      res = new List(new_decl(new Var_d(vd),DL),res);
-      // compute the fields for the struct, adding in a tag field
-      if (!seen_defn_before) {
+  if(!seen_defn_before) {
+    // counters for the tags
+    int tag_count = 0;
+    int box_count = 0;
+    for (let fields = (ed->fields == null) ? null : ed->fields->v;
+	 fields != null; fields = fields->tl) {
+      tunionfield_t f = fields->hd;
+      if (f->typs == null) {
+	// Declare an integer constant for the unboxed field
+	exp_opt_t eopt = (//(ed->sc == Extern) ? null : 
+			  signed_int_exp(tag_count++,DL));
+	let vd = static_vardecl(f->name, uint_t, eopt);
+	//	vd->sc = scope_to_c(ed->sc);
+	vd->tq = new Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
+	res = new List(new_decl(new Var_d(vd),DL),res);
+      } else {
+	// Declare an integer constant for the tag and a struct for the field
+	exp_opt_t eopt = (//(ed->sc == Extern) ? null : 
+			  signed_int_exp(box_count++,DL));
+	let vd = static_vardecl(collapse_qvar_tag(f->name,"_tag"), sint_t, eopt);
+	//	vd->sc = scope_to_c(ed->sc);
+	vd->tq = new Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
+	res = new List(new_decl(new Var_d(vd),DL),res);
+	// compute the fields for the struct, adding in a tag field
         let fs = null;
         int i  = 1;
         for (let ts = f->typs; ts != null; ts = ts->tl, i++) {
-          let fname = (stringptr)(new {xprintf("f%d",i)});
+          let fname = (stringptr)(new xprintf("f%d",i));
           let f = new Structfield(fname,(*ts->hd)[0],
-                               typ_to_c_array((*ts->hd)[1]),null,null);
+				  typ_to_c_array((*ts->hd)[1]),null,null);
           fs = new List(f,fs);
         }
         fs = List::imp_rev(fs);

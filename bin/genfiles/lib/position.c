@@ -42,11 +42,11 @@ extern struct Cyc_Position_Segment* Cyc_Position_segment_join( struct Cyc_Positi
 struct Cyc_Position_Segment*); extern struct _tagged_string Cyc_Position_string_of_loc(
 int); extern struct _tagged_string Cyc_Position_string_of_segment( struct Cyc_Position_Segment*);
 extern struct Cyc_List_List* Cyc_Position_strings_of_segments( struct Cyc_List_List*);
-typedef void* Cyc_Position_Error_kind; extern const unsigned int Cyc_Position_Lex;
-extern const unsigned int Cyc_Position_Parse; extern const unsigned int Cyc_Position_Elab;
-typedef void* Cyc_Position_error_kind_t; struct Cyc_Position_Error{ struct
-_tagged_string source; struct Cyc_Position_Segment* seg; void* kind; struct
-_tagged_string desc; } ; typedef struct Cyc_Position_Error* Cyc_Position_error_t;
+typedef void* Cyc_Position_Error_kind; static const unsigned int Cyc_Position_Lex=
+0; static const unsigned int Cyc_Position_Parse= 1; static const unsigned int
+Cyc_Position_Elab= 2; typedef void* Cyc_Position_error_kind_t; struct Cyc_Position_Error{
+struct _tagged_string source; struct Cyc_Position_Segment* seg; void* kind;
+struct _tagged_string desc; } ; typedef struct Cyc_Position_Error* Cyc_Position_error_t;
 extern struct Cyc_Position_Error* Cyc_Position_mk_err_lex( struct Cyc_Position_Segment*,
 struct _tagged_string); extern struct Cyc_Position_Error* Cyc_Position_mk_err_parse(
 struct Cyc_Position_Segment*, struct _tagged_string); extern struct Cyc_Position_Error*
@@ -123,32 +123,31 @@ GC_malloc( sizeof( struct Cyc_List_List)); _temp35->hd=( void*)({ struct
 _tagged_string* _temp36=( struct _tagged_string*) GC_malloc( sizeof( struct
 _tagged_string) * 1); _temp36[ 0]= Cyc_Position_string_of_pos_pr((*(( struct
 _tuple0*) places->hd)).f2,(*(( struct _tuple0*)( places->tl)->hd)).f2); _temp36;});
-_temp35->tl= ans; _temp35;}); places=( places->tl)->tl;}} return ans;}} const
-unsigned int Cyc_Position_Lex= 0; const unsigned int Cyc_Position_Parse= 1;
-const unsigned int Cyc_Position_Elab= 2; struct Cyc_Position_Error; struct Cyc_Position_Error*
-Cyc_Position_mk_err_lex( struct Cyc_Position_Segment* l, struct _tagged_string
-desc){ return({ struct Cyc_Position_Error* _temp37=( struct Cyc_Position_Error*)
-GC_malloc( sizeof( struct Cyc_Position_Error)); _temp37->source= Cyc_Position_source;
-_temp37->seg= l; _temp37->kind=( void*)(( void*) Cyc_Position_Lex); _temp37->desc=
-desc; _temp37;});} struct Cyc_Position_Error* Cyc_Position_mk_err_parse( struct
+_temp35->tl= ans; _temp35;}); places=( places->tl)->tl;}} return ans;}} struct
+Cyc_Position_Error; struct Cyc_Position_Error* Cyc_Position_mk_err_lex( struct
 Cyc_Position_Segment* l, struct _tagged_string desc){ return({ struct Cyc_Position_Error*
-_temp38=( struct Cyc_Position_Error*) GC_malloc( sizeof( struct Cyc_Position_Error));
-_temp38->source= Cyc_Position_source; _temp38->seg= l; _temp38->kind=( void*)((
-void*) Cyc_Position_Parse); _temp38->desc= desc; _temp38;});} struct Cyc_Position_Error*
-Cyc_Position_mk_err_elab( struct Cyc_Position_Segment* l, struct _tagged_string
-desc){ return({ struct Cyc_Position_Error* _temp39=( struct Cyc_Position_Error*)
-GC_malloc( sizeof( struct Cyc_Position_Error)); _temp39->source= Cyc_Position_source;
-_temp39->seg= l; _temp39->kind=( void*)(( void*) Cyc_Position_Elab); _temp39->desc=
-desc; _temp39;});} char Cyc_Position_Nocontext_tag[ 10u]="Nocontext"; static
-struct _tagged_string Cyc_Position_trunc( int n, struct _tagged_string s){ int
-len=( int) Cyc_String_strlen( s); if( len < n){ return s;}{ int len_one=( n - 3)
-/ 2; int len_two=( n - 3) - len_one; struct _tagged_string ans= Cyc_Core_new_string(
-n + 1); Cyc_String_strncpy( ans, 0, s, 0,( unsigned int) len_one); Cyc_String_strncpy(
-ans, len_one,( struct _tagged_string)({ char* _temp40=( char*)"..."; struct
-_tagged_string _temp41; _temp41.curr= _temp40; _temp41.base= _temp40; _temp41.last_plus_one=
-_temp40 + 4; _temp41;}), 0,( unsigned int) 3); Cyc_String_strncpy( ans, len_one
-+ 3, s, len - len_two,( unsigned int) len_two); return ans;}} static int Cyc_Position_line_length=
-76; static struct _tuple1* Cyc_Position_get_context( struct Cyc_Position_Segment*
+_temp37=( struct Cyc_Position_Error*) GC_malloc( sizeof( struct Cyc_Position_Error));
+_temp37->source= Cyc_Position_source; _temp37->seg= l; _temp37->kind=( void*)((
+void*) Cyc_Position_Lex); _temp37->desc= desc; _temp37;});} struct Cyc_Position_Error*
+Cyc_Position_mk_err_parse( struct Cyc_Position_Segment* l, struct _tagged_string
+desc){ return({ struct Cyc_Position_Error* _temp38=( struct Cyc_Position_Error*)
+GC_malloc( sizeof( struct Cyc_Position_Error)); _temp38->source= Cyc_Position_source;
+_temp38->seg= l; _temp38->kind=( void*)(( void*) Cyc_Position_Parse); _temp38->desc=
+desc; _temp38;});} struct Cyc_Position_Error* Cyc_Position_mk_err_elab( struct
+Cyc_Position_Segment* l, struct _tagged_string desc){ return({ struct Cyc_Position_Error*
+_temp39=( struct Cyc_Position_Error*) GC_malloc( sizeof( struct Cyc_Position_Error));
+_temp39->source= Cyc_Position_source; _temp39->seg= l; _temp39->kind=( void*)((
+void*) Cyc_Position_Elab); _temp39->desc= desc; _temp39;});} char Cyc_Position_Nocontext_tag[
+10u]="Nocontext"; static struct _tagged_string Cyc_Position_trunc( int n, struct
+_tagged_string s){ int len=( int) Cyc_String_strlen( s); if( len < n){ return s;}{
+int len_one=( n - 3) / 2; int len_two=( n - 3) - len_one; struct _tagged_string
+ans= Cyc_Core_new_string( n + 1); Cyc_String_strncpy( ans, 0, s, 0,(
+unsigned int) len_one); Cyc_String_strncpy( ans, len_one,( struct _tagged_string)({
+char* _temp40=( char*)"..."; struct _tagged_string _temp41; _temp41.curr=
+_temp40; _temp41.base= _temp40; _temp41.last_plus_one= _temp40 + 4; _temp41;}),
+0,( unsigned int) 3); Cyc_String_strncpy( ans, len_one + 3, s, len - len_two,(
+unsigned int) len_two); return ans;}} static int Cyc_Position_line_length= 76;
+static struct _tuple1* Cyc_Position_get_context( struct Cyc_Position_Segment*
 seg){ if( seg == 0){( void) _throw(( struct _xtunion_struct*)({ struct Cyc_Position_Nocontext_struct*
 _temp42=( struct Cyc_Position_Nocontext_struct*) GC_malloc( sizeof( struct Cyc_Position_Nocontext_struct));
 _temp42[ 0]=({ struct Cyc_Position_Nocontext_struct _temp43; _temp43.tag= Cyc_Position_Nocontext_tag;

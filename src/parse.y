@@ -2364,10 +2364,8 @@ unary_expression:
 | format_primop '(' argument_expression_list ')'
     { $$=^$(primop_exp($1,$3,LOC(@1,@4))); }
 | MALLOC '(' SIZEOF '(' specifier_qualifier_list ')' ')'
-{ $$=^$(new_exp(new Malloc_e(new Typ_m(speclist2typ((*$5)[1],LOC(@5,@5)))), 
+{ $$=^$(new_exp(new Malloc_e(speclist2typ((*$5)[1],LOC(@5,@5))), 
                 LOC(@1,@7))); }
-| MALLOC '(' SIZEOF '(' qual_opt_identifier ')' ')'
-{ $$=^$(new_exp(new Malloc_e(new Unresolved_m($5)),LOC(@1,@7))); }
 ;
 
 format_primop:

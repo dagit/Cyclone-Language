@@ -31,24 +31,22 @@ char* tag; } ; extern char Cyc_List_Nth_tag[ 4u]; struct Cyc_List_Nth_struct{
 char* tag; } ; extern int Cyc_String_strcmp( struct _tagged_string s1, struct
 _tagged_string s2); extern char Cyc_Arg_Error_tag[ 6u]; struct Cyc_Arg_Error_struct{
 char* tag; } ; extern char Cyc_Arg_Bad_tag[ 4u]; struct Cyc_Arg_Bad_struct{ char*
-tag; struct _tagged_string f1; } ; typedef void* Cyc_Arg_Spec; extern const int
-Cyc_Arg_Unit_spec_tag; struct Cyc_Arg_Unit_spec_struct{ int tag; void(* f1)(); }
-; extern const int Cyc_Arg_Set_spec_tag; struct Cyc_Arg_Set_spec_struct{ int tag;
-int* f1; } ; extern const int Cyc_Arg_Clear_spec_tag; struct Cyc_Arg_Clear_spec_struct{
-int tag; int* f1; } ; extern const int Cyc_Arg_String_spec_tag; struct Cyc_Arg_String_spec_struct{
-int tag; void(* f1)( struct _tagged_string); } ; extern const int Cyc_Arg_Int_spec_tag;
-struct Cyc_Arg_Int_spec_struct{ int tag; void(* f1)( int); } ; extern const int
-Cyc_Arg_Rest_spec_tag; struct Cyc_Arg_Rest_spec_struct{ int tag; void(* f1)(
-struct _tagged_string); } ; typedef void* Cyc_Arg_gspec_t; typedef void* Cyc_Arg_spec_t;
-extern void Cyc_Arg_usage( struct Cyc_List_List*, struct _tagged_string); extern
-int Cyc_Arg_current; extern void Cyc_Arg_parse( struct Cyc_List_List* specs,
-void(* anonfun)( struct _tagged_string), struct _tagged_string errmsg); char Cyc_Arg_Error_tag[
-6u]="Error"; char Cyc_Arg_Bad_tag[ 4u]="Bad"; const int Cyc_Arg_Unit_spec_tag= 0;
-const int Cyc_Arg_Set_spec_tag= 1; const int Cyc_Arg_Clear_spec_tag= 2; const
-int Cyc_Arg_String_spec_tag= 3; const int Cyc_Arg_Int_spec_tag= 4; const int Cyc_Arg_Rest_spec_tag=
-5; typedef void* Cyc_Arg_error; static const int Cyc_Arg_Unknown_tag= 0; struct
-Cyc_Arg_Unknown_struct{ int tag; struct _tagged_string f1; } ; static const int
-Cyc_Arg_Missing_tag= 1; struct Cyc_Arg_Missing_struct{ int tag; struct
+tag; struct _tagged_string f1; } ; typedef void* Cyc_Arg_Spec; static const int
+Cyc_Arg_Unit_spec_tag= 0; struct Cyc_Arg_Unit_spec_struct{ int tag; void(* f1)();
+} ; static const int Cyc_Arg_Set_spec_tag= 1; struct Cyc_Arg_Set_spec_struct{
+int tag; int* f1; } ; static const int Cyc_Arg_Clear_spec_tag= 2; struct Cyc_Arg_Clear_spec_struct{
+int tag; int* f1; } ; static const int Cyc_Arg_String_spec_tag= 3; struct Cyc_Arg_String_spec_struct{
+int tag; void(* f1)( struct _tagged_string); } ; static const int Cyc_Arg_Int_spec_tag=
+4; struct Cyc_Arg_Int_spec_struct{ int tag; void(* f1)( int); } ; static const
+int Cyc_Arg_Rest_spec_tag= 5; struct Cyc_Arg_Rest_spec_struct{ int tag; void(*
+f1)( struct _tagged_string); } ; typedef void* Cyc_Arg_gspec_t; typedef void*
+Cyc_Arg_spec_t; extern void Cyc_Arg_usage( struct Cyc_List_List*, struct
+_tagged_string); extern int Cyc_Arg_current; extern void Cyc_Arg_parse( struct
+Cyc_List_List* specs, void(* anonfun)( struct _tagged_string), struct
+_tagged_string errmsg); char Cyc_Arg_Error_tag[ 6u]="Error"; char Cyc_Arg_Bad_tag[
+4u]="Bad"; typedef void* Cyc_Arg_error; static const int Cyc_Arg_Unknown_tag= 0;
+struct Cyc_Arg_Unknown_struct{ int tag; struct _tagged_string f1; } ; static
+const int Cyc_Arg_Missing_tag= 1; struct Cyc_Arg_Missing_struct{ int tag; struct
 _tagged_string f1; } ; static const int Cyc_Arg_Message_tag= 2; struct Cyc_Arg_Message_struct{
 int tag; struct _tagged_string f1; } ; static const int Cyc_Arg_Wrong_tag= 3;
 struct Cyc_Arg_Wrong_struct{ int tag; struct _tagged_string f1; struct

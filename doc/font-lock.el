@@ -2309,7 +2309,7 @@ See also `c-font-lock-extra-types'.")
     (concat "\\<\\(" c-keywords "\\|" c-type-specs "\\)\\>")
     ;;
     ;; Fontify case/goto keywords and targets, and case default/goto tags.
-    '("\\<\\(case\\|goto\\)\\>[ \t]*\\(-?\\sw+\\)?"
+    '("\\\<\\(case\\|goto\\)\\\>[ \t]+\\(-?\\sw+\\)?"
       (1 font-lock-keyword-face) (2 font-lock-constant-face nil t))
     ;; Anders Lindgren <andersl@andersl.com> points out that it is quicker to
     ;; use MATCH-ANCHORED to effectively anchor the regexp on the left.
@@ -2448,7 +2448,7 @@ See also `c++-font-lock-extra-types'.")
        (c++-type-specs
 	(eval-when-compile
 	  (regexp-opt
-	   '("xenum"
+	   '("tunion" "xtunion"
 	     "class" "public" "private" "protected" "typename"
 	     "struct" "union" "enum" "namespace" "using"
 	     ;; Eric Hopper <hopper@omnifarious.mn.org> says these are new.

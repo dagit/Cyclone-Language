@@ -89,11 +89,11 @@ Cyc_Position_seg_t; extern struct Cyc_Position_Segment* Cyc_Position_segment_of_
 int, int); extern struct Cyc_Position_Segment* Cyc_Position_segment_join( struct
 Cyc_Position_Segment*, struct Cyc_Position_Segment*); extern struct
 _tagged_string Cyc_Position_string_of_segment( struct Cyc_Position_Segment*);
-typedef void* Cyc_Position_Error_kind; extern const unsigned int Cyc_Position_Lex;
-extern const unsigned int Cyc_Position_Parse; extern const unsigned int Cyc_Position_Elab;
-typedef void* Cyc_Position_error_kind_t; struct Cyc_Position_Error{ struct
-_tagged_string source; struct Cyc_Position_Segment* seg; void* kind; struct
-_tagged_string desc; } ; typedef struct Cyc_Position_Error* Cyc_Position_error_t;
+typedef void* Cyc_Position_Error_kind; static const unsigned int Cyc_Position_Lex=
+0; static const unsigned int Cyc_Position_Parse= 1; static const unsigned int
+Cyc_Position_Elab= 2; typedef void* Cyc_Position_error_kind_t; struct Cyc_Position_Error{
+struct _tagged_string source; struct Cyc_Position_Segment* seg; void* kind;
+struct _tagged_string desc; } ; typedef struct Cyc_Position_Error* Cyc_Position_error_t;
 extern struct Cyc_Position_Error* Cyc_Position_mk_err_parse( struct Cyc_Position_Segment*,
 struct _tagged_string); extern char Cyc_Position_Nocontext_tag[ 10u]; struct Cyc_Position_Nocontext_struct{
 char* tag; } ; extern void Cyc_Position_post_error( struct Cyc_Position_Error*);
@@ -118,12 +118,12 @@ struct Cyc_Absyn_XTuniondecl; struct Cyc_Absyn_Tunionfield; struct Cyc_Absyn_Enu
 struct Cyc_Absyn_Enumdecl; struct Cyc_Absyn_Typedefdecl; struct Cyc_Absyn_Vardecl;
 typedef void* Cyc_Absyn_Raw_decl; struct Cyc_Absyn_Decl; typedef void* Cyc_Absyn_Designator;
 typedef struct _xtunion_struct* Cyc_Absyn_StmtAnnot; typedef void* Cyc_Absyn_Attribute;
-struct Cyc_Absyn_Structfield; typedef void* Cyc_Absyn_Mallocarg; typedef void*
-Cyc_Absyn_scope_t; typedef struct Cyc_Absyn_Tqual* Cyc_Absyn_tqual_t; typedef
-void* Cyc_Absyn_size_of_t; typedef void* Cyc_Absyn_kind_t; typedef struct Cyc_Absyn_Tvar*
-Cyc_Absyn_tvar_t; typedef void* Cyc_Absyn_sign_t; typedef struct Cyc_Absyn_Conref*
-Cyc_Absyn_conref_t; typedef void* Cyc_Absyn_constraint_t; typedef void* Cyc_Absyn_bounds_t;
-typedef struct Cyc_Absyn_PtrInfo Cyc_Absyn_ptr_info_t; typedef struct Cyc_Absyn_FnInfo
+struct Cyc_Absyn_Structfield; typedef void* Cyc_Absyn_scope_t; typedef struct
+Cyc_Absyn_Tqual* Cyc_Absyn_tqual_t; typedef void* Cyc_Absyn_size_of_t; typedef
+void* Cyc_Absyn_kind_t; typedef struct Cyc_Absyn_Tvar* Cyc_Absyn_tvar_t; typedef
+void* Cyc_Absyn_sign_t; typedef struct Cyc_Absyn_Conref* Cyc_Absyn_conref_t;
+typedef void* Cyc_Absyn_constraint_t; typedef void* Cyc_Absyn_bounds_t; typedef
+struct Cyc_Absyn_PtrInfo Cyc_Absyn_ptr_info_t; typedef struct Cyc_Absyn_FnInfo
 Cyc_Absyn_fn_info_t; typedef struct Cyc_Absyn_TunionInfo Cyc_Absyn_tunion_info_t;
 typedef struct Cyc_Absyn_XTunionInfo Cyc_Absyn_xtunion_info_t; typedef struct
 Cyc_Absyn_TunionFieldInfo Cyc_Absyn_tunion_field_info_t; typedef struct Cyc_Absyn_XTunionFieldInfo
@@ -145,25 +145,26 @@ Cyc_Absyn_enumdecl_t; typedef struct Cyc_Absyn_Vardecl* Cyc_Absyn_vardecl_t;
 typedef void* Cyc_Absyn_raw_decl_t; typedef struct Cyc_Absyn_Decl* Cyc_Absyn_decl_t;
 typedef void* Cyc_Absyn_designator_t; typedef struct _xtunion_struct* Cyc_Absyn_stmt_annot_t;
 typedef void* Cyc_Absyn_attribute_t; typedef struct Cyc_List_List* Cyc_Absyn_attributes_t;
-typedef struct Cyc_Absyn_Structfield* Cyc_Absyn_structfield_t; typedef void* Cyc_Absyn_mallocarg_t;
-extern const unsigned int Cyc_Absyn_Loc_n; extern const int Cyc_Absyn_Rel_n_tag;
-struct Cyc_Absyn_Rel_n_struct{ int tag; struct Cyc_List_List* f1; } ; extern
-const int Cyc_Absyn_Abs_n_tag; struct Cyc_Absyn_Abs_n_struct{ int tag; struct
-Cyc_List_List* f1; } ; extern const unsigned int Cyc_Absyn_Static; extern const
-unsigned int Cyc_Absyn_Abstract; extern const unsigned int Cyc_Absyn_Public;
-extern const unsigned int Cyc_Absyn_Extern; extern const unsigned int Cyc_Absyn_ExternC;
-struct Cyc_Absyn_Tqual{ int q_const: 1; int q_volatile: 1; int q_restrict: 1; }
-; extern const unsigned int Cyc_Absyn_B1; extern const unsigned int Cyc_Absyn_B2;
-extern const unsigned int Cyc_Absyn_B4; extern const unsigned int Cyc_Absyn_B8;
-extern const unsigned int Cyc_Absyn_AnyKind; extern const unsigned int Cyc_Absyn_MemKind;
-extern const unsigned int Cyc_Absyn_BoxKind; extern const unsigned int Cyc_Absyn_RgnKind;
-extern const unsigned int Cyc_Absyn_EffKind; extern const unsigned int Cyc_Absyn_Signed;
-extern const unsigned int Cyc_Absyn_Unsigned; struct Cyc_Absyn_Conref{ void* v;
-} ; extern const int Cyc_Absyn_Eq_constr_tag; struct Cyc_Absyn_Eq_constr_struct{
-int tag; void* f1; } ; extern const int Cyc_Absyn_Forward_constr_tag; struct Cyc_Absyn_Forward_constr_struct{
-int tag; struct Cyc_Absyn_Conref* f1; } ; extern const unsigned int Cyc_Absyn_No_constr;
-struct Cyc_Absyn_Tvar{ struct _tagged_string* name; struct Cyc_Absyn_Conref*
-kind; } ; extern const unsigned int Cyc_Absyn_Unknown_b; extern const int Cyc_Absyn_Upper_b_tag;
+typedef struct Cyc_Absyn_Structfield* Cyc_Absyn_structfield_t; static const
+unsigned int Cyc_Absyn_Loc_n= 0; static const int Cyc_Absyn_Rel_n_tag= 0; struct
+Cyc_Absyn_Rel_n_struct{ int tag; struct Cyc_List_List* f1; } ; static const int
+Cyc_Absyn_Abs_n_tag= 1; struct Cyc_Absyn_Abs_n_struct{ int tag; struct Cyc_List_List*
+f1; } ; static const unsigned int Cyc_Absyn_Static= 0; static const unsigned int
+Cyc_Absyn_Abstract= 1; static const unsigned int Cyc_Absyn_Public= 2; static
+const unsigned int Cyc_Absyn_Extern= 3; static const unsigned int Cyc_Absyn_ExternC=
+4; struct Cyc_Absyn_Tqual{ int q_const: 1; int q_volatile: 1; int q_restrict: 1;
+} ; static const unsigned int Cyc_Absyn_B1= 0; static const unsigned int Cyc_Absyn_B2=
+1; static const unsigned int Cyc_Absyn_B4= 2; static const unsigned int Cyc_Absyn_B8=
+3; static const unsigned int Cyc_Absyn_AnyKind= 0; static const unsigned int Cyc_Absyn_MemKind=
+1; static const unsigned int Cyc_Absyn_BoxKind= 2; static const unsigned int Cyc_Absyn_RgnKind=
+3; static const unsigned int Cyc_Absyn_EffKind= 4; static const unsigned int Cyc_Absyn_Signed=
+0; static const unsigned int Cyc_Absyn_Unsigned= 1; struct Cyc_Absyn_Conref{
+void* v; } ; static const int Cyc_Absyn_Eq_constr_tag= 0; struct Cyc_Absyn_Eq_constr_struct{
+int tag; void* f1; } ; static const int Cyc_Absyn_Forward_constr_tag= 1; struct
+Cyc_Absyn_Forward_constr_struct{ int tag; struct Cyc_Absyn_Conref* f1; } ;
+static const unsigned int Cyc_Absyn_No_constr= 0; struct Cyc_Absyn_Tvar{ struct
+_tagged_string* name; struct Cyc_Absyn_Conref* kind; } ; static const
+unsigned int Cyc_Absyn_Unknown_b= 0; static const int Cyc_Absyn_Upper_b_tag= 0;
 struct Cyc_Absyn_Upper_b_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; struct
 Cyc_Absyn_PtrInfo{ void* elt_typ; void* rgn_typ; struct Cyc_Absyn_Conref*
 nullable; struct Cyc_Absyn_Tqual* tq; struct Cyc_Absyn_Conref* bounds; } ;
@@ -176,270 +177,272 @@ Cyc_Absyn_TunionFieldInfo{ struct _tuple1* name; struct Cyc_List_List* targs;
 struct _tuple1* fname; struct Cyc_Absyn_Tuniondecl* tud; struct Cyc_Absyn_Tunionfield*
 tufd; } ; struct Cyc_Absyn_XTunionFieldInfo{ struct _tuple1* name; struct
 _tuple1* fname; struct Cyc_Absyn_XTuniondecl* xtud; struct Cyc_Absyn_Tunionfield*
-xtufd; } ; extern const unsigned int Cyc_Absyn_VoidType; extern const int Cyc_Absyn_Evar_tag;
-struct Cyc_Absyn_Evar_struct{ int tag; void* f1; struct Cyc_Core_Opt* f2; int f3;
-} ; extern const int Cyc_Absyn_VarType_tag; struct Cyc_Absyn_VarType_struct{ int
-tag; struct Cyc_Absyn_Tvar* f1; } ; extern const int Cyc_Absyn_TunionType_tag;
-struct Cyc_Absyn_TunionType_struct{ int tag; struct Cyc_Absyn_TunionInfo f1; } ;
-extern const int Cyc_Absyn_XTunionType_tag; struct Cyc_Absyn_XTunionType_struct{
-int tag; struct Cyc_Absyn_XTunionInfo f1; } ; extern const int Cyc_Absyn_TunionFieldType_tag;
-struct Cyc_Absyn_TunionFieldType_struct{ int tag; struct Cyc_Absyn_TunionFieldInfo
-f1; } ; extern const int Cyc_Absyn_XTunionFieldType_tag; struct Cyc_Absyn_XTunionFieldType_struct{
-int tag; struct Cyc_Absyn_XTunionFieldInfo f1; } ; extern const int Cyc_Absyn_PointerType_tag;
-struct Cyc_Absyn_PointerType_struct{ int tag; struct Cyc_Absyn_PtrInfo f1; } ;
-extern const int Cyc_Absyn_IntType_tag; struct Cyc_Absyn_IntType_struct{ int tag;
-void* f1; void* f2; } ; extern const unsigned int Cyc_Absyn_FloatType; extern
-const unsigned int Cyc_Absyn_DoubleType; extern const int Cyc_Absyn_ArrayType_tag;
-struct Cyc_Absyn_ArrayType_struct{ int tag; void* f1; struct Cyc_Absyn_Tqual* f2;
-struct Cyc_Absyn_Exp* f3; } ; extern const int Cyc_Absyn_FnType_tag; struct Cyc_Absyn_FnType_struct{
-int tag; struct Cyc_Absyn_FnInfo f1; } ; extern const int Cyc_Absyn_TupleType_tag;
-struct Cyc_Absyn_TupleType_struct{ int tag; struct Cyc_List_List* f1; } ; extern
-const int Cyc_Absyn_StructType_tag; struct Cyc_Absyn_StructType_struct{ int tag;
-struct _tuple1* f1; struct Cyc_List_List* f2; struct Cyc_Absyn_Structdecl** f3;
-} ; extern const int Cyc_Absyn_UnionType_tag; struct Cyc_Absyn_UnionType_struct{
-int tag; struct _tuple1* f1; struct Cyc_List_List* f2; struct Cyc_Absyn_Uniondecl**
-f3; } ; extern const int Cyc_Absyn_EnumType_tag; struct Cyc_Absyn_EnumType_struct{
-int tag; struct _tuple1* f1; struct Cyc_Absyn_Enumdecl* f2; } ; extern const int
-Cyc_Absyn_RgnHandleType_tag; struct Cyc_Absyn_RgnHandleType_struct{ int tag;
-void* f1; } ; extern const int Cyc_Absyn_TypedefType_tag; struct Cyc_Absyn_TypedefType_struct{
-int tag; struct _tuple1* f1; struct Cyc_List_List* f2; struct Cyc_Core_Opt* f3;
-} ; extern const unsigned int Cyc_Absyn_HeapRgn; extern const int Cyc_Absyn_AccessEff_tag;
-struct Cyc_Absyn_AccessEff_struct{ int tag; void* f1; } ; extern const int Cyc_Absyn_JoinEff_tag;
-struct Cyc_Absyn_JoinEff_struct{ int tag; struct Cyc_List_List* f1; } ; extern
-const int Cyc_Absyn_NoTypes_tag; struct Cyc_Absyn_NoTypes_struct{ int tag;
-struct Cyc_List_List* f1; struct Cyc_Position_Segment* f2; } ; extern const int
-Cyc_Absyn_WithTypes_tag; struct Cyc_Absyn_WithTypes_struct{ int tag; struct Cyc_List_List*
-f1; int f2; struct Cyc_Core_Opt* f3; } ; typedef void* Cyc_Absyn_Pointer_Sort;
-extern const int Cyc_Absyn_NonNullable_ps_tag; struct Cyc_Absyn_NonNullable_ps_struct{
-int tag; struct Cyc_Absyn_Exp* f1; } ; extern const int Cyc_Absyn_Nullable_ps_tag;
-struct Cyc_Absyn_Nullable_ps_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ;
-extern const unsigned int Cyc_Absyn_TaggedArray_ps; extern const int Cyc_Absyn_Regparm_att_tag;
-struct Cyc_Absyn_Regparm_att_struct{ int tag; int f1; } ; extern const
-unsigned int Cyc_Absyn_Stdcall_att; extern const unsigned int Cyc_Absyn_Cdecl_att;
-extern const unsigned int Cyc_Absyn_Noreturn_att; extern const unsigned int Cyc_Absyn_Const_att;
-extern const int Cyc_Absyn_Aligned_att_tag; struct Cyc_Absyn_Aligned_att_struct{
-int tag; int f1; } ; extern const unsigned int Cyc_Absyn_Packed_att; extern
-const int Cyc_Absyn_Section_att_tag; struct Cyc_Absyn_Section_att_struct{ int
-tag; struct _tagged_string f1; } ; extern const unsigned int Cyc_Absyn_Nocommon_att;
-extern const unsigned int Cyc_Absyn_Shared_att; extern const unsigned int Cyc_Absyn_Unused_att;
-extern const unsigned int Cyc_Absyn_Weak_att; extern const unsigned int Cyc_Absyn_Dllimport_att;
-extern const unsigned int Cyc_Absyn_Dllexport_att; extern const unsigned int Cyc_Absyn_No_instrument_function_att;
-extern const unsigned int Cyc_Absyn_Constructor_att; extern const unsigned int
-Cyc_Absyn_Destructor_att; extern const unsigned int Cyc_Absyn_No_check_memory_usage_att;
-extern const unsigned int Cyc_Absyn_Carray_mod; extern const int Cyc_Absyn_ConstArray_mod_tag;
-struct Cyc_Absyn_ConstArray_mod_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ;
-extern const int Cyc_Absyn_Pointer_mod_tag; struct Cyc_Absyn_Pointer_mod_struct{
-int tag; void* f1; void* f2; struct Cyc_Absyn_Tqual* f3; } ; extern const int
-Cyc_Absyn_Function_mod_tag; struct Cyc_Absyn_Function_mod_struct{ int tag; void*
-f1; } ; extern const int Cyc_Absyn_TypeParams_mod_tag; struct Cyc_Absyn_TypeParams_mod_struct{
+xtufd; } ; static const unsigned int Cyc_Absyn_VoidType= 0; static const int Cyc_Absyn_Evar_tag=
+0; struct Cyc_Absyn_Evar_struct{ int tag; void* f1; struct Cyc_Core_Opt* f2; int
+f3; } ; static const int Cyc_Absyn_VarType_tag= 1; struct Cyc_Absyn_VarType_struct{
+int tag; struct Cyc_Absyn_Tvar* f1; } ; static const int Cyc_Absyn_TunionType_tag=
+2; struct Cyc_Absyn_TunionType_struct{ int tag; struct Cyc_Absyn_TunionInfo f1;
+} ; static const int Cyc_Absyn_XTunionType_tag= 3; struct Cyc_Absyn_XTunionType_struct{
+int tag; struct Cyc_Absyn_XTunionInfo f1; } ; static const int Cyc_Absyn_TunionFieldType_tag=
+4; struct Cyc_Absyn_TunionFieldType_struct{ int tag; struct Cyc_Absyn_TunionFieldInfo
+f1; } ; static const int Cyc_Absyn_XTunionFieldType_tag= 5; struct Cyc_Absyn_XTunionFieldType_struct{
+int tag; struct Cyc_Absyn_XTunionFieldInfo f1; } ; static const int Cyc_Absyn_PointerType_tag=
+6; struct Cyc_Absyn_PointerType_struct{ int tag; struct Cyc_Absyn_PtrInfo f1; }
+; static const int Cyc_Absyn_IntType_tag= 7; struct Cyc_Absyn_IntType_struct{
+int tag; void* f1; void* f2; } ; static const unsigned int Cyc_Absyn_FloatType=
+1; static const unsigned int Cyc_Absyn_DoubleType= 2; static const int Cyc_Absyn_ArrayType_tag=
+8; struct Cyc_Absyn_ArrayType_struct{ int tag; void* f1; struct Cyc_Absyn_Tqual*
+f2; struct Cyc_Absyn_Exp* f3; } ; static const int Cyc_Absyn_FnType_tag= 9;
+struct Cyc_Absyn_FnType_struct{ int tag; struct Cyc_Absyn_FnInfo f1; } ; static
+const int Cyc_Absyn_TupleType_tag= 10; struct Cyc_Absyn_TupleType_struct{ int
+tag; struct Cyc_List_List* f1; } ; static const int Cyc_Absyn_StructType_tag= 11;
+struct Cyc_Absyn_StructType_struct{ int tag; struct _tuple1* f1; struct Cyc_List_List*
+f2; struct Cyc_Absyn_Structdecl** f3; } ; static const int Cyc_Absyn_UnionType_tag=
+12; struct Cyc_Absyn_UnionType_struct{ int tag; struct _tuple1* f1; struct Cyc_List_List*
+f2; struct Cyc_Absyn_Uniondecl** f3; } ; static const int Cyc_Absyn_EnumType_tag=
+13; struct Cyc_Absyn_EnumType_struct{ int tag; struct _tuple1* f1; struct Cyc_Absyn_Enumdecl*
+f2; } ; static const int Cyc_Absyn_RgnHandleType_tag= 14; struct Cyc_Absyn_RgnHandleType_struct{
+int tag; void* f1; } ; static const int Cyc_Absyn_TypedefType_tag= 15; struct
+Cyc_Absyn_TypedefType_struct{ int tag; struct _tuple1* f1; struct Cyc_List_List*
+f2; struct Cyc_Core_Opt* f3; } ; static const unsigned int Cyc_Absyn_HeapRgn= 3;
+static const int Cyc_Absyn_AccessEff_tag= 16; struct Cyc_Absyn_AccessEff_struct{
+int tag; void* f1; } ; static const int Cyc_Absyn_JoinEff_tag= 17; struct Cyc_Absyn_JoinEff_struct{
+int tag; struct Cyc_List_List* f1; } ; static const int Cyc_Absyn_NoTypes_tag= 0;
+struct Cyc_Absyn_NoTypes_struct{ int tag; struct Cyc_List_List* f1; struct Cyc_Position_Segment*
+f2; } ; static const int Cyc_Absyn_WithTypes_tag= 1; struct Cyc_Absyn_WithTypes_struct{
+int tag; struct Cyc_List_List* f1; int f2; struct Cyc_Core_Opt* f3; } ; typedef
+void* Cyc_Absyn_Pointer_Sort; static const int Cyc_Absyn_NonNullable_ps_tag= 0;
+struct Cyc_Absyn_NonNullable_ps_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ;
+static const int Cyc_Absyn_Nullable_ps_tag= 1; struct Cyc_Absyn_Nullable_ps_struct{
+int tag; struct Cyc_Absyn_Exp* f1; } ; static const unsigned int Cyc_Absyn_TaggedArray_ps=
+0; static const int Cyc_Absyn_Regparm_att_tag= 0; struct Cyc_Absyn_Regparm_att_struct{
+int tag; int f1; } ; static const unsigned int Cyc_Absyn_Stdcall_att= 0; static
+const unsigned int Cyc_Absyn_Cdecl_att= 1; static const unsigned int Cyc_Absyn_Noreturn_att=
+2; static const unsigned int Cyc_Absyn_Const_att= 3; static const int Cyc_Absyn_Aligned_att_tag=
+1; struct Cyc_Absyn_Aligned_att_struct{ int tag; int f1; } ; static const
+unsigned int Cyc_Absyn_Packed_att= 4; static const int Cyc_Absyn_Section_att_tag=
+2; struct Cyc_Absyn_Section_att_struct{ int tag; struct _tagged_string f1; } ;
+static const unsigned int Cyc_Absyn_Nocommon_att= 5; static const unsigned int
+Cyc_Absyn_Shared_att= 6; static const unsigned int Cyc_Absyn_Unused_att= 7;
+static const unsigned int Cyc_Absyn_Weak_att= 8; static const unsigned int Cyc_Absyn_Dllimport_att=
+9; static const unsigned int Cyc_Absyn_Dllexport_att= 10; static const
+unsigned int Cyc_Absyn_No_instrument_function_att= 11; static const unsigned int
+Cyc_Absyn_Constructor_att= 12; static const unsigned int Cyc_Absyn_Destructor_att=
+13; static const unsigned int Cyc_Absyn_No_check_memory_usage_att= 14; static
+const unsigned int Cyc_Absyn_Carray_mod= 0; static const int Cyc_Absyn_ConstArray_mod_tag=
+0; struct Cyc_Absyn_ConstArray_mod_struct{ int tag; struct Cyc_Absyn_Exp* f1; }
+; static const int Cyc_Absyn_Pointer_mod_tag= 1; struct Cyc_Absyn_Pointer_mod_struct{
+int tag; void* f1; void* f2; struct Cyc_Absyn_Tqual* f3; } ; static const int
+Cyc_Absyn_Function_mod_tag= 2; struct Cyc_Absyn_Function_mod_struct{ int tag;
+void* f1; } ; static const int Cyc_Absyn_TypeParams_mod_tag= 3; struct Cyc_Absyn_TypeParams_mod_struct{
 int tag; struct Cyc_List_List* f1; struct Cyc_Position_Segment* f2; int f3; } ;
-extern const int Cyc_Absyn_Attributes_mod_tag; struct Cyc_Absyn_Attributes_mod_struct{
-int tag; struct Cyc_Position_Segment* f1; struct Cyc_List_List* f2; } ; extern
-const int Cyc_Absyn_Char_c_tag; struct Cyc_Absyn_Char_c_struct{ int tag; void*
-f1; char f2; } ; extern const int Cyc_Absyn_Short_c_tag; struct Cyc_Absyn_Short_c_struct{
-int tag; void* f1; short f2; } ; extern const int Cyc_Absyn_Int_c_tag; struct
-Cyc_Absyn_Int_c_struct{ int tag; void* f1; int f2; } ; extern const int Cyc_Absyn_LongLong_c_tag;
-struct Cyc_Absyn_LongLong_c_struct{ int tag; void* f1; long long f2; } ; extern
-const int Cyc_Absyn_Float_c_tag; struct Cyc_Absyn_Float_c_struct{ int tag;
-struct _tagged_string f1; } ; extern const int Cyc_Absyn_String_c_tag; struct
-Cyc_Absyn_String_c_struct{ int tag; struct _tagged_string f1; } ; extern const
-unsigned int Cyc_Absyn_Null_c; extern const unsigned int Cyc_Absyn_Plus; extern
-const unsigned int Cyc_Absyn_Times; extern const unsigned int Cyc_Absyn_Minus;
-extern const unsigned int Cyc_Absyn_Div; extern const unsigned int Cyc_Absyn_Mod;
-extern const unsigned int Cyc_Absyn_Eq; extern const unsigned int Cyc_Absyn_Neq;
-extern const unsigned int Cyc_Absyn_Gt; extern const unsigned int Cyc_Absyn_Lt;
-extern const unsigned int Cyc_Absyn_Gte; extern const unsigned int Cyc_Absyn_Lte;
-extern const unsigned int Cyc_Absyn_Not; extern const unsigned int Cyc_Absyn_Bitnot;
-extern const unsigned int Cyc_Absyn_Bitand; extern const unsigned int Cyc_Absyn_Bitor;
-extern const unsigned int Cyc_Absyn_Bitxor; extern const unsigned int Cyc_Absyn_Bitlshift;
-extern const unsigned int Cyc_Absyn_Bitlrshift; extern const unsigned int Cyc_Absyn_Bitarshift;
-extern const unsigned int Cyc_Absyn_Size; extern const unsigned int Cyc_Absyn_Printf;
-extern const unsigned int Cyc_Absyn_Fprintf; extern const unsigned int Cyc_Absyn_Xprintf;
-extern const unsigned int Cyc_Absyn_Scanf; extern const unsigned int Cyc_Absyn_Fscanf;
-extern const unsigned int Cyc_Absyn_Sscanf; extern const unsigned int Cyc_Absyn_PreInc;
-extern const unsigned int Cyc_Absyn_PostInc; extern const unsigned int Cyc_Absyn_PreDec;
-extern const unsigned int Cyc_Absyn_PostDec; extern const int Cyc_Absyn_Typ_m_tag;
-struct Cyc_Absyn_Typ_m_struct{ int tag; void* f1; } ; extern const int Cyc_Absyn_Unresolved_m_tag;
-struct Cyc_Absyn_Unresolved_m_struct{ int tag; struct _tuple1* f1; } ; extern
-const int Cyc_Absyn_Tunion_m_tag; struct Cyc_Absyn_Tunion_m_struct{ int tag;
-struct Cyc_Absyn_Tuniondecl* f1; struct Cyc_Absyn_Tunionfield* f2; } ; extern
-const int Cyc_Absyn_XTunion_m_tag; struct Cyc_Absyn_XTunion_m_struct{ int tag;
-struct Cyc_Absyn_XTuniondecl* f1; struct Cyc_Absyn_Tunionfield* f2; } ; extern
-const int Cyc_Absyn_Const_e_tag; struct Cyc_Absyn_Const_e_struct{ int tag; void*
-f1; } ; extern const int Cyc_Absyn_Var_e_tag; struct Cyc_Absyn_Var_e_struct{ int
-tag; struct _tuple1* f1; void* f2; } ; extern const int Cyc_Absyn_UnknownId_e_tag;
-struct Cyc_Absyn_UnknownId_e_struct{ int tag; struct _tuple1* f1; } ; extern
-const int Cyc_Absyn_Primop_e_tag; struct Cyc_Absyn_Primop_e_struct{ int tag;
-void* f1; struct Cyc_List_List* f2; } ; extern const int Cyc_Absyn_AssignOp_e_tag;
-struct Cyc_Absyn_AssignOp_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; struct
-Cyc_Core_Opt* f2; struct Cyc_Absyn_Exp* f3; } ; extern const int Cyc_Absyn_Increment_e_tag;
-struct Cyc_Absyn_Increment_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; void* f2;
-} ; extern const int Cyc_Absyn_Conditional_e_tag; struct Cyc_Absyn_Conditional_e_struct{
+static const int Cyc_Absyn_Attributes_mod_tag= 4; struct Cyc_Absyn_Attributes_mod_struct{
+int tag; struct Cyc_Position_Segment* f1; struct Cyc_List_List* f2; } ; static
+const int Cyc_Absyn_Char_c_tag= 0; struct Cyc_Absyn_Char_c_struct{ int tag; void*
+f1; char f2; } ; static const int Cyc_Absyn_Short_c_tag= 1; struct Cyc_Absyn_Short_c_struct{
+int tag; void* f1; short f2; } ; static const int Cyc_Absyn_Int_c_tag= 2; struct
+Cyc_Absyn_Int_c_struct{ int tag; void* f1; int f2; } ; static const int Cyc_Absyn_LongLong_c_tag=
+3; struct Cyc_Absyn_LongLong_c_struct{ int tag; void* f1; long long f2; } ;
+static const int Cyc_Absyn_Float_c_tag= 4; struct Cyc_Absyn_Float_c_struct{ int
+tag; struct _tagged_string f1; } ; static const int Cyc_Absyn_String_c_tag= 5;
+struct Cyc_Absyn_String_c_struct{ int tag; struct _tagged_string f1; } ; static
+const unsigned int Cyc_Absyn_Null_c= 0; static const unsigned int Cyc_Absyn_Plus=
+0; static const unsigned int Cyc_Absyn_Times= 1; static const unsigned int Cyc_Absyn_Minus=
+2; static const unsigned int Cyc_Absyn_Div= 3; static const unsigned int Cyc_Absyn_Mod=
+4; static const unsigned int Cyc_Absyn_Eq= 5; static const unsigned int Cyc_Absyn_Neq=
+6; static const unsigned int Cyc_Absyn_Gt= 7; static const unsigned int Cyc_Absyn_Lt=
+8; static const unsigned int Cyc_Absyn_Gte= 9; static const unsigned int Cyc_Absyn_Lte=
+10; static const unsigned int Cyc_Absyn_Not= 11; static const unsigned int Cyc_Absyn_Bitnot=
+12; static const unsigned int Cyc_Absyn_Bitand= 13; static const unsigned int
+Cyc_Absyn_Bitor= 14; static const unsigned int Cyc_Absyn_Bitxor= 15; static
+const unsigned int Cyc_Absyn_Bitlshift= 16; static const unsigned int Cyc_Absyn_Bitlrshift=
+17; static const unsigned int Cyc_Absyn_Bitarshift= 18; static const
+unsigned int Cyc_Absyn_Size= 19; static const unsigned int Cyc_Absyn_Printf= 20;
+static const unsigned int Cyc_Absyn_Fprintf= 21; static const unsigned int Cyc_Absyn_Xprintf=
+22; static const unsigned int Cyc_Absyn_Scanf= 23; static const unsigned int Cyc_Absyn_Fscanf=
+24; static const unsigned int Cyc_Absyn_Sscanf= 25; static const unsigned int
+Cyc_Absyn_PreInc= 0; static const unsigned int Cyc_Absyn_PostInc= 1; static
+const unsigned int Cyc_Absyn_PreDec= 2; static const unsigned int Cyc_Absyn_PostDec=
+3; static const int Cyc_Absyn_Const_e_tag= 0; struct Cyc_Absyn_Const_e_struct{
+int tag; void* f1; } ; static const int Cyc_Absyn_Var_e_tag= 1; struct Cyc_Absyn_Var_e_struct{
+int tag; struct _tuple1* f1; void* f2; } ; static const int Cyc_Absyn_UnknownId_e_tag=
+2; struct Cyc_Absyn_UnknownId_e_struct{ int tag; struct _tuple1* f1; } ; static
+const int Cyc_Absyn_Primop_e_tag= 3; struct Cyc_Absyn_Primop_e_struct{ int tag;
+void* f1; struct Cyc_List_List* f2; } ; static const int Cyc_Absyn_AssignOp_e_tag=
+4; struct Cyc_Absyn_AssignOp_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; struct
+Cyc_Core_Opt* f2; struct Cyc_Absyn_Exp* f3; } ; static const int Cyc_Absyn_Increment_e_tag=
+5; struct Cyc_Absyn_Increment_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; void*
+f2; } ; static const int Cyc_Absyn_Conditional_e_tag= 6; struct Cyc_Absyn_Conditional_e_struct{
 int tag; struct Cyc_Absyn_Exp* f1; struct Cyc_Absyn_Exp* f2; struct Cyc_Absyn_Exp*
-f3; } ; extern const int Cyc_Absyn_SeqExp_e_tag; struct Cyc_Absyn_SeqExp_e_struct{
-int tag; struct Cyc_Absyn_Exp* f1; struct Cyc_Absyn_Exp* f2; } ; extern const
-int Cyc_Absyn_UnknownCall_e_tag; struct Cyc_Absyn_UnknownCall_e_struct{ int tag;
-struct Cyc_Absyn_Exp* f1; struct Cyc_List_List* f2; } ; extern const int Cyc_Absyn_FnCall_e_tag;
-struct Cyc_Absyn_FnCall_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; struct Cyc_List_List*
-f2; } ; extern const int Cyc_Absyn_Throw_e_tag; struct Cyc_Absyn_Throw_e_struct{
-int tag; struct Cyc_Absyn_Exp* f1; } ; extern const int Cyc_Absyn_NoInstantiate_e_tag;
-struct Cyc_Absyn_NoInstantiate_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ;
-extern const int Cyc_Absyn_Instantiate_e_tag; struct Cyc_Absyn_Instantiate_e_struct{
-int tag; struct Cyc_Absyn_Exp* f1; struct Cyc_List_List* f2; } ; extern const
-int Cyc_Absyn_Cast_e_tag; struct Cyc_Absyn_Cast_e_struct{ int tag; void* f1;
-struct Cyc_Absyn_Exp* f2; } ; extern const int Cyc_Absyn_Address_e_tag; struct
-Cyc_Absyn_Address_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; extern const
-int Cyc_Absyn_New_e_tag; struct Cyc_Absyn_New_e_struct{ int tag; struct Cyc_Absyn_Exp*
-f1; } ; extern const int Cyc_Absyn_Sizeoftyp_e_tag; struct Cyc_Absyn_Sizeoftyp_e_struct{
-int tag; void* f1; } ; extern const int Cyc_Absyn_Sizeofexp_e_tag; struct Cyc_Absyn_Sizeofexp_e_struct{
-int tag; struct Cyc_Absyn_Exp* f1; } ; extern const int Cyc_Absyn_Deref_e_tag;
-struct Cyc_Absyn_Deref_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; extern
-const int Cyc_Absyn_StructMember_e_tag; struct Cyc_Absyn_StructMember_e_struct{
-int tag; struct Cyc_Absyn_Exp* f1; struct _tagged_string* f2; } ; extern const
-int Cyc_Absyn_StructArrow_e_tag; struct Cyc_Absyn_StructArrow_e_struct{ int tag;
-struct Cyc_Absyn_Exp* f1; struct _tagged_string* f2; } ; extern const int Cyc_Absyn_Subscript_e_tag;
-struct Cyc_Absyn_Subscript_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; struct
-Cyc_Absyn_Exp* f2; } ; extern const int Cyc_Absyn_Tuple_e_tag; struct Cyc_Absyn_Tuple_e_struct{
-int tag; struct Cyc_List_List* f1; } ; extern const int Cyc_Absyn_CompoundLit_e_tag;
-struct Cyc_Absyn_CompoundLit_e_struct{ int tag; struct _tuple2* f1; struct Cyc_List_List*
-f2; } ; extern const int Cyc_Absyn_Array_e_tag; struct Cyc_Absyn_Array_e_struct{
-int tag; struct Cyc_List_List* f1; } ; extern const int Cyc_Absyn_Comprehension_e_tag;
-struct Cyc_Absyn_Comprehension_e_struct{ int tag; struct Cyc_Absyn_Vardecl* f1;
-struct Cyc_Absyn_Exp* f2; struct Cyc_Absyn_Exp* f3; } ; extern const int Cyc_Absyn_Struct_e_tag;
-struct Cyc_Absyn_Struct_e_struct{ int tag; struct _tuple1* f1; struct Cyc_Core_Opt*
-f2; struct Cyc_List_List* f3; struct Cyc_Absyn_Structdecl* f4; } ; extern const
-int Cyc_Absyn_Tunion_e_tag; struct Cyc_Absyn_Tunion_e_struct{ int tag; struct
-Cyc_Core_Opt* f1; struct Cyc_Core_Opt* f2; struct Cyc_List_List* f3; struct Cyc_Absyn_Tuniondecl*
-f4; struct Cyc_Absyn_Tunionfield* f5; } ; extern const int Cyc_Absyn_XTunion_e_tag;
-struct Cyc_Absyn_XTunion_e_struct{ int tag; struct Cyc_Core_Opt* f1; struct Cyc_List_List*
-f2; struct Cyc_Absyn_XTuniondecl* f3; struct Cyc_Absyn_Tunionfield* f4; } ;
-extern const int Cyc_Absyn_Enum_e_tag; struct Cyc_Absyn_Enum_e_struct{ int tag;
-struct _tuple1* f1; struct Cyc_Absyn_Enumdecl* f2; struct Cyc_Absyn_Enumfield*
-f3; } ; extern const int Cyc_Absyn_Malloc_e_tag; struct Cyc_Absyn_Malloc_e_struct{
-int tag; void* f1; } ; extern const int Cyc_Absyn_UnresolvedMem_e_tag; struct
-Cyc_Absyn_UnresolvedMem_e_struct{ int tag; struct Cyc_Core_Opt* f1; struct Cyc_List_List*
-f2; } ; extern const int Cyc_Absyn_StmtExp_e_tag; struct Cyc_Absyn_StmtExp_e_struct{
-int tag; struct Cyc_Absyn_Stmt* f1; } ; extern const int Cyc_Absyn_Codegen_e_tag;
-struct Cyc_Absyn_Codegen_e_struct{ int tag; struct Cyc_Absyn_Fndecl* f1; } ;
-extern const int Cyc_Absyn_Fill_e_tag; struct Cyc_Absyn_Fill_e_struct{ int tag;
-struct Cyc_Absyn_Exp* f1; } ; struct Cyc_Absyn_Exp{ struct Cyc_Core_Opt* topt;
-void* r; struct Cyc_Position_Segment* loc; } ; extern const unsigned int Cyc_Absyn_Skip_s;
-extern const int Cyc_Absyn_Exp_s_tag; struct Cyc_Absyn_Exp_s_struct{ int tag;
-struct Cyc_Absyn_Exp* f1; } ; extern const int Cyc_Absyn_Seq_s_tag; struct Cyc_Absyn_Seq_s_struct{
-int tag; struct Cyc_Absyn_Stmt* f1; struct Cyc_Absyn_Stmt* f2; } ; extern const
-int Cyc_Absyn_Return_s_tag; struct Cyc_Absyn_Return_s_struct{ int tag; struct
-Cyc_Absyn_Exp* f1; } ; extern const int Cyc_Absyn_IfThenElse_s_tag; struct Cyc_Absyn_IfThenElse_s_struct{
+f3; } ; static const int Cyc_Absyn_SeqExp_e_tag= 7; struct Cyc_Absyn_SeqExp_e_struct{
+int tag; struct Cyc_Absyn_Exp* f1; struct Cyc_Absyn_Exp* f2; } ; static const
+int Cyc_Absyn_UnknownCall_e_tag= 8; struct Cyc_Absyn_UnknownCall_e_struct{ int
+tag; struct Cyc_Absyn_Exp* f1; struct Cyc_List_List* f2; } ; static const int
+Cyc_Absyn_FnCall_e_tag= 9; struct Cyc_Absyn_FnCall_e_struct{ int tag; struct Cyc_Absyn_Exp*
+f1; struct Cyc_List_List* f2; } ; static const int Cyc_Absyn_Throw_e_tag= 10;
+struct Cyc_Absyn_Throw_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; static
+const int Cyc_Absyn_NoInstantiate_e_tag= 11; struct Cyc_Absyn_NoInstantiate_e_struct{
+int tag; struct Cyc_Absyn_Exp* f1; } ; static const int Cyc_Absyn_Instantiate_e_tag=
+12; struct Cyc_Absyn_Instantiate_e_struct{ int tag; struct Cyc_Absyn_Exp* f1;
+struct Cyc_List_List* f2; } ; static const int Cyc_Absyn_Cast_e_tag= 13; struct
+Cyc_Absyn_Cast_e_struct{ int tag; void* f1; struct Cyc_Absyn_Exp* f2; } ; static
+const int Cyc_Absyn_Address_e_tag= 14; struct Cyc_Absyn_Address_e_struct{ int
+tag; struct Cyc_Absyn_Exp* f1; } ; static const int Cyc_Absyn_New_e_tag= 15;
+struct Cyc_Absyn_New_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; static
+const int Cyc_Absyn_Sizeoftyp_e_tag= 16; struct Cyc_Absyn_Sizeoftyp_e_struct{
+int tag; void* f1; } ; static const int Cyc_Absyn_Sizeofexp_e_tag= 17; struct
+Cyc_Absyn_Sizeofexp_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; static
+const int Cyc_Absyn_Deref_e_tag= 18; struct Cyc_Absyn_Deref_e_struct{ int tag;
+struct Cyc_Absyn_Exp* f1; } ; static const int Cyc_Absyn_StructMember_e_tag= 19;
+struct Cyc_Absyn_StructMember_e_struct{ int tag; struct Cyc_Absyn_Exp* f1;
+struct _tagged_string* f2; } ; static const int Cyc_Absyn_StructArrow_e_tag= 20;
+struct Cyc_Absyn_StructArrow_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; struct
+_tagged_string* f2; } ; static const int Cyc_Absyn_Subscript_e_tag= 21; struct
+Cyc_Absyn_Subscript_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; struct Cyc_Absyn_Exp*
+f2; } ; static const int Cyc_Absyn_Tuple_e_tag= 22; struct Cyc_Absyn_Tuple_e_struct{
+int tag; struct Cyc_List_List* f1; } ; static const int Cyc_Absyn_CompoundLit_e_tag=
+23; struct Cyc_Absyn_CompoundLit_e_struct{ int tag; struct _tuple2* f1; struct
+Cyc_List_List* f2; } ; static const int Cyc_Absyn_Array_e_tag= 24; struct Cyc_Absyn_Array_e_struct{
+int tag; struct Cyc_List_List* f1; } ; static const int Cyc_Absyn_Comprehension_e_tag=
+25; struct Cyc_Absyn_Comprehension_e_struct{ int tag; struct Cyc_Absyn_Vardecl*
+f1; struct Cyc_Absyn_Exp* f2; struct Cyc_Absyn_Exp* f3; } ; static const int Cyc_Absyn_Struct_e_tag=
+26; struct Cyc_Absyn_Struct_e_struct{ int tag; struct _tuple1* f1; struct Cyc_Core_Opt*
+f2; struct Cyc_List_List* f3; struct Cyc_Absyn_Structdecl* f4; } ; static const
+int Cyc_Absyn_Tunion_e_tag= 27; struct Cyc_Absyn_Tunion_e_struct{ int tag;
+struct Cyc_Core_Opt* f1; struct Cyc_Core_Opt* f2; struct Cyc_List_List* f3;
+struct Cyc_Absyn_Tuniondecl* f4; struct Cyc_Absyn_Tunionfield* f5; } ; static
+const int Cyc_Absyn_XTunion_e_tag= 28; struct Cyc_Absyn_XTunion_e_struct{ int
+tag; struct Cyc_Core_Opt* f1; struct Cyc_List_List* f2; struct Cyc_Absyn_XTuniondecl*
+f3; struct Cyc_Absyn_Tunionfield* f4; } ; static const int Cyc_Absyn_Enum_e_tag=
+29; struct Cyc_Absyn_Enum_e_struct{ int tag; struct _tuple1* f1; struct Cyc_Absyn_Enumdecl*
+f2; struct Cyc_Absyn_Enumfield* f3; } ; static const int Cyc_Absyn_Malloc_e_tag=
+30; struct Cyc_Absyn_Malloc_e_struct{ int tag; void* f1; } ; static const int
+Cyc_Absyn_UnresolvedMem_e_tag= 31; struct Cyc_Absyn_UnresolvedMem_e_struct{ int
+tag; struct Cyc_Core_Opt* f1; struct Cyc_List_List* f2; } ; static const int Cyc_Absyn_StmtExp_e_tag=
+32; struct Cyc_Absyn_StmtExp_e_struct{ int tag; struct Cyc_Absyn_Stmt* f1; } ;
+static const int Cyc_Absyn_Codegen_e_tag= 33; struct Cyc_Absyn_Codegen_e_struct{
+int tag; struct Cyc_Absyn_Fndecl* f1; } ; static const int Cyc_Absyn_Fill_e_tag=
+34; struct Cyc_Absyn_Fill_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ;
+struct Cyc_Absyn_Exp{ struct Cyc_Core_Opt* topt; void* r; struct Cyc_Position_Segment*
+loc; } ; static const unsigned int Cyc_Absyn_Skip_s= 0; static const int Cyc_Absyn_Exp_s_tag=
+0; struct Cyc_Absyn_Exp_s_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; static
+const int Cyc_Absyn_Seq_s_tag= 1; struct Cyc_Absyn_Seq_s_struct{ int tag; struct
+Cyc_Absyn_Stmt* f1; struct Cyc_Absyn_Stmt* f2; } ; static const int Cyc_Absyn_Return_s_tag=
+2; struct Cyc_Absyn_Return_s_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ;
+static const int Cyc_Absyn_IfThenElse_s_tag= 3; struct Cyc_Absyn_IfThenElse_s_struct{
 int tag; struct Cyc_Absyn_Exp* f1; struct Cyc_Absyn_Stmt* f2; struct Cyc_Absyn_Stmt*
-f3; } ; extern const int Cyc_Absyn_While_s_tag; struct Cyc_Absyn_While_s_struct{
-int tag; struct _tuple3 f1; struct Cyc_Absyn_Stmt* f2; } ; extern const int Cyc_Absyn_Break_s_tag;
-struct Cyc_Absyn_Break_s_struct{ int tag; struct Cyc_Absyn_Stmt* f1; } ; extern
-const int Cyc_Absyn_Continue_s_tag; struct Cyc_Absyn_Continue_s_struct{ int tag;
-struct Cyc_Absyn_Stmt* f1; } ; extern const int Cyc_Absyn_Goto_s_tag; struct Cyc_Absyn_Goto_s_struct{
-int tag; struct _tagged_string* f1; struct Cyc_Absyn_Stmt* f2; } ; extern const
-int Cyc_Absyn_For_s_tag; struct Cyc_Absyn_For_s_struct{ int tag; struct Cyc_Absyn_Exp*
-f1; struct _tuple3 f2; struct _tuple3 f3; struct Cyc_Absyn_Stmt* f4; } ; extern
-const int Cyc_Absyn_Switch_s_tag; struct Cyc_Absyn_Switch_s_struct{ int tag;
-struct Cyc_Absyn_Exp* f1; struct Cyc_List_List* f2; } ; extern const int Cyc_Absyn_Fallthru_s_tag;
-struct Cyc_Absyn_Fallthru_s_struct{ int tag; struct Cyc_List_List* f1; struct
-Cyc_Absyn_Switch_clause** f2; } ; extern const int Cyc_Absyn_Decl_s_tag; struct
-Cyc_Absyn_Decl_s_struct{ int tag; struct Cyc_Absyn_Decl* f1; struct Cyc_Absyn_Stmt*
-f2; } ; extern const int Cyc_Absyn_Cut_s_tag; struct Cyc_Absyn_Cut_s_struct{ int
-tag; struct Cyc_Absyn_Stmt* f1; } ; extern const int Cyc_Absyn_Splice_s_tag;
-struct Cyc_Absyn_Splice_s_struct{ int tag; struct Cyc_Absyn_Stmt* f1; } ; extern
-const int Cyc_Absyn_Label_s_tag; struct Cyc_Absyn_Label_s_struct{ int tag;
-struct _tagged_string* f1; struct Cyc_Absyn_Stmt* f2; } ; extern const int Cyc_Absyn_Do_s_tag;
-struct Cyc_Absyn_Do_s_struct{ int tag; struct Cyc_Absyn_Stmt* f1; struct _tuple3
-f2; } ; extern const int Cyc_Absyn_TryCatch_s_tag; struct Cyc_Absyn_TryCatch_s_struct{
-int tag; struct Cyc_Absyn_Stmt* f1; struct Cyc_List_List* f2; } ; struct Cyc_Absyn_Stmt{
-void* r; struct Cyc_Position_Segment* loc; struct Cyc_List_List* non_local_preds;
-int try_depth; struct _xtunion_struct* annot; } ; extern const unsigned int Cyc_Absyn_Wild_p;
-extern const int Cyc_Absyn_Var_p_tag; struct Cyc_Absyn_Var_p_struct{ int tag;
-struct Cyc_Absyn_Vardecl* f1; } ; extern const unsigned int Cyc_Absyn_Null_p;
-extern const int Cyc_Absyn_Int_p_tag; struct Cyc_Absyn_Int_p_struct{ int tag;
-void* f1; int f2; } ; extern const int Cyc_Absyn_Char_p_tag; struct Cyc_Absyn_Char_p_struct{
-int tag; char f1; } ; extern const int Cyc_Absyn_Float_p_tag; struct Cyc_Absyn_Float_p_struct{
-int tag; struct _tagged_string f1; } ; extern const int Cyc_Absyn_Tuple_p_tag;
-struct Cyc_Absyn_Tuple_p_struct{ int tag; struct Cyc_List_List* f1; } ; extern
-const int Cyc_Absyn_Pointer_p_tag; struct Cyc_Absyn_Pointer_p_struct{ int tag;
-struct Cyc_Absyn_Pat* f1; } ; extern const int Cyc_Absyn_Reference_p_tag; struct
-Cyc_Absyn_Reference_p_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ; extern
-const int Cyc_Absyn_Struct_p_tag; struct Cyc_Absyn_Struct_p_struct{ int tag;
-struct Cyc_Absyn_Structdecl* f1; struct Cyc_Core_Opt* f2; struct Cyc_List_List*
-f3; struct Cyc_List_List* f4; } ; extern const int Cyc_Absyn_Tunion_p_tag;
+f3; } ; static const int Cyc_Absyn_While_s_tag= 4; struct Cyc_Absyn_While_s_struct{
+int tag; struct _tuple3 f1; struct Cyc_Absyn_Stmt* f2; } ; static const int Cyc_Absyn_Break_s_tag=
+5; struct Cyc_Absyn_Break_s_struct{ int tag; struct Cyc_Absyn_Stmt* f1; } ;
+static const int Cyc_Absyn_Continue_s_tag= 6; struct Cyc_Absyn_Continue_s_struct{
+int tag; struct Cyc_Absyn_Stmt* f1; } ; static const int Cyc_Absyn_Goto_s_tag= 7;
+struct Cyc_Absyn_Goto_s_struct{ int tag; struct _tagged_string* f1; struct Cyc_Absyn_Stmt*
+f2; } ; static const int Cyc_Absyn_For_s_tag= 8; struct Cyc_Absyn_For_s_struct{
+int tag; struct Cyc_Absyn_Exp* f1; struct _tuple3 f2; struct _tuple3 f3; struct
+Cyc_Absyn_Stmt* f4; } ; static const int Cyc_Absyn_Switch_s_tag= 9; struct Cyc_Absyn_Switch_s_struct{
+int tag; struct Cyc_Absyn_Exp* f1; struct Cyc_List_List* f2; } ; static const
+int Cyc_Absyn_Fallthru_s_tag= 10; struct Cyc_Absyn_Fallthru_s_struct{ int tag;
+struct Cyc_List_List* f1; struct Cyc_Absyn_Switch_clause** f2; } ; static const
+int Cyc_Absyn_Decl_s_tag= 11; struct Cyc_Absyn_Decl_s_struct{ int tag; struct
+Cyc_Absyn_Decl* f1; struct Cyc_Absyn_Stmt* f2; } ; static const int Cyc_Absyn_Cut_s_tag=
+12; struct Cyc_Absyn_Cut_s_struct{ int tag; struct Cyc_Absyn_Stmt* f1; } ;
+static const int Cyc_Absyn_Splice_s_tag= 13; struct Cyc_Absyn_Splice_s_struct{
+int tag; struct Cyc_Absyn_Stmt* f1; } ; static const int Cyc_Absyn_Label_s_tag=
+14; struct Cyc_Absyn_Label_s_struct{ int tag; struct _tagged_string* f1; struct
+Cyc_Absyn_Stmt* f2; } ; static const int Cyc_Absyn_Do_s_tag= 15; struct Cyc_Absyn_Do_s_struct{
+int tag; struct Cyc_Absyn_Stmt* f1; struct _tuple3 f2; } ; static const int Cyc_Absyn_TryCatch_s_tag=
+16; struct Cyc_Absyn_TryCatch_s_struct{ int tag; struct Cyc_Absyn_Stmt* f1;
+struct Cyc_List_List* f2; } ; struct Cyc_Absyn_Stmt{ void* r; struct Cyc_Position_Segment*
+loc; struct Cyc_List_List* non_local_preds; int try_depth; struct
+_xtunion_struct* annot; } ; static const unsigned int Cyc_Absyn_Wild_p= 0;
+static const int Cyc_Absyn_Var_p_tag= 0; struct Cyc_Absyn_Var_p_struct{ int tag;
+struct Cyc_Absyn_Vardecl* f1; } ; static const unsigned int Cyc_Absyn_Null_p= 1;
+static const int Cyc_Absyn_Int_p_tag= 1; struct Cyc_Absyn_Int_p_struct{ int tag;
+void* f1; int f2; } ; static const int Cyc_Absyn_Char_p_tag= 2; struct Cyc_Absyn_Char_p_struct{
+int tag; char f1; } ; static const int Cyc_Absyn_Float_p_tag= 3; struct Cyc_Absyn_Float_p_struct{
+int tag; struct _tagged_string f1; } ; static const int Cyc_Absyn_Tuple_p_tag= 4;
+struct Cyc_Absyn_Tuple_p_struct{ int tag; struct Cyc_List_List* f1; } ; static
+const int Cyc_Absyn_Pointer_p_tag= 5; struct Cyc_Absyn_Pointer_p_struct{ int tag;
+struct Cyc_Absyn_Pat* f1; } ; static const int Cyc_Absyn_Reference_p_tag= 6;
+struct Cyc_Absyn_Reference_p_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ;
+static const int Cyc_Absyn_Struct_p_tag= 7; struct Cyc_Absyn_Struct_p_struct{
+int tag; struct Cyc_Absyn_Structdecl* f1; struct Cyc_Core_Opt* f2; struct Cyc_List_List*
+f3; struct Cyc_List_List* f4; } ; static const int Cyc_Absyn_Tunion_p_tag= 8;
 struct Cyc_Absyn_Tunion_p_struct{ int tag; struct _tuple1* f1; struct Cyc_Core_Opt*
 f2; struct Cyc_List_List* f3; struct Cyc_List_List* f4; struct Cyc_Absyn_Tuniondecl*
-f5; struct Cyc_Absyn_Tunionfield* f6; } ; extern const int Cyc_Absyn_XTunion_p_tag;
-struct Cyc_Absyn_XTunion_p_struct{ int tag; struct _tuple1* f1; struct Cyc_List_List*
+f5; struct Cyc_Absyn_Tunionfield* f6; } ; static const int Cyc_Absyn_XTunion_p_tag=
+9; struct Cyc_Absyn_XTunion_p_struct{ int tag; struct _tuple1* f1; struct Cyc_List_List*
 f2; struct Cyc_List_List* f3; struct Cyc_Absyn_XTuniondecl* f4; struct Cyc_Absyn_Tunionfield*
-f5; } ; extern const int Cyc_Absyn_Enum_p_tag; struct Cyc_Absyn_Enum_p_struct{
+f5; } ; static const int Cyc_Absyn_Enum_p_tag= 10; struct Cyc_Absyn_Enum_p_struct{
 int tag; struct _tuple1* f1; struct Cyc_Absyn_Enumdecl* f2; struct Cyc_Absyn_Enumfield*
-f3; } ; extern const int Cyc_Absyn_UnknownId_p_tag; struct Cyc_Absyn_UnknownId_p_struct{
-int tag; struct _tuple1* f1; } ; extern const int Cyc_Absyn_UnknownCall_p_tag;
-struct Cyc_Absyn_UnknownCall_p_struct{ int tag; struct _tuple1* f1; struct Cyc_List_List*
-f2; struct Cyc_List_List* f3; } ; extern const int Cyc_Absyn_UnknownFields_p_tag;
-struct Cyc_Absyn_UnknownFields_p_struct{ int tag; struct _tuple1* f1; struct Cyc_List_List*
-f2; struct Cyc_List_List* f3; } ; struct Cyc_Absyn_Pat{ void* r; struct Cyc_Core_Opt*
-topt; struct Cyc_Position_Segment* loc; } ; struct Cyc_Absyn_Switch_clause{
+f3; } ; static const int Cyc_Absyn_UnknownId_p_tag= 11; struct Cyc_Absyn_UnknownId_p_struct{
+int tag; struct _tuple1* f1; } ; static const int Cyc_Absyn_UnknownCall_p_tag=
+12; struct Cyc_Absyn_UnknownCall_p_struct{ int tag; struct _tuple1* f1; struct
+Cyc_List_List* f2; struct Cyc_List_List* f3; } ; static const int Cyc_Absyn_UnknownFields_p_tag=
+13; struct Cyc_Absyn_UnknownFields_p_struct{ int tag; struct _tuple1* f1; struct
+Cyc_List_List* f2; struct Cyc_List_List* f3; } ; struct Cyc_Absyn_Pat{ void* r;
+struct Cyc_Core_Opt* topt; struct Cyc_Position_Segment* loc; } ; struct Cyc_Absyn_Switch_clause{
 struct Cyc_Absyn_Pat* pattern; struct Cyc_Core_Opt* pat_vars; struct Cyc_Absyn_Exp*
 where_clause; struct Cyc_Absyn_Stmt* body; struct Cyc_Position_Segment* loc; } ;
-extern const unsigned int Cyc_Absyn_Unresolved_b; extern const int Cyc_Absyn_Global_b_tag;
-struct Cyc_Absyn_Global_b_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ;
-extern const int Cyc_Absyn_Funname_b_tag; struct Cyc_Absyn_Funname_b_struct{ int
-tag; struct Cyc_Absyn_Fndecl* f1; } ; extern const int Cyc_Absyn_Param_b_tag;
-struct Cyc_Absyn_Param_b_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ;
-extern const int Cyc_Absyn_Local_b_tag; struct Cyc_Absyn_Local_b_struct{ int tag;
-struct Cyc_Absyn_Vardecl* f1; } ; extern const int Cyc_Absyn_Pat_b_tag; struct
-Cyc_Absyn_Pat_b_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ; struct Cyc_Absyn_Vardecl{
-void* sc; struct _tuple1* name; struct Cyc_Absyn_Tqual* tq; void* type; struct
-Cyc_Absyn_Exp* initializer; int shadow; struct Cyc_Core_Opt* region; struct Cyc_List_List*
-attributes; } ; struct Cyc_Absyn_Fndecl{ void* sc; int is_inline; struct _tuple1*
-name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt* effect; void* ret_type;
-struct Cyc_List_List* args; int varargs; struct Cyc_Absyn_Stmt* body; struct Cyc_Core_Opt*
-cached_typ; struct Cyc_Core_Opt* param_vardecls; struct Cyc_List_List*
-attributes; } ; struct Cyc_Absyn_Structfield{ struct _tagged_string* name;
-struct Cyc_Absyn_Tqual* tq; void* type; struct Cyc_Core_Opt* width; struct Cyc_List_List*
-attributes; } ; struct Cyc_Absyn_Structdecl{ void* sc; struct Cyc_Core_Opt* name;
-struct Cyc_List_List* tvs; struct Cyc_Core_Opt* fields; struct Cyc_List_List*
-attributes; } ; struct Cyc_Absyn_Uniondecl{ void* sc; struct Cyc_Core_Opt* name;
-struct Cyc_List_List* tvs; struct Cyc_Core_Opt* fields; struct Cyc_List_List*
-attributes; } ; struct Cyc_Absyn_Tunionfield{ struct _tuple1* name; struct Cyc_List_List*
-tvs; struct Cyc_List_List* typs; struct Cyc_Position_Segment* loc; } ; struct
-Cyc_Absyn_Tuniondecl{ void* sc; struct Cyc_Core_Opt* name; struct Cyc_List_List*
-tvs; struct Cyc_Core_Opt* fields; } ; struct Cyc_Absyn_XTuniondecl{ void* sc;
-struct _tuple1* name; struct Cyc_List_List* fields; } ; struct Cyc_Absyn_Enumfield{
-struct _tuple1* name; struct Cyc_Absyn_Exp* tag; struct Cyc_Position_Segment*
-loc; } ; struct Cyc_Absyn_Enumdecl{ void* sc; struct _tuple1* name; struct Cyc_List_List*
-fields; } ; struct Cyc_Absyn_Typedefdecl{ struct _tuple1* name; struct Cyc_List_List*
-tvs; void* defn; } ; extern const int Cyc_Absyn_Var_d_tag; struct Cyc_Absyn_Var_d_struct{
-int tag; struct Cyc_Absyn_Vardecl* f1; } ; extern const int Cyc_Absyn_Fn_d_tag;
-struct Cyc_Absyn_Fn_d_struct{ int tag; struct Cyc_Absyn_Fndecl* f1; } ; extern
-const int Cyc_Absyn_Let_d_tag; struct Cyc_Absyn_Let_d_struct{ int tag; struct
-Cyc_Absyn_Pat* f1; struct Cyc_Core_Opt* f2; struct Cyc_Core_Opt* f3; struct Cyc_Absyn_Exp*
-f4; int f5; } ; extern const int Cyc_Absyn_Struct_d_tag; struct Cyc_Absyn_Struct_d_struct{
-int tag; struct Cyc_Absyn_Structdecl* f1; } ; extern const int Cyc_Absyn_Union_d_tag;
-struct Cyc_Absyn_Union_d_struct{ int tag; struct Cyc_Absyn_Uniondecl* f1; } ;
-extern const int Cyc_Absyn_Tunion_d_tag; struct Cyc_Absyn_Tunion_d_struct{ int
-tag; struct Cyc_Absyn_Tuniondecl* f1; } ; extern const int Cyc_Absyn_XTunion_d_tag;
+static const unsigned int Cyc_Absyn_Unresolved_b= 0; static const int Cyc_Absyn_Global_b_tag=
+0; struct Cyc_Absyn_Global_b_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ;
+static const int Cyc_Absyn_Funname_b_tag= 1; struct Cyc_Absyn_Funname_b_struct{
+int tag; struct Cyc_Absyn_Fndecl* f1; } ; static const int Cyc_Absyn_Param_b_tag=
+2; struct Cyc_Absyn_Param_b_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ;
+static const int Cyc_Absyn_Local_b_tag= 3; struct Cyc_Absyn_Local_b_struct{ int
+tag; struct Cyc_Absyn_Vardecl* f1; } ; static const int Cyc_Absyn_Pat_b_tag= 4;
+struct Cyc_Absyn_Pat_b_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ; struct
+Cyc_Absyn_Vardecl{ void* sc; struct _tuple1* name; struct Cyc_Absyn_Tqual* tq;
+void* type; struct Cyc_Absyn_Exp* initializer; int shadow; struct Cyc_Core_Opt*
+region; struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_Fndecl{ void* sc;
+int is_inline; struct _tuple1* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
+effect; void* ret_type; struct Cyc_List_List* args; int varargs; struct Cyc_Absyn_Stmt*
+body; struct Cyc_Core_Opt* cached_typ; struct Cyc_Core_Opt* param_vardecls;
+struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_Structfield{ struct
+_tagged_string* name; struct Cyc_Absyn_Tqual* tq; void* type; struct Cyc_Core_Opt*
+width; struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_Structdecl{ void*
+sc; struct Cyc_Core_Opt* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
+fields; struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_Uniondecl{ void*
+sc; struct Cyc_Core_Opt* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
+fields; struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_Tunionfield{
+struct _tuple1* name; struct Cyc_List_List* tvs; struct Cyc_List_List* typs;
+struct Cyc_Position_Segment* loc; } ; struct Cyc_Absyn_Tuniondecl{ void* sc;
+struct Cyc_Core_Opt* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
+fields; } ; struct Cyc_Absyn_XTuniondecl{ void* sc; struct _tuple1* name; struct
+Cyc_List_List* fields; } ; struct Cyc_Absyn_Enumfield{ struct _tuple1* name;
+struct Cyc_Absyn_Exp* tag; struct Cyc_Position_Segment* loc; } ; struct Cyc_Absyn_Enumdecl{
+void* sc; struct _tuple1* name; struct Cyc_List_List* fields; } ; struct Cyc_Absyn_Typedefdecl{
+struct _tuple1* name; struct Cyc_List_List* tvs; void* defn; } ; static const
+int Cyc_Absyn_Var_d_tag= 0; struct Cyc_Absyn_Var_d_struct{ int tag; struct Cyc_Absyn_Vardecl*
+f1; } ; static const int Cyc_Absyn_Fn_d_tag= 1; struct Cyc_Absyn_Fn_d_struct{
+int tag; struct Cyc_Absyn_Fndecl* f1; } ; static const int Cyc_Absyn_Let_d_tag=
+2; struct Cyc_Absyn_Let_d_struct{ int tag; struct Cyc_Absyn_Pat* f1; struct Cyc_Core_Opt*
+f2; struct Cyc_Core_Opt* f3; struct Cyc_Absyn_Exp* f4; int f5; } ; static const
+int Cyc_Absyn_Struct_d_tag= 3; struct Cyc_Absyn_Struct_d_struct{ int tag; struct
+Cyc_Absyn_Structdecl* f1; } ; static const int Cyc_Absyn_Union_d_tag= 4; struct
+Cyc_Absyn_Union_d_struct{ int tag; struct Cyc_Absyn_Uniondecl* f1; } ; static
+const int Cyc_Absyn_Tunion_d_tag= 5; struct Cyc_Absyn_Tunion_d_struct{ int tag;
+struct Cyc_Absyn_Tuniondecl* f1; } ; static const int Cyc_Absyn_XTunion_d_tag= 6;
 struct Cyc_Absyn_XTunion_d_struct{ int tag; struct Cyc_Absyn_XTuniondecl* f1; }
-; extern const int Cyc_Absyn_Enum_d_tag; struct Cyc_Absyn_Enum_d_struct{ int tag;
-struct Cyc_Absyn_Enumdecl* f1; } ; extern const int Cyc_Absyn_Typedef_d_tag;
-struct Cyc_Absyn_Typedef_d_struct{ int tag; struct Cyc_Absyn_Typedefdecl* f1; }
-; extern const int Cyc_Absyn_Namespace_d_tag; struct Cyc_Absyn_Namespace_d_struct{
-int tag; struct _tagged_string* f1; struct Cyc_List_List* f2; } ; extern const
-int Cyc_Absyn_Using_d_tag; struct Cyc_Absyn_Using_d_struct{ int tag; struct
-_tuple1* f1; struct Cyc_List_List* f2; } ; extern const int Cyc_Absyn_ExternC_d_tag;
-struct Cyc_Absyn_ExternC_d_struct{ int tag; struct Cyc_List_List* f1; } ; struct
-Cyc_Absyn_Decl{ void* r; struct Cyc_Position_Segment* loc; } ; extern const int
-Cyc_Absyn_ArrayElement_tag; struct Cyc_Absyn_ArrayElement_struct{ int tag;
-struct Cyc_Absyn_Exp* f1; } ; extern const int Cyc_Absyn_FieldName_tag; struct
-Cyc_Absyn_FieldName_struct{ int tag; struct _tagged_string* f1; } ; extern char
-Cyc_Absyn_EmptyAnnot_tag[ 11u]; struct Cyc_Absyn_EmptyAnnot_struct{ char* tag; }
-; extern struct Cyc_Absyn_Tqual* Cyc_Absyn_combine_tqual( struct Cyc_Absyn_Tqual*
-x, struct Cyc_Absyn_Tqual* y); extern struct Cyc_Absyn_Tqual* Cyc_Absyn_empty_tqual();
-extern struct Cyc_Absyn_Conref* Cyc_Absyn_new_conref( void* x); extern struct
-Cyc_Absyn_Conref* Cyc_Absyn_empty_conref(); extern void* Cyc_Absyn_new_evar(
-void*); extern void* Cyc_Absyn_uchar_t; extern void* Cyc_Absyn_uint_t; extern
-void* Cyc_Absyn_sint_t; extern void* Cyc_Absyn_float_t; extern void* Cyc_Absyn_double_t;
+; static const int Cyc_Absyn_Enum_d_tag= 7; struct Cyc_Absyn_Enum_d_struct{ int
+tag; struct Cyc_Absyn_Enumdecl* f1; } ; static const int Cyc_Absyn_Typedef_d_tag=
+8; struct Cyc_Absyn_Typedef_d_struct{ int tag; struct Cyc_Absyn_Typedefdecl* f1;
+} ; static const int Cyc_Absyn_Namespace_d_tag= 9; struct Cyc_Absyn_Namespace_d_struct{
+int tag; struct _tagged_string* f1; struct Cyc_List_List* f2; } ; static const
+int Cyc_Absyn_Using_d_tag= 10; struct Cyc_Absyn_Using_d_struct{ int tag; struct
+_tuple1* f1; struct Cyc_List_List* f2; } ; static const int Cyc_Absyn_ExternC_d_tag=
+11; struct Cyc_Absyn_ExternC_d_struct{ int tag; struct Cyc_List_List* f1; } ;
+struct Cyc_Absyn_Decl{ void* r; struct Cyc_Position_Segment* loc; } ; static
+const int Cyc_Absyn_ArrayElement_tag= 0; struct Cyc_Absyn_ArrayElement_struct{
+int tag; struct Cyc_Absyn_Exp* f1; } ; static const int Cyc_Absyn_FieldName_tag=
+1; struct Cyc_Absyn_FieldName_struct{ int tag; struct _tagged_string* f1; } ;
+extern char Cyc_Absyn_EmptyAnnot_tag[ 11u]; struct Cyc_Absyn_EmptyAnnot_struct{
+char* tag; } ; extern struct Cyc_Absyn_Tqual* Cyc_Absyn_combine_tqual( struct
+Cyc_Absyn_Tqual* x, struct Cyc_Absyn_Tqual* y); extern struct Cyc_Absyn_Tqual*
+Cyc_Absyn_empty_tqual(); extern struct Cyc_Absyn_Conref* Cyc_Absyn_new_conref(
+void* x); extern struct Cyc_Absyn_Conref* Cyc_Absyn_empty_conref(); extern void*
+Cyc_Absyn_new_evar( void*); extern void* Cyc_Absyn_uchar_t; extern void* Cyc_Absyn_uint_t;
+extern void* Cyc_Absyn_sint_t; extern void* Cyc_Absyn_float_t; extern void* Cyc_Absyn_double_t;
 extern void* Cyc_Absyn_starb_typ( void* t, void* rgn, struct Cyc_Absyn_Tqual* tq,
 void* b); extern void* Cyc_Absyn_atb_typ( void* t, void* rgn, struct Cyc_Absyn_Tqual*
 tq, void* b); extern void* Cyc_Absyn_tagged_typ( void* t, void* rgn, struct Cyc_Absyn_Tqual*
@@ -545,27 +548,28 @@ struct Cyc_PP_Out* Cyc_PP_out_t; struct Cyc_PP_Doc; typedef struct Cyc_PP_Doc*
 Cyc_PP_doc_t; extern void Cyc_Lex_register_typedef( struct _tuple1* s); extern
 void Cyc_Lex_enter_namespace( struct _tagged_string*); extern void Cyc_Lex_leave_namespace();
 extern void Cyc_Lex_enter_using( struct _tuple1*); extern void Cyc_Lex_leave_using();
-typedef void* Cyc_Parse_Struct_or_union; const unsigned int Cyc_Parse_Struct_su=
-0; const unsigned int Cyc_Parse_Union_su= 1; typedef void* Cyc_Parse_struct_or_union_t;
-typedef void* Cyc_Parse_Blockitem; const int Cyc_Parse_TopDecls_bl_tag= 0;
+typedef void* Cyc_Parse_Struct_or_union; static const unsigned int Cyc_Parse_Struct_su=
+0; static const unsigned int Cyc_Parse_Union_su= 1; typedef void* Cyc_Parse_struct_or_union_t;
+typedef void* Cyc_Parse_Blockitem; static const int Cyc_Parse_TopDecls_bl_tag= 0;
 struct Cyc_Parse_TopDecls_bl_struct{ int tag; struct Cyc_List_List* f1; } ;
-const int Cyc_Parse_Stmt_bl_tag= 1; struct Cyc_Parse_Stmt_bl_struct{ int tag;
-struct Cyc_Absyn_Stmt* f1; } ; const int Cyc_Parse_FnDecl_bl_tag= 2; struct Cyc_Parse_FnDecl_bl_struct{
-int tag; struct Cyc_Absyn_Fndecl* f1; } ; typedef void* Cyc_Parse_blockitem_t;
-typedef void* Cyc_Parse_Type_specifier; const int Cyc_Parse_Signed_spec_tag= 0;
-struct Cyc_Parse_Signed_spec_struct{ int tag; struct Cyc_Position_Segment* f1; }
-; const int Cyc_Parse_Unsigned_spec_tag= 1; struct Cyc_Parse_Unsigned_spec_struct{
-int tag; struct Cyc_Position_Segment* f1; } ; const int Cyc_Parse_Short_spec_tag=
-2; struct Cyc_Parse_Short_spec_struct{ int tag; struct Cyc_Position_Segment* f1;
-} ; const int Cyc_Parse_Long_spec_tag= 3; struct Cyc_Parse_Long_spec_struct{ int
-tag; struct Cyc_Position_Segment* f1; } ; const int Cyc_Parse_Type_spec_tag= 4;
-struct Cyc_Parse_Type_spec_struct{ int tag; void* f1; struct Cyc_Position_Segment*
-f2; } ; const int Cyc_Parse_Decl_spec_tag= 5; struct Cyc_Parse_Decl_spec_struct{
-int tag; struct Cyc_Absyn_Decl* f1; } ; typedef void* Cyc_Parse_type_specifier_t;
-typedef void* Cyc_Parse_Storage_class; const unsigned int Cyc_Parse_Typedef_sc=
-0; const unsigned int Cyc_Parse_Extern_sc= 1; const unsigned int Cyc_Parse_ExternC_sc=
-2; const unsigned int Cyc_Parse_Static_sc= 3; const unsigned int Cyc_Parse_Auto_sc=
-4; const unsigned int Cyc_Parse_Register_sc= 5; const unsigned int Cyc_Parse_Abstract_sc=
+static const int Cyc_Parse_Stmt_bl_tag= 1; struct Cyc_Parse_Stmt_bl_struct{ int
+tag; struct Cyc_Absyn_Stmt* f1; } ; static const int Cyc_Parse_FnDecl_bl_tag= 2;
+struct Cyc_Parse_FnDecl_bl_struct{ int tag; struct Cyc_Absyn_Fndecl* f1; } ;
+typedef void* Cyc_Parse_blockitem_t; typedef void* Cyc_Parse_Type_specifier;
+static const int Cyc_Parse_Signed_spec_tag= 0; struct Cyc_Parse_Signed_spec_struct{
+int tag; struct Cyc_Position_Segment* f1; } ; static const int Cyc_Parse_Unsigned_spec_tag=
+1; struct Cyc_Parse_Unsigned_spec_struct{ int tag; struct Cyc_Position_Segment*
+f1; } ; static const int Cyc_Parse_Short_spec_tag= 2; struct Cyc_Parse_Short_spec_struct{
+int tag; struct Cyc_Position_Segment* f1; } ; static const int Cyc_Parse_Long_spec_tag=
+3; struct Cyc_Parse_Long_spec_struct{ int tag; struct Cyc_Position_Segment* f1;
+} ; static const int Cyc_Parse_Type_spec_tag= 4; struct Cyc_Parse_Type_spec_struct{
+int tag; void* f1; struct Cyc_Position_Segment* f2; } ; static const int Cyc_Parse_Decl_spec_tag=
+5; struct Cyc_Parse_Decl_spec_struct{ int tag; struct Cyc_Absyn_Decl* f1; } ;
+typedef void* Cyc_Parse_type_specifier_t; typedef void* Cyc_Parse_Storage_class;
+static const unsigned int Cyc_Parse_Typedef_sc= 0; static const unsigned int Cyc_Parse_Extern_sc=
+1; static const unsigned int Cyc_Parse_ExternC_sc= 2; static const unsigned int
+Cyc_Parse_Static_sc= 3; static const unsigned int Cyc_Parse_Auto_sc= 4; static
+const unsigned int Cyc_Parse_Register_sc= 5; static const unsigned int Cyc_Parse_Abstract_sc=
 6; typedef void* Cyc_Parse_storage_class_t; struct Cyc_Parse_Declaration_spec{
 struct Cyc_Core_Opt* sc; struct Cyc_Absyn_Tqual* tq; struct Cyc_List_List*
 type_specs; int is_inline; struct Cyc_List_List* attributes; } ; typedef struct
@@ -2383,7 +2387,7 @@ struct _tagged_string){ _temp2057, _temp2057, _temp2057 + 19u},( struct
 _tagged_string){ _temp2060, _temp2060, _temp2060 + 25u},( struct _tagged_string){
 _temp2063, _temp2063, _temp2063 + 26u},( struct _tagged_string){ _temp2066,
 _temp2066, _temp2066 + 9u},( struct _tagged_string){ _temp2069, _temp2069,
-_temp2069 + 20u}}; static short Cyc_yyr1[ 390u]={ (short)0, (short)120, (short)121,
+_temp2069 + 20u}}; static short Cyc_yyr1[ 389u]={ (short)0, (short)120, (short)121,
 (short)121, (short)121, (short)121, (short)121, (short)121, (short)121, (short)122,
 (short)122, (short)123, (short)123, (short)124, (short)124, (short)124, (short)124,
 (short)125, (short)125, (short)126, (short)127, (short)128, (short)129, (short)130,
@@ -2433,117 +2437,117 @@ _temp2069 + 20u}}; static short Cyc_yyr1[ 390u]={ (short)0, (short)120, (short)1
 (short)214, (short)214, (short)214, (short)215, (short)215, (short)215, (short)216,
 (short)216, (short)216, (short)216, (short)217, (short)217, (short)218, (short)218,
 (short)218, (short)218, (short)218, (short)218, (short)218, (short)218, (short)218,
-(short)218, (short)218, (short)218, (short)219, (short)219, (short)219, (short)219,
-(short)219, (short)219, (short)220, (short)220, (short)220, (short)221, (short)221,
+(short)218, (short)218, (short)219, (short)219, (short)219, (short)219, (short)219,
+(short)219, (short)220, (short)220, (short)220, (short)221, (short)221, (short)221,
 (short)221, (short)221, (short)221, (short)221, (short)221, (short)221, (short)221,
-(short)221, (short)221, (short)221, (short)221, (short)221, (short)222, (short)222,
-(short)222, (short)222, (short)222, (short)222, (short)222, (short)222, (short)222,
-(short)223, (short)224, (short)224, (short)225, (short)225, (short)225, (short)225,
-(short)226, (short)226}; static short Cyc_yyr2[ 390u]={ (short)0, (short)1,
-(short)1, (short)2, (short)3, (short)5, (short)3, (short)5, (short)6, (short)0,
-(short)1, (short)1, (short)1, (short)2, (short)3, (short)3, (short)4, (short)3,
-(short)4, (short)2, (short)1, (short)2, (short)1, (short)2, (short)3, (short)5,
-(short)1, (short)2, (short)2, (short)3, (short)2, (short)3, (short)2, (short)3,
-(short)2, (short)3, (short)1, (short)1, (short)1, (short)1, (short)2, (short)1,
-(short)1, (short)0, (short)1, (short)6, (short)1, (short)3, (short)1, (short)1,
-(short)4, (short)4, (short)1, (short)1, (short)1, (short)1, (short)1, (short)1,
-(short)1, (short)1, (short)1, (short)1, (short)1, (short)1, (short)1, (short)1,
-(short)3, (short)2, (short)4, (short)1, (short)1, (short)1, (short)1, (short)1,
-(short)5, (short)2, (short)1, (short)3, (short)1, (short)3, (short)4, (short)6,
-(short)6, (short)3, (short)3, (short)0, (short)3, (short)3, (short)1, (short)1,
-(short)1, (short)1, (short)2, (short)1, (short)1, (short)3, (short)1, (short)3,
-(short)3, (short)2, (short)3, (short)2, (short)3, (short)1, (short)1, (short)3,
-(short)1, (short)2, (short)3, (short)6, (short)3, (short)4, (short)5, (short)5,
-(short)2, (short)3, (short)4, (short)1, (short)2, (short)3, (short)3, (short)1,
-(short)5, (short)1, (short)2, (short)1, (short)3, (short)3, (short)4, (short)4,
-(short)3, (short)5, (short)4, (short)4, (short)4, (short)2, (short)2, (short)3,
-(short)3, (short)4, (short)1, (short)1, (short)4, (short)4, (short)1, (short)0,
-(short)1, (short)1, (short)3, (short)1, (short)1, (short)2, (short)1, (short)3,
-(short)3, (short)1, (short)3, (short)2, (short)3, (short)1, (short)3, (short)1,
-(short)3, (short)3, (short)5, (short)1, (short)3, (short)2, (short)1, (short)2,
-(short)1, (short)1, (short)3, (short)1, (short)1, (short)2, (short)3, (short)4,
-(short)8, (short)1, (short)2, (short)3, (short)4, (short)2, (short)1, (short)2,
-(short)3, (short)2, (short)1, (short)2, (short)1, (short)2, (short)3, (short)3,
-(short)1, (short)3, (short)1, (short)1, (short)2, (short)3, (short)2, (short)3,
-(short)3, (short)4, (short)2, (short)4, (short)3, (short)3, (short)5, (short)4,
-(short)4, (short)4, (short)2, (short)1, (short)1, (short)1, (short)1, (short)1,
-(short)1, (short)2, (short)2, (short)3, (short)1, (short)2, (short)2, (short)3,
-(short)1, (short)2, (short)1, (short)1, (short)1, (short)5, (short)7, (short)7,
-(short)6, (short)0, (short)3, (short)4, (short)5, (short)6, (short)7, (short)5,
-(short)7, (short)6, (short)7, (short)7, (short)8, (short)7, (short)8, (short)8,
-(short)9, (short)6, (short)7, (short)7, (short)8, (short)3, (short)2, (short)2,
-(short)2, (short)3, (short)2, (short)4, (short)5, (short)1, (short)3, (short)1,
-(short)2, (short)1, (short)1, (short)1, (short)1, (short)5, (short)4, (short)4,
-(short)5, (short)2, (short)2, (short)0, (short)1, (short)1, (short)3, (short)1,
-(short)2, (short)1, (short)1, (short)3, (short)1, (short)3, (short)1, (short)3,
-(short)1, (short)1, (short)1, (short)1, (short)1, (short)1, (short)1, (short)1,
-(short)1, (short)1, (short)1, (short)1, (short)5, (short)2, (short)2, (short)2,
+(short)221, (short)221, (short)221, (short)221, (short)222, (short)222, (short)222,
+(short)222, (short)222, (short)222, (short)222, (short)222, (short)222, (short)223,
+(short)224, (short)224, (short)225, (short)225, (short)225, (short)225, (short)226,
+(short)226}; static short Cyc_yyr2[ 389u]={ (short)0, (short)1, (short)1,
+(short)2, (short)3, (short)5, (short)3, (short)5, (short)6, (short)0, (short)1,
+(short)1, (short)1, (short)2, (short)3, (short)3, (short)4, (short)3, (short)4,
+(short)2, (short)1, (short)2, (short)1, (short)2, (short)3, (short)5, (short)1,
+(short)2, (short)2, (short)3, (short)2, (short)3, (short)2, (short)3, (short)2,
+(short)3, (short)1, (short)1, (short)1, (short)1, (short)2, (short)1, (short)1,
+(short)0, (short)1, (short)6, (short)1, (short)3, (short)1, (short)1, (short)4,
+(short)4, (short)1, (short)1, (short)1, (short)1, (short)1, (short)1, (short)1,
+(short)1, (short)1, (short)1, (short)1, (short)1, (short)1, (short)1, (short)3,
+(short)2, (short)4, (short)1, (short)1, (short)1, (short)1, (short)1, (short)5,
+(short)2, (short)1, (short)3, (short)1, (short)3, (short)4, (short)6, (short)6,
+(short)3, (short)3, (short)0, (short)3, (short)3, (short)1, (short)1, (short)1,
+(short)1, (short)2, (short)1, (short)1, (short)3, (short)1, (short)3, (short)3,
+(short)2, (short)3, (short)2, (short)3, (short)1, (short)1, (short)3, (short)1,
+(short)2, (short)3, (short)6, (short)3, (short)4, (short)5, (short)5, (short)2,
+(short)3, (short)4, (short)1, (short)2, (short)3, (short)3, (short)1, (short)5,
+(short)1, (short)2, (short)1, (short)3, (short)3, (short)4, (short)4, (short)3,
+(short)5, (short)4, (short)4, (short)4, (short)2, (short)2, (short)3, (short)3,
+(short)4, (short)1, (short)1, (short)4, (short)4, (short)1, (short)0, (short)1,
+(short)1, (short)3, (short)1, (short)1, (short)2, (short)1, (short)3, (short)3,
+(short)1, (short)3, (short)2, (short)3, (short)1, (short)3, (short)1, (short)3,
+(short)3, (short)5, (short)1, (short)3, (short)2, (short)1, (short)2, (short)1,
+(short)1, (short)3, (short)1, (short)1, (short)2, (short)3, (short)4, (short)8,
+(short)1, (short)2, (short)3, (short)4, (short)2, (short)1, (short)2, (short)3,
+(short)2, (short)1, (short)2, (short)1, (short)2, (short)3, (short)3, (short)1,
+(short)3, (short)1, (short)1, (short)2, (short)3, (short)2, (short)3, (short)3,
+(short)4, (short)2, (short)4, (short)3, (short)3, (short)5, (short)4, (short)4,
+(short)4, (short)2, (short)1, (short)1, (short)1, (short)1, (short)1, (short)1,
+(short)2, (short)2, (short)3, (short)1, (short)2, (short)2, (short)3, (short)1,
+(short)2, (short)1, (short)1, (short)1, (short)5, (short)7, (short)7, (short)6,
+(short)0, (short)3, (short)4, (short)5, (short)6, (short)7, (short)5, (short)7,
+(short)6, (short)7, (short)7, (short)8, (short)7, (short)8, (short)8, (short)9,
+(short)6, (short)7, (short)7, (short)8, (short)3, (short)2, (short)2, (short)2,
+(short)3, (short)2, (short)4, (short)5, (short)1, (short)3, (short)1, (short)2,
+(short)1, (short)1, (short)1, (short)1, (short)5, (short)4, (short)4, (short)5,
+(short)2, (short)2, (short)0, (short)1, (short)1, (short)3, (short)1, (short)2,
 (short)1, (short)1, (short)3, (short)1, (short)3, (short)1, (short)3, (short)1,
-(short)3, (short)1, (short)3, (short)1, (short)3, (short)3, (short)1, (short)3,
-(short)3, (short)3, (short)3, (short)1, (short)3, (short)3, (short)1, (short)3,
-(short)3, (short)1, (short)3, (short)3, (short)3, (short)1, (short)4, (short)1,
-(short)2, (short)2, (short)2, (short)2, (short)2, (short)2, (short)4, (short)2,
-(short)4, (short)7, (short)7, (short)1, (short)1, (short)1, (short)1, (short)1,
-(short)1, (short)1, (short)1, (short)1, (short)1, (short)4, (short)3, (short)4,
-(short)3, (short)3, (short)3, (short)3, (short)2, (short)2, (short)6, (short)7,
-(short)4, (short)4, (short)1, (short)1, (short)1, (short)3, (short)2, (short)5,
-(short)4, (short)4, (short)5, (short)1, (short)1, (short)3, (short)1, (short)1,
-(short)1, (short)1, (short)1, (short)1}; static short Cyc_yydefact[ 731u]={
-(short)0, (short)36, (short)37, (short)38, (short)39, (short)41, (short)52,
-(short)54, (short)55, (short)56, (short)57, (short)58, (short)59, (short)60,
-(short)61, (short)71, (short)72, (short)73, (short)88, (short)89, (short)43,
-(short)0, (short)0, (short)42, (short)0, (short)0, (short)0, (short)0, (short)388,
-(short)65, (short)389, (short)85, (short)0, (short)53, (short)0, (short)140,
-(short)141, (short)144, (short)1, (short)2, (short)11, (short)0, (short)0,
-(short)12, (short)0, (short)43, (short)43, (short)43, (short)62, (short)63,
-(short)0, (short)64, (short)0, (short)123, (short)0, (short)145, (short)125,
-(short)40, (short)0, (short)34, (short)44, (short)75, (short)269, (short)265,
-(short)268, (short)267, (short)0, (short)263, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)270, (short)19, (short)21, (short)147, (short)149,
-(short)0, (short)85, (short)0, (short)114, (short)0, (short)0, (short)67,
-(short)0, (short)0, (short)0, (short)0, (short)3, (short)0, (short)0, (short)0,
-(short)0, (short)23, (short)0, (short)93, (short)94, (short)96, (short)28,
-(short)30, (short)32, (short)85, (short)0, (short)85, (short)39, (short)0,
-(short)26, (short)0, (short)0, (short)13, (short)0, (short)0, (short)0, (short)135,
-(short)124, (short)136, (short)146, (short)0, (short)0, (short)35, (short)0,
-(short)0, (short)277, (short)276, (short)266, (short)275, (short)0, (short)0,
-(short)0, (short)85, (short)0, (short)110, (short)115, (short)0, (short)0,
-(short)69, (short)70, (short)66, (short)0, (short)43, (short)43, (short)188,
-(short)190, (short)194, (short)0, (short)126, (short)168, (short)0, (short)165,
-(short)0, (short)387, (short)0, (short)0, (short)0, (short)0, (short)349,
-(short)350, (short)351, (short)352, (short)353, (short)354, (short)0, (short)0,
-(short)0, (short)384, (short)374, (short)385, (short)386, (short)0, (short)0,
-(short)0, (short)0, (short)357, (short)0, (short)355, (short)356, (short)0,
-(short)288, (short)301, (short)307, (short)309, (short)311, (short)313, (short)315,
-(short)317, (short)320, (short)325, (short)328, (short)331, (short)335, (short)0,
-(short)0, (short)337, (short)358, (short)373, (short)372, (short)0, (short)4,
-(short)0, (short)6, (short)0, (short)24, (short)0, (short)0, (short)0, (short)14,
-(short)29, (short)31, (short)33, (short)84, (short)0, (short)90, (short)91,
-(short)0, (short)83, (short)40, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)1, (short)1, (short)1, (short)1, (short)1, (short)1, (short)1, (short)1,
+(short)1, (short)1, (short)1, (short)5, (short)2, (short)2, (short)2, (short)1,
+(short)1, (short)3, (short)1, (short)3, (short)1, (short)3, (short)1, (short)3,
+(short)1, (short)3, (short)1, (short)3, (short)3, (short)1, (short)3, (short)3,
+(short)3, (short)3, (short)1, (short)3, (short)3, (short)1, (short)3, (short)3,
+(short)1, (short)3, (short)3, (short)3, (short)1, (short)4, (short)1, (short)2,
+(short)2, (short)2, (short)2, (short)2, (short)2, (short)4, (short)2, (short)4,
+(short)7, (short)1, (short)1, (short)1, (short)1, (short)1, (short)1, (short)1,
+(short)1, (short)1, (short)1, (short)4, (short)3, (short)4, (short)3, (short)3,
+(short)3, (short)3, (short)2, (short)2, (short)6, (short)7, (short)4, (short)4,
+(short)1, (short)1, (short)1, (short)3, (short)2, (short)5, (short)4, (short)4,
+(short)5, (short)1, (short)1, (short)3, (short)1, (short)1, (short)1, (short)1,
+(short)1, (short)1}; static short Cyc_yydefact[ 728u]={ (short)0, (short)36,
+(short)37, (short)38, (short)39, (short)41, (short)52, (short)54, (short)55,
+(short)56, (short)57, (short)58, (short)59, (short)60, (short)61, (short)71,
+(short)72, (short)73, (short)88, (short)89, (short)43, (short)0, (short)0,
+(short)42, (short)0, (short)0, (short)0, (short)0, (short)387, (short)65,
+(short)388, (short)85, (short)0, (short)53, (short)0, (short)140, (short)141,
+(short)144, (short)1, (short)2, (short)11, (short)0, (short)0, (short)12,
+(short)0, (short)43, (short)43, (short)43, (short)62, (short)63, (short)0,
+(short)64, (short)0, (short)123, (short)0, (short)145, (short)125, (short)40,
+(short)0, (short)34, (short)44, (short)75, (short)269, (short)265, (short)268,
+(short)267, (short)0, (short)263, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)270, (short)19, (short)21, (short)147, (short)149, (short)0,
+(short)85, (short)0, (short)114, (short)0, (short)0, (short)67, (short)0,
+(short)0, (short)0, (short)0, (short)3, (short)0, (short)0, (short)0, (short)0,
+(short)23, (short)0, (short)93, (short)94, (short)96, (short)28, (short)30,
+(short)32, (short)85, (short)0, (short)85, (short)39, (short)0, (short)26,
+(short)0, (short)0, (short)13, (short)0, (short)0, (short)0, (short)135, (short)124,
+(short)136, (short)146, (short)0, (short)0, (short)35, (short)0, (short)0,
+(short)277, (short)276, (short)266, (short)275, (short)0, (short)0, (short)0,
+(short)85, (short)0, (short)110, (short)115, (short)0, (short)0, (short)69,
+(short)70, (short)66, (short)0, (short)43, (short)43, (short)188, (short)190,
+(short)194, (short)0, (short)126, (short)168, (short)0, (short)165, (short)0,
+(short)386, (short)0, (short)0, (short)0, (short)0, (short)348, (short)349,
+(short)350, (short)351, (short)352, (short)353, (short)0, (short)0, (short)0,
+(short)383, (short)373, (short)384, (short)385, (short)0, (short)0, (short)0,
+(short)0, (short)356, (short)0, (short)354, (short)355, (short)0, (short)288,
+(short)301, (short)307, (short)309, (short)311, (short)313, (short)315, (short)317,
+(short)320, (short)325, (short)328, (short)331, (short)335, (short)0, (short)0,
+(short)337, (short)357, (short)372, (short)371, (short)0, (short)4, (short)0,
+(short)6, (short)0, (short)24, (short)0, (short)0, (short)0, (short)14, (short)29,
+(short)31, (short)33, (short)84, (short)0, (short)90, (short)91, (short)0,
+(short)83, (short)40, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)387,
+(short)222, (short)224, (short)0, (short)230, (short)228, (short)0, (short)229,
+(short)213, (short)214, (short)215, (short)0, (short)226, (short)216, (short)217,
+(short)218, (short)0, (short)286, (short)27, (short)15, (short)96, (short)171,
+(short)0, (short)130, (short)0, (short)152, (short)0, (short)170, (short)0,
+(short)127, (short)0, (short)150, (short)138, (short)137, (short)0, (short)0,
+(short)78, (short)0, (short)76, (short)264, (short)279, (short)0, (short)278,
+(short)0, (short)0, (short)277, (short)148, (short)111, (short)85, (short)0,
+(short)0, (short)117, (short)121, (short)116, (short)161, (short)191, (short)0,
+(short)99, (short)101, (short)0, (short)0, (short)196, (short)189, (short)197,
+(short)0, (short)87, (short)0, (short)86, (short)0, (short)167, (short)196,
+(short)169, (short)68, (short)0, (short)0, (short)345, (short)303, (short)335,
+(short)0, (short)304, (short)305, (short)0, (short)0, (short)0, (short)0,
+(short)338, (short)339, (short)0, (short)0, (short)0, (short)0, (short)341,
+(short)342, (short)340, (short)142, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)388, (short)222, (short)224, (short)0, (short)230, (short)228, (short)0,
-(short)229, (short)213, (short)214, (short)215, (short)0, (short)226, (short)216,
-(short)217, (short)218, (short)0, (short)286, (short)27, (short)15, (short)96,
-(short)171, (short)0, (short)130, (short)0, (short)152, (short)0, (short)170,
-(short)0, (short)127, (short)0, (short)150, (short)138, (short)137, (short)0,
-(short)0, (short)78, (short)0, (short)76, (short)264, (short)279, (short)0,
-(short)278, (short)0, (short)0, (short)277, (short)148, (short)111, (short)85,
-(short)0, (short)0, (short)117, (short)121, (short)116, (short)161, (short)191,
-(short)0, (short)99, (short)101, (short)0, (short)0, (short)196, (short)189,
-(short)197, (short)0, (short)87, (short)0, (short)86, (short)0, (short)167,
-(short)196, (short)169, (short)68, (short)0, (short)0, (short)345, (short)303,
-(short)335, (short)0, (short)304, (short)305, (short)0, (short)0, (short)0,
-(short)0, (short)338, (short)339, (short)0, (short)0, (short)0, (short)0,
-(short)341, (short)342, (short)340, (short)142, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)291, (short)292, (short)293, (short)294, (short)295, (short)296, (short)297,
-(short)298, (short)299, (short)300, (short)290, (short)0, (short)0, (short)343,
-(short)0, (short)366, (short)367, (short)0, (short)0, (short)0, (short)376,
-(short)0, (short)0, (short)143, (short)20, (short)9, (short)22, (short)9,
-(short)95, (short)97, (short)174, (short)173, (short)16, (short)0, (short)80,
-(short)92, (short)0, (short)0, (short)103, (short)104, (short)106, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)256, (short)257,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)291,
+(short)292, (short)293, (short)294, (short)295, (short)296, (short)297, (short)298,
+(short)299, (short)300, (short)290, (short)0, (short)0, (short)343, (short)0,
+(short)365, (short)366, (short)0, (short)0, (short)0, (short)375, (short)0,
+(short)0, (short)143, (short)20, (short)9, (short)22, (short)9, (short)95,
+(short)97, (short)174, (short)173, (short)16, (short)0, (short)80, (short)92,
+(short)0, (short)0, (short)103, (short)104, (short)106, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)256, (short)257,
 (short)258, (short)0, (short)0, (short)260, (short)0, (short)219, (short)220,
 (short)0, (short)0, (short)96, (short)225, (short)227, (short)223, (short)0,
 (short)159, (short)0, (short)0, (short)155, (short)129, (short)0, (short)0,
@@ -2556,11 +2560,11 @@ _temp2069 + 20u}}; static short Cyc_yyr1[ 390u]={ (short)0, (short)120, (short)1
 (short)0, (short)0, (short)200, (short)0, (short)198, (short)0, (short)0,
 (short)0, (short)212, (short)193, (short)195, (short)166, (short)0, (short)0,
 (short)175, (short)179, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)375, (short)382, (short)0,
-(short)381, (short)308, (short)0, (short)310, (short)312, (short)314, (short)316,
+(short)0, (short)0, (short)0, (short)0, (short)374, (short)381, (short)0,
+(short)380, (short)308, (short)0, (short)310, (short)312, (short)314, (short)316,
 (short)318, (short)319, (short)323, (short)324, (short)321, (short)322, (short)326,
 (short)327, (short)329, (short)330, (short)332, (short)333, (short)334, (short)289,
-(short)0, (short)364, (short)365, (short)360, (short)0, (short)362, (short)363,
+(short)0, (short)363, (short)364, (short)359, (short)0, (short)361, (short)362,
 (short)0, (short)0, (short)0, (short)10, (short)5, (short)7, (short)0, (short)306,
 (short)107, (short)98, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)255, (short)259, (short)0,
@@ -2571,343 +2575,324 @@ _temp2069 + 20u}}; static short Cyc_yyr1[ 390u]={ (short)0, (short)120, (short)1
 (short)271, (short)109, (short)120, (short)119, (short)0, (short)163, (short)162,
 (short)0, (short)206, (short)199, (short)202, (short)0, (short)207, (short)0,
 (short)0, (short)201, (short)0, (short)344, (short)0, (short)176, (short)0,
-(short)180, (short)370, (short)371, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)336, (short)378, (short)0, (short)0, (short)346, (short)361,
-(short)359, (short)379, (short)0, (short)0, (short)82, (short)105, (short)108,
+(short)180, (short)369, (short)370, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)336, (short)377, (short)0, (short)0, (short)346, (short)360,
+(short)358, (short)378, (short)0, (short)0, (short)82, (short)105, (short)108,
 (short)81, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)235, (short)261, (short)0, (short)18, (short)160,
 (short)158, (short)156, (short)0, (short)0, (short)45, (short)47, (short)186,
 (short)285, (short)0, (short)0, (short)205, (short)0, (short)209, (short)211,
 (short)210, (short)203, (short)0, (short)177, (short)181, (short)0, (short)0,
-(short)0, (short)380, (short)0, (short)383, (short)302, (short)377, (short)231,
-(short)235, (short)241, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)262,
-(short)50, (short)51, (short)122, (short)164, (short)208, (short)0, (short)182,
-(short)0, (short)0, (short)368, (short)0, (short)0, (short)0, (short)0, (short)243,
-(short)0, (short)0, (short)0, (short)251, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)234, (short)0, (short)347,
-(short)348, (short)369, (short)232, (short)233, (short)242, (short)244, (short)245,
-(short)0, (short)253, (short)252, (short)0, (short)247, (short)0, (short)0,
-(short)0, (short)0, (short)235, (short)236, (short)0, (short)246, (short)254,
-(short)248, (short)249, (short)0, (short)0, (short)235, (short)237, (short)178,
-(short)250, (short)235, (short)238, (short)235, (short)239, (short)240, (short)0,
-(short)0, (short)0}; static short Cyc_yydefgoto[ 107u]={ (short)728, (short)516,
-(short)517, (short)39, (short)40, (short)234, (short)41, (short)369, (short)42,
-(short)371, (short)43, (short)205, (short)44, (short)45, (short)59, (short)60,
-(short)425, (short)426, (short)46, (short)138, (short)47, (short)48, (short)266,
-(short)267, (short)49, (short)84, (short)50, (short)211, (short)212, (short)95,
-(short)96, (short)97, (short)213, (short)147, (short)381, (short)382, (short)383,
-(short)51, (short)280, (short)281, (short)52, (short)53, (short)54, (short)55,
-(short)116, (short)78, (short)263, (short)457, (short)410, (short)411, (short)286,
-(short)255, (short)149, (short)256, (short)257, (short)472, (short)374, (short)473,
-(short)474, (short)437, (short)438, (short)143, (short)144, (short)145, (short)458,
-(short)293, (short)237, (short)238, (short)239, (short)240, (short)241, (short)242,
-(short)243, (short)662, (short)244, (short)245, (short)270, (short)271, (short)272,
-(short)440, (short)441, (short)442, (short)246, (short)247, (short)355, (short)178,
-(short)521, (short)179, (short)180, (short)181, (short)182, (short)183, (short)184,
-(short)185, (short)186, (short)187, (short)188, (short)189, (short)190, (short)191,
-(short)192, (short)193, (short)194, (short)484, (short)485, (short)195, (short)196};
-static short Cyc_yypact[ 731u]={ (short)806, - (short)-32768, - (short)-32768, -
-(short)-32768, - (short)34, - (short)-32768, - (short)-32768, - (short)-32768, -
-(short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
+(short)379, (short)0, (short)382, (short)302, (short)376, (short)231, (short)235,
+(short)241, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)262, (short)50, (short)51,
+(short)122, (short)164, (short)208, (short)0, (short)182, (short)0, (short)367,
+(short)0, (short)0, (short)0, (short)0, (short)243, (short)0, (short)0, (short)0,
+(short)251, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)234, (short)0, (short)347, (short)368, (short)232, (short)233,
+(short)242, (short)244, (short)245, (short)0, (short)253, (short)252, (short)0,
+(short)247, (short)0, (short)0, (short)0, (short)0, (short)235, (short)236,
+(short)0, (short)246, (short)254, (short)248, (short)249, (short)0, (short)0,
+(short)235, (short)237, (short)178, (short)250, (short)235, (short)238, (short)235,
+(short)239, (short)240, (short)0, (short)0, (short)0}; static short Cyc_yydefgoto[
+107u]={ (short)725, (short)516, (short)517, (short)39, (short)40, (short)234,
+(short)41, (short)369, (short)42, (short)371, (short)43, (short)205, (short)44,
+(short)45, (short)59, (short)60, (short)425, (short)426, (short)46, (short)138,
+(short)47, (short)48, (short)266, (short)267, (short)49, (short)84, (short)50,
+(short)211, (short)212, (short)95, (short)96, (short)97, (short)213, (short)147,
+(short)381, (short)382, (short)383, (short)51, (short)280, (short)281, (short)52,
+(short)53, (short)54, (short)55, (short)116, (short)78, (short)263, (short)457,
+(short)410, (short)411, (short)286, (short)255, (short)149, (short)256, (short)257,
+(short)472, (short)374, (short)473, (short)474, (short)437, (short)438, (short)143,
+(short)144, (short)145, (short)458, (short)293, (short)237, (short)238, (short)239,
+(short)240, (short)241, (short)242, (short)243, (short)661, (short)244, (short)245,
+(short)270, (short)271, (short)272, (short)440, (short)441, (short)442, (short)246,
+(short)247, (short)355, (short)178, (short)521, (short)179, (short)180, (short)181,
+(short)182, (short)183, (short)184, (short)185, (short)186, (short)187, (short)188,
+(short)189, (short)190, (short)191, (short)192, (short)193, (short)194, (short)484,
+(short)485, (short)195, (short)196}; static short Cyc_yypact[ 728u]={ (short)754,
+- (short)-32768, - (short)-32768, - (short)-32768, - (short)29, - (short)-32768,
 - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
-- (short)-32768, - (short)-32768, (short)107, (short)164, (short)579, - (short)-32768,
-(short)164, (short)56, (short)168, (short)168, - (short)-32768, (short)128, -
-(short)-32768, (short)132, (short)279, - (short)-32768, (short)135, (short)150,
-(short)161, - (short)-32768, - (short)-32768, (short)806, - (short)-32768, -
-(short)28, - (short)4, - (short)-32768, (short)130, (short)107, (short)107,
-(short)107, - (short)-32768, - (short)-32768, (short)172, - (short)-32768,
-(short)1830, (short)196, (short)87, (short)85, - (short)-32768, (short)198,
-(short)229, (short)1879, - (short)-32768, (short)240, - (short)-32768, - (short)-32768,
-- (short)-32768, - (short)-32768, (short)579, - (short)-32768, (short)248,
-(short)310, (short)315, (short)579, (short)329, (short)48, - (short)-32768, -
-(short)-32768, (short)355, - (short)-32768, (short)164, (short)334, (short)164,
-(short)124, (short)78, (short)1987, - (short)-32768, (short)345, (short)2081,
-(short)3512, (short)3512, - (short)-32768, (short)806, (short)806, (short)806,
-(short)806, - (short)-32768, (short)365, (short)346, - (short)-32768, (short)1780,
-(short)1879, (short)1879, (short)1879, (short)132, (short)2081, (short)132,
-(short)376, (short)1038, - (short)-32768, (short)1830, (short)130, - (short)-32768,
-(short)1552, (short)1987, (short)2440, - (short)-32768, (short)196, (short)83, -
-(short)-32768, (short)806, (short)367, - (short)-32768, (short)164, (short)374,
-(short)579, - (short)-32768, - (short)-32768, - (short)-32768, (short)3512,
-(short)287, (short)78, (short)132, (short)164, (short)381, - (short)-32768,
-(short)164, (short)164, - (short)-32768, - (short)-32768, - (short)-32768,
-(short)184, (short)107, (short)107, (short)252, - (short)-32768, (short)366,
-(short)14, - (short)-32768, (short)231, (short)22, - (short)-32768, (short)3713,
-- (short)-32768, (short)3512, (short)3579, (short)388, (short)393, - (short)-32768,
 - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
-(short)396, (short)3780, (short)3780, - (short)-32768, - (short)-32768, -
-(short)-32768, - (short)-32768, (short)1384, (short)399, (short)3847, (short)3847,
-- (short)-32768, (short)3847, - (short)-32768, - (short)-32768, (short)410, -
-(short)-32768, - (short)26, (short)453, (short)413, (short)419, (short)424,
-(short)297, (short)65, (short)347, (short)322, (short)192, - (short)-32768,
-(short)472, (short)442, (short)3847, (short)67, - (short)-32768, - (short)-32768,
-(short)69, (short)459, - (short)-32768, (short)462, - (short)-32768, (short)470,
-- (short)-32768, (short)279, (short)2507, (short)1830, - (short)-32768, -
-(short)-32768, - (short)-32768, - (short)-32768, (short)467, (short)471, (short)2081,
-- (short)-32768, (short)269, (short)476, - (short)-32768, (short)474, (short)480,
-(short)482, (short)669, (short)487, (short)489, (short)493, (short)494, (short)2574,
-(short)669, (short)148, (short)669, (short)669, (short)484, - (short)-32768, -
-(short)-32768, (short)492, - (short)-32768, - (short)-32768, (short)130, -
-(short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, (short)496,
-(short)1155, - (short)-32768, - (short)-32768, - (short)-32768, (short)204, -
-(short)-32768, - (short)-32768, - (short)-32768, (short)498, - (short)-32768,
-(short)218, - (short)-32768, (short)497, (short)211, (short)499, (short)500,
-(short)40, - (short)-32768, (short)491, - (short)-32768, - (short)-32768,
-(short)83, (short)505, (short)21, (short)503, (short)508, (short)511, - (short)-32768,
-- (short)-32768, (short)506, (short)509, (short)212, (short)3883, (short)579, -
-(short)-32768, - (short)-32768, (short)132, (short)164, (short)516, (short)224,
-(short)246, - (short)-32768, (short)16, - (short)-32768, (short)518, (short)2081,
-(short)2081, (short)1672, (short)2641, (short)17, - (short)-32768, (short)301,
-(short)218, - (short)-32768, (short)1987, - (short)-32768, (short)1658, -
-(short)-32768, (short)129, - (short)-32768, - (short)-32768, (short)2081,
-(short)1384, - (short)-32768, - (short)-32768, - (short)-32768, (short)2100, -
-(short)-32768, (short)544, (short)3512, (short)1613, (short)584, (short)1384, -
-(short)-32768, - (short)-32768, (short)1155, (short)522, (short)348, (short)3512,
-- (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, (short)3847,
-(short)3512, (short)3847, (short)3847, (short)3847, (short)3847, (short)3847,
-(short)3847, (short)3847, (short)3847, (short)3847, (short)3847, (short)3847,
-(short)3847, (short)3847, (short)3847, (short)3847, (short)3847, (short)3847, -
-(short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
+- (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, - (short)10,
+(short)27, (short)2422, - (short)-32768, (short)27, (short)47, (short)247,
+(short)247, - (short)-32768, (short)82, - (short)-32768, (short)97, (short)113,
+- (short)-32768, (short)130, (short)135, (short)154, - (short)-32768, - (short)-32768,
+(short)754, - (short)-32768, (short)188, (short)280, - (short)-32768, (short)251,
+- (short)10, - (short)10, - (short)10, - (short)-32768, - (short)-32768, (short)168,
+- (short)-32768, (short)1820, (short)198, (short)212, - (short)47, - (short)-32768,
+(short)177, (short)233, (short)1869, - (short)-32768, (short)238, - (short)-32768,
+- (short)-32768, - (short)-32768, - (short)-32768, (short)2422, - (short)-32768,
+(short)260, (short)283, (short)296, (short)2422, (short)325, (short)98, -
+(short)-32768, - (short)-32768, (short)324, - (short)-32768, (short)27, (short)333,
+(short)27, - (short)28, (short)60, (short)1977, - (short)-32768, (short)327,
+(short)2080, (short)3513, (short)3513, - (short)-32768, (short)754, (short)754,
+(short)754, (short)754, - (short)-32768, (short)334, (short)318, - (short)-32768,
+(short)1770, (short)1869, (short)1869, (short)1869, (short)97, (short)2080,
+(short)97, (short)350, (short)1028, - (short)-32768, (short)1820, (short)251, -
+(short)-32768, (short)799, (short)1977, (short)2441, - (short)-32768, (short)198,
+(short)67, - (short)-32768, (short)754, (short)348, - (short)-32768, (short)27,
+(short)358, (short)2422, - (short)-32768, - (short)-32768, - (short)-32768,
+(short)3513, (short)366, (short)60, (short)97, (short)27, (short)353, - (short)-32768,
+(short)27, (short)27, - (short)-32768, - (short)-32768, - (short)-32768, (short)119,
+- (short)10, - (short)10, (short)269, - (short)-32768, (short)360, (short)69, -
+(short)-32768, (short)279, (short)81, - (short)-32768, (short)3714, - (short)-32768,
+(short)3513, (short)3580, (short)367, (short)372, - (short)-32768, - (short)-32768,
+- (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, (short)378,
+(short)3781, (short)3781, - (short)-32768, - (short)-32768, - (short)-32768, -
+(short)-32768, (short)1374, (short)380, (short)3848, (short)3848, - (short)-32768,
+(short)3848, - (short)-32768, - (short)-32768, (short)384, - (short)-32768, -
+(short)32, (short)436, (short)382, (short)406, (short)368, (short)387, (short)153,
+(short)398, (short)356, (short)26, - (short)-32768, (short)614, (short)437,
+(short)3848, (short)77, - (short)-32768, - (short)-32768, (short)111, (short)440,
+- (short)-32768, (short)442, - (short)-32768, (short)446, - (short)-32768,
+(short)113, (short)2508, (short)1820, - (short)-32768, - (short)-32768, -
+(short)-32768, - (short)-32768, (short)448, (short)449, (short)2080, - (short)-32768,
+(short)349, (short)453, - (short)-32768, (short)452, (short)454, (short)455,
+(short)1922, (short)457, (short)459, (short)462, (short)466, (short)2575,
+(short)1922, (short)196, (short)1922, (short)1922, (short)456, - (short)-32768,
+- (short)-32768, (short)464, - (short)-32768, - (short)-32768, (short)251, -
+(short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, (short)472,
+(short)1145, - (short)-32768, - (short)-32768, - (short)-32768, (short)133, -
+(short)-32768, - (short)-32768, - (short)-32768, (short)473, - (short)-32768,
+(short)7, - (short)-32768, (short)470, (short)145, (short)475, (short)471,
+(short)85, - (short)-32768, (short)467, - (short)-32768, - (short)-32768,
+(short)67, (short)476, (short)22, (short)479, (short)480, (short)483, - (short)-32768,
+- (short)-32768, (short)482, (short)484, (short)164, (short)561, (short)2422, -
+(short)-32768, - (short)-32768, (short)97, (short)27, (short)486, (short)217,
+(short)18, - (short)-32768, (short)14, - (short)-32768, (short)487, (short)2080,
+(short)2080, (short)1662, (short)2642, (short)3, - (short)-32768, (short)298,
+(short)7, - (short)-32768, (short)1977, - (short)-32768, (short)1648, - (short)-32768,
+(short)144, - (short)-32768, - (short)-32768, (short)2080, (short)1374, -
+(short)-32768, - (short)-32768, - (short)-32768, (short)2101, - (short)-32768,
+(short)516, (short)3513, (short)1603, (short)554, (short)1374, - (short)-32768,
+- (short)-32768, (short)1145, (short)492, (short)375, (short)3513, - (short)-32768,
+- (short)-32768, - (short)-32768, - (short)-32768, (short)3848, (short)3513,
+(short)3848, (short)3848, (short)3848, (short)3848, (short)3848, (short)3848,
+(short)3848, (short)3848, (short)3848, (short)3848, (short)3848, (short)3848,
+(short)3848, (short)3848, (short)3848, (short)3848, (short)3848, - (short)-32768,
 - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
-- (short)-32768, (short)3512, (short)3512, - (short)-32768, (short)137, -
-(short)-32768, - (short)-32768, (short)2708, (short)140, (short)3512, - (short)-32768,
-(short)2355, (short)519, - (short)-32768, - (short)-32768, (short)806, - (short)-32768,
-(short)806, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
-- (short)-32768, (short)2081, - (short)-32768, - (short)-32768, (short)3512,
-(short)529, (short)524, - (short)-32768, (short)520, (short)2081, (short)3512,
-(short)3512, (short)3512, (short)597, (short)1272, (short)533, - (short)-32768,
-- (short)-32768, - (short)-32768, (short)226, (short)590, - (short)-32768,
-(short)2775, - (short)-32768, - (short)-32768, (short)669, (short)1496, (short)1780,
-- (short)-32768, - (short)-32768, - (short)-32768, (short)3512, (short)551,
-(short)241, (short)537, (short)534, - (short)-32768, (short)218, (short)2032, -
-(short)-32768, (short)560, - (short)-32768, - (short)-32768, - (short)-32768, -
-(short)-32768, - (short)-32768, (short)806, - (short)-32768, (short)549, (short)552,
-(short)548, (short)164, - (short)-32768, (short)3512, - (short)-32768, (short)579,
-- (short)-32768, - (short)-32768, (short)565, (short)3512, (short)579, (short)91,
-- (short)-32768, - (short)-32768, - (short)-32768, (short)556, (short)553,
-(short)557, - (short)-32768, (short)559, - (short)-32768, (short)164, (short)164,
-(short)562, (short)78, (short)571, - (short)-32768, - (short)-32768, - (short)-32768,
-(short)218, - (short)-32768, (short)567, (short)570, - (short)-32768, (short)563,
-(short)301, (short)1924, (short)1987, (short)2842, - (short)-32768, - (short)-32768,
-(short)366, - (short)-32768, (short)574, (short)593, - (short)-32768, - (short)-32768,
-(short)257, (short)2507, (short)352, (short)576, (short)279, (short)581, (short)583,
-(short)587, (short)3646, - (short)-32768, - (short)-32768, (short)585, (short)589,
-(short)453, (short)298, (short)413, (short)419, (short)424, (short)297, (short)65,
-(short)65, (short)347, (short)347, (short)347, (short)347, (short)322, (short)322,
-(short)192, (short)192, - (short)-32768, - (short)-32768, - (short)-32768, -
-(short)-32768, (short)586, - (short)-32768, - (short)-32768, - (short)-32768,
-(short)588, - (short)-32768, - (short)-32768, (short)102, (short)321, (short)1987,
-- (short)-32768, - (short)-32768, - (short)-32768, (short)594, - (short)-32768,
-- (short)-32768, - (short)-32768, (short)269, (short)3512, (short)595, (short)362,
-(short)370, (short)372, (short)598, (short)2909, (short)2976, (short)251, -
-(short)-32768, - (short)-32768, (short)611, (short)614, (short)612, - (short)-32768,
-(short)1830, - (short)-32768, - (short)-32768, (short)78, - (short)-32768,
-(short)617, - (short)-32768, (short)218, - (short)-32768, - (short)-32768, -
-(short)-32768, - (short)-32768, (short)394, (short)616, (short)21, - (short)-32768,
-- (short)-32768, - (short)-32768, - (short)-32768, (short)608, - (short)-32768,
-- (short)-32768, - (short)-32768, - (short)-32768, (short)3913, - (short)-32768,
-- (short)-32768, - (short)-32768, - (short)-32768, (short)2081, (short)618, -
-(short)-32768, (short)631, - (short)-32768, - (short)-32768, - (short)-32768,
-(short)218, - (short)-32768, (short)634, (short)80, - (short)-32768, (short)609,
-(short)641, (short)635, - (short)-32768, (short)2185, - (short)-32768, - (short)-32768,
-- (short)-32768, (short)1830, (short)1973, (short)641, (short)638, (short)2355,
-- (short)-32768, - (short)-32768, (short)3512, (short)3512, - (short)-32768, -
-(short)-32768, - (short)-32768, - (short)-32768, (short)2355, (short)319, -
-(short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, (short)669,
-(short)644, (short)669, (short)3512, (short)3043, (short)292, (short)3110,
-(short)302, (short)3177, (short)466, - (short)-32768, (short)646, - (short)-32768,
-- (short)-32768, - (short)-32768, - (short)-32768, (short)642, (short)643, -
-(short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, (short)402,
-(short)571, - (short)-32768, (short)645, - (short)-32768, - (short)-32768, -
-(short)-32768, - (short)-32768, (short)3512, - (short)-32768, - (short)-32768,
-(short)2507, (short)647, (short)649, - (short)-32768, (short)331, - (short)-32768,
-- (short)-32768, - (short)-32768, (short)716, (short)466, - (short)-32768,
-(short)404, (short)669, (short)409, (short)3244, (short)669, (short)412, (short)3311,
-(short)3378, (short)306, (short)579, (short)640, (short)653, - (short)-32768, -
-(short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
-(short)305, - (short)-32768, (short)651, (short)652, - (short)-32768, (short)2270,
-(short)669, (short)656, (short)659, - (short)-32768, (short)669, (short)669,
-(short)414, - (short)-32768, (short)669, (short)669, (short)417, (short)669,
-(short)421, (short)3445, - (short)8, (short)1155, - (short)-32768, (short)3512,
 - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
-- (short)-32768, - (short)-32768, - (short)-32768, (short)669, - (short)-32768,
-- (short)-32768, (short)669, - (short)-32768, (short)669, (short)669, (short)427,
-(short)3512, (short)920, - (short)-32768, (short)336, - (short)-32768, - (short)-32768,
-- (short)-32768, - (short)-32768, (short)669, (short)309, (short)466, - (short)-32768,
-- (short)-32768, - (short)-32768, (short)920, - (short)-32768, (short)466, -
-(short)-32768, - (short)-32768, (short)758, (short)760, - (short)-32768}; static
-short Cyc_yypgoto[ 107u]={ - (short)-32768, (short)68, - (short)340, - (short)-32768,
-(short)449, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
-- (short)-32768, - (short)48, - (short)32, - (short)52, - (short)-32768, (short)41,
-- (short)40, (short)215, - (short)-32768, (short)271, - (short)115, (short)178,
-- (short)-32768, - (short)-32768, (short)337, - (short)-32768, (short)4, -
-(short)-32768, - (short)126, - (short)-32768, - (short)-32768, - (short)-32768,
-(short)566, (short)561, - (short)71, - (short)-32768, - (short)-32768, (short)242,
-- (short)-32768, - (short)245, - (short)-32768, - (short)14, - (short)51,
-(short)33, - (short)-32768, - (short)-32768, (short)70, - (short)-32768, -
-(short)87, - (short)370, (short)477, - (short)380, - (short)84, - (short)277, -
-(short)-32768, - (short)-32768, - (short)142, (short)619, - (short)346, -
-(short)268, - (short)-32768, (short)338, - (short)148, (short)478, - (short)96,
-(short)270, - (short)153, - (short)74, - (short)-32768, - (short)-32768, -
-(short)35, - (short)237, - (short)-32768, - (short)-32768, - (short)607, -
-(short)-32768, - (short)-32768, - (short)7, (short)501, - (short)-32768, (short)216,
-- (short)-32768, - (short)-32768, - (short)116, - (short)78, - (short)-32768, -
-(short)144, - (short)359, (short)625, (short)458, (short)457, (short)461,
-(short)456, (short)502, (short)197, (short)121, (short)193, (short)243, -
-(short)135, (short)465, - (short)-32768, - (short)-32768, - (short)-32768, -
-(short)-32768, - (short)287, - (short)-32768, - (short)-32768, (short)1}; static
-short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
-(short)107, (short)405, (short)436, (short)120, (short)306, (short)177, (short)197,
-(short)273, (short)142, (short)114, (short)276, (short)72, (short)258, (short)110,
-(short)85, (short)514, (short)108, (short)318, (short)61, (short)73, (short)254,
-(short)74, (short)468, (short)79, (short)81, (short)544, (short)98, (short)518,
-(short)214, (short)56, (short)445, (short)260, (short)321, (short)322, (short)423,
-(short)323, (short)56, (short)142, (short)676, (short)547, (short)325, (short)56,
-(short)109, (short)207, (short)208, (short)209, (short)107, (short)104, (short)57,
-(short)319, (short)236, (short)56, (short)109, (short)357, (short)235, (short)122,
-(short)248, (short)709, (short)373, (short)206, (short)126, (short)90, (short)91,
-(short)73, (short)38, (short)506, (short)555, (short)570, (short)73, (short)249,
-(short)510, (short)114, (short)558, (short)128, (short)295, (short)130, (short)480,
-(short)133, (short)550, (short)132, (short)326, (short)571, (short)99, (short)100,
-(short)101, (short)92, (short)93, (short)56, (short)56, (short)56, (short)56,
-(short)250, (short)710, (short)80, (short)142, (short)450, (short)15, (short)16,
-(short)17, (short)720, (short)417, (short)424, (short)210, (short)89, (short)215,
-(short)395, (short)56, (short)537, (short)724, (short)296, (short)289, (short)451,
-(short)726, (short)297, (short)727, (short)56, (short)302, (short)303, (short)268,
-(short)290, (short)73, (short)117, (short)375, (short)358, (short)359, (short)360,
-(short)333, (short)334, (short)278, (short)299, (short)277, (short)282, (short)283,
-(short)468, (short)461, (short)296, (short)75, (short)214, - (short)85, (short)418,
-(short)634, - (short)85, (short)389, (short)461, (short)56, (short)262, (short)83,
-(short)364, (short)396, (short)109, (short)399, (short)400, (short)469, (short)248,
-(short)198, (short)199, (short)200, (short)201, (short)136, (short)365, (short)361,
-(short)605, (short)479, (short)335, (short)336, (short)137, (short)376, (short)28,
-(short)362, (short)363, (short)76, (short)291, (short)622, (short)30, (short)366,
-(short)296, (short)300, (short)287, (short)288, (short)635, (short)32, (short)77,
-(short)264, (short)560, (short)319, (short)250, (short)236, (short)35, (short)36,
-(short)37, (short)235, (short)475, (short)434, (short)435, (short)319, (short)58,
-(short)384, (short)407, (short)566, (short)567, (short)56, (short)632, (short)502,
-(short)503, (short)504, (short)599, (short)487, (short)82, (short)460, (short)28,
-(short)28, (short)56, (short)453, (short)454, (short)134, (short)30, (short)30,
-(short)507, (short)403, (short)94, (short)511, (short)142, (short)298, (short)32,
-(short)508, (short)135, (short)375, (short)512, (short)86, (short)142, (short)83,
-(short)290, (short)520, (short)56, (short)35, (short)36, (short)37, (short)397,
-(short)483, (short)142, (short)87, (short)398, (short)644, (short)513, (short)28,
-(short)115, (short)667, (short)519, (short)28, (short)465, (short)30, (short)88,
-(short)28, (short)76, (short)30, (short)525, (short)477, (short)141, (short)30,
-(short)102, (short)141, (short)236, (short)103, (short)439, (short)77, (short)235,
-(short)526, (short)527, (short)528, (short)284, (short)532, (short)73, (short)73,
-(short)505, (short)483, (short)285, (short)282, (short)141, (short)444, (short)483,
-(short)85, (short)520, (short)449, (short)375, (short)58, (short)141, (short)141,
-(short)520, (short)118, (short)111, (short)261, (short)436, (short)421, (short)406,
-(short)112, (short)56, (short)341, (short)56, (short)113, (short)407, (short)413,
-(short)432, (short)214, (short)408, (short)342, (short)343, (short)414, (short)407,
-(short)409, (short)56, (short)214, (short)28, (short)640, (short)447, (short)148,
-(short)534, (short)483, (short)30, (short)291, (short)448, (short)483, (short)407,
-(short)119, (short)538, (short)298, (short)541, (short)284, (short)300, (short)585,
-(short)640, (short)121, (short)569, (short)543, (short)290, (short)109, (short)35,
-(short)36, (short)37, (short)531, - (short)85, (short)615, (short)123, (short)593,
-(short)141, (short)83, (short)289, (short)407, (short)109, (short)583, (short)28,
-(short)140, (short)107, (short)584, (short)140, (short)290, (short)30, (short)35,
-(short)36, (short)37, (short)28, (short)331, (short)332, (short)32, (short)578,
-(short)540, (short)30, (short)56, (short)539, (short)56, (short)380, (short)140,
-(short)577, (short)32, (short)35, (short)36, (short)37, (short)520, (short)274,
-(short)140, (short)140, (short)275, (short)654, (short)580, (short)35, (short)36,
-(short)37, (short)141, (short)407, (short)142, (short)58, (short)124, (short)657,
-(short)375, (short)407, (short)462, (short)688, (short)125, (short)407, (short)596,
-(short)463, (short)407, (short)407, (short)640, (short)464, (short)407, (short)692,
-(short)337, (short)338, (short)292, (short)723, (short)612, (short)614, (short)600,
-(short)301, (short)296, (short)602, (short)601, (short)465, (short)647, (short)56,
-(short)556, (short)127, (short)673, (short)620, (short)268, (short)559, (short)674,
-(short)721, (short)73, (short)339, (short)340, (short)407, (short)83, (short)73,
-(short)129, (short)131, (short)140, (short)420, (short)639, (short)146, (short)142,
-(short)203, (short)482, (short)407, (short)282, (short)282, (short)586, (short)407,
-(short)646, (short)711, (short)494, (short)495, (short)496, (short)497, (short)202,
-(short)639, (short)607, (short)407, (short)216, (short)588, (short)265, (short)141,
-(short)141, (short)141, (short)608, (short)407, (short)609, (short)407, (short)269,
-(short)719, (short)141, (short)279, (short)141, (short)294, (short)56, (short)623,
-(short)624, (short)141, (short)141, (short)140, (short)629, (short)311, (short)725,
-(short)109, (short)660, (short)661, (short)312, (short)248, (short)141, (short)313,
-(short)651, (short)653, (short)320, (short)656, (short)670, (short)659, (short)666,
-(short)303, (short)677, (short)407, (short)619, (short)324, (short)375, (short)679,
-(short)407, (short)384, (short)683, (short)407, (short)701, (short)407, (short)375,
-(short)704, (short)407, (short)645, (short)641, (short)706, (short)407, (short)669,
-(short)327, (short)375, (short)56, (short)717, (short)407, (short)328, (short)492,
-(short)493, (short)498, (short)499, (short)639, (short)648, (short)329, (short)650,
-(short)109, (short)330, (short)681, (short)356, (short)107, (short)685, (short)687,
-(short)344, (short)345, (short)346, (short)347, (short)348, (short)349, (short)350,
-(short)351, (short)352, (short)353, (short)206, (short)367, (short)141, (short)439,
-(short)368, (short)140, (short)140, (short)140, (short)377, (short)375, (short)141,
-(short)73, (short)370, (short)378, (short)140, (short)354, (short)140, (short)385,
-(short)386, (short)708, (short)391, (short)140, (short)140, (short)712, (short)387,
-(short)678, (short)388, (short)141, (short)682, (short)500, (short)501, (short)390,
-(short)140, (short)392, (short)393, (short)401, (short)402, (short)642, (short)404,
-(short)141, (short)718, (short)204, (short)412, (short)375, (short)415, (short)419,
-(short)416, (short)422, (short)696, (short)427, (short)428, (short)430, (short)699,
-(short)700, (short)429, (short)431, (short)702, (short)703, (short)446, (short)705,
-(short)452, (short)325, (short)305, (short)62, (short)307, (short)307, (short)478,
-(short)481, (short)515, (short)522, (short)523, (short)524, (short)529, (short)533,
-(short)713, (short)315, (short)316, (short)714, (short)535, (short)715, (short)716,
-(short)542, (short)545, (short)307, (short)307, (short)236, (short)307, (short)141,
-(short)141, (short)235, (short)722, (short)549, (short)546, (short)551, (short)553,
-(short)140, (short)557, (short)552, (short)562, (short)563, (short)689, (short)565,
-(short)564, (short)140, (short)307, (short)236, (short)568, (short)284, (short)73,
-(short)235, (short)28, (short)63, (short)572, (short)64, (short)65, (short)573,
-(short)30, (short)574, (short)236, (short)581, (short)140, (short)587, (short)235,
-(short)66, (short)582, (short)589, (short)67, (short)68, (short)590, (short)591,
-(short)594, (short)597, (short)140, (short)598, (short)69, (short)595, (short)603,
-(short)606, (short)70, (short)71, (short)141, (short)217, (short)610, (short)218,
-(short)219, (short)220, (short)221, (short)222, (short)223, (short)224, (short)225,
-(short)150, (short)616, (short)151, (short)617, (short)152, (short)226, (short)618,
-(short)153, (short)621, (short)227, (short)625, (short)627, (short)636, (short)630,
-(short)154, (short)155, (short)228, (short)229, (short)156, (short)157, (short)158,
-(short)159, (short)160, (short)161, (short)162, (short)631, (short)163, (short)164,
-(short)633, (short)140, (short)140, (short)592, (short)643, (short)637, (short)649,
-(short)663, (short)664, (short)665, (short)675, (short)668, (short)690, (short)671,
-(short)141, (short)672, (short)691, (short)693, (short)694, (short)697, (short)698,
-(short)230, (short)165, (short)166, (short)167, (short)168, (short)729, (short)30,
-(short)730, (short)476, (short)231, (short)106, (short)554, (short)604, (short)169,
-(short)141, (short)626, (short)372, (short)170, (short)466, (short)309, (short)379,
-(short)467, (short)561, (short)443, (short)171, (short)310, (short)628, (short)172,
-(short)173, (short)174, (short)486, (short)488, (short)490, (short)140, (short)175,
-(short)176, (short)489, (short)307, (short)0, (short)307, (short)307, (short)307,
+(short)3513, (short)3513, - (short)-32768, (short)140, - (short)-32768, -
+(short)-32768, (short)2709, (short)195, (short)3513, - (short)-32768, (short)2356,
+(short)491, - (short)-32768, - (short)-32768, (short)754, - (short)-32768,
+(short)754, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
+- (short)-32768, (short)2080, - (short)-32768, - (short)-32768, (short)3513,
+(short)502, (short)497, - (short)-32768, (short)493, (short)2080, (short)3513,
+(short)3513, (short)3513, (short)571, (short)1262, (short)507, - (short)-32768,
+- (short)-32768, - (short)-32768, (short)218, (short)560, - (short)-32768,
+(short)2776, - (short)-32768, - (short)-32768, (short)1922, (short)1486, (short)1770,
+- (short)-32768, - (short)-32768, - (short)-32768, (short)3513, (short)519,
+(short)239, (short)505, (short)498, - (short)-32768, (short)7, (short)2034, -
+(short)-32768, (short)520, - (short)-32768, - (short)-32768, - (short)-32768, -
+(short)-32768, - (short)-32768, (short)754, - (short)-32768, (short)514, (short)515,
+(short)513, (short)27, - (short)-32768, (short)3513, - (short)-32768, (short)2422,
+- (short)-32768, - (short)-32768, (short)530, (short)3513, (short)2422, -
+(short)31, - (short)-32768, - (short)-32768, - (short)-32768, (short)521,
+(short)525, (short)522, - (short)-32768, (short)523, - (short)-32768, (short)27,
+(short)27, (short)529, (short)60, (short)538, - (short)-32768, - (short)-32768,
+- (short)-32768, (short)7, - (short)-32768, (short)531, (short)532, - (short)-32768,
+(short)512, (short)298, (short)1542, (short)1977, (short)2843, - (short)-32768,
+- (short)-32768, (short)360, - (short)-32768, (short)533, (short)544, - (short)-32768,
+- (short)-32768, (short)213, (short)2508, (short)391, (short)537, (short)113,
+(short)540, (short)541, (short)543, (short)3647, - (short)-32768, - (short)-32768,
+(short)545, (short)548, (short)436, (short)241, (short)382, (short)406, (short)368,
+(short)387, (short)153, (short)153, (short)398, (short)398, (short)398, (short)398,
+(short)356, (short)356, (short)26, (short)26, - (short)-32768, - (short)-32768,
+- (short)-32768, - (short)-32768, (short)546, - (short)-32768, - (short)-32768,
+- (short)-32768, (short)552, - (short)-32768, - (short)-32768, (short)62,
+(short)220, (short)1977, - (short)-32768, - (short)-32768, - (short)-32768,
+(short)547, - (short)-32768, - (short)-32768, - (short)-32768, (short)349,
+(short)3513, (short)558, (short)394, (short)396, (short)400, (short)557, (short)2910,
+(short)2977, (short)240, - (short)-32768, - (short)-32768, (short)563, (short)572,
+(short)566, - (short)-32768, (short)1820, - (short)-32768, - (short)-32768,
+(short)60, - (short)-32768, (short)575, - (short)-32768, (short)7, - (short)-32768,
+- (short)-32768, - (short)-32768, - (short)-32768, (short)415, (short)573,
+(short)22, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
+(short)568, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
+(short)3884, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
+(short)2080, (short)578, - (short)-32768, (short)580, - (short)-32768, - (short)-32768,
+- (short)-32768, (short)7, - (short)-32768, (short)582, (short)86, - (short)-32768,
+(short)574, (short)588, (short)581, - (short)-32768, (short)2186, - (short)-32768,
+- (short)-32768, - (short)-32768, (short)1820, (short)2080, (short)588, (short)597,
+(short)2356, - (short)-32768, - (short)-32768, (short)3513, (short)3513, -
+(short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, (short)2356,
+(short)250, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
+(short)1922, (short)603, (short)1922, (short)3513, (short)3044, (short)253,
+(short)3111, (short)257, (short)3178, (short)463, - (short)-32768, (short)606, -
+(short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, (short)602,
+(short)607, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
+(short)404, (short)538, - (short)-32768, (short)610, - (short)-32768, - (short)-32768,
+- (short)-32768, - (short)-32768, (short)3513, - (short)-32768, - (short)-32768,
+(short)2508, (short)613, - (short)-32768, (short)302, - (short)-32768, - (short)-32768,
+- (short)-32768, (short)675, (short)463, - (short)-32768, (short)409, (short)1922,
+(short)412, (short)3245, (short)1922, (short)414, (short)3312, (short)3379,
+(short)272, (short)2422, (short)608, (short)618, - (short)-32768, - (short)-32768,
+- (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, (short)304,
+- (short)-32768, (short)616, - (short)-32768, (short)2271, (short)1922, (short)620,
+(short)623, - (short)-32768, (short)1922, (short)1922, (short)417, - (short)-32768,
+(short)1922, (short)1922, (short)421, (short)1922, (short)427, (short)3446, -
+(short)17, (short)1145, - (short)-32768, (short)3513, - (short)-32768, - (short)-32768,
+- (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
+(short)1922, - (short)-32768, - (short)-32768, (short)1922, - (short)-32768,
+(short)1922, (short)1922, (short)429, (short)3513, (short)911, - (short)-32768,
+(short)321, - (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768,
+(short)1922, (short)311, (short)463, - (short)-32768, - (short)-32768, - (short)-32768,
+(short)911, - (short)-32768, (short)463, - (short)-32768, - (short)-32768,
+(short)717, (short)718, - (short)-32768}; static short Cyc_yypgoto[ 107u]={ -
+(short)-32768, (short)37, - (short)327, - (short)-32768, (short)407, - (short)-32768,
+- (short)-32768, - (short)-32768, - (short)-32768, - (short)-32768, - (short)48,
+- (short)41, - (short)52, - (short)-32768, (short)23, - (short)27, (short)167, -
+(short)-32768, (short)319, - (short)123, (short)95, - (short)-32768, - (short)-32768,
+(short)295, - (short)-32768, (short)10, - (short)-32768, - (short)176, - (short)-32768,
+- (short)-32768, - (short)-32768, (short)524, (short)518, - (short)71, - (short)-32768,
+- (short)-32768, (short)202, - (short)-32768, - (short)261, - (short)-32768, -
+(short)1, - (short)30, (short)5, - (short)-32768, - (short)-32768, (short)63, -
+(short)-32768, - (short)98, - (short)384, (short)430, - (short)390, - (short)84,
+- (short)269, - (short)-32768, - (short)-32768, - (short)190, (short)579, -
+(short)345, - (short)258, - (short)-32768, (short)294, - (short)148, (short)438,
+- (short)109, (short)271, - (short)184, (short)25, - (short)-32768, - (short)-32768,
+- (short)35, - (short)237, - (short)-32768, - (short)-32768, - (short)549, -
+(short)-32768, - (short)-32768, - (short)7, (short)460, - (short)-32768, (short)173,
+- (short)-32768, - (short)-32768, - (short)65, - (short)78, - (short)-32768, -
+(short)144, - (short)399, (short)584, (short)451, (short)450, (short)458,
+(short)465, (short)461, (short)201, (short)107, (short)192, (short)199, -
+(short)69, (short)413, - (short)-32768, - (short)-32768, - (short)-32768, -
+(short)-32768, - (short)202, - (short)-32768, - (short)-32768, (short)1}; static
+short Cyc_yytable[ 3998u]={ (short)109, (short)56, (short)148, (short)258,
+(short)107, (short)405, (short)276, (short)120, (short)306, (short)177, (short)197,
+(short)108, (short)142, (short)254, (short)373, (short)72, (short)436, (short)110,
+(short)445, (short)544, (short)514, (short)318, (short)61, (short)73, (short)115,
+(short)74, (short)114, (short)79, (short)81, (short)547, (short)555, (short)85,
+(short)214, (short)56, (short)468, (short)260, (short)558, (short)38, (short)325,
+(short)423, (short)56, (short)142, (short)76, (short)98, (short)518, (short)56,
+(short)109, (short)207, (short)208, (short)209, (short)107, (short)104, (short)706,
+(short)77, (short)236, (short)56, (short)109, (short)57, (short)235, (short)122,
+(short)248, (short)570, (short)273, (short)206, (short)126, (short)560, (short)134,
+(short)73, (short)99, (short)100, (short)101, (short)571, (short)73, (short)249,
+(short)434, (short)435, (short)89, (short)135, (short)326, (short)130, (short)480,
+(short)133, (short)58, (short)128, (short)15, (short)16, (short)17, (short)707,
+(short)114, (short)132, (short)80, (short)56, (short)56, (short)56, (short)56,
+(short)550, (short)408, (short)450, (short)142, (short)674, (short)289, (short)409,
+(short)321, (short)322, (short)319, (short)323, (short)424, (short)461, (short)250,
+(short)290, (short)56, (short)28, (short)210, (short)451, (short)215, - (short)85,
+(short)461, (short)30, (short)117, (short)56, (short)83, (short)262, (short)268,
+(short)357, (short)73, (short)605, (short)375, (short)198, (short)199, (short)200,
+(short)201, (short)75, (short)278, (short)295, (short)341, (short)282, (short)283,
+(short)358, (short)359, (short)360, (short)277, (short)214, (short)342, (short)343,
+(short)136, (short)468, (short)299, (short)291, (short)56, (short)417, (short)634,
+(short)137, (short)300, (short)109, (short)506, (short)264, (short)469, (short)248,
+(short)717, (short)510, (short)395, (short)407, (short)622, (short)287, (short)288,
+(short)82, (short)479, (short)721, (short)296, (short)599, (short)376, (short)723,
+(short)297, (short)724, (short)361, (short)35, (short)36, (short)37, (short)141,
+(short)302, (short)303, (short)141, (short)362, (short)363, (short)296, (short)296,
+(short)566, (short)567, (short)418, (short)635, (short)236, (short)632, -
+(short)85, (short)364, (short)235, - (short)85, (short)537, (short)28, (short)141,
+(short)83, (short)83, (short)519, (short)250, (short)30, (short)56, (short)365,
+(short)141, (short)141, (short)284, (short)525, (short)32, (short)261, (short)460,
+(short)384, (short)285, (short)56, (short)453, (short)454, (short)333, (short)334,
+(short)366, (short)35, (short)36, (short)37, (short)507, (short)142, (short)406,
+(short)86, (short)28, (short)87, (short)375, (short)508, (short)407, (short)142,
+(short)30, (short)403, (short)520, (short)56, (short)413, (short)319, (short)666,
+(short)298, (short)483, (short)142, (short)414, (short)389, (short)475, (short)643,
+(short)88, (short)319, (short)290, (short)396, (short)28, (short)399, (short)400,
+(short)335, (short)336, (short)432, (short)30, (short)102, (short)477, (short)487,
+(short)103, (short)407, (short)141, (short)236, (short)465, (short)439, (short)421,
+(short)235, (short)115, (short)118, (short)502, (short)503, (short)504, (short)73,
+(short)73, (short)505, (short)483, (short)511, (short)282, (short)90, (short)91,
+(short)483, (short)585, (short)520, (short)512, (short)375, (short)444, (short)397,
+(short)58, (short)520, (short)449, (short)398, (short)291, (short)111, (short)28,
+(short)85, (short)513, (short)56, (short)112, (short)56, (short)30, (short)300,
+(short)113, (short)436, (short)214, (short)141, (short)583, (short)32, (short)447,
+(short)534, (short)584, (short)56, (short)214, (short)600, (short)448, (short)407,
+(short)148, (short)601, (short)483, (short)526, (short)527, (short)528, (short)483,
+(short)532, (short)640, (short)569, (short)284, (short)541, (short)119, (short)28,
+(short)121, (short)615, (short)543, (short)28, (short)76, (short)30, (short)109,
+(short)407, (short)407, (short)30, (short)531, (short)640, (short)94, (short)596,
+(short)653, (short)77, (short)32, (short)296, (short)656, (short)109, (short)407,
+(short)646, (short)578, (short)107, (short)407, (short)123, (short)420, (short)35,
+(short)36, (short)37, (short)539, (short)28, (short)577, (short)686, (short)289,
+(short)124, (short)540, (short)30, (short)56, (short)407, (short)56, (short)92,
+(short)93, (short)290, (short)298, (short)35, (short)36, (short)37, (short)520,
+(short)125, (short)141, (short)141, (short)141, (short)290, (short)580, (short)35,
+(short)36, (short)37, (short)58, (short)141, (short)142, (short)141, (short)639,
+(short)462, (short)375, (short)671, (short)141, (short)141, (short)463, (short)672,
+(short)140, (short)407, (short)464, (short)140, (short)602, (short)129, (short)690,
+(short)141, (short)407, (short)639, (short)593, (short)292, (short)640, (short)720,
+(short)718, (short)203, (short)301, (short)620, (short)407, (short)127, (short)140,
+(short)56, (short)556, (short)146, (short)538, (short)202, (short)268, (short)559,
+(short)140, (short)140, (short)73, (short)28, (short)465, (short)83, (short)216,
+(short)73, (short)131, (short)30, (short)494, (short)495, (short)496, (short)497,
+(short)142, (short)265, (short)32, (short)279, (short)282, (short)282, (short)669,
+(short)708, (short)645, (short)380, (short)331, (short)332, (short)269, (short)35,
+(short)36, (short)37, (short)274, (short)337, (short)338, (short)275, (short)311,
+(short)612, (short)614, (short)339, (short)340, (short)312, (short)716, (short)294,
+(short)141, (short)482, (short)407, (short)313, (short)588, (short)320, (short)56,
+(short)324, (short)141, (short)330, (short)639, (short)722, (short)629, (short)659,
+(short)660, (short)109, (short)140, (short)586, (short)407, (short)248, (short)607,
+(short)407, (short)608, (short)407, (short)328, (short)141, (short)609, (short)407,
+(short)623, (short)624, (short)665, (short)303, (short)619, (short)327, (short)375,
+(short)675, (short)407, (short)141, (short)677, (short)407, (short)681, (short)407,
+(short)375, (short)698, (short)407, (short)644, (short)641, (short)701, (short)407,
+(short)329, (short)384, (short)375, (short)56, (short)703, (short)407, (short)714,
+(short)407, (short)498, (short)499, (short)140, (short)492, (short)493, (short)356,
+(short)367, (short)109, (short)368, (short)500, (short)501, (short)107, (short)370,
+(short)377, (short)391, (short)378, (short)650, (short)652, (short)385, (short)655,
+(short)386, (short)658, (short)387, (short)388, (short)206, (short)390, (short)392,
+(short)439, (short)141, (short)141, (short)393, (short)401, (short)402, (short)375,
+(short)305, (short)73, (short)307, (short)307, (short)404, (short)412, (short)204,
+(short)416, (short)422, (short)668, (short)415, (short)419, (short)428, (short)315,
+(short)316, (short)427, (short)429, (short)430, (short)446, (short)452, (short)431,
+(short)307, (short)307, (short)325, (short)307, (short)679, (short)478, (short)481,
+(short)683, (short)685, (short)515, (short)375, (short)522, (short)523, (short)524,
+(short)62, (short)529, (short)533, (short)535, (short)542, (short)545, (short)549,
+(short)307, (short)140, (short)140, (short)140, (short)546, (short)141, (short)551,
+(short)553, (short)552, (short)557, (short)140, (short)562, (short)140, (short)565,
+(short)574, (short)564, (short)705, (short)140, (short)140, (short)563, (short)709,
+(short)568, (short)284, (short)582, (short)572, (short)573, (short)581, (short)647,
+(short)140, (short)649, (short)587, (short)236, (short)589, (short)591, (short)590,
+(short)235, (short)715, (short)603, (short)594, (short)597, (short)28, (short)63,
+(short)595, (short)64, (short)65, (short)598, (short)30, (short)687, (short)606,
+(short)610, (short)236, (short)433, (short)616, (short)66, (short)235, (short)73,
+(short)67, (short)68, (short)141, (short)618, (short)617, (short)434, (short)435,
+(short)236, (short)69, (short)621, (short)625, (short)235, (short)70, (short)71,
+(short)627, (short)676, (short)630, (short)631, (short)680, (short)633, (short)636,
+(short)592, (short)637, (short)141, (short)344, (short)345, (short)346, (short)347,
+(short)348, (short)349, (short)350, (short)351, (short)352, (short)353, (short)642,
+(short)140, (short)648, (short)693, (short)662, (short)663, (short)673, (short)696,
+(short)697, (short)140, (short)664, (short)699, (short)700, (short)667, (short)702,
+(short)354, (short)670, (short)688, (short)689, (short)691, (short)694, (short)695,
+(short)726, (short)727, (short)476, (short)626, (short)140, (short)554, (short)710,
+(short)466, (short)604, (short)711, (short)372, (short)712, (short)713, (short)379,
+(short)561, (short)309, (short)140, (short)467, (short)443, (short)628, (short)310,
+(short)307, (short)719, (short)307, (short)307, (short)307, (short)307, (short)307,
 (short)307, (short)307, (short)307, (short)307, (short)307, (short)307, (short)307,
-(short)307, (short)307, (short)307, (short)307, (short)307, (short)307, (short)307,
-(short)1, (short)2, (short)3, (short)4, (short)5, (short)6, (short)7, (short)8,
-(short)9, (short)10, (short)11, (short)12, (short)13, (short)14, (short)15,
-(short)16, (short)17, (short)18, (short)19, (short)0, (short)0, (short)20,
-(short)0, (short)491, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)140, (short)0, (short)0, (short)21, (short)0, (short)22, (short)307,
-(short)0, (short)0, (short)0, (short)23, (short)0, (short)24, (short)25, (short)26,
-(short)27, (short)0, (short)0, (short)0, (short)0, (short)0, (short)140, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)28, (short)0, (short)0, (short)0,
-(short)307, (short)29, (short)30, (short)31, (short)0, (short)0, (short)307,
-(short)0, (short)0, (short)32, (short)0, (short)0, (short)33, (short)34, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)35, (short)36, (short)37,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)1, (short)2,
-(short)3, (short)105, (short)5, (short)6, (short)7, (short)8, (short)9, (short)10,
+(short)307, (short)307, (short)307, (short)307, (short)307, (short)1, (short)2,
+(short)3, (short)4, (short)5, (short)6, (short)7, (short)8, (short)9, (short)10,
 (short)11, (short)12, (short)13, (short)14, (short)15, (short)16, (short)17,
-(short)18, (short)19, (short)660, (short)661, (short)20, (short)217, (short)307,
-(short)218, (short)219, (short)220, (short)221, (short)222, (short)223, (short)224,
-(short)225, (short)150, (short)21, (short)151, (short)22, (short)152, (short)226,
-(short)0, (short)153, (short)23, (short)227, (short)0, (short)0, (short)26,
-(short)27, (short)154, (short)155, (short)228, (short)229, (short)156, (short)157,
-(short)158, (short)159, (short)160, (short)161, (short)162, (short)0, (short)163,
-(short)164, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)307,
+(short)18, (short)19, (short)486, (short)488, (short)20, (short)0, (short)0,
+(short)140, (short)140, (short)0, (short)0, (short)0, (short)489, (short)0,
+(short)0, (short)0, (short)21, (short)491, (short)22, (short)307, (short)490,
+(short)0, (short)0, (short)23, (short)0, (short)24, (short)25, (short)26,
+(short)27, (short)0, (short)0, (short)0, (short)0, (short)6, (short)7, (short)8,
+(short)9, (short)10, (short)11, (short)12, (short)13, (short)14, (short)15,
+(short)16, (short)17, (short)18, (short)19, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)230, (short)165,
-(short)166, (short)167, (short)168, (short)29, (short)30, (short)31, (short)0,
-(short)231, (short)106, (short)0, (short)0, (short)169, (short)0, (short)0,
-(short)33, (short)233, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)171, (short)0, (short)0, (short)172, (short)173, (short)174, (short)0,
-(short)0, (short)0, (short)0, (short)175, (short)176, (short)0, (short)1,
+(short)0, (short)0, (short)140, (short)21, (short)0, (short)0, (short)28,
+(short)0, (short)0, (short)0, (short)307, (short)29, (short)30, (short)31,
+(short)26, (short)27, (short)307, (short)0, (short)0, (short)32, (short)0,
+(short)0, (short)33, (short)34, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)35, (short)36, (short)37, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)251, (short)0,
+(short)0, (short)0, (short)140, (short)29, (short)0, (short)31, (short)0,
+(short)252, (short)0, (short)307, (short)0, (short)0, (short)253, (short)0,
+(short)33, (short)34, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)140, (short)0, (short)0, (short)0, (short)0, (short)0, (short)1,
 (short)2, (short)3, (short)105, (short)5, (short)6, (short)7, (short)8, (short)9,
 (short)10, (short)11, (short)12, (short)13, (short)14, (short)15, (short)16,
-(short)17, (short)18, (short)19, (short)0, (short)307, (short)20, (short)217,
-(short)0, (short)218, (short)219, (short)220, (short)221, (short)222, (short)223,
+(short)17, (short)18, (short)19, (short)659, (short)660, (short)20, (short)217,
+(short)307, (short)218, (short)219, (short)220, (short)221, (short)222, (short)223,
 (short)224, (short)225, (short)150, (short)21, (short)151, (short)22, (short)152,
 (short)226, (short)0, (short)153, (short)23, (short)227, (short)0, (short)0,
 (short)26, (short)27, (short)154, (short)155, (short)228, (short)229, (short)156,
@@ -2916,53 +2901,69 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)230, (short)165, (short)166, (short)167, (short)168, (short)29, (short)30,
-(short)31, (short)0, (short)231, (short)106, (short)232, (short)0, (short)169,
-(short)0, (short)0, (short)33, (short)233, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)171, (short)0, (short)0, (short)172, (short)173,
-(short)174, (short)0, (short)0, (short)0, (short)0, (short)175, (short)176,
-(short)1, (short)2, (short)3, (short)105, (short)5, (short)6, (short)7, (short)8,
-(short)9, (short)10, (short)11, (short)12, (short)13, (short)14, (short)15,
-(short)16, (short)17, (short)18, (short)19, (short)0, (short)0, (short)20,
-(short)217, (short)0, (short)218, (short)219, (short)220, (short)221, (short)222,
-(short)223, (short)224, (short)225, (short)150, (short)21, (short)151, (short)22,
-(short)152, (short)226, (short)0, (short)153, (short)23, (short)227, (short)0,
-(short)0, (short)26, (short)27, (short)154, (short)155, (short)228, (short)229,
-(short)156, (short)157, (short)158, (short)159, (short)160, (short)161, (short)162,
-(short)0, (short)163, (short)164, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)230, (short)165, (short)166, (short)167, (short)168, (short)29,
-(short)30, (short)31, (short)0, (short)231, (short)106, (short)0, (short)0,
-(short)169, (short)0, (short)0, (short)33, (short)233, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)171, (short)0, (short)0, (short)172,
+(short)31, (short)0, (short)231, (short)106, (short)0, (short)0, (short)169,
+(short)307, (short)0, (short)33, (short)233, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)171, (short)0, (short)0, (short)172,
 (short)173, (short)174, (short)0, (short)0, (short)0, (short)0, (short)175,
 (short)176, (short)1, (short)2, (short)3, (short)105, (short)5, (short)6,
 (short)7, (short)8, (short)9, (short)10, (short)11, (short)12, (short)13,
 (short)14, (short)15, (short)16, (short)17, (short)18, (short)19, (short)0,
-(short)0, (short)20, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)150, (short)21, (short)151,
-(short)22, (short)152, (short)0, (short)0, (short)153, (short)23, (short)0,
-(short)0, (short)0, (short)26, (short)27, (short)154, (short)155, (short)0,
-(short)0, (short)156, (short)157, (short)158, (short)159, (short)160, (short)161,
-(short)162, (short)0, (short)163, (short)164, (short)0, (short)0, (short)0,
+(short)0, (short)20, (short)217, (short)0, (short)218, (short)219, (short)220,
+(short)221, (short)222, (short)223, (short)224, (short)225, (short)150, (short)21,
+(short)151, (short)22, (short)152, (short)226, (short)0, (short)153, (short)23,
+(short)227, (short)0, (short)0, (short)26, (short)27, (short)154, (short)155,
+(short)228, (short)229, (short)156, (short)157, (short)158, (short)159, (short)160,
+(short)161, (short)162, (short)0, (short)163, (short)164, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)28, (short)165, (short)166, (short)167, (short)168,
-(short)29, (short)30, (short)31, (short)0, (short)530, (short)0, (short)0,
-(short)0, (short)169, (short)0, (short)0, (short)33, (short)233, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)171, (short)0, (short)0,
-(short)172, (short)173, (short)174, (short)0, (short)0, (short)0, (short)0,
-(short)175, (short)176, (short)6, (short)7, (short)8, (short)9, (short)10,
-(short)11, (short)12, (short)13, (short)14, (short)15, (short)16, (short)17,
-(short)18, (short)19, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)150,
-(short)21, (short)151, (short)0, (short)152, (short)0, (short)0, (short)153,
-(short)0, (short)0, (short)0, (short)0, (short)26, (short)27, (short)154,
-(short)155, (short)0, (short)0, (short)156, (short)157, (short)158, (short)159,
+(short)0, (short)0, (short)0, (short)230, (short)165, (short)166, (short)167,
+(short)168, (short)29, (short)30, (short)31, (short)0, (short)231, (short)106,
+(short)232, (short)0, (short)169, (short)0, (short)0, (short)33, (short)233,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)171, (short)0,
+(short)0, (short)172, (short)173, (short)174, (short)0, (short)0, (short)0,
+(short)0, (short)175, (short)176, (short)1, (short)2, (short)3, (short)105,
+(short)5, (short)6, (short)7, (short)8, (short)9, (short)10, (short)11, (short)12,
+(short)13, (short)14, (short)15, (short)16, (short)17, (short)18, (short)19,
+(short)0, (short)0, (short)20, (short)217, (short)0, (short)218, (short)219,
+(short)220, (short)221, (short)222, (short)223, (short)224, (short)225, (short)150,
+(short)21, (short)151, (short)22, (short)152, (short)226, (short)0, (short)153,
+(short)23, (short)227, (short)0, (short)0, (short)26, (short)27, (short)154,
+(short)155, (short)228, (short)229, (short)156, (short)157, (short)158, (short)159,
 (short)160, (short)161, (short)162, (short)0, (short)163, (short)164, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)28, (short)165, (short)166,
+(short)0, (short)0, (short)0, (short)0, (short)230, (short)165, (short)166,
+(short)167, (short)168, (short)29, (short)30, (short)31, (short)0, (short)231,
+(short)106, (short)0, (short)0, (short)169, (short)0, (short)0, (short)33,
+(short)233, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)171,
+(short)0, (short)0, (short)172, (short)173, (short)174, (short)0, (short)0,
+(short)0, (short)0, (short)175, (short)176, (short)1, (short)2, (short)3,
+(short)105, (short)5, (short)6, (short)7, (short)8, (short)9, (short)10, (short)11,
+(short)12, (short)13, (short)14, (short)15, (short)16, (short)17, (short)18,
+(short)19, (short)0, (short)0, (short)20, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)150, (short)21,
+(short)151, (short)22, (short)152, (short)0, (short)0, (short)153, (short)23,
+(short)0, (short)0, (short)0, (short)26, (short)27, (short)154, (short)155,
+(short)0, (short)0, (short)156, (short)157, (short)158, (short)159, (short)160,
+(short)161, (short)162, (short)0, (short)163, (short)164, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)28, (short)165, (short)166, (short)167,
+(short)168, (short)29, (short)30, (short)31, (short)0, (short)530, (short)0,
+(short)0, (short)0, (short)169, (short)0, (short)0, (short)33, (short)233,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)171, (short)0,
+(short)0, (short)172, (short)173, (short)174, (short)0, (short)0, (short)0,
+(short)0, (short)175, (short)176, (short)6, (short)7, (short)8, (short)9,
+(short)10, (short)11, (short)12, (short)13, (short)14, (short)15, (short)16,
+(short)17, (short)18, (short)19, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)150, (short)21, (short)151, (short)0, (short)152, (short)0, (short)0,
+(short)153, (short)0, (short)0, (short)0, (short)0, (short)26, (short)27,
+(short)154, (short)155, (short)0, (short)0, (short)156, (short)157, (short)158,
+(short)159, (short)160, (short)161, (short)162, (short)0, (short)163, (short)164,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)28, (short)165, (short)166,
 (short)167, (short)168, (short)29, (short)30, (short)31, (short)0, (short)0,
 (short)317, (short)0, (short)0, (short)169, (short)0, (short)0, (short)33,
 (short)233, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)171,
@@ -2985,9 +2986,9 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)0, (short)0, (short)0, (short)0, (short)175, (short)176, (short)1,
 (short)2, (short)3, (short)105, (short)5, (short)6, (short)7, (short)8, (short)9,
 (short)10, (short)11, (short)12, (short)13, (short)14, (short)15, (short)16,
-(short)17, (short)18, (short)19, (short)0, (short)251, (short)20, (short)0,
-(short)0, (short)0, (short)29, (short)0, (short)31, (short)0, (short)252,
-(short)0, (short)0, (short)0, (short)21, (short)253, (short)0, (short)33,
+(short)17, (short)18, (short)19, (short)0, (short)0, (short)20, (short)0,
+(short)0, (short)0, (short)29, (short)0, (short)31, (short)0, (short)575,
+(short)0, (short)0, (short)0, (short)21, (short)576, (short)0, (short)33,
 (short)34, (short)0, (short)0, (short)23, (short)0, (short)0, (short)0, (short)26,
 (short)27, (short)0, (short)0, (short)0, (short)0, (short)6, (short)7, (short)8,
 (short)9, (short)10, (short)11, (short)12, (short)13, (short)14, (short)15,
@@ -3025,53 +3026,44 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)21, (short)0,
 (short)0, (short)0, (short)29, (short)0, (short)31, (short)23, (short)0, (short)106,
 (short)0, (short)26, (short)27, (short)0, (short)0, (short)33, (short)34,
-(short)6, (short)7, (short)8, (short)9, (short)10, (short)11, (short)12, (short)13,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)217, (short)0, (short)218, (short)219, (short)220, (short)221,
+(short)222, (short)223, (short)224, (short)225, (short)150, (short)29, (short)151,
+(short)31, (short)152, (short)226, (short)0, (short)153, (short)0, (short)227,
+(short)0, (short)0, (short)33, (short)34, (short)154, (short)155, (short)228,
+(short)229, (short)156, (short)157, (short)158, (short)159, (short)160, (short)161,
+(short)162, (short)0, (short)163, (short)164, (short)6, (short)7, (short)8,
+(short)9, (short)10, (short)11, (short)12, (short)13, (short)14, (short)15,
+(short)16, (short)17, (short)18, (short)19, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)230, (short)165, (short)166,
+(short)167, (short)168, (short)0, (short)30, (short)21, (short)0, (short)231,
+(short)106, (short)0, (short)0, (short)169, (short)0, (short)0, (short)0,
+(short)170, (short)26, (short)27, (short)0, (short)0, (short)0, (short)0,
+(short)171, (short)0, (short)0, (short)172, (short)173, (short)174, (short)0,
+(short)0, (short)0, (short)0, (short)175, (short)176, (short)6, (short)7,
+(short)8, (short)9, (short)10, (short)11, (short)12, (short)13, (short)14,
+(short)15, (short)16, (short)17, (short)18, (short)19, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)29, (short)0, (short)31, (short)0, (short)21, (short)139, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)33, (short)34, (short)0, (short)0,
+(short)26, (short)27, (short)0, (short)0, (short)0, (short)0, (short)0, (short)6,
+(short)7, (short)8, (short)9, (short)10, (short)11, (short)12, (short)13,
 (short)14, (short)15, (short)16, (short)17, (short)18, (short)19, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)21, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)29, (short)0, (short)31,
-(short)26, (short)27, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)33, (short)34, (short)6, (short)7, (short)8, (short)9, (short)10, (short)11,
-(short)12, (short)13, (short)14, (short)15, (short)16, (short)17, (short)18,
-(short)19, (short)6, (short)7, (short)8, (short)9, (short)10, (short)11, (short)12,
-(short)13, (short)14, (short)15, (short)16, (short)17, (short)18, (short)19,
-(short)21, (short)0, (short)0, (short)0, (short)29, (short)0, (short)31, (short)0,
-(short)575, (short)0, (short)0, (short)26, (short)27, (short)576, (short)21,
-(short)33, (short)34, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)26, (short)27, (short)0, (short)0, (short)0, (short)0,
-(short)6, (short)7, (short)8, (short)9, (short)10, (short)11, (short)12, (short)13,
-(short)14, (short)15, (short)16, (short)17, (short)18, (short)19, (short)0,
-(short)0, (short)0, (short)28, (short)0, (short)0, (short)0, (short)0, (short)29,
-(short)30, (short)31, (short)0, (short)0, (short)0, (short)21, (short)0, (short)0,
-(short)0, (short)0, (short)33, (short)34, (short)0, (short)29, (short)0, (short)31,
-(short)26, (short)27, (short)139, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)33, (short)34, (short)6, (short)7, (short)8, (short)9, (short)10,
-(short)11, (short)12, (short)13, (short)14, (short)15, (short)16, (short)17,
-(short)18, (short)19, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)548, (short)0, (short)0, (short)0,
-(short)21, (short)0, (short)0, (short)0, (short)29, (short)0, (short)31, (short)0,
-(short)0, (short)0, (short)0, (short)26, (short)27, (short)470, (short)0,
-(short)33, (short)34, (short)0, (short)150, (short)0, (short)151, (short)0,
-(short)152, (short)0, (short)0, (short)153, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)154, (short)155, (short)0, (short)0,
-(short)156, (short)157, (short)158, (short)159, (short)160, (short)161, (short)162,
-(short)0, (short)163, (short)164, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)29, (short)0, (short)31, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)33, (short)34,
-(short)0, (short)28, (short)165, (short)166, (short)167, (short)168, (short)0,
-(short)30, (short)0, (short)0, (short)0, (short)308, (short)471, (short)0,
-(short)169, (short)0, (short)0, (short)0, (short)170, (short)0, (short)0,
-(short)0, (short)434, (short)435, (short)0, (short)171, (short)0, (short)0,
-(short)172, (short)173, (short)174, (short)0, (short)0, (short)0, (short)0,
-(short)175, (short)176, (short)150, (short)0, (short)151, (short)0, (short)152,
+(short)0, (short)0, (short)0, (short)0, (short)548, (short)21, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)29, (short)0, (short)31, (short)0,
+(short)26, (short)27, (short)0, (short)0, (short)470, (short)0, (short)0,
+(short)33, (short)34, (short)150, (short)0, (short)151, (short)0, (short)152,
 (short)0, (short)0, (short)153, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)154, (short)155, (short)0, (short)0, (short)156, (short)157,
 (short)158, (short)159, (short)160, (short)161, (short)162, (short)0, (short)163,
-(short)164, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)28, (short)165,
+(short)164, (short)0, (short)0, (short)0, (short)0, (short)0, (short)29, (short)0,
+(short)31, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)33, (short)34, (short)0, (short)0, (short)0, (short)28, (short)165,
 (short)166, (short)167, (short)168, (short)0, (short)30, (short)0, (short)0,
-(short)0, (short)308, (short)638, (short)0, (short)169, (short)0, (short)0,
+(short)0, (short)308, (short)471, (short)0, (short)169, (short)0, (short)0,
 (short)0, (short)170, (short)0, (short)0, (short)0, (short)434, (short)435,
 (short)0, (short)171, (short)0, (short)0, (short)172, (short)173, (short)174,
 (short)0, (short)0, (short)0, (short)0, (short)175, (short)176, (short)150,
@@ -3083,7 +3075,7 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)28, (short)165, (short)166, (short)167,
 (short)168, (short)0, (short)30, (short)0, (short)0, (short)0, (short)308,
-(short)695, (short)0, (short)169, (short)0, (short)0, (short)0, (short)170,
+(short)638, (short)0, (short)169, (short)0, (short)0, (short)0, (short)170,
 (short)0, (short)0, (short)0, (short)434, (short)435, (short)0, (short)171,
 (short)0, (short)0, (short)172, (short)173, (short)174, (short)0, (short)0,
 (short)0, (short)0, (short)175, (short)176, (short)150, (short)0, (short)151,
@@ -3094,92 +3086,40 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)28, (short)165, (short)166, (short)167, (short)168,
-(short)0, (short)30, (short)0, (short)0, (short)0, (short)308, (short)0, (short)0,
-(short)169, (short)0, (short)0, (short)0, (short)170, (short)0, (short)0,
-(short)0, (short)434, (short)435, (short)0, (short)171, (short)0, (short)0,
-(short)172, (short)173, (short)174, (short)0, (short)0, (short)0, (short)0,
-(short)175, (short)176, (short)150, (short)0, (short)151, (short)0, (short)152,
-(short)0, (short)0, (short)153, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)154, (short)155, (short)0, (short)0, (short)156, (short)157,
-(short)158, (short)159, (short)160, (short)161, (short)162, (short)0, (short)163,
-(short)164, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)28, (short)165,
-(short)166, (short)167, (short)168, (short)0, (short)30, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)169, (short)0, (short)0, (short)0,
-(short)170, (short)150, (short)0, (short)151, (short)0, (short)152, (short)259,
-(short)171, (short)153, (short)0, (short)172, (short)173, (short)174, (short)0,
-(short)0, (short)154, (short)155, (short)175, (short)176, (short)156, (short)157,
-(short)158, (short)159, (short)160, (short)161, (short)162, (short)0, (short)163,
-(short)164, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)28, (short)165,
-(short)166, (short)167, (short)168, (short)0, (short)30, (short)0, (short)0,
-(short)0, (short)308, (short)0, (short)0, (short)169, (short)0, (short)0,
-(short)0, (short)170, (short)150, (short)0, (short)151, (short)0, (short)152,
-(short)0, (short)171, (short)153, (short)0, (short)172, (short)173, (short)174,
-(short)0, (short)0, (short)154, (short)155, (short)175, (short)176, (short)156,
-(short)157, (short)158, (short)159, (short)160, (short)161, (short)162, (short)0,
-(short)163, (short)164, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)30, (short)0, (short)0, (short)0, (short)308, (short)692,
+(short)0, (short)169, (short)0, (short)0, (short)0, (short)170, (short)0,
+(short)0, (short)0, (short)434, (short)435, (short)0, (short)171, (short)0,
+(short)0, (short)172, (short)173, (short)174, (short)0, (short)0, (short)0,
+(short)0, (short)175, (short)176, (short)150, (short)0, (short)151, (short)0,
+(short)152, (short)0, (short)0, (short)153, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)154, (short)155, (short)0, (short)0,
+(short)156, (short)157, (short)158, (short)159, (short)160, (short)161, (short)162,
+(short)0, (short)163, (short)164, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)28, (short)165, (short)166, (short)167, (short)168, (short)0, (short)30,
-(short)0, (short)0, (short)394, (short)0, (short)0, (short)0, (short)169,
-(short)0, (short)0, (short)0, (short)170, (short)150, (short)0, (short)151,
-(short)0, (short)152, (short)0, (short)171, (short)153, (short)0, (short)172,
-(short)173, (short)174, (short)0, (short)0, (short)154, (short)155, (short)175,
-(short)176, (short)156, (short)157, (short)158, (short)159, (short)160, (short)161,
-(short)162, (short)0, (short)163, (short)164, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)28, (short)165, (short)166, (short)167, (short)168,
-(short)0, (short)30, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)169, (short)0, (short)0, (short)0, (short)170, (short)150, (short)0,
-(short)151, (short)0, (short)152, (short)459, (short)171, (short)153, (short)0,
-(short)172, (short)173, (short)174, (short)0, (short)0, (short)154, (short)155,
-(short)175, (short)176, (short)156, (short)157, (short)158, (short)159, (short)160,
-(short)161, (short)162, (short)0, (short)163, (short)164, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)28, (short)165, (short)166, (short)167,
-(short)168, (short)0, (short)30, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)169, (short)509, (short)0, (short)0, (short)170, (short)150,
-(short)0, (short)151, (short)0, (short)152, (short)0, (short)171, (short)153,
-(short)0, (short)172, (short)173, (short)174, (short)0, (short)0, (short)154,
-(short)155, (short)175, (short)176, (short)156, (short)157, (short)158, (short)159,
+(short)0, (short)28, (short)165, (short)166, (short)167, (short)168, (short)0,
+(short)30, (short)0, (short)0, (short)0, (short)308, (short)0, (short)0, (short)169,
+(short)0, (short)0, (short)0, (short)170, (short)0, (short)62, (short)0, (short)434,
+(short)435, (short)0, (short)171, (short)0, (short)0, (short)172, (short)173,
+(short)174, (short)0, (short)0, (short)0, (short)0, (short)175, (short)176,
+(short)150, (short)0, (short)151, (short)0, (short)152, (short)0, (short)0,
+(short)153, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)154,
+(short)155, (short)0, (short)0, (short)156, (short)157, (short)158, (short)159,
 (short)160, (short)161, (short)162, (short)0, (short)163, (short)164, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)28, (short)165, (short)166,
-(short)167, (short)168, (short)0, (short)30, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)169, (short)536, (short)0, (short)0,
-(short)170, (short)150, (short)0, (short)151, (short)0, (short)152, (short)0,
-(short)171, (short)153, (short)0, (short)172, (short)173, (short)174, (short)0,
-(short)0, (short)154, (short)155, (short)175, (short)176, (short)156, (short)157,
-(short)158, (short)159, (short)160, (short)161, (short)162, (short)0, (short)163,
-(short)164, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)28, (short)165,
-(short)166, (short)167, (short)168, (short)0, (short)30, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)169, (short)0, (short)0, (short)0,
-(short)170, (short)150, (short)0, (short)151, (short)0, (short)152, (short)579,
-(short)171, (short)153, (short)0, (short)172, (short)173, (short)174, (short)0,
-(short)0, (short)154, (short)155, (short)175, (short)176, (short)156, (short)157,
-(short)158, (short)159, (short)160, (short)161, (short)162, (short)0, (short)163,
-(short)164, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)28, (short)165,
-(short)166, (short)167, (short)168, (short)0, (short)30, (short)0, (short)0,
-(short)611, (short)0, (short)0, (short)0, (short)169, (short)0, (short)0,
+(short)0, (short)28, (short)63, (short)0, (short)64, (short)65, (short)0,
+(short)30, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)66,
+(short)0, (short)0, (short)67, (short)68, (short)0, (short)28, (short)165,
+(short)166, (short)167, (short)168, (short)69, (short)30, (short)0, (short)0,
+(short)70, (short)71, (short)0, (short)0, (short)169, (short)0, (short)0,
 (short)0, (short)170, (short)150, (short)0, (short)151, (short)0, (short)152,
-(short)0, (short)171, (short)153, (short)0, (short)172, (short)173, (short)174,
+(short)259, (short)171, (short)153, (short)0, (short)172, (short)173, (short)174,
 (short)0, (short)0, (short)154, (short)155, (short)175, (short)176, (short)156,
 (short)157, (short)158, (short)159, (short)160, (short)161, (short)162, (short)0,
 (short)163, (short)164, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)28, (short)165, (short)166, (short)167, (short)168, (short)0, (short)30,
-(short)0, (short)0, (short)613, (short)0, (short)0, (short)0, (short)169,
+(short)0, (short)0, (short)0, (short)308, (short)0, (short)0, (short)169,
 (short)0, (short)0, (short)0, (short)170, (short)150, (short)0, (short)151,
 (short)0, (short)152, (short)0, (short)171, (short)153, (short)0, (short)172,
 (short)173, (short)174, (short)0, (short)0, (short)154, (short)155, (short)175,
@@ -3188,8 +3128,8 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)28, (short)165, (short)166, (short)167, (short)168,
-(short)0, (short)30, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)169, (short)652, (short)0, (short)0, (short)170, (short)150, (short)0,
+(short)0, (short)30, (short)0, (short)0, (short)394, (short)0, (short)0, (short)0,
+(short)169, (short)0, (short)0, (short)0, (short)170, (short)150, (short)0,
 (short)151, (short)0, (short)152, (short)0, (short)171, (short)153, (short)0,
 (short)172, (short)173, (short)174, (short)0, (short)0, (short)154, (short)155,
 (short)175, (short)176, (short)156, (short)157, (short)158, (short)159, (short)160,
@@ -3198,25 +3138,16 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)28, (short)165, (short)166, (short)167,
 (short)168, (short)0, (short)30, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)169, (short)655, (short)0, (short)0, (short)170, (short)150,
-(short)0, (short)151, (short)0, (short)152, (short)0, (short)171, (short)153,
+(short)0, (short)169, (short)0, (short)0, (short)0, (short)170, (short)150,
+(short)0, (short)151, (short)0, (short)152, (short)459, (short)171, (short)153,
 (short)0, (short)172, (short)173, (short)174, (short)0, (short)0, (short)154,
 (short)155, (short)175, (short)176, (short)156, (short)157, (short)158, (short)159,
 (short)160, (short)161, (short)162, (short)0, (short)163, (short)164, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)28, (short)165, (short)166,
-(short)167, (short)168, (short)0, (short)30, (short)0, (short)0, (short)658,
-(short)0, (short)0, (short)0, (short)169, (short)0, (short)0, (short)0, (short)170,
-(short)150, (short)0, (short)151, (short)0, (short)152, (short)0, (short)171,
-(short)153, (short)0, (short)172, (short)173, (short)174, (short)0, (short)0,
-(short)154, (short)155, (short)175, (short)176, (short)156, (short)157, (short)158,
-(short)159, (short)160, (short)161, (short)162, (short)0, (short)163, (short)164,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)28, (short)165, (short)166,
 (short)167, (short)168, (short)0, (short)30, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)169, (short)680, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)169, (short)509, (short)0, (short)0,
 (short)170, (short)150, (short)0, (short)151, (short)0, (short)152, (short)0,
 (short)171, (short)153, (short)0, (short)172, (short)173, (short)174, (short)0,
 (short)0, (short)154, (short)155, (short)175, (short)176, (short)156, (short)157,
@@ -3225,7 +3156,7 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)28, (short)165,
 (short)166, (short)167, (short)168, (short)0, (short)30, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)169, (short)684, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)169, (short)536, (short)0,
 (short)0, (short)170, (short)150, (short)0, (short)151, (short)0, (short)152,
 (short)0, (short)171, (short)153, (short)0, (short)172, (short)173, (short)174,
 (short)0, (short)0, (short)154, (short)155, (short)175, (short)176, (short)156,
@@ -3234,7 +3165,62 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)28, (short)165, (short)166, (short)167, (short)168, (short)0, (short)30,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)169, (short)686,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)169, (short)0,
+(short)0, (short)0, (short)170, (short)150, (short)0, (short)151, (short)0,
+(short)152, (short)579, (short)171, (short)153, (short)0, (short)172, (short)173,
+(short)174, (short)0, (short)0, (short)154, (short)155, (short)175, (short)176,
+(short)156, (short)157, (short)158, (short)159, (short)160, (short)161, (short)162,
+(short)0, (short)163, (short)164, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)28, (short)165, (short)166, (short)167, (short)168, (short)0,
+(short)30, (short)0, (short)0, (short)611, (short)0, (short)0, (short)0, (short)169,
+(short)0, (short)0, (short)0, (short)170, (short)150, (short)0, (short)151,
+(short)0, (short)152, (short)0, (short)171, (short)153, (short)0, (short)172,
+(short)173, (short)174, (short)0, (short)0, (short)154, (short)155, (short)175,
+(short)176, (short)156, (short)157, (short)158, (short)159, (short)160, (short)161,
+(short)162, (short)0, (short)163, (short)164, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)28, (short)165, (short)166, (short)167, (short)168,
+(short)0, (short)30, (short)0, (short)0, (short)613, (short)0, (short)0, (short)0,
+(short)169, (short)0, (short)0, (short)0, (short)170, (short)150, (short)0,
+(short)151, (short)0, (short)152, (short)0, (short)171, (short)153, (short)0,
+(short)172, (short)173, (short)174, (short)0, (short)0, (short)154, (short)155,
+(short)175, (short)176, (short)156, (short)157, (short)158, (short)159, (short)160,
+(short)161, (short)162, (short)0, (short)163, (short)164, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)28, (short)165, (short)166, (short)167,
+(short)168, (short)0, (short)30, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)169, (short)651, (short)0, (short)0, (short)170, (short)150,
+(short)0, (short)151, (short)0, (short)152, (short)0, (short)171, (short)153,
+(short)0, (short)172, (short)173, (short)174, (short)0, (short)0, (short)154,
+(short)155, (short)175, (short)176, (short)156, (short)157, (short)158, (short)159,
+(short)160, (short)161, (short)162, (short)0, (short)163, (short)164, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)28, (short)165, (short)166,
+(short)167, (short)168, (short)0, (short)30, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)169, (short)654, (short)0, (short)0,
+(short)170, (short)150, (short)0, (short)151, (short)0, (short)152, (short)0,
+(short)171, (short)153, (short)0, (short)172, (short)173, (short)174, (short)0,
+(short)0, (short)154, (short)155, (short)175, (short)176, (short)156, (short)157,
+(short)158, (short)159, (short)160, (short)161, (short)162, (short)0, (short)163,
+(short)164, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)28, (short)165,
+(short)166, (short)167, (short)168, (short)0, (short)30, (short)0, (short)0,
+(short)657, (short)0, (short)0, (short)0, (short)169, (short)0, (short)0,
+(short)0, (short)170, (short)150, (short)0, (short)151, (short)0, (short)152,
+(short)0, (short)171, (short)153, (short)0, (short)172, (short)173, (short)174,
+(short)0, (short)0, (short)154, (short)155, (short)175, (short)176, (short)156,
+(short)157, (short)158, (short)159, (short)160, (short)161, (short)162, (short)0,
+(short)163, (short)164, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)28, (short)165, (short)166, (short)167, (short)168, (short)0, (short)30,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)169, (short)678,
 (short)0, (short)0, (short)170, (short)150, (short)0, (short)151, (short)0,
 (short)152, (short)0, (short)171, (short)153, (short)0, (short)172, (short)173,
 (short)174, (short)0, (short)0, (short)154, (short)155, (short)175, (short)176,
@@ -3244,7 +3230,7 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)28, (short)165, (short)166, (short)167, (short)168, (short)0,
 (short)30, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)169,
-(short)707, (short)0, (short)0, (short)170, (short)150, (short)0, (short)151,
+(short)682, (short)0, (short)0, (short)170, (short)150, (short)0, (short)151,
 (short)0, (short)152, (short)0, (short)171, (short)153, (short)0, (short)172,
 (short)173, (short)174, (short)0, (short)0, (short)154, (short)155, (short)175,
 (short)176, (short)156, (short)157, (short)158, (short)159, (short)160, (short)161,
@@ -3253,16 +3239,25 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)28, (short)165, (short)166, (short)167, (short)168,
 (short)0, (short)30, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)169, (short)0, (short)0, (short)0, (short)170, (short)150, (short)0,
-(short)151, (short)0, (short)0, (short)0, (short)171, (short)0, (short)0,
+(short)169, (short)684, (short)0, (short)0, (short)170, (short)150, (short)0,
+(short)151, (short)0, (short)152, (short)0, (short)171, (short)153, (short)0,
 (short)172, (short)173, (short)174, (short)0, (short)0, (short)154, (short)155,
 (short)175, (short)176, (short)156, (short)157, (short)158, (short)159, (short)160,
 (short)161, (short)162, (short)0, (short)163, (short)164, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)28, (short)165, (short)166, (short)167,
-(short)168, (short)0, (short)30, (short)0, (short)0, (short)0, (short)308,
-(short)0, (short)0, (short)169, (short)0, (short)0, (short)0, (short)170,
+(short)168, (short)0, (short)30, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)169, (short)704, (short)0, (short)0, (short)170, (short)150,
+(short)0, (short)151, (short)0, (short)152, (short)0, (short)171, (short)153,
+(short)0, (short)172, (short)173, (short)174, (short)0, (short)0, (short)154,
+(short)155, (short)175, (short)176, (short)156, (short)157, (short)158, (short)159,
+(short)160, (short)161, (short)162, (short)0, (short)163, (short)164, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)28, (short)165, (short)166,
+(short)167, (short)168, (short)0, (short)30, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)169, (short)0, (short)0, (short)0, (short)170,
 (short)150, (short)0, (short)151, (short)0, (short)0, (short)0, (short)171,
 (short)0, (short)0, (short)172, (short)173, (short)174, (short)0, (short)0,
 (short)154, (short)155, (short)175, (short)176, (short)156, (short)157, (short)158,
@@ -3271,7 +3266,7 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)28, (short)165, (short)166,
 (short)167, (short)168, (short)0, (short)30, (short)0, (short)0, (short)0,
-(short)592, (short)0, (short)0, (short)169, (short)0, (short)0, (short)0,
+(short)308, (short)0, (short)0, (short)169, (short)0, (short)0, (short)0,
 (short)170, (short)150, (short)0, (short)151, (short)0, (short)0, (short)0,
 (short)171, (short)0, (short)0, (short)172, (short)173, (short)174, (short)0,
 (short)0, (short)154, (short)155, (short)175, (short)176, (short)156, (short)157,
@@ -3280,351 +3275,382 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)28, (short)165,
 (short)166, (short)167, (short)168, (short)0, (short)30, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)304, (short)0, (short)0, (short)0,
-(short)170, (short)150, (short)0, (short)151, (short)0, (short)0, (short)0,
-(short)171, (short)0, (short)0, (short)172, (short)173, (short)174, (short)0,
-(short)0, (short)154, (short)155, (short)175, (short)176, (short)156, (short)157,
-(short)158, (short)159, (short)160, (short)161, (short)162, (short)0, (short)163,
-(short)164, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)592, (short)0, (short)0, (short)169, (short)0, (short)0,
+(short)0, (short)170, (short)150, (short)0, (short)151, (short)0, (short)0,
+(short)0, (short)171, (short)0, (short)0, (short)172, (short)173, (short)174,
+(short)0, (short)0, (short)154, (short)155, (short)175, (short)176, (short)156,
+(short)157, (short)158, (short)159, (short)160, (short)161, (short)162, (short)0,
+(short)163, (short)164, (short)0, (short)0, (short)0, (short)0, (short)0,
 (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)28, (short)165,
-(short)166, (short)167, (short)168, (short)0, (short)30, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)314, (short)0, (short)0, (short)0,
-(short)170, (short)150, (short)0, (short)151, (short)0, (short)0, (short)0,
-(short)171, (short)0, (short)0, (short)172, (short)173, (short)174, (short)0,
-(short)0, (short)154, (short)155, (short)175, (short)176, (short)156, (short)157,
-(short)158, (short)159, (short)160, (short)161, (short)162, (short)0, (short)163,
-(short)164, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)62, (short)0, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)28, (short)165,
-(short)166, (short)167, (short)168, (short)0, (short)30, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)0, (short)169, (short)0, (short)0, (short)0,
-(short)170, (short)0, (short)62, (short)0, (short)0, (short)0, (short)0, (short)171,
-(short)0, (short)0, (short)172, (short)173, (short)174, (short)0, (short)0,
-(short)0, (short)0, (short)175, (short)176, (short)28, (short)63, (short)0,
-(short)64, (short)65, (short)0, (short)30, (short)0, (short)0, (short)0, (short)0,
-(short)433, (short)0, (short)66, (short)0, (short)0, (short)67, (short)68,
-(short)0, (short)0, (short)0, (short)434, (short)435, (short)0, (short)69,
-(short)0, (short)0, (short)0, (short)70, (short)71, (short)28, (short)63,
-(short)0, (short)64, (short)65, (short)0, (short)30, (short)0, (short)0, (short)0,
-(short)0, (short)0, (short)0, (short)66, (short)0, (short)0, (short)67, (short)68,
-(short)0, (short)0, (short)0, (short)434, (short)435, (short)0, (short)69,
-(short)0, (short)0, (short)0, (short)70, (short)71}; static short Cyc_yycheck[
-4027u]={ (short)52, (short)0, (short)86, (short)54, (short)52, (short)242,
-(short)274, (short)59, (short)152, (short)87, (short)88, (short)127, (short)83,
-(short)53, (short)129, (short)22, (short)112, (short)52, (short)32, (short)365,
-(short)52, (short)169, (short)21, (short)22, (short)111, (short)24, (short)303,
-(short)26, (short)27, (short)409, (short)44, (short)371, (short)103, (short)32,
-(short)279, (short)113, (short)171, (short)172, (short)17, (short)174, (short)39,
-(short)112, (short)649, (short)413, (short)70, (short)44, (short)98, (short)99,
-(short)100, (short)101, (short)98, (short)50, (short)86, (short)169, (short)106,
-(short)54, (short)108, (short)192, (short)106, (short)66, (short)108, (short)69,
-(short)204, (short)98, (short)71, (short)93, (short)94, (short)66, (short)0,
-(short)356, (short)429, (short)451, (short)71, (short)108, (short)361, (short)115,
-(short)435, (short)73, (short)64, (short)78, (short)317, (short)80, (short)422,
-(short)79, (short)110, (short)455, (short)45, (short)46, (short)47, (short)93,
-(short)94, (short)90, (short)91, (short)92, (short)93, (short)109, (short)104,
-(short)27, (short)169, (short)83, (short)17, (short)18, (short)19, (short)710,
-(short)64, (short)84, (short)102, (short)39, (short)104, (short)225, (short)109,
-(short)398, (short)719, (short)99, (short)97, (short)99, (short)723, (short)103,
-(short)725, (short)118, (short)98, (short)99, (short)121, (short)106, (short)123,
-(short)55, (short)204, (short)60, (short)61, (short)62, (short)65, (short)66,
-(short)131, (short)147, (short)130, (short)134, (short)135, (short)414, (short)291,
-(short)99, (short)84, (short)212, (short)94, (short)103, (short)64, (short)97,
-(short)220, (short)300, (short)147, (short)116, (short)102, (short)82, (short)226,
-(short)205, (short)228, (short)229, (short)304, (short)205, (short)90, (short)91,
-(short)92, (short)93, (short)84, (short)94, (short)97, (short)524, (short)314,
-(short)102, (short)103, (short)91, (short)205, (short)84, (short)105, (short)106,
-(short)89, (short)142, (short)546, (short)90, (short)109, (short)99, (short)147,
-(short)140, (short)141, (short)103, (short)97, (short)100, (short)118, (short)96,
-(short)304, (short)203, (short)242, (short)108, (short)109, (short)110, (short)242,
-(short)311, (short)105, (short)106, (short)314, (short)92, (short)214, (short)99,
-(short)447, (short)448, (short)203, (short)575, (short)341, (short)342, (short)343,
-(short)107, (short)326, (short)83, (short)290, (short)84, (short)84, (short)214,
-(short)287, (short)288, (short)94, (short)90, (short)90, (short)84, (short)236,
-(short)93, (short)84, (short)296, (short)97, (short)97, (short)91, (short)105,
-(short)308, (short)91, (short)97, (short)304, (short)102, (short)106, (short)380,
-(short)236, (short)108, (short)109, (short)110, (short)93, (short)320, (short)314,
-(short)94, (short)97, (short)592, (short)363, (short)84, (short)300, (short)630,
-(short)377, (short)84, (short)293, (short)90, (short)94, (short)84, (short)89,
-(short)90, (short)385, (short)312, (short)83, (short)90, (short)91, (short)86,
-(short)317, (short)94, (short)274, (short)100, (short)317, (short)386, (short)387,
-(short)388, (short)89, (short)390, (short)274, (short)275, (short)355, (short)356,
-(short)95, (short)279, (short)103, (short)278, (short)361, (short)298, (short)429,
-(short)282, (short)365, (short)92, (short)111, (short)112, (short)435, (short)94,
-(short)97, (short)116, (short)563, (short)263, (short)93, (short)102, (short)298,
-(short)108, (short)300, (short)106, (short)99, (short)93, (short)93, (short)377,
-(short)89, (short)116, (short)117, (short)99, (short)99, (short)94, (short)312,
-(short)385, (short)84, (short)584, (short)93, (short)402, (short)93, (short)398,
-(short)90, (short)289, (short)99, (short)402, (short)99, (short)97, (short)401,
-(short)97, (short)407, (short)89, (short)298, (short)474, (short)601, (short)94,
-(short)450, (short)95, (short)106, (short)390, (short)108, (short)109, (short)110,
-(short)390, (short)97, (short)93, (short)97, (short)481, (short)169, (short)102,
-(short)97, (short)99, (short)403, (short)95, (short)84, (short)83, (short)403,
-(short)99, (short)86, (short)106, (short)90, (short)108, (short)109, (short)110,
-(short)84, (short)67, (short)68, (short)97, (short)463, (short)403, (short)90,
-(short)369, (short)403, (short)371, (short)104, (short)103, (short)462, (short)97,
-(short)108, (short)109, (short)110, (short)524, (short)94, (short)111, (short)112,
-(short)97, (short)93, (short)464, (short)108, (short)109, (short)110, (short)212,
-(short)99, (short)463, (short)92, (short)84, (short)93, (short)474, (short)99,
-(short)97, (short)93, (short)85, (short)99, (short)104, (short)102, (short)99,
-(short)99, (short)674, (short)106, (short)99, (short)104, (short)63, (short)64,
-(short)142, (short)104, (short)530, (short)531, (short)95, (short)147, (short)99,
-(short)515, (short)99, (short)461, (short)103, (short)422, (short)431, (short)96,
-(short)95, (short)542, (short)427, (short)436, (short)99, (short)95, (short)431,
-(short)111, (short)112, (short)99, (short)102, (short)436, (short)83, (short)105,
-(short)169, (short)263, (short)584, (short)98, (short)515, (short)99, (short)98,
-(short)99, (short)447, (short)448, (short)98, (short)99, (short)596, (short)690,
-(short)333, (short)334, (short)335, (short)336, (short)93, (short)601, (short)98,
-(short)99, (short)86, (short)477, (short)97, (short)287, (short)288, (short)289,
-(short)98, (short)99, (short)98, (short)99, (short)98, (short)710, (short)296,
-(short)94, (short)298, (short)111, (short)477, (short)85, (short)86, (short)303,
-(short)304, (short)212, (short)568, (short)97, (short)723, (short)539, (short)22,
-(short)23, (short)97, (short)539, (short)314, (short)97, (short)610, (short)611,
-(short)97, (short)613, (short)640, (short)615, (short)98, (short)99, (short)98,
-(short)99, (short)539, (short)95, (short)584, (short)98, (short)99, (short)523,
-(short)98, (short)99, (short)98, (short)99, (short)592, (short)98, (short)99,
-(short)595, (short)589, (short)98, (short)99, (short)637, (short)69, (short)601,
-(short)523, (short)98, (short)99, (short)114, (short)331, (short)332, (short)337,
-(short)338, (short)674, (short)607, (short)115, (short)609, (short)588, (short)113,
-(short)654, (short)97, (short)588, (short)657, (short)658, (short)71, (short)72,
-(short)73, (short)74, (short)75, (short)76, (short)77, (short)78, (short)79,
-(short)80, (short)588, (short)95, (short)377, (short)563, (short)95, (short)287,
-(short)288, (short)289, (short)94, (short)640, (short)385, (short)563, (short)95,
-(short)95, (short)296, (short)96, (short)298, (short)94, (short)97, (short)688,
-(short)84, (short)303, (short)304, (short)692, (short)97, (short)652, (short)97,
-(short)402, (short)655, (short)339, (short)340, (short)97, (short)314, (short)93,
-(short)93, (short)104, (short)97, (short)589, (short)95, (short)414, (short)709,
-(short)96, (short)98, (short)674, (short)98, (short)107, (short)99, (short)95,
-(short)675, (short)99, (short)95, (short)98, (short)679, (short)680, (short)96,
-(short)99, (short)683, (short)684, (short)95, (short)686, (short)95, (short)70,
-(short)150, (short)37, (short)152, (short)153, (short)35, (short)98, (short)102,
-(short)93, (short)99, (short)104, (short)28, (short)93, (short)701, (short)163,
-(short)164, (short)704, (short)41, (short)706, (short)707, (short)83, (short)98,
-(short)171, (short)172, (short)690, (short)174, (short)462, (short)463, (short)690,
-(short)717, (short)84, (short)111, (short)97, (short)99, (short)377, (short)84,
-(short)98, (short)95, (short)99, (short)660, (short)95, (short)98, (short)385,
-(short)192, (short)710, (short)97, (short)89, (short)660, (short)710, (short)84,
-(short)85, (short)98, (short)87, (short)88, (short)98, (short)90, (short)107,
-(short)723, (short)98, (short)402, (short)98, (short)723, (short)97, (short)84,
-(short)97, (short)100, (short)101, (short)98, (short)95, (short)98, (short)98,
-(short)414, (short)98, (short)108, (short)99, (short)95, (short)95, (short)112,
-(short)113, (short)515, (short)25, (short)97, (short)27, (short)28, (short)29,
-(short)30, (short)31, (short)32, (short)33, (short)34, (short)35, (short)94,
-(short)37, (short)93, (short)39, (short)40, (short)98, (short)42, (short)95,
-(short)44, (short)98, (short)107, (short)107, (short)99, (short)49, (short)50,
-(short)51, (short)52, (short)53, (short)54, (short)55, (short)56, (short)57,
-(short)58, (short)59, (short)98, (short)61, (short)62, (short)98, (short)462,
-(short)463, (short)94, (short)98, (short)102, (short)94, (short)93, (short)98,
-(short)98, (short)26, (short)98, (short)104, (short)98, (short)568, (short)98,
-(short)95, (short)98, (short)98, (short)95, (short)93, (short)84, (short)85,
-(short)86, (short)87, (short)88, (short)0, (short)90, (short)0, (short)312,
-(short)93, (short)94, (short)427, (short)523, (short)97, (short)589, (short)553,
-(short)203, (short)101, (short)294, (short)153, (short)212, (short)296, (short)437,
-(short)275, (short)108, (short)153, (short)563, (short)111, (short)112, (short)113,
-(short)325, (short)327, (short)329, (short)515, (short)118, (short)119, (short)328,
-(short)325, - (short)1, (short)327, (short)328, (short)329, (short)330, (short)331,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)28, (short)165, (short)166, (short)167, (short)168, (short)0, (short)30,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)304, (short)0,
+(short)0, (short)0, (short)170, (short)150, (short)0, (short)151, (short)0,
+(short)0, (short)0, (short)171, (short)0, (short)0, (short)172, (short)173,
+(short)174, (short)0, (short)0, (short)154, (short)155, (short)175, (short)176,
+(short)156, (short)157, (short)158, (short)159, (short)160, (short)161, (short)162,
+(short)0, (short)163, (short)164, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)28, (short)165, (short)166, (short)167, (short)168, (short)0,
+(short)30, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)314,
+(short)0, (short)0, (short)0, (short)170, (short)150, (short)0, (short)151,
+(short)0, (short)0, (short)0, (short)171, (short)0, (short)0, (short)172,
+(short)173, (short)174, (short)0, (short)0, (short)154, (short)155, (short)175,
+(short)176, (short)156, (short)157, (short)158, (short)159, (short)160, (short)161,
+(short)162, (short)0, (short)163, (short)164, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)62,
+(short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)0, (short)0, (short)28, (short)165, (short)166, (short)167, (short)168,
+(short)0, (short)30, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0,
+(short)169, (short)0, (short)0, (short)0, (short)170, (short)0, (short)0,
+(short)0, (short)0, (short)0, (short)0, (short)171, (short)0, (short)0, (short)172,
+(short)173, (short)174, (short)0, (short)0, (short)0, (short)0, (short)175,
+(short)176, (short)28, (short)63, (short)0, (short)64, (short)65, (short)0,
+(short)30, (short)0, (short)0, (short)0, (short)0, (short)0, (short)0, (short)66,
+(short)0, (short)0, (short)67, (short)68, (short)0, (short)0, (short)0, (short)434,
+(short)435, (short)0, (short)69, (short)0, (short)0, (short)0, (short)70,
+(short)71}; static short Cyc_yycheck[ 3998u]={ (short)52, (short)0, (short)86,
+(short)112, (short)52, (short)242, (short)129, (short)59, (short)152, (short)87,
+(short)88, (short)52, (short)83, (short)111, (short)204, (short)22, (short)274,
+(short)52, (short)279, (short)409, (short)365, (short)169, (short)21, (short)22,
+(short)54, (short)24, (short)53, (short)26, (short)27, (short)413, (short)429,
+(short)32, (short)103, (short)32, (short)303, (short)113, (short)435, (short)0,
+(short)70, (short)17, (short)39, (short)112, (short)89, (short)44, (short)371,
+(short)44, (short)98, (short)99, (short)100, (short)101, (short)98, (short)50,
+(short)69, (short)100, (short)106, (short)54, (short)108, (short)86, (short)106,
+(short)66, (short)108, (short)451, (short)127, (short)98, (short)71, (short)96,
+(short)94, (short)66, (short)45, (short)46, (short)47, (short)455, (short)71,
+(short)108, (short)105, (short)106, (short)39, (short)105, (short)110, (short)78,
+(short)317, (short)80, (short)92, (short)73, (short)17, (short)18, (short)19,
+(short)104, (short)115, (short)79, (short)27, (short)90, (short)91, (short)92,
+(short)93, (short)422, (short)89, (short)83, (short)169, (short)648, (short)97,
+(short)94, (short)171, (short)172, (short)169, (short)174, (short)84, (short)291,
+(short)109, (short)106, (short)109, (short)84, (short)102, (short)99, (short)104,
+(short)97, (short)300, (short)90, (short)55, (short)118, (short)102, (short)116,
+(short)121, (short)192, (short)123, (short)524, (short)204, (short)90, (short)91,
+(short)92, (short)93, (short)84, (short)131, (short)64, (short)108, (short)134,
+(short)135, (short)60, (short)61, (short)62, (short)130, (short)212, (short)116,
+(short)117, (short)84, (short)414, (short)147, (short)142, (short)147, (short)64,
+(short)64, (short)91, (short)147, (short)205, (short)356, (short)118, (short)304,
+(short)205, (short)707, (short)361, (short)225, (short)99, (short)546, (short)140,
+(short)141, (short)83, (short)314, (short)716, (short)99, (short)107, (short)205,
+(short)720, (short)103, (short)722, (short)97, (short)108, (short)109, (short)110,
+(short)83, (short)98, (short)99, (short)86, (short)105, (short)106, (short)99,
+(short)99, (short)447, (short)448, (short)103, (short)103, (short)242, (short)575,
+(short)94, (short)82, (short)242, (short)97, (short)398, (short)84, (short)103,
+(short)102, (short)102, (short)377, (short)203, (short)90, (short)203, (short)94,
+(short)111, (short)112, (short)89, (short)385, (short)97, (short)116, (short)290,
+(short)214, (short)95, (short)214, (short)287, (short)288, (short)65, (short)66,
+(short)109, (short)108, (short)109, (short)110, (short)84, (short)296, (short)93,
+(short)97, (short)84, (short)94, (short)308, (short)91, (short)99, (short)304,
+(short)90, (short)236, (short)380, (short)236, (short)93, (short)304, (short)630,
+(short)97, (short)320, (short)314, (short)99, (short)220, (short)311, (short)592,
+(short)94, (short)314, (short)106, (short)226, (short)84, (short)228, (short)229,
+(short)102, (short)103, (short)93, (short)90, (short)91, (short)312, (short)326,
+(short)94, (short)99, (short)169, (short)317, (short)293, (short)274, (short)263,
+(short)317, (short)300, (short)94, (short)341, (short)342, (short)343, (short)274,
+(short)275, (short)355, (short)356, (short)84, (short)279, (short)93, (short)94,
+(short)361, (short)474, (short)429, (short)91, (short)365, (short)278, (short)93,
+(short)92, (short)435, (short)282, (short)97, (short)289, (short)97, (short)84,
+(short)298, (short)363, (short)298, (short)102, (short)300, (short)90, (short)298,
+(short)106, (short)563, (short)377, (short)212, (short)95, (short)97, (short)93,
+(short)93, (short)99, (short)312, (short)385, (short)95, (short)99, (short)99,
+(short)402, (short)99, (short)398, (short)386, (short)387, (short)388, (short)402,
+(short)390, (short)584, (short)450, (short)89, (short)407, (short)97, (short)84,
+(short)94, (short)93, (short)95, (short)84, (short)89, (short)90, (short)390,
+(short)99, (short)99, (short)90, (short)390, (short)601, (short)93, (short)104,
+(short)93, (short)100, (short)97, (short)99, (short)93, (short)403, (short)99,
+(short)103, (short)463, (short)403, (short)99, (short)97, (short)263, (short)108,
+(short)109, (short)110, (short)403, (short)84, (short)462, (short)93, (short)97,
+(short)84, (short)403, (short)90, (short)369, (short)99, (short)371, (short)93,
+(short)94, (short)106, (short)97, (short)108, (short)109, (short)110, (short)524,
+(short)85, (short)287, (short)288, (short)289, (short)106, (short)464, (short)108,
+(short)109, (short)110, (short)92, (short)296, (short)463, (short)298, (short)584,
+(short)97, (short)474, (short)95, (short)303, (short)304, (short)102, (short)99,
+(short)83, (short)99, (short)106, (short)86, (short)515, (short)83, (short)104,
+(short)314, (short)99, (short)601, (short)481, (short)142, (short)672, (short)104,
+(short)95, (short)99, (short)147, (short)542, (short)99, (short)96, (short)103,
+(short)422, (short)431, (short)98, (short)401, (short)93, (short)427, (short)436,
+(short)111, (short)112, (short)431, (short)84, (short)461, (short)102, (short)86,
+(short)436, (short)105, (short)90, (short)333, (short)334, (short)335, (short)336,
+(short)515, (short)97, (short)97, (short)94, (short)447, (short)448, (short)640,
+(short)688, (short)596, (short)104, (short)67, (short)68, (short)98, (short)108,
+(short)109, (short)110, (short)94, (short)63, (short)64, (short)97, (short)97,
+(short)530, (short)531, (short)111, (short)112, (short)97, (short)707, (short)111,
+(short)377, (short)98, (short)99, (short)97, (short)477, (short)97, (short)477,
+(short)95, (short)385, (short)113, (short)672, (short)720, (short)568, (short)22,
+(short)23, (short)539, (short)169, (short)98, (short)99, (short)539, (short)98,
+(short)99, (short)98, (short)99, (short)114, (short)402, (short)98, (short)99,
+(short)85, (short)86, (short)98, (short)99, (short)539, (short)69, (short)584,
+(short)98, (short)99, (short)414, (short)98, (short)99, (short)98, (short)99,
+(short)592, (short)98, (short)99, (short)595, (short)589, (short)98, (short)99,
+(short)115, (short)523, (short)601, (short)523, (short)98, (short)99, (short)98,
+(short)99, (short)337, (short)338, (short)212, (short)331, (short)332, (short)97,
+(short)95, (short)588, (short)95, (short)339, (short)340, (short)588, (short)95,
+(short)94, (short)84, (short)95, (short)610, (short)611, (short)94, (short)613,
+(short)97, (short)615, (short)97, (short)97, (short)588, (short)97, (short)93,
+(short)563, (short)462, (short)463, (short)93, (short)104, (short)97, (short)640,
+(short)150, (short)563, (short)152, (short)153, (short)95, (short)98, (short)96,
+(short)99, (short)95, (short)637, (short)98, (short)107, (short)95, (short)163,
+(short)164, (short)99, (short)96, (short)98, (short)95, (short)95, (short)99,
+(short)171, (short)172, (short)70, (short)174, (short)653, (short)35, (short)98,
+(short)656, (short)657, (short)102, (short)672, (short)93, (short)99, (short)104,
+(short)37, (short)28, (short)93, (short)41, (short)83, (short)98, (short)84,
+(short)192, (short)287, (short)288, (short)289, (short)111, (short)515, (short)97,
+(short)99, (short)98, (short)84, (short)296, (short)95, (short)298, (short)95,
+(short)107, (short)98, (short)686, (short)303, (short)304, (short)99, (short)690,
+(short)97, (short)89, (short)84, (short)98, (short)98, (short)98, (short)607,
+(short)314, (short)609, (short)98, (short)688, (short)97, (short)95, (short)98,
+(short)688, (short)706, (short)95, (short)98, (short)98, (short)84, (short)85,
+(short)99, (short)87, (short)88, (short)98, (short)90, (short)659, (short)95,
+(short)97, (short)707, (short)95, (short)94, (short)97, (short)707, (short)659,
+(short)100, (short)101, (short)568, (short)98, (short)93, (short)105, (short)106,
+(short)720, (short)108, (short)95, (short)98, (short)720, (short)112, (short)113,
+(short)107, (short)651, (short)99, (short)98, (short)654, (short)98, (short)107,
+(short)94, (short)102, (short)589, (short)71, (short)72, (short)73, (short)74,
+(short)75, (short)76, (short)77, (short)78, (short)79, (short)80, (short)98,
+(short)377, (short)94, (short)673, (short)93, (short)98, (short)26, (short)677,
+(short)678, (short)385, (short)98, (short)681, (short)682, (short)98, (short)684,
+(short)96, (short)98, (short)104, (short)95, (short)98, (short)95, (short)93,
+(short)0, (short)0, (short)312, (short)553, (short)402, (short)427, (short)698,
+(short)294, (short)523, (short)701, (short)203, (short)703, (short)704, (short)212,
+(short)437, (short)153, (short)414, (short)296, (short)275, (short)563, (short)153,
+(short)325, (short)714, (short)327, (short)328, (short)329, (short)330, (short)331,
 (short)332, (short)333, (short)334, (short)335, (short)336, (short)337, (short)338,
 (short)339, (short)340, (short)341, (short)342, (short)343, (short)3, (short)4,
 (short)5, (short)6, (short)7, (short)8, (short)9, (short)10, (short)11, (short)12,
 (short)13, (short)14, (short)15, (short)16, (short)17, (short)18, (short)19,
-(short)20, (short)21, - (short)1, - (short)1, (short)24, - (short)1, (short)330,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)568,
-- (short)1, - (short)1, (short)36, - (short)1, (short)38, (short)380, - (short)1,
-- (short)1, - (short)1, (short)43, - (short)1, (short)45, (short)46, (short)47,
-(short)48, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)589,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, (short)84, - (short)1, - (short)1, - (short)1,
-(short)429, (short)89, (short)90, (short)91, - (short)1, - (short)1, (short)435,
-- (short)1, - (short)1, (short)97, - (short)1, - (short)1, (short)100, (short)101,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)108,
-(short)109, (short)110, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, - (short)1, (short)3, (short)4, (short)5, (short)6, (short)7, (short)8,
+(short)20, (short)21, (short)325, (short)327, (short)24, - (short)1, - (short)1,
+(short)462, (short)463, - (short)1, - (short)1, - (short)1, (short)328, -
+(short)1, - (short)1, - (short)1, (short)36, (short)330, (short)38, (short)380,
+(short)329, - (short)1, - (short)1, (short)43, - (short)1, (short)45, (short)46,
+(short)47, (short)48, - (short)1, - (short)1, - (short)1, - (short)1, (short)8,
 (short)9, (short)10, (short)11, (short)12, (short)13, (short)14, (short)15,
-(short)16, (short)17, (short)18, (short)19, (short)20, (short)21, (short)22,
-(short)23, (short)24, (short)25, (short)481, (short)27, (short)28, (short)29,
-(short)30, (short)31, (short)32, (short)33, (short)34, (short)35, (short)36,
-(short)37, (short)38, (short)39, (short)40, - (short)1, (short)42, (short)43,
-(short)44, - (short)1, - (short)1, (short)47, (short)48, (short)49, (short)50,
-(short)51, (short)52, (short)53, (short)54, (short)55, (short)56, (short)57,
-(short)58, (short)59, - (short)1, (short)61, (short)62, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, (short)524, - (short)1, -
+(short)16, (short)17, (short)18, (short)19, (short)20, (short)21, - (short)1, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)515, (short)36,
+- (short)1, - (short)1, (short)84, - (short)1, - (short)1, - (short)1, (short)429,
+(short)89, (short)90, (short)91, (short)47, (short)48, (short)435, - (short)1, -
+(short)1, (short)97, - (short)1, - (short)1, (short)100, (short)101, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)108, (short)109,
+(short)110, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
 - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)84,
-(short)85, (short)86, (short)87, (short)88, (short)89, (short)90, (short)91, -
-(short)1, (short)93, (short)94, - (short)1, - (short)1, (short)97, - (short)1, -
-(short)1, (short)100, (short)101, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, (short)108, - (short)1, - (short)1, (short)111, (short)112,
-(short)113, - (short)1, - (short)1, - (short)1, - (short)1, (short)118, (short)119,
-- (short)1, (short)3, (short)4, (short)5, (short)6, (short)7, (short)8, (short)9,
-(short)10, (short)11, (short)12, (short)13, (short)14, (short)15, (short)16,
-(short)17, (short)18, (short)19, (short)20, (short)21, - (short)1, (short)596,
-(short)24, (short)25, - (short)1, (short)27, (short)28, (short)29, (short)30,
-(short)31, (short)32, (short)33, (short)34, (short)35, (short)36, (short)37,
-(short)38, (short)39, (short)40, - (short)1, (short)42, (short)43, (short)44, -
-(short)1, - (short)1, (short)47, (short)48, (short)49, (short)50, (short)51,
-(short)52, (short)53, (short)54, (short)55, (short)56, (short)57, (short)58,
+- (short)1, - (short)1, - (short)1, (short)568, (short)89, - (short)1, (short)91,
+- (short)1, (short)93, - (short)1, (short)481, - (short)1, - (short)1, (short)98,
+- (short)1, (short)100, (short)101, - (short)1, - (short)1, - (short)1, -
+(short)1, - (short)1, - (short)1, - (short)1, (short)589, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, (short)3, (short)4, (short)5, (short)6,
+(short)7, (short)8, (short)9, (short)10, (short)11, (short)12, (short)13,
+(short)14, (short)15, (short)16, (short)17, (short)18, (short)19, (short)20,
+(short)21, (short)22, (short)23, (short)24, (short)25, (short)524, (short)27,
+(short)28, (short)29, (short)30, (short)31, (short)32, (short)33, (short)34,
+(short)35, (short)36, (short)37, (short)38, (short)39, (short)40, - (short)1,
+(short)42, (short)43, (short)44, - (short)1, - (short)1, (short)47, (short)48,
+(short)49, (short)50, (short)51, (short)52, (short)53, (short)54, (short)55,
+(short)56, (short)57, (short)58, (short)59, - (short)1, (short)61, (short)62, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, (short)84, (short)85, (short)86, (short)87, (short)88, (short)89,
+(short)90, (short)91, - (short)1, (short)93, (short)94, - (short)1, - (short)1,
+(short)97, (short)596, - (short)1, (short)100, (short)101, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, (short)108, - (short)1, -
+(short)1, (short)111, (short)112, (short)113, - (short)1, - (short)1, - (short)1,
+- (short)1, (short)118, (short)119, (short)3, (short)4, (short)5, (short)6,
+(short)7, (short)8, (short)9, (short)10, (short)11, (short)12, (short)13,
+(short)14, (short)15, (short)16, (short)17, (short)18, (short)19, (short)20,
+(short)21, - (short)1, - (short)1, (short)24, (short)25, - (short)1, (short)27,
+(short)28, (short)29, (short)30, (short)31, (short)32, (short)33, (short)34,
+(short)35, (short)36, (short)37, (short)38, (short)39, (short)40, - (short)1,
+(short)42, (short)43, (short)44, - (short)1, - (short)1, (short)47, (short)48,
+(short)49, (short)50, (short)51, (short)52, (short)53, (short)54, (short)55,
+(short)56, (short)57, (short)58, (short)59, - (short)1, (short)61, (short)62, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, (short)84, (short)85, (short)86, (short)87, (short)88, (short)89,
+(short)90, (short)91, - (short)1, (short)93, (short)94, (short)95, - (short)1,
+(short)97, - (short)1, - (short)1, (short)100, (short)101, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, (short)108, - (short)1, -
+(short)1, (short)111, (short)112, (short)113, - (short)1, - (short)1, - (short)1,
+- (short)1, (short)118, (short)119, (short)3, (short)4, (short)5, (short)6,
+(short)7, (short)8, (short)9, (short)10, (short)11, (short)12, (short)13,
+(short)14, (short)15, (short)16, (short)17, (short)18, (short)19, (short)20,
+(short)21, - (short)1, - (short)1, (short)24, (short)25, - (short)1, (short)27,
+(short)28, (short)29, (short)30, (short)31, (short)32, (short)33, (short)34,
+(short)35, (short)36, (short)37, (short)38, (short)39, (short)40, - (short)1,
+(short)42, (short)43, (short)44, - (short)1, - (short)1, (short)47, (short)48,
+(short)49, (short)50, (short)51, (short)52, (short)53, (short)54, (short)55,
+(short)56, (short)57, (short)58, (short)59, - (short)1, (short)61, (short)62, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, (short)84, (short)85, (short)86, (short)87, (short)88, (short)89,
+(short)90, (short)91, - (short)1, (short)93, (short)94, - (short)1, - (short)1,
+(short)97, - (short)1, - (short)1, (short)100, (short)101, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, (short)108, - (short)1, -
+(short)1, (short)111, (short)112, (short)113, - (short)1, - (short)1, - (short)1,
+- (short)1, (short)118, (short)119, (short)3, (short)4, (short)5, (short)6,
+(short)7, (short)8, (short)9, (short)10, (short)11, (short)12, (short)13,
+(short)14, (short)15, (short)16, (short)17, (short)18, (short)19, (short)20,
+(short)21, - (short)1, - (short)1, (short)24, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
+(short)1, (short)35, (short)36, (short)37, (short)38, (short)39, - (short)1, -
+(short)1, (short)42, (short)43, - (short)1, - (short)1, - (short)1, (short)47,
+(short)48, (short)49, (short)50, - (short)1, - (short)1, (short)53, (short)54,
+(short)55, (short)56, (short)57, (short)58, (short)59, - (short)1, (short)61,
+(short)62, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, (short)84, (short)85, (short)86, (short)87, (short)88,
+(short)89, (short)90, (short)91, - (short)1, (short)93, - (short)1, - (short)1,
+- (short)1, (short)97, - (short)1, - (short)1, (short)100, (short)101, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)108, -
+(short)1, - (short)1, (short)111, (short)112, (short)113, - (short)1, - (short)1,
+- (short)1, - (short)1, (short)118, (short)119, (short)8, (short)9, (short)10,
+(short)11, (short)12, (short)13, (short)14, (short)15, (short)16, (short)17,
+(short)18, (short)19, (short)20, (short)21, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
+(short)1, - (short)1, - (short)1, - (short)1, (short)35, (short)36, (short)37, -
+(short)1, (short)39, - (short)1, - (short)1, (short)42, - (short)1, - (short)1,
+- (short)1, - (short)1, (short)47, (short)48, (short)49, (short)50, - (short)1,
+- (short)1, (short)53, (short)54, (short)55, (short)56, (short)57, (short)58,
 (short)59, - (short)1, (short)61, (short)62, - (short)1, - (short)1, - (short)1,
 - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
 - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)84, (short)85,
-(short)86, (short)87, (short)88, (short)89, (short)90, (short)91, - (short)1,
-(short)93, (short)94, (short)95, - (short)1, (short)97, - (short)1, - (short)1,
+(short)86, (short)87, (short)88, (short)89, (short)90, (short)91, - (short)1, -
+(short)1, (short)94, - (short)1, - (short)1, (short)97, - (short)1, - (short)1,
 (short)100, (short)101, - (short)1, - (short)1, - (short)1, - (short)1, -
 (short)1, - (short)1, (short)108, - (short)1, - (short)1, (short)111, (short)112,
 (short)113, - (short)1, - (short)1, - (short)1, - (short)1, (short)118, (short)119,
+(short)8, (short)9, (short)10, (short)11, (short)12, (short)13, (short)14,
+(short)15, (short)16, (short)17, (short)18, (short)19, (short)20, (short)21, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)35,
+(short)36, (short)37, - (short)1, (short)39, - (short)1, - (short)1, (short)42,
+- (short)1, - (short)1, - (short)1, - (short)1, (short)47, (short)48, (short)49,
+(short)50, - (short)1, - (short)1, (short)53, (short)54, (short)55, (short)56,
+(short)57, (short)58, (short)59, - (short)1, (short)61, (short)62, - (short)1,
+(short)8, (short)9, (short)10, (short)11, (short)12, (short)13, (short)14,
+(short)15, (short)16, (short)17, (short)18, (short)19, (short)20, (short)21, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)84,
+(short)85, (short)86, (short)87, (short)88, (short)89, (short)90, (short)91,
+(short)36, - (short)1, - (short)1, - (short)1, - (short)1, (short)97, - (short)1,
+- (short)1, (short)100, (short)101, - (short)1, (short)47, (short)48, - (short)1,
+- (short)1, - (short)1, (short)108, - (short)1, - (short)1, (short)111, (short)112,
+(short)113, - (short)1, - (short)1, - (short)1, - (short)1, (short)118, (short)119,
 (short)3, (short)4, (short)5, (short)6, (short)7, (short)8, (short)9, (short)10,
 (short)11, (short)12, (short)13, (short)14, (short)15, (short)16, (short)17,
-(short)18, (short)19, (short)20, (short)21, - (short)1, - (short)1, (short)24,
-(short)25, - (short)1, (short)27, (short)28, (short)29, (short)30, (short)31,
-(short)32, (short)33, (short)34, (short)35, (short)36, (short)37, (short)38,
-(short)39, (short)40, - (short)1, (short)42, (short)43, (short)44, - (short)1, -
-(short)1, (short)47, (short)48, (short)49, (short)50, (short)51, (short)52,
-(short)53, (short)54, (short)55, (short)56, (short)57, (short)58, (short)59, -
-(short)1, (short)61, (short)62, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
+(short)18, (short)19, (short)20, (short)21, - (short)1, - (short)1, (short)24, -
+(short)1, - (short)1, - (short)1, (short)89, - (short)1, (short)91, - (short)1,
+(short)93, - (short)1, - (short)1, - (short)1, (short)36, (short)98, - (short)1,
+(short)100, (short)101, - (short)1, - (short)1, (short)43, - (short)1, - (short)1,
+- (short)1, (short)47, (short)48, - (short)1, - (short)1, - (short)1, - (short)1,
+(short)8, (short)9, (short)10, (short)11, (short)12, (short)13, (short)14,
+(short)15, (short)16, (short)17, (short)18, (short)19, (short)20, (short)21,
+(short)8, (short)9, (short)10, (short)11, (short)12, (short)13, (short)14,
+(short)15, (short)16, (short)17, (short)18, (short)19, (short)20, (short)21,
+(short)36, - (short)1, - (short)1, (short)84, - (short)1, - (short)1, - (short)1,
+- (short)1, (short)89, (short)90, (short)91, (short)47, (short)48, - (short)1,
+(short)36, - (short)1, (short)97, - (short)1, - (short)1, (short)100, (short)101,
+- (short)1, - (short)1, - (short)1, - (short)1, (short)47, (short)48, (short)108,
+(short)109, (short)110, - (short)1, - (short)1, - (short)1, - (short)1, -
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, (short)84, (short)85, (short)86,
-(short)87, (short)88, (short)89, (short)90, (short)91, - (short)1, (short)93,
-(short)94, - (short)1, - (short)1, (short)97, - (short)1, - (short)1, (short)100,
-(short)101, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, (short)108, - (short)1, - (short)1, (short)111, (short)112, (short)113,
-- (short)1, - (short)1, - (short)1, - (short)1, (short)118, (short)119, (short)3,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
+(short)1, (short)84, - (short)1, - (short)1, - (short)1, - (short)1, (short)89,
+(short)90, (short)91, - (short)1, (short)93, - (short)1, - (short)1, - (short)1,
+(short)97, (short)98, - (short)1, (short)100, (short)101, - (short)1, (short)89,
+- (short)1, (short)91, (short)106, (short)93, (short)108, (short)109, (short)110,
+(short)97, (short)98, - (short)1, (short)100, (short)101, - (short)1, - (short)1,
+- (short)1, - (short)1, (short)106, - (short)1, (short)108, (short)109, (short)110,
+(short)3, (short)4, (short)5, (short)6, (short)7, (short)8, (short)9, (short)10,
+(short)11, (short)12, (short)13, (short)14, (short)15, (short)16, (short)17,
+(short)18, (short)19, (short)20, (short)21, - (short)1, - (short)1, (short)24, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, (short)36, - (short)1, (short)38,
+- (short)1, - (short)1, - (short)1, - (short)1, (short)43, - (short)1, - (short)1,
+- (short)1, (short)47, (short)48, - (short)1, - (short)1, - (short)1, - (short)1,
+(short)3, (short)4, (short)5, (short)6, (short)7, (short)8, (short)9, (short)10,
+(short)11, (short)12, (short)13, (short)14, (short)15, (short)16, (short)17,
+(short)18, (short)19, (short)20, (short)21, - (short)1, - (short)1, (short)24, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, (short)36, - (short)1, (short)38,
+(short)89, - (short)1, (short)91, - (short)1, (short)43, (short)94, - (short)1,
+(short)96, (short)47, (short)48, - (short)1, (short)100, (short)101, (short)3,
 (short)4, (short)5, (short)6, (short)7, (short)8, (short)9, (short)10, (short)11,
 (short)12, (short)13, (short)14, (short)15, (short)16, (short)17, (short)18,
 (short)19, (short)20, (short)21, - (short)1, - (short)1, (short)24, - (short)1,
 - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, - (short)1, - (short)1, (short)35, (short)36, (short)37, (short)38,
-(short)39, - (short)1, - (short)1, (short)42, (short)43, - (short)1, - (short)1,
-- (short)1, (short)47, (short)48, (short)49, (short)50, - (short)1, - (short)1,
-(short)53, (short)54, (short)55, (short)56, (short)57, (short)58, (short)59, -
-(short)1, (short)61, (short)62, - (short)1, - (short)1, - (short)1, - (short)1,
+(short)1, - (short)1, - (short)1, - (short)1, (short)36, - (short)1, - (short)1,
+- (short)1, (short)89, - (short)1, (short)91, (short)43, - (short)1, (short)94,
+- (short)1, (short)47, (short)48, - (short)1, - (short)1, (short)100, (short)101,
 - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, (short)84, (short)85, (short)86,
-(short)87, (short)88, (short)89, (short)90, (short)91, - (short)1, (short)93, -
-(short)1, - (short)1, - (short)1, (short)97, - (short)1, - (short)1, (short)100,
-(short)101, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, (short)108, - (short)1, - (short)1, (short)111, (short)112, (short)113,
-- (short)1, - (short)1, - (short)1, - (short)1, (short)118, (short)119, (short)8,
-(short)9, (short)10, (short)11, (short)12, (short)13, (short)14, (short)15,
-(short)16, (short)17, (short)18, (short)19, (short)20, (short)21, - (short)1, -
-(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)35, (short)36,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)25,
+- (short)1, (short)27, (short)28, (short)29, (short)30, (short)31, (short)32,
+(short)33, (short)34, (short)35, (short)89, (short)37, (short)91, (short)39,
+(short)40, - (short)1, (short)42, - (short)1, (short)44, - (short)1, - (short)1,
+(short)100, (short)101, (short)49, (short)50, (short)51, (short)52, (short)53,
+(short)54, (short)55, (short)56, (short)57, (short)58, (short)59, - (short)1,
+(short)61, (short)62, (short)8, (short)9, (short)10, (short)11, (short)12,
+(short)13, (short)14, (short)15, (short)16, (short)17, (short)18, (short)19,
+(short)20, (short)21, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, (short)84, (short)85, (short)86, (short)87, (short)88, -
+(short)1, (short)90, (short)36, - (short)1, (short)93, (short)94, - (short)1, -
+(short)1, (short)97, - (short)1, - (short)1, - (short)1, (short)101, (short)47,
+(short)48, - (short)1, - (short)1, - (short)1, - (short)1, (short)108, - (short)1,
+- (short)1, (short)111, (short)112, (short)113, - (short)1, - (short)1, -
+(short)1, - (short)1, (short)118, (short)119, (short)8, (short)9, (short)10,
+(short)11, (short)12, (short)13, (short)14, (short)15, (short)16, (short)17,
+(short)18, (short)19, (short)20, (short)21, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
+(short)1, (short)89, - (short)1, (short)91, - (short)1, (short)36, (short)94, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)100, (short)101,
+- (short)1, - (short)1, (short)47, (short)48, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, (short)8, (short)9, (short)10, (short)11, (short)12,
+(short)13, (short)14, (short)15, (short)16, (short)17, (short)18, (short)19,
+(short)20, (short)21, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
+(short)1, - (short)1, (short)81, (short)36, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, (short)89, - (short)1, (short)91, - (short)1,
+(short)47, (short)48, - (short)1, - (short)1, (short)30, - (short)1, - (short)1,
+(short)100, (short)101, (short)35, - (short)1, (short)37, - (short)1, (short)39,
+- (short)1, - (short)1, (short)42, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, (short)49, (short)50, - (short)1, - (short)1, (short)53,
+(short)54, (short)55, (short)56, (short)57, (short)58, (short)59, - (short)1,
+(short)61, (short)62, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+(short)89, - (short)1, (short)91, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, (short)100, (short)101, -
+(short)1, - (short)1, - (short)1, (short)84, (short)85, (short)86, (short)87,
+(short)88, - (short)1, (short)90, - (short)1, - (short)1, - (short)1, (short)94,
+(short)95, - (short)1, (short)97, - (short)1, - (short)1, - (short)1, (short)101,
+- (short)1, - (short)1, - (short)1, (short)105, (short)106, - (short)1, (short)108,
+- (short)1, - (short)1, (short)111, (short)112, (short)113, - (short)1, -
+(short)1, - (short)1, - (short)1, (short)118, (short)119, (short)35, - (short)1,
 (short)37, - (short)1, (short)39, - (short)1, - (short)1, (short)42, - (short)1,
-- (short)1, - (short)1, - (short)1, (short)47, (short)48, (short)49, (short)50,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)49, (short)50,
 - (short)1, - (short)1, (short)53, (short)54, (short)55, (short)56, (short)57,
 (short)58, (short)59, - (short)1, (short)61, (short)62, - (short)1, - (short)1,
 - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
 - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)84,
-(short)85, (short)86, (short)87, (short)88, (short)89, (short)90, (short)91, -
-(short)1, - (short)1, (short)94, - (short)1, - (short)1, (short)97, - (short)1,
-- (short)1, (short)100, (short)101, - (short)1, - (short)1, - (short)1, -
-(short)1, - (short)1, - (short)1, (short)108, - (short)1, - (short)1, (short)111,
-(short)112, (short)113, - (short)1, - (short)1, - (short)1, - (short)1, (short)118,
-(short)119, (short)8, (short)9, (short)10, (short)11, (short)12, (short)13,
-(short)14, (short)15, (short)16, (short)17, (short)18, (short)19, (short)20,
-(short)21, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, (short)35, (short)36, (short)37, - (short)1, (short)39, - (short)1, -
-(short)1, (short)42, - (short)1, - (short)1, - (short)1, - (short)1, (short)47,
-(short)48, (short)49, (short)50, - (short)1, - (short)1, (short)53, (short)54,
-(short)55, (short)56, (short)57, (short)58, (short)59, - (short)1, (short)61,
-(short)62, - (short)1, (short)8, (short)9, (short)10, (short)11, (short)12,
-(short)13, (short)14, (short)15, (short)16, (short)17, (short)18, (short)19,
-(short)20, (short)21, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, (short)84, (short)85, (short)86, (short)87, (short)88, (short)89,
-(short)90, (short)91, (short)36, - (short)1, - (short)1, - (short)1, - (short)1,
-(short)97, - (short)1, - (short)1, (short)100, (short)101, - (short)1, (short)47,
-(short)48, - (short)1, - (short)1, - (short)1, (short)108, - (short)1, - (short)1,
-(short)111, (short)112, (short)113, - (short)1, - (short)1, - (short)1, -
-(short)1, (short)118, (short)119, (short)3, (short)4, (short)5, (short)6,
-(short)7, (short)8, (short)9, (short)10, (short)11, (short)12, (short)13,
-(short)14, (short)15, (short)16, (short)17, (short)18, (short)19, (short)20,
-(short)21, - (short)1, (short)84, (short)24, - (short)1, - (short)1, - (short)1,
-(short)89, - (short)1, (short)91, - (short)1, (short)93, - (short)1, - (short)1,
-- (short)1, (short)36, (short)98, - (short)1, (short)100, (short)101, - (short)1,
-- (short)1, (short)43, - (short)1, - (short)1, - (short)1, (short)47, (short)48,
-- (short)1, - (short)1, - (short)1, - (short)1, (short)8, (short)9, (short)10,
-(short)11, (short)12, (short)13, (short)14, (short)15, (short)16, (short)17,
-(short)18, (short)19, (short)20, (short)21, (short)8, (short)9, (short)10,
-(short)11, (short)12, (short)13, (short)14, (short)15, (short)16, (short)17,
-(short)18, (short)19, (short)20, (short)21, (short)36, - (short)1, - (short)1,
-(short)84, - (short)1, - (short)1, - (short)1, - (short)1, (short)89, (short)90,
-(short)91, (short)47, (short)48, - (short)1, (short)36, - (short)1, (short)97, -
-(short)1, - (short)1, (short)100, (short)101, - (short)1, - (short)1, - (short)1,
-- (short)1, (short)47, (short)48, (short)108, (short)109, (short)110, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, (short)84, - (short)1, - (short)1,
-- (short)1, - (short)1, (short)89, (short)90, (short)91, - (short)1, (short)93,
-- (short)1, - (short)1, - (short)1, (short)97, (short)98, - (short)1, (short)100,
-(short)101, - (short)1, (short)89, - (short)1, (short)91, (short)106, (short)93,
-(short)108, (short)109, (short)110, (short)97, (short)98, - (short)1, (short)100,
-(short)101, - (short)1, - (short)1, - (short)1, - (short)1, (short)106, -
-(short)1, (short)108, (short)109, (short)110, (short)3, (short)4, (short)5,
-(short)6, (short)7, (short)8, (short)9, (short)10, (short)11, (short)12, (short)13,
-(short)14, (short)15, (short)16, (short)17, (short)18, (short)19, (short)20,
-(short)21, - (short)1, - (short)1, (short)24, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, - (short)1, (short)36, - (short)1, (short)38, - (short)1, - (short)1,
-- (short)1, - (short)1, (short)43, - (short)1, - (short)1, - (short)1, (short)47,
-(short)48, - (short)1, - (short)1, - (short)1, - (short)1, (short)3, (short)4,
-(short)5, (short)6, (short)7, (short)8, (short)9, (short)10, (short)11, (short)12,
-(short)13, (short)14, (short)15, (short)16, (short)17, (short)18, (short)19,
-(short)20, (short)21, - (short)1, - (short)1, (short)24, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, - (short)1, - (short)1, (short)36, - (short)1, (short)38, (short)89, -
-(short)1, (short)91, - (short)1, (short)43, (short)94, - (short)1, (short)96,
-(short)47, (short)48, - (short)1, (short)100, (short)101, (short)3, (short)4,
-(short)5, (short)6, (short)7, (short)8, (short)9, (short)10, (short)11, (short)12,
-(short)13, (short)14, (short)15, (short)16, (short)17, (short)18, (short)19,
-(short)20, (short)21, - (short)1, - (short)1, (short)24, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, - (short)1, - (short)1, (short)36, - (short)1, - (short)1, - (short)1,
-(short)89, - (short)1, (short)91, (short)43, - (short)1, (short)94, - (short)1,
-(short)47, (short)48, - (short)1, - (short)1, (short)100, (short)101, (short)8,
-(short)9, (short)10, (short)11, (short)12, (short)13, (short)14, (short)15,
-(short)16, (short)17, (short)18, (short)19, (short)20, (short)21, - (short)1, -
-(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)36,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, (short)89, - (short)1, (short)91, (short)47, (short)48, - (short)1, -
-(short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)100, (short)101,
-(short)8, (short)9, (short)10, (short)11, (short)12, (short)13, (short)14,
-(short)15, (short)16, (short)17, (short)18, (short)19, (short)20, (short)21,
-(short)8, (short)9, (short)10, (short)11, (short)12, (short)13, (short)14,
-(short)15, (short)16, (short)17, (short)18, (short)19, (short)20, (short)21,
-(short)36, - (short)1, - (short)1, - (short)1, (short)89, - (short)1, (short)91,
-- (short)1, (short)93, - (short)1, - (short)1, (short)47, (short)48, (short)98,
-(short)36, (short)100, (short)101, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, (short)47, (short)48, - (short)1,
-- (short)1, - (short)1, - (short)1, (short)8, (short)9, (short)10, (short)11,
-(short)12, (short)13, (short)14, (short)15, (short)16, (short)17, (short)18,
-(short)19, (short)20, (short)21, - (short)1, - (short)1, - (short)1, (short)84,
-- (short)1, - (short)1, - (short)1, - (short)1, (short)89, (short)90, (short)91,
-- (short)1, - (short)1, - (short)1, (short)36, - (short)1, - (short)1, - (short)1,
-- (short)1, (short)100, (short)101, - (short)1, (short)89, - (short)1, (short)91,
-(short)47, (short)48, (short)94, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, (short)100, (short)101, (short)8, (short)9, (short)10, (short)11,
-(short)12, (short)13, (short)14, (short)15, (short)16, (short)17, (short)18,
-(short)19, (short)20, (short)21, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)81,
-- (short)1, - (short)1, - (short)1, (short)36, - (short)1, - (short)1, - (short)1,
-(short)89, - (short)1, (short)91, - (short)1, - (short)1, - (short)1, - (short)1,
-(short)47, (short)48, (short)30, - (short)1, (short)100, (short)101, - (short)1,
+(short)85, (short)86, (short)87, (short)88, - (short)1, (short)90, - (short)1, -
+(short)1, - (short)1, (short)94, (short)95, - (short)1, (short)97, - (short)1, -
+(short)1, - (short)1, (short)101, - (short)1, - (short)1, - (short)1, (short)105,
+(short)106, - (short)1, (short)108, - (short)1, - (short)1, (short)111, (short)112,
+(short)113, - (short)1, - (short)1, - (short)1, - (short)1, (short)118, (short)119,
 (short)35, - (short)1, (short)37, - (short)1, (short)39, - (short)1, - (short)1,
 (short)42, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
 (short)49, (short)50, - (short)1, - (short)1, (short)53, (short)54, (short)55,
 (short)56, (short)57, (short)58, (short)59, - (short)1, (short)61, (short)62, -
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-(short)89, - (short)1, (short)91, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, (short)100, (short)101, -
-(short)1, (short)84, (short)85, (short)86, (short)87, (short)88, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, (short)84, (short)85, (short)86, (short)87, (short)88, - (short)1,
 (short)90, - (short)1, - (short)1, - (short)1, (short)94, (short)95, - (short)1,
 (short)97, - (short)1, - (short)1, - (short)1, (short)101, - (short)1, - (short)1,
 - (short)1, (short)105, (short)106, - (short)1, (short)108, - (short)1, -
@@ -3638,73 +3664,19 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
 - (short)1, - (short)1, - (short)1, - (short)1, (short)84, (short)85, (short)86,
 (short)87, (short)88, - (short)1, (short)90, - (short)1, - (short)1, - (short)1,
-(short)94, (short)95, - (short)1, (short)97, - (short)1, - (short)1, - (short)1,
-(short)101, - (short)1, - (short)1, - (short)1, (short)105, (short)106, -
-(short)1, (short)108, - (short)1, - (short)1, (short)111, (short)112, (short)113,
-- (short)1, - (short)1, - (short)1, - (short)1, (short)118, (short)119, (short)35,
+(short)94, - (short)1, - (short)1, (short)97, - (short)1, - (short)1, - (short)1,
+(short)101, - (short)1, (short)37, - (short)1, (short)105, (short)106, - (short)1,
+(short)108, - (short)1, - (short)1, (short)111, (short)112, (short)113, -
+(short)1, - (short)1, - (short)1, - (short)1, (short)118, (short)119, (short)35,
 - (short)1, (short)37, - (short)1, (short)39, - (short)1, - (short)1, (short)42,
 - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)49,
 (short)50, - (short)1, - (short)1, (short)53, (short)54, (short)55, (short)56,
 (short)57, (short)58, (short)59, - (short)1, (short)61, (short)62, - (short)1, -
-(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-(short)84, (short)85, (short)86, (short)87, (short)88, - (short)1, (short)90, -
-(short)1, - (short)1, - (short)1, (short)94, (short)95, - (short)1, (short)97, -
-(short)1, - (short)1, - (short)1, (short)101, - (short)1, - (short)1, - (short)1,
-(short)105, (short)106, - (short)1, (short)108, - (short)1, - (short)1, (short)111,
-(short)112, (short)113, - (short)1, - (short)1, - (short)1, - (short)1, (short)118,
-(short)119, (short)35, - (short)1, (short)37, - (short)1, (short)39, - (short)1,
-- (short)1, (short)42, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, (short)49, (short)50, - (short)1, - (short)1, (short)53, (short)54,
-(short)55, (short)56, (short)57, (short)58, (short)59, - (short)1, (short)61,
-(short)62, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, (short)84, (short)85, (short)86, (short)87, (short)88, -
-(short)1, (short)90, - (short)1, - (short)1, - (short)1, (short)94, - (short)1,
-- (short)1, (short)97, - (short)1, - (short)1, - (short)1, (short)101, - (short)1,
-- (short)1, - (short)1, (short)105, (short)106, - (short)1, (short)108, -
-(short)1, - (short)1, (short)111, (short)112, (short)113, - (short)1, - (short)1,
-- (short)1, - (short)1, (short)118, (short)119, (short)35, - (short)1, (short)37,
-- (short)1, (short)39, - (short)1, - (short)1, (short)42, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, (short)49, (short)50, - (short)1,
-- (short)1, (short)53, (short)54, (short)55, (short)56, (short)57, (short)58,
-(short)59, - (short)1, (short)61, (short)62, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)84, (short)85,
-(short)86, (short)87, (short)88, - (short)1, (short)90, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, (short)97, - (short)1, - (short)1,
-- (short)1, (short)101, (short)35, - (short)1, (short)37, - (short)1, (short)39,
-(short)107, (short)108, (short)42, - (short)1, (short)111, (short)112, (short)113,
-- (short)1, - (short)1, (short)49, (short)50, (short)118, (short)119, (short)53,
-(short)54, (short)55, (short)56, (short)57, (short)58, (short)59, - (short)1,
-(short)61, (short)62, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, (short)84, (short)85, (short)86, (short)87,
-(short)88, - (short)1, (short)90, - (short)1, - (short)1, - (short)1, (short)94,
-- (short)1, - (short)1, (short)97, - (short)1, - (short)1, - (short)1, (short)101,
-(short)35, - (short)1, (short)37, - (short)1, (short)39, - (short)1, (short)108,
-(short)42, - (short)1, (short)111, (short)112, (short)113, - (short)1, - (short)1,
-(short)49, (short)50, (short)118, (short)119, (short)53, (short)54, (short)55,
-(short)56, (short)57, (short)58, (short)59, - (short)1, (short)61, (short)62, -
-(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, (short)84, (short)85, (short)86, (short)87, (short)88, - (short)1,
-(short)90, - (short)1, - (short)1, (short)93, - (short)1, - (short)1, - (short)1,
-(short)97, - (short)1, - (short)1, - (short)1, (short)101, (short)35, - (short)1,
-(short)37, - (short)1, (short)39, - (short)1, (short)108, (short)42, - (short)1,
-(short)111, (short)112, (short)113, - (short)1, - (short)1, (short)49, (short)50,
-(short)118, (short)119, (short)53, (short)54, (short)55, (short)56, (short)57,
-(short)58, (short)59, - (short)1, (short)61, (short)62, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
-(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)84,
-(short)85, (short)86, (short)87, (short)88, - (short)1, (short)90, - (short)1, -
-(short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)97, - (short)1,
+(short)1, (short)84, (short)85, - (short)1, (short)87, (short)88, - (short)1,
+(short)90, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+(short)97, - (short)1, - (short)1, (short)100, (short)101, - (short)1, (short)84,
+(short)85, (short)86, (short)87, (short)88, (short)108, (short)90, - (short)1, -
+(short)1, (short)112, (short)113, - (short)1, - (short)1, (short)97, - (short)1,
 - (short)1, - (short)1, (short)101, (short)35, - (short)1, (short)37, - (short)1,
 (short)39, (short)107, (short)108, (short)42, - (short)1, (short)111, (short)112,
 (short)113, - (short)1, - (short)1, (short)49, (short)50, (short)118, (short)119,
@@ -3714,7 +3686,7 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
 - (short)1, - (short)1, - (short)1, - (short)1, (short)84, (short)85, (short)86,
 (short)87, (short)88, - (short)1, (short)90, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, (short)97, (short)98, - (short)1, - (short)1,
+(short)94, - (short)1, - (short)1, (short)97, - (short)1, - (short)1, - (short)1,
 (short)101, (short)35, - (short)1, (short)37, - (short)1, (short)39, - (short)1,
 (short)108, (short)42, - (short)1, (short)111, (short)112, (short)113, - (short)1,
 - (short)1, (short)49, (short)50, (short)118, (short)119, (short)53, (short)54,
@@ -3723,8 +3695,8 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
 - (short)1, - (short)1, (short)84, (short)85, (short)86, (short)87, (short)88, -
-(short)1, (short)90, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, (short)97, (short)98, - (short)1, - (short)1, (short)101, (short)35,
+(short)1, (short)90, - (short)1, - (short)1, (short)93, - (short)1, - (short)1,
+- (short)1, (short)97, - (short)1, - (short)1, - (short)1, (short)101, (short)35,
 - (short)1, (short)37, - (short)1, (short)39, - (short)1, (short)108, (short)42,
 - (short)1, (short)111, (short)112, (short)113, - (short)1, - (short)1, (short)49,
 (short)50, (short)118, (short)119, (short)53, (short)54, (short)55, (short)56,
@@ -3743,7 +3715,7 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
 - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)84, (short)85,
 (short)86, (short)87, (short)88, - (short)1, (short)90, - (short)1, - (short)1,
-(short)93, - (short)1, - (short)1, - (short)1, (short)97, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, (short)97, (short)98, - (short)1,
 - (short)1, (short)101, (short)35, - (short)1, (short)37, - (short)1, (short)39,
 - (short)1, (short)108, (short)42, - (short)1, (short)111, (short)112, (short)113,
 - (short)1, - (short)1, (short)49, (short)50, (short)118, (short)119, (short)53,
@@ -3752,8 +3724,8 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
 - (short)1, - (short)1, - (short)1, (short)84, (short)85, (short)86, (short)87,
-(short)88, - (short)1, (short)90, - (short)1, - (short)1, (short)93, - (short)1,
-- (short)1, - (short)1, (short)97, - (short)1, - (short)1, - (short)1, (short)101,
+(short)88, - (short)1, (short)90, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, (short)97, (short)98, - (short)1, - (short)1, (short)101,
 (short)35, - (short)1, (short)37, - (short)1, (short)39, - (short)1, (short)108,
 (short)42, - (short)1, (short)111, (short)112, (short)113, - (short)1, - (short)1,
 (short)49, (short)50, (short)118, (short)119, (short)53, (short)54, (short)55,
@@ -3763,8 +3735,8 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
 - (short)1, (short)84, (short)85, (short)86, (short)87, (short)88, - (short)1,
 (short)90, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-(short)97, (short)98, - (short)1, - (short)1, (short)101, (short)35, - (short)1,
-(short)37, - (short)1, (short)39, - (short)1, (short)108, (short)42, - (short)1,
+(short)97, - (short)1, - (short)1, - (short)1, (short)101, (short)35, - (short)1,
+(short)37, - (short)1, (short)39, (short)107, (short)108, (short)42, - (short)1,
 (short)111, (short)112, (short)113, - (short)1, - (short)1, (short)49, (short)50,
 (short)118, (short)119, (short)53, (short)54, (short)55, (short)56, (short)57,
 (short)58, (short)59, - (short)1, (short)61, (short)62, - (short)1, - (short)1,
@@ -3772,7 +3744,7 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
 - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)84,
 (short)85, (short)86, (short)87, (short)88, - (short)1, (short)90, - (short)1, -
-(short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)97, (short)98,
+(short)1, (short)93, - (short)1, - (short)1, - (short)1, (short)97, - (short)1,
 - (short)1, - (short)1, (short)101, (short)35, - (short)1, (short)37, - (short)1,
 (short)39, - (short)1, (short)108, (short)42, - (short)1, (short)111, (short)112,
 (short)113, - (short)1, - (short)1, (short)49, (short)50, (short)118, (short)119,
@@ -3811,7 +3783,7 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
 - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)84, (short)85,
 (short)86, (short)87, (short)88, - (short)1, (short)90, - (short)1, - (short)1,
-- (short)1, - (short)1, - (short)1, - (short)1, (short)97, (short)98, - (short)1,
+(short)93, - (short)1, - (short)1, - (short)1, (short)97, - (short)1, - (short)1,
 - (short)1, (short)101, (short)35, - (short)1, (short)37, - (short)1, (short)39,
 - (short)1, (short)108, (short)42, - (short)1, (short)111, (short)112, (short)113,
 - (short)1, - (short)1, (short)49, (short)50, (short)118, (short)119, (short)53,
@@ -3831,8 +3803,8 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
 - (short)1, (short)84, (short)85, (short)86, (short)87, (short)88, - (short)1,
 (short)90, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
-(short)97, - (short)1, - (short)1, - (short)1, (short)101, (short)35, - (short)1,
-(short)37, - (short)1, - (short)1, - (short)1, (short)108, - (short)1, - (short)1,
+(short)97, (short)98, - (short)1, - (short)1, (short)101, (short)35, - (short)1,
+(short)37, - (short)1, (short)39, - (short)1, (short)108, (short)42, - (short)1,
 (short)111, (short)112, (short)113, - (short)1, - (short)1, (short)49, (short)50,
 (short)118, (short)119, (short)53, (short)54, (short)55, (short)56, (short)57,
 (short)58, (short)59, - (short)1, (short)61, (short)62, - (short)1, - (short)1,
@@ -3840,9 +3812,9 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
 - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)84,
 (short)85, (short)86, (short)87, (short)88, - (short)1, (short)90, - (short)1, -
-(short)1, - (short)1, (short)94, - (short)1, - (short)1, (short)97, - (short)1,
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)97, (short)98,
 - (short)1, - (short)1, (short)101, (short)35, - (short)1, (short)37, - (short)1,
-- (short)1, - (short)1, (short)108, - (short)1, - (short)1, (short)111, (short)112,
+(short)39, - (short)1, (short)108, (short)42, - (short)1, (short)111, (short)112,
 (short)113, - (short)1, - (short)1, (short)49, (short)50, (short)118, (short)119,
 (short)53, (short)54, (short)55, (short)56, (short)57, (short)58, (short)59, -
 (short)1, (short)61, (short)62, - (short)1, - (short)1, - (short)1, - (short)1,
@@ -3850,10 +3822,39 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
 - (short)1, - (short)1, - (short)1, - (short)1, (short)84, (short)85, (short)86,
 (short)87, (short)88, - (short)1, (short)90, - (short)1, - (short)1, - (short)1,
-(short)94, - (short)1, - (short)1, (short)97, - (short)1, - (short)1, - (short)1,
-(short)101, (short)35, - (short)1, (short)37, - (short)1, - (short)1, - (short)1,
-(short)108, - (short)1, - (short)1, (short)111, (short)112, (short)113, -
-(short)1, - (short)1, (short)49, (short)50, (short)118, (short)119, (short)53,
+- (short)1, - (short)1, - (short)1, (short)97, (short)98, - (short)1, - (short)1,
+(short)101, (short)35, - (short)1, (short)37, - (short)1, (short)39, - (short)1,
+(short)108, (short)42, - (short)1, (short)111, (short)112, (short)113, - (short)1,
+- (short)1, (short)49, (short)50, (short)118, (short)119, (short)53, (short)54,
+(short)55, (short)56, (short)57, (short)58, (short)59, - (short)1, (short)61,
+(short)62, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, (short)84, (short)85, (short)86, (short)87, (short)88, -
+(short)1, (short)90, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, (short)97, - (short)1, - (short)1, - (short)1, (short)101, (short)35,
+- (short)1, (short)37, - (short)1, - (short)1, - (short)1, (short)108, - (short)1,
+- (short)1, (short)111, (short)112, (short)113, - (short)1, - (short)1, (short)49,
+(short)50, (short)118, (short)119, (short)53, (short)54, (short)55, (short)56,
+(short)57, (short)58, (short)59, - (short)1, (short)61, (short)62, - (short)1, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+(short)84, (short)85, (short)86, (short)87, (short)88, - (short)1, (short)90, -
+(short)1, - (short)1, - (short)1, (short)94, - (short)1, - (short)1, (short)97,
+- (short)1, - (short)1, - (short)1, (short)101, (short)35, - (short)1, (short)37,
+- (short)1, - (short)1, - (short)1, (short)108, - (short)1, - (short)1, (short)111,
+(short)112, (short)113, - (short)1, - (short)1, (short)49, (short)50, (short)118,
+(short)119, (short)53, (short)54, (short)55, (short)56, (short)57, (short)58,
+(short)59, - (short)1, (short)61, (short)62, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
+(short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+- (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)84, (short)85,
+(short)86, (short)87, (short)88, - (short)1, (short)90, - (short)1, - (short)1,
+- (short)1, (short)94, - (short)1, - (short)1, (short)97, - (short)1, - (short)1,
+- (short)1, (short)101, (short)35, - (short)1, (short)37, - (short)1, - (short)1,
+- (short)1, (short)108, - (short)1, - (short)1, (short)111, (short)112, (short)113,
+- (short)1, - (short)1, (short)49, (short)50, (short)118, (short)119, (short)53,
 (short)54, (short)55, (short)56, (short)57, (short)58, (short)59, - (short)1,
 (short)61, (short)62, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
 - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, -
@@ -3880,78 +3881,74 @@ short Cyc_yytable[ 4027u]={ (short)109, (short)56, (short)148, (short)115,
 - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)84,
 (short)85, (short)86, (short)87, (short)88, - (short)1, (short)90, - (short)1, -
 (short)1, - (short)1, - (short)1, - (short)1, - (short)1, (short)97, - (short)1,
-- (short)1, - (short)1, (short)101, - (short)1, (short)37, - (short)1, - (short)1,
-- (short)1, - (short)1, (short)108, - (short)1, - (short)1, (short)111, (short)112,
-(short)113, - (short)1, - (short)1, - (short)1, - (short)1, (short)118, (short)119,
-(short)84, (short)85, - (short)1, (short)87, (short)88, - (short)1, (short)90, -
-(short)1, - (short)1, - (short)1, - (short)1, (short)95, - (short)1, (short)97,
-- (short)1, - (short)1, (short)100, (short)101, - (short)1, - (short)1, -
-(short)1, (short)105, (short)106, - (short)1, (short)108, - (short)1, - (short)1,
-- (short)1, (short)112, (short)113, (short)84, (short)85, - (short)1, (short)87,
-(short)88, - (short)1, (short)90, - (short)1, - (short)1, - (short)1, - (short)1,
-- (short)1, - (short)1, (short)97, - (short)1, - (short)1, (short)100, (short)101,
-- (short)1, - (short)1, - (short)1, (short)105, (short)106, - (short)1, (short)108,
-- (short)1, - (short)1, - (short)1, (short)112, (short)113}; char Cyc_Yyimpossible_tag[
-13u]="Yyimpossible"; struct Cyc_Yyimpossible_struct{ char* tag; } ; char Cyc_Yystack_overflow_tag[
-17u]="Yystack_overflow"; struct Cyc_Yystack_overflow_struct{ char* tag; } ;
-extern void Cyc_yyerror( struct _tagged_string); extern int Cyc_yylex(); char
-Cyc_YYINITIALSVAL_tag[ 14u]="YYINITIALSVAL"; struct Cyc_YYINITIALSVAL_struct{
-char* tag; } ; static int Cyc_yychar=( int)'\000'; struct Cyc_YYINITIALSVAL_struct
-Cyc_yyinitval={ Cyc_YYINITIALSVAL_tag}; struct _xtunion_struct* Cyc_yylval=(
-struct _xtunion_struct*)& Cyc_yyinitval; static int Cyc_yynerrs= 0; int Cyc_yyparse(){
-int yystate; int yyn= 0; int yyerrstatus; int yychar1= 0; int yyssp_offset;
-struct _tagged_ptr1 yyss=( struct _tagged_ptr1)({ short* _temp2072=( short*)({
-unsigned int _temp2070= 200u; short* _temp2071=( short*) GC_malloc_atomic(
-sizeof( short) * _temp2070); unsigned int i; for( i= 0; i < _temp2070; i ++){
-_temp2071[ i]= (short)0;} _temp2071;}); struct _tagged_ptr1 _temp2073; _temp2073.curr=
-_temp2072; _temp2073.base= _temp2072; _temp2073.last_plus_one= _temp2072 + 200;
-_temp2073;}); int yyvsp_offset; struct _tagged_ptr2 yyvs=( struct _tagged_ptr2)({
-struct _xtunion_struct** _temp2076=( struct _xtunion_struct**)({ unsigned int
-_temp2074= 200u; struct _xtunion_struct** _temp2075=( struct _xtunion_struct**)
-GC_malloc( sizeof( struct _xtunion_struct*) * _temp2074); unsigned int i; for( i=
-0; i < _temp2074; i ++){ _temp2075[ i]= Cyc_yylval;} _temp2075;}); struct
-_tagged_ptr2 _temp2077; _temp2077.curr= _temp2076; _temp2077.base= _temp2076;
-_temp2077.last_plus_one= _temp2076 + 200; _temp2077;}); int yylsp_offset; struct
-_tagged_ptr3 yyls=( struct _tagged_ptr3)({ struct Cyc_Yyltype* _temp2080=(
-struct Cyc_Yyltype*)({ unsigned int _temp2078= 200u; struct Cyc_Yyltype*
-_temp2079=( struct Cyc_Yyltype*) GC_malloc( sizeof( struct Cyc_Yyltype) *
-_temp2078); unsigned int i; for( i= 0; i < _temp2078; i ++){ _temp2079[ i]= Cyc_yynewloc();}
-_temp2079;}); struct _tagged_ptr3 _temp2081; _temp2081.curr= _temp2080;
-_temp2081.base= _temp2080; _temp2081.last_plus_one= _temp2080 + 200; _temp2081;});
-int yystacksize= 200; struct _xtunion_struct* yyval= Cyc_yylval; int yylen;
-yystate= 0; yyerrstatus= 0; Cyc_yynerrs= 0; Cyc_yychar= - 2; yyssp_offset= - 1;
-yyvsp_offset= 0; yylsp_offset= 0; yynewstate:({ struct _tagged_ptr1 _temp2082=
-yyss; short* _temp2084= _temp2082.curr +( ++ yyssp_offset); if( _temp2084 <
-_temp2082.base? 1: _temp2084 >= _temp2082.last_plus_one){ _throw( Null_Exception);}*
-_temp2084=( short) yystate;}); if( yyssp_offset >= yystacksize - 1){ if(
-yystacksize >= 10000){ Cyc_yyerror(( struct _tagged_string)({ char* _temp2085=(
-char*)"parser stack overflow"; struct _tagged_string _temp2086; _temp2086.curr=
-_temp2085; _temp2086.base= _temp2085; _temp2086.last_plus_one= _temp2085 + 22;
-_temp2086;}));( void) _throw(( struct _xtunion_struct*)({ struct Cyc_Yystack_overflow_struct*
-_temp2087=( struct Cyc_Yystack_overflow_struct*) GC_malloc( sizeof( struct Cyc_Yystack_overflow_struct));
-_temp2087[ 0]=({ struct Cyc_Yystack_overflow_struct _temp2088; _temp2088.tag=
-Cyc_Yystack_overflow_tag; _temp2088;}); _temp2087;}));} yystacksize *= 2; if(
-yystacksize > 10000){ yystacksize= 10000;}{ struct _tagged_ptr1 yyss1=({
-unsigned int _temp2089=( unsigned int) yystacksize; short* _temp2090=( short*)
-GC_malloc_atomic( sizeof( short) * _temp2089); unsigned int i; struct
-_tagged_ptr1 _temp2091={ _temp2090, _temp2090, _temp2090 + _temp2089}; for( i= 0;
-i < _temp2089; i ++){ _temp2090[ i]= (short)0;} _temp2091;}); struct
-_tagged_ptr2 yyvs1=({ unsigned int _temp2092=( unsigned int) yystacksize; struct
-_xtunion_struct** _temp2093=( struct _xtunion_struct**) GC_malloc( sizeof(
-struct _xtunion_struct*) * _temp2092); unsigned int i; struct _tagged_ptr2
-_temp2094={ _temp2093, _temp2093, _temp2093 + _temp2092}; for( i= 0; i <
-_temp2092; i ++){ _temp2093[ i]= Cyc_yylval;} _temp2094;}); struct _tagged_ptr3
-yyls1=({ unsigned int _temp2095=( unsigned int) yystacksize; struct Cyc_Yyltype*
-_temp2096=( struct Cyc_Yyltype*) GC_malloc( sizeof( struct Cyc_Yyltype) *
-_temp2095); unsigned int i; struct _tagged_ptr3 _temp2097={ _temp2096, _temp2096,
-_temp2096 + _temp2095}; for( i= 0; i < _temp2095; i ++){ _temp2096[ i]= Cyc_yynewloc();}
-_temp2097;});{ int i= 0; for( 0; i <= yyssp_offset; i ++){({ struct _tagged_ptr1
-_temp2098= yyss1; short* _temp2100= _temp2098.curr + i; if( _temp2100 <
-_temp2098.base? 1: _temp2100 >= _temp2098.last_plus_one){ _throw( Null_Exception);}*
-_temp2100=({ struct _tagged_ptr1 _temp2101= yyss; short* _temp2103= _temp2101.curr
-+ i; if( _temp2103 < _temp2101.base? 1: _temp2103 >= _temp2101.last_plus_one){
-_throw( Null_Exception);}* _temp2103;});});({ struct _tagged_ptr2 _temp2104=
-yyvs1; struct _xtunion_struct** _temp2106= _temp2104.curr + i; if( _temp2106 <
+- (short)1, - (short)1, (short)101, - (short)1, - (short)1, - (short)1, -
+(short)1, - (short)1, - (short)1, (short)108, - (short)1, - (short)1, (short)111,
+(short)112, (short)113, - (short)1, - (short)1, - (short)1, - (short)1, (short)118,
+(short)119, (short)84, (short)85, - (short)1, (short)87, (short)88, - (short)1,
+(short)90, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1, - (short)1,
+(short)97, - (short)1, - (short)1, (short)100, (short)101, - (short)1, - (short)1,
+- (short)1, (short)105, (short)106, - (short)1, (short)108, - (short)1, -
+(short)1, - (short)1, (short)112, (short)113}; char Cyc_Yyimpossible_tag[ 13u]="Yyimpossible";
+struct Cyc_Yyimpossible_struct{ char* tag; } ; char Cyc_Yystack_overflow_tag[ 17u]="Yystack_overflow";
+struct Cyc_Yystack_overflow_struct{ char* tag; } ; extern void Cyc_yyerror(
+struct _tagged_string); extern int Cyc_yylex(); char Cyc_YYINITIALSVAL_tag[ 14u]="YYINITIALSVAL";
+struct Cyc_YYINITIALSVAL_struct{ char* tag; } ; static int Cyc_yychar=( int)'\000';
+struct Cyc_YYINITIALSVAL_struct Cyc_yyinitval={ Cyc_YYINITIALSVAL_tag}; struct
+_xtunion_struct* Cyc_yylval=( struct _xtunion_struct*)& Cyc_yyinitval; static
+int Cyc_yynerrs= 0; int Cyc_yyparse(){ int yystate; int yyn= 0; int yyerrstatus;
+int yychar1= 0; int yyssp_offset; struct _tagged_ptr1 yyss=( struct _tagged_ptr1)({
+short* _temp2072=( short*)({ unsigned int _temp2070= 200u; short* _temp2071=(
+short*) GC_malloc_atomic( sizeof( short) * _temp2070); unsigned int i; for( i= 0;
+i < _temp2070; i ++){ _temp2071[ i]= (short)0;} _temp2071;}); struct
+_tagged_ptr1 _temp2073; _temp2073.curr= _temp2072; _temp2073.base= _temp2072;
+_temp2073.last_plus_one= _temp2072 + 200; _temp2073;}); int yyvsp_offset; struct
+_tagged_ptr2 yyvs=( struct _tagged_ptr2)({ struct _xtunion_struct** _temp2076=(
+struct _xtunion_struct**)({ unsigned int _temp2074= 200u; struct _xtunion_struct**
+_temp2075=( struct _xtunion_struct**) GC_malloc( sizeof( struct _xtunion_struct*)
+* _temp2074); unsigned int i; for( i= 0; i < _temp2074; i ++){ _temp2075[ i]=
+Cyc_yylval;} _temp2075;}); struct _tagged_ptr2 _temp2077; _temp2077.curr=
+_temp2076; _temp2077.base= _temp2076; _temp2077.last_plus_one= _temp2076 + 200;
+_temp2077;}); int yylsp_offset; struct _tagged_ptr3 yyls=( struct _tagged_ptr3)({
+struct Cyc_Yyltype* _temp2080=( struct Cyc_Yyltype*)({ unsigned int _temp2078=
+200u; struct Cyc_Yyltype* _temp2079=( struct Cyc_Yyltype*) GC_malloc( sizeof(
+struct Cyc_Yyltype) * _temp2078); unsigned int i; for( i= 0; i < _temp2078; i ++){
+_temp2079[ i]= Cyc_yynewloc();} _temp2079;}); struct _tagged_ptr3 _temp2081;
+_temp2081.curr= _temp2080; _temp2081.base= _temp2080; _temp2081.last_plus_one=
+_temp2080 + 200; _temp2081;}); int yystacksize= 200; struct _xtunion_struct*
+yyval= Cyc_yylval; int yylen; yystate= 0; yyerrstatus= 0; Cyc_yynerrs= 0; Cyc_yychar=
+- 2; yyssp_offset= - 1; yyvsp_offset= 0; yylsp_offset= 0; yynewstate:({ struct
+_tagged_ptr1 _temp2082= yyss; short* _temp2084= _temp2082.curr +( ++
+yyssp_offset); if( _temp2084 < _temp2082.base? 1: _temp2084 >= _temp2082.last_plus_one){
+_throw( Null_Exception);}* _temp2084=( short) yystate;}); if( yyssp_offset >=
+yystacksize - 1){ if( yystacksize >= 10000){ Cyc_yyerror(( struct _tagged_string)({
+char* _temp2085=( char*)"parser stack overflow"; struct _tagged_string _temp2086;
+_temp2086.curr= _temp2085; _temp2086.base= _temp2085; _temp2086.last_plus_one=
+_temp2085 + 22; _temp2086;}));( void) _throw(( struct _xtunion_struct*)({ struct
+Cyc_Yystack_overflow_struct* _temp2087=( struct Cyc_Yystack_overflow_struct*)
+GC_malloc( sizeof( struct Cyc_Yystack_overflow_struct)); _temp2087[ 0]=({ struct
+Cyc_Yystack_overflow_struct _temp2088; _temp2088.tag= Cyc_Yystack_overflow_tag;
+_temp2088;}); _temp2087;}));} yystacksize *= 2; if( yystacksize > 10000){
+yystacksize= 10000;}{ struct _tagged_ptr1 yyss1=({ unsigned int _temp2089=(
+unsigned int) yystacksize; short* _temp2090=( short*) GC_malloc_atomic( sizeof(
+short) * _temp2089); unsigned int i; struct _tagged_ptr1 _temp2091={ _temp2090,
+_temp2090, _temp2090 + _temp2089}; for( i= 0; i < _temp2089; i ++){ _temp2090[ i]=
+(short)0;} _temp2091;}); struct _tagged_ptr2 yyvs1=({ unsigned int _temp2092=(
+unsigned int) yystacksize; struct _xtunion_struct** _temp2093=( struct
+_xtunion_struct**) GC_malloc( sizeof( struct _xtunion_struct*) * _temp2092);
+unsigned int i; struct _tagged_ptr2 _temp2094={ _temp2093, _temp2093, _temp2093
++ _temp2092}; for( i= 0; i < _temp2092; i ++){ _temp2093[ i]= Cyc_yylval;}
+_temp2094;}); struct _tagged_ptr3 yyls1=({ unsigned int _temp2095=( unsigned int)
+yystacksize; struct Cyc_Yyltype* _temp2096=( struct Cyc_Yyltype*) GC_malloc(
+sizeof( struct Cyc_Yyltype) * _temp2095); unsigned int i; struct _tagged_ptr3
+_temp2097={ _temp2096, _temp2096, _temp2096 + _temp2095}; for( i= 0; i <
+_temp2095; i ++){ _temp2096[ i]= Cyc_yynewloc();} _temp2097;});{ int i= 0; for(
+0; i <= yyssp_offset; i ++){({ struct _tagged_ptr1 _temp2098= yyss1; short*
+_temp2100= _temp2098.curr + i; if( _temp2100 < _temp2098.base? 1: _temp2100 >=
+_temp2098.last_plus_one){ _throw( Null_Exception);}* _temp2100=({ struct
+_tagged_ptr1 _temp2101= yyss; short* _temp2103= _temp2101.curr + i; if(
+_temp2103 < _temp2101.base? 1: _temp2103 >= _temp2101.last_plus_one){ _throw(
+Null_Exception);}* _temp2103;});});({ struct _tagged_ptr2 _temp2104= yyvs1;
+struct _xtunion_struct** _temp2106= _temp2104.curr + i; if( _temp2106 <
 _temp2104.base? 1: _temp2106 >= _temp2104.last_plus_one){ _throw( Null_Exception);}*
 _temp2106=({ struct _tagged_ptr2 _temp2107= yyvs; struct _xtunion_struct**
 _temp2109= _temp2107.curr + i; if( _temp2109 < _temp2107.base? 1: _temp2109 >=
@@ -3963,18 +3960,18 @@ _temp2115= _temp2113.curr + i; if( _temp2115 < _temp2113.base? 1: _temp2115 >=
 _temp2113.last_plus_one){ _throw( Null_Exception);}* _temp2115;});});}} yyss=
 yyss1; yyvs= yyvs1; yyls= yyls1;}} goto yybackup; yybackup: yyn=( int)({ short*
 _temp2116=( short*) Cyc_yypact; unsigned int _temp2117= yystate; if( _temp2117
->= 731u){ _throw( Null_Exception);} _temp2116[ _temp2117];}); if( yyn == - 32768){
+>= 728u){ _throw( Null_Exception);} _temp2116[ _temp2117];}); if( yyn == - 32768){
 goto yydefault;} if( Cyc_yychar == - 2){ Cyc_yychar= Cyc_yylex();} if( Cyc_yychar
 <= 0){ yychar1= 0; Cyc_yychar= 0;} else{ yychar1=( Cyc_yychar > 0? Cyc_yychar <=
 347: 0)?( int)({ short* _temp2118=( short*) Cyc_yytranslate; unsigned int
 _temp2119= Cyc_yychar; if( _temp2119 >= 348u){ _throw( Null_Exception);}
-_temp2118[ _temp2119];}): 227;} yyn += yychar1; if(( yyn < 0? 1: yyn > 4026)? 1:(
+_temp2118[ _temp2119];}): 227;} yyn += yychar1; if(( yyn < 0? 1: yyn > 3997)? 1:(
 int)({ short* _temp2120=( short*) Cyc_yycheck; unsigned int _temp2121= yyn; if(
-_temp2121 >= 4027u){ _throw( Null_Exception);} _temp2120[ _temp2121];}) !=
+_temp2121 >= 3998u){ _throw( Null_Exception);} _temp2120[ _temp2121];}) !=
 yychar1){ goto yydefault;} yyn=( int)({ short* _temp2122=( short*) Cyc_yytable;
-unsigned int _temp2123= yyn; if( _temp2123 >= 4027u){ _throw( Null_Exception);}
+unsigned int _temp2123= yyn; if( _temp2123 >= 3998u){ _throw( Null_Exception);}
 _temp2122[ _temp2123];}); if( yyn < 0){ if( yyn == - 32768){ goto yyerrlab;} yyn=
-- yyn; goto yyreduce;} else{ if( yyn == 0){ goto yyerrlab;}} if( yyn == 730){
+- yyn; goto yyreduce;} else{ if( yyn == 0){ goto yyerrlab;}} if( yyn == 727){
 return 0;} if( Cyc_yychar != 0){ Cyc_yychar= - 2;}({ struct _tagged_ptr2
 _temp2124= yyvs; struct _xtunion_struct** _temp2126= _temp2124.curr +( ++
 yyvsp_offset); if( _temp2126 < _temp2124.base? 1: _temp2126 >= _temp2124.last_plus_one){
@@ -3984,9 +3981,9 @@ yylsp_offset); if( _temp2129 < _temp2127.base? 1: _temp2129 >= _temp2127.last_pl
 _throw( Null_Exception);}* _temp2129= Cyc_yylloc;}); if( yyerrstatus != 0){
 yyerrstatus --;} yystate= yyn; goto yynewstate; yydefault: yyn=( int)({ short*
 _temp2130=( short*) Cyc_yydefact; unsigned int _temp2131= yystate; if( _temp2131
->= 731u){ _throw( Null_Exception);} _temp2130[ _temp2131];}); if( yyn == 0){
+>= 728u){ _throw( Null_Exception);} _temp2130[ _temp2131];}); if( yyn == 0){
 goto yyerrlab;} yyreduce: yylen=( int)({ short* _temp2132=( short*) Cyc_yyr2;
-unsigned int _temp2133= yyn; if( _temp2133 >= 390u){ _throw( Null_Exception);}
+unsigned int _temp2133= yyn; if( _temp2133 >= 389u){ _throw( Null_Exception);}
 _temp2132[ _temp2133];}); if( yylen > 0){ yyval=({ struct _tagged_ptr2 _temp2134=
 yyvs; struct _xtunion_struct** _temp2136= _temp2134.curr +(( yyvsp_offset + 1) -
 yylen); if( _temp2136 < _temp2134.base? 1: _temp2136 >= _temp2134.last_plus_one){
@@ -9395,734 +9392,710 @@ _temp6622[ 0]=({ struct Cyc_Exp_tok_struct _temp6623; _temp6623.tag= Cyc_Exp_tok
 _temp6623.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_Malloc_e_struct*
 _temp6624=( struct Cyc_Absyn_Malloc_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Malloc_e_struct));
 _temp6624[ 0]=({ struct Cyc_Absyn_Malloc_e_struct _temp6625; _temp6625.tag= Cyc_Absyn_Malloc_e_tag;
-_temp6625.f1=( void*)(( void*)({ struct Cyc_Absyn_Typ_m_struct* _temp6626=(
-struct Cyc_Absyn_Typ_m_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Typ_m_struct));
-_temp6626[ 0]=({ struct Cyc_Absyn_Typ_m_struct _temp6627; _temp6627.tag= Cyc_Absyn_Typ_m_tag;
-_temp6627.f1=( void*) Cyc_Parse_speclist2typ((* Cyc_yyget_QualSpecList_tok(({
-struct _tagged_ptr2 _temp6628= yyvs; struct _xtunion_struct** _temp6630=
-_temp6628.curr +( yyvsp_offset - 2); if( _temp6630 < _temp6628.base? 1:
-_temp6630 >= _temp6628.last_plus_one){ _throw( Null_Exception);}* _temp6630;}))).f2,
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6631= yyls; struct Cyc_Yyltype*
-_temp6633= _temp6631.curr +( yylsp_offset - 2); if( _temp6633 < _temp6631.base?
-1: _temp6633 >= _temp6631.last_plus_one){ _throw( Null_Exception);}* _temp6633;}).first_line,({
-struct _tagged_ptr3 _temp6634= yyls; struct Cyc_Yyltype* _temp6636= _temp6634.curr
-+( yylsp_offset - 2); if( _temp6636 < _temp6634.base? 1: _temp6636 >= _temp6634.last_plus_one){
-_throw( Null_Exception);}* _temp6636;}).last_line)); _temp6627;}); _temp6626;}));
-_temp6625;}); _temp6624;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
-_temp6637= yyls; struct Cyc_Yyltype* _temp6639= _temp6637.curr +( yylsp_offset -
-6); if( _temp6639 < _temp6637.base? 1: _temp6639 >= _temp6637.last_plus_one){
-_throw( Null_Exception);}* _temp6639;}).first_line,({ struct _tagged_ptr3
-_temp6640= yyls; struct Cyc_Yyltype* _temp6642= _temp6640.curr + yylsp_offset;
-if( _temp6642 < _temp6640.base? 1: _temp6642 >= _temp6640.last_plus_one){ _throw(
-Null_Exception);}* _temp6642;}).last_line)); _temp6623;}); _temp6622;}); break;
-case 348: _LL6621: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6644=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6644[ 0]=({ struct Cyc_Exp_tok_struct _temp6645; _temp6645.tag= Cyc_Exp_tok_tag;
-_temp6645.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_Malloc_e_struct*
-_temp6646=( struct Cyc_Absyn_Malloc_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Malloc_e_struct));
-_temp6646[ 0]=({ struct Cyc_Absyn_Malloc_e_struct _temp6647; _temp6647.tag= Cyc_Absyn_Malloc_e_tag;
-_temp6647.f1=( void*)(( void*)({ struct Cyc_Absyn_Unresolved_m_struct* _temp6648=(
-struct Cyc_Absyn_Unresolved_m_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Unresolved_m_struct));
-_temp6648[ 0]=({ struct Cyc_Absyn_Unresolved_m_struct _temp6649; _temp6649.tag=
-Cyc_Absyn_Unresolved_m_tag; _temp6649.f1= Cyc_yyget_QualId_tok(({ struct
-_tagged_ptr2 _temp6650= yyvs; struct _xtunion_struct** _temp6652= _temp6650.curr
-+( yyvsp_offset - 2); if( _temp6652 < _temp6650.base? 1: _temp6652 >= _temp6650.last_plus_one){
-_throw( Null_Exception);}* _temp6652;})); _temp6649;}); _temp6648;})); _temp6647;});
-_temp6646;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6653= yyls;
-struct Cyc_Yyltype* _temp6655= _temp6653.curr +( yylsp_offset - 6); if(
-_temp6655 < _temp6653.base? 1: _temp6655 >= _temp6653.last_plus_one){ _throw(
-Null_Exception);}* _temp6655;}).first_line,({ struct _tagged_ptr3 _temp6656=
-yyls; struct Cyc_Yyltype* _temp6658= _temp6656.curr + yylsp_offset; if(
-_temp6658 < _temp6656.base? 1: _temp6658 >= _temp6656.last_plus_one){ _throw(
-Null_Exception);}* _temp6658;}).last_line)); _temp6645;}); _temp6644;}); break;
-case 349: _LL6643: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
+_temp6625.f1=( void*) Cyc_Parse_speclist2typ((* Cyc_yyget_QualSpecList_tok(({
+struct _tagged_ptr2 _temp6626= yyvs; struct _xtunion_struct** _temp6628=
+_temp6626.curr +( yyvsp_offset - 2); if( _temp6628 < _temp6626.base? 1:
+_temp6628 >= _temp6626.last_plus_one){ _throw( Null_Exception);}* _temp6628;}))).f2,
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6629= yyls; struct Cyc_Yyltype*
+_temp6631= _temp6629.curr +( yylsp_offset - 2); if( _temp6631 < _temp6629.base?
+1: _temp6631 >= _temp6629.last_plus_one){ _throw( Null_Exception);}* _temp6631;}).first_line,({
+struct _tagged_ptr3 _temp6632= yyls; struct Cyc_Yyltype* _temp6634= _temp6632.curr
++( yylsp_offset - 2); if( _temp6634 < _temp6632.base? 1: _temp6634 >= _temp6632.last_plus_one){
+_throw( Null_Exception);}* _temp6634;}).last_line)); _temp6625;}); _temp6624;}),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6635= yyls; struct Cyc_Yyltype*
+_temp6637= _temp6635.curr +( yylsp_offset - 6); if( _temp6637 < _temp6635.base?
+1: _temp6637 >= _temp6635.last_plus_one){ _throw( Null_Exception);}* _temp6637;}).first_line,({
+struct _tagged_ptr3 _temp6638= yyls; struct Cyc_Yyltype* _temp6640= _temp6638.curr
++ yylsp_offset; if( _temp6640 < _temp6638.base? 1: _temp6640 >= _temp6638.last_plus_one){
+_throw( Null_Exception);}* _temp6640;}).last_line)); _temp6623;}); _temp6622;});
+break; case 348: _LL6621: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
+_temp6642=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
+_temp6642[ 0]=({ struct Cyc_Primop_tok_struct _temp6643; _temp6643.tag= Cyc_Primop_tok_tag;
+_temp6643.f1=( void*)(( void*) Cyc_Absyn_Printf); _temp6643;}); _temp6642;});
+break; case 349: _LL6641: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
+_temp6645=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
+_temp6645[ 0]=({ struct Cyc_Primop_tok_struct _temp6646; _temp6646.tag= Cyc_Primop_tok_tag;
+_temp6646.f1=( void*)(( void*) Cyc_Absyn_Fprintf); _temp6646;}); _temp6645;});
+break; case 350: _LL6644: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
+_temp6648=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
+_temp6648[ 0]=({ struct Cyc_Primop_tok_struct _temp6649; _temp6649.tag= Cyc_Primop_tok_tag;
+_temp6649.f1=( void*)(( void*) Cyc_Absyn_Xprintf); _temp6649;}); _temp6648;});
+break; case 351: _LL6647: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
+_temp6651=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
+_temp6651[ 0]=({ struct Cyc_Primop_tok_struct _temp6652; _temp6652.tag= Cyc_Primop_tok_tag;
+_temp6652.f1=( void*)(( void*) Cyc_Absyn_Scanf); _temp6652;}); _temp6651;});
+break; case 352: _LL6650: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
+_temp6654=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
+_temp6654[ 0]=({ struct Cyc_Primop_tok_struct _temp6655; _temp6655.tag= Cyc_Primop_tok_tag;
+_temp6655.f1=( void*)(( void*) Cyc_Absyn_Fscanf); _temp6655;}); _temp6654;});
+break; case 353: _LL6653: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
+_temp6657=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
+_temp6657[ 0]=({ struct Cyc_Primop_tok_struct _temp6658; _temp6658.tag= Cyc_Primop_tok_tag;
+_temp6658.f1=( void*)(( void*) Cyc_Absyn_Sscanf); _temp6658;}); _temp6657;});
+break; case 354: _LL6656: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
 _temp6660=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
 _temp6660[ 0]=({ struct Cyc_Primop_tok_struct _temp6661; _temp6661.tag= Cyc_Primop_tok_tag;
-_temp6661.f1=( void*)(( void*) Cyc_Absyn_Printf); _temp6661;}); _temp6660;});
-break; case 350: _LL6659: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
+_temp6661.f1=( void*)(( void*) Cyc_Absyn_Bitnot); _temp6661;}); _temp6660;});
+break; case 355: _LL6659: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
 _temp6663=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
 _temp6663[ 0]=({ struct Cyc_Primop_tok_struct _temp6664; _temp6664.tag= Cyc_Primop_tok_tag;
-_temp6664.f1=( void*)(( void*) Cyc_Absyn_Fprintf); _temp6664;}); _temp6663;});
-break; case 351: _LL6662: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
+_temp6664.f1=( void*)(( void*) Cyc_Absyn_Not); _temp6664;}); _temp6663;});
+break; case 356: _LL6662: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
 _temp6666=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
 _temp6666[ 0]=({ struct Cyc_Primop_tok_struct _temp6667; _temp6667.tag= Cyc_Primop_tok_tag;
-_temp6667.f1=( void*)(( void*) Cyc_Absyn_Xprintf); _temp6667;}); _temp6666;});
-break; case 352: _LL6665: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
-_temp6669=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
-_temp6669[ 0]=({ struct Cyc_Primop_tok_struct _temp6670; _temp6670.tag= Cyc_Primop_tok_tag;
-_temp6670.f1=( void*)(( void*) Cyc_Absyn_Scanf); _temp6670;}); _temp6669;});
-break; case 353: _LL6668: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
-_temp6672=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
-_temp6672[ 0]=({ struct Cyc_Primop_tok_struct _temp6673; _temp6673.tag= Cyc_Primop_tok_tag;
-_temp6673.f1=( void*)(( void*) Cyc_Absyn_Fscanf); _temp6673;}); _temp6672;});
-break; case 354: _LL6671: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
-_temp6675=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
-_temp6675[ 0]=({ struct Cyc_Primop_tok_struct _temp6676; _temp6676.tag= Cyc_Primop_tok_tag;
-_temp6676.f1=( void*)(( void*) Cyc_Absyn_Sscanf); _temp6676;}); _temp6675;});
-break; case 355: _LL6674: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
-_temp6678=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
-_temp6678[ 0]=({ struct Cyc_Primop_tok_struct _temp6679; _temp6679.tag= Cyc_Primop_tok_tag;
-_temp6679.f1=( void*)(( void*) Cyc_Absyn_Bitnot); _temp6679;}); _temp6678;});
-break; case 356: _LL6677: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
-_temp6681=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
-_temp6681[ 0]=({ struct Cyc_Primop_tok_struct _temp6682; _temp6682.tag= Cyc_Primop_tok_tag;
-_temp6682.f1=( void*)(( void*) Cyc_Absyn_Not); _temp6682;}); _temp6681;});
-break; case 357: _LL6680: yyval=( struct _xtunion_struct*)({ struct Cyc_Primop_tok_struct*
-_temp6684=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
-_temp6684[ 0]=({ struct Cyc_Primop_tok_struct _temp6685; _temp6685.tag= Cyc_Primop_tok_tag;
-_temp6685.f1=( void*)(( void*) Cyc_Absyn_Minus); _temp6685;}); _temp6684;});
-break; case 358: _LL6683: yyval=({ struct _tagged_ptr2 _temp6687= yyvs; struct
-_xtunion_struct** _temp6689= _temp6687.curr + yyvsp_offset; if( _temp6689 <
-_temp6687.base? 1: _temp6689 >= _temp6687.last_plus_one){ _throw( Null_Exception);}*
-_temp6689;}); break; case 359: _LL6686: yyval=( struct _xtunion_struct*)({
-struct Cyc_Exp_tok_struct* _temp6691=( struct Cyc_Exp_tok_struct*) GC_malloc(
-sizeof( struct Cyc_Exp_tok_struct)); _temp6691[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6692; _temp6692.tag= Cyc_Exp_tok_tag; _temp6692.f1= Cyc_Absyn_subscript_exp(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6693= yyvs; struct _xtunion_struct**
-_temp6695= _temp6693.curr +( yyvsp_offset - 3); if( _temp6695 < _temp6693.base?
-1: _temp6695 >= _temp6693.last_plus_one){ _throw( Null_Exception);}* _temp6695;})),
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6696= yyvs; struct _xtunion_struct**
-_temp6698= _temp6696.curr +( yyvsp_offset - 1); if( _temp6698 < _temp6696.base?
-1: _temp6698 >= _temp6696.last_plus_one){ _throw( Null_Exception);}* _temp6698;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6699= yyls; struct Cyc_Yyltype*
-_temp6701= _temp6699.curr +( yylsp_offset - 3); if( _temp6701 < _temp6699.base?
-1: _temp6701 >= _temp6699.last_plus_one){ _throw( Null_Exception);}* _temp6701;}).first_line,({
-struct _tagged_ptr3 _temp6702= yyls; struct Cyc_Yyltype* _temp6704= _temp6702.curr
-+ yylsp_offset; if( _temp6704 < _temp6702.base? 1: _temp6704 >= _temp6702.last_plus_one){
-_throw( Null_Exception);}* _temp6704;}).last_line)); _temp6692;}); _temp6691;});
-break; case 360: _LL6690: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6706=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6706[ 0]=({ struct Cyc_Exp_tok_struct _temp6707; _temp6707.tag= Cyc_Exp_tok_tag;
-_temp6707.f1= Cyc_Absyn_unknowncall_exp( Cyc_yyget_Exp_tok(({ struct
-_tagged_ptr2 _temp6708= yyvs; struct _xtunion_struct** _temp6710= _temp6708.curr
-+( yyvsp_offset - 2); if( _temp6710 < _temp6708.base? 1: _temp6710 >= _temp6708.last_plus_one){
-_throw( Null_Exception);}* _temp6710;})), 0, Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6711= yyls; struct Cyc_Yyltype* _temp6713= _temp6711.curr
-+( yylsp_offset - 2); if( _temp6713 < _temp6711.base? 1: _temp6713 >= _temp6711.last_plus_one){
-_throw( Null_Exception);}* _temp6713;}).first_line,({ struct _tagged_ptr3
-_temp6714= yyls; struct Cyc_Yyltype* _temp6716= _temp6714.curr + yylsp_offset;
-if( _temp6716 < _temp6714.base? 1: _temp6716 >= _temp6714.last_plus_one){ _throw(
-Null_Exception);}* _temp6716;}).last_line)); _temp6707;}); _temp6706;}); break;
-case 361: _LL6705: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6718=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6718[ 0]=({ struct Cyc_Exp_tok_struct _temp6719; _temp6719.tag= Cyc_Exp_tok_tag;
-_temp6719.f1= Cyc_Absyn_unknowncall_exp( Cyc_yyget_Exp_tok(({ struct
-_tagged_ptr2 _temp6720= yyvs; struct _xtunion_struct** _temp6722= _temp6720.curr
-+( yyvsp_offset - 3); if( _temp6722 < _temp6720.base? 1: _temp6722 >= _temp6720.last_plus_one){
-_throw( Null_Exception);}* _temp6722;})), Cyc_yyget_ExpList_tok(({ struct
-_tagged_ptr2 _temp6723= yyvs; struct _xtunion_struct** _temp6725= _temp6723.curr
-+( yyvsp_offset - 1); if( _temp6725 < _temp6723.base? 1: _temp6725 >= _temp6723.last_plus_one){
-_throw( Null_Exception);}* _temp6725;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6726= yyls; struct Cyc_Yyltype* _temp6728= _temp6726.curr +(
-yylsp_offset - 3); if( _temp6728 < _temp6726.base? 1: _temp6728 >= _temp6726.last_plus_one){
-_throw( Null_Exception);}* _temp6728;}).first_line,({ struct _tagged_ptr3
-_temp6729= yyls; struct Cyc_Yyltype* _temp6731= _temp6729.curr + yylsp_offset;
-if( _temp6731 < _temp6729.base? 1: _temp6731 >= _temp6729.last_plus_one){ _throw(
-Null_Exception);}* _temp6731;}).last_line)); _temp6719;}); _temp6718;}); break;
-case 362: _LL6717: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6733=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6733[ 0]=({ struct Cyc_Exp_tok_struct _temp6734; _temp6734.tag= Cyc_Exp_tok_tag;
-_temp6734.f1= Cyc_Absyn_structmember_exp( Cyc_yyget_Exp_tok(({ struct
-_tagged_ptr2 _temp6735= yyvs; struct _xtunion_struct** _temp6737= _temp6735.curr
-+( yyvsp_offset - 2); if( _temp6737 < _temp6735.base? 1: _temp6737 >= _temp6735.last_plus_one){
-_throw( Null_Exception);}* _temp6737;})),({ struct _tagged_string* _temp6738=(
+_temp6667.f1=( void*)(( void*) Cyc_Absyn_Minus); _temp6667;}); _temp6666;});
+break; case 357: _LL6665: yyval=({ struct _tagged_ptr2 _temp6669= yyvs; struct
+_xtunion_struct** _temp6671= _temp6669.curr + yyvsp_offset; if( _temp6671 <
+_temp6669.base? 1: _temp6671 >= _temp6669.last_plus_one){ _throw( Null_Exception);}*
+_temp6671;}); break; case 358: _LL6668: yyval=( struct _xtunion_struct*)({
+struct Cyc_Exp_tok_struct* _temp6673=( struct Cyc_Exp_tok_struct*) GC_malloc(
+sizeof( struct Cyc_Exp_tok_struct)); _temp6673[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6674; _temp6674.tag= Cyc_Exp_tok_tag; _temp6674.f1= Cyc_Absyn_subscript_exp(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6675= yyvs; struct _xtunion_struct**
+_temp6677= _temp6675.curr +( yyvsp_offset - 3); if( _temp6677 < _temp6675.base?
+1: _temp6677 >= _temp6675.last_plus_one){ _throw( Null_Exception);}* _temp6677;})),
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6678= yyvs; struct _xtunion_struct**
+_temp6680= _temp6678.curr +( yyvsp_offset - 1); if( _temp6680 < _temp6678.base?
+1: _temp6680 >= _temp6678.last_plus_one){ _throw( Null_Exception);}* _temp6680;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6681= yyls; struct Cyc_Yyltype*
+_temp6683= _temp6681.curr +( yylsp_offset - 3); if( _temp6683 < _temp6681.base?
+1: _temp6683 >= _temp6681.last_plus_one){ _throw( Null_Exception);}* _temp6683;}).first_line,({
+struct _tagged_ptr3 _temp6684= yyls; struct Cyc_Yyltype* _temp6686= _temp6684.curr
++ yylsp_offset; if( _temp6686 < _temp6684.base? 1: _temp6686 >= _temp6684.last_plus_one){
+_throw( Null_Exception);}* _temp6686;}).last_line)); _temp6674;}); _temp6673;});
+break; case 359: _LL6672: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6688=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6688[ 0]=({ struct Cyc_Exp_tok_struct _temp6689; _temp6689.tag= Cyc_Exp_tok_tag;
+_temp6689.f1= Cyc_Absyn_unknowncall_exp( Cyc_yyget_Exp_tok(({ struct
+_tagged_ptr2 _temp6690= yyvs; struct _xtunion_struct** _temp6692= _temp6690.curr
++( yyvsp_offset - 2); if( _temp6692 < _temp6690.base? 1: _temp6692 >= _temp6690.last_plus_one){
+_throw( Null_Exception);}* _temp6692;})), 0, Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6693= yyls; struct Cyc_Yyltype* _temp6695= _temp6693.curr
++( yylsp_offset - 2); if( _temp6695 < _temp6693.base? 1: _temp6695 >= _temp6693.last_plus_one){
+_throw( Null_Exception);}* _temp6695;}).first_line,({ struct _tagged_ptr3
+_temp6696= yyls; struct Cyc_Yyltype* _temp6698= _temp6696.curr + yylsp_offset;
+if( _temp6698 < _temp6696.base? 1: _temp6698 >= _temp6696.last_plus_one){ _throw(
+Null_Exception);}* _temp6698;}).last_line)); _temp6689;}); _temp6688;}); break;
+case 360: _LL6687: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6700=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6700[ 0]=({ struct Cyc_Exp_tok_struct _temp6701; _temp6701.tag= Cyc_Exp_tok_tag;
+_temp6701.f1= Cyc_Absyn_unknowncall_exp( Cyc_yyget_Exp_tok(({ struct
+_tagged_ptr2 _temp6702= yyvs; struct _xtunion_struct** _temp6704= _temp6702.curr
++( yyvsp_offset - 3); if( _temp6704 < _temp6702.base? 1: _temp6704 >= _temp6702.last_plus_one){
+_throw( Null_Exception);}* _temp6704;})), Cyc_yyget_ExpList_tok(({ struct
+_tagged_ptr2 _temp6705= yyvs; struct _xtunion_struct** _temp6707= _temp6705.curr
++( yyvsp_offset - 1); if( _temp6707 < _temp6705.base? 1: _temp6707 >= _temp6705.last_plus_one){
+_throw( Null_Exception);}* _temp6707;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6708= yyls; struct Cyc_Yyltype* _temp6710= _temp6708.curr +(
+yylsp_offset - 3); if( _temp6710 < _temp6708.base? 1: _temp6710 >= _temp6708.last_plus_one){
+_throw( Null_Exception);}* _temp6710;}).first_line,({ struct _tagged_ptr3
+_temp6711= yyls; struct Cyc_Yyltype* _temp6713= _temp6711.curr + yylsp_offset;
+if( _temp6713 < _temp6711.base? 1: _temp6713 >= _temp6711.last_plus_one){ _throw(
+Null_Exception);}* _temp6713;}).last_line)); _temp6701;}); _temp6700;}); break;
+case 361: _LL6699: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6715=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6715[ 0]=({ struct Cyc_Exp_tok_struct _temp6716; _temp6716.tag= Cyc_Exp_tok_tag;
+_temp6716.f1= Cyc_Absyn_structmember_exp( Cyc_yyget_Exp_tok(({ struct
+_tagged_ptr2 _temp6717= yyvs; struct _xtunion_struct** _temp6719= _temp6717.curr
++( yyvsp_offset - 2); if( _temp6719 < _temp6717.base? 1: _temp6719 >= _temp6717.last_plus_one){
+_throw( Null_Exception);}* _temp6719;})),({ struct _tagged_string* _temp6720=(
 struct _tagged_string*) GC_malloc( sizeof( struct _tagged_string) * 1);
-_temp6738[ 0]= Cyc_yyget_String_tok(({ struct _tagged_ptr2 _temp6739= yyvs;
-struct _xtunion_struct** _temp6741= _temp6739.curr + yyvsp_offset; if( _temp6741
-< _temp6739.base? 1: _temp6741 >= _temp6739.last_plus_one){ _throw(
-Null_Exception);}* _temp6741;})); _temp6738;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6742= yyls; struct Cyc_Yyltype* _temp6744= _temp6742.curr
-+( yylsp_offset - 2); if( _temp6744 < _temp6742.base? 1: _temp6744 >= _temp6742.last_plus_one){
-_throw( Null_Exception);}* _temp6744;}).first_line,({ struct _tagged_ptr3
-_temp6745= yyls; struct Cyc_Yyltype* _temp6747= _temp6745.curr + yylsp_offset;
-if( _temp6747 < _temp6745.base? 1: _temp6747 >= _temp6745.last_plus_one){ _throw(
-Null_Exception);}* _temp6747;}).last_line)); _temp6734;}); _temp6733;}); break;
-case 363: _LL6732: { struct _tuple1* q= Cyc_yyget_QualId_tok(({ struct
-_tagged_ptr2 _temp6749= yyvs; struct _xtunion_struct** _temp6751= _temp6749.curr
-+ yyvsp_offset; if( _temp6751 < _temp6749.base? 1: _temp6751 >= _temp6749.last_plus_one){
-_throw( Null_Exception);}* _temp6751;}));{ void* _temp6752=(* q).f1; struct Cyc_List_List*
-_temp6762; struct Cyc_List_List* _temp6764; _LL6754: if(( int) _temp6752 == Cyc_Absyn_Loc_n){
-goto _LL6755;} else{ goto _LL6756;} _LL6756: if(( unsigned int) _temp6752 > 1u?((
-struct _tunion_struct*) _temp6752)->tag == Cyc_Absyn_Rel_n_tag: 0){ _LL6763:
-_temp6762=( struct Cyc_List_List*)(( struct Cyc_Absyn_Rel_n_struct*) _temp6752)->f1;
-if( _temp6762 == 0){ goto _LL6757;} else{ goto _LL6758;}} else{ goto _LL6758;}
-_LL6758: if(( unsigned int) _temp6752 > 1u?(( struct _tunion_struct*) _temp6752)->tag
-== Cyc_Absyn_Abs_n_tag: 0){ _LL6765: _temp6764=( struct Cyc_List_List*)(( struct
-Cyc_Absyn_Abs_n_struct*) _temp6752)->f1; if( _temp6764 == 0){ goto _LL6759;}
-else{ goto _LL6760;}} else{ goto _LL6760;} _LL6760: goto _LL6761; _LL6755: goto
-_LL6753; _LL6757: goto _LL6753; _LL6759: goto _LL6753; _LL6761: Cyc_Parse_err((
-struct _tagged_string)({ char* _temp6766=( char*)"struct field name is qualified";
-struct _tagged_string _temp6767; _temp6767.curr= _temp6766; _temp6767.base=
-_temp6766; _temp6767.last_plus_one= _temp6766 + 31; _temp6767;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6768= yyls; struct Cyc_Yyltype* _temp6770= _temp6768.curr
-+ yylsp_offset; if( _temp6770 < _temp6768.base? 1: _temp6770 >= _temp6768.last_plus_one){
-_throw( Null_Exception);}* _temp6770;}).first_line,({ struct _tagged_ptr3
-_temp6771= yyls; struct Cyc_Yyltype* _temp6773= _temp6771.curr + yylsp_offset;
-if( _temp6773 < _temp6771.base? 1: _temp6773 >= _temp6771.last_plus_one){ _throw(
-Null_Exception);}* _temp6773;}).last_line)); goto _LL6753; _LL6753:;} yyval=(
-struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6774=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6774[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6775; _temp6775.tag= Cyc_Exp_tok_tag; _temp6775.f1= Cyc_Absyn_structmember_exp(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6776= yyvs; struct _xtunion_struct**
-_temp6778= _temp6776.curr +( yyvsp_offset - 2); if( _temp6778 < _temp6776.base?
-1: _temp6778 >= _temp6776.last_plus_one){ _throw( Null_Exception);}* _temp6778;})),(*
-q).f2, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6779= yyls;
-struct Cyc_Yyltype* _temp6781= _temp6779.curr +( yylsp_offset - 2); if(
-_temp6781 < _temp6779.base? 1: _temp6781 >= _temp6779.last_plus_one){ _throw(
-Null_Exception);}* _temp6781;}).first_line,({ struct _tagged_ptr3 _temp6782=
-yyls; struct Cyc_Yyltype* _temp6784= _temp6782.curr + yylsp_offset; if(
-_temp6784 < _temp6782.base? 1: _temp6784 >= _temp6782.last_plus_one){ _throw(
-Null_Exception);}* _temp6784;}).last_line)); _temp6775;}); _temp6774;}); break;}
-case 364: _LL6748: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6786=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6786[ 0]=({ struct Cyc_Exp_tok_struct _temp6787; _temp6787.tag= Cyc_Exp_tok_tag;
-_temp6787.f1= Cyc_Absyn_structarrow_exp( Cyc_yyget_Exp_tok(({ struct
-_tagged_ptr2 _temp6788= yyvs; struct _xtunion_struct** _temp6790= _temp6788.curr
-+( yyvsp_offset - 2); if( _temp6790 < _temp6788.base? 1: _temp6790 >= _temp6788.last_plus_one){
-_throw( Null_Exception);}* _temp6790;})),({ struct _tagged_string* _temp6791=(
+_temp6720[ 0]= Cyc_yyget_String_tok(({ struct _tagged_ptr2 _temp6721= yyvs;
+struct _xtunion_struct** _temp6723= _temp6721.curr + yyvsp_offset; if( _temp6723
+< _temp6721.base? 1: _temp6723 >= _temp6721.last_plus_one){ _throw(
+Null_Exception);}* _temp6723;})); _temp6720;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6724= yyls; struct Cyc_Yyltype* _temp6726= _temp6724.curr
++( yylsp_offset - 2); if( _temp6726 < _temp6724.base? 1: _temp6726 >= _temp6724.last_plus_one){
+_throw( Null_Exception);}* _temp6726;}).first_line,({ struct _tagged_ptr3
+_temp6727= yyls; struct Cyc_Yyltype* _temp6729= _temp6727.curr + yylsp_offset;
+if( _temp6729 < _temp6727.base? 1: _temp6729 >= _temp6727.last_plus_one){ _throw(
+Null_Exception);}* _temp6729;}).last_line)); _temp6716;}); _temp6715;}); break;
+case 362: _LL6714: { struct _tuple1* q= Cyc_yyget_QualId_tok(({ struct
+_tagged_ptr2 _temp6731= yyvs; struct _xtunion_struct** _temp6733= _temp6731.curr
++ yyvsp_offset; if( _temp6733 < _temp6731.base? 1: _temp6733 >= _temp6731.last_plus_one){
+_throw( Null_Exception);}* _temp6733;}));{ void* _temp6734=(* q).f1; struct Cyc_List_List*
+_temp6744; struct Cyc_List_List* _temp6746; _LL6736: if(( int) _temp6734 == Cyc_Absyn_Loc_n){
+goto _LL6737;} else{ goto _LL6738;} _LL6738: if(( unsigned int) _temp6734 > 1u?((
+struct _tunion_struct*) _temp6734)->tag == Cyc_Absyn_Rel_n_tag: 0){ _LL6745:
+_temp6744=( struct Cyc_List_List*)(( struct Cyc_Absyn_Rel_n_struct*) _temp6734)->f1;
+if( _temp6744 == 0){ goto _LL6739;} else{ goto _LL6740;}} else{ goto _LL6740;}
+_LL6740: if(( unsigned int) _temp6734 > 1u?(( struct _tunion_struct*) _temp6734)->tag
+== Cyc_Absyn_Abs_n_tag: 0){ _LL6747: _temp6746=( struct Cyc_List_List*)(( struct
+Cyc_Absyn_Abs_n_struct*) _temp6734)->f1; if( _temp6746 == 0){ goto _LL6741;}
+else{ goto _LL6742;}} else{ goto _LL6742;} _LL6742: goto _LL6743; _LL6737: goto
+_LL6735; _LL6739: goto _LL6735; _LL6741: goto _LL6735; _LL6743: Cyc_Parse_err((
+struct _tagged_string)({ char* _temp6748=( char*)"struct field name is qualified";
+struct _tagged_string _temp6749; _temp6749.curr= _temp6748; _temp6749.base=
+_temp6748; _temp6749.last_plus_one= _temp6748 + 31; _temp6749;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6750= yyls; struct Cyc_Yyltype* _temp6752= _temp6750.curr
++ yylsp_offset; if( _temp6752 < _temp6750.base? 1: _temp6752 >= _temp6750.last_plus_one){
+_throw( Null_Exception);}* _temp6752;}).first_line,({ struct _tagged_ptr3
+_temp6753= yyls; struct Cyc_Yyltype* _temp6755= _temp6753.curr + yylsp_offset;
+if( _temp6755 < _temp6753.base? 1: _temp6755 >= _temp6753.last_plus_one){ _throw(
+Null_Exception);}* _temp6755;}).last_line)); goto _LL6735; _LL6735:;} yyval=(
+struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6756=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6756[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6757; _temp6757.tag= Cyc_Exp_tok_tag; _temp6757.f1= Cyc_Absyn_structmember_exp(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6758= yyvs; struct _xtunion_struct**
+_temp6760= _temp6758.curr +( yyvsp_offset - 2); if( _temp6760 < _temp6758.base?
+1: _temp6760 >= _temp6758.last_plus_one){ _throw( Null_Exception);}* _temp6760;})),(*
+q).f2, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6761= yyls;
+struct Cyc_Yyltype* _temp6763= _temp6761.curr +( yylsp_offset - 2); if(
+_temp6763 < _temp6761.base? 1: _temp6763 >= _temp6761.last_plus_one){ _throw(
+Null_Exception);}* _temp6763;}).first_line,({ struct _tagged_ptr3 _temp6764=
+yyls; struct Cyc_Yyltype* _temp6766= _temp6764.curr + yylsp_offset; if(
+_temp6766 < _temp6764.base? 1: _temp6766 >= _temp6764.last_plus_one){ _throw(
+Null_Exception);}* _temp6766;}).last_line)); _temp6757;}); _temp6756;}); break;}
+case 363: _LL6730: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6768=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6768[ 0]=({ struct Cyc_Exp_tok_struct _temp6769; _temp6769.tag= Cyc_Exp_tok_tag;
+_temp6769.f1= Cyc_Absyn_structarrow_exp( Cyc_yyget_Exp_tok(({ struct
+_tagged_ptr2 _temp6770= yyvs; struct _xtunion_struct** _temp6772= _temp6770.curr
++( yyvsp_offset - 2); if( _temp6772 < _temp6770.base? 1: _temp6772 >= _temp6770.last_plus_one){
+_throw( Null_Exception);}* _temp6772;})),({ struct _tagged_string* _temp6773=(
 struct _tagged_string*) GC_malloc( sizeof( struct _tagged_string) * 1);
-_temp6791[ 0]= Cyc_yyget_String_tok(({ struct _tagged_ptr2 _temp6792= yyvs;
-struct _xtunion_struct** _temp6794= _temp6792.curr + yyvsp_offset; if( _temp6794
-< _temp6792.base? 1: _temp6794 >= _temp6792.last_plus_one){ _throw(
-Null_Exception);}* _temp6794;})); _temp6791;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6795= yyls; struct Cyc_Yyltype* _temp6797= _temp6795.curr
-+( yylsp_offset - 2); if( _temp6797 < _temp6795.base? 1: _temp6797 >= _temp6795.last_plus_one){
-_throw( Null_Exception);}* _temp6797;}).first_line,({ struct _tagged_ptr3
-_temp6798= yyls; struct Cyc_Yyltype* _temp6800= _temp6798.curr + yylsp_offset;
-if( _temp6800 < _temp6798.base? 1: _temp6800 >= _temp6798.last_plus_one){ _throw(
-Null_Exception);}* _temp6800;}).last_line)); _temp6787;}); _temp6786;}); break;
-case 365: _LL6785: { struct _tuple1* q= Cyc_yyget_QualId_tok(({ struct
-_tagged_ptr2 _temp6802= yyvs; struct _xtunion_struct** _temp6804= _temp6802.curr
-+ yyvsp_offset; if( _temp6804 < _temp6802.base? 1: _temp6804 >= _temp6802.last_plus_one){
-_throw( Null_Exception);}* _temp6804;}));{ void* _temp6805=(* q).f1; struct Cyc_List_List*
-_temp6815; struct Cyc_List_List* _temp6817; _LL6807: if(( int) _temp6805 == Cyc_Absyn_Loc_n){
-goto _LL6808;} else{ goto _LL6809;} _LL6809: if(( unsigned int) _temp6805 > 1u?((
-struct _tunion_struct*) _temp6805)->tag == Cyc_Absyn_Rel_n_tag: 0){ _LL6816:
-_temp6815=( struct Cyc_List_List*)(( struct Cyc_Absyn_Rel_n_struct*) _temp6805)->f1;
-if( _temp6815 == 0){ goto _LL6810;} else{ goto _LL6811;}} else{ goto _LL6811;}
-_LL6811: if(( unsigned int) _temp6805 > 1u?(( struct _tunion_struct*) _temp6805)->tag
-== Cyc_Absyn_Abs_n_tag: 0){ _LL6818: _temp6817=( struct Cyc_List_List*)(( struct
-Cyc_Absyn_Abs_n_struct*) _temp6805)->f1; if( _temp6817 == 0){ goto _LL6812;}
-else{ goto _LL6813;}} else{ goto _LL6813;} _LL6813: goto _LL6814; _LL6808: goto
-_LL6806; _LL6810: goto _LL6806; _LL6812: goto _LL6806; _LL6814: Cyc_Parse_err((
-struct _tagged_string)({ char* _temp6819=( char*)"struct field is qualified with module name";
-struct _tagged_string _temp6820; _temp6820.curr= _temp6819; _temp6820.base=
-_temp6819; _temp6820.last_plus_one= _temp6819 + 43; _temp6820;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6821= yyls; struct Cyc_Yyltype* _temp6823= _temp6821.curr
-+ yylsp_offset; if( _temp6823 < _temp6821.base? 1: _temp6823 >= _temp6821.last_plus_one){
-_throw( Null_Exception);}* _temp6823;}).first_line,({ struct _tagged_ptr3
-_temp6824= yyls; struct Cyc_Yyltype* _temp6826= _temp6824.curr + yylsp_offset;
-if( _temp6826 < _temp6824.base? 1: _temp6826 >= _temp6824.last_plus_one){ _throw(
-Null_Exception);}* _temp6826;}).last_line)); goto _LL6806; _LL6806:;} yyval=(
-struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6827=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6827[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6828; _temp6828.tag= Cyc_Exp_tok_tag; _temp6828.f1= Cyc_Absyn_structarrow_exp(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6829= yyvs; struct _xtunion_struct**
-_temp6831= _temp6829.curr +( yyvsp_offset - 2); if( _temp6831 < _temp6829.base?
-1: _temp6831 >= _temp6829.last_plus_one){ _throw( Null_Exception);}* _temp6831;})),(*
-q).f2, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6832= yyls;
-struct Cyc_Yyltype* _temp6834= _temp6832.curr +( yylsp_offset - 2); if(
-_temp6834 < _temp6832.base? 1: _temp6834 >= _temp6832.last_plus_one){ _throw(
-Null_Exception);}* _temp6834;}).first_line,({ struct _tagged_ptr3 _temp6835=
-yyls; struct Cyc_Yyltype* _temp6837= _temp6835.curr + yylsp_offset; if(
-_temp6837 < _temp6835.base? 1: _temp6837 >= _temp6835.last_plus_one){ _throw(
-Null_Exception);}* _temp6837;}).last_line)); _temp6828;}); _temp6827;}); break;}
-case 366: _LL6801: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6839=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6839[ 0]=({ struct Cyc_Exp_tok_struct _temp6840; _temp6840.tag= Cyc_Exp_tok_tag;
-_temp6840.f1= Cyc_Absyn_post_inc_exp( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6841= yyvs; struct _xtunion_struct** _temp6843= _temp6841.curr +(
-yyvsp_offset - 1); if( _temp6843 < _temp6841.base? 1: _temp6843 >= _temp6841.last_plus_one){
-_throw( Null_Exception);}* _temp6843;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6844= yyls; struct Cyc_Yyltype* _temp6846= _temp6844.curr +(
-yylsp_offset - 1); if( _temp6846 < _temp6844.base? 1: _temp6846 >= _temp6844.last_plus_one){
-_throw( Null_Exception);}* _temp6846;}).first_line,({ struct _tagged_ptr3
-_temp6847= yyls; struct Cyc_Yyltype* _temp6849= _temp6847.curr + yylsp_offset;
-if( _temp6849 < _temp6847.base? 1: _temp6849 >= _temp6847.last_plus_one){ _throw(
-Null_Exception);}* _temp6849;}).last_line)); _temp6840;}); _temp6839;}); break;
-case 367: _LL6838: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6851=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6851[ 0]=({ struct Cyc_Exp_tok_struct _temp6852; _temp6852.tag= Cyc_Exp_tok_tag;
-_temp6852.f1= Cyc_Absyn_post_dec_exp( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6853= yyvs; struct _xtunion_struct** _temp6855= _temp6853.curr +(
-yyvsp_offset - 1); if( _temp6855 < _temp6853.base? 1: _temp6855 >= _temp6853.last_plus_one){
-_throw( Null_Exception);}* _temp6855;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6856= yyls; struct Cyc_Yyltype* _temp6858= _temp6856.curr +(
-yylsp_offset - 1); if( _temp6858 < _temp6856.base? 1: _temp6858 >= _temp6856.last_plus_one){
-_throw( Null_Exception);}* _temp6858;}).first_line,({ struct _tagged_ptr3
-_temp6859= yyls; struct Cyc_Yyltype* _temp6861= _temp6859.curr + yylsp_offset;
-if( _temp6861 < _temp6859.base? 1: _temp6861 >= _temp6859.last_plus_one){ _throw(
-Null_Exception);}* _temp6861;}).last_line)); _temp6852;}); _temp6851;}); break;
-case 368: _LL6850: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6863=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6863[ 0]=({ struct Cyc_Exp_tok_struct _temp6864; _temp6864.tag= Cyc_Exp_tok_tag;
-_temp6864.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_CompoundLit_e_struct*
-_temp6865=( struct Cyc_Absyn_CompoundLit_e_struct*) GC_malloc( sizeof( struct
-Cyc_Absyn_CompoundLit_e_struct)); _temp6865[ 0]=({ struct Cyc_Absyn_CompoundLit_e_struct
-_temp6866; _temp6866.tag= Cyc_Absyn_CompoundLit_e_tag; _temp6866.f1= Cyc_yyget_ParamDecl_tok(({
-struct _tagged_ptr2 _temp6867= yyvs; struct _xtunion_struct** _temp6869=
-_temp6867.curr +( yyvsp_offset - 4); if( _temp6869 < _temp6867.base? 1:
-_temp6869 >= _temp6867.last_plus_one){ _throw( Null_Exception);}* _temp6869;}));
-_temp6866.f2=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
-Cyc_yyget_InitializerList_tok(({ struct _tagged_ptr2 _temp6870= yyvs; struct
-_xtunion_struct** _temp6872= _temp6870.curr +( yyvsp_offset - 1); if( _temp6872
-< _temp6870.base? 1: _temp6872 >= _temp6870.last_plus_one){ _throw(
-Null_Exception);}* _temp6872;}))); _temp6866;}); _temp6865;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6873= yyls; struct Cyc_Yyltype* _temp6875= _temp6873.curr
-+( yylsp_offset - 5); if( _temp6875 < _temp6873.base? 1: _temp6875 >= _temp6873.last_plus_one){
-_throw( Null_Exception);}* _temp6875;}).first_line,({ struct _tagged_ptr3
-_temp6876= yyls; struct Cyc_Yyltype* _temp6878= _temp6876.curr + yylsp_offset;
-if( _temp6878 < _temp6876.base? 1: _temp6878 >= _temp6876.last_plus_one){ _throw(
-Null_Exception);}* _temp6878;}).last_line)); _temp6864;}); _temp6863;}); break;
-case 369: _LL6862: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6880=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6880[ 0]=({ struct Cyc_Exp_tok_struct _temp6881; _temp6881.tag= Cyc_Exp_tok_tag;
-_temp6881.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_CompoundLit_e_struct*
-_temp6882=( struct Cyc_Absyn_CompoundLit_e_struct*) GC_malloc( sizeof( struct
-Cyc_Absyn_CompoundLit_e_struct)); _temp6882[ 0]=({ struct Cyc_Absyn_CompoundLit_e_struct
-_temp6883; _temp6883.tag= Cyc_Absyn_CompoundLit_e_tag; _temp6883.f1= Cyc_yyget_ParamDecl_tok(({
-struct _tagged_ptr2 _temp6884= yyvs; struct _xtunion_struct** _temp6886=
-_temp6884.curr +( yyvsp_offset - 5); if( _temp6886 < _temp6884.base? 1:
-_temp6886 >= _temp6884.last_plus_one){ _throw( Null_Exception);}* _temp6886;}));
-_temp6883.f2=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
-Cyc_yyget_InitializerList_tok(({ struct _tagged_ptr2 _temp6887= yyvs; struct
-_xtunion_struct** _temp6889= _temp6887.curr +( yyvsp_offset - 2); if( _temp6889
-< _temp6887.base? 1: _temp6889 >= _temp6887.last_plus_one){ _throw(
-Null_Exception);}* _temp6889;}))); _temp6883;}); _temp6882;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6890= yyls; struct Cyc_Yyltype* _temp6892= _temp6890.curr
-+( yylsp_offset - 6); if( _temp6892 < _temp6890.base? 1: _temp6892 >= _temp6890.last_plus_one){
-_throw( Null_Exception);}* _temp6892;}).first_line,({ struct _tagged_ptr3
-_temp6893= yyls; struct Cyc_Yyltype* _temp6895= _temp6893.curr + yylsp_offset;
-if( _temp6895 < _temp6893.base? 1: _temp6895 >= _temp6893.last_plus_one){ _throw(
-Null_Exception);}* _temp6895;}).last_line)); _temp6881;}); _temp6880;}); break;
-case 370: _LL6879: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6897=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6897[ 0]=({ struct Cyc_Exp_tok_struct _temp6898; _temp6898.tag= Cyc_Exp_tok_tag;
-_temp6898.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_Fill_e_struct*
-_temp6899=( struct Cyc_Absyn_Fill_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Fill_e_struct));
-_temp6899[ 0]=({ struct Cyc_Absyn_Fill_e_struct _temp6900; _temp6900.tag= Cyc_Absyn_Fill_e_tag;
-_temp6900.f1= Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6901= yyvs; struct
-_xtunion_struct** _temp6903= _temp6901.curr +( yyvsp_offset - 1); if( _temp6903
-< _temp6901.base? 1: _temp6903 >= _temp6901.last_plus_one){ _throw(
-Null_Exception);}* _temp6903;})); _temp6900;}); _temp6899;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6904= yyls; struct Cyc_Yyltype* _temp6906= _temp6904.curr
-+( yylsp_offset - 3); if( _temp6906 < _temp6904.base? 1: _temp6906 >= _temp6904.last_plus_one){
-_throw( Null_Exception);}* _temp6906;}).first_line,({ struct _tagged_ptr3
-_temp6907= yyls; struct Cyc_Yyltype* _temp6909= _temp6907.curr + yylsp_offset;
-if( _temp6909 < _temp6907.base? 1: _temp6909 >= _temp6907.last_plus_one){ _throw(
-Null_Exception);}* _temp6909;}).last_line)); _temp6898;}); _temp6897;}); break;
-case 371: _LL6896: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6911=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6911[ 0]=({ struct Cyc_Exp_tok_struct _temp6912; _temp6912.tag= Cyc_Exp_tok_tag;
-_temp6912.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_Codegen_e_struct*
-_temp6913=( struct Cyc_Absyn_Codegen_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Codegen_e_struct));
-_temp6913[ 0]=({ struct Cyc_Absyn_Codegen_e_struct _temp6914; _temp6914.tag= Cyc_Absyn_Codegen_e_tag;
-_temp6914.f1= Cyc_yyget_FnDecl_tok(({ struct _tagged_ptr2 _temp6915= yyvs;
-struct _xtunion_struct** _temp6917= _temp6915.curr +( yyvsp_offset - 1); if(
-_temp6917 < _temp6915.base? 1: _temp6917 >= _temp6915.last_plus_one){ _throw(
-Null_Exception);}* _temp6917;})); _temp6914;}); _temp6913;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6918= yyls; struct Cyc_Yyltype* _temp6920= _temp6918.curr
-+( yylsp_offset - 3); if( _temp6920 < _temp6918.base? 1: _temp6920 >= _temp6918.last_plus_one){
-_throw( Null_Exception);}* _temp6920;}).first_line,({ struct _tagged_ptr3
-_temp6921= yyls; struct Cyc_Yyltype* _temp6923= _temp6921.curr + yylsp_offset;
-if( _temp6923 < _temp6921.base? 1: _temp6923 >= _temp6921.last_plus_one){ _throw(
-Null_Exception);}* _temp6923;}).last_line)); _temp6912;}); _temp6911;}); break;
-case 372: _LL6910: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6925=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6925[ 0]=({ struct Cyc_Exp_tok_struct _temp6926; _temp6926.tag= Cyc_Exp_tok_tag;
-_temp6926.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnknownId_e_struct*
-_temp6927=( struct Cyc_Absyn_UnknownId_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_e_struct));
-_temp6927[ 0]=({ struct Cyc_Absyn_UnknownId_e_struct _temp6928; _temp6928.tag=
-Cyc_Absyn_UnknownId_e_tag; _temp6928.f1= Cyc_yyget_QualId_tok(({ struct
-_tagged_ptr2 _temp6929= yyvs; struct _xtunion_struct** _temp6931= _temp6929.curr
-+ yyvsp_offset; if( _temp6931 < _temp6929.base? 1: _temp6931 >= _temp6929.last_plus_one){
-_throw( Null_Exception);}* _temp6931;})); _temp6928;}); _temp6927;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6932= yyls; struct Cyc_Yyltype* _temp6934= _temp6932.curr
-+ yylsp_offset; if( _temp6934 < _temp6932.base? 1: _temp6934 >= _temp6932.last_plus_one){
-_throw( Null_Exception);}* _temp6934;}).first_line,({ struct _tagged_ptr3
-_temp6935= yyls; struct Cyc_Yyltype* _temp6937= _temp6935.curr + yylsp_offset;
-if( _temp6937 < _temp6935.base? 1: _temp6937 >= _temp6935.last_plus_one){ _throw(
-Null_Exception);}* _temp6937;}).last_line)); _temp6926;}); _temp6925;}); break;
-case 373: _LL6924: yyval=({ struct _tagged_ptr2 _temp6939= yyvs; struct
-_xtunion_struct** _temp6941= _temp6939.curr + yyvsp_offset; if( _temp6941 <
-_temp6939.base? 1: _temp6941 >= _temp6939.last_plus_one){ _throw( Null_Exception);}*
-_temp6941;}); break; case 374: _LL6938: yyval=( struct _xtunion_struct*)({
-struct Cyc_Exp_tok_struct* _temp6943=( struct Cyc_Exp_tok_struct*) GC_malloc(
-sizeof( struct Cyc_Exp_tok_struct)); _temp6943[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6944; _temp6944.tag= Cyc_Exp_tok_tag; _temp6944.f1= Cyc_Absyn_string_exp(
-Cyc_yyget_String_tok(({ struct _tagged_ptr2 _temp6945= yyvs; struct
-_xtunion_struct** _temp6947= _temp6945.curr + yyvsp_offset; if( _temp6947 <
-_temp6945.base? 1: _temp6947 >= _temp6945.last_plus_one){ _throw( Null_Exception);}*
-_temp6947;})), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6948=
-yyls; struct Cyc_Yyltype* _temp6950= _temp6948.curr + yylsp_offset; if(
-_temp6950 < _temp6948.base? 1: _temp6950 >= _temp6948.last_plus_one){ _throw(
-Null_Exception);}* _temp6950;}).first_line,({ struct _tagged_ptr3 _temp6951=
-yyls; struct Cyc_Yyltype* _temp6953= _temp6951.curr + yylsp_offset; if(
-_temp6953 < _temp6951.base? 1: _temp6953 >= _temp6951.last_plus_one){ _throw(
-Null_Exception);}* _temp6953;}).last_line)); _temp6944;}); _temp6943;}); break;
-case 375: _LL6942: yyval=({ struct _tagged_ptr2 _temp6955= yyvs; struct
-_xtunion_struct** _temp6957= _temp6955.curr +( yyvsp_offset - 1); if( _temp6957
-< _temp6955.base? 1: _temp6957 >= _temp6955.last_plus_one){ _throw(
-Null_Exception);}* _temp6957;}); break; case 376: _LL6954: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6959=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6959[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6960; _temp6960.tag= Cyc_Exp_tok_tag; _temp6960.f1= Cyc_Absyn_noinstantiate_exp(
-Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnknownId_e_struct* _temp6961=(
+_temp6773[ 0]= Cyc_yyget_String_tok(({ struct _tagged_ptr2 _temp6774= yyvs;
+struct _xtunion_struct** _temp6776= _temp6774.curr + yyvsp_offset; if( _temp6776
+< _temp6774.base? 1: _temp6776 >= _temp6774.last_plus_one){ _throw(
+Null_Exception);}* _temp6776;})); _temp6773;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6777= yyls; struct Cyc_Yyltype* _temp6779= _temp6777.curr
++( yylsp_offset - 2); if( _temp6779 < _temp6777.base? 1: _temp6779 >= _temp6777.last_plus_one){
+_throw( Null_Exception);}* _temp6779;}).first_line,({ struct _tagged_ptr3
+_temp6780= yyls; struct Cyc_Yyltype* _temp6782= _temp6780.curr + yylsp_offset;
+if( _temp6782 < _temp6780.base? 1: _temp6782 >= _temp6780.last_plus_one){ _throw(
+Null_Exception);}* _temp6782;}).last_line)); _temp6769;}); _temp6768;}); break;
+case 364: _LL6767: { struct _tuple1* q= Cyc_yyget_QualId_tok(({ struct
+_tagged_ptr2 _temp6784= yyvs; struct _xtunion_struct** _temp6786= _temp6784.curr
++ yyvsp_offset; if( _temp6786 < _temp6784.base? 1: _temp6786 >= _temp6784.last_plus_one){
+_throw( Null_Exception);}* _temp6786;}));{ void* _temp6787=(* q).f1; struct Cyc_List_List*
+_temp6797; struct Cyc_List_List* _temp6799; _LL6789: if(( int) _temp6787 == Cyc_Absyn_Loc_n){
+goto _LL6790;} else{ goto _LL6791;} _LL6791: if(( unsigned int) _temp6787 > 1u?((
+struct _tunion_struct*) _temp6787)->tag == Cyc_Absyn_Rel_n_tag: 0){ _LL6798:
+_temp6797=( struct Cyc_List_List*)(( struct Cyc_Absyn_Rel_n_struct*) _temp6787)->f1;
+if( _temp6797 == 0){ goto _LL6792;} else{ goto _LL6793;}} else{ goto _LL6793;}
+_LL6793: if(( unsigned int) _temp6787 > 1u?(( struct _tunion_struct*) _temp6787)->tag
+== Cyc_Absyn_Abs_n_tag: 0){ _LL6800: _temp6799=( struct Cyc_List_List*)(( struct
+Cyc_Absyn_Abs_n_struct*) _temp6787)->f1; if( _temp6799 == 0){ goto _LL6794;}
+else{ goto _LL6795;}} else{ goto _LL6795;} _LL6795: goto _LL6796; _LL6790: goto
+_LL6788; _LL6792: goto _LL6788; _LL6794: goto _LL6788; _LL6796: Cyc_Parse_err((
+struct _tagged_string)({ char* _temp6801=( char*)"struct field is qualified with module name";
+struct _tagged_string _temp6802; _temp6802.curr= _temp6801; _temp6802.base=
+_temp6801; _temp6802.last_plus_one= _temp6801 + 43; _temp6802;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6803= yyls; struct Cyc_Yyltype* _temp6805= _temp6803.curr
++ yylsp_offset; if( _temp6805 < _temp6803.base? 1: _temp6805 >= _temp6803.last_plus_one){
+_throw( Null_Exception);}* _temp6805;}).first_line,({ struct _tagged_ptr3
+_temp6806= yyls; struct Cyc_Yyltype* _temp6808= _temp6806.curr + yylsp_offset;
+if( _temp6808 < _temp6806.base? 1: _temp6808 >= _temp6806.last_plus_one){ _throw(
+Null_Exception);}* _temp6808;}).last_line)); goto _LL6788; _LL6788:;} yyval=(
+struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6809=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6809[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6810; _temp6810.tag= Cyc_Exp_tok_tag; _temp6810.f1= Cyc_Absyn_structarrow_exp(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6811= yyvs; struct _xtunion_struct**
+_temp6813= _temp6811.curr +( yyvsp_offset - 2); if( _temp6813 < _temp6811.base?
+1: _temp6813 >= _temp6811.last_plus_one){ _throw( Null_Exception);}* _temp6813;})),(*
+q).f2, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6814= yyls;
+struct Cyc_Yyltype* _temp6816= _temp6814.curr +( yylsp_offset - 2); if(
+_temp6816 < _temp6814.base? 1: _temp6816 >= _temp6814.last_plus_one){ _throw(
+Null_Exception);}* _temp6816;}).first_line,({ struct _tagged_ptr3 _temp6817=
+yyls; struct Cyc_Yyltype* _temp6819= _temp6817.curr + yylsp_offset; if(
+_temp6819 < _temp6817.base? 1: _temp6819 >= _temp6817.last_plus_one){ _throw(
+Null_Exception);}* _temp6819;}).last_line)); _temp6810;}); _temp6809;}); break;}
+case 365: _LL6783: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6821=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6821[ 0]=({ struct Cyc_Exp_tok_struct _temp6822; _temp6822.tag= Cyc_Exp_tok_tag;
+_temp6822.f1= Cyc_Absyn_post_inc_exp( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6823= yyvs; struct _xtunion_struct** _temp6825= _temp6823.curr +(
+yyvsp_offset - 1); if( _temp6825 < _temp6823.base? 1: _temp6825 >= _temp6823.last_plus_one){
+_throw( Null_Exception);}* _temp6825;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6826= yyls; struct Cyc_Yyltype* _temp6828= _temp6826.curr +(
+yylsp_offset - 1); if( _temp6828 < _temp6826.base? 1: _temp6828 >= _temp6826.last_plus_one){
+_throw( Null_Exception);}* _temp6828;}).first_line,({ struct _tagged_ptr3
+_temp6829= yyls; struct Cyc_Yyltype* _temp6831= _temp6829.curr + yylsp_offset;
+if( _temp6831 < _temp6829.base? 1: _temp6831 >= _temp6829.last_plus_one){ _throw(
+Null_Exception);}* _temp6831;}).last_line)); _temp6822;}); _temp6821;}); break;
+case 366: _LL6820: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6833=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6833[ 0]=({ struct Cyc_Exp_tok_struct _temp6834; _temp6834.tag= Cyc_Exp_tok_tag;
+_temp6834.f1= Cyc_Absyn_post_dec_exp( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6835= yyvs; struct _xtunion_struct** _temp6837= _temp6835.curr +(
+yyvsp_offset - 1); if( _temp6837 < _temp6835.base? 1: _temp6837 >= _temp6835.last_plus_one){
+_throw( Null_Exception);}* _temp6837;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6838= yyls; struct Cyc_Yyltype* _temp6840= _temp6838.curr +(
+yylsp_offset - 1); if( _temp6840 < _temp6838.base? 1: _temp6840 >= _temp6838.last_plus_one){
+_throw( Null_Exception);}* _temp6840;}).first_line,({ struct _tagged_ptr3
+_temp6841= yyls; struct Cyc_Yyltype* _temp6843= _temp6841.curr + yylsp_offset;
+if( _temp6843 < _temp6841.base? 1: _temp6843 >= _temp6841.last_plus_one){ _throw(
+Null_Exception);}* _temp6843;}).last_line)); _temp6834;}); _temp6833;}); break;
+case 367: _LL6832: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6845=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6845[ 0]=({ struct Cyc_Exp_tok_struct _temp6846; _temp6846.tag= Cyc_Exp_tok_tag;
+_temp6846.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_CompoundLit_e_struct*
+_temp6847=( struct Cyc_Absyn_CompoundLit_e_struct*) GC_malloc( sizeof( struct
+Cyc_Absyn_CompoundLit_e_struct)); _temp6847[ 0]=({ struct Cyc_Absyn_CompoundLit_e_struct
+_temp6848; _temp6848.tag= Cyc_Absyn_CompoundLit_e_tag; _temp6848.f1= Cyc_yyget_ParamDecl_tok(({
+struct _tagged_ptr2 _temp6849= yyvs; struct _xtunion_struct** _temp6851=
+_temp6849.curr +( yyvsp_offset - 4); if( _temp6851 < _temp6849.base? 1:
+_temp6851 >= _temp6849.last_plus_one){ _throw( Null_Exception);}* _temp6851;}));
+_temp6848.f2=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+Cyc_yyget_InitializerList_tok(({ struct _tagged_ptr2 _temp6852= yyvs; struct
+_xtunion_struct** _temp6854= _temp6852.curr +( yyvsp_offset - 1); if( _temp6854
+< _temp6852.base? 1: _temp6854 >= _temp6852.last_plus_one){ _throw(
+Null_Exception);}* _temp6854;}))); _temp6848;}); _temp6847;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6855= yyls; struct Cyc_Yyltype* _temp6857= _temp6855.curr
++( yylsp_offset - 5); if( _temp6857 < _temp6855.base? 1: _temp6857 >= _temp6855.last_plus_one){
+_throw( Null_Exception);}* _temp6857;}).first_line,({ struct _tagged_ptr3
+_temp6858= yyls; struct Cyc_Yyltype* _temp6860= _temp6858.curr + yylsp_offset;
+if( _temp6860 < _temp6858.base? 1: _temp6860 >= _temp6858.last_plus_one){ _throw(
+Null_Exception);}* _temp6860;}).last_line)); _temp6846;}); _temp6845;}); break;
+case 368: _LL6844: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6862=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6862[ 0]=({ struct Cyc_Exp_tok_struct _temp6863; _temp6863.tag= Cyc_Exp_tok_tag;
+_temp6863.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_CompoundLit_e_struct*
+_temp6864=( struct Cyc_Absyn_CompoundLit_e_struct*) GC_malloc( sizeof( struct
+Cyc_Absyn_CompoundLit_e_struct)); _temp6864[ 0]=({ struct Cyc_Absyn_CompoundLit_e_struct
+_temp6865; _temp6865.tag= Cyc_Absyn_CompoundLit_e_tag; _temp6865.f1= Cyc_yyget_ParamDecl_tok(({
+struct _tagged_ptr2 _temp6866= yyvs; struct _xtunion_struct** _temp6868=
+_temp6866.curr +( yyvsp_offset - 5); if( _temp6868 < _temp6866.base? 1:
+_temp6868 >= _temp6866.last_plus_one){ _throw( Null_Exception);}* _temp6868;}));
+_temp6865.f2=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+Cyc_yyget_InitializerList_tok(({ struct _tagged_ptr2 _temp6869= yyvs; struct
+_xtunion_struct** _temp6871= _temp6869.curr +( yyvsp_offset - 2); if( _temp6871
+< _temp6869.base? 1: _temp6871 >= _temp6869.last_plus_one){ _throw(
+Null_Exception);}* _temp6871;}))); _temp6865;}); _temp6864;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6872= yyls; struct Cyc_Yyltype* _temp6874= _temp6872.curr
++( yylsp_offset - 6); if( _temp6874 < _temp6872.base? 1: _temp6874 >= _temp6872.last_plus_one){
+_throw( Null_Exception);}* _temp6874;}).first_line,({ struct _tagged_ptr3
+_temp6875= yyls; struct Cyc_Yyltype* _temp6877= _temp6875.curr + yylsp_offset;
+if( _temp6877 < _temp6875.base? 1: _temp6877 >= _temp6875.last_plus_one){ _throw(
+Null_Exception);}* _temp6877;}).last_line)); _temp6863;}); _temp6862;}); break;
+case 369: _LL6861: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6879=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6879[ 0]=({ struct Cyc_Exp_tok_struct _temp6880; _temp6880.tag= Cyc_Exp_tok_tag;
+_temp6880.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_Fill_e_struct*
+_temp6881=( struct Cyc_Absyn_Fill_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Fill_e_struct));
+_temp6881[ 0]=({ struct Cyc_Absyn_Fill_e_struct _temp6882; _temp6882.tag= Cyc_Absyn_Fill_e_tag;
+_temp6882.f1= Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6883= yyvs; struct
+_xtunion_struct** _temp6885= _temp6883.curr +( yyvsp_offset - 1); if( _temp6885
+< _temp6883.base? 1: _temp6885 >= _temp6883.last_plus_one){ _throw(
+Null_Exception);}* _temp6885;})); _temp6882;}); _temp6881;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6886= yyls; struct Cyc_Yyltype* _temp6888= _temp6886.curr
++( yylsp_offset - 3); if( _temp6888 < _temp6886.base? 1: _temp6888 >= _temp6886.last_plus_one){
+_throw( Null_Exception);}* _temp6888;}).first_line,({ struct _tagged_ptr3
+_temp6889= yyls; struct Cyc_Yyltype* _temp6891= _temp6889.curr + yylsp_offset;
+if( _temp6891 < _temp6889.base? 1: _temp6891 >= _temp6889.last_plus_one){ _throw(
+Null_Exception);}* _temp6891;}).last_line)); _temp6880;}); _temp6879;}); break;
+case 370: _LL6878: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6893=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6893[ 0]=({ struct Cyc_Exp_tok_struct _temp6894; _temp6894.tag= Cyc_Exp_tok_tag;
+_temp6894.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_Codegen_e_struct*
+_temp6895=( struct Cyc_Absyn_Codegen_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Codegen_e_struct));
+_temp6895[ 0]=({ struct Cyc_Absyn_Codegen_e_struct _temp6896; _temp6896.tag= Cyc_Absyn_Codegen_e_tag;
+_temp6896.f1= Cyc_yyget_FnDecl_tok(({ struct _tagged_ptr2 _temp6897= yyvs;
+struct _xtunion_struct** _temp6899= _temp6897.curr +( yyvsp_offset - 1); if(
+_temp6899 < _temp6897.base? 1: _temp6899 >= _temp6897.last_plus_one){ _throw(
+Null_Exception);}* _temp6899;})); _temp6896;}); _temp6895;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6900= yyls; struct Cyc_Yyltype* _temp6902= _temp6900.curr
++( yylsp_offset - 3); if( _temp6902 < _temp6900.base? 1: _temp6902 >= _temp6900.last_plus_one){
+_throw( Null_Exception);}* _temp6902;}).first_line,({ struct _tagged_ptr3
+_temp6903= yyls; struct Cyc_Yyltype* _temp6905= _temp6903.curr + yylsp_offset;
+if( _temp6905 < _temp6903.base? 1: _temp6905 >= _temp6903.last_plus_one){ _throw(
+Null_Exception);}* _temp6905;}).last_line)); _temp6894;}); _temp6893;}); break;
+case 371: _LL6892: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6907=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6907[ 0]=({ struct Cyc_Exp_tok_struct _temp6908; _temp6908.tag= Cyc_Exp_tok_tag;
+_temp6908.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnknownId_e_struct*
+_temp6909=( struct Cyc_Absyn_UnknownId_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_e_struct));
+_temp6909[ 0]=({ struct Cyc_Absyn_UnknownId_e_struct _temp6910; _temp6910.tag=
+Cyc_Absyn_UnknownId_e_tag; _temp6910.f1= Cyc_yyget_QualId_tok(({ struct
+_tagged_ptr2 _temp6911= yyvs; struct _xtunion_struct** _temp6913= _temp6911.curr
++ yyvsp_offset; if( _temp6913 < _temp6911.base? 1: _temp6913 >= _temp6911.last_plus_one){
+_throw( Null_Exception);}* _temp6913;})); _temp6910;}); _temp6909;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6914= yyls; struct Cyc_Yyltype* _temp6916= _temp6914.curr
++ yylsp_offset; if( _temp6916 < _temp6914.base? 1: _temp6916 >= _temp6914.last_plus_one){
+_throw( Null_Exception);}* _temp6916;}).first_line,({ struct _tagged_ptr3
+_temp6917= yyls; struct Cyc_Yyltype* _temp6919= _temp6917.curr + yylsp_offset;
+if( _temp6919 < _temp6917.base? 1: _temp6919 >= _temp6917.last_plus_one){ _throw(
+Null_Exception);}* _temp6919;}).last_line)); _temp6908;}); _temp6907;}); break;
+case 372: _LL6906: yyval=({ struct _tagged_ptr2 _temp6921= yyvs; struct
+_xtunion_struct** _temp6923= _temp6921.curr + yyvsp_offset; if( _temp6923 <
+_temp6921.base? 1: _temp6923 >= _temp6921.last_plus_one){ _throw( Null_Exception);}*
+_temp6923;}); break; case 373: _LL6920: yyval=( struct _xtunion_struct*)({
+struct Cyc_Exp_tok_struct* _temp6925=( struct Cyc_Exp_tok_struct*) GC_malloc(
+sizeof( struct Cyc_Exp_tok_struct)); _temp6925[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6926; _temp6926.tag= Cyc_Exp_tok_tag; _temp6926.f1= Cyc_Absyn_string_exp(
+Cyc_yyget_String_tok(({ struct _tagged_ptr2 _temp6927= yyvs; struct
+_xtunion_struct** _temp6929= _temp6927.curr + yyvsp_offset; if( _temp6929 <
+_temp6927.base? 1: _temp6929 >= _temp6927.last_plus_one){ _throw( Null_Exception);}*
+_temp6929;})), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6930=
+yyls; struct Cyc_Yyltype* _temp6932= _temp6930.curr + yylsp_offset; if(
+_temp6932 < _temp6930.base? 1: _temp6932 >= _temp6930.last_plus_one){ _throw(
+Null_Exception);}* _temp6932;}).first_line,({ struct _tagged_ptr3 _temp6933=
+yyls; struct Cyc_Yyltype* _temp6935= _temp6933.curr + yylsp_offset; if(
+_temp6935 < _temp6933.base? 1: _temp6935 >= _temp6933.last_plus_one){ _throw(
+Null_Exception);}* _temp6935;}).last_line)); _temp6926;}); _temp6925;}); break;
+case 374: _LL6924: yyval=({ struct _tagged_ptr2 _temp6937= yyvs; struct
+_xtunion_struct** _temp6939= _temp6937.curr +( yyvsp_offset - 1); if( _temp6939
+< _temp6937.base? 1: _temp6939 >= _temp6937.last_plus_one){ _throw(
+Null_Exception);}* _temp6939;}); break; case 375: _LL6936: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6941=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6941[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6942; _temp6942.tag= Cyc_Exp_tok_tag; _temp6942.f1= Cyc_Absyn_noinstantiate_exp(
+Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnknownId_e_struct* _temp6943=(
 struct Cyc_Absyn_UnknownId_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_e_struct));
-_temp6961[ 0]=({ struct Cyc_Absyn_UnknownId_e_struct _temp6962; _temp6962.tag=
-Cyc_Absyn_UnknownId_e_tag; _temp6962.f1= Cyc_yyget_QualId_tok(({ struct
-_tagged_ptr2 _temp6963= yyvs; struct _xtunion_struct** _temp6965= _temp6963.curr
-+( yyvsp_offset - 1); if( _temp6965 < _temp6963.base? 1: _temp6965 >= _temp6963.last_plus_one){
-_throw( Null_Exception);}* _temp6965;})); _temp6962;}); _temp6961;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6966= yyls; struct Cyc_Yyltype* _temp6968= _temp6966.curr
-+( yylsp_offset - 1); if( _temp6968 < _temp6966.base? 1: _temp6968 >= _temp6966.last_plus_one){
-_throw( Null_Exception);}* _temp6968;}).first_line,({ struct _tagged_ptr3
-_temp6969= yyls; struct Cyc_Yyltype* _temp6971= _temp6969.curr +( yylsp_offset -
-1); if( _temp6971 < _temp6969.base? 1: _temp6971 >= _temp6969.last_plus_one){
-_throw( Null_Exception);}* _temp6971;}).last_line)), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6972= yyls; struct Cyc_Yyltype* _temp6974= _temp6972.curr
-+( yylsp_offset - 1); if( _temp6974 < _temp6972.base? 1: _temp6974 >= _temp6972.last_plus_one){
-_throw( Null_Exception);}* _temp6974;}).first_line,({ struct _tagged_ptr3
-_temp6975= yyls; struct Cyc_Yyltype* _temp6977= _temp6975.curr + yylsp_offset;
-if( _temp6977 < _temp6975.base? 1: _temp6977 >= _temp6975.last_plus_one){ _throw(
-Null_Exception);}* _temp6977;}).last_line)); _temp6960;}); _temp6959;}); break;
-case 377: _LL6958: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6979=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6979[ 0]=({ struct Cyc_Exp_tok_struct _temp6980; _temp6980.tag= Cyc_Exp_tok_tag;
-_temp6980.f1= Cyc_Absyn_instantiate_exp( Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnknownId_e_struct*
-_temp6981=( struct Cyc_Absyn_UnknownId_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_e_struct));
-_temp6981[ 0]=({ struct Cyc_Absyn_UnknownId_e_struct _temp6982; _temp6982.tag=
-Cyc_Absyn_UnknownId_e_tag; _temp6982.f1= Cyc_yyget_QualId_tok(({ struct
-_tagged_ptr2 _temp6983= yyvs; struct _xtunion_struct** _temp6985= _temp6983.curr
-+( yyvsp_offset - 4); if( _temp6985 < _temp6983.base? 1: _temp6985 >= _temp6983.last_plus_one){
-_throw( Null_Exception);}* _temp6985;})); _temp6982;}); _temp6981;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6986= yyls; struct Cyc_Yyltype* _temp6988= _temp6986.curr
-+( yylsp_offset - 4); if( _temp6988 < _temp6986.base? 1: _temp6988 >= _temp6986.last_plus_one){
-_throw( Null_Exception);}* _temp6988;}).first_line,({ struct _tagged_ptr3
-_temp6989= yyls; struct Cyc_Yyltype* _temp6991= _temp6989.curr +( yylsp_offset -
-4); if( _temp6991 < _temp6989.base? 1: _temp6991 >= _temp6989.last_plus_one){
-_throw( Null_Exception);}* _temp6991;}).last_line)),(( struct Cyc_List_List*(*)(
+_temp6943[ 0]=({ struct Cyc_Absyn_UnknownId_e_struct _temp6944; _temp6944.tag=
+Cyc_Absyn_UnknownId_e_tag; _temp6944.f1= Cyc_yyget_QualId_tok(({ struct
+_tagged_ptr2 _temp6945= yyvs; struct _xtunion_struct** _temp6947= _temp6945.curr
++( yyvsp_offset - 1); if( _temp6947 < _temp6945.base? 1: _temp6947 >= _temp6945.last_plus_one){
+_throw( Null_Exception);}* _temp6947;})); _temp6944;}); _temp6943;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6948= yyls; struct Cyc_Yyltype* _temp6950= _temp6948.curr
++( yylsp_offset - 1); if( _temp6950 < _temp6948.base? 1: _temp6950 >= _temp6948.last_plus_one){
+_throw( Null_Exception);}* _temp6950;}).first_line,({ struct _tagged_ptr3
+_temp6951= yyls; struct Cyc_Yyltype* _temp6953= _temp6951.curr +( yylsp_offset -
+1); if( _temp6953 < _temp6951.base? 1: _temp6953 >= _temp6951.last_plus_one){
+_throw( Null_Exception);}* _temp6953;}).last_line)), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6954= yyls; struct Cyc_Yyltype* _temp6956= _temp6954.curr
++( yylsp_offset - 1); if( _temp6956 < _temp6954.base? 1: _temp6956 >= _temp6954.last_plus_one){
+_throw( Null_Exception);}* _temp6956;}).first_line,({ struct _tagged_ptr3
+_temp6957= yyls; struct Cyc_Yyltype* _temp6959= _temp6957.curr + yylsp_offset;
+if( _temp6959 < _temp6957.base? 1: _temp6959 >= _temp6957.last_plus_one){ _throw(
+Null_Exception);}* _temp6959;}).last_line)); _temp6942;}); _temp6941;}); break;
+case 376: _LL6940: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6961=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6961[ 0]=({ struct Cyc_Exp_tok_struct _temp6962; _temp6962.tag= Cyc_Exp_tok_tag;
+_temp6962.f1= Cyc_Absyn_instantiate_exp( Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnknownId_e_struct*
+_temp6963=( struct Cyc_Absyn_UnknownId_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_e_struct));
+_temp6963[ 0]=({ struct Cyc_Absyn_UnknownId_e_struct _temp6964; _temp6964.tag=
+Cyc_Absyn_UnknownId_e_tag; _temp6964.f1= Cyc_yyget_QualId_tok(({ struct
+_tagged_ptr2 _temp6965= yyvs; struct _xtunion_struct** _temp6967= _temp6965.curr
++( yyvsp_offset - 4); if( _temp6967 < _temp6965.base? 1: _temp6967 >= _temp6965.last_plus_one){
+_throw( Null_Exception);}* _temp6967;})); _temp6964;}); _temp6963;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6968= yyls; struct Cyc_Yyltype* _temp6970= _temp6968.curr
++( yylsp_offset - 4); if( _temp6970 < _temp6968.base? 1: _temp6970 >= _temp6968.last_plus_one){
+_throw( Null_Exception);}* _temp6970;}).first_line,({ struct _tagged_ptr3
+_temp6971= yyls; struct Cyc_Yyltype* _temp6973= _temp6971.curr +( yylsp_offset -
+4); if( _temp6973 < _temp6971.base? 1: _temp6973 >= _temp6971.last_plus_one){
+_throw( Null_Exception);}* _temp6973;}).last_line)),(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_TypeList_tok(({ struct
-_tagged_ptr2 _temp6992= yyvs; struct _xtunion_struct** _temp6994= _temp6992.curr
-+( yyvsp_offset - 1); if( _temp6994 < _temp6992.base? 1: _temp6994 >= _temp6992.last_plus_one){
-_throw( Null_Exception);}* _temp6994;}))), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6995= yyls; struct Cyc_Yyltype* _temp6997= _temp6995.curr +(
-yylsp_offset - 4); if( _temp6997 < _temp6995.base? 1: _temp6997 >= _temp6995.last_plus_one){
-_throw( Null_Exception);}* _temp6997;}).first_line,({ struct _tagged_ptr3
-_temp6998= yyls; struct Cyc_Yyltype* _temp7000= _temp6998.curr + yylsp_offset;
-if( _temp7000 < _temp6998.base? 1: _temp7000 >= _temp6998.last_plus_one){ _throw(
-Null_Exception);}* _temp7000;}).last_line)); _temp6980;}); _temp6979;}); break;
-case 378: _LL6978: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp7002=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp7002[ 0]=({ struct Cyc_Exp_tok_struct _temp7003; _temp7003.tag= Cyc_Exp_tok_tag;
-_temp7003.f1= Cyc_Absyn_tuple_exp( Cyc_yyget_ExpList_tok(({ struct _tagged_ptr2
-_temp7004= yyvs; struct _xtunion_struct** _temp7006= _temp7004.curr +(
-yyvsp_offset - 1); if( _temp7006 < _temp7004.base? 1: _temp7006 >= _temp7004.last_plus_one){
-_throw( Null_Exception);}* _temp7006;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp7007= yyls; struct Cyc_Yyltype* _temp7009= _temp7007.curr +(
-yylsp_offset - 3); if( _temp7009 < _temp7007.base? 1: _temp7009 >= _temp7007.last_plus_one){
-_throw( Null_Exception);}* _temp7009;}).first_line,({ struct _tagged_ptr3
-_temp7010= yyls; struct Cyc_Yyltype* _temp7012= _temp7010.curr + yylsp_offset;
-if( _temp7012 < _temp7010.base? 1: _temp7012 >= _temp7010.last_plus_one){ _throw(
-Null_Exception);}* _temp7012;}).last_line)); _temp7003;}); _temp7002;}); break;
-case 379: _LL7001: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp7014=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp7014[ 0]=({ struct Cyc_Exp_tok_struct _temp7015; _temp7015.tag= Cyc_Exp_tok_tag;
-_temp7015.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_Struct_e_struct*
-_temp7016=( struct Cyc_Absyn_Struct_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Struct_e_struct));
-_temp7016[ 0]=({ struct Cyc_Absyn_Struct_e_struct _temp7017; _temp7017.tag= Cyc_Absyn_Struct_e_tag;
-_temp7017.f1= Cyc_yyget_QualId_tok(({ struct _tagged_ptr2 _temp7018= yyvs;
-struct _xtunion_struct** _temp7020= _temp7018.curr +( yyvsp_offset - 3); if(
-_temp7020 < _temp7018.base? 1: _temp7020 >= _temp7018.last_plus_one){ _throw(
-Null_Exception);}* _temp7020;})); _temp7017.f2= 0; _temp7017.f3=(( struct Cyc_List_List*(*)(
+_tagged_ptr2 _temp6974= yyvs; struct _xtunion_struct** _temp6976= _temp6974.curr
++( yyvsp_offset - 1); if( _temp6976 < _temp6974.base? 1: _temp6976 >= _temp6974.last_plus_one){
+_throw( Null_Exception);}* _temp6976;}))), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6977= yyls; struct Cyc_Yyltype* _temp6979= _temp6977.curr +(
+yylsp_offset - 4); if( _temp6979 < _temp6977.base? 1: _temp6979 >= _temp6977.last_plus_one){
+_throw( Null_Exception);}* _temp6979;}).first_line,({ struct _tagged_ptr3
+_temp6980= yyls; struct Cyc_Yyltype* _temp6982= _temp6980.curr + yylsp_offset;
+if( _temp6982 < _temp6980.base? 1: _temp6982 >= _temp6980.last_plus_one){ _throw(
+Null_Exception);}* _temp6982;}).last_line)); _temp6962;}); _temp6961;}); break;
+case 377: _LL6960: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6984=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6984[ 0]=({ struct Cyc_Exp_tok_struct _temp6985; _temp6985.tag= Cyc_Exp_tok_tag;
+_temp6985.f1= Cyc_Absyn_tuple_exp( Cyc_yyget_ExpList_tok(({ struct _tagged_ptr2
+_temp6986= yyvs; struct _xtunion_struct** _temp6988= _temp6986.curr +(
+yyvsp_offset - 1); if( _temp6988 < _temp6986.base? 1: _temp6988 >= _temp6986.last_plus_one){
+_throw( Null_Exception);}* _temp6988;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6989= yyls; struct Cyc_Yyltype* _temp6991= _temp6989.curr +(
+yylsp_offset - 3); if( _temp6991 < _temp6989.base? 1: _temp6991 >= _temp6989.last_plus_one){
+_throw( Null_Exception);}* _temp6991;}).first_line,({ struct _tagged_ptr3
+_temp6992= yyls; struct Cyc_Yyltype* _temp6994= _temp6992.curr + yylsp_offset;
+if( _temp6994 < _temp6992.base? 1: _temp6994 >= _temp6992.last_plus_one){ _throw(
+Null_Exception);}* _temp6994;}).last_line)); _temp6985;}); _temp6984;}); break;
+case 378: _LL6983: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6996=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6996[ 0]=({ struct Cyc_Exp_tok_struct _temp6997; _temp6997.tag= Cyc_Exp_tok_tag;
+_temp6997.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_Struct_e_struct*
+_temp6998=( struct Cyc_Absyn_Struct_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Struct_e_struct));
+_temp6998[ 0]=({ struct Cyc_Absyn_Struct_e_struct _temp6999; _temp6999.tag= Cyc_Absyn_Struct_e_tag;
+_temp6999.f1= Cyc_yyget_QualId_tok(({ struct _tagged_ptr2 _temp7000= yyvs;
+struct _xtunion_struct** _temp7002= _temp7000.curr +( yyvsp_offset - 3); if(
+_temp7002 < _temp7000.base? 1: _temp7002 >= _temp7000.last_plus_one){ _throw(
+Null_Exception);}* _temp7002;})); _temp6999.f2= 0; _temp6999.f3=(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_InitializerList_tok(({
-struct _tagged_ptr2 _temp7021= yyvs; struct _xtunion_struct** _temp7023=
-_temp7021.curr +( yyvsp_offset - 1); if( _temp7023 < _temp7021.base? 1:
-_temp7023 >= _temp7021.last_plus_one){ _throw( Null_Exception);}* _temp7023;})));
-_temp7017.f4= 0; _temp7017;}); _temp7016;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp7024= yyls; struct Cyc_Yyltype* _temp7026= _temp7024.curr
-+( yylsp_offset - 3); if( _temp7026 < _temp7024.base? 1: _temp7026 >= _temp7024.last_plus_one){
-_throw( Null_Exception);}* _temp7026;}).first_line,({ struct _tagged_ptr3
-_temp7027= yyls; struct Cyc_Yyltype* _temp7029= _temp7027.curr + yylsp_offset;
-if( _temp7029 < _temp7027.base? 1: _temp7029 >= _temp7027.last_plus_one){ _throw(
-Null_Exception);}* _temp7029;}).last_line)); _temp7015;}); _temp7014;}); break;
-case 380: _LL7013: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp7031=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp7031[ 0]=({ struct Cyc_Exp_tok_struct _temp7032; _temp7032.tag= Cyc_Exp_tok_tag;
-_temp7032.f1= Cyc_Absyn_stmt_exp( Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
-_temp7033= yyvs; struct _xtunion_struct** _temp7035= _temp7033.curr +(
-yyvsp_offset - 2); if( _temp7035 < _temp7033.base? 1: _temp7035 >= _temp7033.last_plus_one){
-_throw( Null_Exception);}* _temp7035;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp7036= yyls; struct Cyc_Yyltype* _temp7038= _temp7036.curr +(
-yylsp_offset - 4); if( _temp7038 < _temp7036.base? 1: _temp7038 >= _temp7036.last_plus_one){
-_throw( Null_Exception);}* _temp7038;}).first_line,({ struct _tagged_ptr3
-_temp7039= yyls; struct Cyc_Yyltype* _temp7041= _temp7039.curr + yylsp_offset;
-if( _temp7041 < _temp7039.base? 1: _temp7041 >= _temp7039.last_plus_one){ _throw(
-Null_Exception);}* _temp7041;}).last_line)); _temp7032;}); _temp7031;}); break;
-case 381: _LL7030: yyval=( struct _xtunion_struct*)({ struct Cyc_ExpList_tok_struct*
-_temp7043=( struct Cyc_ExpList_tok_struct*) GC_malloc( sizeof( struct Cyc_ExpList_tok_struct));
-_temp7043[ 0]=({ struct Cyc_ExpList_tok_struct _temp7044; _temp7044.tag= Cyc_ExpList_tok_tag;
-_temp7044.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
-Cyc_yyget_ExpList_tok(({ struct _tagged_ptr2 _temp7045= yyvs; struct
-_xtunion_struct** _temp7047= _temp7045.curr + yyvsp_offset; if( _temp7047 <
-_temp7045.base? 1: _temp7047 >= _temp7045.last_plus_one){ _throw( Null_Exception);}*
-_temp7047;}))); _temp7044;}); _temp7043;}); break; case 382: _LL7042: yyval=(
-struct _xtunion_struct*)({ struct Cyc_ExpList_tok_struct* _temp7049=( struct Cyc_ExpList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_ExpList_tok_struct)); _temp7049[ 0]=({ struct Cyc_ExpList_tok_struct
-_temp7050; _temp7050.tag= Cyc_ExpList_tok_tag; _temp7050.f1=({ struct Cyc_List_List*
-_temp7051=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp7051->hd=( void*) Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp7052= yyvs;
-struct _xtunion_struct** _temp7054= _temp7052.curr + yyvsp_offset; if( _temp7054
-< _temp7052.base? 1: _temp7054 >= _temp7052.last_plus_one){ _throw(
-Null_Exception);}* _temp7054;})); _temp7051->tl= 0; _temp7051;}); _temp7050;});
-_temp7049;}); break; case 383: _LL7048: yyval=( struct _xtunion_struct*)({
-struct Cyc_ExpList_tok_struct* _temp7056=( struct Cyc_ExpList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_ExpList_tok_struct)); _temp7056[ 0]=({ struct Cyc_ExpList_tok_struct
-_temp7057; _temp7057.tag= Cyc_ExpList_tok_tag; _temp7057.f1=({ struct Cyc_List_List*
-_temp7058=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp7058->hd=( void*) Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp7062= yyvs;
-struct _xtunion_struct** _temp7064= _temp7062.curr + yyvsp_offset; if( _temp7064
-< _temp7062.base? 1: _temp7064 >= _temp7062.last_plus_one){ _throw(
-Null_Exception);}* _temp7064;})); _temp7058->tl= Cyc_yyget_ExpList_tok(({ struct
-_tagged_ptr2 _temp7059= yyvs; struct _xtunion_struct** _temp7061= _temp7059.curr
-+( yyvsp_offset - 2); if( _temp7061 < _temp7059.base? 1: _temp7061 >= _temp7059.last_plus_one){
-_throw( Null_Exception);}* _temp7061;})); _temp7058;}); _temp7057;}); _temp7056;});
-break; case 384: _LL7055: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp7066=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp7066[ 0]=({ struct Cyc_Exp_tok_struct _temp7067; _temp7067.tag= Cyc_Exp_tok_tag;
-_temp7067.f1= Cyc_Absyn_int_exp((* Cyc_yyget_Int_tok(({ struct _tagged_ptr2
-_temp7068= yyvs; struct _xtunion_struct** _temp7070= _temp7068.curr +
-yyvsp_offset; if( _temp7070 < _temp7068.base? 1: _temp7070 >= _temp7068.last_plus_one){
-_throw( Null_Exception);}* _temp7070;}))).f1,(* Cyc_yyget_Int_tok(({ struct
-_tagged_ptr2 _temp7071= yyvs; struct _xtunion_struct** _temp7073= _temp7071.curr
-+ yyvsp_offset; if( _temp7073 < _temp7071.base? 1: _temp7073 >= _temp7071.last_plus_one){
-_throw( Null_Exception);}* _temp7073;}))).f2, Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp7074= yyls; struct Cyc_Yyltype* _temp7076= _temp7074.curr
-+ yylsp_offset; if( _temp7076 < _temp7074.base? 1: _temp7076 >= _temp7074.last_plus_one){
-_throw( Null_Exception);}* _temp7076;}).first_line,({ struct _tagged_ptr3
-_temp7077= yyls; struct Cyc_Yyltype* _temp7079= _temp7077.curr + yylsp_offset;
-if( _temp7079 < _temp7077.base? 1: _temp7079 >= _temp7077.last_plus_one){ _throw(
-Null_Exception);}* _temp7079;}).last_line)); _temp7067;}); _temp7066;}); break;
-case 385: _LL7065: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp7081=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp7081[ 0]=({ struct Cyc_Exp_tok_struct _temp7082; _temp7082.tag= Cyc_Exp_tok_tag;
-_temp7082.f1= Cyc_Absyn_char_exp( Cyc_yyget_Char_tok(({ struct _tagged_ptr2
-_temp7083= yyvs; struct _xtunion_struct** _temp7085= _temp7083.curr +
-yyvsp_offset; if( _temp7085 < _temp7083.base? 1: _temp7085 >= _temp7083.last_plus_one){
-_throw( Null_Exception);}* _temp7085;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp7086= yyls; struct Cyc_Yyltype* _temp7088= _temp7086.curr +
-yylsp_offset; if( _temp7088 < _temp7086.base? 1: _temp7088 >= _temp7086.last_plus_one){
-_throw( Null_Exception);}* _temp7088;}).first_line,({ struct _tagged_ptr3
-_temp7089= yyls; struct Cyc_Yyltype* _temp7091= _temp7089.curr + yylsp_offset;
-if( _temp7091 < _temp7089.base? 1: _temp7091 >= _temp7089.last_plus_one){ _throw(
-Null_Exception);}* _temp7091;}).last_line)); _temp7082;}); _temp7081;}); break;
-case 386: _LL7080: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp7093=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp7093[ 0]=({ struct Cyc_Exp_tok_struct _temp7094; _temp7094.tag= Cyc_Exp_tok_tag;
-_temp7094.f1= Cyc_Absyn_float_exp( Cyc_yyget_String_tok(({ struct _tagged_ptr2
-_temp7095= yyvs; struct _xtunion_struct** _temp7097= _temp7095.curr +
-yyvsp_offset; if( _temp7097 < _temp7095.base? 1: _temp7097 >= _temp7095.last_plus_one){
-_throw( Null_Exception);}* _temp7097;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp7098= yyls; struct Cyc_Yyltype* _temp7100= _temp7098.curr +
-yylsp_offset; if( _temp7100 < _temp7098.base? 1: _temp7100 >= _temp7098.last_plus_one){
-_throw( Null_Exception);}* _temp7100;}).first_line,({ struct _tagged_ptr3
-_temp7101= yyls; struct Cyc_Yyltype* _temp7103= _temp7101.curr + yylsp_offset;
-if( _temp7103 < _temp7101.base? 1: _temp7103 >= _temp7101.last_plus_one){ _throw(
-Null_Exception);}* _temp7103;}).last_line)); _temp7094;}); _temp7093;}); break;
-case 387: _LL7092: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp7105=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp7105[ 0]=({ struct Cyc_Exp_tok_struct _temp7106; _temp7106.tag= Cyc_Exp_tok_tag;
-_temp7106.f1= Cyc_Absyn_null_exp( Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp7107= yyls; struct Cyc_Yyltype* _temp7109= _temp7107.curr +
-yylsp_offset; if( _temp7109 < _temp7107.base? 1: _temp7109 >= _temp7107.last_plus_one){
-_throw( Null_Exception);}* _temp7109;}).first_line,({ struct _tagged_ptr3
-_temp7110= yyls; struct Cyc_Yyltype* _temp7112= _temp7110.curr + yylsp_offset;
-if( _temp7112 < _temp7110.base? 1: _temp7112 >= _temp7110.last_plus_one){ _throw(
-Null_Exception);}* _temp7112;}).last_line)); _temp7106;}); _temp7105;}); break;
-case 388: _LL7104: yyval=( struct _xtunion_struct*)({ struct Cyc_QualId_tok_struct*
-_temp7114=( struct Cyc_QualId_tok_struct*) GC_malloc( sizeof( struct Cyc_QualId_tok_struct));
-_temp7114[ 0]=({ struct Cyc_QualId_tok_struct _temp7115; _temp7115.tag= Cyc_QualId_tok_tag;
-_temp7115.f1=({ struct _tuple1* _temp7116=( struct _tuple1*) GC_malloc( sizeof(
-struct _tuple1)); _temp7116->f1=( void*)({ struct Cyc_Absyn_Rel_n_struct*
-_temp7121=( struct Cyc_Absyn_Rel_n_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Rel_n_struct));
-_temp7121[ 0]=({ struct Cyc_Absyn_Rel_n_struct _temp7122; _temp7122.tag= Cyc_Absyn_Rel_n_tag;
-_temp7122.f1= 0; _temp7122;}); _temp7121;}); _temp7116->f2=({ struct
-_tagged_string* _temp7117=( struct _tagged_string*) GC_malloc( sizeof( struct
-_tagged_string) * 1); _temp7117[ 0]= Cyc_yyget_String_tok(({ struct _tagged_ptr2
-_temp7118= yyvs; struct _xtunion_struct** _temp7120= _temp7118.curr +
-yyvsp_offset; if( _temp7120 < _temp7118.base? 1: _temp7120 >= _temp7118.last_plus_one){
-_throw( Null_Exception);}* _temp7120;})); _temp7117;}); _temp7116;}); _temp7115;});
-_temp7114;}); break; case 389: _LL7113: yyval=({ struct _tagged_ptr2 _temp7124=
-yyvs; struct _xtunion_struct** _temp7126= _temp7124.curr + yyvsp_offset; if(
-_temp7126 < _temp7124.base? 1: _temp7126 >= _temp7124.last_plus_one){ _throw(
-Null_Exception);}* _temp7126;}); break; default: _LL7123:( void) _throw(( struct
-_xtunion_struct*)({ struct Cyc_Yyimpossible_struct* _temp7128=( struct Cyc_Yyimpossible_struct*)
-GC_malloc( sizeof( struct Cyc_Yyimpossible_struct)); _temp7128[ 0]=({ struct Cyc_Yyimpossible_struct
-_temp7129; _temp7129.tag= Cyc_Yyimpossible_tag; _temp7129;}); _temp7128;}));}
+struct _tagged_ptr2 _temp7003= yyvs; struct _xtunion_struct** _temp7005=
+_temp7003.curr +( yyvsp_offset - 1); if( _temp7005 < _temp7003.base? 1:
+_temp7005 >= _temp7003.last_plus_one){ _throw( Null_Exception);}* _temp7005;})));
+_temp6999.f4= 0; _temp6999;}); _temp6998;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp7006= yyls; struct Cyc_Yyltype* _temp7008= _temp7006.curr
++( yylsp_offset - 3); if( _temp7008 < _temp7006.base? 1: _temp7008 >= _temp7006.last_plus_one){
+_throw( Null_Exception);}* _temp7008;}).first_line,({ struct _tagged_ptr3
+_temp7009= yyls; struct Cyc_Yyltype* _temp7011= _temp7009.curr + yylsp_offset;
+if( _temp7011 < _temp7009.base? 1: _temp7011 >= _temp7009.last_plus_one){ _throw(
+Null_Exception);}* _temp7011;}).last_line)); _temp6997;}); _temp6996;}); break;
+case 379: _LL6995: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp7013=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp7013[ 0]=({ struct Cyc_Exp_tok_struct _temp7014; _temp7014.tag= Cyc_Exp_tok_tag;
+_temp7014.f1= Cyc_Absyn_stmt_exp( Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
+_temp7015= yyvs; struct _xtunion_struct** _temp7017= _temp7015.curr +(
+yyvsp_offset - 2); if( _temp7017 < _temp7015.base? 1: _temp7017 >= _temp7015.last_plus_one){
+_throw( Null_Exception);}* _temp7017;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp7018= yyls; struct Cyc_Yyltype* _temp7020= _temp7018.curr +(
+yylsp_offset - 4); if( _temp7020 < _temp7018.base? 1: _temp7020 >= _temp7018.last_plus_one){
+_throw( Null_Exception);}* _temp7020;}).first_line,({ struct _tagged_ptr3
+_temp7021= yyls; struct Cyc_Yyltype* _temp7023= _temp7021.curr + yylsp_offset;
+if( _temp7023 < _temp7021.base? 1: _temp7023 >= _temp7021.last_plus_one){ _throw(
+Null_Exception);}* _temp7023;}).last_line)); _temp7014;}); _temp7013;}); break;
+case 380: _LL7012: yyval=( struct _xtunion_struct*)({ struct Cyc_ExpList_tok_struct*
+_temp7025=( struct Cyc_ExpList_tok_struct*) GC_malloc( sizeof( struct Cyc_ExpList_tok_struct));
+_temp7025[ 0]=({ struct Cyc_ExpList_tok_struct _temp7026; _temp7026.tag= Cyc_ExpList_tok_tag;
+_temp7026.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+Cyc_yyget_ExpList_tok(({ struct _tagged_ptr2 _temp7027= yyvs; struct
+_xtunion_struct** _temp7029= _temp7027.curr + yyvsp_offset; if( _temp7029 <
+_temp7027.base? 1: _temp7029 >= _temp7027.last_plus_one){ _throw( Null_Exception);}*
+_temp7029;}))); _temp7026;}); _temp7025;}); break; case 381: _LL7024: yyval=(
+struct _xtunion_struct*)({ struct Cyc_ExpList_tok_struct* _temp7031=( struct Cyc_ExpList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_ExpList_tok_struct)); _temp7031[ 0]=({ struct Cyc_ExpList_tok_struct
+_temp7032; _temp7032.tag= Cyc_ExpList_tok_tag; _temp7032.f1=({ struct Cyc_List_List*
+_temp7033=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp7033->hd=( void*) Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp7034= yyvs;
+struct _xtunion_struct** _temp7036= _temp7034.curr + yyvsp_offset; if( _temp7036
+< _temp7034.base? 1: _temp7036 >= _temp7034.last_plus_one){ _throw(
+Null_Exception);}* _temp7036;})); _temp7033->tl= 0; _temp7033;}); _temp7032;});
+_temp7031;}); break; case 382: _LL7030: yyval=( struct _xtunion_struct*)({
+struct Cyc_ExpList_tok_struct* _temp7038=( struct Cyc_ExpList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_ExpList_tok_struct)); _temp7038[ 0]=({ struct Cyc_ExpList_tok_struct
+_temp7039; _temp7039.tag= Cyc_ExpList_tok_tag; _temp7039.f1=({ struct Cyc_List_List*
+_temp7040=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp7040->hd=( void*) Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp7044= yyvs;
+struct _xtunion_struct** _temp7046= _temp7044.curr + yyvsp_offset; if( _temp7046
+< _temp7044.base? 1: _temp7046 >= _temp7044.last_plus_one){ _throw(
+Null_Exception);}* _temp7046;})); _temp7040->tl= Cyc_yyget_ExpList_tok(({ struct
+_tagged_ptr2 _temp7041= yyvs; struct _xtunion_struct** _temp7043= _temp7041.curr
++( yyvsp_offset - 2); if( _temp7043 < _temp7041.base? 1: _temp7043 >= _temp7041.last_plus_one){
+_throw( Null_Exception);}* _temp7043;})); _temp7040;}); _temp7039;}); _temp7038;});
+break; case 383: _LL7037: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp7048=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp7048[ 0]=({ struct Cyc_Exp_tok_struct _temp7049; _temp7049.tag= Cyc_Exp_tok_tag;
+_temp7049.f1= Cyc_Absyn_int_exp((* Cyc_yyget_Int_tok(({ struct _tagged_ptr2
+_temp7050= yyvs; struct _xtunion_struct** _temp7052= _temp7050.curr +
+yyvsp_offset; if( _temp7052 < _temp7050.base? 1: _temp7052 >= _temp7050.last_plus_one){
+_throw( Null_Exception);}* _temp7052;}))).f1,(* Cyc_yyget_Int_tok(({ struct
+_tagged_ptr2 _temp7053= yyvs; struct _xtunion_struct** _temp7055= _temp7053.curr
++ yyvsp_offset; if( _temp7055 < _temp7053.base? 1: _temp7055 >= _temp7053.last_plus_one){
+_throw( Null_Exception);}* _temp7055;}))).f2, Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp7056= yyls; struct Cyc_Yyltype* _temp7058= _temp7056.curr
++ yylsp_offset; if( _temp7058 < _temp7056.base? 1: _temp7058 >= _temp7056.last_plus_one){
+_throw( Null_Exception);}* _temp7058;}).first_line,({ struct _tagged_ptr3
+_temp7059= yyls; struct Cyc_Yyltype* _temp7061= _temp7059.curr + yylsp_offset;
+if( _temp7061 < _temp7059.base? 1: _temp7061 >= _temp7059.last_plus_one){ _throw(
+Null_Exception);}* _temp7061;}).last_line)); _temp7049;}); _temp7048;}); break;
+case 384: _LL7047: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp7063=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp7063[ 0]=({ struct Cyc_Exp_tok_struct _temp7064; _temp7064.tag= Cyc_Exp_tok_tag;
+_temp7064.f1= Cyc_Absyn_char_exp( Cyc_yyget_Char_tok(({ struct _tagged_ptr2
+_temp7065= yyvs; struct _xtunion_struct** _temp7067= _temp7065.curr +
+yyvsp_offset; if( _temp7067 < _temp7065.base? 1: _temp7067 >= _temp7065.last_plus_one){
+_throw( Null_Exception);}* _temp7067;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp7068= yyls; struct Cyc_Yyltype* _temp7070= _temp7068.curr +
+yylsp_offset; if( _temp7070 < _temp7068.base? 1: _temp7070 >= _temp7068.last_plus_one){
+_throw( Null_Exception);}* _temp7070;}).first_line,({ struct _tagged_ptr3
+_temp7071= yyls; struct Cyc_Yyltype* _temp7073= _temp7071.curr + yylsp_offset;
+if( _temp7073 < _temp7071.base? 1: _temp7073 >= _temp7071.last_plus_one){ _throw(
+Null_Exception);}* _temp7073;}).last_line)); _temp7064;}); _temp7063;}); break;
+case 385: _LL7062: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp7075=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp7075[ 0]=({ struct Cyc_Exp_tok_struct _temp7076; _temp7076.tag= Cyc_Exp_tok_tag;
+_temp7076.f1= Cyc_Absyn_float_exp( Cyc_yyget_String_tok(({ struct _tagged_ptr2
+_temp7077= yyvs; struct _xtunion_struct** _temp7079= _temp7077.curr +
+yyvsp_offset; if( _temp7079 < _temp7077.base? 1: _temp7079 >= _temp7077.last_plus_one){
+_throw( Null_Exception);}* _temp7079;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp7080= yyls; struct Cyc_Yyltype* _temp7082= _temp7080.curr +
+yylsp_offset; if( _temp7082 < _temp7080.base? 1: _temp7082 >= _temp7080.last_plus_one){
+_throw( Null_Exception);}* _temp7082;}).first_line,({ struct _tagged_ptr3
+_temp7083= yyls; struct Cyc_Yyltype* _temp7085= _temp7083.curr + yylsp_offset;
+if( _temp7085 < _temp7083.base? 1: _temp7085 >= _temp7083.last_plus_one){ _throw(
+Null_Exception);}* _temp7085;}).last_line)); _temp7076;}); _temp7075;}); break;
+case 386: _LL7074: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp7087=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp7087[ 0]=({ struct Cyc_Exp_tok_struct _temp7088; _temp7088.tag= Cyc_Exp_tok_tag;
+_temp7088.f1= Cyc_Absyn_null_exp( Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp7089= yyls; struct Cyc_Yyltype* _temp7091= _temp7089.curr +
+yylsp_offset; if( _temp7091 < _temp7089.base? 1: _temp7091 >= _temp7089.last_plus_one){
+_throw( Null_Exception);}* _temp7091;}).first_line,({ struct _tagged_ptr3
+_temp7092= yyls; struct Cyc_Yyltype* _temp7094= _temp7092.curr + yylsp_offset;
+if( _temp7094 < _temp7092.base? 1: _temp7094 >= _temp7092.last_plus_one){ _throw(
+Null_Exception);}* _temp7094;}).last_line)); _temp7088;}); _temp7087;}); break;
+case 387: _LL7086: yyval=( struct _xtunion_struct*)({ struct Cyc_QualId_tok_struct*
+_temp7096=( struct Cyc_QualId_tok_struct*) GC_malloc( sizeof( struct Cyc_QualId_tok_struct));
+_temp7096[ 0]=({ struct Cyc_QualId_tok_struct _temp7097; _temp7097.tag= Cyc_QualId_tok_tag;
+_temp7097.f1=({ struct _tuple1* _temp7098=( struct _tuple1*) GC_malloc( sizeof(
+struct _tuple1)); _temp7098->f1=( void*)({ struct Cyc_Absyn_Rel_n_struct*
+_temp7103=( struct Cyc_Absyn_Rel_n_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Rel_n_struct));
+_temp7103[ 0]=({ struct Cyc_Absyn_Rel_n_struct _temp7104; _temp7104.tag= Cyc_Absyn_Rel_n_tag;
+_temp7104.f1= 0; _temp7104;}); _temp7103;}); _temp7098->f2=({ struct
+_tagged_string* _temp7099=( struct _tagged_string*) GC_malloc( sizeof( struct
+_tagged_string) * 1); _temp7099[ 0]= Cyc_yyget_String_tok(({ struct _tagged_ptr2
+_temp7100= yyvs; struct _xtunion_struct** _temp7102= _temp7100.curr +
+yyvsp_offset; if( _temp7102 < _temp7100.base? 1: _temp7102 >= _temp7100.last_plus_one){
+_throw( Null_Exception);}* _temp7102;})); _temp7099;}); _temp7098;}); _temp7097;});
+_temp7096;}); break; case 388: _LL7095: yyval=({ struct _tagged_ptr2 _temp7106=
+yyvs; struct _xtunion_struct** _temp7108= _temp7106.curr + yyvsp_offset; if(
+_temp7108 < _temp7106.base? 1: _temp7108 >= _temp7106.last_plus_one){ _throw(
+Null_Exception);}* _temp7108;}); break; default: _LL7105:( void) _throw(( struct
+_xtunion_struct*)({ struct Cyc_Yyimpossible_struct* _temp7110=( struct Cyc_Yyimpossible_struct*)
+GC_malloc( sizeof( struct Cyc_Yyimpossible_struct)); _temp7110[ 0]=({ struct Cyc_Yyimpossible_struct
+_temp7111; _temp7111.tag= Cyc_Yyimpossible_tag; _temp7111;}); _temp7110;}));}
 yyvsp_offset -= yylen; yyssp_offset -= yylen; yylsp_offset -= yylen;({ struct
-_tagged_ptr2 _temp7130= yyvs; struct _xtunion_struct** _temp7132= _temp7130.curr
-+( ++ yyvsp_offset); if( _temp7132 < _temp7130.base? 1: _temp7132 >= _temp7130.last_plus_one){
-_throw( Null_Exception);}* _temp7132= yyval;}); yylsp_offset ++; if( yylen == 0){({
-struct _tagged_ptr3 _temp7133= yyls; struct Cyc_Yyltype* _temp7135= _temp7133.curr
-+ yylsp_offset; if( _temp7135 < _temp7133.base? 1: _temp7135 >= _temp7133.last_plus_one){
-_throw( Null_Exception);}(* _temp7135).first_line= Cyc_yylloc.first_line;});({
-struct _tagged_ptr3 _temp7136= yyls; struct Cyc_Yyltype* _temp7138= _temp7136.curr
-+ yylsp_offset; if( _temp7138 < _temp7136.base? 1: _temp7138 >= _temp7136.last_plus_one){
-_throw( Null_Exception);}(* _temp7138).first_column= Cyc_yylloc.first_column;});({
-struct _tagged_ptr3 _temp7139= yyls; struct Cyc_Yyltype* _temp7141= _temp7139.curr
-+ yylsp_offset; if( _temp7141 < _temp7139.base? 1: _temp7141 >= _temp7139.last_plus_one){
-_throw( Null_Exception);}(* _temp7141).last_line=({ struct _tagged_ptr3
-_temp7142= yyls; struct Cyc_Yyltype* _temp7144= _temp7142.curr +( yylsp_offset -
-1); if( _temp7144 < _temp7142.base? 1: _temp7144 >= _temp7142.last_plus_one){
-_throw( Null_Exception);}* _temp7144;}).last_line;});({ struct _tagged_ptr3
-_temp7145= yyls; struct Cyc_Yyltype* _temp7147= _temp7145.curr + yylsp_offset;
-if( _temp7147 < _temp7145.base? 1: _temp7147 >= _temp7145.last_plus_one){ _throw(
-Null_Exception);}(* _temp7147).last_column=({ struct _tagged_ptr3 _temp7148=
-yyls; struct Cyc_Yyltype* _temp7150= _temp7148.curr +( yylsp_offset - 1); if(
-_temp7150 < _temp7148.base? 1: _temp7150 >= _temp7148.last_plus_one){ _throw(
-Null_Exception);}* _temp7150;}).last_column;});({ struct _tagged_ptr3 _temp7151=
-yyls; struct Cyc_Yyltype* _temp7153= _temp7151.curr + yylsp_offset; if(
-_temp7153 < _temp7151.base? 1: _temp7153 >= _temp7151.last_plus_one){ _throw(
-Null_Exception);}(* _temp7153).text=( struct _tagged_string)({ char* _temp7154=(
-char*)""; struct _tagged_string _temp7155; _temp7155.curr= _temp7154; _temp7155.base=
-_temp7154; _temp7155.last_plus_one= _temp7154 + 1; _temp7155;});});} else{({
-struct _tagged_ptr3 _temp7156= yyls; struct Cyc_Yyltype* _temp7158= _temp7156.curr
-+ yylsp_offset; if( _temp7158 < _temp7156.base? 1: _temp7158 >= _temp7156.last_plus_one){
-_throw( Null_Exception);}(* _temp7158).last_line=({ struct _tagged_ptr3
-_temp7159= yyls; struct Cyc_Yyltype* _temp7161= _temp7159.curr +(( yylsp_offset
-+ yylen) - 1); if( _temp7161 < _temp7159.base? 1: _temp7161 >= _temp7159.last_plus_one){
-_throw( Null_Exception);}* _temp7161;}).last_line;});({ struct _tagged_ptr3
-_temp7162= yyls; struct Cyc_Yyltype* _temp7164= _temp7162.curr + yylsp_offset;
-if( _temp7164 < _temp7162.base? 1: _temp7164 >= _temp7162.last_plus_one){ _throw(
-Null_Exception);}(* _temp7164).last_column=({ struct _tagged_ptr3 _temp7165=
-yyls; struct Cyc_Yyltype* _temp7167= _temp7165.curr +(( yylsp_offset + yylen) -
-1); if( _temp7167 < _temp7165.base? 1: _temp7167 >= _temp7165.last_plus_one){
-_throw( Null_Exception);}* _temp7167;}).last_column;});} yyn=( int)({ short*
-_temp7168=( short*) Cyc_yyr1; unsigned int _temp7169= yyn; if( _temp7169 >= 390u){
-_throw( Null_Exception);} _temp7168[ _temp7169];}); yystate=( int)({ short*
-_temp7170=( short*) Cyc_yypgoto; unsigned int _temp7171= yyn - 120; if(
-_temp7171 >= 107u){ _throw( Null_Exception);} _temp7170[ _temp7171];}) +( int)({
-struct _tagged_ptr1 _temp7172= yyss; short* _temp7174= _temp7172.curr +
-yyssp_offset; if( _temp7174 < _temp7172.base? 1: _temp7174 >= _temp7172.last_plus_one){
-_throw( Null_Exception);}* _temp7174;}); if(( yystate >= 0? yystate <= 4026: 0)?(
-int)({ short* _temp7175=( short*) Cyc_yycheck; unsigned int _temp7176= yystate;
-if( _temp7176 >= 4027u){ _throw( Null_Exception);} _temp7175[ _temp7176];}) ==(
-int)({ struct _tagged_ptr1 _temp7177= yyss; short* _temp7179= _temp7177.curr +
-yyssp_offset; if( _temp7179 < _temp7177.base? 1: _temp7179 >= _temp7177.last_plus_one){
-_throw( Null_Exception);}* _temp7179;}): 0){ yystate=( int)({ short* _temp7180=(
-short*) Cyc_yytable; unsigned int _temp7181= yystate; if( _temp7181 >= 4027u){
-_throw( Null_Exception);} _temp7180[ _temp7181];});} else{ yystate=( int)({
-short* _temp7182=( short*) Cyc_yydefgoto; unsigned int _temp7183= yyn - 120; if(
-_temp7183 >= 107u){ _throw( Null_Exception);} _temp7182[ _temp7183];});} goto
+_tagged_ptr2 _temp7112= yyvs; struct _xtunion_struct** _temp7114= _temp7112.curr
++( ++ yyvsp_offset); if( _temp7114 < _temp7112.base? 1: _temp7114 >= _temp7112.last_plus_one){
+_throw( Null_Exception);}* _temp7114= yyval;}); yylsp_offset ++; if( yylen == 0){({
+struct _tagged_ptr3 _temp7115= yyls; struct Cyc_Yyltype* _temp7117= _temp7115.curr
++ yylsp_offset; if( _temp7117 < _temp7115.base? 1: _temp7117 >= _temp7115.last_plus_one){
+_throw( Null_Exception);}(* _temp7117).first_line= Cyc_yylloc.first_line;});({
+struct _tagged_ptr3 _temp7118= yyls; struct Cyc_Yyltype* _temp7120= _temp7118.curr
++ yylsp_offset; if( _temp7120 < _temp7118.base? 1: _temp7120 >= _temp7118.last_plus_one){
+_throw( Null_Exception);}(* _temp7120).first_column= Cyc_yylloc.first_column;});({
+struct _tagged_ptr3 _temp7121= yyls; struct Cyc_Yyltype* _temp7123= _temp7121.curr
++ yylsp_offset; if( _temp7123 < _temp7121.base? 1: _temp7123 >= _temp7121.last_plus_one){
+_throw( Null_Exception);}(* _temp7123).last_line=({ struct _tagged_ptr3
+_temp7124= yyls; struct Cyc_Yyltype* _temp7126= _temp7124.curr +( yylsp_offset -
+1); if( _temp7126 < _temp7124.base? 1: _temp7126 >= _temp7124.last_plus_one){
+_throw( Null_Exception);}* _temp7126;}).last_line;});({ struct _tagged_ptr3
+_temp7127= yyls; struct Cyc_Yyltype* _temp7129= _temp7127.curr + yylsp_offset;
+if( _temp7129 < _temp7127.base? 1: _temp7129 >= _temp7127.last_plus_one){ _throw(
+Null_Exception);}(* _temp7129).last_column=({ struct _tagged_ptr3 _temp7130=
+yyls; struct Cyc_Yyltype* _temp7132= _temp7130.curr +( yylsp_offset - 1); if(
+_temp7132 < _temp7130.base? 1: _temp7132 >= _temp7130.last_plus_one){ _throw(
+Null_Exception);}* _temp7132;}).last_column;});({ struct _tagged_ptr3 _temp7133=
+yyls; struct Cyc_Yyltype* _temp7135= _temp7133.curr + yylsp_offset; if(
+_temp7135 < _temp7133.base? 1: _temp7135 >= _temp7133.last_plus_one){ _throw(
+Null_Exception);}(* _temp7135).text=( struct _tagged_string)({ char* _temp7136=(
+char*)""; struct _tagged_string _temp7137; _temp7137.curr= _temp7136; _temp7137.base=
+_temp7136; _temp7137.last_plus_one= _temp7136 + 1; _temp7137;});});} else{({
+struct _tagged_ptr3 _temp7138= yyls; struct Cyc_Yyltype* _temp7140= _temp7138.curr
++ yylsp_offset; if( _temp7140 < _temp7138.base? 1: _temp7140 >= _temp7138.last_plus_one){
+_throw( Null_Exception);}(* _temp7140).last_line=({ struct _tagged_ptr3
+_temp7141= yyls; struct Cyc_Yyltype* _temp7143= _temp7141.curr +(( yylsp_offset
++ yylen) - 1); if( _temp7143 < _temp7141.base? 1: _temp7143 >= _temp7141.last_plus_one){
+_throw( Null_Exception);}* _temp7143;}).last_line;});({ struct _tagged_ptr3
+_temp7144= yyls; struct Cyc_Yyltype* _temp7146= _temp7144.curr + yylsp_offset;
+if( _temp7146 < _temp7144.base? 1: _temp7146 >= _temp7144.last_plus_one){ _throw(
+Null_Exception);}(* _temp7146).last_column=({ struct _tagged_ptr3 _temp7147=
+yyls; struct Cyc_Yyltype* _temp7149= _temp7147.curr +(( yylsp_offset + yylen) -
+1); if( _temp7149 < _temp7147.base? 1: _temp7149 >= _temp7147.last_plus_one){
+_throw( Null_Exception);}* _temp7149;}).last_column;});} yyn=( int)({ short*
+_temp7150=( short*) Cyc_yyr1; unsigned int _temp7151= yyn; if( _temp7151 >= 389u){
+_throw( Null_Exception);} _temp7150[ _temp7151];}); yystate=( int)({ short*
+_temp7152=( short*) Cyc_yypgoto; unsigned int _temp7153= yyn - 120; if(
+_temp7153 >= 107u){ _throw( Null_Exception);} _temp7152[ _temp7153];}) +( int)({
+struct _tagged_ptr1 _temp7154= yyss; short* _temp7156= _temp7154.curr +
+yyssp_offset; if( _temp7156 < _temp7154.base? 1: _temp7156 >= _temp7154.last_plus_one){
+_throw( Null_Exception);}* _temp7156;}); if(( yystate >= 0? yystate <= 3997: 0)?(
+int)({ short* _temp7157=( short*) Cyc_yycheck; unsigned int _temp7158= yystate;
+if( _temp7158 >= 3998u){ _throw( Null_Exception);} _temp7157[ _temp7158];}) ==(
+int)({ struct _tagged_ptr1 _temp7159= yyss; short* _temp7161= _temp7159.curr +
+yyssp_offset; if( _temp7161 < _temp7159.base? 1: _temp7161 >= _temp7159.last_plus_one){
+_throw( Null_Exception);}* _temp7161;}): 0){ yystate=( int)({ short* _temp7162=(
+short*) Cyc_yytable; unsigned int _temp7163= yystate; if( _temp7163 >= 3998u){
+_throw( Null_Exception);} _temp7162[ _temp7163];});} else{ yystate=( int)({
+short* _temp7164=( short*) Cyc_yydefgoto; unsigned int _temp7165= yyn - 120; if(
+_temp7165 >= 107u){ _throw( Null_Exception);} _temp7164[ _temp7165];});} goto
 yynewstate; yyerrlab: if( yyerrstatus == 0){ ++ Cyc_yynerrs; yyn=( int)({ short*
-_temp7184=( short*) Cyc_yypact; unsigned int _temp7185= yystate; if( _temp7185
->= 731u){ _throw( Null_Exception);} _temp7184[ _temp7185];}); if( yyn > - 32768?
-yyn < 4026: 0){ int sze= 0; struct _tagged_string msg; int x; int count; count=
+_temp7166=( short*) Cyc_yypact; unsigned int _temp7167= yystate; if( _temp7167
+>= 728u){ _throw( Null_Exception);} _temp7166[ _temp7167];}); if( yyn > - 32768?
+yyn < 3997: 0){ int sze= 0; struct _tagged_string msg; int x; int count; count=
 0; for( x= yyn < 0? - yyn: 0;( unsigned int) x < 227u / sizeof( char*); x ++){
-if(( int)({ short* _temp7186=( short*) Cyc_yycheck; unsigned int _temp7187= x +
-yyn; if( _temp7187 >= 4027u){ _throw( Null_Exception);} _temp7186[ _temp7187];})
+if(( int)({ short* _temp7168=( short*) Cyc_yycheck; unsigned int _temp7169= x +
+yyn; if( _temp7169 >= 3998u){ _throw( Null_Exception);} _temp7168[ _temp7169];})
 == x){( unsigned int)( sze += Cyc_String_strlen(({ struct _tagged_string*
-_temp7188=( struct _tagged_string*) Cyc_yytname; unsigned int _temp7189= x; if(
-_temp7189 >= 227u){ _throw( Null_Exception);} _temp7188[ _temp7189];})) +(
-unsigned int) 15), count ++;}} msg=({ unsigned int _temp7190=( unsigned int)(
-sze + 15); char* _temp7191=( char*) GC_malloc_atomic( sizeof( char) * _temp7190);
-unsigned int i; struct _tagged_string _temp7192={ _temp7191, _temp7191,
-_temp7191 + _temp7190}; for( i= 0; i < _temp7190; i ++){ _temp7191[ i]='\000';}
-_temp7192;}); Cyc_String_strcpy( msg,( struct _tagged_string)({ char* _temp7193=(
-char*)"parse error"; struct _tagged_string _temp7194; _temp7194.curr= _temp7193;
-_temp7194.base= _temp7193; _temp7194.last_plus_one= _temp7193 + 12; _temp7194;}));
+_temp7170=( struct _tagged_string*) Cyc_yytname; unsigned int _temp7171= x; if(
+_temp7171 >= 227u){ _throw( Null_Exception);} _temp7170[ _temp7171];})) +(
+unsigned int) 15), count ++;}} msg=({ unsigned int _temp7172=( unsigned int)(
+sze + 15); char* _temp7173=( char*) GC_malloc_atomic( sizeof( char) * _temp7172);
+unsigned int i; struct _tagged_string _temp7174={ _temp7173, _temp7173,
+_temp7173 + _temp7172}; for( i= 0; i < _temp7172; i ++){ _temp7173[ i]='\000';}
+_temp7174;}); Cyc_String_strcpy( msg,( struct _tagged_string)({ char* _temp7175=(
+char*)"parse error"; struct _tagged_string _temp7176; _temp7176.curr= _temp7175;
+_temp7176.base= _temp7175; _temp7176.last_plus_one= _temp7175 + 12; _temp7176;}));
 if( count < 5){ count= 0; for( x= yyn < 0? - yyn: 0;( unsigned int) x < 227u /
-sizeof( char*); x ++){ if(( int)({ short* _temp7195=( short*) Cyc_yycheck;
-unsigned int _temp7196= x + yyn; if( _temp7196 >= 4027u){ _throw( Null_Exception);}
-_temp7195[ _temp7196];}) == x){ Cyc_String_strcat( msg, count == 0?( struct
-_tagged_string)({ char* _temp7197=( char*)", expecting `"; struct _tagged_string
-_temp7198; _temp7198.curr= _temp7197; _temp7198.base= _temp7197; _temp7198.last_plus_one=
-_temp7197 + 14; _temp7198;}):( struct _tagged_string)({ char* _temp7199=( char*)" or `";
-struct _tagged_string _temp7200; _temp7200.curr= _temp7199; _temp7200.base=
-_temp7199; _temp7200.last_plus_one= _temp7199 + 6; _temp7200;})); Cyc_String_strcat(
-msg,({ struct _tagged_string* _temp7201=( struct _tagged_string*) Cyc_yytname;
-unsigned int _temp7202= x; if( _temp7202 >= 227u){ _throw( Null_Exception);}
-_temp7201[ _temp7202];})); Cyc_String_strcat( msg,( struct _tagged_string)({
-char* _temp7203=( char*)"'"; struct _tagged_string _temp7204; _temp7204.curr=
-_temp7203; _temp7204.base= _temp7203; _temp7204.last_plus_one= _temp7203 + 2;
-_temp7204;})); count ++;}}} Cyc_yyerror( msg);} else{ Cyc_yyerror(( struct
-_tagged_string)({ char* _temp7205=( char*)"parse error"; struct _tagged_string
-_temp7206; _temp7206.curr= _temp7205; _temp7206.base= _temp7205; _temp7206.last_plus_one=
-_temp7205 + 12; _temp7206;}));}} goto yyerrlab1; yyerrlab1: if( yyerrstatus == 3){
+sizeof( char*); x ++){ if(( int)({ short* _temp7177=( short*) Cyc_yycheck;
+unsigned int _temp7178= x + yyn; if( _temp7178 >= 3998u){ _throw( Null_Exception);}
+_temp7177[ _temp7178];}) == x){ Cyc_String_strcat( msg, count == 0?( struct
+_tagged_string)({ char* _temp7179=( char*)", expecting `"; struct _tagged_string
+_temp7180; _temp7180.curr= _temp7179; _temp7180.base= _temp7179; _temp7180.last_plus_one=
+_temp7179 + 14; _temp7180;}):( struct _tagged_string)({ char* _temp7181=( char*)" or `";
+struct _tagged_string _temp7182; _temp7182.curr= _temp7181; _temp7182.base=
+_temp7181; _temp7182.last_plus_one= _temp7181 + 6; _temp7182;})); Cyc_String_strcat(
+msg,({ struct _tagged_string* _temp7183=( struct _tagged_string*) Cyc_yytname;
+unsigned int _temp7184= x; if( _temp7184 >= 227u){ _throw( Null_Exception);}
+_temp7183[ _temp7184];})); Cyc_String_strcat( msg,( struct _tagged_string)({
+char* _temp7185=( char*)"'"; struct _tagged_string _temp7186; _temp7186.curr=
+_temp7185; _temp7186.base= _temp7185; _temp7186.last_plus_one= _temp7185 + 2;
+_temp7186;})); count ++;}}} Cyc_yyerror( msg);} else{ Cyc_yyerror(( struct
+_tagged_string)({ char* _temp7187=( char*)"parse error"; struct _tagged_string
+_temp7188; _temp7188.curr= _temp7187; _temp7188.base= _temp7187; _temp7188.last_plus_one=
+_temp7187 + 12; _temp7188;}));}} goto yyerrlab1; yyerrlab1: if( yyerrstatus == 3){
 if( Cyc_yychar == 0){ return 1;} Cyc_yychar= - 2;} yyerrstatus= 3; goto
 yyerrhandle; yyerrdefault: yyerrpop: if( yyssp_offset == 0){ return 1;}
-yyvsp_offset --; yystate=( int)({ struct _tagged_ptr1 _temp7207= yyss; short*
-_temp7209= _temp7207.curr +( -- yyssp_offset); if( _temp7209 < _temp7207.base? 1:
-_temp7209 >= _temp7207.last_plus_one){ _throw( Null_Exception);}* _temp7209;});
-yylsp_offset --; yyerrhandle: yyn=( int)({ short* _temp7210=( short*) Cyc_yypact;
-unsigned int _temp7211= yystate; if( _temp7211 >= 731u){ _throw( Null_Exception);}
-_temp7210[ _temp7211];}); if( yyn == - 32768){ goto yyerrdefault;} yyn += 1; if((
-yyn < 0? 1: yyn > 4026)? 1:( int)({ short* _temp7212=( short*) Cyc_yycheck;
-unsigned int _temp7213= yyn; if( _temp7213 >= 4027u){ _throw( Null_Exception);}
-_temp7212[ _temp7213];}) != 1){ goto yyerrdefault;} yyn=( int)({ short*
-_temp7214=( short*) Cyc_yytable; unsigned int _temp7215= yyn; if( _temp7215 >=
-4027u){ _throw( Null_Exception);} _temp7214[ _temp7215];}); if( yyn < 0){ if(
+yyvsp_offset --; yystate=( int)({ struct _tagged_ptr1 _temp7189= yyss; short*
+_temp7191= _temp7189.curr +( -- yyssp_offset); if( _temp7191 < _temp7189.base? 1:
+_temp7191 >= _temp7189.last_plus_one){ _throw( Null_Exception);}* _temp7191;});
+yylsp_offset --; yyerrhandle: yyn=( int)({ short* _temp7192=( short*) Cyc_yypact;
+unsigned int _temp7193= yystate; if( _temp7193 >= 728u){ _throw( Null_Exception);}
+_temp7192[ _temp7193];}); if( yyn == - 32768){ goto yyerrdefault;} yyn += 1; if((
+yyn < 0? 1: yyn > 3997)? 1:( int)({ short* _temp7194=( short*) Cyc_yycheck;
+unsigned int _temp7195= yyn; if( _temp7195 >= 3998u){ _throw( Null_Exception);}
+_temp7194[ _temp7195];}) != 1){ goto yyerrdefault;} yyn=( int)({ short*
+_temp7196=( short*) Cyc_yytable; unsigned int _temp7197= yyn; if( _temp7197 >=
+3998u){ _throw( Null_Exception);} _temp7196[ _temp7197];}); if( yyn < 0){ if(
 yyn == - 32768){ goto yyerrpop;} yyn= - yyn; goto yyreduce;} else{ if( yyn == 0){
-goto yyerrpop;}} if( yyn == 730){ return 0;}({ struct _tagged_ptr2 _temp7216=
-yyvs; struct _xtunion_struct** _temp7218= _temp7216.curr +( ++ yyvsp_offset);
-if( _temp7218 < _temp7216.base? 1: _temp7218 >= _temp7216.last_plus_one){ _throw(
-Null_Exception);}* _temp7218= Cyc_yylval;});({ struct _tagged_ptr3 _temp7219=
-yyls; struct Cyc_Yyltype* _temp7221= _temp7219.curr +( ++ yylsp_offset); if(
-_temp7221 < _temp7219.base? 1: _temp7221 >= _temp7219.last_plus_one){ _throw(
-Null_Exception);}* _temp7221= Cyc_yylloc;}); goto yynewstate;} void Cyc_yyprint(
-int i, struct _xtunion_struct* v){ struct _xtunion_struct* _temp7222= v; struct
-_tuple12* _temp7242; struct _tuple12 _temp7244; int _temp7245; void* _temp7247;
-char _temp7249; short _temp7251; struct _tagged_string _temp7253; struct Cyc_Core_Opt*
-_temp7255; struct Cyc_Core_Opt* _temp7257; struct Cyc_Core_Opt _temp7259; struct
-_tagged_string* _temp7260; struct _tuple1* _temp7262; struct _tuple1 _temp7264;
-struct _tagged_string* _temp7265; void* _temp7267; _LL7224: if( _temp7222->tag
-== Cyc_Okay_tok_tag){ goto _LL7225;} else{ goto _LL7226;} _LL7226: if((*((
-struct _xtunion_struct*) _temp7222)).tag == Cyc_Int_tok_tag){ _LL7243: _temp7242=((
-struct Cyc_Int_tok_struct*) _temp7222)->f1; _temp7244=* _temp7242; _LL7248:
-_temp7247= _temp7244.f1; goto _LL7246; _LL7246: _temp7245= _temp7244.f2; goto
-_LL7227;} else{ goto _LL7228;} _LL7228: if((*(( struct _xtunion_struct*)
-_temp7222)).tag == Cyc_Char_tok_tag){ _LL7250: _temp7249=(( struct Cyc_Char_tok_struct*)
-_temp7222)->f1; goto _LL7229;} else{ goto _LL7230;} _LL7230: if((*(( struct
-_xtunion_struct*) _temp7222)).tag == Cyc_Short_tok_tag){ _LL7252: _temp7251=((
-struct Cyc_Short_tok_struct*) _temp7222)->f1; goto _LL7231;} else{ goto _LL7232;}
-_LL7232: if((*(( struct _xtunion_struct*) _temp7222)).tag == Cyc_String_tok_tag){
-_LL7254: _temp7253=(( struct Cyc_String_tok_struct*) _temp7222)->f1; goto
-_LL7233;} else{ goto _LL7234;} _LL7234: if((*(( struct _xtunion_struct*)
-_temp7222)).tag == Cyc_Stringopt_tok_tag){ _LL7256: _temp7255=(( struct Cyc_Stringopt_tok_struct*)
-_temp7222)->f1; if( _temp7255 == 0){ goto _LL7235;} else{ goto _LL7236;}} else{
-goto _LL7236;} _LL7236: if((*(( struct _xtunion_struct*) _temp7222)).tag == Cyc_Stringopt_tok_tag){
-_LL7258: _temp7257=(( struct Cyc_Stringopt_tok_struct*) _temp7222)->f1; if(
-_temp7257 == 0){ goto _LL7238;} else{ _temp7259=* _temp7257; _LL7261: _temp7260=(
-struct _tagged_string*) _temp7259.v; goto _LL7237;}} else{ goto _LL7238;}
-_LL7238: if((*(( struct _xtunion_struct*) _temp7222)).tag == Cyc_QualId_tok_tag){
-_LL7263: _temp7262=(( struct Cyc_QualId_tok_struct*) _temp7222)->f1; _temp7264=*
-_temp7262; _LL7268: _temp7267= _temp7264.f1; goto _LL7266; _LL7266: _temp7265=
-_temp7264.f2; goto _LL7239;} else{ goto _LL7240;} _LL7240: goto _LL7241; _LL7225:
-fprintf( Cyc_Stdio_stderr,"ok"); goto _LL7223; _LL7227: fprintf( Cyc_Stdio_stderr,"%d",
-_temp7245); goto _LL7223; _LL7229: fprintf( Cyc_Stdio_stderr,"%c",( int)
-_temp7249); goto _LL7223; _LL7231: fprintf( Cyc_Stdio_stderr,"%ds",( int)
-_temp7251); goto _LL7223; _LL7233:({ struct _tagged_string _temp7269= _temp7253;
-fprintf( Cyc_Stdio_stderr,"\"%.*s\"", _temp7269.last_plus_one - _temp7269.curr,
-_temp7269.curr);}); goto _LL7223; _LL7235: fprintf( Cyc_Stdio_stderr,"null");
-goto _LL7223; _LL7237:({ struct _tagged_string _temp7270=* _temp7260; fprintf(
-Cyc_Stdio_stderr,"\"%.*s\"", _temp7270.last_plus_one - _temp7270.curr, _temp7270.curr);});
-goto _LL7223; _LL7239: { struct Cyc_List_List* prefix= 0;{ void* _temp7271=
-_temp7267; struct Cyc_List_List* _temp7279; struct Cyc_List_List* _temp7281;
-_LL7273: if(( unsigned int) _temp7271 > 1u?(( struct _tunion_struct*) _temp7271)->tag
-== Cyc_Absyn_Rel_n_tag: 0){ _LL7280: _temp7279=( struct Cyc_List_List*)(( struct
-Cyc_Absyn_Rel_n_struct*) _temp7271)->f1; goto _LL7274;} else{ goto _LL7275;}
-_LL7275: if(( unsigned int) _temp7271 > 1u?(( struct _tunion_struct*) _temp7271)->tag
-== Cyc_Absyn_Abs_n_tag: 0){ _LL7282: _temp7281=( struct Cyc_List_List*)(( struct
-Cyc_Absyn_Abs_n_struct*) _temp7271)->f1; goto _LL7276;} else{ goto _LL7277;}
-_LL7277: if(( int) _temp7271 == Cyc_Absyn_Loc_n){ goto _LL7278;} else{ goto
-_LL7272;} _LL7274: prefix= _temp7279; goto _LL7272; _LL7276: prefix= _temp7281;
-goto _LL7272; _LL7278: goto _LL7272; _LL7272:;} for( 0; prefix != 0; prefix=
-prefix->tl){({ struct _tagged_string _temp7283=*(( struct _tagged_string*)
-prefix->hd); fprintf( Cyc_Stdio_stderr,"%.*s::", _temp7283.last_plus_one -
-_temp7283.curr, _temp7283.curr);});}({ struct _tagged_string _temp7284=*
-_temp7265; fprintf( Cyc_Stdio_stderr,"%.*s::", _temp7284.last_plus_one -
-_temp7284.curr, _temp7284.curr);}); goto _LL7223;} _LL7241: fprintf( Cyc_Stdio_stderr,"?");
-goto _LL7223; _LL7223:;} struct Cyc_List_List* Cyc_Parse_parse_file( struct Cyc_Stdio___sFILE*
-f){ Cyc_Parse_parse_result= 0; Cyc_Parse_lbuf=({ struct Cyc_Core_Opt* _temp7285=(
-struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp7285->v=(
-void*) Cyc_Lexing_from_file( f); _temp7285;}); Cyc_yyparse(); return Cyc_Parse_parse_result;}
+goto yyerrpop;}} if( yyn == 727){ return 0;}({ struct _tagged_ptr2 _temp7198=
+yyvs; struct _xtunion_struct** _temp7200= _temp7198.curr +( ++ yyvsp_offset);
+if( _temp7200 < _temp7198.base? 1: _temp7200 >= _temp7198.last_plus_one){ _throw(
+Null_Exception);}* _temp7200= Cyc_yylval;});({ struct _tagged_ptr3 _temp7201=
+yyls; struct Cyc_Yyltype* _temp7203= _temp7201.curr +( ++ yylsp_offset); if(
+_temp7203 < _temp7201.base? 1: _temp7203 >= _temp7201.last_plus_one){ _throw(
+Null_Exception);}* _temp7203= Cyc_yylloc;}); goto yynewstate;} void Cyc_yyprint(
+int i, struct _xtunion_struct* v){ struct _xtunion_struct* _temp7204= v; struct
+_tuple12* _temp7224; struct _tuple12 _temp7226; int _temp7227; void* _temp7229;
+char _temp7231; short _temp7233; struct _tagged_string _temp7235; struct Cyc_Core_Opt*
+_temp7237; struct Cyc_Core_Opt* _temp7239; struct Cyc_Core_Opt _temp7241; struct
+_tagged_string* _temp7242; struct _tuple1* _temp7244; struct _tuple1 _temp7246;
+struct _tagged_string* _temp7247; void* _temp7249; _LL7206: if( _temp7204->tag
+== Cyc_Okay_tok_tag){ goto _LL7207;} else{ goto _LL7208;} _LL7208: if((*((
+struct _xtunion_struct*) _temp7204)).tag == Cyc_Int_tok_tag){ _LL7225: _temp7224=((
+struct Cyc_Int_tok_struct*) _temp7204)->f1; _temp7226=* _temp7224; _LL7230:
+_temp7229= _temp7226.f1; goto _LL7228; _LL7228: _temp7227= _temp7226.f2; goto
+_LL7209;} else{ goto _LL7210;} _LL7210: if((*(( struct _xtunion_struct*)
+_temp7204)).tag == Cyc_Char_tok_tag){ _LL7232: _temp7231=(( struct Cyc_Char_tok_struct*)
+_temp7204)->f1; goto _LL7211;} else{ goto _LL7212;} _LL7212: if((*(( struct
+_xtunion_struct*) _temp7204)).tag == Cyc_Short_tok_tag){ _LL7234: _temp7233=((
+struct Cyc_Short_tok_struct*) _temp7204)->f1; goto _LL7213;} else{ goto _LL7214;}
+_LL7214: if((*(( struct _xtunion_struct*) _temp7204)).tag == Cyc_String_tok_tag){
+_LL7236: _temp7235=(( struct Cyc_String_tok_struct*) _temp7204)->f1; goto
+_LL7215;} else{ goto _LL7216;} _LL7216: if((*(( struct _xtunion_struct*)
+_temp7204)).tag == Cyc_Stringopt_tok_tag){ _LL7238: _temp7237=(( struct Cyc_Stringopt_tok_struct*)
+_temp7204)->f1; if( _temp7237 == 0){ goto _LL7217;} else{ goto _LL7218;}} else{
+goto _LL7218;} _LL7218: if((*(( struct _xtunion_struct*) _temp7204)).tag == Cyc_Stringopt_tok_tag){
+_LL7240: _temp7239=(( struct Cyc_Stringopt_tok_struct*) _temp7204)->f1; if(
+_temp7239 == 0){ goto _LL7220;} else{ _temp7241=* _temp7239; _LL7243: _temp7242=(
+struct _tagged_string*) _temp7241.v; goto _LL7219;}} else{ goto _LL7220;}
+_LL7220: if((*(( struct _xtunion_struct*) _temp7204)).tag == Cyc_QualId_tok_tag){
+_LL7245: _temp7244=(( struct Cyc_QualId_tok_struct*) _temp7204)->f1; _temp7246=*
+_temp7244; _LL7250: _temp7249= _temp7246.f1; goto _LL7248; _LL7248: _temp7247=
+_temp7246.f2; goto _LL7221;} else{ goto _LL7222;} _LL7222: goto _LL7223; _LL7207:
+fprintf( Cyc_Stdio_stderr,"ok"); goto _LL7205; _LL7209: fprintf( Cyc_Stdio_stderr,"%d",
+_temp7227); goto _LL7205; _LL7211: fprintf( Cyc_Stdio_stderr,"%c",( int)
+_temp7231); goto _LL7205; _LL7213: fprintf( Cyc_Stdio_stderr,"%ds",( int)
+_temp7233); goto _LL7205; _LL7215:({ struct _tagged_string _temp7251= _temp7235;
+fprintf( Cyc_Stdio_stderr,"\"%.*s\"", _temp7251.last_plus_one - _temp7251.curr,
+_temp7251.curr);}); goto _LL7205; _LL7217: fprintf( Cyc_Stdio_stderr,"null");
+goto _LL7205; _LL7219:({ struct _tagged_string _temp7252=* _temp7242; fprintf(
+Cyc_Stdio_stderr,"\"%.*s\"", _temp7252.last_plus_one - _temp7252.curr, _temp7252.curr);});
+goto _LL7205; _LL7221: { struct Cyc_List_List* prefix= 0;{ void* _temp7253=
+_temp7249; struct Cyc_List_List* _temp7261; struct Cyc_List_List* _temp7263;
+_LL7255: if(( unsigned int) _temp7253 > 1u?(( struct _tunion_struct*) _temp7253)->tag
+== Cyc_Absyn_Rel_n_tag: 0){ _LL7262: _temp7261=( struct Cyc_List_List*)(( struct
+Cyc_Absyn_Rel_n_struct*) _temp7253)->f1; goto _LL7256;} else{ goto _LL7257;}
+_LL7257: if(( unsigned int) _temp7253 > 1u?(( struct _tunion_struct*) _temp7253)->tag
+== Cyc_Absyn_Abs_n_tag: 0){ _LL7264: _temp7263=( struct Cyc_List_List*)(( struct
+Cyc_Absyn_Abs_n_struct*) _temp7253)->f1; goto _LL7258;} else{ goto _LL7259;}
+_LL7259: if(( int) _temp7253 == Cyc_Absyn_Loc_n){ goto _LL7260;} else{ goto
+_LL7254;} _LL7256: prefix= _temp7261; goto _LL7254; _LL7258: prefix= _temp7263;
+goto _LL7254; _LL7260: goto _LL7254; _LL7254:;} for( 0; prefix != 0; prefix=
+prefix->tl){({ struct _tagged_string _temp7265=*(( struct _tagged_string*)
+prefix->hd); fprintf( Cyc_Stdio_stderr,"%.*s::", _temp7265.last_plus_one -
+_temp7265.curr, _temp7265.curr);});}({ struct _tagged_string _temp7266=*
+_temp7247; fprintf( Cyc_Stdio_stderr,"%.*s::", _temp7266.last_plus_one -
+_temp7266.curr, _temp7266.curr);}); goto _LL7205;} _LL7223: fprintf( Cyc_Stdio_stderr,"?");
+goto _LL7205; _LL7205:;} struct Cyc_List_List* Cyc_Parse_parse_file( struct Cyc_Stdio___sFILE*
+f){ Cyc_Parse_parse_result= 0; Cyc_Parse_lbuf=({ struct Cyc_Core_Opt* _temp7267=(
+struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp7267->v=(
+void*) Cyc_Lexing_from_file( f); _temp7267;}); Cyc_yyparse(); return Cyc_Parse_parse_result;}

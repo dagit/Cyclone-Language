@@ -21,10 +21,10 @@ struct Cyc_List_List_empty_struct{ char* tag; } ; extern char Cyc_List_List_mism
 14u]; struct Cyc_List_List_mismatch_struct{ char* tag; } ; extern char Cyc_List_Nth_tag[
 4u]; struct Cyc_List_Nth_struct{ char* tag; } ; struct Cyc_Splay_node; struct
 Cyc_Splay_noderef{ struct Cyc_Splay_node* v; } ; typedef void* Cyc_Splay_tree;
-extern const unsigned int Cyc_Splay_Leaf; extern const int Cyc_Splay_Node_tag;
-struct Cyc_Splay_Node_struct{ int tag; struct Cyc_Splay_noderef* f1; } ; struct
-Cyc_Splay_node{ void* key; void* data; void* left; void* right; } ; extern int
-Cyc_Splay_splay( int(* f)( void*, void*), void*, void*); struct Cyc_SlowDict_Dict;
+static const unsigned int Cyc_Splay_Leaf= 0; static const int Cyc_Splay_Node_tag=
+0; struct Cyc_Splay_Node_struct{ int tag; struct Cyc_Splay_noderef* f1; } ;
+struct Cyc_Splay_node{ void* key; void* data; void* left; void* right; } ;
+extern int Cyc_Splay_splay( int(* f)( void*, void*), void*, void*); struct Cyc_SlowDict_Dict;
 typedef struct Cyc_SlowDict_Dict* Cyc_SlowDict_hdict_t; typedef struct Cyc_SlowDict_Dict*
 Cyc_SlowDict_dict_t; extern char Cyc_SlowDict_Present_tag[ 8u]; struct Cyc_SlowDict_Present_struct{
 char* tag; } ; extern char Cyc_SlowDict_Absent_tag[ 7u]; struct Cyc_SlowDict_Absent_struct{
