@@ -121,12 +121,7 @@ typedef	struct _types_fd_set {
 #define	FD_SET(n,p)   ((p)->fds_bits[(n)/NFDBITS] |= (1L << ((n) % NFDBITS)))
 #define	FD_CLR(n,p)   ((p)->fds_bits[(n)/NFDBITS] &= ~(1L << ((n) % NFDBITS)))
 #define	FD_ISSET(n,p) ((p)->fds_bits[(n)/NFDBITS] & (1L << ((n) % NFDBITS)))
-#define	FD_ZERO(p)	({ \
-     size_t __i; \
-     char *__tmp = (char *)p; \
-     for (__i = 0; __i < sizeof (*(p)); ++__i) \
-       *__tmp++ = 0; \
-})
+#define	FD_ZERO(p) for(int i=0;i<howmany(FD_SETSIZE,NFDBITS);i++)(p)->fds_bits[i]=0
 
 #undef __MS_types__
 #undef _ST_INT32

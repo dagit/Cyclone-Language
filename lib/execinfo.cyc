@@ -1,0 +1,85 @@
+#include <core.h>
+#include <execinfo.h>
+using Core;
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <signal.h>
+
+namespace Cexecinfo {
+#ifdef __linux__
+  extern "C" int backtrace(int *, int);
+#endif
+}
+
+namespace Execinfo;
+using Stdio;
+
+int backtrace(int ?array, int size) {
+#ifdef __linux__
+  if (size > array.size) throw new Failure("backtrace: size > array.size");
+  return Cexecinfo::backtrace((int*)array, size);
+#else
+  throw new Failure("backtrace: unsupported except under Linux");
+  return 0;
+#endif
+}
+
+#ifndef __linux__
+int bt(void) { return 1; }
+#else
+int bt(void) {
+  int bt[20] = { for i < 20 : 0 }; // should be able to omit bound
+  int tochild[2] = {0,0}, fromchild[2] = {0,0};
+  pid_t pid, self_pid;
+
+  if (Unistd::pipe(tochild) || Unistd::pipe(fromchild)) return 1;
+
+  self_pid = Unistd::getpid(); // gotta get it before we fork
+  if ((pid = Unistd::fork()) == 0) { // we are child
+    if (Unistd::dup2(tochild[0], STDIN_FILENO) == -1 ||
+        Unistd::dup2(fromchild[1], STDOUT_FILENO) == -1)
+      return 1;
+    Unistd::execlp("addr2line", "addr2line", "--functions", "-e",
+                   aprintf("/proc/%d/exe", self_pid), NULL);
+    return 1;
+  } else if (pid < 0) { // fork failed
+    Unistd::close(tochild[0]); Unistd::close(tochild[1]);
+    Unistd::close(fromchild[0]); Unistd::close(fromchild[1]);
+    return 1;
+  }
+
+  FILE @w = ({ FILE *f = fdopen(tochild[1], "w");
+               if (!f) return 1; (FILE@)f; });
+  FILE @r = ({ FILE *f = fdopen(fromchild[0], "r");
+               if (!f) {fclose(w);return 1;} (FILE@)f; });
+
+  int n = backtrace(bt, bt.size);
+  for (int c = 0; c < n; c++)
+    fprintf(w,"%#x\n", bt[c]);
+  fflush(w);
+  printf("Backtrace:\n"
+         "  Function          Location\n"
+         "  ----------------  --------------------------------\n");
+  for (int c = 0; c < n; c++) {
+    int d, pos=0;
+    printf("  ");
+    while ((d = getc(r)) != '\n') {
+      putchar(d), pos++;
+    }
+    while (pos++ < 16)
+      putchar(' ');
+    printf("  ");
+    while ((d = getc(r)) != '\n')
+      putchar(d);
+    putchar('\n');
+  }
+  fclose(r); fclose(w);
+  Signal::kill(pid, SIGTERM);
+  Wait::waitpid(pid, NULL, 0);
+  return 0;
+}
+#endif

@@ -20,8 +20,8 @@ namespace Resource {
     rlim_t rlim_max;
   };
 
-  extern "C" int getrlimit(int resource, struct rlimit @rlim);
-  extern "C" int setrlimit(int resource, const struct rlimit @rlim);
+  extern "C" int getrlimit(int resource, struct rlimit @`r rlim);
+  extern "C" int setrlimit(int resource, const struct rlimit @`r rlim);
 }
 
 #endif

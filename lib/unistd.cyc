@@ -7,6 +7,7 @@ namespace Cunistd {
     int chdir(Cstring);
     Cstring<`r> getcwd(Cstring<`r> buf, size_t size);
     int execv(Cstring path, Cstring *argv);
+    int execvp(Cstring file, Cstring *argv);
     int execve(Cstring path, Cstring *argv, Cstring *envp);
     ssize_t read(int fd, Cstring buf, size_t count);
     ssize_t write(int fd, Cstring buf, size_t count);
@@ -41,7 +42,19 @@ int execl(string_t path, string_t arg0, ...`r string_t argv) {
   return Cunistd::execv(string_to_Cstring(path), (Cstring*) newargs);
 }
 
-int execve(string_t filename, string_t ?argv, string_t ?envp) {
+int execlp(string_t path, string_t arg0, ...`r string_t argv) {
+  if (argv[argv.size - 1] != null)
+    throw new Failure("execl: arg list must be null-terminated");
+
+  // We allocate 1+argv.size because we need to prepend arg0
+  Cstring ?newargs = new {for i < 1 + argv.size : null};
+  newargs[0] = string_to_Cstring(arg0);
+  for (int i = 0; i < argv.size; i++)
+    newargs[i+1] = string_to_Cstring(argv[i]);
+  return Cunistd::execvp(string_to_Cstring(path), (Cstring*) newargs);
+}
+
+int execve(string_t filename, string_t const ?argv, string_t const ?envp) {
   if (argv[argv.size - 1] != null)
     throw new Failure("execve: arg list must be null-terminated");
 

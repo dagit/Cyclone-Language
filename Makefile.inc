@@ -38,6 +38,7 @@ CYCLONE_LIBS:=arg\
         dict\
 	dirent\
         errno\
+	execinfo\
 	fcntl\
         filename\
         fn\
@@ -83,6 +84,7 @@ CYCLONE_H:=arg.h\
         dict.h\
 	dirent.h\
         errno.h\
+	execinfo.h\
 	fcntl.h\
         filename.h\
         fn.h\

@@ -10,6 +10,10 @@ BUG FIXES and UNSOUNDNESSES:
 
 * can't cast char?? to const char? const ? (or whatever it is.)
 
+* int foo[] = { 0,0,0 } works but int foo[] = { for i < 3 : 0 }
+  doesn't
+
+
 * add F-bounded polymorphism or at least make it possible to abstract
   qualifiers.  The string library isn't polymorphic enough because in
   many places, we want to pass in a mutable string and get out the
@@ -59,9 +63,10 @@ function declarations are only allowed at top-level.
 
 * are we treating void properly?
 
-* Implementation of exceptions assumes sizeof(void *) == sizeof(int)
-  Also we don't follow C's rules about variables live across longjmp
-  being declared volatile and setjmp only appearing in guards.
+* Implementations of exceptions and backtrace() assume sizeof(void *)
+  == sizeof(int) Also we don't follow C's rules about variables live
+  across longjmp being declared volatile and setjmp only appearing in
+  guards.
 
 * Let programmer catch Null_Exception and Match_Exception.  They are
   not in the initial environment, so they look like variables in patterns.

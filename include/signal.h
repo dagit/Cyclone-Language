@@ -68,6 +68,8 @@ namespace Signal {
   extern void _SIG_DFL(int;{});
   extern void _SIG_IGN(int;{});
   extern void _SIG_ERR(int;{});
+
+  extern "C" int kill(pid_t, int);
 }
 
 #endif

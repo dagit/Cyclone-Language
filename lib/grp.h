@@ -13,6 +13,7 @@ namespace Grp {
 
   extern struct group *getgrnam(string_t name);
   extern struct group *getgrgid(uid_t uid);
+  extern int initgroups(string_t user, gid_t group);
 }
 
 #endif

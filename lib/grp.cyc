@@ -12,6 +12,7 @@ namespace Cgrp {
   extern "C" {
     struct Cgroup *getgrnam(const Cstring name);
     struct Cgroup *getgrgid(gid_t gid);
+    int initgroups(Cstring user, gid_t group);
   }
 #define s2c(x) (string_to_Cstring(x))
 #define c2s(x) (Cstring_to_string(x))
@@ -35,4 +36,8 @@ struct group *getgrgid(gid_t gid) {
                              .gr_gid = src->gr_gid,
                              .gr_mem = ntCsl_to_ntsl(src->gr_mem)}
     : null;
+}
+
+int initgroups(string_t user, gid_t group) {
+  return Cgrp::initgroups(s2c(user), group);
 }

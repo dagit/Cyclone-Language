@@ -4,6 +4,7 @@
 #include <core.h>
 #include <sys/types.h>
 #include <getopt.h> // Since ordinary getopt() belongs in unistd.h
+// This means you need "using Getopt" if you're "using Unistd"
 
 namespace Unistd {
 
@@ -43,7 +44,10 @@ namespace Unistd {
   int chdir(string_t);
   char ?`r getcwd(char ?`r buf, size_t size);
   int execl(string_t path, string_t arg0, ...`r string_t argv);
-  int execve(string_t filename, string_t ?argv, string_t ?envp);
+  int execlp(string_t file, string_t arg0, ...`r string_t argv);
+  //int execv(string_t path, string_t const ?argv);
+  //int execp(string_t file, string_t const ?argv);
+  int execve(string_t filename, string_t const ?argv, string_t const ?envp);
   ssize_t read(int fd, mstring_t buf, size_t count);
   ssize_t write(int fd, string_t buf, size_t count);
   int unlink(string_t pathname);

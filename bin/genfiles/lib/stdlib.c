@@ -16,35 +16,25 @@ struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
 struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
 unsigned char*); extern int* __errno(); struct Cyc_Stdlib__Div{ int quot; int
-rem; } ; struct Cyc_Stdlib__Ldiv{ int quot; int rem; } ; extern int __mb_cur_max
- __attribute__(( dllimport )) ; extern int abs( int)  __attribute__(( cdecl )) ;
-extern int atexit( void(* __func)())  __attribute__(( cdecl )) ; extern struct
-Cyc_Stdlib__Div div( int __numer, int __denom)  __attribute__(( cdecl )) ;
-extern struct Cyc_Stdlib__Ldiv ldiv( int __numer, int __denom)  __attribute__((
-cdecl )) ; extern int rand()  __attribute__(( cdecl )) ; extern void srand(
-unsigned int __seed)  __attribute__(( cdecl )) ; extern int rand_r( unsigned int*
-__seed)  __attribute__(( cdecl )) ; extern int random()  __attribute__(( cdecl
-)) ; extern int srandom( unsigned int __seed)  __attribute__(( cdecl )) ; extern
-int grantpt( int)  __attribute__(( cdecl )) ; extern int unlockpt( int)
- __attribute__(( cdecl )) ; extern double Cyc_Stdlib_atof( struct _tagged_arr);
-extern int Cyc_Stdlib_atoi( struct _tagged_arr); extern int Cyc_Stdlib_atol(
+rem; } ; struct Cyc_Stdlib__Ldiv{ int quot; int rem; } ; extern int __mb_cur_max;
+extern int abs( int); extern int atexit( void(* __func)()); extern struct Cyc_Stdlib__Div
+div( int __numer, int __denom); extern struct Cyc_Stdlib__Ldiv ldiv( int __numer,
+int __denom); extern int rand(); extern void srand( unsigned int __seed); extern
+int rand_r( unsigned int* __seed); extern double Cyc_Stdlib_atof( struct
+_tagged_arr); extern int Cyc_Stdlib_atoi( struct _tagged_arr); extern int Cyc_Stdlib_atol(
 struct _tagged_arr); extern struct _tagged_arr Cyc_Stdlib_getenv( struct
 _tagged_arr); extern double Cyc_Stdlib_strtod( struct _tagged_arr n, struct
 _tagged_arr* end); extern int Cyc_Stdlib_strtol( struct _tagged_arr n, struct
 _tagged_arr* end, int base); extern unsigned int Cyc_Stdlib_strtoul( struct
 _tagged_arr n, struct _tagged_arr* end, int base); extern double atof(
-unsigned char* _nptr)  __attribute__(( cdecl )) ; extern int atoi( unsigned char*
-_nptr)  __attribute__(( cdecl )) ; extern int atol( unsigned char* _nptr)
- __attribute__(( cdecl )) ; extern unsigned char* getenv( unsigned char*
-__string)  __attribute__(( cdecl )) ; extern unsigned char* _findenv(
-unsigned char*, int*)  __attribute__(( cdecl )) ; extern int putenv(
-unsigned char* __string)  __attribute__(( cdecl )) ; extern double strtod(
-unsigned char*, unsigned char**)  __attribute__(( cdecl )) ; extern int strtol(
-unsigned char*, unsigned char**, int base)  __attribute__(( cdecl )) ; extern
-unsigned int strtoul( unsigned char*, unsigned char**, int base)
- __attribute__(( cdecl )) ; double Cyc_Stdlib_atof( struct _tagged_arr _nptr){
-return atof( string_to_Cstring( _nptr));} int Cyc_Stdlib_atoi( struct
-_tagged_arr _nptr){ return atoi( string_to_Cstring( _nptr));} int Cyc_Stdlib_atol(
+unsigned char* _nptr); extern int atoi( unsigned char* _nptr); extern int atol(
+unsigned char* _nptr); extern unsigned char* getenv( unsigned char* __string);
+extern unsigned char* _findenv( unsigned char*, int*); extern int putenv(
+unsigned char* __string); extern double strtod( unsigned char*, unsigned char**);
+extern int strtol( unsigned char*, unsigned char**, int base); extern
+unsigned int strtoul( unsigned char*, unsigned char**, int base); double Cyc_Stdlib_atof(
+struct _tagged_arr _nptr){ return atof( string_to_Cstring( _nptr));} int Cyc_Stdlib_atoi(
+struct _tagged_arr _nptr){ return atoi( string_to_Cstring( _nptr));} int Cyc_Stdlib_atol(
 struct _tagged_arr _nptr){ return atol( string_to_Cstring( _nptr));} struct
 _tagged_arr Cyc_Stdlib_getenv( struct _tagged_arr name){ return
 Cstring_to_string( getenv( string_to_Cstring( name)));} int Cyc_Stdlib_putenv(
