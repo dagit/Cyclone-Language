@@ -737,12 +737,13 @@ _temp74; _temp77;}); break;} else{ _temp74=({ struct Cyc_List_List* _temp79=(
 struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp79->hd=(
 void*)({ struct _tagged_arr* _temp80=( struct _tagged_arr*) GC_malloc( sizeof(
 struct _tagged_arr)); _temp80[ 0]=( struct _tagged_arr) Cyc_String_substring( s,
-0,(( struct _tagged_arr) _temp76).curr - s.curr); _temp80;}); _temp79->tl=
-_temp74; _temp79;}); _temp75 -=(( struct _tagged_arr) _temp76).curr - s.curr; s=
-_tagged_arr_plus( _temp76, sizeof( unsigned char), 1);}} return(( struct Cyc_List_List*(*)(
-struct Cyc_List_List* x)) Cyc_List_imp_rev)( _temp74);}} static int Cyc_file_exists(
-struct _tagged_arr file){ struct Cyc_Stdio___sFILE* f= 0;{ struct _handler_cons
-_temp81; _push_handler(& _temp81);{ int _temp83= 0; if( setjmp( _temp81.handler)){
+0,((( struct _tagged_arr) _temp76).curr - s.curr) / sizeof( unsigned char));
+_temp80;}); _temp79->tl= _temp74; _temp79;}); _temp75 -=((( struct _tagged_arr)
+_temp76).curr - s.curr) / sizeof( unsigned char); s= _tagged_arr_plus( _temp76,
+sizeof( unsigned char), 1);}} return(( struct Cyc_List_List*(*)( struct Cyc_List_List*
+x)) Cyc_List_imp_rev)( _temp74);}} static int Cyc_file_exists( struct
+_tagged_arr file){ struct Cyc_Stdio___sFILE* f= 0;{ struct _handler_cons _temp81;
+_push_handler(& _temp81);{ int _temp83= 0; if( setjmp( _temp81.handler)){
 _temp83= 1;} if( ! _temp83){ f=( struct Cyc_Stdio___sFILE*) Cyc_Stdio_file_open(
 file, _tag_arr("r", sizeof( unsigned char), 2u));; _pop_handler();} else{ void*
 _temp82=( void*) _exn_thrown; void* _temp85= _temp82; _LL87: goto _LL88; _LL89:

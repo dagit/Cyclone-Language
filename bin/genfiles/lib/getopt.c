@@ -177,12 +177,13 @@ _check_unknown_subscript( p, sizeof( struct Cyc_Getopt_option), 0u))->name).curr
 _tagged_arr_inplace_plus_post(& p, sizeof( struct Cyc_Getopt_option), 1),
 option_index ++)){ if( ! Cyc_String_strncmp((( const struct Cyc_Getopt_option*)
 _check_unknown_subscript( p, sizeof( struct Cyc_Getopt_option), 0u))->name,(
-struct _tagged_arr) Cyc_Getopt_nextchar, nameend.curr - Cyc_Getopt_nextchar.curr)){
-if( nameend.curr - Cyc_Getopt_nextchar.curr == Cyc_String_strlen((( const struct
-Cyc_Getopt_option*) _check_unknown_subscript( p, sizeof( struct Cyc_Getopt_option),
-0u))->name)){ pfound= p; indfound= option_index; exact= 1; break;} else{ if(
-pfound.curr ==(( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){ pfound= p;
-indfound= option_index;} else{ ambig= 1;}}}} if( ambig? ! exact: 0){ if( Cyc_Getopt_opterr){({
+struct _tagged_arr) Cyc_Getopt_nextchar,( nameend.curr - Cyc_Getopt_nextchar.curr)
+/ sizeof( unsigned char))){ if(( nameend.curr - Cyc_Getopt_nextchar.curr) /
+sizeof( unsigned char) == Cyc_String_strlen((( const struct Cyc_Getopt_option*)
+_check_unknown_subscript( p, sizeof( struct Cyc_Getopt_option), 0u))->name)){
+pfound= p; indfound= option_index; exact= 1; break;} else{ if( pfound.curr ==((
+struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){ pfound= p; indfound=
+option_index;} else{ ambig= 1;}}}} if( ambig? ! exact: 0){ if( Cyc_Getopt_opterr){({
 struct _tagged_arr _temp0=( struct _tagged_arr)*(( struct _tagged_arr*)
 _check_unknown_subscript( argv, sizeof( struct _tagged_arr), 0)); struct
 _tagged_arr _temp1=( struct _tagged_arr)*(( struct _tagged_arr*)

@@ -1244,7 +1244,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     case Minus:
       // only translation is for tagged arrays:
       // if e2 is not a tagged array, do just like plus of negation,
-      // else result type is unsigned int, so just subtract curr fields
+      // else result type is unsigned int, so subtract curr fields
       type_t elt_typ = VoidType;
       if(is_tagged_pointer_typ_elt(old_typs->hd,&elt_typ)) {
 	exp_t e1 = es->hd;
@@ -1252,6 +1252,8 @@ static void exp_to_c(env_t nv, exp_t e) {
 	if(is_tagged_pointer_typ(old_typs->tl->hd)) {
 	  e1->r = structmember_exp(new_exp(e1->r,DL),curr_sp,DL)->r;
 	  e2->r = structmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
+	  e->r  = prim2_exp(Div, copy_exp(e),
+			    sizeoftyp_exp(typ_to_c(elt_typ),DL),DL)->r;
 	} else {
 	  e->r = fncall_exp(_tagged_arr_plus_e,
 			    list(e1,sizeoftyp_exp(typ_to_c(elt_typ),DL),
