@@ -56,7 +56,7 @@ $(CYC_LIB_PATH)/gc.a:
 
 #This klduge replaces the PLATFORM_INCLUDE kludge -- we hope buildlib comes soon
 include/cstdio.h: include/cstdio.h_in include/arch/$(ARCH).h
-	-rm $@
+	-$(RM) $@
 	echo "#ifndef _STDIO_H" >> $@
 	echo "#define _STDIO_H" >> $@
 	echo "#define _EXTRACT_STDIOCONSTS" >> $@
@@ -64,7 +64,7 @@ include/cstdio.h: include/cstdio.h_in include/arch/$(ARCH).h
 	echo "#undef _EXTRACT_STDIOCONSTS" >> $@
 	cat $< >> $@
 include/csignal.h: include/csignal.h_in include/arch/$(ARCH).h
-	-rm $@
+	-$(RM) $@
 	echo "#ifndef _SIGNAL_H" >> $@
 	echo "#define _SIGNAL_H" >> $@
 	echo "#define _EXTRACT_SIGNALCONSTS" >> $@

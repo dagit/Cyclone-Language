@@ -65,7 +65,7 @@ $(CYCLIB): $(O_LIBS) $(RUNTIME).$(O)
 ifdef MS
 	lib /out:$@ $^
 else
-	-rm -f $@
+	-$(RM) -f $@
 ifdef LC_FLAG
 	$(CYCC) $(LC_FLAG) -o $@ $^
 else
@@ -108,7 +108,7 @@ endif
 
 #This klduge replaces the PLATFORM_INCLUDE kludge -- we hope buildlib comes soon
 cstdio.h: cstdio.h_in arch/$(UPDATEARCH).h
-	-rm $@
+	-$(RM) $@
 	echo "#ifndef _STDIO_H" >> $@
 	echo "#define _STDIO_H" >> $@
 	echo "#define _EXTRACT_STDIOCONSTS" >> $@
@@ -116,7 +116,7 @@ cstdio.h: cstdio.h_in arch/$(UPDATEARCH).h
 	echo "#undef _EXTRACT_STDIOCONSTS" >> $@
 	cat $< >> $@
 csignal.h: csignal.h_in arch/$(UPDATEARCH).h
-	-rm $@
+	-$(RM) $@
 	echo "#ifndef _SIGNAL_H" >> $@
 	echo "#define _SIGNAL_H" >> $@
 	echo "#define _EXTRACT_SIGNALCONSTS" >> $@
