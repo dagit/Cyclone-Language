@@ -120,6 +120,7 @@ datatype Term {
   Var(vardecl_t);
   LogicVar(vardecl_opt_t,int);
   Primop(Absyn::primop_t,list_t<term_t>);
+  Cast(Absyn::type_t, term_t);
 };
 
 string_t term2string(term_t t) {
@@ -133,6 +134,8 @@ string_t term2string(term_t t) {
                    Absynpp::prim2string(p),term2string(t2));
   case &Primop(p,&List{t,_}):
     return aprintf("%s(%s)",Absynpp::prim2string(p),term2string(t));
+  case &Cast(tp,tm):
+    return aprintf("(%s)%s",Absynpp::typ2string(tp),term2string(t));
   default: Tcutil::impos("term2string primop args");
   }
 }
@@ -163,6 +166,9 @@ static term_t var(vardecl_t vd) { return new Var(vd); }
 static term_t primop(Absyn::primop_t p, list_t<term_t,`H> ts) {
   return new Primop(p,ts);
 }
+static term_t cast(Absyn::type_t tp, term_t tm) {
+  return new Cast(tp,tm);
+}
 static term_t fresh_var() {
   static int counter = 0;
   return new LogicVar(NULL,counter++);
@@ -181,6 +187,12 @@ static int cmp_term(term_t t1, term_t t2) {
     return (int)vd1 - (int)vd2;
   case $(&LogicVar(_,_),_): return -1;
   case $(_,&LogicVar(_,_)): return 1;
+  case $(&Cast(tp1,tm1),&Cast(tp2,tm2)):
+    int c = Tcutil::typecmp(tp1,tp2);
+    if (c != 0) return c;
+    return cmp_term(tm1,tm2);
+  case $(&Cast(...),_): return -1;
+  case $(_,&Cast(...)): return 1;
   case $(&Primop(p1,ts1),&Primop(p2,ts2)):
     if (p1 != p2) return (int)p1 - (int)p2;
     return list_cmp(cmp_term, ts1, ts2);
@@ -192,7 +204,7 @@ static bool same_term(term_t t1, term_t t2) { return cmp_term(t1,t2) == 0; }
 ///////////////////// Assertions /////////////////////
 typedef datatype Assn @assn_t;
 
-typedef enum Primreln { Eq, Neq, Lt, Lte } prim_reln_t;
+typedef enum Primreln { Eq, Neq, SLt, SLte, ULt, ULte } prim_reln_t;
 
 datatype Assn {
   True;
@@ -256,8 +268,10 @@ static string_t a2string(assn_t a, int prec, int@ size) {
     switch (p) {
     case Eq: ps = "=="; break;
     case Neq: ps = "!="; break;
-    case Lt: ps = "<"; break;
-    case Lte: ps = "<="; break;
+    case SLt: ps = "S<"; break;
+    case SLte: ps = "S<="; break;
+    case ULt: ps = "U<"; break;
+    case ULte: ps = "U<="; break;
     default: Tcutil::impos("assn2string primop");
     }
     return aprintf("%s%s%s",term2string(t1),ps,term2string(t2));
@@ -490,10 +504,14 @@ static assn_t prim(term_t t1, prim_reln_t p, term_t t2) {
 }
 prim_assn(eq,Eq)
 prim_assn(neq,Neq)
-prim_assn(lt,Lt)
-prim_assn(lte,Lte)
-#define gte(t1,t2) (lte(t2,t1))
-#define gt(t1,t2) (lt(t2,t1))
+prim_assn(slt,SLt)
+prim_assn(slte,SLte)
+prim_assn(ult,ULt)
+prim_assn(ulte,ULte)
+#define sgte(t1,t2) (slte(t2,t1))
+#define ugte(t1,t2) (ulte(t2,t1))
+#define sgt(t1,t2) (slt(t2,t1))
+#define ugt(t1,t2) (ult(t2,t1))
 
 // forward declaration 
 static assn_t reduce(assn_t a);
@@ -511,8 +529,10 @@ static assn_t not(assn_t a) {
     switch (p) {
     case Eq : return neq(t1,t2);
     case Neq: return eq(t1,t2);
-    case Lt : return gte(t1,t2);
-    case Lte: return gt(t1,t2);
+    case SLt : return sgte(t1,t2);
+    case SLte: return sgt(t1,t2);
+    case ULt : return ugte(t1,t2);
+    case ULte: return ugt(t1,t2);
     default: Tcutil::impos("Vcgen::invert: non-primop");
     }
   case &Subst(...): return not(reduce(a));
@@ -544,6 +564,10 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
   switch (t) {
   case &Const(_):
   case &LogicVar(...): return t;
+  case &Cast(tp,tm):
+    let tm2 = reduce_term(tm,non_esc_subst,esc_subst);
+    if (tm != tm2) return cast(tp,tm2);
+    else return t;
   case &Primop(p,ts):
     list_t<term_t> res = NULL;
     bool change = false;
@@ -640,6 +664,10 @@ static term_t subst_term(term_t t, vardecl_t x, term_t newx) {
     }
     if (!change) return t;
     return primop(p,imp_rev(res));
+  case &Cast(tp,tm):
+    let tm2 = subst_term(tm,x,newx);
+    if (tm != tm2) return cast(tp,tm2);
+    else return t;
   case &Const(_):
   case &LogicVar(...): return t;
   }
@@ -651,6 +679,12 @@ static term_t kill_mem_term(term_t t) {
   return reduce_term(t,NULL,&esc_subst);
 }
 
+
+/////////////////// Assertion Factoring //////////////////
+// This code isn't currently used but may be useful.  The
+// basic idea is to try to pull the common conjuncts out
+// to a wider scope.  Eg..,  (A & B & C) || (A & D & C) 
+// should factor into (A & C) & (B || D).  
 
 // intersect two lists of assertions returning the common
 // assertions, and the remainders of the two lists.  Assumes
@@ -739,17 +773,22 @@ static bool find_ctxt(assn_t ctxt, term_t t1, prim_reln_t p1, term_t u1) {
     goto LOOP;
   case &Prim(t2,p2,u2):
     switch $(p2,p1) {
-    case $(Eq,Eq): 
-    case $(Eq,Lte):
-      return (same_term(t1,t2) && same_term(u1,u2) ||
-              same_term(t1,u2) && same_term(u1,t2));
-    case $(Lt,Neq): 
-      return (same_term(t1,t2) && same_term(u1,u2) ||
-              same_term(t1,u2) && same_term(u1,t2));
-    case $(Lt,Lt):
-    case $(Lt,Lte): 
-    case $(Lte,Lte):
     case $(Neq,Neq):
+    case $(Eq,Eq): 
+    case $(Eq,SLte):
+    case $(Eq,ULte):
+      return (same_term(t1,t2) && same_term(u1,u2) ||
+              same_term(t1,u2) && same_term(u1,t2));
+    case $(SLt,Neq): 
+    case $(ULt,Neq): 
+      return (same_term(t1,t2) && same_term(u1,u2) ||
+              same_term(t1,u2) && same_term(u1,t2));
+    case $(SLt,SLt):
+    case $(ULt,ULt):
+    case $(SLt,SLte): 
+    case $(ULt,ULte): 
+    case $(SLte,SLte):
+    case $(ULte,ULte):
       return same_term(t1,t2) && same_term(u1,u2);
     default: return false;
     }
@@ -930,12 +969,16 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
     // add t1 - t2 <= 0 and t2 - t1 <= 0
     if (!add_edge(g,t1,t2,0)) return false;
     return add_edge(g,t2,t1,0);
-  case Lt:
+  case ULt:
     // add t1 - t2 <= -1
     return add_edge(g,t1,t2,-1);
-  case Lte:
+  case ULte:
     // add t1 - t2 <= 0
     return add_edge(g,t1,t2,0);
+  case SLt:
+  case SLte: 
+    // for now, we can't do anything about these
+    return true;
   default: Tcutil::impos("Vcgen:found bad primop in add_constraint");
   }
 }
@@ -980,7 +1023,7 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
     break;
   case &Prim(t1,Neq,t2): 
     // must handle neq specially as t1 < t2 or t2 < t1.
-    a = or(lt(t1,t2),lt(t2,t1));
+    a = or(ult(t1,t2),ult(t2,t1));
     goto LOOP;
   case &Prim(t1,p,t2):
     // add the primitive relation to each graph, pruning out the
@@ -1573,6 +1616,19 @@ static assn_t vcgen_local_decl(env_t env, decl_t d, assn_t a) {
   }
 }
 
+// determine whether a comparing these two expressions is an 
+// unsigned or a signed comparison.
+static bool unsigned_comparison(exp_t e1, exp_t e2) {
+  let t1 = Tcutil::compress((type_t)e1->topt);
+  let t2 = Tcutil::compress((type_t)e2->topt);
+  switch $(t1,t2) {
+  case $(&Absyn::AppType(&Absyn::IntCon(Absyn::Unsigned,_),_),_): return true;
+  case $(_,&Absyn::AppType(&Absyn::IntCon(Absyn::Unsigned,_),_)): return true;
+  case $(&Absyn::PointerType(_),&Absyn::PointerType(_)): return true;
+  default: return false;
+  }
+}
+
 static $(assn_t,assn_t) vcgen_test(env_t env, exp_t e, assn_t ain) {
   switch (e->r) {
   case &Absyn::Conditional_e(e1,e2,e3):
@@ -1602,10 +1658,34 @@ static $(assn_t,assn_t) vcgen_test(env_t env, exp_t e, assn_t ain) {
     switch p {
     case Absyn::Eq:  at = and(at,eq(t1,t2));  af = and(af,neq(t1,t2)); break;
     case Absyn::Neq: at = and(at,neq(t1,t2)); af = and(af,eq(t1,t2)); break;
-    case Absyn::Lt:  at = and(at,lt(t1,t2));  af = and(af,gte(t1,t2)); break;
-    case Absyn::Lte: at = and(at,lte(t1,t2)); af = and(af,gt(t1,t2)); break;
-    case Absyn::Gt:  at = and(at,gt(t1,t2));  af = and(af,lte(t1,t2)); break;
-    case Absyn::Gte: at = and(at,gte(t1,t2)); af = and(af,lt(t1,t2)); break;
+    case Absyn::Lt:
+      if (unsigned_comparison(e1,e2)) {
+        at = and(at,ult(t1,t2));  af = and(af,ugte(t1,t2)); 
+      } else {
+        at = and(at,slt(t1,t2));  af = and(af,sgte(t1,t2)); 
+      }
+      break;
+    case Absyn::Lte: 
+      if (unsigned_comparison(e1,e2)) {
+        at = and(at,ulte(t1,t2)); af = and(af,ugt(t1,t2)); 
+      } else {
+        at = and(at,slte(t1,t2)); af = and(af,sgt(t1,t2)); 
+      }
+      break;
+    case Absyn::Gt:  
+      if (unsigned_comparison(e1,e2)) {
+        at = and(at,ugt(t1,t2));  af = and(af,ulte(t1,t2)); 
+      } else {
+        at = and(at,sgt(t1,t2));  af = and(af,slte(t1,t2)); 
+      }
+      break;
+    case Absyn::Gte: 
+      if (unsigned_comparison(e1,e2)) {
+        at = and(at,ugte(t1,t2)); af = and(af,ult(t1,t2)); 
+      } else {
+        at = and(at,sgte(t1,t2)); af = and(af,slt(t1,t2)); 
+      }
+      break;
     default: break;
     }
     return $(at,af);
@@ -1750,20 +1830,20 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     term_opt_t assn = NULL;
     switch (i) {
     case Absyn::PreInc: 
-      if (t1 != NULL) assn = new Primop(Absyn::Plus,list((term_t)t1,one()));
+      if (t1 != NULL) assn = primop(Absyn::Plus,list((term_t)t1,one()));
       res = assn;
       break;
     case Absyn::PostInc:
       res = t1;
-      if (t1 != NULL) assn = new Primop(Absyn::Plus,list((term_t)t1,one()));
+      if (t1 != NULL) assn = primop(Absyn::Plus,list((term_t)t1,one()));
       break;
     case Absyn::PreDec:
-      if (t1 != NULL) assn = new Primop(Absyn::Minus,list((term_t)t1,one()));
+      if (t1 != NULL) assn = primop(Absyn::Minus,list((term_t)t1,one()));
       res = assn;
       break;
     case Absyn::PostDec:
       res = t1;
-      if (t1 != NULL) assn = new Primop(Absyn::Minus,list((term_t)t1,one()));
+      if (t1 != NULL) assn = primop(Absyn::Minus,list((term_t)t1,one()));
       break;
     default: Tcutil::impos("vcgen vcgen_rexp increment_e");
     }
@@ -1828,11 +1908,11 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::NoInstantiate_e(e): return vcgen_rexp(env,e,ain);
   case &Absyn::Instantiate_e(e,_):  return vcgen_rexp(env,e,ain);
 
-  case &Absyn::Cast_e(t,e,_,c): 
+  case &Absyn::Cast_e(tp,e,_,c): 
     // FIX: really need to put C coercions in terms...
     let $(t,a) = vcgen_rexp(env,e,ain);
     if (c == Absyn::No_coercion)
-      return $(t,a);
+      return $(t == NULL ? NULL : cast(tp,t),a);
     else {
       update_try_assn(env,ain); // coercion could fail
       return $(NULL,a);
@@ -1870,7 +1950,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     default:
       if (t1 != NULL) {
         update_try_assn(env,ain);
-        a2 = and(a2,lt(t2,new Primop(Absyn::Numelts,list(t1))));
+        a2 = and(a2,ult(t2,primop(Absyn::Numelts,list(t1))));
       }
     }
     return $(NULL,a2);
@@ -1897,10 +1977,10 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     // start off with index 0
     a = do_assign(env,a,v,zero());
     while (true) {
-      let at = and(a,lt(v,t1));  // simulate test
-      let af = and(a,gte(v,t1));
+      let at = and(a,ult(v,t1));  // simulate test
+      let af = and(a,ugte(v,t1));
       let $(_,abody) = vcgen_rexp(env,e2,at);  // run body and add one
-      abody = do_assign(env,abody,v,new Primop(Absyn::Plus,list(v,one())));
+      abody = do_assign(env,abody,v,primop(Absyn::Plus,list(v,one())));
       if (implies(&abody,&a)) { a = af; break; }
       a = weaken_assn(abody,a);  // widen and possibly iterate
     }
