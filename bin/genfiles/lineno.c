@@ -448,7 +448,7 @@ struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,unsigned long 
 struct Cyc_Lineno_Pos*Cyc_Lineno_pos_of_abs(struct _dyneither_ptr,int);
 void Cyc_Lineno_poss_of_abss(struct _dyneither_ptr filename,struct Cyc_List_List*places);
 # 28 "lineno.cyl"
-enum Cyc_Lineno_token_val{Cyc_Lineno_NEWLINE  = 0U,Cyc_Lineno_LINEDEF  = 1U,Cyc_Lineno_END  = 2U};
+enum Cyc_Lineno_token_val{Cyc_Lineno_NEWLINE =0U,Cyc_Lineno_LINEDEF =1U,Cyc_Lineno_END =2U};
 # 36
 const int Cyc_Lineno_lex_base[10U]={0,1,- 2,2,6,- 3,16,7,- 1,8};
 const int Cyc_Lineno_lex_backtrk[10U]={- 1,- 1,- 1,1,- 1,- 1,- 1,- 1,- 1,0};

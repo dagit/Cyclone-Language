@@ -625,11 +625,12 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
   case &Attributes_mod(_, atts):
     switch(c_compiler){
     case Gcc_c:
-      if (next_is_pointer(tms->tl)) rest = p_rest;
+      if (next_is_pointer(tms->tl)) 
+	rest = p_rest;
       return cat(rest, atts2doc(atts));
     default:
      if(next_is_pointer(tms->tl))
-	return cat(callconv2doc(atts), rest);
+       return cat(callconv2doc(atts), rest);
      return rest;
     }
   case &TypeParams_mod(ts,loc,print_kinds):
@@ -668,7 +669,7 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
     }
     switch(compress(rgn)) {
     case &AppType(&HeapCon,_): break;
-    case &Evar(_,_,_,_) && print_for_cycdoc: break;
+    case &Evar(...) && print_for_cycdoc: break;
     default: rgd = rgn2doc(rgn);
     }
     doc_t spacer1 = (tqd != mt && (ztd != mt || rgd != mt)) ? text(" ") : mt;
@@ -679,7 +680,7 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
 
 doc_t rgn2doc(type_t t) {
   switch (compress(t)) {
-  case &AppType(&HeapCon,_): return text("`H");
+  case &AppType(&HeapCon,_):   return text("`H");
   case &AppType(&UniqueCon,_): return text("`U");
   case &AppType(&RefCntCon,_): return text("`RC");
   default: return ntyp2doc(t);
@@ -718,7 +719,7 @@ doc_t eff2doc(type_t t) {
 doc_t aggr_kind2doc(aggr_kind_t k) {
   switch(k) {
   case StructA: return text("struct ");
-  default:  return text("union ");
+  default:      return text("union ");
   }
 }
 
@@ -740,31 +741,15 @@ doc_t ntyp2doc(type_t t) {
       string_t kindstring = (k == NULL) ? "K" : kind2string(k->v);
       s = text(aprintf("`E%s%d",kindstring,i));
     }
-//        switch (k->v) {
-//        case RgnKind:
-//  	s = cat(text("`r"),
-//  		text(aprintf("%d",i)));
-//  	  break;
-//        default:
-//	s = cat(print_for_cycdoc?text("\\%"):text("%"),
-//		text("("),
-//		text(aprintf("%d",i)),
-//		(!print_full_evars || tvs == NULL) ?
-//		nil_doc() : tvars2doc(tvs->v),
-//		text(")::"),k == NULL ? question() : kind2doc(k->v));
-//        }
-//    }
     break;
   case &VarType(tv):
     s = tvar2doc(tv);
-    if (print_all_kinds) {
+    if (print_all_kinds)
       s = cat(s,text("::"),kindbound2doc(tv->kind));
-    }
     break;
   case &AppType(&DatatypeCon(tu_info),ts):
     switch(tu_info) {
-    case {.UnknownDatatype = UnknownDatatypeInfo(n,is_x)}:
-      fallthru(n,is_x);
+    case {.UnknownDatatype = UnknownDatatypeInfo(n,is_x)}: fallthru(n,is_x);
     case {.KnownDatatype = &&Datatypedecl(_,n,_,_,is_x)}:
       let kw = text("datatype ");
       let ext = is_x ? text("@extensible ") : nil_doc();
@@ -788,42 +773,39 @@ doc_t ntyp2doc(type_t t) {
     string_t ts;
     switch (sn) {
     case None:
-    case Signed:   sns = "";          break;
-    default: sns = "unsigned "; break;
+    case Signed: sns = "";          break;
+    default:     sns = "unsigned "; break;
     }
     switch (sz) {
     case Char_sz:
       switch (sn) {
-      case None:     sns = ""; break;
-      case Signed:   sns = "signed "; break;
-      default: sns = "unsigned "; break;
+      case None:   sns = "";          break;
+      case Signed: sns = "signed ";   break;
+      default:     sns = "unsigned "; break;
       }
       ts = "char";
       break;
-    case Short_sz: ts = "short"; break;
-    case Int_sz: ts = "int";   break;
-    case Long_sz: ts = "long";   break;
+    case Short_sz: ts = "short";  break;
+    case Int_sz:   ts = "int";    break;
+    case Long_sz:  ts = "long";   break;
     case LongLong_sz:
     default:
       switch(c_compiler) {
       case Gcc_c: ts = "long long"; break;
-      default:  ts = "__int64";   break;
+      default:    ts = "__int64";   break;
       }
       break;
     }
     s = text(aprintf("%s%s",sns,ts));
     break;
   case &AppType(&FloatCon(i),_):
-    if (i==0)
-      s = text("float");
-    else if (i==1)
-      s = text("double");
-    else
-      s = text("long double");
+    switch(i) {
+    case 0:  s = text("float");       break;
+    case 1:  s = text("double");      break;
+    default: s = text("long double"); break;
+    }
     break;
-  case &TupleType(ts):
-    s = cat(dollar(),args2doc(ts));
-    break;
+  case &TupleType(ts): s = cat(dollar(),args2doc(ts)); break;
   case &AppType(&AggrCon(info),ts):
     let $(k,n) = aggr_kinded_name(info);
     s = cat(aggr_kind2doc(k), qvar2doc(n), tps2doc(ts));
@@ -835,14 +817,10 @@ doc_t ntyp2doc(type_t t) {
     break;
   case &AppType(&AnonEnumCon(fs),_):
     s = cat(text("enum "),lb(),nest(2, enumfields2doc(fs)), rb()); break;
-  case &AppType(&EnumCon(n,_),_):
-    s = cat(text("enum "),qvar2doc(n)); break;
-  case &ValueofType(e):
-    s = cat(text("valueof_t("),exp2doc(e),text(")")); break;
-  case &TypeofType(e):
-    s = cat(text("typeof("),exp2doc(e),text(")")); break;
-  case &AppType(&BuiltinCon(t,_),_):
-    s = text(t); break;
+  case &AppType(&EnumCon(n,_),_): s = cat(text("enum "),qvar2doc(n)); break;
+  case &ValueofType(e): s = cat(text("valueof_t("),exp2doc(e),text(")")); break;
+  case &TypeofType(e):  s = cat(text("typeof("),  exp2doc(e),text(")"));  break;
+  case &AppType(&BuiltinCon(t,_),_): s = text(t); break;
   case &TypedefType(n,ts,kopt,_):
     // NB: we could print out the expanded typedef by following the topt
     // pointer (when non-NULL).
@@ -851,35 +829,24 @@ doc_t ntyp2doc(type_t t) {
     // not going to be "normalized" (i.e., come out of to_tms).
     s = cat(qvar2doc(n),tps2doc(ts));
     break;
-  case &AppType(&RgnHandleCon,&List{t,_}):
-    s = cat(text("region_t<"),rgn2doc(t),text(">")); break;
-  case &AppType(&TagCon,&List{t,_}):
-    s = cat(text("tag_t<"),typ2doc(t),text(">")); break;
+  case &AppType(&RgnHandleCon,ts):
+    s = cat(text("region_t<"),rgn2doc(ts->hd),text(">")); break;
+  case &AppType(&TagCon,ts):
+    s = cat(text("tag_t<"),typ2doc(ts->hd),text(">")); break;
   case &AppType(&UniqueCon,_):
   case &AppType(&HeapCon,_):
-  case &AppType(&RefCntCon,_):
-    s = rgn2doc(t); break;
-  case &AppType(&RgnsCon,&List(t,_)):
-    s = cat(text("regions("),typ2doc(t),text(")")); break;
+  case &AppType(&RefCntCon,_): s = rgn2doc(t); break;
+  case &AppType(&RgnsCon,ts):
+    s = cat(text("regions("),typ2doc(ts->hd),text(")")); break;
   case &AppType(&AccessCon,_):
-  case &AppType(&JoinCon,_):
-    s = eff2doc(t); break;
-  case &TypeDeclType(&{.r = &Aggr_td(ad),...},_):
-    s = aggrdecl2doc(ad); break;
-  case &TypeDeclType(&{.r = &Enum_td(ed),...},_):
-    s = enumdecl2doc(ed); break;
-  case &TypeDeclType(&{.r = &Datatype_td(dd),...},_):
-    s = datatypedecl2doc(dd); break;
-  case &AppType(&TrueCon,_):
-    s = text("@true"); break;
-  case &AppType(&FalseCon,_):
-    s = text("@false"); break;
-  case &AppType(&ThinCon,_):
-    s = text("@thin"); break;
-  case &AppType(&FatCon,_):
-    s = text("@fat"); break;
-  case &AppType(c,_):
-    s = text("*bad type application*"); break;
+  case &AppType(&JoinCon,_):   s = eff2doc(t); break;
+  case &TypeDeclType(&{.r=&Aggr_td(d),...},_):     s=aggrdecl2doc(d);     break;
+  case &TypeDeclType(&{.r=&Enum_td(d),...},_):     s=enumdecl2doc(d);     break;
+  case &TypeDeclType(&{.r=&Datatype_td(d),...},_): s=datatypedecl2doc(d); break;
+  case &AppType(&TrueCon,_):  s = text("@true");  break;
+  case &AppType(&FalseCon,_): s = text("@false"); break;
+  case &AppType(&ThinCon,_):  s = text("@thin");  break;
+  case &AppType(&FatCon,_):   s = text("@fat");   break;
   }
   return s;
 }
@@ -1046,22 +1013,22 @@ int exp_prec(exp_t e) {
     case Bitlshift:      return  90;
     case Bitlrshift:     return  80; // unlike C (see grammar)
     case Bitarshift:     return  80; // doesn't actually exist (see grammar)
-    case Numelts:           return 140; // numelts(foo)
-    default:            return 140;
+    case Numelts:        return 140; // numelts(foo)
+    default:             return 140;
     }
   case &AssignOp_e(...):      return  20;
-  case &Increment_e(...):       return 130;
+  case &Increment_e(...):     return 130;
   case &Conditional_e(...):   return  30;
-  case &And_e(...):             return  35; // FIX: right precedence for &&
-  case &Or_e(...):              return  30; // FIX: right precedence for ||
-  case &SeqExp_e(...):          return -10; // DJG: must be less than 0 
+  case &And_e(...):           return  35; // FIX: right precedence for &&
+  case &Or_e(...):            return  30; // FIX: right precedence for ||
+  case &SeqExp_e(...):        return -10; // DJG: must be less than 0 
   case &FnCall_e(...):        return 140;
   case &Pragma_e(...):        return 140;
-  case &Throw_e(...):             return 130;
-  case &NoInstantiate_e(e2):    return exp_prec(e2);
-  case &Instantiate_e(e2,_):    return exp_prec(e2);
-  case &Cast_e(...):        return 120;
-  case &New_e(...):             return 15; // ???
+  case &Throw_e(...):         return 130;
+  case &NoInstantiate_e(e2):  return exp_prec(e2);
+  case &Instantiate_e(e2,_):  return exp_prec(e2);
+  case &Cast_e(...):          return 120;
+  case &New_e(...):           return 15; // ???
   case &Address_e(_):
   case &Sizeoftype_e(_):
   case &Sizeofexp_e(_):
@@ -1070,11 +1037,11 @@ int exp_prec(exp_t e) {
   case &Tagcheck_e(...):
   case &Offsetof_e(...):
   case &Deref_e(...):
-  case &Extension_e(...):        return 130;
+  case &Extension_e(...):     return 130;
   case &AggrMember_e(...):
   case &AggrArrow_e(...):
-  case &Subscript_e(...):       return 140;
-  case &Tuple_e(...):             return 150;
+  case &Subscript_e(...):     return 140;
+  case &Tuple_e(...):         return 150;
   case &CompoundLit_e(...):
   case &Array_e(...):
   case &Comprehension_e(...):
@@ -1086,8 +1053,8 @@ int exp_prec(exp_t e) {
   case &AnonEnum_e(...):
   case &Malloc_e(_):
   case &Swap_e(...):
-  case &UnresolvedMem_e(...):   return 140; // ???
-  case &StmtExp_e(...):           return 10000;
+  case &UnresolvedMem_e(...):  return 140; // ???
+  case &StmtExp_e(...):        return 10000;
   }
 }
 

@@ -507,7 +507,7 @@ void*_tmp27=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0U));void*_tmp
 # 177 "printf.cyc"
 int Cyc___cvt_double(double number,int prec,int flags,int*signp,int fmtch,struct _dyneither_ptr startp,struct _dyneither_ptr endp);
 # 206 "printf.cyc"
-enum Cyc_BASE{Cyc_OCT  = 0U,Cyc_DEC  = 1U,Cyc_HEX  = 2U};
+enum Cyc_BASE{Cyc_OCT =0U,Cyc_DEC =1U,Cyc_HEX =2U};
 # 212
 inline static int Cyc__IO_sputn(int(*ioputc)(int,void*),void*ioputc_env,struct _dyneither_ptr s,int howmany){
 # 214
