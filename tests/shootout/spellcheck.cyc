@@ -18,7 +18,7 @@ int main(int argc, char ?argv[]) {
     struct ht_ht @dict;
     FILE *fh;
     START_TIME
-    wordbuf = new {for i < wordbufsize + 1 : '\000'};
+    wordbuf = (char ?)malloc(wordbufsize + 1);
     dict = ht_create(40000);
     if ((fh = fopen("words.txt", "r")) == NULL) {
 	perror("fopen");

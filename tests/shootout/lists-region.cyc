@@ -101,7 +101,7 @@ DLL @list_sequence(int from, int to) {
 	tmp = from; from = to; to = tmp;
     }
     size = to - from + 1;
-    l = new {for i < size+1 : DLLs{0,NULL,NULL}};
+    l = (DLL ?)malloc((size+1) * sizeof(DLL));
     from--;
     for (i=0, j=1; i<size; ++i, ++j) {
 	l[i].next = &l[i+1];
@@ -118,7 +118,7 @@ DLL @list_sequence(int from, int to) {
 
 DLL @list_copy(DLL<`r> @`r x) {
     int i, j, size = list_length(x);
-    DLL *xp, ?l = new {for i < size+1 : DLLs{0,NULL,NULL}};
+    DLL *xp, ?l = (DLL ?)malloc((size+1) * sizeof(DLL));
     for (i=0, j=1, xp=x; i<size; i++, j++, xp=xp->next) {
 	l[i].next = &l[j];
 	l[j].prev = &l[i];

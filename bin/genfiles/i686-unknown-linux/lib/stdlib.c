@@ -64,6 +64,8 @@ struct _RegionHandle {
 extern struct _RegionHandle _new_region(const char *);
 //  extern struct _RegionHandle _new_region();
 extern void * _region_malloc(struct _RegionHandle *, unsigned int);
+extern void * _region_calloc(struct _RegionHandle *, unsigned int t,
+                             unsigned int n);
 extern void   _free_region(struct _RegionHandle *);
 
 //// Exceptions 
@@ -203,16 +205,30 @@ struct _tagged_arr _tagged_arr_inplace_plus_post(struct _tagged_arr * arr_ptr,
 //// Allocation
 extern void * GC_malloc(int);
 extern void * GC_malloc_atomic(int);
+extern void * GC_calloc(unsigned int,unsigned int);
+extern void * GC_calloc_atomic(unsigned int,unsigned int);
 
 static inline void * _cycalloc(int n) {
-  void * ans = GC_malloc(n);
+  void * ans = (void *)GC_malloc(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
 static inline void * _cycalloc_atomic(int n) {
-  void * ans = GC_malloc(n);
+  void * ans = (void *)GC_malloc_atomic(n);
   if(!ans)
+    _throw_badalloc();
+  return ans;
+}
+static inline void * _cyccalloc(unsigned int s, unsigned int n) {
+  void * ans = (void *)GC_calloc(s,n);
+  if (!ans)
+    _throw_badalloc();
+  return ans;
+}
+static inline void * _cyccalloc_atomic(unsigned int s, unsigned int n) {
+  void * ans = (void *)GC_calloc_atomic(s,n);
+  if (!ans)
     _throw_badalloc();
   return ans;
 }

@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "timer.h"
 
 int
@@ -20,8 +21,8 @@ main(int argc, char ??argv) {
     int i, k, ?x, ?y;
 
     START_TIME
-    x = new {for i<n:0};
-    y = new {for i<n:0};
+    x = (int ?) calloc(sizeof(int), n);
+    y = (int ?) calloc(sizeof(int), n);
 
     for (i = 0; i < n; i++) {
 	x[i] = i + 1;

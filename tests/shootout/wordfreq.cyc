@@ -22,7 +22,7 @@ int main() {
     struct ht_ht @ht;
     struct ht_node @?sort_array, @?sort_tmp, *node;
     START_TIME
-    buf = new { for i < (bufsize + 1) : '\0' };
+    buf = (char ?)malloc(bufsize + 1);
     ht = ht_create(75000);
 
     while ((c = getchar()) > 0) {
@@ -43,7 +43,7 @@ int main() {
     free(buf);
 
     sort_array = sort_tmp =
-      new { for i < ht_count(ht) : new ht_node(NULL,0,NULL) };
+        malloc(sizeof(struct ht_node *) * ht_count(ht));
 
     for (node=ht_first(ht); (*sort_tmp++ = node) != 0; node=ht_next(ht)) ;
 

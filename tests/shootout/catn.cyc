@@ -13,7 +13,7 @@ int main(int argc, char ?argv[])
   int filesz = ftell(f);
   fseek(f,0,SEEK_SET);
 
-  char ?buf = new { for i < filesz+1 : '\0' };
+  char ?buf = malloc(filesz+1);
   int ret = fread(buf,1,filesz,f);
   if (ret != filesz) {
     fprintf(stderr,"failed to read whole file\n");

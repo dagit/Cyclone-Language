@@ -417,20 +417,27 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
       outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
     return $(outflow,typ_to_absrval(e->topt->v,unknown_all));
 
-  case &Malloc_e(eopt,t):
-    root_t    root      = new MallocPt(e);
+  case &Malloc_e(MallocInfo{iscalloc,eopt,topt,exp,isfat}):
+    root_t    root      = new MallocPt(exp);
     place_t   place     = new Place(root,NULL);
     absRval_t rval      = new AddressOf(place);
-    absRval_t place_val = typ_to_absrval(t,unknown_none);
+    absRval_t place_val = 
+      isfat ? NotZeroAll : typ_to_absrval(*topt,unknown_none);
+    flow_t    outflow;
     if(env->all_changed != NULL)
       *(env->all_changed) = Set::insert(*(env->all_changed),place);
-    if(eopt!=NULL)
-      switch(anal_Rexp(env,inflow,(exp_t)eopt)[0]) {
-      case BottomFL: return $(BottomFL,rval);
-      case &ReachableFL(d2): 
-	return $(new ReachableFL(Dict::insert(d2,root,place_val)), rval);
-      }
-    return $(new ReachableFL(Dict::insert(d,root,place_val)), rval);
+    if(eopt!=NULL) {
+      let $(f,rvals) = anal_unordered_Rexps(env,inflow,list((exp_t)eopt,exp));
+      outflow = f;
+    } else {
+      let $(f,_) = anal_Rexp(env,inflow,exp);
+      outflow = f;
+    }
+    switch(outflow) {
+    case BottomFL: return $(outflow,rval);
+    case &ReachableFL(d2):
+      return $(new ReachableFL(Dict::insert(d2,root,place_val)), rval);
+    }
 
   case &New_e(eopt,e):
     root_t    root      = new MallocPt(e);

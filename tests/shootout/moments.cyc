@@ -32,7 +32,7 @@ main() {
     double deviation = 0.0;
     int array_size = 4096;
 
-    double ?nums = new {for i<array_size: (double)0.0};
+    double ?nums = (double ?)malloc(array_size * sizeof(double));
 
     while (fgets(line, MAXLINELEN, stdin)) {
 	sum += (nums[n++] = atof(line));

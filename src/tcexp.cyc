@@ -1586,8 +1586,74 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t *`r topt,
   }
 }
 
+static bool zeroable_type(type_t t) {
+  switch (compress(t)) {
+  case VoidType: return true;
+  case &Evar(_,_,_,_):
+  case &VarType(_): 
+  case &TunionType(_):
+  case &TunionFieldType(_): return false;
+  case &PointerType(PtrInfo{_,_,n,_,_}):
+    return (conref_def(true,n));
+  case &IntType(_,_):
+  case FloatType:
+  case &DoubleType(_): return true;
+  case &ArrayType(t,_,_): return zeroable_type(t);
+  case &FnType(_): return false;
+  case &TupleType(tqs):
+    for (; tqs; tqs = tqs->tl) 
+      if (!zeroable_type((*tqs->hd)[1])) return false;
+    return true;
+  case &StructType(_,ts,sdp):
+    if (sdp == NULL) return false;
+    let sd = *sdp;
+    if (sd->fields == NULL) return false;
+    region r {
+      let inst = List::rzip(r,r,sd->tvs,ts);
+      for (_ fs = sd->fields->v; fs != NULL; fs = fs->tl) 
+        if (!zeroable_type(rsubstitute(r,inst,fs->hd->type))) return false;
+      return true;
+    }
+  case &UnionType(_,_,_): return true; // bits only
+  case &EnumType(_,_): return true;
+  case &SizeofType(_): return true;
+  case &AnonStructType(fs): 
+    for (; fs != NULL; fs = fs->tl) 
+      if (!zeroable_type(fs->hd->type)) return false;
+    return true;
+  case &AnonUnionType(_): return true; // bits only
+  case &AnonEnumType(_): return true;  
+  case &RgnHandleType(_): return false;
+
+  case &TypedefType(_,_,_):
+  case HeapRgn:
+  case &AccessEff(_):
+  case &JoinEff(_):
+  case &RgnsEff(_): 
+    return impos("bad type `%s' in zeroable type",typ2string(t));
+  }
+}
+
+static void check_malloc_type(bool allow_zero, seg_t loc, 
+                              type_t * topt, type_t t) {
+  if (bits_only(t) || (allow_zero && zeroable_type(t))) return;
+  // try unifying t with the topt info to get better results
+  if (topt != NULL) {
+    switch (compress(*topt)) {
+    case &PointerType(PtrInfo{elt_typ,_,_,_,_}): 
+      unify(elt_typ,t);
+      if (bits_only(t) || (allow_zero && zeroable_type(t))) return;
+      break;
+    default: break;
+    }
+  }
+  terr(loc,"%s cannot be used with type %s\n\t(type needs initialization)",
+       allow_zero ? ((string_t)"calloc") : "malloc", typ2string(t));
+}
+
 static type_t tcMalloc(tenv_t te, seg_t loc, type_t *`r topt, exp_opt_t ropt, 
-                       type_t t) {
+                       type_t *@t, exp_t @e, bool is_calloc,
+                       bool @is_fat) {
   type_t rgn = HeapRgn;
   if (ropt != NULL) {
     // check that the region handle is still valid
@@ -1605,16 +1671,71 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t *`r topt, exp_opt_t ropt,
       break;
     }
   }
-  check_type(loc,te,lookup_type_vars(te),MemKind,true,t);
+  tcExp(te,&uint_t,*e);
+  // crawl over e and look for the following cases:
+  //   sizeof(T):  result is T@ or T* depending upon topt
+  //   sizeof(T)*n or n*sizeof(T):  result is T? 
+  //     as long as T is bits-only or zero-able.
+  //   otherwise it's char ?
+  type_t elt_type; // the element type of the resulting pointer
+  exp_t num_elts;  // the number of elements of the resulting pointer
+  bool one_elt;
+  if (is_calloc) {
+    if (*t == NULL) impos("calloc with empty type");
+    elt_type = **t;
+    check_type(loc,te,lookup_type_vars(te),MemKind,true,elt_type);
+    check_malloc_type(true,loc,topt,elt_type);
+    num_elts = *e;
+    one_elt = false;
+  } else {
+    switch ((*e)->r) {
+    case &Sizeoftyp_e(t2):  
+      elt_type = t2;
+      *t = new elt_type;
+      num_elts = uint_exp(1,NULL);
+      tcExp(te,&uint_t,num_elts);
+      one_elt = true;
+      break;
+    case &Primop_e(Times,&List(e1,&List(e2,NULL))):
+      switch ($(e1->r, e2->r)) {
+      case $(&Sizeoftyp_e(t1),_): 
+        check_malloc_type(false,loc,topt,t1);
+        elt_type = t1;
+        *t = new elt_type;
+        num_elts = e2;
+        one_elt = false;
+        break;
+      case $(_,&Sizeoftyp_e(t2)):
+        check_malloc_type(false,loc,topt,t2);
+        elt_type = t2;
+        *t = new elt_type;
+        num_elts = e1;
+        one_elt = false;
+        break;
+      default: goto No_sizeof;
+      }
+      break;
+    default:
+    No_sizeof:
+      elt_type = uchar_t;
+      *t = new elt_type;
+      num_elts = *e;
+      one_elt = false;
+      break;
+    }
+  }
+  *e = num_elts;
+  *is_fat = !one_elt;
   // Don't yet support existential types (to do it, add to TunionFieldInfo
   // and here generate fresh evars).
-  switch(t) {
+  switch(elt_type) {
   case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
     if(tuf->tvs != NULL)
       terr(loc,"malloc with existential types not yet implemented");
     break;
   default: break;
   }
+
   // Avoid casts when we're passed down a nullable type
   let ptr_maker = at_typ;
   if(topt != NULL)
@@ -1625,7 +1746,8 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t *`r topt, exp_opt_t ropt,
       break;
     default: break;
     }
-  return ptr_maker(t,rgn,empty_tqual());
+  if (!one_elt) ptr_maker = tagged_typ;
+  return ptr_maker(elt_type,rgn,empty_tqual());
 }
 // ({ s })
 static type_t tcStmtExp(tenv_t te, seg_t loc, type_t *`r topt, stmt_t s) {
@@ -1967,8 +2089,8 @@ static void tcExpNoInst(tenv_t te, type_t *`r topt, exp_t e) {
   case &AnonEnum_e(*v,t2,ef):
     *v = ef->name;
     t = t2; break;
-  case &Malloc_e(ropt,t2):
-    t = tcMalloc(te,loc,topt,ropt,t2); break;
+  case &Malloc_e(MallocInfo{is_calloc,ropt,*t2,*e,*isfat}):
+    t = tcMalloc(te,loc,topt,ropt,t2,e,is_calloc,isfat); break;
   }
   e->topt = new Opt(t);
 }

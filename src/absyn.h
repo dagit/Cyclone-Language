@@ -143,6 +143,7 @@ namespace Absyn {
   typedef list_t<attribute_t> attributes_t;
   typedef struct Structfield @structfield_t;
   typedef tunion OffsetofField offsetof_field_t;
+  typedef struct MallocInfo malloc_info_t;
 
   // scopes for declarations 
   EXTERN_ABSYN tunion Scope { 
@@ -418,6 +419,24 @@ namespace Absyn {
     TupleIndex(unsigned int);
   };
 
+  // information for malloc:
+  //  it's important to note that when is_calloc is false (i.e., we have
+  //  a malloc or rmalloc) then we can be in one of two states depending
+  //  upon whether we've only parsed the expression or type-checked it.
+  //  If we've parsed it, then elt_type will be NULL and num_elts will
+  //  be the entire argument to malloc.  After type-checking, the malloc
+  //  argument is sizeof(*elt_type)*num_elts.
+  EXTERN_ABSYN struct MallocInfo {
+    bool       is_calloc; // determines whether this is a malloc or calloc
+    exp_opt_t  rgn;      // only here for rmalloc and rcalloc
+    type_t    *elt_type; // when [r]malloc, set by type-checker.  when 
+                         // [r]calloc, set by parser
+    exp_t      num_elts; // for [r]malloc: before tc, is the sizeof(t)*n.
+                         //                after tc, is just n.
+                         // for [r]calloc: is just n.
+    bool       fat_result; // true when result is a elt_type? -- set by tc
+  };
+
   // "raw" expressions -- don't include location info or type
   EXTERN_ABSYN tunion Raw_exp {
     Const_e(cnst_t); // constants
@@ -462,8 +481,8 @@ namespace Absyn {
              tuniondecl_t,tunionfield_t);
     Enum_e(qvar_t,struct Enumdecl *,struct Enumfield *);
     AnonEnum_e(qvar_t,type_t,struct Enumfield *);
-    // rmalloc(r, sizeof(t)) or malloc(sizeof(t))
-    Malloc_e(exp_opt_t, type_t); // first expression is region -- null is heap
+    // malloc(e1), rmalloc(e1,e2), calloc(e1,e2), rcalloc(e1,e2,e3).  
+    Malloc_e(malloc_info_t);
     // will resolve into array, struct, etc.
     UnresolvedMem_e(opt_t<typedef_name_t>,
                     list_t<$(list_t<designator_t>,exp_t)@>);

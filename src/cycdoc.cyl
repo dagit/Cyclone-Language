@@ -677,19 +677,24 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Enum_e(n,_,_): dumpqvar(n); break;
   case &AnonEnum_e(n,_,_): dumpqvar(n); break;
 
-  case &Malloc_e(ropt,t):
+  case &Malloc_e(MallocInfo{iscalloc,ropt,topt,e,_}):
     if (ropt != NULL) {
-      dump_alpha("rmalloc");
+      if (iscalloc) dump_alpha("rcalloc"); else dump_alpha("rmalloc");
       dump_char('(');
       dumpexp((exp_t)ropt); dump_symbol(", ");
     } else {
-      dump_alpha("malloc");
+      if (iscalloc) dump_alpha("calloc"); else dump_alpha("malloc");
       dump_char('(');
     }
-    dump_alpha("sizeof");
-    dump_char('(');
-    dumptyp(t); 
-    dump_symbol("))");
+    if (topt != NULL) {
+      dump_alpha("sizeof");
+      dump_char('(');
+      dumptyp(*topt); 
+      dump_symbol(")");
+      if (iscalloc) dump_symbol(", "); else dump_symbol(" * ");
+    }
+    dumpexp(e);
+    dump_symbol(")");
     break;
 
   case &UnresolvedMem_e(n,des):

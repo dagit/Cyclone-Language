@@ -65,6 +65,17 @@ extern size_t GC_get_free_bytes();
 extern size_t GC_get_total_bytes();
 #endif
 
+// FIX: I'm putting GC_calloc and GC_calloc_atomic in here as just
+// calls to GC_malloc and GC_malloc_atomic respectively.  This will
+// *not* work for the nogc option.
+void *GC_calloc(unsigned int t, unsigned int n) {
+  return (void *)GC_malloc(t*n);
+}
+
+void *GC_calloc_atomic(unsigned int t, unsigned int n) {
+  return (void *)GC_malloc_atomic(t*n);
+}
+
 // Need one of these per thread (we don't have threads)
 static struct _RuntimeStack *_current_handler = NULL;
 
@@ -600,7 +611,8 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
   if (next_size < s) 
     next_size = s + default_region_page_size;
 
-  p = GC_malloc(sizeof(struct _RegionPage) + next_size);
+  // Note, we call calloc here to ensure we get zero-filled pages
+  p = GC_calloc(sizeof(struct _RegionPage) + next_size,1);
   if (!p) {
     fprintf(stderr,"grow_region failure");
     _throw_badalloc;
@@ -641,6 +653,33 @@ void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
   return result;
 }
 
+// allocate s bytes within region r
+void * _region_calloc(struct _RegionHandle *r, unsigned int n, unsigned int t) 
+{
+  unsigned int s = n*t;
+  void *result;
+  // allocate in the heap
+  if (r == NULL) {
+#ifdef CYC_REGION_PROFILE
+    heap_total_bytes += s;
+#endif
+    result = GC_calloc(n,t);
+    if(!result)
+      _throw_badalloc;
+    return result;
+  }
+  // round s up to the nearest MIN_ALIGNMENT value
+  s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
+  if (s > (r->last_plus_one - r->offset))
+    grow_region(r,s);
+  result = (void *)r->offset;
+  r->offset = r->offset + s;
+#ifdef CYC_REGION_PROFILE
+  r->curr->free_bytes = r->curr->free_bytes - s;
+  rgn_total_bytes += s;
+#endif
+  return result;
+}
 
 // allocate a new page and return a region handle for a new region.
 struct _RegionHandle _new_region(const char *rgn_name) {
@@ -649,8 +688,9 @@ struct _RegionHandle _new_region(const char *rgn_name) {
   struct _RegionHandle r;
   struct _RegionPage *p;
 
-  p = (struct _RegionPage *)GC_malloc(sizeof(struct _RegionPage) + 
-                                      default_region_page_size);
+  // we use calloc to make sure the memory is zero'd
+  p = (struct _RegionPage *)GC_calloc(sizeof(struct _RegionPage) + 
+                                      default_region_page_size,1);
   if (p == NULL) 
     _throw_badalloc();
   p->next = NULL;

@@ -917,8 +917,8 @@ using Parse;
 %token NULL_kw LET THROW TRY CATCH
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION
 %token FILL CODEGEN CUT SPLICE
-%token MALLOC
-%token REGION_T SIZEOF_T REGION RNEW RMALLOC REGIONS
+%token MALLOC RMALLOC CALLOC RCALLOC
+%token REGION_T SIZEOF_T REGION RNEW REGIONS
 %token GEN
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
@@ -2431,12 +2431,21 @@ unary_expression:
      let tvs = List::map_c(typ2tvar,loc,$2);
      $$=^$(gentyp_exp(tvs, (*$4)[2], LOC(@1,@5))); }
 /* Cyc: malloc, rmalloc */
-| MALLOC '(' SIZEOF '(' specifier_qualifier_list ')' ')'
-{ $$=^$(new_exp(new Malloc_e(NULL,speclist2typ((*$5)[1],LOC(@5,@5))),
-                LOC(@1,@7))); }
-| RMALLOC '(' assignment_expression ',' SIZEOF '(' specifier_qualifier_list ')' ')'
-{ $$=^$(new_exp(new Malloc_e($3,speclist2typ((*$7)[1],LOC(@7,@7))),
-                LOC(@1,@9))); }
+| MALLOC '(' expression ')'
+   { $$=^$(new_exp(new Malloc_e(MallocInfo{false,NULL,NULL,$3,false}),
+                   LOC(@1,@4))); }
+| RMALLOC '(' assignment_expression ',' expression ')'
+   { $$=^$(new_exp(new Malloc_e(MallocInfo{false,$3,NULL,$5,false}),
+                   LOC(@1,@6))); }
+| CALLOC '(' SIZEOF '(' type_name ')' ',' expression ')'
+   { let $(_,_,t) = *($5);
+     $$=^$(new_exp(new Malloc_e(MallocInfo{true,NULL,new(t),$8,false}),
+                   LOC(@1,@4))); }
+| RCALLOC '(' assignment_expression ',' SIZEOF '(' type_name ')' ',' 
+               expression ')'
+   { let $(_,_,t) = *($7);
+     $$=^$(new_exp(new Malloc_e(MallocInfo{true,$3,new(t),$10,false}),
+                   LOC(@1,@6))); }
 ;
 
 unary_operator:

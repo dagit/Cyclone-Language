@@ -29,11 +29,15 @@ void GC_free(void *x) {
 }
 
 void *GC_malloc(int x) {
-  return (void*)malloc(x);
+  // FIX:  I'm calling calloc to ensure the memory is zero'd.  This
+  // is because I had to define GC_calloc in runtime_cyc.c
+  return (void*)calloc(sizeof(char),x);
 }
 
 void *GC_malloc_atomic(int x) {
-  return (void*)malloc(x);
+  // FIX:  I'm calling calloc to ensure the memory is zero'd.  This
+  // is because I had to define GC_calloc in runtime_cyc.c
+  return (void*)calloc(sizeof(char),x);
 }
 
 unsigned int GC_gc_no = 0;
@@ -51,5 +55,8 @@ size_t GC_get_total_bytes() {
 }
 
 void *GC_realloc(void *x, size_t n) {
-  return realloc(x,n);
+  return (void *)realloc(x,n);
 }
+
+
+

@@ -861,8 +861,11 @@ and block_comment = parse
       scan_type(t1);
       scan_exp(e1);
       return;
-    case &Malloc_e(_,t1):
-      fallthru(t1);
+    case &Malloc_e(MallocInfo{iscalloc,ropt,topt,e,_}):
+      if (ropt != NULL) scan_exp((exp_t)ropt);
+      if (topt != NULL) scan_type(*topt);
+      scan_exp(e);
+      return;
     case &Sizeoftyp_e(t1):
       scan_type(t1);
       return;

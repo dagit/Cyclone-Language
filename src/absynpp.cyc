@@ -873,7 +873,7 @@ int exp_prec(exp_t e) {
   case &Tunion_e(_,_,_,_,_):    fallthru;
   case &Enum_e(_,_,_):          fallthru;
   case &AnonEnum_e(_,_,_):      fallthru;
-  case &Malloc_e(_,_):          return 140;
+  case &Malloc_e(_):            return 140;
   case &UnresolvedMem_e(_,_):   return 140; // ???
   case &StmtExp_e(_):           return 10000;
   case &Codegen_e(_):           return 140;
@@ -1038,14 +1038,31 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &AnonEnum_e(q,_,_):
     s = qvar2doc(q);
     break;
-  case &Malloc_e(eopt,t):
+  case &Malloc_e(MallocInfo{is_calloc,rgnopt,topt,e,_}):
     // Note: This is for Cyclone's malloc, not the mallocs introduced during
     //       translation to C, which are function calls.
-    if (eopt == NULL)
-      s = cat(text("malloc(sizeof("), typ2doc(t), text("))"));
-    else
-      s = cat(text("rmalloc("),exp2doc((exp_t)eopt),text(","),
-              text("sizeof("),typ2doc(t),text("))"));
+    if (is_calloc) {
+      // topt should not be NULL for calloc's
+      exp_t st = sizeoftyp_exp(*topt,NULL);
+      if (rgnopt == NULL)
+        s = cat(text("calloc("),exp2doc(st),text(","),exp2doc(e),text(")"));
+      else 
+        s = cat(text("rcalloc("),exp2doc((exp_t)rgnopt),text(","),
+                exp2doc(st),text(","),exp2doc(e),text(")"));
+    } else {
+      exp_t new_e;
+      // see comments in absyn.h
+      if (topt == NULL)
+        new_e = e;
+      else 
+        new_e = times_exp(sizeoftyp_exp(*topt,NULL),e,NULL);
+    
+      if (rgnopt == NULL)
+        s = cat(text("malloc("),exp2doc(new_e),text(")"));
+      else
+        s = cat(text("rmalloc("),exp2doc((exp_t)rgnopt),text(","),
+                exp2doc(new_e),text(")"));
+    }
     break;
   case &UnresolvedMem_e(n,des):
     // Currently n is always NULL from the parser
