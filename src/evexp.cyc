@@ -79,10 +79,19 @@ static $(cnst_t,bool) eval_const_unprimop(primop_t p,exp_t e) {
   switch ($(p,cn)) {
   case $(Plus,_): break;
   case $(Minus,  {.Int_c = $(s,i)}): cn = Int_c(Signed,  -i); break;
+  case $(Minus, {.Short_c = $(s,i)}): cn = Short_c(Signed, -i); break;
+  case $(Minus, {.Char_c = $(s,i)}): cn = Char_c(Signed, -i); break;
+  case $(Minus, {.LongLong_c = $(s,i)}): cn = LongLong_c(Signed, -i); break;
   case $(Bitnot, {.Int_c = $(s,i)}): cn = Int_c(Unsigned,~i); break;
+  case $(Bitnot, {.Short_c = $(s,i)}): cn = Short_c(Unsigned,~i); break;
+  case $(Bitnot, {.Char_c = $(s,i)}): cn = Char_c(Unsigned,~i); break;
+  case $(Bitnot, {.LongLong_c = $(s,i)}): cn = LongLong_c(Unsigned,~i); break;
   case $(Not,    {.Int_c = $(_,i)}): cn = Int_c(Signed,  i == 0 ? 1 : 0); break;
+  case $(Not,    {.Short_c = $(_,i)}): cn = Short_c(Signed,  i == 0 ? 1 : 0); break;
+  case $(Not,    {.Char_c = $(_,i)}): cn = Char_c(Signed,  i == 0 ? 1 : 0); break;
+  case $(Not,    {.LongLong_c = $(_,i)}): cn = LongLong_c(Signed,  i == 0 ? 1 : 0); break;
   case $(Not,    {.Null_c = _}):      cn = Int_c(Signed,  1); break;
-  default: terr(e->loc,"bad constant expression"); break;
+  default: return $(cn,false);
   }
   return $(cn,true);
 }
@@ -99,11 +108,11 @@ static $(cnst_t,bool) eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
   int    i1, i2;
   switch (cn1) {
   case {.Int_c = $(x,y)}: s1 = x; i1 = y; break;
-  default: terr(e1->loc, "bad constant expression"); return $(cn1,true);
+  default: return $(cn1,false);
   }
   switch (cn2) {
   case {.Int_c = $(x,y)}: s2 = x; i2 = y; break;
-  default: terr(e2->loc, "bad constant expression"); return $(cn1,true);
+  default: return $(cn1,false);
   }
   switch (p) {
   case Div:
