@@ -707,9 +707,7 @@ kind_t tvar_kind(tvar_t tv, kind_t def) {
   switch (compress_kb(tv->kind)) {
   case &Eq_kb(k): return k;
   case &Less_kb(_,k): return k;
-  default:
-    tv->kind = new Less_kb(NULL,def);
-    return def;
+  default: tv->kind = new Less_kb(NULL,def); return def;
   }
 }
 
@@ -792,9 +790,9 @@ kind_t type_kind(type_t t) {
   case &VarType(tv):      return tvar_kind(tv,&bk);
   case &AppType(c,ts):
     switch (c) {
-    case &VoidCon: return &mk;
+    case &VoidCon:      return &mk;
     case &IntCon(_,sz): return (sz==Int_sz || sz==Long_sz) ? &bk : &mk;
-    case &FloatCon(_): return &mk;
+    case &FloatCon(_):  return &mk;
     case &EnumCon(_,_):
     case &AnonEnumCon(_):
     case &RgnHandleCon:    return &bk;
@@ -1010,12 +1008,6 @@ static void unify_tqual(tqual_t tq1, type_t t1, tqual_t tq2, type_t t2) {
   // clear these flags for error reporting purposes
   tq1_const = false;
   tq2_const = false;
-}
-
-bool equal_tqual(tqual_t tq1, tqual_t tq2) {
-  return ((tq1.real_const == tq2.real_const)
-	  && (tq1.q_volatile == tq2.q_volatile)
-	  && (tq1.q_restrict == tq2.q_restrict));
 }
 
 static void unify_cmp_exp(exp_t e1, exp_t e2) {
@@ -2464,7 +2456,7 @@ opt_t<kindbound_t> kind_to_bound_opt(kind_t k) {
 // returns true if t2 is a nullable pointer type
 bool zero_to_null(tenv_t te, type_t t2, exp_t e1) {
   if (is_pointer_type(t2) && is_zero(e1)) {
-    e1->r = new Const_e(Null_c);
+    e1->r = null_exp(0)->r;
     let tenv_tvs = lookup_opt_type_vars(te);
     let t1 = pointer_type(PtrInfo(new_evar(&ako,tenv_tvs),
                                   empty_tqual(0),
@@ -3692,8 +3684,7 @@ static bool typedef_tvar_is_ptr_rgn(tvar_t tvar, struct Typedefdecl *td) {
       switch (compress((type_t)td->defn)) {
       case &PointerType(PtrInfo(_,_,PtrAtts(r,_,_,_,_))):
 	switch (compress(r)) {
-	case &VarType(tv):
-	  return tvar_cmp(tvar,tv) == 0;
+	case &VarType(tv): return tvar_cmp(tvar,tv) == 0;
 	default: break;
 	}
 	break;
@@ -3733,8 +3724,7 @@ static kind_t tvar_inst_kind(tvar_t tvar, kind_t def_kind,
 }
 
 // forward declaration
-static cvtenv_t<`r>
-i_check_valid_type_level_exp(exp_t e, tenv_t te, cvtenv_t<`r> cvtenv);
+static cvtenv_t<`r> i_check_valid_type_level_exp(exp_t, tenv_t, cvtenv_t<`r>);
 
 // check that a @requires/@ensures clause is well-formed and satisfiable
 static $(cvtenv_t<`r>,relns_t) 
@@ -3782,11 +3772,9 @@ static $(cvtenv_t<`r>,relns_t)
 //   then we move to the more constrained kind.  This is why we propagate
 //   around the set of
 // * add default effects for function types
-static cvtenv_t<`r>
-i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
-                   kind_t expected_kind, type_t t,
-                   bool put_in_effect,
-                   bool allow_abs_aggr);
+static cvtenv_t<`r> i_check_valid_type(seg_t, tenv_t, cvtenv_t<`r>,
+				       kind_t expected_kind, type_t t,
+				       bool put_in_effect, bool allow_abs_aggr);
 
 // helper function to check aggregates
 static cvtenv_t<`r>
@@ -4121,8 +4109,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     break;
   case &VarType(v):
     switch (compress_kb(v->kind)) {
-    case &Unknown_kb(*f):
-      *f = new Opt(new Less_kb(NULL,expected_kind)); break;
+    case &Unknown_kb(*f): *f = new Opt(new Less_kb(NULL,expected_kind)); break;
     default: break;
     }
     // this constrains the variable's kind according to other occurrences
@@ -4392,17 +4379,20 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
             // check the type of the varargs is either datatype PrintArg or
             // datatype ScanfArg according to ft.
             // FIX: shouldn't we just do this once when the declaration is made?
-            bool problem;
-            switch ($(ft,compress(pointer_elt_type(cyc_vararg->type)))) {
-            case $(Printf_ft, &AppType(&DatatypeCon({.KnownDatatype = &tud}),_)):
-              problem = (qvar_cmp(tud->name,datatype_print_arg_qvar) != 0); break;
-            case $(Scanf_ft,  &AppType(&DatatypeCon({.KnownDatatype = &tud}),_)):
-              problem = (qvar_cmp(tud->name,datatype_scanf_arg_qvar) != 0); break;
-            default:
-              problem = true; break;
-            }
-            if (problem)
-              terr(loc,"format attribute and vararg types don't match");
+           bool problem;
+           switch ($(ft,compress(pointer_elt_type(cyc_vararg->type)))) {
+           case $(Printf_ft, &AppType(&DatatypeCon({.KnownDatatype = &tud}),_)):
+	     problem = (qvar_cmp(tud->name,datatype_print_arg_qvar()) != 0); 
+	     break;
+           case $(Scanf_ft,  &AppType(&DatatypeCon({.KnownDatatype = &tud}),_)):
+	     problem = (qvar_cmp(tud->name,datatype_scanf_arg_qvar()) != 0); 
+	     break;
+           default:
+	     problem = true; 
+	     break;
+	   }
+	   if (problem)
+	     terr(loc,"format attribute and vararg types don't match");
           }
         }
       }
@@ -4831,7 +4821,9 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
   check_valid_toplevel_type(loc,te,t);
   switch (compress(t)) {
   case &FnType(i):
+    let atts = fd->i.attributes;
     fd->i = i;
+    fd->i.attributes = atts;
     fd->i.ret_tqual.real_const = 
       extract_const_from_typedef(loc,i.ret_tqual.print_const,i.ret_type);
     break;
@@ -4871,7 +4863,6 @@ void add_tvar_identity(tvar_t tv) {
   if (tv->identity == -1)
     tv->identity = new_tvar_id();
 }
-
 void add_tvar_identities(list_t<tvar_t> tvs) {
   List::iter(add_tvar_identity,tvs);
 }

@@ -21,8 +21,7 @@
 #define _ABSYN_H_
 
 
-// These macros are useful for declaring globally shared, nullary
-// data constructors.  
+// These macros are useful for declaring globally shared data constructors.  
 #define extern_datacon(T,C) extern datatype T.C C##_val
 #define datacon(T,C) datatype T.C C##_val = C
 #define datacon1(T,C,e) datatype T.C C##_val = C(e)
@@ -503,7 +502,6 @@ namespace Absyn {
     string_t Wstring_c;
   };
   // constructors for constants
-  extern cnst_t Null_c;
   extern cnst_t Char_c(sign_t,char);
   extern cnst_t Wchar_c(string_t<`H>);
   extern cnst_t Short_c(sign_t,short);
@@ -896,8 +894,9 @@ namespace Absyn {
 
   ///////////////////////// Qualifiers ////////////////////////////
   extern tqual_t const_tqual(seg_t);
-  extern tqual_t combine_tqual(tqual_t x,tqual_t y);
   extern tqual_t empty_tqual(seg_t);
+  extern tqual_t combine_tqual(tqual_t x,tqual_t y);
+  extern bool equal_tqual(tqual_t tq1, tqual_t tq2);
 
   ////////////////////////// Kind bounds //////////////////////////
   extern kindbound_t compress_kb(kindbound_t);
@@ -945,11 +944,11 @@ namespace Absyn {
 
   // exception name and type
   extern qvar_t exn_name;
-  extern datatypedecl_t exn_tud;
+  extern datatypedecl_t exn_tud();
   extern type_t exn_type();
   // datatype PrintArg and datatype ScanfArg types
-  extern qvar_t datatype_print_arg_qvar;
-  extern qvar_t datatype_scanf_arg_qvar;
+  extern qvar_t datatype_print_arg_qvar();
+  extern qvar_t datatype_scanf_arg_qvar();
   // string (char ?)
   extern type_t string_type(type_t rgn);
   extern type_t const_string_type(type_t rgn);
@@ -1054,7 +1053,6 @@ namespace Absyn {
   extern exp_t tuple_exp(list_t<exp_t,`H>, seg_t);
   extern exp_t stmt_exp(stmt_t, seg_t);
   extern exp_t null_pointer_exn_exp(seg_t);
-  extern exp_t match_exn_exp(seg_t);
   extern exp_t array_exp(list_t<exp_t,`H>, seg_t);
   extern exp_t valueof_exp(type_t, seg_t);
   extern exp_t asm_exp(bool volatile_kw, string_t<`H> body, seg_t);
@@ -1062,8 +1060,8 @@ namespace Absyn {
   extern exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H>,
                                  list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>,
 				 seg_t);
-  extern qvar_t uniquergn_qvar;
-  extern exp_t uniquergn_exp; // refers to the unique region in Core::
+  extern qvar_t uniquergn_qvar();
+  extern exp_t uniquergn_exp(); // refers to the unique region in Core::
   /////////////////////////// Statements ///////////////////////////////
   extern stmt_t new_stmt(raw_stmt_t s, seg_t loc);
   extern stmt_t skip_stmt(seg_t loc);

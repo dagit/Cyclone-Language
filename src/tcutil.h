@@ -274,8 +274,6 @@ extern void check_nonzero_bound(seg_t, ptrbound_t);
 // Check that bounds are greater than i -- constrain to i+1 if necessary
 extern void check_bound(seg_t, unsigned int i, ptrbound_t, bool do_warn);
 
-extern bool equal_tqual(tqual_t tq1, tqual_t tq2);
-
 extern list_t<$(aggrfield_t,`a)@`r,`r> 
 resolve_aggregate_designators(region_t<`r>rgn, seg_t loc,
                               list_t<$(list_t<designator_t>,`a)@`r2,`r3> des, 

@@ -288,13 +288,6 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
   if(fd->sc == ExternC && !te->in_extern_c_include)
     terr(loc,"extern \"C\" functions cannot be implemented in Cyclone");
 
-  // reject ill-formed type
-  check_fndecl_valid_type(loc,te,fd);
-  // check for redeclaration
-  type_t t = fndecl2type(fd);
-  // move any function type attributes into the function's type
-  fd->i.attributes = transfer_fn_type_atts(t,fd->i.attributes);
-  fnTypeAttsOK(te, t, loc);
   // check that packed and aligned don't show up in the attributes
   for (_ atts = fd->i.attributes; atts != NULL; atts = atts->tl)
     switch (atts->hd) {
@@ -304,6 +297,13 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
       break;
     default: break;
     }
+
+  // reject ill-formed type
+  check_fndecl_valid_type(loc,te,fd);
+  type_t t = fndecl2type(fd);
+  // move any function type attributes into the function's type
+  fd->i.attributes = transfer_fn_type_atts(t,fd->i.attributes);
+  fnTypeAttsOK(te, t, loc);
 
   // due to recursion, add function to environment before checking body
   try {
@@ -1044,7 +1044,7 @@ static bool vardecl_needed(treeshake_env_t env, decl_t d) {
     //fprintf(stderr,"looking at var %s: ",qvar2string(vd->name));
     // get rid of externs that are never referenced
     if (env->in_cinclude || (vd->sc != Extern && vd->sc != ExternC) ||
-	!qvar_cmp(vd->name,uniquergn_qvar)) {
+	!qvar_cmp(vd->name,uniquergn_qvar())) {
       //fprintf(stderr,"needed--!extern or in_cinclude or unique_rgn\n");
       return true;
     }

@@ -3651,6 +3651,7 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
   f->i.requires_clause = NULL;
   f->i.ensures_clause  = NULL;
   f->i.ret_type = typ_to_c(f->i.ret_type);
+  f->cached_type = typ_to_c((type_t)f->cached_type);
   region frgn; {
     let nv = share_env(frgn,nv);
     for (let args=f->i.args; args != NULL; args = args->tl) {

@@ -21,6 +21,7 @@
 #include <string.h>
 #include "evexp.h"
 #include "tcutil.h"
+#include "warn.h"
 #include "absynpp.h"
 #include "cyclone.h"
 
@@ -1815,6 +1816,12 @@ doc_t decl2doc(decl_t d) {
     fn_info_t type_info = fd->i;
     type_info.attributes = NULL;
     type_t t = new FnType(type_info);
+    if(fd->cached_type != NULL)
+      switch(Tcutil::compress((type_t)fd->cached_type)) {
+      case &FnType(i): 
+	fd->i.attributes = append(fd->i.attributes,i.attributes); break;
+      default: Warn::impos("function has non-function type");
+      }
     doc_t attsdoc   = atts2doc(fd->i.attributes);
     doc_t inlinedoc;
     if(fd->is_inline)

@@ -2882,7 +2882,6 @@ static flow_t anal_decl(analenv_t env, flow_t inflow, decl_t decl) {
 
   case &Fn_d(fd):
     check_nested_fun(env->all_tables,fenv,inflow,fd);
-    type_t t = (type_t)fd->cached_type;
     let vd = (vardecl_t)fd->fn_vardecl;
     // JGM: hmmmm.  nested functions can effect local variables, so if we
     // call one of these, then we should set all of the local variables

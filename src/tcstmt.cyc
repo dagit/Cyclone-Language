@@ -609,9 +609,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let curr_bl = Tcenv::curr_rgn(te);
       if (fd->sc != Public)
 	terr(d->loc,"bad storage class for inner function");
-      check_fndecl_valid_type(d->loc,te,fd);
-      type_t t = fndecl2type(fd);
-      fd->i.attributes = transfer_fn_type_atts(t,fd->i.attributes);
       // check packed and aligned don't show up
       for (_ atts = fd->i.attributes; atts; atts = atts->tl)
 	switch (atts->hd) {
@@ -621,6 +618,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	  break;
 	default: break;
 	}
+      check_fndecl_valid_type(d->loc,te,fd);
+      type_t t = fndecl2type(fd);
+      fd->i.attributes = transfer_fn_type_atts(t,fd->i.attributes);
       vardecl_t vd = new Vardecl {fd->sc, fd->name, 0,const_tqual(0), 
 				  at_type(t,curr_bl,empty_tqual(0), 
 					  false_type),

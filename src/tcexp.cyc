@@ -2152,7 +2152,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
     type_t optrgn = void_type;
     if (rgn_of_pointer(*topt,&optrgn)) {
       rgn = mallocRgn(optrgn);
-      if (rgn == unique_rgn_type) *ropt = uniquergn_exp;
+      if (rgn == unique_rgn_type) *ropt = uniquergn_exp();
     }
   }
   tcExp(clear_abstract_val_ok(te),&uint_type,*e);
@@ -2408,7 +2408,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     type_t optrgn = void_type;
     if (rgn_of_pointer(*topt,&optrgn)) {
       rgn = mallocRgn(optrgn);
-      if (rgn == unique_rgn_type) *rgn_handle = uniquergn_exp;
+      if (rgn == unique_rgn_type) *rgn_handle = uniquergn_exp();
     }
   }
     

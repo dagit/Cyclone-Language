@@ -1177,6 +1177,6 @@ void resolve_decls(env_t env, list_t<decl_t> tds) {
 
 void resolve_all(list_t<Absyn::decl_t,`H> tds) {
   let env = new Env(false,mt_nsctxt(true,mt_renv),NULL);
-  resolve_decl(env, new Decl(new Datatype_d(exn_tud),0));
+  resolve_decl(env, new Decl(new Datatype_d(exn_tud()),0));
   resolve_decls(env, tds);
 }

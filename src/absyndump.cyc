@@ -1301,16 +1301,20 @@ void dumpdecl(decl_t d) {
       default: dump("inline");   break;
       }
     dumpscope(fd->sc);
+
     fn_info_t type_info = fd->i;
     type_info.attributes = NULL;
     type_t t = new FnType(type_info);
+    if(fd->cached_type != NULL)
+      switch(Tcutil::compress((type_t)fd->cached_type)) {
+      case &FnType(i): 
+	fd->i.attributes = append(fd->i.attributes,i.attributes); break;
+      default: Warn::impos("function has non-function type");
+      }
+
     switch(c_compiler){
-    case Gcc_c:
-      dumptqtd(empty_tqual(0), t, dump_atts_qvar,fd);
-      break;
-    default:
-      dumptqtd(empty_tqual(0), t, dump_callconv_fdqvar,fd);
-      break;  
+    case Gcc_c: dumptqtd(empty_tqual(0), t, dump_atts_qvar,fd); break;
+    default:    dumptqtd(empty_tqual(0), t, dump_callconv_fdqvar,fd); break;  
     }
     dump_char('{');
     dumpstmt(fd->body,false);

@@ -116,7 +116,7 @@ tenv_t tc_init() {
 		    .enumdecls     = Dict::empty(qvar_cmp),
 		    .typedefs      = Dict::empty(qvar_cmp),
 		    .ordinaries    = Dict::empty(qvar_cmp)};
-  ae->datatypedecls = Dict::insert(ae->datatypedecls, exn_name, new exn_tud);
+  ae->datatypedecls = Dict::insert(ae->datatypedecls, exn_name, new exn_tud());
   return new Tenv(NULL,ae,NULL,false,false,false,false);
 }
 binding_t lookup_ordinary_global(tenv_t te,seg_t loc,qvar_t q,bool is_use) {

@@ -88,11 +88,11 @@ i_t empty() {
 i_t final() {
   let i = empty();
   // add definition of @extensible datatype exn
-  let exn_d = new *exn_tud;
+  let exn_d = new *exn_tud();
   exn_d->sc = Public;
   i->exports->datatypedecls = Dict::insert(i->exports->datatypedecls, exn_name, 
 					   exn_d);
-  for(let tufs = exn_tud->fields->v; tufs != NULL; tufs = tufs->tl) {
+  for(let tufs = exn_tud()->fields->v; tufs != NULL; tufs = tufs->tl) {
     let exn_f = new *tufs->hd;
     exn_f->sc = Public;
     let exn_fd = new Tcdecl::Xdatatypefielddecl(exn_d, exn_f);
