@@ -757,6 +757,7 @@ epilogue {
 #define MM_NULLACT ((const char ?)NULL)
 #define MM_NULLTAG ((const char ?)NULL)
 extern int fmtmsg(long, const char ?, int, const char ?,
+
                   const char ?, const char ?);
 }
 cycstub {
@@ -3380,6 +3381,28 @@ epilogue {
 }
 ;
 
+sys/dir.h:
+epilogue {
+  #include <cdirent.h>
+}
+;
+
+sys/file.h:
+include {
+L_SET
+L_CURR
+L_INCR
+L_XTND
+F_OK
+X_OK
+W_OK
+R_OK
+}
+prologue {
+  #include <cfcntl.h>
+}
+;
+
 sys/ipc.h:
 include {
 ipc_perm
@@ -4187,10 +4210,58 @@ epilogue waitpid {
 }
 ;
 
-syslog.h:
+sys/syslog.h:
+include {
+LOG_EMERG
+LOG_ALERT
+LOG_CRIT
+LOG_ERR
+LOG_WARNING
+LOG_NOTICE
+LOG_INFO
+LOG_DEBUG
+LOG_PRIMASK
+LOG_PRI
+LOG_MAKEPRI
+LOG_KERN
+LOG_USER
+LOG_MAIL
+LOG_DAEMON
+LOG_AUTH
+LOG_SYSLOG
+LOG_LPR
+LOG_NEWS
+LOG_UUCP
+LOG_CRON
+LOG_AUTHPRIV
+LOG_FTP
+LOG_LOCAL0
+LOG_LOCAL1
+LOG_LOCAL2
+LOG_LOCAL3
+LOG_LOCAL4
+LOG_LOCAL5
+LOG_LOCAL6
+LOG_LOCAL7
+LOG_NFACILITIES
+LOG_FACMASK
+LOG_FAC
+LOG_MASK
+LOG_UPTO
+LOG_PID
+LOG_CONS
+LOG_ODELAY
+LOG_NDELAY
+LOG_NOWAIT
+LOG_PERROR
+}
 epilogue {
+extern "C" void closelog (void);
+exetrn "C" int setlogmask (int);
   // This declares a not quite printf like function, we need to write
   // it in Cyclone.
+  // void openlog (const char *, int, int);
+  // void syslog (int, const char *, ...);
 }
 ;
 

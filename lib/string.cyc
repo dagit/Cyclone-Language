@@ -595,6 +595,45 @@ size_t strcspn(string_t s, string_t accept) {
   return len;
 }
 
+// Return substring from current position to first occurrence of a
+// character in tok.  Modifies s by storing a NULL at that position.
+// Subsequent calls with NULL as the token will start at the end
+// of the previous token.
+mstring_t<`H> strtok (mstring_t<`H> s, string_t delim)
+{
+  static mstring_t<`H> olds = NULL;
+  mstring_t<`H> token;
+
+  if (s == NULL) {
+    if (olds == NULL)
+      return NULL;
+    s = olds;
+  }
+
+  /* Scan leading delimiters.  */
+  size_t inc = strspn (s, delim);
+  if ((inc >= s.size) || *(s + inc) == '\0')
+    {
+      olds = NULL;
+      return NULL;
+    }
+  else
+    s += inc;
+
+  /* Find the end of the token.  */
+  token = s;
+  s = mstrpbrk (token, delim);
+  if (s == NULL)
+    /* This token finishes the string.  */
+    olds = NULL;
+  else
+    {
+      /* Terminate the token and make OLDS point past it.  */
+      *s = '\0';
+      olds = s + 1;
+    }
+  return token;
+}
 
 ////////////////////////// CONVERSIONS
 list_t<int,`r> rexplode(region_t<`r> r,string_t s) {

@@ -122,6 +122,7 @@ extern double strtod(const char ?`r n, const char ?`r *`r2 end);
 extern long strtol(const char ?`r n, const char ?`r *`r2 end, int base);
 /* Convert a string to an unsigned long integer.  */
 extern unsigned long strtoul(const char ?`r n,const char ?`r *`r2 end, int base);
+extern unsigned long mstrtoul(char ?`r n,char ?`r *`r2 endptr,int base);
 /* Here for compatibility reasons.  Will call Array::qsort */
 extern void qsort<`a::B,`r::R>(`a ?`r tab, size_t nmemb, size_t szmemb, Array::cmpfn_t<`a,`r,`r>);
 

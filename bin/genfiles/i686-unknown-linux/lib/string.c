@@ -296,7 +296,8 @@ needle); extern struct _tagged_arr Cyc_Std_strpbrk( struct _tagged_arr s, struct
 _tagged_arr accept); extern struct _tagged_arr Cyc_Std_mstrpbrk( struct
 _tagged_arr s, struct _tagged_arr accept); extern unsigned int Cyc_Std_strspn(
 struct _tagged_arr s, struct _tagged_arr accept); extern unsigned int Cyc_Std_strcspn(
-struct _tagged_arr s, struct _tagged_arr accept); extern struct Cyc_List_List*
+struct _tagged_arr s, struct _tagged_arr accept); extern struct _tagged_arr Cyc_Std_strtok(
+struct _tagged_arr s, struct _tagged_arr delim); extern struct Cyc_List_List*
 Cyc_Std_explode( struct _tagged_arr s); extern struct Cyc_List_List* Cyc_Std_rexplode(
 struct _RegionHandle*, struct _tagged_arr s); extern struct _tagged_arr Cyc_Std_implode(
 struct Cyc_List_List* c); extern int Cyc_Std_strcasecmp( struct _tagged_arr,
@@ -600,17 +601,30 @@ unsigned char)); j ++){ if(*(( const unsigned char*) _check_unknown_subscript( s
 sizeof( unsigned char),( int) i)) != *(( const unsigned char*)
 _check_unknown_subscript( accept, sizeof( unsigned char), j))){ break;}} if( j
 ==  _get_arr_size( accept, sizeof( unsigned char))){ return i;}}} return len;}
-struct Cyc_List_List* Cyc_Std_rexplode( struct _RegionHandle* r, struct
-_tagged_arr s){ struct Cyc_List_List* result= 0;{ int i=( int)( Cyc_Std_strlen(
-s) -  1); for( 0; i >=  0; i --){ result=({ struct Cyc_List_List* _temp33=(
-struct Cyc_List_List*) _region_malloc( r, sizeof( struct Cyc_List_List));
-_temp33->hd=( void*)(( int)*(( const unsigned char*) _check_unknown_subscript( s,
-sizeof( unsigned char), i))); _temp33->tl= result; _temp33;});}} return result;}
-struct Cyc_List_List* Cyc_Std_explode( struct _tagged_arr s){ return Cyc_Std_rexplode(
-Cyc_Core_heap_region, s);} struct _tagged_arr Cyc_Std_implode( struct Cyc_List_List*
-chars){ struct _tagged_arr s= Cyc_Core_new_string((( int(*)( struct Cyc_List_List*
-x)) Cyc_List_length)( chars)); unsigned int i= 0; while( chars !=  0) {*((
-unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char),( int) i ++))=(
+struct _tagged_arr Cyc_Std_strtok( struct _tagged_arr s, struct _tagged_arr
+delim){ static struct _tagged_arr olds={( void*) 0u,( void*) 0u,( void*)( 0u + 
+0u)}; struct _tagged_arr token; if( s.curr == ( _tag_arr( 0u, 0u, 0u)).curr){
+if( olds.curr == ( _tag_arr( 0u, 0u, 0u)).curr){ return _tag_arr( 0u, 0u, 0u);}
+s= olds;}{ unsigned int inc= Cyc_Std_strspn(( struct _tagged_arr) s, delim); if(
+inc >=  _get_arr_size( s, sizeof( unsigned char))? 1:*(( unsigned char*)
+_check_unknown_subscript( _tagged_arr_plus( s, sizeof( unsigned char),( int) inc),
+sizeof( unsigned char), 0u)) == '\000'){ olds= _tag_arr( 0u, 0u, 0u); return
+_tag_arr( 0u, 0u, 0u);} else{ _tagged_arr_inplace_plus(& s, sizeof(
+unsigned char),( int) inc);} token= s; s= Cyc_Std_mstrpbrk( token, delim); if( s.curr
+== ( _tag_arr( 0u, 0u, 0u)).curr){ olds= _tag_arr( 0u, 0u, 0u);} else{*((
+unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), 0u))='\000';
+olds= _tagged_arr_plus( s, sizeof( unsigned char), 1);} return token;}} struct
+Cyc_List_List* Cyc_Std_rexplode( struct _RegionHandle* r, struct _tagged_arr s){
+struct Cyc_List_List* result= 0;{ int i=( int)( Cyc_Std_strlen( s) -  1); for( 0;
+i >=  0; i --){ result=({ struct Cyc_List_List* _temp33=( struct Cyc_List_List*)
+_region_malloc( r, sizeof( struct Cyc_List_List)); _temp33->hd=( void*)(( int)*((
+const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), i)));
+_temp33->tl= result; _temp33;});}} return result;} struct Cyc_List_List* Cyc_Std_explode(
+struct _tagged_arr s){ return Cyc_Std_rexplode( Cyc_Core_heap_region, s);}
+struct _tagged_arr Cyc_Std_implode( struct Cyc_List_List* chars){ struct
+_tagged_arr s= Cyc_Core_new_string((( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(
+chars)); unsigned int i= 0; while( chars !=  0) {*(( unsigned char*)
+_check_unknown_subscript( s, sizeof( unsigned char),( int) i ++))=(
 unsigned char)(( int) chars->hd); chars= chars->tl;} return s;} int Cyc_Std_strcasecmp(
 struct _tagged_arr s1, struct _tagged_arr s2){ if( s1.curr ==  s2.curr){ return
 0;}{ unsigned int len1= Cyc_Std_int_strleno( s1, _tag_arr("Std::strcasecmp",

@@ -257,14 +257,15 @@ _tagged_arr); extern struct _tagged_arr Cyc_Std_getenv( struct _tagged_arr);
 extern double Cyc_Std_strtod( struct _tagged_arr n, struct _tagged_arr* end);
 extern int Cyc_Std_strtol( struct _tagged_arr n, struct _tagged_arr* end, int
 base); extern unsigned int Cyc_Std_strtoul( struct _tagged_arr n, struct
-_tagged_arr* end, int base); extern void Cyc_Std_qsort( struct _tagged_arr tab,
-unsigned int nmemb, unsigned int szmemb, int(*)( void**, void**)); extern int
-Cyc_Std_system( struct _tagged_arr); extern double atof( unsigned char*); extern
-int atoi( unsigned char*); extern int atol( unsigned char*); extern
-unsigned char* getenv( unsigned char*); extern int putenv( unsigned char*);
-extern double strtod( unsigned char*, unsigned char**); extern int strtol(
-unsigned char*, unsigned char**, int); extern unsigned int strtoul(
-unsigned char*, unsigned char**, int); extern int system( unsigned char*);
+_tagged_arr* end, int base); extern unsigned int Cyc_Std_mstrtoul( struct
+_tagged_arr n, struct _tagged_arr* endptr, int base); extern void Cyc_Std_qsort(
+struct _tagged_arr tab, unsigned int nmemb, unsigned int szmemb, int(*)( void**,
+void**)); extern int Cyc_Std_system( struct _tagged_arr); extern double atof(
+unsigned char*); extern int atoi( unsigned char*); extern int atol(
+unsigned char*); extern unsigned char* getenv( unsigned char*); extern int
+putenv( unsigned char*); extern double strtod( unsigned char*, unsigned char**);
+extern int strtol( unsigned char*, unsigned char**, int); extern unsigned int
+strtoul( unsigned char*, unsigned char**, int); extern int system( unsigned char*);
 double Cyc_Std_atof( struct _tagged_arr _nptr){ return atof( string_to_Cstring(
 _nptr));} int Cyc_Std_atoi( struct _tagged_arr _nptr){ return atoi(
 string_to_Cstring( _nptr));} int Cyc_Std_atol( struct _tagged_arr _nptr){ return
@@ -299,7 +300,13 @@ _tagged_arr* endptr, int base){ Cyc_Std_check_valid_cstring( n);{ unsigned char*
 c= underlying_Cstring( n); unsigned char* e= endptr ==  0? 0: c; unsigned int r=
 strtoul( c,( unsigned char**)& e, base); if( endptr !=  0){ int m=( int)((
 unsigned int) e - ( unsigned int) c);* endptr= _tagged_arr_plus( n, sizeof(
-unsigned char), m);} return r;}} void Cyc_Std_qsort( struct _tagged_arr tab,
-unsigned int nmemb, unsigned int szmemb, int(* compfn)( void**, void**)){ Cyc_Array_qsort(
-compfn, tab,( int) nmemb);} int Cyc_Std_system( struct _tagged_arr cmd){ return
-system( string_to_Cstring( cmd));}
+unsigned char), m);} return r;}} unsigned int Cyc_Std_mstrtoul( struct
+_tagged_arr n, struct _tagged_arr* endptr, int base){ Cyc_Std_check_valid_cstring((
+struct _tagged_arr) n);{ unsigned char* c= underlying_Cstring(( struct
+_tagged_arr) n); unsigned char* e= endptr ==  0? 0: c; unsigned int r= strtoul(
+c,( unsigned char**)& e, base); if( endptr !=  0){ int m=( int)(( unsigned int)
+e - ( unsigned int) c);* endptr= _tagged_arr_plus( n, sizeof( unsigned char), m);}
+return r;}} void Cyc_Std_qsort( struct _tagged_arr tab, unsigned int nmemb,
+unsigned int szmemb, int(* compfn)( void**, void**)){ Cyc_Array_qsort( compfn,
+tab,( int) nmemb);} int Cyc_Std_system( struct _tagged_arr cmd){ return system(
+string_to_Cstring( cmd));}

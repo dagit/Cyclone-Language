@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1/lib/execinfo.c
 *** i686-unknown-linux/lib/execinfo.c	Wed Nov  7 10:35:16 2001
---- i386-unknown-bsdi3.1/lib/execinfo.c	Wed Nov  7 18:58:18 2001
+--- i386-unknown-bsdi3.1/lib/execinfo.c	Thu Nov  8 17:20:30 2001
 ***************
 *** 242,360 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
@@ -164,7 +164,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-bsdi3.1/lib/getopt.c
 *** i686-unknown-linux/lib/getopt.c	Wed Nov  7 10:35:16 2001
---- i386-unknown-bsdi3.1/lib/getopt.c	Wed Nov  7 18:58:18 2001
+--- i386-unknown-bsdi3.1/lib/getopt.c	Thu Nov  8 17:20:30 2001
 ***************
 *** 271,281 ****
   __fd); extern struct _tagged_arr Cyc_Std_getenv( struct _tagged_arr); struct Cyc_Std_timeval{
@@ -189,7 +189,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-bsdi3.1/l
   int Cyc_Std__getopt_internal( int __argc, struct _tagged_arr __argv, struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c i386-unknown-bsdi3.1/lib/in.c
 *** i686-unknown-linux/lib/in.c	Wed Nov  7 10:35:18 2001
---- i386-unknown-bsdi3.1/lib/in.c	Wed Nov  7 18:58:18 2001
+--- i386-unknown-bsdi3.1/lib/in.c	Thu Nov  8 17:20:30 2001
 ***************
 *** 243,253 ****
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
@@ -214,7 +214,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c i386-unknown-bsdi3.1/lib/i
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c i386-unknown-bsdi3.1/lib/inet.c
 *** i686-unknown-linux/lib/inet.c	Wed Nov  7 10:35:16 2001
---- i386-unknown-bsdi3.1/lib/inet.c	Wed Nov  7 18:58:18 2001
+--- i386-unknown-bsdi3.1/lib/inet.c	Thu Nov  8 17:20:30 2001
 ***************
 *** 243,253 ****
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
@@ -239,7 +239,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c i386-unknown-bsdi3.1/lib
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c i386-unknown-bsdi3.1/lib/netdb.c
 *** i686-unknown-linux/lib/netdb.c	Wed Nov  7 10:35:18 2001
---- i386-unknown-bsdi3.1/lib/netdb.c	Wed Nov  7 18:58:18 2001
+--- i386-unknown-bsdi3.1/lib/netdb.c	Thu Nov  8 17:20:30 2001
 ***************
 *** 243,253 ****
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
@@ -264,7 +264,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c i386-unknown-bsdi3.1/li
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c i386-unknown-bsdi3.1/lib/socket.c
 *** i686-unknown-linux/lib/socket.c	Wed Nov  7 10:35:20 2001
---- i386-unknown-bsdi3.1/lib/socket.c	Wed Nov  7 18:58:18 2001
+--- i386-unknown-bsdi3.1/lib/socket.c	Thu Nov  8 17:20:30 2001
 ***************
 *** 243,253 ****
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
@@ -289,7 +289,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c i386-unknown-bsdi3.1/l
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-bsdi3.1/lib/stat.c
 *** i686-unknown-linux/lib/stat.c	Wed Nov  7 10:35:20 2001
---- i386-unknown-bsdi3.1/lib/stat.c	Wed Nov  7 18:58:18 2001
+--- i386-unknown-bsdi3.1/lib/stat.c	Thu Nov  8 17:20:30 2001
 ***************
 *** 245,256 ****
   tm_wday; int tm_yday; int tm_isdst; } ; extern void tzset(); extern int time(
@@ -317,7 +317,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-bsdi3.1/lib
   filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c i386-unknown-bsdi3.1/lib/time.c
 *** i686-unknown-linux/lib/time.c	Wed Nov  7 10:35:20 2001
---- i386-unknown-bsdi3.1/lib/time.c	Wed Nov  7 18:58:18 2001
+--- i386-unknown-bsdi3.1/lib/time.c	Thu Nov  8 17:20:30 2001
 ***************
 *** 253,271 ****
   struct _tagged_arr); extern int timezone; extern int daylight; struct Cyc_Std_timeval{
@@ -358,7 +358,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c i386-unknown-bsdi3.1/lib
   unsigned int Cyc_Std_strftime( struct _tagged_arr s, unsigned int maxsize,
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c i386-unknown-bsdi3.1/lib/unistd.c
 *** i686-unknown-linux/lib/unistd.c	Wed Nov  7 10:35:20 2001
---- i386-unknown-bsdi3.1/lib/unistd.c	Wed Nov  7 18:58:18 2001
+--- i386-unknown-bsdi3.1/lib/unistd.c	Thu Nov  8 17:20:30 2001
 ***************
 *** 243,285 ****
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
@@ -446,7 +446,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c i386-unknown-bsdi3.1/l
   truncate( unsigned char*, int); extern int write( int fd, unsigned char* buf,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c i386-unknown-bsdi3.1/src/buildlib.c
 *** i686-unknown-linux/src/buildlib.c	Wed Nov  7 18:49:38 2001
---- i386-unknown-bsdi3.1/src/buildlib.c	Wed Nov  7 18:58:18 2001
+--- i386-unknown-bsdi3.1/src/buildlib.c	Thu Nov  8 17:20:30 2001
 ***************
 *** 331,363 ****
   tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*
@@ -513,7 +513,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c i386-unknown-bsdi3.1
   int* filedes); extern int lseek( int filedes, int offset, int whence); extern
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c.orig i386-unknown-bsdi3.1/src/buildlib.c.orig
 *** i686-unknown-linux/src/buildlib.c.orig	Wed Dec 31 19:00:00 1969
---- i386-unknown-bsdi3.1/src/buildlib.c.orig	Wed Nov  7 18:58:18 2001
+--- i386-unknown-bsdi3.1/src/buildlib.c.orig	Thu Nov  8 17:20:30 2001
 ***************
 *** 0 ****
 --- 1,2805 ----

@@ -107,6 +107,7 @@ extern string_t<`r>  strpbrk(string_t<`r> s, string_t accept);
 extern mstring_t<`r> mstrpbrk(mstring_t<`r> s, string_t accept);
 extern size_t        strspn(string_t s, string_t accept);
 extern size_t        strcspn(string_t s, string_t accept);
+extern mstring_t<`H> strtok (mstring_t<`H> s, string_t delim);
 
 ////////////////////////// CONVERSIONS
 

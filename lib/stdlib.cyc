@@ -114,6 +114,24 @@ namespace Std {
     return r;
   }
 
+  unsigned long mstrtoul(char ?`r n,char ?`r *`r2 endptr,int base){
+    // need to ensure that the string has a '\0' in it before
+    // handing it off to C.
+    check_valid_cstring(n);
+    // FIX:  TOTAL HACK ALERT
+    Cstring c = underlying_Cstring(n); // so far so good
+    Cstring e = (endptr == NULL) ? NULL : c;
+    unsigned long r = Cstdlib::strtoul(c, &e, base);
+    if (endptr != NULL) {
+      // need to adjust the end -- the best we can do is calculate
+      // the diff between e and c.  And our pointer arithmetic doesn't
+      // support subtraction on * types.  So I'm casting to unsigned int.
+      int m = (unsigned int)e - (unsigned int)c;
+      *endptr = n + m;
+    }
+    return r;
+  }
+
   void qsort<`a::B,`r::R>(`a ?`r tab, size_t nmemb, size_t szmemb, 
 		       Array::cmpfn_t<`a,`r,`r> compfn) {
     Array::qsort(compfn, tab, nmemb);
