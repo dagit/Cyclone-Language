@@ -36,9 +36,6 @@ extern_datacon(Absyn::AbsynAnnot,NullOnly);
 extern_datacon(Absyn::AbsynAnnot,NullAndFatBound);
 extern_datacon(Absyn::AbsynAnnot,FatBound);
 
-extern bool warn_bounds_checks;  // FLAG
-extern bool warn_all_null_deref; // FLAG
-
 void insert_checks(List::list_t<Absyn::decl_t,`H>);
 }
 

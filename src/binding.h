@@ -26,7 +26,6 @@ namespace Binding {
   using List;
   using Dict;
 
-  extern bool warn_override;
   void resolve_all(list_t<Absyn::decl_t,`H> tds);
 
   // only the lexer needs the rest of this

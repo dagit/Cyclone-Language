@@ -19,6 +19,7 @@
 #include <string.h>
 #include "absynpp.h"
 #include "warn.h"
+#include "flags.h"
 #include "unify.h"
 #include "tcutil.h"
 #include "attributes.h"
@@ -43,9 +44,6 @@ namespace Tc;
 // used for the error messages of tcdecl
 static string_t tc_msg_c = "";
 static string_t * tc_msg = &tc_msg_c;
-
-// used to control when we warn for bits-only unions
-bool aggressive_warn = false;
 
 static bool export_member(qvar_t x, list_t<$(seg_t,qvar_t,bool)@> exports) {
   for (; exports != NULL; exports = exports->tl) {
@@ -499,7 +497,7 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
       // warn when fields of unions are not bits-only -- these can
       // only be written and not read.
       for (_ f = fs; f != NULL; f = f->tl)
-	if (aggressive_warn &&
+	if (Flags::tc_aggressive_warn &&
             !is_bits_only_type(f->hd->type) && f->hd->requires_clause == NULL)
 	  Warn::warn2(loc,"member ",*f->hd->name," of union ",q," has type ",
 		      f->hd->type," so it can only be written and not read");
@@ -834,7 +832,7 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
 	let tecpy = copy_tenv_dicts(te);
 	tecpy->in_extern_c_include = true;
 	tc_decls(tecpy,*ds2,true,check_var_init,NULL);
-	Toc::init();
+	Toc::init(); // bleach: (for typ_to_c)
 	set_scopes(ovrs, ExternC); //ow scope mismatch warnings -- ovrs are not typechecked independently
 	Cifc::user_overrides(d->loc, tecpy, ds2, ovrs);
 	Toc::finish();

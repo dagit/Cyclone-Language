@@ -30,9 +30,9 @@
 #include <dict.h>
 #include <set.h>
 #include "warn.h"
+#include "flags.h"
 #include "binding.h"
 #include "cifc.h"
-
 using List;
 using Absyn;
 using Warn;
@@ -41,8 +41,6 @@ namespace Binding;
 typedef Dict::dict_t<`a,`b> dict_t<`a,`b>;
 
 datatype exn {BindingError};
-
-bool warn_override = false;
 
 //////////////// Namespace Resolution ///////////////
 //After years of repeating logic in the lexer and type-checker, we share it here
@@ -328,7 +326,7 @@ void resolve_and_add_vardecl(seg_t loc, env_t env, vardecl_t vd) {
   absolutize_decl(loc,env,vd->name,vd->sc);
   let &$(decl_ns,decl_name) = vd->name;
   resolve_type(loc,env,vd->type);
-  if(warn_override)
+  if(Flags::warn_override)
     check_warn_override(loc,env,vd->name);
   if(!at_toplevel(env))
     *env->local_vars = Dict::insert(*env->local_vars, decl_name,
@@ -964,7 +962,7 @@ void resolve_decl(env_t env, decl_t d) {
     let vds = get_fun_vardecls(true, loc, env, fd->i.args, fd->i.cyc_varargs);
     fd->param_vardecls = new Core::Opt(vds);
 
-    if(warn_override) // need to do before changing env->local_vars
+    if(Flags::warn_override) // need to do before changing env->local_vars
       check_warn_override(loc,env,fd->name);
 
     let old_locals = env->local_vars; // non-NULL only for nested functions

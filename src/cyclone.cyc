@@ -41,9 +41,6 @@
 namespace Port {
   void port(List::list_t<Absyn::decl_t>);
 }
-namespace ParseErrors {
-  extern bool print_state_and_token; // FLAG
-}
 namespace Lex {
   void pos_init();
   void lex_init(bool use_cyclone_keywords);
@@ -52,21 +49,14 @@ namespace Lex {
 using Cyclone;
 using Core;
 using List;
-using Arg;
 typedef Hashtable::table_t<`a,`b> table_t<`a,`b>;
 
 static bool pp_r       = false; // FLAGS ALL HERE (care about static?)
 static bool noshake_r  = false; 
-static bool stop_after_cpp_r = false;
-static bool parseonly_r = false;
-static bool tc_r       = false;
-static bool cf_r       = false;
 static bool noprint_r  = false;
 static bool ic_r       = false;
-static bool toc_r      = false;
 static bool stop_after_objectfile_r = false;
 static bool stop_after_asmfile_r = false;
-static bool inline_functions_r = false;
 static bool elim_se_r    = false;
 static bool v_r        = false;
 static bool save_temps_r = false;
@@ -112,7 +102,7 @@ void set_port_c_code() {
   Flags::porting_c_code = true;
   Position::max_errors = 65535; // allow a lot of errors
   save_c_r = true; // save temp files
-  parseonly_r = true; // stop after parsing
+  Flags::set_parseonly();
 }
 
 static string_t *output_file = NULL;
@@ -225,7 +215,7 @@ static void set_save_temps() {
 
 static bool produce_dependencies = false;
 static void set_produce_dependencies() {
-  stop_after_cpp_r = true;
+  Flags::stop_after_pass = Flags::Cpp;
   produce_dependencies = true;
   add_cpparg("-M");
 }
@@ -248,12 +238,8 @@ static void clear_lineno() {
   generate_line_directives_r = false;
   set_save_temps();
 }
-static void set_inline_functions() {
-  inline_functions_r = true;
-}
-static void set_elim_se() {
+static void set_elim_se() { // still exist in cyc_include.h
   elim_se_r = true;
-  set_inline_functions();
 }
 static void set_tovc() {
   Flags::tovc_r = true;
@@ -294,16 +280,6 @@ static void set_pg() {
 static void set_stop_after_asmfile() {
   stop_after_asmfile_r = true;
   add_ccarg("-S");
-}
-
-static void set_all_warnings() {
-  InsertChecks::warn_bounds_checks = true;
-  InsertChecks::warn_all_null_deref = true;
-  NewControlFlow::warn_lose_unique = true;
-  Flags::warn_alias_coerce = true;
-  Flags::warn_region_coerce = true;
-  Tc::aggressive_warn = true;
-  Binding::warn_override = true;
 }
 
 // This only works enough to support cycdoc so far
@@ -394,7 +370,7 @@ static void noassume_gcc_flag() {
 
 static void remove_file(string_t<`H> s) {
   if (save_temps_r) return;
-  else remove((const char @)s);
+  remove((const char @)s);
 }
 
 ////********************************************************************
@@ -403,8 +379,7 @@ bool compile_failure = false; // for exit code (helps Makefile)
 
 FILE *try_file_open(string_t filename, string_t mode, string_t msg_part) {
   try return file_open(filename,mode);
-  catch {
-  default:
+  catch { default:
     compile_failure = true;
     fprintf(stderr, "\nError: couldn't open %s %s\n", msg_part, filename);
     fflush(stderr);
@@ -422,38 +397,29 @@ void endtime(struct timeval *start) {
   if (v_r) fprintf(stderr,"(%d.%06d secs)\n",end.tv_sec,end.tv_usec);
 }
 
+$(datatype exn @,const char*,int)* uncaught_exn = NULL;
+
 extern "C" void CYCALLOCPROFILE_mark(const char *s);
 
 `b do_stage(string_t stage_name, list_t<Absyn::decl_t,`H> tds,
-	    `b f(`a, list_t<Absyn::decl_t,`H>), `a env,
-	    void on_fail(`c), `c failenv) {
+	    `b f(`a, list_t<Absyn::decl_t,`H>), `a env, `b onfail) {
   CYCALLOCPROFILE_mark(stage_name);
   struct timeval start;
   gettimeofday(&start,NULL);
 
-  let ans;
+  let ans = onfail;
   try ans = f(env,tds);
-  catch {
-  case x:
-    // Only throw the exception if it wasn't the result of a cascading error
-    if (Position::error_p()) {
-      compile_failure = true;
-      on_fail(failenv);
-      fprintf(stderr,"\nCOMPILATION FAILED!\n");
-      fflush(stderr);
-    }
-    else {
-      fprintf(stderr,"COMPILER STAGE %s\n",stage_name);
-      on_fail(failenv);
-    }
-    endtime(&start);
-    Core::rethrow(x);
+  catch { case x:
+    if (Position::error_p())
+      break;
+    compile_failure = true;
+    fprintf(stderr,"COMPILER STAGE %s (unexpected exception) \n",stage_name);
+    uncaught_exn = new $(x,get_exn_filename(),get_exn_lineno());
     break;
   }
   if (Position::error_p())
     compile_failure = true;
   if (compile_failure) {
-    on_fail(failenv);
     fprintf(stderr,"\nCOMPILATION FAILED!\n");
     fflush(stderr);
   } else if (v_r) {
@@ -463,9 +429,6 @@ extern "C" void CYCALLOCPROFILE_mark(const char *s);
   endtime(&start);
   return ans;
 }
-
-static void ignore(`a x) {}
-static void remove_fileptr(mstringptr_t<`H> s) { remove_file(*s); }
 
 list_t<Absyn::decl_t> do_parse(FILE @ f, list_t<Absyn::decl_t,`H> ignore) {
   Lex::lex_init(true); // must forget typedefs, may as well flush symbols too
@@ -495,7 +458,7 @@ bool do_adjust(bool ignore, list_t<Absyn::decl_t,`H> tds) {
 list_t<Absyn::decl_t> do_typecheck(Tcenv::tenv_t te,
 				   list_t<Absyn::decl_t,`H> tds){
   Tc::tc(te, true, tds);
-  if (!noshake_r)
+  if (!noshake_r) 
     tds = Tc::treeshake(te,tds);
   return tds;
 }
@@ -538,12 +501,6 @@ list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE *`H, FILE @`H)@ params,
       Interface::save(i0, fo);
   }
   return tds;
-}
-void interface_fail($(Tcenv::tenv_t, FILE *`H, FILE @`H)@ params) {
-  let &$(_, fi, fo) = params;
-  if(fi != NULL)
-    file_close(fi);
-  file_close(fo);
 }
 
 list_t<Absyn::decl_t>
@@ -631,7 +588,7 @@ static string_t find_in_exec_path(string_t s) {
 list_t<Absyn::decl_t> do_print($(FILE@`H,mstring_t<`H>) @env,
 			       list_t<Absyn::decl_t,`H> tds) {
   let &$(out_file,cfile) = env;
-    let params_r = tc_r ? Absynpp::cyc_params_r : Absynpp::c_params_r;
+    let params_r = (Flags::stop_after_pass < Flags::Toc) ? Absynpp::cyc_params_r : Absynpp::c_params_r;
   params_r.expand_typedefs = ! Flags::noexpand_r;
   params_r.to_VC = Flags::tovc_r;
   params_r.add_cyc_prefix = add_cyc_namespace_r;
@@ -641,11 +598,8 @@ list_t<Absyn::decl_t> do_print($(FILE@`H,mstring_t<`H>) @env,
   params_r.print_all_kinds = print_all_kinds_r;
   params_r.print_all_effects = print_all_effects_r;
 
-  if (inline_functions_r)
-    fprintf(out_file,"#define _INLINE_FUNCTIONS\n");
-
   // Copy cyc_setjmp.h and cyc_include.h to out_file.
-  if (!parseonly_r && !tc_r && !cf_r) {
+  if (Flags::stop_after_pass > Flags::FlowAnalysis) {
     if (!nocyc_setjmp_r) {
       if (Flags::compile_for_boot)
         fprintf(out_file,"#include <setjmp.h>\n");
@@ -661,14 +615,7 @@ list_t<Absyn::decl_t> do_print($(FILE@`H,mstring_t<`H>) @env,
     Absyndump::dumpdecllist2file(tds,out_file);
   }
   fflush(out_file);
-  file_close(out_file);
-  cfiles = new List(new cfile,cfiles);
   return tds;
-}
-void print_fail($(FILE@`H,mstring_t<`H>) @env) {
-  let &$(out_file,cfile) = env;
-  file_close(out_file);
-  cfiles = new List(new strdup(cfile),cfiles);
 }
 
 // Take as input a string, return the list of substrings separated by colons
@@ -682,8 +629,7 @@ static list_t<stringptr_t> split_by_char(string_t<`H> s, char c) {
     if (end == NULL) {
       result = new List(new s,result);
       break;
-    }
-    else {
+    } else {
       result = new List(new ((string_t)substring(s,0,(string_t)end-s)),result);
       len -= ((string_t)end-s);
       s = end+1;
@@ -812,16 +758,16 @@ static void process_file(string_t<`H> filename) {
                         List::map(sh_escape_stringptr,stdinc_dirs)),
                " -I");
   string_t ofile_string;
-  if (stop_after_cpp_r) {
+  if (Flags::stop_after_pass <= Flags::Cpp) {
     if (output_file != NULL)
       ofile_string = aprintf(" > %s", *output_file);
     else // output to standard out
       ofile_string = "";
-  }
-  else ofile_string = aprintf(" > %s", sh_escape_string(preprocfile));
+  } else 
+    ofile_string = aprintf(" > %s", sh_escape_string(preprocfile));
 
   string_t fixup_string;
-  if (produce_dependencies)
+  if (produce_dependencies) {
     // Both of the below hacks can probably be eliminated when we move
     // to gcc 3.0
     if (dependencies_target == NULL)
@@ -829,100 +775,82 @@ static void process_file(string_t<`H> filename) {
       // the dependency produced by cpp will be something like foo.cyc.o,
       // but we want it to be foo.o.
       fixup_string = " | sed 's/^\\(.*\\)\\.cyc\\.o:/\\1.o:/'";
-    else {
+    else 
       // Hack to handle the -MT flag, which is not supported in gcc 2.95
       // Note, we should probably make sure any special characters in
       // *dependencies_target are escaped, but WE DON'T.
-      fixup_string =
-        aprintf(" | sed 's/^.*\\.cyc\\.o:/%s:/'",
-                *dependencies_target);
-    }
-  else fixup_string = "";
+      fixup_string = aprintf(" | sed 's/^.*\\.cyc\\.o:/%s:/'",
+			     *dependencies_target);
+  } else 
+    fixup_string = "";
 
   let cmd = aprintf("%s %s%s %s%s%s",
-	            cpp,
-                    cppargs_string, stdinc_string,
-                    sh_escape_string(filename),
-                    fixup_string, ofile_string);
+	            cpp, cppargs_string, stdinc_string,
+                    sh_escape_string(filename), fixup_string, ofile_string);
 
   if (v_r) fprintf(stderr,"%s\n",cmd);
   if (system((const char @)cmd) != 0) {
     compile_failure = true;
     fprintf(stderr,"\nError: preprocessing\n");
-    if (!stop_after_cpp_r) remove_file(preprocfile);
+    if (Flags::stop_after_pass > Flags::Cpp) remove_file(preprocfile);
     return;
   }
-  if (stop_after_cpp_r) return;
+  if (Flags::stop_after_pass <= Flags::Cpp) return;
 
   // Run the stages of the Cyclone compiler
   Position::reset_position(preprocfile); // necessary for good error messages!
   FILE * in_file  = try_file_open(preprocfile,"r","file");
-  if (compile_failure) return;
 
   list_t<Absyn::decl_t> tds = NULL;
+  let jump_tables = NULL;
+  let te = Tcenv::tc_init(); 
 
   // Parsing
-  tds = do_stage("parsing", tds, do_parse, (FILE@)in_file,
-		 remove_fileptr, preprocfileptr);
-  if(compile_failure) return;
+  if(!compile_failure && Flags::stop_after_pass >= Flags::Parsing)
+    tds = do_stage("parsing", tds, do_parse, (FILE@)in_file, tds);
 
-  if (Flags::porting_c_code) {
+  // Porting
+  if (!compile_failure && Flags::porting_c_code) {
     Port::port(tds);
+    remove_file(preprocfile);
     return;
   }
+
   // Binding resolution
-  do_stage("binding", tds, do_binding, true, remove_fileptr, preprocfileptr);
-  if(compile_failure) return;
+  if(!compile_failure && Flags::stop_after_pass >= Flags::Binding)
+    do_stage("binding", tds, do_binding, true, true);
 
-  // Current Region Metavariable substitution
-  try {
-  do_stage("current region resolution", tds, do_adjust, true,
-	   remove_fileptr, preprocfileptr);
-  if(compile_failure) return;  
-  } catch {
-  case &Core::Failure(s):
-    fprintf(stderr,"Got exception Failure(%s)\n",s);
-    return;
-  case e: rethrow(e);
-  }
+  // Current-Region Metavariable substitution
+  if(!compile_failure && Flags::stop_after_pass >= Flags::CurrentRegion)
+    do_stage("current region resolution", tds, do_adjust, true, true);
 
-  let jump_tables;
-  { let te = Tcenv::tc_init(); // Must declare BEFORE the goto
+  // Type checking
+  if(!compile_failure && Flags::stop_after_pass >= Flags::TypeChecking)
+    tds = do_stage("type checking", tds, do_typecheck, te, tds);
 
-    if (parseonly_r) goto PRINTC;
+  // Jump analysis
+  if(!compile_failure && Flags::stop_after_pass >= Flags::Jumps)
+    jump_tables = do_stage("jump checking", tds, do_jumpanalysis, true, NULL);
 
-    // Type checking
-    tds = do_stage("type checking", tds, do_typecheck, te,
-		   remove_fileptr, preprocfileptr);
-    if(compile_failure) return;
+  // Control-flow checking
+  if(!compile_failure && Flags::stop_after_pass >= Flags::FlowAnalysis)
+    tds = do_stage("control-flow checking",tds,do_cfcheck,(_@)jump_tables,tds);
 
-    // Jump analysis
-    jump_tables = do_stage("jump checking", tds, do_jumpanalysis, true,
-			   remove_fileptr, preprocfileptr);
-    if(compile_failure) return;
-
-    // Control-flow checking
-    if (tc_r) goto PRINTC;
-    do_stage("control-flow checking", tds, do_cfcheck, jump_tables,
-	     remove_fileptr, preprocfileptr);
-    if (compile_failure) return;
-    // Verification-condition generation
-    if (vcgen_r) {
-      do_stage("verification condition generation", tds, do_vcgen, jump_tables,
-               remove_fileptr, preprocfileptr);
-      if (compile_failure) return;
-    }
-    do_stage("check insertion", tds, do_insert_checks, true,
-	     remove_fileptr, preprocfileptr);
-    if (compile_failure) return;
+  // Verification-condition generation (optional for now -- vcgen_r)
+  if (!compile_failure && vcgen_r && Flags::stop_after_pass >= Flags::VCGen)
+    do_stage("verification condition generation",tds,do_vcgen,(_@)jump_tables,true);
+  
+  // check-insertion
+  if(!compile_failure && Flags::stop_after_pass >= Flags::CheckInsertion)
+    do_stage("check insertion", tds, do_insert_checks, true, true);
     
-    // Generate interface file
-    if (generate_interface_r) {
-      FILE *inter_file = try_file_open((const char @)interfacefile,"w","interface file");
-      if (inter_file == NULL) {
-        compile_failure = true;
-	return;
-      }
+  // Generate interface file
+  if (!compile_failure && generate_interface_r
+      && Flags::stop_after_pass >= Flags::Toc) {
+    FILE *inter_file = try_file_open((const char @)interfacefile,"w","interface file");
+    if (inter_file == NULL)
+      compile_failure = true;
+    else {
       Absyndump::set_params(&Absynpp::cyci_params_r);
       Absyndump::dump_interface(tds, inter_file);
       fclose(inter_file);
@@ -930,54 +858,60 @@ static void process_file(string_t<`H> filename) {
     }
 
     // Interface checking
-    if (ic_r) {
+    if (!compile_failure && ic_r) {
       FILE *inter_file = fopen((const char @)interfacefile, "r");
       FILE *inter_objfile = try_file_open(interfaceobjfile, "w", "interface object file");
-      if (inter_objfile == NULL) {
+      if (inter_objfile == NULL)
         compile_failure = true;
-        return;
+      else {
+	Position::reset_position(interfacefile);
+	let int_env = $(te, inter_file, (FILE @)inter_objfile);
+	tds = do_stage("interface checking", tds, do_interface, &int_env, tds);
+	if(inter_file != NULL)
+	  file_close(inter_file);
+	file_close(inter_objfile);
       }
-      Position::reset_position(interfacefile);
-      let int_env = $(te, inter_file, (FILE@)inter_objfile);
-      tds = do_stage("interface checking", tds, do_interface, &int_env,
-		     interface_fail, &int_env);
     }
   }
-  if (cf_r) goto PRINTC;
 
   // Translation to C
-  tds = do_stage("translation to C",tds, do_translate, jump_tables->pop_tables,
-		 remove_fileptr, preprocfileptr);
+  if(!compile_failure && Flags::stop_after_pass >= Flags::Toc)
+    tds = do_stage("translation to C",tds, do_translate,jump_tables->pop_tables,
+		   tds);
   // Removal of aggregates (necessary for comprehensions and to avoid GCC bug)
-  tds = do_stage("aggregate removal",tds,do_removeaggrs,true,ignore,true);
-  if (compile_failure) return;
+  if(!compile_failure && Flags::stop_after_pass >= Flags::AggregateRemoval)
+    tds = do_stage("aggregate removal",tds,do_removeaggrs,true,tds);
 
   // Translation to left-to-right evaluation order
-  if (toseqc_r)
+  if(!compile_failure && toseqc_r && Flags::stop_after_pass >= Flags::EvalOrder)
     tds = do_stage("post-pass to L-to-R evaluation order", tds, do_toseqc, 
-		   true, ignore, true);
+		   true, tds);
   // Clean up state common to last three passes
-  Toc::finish();
+  if(!compile_failure)
+    Toc::finish();
 
-  if (compile_failure) return;
- 
  // removal of gcc extensions (tovc is an antiquated name)
-  if (Flags::tovc_r || elim_se_r)
-    tds = do_stage("post-pass to VC", tds, do_tovc, true, ignore, true);
-  if (compile_failure) return;
+  if (!compile_failure && (Flags::tovc_r || elim_se_r))
+    tds = do_stage("post-pass to VC", tds, do_tovc, true, tds);
 
   Warn::flush_warnings(); // cannot do after preprocfile is removed
   remove_file(preprocfile);
+  if(uncaught_exn != NULL) {// cannot use rethrow b/c file and line is wrong now
+    let &$(e,fn,line) = (_@)uncaught_exn;
+    fprintf(stderr,"uncaught exception: %s from %s, line %d\n",
+	    get_exn_name(e),fn,line);
+    fflush(stderr);
+    return;
+  }
 
   // jcheney: we make a (empty) .c file even if the .cyc file produced no decls
- PRINTC: {
   FILE *out_file;
-  if (parseonly_r || tc_r || cf_r)
+  if (Flags::stop_after_pass <= Flags::FlowAnalysis) {
     if (output_file != NULL)
       out_file = try_file_open(*output_file,"w","output file");
     else
       out_file = stdout;
-  else if (toc_r && output_file != NULL)
+  } else if (Flags::stop_after_pass < Flags::CCompiler && output_file != NULL)
     out_file = try_file_open(*output_file,"w","output file");
   else
     out_file = try_file_open(cfile,"w","output file");
@@ -986,8 +920,9 @@ static void process_file(string_t<`H> filename) {
 
   if (!noprint_r) {
     let env = new $((FILE@)out_file,cfile);
-    tds = do_stage("printing", tds, do_print, env, print_fail, env);
-  }
+    tds = do_stage("printing", tds, do_print, env, tds);
+    file_close(out_file);
+    cfiles = new List(new strdup(cfile),cfiles);
   }
 }
 
@@ -1009,7 +944,6 @@ static interface_t read_cycio(string_t<`H> @ n) {
     exit(1);
   }
   Position::reset_position(nf); /* in case of parsing problems */
-  //printf("reading %s\n", nf);
   let i = Interface::load(f);
   file_close(f);
   return i;
@@ -1031,6 +965,7 @@ using Arg {
 
   void print_options();
 
+  // FIX: move strings to flags.cyc
 #define make_option(opt,flag,isprefix,argdesc,spec,spec_arg,description) \
   datatype Spec.spec opt##_spec = spec(spec_arg); \
   option_t opt##_tuple = $(flag,isprefix,argdesc,&opt##_spec,description); \
@@ -1088,31 +1023,31 @@ using Arg {
               String_spec,Specsfile::set_target_arch,
               "Set target machine");
   make_option(opt18,"-Wlose-unique",false,"",
-              Set_spec,&NewControlFlow::warn_lose_unique,
+              Set_spec,&Flags::warn_lose_unique,
               "Try to warn when a unique pointer might get lost");
   make_option(opt19,"-Woverride",false,"",
-              Set_spec,&Binding::warn_override,
+              Set_spec,&Flags::warn_override,
               "Warn when a local variable overrides an existing variable");
   make_option(opt20,"-Wall",false,"",
-              Unit_spec,set_all_warnings,
+              Unit_spec,Flags::set_all_warnings,
               "Turn on all warnings");
   make_option(opt21,"-E",false,"",
-              Set_spec,&stop_after_cpp_r,
+              Unit_spec,Flags::set_cpponly,
               "Stop after preprocessing");
   make_option(opt22,"-stopafter-parse",false,"",
-              Set_spec,&parseonly_r,
+              Unit_spec,Flags::set_parseonly,
               "Stop after parsing");
   make_option(opt23,"-stopafter-tc",false,"",
-              Set_spec,&tc_r,
+              Unit_spec,Flags::set_tconly,
               "Stop after type checking");
   make_option(opt24,"-noprint",false,"",
               Set_spec,&noprint_r,
               "Do not print output (when stopping early)");
   make_option(opt25,"-stopafter-cf",false,"",
-              Set_spec,&cf_r,
+              Unit_spec,Flags::set_cfonly,
               "Stop after control-flow checking");
   make_option(opt26,"-stopafter-toc",false,"",
-              Set_spec,&toc_r,
+              Unit_spec,Flags::set_toconly,
               "Stop after translation to C");
   make_option(opt27,"-ic",false,"",
               Set_spec,&ic_r,
@@ -1154,9 +1089,6 @@ using Arg {
   make_option(opt39,"--noboundschecks",false,"",
               Unit_spec,set_noboundschecks,
               "Disable bounds checks");
-  make_option(opt40,"--inline-checks",false,"",
-              Unit_spec,set_inline_functions,
-              "Inline bounds checks instead of #define");
   make_option(opt41,"-use-cpp",false,"<path>",
               String_spec,set_cpp,
               "Indicate which preprocessor to use");
@@ -1197,10 +1129,10 @@ using Arg {
               String_spec,set_cyc_include,
               "Set cyc_include.h to be <file>");
   make_option(opt54,"-warnboundschecks", false, "",
-              Set_spec,&InsertChecks::warn_bounds_checks,
+              Set_spec,&Flags::warn_bounds_checks,
               "Warn when bounds checks can't be eliminated");
   make_option(opt55,"-warnnullchecks", false, "",
-              Set_spec,&InsertChecks::warn_all_null_deref,
+              Set_spec,&Flags::warn_all_null_deref,
               "Warn when any null check can't be eliminated");
   make_option(opt56,"-warnaliascoercion", false, "",
               Set_spec,&Flags::warn_alias_coerce,
@@ -1245,7 +1177,7 @@ using Arg {
               Unit_spec,set_many_errors,
               "don't stop after only a few errors.");
   make_option(opt70,"--parsestate",false, "",
-              Set_spec,&ParseErrors::print_state_and_token,
+              Set_spec,&Flags::print_parser_state_and_token,
               "print the parse state and token on a syntax error");
   make_option(opt71,"-known-gcc-flags-only",false,"",
               Unit_spec,noassume_gcc_flag,
@@ -1273,7 +1205,7 @@ using Arg {
     &opt30,&opt31,&opt32,
               //&opt74,&opt75, // used to go here for some reason
                          &opt33,&opt34,&opt35,&opt36,&opt37,&opt38,&opt39,
-    &opt40,&opt41,&opt42,&opt43,&opt44,&opt45,&opt46,&opt47,&opt48,&opt49,
+    &opt41,&opt42,&opt43,&opt44,&opt45,&opt46,&opt47,&opt48,&opt49,
     &opt50,&opt51,&opt52,&opt53,&opt54,&opt55,&opt56,&opt57,&opt58,&opt59,
     &opt60,&opt61,&opt62,&opt63,&opt64,&opt65,&opt66,&opt67,&opt68,&opt69,
     &opt70,&opt71,&opt72,&opt73,&opt74,&opt75,&opt76
@@ -1348,9 +1280,9 @@ int main(int argc, string_t<`H> ?`H argv) {
   // the .c output.
   /* The absolute file name is kept in a global variable */
   /* don't bother if we won't translate to C or if set explicitly */
-  if (!stop_after_cpp_r && !nocyc_setjmp_r)
+  if (Flags::stop_after_pass > Flags::Cpp && !nocyc_setjmp_r)
     cyc_setjmp = find_in_arch_path("cyc_setjmp.h");
-  if (!stop_after_cpp_r && strlen(cyc_include) == 0)
+  if (Flags::stop_after_pass > Flags::Cpp && strlen(cyc_include) == 0)
     cyc_include = find_in_exec_path("cyc_include.h");
 
   // Process each .cyc file
@@ -1364,7 +1296,7 @@ int main(int argc, string_t<`H> ?`H argv) {
     Core::rethrow(x);
   }
 
-  if (stop_after_cpp_r || parseonly_r || tc_r || toc_r) return 0;
+  if (Flags::stop_after_pass < Flags::CCompiler) return 0;
 
   // If there are no files for the C compiler to process don't bother
   // to run it.

@@ -514,7 +514,13 @@ void Cyc_Warn_warn2(unsigned,struct _fat_ptr);
 # 71
 void*Cyc_Warn_impos2(struct _fat_ptr);
 # 73
-void*Cyc_Warn_impos_loc2(unsigned,struct _fat_ptr);struct Cyc_PP_Ppstate;struct Cyc_PP_Out;struct Cyc_PP_Doc;struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
+void*Cyc_Warn_impos_loc2(unsigned,struct _fat_ptr);
+# 43 "flags.h"
+extern int Cyc_Flags_tc_aggressive_warn;
+# 73
+enum Cyc_Flags_C_Compilers{Cyc_Flags_Gcc_c =0U,Cyc_Flags_Vc_c =1U};
+# 87 "flags.h"
+enum Cyc_Flags_Cyclone_Passes{Cyc_Flags_Cpp =0U,Cyc_Flags_Parsing =1U,Cyc_Flags_Binding =2U,Cyc_Flags_CurrentRegion =3U,Cyc_Flags_TypeChecking =4U,Cyc_Flags_Jumps =5U,Cyc_Flags_FlowAnalysis =6U,Cyc_Flags_VCGen =7U,Cyc_Flags_CheckInsertion =8U,Cyc_Flags_Toc =9U,Cyc_Flags_AggregateRemoval =10U,Cyc_Flags_EvalOrder =11U,Cyc_Flags_CCompiler =12U,Cyc_Flags_AllPasses =13U};struct Cyc_PP_Ppstate;struct Cyc_PP_Out;struct Cyc_PP_Doc;struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
 # 63 "absynpp.h"
 struct _fat_ptr Cyc_Absynpp_typ2string(void*);
 # 27 "unify.h"
@@ -694,8 +700,6 @@ void Cyc_Tcstmt_tcStmt(struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Stmt*,int new_blo
 struct Cyc_List_List*Cyc_Formatstr_get_format_types(struct Cyc_Tcenv_Tenv*,struct _fat_ptr,int isCproto,unsigned);
 # 34
 struct Cyc_List_List*Cyc_Formatstr_get_scanf_types(struct Cyc_Tcenv_Tenv*,struct _fat_ptr,int isCproto,unsigned);
-# 29 "tc.h"
-extern int Cyc_Tc_aggressive_warn;
 # 44 "tctyp.h"
 void Cyc_Tctyp_check_type(unsigned,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*bound_tvars,struct Cyc_Absyn_Kind*k,int allow_evars,int allow_abs_aggr,void*);
 # 26 "tcexp.h"
@@ -754,7 +758,7 @@ static void*Cyc_Tcexp_tcExpNoPromote(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Ab
 static void Cyc_Tcexp_check_contains_assign(struct Cyc_Absyn_Exp*e){
 void*_tmp1A=e->r;void*_stmttmp1=_tmp1A;void*_tmp1B=_stmttmp1;if(((struct Cyc_Absyn_AssignOp_e_Absyn_Raw_exp_struct*)_tmp1B)->tag == 4U){if(((struct Cyc_Absyn_AssignOp_e_Absyn_Raw_exp_struct*)_tmp1B)->f2 == 0){_LL1: _LL2:
 # 109
- if(Cyc_Tc_aggressive_warn)
+ if(Cyc_Flags_tc_aggressive_warn)
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmp1D=({struct Cyc_Warn_String_Warn_Warg_struct _tmp52F;_tmp52F.tag=0U,({struct _fat_ptr _tmp670=({const char*_tmp1E="assignment in test";_tag_fat(_tmp1E,sizeof(char),19U);});_tmp52F.f1=_tmp670;});_tmp52F;});void*_tmp1C[1U];_tmp1C[0]=& _tmp1D;({unsigned _tmp671=e->loc;Cyc_Warn_warn2(_tmp671,_tag_fat(_tmp1C,sizeof(void*),1U));});});
 goto _LL0;}else{goto _LL3;}}else{_LL3: _LL4:
  goto _LL0;}_LL0:;}
@@ -1786,7 +1790,7 @@ Cyc_Tcutil_check_nonzero_bound(loc,b);
 if(!Cyc_Tcutil_kind_leq(Cyc_Tcutil_type_kind(t2),& Cyc_Tcutil_tmk)&& !Cyc_Tcenv_abstract_val_ok(te)){
 void*_tmp2BF=Cyc_Absyn_compress(t2);void*_stmttmp2A=_tmp2BF;void*_tmp2C0=_stmttmp2A;if(((struct Cyc_Absyn_FnType_Absyn_Type_struct*)_tmp2C0)->tag == 5U){_LLB: _LLC:
 # 1338
- if(Cyc_Tc_aggressive_warn)
+ if(Cyc_Flags_tc_aggressive_warn)
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmp2C2=({struct Cyc_Warn_String_Warn_Warg_struct _tmp5E4;_tmp5E4.tag=0U,({struct _fat_ptr _tmp7C8=({const char*_tmp2C3="unnecessary dereference for function type";_tag_fat(_tmp2C3,sizeof(char),42U);});_tmp5E4.f1=_tmp7C8;});_tmp5E4;});void*_tmp2C1[1U];_tmp2C1[0]=& _tmp2C2;({unsigned _tmp7C9=loc;Cyc_Warn_warn2(_tmp7C9,_tag_fat(_tmp2C1,sizeof(void*),1U));});});
 return t;}else{_LLD: _LLE:
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmp2C5=({struct Cyc_Warn_String_Warn_Warg_struct _tmp5E5;_tmp5E5.tag=0U,({struct _fat_ptr _tmp7CA=({const char*_tmp2C6="cannot dereference abstract pointer type";_tag_fat(_tmp2C6,sizeof(char),41U);});_tmp5E5.f1=_tmp7CA;});_tmp5E5;});void*_tmp2C4[1U];_tmp2C4[0]=& _tmp2C5;({unsigned _tmp7CB=loc;Cyc_Warn_err2(_tmp7CB,_tag_fat(_tmp2C4,sizeof(void*),1U));});});}_LLA:;}

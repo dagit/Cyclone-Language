@@ -369,8 +369,26 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
  struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _fat_ptr f1;};
 # 173 "core.h"
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};
-# 53 "flags.h"
+# 37 "flags.h"
+extern int Cyc_Flags_warn_override;
+# 43
+extern int Cyc_Flags_tc_aggressive_warn;
+# 47
+extern int Cyc_Flags_warn_alias_coerce;
+# 51
+extern int Cyc_Flags_warn_region_coerce;
+# 54
+extern int Cyc_Flags_warn_lose_unique;
+# 58
+extern int Cyc_Flags_warn_bounds_checks;
+# 62
+extern int Cyc_Flags_warn_all_null_deref;
+# 73
 enum Cyc_Flags_C_Compilers{Cyc_Flags_Gcc_c =0U,Cyc_Flags_Vc_c =1U};
+# 87 "flags.h"
+enum Cyc_Flags_Cyclone_Passes{Cyc_Flags_Cpp =0U,Cyc_Flags_Parsing =1U,Cyc_Flags_Binding =2U,Cyc_Flags_CurrentRegion =3U,Cyc_Flags_TypeChecking =4U,Cyc_Flags_Jumps =5U,Cyc_Flags_FlowAnalysis =6U,Cyc_Flags_VCGen =7U,Cyc_Flags_CheckInsertion =8U,Cyc_Flags_Toc =9U,Cyc_Flags_AggregateRemoval =10U,Cyc_Flags_EvalOrder =11U,Cyc_Flags_CCompiler =12U,Cyc_Flags_AllPasses =13U};
+# 103
+extern enum Cyc_Flags_Cyclone_Passes Cyc_Flags_stop_after_pass;
 # 25 "flags.cyc"
 int Cyc_Flags_compile_for_boot=0;
 int Cyc_Flags_warn_alias_coerce=0;
@@ -381,3 +399,34 @@ int Cyc_Flags_porting_c_code=0;
 int Cyc_Flags_no_regions=0;
 int Cyc_Flags_no_register=0;
 int Cyc_Flags_noexpand_r=0;
+int Cyc_Flags_warn_bounds_checks=0;
+int Cyc_Flags_warn_all_null_deref=0;
+int Cyc_Flags_warn_override=0;
+int Cyc_Flags_warn_lose_unique=0;
+int Cyc_Flags_tc_aggressive_warn=0;
+enum Cyc_Flags_Cyclone_Passes Cyc_Flags_stop_after_pass=Cyc_Flags_AllPasses;
+int Cyc_Flags_print_parser_state_and_token=0;
+# 42
+void Cyc_Flags_set_all_warnings (void){
+Cyc_Flags_warn_bounds_checks=1;
+Cyc_Flags_warn_all_null_deref=1;
+Cyc_Flags_warn_lose_unique=1;
+Cyc_Flags_warn_alias_coerce=1;
+Cyc_Flags_warn_region_coerce=1;
+Cyc_Flags_tc_aggressive_warn=1;
+Cyc_Flags_warn_override=1;}
+# 51
+void Cyc_Flags_set_cpponly (void){
+Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_Cpp?Cyc_Flags_stop_after_pass: Cyc_Flags_Cpp;}
+# 54
+void Cyc_Flags_set_parseonly (void){
+Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_Parsing?Cyc_Flags_stop_after_pass: Cyc_Flags_Parsing;}
+# 57
+void Cyc_Flags_set_tconly (void){
+Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_TypeChecking?Cyc_Flags_stop_after_pass: Cyc_Flags_TypeChecking;}
+# 60
+void Cyc_Flags_set_cfonly (void){
+Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_FlowAnalysis?Cyc_Flags_stop_after_pass: Cyc_Flags_FlowAnalysis;}
+# 63
+void Cyc_Flags_set_toconly (void){
+Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_EvalOrder?Cyc_Flags_stop_after_pass: Cyc_Flags_EvalOrder;}

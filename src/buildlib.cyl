@@ -69,10 +69,7 @@
 #include "absynpp.h"
 #include "parse.h"
 #include "tc.h"
-// #include "toc.h"
-#include "tcdecl.h"
 #include "cifc.h"
-#include "tcutil.h"
 #include "binding.h"
 #include "specsfile.h"
 
@@ -92,13 +89,12 @@ static const char ?target_cflags = "";
 
 static int do_setjmp = 0;
 static int verbose = 0;
-bool noexpand_r = true;
 
 FILE *log_file = NULL;
 FILE *cstubs_file = NULL;
 FILE *cycstubs_file = NULL;
 
-int log(const char ?fmt, ... inject parg_t<`r2> ap)
+int log(const char ?fmt, ... inject parg_t ap)
   __attribute__((format(printf,1,2)))
 {
   if (log_file == NULL) {
@@ -118,23 +114,23 @@ static void add_target(stringptr_t<`H,`H> sptr) {
 }
 /* Forward declarations of lexing functions */
 typedef $(stringptr_t,Set::set_t<stringptr_t>) *line_t;
-extern line_t line(Lexbuf<`a>);
-extern int macroname(Lexbuf<`a>);
-extern int args(Lexbuf<`a>);
-extern int token(Lexbuf<`a>);
-extern int string(Lexbuf<`a>);
+extern line_t line(Lexbuf);
+extern int macroname(Lexbuf);
+extern int args(Lexbuf);
+extern int token(Lexbuf);
+extern int string(Lexbuf);
 
 FILE *slurp_out = NULL;
-extern int slurp(Lexbuf<`a>);
-extern int slurp_string(Lexbuf<`a>);
-extern int asmtok(Lexbuf<`a>);
-extern int asm_string(Lexbuf<`a>);
-extern int asm_comment(Lexbuf<`a>);
+extern int slurp(Lexbuf);
+extern int slurp_string(Lexbuf);
+extern int asmtok(Lexbuf);
+extern int asm_string(Lexbuf);
+extern int asm_comment(Lexbuf);
 
 typedef $(string_t,stringptr_t) *suck_line_t;
-extern suck_line_t suck_line(Lexbuf<`a>);
-extern int suck_macroname(Lexbuf<`a>);
-extern int suck_restofline(Lexbuf<`a>);
+extern suck_line_t suck_line(Lexbuf);
+extern int suck_macroname(Lexbuf);
+extern int suck_restofline(Lexbuf);
 string_t current_line = NULL;
 
 /* When $(A,B) is an ifdefined_t, B will be printed if A is NULL
@@ -148,12 +144,12 @@ typedef $(stringptr_t<`H,`H>,stringptr_t<`H>) @userdef_t;
 typedef $(string_t,list_t<stringptr_t>,list_t<userdef_t>,list_t<stringptr_t>,
           list_t<ifdefined_t>,list_t<ifdefined_t>,list_t<ifdefined_t>,
           list_t<stringptr_t>) *spec_t;
-extern spec_t spec(Lexbuf<`a>);
-extern int commands(Lexbuf<`a>);
-extern int snarfsymbols(Lexbuf<`a>);
-extern int block(Lexbuf<`a>);
-extern int block_string(Lexbuf<`a>);
-extern int block_comment(Lexbuf<`a>);
+extern spec_t spec(Lexbuf);
+extern int commands(Lexbuf);
+extern int snarfsymbols(Lexbuf);
+extern int block(Lexbuf);
+extern int block_string(Lexbuf);
+extern int block_comment(Lexbuf);
 string_t current_headerfile = NULL;
 list_t<stringptr_t> snarfed_symbols = NULL;
 list_t<stringptr_t> current_symbols = NULL;
@@ -190,14 +186,11 @@ static string_t<`H> remove_user_prefix(string_t<`H> symbol) {
 static void rename_decl(decl_t d) {
   switch (d->r) {
   case &Aggr_d(ad):
-    (*ad->name)[1] = new remove_user_prefix(*(*ad->name)[1]);
-    break;
+    (*ad->name)[1] = new remove_user_prefix(*(*ad->name)[1]); break;
   case &Enum_d(ed):
-    (*ed->name)[1] = new remove_user_prefix(*(*ed->name)[1]);
-    break;
+    (*ed->name)[1] = new remove_user_prefix(*(*ed->name)[1]); break;
   case &Typedef_d(td):
-    (*td->name)[1] = new remove_user_prefix(*(*td->name)[1]);
-    break;
+    (*td->name)[1] = new remove_user_prefix(*(*td->name)[1]); break;
 
   case &Fn_d(_):
   case &Var_d(_):
@@ -1277,7 +1270,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   }
 
   static FILE *script_file = NULL;
-  int prscript(const char ?fmt, ... inject parg_t<`r2> ap)
+  int prscript(const char ?fmt, ... inject parg_t ap)
     __attribute__((format(printf,1,2)))
   {
     if (script_file == NULL) {

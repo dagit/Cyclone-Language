@@ -34,6 +34,7 @@
 #include "rgnorder.h"
 #include "tcpat.h"
 #include "warn.h"
+#include "flags.h"
 
 // for debugging
 #include "absynpp.h"
@@ -80,8 +81,6 @@ static int strcmp(buffer_t s1, buffer_t s2) {
   }
 }
 
-// flag controlling whether or not to warn when we lose unique pointers
-bool warn_lose_unique = false;
 //////////////////////////// Statement Decoration //////////////////////////
 struct CFStmtAnnot {
   int    visited;  // for detecting need to iterate
@@ -224,7 +223,7 @@ static void update_flow(analenv_t env, stmt_t s, flow_t flow) {
   let new_flow = join_flow(env->fenv, flow, *sflow);
   // check for variables that might be going out of scope and have
   // unique pointers in them.
-  if (warn_lose_unique) {
+  if (Flags::warn_lose_unique)
     switch $(flow,new_flow) {
     case $({.ReachableFL = $(fd,_)},{.ReachableFL = $(new_fd,_)}):
       let ckenv = $(env,s->loc,new_fd);
@@ -232,7 +231,6 @@ static void update_flow(analenv_t env, stmt_t s, flow_t flow) {
       break;
     default: break;
     }
-  }
   if(!flow_lessthan_approx(new_flow, *sflow)) {
     DEBUG_PRINT("update_flow for |%s|: flow changed\n*sflow=\n",
 		Absynpp::stmt2string(s));
@@ -715,8 +713,8 @@ static $(flow_t,absRval_t) do_assign(flow_env_t fenv,
       let outdict = assign_place(fenv,loc,indict,p,rval);
       relns   = reln_assign_exp(Core::heap_region,relns,lexp,rexp);
       outflow = ReachableFL(outdict,relns);
-      if (warn_lose_unique &&
-         Tcutil::is_noalias_pointer_or_aggr((type_t)lexp->topt)){
+      if (Flags::warn_lose_unique &&
+	  Tcutil::is_noalias_pointer_or_aggr((type_t)lexp->topt)){
         // check to see if we're over-writing a unique pointer
 	let $(rv,_) = unname_rval(lookup_place(indict,p));
 	switch (rv) {
@@ -2170,7 +2168,7 @@ static void check_init_params(seg_t loc, analenv_t env, flow_t flow) {
       if(initlevel(env->fenv,d,lookup_place(d,inits->hd))!=AllIL)
 	aerr(loc, "function may not initialize all the parameters "
 		     "with attribute 'initializes'");
-    if (warn_lose_unique) {
+    if (Flags::warn_lose_unique) {
       let check_env = $(loc,env,d);
       Dict::iter_c(check_for_unused_unique,&check_env,d);
     }
@@ -2823,7 +2821,7 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s,
 
   case &Decl_s(d,s):
     outflow = anal_stmt(env,anal_decl(env,inflow,d),s,rval_opt);
-    if (warn_lose_unique)
+    if (Flags::warn_lose_unique)
       check_dropped_unique(env,outflow,d);
     return outflow;
 

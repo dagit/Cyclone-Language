@@ -1,15 +1,11 @@
 #include <core.h>
 #include <cycboot.h>
-#include <warn.h>
+#include "warn.h"
+#include "flags.h"
 #define ALL_PARSE_H
 #include "parse.h"
 
 namespace ParseErrors {
-  // when set, we just print out the state and token for a parse
-  // error and then exit immediately.  Used for generating the
-  // message table.
-  bool print_state_and_token = false; // FLAG
-
   struct ParseState { int state; int token; const char ?msg; };
 
   static struct ParseState msg_table[] = { 
@@ -21,7 +17,7 @@ namespace ParseErrors {
 using ParseErrors;
 
 void yyerror(string_t<`H> s, int state, int token) { 
-  if (ParseErrors::print_state_and_token) {
+  if (Flags::print_parser_state_and_token) {
     printf("parse error: state [%d], token [%d]\n",state,token);
     exit(1);
   }

@@ -33,6 +33,15 @@ extern bool no_regions;
   // it as public (the default)
 extern bool no_register;
 
+  // true for printing a warning when a declaration shadows an outer binding
+extern bool warn_override;
+
+  // true for getting more warnings from the type-checker:
+  // * read-only union fields (becasuse untagged and not-bits-only)
+  // * assignments in tests (often means = should be ==)
+  // * unnecessary (and meaningless) dereferences of function pointers
+extern bool tc_aggressive_warn;
+
   // true for printing a warning when an alias coercion is implicitly
   // introduced (when coercing a function argument)
 extern bool warn_alias_coerce;
@@ -40,6 +49,17 @@ extern bool warn_alias_coerce;
   // true for printing a warning when a region-outlives relationship
   // is used for implicitly coercing an expression
 extern bool warn_region_coerce;
+
+  // true for printing when we lose a unique pointer
+extern bool warn_lose_unique;
+
+  // true for printing a warning when a bounds-check (for a subscript)
+  // is inserted into the generated C code
+extern bool warn_bounds_checks; 
+
+  // true for printing a warning when a null-check (for a dereference)
+  // is inserted into the generated C code
+extern bool warn_all_null_deref;
 
   // true for do not expand typedefs to their definitions when generating
   // C code
@@ -56,11 +76,50 @@ enum C_Compilers {
 };
 extern enum C_Compilers c_compiler;
 
+  // Note: this is just for "stopping early". There are several
+  // other issues for passes:
+  //  * do we treeshake
+  //  * do we generate interfaces
+  //  * what printer do we use (or do we not print at all)
+  //  * do we call the linker
+  //  * do we skip vcgen
+  //  * do we skip toseqc
+enum Cyclone_Passes {
+  Cpp,
+  Parsing,
+  Binding,
+  CurrentRegion,
+  TypeChecking,
+  Jumps,
+  FlowAnalysis,
+  VCGen,
+  CheckInsertion,
+  Toc,
+  AggregateRemoval,
+  EvalOrder,
+  CCompiler,
+  AllPasses // must be last -- means do everything (the default)
+};
+extern enum Cyclone_Passes stop_after_pass;
+
+void set_cpponly();
+void set_parseonly();
+void set_tconly();
+void set_cfonly();
+void set_toconly(); // somewhat misnamed, just doesn't call C compiler!
+
   // true for building the bootstrapped compiler; lexer strips out
   // directory-paths from #line directives so the repository doesn't
   // end up referring to the compiler-hacker's working directory.
   // Also effects how we #include setjmp.h and include libraries
 extern bool compile_for_boot;
+
+  // when set, we just print out the state and token for a parse
+  // error and then exit immediately.  Used for generating the message table.
+extern bool print_parser_state_and_token;
+
+  // sets every flag above with warn in its name
+void set_all_warnings();
 }
 
 #endif

@@ -24,6 +24,7 @@
 
 #include <string.h>
 #include "warn.h"
+#include "flags.h"
 #include "absynpp.h"
 #include "unify.h"
 #include "tcutil.h"
@@ -31,7 +32,6 @@
 #include "evexp.h"
 #include "tcstmt.h"
 #include "formatstr.h"
-#include "tc.h"
 #include "tctyp.h"
 #include "tcexp.h"
 using Core;
@@ -106,7 +106,7 @@ static type_t tcExpNoPromote(tenv_t, type_t *, exp_t);
 static void check_contains_assign(exp_t e) {
   switch (e->r) {
   case &AssignOp_e(_,NULL,_): 
-    if (Tc::aggressive_warn) 
+    if (Flags::tc_aggressive_warn) 
       Warn::warn2(e->loc,"assignment in test");
     break;
   default: break;
@@ -1335,7 +1335,7 @@ static type_t tcDeref(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
     if (!kind_leq(type_kind(t2),&tmk) && !abstract_val_ok(te))
       switch (compress(t2)) {
       case &FnType(...):
-        if (Tc::aggressive_warn)
+        if (Flags::tc_aggressive_warn)
           Warn::warn2(loc,"unnecessary dereference for function type");
         return t;
       default: Warn::err2(loc,"cannot dereference abstract pointer type");

@@ -26,8 +26,6 @@ namespace Tc {
 using Absyn;
 using Tcenv;
 
-extern bool aggressive_warn;
-
 void tc(tenv_t te, bool var_default_init, List::list_t<decl_t,`H> ds);
 
   // if called, must be after tc is called

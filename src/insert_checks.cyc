@@ -35,6 +35,7 @@
 #include "tcutil.h"
 #include "evexp.h"
 #include "warn.h"
+#include "flags.h"
 #include "insert_checks.h"
 
 //#define BCE_DEBUG
@@ -45,7 +46,6 @@ using Absynpp;
 
 using Absyn;
 using Warn;
-using Tcutil;
 using Core;
 using Relations;
 namespace InsertChecks;
@@ -64,8 +64,6 @@ datacon(Absyn::AbsynAnnot,NullAndFatBound);
 datacon(Absyn::AbsynAnnot,FatBound);
 typedef absyn_annot_t annot_t;
 
-bool     warn_bounds_checks       = false; // command-line flag
-bool     warn_all_null_deref      = false; // command-line flag
 unsigned total_bounds_checks      = 0;     // just statistics
 unsigned bounds_checks_eliminated = 0;     // just statistics
 
@@ -93,7 +91,7 @@ static bool need_null_check(env_t nv, exp_t e) {
   // check the type, though if the analysis is good, this should be redundant
   switch (compress((type_t)e->topt)) {
   case &PointerType(PtrInfo(_,_,PtrAtts(_,n,...))):
-    if(!force_type2bool(false,n))
+    if(!Tcutil::force_type2bool(false,n))
       return false;
     break;
   default: impos_loc(e->loc,"need_null_check: non-pointer type");
@@ -112,7 +110,7 @@ static bool need_null_check(env_t nv, exp_t e) {
     err(e->loc,"cannot perform NULL-pointer check at toplevel");
     return false;
   }
-  if(warn_all_null_deref)
+  if(Flags::warn_all_null_deref)
     warn(e->loc,"inserted null check");
   return true;
 }
@@ -203,7 +201,7 @@ static bool need_bounds_check(env_t nv, relns_t<`H> relns, exp_t a, exp_t i) {
 #endif
   if(!ans)
     ++bounds_checks_eliminated;
-  if(warn_bounds_checks && ans)
+  if(Flags::warn_bounds_checks && ans)
     warn(a->loc,"inserted bounds check (location is pointer expression)");
   return ans;
 }
@@ -254,7 +252,7 @@ static void do_exp(env_t nv, exp_t e) {
     // * fat-pointer: no, out-of-bounds is okay (affects curr, not base)
     // * thin zt pointer: yes! (and toc.cyc also always checks for *e2 != 0)
     if(Tcutil::get_type_bound((type_t)e2->topt) != NULL
-       && is_zeroterm_pointer_type((type_t)e2->topt) 
+       && Tcutil::is_zeroterm_pointer_type((type_t)e2->topt) 
        && need_null_check(nv,e2))
       e->annot = &NullOnly_val;
     else
@@ -277,10 +275,10 @@ static void do_exp(env_t nv, exp_t e) {
     // casts from non-pointers to pointers are rejected by type-checker
     switch ($(compress((type_t)e1->topt),compress(t))) {
     case $(&PointerType(p1),&PointerType(p2)):
-      let n1 = force_type2bool(false,p1.ptr_atts.nullable);
-      let n2 = force_type2bool(false,p2.ptr_atts.nullable);
-      let b1 = get_bounds_exp(bounds_one(),p1.ptr_atts.bounds);
-      let b2 = get_bounds_exp(bounds_one(),p2.ptr_atts.bounds);
+      let n1 = Tcutil::force_type2bool(false,p1.ptr_atts.nullable);
+      let n2 = Tcutil::force_type2bool(false,p2.ptr_atts.nullable);
+      let b1 = Tcutil::get_bounds_exp(bounds_one(),p1.ptr_atts.bounds);
+      let b2 = Tcutil::get_bounds_exp(bounds_one(),p2.ptr_atts.bounds);
       if(n1 && !n2 && coercion != Null_to_NonNull)
 	impos_loc(e->loc,"null-check conversion mis-classified");
       else if (b1 && !b2 && coercion == Null_to_NonNull)
@@ -336,7 +334,7 @@ static void do_exp(env_t nv, exp_t e) {
     case &TupleType(_): e->annot = &NoCheck_val; break; // type-checker checks
     case &PointerType(PtrInfo(ta,tq,PtrAtts(rgn,n,b,zt,_))):
       bool bds_ck  = need_bounds_check(nv,get_relns(e1),e1,e2);
-      exp_opt_t bd = get_bounds_exp(bounds_one(),b);
+      exp_opt_t bd = Tcutil::get_bounds_exp(bounds_one(),b);
       bool fat_ptr = (bd == NULL);
       bool null_ck;
       // we do not need to do a null check if e1 is a fat pointer

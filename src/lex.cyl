@@ -38,8 +38,6 @@ using Lexing;
 using Parse;
 using Absyn;
 
-void yyerror(string_t<`H> s, int state, int token);
-
 namespace Lex {
 
 struct Trie<`r::R>;
@@ -75,7 +73,7 @@ typedef struct DynTrieSymbols *`U dyn_trie_symbols_t;
 /////////////////////////////// Globals /////////////////////////////
 
 // These must be (re-)initialized in lex_init.
-static int    num_kws  = 0;
+static int num_kws  = 0;
 struct KeyWordInfo { int token_index; bool is_c_keyword; };
 static struct KeyWordInfo ?  kw_nums  = NULL;
 
@@ -103,14 +101,12 @@ static dyn_trie_t typedefs_trie = NULL;//int field true iff path is a typedef
 static int comment_depth = 0;
 
 // These needn't be set by lex_init -- they're set while finding a token.
-static cnst_t               token_int = Cnst{.Int_c = $(Signed,0)};
-static string_t             bogus_string   = "*bogus*";
-static $(nmspace_t,var_t)   token_id_pair = $(Nmspace{.Loc_n = 0},
-					      &bogus_string);
-
-static char                 token_char   = '\000';
-string_t                    token_string = "";
-qvar_t                      token_qvar   = &token_id_pair;
+static cnst_t             token_int     = Cnst{.Int_c = $(Signed,0)};
+static string_t           bogus_string  = "*bogus*";
+static $(nmspace_t,var_t) token_id_pair = $(Nmspace{.Loc_n = 0}, &bogus_string);
+static char               token_char    = '\000';
+string_t                  token_string  = "";
+qvar_t                    token_qvar    = &token_id_pair;
 //static $(bool,string_t<`H>) token_asm = $(false,"");
 
 static int runaway_start = 0;
@@ -237,7 +233,7 @@ static trie_t<`d> empty_trie(region_t<`d> d, int dummy) {
 static int trie_char(int c) {
   // get the legal chars into a narrow range starting at 0
   if(c >= 95) return c - 59;
-  else if(c > 64) return c - 55;
+  if(c > 64) return c - 55;
   return c - 48;
 }
 
@@ -310,20 +306,18 @@ static int str_index(string_t buff, int offset, int len) {
   return res;
 }
 
-static int str_index_lbuf(Lexbuf<`a> lbuf) {
+static int str_index_lbuf(Lexbuf lbuf) {
   return str_index(lbuf->lex_buffer, 
 		   lbuf->lex_start_pos,
 		   lbuf->lex_curr_pos - lbuf->lex_start_pos);
 }
 
-static int insert_typedef_body(region_t<`d> h, $(trie_t<`d>, string_t s)@ arg)
-{
+static int insert_typedef_body(region_t<`d> h, $(trie_t<`d>, string_t s)@ arg) {
   let $(t,s) = *arg;
   let t_node = trie_lookup(h, t, s, 0, numelts(s)-1);
   t_node->shared_str = true;
   return 0;
 }
-
 
 static void insert_typedef(stringptr_t sptr) {
   let s = *sptr;
@@ -362,14 +356,14 @@ static stringptr_t get_symbol(int symbol_num) {
 
   // copied from Core
 static int int_of_char(char c) {
-  if ('0'<=c && c<='9')      return c-'0';
-  else if ('a'<=c && c<='f') return 10+c-'a';
-  else if ('A'<=c && c<='F') return 10+c-'A';
-  else throw new Invalid_argument("string to integer conversion");
+  if ('0'<=c && c<='9') return c-'0';
+  if ('a'<=c && c<='f') return 10+c-'a';
+  if ('A'<=c && c<='F') return 10+c-'A';
+  throw new Invalid_argument("string to integer conversion");
 }
 
  
-static cnst_t intconst(Lexbuf<`a> lbuf, int start, int end, int base) {
+static cnst_t intconst(Lexbuf lbuf, int start, int end, int base) {
   sign_t sn = None;
   start += lbuf->lex_start_pos;
   mstring_t    buff = lbuf->lex_buffer + start;
@@ -400,11 +394,10 @@ static cnst_t intconst(Lexbuf<`a> lbuf, int start, int end, int base) {
         err("integer constant too large",lbuf);
       size = LongLong_sz;
     }
-    if (size == Int_sz) {
+    if (size == Int_sz)
       res = Cnst{.Int_c = $(sn,(unsigned int)n)};
-    } else {
+    else
       res = Cnst{.LongLong_c = $(sn,n)};
-    }
   } else {
     long long int n = 0;
     for (int i = 0; i < len; i++)
@@ -415,11 +408,10 @@ static cnst_t intconst(Lexbuf<`a> lbuf, int start, int end, int base) {
         err("integer constant too large",lbuf);
       size = LongLong_sz;
     }
-    if (size == Int_sz) {
+    if (size == Int_sz)
       res = Cnst{.Int_c = $(sn,(int)n)};
-    } else {
+    else
       res = Cnst{.LongLong_c = $(sn,n)};
-    }
   }
   return res;
 }
@@ -572,30 +564,24 @@ void register_typedef(qvar_t q) {
   insert_typedef((*q)[1]);
 }
 
-static short process_id(Lexbuf<`a> lbuf) {
+static short process_id(Lexbuf lbuf) {
   int symbol_num = str_index_lbuf(lbuf);
 
   // maybe it's a keyword
-  if(symbol_num <= num_kws) {
+  if(symbol_num <= num_kws)
     // check to see if we're parsing C or Cyclone
     if (!in_extern_c || kw_nums[symbol_num-1].is_c_keyword) {
       short res = (short)kw_nums[symbol_num-1].token_index; 
       return res;
     }
-  }
 
+  // it could be a typedef or an identifer
   let s = get_symbol(symbol_num);
   token_string = *s;
-
-  // maybe it's a typedef
-  if (is_typedef(NULL,s))
-    return TYPEDEF_NAME;
-
-  // alas, it's an identifier
-  return IDENTIFIER;
+  return (is_typedef(NULL,s)) ? TYPEDEF_NAME : IDENTIFIER;
 }
 
-static short process_qual_id(Lexbuf<`a> lbuf) {
+static short process_qual_id(Lexbuf lbuf) {
   if(in_extern_c)
     err("qualified identifiers not allowed in C code",lbuf);
   int       i   = lbuf->lex_start_pos;
@@ -610,30 +596,27 @@ static short process_qual_id(Lexbuf<`a> lbuf) {
     for (; i < end && s[i] != ':'; i++) 
       ; // skip
     if (start == i) // no progress -- first char is ':'
-      throw new Impossible("bad namespace");
+      Warn::impos2("bad namespace");
     int vlen = i - start;
     if (v != NULL)
-      rev_vs = new List((var_t)v,rev_vs);
+      rev_vs = new List(v,rev_vs);
     v = get_symbol(str_index(s, start, vlen));
     i += 2;
   }
   if (v == NULL)
-    throw new Impossible("bad namespace");
+    Warn::impos2("bad namespace");
   list_t<var_t> vs = List::imp_rev(rev_vs);
   // special cases:  when we have Cyc::Foo::bar or C::Foo::bar then
   // we have absolute namespaces.
   if (vs != NULL && strcmp(*vs->hd,"Cyc") == 0) {
     vs = vs->tl;
-    token_qvar = new $(Abs_n(vs,false),(var_t)v);
-  }
-  else if (vs != NULL && strcmp(*vs->hd,"C") == 0) {
+    token_qvar = new $(Abs_n(vs,false),v);
+  } else if (vs != NULL && strcmp(*vs->hd,"C") == 0) {
     vs = vs->tl;
-    token_qvar = new $(Abs_n(vs,true),(var_t)v);
+    token_qvar = new $(Abs_n(vs,true),v);
   } else 
-    token_qvar = new $(Rel_n(vs),(var_t)v);
-  if (is_typedef(vs,(var_t)v))
-    return QUAL_TYPEDEF_NAME;
-  return QUAL_IDENTIFIER;
+    token_qvar = new $(Rel_n(vs),v);
+  return (is_typedef(vs,v)) ? QUAL_TYPEDEF_NAME : QUAL_IDENTIFIER;
 }
 
 // Tracking source files and line numbers
@@ -668,7 +651,8 @@ static pinfo_t<`r> rnew_filepos(region_t<`r> r,
 
 // when we see a newline, we add it into the current filepos entry
 static void inc_linenumber() {
-  if (pos_info == NULL) throw new Impossible("empty position info!");
+  if (pos_info == NULL) 
+    Warn::impos2("empty position info!");
   pinfo_t p = (pinfo_t)pos_info;
   seg_t ?`U linenums = NULL;
   p->linenumpos :=: linenums;
@@ -1129,14 +1113,13 @@ void lex_init(bool include_cyclone_keywords) {
   kw_nums       = new {for i < num_kws : KeyWordInfo{0,0}};
   unsigned i = 0;
   unsigned rwsze = numelts(rw_array);
-  for (unsigned j = 0; j < rwsze; j++) {
+  for (unsigned j = 0; j < rwsze; j++)
     if (include_cyclone_keywords || rw_array[j][2]) {
       let str = rw_array[j][0];
       str_index(str, 0, strlen(str));
       kw_nums[i] = KeyWordInfo{rw_array[j][1],rw_array[j][2]};
       i++;
     }
-  }
   typedef_init();
   comment_depth = 0;
 }

@@ -31,3 +31,35 @@ bool porting_c_code = false;
 bool no_regions = false;
 bool no_register = false;
 bool noexpand_r = false;
+bool warn_bounds_checks  = false; 
+bool warn_all_null_deref = false;
+bool warn_override = false;
+bool warn_lose_unique = false;
+bool tc_aggressive_warn = false;
+enum Cyclone_Passes stop_after_pass = AllPasses;
+bool print_parser_state_and_token = false;
+
+void set_all_warnings() {
+  warn_bounds_checks = true;
+  warn_all_null_deref = true;
+  warn_lose_unique = true;
+  warn_alias_coerce = true;
+  warn_region_coerce = true;
+  tc_aggressive_warn = true;
+  warn_override = true;
+}
+void set_cpponly() {
+  stop_after_pass = stop_after_pass < Cpp ? stop_after_pass : Cpp;
+}
+void set_parseonly() {
+  stop_after_pass = stop_after_pass < Parsing ? stop_after_pass : Parsing;
+}
+void set_tconly() {
+  stop_after_pass = stop_after_pass < TypeChecking ? stop_after_pass : TypeChecking;
+}
+void set_cfonly() {
+  stop_after_pass = stop_after_pass < FlowAnalysis ? stop_after_pass : FlowAnalysis;
+}
+void set_toconly() {
+  stop_after_pass = stop_after_pass < EvalOrder ? stop_after_pass : EvalOrder;
+}

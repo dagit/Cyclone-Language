@@ -31,9 +31,6 @@ namespace NewControlFlow {
 // the entry point
 void cf_check(JumpAnalysis::jump_anal_res_t tables,List::list_t<Absyn::decl_t>);
 
-// controls whether or not we warn when we lose a unique pointer --
-// costs some performance probably.
-  extern bool warn_lose_unique; // FLAG
 }
 
 #endif

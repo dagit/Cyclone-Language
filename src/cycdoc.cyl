@@ -61,11 +61,7 @@ rule token "$(int,comment_t)*" = parse
 | _   { return token(lexbuf); }
 
 {
-  #include "absyn.h"
-  #include "tcutil.h"
-  #include "evexp.h"
   using Absyn;
-  bool noexpand_r = false;
   static void dump_begin() {
     /* MUST START LINE */
     puts("%%HEVEA \\begin{latexonly}\n"
@@ -417,9 +413,8 @@ rule token "$(int,comment_t)*" = parse
     Absynpp::set_params(&Absynpp::tc_params_r);
     Absynpp::print_for_cycdoc = true;
 
-    for (let l = rev(cycdoc_files); l != NULL; l = l->tl) {
+    for (let l = rev(cycdoc_files); l != NULL; l = l->tl)
       process_file(*(l->hd));
-    }
 
     return 0;
   }
