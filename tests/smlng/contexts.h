@@ -77,6 +77,7 @@ typedef unsigned short context_t;
 #define SPACE(x)        ((x)==0x20||(x)==0x0d||(x)==0x0a||(x)==0x09)
 #define SPACECONTEXT(x) (UL(x)==0?setw(clrS(clrEM(clrI(clrB(x))))):clrS(clrEM(clrI(clrB(x)))))
 
-#define MAX_NEST 100000
+// Given 5MB input limit this should be sufficient
+#define MAX_NEST 749000
 
 #endif
