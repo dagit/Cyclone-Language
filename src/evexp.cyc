@@ -316,7 +316,26 @@ static int const_exp_case_number(exp_t e) {
   }
 }
 
+// reduce (unsigned int)valueof(-) to valueof(-)
+static exp_t strip_cast(exp_t e) {
+  switch (e->r) {
+  case &Cast_e(t,e2,_,_):
+    if (unify(t,uint_type)) {
+      switch (e2->r) {
+      case &Valueof_e(_): return e2;
+      default: break;
+      }
+    }
+    break;
+  default: break;
+  }
+  return e;
+}
+
 int const_exp_cmp(exp_t e1, exp_t e2) {
+  // strip off unnecessary casts
+  e1 = strip_cast(e1);
+  e2 = strip_cast(e2);
   let $(i1,known1) = eval_const_uint_exp(e1);
   let $(i2,known2) = eval_const_uint_exp(e2);
   if(known1 && known2)

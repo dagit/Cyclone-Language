@@ -9,12 +9,12 @@
 
 #define SIZE 30
 
-int @{cols}`r @{rows}`r mkmatrix(region_t r,
-                                 tag_t rows, 
-                                 tag_t cols) {
+int @{valueof(`cols)}`r @{valueof(`rows)}`r mkmatrix(region_t r,
+                                                     tag_t<`rows> rows, 
+                                                     tag_t<`cols> cols) {
     int count = 1;
-    int @{cols}@{rows} m = 
-       rnew(r) {for i < rows : rnew(r) {for j < cols : count++}};
+    int @{valueof(`cols)}@{valueof(`rows)} m = 
+        rnew(r) {for i < rows : rnew(r) {for j < cols : count++}};
     return(m);
 }
 

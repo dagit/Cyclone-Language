@@ -12,7 +12,7 @@ LANGS := $(EXELANGS) $(JAVALANGS)
 # Not working yet: echo moments
 # Not implemented at all: methcall objinst prodcons regexmatch
 #  wordfreq
-BENCHMARKS := ackermann ary3 except fibo hash hash2 heapsort nestedloop random reversefile sieve sumcol wc lists strcat
+BENCHMARKS := ackermann ary3 except fibo hash hash2 heapsort nestedloop random reversefile sieve sumcol wc lists strcat matrix
 
 N = 11
 

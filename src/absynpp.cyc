@@ -649,11 +649,19 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
     doc_t tqd = tqual2doc(tq2);
     switch (Tcutil::compress(bd)) {
     case &AppType(&FatCon,_): ptr = question(); break;
-    case &AppType(&ThinCon,&List{&ValueofType(e),_}): 
-      ptr = text(type2bool(true,nullable) ? "*" : "@");
-      let $(val,known) = Evexp::eval_const_uint_exp(e);
-      if(!known || val != 1)
-	ptr = cat(ptr,lb(),exp2doc(e),rb());
+    case &AppType(&ThinCon,&List{targ,_}):
+      switch (compress(targ)) {
+      case &ValueofType(e): 
+        ptr = text(type2bool(true,nullable) ? "*" : "@");
+        let $(val,known) = Evexp::eval_const_uint_exp(e);
+        if(!known || val != 1)
+          ptr = cat(ptr,lb(),exp2doc(e),rb());
+        break;
+      default:
+        ptr = text(type2bool(true,nullable) ? "*" : "@");
+        ptr = cat(ptr,lb(),typ2doc(targ),rb());
+        break;
+      }
       break;
     default:
       ptr = text(type2bool(true,nullable) ? "*" : "@");
@@ -845,7 +853,10 @@ doc_t ntyp2doc(type_t t) {
   case &TypeDeclType(&{.r=&Datatype_td(d),...},_): s=datatypedecl2doc(d); break;
   case &AppType(&TrueCon,_):  s = text("@true");  break;
   case &AppType(&FalseCon,_): s = text("@false"); break;
-  case &AppType(&ThinCon,_):  s = text("@thin");  break;
+  case &AppType(&ThinCon,&List{t,_}):  
+    s = cat(text("@thin @numelts"),lb(),typ2doc(t),rb()); break;
+  case &AppType(&ThinCon,_):  
+    s = text("@thin"); break;
   case &AppType(&FatCon,_):   s = text("@fat");   break;
   }
   return s;

@@ -2227,7 +2227,6 @@ static bool ptrsubtype(tenv_t te,
 // to do various coercions.  We only do coercions that don't have
 // a failure here.
 bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
-  //fprintf(stderr,"silent_castable %s and %s\n",typ2string(t1),typ2string(t2));
   t1 = compress(t1);
   t2 = compress(t2);
   switch ($(t1,t2)) {
@@ -5514,7 +5513,8 @@ type_t promote_array(type_t t, type_t rgn, bool convert_tag) {
 	  impos("cannot convert tag without type!");
 	switch(compress((type_t)bnd->topt)) {
 	case &AppType(&TagCon,&List{t,_}):
-	  b = thin_bounds_exp(cast_exp(uint_type,valueof_exp(t,0),false,No_coercion,0));
+	  //b = thin_bounds_exp(cast_exp(uint_type,valueof_exp(t,0),false,No_coercion,0));
+          b = thin_bounds_exp(valueof_exp(t,0));
 	  break;
 	default:
 	  if(is_const_exp(bnd))

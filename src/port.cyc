@@ -1769,7 +1769,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     add_return_type(fn_env,c_rettype);
     for (let xs = c_args; xs; xs = xs->tl) {
       let $(x,t,q,ct) = *xs->hd;
-      fn_env = add_var(fn_env, new $(Loc_n,x), t, q, ct,0);
+      fn_env = add_var(fn_env, new $(Loc_n,(_@)x), t, q, ct,0);
     }
     gen_stmt(fn_env,fd->body);
 #ifdef PORT_DEBUG
