@@ -3764,8 +3764,44 @@ cycstub ftok {
 ;
 
 sys/mman.h:
+include {
+MAP_FAILED
+PROT_READ
+MAP_SHARED
+MAP_PRIVATE
+}
 epilogue {
-  // This one looks very tricky.  We don't support it yet.
+  // The traditional first arg to mmap should be 0 anyway, so don't
+  // even bother to pass it to us.
+  extern char ?mmap(size_t length, int prot, int flags, int fd, off_t offset);
+
+  extern int munmap(char ?start, size_t length);
+}
+cycstub mman {
+  namespace Cmman {
+    extern "C" Cstring 
+      mmap(Cstring start, size_t length, int prot,
+           int flags, int fd, off_t offset);
+    exern "C" int munmap(Cstring start, size_t length);
+  }
+  static xtunion exn.Failure __mmap_failure =
+    Failure("mmap called with illegal prot/flags");
+  const char ?mmap(size_t length, int prot, 
+                   int flags, int fd, off_t offset) {
+    if (prot == PROT_READ &&
+        (flags == MAP_PRIVATE || flags == MAP_SHARED))
+      return wrap_Cstring_as_string
+        (Cmman::mmap(NULL, length, prot, flags, fd, offset),
+         length);
+    else
+      throw &__mmap_failure;
+  }
+  // Is it unsafe to ask the user for the size?  I'd like to take it
+  // from the char? type, but that could have been cast around...
+  int munmap(const char ?start, size_t length) {
+    // We definitely do NOT want to copy the "string"
+    return Cmman::munmap(underlying_Cstring(start), length);
+  }
 }
 ;
 
@@ -4768,6 +4804,7 @@ termios.h:
 
 time.h:
 include {
+tm
 CLOCKS_PER_SEC
 CLOCK_PROCESS_CPUTIME_ID
 CLOCK_THREAD_CPUTIME_ID
@@ -4791,6 +4828,8 @@ epilogue {
   /* We'd like to
      include {tm}
      but in Linux tm is a struct containing a pointer
+          no biggie---just treat it as if it only has one character;
+	  don't always use it anyway.
   */
 
   // We'd like to
@@ -4799,12 +4838,10 @@ epilogue {
 
 }
 epilogue asctime {
-  // Omitted because of the struct tm problem
-  //  extern "C" char @{26} asctime(const struct tm @);
+  extern "C" char @{26} asctime(const struct tm @);
 }
 epilogue asctime_r {
-  // Omitted because of the struct tm problem
-  //  extern "C" char @{26}`r asctime_r(const struct tm @, char @{26}`r);
+  extern "C" char @{26}`r asctime_r(const struct tm @, char @{26}`r);
 }
 epilogue clock {
   extern "C" clock_t clock(void);
@@ -4863,24 +4900,19 @@ cstub getdate {
   }
 }
 epilogue gmtime {
-  // Omitted because of the struct tm problem
-  //  extern "C" struct tm @gmtime(const time_t @);
+  extern "C" struct tm @gmtime(const time_t @);
 }
 epilogue gmtime_r {
-  // Omitted because of the struct tm problem
-  //  extern "C" struct tm @`r gmtime_r(const time_t @, struct tm @`r);
+  extern "C" struct tm @`r gmtime_r(const time_t @, struct tm @`r);
 }
 epilogue localtime {
-  // Omitted because of the struct tm problem
-  //  extern "C" struct tm @localtime(const time_t @);
+  extern "C" struct tm @localtime(const time_t @);
 }
 epilogue localtime_r {
-  // Omitted because of the struct tm problem
-  //  extern "C" struct tm @`r localtime_r(const time_t @, struct tm @`r);
+  extern "C" struct tm @`r localtime_r(const time_t @, struct tm @`r);
 }
 epilogue mktime {
-  // Omitted because of the struct tm problem
-  //  extern "C" time_t mktime(const struct tm @);
+  extern "C" time_t mktime(const struct tm @);
 }
 epilogue nanosleep {
   // Note, posix says the second arg of nanosleep may be NULL

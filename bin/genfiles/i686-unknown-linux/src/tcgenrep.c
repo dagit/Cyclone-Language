@@ -318,7 +318,9 @@ _tagged_arr f1;void*f2;};struct Cyc_Typerep_XTUnion_struct{int tag;struct
 _tagged_arr f1;struct _tagged_arr f2;};struct Cyc_Typerep_Union_struct{int tag;struct
 _tagged_arr*f1;int f2;struct _tagged_arr f3;};struct Cyc_Typerep_Enum_struct{int tag;
 struct _tagged_arr*f1;int f2;struct _tagged_arr f3;};unsigned int Cyc_Typerep_size_type(
-void*rep);struct Cyc_Std_timespec{int tv_sec;int tv_nsec;};struct Cyc_Std_itimerspec{
+void*rep);struct Cyc_Std_timespec{int tv_sec;int tv_nsec;};struct Cyc_Std_tm{int
+tm_sec;int tm_min;int tm_hour;int tm_mday;int tm_mon;int tm_year;int tm_wday;int
+tm_yday;int tm_isdst;int tm_gmtoff;const char*tm_zone;};struct Cyc_Std_itimerspec{
 struct Cyc_Std_timespec it_interval;struct Cyc_Std_timespec it_value;};struct Cyc_Absyn_Rel_n_struct{
 int tag;struct Cyc_List_List*f1;};struct Cyc_Absyn_Abs_n_struct{int tag;struct Cyc_List_List*
 f1;};struct _tuple6{void*f1;struct _tagged_arr*f2;};struct Cyc_Absyn_Conref;struct

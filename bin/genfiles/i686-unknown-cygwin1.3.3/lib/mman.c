@@ -256,8 +256,10 @@ char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};char*
 underlying_Cstring(struct _tagged_arr);struct _tagged_arr wrap_Cstring_as_string(
-char*,unsigned int);char*mmap(char*start,unsigned int length,int prot,int flags,int
-fd,int offset);int munmap(char*start,unsigned int length);struct _tagged_arr Cyc_Std_mmap(
+char*,unsigned int);struct _tagged_arr Cyc_Std_mmap(unsigned int length,int prot,int
+flags,int fd,int offset);int Cyc_Std_munmap(struct _tagged_arr start,unsigned int
+length);char*mmap(char*start,unsigned int length,int prot,int flags,int fd,int offset);
+int munmap(char*start,unsigned int length);struct _tagged_arr Cyc_Std_mmap(
 unsigned int length,int prot,int flags,int fd,int offset){return
 wrap_Cstring_as_string(mmap(0,length,prot,flags,fd,offset),length);}int Cyc_Std_munmap(
 struct _tagged_arr start,unsigned int length){return munmap(underlying_Cstring((

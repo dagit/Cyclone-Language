@@ -580,12 +580,21 @@ doc_t ntyp2doc(type_t t) {
     if (topt != NULL)
       // This is an error case, topt should be NULL in a normalized type
       return(ntyp2doc(topt->v));
-    else s = cat(text("%"),
-                 text("("),
-                 text(aprintf("%d",i)),
-                 (!print_full_evars || tvs == NULL) ?
-                 text("") : tvars2doc(tvs->v),
-                 text(")::"),k == NULL ? text("?") : kind2doc(k->v));
+    else {
+      switch (k->v) {
+      case RgnKind:
+	s = cat(text("`r"),
+		text(aprintf("%d",i)));
+	  break;
+      default:
+	s = cat(text("%"),
+		text("("),
+		text(aprintf("%d",i)),
+		(!print_full_evars || tvs == NULL) ?
+		text("") : tvars2doc(tvs->v),
+		text(")::"),k == NULL ? text("?") : kind2doc(k->v));
+      }
+    }
     break;
   case &VarType(tv):
     s = textptr(tv->name);

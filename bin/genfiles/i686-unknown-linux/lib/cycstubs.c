@@ -867,22 +867,24 @@ unsigned short millitm;short timezone;short dstflag;};struct Cyc_Std_tms{int
 tms_utime;int tms_stime;int tms_cutime;int tms_cstime;};struct Cyc_Std_sockaddr_un{
 unsigned short sun_family;char sun_path[108];};struct Cyc_Std_utsname{char sysname[
 65];char nodename[65];char release[65];char version[65];char machine[65];char
-__domainname[65];};struct Cyc_Std_itimerspec{struct Cyc_Std_timespec it_interval;
-struct Cyc_Std_timespec it_value;};enum Cyc_Std___anonymous_enum_362__{Cyc_Std__PC_LINK_MAX
- = 0,Cyc_Std__PC_MAX_CANON  = 1,Cyc_Std__PC_MAX_INPUT  = 2,Cyc_Std__PC_NAME_MAX  = 
-3,Cyc_Std__PC_PATH_MAX  = 4,Cyc_Std__PC_PIPE_BUF  = 5,Cyc_Std__PC_CHOWN_RESTRICTED
- = 6,Cyc_Std__PC_NO_TRUNC  = 7,Cyc_Std__PC_VDISABLE  = 8,Cyc_Std__PC_SYNC_IO  = 9,
-Cyc_Std__PC_ASYNC_IO  = 10,Cyc_Std__PC_PRIO_IO  = 11,Cyc_Std__PC_SOCK_MAXBUF  = 12,
-Cyc_Std__PC_FILESIZEBITS  = 13,Cyc_Std__PC_REC_INCR_XFER_SIZE  = 14,Cyc_Std__PC_REC_MAX_XFER_SIZE
- = 15,Cyc_Std__PC_REC_MIN_XFER_SIZE  = 16,Cyc_Std__PC_REC_XFER_ALIGN  = 17};enum 
-Cyc_Std___anonymous_enum_364__{Cyc_Std__CS_PATH  = 0};int Cyc_Std_access(struct
-_tagged_arr,int);int Cyc_Std_chdir(struct _tagged_arr);int Cyc_Std_chown(struct
-_tagged_arr,unsigned int,unsigned int);int Cyc_Std_chroot(struct _tagged_arr);int
-Cyc_Std_execlp(struct _tagged_arr,struct _tagged_arr,struct _tagged_arr);int Cyc_Std_execve(
-struct _tagged_arr,struct _tagged_arr,struct _tagged_arr);struct _tagged_arr Cyc_Std_getcwd(
-struct _tagged_arr buf,unsigned int size);int Cyc_Std_gethostname(struct _tagged_arr,
-unsigned int);struct _tagged_arr Cyc_Std_getpass(struct _tagged_arr);int Cyc_Std_link(
-struct _tagged_arr,struct _tagged_arr);int Cyc_Std_read(int,struct _tagged_arr,
+__domainname[65];};struct Cyc_Std_tm{int tm_sec;int tm_min;int tm_hour;int tm_mday;
+int tm_mon;int tm_year;int tm_wday;int tm_yday;int tm_isdst;int tm_gmtoff;const char*
+tm_zone;};struct Cyc_Std_itimerspec{struct Cyc_Std_timespec it_interval;struct Cyc_Std_timespec
+it_value;};enum Cyc_Std___anonymous_enum_362__{Cyc_Std__PC_LINK_MAX  = 0,Cyc_Std__PC_MAX_CANON
+ = 1,Cyc_Std__PC_MAX_INPUT  = 2,Cyc_Std__PC_NAME_MAX  = 3,Cyc_Std__PC_PATH_MAX  = 4,
+Cyc_Std__PC_PIPE_BUF  = 5,Cyc_Std__PC_CHOWN_RESTRICTED  = 6,Cyc_Std__PC_NO_TRUNC
+ = 7,Cyc_Std__PC_VDISABLE  = 8,Cyc_Std__PC_SYNC_IO  = 9,Cyc_Std__PC_ASYNC_IO  = 10,
+Cyc_Std__PC_PRIO_IO  = 11,Cyc_Std__PC_SOCK_MAXBUF  = 12,Cyc_Std__PC_FILESIZEBITS
+ = 13,Cyc_Std__PC_REC_INCR_XFER_SIZE  = 14,Cyc_Std__PC_REC_MAX_XFER_SIZE  = 15,Cyc_Std__PC_REC_MIN_XFER_SIZE
+ = 16,Cyc_Std__PC_REC_XFER_ALIGN  = 17};enum Cyc_Std___anonymous_enum_364__{Cyc_Std__CS_PATH
+ = 0};int Cyc_Std_access(struct _tagged_arr,int);int Cyc_Std_chdir(struct
+_tagged_arr);int Cyc_Std_chown(struct _tagged_arr,unsigned int,unsigned int);int
+Cyc_Std_chroot(struct _tagged_arr);int Cyc_Std_execlp(struct _tagged_arr,struct
+_tagged_arr,struct _tagged_arr);int Cyc_Std_execve(struct _tagged_arr,struct
+_tagged_arr,struct _tagged_arr);struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr
+buf,unsigned int size);int Cyc_Std_gethostname(struct _tagged_arr,unsigned int);
+struct _tagged_arr Cyc_Std_getpass(struct _tagged_arr);int Cyc_Std_link(struct
+_tagged_arr,struct _tagged_arr);int Cyc_Std_read(int,struct _tagged_arr,
 unsigned int);int Cyc_Std_rmdir(struct _tagged_arr);int Cyc_Std_symlink(struct
 _tagged_arr,struct _tagged_arr);int Cyc_Std_truncate(struct _tagged_arr,int);int Cyc_Std_unlink(
 struct _tagged_arr);int Cyc_Std_write(int,struct _tagged_arr,unsigned int);int
