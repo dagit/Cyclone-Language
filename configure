@@ -12,6 +12,12 @@
 # get the root directory of the source tree
 CYCDIR=`pwd`
 
+# figure out the architecture
+ARCH=`config/config.guess`
+TARGET=`echo ${ARCH} | awk -F'-' '{ print $1 }'`
+TYPE=`echo ${ARCH} | awk -F'-' '{ print $2 }'`
+OS=`echo ${ARCH} | awk -F'-' '{ print $3 }'`
+
 ###########################################################################
 # functions to find appropriate helper programs
 #
@@ -20,9 +26,6 @@ CYCDIR=`pwd`
 #   given the architecture, outputs a suitable version of egrep
 
 function egrep_path {
-  TARGET=`echo $1 | awk -F'-' '{ print $1 }'`
-  TYPE=`echo $1 | awk -F'-' '{ print $2 }'`
-  OS=`echo $1 | awk -F'-' '{ print $3 }'`
   EGREP="egrep"
   if [ "$TYPE" = "sun" ]; then
     f="/usr/xpg4/bin/egrep"
@@ -34,6 +37,26 @@ function egrep_path {
     fi
   fi
   echo $EGREP
+}
+
+# finds a suitable version of cc, along with special flags
+#   if it can't find gcc, it uses cc (which, if not symlinked to gcc,
+#   will fail)
+#
+function get_cc {
+  for comp in gcc cc; do
+    CC=`which $comp 2> /dev/null`
+    if [ -n "$CC" ]; then
+      CC=$comp
+      break
+    fi
+  done
+  if [ -n "$CC" ]; then
+    echo $CC
+  else
+    echo "Could not find gcc on this system"
+    exit 1
+  fi
 }
 
 ###########################################################################
@@ -90,9 +113,8 @@ if [ -n "$prefix" ]; then
   libdir="$prefix/lib/cyclone"
 fi
 
-# now figure out the architecture
+# start configuring things
 cd config
-ARCH=`./config.guess`
 
 # function to cleanup if we can't port the arch
 function cleanup {
@@ -101,12 +123,15 @@ function cleanup {
   exit 1
 }
 
+# figure out cc to use
+CC=`get_cc`
+
 # see if we have #defines for this architecture
 if [ ! -f "arch/${ARCH}" ]; then
   echo "This architecture is currently unsupported.  Set it up (y/n)?"
   read resp
   if [ "$resp" = "y" ]; then
-    echo | gcc -E -dM - > arch/$ARCH
+    echo | ${CC} -E -dM - > arch/$ARCH
     if [ $? != 0 ]; then
       echo "error creating arch #define file"
       cleanup
@@ -119,6 +144,7 @@ if [ ! -f "arch/${ARCH}" ]; then
     echo "Creating architecture-specific include file"
     EGREP=`egrep_path ${ARCH}`
     export EGREP
+    export CC
     ./arch_include > ${CYCDIR}/lib/arch/${ARCH}.h
     cp ${CYCDIR}/lib/arch/${ARCH}.h ${CYCDIR}/include/arch/${ARCH}.h
     if [ $? != 0 ]; then
@@ -206,6 +232,7 @@ INC_INSTALL=${incdir}
 BIN_INSTALL=${bindir}
 LIB_INSTALL=${libdir}
 ALL_ARCHS=${ALL_ARCHS}
+CC=${CC}
 
 EOF
 cat Makefile.inc.in) > Makefile.inc

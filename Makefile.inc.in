@@ -1,7 +1,5 @@
 # -*- Makefile -*-
 
-CC=gcc
-
 # Assume with Windows
 
 O := o
