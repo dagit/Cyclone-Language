@@ -654,6 +654,12 @@ and slurp = parse /* returns 1 if more to do, 0 if all done */
   fputs("0",(FILE @)slurp_out); /* appears as expression followed by ';' typically */
   log("Warning: replacing use of __asm__ with 0\n");
   return 1; }
+| "__asm" ws* '(' /* FreeBSD uses __asm instead of __asm__ (argh!) */
+{ parens_to_match = 1;
+  while (asmtok(lexbuf)) /* skip */;
+  fputs("0",(FILE @)slurp_out); /* appears as expression followed by ';' typically */
+  log("Warning: replacing use of __asm with 0\n");
+  return 1; }
 | [^ '"']
 { fputc(lexeme_char(lexbuf,0),(FILE @)slurp_out); return 1; }
 
