@@ -133,13 +133,11 @@ static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
   }
 }
 
-static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, 
-		      vardecl_t vd, bool check_var_init, 
-                      bool in_cinclude,
-                      list_t<$(seg_t,qvar_t,bool)@>* exports) {
-  let &Vardecl(sc,&$(ns,v),_,t,initializer,_,atts,_) = vd;
+static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init, 
+                      bool in_cinclude, list_t<$(seg_t,qvar_t,bool)@>* exports){
+  let &Vardecl(sc,q,_,t,initializer,_,atts,_) = vd;
 #ifdef DEBUG
-  fprintf(stderr,"type-checking vardecl_t %s, type %s\n",*v, 
+  fprintf(stderr,"type-checking vardecl_t %s, type %s\n",*((*q)[1]), 
           typ2string(vd->type)); fflush(stderr);
 #endif
 
@@ -267,7 +265,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
 
   // update the environment
   try {
-    let ans = Dict::lookup(ge->ordinaries, v);
+    let ans = Dict::lookup(te->ae->ordinaries, q);
     switch ((*ans)[0]) {
     case &VarRes(b0):
       let b1 = new Global_b(vd);
@@ -278,8 +276,8 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
       if (exports == NULL || export_member(vd->name,*exports)) 
         if (b != b0 || (*ans)[1]) 
           // no need to reinsert the entry 
-          ge->ordinaries = Dict::insert(ge->ordinaries, v,
-                                        new $(new VarRes(b), true));
+          te->ae->ordinaries = Dict::insert(te->ae->ordinaries, q,
+					    new $(new VarRes(b), true));
       return;
     case &AggrRes(_): 
       if (aggressive_warn)
@@ -297,8 +295,8 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
     }
   } catch { case &Dict::Absent: break; }
   if (exports == NULL || export_member(vd->name,*exports))
-    ge->ordinaries = Dict::insert(ge->ordinaries, v,
-                                  new $(new VarRes(new Global_b(vd)), false));
+    te->ae->ordinaries = Dict::insert(te->ae->ordinaries, q,
+				      new $(new VarRes(new Global_b(vd)), false));
 }
 
 static bool is_main(qvar_t n) {
@@ -310,11 +308,11 @@ static bool is_main(qvar_t n) {
   }
 }
 
-static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
+static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
                      list_t<$(seg_t,qvar_t,bool)@>* exports) {
-  var_t   v  = (*fd->name)[1];
+  qvar_t q = fd->name;
 #ifdef DEBUG
-  fprintf(stderr,"type-checking fndecl %s\n",*v); fflush(stderr);
+  fprintf(stderr,"type-checking fndecl %s\n",*((*q)[1])); fflush(stderr);
 #endif
   if(fd->sc == ExternC && !te->in_extern_c_include)
     terr(loc,"extern \"C\" functions cannot be implemented in Cyclone");
@@ -338,7 +336,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
 
   // due to recursion, add function to environment before checking body
   try {
-    let ans = Dict::lookup(ge->ordinaries, v);
+    let ans = Dict::lookup(te->ae->ordinaries, q);
     switch ((*ans)[0]) {
     case &VarRes(b0):
       let b1 = new Funname_b(fd);
@@ -346,9 +344,9 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
       if (bp == NULL) break; // error in merging
       let b = *bp;
       // make the update if the function is exported
-      if (exports == NULL || export_member(fd->name,*exports))
+      if (exports == NULL || export_member(q,*exports))
         if (!(b == b0 && (*ans)[1])) // no need to reinsert the entry
-          ge->ordinaries = Dict::insert(ge->ordinaries, v,
+          te->ae->ordinaries = Dict::insert(te->ae->ordinaries, q,
                                         new $(new VarRes(b), true));
       break;
     case &AggrRes(_):
@@ -365,7 +363,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
   } catch { case &Dict::Absent:
     if (exports == NULL || export_member(fd->name,*exports)) {
       let b = new Funname_b(fd);
-      ge->ordinaries = Dict::insert(ge->ordinaries, v,
+      te->ae->ordinaries = Dict::insert(te->ae->ordinaries, q,
                                     new $(new VarRes(new Funname_b(fd)), false));
     }
     break;
@@ -393,7 +391,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
     }
   }
   // look for main and check that it has a good type
-  if (is_main(fd->name)) {
+  if (is_main(q)) {
     // result type should be int
     switch (compress(fd->ret_type)) {
     case &VoidType: warn(loc,"main declared with return type void"); break;
@@ -444,15 +442,15 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
   }
 }
 
-static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
-  var_t v = (*td->name)[1];
+static void tcTypedefdecl(tenv_t te, seg_t loc, typedefdecl_t td) {
+  qvar_t q = td->name;
 #ifdef DEBUG
-  fprintf(stderr,"type-checking typedefdecl %s",*v);
+  fprintf(stderr,"type-checking typedefdecl %s",*((*q)[1]));
   fflush(stderr);
 #endif
   // check for redeclaration (never allowed, apparently)
-  if (Dict::member(ge->typedefs,v)) {
-    terr(loc,"redeclaration of typedef %s",*v);
+  if (Dict::member(te->ae->typedefs,q)) {
+    terr(loc,"redeclaration of typedef %s",*((*q)[1]));
     return;
   }
   // reject ill-formed type
@@ -484,10 +482,10 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
     }
   
   // add to environment
-  ge->typedefs = Dict::insert(ge->typedefs,v,td);
+  te->ae->typedefs = Dict::insert(te->ae->typedefs,q,td);
 }
 
-static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, 
+static void tcAggrImpl(tenv_t te, seg_t loc, 
                        aggr_kind_t str_or_union,
                        list_t<tvar_t,`H> tvs,
 		       list_t<$(type_t,type_t)@> rpo, 
@@ -570,7 +568,7 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc,
   }
 }
 
-static void rule_out_memkind(seg_t loc, var_t n, list_t<tvar_t> tvs,
+static void rule_out_memkind(seg_t loc, qvar_t n, list_t<tvar_t> tvs,
 			     bool constrain_top_kind) {
   for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
     switch (compress_kb(tvs2->hd->kind)) {
@@ -589,17 +587,17 @@ static void rule_out_memkind(seg_t loc, var_t n, list_t<tvar_t> tvs,
       *f = new Opt(kind_to_bound(k)); continue;
     case &Eq_kb(&Kind(MemKind,a)):
       terr(loc,"type %s attempts to abstract type variable %s of kind %s", 
-           *n, *tvs2->hd->name, Absynpp::kind2string(new Kind(MemKind,a)));
+           *((*n)[1]), *tvs2->hd->name, Absynpp::kind2string(new Kind(MemKind,a)));
       continue;
     default: continue;
     }
   }
 }
 
-void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
-  let v = (*ad->name)[1];
+void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
+  let q = ad->name;
 #ifdef DEBUG
-  fprintf(stderr,"type-checking type decl %s\n",*v);
+  fprintf(stderr,"type-checking type decl %s\n",*((*q)[1]));
   fflush(stderr);
 #endif
   // allow only packed and aligned attributes
@@ -609,7 +607,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     case &Aligned_att(_): continue;
     default: 
       terr(loc,"bad attribute %s in %s definition",
-           attribute2string(atts->hd), *v);
+           attribute2string(atts->hd), *((*q)[1]));
       break;
     }
   
@@ -622,19 +620,19 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
 
   // check the fields and update the environment
   // may not be the first declaration, so must not overwrite the dict entry!
-  switch ($(ad->impl, Dict::lookup_opt(ge->aggrdecls, v))) {
+  switch ($(ad->impl, Dict::lookup_opt(te->ae->aggrdecls, q))) {
   case $(NULL, NULL):
     // insert ad in the environment
-    rule_out_memkind(loc,v,tvs,false);
+    rule_out_memkind(loc,q,tvs,false);
     // FIX: ignores @tagged qualifier which may be on struct!
-    ge->aggrdecls = Dict::insert(ge->aggrdecls, v, new ad);
+    te->ae->aggrdecls = Dict::insert(te->ae->aggrdecls, q, new ad);
     break;
   case $(&AggrdeclImpl(exist_vars,rgn_po,fs,tagged), NULL):
     // FIX: check rgn_po for well-formed!
     // for the sake of recursive fields, make name abstract in body
     let adp = new (new Aggrdecl(ad->kind, Extern, ad->name, tvs,
 				NULL, ad->attributes, false));
-    ge->aggrdecls = Dict::insert(ge->aggrdecls, v, adp);
+    te->ae->aggrdecls = Dict::insert(te->ae->aggrdecls, q, adp);
 
     // reject ill-formed type
     // FIX: should be distinct from tvs but these already have
@@ -646,12 +644,12 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     // reject struct with @tagged qualifier
     if (tagged && (ad->kind == StructA))
       terr(loc,"@tagged qualifier is only allowed on union declarations");
-    tcAggrImpl(te, ge, loc, ad->kind, append(tvs,exist_vars), rgn_po, fs);
+    tcAggrImpl(te, loc, ad->kind, append(tvs,exist_vars), rgn_po, fs);
 
-    rule_out_memkind(loc, v, tvs, false);
+    rule_out_memkind(loc, q, tvs, false);
     // we constrain existential variables to be Aliasable if
     //   they have not yet been fixed
-    rule_out_memkind(loc, v, exist_vars, true);
+    rule_out_memkind(loc, q, exist_vars, true);
 
     if(ad->kind == UnionA && !tagged)
       // warn when fields of unions are not bits-only -- these can
@@ -660,7 +658,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
 	if (aggressive_warn &&
             !bits_only(f->hd->type) && f->hd->requires_clause == NULL)
 	  warn(loc,"member %s of union %s has type %s which is not `bits-only' so it can only be written and not read",
-	       *f->hd->name,*v, typ2string(f->hd->type));
+	       *f->hd->name,*((*q)[1]), typ2string(f->hd->type));
 
     *adp = ad; //insert ad in the environment
     break;
@@ -683,7 +681,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     // reject struct with @tagged qualifier
     if (tagged && (ad->kind == StructA))
       terr(loc,"@tagged qualifier is only allowed on union declarations");
-    tcAggrImpl(te, ge, loc, ad->kind, append(tvs,exist_vars), rgn_po, fs);
+    tcAggrImpl(te, loc, ad->kind, append(tvs,exist_vars), rgn_po, fs);
 
     *adp = ad0;// restore the previous declaration and go update the environment
     fallthru(adp);
@@ -693,11 +691,11 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     if (ad2 == NULL)
       return; // error in redeclaration
     else {
-      rule_out_memkind(loc, v, tvs, false);
+      rule_out_memkind(loc, q, tvs, false);
       // we constrain existential variables to be Aliasable if
       //   they have not yet been fixed
       if (ad->impl != NULL) 
-	rule_out_memkind(loc, v, ad->impl->exist_vars, true);
+	rule_out_memkind(loc, q, ad->impl->exist_vars, true);
     
       *adp = (aggrdecl_t)ad2; // make the update
       ad = (aggrdecl_t)ad2; // update ad so we add the right constructor below
@@ -705,11 +703,11 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     }
   }
   // add the constructor to the environment
-  ge->ordinaries = Dict::insert(ge->ordinaries,  v,
-				  new $(new AggrRes(ad), true));
+  te->ae->ordinaries = Dict::insert(te->ae->ordinaries,  q,
+				    new $(new AggrRes(ad), true));
 }
 
-static void rule_out_mem_and_unique(seg_t loc, var_t v, list_t<tvar_t> tvs) {
+static void rule_out_mem_and_unique(seg_t loc, qvar_t q, list_t<tvar_t> tvs) {
   for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
     switch (compress_kb(tvs2->hd->kind)) {
     case &Unknown_kb(*f): fallthru(f);
@@ -724,23 +722,22 @@ static void rule_out_mem_and_unique(seg_t loc, var_t v, list_t<tvar_t> tvs) {
       *f = new Opt(kind_to_bound(&rk)); break;
     case &Eq_kb(&Kind(RgnKind,Top)):
       terr(loc,"type %s attempts to abstract type "
-           "variable %s of kind TR",*v,*tvs2->hd->name); break;
+           "variable %s of kind TR",*((*q)[1]),*tvs2->hd->name); break;
     case &Less_kb(*f,&Kind(k,Unique)): fallthru(k);
     case &Eq_kb(&Kind(k,Unique)):
       terr(loc,"type %s attempts to abstract type "
-           "variable %s of kind %s",
-	   *v,*tvs2->hd->name,kind2string(new Kind(k,Unique))); break;
+	   "variable %s of kind %s",
+	   *((*q)[1]),*tvs2->hd->name,kind2string(new Kind(k,Unique))); break;
     case &Eq_kb(&Kind(MemKind,a)):
       terr(loc,"type %s attempts to abstract type "
-           "variable %s of kind %s",*v,*tvs2->hd->name,
+           "variable %s of kind %s",*((*q)[1]),*tvs2->hd->name,
 	   Absynpp::kind2string(new Kind(MemKind,a))); break;
     default: break;
     }
   }
 }
 
-static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, genv_t ge, 
-                                            seg_t loc,
+static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, seg_t loc,
 					    string_t obj, 
                                             bool is_extensible,
 					    qvar_t name,
@@ -798,18 +795,18 @@ static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, genv_t ge,
   // may not define the old ones or the tvars may not be the same)
   for(let fs = fields; fs != NULL; fs = fs->tl) {
     let f = fs->hd;
-    ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
-                                  new $(new DatatypeRes(tudres,f), true));
+    te->ae->ordinaries = Dict::insert(te->ae->ordinaries, f->name,
+				      new $(new DatatypeRes(tudres,f), true));
   }
 
   return fields2;
 }
 
-void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
-  var_t v = (*tud->name)[1];
+void tcDatatypedecl(tenv_t te, seg_t loc, datatypedecl_t tud) {
+  qvar_t q = tud->name;
   string_t obj = tud->is_extensible ? "@extensible datatype" : "datatype";
 #ifdef DEBUG
-  fprintf(stderr,"type-checking %sdecl %s\n",obj,*v);
+  fprintf(stderr,"type-checking %sdecl %s\n",obj,*((*q)[1]));
   fflush(stderr);
 #endif
   list_t<tvar_t> tvs = tud->tvs;
@@ -832,6 +829,7 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
     // having to write @extensible all the time.  The bad news is that
     // you can't shadow an extensible datatype that is reachable in the
     // current namespace.  But oh well...
+    // FIX: necessary now that we have binding pass?
     try {
       tud_opt = lookup_xdatatypedecl(temp,te,loc,tud->name);
       if (tud_opt == NULL && !tud->is_extensible) throw new Dict::Absent;
@@ -842,7 +840,7 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
       }
     } catch {
     case &Dict::Absent:
-      let tdopt = Dict::lookup_opt(ge->datatypedecls, v);
+      let tdopt = Dict::lookup_opt(te->ae->datatypedecls, q);
       tud_opt = tdopt ? rnew(temp)(*tdopt) : NULL;
       break;
     }
@@ -852,18 +850,18 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
     switch ($(tud->fields, tud_opt)) {
     case $(NULL, NULL):
       // insert tud in the environment
-      rule_out_mem_and_unique(loc,v,tvs);
-      ge->datatypedecls = Dict::insert(ge->datatypedecls, v, new tud);
+      rule_out_mem_and_unique(loc,q,tvs);
+      te->ae->datatypedecls = Dict::insert(te->ae->datatypedecls, q, new tud);
       break;
     case $(&Opt(*fs), NULL):
       // for the sake of recursive fields, make name abstract in body
       let tudp = new (new Datatypedecl(Extern,tud->name,tvs,NULL,
                                        tud->is_extensible));
-      ge->datatypedecls = Dict::insert(ge->datatypedecls, v, tudp);
+      te->ae->datatypedecls = Dict::insert(te->ae->datatypedecls, q, tudp);
    
       // check the fields (and sort them if this is a @extensible datatype)
-      *fs = tcDatatypeFields(te,ge,loc,obj,tud->is_extensible,tud->name,*fs,tvs,tud);
-      rule_out_mem_and_unique(loc,v,tvs);
+      *fs = tcDatatypeFields(te,loc,obj,tud->is_extensible,tud->name,*fs,tvs,tud);
+      rule_out_mem_and_unique(loc,q,tvs);
       *tudp = tud; //insert tud in the environment
       break;
     case $(&Opt(*fs), &tudp):
@@ -877,7 +875,7 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
                                tud->is_extensible);
       
       // check the fields (and sort them if this is a @extensible datatype)
-      *fs = tcDatatypeFields(te,ge,loc,obj,tud->is_extensible,
+      *fs = tcDatatypeFields(te,loc,obj,tud->is_extensible,
                              tud->name,*fs,tvs,tud);
 
 
@@ -886,7 +884,7 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
     case $(NULL, &tudp):
       // try to merge the declarations
       let tud2 = Tcdecl::merge_datatypedecl(*tudp, tud, loc, tc_msg);
-      rule_out_mem_and_unique(loc,v,tvs);
+      rule_out_mem_and_unique(loc,q,tvs);
       if (tud2 == NULL)
         return; // error in redeclaration
       else {
@@ -897,10 +895,10 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
   }
 }
 
-void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
-  var_t v = (*ed->name)[1];
+void tcEnumdecl(tenv_t te, seg_t loc, enumdecl_t ed) {
+  qvar_t q = ed->name;
 #ifdef DEBUG
-  fprintf(stderr,"type-checking enumdecl %s",*v);
+  fprintf(stderr,"type-checking enumdecl %s",*((*q)[1]));
   fflush(stderr);
 #endif
   // check the fields.
@@ -915,7 +913,7 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
       else
 	prev_fields = rnew(uprev_rgn) List((*f->name)[1],prev_fields);
       // check for shadowing of global variables
-      if (Dict::lookup_opt(ge->ordinaries,(*f->name)[1]) != NULL)
+      if (Dict::lookup_opt(te->ae->ordinaries,f->name) != NULL)
 	terr(f->loc,"enum field name %s shadows global name",*((*f->name)[1]));
 
       if (f->tag == NULL) {
@@ -932,20 +930,20 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
 
   // update the environment
   try {
-    let edp = Dict::lookup(ge->enumdecls, v);
+    let edp = Dict::lookup(te->ae->enumdecls, q);
     let ed2 = Tcdecl::merge_enumdecl(*edp, ed, loc, tc_msg);
     if (ed2 == NULL) return;
     *edp = (enumdecl_t) ed2; // if there's no error, make the update
   } catch { case &Dict::Absent:
     let edp = new ed;
-    ge->enumdecls = Dict::insert(ge->enumdecls, v, edp);
+    te->ae->enumdecls = Dict::insert(te->ae->enumdecls, q, edp);
     break;
   }
   if (ed->fields != NULL)
     for (_ fs = ed->fields->v; fs != NULL; fs = fs->tl) {
       let f = fs->hd;
-      ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
-				    new $(new EnumRes(ed,f), true));
+      te->ae->ordinaries = Dict::insert(te->ae->ordinaries, f->name,
+					new $(new EnumRes(ed,f), true));
     }
 
   // Now make sure that the fields are constant expressions;
@@ -956,7 +954,7 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
       Tcexp::tcExp(te,NULL,(exp_t)f->tag); // substitute if poss
       if (!Tcutil::is_const_exp((exp_t)f->tag))
 	terr(loc,"enum %s, field %s: expression is not constant",
-             *v,*(*f->name)[1]);
+             *((*q)[1]),*(*f->name)[1]);
     }
 }
 
@@ -989,7 +987,6 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
                      region_t<`g> grgn,
                      list_t<$(seg_t,qvar_t,bool)@`H,`H>* exports) {
 
-  genv_t ge = Dict::lookup(te->ae,te->ns); // no longer a copy!!!
   list_t<decl_t,`H> last = NULL;
 
   for (let ds = ds0; ds != NULL; last = ds, ds = ds->tl) {
@@ -1007,34 +1004,34 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
     case &Var_d(vd):
       if (in_externC && okay_externC(d->loc,vd->sc,te->in_extern_c_include))
         vd->sc = ExternC;
-      tcVardecl(te,ge,loc,vd,check_var_init,te->in_extern_c_include,exports);
+      tcVardecl(te,loc,vd,check_var_init,te->in_extern_c_include,exports);
       break;
     case &Fn_d(fd):
       if (in_externC && okay_externC(d->loc,fd->sc,te->in_extern_c_include))
 	fd->sc = ExternC;
-      tcFndecl(te,ge,loc,fd,exports);
+      tcFndecl(te,loc,fd,exports);
       break;
     case &Typedef_d(td):
       td->extern_c = te->in_extern_c_include;
       // FIX: if we ever end up with a TypeDeclType inside a type
       // then it should be entered into the current namespace, unless
       // it's occurring within in_externC code.  
-      tcTypedefdecl(te,ge,loc,td);
+      tcTypedefdecl(te,loc,td);
       break;
     case &Aggr_d(ad):
       if (in_externC &&  okay_externC(d->loc,ad->sc,te->in_extern_c_include))
 	ad->sc = ExternC;
-      tcAggrdecl(te,ge,loc,ad);
+      tcAggrdecl(te,loc,ad);
       break;
     case &Datatype_d(tud):
       if (in_externC && okay_externC(d->loc,tud->sc,te->in_extern_c_include))
 	tud->sc = ExternC;
-      tcDatatypedecl(te,ge,loc,tud);
+      tcDatatypedecl(te,loc,tud);
       break;
     case &Enum_d(ed):
       if (in_externC && okay_externC(d->loc,ed->sc,te->in_extern_c_include))
         ed->sc = ExternC;
-      tcEnumdecl(te,ge,loc,ed);
+      tcEnumdecl(te,loc,ed);
       break;
     case &Porton_d:
       warn(d->loc,"spurious __cyclone_port_on__");
@@ -1042,16 +1039,9 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
     case &Portoff_d:
       break;
     case &Namespace_d(v,ds2):
-      // DAN: This case is much more imperative than it used to be.
-      let ns  = te->ns;
-      let ns2 = List::append(ns,new List(v,NULL));
-
-      // Make sure namespace v exists (going away soon)
-      if(!Dict::member(te->ae,ns2))
-        te->ae = Dict::insert(te->ae, ns2, empty_genv(grgn));
-
       // Do the nested declarations then restore the namespace
-      te->ns = ns2;
+      let ns  = te->ns;
+      te->ns = List::append(ns,new List(v,NULL));
       tc_decls(te,ds2,in_externC,check_var_init,grgn,exports);
       te->ns = ns;
       break;
@@ -1092,18 +1082,18 @@ void tc(region_t<`g> g, tenv_t<`g> te, bool check_var_init,
 
 // for tree-shaking (so we don't include the world)
 // Note: We must shake after all type-checking or we'll be too eager.
-// Note: All names should now be absolute.
+// Note: We used to recompute genv, but this seems pointless (only
+//       interface.cyc uses it and it should not care about unused stuff),
+//       so now we just trim the actual abstract syntax
 
 // We recompute the global environment and delete what's not needed anymore
-// all would be far easier if Dict has a delete function :-)
+// all would be far easier if Dict has a delete function
 
-// for each namespace, we have the environment and a list of what to remove
-static struct TreeshakeEnv<`r::R,`g::R> {
-  region_t<`r> rgn;
-  bool         in_cinclude;
-  Dict::dict_t<list_t<var_t>, $(genv_t<`g>, Set::set_t<var_t,`r>) @`r, `r> nsdict;
+static struct TreeshakeEnv<`g::R> {
+  bool in_cinclude;
+  Dict::dict_t<qvar_t,$(resolved_t,bool)@`g,`g> ordinaries;
 };  
-typedef struct TreeshakeEnv<`r,`g> @`r2 treeshake_env_t<`r,`r2,`g>;
+typedef struct TreeshakeEnv<`g> @`r2 treeshake_env_t<`r2,`g>;
 
 static bool vardecl_needed(treeshake_env_t env, decl_t d);
 
@@ -1121,23 +1111,7 @@ static bool vardecl_needed(treeshake_env_t env, decl_t d) {
       //fprintf(stderr,"needed--!extern or in_cinclude or unique_rgn\n");
       return true;
     }
-    let &$(nsl,name) = vd->name;
-    list_t<var_t> ns;
-    switch (nsl) {
-    case {.Loc_n = _}: ns = NULL; break;
-    case {.Rel_n = y}: ns = y;    break;
-    case {.C_n   = y}: ns = y;    break;
-    case {.Abs_n = y}: ns = y;    break;
-    }
-    let nsenv = Dict::lookup(env->nsdict,ns);
-    let ge = (*nsenv)[0];
-    let needed = (*Dict::lookup(ge->ordinaries,name))[1];
-    if (! needed) {// we'll remove it later from ge->ordinaries
-      (*nsenv)[1] = Set::rinsert(env->rgn, (*nsenv)[1], name); 
-      //fprintf(stderr,"not needed\n");
-    } //else 
-      //fprintf(stderr,"needed.\n");
-    return needed;
+    return (*Dict::lookup(env->ordinaries,vd->name))[1];
   case &ExternC_d(*ds2p): fallthru(ds2p);
   case &Using_d(_,*ds2p): fallthru(ds2p);
   case &Namespace_d(_,*ds2p):
@@ -1153,28 +1127,7 @@ static bool vardecl_needed(treeshake_env_t env, decl_t d) {
   }
 }
 
-static bool treeshake_remove_f(Set::set_t<var_t> set, var_t x, `a y) {
-  return !Set::member(set, x);
-}
-
-static $(genv_t<`g>, Set::set_t<var_t,`r>)@`r 
-treeshake_make_env_f(region_t<`r> rgn, genv_t<`g> ge) {
-  return rnew (rgn) $(ge, Set::rempty(rgn, strptrcmp));
-}
-
-list_t<decl_t> treeshake(tenv_t<`g,_> te, list_t<decl_t> ds) {
-  region rgn; 
-  let env = TreeshakeEnv(rgn, false,
-			 Dict::rmap_c(rgn,treeshake_make_env_f,rgn,te->ae));
-  let ds1 = treeshake_f(&env, ds);
-  if(Dict::is_empty(env.nsdict))
-    return ds1; // shouldn't be possible
-  // update the global environment
-  Iter::iter_t<_,`rgn> iter = Dict::make_iter(Core::heap_region,env.nsdict);
-  let pr = *Dict::rchoose(rgn,env.nsdict);
-  while(Iter::next(iter,&pr)) {
-    let $(_,&$(ge,set)) = pr;
-    ge->ordinaries = Dict::rfilter_c(ge->grgn, treeshake_remove_f, set, ge->ordinaries);
-  }
-  return ds1;
+list_t<decl_t> treeshake(tenv_t te, list_t<decl_t> ds) {
+  let env = TreeshakeEnv(false, te->ae->ordinaries);
+  return treeshake_f(&env, ds);
 }

@@ -3939,13 +3939,13 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     case &Aggr_td(ad):
       if (te->in_extern_c_include)
         ad->sc = ExternC;
-      Tc::tcAggrdecl(te,Dict::lookup(te->ae,te->ns),loc,ad); break;
+      Tc::tcAggrdecl(te,loc,ad); break;
     case &Enum_td(ed):
       if (te->in_extern_c_include)
         ed->sc = ExternC;
-      Tc::tcEnumdecl(te,Dict::lookup(te->ae,te->ns),loc,ed); break;
+      Tc::tcEnumdecl(te,loc,ed); break;
     case &Datatype_td(dd):
-      Tc::tcDatatypedecl(te,Dict::lookup(te->ae,te->ns),loc,dd); break;
+      Tc::tcDatatypedecl(te,loc,dd); break;
     }
     *topt = new new_t;
     return i_check_valid_type(loc,te,cvtenv,expected_kind,new_t,put_in_effect,
@@ -3953,7 +3953,6 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 
   case &AnonEnumType(fs):
     // Note: this code is duplicated almost exactly in tc.cyc
-    genv_t ge = Dict::lookup(te->ae,te->ns);
     TEMP_RGN(te, uprev_rgn) {
       list_t<field_name_t/*, `uprev_rgn*/> prev_fields = NULL;
       unsigned int tag_count = 0;
@@ -3971,8 +3970,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 
         unsigned int t1 = Evexp::eval_const_uint_exp((exp_t)f->tag)[0];
         tag_count = t1+1;
-        ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
-                                      new $(new AnonEnumRes(t,f), true));
+        te->ae->ordinaries = Dict::insert(te->ae->ordinaries, f->name,
+					  new $(new AnonEnumRes(t,f), true));
       }
     }
     break;
@@ -3983,9 +3982,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         *edp = *ed;
       } catch {
       case &Dict::Absent:
-        let ge = Dict::lookup(te->ae,te->ns);
         let ed_orig = new Enumdecl{Extern,n,NULL};
-        Tc::tcEnumdecl(te,ge,loc,ed_orig);
+        Tc::tcEnumdecl(te,loc,ed_orig);
         enumdecl_t @ed = lookup_enumdecl(te,loc,n);
         *edp = *ed;
         break;
@@ -4000,9 +3998,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       try tudp = lookup_datatypedecl(te,loc,n);// FIX: lookup_xdatatypedecl needed?
       catch { case &Dict::Absent:
         // declare the datatype for the user
-        let ge = Dict::lookup(te->ae,te->ns);
         let tud = new Datatypedecl{Extern, n, NULL, NULL, is_x};
-        Tc::tcDatatypedecl(te, ge, loc, tud);
+        Tc::tcDatatypedecl(te, loc, tud);
         tudp = lookup_datatypedecl(te,loc,n);
         // give an error here if targs is non-empty
         if (targs != NULL) {
@@ -4621,9 +4618,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       } catch { case &Dict::Absent:
 	// add as an abstract type declaration
 	// FIX: use the correct namespace by examining the qvar_t n
-	let ge = Dict::lookup(te->ae,te->ns);
 	let ad = new Aggrdecl{k,Extern,n,NULL,NULL,NULL,false};
-	Tc::tcAggrdecl(te,ge,loc,ad);
+	Tc::tcAggrdecl(te,loc,ad);
 	adp = lookup_aggrdecl(te,loc,n);
 	*info = KnownAggr(adp);
         // give an error here if targs is non-empty:

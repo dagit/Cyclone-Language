@@ -18,7 +18,6 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 
 /* An identifier can have at most one binding in each of the following:
-
    1) namespaces (after "namespace" or "using")
    2) structure tags (after "struct")
    3) union tags (after "union")
@@ -32,11 +31,10 @@
    constructors.
 
    The environment data structures below follow from this directly.
-   Note that labels can only appear inside of functions, so they don't
-   appear in global environments.  And structure and union members
-   must be resolved on a per-structure/per-union basis (e.g., two
-   structs can have members with the same names) so their bindings
-   don't belong in our environments.
+   Structure and union members must be resolved on a
+   per-structure/per-union basis (e.g., two structs can have members
+   with the same names) so their bindings don't belong in our
+   environments.
 */
 #include <core.h>
 #include <cycboot.h>
@@ -77,10 +75,10 @@ datacon(exn,Env_error);
 
 // Type environments
 struct Tenv<`g::R,`l::R> {
-  list_t<var_t>    ns;  // current namespace
-  Dict::dict_t<list_t<var_t,`H>,genv_t<`g>,`g> ae; // absolute identifiers
+  list_t<var_t>       ns; // current namespace
+  genv_t<`g>          ae; // absolute identifiers -- now 5 big dicts
   struct Fenv<`l> *`l le; // local environment
-  bool allow_valueof;   // controls whether we allow valueof(T) in an expr
+  bool allow_valueof;     // controls whether we allow valueof(T) in an expr
   bool in_extern_c_include;
 };
 // Region notes:  we leave ns heap-allocated because this gets
@@ -91,17 +89,16 @@ struct Tenv<`g::R,`l::R> {
 // Global environments -- what's declared in a global scope
 struct Genv<`g::R> {
   region_t<`g> grgn;   // region for allocating globals
-  Dict::dict_t<var_t,aggrdecl_t@,`g> aggrdecls;
-  Dict::dict_t<var_t,datatypedecl_t@,`g> datatypedecls;
-  Dict::dict_t<var_t,enumdecl_t@,`g>   enumdecls;
+  Dict::dict_t<qvar_t,aggrdecl_t@,`g> aggrdecls;
+  Dict::dict_t<qvar_t,datatypedecl_t@,`g> datatypedecls;
+  Dict::dict_t<qvar_t,enumdecl_t@,`g>   enumdecls;
   // no indirection b/c no redeclaration
-  Dict::dict_t<var_t,typedefdecl_t,`g> typedefs;
+  Dict::dict_t<qvar_t,typedefdecl_t,`g> typedefs;
   // bool for tree-shaking
-  Dict::dict_t<var_t,$(resolved_t,bool)@`g,`g> ordinaries;
+  Dict::dict_t<qvar_t,$(resolved_t,bool)@`g,`g> ordinaries;
 };
-// Region notes:  the @ pointers for aggrdecl_t, datatypedecl_t,
-// and enumdecl_t show up in the abstract syntax, so we make them
-// heap pointers.  
+// Region notes:  the @ pointers for aggrdecl_t, datatypedecl_t, and
+// enumdecl_t show up in the abstract syntax, so we make them heap pointers.  
 
 // Used to tell what an ordinary identifer refers to
 datatype Resolved {
@@ -186,86 +183,41 @@ binding_t lookup_binding(bnds_t bs, var_t v) {
 }
 
 //////////////////////// Top-level Environment Manipulation //////////////////
-
-genv_t<`r> empty_genv(region_t<`r> r) {
-  return rnew(r) Genv{.grgn        = r,
-                      .aggrdecls   = Dict::rempty(r,strptrcmp),
-                      .datatypedecls = Dict::rempty(r,strptrcmp),
-                      .enumdecls   = Dict::rempty(r,strptrcmp),
-		      .typedefs    = Dict::rempty(r,strptrcmp),
-		      .ordinaries  = Dict::rempty(r,strptrcmp)};
-}
-
 tenv_t<`r,`r> tc_init(region_t<`r> r) {
-  // Initialize globals
-  empty_var_set = new Opt(Set::empty(strptrcmp));
   // Set up initial environment so that datatype exn, etc. is defined
-  let ge     = empty_genv(r);
-  ge->datatypedecls = Dict::insert(ge->datatypedecls, (*exn_name)[1], new exn_tud);
+  let ae = rnew(r) Genv{.grgn = r,
+                        .aggrdecls     = Dict::rempty(r,qvar_cmp),
+                        .datatypedecls = Dict::rempty(r,qvar_cmp),
+                        .enumdecls     = Dict::rempty(r,qvar_cmp),
+		        .typedefs      = Dict::rempty(r,qvar_cmp),
+		        .ordinaries    = Dict::rempty(r,qvar_cmp)};
+  ae->datatypedecls = Dict::insert(ae->datatypedecls, exn_name, new exn_tud);
   for (let tufs = exn_tud->fields->v; tufs != NULL; tufs = tufs->tl)
-    ge->ordinaries = Dict::insert(ge->ordinaries, (*tufs->hd->name)[1],
+    ae->ordinaries = Dict::insert(ae->ordinaries, tufs->hd->name,
                                   rnew(r)
-                                  $(new DatatypeRes(exn_tud,tufs->hd),true));
-
-  Dict::dict_t<list_t<var_t,`H>,genv_t<`r>,`r> ae =
-    Dict::insert(Dict::rempty(r,varlist_cmp), NULL, ge);
+				  $(new DatatypeRes(exn_tud,tufs->hd),true));
   return rnew(r) Tenv(NULL,ae,NULL,false,false);
 }
-
-// lookup functions
 static resolved_t lookup_ordinary_global(tenv_t te,seg_t loc,qvar_t q,bool is_use) {
-  let &$(nsl,v) = q;
-  switch (nsl) {
-  case {.C_n = y}: fallthru(y);
-  case {.Abs_n = y}:
-    let ans = Dict::lookup(Dict::lookup(te->ae,y)->ordinaries,v);
-    if(is_use)
-      (*ans)[1] = true;
-    return (*ans)[0];
-  default: throw new Core::Impossible("compiler-bug: relative name in tcenv");
-  }
+  let ans = Dict::lookup(te->ae->ordinaries, q);
+  if(is_use)
+    (*ans)[1] = true;
+  return (*ans)[0];
 }
 aggrdecl_t @ lookup_aggrdecl(tenv_t te,seg_t loc,qvar_t q) {
-  let &$(nsl,v) = q;
-  switch (nsl) {
-  case {.C_n = y}: fallthru(y);
-  case {.Abs_n = y}: return Dict::lookup(Dict::lookup(te->ae,y)->aggrdecls, v);
-  default: throw new Core::Impossible("compiler-bug: relative name in tcenv");
-  }
+  return Dict::lookup(te->ae->aggrdecls, q);
 }
 datatypedecl_t @ lookup_datatypedecl(tenv_t te,seg_t loc,qvar_t q) {
-  let &$(nsl,v) = q;
-  switch (nsl) {
-  case {.C_n = y}: fallthru(y);
-  case {.Abs_n = y}: 
-    return Dict::lookup(Dict::lookup(te->ae,y)->datatypedecls, v);
-  default: throw new Core::Impossible("compiler-bug: relative name in tcenv");
-  }
+  return Dict::lookup(te->ae->datatypedecls, q);
 }
 datatypedecl_t@*`r lookup_xdatatypedecl(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q) {
-  let &$(nsl,v) = q;
-  switch (nsl) {
-  case {.C_n = y}: fallthru(y);
-  case {.Abs_n = y}:
-    return rnew(r) Dict::lookup(Dict::lookup(te->ae,y)->datatypedecls,v);
-  default: throw new Core::Impossible("compiler-bug: relative name in tcenv");
-  }
+  return rnew(r) Dict::lookup(te->ae->datatypedecls, q);
 }
 enumdecl_t @lookup_enumdecl(tenv_t te, seg_t loc, qvar_t q) {
-  let &$(nsl,v) = q;
-  switch (nsl) {
-  case {.C_n = y}: fallthru(y);
-  case {.Abs_n = y}: return Dict::lookup(Dict::lookup(te->ae,y)->enumdecls,v);
-  default: throw new Core::Impossible("compiler-bug: relative name in tcenv");
-  }
+  return Dict::lookup(te->ae->enumdecls, q);
 }
 typedefdecl_t lookup_typedefdecl(tenv_t te, seg_t loc, qvar_t q) {
-  let &$(nsl,v) = q;
-  switch (nsl) {
-  case {.C_n = y}: fallthru(y);
-  case {.Abs_n = y}: return Dict::lookup(Dict::lookup(te->ae,y)->typedefs,v);
-  default: throw new Core::Impossible("compiler-bug: relative name in tcenv");
-  }
+  return Dict::lookup(te->ae->typedefs, q);
 }
 
 //////////////////// Function Environment Manipulation //////////////////////

@@ -49,8 +49,8 @@ namespace Interface {
   extern i_t final();
   
   // build a maximal interface from the global environment computed by the type-checker
-  // also check that each (non extern) function prototyp is eventually provided
-  extern i_t extract(Dict::dict_t<list_t<var_t,`H>, genv_t> ae);
+  // also check that each (non extern) function prototype is eventually provided
+  extern i_t extract(genv_t ae);
 
   // check if i1 may safely be used instead of i2 (ie. i1 is more restrictive than i2) :
   // _ everything provided by in i1 is provided by i2

@@ -200,8 +200,7 @@ extern dict_t<`a,`b,`r> union_two_c(`b (@f)(`c,`a,`b,`b), `c env,
     [d2], its value in the result is obtained by applying [f] to the
     two values, the key, and env.  Note that the resulting dictionary
     is allocated in the same region as [d2].  (We don't use [union] as
-    the name of the function, because [union] is a keyword in
-    Cyclone.) */
+    the name of the function, because [union] is a Cyclone keyword.) */
 
 extern dict_t<`a,`b,`r> intersect(`b (@f)(`a,`b,`b),
                                   dict_t<`a,`b,`r> d1,

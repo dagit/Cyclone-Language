@@ -59,13 +59,13 @@ typedef datatype Resolved @`r resolved_t<`r>;
 // FIX: We should tree-shake the type declarations too!
 extern struct Genv<`g::R> {
   region_t<`g> grgn;
-  dict_t<var_t,aggrdecl_t@,`g>     aggrdecls;
-  dict_t<var_t,datatypedecl_t@,`g> datatypedecls;
-  dict_t<var_t,enumdecl_t@,`g>     enumdecls;
+  dict_t<qvar_t,aggrdecl_t@,`g>     aggrdecls;
+  dict_t<qvar_t,datatypedecl_t@,`g> datatypedecls;
+  dict_t<qvar_t,enumdecl_t@,`g>     enumdecls;
   // no indirection b/c no redeclaration
-  dict_t<var_t,typedefdecl_t,`g>   typedefs; 
+  dict_t<qvar_t,typedefdecl_t,`g>   typedefs; 
   // bool for tree-shaking
-  dict_t<var_t,$(resolved_t,bool)@`g,`g> ordinaries;
+  dict_t<qvar_t,$(resolved_t,bool)@`g,`g> ordinaries;
 };
 typedef struct Genv<`r> @`r genv_t<`r>;
 
@@ -76,9 +76,9 @@ typedef struct Fenv<`l> @`l fenv_t<`l>;
 // Type environments -- `g is the region for global information
 // and `l is the region for local information
 extern struct Tenv<`g::R,`l::R> {
-  list_t<var_t>                       ns; // current namespace
-  dict_t<list_t<var_t>,genv_t<`g>,`g> ae; // absolute environment
-  struct Fenv<`l> *`l                 le; // local environment
+  list_t<var_t>       ns; // current namespace
+  genv_t<`g>          ae; // absolute environment
+  struct Fenv<`l> *`l le; // local environment
   bool allow_valueof;   // controls whether we allow valueof(T) in an expr
   bool in_extern_c_include;
 };
@@ -99,7 +99,6 @@ extern region_t<`r> get_fnrgn(tenv_t<`g,`r>);
 #endif
 
 extern tenv_t<`r,`r> tc_init(region_t<`r>);
-extern genv_t<`r> empty_genv(region_t<`r>);
 extern fenv_t<`r> new_fenv(region_t<`r>,seg_t,fndecl_t);
 extern fenv_t<`r> nested_fenv(seg_t,fenv_t<`r> old_fenv, fndecl_t new_fn);
 // bogus fenv is used for checking requires/ensures clauses

@@ -310,8 +310,7 @@ static type_t tcVar(tenv_t te, seg_t loc, type_t * topt, exp_t e, binding_t *b){
   case &Pat_b(vd):     fallthru(vd);
   case &Local_b(vd):   fallthru(vd);
   case &Param_b(vd):
-    // FIX DJG: temporary measure to make tree-shaking sound
-    //      (now that we have binding, tree-shaking should be redone)
+    // FIX DJG: I think all this accomplishes now is warning on shadowing
     lookup_ordinary(heap_region,te,loc,vd->name,true);
     if (te->allow_valueof) {
       switch (compress(vd->type)) {
