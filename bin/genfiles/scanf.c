@@ -621,7 +621,7 @@ break;}}
 nread +=sum;}else{
 # 438
 long long sum=0;
-struct _fat_ptr _tmp1A=Cyc_va_arg_char_ptr(*((void**)_check_fat_subscript(ap,sizeof(void*),0U)));struct _fat_ptr z=_tmp1A;_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
+struct _fat_ptr _tmp1A=Cyc_va_arg_char_ptr(*((void**)ap.curr));struct _fat_ptr z=_tmp1A;_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 for(1;width > 0;1){
 n=_IO_getc(fp);
 if(n == -1 && width != 0)
@@ -702,7 +702,7 @@ break;}}
 # 525
 nread +=n;}}else{
 # 527
-struct _fat_ptr _tmp1B=Cyc_va_arg_string_ptr(*((void**)_check_fat_subscript(ap,sizeof(void*),0U)));struct _fat_ptr p2=_tmp1B;_fat_ptr_inplace_plus(& ap,sizeof(void*),1);{
+struct _fat_ptr _tmp1B=Cyc_va_arg_string_ptr(*((void**)ap.curr));struct _fat_ptr p2=_tmp1B;_fat_ptr_inplace_plus(& ap,sizeof(void*),1);{
 struct _fat_ptr _tmp1C=p2;struct _fat_ptr p3=_tmp1C;
 int c=_IO_peekc(fp);
 while(!isspace((int)((unsigned char)c))){

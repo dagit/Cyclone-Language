@@ -1126,7 +1126,7 @@ unsigned long _tmpA0=Cyc_strlen((struct _fat_ptr)s);unsigned long len=_tmpA0;
 int _tmpA1=0;int single_quotes=_tmpA1;
 int _tmpA2=0;int other_special=_tmpA2;
 {int i=0;for(0;(unsigned long)i < len;++ i){
-char _tmpA3=*((const char*)_check_fat_subscript(s,sizeof(char),i));char c=_tmpA3;
+char _tmpA3=((const char*)s.curr)[i];char c=_tmpA3;
 if((int)c == 39)++ single_quotes;else{
 if(Cyc_is_other_special(c))++ other_special;}}}
 # 682
@@ -1141,7 +1141,7 @@ struct _fat_ptr s2=({unsigned _tmpB5=(len2 + 1U)+ 1U;char*_tmpB4=_cycalloc_atomi
 int _tmpAB=0;int i=_tmpAB;
 int _tmpAC=0;int j=_tmpAC;
 for(1;(unsigned long)i < len;++ i){
-char _tmpAD=*((const char*)_check_fat_subscript(s,sizeof(char),i));char c=_tmpAD;
+char _tmpAD=((const char*)s.curr)[i];char c=_tmpAD;
 if((int)c == 39 || Cyc_is_other_special(c))
 ({struct _fat_ptr _tmpAE=_fat_ptr_plus(s2,sizeof(char),j ++);char _tmpAF=*((char*)_check_fat_subscript(_tmpAE,sizeof(char),0U));char _tmpB0='\\';if(_get_fat_size(_tmpAE,sizeof(char))== 1U &&(_tmpAF == 0 && _tmpB0 != 0))_throw_arraybounds();*((char*)_tmpAE.curr)=_tmpB0;});
 ({struct _fat_ptr _tmpB1=_fat_ptr_plus(s2,sizeof(char),j ++);char _tmpB2=*((char*)_check_fat_subscript(_tmpB1,sizeof(char),0U));char _tmpB3=c;if(_get_fat_size(_tmpB1,sizeof(char))== 1U &&(_tmpB2 == 0 && _tmpB3 != 0))_throw_arraybounds();*((char*)_tmpB1.curr)=_tmpB3;});}

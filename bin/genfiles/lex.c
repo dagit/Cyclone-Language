@@ -540,7 +540,7 @@ return sum;}
 static int Cyc_Lex_do_possible_qualifier(struct Cyc_Lexing_lexbuf*lexbuf){
 struct _fat_ptr b=(struct _fat_ptr)_fat_ptr_plus(_fat_ptr_plus(lexbuf->lex_buffer,sizeof(char),lexbuf->lex_start_pos),sizeof(char),1);
 unsigned len=(unsigned)(lexbuf->lex_curr_pos - (lexbuf->lex_start_pos + 1));
-{char _tmp60=*((const char*)_check_fat_subscript(b,sizeof(char),0));char _stmttmp0=_tmp60;char _tmp61=_stmttmp0;switch((int)_tmp61){case 116:
+{char _tmp60=((const char*)b.curr)[0];char _stmttmp0=_tmp60;char _tmp61=_stmttmp0;switch((int)_tmp61){case 116:
 # 233
  if(len == 6U &&({struct _fat_ptr _tmp175=b;Cyc_strncmp(_tmp175,({const char*_tmp62="tagged";_tag_fat(_tmp62,sizeof(char),7U);}),6U);})== 0)return 340;
 if(len == 4U &&({struct _fat_ptr _tmp176=b;Cyc_strncmp(_tmp176,({const char*_tmp63="thin";_tag_fat(_tmp63,sizeof(char),5U);}),4U);})== 0)return 331;
@@ -801,7 +801,7 @@ union Cyc_Lex_TrieChildren _tmpD4=((struct Cyc_Lex_Trie*)_check_null(t))->childr
 return 0;}else{_tmpD6=((_tmpD5.One).val).f2;{struct Cyc_Lex_Trie*one_trie=_tmpD6;
 t=one_trie;goto _LL3;}}default: _tmpD6=(_tmpD5.Many).val;{struct Cyc_Lex_Trie**arr=_tmpD6;
 # 546
-struct Cyc_Lex_Trie*_tmpD8=*((struct Cyc_Lex_Trie**)({typeof(arr )_tmp19F=arr;_check_known_subscript_notnull(_tmp19F,64U,sizeof(struct Cyc_Lex_Trie*),Cyc_Lex_trie_char((int)*((const char*)_check_fat_subscript(s,sizeof(char),i))));}));struct Cyc_Lex_Trie*next=_tmpD8;
+struct Cyc_Lex_Trie*_tmpD8=*((struct Cyc_Lex_Trie**)({typeof(arr )_tmp19F=arr;_check_known_subscript_notnull(_tmp19F,64U,sizeof(struct Cyc_Lex_Trie*),Cyc_Lex_trie_char((int)((const char*)s.curr)[i]));}));struct Cyc_Lex_Trie*next=_tmpD8;
 if(next == 0)
 return 0;
 t=next;

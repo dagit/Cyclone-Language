@@ -861,7 +861,7 @@ struct _tuple10*_tmpAC=stk;void*_tmpAE;struct _fat_ptr _tmpAD;_tmpAD=_tmpAC->f1;
 int _tmpAF=*indp;int ind=_tmpAF;
 if(ind == -1)
 return 0;{
-const struct Cyc_Dict_T*_tmpB0=*((const struct Cyc_Dict_T**)_check_fat_subscript(stack,sizeof(const struct Cyc_Dict_T*),ind));const struct Cyc_Dict_T*t=_tmpB0;
+const struct Cyc_Dict_T*_tmpB0=((const struct Cyc_Dict_T**)stack.curr)[ind];const struct Cyc_Dict_T*t=_tmpB0;
 *dest=((const struct Cyc_Dict_T*)_check_null(t))->key_val;
 -- ind;
 if((unsigned)t->left)

@@ -750,7 +750,7 @@ unsigned long _tmp91=Cyc_strlen((struct _fat_ptr)s);unsigned long len=_tmp91;
 if(i < 0 ||(unsigned long)i >= len)return 0;{
 # 362
 int _tmp92=0;int suppress=_tmp92;
-char _tmp93=*((const char*)_check_fat_subscript(s,sizeof(char),i));char c=_tmp93;
+char _tmp93=((const char*)s.curr)[i];char c=_tmp93;
 if((int)c == 42){
 suppress=1;
 ++ i;

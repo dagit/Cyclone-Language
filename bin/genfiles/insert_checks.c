@@ -874,7 +874,7 @@ Cyc_InsertChecks_do_exp(nv,e);Cyc_InsertChecks_do_scs(nv,scs);goto _LL0;}default
 Cyc_InsertChecks_do_stmt(nv,s1);Cyc_InsertChecks_do_scs(nv,scs);goto _LL0;}}_LL0:;}
 # 605
 void Cyc_InsertChecks_insert_checks(struct Cyc_List_List*tds,struct Cyc_JumpAnalysis_Jump_Anal_Result*tables,int do_vcgen){
-# 613
+# 615 "insert_checks.cyc"
 struct Cyc_InsertChecks_Env _tmp75=Cyc_InsertChecks_toplevel_env(tables,do_vcgen);struct Cyc_InsertChecks_Env nv=_tmp75;
 for(1;tds != 0;tds=tds->tl){
 Cyc_InsertChecks_do_decl(nv,(struct Cyc_Absyn_Decl*)tds->hd);}}

@@ -630,7 +630,7 @@ struct _fat_ptr Cyc_strncpy(struct _fat_ptr dest,struct _fat_ptr src,unsigned lo
 int i;
 n <= _get_fat_size(dest,sizeof(char))?0:({int(*_tmp9D)(struct _fat_ptr,struct _fat_ptr,unsigned)=({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;});struct _fat_ptr _tmp9C=({const char*_tmp29="n <= numelts(dest)";_tag_fat(_tmp29,sizeof(char),19U);});_tmp9D(_tmp9C,({const char*_tmp2A="string.cyc";_tag_fat(_tmp2A,sizeof(char),11U);}),287U);});
 for(i=0;(unsigned long)i < n;++ i){
-char _tmp2B=*((const char*)_check_fat_subscript(src,sizeof(char),i));char srcChar=_tmp2B;
+char _tmp2B=((const char*)src.curr)[i];char srcChar=_tmp2B;
 if((int)srcChar == 0)break;
 ((char*)dest.curr)[i]=srcChar;}
 # 293

@@ -522,7 +522,7 @@ return({struct Cyc_Core_Opt*_tmpC=_cycalloc(sizeof(*_tmpC));({void*_tmp70=Cyc_Ki
 # 109
 struct Cyc_Absyn_Kind*Cyc_Kinds_id_to_kind(struct _fat_ptr s,unsigned loc){
 if(Cyc_strlen((struct _fat_ptr)s)== 1U || Cyc_strlen((struct _fat_ptr)s)== 2U){
-char _tmpD=*((const char*)_check_fat_subscript(s,sizeof(char),0));char _stmttmp0=_tmpD;char _tmpE=_stmttmp0;switch((int)_tmpE){case 65:
+char _tmpD=((const char*)s.curr)[0];char _stmttmp0=_tmpD;char _tmpE=_stmttmp0;switch((int)_tmpE){case 65:
  return& Cyc_Kinds_ak;case 77:
  return& Cyc_Kinds_mk;case 66:
  return& Cyc_Kinds_bk;case 82:
@@ -530,7 +530,7 @@ char _tmpD=*((const char*)_check_fat_subscript(s,sizeof(char),0));char _stmttmp0
  return& Cyc_Kinds_ek;case 73:
  return& Cyc_Kinds_ik;case 85:
 # 119
-{char _tmpF=*((const char*)_check_fat_subscript(s,sizeof(char),1));char _stmttmp1=_tmpF;char _tmp10=_stmttmp1;switch((int)_tmp10){case 82:
+{char _tmpF=((const char*)s.curr)[1];char _stmttmp1=_tmpF;char _tmp10=_stmttmp1;switch((int)_tmp10){case 82:
  return& Cyc_Kinds_urk;case 65:
  return& Cyc_Kinds_uak;case 77:
  return& Cyc_Kinds_umk;case 66:
@@ -539,7 +539,7 @@ char _tmpD=*((const char*)_check_fat_subscript(s,sizeof(char),0));char _stmttmp0
 # 126
 goto _LL0;case 84:
 # 128
-{char _tmp11=*((const char*)_check_fat_subscript(s,sizeof(char),1));char _stmttmp2=_tmp11;char _tmp12=_stmttmp2;switch((int)_tmp12){case 82:
+{char _tmp11=((const char*)s.curr)[1];char _stmttmp2=_tmp11;char _tmp12=_stmttmp2;switch((int)_tmp12){case 82:
  return& Cyc_Kinds_trk;case 65:
  return& Cyc_Kinds_tak;case 77:
  return& Cyc_Kinds_tmk;case 66:

@@ -605,10 +605,12 @@ static void do_stmt(env_t nv, stmt_t s) {
 void insert_checks(List::list_t<decl_t,`H> tds,
 		   JumpAnalysis::jump_anal_res_t tables, bool do_vcgen) {
 #ifdef PERFORMANCE_DEBUG
-  //  relations_eliminated_check = 0;
-  //  vcgen_eliminated_check = 0;
-  //  simple_eliminated_check = 0;
-  //  both_eliminated_check = 0;
+  total_bounds_checks      = 0;     // just statistics
+  bounds_checks_eliminated = 0;     // just statistics
+  simple_eliminated_check = 0;
+  relations_eliminated_check = 0;
+  both_eliminated_check = 0;
+  vcgen_eliminated_check = 0;
 #endif
   let nv = toplevel_env(tables, do_vcgen);
   for(; tds != NULL; tds = tds->tl)

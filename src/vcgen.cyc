@@ -699,16 +699,12 @@ static assn_t vcgen_local_decl(env_t env, decl_t d, assn_t a) {
     for (let vds = vds->v; vds != NULL; vds = vds->tl) {
       let $(vdopt,eopt) = *vds->hd;
       if (vdopt != NULL) {
-        // FIX: the expressions associated with the patterns are not right.
-        a = add_vardecl(env,*vdopt,a);
-        /*
         if (eopt == NULL) a = add_vardecl(env,*vdopt,a);
         else {
-          let $(t,a1) = vcgen_rexp(env,e,a);
+          let $(t,a1) = vcgen_rexp(env,eopt,a);
           let tv = new Var(*vdopt);
           a = do_assign(env,a1,tv,t);
         }
-        */
       }
     }
     return a;

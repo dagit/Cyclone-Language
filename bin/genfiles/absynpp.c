@@ -670,7 +670,7 @@ if(n > 0 &&(int)*((const char*)_check_fat_subscript(s,sizeof(char),n))== 0)-- n;
 # 307
 int len=0;
 {int i=0;for(0;i <= n;++ i){
-char _tmp1F=*((const char*)_check_fat_subscript(s,sizeof(char),i));char _stmttmp0=_tmp1F;char _tmp20=_stmttmp0;char _tmp21;switch((int)_tmp20){case 7:
+char _tmp1F=((const char*)s.curr)[i];char _stmttmp0=_tmp1F;char _tmp20=_stmttmp0;char _tmp21;switch((int)_tmp20){case 7:
  goto _LL4;case 8: _LL4:
  goto _LL6;case 12: _LL6:
  goto _LL8;case 10: _LL8:
@@ -688,7 +688,7 @@ goto _LL0;}}_LL0:;}}{
 struct _fat_ptr t=Cyc_Core_new_string((unsigned)(len + 1));
 int j=0;
 {int i=0;for(0;i <= n;++ i){
-char _tmp22=*((const char*)_check_fat_subscript(s,sizeof(char),i));char _stmttmp1=_tmp22;char _tmp23=_stmttmp1;char _tmp24;switch((int)_tmp23){case 7:
+char _tmp22=((const char*)s.curr)[i];char _stmttmp1=_tmp22;char _tmp23=_stmttmp1;char _tmp24;switch((int)_tmp23){case 7:
 ({struct _fat_ptr _tmp25=_fat_ptr_plus(t,sizeof(char),j ++);char _tmp26=*((char*)_check_fat_subscript(_tmp25,sizeof(char),0U));char _tmp27='\\';if(_get_fat_size(_tmp25,sizeof(char))== 1U &&(_tmp26 == 0 && _tmp27 != 0))_throw_arraybounds();*((char*)_tmp25.curr)=_tmp27;});({struct _fat_ptr _tmp28=_fat_ptr_plus(t,sizeof(char),j ++);char _tmp29=*((char*)_check_fat_subscript(_tmp28,sizeof(char),0U));char _tmp2A='a';if(_get_fat_size(_tmp28,sizeof(char))== 1U &&(_tmp29 == 0 && _tmp2A != 0))_throw_arraybounds();*((char*)_tmp28.curr)=_tmp2A;});goto _LL15;case 8:
 ({struct _fat_ptr _tmp2B=_fat_ptr_plus(t,sizeof(char),j ++);char _tmp2C=*((char*)_check_fat_subscript(_tmp2B,sizeof(char),0U));char _tmp2D='\\';if(_get_fat_size(_tmp2B,sizeof(char))== 1U &&(_tmp2C == 0 && _tmp2D != 0))_throw_arraybounds();*((char*)_tmp2B.curr)=_tmp2D;});({struct _fat_ptr _tmp2E=_fat_ptr_plus(t,sizeof(char),j ++);char _tmp2F=*((char*)_check_fat_subscript(_tmp2E,sizeof(char),0U));char _tmp30='b';if(_get_fat_size(_tmp2E,sizeof(char))== 1U &&(_tmp2F == 0 && _tmp30 != 0))_throw_arraybounds();*((char*)_tmp2E.curr)=_tmp30;});goto _LL15;case 12:
 ({struct _fat_ptr _tmp31=_fat_ptr_plus(t,sizeof(char),j ++);char _tmp32=*((char*)_check_fat_subscript(_tmp31,sizeof(char),0U));char _tmp33='\\';if(_get_fat_size(_tmp31,sizeof(char))== 1U &&(_tmp32 == 0 && _tmp33 != 0))_throw_arraybounds();*((char*)_tmp31.curr)=_tmp33;});({struct _fat_ptr _tmp34=_fat_ptr_plus(t,sizeof(char),j ++);char _tmp35=*((char*)_check_fat_subscript(_tmp34,sizeof(char),0U));char _tmp36='f';if(_get_fat_size(_tmp34,sizeof(char))== 1U &&(_tmp35 == 0 && _tmp36 != 0))_throw_arraybounds();*((char*)_tmp34.curr)=_tmp36;});goto _LL15;case 10:
