@@ -54,56 +54,30 @@ struct _tagged_string xprintf(char *fmt, ...) {
 
 // Exceptions
 
-static struct _handler_cons *_handler_stack = NULL;
+// Need one of these per thread (we don't have threads)
+static struct _handler_cons *_current_handler = NULL;
 
 // create a new handler, put it on the stack, and return it so its
 // jmp_buf can be filled in by the caller
-struct _handler_cons *_push_handler() {
-  struct _handler_cons *h =
-    (struct _handler_cons *)GC_malloc(sizeof(struct _handler_cons));
-  if (h == NULL) {
-    fprintf(stderr,"internal error: out of memory in _push_handler\n");
-    exit(1);
-  }
-  h->tail = _handler_stack;
-  _handler_stack = h;
-  return h;
+void _push_handler(struct _handler_cons * new_handler) {
+  new_handler->tail = _current_handler;
+  _current_handler  = new_handler;
 }
 
-// Pop n handlers off the stack, then one more, returning it
+// set _current_handler to it's n+1'th tail
 // Invariant: result is non-null
-struct _handler_cons *_npop_handler(int n) {
-  struct _handler_cons *result;
+void _npop_handler(int n) {
   if (n<0) {
     fprintf(stderr,
             "internal error: _npop_handler called with negative argument\n");
     exit(1);
   }
-  for (;n>=0;n--) {
-    if (_handler_stack == NULL) {
+  for(; n>=0; n--) {
+    if(_current_handler == NULL) {
       fprintf(stderr,"internal error: empty handler stack\n");
       exit(1);
-    }
-    result = _handler_stack;
-    _handler_stack = (struct _handler_cons*)_handler_stack->tail;
-  }
-  return result;
-}
-
-static void _init_handler_stack() {
-  exn e;
-  struct _handler_cons *h =
-    (struct _handler_cons *)GC_malloc(sizeof(struct _handler_cons));
-  if (h == NULL) {
-    fprintf(stderr,"internal error: out of memory in _init_handler_stack\n");
-    exit(1);
-  }
-  h->tail = NULL;
-  _handler_stack = h;
-  e = (exn)setjmp(h->handler);
-  if (e) {
-    fprintf(stderr,"Uncaught exception %s\n",e->tag);
-    exit(1);
+    } 
+    _current_handler = _current_handler->tail;
   }
 }
 
@@ -111,40 +85,13 @@ void _pop_handler() {
   _npop_handler(0);
 }
 void throw(exn e) {
-  struct _handler_cons *h;
-  // fprintf(stderr,"throwing exception %s\n",e->tag); fflush(stderr);
-  h = _npop_handler(0);
-  longjmp(h->handler,(int)e);
+  struct _handler_cons * my_handler = _current_handler;
+  _npop_handler(0);
+  longjmp(my_handler->handler,(int)e);
 }
 void _throw(exn e) {
   throw(e);
 }
-
-/*
-
-PROBLEM: the strategy below does not work.  _trycatch is supposed to
-return NULL the first time it returns, and, if it returns a second
-time, it should return a non-NULL exn that was thrown.  In fact, this
-is what happens.  HOWEVER, because of the way setjmp is implemented,
-the second non-NULL return value does not make it into e.  The only
-way I've found to get around this is to essentially inline the
-_trycatch, but, this means exposing setjmp everywhere, so it's not
-great.
-
-exn _trycatch() {
-  struct _handler_cons *h = _push_handler();
-  return (exn)setjmp(h->handler);
-}
-
-// Now try works as follows:
-exn e = _trycatch();
-if (!e) {
-  // try body
-  _pop_handler();
-} else {
-  // handlers -- switch on e
-} */
-
 
 ////////////////////////////////////////////////////////////////
 // The rest of the code is stuff declared in core.h or otherwise
@@ -313,7 +260,13 @@ extern int Cyc_main(void);
 
 int main(int argc, char **argv)
 {
-  _init_handler_stack();
+  struct _handler_cons top_handler;
+  int status = setjmp(top_handler.handler);
+  _push_handler(&top_handler);
+  if(status) {
+    fprintf(stderr,"Uncaught exception %s\n",((exn)status)->tag);
+    return 1;
+  }
   init_stdlib_io();
   cyc_argc = argc;
   cyc_argv = argv;

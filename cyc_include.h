@@ -25,8 +25,8 @@ struct _handler_cons {
   jmp_buf handler;
   struct _handler_cons *tail;
 };
-extern struct _handler_cons *_push_handler();
-extern struct _handler_cons *_npop_handler(int);
+extern void _push_handler(struct _handler_cons *);
+extern void _npop_handler(int);
 extern void _pop_handler();
 extern void _throw(exn e);
 

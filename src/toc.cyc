@@ -2324,35 +2324,35 @@ static void stmt_to_c(env nv, stmt s) {
       // NOTE: Because explicit fallthru is not allowed in the last case,
       //       appending a new last case can't change the meaning of any
       //       control flow.
-      // BROKEN.  Sometimes e does not get the non-null second return value
-      // of _trycatch.  _trycatch really does return non-null, but e doesn't
-      // see it.  It works sometimes, but not always...
-      //
-      // exn e = _trycatch();
+      // struct handler_cons h;
+      // _push_handler(&h);
+      // exn e = (exn)setjmp(h.handler);
       // if (!e) {
       //   body
       //   _pop_handler();
       // } else switch (e) scs
       //
       // [Auxillary functions are defined in cyc_runtime.c]
-      qvar e = temp_var();
-      _ e_exp = var_exp(e,DL);
+      qvar h_var = temp_var();
+      qvar e_var = temp_var();
+      exp  h_exp = var_exp(h_var,DL);
+      exp  e_exp = var_exp(e_var,DL);
+      typ  h_typ = strct(_handler_cons_sp);
+      typ  e_typ = typ_to_c(exn_typ);
+      exp  pushhandler_exp = var_exp(&$(null, _push_handler_sp),DL);
+      exp  setjmp_exp      = var_exp(&$(null, setjmp_sp),       DL);
+      exp  pophandler_exp  = var_exp(&$(null, _pop_handler_sp), DL);
       // e_exp needs a typ because it'll go through exp_to_c;
       // as well, it must be in varmap
-      _ e_typ = typ_to_c(exn_typ);
       e_exp->topt = &Opt(e_typ);
-      nv = add_varmap(nv,e,e_exp);
-      _ h     = temp_var();
-      _ h_exp = var_exp(h,DL);
-      _ h_typ = cstar_typ(strct(_handler_cons_sp),empty_tqual());
-      _ setjmp_exp      = var_exp(&$(null,setjmp_sp),DL);
-      _ pushhandler_exp = var_exp(&$(null,_push_handler_sp),DL);
-      _ pophandler_exp  = var_exp(&$(null,_pop_handler_sp),DL);
-      //    let trycatch_exp = var_exp(&$(null,(string)"_trycatch"),DL);
+      nv = add_varmap(nv,e_var,e_exp);
+
+      // translate the body
       stmt_to_c(try_env(nv),body);
       _ tryandpop_stmt = seq_stmt(body,
 				  exp_stmt(fncall_exp(pophandler_exp, null,
 						      DL), DL),DL);
+
       // add a default case which re-throws the exception
       _ x    = temp_var();
       _ xexp = var_exp(x,DL);
@@ -2369,19 +2369,24 @@ static void stmt_to_c(env nv, stmt s) {
       _ handler_stmt = switch_stmt(e_exp,
 				   List::append(scs,
 						&cons(default_case,null)),DL);
+      // translate the switches
       stmt_to_c(nv,handler_stmt);
-      _ setjmp_call = // (exn)setjmp(h->handler)
+
+      // wrap with the conditional, declarations, and setjmp
+      _ setjmp_call = // (exn)setjmp(h.handler)
 	cast_exp(e_typ,
 		 fncall_exp(setjmp_exp,
-			    &cons(structarrow_exp(h_exp,handler_sp,DL), null),
+			    &cons(structmember_exp(h_exp,handler_sp,DL), null),
 			    DL),DL);
       s->r =
-	declare_stmt(h,h_typ,
-		     fncall_exp(pushhandler_exp, null, DL),
-		     declare_stmt(e,e_typ,setjmp_call,
-				  ifthenelse_stmt(prim1_exp(Not, e_exp,DL),
-						  tryandpop_stmt,
-						  handler_stmt, DL),DL),DL)->r;
+	declare_stmt(h_var,h_typ,
+		     null,
+	 seq_stmt(exp_stmt(fncall_exp(pushhandler_exp, 
+				      &cons(address_exp(h_exp,DL),null),DL),DL),
+		  declare_stmt(e_var,e_typ,setjmp_call,
+			       ifthenelse_stmt(prim1_exp(Not, e_exp,DL),
+					       tryandpop_stmt,
+					       handler_stmt, DL),DL),DL),DL)->r;
       return;
     }
   }
