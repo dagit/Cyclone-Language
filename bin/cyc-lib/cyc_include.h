@@ -656,21 +656,29 @@ static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
 }
 
 #if defined(CYC_REGION_PROFILE) 
-extern void* _profile_GC_malloc(int,char *file,int lineno);
-extern void* _profile_GC_malloc_atomic(int,char *file,int lineno);
+extern void* _profile_GC_malloc(int,const char *file,const char *func,
+                                int lineno);
+extern void* _profile_GC_malloc_atomic(int,const char *file,
+                                       const char *func,int lineno);
 extern void* _profile_region_malloc(struct _RegionHandle *, unsigned,
-                                     char *file,int lineno);
+                                    const char *file,
+                                    const char *func,
+                                    int lineno);
 extern struct _RegionHandle _profile_new_region(const char *rgn_name,
-						char *file,int lineno);
+						const char *file,
+						const char *func,
+                                                int lineno);
 extern void _profile_free_region(struct _RegionHandle *,
-				 char *file,int lineno);
+				 const char *file,
+                                 const char *func,
+                                 int lineno);
 #  if !defined(RUNTIME_CYC)
-#define _new_region(n) _profile_new_region(n,__FILE__ ":" __FUNCTION__,__LINE__)
-#define _free_region(r) _profile_free_region(r,__FILE__ ":" __FUNCTION__,__LINE__)
-#define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__ ":" __FUNCTION__,__LINE__)
+#define _new_region(n) _profile_new_region(n,__FILE__,__FUNCTION__,__LINE__)
+#define _free_region(r) _profile_free_region(r,__FILE__,__FUNCTION__,__LINE__)
+#define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__,__FUNCTION__,__LINE__)
 #  endif
-#define _cycalloc(n) _profile_GC_malloc(n,__FILE__ ":" __FUNCTION__,__LINE__)
-#define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
+#define _cycalloc(n) _profile_GC_malloc(n,__FILE__,__FUNCTION__,__LINE__)
+#define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
 
