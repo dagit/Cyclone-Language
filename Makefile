@@ -143,7 +143,7 @@ update:
 	@cmp -s $(LIBDIR)/nogc.c $(ARCHDIR)/lib/nogc.c || (echo UPDATING $(LIBDIR)/nogc.c; cp $(LIBDIR)/nogc.c $(ARCHDIR)/lib/nogc.c)
 	@cmp -s $(LIBDIR)/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME) || (echo UPDATING $(LIBDIR)/$(C_RUNTIME); cp $(LIBDIR)/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME))
 	@cmp -s $(LIBDIR)/precore_c.h $(ARCHDIR)/lib/precore_c.h || (echo UPDATING $(LIBDIR)/precore_c.h; cp $(LIBDIR)/precore_c.h $(ARCHDIR)/lib/precore_c.h)
-ifeq ($(TARGET),$(ARCH))
+ifndef TARGET
 	@for i in $(CYCLONE_H); do (cmp -s lib/$$i include/$$i || (echo UPDATING lib/$$i; cp lib/$$i include/$$i)) done
 	@(cd lib; for i in arch/*.h; do (cmp -s $$i ../include/$$i || (echo UPDATING lib/$$i; cp $$i ../include/$$i)) done)
 	@cmp -s lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h || (echo UPDATING cyc-lib/include/cyc_include.h; cp lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h)
