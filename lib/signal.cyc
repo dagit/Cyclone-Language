@@ -26,7 +26,7 @@ namespace Csignal {
   }
 }
 
-namespace std;
+namespace Std;
 
 void _SIG_DFL(int n;{}) {} // equate to 0
 void _SIG_IGN(int n;{}) {} // equate to 1

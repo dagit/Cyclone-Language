@@ -27,7 +27,7 @@
 #include "absyn.h"
 
 namespace Absynpp {
-using std;
+using Std;
 using Absyn;
 using List;
 using PP;

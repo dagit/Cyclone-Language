@@ -25,7 +25,7 @@
 #include <list.h>
 #include <lexing.h>
 using Core {
-using std {
+using Std {
 using Absyn {
 using List {
 using Lexing {

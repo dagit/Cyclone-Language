@@ -29,9 +29,10 @@ $(OUT_PREFIX)%.o : %.cyc
 	$(CYCC) $(CYC_FLAGS) -c -o $@ $<
 
 clean_prefix:
-	rm -f $(addprefix $(OUT_PREFIX), freq.o strings.o markov.o grep.o  *.exe)
+	$(RM) $(addprefix $(OUT_PREFIX), freq.o strings.o markov.o grep.o  *.exe)
 
 clean:
-	rm -f *freq.o *freq.c *strings.o *strings.c *markov.o *markov.c  *grep.o *grep.c 
-	rm -f *~ *.exe *.output *.stackdump
-	rm -f freq array array2 grep strings
+	$(RM) *freq.o *freq.c *strings.o *strings.c *markov.o *markov.c  *grep.o *grep.c 
+	$(RM) *~ *.exe *.output *.stackdump
+	$(RM) freq strings grep markov
+	$(RM) freq array array2 grep strings

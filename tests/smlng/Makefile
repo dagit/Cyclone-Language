@@ -66,6 +66,7 @@ buffer.cyc: buffer.h
 parser.cyc: parser.h buffer.h smlng.h
 
 clean:
-	rm -f smlng.o tag_elim.o timer.o buffer2.o buffer.o parser.o generate.o validate.o decorate.o flat.o dynamic.o
-	rm -f smlng.c tag_elim.c timer.c buffer2.c buffer.c parser.c generate.c validate.c decorate.c flat.c dynamic.c
-	rm -f *~ *.exe *.output *.stackdump
+	$(RM) smlng.o tag_elim.o timer.o buffer2.o buffer.o parser.o generate.o validate.o decorate.o flat.o dynamic.o
+	$(RM) smlng.c tag_elim.c timer.c buffer2.c buffer.c parser.c generate.c validate.c decorate.c flat.c dynamic.c
+	$(RM) *~ *.exe *.output *.stackdump
+	$(RM) smlng generate validate decorate stack

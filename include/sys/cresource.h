@@ -23,7 +23,7 @@
 #ifndef _SYS_RESOURCE_H
 #define _SYS_RESOURCE_H
 
-namespace std {
+namespace Std {
 
 #define RLIMIT_CPU 0
 #define RLIMIT_FSIZE 1

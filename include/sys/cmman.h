@@ -19,7 +19,7 @@
 #ifndef _SYS_MMAN_H
 #define _SYS_MMAN_H
 
-namespace std {
+namespace Std {
 
   // In C, MAP_FAILED is (void*)-1, but I have no idea why.  The user
   // can never request a map at (void*)0, since that is defined to

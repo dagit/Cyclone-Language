@@ -1,13 +1,13 @@
- struct Cyc_std_option{ struct _tagged_arr name; int has_arg; int* flag; int val;
-} ; extern int Cyc_std_getopt_long( int __argc, struct _tagged_arr __argv,
+ struct Cyc_Std_option{ struct _tagged_arr name; int has_arg; int* flag; int val;
+} ; extern int Cyc_Std_getopt_long( int __argc, struct _tagged_arr __argv,
 struct _tagged_arr __shortopts, struct _tagged_arr __longopts, int* __longind);
-extern int Cyc_std_getopt_long_only( int __argc, struct _tagged_arr __argv,
+extern int Cyc_Std_getopt_long_only( int __argc, struct _tagged_arr __argv,
 struct _tagged_arr __shortopts, struct _tagged_arr __longopts, int* __longind);
-extern int Cyc_std__getopt_internal( int __argc, struct _tagged_arr __argv,
+extern int Cyc_Std__getopt_internal( int __argc, struct _tagged_arr __argv,
 struct _tagged_arr __shortopts, struct _tagged_arr __longopts, int* __longind,
-int __long_only); int Cyc_std_getopt_long( int argc, struct _tagged_arr argv,
+int __long_only); int Cyc_Std_getopt_long( int argc, struct _tagged_arr argv,
 struct _tagged_arr options, struct _tagged_arr long_options, int* opt_index){
-return Cyc_std__getopt_internal( argc, argv, options, long_options, opt_index, 0);}
-int Cyc_std_getopt_long_only( int argc, struct _tagged_arr argv, struct
+return Cyc_Std__getopt_internal( argc, argv, options, long_options, opt_index, 0);}
+int Cyc_Std_getopt_long_only( int argc, struct _tagged_arr argv, struct
 _tagged_arr options, struct _tagged_arr long_options, int* opt_index){ return
-Cyc_std__getopt_internal( argc, argv, options, long_options, opt_index, 1);}
+Cyc_Std__getopt_internal( argc, argv, options, long_options, opt_index, 1);}

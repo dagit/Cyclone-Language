@@ -21,7 +21,7 @@
    Free Software Foundation, Inc. */
 
 #include <cgetopt.h>
-namespace std {
+namespace Std {
 int
 getopt_long (int argc, char ?`H?argv, const char ?options,
              const struct option ?long_options, int *opt_index)

@@ -29,7 +29,7 @@
 
 namespace Absyndump {
 extern void set_params(struct Absynpp::Params @ `r fs);
-extern void dumpdecllist2file(List::list_t<Absyn::decl_t> tdl, std::FILE @f);
+extern void dumpdecllist2file(List::list_t<Absyn::decl_t> tdl, Std::FILE @f);
 }
 
 #endif

@@ -29,7 +29,7 @@
 /* Get size_t from <stddef.h> */
 #include <cstddef.h>
 
-namespace std {
+namespace Std {
 extern "C" {
 
 int system(Cstring);

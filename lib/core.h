@@ -41,7 +41,7 @@ extern `a identity(`a);
 extern int intcmp(int,int);
 extern int charcmp(char,char);
 extern int ptrcmp(`a::A @ `r, `a::A @ `r); 
-extern xtunion exn { extern InvalidArg(string_t) };
+extern xtunion exn { extern Invalid_argument(string_t) };
 extern xtunion exn { extern Failure(string_t) };
 extern xtunion exn { extern Impossible(string_t) };
 extern xtunion exn { extern Not_found };

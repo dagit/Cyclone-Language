@@ -23,7 +23,7 @@
 
 #include <cstddef.h> // get size_t
 
-namespace std {
+namespace Std {
 #if defined (__CYGWIN__) || defined (__CYGWIN32__)
 /* cygwin */
 typedef unsigned long   	clock_t;

@@ -37,7 +37,7 @@
 
 namespace Lexing {
 using Core;
-using std;
+using Std;
 
 extern xtunion exn { extern Error(string_t) };
 

@@ -26,7 +26,7 @@
 #ifndef _STDIO_H_
 #define _STDIO_H_
 #include <core.h>
-namespace std {
+namespace Std {
 using Core;
 
 /* The name __sFILE is derived from Cygwin but we have our own
@@ -217,8 +217,8 @@ extern int sprintf(char ?`r1 s, const char ?`r2 fmt, ...`r3 inject parg_t<`r4>)
 extern char ? aprintf(const char ?`r2 fmt, ...`r3 inject parg_t<`r4>)
   __attribute__((format(printf,1,2)))
   ;
-extern char ?`r1 raprintf(region_t<`r1>, const char ?`r2 fmt, 
-                          ...`r3 inject parg_t<`r4> ap)
+extern char ?`r1 rprintf(region_t<`r1>, const char ?`r2 fmt, 
+                         ...`r3 inject parg_t<`r4> ap)
   __attribute__((format(printf,2,3)))
   ;
 
@@ -232,8 +232,8 @@ extern int vprintf(const char ?`r fmt, parg_t<`r2> ? `r1)
 extern int vsprintf(char ?`r1 s, const char ?`r2 fmt, parg_t<`r4> ? `r3)
   __attribute__((format(printf,2,0)))
   ;
-extern char ?`r1 vraprintf(region_t<`r1> r1, const char ?`r2 fmt, 
-                           parg_t<`r4> ? `r3 ap)
+extern char ?`r1 vrprintf(region_t<`r1> r1, const char ?`r2 fmt, 
+                          parg_t<`r4> ? `r3 ap)
   __attribute__((format(printf,2,0)))
   ;
 

@@ -56,7 +56,7 @@ static void rotate_left(region_t<`r> r, struct noderef<`a,`b,`r> @`r nr) {
     nr->v = rnew(r) node(n2->key, n2->data, n2->left, t);
     break;
   default:
-    throw new InvalidArg("Splay::rotate_left");
+    throw new Invalid_argument("Splay::rotate_left");
   }
 }
 
@@ -69,7 +69,7 @@ static void rotate_right(region_t<`r> r, struct noderef<`a,`b,`r> @`r nr) {
     nr->v = rnew(r) node(n2->key, n2->data, t, n2->right);
     break;
   default:
-    throw new InvalidArg("Splay::rotate_right");
+    throw new Invalid_argument("Splay::rotate_right");
   }
 }
 
@@ -85,7 +85,7 @@ static void rotate_right(region_t<`r> r, struct noderef<`a,`b,`r> @`r nr) {
 //                                       n2->right, n->right))));
 //     break;
 //   default:
-//     throw InvalidArg("Splay::rotate_left");
+//     throw Invalid_argument("Splay::rotate_left");
 //   }
 // }
 //
@@ -100,7 +100,7 @@ static void rotate_right(region_t<`r> r, struct noderef<`a,`b,`r> @`r nr) {
 //                   n2->right);
 //     break;
 //   default:
-//     throw InvalidArg("Splay::rotate_right");
+//     throw Invalid_argument("Splay::rotate_right");
 //   }
 // }
 

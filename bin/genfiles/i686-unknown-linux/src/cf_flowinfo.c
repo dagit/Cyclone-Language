@@ -1,6 +1,6 @@
  extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
 extern int Cyc_Core_intcmp( int, int); extern int Cyc_Core_ptrcmp( void**, void**);
-extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -28,8 +28,8 @@ extern struct Cyc_Dict_Dict* Cyc_Dict_intersect_c( void*(* f)( void*, void*,
 void*), void* env, struct Cyc_Dict_Dict* d1, struct Cyc_Dict_Dict* d2); extern
 int Cyc_Dict_forall_c( int(* f)( void*, void*, void*), void* env, struct Cyc_Dict_Dict*
 d); extern int Cyc_Dict_forall_intersect( int(* f)( void*, void*, void*), struct
-Cyc_Dict_Dict* d1, struct Cyc_Dict_Dict* d2); extern int Cyc_std_strcmp( struct
-_tagged_arr s1, struct _tagged_arr s2); extern int Cyc_std_zstrptrcmp( struct
+Cyc_Dict_Dict* d1, struct Cyc_Dict_Dict* d2); extern int Cyc_Std_strcmp( struct
+_tagged_arr s1, struct _tagged_arr s2); extern int Cyc_Std_zstrptrcmp( struct
 _tagged_arr*, struct _tagged_arr*); struct Cyc_Lineno_Pos{ struct _tagged_arr
 logical_file; struct _tagged_arr line; int line_no; int col; } ; extern
 unsigned char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment; static const
@@ -339,23 +339,23 @@ Cyc_Absyn_Decl{ void* r; struct Cyc_Position_Segment* loc; } ; static const int
 Cyc_Absyn_ArrayElement= 0; struct Cyc_Absyn_ArrayElement_struct{ int tag; struct
 Cyc_Absyn_Exp* f1; } ; static const int Cyc_Absyn_FieldName= 1; struct Cyc_Absyn_FieldName_struct{
 int tag; struct _tagged_arr* f1; } ; extern unsigned char Cyc_Absyn_EmptyAnnot[
-15u]; struct Cyc_std___sFILE; extern unsigned char Cyc_std_FileCloseError[ 19u];
-extern unsigned char Cyc_std_FileOpenError[ 18u]; struct Cyc_std_FileOpenError_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_std_String_pa=
-0; struct Cyc_std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
-const int Cyc_std_Int_pa= 1; struct Cyc_std_Int_pa_struct{ int tag; unsigned int
-f1; } ; static const int Cyc_std_Double_pa= 2; struct Cyc_std_Double_pa_struct{
-int tag; double f1; } ; static const int Cyc_std_ShortPtr_pa= 3; struct Cyc_std_ShortPtr_pa_struct{
-int tag; short* f1; } ; static const int Cyc_std_IntPtr_pa= 4; struct Cyc_std_IntPtr_pa_struct{
-int tag; unsigned int* f1; } ; static const int Cyc_std_ShortPtr_sa= 0; struct
-Cyc_std_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int Cyc_std_UShortPtr_sa=
-1; struct Cyc_std_UShortPtr_sa_struct{ int tag; unsigned short* f1; } ; static
-const int Cyc_std_IntPtr_sa= 2; struct Cyc_std_IntPtr_sa_struct{ int tag; int*
-f1; } ; static const int Cyc_std_UIntPtr_sa= 3; struct Cyc_std_UIntPtr_sa_struct{
-int tag; unsigned int* f1; } ; static const int Cyc_std_StringPtr_sa= 4; struct
-Cyc_std_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static const
-int Cyc_std_DoublePtr_sa= 5; struct Cyc_std_DoublePtr_sa_struct{ int tag; double*
-f1; } ; static const int Cyc_std_FloatPtr_sa= 6; struct Cyc_std_FloatPtr_sa_struct{
+15u]; struct Cyc_Std___sFILE; extern unsigned char Cyc_Std_FileCloseError[ 19u];
+extern unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Std_String_pa=
+0; struct Cyc_Std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_Std_Int_pa= 1; struct Cyc_Std_Int_pa_struct{ int tag; unsigned int
+f1; } ; static const int Cyc_Std_Double_pa= 2; struct Cyc_Std_Double_pa_struct{
+int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa= 3; struct Cyc_Std_ShortPtr_pa_struct{
+int tag; short* f1; } ; static const int Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{
+int tag; unsigned int* f1; } ; static const int Cyc_Std_ShortPtr_sa= 0; struct
+Cyc_Std_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa=
+1; struct Cyc_Std_UShortPtr_sa_struct{ int tag; unsigned short* f1; } ; static
+const int Cyc_Std_IntPtr_sa= 2; struct Cyc_Std_IntPtr_sa_struct{ int tag; int*
+f1; } ; static const int Cyc_Std_UIntPtr_sa= 3; struct Cyc_Std_UIntPtr_sa_struct{
+int tag; unsigned int* f1; } ; static const int Cyc_Std_StringPtr_sa= 4; struct
+Cyc_Std_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static const
+int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double*
+f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
 int tag; float* f1; } ; static const int Cyc_Tcenv_VarRes= 0; struct Cyc_Tcenv_VarRes_struct{
 int tag; void* f1; } ; static const int Cyc_Tcenv_StructRes= 1; struct Cyc_Tcenv_StructRes_struct{
 int tag; struct Cyc_Absyn_Structdecl* f1; } ; static const int Cyc_Tcenv_TunionRes=
@@ -535,13 +535,13 @@ struct Cyc_CfFlowInfo_TuplePI_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_
 _temp157[ 0]=({ struct Cyc_CfFlowInfo_TuplePI_struct _temp158; _temp158.tag= Cyc_CfFlowInfo_TuplePI;
 _temp158.f1= d; _temp158;}); _temp157;});} _LL128: _temp150= _temp141; goto
 _LL130; _LL130: { struct Cyc_Dict_Dict* d=(( struct Cyc_Dict_Dict*(*)( int(*
-comp)( struct _tagged_arr*, struct _tagged_arr*))) Cyc_Dict_empty)( Cyc_std_zstrptrcmp);
+comp)( struct _tagged_arr*, struct _tagged_arr*))) Cyc_Dict_empty)( Cyc_Std_zstrptrcmp);
 for( 0; _temp150 !=  0; _temp150=(( struct Cyc_List_List*) _check_null( _temp150))->tl){
 struct Cyc_Absyn_Structfield _temp161; void* _temp162; struct _tagged_arr*
 _temp164; struct Cyc_Absyn_Structfield* _temp159=( struct Cyc_Absyn_Structfield*)((
 struct Cyc_List_List*) _check_null( _temp150))->hd; _temp161=* _temp159; _LL165:
 _temp164= _temp161.name; goto _LL163; _LL163: _temp162=( void*) _temp161.type;
-goto _LL160; _LL160: if( Cyc_std_strcmp(* _temp164, _tag_arr("", sizeof(
+goto _LL160; _LL160: if( Cyc_Std_strcmp(* _temp164, _tag_arr("", sizeof(
 unsigned char), 1u)) !=  0){ d=(( struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict*
 d, struct _tagged_arr* key, void* data)) Cyc_Dict_insert)( d, _temp164, Cyc_CfFlowInfo_typ_to_unesc_none_pinfo(
 _temp162));}} return( void*)({ struct Cyc_CfFlowInfo_StructPI_struct* _temp166=(

@@ -24,10 +24,10 @@ using Core;
 namespace Cfcntl {
   extern "C" int fcntl(int fd, int cmd);
   extern "C" int fcntl_with_arg(int fd, int cmd, long arg);
-  extern "C" int fcntl_with_lock(int fd, int cmd, struct std::flock *lock);
+  extern "C" int fcntl_with_lock(int fd, int cmd, struct Std::flock *lock);
 }
 
-namespace std;
+namespace Std;
 
 int fcntl(int fd, int cmd, ...`r tunion FcntlArg argv) {
   if (argv.size == 0) return Cfcntl::fcntl(fd, cmd);

@@ -1,3 +1,5 @@
+/* This doesn't work yet. */
+
 /* Cycdoc: produce documentation from commented .h files.
    Copyright (C) 2001 Greg Morrisett, AT&T
    This file is part of the Cyclone compiler.

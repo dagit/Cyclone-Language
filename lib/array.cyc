@@ -74,7 +74,7 @@ void qsort(int less_eq(`a,`a),`a ?arr, int len)
   int i, j, limit_ofs;         /* scan and limit pointers        */
 
   if (base_ofs < 0 || base_ofs + len > arr.size || len < 0)
-    throw new Core::InvalidArg("Array::qsort");
+    throw new Core::Invalid_argument("Array::qsort");
 
   limit_ofs = base_ofs + len;
   sp_ofs = 0;
@@ -147,7 +147,7 @@ void qsort(int less_eq(`a,`a),`a ?arr, int len)
 void msort(int less_eq(`a,`a), `a ?`H arr, int len) {
 
   if (len > arr.size || len < 0)
-    throw new Core::InvalidArg("Array::msort");
+    throw new Core::Invalid_argument("Array::msort");
 
   `a ?from = new {for i < len : arr[0]}; // fill with `a junk
   `a ?to   = arr;
@@ -450,7 +450,7 @@ bool mem(int compare(`a,`a), `a ?`r l, `a x) {
   int n = (n_opt == NULL ? sx - start : *n_opt);
 
   if (start < 0 || n <= 0 || start + (n_opt == NULL ? 0 : n) > sx)
-    throw new Core::InvalidArg("Array::extract");
+    throw new Core::Invalid_argument("Array::extract");
 
   return new {for i < n : x[start+i]};
 }

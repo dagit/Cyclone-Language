@@ -183,6 +183,7 @@ clean_nogc:
 	$(MAKE) clean -C tools/aprof
 	$(MAKE) clean -C src
 	$(MAKE) clean -C lib
+	$(MAKE) clean -C tests
 	@for arch in $(ALL_ARCHS); do\
 	    $(MAKE) clean_prefix -C src OUT_PREFIX=../$$arch/;\
 	    $(MAKE) clean_prefix -C lib OUT_PREFIX=../$$arch/;\

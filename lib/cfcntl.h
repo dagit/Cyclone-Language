@@ -42,7 +42,7 @@
 #define F_GETFL 3
 #define F_SETFL 4
 
-namespace std {
+namespace Std {
 
   struct flock {
     short l_type;

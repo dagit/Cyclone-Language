@@ -26,7 +26,7 @@
 #include <stddef.h> // for size_t
 #include <math.h> //  for pow
 
-namespace std {
+namespace Std {
 using Core;
 using List;
 
@@ -85,8 +85,8 @@ static int cmp(string_t s1, size_t len1,
 int strcmp(string_t s1, string_t s2) {
   if (s1 == s2)
     return 0;
-  size_t len1 = int_strleno(s1,"std::strcmp");
-  size_t len2 = int_strleno(s2,"std::strcmp");
+  size_t len1 = int_strleno(s1,"Std::strcmp");
+  size_t len2 = int_strleno(s2,"Std::strcmp");
   return cmp(s1,len1,s2,len2,case_cmp);
 }
 
@@ -114,8 +114,8 @@ static int ncmp(string_t s1, size_t len1,
 // Like strcmp but compare no more than n characters.
 // If n<0 return 0 (equal).
 int strncmp(string_t s1, string_t s2, size_t n) {
-  size_t len1 = int_strleno(s1,"std::strncmp");
-  size_t len2 = int_strleno(s2,"std::strncmp");
+  size_t len1 = int_strleno(s1,"Std::strncmp");
+  size_t len2 = int_strleno(s2,"Std::strncmp");
   return ncmp(s1,len1,s2,len2,n,case_cmp);
 }
 
@@ -184,14 +184,14 @@ static mstring_t<`r> int_strcato(mstring_t<`r> dest,string_t src,string_t<`H> er
       dest[i+dlen] = '\000';
   }
   else
-    throw new InvalidArg(error);
+    throw new Invalid_argument(error);
   return dest;
 }
 
 // Destructive concatenation: the first argument is modified,
 // and returned
 mstring_t<`r> strcat(mstring_t<`r> dest,string_t src) {
-  return int_strcato(dest,src,"std::strcat");
+  return int_strcato(dest,src,"Std::strcat");
 }
 
 // Allocate a new string and fill it with the concatenation of a and b
@@ -298,7 +298,7 @@ mstring_t<`r> strncpy(mstring_t<`r> dest, string_t src, size_t n) {
   let srcSz = src.size;
   if (n <= 0) return dest;
   if (n > destSz || n > srcSz)
-    throw new InvalidArg("std::strncpy");
+    throw new Invalid_argument("Std::strncpy");
   int i;
   for (i=0; i<n; i++) {
     let srcChar = src[i];
@@ -336,7 +336,7 @@ mstring_t<`r> zstrncpy(mstring_t<`r> dest, string_t src, size_t n) {
   let srcSz  = src.size;
   if (n <= 0) return dest;
   if (n > destSz || n > srcSz)
-    throw new InvalidArg("std::zstrncpy");
+    throw new Invalid_argument("Std::zstrncpy");
   int i;
   for (i=0; i<n; i++) 
     dest[i] = src[i];
@@ -417,7 +417,7 @@ mstring_t realloc_str(mstring_t<`H> str, size_t sz) {
 mstring_t<`r> rsubstring(region_t<`r> r,string_t s, 
                      int start, size_t amt) {
   if (start < 0 || amt < 0 || start + ((int)amt) - 1 > (int)(s.size))
-    throw new InvalidArg("std::substring");
+    throw new Invalid_argument("Std::substring");
   mstring_t ans = rnew_string(r,amt+1);
   for(size_t i=0; i<amt; ++i)
     ans[i] = s[start+i];
@@ -430,16 +430,16 @@ mstring_t substring(string_t s, int start, size_t amt) {
 }
 
 // replace last with second at end of first
-// raise InvalidArg if second is not end of first.
+// raise Invalid_argument if second is not end of first.
 mstring_t<`r> rreplace_suffix (region_t<`r> r,string_t src, string_t curr_suffix, string_t new_suffix) {
   size_t m = src.size;
   size_t n = curr_suffix.size;
-  string_t err = "std::replace_suffix";
+  string_t err = "Std::replace_suffix";
   if (m < n) 
-    throw new InvalidArg(err);
+    throw new Invalid_argument(err);
   for (size_t i = 1; i <= n; ++i)
     if (src[m-i] != curr_suffix[n-i])
-      throw new InvalidArg(err);
+      throw new Invalid_argument(err);
   mstring_t ans = rnew_string(r,m-n+new_suffix.size);
   strncpy(ans,src,m-n);
   strncpy(ans+m-n,new_suffix,new_suffix.size);
@@ -454,7 +454,7 @@ mstring_t replace_suffix (string_t src, string_t curr_suffix, string_t new_suffi
 // Search for any character of accept in s.
 // Return a ? pointer to the first such character, or NULL if none.
 mstring_t<`r> strpbrk(mstring_t<`r> s, string_t accept) {
-  int len = int_strleno(s,"std::strpbrk");
+  int len = int_strleno(s,"Std::strpbrk");
   char c = '\000';
 
   for (; len>0 && (c=*s)!=0; len--,s++) {
@@ -468,7 +468,7 @@ mstring_t<`r> strpbrk(mstring_t<`r> s, string_t accept) {
 // Return a pointer to the first occurrence of c in s, 
 // or NULL if none.
 string_t<`r> strchr(string_t<`r> s, char c) {
-  int len = int_strleno(s,"std::strchr");
+  int len = int_strleno(s,"Std::strchr");
   char c2 = '\000';
 
   for (; len>0 && (c2=*s)!=0; len--,s++) {
@@ -481,7 +481,7 @@ string_t<`r> strchr(string_t<`r> s, char c) {
 // Return a pointer to the last occurrence of c in s,
 // or NULL if none.
 mstring_t<`r> strrchr(mstring_t<`r> s, char c) {
-  int len = int_strleno(s,"std::strrchr");
+  int len = int_strleno(s,"Std::strrchr");
   int i = len - 1;
   s += i;
 
@@ -495,10 +495,10 @@ mstring_t<`r> strrchr(mstring_t<`r> s, char c) {
 // Return a pointer to the beginning of the substring needle within
 // haystack, or NULL if the substring is not found.
 string_t<`r> strstr(string_t<`r> haystack, string_t needle) {
-  if (!haystack || !needle) throw new InvalidArg("std::strstr");
+  if (!haystack || !needle) throw new Invalid_argument("Std::strstr");
   if (*needle == '\0') return haystack;
 
-  int len = int_strleno(needle, "std::strstr");
+  int len = int_strleno(needle, "Std::strstr");
   for (string_t<`r> start = haystack;
        (start = strchr(start, *needle)) != NULL;
        start = strchr(start+1, *needle))
@@ -512,7 +512,7 @@ string_t<`r> strstr(string_t<`r> haystack, string_t needle) {
 // Return the offset to the first such character, or the length
 // of s if none.
 size_t strspn(string_t s, string_t accept) {
-  size_t len = int_strleno(s,"std::strspn");
+  size_t len = int_strleno(s,"Std::strspn");
 
   for (size_t i=0; i<len; i++) {
     int j;
@@ -572,7 +572,7 @@ int to_int(string_t s, int * offset) {
     i++;
   }
   ans = ans*sn;
-  if (!digit_seen) throw new InvalidArg("std::to_int");
+  if (!digit_seen) throw new Invalid_argument("Std::to_int");
   if (offset != NULL) *offset = i;
   return ans;
 }
@@ -612,7 +612,7 @@ double to_double(string_t s, int * offset) {
       i++;
     }
   }
-  if (!digit_seen) throw new InvalidArg("std::to_double");
+  if (!digit_seen) throw new Invalid_argument("Std::to_double");
   // look for exponent
   if (i < s.size && (s[i] == 'e' || s[i] == 'E')) {
     i++;
@@ -630,7 +630,7 @@ double to_double(string_t s, int * offset) {
       exponent = exponent * 10 + ((int)(s[i] - '0'));
       i++;
     }
-    if (!digit_seen) throw new InvalidArg("std::to_double");
+    if (!digit_seen) throw new Invalid_argument("Std::to_double");
     ans = ans * pow(10.0, (double)(exponent*exp_sign));
   }
   if (offset != NULL) *offset = i;
@@ -641,8 +641,8 @@ double to_double(string_t s, int * offset) {
 int strcasecmp(string_t s1, string_t s2) {
   if (s1 == s2)
     return 0;
-  size_t len1 = int_strleno(s1,"std::strcasecmp");
-  size_t len2 = int_strleno(s2,"std::strcasecmp");
+  size_t len1 = int_strleno(s1,"Std::strcasecmp");
+  size_t len2 = int_strleno(s2,"Std::strcasecmp");
   return cmp(s1,len1,s2,len2,case_cmp);
 }
 
@@ -652,8 +652,8 @@ static int nocase_cmp(char c1, char c2) {
 
 // Like strncmp, but case insensitive.
 int strncasecmp(string_t s1, string_t s2, size_t n) {
-  size_t len1 = int_strleno(s1,"std::strncasecmp");
-  size_t len2 = int_strleno(s2,"std::strncasecmp");
+  size_t len1 = int_strleno(s1,"Std::strncasecmp");
+  size_t len2 = int_strleno(s2,"Std::strncasecmp");
   return ncmp(s1,len1,s2,len2,n,nocase_cmp);
 }
 

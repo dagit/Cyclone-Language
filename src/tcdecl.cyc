@@ -83,7 +83,7 @@ static bool check_type(type_t t0, type_t t1) {
 static unsigned int get_uint_const_value(exp_t e) {
   switch(e->r) {
   case &Const_e(&Int_c(_, x)): return (unsigned int) x;
-  default: throw new InvalidArg("Tcdecl::get_uint_const_value");
+  default: throw new Invalid_argument("Tcdecl::get_uint_const_value");
   }
 }
 
@@ -726,7 +726,7 @@ binding_t merge_binding(binding_t b0, binding_t b1, seg_t loc, string_t * `r msg
 					 "variable", qvar2string(d0->name), loc, msg);
     if (!res) return Unresolved_b;
     return b0;
-  default: throw new InvalidArg("Tcdecl::merge_binding");
+  default: throw new Invalid_argument("Tcdecl::merge_binding");
   }
 }
 

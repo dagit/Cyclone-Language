@@ -28,13 +28,13 @@ int length(xarray_t<`a> xarr) {
 
 `a get(xarray_t<`a> xarr, int i) {
   if (i < 0 || i >= xarr->num_elmts)
-    throw new InvalidArg("Xarray::get: bad index");
+    throw new Invalid_argument("Xarray::get: bad index");
   return xarr->elmts[i];
 }
 
 void set(xarray_t<`a> xarr, int i, `a a) {
   if (i < 0 || i >= xarr->num_elmts)
-    throw new InvalidArg("Xarray::set: bad index");
+    throw new Invalid_argument("Xarray::set: bad index");
   xarr->elmts[i] = a;
 }
 
@@ -46,12 +46,12 @@ xarray_t<`a> create_empty() {
  // create an xarray with zero elements, but space for len elements
 xarray_t<`a> create(int len, `a a) {
   if (len < 0)
-    throw new InvalidArg("xarrays must have a non-negative size buffer");
+    throw new Invalid_argument("xarrays must have a non-negative size buffer");
   return new Xarray{.elmts=new {for i < len : a}, .num_elmts=0};
 }
 
 xarray_t<`a> singleton(int len, `a a) {
-  if(len<1) throw new InvalidArg("singleton xarray must have size >=1");
+  if(len<1) throw new Invalid_argument("singleton xarray must have size >=1");
   xarray_t<`a> x = create(len,a);
   x->num_elmts=1;
   return x;

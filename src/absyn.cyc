@@ -210,7 +210,7 @@ type_t exn_typ = &exn_typ_tt;
 static string_t printarg_str = "PrintArg";
 static string_t scanfarg_str = "ScanfArg";
 static string_t cyc_str = "Cyc";
-static string_t std_str = "std";
+static string_t std_str = "Std";
 static struct List<var_t,`H> std_list = {&std_str, NULL};
 static tunion Nmspace.Abs_n std_namespace = Abs_n(&std_list);
 static $(nmspace_t,var_t) tunion_print_arg_qvar_p = 
@@ -290,7 +290,7 @@ static opt_t<type_t> file_t_opt = NULL;
 // If so, we'll need a rgn_t argument.
 static string_t sf_str = "__sFILE";
 static stringptr_t sf = &sf_str;
-static string_t st_str = "std";
+static string_t st_str = "Std";
 static stringptr_t st = &st_str;
 
 type_t file_typ() {

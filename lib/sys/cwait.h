@@ -12,7 +12,7 @@
 #define WIFSTOPPED(status) (((status) & 0xff) == 0x7f)
 #define WSTOPSIG(status) WEXITSTATUS(status)
 
-namespace std {
+namespace Std {
   extern "C" pid_t wait(int *`r status);
   extern "C" pid_t waitpid(pid_t pid, int *`r status, int options);
 }

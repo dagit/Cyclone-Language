@@ -18,7 +18,7 @@
 
 #ifndef  _MATH_H_
 #define  _MATH_H_
-namespace std {
+namespace Std {
 extern "C" {
 
 double acos(double);

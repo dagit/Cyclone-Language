@@ -24,11 +24,11 @@
 #define assert(test) (0)
 #else
 #include <core.h>
-namespace std {
+namespace Std {
 extern `a
 __assert_fail (string_t assertion, string_t file, unsigned int line);
 }
 #define __STRING(x) #x
 #define assert(expr) ((expr) ? 0 : \
-  (std::__assert_fail(__STRING(expr), __FILE__, __LINE__), 0))
+  (Std::__assert_fail(__STRING(expr), __FILE__, __LINE__), 0))
 #endif

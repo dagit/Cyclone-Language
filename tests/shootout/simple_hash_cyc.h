@@ -6,7 +6,7 @@
 
 #include <cstdio.h>
 #include <cstring.h>
-using std {
+using Std {
 
 #define ht_num_primes 28
 

@@ -21,7 +21,7 @@
 
 #include <sys/ctypes.h> // for time_t
 
-namespace std {
+namespace Std {
 struct timeval {
   time_t tv_sec;
   long tv_usec;

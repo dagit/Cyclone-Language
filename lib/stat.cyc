@@ -30,7 +30,7 @@ namespace Cstat {
 #define s2c(x) (string_to_Cstring(x))
 }
 
-namespace std;
+namespace Std;
 
 int open(string_t pathname, int flags, ...`r mode_t mode) {
   mode_t my_mode;

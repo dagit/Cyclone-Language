@@ -1,5 +1,5 @@
  extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -29,39 +29,41 @@ extern struct Cyc_Xarray_Xarray* Cyc_Xarray_map_c( void*(* f)( void*, void*),
 void*, struct Cyc_Xarray_Xarray*); extern void Cyc_Xarray_reuse( struct Cyc_Xarray_Xarray*
 xarr); int Cyc_Xarray_length( struct Cyc_Xarray_Xarray* xarr){ return xarr->num_elmts;}
 void* Cyc_Xarray_get( struct Cyc_Xarray_Xarray* xarr, int i){ if( i <  0? 1: i
->=  xarr->num_elmts){( int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
-_temp0=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp0[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp1; _temp1.tag= Cyc_Core_InvalidArg;
+>=  xarr->num_elmts){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
+_temp0=( struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
+_temp0[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp1; _temp1.tag= Cyc_Core_Invalid_argument;
 _temp1.f1= _tag_arr("Xarray::get: bad index", sizeof( unsigned char), 23u);
 _temp1;}); _temp0;}));} return*(( void**) _check_unknown_subscript( xarr->elmts,
 sizeof( void*), i));} void Cyc_Xarray_set( struct Cyc_Xarray_Xarray* xarr, int i,
 void* a){ if( i <  0? 1: i >=  xarr->num_elmts){( int) _throw(( void*)({ struct
-Cyc_Core_InvalidArg_struct* _temp2=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp2[ 0]=({ struct Cyc_Core_InvalidArg_struct
-_temp3; _temp3.tag= Cyc_Core_InvalidArg; _temp3.f1= _tag_arr("Xarray::set: bad index",
-sizeof( unsigned char), 23u); _temp3;}); _temp2;}));}*(( void**)
-_check_unknown_subscript( xarr->elmts, sizeof( void*), i))= a;} struct Cyc_Xarray_Xarray*
-Cyc_Xarray_create_empty(){ struct _tagged_arr x= _tag_arr(({ void** _temp5=(
-void**) GC_malloc( sizeof( void*) *  0); _temp5;}), sizeof( void*), 0u); return({
-struct Cyc_Xarray_Xarray* _temp4=( struct Cyc_Xarray_Xarray*) GC_malloc( sizeof(
-struct Cyc_Xarray_Xarray)); _temp4->elmts= x; _temp4->num_elmts= 0; _temp4;});}
-struct Cyc_Xarray_Xarray* Cyc_Xarray_create( int len, void* a){ if( len <  0){(
-int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp6=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp6[ 0]=({ struct Cyc_Core_InvalidArg_struct
-_temp7; _temp7.tag= Cyc_Core_InvalidArg; _temp7.f1= _tag_arr("xarrays must have a non-negative size buffer",
-sizeof( unsigned char), 45u); _temp7;}); _temp6;}));} return({ struct Cyc_Xarray_Xarray*
+Cyc_Core_Invalid_argument_struct* _temp2=( struct Cyc_Core_Invalid_argument_struct*)
+GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp2[ 0]=({
+struct Cyc_Core_Invalid_argument_struct _temp3; _temp3.tag= Cyc_Core_Invalid_argument;
+_temp3.f1= _tag_arr("Xarray::set: bad index", sizeof( unsigned char), 23u);
+_temp3;}); _temp2;}));}*(( void**) _check_unknown_subscript( xarr->elmts,
+sizeof( void*), i))= a;} struct Cyc_Xarray_Xarray* Cyc_Xarray_create_empty(){
+struct _tagged_arr x= _tag_arr(({ void** _temp5=( void**) GC_malloc( sizeof(
+void*) *  0); _temp5;}), sizeof( void*), 0u); return({ struct Cyc_Xarray_Xarray*
+_temp4=( struct Cyc_Xarray_Xarray*) GC_malloc( sizeof( struct Cyc_Xarray_Xarray));
+_temp4->elmts= x; _temp4->num_elmts= 0; _temp4;});} struct Cyc_Xarray_Xarray*
+Cyc_Xarray_create( int len, void* a){ if( len <  0){( int) _throw(( void*)({
+struct Cyc_Core_Invalid_argument_struct* _temp6=( struct Cyc_Core_Invalid_argument_struct*)
+GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp6[ 0]=({
+struct Cyc_Core_Invalid_argument_struct _temp7; _temp7.tag= Cyc_Core_Invalid_argument;
+_temp7.f1= _tag_arr("xarrays must have a non-negative size buffer", sizeof(
+unsigned char), 45u); _temp7;}); _temp6;}));} return({ struct Cyc_Xarray_Xarray*
 _temp8=( struct Cyc_Xarray_Xarray*) GC_malloc( sizeof( struct Cyc_Xarray_Xarray));
 _temp8->elmts=({ unsigned int _temp9=( unsigned int) len; void** _temp10=( void**)
 GC_malloc( sizeof( void*) *  _temp9); struct _tagged_arr _temp12= _tag_arr(
 _temp10, sizeof( void*),( unsigned int) len);{ unsigned int _temp11= _temp9;
 unsigned int i; for( i= 0; i <  _temp11; i ++){ _temp10[ i]= a;}}; _temp12;});
 _temp8->num_elmts= 0; _temp8;});} struct Cyc_Xarray_Xarray* Cyc_Xarray_singleton(
-int len, void* a){ if( len <  1){( int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
-_temp13=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp13[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp14; _temp14.tag= Cyc_Core_InvalidArg;
-_temp14.f1= _tag_arr("singleton xarray must have size >=1", sizeof(
-unsigned char), 36u); _temp14;}); _temp13;}));}{ struct Cyc_Xarray_Xarray* x=
-Cyc_Xarray_create( len, a); x->num_elmts= 1; return x;}} void Cyc_Xarray_add(
+int len, void* a){ if( len <  1){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
+_temp13=( struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct
+Cyc_Core_Invalid_argument_struct)); _temp13[ 0]=({ struct Cyc_Core_Invalid_argument_struct
+_temp14; _temp14.tag= Cyc_Core_Invalid_argument; _temp14.f1= _tag_arr("singleton xarray must have size >=1",
+sizeof( unsigned char), 36u); _temp14;}); _temp13;}));}{ struct Cyc_Xarray_Xarray*
+x= Cyc_Xarray_create( len, a); x->num_elmts= 1; return x;}} void Cyc_Xarray_add(
 struct Cyc_Xarray_Xarray* xarr, void* a){ if( xarr->num_elmts ==  _get_arr_size(
 xarr->elmts, sizeof( void*))){ if( xarr->num_elmts ==  0){ xarr->elmts= _tag_arr(({
 unsigned int _temp15=( unsigned int) 10; void** _temp16=( void**) GC_malloc(

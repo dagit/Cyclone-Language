@@ -628,12 +628,12 @@ void xarray_test() {
   okfail(Xarray::get(xa,0)=='a');
   okfail(Xarray::get(xa,1)=='b');
   okfail(Xarray::get(xa,2)=='c');
-  try { Xarray::get(xa,3); fail(); } catch { case &Core::InvalidArg(x): ok(); break; }
+  try { Xarray::get(xa,3); fail(); } catch { case &Core::Invalid_argument(x): ok(); break; }
   Xarray::set(xa,1,'B');
   okfail(Xarray::get(xa,1)=='B');
   Xarray::add(xa,'d');
   okfail(Xarray::get(xa,3)=='d');
-  try { Xarray::get(xa,4); fail(); } catch { case &Core::InvalidArg(x): ok(); break; }
+  try { Xarray::get(xa,4); fail(); } catch { case &Core::Invalid_argument(x): ok(); break; }
   test_end();;
 }
 

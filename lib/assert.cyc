@@ -23,7 +23,7 @@
 #include <core.h>
 #include <stdio.h>
 
-namespace std {
+namespace Std {
 
   `a
   __assert_fail (string_t assertion, string_t file, unsigned int line) {

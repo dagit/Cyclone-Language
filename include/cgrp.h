@@ -21,7 +21,7 @@
 
 #include <sys/ctypes.h>
 
-namespace std {
+namespace Std {
   struct group {
     string_t gr_name;
     string_t gr_passwd;

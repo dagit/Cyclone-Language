@@ -30,7 +30,7 @@
 namespace Interface {
   using List;
   using Absyn;
-  using std;
+  using Std;
   using Tcenv;
 
   // abstract type for program interfaces

@@ -10,7 +10,7 @@
 #include "parser.h"
 
 using Core {
-using std {
+using Std {
 using Lexing {
 using Parser {
 namespace Lexer {

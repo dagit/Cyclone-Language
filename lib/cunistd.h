@@ -27,7 +27,7 @@
 #include <sys/ctime.h>  // for struct timeval
 #include <cgetopt.h>    // Since ordinary getopt() belongs in unistd.h
 
-namespace std {
+namespace Std {
 
 /* Values for the WHENCE argument to lseek.  */
 #ifndef	_STDIO_H		/* <stdio.h> has the same definitions.  */

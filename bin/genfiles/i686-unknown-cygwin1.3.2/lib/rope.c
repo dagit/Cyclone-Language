@@ -1,7 +1,7 @@
  extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern struct _tagged_arr Cyc_Core_new_string( int); extern unsigned char Cyc_Core_InvalidArg[
-15u]; struct Cyc_Core_InvalidArg_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+extern struct _tagged_arr Cyc_Core_new_string( int); extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
 15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
 f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
@@ -20,9 +20,9 @@ struct Cyc_Rope_Rope_node* Cyc_Rope_concat( struct Cyc_Rope_Rope_node*, struct
 Cyc_Rope_Rope_node*); extern struct Cyc_Rope_Rope_node* Cyc_Rope_concata( struct
 _tagged_arr); extern struct Cyc_Rope_Rope_node* Cyc_Rope_concatl( struct Cyc_List_List*);
 extern unsigned int Cyc_Rope_length( struct Cyc_Rope_Rope_node*); extern int Cyc_Rope_cmp(
-struct Cyc_Rope_Rope_node*, struct Cyc_Rope_Rope_node*); extern unsigned int Cyc_std_strlen(
-struct _tagged_arr s); extern int Cyc_std_strcmp( struct _tagged_arr s1, struct
-_tagged_arr s2); extern struct _tagged_arr Cyc_std_strncpy( struct _tagged_arr,
+struct Cyc_Rope_Rope_node*, struct Cyc_Rope_Rope_node*); extern unsigned int Cyc_Std_strlen(
+struct _tagged_arr s); extern int Cyc_Std_strcmp( struct _tagged_arr s1, struct
+_tagged_arr s2); extern struct _tagged_arr Cyc_Std_strncpy( struct _tagged_arr,
 struct _tagged_arr, unsigned int); static const int Cyc_Rope_String_rope= 0;
 struct Cyc_Rope_String_rope_struct{ int tag; struct _tagged_arr f1; } ; static
 const int Cyc_Rope_Array_rope= 1; struct Cyc_Rope_Array_rope_struct{ int tag;
@@ -67,7 +67,7 @@ _temp25; _LL19: if(*(( int*) _temp17) ==  Cyc_Rope_String_rope){ _LL24: _temp23=
 struct Cyc_Rope_String_rope_struct*) _temp17)->f1; goto _LL20;} else{ goto _LL21;}
 _LL21: if(*(( int*) _temp17) ==  Cyc_Rope_Array_rope){ _LL26: _temp25=(( struct
 Cyc_Rope_Array_rope_struct*) _temp17)->f1; goto _LL22;} else{ goto _LL18;} _LL20:
-return( unsigned int) Cyc_std_strlen( _temp23); _LL22: { unsigned int total= 0;
+return( unsigned int) Cyc_Std_strlen( _temp23); _LL22: { unsigned int total= 0;
 unsigned int sz= _get_arr_size( _temp25, sizeof( struct Cyc_Rope_Rope_node*));{
 unsigned int i= 0; for( 0; i <  sz; i ++){ total += Cyc_Rope_length(*(( struct
 Cyc_Rope_Rope_node**) _check_unknown_subscript( _temp25, sizeof( struct Cyc_Rope_Rope_node*),(
@@ -78,7 +78,7 @@ _LL29: if(*(( int*) _temp27) ==  Cyc_Rope_String_rope){ _LL34: _temp33=(( struct
 Cyc_Rope_String_rope_struct*) _temp27)->f1; goto _LL30;} else{ goto _LL31;}
 _LL31: if(*(( int*) _temp27) ==  Cyc_Rope_Array_rope){ _LL36: _temp35=(( struct
 Cyc_Rope_Array_rope_struct*) _temp27)->f1; goto _LL32;} else{ goto _LL28;} _LL30: {
-unsigned int _temp37= Cyc_std_strlen( _temp33); Cyc_std_strncpy(
+unsigned int _temp37= Cyc_Std_strlen( _temp33); Cyc_Std_strncpy(
 _tagged_arr_plus( s, sizeof( unsigned char),( int) i), _temp33, _temp37); return
 i +  _temp37;} _LL32: { unsigned int _temp38= _get_arr_size( _temp35, sizeof(
 struct Cyc_Rope_Rope_node*));{ int j= 0; for( 0; j <  _temp38; j ++){ i= Cyc_Rope_flatten_it(
@@ -90,6 +90,6 @@ void*)({ struct Cyc_Rope_String_rope_struct* _temp39=( struct Cyc_Rope_String_ro
 GC_malloc( sizeof( struct Cyc_Rope_String_rope_struct)); _temp39[ 0]=({ struct
 Cyc_Rope_String_rope_struct _temp40; _temp40.tag= Cyc_Rope_String_rope; _temp40.f1=(
 struct _tagged_arr) s; _temp40;}); _temp39;}))); return s;} int Cyc_Rope_cmp(
-struct Cyc_Rope_Rope_node* r1, struct Cyc_Rope_Rope_node* r2){ return Cyc_std_strcmp((
+struct Cyc_Rope_Rope_node* r1, struct Cyc_Rope_Rope_node* r2){ return Cyc_Std_strcmp((
 struct _tagged_arr) Cyc_Rope_to_string( r1),( struct _tagged_arr) Cyc_Rope_to_string(
 r2));}

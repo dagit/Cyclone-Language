@@ -23,7 +23,7 @@
 #include <sys/ctypes.h>
 #include <cstddef.h>
 
-namespace std {
+namespace Std {
 
   // What should this be under Cygwin?
 #define CLOCKS_PER_SEC 1000000l

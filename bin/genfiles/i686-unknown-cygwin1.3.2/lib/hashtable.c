@@ -1,5 +1,5 @@
  extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -23,23 +23,23 @@ t, void* key); extern int Cyc_Hashtable_hash_string( struct _tagged_arr s);
 extern int Cyc_Hashtable_hash_stringptr( struct _tagged_arr* s); extern void Cyc_Hashtable_iter(
 void(* f)( void*, void*), struct Cyc_Hashtable_Table* t); extern void Cyc_Hashtable_print_table_map(
 struct Cyc_Hashtable_Table* t, void(* prn_key)( void*), void(* prn_val)( void*));
-struct Cyc_std___sFILE; extern unsigned char Cyc_std_FileCloseError[ 19u];
-extern unsigned char Cyc_std_FileOpenError[ 18u]; struct Cyc_std_FileOpenError_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_std_String_pa=
-0; struct Cyc_std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
-const int Cyc_std_Int_pa= 1; struct Cyc_std_Int_pa_struct{ int tag; unsigned int
-f1; } ; static const int Cyc_std_Double_pa= 2; struct Cyc_std_Double_pa_struct{
-int tag; double f1; } ; static const int Cyc_std_ShortPtr_pa= 3; struct Cyc_std_ShortPtr_pa_struct{
-int tag; short* f1; } ; static const int Cyc_std_IntPtr_pa= 4; struct Cyc_std_IntPtr_pa_struct{
-int tag; unsigned int* f1; } ; extern int Cyc_std_printf( struct _tagged_arr fmt,
-struct _tagged_arr); static const int Cyc_std_ShortPtr_sa= 0; struct Cyc_std_ShortPtr_sa_struct{
-int tag; short* f1; } ; static const int Cyc_std_UShortPtr_sa= 1; struct Cyc_std_UShortPtr_sa_struct{
-int tag; unsigned short* f1; } ; static const int Cyc_std_IntPtr_sa= 2; struct
-Cyc_std_IntPtr_sa_struct{ int tag; int* f1; } ; static const int Cyc_std_UIntPtr_sa=
-3; struct Cyc_std_UIntPtr_sa_struct{ int tag; unsigned int* f1; } ; static const
-int Cyc_std_StringPtr_sa= 4; struct Cyc_std_StringPtr_sa_struct{ int tag; struct
-_tagged_arr f1; } ; static const int Cyc_std_DoublePtr_sa= 5; struct Cyc_std_DoublePtr_sa_struct{
-int tag; double* f1; } ; static const int Cyc_std_FloatPtr_sa= 6; struct Cyc_std_FloatPtr_sa_struct{
+struct Cyc_Std___sFILE; extern unsigned char Cyc_Std_FileCloseError[ 19u];
+extern unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Std_String_pa=
+0; struct Cyc_Std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_Std_Int_pa= 1; struct Cyc_Std_Int_pa_struct{ int tag; unsigned int
+f1; } ; static const int Cyc_Std_Double_pa= 2; struct Cyc_Std_Double_pa_struct{
+int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa= 3; struct Cyc_Std_ShortPtr_pa_struct{
+int tag; short* f1; } ; static const int Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{
+int tag; unsigned int* f1; } ; extern int Cyc_Std_printf( struct _tagged_arr fmt,
+struct _tagged_arr); static const int Cyc_Std_ShortPtr_sa= 0; struct Cyc_Std_ShortPtr_sa_struct{
+int tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa= 1; struct Cyc_Std_UShortPtr_sa_struct{
+int tag; unsigned short* f1; } ; static const int Cyc_Std_IntPtr_sa= 2; struct
+Cyc_Std_IntPtr_sa_struct{ int tag; int* f1; } ; static const int Cyc_Std_UIntPtr_sa=
+3; struct Cyc_Std_UIntPtr_sa_struct{ int tag; unsigned int* f1; } ; static const
+int Cyc_Std_StringPtr_sa= 4; struct Cyc_Std_StringPtr_sa_struct{ int tag; struct
+_tagged_arr f1; } ; static const int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{
+int tag; double* f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
 int tag; float* f1; } ; struct Cyc_Hashtable_Table{ int(* cmp)( void*, void*);
 int(* hash)( void*); int max_len; struct _tagged_arr tab; } ; struct Cyc_Hashtable_Table*
 Cyc_Hashtable_create( int sz, int(* cmp)( void*, void*), int(* hash)( void*)){
@@ -121,19 +121,19 @@ _check_null( iter))->hd)[ _check_known_subscript_notnull( 1u, 0)]).f2);}}} void
 Cyc_Hashtable_print_table_map( struct Cyc_Hashtable_Table* t, void(* prn_key)(
 void*), void(* prn_val)( void*)){ struct _tagged_arr odata= t->tab; int osize=(
 int) _get_arr_size( odata, sizeof( struct Cyc_List_List*)); int i= 0; for( 0; i
-<  osize; i ++){({ struct Cyc_std_Int_pa_struct _temp14; _temp14.tag= Cyc_std_Int_pa;
-_temp14.f1=( int)(( unsigned int) i);{ void* _temp13[ 1u]={& _temp14}; Cyc_std_printf(
+<  osize; i ++){({ struct Cyc_Std_Int_pa_struct _temp14; _temp14.tag= Cyc_Std_Int_pa;
+_temp14.f1=( int)(( unsigned int) i);{ void* _temp13[ 1u]={& _temp14}; Cyc_Std_printf(
 _tag_arr("%d: ", sizeof( unsigned char), 5u), _tag_arr( _temp13, sizeof( void*),
 1u));}});{ struct Cyc_List_List* iter=*(( struct Cyc_List_List**)
 _check_unknown_subscript( odata, sizeof( struct Cyc_List_List*), i)); for( 0;
 iter !=  0; iter=(( struct Cyc_List_List*) _check_null( iter))->tl){({ void*
-_temp15[ 0u]={}; Cyc_std_printf( _tag_arr("(", sizeof( unsigned char), 2u),
+_temp15[ 0u]={}; Cyc_Std_printf( _tag_arr("(", sizeof( unsigned char), 2u),
 _tag_arr( _temp15, sizeof( void*), 0u));}); prn_key(((( struct _tuple0*)((
 struct Cyc_List_List*) _check_null( iter))->hd)[ _check_known_subscript_notnull(
-1u, 0)]).f1);({ void* _temp16[ 0u]={}; Cyc_std_printf( _tag_arr(",", sizeof(
+1u, 0)]).f1);({ void* _temp16[ 0u]={}; Cyc_Std_printf( _tag_arr(",", sizeof(
 unsigned char), 2u), _tag_arr( _temp16, sizeof( void*), 0u));}); prn_val((((
 struct _tuple0*)(( struct Cyc_List_List*) _check_null( iter))->hd)[
-_check_known_subscript_notnull( 1u, 0)]).f2);({ void* _temp17[ 0u]={}; Cyc_std_printf(
+_check_known_subscript_notnull( 1u, 0)]).f2);({ void* _temp17[ 0u]={}; Cyc_Std_printf(
 _tag_arr(") ", sizeof( unsigned char), 3u), _tag_arr( _temp17, sizeof( void*), 0u));});}}({
-void* _temp18[ 0u]={}; Cyc_std_printf( _tag_arr("\n", sizeof( unsigned char), 2u),
+void* _temp18[ 0u]={}; Cyc_Std_printf( _tag_arr("\n", sizeof( unsigned char), 2u),
 _tag_arr( _temp18, sizeof( void*), 0u));});}}

@@ -238,14 +238,14 @@ Cstring underlying_Cstring(struct _tagged_arr s) {
   return str;
 }
 
-struct Cyc_std___sFILE {
+struct Cyc_Std___sFILE {
   FILE *file; // Mirror any changes in stdio.cyc
-} Cyc_std_stdin_v, Cyc_std_stdout_v, Cyc_std_stderr_v,
-  *Cyc_std_stdin = &Cyc_std_stdin_v,
-  *Cyc_std_stdout = &Cyc_std_stdout_v,
-  *Cyc_std_stderr = &Cyc_std_stderr_v;
+} Cyc_Std_stdin_v, Cyc_Std_stdout_v, Cyc_Std_stderr_v,
+  *Cyc_Std_stdin = &Cyc_Std_stdin_v,
+  *Cyc_Std_stdout = &Cyc_Std_stdout_v,
+  *Cyc_Std_stderr = &Cyc_Std_stderr_v;
 
-FILE *_sfile_to_file(struct Cyc_std___sFILE *sf) {
+FILE *_sfile_to_file(struct Cyc_Std___sFILE *sf) {
   if(!sf) {
     fprintf(stderr,"Attempt to access null file descriptor.\n");
     exit(255);
@@ -254,7 +254,7 @@ FILE *_sfile_to_file(struct Cyc_std___sFILE *sf) {
     throw(Cyc_Null_Exception); // FIX:  should be more descriptive?
   return sf->file;
 }
-FILE *sfile_to_file(struct Cyc_std___sFILE *sf) {
+FILE *sfile_to_file(struct Cyc_Std___sFILE *sf) {
   if(!sf) {
     fprintf(stderr,"Attempt to access null file descriptor.\n");
     exit(255);
@@ -264,7 +264,7 @@ FILE *sfile_to_file(struct Cyc_std___sFILE *sf) {
   return sf->file;
 }
 
-int Cyc_std_file_string_read(struct Cyc_std___sFILE *sf, 
+int Cyc_Std_file_string_read(struct Cyc_Std___sFILE *sf, 
                                struct _tagged_arr dest,
                                int dest_offset, int max_count) {
   unsigned char *new_curr = dest.curr + dest_offset;
@@ -278,7 +278,7 @@ int Cyc_std_file_string_read(struct Cyc_std___sFILE *sf,
   }
   return fread(new_curr, 1, max_count, fd);
 }
-int Cyc_std_file_string_write(struct Cyc_std___sFILE *sf, 
+int Cyc_Std_file_string_write(struct Cyc_Std___sFILE *sf, 
                                 struct _tagged_arr src,
                                 int src_offset, int max_count) {
   size_t sz = src.last_plus_one - src.curr;
@@ -311,7 +311,7 @@ struct sa_xtunion {
 struct sockaddr *sockaddr_to_Csockaddr(struct sa_xtunion *xtunionaddr) {
   return &xtunionaddr->sa;
 }
-extern unsigned char *Cyc_std_sockaddr_in;
+extern unsigned char *Cyc_Std_sockaddr_in;
 
 // We handle Unix domain sockets properly here: the sa field is an
 // argument, since it could be bigger (or smaller) than 16
@@ -324,7 +324,7 @@ struct sa_xtunion *Csockaddr_to_sockaddr(struct sockaddr *addr, int len) {
   }
   memcpy(&result->sa, addr, len);
   switch (addr->sa_family) {
-  case AF_INET: result->tag = Cyc_std_sockaddr_in; break;
+  case AF_INET: result->tag = Cyc_Std_sockaddr_in; break;
   default:
     fprintf(stderr, "internal error: Csockaddr_to_sockaddr with unsupported socket type\n");
     exit(1);
@@ -348,22 +348,22 @@ int fcntl_with_lock(int fd, int cmd, void *lock) {
 ///////////////////////////////////////////////
 // Signals (goes with signal.cyc)
 
-extern void Cyc_std__SIG_DFL(int);
-extern void Cyc_std__SIG_IGN(int);
-extern void Cyc_std__SIG_ERR(int);
+extern void Cyc_Std__SIG_DFL(int);
+extern void Cyc_Std__SIG_IGN(int);
+extern void Cyc_Std__SIG_ERR(int);
 typedef void (*signal_t)(int);
 extern signal_t signal(int, signal_t);
 
 signal_t signal_func(int sig, signal_t p) {
-  if (p == Cyc_std__SIG_DFL) p = ((void(*)(int)) 0);
-  else if (p == Cyc_std__SIG_IGN) p = ((void(*)(int)) 1);
-  else if (p == Cyc_std__SIG_ERR) p = ((void(*)(int))-1);
+  if (p == Cyc_Std__SIG_DFL) p = ((void(*)(int)) 0);
+  else if (p == Cyc_Std__SIG_IGN) p = ((void(*)(int)) 1);
+  else if (p == Cyc_Std__SIG_ERR) p = ((void(*)(int))-1);
 
   p = signal(sig, p);
 
-  if (p == (void(*)(int)) 0) p = Cyc_std__SIG_DFL;
-  else if (p == (void(*)(int)) 1) p = Cyc_std__SIG_IGN;
-  else if (p == (void(*)(int))-1) p = Cyc_std__SIG_ERR;
+  if (p == (void(*)(int)) 0) p = Cyc_Std__SIG_DFL;
+  else if (p == (void(*)(int)) 1) p = Cyc_Std__SIG_IGN;
+  else if (p == (void(*)(int))-1) p = Cyc_Std__SIG_ERR;
   return p;
 }
 
@@ -464,9 +464,9 @@ int main(int argc, char **argv) {
     return 1;
   }
   // set standard file descriptors
-  Cyc_std_stdin->file = stdin;
-  Cyc_std_stdout->file = stdout;
-  Cyc_std_stderr->file = stderr;
+  Cyc_Std_stdin->file = stdin;
+  Cyc_Std_stdout->file = stdout;
+  Cyc_Std_stderr->file = stderr;
   // convert command-line args to Cyclone strings
   {struct _tagged_argv args;
   int i, result;

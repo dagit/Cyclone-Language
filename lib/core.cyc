@@ -21,7 +21,7 @@
 // The rest is all Cyclone
 namespace Core;
 
-xtunion exn { InvalidArg(string_t) };
+xtunion exn { Invalid_argument(string_t) };
 xtunion exn { SysError(int) };
 
 /////////////////////////////Generally Useful Things//////////////

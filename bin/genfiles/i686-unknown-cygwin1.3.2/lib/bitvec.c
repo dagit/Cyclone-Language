@@ -1,5 +1,5 @@
  extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -30,23 +30,23 @@ Cyc_List_List*); extern struct Cyc_List_List* Cyc_Bitvec_to_sorted_list( struct
 _tagged_arr bvec, int sz); extern void Cyc_Bitvec_clear_all( struct _tagged_arr);
 extern void Cyc_Bitvec_set_all( struct _tagged_arr); extern int Cyc_Bitvec_all_set(
 struct _tagged_arr bvec, int sz); extern void Cyc_Bitvec_print_bvec( struct
-_tagged_arr bvec); struct Cyc_std___sFILE; extern unsigned char Cyc_std_FileCloseError[
-19u]; extern unsigned char Cyc_std_FileOpenError[ 18u]; struct Cyc_std_FileOpenError_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_std_String_pa=
-0; struct Cyc_std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
-const int Cyc_std_Int_pa= 1; struct Cyc_std_Int_pa_struct{ int tag; unsigned int
-f1; } ; static const int Cyc_std_Double_pa= 2; struct Cyc_std_Double_pa_struct{
-int tag; double f1; } ; static const int Cyc_std_ShortPtr_pa= 3; struct Cyc_std_ShortPtr_pa_struct{
-int tag; short* f1; } ; static const int Cyc_std_IntPtr_pa= 4; struct Cyc_std_IntPtr_pa_struct{
-int tag; unsigned int* f1; } ; extern int Cyc_std_printf( struct _tagged_arr fmt,
-struct _tagged_arr); static const int Cyc_std_ShortPtr_sa= 0; struct Cyc_std_ShortPtr_sa_struct{
-int tag; short* f1; } ; static const int Cyc_std_UShortPtr_sa= 1; struct Cyc_std_UShortPtr_sa_struct{
-int tag; unsigned short* f1; } ; static const int Cyc_std_IntPtr_sa= 2; struct
-Cyc_std_IntPtr_sa_struct{ int tag; int* f1; } ; static const int Cyc_std_UIntPtr_sa=
-3; struct Cyc_std_UIntPtr_sa_struct{ int tag; unsigned int* f1; } ; static const
-int Cyc_std_StringPtr_sa= 4; struct Cyc_std_StringPtr_sa_struct{ int tag; struct
-_tagged_arr f1; } ; static const int Cyc_std_DoublePtr_sa= 5; struct Cyc_std_DoublePtr_sa_struct{
-int tag; double* f1; } ; static const int Cyc_std_FloatPtr_sa= 6; struct Cyc_std_FloatPtr_sa_struct{
+_tagged_arr bvec); struct Cyc_Std___sFILE; extern unsigned char Cyc_Std_FileCloseError[
+19u]; extern unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Std_String_pa=
+0; struct Cyc_Std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_Std_Int_pa= 1; struct Cyc_Std_Int_pa_struct{ int tag; unsigned int
+f1; } ; static const int Cyc_Std_Double_pa= 2; struct Cyc_Std_Double_pa_struct{
+int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa= 3; struct Cyc_Std_ShortPtr_pa_struct{
+int tag; short* f1; } ; static const int Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{
+int tag; unsigned int* f1; } ; extern int Cyc_Std_printf( struct _tagged_arr fmt,
+struct _tagged_arr); static const int Cyc_Std_ShortPtr_sa= 0; struct Cyc_Std_ShortPtr_sa_struct{
+int tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa= 1; struct Cyc_Std_UShortPtr_sa_struct{
+int tag; unsigned short* f1; } ; static const int Cyc_Std_IntPtr_sa= 2; struct
+Cyc_Std_IntPtr_sa_struct{ int tag; int* f1; } ; static const int Cyc_Std_UIntPtr_sa=
+3; struct Cyc_Std_UIntPtr_sa_struct{ int tag; unsigned int* f1; } ; static const
+int Cyc_Std_StringPtr_sa= 4; struct Cyc_Std_StringPtr_sa_struct{ int tag; struct
+_tagged_arr f1; } ; static const int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{
+int tag; double* f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
 int tag; float* f1; } ; int Cyc_Bitvec_get( struct _tagged_arr bvec, int pos){
 int word= pos >>  5; int offset= pos &  31; return(*(( int*)
 _check_unknown_subscript( bvec, sizeof( int), word)) >>  offset &  1) ==  1;}
@@ -118,9 +118,9 @@ words= sz >>  5;{ int i= 0; for( 0; i <  words; i ++){ if(*(( int*)
 _check_unknown_subscript( bvec, sizeof( int), i)) !=  -1){ return 0;}}}{ int i=
 words *  32; for( 0; i <  sz; i ++){ if( ! Cyc_Bitvec_get( bvec, i)){ return 0;}}}
 return 1;} void Cyc_Bitvec_print_bvec( struct _tagged_arr bvec){{ int i= 0; for(
-0; i <  32 *  _get_arr_size( bvec, sizeof( int)); ++ i){({ struct Cyc_std_Int_pa_struct
-_temp15; _temp15.tag= Cyc_std_Int_pa; _temp15.f1=( int)(( unsigned int)( Cyc_Bitvec_get(
-bvec, i)? 1: 0));{ void* _temp14[ 1u]={& _temp15}; Cyc_std_printf( _tag_arr("%d",
+0; i <  32 *  _get_arr_size( bvec, sizeof( int)); ++ i){({ struct Cyc_Std_Int_pa_struct
+_temp15; _temp15.tag= Cyc_Std_Int_pa; _temp15.f1=( int)(( unsigned int)( Cyc_Bitvec_get(
+bvec, i)? 1: 0));{ void* _temp14[ 1u]={& _temp15}; Cyc_Std_printf( _tag_arr("%d",
 sizeof( unsigned char), 3u), _tag_arr( _temp14, sizeof( void*), 1u));}});}}({
-void* _temp16[ 0u]={}; Cyc_std_printf( _tag_arr("\n", sizeof( unsigned char), 2u),
+void* _temp16[ 0u]={}; Cyc_Std_printf( _tag_arr("\n", sizeof( unsigned char), 2u),
 _tag_arr( _temp16, sizeof( void*), 0u));});}

@@ -18,7 +18,7 @@
 
 #ifndef _CTYPE_H_
 #define _CTYPE_H_
-namespace std {
+namespace Std {
 extern "C" {
 int isalnum(int);
 int isalpha(int);

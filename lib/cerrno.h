@@ -23,18 +23,18 @@
 #ifndef _ERRNO_H_
 #define _ERRNO_H_
 
-namespace std {
+namespace Std {
 extern const char ?sys_err(int);
 extern "C" {
 
 #if defined(__CYGWIN32__) || defined(__CYGWIN__)
 /* cygwin */
 int @ __errno(void);
-#define errno (*std::__errno())
+#define errno (*Std::__errno())
 #else
 /* x86 linux */
 int @ __errno_location(void);
-#define errno (*std::__errno_location())
+#define errno (*Std::__errno_location())
 #endif
 
 #define	EPERM		 1	/* Operation not permitted */

@@ -3,7 +3,7 @@
 
 #include <sys/ctime.h> // for struct timeval
 
-namespace std {
+namespace Std {
 #ifndef FD_SETSIZE
 #define FD_SETSIZE 64
 #endif

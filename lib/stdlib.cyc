@@ -34,7 +34,7 @@ namespace Cstdlib {
 }
 
 using Core;
-namespace std {
+namespace Std {
   double atof(const char ?`r _nptr) {
     return Cstdlib::atof(s2c(_nptr));
   }
@@ -51,11 +51,11 @@ namespace std {
     return Cstdlib::putenv(s2c(s));
   }
   static void check_valid_cstring(const char ?`r s) {
-    if (s == NULL) throw new InvalidArg("strtox NULL pointer");
+    if (s == NULL) throw new Invalid_argument("strtox NULL pointer");
     bool found_zero = false;
     for (int i = s.size - 1; i >= 0; i--)
       if (s[i] == '\0') { found_zero = true; break; }
-    if (!found_zero) throw new InvalidArg("strtox: not a C string");
+    if (!found_zero) throw new Invalid_argument("strtox: not a C string");
   }
 
   double strtod(const char ?`r nptr, const char ?`r *`r2 endptr) {

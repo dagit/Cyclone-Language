@@ -8,7 +8,7 @@ struct _tuple0*); struct _tuple1{ void* f1; void* f2; void* f3; } ; extern void*
 Cyc_Core_third( struct _tuple1*); extern void* Cyc_Core_identity( void*); extern
 int Cyc_Core_intcmp( int, int); extern int Cyc_Core_charcmp( unsigned char,
 unsigned char); extern int Cyc_Core_ptrcmp( void**, void**); extern
-unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -18,8 +18,8 @@ unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); unsigned char Cyc_Core_InvalidArg[
-15u]="\000\000\000\000InvalidArg"; unsigned char Cyc_Core_SysError[ 13u]="\000\000\000\000SysError";
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); unsigned char Cyc_Core_Invalid_argument[
+21u]="\000\000\000\000Invalid_argument"; unsigned char Cyc_Core_SysError[ 13u]="\000\000\000\000SysError";
 struct Cyc_Core_SysError_struct{ unsigned char* tag; int f1; } ; unsigned char
 Cyc_Core_Failure[ 12u]="\000\000\000\000Failure"; unsigned char Cyc_Core_Impossible[
 15u]="\000\000\000\000Impossible"; unsigned char Cyc_Core_Not_found[ 14u]="\000\000\000\000Not_found";

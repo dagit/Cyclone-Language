@@ -69,7 +69,7 @@ int fileno(__sFILE @__stream);
 #define s2c(x) (string_to_Cstring(x))
 }}
 
-namespace std;
+namespace Std;
 
 abstract struct __sFILE {
   Cstdio::__sFILE *file; // Mirror any changes in runtime_cyc.c

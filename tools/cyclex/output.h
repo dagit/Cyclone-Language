@@ -9,7 +9,7 @@
 #include "compact.h"
 
 namespace Output {
-using std;
+using Std;
 
 extern void output_lexdef(string_t sourcename, 
 			  FILE @ infile, 

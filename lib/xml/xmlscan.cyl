@@ -97,7 +97,7 @@ static string_t after(int n,string_t s) {
   try
     return substring(s,n,strlen(s)-n);
   catch {
-    case &Core::InvalidArg(_):
+    case &Core::Invalid_argument(_):
       error("internal lexing error");
       return ""; // Unreachable
   }

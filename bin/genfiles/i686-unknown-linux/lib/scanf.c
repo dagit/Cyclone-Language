@@ -1,5 +1,5 @@
  extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -15,98 +15,99 @@ int); extern int isdigit( int); extern int isgraph( int); extern int islower(
 int); extern int isprint( int); extern int ispunct( int); extern int isspace(
 int); extern int isupper( int); extern int isxdigit( int); extern int toascii(
 int); extern int tolower( int); extern int toupper( int); extern int _tolower(
-int); extern int _toupper( int); extern int system( unsigned char*); struct Cyc_std__Div{
-int quot; int rem; } ; struct Cyc_std__Ldiv{ int quot; int rem; } ; extern int
-abs( int __x); extern int atexit( void(* __func)()); extern struct Cyc_std__Div
-div( int __numer, int __denom); extern struct Cyc_std__Ldiv ldiv( int __numer,
+int); extern int _toupper( int); extern int system( unsigned char*); struct Cyc_Std__Div{
+int quot; int rem; } ; struct Cyc_Std__Ldiv{ int quot; int rem; } ; extern int
+abs( int __x); extern int atexit( void(* __func)()); extern struct Cyc_Std__Div
+div( int __numer, int __denom); extern struct Cyc_Std__Ldiv ldiv( int __numer,
 int __denom); extern int random(); extern void srandom( unsigned int __seed);
 extern int rand(); extern void srand( unsigned int __seed); extern int rand_r(
 unsigned int* __seed); extern int grantpt( int __fd); extern int unlockpt( int
-__fd); extern double Cyc_std_atof( struct _tagged_arr); extern int Cyc_std_strtol(
+__fd); extern double Cyc_Std_atof( struct _tagged_arr); extern int Cyc_Std_strtol(
 struct _tagged_arr n, struct _tagged_arr* end, int base); extern unsigned int
-Cyc_std_strtoul( struct _tagged_arr n, struct _tagged_arr* end, int base);
-struct Cyc_std___sFILE; extern struct Cyc_std___sFILE* Cyc_std_stdin; extern int
-Cyc_std_fgetc( struct Cyc_std___sFILE* __stream); extern int Cyc_std_getc(
-struct Cyc_std___sFILE* __stream); extern int Cyc_std_ungetc( int __c, struct
-Cyc_std___sFILE* __stream); extern unsigned char Cyc_std_FileCloseError[ 19u];
-extern unsigned char Cyc_std_FileOpenError[ 18u]; struct Cyc_std_FileOpenError_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_std_String_pa=
-0; struct Cyc_std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
-const int Cyc_std_Int_pa= 1; struct Cyc_std_Int_pa_struct{ int tag; unsigned int
-f1; } ; static const int Cyc_std_Double_pa= 2; struct Cyc_std_Double_pa_struct{
-int tag; double f1; } ; static const int Cyc_std_ShortPtr_pa= 3; struct Cyc_std_ShortPtr_pa_struct{
-int tag; short* f1; } ; static const int Cyc_std_IntPtr_pa= 4; struct Cyc_std_IntPtr_pa_struct{
-int tag; unsigned int* f1; } ; static const int Cyc_std_ShortPtr_sa= 0; struct
-Cyc_std_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int Cyc_std_UShortPtr_sa=
-1; struct Cyc_std_UShortPtr_sa_struct{ int tag; unsigned short* f1; } ; static
-const int Cyc_std_IntPtr_sa= 2; struct Cyc_std_IntPtr_sa_struct{ int tag; int*
-f1; } ; static const int Cyc_std_UIntPtr_sa= 3; struct Cyc_std_UIntPtr_sa_struct{
-int tag; unsigned int* f1; } ; static const int Cyc_std_StringPtr_sa= 4; struct
-Cyc_std_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static const
-int Cyc_std_DoublePtr_sa= 5; struct Cyc_std_DoublePtr_sa_struct{ int tag; double*
-f1; } ; static const int Cyc_std_FloatPtr_sa= 6; struct Cyc_std_FloatPtr_sa_struct{
-int tag; float* f1; } ; extern int Cyc_std_scanf( struct _tagged_arr fmt, struct
-_tagged_arr); extern int Cyc_std_fscanf( struct Cyc_std___sFILE* stream, struct
-_tagged_arr fmt, struct _tagged_arr); extern int Cyc_std_sscanf( struct
-_tagged_arr src, struct _tagged_arr fmt, struct _tagged_arr); extern int Cyc_std_vfscanf(
-struct Cyc_std___sFILE* stream, struct _tagged_arr fmt, struct _tagged_arr);
-extern int Cyc_std_vsscanf( struct _tagged_arr src, struct _tagged_arr fmt,
-struct _tagged_arr); static struct _tagged_arr Cyc_std___sccl( struct
-_tagged_arr tab, struct _tagged_arr fmt); static short* Cyc_std_va_arg_short_ptr(
+Cyc_Std_strtoul( struct _tagged_arr n, struct _tagged_arr* end, int base);
+struct Cyc_Std___sFILE; extern struct Cyc_Std___sFILE* Cyc_Std_stdin; extern int
+Cyc_Std_fgetc( struct Cyc_Std___sFILE* __stream); extern int Cyc_Std_getc(
+struct Cyc_Std___sFILE* __stream); extern int Cyc_Std_ungetc( int __c, struct
+Cyc_Std___sFILE* __stream); extern unsigned char Cyc_Std_FileCloseError[ 19u];
+extern unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Std_String_pa=
+0; struct Cyc_Std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_Std_Int_pa= 1; struct Cyc_Std_Int_pa_struct{ int tag; unsigned int
+f1; } ; static const int Cyc_Std_Double_pa= 2; struct Cyc_Std_Double_pa_struct{
+int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa= 3; struct Cyc_Std_ShortPtr_pa_struct{
+int tag; short* f1; } ; static const int Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{
+int tag; unsigned int* f1; } ; static const int Cyc_Std_ShortPtr_sa= 0; struct
+Cyc_Std_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa=
+1; struct Cyc_Std_UShortPtr_sa_struct{ int tag; unsigned short* f1; } ; static
+const int Cyc_Std_IntPtr_sa= 2; struct Cyc_Std_IntPtr_sa_struct{ int tag; int*
+f1; } ; static const int Cyc_Std_UIntPtr_sa= 3; struct Cyc_Std_UIntPtr_sa_struct{
+int tag; unsigned int* f1; } ; static const int Cyc_Std_StringPtr_sa= 4; struct
+Cyc_Std_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static const
+int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double*
+f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
+int tag; float* f1; } ; extern int Cyc_Std_scanf( struct _tagged_arr fmt, struct
+_tagged_arr); extern int Cyc_Std_fscanf( struct Cyc_Std___sFILE* stream, struct
+_tagged_arr fmt, struct _tagged_arr); extern int Cyc_Std_sscanf( struct
+_tagged_arr src, struct _tagged_arr fmt, struct _tagged_arr); extern int Cyc_Std_vfscanf(
+struct Cyc_Std___sFILE* stream, struct _tagged_arr fmt, struct _tagged_arr);
+extern int Cyc_Std_vsscanf( struct _tagged_arr src, struct _tagged_arr fmt,
+struct _tagged_arr); static struct _tagged_arr Cyc_Std___sccl( struct
+_tagged_arr tab, struct _tagged_arr fmt); static short* Cyc_Std_va_arg_short_ptr(
 void* a){ void* _temp0= a; short* _temp8; unsigned short* _temp10; _LL2: if(*((
-int*) _temp0) ==  Cyc_std_ShortPtr_sa){ _LL9: _temp8=(( struct Cyc_std_ShortPtr_sa_struct*)
-_temp0)->f1; goto _LL3;} else{ goto _LL4;} _LL4: if(*(( int*) _temp0) ==  Cyc_std_UShortPtr_sa){
-_LL11: _temp10=(( struct Cyc_std_UShortPtr_sa_struct*) _temp0)->f1; goto _LL5;}
+int*) _temp0) ==  Cyc_Std_ShortPtr_sa){ _LL9: _temp8=(( struct Cyc_Std_ShortPtr_sa_struct*)
+_temp0)->f1; goto _LL3;} else{ goto _LL4;} _LL4: if(*(( int*) _temp0) ==  Cyc_Std_UShortPtr_sa){
+_LL11: _temp10=(( struct Cyc_Std_UShortPtr_sa_struct*) _temp0)->f1; goto _LL5;}
 else{ goto _LL6;} _LL6: goto _LL7; _LL3: return _temp8; _LL5: return( short*)
-_temp10; _LL7:( int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
-_temp12=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp12[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp13; _temp13.tag= Cyc_Core_InvalidArg;
-_temp13.f1= _tag_arr("scan expects short pointer", sizeof( unsigned char), 27u);
-_temp13;}); _temp12;})); _LL1:;} static int* Cyc_std_va_arg_int_ptr( void* a){
-void* _temp14= a; int* _temp22; unsigned int* _temp24; _LL16: if(*(( int*)
-_temp14) ==  Cyc_std_IntPtr_sa){ _LL23: _temp22=(( struct Cyc_std_IntPtr_sa_struct*)
+_temp10; _LL7:( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
+_temp12=( struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct
+Cyc_Core_Invalid_argument_struct)); _temp12[ 0]=({ struct Cyc_Core_Invalid_argument_struct
+_temp13; _temp13.tag= Cyc_Core_Invalid_argument; _temp13.f1= _tag_arr("scan expects short pointer",
+sizeof( unsigned char), 27u); _temp13;}); _temp12;})); _LL1:;} static int* Cyc_Std_va_arg_int_ptr(
+void* a){ void* _temp14= a; int* _temp22; unsigned int* _temp24; _LL16: if(*((
+int*) _temp14) ==  Cyc_Std_IntPtr_sa){ _LL23: _temp22=(( struct Cyc_Std_IntPtr_sa_struct*)
 _temp14)->f1; goto _LL17;} else{ goto _LL18;} _LL18: if(*(( int*) _temp14) == 
-Cyc_std_UIntPtr_sa){ _LL25: _temp24=(( struct Cyc_std_UIntPtr_sa_struct*)
+Cyc_Std_UIntPtr_sa){ _LL25: _temp24=(( struct Cyc_Std_UIntPtr_sa_struct*)
 _temp14)->f1; goto _LL19;} else{ goto _LL20;} _LL20: goto _LL21; _LL17: return
-_temp22; _LL19: return( int*) _temp24; _LL21:( int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
-_temp26=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp26[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp27; _temp27.tag= Cyc_Core_InvalidArg;
-_temp27.f1= _tag_arr("scan expects int pointer", sizeof( unsigned char), 25u);
-_temp27;}); _temp26;})); _LL15:;} static struct _tagged_arr Cyc_std_va_arg_string_ptr(
-void* a){ void* _temp28= a; struct _tagged_arr _temp34; _LL30: if(*(( int*)
-_temp28) ==  Cyc_std_StringPtr_sa){ _LL35: _temp34=(( struct Cyc_std_StringPtr_sa_struct*)
-_temp28)->f1; goto _LL31;} else{ goto _LL32;} _LL32: goto _LL33; _LL31: return
-_temp34; _LL33:( int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
-_temp36=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp36[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp37; _temp37.tag= Cyc_Core_InvalidArg;
+_temp22; _LL19: return( int*) _temp24; _LL21:( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
+_temp26=( struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct
+Cyc_Core_Invalid_argument_struct)); _temp26[ 0]=({ struct Cyc_Core_Invalid_argument_struct
+_temp27; _temp27.tag= Cyc_Core_Invalid_argument; _temp27.f1= _tag_arr("scan expects int pointer",
+sizeof( unsigned char), 25u); _temp27;}); _temp26;})); _LL15:;} static struct
+_tagged_arr Cyc_Std_va_arg_string_ptr( void* a){ void* _temp28= a; struct
+_tagged_arr _temp34; _LL30: if(*(( int*) _temp28) ==  Cyc_Std_StringPtr_sa){
+_LL35: _temp34=(( struct Cyc_Std_StringPtr_sa_struct*) _temp28)->f1; goto _LL31;}
+else{ goto _LL32;} _LL32: goto _LL33; _LL31: return _temp34; _LL33:( int) _throw((
+void*)({ struct Cyc_Core_Invalid_argument_struct* _temp36=( struct Cyc_Core_Invalid_argument_struct*)
+GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp36[ 0]=({
+struct Cyc_Core_Invalid_argument_struct _temp37; _temp37.tag= Cyc_Core_Invalid_argument;
 _temp37.f1= _tag_arr("scan expects char pointer", sizeof( unsigned char), 26u);
-_temp37;}); _temp36;})); _LL29:;} static double* Cyc_std_va_arg_double_ptr( void*
-a){ void* _temp38= a; double* _temp44; _LL40: if(*(( int*) _temp38) ==  Cyc_std_DoublePtr_sa){
-_LL45: _temp44=(( struct Cyc_std_DoublePtr_sa_struct*) _temp38)->f1; goto _LL41;}
+_temp37;}); _temp36;})); _LL29:;} static double* Cyc_Std_va_arg_double_ptr( void*
+a){ void* _temp38= a; double* _temp44; _LL40: if(*(( int*) _temp38) ==  Cyc_Std_DoublePtr_sa){
+_LL45: _temp44=(( struct Cyc_Std_DoublePtr_sa_struct*) _temp38)->f1; goto _LL41;}
 else{ goto _LL42;} _LL42: goto _LL43; _LL41: return _temp44; _LL43:( int) _throw((
-void*)({ struct Cyc_Core_InvalidArg_struct* _temp46=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp46[ 0]=({ struct
-Cyc_Core_InvalidArg_struct _temp47; _temp47.tag= Cyc_Core_InvalidArg; _temp47.f1=
-_tag_arr("scan expects double pointer", sizeof( unsigned char), 28u); _temp47;});
-_temp46;})); _LL39:;} static float* Cyc_std_va_arg_float_ptr( void* a){ void*
-_temp48= a; float* _temp54; _LL50: if(*(( int*) _temp48) ==  Cyc_std_FloatPtr_sa){
-_LL55: _temp54=(( struct Cyc_std_FloatPtr_sa_struct*) _temp48)->f1; goto _LL51;}
+void*)({ struct Cyc_Core_Invalid_argument_struct* _temp46=( struct Cyc_Core_Invalid_argument_struct*)
+GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp46[ 0]=({
+struct Cyc_Core_Invalid_argument_struct _temp47; _temp47.tag= Cyc_Core_Invalid_argument;
+_temp47.f1= _tag_arr("scan expects double pointer", sizeof( unsigned char), 28u);
+_temp47;}); _temp46;})); _LL39:;} static float* Cyc_Std_va_arg_float_ptr( void*
+a){ void* _temp48= a; float* _temp54; _LL50: if(*(( int*) _temp48) ==  Cyc_Std_FloatPtr_sa){
+_LL55: _temp54=(( struct Cyc_Std_FloatPtr_sa_struct*) _temp48)->f1; goto _LL51;}
 else{ goto _LL52;} _LL52: goto _LL53; _LL51: return _temp54; _LL53:( int) _throw((
-void*)({ struct Cyc_Core_InvalidArg_struct* _temp56=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp56[ 0]=({ struct
-Cyc_Core_InvalidArg_struct _temp57; _temp57.tag= Cyc_Core_InvalidArg; _temp57.f1=
-_tag_arr("scan expects float pointer", sizeof( unsigned char), 27u); _temp57;});
-_temp56;})); _LL49:;} int Cyc_std__IO_vfscanf( int(* _IO_getc)( void*), int(*
-_IO_ungetc)( int, void*), int(* _IO_peekc)( void*), void* fp, struct _tagged_arr
-fmt0, struct _tagged_arr ap, int* errp){ struct _tagged_arr fmt= fmt0; int c;
-long long width; struct _tagged_arr p= _tag_arr( 0u, 0u, 0u); int n; int flags=
-0; struct _tagged_arr p0= _tag_arr( 0u, 0u, 0u); int nassigned; int nread; int
-base= 0; int use_strtoul= 0; unsigned char ccltab[ 256u];{ unsigned int _temp154=
-256u; unsigned int i; for( i= 0; i <  _temp154; i ++){ ccltab[ i]='0';}}{
-unsigned char buf[ 350u];{ unsigned int _temp153= 350u; unsigned int i; for( i=
-0; i <  _temp153; i ++){ buf[ i]='0';}}{ int seen_eof= 0; static short basefix[
-17u]={ 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}; nassigned= 0;
-nread= 0; for( 0; 1; 0){ c=( int)*(( const unsigned char*)
+void*)({ struct Cyc_Core_Invalid_argument_struct* _temp56=( struct Cyc_Core_Invalid_argument_struct*)
+GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp56[ 0]=({
+struct Cyc_Core_Invalid_argument_struct _temp57; _temp57.tag= Cyc_Core_Invalid_argument;
+_temp57.f1= _tag_arr("scan expects float pointer", sizeof( unsigned char), 27u);
+_temp57;}); _temp56;})); _LL49:;} int Cyc_Std__IO_vfscanf( int(* _IO_getc)( void*),
+int(* _IO_ungetc)( int, void*), int(* _IO_peekc)( void*), void* fp, struct
+_tagged_arr fmt0, struct _tagged_arr ap, int* errp){ struct _tagged_arr fmt=
+fmt0; int c; long long width; struct _tagged_arr p= _tag_arr( 0u, 0u, 0u); int n;
+int flags= 0; struct _tagged_arr p0= _tag_arr( 0u, 0u, 0u); int nassigned; int
+nread; int base= 0; int use_strtoul= 0; unsigned char ccltab[ 256u];{
+unsigned int _temp154= 256u; unsigned int i; for( i= 0; i <  _temp154; i ++){
+ccltab[ i]='0';}}{ unsigned char buf[ 350u];{ unsigned int _temp153= 350u;
+unsigned int i; for( i= 0; i <  _temp153; i ++){ buf[ i]='0';}}{ int seen_eof= 0;
+static short basefix[ 17u]={ 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+15, 16}; nassigned= 0; nread= 0; for( 0; 1; 0){ c=( int)*(( const unsigned char*)
 _check_unknown_subscript( _tagged_arr_inplace_plus_post(& fmt, sizeof(
 unsigned char), 1), sizeof( unsigned char), 0u)); if( c ==  0){ goto done;} if(
 isspace( c)){ for( 0; 1; 0){ c= _IO_getc( fp); if( c ==  - 1){ seen_eof ++;
@@ -132,13 +133,13 @@ break; case 'u': _LL78: c= 3; use_strtoul= 1; base= 10; break; case 'X': _LL79:
 goto _LL80; case 'x': _LL80: flags |= 256; c= 3; use_strtoul= 1; base= 16;
 break; case 'E': _LL81: goto _LL82; case 'F': _LL82: goto _LL83; case 'e': _LL83:
 goto _LL84; case 'f': _LL84: goto _LL85; case 'g': _LL85: c= 4; break; case 's':
-_LL86: c= 2; break; case '[': _LL87: fmt= Cyc_std___sccl( _tag_arr( ccltab,
+_LL86: c= 2; break; case '[': _LL87: fmt= Cyc_Std___sccl( _tag_arr( ccltab,
 sizeof( unsigned char), 256u), fmt); flags |= 32; c= 1; break; case 'c': _LL88:
 flags |= 32; c= 0; break; case 'p': _LL89: flags |= 16 |  256; c= 3; use_strtoul=
 1; base= 16; break; case 'n': _LL90: if( flags &  8){ continue;} if( flags &  4){*
-Cyc_std_va_arg_short_ptr(*(( void**) _check_unknown_subscript( ap, sizeof( void*),
-0u)))=( short) nread;} else{ if( flags &  1){* Cyc_std_va_arg_int_ptr(*(( void**)
-_check_unknown_subscript( ap, sizeof( void*), 0u)))=( int) nread;} else{* Cyc_std_va_arg_int_ptr(*((
+Cyc_Std_va_arg_short_ptr(*(( void**) _check_unknown_subscript( ap, sizeof( void*),
+0u)))=( short) nread;} else{ if( flags &  1){* Cyc_Std_va_arg_int_ptr(*(( void**)
+_check_unknown_subscript( ap, sizeof( void*), 0u)))=( int) nread;} else{* Cyc_Std_va_arg_int_ptr(*((
 void**) _check_unknown_subscript( ap, sizeof( void*), 0u)))=( int) nread;}}
 _tagged_arr_inplace_plus_post(& ap, sizeof( void*), 1); continue; case '\000':
 _LL91: nassigned= - 1; goto done; default: _LL92: if( isupper( c)){ flags |= 1;}
@@ -149,7 +150,7 @@ switch( c){ case 0: _LL94: if( width ==  0){ width=( long long) 1;} if( flags &
 8){ long long sum=( long long) 0; for( 0; 1; 0){ n= _IO_getc( fp); if( n ==  - 1?
 width !=  0: 0){ goto eof_failure;} else{ if( n ==  - 1){ seen_eof ++; break;}}
 sum ++; width --;} nread += sum;} else{ long long sum=( long long) 0; struct
-_tagged_arr _temp96= Cyc_std_va_arg_string_ptr(*(( void**)
+_tagged_arr _temp96= Cyc_Std_va_arg_string_ptr(*(( void**)
 _check_unknown_subscript( ap, sizeof( void*), 0u)));
 _tagged_arr_inplace_plus_post(& ap, sizeof( void*), 1); for( 0; 1; 0){ n=
 _IO_getc( fp); if( n ==  - 1? width !=  0: 0){ goto eof_failure;} else{ if( n == 
@@ -164,7 +165,7 @@ if( flags &  8){ n= 0;{ int c= _IO_peekc( fp); while(( int) ccltab[
 _check_known_subscript_notnull( 256u,( int)(( unsigned char) c))]) { n ++;
 _IO_getc( fp); if( -- width ==  0){ break;} if(( c= _IO_peekc( fp)) ==  - 1){
 if( n ==  0){ goto eof_failure;} seen_eof ++; break;}} if( n ==  0){ goto
-match_failure;}}} else{ struct _tagged_arr _temp98= Cyc_std_va_arg_string_ptr(*((
+match_failure;}}} else{ struct _tagged_arr _temp98= Cyc_Std_va_arg_string_ptr(*((
 void**) _check_unknown_subscript( ap, sizeof( void*), 0u)));
 _tagged_arr_inplace_plus_post(& ap, sizeof( void*), 1);{ struct _tagged_arr
 _temp99= _temp98; int c= _IO_peekc( fp); while(( int) ccltab[
@@ -181,7 +182,7 @@ unsigned char), 0u))='\000'; nassigned ++;}} nread += n; break; case 2: _LL97:
 if( width ==  0){ width=( long long) ~ 0;} if( flags &  8){ n= 0;{ int c=
 _IO_peekc( fp); while( ! isspace(( int)(( unsigned char) c))) { n ++; _IO_getc(
 fp); if( -- width ==  0){ break;} if(( c= _IO_peekc( fp)) ==  - 1){ seen_eof ++;
-break;}} nread += n;}} else{ struct _tagged_arr _temp101= Cyc_std_va_arg_string_ptr(*((
+break;}} nread += n;}} else{ struct _tagged_arr _temp101= Cyc_Std_va_arg_string_ptr(*((
 void**) _check_unknown_subscript( ap, sizeof( void*), 0u)));
 _tagged_arr_inplace_plus_post(& ap, sizeof( void*), 1);{ struct _tagged_arr
 _temp102= _temp101; int c= _IO_peekc( fp); while( ! isspace(( int)((
@@ -226,14 +227,14 @@ sizeof( unsigned char), -1)); if( c == 'x'? 1: c == 'X'){
 _tagged_arr_inplace_plus(& p, sizeof( unsigned char), -1); _IO_ungetc( c, fp);}
 if(( flags &  8) ==  0){ unsigned int res;*(( unsigned char*)
 _check_unknown_subscript( p, sizeof( unsigned char), 0u))='\000'; if(
-use_strtoul){ res= Cyc_std_strtoul( _tag_arr( buf, sizeof( unsigned char), 350u),
-0, base);} else{ res=( unsigned int) Cyc_std_strtol( _tag_arr( buf, sizeof(
-unsigned char), 350u), 0, base);} if( flags &  16){* Cyc_std_va_arg_int_ptr(*((
+use_strtoul){ res= Cyc_Std_strtoul( _tag_arr( buf, sizeof( unsigned char), 350u),
+0, base);} else{ res=( unsigned int) Cyc_Std_strtol( _tag_arr( buf, sizeof(
+unsigned char), 350u), 0, base);} if( flags &  16){* Cyc_Std_va_arg_int_ptr(*((
 void**) _check_unknown_subscript( ap, sizeof( void*), 0u)))=( int) res;} else{
-if( flags &  4){* Cyc_std_va_arg_short_ptr(*(( void**) _check_unknown_subscript(
-ap, sizeof( void*), 0u)))=( short) res;} else{ if( flags &  1){* Cyc_std_va_arg_int_ptr(*((
+if( flags &  4){* Cyc_Std_va_arg_short_ptr(*(( void**) _check_unknown_subscript(
+ap, sizeof( void*), 0u)))=( short) res;} else{ if( flags &  1){* Cyc_Std_va_arg_int_ptr(*((
 void**) _check_unknown_subscript( ap, sizeof( void*), 0u)))=( int) res;} else{*
-Cyc_std_va_arg_int_ptr(*(( void**) _check_unknown_subscript( ap, sizeof( void*),
+Cyc_Std_va_arg_int_ptr(*(( void**) _check_unknown_subscript( ap, sizeof( void*),
 0u)))=( int) res;}}} _tagged_arr_inplace_plus_post(& ap, sizeof( void*), 1);
 nassigned ++;} nread +=( p.curr - ( _tag_arr( buf, sizeof( unsigned char), 350u)).curr)
 /  sizeof( unsigned char); break; case 4: _LL103: if( width ==  0? 1: width > 
@@ -261,9 +262,9 @@ if( c != 'e'? c != 'E': 0){ _IO_ungetc( c, fp); _tagged_arr_inplace_plus(& p,
 sizeof( unsigned char), -1); c=( int)*(( unsigned char*)
 _check_unknown_subscript( p, sizeof( unsigned char), 0u));} _IO_ungetc( c, fp);}
 if(( flags &  8) ==  0){ double res;*(( unsigned char*) _check_unknown_subscript(
-p, sizeof( unsigned char), 0u))='\000'; res= Cyc_std_atof( _tag_arr( buf,
-sizeof( unsigned char), 350u)); if( flags &  1){* Cyc_std_va_arg_double_ptr(*((
-void**) _check_unknown_subscript( ap, sizeof( void*), 0u)))= res;} else{* Cyc_std_va_arg_float_ptr(*((
+p, sizeof( unsigned char), 0u))='\000'; res= Cyc_Std_atof( _tag_arr( buf,
+sizeof( unsigned char), 350u)); if( flags &  1){* Cyc_Std_va_arg_double_ptr(*((
+void**) _check_unknown_subscript( ap, sizeof( void*), 0u)))= res;} else{* Cyc_Std_va_arg_float_ptr(*((
 void**) _check_unknown_subscript( ap, sizeof( void*), 0u)))=( float) res;}
 _tagged_arr_inplace_plus_post(& ap, sizeof( void*), 1); nassigned ++;} nread +=(
 p.curr - ( _tag_arr( buf, sizeof( unsigned char), 350u)).curr) /  sizeof(
@@ -275,7 +276,7 @@ _temp151;}));}} eof_failure: seen_eof ++; input_failure: if( nassigned ==  0){
 nassigned= - 1;} control_failure: match_failure: if(( unsigned int) errp){*((
 int*) _check_null( errp)) |= 2;} done: if(( unsigned int) errp? seen_eof: 0){*((
 int*) _check_null( errp)) |= 1;} return nassigned;}}} static struct _tagged_arr
-Cyc_std___sccl( struct _tagged_arr tab, struct _tagged_arr fmt){ int c; int n;
+Cyc_Std___sccl( struct _tagged_arr tab, struct _tagged_arr fmt){ int c; int n;
 int v; c=( int)*(( const unsigned char*) _check_unknown_subscript(
 _tagged_arr_inplace_plus_post(& fmt, sizeof( unsigned char), 1), sizeof(
 unsigned char), 0u)); if( c == '^'){ v= 1; c=( int)*(( const unsigned char*)
@@ -294,33 +295,33 @@ _check_unknown_subscript( fmt, sizeof( unsigned char), 0u)); if( n == ']'? 1: n
 unsigned char), 1); do {*(( unsigned char*) _check_unknown_subscript( tab,
 sizeof( unsigned char), ++ c))=( unsigned char) v;} while ( c <  n); goto
 doswitch; break; case ']': _LL157: return fmt; default: _LL158: c= n; break;}}}
-static int Cyc_std_string_getc( struct _tagged_arr* sptr){ unsigned char c;
+static int Cyc_Std_string_getc( struct _tagged_arr* sptr){ unsigned char c;
 struct _tagged_arr s=* sptr; if(( s.curr == (( struct _tagged_arr) _tag_arr( 0u,
 0u, 0u)).curr? 1: _get_arr_size( s, sizeof( unsigned char)) ==  0)? 1:( c=*((
 const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), 0)))
 == '\000'){ return - 1;}* sptr= _tagged_arr_plus( s, sizeof( unsigned char), 1);
-return( int) c;} static int Cyc_std_string_ungetc( int ignore, struct
+return( int) c;} static int Cyc_Std_string_ungetc( int ignore, struct
 _tagged_arr* sptr){* sptr= _tagged_arr_plus(* sptr, sizeof( unsigned char), - 1);
-return 0;} static int Cyc_std_string_peekc( struct _tagged_arr* sptr){
+return 0;} static int Cyc_Std_string_peekc( struct _tagged_arr* sptr){
 unsigned char c; struct _tagged_arr s=* sptr; if(( s.curr == (( struct
 _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr? 1: _get_arr_size( s, sizeof(
 unsigned char)) ==  0)? 1:( c=*(( const unsigned char*) _check_unknown_subscript(
 s, sizeof( unsigned char), 0))) == '\000'){ return - 1;} return( int) c;} int
-Cyc_std_vsscanf( struct _tagged_arr src, struct _tagged_arr fmt, struct
-_tagged_arr ap){ int err= 0; int(* sgc)( struct _tagged_arr*)= Cyc_std_string_getc;
+Cyc_Std_vsscanf( struct _tagged_arr src, struct _tagged_arr fmt, struct
+_tagged_arr ap){ int err= 0; int(* sgc)( struct _tagged_arr*)= Cyc_Std_string_getc;
 return(( int(*)( int(* _IO_getc)( struct _tagged_arr*), int(* _IO_ungetc)( int,
 struct _tagged_arr*), int(* _IO_peekc)( struct _tagged_arr*), struct _tagged_arr*
-fp, struct _tagged_arr fmt0, struct _tagged_arr ap, int* errp)) Cyc_std__IO_vfscanf)(
-Cyc_std_string_getc, Cyc_std_string_ungetc, Cyc_std_string_peekc,& src, fmt, ap,(
-int*)& err);} int Cyc_std_sscanf( struct _tagged_arr src, struct _tagged_arr fmt,
-struct _tagged_arr ap){ return Cyc_std_vsscanf( src, fmt, ap);} int Cyc_std_peekc(
-struct Cyc_std___sFILE* stream){ int c= Cyc_std_fgetc( stream); Cyc_std_ungetc(
-c, stream); return c;} int Cyc_std_vfscanf( struct Cyc_std___sFILE* stream,
+fp, struct _tagged_arr fmt0, struct _tagged_arr ap, int* errp)) Cyc_Std__IO_vfscanf)(
+Cyc_Std_string_getc, Cyc_Std_string_ungetc, Cyc_Std_string_peekc,& src, fmt, ap,(
+int*)& err);} int Cyc_Std_sscanf( struct _tagged_arr src, struct _tagged_arr fmt,
+struct _tagged_arr ap){ return Cyc_Std_vsscanf( src, fmt, ap);} int Cyc_Std_peekc(
+struct Cyc_Std___sFILE* stream){ int c= Cyc_Std_fgetc( stream); Cyc_Std_ungetc(
+c, stream); return c;} int Cyc_Std_vfscanf( struct Cyc_Std___sFILE* stream,
 struct _tagged_arr fmt, struct _tagged_arr ap){ int err= 0; return(( int(*)( int(*
-_IO_getc)( struct Cyc_std___sFILE*), int(* _IO_ungetc)( int, struct Cyc_std___sFILE*),
-int(* _IO_peekc)( struct Cyc_std___sFILE*), struct Cyc_std___sFILE* fp, struct
-_tagged_arr fmt0, struct _tagged_arr ap, int* errp)) Cyc_std__IO_vfscanf)( Cyc_std_getc,
-Cyc_std_ungetc, Cyc_std_peekc, stream, fmt, ap,( int*)& err);} int Cyc_std_fscanf(
-struct Cyc_std___sFILE* stream, struct _tagged_arr fmt, struct _tagged_arr ap){
-return Cyc_std_vfscanf( stream, fmt, ap);} int Cyc_std_scanf( struct _tagged_arr
-fmt, struct _tagged_arr ap){ return Cyc_std_vfscanf( Cyc_std_stdin, fmt, ap);}
+_IO_getc)( struct Cyc_Std___sFILE*), int(* _IO_ungetc)( int, struct Cyc_Std___sFILE*),
+int(* _IO_peekc)( struct Cyc_Std___sFILE*), struct Cyc_Std___sFILE* fp, struct
+_tagged_arr fmt0, struct _tagged_arr ap, int* errp)) Cyc_Std__IO_vfscanf)( Cyc_Std_getc,
+Cyc_Std_ungetc, Cyc_Std_peekc, stream, fmt, ap,( int*)& err);} int Cyc_Std_fscanf(
+struct Cyc_Std___sFILE* stream, struct _tagged_arr fmt, struct _tagged_arr ap){
+return Cyc_Std_vfscanf( stream, fmt, ap);} int Cyc_Std_scanf( struct _tagged_arr
+fmt, struct _tagged_arr ap){ return Cyc_Std_vfscanf( Cyc_Std_stdin, fmt, ap);}

@@ -21,10 +21,10 @@
 using Core;
 
 namespace Cdirent {
-  extern "C" std::DIR *opendir(Cstring name);
+  extern "C" Std::DIR *opendir(Cstring name);
 }
 
-namespace std;
+namespace Std;
 
 DIR *opendir(string_t name) {
   return Cdirent::opendir(string_to_Cstring(name));

@@ -223,8 +223,8 @@ list_t<Absyn::decl_t>
   case Dict::Absent:
     exn_string = "Exception Dict::Absent";
     break;
-  case &InvalidArg(s):
-    exn_string = "Exception Core::InvalidArg";
+  case &Invalid_argument(s):
+    exn_string = "Exception Core::Invalid_argument";
     explain_string = s;
     break;
   case x:
@@ -630,7 +630,7 @@ static interface_t read_cycio(string_t<`H> @ n) {
   try {
     basename = Filename::chop_extension(*n);
   } catch {
-  case &InvalidArg(_): basename = *n; break;
+  case &Invalid_argument(_): basename = *n; break;
   }
   let nf = strconcat(basename, ".cycio");
   let f = try_file_open(nf, "r", "interface object file");
@@ -891,8 +891,8 @@ int main(int argc, string_t<`H> ?`H argv) {
     compile_failure = true;
     remove_cfiles();
     return 1;
-  case &InvalidArg(s):
-    printf ("Exception Core::InvalidArg %s\n", s);
+  case &Invalid_argument(s):
+    printf ("Exception Core::Invalid_argument %s\n", s);
     compile_failure = true;
     remove_cfiles();
     return 1;

@@ -50,7 +50,7 @@ static type_t expr_err(tenv_t te,seg_t loc,string_t msg,
                        ...`r1 inject parg_t<`r2> ap) 
   __attribute__((format(printf,3,4)))
 {
-  terr(loc,vraprintf(heap_region,msg,ap));
+  terr(loc,vrprintf(heap_region,msg,ap));
   return wildtyp(new Opt(lookup_type_vars(te)));
 }
 

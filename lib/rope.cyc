@@ -46,7 +46,7 @@ rope_t concatl(List::list_t<rope_t> l) {
 
 unsigned int length(rope_t r) {
   switch (r->v) {
-  case &String_rope(ss): return (unsigned int)std::strlen(ss);
+  case &String_rope(ss): return (unsigned int)Std::strlen(ss);
   case &Array_rope(rs):
     unsigned int total = 0, sz = rs.size;
     for (unsigned int i = 0; i < sz; i++)
@@ -58,8 +58,8 @@ unsigned int length(rope_t r) {
 static unsigned int flatten_it(mstring_t s, unsigned int i, rope_t r) {
   switch (r->v) {
   case &String_rope(ss):
-    let len = std::strlen(ss);
-    std::strncpy(s+i,ss,len);
+    let len = Std::strlen(ss);
+    Std::strncpy(s+i,ss,len);
     return i+len;
   case &Array_rope(rs):
     let len = rs.size;
@@ -78,5 +78,5 @@ mstring_t to_string(rope_t r) {
 }
 
 int cmp(rope_t r1, rope_t r2) {
-  return std::strcmp(to_string(r1), to_string(r2));
+  return Std::strcmp(to_string(r1), to_string(r2));
 }

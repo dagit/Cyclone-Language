@@ -47,7 +47,7 @@ namespace Csocket {
   }
 }
 
-namespace std;
+namespace Std;
 
 int bind(int fd, const xtunion sockaddr addr) {
   let $(Caddr, Clen) = Csocket::sa2Csa(addr);

@@ -21,7 +21,7 @@
 
 #include <sys/ctypes.h>
 
-namespace std {
+namespace Std {
   struct passwd {
     string_t pw_name;
     string_t pw_passwd;

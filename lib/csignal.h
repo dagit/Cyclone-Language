@@ -29,7 +29,7 @@
 
 #include <sys/ctypes.h> // for pid_t
 
-namespace std {
+namespace Std {
   typedef int sig_atomic_t;
 
   typedef void (*__sighandler_t) (int;{});

@@ -29,7 +29,7 @@ namespace XmlParse {
 using Lexing;
 using List;
 using Core;
-using std;
+using Std;
 using Xml;
 
 extern list_t<content_t> parse_file(FILE @`H f);

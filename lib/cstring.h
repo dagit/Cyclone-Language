@@ -23,7 +23,7 @@
 #include <list.h>
 #include <cstddef.h> // for size_t
 
-namespace std {
+namespace Std {
 using Core;
 using List;
 
@@ -33,7 +33,7 @@ using List;
 // have names starting with 'z'.  Many functions accept a string
 // and an offset; these functions may have names ending in 'o'.
 // Functions whose arguments have range errors throw the
-// Core::InvalidArg exn.
+// Core::Invalid_argument exn.
 
 ///////////////////////// WRAPPERS
 extern string_t strerror(int);
@@ -87,7 +87,7 @@ extern mstring_t     substring(string_t,int ofs, size_t n);
 extern mstring_t<`r> rsubstring(region_t<`r>,string_t,int ofs, size_t n);
 
 // replace last with second at end of first
-// raise InvalidArg if second is not end of first.
+// raise Invalid_argument if second is not end of first.
 extern mstring_t     replace_suffix(string_t,string_t,string_t);
 extern mstring_t<`r> rreplace_suffix (region_t<`r> r,string_t src, 
                                  string_t curr_suffix, 
@@ -108,15 +108,15 @@ extern mstring_t      implode(list_t<int> c);
 
 // convert s to an int.  if offset is NULL, starts at offset 0. 
 // otherwise, starts at *offset.  Skips leading whitespace.  Raises
-// InvalidArg if no valid int is found.  If offset is non-NULL, 
+// Invalid_argument if no valid int is found.  If offset is non-NULL, 
 // returns the index of the last character consumed + 1.
 extern int to_int(string_t s, int * offset);
 
 // convert s to a double.  if offset is NULL, starts at offset 0. 
 // otherwise, starts at *offset.  Skips leading whitespace.  Raises
-// InvalidArg if no valid int is found.  If offset is non-NULL, 
+// Invalid_argument if no valid int is found.  If offset is non-NULL, 
 // returns the index of the last character consumed + 1.
-extern double to_double(string_t s, int * offset); // raises InvalidArg
+extern double to_double(string_t s, int * offset); // raises Invalid_argument
 }
 
 #endif

@@ -39,7 +39,7 @@ mstring_t chop_extension(string_t filename) {
   while (i >= 0 && filename[i] != '.')
     --i;
   if (i < 0)
-    throw new InvalidArg("chop_extension");
+    throw new Invalid_argument("chop_extension");
   return substring(filename, 0, i);
 }
 

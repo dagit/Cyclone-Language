@@ -24,7 +24,7 @@ namespace Cnetdb {
   abstract struct Cservent {
     Cstring s_name;
     Cstring @s_aliases;
-    std::in_port_t s_port;
+    Std::in_port_t s_port;
     Cstring s_proto;
   };
   abstract struct Chostent {
@@ -37,19 +37,19 @@ namespace Cnetdb {
     int h_addrtype;
     int h_length;     // always 4
 #endif
-    struct std::in_addr *@h_addr_list;
+    struct Std::in_addr *@h_addr_list;
   };
   extern "C" {
     struct Cservent *getservbyname(const Cstring name, const Cstring proto);
     struct Chostent *gethostbyname(const Cstring name);
     void herror(Cstring);
-    struct std::in_addr *?pntlp_toCyc(struct std::in_addr *@);
+    struct Std::in_addr *?pntlp_toCyc(struct Std::in_addr *@);
   }
 #define s2c(x) (string_to_Cstring(x))
 #define c2s(x) (Cstring_to_string(x))
 }
 
-namespace std;
+namespace Std;
 
 struct servent *getservbyname(string_t name, string_t proto) {
   struct Cnetdb::Cservent *src = Cnetdb::getservbyname(s2c(name),s2c(proto));

@@ -32,7 +32,7 @@ namespace Ctime {
   }
 }
 
-namespace std;
+namespace Std;
 
 mstring_t asctime(const struct tm @`r timeptr) {
   return Cstring_to_string(Ctime::asctime(timeptr));
@@ -52,12 +52,12 @@ size_t strftime(string_t s, size_t maxsize, string_t fmt,
 // FIX: should check that s is long enough
 mstring_t asctime_r(const struct tm @`r t, mstring_t s) {
   if (s.size < 50) 
-    throw new InvalidArg("Time::asctime_r: string too small (< 50)");
+    throw new Invalid_argument("Time::asctime_r: string too small (< 50)");
   return Cstring_to_string(Ctime::asctime_r(t,underlying_Cstring(s)));
 }
 
 mstring_t ctime_r(const time_t @`r t, mstring_t s) {
   if (s.size < 50) 
-    throw new InvalidArg("Time::ctime_r: string too small (< 50)");
+    throw new Invalid_argument("Time::ctime_r: string too small (< 50)");
   return Cstring_to_string(Ctime::ctime_r(t,underlying_Cstring(s)));
 }

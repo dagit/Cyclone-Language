@@ -46,13 +46,13 @@ extern void unify_it(type_t t1, type_t t2);
 void terr(seg_t loc, string_t fmt, ...`r1 inject parg_t<`r2> ap) 
   __attribute__((format(printf,2,3)))
 {
-  Position::post_error(Position::mk_err_elab(loc,vraprintf(heap_region,fmt,ap)));
+  Position::post_error(Position::mk_err_elab(loc,vrprintf(heap_region,fmt,ap)));
 }
 
 `a impos(string_t fmt, ...`r1 inject parg_t<`r2> ap) 
   __attribute__((format(printf,1,2)))
 {
-  string_t msg = vraprintf(heap_region,fmt,ap);
+  string_t msg = vrprintf(heap_region,fmt,ap);
   fprintf(stderr,"Error: %s\n",msg);
   fflush(stderr);
   throw TypeErr;
@@ -76,7 +76,7 @@ static list_t<stringptr_t> warning_msgs = NULL;
 void warn(seg_t sg, string_t fmt, ...`r1 inject parg_t<`r2> ap) 
   __attribute__((format(printf,2,3)))
 {
-  string_t msg = vraprintf(heap_region,fmt,ap);
+  string_t msg = vrprintf(heap_region,fmt,ap);
   warning_segs = new List(sg,      warning_segs);
   warning_msgs = new List(new msg, warning_msgs);
 }

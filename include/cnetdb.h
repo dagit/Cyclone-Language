@@ -22,7 +22,7 @@
 #include <core.h>
 #include <netinet/cin.h>
 
-namespace std {
+namespace Std {
   struct servent {
     mstring_t s_name;
     mstring_t ?s_aliases;

@@ -70,7 +70,7 @@ typedef unsigned int socklen_t;
 #define AF_NETLINK PF_NETLINK
 #define AF_PACKET PF_PACKET
 
-namespace std {
+namespace Std {
 
 typedef unsigned short sa_family_t;
 

@@ -79,7 +79,7 @@ static char sccsid[] = "%W% (Berkeley) %G%";
 #include <stdio.h>
 using Core;
 
-namespace std;
+namespace Std;
 
 typedef long long int _IO_ssize_t;
 
@@ -146,7 +146,7 @@ static short @`r va_arg_short_ptr(sarg_t<`r,`r2> a) {
   switch (a) {
   case &ShortPtr_sa(p): return p;
   case &UShortPtr_sa(p): return (short @`r) p;
-  default: throw new InvalidArg("scan expects short pointer");
+  default: throw new Invalid_argument("scan expects short pointer");
   }
 }
 
@@ -154,28 +154,28 @@ static int @`r va_arg_int_ptr(sarg_t<`r,`r2> a) {
   switch (a) {
   case &IntPtr_sa(p): return p;
   case &UIntPtr_sa(p): return (int @`r)p;
-  default: throw new InvalidArg("scan expects int pointer");
+  default: throw new Invalid_argument("scan expects int pointer");
   }
 }  
 
 static char ?`r va_arg_string_ptr(sarg_t<`r,`r2> a) {
   switch (a) {
   case &StringPtr_sa(p): return p;
-  default: throw new InvalidArg("scan expects char pointer");
+  default: throw new Invalid_argument("scan expects char pointer");
   }
 }  
 
 static double @`r va_arg_double_ptr(sarg_t<`r,`r2> a) {
   switch (a) {
   case &DoublePtr_sa(p): return p;
-  default: throw new InvalidArg("scan expects double pointer");
+  default: throw new Invalid_argument("scan expects double pointer");
   }
 }  
 
 static float @`r va_arg_float_ptr(sarg_t<`r,`r2> a) {
   switch (a) {
   case &FloatPtr_sa(p): return p;
-  default: throw new InvalidArg("scan expects float pointer");
+  default: throw new Invalid_argument("scan expects float pointer");
   }
 }  
 

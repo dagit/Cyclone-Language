@@ -19,7 +19,7 @@
 #ifndef _STDDEF_H
 #define _STDDEF_H
 
-namespace std {
+namespace Std {
 typedef unsigned int 		size_t;
 }
 

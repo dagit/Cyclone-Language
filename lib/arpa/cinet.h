@@ -21,7 +21,7 @@
 
 #include <netinet/cin.h>
 
-namespace std {
+namespace Std {
   extern int inet_aton(string_t cp, struct in_addr @`r inp);
 }
 

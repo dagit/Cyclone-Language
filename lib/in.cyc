@@ -22,7 +22,7 @@
 #include <sys/socket.h>
 using Core;
 
-namespace std;
+namespace Std;
 
 extern xtunion sockaddr {
   sockaddr_in(struct sockaddr_in);

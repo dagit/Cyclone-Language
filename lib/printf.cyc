@@ -77,7 +77,7 @@ the executable file might be covered by the GNU General Public License. */
 
 using Core;
 
-namespace std;
+namespace Std;
 
 // vararg union for printf, fprintf, sprintf 
 tunion PrintArg<`r::R> {
@@ -101,7 +101,7 @@ static string_t parg2string(parg_t<`r> x) {
 }
 
 static `a badarg(string_t<`H> s) {
-  return throw new InvalidArg(s);
+  return throw new Invalid_argument(s);
 }
 
 // Extract an "int" vararg.
@@ -923,7 +923,7 @@ eformat:	if (expcnt) {
 				++t;
 		}
                 break;
-        default: throw new Impossible("stdio::__cvt_double");
+        default: throw new Impossible("Std::__cvt_double");
 	}
 	return (t - startp);
 }
@@ -989,7 +989,7 @@ static int putc_void(int c, int dummy) {
   return 1;
 }
 
-char ?`r1 vraprintf(region_t<`r1> r1, const char ?`r2 fmt, parg_t<`r4> ?`r3 ap)
+char ?`r1 vrprintf(region_t<`r1> r1, const char ?`r2 fmt, parg_t<`r4> ?`r3 ap)
   __attribute__((format(printf,2,0)))
 {
   // figure out the size of the resulting string -- add one for 0 terminator
@@ -999,16 +999,16 @@ char ?`r1 vraprintf(region_t<`r1> r1, const char ?`r2 fmt, parg_t<`r4> ?`r3 ap)
   return s;
 }
 
-char ?`r1 raprintf(region_t<`r1> r1, const char ?`r2 fmt, 
+char ?`r1 rprintf(region_t<`r1> r1, const char ?`r2 fmt, 
                    ...`r3 inject parg_t<`r4> ap) 
   __attribute__((format(printf,2,3)))
 {
-  return vraprintf(r1, fmt, ap);
+  return vrprintf(r1, fmt, ap);
 }
 
 char ? aprintf(const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap) 
   __attribute__((format(printf,1,2)))
 {
-  return vraprintf(heap_region, fmt, ap);
+  return vrprintf(heap_region, fmt, ap);
 }
   

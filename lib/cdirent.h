@@ -21,7 +21,7 @@
 
 #include <sys/ctypes.h> // for ino_t
 
-namespace std {
+namespace Std {
   // Fortunately this is the same in cygwin and glibc
   struct dirent {
     long d_ino;

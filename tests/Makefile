@@ -84,10 +84,16 @@ $(OUT_PREFIX)%.o : %.cyc $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -c $< 
 
 clean_prefix:
-	rm -f $(addprefix $(OUT_PREFIX), hello hello.o cyctest cyctest.o cyctest.c foo foo_tab.* foo.o foo.c histogram histogram.o histogram.c merge_sort merge_sort.o test_getopt.o test_getopt *.exe)
+	$(RM) $(addprefix $(OUT_PREFIX), hello hello.o cyctest cyctest.o cyctest.c foo foo_tab.* foo.o foo.c histogram histogram.o histogram.c merge_sort merge_sort.o test_getopt.o test_getopt *.exe)
 
 clean:
-	rm -f *hello.o *hello.c *bytes.o *bytes.c *cyctest.o *cyctest.c *foo_tab.* *foo.o *foo.c *histogram.o *histogram.c *finger.o *finger.c *test_getopt.c *test_getopt.o
-	rm -f *test_regions.o *test_regions.c
-	rm -f hello cyctest foo histogram merge_sort
-	rm -f *~ *.exe *.output *.stackdump
+	$(RM) *hello.o *hello.c *bytes.o *bytes.c *cyctest.o *cyctest.c *foo_tab.* *foo.o *foo.c *histogram.o *histogram.c *finger.o *finger.c *test_getopt.c *test_getopt.o
+	$(RM) *test_regions.o *test_regions.c
+	$(RM) hello cyctest foo histogram merge_sort finger test_getopt
+	$(RM) *~ *.exe *.output *.stackdump
+	$(MAKE) clean -C benchmarks
+	$(MAKE) clean -C compress/cacm
+	$(MAKE) clean -C compress/ppm
+	$(MAKE) clean -C shootout
+	$(MAKE) clean -C smlng
+	$(MAKE) clean -C tpop

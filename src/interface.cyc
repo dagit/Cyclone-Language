@@ -67,13 +67,13 @@ struct I {
 
 static ienv_t new_ienv() {
   return new Ienv {
-    .structdecls  = Dict::empty(std::zstrptrcmp),
-    .uniondecls   = Dict::empty(std::zstrptrcmp),
-    .tuniondecls  = Dict::empty(std::zstrptrcmp),
-    .enumdecls    = Dict::empty(std::zstrptrcmp),
-    .typedefdecls = Dict::empty(std::zstrptrcmp),
-    .vardecls     = Dict::empty(std::zstrptrcmp),
-    .xtunionfielddecls = Dict::empty(std::zstrptrcmp)
+    .structdecls  = Dict::empty(Std::zstrptrcmp),
+    .uniondecls   = Dict::empty(Std::zstrptrcmp),
+    .tuniondecls  = Dict::empty(Std::zstrptrcmp),
+    .enumdecls    = Dict::empty(Std::zstrptrcmp),
+    .typedefdecls = Dict::empty(Std::zstrptrcmp),
+    .vardecls     = Dict::empty(Std::zstrptrcmp),
+    .xtunionfielddecls = Dict::empty(Std::zstrptrcmp)
   };
 }
 
@@ -157,7 +157,7 @@ static void err(string_t msg) {
   Tcutil::terr(NULL, msg);
 }
 
-#define invalid_arg(s) throw(new Core::InvalidArg(s))
+#define invalid_arg(s) throw(new Core::Invalid_argument(s))
 //better than a function regarding to the control flow
 
 static void fields_err(string_t sc, string_t t, qvar_t n) {

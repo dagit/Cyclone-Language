@@ -93,7 +93,7 @@
     /* Ports greater this value are reserved for (non-privileged) servers.  */
 #define IPPORT_USERRESERVED 5000
 
-namespace std {
+namespace Std {
   /* Type to represent a port. */
   typedef unsigned short in_port_t;
 

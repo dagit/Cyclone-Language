@@ -1,7 +1,7 @@
  extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern struct _tagged_arr Cyc_Core_new_string( int); extern unsigned char Cyc_Core_InvalidArg[
-15u]; struct Cyc_Core_InvalidArg_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+extern struct _tagged_arr Cyc_Core_new_string( int); extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
 15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
 f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
@@ -18,29 +18,29 @@ _tagged_arr); extern int Cyc_Filename_check_suffix( struct _tagged_arr, struct
 _tagged_arr); extern struct _tagged_arr Cyc_Filename_gnuify( struct _tagged_arr);
 struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
 unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern struct _tagged_arr Cyc_std_strconcat(
-struct _tagged_arr, struct _tagged_arr); extern struct _tagged_arr Cyc_std_substring(
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern struct _tagged_arr Cyc_Std_strconcat(
+struct _tagged_arr, struct _tagged_arr); extern struct _tagged_arr Cyc_Std_substring(
 struct _tagged_arr, int ofs, unsigned int n); struct _tagged_arr Cyc_Filename_concat(
-struct _tagged_arr s1, struct _tagged_arr s2){ return Cyc_std_strconcat( s1,(
-struct _tagged_arr) Cyc_std_strconcat( _tag_arr("/", sizeof( unsigned char), 2u),
+struct _tagged_arr s1, struct _tagged_arr s2){ return Cyc_Std_strconcat( s1,(
+struct _tagged_arr) Cyc_Std_strconcat( _tag_arr("/", sizeof( unsigned char), 2u),
 s2));} struct _tagged_arr Cyc_Filename_chop_extension( struct _tagged_arr
 filename){ int i=( int)( _get_arr_size( filename, sizeof( unsigned char)) -  1);
 while( i >=  0?*(( const unsigned char*) _check_unknown_subscript( filename,
 sizeof( unsigned char), i)) != '.': 0) { -- i;} if( i <  0){( int) _throw(( void*)({
-struct Cyc_Core_InvalidArg_struct* _temp0=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp0[ 0]=({ struct Cyc_Core_InvalidArg_struct
-_temp1; _temp1.tag= Cyc_Core_InvalidArg; _temp1.f1= _tag_arr("chop_extension",
-sizeof( unsigned char), 15u); _temp1;}); _temp0;}));} return Cyc_std_substring(
-filename, 0,( unsigned int) i);} struct _tagged_arr Cyc_Filename_dirname( struct
-_tagged_arr filename){ int i=( int)( _get_arr_size( filename, sizeof(
-unsigned char)) -  1); while( i >=  0?*(( const unsigned char*)
-_check_unknown_subscript( filename, sizeof( unsigned char), i)) != '/': 0) { --
-i;} if( i <  0){ return Cyc_Core_new_string( 0);} return Cyc_std_substring(
+struct Cyc_Core_Invalid_argument_struct* _temp0=( struct Cyc_Core_Invalid_argument_struct*)
+GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp0[ 0]=({
+struct Cyc_Core_Invalid_argument_struct _temp1; _temp1.tag= Cyc_Core_Invalid_argument;
+_temp1.f1= _tag_arr("chop_extension", sizeof( unsigned char), 15u); _temp1;});
+_temp0;}));} return Cyc_Std_substring( filename, 0,( unsigned int) i);} struct
+_tagged_arr Cyc_Filename_dirname( struct _tagged_arr filename){ int i=( int)(
+_get_arr_size( filename, sizeof( unsigned char)) -  1); while( i >=  0?*(( const
+unsigned char*) _check_unknown_subscript( filename, sizeof( unsigned char), i))
+!= '/': 0) { -- i;} if( i <  0){ return Cyc_Core_new_string( 0);} return Cyc_Std_substring(
 filename, 0,( unsigned int) i);} struct _tagged_arr Cyc_Filename_basename(
 struct _tagged_arr filename){ int i=( int)( _get_arr_size( filename, sizeof(
 unsigned char)) -  1); while( i >=  0?*(( const unsigned char*)
 _check_unknown_subscript( filename, sizeof( unsigned char), i)) != '/': 0) { --
-i;} return Cyc_std_substring( filename, i +  1, _get_arr_size( filename, sizeof(
+i;} return Cyc_Std_substring( filename, i +  1, _get_arr_size( filename, sizeof(
 unsigned char)) - ( i +  1));} int Cyc_Filename_check_suffix( struct _tagged_arr
 filename, struct _tagged_arr suffix){ int i=( int)( _get_arr_size( filename,
 sizeof( unsigned char)) -  1); int j=( int)( _get_arr_size( suffix, sizeof(

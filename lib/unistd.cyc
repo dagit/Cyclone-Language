@@ -33,7 +33,7 @@ namespace Cunistd {
   }
 }
 
-namespace std;
+namespace Std;
 
 int chdir(string_t path) {
   return Cunistd::chdir(string_to_Cstring(path));

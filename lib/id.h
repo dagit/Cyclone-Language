@@ -25,7 +25,7 @@
 
 namespace Id {
 using Core;
-using std;
+using Std;
 
 // id.h:    defines an identifiers used in compilers, type-checkers, etc.
 
