@@ -878,14 +878,14 @@ typedef unsigned int Cyc_seg_t;
 static struct Cyc_List_List*Cyc_Warn_warning_segs=0;
 static struct Cyc_List_List*Cyc_Warn_warning_msgs=0;
 # 31
-void Cyc_Warn_vwarn(unsigned int sg,struct _dyneither_ptr fmt,struct _dyneither_ptr ap){
+void Cyc_Warn_vwarn(unsigned int loc,struct _dyneither_ptr fmt,struct _dyneither_ptr ap){
 struct _dyneither_ptr msg=(struct _dyneither_ptr)Cyc_vrprintf(Cyc_Core_heap_region,fmt,ap);
-Cyc_Warn_warning_segs=({struct Cyc_List_List*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->hd=(void*)sg;_tmp0->tl=Cyc_Warn_warning_segs;_tmp0;});
+Cyc_Warn_warning_segs=({struct Cyc_List_List*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->hd=(void*)loc;_tmp0->tl=Cyc_Warn_warning_segs;_tmp0;});
 Cyc_Warn_warning_msgs=({struct Cyc_List_List*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->hd=({struct _dyneither_ptr*_tmp2=_cycalloc(sizeof(*_tmp2));_tmp2[0]=msg;_tmp2;});_tmp1->tl=Cyc_Warn_warning_msgs;_tmp1;});}
 # 37
-void Cyc_Warn_warn(unsigned int sg,struct _dyneither_ptr fmt,struct _dyneither_ptr ap){
+void Cyc_Warn_warn(unsigned int loc,struct _dyneither_ptr fmt,struct _dyneither_ptr ap){
 # 39
-Cyc_Warn_vwarn(sg,fmt,ap);}
+Cyc_Warn_vwarn(loc,fmt,ap);}
 # 41
 void Cyc_Warn_flush_warnings(){
 if(Cyc_Warn_warning_segs == 0)
@@ -902,12 +902,15 @@ Cyc_Warn_warning_msgs=((struct Cyc_List_List*)_check_null(Cyc_Warn_warning_msgs)
 ({void*_tmpA=0;Cyc_fprintf(Cyc_stderr,({const char*_tmpB="**************\n";_tag_dyneither(_tmpB,sizeof(char),16);}),_tag_dyneither(_tmpA,sizeof(void*),0));});
 Cyc_fflush(Cyc_stderr);};}
 # 57
-void Cyc_Warn_err(unsigned int loc,struct _dyneither_ptr fmt,struct _dyneither_ptr ap){
-# 59
+void Cyc_Warn_verr(unsigned int loc,struct _dyneither_ptr fmt,struct _dyneither_ptr ap){
 Cyc_Position_post_error(Cyc_Position_mk_err(loc,(struct _dyneither_ptr)Cyc_vrprintf(Cyc_Core_heap_region,fmt,ap)));}
-# 62
+# 61
+void Cyc_Warn_err(unsigned int loc,struct _dyneither_ptr fmt,struct _dyneither_ptr ap){
+# 63
+Cyc_Warn_verr(loc,fmt,ap);}
+# 66
 void*Cyc_Warn_impos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap){
-# 65
+# 69
 struct _dyneither_ptr msg=(struct _dyneither_ptr)Cyc_vrprintf(Cyc_Core_heap_region,fmt,ap);
 ({struct Cyc_String_pa_PrintArg_struct _tmpE;_tmpE.tag=0;_tmpE.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)msg);({void*_tmpC[1]={& _tmpE};Cyc_fprintf(Cyc_stderr,({const char*_tmpD="Compiler Error: %s\n";_tag_dyneither(_tmpD,sizeof(char),20);}),_tag_dyneither(_tmpC,sizeof(void*),1));});});
 Cyc_fflush(Cyc_stderr);

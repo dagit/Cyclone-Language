@@ -25,7 +25,6 @@
 namespace Binding {
   using List;
   using Dict;
-  using Position;
 
   extern bool warn_override;
   void resolve_all(list_t<Absyn::decl_t,`H> tds);
@@ -46,9 +45,9 @@ namespace Binding {
 
   nsctxt_t<`a> mt_nsctxt(`b, `a mkdata(`b));
   void enter_ns(nsctxt_t<`a>, Absyn::var_t, `b, `a mkdata(`b));
-  namespace_name_t enter_using(seg_t loc, nsctxt_t ctxt, Absyn::qvar_t usename);
+  namespace_name_t enter_using(Absyn::seg_t loc, nsctxt_t ctxt, Absyn::qvar_t usename);
   void leave_ns(nsctxt_t ctxt);
   void leave_using(nsctxt_t ctxt);
-  namespace_name_t resolve_rel_ns(seg_t, nsctxt_t, namespace_name_t);
+  namespace_name_t resolve_rel_ns(Absyn::seg_t, nsctxt_t, namespace_name_t);
 }
 #endif

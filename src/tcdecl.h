@@ -23,8 +23,6 @@
 
 namespace Tcdecl {
   using Absyn;
-  //  using String;
-  using Position;
 
   extern datatype exn {extern Incompatible};
 

@@ -30,7 +30,6 @@
 using Core;
 using List;
 using Set;
-using Position;
 using Absyn;
 using Absynpp;
 using Tcenv;
@@ -2421,7 +2420,7 @@ bool zero_to_null(tenv_t te, type_t t2, exp_t e1) {
     bool retv = coerce_arg(te, e1, t2, &bogus);
     if (bogus != false)
       impos("zero_to_null resulted in an alias coercion on %s at %s\n",
-	    exp2string(e1), string_of_segment(e1->loc));
+	    exp2string(e1), Position::string_of_segment(e1->loc));
     return retv;
   }
   return false;
@@ -2499,7 +2498,7 @@ static bool can_insert_alias(exp_t e, type_t e_typ,
       }
     case &TypedefType(_,_,_,_):
       impos("got typedef %s in can_insert_alias at %s\n",
-	    typ2string(compress(wants_typ)), string_of_segment(loc));
+	    typ2string(compress(wants_typ)), Position::string_of_segment(loc));
     default: return false;
     }
   }

@@ -49,7 +49,6 @@ using RgnOrder;
 namespace Tcenv;
 
 typedef Set::set_t<`a> set_t<`a>;
-typedef Position::seg_t seg_t;
 
 datatype exn {Env_error};
 datacon(exn,Env_error);

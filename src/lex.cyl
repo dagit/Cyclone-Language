@@ -29,12 +29,12 @@
 #include <dict.h>
 #include "tcutil.h"
 #include "binding.h"
+#include "warn.h"
 using Core;
 using List;
 using Lexing;
 using Parse;
 using Absyn;
-using Position;
 
 extern void yyerror(string_t<`H> s, int state, int token);
 
@@ -117,27 +117,25 @@ static $(bool,string_t<`H>) token_asm = $(false,"");
 static int runaway_start = 0;
 static int paren_depth = 0; // used for __asm__ parsing
 
-static void err(string_t<`H> msg,Lexbuf<`a> lb) {
+static void err(string_t<`H> msg, Lexbuf lb) {
   seg_t s = lexeme_start(lb);
-  post_error(mk_err(s,msg));
+  Warn::err(s,msg);
 }
-static void runaway_err(string_t<`H> msg,Lexbuf<`a> lb) {
+static void runaway_err(string_t<`H> msg, Lexbuf lb) {
   seg_t s = runaway_start;
-  post_error(mk_err(s,msg));
+  Warn::err(s,msg);
 }
-static char cnst2char(cnst_t cnst,Lexbuf<`a> lb) {
+static char cnst2char(cnst_t cnst, Lexbuf lb) {
   switch (cnst) {
-  case {.Int_c = $(_,i)}: return (char)i;
+  case {.Int_c      = $(_,i)}: return (char)i;
   case {.LongLong_c = $(_,i)}: return (char)i;
-  case {.Char_c = $(_,c)}: return c;
-  default: err("couldn't convert constant to char!",lb);
-    return (char)0;
+  case {.Char_c     = $(_,c)}: return c;
+  default: err("couldn't convert constant to char!",lb); return (char)0;
   }
 }
 
 // ************************** RESERVED WORDS **************************
-// the bool is true when the keyword is a C keyword as opposed to a
-// Cyclone keyword.  
+// bool is true when the keyword is a C keyword as opposed to a Cyclone keyword
 static $(string_t,short,bool) rw_array[] = {
   $("__attribute__", ATTRIBUTE, true),
   $("abstract", ABSTRACT, false),
@@ -471,7 +469,7 @@ static void recompute_typedefs() {
   dyn_trie_t tdefs = NULL;
   tdefs :=: typedefs_trie;
   let DynTrie{dyn,t} = *tdefs;
-  Core::free_ukey(dyn);
+  free_ukey(dyn);
   let NewDynamicRegion{<`d2> dyn2} = new_ukey();
   trie_t<`d2> t2 = open_region(dyn2, 0, empty_trie);
   *tdefs = DynTrie{dyn2, t2};
@@ -651,7 +649,7 @@ static pinfo_t<`r> rnew_filepos(region_t<`r> r,
                                 const char ?`H filename, 
                                 unsigned int starting_line, 
                                 pinfo_opt_t<`r> next) {
-  seg_t ?`U linenumpos = rcalloc(Core::unique_region, 10, sizeof(seg_t));
+  seg_t ?`U linenumpos = rcalloc(unique_region, 10, sizeof(seg_t));
   linenumpos[0] = yylloc.first_line;
   return rnew(r) PosInfo{.next = next, .starting_line = starting_line,
                          .filename = filename,
@@ -670,12 +668,12 @@ static void inc_linenumber() {
   // check for enough space to insert the position
   if (offset >= n) {
     // have to grow the array -- double it and copy over old array
-    seg_t ?`U newlinenums = rcalloc(Core::unique_region,n*2,sizeof(seg_t));
+    seg_t ?`U newlinenums = rcalloc(unique_region,n*2,sizeof(seg_t));
     for (unsigned i = 0; i < n; i++)
       newlinenums[i] = linenums[i];
     linenums :=: newlinenums;
     // free old array of positions
-    Core::ufree((_*)newlinenums);
+    ufree((_*)newlinenums);
   }
   // plug in the current position for this line number
   linenums[offset] = yylloc.first_line;
@@ -712,8 +710,7 @@ static void process_directive(char ?line) {
     linenumber++; // we don't understand it, so skip over it
     return;
   }
-  pos_info = rnew_filepos(Core::heap_region, filename, 
-                          linenumber, pos_info);
+  pos_info = rnew_filepos(heap_region, filename, linenumber, pos_info);
 }
 
 // translate an absolute character offset to a file and line number
@@ -751,7 +748,6 @@ int strng_next(Lexbuf);
 int wstrng(Lexbuf);
 int wstrng_next(Lexbuf);
 int comment(Lexbuf);
-int cyc_qual(Lexbuf);
 int snarf_asm(Lexbuf);
 int snarf_asm_body(Lexbuf);
 } // namespace Lex
@@ -796,52 +792,64 @@ namespace Lex;
 ////////////////////////// LEXING RULES /////////////////////////////
 }
 
-let newline = ('\n' | '\r' | "\r\n")
-let notidchar = [^'A'-'Z''a'-'z''0'-'9''_'] 
+let newline     = ('\n' | '\r' | "\r\n")
+let notnewline  = [^ '\n' '\r']
+let idchar      = ['A'-'Z''a'-'z''0'-'9''_'] 
+let notidchar   = [^'A'-'Z''a'-'z''0'-'9''_'] 
+let firstidchar = ['A'-'Z''a'-'z']
+let cnstsuffix  = (((['u''U'])?(['l''L'])?(['l''L'])?) |
+		   ((['l''L'])?(['l''L'])?(['u''U'])?))
 
 rule token = parse
-| "asm" { return snarf_asm(lexbuf); }
+| "asm"     { return snarf_asm(lexbuf); }
 | "__asm__" { return snarf_asm(lexbuf); }
 /* Identifiers, type names, and keywords */
-| ['A'-'Z''a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
-{ return process_id(lexbuf); }
-| ['_']['A'-'Z''a'-'z''0'-'9''_']+
-{ return process_id(lexbuf); }
+| firstidchar idchar* { return process_id(lexbuf); }
+| '_'         idchar+ { return process_id(lexbuf); }
 /* Qualified identifiers and type names (e.g., Foo::bar) */
-| (['A'-'Z''a'-'z']['A'-'Z''a'-'z''0'-'9''_']*':'':')+
-  ['A'-'Z''a'-'z''_']['A'-'Z''a'-'z''0'-'9''_']*
-      { return process_qual_id(lexbuf); }
+| (firstidchar idchar* ':' ':')+ (firstidchar | '_') idchar*
+     { return process_qual_id(lexbuf); }
 /* Type variables */
-| '`'['A'-'Z''a'-'z''_']['A'-'Z''a'-'z''0'-'9''_']*
+| '`' (firstidchar | '_') idchar*
    { token_string = *(get_symbol(str_index_lbuf(lexbuf))); 
-      return TYPE_VAR; }
+     return TYPE_VAR; }
 /* Cyclone qualifiers (e.g., @zeroterm, @tagged, etc.) */
-| '@' { return cyc_qual(lexbuf); }
+/* HACK: If we see @taggedfoo then this should be lexed as '@' 'taggedfoo', not
+ * '@tagged' 'foo' -- so we find a notidchar and back up the lexer */
+/* FIX: with more aggressive back-up, we can get these 
+   string-constants out of the lexer */
+| "@tagged"notidchar      { --lexbuf->lex_curr_pos; return TAGGED_QUAL; }
+| "@notnull"notidchar     { --lexbuf->lex_curr_pos; return NOTNULL_QUAL; }
+| "@zeroterm"notidchar    { --lexbuf->lex_curr_pos; return ZEROTERM_QUAL; }
+| "@nozeroterm"notidchar  { --lexbuf->lex_curr_pos; return NOZEROTERM_QUAL; }
+| "@extensible"notidchar  { --lexbuf->lex_curr_pos; return EXTENSIBLE_QUAL; }
+| "@resetable"notidchar   { --lexbuf->lex_curr_pos; return RESETABLE_QUAL; }
+| "@region"notidchar      { --lexbuf->lex_curr_pos; return REGION_QUAL; }
+| "@numelts"notidchar     { --lexbuf->lex_curr_pos; return NUMELTS_QUAL; }
+| "@thin"notidchar        { --lexbuf->lex_curr_pos; return THIN_QUAL; }
+| "@fat"notidchar         { --lexbuf->lex_curr_pos; return FAT_QUAL; }
+| "@nullable"notidchar    { --lexbuf->lex_curr_pos; return NULLABLE_QUAL; }
+| "@requires"notidchar    { --lexbuf->lex_curr_pos; return REQUIRES_QUAL; }
+| "@ensures"notidchar     { --lexbuf->lex_curr_pos; return ENSURES_QUAL; }
+
 /* Integer constants */
-| '0'['x''X']['0'-'9''a'-'f''A'-'F']+(((['u''U'])?(['l''L'])?(['l''L'])?)|
-                                      ((['l''L'])?(['l''L'])?(['u''U'])?))
+| '0'['x''X']['0'-'9''a'-'f''A'-'F']+ cnstsuffix
       { token_int = intconst(lexbuf,2,0,16);
         return INTEGER_CONSTANT; }
-| '0'['0'-'7']*(((['u''U'])?(['l''L'])?(['l''L'])?)|
-                                      ((['l''L'])?(['l''L'])?(['u''U'])?))
+| '0'['0'-'7']* cnstsuffix
       { token_int = intconst(lexbuf,0,0,8);
         return INTEGER_CONSTANT; }
-| '0'['0'-'9']+(((['u''U'])?(['l''L'])?(['l''L'])?)|
-                                      ((['l''L'])?(['l''L'])?(['u''U'])?))
+| '0'['0'-'9']+ cnstsuffix
       /* This is really an error case according to OSI C --
          the leading 0 indicates this should be in octal. */
       /* FIX: print a warning message? */
       { token_int = intconst(lexbuf,0,0,10);
         return INTEGER_CONSTANT; }
-| ['1'-'9']['0'-'9']*(((['u''U'])?(['l''L'])?(['l''L'])?)|
-                                      ((['l''L'])?(['l''L'])?(['u''U'])?))
+| ['1'-'9']['0'-'9']* cnstsuffix
       { token_int = intconst(lexbuf,0,0,10);
         return INTEGER_CONSTANT; }
-/* Floating-point constants */
-| ['0'-'9']+['e''E']['+''-']?['0'-'9']+['f''F''l''L']?
-      { token_string = lexeme(lexbuf);
-        return FLOATING_CONSTANT; }
-| ((['0'-'9']+'.')|(['0'-'9']+'.'['0'-'9']+)|('.'['0'-'9']+))
+/* Floating-point constants -- must come after int constants */
+| ((['0'-'9']+ ('.'?)) | (['0'-'9']+'.'['0'-'9']+) | ('.'['0'-'9']+))
   (['e''E']['+''-']?['0'-'9']+)?['f''F''l''L']?
       { token_string = lexeme(lexbuf);
         return FLOATING_CONSTANT; }
@@ -874,11 +882,10 @@ rule token = parse
 /* swap operation */
 | ":=:" { return SWAP; }
 /* comments, directives, whitespace, etc. */
-| "#"[^ '\n' '\r']*(newline)      
+| "#" notnewline* newline
   { process_directive(lexeme(lexbuf)); return token(lexbuf); }
-| [' ' '\t' '\v' '\f']+           { return token(lexbuf); }
-| newline                         { inc_linenumber(); return token(lexbuf); }
-| "//"[^'\n' '\r']* newline       { inc_linenumber(); return token(lexbuf); }
+| [' ' '\t' '\v' '\f']+ { return token(lexbuf); }
+| ("//" notnewline*)? newline { inc_linenumber(); return token(lexbuf); }
 | "/*"  { comment_depth = 1; 
 	  runaway_start = lexeme_start(lexbuf); 
 	  comment(lexbuf); 
@@ -924,7 +931,7 @@ rule token = parse
             { token_char = cnst2char(intconst(lexbuf,2,1,8),lexbuf);
               return CHARACTER_CONSTANT;
             }
-/* hex character escapes */
+/* hex character escapes */ /* FIX? shouldn't this be A-Fa-f */
 | "'\\x" ['0'-'9''A'-'Z''a'-'z']+ "'"
             { token_char = cnst2char(intconst(lexbuf,3,1,16),lexbuf);
               return CHARACTER_CONSTANT;
@@ -937,25 +944,6 @@ rule token = parse
 | eof { return -1; }
 /* Default case */
 | _   { return (int)(lexeme_char(lexbuf,0)); }
-
-and cyc_qual = parse
-/* HACK: If we see @taggedfoo then this should be lexed as '@' 'taggedfoo', not
- * '@tagged' 'foo' -- so we back up the lexer if necessary -- I don't
- * see an easier way to do this... */
-  "tagged"notidchar      { --lexbuf->lex_curr_pos; return TAGGED_QUAL; }
-| "notnull"notidchar     { --lexbuf->lex_curr_pos; return NOTNULL_QUAL; }
-| "zeroterm"notidchar    { --lexbuf->lex_curr_pos; return ZEROTERM_QUAL; }
-| "nozeroterm"notidchar  { --lexbuf->lex_curr_pos; return NOZEROTERM_QUAL; }
-| "extensible"notidchar  { --lexbuf->lex_curr_pos; return EXTENSIBLE_QUAL; }
-| "resetable"notidchar   { --lexbuf->lex_curr_pos; return RESETABLE_QUAL; }
-| "region"notidchar      { --lexbuf->lex_curr_pos; return REGION_QUAL; }
-| "numelts"notidchar     { --lexbuf->lex_curr_pos; return NUMELTS_QUAL; }
-| "thin"notidchar        { --lexbuf->lex_curr_pos; return THIN_QUAL; }
-| "fat"notidchar         { --lexbuf->lex_curr_pos; return FAT_QUAL; }
-| "nullable"notidchar    { --lexbuf->lex_curr_pos; return NULLABLE_QUAL; }
-| "requires"notidchar    { --lexbuf->lex_curr_pos; return REQUIRES_QUAL; }
-| "ensures"notidchar     { --lexbuf->lex_curr_pos; return ENSURES_QUAL; }
-| _                      { --lexbuf->lex_curr_pos; return '@'; }
 
 and scan_charconst = parse
     "'"     { return 0; }
@@ -1021,17 +1009,16 @@ and strng = parse
   | "\\?"           { store_string_char('?');  return 1; }
   /* octal character escapes */
   | "\\" ['0'-'7']['0'-'7']?['0'-'7']?
-                    { store_string_char(cnst2char(intconst(lexbuf,1,0,8),lexbuf));
-                      return 1;
-                    }
+            { store_string_char(cnst2char(intconst(lexbuf,1,0,8),lexbuf));
+              return 1;
+            }
   /* hex character escapes FIX? any length okay? */
   | "\\x" ['0'-'9''A'-'F''a'-'f']+
                     { store_string_char(cnst2char(intconst(lexbuf,2,0,16),lexbuf));
                       return 1;
                     }
-  | [^ '"''\\''\n']   /* NOT double quote, backslash, or newline */
-                    { /* for efficiency, should have a while loop here */
-                      store_string_char (lexeme_char(lexbuf,0));
+  | [^ '"''\\''\n']+ /* NOT double quote, backslash, or newline */
+                    { store_string(lexeme(lexbuf));
 		      return 1; }
   | newline         { inc_linenumber(); 
                       runaway_err("string ends in newline",lexbuf);
@@ -1079,9 +1066,8 @@ and wstrng = parse
                     { store_string(lexeme(lexbuf));
                       return 1;
                     }
-  | [^ '"''\\''\n']   /* NOT double quote, backslash, or newline */
-                    { /* for efficiency, should have a while loop here */
-                      store_string_char (lexeme_char(lexbuf,0));
+  | [^ '"''\\''\n']+  /* NOT double quote, backslash, or newline */
+                    { store_string(lexeme(lexbuf));
 		      return 1; }
   | newline         { inc_linenumber();
                       runaway_err("string ends in newline",lexbuf);
@@ -1105,7 +1091,7 @@ and comment = parse
  | '*'              { return comment(lexbuf); }
  | '/'              { return comment(lexbuf); }
  | newline          { inc_linenumber(); return comment(lexbuf); }
- | [^ '\n' '\r' '/' '*']+     { return comment(lexbuf); }
+ | [^ '\n' '\r' '/' '*']+  { return comment(lexbuf); }
 
 /* HACK: we're counting on there being no comments between "asm" and
    "volatile" and the first paren. */
@@ -1200,15 +1186,15 @@ void lex_init(bool include_cyclone_keywords) {
     dyn_trie_symbols_t idt = NULL;
     idt :=: ids_trie;
     let DynTrieSymbols{dyn,...} = *idt;
-    Core::free_ukey(dyn);
-    Core::ufree(idt);
+    free_ukey(dyn);
+    ufree(idt);
   }
   if (typedefs_trie != NULL) {
     dyn_trie_t tdefs = NULL;
     tdefs :=: typedefs_trie;
     let DynTrie{dyn,...} = *tdefs;
-    Core::free_ukey(dyn);
-    Core::ufree(tdefs);
+    free_ukey(dyn);
+    ufree(tdefs);
   }
   // Now allocate dynamic regions for the tries
   let NewDynamicRegion{id_dyn} = new_ukey();

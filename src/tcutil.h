@@ -25,7 +25,6 @@
 namespace Tcutil {
 using List;
 using Absyn;
-using Position;
 using Tcenv;
 
 extern `a impos(string_t fmt, ... inject parg_t<`r2> ap)

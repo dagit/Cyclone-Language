@@ -29,7 +29,6 @@ namespace Absynpp {
 }
 using Core;
 using List;
-using Position;
 
 //FJS -- hack this in here until we create a file such as flags.cyc
 namespace Cyclone{ 
@@ -117,7 +116,7 @@ tqual_t combine_tqual(tqual_t x,tqual_t y) {
 	       x.q_volatile || y.q_volatile,
 	       x.q_restrict || y.q_restrict,
                x.real_const || y.real_const,
-               segment_join(x.loc,y.loc));
+               Position::segment_join(x.loc,y.loc));
 }
 
 tqual_t empty_tqual(seg_t loc) { return Tqual(false,false,false,false,loc); }

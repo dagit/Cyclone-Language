@@ -28,7 +28,6 @@
 
 #include <dict.h>
 #include <string.h>
-#include <position.h>
 #include "absynpp.h"
 #include "tc.h"
 #include "parse.h"

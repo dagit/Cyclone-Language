@@ -28,15 +28,15 @@ static List::list_t<stringptr_t> warning_msgs = NULL;
 
 // we batch warnings because we have to parse the file to determine
 // line and column information.
-void vwarn(seg_t sg, string_t fmt, parg_t ? ap) {
+void vwarn(seg_t loc, string_t fmt, parg_t ? ap) {
   string_t msg = vrprintf(Core::heap_region,fmt,ap);
-  warning_segs = new List::List(sg,      warning_segs);
+  warning_segs = new List::List(loc,      warning_segs);
   warning_msgs = new List::List(new msg, warning_msgs);
 }
 
-void warn(seg_t sg, string_t fmt, ... inject parg_t ap)
+void warn(seg_t loc, string_t fmt, ... inject parg_t ap)
   __attribute__((format(printf,2,3))) {
-  vwarn(sg, fmt, ap);
+  vwarn(loc, fmt, ap);
 }
 void flush_warnings() {
   if(warning_segs == NULL)
@@ -54,9 +54,13 @@ void flush_warnings() {
   fflush(stderr);
 }
 
+void verr(seg_t loc, string_t fmt, parg_t ? ap) {
+ Position::post_error(Position::mk_err(loc,vrprintf(Core::heap_region,fmt,ap)));
+}
+
 void err(seg_t loc, string_t fmt, ... inject parg_t ap)
   __attribute__((format(printf,2,3))) {
- Position::post_error(Position::mk_err(loc,vrprintf(Core::heap_region,fmt,ap)));
+  verr(loc, fmt, ap);
 }
 
 `a impos(string_t fmt, ... inject parg_t ap)

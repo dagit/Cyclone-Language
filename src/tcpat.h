@@ -23,7 +23,6 @@
 
 namespace Tcpat {
 using List;
-using Position;
 using Absyn;
 using Tcenv;
 

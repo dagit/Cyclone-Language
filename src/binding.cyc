@@ -38,7 +38,6 @@ using Warn;
 namespace Binding;
 
 typedef Dict::dict_t<`a,`b> dict_t<`a,`b>;
-typedef Position::seg_t seg_t;
 
 datatype exn {BindingError};
 

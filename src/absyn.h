@@ -77,7 +77,8 @@ namespace Tcpat {
 namespace Absyn {
   using Core;
   using List;
-  using Position;
+
+  typedef Position::seg_t seg_t;
   
   typedef stringptr_t field_name_t; // field names (for structs, etc.)
   typedef stringptr_t var_t;        // variables are string pointers

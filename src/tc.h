@@ -27,7 +27,6 @@ namespace Tc {
 using List;
 using Absyn;
 using Tcenv;
-using Position;
 
 extern bool aggressive_warn;
 

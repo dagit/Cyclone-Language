@@ -26,9 +26,7 @@
 namespace Tcenv {
 using Core;
 using List;
-using Dict;
 using Absyn;
-using Position;
 
 // This is thrown whenever we try to lookup a local variable but we're
 // not within a function definition...
@@ -54,13 +52,13 @@ typedef datatype Resolved @`r resolved_t<`r>;
 // FIX: We should tree-shake the type declarations too!
 extern struct Genv<`g::R> {
   region_t<`g> grgn;
-  dict_t<qvar_t,aggrdecl_t@,`g>     aggrdecls;
-  dict_t<qvar_t,datatypedecl_t@,`g> datatypedecls;
-  dict_t<qvar_t,enumdecl_t@,`g>     enumdecls;
+  Dict::dict_t<qvar_t,aggrdecl_t@,`g>     aggrdecls;
+  Dict::dict_t<qvar_t,datatypedecl_t@,`g> datatypedecls;
+  Dict::dict_t<qvar_t,enumdecl_t@,`g>     enumdecls;
   // no indirection b/c no redeclaration
-  dict_t<qvar_t,typedefdecl_t,`g>   typedefs; 
+  Dict::dict_t<qvar_t,typedefdecl_t,`g>   typedefs; 
   // bool for tree-shaking
-  dict_t<qvar_t,$(resolved_t,bool)@`g,`g> ordinaries;
+  Dict::dict_t<qvar_t,$(resolved_t,bool)@`g,`g> ordinaries;
 };
 typedef struct Genv<`r> @`r genv_t<`r>;
 

@@ -22,11 +22,13 @@
 #include <position.h>
 
 namespace Warn {
-  void vwarn(Position::seg_t sg, string_t fmt, parg_t ? ap);
+  void vwarn(Position::seg_t loc, string_t fmt, parg_t ? ap);
 
-  void warn(Position::seg_t sg, string_t fmt, ... inject parg_t ap)
+  void warn(Position::seg_t loc, string_t fmt, ... inject parg_t ap)
     __attribute__((format(printf,2,3)));
   void flush_warnings();
+
+  void verr(Position::seg_t loc, string_t fmt, parg_t ? ap);
 
   void err(Position::seg_t loc, string_t fmt, ... inject parg_t ap)
     __attribute__((format(printf,2,3)));

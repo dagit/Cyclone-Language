@@ -22,13 +22,11 @@
 #include <string.h>
 #include "tcutil.h"
 #include "absynpp.h"
-
 using Core;
 using List;
 using Absyn;
 using Tcutil;
 using Absynpp;
-using Position;
 
 namespace Tcdecl;
 

@@ -37,7 +37,6 @@
 #include "new_control_flow.h"
 using Core;
 using List;
-using Position;
 using Absyn;
 using Absynpp;
 using Tcenv;
