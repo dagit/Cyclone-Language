@@ -371,17 +371,16 @@ sz=_get_arr_size(s,sizeof(char));for(i=0;i < sz;i ++){if(((const char*)s.curr)[(
 i]== '\000')return i;}return i;}int Cyc_strcmp(struct _tagged_arr s1,struct
 _tagged_arr s2){if(s1.curr == s2.curr)return 0;{int i=0;unsigned int sz1=
 _get_arr_size(s1,sizeof(char));unsigned int sz2=_get_arr_size(s2,sizeof(char));
-unsigned int minsz=sz1 < sz2?sz1: sz2;(minsz <= sz1?minsz <= sz2: 0)?0:((int(*)(struct
-_tagged_arr assertion,struct _tagged_arr file,unsigned int line))Cyc___assert_fail)(({
-const char*_tmp0="minsz <= sz1 && minsz <= sz2";_tag_arr(_tmp0,sizeof(char),
-_get_zero_arr_size(_tmp0,29));}),({const char*_tmp1="string.cyc";_tag_arr(_tmp1,
-sizeof(char),_get_zero_arr_size(_tmp1,11));}),60);while(i < minsz){char c1=*((
-const char*)_check_unknown_subscript(s1,sizeof(char),i));char c2=*((const char*)
-_check_unknown_subscript(s2,sizeof(char),i));if(c1 == '\000'){if(c2 == '\000')
-return 0;else{return - 1;}}else{if(c2 == '\000')return 1;else{int diff=c1 - c2;if(diff
-!= 0)return diff;}}++ i;}if(sz1 == sz2)return 0;if(minsz < sz2){if(*((const char*)
-_check_unknown_subscript(s2,sizeof(char),i))== '\000')return 0;else{return - 1;}}
-else{if(*((const char*)_check_unknown_subscript(s1,sizeof(char),i))== '\000')
+unsigned int minsz=sz1 < sz2?sz1: sz2;(minsz <= _get_arr_size(s1,sizeof(char))?minsz
+<= _get_arr_size(s2,sizeof(char)): 0)?0:((int(*)(struct _tagged_arr assertion,
+struct _tagged_arr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp0="minsz <= s1.size && minsz <= s2.size";
+_tag_arr(_tmp0,sizeof(char),_get_zero_arr_size(_tmp0,37));}),({const char*_tmp1="string.cyc";
+_tag_arr(_tmp1,sizeof(char),_get_zero_arr_size(_tmp1,11));}),60);while(i < minsz){
+char c1=((const char*)s1.curr)[i];char c2=((const char*)s2.curr)[i];if(c1 == '\000'){
+if(c2 == '\000')return 0;else{return - 1;}}else{if(c2 == '\000')return 1;else{int diff=
+c1 - c2;if(diff != 0)return diff;}}++ i;}if(sz1 == sz2)return 0;if(minsz < sz2){if(*((
+const char*)_check_unknown_subscript(s2,sizeof(char),i))== '\000')return 0;else{
+return - 1;}}else{if(*((const char*)_check_unknown_subscript(s1,sizeof(char),i))== '\000')
 return 0;else{return 1;}}}}int Cyc_strptrcmp(struct _tagged_arr*s1,struct _tagged_arr*
 s2){return Cyc_strcmp((struct _tagged_arr)*s1,(struct _tagged_arr)*s2);}inline
 static int Cyc_ncmp(struct _tagged_arr s1,unsigned int len1,struct _tagged_arr s2,

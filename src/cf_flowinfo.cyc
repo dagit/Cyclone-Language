@@ -16,7 +16,6 @@
    along with the Cyclone compiler; see the file COPYING. If not,
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
-
 #include <core.h>
 #include <list.h>
 #include <set.h>
@@ -28,7 +27,6 @@
 
 #define CF_FLOWINFO_CYC
 #include "cf_flowinfo.h"
-
 using Absyn;
 using List;
 using Absynpp;
@@ -48,8 +46,9 @@ absRval_t esc_none     = &esc_none_v;
 absRval_t esc_this     = &esc_this_v;
 absRval_t esc_all      = &esc_all_v;
 
-static place_set_t * mt_place_set_opt = NULL;
 place_set_t mt_place_set() {
+  static place_set_t * mt_place_set_opt = NULL;
+
   if(mt_place_set_opt == NULL)
     mt_place_set_opt = new Set::empty(place_cmp);
   return *mt_place_set_opt;
@@ -60,10 +59,10 @@ int root_cmp(root_t r1, root_t r2) {
   if(((int)r1) == ((int)r2))
     return 0;
   switch ($(r1,r2)) {
-  case $(&VarRoot(vd1),&VarRoot(vd2)): return ((int) vd1) - ((int) vd2);
+  case $(&VarRoot(vd1),&VarRoot(vd2)): return vd1 - vd2;
   case $(&VarRoot(_),_): return -1;
   case $(_,&VarRoot(_)): return 1;
-  case $(&MallocPt(e1,_),&MallocPt(e2,_)): return ((int) e1) - ((int) e2);
+  case $(&MallocPt(e1,_),&MallocPt(e2,_)): return e1 - e2;
   case $(&MallocPt(_,_),_): return -1;
   case $(_,&MallocPt(_,_)): return 1;
   case $(&InitParam(i1,_), &InitParam(i2,_)): return i1-i2;
@@ -102,8 +101,8 @@ static mstringptr_t place2string(place_t p) {
 //   (If we ever have memory kinds, then we either need to figure out field's
 //    instantiated types or not allow partial initialization of such fields.)
 // Note: We could memoize answers here.
-absRval_t i_typ_to_absrval(bool allow_zeroterm,
-                           type_t t, absRval_t leafval) {
+static absRval_t i_typ_to_absrval(bool allow_zeroterm,
+				  type_t t, absRval_t leafval) {
   if(!is_union_type(t))
     switch(Tcutil::compress(t)) {
     case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
@@ -132,9 +131,18 @@ absRval_t i_typ_to_absrval(bool allow_zeroterm,
       return new Aggregate(d);
     case &ArrayType(ArrayInfo{et,_,_,zeroterm}) && conref_def(false,zeroterm):
       // special case for zero-terminated arrays of bits-only things -- 
-      // here, we initialize them at translation by putting a 0 in at
-      // the end.
+      // here, we initialize them at translation by putting a 0 in at the end.
       return (allow_zeroterm && Tcutil::bits_only(et)) ? unknown_all : leafval;
+    case &TagType(t):
+      // KLUDGE: if a singleton is initialized, we know the value
+      // Note: It is unsound to use TagCmps if the value is uninitialized!
+      switch(leafval) {
+      case &UnknownR(AllIL):
+      case &Esc(AllIL):
+      case Zero:
+      case NotZeroAll: return new TagCmps(list(new TagCmp(Eq,t)));
+      default: return leafval;
+      }
     default: break;
     }
   return Tcutil::bits_only(t) ? unknown_all : leafval;
@@ -242,8 +250,6 @@ static struct InitlevelEnv {
   flowdict_t d;
   list_t<place_t> seen;
 };
-static char dummy_str_v[1]ZEROTERM = "";
-static const char ? dummy_str = dummy_str_v;
 static initlevel_t initlevel_approx(absRval_t r) {
   switch(r) {
   case &UnknownR(il): return il;
@@ -251,6 +257,10 @@ static initlevel_t initlevel_approx(absRval_t r) {
   case Zero:
   case NotZeroAll:    return AllIL;
   case NotZeroThis:   return ThisIL;
+    // KLUDGE: Maybe r is actually uninitialized, but then whatever test
+    //  gave it TagCmps would fail.  In fact, that could only happen for
+    //  a tag_t<`a> place because ints are always considered initialized
+  case &TagCmps(_):   return AllIL;
   default: throw new Core::Impossible("initlevel_approx");
   }
 }
@@ -320,7 +330,7 @@ static struct AssignEnv<`r::R> {
   flowdict_t       d;
   Position::seg_t  loc;
 };
-static absRval_t assign_place_inner(struct AssignEnv<`r> @ env, `a a,
+static absRval_t assign_place_inner(struct AssignEnv @ env, `a a,
 				    absRval_t oldval, absRval_t newval) {
   // assignments to escaped places must be fully-init because other aliases
   // might assume fully-init.  Always causes place to be added for same reason.
@@ -346,7 +356,7 @@ static absRval_t assign_place_inner(struct AssignEnv<`r> @ env, `a a,
   default: return newval;
   }
 }
-static absRval_t assign_place_outer(struct AssignEnv<`r> @ env, 
+static absRval_t assign_place_outer(struct AssignEnv @ env, 
 				    list_t<field_name_t> fs,
 				    absRval_t oldval, absRval_t newval) {
   if(fs == NULL) return assign_place_inner(env,0,oldval,newval);
@@ -388,6 +398,34 @@ static struct AfterEnv<`r::R> {
 };
 typedef struct AfterEnv<`r1> @`r2 afterenv_t<`r1,`r2>;
 
+static bool absRval_lessthan_approx(`a ignore, absRval_t r1, absRval_t r2);
+
+static list_t<tag_cmp_t> join_tag_cmps(list_t<tag_cmp_t,`H> l1, 
+				       list_t<tag_cmp_t,`H> l2) {
+  if(l1==l2) return l1; // if not ptr-equal, just build a new list
+  let res = NULL;
+  for(; l2 != NULL; l2 = l2->tl) {
+    let &TagCmp(cmp2,bd2) = l2->hd;
+    // look through l1 for the best joined comparison we can find
+    bool found = false;
+    primop_t joined_cmp = Lte; // definite assignment too weak
+    for(let old = l1; old != NULL; old = old->tl) {
+      let &TagCmp(cmp1,bd1) = old->hd;
+      // typecmp heavyweight? (could at least check ptrequal first)
+      if(Tcutil::typecmp(bd2,bd1) == 0) {
+	found = true;
+	if(cmp1==cmp2) {
+	  joined_cmp = cmp1;
+	  break;
+	}
+      }
+    }
+    if(found)
+      res = new List(new TagCmp(joined_cmp,bd2), res);
+  }
+  return res;
+}
+
 // note: There is another reasonable policy for losing an alias to AllInit:
 //   (when destination unescaped!)
 //   still make the result ThisInit and **don't** lose the aliases downstream.
@@ -418,6 +456,15 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
     if(new_d == d2) return r2;
     return new Aggregate(new_d);
     
+  case $(&TagCmps(l1),&TagCmps(l2)):
+    let new_l = join_tag_cmps(l1,l2);
+    if(new_l==l1) return r1;
+    return new TagCmps(new_l);
+
+    // KLUDGE: see above -- TagCmps are fully initialized
+  case $(&TagCmps(_),_): return r2;
+  case $(_,&TagCmps(_)): return r1;
+    
   default: break;
   }
   initlevel_t il1 = initlevel(env->d1,r1);
@@ -438,7 +485,8 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
     }
   }
 }
-bool same_relop(reln_op_t r1,reln_op_t r2) {
+
+static bool same_relop(reln_op_t r1,reln_op_t r2) {
   if (r1 == r2) return true;
   switch ($(r1,r2)) {
   case $(&EqualConst(c1),&EqualConst(c2)): return c1 == c2;
@@ -449,7 +497,7 @@ bool same_relop(reln_op_t r1,reln_op_t r2) {
   default: return false;
   }
 }
-relns_t join_relns(relns_t r1s, relns_t r2s) {
+static relns_t join_relns(relns_t r1s, relns_t r2s) {
   if (r1s == r2s) return r1s;
   //  fprintf(stderr,"join on ["); print_relns(r1s); 
   //  fprintf(stderr,"] and ["); print_relns(r2s); fprintf(stderr,"]\n");
@@ -493,6 +541,30 @@ flow_t join_flow(place_set_t* all_changed, flow_t f1, flow_t f2){
   }
 }
 
+$(flow_t,absRval_t) join_flow_and_rval(place_set_t* all_changed,
+				       $(flow_t,absRval_t) pr1,
+				       $(flow_t,absRval_t) pr2) {
+  // possibly wasteful because it could do the escape shtuff twice
+  // and it can because of && and || using 0 which abstracts to Zero. Sigh.
+  let $(f1,r1) = pr1;
+  let $(f2,r2) = pr2;
+  flow_t outflow = join_flow(all_changed,f1,f2);
+  switch($(f1,f2,outflow)) {
+  case $(BottomFL,_,_): return $(outflow,r2);
+  case $(_,BottomFL,_): return $(outflow,r1);
+  case $(&ReachableFL(d1,_),&ReachableFL(d2,_), &ReachableFL(outd,relns)):
+    if(absRval_lessthan_approx(0,r1,r2)) return $(outflow,r2);
+    if(absRval_lessthan_approx(0,r2,r1)) return $(outflow,r1);
+    region rgn {
+      let env  = JoinEnv(rnew(rgn) EscPile(rgn,NULL),d1,d2);
+      let outr = join_absRval(&env,0,r1,r2);
+      return $(new ReachableFL(escape_these(env.pile,all_changed,outd),relns),
+	       outr);
+    }
+  default: throw new Core::Impossible("join_flow_and_rval: BottomFL outflow");
+  }
+}
+
 static absRval_t after_absRval_d(afterenv_t,field_name_t,absRval_t,absRval_t);
 static absRval_t after_absRval(afterenv_t env, absRval_t r1, absRval_t r2) {
   bool changed1 = env->changed == One || Set::member(env->chg1,env->curr_place);
@@ -518,7 +590,7 @@ static absRval_t after_absRval(afterenv_t env, absRval_t r1, absRval_t r2) {
     if(new_d == d1) return r1;
     if(new_d == d2) return r2;
     return new Aggregate(new_d);
-  default: throw new Core::Impossible("after_pathinfo -- non-aggregates!");
+  default: throw new Core::Impossible("after_absRval -- non-aggregates!");
   }
 }
 static absRval_t after_absRval_d(afterenv_t env, field_name_t key,
@@ -571,6 +643,24 @@ flow_t after_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
   }
 }
 
+static bool tag_cmps_lessthan_approx(list_t<tag_cmp_t> l1, 
+				     list_t<tag_cmp_t> l2) {
+  // does a simple subset rather than a semantic implication.  Hey we're approx.
+  for(; l2 != NULL; l2 = l2->tl) {
+    let &TagCmp(cmp1,bd1) = l2->hd;
+    let l = l1;
+    for(; l != NULL; l=l->tl) {
+      let &TagCmp(cmp2,bd2) = l->hd;
+      // typecmp heavyweight? (could at least check ptrequal first)
+      if(cmp2 == cmp1 && Tcutil::typecmp(bd2,bd1) == 0)
+	break;
+    }
+    if(l==NULL)
+      return false;
+  }
+  return true;
+}
+
 // WARNING: This is where we cheat ("approx") for performance.
 static bool absRval_lessthan_approx(`a ignore, absRval_t r1, absRval_t r2) {
   if(r1 == r2) return true;
@@ -586,6 +676,8 @@ static bool absRval_lessthan_approx(`a ignore, absRval_t r1, absRval_t r2) {
   case $(_, NotZeroAll): return false;
   case $(&Esc(_),&Esc(_)): break;
   case $(&Esc(_),_): return false;
+  case $(&TagCmps(l1),&TagCmps(l2)): return tag_cmps_lessthan_approx(l1,l2);
+  case $(_,&TagCmps(_)): return false;
   default: break;
   }
   switch($(initlevel_approx(r1), initlevel_approx(r2))) {
@@ -597,7 +689,7 @@ static bool absRval_lessthan_approx(`a ignore, absRval_t r1, absRval_t r2) {
   }
 }
 
-bool relns_approx(relns_t r2s, relns_t r1s) {
+static bool relns_approx(relns_t r2s, relns_t r1s) {
   if (r1s == r2s) return true;
   //fprintf(stderr,"approx on ["); print_relns(r1s); 
   //fprintf(stderr,"] and ["); print_relns(r2s); fprintf(stderr,"]");
@@ -611,12 +703,9 @@ bool relns_approx(relns_t r2s, relns_t r1s) {
         break;
       }
     }
-    if (!found) {
-      //fprintf(stderr,"--false\n"); 
+    if (!found)
       return false; 
-    }
   }
-  //fprintf(stderr,"--true\n");
   return true;
 }
 
@@ -770,7 +859,7 @@ relns_t reln_assign_exp(relns_t r, exp_t e1, exp_t e2) {
   return r;
 }
 
-void print_reln(reln_t r) {
+static void print_reln(reln_t r) {
   fprintf(stderr,"%s",qvar2string(r->vd->name));
   switch (r->rop) {
   case &EqualConst(c): fprintf(stderr,"==%d",c); break;
@@ -780,7 +869,6 @@ void print_reln(reln_t r) {
   case &LessEqSize(vd): fprintf(stderr,"<=%s.size",qvar2string(vd->name));break;
   }
 }
-
 void print_relns(relns_t r) {
   for (; r != NULL; r = r->tl) {
     print_reln(r->hd);

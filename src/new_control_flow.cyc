@@ -247,9 +247,10 @@ static flow_t notzero(analenv_t env, flow_t inflow, flow_t outflow,
     }
   }
 }
-// same comments as for previous function
+
+
 static $(flow_t,flow_t) splitzero(analenv_t env, flow_t inflow, flow_t outflow,
-				  exp_t e, initlevel_t il) {
+                                  exp_t e, initlevel_t il) {
   switch(outflow) {
   case BottomFL: return $(outflow,outflow);
   case &ReachableFL(d,relns):
@@ -258,10 +259,52 @@ static $(flow_t,flow_t) splitzero(analenv_t env, flow_t inflow, flow_t outflow,
     case &PlaceL(p): // okay b/c p can't be escaped (it's Unknown) 
       absRval_t nzval = il==AllIL ? NotZeroAll : NotZeroThis;
       return 
-	$(new ReachableFL(assign_place(e->loc,d,env->all_changed,p,nzval),
+        $(new ReachableFL(assign_place(e->loc,d,env->all_changed,p,nzval),
                           relns),
-	  new ReachableFL(assign_place(e->loc,d,env->all_changed,p,Zero),
+          new ReachableFL(assign_place(e->loc,d,env->all_changed,p,Zero),
                           relns));
+    }
+  }
+}
+
+// same comments as for previous function, only does anything if r2 is TagCmps
+// ASSUMES all cmp primops are Lt, Lte, or Eq
+static flow_t if_tagcmp(analenv_t env, flow_t flow, exp_t e1, 
+			absRval_t r1,  primop_t p,  absRval_t r2) {
+  switch(flow) {
+  case BottomFL: return flow;
+  case &ReachableFL(d,relns):
+    switch (r2) {
+    case &TagCmps(cl2):
+      switch(anal_Lexp(env,flow,e1)[1]) {
+      case UnknownL: return flow;
+      case &PlaceL(pl):
+	list_t new_cl;
+	switch(r1) { 
+	case &TagCmps(cl1): new_cl = cl1; break;
+	  // some choice for these whether to use tags or not
+	case &UnknownR(AllIL):
+	case Zero:
+	case NotZeroAll: new_cl = NULL; break; 
+	default: return flow;
+	}
+	
+	// see assumption above!
+	for(; cl2 != NULL; cl2 = cl2->tl) {
+	  primop_t new_cmp;
+	  switch($(p,cl2->hd->cmp)) {
+	  case $(Lt,_):
+	  case $(_,Lt):  new_cmp = Lt; break;
+	  case $(Eq,Eq): new_cmp = Eq; break;
+	  default: new_cmp = Lte; break;
+	  }
+	  new_cl = new List(new TagCmp(new_cmp, cl2->hd->bd), new_cl);
+	}
+	return new ReachableFL(assign_place(e1->loc,d,env->all_changed,pl,
+					    new TagCmps(new_cl)),
+			       relns);
+      }
+    default: return flow;
     }
   }
 }
@@ -280,12 +323,14 @@ static $(flow_t,absRval_t) anal_derefR(analenv_t env, flow_t inflow,
       if(Tcutil::is_bound_one(bd))
 	switch(r) {
 	case NotZeroAll: 
-	case NotZeroThis: e->annot = new NotZero(relns); break;
+	case NotZeroThis: 
+	  e->annot = new NotZero(relns); 
+	  break;
 	case &AddressOf(p): 
 	  e->annot = new NotZero(relns); 
 	  return $(f,lookup_place(outdict,p));
 	case Zero: 
-	  e->annot = new IsZero(relns);
+	  e->annot = IsZero;
 	  return $(BottomFL,typ_to_absrval(elttype,unknown_all));
 	case &UnknownR(il): f = notzero(env,inflow,f,e,il); fallthru;
 	default: e->annot = new UnknownZ(relns);
@@ -308,15 +353,15 @@ static $(flow_t,absRval_t) anal_derefR(analenv_t env, flow_t inflow,
 // i < x.size to the relations.
 static relns_t add_subscript_reln(relns_t relns, exp_t e1, exp_t e2) {
   switch (e1->r) {
-  case &Var_e(_,&Pat_b(x)):  fallthru(x);
-  case &Var_e(_,&Local_b(x)):fallthru(x);
-  case &Var_e(_,&Param_b(x)):fallthru(x);
+  case &Var_e(_,&Pat_b(x)):   fallthru(x);
+  case &Var_e(_,&Local_b(x)): fallthru(x);
+  case &Var_e(_,&Param_b(x)): fallthru(x);
   case &Var_e(_,&Global_b(x)):
-    if (!x->escapes) {
+    if (!x->escapes)
       switch (e2->r) {
-      case &Var_e(_,&Pat_b(i)):  fallthru(i);
-      case &Var_e(_,&Local_b(i)):fallthru(i);
-      case &Var_e(_,&Param_b(i)):fallthru(i);
+      case &Var_e(_,&Pat_b(i)):   fallthru(i);
+      case &Var_e(_,&Local_b(i)): fallthru(i);
+      case &Var_e(_,&Param_b(i)): fallthru(i);
       case &Var_e(_,&Global_b(i)):
         if (!i->escapes) {
           // we have x[i] -- add i < x.size to relns if not already present.
@@ -334,7 +379,7 @@ static relns_t add_subscript_reln(relns_t relns, exp_t e1, exp_t e2) {
         return relns;
       default: return relns;
       }
-    } else return relns;
+    else return relns;
   default: return relns;
   }
 }
@@ -439,7 +484,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 	  switch(lval) {
 	  case &PlaceL(p): 
 	    outdict = assign_place(e->loc,outdict,env->all_changed,p,rval);
-            relns = reln_assign_exp(relns,e1,e2);
+            relns   = reln_assign_exp(relns,e1,e2);
 	    outflow = new ReachableFL(outdict,relns);
 	    update_tryflow(env, outflow);
 	    return $(outflow, rval);
@@ -602,14 +647,10 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     }  
       
   case &Conditional_e(e1,e2,e3): 
-    // if e2 and e3 are the same rval, we're conservative.  Who cares.
     let $(f1t,f1f) = anal_test(env,inflow,e1);
-    let $(f2, r2)  = anal_Rexp(env,f1t,   e2);
-    let $(f3, r3)  = anal_Rexp(env,f1f,   e3);
-    return $(join_flow(env->all_changed,
-		       use_Rval(env,e2->loc,f2,r2),
-		       use_Rval(env,e3->loc,f3,r3)),
-	     typ_to_absrval(e->topt->v,unknown_all));
+    let pr2        = anal_Rexp(env,f1t,   e2);
+    let pr3        = anal_Rexp(env,f1f,   e3);
+    return join_flow_and_rval(env->all_changed,pr2,pr3);
 
   case &Subscript_e(e1,e2): // FIX: avoid list allocation
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,list(e1,e2));
@@ -634,13 +675,21 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 				 fieldname(Evexp::eval_const_uint_exp(e2)[0])));
       default: throw new Core::Impossible("anal_Rexp: Subscript");
       }
-    default: break;
+    case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_))):
+      // translation to C reports "can't prove in bounds" errors
+      switch(compress_conref(b)->v) {
+      case &Eq_constr(&AbsUpper_b(_)):
+	switch(rvals->tl->hd) {
+	case &TagCmps(cl): e2->annot = new HasTagCmps(cl); break;
+	default: break;
+	}
+	break;
+      default: break;
+      }
+      let $(f3,r) = anal_derefR(env,inflow,f,e1,rvals->hd);
+      return f3==BottomFL ? $(f3,r) : $(f2,r);
+    default: throw new Core::Impossible("anal_Rexp: Subscript -- bad type");
     }
-    let $(f3,r) = anal_derefR(env,inflow,f,e1,rvals->hd);
-    if(f3==BottomFL)
-      return $(f3,r);
-    else
-      return $(f2,r);
 
   case &Tunion_e(es,_,_): fallthru(es); // NULL case handled above
   case &Tuple_e(es):
@@ -797,9 +846,10 @@ static $(flow_t,absLval_t) anal_derefL(analenv_t env, flow_t inflow, flow_t f,
 	  e->annot = new NotZero(relns);
 	  return $(f, new PlaceL(new Place(root, append(flds2,flds))));
 	case Zero: 
-	  e->annot = new IsZero(relns);
+	  e->annot = IsZero;
 	  return $(BottomFL,UnknownL);
 	case &UnknownR(il): f = notzero(env,inflow,f,e,il); fallthru;
+	// Note: I think tag cmps aren't useful here
 	default: e->annot = new UnknownZ(relns);
 	}
       else
@@ -812,7 +862,7 @@ static $(flow_t,absLval_t) anal_derefL(analenv_t env, flow_t inflow, flow_t f,
   }
 }
 
-// Note: we except all exps, just returning UnknownL for non-lvalues b/c of
+// Note: we accept all exps, just returning UnknownL for non-lvalues b/c of
 // how code like notzero and splitzero use this function, but no reason
 // in these cases to track any effects.
 // Note: As with anal_Rexp, it's okay to return immediately on BottomFL.
@@ -852,25 +902,33 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
     case &TupleType(_):
       let fld = fieldname(Evexp::eval_const_uint_exp(e2)[0]);
       return anal_Lexp_rec(env,inflow,e1,new List(fld,flds));
-    default: break;
+    case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_))):
+      let $(f,rvals) = anal_unordered_Rexps(env,inflow,list(e1,e2));
+      let f2 = f;
+      switch(f) {
+      case &ReachableFL(d2,relns):
+	if(initlevel(d2,rvals->tl->hd)==NoneIL)
+	  Tcutil::terr(e2->loc, "expression may not be initialized");
+	let new_relns = add_subscript_reln(relns,e1,e2);
+	if (relns != new_relns)
+	  f2 = new ReachableFL(d2,new_relns);
+	break;
+      default: break;
+      }
+      // translation to C reports "can't prove in bounds" errors
+      switch(compress_conref(b)->v) {
+      case &Eq_constr(&AbsUpper_b(_)):
+	switch(rvals->tl->hd) {
+	case &TagCmps(cl): e2->annot = new HasTagCmps(cl); break;
+	default: break;
+	}
+	break;
+      default: break;
+      }
+      let $(f3,r) = anal_derefL(env,inflow,f,e1,rvals->hd,flds);
+      return f3==BottomFL ? $(f3,r) : $(f2,r);
+    default: throw new Core::Impossible("anal_Lexp: Subscript -- bad type");
     }
-    let $(f,rvals) = anal_unordered_Rexps(env,inflow,list(e1,e2));
-    let f2 = f;
-    switch(f) {
-    case &ReachableFL(d2,relns):
-      if(initlevel(d2,rvals->tl->hd)==NoneIL)
-	Tcutil::terr(e2->loc, "expression may not be initialized");
-      let new_relns = add_subscript_reln(relns,e1,e2);
-      if (relns != new_relns)
-        f2 = new ReachableFL(d2,new_relns);
-      break;
-    default: break;
-    }
-    let $(f3,r) = anal_derefL(env,inflow,f,e1,rvals->hd,flds);
-    if(f3==BottomFL)
-      return $(f3,r);
-    else
-      return $(f2,r);
 
     // KLUDGE: unions (see comment at top of file)
   case &AggrMember_e(e1,fld): 
@@ -891,7 +949,6 @@ static $(flow_t,absLval_t) anal_Lexp(analenv_t env, flow_t inflow, exp_t e) {
 static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
   switch(e->r) {
   case &Conditional_e(e1,e2,e3):
-    // if e2 and e3 are the same rval, we're conservative.  Who cares.
     let $(f1t,f1f) = anal_test(env,inflow,e1);
     let $(f2t,f2f) = anal_test(env,f1t,   e2);
     let $(f3t,f3f) = anal_test(env,f1f,   e3);
@@ -902,40 +959,81 @@ static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
   case &Primop_e(Not,&List(e1,NULL)):          
     let $(f1,f2) = anal_test(env,inflow,e1);
     return $(f2,f1);
-  case &Primop_e(p,es) && p==Eq || p==Neq || p==Lt || p==Lte:
+  case &Primop_e(p,es):
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,es);
     switch(f) {
     case BottomFL: return $(f,f);
     case &ReachableFL(d,relns):
+      let e1 = es->hd;
+      let e2 = es->tl->hd;
       let r1 = rvals->hd;
       let r2 = rvals->tl->hd;
       if(initlevel(d,r1)==NoneIL)
 	Tcutil::terr(es->hd->loc,"expression may not be initialized");
       if(initlevel(d,r2)==NoneIL)
 	Tcutil::terr(es->tl->hd->loc,"expression may not be initialized");
+
+      // zero-splitting, only for Eq and Neq with Zero and Unknown, so can
+      // take precedence over any array-bounds splitting
+      if(p==Eq || p==Neq)
+	switch($(r1,r2)) {
+	case $(&UnknownR(il),Zero): // f is correct for both args b/c unordered
+	  let $(f1,f2) = splitzero(env,f,f,e1,il);
+	  switch(p) { 
+	  case Eq:  return $(f2,f1);
+	  case Neq: return $(f1,f2);
+	  default: throw new Core::Impossible("anal_test, zero-split");
+	  }
+	case $(Zero,&UnknownR(il)):
+	  let $(f1,f2) = splitzero(env,f,f,e2,il);
+	  switch(p) { 
+	  case Eq:  return $(f2,f1);
+	  case Neq: return $(f1,f2);
+	  default: throw new Core::Impossible("anal_test, zero-split");
+	  }
+	default: break;
+	}
+
+      // bounds checking needs unsigned comparisons
+      // this (hoisted) check shouldn't disable any of Greg's stuff because
+      // it always used to either check for unsigned or require x.size,
+      // which is unsigned
+      switch($(Tcutil::compress(e1->topt->v),Tcutil::compress(e2->topt->v))) {
+      case $(&IntType(Unsigned,_),_):
+      case $(_,&IntType(Unsigned,_)):
+      case $(&TagType(_),_):
+      case $(_,&TagType(_)): break;
+      default: return $(f,f);
+      }
+
       switch(p) {
       case Eq: 
-	switch($(r1,r2)) {
-	case $(&UnknownR(il),Zero): // f is correct for both args b/c unordered
-	  let $(f1,f2) = splitzero(env,f,f,es->hd,il);
-	  return $(f2,f1);
-	case $(Zero,&UnknownR(il)):
-	  let $(f1,f2) = splitzero(env,f,f,es->tl->hd,il);
-	  return $(f2,f1);
-	default: return $(f,f);
-	}
+	let ft = if_tagcmp(env,f,e1,r1,Eq,r2);
+	ft = if_tagcmp(env,ft,e2,r2,Eq,r1);
+	return $(ft,f);
       case Neq:
-	switch($(r1,r2)) {
-	case $(&UnknownR(il),Zero): // f is correct for both args b/c unordered
-	  return splitzero(env,f,f,es->hd,il);
-	case $(Zero,&UnknownR(il)):
-	  return splitzero(env,f,f,es->tl->hd,il);
-	default: return $(f,f);
-	}
+	let ff = if_tagcmp(env,f,e1,r1,Eq,r2);
+	ff = if_tagcmp(env,ff,e2,r2,Eq,r1);
+	return $(f,ff);
+      case Gt:
+	let ft = if_tagcmp(env,f,e2,r2,Lt,r1);
+	let ff = if_tagcmp(env,f,e1,r1,Lte,r2);
+	return $(ft,ff);
+      case Gte:
+	let ft = if_tagcmp(env,f,e2,r2,Lte,r1);
+	let ff = if_tagcmp(env,f,e1,r1,Lt,r2);
+	return $(ft,ff);
+
       case Lt:
+	let ft = if_tagcmp(env,f,e1,r1,Lt,r2);
+	let ff = if_tagcmp(env,f,e2,r2,Lte,r1);
+
+	switch(ft) {
+	case BottomFL: throw new Core::Impossible("anal_test, Lt");
+	case &ReachableFL(d2,_): d = d2;
+	}
+
 	// this case tracks most of the inequalities we need for bounds-checking
-	let e1 = es->hd;
-	let e2 = es->tl->hd;
 	switch (e1->r) {
 	  // Note: global arrays are the only thing that don't "escape"
 	case &Var_e(_,&Global_b(v1)) && !v1->escapes: fallthru(v1);
@@ -949,21 +1047,11 @@ static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
 	  case &Var_e(_,&Param_b(v2))  && !v2->escapes:
 	    // check that v1 or v2 is unsigned to ensure this is an
 	    // unsigned comparison
-	    switch ($(Tcutil::compress(v1->type),Tcutil::compress(v2->type))) {
-	    case $(&IntType(Unsigned,B4),_): break;
-	    case $(_,&IntType(Unsigned,B4)): break;
-	    default: return $(f,f);
-	    }
 	    let relns_true = new List(new Reln(v1,new LessVar(v2)),relns);
-	    return $(new ReachableFL(d,relns_true), f);
+	    return $(new ReachableFL(d,relns_true), ff);
 	  case &Const_e(&Int_c(_,i)): 
-	    switch($(Tcutil::compress(v1->type),Tcutil::compress(e2->topt->v))){
-	    case $(&IntType(Unsigned,B4),_): break;
-	    case $(_,&IntType(Unsigned,B4)): break;
-	    default: return $(f,f);
-	    }
 	    let relns_true = new List(new Reln(v1,new LessConst(i)),relns);
-	    return $(new ReachableFL(d,relns_true), f);
+	    return $(new ReachableFL(d,relns_true), ff);
 	  case &Primop_e(Size,&List(e3,_)):
 	    switch (e3->r) {
 	    case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
@@ -972,18 +1060,24 @@ static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
 	    case &Var_e(_,&Param_b(v2))  && !v2->escapes:
 	      // size is always unsigned
 	      let relns_true = new List(new Reln(v1,new LessSize(v2)),relns);
-	      return $(new ReachableFL(d,relns_true), f);
-	    default: return $(f,f);
+	      return $(new ReachableFL(d,relns_true), ff);
+	    default: return $(ft,ff);
 	    }
-	  default: return $(f,f);
+	  default: return $(ft,ff);
 	  }
-	default: return $(f,f);
+	default: return $(ft,ff);
 	}
 	
-	// this case checks for i <= x.size
       case Lte:
-	let e1 = es->hd;
-	let e2 = es->tl->hd;
+	let ft = if_tagcmp(env,f,e1,r1,Lte,r2);
+	let ff = if_tagcmp(env,f,e2,r1,Lt,r1);
+	
+	switch(ft) {
+	case BottomFL: throw new Core::Impossible("anal_test, Lte");
+	case &ReachableFL(d2,_): d = d2;
+	}
+
+	// this case checks for i <= x.size
 	switch (e1->r) {
 	  // Note: global arrays are the only thing that don't "escape"
 	case &Var_e(_,&Global_b(v1)) && !v1->escapes: fallthru(v1);
@@ -999,14 +1093,14 @@ static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
 	    case &Var_e(_,&Param_b(v2))  && !v2->escapes:
 	      // size is always unsigned
 	      let relns_true = new List(new Reln(v1,new LessEqSize(v2)),relns);
-	      return $(new ReachableFL(d,relns_true), f);
-	    default: return $(f,f);
+	      return $(new ReachableFL(d,relns_true), ff);
+	    default: return $(ft,ff);
 	    }
-	  default: return $(f,f);
+	  default: return $(ft,ff);
 	  }
-	default: return $(f,f);
+	default: return $(ft,ff);
 	}
-      default: Tcutil::impos("bad primop guard in new_control_flow:anal_test");
+      default: return $(f,f);
       }
     }
   default: break;
@@ -1026,6 +1120,7 @@ static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
       return $(BottomFL,BottomFL);
     case &UnknownR(il): return splitzero(env,inflow,f,e,il);
     case &Esc(_):       return $(f,f);
+    case &TagCmps(_):   return $(f,f); // may be better to splitzero?
     case &Aggregate(_): throw new Core::Impossible("anal_test");
     }
   }
@@ -1136,9 +1231,6 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s) {
     update_flow(env, guard, e3_outflow);
     return f2f;
 
-    //case &ForArray_s(_):
-    //return impos("forarray not yet implemented!");
-
     // eg. of when this can happen is when destination is end of function
   case &Break_s(NULL): return BottomFL;
   case &Fallthru_s(es,&destclause): 
@@ -1193,7 +1285,7 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s) {
     case BottomFL: break;
     default: Tcutil::terr(s->loc, "last catch clause may implicitly fallthru");
     }
-    return s1_outflow; // really join with scs_outflow, but it's BottomFL;
+    return s1_outflow; // really join with scs_outflow, but it's BottomFL
 
   case &Decl_s(d,s): return anal_stmt(env,anal_decl(env,inflow,d),s);
 

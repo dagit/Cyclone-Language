@@ -317,15 +317,15 @@ type_t array_typ(type_t elt_type, tqual_t tq, exp_opt_t num_elts,
 }
 
 // FILE
-static type_t* file_t_opt = NULL;
 
 // Maybe someday we'll allow FILE objects to live somewhere other than
 // in the heap (by making the runtime interface more flexible).  
 // If so, we'll need a rgn_t argument.
-static string_t sf_str = "__sFILE";
-static stringptr_t sf = &sf_str;
-
 type_t file_typ() {
+  static type_t* file_t_opt = NULL;
+  static string_t sf_str = "__sFILE";
+  static stringptr_t sf = &sf_str;
+
   if(file_t_opt == NULL) {
     typedef_name_t file_t_name = new $((tunion Nmspace)&std_namespace, sf);
     aggrdecl_t sd = new Aggrdecl(StructA,Abstract,file_t_name,NULL,NULL,NULL);
@@ -335,8 +335,9 @@ type_t file_typ() {
   return *file_t_opt;
 }
 
-static type_t* void_star_t_opt = NULL;
 type_t void_star_typ() {
+  static type_t* void_star_t_opt = NULL;
+
   if (void_star_t_opt == NULL)
     void_star_t_opt = new star_typ(VoidType,HeapRgn,empty_tqual(),false_conref);
   return *void_star_t_opt;

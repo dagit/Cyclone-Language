@@ -16,7 +16,6 @@
    along with the Cyclone compiler; see the file COPYING. If not,
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
-
 #ifndef CF_FLOWINFO_H
 #define CF_FLOWINFO_H
 
@@ -28,7 +27,7 @@
 
 // Note: Okasaki's dictionaries may be the wrong thing here because
 //       we're doing a lot of intersections.  I don't know what's better,
-//       but we do have all the dictionary's domains known in advance, so 
+//       but we do have all the dictionarys' domains known in advance, so 
 //       there probably is something better.
 
 // A cute hack to avoid defining the abstract syntax twice.
@@ -74,10 +73,19 @@ EXTERN_CFFLOW struct Reln {
 typedef struct Reln @reln_t;
 typedef List::list_t<reln_t> relns_t;
 
+EXTERN_CFFLOW struct TagCmp {
+  Absyn::primop_t cmp; // for now, MUST be Lt, Lte, or Eq
+  Absyn::type_t   bd;  // IntKind
+};
+typedef struct TagCmp @tag_cmp_t;
+
+  // as with AbsRVal below, HasTagCmps forgets zero-ness which technically
+  // is bad but shouldn't matter in practice.
 xtunion Absyn::AbsynAnnot { 
-  EXTERN_CFFLOW IsZero(relns_t);
+  EXTERN_CFFLOW IsZero;
   EXTERN_CFFLOW NotZero(relns_t);
   EXTERN_CFFLOW UnknownZ(relns_t);
+  EXTERN_CFFLOW HasTagCmps(List::list_t<tag_cmp_t>);
 };
 
 EXTERN_CFFLOW tunion AbsLVal { PlaceL(place_t); UnknownL; };
@@ -93,6 +101,11 @@ EXTERN_CFFLOW tunion AbsRVal {
   UnknownR(initlevel_t);
   Esc(initlevel_t); // as an rval means same thing as UnknownR!!
   AddressOf(place_t);
+  // TagCmps forgets zero-ness which technically is bad but shouldn't
+  // matter in practice (why would an array index also be used in tests?)
+  // and joins punt to UnknownR/Esc when comparing a TagCmp w/ something else
+  // Can always add zero-ness as another field.
+  TagCmps(List::list_t<tag_cmp_t>);
   Aggregate(aggrdict_t);
 };
 
@@ -144,6 +157,9 @@ extern flowdict_t assign_place(Position::seg_t loc, flowdict_t d,
 			       place_set_t * all_changed, place_t<`H,`H> place,
 			       absRval_t r);
 extern flow_t join_flow(place_set_t*,flow_t,flow_t); 
+extern $(flow_t,absRval_t) join_flow_and_rval(place_set_t* all_changed,
+					      $(flow_t,absRval_t) pr1,
+					      $(flow_t,absRval_t) pr2);
 extern flow_t after_flow(place_set_t*,flow_t,flow_t,place_set_t,place_set_t);
   // reset anything that points into rgn to be uninitialized
 extern flow_t kill_flow_region(flow_t f, Absyn::type_t rgn);

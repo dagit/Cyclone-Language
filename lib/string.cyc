@@ -57,7 +57,7 @@ int strcmp(buffer_t s1, buffer_t s2) {
   unsigned int sz1 = s1.size;
   unsigned int sz2 = s2.size;
   unsigned int minsz = (sz1 < sz2) ? sz1 : sz2;
-  assert(minsz <= sz1 && minsz <= sz2);
+  assert(minsz <= s1.size && minsz <= s2.size);
   while (i < minsz) {
     char c1 = s1[i];
     char c2 = s2[i];

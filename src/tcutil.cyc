@@ -1776,7 +1776,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     return false;
 
   case $(&SizeofType(_),&IntType(_,B4)):
-  case $(&TagType(_),&IntType(_,B4)): return true;
+  case $(&TagType(_),&IntType(_,_)): return true;
 
   default: return unify(t1,t2);
   }
