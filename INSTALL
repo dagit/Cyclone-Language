@@ -78,3 +78,24 @@ POTENTIAL PROBLEMS
 (6) You may have to raise your stack limit.  The way to do this varies
     by shell; "ulimit", "limit", and "unlimit" are some commands used
     in some shells.
+
+
+BUILDING A CROSS COMPILER
+
+You can build a cross compiler (which runs on one computer and
+compiles programs that are to run on a second computer) provided
+you already have a gcc cross compiler installed.
+
+To build the cross compiler do
+
+  ./configure --target=ARCH
+  make
+  make install
+
+where ARCH is the desired target architecture.
+
+This will build a cyclone executable that understands the -b flag:
+
+  cyclone -b ARCH -o foo foo.cyc
+
+will produce an executable, foo, suitable for running on ARCH.
