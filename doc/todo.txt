@@ -141,6 +141,9 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
   - add the remaining thread primitives; i.e. port some/all of the POSIX
     threads interface.
 
+* argv should be zero-terminated.  We should make it have type
+  char*?ZEROTERM or something like that.
+
 * need to port more C libraries
 
 * should have some "intern C" or "unsafe_C" where we can escape

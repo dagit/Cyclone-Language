@@ -18,13 +18,13 @@ GCCEXEFILES = $(addprefix gcc-, $(EXEFILES))
 NOCHECKEXEFILES = $(addprefix nocheck-, $(EXEFILES))
 # NOBOUNDSEXEFILES = $(addprefix nobounds-, $(EXEFILES))
 DIFFFILES = $(addsuffix .diff, $(BENCHMARKS))
-HIST=hist$(EXE)
+CYCHIST=cychist$(EXE)
 CATN=catn$(EXE)
 
 all: $(EXEFILES) $(GCCEXEFILES) $(NOCHECKEXEFILES)
 
-bench: all $(HIST) $(CATN)
-	@(./runtests 11 | ./hist)
+bench: all $(CYCHIST) $(CATN)
+	@(./runtests 11 | ./cychist)
 
 diff: $(DIFFFILES)
 	@(for file in $(DIFFFILES); do \
@@ -39,11 +39,12 @@ clean:
 	$(RM) $(NOCHECKEXEFILES) $(NOBOUNDSEXEFILES)
 	$(RM) $(EXEFILES)
 	$(RM) $(GCCEXEFILES)
-	$(RM) $(HIST) $(CATN)
+	$(RM) $(CYCHIST) $(CATN)
 	$(RM) *.diff
 
-$(HIST): hist.c
-	gcc $(CFLAGS) -o $@ -x c $^ -lm
+$(CYCHIST): cychist.cyc
+	$(CYCC) $(CYC_FLAGS) -o $@ $^ -lm
+#gcc $(CFLAGS) -o $@ -x c $^ -lm
 
 %.diff: %.gcc %.cyc
 	@(diff $*.gcc $*.cyc > $@; echo $@; exit 0)

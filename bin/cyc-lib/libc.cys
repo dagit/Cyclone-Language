@@ -2482,6 +2482,7 @@ hstub {
     String_pa(const char ?NOZEROTERM`r);
     Int_pa(unsigned long);
     Double_pa(double);
+    LongDouble_pa(long double);
     ShortPtr_pa(short @`r);
     IntPtr_pa(unsigned long @`r);
   };

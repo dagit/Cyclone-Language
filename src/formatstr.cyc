@@ -258,11 +258,19 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
     case 'A':
       // We don't allow any length modifiers for floating point numbers;
       // in particular, we don't allow L (long double)
-      if (lenmod != NULL) {
-        terr(loc,"length modifiers are not allowed with %%%c",c);
+      //if (lenmod != NULL) {
+      //  terr(loc,"length modifiers are not allowed with %%%c",c);
+      //  return NULL;
+      //}
+      switch (lenmod) {
+      case NULL:       typs = new List(double_typ(false),typs); break;
+      case &List(x,NULL) && x =='l': 
+        typs = new List(double_typ(true),typs); break;
+      default:
+        terr(loc,"length modifier '%s' is not allowed with %%%c",
+             implode(lenmod), c);
         return NULL;
       }
-      typs = new List(double_typ(false),typs);
       break;
     case 'c':
       for (_ f = flags; f != NULL; f = f->tl)

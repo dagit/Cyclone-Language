@@ -83,6 +83,7 @@ tunion PrintArg<`r::R> {
   Int_pa(unsigned long);
   //  Float_pa(float);
   Double_pa(double);
+  LongDouble_pa(long double);
   ShortPtr_pa(short @`r);
   IntPtr_pa(unsigned long @`r);
 };
@@ -93,6 +94,7 @@ static string_t parg2string(parg_t x) {
   case &Int_pa(_): return "int"; 
     // case &Float_pa(_): return "float";
   case &Double_pa(_): return "double";
+  case &LongDouble_pa(_): return "long double";
   case &ShortPtr_pa(_): return "short *";
   case &IntPtr_pa(_): return "unsigned long *";
   }
@@ -135,6 +137,7 @@ static unsigned long va_arg_uint(parg_t? ap) {
 static double va_arg_double(parg_t? ap) {
   switch (*ap) {
   case &Double_pa(d): return d;
+  case &LongDouble_pa(ld): return (double)ld;
     // case &Float_pa(f): return (double)f;
   default: throw badarg(aprintf("printf expected double but found %s",
                                 parg2string(*ap)));
