@@ -3086,11 +3086,33 @@ epilogue vsscanf {
     __attribute__((format(scanf,2,0)))
     ;
 }
+epilogue getw {
+  // getw is a glibc function but does not appear in posix; remove ??
+  extern int getw(FILE @);
+}
+cycstub getw {
+  namespace Cstdio {
+    extern "C" int getw(__cFILE @);
+  }
+  int getw(FILE @f) {
+    return Cstdio::getw(f->file);
+  }
+}
+epilogue putw {
+  // putw is a glibc function but does not appear in posix; remove ??
+  extern int putw(int, FILE @);
+}
+cycstub putw {
+  namespace Cstdio {
+    extern "C" int putw(int, __cFILE @);
+  }
+  int putw(int x, FILE @f) {
+    return Cstdio::putw(x,f->file);
+  }
+}
 epilogue {
   // These functions appear in glibc but are not part of the posix
   // standard.  They are omitted for now.
-  //  extern int getw (FILE @);
-  //  extern int putw (int, FILE @);
   //  extern void setbuffer (FILE @, char ?, size_t);
   //  extern void setlinebuf (FILE @);
 }
