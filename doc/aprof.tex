@@ -1,0 +1,22 @@
+\subsection{The allocation profiler, \texttt{aprof}}
+
+To get a profile of the allocation behavior of a Cyclone program,
+follow these steps:
+\begin{enumerate}
+\item Compile the program with the flag \texttt{-pa}.  The resulting
+  executable will be compiled to record allocation behavior.  It will
+  also be linked with a version of the standard library that records
+  its allocation behavior.  (If you get the message, ``can't find
+  internal compiler file \texttt{libcyc_a.a},'' then ask your system
+  administrator to install the special version of the library.)
+\item Execute the program as normal.  As it executes, it will write to
+  a file \texttt{amon.out} in the current working directory; if the
+  file exists before execution, it will be overwritten.
+\item Run the program \texttt{aprof}.  This will examine
+  \texttt{amon.out} and print a report on the allocation behavior of
+  the program.
+\end{enumerate}
+
+% Local Variables:
+% TeX-master: "main-screen"
+% End:
