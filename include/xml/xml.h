@@ -33,41 +33,41 @@ namespace Xml {
 using Core;
 using List;
 
-typedef string_t chardata;
-typedef string_t reference;
-typedef string_t comment;
-typedef string_t name;
+typedef string_t<`r> chardata<`r>;
+typedef string_t<`r> reference<`r>;
+typedef string_t<`r> comment<`r>;
+typedef string_t<`r> name<`r>;
 
 EXTERN_DEFINITION
-datatype attvalue {
-  Attvalue1(string_t), // should be delimited by single quotes
-  Attvalue2(string_t)  // should be delimited by double quotes
+datatype attvalue<`r> {
+  Attvalue1(string_t<`r>), // should be delimited by single quotes
+  Attvalue2(string_t<`r>)  // should be delimited by double quotes
 };
-typedef datatype attvalue @attvalue_t;
+typedef datatype attvalue<`r> @`r attvalue_t<`r>;
 
-typedef $(name,attvalue_t)@ attribute_t;
+typedef $(name<`r>,attvalue_t<`r>)@`r attribute_t<`r>;
 
-typedef $(name,string_t)@ pi_t;
+typedef $(name<`r>,string_t<`r>)@`r pi_t<`r>;
 
-extern datatype content;
-typedef datatype content @content_t;
+extern datatype content<`r::R>; // forward definition
+typedef datatype content<`r::R> @`r content_t<`r>;
 
 EXTERN_DEFINITION
-datatype element {
-  StartEnd(name,list_t<attribute_t>, // Element with start and end tags
-           list_t<content_t>);
-  Empty(name,list_t<attribute_t>);   // Element with no content
+datatype element<`r::R> {
+  StartEnd(name<`r>,list_t<attribute_t<`r>,`r>, // Element with start and end tags
+           list_t<content_t<`r>,`r>);
+  Empty(name<`r>,list_t<attribute_t<`r>,`r>);   // Element with no content
 };
-typedef datatype element @element_t;
+typedef datatype element<`r> @`r element_t<`r>;
 
 EXTERN_DEFINITION
-datatype content {
-  Element(element_t);   // A nested element
-  Chardata(chardata);   // Character data
-  Reference(reference); // Character reference: &foo; or &#0;
-  Cdsect(chardata);     // CDATA section: <![CDATA[ ]]>
-  Pi(pi_t);             // Processing instruction: <?foo ?>
-  Comment(comment);     // Comment: <!-- -->
+datatype content<`r> {
+  Element(element_t<`r>);   // A nested element
+  Chardata(chardata<`r>);   // Character data
+  Reference(reference<`r>); // Character reference: &foo; or &#0;
+  Cdsect(chardata<`r>);     // CDATA section: <![CDATA[ ]]>
+  Pi(pi_t<`r>);             // Processing instruction: <?foo ?>
+  Comment(comment<`r>);     // Comment: <!-- -->
 };
 
 // various routines to help document processing */
@@ -77,40 +77,40 @@ datatype exn { EXTERN_DEFINITION procXMLdocFailed(string_t) };
   /** [procXMLdocFailed] is thrown if one of the following routines
       fails to process the document as specified. **/
 
-extern attvalue_t getAttribute(list_t<attribute_t> atrs, name nm);
+extern attvalue_t<`r> getAttribute(list_t<attribute_t<`r>> atrs, name nm);
   /** [getAttribute(a,n)] returns the attribute value from [a] that
       whose name matches [n]; throws [procXMLdocFailed]
       if not found. **/
 
-extern attvalue_t matchAttribute(attribute_t atr, name nm);
+extern attvalue_t<`r> matchAttribute(attribute_t<`r> atr, name nm);
   /** [matchAttribute(atr,nm)] returns the value associated with
       attribute [atr] if it has name [nm]; throws [procXMLdocFailed]
       if not. **/
 
-extern list_t<attvalue_t *,`r>
+extern list_t<attvalue_t<`s> *,`r>
 getAttributes(region_t<`r> r,
-              list_t<attribute_t> atrs,list_t<name @> names);
+              list_t<attribute_t<`s>> atrs,list_t<name @> names);
   /** [getAttributes(r,a,n)] returns the attribute values from [a] that
       match the names in [n], returned in the order the names appear in
       [n].  If a name is missing, a NULL is inserted instead.  Order
       does not matter.  **/
 
-extern list_t<attvalue_t,`r>
-matchAttributes(region_t<`r>,list_t<attribute_t> atrs,list_t<name @> names);
+extern list_t<attvalue_t<`s>,`r>
+matchAttributes(region_t<`r>,list_t<attribute_t<`s>> atrs,list_t<name @> names);
   /** [matchAttributes(r,a,n)] returns the attribute values from [a] that
       match the names in [n].  The lists must match up exactly
-      (i.e. order matters).  If order shouldn't matter, you can sort
+      (i.e., order matters).  If order shouldn't matter, you can sort
       both lists first.  **/
 
-extern $(list_t<content_t>,list_t<attribute_t>)
-getElemData(content_t doc, string_t tagname);
+extern $(list_t<content_t<`r>,`r>,list_t<attribute_t<`r>,`r>)
+getElemData(content_t<`r> doc, string_t tagname);
   /** [getElemData(doc,tag)] checks that the document [doc] is a
       single element with tag [tag], and returns the contents and
       attributes of that element.  On error, a [parseConfigFailed]
       exception is thrown.  **/
 
-extern list_t<content_t,`r> 
-clearWhitespaceContent(list_t<content_t,`r> docs);
+extern list_t<content_t<`r>,`r> 
+clearWhitespaceContent(list_t<content_t<`r>,`r> docs);
   /** [clearWhitespaceContent(docs)] removes all occurences of
       Chardata variants in docs that have only whitespace
       content. **/

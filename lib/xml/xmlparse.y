@@ -31,7 +31,6 @@ using Lexing;
 // global state (we're not re-entrant)
 namespace XmlParse {
 Core::opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf = NULL;
-static list_t<content_t> parse_result = NULL;
 void error(string_t<`H> msg) {
   throw new Core::Failure(msg);
 }
@@ -46,12 +45,13 @@ enum context getContext() {
   return current;
 } 
 
-
 }
 
 using XmlParse;
+#define RNEW rnew(yyoutregion)
 
 %}
+%pure_parser
 
 // Tokens
 %token ATTVALUE1
@@ -70,79 +70,82 @@ using XmlParse;
 %token SLASHCLOSE
 
 // Union of types of productions
-%union{
-  String_tok(string_t<`H>);
-  Pi_tok($(Xml::name,string_t<`H>)@`H);
-  Element_tok(Xml::element_t);
-  Content_tok(List::list_t<Xml::content_t,`H>);
-  Attribute_tok(Xml::attribute_t);
-  Attributes_tok(List::list_t<Xml::attribute_t,`H>);
-  STag_tok($(string_t<`H>,List::list_t<Xml::attribute_t,`H>)@`H);
-  /*EmptyElemTag_tok($(string_t,List::list_t<Xml::attribute_t>)@);*/
+%union <`yy> {
+  String_tok(string_t<`yy>);
+  Pi_tok($(Xml::name<`yy>,string_t<`yy>)@`yy);
+  Element_tok(Xml::element_t<`yy>);
+  Content_tok(List::list_t<Xml::content_t<`yy>,`yy>);
+  Attribute_tok(Xml::attribute_t<`yy>);
+  Attributes_tok(List::list_t<Xml::attribute_t<`yy>,`yy>);
+  STag_tok($(string_t<`yy>,List::list_t<Xml::attribute_t<`yy>,`yy>)@`yy);
 }
 
 // Tags for productions
-%type <string_t<`H>> ATTVALUE1
-%type <string_t<`H>> ATTVALUE2
-%type <string_t<`H>> CDSECT
-%type <string_t<`H>> CHARDATA
-%type <string_t<`H>> COMMENT
-%type <string_t<`H>> NAME
-%type <string_t<`H>> OPEN
-%type <string_t<`H>> opn
-%type <string_t<`H>> OPENSLASH
-%type <string_t<`H>> opnslash
-%type <$(Xml::name,string_t<`H>)@`H>     PI
-%type <string_t<`H>> REFERENCE
-%type <Xml::element_t> element
-%type <List::list_t<Xml::content_t,`H>> content
-%type <List::list_t<Xml::content_t,`H>> content0
-%type <Xml::attribute_t> attribute
-%type <List::list_t<Xml::attribute_t,`H>> attributes
-%type <$(string_t<`H>,List::list_t<Xml::attribute_t,`H>)@`H> sTag
-%type <string_t<`H>> eTag
-%type <$(string_t<`H>,List::list_t<Xml::attribute_t,`H>)@`H> emptyElemTag
+%type <string_t<`yy>> ATTVALUE1
+%type <string_t<`yy>> ATTVALUE2
+%type <string_t<`yy>> CDSECT
+%type <string_t<`yy>> CHARDATA
+%type <string_t<`yy>> COMMENT
+%type <string_t<`yy>> NAME
+%type <string_t<`yy>> OPEN
+%type <string_t<`yy>> opn
+%type <string_t<`yy>> OPENSLASH
+%type <string_t<`yy>> opnslash
+%type <$(Xml::name<`yy>,string_t<`yy>)@`yy>     PI
+%type <string_t<`yy>> REFERENCE
+%type <Xml::element_t<`yy>> element
+%type <List::list_t<Xml::content_t<`yy>,`yy>> content
+%type <List::list_t<Xml::content_t<`yy>,`yy>> content0
+%type <Xml::attribute_t<`yy>> attribute
+%type <List::list_t<Xml::attribute_t<`yy>,`yy>> attributes
+%type <$(string_t<`yy>,List::list_t<Xml::attribute_t<`yy>,`yy>)@`yy> sTag
+%type <string_t<`yy>> eTag
+%type <$(string_t<`yy>,List::list_t<Xml::attribute_t<`yy>,`yy>)@`yy> emptyElemTag
 
 %start content0
 
 %%
 
-content0: content     { $$ = $!1; XmlParse::parse_result = $1; }
+content0: content     { $$ = $!1;
+                        *parse_result = $1;
+                      }
 
 element:
-  emptyElemTag      { let $(n,a) = *($1); $$ = ^$(new Empty(n,a)); }
+  emptyElemTag      { let $(n,a) = *($1);
+                      $$ = ^$(RNEW Empty(n,a));
+                    }
 | sTag content eTag { let $(sn,a) = *($1);
                       let en = $3;
                       if (strcmp(sn,en) == 0)
-                        $$ = ^$(new StartEnd(sn,a,$2));
+                        $$ = ^$(RNEW StartEnd(sn,a,$2));
                       else error("tag mismatch");
                     }
 
 sTag:
-  opn attributes cls { $$ = ^$(new $($1,$2)); }
+  opn attributes cls { $$ = ^$(RNEW $($1,$2)); }
 
 opn:
   OPEN { setContext(InTag); $$ = $!1; }
 
 attributes:
   /* empty */          { $$ = ^$(NULL); }
-| attribute attributes { $$ = ^$(new List($1,$2)); }
+| attribute attributes { $$ = ^$(RNEW List($1,$2)); }
 
 attribute:
-  NAME EQ ATTVALUE1 { $$ = ^$(new $($1,new Attvalue1($3))); }
-| NAME EQ ATTVALUE2 { $$ = ^$(new $($1,new Attvalue2($3))); }
+  NAME EQ ATTVALUE1 { $$ = ^$(RNEW $($1,RNEW Attvalue1($3))); }
+| NAME EQ ATTVALUE2 { $$ = ^$(RNEW $($1,RNEW Attvalue2($3))); }
 
 cls:
   CLOSE { setContext(Normal); }
 
 content:
   /* empty */       { $$ = ^$(NULL); }
-| element content   { $$ = ^$(new List(new Element($1),$2)); }
-| CHARDATA content  { $$ = ^$(new List(new Chardata($1),$2)); }
-| REFERENCE content { $$ = ^$(new List(new Reference($1),$2)); }
-| CDSECT content    { $$ = ^$(new List(new Cdsect($1),$2)); }
-| PI content        { $$ = ^$(new List(new Pi($1),$2)); }
-| COMMENT content   { $$ = ^$(new List(new Comment($1),$2)); }
+| element content   { $$ = ^$(RNEW List(RNEW Element($1),$2)); }
+| CHARDATA content  { $$ = ^$(RNEW List(RNEW Chardata($1),$2)); }
+| REFERENCE content { $$ = ^$(RNEW List(RNEW Reference($1),$2)); }
+| CDSECT content    { $$ = ^$(RNEW List(RNEW Cdsect($1),$2)); }
+| PI content        { $$ = ^$(RNEW List(RNEW Pi($1),$2)); }
+| COMMENT content   { $$ = ^$(RNEW List(RNEW Comment($1),$2)); }
 
 eTag:
   opnslash cls { $$ = $!1; }
@@ -151,7 +154,7 @@ opnslash:
   OPENSLASH { setContext(InTag); $$ = $!1; }
 
 emptyElemTag:
-  opn attributes slashcls { $$ = ^$(new $($1,$2)); }
+  opn attributes slashcls { $$ = ^$(RNEW $($1,$2)); }
 
 slashcls:
   SLASHCLOSE { setContext(Normal); }
@@ -161,12 +164,14 @@ slashcls:
 void yyerror(string_t s) { return; } 
 
 namespace XmlParse{
-  list_t<content_t> parse_file(FILE @`H f) {
-    parse_result = NULL;
+  list_t<content_t<`rr>,`rr> rparse_file(region_t<`rr> rr,FILE @`H f) {
+    list_t<content_t<`rr>,`rr> parse_result = NULL;
     lbuf = new Core::Opt(from_file(f));
     XmlScan::init();
-    yyparse();
+    yyparse(rr,&parse_result);
     return parse_result;
   }
+  list_t<content_t> parse_file(FILE @`H f) {
+    return rparse_file(Core::heap_region,f);
+  }
 }
-

@@ -19,7 +19,7 @@
 #ifndef _XMLDUMP_H
 #define _XMLDUMP_H
 
-#include "xml.h"
+#include <xml/xml.h>
 #include <list.h>
 #include <stdio.h>
 

@@ -19,11 +19,18 @@
 #ifndef _XMLPARSE_H
 #define _XMLPARSE_H
 
-#include "xml.h"
+#include <xml/xml.h>
 #include <lexing.h>
 #include <list.h>
 #include <core.h>
 #include <stdio.h>
+
+#define YYPARSE_PARAM_ARG region_t<`yy> yyoutregion, List::list_t<Xml::content_t<`yy>,`yy> @parse_result
+//#define YYPARSE_RET $(int, List::list_t<Xml::content_t<`yy>,`yy>)
+#define YYLEX_PARAM_ARG union YYSTYPE<`r> yylval
+#define YYLEX_ARG yylval
+
+extern int yyparse(YYPARSE_PARAM_ARG);
 
 namespace XmlParse {
 using Lexing;
@@ -31,6 +38,7 @@ using List;
 using Core;
 using Xml;
 
+extern list_t<content_t<`r>,`r> rparse_file(region_t<`r> r,FILE @`H f);
 extern list_t<content_t> parse_file(FILE @`H f);
 extern opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf;
 extern void error(string_t<`H> msg);

@@ -47,7 +47,7 @@ extern int intag(Lexbuf<`a>);
 }
 
 // for parser -- must not be prefixed
-int yylex() { 
+int yylex(YYLEX_PARAM_ARG) { 
   int ans;
   switch (getContext()) {
   case Normal: ans = XmlScan::data(lbuf->v); break;

@@ -1980,12 +1980,12 @@ _tmp221=(struct Cyc_Absyn_Exp_p_struct*)_tmp209;if(_tmp221->tag != 16)goto _LLEC
 else{_tmp222=_tmp221->f1;}}_LLEB: return _tmp222;_LLEC:;_LLED:{const char*_tmp9D1;
 Cyc_Parse_err(((_tmp9D1="cannot mix patterns and expressions in case",
 _tag_dyneither(_tmp9D1,sizeof(char),44))),p->loc);}return Cyc_Absyn_null_exp(p->loc);
-_LLD9:;}union Cyc_YYSTYPE;struct _union_YYSTYPE_Int_tok{int tag;struct _tuple6 val;};
-struct _union_YYSTYPE_Char_tok{int tag;char val;};struct _union_YYSTYPE_String_tok{
-int tag;struct _dyneither_ptr val;};struct _union_YYSTYPE_Stringopt_tok{int tag;
-struct Cyc_Core_Opt*val;};struct _union_YYSTYPE_QualId_tok{int tag;struct _tuple1*
-val;};struct _tuple18{int f1;struct _dyneither_ptr f2;};struct _union_YYSTYPE_Asm_tok{
-int tag;struct _tuple18 val;};struct _tuple19{struct Cyc_Position_Segment*f1;union Cyc_Absyn_Constraint*
+_LLD9:;}struct _union_YYSTYPE_Int_tok{int tag;struct _tuple6 val;};struct
+_union_YYSTYPE_Char_tok{int tag;char val;};struct _union_YYSTYPE_String_tok{int tag;
+struct _dyneither_ptr val;};struct _union_YYSTYPE_Stringopt_tok{int tag;struct Cyc_Core_Opt*
+val;};struct _union_YYSTYPE_QualId_tok{int tag;struct _tuple1*val;};struct _tuple18{
+int f1;struct _dyneither_ptr f2;};struct _union_YYSTYPE_Asm_tok{int tag;struct
+_tuple18 val;};struct _tuple19{struct Cyc_Position_Segment*f1;union Cyc_Absyn_Constraint*
 f2;union Cyc_Absyn_Constraint*f3;};struct _union_YYSTYPE_YY1{int tag;struct _tuple19*
 val;};struct _union_YYSTYPE_YY2{int tag;union Cyc_Absyn_Constraint*val;};struct
 _union_YYSTYPE_YY3{int tag;struct Cyc_Absyn_Exp*val;};struct _union_YYSTYPE_YY4{int

@@ -30,8 +30,8 @@ using List;
 /* [getElemData(doc,tag)] checks that the document [doc] is a single
    element with tag [tag], and returns the contents and attributes of
    that element.  On error, a [parseConfigFailed] exception is thrown.  */
-$(list_t<content_t>,list_t<attribute_t>)
-getElemData(content_t doc, string_t tagname)
+$(list_t<content_t<`r>,`r>,list_t<attribute_t<`r>,`r>)
+getElemData(content_t<`r> doc, string_t tagname)
 {
   switch (doc) {
   case &Element(e):
@@ -80,7 +80,7 @@ getElemData(content_t doc, string_t tagname)
 /** [getAttribute(a,n)] returns the attribute value from [a] that
     whose name matches [n]; throws [procXMLdocFailed]
     if not found. **/
-attvalue_t getAttribute(list_t<attribute_t> atrs, name nm)
+attvalue_t<`r> getAttribute(list_t<attribute_t<`r>> atrs, name nm)
 {
   while (atrs != NULL) {
     let &$(anm,val) = atrs->hd;
@@ -96,9 +96,9 @@ attvalue_t getAttribute(list_t<attribute_t> atrs, name nm)
     match the names in [n], returned in the order the names appear in
     [n].  If a name is missing, a NULL is inserted instead.  Order
     does not matter.  **/
-list_t<attvalue_t *,`r>
+list_t<attvalue_t<`s> *,`r>
 getAttributes(region_t<`r> r,
-	      list_t<attribute_t> atrs,list_t<name @> names)
+	      list_t<attribute_t<`s>> atrs,list_t<name @> names)
 {
   list_t<attvalue_t *`H,`r> res = NULL;
   while (names != NULL) {
@@ -120,9 +120,9 @@ getAttributes(region_t<`r> r,
    match the names in [n].  The lists must match up exactly
    (i.e. order matters).  If order shouldn't matter, you can sort both
    lists first.  */
-list_t<attvalue_t,`r>
+list_t<attvalue_t<`s>,`r>
 matchAttributes(region_t<`r> r,
-		list_t<attribute_t> atrs,list_t<name @> names) 
+		list_t<attribute_t<`s>> atrs,list_t<name @> names) 
 {
   list_t<attvalue_t,`r> res = NULL;
   while (names != NULL) {
@@ -146,7 +146,7 @@ matchAttributes(region_t<`r> r,
 
 /* [matchAttribute(atr,nm)] returns the value associated with attribute
    [atr] if it has name [nm]; throws [procXMLdocFailed] if not.  */
-attvalue_t matchAttribute(attribute_t atr, name nm) {
+attvalue_t<`r> matchAttribute(attribute_t<`r> atr, name nm) {
   let &$(anm,aval) = atr;
   if (!strcmp(anm,nm))
     return aval;
@@ -158,7 +158,7 @@ attvalue_t matchAttribute(attribute_t atr, name nm) {
 /* [clearWhitespaceContent(d)] removes all Chardata doc's that
    are sub-docs of [d] that consist only of whitespace. 
    Modifies the tree in-place. */
-list_t<content_t,`r> clearWhitespaceContent(list_t<content_t,`r> docs) {
+list_t<content_t<`r>,`r> clearWhitespaceContent(list_t<content_t<`r>,`r> docs) {
   if (docs != NULL) {
     switch (docs->hd) {
     case &Element(elem):

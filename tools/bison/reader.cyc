@@ -753,6 +753,8 @@ static char? type2nth(char ? type_name){
   
 }
 
+static char ?union_typename = NULL;
+
 void
 parse_type_decl ()
 {
@@ -781,8 +783,25 @@ parse_type_decl ()
     // modify bison so that we get rid of the union definition and gensym
     // tokens appropriately.
     //fprintf((FILE @)fattrs, "\n_ yyget_%s(datatype @extensible YYSTYPE yy1) {switch(yy1) {case &%s(yy2): return yy2; default: throw &yyfail_%s;}}\n", name, name, name);
-    fprintf((FILE @)fattrs, "\n%s yyget_%s(union YYSTYPE yy1) {\n_ yyzzz; \n  switch(yy1) {\n    case {.%s = yyzzzz}: \n      yyzzz = yyzzzz;\n      break;\n    default: throw &yyfail_%s;\n  }; \n  return yyzzz;\n}",name,deconstructor,deconstructor,deconstructor);
-    fprintf((FILE @)fattrs, "\nunion YYSTYPE %s(%s yy1) { return YYSTYPE{.%s = yy1}; }",deconstructor,name,deconstructor);
+    region pr;
+    let vars = NULL;
+    if (union_typename != NULL)
+      vars = rprintf(pr,"<%s> ",union_typename);
+    fprintf((FILE @)fattrs,
+            "\n%s yyget_%s(union YYSTYPE %syy1) {\n"
+            "_ yyzzz; \n"
+            "  switch(yy1) {\n"
+            "    case {.%s = yyzzzz}: \n"
+            "      yyzzz = yyzzzz;\n"
+            "      break;\n"
+            "    default: throw &yyfail_%s;\n"
+            "  }; \n"
+            "  return yyzzz;\n"
+            "}",
+            name,deconstructor,vars,
+            deconstructor,deconstructor);
+    fprintf((FILE @)fattrs, "\nunion YYSTYPE %s%s(%s yy1) { return YYSTYPE{.%s = yy1}; }",vars,deconstructor,name,deconstructor);
+    fprintf((FILE @)fattrs,"\n#define YYSTYPEVARS %s\n",vars);
   }
 
   for (;;)
@@ -944,7 +963,22 @@ parse_union_decl()
   new_field = 1;
   state = 0;
 
-  c = getc((FILE @)finput);
+  /* Look for optional TYPENAME between "%union" and "{" */
+  c = lex();
+  if (c==TYPENAME) {
+    /* yes, store it for later */
+    int k = strlen(token_buffer);
+    union_typename = NEW2(k + 1, char);
+    strcpy(union_typename, token_buffer);
+    /* set up c for loop */
+    c = getc((FILE @)finput);
+  }
+  else if (c==LEFT_CURLY)
+    /* no, it's missing, just set up c for loop */
+    c = '{';
+  else
+    /* lex() skips white space, so this is an error */
+    fatal("syntax error after %union");
 
   while (c != EOF)
     {
@@ -1159,10 +1193,17 @@ struct strlist * reverse(struct strlist *`H x) {
 void
 print_union_decl()
 {
+  region pr;
   seen_destructors = reverse(seen_destructors);
   struct strlist *`H l1 = seen_destructors;
-  fprintf((FILE @)fattrs0,"\nunion YYSTYPE;\n@tagged union YYSTYPE ");
-  fprintf((FILE @)fattrs0,"\n{");
+  let vars = NULL;
+  if (union_typename!=NULL)
+    vars = rprintf(pr,"<%s>",union_typename);
+  fprintf((FILE @)fattrs0,
+//          "\nunion YYSTYPE %s;\n"
+          "@tagged union YYSTYPE %s\n{",
+//          vars,
+          vars);
   for(; l1 != NULL; l1 = l1->tl){
     fprintf((FILE @)fattrs0,"\n  %s %s;",
             l1->str, l1->nth);
@@ -1170,8 +1211,10 @@ print_union_decl()
   fprintf((FILE @)fattrs0,"\n  int YYINITIALSVAL;");
   fprintf((FILE @)fattrs0,"\n};\n");
   if (fdefines){
-    fprintf((FILE @)fdefines,"\nextern int yyparse();");
-    fprintf((FILE @)fdefines,"\nextern @tagged union YYSTYPE ");
+// TJ: YYPARSE_PARAM_ARG DOESN'T APPEAR IN .h FILE !
+//    fprintf((FILE @)fdefines,"\nextern int yyparse(YYPARSE_PARAM_ARG);");
+    fprintf((FILE @)fdefines,"\nextern @tagged union YYSTYPE %s",
+            vars);
     fprintf((FILE @)fdefines,"\n{");
     l1 = seen_destructors;
     for(; l1 != NULL; l1 = l1->tl){

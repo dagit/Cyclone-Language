@@ -83,10 +83,14 @@ extern void yyerror(string_t);
 extern int yylex(YYLEX_PARAM_ARG);
 
 
-static int	yychar = '\000';       /*  the lookahead symbol		*/
-union YYSTYPE yylval = {.YYINITIALSVAL = 0};/* semantic value of lookahead symbol */
-
-static int yynerrs = 0;		/*  number of parse errors so far       */
+#ifndef YYPURE
+/*  the lookahead symbol */
+static int yychar = '\000';       
+/* semantic value of lookahead symbol */
+union YYSTYPE yylval = {.YYINITIALSVAL = 0};
+/*  number of parse errors so far */
+static int yynerrs = 0;
+#endif
 
 #if YYDEBUG
  bool yydebug = true;	/*  nonzero means print parse trace	*/
@@ -124,6 +128,13 @@ static int yynerrs = 0;		/*  number of parse errors so far       */
 #ifndef YYPARSE_PARAM_ARG
 #define YYPARSE_PARAM_ARG 
 #endif
+
+/* If type variables (e.g., regions) are used with YYSTYPE this
+   will already be set.
+*/
+#ifndef YYSTYPEVARS
+#define YYSTYPEVARS
+#endif
 int yyparse(YYPARSE_PARAM_ARG)
 {
   // the arrays are allocated in this region
@@ -132,6 +143,14 @@ region yyregion; {
   int yyn=0;
   int yyerrstatus;//  number of tokens to shift before error messages enabled 
   int yychar1 = 0;//  lookahead token as an internal (translated) token number 
+#ifdef YYPURE
+  int yychar;
+  union YYSTYPE YYSTYPEVARS yylval = {.YYINITIALSVAL = 0};
+  int yynerrs;
+#ifdef YYLSP_NEEDED
+  YYLTYPE yylloc;
+#endif
+#endif
 
   int yyssp_offset;
   /*  the state stack     */
@@ -150,15 +169,6 @@ region yyregion; {
 #endif
 
   int yystacksize = YYINITDEPTH;
-
-#ifdef YYPURE
-  int yychar;
-  union YYSTYPE yylval;
-  int yynerrs;
-#ifdef YYLSP_NEEDED
-  YYLTYPE yylloc;
-#endif
-#endif
 
   union YYSTYPE yyval = yylval;/* the variable used to return		*/
 				/*  semantic values from the action	*/

@@ -21,7 +21,7 @@
 
 #include <lexing.h>
 
-extern int yylex();
+//extern int yylex(YYLEX_PARAM_ARG);
 
 namespace XmlScan {
 
