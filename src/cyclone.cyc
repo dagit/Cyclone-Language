@@ -80,6 +80,7 @@ extern "C" {
   extern Cstring Cdef_lib_path;
   extern Cstring Carch;
   extern Cstring Ccomp;
+  extern Cstring Ccflags;
 }
 
 static string_t cpp = "";
@@ -95,8 +96,9 @@ static void add_cpparg(string_t<`H> s) {
 // Prints the version # and exits
 static void print_version() {
   printf("The Cyclone compiler, version %s\n", version);
-  printf("Compiled for architecture: %s / %s\n", 
-	 Cstring_to_string(Carch), Cstring_to_string(Ccomp));
+  printf("Compiled for architecture: %s CC=\"%s %s\"\n", 
+	 Cstring_to_string(Carch), Cstring_to_string(Ccomp),
+	 Cstring_to_string(Ccflags));
   printf("Standard library directory: %s\n",Cstring_to_string(Cdef_lib_path));
   printf("Standard include directory: %s\n", Cstring_to_string(Cdef_inc_path));
   exit(0);
@@ -722,6 +724,11 @@ int main(int argc, string_t<`H> ?`H argv) {
   // set default preprocessor before overwriting with argument processing
   string_t comp = Cstring_to_string(Ccomp);
   set_cpp(strconcat(comp," -x c -E -U__GNUC__ -nostdinc"));
+
+  // set up default ccargs
+  string_t cflags = Cstring_to_string(Ccflags);
+  if (strlen(cflags) != 0)
+    add_ccarg(cflags);
 
   // now parse the arguments
   Arg::speclist_t<`H,`H> options =

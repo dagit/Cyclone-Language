@@ -24,7 +24,7 @@
 include Makefile.inc
 
 ifndef ARCH
-$(error "Must have ARCH variable defined to properly compile")
+$(error "Must have ARCH variable defined to properly compile; run configure")
 endif
 
 CYC_BIN_PATH := $(CYCDIR)/bin
@@ -49,7 +49,7 @@ tools:
 .PHONY: tools
 
 $(CYC_LIB_PATH)/gc.a:
-	$(MAKE) -C gc gc.a CC=gcc CFLAGS=" -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DSILENT -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"
+	$(MAKE) -C gc gc.a CC=$(CC) CFLAGS=" $(CFLAGS) -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DSILENT -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"
 	ln gc/gc.a $@
 
 # After building all of the source, install it in the user-defined 
@@ -188,7 +188,7 @@ endif
 #   communicate between update_all_archs and update for this to
 #   work properly.
 update_all_archs: 
-	$(MAKE) -c bin/genfiles clean
+	$(MAKE) -C bin/genfiles clean
 	@if [ "$(PATCH_ARCH)" != "$(ARCH)" ]; then\
 	  if [ ! -d "$(PATCH_ARCH)" ]; then mkdir $(PATCH_ARCH); fi;\
           $(MAKE) -C lib TARGET=$(PATCH_ARCH) $(PATCH_ARCH);\

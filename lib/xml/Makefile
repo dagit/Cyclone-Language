@@ -11,7 +11,7 @@ CYCC=$(CYC_BIN_PATH)/$(CYCCOMP)
 CYCBISON=$(CYC_BIN_PATH)/cycbison$(EXE)
 CYCLEX=$(CYC_BIN_PATH)/cyclex$(EXE)
 
-override CYC_FLAGS+= $(DEF_CYC_FLAGS) -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -B$(CYCDIR)/bin/cyc-lib
+override CYC_FLAGS+= -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -B$(CYCDIR)/bin/cyc-lib
 
 SRCS=xml xmlparse_tab xmlscan xmldump
 

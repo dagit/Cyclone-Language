@@ -40,6 +40,7 @@ $(ARCH)/src/install_path.c:
 	@(echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
 	  echo "char *Carch = \"$(ARCH)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
+	  echo "char *Ccflags = \"$(CFLAGS)\";"; \
 	  echo "char *Ccomp = \"$(CC)\";") > install_path_tmp
 	@(cmp -s $@ install_path_tmp || cp install_path_tmp $@)
 	$(RM) install_path_tmp
