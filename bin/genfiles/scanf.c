@@ -633,7 +633,7 @@ if(n == -1){
 ++ seen_eof;
 break;}}
 # 448
-*((char*)z.curr)=(char)n;
+*((char*)_check_fat_subscript(z,sizeof(char),0U))=(char)n;
 _fat_ptr_inplace_plus(& z,sizeof(char),1);
 ++ sum;
 -- width;}
@@ -951,7 +951,7 @@ goto _LL0;}
 # 863
 _fat_ptr_inplace_plus(& fmt,sizeof(char),1);
 do{
-tab[++ c]=(char)v;}while(c < n);
+*((char*)_check_known_subscript_notnull(tab,256U,sizeof(char),++ c))=(char)v;}while(c < n);
 # 873
 goto doswitch;
 # 881

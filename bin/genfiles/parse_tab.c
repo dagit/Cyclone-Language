@@ -2004,10 +2004,10 @@ if(yychar <= 0){
 yychar1=0;
 yychar=0;}else{
 # 282
-yychar1=yychar > 0 && yychar <= 381?(int)Cyc_yytranslate[yychar]: 321;}
+yychar1=yychar > 0 && yychar <= 381?(int)*((short*)_check_known_subscript_notnull(Cyc_yytranslate,382U,sizeof(short),yychar)): 321;}
 # 299 "cycbison.simple"
 yyn +=yychar1;
-if((yyn < 0 || yyn > 6838)||(int)Cyc_yycheck[yyn]!= yychar1)goto yydefault;
+if((yyn < 0 || yyn > 6838)||(int)*((short*)_check_known_subscript_notnull(Cyc_yycheck,6839U,sizeof(short),yyn))!= yychar1)goto yydefault;
 # 302
 yyn=(int)Cyc_yytable[yyn];
 # 309
@@ -2025,7 +2025,7 @@ int _Tmp1=0;_npop_handler(0);return _Tmp1;}
 if(yychar != 0)
 yychar=-2;
 # 332
-({struct Cyc_Yystacktype _Tmp1=({struct Cyc_Yystacktype _Tmp2;_Tmp2.v=yylval,_Tmp2.l=yylloc;_Tmp2;});((struct Cyc_Yystacktype*)yyvs.curr)[++ yyvsp_offset]=_Tmp1;});
+({struct Cyc_Yystacktype _Tmp1=({struct Cyc_Yystacktype _Tmp2;_Tmp2.v=yylval,_Tmp2.l=yylloc;_Tmp2;});*((struct Cyc_Yystacktype*)_check_fat_subscript(yyvs,sizeof(struct Cyc_Yystacktype),++ yyvsp_offset))=_Tmp1;});
 # 338
 if(yyerrstatus != 0)-- yyerrstatus;
 # 340
@@ -4090,7 +4090,7 @@ struct Cyc_Yystacktype*p=(struct Cyc_Yystacktype*)_check_null(_untag_fat_ptr(_fa
 ((p[1]).l).last_line=((p[0]).l).last_line;
 ((p[1]).l).last_column=((p[0]).l).last_column;}else{
 # 399
-((((struct Cyc_Yystacktype*)yyvs.curr)[yyvsp_offset]).l).last_line=((((struct Cyc_Yystacktype*)yyvs.curr)[(yyvsp_offset + yylen)- 1]).l).last_line;
+({int _Tmp1=((*((struct Cyc_Yystacktype*)_check_fat_subscript(yyvs,sizeof(struct Cyc_Yystacktype),(yyvsp_offset + yylen)- 1))).l).last_line;((*((struct Cyc_Yystacktype*)_check_fat_subscript(yyvs,sizeof(struct Cyc_Yystacktype),yyvsp_offset))).l).last_line=_Tmp1;});
 ((((struct Cyc_Yystacktype*)yyvs.curr)[yyvsp_offset]).l).last_column=((((struct Cyc_Yystacktype*)yyvs.curr)[(yyvsp_offset + yylen)- 1]).l).last_column;}
 # 409
 yyn=(int)*((short*)_check_known_subscript_notnull(Cyc_yyr1,549U,sizeof(short),yyn));
@@ -4164,14 +4164,14 @@ yyerrdefault:
 # 505
  if(yyssp_offset == 0){int _Tmp1=1;_npop_handler(0);return _Tmp1;}
 -- yyvsp_offset;
-yystate=(int)((short*)yyss.curr)[-- yyssp_offset];
+yystate=(int)*((short*)_check_fat_subscript(yyss,sizeof(short),-- yyssp_offset));
 # 521 "cycbison.simple"
 yyerrhandle:
  yyn=(int)*((short*)_check_known_subscript_notnull(Cyc_yypact,1073U,sizeof(short),yystate));
 if(yyn == -32768)goto yyerrdefault;
 # 525
 yyn +=1;
-if((yyn < 0 || yyn > 6838)||(int)Cyc_yycheck[yyn]!= 1)goto yyerrdefault;
+if((yyn < 0 || yyn > 6838)||(int)*((short*)_check_known_subscript_notnull(Cyc_yycheck,6839U,sizeof(short),yyn))!= 1)goto yyerrdefault;
 # 528
 yyn=(int)Cyc_yytable[yyn];
 if(yyn < 0){
@@ -4185,7 +4185,7 @@ if(yyn == 0)goto yyerrpop;}
 if(yyn == 1072){
 int _Tmp1=0;_npop_handler(0);return _Tmp1;}
 # 546
-({struct Cyc_Yystacktype _Tmp1=({struct Cyc_Yystacktype _Tmp2;_Tmp2.v=yylval,_Tmp2.l=yylloc;_Tmp2;});((struct Cyc_Yystacktype*)yyvs.curr)[++ yyvsp_offset]=_Tmp1;});
+({struct Cyc_Yystacktype _Tmp1=({struct Cyc_Yystacktype _Tmp2;_Tmp2.v=yylval,_Tmp2.l=yylloc;_Tmp2;});*((struct Cyc_Yystacktype*)_check_fat_subscript(yyvs,sizeof(struct Cyc_Yystacktype),++ yyvsp_offset))=_Tmp1;});
 # 551
 goto yynewstate;}
 # 149 "cycbison.simple"

@@ -836,7 +836,7 @@ if(escapes == 0)return s;{
 struct _fat_ptr news=({unsigned _Tmp0=((n + (unsigned)escapes)+ 1U)+ 1U;_tag_fat(({char*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(char)));({{unsigned _Tmp2=(n + (unsigned)escapes)+ 1U;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]='\000';}_Tmp1[_Tmp2]=0;}0;});_Tmp1;}),sizeof(char),_Tmp0);});
 unsigned pos=0U;
 {unsigned i=0U;for(0;i < n;++ i){
-char ch=((const char*)s.curr)[(int)i];
+char ch=*((const char*)_check_fat_subscript(s,sizeof(char),(int)i));
 if((int)((const char*)s.curr)[(int)i]== 34 ||(int)((const char*)s.curr)[(int)i]== 92){
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(news,sizeof(char),(int)pos);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='\\';if(_get_fat_size(_Tmp0,sizeof(char))== 1U &&(_Tmp1 == 0 && _Tmp2 != 0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 ++ pos;}

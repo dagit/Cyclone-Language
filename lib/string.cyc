@@ -17,14 +17,12 @@
    330, Boston, MA 02111-1307 USA. */
 
 // String library, base on code from Mike Hicks, modified by T. Jim
-
 #include <core.h>
 #include <list.h>
 #include <string.h>
 #include <strings.h>
 #include <cycboot.h> // for size_t
 #include <assert.h>
-
 // Need to undefine these so that we can refer to their C versions
 #undef bcopy
 #undef memcpy
@@ -36,14 +34,16 @@ using List;
 extern "C" Cstring strerror(int errnum);
 
 ///////////////////////// LENGTH
-size_t strlen(buffer_t s) {
+size_t strlen(buffer_t s) /*@ensures(return_value <= numelts(s))*/
+{
   size_t i;
   unsigned int sz = numelts(s);
-  for (i = 0; i < sz; i++)
+  for (i = 0; /*@assert(i <= numelts(s)) && */i < sz; ++i) 
     if (s[i] == '\000')
       return i;
   return i;
 }
+
 
 ///////////////////////// COMPARISONS
 // Compare two strings lexicographically.

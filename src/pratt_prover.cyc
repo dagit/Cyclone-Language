@@ -84,8 +84,9 @@ static void print_graphs(graph_t* gs) {
         }
         if (ds->next != NULL) fprintf(stderr,",");
       }
-      fprintf(stderr,"}\n");
+      if (ns->next != NULL) fprintf(stderr,",\n\t ");
     }
+    fprintf(stderr,"}\n");
   }
 }
 
@@ -145,27 +146,27 @@ static graph_t *graph_append(graph_t *`H g1, graph_t *`H g2) {
 static bool add_edge(graph_t @, bool, term_t, term_t, int, assn_opt_t);
 static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2);
 
-static void add_node(graph_t @g, term_t n);
+static bool add_node(graph_t @g, term_t n);
 
-static void add_eq(graph_t @g, term_t t1, term_t t2) {
-  add_node(g,t2);
-  //fprintf(stderr,"adding %s = %s to graph\n",term2string(t1),term2string(t2));
-  add_constraint(g, t1, ULte, t2);
-  add_constraint(g, t1, SLte, t2);
-  add_constraint(g, t2, ULte, t1);
-  add_constraint(g, t2, SLte, t1);
+static bool add_eq(graph_t @g, term_t t1, term_t t2) {
+  return add_node(g,t2) &&
+    add_constraint(g, t1, ULte, t2) &&
+    add_constraint(g, t1, SLte, t2) &&
+    add_constraint(g, t2, ULte, t1) &&
+    add_constraint(g, t2, SLte, t1);
 }
 
 // check n to see if its type reveals its numelts is known and if so,
 // add the information to the graph.  similarly, check if n's type
-// is tag_t<valueof(e)> and if so, add n == e.
-static void add_type_info(graph_t @g, term_t n) {
+// is tag_t<valueof(e)> and if so, add n == e.  
+// an unsigned term, then add n >= 0
+static int add_type_info(graph_t @g, term_t n) {
   let topt = get_term_type(n);
   if (topt != NULL) {
     type_t t = (type_t)topt;
     let eopt = Tcutil::get_type_bound(t);
     if (eopt != NULL) {
-      term_t t1 = primop(Absyn::Numelts, list(n));
+      term_t t1 = primop(Absyn::Numelts, list(n), Absyn::uint_type);
       // sigh -- must get rid of a cast to int/long
       exp_t e = (exp_t)eopt;
     loop:
@@ -183,39 +184,43 @@ static void add_type_info(graph_t @g, term_t n) {
       default: break;
       }
       term_t t2 = cnst((exp_t)e);
-      add_constraint(g, t2, ULte, t1);
-      add_constraint(g, t2, SLte, t1);
+      if (!add_constraint(g, t2, ULte, t1)) return false;
+      if (!add_constraint(g, t2, SLte, t1)) return false;
     }
     switch (Absyn::compress(t)) {
+    case &Absyn::AppType(&Absyn::IntCon(Absyn::Unsigned,_),_):
+      if (!add_constraint(g, zero(), ULte, n)) return false;
+      break;
     case &Absyn::AppType(&Absyn::TagCon,&List{v,_}):
       switch (Absyn::compress(v)) {
       case &Absyn::ValueofType(e): add_eq(g,n,cnst(e)); break;
-      case v2: add_eq(g,n,cnst(Absyn::valueof_exp(v2,0))); break;
+      case v2: 
+        if (!add_eq(g,n,cnst(Absyn::valueof_exp(v2,0)))) return false; break;
       }
       break;
     default: break;
     }
   }
+  return true;
 }
 
 // add a row to a single graph if not already present
-static void add_node(graph_t @g, term_t n) {
+static int add_node(graph_t @g, term_t n) {
   for (let ns = g->rows; ns != NULL; ns = ns->next) {
-    if (cmp_term(ns->source,n) == 0) return;
+    if (cmp_term(ns->source,n) == 0) return true;
   }
   g->rows = new Row{g->rows,n,NULL};
   // if n is numelts(x) then add n <s MAXINT and n <u MAXINT
   switch (n){
-  case &Primop(Absyn::Numelts, &List(x,_)):
-    add_edge(g, false, n, zero(), MAXINT-1, NULL);
-    add_edge(g, true, n, zero(), MAXINT-1, NULL);
-    // if x has type T*{e}, then add numelts(n) == e.
-    add_type_info(g,x);
-    break;
+  case &Primop(Absyn::Numelts, &List(x,_),_):
+    return add_edge(g, false, n, zero(), MAXINT-1, NULL) &&
+      add_edge(g, true, n, zero(), MAXINT-1, NULL) &&
+      // if x has type T*{e}, then add numelts(n) == e.
+      add_type_info(g,x);
   default:
-    add_type_info(g,n);
-    break;
+    return add_type_info(g,n);
   }
+  return true;
 }
 
 static row_t lookup_row(graph_t @g, term_t i) {
@@ -336,8 +341,8 @@ is_unsigned_overflow(unsigned c1, operator_t op,unsigned c2){
 // while computing shoterst path of all pairs and looking for negative
 // weight cycles.
 static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist, assn_opt_t origin){
-  add_node(g,i);
-  add_node(g,j);
+  if (!add_node(g,i)) return false;
+  if (!add_node(g,j)) return false;
   dist_t* ij_dist = lookup_distance(lookup_row(g,i),is_signed,j);
   // if we already have a shorter path, then this constraint is redundant
   if (ij_dist != NULL && ij_dist->length < dist) 
@@ -414,6 +419,46 @@ static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist, a
   return true;
 }
 
+// useful for debugging... just checks that there aren't shorter
+// paths.
+static bool check_graph_consistent(graph_t @g) {
+  for (let i = g->rows; i != NULL; i = i->next) {
+    for (let j = g->rows; j != NULL; j = j->next) {
+      if (i == j) continue;
+      let ij_signed = lookup_distance(i,true,j->source);
+      let ij_unsigned = lookup_distance(i,false,j->source);
+      for (let k = g->rows; k != NULL; k = k->next) {
+        if (i == k || j == k) continue;
+        let ik_signed = lookup_distance(i,true,k->source);
+        let ik_unsigned = lookup_distance(i,false,k->source);
+        let kj_signed = lookup_distance(k,true,j->source);
+        let kj_unsigned = lookup_distance(k,false,j->source);
+        if (ik_signed != NULL && kj_signed != NULL) {
+          let $(of1,sum1) = 
+            is_signed_overflow(ik_signed->length, PLUS, kj_signed->length);
+          if (!of1) {
+            if (ij_signed == NULL || ij_signed->length > sum1) {
+              if (!add_edge(g,true,i->source,j->source,sum1,NULL)) 
+                return false;
+            }
+          }
+        }
+        if (ik_unsigned != NULL && kj_unsigned != NULL) {
+          let $(of2,sum2) = 
+            is_signed_overflow(ik_unsigned->length, PLUS, kj_unsigned->length);
+          if (!of2) {
+            if (ij_unsigned == NULL || ij_unsigned->length > sum2) {
+              if (!add_edge(g,false,i->source,j->source,sum2,NULL)) 
+                return false;
+            }
+          }
+        }
+      }
+    }
+  }
+  return true;
+}
+
 static $(unsigned int,bool) eval_term(term_t t) {
   switch (t) {
   case &Uint(i): return $(i, true);
@@ -428,7 +473,7 @@ static $(term_t, int) break_term(graph_t @g, bool is_signed,term_t t){
   term_t res = t;
   Absyn::primop_t p;
   switch (t){
-  case &Primop(Absyn::Plus, ts):
+  case &Primop(Absyn::Plus, ts,_):
     p = Absyn::Plus;
     if (ts == NULL){
       Tcutil::impos("no argument for primop");
@@ -451,7 +496,7 @@ static $(term_t, int) break_term(graph_t @g, bool is_signed,term_t t){
       //other cases t = t1+t2+t2 ..., ignore
       return $(t, 0);
     break;
-  case &Primop(Absyn::Minus, ts):
+  case &Primop(Absyn::Minus, ts, _):
     p = Absyn::Minus;
     if (ts == NULL){
       Tcutil::impos("no argument for primop");
@@ -696,7 +741,9 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
     unsigned int n = num_graphs(gs);
     if (max_paths_seen < n) max_paths_seen = n;
     // too many disjuncts -- give up.  
-    if (n >= max_paths) throw &too_large; // could just set gs = true_graph(); 
+    if (n >= max_paths) {
+      throw &too_large; // could just set gs = true_graph(); 
+    }
     // must copy the graphs since we mutate them in place
     graph_t *gs1 = gs;
     graph_t *gs2 = copy_graph(gs);
@@ -737,7 +784,6 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
     a = reduce(a);
     goto LOOP;
   }
-  // return the set of graphs
   return gs;
 }
 
@@ -747,9 +793,21 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
 static bool consistent(assn_t a) {
   try {
     // start with just an empty graph (true) and then add in a
-    graph_t ?gs = cgraph(true_graph(),a);
+    graph_t *gs = cgraph(true_graph(),a);
     // if we get back an empty list of disjuncts (false) then
     // the graph is not consistent.
+    /*
+    if (gs != NULL) {
+      fprintf(stderr,"resulting graphs are:\n");
+      print_graphs(gs);
+      fprintf(stderr,"\nDouble checking consistency...\n");
+      for (; gs != NULL; gs = gs->next)
+        if (!check_graph_consistent(gs)) {
+          fprintf(stderr,"Oops!\n");
+          print_graphs(gs);
+        }
+    }
+    */
     return (gs != NULL);
   } catch {
     // if the graph has too many paths in it, we'll end up here.

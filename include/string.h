@@ -35,7 +35,7 @@
 extern "C" Cstring strerror(int errnum);
 
 ///////////////////////// LENGTH
-extern size_t strlen(buffer_t s);
+extern size_t strlen(buffer_t s) /*@ensures(return_value <= numelts(s))*/;
 
 ///////////////////////// COMPARISONS
 // Return <0 if s1 < s2, 0 if s1 == s2, and >0 if s1 > s2.

@@ -699,7 +699,7 @@ static void*Cyc_Toc_unimp(struct _fat_ptr str){
 # 71
 static void*Cyc_Toc_toc_impos(struct _fat_ptr ap){
 void*toc=(void*)({struct Cyc_Warn_String_Warn_Warg_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Warn_String_Warn_Warg_struct));_Tmp0->tag=0,_Tmp0->f1=({const char*_Tmp1="Toc: ";_tag_fat(_Tmp1,sizeof(char),6U);});_Tmp0;});
-struct _fat_ptr args=({unsigned _Tmp0=_get_fat_size(ap,sizeof(void*))+ 1U;_tag_fat(({void**_Tmp1=_cycalloc(_check_times(_Tmp0,sizeof(void*)));({{unsigned _Tmp2=_get_fat_size(ap,sizeof(void*))+ 1U;unsigned i;for(i=0;i < _Tmp2;++ i){i == 0U?_Tmp1[i]=toc:(_Tmp1[i]=((void**)ap.curr)[(int)(i - 1U)]);}}0;});_Tmp1;}),sizeof(void*),_Tmp0);});
+struct _fat_ptr args=({unsigned _Tmp0=_get_fat_size(ap,sizeof(void*))+ 1U;_tag_fat(({void**_Tmp1=_cycalloc(_check_times(_Tmp0,sizeof(void*)));({{unsigned _Tmp2=_get_fat_size(ap,sizeof(void*))+ 1U;unsigned i;for(i=0;i < _Tmp2;++ i){i == 0U?_Tmp1[i]=toc:(_Tmp1[i]=*((void**)_check_fat_subscript(ap,sizeof(void*),(int)(i - 1U))));}}0;});_Tmp1;}),sizeof(void*),_Tmp0);});
 Cyc_Warn_vimpos2(args);}
 # 77
 struct _fat_ptr Cyc_Toc_globals={(void*)0,(void*)0,(void*)(0 + 0)};
@@ -2159,7 +2159,7 @@ struct _fat_ptr vs=({unsigned _TmpF=(unsigned)num_varargs;_tag_fat(({struct _tup
 # 1994
 struct Cyc_List_List*array_args=0;
 {int i=num_varargs - 1;for(0;i >= 0;-- i){
-array_args=({struct Cyc_List_List*_TmpF=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Absyn_Exp*_Tmp10=Cyc_Absyn_address_exp(Cyc_Absyn_var_exp(((struct _tuple1**)vs.curr)[i],0U),0U);_TmpF->hd=_Tmp10;}),_TmpF->tl=array_args;_TmpF;});}}
+array_args=({struct Cyc_List_List*_TmpF=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Absyn_Exp*_Tmp10=Cyc_Absyn_address_exp(Cyc_Absyn_var_exp(*((struct _tuple1**)_check_fat_subscript(vs,sizeof(struct _tuple1*),i)),0U),0U);_TmpF->hd=_Tmp10;}),_TmpF->tl=array_args;_TmpF;});}}
 s=({struct _tuple1*_TmpF=argv;void*_Tmp10=arr_type;struct Cyc_Absyn_Exp*_Tmp11=Cyc_Absyn_array_exp(array_args,0U);Cyc_Absyn_declare_stmt(_TmpF,_Tmp10,_Tmp11,s,0U);});
 # 1999
 es=Cyc_List_imp_rev(es);
@@ -2168,7 +2168,7 @@ int i=Cyc_List_length(es)- 1;
 for(1;es != 0;(es=es->tl,injectors=injectors->tl,-- i)){
 struct Cyc_Absyn_Exp*arg=(struct Cyc_Absyn_Exp*)es->hd;
 void*arg_type=_check_null(arg->topt);
-struct _tuple1*var=((struct _tuple1**)vs.curr)[i];
+struct _tuple1*var=*((struct _tuple1**)_check_fat_subscript(vs,sizeof(struct _tuple1*),i));
 struct Cyc_Absyn_Exp*varexp=Cyc_Absyn_var_exp(var,0U);
 struct Cyc_Absyn_Datatypefield*_stmttmp33=(struct Cyc_Absyn_Datatypefield*)(_check_null(injectors))->hd;struct Cyc_Absyn_Datatypefield*_TmpF=_stmttmp33;void*_Tmp10;void*_Tmp11;_Tmp11=_TmpF->name;_Tmp10=_TmpF->typs;{struct _tuple1*qv=_Tmp11;struct Cyc_List_List*tqts=_Tmp10;
 void*field_typ=Cyc_Toc_typ_to_c((*((struct _tuple23*)(_check_null(tqts))->hd)).f2);

@@ -475,10 +475,10 @@ Cyc_fflush(Cyc_stderr);
 goto CLEANUP_AND_RETURN;}
 # 95
 if(c == 58){
-strname[i]='\000';
+*((char*)_check_known_subscript_notnull(strname,256U,sizeof(char),i))='\000';
 break;}
 # 99
-strname[i]=(char)c;
+*((char*)_check_known_subscript_notnull(strname,256U,sizeof(char),i))=(char)c;
 ++ i;
 if(i >= 256){
 ({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=file;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,({const char*_Tmp2="Error reading spec file %s: string name too long\n";_tag_fat(_Tmp2,sizeof(char),50U);}),_tag_fat(_Tmp1,sizeof(void*),1));});
@@ -505,7 +505,7 @@ i=1;
 while(1){
 c=Cyc_fgetc(spec_file);
 if((c == -1 || c == 10)|| c == 13){*((char*)_check_known_subscript_notnull(strvalue,4096U,sizeof(char),i))='\000';break;}
-strvalue[i]=(char)c;
+*((char*)_check_known_subscript_notnull(strvalue,4096U,sizeof(char),i))=(char)c;
 ++ i;
 if(i >= 4096){
 ({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=file;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=
@@ -537,7 +537,7 @@ while(1){
 # 158
 while(1){
 if((unsigned long)i >= n)goto DONE;
-if((int)((const char*)cmdline.curr)[i]== 0)goto DONE;
+if((int)*((const char*)_check_fat_subscript(cmdline,sizeof(char),i))== 0)goto DONE;
 if(!isspace((int)((const char*)cmdline.curr)[i]))break;
 ++ i;}
 # 164
@@ -545,23 +545,23 @@ j=0;
 # 169
 while(1){
 if((unsigned long)i >= n)break;
-if((int)((const char*)cmdline.curr)[i]== 0)break;
+if((int)*((const char*)_check_fat_subscript(cmdline,sizeof(char),i))== 0)break;
 if(isspace((int)((const char*)cmdline.curr)[i]))break;
 if((int)((const char*)cmdline.curr)[i]== 92){
 # 175
 ++ i;
 if((unsigned long)i >= n)break;
-if((int)((const char*)cmdline.curr)[i]== 0)break;
-buf[j]=((const char*)cmdline.curr)[i];
+if((int)*((const char*)_check_fat_subscript(cmdline,sizeof(char),i))== 0)break;
+*((char*)_check_known_subscript_notnull(buf,4096U,sizeof(char),j))=((const char*)cmdline.curr)[i];
 ++ j;}else{
 # 182
-buf[j]=((const char*)cmdline.curr)[i];
+*((char*)_check_known_subscript_notnull(buf,4096U,sizeof(char),j))=((const char*)cmdline.curr)[i];
 ++ j;}
 # 185
 ++ i;}
 # 187
 if(j < 4096)
-buf[j]='\000';
+*((char*)_check_known_subscript_notnull(buf,4096U,sizeof(char),j))='\000';
 # 190
 l=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp3=Cyc_strdup(_tag_fat(buf,sizeof(char),4096U));*_Tmp2=_Tmp3;});_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=l;_Tmp0;});}
 # 192

@@ -230,7 +230,7 @@ struct SharedEnv {
   term_opt_t* exp_stmt;
   // used to record the result terms and assertions for a function.  Only
   // needed when the function has an ensures clause.
-  term_opt_t  res_term;
+  term_opt_t  res_term; // the return_value 
   assn_t*     res_assn;
   // true by default: controls whether we widen assertions at join points
   bool        widen_paths;
@@ -261,14 +261,14 @@ static assn_t may_widen(env_t env, assn_t a) {
 }
 
 static env_t 
-initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info, assn_t *`H res_assn) {
+initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info, assn_t *`H res_assn, term_opt_t res_term) {
   let succ_table = Hashtable::lookup(tables->succ_tables,fd);
   let assn_table = Hashtable::create(57, Core::ptrcmp, hash_ptr);
   let senv =  new SharedEnv{.assn_table = assn_table,
                             .succ_table = succ_table,
                             .try_assn = NULL,
                             .exp_stmt = NULL,
-                            .res_term = NULL,
+                            .res_term = res_term,
                             .res_assn = res_assn,
                             .widen_paths = !Flags::allpaths};
   let d = Dict::empty(Core::ptrcmp);
@@ -364,11 +364,8 @@ static void update_try_assn(env_t env, assn_t a) {
 static void update_return(env_t env, term_opt_t t, assn_t a, type_opt_t topt) {
   let shared = env->shared;
   if (shared->res_assn == NULL) return;
-  if (shared->res_term != NULL || t != NULL) {
-    let v = fresh_var(topt);
-    shared->res_term = v;
-    *shared->res_assn = 
-      or(and(a,eq(v,t)),and(*shared->res_assn,eq(v,shared->res_term)));
+  if (shared->res_term != NULL) {
+    *shared->res_assn = or(and(a,eq(shared->res_term,t)),*shared->res_assn);
   } else {
     *shared->res_assn = or(a,*shared->res_assn);
   }
@@ -861,17 +858,10 @@ static $(assn_t,assn_t) vcgen_test(env_t env, exp_t e, assn_t ain) {
     let at = a2;
     let af = a2;
     switch p {
-      //case Absyn::Eq:  at = and(at,eq(t1,t2));  af = and(af,neq(t1,t2)); break;
-      // case Absyn::Neq: at = and(at,neq(t1,t2)); af = and(af,eq(t1,t2)); break;
-      //  for now, we are eliminating use of neq to avoid creating or's
     case Absyn::Eq:  
-      at = and(at,eq(t1,t2)); 
-      af = and(at, neq(t1,t2));/* af doesn't change */ 
-      break;
-    case Absyn::Neq: /* at doesn't change */ 
-      at = and(af,neq(t1,t2));
-      af = and(af,eq(t1,t2)); 
-      break;
+      at = and(at,eq(t1,t2)); af = and(af,neq(t1,t2)); break;
+    case Absyn::Neq: 
+      at = and(at,neq(t1,t2)); af = and(af,eq(t1,t2)); break;
     case Absyn::Lt:
       if (unsigned_comparison(e1,e2)) {
         at = and(at,ult(t1,t2));  af = and(af,ugte(t1,t2)); 
@@ -1060,7 +1050,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Primop_e(p,es):
     let $(ts, aout) = vcgen_rexps_always(env, es, ain);
     term_opt_t t = NULL;
-    if (ts != NULL) t = primop(p, ts);
+    if (ts != NULL) t = primop(p, ts, e->topt);
     // if  the expression has type unsigned, then we may conclude
     // t == t1 % t2 u< t2
     if ((p == Absyn::Mod) && (is_unsigned_int_exp(e))){
@@ -1081,7 +1071,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       if (t1 == NULL || t2 == NULL) 
         t2 = NULL;
       else
-        t2 = primop(popt->v,list((term_t)t1,(term_t)t2));
+        t2 = primop(popt->v,list((term_t)t1,(term_t)t2),e->topt);
     }
     let a = do_assign(env,a2,lt,t2);
     return $(lt,a);
@@ -1092,20 +1082,20 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     term_opt_t assn = NULL;
     switch (i) {
     case Absyn::PreInc: 
-      if (t1 != NULL) assn = primop(Absyn::Plus,list((term_t)t1,one()));
+      if (t1 != NULL) assn = primop(Absyn::Plus,list((term_t)t1,one()),e->topt);
       res = assn;
       break;
     case Absyn::PostInc:
       res = t1;
-      if (t1 != NULL) assn = primop(Absyn::Plus,list((term_t)t1,one()));
+      if (t1 != NULL) assn = primop(Absyn::Plus,list((term_t)t1,one()),e->topt);
       break;
     case Absyn::PreDec:
-      if (t1 != NULL) assn = primop(Absyn::Minus,list((term_t)t1,one()));
+      if (t1 != NULL) assn = primop(Absyn::Minus,list((term_t)t1,one()),e->topt);
       res = assn;
       break;
     case Absyn::PostDec:
       res = t1;
-      if (t1 != NULL) assn = primop(Absyn::Minus,list((term_t)t1,one()));
+      if (t1 != NULL) assn = primop(Absyn::Minus,list((term_t)t1,one()),e->topt);
       break;
     default: Warn::impos("vcgen vcgen_rexp increment_e");
     }
@@ -1245,7 +1235,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       
       // we don't know t2, can't really infer anything about the bound
       if (t2 == NULL) break;
-      term_numelts = primop(Absyn::Numelts, list(t1));
+      term_numelts = primop(Absyn::Numelts, list(t1), Absyn::uint_type);
       /* we figure this out in the constraint solver now in order to
          keep the size of the assertion small.
       exp_opt_t bound = Tcutil::get_type_bound((type_t)e1->topt);
@@ -1286,7 +1276,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       let at = and(a,ult(v,t1));  // simulate test
       let af = and(a,ugte(v,t1));
       let $(_,abody) = vcgen_rexp(env,e2,at);  // run body and add one
-      abody = do_assign(env,abody,v,primop(Absyn::Plus,list(v,one())));
+      abody = do_assign(env,abody,v,primop(Absyn::Plus,list(v,one()),vd->type));
       if (simple_implies(&abody,&a)) { a = af; break; }
       // no choice about widening here to ensure termination
       a = widen(or(abody,a));  // widen and possibly iterate
@@ -1334,7 +1324,8 @@ void vcgen_fundecl(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, ass
   // put in the requires clause as an assumption.
   let $(args,reqopt,ensopt,ret_value) = get_requires_and_ensures_info(&fd->i);
   assn_t *result_assn = (ensopt == NULL) ? NULL : new ((assn_t)&false_assn);
-  let env = initial_env(tables,fd,assn_info,result_assn);
+  term_opt_t res_term = (ret_value == NULL) ? NULL : (new Var((vardecl_t)ret_value));
+  let env = initial_env(tables,fd,assn_info,result_assn,res_term);
   if (reqopt != NULL) {
     // hope the vards in here point to the vardecls in the fn...
     a = vcgen_test(env,(exp_t)reqopt,a)[0];
@@ -1348,10 +1339,6 @@ void vcgen_fundecl(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, ass
     let res_assn_opt = *senv->res_assn;
     assn_t res_assn = &false_assn;
     if (res_assn_opt != NULL) res_assn = ((assn_t)res_assn_opt);
-    string_t str = "NULL";
-    if (senv->res_term != NULL) str = term2string((term_t)senv->res_term);
-    if (ret_value != NULL && senv->res_term) 
-      res_assn = and(res_assn,eq(new Var((vardecl_t)ret_value),senv->res_term));
     if (!implies(&res_assn,&at))
       Warn::err(ens->loc, "cannot prove the @ensures clause %s from %s",
 		assn2string(reduce(at)),assn2string(reduce(res_assn)));

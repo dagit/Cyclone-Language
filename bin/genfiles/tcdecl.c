@@ -449,7 +449,7 @@ if(Cyc_strlen(*msg1)== 0U)
 fmt2=Cyc_strconcat(({const char*_Tmp0="%s";_tag_fat(_Tmp0,sizeof(char),3U);}),fmt);else{
 # 49
 fmt2=Cyc_strconcat(({const char*_Tmp0="%s ";_tag_fat(_Tmp0,sizeof(char),4U);}),fmt);}{
-struct _fat_ptr ap2=({unsigned _Tmp0=_get_fat_size(ap,sizeof(void*))+ 1U;_tag_fat(({void**_Tmp1=_cycalloc(_check_times(_Tmp0,sizeof(void*)));({{unsigned _Tmp2=_get_fat_size(ap,sizeof(void*))+ 1U;unsigned i;for(i=0;i < _Tmp2;++ i){i == 0U?({void*_Tmp3=(void*)({struct Cyc_String_pa_PrintArg_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_String_pa_PrintArg_struct));_Tmp4->tag=0,_Tmp4->f1=*msg1;_Tmp4;});_Tmp1[i]=_Tmp3;}):(_Tmp1[i]=((void**)ap.curr)[(int)(i - 1U)]);}}0;});_Tmp1;}),sizeof(void*),_Tmp0);});
+struct _fat_ptr ap2=({unsigned _Tmp0=_get_fat_size(ap,sizeof(void*))+ 1U;_tag_fat(({void**_Tmp1=_cycalloc(_check_times(_Tmp0,sizeof(void*)));({{unsigned _Tmp2=_get_fat_size(ap,sizeof(void*))+ 1U;unsigned i;for(i=0;i < _Tmp2;++ i){i == 0U?({void*_Tmp3=(void*)({struct Cyc_String_pa_PrintArg_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_String_pa_PrintArg_struct));_Tmp4->tag=0,_Tmp4->f1=*msg1;_Tmp4;});_Tmp1[i]=_Tmp3;}):(_Tmp1[i]=*((void**)_check_fat_subscript(ap,sizeof(void*),(int)(i - 1U))));}}0;});_Tmp1;}),sizeof(void*),_Tmp0);});
 # 52
 Cyc_Position_post_error(({unsigned _Tmp0=loc;Cyc_Position_mk_err(_Tmp0,Cyc_vrprintf(Cyc_Core_heap_region,fmt2,ap2));}));}}}
 # 57

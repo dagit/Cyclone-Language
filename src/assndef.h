@@ -55,7 +55,7 @@ namespace AssnDef{
     Const(exp_t); // a Cyclone "constant" expression (e.g., 3, sizeof(e), etc.)
     Var(vardecl_t);
     LogicVar(vardecl_opt_t,int,type_opt_t);
-    Primop(Absyn::primop_t,list_t<term_t>);
+    Primop(Absyn::primop_t,list_t<term_t>,type_opt_t);
     Cast(Absyn::type_t, term_t);
   };
 
@@ -68,7 +68,7 @@ namespace AssnDef{
   term_t var(vardecl_t vd);
 
   //  bool is_commutative(Absyn::primop_t p);
-  term_t primop(Absyn::primop_t p, list_t<term_t,`H> ts);
+  term_t primop(Absyn::primop_t p, list_t<term_t,`H> ts, type_opt_t);
   term_t cast(Absyn::type_t tp, term_t tm);
   term_t fresh_var(type_opt_t);
 

@@ -256,6 +256,7 @@ static int do_possible_qualifier(Lexbuf lexbuf) {
     break;
   case 'a':
     if(len == 6 && strncmp(b,"assert",6)==0) return ASSERT_QUAL;
+    if(len == 8 && strncmp(b,"assert__",8)==0) return ASSERT_QUAL;
     if(len == 12 && strncmp(b,"autoreleased",12)==0) return AUTORELEASED_QUAL;
     break;
   default: break;

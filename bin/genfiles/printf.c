@@ -1046,7 +1046,7 @@ struct _tuple0*_Tmp0=sptr_n;void*_Tmp1;void*_Tmp2;_Tmp2=_Tmp0->f1;_Tmp1=_Tmp0->f
 struct _fat_ptr s=*sptr;
 unsigned long n=*nptr;
 if(n == 0U)return -1;
-*((char*)s.curr)=(char)c;
+*((char*)_check_fat_subscript(s,sizeof(char),0U))=(char)c;
 _fat_ptr_inplace_plus(sptr,sizeof(char),1);
 *nptr=n - 1U;
 return 1;}}
