@@ -3826,6 +3826,19 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         let t = (*trip)[2];
         new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&tmk,t,true);
         (*trip)[1].real_const = extract_const_from_typedef(loc,(*trip)[1].print_const,t);
+        // after resolving t, it may be an array type.  if so, as an argument
+        // to a function, we need to convert it to a pointer type.
+        switch (compress(t)) {
+        case &ArrayType(ArrayInfo{elt_type,tq,num_elts,zero_term,zt_loc}):
+          // create a new region variable for the pointer
+          let ptr_rgn = new_evar(NULL,NULL);
+          new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&rk,ptr_rgn,true);
+          let t2 = atb_typ(elt_type, ptr_rgn, tq, 
+                           new Upper_b((exp_t)num_elts), zero_term);
+          (*trip)[2] = t2;
+          break;
+        default: break;
+        }
       }
 
       // varargs

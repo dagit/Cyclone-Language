@@ -793,8 +793,8 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
   if (ds->is_inline)
     err("inline is allowed only on function definitions",loc);
   if (tss == NULL) {
-    err("missing type specifiers in declaration",loc);
-    return NULL;
+    Tcutil::warn(loc,"missing type specifiers in declaration, assuming int");
+    tss = list(type_spec(sint_typ,loc));
   }
 
   scope_t s = Public;

@@ -922,6 +922,7 @@ static struct Env<`r::R> {
   struct FallthruInfo<`r2> *`r2 fallthru_info;
   Dict::dict_t<qvar_t,exp_t,`r> varmap;
   bool toplevel;
+  bool @`r2 in_lhs;  
   region_t<`r> rgn;
 };
 typedef struct Env<`r> @`r env_t<`r>;
@@ -929,6 +930,10 @@ typedef struct Env<`r> @`r env_t<`r>;
 static bool is_toplevel(env_t nv) {
   let &Env{.toplevel=t,...} = nv;
   return t;
+}
+static bool in_lhs(env_t nv) {
+  let &Env{.in_lhs=b,...} = nv;
+  return *b;
 }
 
 static exp_t lookup_varmap(env_t nv, qvar_t x) {
@@ -943,21 +948,26 @@ static env_t<`r> empty_env(region_t<`r> r) {
                      .fallthru_info = NULL,
                      .varmap        = Dict::rempty(r,qvar_cmp),
                      .toplevel      = true,
+                     .in_lhs        = rnew(r) false,
                      .rgn           = r};
 }
 
 static env_t<`r> share_env(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
-  let &Env{b,c,f,v,t,_} = e;
-  return rnew(r) Env{b,c,f,Dict::rshare(r,v),t,r};
+  let &Env{b,c,f,v,t,lhs,_} = e;
+  return rnew(r) Env{b,c,f,Dict::rshare(r,v),t,lhs,r};
 }
 
 static env_t<`r> clear_toplevel(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
-  let &Env{b,c,f,v,t,_} = e;
-  return rnew(r) Env{b,c,f,Dict::rshare(r,v),false,r};
+  let &Env{b,c,f,v,t,lhs,_} = e;
+  return rnew(r) Env{b,c,f,Dict::rshare(r,v),false,lhs,r};
 }
 static env_t<`r> set_toplevel(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
-  let &Env{b,c,f,v,t,_} = e;
-  return rnew(r) Env{b,c,f,Dict::rshare(r,v),true,r};
+  let &Env{b,c,f,v,t,lhs,_} = e;
+  return rnew(r) Env{b,c,f,Dict::rshare(r,v),true,lhs,r};
+}
+static void set_lhs(env_t<`r> e, bool b) {
+  let &Env{.in_lhs = lhs,...} = e;
+  *lhs = b;
 }
 
 // add x->y to variable map in environment
@@ -968,16 +978,16 @@ static env_t<`r> add_varmap(region_t<`r> r, env_t<`r2> e, qvar_t x, exp_t y : {`
     toc_impos("Toc::add_varmap on Rel_n: %s\n", qvar2string(x));
   default: break;
   }
-  let &Env{b,c,f,v,t,_} = e;
+  let &Env{b,c,f,v,t,lhs,_} = e;
   let new_v = Dict::insert(Dict::rshare(r,v), x, y);
-  return rnew(r) Env{b,c,f,new_v,t,r};
+  return rnew(r) Env{b,c,f,new_v,t,lhs,r};
 }
 
 // env for loop body: break and continue labels are set to null,
 // exception handler pop counters for break and continue are zeroed
 static env_t<`r> loop_env(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
-  let &Env{b,c,f,v,t,_} = e;
-  return rnew(r) Env{NULL,NULL,f,Dict::rshare(r,v),t,r};
+  let &Env{b,c,f,v,t,lhs,_} = e;
+  return rnew(r) Env{NULL,NULL,f,Dict::rshare(r,v),t,lhs,r};
 }
 
 // env for a switch clause: give new label for break, and zero its pop counter
@@ -990,19 +1000,19 @@ non_last_switchclause_env(region_t<`r> r,
   for(; fallthru_binders != NULL; fallthru_binders = fallthru_binders->tl)
     fallthru_vars = rnew(r) List(fallthru_binders->hd->name, fallthru_vars);
   fallthru_vars = List::imp_rev(fallthru_vars);
-  let &Env{b,c,f,v,t,_} = e;
-  let &Env{_,_,_,next_case_varmap,_,_} = next_case_env;
+  let &Env{b,c,f,v,t,lhs,_} = e;
+  let &Env{_,_,_,next_case_varmap,_,_,_} = next_case_env;
   struct FallthruInfo<`r>*`r fi = 
     rnew(r) FallthruInfo{fallthru_l,fallthru_vars,
                            Dict::rshare(r,next_case_varmap)};
-  return rnew(r) Env{rnew(r) break_l, c, fi, Dict::rshare(r,v),t,r};
+  return rnew(r) Env{rnew(r) break_l, c, fi, Dict::rshare(r,v),t,lhs,r};
 }
 
 static env_t<`r> 
 last_switchclause_env(region_t<`r> r, env_t<`r2> e, var_t break_l : 
                       {`r2} > `r) {
-  let &Env{b,c,f,v,t,_} = e;
-  return rnew(r) Env{rnew(r) break_l, c, NULL, Dict::rshare(r,v), t, r};
+  let &Env{b,c,f,v,t,lhs,_} = e;
+  return rnew(r) Env{rnew(r) break_l, c, NULL, Dict::rshare(r,v), t, lhs, r};
 }
 
 // must have no pattern vars and type is int, char, or datatype of a type
@@ -1011,10 +1021,10 @@ last_switchclause_env(region_t<`r> r, env_t<`r2> e, var_t break_l :
 static env_t<`r> 
 switch_as_switch_env(region_t<`r> r, env_t<`r2> e, var_t next_l :
                      {`r2} > `r) {
-  let &Env{b,c,f,v,t,_} = e;
+  let &Env{b,c,f,v,t,lhs,_} = e;
   return rnew(r) Env{NULL,c,rnew(r) FallthruInfo{next_l,NULL,
                                                    Dict::rempty(r,qvar_cmp)},
-                       Dict::rshare(r,v), t, r};
+                       Dict::rshare(r,v), t, lhs, r};
 }
 
 #ifdef COARSE_REGIONS
@@ -1622,6 +1632,8 @@ static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t> fs,
   }
 }
 
+static void push_address_stmt(stmt_t s);
+
 // we want to take the address of e but it may no longer be a valid
 // lhs, due to a cast or null-check or whatever.
 static exp_t push_address_exp(exp_t e) {
@@ -1632,9 +1644,24 @@ static exp_t push_address_exp(exp_t e) {
     return e;
   case &Deref_e(e1):
     return e1;
+  case &StmtExp_e(s):
+    // we only have this case because of assignments to 
+    // tagged union members -- see tagged_union_assignop
+    push_address_stmt(s);
+    return e;
   default:
     if (is_lvalue(e)) return address_exp(e,DL);
-    toc_impos("can't take & of %s",exp2string(e));
+    toc_impos("can't take & of exp %s",exp2string(e));
+  }
+}
+
+static void push_address_stmt(stmt_t s) {
+  switch (s->r) {
+  case &Seq_s(_,s2): fallthru(s2);
+  case &Decl_s(_,s2): push_address_stmt(s2); break;
+  case &Exp_s(*e): *e = push_address_exp(*e); break;
+  default: 
+    toc_impos("can't take & of stmt %s",stmt2string(s));
   }
 }
 
@@ -1800,8 +1827,14 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
 //     if (temp->f.tag != f_tag) throw_match();
 //     temp->f.val;
 //  })
+// unless we are in a left-hand-side context, in which case we translate to
+//  ({ temp = &e1->f; // okay because e1 must be a lhs
+//     if (temp->tag != f_tag) throw_match();
+//     &temp->val; 
+//  })
 static raw_exp_t check_tagged_union(exp_t e1,type_t e1_c_type,
                                     type_t aggrtype,field_name_t f,
+                                    bool in_lhs,
                                     exp_t aggrproj(exp_t,field_name_t,seg_t)) {
   aggrdecl_t ad;
   switch (compress(aggrtype)) {
@@ -1812,14 +1845,26 @@ static raw_exp_t check_tagged_union(exp_t e1,type_t e1_c_type,
   }
   let temp = temp_var();
   let temp_exp = var_exp(temp,DL);
-  let temp_f_tag = aggrmember_exp(aggrproj(temp_exp,f,DL),tag_sp,DL);
   let f_tag = signed_int_exp(get_member_offset(ad,f),DL);
-  let test_exp = neq_exp(temp_f_tag,f_tag,DL);
-  let temp_f_val = aggrmember_exp(aggrproj(temp_exp,f,DL),val_sp,DL);
-  let sres = exp_stmt(temp_f_val,DL);
-  let ifs = ifthenelse_stmt(test_exp,throw_match_stmt(),skip_stmt_dl(),DL);
-  let s = declare_stmt(temp,e1_c_type,e1,seq_stmt(ifs,sres,DL),DL);
-  return stmt_exp_r(s);
+  if (in_lhs) {
+    let temp_f_tag = aggrarrow_exp(temp_exp,tag_sp,DL);
+    let test_exp = neq_exp(temp_f_tag,f_tag,DL);
+    let temp_f_val = aggrarrow_exp(temp_exp,val_sp,DL);
+    let sres = exp_stmt(address_exp(temp_f_val,DL),DL);
+    let ifs = ifthenelse_stmt(test_exp,throw_match_stmt(),skip_stmt_dl(),DL);
+    let e1_p_type = cstar_typ(e1_c_type,mt_tq);
+    let e1_f = address_exp(aggrproj(e1,f,DL),DL);
+    let s = declare_stmt(temp,e1_p_type,e1_f,seq_stmt(ifs,sres,DL),DL);
+    return stmt_exp_r(s);    
+  } else {
+    let temp_f_tag = aggrmember_exp(aggrproj(temp_exp,f,DL),tag_sp,DL);
+    let test_exp = neq_exp(temp_f_tag,f_tag,DL);
+    let temp_f_val = aggrmember_exp(aggrproj(temp_exp,f,DL),val_sp,DL);
+    let sres = exp_stmt(temp_f_val,DL);
+    let ifs = ifthenelse_stmt(test_exp,throw_match_stmt(),skip_stmt_dl(),DL);
+    let s = declare_stmt(temp,e1_c_type,e1,seq_stmt(ifs,sres,DL),DL);
+    return stmt_exp_r(s);
+  }
 }
 
 // return true if e is e1.f or e1->f where e1 is a (pointer to a)
@@ -1912,7 +1957,8 @@ static raw_exp_t tagged_union_assignop(exp_t e1, type_t e1_cyc_type,
     s2 = ifthenelse_stmt(test_exp,throw_match_stmt(),skip_stmt_dl(),DL);
   }
   stmt_t s1 = declare_stmt(temp,cstar_typ(member_type,mt_tq),
-                           push_address_exp(e1),seq_stmt(s2,s3,DL),DL);
+                           push_address_exp(e1),
+                           seq_stmt(s2,s3,DL),DL);
   return stmt_exp_r(s1);
 }
 
@@ -1920,6 +1966,8 @@ static void exp_to_c(env_t nv, exp_t e) {
   let r = e->r;
   if(e->topt == NULL)
     toc_impos("exp_to_c: no type for %s",exp2string(e));
+  //if (in_lhs(nv))
+  //  fprintf(stderr,"in_lhs for %s\n",exp2string(e));
   type_t old_typ = e->topt->v;
   switch (r) {
   case &Const_e({.Null_c = _}):
@@ -2094,7 +2142,9 @@ static void exp_to_c(env_t nv, exp_t e) {
         toc_impos("in-place inc/dec on @tagged union");
       }
     }
+    set_lhs(nv,true);
     exp_to_c(nv,e2);
+    set_lhs(nv,false);
     // only t ? or zero-terminated types are translated funny, 
     // note that e2 is an lvalue!
     type_t elt_typ = &VoidType_val;
@@ -2145,7 +2195,9 @@ static void exp_to_c(env_t nv, exp_t e) {
     int f_tag = 0; // bogus unless e1_tagged_proj
     type_t tagged_member_struct_type = &VoidType_val; // bogus unless e1_tagged_proj
     if (is_tagged_union_project(e1,&f_tag,&tagged_member_struct_type,true)) {
+      set_lhs(nv,true);
       exp_to_c(nv,e1); 
+      set_lhs(nv,false);
       exp_to_c(nv,e2);
       e->r = tagged_union_assignop(e1,e1_old_typ,popt,e2,e2_old_typ,f_tag,
                                    tagged_member_struct_type);
@@ -2162,7 +2214,9 @@ static void exp_to_c(env_t nv, exp_t e) {
     // See if e1 is a polymorphic field (i.e., is an instantiated type
     // variable) -- if so, coerce e2 to void*.
     bool e1_poly    = is_poly_project(e1);
+    set_lhs(nv,true);
     exp_to_c(nv,e1); 
+    set_lhs(nv,false);
     exp_to_c(nv,e2);
     // special case for pointer arithmetic of t ? or zero-terminated types
     bool done = false;
@@ -2544,7 +2598,9 @@ DynCast:
       e->r = init_tuple(nv, true, NULL, es)->r;
       break;
     default: // it's actually an address-of.
+      set_lhs(nv,true);
       exp_to_c(nv,e1);
+      set_lhs(nv,false);
       if(!is_lvalue(e1)) {
 	lvalue_assign(e1,NULL,address_lvalue,true);
 	// the wrong cast got pushed out, so as a kludge, just re-cast
@@ -2753,6 +2809,8 @@ DynCast:
     }
     break;
   case &Deref_e(e1):
+    let old_lhs = in_lhs(nv);
+    set_lhs(nv,false);
     let e1_typ = compress(e1->topt->v);
     switch (e1_typ) {
     case &PointerType(PtrInfo{t2,tq,PtrAtts(rgn,cr,b,zt,_)}):
@@ -2793,6 +2851,7 @@ DynCast:
       break;
     default: toc_impos("exp_to_c: Deref: non-pointer");
     }
+    set_lhs(nv,old_lhs);
     break;
   case &AggrMember_e(e1,f,is_tagged,is_read):
     bool is_poly = is_poly_project(e);
@@ -2800,12 +2859,15 @@ DynCast:
     exp_to_c(nv, e1);
     if (is_tagged && is_read) {
       e->r = check_tagged_union(e1,typ_to_c(e1_cyc_type),e1_cyc_type,f,
+                                in_lhs(nv),
                                 aggrmember_exp);
     }
     if(is_poly)
       e->r = array_to_ptr_cast(typ_to_c(e->topt->v),new_exp(e->r,DL),DL)->r;
     break;
   case &AggrArrow_e(e1,f,is_tagged,is_read):
+    let old_lhs = in_lhs(nv);
+    set_lhs(nv,false);
     type_t e1typ = compress(e1->topt->v);
     bool do_null_check = need_null_check(e1);
     exp_to_c(nv, e1);
@@ -2852,12 +2914,15 @@ DynCast:
       break;
     }
     if (is_tagged && is_read) {
-      e->r = check_tagged_union(e1,typ_to_c(e1typ),ta,f,aggrarrow_exp);
+      e->r = check_tagged_union(e1,typ_to_c(e1typ),ta,f,in_lhs(nv),aggrarrow_exp);
     }
     if(is_poly && is_read)
       e->r = array_to_ptr_cast(typ_to_c(e->topt->v),new_exp(e->r,DL),DL)->r;
+    set_lhs(nv,old_lhs);
     break;
   case &Subscript_e(e1,e2):
+    let old_lhs = in_lhs(nv);
+    set_lhs(nv,false);
     let e1_typ = compress(e1->topt->v);
     // e1 could be a tuple or an array of various sorts
     switch (e1_typ) {
@@ -2946,6 +3011,7 @@ DynCast:
       break;
     default: toc_impos("exp_to_c: Subscript on non-tuple/array/tuple ptr");
     }
+    set_lhs(nv,old_lhs);
     break;
   case &Tuple_e(es):
     if(!is_toplevel(nv))
@@ -3206,8 +3272,10 @@ DynCast:
     type_t tagged_mem_type2 = &VoidType_val;
     bool e2_tmem = is_tagged_union_project(e2,&f2_tag,&tagged_mem_type2,true);
 
+    set_lhs(nv,true);
     exp_to_c(nv,e1);
     exp_to_c(nv,e2);
+    set_lhs(nv,false);
 
     // special case when e1 or e2 is a tagged union member (e.g., e.f or e->f)
     if (e1_tmem) {

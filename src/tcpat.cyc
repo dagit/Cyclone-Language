@@ -1166,8 +1166,6 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
     case &TagInt_p(tv,vd): return aprintf("%s<`%s>",qvar2string(vd->name),
                                           *tv->name);
     case &Tuple_p(_,_): return aprintf("$(%s)",descs2string(r,ds));
-    case &Pointer_p(&Pat{&Datatype_p(_,tuf,_,_),_,_}): 
-      return aprintf("&%s(%s)",qvar2string(tuf->name),descs2string(r,ds));
     case &Pointer_p(_):
       return aprintf("&%s",descs2string(r,ds));
     case &Aggr_p(&AggrInfo({.KnownAggr = &ad},_),_,dlps,_): 
@@ -1181,7 +1179,10 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
       }
       return aprintf("%s{%s}",qvar2string(ad->name),descs2string(r,ds));
     case &Datatype_p(_, tuf, _, _): 
-      return aprintf("%s",qvar2string(tuf->name));
+      if (ds == NULL)
+        return aprintf("%s",qvar2string(tuf->name));
+      else 
+        return aprintf("%s(%s)",qvar2string(tuf->name),descs2string(r,ds));
     case &Null_p: return "NULL";
     case &Int_p(_,i): return aprintf("%d",i);
     case &Char_p(c): return aprintf("%d",c);
@@ -1234,7 +1235,7 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
           if (List::length(args) == 0)
             return n;
           else 
-            return aprintf("&%s(...)",n);
+            return aprintf("%s(...)",n);
         }
       }
       throw &Desc2string_val;

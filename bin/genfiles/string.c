@@ -708,15 +708,16 @@ _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossib
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
 char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
 char*tag;struct _dyneither_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;
-extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{char*tag;};
-extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{char*tag;};
-struct _dyneither_ptr wrap_Cbuffer_as_buffer(char*,unsigned long);inline static void* 
-arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){if(bd >> 20  || sz
->> 12)return 0;{unsigned char*ptrbd=dyn.curr + bd * sz;if(((ptrbd < dyn.curr  || dyn.curr
-== 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)return 0;return dyn.curr;};}
-struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};int Cyc_List_length(struct
-Cyc_List_List*x);extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{
-char*tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};char*
+extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_Core_Open_Region[
+12];struct Cyc_Core_Open_Region_struct{char*tag;};extern char Cyc_Core_Free_Region[
+12];struct Cyc_Core_Free_Region_struct{char*tag;};struct _dyneither_ptr
+wrap_Cbuffer_as_buffer(char*,unsigned long);inline static void* arrcast(struct
+_dyneither_ptr dyn,unsigned int bd,unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{
+unsigned char*ptrbd=dyn.curr + bd * sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || 
+dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)return 0;return dyn.curr;};}struct
+Cyc_List_List{void*hd;struct Cyc_List_List*tl;};int Cyc_List_length(struct Cyc_List_List*
+x);extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{char*
+tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};char*
 strerror(int errnum);unsigned long Cyc_strlen(struct _dyneither_ptr s);int Cyc_strcmp(
 struct _dyneither_ptr s1,struct _dyneither_ptr s2);int Cyc_strptrcmp(struct
 _dyneither_ptr*s1,struct _dyneither_ptr*s2);int Cyc_strncmp(struct _dyneither_ptr s1,

@@ -37,9 +37,11 @@ override CYCFLAGS += $(addprefix -I, $(INC_PATH)) -B. -B$(LIB_PATH) -save-c
 # various flags to set
 ifdef DEBUGBUILD
 override CYCFLAGS += -pp -g
+override CFLAGS += -g
 endif
 ifdef PROFILE
 override CYCFLAGS += -pg
+override CFLAGS += -pg
 endif
 ifdef ALLOC_PROFILE
 override CYCFLAGS += -pa
@@ -52,6 +54,7 @@ override CYCFLAGS += -noregions
 endif
 ifdef OPTBUILD
 override CYCFLAGS += -O3
+override CFLAGS += -O3
 endif
 
 # cross compilation -- will be changed to use -b shortly

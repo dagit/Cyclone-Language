@@ -1404,7 +1404,9 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
 			   exp_t outer_e, exp_t e, field_name_t f,
                            bool @is_tagged, bool @is_read) {
   // As per K&R, don't promote e from array to pointer type
-  tcExpNoPromote(te,NULL,e);
+  TEMP_RGN(te, r) {
+    tcExpNoPromote(clear_notreadctxt(r,te),NULL,e);
+  }
   // record whether or not we're in a read context
   *is_read = !in_notreadctxt(te);
   switch (compress(e->topt->v)) {
