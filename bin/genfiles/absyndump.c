@@ -583,7 +583,7 @@ unsigned sz=Cyc_strlen(s);
 if(sz >= 1U){
 if(Cyc_Absyndump_need_space_before())
 Cyc_fputc(32,*Cyc_Absyndump_dump_file);
-Cyc_Absyndump_prev_char=*((const char*)_check_fat_subscript(s,sizeof(char),(int)(sz - 1U)));
+Cyc_Absyndump_prev_char=((const char*)s.curr)[(int)(sz - 1U)];
 Cyc_file_string_write(*Cyc_Absyndump_dump_file,s,0,(int)sz);}}
 # 134
 static void Cyc_Absyndump_dump_nospace(struct _fat_ptr s){
@@ -591,7 +591,7 @@ int sz=(int)Cyc_strlen(s);
 # 137
 if(sz >= 1){
 Cyc_file_string_write(*Cyc_Absyndump_dump_file,s,0,sz);
-Cyc_Absyndump_prev_char=*((const char*)_check_fat_subscript(s,sizeof(char),sz - 1));}}
+Cyc_Absyndump_prev_char=((const char*)s.curr)[sz - 1];}}
 # 142
 static void Cyc_Absyndump_dump_char(int c){
 # 144

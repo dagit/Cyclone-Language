@@ -420,13 +420,68 @@ assn_size_loop(assn_t a, unsigned int c, list_t<assn_t,`H>@ prev){
 static unsigned int max_assn_size = 0;
 
 // calculate the size of an assertion
-static unsigned int assn_size(assn_t a) {
+unsigned int assn_size(assn_t a) {
   list_t<assn_t,`H> prev = NULL;
   let c = assn_size_loop(a,0,&prev);
   if (c > max_assn_size) {
     max_assn_size = c;
   }
   return c;
+}
+
+static string_t d2string(assn_t a, int @c,
+                         list_t<$(assn_t,string_t<`H>,string_t<`H>)@`H,`H>@ prev) {
+  for (let ps = *prev; ps != NULL; ps = ps->tl) {
+    let &$(a1,n,v) = ps->hd;
+    if ((unsigned int)a1 == (unsigned int)a) return n;
+  }
+  let n = aprintf("A%d",*c); 
+  *c = *c+1;
+  string_t s;
+  switch (a) {
+  case &True: s = "true"; break;
+  case &False: s = "false"; break;
+  case &Prim(...): s = assn2string(a); break;
+  case &And(a1,a2):
+    let d1 = d2string(a1,c,prev);
+    let d2 = d2string(a2,c,prev);
+    s = aprintf("%s && %s",d1,d2);
+    break;
+  case &Or(a1,a2):
+    let d1 = d2string(a1,c,prev);
+    let d2 = d2string(a2,c,prev);
+    s = aprintf("%s || %s",d1,d2);
+    break;
+  case &Not(a):
+    let d = d2string(a,c,prev);
+    s = aprintf("not(%s)",d);
+    break;
+  case &Subst(vd,t,a):
+    let d = d2string(a,c,prev);
+    s = aprintf("Subst[%s=%s](%s)",Absynpp::qvar2string(vd->name),
+                term2string(t),d);
+    break;
+  case &Kill(a):
+    let d = d2string(a,c,prev);
+    s = aprintf("Kill(%s)",d);
+    break;
+  }
+  *prev = new List{new $(a,n,s),*prev};
+  return n;
+}
+
+string_t dag2string(assn_t a) {
+  list_t<$(assn_t,string_t<`H>,string_t<`H>)@`H,`H> decls = NULL;
+  string_t@`H newline = new "\n";
+  string_t@`H equals = new " = ";
+  int count = 0;
+  string_t res = d2string(a,&count,&decls);
+  list_t<string_t@`H,`H> strings = new List{new " in ",new List{new res,NULL}};
+  for (; decls != NULL; decls = decls->tl) {
+    let &$(_,*n,*d) = decls->hd;
+    strings = new List{n,new List{equals,new List{d,new List{newline,strings}}}};
+  }
+  return strconcat_l(strings);
 }
 
 // calculate a string representation (and total tree node count) for an
@@ -493,7 +548,7 @@ datatype Assn.False false_assn = False;
 // that want to lookup.  That could happen if we had a different 
 // type for hashtable lookup (as we did with dictionaries.)
 
-static int assnhash(datatype Assn @a) {
+int assnhash(datatype Assn @a) {
   switch (a) {
   case &False: return 0;
   case &True: return 1;

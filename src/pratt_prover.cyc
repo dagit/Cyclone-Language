@@ -18,6 +18,7 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 #include "assndef.h"
 #include <list.h>
+#include <set.h>
 
 using AssnDef;
 using List;
@@ -227,6 +228,24 @@ static void add_eq(graph_t @g, term_t t1, term_t t2);
 static $(bool,unsigned,term_opt_t) subst_term_with_const(graph_t @g, term_t t);
 static int *lookup_dist(node_t @`H source, node_t @`H target, bool is_signed);
 
+static exp_t strip_cast(exp_t e) {
+ LOOP:
+  switch (e->r) {
+  case &Absyn::Cast_e(tp2,e2,...):
+    switch (Absyn::compress(tp2)) {
+    case &Absyn::AppType(&Absyn::IntCon(_,s),_):
+      if (s == Absyn::Int_sz || s == Absyn::Long_sz) {
+        e = e2; goto LOOP;
+      }
+      break;
+    default: break;
+    }
+    break;
+  default: break;
+  }
+  return e;
+}
+
 // Depending upon the type of a term, we can sometimes add extra
 // information to a graph.  For instance, if t : int@{42} then we
 // can add numelts(t) <= 42, and if t : tag_t<valueof(e)> then
@@ -240,9 +259,9 @@ static void add_type_info(graph_t @g, term_t term) {
   switch (term) {
   case &Unop(Absyn::Numelts,x,_):
     // add term s< MAXINT and term u< MAXINT and 0 u<= term
-    //    set_distance(g,term,zero(),MAXINT-1,true);
     set_distance(g,term,zero(),MAXINT-1,false);
-    //    set_distance(g,zero(),term,0,true);
+    // also add x as a node to pick up any constant bounds information
+    term2node(g, x);
     break;
   default: break;
   }
@@ -253,21 +272,7 @@ static void add_type_info(graph_t @g, term_t term) {
     if (eopt != NULL) {
       term_t t1 = unop(Absyn::Numelts,term,Absyn::uint_type);
       // sigh -- must get rid of a cast to int/long
-      exp_t e = (exp_t)eopt;
-    loop:
-      switch (e->r) {
-      case &Absyn::Cast_e(tp2,e2,...):
-        switch (Absyn::compress(tp2)) {
-        case &Absyn::AppType(&Absyn::IntCon(_,s),_):
-          if (s == Absyn::Int_sz || s == Absyn::Long_sz) {
-            e = e2; goto loop;
-          }
-          break;
-        default: break;
-        }
-        break;
-      default: break;
-      }
+      exp_t e = strip_cast((exp_t)eopt);
       term_t t2 = cnst((exp_t)e);
       // FIX -- if the term is a * type, then we need to say something
       // like ((term == 0) ==> numelts(term) == 0) && 
@@ -544,6 +549,9 @@ static graph_t *copy_graphs(graph_t *gopt) {
   return newg;
 }
 
+// used to control iteration
+static bool graph_change = false;
+
 // Applies f to each of the graphs in gs.  If f throws Inconsistent,
 // then the graph is removed from the list gs (imperatively).  
 // Returns the resulting list of graphs.
@@ -555,6 +563,7 @@ static graph_t *app_graphs(void (@f)(`env,graph_t @`H), `env e, graph_t *`H gs) 
       prev = g;
     } catch {
     case &Inconsistent:
+      graph_change = true;
       if (prev == NULL) {
         gs = g->next;
       } else {
@@ -711,7 +720,6 @@ static void congruence_close_graph(int dummy, graph_t @g) {
 static graph_t *congruence_close_graphs(graph_t *`H gs) {
   return app_graphs(congruence_close_graph,0,gs);
 }
-
 
 //find out if s[t] = s[t1+c2] =? s[t1] + c2
 static $(bool, term_t, int) break_term(graph_t @g, term_t t, bool is_signed){
@@ -1068,6 +1076,59 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
   return gs;
 }
 
+static Set::set_t<term_t> get_pointer_terms(term_t t,Set::set_t<term_t,`H> s) {
+ LOOP:
+  let topt = get_term_type(t);
+  if (topt != NULL && Tcutil::is_nullable_pointer_type((type_t)topt,false)
+      && Tcutil::get_type_bound((type_t)topt) != NULL)
+    s = Set::insert(s,t);
+  switch (t) {
+  case &Cast(_,t1): t = t1; goto LOOP;
+  case &Unop(_,t1,_): t = t1; goto LOOP;
+  case &Binop(_,t1,t2,_): 
+    s = get_pointer_terms(t1,s);
+    t = t2; goto LOOP;
+  default: break;
+  }
+  return s;
+}
+
+static Set::set_t<term_t> 
+get_graph_pointer_terms(graph_t * g,Set::set_t<term_t,`H> s) {
+  for (; g != NULL; g = g->next) 
+    for (let rs = g->rows; rs != NULL; rs = rs->next) 
+      s = get_pointer_terms(rs->rep,s);
+  return s;
+}
+
+static void add_ptr_info($(term_t t,term_t,term_t bnd)@env, graph_t@`H g) {
+  let $(t,tnumelts,bnd) = *env;
+  // check to see if 0 u< t -- i.e., 0 - t u<= -1
+  let dist = lookup_dist(term2node(g,zero()),term2node(g,t),false);
+  if (dist != 0 && *dist <= -1) {
+    add_constraint(g,bnd,ULte,tnumelts);
+    add_constraint(g,bnd,SLte,tnumelts);
+  }
+}
+
+static graph_t *add_ptr_type_info(term_t t, graph_t *`H gs) {
+  type_t type = (type_t)get_term_type(t);
+  exp_t e = strip_cast((exp_t)Tcutil::get_type_bound(type));
+  term_t bnd = cnst(e);
+  term_t tnumelts = unop(Absyn::Numelts,t,Absyn::uint_type);
+  let env = $(t,tnumelts,bnd);
+  return app_graphs(add_ptr_info,&env,gs);
+}
+
+// certain bits of type information are best expressed as explicit
+// assertions.  For instance, when t : int*{c}, then we would like
+// to add or(t == 0, c <= numelts(t)).  So we add these facts to the
+// assertion explicitly before converting it to the graph representation.
+static graph_t *add_type_assns(graph_t *`H gs) {
+  Set::set_t<term_t> ptrs = get_graph_pointer_terms(gs,Set::empty(cmp_term));
+  return Set::fold(add_ptr_type_info,ptrs,gs);
+}
+
 // check to see if an assertion is consistent using the constraint solver.
 // if it returns false, then the assertion is definitely inconsistent.
 // if it returns true, then the assertion might be consistent.
@@ -1075,11 +1136,16 @@ static bool consistent(assn_t a) {
   try {
     // start with just an empty graph (true) and then add in assertion a
     graph_t *gs = cgraph(true_graph(),a);
-    // run congruence closure to weed out graphs
-    gs = associate_ud_sd_in_graphs(gs);
-    gs = congruence_close_graphs(gs);
-    gs = break_term_in_graphs(gs);
-    gs = associate_ud_sd_in_graphs(gs);
+    // run closure passes to weed out graphs
+    graph_change = true;
+    while (graph_change && gs != NULL) {
+      graph_change = false;
+      gs = associate_ud_sd_in_graphs(gs);
+      gs = add_type_assns(gs);
+      gs = congruence_close_graphs(gs);
+      gs = break_term_in_graphs(gs);
+      gs = associate_ud_sd_in_graphs(gs);
+    }
     // if we get back an empty list of disjuncts (false) then
     // the graph is not consistent.
     return (gs != NULL);

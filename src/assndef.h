@@ -94,10 +94,12 @@ namespace AssnDef{
     Subst(vardecl_t x,term_t t,assn_t a); // a[t/x] -- lazy substitution
     Kill(assn_t); // replace all escaping variables with fresh logic variables
   };
-
-  int assncmp(datatype Assn@a1, datatype Assn@a2);  
+  unsigned int assn_size(assn_t a);
+  int assncmp(datatype Assn@a1, datatype Assn@a2);
+  int assnhash(datatype Assn @a);
 
   string_t assn2string(assn_t a);
+  string_t dag2string(assn_t a);  // shows sharing
 
   // assertion constants for true and false
   extern datatype Assn.True true_assn;

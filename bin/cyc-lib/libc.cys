@@ -3228,8 +3228,8 @@ cycstub setvbuf {
   static datatype exn.Failure __setvbuf_failure_2 =
     Failure("setvbuf: buffer insufficient");
   int setvbuf(FILE @f, char ? @nozeroterm`H buf, int type, size_t size) {
-    if (!buf) throw &__setvbuf_failure_1;
-    if (numelts(buf) < size) throw &__setvbuf_failure_2;
+    if (!buf && type != _IONBF) throw &__setvbuf_failure_1;
+    if (buf && numelts(buf) < size) throw &__setvbuf_failure_2;
     return Cstdio::setvbuf(f->file,(char * @nozeroterm`H)buf,type,size);
   }
 }

@@ -17,64 +17,92 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-/* What we are doing here is computing a pre/post-condition in a forwards
-   fashion for each statement and expression within a function.  The 
-   assertion language is very simple: equality and inequality over
-   terms, disjunction, and conjunction (no quantifiers).  The terms
-   include what we consider to be "constant" expressions in Cyclone,
-   primops of terms, program variables, and logical variables.  
+/* 
+What we are doing here is computing a pre/post-condition in a forwards
+fashion for each statement and expression within a function.  We are
+also generating verification conditions at certain key points to be
+used within insert_checks.  These verification conditions are of the
+form A => B where A describes the set of possible states for the
+control-flow point, and B describes a safety check that needs to be
+done (e.g., an array index is in bounds, a pointer is not NULL, etc.)
 
-   There's an extremely simple, essentially syntactic prover that is
-   used to show implications.  There's also an extremely simple strategy
-   for generating loop invariants.  The trickyness is in ensuring
-   that the iterative analysis terminates.  In essence, each time
-   around a loop, we're guaranteeing that we get a smaller (in terms
-   of total node count) assertion.  The worst case is we fall back to "true".
+The assertion language is very simple: equality and inequality over
+terms, disjunction, and conjunction (no quantifiers yet) so we cannot
+yet generate strongest post-conditions.  The terms include what we
+consider to be "constant" expressions in Cyclone, primops of terms,
+program variables, and logical variables.
 
-   To keep the analysis simple and somewhat structured, we essentially
-   punt on goto's.  More properly, whenever we hit a labelled statement,
-   we reset the incoming pre-condition to "true".  This allows me to
-   do purely local iteration for calculating the assertions.  To handle
-   other non-local edges (e.g., break, continue, throw) we essentially
-   pile up assertions on the statement and OR them in with the natural
-   flow's pre-condition.  
+The system currently uses two provers.  One prover is extremely simple
+and essentially syntactic and is used to discharge most of the
+verification conditions.  The other prover is based on solving
+difference constraints on terms and is quite a bit more expensive.  In
+particular, it computes a DNF representation for a verification
+condition so there can be an exponential blow-up (roughly
+corresponding to the number of execution paths reaching a particular
+control-flow point.)
 
-   Also to keep the analysis simple, we punt on alias analysis.  Variables 
-   have a flag indicating whether or not they escape syntactically.
-   When updating an escaping variable, we essentially "kill" all 
-   escaping variables.  The same happens for a function call.  This is
-   *not* thread-safe.  To achieve that, we would have to kill all escaping
-   things after each step. 
+To keep the system scalable by default, we employ a number of
+strategies.  First, at join-points, we do not simply take the
+disjunction of the incoming assertions.  Rather, we weaken the
+disjunction by factoring out the syntactically common conjuncts.  This
+ensures that most verification conditions do not have a large number
+of disjunctions and essentially makes the analysis path insensitive by
+default.  Users can override this behavior by either (a) putting in an
+explicit assertion at the join-point, or (b) turning on "allpaths"
+using a pragma.
 
-   Maintaining sharing is crucial for avoiding an exponential space blow 
-   up.  We use hash-consing to share all assertions nodes, and we use
-   lazy substitution to avoid breaking the sharing as much as possible.
+Second, we use a very simple strategy for constructing loop
+invariants.  In particular, we use an iterative approach which weakens (in
+the sense above) the proposed invariant each time around the loop.
+Since the weakening is syntactic, the size of the assertion decreases
+each time we iterate.  So the worst case fixed-point is the assertion
+True.  However, this tends to get the easy invariants with
+relatively little overhead.  Users can override this default by
+putting in explicit loop invariants.
 
-   There are a lot of ways we should improve this analysis and a few
-   things that need to be fixed:
+Third, it is crucial that we physically share term and assertion
+nodes as much as possible to avoid an exponential space blow-up when
+we are path-sensitive.  We use hash-consing to share all term & assertion 
+nodes, and we use lazy substitution to avoid breaking the sharing 
+as much as possible.
 
-   * We need to replace the relations stuff in the type-checker (e.g.,
-     subtyping) with calls to manipulate the @requires/@ensures stuff
-     in here.
-   * We should take pattern matching tests into account for a switch.
-   * We shouldn't kill unique variables.
-   * We should only kill "type-compatible" expressions on an update.
-     For instance, we don't need to kill pointer variables if we're
-     assigning an integer value.  Note that if we had terms like
-     *t or t.f or t->f or t1[t2] then we'd have to kill any of those
-     though...
-   * We should make the simple thm. prover a bit smarter.
-   * We should add support for more predicates and relations (e.g.,
-     track whether x == null, or tagcheck(x.f), or datatype tags, etc.)?
-   * Could have user-defined predicates...
-   * If we knew that a goto was forward, then we could deal with it...
-   */
+To keep the analysis simple and somewhat structured, we essentially
+punt on goto's.  More properly, whenever we hit a labelled statement, 
+we reset the incoming pre-condition to "true", unless there's an
+explicit @assert(A) invariant.  This allows us to
+do purely local iteration for calculating the assertions.  To handle
+other non-local edges (e.g., break, continue, throw) we essentially
+pile up assertions on the statement and OR them in with the natural
+flow's pre-condition.  
 
-/* TODO List 
- * 1) Treat equivalence relation separately, instead of adding four new 
- * constraints, we want to merge all terms that are equivalent into
- * one equivalence class
- */
+Also to keep the analysis simple, we punt on alias analysis.  Variables 
+have a flag indicating whether or not they escape syntactically.
+When updating an escaping variable, we essentially "kill" all 
+escaping variables.  The same happens for a function call.  This is
+not thread-safe.  To achieve that, we would have to kill all escaping
+things after each step. 
+
+There are a lot of ways we should improve this analysis and a few
+things that need to be fixed:
+
+* We need to replace the relations stuff in the type-checker (e.g.,
+  subtyping) with calls to manipulate the @requires/@ensures stuff
+  in here.
+* We should take pattern matching tests into account for a switch.
+* We shouldn't kill unique variables.
+* We should only kill "type-compatible" expressions on an update.
+  For instance, we don't need to kill pointer variables if we're
+  assigning an integer value.  Note that if we had terms like
+  *t or t.f or t->f or t1[t2] then we'd have to kill any of those
+  though...
+* We should make the simple thm. prover a bit smarter.
+* We should add support for more predicates and relations (e.g.,
+  track whether x == null, or tagcheck(x.f), or datatype tags, etc.)?
+* Could have user-defined predicates...
+* If we knew that a goto was forward, then we could deal with it...  
+
+*/
+
 #include "vcgen.h"
 #include "absyn.h"
 #include "absynpp.h"
@@ -121,57 +149,85 @@ static bool implies(assn_t @a1, assn_t @a2) {
 // We use this at loops to ensure we eventually get a loop
 // invariant.  We also use this at statement-level join
 // points, because otherwise we blow up into a large number
-// of paths.
-typedef struct Set::Set<`a,`H>*`H set_opt_t<`a>;
+// of paths.  We use dictionaries (instead of sets) because
+// they scale better.
+typedef Set::set_t<assn_t> assn_set_t;
+typedef struct Set::Set<assn_t> *assn_set_opt_t;
+typedef Hashtable::table_t<assn_t,assn_set_opt_t> assn_map_t;
 
-// s is a set of primitive assertions that we consider to be
-// a conjunction -- we are computing an approximation of and(sopt,a).  
-// When sopt is NULL, it represents false.  
-static set_opt_t<assn_t> widen_it(set_opt_t<assn_t> sopt, assn_t a) {
-  if (sopt == NULL) return NULL;
-  let s = (Set::set_t<assn_t>)sopt;
-  switch (a) {
-  case &Prim(t1,Eq,t2): 
-    s = Set::insert(s,a);
-    // when we have t1 == t2 and they are of integral type, then we
-    // also want to remember that t1 <= t2 and t2 <= t1 so that when
-    // we intersect, we don't lose the information.
-    let topt1 = get_term_type(t1);
-    let topt2 = get_term_type(t2);
-    if ((topt1 != NULL && Tcutil::is_integral_type((type_t)topt1)) ||
-        (topt2 != NULL && Tcutil::is_integral_type((type_t)topt2))) {
-      s = Set::insert(s,slte(t1,t2));
-      s = Set::insert(s,slte(t2,t1));
-      s = Set::insert(s,ulte(t1,t2));
-      s = Set::insert(s,ulte(t2,t1));
-    }
-    return s;
-  case &Prim(t1,SLt,t2):
-    s = Set::insert(s,a);
-    s = Set::insert(s,slte(t1,t2));
-    return s;
-  case &Prim(t1,ULt,t2):
-    s = Set::insert(s,a);
-    s = Set::insert(s,ulte(t1,t2));
-    return s;
-  case &Prim(t1,p,t2): return Set::insert(s,a); 
-  case &And(a1,a2): return widen_it(widen_it(s,a1),a2);
-  case &Or(a1,a2):  
-    let s1 = widen_it(s,a1);
-    let s2 = widen_it(s,a2);
-    if (s1 == NULL) return s2;
-    if (s2 == NULL) return s1;
-    return Set::intersect((Set::set_t<assn_t>)s1,(Set::set_t<assn_t>)s2);
-  case &True: return s;
-  case &False: return NULL;
-  default: return widen_it(s,reduce(a));
+static int or_assns = 0;
+static int total_nodes = 0;
+static int total_hits = 0;
+
+static assn_set_opt_t widen_it(assn_map_t m, assn_t a) {
+  total_nodes++;
+  assn_set_opt_t *r = Hashtable::lookup_opt(m, a);
+  if (r != NULL) {
+    total_hits++;
+    return *r;
   }
+  assn_set_opt_t s;
+  switch (a) {
+  case &True: s = Set::empty(assncmp); break;
+  case &False: s = NULL; break;
+  case &And(a1,a2):
+    let s1 = widen_it(m,a1);
+    let s2 = widen_it(m,a2);
+    if (s1 == NULL || s2 == NULL) 
+      s = NULL; 
+    else 
+      s = Set::union_two((assn_set_t)s1,(assn_set_t)s2);
+    break;
+  case &Or(a1,a2):
+    or_assns++;
+    let s1 = widen_it(m,a1);
+    let s2 = widen_it(m,a2);
+    if (s1 == NULL) 
+      s = s2;
+    else if (s2 == NULL)
+      s = s1;
+    else
+      s = Set::intersect((assn_set_t)s1,(assn_set_t)s2);
+    break;
+  case &Prim(t1,p,t2):
+    s = Set::singleton(assncmp,a);
+    switch (p) {
+    case Eq:
+      // when we have t1 == t2 and they are of integral type, then we
+      // also want to remember that t1 <= t2 and t2 <= t1 so that when
+      // we intersect, we don't lose the information.
+      let topt1 = get_term_type(t1);
+      let topt2 = get_term_type(t2);
+      if ((topt1 != NULL && Tcutil::is_integral_type((type_t)topt1)) ||
+          (topt2 != NULL && Tcutil::is_integral_type((type_t)topt2))) {
+        s = Set::insert(s,slte(t1,t2));
+        s = Set::insert(s,slte(t2,t1));
+        s = Set::insert(s,ulte(t1,t2));
+        s = Set::insert(s,ulte(t2,t1));
+      }
+      break;
+    case SLt:
+      s = Set::insert(s,slte(t1,t2));
+      break;
+    case ULt:
+      s = Set::insert(s,ulte(t1,t2));
+      break;
+    default: break;
+    }
+    break;
+  default:
+    s = widen_it(m, reduce(a));
+    break;
+  }
+  Hashtable::insert(m,a,s);
+  return s;
 }
 
 static assn_t widen(assn_t a) {
-  let sopt = widen_it(Set::empty(assncmp),a);
+  or_assns = 0; total_nodes = 0; total_hits = 0;
+  let sopt = widen_it(Hashtable::create(101,assncmp,assnhash),a);
   if (sopt == NULL) return &false_assn;
-  return Set::fold(and,(Set::set_t<assn_t>)sopt,&true_assn);
+  return Set::fold(and,(assn_set_t)sopt,&true_assn);
 }
 
 // only widens when env->shared->widen_paths is true (defined below)
@@ -536,12 +592,24 @@ static list_t<assn_t> heuristic_loop_invariants(env_t env, stmt_t s, assn_t ain)
   return loop_invariants;
 }
 
+static exp_opt_t find_assert_e(stmt_t s) {
+  while (true) {
+    switch (s->r) {
+    case &Absyn::Exp_s(&Absyn::Exp{.r = &Absyn::Assert_e(e),...}): return e;
+    case &Absyn::Seq_s(sa,_): s = sa; continue;
+    default: return NULL;
+    }
+  }
+}
+
 // To simplify things, I'm treating the control-flow as if it were
 // structured.  Upon reaching a labelled statement, I set the pre-
-// condition to "True" which is conservative.   This lets me do
+// condition to "True" which is conservative, unless there's an 
+// explicit invariant associated with the label.   This lets me do
 // local iteration for loops and so forth to generate invariants,
 // since the only back-edges in the simplified graph are always
-// part of the control constructs.  
+// part of the control constructs, or have an explicit invariant
+// associated with them.  
 static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
   // merge the pre-condition with any pre-recorded assertions.
   // we'll have one if there was some control-flow to this statement.
@@ -759,14 +827,38 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     s = s1;
     goto LOOP;
   case &Absyn::Label_s(_,s1): 
-    // by making the assertion True here, we're effectively losing
-    // all information when we do a goto.  This is conservative, 
-    // and means that I don't have to worry about non-structured
-    // control-flow.
-    ain = &true_assn;
+    // check to see if s1 is an assertion -- if so, use it as the
+    // assumption.  When we do a goto, we'll also look to see if
+    // the target label has an assertion and check the implication.
+    exp_opt_t label_assn_opt = find_assert_e(s1);
+    if (label_assn_opt == NULL) {
+      // by making the assertion True here, we're effectively losing
+      // all information when we do a goto.  This is conservative, 
+      // and means that I don't have to worry about non-structured
+      // control-flow.
+      ain = &true_assn;
+    }
     s = s1;
     goto LOOP;
-  case &Absyn::Goto_s(_): return &false_assn; // see above
+  case &Absyn::Goto_s(_): 
+    // if the target label has an @assert associated with it,
+    // then check that we imply the assertion.
+    let destopt = Hashtable::lookup(env->shared->succ_table,s);
+    if (destopt != NULL) {
+      switch (destopt->r) {
+      case &Absyn::Label_s(_,s1):
+        exp_opt_t label_assn_opt = find_assert_e(s1);
+        if (label_assn_opt == NULL) break;
+        exp_t label_assn = (exp_t)label_assn_opt;
+        let $(at,_) = vcgen_test(env,label_assn,&true_assn);
+        if (!implies(&ain,&at))
+          Warn::err(s->loc, "cannot prove @assert(%s)\nfrom %s",
+                    assn2string(at), assn2string(reduce(ain)));
+        break;
+      default: break;
+      }
+    }
+    return &false_assn; // see above
   case &Absyn::TryCatch_s(s,scs,_):
     // save old try/catch-handler assertion
     let old_try_assn = env->shared->try_assn;
@@ -1206,7 +1298,6 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Cast_e(tp,e1,_,c): 
     // FIX: really need to put C coercions in terms...
     let $(topt,a) = vcgen_rexp(env,e1,ain);
-
     // we only need to retain the cast on the term if it
     // changes the size of the value.  In particular, we
     // can drop a cast from an int to an unsigned int and
@@ -1229,6 +1320,51 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       s2 = (s2 == Absyn::Long_sz? Absyn::Int_sz:s2);
       if (s1 == s2) return $(topt,a);
       break;
+    case $(&Absyn::PointerType(p2),&Absyn::PointerType(p1)):
+      let n1 = Tcutil::force_type2bool(false,p1.ptr_atts.nullable);
+      let n2 = Tcutil::force_type2bool(false,p2.ptr_atts.nullable);
+      let b1 = Tcutil::get_bounds_exp(Absyn::bounds_one(),p1.ptr_atts.bounds);
+      let b2 = Tcutil::get_bounds_exp(Absyn::bounds_one(),p2.ptr_atts.bounds);
+      switch $(b1,b2) {
+      case $(&_, &_):  
+        // Both thin pointers -- type-checker should ensure that 
+        // we're casting to a smaller length so we don't have to worry about
+        // that check.  Now check to see if we have to do a NULL-check.
+        if (n1 && !n2) {
+          if (topt != NULL) {
+            term_t term = (term_t)topt;
+            let null_check = neq(zero(),term);
+            let exp_checks = new ExpChecks{.ctxt=a,.bounds_check=&true_assn,
+                                           .null_check=null_check};
+            update_try_assn(env,and(a,eq(term,zero())));
+            return $(term,and(a,null_check));
+          } else {
+            update_try_assn(env,a);
+          }
+        }
+        return $(topt,a);
+      case $(&_,NULL):  // cast to fat -- no failure possible
+        return $(topt,a);
+      case $(NULL,&_):  
+        // cast from fat -- need bounds check and possible null check
+        // depending upon n2.
+        if (topt != NULL) {
+          let term = (term_t)topt;
+          let null_check = n2 ? (assn_t)&true_assn : neq(zero(),term);
+          let $(b,_) = vcgen_rexp_always(env, (exp_t)b2, a);
+          let bcheck = ulte(b,unop(Absyn::Numelts,term,Absyn::uint_type));
+          let exp_checks = new ExpChecks{.ctxt=a,.bounds_check=bcheck,
+                                         .null_check=null_check};
+          let checks = and(null_check,bcheck);
+          update_try_assn(env,and(a,not(checks)));
+          return $(term,and(a,checks));
+        } else {
+          update_try_assn(env,a);
+        }
+        return $(topt,a);
+      case $(NULL,NULL): // fat to fat -- no failure possible
+        return $(topt,a);
+      }
     default: break;
     }
     if (c == Absyn::No_coercion) {

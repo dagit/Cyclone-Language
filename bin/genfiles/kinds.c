@@ -559,7 +559,7 @@ char _Tmp0=((const char*)s.curr)[0];switch((int)_Tmp0){case 65:
 # 155
  if(Cyc_strlen(s)==2U){
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp1=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=_tag_fat("Usage of deprecated kind: ",sizeof(char),27U);_Tmp2;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=s;_Tmp3;});void*_Tmp3[2];_Tmp3[0]=& _Tmp1,_Tmp3[1]=& _Tmp2;Cyc_Warn_warn2(loc,_tag_fat(_Tmp3,sizeof(void*),2));});
-if((int)*((const char*)_check_fat_subscript(s,sizeof(char),1))==66){
+if((int)((const char*)s.curr)[1]==66){
 char _Tmp1=((const char*)s.curr)[0];switch((int)_Tmp1){case 85:
  return& Cyc_Kinds_bk_uhint;case 84:
  return& Cyc_Kinds_bk_rhint;case 67:
