@@ -42,7 +42,6 @@
 #include <set.h>
 #include <dict.h>
 #include <cstring.h>
-#include <assert.h>
 #include "absyn.h"
 #include "tcutil.h"
 #include "evexp.h"

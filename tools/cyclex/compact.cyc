@@ -1,7 +1,6 @@
 
 #include "core.h"
 #include "list.h"
-#include "ref.h"
 #include "hashtable.h"
 
 #include "lexgen.h"
@@ -23,28 +22,30 @@ struct Lex_tables {
 
 // Determine the integer occurring most frequently in an array
 static int most_frequent_elt(int ?v) {
-  Hashtable::table_t<int,Ref::ref_t<int>> frequencies = 
-     Hashtable::create(17, intcmp, identity);
+  region rgn {
+  Hashtable::table_t<int,int@> frequencies =
+    Hashtable::create(17, intcmp, identity);
   int max_freq  = 0;
   int most_freq = 0;
   for(int i=0; i < v.size; ++i) {
-    int      e = v[i];
-    Ref::ref_t<int> r;
+    int   e = v[i];
+    int @ r;
     try r = Hashtable::lookup(frequencies, e);
     catch {
     case Not_found: 
-      r = Ref::new_ref(0); 
+      r = rnew(rgn) 0;
       Hashtable::insert(frequencies, e, r);
       break;
     }
-    int f = Ref::get(r) + 1;
-    Ref::set(r, f);
+    int f = (*r) + 1;
+    *r = f;
     if(f > max_freq) {
       max_freq  = f;
       most_freq = e;
     }
   }
   return most_freq;
+  }
 }
 
 // Transform an array into a list of (position, non-default element)
@@ -96,7 +97,7 @@ static $(int,int)@ pack_moves(int state_num, automata_move_t ?moves) {
 		       ({int x; 
 		       switch(moves[i]) { 
 		       case Backtrack: x = -1; break;
-		       case &Goto(n):   x = n;  break;
+		       case &Goto(n):  x = n;  break;
 		       }
 		       x;
 		       })};

@@ -49,7 +49,6 @@ gen-libdoc.tex: \
   ../include/list.h \
   ../include/pp.h \
   ../include/queue.h \
-  ../include/ref.h \
   ../include/rope.h \
   ../include/set.h \
   ../include/slowdict.h \

@@ -11,7 +11,6 @@
 #include <ctype.h>
 #include <xarray.h>
 #include <bitvec.h>
-#include <ref.h>
 #include <filename.h>
 #include <fn.h>
 #include <pp.h>
@@ -26,7 +25,6 @@ using Dict;
 using Hashtable;
 using Xarray;
 using Bitvec;
-using Ref;
 using Fn;
 using Array;
 
@@ -655,24 +653,6 @@ void bitvec_test() {
   test_end();
 }
 
-void ref_test() {
-  test_begin("Ref");
-  ref_t<int> x = new_ref(4);
-  okfail(Ref::get(x)==4);
-  okfail(Ref::get(x)!=5);
-  Ref::set(x,2);
-  okfail(Ref::get(x)==2);
-  okfail(Ref::get(x)!=4);
-
-  ref_t<stringptr_t> y = new_ref(allocstr("hello")); // FIX: cast required!
-  okfail(0==strcmp(*(Ref::get(y)),"hello"));
-  okfail(0!=strcmp(*(Ref::get(y)),"world"));
-  Ref::set(y,allocstr("world"));
-  okfail(0!=strcmp(*(Ref::get(y)),"hello"));
-  okfail(0==strcmp(*(Ref::get(y)),"world"));
-  test_end();
-}
-
 void filename_test() {
   // UNTESTED:
   // gnuify
@@ -1037,7 +1017,6 @@ int main(int argc, string_t<`H> ?`H args) {
   ctype_test();
   xarray_test();
   bitvec_test();
-  ref_test();
   filename_test();
   float_test();
   fn_test();

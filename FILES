@@ -30,7 +30,7 @@ tools: the source code for various tools written in Cyclone
      genfiles: needed for bootstrapping the lexer generator, because
                the lexer generator sources include a lex file!
 
-  cycbison: a parser generator, produces Cyclone parsers.  Ported from
+  bison: a parser generator, produces Cyclone parsers.  Ported from
             bison, a gnu parser generator for C written in C.
 
   aprof: an allocation profiler.  A Cyclone program compiled with -pa
