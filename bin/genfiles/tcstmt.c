@@ -266,7 +266,8 @@ void ** _zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i,const char
 #define _tag_dyneither(tcurr,elt_sz,num_elts) ({ \
   struct _dyneither_ptr _tag_arr_ans; \
   _tag_arr_ans.base = _tag_arr_ans.curr = (void*)(tcurr); \
-  _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts); \
+  /* JGM: if we're tagging NULL, ignore num_elts */ \
+  _tag_arr_ans.last_plus_one = _tag_arr_ans.base ? (_tag_arr_ans.base + (elt_sz) * (num_elts)) : 0; \
   _tag_arr_ans; })
 
 #ifdef NO_CYC_BOUNDS_CHECKS
@@ -312,7 +313,12 @@ static struct
  _dyneither_ptr _dyneither_ptr_decrease_size(struct _dyneither_ptr x,
                                             unsigned int sz,
                                             unsigned int numelts) {
-  x.last_plus_one -= sz * numelts; 
+  unsigned delta = sz * numelts;
+  /* Don't let someone decrease the size so much that it wraps around.
+   * This is crucial to get NULL right. */
+  if (x.last_plus_one - x.base >= delta)
+    x.last_plus_one -= delta;
+  else x.last_plus_one = x.base;
   return x; 
 }
 

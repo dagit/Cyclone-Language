@@ -17,8 +17,6 @@
       "\\\<malloc>\\\>"
       "\\\<rmalloc>\\\>"
       "\\\<region>\\\>"      
-      "\\\<xtunion\\\>"  ; deprecated
-      "\\\<tunion\\\>"   ; deprecated
       "\\\<datatype\\\>"
       "\\\<extensible\\\>"
       "\\\<zeroterm\\\>"
