@@ -374,15 +374,13 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
- extern char Cyc_FileCloseError[15U];extern char Cyc_FileOpenError[14U];
+
 # 300 "cycboot.h"
-extern int isspace(int);
+ extern int isspace(int);
 # 339
 extern const long Cyc_long_max;extern const long Cyc_long_min;
 # 22 "ctype.h"
-extern int isspace(int);extern char Cyc_Core_Invalid_argument[17U];extern char Cyc_Core_Failure[8U];extern char Cyc_Core_Impossible[11U];extern char Cyc_Core_Not_found[10U];extern char Cyc_Core_Unreachable[12U];
-# 171 "core.h"
-extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_List_List_mismatch[14U];extern char Cyc_List_Nth[4U];
+extern int isspace(int);
 # 81 "string.h"
 extern struct _fat_ptr Cyc__memcpy(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned);
 # 29 "assert.h"
@@ -390,24 +388,16 @@ extern void*Cyc___assert_fail(struct _fat_ptr,struct _fat_ptr,unsigned);
 # 7 "ap.h"
 extern struct Cyc_AP_T*Cyc_AP_zero;
 extern struct Cyc_AP_T*Cyc_AP_one;
-struct Cyc_AP_T*Cyc_AP_new(long);
+# 10
 struct Cyc_AP_T*Cyc_AP_fromint(long);
-# 16
-struct Cyc_AP_T*Cyc_AP_add(struct Cyc_AP_T*,struct Cyc_AP_T*);
-struct Cyc_AP_T*Cyc_AP_sub(struct Cyc_AP_T*,struct Cyc_AP_T*);
+# 18
 struct Cyc_AP_T*Cyc_AP_mul(struct Cyc_AP_T*,struct Cyc_AP_T*);
-struct Cyc_AP_T*Cyc_AP_div(struct Cyc_AP_T*,struct Cyc_AP_T*);
+# 20
 struct Cyc_AP_T*Cyc_AP_mod(struct Cyc_AP_T*,struct Cyc_AP_T*);
-struct Cyc_AP_T*Cyc_AP_pow(struct Cyc_AP_T*,struct Cyc_AP_T*,struct Cyc_AP_T*);
+# 22
 struct Cyc_AP_T*Cyc_AP_addi(struct Cyc_AP_T*,long);
 # 28
 struct Cyc_AP_T*Cyc_AP_rshift(struct Cyc_AP_T*,int);
-struct Cyc_AP_T*Cyc_AP_and(struct Cyc_AP_T*,struct Cyc_AP_T*);
-struct Cyc_AP_T*Cyc_AP_or(struct Cyc_AP_T*,struct Cyc_AP_T*);
-struct Cyc_AP_T*Cyc_AP_xor(struct Cyc_AP_T*,struct Cyc_AP_T*);
-int Cyc_AP_cmp(struct Cyc_AP_T*,struct Cyc_AP_T*);
-# 34
-struct Cyc_AP_T*Cyc_AP_gcd(struct Cyc_AP_T*,struct Cyc_AP_T*);
 # 8 "xp.h"
 extern int Cyc_XP_add(int,struct _fat_ptr,struct _fat_ptr,struct _fat_ptr,int);
 extern int Cyc_XP_sub(int,struct _fat_ptr,struct _fat_ptr,struct _fat_ptr,int);
@@ -437,7 +427,7 @@ struct Cyc_AP_T*Cyc_AP_one;
 int Cyc_init=0;
 # 25
 static struct Cyc_AP_T*Cyc_normalize(struct Cyc_AP_T*,int);
-static int Cyc_cmp(struct Cyc_AP_T*,struct Cyc_AP_T*);
+# 27
 static void Cyc_AP_init (void){
 Cyc_init=1;
 Cyc_AP_zero=Cyc_AP_fromint(0);
@@ -518,7 +508,7 @@ struct Cyc_AP_T*Cyc_AP_neg(struct Cyc_AP_T*x){
 struct Cyc_AP_T*z;
 (unsigned)x?0:({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;})(({const char*_Tmp0="x";_tag_fat(_Tmp0,sizeof(char),2U);}),({const char*_Tmp0="ap.cyc";_tag_fat(_Tmp0,sizeof(char),7U);}),97U);
 z=Cyc_mk(x->ndigits);
-({(struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy;})((_check_null(z))->digits,x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
+Cyc__memcpy((_check_null(z))->digits,x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
 z->ndigits=x->ndigits;
 z->sign=z->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0?1: - x->sign;
 return z;}
@@ -527,7 +517,7 @@ struct Cyc_AP_T*Cyc_AP_abs(struct Cyc_AP_T*x){
 struct Cyc_AP_T*z;
 (unsigned)x?0:({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;})(({const char*_Tmp0="x";_tag_fat(_Tmp0,sizeof(char),2U);}),({const char*_Tmp0="ap.cyc";_tag_fat(_Tmp0,sizeof(char),7U);}),106U);
 z=Cyc_mk(x->ndigits);
-({(struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy;})((_check_null(z))->digits,x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
+Cyc__memcpy((_check_null(z))->digits,x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
 z->ndigits=x->ndigits;
 z->sign=1;
 return z;}
@@ -803,7 +793,7 @@ if(x->sign == -1)
 ++ size;
 str=({unsigned _Tmp0=size;_tag_fat(_cyccalloc_atomic(sizeof(char),_Tmp0),sizeof(char),_Tmp0);});
 q=({unsigned _Tmp0=(unsigned)x->ndigits * sizeof(unsigned char);_tag_fat(_cycalloc_atomic(_Tmp0),1U,_Tmp0);});
-({(struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy;})(q,x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
+Cyc__memcpy(q,x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
 if(x->sign == -1){
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(str,sizeof(char),0);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='-';if(_get_fat_size(_Tmp0,sizeof(char))== 1U &&(_Tmp1 == 0 && _Tmp2 != 0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(str,sizeof(char),1);int _Tmp1=size - 1;int _Tmp2=base;int _Tmp3=x->ndigits;Cyc_XP_tostr(_Tmp0,_Tmp1,_Tmp2,_Tmp3,q);});}else{
@@ -821,7 +811,7 @@ x=y;
 y=tmp;}
 # 402
 z=Cyc_mk(x->ndigits);
-({(struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy;})((_check_null(z))->digits,x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
+Cyc__memcpy((_check_null(z))->digits,x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
 z->ndigits=x->ndigits;
 z->sign=x->sign;
 return z;}

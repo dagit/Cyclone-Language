@@ -376,7 +376,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif
  struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};
 # 73 "cycboot.h"
-extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);extern char Cyc_FileCloseError[15U];extern char Cyc_FileOpenError[14U];
+extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);
 # 7 "ap.h"
 extern struct Cyc_AP_T*Cyc_AP_zero;
 extern struct Cyc_AP_T*Cyc_AP_one;
@@ -395,9 +395,7 @@ extern struct Cyc_AP_T*Cyc_AP_div(struct Cyc_AP_T*,struct Cyc_AP_T*);
 extern int Cyc_AP_cmp(struct Cyc_AP_T*,struct Cyc_AP_T*);
 # 34
 extern struct Cyc_AP_T*Cyc_AP_gcd(struct Cyc_AP_T*,struct Cyc_AP_T*);
-extern struct Cyc_AP_T*Cyc_AP_lcm(struct Cyc_AP_T*,struct Cyc_AP_T*);
-# 7 "apq.h"
-struct Cyc_APQ_T*Cyc_APQ_fromAP(struct Cyc_AP_T*,struct Cyc_AP_T*);struct Cyc_APQ_T{struct Cyc_AP_T*n;struct Cyc_AP_T*d;};char Cyc_Invalid_argument[17U]="Invalid_argument";struct Cyc_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};
+extern struct Cyc_AP_T*Cyc_AP_lcm(struct Cyc_AP_T*,struct Cyc_AP_T*);struct Cyc_APQ_T{struct Cyc_AP_T*n;struct Cyc_AP_T*d;};char Cyc_Invalid_argument[17U]="Invalid_argument";struct Cyc_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};
 # 13 "apq.cyc"
 struct Cyc_APQ_T*Cyc_reduce(struct Cyc_APQ_T*q){
 if(Cyc_AP_cmp((_check_null(q))->d,Cyc_AP_zero)< 0){
@@ -419,7 +417,7 @@ q->d=Cyc_AP_one;
 return q;}
 # 34
 struct Cyc_APQ_T*Cyc_APQ_fromAP(struct Cyc_AP_T*n,struct Cyc_AP_T*d){
-if(Cyc_AP_cmp(d,Cyc_AP_zero)== 0)(int)_throw((void*)({struct Cyc_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Invalid_argument,_Tmp0->f1=({const char*_Tmp1="APQ_fromAP: divide by zero";_tag_fat(_Tmp1,sizeof(char),27U);});_Tmp0;}));{
+if(Cyc_AP_cmp(d,Cyc_AP_zero)== 0)(void*)_throw((void*)({struct Cyc_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Invalid_argument,_Tmp0->f1=({const char*_Tmp1="APQ_fromAP: divide by zero";_tag_fat(_Tmp1,sizeof(char),27U);});_Tmp0;}));{
 struct Cyc_APQ_T*q=_cycalloc(sizeof(struct Cyc_APQ_T));
 q->n=n;
 q->d=d;
@@ -434,7 +432,7 @@ if((int)*((const char*)s.curr)){
 struct Cyc_AP_T*d=Cyc_AP_fromstr((const char*)_untag_fat_ptr(_fat_ptr_plus(s,sizeof(char),1),sizeof(char),1U),base);
 if(Cyc_AP_cmp(d,Cyc_AP_zero))
 q->d=d;else{
-(int)_throw((void*)({struct Cyc_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Invalid_argument,_Tmp0->f1=({const char*_Tmp1="APQ_fromstr: malformed string";_tag_fat(_Tmp1,sizeof(char),30U);});_Tmp0;}));}}else{
+(void*)_throw((void*)({struct Cyc_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Invalid_argument,_Tmp0->f1=({const char*_Tmp1="APQ_fromstr: malformed string";_tag_fat(_Tmp1,sizeof(char),30U);});_Tmp0;}));}}else{
 # 54
 q->d=Cyc_AP_one;}
 return Cyc_reduce(q);}
@@ -466,7 +464,7 @@ struct Cyc_APQ_T*Cyc_APQ_mul(struct Cyc_APQ_T*p,struct Cyc_APQ_T*q){
 return({struct Cyc_AP_T*_Tmp0=({struct Cyc_AP_T*_Tmp1=(_check_null(p))->n;Cyc_AP_mul(_Tmp1,(_check_null(q))->n);});Cyc_APQ_fromAP(_Tmp0,Cyc_AP_mul(p->d,q->d));});}
 # 90
 struct Cyc_APQ_T*Cyc_APQ_div(struct Cyc_APQ_T*p,struct Cyc_APQ_T*q){
-if(Cyc_AP_cmp((_check_null(q))->n,Cyc_AP_zero)== 0)(int)_throw((void*)({struct Cyc_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Invalid_argument,_Tmp0->f1=({const char*_Tmp1="APQ_div: divide by zero";_tag_fat(_Tmp1,sizeof(char),24U);});_Tmp0;}));
+if(Cyc_AP_cmp((_check_null(q))->n,Cyc_AP_zero)== 0)(void*)_throw((void*)({struct Cyc_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Invalid_argument,_Tmp0->f1=({const char*_Tmp1="APQ_div: divide by zero";_tag_fat(_Tmp1,sizeof(char),24U);});_Tmp0;}));
 return({struct Cyc_AP_T*_Tmp0=Cyc_AP_mul((_check_null(p))->n,q->d);Cyc_APQ_fromAP(_Tmp0,Cyc_AP_mul(p->d,q->n));});}
 # 95
 int Cyc_APQ_cmp(struct Cyc_APQ_T*p,struct Cyc_APQ_T*q){

@@ -374,17 +374,15 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
- extern char Cyc_Core_Invalid_argument[17U];extern char Cyc_Core_Failure[8U];extern char Cyc_Core_Impossible[11U];extern char Cyc_Core_Not_found[10U];extern char Cyc_Core_Unreachable[12U];
-# 171 "core.h"
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};
+ struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};
 # 157 "cycboot.h"
-extern int Cyc_printf(struct _fat_ptr,struct _fat_ptr);extern char Cyc_FileCloseError[15U];extern char Cyc_FileOpenError[14U];
+extern int Cyc_printf(struct _fat_ptr,struct _fat_ptr);
 # 319 "cycboot.h"
-extern void exit(int);extern char Cyc_List_List_mismatch[14U];extern char Cyc_List_Nth[4U];extern char Cyc_Absyn_EmptyAnnot[11U];
+extern void exit(int);
 # 35 "warn.h"
 void Cyc_Warn_err(unsigned,struct _fat_ptr,struct _fat_ptr);
 # 127 "flags.h"
-extern int Cyc_Flags_print_parser_state_and_token;extern char Cyc_Parse_Exit[5U];
+extern int Cyc_Flags_print_parser_state_and_token;
 # 27 "parse.h"
 struct _fat_ptr Cyc_token2string(int);struct Cyc_Yyltype{int timestamp;int first_line;int first_column;int last_line;int last_column;};
 # 92 "parse_tab.h"

@@ -374,17 +374,15 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];extern char Cyc_Core_Failure[8U];extern char Cyc_Core_Impossible[11U];extern char Cyc_Core_Not_found[10U];extern char Cyc_Core_Unreachable[12U];
-# 171 "core.h"
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];
+ struct Cyc_Core_Opt{void*v;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 178 "list.h"
-extern struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*);extern char Cyc_List_Nth[4U];struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};extern char Cyc_FileCloseError[15U];extern char Cyc_FileOpenError[14U];
+extern struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*);struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};
 # 290 "cycboot.h"
 extern int isdigit(int);
 # 38 "string.h"
 extern unsigned long Cyc_strlen(struct _fat_ptr);
 # 136 "string.h"
-extern struct _fat_ptr Cyc_implode(struct Cyc_List_List*);struct Cyc_Absyn_Tqual{int print_const: 1;int q_volatile: 1;int q_restrict: 1;int real_const: 1;unsigned loc;};extern char Cyc_Absyn_EmptyAnnot[11U];
+extern struct _fat_ptr Cyc_implode(struct Cyc_List_List*);struct Cyc_Absyn_Tqual{int print_const: 1;int q_volatile: 1;int q_restrict: 1;int real_const: 1;unsigned loc;};
 # 863 "absyn.h"
 struct Cyc_Absyn_Tqual Cyc_Absyn_const_tqual(unsigned);
 struct Cyc_Absyn_Tqual Cyc_Absyn_empty_tqual(unsigned);
@@ -407,7 +405,7 @@ void Cyc_Warn_verr(unsigned,struct _fat_ptr,struct _fat_ptr);
 # 238 "tcutil.h"
 void*Cyc_Tcutil_any_bool(struct Cyc_List_List*);
 # 47 "kinds.h"
-extern struct Cyc_Core_Opt Cyc_Kinds_rko;struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;const struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[8U];extern char Cyc_Dict_Absent[7U];extern char Cyc_Tcenv_Env_error[10U];struct Cyc_Tcenv_Genv{struct Cyc_Dict_Dict aggrdecls;struct Cyc_Dict_Dict datatypedecls;struct Cyc_Dict_Dict enumdecls;struct Cyc_Dict_Dict typedefs;struct Cyc_Dict_Dict ordinaries;};struct Cyc_Tcenv_Fenv;struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Tcenv_Genv*ae;struct Cyc_Tcenv_Fenv*le;int allow_valueof: 1;int in_extern_c_include: 1;int in_tempest: 1;int tempest_generalize: 1;int in_extern_c_inc_repeat: 1;};
+extern struct Cyc_Core_Opt Cyc_Kinds_rko;struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;const struct Cyc_Dict_T*t;};struct Cyc_Tcenv_Genv{struct Cyc_Dict_Dict aggrdecls;struct Cyc_Dict_Dict datatypedecls;struct Cyc_Dict_Dict enumdecls;struct Cyc_Dict_Dict typedefs;struct Cyc_Dict_Dict ordinaries;};struct Cyc_Tcenv_Fenv;struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Tcenv_Genv*ae;struct Cyc_Tcenv_Fenv*le;int allow_valueof: 1;int in_extern_c_include: 1;int in_tempest: 1;int tempest_generalize: 1;int in_extern_c_inc_repeat: 1;};
 # 99 "tcenv.h"
 struct Cyc_List_List*Cyc_Tcenv_lookup_type_vars(struct Cyc_Tcenv_Tenv*);
 # 31 "formatstr.cyc"
@@ -436,7 +434,7 @@ c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 break;}
 # 65
 if((unsigned long)i >= len)return 0;
-flags=({(struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev;})(flags);{
+flags=Cyc_List_imp_rev(flags);{
 # 69
 struct Cyc_List_List*width=0;
 c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
@@ -450,7 +448,7 @@ if(isdigit((int)c))width=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(st
 break;}}}
 # 81
 if((unsigned long)i >= len)return 0;
-width=({(struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev;})(width);{
+width=Cyc_List_imp_rev(width);{
 # 85
 struct Cyc_List_List*precision=0;
 c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
@@ -468,7 +466,7 @@ if(isdigit((int)c))precision=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeo
 break;}}}}
 # 101
 if((unsigned long)i >= len)return 0;
-precision=({(struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev;})(precision);{
+precision=Cyc_List_imp_rev(precision);{
 # 106
 struct Cyc_List_List*lenmod=0;
 c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
@@ -495,7 +493,7 @@ goto _LLD;default:
  goto _LLD;}_LLD:;}
 # 130
 if((unsigned long)i >= len)return 0;
-lenmod=({(struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev;})(lenmod);
+lenmod=Cyc_List_imp_rev(lenmod);
 # 134
 c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 {char _Tmp0=c;switch((int)_Tmp0){case 100:
@@ -725,7 +723,7 @@ struct _fat_ptr _TmpC=Cyc_implode(lenmod);_TmpB.f1=_TmpC;});_TmpB;});void*_TmpB[
 goto _LL12;default:  {
 struct Cyc_List_List*_Tmp9=0;_npop_handler(0);return _Tmp9;}}_LL12:;}}}}}{
 # 346
-struct Cyc_List_List*_Tmp1=({(struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev;})(typs);_npop_handler(0);return _Tmp1;}
+struct Cyc_List_List*_Tmp1=Cyc_List_imp_rev(typs);_npop_handler(0);return _Tmp1;}
 # 176
 ;_pop_region();}struct _tuple12{int f1;struct Cyc_List_List*f2;struct Cyc_List_List*f3;char f4;int f5;};
 # 357 "formatstr.cyc"
@@ -748,7 +746,7 @@ if(isdigit((int)c))width=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(st
 break;}}
 # 376
 if((unsigned long)i >= len)return 0;
-width=({(struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev;})(width);{
+width=Cyc_List_imp_rev(width);{
 # 381
 struct Cyc_List_List*lenmod=0;
 c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
@@ -777,7 +775,7 @@ goto _LL0;default:
  goto _LL0;}_LL0:;}
 # 407
 if((unsigned long)i >= len)return 0;
-lenmod=({(struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev;})(lenmod);
+lenmod=Cyc_List_imp_rev(lenmod);
 # 411
 c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 {char _Tmp0=c;switch((int)_Tmp0){case 100:
@@ -964,4 +962,4 @@ struct Cyc_List_List*_Tmp8=0;_npop_handler(0);return _Tmp8;}}_LL8:;}}}}}
 # 443
 ;_pop_region();}
 # 571
-return({(struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev;})(typs);}
+return Cyc_List_imp_rev(typs);}

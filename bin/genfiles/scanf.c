@@ -374,9 +374,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
- extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];extern char Cyc_Core_Unreachable[12U];
-# 171 "core.h"
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc___cycFILE;
+ extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};struct Cyc___cycFILE;
 # 52 "cycboot.h"
 extern struct Cyc___cycFILE*Cyc_stdin;
 # 90
@@ -385,8 +383,6 @@ extern int Cyc_fgetc(struct Cyc___cycFILE*);struct Cyc_ShortPtr_sa_ScanfArg_stru
 extern int Cyc_getc(struct Cyc___cycFILE*);
 # 222 "cycboot.h"
 extern int Cyc_ungetc(int,struct Cyc___cycFILE*);
-# 247
-int Cyc_vsscanf(struct _fat_ptr,struct _fat_ptr,struct _fat_ptr);extern char Cyc_FileCloseError[15U];extern char Cyc_FileOpenError[14U];
 # 300 "cycboot.h"
 extern int isspace(int);
 # 302
@@ -403,35 +399,35 @@ static short*Cyc_va_arg_short_ptr(void*a){
 void*_Tmp0=a;void*_Tmp1;switch(*((int*)_Tmp0)){case 0: _Tmp1=((struct Cyc_ShortPtr_sa_ScanfArg_struct*)_Tmp0)->f1;{short*p=_Tmp1;
 return p;}case 1: _Tmp1=((struct Cyc_UShortPtr_sa_ScanfArg_struct*)_Tmp0)->f1;{unsigned short*p=_Tmp1;
 return(short*)p;}default:
-(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp2->tag=Cyc_Core_Invalid_argument,_Tmp2->f1=({const char*_Tmp3="scan expects short pointer";_tag_fat(_Tmp3,sizeof(char),27U);});_Tmp2;}));};}
+(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp2->tag=Cyc_Core_Invalid_argument,_Tmp2->f1=({const char*_Tmp3="scan expects short pointer";_tag_fat(_Tmp3,sizeof(char),27U);});_Tmp2;}));};}
 # 147
 static int*Cyc_va_arg_int_ptr(void*a){
 void*_Tmp0=a;void*_Tmp1;switch(*((int*)_Tmp0)){case 2: _Tmp1=((struct Cyc_IntPtr_sa_ScanfArg_struct*)_Tmp0)->f1;{int*p=_Tmp1;
 return p;}case 3: _Tmp1=((struct Cyc_UIntPtr_sa_ScanfArg_struct*)_Tmp0)->f1;{unsigned*p=_Tmp1;
 return(int*)p;}default:
-(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp2->tag=Cyc_Core_Invalid_argument,_Tmp2->f1=({const char*_Tmp3="scan expects int pointer";_tag_fat(_Tmp3,sizeof(char),25U);});_Tmp2;}));};}
+(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp2->tag=Cyc_Core_Invalid_argument,_Tmp2->f1=({const char*_Tmp3="scan expects int pointer";_tag_fat(_Tmp3,sizeof(char),25U);});_Tmp2;}));};}
 # 155
 static struct _fat_ptr Cyc_va_arg_string_ptr(void*a){
 void*_Tmp0=a;struct _fat_ptr _Tmp1;switch(*((int*)_Tmp0)){case 4: _Tmp1=((struct Cyc_StringPtr_sa_ScanfArg_struct*)_Tmp0)->f1;{struct _fat_ptr p=_Tmp1;
 return _fat_ptr_decrease_size(p,sizeof(char),1U);}case 7: _Tmp1=((struct Cyc_CharPtr_sa_ScanfArg_struct*)_Tmp0)->f1;{struct _fat_ptr p=_Tmp1;
 return p;}default:
-(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp2->tag=Cyc_Core_Invalid_argument,_Tmp2->f1=({const char*_Tmp3="scan expects char pointer";_tag_fat(_Tmp3,sizeof(char),26U);});_Tmp2;}));};}
+(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp2->tag=Cyc_Core_Invalid_argument,_Tmp2->f1=({const char*_Tmp3="scan expects char pointer";_tag_fat(_Tmp3,sizeof(char),26U);});_Tmp2;}));};}
 # 163
 static double*Cyc_va_arg_double_ptr(void*a){
 void*_Tmp0=a;void*_Tmp1;if(*((int*)_Tmp0)== 5){_Tmp1=((struct Cyc_DoublePtr_sa_ScanfArg_struct*)_Tmp0)->f1;{double*p=_Tmp1;
 return p;}}else{
-(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp2->tag=Cyc_Core_Invalid_argument,_Tmp2->f1=({const char*_Tmp3="scan expects double pointer";_tag_fat(_Tmp3,sizeof(char),28U);});_Tmp2;}));};}
+(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp2->tag=Cyc_Core_Invalid_argument,_Tmp2->f1=({const char*_Tmp3="scan expects double pointer";_tag_fat(_Tmp3,sizeof(char),28U);});_Tmp2;}));};}
 # 170
 static float*Cyc_va_arg_float_ptr(void*a){
 void*_Tmp0=a;void*_Tmp1;if(*((int*)_Tmp0)== 6){_Tmp1=((struct Cyc_FloatPtr_sa_ScanfArg_struct*)_Tmp0)->f1;{float*p=_Tmp1;
 return p;}}else{
-(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp2->tag=Cyc_Core_Invalid_argument,_Tmp2->f1=({const char*_Tmp3="scan expects float pointer";_tag_fat(_Tmp3,sizeof(char),27U);});_Tmp2;}));};}
+(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp2->tag=Cyc_Core_Invalid_argument,_Tmp2->f1=({const char*_Tmp3="scan expects float pointer";_tag_fat(_Tmp3,sizeof(char),27U);});_Tmp2;}));};}
 # 177
 static struct _fat_ptr Cyc_va_arg_char_ptr(void*a){
 void*_Tmp0=a;struct _fat_ptr _Tmp1;switch(*((int*)_Tmp0)){case 7: _Tmp1=((struct Cyc_CharPtr_sa_ScanfArg_struct*)_Tmp0)->f1;{struct _fat_ptr p=_Tmp1;
 return p;}case 4: _Tmp1=((struct Cyc_StringPtr_sa_ScanfArg_struct*)_Tmp0)->f1;{struct _fat_ptr p=_Tmp1;
 return _fat_ptr_decrease_size(p,sizeof(char),1U);}default:
-(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp2->tag=Cyc_Core_Invalid_argument,_Tmp2->f1=({const char*_Tmp3="scan expects char pointer";_tag_fat(_Tmp3,sizeof(char),26U);});_Tmp2;}));};}
+(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp2->tag=Cyc_Core_Invalid_argument,_Tmp2->f1=({const char*_Tmp3="scan expects char pointer";_tag_fat(_Tmp3,sizeof(char),26U);});_Tmp2;}));};}
 # 188
 int Cyc__IO_vfscanf(int(*_IO_getc)(void*),int(*_IO_ungetc)(int,void*),int(*_IO_peekc)(void*),void*fp,struct _fat_ptr fmt0,struct _fat_ptr ap,int*errp){
 # 198
@@ -907,7 +903,7 @@ _fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 nread +=(p.curr - ({char*_Tmp1=buf;_tag_fat(_Tmp1,sizeof(char),351U);}).curr)/ sizeof(char);
 goto _LL47;default:
 # 777
-(int)_throw((void*)({struct Cyc_Core_Impossible_exn_struct*_Tmp1=_cycalloc(sizeof(struct Cyc_Core_Impossible_exn_struct));_Tmp1->tag=Cyc_Core_Impossible,_Tmp1->f1=({const char*_Tmp2="scanf3";_tag_fat(_Tmp2,sizeof(char),7U);});_Tmp1;}));}_LL47:;}}
+(void*)_throw((void*)({struct Cyc_Core_Impossible_exn_struct*_Tmp1=_cycalloc(sizeof(struct Cyc_Core_Impossible_exn_struct));_Tmp1->tag=Cyc_Core_Impossible,_Tmp1->f1=({const char*_Tmp2="scanf3";_tag_fat(_Tmp2,sizeof(char),7U);});_Tmp1;}));}_LL47:;}}
 # 781
 eof_failure:
  ++ seen_eof;

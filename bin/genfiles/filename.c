@@ -376,9 +376,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif
 
 # 95 "core.h"
- struct _fat_ptr Cyc_Core_new_string(unsigned);extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];extern char Cyc_Core_Impossible[11U];extern char Cyc_Core_Not_found[10U];extern char Cyc_Core_Unreachable[12U];
-# 171
-extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_List_List_mismatch[14U];extern char Cyc_List_Nth[4U];extern char Cyc_FileCloseError[15U];extern char Cyc_FileOpenError[14U];
+ struct _fat_ptr Cyc_Core_new_string(unsigned);extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};
 # 62 "string.h"
 extern struct _fat_ptr Cyc_strconcat(struct _fat_ptr,struct _fat_ptr);
 # 109 "string.h"
@@ -392,7 +390,7 @@ int i=(int)(_get_fat_size(filename,sizeof(char))- 1U);
 while(i >= 0 &&(int)*((const char*)_check_fat_subscript(filename,sizeof(char),i))!= 46){
 -- i;}
 if(i < 0)
-(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=({const char*_Tmp1="chop_extension";_tag_fat(_Tmp1,sizeof(char),15U);});_Tmp0;}));
+(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=({const char*_Tmp1="chop_extension";_tag_fat(_Tmp1,sizeof(char),15U);});_Tmp0;}));
 return Cyc_substring(filename,0,(unsigned long)i);}
 # 50
 struct _fat_ptr Cyc_Filename_dirname(struct _fat_ptr filename){

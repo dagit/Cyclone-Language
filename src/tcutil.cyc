@@ -2941,6 +2941,11 @@ static bool cnst_exp(bool var_okay, exp_t e) {
       if (!cnst_exp(false,es->hd))
         return false;
     return true;
+  case &StmtExp_e(s): // special-case b/c of gcc 3.4 bug we are avoiding
+    switch(s->r) {
+    case &Exp_s(e): return cnst_exp(var_okay,e);
+    default: return false;
+    }
   default: return false;
   }
 }

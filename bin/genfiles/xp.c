@@ -378,9 +378,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 # 4 "ctype.h"
  extern int isalnum(int);
 # 22
-extern int isspace(int);extern char Cyc_Core_Invalid_argument[17U];extern char Cyc_Core_Failure[8U];extern char Cyc_Core_Impossible[11U];extern char Cyc_Core_Not_found[10U];extern char Cyc_Core_Unreachable[12U];
-# 171 "core.h"
-extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_List_List_mismatch[14U];extern char Cyc_List_Nth[4U];extern char Cyc_FileCloseError[15U];extern char Cyc_FileOpenError[14U];
+extern int isspace(int);
 # 282 "cycboot.h"
 extern int isalnum(int);
 # 300
@@ -391,15 +389,8 @@ extern struct _fat_ptr Cyc__memcpy(struct _fat_ptr,struct _fat_ptr,unsigned long
 extern struct _fat_ptr Cyc_memset(struct _fat_ptr,char,unsigned long);
 # 29 "assert.h"
 extern void*Cyc___assert_fail(struct _fat_ptr,struct _fat_ptr,unsigned);
-# 9 "xp.h"
-int Cyc_XP_sub(int,struct _fat_ptr,struct _fat_ptr,struct _fat_ptr,int);
-# 12
-int Cyc_XP_sum(int,struct _fat_ptr,struct _fat_ptr,int);
-# 14
-int Cyc_XP_product(int,struct _fat_ptr,struct _fat_ptr,int);
-int Cyc_XP_quotient(int,struct _fat_ptr,struct _fat_ptr,int);
-# 25
-int Cyc_XP_length(int,struct _fat_ptr);static char _TmpG0[37U]="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+# 15 "xp.h"
+int Cyc_XP_quotient(int,struct _fat_ptr,struct _fat_ptr,int);static char _TmpG0[37U]="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 # 7 "xp.cyc"
 static struct _fat_ptr Cyc_digits={_TmpG0,_TmpG0,_TmpG0 + 37U};
 static char Cyc_map[75U]={'\000','\001','\002','\003','\004','\005','\006','\a','\b','\t','$','$','$','$','$','$','$','\n','\v','\f','\r','\016','\017','\020','\021','\022','\023','\024','\025','\026','\027','\030','\031','\032','\033','\034','\035','\036','\037',' ','!','"','#','$','$','$','$','$','$','\n','\v','\f','\r','\016','\017','\020','\021','\022','\023','\024','\025','\026','\027','\030','\031','\032','\033','\034','\035','\036','\037',' ','!','"','#'};
@@ -512,13 +503,13 @@ if(_get_fat_size(r,sizeof(unsigned char))> 1U)
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(r,sizeof(char),1);Cyc_memset(_Tmp0,'\000',(unsigned long)(my - 1));});}else{
 if(m > n){
 Cyc_memset(q,'\000',(unsigned long)nx);
-({(struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy;})(r,x,(unsigned)n / sizeof(*((unsigned char*)x.curr))+ (unsigned)((unsigned)n % sizeof(*((unsigned char*)x.curr))== 0U?0: 1),sizeof(*((unsigned char*)x.curr)));
+Cyc__memcpy(r,x,(unsigned)n / sizeof(*((unsigned char*)x.curr))+ (unsigned)((unsigned)n % sizeof(*((unsigned char*)x.curr))== 0U?0: 1),sizeof(*((unsigned char*)x.curr)));
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(r,sizeof(char),n);Cyc_memset(_Tmp0,'\000',(unsigned long)(my - n));});}else{
 # 128
 int k;
 struct _fat_ptr rem=tmp;struct _fat_ptr dq=_fat_ptr_plus(_fat_ptr_plus(tmp,sizeof(unsigned char),n),sizeof(unsigned char),1);
 2 <= m && m <= n?0:({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;})(({const char*_Tmp0="2 <= m && m <= n";_tag_fat(_Tmp0,sizeof(char),17U);}),({const char*_Tmp0="xp.cyc";_tag_fat(_Tmp0,sizeof(char),7U);}),130U);
-({(struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy;})(rem,x,(unsigned)n / sizeof(*((unsigned char*)x.curr))+ (unsigned)((unsigned)n % sizeof(*((unsigned char*)x.curr))== 0U?0: 1),sizeof(*((unsigned char*)x.curr)));
+Cyc__memcpy(rem,x,(unsigned)n / sizeof(*((unsigned char*)x.curr))+ (unsigned)((unsigned)n % sizeof(*((unsigned char*)x.curr))== 0U?0: 1),sizeof(*((unsigned char*)x.curr)));
 ((unsigned char*)rem.curr)[n]='\000';
 for(k=n - m;k >= 0;-- k){
 int qk;
@@ -548,7 +539,7 @@ int borrow;
 borrow=({int _Tmp0=m + 1;struct _fat_ptr _Tmp1=_fat_ptr_plus(rem,sizeof(unsigned char),k);struct _fat_ptr _Tmp2=_fat_ptr_plus(rem,sizeof(unsigned char),k);Cyc_XP_sub(_Tmp0,_Tmp1,_Tmp2,dq,0);});
 borrow == 0?0:({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;})(({const char*_Tmp0="borrow == 0";_tag_fat(_Tmp0,sizeof(char),12U);}),({const char*_Tmp0="xp.cyc";_tag_fat(_Tmp0,sizeof(char),7U);}),159U);}}
 # 162
-({(struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy;})(r,rem,(unsigned)m / sizeof(*((unsigned char*)rem.curr))+ (unsigned)((unsigned)m % sizeof(*((unsigned char*)rem.curr))== 0U?0: 1),sizeof(*((unsigned char*)rem.curr)));{
+Cyc__memcpy(r,rem,(unsigned)m / sizeof(*((unsigned char*)rem.curr))+ (unsigned)((unsigned)m % sizeof(*((unsigned char*)rem.curr))== 0U?0: 1),sizeof(*((unsigned char*)rem.curr)));{
 # 164
 int i;
 for(i=(n - m)+ 1;i < nx;++ i){

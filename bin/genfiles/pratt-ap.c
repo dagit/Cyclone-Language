@@ -374,13 +374,11 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
- extern char Cyc_Core_Invalid_argument[17U];extern char Cyc_Core_Failure[8U];extern char Cyc_Core_Impossible[11U];extern char Cyc_Core_Not_found[10U];extern char Cyc_Core_Unreachable[12U];
-# 171 "core.h"
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];
+ struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 178 "list.h"
-extern struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*);extern char Cyc_List_Nth[4U];struct _union_Nmspace_Rel_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_Abs_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_C_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_Loc_n{int tag;int val;};union Cyc_Absyn_Nmspace{struct _union_Nmspace_Rel_n Rel_n;struct _union_Nmspace_Abs_n Abs_n;struct _union_Nmspace_C_n C_n;struct _union_Nmspace_Loc_n Loc_n;};struct _tuple0{union Cyc_Absyn_Nmspace f1;struct _fat_ptr*f2;};
+extern struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*);struct _union_Nmspace_Rel_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_Abs_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_C_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_Loc_n{int tag;int val;};union Cyc_Absyn_Nmspace{struct _union_Nmspace_Rel_n Rel_n;struct _union_Nmspace_Abs_n Abs_n;struct _union_Nmspace_C_n C_n;struct _union_Nmspace_Loc_n Loc_n;};struct _tuple0{union Cyc_Absyn_Nmspace f1;struct _fat_ptr*f2;};
 # 150 "absyn.h"
-enum Cyc_Absyn_Scope{Cyc_Absyn_Static =0U,Cyc_Absyn_Abstract =1U,Cyc_Absyn_Public =2U,Cyc_Absyn_Extern =3U,Cyc_Absyn_ExternC =4U,Cyc_Absyn_Register =5U};struct Cyc_Absyn_Tqual{int print_const: 1;int q_volatile: 1;int q_restrict: 1;int real_const: 1;unsigned loc;};struct Cyc_Absyn_Exp{void*topt;void*r;unsigned loc;void*annot;};struct Cyc_Absyn_Vardecl{enum Cyc_Absyn_Scope sc;struct _tuple0*name;unsigned varloc;struct Cyc_Absyn_Tqual tq;void*type;struct Cyc_Absyn_Exp*initializer;void*rgn;struct Cyc_List_List*attributes;int escapes;int is_proto;};extern char Cyc_Absyn_EmptyAnnot[11U];
+enum Cyc_Absyn_Scope{Cyc_Absyn_Static =0U,Cyc_Absyn_Abstract =1U,Cyc_Absyn_Public =2U,Cyc_Absyn_Extern =3U,Cyc_Absyn_ExternC =4U,Cyc_Absyn_Register =5U};struct Cyc_Absyn_Tqual{int print_const: 1;int q_volatile: 1;int q_restrict: 1;int real_const: 1;unsigned loc;};struct Cyc_Absyn_Exp{void*topt;void*r;unsigned loc;void*annot;};struct Cyc_Absyn_Vardecl{enum Cyc_Absyn_Scope sc;struct _tuple0*name;unsigned varloc;struct Cyc_Absyn_Tqual tq;void*type;struct Cyc_Absyn_Exp*initializer;void*rgn;struct Cyc_List_List*attributes;int escapes;int is_proto;};
 # 29 "unify.h"
 int Cyc_Unify_unify(void*,void*);struct Cyc___cycFILE;
 # 53 "cycboot.h"
@@ -388,11 +386,11 @@ extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_String_pa_PrintArg_struct{int 
 # 73
 extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);
 # 100
-extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);extern char Cyc_FileCloseError[15U];extern char Cyc_FileOpenError[14U];
+extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);
 # 125 "tcutil.h"
-int Cyc_Tcutil_typecmp(void*,void*);extern char Cyc_Set_Absent[7U];extern char Cyc_Dict_Present[8U];extern char Cyc_Dict_Absent[7U];
+int Cyc_Tcutil_typecmp(void*,void*);
 # 41 "cf_flowinfo.h"
-int Cyc_CfFlowInfo_anal_error;extern char Cyc_CfFlowInfo_IsZero[7U];extern char Cyc_CfFlowInfo_NotZero[8U];extern char Cyc_CfFlowInfo_UnknownZ[9U];
+int Cyc_CfFlowInfo_anal_error;
 # 7 "ap.h"
 extern struct Cyc_AP_T*Cyc_AP_zero;
 # 13
@@ -451,7 +449,7 @@ return({struct Cyc_Int_pa_PrintArg_struct _Tmp3=({struct Cyc_Int_pa_PrintArg_str
  return Cyc_aprintf(({const char*_Tmp3="return_value";_tag_fat(_Tmp3,sizeof(char),13U);}),_tag_fat(0U,sizeof(void*),0));};}struct Cyc_Pratt_Edge{union Cyc_Pratt_Node x;union Cyc_Pratt_Node y;struct Cyc_AP_T*value;};struct Cyc_Pratt_Graph{struct Cyc_List_List*nodes;struct Cyc_List_List*edges;};
 # 149
 struct Cyc_Pratt_Graph*Cyc_Pratt_empty_graph (void){
-struct Cyc_List_List*nodes=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));_Tmp0->hd=& Cyc_Pratt_zero_node,_Tmp0->tl=0;_Tmp0;});
+struct Cyc_List_List*nodes;nodes=_cycalloc(sizeof(struct Cyc_List_List)),nodes->hd=& Cyc_Pratt_zero_node,nodes->tl=0;
 return({struct Cyc_Pratt_Graph*_Tmp0=_cycalloc(sizeof(struct Cyc_Pratt_Graph));_Tmp0->nodes=nodes,_Tmp0->edges=0;_Tmp0;});}
 # 155
 static struct Cyc_List_List*Cyc_Pratt_copy_edges(struct Cyc_List_List*ds){
@@ -460,7 +458,7 @@ for(1;ds != 0;ds=ds->tl){
 struct Cyc_Pratt_Edge*e=(struct Cyc_Pratt_Edge*)ds->hd;
 res=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Pratt_Edge*_Tmp1=({struct Cyc_Pratt_Edge*_Tmp2=_cycalloc(sizeof(struct Cyc_Pratt_Edge));_Tmp2->x=e->x,_Tmp2->y=e->y,_Tmp2->value=e->value;_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=res;_Tmp0;});}
 # 161
-return({(struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev;})(res);}
+return Cyc_List_imp_rev(res);}
 # 164
 struct Cyc_Pratt_Graph*Cyc_Pratt_copy_graph(struct Cyc_Pratt_Graph*G){
 struct Cyc_Pratt_Graph*_Tmp0=G;void*_Tmp1;void*_Tmp2;_Tmp2=_Tmp0->nodes;_Tmp1=_Tmp0->edges;{struct Cyc_List_List*nodes=_Tmp2;struct Cyc_List_List*edges=_Tmp1;

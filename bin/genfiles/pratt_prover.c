@@ -374,18 +374,16 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
- extern char Cyc_Core_Invalid_argument[17U];extern char Cyc_Core_Failure[8U];extern char Cyc_Core_Impossible[11U];extern char Cyc_Core_Not_found[10U];extern char Cyc_Core_Unreachable[12U];
-# 171 "core.h"
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
+ struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 54 "list.h"
-extern struct Cyc_List_List*Cyc_List_list(struct _fat_ptr);extern char Cyc_List_List_mismatch[14U];extern char Cyc_List_Nth[4U];
+extern struct Cyc_List_List*Cyc_List_list(struct _fat_ptr);
 # 171 "absyn.h"
 enum Cyc_Absyn_Size_of{Cyc_Absyn_Char_sz =0U,Cyc_Absyn_Short_sz =1U,Cyc_Absyn_Int_sz =2U,Cyc_Absyn_Long_sz =3U,Cyc_Absyn_LongLong_sz =4U};
 enum Cyc_Absyn_Sign{Cyc_Absyn_Signed =0U,Cyc_Absyn_Unsigned =1U,Cyc_Absyn_None =2U};struct Cyc_Absyn_IntCon_Absyn_TyCon_struct{int tag;enum Cyc_Absyn_Sign f1;enum Cyc_Absyn_Size_of f2;};struct Cyc_Absyn_AppType_Absyn_Type_struct{int tag;void*f1;struct Cyc_List_List*f2;};struct Cyc_Absyn_ValueofType_Absyn_Type_struct{int tag;struct Cyc_Absyn_Exp*f1;};
 # 465 "absyn.h"
 enum Cyc_Absyn_Primop{Cyc_Absyn_Plus =0U,Cyc_Absyn_Times =1U,Cyc_Absyn_Minus =2U,Cyc_Absyn_Div =3U,Cyc_Absyn_Mod =4U,Cyc_Absyn_Eq =5U,Cyc_Absyn_Neq =6U,Cyc_Absyn_Gt =7U,Cyc_Absyn_Lt =8U,Cyc_Absyn_Gte =9U,Cyc_Absyn_Lte =10U,Cyc_Absyn_Not =11U,Cyc_Absyn_Bitnot =12U,Cyc_Absyn_Bitand =13U,Cyc_Absyn_Bitor =14U,Cyc_Absyn_Bitxor =15U,Cyc_Absyn_Bitlshift =16U,Cyc_Absyn_Bitlrshift =17U,Cyc_Absyn_Numelts =18U};
 # 490
-enum Cyc_Absyn_Coercion{Cyc_Absyn_Unknown_coercion =0U,Cyc_Absyn_No_coercion =1U,Cyc_Absyn_Null_to_NonNull =2U,Cyc_Absyn_Other_coercion =3U};struct Cyc_Absyn_Cast_e_Absyn_Raw_exp_struct{int tag;void*f1;struct Cyc_Absyn_Exp*f2;int f3;enum Cyc_Absyn_Coercion f4;};struct Cyc_Absyn_Exp{void*topt;void*r;unsigned loc;void*annot;};extern char Cyc_Absyn_EmptyAnnot[11U];
+enum Cyc_Absyn_Coercion{Cyc_Absyn_Unknown_coercion =0U,Cyc_Absyn_No_coercion =1U,Cyc_Absyn_Null_to_NonNull =2U,Cyc_Absyn_Other_coercion =3U};struct Cyc_Absyn_Cast_e_Absyn_Raw_exp_struct{int tag;void*f1;struct Cyc_Absyn_Exp*f2;int f3;enum Cyc_Absyn_Coercion f4;};struct Cyc_Absyn_Exp{void*topt;void*r;unsigned loc;void*annot;};
 # 870 "absyn.h"
 void*Cyc_Absyn_compress(void*);
 # 886
@@ -397,7 +395,7 @@ struct Cyc_Absyn_Exp*Cyc_Absyn_valueof_exp(void*,unsigned);struct Cyc___cycFILE;
 # 53 "cycboot.h"
 extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};
 # 100
-extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);extern char Cyc_FileCloseError[15U];extern char Cyc_FileOpenError[14U];struct _tuple11{unsigned f1;int f2;};
+extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);struct _tuple11{unsigned f1;int f2;};
 # 28 "evexp.h"
 extern struct _tuple11 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*);
 # 30 "tcutil.h"
@@ -470,7 +468,7 @@ static struct Cyc_PrattProver_Graph*Cyc_PrattProver_true_graph (void){return({st
 static struct Cyc_PrattProver_Distance*Cyc_PrattProver_copy_distance(struct Cyc_PrattProver_Distance*ds){
 struct Cyc_PrattProver_Distance*res=0;
 for(1;ds != 0;ds=ds->next){
-struct Cyc_PrattProver_Distance*newds=({struct Cyc_PrattProver_Distance*_Tmp0=_cycalloc(sizeof(struct Cyc_PrattProver_Distance));*_Tmp0=*ds;_Tmp0;});
+struct Cyc_PrattProver_Distance*newds;newds=_cycalloc(sizeof(struct Cyc_PrattProver_Distance)),*newds=*ds;
 newds->next=res;
 res=newds;}
 # 112
@@ -519,7 +517,7 @@ if(topt != 0){
 void*t=topt;
 struct Cyc_Absyn_Exp*eopt=Cyc_Tcutil_get_type_bound(t);
 if(eopt != 0){
-void*t1=Cyc_AssnDef_primop(18U,({void*_Tmp0[1];_Tmp0[0]=n;({(struct Cyc_List_List*(*)(struct _fat_ptr))Cyc_List_list;})(_tag_fat(_Tmp0,sizeof(void*),1));}));
+void*t1=Cyc_AssnDef_primop(18U,({void*_Tmp0[1];_Tmp0[0]=n;Cyc_List_list(_tag_fat(_Tmp0,sizeof(void*),1));}));
 # 170
 struct Cyc_Absyn_Exp*e=eopt;
 loop: {
@@ -936,7 +934,7 @@ goto LOOP;}case 4: _Tmp3=(void*)((struct Cyc_AssnDef_Or_AssnDef_Assn_struct*)_Tm
 unsigned n=Cyc_PrattProver_num_graphs(gs);
 if(Cyc_PrattProver_max_paths_seen < n)Cyc_PrattProver_max_paths_seen=n;
 # 699
-if(n >= Cyc_PrattProver_max_paths)(int)_throw((void*)& Cyc_PrattProver_too_large);{
+if(n >= Cyc_PrattProver_max_paths)(void*)_throw((void*)& Cyc_PrattProver_too_large);{
 # 701
 struct Cyc_PrattProver_Graph*gs1=gs;
 struct Cyc_PrattProver_Graph*gs2=Cyc_PrattProver_copy_graph(gs);
@@ -980,7 +978,7 @@ int _Tmp2=(struct Cyc_PrattProver_Graph*)gs.curr != (struct Cyc_PrattProver_Grap
 # 750
 ;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3=_Tmp2;void*_Tmp4;if(((struct Cyc_PrattProver_TooLarge_exn_struct*)_Tmp3)->tag == Cyc_PrattProver_TooLarge)
 # 757
-return 1;else{_Tmp4=_Tmp3;{void*exn=_Tmp4;(int)_rethrow(exn);}};}}}
+return 1;else{_Tmp4=_Tmp3;{void*exn=_Tmp4;(void*)_rethrow(exn);}};}}}
 # 762
 int Cyc_PrattProver_constraint_prove(void*ctxt,void*a){
 void*b=({void*_Tmp0=ctxt;Cyc_AssnDef_and(_Tmp0,Cyc_AssnDef_not(a));});
@@ -999,7 +997,7 @@ for(1;g1 != 0;g1=g1->next){
 struct Cyc_PrattProver_Row*r=Cyc_PrattProver_lookup_row_in_rows(g2,g1->source);
 if(r != 0){
 # 783
-struct Cyc_PrattProver_Row*newrow=({struct Cyc_PrattProver_Row*_Tmp0=_cycalloc(sizeof(struct Cyc_PrattProver_Row));*_Tmp0=*g1;_Tmp0;});
+struct Cyc_PrattProver_Row*newrow;newrow=_cycalloc(sizeof(struct Cyc_PrattProver_Row)),*newrow=*g1;
 newrow->next=res;
 res=newrow;
 res->distance=0;{

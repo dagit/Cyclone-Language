@@ -17,8 +17,9 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-// This is an optional pass that removes structs, enums, and (TO DO) externs
+// This is an optional pass that removes structs, enums, and externs
 // that are not used.  It runs on C code, not Cyclone code.
+// FIX: would be less conservative if we merged the worklists
 
 #include <hashtable.h>
 #include <set.h>
@@ -30,6 +31,7 @@ namespace LowTreeShake;
 // lists because types can be declared multiple times
 typedef Hashtable::table_t<qvar_t,List::list_t<aggrdecl_t>> aggr_table_t;
 typedef Set::set_t<qvar_t> qvar_set_t;
+typedef Hashtable::table_t<qvar_t,bool> qvar_dict_t;
 
 // essentially global state for the pass
 struct Env {
@@ -37,6 +39,8 @@ struct Env {
   qvar_set_t   aggr_worklist;
   qvar_set_t   aggr_keepers;
   qvar_set_t   enum_keepers; // could distinguish needing tags and not
+  qvar_dict_t  global_keepers;
+  qvar_dict_t  funs_defined;
 };
 typedef struct Env@`r env_t<`r>;
 
@@ -76,10 +80,16 @@ static void build_tables_type(env_t env, type_t t) {
 static void build_tables_exp(env_t env, exp_t e) {
   // recursive descent for types (plus later vars)
   switch(e->r) {
+  case &Var_e(&Global_b(vd)): fallthru(vd->name);   
+  case &Var_e(&Funname_b(&Fndecl{.name=qv,...})): fallthru(qv);   
+  case &Var_e(&Unresolved_b(qv)): 
+    if(!Hashtable::lookup_opt(env->funs_defined,qv) 
+       && !Hashtable::lookup_opt(env->global_keepers,qv))
+      Hashtable::insert(env->global_keepers,qv,true);
+    break;
+  case &Var_e(...):
   case &Const_e(_):
-  case &AnonEnum_e(...):        
-  case &Var_e(_): break;
-
+  case &AnonEnum_e(...): break;
   case &Enum_e(ed,_): Set::imp_insert(env->enum_keepers,ed->name); break;
 
   case &Cast_e(t,e1,...):
@@ -202,6 +212,7 @@ static void build_tables(env_t env, List::list_t<decl_t,`H> tds) {
 	build_tables_exp(env,(exp_t)vd->initializer);
       break;
     case &Fn_d(fd):
+      Hashtable::insert(env->funs_defined,fd->name,true);
       build_tables_type(env,fd->i.ret_type);
       for(let args = fd->i.args; args != NULL; args=args->tl)
 	build_tables_type(env,(*args->hd)[2]);
@@ -242,7 +253,10 @@ static List::list_t<decl_t,`H> trim_decls(env_t env, List::list_t<decl_t,`H> tds
   let ans = NULL;
   for(; tds != NULL; tds = tds->tl) {
     bool keep;
-    switch(tds->hd->r) { // FIX: skipping Enum_d and Var_d for now
+    switch(tds->hd->r) { 
+    case &Var_d(vd): keep = (vd->sc != Extern && vd->is_proto != true) 
+		       || Hashtable::lookup_opt(env->global_keepers,vd->name);
+      break;
     case &Aggr_d(ad): keep = Set::member(env->aggr_keepers,ad->name); break;
     case &Enum_d(ed): keep = Set::member(env->enum_keepers,ed->name); break;
     default:          keep = true; break;
@@ -257,7 +271,9 @@ List::list_t<decl_t> shake(List::list_t<decl_t,`H> tds) {
   let env = Env(Hashtable::create(37,qvar_cmp,hash_qvar),
 		Set::empty(qvar_cmp),
 		Set::empty(qvar_cmp),
-		Set::empty(qvar_cmp));
+		Set::empty(qvar_cmp),
+		Hashtable::create(37,qvar_cmp,hash_qvar),
+		Hashtable::create(37,qvar_cmp,hash_qvar));
   build_tables(&env,tds);
   process_worklist(&env);
   return trim_decls(&env,tds);

@@ -72,9 +72,13 @@ static struct Env { // a tagged union or datatype may be better
 };
 typedef struct Env env_t;
 static env_t other_env = Env(Other,NULL);
+static env_t no_init(env_t env) {
+  return env.ctxt == Initializer ? other_env : env;
+}
 
 static enum ExpResult {
   WasArray,
+  UsedInitializer,
   OtherRes
 };
 static struct Result {
@@ -87,8 +91,13 @@ static void remove_aggrs_stmt(stmt_t s);
 
 static void noarray_remove_aggrs_exp(env_t env, exp_t e) {
   let Result(r) = remove_aggrs_exp(env,e);
-  if(r != OtherRes)
+  if(r == WasArray)
     Warn::impos2("remove_aggrs_exp -- unexpected array or comprehension: ",e);
+}
+
+static bool can_use_initializer(exp_t e, type_t t) {
+  return e->topt && !Tcutil::is_array_type((type_t)e->topt)
+    && Tcutil::typecmp((type_t)e->topt,t)==0;
 }
 
 static result_t remove_aggrs_exp(env_t env, exp_t e) {
@@ -122,8 +131,16 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
   case &New_e(_,e1):
     switch(e->annot) {
     case &Toc::NewInfo(mexp,typ): 
+      // for less output, try to special case initializers: t x = new e;
+      if(env.ctxt == Initializer && can_use_initializer((exp_t)env.dest,typ)) {
+	remove_aggrs_exp(Env(NewDest,env.dest),e1);
+	e->r = seq_exp(assign_exp((exp_t)env.dest,mexp,DL),
+		       e1,DL)->r;
+	res = UsedInitializer; 
+	break;
+      }
       let xvar = Toc::temp_var();
-      let xexp =  var_exp(xvar,DL);
+      let xexp = var_exp(xvar,DL);
       remove_aggrs_exp(Env(NewDest,xexp), e1); 
       let s = declare_stmt(xvar,typ,mexp,
 			   seq_stmt(exp_stmt(e1,DL),exp_stmt(xexp,DL),DL),DL);
@@ -143,7 +160,7 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
       dest = var_exp(*v,DL);
     } else {
       v = NULL;
-      dest   = (exp_t)env.dest;
+      dest = (exp_t)env.dest;
       if(env.ctxt == NewDest)
 	dest = deref_exp(dest,DL);
     }
@@ -256,14 +273,14 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
   case &SeqExp_e(e1,e2): 
     did_assign = true; // b/c we pass env for e2
     noarray_remove_aggrs_exp(other_env,e1);
-    noarray_remove_aggrs_exp(env,e2);
+    noarray_remove_aggrs_exp(no_init(env),e2);
     break;
   case &Conditional_e(e1,e2,e3): 
     did_assign = true; // b/c we pass env for e2 and e3
     noarray_remove_aggrs_exp(other_env,e1);
-    noarray_remove_aggrs_exp(env,e2);
+    noarray_remove_aggrs_exp(no_init(env),e2);
     let env3 = Env(env.ctxt, (env.dest==NULL ? NULL : copy_exp(env.dest)));
-    noarray_remove_aggrs_exp(env3,e3); // avoid sharing dest!
+    noarray_remove_aggrs_exp(no_init(env3),e3); // avoid sharing dest!
     break;
 
   case &FnCall_e(e,es,NULL,_): // NULL b/c varargs already translated away
@@ -363,9 +380,11 @@ static void remove_aggrs_stmt(stmt_t s) {
       // May produce "prettier" output to do something like this for
       // aggregates too, but currently we just use a statement-expression.
       if(vd->initializer != NULL) {
-	let Result(r) = remove_aggrs_exp(Env(Initializer,var_exp(vd->name,DL)), 
+	let var_exp = varb_exp(new Local_b(vd),DL);
+	var_exp->topt = vd->type;
+	let Result(r) = remove_aggrs_exp(Env(Initializer,var_exp),
 					 (exp_t)vd->initializer);
-	if(r==WasArray) {
+	if(r==WasArray || r==UsedInitializer) {
 	  s->r = decl_stmt(d, seq_stmt(exp_stmt((exp_t)vd->initializer,DL),
 				       s2, DL), DL)->r;
 	  vd->initializer = NULL;

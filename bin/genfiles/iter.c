@@ -374,9 +374,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
- extern char Cyc_Core_Invalid_argument[17U];extern char Cyc_Core_Failure[8U];extern char Cyc_Core_Impossible[11U];extern char Cyc_Core_Not_found[10U];extern char Cyc_Core_Unreachable[12U];
-# 171 "core.h"
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Iter_Iter{void*env;int(*next)(void*,void*);};
+ struct Cyc_Iter_Iter{void*env;int(*next)(void*,void*);};
 # 22 "iter.cyc"
 int Cyc_Iter_next(struct Cyc_Iter_Iter iter,void*dest){
 struct Cyc_Iter_Iter _Tmp0=iter;void*_Tmp1;void*_Tmp2;_Tmp2=(void*)_Tmp0.env;_Tmp1=_Tmp0.next;{void*env=_Tmp2;int(*f)(void*,void*)=_Tmp1;

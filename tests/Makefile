@@ -14,7 +14,8 @@ endif
 HAVE_PTHREAD=no
 #EXES := $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme cinclude testasm patterns)
 # test asm doesn't work for me on cygwin
-EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme cinclude patterns multimethod testasm) # testsexp)
+EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme cinclude patterns multimethod testasm)
+ # testsexp)
 
 ifeq ($(HAVE_PTHREAD),yes)
 EXES += $(addsuffix $(EXE),testexn)
@@ -126,7 +127,8 @@ endif
 	$(CYCC) $(CYCFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
-	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions test_currgn unique_test zeroterm structarray flatlist md5 require streambufftest streambuff refcnt_test dynregion md5driver scheme unique_patterns cinclude testasm testexn multimethod)# testsexp)
+	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions test_currgn unique_test zeroterm structarray flatlist md5 require streambufftest streambuff refcnt_test dynregion md5driver scheme unique_patterns cinclude testasm testexn multimethod)
+# testsexp)
 	$(RM) foo_tab.* unsafe_cast.o pcredemo.o pcredemo.c pcredemo md5driver.o
 	$(RM) $(EXES) fail1.tmp fail2.tmp fail3.tmp fail4.tmp
 	$(RM) *~ *.exe *.output *.stackdump

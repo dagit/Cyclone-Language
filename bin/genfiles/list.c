@@ -374,72 +374,17 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];extern char Cyc_Core_Failure[8U];extern char Cyc_Core_Impossible[11U];extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};
+ struct Cyc_Core_Opt{void*v;};struct Cyc_Core_Not_found_exn_struct{char*tag;};
 # 149 "core.h"
-extern struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val;extern char Cyc_Core_Unreachable[12U];
+extern struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val;
 # 168
-extern struct _RegionHandle*Cyc_Core_heap_region;
-# 171
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
-# 61 "list.h"
-int Cyc_List_length(struct Cyc_List_List*);
-# 72
-struct Cyc_List_List*Cyc_List_rcopy(struct _RegionHandle*,struct Cyc_List_List*);
-# 79
-struct Cyc_List_List*Cyc_List_rmap(struct _RegionHandle*,void*(*)(void*),struct Cyc_List_List*);
-# 86
-struct Cyc_List_List*Cyc_List_rmap_c(struct _RegionHandle*,void*(*)(void*,void*),void*,struct Cyc_List_List*);extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};
-# 100
-struct Cyc_List_List*Cyc_List_rmap2(struct _RegionHandle*,void*(*)(void*,void*),struct Cyc_List_List*,struct Cyc_List_List*);
-# 112
-struct Cyc_List_List*Cyc_List_rmap3(struct _RegionHandle*,void*(*)(void*,void*,void*),struct Cyc_List_List*,struct Cyc_List_List*,struct Cyc_List_List*);
-# 153
-void*Cyc_List_fold_right(void*(*)(void*,void*),struct Cyc_List_List*,void*);
-# 157
-void*Cyc_List_fold_right_c(void*(*)(void*,void*,void*),void*,struct Cyc_List_List*,void*);
-# 167
-struct Cyc_List_List*Cyc_List_rrevappend(struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_List_List*);
-# 175
-struct Cyc_List_List*Cyc_List_rrev(struct _RegionHandle*,struct Cyc_List_List*);
-# 178
-struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*);
-# 190
-struct Cyc_List_List*Cyc_List_rappend(struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_List_List*);
-# 205
-struct Cyc_List_List*Cyc_List_rflatten(struct _RegionHandle*,struct Cyc_List_List*);
-# 214
-struct Cyc_List_List*Cyc_List_rmerge_sort(struct _RegionHandle*,int(*)(void*,void*),struct Cyc_List_List*);
-# 220
-struct Cyc_List_List*Cyc_List_rimp_merge_sort(int(*)(void*,void*),struct Cyc_List_List*);
-# 230
-struct Cyc_List_List*Cyc_List_rmerge(struct _RegionHandle*,int(*)(void*,void*),struct Cyc_List_List*,struct Cyc_List_List*);
-# 234
-struct Cyc_List_List*Cyc_List_imp_merge(int(*)(void*,void*),struct Cyc_List_List*,struct Cyc_List_List*);extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
-# 246
-struct Cyc_List_List*Cyc_List_nth_tail(struct Cyc_List_List*,int);
-# 276
-struct Cyc_List_List*Cyc_List_rzip(struct _RegionHandle*,struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_List_List*);
-# 288
-struct Cyc_List_List*Cyc_List_rzip3(struct _RegionHandle*,struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_List_List*,struct Cyc_List_List*);struct _tuple0{struct Cyc_List_List*f1;struct Cyc_List_List*f2;};
-# 303
-struct _tuple0 Cyc_List_rsplit(struct _RegionHandle*,struct _RegionHandle*,struct Cyc_List_List*);struct _tuple1{struct Cyc_List_List*f1;struct Cyc_List_List*f2;struct Cyc_List_List*f3;};
-# 310
-struct _tuple1 Cyc_List_rsplit3(struct _RegionHandle*,struct _RegionHandle*,struct _RegionHandle*,struct Cyc_List_List*);
-# 354
-struct Cyc_List_List*Cyc_List_delete_cmp(int(*)(void*,void*),struct Cyc_List_List*,void*);
-# 367
-struct _fat_ptr Cyc_List_rto_array(struct _RegionHandle*,struct Cyc_List_List*);
+extern struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
+# 246 "list.h"
+struct Cyc_List_List*Cyc_List_nth_tail(struct Cyc_List_List*,int);struct _tuple0{struct Cyc_List_List*f1;struct Cyc_List_List*f2;};struct _tuple1{struct Cyc_List_List*f1;struct Cyc_List_List*f2;struct Cyc_List_List*f3;};
 # 371
 struct Cyc_List_List*Cyc_List_from_array(struct _fat_ptr);
 # 374
 struct Cyc_List_List*Cyc_List_rfrom_array(struct _RegionHandle*,struct _fat_ptr);
-# 380
-struct Cyc_List_List*Cyc_List_rtabulate(struct _RegionHandle*,int,void*(*)(int));
-struct Cyc_List_List*Cyc_List_rtabulate_c(struct _RegionHandle*,int,void*(*)(void*,int),void*);
-# 397
-struct Cyc_List_List*Cyc_List_rfilter(struct _RegionHandle*,int(*)(void*),struct Cyc_List_List*);
-# 400
-struct Cyc_List_List*Cyc_List_rfilter_c(struct _RegionHandle*,int(*)(void*,void*),void*,struct Cyc_List_List*);
 # 30 "list.cyc"
 int Cyc_List_length(struct Cyc_List_List*x){
 int i=0;
@@ -466,7 +411,7 @@ if(x == 0)return 0;
 result=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));_Tmp0->hd=x->hd,_Tmp0->tl=0;_Tmp0;});
 prev=result;
 for(x=x->tl;x != 0;x=x->tl){
-struct Cyc_List_List*temp=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));_Tmp0->hd=x->hd,_Tmp0->tl=0;_Tmp0;});
+struct Cyc_List_List*temp;temp=_region_malloc(r,sizeof(struct Cyc_List_List)),temp->hd=x->hd,temp->tl=0;
 prev->tl=temp;
 prev=temp;}
 # 69
@@ -482,7 +427,7 @@ if(x == 0)return 0;
 result=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));({void*_Tmp1=f(x->hd);_Tmp0->hd=_Tmp1;}),_Tmp0->tl=0;_Tmp0;});
 prev=result;
 for(x=x->tl;x != 0;x=x->tl){
-struct Cyc_List_List*temp=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));({void*_Tmp1=f(x->hd);_Tmp0->hd=_Tmp1;}),_Tmp0->tl=0;_Tmp0;});
+struct Cyc_List_List*temp;temp=_region_malloc(r,sizeof(struct Cyc_List_List)),({void*_Tmp0=f(x->hd);temp->hd=_Tmp0;}),temp->tl=0;
 prev->tl=temp;
 prev=temp;}
 # 88
@@ -498,7 +443,7 @@ if(x == 0)return 0;
 result=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));({void*_Tmp1=f(env,x->hd);_Tmp0->hd=_Tmp1;}),_Tmp0->tl=0;_Tmp0;});
 prev=result;
 for(x=x->tl;x != 0;x=x->tl){
-struct Cyc_List_List*e=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));({void*_Tmp1=f(env,x->hd);_Tmp0->hd=_Tmp1;}),_Tmp0->tl=0;_Tmp0;});
+struct Cyc_List_List*e;e=_region_malloc(r,sizeof(struct Cyc_List_List)),({void*_Tmp0=f(env,x->hd);e->hd=_Tmp0;}),e->tl=0;
 prev->tl=e;
 prev=e;}
 # 107
@@ -513,7 +458,7 @@ struct Cyc_List_List*Cyc_List_rmap2(struct _RegionHandle*r,void*(*f)(void*,void*
 struct Cyc_List_List*result;struct Cyc_List_List*prev;
 # 124
 if(x == 0 && y == 0)return 0;
-if(x == 0 || y == 0)(int)_throw((void*)& Cyc_List_List_mismatch_val);
+if(x == 0 || y == 0)(void*)_throw((void*)& Cyc_List_List_mismatch_val);
 # 127
 result=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));({void*_Tmp1=f(x->hd,y->hd);_Tmp0->hd=_Tmp1;}),_Tmp0->tl=0;_Tmp0;});
 prev=result;
@@ -521,13 +466,13 @@ x=x->tl;
 y=y->tl;
 # 132
 while(x != 0 && y != 0){
-struct Cyc_List_List*temp=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));({void*_Tmp1=f(x->hd,y->hd);_Tmp0->hd=_Tmp1;}),_Tmp0->tl=0;_Tmp0;});
+struct Cyc_List_List*temp;temp=_region_malloc(r,sizeof(struct Cyc_List_List)),({void*_Tmp0=f(x->hd,y->hd);temp->hd=_Tmp0;}),temp->tl=0;
 prev->tl=temp;
 prev=temp;
 x=x->tl;
 y=y->tl;}
 # 139
-if(x != 0 || y != 0)(int)_throw((void*)& Cyc_List_List_mismatch_val);
+if(x != 0 || y != 0)(void*)_throw((void*)& Cyc_List_List_mismatch_val);
 return result;}
 # 143
 struct Cyc_List_List*Cyc_List_map2(void*(*f)(void*,void*),struct Cyc_List_List*x,struct Cyc_List_List*y){
@@ -538,7 +483,7 @@ struct Cyc_List_List*Cyc_List_rmap3(struct _RegionHandle*r,void*(*f)(void*,void*
 struct Cyc_List_List*result;struct Cyc_List_List*prev;
 # 152
 if((x == 0 && y == 0)&& z == 0)return 0;
-if((x == 0 || y == 0)|| z == 0)(int)_throw((void*)& Cyc_List_List_mismatch_val);
+if((x == 0 || y == 0)|| z == 0)(void*)_throw((void*)& Cyc_List_List_mismatch_val);
 # 155
 result=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));({void*_Tmp1=f(x->hd,y->hd,z->hd);_Tmp0->hd=_Tmp1;}),_Tmp0->tl=0;_Tmp0;});
 prev=result;
@@ -548,14 +493,14 @@ y=y->tl;
 z=z->tl;
 # 162
 while((x != 0 && y != 0)&& z != 0){
-struct Cyc_List_List*temp=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));({void*_Tmp1=f(x->hd,y->hd,z->hd);_Tmp0->hd=_Tmp1;}),_Tmp0->tl=0;_Tmp0;});
+struct Cyc_List_List*temp;temp=_region_malloc(r,sizeof(struct Cyc_List_List)),({void*_Tmp0=f(x->hd,y->hd,z->hd);temp->hd=_Tmp0;}),temp->tl=0;
 prev->tl=temp;
 prev=temp;
 x=x->tl;
 y=y->tl;
 z=z->tl;}
 # 170
-if((x != 0 || y != 0)|| z != 0)(int)_throw((void*)& Cyc_List_List_mismatch_val);
+if((x != 0 || y != 0)|| z != 0)(void*)_throw((void*)& Cyc_List_List_mismatch_val);
 return result;}
 # 174
 struct Cyc_List_List*Cyc_List_map3(void*(*f)(void*,void*,void*),struct Cyc_List_List*x,struct Cyc_List_List*y,struct Cyc_List_List*z){
@@ -580,22 +525,22 @@ f(env,x->hd);}}
 void Cyc_List_app2(void*(*f)(void*,void*),struct Cyc_List_List*x,struct Cyc_List_List*y){
 for(1;x != 0 && y != 0;(x=x->tl,y=y->tl)){
 f(x->hd,y->hd);}
-if(x != 0 || y != 0)(int)_throw((void*)& Cyc_List_List_mismatch_val);}
+if(x != 0 || y != 0)(void*)_throw((void*)& Cyc_List_List_mismatch_val);}
 # 212
 void Cyc_List_app2_c(void*(*f)(void*,void*,void*),void*env,struct Cyc_List_List*x,struct Cyc_List_List*y){
 for(1;x != 0 && y != 0;(x=x->tl,y=y->tl)){
 f(env,x->hd,y->hd);}
-if(x != 0 || y != 0)(int)_throw((void*)& Cyc_List_List_mismatch_val);}
+if(x != 0 || y != 0)(void*)_throw((void*)& Cyc_List_List_mismatch_val);}
 # 220
 void Cyc_List_iter2(void(*f)(void*,void*),struct Cyc_List_List*x,struct Cyc_List_List*y){
 for(1;x != 0 && y != 0;(x=x->tl,y=y->tl)){
 f(x->hd,y->hd);}
-if(x != 0 || y != 0)(int)_throw((void*)& Cyc_List_List_mismatch_val);}
+if(x != 0 || y != 0)(void*)_throw((void*)& Cyc_List_List_mismatch_val);}
 # 225
 void Cyc_List_iter2_c(void(*f)(void*,void*,void*),void*env,struct Cyc_List_List*x,struct Cyc_List_List*y){
 for(1;x != 0 && y != 0;(x=x->tl,y=y->tl)){
 f(env,x->hd,y->hd);}
-if(x != 0 || y != 0)(int)_throw((void*)& Cyc_List_List_mismatch_val);}
+if(x != 0 || y != 0)(void*)_throw((void*)& Cyc_List_List_mismatch_val);}
 # 234
 void*Cyc_List_fold_left(void*(*f)(void*,void*),void*accum,struct Cyc_List_List*x){
 for(1;x != 0;x=x->tl){
@@ -651,7 +596,7 @@ if(y == 0)return Cyc_List_rcopy(r2,x);
 result=({struct Cyc_List_List*_Tmp0=_region_malloc(r2,sizeof(struct Cyc_List_List));_Tmp0->hd=x->hd,_Tmp0->tl=0;_Tmp0;});
 prev=result;
 for(x=x->tl;x != 0;x=x->tl){
-struct Cyc_List_List*temp=({struct Cyc_List_List*_Tmp0=_region_malloc(r2,sizeof(struct Cyc_List_List));_Tmp0->hd=x->hd,_Tmp0->tl=0;_Tmp0;});
+struct Cyc_List_List*temp;temp=_region_malloc(r2,sizeof(struct Cyc_List_List)),temp->hd=x->hd,temp->tl=0;
 prev->tl=temp;
 prev=temp;}
 # 308
@@ -779,10 +724,10 @@ void*Cyc_List_nth(struct Cyc_List_List*x,int i){
 return(_check_null(Cyc_List_nth_tail(x,i)))->hd;}
 # 472
 struct Cyc_List_List*Cyc_List_nth_tail(struct Cyc_List_List*x,int i){
-if(i < 0)(int)_throw((void*)& Cyc_List_Nth_val);
+if(i < 0)(void*)_throw((void*)& Cyc_List_Nth_val);
 for(1;i > 0;(-- i,x=x->tl)){
 if(x == 0)
-(int)_throw((void*)& Cyc_List_Nth_val);}
+(void*)_throw((void*)& Cyc_List_Nth_val);}
 return x;}
 # 482
 int Cyc_List_forall(int(*pred)(void*),struct Cyc_List_List*x){
@@ -821,7 +766,7 @@ struct Cyc_List_List*Cyc_List_rzip(struct _RegionHandle*r3,struct _RegionHandle*
 struct Cyc_List_List*result;struct Cyc_List_List*prev;struct Cyc_List_List*temp;
 # 524
 if(x == 0 && y == 0)return 0;
-if(x == 0 || y == 0)(int)_throw((void*)& Cyc_List_List_mismatch_val);
+if(x == 0 || y == 0)(void*)_throw((void*)& Cyc_List_List_mismatch_val);
 # 527
 result=({struct Cyc_List_List*_Tmp0=_region_malloc(r3,sizeof(struct Cyc_List_List));({struct _tuple2*_Tmp1=({struct _tuple2*_Tmp2=_region_malloc(r4,sizeof(struct _tuple2));_Tmp2->f1=x->hd,_Tmp2->f2=y->hd;_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=0;_Tmp0;});
 prev=result;
@@ -836,7 +781,7 @@ prev=temp;
 x=x->tl;
 y=y->tl;}
 # 540
-if(x != 0 || y != 0)(int)_throw((void*)& Cyc_List_List_mismatch_val);
+if(x != 0 || y != 0)(void*)_throw((void*)& Cyc_List_List_mismatch_val);
 return result;}
 # 544
 struct Cyc_List_List*Cyc_List_zip(struct Cyc_List_List*x,struct Cyc_List_List*y){
@@ -847,7 +792,7 @@ struct Cyc_List_List*Cyc_List_rzip3(struct _RegionHandle*r3,struct _RegionHandle
 struct Cyc_List_List*result;struct Cyc_List_List*prev;struct Cyc_List_List*temp;
 # 552
 if((x == 0 && y == 0)&& z == 0)return 0;
-if((x == 0 || y == 0)|| z == 0)(int)_throw((void*)& Cyc_List_List_mismatch_val);
+if((x == 0 || y == 0)|| z == 0)(void*)_throw((void*)& Cyc_List_List_mismatch_val);
 # 555
 result=({struct Cyc_List_List*_Tmp0=_region_malloc(r3,sizeof(struct Cyc_List_List));({struct _tuple3*_Tmp1=({struct _tuple3*_Tmp2=_region_malloc(r4,sizeof(struct _tuple3));_Tmp2->f1=x->hd,_Tmp2->f2=y->hd,_Tmp2->f3=z->hd;_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=0;_Tmp0;});
 prev=result;
@@ -864,7 +809,7 @@ x=x->tl;
 y=y->tl;
 z=z->tl;}
 # 570
-if((x != 0 || y != 0)|| z != 0)(int)_throw((void*)& Cyc_List_List_mismatch_val);
+if((x != 0 || y != 0)|| z != 0)(void*)_throw((void*)& Cyc_List_List_mismatch_val);
 return result;}
 # 574
 struct Cyc_List_List*Cyc_List_zip3(struct Cyc_List_List*x,struct Cyc_List_List*y,struct Cyc_List_List*z){
@@ -937,13 +882,13 @@ void*Cyc_List_assoc(struct Cyc_List_List*l,void*x){
 for(1;l != 0;l=l->tl){
 if((((struct _tuple2*)l->hd)[0]).f1 == x)
 return(((struct _tuple2*)l->hd)[0]).f2;}
-(int)_throw((void*)& Cyc_Core_Not_found_val);}
+(void*)_throw((void*)& Cyc_Core_Not_found_val);}
 # 664
 void*Cyc_List_assoc_cmp(int(*cmp)(void*,void*),struct Cyc_List_List*l,void*x){
 for(1;l != 0;l=l->tl){
 if(cmp((*((struct _tuple2*)l->hd)).f1,x)== 0)
 return(*((struct _tuple2*)l->hd)).f2;}
-(int)_throw((void*)& Cyc_Core_Not_found_val);}
+(void*)_throw((void*)& Cyc_Core_Not_found_val);}
 # 675
 struct Cyc_List_List*Cyc_List_delete_cmp(int(*cmp)(void*,void*),struct Cyc_List_List*l,void*x){
 struct Cyc_List_List*prev=0;
@@ -958,7 +903,7 @@ return l;}
 prev=iter;
 iter=iter->tl;}
 # 688
-(int)_throw((void*)& Cyc_Core_Not_found_val);}
+(void*)_throw((void*)& Cyc_Core_Not_found_val);}
 # 691
 static int Cyc_List_ptrequal(void*x,void*y){
 return !(x == y);}
@@ -1050,7 +995,7 @@ struct Cyc_List_List*Cyc_List_rfilter_c(struct _RegionHandle*r,int(*f)(void*,voi
 if(l == 0)
 return 0;{
 # 808
-struct Cyc_List_List*result=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));_Tmp0->hd=l->hd,_Tmp0->tl=0;_Tmp0;});
+struct Cyc_List_List*result;result=_region_malloc(r,sizeof(struct Cyc_List_List)),result->hd=l->hd,result->tl=0;{
 struct Cyc_List_List*end=result;
 struct Cyc_List_List*temp;
 for(1;l != 0;l=l->tl){
@@ -1059,7 +1004,7 @@ temp=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List))
 end->tl=temp;
 end=temp;}}
 # 817
-return result->tl;}}
+return result->tl;}}}
 # 820
 struct Cyc_List_List*Cyc_List_filter_c(int(*f)(void*,void*),void*env,struct Cyc_List_List*l){
 return Cyc_List_rfilter_c(Cyc_Core_heap_region,f,env,l);}
@@ -1068,7 +1013,7 @@ struct Cyc_List_List*Cyc_List_rfilter(struct _RegionHandle*r,int(*f)(void*),stru
 if(l == 0)
 return 0;{
 # 828
-struct Cyc_List_List*result=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));_Tmp0->hd=l->hd,_Tmp0->tl=0;_Tmp0;});
+struct Cyc_List_List*result;result=_region_malloc(r,sizeof(struct Cyc_List_List)),result->hd=l->hd,result->tl=0;{
 struct Cyc_List_List*end=result;
 struct Cyc_List_List*temp;
 for(1;l != 0;l=l->tl){
@@ -1077,7 +1022,7 @@ temp=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List))
 end->tl=temp;
 end=temp;}}
 # 837
-return result->tl;}}
+return result->tl;}}}
 # 840
 struct Cyc_List_List*Cyc_List_filter(int(*f)(void*),struct Cyc_List_List*l){
 return Cyc_List_rfilter(Cyc_Core_heap_region,f,l);}

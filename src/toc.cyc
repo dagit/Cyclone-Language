@@ -741,7 +741,7 @@ type_t typ_to_c(type_t t) {
   case &Evar(_,*t2,_,_):
     if (*t2 != NULL)
       return typ_to_c((type_t)(*t2));
-    return *t2 = sint_type;
+    return *t2 = void_star_type();
   case &VarType(tv):
     if (Kinds::tvar_kind(tv,&Kinds::bk)->kind == AnyKind)
       return void_type;
@@ -2048,30 +2048,16 @@ static void exp_to_c(env_t nv, exp_t e) {
     //  don't show up in the translated type.  Moreover, we probably don't
     //  get warnings when the only use of the tyvar is as a parameter b/c
     //  it's just an implicit cast to void * (so long as inst type isn't int)
-    for(; ts != NULL; ts = ts->tl) {
-      let k = type_kind(ts->hd)->kind;
-      if(k != EffKind && k != RgnKind) {
-	switch(compress(ts->hd)) {
-	case &VarType(_):
-	case &AppType(&DatatypeCon(_),_): continue;
-	default:
-	  let tc = typ_to_c((type_t)e->topt);
-	  e->r = array_to_ptr_cast(tc,e1,DL)->r;
-	  // HACK ALERT:
-	  // gcc 3.4 refuses to compile a function call ( (t)f )(...)
-	  // for types t that we need, so use ({(t)f})(...) instead.
-	  // This turns out to be easiest to code here, in Instantiate,
-	  // because functions are always instantiated before calling.
-	  switch (tc) {
-	  case &PointerType(PtrInfo(&FnType(_),_,_)):
-	    e->r = stmt_exp_r(exp_stmt(new_exp(e->r,e->loc),e->loc));
-	    break;
-	  default: break;
-	  }
-	  break;
-	}
-	break;
-      }
+    let tc = typ_to_c((type_t)e->topt);
+    let tc1 = typ_to_c((type_t)e1->topt);
+    if(!Tcutil::typecmp(tc,tc1)==0) {
+      e->r = array_to_ptr_cast(tc,e1,DL)->r;
+      // HACK ALERT:
+      // gcc 3.4 refuses to compile a function call ( (t)f )(...)
+      // for types t that we need, so use ({(t)f})(...) instead.
+      // This turns out to be easiest to code here, in Instantiate,
+      // because functions are always instantiated before calling.
+      e->r = stmt_exp_r(exp_stmt(new_exp(e->r,e->loc),e->loc));
     }
     break;
   case &Cast_e(*t,e1,user_inserted,coercion):

@@ -375,10 +375,8 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif
 #endif
  struct Cyc_Core_Opt{void*v;};
-# 125 "core.h"
-int Cyc_Core_nptrcmp(void*,void*);
-# 127
-struct _RegionHandle*Cyc_Core_current_handle (void);extern char Cyc_Core_Invalid_argument[17U];extern char Cyc_Core_Failure[8U];extern char Cyc_Core_Impossible[11U];extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];
+# 127 "core.h"
+struct _RegionHandle*Cyc_Core_current_handle (void);extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};
 # 171
 extern struct _RegionHandle*Cyc_Core_unique_region;
 # 201

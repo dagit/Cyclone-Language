@@ -374,11 +374,9 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
- extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];extern char Cyc_Core_Unreachable[12U];
+ extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};
 # 168 "core.h"
 extern struct _RegionHandle*Cyc_Core_heap_region;
-# 171
-extern struct _RegionHandle*Cyc_Core_unique_region;
 # 41 "cycboot.h"
 extern double modf(double,double*);struct Cyc___cycFILE;
 # 51
@@ -387,16 +385,6 @@ extern struct Cyc___cycFILE*Cyc_stdout;struct Cyc_String_pa_PrintArg_struct{int 
 struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);
 # 161 "cycboot.h"
 extern int Cyc_putc(int,struct Cyc___cycFILE*);
-# 224 "cycboot.h"
-int Cyc_vfprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);
-# 228
-int Cyc_vprintf(struct _fat_ptr,struct _fat_ptr);
-# 232
-struct _fat_ptr Cyc_vrprintf(struct _RegionHandle*,struct _fat_ptr,struct _fat_ptr);
-# 239
-int Cyc_vsnprintf(struct _fat_ptr,unsigned long,struct _fat_ptr,struct _fat_ptr);
-# 243
-int Cyc_vsprintf(struct _fat_ptr,struct _fat_ptr,struct _fat_ptr);extern char Cyc_FileCloseError[15U];extern char Cyc_FileOpenError[14U];extern char Cyc_List_List_mismatch[14U];extern char Cyc_List_Nth[4U];
 # 104 "string.h"
 extern struct _fat_ptr Cyc_strdup(struct _fat_ptr);
 # 87 "printf.cyc"
@@ -438,22 +426,22 @@ void*_stmttmp4=*((void**)ap.curr);void*_Tmp0=_stmttmp4;long double _Tmp1;double 
 return d;}case 3: _Tmp1=((struct Cyc_LongDouble_pa_PrintArg_struct*)_Tmp0)->f1;{long double ld=_Tmp1;
 return(double)ld;}default:
 # 138
-(int)_throw(({void*(*_Tmp3)(struct _fat_ptr)=({(void*(*)(struct _fat_ptr))Cyc_badarg;});_Tmp3(({struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,({struct _fat_ptr _Tmp6=Cyc_parg2string(*((void**)ap.curr));_Tmp5.f1=_Tmp6;});_Tmp5;});void*_Tmp5[1];_Tmp5[0]=& _Tmp4;Cyc_aprintf(({const char*_Tmp6="printf expected double but found %s";_tag_fat(_Tmp6,sizeof(char),36U);}),_tag_fat(_Tmp5,sizeof(void*),1));}));}));};}
+(void*)_throw(Cyc_badarg(({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,({struct _fat_ptr _Tmp5=Cyc_parg2string(*((void**)ap.curr));_Tmp4.f1=_Tmp5;});_Tmp4;});void*_Tmp4[1];_Tmp4[0]=& _Tmp3;Cyc_aprintf(({const char*_Tmp5="printf expected double but found %s";_tag_fat(_Tmp5,sizeof(char),36U);}),_tag_fat(_Tmp4,sizeof(void*),1));})));};}
 # 144
 static short*Cyc_va_arg_short_ptr(struct _fat_ptr ap){
 void*_stmttmp5=*((void**)ap.curr);void*_Tmp0=_stmttmp5;void*_Tmp1;if(*((int*)_Tmp0)== 4){_Tmp1=((struct Cyc_ShortPtr_pa_PrintArg_struct*)_Tmp0)->f1;{short*p=_Tmp1;
 return p;}}else{
-(int)_throw(({(void*(*)(struct _fat_ptr))Cyc_badarg;})(({const char*_Tmp2="printf expected short pointer";_tag_fat(_Tmp2,sizeof(char),30U);})));};}
+(void*)_throw(Cyc_badarg(({const char*_Tmp2="printf expected short pointer";_tag_fat(_Tmp2,sizeof(char),30U);})));};}
 # 152
 static unsigned long*Cyc_va_arg_int_ptr(struct _fat_ptr ap){
 void*_stmttmp6=*((void**)ap.curr);void*_Tmp0=_stmttmp6;void*_Tmp1;if(*((int*)_Tmp0)== 5){_Tmp1=((struct Cyc_IntPtr_pa_PrintArg_struct*)_Tmp0)->f1;{unsigned long*p=_Tmp1;
 return p;}}else{
-(int)_throw(({(void*(*)(struct _fat_ptr))Cyc_badarg;})(({const char*_Tmp2="printf expected int pointer";_tag_fat(_Tmp2,sizeof(char),28U);})));};}
+(void*)_throw(Cyc_badarg(({const char*_Tmp2="printf expected int pointer";_tag_fat(_Tmp2,sizeof(char),28U);})));};}
 # 160
 static const struct _fat_ptr Cyc_va_arg_string(struct _fat_ptr ap){
 void*_stmttmp7=*((void**)ap.curr);void*_Tmp0=_stmttmp7;struct _fat_ptr _Tmp1;if(*((int*)_Tmp0)== 0){_Tmp1=((struct Cyc_String_pa_PrintArg_struct*)_Tmp0)->f1;{struct _fat_ptr s=_Tmp1;
 return s;}}else{
-(int)_throw(({(void*(*)(struct _fat_ptr))Cyc_badarg;})(({const char*_Tmp2="printf expected string";_tag_fat(_Tmp2,sizeof(char),23U);})));};}
+(void*)_throw(Cyc_badarg(({const char*_Tmp2="printf expected string";_tag_fat(_Tmp2,sizeof(char),23U);})));};}
 # 177 "printf.cyc"
 int Cyc___cvt_double(double,int,int,int*,int,struct _fat_ptr,struct _fat_ptr);
 # 206 "printf.cyc"
@@ -1027,7 +1015,7 @@ if((int)*((char*)_check_fat_subscript(t,sizeof(char),0U))!= 46)
 _fat_ptr_inplace_plus(& t,sizeof(char),1);}}
 # 952
 goto _LL0;default:
-(int)_throw((void*)({struct Cyc_Core_Impossible_exn_struct*_Tmp1=_cycalloc(sizeof(struct Cyc_Core_Impossible_exn_struct));_Tmp1->tag=Cyc_Core_Impossible,_Tmp1->f1=({const char*_Tmp2="__cvt_double";_tag_fat(_Tmp2,sizeof(char),13U);});_Tmp1;}));}_LL0:;}
+(void*)_throw((void*)({struct Cyc_Core_Impossible_exn_struct*_Tmp1=_cycalloc(sizeof(struct Cyc_Core_Impossible_exn_struct));_Tmp1->tag=Cyc_Core_Impossible,_Tmp1->f1=({const char*_Tmp2="__cvt_double";_tag_fat(_Tmp2,sizeof(char),13U);});_Tmp1;}));}_LL0:;}
 # 955
 return(t.curr - startp.curr)/ sizeof(char);}
 # 959

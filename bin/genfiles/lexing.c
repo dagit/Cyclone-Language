@@ -378,17 +378,11 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 # 95 "core.h"
  struct _fat_ptr Cyc_Core_new_string(unsigned);
 # 99
-struct _fat_ptr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned);extern char Cyc_Core_Invalid_argument[17U];extern char Cyc_Core_Failure[8U];extern char Cyc_Core_Impossible[11U];extern char Cyc_Core_Not_found[10U];extern char Cyc_Core_Unreachable[12U];
+struct _fat_ptr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned);
 # 168
-extern struct _RegionHandle*Cyc_Core_heap_region;
-# 171
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc___cycFILE;extern char Cyc_FileCloseError[15U];extern char Cyc_FileOpenError[14U];
+extern struct _RegionHandle*Cyc_Core_heap_region;struct Cyc___cycFILE;
 # 276 "cycboot.h"
-extern int Cyc_file_string_read(struct Cyc___cycFILE*,struct _fat_ptr,int,int);extern char Cyc_Lexing_Error[6U];struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;struct _fat_ptr lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{int(*read_fun)(struct _fat_ptr,int,void*);void*read_fun_state;};
-# 75 "lexing.h"
-struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(int(*)(struct _fat_ptr,int,void*),void*);
-# 81
-struct _fat_ptr Cyc_Lexing_rlexeme(struct _RegionHandle*,struct Cyc_Lexing_lexbuf*);extern char Cyc_List_List_mismatch[14U];extern char Cyc_List_Nth[4U];
+extern int Cyc_file_string_read(struct Cyc___cycFILE*,struct _fat_ptr,int,int);struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;struct _fat_ptr lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{int(*read_fun)(struct _fat_ptr,int,void*);void*read_fun_state;};
 # 73 "string.h"
 extern struct _fat_ptr Cyc_zstrncpy(struct _fat_ptr,struct _fat_ptr,unsigned long);
 # 104 "string.h"
@@ -445,7 +439,7 @@ static void Cyc_Lexing_set_eof(struct Cyc_Lexing_lexbuf*lbuf){
 lbuf->lex_eof_reached=1;}
 # 131
 struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(struct _fat_ptr s){
-return({struct Cyc_Lexing_lexbuf*_Tmp0=_cycalloc(sizeof(struct Cyc_Lexing_lexbuf));_Tmp0->refill_buff=({(void(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_set_eof;}),_Tmp0->refill_state=(void*)0,({
+return({struct Cyc_Lexing_lexbuf*_Tmp0=_cycalloc(sizeof(struct Cyc_Lexing_lexbuf));_Tmp0->refill_buff=Cyc_Lexing_set_eof,_Tmp0->refill_state=(void*)0,({
 # 134
 struct _fat_ptr _Tmp1=Cyc_strdup(s);_Tmp0->lex_buffer=_Tmp1;}),_Tmp0->lex_buffer_len=(int)
 _get_fat_size(s,sizeof(char)),_Tmp0->lex_abs_pos=0,_Tmp0->lex_start_pos=0,_Tmp0->lex_curr_pos=0,_Tmp0->lex_last_pos=0,_Tmp0->lex_last_action=0,_Tmp0->lex_eof_reached=1;_Tmp0;});}
