@@ -2,6 +2,57 @@ Cyclone Release Notes:
 
 This file explains some of the changes that occurred in between releases.
 ----------------------------------------------------------------------
+Changes going from Version 0.7 dated February 2004, to version 0.8,
+May 2004.
+
+* Added doc/ directory to the distribution, which includes
+  * source for the user manual
+  * emacs .el files for syntax highlighting
+
+* Various improvements to zero-terminated pointers:
+  * allow swapping NULL into a zero-terminated array.
+  * improved code generation to reduce dynamic checks, particularly when
+    doing pointer arithmetic to iterate through the array.
+
+* Added features to aprof region profiler
+  * more control over colors, appearance of GC markers, axis scaling
+
+* Modifications to buildlib to support cross-compiling to Nintendo
+  Gameboy. 
+
+* Other small improvements
+  * improved parser error messages (somewhat)
+  * added support for the __extension__ attribute
+  * permit dereferencing function pointer before a call.
+  * allow creating of fat pointers known to be out of bounds at
+    compile-time: now issue a warning rather than signalling an error.
+
+* Various bug fixes:
+  * compiler was not properly enforcing const when doing pointer
+    dereferences.
+  * the -o command-line flag is no longer sensitive to argument order.
+  * no longer allow assignments or function calls in where clauses in
+    patterns (following &&) to avoid evaluation order issues.
+  * some uses of typeof(e) form were not compiling properly.
+  * now avoid throwing exceptions in compiler due to cascading errors.
+  * fixed bug in array bounds check elimination that was eliminating
+    some checks illegally
+  * fixed bug in dynamic regions: was allowing an opened dynamic region to
+    outlive an enclosed, opened dynamic region.
+  * fixed problem preventing automatic coercion of float constants to
+    doubles when initializing arrays.
+  * fixed small bugs in the dict and string library files
+
+* Restructurings of the compiler and runtime system
+  * broke out code generation for the initialization of aggregates and
+    arrays into a separate pass (remove-aggregates.cyc) following the rest
+    of code generation (toc.cyc) 
+  * created file runtime_zeroterm.c to contain routines for zero-terminated
+    pointers.  runtime_internal.h srves as interfce between various runtime
+    files.  Cleaned up cyc_include.h
+  * removed use of lexical regions from flow analysis (now just heap)
+
+----------------------------------------------------------------------
 Changes going from Version 0.6 dated September 2003, to Version 0.7,
 February 2004.
 

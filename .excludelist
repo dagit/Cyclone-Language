@@ -26,10 +26,9 @@
 /core$
 /config.log$
 /cyclone-.*\.tar\.gz$
-/doc$
-/doc/cyc_users_guide\.htm$
 /doc/cyclone\.gif$
 /doc/web$
+/doc/*.txt$
 /include/arch$
 /include/arpa$
 /include/machine$
