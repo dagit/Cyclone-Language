@@ -108,8 +108,10 @@ void output_tables(FILE @oc, Compact::lex_tables_t tbl) {
 
 void output_entry(string_t sourcename, FILE @ ic, FILE @ oc, 
 		  Lexgen::automata_entry_t e) {
-  fprintf(oc, "int %s_rec(Lexbuf<`a> lexbuf, int lexstate) {\n", e->name);
-  // save new state, then switch on it , so default case can use it.
+  fprintf(oc, "%s %s_rec(Lexbuf<`a> lexbuf, int lexstate) {\n",
+	  (e->type)?e->type:"int",
+	  e->name);
+  // save new state, then switch on it, so default case can use it.
   // (int switch can't get the value being switched on??)
   fprintf(oc, "  lexstate = lex_engine(lexstate,lexbuf);\n");
   fprintf(oc, "  switch (lexstate) {\n");
@@ -122,7 +124,8 @@ void output_entry(string_t sourcename, FILE @ ic, FILE @ oc,
     " default: lexbuf->refill_buff(lexbuf); return %s_rec(lexbuf,lexstate);\n",
 	  e->name);
   fprintf(oc, "  }\n throw new Error(\"some action didn't return!\");\n}\n");
-  fprintf(oc, "int %s(Lexbuf<`a> lexbuf) { return %s_rec(lexbuf,%d); }\n",
+  fprintf(oc, "%s %s(Lexbuf<`a> lexbuf) { return %s_rec(lexbuf,%d); }\n",
+	  (e->type)?e->type:"int",
           e->name, e->name, e->initial_state);
 }
 

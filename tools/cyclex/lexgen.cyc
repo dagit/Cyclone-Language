@@ -30,6 +30,7 @@ typedef tunion Regexp regexp_t;
 
 static struct Lexer_entry {
   string_t                   name;
+  string_t                   type;
   regexp_t                   regexp;
   list_t<$(int,location_t)@> actions;
 };
@@ -73,11 +74,14 @@ $(list_t<int>?, list_t<lexer_entry_t>)@ encode_lexdef(lexer_definition_t def) {
   chars_count = 0;
   list_t<lexer_entry_t> entry_list_rev = NULL;
   for(let entries = def->entrypoints; entries!=NULL; entries=entries->tl) {
-    let &$(entry_name, casedef) = entries->hd;
+    let &$(entry_name, entry_type, casedef) = entries->hd;
     actions       = NULL;
     actions_count = 0;
     let re = encode_casedef(casedef); // mutates actions
-    entry_list_rev = new List(new Lexer_entry(entry_name, re, rev(actions)),
+    entry_list_rev = new List(new Lexer_entry(entry_name,
+					      entry_type,
+					      re,
+					      rev(actions)),
                               entry_list_rev);
   }
   list_t<int> ?chr = to_array(rev(chars));
@@ -260,10 +264,10 @@ make_dfa(Syntax::lexer_definition_t lexdef) {
   for(; entry_list != NULL; entry_list = entry_list->tl) {
     let le = entry_list->hd;
     initial_states = new List(new Automata_entry{le->name,
-			 		   get_state(firstpos(le->regexp)),
-				 	   le->actions
-                                          },
-			   initial_states);
+						 le->type,
+						 get_state(firstpos(le->regexp)),
+						 le->actions},
+			      initial_states);
   }
   initial_states = List::imp_rev(initial_states);
   list_t<$(automata_t,int)@> states = NULL;

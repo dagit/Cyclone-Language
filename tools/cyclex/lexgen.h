@@ -35,8 +35,9 @@ LEXGEN_EXTERN_DEFINITION tunion Automata {
 typedef tunion Automata automata_t;
 
 LEXGEN_EXTERN_DEFINITION struct Automata_entry {
-  string_t                   name;
-  int                              initial_state;
+  string_t                           name;
+  string_t                           type;
+  int                                initial_state;
   list_t<$(int,Syntax::location_t)@> actions;
 };
 typedef struct Automata_entry @ automata_entry_t;
