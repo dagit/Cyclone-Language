@@ -1,0 +1,594 @@
+#include <core.h>
+#include <stdio.h>
+#include <string.h>
+#include <list.h>
+using Core;
+using List;
+namespace Scheme;
+//////////////////////////////////////////////////////////////////////
+// Dynamic region interface
+//////////////////////////////////////////////////////////////////////
+
+// a capability to access dynamic region `r
+typedef struct DynamicRegion<`r>@`U ukey_t<`r>;
+
+// a capability to generate next_region<`r>'s key (and the next counter)
+struct RegionCtr<`r::R>;
+typedef struct RegionCtr<`r>@`U rgn_ctr_t<`r>;
+
+// next_rgn maps regions to regions and gives us a way to generate
+// an infinite name supply for regions.
+typedef _::R next_rgn<`r::R>;
+
+struct CounterRgn<`r> {
+  ukey_t<`r> key;
+  rgn_ctr_t<`r> ctr;
+};  
+
+// return type for new_ukey() -- a fresh region, a key for the region,
+// and a counter for generating follow-on regions.
+struct NewCounterRgn {
+  <`r::R>
+  struct CounterRgn<`r> cr;
+};
+
+// I need this function to keep the compiler from trimming away
+// the prototype for Cyc_Core_new_ukey() which is called below.
+static void never_called() {
+  new_ukey();
+}
+
+// Here are the new C functions we need for generating a fresh
+// key and counter, as well as the next key and counter.  
+extern "C include" {
+  // get a new region, it's key, and it's counter
+  static struct NewCounterRgn new_ukey_and_counter() {
+    struct Cyc_Scheme_NewCounterRgn res;
+    res.cr.key = Cyc_Core_new_ukey().key;
+    res.cr.ctr = 0;
+    return res;
+  }
+  // generate the next region -- you pass in the capability for the
+  // region counter on `r, and you get out a key for the next_rgn<`r>
+  // as well as a counter for generating next_rgn<next_rgn<`r>> and
+  // so forth.  
+  static struct CounterRgn<next_rgn<`r>> next_key(rgn_ctr_t<`r> c; {}) {
+    struct Cyc_Scheme_CounterRgn cr;
+    cr.key = Cyc_Core_new_ukey().key;
+    cr.ctr = 0;
+    return cr;
+  }
+} export { new_ukey_and_counter, next_key }
+
+//////////////////////////////////////////////////////////////////////
+// Core lambda calculus interpreter
+//////////////////////////////////////////////////////////////////////
+// forward declarations
+struct Closure<`r::R>;
+datatype Object<`r::R>;
+struct Env<`r::R>;
+typedef struct Closure<`r> closure_t<`r>;
+typedef datatype Object<`r>*`r object_t<`r>;
+typedef datatype Exp@`H exp_t;
+typedef struct Env<`r>*`r env_t<`r>;
+// an environment has a next link and a sequence of values
+struct Env<`r> {
+  env_t<next_rgn<`r>> forward;
+  env_t<`r> next;
+  object_t<`r>?`r values;
+};
+
+// a closure has an environment object and some code
+struct Closure<`r> {
+  object_t<next_rgn<`r>> forward;
+  env_t<`r> env;
+  exp_t code;
+};
+
+// run-time objects
+datatype Object<`r> {
+  Int_v(int);
+  True_v;
+  False_v;
+  String_v(char ?`r);
+  Closure_v(closure_t<`r>);
+  Primop_v(object_t<`r> (@`H)<`r>(region_t<`r>,object_t<`r>?`r));
+  // pairs and vectors are created by calling cons and vector primops
+  Pair_v(object_t<next_rgn<`r>>,object_t<`r>,object_t<`r>);
+  Vector_v(object_t<next_rgn<`r>>,object_t<`r>?`r);
+};
+
+// expressions:
+// e ::= x | i | #t | #f | nil | <string> | primop | (e e1 ... en) | 
+//      (lambda (x1 ... xn) e) | (if e1 e2 e3) | (e1,e2) | #(e1 ... en) 
+datatype Exp {
+  Var_e(const char ?,unsigned int depth, unsigned int offset);  
+  Int_e(int);
+  True_e;
+  False_e;
+  Nil_e;
+  String_e(const char ?);
+  Primop_e(object_t<`r> (@`H)<`r>(region_t<`r>,object_t<`r>?`r));
+  Apply_e(exp_t?);
+  Lambda_e(const char??,exp_t);
+  If_e(exp_t, exp_t, exp_t);
+  Set_e(const char ?,unsigned int depth, unsigned int offset, exp_t);
+};
+
+// failure function
+static void fail(const char ?msg) __attribute__((noreturn)) {
+  fprintf(stderr,"Runtime Exception: %s", msg);
+  exit(1);
+}
+
+// copy a string
+static char ?`r copy_string(region_t<`r> r, const char ? s) {
+  return rnew(r) {for i < numelts(s) : s[i]};
+}
+
+// lookup variable in the environment
+object_t<`r> lookup(env_t<`r> env, unsigned int depth, unsigned int offset) {
+  for (; depth != 0; depth--) env = env->next;
+  let vs = env->values;
+  return vs[offset];
+}
+
+void setvar(env_t<`r> env, unsigned int depth, unsigned int offset, 
+            object_t<`r> v) {
+  for (; depth != 0; depth--) env = env->next;
+  let vs = env->values;
+  vs[offset] = v;
+}
+
+// stack frames:  correspond to Felleisen and Wright-style semantics
+// E ::= (v1 v2 ... vi-1 [] ei+1 ... en) | (if [] e2 e3) 
+// S ::= nil | E::S
+@tagged union Frame<`r> {
+  $(exp_t,exp_t) if_frame;     // if [] e2 e3
+  $(exp_t?,unsigned int,object_t<`r>?`r) apply_frame; //(v1 ... [] ei+1 ... en)
+  $(unsigned int depth, unsigned int offset) set_frame;
+};
+struct Stack<`r> {
+  struct Stack<`r>*`U next;
+  env_t<`r> env;
+  union Frame<`r> frame;
+};
+typedef struct Stack<`r>*`U stack_t<`r>;
+
+@tagged union Result<`r> {
+  object_t<`r> value;
+  exp_t        expr;
+};
+typedef union Result<`r> result_t<`r>;
+
+struct State<`r> {
+  stack_t<`r> stack;
+  env_t<`r>   env;
+  result_t<`r> result;
+};
+typedef struct State<`r> state_t<`r>;
+
+datatype exn { Finished(int) };
+
+// take one transition step in the operational semantics
+// inputs:  r is the region where everything is allocated
+//          stack is the current control-stack
+//          env should be a list of the values corresponding to the variables
+//          e is the expression to reduce or the last value reduced
+// outputs: updated stack, environment, and expression or value
+state_t<`r> step(region_t<`r> r, state_t<`r> arg) {
+  switch (arg.result) {
+    // we have an expression to evaluate -- if it's a value, return
+    // it immediately.  Otherwise, push a frame on the stack and start
+    // evaluating sub-expressions.
+  case {.expr = e}:
+    switch (e) {
+    case &Var_e(_,d,off): 
+      arg.result.value = lookup(arg.env,d,off);  // lookup the variable in the env
+      break;
+    case &Int_e(i):              // return the integer as an object
+      arg.result.value = rnew(r) Int_v(i);
+      break;
+    case &True_e:
+      arg.result.value = rnew(r) True_v;
+      break;
+    case &False_e:
+      arg.result.value = rnew(r) False_v;
+      break;
+    case &Nil_e:
+      arg.result.value = NULL;
+      break;
+    case &String_e(s):
+      arg.result.value = rnew(r) String_v(copy_string(r,s));
+      break;
+    case &Lambda_e(_,e):           // create a closure
+      arg.result.value = rnew(r) Closure_v(Closure{NULL,arg.env,e});
+      break;
+    case &Primop_e(p):           // push "p []" on stack and evaluate e
+      arg.result.value = rnew(r) Primop_v(p<>);
+      break;
+    case &Apply_e(es):        // push "[] e2" on stack and evaluate e1
+      object_t<`r>? vs = new {for i < numelts(es) : NULL};
+      arg.stack = unew Stack{arg.stack, arg.env,
+                             Frame{.apply_frame = $(es,0,vs)}};
+      arg.result.expr = es[0];
+      break;
+    case &If_e(e1,e2,e3):        // push "if [] e2 e3" on stack and evaluate e1
+      arg.stack = unew Stack{arg.stack, arg.env, Frame{.if_frame = $(e2,e3)}};
+      arg.result.expr = e1;
+      break;
+    case &Set_e(_,depth,offset,e):
+      arg.stack = unew Stack{arg.stack, arg.env, 
+                             Frame{.set_frame = $(depth,offset)}};
+      arg.result.expr = e;
+      break;
+    }
+    break;
+  case {.value = v}:
+    // we have a value to evaluate -- pop a frame from the stack, plug in
+    // the value into the hole, and continue as appropriate.
+    if (arg.stack == NULL) {
+      switch (v) {
+      case &Int_v(i): throw new Finished(i);
+      default: fail("answer is not an integer!");
+      }
+    }
+    let fr = arg.stack;
+    arg.env = fr->env;
+    arg.stack = fr->next;
+    switch (fr->frame) {
+      // if [] e2 e2: if v is #t evaluate e2, else if v is #f evaluate e3
+    case {.if_frame = $(e1,e2) }:  
+      switch (v) {
+      case &True_v:
+        arg.result.expr = e1;
+        break;
+      case &False_v: 
+        arg.result.expr = e2;
+        break;
+      default: fail("expecting boolean");
+      }
+      ufree(fr);
+      break;
+    case {.set_frame = $(depth,offset)}:
+      ufree(fr);
+      setvar(arg.env, depth, offset, v);
+      break;
+    // application
+    case {.apply_frame = $(es,off,vs)}:
+      vs[off] = v;
+      // see if we have more arguments to evaluate
+      if (off < numelts(es)) {
+        off = off + 1;
+        arg.result.expr = es[off];
+        fr->frame.apply_frame = $(es,off,vs);
+        fr->next = arg.stack;
+        arg.stack = fr;
+      } else {
+        let f = vs[0];
+        let args = vs+1;
+        ufree(fr);
+        switch (f) {
+        case &Primop_v(p): 
+          arg.result.value = p(r,args);
+          break;
+        case &Closure_v(Closure{_,clos_env,body}):
+          arg.env = rnew(r) Env{NULL,clos_env,args};
+          arg.result.expr = body;
+          break;
+        default:
+          fail("expecting primop or closure");
+        }
+      }
+      break;
+    }
+    break;
+  }
+  return arg;
+}
+
+
+// forward declaration
+env_t<next_rgn<`r>> copy_env(region_t<next_rgn<`r>> r2, env_t<`r> ;
+                             {`r,next_rgn<`r>});
+
+// forward an object from `r to next_rgn<`r>, given a handle for
+// next_rgn<`r>.  We have to put in an explicit capability since
+// I haven't hacked Cyclone to recognize that it should assume
+// all types of region kind should be assumed in the capability.
+// (In fact, I had to change the parser to get this to go through,
+// but the type-checker worked just fine!  So it's just the default
+// effect calculation that needs to be fixed.)
+//
+// This works by creating the object in the to-space (but setting all
+// of its fields to NULL), setting the forwarding pointer to point
+// to the new object, then forwarding all of the fields, and
+// finally plugging their forwarded values into the new copy of
+// the object.  So, we're doing a depth-first traversal.  Doing
+// a breadth first traversal seems much harder, since we need to
+// be in an intermediate state where the to-space objects have
+// pointers to from-space objects.  We could accomplish this with
+// an explicit queue of some sort, and by pulling the same trick
+// that I do here (don't initialize the value in to-space until
+// its fields have been forwarded.)  
+object_t<next_rgn<`r>> forward(region_t<next_rgn<`r>> r2, object_t<`r> v ;
+                               {`r,next_rgn<`r>}) {
+  switch (v) {
+  case NULL: return NULL;
+  case &Int_v(i): return rnew(r2) Int_v(i);
+  case &True_v: return rnew(r2) True_v;
+  case &False_v: return rnew(r2) False_v;
+  case &String_v(s): return rnew(r2) String_v(copy_string(r2,s));
+  case &Primop_v(p): return rnew(r2) Primop_v(p<>);
+  case &Pair_v(*f,v1,v2):
+    if (*f != NULL) return *f;
+    let new_v = rnew(r2) Pair_v(NULL,NULL,NULL);
+    *f = new_v;
+    let new_v1 = forward(r2,v1);
+    let new_v2 = forward(r2,v2);
+    switch (new_v) {
+    case &Pair_v(_,*v1p,*v2p): *v1p = new_v1; *v2p = new_v2; break;
+    default: break; // impossible
+    }
+    return new_v;
+  case &Closure_v(Closure{*f,env,e}):
+    if (*f != NULL) return *f;
+    let new_v = rnew(r2) Closure_v(Closure{NULL,NULL,e});
+    *f = new_v;
+    let new_env = copy_env(r2,env);
+    switch (new_v) {
+    case &Closure_v(Closure{_,*envp,_}): *envp = new_env; break;
+    default: break; // impossible
+    }
+    return new_v;
+  case &Vector_v(*f,vs):
+    if (*f != NULL) return *f;
+    unsigned n = numelts(vs);
+    let new_vs = rnew(r2) {for i < n : NULL};
+    let new_v = rnew(r2) Vector_v(NULL,new_vs);
+    for (unsigned i = 0; i < n; i++) 
+      new_vs[i] = forward(r2,vs[i]);
+    return new_v;
+  }
+}
+
+// forward an environment
+env_t<next_rgn<`r>> copy_env(region_t<next_rgn<`r>> r2, env_t<`r> env;
+                             {`r,next_rgn<`r>}) {
+  if (env == NULL) return NULL;
+  if (env->forward != NULL) return env->forward;
+  unsigned n = numelts(env->values);
+  let new_values = rnew(r2) {for i < n : NULL};
+  let new_env = rnew(r2) Env{NULL,NULL,new_values};
+  env->forward = new_env;
+  new_env->next = copy_env(r2,env->next);
+  for (unsigned i = 0; i < n; i++) 
+    new_values[i] = forward(r2,env->values[i]);
+  return new_env;
+}
+
+// copy the stack and anything reachable from it from `r to next_rgn<`r>
+// This destroys the old stack.
+stack_t<next_rgn<`r>> copy_roots(region_t<next_rgn<`r>> r2, stack_t<`r> s ;
+                                 {`r,next_rgn<`r>}) {
+  if (s == NULL) return NULL;
+  stack_t<next_rgn<`r>> frame2;
+  stack_t<next_rgn<`r>> next2 = copy_roots(r2, s->next);
+  env_t<next_rgn<`r>> env2 = copy_env(r2,s->env);
+  switch (s->frame) {
+  case {.if_frame = $(e1,e2)}: 
+    frame2 = unew Stack{next2, env2, Frame{.if_frame = $(e1,e2)}};
+    break;
+  case {.apply_frame = $(es,i,vs)}:
+    let new_vs = rnew(r2) {for i < numelts(vs) : forward(r2,vs[i])};
+    frame2 = unew Stack{next2, env2, Frame{.apply_frame = $(es,i,new_vs)}};
+    break;
+  case {.set_frame = $(d,off)}:
+    frame2 = unew Stack{next2, env2, Frame{.set_frame = $(d,off)}};
+    break;
+  }
+  ufree(s);
+  return frame2;
+}
+
+// the machine state has an (abstracted) region, a key for accessing
+// the region, a counter (for generating the next region), and a
+// stack. 
+struct MachineState {
+  <`r>
+  ukey_t<`r>    key;
+  rgn_ctr_t<`r> counter;
+  state_t<`r>   state;
+};
+
+// have to box it since alas, my_open_region must return a boxed type.
+// we can fix this by baking open_region into the language instead
+// of treating it as a h.o. function.
+typedef struct MachineState@`U mach_state_t;
+
+// given a machine state, produce a new one that is isomorphic
+// except that it drops all unreachable objects, and destroy the 
+// old machine state.
+struct MachineState gc(struct MachineState ms) {
+  let MachineState{<`r> key, counter, state} = ms;
+  // generate the to-space from the old-space's counter
+  let CounterRgn{new_key, new_counter} = next_key(counter);
+  // open the old-space's key
+  { region r = open(key);
+    // open the to-space's key
+    { region r2 = open(new_key);
+      // copy the stack
+      let new_stack = copy_roots(r2,state.stack);
+      // copy the environment
+      let new_env = copy_env(r2, state.env);
+      // copy the result
+      result_t<next_rgn<`r>> new_result;
+      switch (state.result) {
+      case {.expr = e}: new_result = Result{.expr = e}; break;
+      case {.value = v}: 
+        new_result = Result{.value = forward(r2,v)};
+        break;
+      }
+      // package up the new key, new counter, and new stack as the
+      // resulting machine state.
+      let new_state = State{new_stack, new_env, new_result};
+      ms = MachineState{new_key, new_counter, new_state};
+    }
+  }
+  free_ukey(key); // free the old space
+  return ms;     // return the new machine state
+}
+
+// cdr primop (tail)
+object_t<`r> cdr(region_t<`r> r, object_t<`r>?`r p) {
+  switch (p[0]) {
+  case &Pair_v(_,v1,v2): return v2;
+  default: fail("expected pair but found other");
+  }
+}
+
+// car primop (head)
+object_t<`r> car(region_t<`r> r, object_t<`r>?`r p) {
+  switch (p[0]) {
+  case &Pair_v(_,v1,v2): return v1;
+  default: fail("expected pair but found other");
+  }
+}
+
+// setcar primop (set head)
+object_t<`r> setcar(region_t<`r> r, object_t<`r>?`r p) {
+  switch (p[0]) {
+  case &Pair_v(_,*v1,_): *v1 = p[1]; return *v1;
+  default: fail("expected pair but found other");
+  }
+}
+
+// setcdr primop (set tail)
+object_t<`r> setcdr(region_t<`r> r, object_t<`r>?`r p) {
+  switch (p[0]) {
+  case &Pair_v(_,_,*v2): *v2 = p[1]; return *v2;
+  default: fail("expected pair but found other");
+  }
+}
+
+// + primop (sums all arguments)
+object_t<`r> plus(region_t<`r> r, object_t<`r>?`r p) {
+  int sum = 0;
+  unsigned n = numelts(p);
+  for (unsigned i = 0; i < numelts(p); i++)
+    switch (p[i]) {
+    case &Int_v(x): sum += x; break;
+    default: fail("expected number");
+    }
+  return rnew(r) Int_v(sum);
+}
+
+// * primop
+object_t<`r> times(region_t<`r> r, object_t<`r>?`r p) {
+  int prod = 0;
+  unsigned n = numelts(p);
+  for (unsigned i = 0; i < numelts(p); i++)
+    switch (p[i]) {
+    case &Int_v(x): prod *= x; break;
+    default: fail("expected number");
+    }
+  return rnew(r) Int_v(prod);
+}
+
+env_t<`r> initial_env(region_t<`r> r) {
+  return NULL;
+}
+
+// construct the initial machine state with a fresh dynamic region,
+// it's key, it's counter (for generating the next region), an
+// empty stack, an empty environment, and a result expression to be
+// evaluated.
+struct MachineState init_state(exp_t e) {
+  let NewCounterRgn {<`r> CounterRgn{key, ctr}} = new_ukey_and_counter();
+  env_t<`r> env;
+  { region r = open(key);
+    env = initial_env(r);
+  }
+  return MachineState{key, ctr, State{NULL, env, {.expr = e}}};
+}
+
+// how many steps we take before performing a GC
+#define GC_STEP 10
+
+// the main loop of the interpreter -- run for GC_STEP steps
+// doing one reduction per step.  The steps update the stack,
+// environment, and expression to be evaluated.
+state_t<`r> trampoline(region_t<`r> r,state_t<`r> state) {
+  for (int i = 0; i < GC_STEP; i++) {
+    state = step(r, state);
+  }
+  return state;
+}
+                                                
+
+// the toplevel -- creates an initial abstract machine state,
+// and then enters a loop which does the trampoline followed
+// by a gc.  
+int toplevel(exp_t e) {
+  struct MachineState ms = init_state(e);
+  try {
+    while (true) {
+      let MachineState{<`r> key, counter, state} = ms;
+      { region r = open(key);
+        state = trampoline(r, state);
+        ms = MachineState{key,counter,state};
+        ms = gc(ms);
+      }
+    }
+  } catch {
+  case &Finished(i): printf("The result is %d\n",i); return i;
+  }
+}
+
+// map a string variable to its debruijn depth and offset, given
+// an environment that has all of the bound variables in it.
+$(unsigned depth,unsigned offset) static_map(list_t<const char ?`H?`H@`r,`r> env,
+                                             const char ?`H x) {
+  unsigned d = 0;
+  unsigned off;
+  while (env != NULL) {
+    let args = *env->hd;
+    for (off = 0; off < numelts(args); off++) 
+      if (strcmp(x,args[off]) == 0) return $(d,off);
+    env = env->tl;
+    d++;
+  }
+  fail(aprintf("unbound variable %s",x));
+}
+
+// add debruijn indices in to all variables
+void debruijn(region_t<`r> r,list_t<const char?`H?`H@`r,`r> d, exp_t e) {
+  switch (e) {
+  case &Var_e(s,*depth,*offset):
+    let $(dep,off) = static_map(d,s);
+    *depth = dep;
+    *offset = off;
+    break;
+  case &Int_e(_):
+  case &True_e:
+  case &False_e:
+  case &Nil_e: 
+  case &String_e(_): 
+  case &Primop_e(_): break;
+  case &Apply_e(es):
+    for (unsigned i = 0; i < numelts(es); i++) debruijn(r,d,es[i]);
+    break;
+  case &Lambda_e(args,body):
+    debruijn(r, rnew(r) List{rnew(r) args,d}, body);
+    break;
+  case &If_e(e1,e2,e3):
+    debruijn(r,d,e1); debruijn(r,d,e2); debruijn(r,d,e3); 
+    break;
+  case &Set_e(s,*depth,*offset,e):
+    let $(dep,off) = static_map(d,s);
+    *depth = dep;
+    *offset = off;
+    debruijn(r,d,e);
+    break;
+  }
+}
