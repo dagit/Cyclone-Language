@@ -84,21 +84,21 @@ rule token "$(int,comment_t)*" = parse
          "%%HEVEA \\end{latexonly}\n"
          "%%HEVEA \\begin{rawhtml}<dl><dt>"
          "<table><tr><td bgcolor=\"c0d0ff\">\\end{rawhtml}\n"
-         "\\begin{tabbing}\n");
+         "\\begin{tabbing}");
   }
   static void dump_middle() {
     puts("\\end{tabbing}\n"
          "%%HEVEA \\begin{latexonly}\n"
          "\\end{minipage}}\\\\\\strut\n"
          "%%HEVEA \\end{latexonly}\n"
-         "%%HEVEA \\begin{rawhtml}</td></tr></table><dd>\\end{rawhtml}\n");
+         "%%HEVEA \\begin{rawhtml}</td></tr></table><dd>\\end{rawhtml}");
   }
   static void dump_end() {
     /* MUST START LINE */
     puts("%%HEVEA \\begin{latexonly}\n"
          "\\end{list}\\smallskip\n"
          "%%HEVEA \\end{latexonly}\n"
-         "%%HEVEA \\begin{rawhtml}</dl>\\end{rawhtml}\n");
+         "%%HEVEA \\begin{rawhtml}</dl>\\end{rawhtml}");
   }
 
   /* Print s, replacing "..[..].." with "..\texttt{..}.."

@@ -709,12 +709,12 @@ int tag;struct Cyc_Absyn_Stmt*f1;};struct Cyc_Tcenv_Outermost_struct{int tag;voi
 };struct Cyc_Tcenv_Frame_struct{int tag;void*f1;void*f2;};struct Cyc_Tcenv_Hidden_struct{
 int tag;void*f1;void*f2;};struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Dict_Dict*
 ae;struct Cyc_Core_Opt*le;};static void Cyc_dump_begin(){Cyc_Std_puts(({const char*
-_tmp10="%%HEVEA \\begin{latexonly}\n\\begin{list}{}{\\setlength\\itemsep{0pt}\\setlength\\topsep{0pt}\\setlength\\leftmargin{\\parindent}\\setlength\\itemindent{-\\leftmargin}}\\item[]\\colorbox{cycdochighlight}{\\ttfamily\\begin{minipage}[b]{\\textwidth}\n%%HEVEA \\end{latexonly}\n%%HEVEA \\begin{rawhtml}<dl><dt><table><tr><td bgcolor=\"c0d0ff\">\\end{rawhtml}\n\\begin{tabbing}\n";
-_tag_arr(_tmp10,sizeof(char),_get_zero_arr_size(_tmp10,348));}));}static void Cyc_dump_middle(){
-Cyc_Std_puts(({const char*_tmp11="\\end{tabbing}\n%%HEVEA \\begin{latexonly}\n\\end{minipage}}\\\\\\strut\n%%HEVEA \\end{latexonly}\n%%HEVEA \\begin{rawhtml}</td></tr></table><dd>\\end{rawhtml}\n";
-_tag_arr(_tmp11,sizeof(char),_get_zero_arr_size(_tmp11,148));}));}static void Cyc_dump_end(){
-Cyc_Std_puts(({const char*_tmp12="%%HEVEA \\begin{latexonly}\n\\end{list}\\smallskip\n%%HEVEA \\end{latexonly}\n%%HEVEA \\begin{rawhtml}</dl>\\end{rawhtml}\n";
-_tag_arr(_tmp12,sizeof(char),_get_zero_arr_size(_tmp12,114));}));}static void Cyc_pr_comment(
+_tmp10="%%HEVEA \\begin{latexonly}\n\\begin{list}{}{\\setlength\\itemsep{0pt}\\setlength\\topsep{0pt}\\setlength\\leftmargin{\\parindent}\\setlength\\itemindent{-\\leftmargin}}\\item[]\\colorbox{cycdochighlight}{\\ttfamily\\begin{minipage}[b]{\\textwidth}\n%%HEVEA \\end{latexonly}\n%%HEVEA \\begin{rawhtml}<dl><dt><table><tr><td bgcolor=\"c0d0ff\">\\end{rawhtml}\n\\begin{tabbing}";
+_tag_arr(_tmp10,sizeof(char),_get_zero_arr_size(_tmp10,347));}));}static void Cyc_dump_middle(){
+Cyc_Std_puts(({const char*_tmp11="\\end{tabbing}\n%%HEVEA \\begin{latexonly}\n\\end{minipage}}\\\\\\strut\n%%HEVEA \\end{latexonly}\n%%HEVEA \\begin{rawhtml}</td></tr></table><dd>\\end{rawhtml}";
+_tag_arr(_tmp11,sizeof(char),_get_zero_arr_size(_tmp11,147));}));}static void Cyc_dump_end(){
+Cyc_Std_puts(({const char*_tmp12="%%HEVEA \\begin{latexonly}\n\\end{list}\\smallskip\n%%HEVEA \\end{latexonly}\n%%HEVEA \\begin{rawhtml}</dl>\\end{rawhtml}";
+_tag_arr(_tmp12,sizeof(char),_get_zero_arr_size(_tmp12,113));}));}static void Cyc_pr_comment(
 struct Cyc_Std___cycFILE*outf,struct _tagged_arr s){int depth=0;int len=(int)Cyc_Std_strlen(
 s);int i=0;for(0;i < len;i ++){char c=*((const char*)_check_unknown_subscript(s,
 sizeof(char),i));if(c != '['){Cyc_Std_fputc((int)c,outf);continue;}Cyc_Std_fputs(({
