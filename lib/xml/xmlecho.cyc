@@ -14,10 +14,9 @@ void doit(string file) {
   Stdio::fclose(fd);
 }
 
-int main() {
-  string ?arg = Core::std_args();
-  arg++; // skip the name of the executable
-  for (int n = arg.size; n > 0; n--,arg++)
-    doit(*arg);
+int main(int argc, string ? argv) {
+  argv++; // skip the name of the executable
+  for (int n = argv.size; n > 0; n--,argv++)
+    doit(*argv);
   return 0;
 }

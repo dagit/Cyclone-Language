@@ -119,17 +119,6 @@ struct _tagged_string Cstring_to_string(Cstring s) {
   return str;
 }
 
-char *Cyc_new_string(char *s) {
-  char *n = GC_malloc_atomic(strlen(s));
-  char *t = n;
-  while (*s) {
-    *t = *s;
-    t++;
-    s++;
-  };
-  return n;
-}
-
 Cstring string_to_Cstring(string s) {
   int i;
   char *contents = s.curr;
@@ -223,45 +212,20 @@ int f_close(FILE *fd) {
 
 #include <stdio.h>
 
-FILE *Cyc_Stdio_stdin = NULL;
-FILE *Cyc_Stdio_stdout = NULL;
-FILE *Cyc_Stdio_stderr = NULL;
+FILE *Cyc_Stdio_stdin; 
+FILE *Cyc_Stdio_stdout;
+FILE *Cyc_Stdio_stderr;
 
-void init_stdlib_io() {
-  Cyc_Stdio_stdin = stdin;
-  Cyc_Stdio_stdout = stdout;
-  Cyc_Stdio_stderr = stderr;
-}
+// argc is redundant
+struct _tagged_argv { 
+  struct _tagged_string *curr;
+  struct _tagged_string *base;
+  struct _tagged_string *last_plus_one;
+};
+extern int Cyc_main(int argc, struct _tagged_argv argv); 
 
-
-// To be used in core.cyc only
-int cyc_argc;
-static char **cyc_argv;
-
-static int current_argc;
-static char **current_argv;
-
-void start_args() {
-  current_argc = cyc_argc;
-  current_argv = cyc_argv;
-}
-
-struct _tagged_string next_arg() {
-  struct _tagged_string arg;
-  if (current_argc <= 0) {
-    fprintf(stderr,"next_arg called when there is no next arg\n");
-    exit(1);
-  }
-  arg = Cstring_to_string(*current_argv);
-  current_argv++;
-  current_argc--;
-  return arg;
-}
-
-extern int Cyc_main(void);
-
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
+  // install outermost exception handler
   struct _handler_cons top_handler;
   int status = setjmp(top_handler.handler);
   _push_handler(&top_handler);
@@ -269,8 +233,19 @@ int main(int argc, char **argv)
     fprintf(stderr,"Uncaught exception %s\n",((exn)status)->tag);
     return 1;
   }
-  init_stdlib_io();
-  cyc_argc = argc;
-  cyc_argv = argv;
-  return Cyc_main();
+  // set standard file descriptors
+  Cyc_Stdio_stdin  = stdin;
+  Cyc_Stdio_stdout = stdout;
+  Cyc_Stdio_stderr = stderr;
+  // convert command-line args to Cyclone strings
+  {struct _tagged_argv args;
+  int i;
+  args.base = 
+    (struct _tagged_string *)GC_malloc(argc*sizeof(struct _tagged_string));
+  args.curr = args.base;
+  args.last_plus_one = args.base + argc;
+  for(i = 0; i < argc; ++i)
+    args.curr[i] = Cstring_to_string(argv[i]);
+  return Cyc_main(argc, args);
+  }
 }

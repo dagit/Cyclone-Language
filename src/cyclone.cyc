@@ -226,7 +226,7 @@ void compile_file(string filename) {
   return;
 }
 
-int main() {
+int main(int argc, string ? argv) {
   $(string,spec_t,string) specs[15] = 
     {$("-nocyc",new Clear_spec(add_cyc_namespace),
        "does not add implicit namespace Cyc"),
@@ -275,7 +275,7 @@ int main() {
   let l15 = List(&specs[14],&l14);
   let options = &l15;
 		 
-  Arg::parse(options, compile_file, "Options:");
+  Arg::parse(options, compile_file, "Options:", argv);
 
   return compile_failure ? 1 : 0;
 }

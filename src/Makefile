@@ -23,8 +23,7 @@ CFLAGS:=-fwritable-strings -I..
 CYC_SRCS:=$(addsuffix .cyc, $(CYCLONE_SRCS))
 
 #CYC_FLAGS:=-I ../lib -tc -toc -pp
-CYC_FLAGS:=-I ../lib -tc -toc -up
-
+CYC_FLAGS:=-I ../lib -tc -toc -up #-check_null
 LIB:=../lib/$(OUT_PREFIX)$(CYCLIB)
 
 all: $(OUT_PREFIX)$(CYCCOMP)

@@ -1124,6 +1124,12 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Const_e(Null_c):
     switch (compress(old_typ)) {
     case &PointerType(PtrInfo{elt,_,_,_,b}):
+      
+      if(b->v == No_constr) { // eg. int z = null;
+	// null -> 0  -- this is okay according to C's rules!
+	e->r = signed_int_exp(0,DL)->r;
+	break;
+      }
       switch (conref_val(b)) {
       case Unknown_b:
 	let zero = new $(null,signed_int_exp(0,DL));
@@ -1619,6 +1625,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &StructArrow_e(e1,f):
     exp_to_c(nv, e1);
+    bool is_poly = is_poly_project(e); // decide before mutating e
     if (is_nullable(e1->topt->v)) {
       // {(t x=e1; if (x == null) throw(NullPointer); x->f;)}
       qvar_t x  = temp_var();
@@ -1629,9 +1636,9 @@ static void exp_to_c(env_t nv, exp_t e) {
       stmt_t s2 = exp_stmt(structarrow_exp(var_exp(x,DL),f,DL),DL);
       stmt_t s3 = seq_stmt(s1,s2,DL);
       e->r = stmt_exp(declare_stmt(x,tx,e1,s3,DL),DL)->r;
-    } else if(is_poly_project(e)) {
-      e->r = array_to_ptr_cast(typ_to_c(e->topt->v),new_exp(e->r,DL),DL)->r;
     }
+    if(is_poly)
+      e->r = array_to_ptr_cast(typ_to_c(e->topt->v),new_exp(e->r,DL),DL)->r;
     break;
   case &Subscript_e(e1,e2):
     let e1_typ = compress(e1->topt->v);
@@ -1641,7 +1648,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     // note:  casts to array types t[] or t[3] should be casts to pointer
     // types *t
     e1->r = array_to_ptr(typ_to_c(e1_typ),new_exp(e1->r,DL),DL)->r;
-    // e1 could be a tuple, pointer to tuple, or an array of various sorts
+    // e1 could be a tuple or an array of various sorts
     switch (e1_typ) {
     case &TupleType(ts):
       // e1->fi  where i = e2+1

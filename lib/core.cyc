@@ -7,12 +7,6 @@
 //                                                                        //
 ////////////////////////////////////////////////////////////////////////////
 
-// These are supplied by C; they do not appear in core.h, we want them
-// to be used only from the functions in this file.
-
-extern "C" int    cyc_argc;
-extern "C" void   start_args();
-extern "C" string next_arg();
 namespace String {
 extern string strconcat(string,string);
 }
@@ -22,33 +16,6 @@ namespace Core;
 
 xtunion exn { InvalidArg(string) };
 xtunion exn { SysError(int) };
-
-/* Popcorn version of fgets; returns the # of chars read */
-/*
-int file_gets(string buf,int ofs,FILE @f) {
-  int i, len = buf.size, retc;
-  if (ofs < 0 || ofs >= len)
-    throw InvalidArg("file_gets");
-  // built on f_string_read; pretty inefficient but oh well 
-  for (i = ofs; i<len; i++) {
-    retc = f_string_read(f,buf,i,1);
-    if (retc   !=   1 || // assume EOF 
-	buf[i] == '\n') { // end-of-line 
-      buf[i] = '\000';
-      break;
-    }
-  }
-  return i-ofs;
-}
-*/
-
-string ?std_args() {
-  string ?args = new { for i < cyc_argc : "" };
-  start_args();
-  for (int i = 0; i < cyc_argc; i++)
-    args[i] = next_arg();
-  return args;
-}
 
 /////////////////////////////Generally Useful Things//////////////
 xtunion exn { Failure(string) };

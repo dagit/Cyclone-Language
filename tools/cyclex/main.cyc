@@ -13,16 +13,14 @@
 using Core;
 using Stdio;
 
-int main() {
-  string ?argv = std_args();
-  int    arglen  = argv.size;
-  if(arglen < 2 || arglen > 3) {
+int main(int argc, string ? argv) {
+  if(argc < 2 || argc > 3) {
     fprintf(stderr, "Usage: cycocamllex <input file> [<output file>]");
     return 1;
   }
   string source_name = argv[1];
   string dest_name;
-  if(arglen==3)
+  if(argc==3)
     dest_name = argv[2];
   else if (Filename::check_suffix(source_name,(string)".cyl"))
     dest_name = String::strconcat(Filename::chop_extension(source_name),

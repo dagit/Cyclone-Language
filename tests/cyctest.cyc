@@ -842,11 +842,10 @@ void r_foo(string s) {
 void a_foo(string s) {
   printf("Anon %s\n",s);
 }
-void arg_test() {
+void arg_test(string ? args) {
   // NOTE, TO TEST IT GIVE IT SOME ARGS!
   test_begin("Arg");
 
-  let args = Core::std_args();
   if (args.size<=0) fail();
   else if (args.size==1) ok();
   else {
@@ -859,7 +858,8 @@ void arg_test() {
     let r = new $((string)"-r",(spec_t)(new Rest_spec(r_foo)),(string)"rest");
     parse(new List(u,new List(s,new List(c,new List(i,new List(r,null))))),
           a_foo,
-          "Usage:");
+          "Usage:",
+	  args);
     printf("u_foo_foo=%d, "
            "s_foo=%s, "
            "c_foo=%s, "
@@ -1016,7 +1016,7 @@ using Errno {
   }
 }
 
-int main() {
+int main(int argc, string ? args) {
   printf("*************** CYCLONE TEST SUITE ***************\n\n");
 
   printf("EXCEPTIONS:\n");
@@ -1055,7 +1055,7 @@ int main() {
   fn_test();
   pp_test();
   id_test();
-  arg_test();
+  arg_test(args);
   printf_test();
   att_test();
   // scanf_test(); // commented out because sscanf is insecure

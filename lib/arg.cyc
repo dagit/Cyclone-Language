@@ -88,8 +88,9 @@ static void stop(int prog_pos, tunion error e,
 
 void parse(glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist, 
            void anonfun(string),
-	   string errmsg) {
-  args = std_args();
+	   string errmsg,
+	   string ? orig_args) {
+  args = orig_args;
 
   int initpos = current;
   int l       = args.size;

@@ -10,7 +10,7 @@ CYCLEX=$(CYCDIR)/bin/cyclex.exe
 
 CFLAGS= -fwritable-strings -I$(CYCDIR)
 
-CYC_FLAGS=-I $(CYCDIR)/lib -tc -toc -pp
+CYC_FLAGS=-I $(CYCDIR)/lib -tc -toc -pp #-check_null
 
 LIB=$(CYCDIR)/bin/cyclib.a
 

@@ -21,7 +21,7 @@ CYC_LIBS:=$(addsuffix .cyc, $(CYCLONE_LIBS))
 CYC_FLAGS_PP := -tc -toc -pp
 
 #CYC_FLAGS:= -tc -toc -pp
-CYC_FLAGS:= -tc -toc -up
+CYC_FLAGS:= -tc -toc -up #-check_null
 
 all: $(OUT_PREFIX)$(CYCLIB) xml/libxml.a
 

@@ -1,9 +1,10 @@
 #include "cyc_include.h"
 
- typedef unsigned int Cyc_uint; typedef char* Cyc_Cstring; typedef struct
-_tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
-struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void* exit(
-int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef struct Cyc_Core_Opt*
+ typedef int Cyc___int32_t; typedef unsigned int Cyc___uint32_t; typedef
+unsigned int Cyc_uint; typedef char* Cyc_Cstring; typedef struct _tagged_string
+Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef struct
+_tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void* exit( int);
+extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef struct Cyc_Core_Opt*
 Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg_tag[ 11u]; struct Cyc_Core_InvalidArg_struct{
 char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Failure_tag[ 8u];
 struct Cyc_Core_Failure_struct{ char* tag; struct _tagged_string f1; } ; extern

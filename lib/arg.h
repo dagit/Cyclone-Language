@@ -25,7 +25,7 @@ extern void usage (List::glist_t<$(string,gspec_t<`e>,string)@`r1,`r2>,string);
 extern int current;
 
 extern void parse(List::glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> specs, 
-		  void anonfun(string), string errmsg);
+		  void anonfun(string), string errmsg, string ? args);
 
 }
 

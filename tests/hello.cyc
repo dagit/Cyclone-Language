@@ -4,11 +4,9 @@
 using Core;
 using Stdio;
 
-int main() {
+int main(int argc, string ? args) {
   // Get the command line arguments as an array of strings.
   // The first string is the name of the program.
-  string ?args = std_args();  
-
   if (args.size <= 1) 
     throw new Failure("missing name!");
   else
