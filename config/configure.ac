@@ -94,12 +94,38 @@ AC_SUBST(TARGET_RANLIB)
 AC_SUBST(TARGET_CFLAGS)
 AC_SUBST(TARGET_LDFLAGS)
 
-# Cyclone assumes sizeof(int) == sizeof(void *)
+# Cyclone makes some assumptions about the size of types.
+# We believe the genfiles will not build a proper compiler if the
+# assumptions are violated, so we check for this at configure time.
 # FIX: we should check for target too??
+AC_CHECK_SIZEOF(char)
+if [[ "$ac_cv_sizeof_char" != 1 ]]; then
+  echo "ERROR: cannot build because sizeof(char) == $ac_cv_sizeof_char != 1"
+  exit
+fi
+AC_CHECK_SIZEOF(short)
+if [[ "$ac_cv_sizeof_short" != 2 ]]; then
+  echo "ERROR: cannot build because sizeof(short) == $ac_cv_sizeof_short != 2"
+  exit
+fi
 AC_CHECK_SIZEOF(int)
+if [[ "$ac_cv_sizeof_int" != 4 ]]; then
+  echo "ERROR: cannot build because sizeof(int) == $ac_cv_sizeof_int != 4"
+  exit
+fi
+AC_CHECK_SIZEOF(long)
+if [[ "$ac_cv_sizeof_long" != 4 ]]; then
+  echo "ERROR: cannot build because sizeof(long) == $ac_cv_sizeof_long != 4"
+  exit
+fi
+AC_CHECK_SIZEOF(long long)
+if [[ "$ac_cv_sizeof_long_long" != 8 ]]; then
+  echo "ERROR: cannot build because sizeof(long long) == $ac_cv_sizeof_long_long != 8"
+  exit
+fi
 AC_CHECK_SIZEOF(void *)
-if [[ "$ac_cv_sizeof_int" != "$ac_cv_sizeof_void_p" ]]; then
-  echo "ERROR: cannot build because sizeof(int) == $ac_cv_sizeof_int != sizeof(void *) == $ac_cv_sizeof_void_p"
+if [[ "$ac_cv_sizeof_void_p" != 4 ]]; then
+  echo "ERROR: cannot build because sizeof(void *) == $ac_cv_sizeof_void_p != 4"
   exit
 fi
 
