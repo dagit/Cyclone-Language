@@ -417,8 +417,8 @@ flow_t join_flow(place_set_t* all_changed, flow_t f1, flow_t f2){
     if(flow_lessthan_approx(f1,f2)) return f2;
     if(flow_lessthan_approx(f2,f1)) return f1;
     region rgn {
-      struct JoinEnv<`rgn> env     = JoinEnv(rnew(rgn) EscPile(rgn,NULL),d1,d2);
-      flowdict_t           outdict = Dict::intersect_c(join_absRval,&env,d1,d2);
+      let env     = JoinEnv(rnew(rgn) EscPile(rgn,NULL),d1,d2);
+      let outdict = Dict::intersect_c(join_absRval,&env,d1,d2);
       return new ReachableFL(escape_these(env.pile, all_changed, outdict));
     }
   }

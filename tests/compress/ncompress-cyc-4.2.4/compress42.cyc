@@ -1340,6 +1340,7 @@ compdir(dir)
  * file size for noticeable speed improvement on small files.  Please direct
  * questions about this implementation to ames!jaw.
  */
+
 void
 compress(fdin, fdout)
   int		fdin;
@@ -1369,7 +1370,6 @@ int		fdout;
       unsigned short	ent;
     } e;
   } fcode;
-
   ratio = 0;
   checkpoint = CHECK_GAP;
   extcode = MAXCODE(n_bits = INIT_BITS)+1;
@@ -1613,7 +1613,7 @@ int		fdout;
   REG13	code_int		 maxcode;
   REG14	code_int		 maxmaxcode;
   REG15	int				 n_bits;
-  REG16	int				 rsize;
+  REG16	int				 rsize=0;
 
   bytes_in = 0;
   bytes_out = 0;

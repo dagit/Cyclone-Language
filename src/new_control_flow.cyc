@@ -25,9 +25,10 @@
 
 // TO DO: Exploit @ types to know NotZero!
 
-// KLUDGE: For unions, we just merge all fields, so you can read
-// longer after writing shorter, but because they're bits, safety is
-// not compromised.
+// TO DO: Exploit noreturn attribute to know BottomFL
+
+// KLUDGE: For unions, we just pretend its initialized.  Since they're bits,
+// safety is not compromised.
 
 // The previous pass (type-checking) sets up:
 // * decorating all stmts with their correct non_local_preds
@@ -461,8 +462,8 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
   case &StructMember_e(e1,field):
     let $(f,r) = anal_Rexp(env,inflow,e1);
     switch(Tcutil::compress(e1->topt->v)) {
-    case &AnonUnionType(_):
-    case &UnionType(_,_,_): return $(f,r); // just drop the field
+    case &AnonUnionType(_): 
+    case &UnionType(_,_,_): return $(f,typ_to_absrval(e->topt->v,unknown_all)); 
     default: break;
     }
     switch(r) {
@@ -698,10 +699,11 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
     }
     return anal_derefL(env,inflow,f,e1,rvals->hd,flds);
 
+    // KLUDGE: unions (see comment at top of file)
   case &StructMember_e(e1,fld): 
     switch(Tcutil::compress(e1->topt->v)) {
-    case &AnonUnionType(_): // just drop the field
-    case &UnionType(_,_,_): break;
+    case &AnonUnionType(_): 
+    case &UnionType(_,_,_): return $(inflow,UnknownL);
     default: flds = new List(fld,flds);
     }
     return anal_Lexp_rec(env,inflow,e1,flds); 
@@ -950,7 +952,6 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s) {
                                       " or unimplemented stmt form");
   }
 }
-
 
 static flow_t anal_decl(analenv_t env, flow_t inflow, decl_t decl) {
   switch(decl->r) {
