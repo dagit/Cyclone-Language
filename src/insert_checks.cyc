@@ -356,11 +356,11 @@ static void do_exp(env_t nv, exp_t e) {
       bool bds_ck_vcgen;
       if (nv.vcgen_r){
 	bds_ck_vcgen = need_bounds_check_vcgen(nv, e1);
-	if (bds_ck_vcgen != bds_ck){
-	  fprintf(stderr, "exp: %s[%s]  reln: %s  vcgen: %s\n", Absynpp::exp2string(e1), 
-		  Absynpp::exp2string(e2), bds_ck?"true":"false", 
-		  bds_ck_vcgen?"true":"false");
-	}
+	//	if (bds_ck_vcgen != bds_ck){
+	//	  fprintf(stderr, "exp: %s[%s]  reln: %s  vcgen: %s\n", Absynpp::exp2string(e1), 
+	//		  Absynpp::exp2string(e2), bds_ck?"true":"false", 
+	//		  bds_ck_vcgen?"true":"false");
+	//	}
       }
       exp_opt_t bd = Tcutil::get_bounds_exp(bounds_one(),b);
       bool fat_ptr = (bd == NULL);
