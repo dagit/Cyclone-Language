@@ -123,8 +123,7 @@ static inline bool same_ctxt(ctxt_t c1, ctxt_t c2) {
 // given an array of documents, merges those that are the same in place
 // within the array.  The integer returned is the new number of nodes
 // in the array.
-static unsigned int merge_same($(ctxt_t,doc_t)? a) {
-  unsigned int sz = a.size;
+static unsigned int merge_same($(ctxt_t,doc_t)?`r a, unsigned int sz) {
   unsigned int cur_target = 0;
   for (_ i = 0; i < sz; i++) {
     let $(c,d) = a[i];
@@ -159,74 +158,75 @@ static inline int ctxt_diff(ctxt_t c1, ctxt_t c2) {
 }  
 
 // Merge documents d1 and d2 according to their contexts.
-static $(ctxt_t,doc_t) merge_doc(ctxt_t c1,doc_t d1,ctxt_t c2,doc_t d2) {
+static $(ctxt_t,doc_t) merge_doc(ctxt_t c1,doc_t d1,ctxt_t c2,doc_t d2,
+				 unsigned int @`r tags) {
   ctxt_t c3 = c1;
   if (c1.B != c2.B) {
     if (c1.B)
-      d1 = new Tagged(B_tag,d1);
+      *tags=*tags+1, d1 = new Tagged(B_tag,d1);
     else 
-      d2 = new Tagged(B_tag,d2);
+      *tags=*tags+1, d2 = new Tagged(B_tag,d2);
     c3.B = false;
   }
   if (c1.EM != c2.EM) {
     if (c1.EM)
-      d1 = new Tagged(EM_tag,d1);
+      *tags=*tags+1, d1 = new Tagged(EM_tag,d1);
     else
-      d2 = new Tagged(EM_tag,d2);
+      *tags=*tags+1, d2 = new Tagged(EM_tag,d2);
     c3.EM = false;
   }
   if (c1.I != c2.I) {
     if (c1.I)
-      d1 = new Tagged(I_tag,d1);
+      *tags=*tags+1, d1 = new Tagged(I_tag,d1);
     else
-      d2 = new Tagged(I_tag,d2);
+      *tags=*tags+1, d2 = new Tagged(I_tag,d2);
     c3.I = false;
   }
   if (c1.S != c2.S) {
     if (c1.S)
-      d1 = new Tagged(S_tag,d1);
+      *tags=*tags+1, d1 = new Tagged(S_tag,d1);
     else
-      d2 = new Tagged(S_tag,d2);
+      *tags=*tags+1, d2 = new Tagged(S_tag,d2);
     c3.S = false;
   }
   if (c1.TT != c2.TT) {
     if (c1.TT)
-      d1 = new Tagged(TT_tag,d1);
+      *tags=*tags+1, d1 = new Tagged(TT_tag,d1);
     else
-      d2 = new Tagged(TT_tag,d2);
+      *tags=*tags+1, d2 = new Tagged(TT_tag,d2);
     c3.TT = false;
   }
   // tricky -- must add enough U fields
   while (c1.U != c2.U) {
     if (c1.U > c2.U) {
       c3.U = c2.U;
-      d1 = new Tagged(U_tag,d1);
+      *tags=*tags+1, d1 = new Tagged(U_tag,d1);
       c1.U--;
     } else {
       c3.U = c1.U;
-      d2 = new Tagged(U_tag,d2);
+      *tags=*tags+1, d2 = new Tagged(U_tag,d2);
       c2.U--;
     }
   }
   // tricky -- if size is don't know, we HAVE to propagate that up
   if (c1.size != c2.size) {
     if (c1.size == DONT_KNOW) {
-      d2 = new Tagged(c2.size,d2);
+      *tags=*tags+1, d2 = new Tagged(c2.size,d2);
       c3.size = DONT_KNOW;
     } else {
       // NOTE, could pick either one
-      d1 = new Tagged(c1.size,d1);
+      *tags=*tags+1, d1 = new Tagged(c1.size,d1);
       c3.size = c2.size;
     } 
   }
   // tricky -- if color is don't know, we HAVE to propagate that up
   if (c1.color != c2.color) {
     if (c1.color == DONT_KNOW) {
-      d2 = new Tagged((char)(c2.color),d2);
+      *tags=*tags+1, d2 = new Tagged((char)(c2.color),d2);
       c3.color = DONT_KNOW;
     } else {
       // NOTE, could pick either one
-      d1 = new Tagged((char)(c1.color),d1);
+      *tags=*tags+1, d1 = new Tagged((char)(c1.color),d1);
       c3.color = c2.color;
     } 
   }
@@ -238,8 +238,8 @@ static $(ctxt_t,doc_t) merge_doc(ctxt_t c1,doc_t d1,ctxt_t c2,doc_t d2) {
 // if the difference in their contexts is less than curr_delta.
 // This is a simple, greedy, left-to-right heuristic and where
 // most of the tuning can be done.
-static unsigned int merge_mostly_same($(ctxt_t,doc_t)? a, unsigned int sz,
-                                      int curr_delta) {
+static unsigned int merge_mostly_same($(ctxt_t,doc_t)?`r2 a, unsigned int sz,
+                                      int curr_delta, unsigned int @`r tags) {
   unsigned int cur_target = 0;
   for (_ i = 0; i < sz; i++) {
     let $(c,d) = a[i];
@@ -248,7 +248,7 @@ static unsigned int merge_mostly_same($(ctxt_t,doc_t)? a, unsigned int sz,
       let $(c2,d2) = a[j];
       let delta = ctxt_diff(c,c2);
       if (delta < curr_delta) {
-        let $(c3,d3) = merge_doc(c,d,c2,d2);
+        let $(c3,d3) = merge_doc(c,d,c2,d2,tags);
         d = d3;
         c = c3;
       } else {
@@ -264,58 +264,280 @@ static unsigned int merge_mostly_same($(ctxt_t,doc_t)? a, unsigned int sz,
   return cur_target;
 }
 
+static unsigned int set_color($(ctxt_t,doc_t)?`r a, unsigned int sz) {
+  unsigned int tags = 0;
+  for (_ i = 0; i < sz; i++) {
+    let $(c,d) = a[i];
+    if (c.color != DONT_KNOW) {
+      d = new Tagged((char)c.color,d);
+      c.color = DONT_KNOW;
+      tags++;
+      a[i] = $(c,d);
+    }
+  }
+  return tags;
+}
+
+static unsigned int set_underline($(ctxt_t,doc_t)?`r a, unsigned int sz) {
+  unsigned int tags = 0;
+  for (_ i = 0; i < sz; i++) {
+    let $(c,d) = a[i];
+    if (c.U != 0) {
+      d = new Tagged(U_tag,d);
+      c.U = (char)(c.U - 1);
+      tags++;
+      a[i] = $(c,d);
+    }
+  }
+  return tags;
+}
+
+#define setfield(FIELD) \
+static unsigned int set_##FIELD($(ctxt_t,doc_t)?`r a, unsigned int sz) { \
+  unsigned int tags = 0; \
+  for (_ i = 0; i < sz; i++) { \
+    let $(c,d) = a[i]; \
+    if (c.FIELD) { \
+      d = new Tagged(FIELD##_tag,d); \
+      c.FIELD = false; \
+      tags++; \
+      a[i] = $(c,d); \
+    } \
+  } \
+  return tags; \
+}
+
+setfield(B)
+setfield(EM)
+setfield(I)
+setfield(S)
+setfield(TT)
+
+static unsigned int set_size($(ctxt_t,doc_t)?`r a, unsigned int sz) {
+  unsigned int tags = 0;
+  for (_ i = 0; i < sz; i++) {
+    let $(c,d) = a[i];
+    if (c.size != DONT_KNOW) {
+      d = new Tagged((char)c.size,d);
+      tags++;
+      c.size = DONT_KNOW;
+      a[i] = $(c,d);
+    }
+  }
+  return tags;
+}
 
 // Finish off the document by adding any needed tags so that we
 // get something that works in the initial context.
-static doc_t finish_doc(ctxt_t c1,doc_t d1) {
+static doc_t finish_doc(ctxt_t c1,doc_t d1,unsigned int @`r tags) {
   if (c1.B) 
-    d1 = new Tagged(B_tag,d1);
+    *tags=*tags+1, d1 = new Tagged(B_tag,d1);
   if (c1.EM) 
-    d1 = new Tagged(EM_tag,d1);
+    *tags=*tags+1, d1 = new Tagged(EM_tag,d1);
   if (c1.I)
-    d1 = new Tagged(I_tag,d1);
+    *tags=*tags+1, d1 = new Tagged(I_tag,d1);
   if (c1.S)
-    d1 = new Tagged(S_tag,d1);
+    *tags=*tags+1, d1 = new Tagged(S_tag,d1);
   if (c1.TT)
-    d1 = new Tagged(TT_tag,d1);
+    *tags=*tags+1, d1 = new Tagged(TT_tag,d1);
   while (c1.U != 0) {
-    d1 = new Tagged(U_tag,d1);
+    *tags=*tags+1, d1 = new Tagged(U_tag,d1);
     c1.U--;
   }
   if (c1.size != DONT_KNOW) 
-    d1 = new Tagged(c1.size,d1);
+    *tags=*tags+1, d1 = new Tagged(c1.size,d1);
   if (c1.color != DONT_KNOW) 
-    d1 = new Tagged((char)(c1.color),d1);
+    *tags=*tags+1, d1 = new Tagged((char)(c1.color),d1);
   return d1;
 }
 
+static $(ctxt_t,doc_t)? copy_arr($(ctxt_t,doc_t) ?a, unsigned int sz) {
+  let cp = new {for i < sz : a[i]};
+  return cp;
+}
+
+static $(doc_t,unsigned int) first_try($(ctxt_t,doc_t)? orig, unsigned int c) {
+  unsigned int tags = 0;
+  doc_t ans;
+  region r {
+    let a = rnew(r) {for i < c : orig[i]};
+    tags += set_color(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_color have %d nodes\n",c);fflush(stderr);
+    tags += set_size(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_size have %d nodes\n",c);fflush(stderr);
+    tags += set_B(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_B have %d nodes\n",c);fflush(stderr);
+    tags += set_EM(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_EM have %d nodes\n",c);fflush(stderr);
+    tags += set_S(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_S have %d nodes\n",c);fflush(stderr);
+    tags += set_I(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_I have %d nodes\n",c);fflush(stderr);
+    tags += set_TT(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_TT have %d nodes\n",c);fflush(stderr);
+    for (_ k = 1; true; k++) {
+      // merge any nodes with a delta less than k
+      c = merge_mostly_same(a,c,k,&tags);
+      fprintf(stderr,"merging %d nodes\n",c);
+      // stop if we only have one node left
+      if (c == 1) break;
+    }
+    let $(ctxt,d) = a[0];
+    // complete the node
+    ans = finish_doc(ctxt,d,&tags);
+  }
+  fprintf(stderr,"first try total tags %d\n",tags);fflush(stderr);
+  return $(ans,tags);
+}
+
+static $(doc_t,unsigned int) second_try($(ctxt_t,doc_t)? orig, unsigned int c){
+  unsigned int tags = 0;
+  doc_t ans;
+  region r {
+    let a = rnew(r) {for i < c : orig[i]};
+    tags += set_size(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_size have %d nodes\n",c);fflush(stderr);
+    tags += set_color(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_color have %d nodes\n",c);fflush(stderr);
+    tags += set_B(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_B have %d nodes\n",c);fflush(stderr);
+    tags += set_EM(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_EM have %d nodes\n",c);fflush(stderr);
+    tags += set_S(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_S have %d nodes\n",c);fflush(stderr);
+    tags += set_I(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_I have %d nodes\n",c);fflush(stderr);
+    tags += set_TT(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_TT have %d nodes\n",c);fflush(stderr);
+    for (_ k = 1; true; k++) {
+      // merge any nodes with a delta less than k
+      c = merge_mostly_same(a,c,k,&tags);
+      fprintf(stderr,"merging %d nodes\n",c);
+      // stop if we only have one node left
+      if (c == 1) break;
+    }
+    let $(ctxt,d) = a[0];
+    // complete the node
+    ans = finish_doc(ctxt,d,&tags);
+  }
+  fprintf(stderr,"second try total tags %d\n",tags);fflush(stderr);
+  return $(ans,tags);
+}
+
+static $(doc_t,unsigned int) third_try($(ctxt_t,doc_t)? orig, unsigned int c){
+  unsigned int tags = 0;
+  doc_t ans;
+  region r {
+    let a = rnew(r) {for i < c : orig[i]};
+    tags += set_B(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_B have %d nodes\n",c);fflush(stderr);
+    tags += set_EM(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_EM have %d nodes\n",c);fflush(stderr);
+    tags += set_S(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_S have %d nodes\n",c);fflush(stderr);
+    tags += set_I(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_I have %d nodes\n",c);fflush(stderr);
+    tags += set_TT(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_TT have %d nodes\n",c);fflush(stderr);
+    tags += set_color(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_color have %d nodes\n",c);fflush(stderr);
+    tags += set_size(a,c);
+    c = merge_same(a,c);
+    fprintf(stderr,"after set_size have %d nodes\n",c);fflush(stderr);
+    for (_ k = 1; true; k++) {
+      // merge any nodes with a delta less than k
+      c = merge_mostly_same(a,c,k,&tags);
+      fprintf(stderr,"merging %d nodes\n",c);
+      // stop if we only have one node left
+      if (c == 1) break;
+    }
+    let $(ctxt,d) = a[0];
+    // complete the node
+    ans = finish_doc(ctxt,d,&tags);
+  }
+  fprintf(stderr,"third try total tags %d\n",tags);fflush(stderr);
+  return $(ans,tags);
+}
+
+static $(doc_t,unsigned int) fourth_try($(ctxt_t,doc_t)? a, unsigned int c) {
+  unsigned int tags = 0;
+  tags += set_TT(a,c);
+  c = merge_same(a,c);
+  fprintf(stderr,"after set_TT have %d nodes\n",c);fflush(stderr);
+  tags += set_size(a,c);
+  c = merge_same(a,c);
+  fprintf(stderr,"after set_size have %d nodes\n",c);fflush(stderr);
+  tags += set_color(a,c);
+  c = merge_same(a,c);
+  fprintf(stderr,"after set_color have %d nodes\n",c);fflush(stderr);
+  tags += set_B(a,c);
+  c = merge_same(a,c);
+  fprintf(stderr,"after set_B have %d nodes\n",c);fflush(stderr);
+  tags += set_EM(a,c);
+  c = merge_same(a,c);
+  fprintf(stderr,"after set_EM have %d nodes\n",c);fflush(stderr);
+  tags += set_S(a,c);
+  c = merge_same(a,c);
+  fprintf(stderr,"after set_S have %d nodes\n",c);fflush(stderr);
+  tags += set_I(a,c);
+  c = merge_same(a,c);
+  fprintf(stderr,"after set_I have %d nodes\n",c);fflush(stderr);
+  for (_ k = 1; true; k++) {
+    // merge any nodes with a delta less than k
+    c = merge_mostly_same(a,c,k,&tags);
+    fprintf(stderr,"merging %d nodes\n",c);
+    // stop if we only have one node left
+    if (c == 1) break;
+  }
+  let $(ctxt,d) = a[0];
+  // complete the node
+  let ans = finish_doc(ctxt,d,&tags);
+  fprintf(stderr,"fourth try total tags %d\n",tags);fflush(stderr);
+  return $(ans,tags);
+}
 
 // a bad name for the function -- flattens out the document into an
 // array and then tries to merge things up
 doc_t flatten_array(doc_t d) {
   unsigned int n = num_texts(d); // calculate number of leaves
   unsigned int c = 0;
-  fprintf(stderr," %d ",n);
+  fprintf(stderr,"initially have %d nodes\n",n); fflush(stderr);
   $(ctxt_t, doc_t) p = $(init_flat_context,d);
-  $(ctxt_t, doc_t) ? a = new {for i < n : p}; // build an array
-  flat_arr(init_flat_context,d,a,&c); // write the leaves in the array
-  fprintf(stderr," %d ",c);
-  c = merge_same(a); // merge any nodes that are the same
-  fprintf(stderr," %d ",c);
-  for (_ k = 1; k <= 8; k++) {
-    // merge any nodes with a delta less than k
-    c = merge_mostly_same(a,c,k);
-    fprintf(stderr," %d ",c);
-    // stop if we only have one node left
-    if (c == 1) break;
-  }
-  if (c != 1) {
-    fprintf(stderr,"flatten_array: count is %d\n",c);
-    throw new Impossible("flatten_array");
-  }
-  let $(ctxt,d) = a[0];
-  // complete the node
-  let ans = finish_doc(ctxt,d);
-  return ans;
+  $(ctxt_t, doc_t) ? orig = new {for i < n : p}; // build an array
+  flat_arr(init_flat_context,d,orig,&c); // write the leaves in the array
+  c = merge_same(orig,n);
+  fprintf(stderr,"after merge have %d nodes\n",c); fflush(stderr);
+  let $(d1,c1) = first_try(orig,c);
+  let $(d2,c2) = second_try(orig,c);
+  let $(d3,c3) = third_try(orig,c);
+  let $(d4,c4) = fourth_try(orig,c);
+  if (c1 < c2 && c1 < c3 && c1 < c4)
+    return d1; 
+  else if (c2 < c3 && c2 < c1 && c2 < c4)
+    return d2;
+  else if (c3 < c1 && c3 < c2 && c3 < c4)
+    return d3;
+  else 
+    return d4;
 }
   
