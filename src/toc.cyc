@@ -69,7 +69,7 @@ namespace Toc;
 // used for creation of all abstract syntax node locations created here
 #define DL NULL
 
-//#define BCE_DEBUG
+// #define BCE_DEBUG
 bool warn_bounds_checks = false;
 bool warn_all_null_deref = false;
 unsigned total_bounds_checks = 0;
@@ -1134,8 +1134,38 @@ static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
           switch (r->rop) {
             // y < numelts(x)
           case CfFlowInfo::LessNumelts(z): if (x == z) return true; else break;
-          case CfFlowInfo::LessVar(z):
-            // y < z -- try to find z == numelts(x) or z <= numelts(x)
+          case CfFlowInfo::LessVar(z,zt):
+            // y < z -- 
+            // first try to find out z : tag_t<t> and x has type t*{e} and
+            // then prove t <= e.  Here's where we need z's original type.
+            // Unfortunately, z->type is the translated type at this point.
+#ifdef BCE_DEBUG
+            fprintf(stderr,"found %s < %s:%s and %s's type is %s\n",
+                    qvar2string(y->name),
+                    qvar2string(z->name),
+                    typ2string(zt),
+                    qvar2string(x->name),
+                    typ2string(a->topt->v));
+#endif
+            switch $(compress(zt), compress(a->topt->v)) {
+            case $(&TagType(tagv), &PointerType(PtrInfo{_,_,PtrAtts{.bounds = bnd, ...}})):
+              switch (conref_val(bnd)) {
+              case &Upper_b(tage):
+                let tve = cast_exp(uint_typ,valueof_exp(tagv,NULL),false,
+                                  No_coercion,NULL);
+#ifdef BCE_DEBUG
+                fprintf(stderr,"checking to see if %s <= %s\n",
+                        exp2string(tve), exp2string(tage));
+#endif
+                if (Evexp::lte_const_exp(tve, tage)) 
+                  return true;
+                break;
+              default: break;
+              }
+              break;
+            default: break;
+            }
+            // then try to find z == numelts(x) or z <= numelts(x) 
             for (let rs = relns; rs != NULL; rs = rs->tl) {
               let r = rs->hd;
               if (r->vd == z) 
@@ -1146,7 +1176,7 @@ static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
 		  break;
                 case CfFlowInfo::EqualConst(c): 
                   return check_const_array(c,x->type);
-                case CfFlowInfo::LessVar(w):
+                case CfFlowInfo::LessVar(w,_):
                   if (check_leq_size_var(relns, x, w)) return true; 
 		  break;
                 default: break;
@@ -2621,9 +2651,10 @@ DynCast:
       break;
     case &PointerType(PtrInfo{ta,tq,PtrAtts(rgn,bcr,b,zt,_)}):
       let relns = get_relns(e1);
-      //fprintf(stderr,"subscript %s: relns:",exp2string(e));
-      //CfFlowInfo::print_relns(relns); fprintf(stderr,"\n");
-
+#ifdef BCE_DEBUG
+      fprintf(stderr,"subscript %s: relns:",exp2string(e));
+      CfFlowInfo::print_relns(relns); fprintf(stderr,"\n");
+#endif
       bool in_bnds = false;
       switch (conref_def(bounds_one,b)) {
       default:
@@ -2902,12 +2933,17 @@ DynCast:
                                         exp_stmt(rexp,DL),DL),DL);
       e->r = stmt_exp_r(s);
     } else {
+      let nelts = sizeoftyp_exp(t_c,DL);
+      switch (num_elts->r) {
+      case &Const_e(Int_c(_,1)): break;
+      default: nelts = times_exp(nelts,num_elts,DL); break;
+      }
       if (rgnopt != NULL && !no_regions) {
         exp_t rgn = (exp_t)rgnopt;
         exp_to_c(nv,rgn);
-        e->r = rmalloc_exp(rgn, sizeoftyp_exp(t_c,DL))->r;
+        e->r = rmalloc_exp(rgn, nelts)->r;
       } else {
-        e->r = malloc_exp(*topt, sizeoftyp_exp(t_c,DL))->r;
+        e->r = malloc_exp(*topt, nelts)->r;
       }
     }
     break;

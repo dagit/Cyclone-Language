@@ -1552,8 +1552,9 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
       *is_zero_term = true;
     }
     // FIX:  bound may not be a constant here...
-    return array_typ(t,(tqopt == NULL) ? empty_tqual(NULL) : *tqopt, bound, 
-                     (ztopt == NULL) ? false_conref : *ztopt, NULL);
+    let res = array_typ(t,(tqopt == NULL) ? empty_tqual(NULL) : *tqopt, bound, 
+                        (ztopt == NULL) ? false_conref : *ztopt, NULL);
+    return res;
   }
 }
 
@@ -1813,8 +1814,10 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
   tcExp(te,&uint_typ,*e);
   // crawl over e and look for the following cases:
   //   sizeof(T):  result is T@ or T* depending upon topt
-  //   sizeof(T)*n or n*sizeof(T):  result is T? 
-  //     as long as T is bits-only or zero-able.
+  //   sizeof(T)*n or n*sizeof(T):  
+  //     if T is bits-only or zero-able then:
+  //       if n has type tag_t<N> and topt wants it, then result is T*{`n}
+  //       otherwise, result is T? 
   //   otherwise it's char ?
   type_t elt_type; // the element type of the resulting pointer
   exp_t num_elts;  // the number of elements of the resulting pointer
@@ -1880,7 +1883,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
   let zero_term = false_conref;
   if(topt != NULL)
     switch (compress(*topt)) {
-    case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,zt,_))): 
+    case &PointerType(PtrInfo(_,_,PtrAtts(_,n,b,zt,_))): 
       zero_term = zt;
       if(conref_def(false,n))
 	ptr_maker = star_typ; 
@@ -1889,6 +1892,32 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
       if (conref_def(false,zt) && !(*is_calloc)) {
         warn(loc,"converting malloc to calloc to ensure zero-termination");
         *is_calloc = true;
+      }
+      // here, we're seeing if what's expected is T@{e}.  If so, we
+      // check to see if e is the same as upper_exp or its type.
+      switch (conref_def(bounds_one,b)) {
+      case DynEither_b: break;
+      case &Upper_b(upper_exp) && !one_elt:
+        let is_constant = Evexp::c_can_eval(num_elts);
+        if (is_constant && Evexp::same_const_exp(upper_exp,num_elts)) {
+          *is_fat = false;
+          return atb_typ(elt_type,rgn,empty_tqual(NULL),conref_val(b),
+                         zero_term);
+        }
+        switch (compress(num_elts->topt->v)) {
+        case &TagType(tagtyp):
+          let tagtyp_exp = cast_exp(uint_typ,valueof_exp(tagtyp,NULL),false,
+                                    No_coercion,NULL);
+          if (Evexp::same_const_exp(tagtyp_exp,upper_exp)) {
+            *is_fat = false;
+            return atb_typ(elt_type,rgn,empty_tqual(NULL),conref_val(b),
+                           zero_term);
+          }
+          break;
+        default: break;
+        }
+        break;
+      default: break;
       }
       break;
     default: break;
@@ -1994,7 +2023,9 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       exp_t bnd = (exp_t)bndopt;
       bounds_t b;
       switch(compress(bnd->topt->v)) {
-        // case &TagType(t): b = new AbsUpper_b(t); break;
+      case &TagType(t): 
+        b = new Upper_b(cast_exp(uint_typ,valueof_exp(t,NULL),false,No_coercion,NULL)); 
+        break;
       default:
 	if(is_const_exp(te,bnd))
 	  b = new Upper_b(bnd);

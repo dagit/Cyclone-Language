@@ -1409,7 +1409,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
       case &Var_e(_,&Local_b(v2)) && !v2->escapes: fallthru(v2);
       case &Var_e(_,&Pat_b(v2)) && !v2->escapes: fallthru(v2);
       case &Var_e(_,&Param_b(v2)) && !v2->escapes:
-        new_relns = rnew(env->r) List(rnew(env->r) Reln(vd,LessVar(v2)),relns);
+        new_relns = rnew(env->r) List(rnew(env->r) Reln(vd,LessVar(v2,v2->type)),relns);
         break;
       case &Const_e(Int_c(_,i)): 
         new_relns = rnew(env->r) List(rnew(env->r) Reln(vd,LessConst(i)),relns);
@@ -1812,7 +1812,7 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
             // check that v1 or v2 is unsigned to ensure this is an
             // unsigned comparison
             let r = env->fenv->r;
-            let relns_true = rnew(r) List(rnew(r) Reln(v1,LessVar(v2)),relns);
+            let relns_true = rnew(r) List(rnew(r) Reln(v1,LessVar(v2,v2->type)),relns);
             return $(ReachableFL(d,relns_true,cinfo), ff);
           case &Const_e(Int_c(_,i)): 
             let r = env->fenv->r;

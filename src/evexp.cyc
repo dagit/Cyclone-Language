@@ -207,7 +207,13 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
     }
     terr(e->loc,"bad static expression (too many args to primop)");
     return $(Int_c(Signed,0), true);
-  case &Valueof_e(_): 
+  case &Valueof_e(t): 
+    // special case to reduce valueof(valueof_t<e>) to e
+    switch (compress(t)) {
+    case &ValueofType(e2): return eval_const_exp(e2);
+    default: break;
+    }
+    fallthru;
   case &Sizeoftyp_e(_): 
   case &Sizeofexp_e(_):
   case &Offsetof_e(_,_): ans = $(Int_c(Signed,0), false); break;

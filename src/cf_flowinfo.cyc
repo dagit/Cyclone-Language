@@ -709,7 +709,7 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
 static bool same_relop(reln_op_t r1,reln_op_t r2) {
   switch ($(r1,r2)) {
   case $(EqualConst(c1),EqualConst(c2)): return c1 == c2;
-  case $(LessVar(v1),   LessVar(v2)):    return v1 == v2;
+  case $(LessVar(v1,_),   LessVar(v2,_)):    return v1 == v2;
   case $(LessNumelts(v1),  LessNumelts(v2)):   return v1 == v2;
   case $(LessConst(c1), LessConst(c2)):  return c1 == c2;
   case $(LessEqNumelts(v1),LessEqNumelts(v2)): return v1 == v2;
@@ -1065,7 +1065,7 @@ relns_t<`r> reln_kill_var(region_t<`r> rgn, relns_t<`r> rs, vardecl_t v) {
     let r = p->hd;
     if (r->vd == v) { found = true; break; }
     switch (r->rop) {
-    case LessVar(v2):   fallthru(v2);
+    case LessVar(v2,_):   fallthru(v2);
     case LessNumelts(v2):  fallthru(v2);
     case LessEqNumelts(v2): if(v==v2) found = true; break;
     default: break;
@@ -1078,7 +1078,7 @@ relns_t<`r> reln_kill_var(region_t<`r> rgn, relns_t<`r> rs, vardecl_t v) {
     let r = p->hd;
     if (r->vd != v) {
       switch (r->rop) {
-      case LessVar(v2):   fallthru(v2);
+      case LessVar(v2,_):   fallthru(v2);
       case LessNumelts(v2):  fallthru(v2);
       case LessEqNumelts(v2): if (v == v2) continue; break;
       default: break;
@@ -1220,7 +1220,7 @@ static void print_reln(reln_t r) {
   fprintf(stderr,"%s",qvar2string(r->vd->name));
   switch (r->rop) {
   case EqualConst(c): fprintf(stderr,"==%d",c); break;
-  case LessVar(vd):   fprintf(stderr,"<%s",qvar2string(vd->name)); break;
+  case LessVar(vd,_):   fprintf(stderr,"<%s",qvar2string(vd->name)); break;
   case LessNumelts(vd):  fprintf(stderr,"<numelts(%s)",qvar2string(vd->name)); break;
   case LessConst(c):  fprintf(stderr,"<%d",c); break;
   case LessEqNumelts(vd): fprintf(stderr,"<=numelts(%s)",qvar2string(vd->name));break;

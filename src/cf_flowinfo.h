@@ -69,7 +69,7 @@ typedef tunion InitLevel initlevel_t;
 // primitive relations that we track for non-escaping, integral variables
 EXTERN_CFFLOW __flat__ tunion RelnOp {
   EqualConst(unsigned int);        // == c
-  LessVar(Absyn::vardecl_t);       // < y
+  LessVar(Absyn::vardecl_t,Absyn::type_t); // < y -- type is needed due to xlation
   LessNumelts(Absyn::vardecl_t);   // < numelts(y)
   LessConst(unsigned int);         // < c
   LessEqNumelts(Absyn::vardecl_t); // <= numelts(y)

@@ -213,11 +213,11 @@ typedef enum BASE base_t;
 /* Print out a string up to howmany characters using the given io closure.
  * Returns a count of how many characters were successfully spit out.
  */
-static int _IO_sputn(int (@ioputc)(int,`a), `a ioputc_env, const char ? s, 
+static inline int _IO_sputn(int (@ioputc)(int,`a), `a ioputc_env, const char ? s, 
                      int howmany) {
   int i = 0;
   while (i < howmany) {
-    if (numelts(s) == 0 || ioputc(*s,ioputc_env) == EOF) return i;
+    if (ioputc(*s,ioputc_env) == EOF) return i;
     s++;
     i++;
   }
@@ -229,7 +229,7 @@ static int _IO_nzsputn(int (@ioputc)(int,`a), `a ioputc_env,
   int i = 0;
   while (i < howmany) {
     char c;
-    if (numelts(s) == 0 || (c = *s) == 0 || ioputc(c,ioputc_env) == EOF) return i;
+    if ((c = *s) == 0 || ioputc(c,ioputc_env) == EOF) return i;
     s++;
     i++;
   }
@@ -268,7 +268,7 @@ static const char ?NOZEROTERM`r my_nzmemchr(const char?NOZEROTERM`r s, char c, i
   return NULL;
 }
 
-static const size_t my_strlen(const char ?NOZEROTERM s) {
+static inline const size_t my_strlen(const char ?NOZEROTERM s) {
   unsigned sz = numelts(s);
   unsigned i = 0;
   while (i < sz && s[i] != 0) i++;
@@ -999,9 +999,9 @@ static int putc_string(int c, $(char ?NOZEROTERM @,size_t @)@ sptr_n) {
   let &$(sptr,nptr) = sptr_n;
   char ?NOZEROTERM s = *sptr;
   size_t n = *nptr;
-  if ((numelts(s) == 0) || (n == 0)) return EOF;
+  if (n == 0) return EOF;
   *s = (char)c;
-  *sptr = s+1;
+  ++(*sptr);
   *nptr = n-1;
   return 1;
 }
