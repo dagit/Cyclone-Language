@@ -51,6 +51,9 @@ bool is_format_prim(primop p) {
   case Printf:  return true;
   case Fprintf: return true;
   case Xprintf: return true; 
+  case Scanf:   return true; 
+  case Fscanf:  return true; 
+  case Sscanf:  return true; 
   default:      return false;
   }
 }

@@ -825,7 +825,7 @@ using Parse;
 %token BOXED_FLOAT BOXED_DOUBLE NULL LET THROW TRY CATCH
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE XENUM
 %token FILL CODEGEN CUT SPLICE
-%token PRINTF FPRINTF XPRINTF 
+%token PRINTF FPRINTF XPRINTF SCANF FSCANF SSCANF
 /* double and triple-character tokens */
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -2123,9 +2123,12 @@ unary_expression:
 ;
 
 format_primop:
-  PRINTF { $$=^$(Printf); }
+  PRINTF  { $$=^$(Printf); }
 | FPRINTF { $$=^$(Fprintf); }
 | XPRINTF { $$=^$(Xprintf); }
+| SCANF   { $$=^$(Scanf); }
+| FSCANF  { $$=^$(Fscanf); }
+| SSCANF  { $$=^$(Sscanf); }
 ;
 
 unary_operator:

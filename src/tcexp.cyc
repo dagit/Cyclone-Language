@@ -591,6 +591,263 @@ static void check_format_args(tenv te, exp fmt, list<exp> args) {
     terr(args->hd->loc,"too many arguments");
 }
 
+// Parse a scanf conversion specification starting at index i in string s.
+// s[i] should be the first character after the leading '%'.
+// If there is an error, return null.
+// Otherwise, return whether assignment should be suppressed (a bool),
+// the width and length modifier (lists of Chars),
+// the conversion specifier (a char),
+// and the index of the character following the conversion specifier.
+Opt_t<$(bool, list<Char>, list<Char>, char, int)@>
+parse_inputformat(string s, int i) {
+  let len = String::strlen(s);
+  if (i<0 || i>=len) return null;
+
+  let suppress = false;
+  let c = s[i];
+  if (c == '*') {
+    suppress = true;
+    i++;
+    if (i>=len) return null;
+  }
+
+  let width = null;
+  for (; i<len; i++) {
+    c = s[i];
+    if (Character::isdigit(c)) width = &cons((Char)c,width);
+    else break;
+  }
+  if (i>=len) return null;
+  width = List::imp_rev(width);
+
+  // Parse length modifier:
+  //  ('h' | 'l' | 'j' | 'z' | 't' | 'L' | 'h' 'h' | 'l' 'l')
+  let lenmod = null;
+  c = s[i]; // not redundant
+  switch (c) {
+  case 'h':
+    lenmod = &cons((Char)c,lenmod);
+    i++;
+    if (i>=len) return null;
+    c = s[i];
+    if (c == 'h') { lenmod = &cons((Char)c,lenmod); i++; }
+    break;
+  case 'l':
+    lenmod = &cons((Char)c,lenmod);
+    i++;
+    if (i>=len) return null;
+    c = s[i];
+    if (c == 'l') { lenmod = &cons((Char)c,lenmod); i++; }
+    break;
+  case 'j': fallthru; 
+  case 'z': fallthru; 
+  case 't': fallthru; 
+  case 'L':
+    lenmod = &cons((Char)c,lenmod);
+    i++;
+    break;
+  default: break;
+  }
+  if (i>=len) return null;
+  lenmod = List::imp_rev(lenmod); // unnecessary
+
+  // Parse conversion specifier
+  c = s[i]; // not redundant
+  switch (c) {
+  case 'd': break;
+  case 'i': break;
+  case 'o': break;
+  case 'u': break;
+  case 'x': break;
+  case 'X': break;
+  case 'f': break;
+  case 'F': break;
+  case 'e': break;
+  case 'E': break;
+  case 'g': break;
+  case 'G': break;
+  case 'a': break;
+  case 'A': break;
+  case 'c': break;
+  case 's': break;
+  case 'p': break;
+  case 'n': break;
+  case '%': break;
+  default: return null;
+  }
+  return &Opt(&$(suppress,width,lenmod,c,i+1));
+}
+static list<typ> get_scanf_typs(string s,segment loc) {
+  // FIX: on error we return null.  This will probably lead to
+  // cascading errors (e.g., too many arguments to scanf).
+  let len = String::strlen(s);
+  let typs = null;
+  int i;
+  for (i=0; i<len; i++) {
+    if (s[i] != '%') continue;
+    let x = parse_inputformat(s,i+1);
+    if (x == null) {
+      terr(loc,"bad format string");
+      return null; // bad conversion specification
+    }
+    let &$(suppress,width,lenmod,c,j) = x->v;
+    i = j-1; // Subtract 1 because for-loop ends with i++
+    switch (lenmod) {
+    case &cons(x,null) && (x == 'j' || x == 'z' || x == 't'):
+      // These length modifiers are OK in C99 but we don't support them yet
+      terr(loc,xprintf("length modifier '%c' is not supported",x));
+      return null;
+    default: break;
+    }
+    if (suppress) continue;
+    typ t;
+    switch (c) {
+    case 'd': fallthru;
+    case 'i':
+      switch (lenmod) {
+      case null:
+        t = nonnullableptr_typ(sint_t,empty_tqual()); break;
+      case &cons(x,null) && x=='l':
+        t = nonnullableptr_typ(slong_t,empty_tqual()); break;
+      case &cons(x,null) && x=='h':
+        t = nonnullableptr_typ(sshort_t,empty_tqual()); break;
+      case &cons(x,&cons(y,null)) && (x=='h' && y=='h'):
+        t = nonnullableptr_typ(schar_t,empty_tqual()); break;
+      // We don't support ll
+      default:
+        terr(loc,
+             xprintf("length modifier '%s' is not allowed with %%%c",
+                     String::implode(lenmod), c));
+        return null;
+      }
+      typs = &cons(t,typs);
+      break;
+    case 'u':
+      fallthru;
+    case 'o': fallthru;
+    case 'x': fallthru;
+    case 'X':
+      switch (lenmod) {
+      case null:
+        t = nonnullableptr_typ(uint_t,empty_tqual()); break;
+      case &cons(x,null) && x=='l':
+        t = nonnullableptr_typ(ulong_t,empty_tqual()); break;
+      case &cons(x,null) && x=='h':
+        t = nonnullableptr_typ(ushort_t,empty_tqual()); break;
+      case &cons(x,&cons(y,null))
+        && (x=='h' && y=='h'):
+          t = nonnullableptr_typ(uchar_t,empty_tqual()); break;
+      // We don't support ll
+      default:
+        terr(loc,
+             xprintf("length modifier '%s' is not allowed with %%%c",
+                     String::implode(lenmod), c));
+        return null;
+      }
+      typs = &cons(t,typs);
+      break;
+    case 'f': fallthru;
+    case 'F': fallthru;
+    case 'e': fallthru;
+    case 'E': fallthru;
+    case 'g': fallthru;
+    case 'G': fallthru;
+    case 'a': fallthru;
+    case 'A':
+      switch (lenmod) {
+      case null:
+        // Note, %f means float in scanf, double in printf!!
+        t = nonnullableptr_typ(float_t,empty_tqual()); break;
+      case &cons(x,null) && x=='l':
+        t = nonnullableptr_typ(double_t,empty_tqual()); break;
+      // We don't support L
+      default:
+        terr(loc,
+             xprintf("length modifier '%s' is not allowed with %%%c",
+                     String::implode(lenmod), c));
+        return null;
+      }
+      typs = &cons(t,typs);
+      break;
+    case 'c':
+      terr(loc,"%%c is not supported");
+      return null;
+    case 's':
+      terr(loc,"%%s is not supported");
+      return null;
+    case '[':
+      terr(loc,"%%[ is not supported");
+      return null;
+    case 'p':
+      terr(loc,"%%p is not supported");
+      return null;
+    case 'n':
+      switch (lenmod) {
+      case null:
+        t = nonnullableptr_typ(sint_t,empty_tqual()); break;
+      case &cons(x,null) && x=='l':
+        t = nonnullableptr_typ(ulong_t,empty_tqual()); break;
+      case &cons(x,null) && x=='h':
+        t = nonnullableptr_typ(sshort_t,empty_tqual()); break;
+      case &cons(x,&cons(y,null)) && (x=='h' && y=='h'):
+          t = nonnullableptr_typ(schar_t,empty_tqual()); break;
+      // We don't support ll
+      default:
+        terr(loc,xprintf("length modifier '%s' not allowed with %%n",
+                         String::implode(lenmod)));
+        return null;
+      }
+      typs = &cons(t,typs);
+      break;
+    case '%':
+      if (suppress) {
+        terr(loc,"Assignment suppression (*) is not allowed with %%%%");
+        return null;
+      }
+      if (width != null) {
+        terr(loc,xprintf("width '%s' not allowed with %%%%",
+                         String::implode(width)));
+        return null;
+      }
+      if (lenmod != null) {
+        terr(loc,xprintf("length modifier '%s' not allowed with %%%%",
+                         String::implode(lenmod)));
+        return null;
+      }
+      break;
+    default:
+      return null; // impossible
+    }
+  }
+  return (List::imp_rev(typs));
+}
+static void check_scanf_args(tenv te, exp fmt, list<exp> args) {
+  string fmt_str;
+  list<typ> desc_types = null;
+  int i = 0;
+
+  // get out the literal format string
+  switch (fmt->r) {
+  case Const_e(String_c(s)): fmt_str = s; break;
+  default: terr(fmt->loc, "expecting a literal format string"); return;
+  }
+  let desc_types = get_scanf_typs(fmt_str,fmt->loc);
+  // now check that each desc_type matches the expression types
+  for (; desc_types != null && args != null; desc_types = desc_types->tl, 
+	                                     args = args->tl) {
+    typ t = desc_types->hd;
+    exp e = args->hd;
+    if (!coerce_arg(te,e,t))
+      terr(e->loc,xprintf("descriptor has type %s but argument has type %s",
+			  typ2string(t), typ2string(e->topt->v)));
+  }
+  if (desc_types != null)
+    terr(fmt->loc,xprintf("descriptor expects another value of type %s",
+			  typ2string(desc_types->hd)));
+  else if (args != null)
+    terr(args->hd->loc,"too many arguments");
+}
+
 // Unary primops like -e, !e, etc. 
 static typ tcUnPrimop(tenv te, segment loc, Opt_t<typ> topt, primop p, exp e) {
   typ t = compress(e->topt->v);
@@ -763,6 +1020,41 @@ static synth tcPrimop(tenv te, segment loc, Opt_t<typ> topt,
       return expr_err(te,loc,"missing format string in xprintf");
     check_format_args(te, es->hd, es->tl);
     t = string_typ();
+    break;
+  case Scanf:
+    if (es == null)
+      return expr_err(te,loc,"missing format string in scanf");
+    check_scanf_args(te, es->hd, es->tl);
+    t = sint_t;
+    break;
+  case Fscanf:
+    if (es == null || es->tl == null)
+      return
+        expr_err(te,loc,"missing file descriptor or format string in fscanf");
+    if (!unify(es->hd->topt->v, file_typ()))
+      terr(es->hd->loc,xprintf("expecting FILE @ but found %s",
+			       typ2string(es->hd->topt->v)));
+    check_scanf_args(te, es->tl->hd, es->tl->tl);
+    t = sint_t;
+    break;
+  case Sscanf:
+    // We don't support sscanf because we cannot guarantee that the
+    // input string is null terminated.  The standard sscanf might
+    // read past the end of the string -- a potential security breach.
+    // Possible fixes: copy the string or re-implement sscanf from scratch.
+    expr_err(te,loc,"sscanf is not supported");
+    /* 
+    // It's sometimes helpful to allow sscanf for debugging, but
+    // usually this should be commented out.
+    if (es == null || es->tl == null)
+      return
+        expr_err(te,loc,"missing input string or format string in sscanf");
+    if (!coerce_arg(te,es->hd, string_typ()))
+      terr(es->hd->loc,xprintf("expecting string found %s",
+			       typ2string(es->hd->topt->v)));
+    check_scanf_args(te, es->tl->hd, es->tl->tl);
+    */
+    t = sint_t;
     break;
   default:
     switch (List::length(es)) {

@@ -1123,6 +1123,16 @@ static void exp_to_c(env nv, exp e) {
       if (es == null) toc_impos("fprintf without arguments");
       e->r = printf_to_c(p,&Opt(es->hd),es->tl,typs->tl)->r;
       break;
+    case Sscanf:
+      // INSECURE -- but useful for debugging.
+      // The problem is that we can't guarantee that the input string
+      // is null terminated -- sscanf could start reading past the end
+      // of the string.  This could lead to a security breach.
+      // Any sscanf expression should be rejected by the typechecker;
+      // sometimes we disable this to help debug fscanf and scanf.
+      if (es == null) toc_impos("sscanf without arguments");
+      es->hd->r = structarrow_exp(new_exp(es->hd->r,es->hd->loc),"contents",DL)->r;
+      break;
     default: break; //skip
     }
     break;

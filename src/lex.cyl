@@ -28,7 +28,7 @@ namespace Lex {
 /************************** RESERVED WORDS **************************/
 
   // Fix: having to cast is a pain
-static $(string,short) rw_array[58] = {
+static $(string,short) rw_array[61] = {
   $((string)"Char", (short)BOXED_CHAR),
   $((string)"Double", (short)BOXED_DOUBLE),
   $((string)"Float", (short)BOXED_FLOAT),
@@ -56,6 +56,7 @@ static $(string,short) rw_array[58] = {
   $((string)"float", (short)FLOAT),
   $((string)"for", (short)FOR),
   $((string)"fprintf", (short)FPRINTF),
+  $((string)"fscanf", (short)FSCANF),
   $((string)"goto", (short)GOTO),
   $((string)"if", (short)IF),
   $((string)"inline", (short)INLINE),
@@ -69,10 +70,12 @@ static $(string,short) rw_array[58] = {
   $((string)"register", (short)REGISTER),
   $((string)"restrict", (short)RESTRICT),
   $((string)"return", (short)RETURN),
+  $((string)"scanf", (short)SCANF),
   $((string)"short", (short)SHORT),
   $((string)"signed", (short)SIGNED),
   $((string)"sizeof", (short)SIZEOF),
   $((string)"splice", (short)SPLICE),
+  $((string)"sscanf", (short)SSCANF),
   $((string)"static", (short)STATIC),
   $((string)"struct", (short)STRUCT),
   $((string)"switch", (short)SWITCH),

@@ -42,6 +42,7 @@ see the source files for attribution.
 * Queue::                       Queues                       
 * Ref::                         Reference cells
 * Rope::                        Efficient string library
+* Scanf::                       Formatted input
 * Set::                         Sets
 * Splay::                       Splay trees
 * String::                      String functions
@@ -1414,14 +1415,14 @@ Cyclone provides safe versions of @code{printf} and @code{fprintf} as
 built-in primitives.  It also provides a built-in function,
 @code{xprintf}, that allocates a string, prints to it, and returns it.
 Cyclone protects against format string attacks by requiring the format
-string argument of the @code{printf} functions to be a string constaant,
+string argument of the @code{printf} functions to be a string constant,
 and by doing more rigorous checks than the C version of @code{printf}.
 
 @heading Functions
 @example
-int    printf(string s,...);
-int    fprintf(FILE @@string s,...);
-string xprintf(string s,...);
+int    printf(string s, ...);
+int    fprintf(FILE @@f, string s, ...);
+string xprintf(string s, ...);
 @end example
 
 @heading Use
@@ -1523,7 +1524,7 @@ a: double
 A: double
 c: int
 s: string
-n: int *          unsigned long *   short *          char *
+n: int @@          unsigned long @@   short @@          char @@
 %  no arg
 @end example
 
@@ -1718,7 +1719,7 @@ Returns the value held in reference cell @var{r}.
 Updates the value held in cell @var{r} with @var{x}.
 @end defun
 
-@node Rope, Set, Ref, Top
+@node Rope, Scanf, Ref, Top
 @chapter Rope
 
 Namespace @code{Rope} defines a representation of character strings that
@@ -1808,7 +1809,115 @@ Returns a rope containing the concatenation of the ropes in list
 @var{l}, from left to right.
 @end defun
 
-@node Set, Splay, Rope, Top
+@node Scanf, Set, Rope, Top
+@chapter Scanf
+
+Cyclone provides safe versions of @code{scanf} and @code{fscanf} as
+built-in primitives.  @code{sscanf} is not yet supported.
+
+@heading Functions
+@example
+int    scanf(string s,...);
+int    fscanf(FILE @@ f, string s,...);
+@end example
+
+@heading Use
+
+@defun scanf (s,...)
+Reads from the standard input according to the format string @var{s}.
+Results are stored in the remaining arguments.
+@code{scanf} returns the number of arguments successfully read.
+If an error occurs before any arguments are converted, @code{EOF} is
+returned.
+@end defun
+
+@defun fprintf (f,s,...)
+Reads from the stream @var{f} according to the format string @var{s}.
+Results are stored in the remaining arguments.
+@code{fscanf} returns the number of arguments successfully read.
+If an error occurs before any arguments are converted, @code{EOF} is
+returned.
+@end defun
+
+@heading Format strings
+
+Cyclone requires the format string arguments of @code{scanf} and
+@code{fscanf} to be string constants, and it checks the remaining
+arguments for consistency at compile time.
+
+The format string consists of white space characters (which match any
+(possible empty) sequence of white space characters), ordinary
+(non-@code{%}) characters (which match themselves), and @emph{conversion
+specifications}, which are sequences of characters introduced by
+@code{%}.  Each conversion specification `converts' a sequence of
+characters from the input stream, placing the result into storage
+pointed to by the corresponding argument of @code{scanf} or
+@code{fscanf}.
+
+A conversion specification has the following parts, described, in order,
+by regular expressions:
+@itemize
+@item An optional assignment suppression character, @code{*}
+@item An optional maximal @emph{width}:
+([@code{0}-@code{9}]+)?
+@item An optional @emph{length modifier}:
+(@code{l} | @code{h} | @code{hh} )
+@item A @emph{conversion specifier}:
+[@code{d} @code{i} @code{o} @code{u} @code{x} @code{X} @code{f} @code{F} @code{e} @code{E} @code{g} @code{G} @code{a} @code{A} @code{n} @code{%}]
+@end itemize
+
+If the assignment suppression character @code{*} is given, the
+characters corresponding to the conversion specifier are read, but no
+argument is assigned, and no argument is required for that specifier.
+
+The optional length modifier and conversion specifier give the type of
+the corresponding argument, as shown in the table below.  If no type
+appears, then the combination of conversion specifier and length
+modifier is not allowed.
+
+@example
+   none             l                 h                  hh
+   ---------------------------------------------------------------------
+d: int @@            long @@            short @@            char @@
+i: int @@            long @@            short @@            char @@
+o: unsigned int @@   unsigned long @@   unsigned short @@   unsigned char @@
+u: unsigned int @@   unsigned long @@   unsigned short @@   unsigned char @@
+x: unsigned int @@   unsigned long @@   unsigned short @@   unsigned char @@
+X: unsigned int @@   unsigned long @@   unsigned short @@   unsigned char @@
+f: float@@           double@@
+F: float@@           double@@
+e: float@@           double@@
+E: float@@           double@@
+g: float@@           double@@
+G: float@@           double@@
+a: float@@           double@@
+A: float@@           double@@
+n: int @@            unsigned long @@   short @@            char @@
+%  no arg
+@end example
+
+The @code{d} and @code{i} specifiers match optionally signed decimal
+integers.
+
+The @code{o} specifier matches an optionally signed octal integer.
+
+The @code{u} specifier matches an optionally signed decimal integer.
+
+The @code{x} and @code{X} specifiers match optionally signed hexidecimal
+integers.
+
+The @code{f}, @code{F}, @code{e}, @code{E}, @code{g}, @code{G},
+@code{a}, and @code{A} specifiers match floating point numbers.
+
+The @code{n} specifier does not match any input; instead, the number of
+characters read by the call of @code{fscanf} or @code{scanf} up to the
+@code{n} specifier is stored where the argument points.
+
+The @code{%} specifier matches a @code{%} character.  No assignment
+suppression, width, or length modifiers are allowed for the @code{%}
+conversion.
+
+@node Set, Splay, Scanf, Top
 @chapter Set
 
 Namespace @code{Set} defines polymorphic, functional, finite sets of

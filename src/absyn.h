@@ -192,7 +192,7 @@ namespace Absyn {
   EXTERN_DEFINITION enum Primop {
     Plus, Times, Minus, Div, Mod, Eq, Neq, Gt, Lt, Gte, Lte, Not,
     Bitnot, Bitand, Bitor, Bitxor, Bitlshift, Bitlrshift, Bitarshift,
-    Size, Printf, Fprintf, Xprintf
+    Size, Printf, Fprintf, Xprintf, Scanf, Fscanf, Sscanf
   };
 
   EXTERN_DEFINITION enum Incrementor { PreInc, PostInc, PreDec, PostDec };
@@ -532,7 +532,7 @@ namespace Absyn {
   extern decl xenum_decl(scope s,typedef_name n,list<enumfield> fs,
 			 segment loc);
 
-  // return true if p is printf, sprintf, fprintf
+  // return true if p is printf, sprintf, fprintf, scanf, fscanf, sscanf
   extern bool is_format_prim(primop p);
 
   extern typ function_typ(list<tvar>,typ,list<$(Opt_t<var>,tqual,typ)@>,bool);

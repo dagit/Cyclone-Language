@@ -881,6 +881,66 @@ void printf_test() {
   test_end();
 }
 
+/*
+// Normally commented out because sscanf is insecure.
+// Sometimes uncommented for testing.
+void scanf_test() {
+  test_begin("Scanf");
+  long l = 0;
+  int i = 0;
+  short s = 0;
+  char c = 0;
+  unsigned long ul = 0;
+  unsigned int ui = 0;
+  unsigned short us = 0;
+  unsigned char uc = 0;
+  double d = 0.0;
+
+  sscanf("10","%d",&i);
+  okfail(i == 10);
+  sscanf("+11","%d",&i);
+  okfail(i == 11);
+  sscanf("-10","%d",&i);
+  okfail(i == -10);
+  sscanf("10","%o",&ui);
+  okfail(ui == 010);
+  sscanf("-10","%o",&ui);
+  okfail(ui == -010);
+  sscanf("+11","%o",&ui);
+  okfail(ui == 011);
+  sscanf("af","%x",&ui);
+  okfail(ui == 0xaf);
+  sscanf("-af","%X",&ui);
+  okfail(ui == -0xaf);
+  sscanf("+fe","%x",&ui);
+  okfail(ui == 0xfe);
+  sscanf("AF","%x",&ui);
+  okfail(ui == 0xaf);
+  sscanf("-AF","%X",&ui);
+  okfail(ui == -0xaf);
+  sscanf("+FE","%x",&ui);
+  okfail(ui == 0xfe);
+  sscanf("%45","%%%i",&i);
+  okfail(i == 45);
+
+  // Note we have to use %lf etc. for &d !!
+  // Printf uses %f for double, but %f means float for scanf.
+  sscanf("45.300000","%lf",&d);
+  okfail(d == 45.3);
+  sscanf("54.30","%lf",&d);
+  okfail(d == 54.3);
+  sscanf("5.43","%lg",&d);
+  okfail(d == 5.43);
+  sscanf("4.530000e+01","%le",&d);
+  okfail(d == 45.3);
+  sscanf("XXX  4.53e+02","XXX%le",&d);
+  okfail(d == 453.0);
+  sscanf("XXX  3.53e+01","XXX%le",&d);
+  okfail(d == 35.3);
+  test_end();
+}
+*/
+
 void cyc_main() {
   printf("*************** CYCLONE TEST SUITE ***************\n\n");
 
@@ -922,6 +982,7 @@ void cyc_main() {
   id_test();
   arg_test();
   printf_test();
+  // scanf_test(); // commented out because sscanf is insecure
 
   if (no_errors)
     printf("\nDONE: there were no errors\n");
