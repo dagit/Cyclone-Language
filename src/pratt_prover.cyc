@@ -428,16 +428,19 @@ static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist, a
 static $(unsigned int,bool) eval_term(term_t t) {
   switch (t) {
   case &Uint(i): return $(i, true);
-    //  case &Const(e): return Evexp::eval_const_uint_exp(e);
+  case &Const(e): return Evexp::eval_const_uint_exp(e);
   default: return $(0,false);
   }
 }
 
-static $(term_t, int) break_signed_term(graph_t @g, term_t t){
-  int c=0;
-  term_t res=t;
+static $(term_t, int) break_term(graph_t @g, bool is_signed,term_t t){
+  int c = 0;
+  unsigned cu = 0u;
+  term_t res = t;
+  Absyn::primop_t p;
   switch (t){
   case &Primop(Absyn::Plus, ts):
+    p = Absyn::Plus;
     if (ts == NULL){
       Tcutil::impos("no argument for primop");
     }else if (ts->tl == NULL){
@@ -449,16 +452,18 @@ static $(term_t, int) break_signed_term(graph_t @g, term_t t){
       if (okay1) {// t = c1 + t'
 	res = ts->tl->hd;
 	c = (int)c1;
+	cu = (unsigned)c1;
       }else if (okay2){//t = t' + c2
 	res = ts->hd;
 	c = (int)c2;
+	cu = (unsigned)c2;
       }else return $(t,0);
-    }else{
+    }else
       //other cases t = t1+t2+t2 ..., ignore
       return $(t, 0);
-    }
     break;
   case &Primop(Absyn::Minus, ts):
+    p = Absyn::Minus;
     if (ts == NULL){
       Tcutil::impos("no argument for primop");
     }else if (ts->tl == NULL){
@@ -469,6 +474,7 @@ static $(term_t, int) break_signed_term(graph_t @g, term_t t){
       if (okay2){ // t = t' - c2
 	res = ts->hd;
 	c = -((int)c2); // t = t' + (-c2)
+	cu = c2;
       }
       else return $(t, 0);
     }else return $(t, 0);
@@ -478,26 +484,40 @@ static $(term_t, int) break_signed_term(graph_t @g, term_t t){
   }
   //now we have t = res + c;
   //check if value_s(res) + value_s(c) overflow or underflow
-  if (c == 0) return $(res, 0); //no over/underflow
-  else if (c > 0){
-    // only overflow could possibily happen
-    let dist = lookup_distance(lookup_row(g, res), true, zero());
-    if (dist == NULL || dist->length > MAXINT - c){
-      return $(t, 0);
-    }else {// dist->length <= MAXINT-c, so value_s(t) + value_s(c) in bound
-      return $(res, c);
+  if (is_signed){
+    if (c == 0) return $(res, 0); //no over/underflow
+    else if (c > 0){
+      // only overflow could possibily happen
+      let dist = lookup_distance(lookup_row(g, res), true, zero());
+      if (dist == NULL || dist->length > MAXINT - c){
+	return $(t, 0);
+      }else {// dist->length <= MAXINT-c, so value_s(t) + value_s(c) in bound
+	return $(res, c);
+      }
+    }else {//c < 0 
+      let dist = lookup_distance(lookup_row(g,zero()), true, res);
+      if (dist == NULL || dist->length > c - MININT){
+	return $(t, 0);
+      }else {
+	//dist->length <= c - MININT
+	// 0-v(res) <= dist->length  <= c - MININT
+	// then v(res) + c >= MININT, no underflow here
+	return $(res, c);
+      }
     }
-  }else {//c < 0 
-    let dist = lookup_distance(lookup_row(g,zero()), true, res);
-    if (dist == NULL || dist->length > c - MININT){
+  }else {//is unsigned
+    if (p == Absyn::Plus){
+      let dist = lookup_distance(lookup_row(g, res), false, zero());
+      if (dist == NULL) return $(t,0);
+      if (dist->length <=0) return $(res, cu);
+      if (dist->length > 0 && (unsigned)dist->length <= MAXUINT - cu)
+	return $(res, cu);
+    }
+    else { // p == Absyn::Minus
       return $(t, 0);
-    }else {
-      //dist->length <= c - MININT
-      // 0-v(res) <= dist->length  <= c - MININT
-      // then v(res) + c >= MININT, no underflow here
-      return $(res, c);
     }
   }
+  return $(t, 0);
 }
 
 // convert a primitive assertion to a constraint and add it to the graph.
@@ -609,25 +629,51 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
   switch (p) {
   case ULt:
     // add t1 - t2 U<= -1
+    let $(tt1, c1) = break_term(g, false, t1);
+    let $(tt2, c2) = break_term(g, false, t2);
+    let $(of, dist) = is_unsigned_overflow((unsigned)c2, MINUS, (unsigned)c1);
+    if (!of) {
+      let $(of, dist) = is_unsigned_overflow((unsigned)dist, MINUS, 1u);
+      if (!of){
+	if (!add_edge(g, false, tt1, tt2, dist, origin))
+	  return false;
+      }
+    }
     return add_edge(g,false,t1,t2,-1, origin);
   case ULte:
     // add t1 - t2 U<= 0
+    let $(tt1, c1) = break_term(g, false, t1);
+    let $(tt2, c2) = break_term(g, false, t2);
+    let $(of, dist) = is_unsigned_overflow((unsigned)c2, MINUS, (unsigned)c1);
+    if (!of){
+      //      fprintf(stderr, "break terms into %s - %s <= %d\n",
+      //	      term2string(tt1), term2string(tt2), dist);
+      if (!add_edge(g, false, tt1, tt2, dist, origin))
+	return false;
+    }
     return add_edge(g,false,t1,t2,0, origin);
   case SLt:
-    // add t1 - t2 S<= -1
+    let $(tt1, c1) = break_term(g, true, t1);
+    let $(tt2, c2) = break_term(g, true, t2);
+    let $(of, dist) = is_signed_overflow((int)c2, MINUS, (int)c1);
+    if (!of) {
+      let $(of, dist) = is_signed_overflow((int)dist, MINUS, 1);
+      if (!of){
+	if (!add_edge(g, true, tt1, tt2, dist, origin))
+	  return false;
+      }
+    }
     return add_edge(g,true,t1,t2,-1, origin);
   case SLte: 
     // add t1 - t2 S<= 0
-    let $(tt1, c1) = break_signed_term(g, t1);
-    let $(tt2, c2) = break_signed_term(g, t2);
+    let $(tt1, c1) = break_term(g, true,t1);
+    let $(tt2, c2) = break_term(g, true,t2);
     let $(of, dist) = is_signed_overflow(c2, MINUS, c1);
     if (!of){
       if(!add_edge(g, true, tt1, tt2, dist, origin))
 	return false;
-      else
-	return add_edge(g,true,t1,t2,0, origin);
-    }else
-      return add_edge(g,true,t1,t2,0, origin);
+    }
+    return add_edge(g,true,t1,t2,0, origin);
   default: Tcutil::impos("Vcgen:found bad primop in add_constraint");
   }
 }

@@ -401,12 +401,14 @@ static void do_exp(env_t nv, exp_t e) {
 #ifdef PERFORMANCE_DEBUG
         if (!bds_ck) 
           ++bounds_checks_eliminated;
+	else
+	  warn(e1->loc, "vcgen failed here");
         let old_bds_ck = need_bounds_check(nv,get_relns(e1),e1,e2);
         if (old_bds_ck != bds_ck) {
           if (bds_ck) {
             warn(e1->loc,"relations eliminated check here, but not vcgen");
             ++relations_eliminated_check;
-          } else 
+          } else
             ++vcgen_eliminated_check;
         } else {
           if (!bds_ck && !old_bds_ck) ++both_eliminated_check;

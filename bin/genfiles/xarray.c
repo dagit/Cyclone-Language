@@ -472,13 +472,13 @@ struct Cyc_Xarray_Xarray*Cyc_Xarray_rappend(struct _RegionHandle*r,struct Cyc_Xa
 int newsz=(int)(_get_fat_size(xarr1->elmts,sizeof(void*))+ _get_fat_size(xarr2->elmts,sizeof(void*)));
 if(newsz == 0)
 return Cyc_Xarray_rcreate_empty(r);{
-void*init=_get_fat_size(xarr1->elmts,sizeof(void*))== 0U?*((void**)_check_fat_subscript(xarr2->elmts,sizeof(void*),0)):*((void**)_check_fat_subscript(xarr1->elmts,sizeof(void*),0));
+void*init=_get_fat_size(xarr1->elmts,sizeof(void*))== 0U?((void**)(xarr2->elmts).curr)[0]:((void**)(xarr1->elmts).curr)[0];
 struct Cyc_Xarray_Xarray*ans=({struct Cyc_Xarray_Xarray*_tmp1B=_region_malloc(r,sizeof(*_tmp1B));({struct _fat_ptr _tmp3F=({unsigned _tmp1A=(unsigned)newsz;void**_tmp19=({struct _RegionHandle*_tmp3E=Cyc_Core_unique_region;_region_malloc(_tmp3E,_check_times(_tmp1A,sizeof(void*)));});({{unsigned _tmp2D=(unsigned)newsz;unsigned i;for(i=0;i < _tmp2D;++ i){_tmp19[i]=init;}}0;});_tag_fat(_tmp19,sizeof(void*),_tmp1A);});_tmp1B->elmts=_tmp3F;}),_tmp1B->num_elmts=0;_tmp1B;});
 # 121
 {int i=0;for(0;i < xarr1->num_elmts;++ i){
-Cyc_Xarray_add(ans,*((void**)_check_fat_subscript(xarr1->elmts,sizeof(void*),i)));}}
+Cyc_Xarray_add(ans,((void**)(xarr1->elmts).curr)[i]);}}
 {int i=0;for(0;i < xarr2->num_elmts;++ i){
-Cyc_Xarray_add(ans,*((void**)_check_fat_subscript(xarr2->elmts,sizeof(void*),i)));}}
+Cyc_Xarray_add(ans,((void**)(xarr2->elmts).curr)[i]);}}
 return ans;}}
 # 128
 struct Cyc_Xarray_Xarray*Cyc_Xarray_append(struct Cyc_Xarray_Xarray*xarr1,struct Cyc_Xarray_Xarray*xarr2){

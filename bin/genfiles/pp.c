@@ -738,11 +738,11 @@ struct Cyc_PP_Doc*Cyc_PP_cats_arr(struct _fat_ptr docs){
 int sz=(int)_get_fat_size(docs,sizeof(struct Cyc_PP_Doc*));
 if(sz == 0)
 (int)_throw((void*)({struct Cyc_Core_Failure_exn_struct*_tmp87=_cycalloc(sizeof(*_tmp87));_tmp87->tag=Cyc_Core_Failure,({struct _fat_ptr _tmpDB=({const char*_tmp86="cats_arr -- size zero array";_tag_fat(_tmp86,sizeof(char),28U);});_tmp87->f1=_tmpDB;});_tmp87;}));{
-struct Cyc_PP_Doc*d=*((struct Cyc_PP_Doc**)_check_fat_subscript(docs,sizeof(struct Cyc_PP_Doc*),0));
+struct Cyc_PP_Doc*d=((struct Cyc_PP_Doc**)docs.curr)[0];
 int mw=d->mw;
 int mwo=d->mw;
 {int i=1;for(0;i < sz;++ i){
-int mw2=Cyc_PP_min(mw,mwo + (*((struct Cyc_PP_Doc**)_check_fat_subscript(docs,sizeof(struct Cyc_PP_Doc*),i)))->mwo);
+int mw2=Cyc_PP_min(mw,mwo + (((struct Cyc_PP_Doc**)docs.curr)[i])->mwo);
 int mwo2=Cyc_PP_min(mw,mwo + (((struct Cyc_PP_Doc**)docs.curr)[i])->mw);
 mw=mw2;
 mwo=mwo2;}}

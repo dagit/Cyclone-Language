@@ -462,7 +462,7 @@ fmt2=(struct _fat_ptr)({struct _fat_ptr _tmp1CA=({const char*_tmp0="%s";_tag_fat
 # 49
 fmt2=(struct _fat_ptr)({struct _fat_ptr _tmp1CB=({const char*_tmp1="%s ";_tag_fat(_tmp1,sizeof(char),4U);});Cyc_strconcat(_tmp1CB,(struct _fat_ptr)fmt);});}{
 struct _fat_ptr ap2=({unsigned _tmp4=_get_fat_size(ap,sizeof(void*))+ 1U;void**_tmp3=_cycalloc(_check_times(_tmp4,sizeof(void*)));({{unsigned _tmp161=_get_fat_size(ap,sizeof(void*))+ 1U;unsigned i;for(i=0;i < _tmp161;++ i){
-i == 0U?({void*_tmp1CC=(void*)({struct Cyc_String_pa_PrintArg_struct*_tmp2=_cycalloc(sizeof(*_tmp2));_tmp2->tag=0,_tmp2->f1=(struct _fat_ptr)((struct _fat_ptr)*msg1);_tmp2;});_tmp3[i]=_tmp1CC;}):(_tmp3[i]=*((void**)_check_fat_subscript(ap,sizeof(void*),(int)(i - 1U))));}}0;});_tag_fat(_tmp3,sizeof(void*),_tmp4);});
+i == 0U?({void*_tmp1CC=(void*)({struct Cyc_String_pa_PrintArg_struct*_tmp2=_cycalloc(sizeof(*_tmp2));_tmp2->tag=0,_tmp2->f1=(struct _fat_ptr)((struct _fat_ptr)*msg1);_tmp2;});_tmp3[i]=_tmp1CC;}):(_tmp3[i]=((void**)ap.curr)[(int)(i - 1U)]);}}0;});_tag_fat(_tmp3,sizeof(void*),_tmp4);});
 Cyc_Position_post_error(({unsigned _tmp1CD=loc;Cyc_Position_mk_err(_tmp1CD,(struct _fat_ptr)Cyc_vrprintf(Cyc_Core_heap_region,fmt2,ap2));}));}}}
 # 57
 static void Cyc_Tcdecl_merge_scope_err(enum Cyc_Absyn_Scope s0,enum Cyc_Absyn_Scope s1,struct _fat_ptr t,struct _fat_ptr v,unsigned loc,struct _fat_ptr*msg){

@@ -1051,7 +1051,7 @@ struct _tuple0*_tmpBA=sptr_n;void*_tmpBC;void*_tmpBB;_tmpBB=_tmpBA->f1;_tmpBC=_t
 struct _fat_ptr s=*sptr;
 unsigned long n=*nptr;
 if(n == 0U)return -1;
-*((char*)_check_fat_subscript(s,sizeof(char),0U))=(char)c;
+*((char*)s.curr)=(char)c;
 _fat_ptr_inplace_plus(sptr,sizeof(char),1);
 *nptr=n - 1U;
 return 1;}}

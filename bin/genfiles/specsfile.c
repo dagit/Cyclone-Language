@@ -470,10 +470,10 @@ Cyc_fflush(Cyc_stderr);
 goto CLEANUP_AND_RETURN;}
 # 95
 if(c == 58){
-*((char*)_check_known_subscript_notnull(strname,256U,sizeof(char),i))='\000';
+strname[i]='\000';
 break;}
 # 99
-*((char*)_check_known_subscript_notnull(strname,256U,sizeof(char),i))=(char)c;
+strname[i]=(char)c;
 ++ i;
 if(i >= 256){
 ({struct Cyc_String_pa_PrintArg_struct _tmp11=({struct Cyc_String_pa_PrintArg_struct _tmp5B;_tmp5B.tag=0,_tmp5B.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp5B;});void*_tmpF[1];_tmpF[0]=& _tmp11;({struct Cyc___cycFILE*_tmp6C=Cyc_stderr;struct _fat_ptr _tmp6B=({const char*_tmp10="Error reading spec file %s: string name too long\n";_tag_fat(_tmp10,sizeof(char),50U);});Cyc_fprintf(_tmp6C,_tmp6B,_tag_fat(_tmpF,sizeof(void*),1));});});
@@ -500,7 +500,7 @@ i=1;
 while(1){
 c=Cyc_fgetc(spec_file);
 if((c == -1 || c == 10)|| c == 13){*((char*)_check_known_subscript_notnull(strvalue,4096U,sizeof(char),i))='\000';break;}
-*((char*)_check_known_subscript_notnull(strvalue,4096U,sizeof(char),i))=(char)c;
+strvalue[i]=(char)c;
 ++ i;
 if(i >= 4096){
 ({struct Cyc_String_pa_PrintArg_struct _tmp19=({struct Cyc_String_pa_PrintArg_struct _tmp5D;_tmp5D.tag=0,_tmp5D.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp5D;});struct Cyc_String_pa_PrintArg_struct _tmp1A=({struct Cyc_String_pa_PrintArg_struct _tmp5C;_tmp5C.tag=0,({
@@ -532,7 +532,7 @@ while(1){
 # 158
 while(1){
 if((unsigned long)i >= n)goto DONE;
-if((int)*((const char*)_check_fat_subscript(cmdline,sizeof(char),i))== 0)goto DONE;
+if((int)((const char*)cmdline.curr)[i]== 0)goto DONE;
 if(!isspace((int)((const char*)cmdline.curr)[i]))break;
 ++ i;}
 # 164
@@ -540,23 +540,23 @@ j=0;
 # 169
 while(1){
 if((unsigned long)i >= n)break;
-if((int)*((const char*)_check_fat_subscript(cmdline,sizeof(char),i))== 0)break;
+if((int)((const char*)cmdline.curr)[i]== 0)break;
 if(isspace((int)((const char*)cmdline.curr)[i]))break;
 if((int)((const char*)cmdline.curr)[i]== 92){
 # 175
 ++ i;
 if((unsigned long)i >= n)break;
-if((int)*((const char*)_check_fat_subscript(cmdline,sizeof(char),i))== 0)break;
-*((char*)_check_known_subscript_notnull(buf,4096U,sizeof(char),j))=((const char*)cmdline.curr)[i];
+if((int)((const char*)cmdline.curr)[i]== 0)break;
+buf[j]=((const char*)cmdline.curr)[i];
 ++ j;}else{
 # 182
-*((char*)_check_known_subscript_notnull(buf,4096U,sizeof(char),j))=((const char*)cmdline.curr)[i];
+buf[j]=((const char*)cmdline.curr)[i];
 ++ j;}
 # 185
 ++ i;}
 # 187
 if(j < 4096)
-*((char*)_check_known_subscript_notnull(buf,4096U,sizeof(char),j))='\000';
+buf[j]='\000';
 # 190
 l=({struct Cyc_List_List*_tmp22=_cycalloc(sizeof(*_tmp22));({struct _fat_ptr*_tmp7C=({struct _fat_ptr*_tmp21=_cycalloc(sizeof(*_tmp21));({struct _fat_ptr _tmp7B=(struct _fat_ptr)Cyc_strdup(_tag_fat(buf,sizeof(char),4096U));*_tmp21=_tmp7B;});_tmp21;});_tmp22->hd=_tmp7C;}),_tmp22->tl=l;_tmp22;});}
 # 192

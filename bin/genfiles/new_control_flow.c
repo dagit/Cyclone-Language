@@ -604,8 +604,8 @@ unsigned sz2=_get_fat_size(s2,sizeof(char));
 unsigned minsz=sz1 < sz2?sz1: sz2;
 # 61
 while((unsigned)i < minsz){
-char c1=*((const char*)_check_fat_subscript(s1,sizeof(char),i));
-char c2=*((const char*)_check_fat_subscript(s2,sizeof(char),i));
+char c1=((const char*)s1.curr)[i];
+char c2=((const char*)s2.curr)[i];
 if((int)c1 == 0){
 if((int)c2 == 0)return 0;else{
 return -1;}}else{
@@ -618,10 +618,10 @@ if(diff != 0)return diff;}}
 # 74
 if(sz1 == sz2)return 0;
 if(minsz < sz2){
-if((int)*((const char*)_check_fat_subscript(s2,sizeof(char),i))== 0)return 0;else{
+if((int)((const char*)s2.curr)[i]== 0)return 0;else{
 return -1;}}else{
 # 79
-if((int)*((const char*)_check_fat_subscript(s1,sizeof(char),i))== 0)return 0;else{
+if((int)((const char*)s1.curr)[i]== 0)return 0;else{
 return 1;}}}}struct Cyc_NewControlFlow_CFStmtAnnot{int visited;};static char Cyc_NewControlFlow_CFAnnot[8U]="CFAnnot";struct Cyc_NewControlFlow_CFAnnot_Absyn_AbsynAnnot_struct{char*tag;struct Cyc_NewControlFlow_CFStmtAnnot f1;};struct Cyc_NewControlFlow_AnalEnv{struct Cyc_JumpAnalysis_Jump_Anal_Result*all_tables;struct Cyc_Hashtable_Table*succ_table;struct Cyc_Hashtable_Table*pat_pop_table;struct Cyc_CfFlowInfo_FlowEnv*fenv;int iterate_again;int iteration_num;int in_try;union Cyc_CfFlowInfo_FlowInfo tryflow;int noreturn;void*return_type;struct Cyc_List_List*unique_pat_vars;struct Cyc_List_List*param_roots;struct Cyc_List_List*noconsume_params;struct Cyc_Hashtable_Table*flow_table;struct Cyc_List_List*return_relns;};struct _tuple18{void*f1;int f2;};
 # 125 "new_control_flow.cyc"
 static union Cyc_CfFlowInfo_FlowInfo Cyc_NewControlFlow_anal_stmt(struct Cyc_NewControlFlow_AnalEnv*,union Cyc_CfFlowInfo_FlowInfo,struct Cyc_Absyn_Stmt*,struct _tuple18*);

@@ -555,10 +555,36 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     // its assertion will be updated by a continue.  We disallow
     // goto's in the analysis by essentially forcing their destination's
     // assertion to be true.
+    assn_t loop_inv = &true_assn;
+    switch (e->r){
+      // we treat e2 = @assert(...) && ... specially
+      // the @assert would be considered as loop invariance
+    case &Absyn::And_e(eleft, eright):
+      switch (eleft->r){
+      case &Absyn::Assert_e(eassn):
+	let $(tm, an) = vcgen_rexp(env, eleft, ain);
+	loop_inv = vcgen_test(env, eassn, &true_assn)[0];
+	e = eright;
+	ain = an;
+	break;
+      default:
+	break;
+      }
+      break;
+    default:
+      break;
+    }
     while (true) {
       ain = loop_assn(env,dummy,ain);
+      ain = and(ain, loop_inv);
       let $(at,af) = vcgen_test(env,e,ain);
       ain = vcgen_stmt(env,s,at);
+      if (!implies(&ain, &loop_inv)){
+	//failed in testing invariance;
+	Warn::err(e->loc, "can not prove loop invariance %s from %s\n",
+		  assn2string(loop_inv), assn2string(ain));
+	return &true_assn;
+      }
       if (simple_implies(&ain,get_assn(env,dummy))) return af;
     } 
   case &Absyn::Continue_s: fallthru;
@@ -580,20 +606,75 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
   case &Absyn::For_s(e1,$(e2,dummy2),$(e3,dummy3),s):
     let $(_,a) = vcgen_rexp(env,e1,ain);
     ain = a;
-    // similar to while loop.
+    assn_t loop_inv = &true_assn;
+    switch (e2->r){
+      // we treat e2 = @assert(...) && ... specially
+      // the @assert would be considered as loop invariance
+    case &Absyn::And_e(eleft, eright):
+      switch (eleft->r){
+      case &Absyn::Assert_e(eassn):
+	let $(tm, an) = vcgen_rexp(env, eleft, ain);
+	loop_inv = vcgen_test(env, eassn, &true_assn)[0];
+	e2 = eright;
+	ain = an;
+	break;
+      default:
+	break;
+      }
+      break;
+    default:
+      break;
+    }
     while (true) {
       ain = loop_assn(env,dummy2,ain);
+      ain = and(ain, loop_inv);
       let $(at,af) = vcgen_test(env,e2,ain);
       ain = vcgen_stmt(env,s,at);
       // must do pre-statement check because continue goes here
       ain = pre_stmt_update(env,dummy3,ain);
       ain = vcgen_rexp(env,e3,ain)[1];
-      if (simple_implies(&ain,get_assn(env,dummy2))) return af;
+      if (!implies(&ain, &loop_inv)){
+	//failed in testing invariance;
+	Warn::err(e2->loc, "can not prove loop invariance %s from %s\n",
+		  assn2string(loop_inv), assn2string(ain));
+	return &true_assn;
+      }
+      if ((simple_implies(&ain,get_assn(env,dummy2))) &&
+	  (implies(&ain, &loop_inv))){
+	return and(loop_inv,af);
+      }
     }
   case &Absyn::Do_s(s,$(e,dummy)):
     // similar to while loop
+    assn_t loop_inv = &true_assn;
+    switch (e->r){
+      // we treat e2 = @assert(...) && ... specially
+      // the @assert would be considered as loop invariance
+    case &Absyn::And_e(eleft, eright):
+      switch (eleft->r){
+      case &Absyn::Assert_e(eassn):
+	ain = vcgen_stmt(env, s, ain);
+	let $(tm, an) = vcgen_rexp(env, eleft, ain);
+	loop_inv = vcgen_test(env, eassn, &true_assn)[0];
+	e = eright;
+	ain = an;
+	break;
+      default:
+	break;
+      }
+      break;
+    default:
+      break;
+    }
     while (true) {
+      ain = and(ain, loop_inv);
       ain = vcgen_stmt(env,s,ain);
+      if (!implies(&ain, &loop_inv)){
+	//failed in testing invariance;
+	Warn::err(e->loc, "can not prove loop invariance %s from %s\n",
+		  assn2string(loop_inv), assn2string(ain));
+	return &true_assn;
+      }
       let $(at,af) = vcgen_test(env,e,ain);
       ain = may_widen(env,or(*get_assn(env,dummy),ain));
       if (simple_implies(&ain,get_assn(env,dummy))) return af;
@@ -772,8 +853,14 @@ static $(assn_t,assn_t) vcgen_test(env_t env, exp_t e, assn_t ain) {
       //case Absyn::Eq:  at = and(at,eq(t1,t2));  af = and(af,neq(t1,t2)); break;
       // case Absyn::Neq: at = and(at,neq(t1,t2)); af = and(af,eq(t1,t2)); break;
       //  for now, we are eliminating use of neq to avoid creating or's
-    case Absyn::Eq:  at = and(at,eq(t1,t2)); /* af doesn't change */ break;
-    case Absyn::Neq: /* at doesn't change */ af = and(af,eq(t1,t2)); break;
+    case Absyn::Eq:  
+      at = and(at,eq(t1,t2)); 
+      af = and(at, neq(t1,t2));/* af doesn't change */ 
+      break;
+    case Absyn::Neq: /* at doesn't change */ 
+      at = and(af,neq(t1,t2));
+      af = and(af,eq(t1,t2)); 
+      break;
     case Absyn::Lt:
       if (unsigned_comparison(e1,e2)) {
         at = and(at,ult(t1,t2));  af = and(af,ugte(t1,t2)); 
@@ -1225,8 +1312,8 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Assert_e(e1):
     let $(at,_) = vcgen_test(env,e1,&true_assn);
     if (!implies(&ain,&at)) 
-      Warn::err(e->loc, "cannot prove @assert from %s",
-                assn2string(reduce(ain)));
+      Warn::err(e->loc, "cannot prove @assert(%s) \n\nfrom %s",
+                assn2string(at), assn2string(reduce(ain)));
     return $(one(),and(ain,at));
   }
 }

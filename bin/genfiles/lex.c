@@ -721,7 +721,7 @@ res=({union Cyc_Absyn_Cnst _tmp159;(_tmp159.LongLong_c).tag=6U,((_tmp159.LongLon
 # 439
 long long n=0;
 {int i=0;for(0;i < len;++ i){
-n=({long long _tmp19A=n * (long long)base;_tmp19A + (long long)Cyc_Lex_int_of_char(*((char*)_check_fat_subscript(buff,sizeof(char),i)));});}}{
+n=({long long _tmp19A=n * (long long)base;_tmp19A + (long long)Cyc_Lex_int_of_char(((char*)buff.curr)[i]);});}}{
 unsigned long long x=(unsigned long long)n >> 32U;
 if(x != 4294967295U && x != 0U){
 if(declared_size &&(int)size == 2)

@@ -444,8 +444,8 @@ int diff=(int)c1 - (int)c2;
 if(diff != 0)return diff;}}
 # 68
 if(sz1 == sz2)return 0;
-if(sz1 < sz2)return(int)*((const char*)_check_fat_subscript(s2,sizeof(char),i))== 0?0: -1;
-return(int)*((const char*)_check_fat_subscript(s1,sizeof(char),i))== 0?0: 1;}}
+if(sz1 < sz2)return(int)((const char*)s2.curr)[i]== 0?0: -1;
+return(int)((const char*)s1.curr)[i]== 0?0: 1;}}
 # 73
 int Cyc_strptrcmp(struct _fat_ptr*s1,struct _fat_ptr*s2){
 return Cyc_strcmp((struct _fat_ptr)*s1,(struct _fat_ptr)*s2);}

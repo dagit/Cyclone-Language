@@ -765,12 +765,12 @@ struct _RegionHandle _tmp8E=_new_region("temp");struct _RegionHandle*temp=& _tmp
 struct _fat_ptr queue=_tag_fat(({unsigned _tmp98=16U;const struct Cyc_Dict_T**_tmp97=({struct _RegionHandle*_tmpF7=temp;_region_malloc(_tmpF7,_check_times(_tmp98,sizeof(const struct Cyc_Dict_T*)));});({{unsigned _tmpCD=16U;unsigned i;for(i=0;i < _tmpCD;++ i){_tmp97[i]=t2;}}0;});_tmp97;}),sizeof(const struct Cyc_Dict_T*),16U);
 int ind=0;
 while(ind != -1){
-const struct Cyc_Dict_T*_tmp8F=*((const struct Cyc_Dict_T**)_check_fat_subscript(queue,sizeof(const struct Cyc_Dict_T*),ind --));const struct Cyc_Dict_T*_stmttmp1=_tmp8F;const struct Cyc_Dict_T*_tmp90=_stmttmp1;void*_tmp94;void*_tmp93;const struct Cyc_Dict_T*_tmp92;const struct Cyc_Dict_T*_tmp91;_tmp91=_tmp90->left;_tmp92=_tmp90->right;_tmp93=(_tmp90->key_val).f1;_tmp94=(_tmp90->key_val).f2;{const struct Cyc_Dict_T*l=_tmp91;const struct Cyc_Dict_T*r=_tmp92;void*k=_tmp93;void*v=_tmp94;
+const struct Cyc_Dict_T*_tmp8F=((const struct Cyc_Dict_T**)queue.curr)[ind --];const struct Cyc_Dict_T*_stmttmp1=_tmp8F;const struct Cyc_Dict_T*_tmp90=_stmttmp1;void*_tmp94;void*_tmp93;const struct Cyc_Dict_T*_tmp92;const struct Cyc_Dict_T*_tmp91;_tmp91=_tmp90->left;_tmp92=_tmp90->right;_tmp93=(_tmp90->key_val).f1;_tmp94=(_tmp90->key_val).f2;{const struct Cyc_Dict_T*l=_tmp91;const struct Cyc_Dict_T*r=_tmp92;void*k=_tmp93;void*v=_tmp94;
 if((unsigned)(ind + 2)>= _get_fat_size(queue,sizeof(const struct Cyc_Dict_T*)))
 queue=({unsigned _tmp96=_get_fat_size(queue,sizeof(const struct Cyc_Dict_T*))* 2U;const struct Cyc_Dict_T**_tmp95=({struct _RegionHandle*_tmpF8=temp;_region_malloc(_tmpF8,_check_times(_tmp96,sizeof(const struct Cyc_Dict_T*)));});({{unsigned _tmpCB=_get_fat_size(queue,sizeof(const struct Cyc_Dict_T*))* 2U;unsigned i;for(i=0;i < _tmpCB;++ i){
 i < _get_fat_size(queue,sizeof(const struct Cyc_Dict_T*))?_tmp95[i]=((const struct Cyc_Dict_T**)queue.curr)[(int)i]:(_tmp95[i]=t2);}}0;});_tag_fat(_tmp95,sizeof(const struct Cyc_Dict_T*),_tmp96);});
-if(l != (const struct Cyc_Dict_T*)0)*((const struct Cyc_Dict_T**)_check_fat_subscript(queue,sizeof(const struct Cyc_Dict_T*),++ ind))=l;
-if(r != (const struct Cyc_Dict_T*)0)*((const struct Cyc_Dict_T**)_check_fat_subscript(queue,sizeof(const struct Cyc_Dict_T*),++ ind))=r;
+if(l != (const struct Cyc_Dict_T*)0)((const struct Cyc_Dict_T**)queue.curr)[++ ind]=l;
+if(r != (const struct Cyc_Dict_T*)0)((const struct Cyc_Dict_T**)queue.curr)[++ ind]=r;
 if(Cyc_Dict_member(d1,k))
 ans_tree=(const struct Cyc_Dict_T*)({struct _RegionHandle*_tmp100=d2.r;int(*_tmpFF)(void*,void*)=d2.rel;struct _tuple0 _tmpFE=({struct _tuple0 _tmpCC;_tmpCC.f1=k,({void*_tmpFD=({void*(*_tmpFC)(void*,void*,void*,void*)=f;void*_tmpFB=env;void*_tmpFA=k;void*_tmpF9=Cyc_Dict_lookup(d1,k);_tmpFC(_tmpFB,_tmpFA,_tmpF9,v);});_tmpCC.f2=_tmpFD;});_tmpCC;});Cyc_Dict_ins(_tmp100,_tmpFF,_tmpFE,ans_tree);});}}}{
 # 457
@@ -865,9 +865,9 @@ const struct Cyc_Dict_T*_tmpB0=((const struct Cyc_Dict_T**)stack.curr)[ind];cons
 *dest=((const struct Cyc_Dict_T*)_check_null(t))->key_val;
 -- ind;
 if((unsigned)t->left)
-*((const struct Cyc_Dict_T**)_check_fat_subscript(stack,sizeof(const struct Cyc_Dict_T*),++ ind))=t->left;
+((const struct Cyc_Dict_T**)stack.curr)[++ ind]=t->left;
 if((unsigned)t->right)
-*((const struct Cyc_Dict_T**)_check_fat_subscript(stack,sizeof(const struct Cyc_Dict_T*),++ ind))=t->right;
+((const struct Cyc_Dict_T**)stack.curr)[++ ind]=t->right;
 *indp=ind;
 return 1;}}}
 # 579

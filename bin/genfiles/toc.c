@@ -702,7 +702,7 @@ static void*Cyc_Toc_unimp(struct _fat_ptr str){
 # 71
 static void*Cyc_Toc_toc_impos(struct _fat_ptr ap){
 void*toc=(void*)({struct Cyc_Warn_String_Warn_Warg_struct*_tmp5=_cycalloc(sizeof(*_tmp5));_tmp5->tag=0,({struct _fat_ptr _tmp6ED=({const char*_tmp4="Toc: ";_tag_fat(_tmp4,sizeof(char),6U);});_tmp5->f1=_tmp6ED;});_tmp5;});
-struct _fat_ptr args=({unsigned _tmp3=_get_fat_size(ap,sizeof(void*))+ 1U;void**_tmp2=_cycalloc(_check_times(_tmp3,sizeof(void*)));({{unsigned _tmp676=_get_fat_size(ap,sizeof(void*))+ 1U;unsigned i;for(i=0;i < _tmp676;++ i){i == 0U?_tmp2[i]=toc:(_tmp2[i]=*((void**)_check_fat_subscript(ap,sizeof(void*),(int)(i - 1U))));}}0;});_tag_fat(_tmp2,sizeof(void*),_tmp3);});
+struct _fat_ptr args=({unsigned _tmp3=_get_fat_size(ap,sizeof(void*))+ 1U;void**_tmp2=_cycalloc(_check_times(_tmp3,sizeof(void*)));({{unsigned _tmp676=_get_fat_size(ap,sizeof(void*))+ 1U;unsigned i;for(i=0;i < _tmp676;++ i){i == 0U?_tmp2[i]=toc:(_tmp2[i]=((void**)ap.curr)[(int)(i - 1U)]);}}0;});_tag_fat(_tmp2,sizeof(void*),_tmp3);});
 Cyc_Warn_vimpos2(args);}
 # 77
 struct _fat_ptr Cyc_Toc_globals={(void*)0,(void*)0,(void*)(0 + 0)};

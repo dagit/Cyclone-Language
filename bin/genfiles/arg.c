@@ -425,7 +425,7 @@ Cyc_Buffer_add_string(b,s);
 return _tag_fat(0,0,0);}{
 # 100
 int i;
-for(i=howmuch - 1;i >= 0 && !isspace((int)*((const char*)_check_fat_subscript(s,sizeof(char),i)));-- i){
+for(i=howmuch - 1;i >= 0 && !isspace((int)((const char*)s.curr)[i]);-- i){
 ;}
 # 105
 if(i < 0)
