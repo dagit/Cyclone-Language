@@ -1313,7 +1313,8 @@ declaration:
     { let location=SLOC(@1);
       $$=^$(make_declarations($1,NULL,location,location)); }
 | declaration_specifiers init_declarator_list ';'
-{ $$=^$(make_declarations($1,$2,SLOC(@1),LOC(@1,@3))); }
+{ let location = LOC(@1,@3);
+  $$=^$(make_declarations($1,$2,SLOC(@1),location)); }
 /* Cyc: let declaration */
 | LET pattern '=' expression ';'
     { $$=^$(new List(let_decl($2,$4,LOC(@1,@5)),NULL)); }
@@ -2445,7 +2446,7 @@ compound_statement:
 ;
 
 block_item_list:
-  declaration { $$=^$(flatten_declarations($1,skip_stmt(DUMMYLOC))); }
+  declaration { $$=^$(flatten_declarations($1,skip_stmt(SLOC(@1)))); }
 | declaration block_item_list { $$=^$(flatten_declarations($1,$2)); }
 | IDENTIFIER ':' declaration { $$=^$(new_stmt(new Label_s(new $1,flatten_declarations($3,skip_stmt(DUMMYLOC))),SLOC(@1))
 					      ); }

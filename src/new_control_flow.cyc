@@ -98,6 +98,7 @@ struct AnalEnv<`r::R> {
   flow_t<`r>    tryflow;     // updated by any flow change while in a try-block
   place_set_t<`r>*`r all_changed;// NULL for "not in unorderd so don't bother"
   bool          noreturn;    // true when function is "noreturn"
+  type_t        return_type; // return type for function
   list_t<$(stmt_t,list_t<place_t<`r,`r>,`r>,list_t<exp_t,`r>)@`r,`r> unique_pat_vars;
   // list of pattern variables having unique pointer type, and the
   // statement that introduced them; they will be potentially
@@ -571,7 +572,8 @@ static $(flow_t<`r>,absRval_t<`r>)
       // else cannot be known: FIX: determine notzero as appropriate
       if(Tcutil::is_bound_one(bd)) {
 	vardecl_opt_t locname = NULL;
-	retry: switch(r) {
+      retry:
+	switch(r) {
 	case &NamedLocation(n,r2): r = r2; locname = n; goto retry;
 	case &NotZeroAll:
 	case &NotZeroThis:
@@ -858,7 +860,7 @@ static bool is_local_var_rooted_path(Absyn::exp_t e) {
     case &TupleType(...): return is_local_var_rooted_path(e);
     default: return false;
     }
-  case &Cast_e(_,e,...): return is_local_var_rooted_path(e);
+    // case &Cast_e(_,e,...): return is_local_var_rooted_path(e);
   default: return false;
   }
 }
@@ -2278,6 +2280,26 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
 // 	      s == annot->encloser ? "(self)" : "");
   switch(s->r) {
   case &Skip_s: return inflow;
+    
+  case &Break_s(NULL): 
+    // eg. of when this can happen is when destination is end of function
+    // this is only okay when the return type of the function is void.  
+    switch (inflow) {
+    case {.ReachableFL = _}:
+      switch (Tcutil::compress(env->return_type)) {
+      case &VoidType: break;
+      case &FloatType(_):
+      case &IntType(...):
+        Tcutil::warn(s->loc,"break may cause function not to return a value");
+        break;
+      default:
+        Tcutil::terr(s->loc,"break may cause function not to return a value");
+        break;
+      }
+      break;
+    default: break;
+    }
+    fallthru;
   case &Return_s(NULL):
     if (env->noreturn)
       aerr(s->loc,"`noreturn' function might return");
@@ -2352,8 +2374,6 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     update_flow(env, guard, e3_outflow);
     return f2f;
 
-    // eg. of when this can happen is when destination is end of function
-  case &Break_s(NULL): return BottomFL();
   case &Fallthru_s(es,&destclause):
     ANAL_RGN(env, temp) {
       let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,es,true,true);
@@ -2494,8 +2514,13 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
       case {.ReachableFL = $(fd,relns)}:
         // first, check that the named location hasn't been messed with.
         switch (lookup_place(fd,p)) {
-        case &NamedLocation(l2,_): 
+        case &NamedLocation(l2,new_rv): 
           if (l2 != vd) fallthru;
+          // JGM: a little bit of an optimization to preserve an
+          // rvalue if it's unchanged.
+          let $(_,rv) = join_flow_and_rval(fenv,env->all_changed,
+                                           $(f,old_rval),$(f,new_rv));
+          old_rval_approx = rv;
           break;
         default:
           aerr(s->loc,"aliased location was overwritten");
@@ -2661,7 +2686,7 @@ static void check_nested_fun(flow_env_t<`r> fenv,
   bool      noreturn = Tcutil::is_noreturn(Tcutil::fndecl2typ(fd));
   Hashtable::table_t<stmt_t,flow_t@`r,`r> flow_table =
     Hashtable::rcreate(frgn, 33, Core::ptrcmp, hash_ptr);
-  analenv_t env = rnew(frgn) AnalEnv(frgn,fenv,true,0,false,inflow,NULL,noreturn,NULL,param_roots,noconsume_roots,flow_table);
+  analenv_t env = rnew(frgn) AnalEnv(frgn,fenv,true,0,false,inflow,NULL,noreturn,fd->ret_type,NULL,param_roots,noconsume_roots,flow_table);
   flow_t    outflow  = inflow;
   while(env->iterate_again && !anal_error) {
     ++(env->iteration_num);

@@ -1256,15 +1256,21 @@ static void exp_to_c(env_t nv, exp_t e); // forward declaration
 static void stmt_to_c(env_t nv, stmt_t s); // forward declaration
 
 static bool need_null_check(exp_t e) { // e must be pre-translation!
+  //fprintf(stderr,"checking need_null_check on %s\n",exp2string(e));
   switch(e->annot) {
-  case &CfFlowInfo::UnknownZ(_): return is_nullable((type_t)e->topt);
-  case &CfFlowInfo::NotZero(_):  return false;
+  case &CfFlowInfo::UnknownZ(_): 
+    //fprintf(stderr,"annotation is unknown\n");
+    return is_nullable((type_t)e->topt);
+  case &CfFlowInfo::NotZero(_):  
+    //fprintf(stderr,"annotation is notzero\n");
+    return false;
   case &CfFlowInfo::IsZero:
     Tcutil::terr(e->loc,"dereference of NULL pointer");
     return false;
   case &EmptyAnnot:
     // warning is unfounded under sizeof as in memcpy
     // Tcutil::warn(e->loc,"unreachable dereference");
+    //fprintf(stderr,"annotation is empty\n");
     return true;
   default: toc_impos("need_null_check");
   }

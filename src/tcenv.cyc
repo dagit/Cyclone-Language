@@ -822,9 +822,12 @@ void process_break(tenv_t te, stmt_t s, stmt_opt_t @sopt) {
     terr(s->loc, "break not in a loop or switch");
     return;
   case &FnEnd_j:
-    // Note doing this here is more conservative than in control-flow.
-    // Eg: while(true) if(false) break; else return 0;
-    // But it's a pain to do in control flow because there is no stmt dest
+    // JGM: we now check for this in the control-flow analysis so you
+    // can ignore the following comment.
+    //// Note doing this here is more conservative than in control-flow.
+    //// Eg: while(true) if(false) break; else return 0;
+    //// But it's a pain to do in control flow because there is no stmt dest
+    /*
     switch (Tcutil::compress(shared->return_typ)) {
     case &VoidType: break;
     case &FloatType(_):
@@ -835,8 +838,11 @@ void process_break(tenv_t te, stmt_t s, stmt_opt_t @sopt) {
       Tcutil::terr(s->loc,"break may cause function not to return a value");
       break;
     }
+    */
     return;
   case &CaseEnd_j:
+    // FIX:  should really deal with this in the flow analysis for greater
+    // precision...
     // Analogous comment to previous case applies.
     terr(s->loc, "break causes outer switch clause to implicitly fallthru");
     return;
