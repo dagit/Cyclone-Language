@@ -2009,9 +2009,10 @@ static list_t<$(tqual_t,type_t)@> flatten_typ(tenv_t te,type_t t1) {
 static bool ptrsubtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume, type_t t1, type_t t2);
 static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume, type_t t1, type_t t2) {
   if (unify(t1,t2)) return true;
-  for (_ a = assume; a != NULL; a = a->tl)
+  for (_ a = assume; a != NULL; a = a->tl) 
     if (unify(t1,(*a->hd)[0]) && unify(t2,(*a->hd)[1])) 
       return true;
+
   t1 = compress(t1);
   t2 = compress(t2);
   switch ($(t1,t2)) {
@@ -3832,6 +3833,7 @@ bool bits_only(type_t t) {
 // Actually need to distinguish two kinds of constant expressions, as in ANSI C
 // This is now sort of for top-level expressions
 static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
+  fprintf(stderr,"cnst_exp(%s)\n",exp2string(e));
   switch (e->r) {
   case &Const_e(_):     return true;
   case &Sizeoftyp_e(_): return true;
@@ -3841,19 +3843,25 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
   case &Gentyp_e(_,_):    return true;
   case &Enum_e(_,_,_):  return true;
   case &AnonEnum_e(_,_,_):return true;
-  case &Var_e(qv,_):
+  case &Var_e(qv,b):
     // NB: top-level function names and arrays are "constant"
     // Ignore unbound variables b/c should be reported elsewhere
-    try switch (lookup_ordinary(te, e->loc, qv)) {
-    case &VarRes(&Funname_b(_)): return true;
-    case &VarRes(&Global_b(vd)):
+    switch (b) {
+    case &Funname_b(_): 
+      return true;
+    case &Global_b(vd):
       switch (compress(vd->type)) {
-      case &ArrayType(_,_,_): return true;
-      default: return var_okay;
+      case &ArrayType(_,_,_): 
+        return true;
+      case &FnType(_):
+        return true;
+      default: 
+        return var_okay;
       }
-    case &VarRes(Unresolved_b): return false;
-    default: return var_okay;
-    } catch { case Dict::Absent: return false; }
+    case Unresolved_b: return false;
+    default: 
+      return var_okay;
+    }
 
   case &Conditional_e(e1,e2,e3):
     return (cnst_exp(te,false,e1)
