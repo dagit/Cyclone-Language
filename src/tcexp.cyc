@@ -1665,8 +1665,9 @@ static type_t tcCompoundLit(tenv_t te, seg_t loc, type_t * topt,
  // Note that we pass in an optional element type, not the (optional)
  // expected type of the array.  See tcNew and the call to tcArray.
  // We also pass in whether or not the array is to be zero terminated.
-static type_t tcArray(tenv_t te,seg_t loc,type_t * elt_topt, bool zero_term,
-                   list_t<$(list_t<designator_t>,exp_t)@> des) {
+static type_t tcArray(tenv_t te, seg_t loc, type_t *elt_topt,
+                      tqual_t *elt_tqopt, bool zero_term,
+                      list_t<$(list_t<designator_t>,exp_t)@> des) {
   type_t res_t2;
   TEMP_RGN(te, r) {
     let           num_es  = List::length(des);
@@ -1682,8 +1683,9 @@ static type_t tcArray(tenv_t te,seg_t loc,type_t * elt_topt, bool zero_term,
         terr(e->loc,"zero-terminated array doesn't end with zero.");
     }
     sz_exp->topt = new Opt(uint_typ);
-    res_t2   = array_typ(res, empty_tqual(NULL), sz_exp, 
-                         zero_term ? true_conref : false_conref,NULL);
+    res_t2 = array_typ(res,
+                       (elt_tqopt?(*elt_tqopt):(empty_tqual(NULL))),
+                       sz_exp, zero_term ? true_conref : false_conref,NULL);
     
     for (_ es2 = es; es2 != NULL; es2 = es2->tl)
       tcExpInitializer(te,elt_topt,es2->hd);
@@ -2355,7 +2357,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       default: break;
       }
     }
-    let t_array = tcArray(te,e1->loc,elt_typ_opt,zero_term,des);
+    let t_array = tcArray(te,e1->loc,elt_typ_opt,NULL,zero_term,des);
     e1->topt = new Opt(t_array);
     type_t res_typ;
     switch (compress(t_array)) {
@@ -2689,17 +2691,19 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     // tcArray expects us to pass in an optional element type, not
     // the array type.  See also tcNew.
     type_t *elt_topt = NULL;
+    tqual_t *elt_tqopt = NULL;
     bool zero_term = false;
     if (topt != NULL) {
       switch (compress(*topt)) {
-      case &ArrayType(ArrayInfo{*et,_,_,zt,_}): 
+      case &ArrayType(ArrayInfo{*et,*etq,_,zt,_}): 
         elt_topt = et; 
+        elt_tqopt = etq; 
         zero_term = conref_def(false,zt);
         break;
       default: break;
       }
     }
-    t = tcArray(te,loc,elt_topt,zero_term,des); break;
+    t = tcArray(te,loc,elt_topt,elt_tqopt,zero_term,des); break;
   case &StmtExp_e(s):
     t = tcStmtExp(te,loc,topt,s); break;
   case &Comprehension_e(vd,e1,e2,*iszeroterm):
