@@ -1551,6 +1551,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         name = v;
         break;
       case &Fn_d(x):
+	if(x->is_inline) { name = NULL; break; } // DJG: ??
         let &$(_,v) = x->name;
         name = v;
         break;
