@@ -1473,7 +1473,7 @@ s,struct _dynforward_ptr fmt,struct _dynforward_ptr ap){return Cyc_vsnprintf(s,
 _get_dynforward_size(s,sizeof(char)),fmt,ap);}static int Cyc_putc_void(int c,int
 dummy);static int Cyc_putc_void(int c,int dummy){return 1;}struct _dynforward_ptr Cyc_vrprintf(
 struct _RegionHandle*r1,struct _dynforward_ptr fmt,struct _dynforward_ptr ap);static
-void _tmp168(char**_tmp164,unsigned int*_tmp167,unsigned int*_tmp166){for(*
+void _tmp168(unsigned int*_tmp167,unsigned int*_tmp166,char**_tmp164){for(*
 _tmp167=0;*_tmp167 < *_tmp166;(*_tmp167)++){(*_tmp164)[*_tmp167]='\000';}}struct
 _dynforward_ptr Cyc_vrprintf(struct _RegionHandle*r1,struct _dynforward_ptr fmt,
 struct _dynforward_ptr ap){int size=((int(*)(int(*ioputc)(int,int),int ioputc_env,
@@ -1482,7 +1482,7 @@ struct _dynforward_ptr fmt0,struct _dynforward_ptr ap))Cyc__IO_vfprintf)(Cyc_put
 _tmp165;char*_tmp164;unsigned int _tmp163;struct _dynforward_ptr s=(_tmp163=(
 unsigned int)size,((_tmp164=(char*)_region_malloc(r1,_check_times(sizeof(char),
 _tmp163 + 1)),((_tmp165=_tag_dynforward(_tmp164,sizeof(char),_tmp163 + 1),((((
-_tmp166=_tmp163,((_tmp168(& _tmp164,& _tmp167,& _tmp166),_tmp164[_tmp166]=(char)0)))),
+_tmp166=_tmp163,((_tmp168(& _tmp167,& _tmp166,& _tmp164),_tmp164[_tmp166]=(char)0)))),
 _tmp165)))))));Cyc_vsprintf(_dynforward_ptr_decrease_size(s,sizeof(char),1),fmt,
 ap);return s;}struct _dynforward_ptr Cyc_rprintf(struct _RegionHandle*r1,struct
 _dynforward_ptr fmt,struct _dynforward_ptr ap);struct _dynforward_ptr Cyc_rprintf(

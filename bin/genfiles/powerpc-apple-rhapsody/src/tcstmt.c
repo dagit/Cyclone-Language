@@ -1388,8 +1388,8 @@ _tmp15D[1]=& _tmp15B,Cyc_Tcutil_terr(s0->loc,((_tmp15E="returns value of type %s
 _tag_dynforward(_tmp15E,sizeof(char),_get_zero_arr_size_char(_tmp15E,41)))),
 _tag_dynforward(_tmp15D,sizeof(void*),2)))))))))))));}Cyc_Tcutil_explain_failure();}
 if(Cyc_Tcutil_is_noalias_pointer_or_aggr(t) && !Cyc_Tcutil_is_noalias_path(e)){
-const char*_tmp161;void*_tmp160;(_tmp160=0,Cyc_Tcutil_terr(e->loc,((_tmp161="Cannot consume paths; do swap instead",
-_tag_dynforward(_tmp161,sizeof(char),_get_zero_arr_size_char(_tmp161,38)))),
+const char*_tmp161;void*_tmp160;(_tmp160=0,Cyc_Tcutil_terr(e->loc,((_tmp161="Cannot consume non-unique paths; do swap instead",
+_tag_dynforward(_tmp161,sizeof(char),_get_zero_arr_size_char(_tmp161,49)))),
 _tag_dynforward(_tmp160,sizeof(void*),0)));}}return;}_LL10: if(_tmp14 <= (void*)1)
 goto _LL12;if(*((int*)_tmp14)!= 3)goto _LL12;_tmp19=((struct Cyc_Absyn_IfThenElse_s_struct*)
 _tmp14)->f1;_tmp1A=((struct Cyc_Absyn_IfThenElse_s_struct*)_tmp14)->f2;_tmp1B=((
@@ -1458,8 +1458,8 @@ _tag_dynforward(_tmp16D,sizeof(char),_get_zero_arr_size_char(_tmp16D,63)))),
 _tag_dynforward(_tmp16C,sizeof(void*),2)))))))))))));}Cyc_Tcutil_explain_failure();}
 if(Cyc_Tcutil_is_noalias_pointer_or_aggr((void*)_tmp63->hd) && !Cyc_Tcutil_is_noalias_path((
 struct Cyc_Absyn_Exp*)_tmp33->hd)){const char*_tmp170;void*_tmp16F;(_tmp16F=0,Cyc_Tcutil_terr(((
-struct Cyc_Absyn_Exp*)_tmp33->hd)->loc,((_tmp170="Cannot consume paths; do swap instead",
-_tag_dynforward(_tmp170,sizeof(char),_get_zero_arr_size_char(_tmp170,38)))),
+struct Cyc_Absyn_Exp*)_tmp33->hd)->loc,((_tmp170="Cannot consume non-unique paths; do swap instead",
+_tag_dynforward(_tmp170,sizeof(char),_get_zero_arr_size_char(_tmp170,49)))),
 _tag_dynforward(_tmp16F,sizeof(void*),0)));}}if(_tmp33 != 0){const char*_tmp173;
 void*_tmp172;(_tmp172=0,Cyc_Tcutil_terr(s0->loc,((_tmp173="too many arguments to explicit fallthru",
 _tag_dynforward(_tmp173,sizeof(char),_get_zero_arr_size_char(_tmp173,40)))),
@@ -1485,16 +1485,16 @@ _tmp14)->f1;_tmp39=((struct Cyc_Absyn_Switch_s_struct*)_tmp14)->f2;_LL23: Cyc_Tc
 te,0,_tmp38);{void*_tmp74=(void*)((struct Cyc_Core_Opt*)_check_null(_tmp38->topt))->v;
 if(Cyc_Tcutil_is_noalias_pointer_or_aggr(_tmp74) && !Cyc_Tcutil_is_noalias_path(
 _tmp38)){const char*_tmp186;void*_tmp185;(_tmp185=0,Cyc_Tcutil_terr(_tmp38->loc,((
-_tmp186="Cannot consume paths; do swap instead",_tag_dynforward(_tmp186,sizeof(
-char),_get_zero_arr_size_char(_tmp186,38)))),_tag_dynforward(_tmp185,sizeof(void*),
-0)));}{struct _RegionHandle _tmp77=_new_region("r");struct _RegionHandle*r=& _tmp77;
-_push_region(r);{struct Cyc_Tcenv_Tenv*_tmp78=Cyc_Tcenv_set_in_switch(r,te);
-_tmp78=Cyc_Tcenv_clear_fallthru(r,_tmp78);{struct Cyc_List_List*scs=((struct Cyc_List_List*(*)(
-struct Cyc_List_List*x))Cyc_List_rev)(_tmp39);for(0;scs != 0;scs=scs->tl){struct
-Cyc_Absyn_Pat*_tmp79=((struct Cyc_Absyn_Switch_clause*)scs->hd)->pattern;struct
-Cyc_Tcpat_TcPatResult _tmp7A=Cyc_Tcpat_tcPat(_tmp78,_tmp79,& _tmp74);struct Cyc_List_List*
-_tmp7B=_tmp7A.tvars_and_bounds_opt == 0?0:(*_tmp7A.tvars_and_bounds_opt).f1;if(!
-Cyc_Tcutil_unify((void*)((struct Cyc_Core_Opt*)_check_null(_tmp79->topt))->v,
+_tmp186="Cannot consume non-unique paths; do swap instead",_tag_dynforward(
+_tmp186,sizeof(char),_get_zero_arr_size_char(_tmp186,49)))),_tag_dynforward(
+_tmp185,sizeof(void*),0)));}{struct _RegionHandle _tmp77=_new_region("r");struct
+_RegionHandle*r=& _tmp77;_push_region(r);{struct Cyc_Tcenv_Tenv*_tmp78=Cyc_Tcenv_set_in_switch(
+r,te);_tmp78=Cyc_Tcenv_clear_fallthru(r,_tmp78);{struct Cyc_List_List*scs=((
+struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_rev)(_tmp39);for(0;scs != 
+0;scs=scs->tl){struct Cyc_Absyn_Pat*_tmp79=((struct Cyc_Absyn_Switch_clause*)scs->hd)->pattern;
+struct Cyc_Tcpat_TcPatResult _tmp7A=Cyc_Tcpat_tcPat(_tmp78,_tmp79,& _tmp74);struct
+Cyc_List_List*_tmp7B=_tmp7A.tvars_and_bounds_opt == 0?0:(*_tmp7A.tvars_and_bounds_opt).f1;
+if(!Cyc_Tcutil_unify((void*)((struct Cyc_Core_Opt*)_check_null(_tmp79->topt))->v,
 _tmp74)){{const char*_tmp18B;void*_tmp18A[2];struct Cyc_String_pa_struct _tmp189;
 struct Cyc_String_pa_struct _tmp188;(_tmp188.tag=0,((_tmp188.f1=(struct
 _dynforward_ptr)((struct _dynforward_ptr)Cyc_Absynpp_typ2string((void*)((struct

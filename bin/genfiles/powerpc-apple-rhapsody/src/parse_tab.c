@@ -3306,7 +3306,7 @@ _tmp42B[23]="no_instrument_function";static char _tmp42C[12]="constructor";stati
 char _tmp42D[11]="destructor";static char _tmp42E[22]="no_check_memory_usage";
 static char _tmp42F[5]="pure";struct _tuple20{struct Cyc_List_List*f1;struct Cyc_Absyn_Exp*
 f2;};int Cyc_yyparse(struct Cyc_Lexing_lexbuf*yylex_buf);static void _tmpA10(
-unsigned int*_tmpA0E,short**_tmpA0D,unsigned int*_tmpA0F){for(*_tmpA0F=0;*
+unsigned int*_tmpA0F,unsigned int*_tmpA0E,short**_tmpA0D){for(*_tmpA0F=0;*
 _tmpA0F < *_tmpA0E;(*_tmpA0F)++){(*_tmpA0D)[*_tmpA0F]=(short)0;}}static void
 _tmpA15(unsigned int*_tmpA14,unsigned int*_tmpA13,union Cyc_YYSTYPE_union**
 _tmpA12){for(*_tmpA14=0;*_tmpA14 < *_tmpA13;(*_tmpA14)++){(*_tmpA12)[*_tmpA14]=
@@ -3320,7 +3320,7 @@ _tmp37F;_push_region(yyregion);{int yystate;int yyn=0;int yyerrstatus;int yychar
 int yyssp_offset;unsigned int _tmpA0F;unsigned int _tmpA0E;short*_tmpA0D;
 unsigned int _tmpA0C;short*yyss=(short*)((_tmpA0C=10000,((_tmpA0D=(short*)
 _region_malloc(yyregion,_check_times(sizeof(short),_tmpA0C)),((((_tmpA0E=_tmpA0C,
-_tmpA10(& _tmpA0E,& _tmpA0D,& _tmpA0F))),_tmpA0D))))));int yyvsp_offset;unsigned int
+_tmpA10(& _tmpA0F,& _tmpA0E,& _tmpA0D))),_tmpA0D))))));int yyvsp_offset;unsigned int
 _tmpA14;unsigned int _tmpA13;union Cyc_YYSTYPE_union*_tmpA12;unsigned int _tmpA11;
 union Cyc_YYSTYPE_union*yyvs=(union Cyc_YYSTYPE_union*)((_tmpA11=10000,((_tmpA12=(
 union Cyc_YYSTYPE_union*)_region_malloc(yyregion,_check_times(sizeof(union Cyc_YYSTYPE_union),

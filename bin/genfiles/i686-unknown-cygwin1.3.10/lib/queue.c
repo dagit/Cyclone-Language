@@ -964,8 +964,8 @@ q){if(q->front == 0)(int)_throw((void*)Cyc_Queue_Empty);else{return(void*)((
 struct Cyc_List_List*)_check_null(q->front))->hd;}}void Cyc_Queue_clear(struct Cyc_Queue_Queue*
 q){q->front=0;q->rear=0;q->len=0;}void Cyc_Queue_remove(struct Cyc_Queue_Queue*q,
 void*v){struct Cyc_List_List*x;struct Cyc_List_List*y;for((x=q->front,y=0);x != 0;(
-y=x,x=x->tl)){if((void*)x->hd == v){if(q->front == x)q->front=x->tl;else{((struct
-Cyc_List_List*)_check_null(y))->tl=x->tl;}if(q->rear == x)q->rear=y;break;}}}
+y=x,x=x->tl)){if((void*)x->hd == v){-- q->len;if(q->front == x)q->front=x->tl;else{((
+struct Cyc_List_List*)_check_null(y))->tl=x->tl;}if(q->rear == x)q->rear=y;break;}}}
 struct Cyc_List_List*Cyc_Queue_rfilter_c(struct _RegionHandle*r,int(*f)(void*,void*),
 void*env,struct Cyc_Queue_Queue*q){return Cyc_List_rfilter_c(r,f,env,q->front);}
 int Cyc_Queue_length(struct Cyc_Queue_Queue*q){return(int)q->len;}void Cyc_Queue_iter(

@@ -1219,7 +1219,7 @@ _dynforward_ptr x);static void _tmp6F(struct _dynforward_ptr*x,unsigned int*_tmp
 unsigned int*_tmp6D,void***_tmp6B){for(*_tmp6E=0;*_tmp6E < *_tmp6D;(*_tmp6E)++){(*
 _tmp6B)[*_tmp6E]=(*((struct _tuple0*)_check_dynforward_subscript(*x,sizeof(struct
 _tuple0),(int)*_tmp6E))).f1;}}static void _tmp75(unsigned int*_tmp74,unsigned int*
-_tmp73,struct _dynforward_ptr*x,void***_tmp71){for(*_tmp74=0;*_tmp74 < *_tmp73;(*
+_tmp73,void***_tmp71,struct _dynforward_ptr*x){for(*_tmp74=0;*_tmp74 < *_tmp73;(*
 _tmp74)++){(*_tmp71)[*_tmp74]=(*((struct _tuple0*)_check_dynforward_subscript(*x,
 sizeof(struct _tuple0),(int)*_tmp74))).f2;}}struct _tuple1 Cyc_Array_split(struct
 _dynforward_ptr x){int sx=(int)_get_dynforward_size(x,sizeof(struct _tuple0));
@@ -1231,7 +1231,7 @@ _tmp80)),((_tmp7E=_tag_dynforward(_tmp7F,sizeof(void*),_tmp80),((((_tmp7D=_tmp80
 _tmp6F(& x,& _tmp7C,& _tmp7D,& _tmp7F))),_tmp7E)))))))),((_tmp76.f2=((_tmp7B=(
 unsigned int)sx,((_tmp7A=(void**)_cycalloc(_check_times(sizeof(void*),_tmp7B)),((
 _tmp79=_tag_dynforward(_tmp7A,sizeof(void*),_tmp7B),((((_tmp78=_tmp7B,_tmp75(&
-_tmp77,& _tmp78,& x,& _tmp7A))),_tmp79)))))))),_tmp76)));}int Cyc_Array_memq(struct
+_tmp77,& _tmp78,& _tmp7A,& x))),_tmp79)))))))),_tmp76)));}int Cyc_Array_memq(struct
 _dynforward_ptr l,void*x);int Cyc_Array_memq(struct _dynforward_ptr l,void*x){int s=(
 int)_get_dynforward_size(l,sizeof(void*));{int i=0;for(0;i < s;++ i){if(*((void**)
 _check_dynforward_subscript(l,sizeof(void*),i))== x)return 1;}}return 0;}int Cyc_Array_mem(

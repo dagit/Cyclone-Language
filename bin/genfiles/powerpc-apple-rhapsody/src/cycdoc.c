@@ -1398,8 +1398,8 @@ _LL9;case '&': _LL9: goto _LLA;case '(': _LLA: goto _LLB;case ')': _LLB: goto _L
 _LLC: goto _LLD;case '^': _LLD: goto _LLE;case '<': _LLE: goto _LLF;case '>': _LLF: goto _LL10;
 case ' ': _LL10: goto _LL11;case '\n': _LL11: goto _LL12;case '\t': _LL12: return 1;default:
 _LL13: return 0;}}static struct _dynforward_ptr Cyc_sh_escape_string(struct
-_dynforward_ptr s);static void _tmpBB(unsigned int*_tmpB9,char**_tmpB7,unsigned int*
-_tmpBA){for(*_tmpBA=0;*_tmpBA < *_tmpB9;(*_tmpBA)++){(*_tmpB7)[*_tmpBA]='\000';}}
+_dynforward_ptr s);static void _tmpBB(char**_tmpB7,unsigned int*_tmpBA,unsigned int*
+_tmpB9){for(*_tmpBA=0;*_tmpBA < *_tmpB9;(*_tmpBA)++){(*_tmpB7)[*_tmpBA]='\000';}}
 static struct _dynforward_ptr Cyc_sh_escape_string(struct _dynforward_ptr s){
 unsigned long _tmp1A=Cyc_strlen((struct _dynforward_ptr)s);int _tmp1B=0;int _tmp1C=0;{
 int i=0;for(0;i < _tmp1A;++ i){char _tmp1D=*((const char*)_check_dynforward_subscript(
@@ -1416,7 +1416,7 @@ _tmp22=(_tmp1A + _tmp1B)+ _tmp1C;unsigned int _tmpBA;unsigned int _tmpB9;struct
 _dynforward_ptr _tmpB8;char*_tmpB7;unsigned int _tmpB6;struct _dynforward_ptr s2=(
 _tmpB6=_tmp22 + 1,((_tmpB7=(char*)_cycalloc_atomic(_check_times(sizeof(char),
 _tmpB6 + 1)),((_tmpB8=_tag_dynforward(_tmpB7,sizeof(char),_tmpB6 + 1),((((_tmpB9=
-_tmpB6,((_tmpBB(& _tmpB9,& _tmpB7,& _tmpBA),_tmpB7[_tmpB9]=(char)0)))),_tmpB8)))))));
+_tmpB6,((_tmpBB(& _tmpB7,& _tmpBA,& _tmpB9),_tmpB7[_tmpB9]=(char)0)))),_tmpB8)))))));
 int _tmp23=0;int _tmp24=0;for(0;_tmp23 < _tmp1A;++ _tmp23){char _tmp25=*((const char*)
 _check_dynforward_subscript(s,sizeof(char),_tmp23));if(_tmp25 == '\''  || Cyc_is_other_special(
 _tmp25)){char _tmpBE;char _tmpBD;struct _dynforward_ptr _tmpBC;(_tmpBC=

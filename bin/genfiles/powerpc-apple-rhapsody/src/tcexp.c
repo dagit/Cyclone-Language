@@ -1634,24 +1634,24 @@ _tmpA3->tl){Cyc_Tcexp_tcExp(te,0,(struct Cyc_Absyn_Exp*)_tmpA3->hd);if(Cyc_Tcuti
 void*)((struct Cyc_Core_Opt*)_check_null(((struct Cyc_Absyn_Exp*)_tmpA3->hd)->topt))->v)
  && !Cyc_Tcutil_is_noalias_path((struct Cyc_Absyn_Exp*)_tmpA3->hd)){const char*
 _tmp581;void*_tmp580;(_tmp580=0,Cyc_Tcutil_terr(((struct Cyc_Absyn_Exp*)_tmpA3->hd)->loc,((
-_tmp581="Cannot consume paths; do swap instead",_tag_dynforward(_tmp581,sizeof(
-char),_get_zero_arr_size_char(_tmp581,38)))),_tag_dynforward(_tmp580,sizeof(void*),
-0)));}}}return;_LL70:;}if(opt_args != 0){struct Cyc_List_List*_tmpA6=(struct Cyc_List_List*)
-opt_args->v;for(0;desc_types != 0  && _tmpA6 != 0;(desc_types=desc_types->tl,_tmpA6=
-_tmpA6->tl)){void*t=(void*)desc_types->hd;struct Cyc_Absyn_Exp*e=(struct Cyc_Absyn_Exp*)
-_tmpA6->hd;Cyc_Tcexp_tcExp(te,(void**)& t,e);if(!Cyc_Tcutil_coerce_arg(te,e,t)){{
-const char*_tmp586;void*_tmp585[2];struct Cyc_String_pa_struct _tmp584;struct Cyc_String_pa_struct
-_tmp583;(_tmp583.tag=0,((_tmp583.f1=(struct _dynforward_ptr)((struct
-_dynforward_ptr)Cyc_Absynpp_typ2string((void*)((struct Cyc_Core_Opt*)_check_null(
-e->topt))->v)),((_tmp584.tag=0,((_tmp584.f1=(struct _dynforward_ptr)((struct
-_dynforward_ptr)Cyc_Absynpp_typ2string(t)),((_tmp585[0]=& _tmp584,((_tmp585[1]=&
-_tmp583,Cyc_Tcutil_terr(e->loc,((_tmp586="descriptor has type \n%s\n but argument has type \n%s",
+_tmp581="Cannot consume non-unique paths; do swap instead",_tag_dynforward(
+_tmp581,sizeof(char),_get_zero_arr_size_char(_tmp581,49)))),_tag_dynforward(
+_tmp580,sizeof(void*),0)));}}}return;_LL70:;}if(opt_args != 0){struct Cyc_List_List*
+_tmpA6=(struct Cyc_List_List*)opt_args->v;for(0;desc_types != 0  && _tmpA6 != 0;(
+desc_types=desc_types->tl,_tmpA6=_tmpA6->tl)){void*t=(void*)desc_types->hd;
+struct Cyc_Absyn_Exp*e=(struct Cyc_Absyn_Exp*)_tmpA6->hd;Cyc_Tcexp_tcExp(te,(void**)&
+t,e);if(!Cyc_Tcutil_coerce_arg(te,e,t)){{const char*_tmp586;void*_tmp585[2];
+struct Cyc_String_pa_struct _tmp584;struct Cyc_String_pa_struct _tmp583;(_tmp583.tag=
+0,((_tmp583.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)Cyc_Absynpp_typ2string((
+void*)((struct Cyc_Core_Opt*)_check_null(e->topt))->v)),((_tmp584.tag=0,((_tmp584.f1=(
+struct _dynforward_ptr)((struct _dynforward_ptr)Cyc_Absynpp_typ2string(t)),((
+_tmp585[0]=& _tmp584,((_tmp585[1]=& _tmp583,Cyc_Tcutil_terr(e->loc,((_tmp586="descriptor has type \n%s\n but argument has type \n%s",
 _tag_dynforward(_tmp586,sizeof(char),_get_zero_arr_size_char(_tmp586,51)))),
 _tag_dynforward(_tmp585,sizeof(void*),2)))))))))))));}Cyc_Tcutil_explain_failure();}
 if(Cyc_Tcutil_is_noalias_pointer_or_aggr(t) && !Cyc_Tcutil_is_noalias_path(e)){
 const char*_tmp589;void*_tmp588;(_tmp588=0,Cyc_Tcutil_terr(((struct Cyc_Absyn_Exp*)
-_tmpA6->hd)->loc,((_tmp589="Cannot consume paths; do swap instead",
-_tag_dynforward(_tmp589,sizeof(char),_get_zero_arr_size_char(_tmp589,38)))),
+_tmpA6->hd)->loc,((_tmp589="Cannot consume non-unique paths; do swap instead",
+_tag_dynforward(_tmp589,sizeof(char),_get_zero_arr_size_char(_tmp589,49)))),
 _tag_dynforward(_tmp588,sizeof(void*),0)));}}if(desc_types != 0){const char*
 _tmp58C;void*_tmp58B;(_tmp58B=0,Cyc_Tcutil_terr(fmt->loc,((_tmp58C="too few arguments",
 _tag_dynforward(_tmp58C,sizeof(char),_get_zero_arr_size_char(_tmp58C,18)))),
@@ -2053,8 +2053,8 @@ _tmp616="assignment to non-lvalue",_tag_dynforward(_tmp616,sizeof(char),
 _get_zero_arr_size_char(_tmp616,25)))),_tag_dynforward(_tmp615,sizeof(void*),0)));}
 Cyc_Tcexp_check_writable(te,e1);if(po == 0){if(Cyc_Tcutil_is_noalias_pointer_or_aggr(
 t2) && !Cyc_Tcutil_is_noalias_path(e2)){const char*_tmp619;void*_tmp618;(_tmp618=
-0,Cyc_Tcutil_terr(e2->loc,((_tmp619="Cannot consume paths; do swap instead",
-_tag_dynforward(_tmp619,sizeof(char),_get_zero_arr_size_char(_tmp619,38)))),
+0,Cyc_Tcutil_terr(e2->loc,((_tmp619="Cannot consume non-unique paths; do swap instead",
+_tag_dynforward(_tmp619,sizeof(char),_get_zero_arr_size_char(_tmp619,49)))),
 _tag_dynforward(_tmp618,sizeof(void*),0)));}if(!Cyc_Tcutil_coerce_assign(te,e2,
 t1)){const char*_tmp61E;void*_tmp61D[2];struct Cyc_String_pa_struct _tmp61C;struct
 Cyc_String_pa_struct _tmp61B;void*_tmp16D=(_tmp61B.tag=0,((_tmp61B.f1=(struct
@@ -2152,8 +2152,8 @@ _tag_dynforward(_tmp62D,sizeof(char),_get_zero_arr_size_char(_tmp62D,57)))),
 _tag_dynforward(_tmp62C,sizeof(void*),2)))))))))))));}Cyc_Tcutil_unify((void*)((
 struct Cyc_Core_Opt*)_check_null(e1->topt))->v,t2);Cyc_Tcutil_explain_failure();}
 if(Cyc_Tcutil_is_noalias_pointer_or_aggr(t2) && !Cyc_Tcutil_is_noalias_path(e1)){
-const char*_tmp630;void*_tmp62F;(_tmp62F=0,Cyc_Tcutil_terr(e1->loc,((_tmp630="Cannot consume paths; do swap instead",
-_tag_dynforward(_tmp630,sizeof(char),_get_zero_arr_size_char(_tmp630,38)))),
+const char*_tmp630;void*_tmp62F;(_tmp62F=0,Cyc_Tcutil_terr(e1->loc,((_tmp630="Cannot consume non-unique paths; do swap instead",
+_tag_dynforward(_tmp630,sizeof(char),_get_zero_arr_size_char(_tmp630,49)))),
 _tag_dynforward(_tmp62F,sizeof(void*),0)));}_tmp18B=_tmp18B->tl;_tmp19C=_tmp19C->tl;}{
 int args_already_checked=0;{struct Cyc_List_List*a=_tmp1A0;for(0;a != 0;a=a->tl){
 void*_tmp1A7=(void*)a->hd;void*_tmp1A8;int _tmp1A9;int _tmp1AA;_LL12B: if(_tmp1A7 <= (
@@ -2203,8 +2203,8 @@ _tmp640="vararg requires type %s but argument has type %s",_tag_dynforward(
 _tmp640,sizeof(char),_get_zero_arr_size_char(_tmp640,49)))),_tag_dynforward(
 _tmp63F,sizeof(void*),2)))))))))))));}Cyc_Tcutil_explain_failure();}if(Cyc_Tcutil_is_noalias_pointer_or_aggr(
 _tmp1BB) && !Cyc_Tcutil_is_noalias_path(e1)){const char*_tmp643;void*_tmp642;(
-_tmp642=0,Cyc_Tcutil_terr(e1->loc,((_tmp643="Cannot consume paths; do swap instead",
-_tag_dynforward(_tmp643,sizeof(char),_get_zero_arr_size_char(_tmp643,38)))),
+_tmp642=0,Cyc_Tcutil_terr(e1->loc,((_tmp643="Cannot consume non-unique paths; do swap instead",
+_tag_dynforward(_tmp643,sizeof(char),_get_zero_arr_size_char(_tmp643,49)))),
 _tag_dynforward(_tmp642,sizeof(void*),0)));}}else{void*_tmp1C4=Cyc_Tcutil_compress(
 _tmp1BB);struct Cyc_Absyn_TunionInfo _tmp1C5;union Cyc_Absyn_TunionInfoU_union
 _tmp1C6;struct Cyc_Absyn_Tuniondecl**_tmp1C7;struct Cyc_Absyn_Tuniondecl*_tmp1C8;
@@ -2231,8 +2231,8 @@ y))Cyc_List_rzip)(rgn,rgn,_tmp1CB->tvs,_tmp1C9);for(0;_tmp18B != 0;_tmp18B=
 _tmp18B->tl){++ _tmp1BD->num_varargs;{struct Cyc_Absyn_Exp*e1=(struct Cyc_Absyn_Exp*)
 _tmp18B->hd;if(!args_already_checked){Cyc_Tcexp_tcExp(_tmp18D,0,e1);if(Cyc_Tcutil_is_noalias_pointer_or_aggr((
 void*)((struct Cyc_Core_Opt*)_check_null(e1->topt))->v) && !Cyc_Tcutil_is_noalias_path(
-e1)){const char*_tmp64D;void*_tmp64C;(_tmp64C=0,Cyc_Tcutil_terr(e1->loc,((_tmp64D="Cannot consume paths; do swap instead",
-_tag_dynforward(_tmp64D,sizeof(char),_get_zero_arr_size_char(_tmp64D,38)))),
+e1)){const char*_tmp64D;void*_tmp64C;(_tmp64C=0,Cyc_Tcutil_terr(e1->loc,((_tmp64D="Cannot consume non-unique paths; do swap instead",
+_tag_dynforward(_tmp64D,sizeof(char),_get_zero_arr_size_char(_tmp64D,49)))),
 _tag_dynforward(_tmp64C,sizeof(void*),0)));}}{struct Cyc_Absyn_Tunionfield*
 _tmp1D5=Cyc_Tcexp_tcInjection(_tmp18D,e1,_tmp1BB,rgn,_tmp1D2,fields);if(_tmp1D5
 != 0){struct Cyc_List_List*_tmp64E;_tmp1BD->injectors=((struct Cyc_List_List*(*)(
@@ -3378,8 +3378,8 @@ struct _dynforward_ptr)Cyc_Absynpp_typ2string(*topt)),((_tmp823[0]=& _tmp822,((
 _tmp823[1]=& _tmp821,((_tmp823[2]=& _tmp820,Cyc_fprintf(Cyc_stderr,((_tmp824="topt=%s, e->topt->v=%s, e=%s\n",
 _tag_dynforward(_tmp824,sizeof(char),_get_zero_arr_size_char(_tmp824,30)))),
 _tag_dynforward(_tmp823,sizeof(void*),3)))))))))))))))))));}{const char*_tmp828;
-void*_tmp827;(_tmp827=0,Cyc_Tcutil_terr(e->loc,((_tmp828="Cannot consume paths; do swap instead",
-_tag_dynforward(_tmp828,sizeof(char),_get_zero_arr_size_char(_tmp828,38)))),
+void*_tmp827;(_tmp827=0,Cyc_Tcutil_terr(e->loc,((_tmp828="Cannot consume non-unique paths; do swap instead",
+_tag_dynforward(_tmp828,sizeof(char),_get_zero_arr_size_char(_tmp828,49)))),
 _tag_dynforward(_tmp827,sizeof(void*),0)));}}{void*_tmp458=(void*)e->r;union Cyc_Absyn_Cnst_union
 _tmp459;_LL26D: if(*((int*)_tmp458)!= 28)goto _LL26F;_LL26E: goto _LL270;_LL26F: if(*((
 int*)_tmp458)!= 29)goto _LL271;_LL270: goto _LL272;_LL271: if(*((int*)_tmp458)!= 0)

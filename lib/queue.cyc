@@ -114,6 +114,7 @@ void remove(queue_t<`a,`r> q,`a v) {
   list_t<`a,`r> x, y;
   for (x = q->front, y = NULL; x != NULL; y = x, x = x->tl) {
     if (x->hd == v) {
+      q->len--;
       // fix pointers at the front of the q
       if (q->front == x)
 	q->front = x->tl;

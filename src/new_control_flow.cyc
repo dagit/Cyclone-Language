@@ -367,28 +367,47 @@ anal_use_ints(analenv_t<`r> env, flow_t<`r> inflow,
   }
 }
 
-// we can get the lval this way only because f and the flow returned
-// by anal_Lexp will not differ w.r.t. must-point-to information.
-// i.e. we should be called with the inflow the caller used as an *argument*
-// to anal_Rexp
-// Also: the result of anal_Rexp on e MUST be Unknown, not Esc!
+// Called from anal_deref* when anal_Rexp([inflow],[e]) yields
+// $(UnknownR([il]),[outflow]) where [il] > NoneIL.  Used to generate
+// a new lval for that expression and assign to it a new rval that is
+// assumed to be not zero, by virtue of the dereference.  We can get
+// the lval this way only because f and the flow returned by anal_Lexp
+// will not differ w.r.t. must-point-to information.  i.e. we should
+// be called with the inflow the caller used as an *argument* to
+// anal_Rexp Also: the result of anal_Rexp on e (before calling this)
+// MUST be Unknown, not Esc! or it would be unsound to generate a
+// place for it.
 static flow_t<`r> 
 notzero(analenv_t<`r> env, flow_t<`r> inflow, flow_t<`r> outflow,
         exp_t e, initlevel_t il) {
+//   fprintf(stderr,"in notzero for exp |%s|\n",Absynpp::exp2string(e));
+  DEBUG_PRINT("inflow=\n");
+  DEBUG_PRINT_F(print_flow,inflow);
   switch(outflow) {
   case BottomFL: return outflow;
   case ReachableFL(d,relns,cinfo):
     switch(anal_Lexp(env,inflow,e)[1]) {
-    case UnknownL: return outflow;
+    case UnknownL: 
+      DEBUG_PRINT("Got UnknownL, outflow=\n");
+      DEBUG_PRINT_F(print_flow,outflow);
+      return outflow;
     case PlaceL(p): // okay b/c p can't be escaped (it's Unknown) 
+      DEBUG_PRINT("Got place ");
+      DEBUG_PRINT_F(print_place,p);
       absRval_t nzval = il==AllIL ? NotZeroAll : NotZeroThis;
-      return ReachableFL(assign_place(env->fenv,e->loc,d,env->all_changed,
-                                      p,nzval),relns,cinfo);
+      let outflow = ReachableFL(assign_place(env->fenv,e->loc,d,env->all_changed,
+					     p,nzval),relns,cinfo);
+      DEBUG_PRINT("outflow=\n");
+      DEBUG_PRINT_F(print_flow,outflow);
+      return outflow;
     }
   }
 }
 
-
+// Called from anal_test when anal_Rexp([inflow],[e]) yields
+// $(UnknownR([il]),[outflow]) where [il] > NoneIL. Used to generate a
+// new place [p] for that expression and assign to it a new rval that
+// is either zero or notzero if the place is unaliased.
 static $(flow_t<`r>,flow_t<`r>) 
 splitzero(analenv_t<`r> env, flow_t<`r> inflow, flow_t<`r> outflow,
           exp_t e, initlevel_t il) {
@@ -902,19 +921,24 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     let arg2 = List{r,NULL};
     let arg1 = List{l,&arg2};
     let $(f,_) = anal_use_ints(env,inflow,&arg1,true);
-    let $(_,lval) = anal_Lexp(env,f,e);
+    let $(_,lval) = anal_Lexp(env,f,l);
     f = consume_unique_rvals(e->loc,f); // consume the rhs of the assignment
     switch(f) {
     case ReachableFL(outdict,relns,cinfo):
       switch (lval) {
       case PlaceL(p): 
+      DEBUG_PRINT("assignOp: old_inflow=\n");
+      DEBUG_PRINT_F(print_flow,f);
 	cinfo = consume_assignment(env,p,cinfo,outdict,l);
 	relns = reln_kill_exp(fenv->r,relns,l);
 	outdict = assign_place(fenv,l->loc,outdict,
 			       env->all_changed,p,fenv->unknown_all);
 	f = ReachableFL(outdict,relns,cinfo);
+        DEBUG_PRINT("assignOp: new flow=\n");
+        DEBUG_PRINT_F(print_flow,f);
 	break;
       case UnknownL: 
+	DEBUG_PRINT("assignOp: unknown place\n");
 	// if we don't know the place, then this an unconsumed location
 	// accessible via a non-unique path (either a global, or
 	// a nested definition).  Can do nothing in this case.
@@ -1275,7 +1299,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     region temp {
       let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,
                                             rlist(temp,e1,e2),true);
-      f = readthrough_unique_rvals(e2->loc,f); // read index expr
+      f = readthrough_unique_rvals(e2->loc,f); // deref e1
       let f2 = f;
       switch(f) {
       case ReachableFL(d2,relns,c2):
@@ -1496,9 +1520,17 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
   }
 }
 
+// Having $([f],[r]) = anal_Rexp([env],[inflow],[e]) (or the unordered
+// version) and the field nesting [flds], where [e] is a pointer being
+// dereferenced, we here set the annotations need for null-check
+// elimination, etc., and return an appropriate lvalue; either a place
+// if it is known or else UnknownL.
 static $(flow_t<`r>,absLval_t<`r>) 
-  anal_derefL(analenv_t<`r> env, flow_t<`r> inflow, flow_t<`r> f, 
-              exp_t e, absRval_t<`r> r, 
+  anal_derefL(analenv_t<`r> env,
+	      flow_t<`r> inflow,
+              exp_t e,
+	      flow_t<`r> f,
+	      absRval_t<`r> r,
               list_t<int,`r> flds) {
   let fenv = env->fenv;
   switch(Tcutil::compress(e->topt->v)) {
@@ -1572,7 +1604,7 @@ static $(flow_t<`r>,absLval_t<`r>)
   case &Deref_e(e1): 
     let $(f,r) = anal_Rexp(env,inflow,e1);
     f = readthrough_unique_rvals(e->loc,f); // read e1
-    return anal_derefL(env,inflow,f,e1,r,flds);
+    return anal_derefL(env,inflow,e1,f,r,flds);
 
   case &Subscript_e(e1,e2): 
     // assumes that tuple-projection implies e2 is pure and is evaluable
@@ -1610,7 +1642,7 @@ static $(flow_t<`r>,absLval_t<`r>)
           break;
         default: break;
         }
-        let $(f3,r) = anal_derefL(env,inflow,f,e1,rvals->hd,flds);
+        let $(f3,r) = anal_derefL(env,inflow,e1,f,rvals->hd,flds);
         switch (f3) {
         case BottomFL: return $(f3,r);
         default: return $(f2,r);
@@ -1694,13 +1726,6 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
       r2 = rvals->tl->hd;
       f = fl;
     }
-    // if the primop could be pointer, we may have to consume the exp.
-    // Otherwise, we are just reading for purposes of comparison, or
-    // computing on integers.
-    switch (p) {
-    case Plus: case Minus: check_unique_rvals(es->hd->loc,f); break;
-    default: f = readthrough_unique_rvals(es->hd->loc,f); break;
-    }    
     switch(f) {
     case BottomFL: return $(f,f);
     case ReachableFL(d,relns,cinfo):
@@ -1715,6 +1740,8 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
       // take precedence over any array-bounds splitting
       if(p==Eq || p==Neq)
         switch($(r1,r2)) {
+	/* XXX here I would adjust things to use VirtualAddrOf; 
+	   do a fall-through on that case for the next two */
         case $(&UnknownR(il),Zero): // f is correct for both args b/c unordered
           let $(f1,f2) = splitzero(env,f,f,e1,il);
           switch(p) { 
@@ -1858,8 +1885,8 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     }
   default: break;
   }
-  // NB: just the default case from here on; should otherwise have
-  // returned in switch statement
+  // NB: just the default case of the outermost switch from here on;
+  // should otherwise have returned in switch statement
   let $(f,r) = anal_Rexp(env,inflow,e);
   f = readthrough_unique_rvals(e->loc,f); // read test expr
   switch(f) {
@@ -1874,6 +1901,7 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     case &Esc(NoneIL): 	
       Tcutil::terr(e->loc,"expression may not be initialized");
       return $(BottomFL,BottomFL);
+    /* XXX another place to add VirtAddrOf fallthru */
     case &UnknownR(il): return splitzero(env,inflow,f,e,il);
     case &Esc(_):       return $(f,f);
     case &TagCmps(_):   return $(f,f); // may be better to splitzero?

@@ -4138,8 +4138,9 @@ bool is_noalias_pointer(type_t t) {
 }
 
 bool is_noalias_pointer_or_aggr(type_t t) {
+  let t = compress(t);
   if (is_noalias_pointer(t)) return true;
-  switch (compress(t)) {
+  switch (t) {
   case &TupleType(qts):
     while (qts != NULL) {
       if (is_noalias_pointer_or_aggr((*qts->hd)[1])) return true;
@@ -4238,114 +4239,9 @@ static bool is_noalias_field(type_t t, field_name_t f) {
   }
 }
 
-#ifndef NO_PATHS
 // returns true if the path [e] is entirely unique.  I.e. **x is unique
 // if x has type (e.g.) int *`U*`U*`U x but not if it has type (e.g.)
 // int *`U*`H*`U x
-static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
-  switch (e->r) {
-  case &Increment_e(_,_):
-  case &And_e(_,_):
-  case &Or_e(_,_):
-  case &Throw_e(_):
-  case &Address_e(_):
-    // address of a `U pointer is not unique
-  case &Sizeoftyp_e(_):
-  case &Sizeofexp_e(_):
-  case &Offsetof_e(_,_):
-  case &Gentyp_e(_,_):
-  case &CompoundLit_e(_,_):
-  case &Comprehension_e(_,_,_,_):
-  case &Array_e(_):
-  case &Enum_e(_,_,_):
-  case &AnonEnum_e(_,_,_):
-  case &Swap_e(_,_):
-    // has void type
-  case &Var_e(_,&Global_b(_)): 
-    // accessing anything via a global is never a unique path
-  case &Primop_e(_,_): return false;
-
-  case &Tunion_e(_,_,_):
-  case &Tuple_e(_):  
-  case &Struct_e(_,_,_,_):
-  case &AnonStruct_e(_,_):
-  case &Const_e(_):
-  case &Malloc_e(_):
-  case &New_e(_,_):
-  case &Var_e(_,&Local_b(_)):
-  case &Var_e(_,&Pat_b(_)):
-  case &Var_e(_,&Param_b(_)):
-    return ignore_leaf || is_noalias_pointer_or_aggr(e->topt->v);
-  case &Conditional_e(_,e1,_): fallthru(e1);
-  case &SeqExp_e(_,e1): fallthru(e1);
-  case &AssignOp_e(e1,_,_):
-    return is_noalias_path_aux(e1,ignore_leaf);
-  case &FnCall_e(e1,_,_):
-    switch (compress(e1->topt->v)) {
-    case &FnType(FnInfo(_,_,rt,_,_,_,_,_)):
-      return ignore_leaf || is_noalias_pointer_or_aggr(rt);
-    case &PointerType(PtrInfo(t,_,_)):
-      switch (compress(t)) {
-      case &FnType(FnInfo(_,_,rt,_,_,_,_,_)):
-	return ignore_leaf || is_noalias_pointer_or_aggr(rt);
-      default: break;
-      }
-      fallthru;
-    default: Tcutil::impos("Fncall has non function type %s",
-			   typ2string(e1->topt->v));
-    }
-  case &Cast_e(t,e1,_,_):
-    return is_noalias_pointer_or_aggr(t) && is_noalias_path_aux(e1,true);
-  case &Deref_e(e1):
-    return (ignore_leaf || is_noalias_pointer_or_aggr(e->topt->v)) && 
-           is_noalias_path_aux(e1, false);
-  case &AggrArrow_e(e1,f):
-    switch (compress(e1->topt->v)) {
-    case &PointerType(PtrInfo(t2,_,_)): 
-      return (ignore_leaf || is_noalias_field(t2,f)) &&
-	     is_noalias_path_aux(e1,false);
-    default: Tcutil::impos("is_noalias_path_aux: -> on non-pointer");
-    }
-    return false;
-  case &AggrMember_e(e1,f):
-    return (ignore_leaf || is_noalias_field(e1->topt->v,f)) &&
-      is_noalias_path_aux(e1,false);
-  case &Subscript_e(e1,e2):
-    switch (compress(e1->topt->v)) {
-    case &PointerType(PtrInfo(t,_,_)):
-      return (ignore_leaf || is_noalias_pointer_or_aggr(t)) &&
-	is_noalias_path_aux(e1,false);
-    case &TupleType(ts): 
-      let $(i,known) = Evexp::eval_const_uint_exp(e2);
-      if(!known) Tcutil::impos("is_noalias_path_aux: non-constant subscript");
-      try {
-	let t = (*List::nth(ts,i))[1];
-	return (ignore_leaf || is_noalias_pointer_or_aggr(t)) &&
-	  is_noalias_path_aux(e1,false);
-      } catch { case Nth:
-	return Tcutil::impos("is_noalias_path_aux: out-of-bounds subscript");
-      }
-    default: Tcutil::impos("is_noalias_path_aux: subscript on non-pointer/tuple");
-    }
-  case &StmtExp_e(s):
-    // keep looking for the final expression of the statement,
-    //   and recurse into that to find the unique path
-    while(true) {
-      switch(s->r) {
-      case &Seq_s(s1,s2): s = s2; break;
-      case &Decl_s(d,s1): s = s1; break;
-      case &Exp_s(e): return is_noalias_path_aux(e,ignore_leaf);
-      default: Tcutil::impos("is_noalias_stmt_exp: ill-formed StmtExp");
-      }
-    }
-  default: Tcutil::impos("Called is_noalias_path_aux with bogus exp |%s|\n",
-			 exp2string(e));
-  }  
-}
-#else
-// the complete version of this is above; this version does not
-// consider nested pointers, but only aggregates and direct locations.
-// This forces unique pointers in structures to be swapped.
 static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
   switch (e->r) {
   case &Increment_e(_,_):
@@ -4364,23 +4260,37 @@ static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
   case &AnonEnum_e(_,_,_):
   case &Swap_e(_,_): // has void type
   case &Var_e(_,&Global_b(_)): // via a global is never a unique path
-
-  // Pointer paths are not allowed yet ...
-  case &AggrArrow_e(_,_): 
-  case &Deref_e(_):
-
   case &Primop_e(_,_): return false;
-
-//   case &AggrMember_e(_,_):
-//   case &Subscript_e(_,_):
-  // These are always directly available, so need to be considered part
-  // of a unique path.
+#ifdef NO_POINTER_PATHS
+  case &Deref_e(_):
+  case &AggrArrow_e(_,_): return false;
+#else
+  case &Deref_e(e1):
+    return (ignore_leaf || is_noalias_pointer_or_aggr(e->topt->v)) && 
+           is_noalias_path_aux(e1, false);
+  case &AggrArrow_e(e1,f):
+    switch (compress(e1->topt->v)) {
+    case &PointerType(PtrInfo(t2,_,_)): 
+      return (ignore_leaf || is_noalias_field(t2,f)) &&
+	     is_noalias_path_aux(e1,false);
+    default: Tcutil::impos("is_noalias_path_aux: -> on non-pointer");
+    }
+    return false;
+#endif
+  // Flat aggregates are always directly available, so are considered part
+  // of a unique path if they contain unique pointers
   case &AggrMember_e(e1,f):
     return (ignore_leaf || is_noalias_field(e1->topt->v,f)) &&
       is_noalias_path_aux(e1,false);
   case &Subscript_e(e1,e2):
     switch (compress(e1->topt->v)) {
-    case &PointerType(PtrInfo(t,_,_)): return false; // for now
+    case &PointerType(PtrInfo(t,_,_)):
+#ifdef NO_POINTER_PATHS
+      return false;
+#else
+      return (ignore_leaf || is_noalias_pointer_or_aggr(t)) &&
+	is_noalias_path_aux(e1,false);
+#endif
     case &TupleType(ts): 
       let $(i,known) = Evexp::eval_const_uint_exp(e2);
       if(!known) Tcutil::impos("is_noalias_path_aux: non-constant subscript");
@@ -4427,8 +4337,7 @@ static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
 			   typ2string(e1->topt->v));
     }
   case &Cast_e(t,e1,_,_): 
-    return is_noalias_pointer_or_aggr(t) &&
-           is_noalias_path_aux(e1,true);
+    return is_noalias_pointer_or_aggr(t) && is_noalias_path_aux(e1,true);
   case &StmtExp_e(s):
     // keep looking for the final expression of the statement,
     //   and recurse into that to find the unique path
@@ -4444,7 +4353,6 @@ static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
 			 exp2string(e));
   }
 }
-#endif
 bool is_noalias_path(exp_t e) {
   return is_noalias_path_aux(e,false);
 }

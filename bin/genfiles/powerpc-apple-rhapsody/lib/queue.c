@@ -971,14 +971,15 @@ void Cyc_Queue_clear(struct Cyc_Queue_Queue*q);void Cyc_Queue_clear(struct Cyc_Q
 q){q->front=0;q->rear=0;q->len=0;}void Cyc_Queue_remove(struct Cyc_Queue_Queue*q,
 void*v);void Cyc_Queue_remove(struct Cyc_Queue_Queue*q,void*v){struct Cyc_List_List*
 x;struct Cyc_List_List*y;for((x=q->front,y=0);x != 0;(y=x,x=x->tl)){if((void*)x->hd
-== v){if(q->front == x)q->front=x->tl;else{((struct Cyc_List_List*)_check_null(y))->tl=
-x->tl;}if(q->rear == x)q->rear=y;break;}}}struct Cyc_List_List*Cyc_Queue_rfilter_c(
-struct _RegionHandle*r,int(*f)(void*,void*),void*env,struct Cyc_Queue_Queue*q);
-struct Cyc_List_List*Cyc_Queue_rfilter_c(struct _RegionHandle*r,int(*f)(void*,void*),
-void*env,struct Cyc_Queue_Queue*q){return Cyc_List_rfilter_c(r,f,env,q->front);}
-int Cyc_Queue_length(struct Cyc_Queue_Queue*q);int Cyc_Queue_length(struct Cyc_Queue_Queue*
-q){return(int)q->len;}void Cyc_Queue_iter(void(*f)(void*),struct Cyc_Queue_Queue*q);
-void Cyc_Queue_iter(void(*f)(void*),struct Cyc_Queue_Queue*q){struct Cyc_List_List*
-x=q->front;for(0;x != 0;x=x->tl){f((void*)x->hd);}}void Cyc_Queue_app(void*(*f)(
-void*),struct Cyc_Queue_Queue*q);void Cyc_Queue_app(void*(*f)(void*),struct Cyc_Queue_Queue*
-q){struct Cyc_List_List*x=q->front;for(0;x != 0;x=x->tl){f((void*)x->hd);}}
+== v){-- q->len;if(q->front == x)q->front=x->tl;else{((struct Cyc_List_List*)
+_check_null(y))->tl=x->tl;}if(q->rear == x)q->rear=y;break;}}}struct Cyc_List_List*
+Cyc_Queue_rfilter_c(struct _RegionHandle*r,int(*f)(void*,void*),void*env,struct
+Cyc_Queue_Queue*q);struct Cyc_List_List*Cyc_Queue_rfilter_c(struct _RegionHandle*r,
+int(*f)(void*,void*),void*env,struct Cyc_Queue_Queue*q){return Cyc_List_rfilter_c(
+r,f,env,q->front);}int Cyc_Queue_length(struct Cyc_Queue_Queue*q);int Cyc_Queue_length(
+struct Cyc_Queue_Queue*q){return(int)q->len;}void Cyc_Queue_iter(void(*f)(void*),
+struct Cyc_Queue_Queue*q);void Cyc_Queue_iter(void(*f)(void*),struct Cyc_Queue_Queue*
+q){struct Cyc_List_List*x=q->front;for(0;x != 0;x=x->tl){f((void*)x->hd);}}void Cyc_Queue_app(
+void*(*f)(void*),struct Cyc_Queue_Queue*q);void Cyc_Queue_app(void*(*f)(void*),
+struct Cyc_Queue_Queue*q){struct Cyc_List_List*x=q->front;for(0;x != 0;x=x->tl){f((
+void*)x->hd);}}

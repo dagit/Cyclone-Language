@@ -218,7 +218,7 @@ extern bool is_noalias_pointer(type_t t);
 
 // returns true if this expression only deferences non-aliasable pointers
 // and if the ultimate result is a noalias pointer or aggregate
-#define NO_PATHS
+#define NO_POINTER_PATHS
 extern bool is_noalias_path(exp_t e);
 
 // returns true if this expression is an aggregate that contains
