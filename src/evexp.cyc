@@ -75,8 +75,11 @@ cnst_t eval_const_exp(exp e) {
     } else 
       cn = eval_const_binprimop(p,es->hd,es->tl->hd);
     break;
-  case Sizeof_e(t):
+  case Sizeoftyp_e(t):
     cn = eval_sizeof(t,e->loc);
+    break;
+  case Sizeofexp_e(e1):
+    cn = eval_sizeof(e1->topt->v,e1->loc);
     break;
   case Cast_e(t,e2):
     // FIX: this needs to be generalized

@@ -2264,8 +2264,8 @@ unary_expression:
 | '*' cast_expression     { $$=^$(deref_exp  ($2,LOC(@1,@2))); }
 | '+' cast_expression     { $$=$!2; }
 | unary_operator cast_expression { $$=^$(prim1_exp($1,$2,LOC(@1,@2))); }
-| SIZEOF '(' type_name ')'       { $$=^$(sizeof_exp((*$3)[2],LOC(@1,@4))); }
-| SIZEOF unary_expression        { $$=^$(prim1_exp(Size,$2,LOC(@1,@2))); }
+| SIZEOF '(' type_name ')'       { $$=^$(sizeoftyp_exp((*$3)[2],LOC(@1,@4))); }
+| SIZEOF unary_expression        { $$=^$(sizeofexp_exp($2,LOC(@1,@2))); }
 /* Cyc: throw, printf, fprintf, sprintf */
 | THROW unary_expression
     { $$=^$(throw_exp($2,LOC(@1,@2))); }

@@ -914,7 +914,7 @@ static exp make_struct(qvar x, typ struct_typ, stmt s,
   typ     t;
   if(pointer) {
     t  = cstar_typ(struct_typ, mt_tq);
-    let se = sizeof_exp(struct_typ,DL);
+    let se = sizeoftyp_exp(struct_typ,DL);
     eo = cast_exp(t, is_atomic ? malloc_atomic(se) : malloc_ptr(se), DL);
   } else {
     t  = struct_typ;
@@ -1373,7 +1373,8 @@ static void exp_to_c(env nv, exp e) {
       break;
     }
     break;
-  case Sizeof_e(t): e->r = Sizeof_e(typ_to_c_array(t)); break;
+  case Sizeoftyp_e(t): e->r = Sizeoftyp_e(typ_to_c_array(t)); break;
+  case Sizeofexp_e(e1): exp_to_c(nv,e1); break;
   case Deref_e(e1):
     exp_to_c(nv, e1);
     switch (compress(e1->topt->v)) {
@@ -1577,7 +1578,7 @@ static void exp_to_c(env nv, exp e) {
       }
       typ elt_typ=typ_to_c(old_elt_typ);
       let ptr_typ = cstar_typ(elt_typ,mt_tq);
-      let e2 = times_exp(sizeof_exp(elt_typ,DL),
+      let e2 = times_exp(sizeoftyp_exp(elt_typ,DL),
                          signed_int_exp(List::length(dles0),DL),DL);
       let e1 = malloc_exp(old_elt_typ,e2);
       let e0 = cast_exp(ptr_typ,e1,DL);
@@ -1622,9 +1623,10 @@ static void exp_to_c(env nv, exp e) {
     // FIX:  casts needed on exp_opts
     list_t<$(qvar,typ,exp_opt)@> decls =
       &List(&$(max,uint_t,(exp_opt)e1),null);
-    exp ainit = cast_exp(ptr_typ,malloc_exp(old_elt_typ,
-					    times_exp(sizeof_exp(elt_typ,DL),
-						      var_exp(max,DL),DL)),DL);
+    exp ainit = cast_exp(ptr_typ,
+                         malloc_exp(old_elt_typ,
+                                    times_exp(sizeoftyp_exp(elt_typ,DL),
+                                              var_exp(max,DL),DL)),DL);
     decls = &List(&$(a,ptr_typ,(exp_opt)ainit),decls);
     decls = &List(&$(x1,uint_t,null),decls);
     if (is_tagged_ptr) {
@@ -1732,7 +1734,7 @@ static void exp_to_c(env nv, exp e) {
       // value-carrying constructor
       // ({ struct qv_tag *x = (struct qv_tag*)malloc(sizeof(struct qv_tag));
       //    x->tag = i; x->f1 = e1; ...; x->fn = en; (t)x; })
-      let e2 = sizeof_exp(strct_typ,DL);
+      let e2 = sizeoftyp_exp(strct_typ,DL);
       let atomic = true;
       let rev_assign =
 	&List(assign_stmt(structarrow_exp(xexp,tag_sp,DL),
@@ -1785,7 +1787,7 @@ static void exp_to_c(env nv, exp e) {
       // ({ struct qv_tag *x = (struct qv_tag*)malloc(sizeof(struct qv_tag));
       //    *x = (struct qv_tag){->tag = i, ->f1 = e1, ..., ->fn = en}; (t)x; })
       let atomic = true;
-      let e2 = sizeof_exp(strct_typ,DL);
+      let e2 = sizeoftyp_exp(strct_typ,DL);
       list_t<$(list_t<designator>,exp)@> dles = null;
       for (int i = 1; es != null; es = es->tl, i++) {
 	if (!atomic_typ(es->hd->topt->v)) atomic = false;
@@ -1813,7 +1815,7 @@ static void exp_to_c(env nv, exp e) {
 
   case Malloc_e(Typ_m(t)): 
     typ t_c = typ_to_c(t);
-    e->r = malloc_exp(t, sizeof_exp(t_c,DL))->r;
+    e->r = malloc_exp(t, sizeoftyp_exp(t_c,DL))->r;
     break;
 
   case Malloc_e(_): toc_impos("unimplemented Malloc_e form"); break;

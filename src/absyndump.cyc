@@ -424,8 +424,11 @@ void dumpexp_prec(int inprec, exp e) {
   case Address_e(e1):
     dump_char('&'); dumpexp_prec(myprec,e1); break;
 
-  case Sizeof_e(t):
+  case Sizeoftyp_e(t):
     dump("sizeof("); dumptyp(t); dump_char(')'); break;
+
+  case Sizeofexp_e(e1):
+    dump("sizeof("); dumpexp_prec(myprec,e1); dump_char(')'); break;
 
   case Deref_e(e1):
     dump_char('*'); dumpexp_prec(myprec,e1); break;

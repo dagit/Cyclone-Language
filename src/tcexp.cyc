@@ -1220,7 +1220,8 @@ static typ tcFill(tenv_t te, seg_t loc, typ *`r topt, exp e) {
 static bool cnst_exp(tenv te, bool var_okay, exp e) {
   switch (e->r) {
   case Const_e(_):  return true;
-  case Sizeof_e(t): return true;
+  case Sizeoftyp_e(t): return true;
+  case Sizeofexp_e(e1): return cnst_exp(te,true,e1);
 
   case Var_e(qv,_):
     // NB: top-level function names and arrays are "constant"
@@ -1408,7 +1409,10 @@ static void tcExpNoInst(tenv te, typ *`r topt, exp e) {
     t = tcCast(te,loc,topt,t1,e1); break;
   case Address_e(e1):
     t = tcAddress(te,loc,topt,e1); break;
-  case Sizeof_e(t1):
+  case Sizeofexp_e(e1):
+    let t1 = tcExpNoPromote(te, null, e1);
+    t = tcSizeof(te,loc,topt,t1); break;
+  case Sizeoftyp_e(t1):
     t = tcSizeof(te,loc,topt,t1); break;
   case Deref_e(e1):
     t = tcDeref(te,loc,topt,e1); break;

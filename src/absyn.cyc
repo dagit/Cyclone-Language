@@ -306,7 +306,8 @@ exp cast_exp(typ t, exp e, seg_t loc) {
 }
 exp throw_exp(exp e,   seg_t loc) { return new_exp(Throw_e(e), loc); }
 exp address_exp(exp e, seg_t loc) { return new_exp(Address_e(e), loc); }
-exp sizeof_exp(typ t,  seg_t loc) { return new_exp(Sizeof_e(t), loc); }
+exp sizeoftyp_exp(typ t, seg_t loc) { return new_exp(Sizeoftyp_e(t), loc); }
+exp sizeofexp_exp(exp e, seg_t loc) { return new_exp(Sizeofexp_e(e), loc); }
 exp deref_exp(exp e,   seg_t loc) { return new_exp(Deref_e(e), loc); }
 exp structmember_exp(exp e, field_name n, seg_t loc) {
   return new_exp(StructMember_e(e,n), loc); 

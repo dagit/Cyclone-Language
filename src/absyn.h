@@ -321,7 +321,8 @@ namespace Absyn {
     Instantiate_e(exp,list_t<typ>);
     Cast_e(typ,exp);
     Address_e(exp);
-    Sizeof_e(typ);
+    Sizeoftyp_e(typ);
+    Sizeofexp_e(exp);
     Deref_e(exp);
     StructMember_e(exp,field_name);
     StructArrow_e(exp,field_name);
@@ -625,7 +626,8 @@ namespace Absyn {
   extern exp instantiate_exp(exp, list_t<typ>, seg_t);
   extern exp cast_exp(typ, exp, seg_t);
   extern exp address_exp(exp, seg_t);
-  extern exp sizeof_exp(typ t, seg_t);
+  extern exp sizeoftyp_exp(typ t, seg_t);
+  extern exp sizeofexp_exp(exp e, seg_t);
   extern exp deref_exp(exp, seg_t);
   extern exp structmember_exp(exp, field_name, seg_t);
   extern exp structarrow_exp(exp, field_name, seg_t);

@@ -250,6 +250,7 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
   switch(e->r) {
 
   case NoInstantiate_e(e1): fallthru(e1);
+  case Sizeofexp_e(e1):     fallthru(e1);
   case Instantiate_e(e1,_): return abstract_exp(env, e1);
 
   // these things are fully initialized non-lvalues that "jump one way"
@@ -265,7 +266,7 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
 		  null);
 
   // these things are fully initialized non-lvalues, no access-path concerns
-  case Sizeof_e(_):           fallthru;
+  case Sizeoftyp_e(_):        fallthru;
   case Const_e(_):            fallthru;
   case Var_e(_,Funname_b(_)): fallthru;
     return mkSyn_tf(mkSkipAE(), null,          make_assigns(env,mkUnknownOp()));

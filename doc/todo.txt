@@ -26,8 +26,6 @@ BUG FIXES and UNSOUNDNESSES:
 
 MISSING THINGS NEEDED TO PORT REAL CODE:
 ----------------------------------------
-* need to add GCC-style attributes for functions, structs, variables, etc.
-
 * Need to port more C libraries
 
 * We should add unions in, and allow them when the different variants
@@ -48,6 +46,10 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
   codes have functions that write to log files or something like that
   and have their own wrapper functions for fprintf/fscanf.  So I think
   we have to bite the bullet and provide some support for this.
+
+* command line arguments like GCC's with the proper defaults 
+  (e.g., -tc -toc -up should be default.)  Also, should support
+  passing flags through to GCC and the pre-processor.
 
 THINGS NEEDED TO SIMPLIFY PORTING:
 ----------------------------------

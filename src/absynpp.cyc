@@ -563,7 +563,8 @@ int exp_prec(exp e) {
   case Instantiate_e(e2,_): return exp_prec(e2);
   case Cast_e(_,_):          return 120;
   case Address_e(_):       return 130;
-  case Sizeof_e(_):        return 130;
+  case Sizeoftyp_e(_):     return 130;
+  case Sizeofexp_e(_):     return 130;
   case Deref_e(_):         return 130;
   case StructMember_e(_,_):  return 140;
   case StructArrow_e(_,_):   return 140; // ???
@@ -673,10 +674,13 @@ doc_t exp2doc_prec(int inprec, exp e) {
     s = cat2(text("&"),
              exp2doc_prec(myprec,e1));
     break;
-  case Sizeof_e(t):
+  case Sizeoftyp_e(t):
     s = cat3(text("sizeof("),
              typ2doc(t),
              text(")"));
+    break;
+  case Sizeofexp_e(e1):
+    s = cat3(text("sizeof("),exp2doc(e1),text(")"));
     break;
   case Deref_e(e1):
     s = cat2(text("*"),
