@@ -22,10 +22,11 @@
 #include <list.h>
 #include <ctype.h>
 #include <string.h>
+#include <strings.h>
 #include <stdio.h> // for size_t
 #include <math.h> //  for pow
 
-namespace String;
+namespace String {
 using Core;
 using List;
 using Stdio; // for size_t
@@ -65,10 +66,6 @@ static size_t int_strleno(const char ?`r1 s, int ofs, string_t error) {
 ///////////////////////// COMPARISONS
 static int case_cmp(char c1, char c2) {
   return (c1-c2);
-}
-
-static int nocase_cmp(char c1, char c2) {
-  return case_cmp((char)Ctype::toupper(c1),(char)Ctype::toupper(c2));
 }
 
 static int cmp(const char ?`r1 s1, int ofs1, size_t len1,
@@ -123,14 +120,6 @@ int strncmp(const char ?`r1 s1, const char?`r2 s2, size_t n) {
   size_t len2 = int_strleno(s2,0,"String::strncmp");
   return ncmp(s1,0,len1,s2,0,len2,n,case_cmp);
 }
-
-// Like strncmp, but case insensitive.  GCC has it but not C.
-int strncasecmp(const char ?`r1 s1, const char ?`r2 s2, size_t n) {
-  size_t len1 = int_strleno(s1,0,"String::strncasecmp");
-  size_t len2 = int_strleno(s2,0,"String::strncasecmp");
-  return ncmp(s1,0,len1,s2,0,len2,n,nocase_cmp);
-}
-
 
 // Like strcmp but don't consider zeros (null characters) as marking
 // the end of strings.
@@ -631,4 +620,31 @@ double to_double(const char ?`r1 s, int *`r offset) {
   }
   if (offset != null) *offset = i;
   return ans*sn;
+}
+
+}
+
+/* Perhaps the remainder should be broken out into a separate file */
+namespace Strings {
+
+// Like strcmp, but case insensitive.
+int strcasecmp(const char ?`r1 s1, const char ?`r2 s2) {
+  if (s1 == s2)
+    return 0;
+  size_t len1 = String::int_strleno(s1,0,"Strings::strcasecmp");
+  size_t len2 = String::int_strleno(s2,0,"Strings::strcasecmp");
+  return String::cmp(s1,0,len1,s2,0,len2,String::case_cmp);
+}
+
+static int nocase_cmp(char c1, char c2) {
+  return String::case_cmp((char)Ctype::toupper(c1),(char)Ctype::toupper(c2));
+}
+
+// Like strncmp, but case insensitive.
+int strncasecmp(const char ?`r1 s1, const char ?`r2 s2, size_t n) {
+  size_t len1 = String::int_strleno(s1,0,"Strings::strncasecmp");
+  size_t len2 = String::int_strleno(s2,0,"Strings::strncasecmp");
+  return String::ncmp(s1,0,len1,s2,0,len2,n,nocase_cmp);
+}
+
 }

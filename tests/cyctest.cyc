@@ -4,6 +4,7 @@
 #include <set.h>
 #include <hashtable.h>
 #include <string.h>
+#include <strings.h>
 #include <buffer.h>
 #include <queue.h>
 #include <rope.h>
@@ -503,7 +504,7 @@ void string_test() {
   okfail(String::strrchr((mstring_t)s2+2,'o')==null);
   okfail(String::strncmp((mstring_t)s2+1,"xxxobaax"+3,4)==0);
   okfail(String::strncmp((mstring_t)s2+1,"xxxobaax"+3,5)!=0);
-  okfail(String::strncasecmp((mstring_t)s2+1,"xxxObAax"+3,4)==0);
+  okfail(Strings::strncasecmp((mstring_t)s2+1,"xxxObAax"+3,4)==0);
   let s3 = String::strdup(s2);
   okfail(String::strcmp(s3,s2)==0);
 

@@ -71,25 +71,17 @@ unsigned char* _findenv( unsigned char*, int*)  __attribute__(( cdecl )) ;
 extern unsigned char* _findenv_r( struct Cyc__reent*, unsigned char*, int*)
  __attribute__(( cdecl )) ; extern int putenv( unsigned char* __string)
  __attribute__(( cdecl )) ; extern int _putenv_r( struct Cyc__reent*,
-unsigned char* __string)  __attribute__(( cdecl )) ; extern int setenv(
-unsigned char* __string, unsigned char* __value, int __overwrite)
- __attribute__(( cdecl )) ; extern int _setenv_r( struct Cyc__reent*,
-unsigned char* __string, unsigned char* __value, int __overwrite)
- __attribute__(( cdecl )) ; extern double strtod( unsigned char*, unsigned char**)
- __attribute__(( cdecl )) ; extern int strtol( unsigned char*, unsigned char**,
-int base)  __attribute__(( cdecl )) ; extern unsigned int strtoul( unsigned char*,
-unsigned char**, int base)  __attribute__(( cdecl )) ; extern void unsetenv(
-unsigned char* __string)  __attribute__(( cdecl )) ; extern void _unsetenv_r(
-struct Cyc__reent*, unsigned char* __string)  __attribute__(( cdecl )) ; double
-Cyc_Stdlib_atof( struct _tagged_arr _nptr){ return atof( string_to_Cstring(
-_nptr));} int Cyc_Stdlib_atoi( struct _tagged_arr _nptr){ return atoi(
-string_to_Cstring( _nptr));} int Cyc_Stdlib_atol( struct _tagged_arr _nptr){
-return atol( string_to_Cstring( _nptr));} struct _tagged_arr Cyc_Stdlib_getenv(
-struct _tagged_arr name){ return Cstring_to_string( getenv( string_to_Cstring(
-name)));} int Cyc_Stdlib_putenv( struct _tagged_arr s){ return putenv(
-string_to_Cstring( s));} int Cyc_Stdlib_setenv( struct _tagged_arr s, struct
-_tagged_arr v, int overwrite){ return setenv( string_to_Cstring( s),
-string_to_Cstring( v), overwrite);} static void Cyc_Stdlib_check_valid_cstring(
+unsigned char* __string)  __attribute__(( cdecl )) ; extern double strtod(
+unsigned char*, unsigned char**)  __attribute__(( cdecl )) ; extern int strtol(
+unsigned char*, unsigned char**, int base)  __attribute__(( cdecl )) ; extern
+unsigned int strtoul( unsigned char*, unsigned char**, int base)
+ __attribute__(( cdecl )) ; double Cyc_Stdlib_atof( struct _tagged_arr _nptr){
+return atof( string_to_Cstring( _nptr));} int Cyc_Stdlib_atoi( struct
+_tagged_arr _nptr){ return atoi( string_to_Cstring( _nptr));} int Cyc_Stdlib_atol(
+struct _tagged_arr _nptr){ return atol( string_to_Cstring( _nptr));} struct
+_tagged_arr Cyc_Stdlib_getenv( struct _tagged_arr name){ return
+Cstring_to_string( getenv( string_to_Cstring( name)));} int Cyc_Stdlib_putenv(
+struct _tagged_arr s){ return putenv( string_to_Cstring( s));} static void Cyc_Stdlib_check_valid_cstring(
 struct _tagged_arr s){ if( s.curr ==(( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){(
 int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp0=( struct Cyc_Core_InvalidArg_struct*)
 GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp0[ 0]=({ struct Cyc_Core_InvalidArg_struct
@@ -118,5 +110,4 @@ n);{ unsigned char* c= underlying_Cstring( n); unsigned char* e= endptr == 0? 0:
 c; unsigned int r= strtoul( c,( unsigned char**)& e, base); if( endptr != 0){
 int m=( int)(( unsigned int) e -( unsigned int) c);*(( struct _tagged_arr*)
 _check_null( endptr))= _tagged_arr_plus( n, sizeof( unsigned char), m);} return
-r;}} void Cyc_Stdlib_unsetenv( struct _tagged_arr s){ unsetenv(
-string_to_Cstring( s));}
+r;}}

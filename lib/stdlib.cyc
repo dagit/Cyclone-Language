@@ -17,14 +17,18 @@ namespace Cstdlib {
     Cstring _EXFUN(_findenv_r,(struct _reent *, _CONST Cstring, int *));
     int _EXFUN(putenv,(const Cstring __string));
     int	_EXFUN(_putenv_r,(struct _reent @, const Cstring __string));
+/* Commented out because it's not available in IRIX
     int	_EXFUN(setenv,(const Cstring __string, const Cstring __value, int __overwrite));
     int	_EXFUN(_setenv_r,(struct _reent @, const Cstring __string, const Cstring __value, int __overwrite));
+*/
     double _EXFUN(strtod,(Cstring, Cstring *`r));
     long _EXFUN(strtol,(Cstring, Cstring *`r, int base));
     unsigned long _EXFUN(strtoul,(Cstring, Cstring *`r, int base));
 #ifdef __CYGWIN__
+/* Commented out because it's not available in IRIX
     void _EXFUN(unsetenv,(const Cstring __string));
     void _EXFUN(_unsetenv_r,(struct _reent @, const Cstring __string));
+*/
 #endif
 
 #define s2c(x) (string_to_Cstring(x))
@@ -71,9 +75,11 @@ namespace Stdlib {
     return Cstdlib::_putenv_r(r,s2c(s));
   }
    */
+/* Commented out because it's not available in IRIX
   int setenv(string_t s, string_t v, int overwrite) {
     return Cstdlib::setenv(s2c(s),s2c(v),overwrite);
   }
+*/
   /*
   int _setenv_r(struct _reent @r, string s, string v, int overwrite) {
     return Cstdlib::_setenv_r(r,s2c(s),s2c(v),overwrite);
@@ -142,13 +148,13 @@ namespace Stdlib {
   }
 
 #ifdef __CYGWIN__
+/* Commented out because it's not available in IRIX
   void unsetenv(string_t s) {
     Cstdlib::unsetenv(s2c(s));
   }
-  /*
   void _unsetenv_r(struct _reent @r, string s) {
     Cstdlib::_unsetenv_r(r,s2c(s));
   }
-  */
+*/
 #endif
 }

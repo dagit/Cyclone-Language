@@ -106,6 +106,7 @@ CYCLONE_H:=arg.h\
 	stdio.h\
         stdlib.h\
         string.h\
+        strings.h\
         sys/socket.h\
         time.h\
         xarray.h\
