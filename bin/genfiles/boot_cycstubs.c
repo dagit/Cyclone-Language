@@ -372,45 +372,52 @@ _get_zero_arr_size_voidstar(const void **orig_x, unsigned int orig_offset) {
 
 /* Does in-place addition of a zero-terminated pointer (x += e and ++x).  
    Note that this expands to call _zero_arr_plus_<type>_fn. */
-static _INLINE void 
+static _INLINE char *
 _zero_arr_inplace_plus_char_fn(char **x, int orig_i,const char *filename,unsigned lineno) {
   *x = _zero_arr_plus_char_fn(*x,1,orig_i,filename,lineno);
+  return *x;
 }
 #define _zero_arr_inplace_plus_char(x,i) \
   _zero_arr_inplace_plus_char_fn(x,i,__FILE__,__LINE__)
-static _INLINE void 
+static _INLINE short *
 _zero_arr_inplace_plus_short_fn(short **x, int orig_i,const char *filename,unsigned lineno) {
   *x = _zero_arr_plus_short_fn(*x,1,orig_i,filename,lineno);
+  return *x;
 }
 #define _zero_arr_inplace_plus_short(x,i) \
   _zero_arr_inplace_plus_short_fn(x,i,__FILE__,__LINE__)
-static _INLINE void 
+static _INLINE int *
 _zero_arr_inplace_plus_int(int **x, int orig_i,const char *filename,unsigned lineno) {
   *x = _zero_arr_plus_int_fn(*x,1,orig_i,filename,lineno);
+  return *x;
 }
 #define _zero_arr_inplace_plus_int(x,i) \
   _zero_arr_inplace_plus_int_fn(x,i,__FILE__,__LINE__)
-static _INLINE void 
+static _INLINE float *
 _zero_arr_inplace_plus_float_fn(float **x, int orig_i,const char *filename,unsigned lineno) {
   *x = _zero_arr_plus_float_fn(*x,1,orig_i,filename,lineno);
+  return *x;
 }
 #define _zero_arr_inplace_plus_float(x,i) \
   _zero_arr_inplace_plus_float_fn(x,i,__FILE__,__LINE__)
-static _INLINE void 
+static _INLINE double *
 _zero_arr_inplace_plus_double_fn(double **x, int orig_i,const char *filename,unsigned lineno) {
   *x = _zero_arr_plus_double_fn(*x,1,orig_i,filename,lineno);
+  return *x;
 }
 #define _zero_arr_inplace_plus_double(x,i) \
   _zero_arr_inplace_plus_double_fn(x,i,__FILE__,__LINE__)
-static _INLINE void 
+static _INLINE long double *
 _zero_arr_inplace_plus_longdouble_fn(long double **x, int orig_i,const char *filename,unsigned lineno) {
   *x = _zero_arr_plus_longdouble_fn(*x,1,orig_i,filename,lineno);
+  return *x;
 }
 #define _zero_arr_inplace_plus_longdouble(x,i) \
   _zero_arr_inplace_plus_longdouble_fn(x,i,__FILE__,__LINE__)
-static _INLINE void 
+static _INLINE void *
 _zero_arr_inplace_plus_voidstar_fn(void ***x, int orig_i,const char *filename,unsigned lineno) {
   *x = _zero_arr_plus_voidstar_fn(*x,1,orig_i,filename,lineno);
+  return *x;
 }
 #define _zero_arr_inplace_plus_voidstar(x,i) \
   _zero_arr_inplace_plus_voidstar_fn(x,i,__FILE__,__LINE__)
