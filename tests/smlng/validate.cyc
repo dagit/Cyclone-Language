@@ -40,15 +40,17 @@ int main(int argc, char ??argv) {
     if (c1 == EOF)
       if (c2 == EOF) break;
       else {
-        printf("Error: %s ends after %d characters, while %s goes on\n",
+        printf("Error: %s ends after %d characters, "
+	       "while %s goes on at char %d\n",
                argv[1],N1::input_pos,
-               (argc<3)?(string_t)"stdin":argv[2]);
+               (argc<3)?(string_t)"stdin":argv[2],N2::input_pos);
         exit(1);
       }
     else if (c2 == EOF) {
-      printf("Error: %s ends after %d characters, while %s goes on\n",
+      printf("Error: %s ends after %d characters, "
+	     "while %s goes on at char %d\n",
              (argc<3)?(string_t)"stdin":argv[2],
-             N2::input_pos,argv[1]);
+             N2::input_pos,argv[1],N1::input_pos);
       exit(1);
     }
     if (c1 != c2) {

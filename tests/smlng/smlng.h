@@ -50,11 +50,11 @@ extern tunion Document {
 #define DONT_KNOW 255
 void dump(Buffer::buf_t b,doc_t d);
 extern struct Context {
-  bool B :1;
-  bool EM :1;
-  bool I :1;
-  bool S :1;
-  bool TT :1;
+  unsigned int B :1;
+  unsigned int EM :1;
+  unsigned int I :1;
+  unsigned int S :1;
+  unsigned int TT :1;
   char U :2;    // [0-3]
   char size;    // [0-9]
   char color;   // [r_tag-w_tag]
