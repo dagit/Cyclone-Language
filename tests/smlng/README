@@ -1,0 +1,13 @@
+Our entry consists of shell-script that drives a couple of executable
+files, smlng and validate.  The former file performs the optimizations
+while the latter file makes sure that the output is legal input.
+The shellscript makes sure we don't exhaust our time limit and that
+our output file is both correct and at least as small as the input.
+
+The shellscript assumes some packages are available, including bash,
+awk, du, and cat.  It looks as if the RPMS for these packages are
+installed at INRIA, but we must assume that the PATH is set up properly
+to make them available.  We did not have any RedHat 7.1 machines to test
+on, so we are hoping RedHat 6.2 executables will still work.
+
+It was fun to work on!
