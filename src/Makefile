@@ -82,7 +82,7 @@ $(OUT_PREFIX)lex.cyc : lex.cyl $(CYCLEX)
 $(OUT_PREFIX)parse_tab.o: $(OUT_PREFIX)parse_tab.cyc $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYC_FLAGS) -c $< 
 $(OUT_PREFIX)parse_tab.cyc: parse.y $(CYCBISON)
-	$(CYCBISON) --no-lines -d $< -o $@
+	$(CYCBISON) -d $< -o $@
 #$(OUT_PREFIX)parse_tab.h: parse.y $(CYCBISON)
 #	$(CYCBISON) -v -d $< -o $(OUT_PREFIX)parse_tab.cyc
 parse_tab.h: parse.y $(CYCBISON)

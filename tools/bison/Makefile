@@ -55,7 +55,6 @@ install: all $(BINDIR)/$(PROG)
 
 $(BINDIR)/$(PROG): $(PROG)
 	cp $(PROG) $(BINDIR)
-	cp $(PROG) /usr/local/bin
 
 all: $(PROG)
 
