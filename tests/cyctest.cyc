@@ -252,6 +252,10 @@ void array_test() {
   int z4[?] = Array::map(add2,Array::extract(z2,2,&Core::Opt(4)));
   Array::imp_map(add2,z4);
   okfail(0==array_cmp(int_cmp,z4,Array::extract(z2,6,null)));
+  $(int,int) z5[?] = new {for i < 10 : $((int)(i),(int)(i)) };
+  okfail(10==sizeof(z5));
+  $(int [?],int [?]) pair = Array::split(z5);
+  okfail(0==array_cmp(int_cmp,pair[0],pair[1]));
   test_end();
 }
 
