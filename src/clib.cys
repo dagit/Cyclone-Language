@@ -13,6 +13,9 @@ fpos_t
 size_t
 wchar_t
 {
+#include <core.h>
+namespace Std {
+using Core;
 /* The name __sFILE is derived from Cygwin but we have our own
    implementation in runtime_cyc.c */
 extern struct __sFILE;  
@@ -230,6 +233,7 @@ extern int vsscanf(const char ?`r src, const char ?`r1 fmt,
   __attribute__((format(scanf,2,0)))
   ;
 }
+}
 
 stdlib.h:
 EXIT_FAILURE
@@ -249,6 +253,11 @@ WIFSTOPPED
 WSTOPSIG
 WTERMSIG
 {
+/* Get size_t from <stddef.h> */
+#include <cstddef.h>
+#include <core.h>
+
+namespace Std {
 extern "C" {
 int system(Cstring);
 
@@ -307,11 +316,63 @@ extern long strtol(const char ?`r n, const char ?`r *`r2 end, int base);
 /* Convert a string to an unsigned long integer.  */
 extern unsigned long strtoul(const char ?`r n,const char ?`r *`r2 end, int base);
 }
+}
 
 stddef.h:
 ptrdiff_t
 size_t
 {}
+
+sys/stat.h:
+stat
+**OMIT_VARIABLE stat
+S_IFBLK
+S_IFCHR
+S_IFIFO
+S_IFREG
+S_IFDIR
+S_IFLNK
+S_IFSOCK
+S_IRWXU
+S_IRUSR
+S_IWUSR
+S_IXUSR
+S_IRWXG
+S_IRGRP
+S_IWGRP
+S_IXGRP
+S_IRWXO
+S_IROTH
+S_IWOTH
+S_IXOTH
+S_ISUID
+S_ISGID
+S_ISVTX
+S_ISBLK
+S_ISCHR
+S_ISDIR
+S_ISFIFO
+S_ISREG
+S_ISLNK
+S_ISSOCK
+S_TYPEISMQ
+S_TYPEISSEM
+S_TYPEISSHM
+S_TYPEISTMO
+{
+#include <Core.h> // for string_t
+namespace Std {
+  extern int chmod(string_t, mode_t);
+  extern "C" int fchmod(int, mode_t);
+  extern "C" int fstat(int fd, struct stat @buf);
+  extern int lstat(string_t filename, struct stat @buf);
+  extern int mkdir(string_t pathname, mode_t mode);
+  extern int mkfifo(string_t pathname, mode_t mode);
+  extern int mknod(string_t pathname, mode_t mode, dev_t);
+  extern int stat(string_t filename, struct stat @buf);
+  extern "C" mode_t umask(mode_t mask);
+}
+}
 
 sys/types.h:
 blkcnt_t
@@ -327,3 +388,4 @@ size_t
 ssize_t
 time_t
 uid_t
+{}

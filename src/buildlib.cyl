@@ -22,6 +22,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <ctype.h>
 #include "absyn.h"
 #include "absynpp.h"
 #include "parse.h"
@@ -61,7 +62,7 @@ extern int suck_macroname(Lexbuf<`a>);
 extern int suck_restofline(Lexbuf<`a>);
 string_t current_line = NULL;
 
-typedef $(string_t,list_t<stringptr_t>,string_t) *spec_t;
+typedef $(string_t,list_t<stringptr_t>,list_t<stringptr_t>,string_t) *spec_t;
 extern spec_t spec(Lexbuf<`a>);
 extern int startsymbols(Lexbuf<`a>);
 extern int block(Lexbuf<`a>);
@@ -69,6 +70,7 @@ extern int block_string(Lexbuf<`a>);
 extern int block_comment(Lexbuf<`a>);
 string_t current_header = NULL;
 list_t<stringptr_t> current_symbols = NULL;
+list_t<stringptr_t> current_omit_symbols = NULL;
 struct Buffer::t *specblock = NULL;
 int braces_to_match = 0;
 
@@ -369,9 +371,10 @@ and spec "spec_t" = parse
   (string_t)substring(lexeme(lexbuf), 0,
                       lexeme_end(lexbuf)-lexeme_start(lexbuf)-1);
   current_symbols = NULL;
+  current_omit_symbols = NULL;
   specblock = Buffer::create(255);
   startsymbols(lexbuf);
-  return new $(current_header,current_symbols,
+  return new $(current_header,current_symbols,current_omit_symbols,
                (string_t)Buffer::contents((Buffer::T)specblock));
 }
 | [' ''\t''\n''\r']+
@@ -382,7 +385,19 @@ and spec "spec_t" = parse
 { return NULL; }
 
 and startsymbols = parse
-  ['A'-'Z''a'-'z''0'-'9''_']+
+  "**OMIT_VARIABLE" [' ''\t''\n''\r']+ ['A'-'Z''a'-'z''0'-'9''_']+
+{ let s = lexeme(lexbuf);
+  let j = strrchr(s,' ');
+  if (j == NULL) j = strrchr(s,'\t');
+  if (j == NULL) j = strrchr(s,'\n');
+  if (j == NULL) j = strrchr(s,'\r');
+  j = strpbrk(j,
+              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+              "abcdefghijklmnopqrstuvwxyz"
+              "0123456789_");
+  current_omit_symbols = new List(new (string_t)j,current_omit_symbols);
+  return startsymbols(lexbuf); }
+| ['A'-'Z''a'-'z''0'-'9''_']+
 { current_symbols = new List(new (string_t)lexeme(lexbuf),current_symbols);
   return startsymbols(lexbuf); }
 | [' ''\t''\n''\r']+
@@ -704,7 +719,7 @@ and block_comment = parse
       if (x->fields) {
         for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
           let f = fs->hd;
-          add_target(f->name);
+          //          add_target(f->name);
           scan_type(f->type);
           scan_exp_opt(f->width);
         }
@@ -775,6 +790,7 @@ and block_comment = parse
       fprintf(stderr,"Error: unexpected extern \"C\" declaration\n");
       exit(1); return NULL;
     }
+
     /* The cast is needed so the return type matches */
     return new $((_ @)current_source,*current_targets);
   }
@@ -852,6 +868,7 @@ and block_comment = parse
 
   int process_file(string_t filename, string_t dir,
                    list_t<stringptr_t<`H,`H>,`H> start_symbols,
+                   list_t<stringptr_t<`H,`H>,`H> omit_symbols,
                    string_t epilogue) {
     fprintf(stderr,
             "*********************************  working on %s...\n",filename);
@@ -920,12 +937,26 @@ and block_comment = parse
       let entry = scan_decl(d->hd);
       if (entry == NULL) continue;
       let &$(name,uses) = (_ @)entry; // force NULL check to get rid of warning
-      Hashtable::insert(t,name,uses);
+      /* Add the dependencies to the table.  Note that name might
+         already have an entry in the table -- there can be more than
+         one declaration for a name, e.g., struct stat and function
+         stat in sys/stat.h. */
+      let old;
+      try
+        old = Hashtable::lookup(t,name);
+      catch {
+      case Not_found: old = Set::empty(strptrcmp); break;
+      }
+      Hashtable::insert(t,name,Set::union_two(uses,old));
     }
 
     /* Compute reachable symbols */
     let reachable_set = reachable(start_symbols,t);
-    //    printf("There are %d reachable symbols\n",Set::cardinality(reachable_set));
+//    if (strcmp(filename,"sys/stat.h")==0) {
+//      printf("There are %d reachable symbols\n",
+//             Set::cardinality(reachable_set));
+//      Set::iter(pr,reachable_set);
+//    }
 
     /* Print reachable declarations */
     let reachable_decls = NULL;
@@ -935,11 +966,13 @@ and block_comment = parse
       switch (decl->r) {
       case &Var_d(x):
         let &$(_,v) = x->name;
-        name = v;
+        if (mem(strptrcmp,omit_symbols,v)) name = NULL;
+        else name = v;
         break;
       case &Fn_d(x):
         let &$(_,v) = x->name;
-        name = v;
+        if (mem(strptrcmp,omit_symbols,v)) name = NULL;
+        else name = v;
         break;
       case &Struct_d(x):
         if (!x->name) name = NULL;
@@ -978,6 +1011,28 @@ and block_comment = parse
     if (force_directory_prefixes(filename)) return 1;
     let out_file = fopen(filename,"w");
     if (out_file == NULL) return 1;
+    let dirname = Filename::dirname(filename);
+    let cfilename = 
+      (dirname.size == 0)?
+      (aprintf("c%s", Filename::basename(filename))):
+      (Filename::concat(dirname,
+                        aprintf("c%s", Filename::basename(filename))));
+    fprintf((FILE @)out_file,"#include <%s>\nusing Std;\n",cfilename);
+    fclose((FILE @)out_file);
+    out_file = fopen(cfilename, "w");
+    mstring_t ifdefmacro = aprintf("_%s_",filename);
+    for (let j = 0; j < ifdefmacro.size; j++) {
+      if (ifdefmacro[j] == '.' || ifdefmacro[j] == '/')
+        ifdefmacro[j] = '_';
+      else if (ifdefmacro[j] != '_' && ifdefmacro[j] != '/')
+        ifdefmacro[j] = (char)toupper(ifdefmacro[j]);
+    }
+    fprintf((FILE @)out_file,
+            "#ifndef %s\n"
+            "#define %s\n"
+            "namespace Std {\n",
+            ifdefmacro,
+            ifdefmacro);
     Absynpp::decllist2file(reachable_decls,(FILE @)out_file);
 
     /* Print reachable macros */
@@ -997,8 +1052,10 @@ and block_comment = parse
     }
     fclose(in_file);
     remove(preprocfile);
+    fprintf((FILE @)out_file,"}\n");
 
     fputs(epilogue,(FILE @)out_file);
+    fprintf((FILE @)out_file,"#endif\n");
     fclose((FILE @)out_file);
 
     fprintf(stderr,
@@ -1015,8 +1072,8 @@ and block_comment = parse
     let l = Lexing::from_file(in_file);
     let entry;
     while ( (entry = spec(l)) != NULL) {
-      let &$(headerfile,start_symbols,epilogue) = (_ @)entry;
-      if (process_file(headerfile,dir,start_symbols,epilogue))
+      let &$(headerfile,start_symbols,omit_symbols,epilogue) = (_ @)entry;
+      if (process_file(headerfile,dir,start_symbols,omit_symbols,epilogue))
         return 1;
     }
     fclose(in_file);
