@@ -173,6 +173,17 @@ static void set_lineno() {
   set_save_temps();
 }
 
+static void set_noboundschecks() {
+  add_ccarg("-DNO_CYC_BOUNDS_CHECKS");
+}
+static void set_nonullchecks() {
+  add_ccarg("-DNO_CYC_NULL_CHECKS");
+}
+static void set_nochecks() {
+  set_noboundschecks();
+  set_nonullchecks();
+}
+
 static void set_nocyc() {
   add_cyc_namespace_r = false;
   add_ccarg("-DNO_CYC_PREFIX");
@@ -856,6 +867,15 @@ int main(int argc, string_t<`H> ?`H argv) {
          new $("--lineno",false,"",
                new Unit_spec(set_lineno),
                "Generate line numbers for debugging"),
+         new $("--nochecks",false,"",
+               new Unit_spec(set_nochecks),
+               "Disable bounds/null checks"),
+         new $("--nonullchecks",false,"",
+               new Unit_spec(set_nonullchecks),
+               "Disable null checks"),
+         new $("--noboundschecks",false,"",
+               new Unit_spec(set_noboundschecks),
+               "Disable bounds checks"),
          new $("-use-cpp",false,"<path>",
                new String_spec(set_cpp),
                "Indicate which preprocessor to use"),

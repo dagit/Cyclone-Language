@@ -99,21 +99,31 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 //// Built-in Run-time Checks and company
 static inline 
 void * _check_null(void * ptr) {
+#ifndef NO_CYC_NULL_CHECKS
   if(!ptr)
     _throw_null();
+#endif
   return ptr;
 }
 static inline 
 char * _check_known_subscript_null(void * ptr, unsigned bound, 
 				   unsigned elt_sz, unsigned index) {
-  if(!ptr || index >= bound)
+#ifndef NO_CYC_NULL_CHECKS
+  if(!ptr)
     _throw_null();
+#endif
+#ifndef NO_CYC_BOUNDS_CHECKS
+  if(index >= bound)
+    _throw_arraybounds();
+#endif
   return ((char *)ptr) + elt_sz*index;
 }
 static inline 
 unsigned _check_known_subscript_notnull(unsigned bound, unsigned index) {
+#ifndef NO_CYC_BOUNDS_CHECKS
   if(index >= bound)
     _throw_arraybounds();
+#endif
   return index;
 }
 static inline 
@@ -125,10 +135,14 @@ char * _check_unknown_subscript(struct _tagged_arr arr,
   unsigned char * ans = arr.curr + elt_sz * index;
   // might be faster not to distinguish these two cases. definitely would be
   // smaller.
+#ifndef NO_CYC_NULL_CHECKS
   if(!arr.base) 
     _throw_null();
+#endif
+#ifndef NO_CYC_BOUNDS_CHECKS
   if(ans < arr.base || ans >= arr.last_plus_one)
     _throw_arraybounds();
+#endif
   return ans;
 }
 static inline 
@@ -155,8 +169,10 @@ char * _untag_arr(struct _tagged_arr arr, unsigned elt_sz, unsigned num_elts) {
   // Note: if arr is "null" base and curr should both be null, so this
   //       is correct (caller checks for null if untagging to @ type)
   // base may not be null if you use t ? pointer subtraction to get 0 -- oh well
+#ifndef NO_CYC_BOUNDS_CHECKS
   if(arr.curr < arr.base || arr.curr + elt_sz * num_elts > arr.last_plus_one)
     _throw_arraybounds();
+#endif
   return arr.curr;
 }
 static inline 

@@ -25,8 +25,10 @@
 #include <strings.h>
 #include <stddef.h> // for size_t
 
+// Need to undefine these so that we can refer to their C versions
 #undef bcopy
-#undef bzero
+#undef memcpy
+#undef memmove
 
 //  #define static_c2s(x) (Cstring_to_string(x))
 #define static_c2s(x) (wrap_Cstring_as_string(x,-1))
@@ -725,14 +727,14 @@ namespace Cstr {
   }
 }
 
-`a::A?`r memcpy(`a?`r d, const `a? s, size_t n, sizeof_t<`a> sz) {
+`a::A?`r _memcpy(`a?`r d, const `a? s, size_t n, sizeof_t<`a> sz) {
   if (d == NULL || d.size < n || s == NULL || s.size < n)
     throw new Invalid_argument("Std::memcpy");
   Cstr::memcpy((`a *)d, (const `a *)s, n*sz);
   return d;
 }
 
-`a::A?`r memmove(`a?`r d, const `a? s, size_t n, sizeof_t<`a> sz) {
+`a::A?`r _memmove(`a?`r d, const `a? s, size_t n, sizeof_t<`a> sz) {
   if (d == NULL || d.size < n || s == NULL || s.size < n)
     throw new Invalid_argument("Std::memove");
   Cstr::memmove((`a *)d, (const `a *)s, n*sz);
@@ -782,7 +784,7 @@ void bzero(char? s, size_t n) {
   Cstr::bzero((_*)s,n);
 }
 
-void bcopy(const `a::A? src, `a?`r dst, size_t n, sizeof_t<`a> sz) {
+void _bcopy(const `a::A? src, `a?`r dst, size_t n, sizeof_t<`a> sz) {
   if(src == NULL || src.size < n || dst == NULL || dst.size < n)
     throw new Invalid_argument("Std::bcopy");
   Cstr::bcopy((const `a*)src,(_*)dst,n*sz);

@@ -99,21 +99,31 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 //// Built-in Run-time Checks and company
 static inline 
 void * _check_null(void * ptr) {
+#ifndef NO_CYC_NULL_CHECKS
   if(!ptr)
     _throw_null();
+#endif
   return ptr;
 }
 static inline 
 char * _check_known_subscript_null(void * ptr, unsigned bound, 
 				   unsigned elt_sz, unsigned index) {
-  if(!ptr || index >= bound)
+#ifndef NO_CYC_NULL_CHECKS
+  if(!ptr)
     _throw_null();
+#endif
+#ifndef NO_CYC_BOUNDS_CHECKS
+  if(index >= bound)
+    _throw_arraybounds();
+#endif
   return ((char *)ptr) + elt_sz*index;
 }
 static inline 
 unsigned _check_known_subscript_notnull(unsigned bound, unsigned index) {
+#ifndef NO_CYC_BOUNDS_CHECKS
   if(index >= bound)
     _throw_arraybounds();
+#endif
   return index;
 }
 static inline 
@@ -125,10 +135,14 @@ char * _check_unknown_subscript(struct _tagged_arr arr,
   unsigned char * ans = arr.curr + elt_sz * index;
   // might be faster not to distinguish these two cases. definitely would be
   // smaller.
+#ifndef NO_CYC_NULL_CHECKS
   if(!arr.base) 
     _throw_null();
+#endif
+#ifndef NO_CYC_BOUNDS_CHECKS
   if(ans < arr.base || ans >= arr.last_plus_one)
     _throw_arraybounds();
+#endif
   return ans;
 }
 static inline 
@@ -155,8 +169,10 @@ char * _untag_arr(struct _tagged_arr arr, unsigned elt_sz, unsigned num_elts) {
   // Note: if arr is "null" base and curr should both be null, so this
   //       is correct (caller checks for null if untagging to @ type)
   // base may not be null if you use t ? pointer subtraction to get 0 -- oh well
+#ifndef NO_CYC_BOUNDS_CHECKS
   if(arr.curr < arr.base || arr.curr + elt_sz * num_elts > arr.last_plus_one)
     _throw_arraybounds();
+#endif
   return arr.curr;
 }
 static inline 
@@ -272,16 +288,16 @@ _RegionHandle*, struct Cyc_List_List*, struct _tagged_arr); extern struct
 _tagged_arr Cyc_Std_strcpy( struct _tagged_arr dest, struct _tagged_arr src);
 extern struct _tagged_arr Cyc_Std_strncpy( struct _tagged_arr, struct
 _tagged_arr, unsigned int); extern struct _tagged_arr Cyc_Std_zstrncpy( struct
-_tagged_arr, struct _tagged_arr, unsigned int); extern struct _tagged_arr Cyc_Std_memcpy(
+_tagged_arr, struct _tagged_arr, unsigned int); extern struct _tagged_arr Cyc_Std__memcpy(
 struct _tagged_arr d, struct _tagged_arr s, unsigned int, unsigned int); extern
-struct _tagged_arr Cyc_Std_memmove( struct _tagged_arr d, struct _tagged_arr s,
+struct _tagged_arr Cyc_Std__memmove( struct _tagged_arr d, struct _tagged_arr s,
 unsigned int, unsigned int); extern int Cyc_Std_memcmp( struct _tagged_arr s1,
 struct _tagged_arr s2, unsigned int n); extern struct _tagged_arr Cyc_Std_memchr(
 struct _tagged_arr s, unsigned char c, unsigned int n); extern struct
 _tagged_arr Cyc_Std_mmemchr( struct _tagged_arr s, unsigned char c, unsigned int
 n); extern struct _tagged_arr Cyc_Std_memset( struct _tagged_arr s,
 unsigned char c, unsigned int n); extern void Cyc_Std_bzero( struct _tagged_arr
-s, unsigned int n); extern void Cyc_Std_bcopy( struct _tagged_arr src, struct
+s, unsigned int n); extern void Cyc_Std__bcopy( struct _tagged_arr src, struct
 _tagged_arr dst, unsigned int n, unsigned int sz); extern struct _tagged_arr Cyc_Std_expand(
 struct _tagged_arr s, unsigned int sz); extern struct _tagged_arr Cyc_Std_rexpand(
 struct _RegionHandle*, struct _tagged_arr s, unsigned int sz); extern struct
@@ -663,7 +679,7 @@ unsigned int n); extern unsigned char* memchr( const unsigned char*,
 unsigned char c, unsigned int n); extern unsigned char* memset( unsigned char*,
 unsigned char c, unsigned int n); extern void bcopy( const void* src, void* dest,
 unsigned int n); extern void bzero( void* s, unsigned int n); struct _tagged_arr
-Cyc_Std_memcpy( struct _tagged_arr d, struct _tagged_arr s, unsigned int n,
+Cyc_Std__memcpy( struct _tagged_arr d, struct _tagged_arr s, unsigned int n,
 unsigned int sz){ if((( d.curr == ( _tag_arr( 0u, 0u, 0u)).curr? 1:
 _get_arr_size( d, sizeof( void)) <  n)? 1: s.curr == (( struct _tagged_arr)
 _tag_arr( 0u, 0u, 0u)).curr)? 1: _get_arr_size( s, sizeof( void)) <  n){( int)
@@ -673,7 +689,7 @@ struct Cyc_Core_Invalid_argument_struct _temp35; _temp35.tag= Cyc_Core_Invalid_a
 _temp35.f1= _tag_arr("Std::memcpy", sizeof( unsigned char), 12u); _temp35;});
 _temp34;}));} memcpy(( void*) _check_null( _untag_arr( d, sizeof( void), 1u)),(
 const void*) _check_null( _untag_arr( s, sizeof( void), 1u)), n *  sz); return d;}
-struct _tagged_arr Cyc_Std_memmove( struct _tagged_arr d, struct _tagged_arr s,
+struct _tagged_arr Cyc_Std__memmove( struct _tagged_arr d, struct _tagged_arr s,
 unsigned int n, unsigned int sz){ if((( d.curr == ( _tag_arr( 0u, 0u, 0u)).curr?
 1: _get_arr_size( d, sizeof( void)) <  n)? 1: s.curr == (( struct _tagged_arr)
 _tag_arr( 0u, 0u, 0u)).curr)? 1: _get_arr_size( s, sizeof( void)) <  n){( int)
@@ -733,7 +749,7 @@ Cyc_Core_Invalid_argument_struct)); _temp54[ 0]=({ struct Cyc_Core_Invalid_argum
 _temp55; _temp55.tag= Cyc_Core_Invalid_argument; _temp55.f1= _tag_arr("Std::bzero",
 sizeof( unsigned char), 11u); _temp55;}); _temp54;}));}(( void(*)( unsigned char*
 s, unsigned int n)) bzero)(( unsigned char*) _check_null( _untag_arr( s, sizeof(
-unsigned char), 1u)), n);} void Cyc_Std_bcopy( struct _tagged_arr src, struct
+unsigned char), 1u)), n);} void Cyc_Std__bcopy( struct _tagged_arr src, struct
 _tagged_arr dst, unsigned int n, unsigned int sz){ if((( src.curr == (( struct
 _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr? 1: _get_arr_size( src, sizeof( void))
 <  n)? 1: dst.curr == ( _tag_arr( 0u, 0u, 0u)).curr)? 1: _get_arr_size( dst,

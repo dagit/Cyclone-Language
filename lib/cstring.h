@@ -78,14 +78,22 @@ extern mstring_t<`r> zstrncpy(mstring_t<`r>,string_t,size_t);
 
 // memcpy and memmove behave like C's except that instead of
 // calling it memcpy(d,s,n*sizeof(t)), separate out the sizeof(t).
-extern `a::A?`r memcpy(`a?`r d, const `a? s, size_t, sizeof_t<`a>);
-extern `a::A?`r memmove(`a?`r d, const `a? s, size_t, sizeof_t<`a>);
+extern `a::A?`r _memcpy(`a?`r d, const `a? s, size_t, sizeof_t<`a>);
+extern `a::A?`r _memmove(`a?`r d, const `a? s, size_t, sizeof_t<`a>);
 extern int memcmp(const char ?s1, const char ?s2, size_t n);
 extern const char ?`r memchr(const char ?`r s, char c, size_t n);
 extern char ?`r mmemchr(char ?`r s, char c, size_t n);
 extern char ?`r memset(char ?`r s, char c, size_t n);
 extern void bzero(char? s, size_t n);
-extern void bcopy(const `a::A? src, `a?`r dst, size_t n, sizeof_t<`a> sz);
+extern void _bcopy(const `a::A? src, `a?`r dst, size_t n, sizeof_t<`a> sz);
+
+// jcheney: might want to define this so that partial copies are an error 
+//instead of silently copying up to the end of the last-touched record
+#define _rounddiv(q,d) (((q)/(d)) + ((((q)%(d)) == 0) ? 0 : 1))
+
+#define memcpy(d,s,n) _memcpy((d),(s),_rounddiv(n,sizeof(*(s))),sizeof(*(s)))
+#define memmove(d,s,n) _memmove((d),(s),_rounddiv(n,sizeof(*(s))),sizeof(*(s)))
+#define bcopy(s,d,n) _bcopy((s),(d),_rounddiv(n,sizeof(*(s))),sizeof(*(s)))
                                         
 // Allocating
 extern mstring_t     expand(string_t s, size_t sz); /* like realloc */
