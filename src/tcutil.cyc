@@ -2803,7 +2803,8 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     // Make relative name absolute
     *n = (ed->name)[0];
     break;
-  case &TunionType(TunionInfo(*info,targs,rgn)):
+  case &TunionType(TunionInfo(*info,*targsp,rgn)):
+    let targs = *targsp;
     switch(*info) {
     case &UnknownTunion(UnknownTunionInfo(n,is_x)):
       tuniondecl_t@ tudp;
@@ -2843,9 +2844,17 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       if (targs != NULL)
 	terr(loc,"too many type arguments for tunion %s",
              qvar2string(tud->name));
-      if (tvs != NULL) 
-	terr(loc,"too few type arguments for tunion %s",
-			 qvar2string(tud->name));
+      if (tvs != NULL) {
+        // fill in missing parameters
+        list_t<type_t> hidden_ts = NULL;
+        for (; tvs != NULL; tvs = tvs->tl) {
+          kind_t k1 = tvar_kind(tvs->hd);
+          type_t e = new_evar(NULL,NULL);
+          hidden_ts = new List(e,hidden_ts);
+          cvtenv = i_check_valid_type(loc,te,cvtenv,k1,e);
+        }
+        *targsp = List::imp_append(*targsp,List::imp_rev(hidden_ts));
+      }
       break;
     }
     break;
@@ -3226,7 +3235,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     }
     break;
 
-  case &StructType(tdnopt,targs,*sdp):
+  case &StructType(tdnopt,*targs,*sdp):
     if (tdnopt == NULL) {
       // better be an anonymous struct
       if (*sdp == NULL) {
@@ -3246,7 +3255,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         Tc::tcStructdecl(te, ge, loc, sd);
         *sdp = lookup_structdecl(te,loc,tdn);
         // give an error here if targs is non-empty:
-        if (targs != NULL) {
+        if (*targs != NULL) {
           terr(loc,"please declare parameterized struct %s before using",
                qvar2string(tdn));
           return cvtenv;
@@ -3261,20 +3270,27 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     if (sd->name != NULL) // sanity check
       *tdnopt = sd->name->v[0];
     list_t<tvar_t> tvs = sd->tvs;
-    // FIX: allow partial instantiation with defaults
-    int lvs   = List::length(tvs);
-    int largs = List::length(targs);
-    if (lvs != largs) 
-      terr(loc,"struct %s expects %d type arguments but was given %d",
-           qvar2string((qvar_t)tdnopt),lvs,largs);
-    // check that each of the type arguments is well-formed
-    for (; targs != NULL; targs = targs->tl, tvs = tvs->tl) {
-      type_t t1 = targs->hd;
-      kind_t k1 = tvar_kind(tvs->hd);
-      cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1);
+    list_t<type_t> ts = *targs;
+    for (; ts != NULL && tvs != NULL; ts = ts->tl, tvs = tvs->tl) {
+      kind_t k = tvar_kind(tvs->hd);
+      cvtenv = i_check_valid_type(loc,te,cvtenv,k,ts->hd);
+    }
+    if (ts != NULL)
+      terr(loc,"too many parameters for struct %s",
+           qvar2string((qvar_t)tdnopt));
+    if (tvs != NULL) {
+      // add in hidden type parameters
+      list_t<type_t> hidden_ts = NULL;
+      for (; tvs != NULL; tvs = tvs->tl) {
+        kind_t k = tvar_kind(tvs->hd);
+        type_t e = new_evar(NULL,NULL);
+        hidden_ts = new List(e,hidden_ts);
+        cvtenv = i_check_valid_type(loc,te,cvtenv,k,e);
+      }
+      *targs = List::imp_append(*targs,List::imp_rev(hidden_ts));
     }
     break;
-  case &UnionType(tdnopt,targs,*udp):
+  case &UnionType(tdnopt,*targs,*udp):
     if (tdnopt == NULL) {
       terr(loc,"missing union name");
       return cvtenv;
@@ -3289,7 +3305,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         Tc::tcUniondecl(te, ge, loc, ud);
         *udp = lookup_uniondecl(te,loc,tdn);
         // give an error here if targs is non-empty
-        if (targs != NULL) {
+        if (*targs != NULL) {
           terr(loc,"please declare parameterized union %s before using",
                qvar2string(tdn));
           return cvtenv;
@@ -3304,16 +3320,24 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     if (ud->name != NULL) // sanity check
       *tdnopt = ud->name->v[0];
     list_t<tvar_t> tvs = ud->tvs;
-    int lvs   = List::length(tvs);
-    int largs = List::length(targs);
-    if (lvs != largs) 
-      terr(loc,"union %s expects %d type arguments but was given %d",
-           qvar2string((qvar_t)tdnopt),lvs,largs);
-    // check that each of the type arguments is well-formed
-    for (; targs != NULL; targs = targs->tl, tvs = tvs->tl) {
-      type_t t1 = targs->hd;
-      kind_t k1 = tvar_kind(tvs->hd);
-      cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1);
+    list_t<type_t> ts = *targs;
+    for (; ts != NULL && tvs != NULL; ts = ts->tl, tvs = tvs->tl) {
+      kind_t k = tvar_kind(tvs->hd);
+      cvtenv = i_check_valid_type(loc,te,cvtenv,k,ts->hd);
+    }
+    if (ts != NULL)
+      terr(loc,"too many parameters for union %s",
+           qvar2string((qvar_t)tdnopt));
+    if (tvs != NULL) {
+      // add in hidden type parameters
+      list_t<type_t> hidden_ts = NULL;
+      for (; tvs != NULL; tvs = tvs->tl) {
+        kind_t k = tvar_kind(tvs->hd);
+        type_t e = new_evar(NULL,NULL);
+        hidden_ts = new List(e,hidden_ts);
+        cvtenv = i_check_valid_type(loc,te,cvtenv,k,e);
+      }
+      *targs = List::imp_append(*targs,List::imp_rev(hidden_ts));
     }
     break;
   case &TypedefType(tdn,*targs_ref,*toptp):
