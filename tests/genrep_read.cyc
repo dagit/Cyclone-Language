@@ -255,7 +255,8 @@ void do_read(tunion Typestruct rep, `a::A@ val) {
   printf("------\n");
   `a@ val2 = read_type(rep,stdin);
   print_type(rep,val2);
-  printf("\n\n");
+  bool eq = eq_type(rep,val,val2);
+  printf("?\n%s\n\n", eq ? (string_t)"true":"false");
 }
 void do_all(tunion Typestruct rep, `a::A@ val) {
 #ifdef PRINT
@@ -271,7 +272,7 @@ void do_all(tunion Typestruct rep, `a::A@ val) {
 
 
 
-void main() {
+int main() {
 
 
 #ifdef TEST

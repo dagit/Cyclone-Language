@@ -77,6 +77,7 @@ EXTERN_TYPEREP tunion Typestruct {
       [ts] is a Tuple describing the tunionfield data.  (the same tuple as
       in the tunion or xtunion typestruct. 
   **/
+  // should this have tag? or same data as tunion?
   TUnionField(string_t<`H>,string_t<`H>,unsigned int, $(unsigned int,tunion Typestruct)@?);
   /** [name, XTUnion(fields)] is an xtunion type [name], where each element of
       the array [fields] is a pair [(tag,ts)] of a tag value [tag]

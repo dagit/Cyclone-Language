@@ -14,8 +14,10 @@ using Position;
 #define TEST
 #define SHARING
 #define CYCLE
+//#define COPY
+#define EQUAL
 //#define READ
-#define XML
+//#define XML
 #define PRINT
 //#define PRINTTYPE
 //#define WRITE
@@ -111,6 +113,7 @@ tunion Typestruct enum_rep = __gen(enum_t);
 
 // tunionfields
 tunion Typestruct tunionfield_rep = __gen(tunion Foo.Foo2);
+
 
 // recursive tunions
 tunion Typestruct foo_rep = __gen(foo_t);
@@ -232,8 +235,12 @@ xtunion XFoo {
   XFoo2(int,char);
 };
 
+
+
 typestruct_t xtunion_rep = __gen(xtunion XFoo);
 
+// xtunionfields
+tunion Typestruct xtunionfield_rep = __gen(xtunion XFoo.XFoo2);
 
 #endif
 
@@ -268,7 +275,8 @@ void do_read(tunion Typestruct rep, `a::A@ val) {
   printf("------\n");
   `a@ val2 = read_type(rep,stdin);
   print_type(rep,val2);
-  printf("\n\n");
+  bool eq = eq_type(rep,val,val2);
+  printf("?\n%s\n\n", eq ? (string_t)"true":"false");
 }
 
 #ifdef XML 
@@ -280,6 +288,22 @@ void do_xml(tunion Typestruct rep, `a::A@ val) {
   do_print(rep,i2);
 }
 #endif
+
+void do_copy(tunion Typestruct rep, `a::A@ val) {
+  printf("------\n");
+  `a@ val2 = copy_type(rep,val);
+  print_type(rep,val2);
+  printf("\n\n");
+}
+void do_equal(tunion Typestruct rep, `a::A@ val) {
+  printf("==\n");
+  `a@ val2 = copy_type(rep,val);
+  print_type(rep,val2);
+  bool eq = eq_type(rep,val,val2);
+  printf("?\n%s\n\n", eq ? (string_t)"true":"false");
+  if(!eq) throw new Core::Failure("equality failure");
+}
+
 void do_all(tunion Typestruct rep, `a::A@ val) {
 #ifdef PRINTTYPE
   do_printtype(rep);
@@ -296,10 +320,17 @@ void do_all(tunion Typestruct rep, `a::A@ val) {
 #ifdef XML
   do_xml(rep,val);
 #endif
+#ifdef COPY
+  do_copy(rep,val);
+#endif
+#ifdef EQUAL
+  do_equal(rep,val);
+#endif
 }
 
 
-void main() {
+int main() {
+
 
 
 #ifdef TEST
@@ -425,10 +456,12 @@ void main() {
   do_all(bfstruct_rep,&bfs);
 
   xtunion XFoo x = XFoo1;
+  //  Cstring xf = XFoo2;
   do_all(xtunion_rep,&x);
   x = new XFoo2(1,'a');
   do_all(xtunion_rep,&x);
-
+  xtunion XFoo.XFoo2 y = XFoo2(2,'b');
+  do_all(xtunionfield_rep,&y);
 
 
 #endif

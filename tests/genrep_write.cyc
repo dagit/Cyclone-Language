@@ -269,7 +269,7 @@ void do_all(tunion Typestruct rep, `a::A@ val) {
 
 
 
-void main() {
+int main() {
 
 
 #ifdef TEST

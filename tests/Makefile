@@ -9,7 +9,7 @@ ifndef devel
 CYCC=cyclone$(EXE)
 else
 CYCC=../build/boot/cyclone$(EXE)
-CYCFLAGS=-I../include -B../build/boot
+CYCFLAGS=-I../include -B../build/boot -pp -save-c
 endif
 
 all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram finger test_getopt)
@@ -70,6 +70,10 @@ genrep_test$(EXE):  genrep_test.o muttrep.o
 # This takes care of non-machine-generated versions (the .cyc is already there)
 %.o : %.cyc
 	$(CYCC) $(CYCFLAGS) -c $< 
+
+#This takes care of any single-file program
+%$(EXE): %.cyc
+	$(CYCC) $(LDFLAGS) -o $@ $^
 
 clean:
 	$(RM) $(addsuffix .[oc], genrep_test genrep_read genrep_write hello bytes cyctest foo histogram finger test_getopt typeref typerep_test test_regions)\

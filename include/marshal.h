@@ -32,7 +32,13 @@ extern void fprint_type(tunion Typerep::Typestruct rep, FILE@ fp,`a::A@ val);
 extern void print_type(tunion Typerep::Typestruct rep, `a::A@ val);
 
 extern void write_type(tunion Typerep::Typestruct rep, FILE@ fp, `a::A@ val);
+extern `a::A@`r rread_type(region_t<`r> r,tunion Typerep::Typestruct rep, FILE@ fp);
 extern `a::A@ read_type(tunion Typerep::Typestruct rep, FILE@ fp);
+extern `a::A@`r rcopy_type(region_t<`r>,tunion Typerep::Typestruct rep, `a@ val);
+extern `a::A@ copy_type(tunion Typerep::Typestruct rep, `a@ val);
+extern bool leq_type(tunion Typerep::Typestruct rep, `a::A@ x, `a@ y);
+extern bool eq_type(tunion Typerep::Typestruct rep, `a::A@ x, `a@ y);
+extern int cmp_type(tunion Typerep::Typestruct rep, `a::A@ x, `a@ y);
 
 }
 
