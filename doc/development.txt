@@ -61,7 +61,7 @@ from the cyclone directory.  This will generate the .c files for each
 supported architecture ARCH in the directories cyclone/ARCH, and then copy
 the changed files to cyclone/bin/genfiles/ARCH.  Alternatively, a subset of
 the supported architectures called the development architectures (currently
-i686-unknown-linux and i686-cygwin-1.3.2) can be updated by doing
+i686-unknown-linux and i686-cygwin-1.3.10) can be updated by doing
 
 make update_devel_archs
 

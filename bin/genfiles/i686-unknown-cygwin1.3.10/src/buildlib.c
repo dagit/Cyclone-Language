@@ -802,45 +802,46 @@ ae;struct Cyc_Core_Opt*le;};struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tc_init();void Cyc_T
 struct Cyc_Tcenv_Tenv*te,int var_default_init,struct Cyc_List_List*ds);typedef
 struct{int quot;int rem;}Cyc_div_t;typedef struct{int quot;int rem;}Cyc_ldiv_t;void*
 abort();void exit(int);int system(const char*);struct Cyc_stat{short st_dev;
-unsigned int st_ino;int st_mode;unsigned short st_nlink;unsigned short st_uid;
-unsigned short st_gid;short st_rdev;int st_size;int st_atime;int st_spare1;int
-st_mtime;int st_spare2;int st_ctime;int st_spare3;int st_blksize;int st_blocks;int
-st_spare4[2];};int mkdir(const char*pathname,int mode);struct Cyc_flock{short l_type;
-short l_whence;int l_start;int l_len;short l_pid;short l_xxx;};struct Cyc_Flock_struct{
-int tag;struct Cyc_flock*f1;};struct Cyc_Long_struct{int tag;int f1;};int Cyc_open(
-const char*,int,struct _tagged_arr);struct Cyc_option{struct _tagged_arr name;int
-has_arg;int*flag;int val;};int chdir(const char*);int close(int);struct _tagged_arr
-Cyc_getcwd(struct _tagged_arr buf,unsigned int size);int isspace(int);int toupper(int);
-void Cyc_Lex_lex_init(int use_cyclone_keywords);extern char*Ccomp;struct Cyc___cycFILE*
-Cyc_log_file=0;struct Cyc___cycFILE*Cyc_cstubs_file=0;struct Cyc___cycFILE*Cyc_cycstubs_file=
-0;int Cyc_log(struct _tagged_arr fmt,struct _tagged_arr ap){if(Cyc_log_file == 0){({
-void*_tmp0[0]={};Cyc_fprintf(Cyc_stderr,({const char*_tmp1="Internal error: log file is NULL\n";
-_tag_arr(_tmp1,sizeof(char),_get_zero_arr_size(_tmp1,34));}),_tag_arr(_tmp0,
-sizeof(void*),0));});exit(1);}{int _tmp2=Cyc_vfprintf((struct Cyc___cycFILE*)
-_check_null(Cyc_log_file),fmt,ap);Cyc_fflush((struct Cyc___cycFILE*)((struct Cyc___cycFILE*)
-_check_null(Cyc_log_file)));return _tmp2;}}static struct _tagged_arr*Cyc_current_source=
-0;static struct Cyc_List_List*Cyc_current_args=0;static struct Cyc_Set_Set**Cyc_current_targets=
-0;static void Cyc_add_target(struct _tagged_arr*sptr){Cyc_current_targets=({struct
-Cyc_Set_Set**_tmp3=_cycalloc(sizeof(*_tmp3));_tmp3[0]=((struct Cyc_Set_Set*(*)(
-struct Cyc_Set_Set*s,struct _tagged_arr*elt))Cyc_Set_insert)(*((struct Cyc_Set_Set**)
-_check_null(Cyc_current_targets)),sptr);_tmp3;});}struct _tuple11{struct
-_tagged_arr*f1;struct Cyc_Set_Set*f2;};struct _tuple11*Cyc_line(struct Cyc_Lexing_lexbuf*);
-int Cyc_macroname(struct Cyc_Lexing_lexbuf*);int Cyc_args(struct Cyc_Lexing_lexbuf*);
-int Cyc_token(struct Cyc_Lexing_lexbuf*);int Cyc_string(struct Cyc_Lexing_lexbuf*);
-struct Cyc___cycFILE*Cyc_slurp_out=0;int Cyc_slurp(struct Cyc_Lexing_lexbuf*);int
-Cyc_slurp_string(struct Cyc_Lexing_lexbuf*);int Cyc_asm(struct Cyc_Lexing_lexbuf*);
-int Cyc_asm_string(struct Cyc_Lexing_lexbuf*);int Cyc_asm_comment(struct Cyc_Lexing_lexbuf*);
-struct _tuple12{struct _tagged_arr f1;struct _tagged_arr*f2;};struct _tuple12*Cyc_suck_line(
-struct Cyc_Lexing_lexbuf*);int Cyc_suck_macroname(struct Cyc_Lexing_lexbuf*);int Cyc_suck_restofline(
-struct Cyc_Lexing_lexbuf*);struct _tagged_arr Cyc_current_line=(struct _tagged_arr){(
-void*)0,(void*)0,(void*)(0 + 0)};struct _tuple13{struct _tagged_arr f1;struct
-_tagged_arr f2;};struct _tuple14{struct _tagged_arr f1;struct Cyc_List_List*f2;struct
-Cyc_List_List*f3;struct Cyc_List_List*f4;struct Cyc_List_List*f5;struct Cyc_List_List*
-f6;};struct _tuple14*Cyc_spec(struct Cyc_Lexing_lexbuf*);int Cyc_commands(struct Cyc_Lexing_lexbuf*);
-int Cyc_snarfsymbols(struct Cyc_Lexing_lexbuf*);int Cyc_block(struct Cyc_Lexing_lexbuf*);
-int Cyc_block_string(struct Cyc_Lexing_lexbuf*);int Cyc_block_comment(struct Cyc_Lexing_lexbuf*);
-struct _tagged_arr Cyc_current_headerfile=(struct _tagged_arr){(void*)0,(void*)0,(
-void*)(0 + 0)};struct Cyc_List_List*Cyc_snarfed_symbols=0;struct Cyc_List_List*Cyc_current_symbols=
+unsigned int st_ino;int st_mode;unsigned short st_nlink;unsigned short __st_uid16;
+unsigned short __st_gid16;short st_rdev;int __st_size32;int st_atime;unsigned int
+__st_uid32;int st_mtime;unsigned int __st_gid32;int st_ctime;int st_spare3;int
+st_blksize;int st_blocks;long long __st_size64;};int mkdir(const char*pathname,int
+mode);struct Cyc_flock{short l_type;short l_whence;int l_start;int l_len;short l_pid;
+short l_xxx;};struct Cyc_Flock_struct{int tag;struct Cyc_flock*f1;};struct Cyc_Long_struct{
+int tag;int f1;};int Cyc_open(const char*,int,struct _tagged_arr);struct Cyc_option{
+struct _tagged_arr name;int has_arg;int*flag;int val;};int chdir(const char*);int close(
+int);struct _tagged_arr Cyc_getcwd(struct _tagged_arr buf,unsigned int size);int
+isspace(int);int toupper(int);void Cyc_Lex_lex_init(int use_cyclone_keywords);
+extern char*Ccomp;struct Cyc___cycFILE*Cyc_log_file=0;struct Cyc___cycFILE*Cyc_cstubs_file=
+0;struct Cyc___cycFILE*Cyc_cycstubs_file=0;int Cyc_log(struct _tagged_arr fmt,struct
+_tagged_arr ap){if(Cyc_log_file == 0){({void*_tmp0[0]={};Cyc_fprintf(Cyc_stderr,({
+const char*_tmp1="Internal error: log file is NULL\n";_tag_arr(_tmp1,sizeof(char),
+_get_zero_arr_size(_tmp1,34));}),_tag_arr(_tmp0,sizeof(void*),0));});exit(1);}{
+int _tmp2=Cyc_vfprintf((struct Cyc___cycFILE*)_check_null(Cyc_log_file),fmt,ap);
+Cyc_fflush((struct Cyc___cycFILE*)((struct Cyc___cycFILE*)_check_null(Cyc_log_file)));
+return _tmp2;}}static struct _tagged_arr*Cyc_current_source=0;static struct Cyc_List_List*
+Cyc_current_args=0;static struct Cyc_Set_Set**Cyc_current_targets=0;static void Cyc_add_target(
+struct _tagged_arr*sptr){Cyc_current_targets=({struct Cyc_Set_Set**_tmp3=_cycalloc(
+sizeof(*_tmp3));_tmp3[0]=((struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*s,struct
+_tagged_arr*elt))Cyc_Set_insert)(*((struct Cyc_Set_Set**)_check_null(Cyc_current_targets)),
+sptr);_tmp3;});}struct _tuple11{struct _tagged_arr*f1;struct Cyc_Set_Set*f2;};
+struct _tuple11*Cyc_line(struct Cyc_Lexing_lexbuf*);int Cyc_macroname(struct Cyc_Lexing_lexbuf*);
+int Cyc_args(struct Cyc_Lexing_lexbuf*);int Cyc_token(struct Cyc_Lexing_lexbuf*);int
+Cyc_string(struct Cyc_Lexing_lexbuf*);struct Cyc___cycFILE*Cyc_slurp_out=0;int Cyc_slurp(
+struct Cyc_Lexing_lexbuf*);int Cyc_slurp_string(struct Cyc_Lexing_lexbuf*);int Cyc_asm(
+struct Cyc_Lexing_lexbuf*);int Cyc_asm_string(struct Cyc_Lexing_lexbuf*);int Cyc_asm_comment(
+struct Cyc_Lexing_lexbuf*);struct _tuple12{struct _tagged_arr f1;struct _tagged_arr*
+f2;};struct _tuple12*Cyc_suck_line(struct Cyc_Lexing_lexbuf*);int Cyc_suck_macroname(
+struct Cyc_Lexing_lexbuf*);int Cyc_suck_restofline(struct Cyc_Lexing_lexbuf*);
+struct _tagged_arr Cyc_current_line=(struct _tagged_arr){(void*)0,(void*)0,(void*)(
+0 + 0)};struct _tuple13{struct _tagged_arr f1;struct _tagged_arr f2;};struct _tuple14{
+struct _tagged_arr f1;struct Cyc_List_List*f2;struct Cyc_List_List*f3;struct Cyc_List_List*
+f4;struct Cyc_List_List*f5;struct Cyc_List_List*f6;};struct _tuple14*Cyc_spec(
+struct Cyc_Lexing_lexbuf*);int Cyc_commands(struct Cyc_Lexing_lexbuf*);int Cyc_snarfsymbols(
+struct Cyc_Lexing_lexbuf*);int Cyc_block(struct Cyc_Lexing_lexbuf*);int Cyc_block_string(
+struct Cyc_Lexing_lexbuf*);int Cyc_block_comment(struct Cyc_Lexing_lexbuf*);struct
+_tagged_arr Cyc_current_headerfile=(struct _tagged_arr){(void*)0,(void*)0,(void*)(
+0 + 0)};struct Cyc_List_List*Cyc_snarfed_symbols=0;struct Cyc_List_List*Cyc_current_symbols=
 0;struct Cyc_List_List*Cyc_current_cstubs=0;struct Cyc_List_List*Cyc_current_cycstubs=
 0;struct Cyc_List_List*Cyc_current_hstubs=0;struct Cyc_List_List*Cyc_current_omit_symbols=
 0;struct Cyc_List_List*Cyc_current_cpp=0;struct Cyc_Buffer_t*Cyc_specbuf=0;int Cyc_braces_to_match=

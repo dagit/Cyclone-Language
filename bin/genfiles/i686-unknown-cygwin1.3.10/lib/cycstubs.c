@@ -491,7 +491,7 @@ _tmp8=((struct Cyc_Flock_struct*)_tmp6)->f1;_LL4: return fcntl_with_lock(fd,cmd,
 struct Cyc_flock*)_tmp8);_LL0:;}}}int Cyc_open(const char*s,int i,struct _tagged_arr
 ms){if(_get_arr_size(ms,sizeof(int))>= 1)return open_with_mode(s,i,*((int*)
 _check_unknown_subscript(ms,sizeof(int),0)));else{return open_without_mode(s,i);}}
-enum Cyc___anonymous_enum_29__{Cyc_IPPORT_ECHO  = 7,Cyc_IPPORT_DISCARD  = 9,Cyc_IPPORT_SYSTAT
+enum Cyc___anonymous_enum_31__{Cyc_IPPORT_ECHO  = 7,Cyc_IPPORT_DISCARD  = 9,Cyc_IPPORT_SYSTAT
  = 11,Cyc_IPPORT_DAYTIME  = 13,Cyc_IPPORT_NETSTAT  = 15,Cyc_IPPORT_FTP  = 21,Cyc_IPPORT_TELNET
  = 23,Cyc_IPPORT_SMTP  = 25,Cyc_IPPORT_TIMESERVER  = 37,Cyc_IPPORT_NAMESERVER  = 42,
 Cyc_IPPORT_WHOIS  = 43,Cyc_IPPORT_MTP  = 57,Cyc_IPPORT_TFTP  = 69,Cyc_IPPORT_RJE  = 
@@ -502,7 +502,7 @@ Cyc_IPPORT_WHOIS  = 43,Cyc_IPPORT_MTP  = 57,Cyc_IPPORT_TFTP  = 69,Cyc_IPPORT_RJE
 char*s_name;char**s_aliases;short s_port;char*s_proto;};struct Cyc_protoent{char*
 p_name;char**p_aliases;short p_proto;};struct Cyc_hostent{char*h_name;char**
 h_aliases;short h_addrtype;short h_length;struct Cyc_in_addr**h_addr_list;};enum 
-Cyc___anonymous_enum_30__{Cyc_IPPROTO_IP  = 0,Cyc_IPPROTO_ICMP  = 1,Cyc_IPPROTO_IGMP
+Cyc___anonymous_enum_32__{Cyc_IPPROTO_IP  = 0,Cyc_IPPROTO_ICMP  = 1,Cyc_IPPROTO_IGMP
  = 2,Cyc_IPPROTO_IPIP  = 4,Cyc_IPPROTO_TCP  = 6,Cyc_IPPROTO_EGP  = 8,Cyc_IPPROTO_PUP
  = 12,Cyc_IPPROTO_UDP  = 17,Cyc_IPPROTO_IDP  = 22,Cyc_IPPROTO_RAW  = 255,Cyc_IPPROTO_MAX
  = 256};struct Cyc_sockaddr_in{short sin_family;unsigned short sin_port;struct Cyc_in_addr
@@ -822,39 +822,39 @@ _tmp7F)->f1;_tmp81=_tmp7A.f2;if(*((int*)_tmp81)!= 3)goto _LL3D;_tmp82=((struct C
 _tmp81)->f1;_LL3C: return setsockopt_timeval(fd,level,optname,(const struct Cyc_timeval*)
 _tmp80,_tmp82);_LL3D:;_LL3E:(int)_throw((void*)Cyc_SocketError);_LL38:;}}struct
 Cyc_stat{short st_dev;unsigned int st_ino;int st_mode;unsigned short st_nlink;
-unsigned short st_uid;unsigned short st_gid;short st_rdev;int st_size;int st_atime;
-int st_spare1;int st_mtime;int st_spare2;int st_ctime;int st_spare3;int st_blksize;int
-st_blocks;int st_spare4[2];};struct Cyc_timezone{int tz_minuteswest;int tz_dsttime;}
-;struct Cyc_itimerval{struct Cyc_timeval it_interval;struct Cyc_timeval it_value;};
-int Cyc_gettimeofday(struct Cyc_timeval*,struct Cyc_timezone*);int select(int,struct
-Cyc__types_fd_set*,struct Cyc__types_fd_set*,struct Cyc__types_fd_set*,struct Cyc_timeval*);
-void Cyc_FD_CLR(int,struct Cyc__types_fd_set*);int Cyc_FD_ISSET(int,struct Cyc__types_fd_set*);
-void Cyc_FD_SET(int,struct Cyc__types_fd_set*);void Cyc_FD_ZERO(struct Cyc__types_fd_set*);
-int gettimeofday(struct Cyc_timeval*,struct Cyc_timezone*);int Cyc_gettimeofday(
-struct Cyc_timeval*a,struct Cyc_timezone*b){return gettimeofday(a,0);}struct Cyc_timeb{
-int time;unsigned short millitm;short timezone;short dstflag;};struct Cyc_tms{
-unsigned int tms_utime;unsigned int tms_stime;unsigned int tms_cutime;unsigned int
-tms_cstime;};struct Cyc_sockaddr_un{unsigned short sun_family;char sun_path[108];};
-struct Cyc_utsname{char sysname[20];char nodename[20];char release[20];char version[
-20];char machine[20];};struct Cyc_itimerspec{struct Cyc_timespec it_interval;struct
-Cyc_timespec it_value;};struct Cyc_tm{int tm_sec;int tm_min;int tm_hour;int tm_mday;
-int tm_mon;int tm_year;int tm_wday;int tm_yday;int tm_isdst;};unsigned int Cyc_strftime(
-struct _tagged_arr,unsigned int,struct _tagged_arr,const struct Cyc_tm*);
-unsigned int strftime(char*,unsigned int,const char*,const struct Cyc_tm*);static
-char _tmp84[27]="fgets: buffer insufficient";static struct Cyc_Core_Failure_struct
-Cyc___strftime_failure={Cyc_Core_Failure,{_tmp84,_tmp84,_tmp84 + 27}};
-unsigned int Cyc_strftime(struct _tagged_arr s,unsigned int maxsize,struct
-_tagged_arr fmt,const struct Cyc_tm*t){if(maxsize > _get_arr_size(s,sizeof(char)))(
-int)_throw((void*)& Cyc___strftime_failure);return strftime((char*)_check_null(
-_untag_arr(s,sizeof(char),1)),maxsize,(const char*)_check_null(_untag_arr(fmt,
-sizeof(char),1)),t);}struct Cyc_option{struct _tagged_arr name;int has_arg;int*flag;
-int val;};int Cyc_execlp(const char*,const char*,struct _tagged_arr);int execvp(const
-char*file,const char**argv);struct _tagged_arr Cyc_getcwd(struct _tagged_arr buf,
-unsigned int size);int Cyc_gethostname(struct _tagged_arr,unsigned int);int Cyc_read(
-int,struct _tagged_arr,unsigned int);int Cyc_write(int,struct _tagged_arr,
-unsigned int);static char _tmp86[36]="execlp arg list not NULL-terminated";static
-struct Cyc_Core_Failure_struct Cyc___execlp_failure={Cyc_Core_Failure,{_tmp86,
-_tmp86,_tmp86 + 36}};int Cyc_execlp(const char*path,const char*arg0,struct
+unsigned short __st_uid16;unsigned short __st_gid16;short st_rdev;int __st_size32;
+int st_atime;unsigned int __st_uid32;int st_mtime;unsigned int __st_gid32;int
+st_ctime;int st_spare3;int st_blksize;int st_blocks;long long __st_size64;};struct
+Cyc_timezone{int tz_minuteswest;int tz_dsttime;};struct Cyc_itimerval{struct Cyc_timeval
+it_interval;struct Cyc_timeval it_value;};int Cyc_gettimeofday(struct Cyc_timeval*,
+struct Cyc_timezone*);int select(int,struct Cyc__types_fd_set*,struct Cyc__types_fd_set*,
+struct Cyc__types_fd_set*,struct Cyc_timeval*);void Cyc_FD_CLR(int,struct Cyc__types_fd_set*);
+int Cyc_FD_ISSET(int,struct Cyc__types_fd_set*);void Cyc_FD_SET(int,struct Cyc__types_fd_set*);
+void Cyc_FD_ZERO(struct Cyc__types_fd_set*);int gettimeofday(struct Cyc_timeval*,
+struct Cyc_timezone*);int Cyc_gettimeofday(struct Cyc_timeval*a,struct Cyc_timezone*
+b){return gettimeofday(a,0);}struct Cyc_timeb{int time;unsigned short millitm;short
+timezone;short dstflag;};struct Cyc_tms{unsigned int tms_utime;unsigned int
+tms_stime;unsigned int tms_cutime;unsigned int tms_cstime;};struct Cyc_sockaddr_un{
+unsigned short sun_family;char sun_path[108];};struct Cyc_utsname{char sysname[20];
+char nodename[20];char release[20];char version[20];char machine[20];};struct Cyc_itimerspec{
+struct Cyc_timespec it_interval;struct Cyc_timespec it_value;};struct Cyc_tm{int
+tm_sec;int tm_min;int tm_hour;int tm_mday;int tm_mon;int tm_year;int tm_wday;int
+tm_yday;int tm_isdst;};unsigned int Cyc_strftime(struct _tagged_arr,unsigned int,
+struct _tagged_arr,const struct Cyc_tm*);unsigned int strftime(char*,unsigned int,
+const char*,const struct Cyc_tm*);static char _tmp84[27]="fgets: buffer insufficient";
+static struct Cyc_Core_Failure_struct Cyc___strftime_failure={Cyc_Core_Failure,{
+_tmp84,_tmp84,_tmp84 + 27}};unsigned int Cyc_strftime(struct _tagged_arr s,
+unsigned int maxsize,struct _tagged_arr fmt,const struct Cyc_tm*t){if(maxsize > 
+_get_arr_size(s,sizeof(char)))(int)_throw((void*)& Cyc___strftime_failure);return
+strftime((char*)_check_null(_untag_arr(s,sizeof(char),1)),maxsize,(const char*)
+_check_null(_untag_arr(fmt,sizeof(char),1)),t);}struct Cyc_option{struct
+_tagged_arr name;int has_arg;int*flag;int val;};int Cyc_execlp(const char*,const char*,
+struct _tagged_arr);int execvp(const char*file,const char**argv);struct _tagged_arr
+Cyc_getcwd(struct _tagged_arr buf,unsigned int size);int Cyc_gethostname(struct
+_tagged_arr,unsigned int);int Cyc_read(int,struct _tagged_arr,unsigned int);int Cyc_write(
+int,struct _tagged_arr,unsigned int);static char _tmp86[36]="execlp arg list not NULL-terminated";
+static struct Cyc_Core_Failure_struct Cyc___execlp_failure={Cyc_Core_Failure,{
+_tmp86,_tmp86,_tmp86 + 36}};int Cyc_execlp(const char*path,const char*arg0,struct
 _tagged_arr argv){if(*((const char**)_check_unknown_subscript(argv,sizeof(const
 char*),(int)(_get_arr_size(argv,sizeof(const char*))- 1)))!= (const char*)0)(int)
 _throw((void*)& Cyc___execlp_failure);{const char**newargs=(const char**)_untag_arr(({
