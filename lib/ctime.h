@@ -48,8 +48,8 @@ namespace Std {
   extern "C" struct tm @localtime(const time_t @`r timep);
   extern size_t strftime(string_t s, size_t maxsize, string_t fmt, 
                          const struct tm @`r t);
-  extern mstring_t asctime_r(const struct tm @`r, mstring_t);
-  extern mstring_t ctime_r(const time_t @`r, mstring_t);
+  extern mstring_t<`H> asctime_r(const struct tm @`r, mstring_t<`H>);
+  extern mstring_t<`H> ctime_r(const time_t @`r, mstring_t<`H>);
 
 #ifdef __CYGWIN__
   extern "C" long int _timezone;

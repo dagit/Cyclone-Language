@@ -36,7 +36,7 @@ CYC_INC_PATH := $(CYCDIR)/lib
 CYCC:=$(CYC_BIN_PATH)/$(CYCCOMP) 
 OUT_PREFIX=
 
-build: $(CYC_LIB_PATH)/gc.a cyclone tools libs
+build: $(CYC_LIB_PATH)/gc.a cyclone tools aprof libs
 
 # This target builds off the C files in bin/genfiles
 cyclone:
@@ -45,7 +45,6 @@ cyclone:
 tools:
 	$(MAKE) install -C tools/bison
 	$(MAKE) install -C tools/cyclex
-	$(MAKE) install -C tools/aprof
 .PHONY: tools
 
 libs:
@@ -108,7 +107,7 @@ lib_src:
 
 # Allocation profiler and its special version of the Cyclone library
 aprof:
-	$(MAKE) install_a -C bin/genfiles/$(ARCH)
+	$(MAKE) install_a -C bin/genfiles
 	$(MAKE) install -C tools/aprof
 
 # This target compares the C files in bin/genfiles to those in src

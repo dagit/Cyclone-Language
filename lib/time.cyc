@@ -19,28 +19,31 @@
 #include <time.h>
 #include <sys/time.h>
 #include <core.h>
+#include <string.h>
 
 using Core;
 
 namespace Ctime {
   extern "C" {
-    Cstring asctime(const struct tm @`r timeptr);
-    Cstring ctime(const time_t @`r timep);
+    Cstring<`H> asctime(const struct tm @`r timeptr);
+    Cstring<`H> ctime(const time_t @`r timep);
     size_t strftime(Cstring s, size_t maxsize, const Cstring fmt,
                     const struct tm @`r t);
-    Cstring asctime_r(const struct tm @`r, Cstring);
-    Cstring ctime_r(const time_t @`r, Cstring);
+    Cstring<`r2> asctime_r(const struct tm @`r, Cstring<`r2>);
+    Cstring<`r2> ctime_r(const time_t @`r, Cstring<`r2>);
   }
+//  #define static_c2s(x) (Cstring_to_string(x))
+#define static_c2s(x) (wrap_Cstring_as_string(x,-1))
 }
 
 namespace Std;
 
 mstring_t asctime(const struct tm @`r timeptr) {
-  return Cstring_to_string(Ctime::asctime(timeptr));
+  return static_c2s(Ctime::asctime(timeptr));
 }
 
 mstring_t ctime(const time_t @`r timep) {
-  return Cstring_to_string(Ctime::ctime(timep));
+  return static_c2s(Ctime::ctime(timep));
 }
 
 size_t strftime(string_t s, size_t maxsize, string_t fmt,
@@ -51,14 +54,28 @@ size_t strftime(string_t s, size_t maxsize, string_t fmt,
 }
 
 // FIX: should check that s is long enough
-mstring_t asctime_r(const struct tm @`r t, mstring_t s) {
-  if (s.size < 50) 
-    throw new Invalid_argument("Time::asctime_r: string too small (< 50)");
-  return Cstring_to_string(Ctime::asctime_r(t,underlying_Cstring(s)));
+mstring_t<`H> asctime_r(const struct tm @`r t, mstring_t<`H> s) {
+//    if (s.size < 50) 
+//      throw new Invalid_argument("Time::asctime_r: string too small (< 50)");
+//    return Cstring_to_string(Ctime::asctime_r(t,underlying_Cstring(s)));
+  let sr = static_c2s(Ctime::asctime(t));
+  if (strlen(sr)+1 > s.size)
+    throw new Invalid_argument("Time::asctime_r: string too small");
+  else {
+    strcpy(s,sr);
+    return s;
+  }
 }
 
-mstring_t ctime_r(const time_t @`r t, mstring_t s) {
-  if (s.size < 50) 
-    throw new Invalid_argument("Time::ctime_r: string too small (< 50)");
-  return Cstring_to_string(Ctime::ctime_r(t,underlying_Cstring(s)));
+mstring_t<`H> ctime_r(const time_t @`r t, mstring_t<`H> s) {
+  let sr = static_c2s(Ctime::ctime(t));
+  if (strlen(sr)+1 > s.size)
+    throw new Invalid_argument("Time::ctime_r: string too small");
+  else {
+    strcpy(s,sr);
+    return s;
+  }
+//    if (s.size < 50) 
+//      throw new Invalid_argument("Time::ctime_r: string too small (< 50)");
+//    return Cstring_to_string(Ctime::ctime_r(t,underlying_Cstring(s)));
 }

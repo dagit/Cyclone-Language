@@ -25,6 +25,9 @@
 #include <strings.h>
 #include <stddef.h> // for size_t
 
+//  #define static_c2s(x) (Cstring_to_string(x))
+#define static_c2s(x) (wrap_Cstring_as_string(x,-1))
+
 namespace Std {
 using Core;
 using List;
@@ -36,7 +39,7 @@ namespace C_string {
   }
 }
 string_t strerror(int errnum) {
-  return Cstring_to_string(C_string::strerror(errnum));
+  return static_c2s(C_string::strerror(errnum));
 }
 
 ///////////////////////// LENGTH

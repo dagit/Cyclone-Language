@@ -33,6 +33,7 @@ namespace Cpwd {
   extern "C" {
     struct Cpasswd *getpwnam(const Cstring name);
     struct Cpasswd *getpwuid(uid_t uid);
+    extern void free(void *); /* C's free */
   }
 #define s2c(x) (string_to_Cstring(x))
 #define c2s(x) (Cstring_to_string(x))
@@ -41,8 +42,9 @@ namespace Cpwd {
 namespace Std;
 
 struct passwd *getpwnam(string_t name) {
+  /* FIX should free C malloced structure after copying it */
   struct Cpwd::Cpasswd *src = Cpwd::getpwnam(s2c(name));
-  return src ? new passwd{.pw_name = c2s(src->pw_name),
+  let ret = src ? new passwd{.pw_name = c2s(src->pw_name),
                              .pw_passwd = c2s(src->pw_passwd),
                              .pw_uid = src->pw_uid,
                              .pw_gid = src->pw_gid,
@@ -50,11 +52,14 @@ struct passwd *getpwnam(string_t name) {
                              .pw_dir = c2s(src->pw_dir),
                              .pw_shell = c2s(src->pw_shell)}
     : NULL;
+  /* FIX: free the string malloced from C? */
+//    Cpwd::free(src);
+  return ret;
 }
 
 struct passwd *getpwuid(uid_t uid) {
   struct Cpwd::Cpasswd *src = Cpwd::getpwuid(uid);
-  return src ? new passwd{.pw_name = c2s(src->pw_name),
+  let ret = src ? new passwd{.pw_name = c2s(src->pw_name),
                              .pw_passwd = c2s(src->pw_passwd),
                              .pw_uid = src->pw_uid,
                              .pw_gid = src->pw_gid,
@@ -62,4 +67,7 @@ struct passwd *getpwuid(uid_t uid) {
                              .pw_dir = c2s(src->pw_dir),
                              .pw_shell = c2s(src->pw_shell)}
     : NULL;
+  /* FIX: free the string malloced from C? */
+//    Cpwd::free(src);
+  return ret;
 }

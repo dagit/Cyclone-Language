@@ -66,9 +66,9 @@ void perror(Cstring __s);
 int fileno(__sFILE @__stream);
 __sFILE *popen(Cstring, Cstring);
 int pclose(__sFILE @__stream);
-  //__sFILE *  popen(Cstring, Cstring);
-  //int	pclose(__sFILE @);
 #define s2c(x) (string_to_Cstring(x))
+//  #define static_c2s(x) (Cstring_to_string(x))
+#define static_c2s(x) (wrap_Cstring_as_string(x,-1))
 }}
 
 namespace Std;
@@ -91,7 +91,7 @@ FILE *tmpfile() {
 }
 
 char ?`H tmpnam(char ?`H s) {
-  char ?name = Cstring_to_string(Cstdio::tmpnam(NULL));
+  char ?name = static_c2s(Cstdio::tmpnam(NULL));
   return s ? strcpy(s, name) : name;
 }
 

@@ -206,14 +206,16 @@ static inline unsigned int _check_times(unsigned int x, unsigned int y) {
   return word_ans;
 }
 
-#ifdef CYC_REGION_PROFILE
+#if defined(CYC_REGION_PROFILE) 
 extern void * _profile_GC_malloc(int,char *file,int lineno);
 extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
 extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
                                      char *file,int lineno);
-#define _cycalloc(n) _profile_cycalloc(n,__FUNCTION__,__LINE__)
-#define _cycalloc_atomic(n) _profile_cycalloc_atomic(n,__FUNCTION__,__LINE__)
-#define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FUNCTION__,__LINE__)
+#  if !defined(RUNTIME_CYC)
+#define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
+#  endif
+#define _cycalloc(n) _profile_GC_malloc(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
+#define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
 #endif
 
 #endif
@@ -384,4 +386,4 @@ unsigned char), 42u); _temp29;}); _temp28;}));} return gethostname(
 underlying_Cstring(( struct _tagged_arr) buf), count);} int Cyc_Std_chroot(
 struct _tagged_arr pathname){ return chroot( string_to_Cstring( pathname));}
 struct _tagged_arr Cyc_Std_getpass( struct _tagged_arr prompt){ return
-Cstring_to_string( getpass( string_to_Cstring( prompt)));}
+wrap_Cstring_as_string( getpass( string_to_Cstring( prompt)), - 1);}

@@ -27,6 +27,10 @@
 // The C include file precore_c.h is produced (semi) automatically
 // from the Cyclone include file precore.h.  Note, it now includes
 // the contents of cyc_include.h
+
+/* RUNTIME_CYC defined to prevent including parts of precore_c.h 
+   that might cause problems, particularly relating to region profiling */
+#define RUNTIME_CYC
 #include "precore_c.h"
 
 extern void exit(int);
@@ -157,6 +161,8 @@ struct _tagged_arr wrap_Cstring_as_string(Cstring s, size_t len) {
   if (s == NULL) {
     str.base = str.curr = str.last_plus_one = NULL;
   } else {
+    if (len == -1)
+      len = strlen(s)+1;
     str.base = str.curr = s;
     str.last_plus_one = str.base + len;
   }
@@ -170,7 +176,7 @@ struct _tagged_arr Cstring_to_string(Cstring s) {
   }
   else {
     int sz = strlen(s)+1;
-    str.base = (char *)GC_malloc_atomic(sz);
+    str.base = (char *)_cycalloc_atomic(sz);
     if (str.base == NULL) 
       _throw_badalloc();
     str.curr = str.base;
@@ -222,7 +228,7 @@ struct _tagged_arr ntCsl_to_ntsl(Cstring *ntCsl) {
   Cstring *ptr;
 
   for (ptr = ntCsl; *ptr;  ptr++,numstrs++); // not safe!
-  result.base = (char *)GC_malloc_atomic(numstrs+1);
+  result.base = (char *)_cycalloc_atomic(numstrs+1);
   if (result.base == NULL) 
     _throw_badalloc();
 

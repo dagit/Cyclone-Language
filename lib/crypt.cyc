@@ -25,10 +25,13 @@ namespace Ccrypt {
     Cstring crypt(const Cstring key, const Cstring salt);
   }
 #define s2c(x) (string_to_Cstring(x))
+#define c2s(x) (Cstring_to_string(x))
+//  #define static_c2s(x) (Cstring_to_string(x))
+#define static_c2s(x) (wrap_Cstring_as_string(x,-1))
 }
 
 namespace Std;
 
 char ?crypt(const char ?key, const char ?salt) {
-  return Ccrypt::crypt(s2c(key), s2c(salt));
+  return static_c2s(Ccrypt::crypt(s2c(key), s2c(salt)));
 }

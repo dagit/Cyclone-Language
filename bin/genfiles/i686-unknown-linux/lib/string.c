@@ -206,14 +206,16 @@ static inline unsigned int _check_times(unsigned int x, unsigned int y) {
   return word_ans;
 }
 
-#ifdef CYC_REGION_PROFILE
+#if defined(CYC_REGION_PROFILE) 
 extern void * _profile_GC_malloc(int,char *file,int lineno);
 extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
 extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
                                      char *file,int lineno);
-#define _cycalloc(n) _profile_cycalloc(n,__FUNCTION__,__LINE__)
-#define _cycalloc_atomic(n) _profile_cycalloc_atomic(n,__FUNCTION__,__LINE__)
-#define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FUNCTION__,__LINE__)
+#  if !defined(RUNTIME_CYC)
+#define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
+#  endif
+#define _cycalloc(n) _profile_GC_malloc(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
+#define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
 #endif
 
 #endif
@@ -289,7 +291,7 @@ struct Cyc_List_List* c); extern int Cyc_Std_strcasecmp( struct _tagged_arr,
 struct _tagged_arr); extern int Cyc_Std_strncasecmp( struct _tagged_arr s1,
 struct _tagged_arr s2, unsigned int len); extern unsigned char* strerror( int
 errnum); struct _tagged_arr Cyc_Std_strerror( int errnum){ return( struct
-_tagged_arr) Cstring_to_string( strerror( errnum));} unsigned int Cyc_Std_strlen(
+_tagged_arr) wrap_Cstring_as_string( strerror( errnum), - 1);} unsigned int Cyc_Std_strlen(
 struct _tagged_arr s){ unsigned int i; for( i= 0; i <  _get_arr_size( s, sizeof(
 unsigned char)); i ++){ if(*(( const unsigned char*) _check_unknown_subscript( s,
 sizeof( unsigned char),( int) i)) == '\000'){ return i;}} return i;} static

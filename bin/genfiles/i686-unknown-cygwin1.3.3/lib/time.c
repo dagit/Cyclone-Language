@@ -206,14 +206,16 @@ static inline unsigned int _check_times(unsigned int x, unsigned int y) {
   return word_ans;
 }
 
-#ifdef CYC_REGION_PROFILE
+#if defined(CYC_REGION_PROFILE) 
 extern void * _profile_GC_malloc(int,char *file,int lineno);
 extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
 extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
                                      char *file,int lineno);
-#define _cycalloc(n) _profile_cycalloc(n,__FUNCTION__,__LINE__)
-#define _cycalloc_atomic(n) _profile_cycalloc_atomic(n,__FUNCTION__,__LINE__)
-#define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FUNCTION__,__LINE__)
+#  if !defined(RUNTIME_CYC)
+#define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
+#  endif
+#define _cycalloc(n) _profile_GC_malloc(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
+#define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
 #endif
 
 #endif
@@ -244,29 +246,37 @@ _timezone; extern int daylight; struct Cyc_Std_timeval{ int tv_sec; int tv_usec;
 gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone* __z); extern
 int select( int n, struct Cyc_Std__types_fd_set* readfds, struct Cyc_Std__types_fd_set*
 writefds, struct Cyc_Std__types_fd_set* exceptfds, struct Cyc_Std_timeval*
-timeout); extern unsigned char* asctime( const struct Cyc_Std_tm* timeptr);
-extern unsigned char* ctime( const int* timep); extern unsigned int strftime(
+timeout); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
+unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[ 8u];
+extern unsigned int Cyc_Std_strlen( struct _tagged_arr s); extern struct
+_tagged_arr Cyc_Std_strcpy( struct _tagged_arr dest, struct _tagged_arr src);
+extern unsigned char* asctime( const struct Cyc_Std_tm* timeptr); extern
+unsigned char* ctime( const int* timep); extern unsigned int strftime(
 unsigned char* s, unsigned int maxsize, unsigned char* fmt, const struct Cyc_Std_tm*
 t); extern unsigned char* asctime_r( const struct Cyc_Std_tm*, unsigned char*);
 extern unsigned char* ctime_r( const int*, unsigned char*); struct _tagged_arr
-Cyc_Std_asctime( const struct Cyc_Std_tm* timeptr){ return Cstring_to_string(
-asctime( timeptr));} struct _tagged_arr Cyc_Std_ctime( const int* timep){ return
-Cstring_to_string( ctime( timep));} unsigned int Cyc_Std_strftime( struct
-_tagged_arr s, unsigned int maxsize, struct _tagged_arr fmt, const struct Cyc_Std_tm*
-t){ unsigned int m= _get_arr_size( s, sizeof( unsigned char)) <  maxsize?
-_get_arr_size( s, sizeof( unsigned char)): maxsize; return strftime(
-underlying_Cstring( s), m, underlying_Cstring( fmt), t);} struct _tagged_arr Cyc_Std_asctime_r(
-const struct Cyc_Std_tm* t, struct _tagged_arr s){ if( _get_arr_size( s, sizeof(
-unsigned char)) <  50){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp0=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
-_temp0[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp1; _temp1.tag= Cyc_Core_Invalid_argument;
-_temp1.f1= _tag_arr("Time::asctime_r: string too small (< 50)", sizeof(
-unsigned char), 41u); _temp1;}); _temp0;}));} return Cstring_to_string(
-asctime_r( t, underlying_Cstring(( struct _tagged_arr) s)));} struct _tagged_arr
-Cyc_Std_ctime_r( const int* t, struct _tagged_arr s){ if( _get_arr_size( s,
-sizeof( unsigned char)) <  50){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp2=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
-_temp2[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp3; _temp3.tag= Cyc_Core_Invalid_argument;
-_temp3.f1= _tag_arr("Time::ctime_r: string too small (< 50)", sizeof(
-unsigned char), 39u); _temp3;}); _temp2;}));} return Cstring_to_string( ctime_r(
-t, underlying_Cstring(( struct _tagged_arr) s)));}
+Cyc_Std_asctime( const struct Cyc_Std_tm* timeptr){ return
+wrap_Cstring_as_string( asctime( timeptr), - 1);} struct _tagged_arr Cyc_Std_ctime(
+const int* timep){ return wrap_Cstring_as_string( ctime( timep), - 1);}
+unsigned int Cyc_Std_strftime( struct _tagged_arr s, unsigned int maxsize,
+struct _tagged_arr fmt, const struct Cyc_Std_tm* t){ unsigned int m=
+_get_arr_size( s, sizeof( unsigned char)) <  maxsize? _get_arr_size( s, sizeof(
+unsigned char)): maxsize; return strftime( underlying_Cstring( s), m,
+underlying_Cstring( fmt), t);} struct _tagged_arr Cyc_Std_asctime_r( const
+struct Cyc_Std_tm* t, struct _tagged_arr s){ struct _tagged_arr _temp0=
+wrap_Cstring_as_string( asctime( t), - 1); if( Cyc_Std_strlen(( struct
+_tagged_arr) _temp0) +  1 >  _get_arr_size( s, sizeof( unsigned char))){( int)
+_throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp1=( struct Cyc_Core_Invalid_argument_struct*)
+_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp1[ 0]=({
+struct Cyc_Core_Invalid_argument_struct _temp2; _temp2.tag= Cyc_Core_Invalid_argument;
+_temp2.f1= _tag_arr("Time::asctime_r: string too small", sizeof( unsigned char),
+34u); _temp2;}); _temp1;}));} else{ Cyc_Std_strcpy( s,( struct _tagged_arr)
+_temp0); return s;}} struct _tagged_arr Cyc_Std_ctime_r( const int* t, struct
+_tagged_arr s){ struct _tagged_arr _temp3= wrap_Cstring_as_string( ctime( t), -
+1); if( Cyc_Std_strlen(( struct _tagged_arr) _temp3) +  1 >  _get_arr_size( s,
+sizeof( unsigned char))){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
+_temp4=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
+_temp4[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp5; _temp5.tag= Cyc_Core_Invalid_argument;
+_temp5.f1= _tag_arr("Time::ctime_r: string too small", sizeof( unsigned char),
+32u); _temp5;}); _temp4;}));} else{ Cyc_Std_strcpy( s,( struct _tagged_arr)
+_temp3); return s;}}

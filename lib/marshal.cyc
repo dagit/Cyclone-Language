@@ -172,6 +172,8 @@ print_type_base(typestruct_t rep, addr_set_t env, `a @ val)
       unsigned int* xtstructp = unsafe_cast(*xtunionp);
       if(*xtstructp != 0) {
 	Cstring<`H> xtnamec = unsafe_cast(*xtstructp+4);
+	/* XXX do we really want to copy this, or just mess
+	   with the underlying string? */
 	string_t<`H> xtname = Core::Cstring_to_string(xtnamec);
 	printf("&%s[( ",xtname);
 	/* figure out which variant it is */
@@ -180,6 +182,8 @@ print_type_base(typestruct_t rep, addr_set_t env, `a @ val)
       }
       else {
 	Cstring<`H> xtnamec = unsafe_cast(*xtunionp+4);
+	/* XXX do we really want to copy this, or just mess
+	   with the underlying string? */
 	string_t<`H> xtname = Core::Cstring_to_string(xtnamec);
 	printf("&%s[( ",xtname);
       }

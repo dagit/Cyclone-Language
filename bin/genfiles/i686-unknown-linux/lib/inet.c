@@ -206,14 +206,16 @@ static inline unsigned int _check_times(unsigned int x, unsigned int y) {
   return word_ans;
 }
 
-#ifdef CYC_REGION_PROFILE
+#if defined(CYC_REGION_PROFILE) 
 extern void * _profile_GC_malloc(int,char *file,int lineno);
 extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
 extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
                                      char *file,int lineno);
-#define _cycalloc(n) _profile_cycalloc(n,__FUNCTION__,__LINE__)
-#define _cycalloc_atomic(n) _profile_cycalloc_atomic(n,__FUNCTION__,__LINE__)
-#define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FUNCTION__,__LINE__)
+#  if !defined(RUNTIME_CYC)
+#define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
+#  endif
+#define _cycalloc(n) _profile_GC_malloc(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
+#define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
 #endif
 
 #endif
@@ -258,5 +260,5 @@ unsigned char* cp, struct Cyc_Std_in_addr* inp); extern unsigned char* inet_ntoa
 struct Cyc_Std_in_addr); extern unsigned int inet_addr( unsigned char*); int Cyc_Std_inet_aton(
 struct _tagged_arr cp, struct Cyc_Std_in_addr* inp){ return inet_aton(
 string_to_Cstring( cp), inp);} struct _tagged_arr Cyc_Std_inet_ntoa( struct Cyc_Std_in_addr
-x){ return Cstring_to_string( inet_ntoa( x));} unsigned int Cyc_Std_inet_addr(
+x){ return wrap_Cstring_as_string( inet_ntoa( x), - 1);} unsigned int Cyc_Std_inet_addr(
 struct _tagged_arr addr){ return inet_addr( string_to_Cstring( addr));}

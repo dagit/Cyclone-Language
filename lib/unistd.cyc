@@ -41,6 +41,8 @@ namespace Cunistd {
     Cstring getpass(const Cstring);
   }
 }
+//  #define static_c2s(x) (Cstring_to_string(x))
+#define static_c2s(x) (wrap_Cstring_as_string(x,-1))
 
 namespace Std;
 
@@ -148,5 +150,5 @@ int chroot(string_t pathname) {
 }
 
 char ?getpass(const char? prompt) {
-  return Cstring_to_string(Cunistd::getpass(string_to_Cstring(prompt)));
+  return static_c2s(Cunistd::getpass(string_to_Cstring(prompt)));
 }

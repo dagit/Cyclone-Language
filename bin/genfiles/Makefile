@@ -22,7 +22,7 @@ $(CYC_BIN_PATH)/cycdoc$(EXE): $(ARCH)/src/cycdoc$(EXE)
 $(CYC_BIN_PATH)/buildlib$(EXE): $(ARCH)/src/buildlib$(EXE)
 	cp $< $@
 
-install_a: $(ARCH)/lib/libcyc_a.a
+install_a: $(ARCH)/lib/libcyc_a.a $(ARCH)/lib/nogc_a.a
 	cp $^ $(CYC_LIB_PATH)
 
 # architecture-specific targets
@@ -43,6 +43,12 @@ $(ARCH)/lib/libcyc_a.a: $(addprefix $(ARCH)/lib/, $(A_LIBS) a_$(RUNTIME).o)
 	-ranlib $@
 
 $(ARCH)/lib/nogc.a: $(ARCH)/lib/nogc.o
+	-$(RM) $@
+	ar rc $@ $^
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
+
+$(ARCH)/lib/nogc_a.a: $(ARCH)/lib/a_nogc.o
 	-$(RM) $@
 	ar rc $@ $^
 	@echo Trying ranlib, if not found, probably ok to ignore error messages

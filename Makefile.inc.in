@@ -235,6 +235,7 @@ C_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS))
 C_LIBS:=$(addsuffix .c, $(CYCLONE_LIBS))
 O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS))
 O_LIBS:=$(addsuffix .$(O), $(CYCLONE_LIBS))
+A_LIBS:=$(addprefix a_, $(O_LIBS))
 C_RUNTIME:=$(addsuffix .c, $(RUNTIME))
 
 UPDATE_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS) cycdoc buildlib)
