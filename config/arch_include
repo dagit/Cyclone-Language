@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # This creates the .h file with architecture-specific constants.  Output
 # goes to stdout, so you need to copy into the appropriate file.
 #

@@ -4,8 +4,9 @@
 # usage: configure
 #
 # TODO:
+#   locate bash on the system (for Cornell Suns it's /usr/local/gnu/bin/bash)
+#     if bash cannot be found, use ksh instead.
 #   better job of finding egrep
-#   locate bash on the system (on the Cornell suns it's /usr/local/gnu/bin/bash
 #
 
 # get the root directory of the source tree
@@ -134,7 +135,9 @@ if [ ! -f "arch/${ARCH}" ]; then
       echo "Using the genfiles from ${DEF_ARCH}" 
       cp -r ${CYCDIR}/bin/genfiles/${DEF_ARCH}/* ${CYCDIR}/bin/genfiles/${ARCH}
       CVS_files=`find ${CYCDIR}/bin/genfiles/${ARCH} -name CVS`
-      \rm -rf $CVS_files
+      if [ -n "$CVS_files" ]; then
+        \rm -rf $CVS_files
+      fi
     fi
   else
     echo "aborting."
@@ -156,7 +159,10 @@ else
       esac
       echo "Using the genfiles from ${DEF_ARCH}" 
       cp -r ${CYCDIR}/bin/genfiles/${DEF_ARCH}/* ${CYCDIR}/bin/genfiles/${ARCH}
-      find ${CYCDIR}/bin/genfiles/${ARCH} -name CVS -exec rm -rf {} \;
+      CVS_files=`find ${CYCDIR}/bin/genfiles/${ARCH} -name CVS`
+      if [ -n "$CVS_files" ]; then
+        \rm -rf $CVS_files
+      fi
     fi
   else
     echo "Error---missing configuration files for ${ARCH}; rerun configure"

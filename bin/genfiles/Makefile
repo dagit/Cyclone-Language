@@ -23,13 +23,16 @@ $(ARCH):
 	extract_patch $(PATH_ARCH) $(ARCH)
 $(ARCH)/lib/$(CYCLIB): $(addprefix $(ARCH)/lib/, $(O_LIBS) $(RUNTIME).o)
 	-rm -f $@
-	ar rcs $@ $^
+	ar rc $@ $^
+	ranlib $@
 $(ARCH)/lib/libcyc_a.a: $(addprefix $(ARCH)/lib/, $(A_LIBS) a_$(RUNTIME).o)
 	-rm -f $@
-	ar rcs $@ $^
+	ar rc $@ $^
+	ranlib $@
 $(ARCH)/lib/nogc.a: $(ARCH)/lib/nogc.o
 	-rm -f $@
-	ar rcs $@ $^
+	ar rc $@ $^
+	ranlib $@
 $(ARCH)/src/cyclone$(EXE): $(addprefix $(ARCH)/src/, $(O_SRCS) install_path.o) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 

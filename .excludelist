@@ -1,6 +1,7 @@
 ~
 \.#
 CVS
+TAGS
 cyclone/include/sys/select.h
 cyclone/include/sys/cselect.h
 cyclone/lib/sys/select.h

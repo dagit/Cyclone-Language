@@ -48,14 +48,16 @@ ifdef MS
 else
 	-rm -f $@
 ifeq ($(LC_FLAG),)
-	ar rcs $@ $^
+	ar rc $@ $^
+	ranlib $@
 else
 	$(CYCC) $(LC_FLAG) -o $@ $^
 endif
 endif
 
 nogc.a: nogc.o
-	ar rcs $@ $^
+	ar rc $@ $^
+	ranlib $@
 
 precore_c.h: precore.h $(CYCC)
 	cp precore.h precore.cyc

@@ -1,0 +1,11 @@
+This file contains the state of ports to various architectures.
+
+Linux and Cygwin should be pretty stable, since we use them regularly.
+
+OpenBSD:
+
+Some things still don't work:
+1) finger.cyc doesn't compile correctly in tests (something to do with errno)
+2) GC gives warning:
+  Needed to allocate blacklisted block at 0x17b000
+

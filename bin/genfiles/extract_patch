@@ -19,6 +19,7 @@ if [ ! -d "${ARCH}" ]; then
     exit 1
   fi
 
+  echo EXTRACTING ${ARCH}
   cp -r ${PATCH_ARCH} ${ARCH}
   cd ${ARCH}
   patch -p1 < ../${ARCH}.patch

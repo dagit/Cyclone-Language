@@ -11,7 +11,9 @@
 # It is strongly advised that you precede step 3 with the boostrap-checking
 # facilities provided by CYCC and OUT_PREFIX.
 # To update for other architectures, do make update_all_archs after you have
-# reached a fixpoint.
+# reached a fixpoint.  Alternatively, do make update_devel_archs to just
+# update linux and cygwin; you can wait until just before a release to
+# do update_all_archs.
 
 # To use a new version of the compiler without nuking the C files used to
 # bootstrap:
@@ -143,10 +145,9 @@ update:
 	@if [ "$(UPDATEARCH)" = "$(PATCH_ARCH)" ]; then\
 	  cd bin/genfiles; echo "UPDATING REFERENCE ARCH $(UPDATEARCH)";\
 	  for arch in $(ALL_ARCHS); do\
-	    echo "EXTRACTING $$arch"; ./extract_patch $(PATCH_ARCH) $$arch;\
+	    ./extract_patch $(PATCH_ARCH) $$arch;\
 	  done; cd ../..;\
-	elif [ -f "$(ARCHDIR).patch" ]; then\
-	  cd bin/genfiles; echo "EXTRACTING $(UPDATEARCH)";\
+	else\
 	  ./extract_patch $(PATCH_ARCH) $(UPDATEARCH);\
 	fi
 	@for i in $(C_SRCS); do (cmp -s $(SRCDIR)/$$i $(ARCHDIR)/src/$$i || (echo UPDATING $(SRCDIR)/$$i; cp $(SRCDIR)/$$i $(ARCHDIR)/src/$$i)) done
@@ -170,7 +171,9 @@ endif
 	elif [ -f "$(ARCHDIR).patch" ]; then\
 	  echo "PATCHIFYING $(UPDATEARCH)";\
 	  $(MAKE) -s -C bin/genfiles $(UPDATEARCH).patch && \
-	  $(RM) -rf $(ARCHDIR);\
+	  if [ "$(UPDATEARCH)" != "$(ARCH)" ]; then
+	    $(RM) -rf $(ARCHDIR);\
+	  fi
 	fi
 
 # This will compile (C files) and update for all supported architectures
@@ -206,6 +209,10 @@ update_all_archs:
 	    fi;\
 	  fi;\
 	done
+
+# only update development architectures
+update_devel_archs:
+	$(MAKE) update_all_archs ALL_ARCHS="$(DEVEL_ARCHS)"
 
 # affected by CYCC and OUT_PREFIX
 test:

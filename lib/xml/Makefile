@@ -28,7 +28,8 @@ test: xmlecho$(EXE)
 
 libxml.a: $(OBJS)
 	-rm -f $@
-	ar rcs $@ $^
+	ar rc $@ $^
+	ranlib $@
 
 csrc: $(CSRCS)
 
