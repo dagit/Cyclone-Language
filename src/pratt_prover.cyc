@@ -157,10 +157,18 @@ static void insert_distance(graph_t @g, bool is_signed, term_t i, term_t j, int 
   g->distance = new Distance{g->distance,i,j,is_signed ? Signed_valid : Unsigned_valid,dist,dist};
 }
 
+// FIX: 32-bit dependency!
+#define MAXINT (0x7fffffff)
+#define MININT (0x80000000)
+
 // add an edge to a graph and close it off to find shortest paths.
 // returns true if the resulting graph remains consistent and false
 // otherwise.
 // FIX: MUST WORRY ABOUT OVERFLOW ISSUES
+// wangyl: here we are using signed integer to represent weight of
+// the edges in the graph, we need to check if any overflow happens
+// while computing shoterst path of all pairs and looking for negative
+// weight cycles.
 static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist){
   add_node(g,i);
   add_node(g,j);
@@ -171,8 +179,26 @@ static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist){
   int* ji_dist = lookup_distance(g,is_signed,j,i);
   // if  j -n-> i -dist-> j  and n+dist is negative, we have a contradiction.
   // FIX -- distance could overflow
-  if (ji_dist != NULL && (*ji_dist + dist) < 0)
-    return false; 
+  if (ji_dist != NULL){
+    int sum = *ji_dist + dist;
+    if(~((*ji_dist) ^ dist) & (sum ^ dist) >> 31){
+      // overflow happened, the two operands have the same sign while the sum
+      // has a different sign bit from the operand
+      if (dist >> 31){
+	//both operands are negative, then the sum is actually negative, the 
+	//graph is inconsistent with the new edge.
+	return false;
+      }
+      //both operands are positive, the sum should be positive
+      //even if it overflowed to look like negative
+      else return true; 
+    }else{
+      // no overflow, so just check the sum as we used to.
+      if (sum < 0)
+	return false; 
+    }
+  }
+
   // update shortest path for each pair of nodes
   for (let ks = g->nodes; ks != NULL; ks = ks->tl) {
     let k = ks->hd;
@@ -184,10 +210,48 @@ static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist){
       if (jl_dist != NULL) {
         let kl_dist = lookup_distance(g,is_signed,k,l);
         // FIX -- distance could overflow
+	int sum1, sum2;
+	if(*ki_dist ^ dist >> 31){
+	  //two operands with different signs, no overflow;
+	  sum1 = *ki_dist+dist;
+	  sum2 = *ji_dist;
+	}else if (dist ^ *jl_dist >> 31){
+	  //two operands with different signs, no overflow;
+	  sum1 = dist + *jl_dist;
+	  sum2 = *ki_dist;
+	}else{
+	  // *ki_dist, dist and jl_dist all have the same sign
+	  //might overflow here, need to check:
+	  sum1 = *ki_dist+dist;
+	  //sum1 should have the same sign as dist
+	}
+	int new_dist = sum1 + sum2;
+	bool overflow;
+	if (sum1 ^ sum2 >> 31){
+	  //sum1 and sum2 have different signs, no overflow here
+	  //nothing needs to be done
+	  overflow = false;
+	}else {
+	  //sum1 and sum2 have the same sign, might overflow here
+	  if (sum1 < 0 && new_dist > 0){
+	    //underflow happened, 
+	    //new dist is less than MININT
+	    new_dist = (int)MININT;
+	    overflow = false;
+	  }else if (sum1 > 0 && new_dist < 0){
+	    overflow = true;
+	    //new dist is bigger than MAXINT, overflow happened
+	  }
+	}
         let new_dist = *ki_dist + dist + *jl_dist;
-        if (kl_dist == NULL) {
+        if (kl_dist == NULL && !overflow) {
+	  //when distance is too big to be represented by int,
+	  //just throw out the edge.
           insert_distance(g,is_signed,k,l,new_dist);
-        } else if (*kl_dist > new_dist) {
+        } else if (*kl_dist > new_dist && !overflow) {
+	  //when the distance is too small to be represented by int,
+	  //it 's actually sound to replace it with an edge with
+	  //greater weight to get a distance representable by int
           *kl_dist = new_dist;
         }
       }
@@ -203,8 +267,6 @@ static $(unsigned int,bool) eval_term(term_t t) {
   }
 }
 
-// FIX: 32-bit dependency!
-#define MAXINT (0x7fffffff)
 
 // convert a primitive assertion to a constraint and add it to the graph.
 // returns true if the resulting graph remains consistent, false otherwise.
