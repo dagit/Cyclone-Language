@@ -19,19 +19,16 @@
 /* This file defines the low-level representation of Cyclone data
    for implementing generic marshallers. */
 
-#define TYPEREP_CYC /* instantiate the the type */
-
-#include "typerep.h"
+#include <typerep.h>
 #include <stdio.h>
+#include "marshal.h"
 
 using Typerep;
+using Marshal;
 
 extern "C" `b unsafe_cast<`b,`a>(`a x);
 
-/* to "encourage" the user to include this file, we make gen() a macro */
-#define gen(t) __gen(t)
-
-namespace Typerep;
+namespace Marshal;
 
 /*-------------------------------------------------------------------------*/
 /* given a tag and a list of typereps, each assumed to be a TUnionField,
@@ -65,6 +62,15 @@ size_type(typestruct_t rep)
   case &FatPtr(_): return sizeof(void ?);
   case &Tuple(szb,_): return szb;
   case &TUnion(_): return sizeof(void *);
+  case &Union(tss): 
+    int max = 0;
+    for(int i = 0; i < tss.size; i++) {
+      let sz = size_type(*tss[i]);
+      max = (max < sz)? sz : max;
+    }
+    return max;
+    // polymorphic constructs
+  default: throw new Core::Failure("Unhandled case in size_type");
   }
 }
 
@@ -96,7 +102,11 @@ print_ptr_type(typestruct_t typ,
 //      print_typestruct(typ);
     print_type(typ, *ptr);
     return;
+  case &Union(_):
+    throw new Core::Failure("Cannot print Unions");
+  default: throw new Core::Failure("Unhandled case in print_ptr_type");
   }
+  
 }
 
 /*-------------------------------------------------------------------------*/
@@ -213,6 +223,9 @@ print_type(typestruct_t rep, `a @ val)
     }
     printf(" )]");
     break;
+  case &Union(_):
+    throw new Core::Failure("Cannot print Unions");
+  default: throw new Core::Failure("Unhandled case in print_type");
   }
 }
 
@@ -242,6 +255,10 @@ xmlize_ptr_type(typestruct_t typ,
     xmlize_type(typ, *ptr);
     
     return;
+  case &Union(_):
+    throw new Core::Failure("Cannot xmlize Unions");
+  default: throw new Core::Failure("Unhandled case in xmlize_ptr_type");
+
   }
 }
 
@@ -354,62 +371,11 @@ xmlize_type(typestruct_t rep, `a @ val)
 
     }
     break;
+  case &Union(_):
+    throw new Core::Failure("Cannot xmlize Unions");
+  default: throw new Core::Failure("Unhandled case in xmlize_type");
   }
-}
-
-/*-------------------------------------------------------------------------*/
-/* Pretty-prints a typestruct for debugging purposes */
-void 
-print_typestruct(typestruct_t rep) 
-{
-  switch (rep) {
-
-  case &Int(sz):
-    printf("Int(%d)",sz);
-    break;
-
-  case Float:
-    printf ("Float");
-    break;
-
-  case Double:
-    printf ("Double");
-    break;
-
-  case &ThinPtr(sz,typ):
-    printf("ThinPtr(%d,", sz);
-    print_typestruct(typ);
-    printf(")");
-    break;
-
-  case &FatPtr(typ): 
-    printf("FatPtr(");
-    print_typestruct(typ);
-    printf(")");
-    break;
-
-  case &Tuple(sz,l):
-    printf("Tuple(%d,[",sz);
-    for (int i = 0; i < l.size; i++) {
-      let $(ofs,typ) = *(l[i]);
-      printf ("$(%d,",ofs);
-      print_typestruct(typ);
-      printf (")%c", (i != (l.size-1) ? ',' : ' '));
-    }
-    printf(" )");
-    break;
-
-  case &TUnion(l):
-    printf("TUnion(");
-    for (int i = 0; i < l.size; i++) {
-      let $(tag,typ) = *(l[i]);
-      printf ("$(%d,",tag);
-      print_typestruct(typ);
-      printf (")%c", (i != (l.size-1) ? ',' : ' '));
-    }    
-    printf(" )");
-    break;
-  }
+  
 }
 
 /*--- SLOP ---*/

@@ -1,9 +1,19 @@
 #include <stdio.h>
-#include "typerep.h"
+#include <typerep.h>
+#include "marshal.h"
+#include <list.h>
 
+using List;
 using Typerep;
+using Marshal;
 
-tunion Typestruct int_rep = gen(void);
+//#define NEW
+#define TEST
+
+typedef union Bar {
+  int x;
+  double y;
+} bar_t;
 
 /* Example types */
 typedef tunion Foo {
@@ -11,10 +21,6 @@ typedef tunion Foo {
   Foo2(int,int);
   Foo3(float);
   Foo4(int,tunion Foo);
-#define Foo1_tag 0
-#define Foo2_tag 0
-#define Foo3_tag 1
-#define Foo4_tag 2
 } foo_t;
 
 typedef struct Intlist {
@@ -32,106 +38,176 @@ struct Inttree {
   inttree_t * right;
 };
 
+enum Enum { A, B, C};
+typedef enum Enum enum_t;
 
-/*
-tunion Typestruct foo_rep = gen(foo_t);
-tunion Typestruct list_rep = gen(intlist_t);
-tunion Typestruct tree_rep = gen(inttree_t);
-*/
+#ifdef TEST 
+
+tunion Typestruct arr_rep = gen(int[5]);
+tunion Typestruct ptr_rep = gen(int*);
+
+tunion Typestruct int_rep = gen(int);
+tunion Typestruct float_rep = gen(float);
+tunion Typestruct double_rep = gen(double);
+
+tunion Typestruct arr_rep2 = gen(int[7][6][5]);
+tunion Typestruct tuple_rep = gen($(double,$(int,int)));
+typedef $(int,float)@ pair_t;
+tunion Typestruct pair_t_rep = gen(pair_t);
+struct Pair {
+  float a;
+  int b;
+};
+tunion Typestruct pair_rep = gen(struct Pair);
+typedef struct {
+  int a;
+  int b;
+  int c;
+} triple_t;
+tunion Typestruct triple_rep = gen(triple_t);
+
+tunion Typestruct intlist_rep = __gen(intlist_t );
+tunion Typestruct inttree_rep = __gen(inttree_t );
+
+tunion Typestruct enum_rep = __gen(enum_t);
+tunion Typestruct tunionfield_rep = __gen(tunion Foo.Foo2);
+
+tunion Typestruct foo_rep = __gen(foo_t);
+tunion Typestruct bar_rep = __gen(bar_t);
+
+#endif
+
+#ifdef NEW
+typedef $(`a,`b) polypair<`a,`b> ;
+tunion Typestruct pp_rep = __gen(list_t<int>);
+#endif
+
 
 extern "C" `b unsafe_cast<`b,`a>(`a x);
 
-void do_print(tunion Foo f) {
-  int @foo = unsafe_cast(f);
-  print_type((tunion Typestruct)&foo_rep,foo);
-  printf("\n");
-}
-
-void do_xmlize(tunion Foo f) {
-  int @foo = unsafe_cast(f);
-  xmlize_type((tunion Typestruct)&foo_rep,foo);
-  printf("\n");
-}
-void do_print2(intlist_t* f) {
-  int @foo = unsafe_cast(f);
+void do_print(tunion Typestruct rep, `a val) {
+  int @foo = unsafe_cast(val);
   if(foo == NULL) printf("NULL");
-  else print_type((tunion Typestruct)&list_rep,foo);
+  else print_type(rep,foo);
   printf("\n");
 }
 
-void do_xmlize2(intlist_t* f) {
-  int @foo = unsafe_cast(f);
-  if(foo == NULL) printf("<null/>");
-  else xmlize_type((tunion Typestruct)&list_rep,foo);
-  printf("\n");
-}
-void do_print3(inttree_t* f) {
-  int @foo = unsafe_cast(f);
-  if(foo == NULL) printf("NULL");
-  else print_type((tunion Typestruct)&tree_rep,foo);
+void do_xmlize(tunion Typestruct rep, `a val) {
+  int @foo = unsafe_cast(val);
+  if(foo == NULL) printf("<null>");
+  else xmlize_type(rep,foo);
   printf("\n");
 }
 
-void do_xmlize3(inttree_t* f) {
-  int @foo = unsafe_cast(f);
-  if(foo == NULL) printf("<null/>");
-  else xmlize_type((tunion Typestruct)&tree_rep,foo);
-  printf("\n");
-}
+
 
 void main() {
-  /*  tunion Foo f;
+#ifdef TEST
+  int i = 0xffffffff;
+  do_print(int_rep,&i);
+  do_xmlize(int_rep,&i);
+  float j = 1.2345678;
+  do_print(float_rep,&j);
+  do_xmlize(float_rep,&j);
+  double k = 1.23456789101112;
+  do_print(double_rep,&k);
+  do_xmlize(double_rep,&k);
+  // FIX: Make interface to print_type more uniform
+  // Avoid type dependence of whether to take address of argument
+  int* ip = &i;
+  do_print(ptr_rep,ip);
+  do_xmlize(ptr_rep,ip);
 
-  f = Foo1;
-  do_print(f);
-  do_xmlize(f);
+  // FIX/DANGER: Because of unsafe casting, float constants don't get promoted
+  // to doubles automatically, so testing this is tricky.  There's
+  // no real bug, you just have to remember to make the doubleness explicit.
+  let t = $((double)1.0,$(20,300));
+  do_print(tuple_rep,&t);
+  do_xmlize(tuple_rep,&t);
 
-  f = new Foo2(1,2);
-  do_print(f);
-  do_xmlize(f);
+  // Typedef test
+  let td = $(1,55.5);
+  do_print(pair_t_rep,&td);
+  do_xmlize(pair_t_rep,&td);
 
-  f = new Foo3(1.245);
-  do_print(f);
-  do_xmlize(f);
+  // Struct test: nonrecursive
+  let ps = Pair{.a = 310.1, .b = 7};
+  do_print(pair_rep,&ps);
+  do_xmlize(pair_rep,&ps);
 
-  f = new Foo4(1,f);
-  do_print(f);
-  do_xmlize(f);
-
+  // Anon struct test: this should work if above does
+  // But: scares the heck out of C compiler!  Lots of warnings
+  triple_t ts;
+  ts.a = 1;
+  ts.b = 2;
+  ts.c = 3;
+  do_print(triple_rep,&ts);
+  do_xmlize(triple_rep,&ts);
 
   struct Intlist * g = NULL;
-  do_print2(g);
-  do_xmlize2(g);
+  do_print(intlist_rep,g);
+  do_xmlize(intlist_rep,g);
   g = new Intlist{.val=(unsigned int)6,.next=NULL};
- 
-  do_print2(g);
-  do_xmlize2(g);
+
+  do_print(intlist_rep,g);
+  do_xmlize(intlist_rep,g);
 
   g = new Intlist{.val=(unsigned int)5,.next=new Intlist{.val=(unsigned int)6,.next=new Intlist{.val = (unsigned int)7, .next=NULL}}};
 
 
-  do_print2(g);
-  do_xmlize2(g);
+  do_print(intlist_rep,g);
+  do_xmlize(intlist_rep,g);
 
 
   inttree_t* h = NULL;
-  do_print3(h);
-  do_xmlize3(h);
+  do_print(inttree_rep,h);
+  do_xmlize(inttree_rep,h);
   
   inttree_t* h = new Inttree{.val=5,.left=NULL,.right=NULL};
-  do_print3(h);
-  do_xmlize3(h);
+  do_print(inttree_rep,h);
+  do_xmlize(inttree_rep,h);
   inttree_t* h = new Inttree{.val=5,.left=new Inttree{.val=4,.left=NULL,.right=NULL},.right=new Inttree{.val=6,.left=NULL,.right=NULL}};
-  do_print3(h);
-  do_xmlize3(h);
-*/
+  do_print(inttree_rep,h);
+  do_xmlize(inttree_rep,h);
+
+  enum_t en = A;
+  do_print(enum_rep,&en);
+  do_xmlize(enum_rep,&en);
+
+  tunion Foo.Foo2 blah = Foo2(12,34);
+  do_print(tunionfield_rep, &blah);
+  do_xmlize(tunionfield_rep,&blah);
+
+  tunion Foo f;
+
+  f = Foo1;
+  do_print(foo_rep,f);
+  do_xmlize(foo_rep,f);
+
+  f = new Foo2(1,2);
+  do_print(foo_rep,f);
+  do_xmlize(foo_rep,f);
+
+  f = new Foo3(1.245);
+  do_print(foo_rep,f);
+  do_xmlize(foo_rep,f);
+
+  f = new Foo4(1,f);
+  do_print(foo_rep,f);
+  do_xmlize(foo_rep,f);
+
+  print_typestruct(bar_rep);
+  printf("\n");
+
+
+#endif
   
+#ifdef CYCLE
   //demonstration that cycles break things
-  /*
-    intlist_t * cycle = new Intlist{.val = (unsigned int) 6, .next = NULL};
+  intlist_t * cycle = new Intlist{.val = (unsigned int) 6, .next = NULL};
   h->next = cycle;
   do_print2(cycle);
   do_xmlize2(cycle);
-  */
+#endif  
 }
 

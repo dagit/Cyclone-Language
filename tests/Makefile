@@ -4,6 +4,8 @@
 
 include ../Makefile.inc
 
+
+
 # Choose which variables you want depending on the compiler you need
 # for the compiler in src
 ifdef devel
@@ -83,11 +85,11 @@ $(OUT_PREFIX)unsafe_cast.o: $(OUT_PREFIX)unsafe_cast.c
 	$(CC) -c $< -o $@
 
 $(OUT_PREFIX)typerep_test$(EXE): $(OUT_PREFIX)unsafe_cast.o \
-  $(OUT_PREFIX)typerep.o $(OUT_PREFIX)typerep_test.o
+ $(OUT_PREFIX)marshal.o $(OUT_PREFIX)typerep_test.o 
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 
 $(OUT_PREFIX)genrep_test$(EXE): $(OUT_PREFIX)unsafe_cast.o \
-  $(OUT_PREFIX)typerep.o $(OUT_PREFIX)genrep_test.o
+  $(OUT_PREFIX)marshal.o $(OUT_PREFIX)genrep_test.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 
 # This takes care of non-machine-generated versions (the .cyc is already there)

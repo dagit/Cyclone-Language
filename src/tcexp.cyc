@@ -267,7 +267,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t *`r topt, cnst_t c, exp_t e){
 static type_t tcVar(tenv_t te, seg_t loc, qvar_t q, binding_t b) {
   switch(b) {
   case Unresolved_b:
-    return expr_err(te,loc,"unbound identifier %s",qvar2string(q));
+    return expr_err(te,loc,"unresolved identifier: %s",qvar2string(q));
   case &Global_b(vd):
     q[0] = vd->name[0];
     return vd->type;

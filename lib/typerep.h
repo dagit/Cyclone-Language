@@ -22,6 +22,9 @@
 #ifndef _TYPEREP_H_
 #define _TYPEREP_H_
 
+#include <core.h>
+using Core;
+
 // A cute hack to avoid defining the abstract syntax twice.
 #ifdef TYPEREP_CYC
 #define EXTERN_TYPEREP
@@ -32,8 +35,11 @@
 #define gen(t) __gen(t)
 
 namespace Typerep {
+typedef stringptr_t<`H,`H> name_t;
 
 EXTERN_TYPEREP tunion Typestruct {
+  /** [Var(name) indicated a type parameter variable [name] **/
+  Var(name_t);
   /** [Int(sz)] indicates integer types having [sz] bits **/
   Int(unsigned int);
   /** [Float] indicates a float type **/
@@ -50,20 +56,36 @@ EXTERN_TYPEREP tunion Typestruct {
   **/
   Tuple(unsigned int, $(unsigned int,tunion Typestruct)@?);
   /** [TUnion(fields)] is a tunion type, where each element of
-      the array [fields] is a TunionField that contains
-      data.  Tag-only fields are not included in the array (since
+      the array [fields] is a pair [(tag,ts)] of a tag value [tag]
+      and a Typestruct [ts] representing the type of the tagged data.
+      Tag-only fields are not included in the array (since
       we can just check the tunion pointer to see if it's a tag).
   **/
   TUnion($(unsigned int, tunion Typestruct)@?);
+  /** [Union(fields)] is a union type, where each element of
+      the array [fields] is a Typestruct represnting the data
+      for a possible case of the union.
+  **/
+  Union(tunion Typestruct@?);
+  /** [Forall(vars, ts)] is a polymorphic type wrapper.
+      The string array [vars] lists the variables bound by this forall in [ts].
+  **/
+  Forall(name_t?,tunion Typestruct@);
+  /** [App(ts,ts_params)] describes an instantiation of a polymorphic
+      type.  Typestruct [ts] must be a [Forall(vars,ts2)].  The [ts_params]
+      represent the instantiations of the type variables bound inside [ts2].
+      The correspondence between variables and type parameters is by position
+      in the arrays; [ts_param[i]] binds to [vars[i]] (and the arrays must 
+      have the same length)
+   **/
+  App(tunion Typestruct, tunion Typestruct?);
 };
-
+  
 typedef tunion Typestruct typestruct_t;
-
-extern void print_type(typestruct_t rep, `a@ val);
+  
 extern void print_typestruct(typestruct_t rep);
-extern void xmlize_type(typestruct_t rep, `a@ val);
 extern void xmlize_typestruct(typestruct_t rep);
-
+extern typestruct_t normalize(typestruct_t ts);
 }
 
 #endif

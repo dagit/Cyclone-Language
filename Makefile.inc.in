@@ -66,6 +66,7 @@ CYCLONE_LIBS:=arg\
         string\
         socket\
         time\
+        typerep\
 	unistd\
         xarray
 
@@ -148,6 +149,7 @@ CYCLONE_H:=arg.h\
 	sys/types.h\
 	sys/wait.h\
 	time.h\
+	typerep.h\
 	unistd.h\
 	xarray.h
 

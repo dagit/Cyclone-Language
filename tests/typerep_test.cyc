@@ -1,8 +1,10 @@
 #include <stdio.h>
-#include "typerep.h"
+#include <typerep.h>
+#include "marshal.h"
 
 using Typerep;
-
+using Marshal;
+using List;
 /* Example types */
 tunion Foo {
   Foo1;
@@ -18,6 +20,8 @@ tunion Foo {
 //  int x = __gen(int);
 
 tunion Typestruct.Int int_tag = Int(32);
+
+
 
 /* tag Foo1 not included */
 //  $(unsigned int, tunion Typestruct) 
@@ -36,7 +40,7 @@ $(unsigned int, tunion Typestruct)
 $(unsigned int, tunion Typestruct) 
   elem_Foo2_tup_list_hd = $(0,(tunion Typestruct)&int_tag);
 $(unsigned int, tunion Typestruct) @
-  elem_Foo2_tup_arr[3] = { &elem_Foo2_tup_list_hd,
+  elem_Foo2_tup_arr[] = { &elem_Foo2_tup_list_hd,
 			   &elem_Foo2_tup_list_tl_hd,
 			   &elem_Foo2_tup_list_tl_tl_hd };
 tunion Typestruct.Tuple elem_Foo2_tup = Tuple(3*sizeof(int),
@@ -50,7 +54,7 @@ $(unsigned int, tunion Typestruct)
 $(unsigned int, tunion Typestruct) 
   elem_Foo3_tup_list_hd = $(0,(tunion Typestruct)&int_tag);
 $(unsigned int, tunion Typestruct) @
-  elem_Foo3_tup_arr[2] = { &elem_Foo3_tup_list_hd,
+  elem_Foo3_tup_arr[] = { &elem_Foo3_tup_list_hd,
 			   &elem_Foo3_tup_list_tl_hd };
 tunion Typestruct.Tuple elem_Foo3_tup = 
   Tuple(sizeof(float)+sizeof(int),elem_Foo3_tup_arr);
@@ -66,7 +70,7 @@ $(unsigned int, tunion Typestruct)
 $(unsigned int, tunion Typestruct) 
   elem_Foo4_tup_list_hd = $(0,(tunion Typestruct)&int_tag);
 $(unsigned int, tunion Typestruct) @
-  elem_Foo4_tup_arr[3] = { &elem_Foo4_tup_list_hd,
+  elem_Foo4_tup_arr[] = { &elem_Foo4_tup_list_hd,
 			   &elem_Foo4_tup_list_tl_hd,
 			   &elem_Foo4_tup_list_tl_tl_hd };
 tunion Typestruct.Tuple elem_Foo4_tup = Tuple(2*sizeof(int)+sizeof(void *),
@@ -84,13 +88,16 @@ typedef struct Intlist {
   struct Intlist * next;
 } intlist_t;
 
-extern tunion Typestruct.Tuple list_rep;
-tunion Typestruct.ThinPtr listptr_rep = ThinPtr(1,(tunion Typestruct)&list_rep);
+extern tunion Typestruct.Tuple list_base;
+tunion Typestruct.ThinPtr listptr_rep = ThinPtr(1,(tunion Typestruct)&list_base);
 $(unsigned int,tunion Typestruct) list_arr1 = $((unsigned int)0, (tunion Typestruct)&int_tag);
 $(unsigned int,tunion Typestruct) list_arr2 = $((unsigned int)4,(tunion Typestruct)&listptr_rep);
 $(unsigned int,tunion Typestruct)@ 
   elems_list_arr[2] = { &list_arr1, &list_arr2};
-tunion Typestruct.Tuple list_rep = Tuple(8, ($(unsigned int, tunion Typestruct)@?) elems_list_arr);
+tunion Typestruct.Tuple list_base = Tuple(8, ($(unsigned int, tunion Typestruct)@?) elems_list_arr);
+
+
+tunion Typestruct list_rep = &list_base;
 
 extern struct Inttree;
 typedef struct Inttree inttree_t;
@@ -127,14 +134,14 @@ void do_xmlize(tunion Foo f) {
 void do_print2(intlist_t* f) {
   int @foo = unsafe_cast(f);
   if(foo == NULL) printf("NULL");
-  else print_type((tunion Typestruct)&list_rep,foo);
+  else print_type(list_rep,foo);
   printf("\n");
 }
 
 void do_xmlize2(intlist_t* f) {
   int @foo = unsafe_cast(f);
   if(foo == NULL) printf("<null/>");
-  else xmlize_type((tunion Typestruct)&list_rep,foo);
+  else xmlize_type(list_rep,foo);
   printf("\n");
 }
 void do_print3(inttree_t* f) {

@@ -23,15 +23,18 @@
 #include <string.h>
 #include <hashtable.h>
 #include <position.h>
+#include <typerep.h>
 #include "absyn.h"
 #include "absynpp.h"
+#include "evexp.h"
 #include "tcutil.h"
 #include "tcenv.h"
 #include "toc.h"
 
-// #include "typerep.h"
+
 
 using Absyn;
+using Core;
 using Tcenv;
 using Dict;
 using List;
@@ -39,10 +42,9 @@ using Position;
 
 namespace Tcgenrep;
 
-  /* the dictionary entries should be indexed by types and be a three-tuple
+/* the dictionary entries should be indexed by types and be a three-tuple
      1) A LIST of declarations
-     2) A string indicating the variable name of the final expression
-        (i.e., the one to use)
+     2) An expression which evaluates to the appropriate Typestruct
      3) A list of pointers to other three tuples that these declarations
         depend on.
      4) A flag indicating whether this series of declarations has
@@ -53,18 +55,13 @@ namespace Tcgenrep;
      declarations to return.
   */
 
-/*------------------------------------------------------------------------*/
-/* Data used to keep track of generated typestruct declarations based
-   on the user-provided type */
-typedef tunion StringorDecl {
-  String(string_t);
-  Decl(decl_t);
-} stringordecl_t;
+
 
 typedef struct RepInfo {
-  list_t<stringordecl_t> decls;
-  stringptr_t varname;
+  list_t<decl_t> decls;
+  exp_opt_t exp; 
   list_t<struct RepInfo @> dependencies;
+  opt_t<decl_t> fwd_decl;
   int emitted;
 } @repinfo_t;
 
@@ -80,6 +77,17 @@ static int typecmp(type_t t1, type_t t2) {
   string_t t1str = Absynpp::typ2string(t1);
   string_t t2str = Absynpp::typ2string(t2);
   return strcmp(t1str,t2str);
+}
+
+dict_t<type_t,repinfo_t> empty_typerep_dict() {
+  return empty(typecmp);
+}
+void print_dict_entry(type_t type, repinfo_t info) {
+  printf("(%s,%d)\n",Absynpp::typ2string(type),info->emitted);
+}
+
+void print_typerep_dict(dict_t<type_t,repinfo_t,`H> dict) {
+  Dict::iter(print_dict_entry,dict);
 }
 
 // These routines are used to hash repinfos to keep track of nodes visited
@@ -113,17 +121,23 @@ static tunionfield_t getField(tuniondecl_t td, qvar_t fieldname) {
 static string_t tcgenrep_nm = "Tcgenrep";
 static struct List<var_t,`H> l = { .hd=&tcgenrep_nm, .tl=NULL };
 static tunion Nmspace.Abs_n tcgenrep_nmspace = Abs_n(&l);
+static nmspace_t tcgenrep_nmspace2 = (tunion Nmspace)&tcgenrep_nmspace;
+// defines the Tcgenrep namespace as an absyn value
+static string_t typerep_nm = "Typerep";
+static struct List<var_t,`H> l2 = { .hd=&typerep_nm, .tl=NULL };
+static tunion Nmspace.Abs_n typerep_nmspace = Abs_n(&l2);
 
 /*------------------------------------------------------------------------*/
 // depth-first-search on repinfo_t's, based on the dependency edges.
 //   this allows for a topological sort to extract the relevant
 //   declarations.
-static list_t<list_t<stringordecl_t>>
+// new: uses emitted flag to determine whether to include decls in list;
+// sets it if unset
+static list_t<list_t<decl_t>>
 dfsvisit(repinfo_t ri, Hashtable::table_t<repinfo_t, int> visited) {
   try {
     Hashtable::lookup(visited,ri);
     // did not raise exception, so we already visited it
-    // FIX: must detect cycle and insert prototype in that case
     return NULL;
   } catch {
   case Not_found:
@@ -134,11 +148,22 @@ dfsvisit(repinfo_t ri, Hashtable::table_t<repinfo_t, int> visited) {
     for (list_t l = ri->dependencies; l != NULL; l = l->tl)
       ds = imp_append(ds,dfsvisit(l->hd,visited));
     // add our own decls
-    let l = new List(ri->decls,NULL);
-    return imp_append(ds,l);
+    if(ri->emitted == 0) {
+      // prefix with forward decl, if present
+      if(ri->fwd_decl != NULL) {
+      	ds = new List(list(ri->fwd_decl->v),ds);
+      }
+      let l = new List(ri->decls,NULL);
+      ri->emitted = 1;
+      return imp_append(ds,l);
+    }
+    else {
+      //printf("Skipping ... { \n%s\n }\n", Absynpp::decllist2string(ri->decls));
+      return ds;
+    }
   }
 }    
-static list_t<stringordecl_t> dfs(repinfo_t ri)
+static list_t<decl_t> dfs(repinfo_t ri)
 {
   Hashtable::table_t tab = Hashtable::create(53,repcmp,rephash);
   list_t ds = dfsvisit(ri,tab);
@@ -149,10 +174,390 @@ static list_t<stringordecl_t> dfs(repinfo_t ri)
 // once and for all, and then use that when generating
 // syntax
 static string_t typestruct_str = "Typestruct";
+static string_t var_str = "Var";
+static string_t int_str = "Int";
+static string_t float_str = "Float";
+static string_t double_str = "Double";
+static string_t thinptr_str = "ThinPtr";
+static string_t fatptr_str = "FatPtr";
+static string_t tuple_str = "Tuple";
+static string_t tunion_str = "TUnion";
+static string_t union_str = "Union";
+
 static $(nmspace_t,var_t) typestruct_name =
-  $((tunion Nmspace)&tcgenrep_nmspace, &typestruct_str);
+$((tunion Nmspace)&typerep_nmspace, &typestruct_str);
 static tuniondecl_t *`H typestruct_decl = NULL;
 
+static int gen_id_counter = 0;
+static stringptr_t new_gen_id(string_t name) {
+  return new (string_t)aprintf("_gen%s_%d",name,gen_id_counter++);
+}
+
+static void print_params(list_t<type_t>l) {
+  printf ("<");
+  for(list_t<type_t> p = l ; 
+      p != NULL;
+      p = p->tl) {
+    printf("%s%c",Absynpp::typ2string(p->hd),(p->tl != NULL)? ',' : ' ');
+  }
+  printf(">\n");
+}
+
+static void print_tvars(list_t<tvar_t>l) {
+  printf ("<");
+  for(list_t<tvar_t> p = l ; 
+      p != NULL;
+      p = p->tl) {
+    printf("%s%c",*p->hd->name,(p->tl != NULL)? ',' : ' ');
+  }
+  printf(">\n");
+}
+
+static tunion Nmspace.Rel_n top_nm_0 = Rel_n(NULL);
+static tunion Nmspace top_nm = (tunion Nmspace)&top_nm_0;
+static qvar_t toplevel_name(var_t name) {
+  return new $(top_nm, (var_t)name);
+}
+
+static qvar_t relative_name(list_t<var_t,`H> pathl, var_t name) {
+  tunion Nmspace.Rel_n@ path = new Rel_n(pathl);
+  return new $((tunion Nmspace)path, (var_t)name);
+}
+static decl_t gen_decl(stringptr_t<`H,`H> name, type_t type, exp_opt_t init,seg_t seg)
+{
+  qvar_t qvar = toplevel_name(name);
+  vardecl_t vd = new_vardecl(qvar,type,init);
+  vd->sc = Static;
+  tunion Raw_decl.Var_d@ r1 = new Var_d(vd);
+  tunion Raw_decl r2 = (tunion Raw_decl)r1;
+  return new_decl(r2,seg);
+}
+
+static decl_t gen_vardecl_sc(stringptr_t<`H,`H> name, type_t type, exp_opt_t init,scope_t sc,seg_t seg)
+{
+  qvar_t qvar = toplevel_name(name);
+  vardecl_t vd = new_vardecl(qvar,type,init);
+  vd->sc = sc;
+  tunion Raw_decl.Var_d@ r1 = new Var_d(vd);
+  tunion Raw_decl r2 = (tunion Raw_decl)r1;
+  return new_decl(r2,seg);
+}
+
+
+static exp_t cnst_string(string_t<`H> s,seg_t seg) {
+  return const_exp((tunion Cnst)(new String_c(s)),seg);
+}
+
+
+static exp_t cnst_int(int i,seg_t seg) {
+  return const_exp((tunion Cnst)(new Int_c(Signed,i)),seg);
+}
+
+static exp_t cnst_int_cls(seg_t seg,int i) {
+  return const_exp((tunion Cnst)(new Int_c(Signed,i)),seg);
+}
+
+static int size_of2int(size_of_t sz) {
+  switch(sz) {
+  case B1: return 8;
+  case B2: return 16;
+  case B4: return 32;
+  case B8: return 64;
+  }
+}
+
+static type_t array_typ(type_t ty, tqual_t tq, exp_opt_t e) {
+  return new ArrayType(ty,tq,e);
+}
+
+static type_t tunion_typ(var_t name) {
+  return new TunionType(
+			TunionInfo(
+				   new UnknownTunion(UnknownTunionInfo(toplevel_name(name),
+								       false)),
+				   NULL,
+				   HeapRgn));
+}
+static type_t tunionfield_typ(var_t name, var_t fieldname) {
+  return new TunionFieldType(TunionFieldInfo(new UnknownTunionfield(UnknownTunionFieldInfo(toplevel_name(name),toplevel_name(fieldname),false)),NULL));
+}
+
+static exp_t call_exp(qvar_t name, list_t<exp_t,`H> args, seg_t loc) {
+  return unknowncall_exp(unknownid_exp(name,loc),args,loc);
+}
+
+static decl_t tunion_constructor_decl(var_t tunionname, 
+				      var_t fieldname, 
+				      var_t varname, 
+				      list_t<exp_t,`H> args, 
+				      seg_t loc) {
+  let t1 = tunionfield_typ(tunionname,fieldname);
+  let e1 = call_exp(toplevel_name(fieldname),args,loc);
+  let d1 = gen_decl(varname,t1,e1,loc);
+  return d1;
+}
+
+//FIX: polymorphize these
+static type_t get_second($(tqual_t,type_t)@ pair) {
+  return (*pair)[1];
+}
+
+static var_t get_first($(var_t,exp_t)@ pair) {
+  return (*pair)[0];
+}
+
+
+static string_t list_str = "list";
+static string_t List_str = "List";
+
+
+
+static exp_t tuple2_exp_cls(seg_t loc, $(exp_t,exp_t)@ es) {
+  let &$(e1,e2) = es;
+  return tuple_exp(list(e1,e2),loc);
+}
+static string_t null_str = "NULL";
+
+static exp_t list_exp(list_t<exp_t,`H> l, seg_t loc) {
+  if(l == NULL) return null_exp(loc);
+  return call_exp(toplevel_name(&list_str),
+		  l,
+		  loc);
+}
+
+static exp_t make_sizeoftyp_exp(seg_t loc, type_t type) {
+  return sizeoftyp_exp(type,loc);
+}
+
+static $(list_t<exp_t>,exp_t)@ tri_sum_exps (seg_t loc, $(list_t<exp_t,`H>,exp_t)@ carry, exp_t e) {
+  let &$(sums,total) = carry;
+  let newsums = new List{.hd=total, .tl=sums};
+  return new $(newsums,add_exp(e,total,loc));
+}
+
+static exp_t get_and_cast_ri_exp(seg_t loc, repinfo_t info) {
+  return cast_exp(tunion_typ(&typestruct_str),(exp_t)info->exp,loc);
+}
+
+static $(var_t,exp_t)@ gen_id_for_exp(exp_t e) {
+  return new $(new_gen_id("tuple"),e);
+}
+
+static decl_t gen_decl_cls($(type_t,seg_t)@ env, $(var_t,exp_t)@ name_exp) {
+  let &$(ty,loc) = env;
+  let &$(name,exp) = name_exp;
+  return gen_decl(name,ty,exp,loc);
+}
+
+static $(list_t<designator_t,`H>,exp_t)@ null_designator_exp(exp_t e) {
+  return new $(NULL,e);
+}
+
+static exp_t arr_init_exp(list_t<exp_t,`H> l,seg_t loc) {
+  // map exp_t's into $(list_t<designator_t,`H>,exp_t)@'s
+  // where the first component is NULL.
+  let l2 = List::map(null_designator_exp,l);
+  return unresolvedmem_exp(NULL,l2,loc);
+}
+
+static exp_t address_exp_cls(seg_t loc, exp_t e) {
+  return address_exp(e,loc);
+}
+static exp_t unknownid_exp_cls(seg_t loc, qvar_t e) {
+  return unknownid_exp(e,loc);
+}
+
+static type_t select_structfield_type(structfield_t sf) {
+  // check safety
+  if(strcmp(*(sf->name),"") == 0)
+    Tcutil::impos("gen(): anonymous (padding) structfield not handled yet");
+  if(sf->width != NULL) // indicating a bit-field 
+    Tcutil::impos("gen(): bitfields in structs not handled yet");
+  return sf->type;
+}
+
+// trickiness: fwd_decls only used if creating a new ri, ignroed if updateing existing
+
+static dict_t<type_t,repinfo_t,`H>
+update_info(dict_t<type_t,repinfo_t,`H> dict,
+	    type_t type,
+	    list_t<decl_t,`H> decls,
+	    exp_opt_t exp,
+	    list_t<repinfo_t,`H> dependencies,
+	    opt_t<decl_t,`H> fwd_decl) {
+  // is there an info record there already?
+  let info = lookup_opt(dict,type);
+  if(info != NULL ) { // if so, update it with new information
+    printf("Updated ri for %s\n",Absynpp::typ2string(type));
+    info->v->decls = decls;
+    info->v->exp = exp;
+    info->v->dependencies = dependencies;
+    // emitted should be and remain 0
+    return dict;
+  }
+  else {
+    printf("Added ri for %s\n",Absynpp::typ2string(type));
+    return insert(dict,type,new RepInfo{.decls=decls,
+					   .exp=exp,
+					   .dependencies=dependencies,
+					   .fwd_decl = fwd_decl,
+					   .emitted=0});
+  }
+}
+
+static tqual_t tq_none = Tqual{.q_const=0,.q_volatile=0,.q_restrict=0};
+
+static $(tqual_t,type_t)@ tqual_type(tqual_t* tq,type_t type) {
+  return new $(*tq,type);
+}
+
+static type_t tuple_typ(list_t<type_t,`H> types) {
+  let tqualtypes = List::map_c(tqual_type,&tq_none,types);
+  tunion Type.TupleType @ tuple_type_base = new TupleType(tqualtypes);
+  type_t tuple_type = (tunion Type) tuple_type_base;
+  return tuple_type;
+}
+
+// Given a type, varname, and list of exps, construct
+// a sequence of decls that build an array structure, and 
+// return an exp containing the array's name
+static $(list_t<decl_t>, exp_t) @
+array_decls(type_t type, list_t<exp_t,`H> exps, seg_t loc) {
+  
+  let nameexplist = List::map(gen_id_for_exp,exps);
+  // generate n decls, one for each type, name, exp triple.
+  let decls = List::map_c(gen_decl_cls,new $(type,loc),nameexplist);
+  // then generate one decl that combines them all in an array initializer
+  // step 1: find the names
+  let names = List::map(get_first,nameexplist);
+  let topnames = List::map(toplevel_name,names);
+  let topexpnames = List::map_c(unknownid_exp_cls,loc,topnames);
+  // step 2: take their addresses to get tunion Typestruct exp's
+  let addrnames = List::map_c(address_exp_cls,loc,topexpnames);
+  // step 3: wrap them all inside an array initializer exp
+  let addrnamesexp = arr_init_exp(addrnames,loc);
+  // step 4: declare an unspecified-length array initialized to this
+  let arrname = new_gen_id("arr");
+  let pptr_type = at_typ(type,HeapRgn,tq_none);
+  let arrty = array_typ(pptr_type,tq_none,NULL);
+  let d1 = gen_decl(arrname,arrty,addrnamesexp,loc);
+  let resultexp = unknownid_exp(toplevel_name(arrname),loc);
+  return new $(imp_append(decls,list(d1)),resultexp);
+}
+
+static type_t 
+check_tunionfield_and_get_type(tunionfield_t tuf) {
+  if(tuf->tvs != NULL) {
+    Tcutil::impos("gen(): tunionfield type varaibles not handled");
+  }
+  // preserves tquals of original tunion...
+  return new TupleType(tuf->typs);
+}
+
+static `a id(`a x) {
+  return x;
+}
+
+// forward declaration
+static $(dict_t<type_t,repinfo_t,`H>,repinfo_t) @
+lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type);
+
+
+
+static $(dict_t<type_t,repinfo_t,`H>,list_t<repinfo_t,`H>) @
+lookupRepsCls($(tenv_t,seg_t)@ env,
+	      type_t type,
+	      $(dict_t<type_t,repinfo_t,`H>,list_t<repinfo_t,`H>)@ carry) {
+  let &$(dict,ri) = lookupRep((*env)[0],(*carry)[0],(*env)[1],type);
+  return new $(dict,new List{.hd=ri,.tl=(*carry)[1]});
+}
+
+
+static dict_t<type_t,repinfo_t,`H>
+buildRepTuple(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, var_t varname, type_t type, list_t<type_t> types)
+{
+  let sizeof_tuple = sizeoftyp_exp(type,loc);
+  // use closures here to apply partially evaluated lookuprep
+  let env = new $(te,loc);
+  let carry = new $(dict,NULL);
+  // this should really be a fold, producing the typeris list and the dict.
+  // that way, the dicts will be merged right in the end
+  let &$(dict2,ris) = List::fold_right_c(lookupRepsCls,env,types,carry);
+  dict = dict2;
+  let sizeofs = List::map_c(make_sizeoftyp_exp,loc,types);
+  let &$(tri_sum_sizeofs_rev,_) = List::fold_left_c(tri_sum_exps,loc,new $(NULL,cnst_int(0,loc)),sizeofs);
+  let tri_sum_sizeofs = List::rev(tri_sum_sizeofs_rev);
+  let riexps = List::map_c(get_and_cast_ri_exp,loc,ris);
+  let tuplelist = List::map_c(tuple2_exp_cls,loc,List::zip(tri_sum_sizeofs,riexps));
+
+  // construct the (globally unique) type of components of the tuple array
+  // FIX: Make this not duplicate so much run time data.
+
+  type_t tuple_type = tuple_typ(list(uint_t,tunion_typ(&typestruct_str)));
+
+  let &$(tupledecls,arrexp) = array_decls(tuple_type,tuplelist,loc);
+  // generate a declaration
+  let d2 = tunion_constructor_decl(&typestruct_str,&tuple_str, varname,
+				   list(sizeof_tuple,
+					arrexp),
+				   loc);
+  return update_info(dict,type,imp_append(tupledecls,list(d2)),
+		     address_exp(unknownid_exp(toplevel_name(varname),loc),loc),
+		     ris,
+		     NULL);
+}
+
+static dict_t<type_t,repinfo_t,`H>
+buildRepUnion(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, var_t varname, type_t type, list_t<type_t> types)
+{
+  // use closures here to apply partially evaluated lookuprep
+  let env = new $(te,loc);
+  let carry = new $(dict,NULL);
+  // this should really be a fold, producing the typeris list and the dict.
+  // that way, the dicts will be merged right in the end
+  let &$(dict2,ris) = List::fold_right_c(lookupRepsCls,env,types,carry);
+  dict = dict2;
+  let riexps = List::map_c(get_and_cast_ri_exp,loc,ris);
+  let &$(decls,arrexp) = array_decls(tunion_typ(&typestruct_str),riexps,loc);
+  // generate a declaration
+  let d2 = tunion_constructor_decl(&typestruct_str,&union_str, varname,
+				   list(arrexp),
+				   loc);
+  return update_info(dict,type,imp_append(decls,list(d2)),
+		     address_exp(unknownid_exp(toplevel_name(varname),loc),loc),
+		     ris,
+		     NULL);
+}
+
+// builds Typestruct.Tunion for given set of types
+static dict_t<type_t,repinfo_t,`H>
+buildRepTunion(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, var_t varname, type_t type, list_t<type_t> types){
+  let env = new $(te,loc);
+  let carry = new $(dict,NULL);
+  // fetch (building if necessary) repinfos for all component types
+  let &$(dict2,ris) = List::fold_right_c(lookupRepsCls,env,types,carry);
+  dict = dict2;
+  // build tag list of appropriate length
+  let tagints = List::tabulate(List::length(ris),id);
+  let tags = List::map_c(cnst_int_cls,loc,tagints);
+  // build list of tunion case types
+  let riexps = List::map_c(get_and_cast_ri_exp,loc,ris);
+  // pair these with tags 
+  let tagriexps = List::zip(tags,riexps);
+  let tuplelist = List::map_c(tuple2_exp_cls,loc,tagriexps);
+  // build the type of elements of Tunion array
+  type_t tuple_type = tuple_typ(list(uint_t,tunion_typ(&typestruct_str)));
+  let &$(tupledecls,arrexp) = array_decls(tuple_type,tuplelist,loc);
+  // generate a declaration
+  let d2 = tunion_constructor_decl(&typestruct_str,&tunion_str, varname,
+				   list(arrexp),
+				   loc);
+  return update_info(dict,type,imp_append(tupledecls,list(d2)),
+		     address_exp(unknownid_exp(toplevel_name(varname),loc),loc),
+		     ris,
+		     NULL);
+  return dict;
+}
 /*------------------------------------------------------------------------*/
 // Given a type, looks for the typestruct decl for that type in the
 // dictionary.  If found, it returns the dictionary back, along
@@ -160,103 +565,358 @@ static tuniondecl_t *`H typestruct_decl = NULL;
 // If not found, it generates the decl(s), enters them into the
 // dictionary, and returns as before.  Will operate recursively.
 static $(dict_t<type_t,repinfo_t,`H>,repinfo_t) @
-  lookupRep(tenv_t te, seg_t loc, type_t type, 
-	    dict_t<type_t,repinfo_t,`H> dict)
+lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 {
+  //printf("Type %s (%x)\n", Absynpp::typ2string(type),type);
+
   if (typestruct_decl == NULL)
     lookup_tuniondecl(te,loc,&typestruct_name);
 
   Core::opt_t<repinfo_t> info = lookup_opt(dict,type);
-  if (info != NULL)
-    return new $(dict,info->v);
+
+  if (info != NULL) {
+    //printf("Done %s\n",Absynpp::typ2string(type));
+    let ret = new $(dict,info->v);
+    return ret;
+  }
   else {
-//      switch (type) {
-//      case VoidType: 
-//        Tcutil::terr(loc,"found void in gen() expression");
-//      case Evar(_,_,_,_):
-//        Tcutil::impos("Evar in gen() expression");
-//      case VarType(_):
-//        Tcutil::terr(loc,"found variable type in gen() expression");
-//      case TunionType(tui): // tunion_info_t
-//        // XXX need to check that tui->targs applied to
-//        // the tunion is closed
-//        switch (tui->tunion_info) {
-//        case UnknownTunion(_):
-//  	Tcutil::terr(loc,"found unknown tunion type in gen() expression");
-//        case KnownTunion(tud):
-//  	if (tud->is_xtunion)
-//  	  Tcutil::terr(loc,"found xtunion type in gen() expression");
-//  	else {
-//  	  // for each of the tunion fields that has associated
-//  	  // data, output a Tuple.  For tag-only fields, do
-//  	  // nothing.	
-//  	}
-//      case TunionFieldType(t): // tunion_field_info_t
-//      case PointerType(pt): // ptr_info_t
-//      case IntType(_,sz): // size_of_t
-//        /* SYNTAX for tunion Typestruct.Int int_tag = Int(32); */
-//        /*-----------------------------------------------------*/
-//        // generate fresh varname
-//        let v = Toc::temp_var();
-//        // tunion field type
-//        let IntF = $((tunion Nmspace)&tgcenrep_nmspace, &typestruct_name);
-//        let tuf = getField(*typestruct_decl, &IntF);
-//        let tui =
-//  	new TunionFieldInfo
-//  	(new TunionFieldInfoU
-//  	 (new KnownTunionField(*typestruct_decl, tuf)), // XXX make copy?
-//  	 NULL);
-//        let t = new TunionFieldType(tui);
-//        // initialization expression
-//        let inite = new ;
-//        let exp = new Tunion_e(NULL,NULL,
-//  			     new struct List{.hd=inite,.tl=NULL},
-//  			     *typestruct_decl,tuf);
-//        vardecl_t vd = static_vardecl(v,t,new struct Opt{.v=exp});
-//      case FloatType:
-//      case DoubleType:
-//      case ArrayType(type_t/* element typ*/,tqual_t,exp_opt_t/* size */):
-//      case FnType(fn_info_t): 
-//        Tcutil::terr(loc,"found function type in gen() expression");
-//      case TupleType(list_t<$(tqual_t,type_t)@>): // MemKind
-//      case StructType(typedef_name_opt_t,list_t<type_t>,structdecl_t *): // MemKind
-//      case UnionType(typedef_name_opt_t,list_t<type_t>,uniondecl_t *): // MemKind 
-//      case AnonStructType(list_t<structfield_t>): // MemKind
-//      case AnonUnionType(list_t<structfield_t>): // MemKind
-//      case EnumType(typedef_name_t,struct Enumdecl *): // BoxKind
-//      case RgnHandleType(type_t):   // BoxKind
-//      // An abbreviation -- the opt_t<typ> contains the definition if any
-//      case TypedefType(typedef_name_t,list_t<type_t>,opt_t<type_t>):
-//      case HeapRgn:                 // RgnKind
-//      case AccessEff(type_t):       // RgnKind -> EffKind
-//      case JoinEff(list_t<type_t>): // EffKind list -> EffKind
-//      case RgnsEff(type_t):         // AnyKind -> EffKind
-//      }
-    Tcutil::impos("gen() expression not yet supported");
-    throw Tcutil::TypeErr; // redundant, as impos will do this
+    switch (type) {
+    case &IntType(_,sz):
+
+      // tunion Typestruct.Int rep = Int(32);
+      let varname = new_gen_id("rep");
+      let d1 = tunion_constructor_decl(&typestruct_str,&int_str, varname,
+				       list(cnst_int(size_of2int(sz),loc)),
+				       loc);     
+      dict = update_info(dict,
+			 type,
+			 list(d1),
+			 address_exp(unknownid_exp(toplevel_name(varname),
+						   loc),loc),
+			 NULL,NULL);
+      break;
+    case FloatType:
+      dict = update_info(dict,
+			 type,
+			 NULL,
+			 unknownid_exp(toplevel_name(&float_str),loc),
+			 NULL,NULL);
+      break;
+    case DoubleType:
+      dict = update_info(dict,
+			 type,
+			 NULL,
+			 unknownid_exp(toplevel_name(&double_str),loc),
+			 NULL,NULL);
+      break;
+
+    case &PointerType(pt): // ptr_info_t
+      //printf("Pointer type: %s (%x)\n", Absynpp::typ2string(pt.elt_typ),pt.elt_typ);
+      let &$(dict2,base_info) = lookupRep(te,dict,loc,pt.elt_typ);
+      dict = dict2;
+      switch(conref_val(pt.bounds)) {
+      case &Upper_b(e):
+	// e must be a constant; evaluate it
+	unsigned int bound = Evexp::eval_const_uint_exp(e);
+	// tunion Typestruct.ThinPtr gen = ThinPtr(`bound`,`base_info->exp`);
+	let varname = new_gen_id("rep");
+	let d1 = tunion_constructor_decl(&typestruct_str,&thinptr_str, varname,
+					 list(cnst_int(bound,loc),
+					      (exp_t)base_info->exp),loc);
+	dict = update_info(dict,
+			   type,
+			   list(d1),
+			   address_exp(unknownid_exp(toplevel_name(varname),loc),loc),
+			   list(base_info),NULL);
+	break;
+      case Unknown_b:
+	// a ? pointer
+	// tunion Typestruct.FatPtr(`base_info->exp`);
+	let varname = new_gen_id("rep");
+	let d1 = tunion_constructor_decl(&typestruct_str,&fatptr_str, varname,
+					 list((exp_t)base_info->exp),loc);
+	dict = update_info(dict,
+			   type,
+			   list(d1),
+			   address_exp(unknownid_exp(toplevel_name(varname),loc),loc),
+			   list(base_info),NULL);
+	break;
+      }
+      break;
+    case &ArrayType(arrtype,tq,e):
+      if(e == NULL) {
+	Tcutil::impos("tcgenrep:At this point, array bounds must be constants");
+      }
+      // get info for base type
+      let &$(dict2,base_info) = lookupRep(te,dict,loc,arrtype);
+      dict = dict2;
+      // e must be a constant; evaluate it
+      unsigned int bound = Evexp::eval_const_uint_exp((exp_t)e);
+      // tunion Typestruct.ThinPtr gen = ThinPtr(`bound`,`base_info->exp`);
+      let varname = new_gen_id("rep");
+      let d1 = tunion_constructor_decl(&typestruct_str,&thinptr_str, varname,
+				       list(cnst_int(bound,loc),
+					    (exp_t)base_info->exp),loc);
+      dict = update_info(dict,
+			 type,
+			 list(d1),
+			 address_exp(unknownid_exp(toplevel_name(varname),loc),loc),
+			 list(base_info),NULL);
+      break;
+    case &TupleType(fields):
+      // idea: generate reps for each component type
+      // emit 
+      // tunion Typestruct.Tuple tuple_rep = Tuple(sizeof(tuple_type),
+      //                                    (sizeof(t1),rep_exp(t1),...));
+      // problems: what to do about tq's?
+      // FIX: Abstract this since it's used almost verbatim by struct, anonstruct
+      let types = List::map(get_second,fields);
+      let varname = new_gen_id("rep");
+      dict = buildRepTuple(te,dict,loc,varname,type,types);
+      break;
+    case &TypedefType(name,params,def):
+      if(params != NULL) {
+	Tcutil::impos("gen(): typedefs with parameters not yet supported");
+	print_params(params);
+      }
+      if(def == NULL) 
+	Tcutil::impos("gen(): typedef definition must be present by now");
+      // lookup rep for definition
+      // throws away current "info"
+      let &$(dict2,info2) = lookupRep(te,dict,loc,def->v);
+      dict = insert(dict2,type,info2);
+      break;
+    case &StructType(tydefname,params,stdeclopt): // MemKind
+      if(params != NULL) {
+	Tcutil::impos("gen(): structs with parameters not yet supported");
+	print_params(params);
+      }
+      if(stdeclopt == NULL)
+	Tcutil::impos("gen(): struct declaration must be present by now");
+      // Almost identical to Tuple case.
+      // Filter structfield list of stdecl to form like that in tuple case
+      // Wrinkle: anonymous padding bytes (would like to omit, but safe to include)
+      // Wrinkle: Type parameters
+      // Wrinkle: Recursive structs (recursive uses of struct name within def)
+      // Add forward declaration in case of recursive struct
+      // Gensym a new var name & create an address exp for exp; this
+      // exp is needed 
+      let varname = new_gen_id("rep");
+      // fwd_decl = extern tunion Typestruct.Tuple `varname`;
+      let fwd_decl = new Opt{.v=gen_vardecl_sc(varname,tunionfield_typ(&typestruct_str,&tuple_str),NULL,Extern,loc)};
+      dict = update_info(dict,type,NULL,address_exp(unknownid_exp(toplevel_name(varname),loc),loc),NULL,fwd_decl);
+      let stdecl = *stdeclopt;
+      if (stdecl->tvs != NULL) {
+	Tcutil::impos("gen(): structs with tyvariables not yet supported");
+	print_tvars(stdecl->tvs);
+      }
+      // Idea to handle parameters:
+      // 1: Check that #params = #tyvars, and zip the lists together
+      let tvs = stdecl->tvs;
+      if(List::length(params) != List::length(tvs))
+	Tcutil::terr(loc,"gen(): number of params differs from number of tyvars");
+      let $(p,q) = $(tvs,params);
+      list_t<type_t> r = NULL;
+      for( ; p != NULL; p = p->tl, q = q->tl) {
+	switch(Tcutil::typ_kind(q->hd)) {
+	case AnyKind: fallthru;
+	case MemKind: fallthru;
+	case BoxKind:
+	// 2: Do lookupRep for each param type
+	let &$(dict2,ri) = lookupRep(te,dict,loc,q->hd);
+	dict = dict2;
+	let ty = new VarType(tvs->hd);
+	r = new List{.hd=ty,.tl=r};
+	// 3: Assign Var(tv) to corresponding ri
+	dict = Dict::insert(dict,ty,ri);
+	break;
+	default:
+	  ;
+	}
+      }
+      // 4: Process bound struct/whatever
+      
+      if (stdecl->fields == NULL)
+	Tcutil::impos("gen(): struct fields must be present");
+      let types = List::map(select_structfield_type,stdecl->fields->v);
+      dict = buildRepTuple(te,dict,loc,varname,type,types);
+      // 5: Unassign vars
+      for(list_t<type_t> rp = r; rp != NULL; rp = rp->tl) {
+	//dict = Dict::delete(dict,rp->hd);
+      }
+      // Problem: Recursive definitions cause infinite loops!
+      // Idea: Add forward declaration field to repinfo_t.
+      // Pre-emptively add the info for this struct to the dict (as a forward decl).
+      // Then whenever we encounter this struct inside, we can just refer to that instead of looking forever.
+      // When we DFS, if we encounter a loop we then know to emit the generated forward decl; if we don't loop back to this def then we don't have to forward delcare it (although it would be safe to do so).
+      break;
+    case &AnonStructType(fields): // MemKind
+      // Almost identical to Struct case.
+      // Filter structfield list of stdecl to form like that in tuple case
+      // Wrinkle: anonymous padding bytes (would like to omit, but safe to include)
+      let types = List::map(select_structfield_type,fields);
+      let varname = new_gen_id("rep");
+      dict = buildRepTuple(te,dict,loc,varname,type,types);
+      break;
+
+
+    case VoidType: 
+      Tcutil::terr(loc,"found void in gen() expression");
+      break;
+    case &Evar(_,_,_,_):
+      Tcutil::terr(loc,"found evar in gen() expression");
+      break;
+    case &VarType(tvar):
+      Tcutil::terr(loc,"found tyvar in gen() expression");
+      /*      // string_t name = `*tvar->name`;
+      let strname = new_gen_id("name");
+      let d1 = gen_decl(strname,string_typ(HeapRgn),cnst_string(*tvar->name,loc),loc);
+      // tunion Typestruct.Var gen = Var(&name);
+      let varname = new_gen_id("gen");
+      let d2 = tunion_constructor_decl(&typestruct_str,&var_str, varname,
+				       list(address_exp(unknownid_exp(toplevel_name(strname),loc),loc)),
+				       loc);     
+      dict = update_info(dict,
+			 type,
+			 list(d1,d2),
+			 address_exp(unknownid_exp(toplevel_name(varname),
+						   loc),loc),
+			 NULL,NULL);
+      */
+      break;
+      Tcutil::terr(loc,"found variable type in gen() expression");
+      break;
+    case &FnType(fi): 
+      Tcutil::terr(loc,"found function type in gen() expression");
+      break;
+      // conceivably we might have to marshal these somehow... how?
+    case &RgnHandleType(_): fallthru;
+    case HeapRgn:           fallthru;
+    case &AccessEff(_):     fallthru;
+    case &JoinEff(_):       fallthru;
+    case &RgnsEff(_):       
+      Tcutil::terr(loc,"gen(): unhandled region, handle or effect type");
+      break;
+    case &TunionType(tui): // tunion_info_t
+      if(tui.targs != NULL) 
+	Tcutil::impos("gen(): tunion type parameters not handled yet");
+      switch(tui.tunion_info) {
+      case &KnownTunion(tudecl):
+	if(tudecl->tvs != NULL) 
+	  Tcutil::impos("gen(): tunion type variables not handled yet");
+	if(tudecl->fields == NULL) 
+	  Tcutil::impos("gen(): tunion fields not present");
+	// build fwd decl in case of recursion
+	let varname = new_gen_id("rep");
+	// fwd_decl = extern tunion Typestruct.Tuple `varname`;
+	let fwd_decl = new Opt{.v=gen_vardecl_sc(varname,tunionfield_typ(&typestruct_str,&tunion_str),NULL,Extern,loc)};
+	dict = update_info(dict,type,NULL,address_exp(unknownid_exp(toplevel_name(varname),loc),loc),NULL,fwd_decl);
+	let fields = tudecl->fields->v;
+	let types = List::map(check_tunionfield_and_get_type,fields);
+	// this builds absyn for Typestruct.Tunion with appropriate entries
+	dict = buildRepTunion(te,dict,loc,varname,type,types);
+	break;
+      case &UnknownTunion(_):
+	Tcutil::impos("gen(): tunion must be resolved by now");
+	break;
+      }
+      break;
+    case &TunionFieldType(tfieldinfo): // tunion_field_info_t
+      // should be similar to tuple
+      if(tfieldinfo.targs != NULL)
+	Tcutil::impos("gen(): tunionfield type parameters not handled yet");
+      switch (tfieldinfo.field_info) {
+      case &KnownTunionfield(decl,field):
+	if(field->tvs != NULL) 
+	  Tcutil::impos("gen(): tunionfield type parameters not handled yet");
+	let types = List::map(get_second,field->typs);
+	let types2 = new List(uint_t,types);
+	let varname = new_gen_id("rep");
+	dict = buildRepTuple(te,dict,loc,varname,type,types2);
+	break;
+      default:
+	Tcutil::impos("gen(): tunionfield must be known at this point");
+	break;
+      }
+      break;
+    case &UnionType(name,params,udeclopt):   
+      if(params != NULL)
+	Tcutil::impos("gen(): unions with parameters not yet supported");
+      if(udeclopt == NULL)
+	Tcutil::impos("gen(): union declaration must be present by now");
+      // Almost identical to Tuple case.
+      // Filter structfield list of stdecl to form like that in tuple case
+      // Wrinkle: Type parameters
+
+      
+      let udecl = *udeclopt;
+      if(udecl->tvs != NULL)
+	Tcutil::impos("gen: structs with parameters not yet supported");
+      if (udecl->fields == NULL)
+	Tcutil::impos("gen(): struct fields must be present");
+      let types = List::map(select_structfield_type,udecl->fields->v);
+
+      let varname = new_gen_id("rep");      
+      dict = buildRepUnion(te,dict,loc,varname,type,types);
+      break;
+      
+    case &AnonUnionType(fields): // MemKind
+      // Almost identical to Struct case.
+      // Filter structfield list of stdecl to form like that in tuple case
+      // Wrinkle: anonymous padding bytes (would like to omit, but safe to include)
+      let types = List::map(select_structfield_type,fields);
+      let varname = new_gen_id("rep");
+      dict = buildRepUnion(te,dict,loc,varname,type,types);
+      break;
+
+      // similar to union
+    case &EnumType(_,_): 
+      // tunion Typestruct.Int rep = Int(32);
+      let varname = new_gen_id("rep");
+      let d1 = tunion_constructor_decl(&typestruct_str,&int_str, varname,
+				       list(cnst_int(32,loc)),
+				       loc);     
+      dict = update_info(dict,
+			 type,
+			 list(d1),
+			 address_exp(unknownid_exp(toplevel_name(varname),
+						   loc),loc),
+			 NULL,NULL);
+      break;
+      //    default:
+      //      Tcutil::impos("gen() expression not yet supported");
+      //      throw Tcutil::TypeErr; // redundant, as impos will do this
+    }
+    //printf("Done %s\n",Absynpp::typ2string(type));
+    return new $(dict,lookup(dict,type));
   }
 }
 
+
+static bool not_emitted_filter(repinfo_t ri) {
+  return (ri->emitted == 0);
+}
+static void mark_emitted(repinfo_t ri) {
+  ri->emitted = 1;
+}
 /*------------------------------------------------------------------------*/
 // Replaces a gen(t) expression with a Typestruct value.  As a result,
 // it needs to generate a number of static declarations of data, and 
 // finally an expression of type tunion Typestruct.  FIX: take in
 // and return a Dictionary so that we can reuse declarations from
 // previous gen()'s in the same file.
-$(list_t<decl_t>,exp_t)
-  tcGenrep(tenv_t te, genv_t ge, seg_t loc, type_t type)
+$(dict_t<type_t,repinfo_t,`H>,list_t<decl_t>,exp_t)
+  tcGenrep(tenv_t te, genv_t ge, seg_t loc, type_t type,dict_t<type_t,repinfo_t,`H> dict)
 {
-  dict_t<type_t,repinfo_t> dict = empty(typecmp);
-
   // first check that type is well-formed
   Tcutil::check_valid_toplevel_type(loc,te,type);
 
   // generate the declarations
-  let &$(dict,ri) = lookupRep(te, loc, type, dict);  
+  let &$(dict,ri) = lookupRep(te, dict, loc, type);  
   let decls = dfs(ri);
-  let varname = new $((tunion Nmspace)&tcgenrep_nmspace,ri->varname);
-  let varexp = var_exp(varname,loc);
+  printf("Emitting...\n%s\n",Absynpp::decllist2string(decls));
+  
 
-  return $(NULL /* FIX:parse decls, above, and fill in here */, varexp);
+  return $(dict,decls, (exp_t)ri->exp);
 }
 

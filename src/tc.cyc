@@ -783,7 +783,10 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0, bool in_externC, bool che
 
   genv_t ge = Dict::lookup(te->ae,te->ns); // no longer a copy!!!
   list_t<decl_t,`H> last = NULL;
-
+  
+  // FIX: Add dict to some environment so that typerep declarations get reused
+  typerep_dict_t dict = empty_typerep_dict();
+  
   for (let ds = ds0; ds != NULL; last = ds, ds = ds->tl) {
     decl_t    d   = ds->hd;
     seg_t loc = d->loc;
@@ -803,24 +806,34 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0, bool in_externC, bool che
 	case &Gentyp_e(t):
 	  /* FIX: should pass in a dictionary and use that throughout
 	     typechecking to share generated declarations */
-	  let &$(ds2,e) = tcGenrep(te,ge,loc,t);
+	  let $(dict2,ds2,e) = tcGenrep(te,ge,loc,t,dict);
+	  dict = dict2;
 	  /* typecheck the generated declarations */
 	  tc_decls(te,ds2,in_externC,check_var_init);
 	  /* replace the gentype expression with the generated one */
 	  vd->initializer = e;
+	  printf("%s\n",decllist2string(List::list(d)));
 	  /* then typecheck the vardecl */
 	  tcVardecl(te,ge,loc,vd,check_var_init);
 	  /* splice in the new declarations */
-	  if (last != NULL) {
-	    imp_append(ds2,ds);
-	    last->tl = ds2;
-	  }
-	  else {
-	    ds->hd = ds2->hd;
-	    /* need to replace the first element's hd with the new
-	       declarations and then create */
+	  /* this is tricky! */
+	  //	  printf("==============BEFORE=================\n%s\n====================BEFORE=====================\n",decllist2string(ds0));
+	  if(ds2 != NULL) {
+	    if (last != NULL) {
+	      imp_append(ds2,ds);
+	      last->tl = ds2;
+	    }
+	    else {
+	      struct List<decl_t,`H> tmp = List{.hd = ds->hd, .tl = ds->tl};
+	      ds->hd = ds2->hd;
+	      ds->tl = ds2->tl;
+	      ds2->hd = tmp.hd;
+	      ds2->tl = tmp.tl;
+	      imp_append(ds,ds2);
+	    }
 	  }
 	  /* continue the loop */
+	  //printf("==============AFTER=================\n%s\n====================AFTER=====================\n",decllist2string(ds0));
 	  continue;
 	default:
 	  break;

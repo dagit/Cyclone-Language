@@ -30,9 +30,19 @@ namespace Tcgenrep {
   using Tcenv;
   using Position;
 
-extern $(list_t<decl_t>,exp_t) @tcGenrep(tenv_t te, genv_t ge, 
-					 seg_t loc, type_t type);
+  extern struct RepInfo;
+  typedef struct RepInfo@ repinfo_t;
+  typedef Dict::dict_t<type_t,repinfo_t> typerep_dict_t;
 
-}
+  extern typerep_dict_t empty_typerep_dict();
+  extern void print_typerep_dict(typerep_dict_t dict);
+  extern $(typerep_dict_t,list_t<decl_t>,exp_t)
+    tcGenrep(tenv_t te, 
+	     genv_t ge, 
+	     seg_t loc, 
+	     type_t type,
+	     typerep_dict_t dict);
+    
+    }
 
 #endif

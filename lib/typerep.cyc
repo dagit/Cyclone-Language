@@ -1,0 +1,280 @@
+/* This file is part of the Cyclone Library.
+   Copyright (C) 2001 Greg Morrisett, AT&T
+
+   This library is free software; you can redistribute it and/or it
+   under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; see the file COPYING.LIB.  If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place, Suite
+   330, Boston, MA 02111-1307 USA. */
+
+/* This file defines the low-level representation of Cyclone data
+   for implementing generic marshallers. */
+
+#define TYPEREP_CYC /* instantiate the the type */
+
+#include "typerep.h"
+#include <stdio.h>
+#include <dict.h>
+#include <string.h>
+
+using Typerep;
+using Dict;
+
+
+namespace Typerep;
+
+
+/*-------------------------------------------------------------------------*/
+/* Pretty-prints a typestruct for debugging purposes */
+void 
+print_typestruct(typestruct_t rep) 
+{
+  switch (rep) {
+  case &Var(name):
+    printf("Var(%s)",*name);
+    break;
+
+  case &Int(sz):
+    printf("Int(%d)",sz);
+    break;
+
+  case Float:
+    printf ("Float");
+    break;
+
+  case Double:
+    printf ("Double");
+    break;
+
+  case &ThinPtr(sz,typ):
+    printf("ThinPtr(%d,", sz);
+    print_typestruct(typ);
+    printf(")");
+    break;
+
+  case &FatPtr(typ): 
+    printf("FatPtr(");
+    print_typestruct(typ);
+    printf(")");
+    break;
+
+  case &Tuple(sz,l):
+    printf("Tuple(%d,[",sz);
+    for (int i = 0; i < l.size; i++) {
+      let $(ofs,typ) = *(l[i]);
+      printf ("$(%d,",ofs);
+      print_typestruct(typ);
+      printf (")%c", (i != (l.size-1) ? ',' : ' '));
+    }
+    printf(" ]");
+    break;
+
+  case &TUnion(l):
+    printf("TUnion(");
+    for (int i = 0; i < l.size; i++) {
+      let $(tag,typ) = *(l[i]);
+      printf ("$(%d,",tag);
+      print_typestruct(typ);
+      printf (")%c", (i != (l.size-1) ? ',' : ' '));
+    }    
+    printf(" )");
+    break;
+ case &Union(l):
+   printf("Union(");
+   for (int i = 0; i < l.size; i++) {
+      print_typestruct(*l[i]);
+      printf ("%c", (i != (l.size-1) ? ',' : ' '));
+    }   
+   printf(")");
+   break;
+ case &Forall(names,ts):
+   printf("Forall([");
+   for(int i = 0; i < names.size; i++) {
+     printf(*names[i]);
+     printf ("%c", (i != (names.size-1) ? ',' : ' '));
+   }
+   printf("],");
+   print_typestruct(*ts);
+   printf(")");
+   break;
+ case &App(ts,params):
+   printf("App(");
+   print_typestruct(ts);
+   printf(",[");
+   for(int i = 0; i < params.size; i++) {
+     print_typestruct(params[i]);
+     printf ("%c", (i != (params.size-1) ? ',' : ' '));
+   }
+   printf("])");
+   break;
+  }
+
+}
+
+
+/*-------------------------------------------------------------------------*/
+/* XMLizes a typestruct for debugging purposes */
+void 
+xmlize_typestruct(typestruct_t rep) 
+{
+  switch (rep) {
+  case &Var(name):
+    printf("<Var name=\"%s\"/>",*name);
+    break;
+  case &Int(sz):
+    printf("<Int sz=\"%d\"/>",sz);
+    break;
+
+  case Float:
+    printf ("<Float/>");
+    break;
+
+  case Double:
+    printf ("<Double/>");
+    break;
+
+  case &ThinPtr(sz,typ):
+    printf("<ThinPtr sz=\"%d\">", sz);
+    xmlize_typestruct(typ);
+    printf("</ThinPtr");
+    break;
+
+  case &FatPtr(typ): 
+    printf("<FatPtr>");
+    xmlize_typestruct(typ);
+    printf("</FatPtr>");
+    break;
+
+  case &Tuple(sz,l):
+    printf("<Tuple sz=\"%d\">",sz);
+    for (int i = 0; i < l.size; i++) {
+      let $(ofs,typ) = *(l[i]);
+      printf ("<Component ofs=\"%d\">",ofs);
+      xmlize_typestruct(typ);
+      printf ("</Component>");
+    }
+    printf("</Tuple>");
+    break;
+
+  case &TUnion(l):
+    printf("<TUnion>");
+    for (int i = 0; i < l.size; i++) {
+      let $(tag,typ) = *(l[i]);
+      printf ("<Tag tag=\"%d\">",tag);
+      xmlize_typestruct(typ);
+      printf ("</Tag>");
+    }    
+    printf("</Tunion>");
+    break;
+ case &Union(l):
+   printf("<Union>");
+   for (int i = 0; i < l.size; i++) {
+      printf ("<Case>");
+      xmlize_typestruct(*l[i]);
+      printf ("</Case>");
+    }   
+   printf("</Union>");
+   break;
+ case &Forall(names,ts):
+   printf("<Forall vars=\"");
+   for(int i = 0; i < names.size; i++) {
+     if(i != 0) printf(", ");
+     printf(*names[i]);
+   }
+   printf("\">");
+   xmlize_typestruct(*ts);
+   printf("</Forall>");
+   break;
+ case &App(ts,params):
+   printf("<App>");
+   xmlize_typestruct(ts);
+   for(int i = 0; i < params.size; i++) {
+     if(i != 0) printf(", ");
+     xmlize_typestruct(params[i]);
+   }
+   printf("</App>");
+   break;
+  }
+}
+// something wron with this
+
+
+static typestruct_t 
+normalize_env(dict_t<name_t,typestruct_t,`H> env,
+	      typestruct_t ts) {
+  switch (ts) {
+  case &Var(name): 
+    return Dict::lookup(env,(string_t@`H)name);
+  
+  case &Int(_): fallthru;
+  case Float:  fallthru;
+  case Double:
+    return ts;
+  case &ThinPtr(wd,ts2):
+    return new ThinPtr(wd,normalize_env(env,ts2));
+  case &FatPtr(ts2):
+    return new FatPtr(normalize_env(env,ts2));
+  case &Tuple(sz, fields):
+    let newfields = new {for i < fields.size: NULL};
+    for(int i = 0; i < fields.size; i++) {
+      let &$(x,tsi) = fields[i];
+      newfields[i] = new $(x,normalize_env(env,tsi));
+    }
+    let newfields2 = new {for i < fields.size: (_@)newfields[i]};
+    
+    return new Tuple(sz,(_?)newfields2);
+
+  case &TUnion(fields):
+    let newfields = new {for i < fields.size: NULL};
+    for(int i = 0; i < fields.size; i++) {
+      let &$(x,tsi) = fields[i];
+      newfields[i] = new $(x,normalize_env(env,tsi));
+    }
+    let newfields2 = new {for i < fields.size: (_@)newfields[i]};
+    
+    return new TUnion((_?)newfields2);
+
+
+  case &Union(tss):
+    let newfields = new{for i < tss.size:NULL};
+    for(int i = 0; i < tss.size; i++) {
+      newfields[i] = new normalize_env(env,*tss[i]);
+    }
+    let newfields2 = new {for i < tss.size: (_@)newfields[i]};
+    
+    return new Union((_?)newfields2);
+
+  case &Forall(names,ts2):
+    return new Forall(names,new normalize_env(env,*ts2));
+  case &App(ts2, tss):
+    switch(normalize_env(env,ts2)) { // Slow!
+    case &Forall(names,ts3) :
+      if(tss.size != names.size) 
+	throw new Core::Failure("app appiled wrong number of arguments");
+      for(int i = 0; i < tss.size; i++) {
+	env=Dict::insert(env,names[i],tss[i]);
+      }
+      return normalize_env(env,*ts3);
+    default: throw new Core::Failure("app misapplied");
+    }
+
+  }
+}
+	
+int name_order(name_t s1, name_t s2) {
+  return strcmp(*s1,*s2);
+}
+
+typestruct_t normalize(typestruct_t ts) {
+  return normalize_env(Dict::empty(name_order),ts);
+}			  
+
