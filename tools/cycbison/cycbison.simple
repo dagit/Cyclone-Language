@@ -119,21 +119,24 @@ int yyparse(YYPARSE_PARAM_ARG)
 
   int yyssp_offset;
   /*  the state stack     */
-  short ?yyss = new {for i < YYINITDEPTH : 0};
+  short @{YYMAXDEPTH} yyss = 
+	(short @{YYMAXDEPTH})(new {for i < YYMAXDEPTH : (short)0});
   /*  the semantic value stack */
   int yyvsp_offset;
-  xtunion YYSTYPE ?yyvs = new {for i < YYINITDEPTH : yylval}; 
+  xtunion YYSTYPE @{YYMAXDEPTH} yyvs = 
+	(xtunion YYSTYPE @{YYMAXDEPTH})(new {for i < YYMAXDEPTH : yylval}); 
 
 #ifdef YYLSP_NEEDED
   /*  the location stack */
   int yylsp_offset;
-  YYLTYPE ?yyls = new {for i < YYINITDEPTH: yynewloc()};
+  YYLTYPE @{YYMAXDEPTH} yyls = 
+	(YYLTYPE @{YYMAXDEPTH})(new {for i < YYMAXDEPTH: yynewloc()});
 #define YYPOPSTACK   (yyvsp_offset--, yyssp_offset--, yylsp_offset--)
 #else
 #define YYPOPSTACK   (yyvsp_offset--, yyssp_offset--)
 #endif
 
-  int yystacksize = YYINITDEPTH;
+  int yystacksize = YYMAXDEPTH;
 
 #ifdef YYPURE
   int yychar;
@@ -184,6 +187,7 @@ yynewstate:
       yyerror("parser stack overflow");
       throw Yystack_overflow;
     }
+#if 0
     yystacksize *= 2;
     if (yystacksize > YYMAXDEPTH)
       yystacksize = YYMAXDEPTH;
@@ -203,6 +207,7 @@ yynewstate:
     yyvs = yyvs1;
 #ifdef YYLSP_NEEDED
     yyls = yyls1;
+#endif
 #endif
   }
     

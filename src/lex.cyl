@@ -49,15 +49,16 @@ void yyerror(string_t s) {
 
 namespace Lex {
 
-// Should probably put this trie thing in the library
 static struct Trie;
 typedef struct Trie * trie_t;
-  //typedef trie_t @{75} trie_child_v_t; // enough room for Cyclone ids and `
-typedef trie_t @{63} trie_child_v_t; // enough room for Cyclone ids and `
-typedef trie_child_v_t * trie_child_t;
+tunion TrieChildren {
+  Zero;
+  One(int, trie_t);
+  Many(trie_t @{64}); // enough room for id chars and `
+};
 static struct Trie {
-  trie_child_t  children;   // null means none
-  int           shared_str; // meaning depends on which trie -- see below
+  tunion TrieChildren children;
+  int                 shared_str; // meaning depends on which trie -- see below
 };
 
 /////////////////////////////// Globals /////////////////////////////
@@ -66,32 +67,32 @@ static struct Trie {
 static int    num_kws  = 0;
 static int ?  kw_nums  = null;
 static struct Xarray::Xarray<stringptr_t> * symbols  = null;
-static trie_t ids_trie      = null;//int field is symbol index, -1 for not there
+static trie_t ids_trie      = null;//int field is symbol index, 0 for not there
 static trie_t typedefs_trie = null;//int field true iff path is a typedef
 
 static int comment_depth = 0;
 
 // These needn't be set by lex_init -- they're set while finding a token.
-static $(sign_t,int)    token_int_pair = $((sign_t)Signed,0);
-static string_t   bogus_string   = "*bogus*";
-static tunion Nmspace.Abs_n absn_null  = Abs_n(null);
-static $(nmspace_t,var_t) token_id_pair  = $((nmspace_t)(&absn_null),
-                                           &bogus_string);
+static $(sign_t,int)        token_int_pair = $(Signed,0);
+static string_t             bogus_string   = "*bogus*";
+static tunion Nmspace.Abs_n absn_null      = Abs_n(null);
+static $(nmspace_t,var_t)   token_id_pair  = $((nmspace_t)(&absn_null),
+					       &bogus_string);
 
-static char             token_char     = '\000';
-static string_t   token_string   = "";
-static $(sign_t,int)@   token_int      = &token_int_pair;
-static qvar_t           token_qvar     = &token_id_pair;
+static char           token_char   = '\000';
+static string_t       token_string = "";
+static $(sign_t,int)@ token_int    = &token_int_pair;
+static qvar_t         token_qvar   = &token_id_pair;
 
 static int runaway_start = 0;
 
 static void err(string_t msg,Lexbuf<`a> lb) {
   seg_t s = segment_of_abs(lexeme_start(lb),lexeme_end(lb));
-  post_error(mk_err_lex (s,msg));
+  post_error(mk_err_lex(s,msg));
 }
 static void runaway_err(string_t msg,Lexbuf<`a> lb) {
   seg_t s = segment_of_abs(runaway_start,lexeme_start(lb));
-  post_error(mk_err_lex (s,msg));
+  post_error(mk_err_lex(s,msg));
 }
 
 // ************************** RESERVED WORDS **************************
@@ -132,8 +133,8 @@ static $(string_t,short) rw_array[] = {
   $("null", NULL_kw),
   $("offsetof", OFFSETOF),
   $("printf", PRINTF),
-  $("region_t",REGION_T),
-  $("region",REGION),
+  $("region_t", REGION_T),
+  $("region", REGION),
   $("register", REGISTER),
   $("restrict", RESTRICT),
   $("return", RETURN),
@@ -163,48 +164,63 @@ static $(string_t,short) rw_array[] = {
 };
 
 ///////////////////////// Trie manipulation ///////////////////////
-static int str_index(string_t buff, int offset, int len) {
+static int trie_char(int c) {
+  // get the legal chars into a narrow range starting at 0
+  c -= 48;
+  if(c >= 47) c -= 11;
+  else if(c > 16) c -= 7;
+  return c;
+}
+
+static trie_t trie_lookup(trie_t t, string_t buff, int offset, int len) {
   int    i    = offset;
   int    last = offset + len - 1;
-  trie_t t    = ids_trie;
   while(i <= last) {
-    int ch = ((int)buff[i]) - 48; // see width of trie above
-    if (ch > 47) ch -= 12;
-    else if (ch > 16) ch -= 7;
-    if(t->children == null) {
-      // new string, extend the trie and return
-      while(i <= last) {
-        let temp = (trie_child_v_t)(new { for q < 63 : null });
-        let temp2 = new temp;
-	t->children = (trie_child_t)temp2;
-	(*(t->children))[ch] = new Trie(null,-1);
-	t = (*(t->children))[ch];
-	++i;
-	ch = ((int)buff[i]) - 48; // see width of trie above
-        if (ch > 47) ch -= 12;
-        else if (ch > 16) ch -= 7;
+    switch(t->children) {
+    case &Many(arr):
+      // walk down one level
+      int ch = trie_char(buff[i]);
+      if(arr[ch] == null)
+	arr[ch] = new Trie(Zero,0);
+      t = arr[ch];
+      ++i;
+      break;
+    case &One(one_ch, one_trie):
+      // walk down one level
+      if(one_ch == buff[i]) {
+	t = one_trie;
+      } else {
+	let arr = new {for j < 64: null};
+	arr[trie_char(one_ch)] = one_trie;
+	let ch = trie_char(buff[i]);
+	arr[ch] = new Trie(Zero,0);
+	t->children = new Many(arr); 
+	t = arr[ch];
       }
-      let newstr = new_string(len+1);
-      String::zstrncpy(newstr,buff+offset,len);
-      int ans = Xarray::add_ind((Xarray::xarray_t<stringptr_t>)symbols, 
-				new ((string_t)newstr));
-      t->shared_str = ans;
-      return ans;
+      ++i;
+      break;
+    case Zero:
+      // new string -- extend the trie
+      while(i <= last) {
+	let next = new Trie(Zero,0);
+	t->children = new One(buff[i++], next);
+	t = next;
+      }
+      return t;
     }
-    // walk down one level
-    if((*(t->children))[ch] == null)
-      (*(t->children))[ch] = new Trie(null,-1);
-    t = (*(t->children))[ch];
-    ++i;
   }
+  return t;
+}
+
+static int str_index(string_t buff, int offset, int len) {
+  let t = trie_lookup(ids_trie, buff, offset, len);
   // build string if necessary and return
-  if(t->shared_str == -1) {
+  if(t->shared_str == 0) {
     let newstr = new_string(len+1);
     String::zstrncpy(newstr,buff+offset,len);
     int ans = Xarray::add_ind((Xarray::xarray_t<stringptr_t>)symbols, 
 			      new ((string_t)newstr));
     t->shared_str = ans;
-    return ans;
   }
   return t->shared_str;
 }
@@ -217,30 +233,7 @@ static int str_index_lbuf(Lexbuf<`a> lbuf) {
 
 static void insert_typedef(stringptr_t sptr) {
   let s = *sptr;
-  int    len = s.size - 1;
-  trie_t t   = typedefs_trie;
-  for(int i=0; i < len; ++i) {
-    int ch = ((int)s[i]) - 48;
-    if (ch > 47) ch -= 12;
-    else if (ch > 16) ch -= 7;
-    if(t->children == null) {
-      while(i < len) {
-	t->children = (trie_child_t) (new $((new { for i < 63 : null })));
-	(*(t->children))[ch] = new Trie(null,0);
-	t = (*(t->children))[ch];
-	++i;
-	ch = ((int)s[i]) - 48; // see width of trie above
-        if (ch > 47) ch -= 12;
-        else if (ch > 16) ch -= 7;
-      }
-      t->shared_str = true;
-      return;
-    }
-    // walk down one level
-    if((*(t->children))[ch] == null)
-      (*(t->children))[ch] = new Trie(null,false);
-    t = (*(t->children))[ch];
-  }
+  let t = trie_lookup(typedefs_trie, s, 0, s.size-1);
   t->shared_str = true;
   return;
 }
@@ -396,7 +389,7 @@ static list_t<var_t> get_absolute_namespace(struct List<var_t,`H> @ns) {
 
 static void recompute_typedefs() {
   // Drop the old trie on the floor.
-  typedefs_trie = new Trie(null,false);
+  typedefs_trie = new Trie(Zero,false);
   
   // For each enclosing scope, get the visible namespaces and add all
   // of their typedefs
@@ -430,16 +423,17 @@ static bool is_typedef(List::list_t<var_t> ns, var_t v) {
   int    len = s.size - 1;
   trie_t t   = typedefs_trie;
   for(int i = 0; i < len; ++i)
-    if(t == null || t->children == null)
-      return false;
-    else {
-      int ch = ((int)s[i]) - 48;
-      if (ch > 47) ch -= 12;
-      else if (ch > 16) ch -= 7;
-      t = (*(t->children))[ch];
+    switch (t->children) {
+    case Zero: return false;
+    case &One(one_ch, one_trie) && one_ch != s[i]: return false;
+    case &One(_,      one_trie): t = one_trie; break;
+    case &Many(arr):
+      let next = arr[trie_char(s[i])];
+      if(next == null)
+	return false;
+      t = next;
+      break;
     }
-  if(t == null)
-    return false;
   return t->shared_str;
 }
 
@@ -470,7 +464,9 @@ void enter_namespace(var_t s) {
 				    });
 
   }
-  recompute_typedefs();
+  // some more typedefs may be visible
+  // recompute_typedefs(); // too slow! (does repeated work)
+  Set::iter(insert_typedef,Dict::lookup(lstate->v->decls,new_ns)->typedefs);
 }
 void leave_namespace() {
   // we never leave the outermost namespace, so the cast is okay
@@ -495,7 +491,8 @@ void enter_using(qvar_t q) {
   lstate->v->lstack->hd->imported_namespaces = new List(ans,imported);
   
   // some more typedefs may be visible
-  recompute_typedefs();
+  // recompute_typedefs(); // too slow! (does repeated work)
+  Set::iter(insert_typedef,Dict::lookup(lstate->v->decls,ans)->typedefs);
 }
 void leave_using() {
   let imported = lstate->v->lstack->hd->imported_namespaces;
@@ -523,8 +520,8 @@ static short process_id(Lexbuf<`a> lbuf) {
   int symbol_num = str_index_lbuf(lbuf);
 
   // maybe it's a keyword
-  if(symbol_num < num_kws)
-    return (short)kw_nums[symbol_num]; 
+  if(symbol_num <= num_kws)
+    return (short)kw_nums[symbol_num-1]; 
 
   let s = get_symbol(symbol_num);
 
@@ -782,9 +779,11 @@ and comment = parse
 {
 
 void lex_init() {
-  ids_trie      = new {Trie(null,-1)};
-  typedefs_trie = new {Trie(null,false)};
+  ids_trie      = new Trie(Zero,0);
+  typedefs_trie = new Trie(Zero,false);
   symbols       = Xarray::create(101,new ((string_t)""));
+  // don't use first entry b/c 0 means "not a symbol"
+  Xarray::add((Xarray::xarray_t<stringptr_t>)symbols, &bogus_string);
   num_kws       = rw_array.size;
   kw_nums       = new {for i < num_kws : 0};
   for (int i=0; i < num_kws; ++i) {

@@ -35,8 +35,7 @@ struct Cyc_Stdio___sFILE*); extern struct Cyc_Lexing_lexbuf* Cyc_Lexing_from_str
 struct _tagged_arr); extern struct _tagged_arr Cyc_Lexing_lexeme( struct Cyc_Lexing_lexbuf*);
 extern unsigned char Cyc_Lexing_lexeme_char( struct Cyc_Lexing_lexbuf*, int);
 extern int Cyc_Lexing_lexeme_start( struct Cyc_Lexing_lexbuf*); extern int Cyc_Lexing_lexeme_end(
-struct Cyc_Lexing_lexbuf*); extern int Cyc_Lexing_lex_engine( struct Cyc_Lexing_lex_tables*,
-int, struct Cyc_Lexing_lexbuf*); struct Cyc_List_List{ void* hd; struct Cyc_List_List*
+struct Cyc_Lexing_lexbuf*); struct Cyc_List_List{ void* hd; struct Cyc_List_List*
 tl; } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
 18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern struct _tagged_arr Cyc_String_zstrncpy(
 struct _tagged_arr, struct _tagged_arr, int); extern struct _tagged_arr Cyc_String_strdup(
@@ -98,24 +97,4 @@ lbuf, int i){ return*(( unsigned char*) _check_unknown_subscript( lbuf->lex_buff
 sizeof( unsigned char), lbuf->lex_start_pos + i));} int Cyc_Lexing_lexeme_start(
 struct Cyc_Lexing_lexbuf* lbuf){ return lbuf->lex_abs_pos + lbuf->lex_start_pos;}
 int Cyc_Lexing_lexeme_end( struct Cyc_Lexing_lexbuf* lbuf){ return lbuf->lex_abs_pos
-+ lbuf->lex_curr_pos;} int Cyc_Lexing_lex_engine( struct Cyc_Lexing_lex_tables*
-tbl, int start_state, struct Cyc_Lexing_lexbuf* lbuf){ int state; int base; int
-backtrk; int c; state= start_state; if( state >= 0){ lbuf->lex_last_pos=( lbuf->lex_start_pos=
-lbuf->lex_curr_pos); lbuf->lex_last_action= - 1;} else{ state=( - state) - 1;}
-while( 1) { base=*(( int*) _check_unknown_subscript( tbl->lex_base, sizeof( int),
-state)); if( base < 0){ return( - base) - 1;} backtrk=*(( int*)
-_check_unknown_subscript( tbl->lex_backtrk, sizeof( int), state)); if( backtrk
->= 0){ lbuf->lex_last_pos= lbuf->lex_curr_pos; lbuf->lex_last_action= backtrk;}
-if( lbuf->lex_curr_pos >= lbuf->lex_buffer_len){ if( ! lbuf->lex_eof_reached){
-return( - state) - 1;} else{ c= 256;}} else{ c=( int)*(( unsigned char*)
-_check_unknown_subscript( lbuf->lex_buffer, sizeof( unsigned char), lbuf->lex_curr_pos
-++)); if( c == - 1){ c= 256;}} if(*(( int*) _check_unknown_subscript( tbl->lex_check,
-sizeof( int), base + c)) == state){ state=*(( int*) _check_unknown_subscript(
-tbl->lex_trans, sizeof( int), base + c));} else{ state=*(( int*)
-_check_unknown_subscript( tbl->lex_default, sizeof( int), state));} if( state <
-0){ lbuf->lex_curr_pos= lbuf->lex_last_pos; if( lbuf->lex_last_action == - 1){(
-int) _throw(( void*)({ struct Cyc_Lexing_Error_struct* _temp3=( struct Cyc_Lexing_Error_struct*)
-GC_malloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp3[ 0]=({ struct Cyc_Lexing_Error_struct
-_temp4; _temp4.tag= Cyc_Lexing_Error; _temp4.f1= _tag_arr("empty token", sizeof(
-unsigned char), 12u); _temp4;}); _temp3;}));} else{ return lbuf->lex_last_action;}}
-else{ if( c == 256){ lbuf->lex_eof_reached= 0;}}}}
++ lbuf->lex_curr_pos;}

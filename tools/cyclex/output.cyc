@@ -42,13 +42,69 @@ void output_array(FILE @ oc, int ?v) { // Doesn't work for really short arrays?
 }
 
 void output_tables(FILE @oc, Compact::lex_tables_t tbl) {
-  fprintf(oc, "struct lex_tables *lt = null;\n");
-  fprintf(oc, "int lbase[] = ");       output_array(oc, tbl->base);
-  fprintf(oc, ";\nint lbacktrk[] = "); output_array(oc, tbl->backtrk);
-  fprintf(oc, ";\nint ldefault[] = "); output_array(oc, tbl->defaultX);
-  fprintf(oc, ";\nint ltrans[] = ");   output_array(oc, tbl->trans);
-  fprintf(oc, ";\nint lcheck[] = ");   output_array(oc, tbl->check);
+  fprintf(oc, "const int lex_base[] = ");       output_array(oc, tbl->base);
+  fprintf(oc, ";\nconst int lex_backtrk[] = "); output_array(oc, tbl->backtrk);
+  fprintf(oc, ";\nconst int lex_default[] = "); output_array(oc, tbl->defaultX);
+  fprintf(oc, ";\nconst int lex_trans[] = ");   output_array(oc, tbl->trans);
+  fprintf(oc, ";\nconst int lex_check[] = ");   output_array(oc, tbl->check);
   fprintf(oc, ";\n");
+  // we make a new engine every time for cheaper array-bounds checks:
+  fprintf(oc,
+"     int lex_engine(int start_state, Lexbuf<`a> lbuf) {\n"
+"\n"
+"       int state, base, backtrk;\n"
+"       int c;\n"
+"       state = start_state;\n"
+"\n"
+"       if (state >= 0) {\n"
+	 // First entry 
+"	 lbuf->lex_last_pos = lbuf->lex_start_pos = lbuf->lex_curr_pos;\n"
+"	 lbuf->lex_last_action = -1;\n"
+"       } else {\n"
+	 // Reentry after refill 
+"	 state = -state-1;\n"
+"       }\n"
+"       while (true) {\n"
+"	 base = lex_base[state];\n"
+"	 if (base < 0) return -base-1;\n"
+	 // See if it's a backtrack point 
+"	 backtrk = lex_backtrk[state];\n"
+"	 if (backtrk >= 0) {\n"
+"	   lbuf->lex_last_pos    = lbuf->lex_curr_pos;\n"
+"	   lbuf->lex_last_action = backtrk;\n"
+"	 }\n"
+	 // See if we need a refill 
+"	 if (lbuf->lex_curr_pos >= lbuf->lex_buffer_len) {\n"
+"	   if (!lbuf->lex_eof_reached)\n"
+"	     return -state-1;\n"
+"	   else\n"
+"	     c = 256;\n"
+"	 } else {\n"
+	   // Read next input char 
+"	   c = (int) (lbuf->lex_buffer[lbuf->lex_curr_pos++]);\n"
+"	   if (c==EOF) c=256;\n"
+"	 }\n"
+	 // Determine next state 
+"	 if (lex_check[base+c]==state)\n"
+"	   state = lex_trans[base+c];\n"
+"	 else\n"
+"	   state = lex_default[state];\n"
+	 // If no transition on this char, return to last backtrack point 
+"	 if (state < 0) {\n"
+"	   lbuf->lex_curr_pos = lbuf->lex_last_pos;\n"
+"	   if (lbuf->lex_last_action == -1)\n"
+"	     throw new Error(\"empty token\");\n"
+"	   else {\n"
+"	     return lbuf->lex_last_action;\n"
+"	   }\n"
+"	 } else {\n"
+	   // Erase the EOF condition only if the EOF pseudo-character was
+	   // consumed by the automaton (i.e., there was no backtrack above)
+"	   if (c == 256) lbuf->lex_eof_reached = false;\n"
+"	 }\n"
+"       }\n"
+"  }\n"
+	  );
 }
 
 void output_entry(string_t sourcename, FILE @ ic, FILE @ oc, 
@@ -56,8 +112,7 @@ void output_entry(string_t sourcename, FILE @ ic, FILE @ oc,
   fprintf(oc, "int %s_rec(Lexbuf<`a> lexbuf, int lexstate) {\n", e->name);
   // save new state, then switch on it , so default case can use it.
   // (int switch can't get the value being switched on??)
-  fprintf(oc, "  if (lt == null) lt = new lex_tables(lbase, lbacktrk, ldefault, ltrans, lcheck);\n");
-  fprintf(oc, "  lexstate = lex_engine((LexTables)lt,lexstate,lexbuf);\n");
+  fprintf(oc, "  lexstate = lex_engine(lexstate,lexbuf);\n");
   fprintf(oc, "  switch (lexstate) {\n");
   for(let actions=e->actions; actions!=null; actions=actions->tl) {
     let &$(num,loc) = actions->hd;

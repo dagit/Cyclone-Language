@@ -56,8 +56,6 @@ extern char      lexeme_char (Lexbuf<`a>, int);
 extern int       lexeme_start(Lexbuf<`a>);
 extern int       lexeme_end  (Lexbuf<`a>);
 
-extern int lex_engine(LexTables,int,Lexbuf<`a>);
-
 }
 
 #endif

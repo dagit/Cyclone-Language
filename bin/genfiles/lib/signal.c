@@ -17,9 +17,8 @@ extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
 struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
 unsigned char*); extern int* __errno(); void(* Cyc_Signal_signal( int sig, void(*
 func)( int)))( int); extern int raise( int sig); struct Cyc_Csignal_Csig_func_ptr;
-extern struct Cyc_Csignal_Csig_func_ptr* signal( int sig, struct Cyc_Csignal_Csig_func_ptr*
-func); extern struct Cyc_Csignal_Csig_func_ptr* signal_toC( void(*)( int));
-extern void(* signal_fromC( struct Cyc_Csignal_Csig_func_ptr* func))( int); void
-Cyc_Signal__SIG_DFL( int n){;} void Cyc_Signal__SIG_IGN( int n){;} void Cyc_Signal__SIG_ERR(
-int n){;} void(* Cyc_Signal_signal( int sig, void(* func)( int)))( int){ return
-signal_fromC( signal( sig, signal_toC( func)));}
+extern struct Cyc_Csignal_Csig_func_ptr* signal_toC( void(*)( int)); extern void(*
+signal_fromC( struct Cyc_Csignal_Csig_func_ptr* func))( int); void Cyc_Signal__SIG_DFL(
+int n){;} void Cyc_Signal__SIG_IGN( int n){;} void Cyc_Signal__SIG_ERR( int n){;}
+void(* Cyc_Signal_signal( int sig, void(* func)( int)))( int){ return( void(*)(
+int)) Cyc_Signal__SIG_DFL;}

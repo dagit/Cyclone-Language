@@ -6,7 +6,7 @@ namespace Csignal {
   extern "C" {
     extern struct Csig_func_ptr;
     typedef struct Csig_func_ptr *Csig_func_ptr;
-    Csig_func_ptr signal(int sig, Csig_func_ptr func);
+    //    Csig_func_ptr signal(int sig, Csig_func_ptr func);
     Csig_func_ptr signal_toC(Signal::_sig_func_ptr);
     Signal::_sig_func_ptr signal_fromC(Csig_func_ptr func);
   }
@@ -21,5 +21,6 @@ void _SIG_IGN(int n;{}) {} // equate to 1
 void _SIG_ERR(int n;{}) {} // equate to -1
 
 _sig_func_ptr signal(int sig, _sig_func_ptr func) {
-  return fromC(Csignal::signal(sig, toC(func)));
+  return _SIG_DFL;
+  //  return fromC(Csignal::signal(sig, toC(func)));
 }

@@ -31,11 +31,13 @@ using Stdio;
 using Lexing;
 using Parser;
 
+namespace Lexer {
 int line_num       = 1;
 int line_start_pos = 0;
+}
 
 void yyerror(string_t s) {
-  fprintf(stderr, "%s, line:%d", s, line_num);
+  fprintf(stderr, "%s, line:%d", s, Lexer::line_num);
   fflush(stderr);
   throw new Parser_error(s);
 }
@@ -99,7 +101,7 @@ char char_for_octal_code(Lexbuf<`a> lbuf, int i) {
 		     (((int) lexeme_char(lbuf,i+2)) - '0'));
 }
 
-static int handle_lexical_error(int fn<`b,`e>(Lexing::Lexbuf<`b>;`e), 
+static int handle_lexical_error(int fn(Lexing::Lexbuf<`a>), 
                                 Lexbuf<`a>lbuf) {
   int line = line_num;
   int column = lexeme_start(lbuf) - line_start_pos;
@@ -123,7 +125,7 @@ int yylex() {
   switch (ans) {
   case TIDENT:  yylval = new String_tok(Lexer::token_string);   break;
   case TSTRING: yylval = new String_tok(Lexer::token_string);   break;
-  case TCHAR:   yylval = new Char_tok(Lexer::token_char);       break;
+  case TCHAR:   yylval = new Char_tok((char)Lexer::token_char); break;
   case TACTION: yylval = new Location_tok(Lexer::token_action); break;
   default: break;
   }
@@ -188,9 +190,9 @@ rule lexmain = parse
 | '^' { return TCARET; }
 | '-' { return TDASH; }
 | eof { return -1; }
-| _ { throw Lexical_error(xprintf("illegal character %s", lexeme(lexbuf)),
-			  line_num, 
-			  lexeme_start(lexbuf) - line_start_pos); }
+| _ { throw new Lexical_error(xprintf("illegal character %s", lexeme(lexbuf)),
+			      line_num, 
+			      lexeme_start(lexbuf) - line_start_pos); }
 
 and action = parse
   '{' { ++brace_depth; return action(lexbuf); }
@@ -212,7 +214,7 @@ and action = parse
          comment(lexbuf); 
          return action(lexbuf);
        }
-| eof  { throw Lexical_error("unterminated action", 0, 0); }
+| eof  { throw new Lexical_error("unterminated action", 0, 0); }
 | '\n' { line_start_pos = lexeme_end(lexbuf);
          ++line_num;
          return action(lexbuf);
@@ -234,7 +236,7 @@ and strng = parse
   { store_string_char(char_for_octal_code(lexbuf,1)); 
     return strng(lexbuf); }
 | eof
-  { throw Lexical_error("unterminated string", 0, 0); }
+  { throw new Lexical_error("unterminated string", 0, 0); }
 | '\n'
   { store_string_char('\n'); 
     line_start_pos = lexeme_end(lexbuf);
@@ -255,7 +257,7 @@ and comment = parse
 | "'" [^ '\\' '\''] "'"                   { return comment(lexbuf); }
 | "'\\" ['\\' '\'' 'n' 't' 'b' 'r'] "'"   { return comment(lexbuf); }
 | "'\\" ['0'-'7'] ['0'-'7'] ['0'-'7'] "'" { return comment(lexbuf); }
-| eof { throw Lexical_error("unterminated comment", 0, 0); }
+| eof { throw new Lexical_error("unterminated comment", 0, 0); }
 | '\n' { line_start_pos = lexeme_end(lexbuf);
          ++line_num;
          return comment(lexbuf);

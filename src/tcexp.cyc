@@ -999,6 +999,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
   tqual_t tq = empty_tqual();
   if(is_const)
     tq.q_const = true;
+  // FIX: use topt to determine if we should return a tunion type
   type_t t = at_typ(e->topt->v, rgn, tq);
   return t;
 }
