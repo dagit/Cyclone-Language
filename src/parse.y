@@ -1383,7 +1383,7 @@ declarator:
   direct_declarator
     { $$=$!1; }
 | pointer direct_declarator
-    { $$=^$(&Declarator($2->id,List::append($1,$2->tms))); }
+    { $$=^$(&Declarator($2->id,List::imp_append($1,$2->tms))); }
 ;
 
 direct_declarator:
@@ -1610,7 +1610,7 @@ abstract_declarator:
 | direct_abstract_declarator
     { $$=$!1; }
 | pointer direct_abstract_declarator
-    { $$=^$(&Abstractdeclarator(List::append($1,$2->tms))); }
+    { $$=^$(&Abstractdeclarator(List::imp_append($1,$2->tms))); }
 ;
 
 direct_abstract_declarator:
@@ -2169,9 +2169,9 @@ postfix_expression:
 | postfix_expression DEC_OP
     { $$=^$(post_dec_exp($1,LOC(@1,@2))); }
 | '(' type_name ')' '{' initializer_list '}'
-    { $$=^$(new_exp(CompoundLit_e($2,List::rev($5)),LOC(@1,@6))); }
+    { $$=^$(new_exp(CompoundLit_e($2,List::imp_rev($5)),LOC(@1,@6))); }
 | '(' type_name ')' '{' initializer_list ',' '}'
-    { $$=^$(new_exp(CompoundLit_e($2,List::rev($5)),LOC(@1,@7))); }
+    { $$=^$(new_exp(CompoundLit_e($2,List::imp_rev($5)),LOC(@1,@7))); }
 /* Cyc: expressions to build arrays */
 | NEW '{' '}'
   /* empty arrays */
@@ -2214,7 +2214,7 @@ primary_expression:
     { $$=^$(new_exp(Tuple_e($3),LOC(@1,@4))); }
 /* Cyc: structure expressions */
 | qual_opt_identifier '{' initializer_list '}'
-    { $$=^$(new_exp(Struct_e($1,null,List::rev($3),null),LOC(@1,@4))); }
+    { $$=^$(new_exp(Struct_e($1,null,List::imp_rev($3),null),LOC(@1,@4))); }
 /* Cyc: compound statement expressions, as in gcc */
 | '(' '{' block_item_list '}' ')'
     { $$=^$(new_exp(StmtExp_e($3),LOC(@1,@5))); }

@@ -1059,7 +1059,7 @@ Doc decl2doc(decl d) {
   case Var_d(&Vardecl(sc,name,tq,type,initializer,shadow_depth)):
     Doc sn = qvar2doc(name);
     if(shadow_depth > 0)
-      sn = cat2(text(xprintf("%d",shadow_depth)), sn);
+      sn = cat2(sn, text(xprintf("%d",shadow_depth)));
     s = cat4(scope2doc(sc),
              tqtd2doc(tq,type,&Opt(sn)),
              (initializer == null) 
