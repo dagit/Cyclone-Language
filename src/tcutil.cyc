@@ -4580,6 +4580,34 @@ static cvtenv_t<`r> check_valid_type(seg_t loc, tenv_t te,
   return cvt;
 }
 
+// we can constrain the region evars to HeapRgn and the
+// effect evars to the empty effect, but we're out of luck
+// for the type and int variables.
+void check_free_evars(list_t<type_t> free_evars, type_t in_t, seg_t loc)
+{
+  for (; free_evars != NULL; free_evars = free_evars->tl) {
+    type_t e = free_evars->hd;
+    switch (typ_kind(e)) {
+    case &Kind(RgnKind,Unique):
+      if (!unify(e,&UniqueRgn_val))
+	impos("can't unify evar with unique region!");
+      break;
+    case &Kind(RgnKind,Aliasable): // unify with the heap
+    case &Kind(RgnKind,Top):
+      if (!unify(e,&HeapRgn_val)) impos("can't unify evar with heap!");
+      break;
+    case &Kind(EffKind,_):
+      if (!unify(e,empty_effect)) impos("can't unify evar with {}!");
+      break;
+    default:
+      terr(loc,"hidden type variable %s isn't abstracted in type %s",
+	   typ2string(e), typ2string(in_t));
+      break;
+    }
+  }
+}
+
+
 // Same as check_valid_type except that for function types, we check
 // that either the bound type variables are empty (in which case we
 // plug them in) or else the free type variables are contained in the
@@ -4646,30 +4674,7 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
       }
       if (free_tvars != NULL)
         terr(loc,"unbound type variable %s",*free_tvars->hd->name);
-      // we can constrain the region evars to HeapRgn and the
-      // effect evars to the empty effect, but we're out of luck
-      // for the type and int variables.
-      if (free_evars != NULL)
-        for (; free_evars != NULL; free_evars = free_evars->tl) {
-          type_t e = free_evars->hd;
-          switch (typ_kind(e)) {
-	  case &Kind(RgnKind,Unique):
-            if (!unify(e,&UniqueRgn_val))
-              impos("can't unify evar with unique region!");
-            break;
-          case &Kind(RgnKind,Aliasable): // use the Heap if unconstrained
-          case &Kind(RgnKind,Top):
-            if (!unify(e,&HeapRgn_val)) impos("can't unify evar with heap!");
-            break;
-          case &Kind(EffKind,_):
-            if (!unify(e,empty_effect)) impos("can't unify evar with {}!");
-            break;
-          default:
-            terr(loc,"hidden type variable %s isn't abstracted in type %s",
-                 typ2string(e), typ2string(t));
-            break;
-          }
-        }
+      check_free_evars(free_evars,t,loc);
     }
   }
 }
@@ -4722,28 +4727,8 @@ void check_type(seg_t loc, tenv_t te,
       let ftvn = fs->hd->name;
       terr(loc,"unbound type variable %s in type %s",*ftvn,typ2string(t));
     }
-    if (!allow_evars && free_evars != NULL) {
-      for (; free_evars != NULL; free_evars = free_evars->tl) {
-        type_t e = free_evars->hd;
-        switch (typ_kind(e)) {
-        case &Kind(RgnKind,Unique):
-          if (!unify(e,&UniqueRgn_val))
-	    impos("can't unify evar with unique region!");
-          break;
-        case &Kind(RgnKind,Aliasable): // unify with the heap
-        case &Kind(RgnKind,Top):
-          if (!unify(e,&HeapRgn_val)) impos("can't unify evar with heap!");
-          break;
-	case &Kind(EffKind,_):
-          if (!unify(e,empty_effect)) impos("can't unify evar with {}!");
-          break;
-        default:
-          terr(loc,"hidden type variable %s isn't abstracted in type %s",
-               typ2string(e), typ2string(t));
-          break;
-        }
-      }
-    }
+    if (!allow_evars)
+      check_free_evars(free_evars,t,loc);
   }
 }
 
