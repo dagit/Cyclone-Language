@@ -2,15 +2,12 @@
 # src or lib.  If you have, go update Makefile.inc.in in the obvious manner!
 
 # To update to a new version of the compiler, here's the boostrap sequence
-#   1. make all
+#   1. make
 #   2. make cyclone_src
 #   3. make update
-#   4. make cyclone
+#   4. make
 # It is strongly advised that you precede step 3 with the boostrap-checking
 # facilities provided by overriding CYCC, BUILDDIR, INC_PATH, and LIB_PATH.
-# To update for other architectures, do make update_all_archs after you have
-# reached a fixpoint.  Alternatively, do make update_devel_archs to update 
-# linux and cygwin and wait until just before a release to do update_all_archs.
 
 # To use a new version of the compiler without nuking the C files used to
 # bootstrap:
@@ -53,18 +50,21 @@ tools:
 	$(MAKE) -C tools/cyclex install 
 	$(MAKE) -C tools/flex   install 
 	$(MAKE) -C tools/rewrite install
-aprof:
-	$(MAKE) -C bin/genfiles install_a 
-	$(MAKE) -C tools/aprof  install 
-gprof:
-	$(MAKE) -C bin/genfiles install_pg 
+
 libs:
 ifndef NO_XML_LIB
 	$(MAKE) -C lib/xml install 
 endif
-# Non-null/bounds checked version of the library -- not built by default
-nocheck:
-	$(MAKE) -C bin/genfiles install_nocheck 
+
+aprof: $(CYC_LIB_PATH)/libcyc_a.a \
+  $(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/, nogc_a.a $(RUNTIME)_a.$(O))
+	$(MAKE) -C tools/aprof  install 
+
+gprof: $(CYC_LIB_PATH)/libcyc_pg.a \
+  $(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/, nogc_pg.a $(RUNTIME)_pg.$(O))
+
+nocheck: $(CYC_LIB_PATH)/libcyc_nocheck.a \
+  $(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/, nogc.a $(RUNTIME).$(O))
 
 .PHONY: all tools cyclone aprof gprof libs nocheck
 
@@ -135,17 +135,30 @@ $(CYC_LIB_PATH)/$(CYCBOOTLIB): \
 	-ranlib $@
 
 # probably unnecessary
-bin/genfiles/%.$(O): bin/genfiles/%.c
+%.$(O): %.c
 	$(CC) -c -o $@ $(CFLAGS) $<
 
-bin/genfiles/%_a.$(O): bin/genfiles/%.c
+%.$(O): %.cyc bin/cyclone$(EXE)
+	bin/cyclone$(EXE) -c -Iinclude -I$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include -B$(CYC_LIB_PATH)/cyc-lib -o $@ $<
+
+%_a.$(O): %.c
 	$(CC) -c -o $@ -DCYC_REGION_PROFILE $(CFLAGS) $<
 
-bin/genfiles/%_g.$(O): bin/genfiles/%.c
+%_a.$(O): %.cyc bin/cyclone$(EXE)
+	bin/cyclone$(EXE) -pa -c -Iinclude -I$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include -B$(CYC_LIB_PATH)/cyc-lib -o $@ $<
+
+%_pg.$(O): %.c
 	$(CC) -c -o $@ -pg $(CFLAGS) $<
 
-bin/genfiles/%_nocheck.$(O): bin/genfiles/%.c
+%_pg.$(O): %.cyc bin/cyclone$(EXE)
+	bin/cyclone$(EXE) -pg -c -Iinclude -I$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include -B$(CYC_LIB_PATH)/cyc-lib -o $@ $<
+
+%_nocheck.$(O): %.c
 	$(CC) -c -o $@ -DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(CFLAGS) $<
+
+%_nocheck.$(O): %.cyc bin/cyclone$(EXE)
+	bin/cyclone$(EXE) --nochecks -c -Iinclude -I$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include -B$(CYC_LIB_PATH)/cyc-lib -o $@ $<
+
 
 bin/genfiles/install_path.c: $(CYCDIR)/Makefile.inc
 	 (echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
@@ -170,25 +183,48 @@ $(CYC_LIB_PATH)/$(CYCLIB): \
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
-lib/%.$(O): lib/%.cyc bin/cyclone$(EXE)
-	bin/cyclone$(EXE) -c \
-	  -Iinclude -I$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include \
-	  -B$(CYC_LIB_PATH)/cyc-lib \
-	  -o $@ $<
+$(CYC_LIB_PATH)/libcyc_a.a: \
+  $(addprefix bin/genfiles/, $(A_BOOT_LIBS)) \
+  $(addprefix lib/, $(A_LIBS)) \
+  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs_a.$(O) \
+  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs_a.$(O)
+	-$(RM) $@
+	ar rc $@ \
+	  $(addprefix bin/genfiles/, $(A_BOOT_LIBS)) \
+	  $(addprefix lib/, $(A_LIBS)) \
+	  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs_a.$(O) \
+	  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs_a.$(O)
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
 
-$(CYC_LIB_PATH)/nocheck_$(CYCBOOTLIB): $(CYC_INCLUDE_H)
-$(CYC_LIB_PATH)/nocheck_$(CYCBOOTLIB): \
-  bin/genfiles/nocheck_$(CYCBOOTLIB)
-	$(MAKE) -C bin/genfiles nocheck_$(CYCBOOTLIB)
-	cp -p $< $@
+$(CYC_LIB_PATH)/libcyc_pg.a: \
+  $(addprefix bin/genfiles/, $(PG_BOOT_LIBS)) \
+  $(addprefix lib/, $(PG_LIBS)) \
+  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs_pg.$(O) \
+  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs_pg.$(O)
+	-$(RM) $@
+	ar rc $@ \
+	  $(addprefix bin/genfiles/, $(PG_BOOT_LIBS)) \
+	  $(addprefix lib/, $(PG_LIBS)) \
+	  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs_pg.$(O) \
+	  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs_pg.$(O)
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
 
-$(CYC_LIB_PATH)/nocheck_$(CYCLIB): $(CYC_INCLUDE_H)
-$(CYC_LIB_PATH)/nocheck_$(CYCLIB): \
-  bin/genfiles/$(CYCLIB)
-	$(MAKE) -C bin/genfiles nocheck_$(CYCLIB)
-	cp -p $< $@
+$(CYC_LIB_PATH)/libcyc_nocheck.a: \
+  $(addprefix bin/genfiles/, $(NOCHECK_BOOT_LIBS)) \
+  $(addprefix lib/, $(NOCHECK_LIBS)) \
+  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs_nocheck.$(O) \
+  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs_nocheck.$(O)
+	-$(RM) $@
+	ar rc $@ \
+	  $(addprefix bin/genfiles/, $(PG_BOOT_LIBS)) \
+	  $(addprefix lib/, $(PG_LIBS)) \
+	  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs_nocheck.$(O) \
+	  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs_nocheck.$(O)
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
 
-# Might as well just make this nogc.o, but requires changes in cyclone.cyc
 $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc.a: $(CYC_INCLUDE_H)
 $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc.a: \
   bin/genfiles/nogc.$(O)
@@ -197,9 +233,35 @@ $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc.a: \
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc_a.a: $(CYC_INCLUDE_H)
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc_a.a: \
+  bin/genfiles/nogc_a.$(O)
+	-$(RM) $@
+	ar rc $@ $<
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
+
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc_pg.a: $(CYC_INCLUDE_H)
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc_pg.a: \
+  bin/genfiles/nogc_pg.$(O)
+	-$(RM) $@
+	ar rc $@ $<
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
+
 $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O): $(CYC_INCLUDE_H)
 $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O): \
   bin/genfiles/$(RUNTIME).$(O)
+	cp $< $@
+
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME)_a.$(O): $(CYC_INCLUDE_H)
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME)_a.$(O): \
+  bin/genfiles/$(RUNTIME)_a.$(O)
+	cp $< $@
+
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME)_pg.$(O): $(CYC_INCLUDE_H)
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME)_pg.$(O): \
+  bin/genfiles/$(RUNTIME)_pg.$(O)
 	cp $< $@
 
 # The rule for creating cyc_include.h creates as a side effect

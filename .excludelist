@@ -14,6 +14,9 @@
 /\.inst$
 /bin/genfiles/i686-unknown-cygwin1\.3\.2$
 /bin/genfiles/i686-unknown-cygwin1\.3\.3$
+/bin/genfiles/i686-unknown-cygwin1\.3\.10$
+/bin/genfiles/i686-unknown-linux$
+/bin/genfiles/powerpc-apple-rhapsody$
 /bin/genfiles/lib$
 /bin/genfiles/src$
 /build$

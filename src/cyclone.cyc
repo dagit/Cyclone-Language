@@ -1424,7 +1424,7 @@ int main(int argc, string_t<`H> ?`H argv) {
       runtime_filename = "runtime_cyc_a.o";
     } else if(nocheck_r) {
       libcyc_flag = "-lcyc_nocheck";
-      nogc_filename = "nogc_nocheck.a";
+      nogc_filename = "nogc.a";
       runtime_filename = "runtime_cyc.o";
     } else if(pg_r) {
       libcyc_flag = "-lcyc_pg";

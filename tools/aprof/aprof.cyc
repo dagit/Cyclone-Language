@@ -29,7 +29,7 @@ using Core;
 using Hashtable;
 
 
-char buf[81]ZEROTERM;
+char buf[81]@zeroterm;
 
 List::list_t<$(stringptr_t<`H,`H>,
 	       $(table_t<stringptr_t<`H,`H>,$(int,int)@>,int)@,
@@ -191,7 +191,7 @@ void update_table(stringptr_t<`H,`H> pos, $(int,int)@`H stats,
     *byte_count = *byte_count + stats[0][0];
     *call_count = *call_count + stats[0][1];
   } catch {
-  case Not_found:
+  case &Not_found:
     insert(tab, pos, stats); 
     (*count)++;
     break;
@@ -330,7 +330,7 @@ int main(int argc, string_t ?argv) {
 	   past ones created at this spot. */
 	insert(names,rname,true);
       } catch {
-      case Not_found:
+      case &Not_found:
 	/* first time; add initial correlation. */
 	table_t<stringptr_t<`H,`H>,bool> tab = 
 	  create(101, strptrcmp, hash_stringptr);
@@ -367,11 +367,11 @@ int main(int argc, string_t ?argv) {
 	  *byte_count = *byte_count + count;
 	  *call_count = *call_count + 1;
 	} catch {
-	case Not_found:
+	case &Not_found:
 	  insert(table, s, new $(count,1)); break;
 	}
       } catch {
-	case Not_found:
+	case &Not_found:
 	  /* first time we've seen this (dynamic) region;
 	     add it to the region table.  Should have only
 	     one entry per region. */
@@ -409,7 +409,7 @@ int main(int argc, string_t ?argv) {
    let tab = x->hd[0][1][0][0];
    iter_c(add, tab, closure);
    /* sort it by total allocation size */
-   Array::qsort(cmp,results,results.size);
+   Array::qsort(cmp,results,numelts(results));
    /* print it out */
    print_results(x->hd[0][0],x->hd[0][1][0][1],
 		 num,results,x->hd[0][2],x->hd[0][3]);
