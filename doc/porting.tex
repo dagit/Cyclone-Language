@@ -33,7 +33,10 @@ To a first approximation, you can port a simple program
 from C to Cyclone by following these steps which are
 detailed below:
 \begin{itemize}
+\item \hyperlink{port:null}{Use NULL instead of 0.}
 \item \hyperlink{port:pointers}{Change pointer types to fat pointer types where necessary.}  
+\item \hyperlink{port:malloc}{Use comprehensions to heap-allocate arrays.}
+\item \hyperlink{port:unions}{Use tunions for unions with pointers.}
 \item \hyperlink{port:initialize}{Initialize variables.}  
 \item \hyperlink{port:cases}{Put breaks or fallthrus in switch cases.} 
 \item \hyperlink{port:temp}{Replace one temporary with multiple temporaries.}  
@@ -43,6 +46,8 @@ detailed below:
 \item \hyperlink{port:free}{Get rid of calls to free, realloc, memset, memcpy, etc.}
 \item \hyperlink{port:poly}{Use polymorphism or tunions to get rid of void*.}  
 \item \hyperlink{port:arrays}{Be careful with \& and arrays.}
+\item \hyperlink{port:vararg}{Rewrite the bodies of vararg functions.}
+\item \hyperlink{port:setjmp}{Use exceptions instead of setjmp.}
 \end{itemize}
 
 Even when you follow these suggestions, you'll still need to test and
@@ -61,6 +66,12 @@ level, so you'll want to use the \texttt{-save-c} and \texttt{-g}
 options when compiling your code.  
 
 \begin{porta}
+{port:null}{Use NULL instead of 0.}
+
+Use \texttt{NULL} instead of 0 for null-pointers.  
+\end{porta}
+
+\begin{porta}
 {port:pointers}{Change pointer types to fat pointer types where necessary.}  
 
 Ideally, you should examine the code and use thin pointers (e.g., \texttt{int*}
@@ -72,6 +83,31 @@ when porting C code is to just change all pointers to fat pointers.
 The code is then more likely to compile, but will have greater overhead.
 After changing to use all fat pointers, you may wish to profile or reexamine
 your code and figure out where you can profitably use thin pointers.
+\end{porta}
+
+\begin{porta}{port:malloc}{Use comprehensions to heap-allocate arrays.}
+
+Cyclone provides limited support for \texttt{malloc} and separated
+initialization but this really only works for \texttt{struct}s or
+tuples.  To heap- or region-allocate and initialize an array, use
+\texttt{new} or \texttt{rnew} in conjunction with array comprehensions.  
+For example, to copy a string \texttt{s}, one might write:
+\begin{verbatim}
+  char ?t = new {for i < s.size : s[i]};
+\end{verbatim}
+
+
+\end{porta}
+
+\begin{porta}{port:unions}{Use tunions for unions with pointers.}
+
+Cyclone only accepts unions that contain ``bits'' (i.e., ints; chars;
+shorts; floats; doubles; or tuples, structs, unions, or arrays of bits.)
+So if you have a C union with a pointer type in it, you'll have to
+code around it.  One way is to simply use a tagged union (\texttt{tunion}).
+Note that this adds a level of indirection and requires pattern
+matching to ensure type-safety.  
+
 \end{porta}
 
 \begin{porta}{port:initialize}{Initialize variables.}  
@@ -401,6 +437,19 @@ exception.
 
 \end{porta}
 
+\begin{porta}{port:vararg}{Rewrite the bodies of vararg functions.}
+
+See the section on varargs for more details.  
+\end{porta}
+
+\begin{porta}{port:setjmp}{Use exceptions instead of setjmp.}
+
+Many uses of \texttt{setjmp}/\texttt{longjmp} can be replaced
+with a \texttt{try}-block and a \texttt{throw}.  Of course,
+you can't do this for things like a user-level threads package,
+but rather, only for those situations where you're trying
+to ``pop-out'' of a deeply nested set of function calls.
+\end{porta}
 
 \subsection{Interfacing to C}
 
