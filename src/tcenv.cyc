@@ -810,8 +810,8 @@ void check_delayed_effects(tenv_t te) {
       continue;
     if(eff_outlives_eff(rgn_order, eff, capability))
       continue;
-    terr(loc, "Capability %s does not cover function's effect %s",
-	 typ2string(capability), typ2string(eff));
+    terr(loc, "Capability \n%s\ndoes not cover function's effect\n%s",
+       typ2string(capability), typ2string(eff));
   }
 }
 

@@ -1141,8 +1141,8 @@ _tmp117.f1;_tmp119=_tmp117.f2;_tmp11A=_tmp117.f3;_tmp11B=_tmp117.f4;if(Cyc_Tcuti
 _tmp118))continue;({struct Cyc_Std_String_pa_struct _tmp11E;_tmp11E.tag=0;_tmp11E.f1=(
 struct _tagged_arr)Cyc_Absynpp_typ2string(_tmp119);{struct Cyc_Std_String_pa_struct
 _tmp11D;_tmp11D.tag=0;_tmp11D.f1=(struct _tagged_arr)Cyc_Absynpp_typ2string(
-_tmp118);{void*_tmp11C[2]={& _tmp11D,& _tmp11E};Cyc_Tcutil_terr(_tmp11B,_tag_arr("Capability %s does not cover function's effect %s",
-sizeof(char),50),_tag_arr(_tmp11C,sizeof(void*),2));}}});}}}struct _tuple7{struct
+_tmp118);{void*_tmp11C[2]={& _tmp11D,& _tmp11E};Cyc_Tcutil_terr(_tmp11B,_tag_arr("Capability \n%s\ndoes not cover function's effect\n%s",
+sizeof(char),51),_tag_arr(_tmp11C,sizeof(void*),2));}}});}}}struct _tuple7{struct
 Cyc_RgnOrder_RgnPO*f1;struct Cyc_List_List*f2;struct Cyc_Position_Segment*f3;};
 void Cyc_Tcenv_check_rgn_partial_order(struct Cyc_Tcenv_Tenv*te,struct Cyc_Position_Segment*
 loc,struct Cyc_List_List*po){if(te->le == 0){for(0;po != 0;po=po->tl){if(!Cyc_Tcutil_subset_effect(

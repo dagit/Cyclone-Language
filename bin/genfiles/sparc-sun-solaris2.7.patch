@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c sparc-sun-solaris2.7/lib/cycstubs.c
-*** i686-unknown-linux/lib/cycstubs.c	Mon Feb  4 16:17:02 2002
---- sparc-sun-solaris2.7/lib/cycstubs.c	Mon Feb  4 16:51:00 2002
+*** i686-unknown-linux/lib/cycstubs.c	Mon Feb  4 16:22:46 2002
+--- sparc-sun-solaris2.7/lib/cycstubs.c	Mon Feb  4 17:13:31 2002
 ***************
 *** 284,294 ****
   _check_unknown_subscript(ms,sizeof(unsigned int),0)));else{return
@@ -59,8 +59,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c sparc-sun-solaris2.7
   _tagged_arr filename,struct Cyc_Std_stat_t*buf){return lstat(string_to_Cstring(
   filename),buf);}int Cyc_Std_mkdir(struct _tagged_arr pathname,unsigned int mode){
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.7/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Mon Feb  4 16:17:02 2002
---- sparc-sun-solaris2.7/lib/execinfo.c	Mon Feb  4 16:51:00 2002
+*** i686-unknown-linux/lib/execinfo.c	Mon Feb  4 16:22:46 2002
+--- sparc-sun-solaris2.7/lib/execinfo.c	Mon Feb  4 17:13:31 2002
 ***************
 *** 256,334 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
@@ -168,8 +168,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.7
 ! Cyc_Core_Failure_struct _tmp1;_tmp1.tag=Cyc_Core_Failure;_tmp1.f1=_tag_arr("backtrace: unsupported except under Linux",
 ! sizeof(char),42);_tmp1;});_tmp0;}));return 0;}int Cyc_Execinfo_bt(){return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c sparc-sun-solaris2.7/lib/getopt.c
-*** i686-unknown-linux/lib/getopt.c	Fri Feb  1 12:57:32 2002
---- sparc-sun-solaris2.7/lib/getopt.c	Mon Feb  4 16:51:00 2002
+*** i686-unknown-linux/lib/getopt.c	Fri Feb  1 11:49:51 2002
+--- sparc-sun-solaris2.7/lib/getopt.c	Mon Feb  4 17:13:31 2002
 ***************
 *** 271,284 ****
   quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};struct _tagged_arr Cyc_Std_getenv(
@@ -199,8 +199,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c sparc-sun-solaris2.7/l
   int Cyc_Std_chdir(struct _tagged_arr);int Cyc_Std_chown(struct _tagged_arr,
   unsigned int,unsigned int);struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c sparc-sun-solaris2.7/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Mon Feb  4 16:17:00 2002
---- sparc-sun-solaris2.7/src/buildlib.c	Mon Feb  4 16:51:00 2002
+*** i686-unknown-linux/src/buildlib.c	Mon Feb  4 16:22:47 2002
+--- sparc-sun-solaris2.7/src/buildlib.c	Mon Feb  4 17:13:31 2002
 ***************
 *** 583,608 ****
   struct Cyc_Std__Div{int quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};int Cyc_Std_system(

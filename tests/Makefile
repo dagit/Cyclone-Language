@@ -58,6 +58,12 @@ unsafe_cast.o: unsafe_cast.c
 typerep_test$(EXE): typerep_test.o 
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
+equiv.o: equiv.c
+	$(CC) -c $< -o $@
+
+rep$(EXE):  rep.o equiv.o
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
+
 genrep_write$(EXE):  genrep_write.o muttrep.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
@@ -73,7 +79,7 @@ genrep_test$(EXE):  genrep_test.o muttrep.o
 
 #This takes care of any single-file program
 %$(EXE): %.cyc
-	$(CYCC) $(LDFLAGS) -o $@ $^
+	$(CYCC) $(CYCFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
 	$(RM) $(addsuffix .[oc], genrep_test genrep_read genrep_write hello bytes cyctest foo histogram finger test_getopt typeref typerep_test test_regions)\

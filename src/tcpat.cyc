@@ -267,9 +267,10 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       t = wildtyp(new Opt(lookup_type_vars(te)));
       break;
     }
-    region rgn {
+    region<`rgn> rgn {
       // constrain type variables to have at least the kind they were abstracted over
       let var_tvs = NULL;
+      list_t<$(type_t,type_t)@> outlives_constraints = NULL;
       let u = ad->impl->exist_vars;
       for (_ t = exist_ts ; t != NULL; t = t->tl) {
 	tvar_t tv = t->hd;
@@ -299,8 +300,14 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 	       *tv->name,
 	       kindbound2string(kb1),kind2string(k2));
 	}
-	var_tvs = rnew(rgn) List((type_t)(new VarType(tv)),var_tvs);
+	type_t vartype = new VarType(tv);
+	var_tvs = rnew(rgn) List((type_t)(vartype),var_tvs);
+	// if unpacking a region var, must add it to the po
+	if(k2 == RgnKind) {
+          outlives_constraints = new List(new $(empty_effect,vartype),outlives_constraints);
+	}
       }
+
       var_tvs = imp_rev(var_tvs);
 
       tenv_t te2 = add_type_vars(p->loc,te,exist_ts);
@@ -318,6 +325,8 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 	  res.tvars_and_bounds_opt = new $(NULL,NULL);
 	(*res.tvars_and_bounds_opt)[0] = append((*res.tvars_and_bounds_opt)[0],
 						exist_ts);
+	(*res.tvars_and_bounds_opt)[1] = append((*res.tvars_and_bounds_opt)[1],
+						outlives_constraints);
 	let rpo_inst = NULL;
 	for(let rpo=ad->impl->rgn_po; rpo != NULL; rpo = rpo->tl)
 	  rpo_inst = new List(new $(rsubstitute(rgn,inst,(*rpo->hd)[0]),

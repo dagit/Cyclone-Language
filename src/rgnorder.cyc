@@ -169,7 +169,7 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
 	  return true;
 	if(Dict::member(po->d,next)) {
 	  add_to_search(&env,Dict::lookup(po->d,next)->these_outlive);
-	}
+	} else impos("RgnOrder: type variable not in dict");
       }
       return false;
     default: return false;
@@ -188,7 +188,7 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
 	  if(contains_rgnseff(tv,next_eff))
 	    return true;
 	  add_to_search(&env,next_eff);
-	}
+	} else impos("RgnOrder: type variable not in dict");
       }
       return false;
     default: return false;
