@@ -526,7 +526,7 @@ extern struct Cyc_Core_Opt Cyc_Tcutil_tmko;
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
 # 26 "cyclone.h"
 enum Cyc_Cyclone_C_Compilers{Cyc_Cyclone_Gcc_c =0U,Cyc_Cyclone_Vc_c =1U};
-# 46 "evexp.h"
+# 47 "evexp.h"
 extern int Cyc_Evexp_exp_cmp(struct Cyc_Absyn_Exp*e1,struct Cyc_Absyn_Exp*e2);
 # 34 "absyn.cyc"
 int Cyc_Cyclone_tovc_r=0;

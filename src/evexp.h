@@ -43,6 +43,7 @@ extern bool lte_const_exp(Absyn::exp_t e1, Absyn::exp_t e2);
 
 // usable for sorting, trees, etc.  evaluates constant expressions
 // where it can -- shouldn't produce an error.
+extern int cmp_cnst(Absyn::cnst_t c1, Absyn::cnst_t c2);
 extern int exp_cmp(Absyn::exp_t e1, Absyn::exp_t e2);
 
 // similar to above but expects that the expression is (or can be coerced to)

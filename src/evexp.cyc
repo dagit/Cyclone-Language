@@ -331,7 +331,7 @@ static unsigned long long integral_const_to_long_long(cnst_t c) {
   return res;
 }
 
-static int cmp_cnst(cnst_t c1, cnst_t c2) {
+int cmp_cnst(cnst_t c1, cnst_t c2) {
   switch $(c1,c2) {
   case $({.Null_c = _},{.Null_c = _}): return 0;
   case $({.Null_c = _},_): return -1;

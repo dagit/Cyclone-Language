@@ -107,6 +107,7 @@ typedef Absyn::switch_clause_t switch_clause_t;
 typedef Absyn::var_opt_t var_opt_t;
 typedef Absyn::tqual_t tqual_t;
 typedef Absyn::exp_opt_t exp_opt_t;
+typedef Absyn::cnst_t cnst_t;
 ////// Forward Declaration for Environments /////
 struct Env;
 typedef struct Env @env_t;
@@ -115,7 +116,7 @@ typedef struct Env @env_t;
 typedef datatype Term @term_t, *term_opt_t;
 
 datatype Term {
-  Const(exp_t);  // a Cyclone "constant" expression
+  Const(exp_t); // a Cyclone "constant" expression (e.g., 3, sizeof(e), etc.)
   Var(vardecl_t);
   LogicVar(vardecl_opt_t,int);
   Primop(Absyn::primop_t,list_t<term_t>);
@@ -123,7 +124,7 @@ datatype Term {
 
 string_t term2string(term_t t) {
   switch (t) {
-  case &Const(c): return Absynpp::exp2string(c);
+  case &Const(e): return Absynpp::exp2string(e);
   case &Var(vd): return Absynpp::qvar2string(vd->name);
   case &LogicVar(NULL,i): return aprintf("_X%d",i);
   case &LogicVar(vd,i): return aprintf("_%s%d",Absynpp::qvar2string(vd->name),i);
@@ -136,7 +137,7 @@ string_t term2string(term_t t) {
   }
 }
 
-static term_t cnst(Absyn::exp_t c) { return new Const(c); }
+static term_t cnst(Absyn::exp_t e) { return new Const(e); }
 static term_t zero() {
   static term_opt_t z = NULL;
   if (z == NULL) {
@@ -148,14 +149,14 @@ static term_t zero() {
   } else return (term_t)z;
 }
 static term_t one() {
-  static term_opt_t z = NULL;
-  if (z == NULL) {
+  static term_opt_t n = NULL;
+  if (n == NULL) {
     let e = Absyn::int_exp(Absyn::None,1,0);
     e->topt = Absyn::int_type(Absyn::None,Absyn::Int_sz);
     let r = cnst(e);
-    z = r;
+    n = r;
     return r;
-  } else return (term_t)z;
+  } else return (term_t)n;
 }
   
 static term_t var(vardecl_t vd) { return new Var(vd); }
@@ -167,9 +168,9 @@ static term_t fresh_var() {
   return new LogicVar(NULL,counter++);
 }
 
-int cmp_term(term_t t1, term_t t2) {
+static int cmp_term(term_t t1, term_t t2) {
   switch $(t1,t2) {
-  case $(&Const(c1),&Const(c2)): return Evexp::exp_cmp(c1,c2);
+  case $(&Const(e1),&Const(e2)): return Evexp::exp_cmp(e1,e2);
   case $(&Const(_),_): return -1;
   case $(_,&Const(_)): return 1;
   case $(&Var(vd1),&Var(vd2)): return (int)vd1 - (int)vd2;
@@ -186,7 +187,7 @@ int cmp_term(term_t t1, term_t t2) {
   }
 }
 
-bool same_term(term_t t1, term_t t2) { return cmp_term(t1,t2) == 0; }
+static bool same_term(term_t t1, term_t t2) { return cmp_term(t1,t2) == 0; }
 
 ///////////////////// Assertions /////////////////////
 typedef datatype Assn @assn_t;
@@ -207,6 +208,7 @@ datatype Assn {
 // take care to figure out the size as a dag and not a tree.
 static unsigned int 
   assn_size_loop(assn_t a, unsigned int c, list_t<assn_t,`H>@ prev){
+  LOOP:
   if (memq(*prev,a)) return c;
   *prev = new List(a,*prev);
   switch (a) {
@@ -215,10 +217,17 @@ static unsigned int
   case &Prim(...): return 1+c;
   case &And(a1,a2): fallthru(a1,a2);
   case &Or(a1,a2): 
-    return assn_size_loop(a1,assn_size_loop(a2,1+c,prev),prev);
-  case &Subst(vd,t,a):
-    return assn_size_loop(a,c+1,prev);
-  case &Kill(a): return assn_size_loop(a,c+1,prev);
+    c = assn_size_loop(a2,1+c,prev);
+    a = a1;
+    goto LOOP;
+  case &Subst(vd,t,a1):
+    ++c;
+    a = a1;
+    goto LOOP;
+  case &Kill(a1): 
+    ++c;
+    a = a1;
+    goto LOOP;
   }
 }
 
@@ -291,7 +300,6 @@ static datatype Assn.False false_assn = False;
 // that want to lookup.  That could happen if we had a different 
 // type for hashtable lookup (as we did with dictionaries.)
 
-// FIX: need a good hash function...
 static int assnhash(datatype Assn @a) {
   switch (a) {
   case &False: return 0;
@@ -309,6 +317,7 @@ static int assnhash(datatype Assn @a) {
 // compare two assertions for structural equality -- does not assume
 // the components have been hash-consed, but probably could.
 static int assncmp(datatype Assn @a1, datatype Assn @a2) {
+ LOOP:
   if (a1 == a2) return 0;
   switch $(a1,a2) {
   case $(&True,&True): return 0;
@@ -321,7 +330,9 @@ static int assncmp(datatype Assn @a1, datatype Assn @a2) {
   case $(&And(a11,a12),&And(a21,a22)): 
     int c = assncmp(a11,a21);
     if (c != 0) return c;
-    return assncmp(a12,a22);
+    a1 = a12;
+    a2 = a22;
+    goto LOOP;
   case $(&Or(_,_),_): return -1;
   case $(_,&Or(_,_)): return 1;
   case $(&And(_,_),_): return -1;
@@ -337,12 +348,14 @@ static int assncmp(datatype Assn @a1, datatype Assn @a2) {
   case $(&Kill(a1),&Kill(a2)): return assncmp(a1,a2);
   case $(&Kill(_),_): return -1;
   case $(_,&Kill(_)): return 1;
-  case $(&Subst(vd1,t1,a1),&Subst(vd2,t2,a2)):
+  case $(&Subst(vd1,t1,a11),&Subst(vd2,t2,a22)):
     int c = (int)vd1 - (int)vd2;
     if (c != 0) return c;
     c = cmp_term(t1,t2);
     if (c != 0) return c;
-    return assncmp(a1,a2);
+    a1 = a11;
+    a2 = a22;
+    goto LOOP;
   }
 }
 
@@ -355,6 +368,7 @@ static struct Hashtable::Table<assn_t,$(assn_t,bool reduced)@>
 // lookup an assertion to see if it has delayed substitutions or
 // kills with in it.  
 static bool is_reduced(assn_t a) {
+  if (hash_cons_table == NULL) return false;
   let resopt = Hashtable::lookup_opt((Hashtable::table_t)hash_cons_table,a);
   if (resopt == NULL) return false;
   let &$(_,b) = *resopt;
@@ -424,9 +438,6 @@ static assn_t and(assn_t a1, assn_t a2) {
   case $(_,&True): return a1;
   case $(&False,_): return a1;
   case $(_,&False): return a2;
-  case $(&Kill(a1),&Kill(a2)): 
-    // And(Kill(a1),Kill(a2)) = Kill(And(a1,a2))
-    return kill(and(a1,a2));
   default: 
     // Sort the two operands so that we're more likely to share.
     // Note that we could do more than this and, for instance,
@@ -446,9 +457,6 @@ static assn_t or(assn_t a1, assn_t a2) {
   case $(_,&True): return a2;
   case $(&False,_): return a2;
   case $(_,&False): return a1;
-  case $(&Kill(a1),&Kill(a2)): 
-    // Or(Kill(a1),Kill(a2)) = Kill(Or(a1,a2))
-    return kill(or(a1,a2));
   default: 
     // sort the operands and hash-cons.
     if ((int)a1 > (int)a2)
@@ -486,7 +494,32 @@ prim_assn(lt,Lt)
 prim_assn(lte,Lte)
 #define gte(t1,t2) (lte(t2,t1))
 #define gt(t1,t2) (lt(t2,t1))
-  
+
+// forward declaration 
+static assn_t reduce(assn_t a);
+
+// compute negation of assertion -- unfortunately requires
+// reducing the assertion (i.e., getting rid of Subst and Kill
+// nodes.)
+static assn_t not(assn_t a) {
+  switch (a) {
+  case &True: return &false_assn;
+  case &False: return &true_assn;
+  case &And(a1,a2): return or(not(a1),not(a2));
+  case &Or(a1,a2): return and(not(a1),not(a2));
+  case &Prim(t1,p,t2):
+    switch (p) {
+    case Eq : return neq(t1,t2);
+    case Neq: return eq(t1,t2);
+    case Lt : return gte(t1,t2);
+    case Lte: return gt(t1,t2);
+    default: Tcutil::impos("Vcgen::invert: non-primop");
+    }
+  case &Subst(...): return not(reduce(a));
+  case &Kill(...): return not(reduce(a));
+  }
+}
+
 ////// Push Through Subst and Kill nodes ////
 // These functions take care of eliminating all of the Kill and
 // Subst nodes in an assertion in one pass.  It is, unfortunately,
@@ -521,7 +554,7 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
       if (new_term != old_term) change = true;
     }
     if (!change) return t;
-    return new Primop(p,imp_rev(res));
+    return primop(p,imp_rev(res));
   case &Var(vd):
     if (vd->escapes && esc_subst != NULL) {
       // it's an escaping variable and we're under a Kill node.
@@ -550,6 +583,7 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
 static assn_t 
 reduce_assn(assn_t a, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst, 
             list_t<$(vardecl_t,term_t)@`H,`H> *esc_subst) {
+ LOOP:
   switch (a) {
   case &True:
   case &False: return a;
@@ -573,11 +607,12 @@ reduce_assn(assn_t a, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
     // when esc_subst is non-null...
     list_t<$(vardecl_t,term_t)@> new_esc_subst = NULL;
     return reduce_assn(a,non_esc_subst,&new_esc_subst);
-  case &Subst(vd,t,a):
+  case &Subst(vd,t,a1):
     // add vd->t to the non_esc_subst
     t = reduce_term(t,non_esc_subst,esc_subst);
     non_esc_subst = new List(new $(vd,t),non_esc_subst);
-    return reduce_assn(a,non_esc_subst,esc_subst);
+    a = a1;
+    goto LOOP;
   }
 }
 
@@ -591,8 +626,9 @@ static assn_t reduce(assn_t a) {
 // a one-shot substitution -- needed in the assignment code below.
 static term_t subst_term(term_t t, vardecl_t x, term_t newx) {
   switch (t) {
-  case &Const(_):
-  case &LogicVar(...): return t;
+  case &Var(vd):
+    if (vd == x) return newx;
+    return t;
   case &Primop(p,ts):
     list_t<term_t> res = NULL;
     bool change = false;
@@ -603,10 +639,9 @@ static term_t subst_term(term_t t, vardecl_t x, term_t newx) {
       if (new_term != old_term) change = true;
     }
     if (!change) return t;
-    return new Primop(p,imp_rev(res));
-  case &Var(vd):
-    if (vd == x) return newx;
-    return t;
+    return primop(p,imp_rev(res));
+  case &Const(_):
+  case &LogicVar(...): return t;
   }
 }
 
@@ -616,16 +651,92 @@ static term_t kill_mem_term(term_t t) {
   return reduce_term(t,NULL,&esc_subst);
 }
 
-////////// Implication for Assertions //////////////
+
+// intersect two lists of assertions returning the common
+// assertions, and the remainders of the two lists.  Assumes
+// the assertions are in sorted order.
+static void intersect(list_t<assn_t,`H> a1s, list_t<assn_t,`H> a2s, 
+                      list_t<assn_t,`H>@common,
+                      list_t<assn_t,`H>@res1,
+                      list_t<assn_t,`H>@res2) {
+  while (true) {
+    switch $(a1s,a2s) {
+    case $(NULL,NULL): return;
+    case $(_,NULL): *res1 = List::revappend(a1s,*res1); return;
+    case $(NULL,_): *res2 = List::revappend(a2s,*res2); return;
+    default: 
+      int c = assncmp(a1s->hd,a2s->hd);
+      if (c == 0) {
+        *common = new List(a1s->hd,*common);
+        a1s = a1s->tl;
+        a2s = a2s->tl;
+      } else if (c < 0) {
+        *res1 = new List(a1s->hd,*res1);
+        a1s = a1s->tl;
+      } else {
+        *res2 = new List(a2s->hd,*res2);
+        a2s = a2s->tl;
+      }
+    }
+  }
+}
+
+static $(list_t<assn_t> common, list_t<assn_t> res1, list_t<assn_t> res2) 
+  intersect_assns(list_t<assn_t,`H> a1s, list_t<assn_t,`H> a2s) {
+  let common = NULL;
+  let res1 = NULL;
+  let res2 = NULL;
+  intersect(a1s,a2s,&common,&res1,&res2);
+  return $(List::imp_rev(common),List::imp_rev(res1),List::imp_rev(res2));
+}
+
+// pull out the common primitive relations, but avoid duplicating
+// things in forming the full cross-product
+static $(list_t<assn_t>,assn_t) factor(assn_t a) {
+  switch (a) {
+  case &True: return $(NULL,&true_assn);
+  case &False: return $(NULL,&false_assn);
+  case &Prim(...): return $(new List{a,NULL},&true_assn);
+  case &And(a1,a2):
+    let $(c1s,a1) = factor(a1);
+    let $(c2s,a2) = factor(a2);
+    return $(List::merge(assncmp,c1s,c2s),and(a1,a2));
+  case &Or(a1,a2):
+    let $(c1s,a1) = factor(a1);
+    let $(c2s,a2) = factor(a2);
+    let $(cs,c1s,c2s) = intersect_assns(c1s,c2s);
+    return $(cs,or(List::fold_left(and,a1,c1s),List::fold_left(and,a2,c2s)));
+  default: return $(NULL,a);
+  }
+}
+
+static assn_t factor_assn(assn_t a) {
+  //unsigned int asize = assn_size(a);
+  let $(cs,a) = factor(a);
+  a = List::fold_left(and,a,cs);
+  //unsigned int newsize = assn_size(a);
+  //fprintf(stderr,"factor before %d after %d\n",asize,newsize);
+  //fprintf(stderr,"%s\n",assn2string(a));
+  return a;
+}
+
+
+////////// Syntactic Implication for Assertions //////////////
 // returns true when ctxt |- t1 p t2
 // uses only very local, syntactic matching.
-// assumes ctxt is reduced.
 static bool find_ctxt(assn_t ctxt, term_t t1, prim_reln_t p1, term_t u1) {
+ LOOP:
   switch (ctxt) {
   case &False: return true;
   case &True: return false;
-  case &And(a1,a2): return find_ctxt(a1,t1,p1,u1) || find_ctxt(a2,t1,p1,u1);
-  case &Or(a1,a2): return find_ctxt(a1,t1,p1,u1) && find_ctxt(a2,t1,p1,u1);
+  case &And(a1,a2): 
+    if (find_ctxt(a1,t1,p1,u1)) return true;
+    ctxt = a2;
+    goto LOOP;
+  case &Or(a1,a2): 
+    if (!find_ctxt(a1,t1,p1,u1)) return false;
+    ctxt = a2;
+    goto LOOP;
   case &Prim(t2,p2,u2):
     switch $(p2,p1) {
     case $(Eq,Eq): 
@@ -642,62 +753,326 @@ static bool find_ctxt(assn_t ctxt, term_t t1, prim_reln_t p1, term_t u1) {
       return same_term(t1,t2) && same_term(u1,u2);
     default: return false;
     }
-  default: Tcutil::impos("Vcgen::find_ctxt");
+  default: 
+    ctxt = reduce(ctxt);
+    goto LOOP;
   }
 }
 
 // returns true when ctxt |- a
 // uses only very local, syntactic matching.
-// assumes a is reduced.
 static bool simple_prove(assn_t ctxt, assn_t a) {
+ LOOP:
   if (ctxt == a) return true;
   switch (a) {
   case &True: return true;
   case &False: return false;
-  case &And(a1,a2): return simple_prove(ctxt,a1) && simple_prove(ctxt,a2);
-  case &Or(a1,a2): return simple_prove(ctxt,a1) || simple_prove(ctxt,a2);
-  case &Prim(t1,p,t2): return find_ctxt(reduce(ctxt),t1,p,t2); 
-  default: Tcutil::impos("Vcgen::simple_prove");
+  case &And(a1,a2): 
+    if (!simple_prove(ctxt,a1)) return false;
+    a = a2;
+    goto LOOP;
+  case &Or(a1,a2): 
+    if (simple_prove(ctxt,a1)) return true;
+    a = a2;
+    goto LOOP;
+  case &Prim(t1,p,t2): return find_ctxt(ctxt,t1,p,t2); 
+  default: 
+    a = reduce(a);
+    goto LOOP;
   }
 }
 
+
+//////////////////// Constraint Solving //////////////////
+// We use a variation of the Pratt algorithm here where we keep
+// track of a distance between terms and find the minimal length path
+// between any two terms.  If we ever get a negative-length cycle,
+// then the constraints are inconsistent.  
+//
+// We represent a conjunction of constraints as a sparse matrix of
+// the distances.  We consider distance(i,j) == 0 implicitly, and
+// otherwise, if (i,j) are not in the graph, the distance is infinite.
+//
+// To deal with an entire assertion, we must collect a set of graphs.
+// representing alternative states.  This effectively converts the 
+// assertion to DNF which is an exponential blowup.  To avoid running
+// out of time or memory, we limit the blowup according to the
+// variable max_paths.
+
+typedef struct Distance {
+  struct Distance *next;  // ptr to next entry in sparse matrix
+  term_t t1;
+  term_t t2;
+  int    dist;
+} *distance_t;
+
+typedef struct Graph {
+  struct Graph *next;    // ptr to next graph in disjunction
+  list_t<term_t> nodes;
+  distance_t distance;
+} graph_t;
+
+// print out a set of graphs
+static void print_graphs(graph_t* gs) {
+  fprintf(stderr,"Graphs:\n");
+  for (; gs != NULL; gs = gs->next) {
+    fprintf(stderr,"\t{");
+    for (let ds = gs->distance; ds != NULL; ds = ds->next) {
+      fprintf(stderr,"%s - %s <= %d",term2string(ds->t1),term2string(ds->t2),
+              ds->dist);
+      if (ds->next != NULL) fprintf(stderr,",");
+    }
+    fprintf(stderr,"}\n");
+  }
+}
+
+// determine the number of graphs
+static unsigned int num_graphs(graph_t *`H gs) {
+  unsigned n = 0;
+  for (; gs != NULL; gs = gs->next)
+    ++n;
+  return n;
+}
+
+// represents "true" -- a singleton graph with no edges (everything
+// is infinitely far apart.)
+static graph_t @true_graph() { return new Graph{NULL,NULL,NULL};}
+
+// used in copying of graphs
+static distance_t copy_distance(distance_t ds) {
+  distance_t res = NULL;
+  for (; ds != NULL; ds = ds->next) {
+    res = new Distance{res,ds->t1,ds->t2,ds->dist};
+  }
+  return res;
+}
+
+// copies a whole set of graphs -- used when we have a disjunction
+static graph_t *copy_graph(graph_t * g) {
+  graph_t *res = NULL;
+  for (; g != NULL; g = g->next) {
+    res = new Graph{res,g->nodes,copy_distance(g->distance)};
+  }
+  return res;
+}
+
+// appends to sets of graphs -- could be smarter and try to remove
+// duplicates...
+static graph_t *graph_append(graph_t *`H g1, graph_t *`H g2) {
+  if (g1 == NULL) return g2;
+  if (g2 == NULL) return g1;
+  graph_t @p = g1;
+  for (let x = p->next; x != NULL; p = x, x=p->next) /* skip */ ;
+  p->next = g2;
+  return g1;
+}
+
+// add a node to a single graph if not already present
+static void add_node(graph_t @g, term_t n) {
+  if (!List::mem(cmp_term,g->nodes,n))
+    g->nodes = new List{n,g->nodes};
+}
+
+// lookup the distance between two nodes in the graph -- returns NULL
+// if the distance is infinite.
+static int* lookup_distance(graph_t @g, term_t i, term_t j) {
+  static int zero = 0;
+  if (cmp_term(i,j) == 0) return &zero; // same term always at distance 0
+  for (let ds = g->distance; ds != NULL; ds = ds->next) {
+    if (cmp_term(i,ds->t1) == 0 && cmp_term(j,ds->t2) == 0) return &ds->dist;
+  }
+  return NULL;
+}
+
+// add an edge to a graph and close it off to find shortest paths.
+// returns true if the resulting graph remains consistent and false
+// otherwise.
+static bool add_edge(graph_t @g, term_t i, term_t j, int dist) {
+  add_node(g,i);
+  add_node(g,j);
+  int* ij_dist = lookup_distance(g,i,j);
+  // if we already have a shorter path, then this constraint is redundant
+  if (ij_dist != NULL && *ij_dist < dist) 
+    return true;
+  int* ji_dist = lookup_distance(g,j,i);
+  // if  j -n-> i -dist-> j  and n+dist is negative, we have a contradiction.
+  if (ji_dist != NULL && (*ji_dist + dist) < 0)
+    return false; 
+  // update shortest path for each pair of nodes
+  for (let ks = g->nodes; ks != NULL; ks = ks->tl) {
+    let k = ks->hd;
+    let ki_dist = lookup_distance(g,k,i);
+    if (ki_dist == NULL) continue;
+    for (let ls = g->nodes; ls != NULL; ls = ls->tl) {
+      let l = ls->hd;
+      let jl_dist = lookup_distance(g,j,l);
+      if (jl_dist != NULL) {
+        let kl_dist = lookup_distance(g,k,l);
+        let new_dist = *ki_dist + dist + *jl_dist;
+        if (kl_dist == NULL) {
+          g->distance = new Distance{g->distance,k,l,new_dist};
+        } else if (*kl_dist > new_dist) {
+          *kl_dist = new_dist;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+// convert a primitive assertion to a constraint and add it to the graph.
+// returns true if the resulting graph remains consistent, false otherwise.
+static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
+  // FIX:  we need to do a lot more here, ranging from taking constants
+  // into account, to dealing with the signed/unsigned issue.
+  switch (p) {
+  case Eq:
+    // add t1 - t2 <= 0 and t2 - t1 <= 0
+    if (!add_edge(g,t1,t2,0)) return false;
+    return add_edge(g,t2,t1,0);
+  case Lt:
+    // add t1 - t2 <= -1
+    return add_edge(g,t1,t2,-1);
+  case Lte:
+    // add t1 - t2 <= 0
+    return add_edge(g,t1,t2,0);
+  default: Tcutil::impos("Vcgen:found bad primop in add_constraint");
+  }
+}
+
+datatype exn { TooLarge };
+datatype exn.TooLarge too_large = TooLarge;
+
+//FIX: add a way for the user to control this.
+unsigned int max_paths = 33;
+unsigned int max_paths_seen = 0;
+
+// given a set of graphs gs representing A1 or A2 or ... or An
+// and given assertion a, compute the set of graphs representing
+// (A1 or A2 ... or An) and a.  This is written with explicit
+// tail-calls to be as fast as possible.  If we end up with two
+// many disjuncts, then we throw an exception to back out of the
+// whole thing.  
+static graph_t *cgraph(graph_t *`H gs, assn_t a) {
+ LOOP:
+  if (gs == NULL) return gs; // already inconsistent
+  switch (a) {
+  case &True: break;         // gs and true == gs
+  case &False: gs = NULL; break; // gs and false == false
+  case &And(a1,a2): 
+    gs = cgraph(gs,a2);  // gs and (a1 and a2) == (gs and a2) and a1
+    a = a1;
+    goto LOOP;
+  case &Or(a1,a2):
+    unsigned int n = num_graphs(gs);
+    if (max_paths_seen < n) max_paths_seen = n;
+    // too many disjuncts -- give up.  
+    if (n >= max_paths) throw &too_large; // could just set gs = true_graph(); 
+    // must copy the graphs since we mutate them in place
+    graph_t *gs1 = gs;
+    graph_t *gs2 = copy_graph(gs);
+    // compute (gs and a1)
+    gs1 = cgraph(gs1,a1);
+    // compute (gs and a2)
+    gs2 = cgraph(gs2,a2);
+    // return (gs and a1) or (gs and a2)
+    gs = graph_append(gs1,gs2);
+    break;
+  case &Prim(t1,Neq,t2): 
+    // must handle neq specially as t1 < t2 or t2 < t1.
+    a = or(lt(t1,t2),lt(t2,t1));
+    goto LOOP;
+  case &Prim(t1,p,t2):
+    // add the primitive relation to each graph, pruning out the
+    // inconsistent ones.
+    graph_t *prev = NULL;
+    for (let g = gs; g != NULL; g = g->next) {
+      if (!add_constraint(g,t1,p,t2)) {
+        if (prev == NULL) {
+          gs = g->next;
+        } else {
+          prev->next = g->next;
+        }
+      } else {
+        prev = g;
+      }
+    }
+    break;
+  default: 
+    // reduce any substitutions and go around the loop.
+    a = reduce(a);
+    goto LOOP;
+  }
+  // return the set of graphs
+  return gs;
+}
+
+// check to see if an assertion is consistent using the constraint solver.
+// if it returns false, then the assertion is definitely inconsistent.
+// if it returns true, then the assertion might be consistent.
+static bool consistent(assn_t a) {
+  try {
+    // start with just an empty graph (true) and then add in a
+    graph_t ?gs = cgraph(true_graph(),a);
+    // if we get back an empty list of disjuncts (false) then
+    // the graph is not consistent.
+    return (gs != NULL);
+  } catch {
+    // if the graph has too many paths in it, we'll end up here.
+    // we must conservatively assume that the assertion is consistent.
+  case &TooLarge: return true;
+  }
+}
+
+// see if ctxt |- a by trying to prove that ctxt and not(a) is inconsistent.
 static bool constraint_prove(assn_t ctxt, assn_t a) {
-  // FIX: here's where we want to use the pratt stuff.
-  return false;
+  assn_t b = and(ctxt,not(a));
+  return !consistent(b);
 }
 
 // returns true if a2 is provable from a1 (i.e., a1 |- a2)
 // tries simple_prove first and then tries the constraint solver
-static bool implies(assn_t a1, assn_t a2) {
-  return simple_prove(a1,reduce(a2)) || constraint_prove(a1,a2);
+static bool implies_noreduce(assn_t a1, assn_t a2) {
+  return simple_prove(a1,a2) || constraint_prove(a1,a2);
 }
 
+// same as above but as a side effect, reduces the caller's
+// assertions.
+static bool implies(assn_t @a1, assn_t @a2) {
+  *a1 = reduce(*a1);
+  *a2 = reduce(*a2);
+  return implies_noreduce(*a1,*a2);
+}
 
 ////////// Widening for Assertions ////////////////////
 
 // We want to find an assertion a' such that ctxt => a' and a => a'.
 // (so or(ctxt,a) => a'.)  In addition, we want a' to have size less
 // than or equal to a.  
-static assn_t weaken(assn_t ctxt, assn_t a) {
-  a = reduce(a);
-  if (implies(ctxt,a)) return a;
+static assn_t weaken_it(assn_t ctxt, assn_t a) {
+  if (simple_prove(ctxt,a)) return a;
+  assn_t res;
   switch (a) {
   case &And(a1,a2):
-    let b1 = weaken(ctxt,a1);            // IH: ctxt=>b1 & a1=>b1
-    let b2 = weaken(ctxt,a2);            // IH: ctxt=>b2 & a2=>b2
-    if (implies(b1,b2)) return b1;
-    if (implies(b2,b1)) return b2;
-    return and(b1,b2);                   // ctxt => b1&b2  a1&a2=> b1&b2
+    let b1 = weaken_it(ctxt,a1);            // IH: ctxt=>b1 & a1=>b1
+    let b2 = weaken_it(ctxt,a2);            // IH: ctxt=>b2 & a2=>b2
+    //if (implies_noreduce(b1,b2)) return b1;
+    //if (implies_noreduce(b2,b1)) return b2;
+    res = and(b1,b2);                   // ctxt => b1&b2  a1&a2=> b1&b2
+    break;
   case &Or(a1,a2):
-    let b1 = weaken(a2,a1);           // a1=>b1 & a2=>b1
-    let b2 = weaken(a1,a2);           // a2=>b2 & a1=>b2
-    let c = weaken(ctxt,and(b1,b2));  // ctxt=>c  b1&b2=>c  a1|a2=>b1&b2
-    return c;
+    let b1 = weaken_it(a2,a1);           // a1=>b1 & a2=>b1
+    let b2 = weaken_it(a1,a2);           // a2=>b2 & a1=>b2
+    res = weaken_it(ctxt,and(b1,b2));  // ctxt=>c  b1&b2=>c  a1|a2=>b1&b2
+    break;
   case &True: 
   case &False: 
-  case &Prim(...): return &true_assn;
-  default: Tcutil::impos("Vcgen::weaken");
+  case &Prim(...): 
+    res = &true_assn;
+    break;
+  default: return weaken_it(ctxt, reduce(a));
   }
+  return res;
 }
 
 // We are given assertions A1 and A2 and would like to find
@@ -706,8 +1081,9 @@ static assn_t weaken(assn_t ctxt, assn_t a) {
 // A is "smaller" than A2.  The widen operation ensures that
 // either we get back A2 or else the assertion is smaller
 // (or as a technical hitch, we flip once from false to true.)
-static assn_t widen_assn(assn_t a1, assn_t a2) {
-  return weaken(a1,a2);
+static assn_t weaken_assn(assn_t ctxt, assn_t a) {
+  if (implies(&ctxt,&a)) return a;
+  return weaken_it(ctxt,a);
 }
 
 ////////// Updating an Assertion //////////////////
@@ -828,12 +1204,13 @@ static assn_t pre_stmt_update(env_t env, stmt_t s, assn_t ain) {
 }
 
 // get the pre-condition currently associated with a statement.
-static assn_t get_assn(env_t env, stmt_t s) {
+static assn_t@ get_assn(env_t env, stmt_t s) {
+  static assn_t false_pointer = &false_assn;
   assn_t @* popt = Hashtable::lookup_opt(env->shared->assn_table,s);
   if (popt != NULL)
-    return **popt;
+    return *popt;
   else
-    return &false_assn;
+    return &false_pointer;
 }
 
 // similar to pre_stmt_update except that we use widen instead of or
@@ -842,7 +1219,7 @@ static assn_t loop_assn(env_t env, stmt_t s, assn_t ain) {
   assn_t @* aprevopt = Hashtable::lookup_opt(env->shared->assn_table,s);
   if (aprevopt != NULL) {
     let aprev = *aprevopt;
-    ain = widen_assn(ain,*aprev);
+    ain = weaken_assn(ain,*aprev);
     *aprev = ain;
   } else {
     Hashtable::insert(env->shared->assn_table,s,new ain);
@@ -914,14 +1291,6 @@ static assn_t vcgen_switch(env_t env, list_t<switch_clause_t> scs, assn_t ain);
 // Do vcgen for a local declaration
 static assn_t vcgen_local_decl(env_t env, decl_t d, assn_t a);
 
-#ifdef VCGEN_DEBUG
-#define vcgen_rexp(env,e,a) vcgen_rexp_debug(env,e,a)
-#define vcgen_stmt(env,s,a) vcgen_stmt_debug(env,s,a)
-static unsigned int indent = 0;
-static void print_tabs() {
-  for (unsigned i = indent; i > 0; i--)
-    fprintf(stderr," ");
-}
 static string_t stmt2shortstring(stmt_t s) {
   switch (s->r) {
   case &Absyn::IfThenElse_s(e,...): 
@@ -937,8 +1306,24 @@ static string_t stmt2shortstring(stmt_t s) {
     return aprintf("do ... while (%s)",Absynpp::exp2string(e));
   case &Absyn::TryCatch_s(s,...): 
     return aprintf("try %s catch ...",stmt2shortstring(s));
-  default: return Absynpp::stmt2string(s);
+  case &Absyn::Seq_s(s,...): return stmt2shortstring(s);
+  default: 
+    let s = Absynpp::stmt2string(s);
+    unsigned max = numelts(s) < 11 ? numelts(s) : 11;
+    char ?@nozeroterm res = malloc(sizeof(char)*max);
+    for (int i = 0; i < max-1; i++)
+      res[i] = s[i];
+    return aprintf("%s...",res);
   }
+}
+
+#ifdef VCGEN_DEBUG
+#define vcgen_rexp(env,e,a) vcgen_rexp_debug(env,e,a)
+#define vcgen_stmt(env,s,a) vcgen_stmt_debug(env,s,a)
+static unsigned int indent = 0;
+static void print_tabs() {
+  for (unsigned i = indent; i > 0; i--)
+    fprintf(stderr," ");
 }
 static assn_t vcgen_stmt_debug(env_t env, stmt_t s, assn_t ain) {
   switch (s->r) {
@@ -985,6 +1370,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_debug(env_t env, exp_t e, assn_t ain) {
 static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
   // merge the pre-condition with any pre-recorded assertions.
   // we'll have one if there was some control-flow to this statement.
+ LOOP:
   ain = pre_stmt_update(env,s,ain);
   //assn_size(ain);
   // don't bother analyzing if we can show the assertion is false
@@ -1002,7 +1388,10 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     if (env->shared->exp_stmt != NULL) 
       *(env->shared->exp_stmt) = t;
     return aout;
-  case &Absyn::Seq_s(s1,s2): return vcgen_stmt(env,s2,vcgen_stmt(env,s1,ain));
+  case &Absyn::Seq_s(s1,s2): 
+    ain = vcgen_stmt(env,s1,ain);
+    s = s2;
+    goto LOOP;
   case &Absyn::Return_s(NULL): 
     update_return(env,NULL,ain);
     return &false_assn;
@@ -1027,7 +1416,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
       ain = loop_assn(env,dummy,ain);
       let $(at,af) = vcgen_test(env,e,ain);
       ain = vcgen_stmt(env,s,at);
-      if (implies(ain,get_assn(env,dummy))) return af;
+      if (implies(&ain,get_assn(env,dummy))) return af;
     } 
   case &Absyn::Continue_s: fallthru;
     // continue is a backwards jump in a loop, but we take
@@ -1056,15 +1445,15 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
       // must do pre-statement check because continue goes here
       ain = pre_stmt_update(env,dummy3,ain);
       ain = vcgen_rexp(env,e3,ain)[1];
-      if (implies(ain,get_assn(env,dummy2))) return af;
+      if (implies(&ain,get_assn(env,dummy2))) return af;
     }
   case &Absyn::Do_s(s,$(e,dummy)):
     // similar to while loop
     while (true) {
       ain = vcgen_stmt(env,s,ain);
       let $(at,af) = vcgen_test(env,e,ain);
-      ain = widen_assn(get_assn(env,dummy),ain);
-      if (implies(ain,get_assn(env,dummy))) return af;
+      ain = weaken_assn(*get_assn(env,dummy),ain);
+      if (implies(&ain,get_assn(env,dummy))) return af;
       loop_assn(env,dummy,ain);
     }
   case &Absyn::Switch_s(e,scs,_):
@@ -1087,8 +1476,10 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     }
     forward_assn(env, dest->body, a);
     return &false_assn;
-  case &Absyn::Decl_s(d,s):
-    return vcgen_stmt(env,s,vcgen_local_decl(env,d,ain));
+  case &Absyn::Decl_s(d,s1):
+    ain = vcgen_local_decl(env,d,ain);
+    s = s1;
+    goto LOOP;
   case &Absyn::Label_s(_,s): 
     // by making the assertion True here, we're effectively losing
     // all information when we do a goto.  This is conservative, 
@@ -1318,7 +1709,7 @@ static void check_requires(env_t env, list_t<term_t> inputs,
     }
     // FIX? varargs.
     let $(at,_) = vcgen_test(env,(exp_t)reqopt,&true_assn);
-    if (!implies(a,at))
+    if (!implies(&a,&at))
       Warn::err(req->loc, "cannot prove @requires %s from %s",
                 assn2string(reduce(at)), assn2string(reduce(a)));
   }
@@ -1329,7 +1720,7 @@ static term_opt_t deref_lterm(env_t env, term_opt_t lt, assn_t ain) {
 }
 
 static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
-  if (Tcutil::is_const_exp(e)) return $(new Const(e),ain);
+  if (Tcutil::is_const_exp(e)) return $(cnst(e),ain);
   switch (e->r) {
   case &Absyn::Const_e(c): 
     // should really be caught by the above...
@@ -1510,8 +1901,8 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       let af = and(a,gte(v,t1));
       let $(_,abody) = vcgen_rexp(env,e2,at);  // run body and add one
       abody = do_assign(env,abody,v,new Primop(Absyn::Plus,list(v,one())));
-      if (implies(abody,a)) { a = af; break; }
-      a = widen_assn(abody,a);  // widen and possibly iterate
+      if (implies(&abody,&a)) { a = af; break; }
+      a = weaken_assn(abody,a);  // widen and possibly iterate
     }
     return $(NULL,a);
   case &Absyn::ComprehensionNoinit_e(e,_,_):
@@ -1547,7 +1938,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     return $(zero(),ain);
   case &Absyn::Assert_e(e1):
     let $(at,_) = vcgen_test(env,e1,&true_assn);
-    if (!implies(ain,at)) 
+    if (!implies(&ain,&at)) 
       Warn::err(e->loc, "cannot prove @assert from %s",
                 assn2string(reduce(ain)));
     return $(one(),and(ain,at));
@@ -1582,7 +1973,7 @@ void vcgen_topdecls(JumpAnalysis::jump_anal_res_t tables, list_t<Absyn::decl_t> 
         if (senv->res_term != NULL) str = term2string((term_t)senv->res_term);
         if (ret_value != NULL && senv->res_term) 
           res_assn = and(res_assn,eq(new Var((vardecl_t)ret_value),senv->res_term));
-        if (!implies(res_assn,at))
+        if (!implies(&res_assn,&at))
           Warn::err(ens->loc, "cannot prove the @ensures clause %s from %s",
                     assn2string(reduce(at)),assn2string(reduce(res_assn)));
       }
@@ -1593,4 +1984,5 @@ void vcgen_topdecls(JumpAnalysis::jump_anal_res_t tables, list_t<Absyn::decl_t> 
     default: break;
     }
   }
+  //fprintf(stderr,"max_paths_seen = %d\n",max_paths_seen);
 }

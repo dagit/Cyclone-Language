@@ -440,10 +440,11 @@ int Cyc_Evexp_c_can_eval(struct Cyc_Absyn_Exp*e);
 # 41 "evexp.h"
 int Cyc_Evexp_same_uint_const_exp(struct Cyc_Absyn_Exp*e1,struct Cyc_Absyn_Exp*e2);
 # 46
+int Cyc_Evexp_cmp_cnst(union Cyc_Absyn_Cnst c1,union Cyc_Absyn_Cnst c2);
 extern int Cyc_Evexp_exp_cmp(struct Cyc_Absyn_Exp*e1,struct Cyc_Absyn_Exp*e2);
-# 50
+# 51
 int Cyc_Evexp_uint_exp_cmp(struct Cyc_Absyn_Exp*e1,struct Cyc_Absyn_Exp*e2);
-# 53
+# 54
 int Cyc_Evexp_okay_szofarg(void*t);struct _tuple12{union Cyc_Absyn_Cnst f1;int f2;};
 # 36 "evexp.cyc"
 static struct _tuple12 Cyc_Evexp_eval_const_exp(struct Cyc_Absyn_Exp*);
@@ -732,7 +733,7 @@ res=(unsigned long long)x;goto _LL0;}default: _LL9: _LLA:
 # 331
 return res;}struct _tuple17{union Cyc_Absyn_Cnst f1;union Cyc_Absyn_Cnst f2;};
 # 334
-static int Cyc_Evexp_cmp_cnst(union Cyc_Absyn_Cnst c1,union Cyc_Absyn_Cnst c2){
+int Cyc_Evexp_cmp_cnst(union Cyc_Absyn_Cnst c1,union Cyc_Absyn_Cnst c2){
 struct _tuple17 _tmp9D=({struct _tuple17 _tmp1A5;_tmp1A5.f1=c1,_tmp1A5.f2=c2;_tmp1A5;});struct _tuple17 _stmttmp12=_tmp9D;struct _tuple17 _tmp9E=_stmttmp12;int _tmpA2;struct _fat_ptr _tmpA1;int _tmpA0;struct _fat_ptr _tmp9F;struct _fat_ptr _tmpA3;struct _fat_ptr _tmpA4;struct _fat_ptr _tmpA6;struct _fat_ptr _tmpA5;struct _fat_ptr _tmpA8;struct _fat_ptr _tmpA7;struct _fat_ptr _tmpAA;struct _fat_ptr _tmpA9;if(((_tmp9E.f1).Null_c).tag == 1){if(((_tmp9E.f2).Null_c).tag == 1){_LL1: _LL2:
  return 0;}else{_LL3: _LL4:
  return - 1;}}else{if(((_tmp9E.f2).Null_c).tag == 1){_LL5: _LL6:
