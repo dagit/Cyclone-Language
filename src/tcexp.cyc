@@ -2127,7 +2127,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
     }
   }
   // if the type passed down constrains the region in any way
-  // switched to the constrained one.
+  // switch to the constrained one.
   else if (topt != NULL) {
     type_t optrgn = &VoidType_val;
     if (rgn_of_pointer(*topt,&optrgn)) {

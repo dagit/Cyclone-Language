@@ -692,9 +692,8 @@ static var_t fresh_label() {
   return use_toc_state(0, fresh_label_body<>);
 }
 
-// These two functions should never be used for xdatatypes. Should memoize?
-// Note the former used to use static const int variables, but couldn't
-// at top-level.
+// This should never be used for xdatatypes. Should memoize?
+// The former used to use static const int variables, but couldn't at top-level.
 static exp_t datatype_tag(datatypedecl_t td, qvar_t name) {
   int ans = 0;
   let fs  = td->fields->v;
@@ -804,8 +803,7 @@ type_t typ_to_c(type_t t) {
     return typ_to_c((type_t)(*t2));
   case &VarType(tv):
     if (tvar_kind(tv,&bk)->kind == AnyKind) {
-//       fprintf(stderr,"Mapping type var %s to void; has AnyKind\n",
-// 	      *(tv->name));
+//     fprintf(stderr,"Mapping type var %s to void; has AnyKind\n",*(tv->name));
       return &VoidType_val;
     }
     else return void_star_typ(); // map `a to void *
