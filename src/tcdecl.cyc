@@ -620,7 +620,7 @@ binding_t merge_binding(binding_t b0, binding_t b1, seg_t loc, string_t * msg) {
     return new Global_b((vardecl_t) d2);
   case $(&Global_b(d0),  &Funname_b(d1)):
     let $(_,res) = check_var_or_fn_decl(d0->sc,d0->type,d0->tq,d0->attributes,
-					d1->sc,d1->cached_typ->v,empty_tqual(), 
+					d1->sc,d1->cached_typ->v,empty_tqual(NULL), 
 					d1->attributes, "function", 
 					qvar2string(d0->name), loc, msg);
     return res ? b1 : Unresolved_b;
@@ -628,7 +628,7 @@ binding_t merge_binding(binding_t b0, binding_t b1, seg_t loc, string_t * msg) {
     merr(loc, msg, "redefinition of function %s", qvar2string(d1->name));
     return Unresolved_b;
   case $(&Funname_b(d0), &Global_b(d1)) :
-    let $(_, res) = check_var_or_fn_decl(d0->sc,d0->cached_typ->v,empty_tqual(),
+    let $(_, res) = check_var_or_fn_decl(d0->sc,d0->cached_typ->v,empty_tqual(NULL),
 					 d0->attributes, d1->sc, d1->type, 
 					 d1->tq, d1->attributes, "variable", 
 					 qvar2string(d0->name), loc, msg);

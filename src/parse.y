@@ -329,7 +329,7 @@ static fndecl_t make_function(opt_t<decl_spec_t> dso, declarator_t d,
 
   scope_t sc = Public;
   list_t<type_specifier_t> tss = NULL;
-  tqual_t tq = empty_tqual();
+  tqual_t tq = empty_tqual(NULL);
   bool is_inline = false;
   list_t<attribute_t> atts = NULL;
 
@@ -531,9 +531,11 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
   if (tms==NULL) return $(tq,t,NULL,atts);
   switch (tms->hd) {
   case &Carray_mod(zeroterm):
-    return apply_tms(empty_tqual(),array_typ(t,tq,NULL,zeroterm),atts,tms->tl);
+    return apply_tms(empty_tqual(NULL),
+                     array_typ(t,tq,NULL,zeroterm),atts,tms->tl);
   case &ConstArray_mod(e,zeroterm):
-    return apply_tms(empty_tqual(),array_typ(t,tq,e,zeroterm),atts,tms->tl);
+    return apply_tms(empty_tqual(NULL),
+                     array_typ(t,tq,e,zeroterm),atts,tms->tl);
   case &Function_mod(args): {
     switch (args) {
     case &WithTypes(args2,c_vararg,cyc_vararg,eff,rgn_po):
@@ -575,7 +577,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
       // (or volatile, or restrict).  The result will be copied
       // anyway.  TODO: maybe we should issue a warning.  But right
       // now we don't have a loc so the warning will be confusing.
-      return apply_tms(empty_tqual(),
+      return apply_tms(empty_tqual(tq.loc),
 		       function_typ(typvars,eff,t,args2,
 				    c_vararg,cyc_vararg,rgn_po,fn_atts),
 		       new_atts,
@@ -659,9 +661,10 @@ static stmt_t flatten_declarations(list_t<decl_t> ds, stmt_t s){
 // involved function and thus I expect a number of subtle errors.
 static list_t<decl_t> make_declarations(decl_spec_t ds,
 					list_t<$(declarator_t,exp_opt_t)@> ids,
+                                        seg_t tqual_loc,
 					seg_t loc) {
   let &Declaration_spec(_,tq,tss,_,atts) = ds;
-
+  if (tq.loc == NULL) tq.loc = tqual_loc;
   if (ds->is_inline)
     err("inline is allowed only on function definitions",loc);
   if (tss == NULL) {
@@ -844,7 +847,7 @@ using Parse;
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION 
 %token MALLOC RMALLOC CALLOC RCALLOC
 %token REGION_T SIZEOF_T TAG_T REGION RNEW REGIONS RESET_REGION
-%token GEN NOZEROTERM_kw ZEROTERM_kw
+%token GEN NOZEROTERM_kw ZEROTERM_kw PORTON PORTOFF
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -920,7 +923,7 @@ using Parse;
 %type <char> CHARACTER_CONSTANT
 %type <string_t> FLOATING_CONSTANT namespace_action
 %type <string_t> IDENTIFIER TYPEDEF_NAME TYPE_VAR STRING field_name
-%type <$(conref_t<bool>,conref_t<bounds_t>)@> pointer_null_and_bound
+%type <$(Position::seg_t,conref_t<bool>,conref_t<bounds_t>)@> pointer_null_and_bound
 %type <conref_t<bounds_t>> pointer_bound
 %type <exp_t> primary_expression postfix_expression unary_expression
 %type <exp_t> cast_expression constant multiplicative_expression
@@ -1062,6 +1065,10 @@ translation_unit:
        list_t<$(seg_t,qvar_t,bool)@> exs = $6;
       $$=^$(new List(new Decl(new ExternCinclude_d($4,exs),LOC(@1,@6)),$7));
     }
+| PORTON ';' translation_unit
+  { $$=^$(new List(new Decl(Porton_d,LOC(@1,@1)),$3)); }
+| PORTOFF ';' translation_unit
+  { $$=^$(new List(new Decl(Portoff_d,LOC(@1,@1)),$3)); }
 | /* empty */ { $$=^$(NULL); }
 ;
 
@@ -1128,9 +1135,9 @@ unnamespace_action:
 /***************************** DECLARATIONS *****************************/
 declaration:
   declaration_specifiers ';'
-    { $$=^$(make_declarations($1,NULL,LOC(@1,@1))); }
+    { $$=^$(make_declarations($1,NULL,LOC(@1,@1),LOC(@1,@1))); }
 | declaration_specifiers init_declarator_list ';'
-    { $$=^$(make_declarations($1,$2,LOC(@1,@3))); }
+    { $$=^$(make_declarations($1,$2,LOC(@1,@1),LOC(@1,@3))); }
 /* Cyc: let declaration */
 | LET pattern '=' expression ';'
     { $$=^$(new List(let_decl($2,$4,LOC(@1,@5)),NULL)); }
@@ -1157,7 +1164,8 @@ declaration_list:
 /* Cyc: added optional attributes */
 declaration_specifiers:
   storage_class_specifier
-    { $$=^$(new Declaration_spec(new Opt($1),empty_tqual(),NULL,false,NULL)); }
+    { $$=^$(new Declaration_spec(new Opt($1),empty_tqual(LOC(@1,@1)),
+                                 NULL,false,NULL)); }
 | storage_class_specifier declaration_specifiers
     { if ($2->sc != NULL)
         Tcutil::warn(LOC(@1,@2),
@@ -1167,7 +1175,7 @@ declaration_specifiers:
                                  $2->attributes));
     }
 | type_specifier
-    { $$=^$(new Declaration_spec(NULL,empty_tqual(),
+    { $$=^$(new Declaration_spec(NULL,empty_tqual(LOC(@1,@1)),
                                  new List($1,NULL),false,NULL)); }
 | type_specifier declaration_specifiers
     { $$=^$(new Declaration_spec($2->sc,$2->tq,new List($1,$2->type_specs),
@@ -1182,13 +1190,15 @@ declaration_specifiers:
                                  $2->attributes));
     }
 | INLINE
-    { $$=^$(new Declaration_spec(NULL,empty_tqual(),NULL,true,NULL)); }
+    { $$=^$(new Declaration_spec(NULL,empty_tqual(LOC(@1,@1)),
+                                 NULL,true,NULL)); }
 | INLINE declaration_specifiers
     { $$=^$(new Declaration_spec($2->sc,$2->tq,$2->type_specs,true,
                                  $2->attributes));
     }
 | attributes
-    { $$=^$(new Declaration_spec(NULL,empty_tqual(),NULL,false,$1)); }
+    { $$=^$(new Declaration_spec(NULL,empty_tqual(LOC(@1,@1)),
+                                 NULL,false,$1)); }
 | attributes declaration_specifiers
     { $$=^$(new Declaration_spec($2->sc,$2->tq,
                                  $2->type_specs, $2->is_inline,
@@ -1388,9 +1398,9 @@ kind:
 ;
 
 type_qualifier:
-  CONST    { $$=^$(Tqual(true,false,false,true)); }
-| VOLATILE { $$=^$(Tqual(false,true,false,false)); }
-| RESTRICT { $$=^$(Tqual(false,false,true,false)); }
+  CONST    { $$=^$(Tqual(true,false,false,true,LOC(@1,@1))); }
+| VOLATILE { $$=^$(Tqual(false,true,false,false,NULL)); }
+| RESTRICT { $$=^$(Tqual(false,false,true,false,NULL)); }
 ;
 
 /* parsing of enum specifiers */
@@ -1496,6 +1506,7 @@ struct_declaration:
        * and then convert this to a list of struct fields: (1) id,
        * (2) tqual, (3) type. */
       let &$(tq,tspecs,atts) = $1;
+      if (tq.loc == NULL) tq.loc = LOC(@1,@1);
       let $(decls, widths) = List::split($2);
       let t = speclist2typ(tspecs, LOC(@1,@1));
       let info = List::zip(apply_tmss(tq,t,decls,atts),widths);
@@ -1509,7 +1520,7 @@ struct_declaration:
 // identifier.
 specifier_qualifier_list:
   type_specifier
-    { $$=^$(new $(empty_tqual(), new List($1,NULL), NULL)); }
+    { $$=^$(new $(empty_tqual(LOC(@1,@1)), new List($1,NULL), NULL)); }
 | type_specifier notypedef_specifier_qualifier_list
     { $$=^$(new $((*$2)[0], new List($1,(*$2)[1]), (*$2)[2]));}
 | type_qualifier
@@ -1517,7 +1528,7 @@ specifier_qualifier_list:
 | type_qualifier specifier_qualifier_list
     { $$=^$(new $(combine_tqual($1,(*$2)[0]), (*$2)[1], (*$2)[2])); }
 | attributes
-    { $$=^$(new $(empty_tqual(), NULL, $1)); }
+    { $$=^$(new $(empty_tqual(LOC(@1,@1)), NULL, $1)); }
 | attributes specifier_qualifier_list
     { $$=^$(new $((*$2)[0], (*$2)[1], append($1,(*$2)[2]))); }
 ;
@@ -1525,7 +1536,7 @@ specifier_qualifier_list:
 // Same as above but does not allow typedef names as specifiers
 notypedef_specifier_qualifier_list:
   type_specifier_notypedef
-    { $$=^$(new $(empty_tqual(), new List($1,NULL), NULL)); }
+    { $$=^$(new $(empty_tqual(LOC(@1,@1)), new List($1,NULL), NULL)); }
 | type_specifier_notypedef notypedef_specifier_qualifier_list
     { $$=^$(new $((*$2)[0], new List($1,(*$2)[1]), (*$2)[2]));}
 | type_qualifier
@@ -1533,7 +1544,7 @@ notypedef_specifier_qualifier_list:
 | type_qualifier notypedef_specifier_qualifier_list
     { $$=^$(new $(combine_tqual($1,(*$2)[0]), (*$2)[1], (*$2)[2])); }
 | attributes
-    { $$=^$(new $(empty_tqual(), NULL, $1)); }
+    { $$=^$(new $(empty_tqual(LOC(@1,@1)), NULL, $1)); }
 | attributes notypedef_specifier_qualifier_list
     { $$=^$(new $((*$2)[0], (*$2)[1], append($1,(*$2)[2]))); }
 ;
@@ -1728,14 +1739,14 @@ one_pointer:
   { list_t<type_modifier_t> ans = NULL;
     if($4 != NULL)
       ans = new List(new Attributes_mod(LOC(@4,@4),$4), ans);
-    ans = new List(new Pointer_mod(PtrAtts($3,(*$1)[0],(*$1)[1],$2),$5), ans);
+    ans = new List(new Pointer_mod(PtrAtts($3,(*$1)[1],(*$1)[2],$2,(*$1)[0]),$5), ans);
     $$ = ^$(ans);
   }
 
 pointer_null_and_bound:
-  '*' pointer_bound { $$=^$(new $(true_conref,  $2)); }
-| '@' pointer_bound { $$=^$(new $(false_conref, $2)); }
-| '?' { $$=^$(new $(true_conref,  bounds_unknown_conref));  }
+  '*' pointer_bound { $$=^$(new $(LOC(@1,@1),true_conref, $2)); }
+| '@' pointer_bound { $$=^$(new $(LOC(@1,@1), false_conref, $2)); }
+| '?' { $$=^$(new $(LOC(@1,@1), true_conref,  bounds_unknown_conref));  }
 
 pointer_bound:
 /* empty */ { $$=^$(bounds_one_conref); }
@@ -1755,7 +1766,7 @@ rgn_opt:
 ;
 
 tqual_list:
-/* empty */ { $$ = ^$(empty_tqual()); }
+/* empty */ { $$ = ^$(empty_tqual(LOC(@1,@1))); }
 | type_qualifier tqual_list { $$ = ^$(combine_tqual($1,$2)); }
 ;
 
@@ -1852,6 +1863,7 @@ parameter_list:
 parameter_declaration:
   specifier_qualifier_list declarator_withtypedef
     { let &$(tq,tspecs,atts) = $1; 
+      if (tq.loc == NULL) tq.loc = LOC(@1,@1);
       let &Declarator(qv,tms) = $2;
       let t = speclist2typ(tspecs, LOC(@1,@1));
       let $(tq2,t2,tvs,atts2) = apply_tms(tq,t,atts,tms);
@@ -1866,6 +1878,7 @@ parameter_declaration:
     }
 | specifier_qualifier_list
     { let &$(tq,tspecs,atts) = $1; 
+      if (tq.loc == NULL) tq.loc = LOC(@1,@1);
       let t = speclist2typ(tspecs, LOC(@1,@1));
       if (atts != NULL)
         Tcutil::warn(LOC(@1,@1),"bad attributes on parameter, ignoring");
@@ -1873,6 +1886,7 @@ parameter_declaration:
     }
 | specifier_qualifier_list abstract_declarator
     { let &$(tq,tspecs,atts) = $1; 
+      if (tq.loc == NULL) tq.loc = LOC(@1,@1);
       let t = speclist2typ(tspecs, LOC(@1,@1));
       let tms = $2->tms;
       let $(tq2,t2,tvs,atts2) = apply_tms(tq,t,atts,tms);

@@ -1050,7 +1050,12 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       if (x->defn)
         scan_type(x->defn->v);
       break;
-
+    case Porton_d:
+      fprintf(stderr,"Error: unexpected __cyclone_port_on__");
+      exit(1); return NULL;
+    case Portoff_d:
+      fprintf(stderr,"Error: unexpected __cyclone_port_off__");
+      exit(1); return NULL;
     case &Let_d(_,_,_):
       fprintf(stderr,"Error: unexpected let declaration\n");
       exit(1); return NULL;
@@ -1380,7 +1385,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         let &$(_,v) = x->name;
         name = v;
         break;
-
+      case Porton_d:
+      case Portoff_d:
       case &Let_d(_,_,_):
       case &Tunion_d(_):
       case &Letv_d(_):
@@ -1439,7 +1445,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         let &$(_,v) = x->name;
         name = v;
         break;
-
+      case Porton_d:
+      case Portoff_d:
       case &Let_d(_,_,_):
       case &Tunion_d(_):
       case &Letv_d(_):

@@ -148,7 +148,7 @@ static type_t num_type(type_t * topt, type_t numt) {
 }
 static void set_vd(vardecl_t vd, list_t<vardecl_t>@ v_result_ptr, type_t t){
   vd->type = t;
-  vd->tq   = empty_tqual();
+  vd->tq   = empty_tqual(NULL);
   *v_result_ptr = new List(vd,*v_result_ptr);
 }
 static tcpat_result_t combine_results(tcpat_result_t res1, tcpat_result_t res2){
@@ -189,9 +189,10 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       break;
     }
     set_vd(vd, &res.patvars, 
-	   new PointerType(PtrInfo(t,empty_tqual(),
+	   new PointerType(PtrInfo(t,empty_tqual(NULL),
 				   PtrAtts(*rgn_opt,false_conref,
-					   empty_conref(),empty_conref()))));
+					   empty_conref(),empty_conref(),
+                                           NULL))));
     break;
 
   case &TagInt_p(tv,vd): 
@@ -223,10 +224,11 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       default: break;
       }
     let tenv_tvs = lookup_type_vars(te);
-    t = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)),empty_tqual(),
+    t = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)),
+                                empty_tqual(NULL),
 				PtrAtts(new_evar(&rk,new Opt(tenv_tvs)),
 					true_conref,
-					empty_conref(),empty_conref())));
+					empty_conref(),empty_conref(),NULL)));
     break;
 
   case &Pointer_p(p2):
@@ -257,15 +259,17 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 	t = new TunionType(TunionInfo{new KnownTunion(new tud),targs,ptr_rgn});
 	break;
       default:
-	t = new PointerType(PtrInfo(p2->topt->v, empty_tqual(),
+	t = new PointerType(PtrInfo(p2->topt->v, empty_tqual(NULL),
 				    PtrAtts(ptr_rgn, empty_conref(), 
-					    empty_conref(), empty_conref())));
+					    empty_conref(), empty_conref(),
+                                            NULL)));
 	break;
       }
     else 
-      t = new PointerType(PtrInfo(p2->topt->v, empty_tqual(),
+      t = new PointerType(PtrInfo(p2->topt->v, empty_tqual(NULL),
 				  PtrAtts(ptr_rgn, empty_conref(), 
-					  empty_conref(), empty_conref())));
+					  empty_conref(), empty_conref(),
+                                          NULL)));
     break;
 
   case &Tuple_p(ps):
@@ -283,7 +287,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 	topt_ts    = topt_ts->tl;
       }
       res = combine_results(res,tcPatRec(te,ps->hd,inner_topt,rgn_opt));
-      pat_ts = new List(new $(empty_tqual(),ps->hd->topt->v),pat_ts);
+      pat_ts = new List(new $(empty_tqual(NULL),ps->hd->topt->v),pat_ts);
     }
     t = new TupleType(List::imp_rev(pat_ts));
     break;
@@ -462,7 +466,7 @@ void check_pat_regions(tenv_t te, pat_t p) {
   case &Pointer_p(p2):
     check_pat_regions(te,p2);
     switch (p->topt->v) {
-    case &PointerType(PtrInfo(_,_,PtrAtts(rt,_,_,_))): fallthru(rt);
+    case &PointerType(PtrInfo(_,_,PtrAtts(rt,_,_,_,_))): fallthru(rt);
     case &TunionType(TunionInfo{_,_,rt}):
       check_rgn_accessible(te,p->loc,rt);
       return;
@@ -616,7 +620,7 @@ static simple_pat_t compile_pat(pat_t p) {
   case &Reference_p(_): s = Any; break;
   case &Pointer_p(pp):
     switch (compress(p->topt->v)) {
-    case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_))):
+    case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_,_))):
       bool is_nullable = false;
       bool still_working = true;
       while (still_working) {

@@ -308,7 +308,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
        // will then match.
        type_t ptr = tagged_typ(char_typ, 
                                new_evar(&rk,new Opt(lookup_type_vars(te))),
-                               const_tqual(), false_conref);
+                               const_tqual(NULL), false_conref);
        typs = new List(ptr,typs);
       break;
     case 'p':
@@ -337,7 +337,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
 	     implode(lenmod), c);
         return NULL;
       }
-      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(),false_conref);
+      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(NULL),false_conref);
       typs = new List(t,typs);
       break;
     case '%':
@@ -489,7 +489,7 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
               implode(lenmod), c);
         return NULL;
       }
-      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(),false_conref);
+      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(NULL),false_conref);
       typs = new List(t,typs);
       break;
     case 'u':
@@ -507,7 +507,7 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
 	     implode(lenmod), c);
         return NULL;
       }
-      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(),false_conref);
+      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(NULL),false_conref);
       typs = new List(t,typs);
       break;
     case 'f': 
@@ -528,13 +528,13 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
               implode(lenmod), c);
         return NULL;
       }
-      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(),false_conref);
+      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(NULL),false_conref);
       typs = new List(t,typs);
       break;
       //JGM: need to fix and synch up with lib/scanf.cyc
     case 'c':
       let tvs = new Opt(lookup_type_vars(te));
-      typs = new List(tagged_typ(char_typ,new_evar(&rk,tvs),empty_tqual(),
+      typs = new List(tagged_typ(char_typ,new_evar(&rk,tvs),empty_tqual(NULL),
                                  false_conref),typs);
       break;
     case 's':
@@ -542,7 +542,7 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
       // we use a mbuffer_t here because this matches more things.
       type_t ptr = tagged_typ(char_typ, 
                               new_evar(&rk,new Opt(lookup_type_vars(te))),
-                              empty_tqual(), false_conref);
+                              empty_tqual(NULL), false_conref);
       typs = new List(ptr,typs);
       break;
     case '[':
@@ -561,7 +561,7 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
 	     implode(lenmod), c);
         return NULL;
       }
-      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(),false_conref);
+      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(NULL),false_conref);
       typs = new List(t,typs);
       break;
     case '%':

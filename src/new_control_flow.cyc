@@ -315,7 +315,7 @@ static flow_t if_tagcmp(analenv_t env, flow_t flow, exp_t e1,
 static $(flow_t,absRval_t) anal_derefR(analenv_t env, flow_t inflow,
 				       flow_t f, exp_t e, absRval_t r) {
   switch(Tcutil::compress(e->topt->v)) {
-  case &PointerType(PtrInfo(elttype,_,PtrAtts(_,_,bd,zt))):
+  case &PointerType(PtrInfo(elttype,_,PtrAtts(_,_,bd,zt,_))):
     switch(f) {
     case BottomFL: return $(f,typ_to_absrval(elttype,unknown_all));
     case &ReachableFL(outdict,relns):
@@ -693,7 +693,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 				 fieldname(Evexp::eval_const_uint_exp(e2)[0])));
       default: throw new Core::Impossible("anal_Rexp: Subscript");
       }
-    case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_))):
+    case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_,_))):
       // translation to C reports "can't prove in bounds" errors
       switch(compress_conref(b)->v) {
       case &Eq_constr(&AbsUpper_b(_)):
@@ -850,7 +850,7 @@ static $(flow_t,absLval_t) anal_derefL(analenv_t env, flow_t inflow, flow_t f,
 				       exp_t e, absRval_t r, 
 				       list_t<field_name_t,`H> flds) {
   switch(Tcutil::compress(e->topt->v)) {
-  case &PointerType(PtrInfo{elttype,_,PtrAtts(_,_,bd,zt)}):
+  case &PointerType(PtrInfo{elttype,_,PtrAtts(_,_,bd,zt,_)}):
     switch(f) {
     case BottomFL: return $(f,UnknownL);
     case &ReachableFL(outdict,relns):
@@ -924,7 +924,7 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
     case &TupleType(_):
       let fld = fieldname(Evexp::eval_const_uint_exp(e2)[0]);
       return anal_Lexp_rec(env,inflow,e1,new List(fld,flds));
-    case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_))):
+    case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_,_))):
       let $(f,rvals) = anal_unordered_Rexps(env,inflow,list(e1,e2));
       let f2 = f;
       switch(f) {
@@ -1448,8 +1448,8 @@ static void check_fun(fndecl_t fd) {
 	}
 	let vd = List::nth(fd->param_vardecls->v,j-1);
 	switch(Tcutil::compress(vd->type)) {
-	case &PointerType(PtrInfo(t,_,PtrAtts(_,nullable,bd,zt))):
-	  if(conref_val(nullable))
+	case &PointerType(PtrInfo(t,_,PtrAtts(_,nullable,bd,zt,_))):
+	  if(conref_def(false,nullable))
 	    Tcutil::terr(loc, "initializes attribute not allowed on "
 			 "nullable pointers");
 	  if(!Tcutil::is_bound_one(bd))

@@ -130,6 +130,8 @@ static $(string_t,short,bool) rw_array[] = {
   $("NOZEROTERM",NOZEROTERM_kw, false),
   $("NULL", NULL_kw, false),
   $("offsetof", OFFSETOF, true),
+  $("__cyclone_port_on__", PORTON, false),
+  $("__cyclone_port_off__", PORTOFF, false),
   $("rcalloc", RCALLOC, false),
   $("region_t", REGION_T, false),
   $("region", REGION, false),

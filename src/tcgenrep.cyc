@@ -469,7 +469,7 @@ make_fwd_decl_info(dict_t<type_t,repinfo_t,`H> dict,
   }
 }
 
-static tqual_t tq_none = Tqual{.print_const=0,.q_volatile=0,.q_restrict=0,.real_const=0};
+static tqual_t tq_none = Tqual{.print_const=0,.q_volatile=0,.q_restrict=0,.real_const=0,.loc=NULL};
 
 static $(tqual_t,type_t)@ tqual_type(tqual_t* tq,type_t type) {
   return new $(*tq,type);
@@ -903,7 +903,7 @@ buildRepXTunion(qvar_t xname, tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t
   let tagriexps = List::zip(tags,riexps);
   let tuplelist = List::map_c(tuple2_exp_cls,loc,tagriexps);
   // build the type of elements of Tunion array
-  type_t name_type = tagged_typ(char_typ,HeapRgn,Tqual{.print_const=true,.q_volatile=false,.q_restrict=0,.real_const=true},true_conref);
+  type_t name_type = tagged_typ(char_typ,HeapRgn,Tqual{.print_const=true,.q_volatile=false,.q_restrict=0,.real_const=true,.loc=NULL},true_conref);
   type_t tuple_type = tuple_typ(list(name_type,
 				     tunion_typ(typerep_name(&typestruct_str))));
   let &$(tupledecls,arrexp) = array_decls(tuple_type,tuplelist,loc);

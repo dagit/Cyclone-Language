@@ -251,20 +251,20 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
   
   let iter = Set::make_iter(Core::heap_region, freevars);
   // having to initialize is a pain :-(
-  let vd = new Vardecl(Public,exn_name,empty_tqual(),VoidType,
+  let vd = new Vardecl(Public,exn_name,empty_tqual(NULL),VoidType,
 		       NULL,NULL,NULL,false);
     // don't box if it's a stack-allocated array
   while(Iter::next(iter,&vd))
     switch(vd->type) {
     case &ArrayType(ArrayInfo{elt_typ,_,_,_}): 
       params = new List(new $((*vd->name)[1], vd->tq, 
-			      cstar_typ(elt_typ,empty_tqual())),
+			      cstar_typ(elt_typ,empty_tqual(NULL))),
 			params);
       args = new List(var_exp(vd->name,DL), args); 
       break;
     default: 
       params = new List(new $((*vd->name)[1], vd->tq, 
-			      cstar_typ(vd->type,empty_tqual())),
+			      cstar_typ(vd->type,empty_tqual(NULL))),
 			params);
       args = new List(address_exp(var_exp(vd->name,DL),DL), args);
       break;
@@ -565,6 +565,8 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
     case &Using_d(_,ds2):     fallthru(ds2);
     case &ExternC_d(ds2):     fallthru(ds2);
     case &ExternCinclude_d(ds2,_):
+    case Porton_d:
+    case Portoff_d:
       throw new Impossible("nested translation unit after translation to C");
     }
   }

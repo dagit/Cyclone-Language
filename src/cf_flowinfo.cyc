@@ -145,7 +145,7 @@ static absRval_t i_typ_to_absrval(bool allow_zeroterm,
     case NotZeroAll: return new TagCmps(list(new TagCmp(Eq,t)));
     default: return leafval;
     }
-    case &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,_,_}}) 
+    case &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,_,_,_}}) 
       && !conref_def(false,nbl):
 	switch(leafval) {
 	case &UnknownR(ThisIL): return NotZeroThis;
@@ -925,7 +925,7 @@ static bool contains_region(tvar_t rgn, type_t t) {
   case &TunionFieldType(TunionFieldInfo{_,targs}): fallthru(targs);
   case &JoinEff(targs): 
     return List::exists_c(contains_region,rgn,targs);
-  case &PointerType(PtrInfo{t2,_,PtrAtts(r,_,_,_)}):
+  case &PointerType(PtrInfo{t2,_,PtrAtts(r,_,_,_,_)}):
     return contains_region(rgn,r) || contains_region(rgn,t2);
   case &FnType(_): return false;
   case &TupleType(tqs):

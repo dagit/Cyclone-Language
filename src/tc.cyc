@@ -351,18 +351,18 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
         opt_t<list_t<tvar_t>> tvs = new Opt(fd->tvs);
         if (!unify(t2,tagged_typ(string_typ(new_evar(new Opt(RgnKind),tvs)),
                                  new_evar(new Opt(RgnKind),tvs),
-                                 empty_tqual(),empty_conref())) &&
+                                 empty_tqual(NULL),empty_conref())) &&
             !unify(t2,tagged_typ(const_string_typ(new_evar(new Opt(RgnKind),
                                                            tvs)),
                                  new_evar(new Opt(RgnKind),tvs),
-                                 empty_tqual(),empty_conref())) &&
+                                 empty_tqual(NULL),empty_conref())) &&
             !unify(t2,tagged_typ(string_typ(new_evar(new Opt(RgnKind),tvs)),
                                  new_evar(new Opt(RgnKind),tvs),
-                                 const_tqual(),empty_conref())) &&
+                                 const_tqual(NULL),empty_conref())) &&
             !unify(t2,tagged_typ(const_string_typ(new_evar(new Opt(RgnKind),
                                                            tvs)),
                                  new_evar(new Opt(RgnKind),tvs),
-                                 const_tqual(),empty_conref()))) {
+                                 const_tqual(NULL),empty_conref()))) {
           terr(loc,"second argument of main has type %s instead of char??",
                typ2string(t2));
         }
@@ -925,7 +925,11 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
         ed->sc = ExternC;
       tcEnumdecl(te,ge,loc,ed);
       break;
-
+    case Porton_d:
+      warn(d->loc,"spurious __cyclone_port_on__");
+      break;
+    case Portoff_d:
+      break;
     case &Namespace_d(v,ds2):
       // DAN: This case is much more imperative than it used to be.
       let ns  = te->ns;

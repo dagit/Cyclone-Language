@@ -1,0 +1,1341 @@
+/* Porting C code to Cyclone
+   Copyright (C) 2001 Greg Morrisett, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+/* TODO:
+
+   Need to get locations on qualifiers so we can insert the right
+   edits there.  
+
+*/
+
+#include <core.h>
+#include <string.h>
+#include <list.h>
+#include <position.h>
+#include "absyn.h"
+#include "absynpp.h"
+#include "tcutil.h"
+#include "tcenv.h"
+#include "tcexp.h"
+#include "tcstmt.h"
+#include "evexp.h"
+#include "tc.h"
+#include <stdio.h>
+#include "tcdecl.h"
+#include "tcgenrep.h"
+#include <set.h>
+// cheat -- we know what positions are...
+namespace Position {
+  extern struct Segment{ int start; int end; };
+}
+
+using Core;
+using List;
+using Position;
+using Absyn;
+using Absynpp;
+using Tcutil;
+using Tcenv;
+
+namespace Port;
+//#define PORT_DEBUG 1
+
+// An edit indicates a change that needs to be made
+typedef struct Edit {
+  seg_t loc;
+  string_t old_string;
+  string_t new_string;
+} @edit_t;
+typedef list_t<edit_t> edits_t;
+// Used for sorting edits
+int cmp_edit(edit_t e1, edit_t e2) {
+  if (e1->loc && e2->loc)
+    return e1->loc->start - e2->loc->start;
+  else if (e1->loc == e2->loc) return 0;
+  else if (e1->loc) return 1;
+  else return -1;
+}
+
+/////////////////////////////////////////////////////////////////////
+// A ctype_t is a type that we use for processing C code and is
+// an approximation of Absyn's type_t
+extern tunion Ctype;
+typedef tunion Ctype ctype_t;
+// Unification variables
+typedef struct Cvar {
+  int id;
+  ctype_t *eq; // when not NULL, points to equivalence class
+  list_t<ctype_t> uppers; // upper bounds
+  list_t<ctype_t> lowers; // lower bounds
+} @cvar_t;
+// Used in aggregates
+typedef struct Cfield { 
+  ctype_t qual; 
+  field_name_t f;
+  ctype_t type; 
+}@ cfield_t;
+typedef list_t<cfield_t> cfields_t;
+tunion Ctype {
+  Const_ct;     // const qualifier
+  Notconst_ct;  // not-const qualifier
+  Thin_ct;      // * pointers
+  Fat_ct;       // ? pointers
+  Void_ct;      // void
+  Zero_ct;      // used for NULL and 0
+  Arith_ct;     // used for int, short, char, float, double, long long, etc.
+  Ptr_ct(ctype_t elt, ctype_t qual, ctype_t ptr_kind);
+  Array_ct(ctype_t elt, ctype_t qual);
+  // used for an aggregate that we've figured out
+  KnownAggr_ct(struct Aggrdecl @, cfields_t);
+  // used for an aggregate that we've not yet figured out -- if eq is
+  // not NULL, points to the equivalence class
+  UnknownAggr_ct(cfields_t, ctype_t* eq); 
+  Fn_ct(ctype_t return_type, list_t<ctype_t> arg_types);
+  Var_ct(cvar_t);
+};
+
+//////////////////////////////////////////////////////////////////
+// Convert a ctype_t to a string
+static string_t ctypes2string(bool deep, list_t<ctype_t,`H> ts);
+static string_t cfields2string(bool deep, cfields_t ts);
+static string_t ctype2string(bool deep, ctype_t t) {
+  switch (t) {
+  case Const_ct: return "const";
+  case Notconst_ct: return "notconst";
+  case Thin_ct: return "thin";
+  case Fat_ct: return "fat";
+  case Void_ct: return "void";
+  case Zero_ct: return "zero";
+  case Arith_ct: return "arith";
+  case &Ptr_ct(elt,qual,k): 
+    return aprintf("ptr(%s,%s,%s)",ctype2string(deep,elt),
+                   ctype2string(deep,qual),ctype2string(deep,k));
+  case &Array_ct(elt,qual): 
+    return aprintf("array(%s,%s)",ctype2string(deep,elt),
+                   ctype2string(deep,qual));
+  case &KnownAggr_ct(ad, cfs):
+    string_t s = (ad->kind == StructA) ? "struct" : "union";
+    return aprintf("%s %s {%s}",s,qvar2string(ad->name),
+                   cfields2string(deep,cfs));
+  case &UnknownAggr_ct(cfs, &eq): return ctype2string(deep,eq);
+  case &UnknownAggr_ct(cfs, _):
+    return aprintf("aggr {%s}",cfields2string(deep,cfs));
+  case &Fn_ct(t,ts):
+    return aprintf("fn(%s)->%s",ctypes2string(deep,ts),ctype2string(deep,t));
+  case &Var_ct(cv):
+    if (cv->eq)
+      return ctype2string(deep,*cv->eq);
+    else if (!deep)
+      return aprintf("var(%d)",cv->id);
+    else return aprintf("var(%d[>=%s][<=%s])",cv->id,
+                        ctypes2string(false,cv->uppers),
+                        ctypes2string(false,cv->lowers));
+  }
+}
+static stringptr_t ctype2stringptr(bool deep,ctype_t t) { return new (ctype2string(deep,t)); }
+list_t<stringptr_t> sep(string_t<`H> s, list_t<stringptr_t<`H,`H>,`H> xs) {
+  let sptr = new(s);
+  if (xs == NULL) return xs;
+  let prev = xs;
+  let curr = xs->tl;
+  for (; curr != NULL; prev = curr, curr = curr->tl) {
+    prev->tl = new List(sptr,curr);
+  }
+  return xs;
+}
+static stringptr_t cfield2stringptr(bool deep, cfield_t f) {
+  string_t s = 
+    aprintf("%s %s: %s",ctype2string(deep,f->qual),*f->f,ctype2string(deep,f->type));
+  return new s;
+}
+static string_t ctypes2string(bool deep, list_t<ctype_t,`H> ts) {
+  return strconcat_l(sep(",",map_c(ctype2stringptr,deep,ts)));
+}
+static string_t cfields2string(bool deep,cfields_t fs) {
+  return strconcat_l(sep(";",map_c(cfield2stringptr,deep,fs)));
+}
+
+//////////////////////////////////////////////////////////////////
+// Constructors for ctypes
+static ctype_t notconst_ct() { return Notconst_ct; }
+static ctype_t const_ct() { return Const_ct; }
+static ctype_t thin_ct() { return Thin_ct; }
+static ctype_t fat_ct() { return Fat_ct; }
+static ctype_t void_ct() { return Void_ct; }
+static ctype_t zero_ct() { return Zero_ct; }
+static ctype_t arith_ct() { return Arith_ct; }
+static ctype_t unknown_aggr_ct(cfields_t fs) {
+  return new UnknownAggr_ct(fs,NULL);
+}
+static ctype_t known_aggr_ct(struct Aggrdecl @`H ad,cfields_t fs) {
+  return new KnownAggr_ct(ad,fs);
+}
+static ctype_t ptr_ct(ctype_t elt, ctype_t qual, ctype_t ptr_kind) {
+  return new Ptr_ct(elt,qual,ptr_kind);
+}
+static ctype_t array_ct(ctype_t elt, ctype_t qual) {
+  return new Array_ct(elt,qual);
+}
+static ctype_t fn_ct(ctype_t return_type, list_t<ctype_t,`H> args) {
+  return new Fn_ct(return_type,args);
+}
+static ctype_t var() {
+  static int counter = 0;
+  return new Var_ct(new Cvar{counter++, NULL, NULL, NULL});
+}
+static ctype_t new_var(`a x) {
+  return var();
+}
+
+//////////////////////////////////////////////////////////////////
+// compress out levels of indirection
+static ctype_t compress_ct(ctype_t t) {
+  switch (t) {
+  case &Var_ct(&Cvar{_,eq,us,ls}): 
+    if (eq) return compress_ct(*eq);
+    else return t;
+  case &UnknownAggr_ct(_,eq):
+    if (eq) return compress_ct(*eq);
+    else return t;
+  default: return t;
+  }
+}
+
+//////////////////////////////////////////////////////////////////
+// occurs check for variables in ctypes
+static bool occurs(ctype_t v, ctype_t t) {
+  t = compress_ct(t);
+  if (t == v) return true;
+  switch (t) {
+  case &Ptr_ct(t1,t2,t3): return occurs(v,t1) || occurs(v,t2) || occurs(v,t3);
+  case &Array_ct(t1,t2): return occurs(v,t1) || occurs(v,t2);
+  case &Fn_ct(t,ts):
+    if (occurs(v,t)) return true;
+    for (; ts; ts = ts->tl) 
+      if (occurs(v,ts->hd)) return true;
+    return false;
+  case &KnownAggr_ct(_,fs): fallthru(fs);
+  case &UnknownAggr_ct(fs,_):
+    for (; fs; fs = fs->tl) 
+      if (occurs(v,fs->hd->qual) || occurs(v,fs->hd->type)) return true;
+    return false;
+  default: return false;
+  }
+}
+
+
+//////////////////////////////////////////////////////////////////
+// Unification of ctypes
+// thrown when unification fails
+xtunion exn { Unify_ct };
+static bool leq(ctype_t t1, ctype_t t2);
+static void unify_cts(list_t<ctype_t> t1, list_t<ctype_t> t2);
+static cfields_t merge_fields(cfields_t fs1, cfields_t fs2, bool allow_subset);
+static void unify_ct(ctype_t t1, ctype_t t2) {
+  t1 = compress_ct(t1);
+  t2 = compress_ct(t2);
+  if (t1 == t2) return;
+  switch ($(t1,t2)) {
+  case $(&Var_ct(v1),_): 
+    if (!occurs(t1,t2)) {
+      for (let us = v1->uppers; us; us = us->tl)
+        if (!leq(t2,us->hd)) throw Unify_ct;
+      for (let ls = v1->lowers; ls; ls = ls->tl)
+        if (!leq(ls->hd,t2)) throw Unify_ct;
+      v1->eq = new t2;
+      return;
+    } else throw Unify_ct;
+  case $(_, &Var_ct(v1)): unify_ct(t2,t1); return;
+  case $(&Ptr_ct(e1,q1,k1), &Ptr_ct(e2,q2,k2)):
+    unify_ct(e1,e2); unify_ct(q1,q2); unify_ct(k1,k2); return;
+  case $(&Array_ct(e1,q1), &Array_ct(e2,q2)):
+    unify_ct(e1,e2); unify_ct(q1,q2); return;
+  case $(&Fn_ct(t1,ts1), &Fn_ct(t2,ts2)):
+    unify_ct(t1,t2); unify_cts(ts1,ts2); return;
+  case $(&KnownAggr_ct(ad1,fs1), &KnownAggr_ct(ad2,fs2)): 
+    if (ad1 == ad2) return; else throw Unify_ct;
+  case $(&UnknownAggr_ct(fs1,*eq1), &UnknownAggr_ct(fs2,*eq2)):
+    let t = unknown_aggr_ct(merge_fields(fs1,fs2,true));
+    *eq1 = *eq2 = new t;
+    return;
+  case $(&UnknownAggr_ct(fs1,*eq), &KnownAggr_ct(ad,fs2)):
+    merge_fields(fs2,fs1,false);
+    *eq = new t2;
+    return;
+  case $(&KnownAggr_ct(ad,fs2), &UnknownAggr_ct(fs1,*eq)):
+    merge_fields(fs2,fs1,false);
+    *eq = new t1;
+    return;
+  default: throw Unify_ct;
+  }
+}
+static void unify_cts(list_t<ctype_t> t1, list_t<ctype_t> t2) {
+  for (; t1 != NULL && t2 != NULL; t1 = t1->tl, t2 = t2->tl) {
+    unify_ct(t1->hd,t2->hd);
+  }
+  if (t1 != NULL || t2 != NULL) 
+    throw Unify_ct;
+}
+// Merges two sets of fields so that they are point-wise constrained.
+// If allow_subset is false, then fs2 must be a subset of the fields in fs1
+static cfields_t merge_fields(cfields_t fs1, cfields_t fs2, 
+                              bool allow_f1_subset_f2) {
+  cfields_t common = NULL;
+  for (let xs2 = fs2; xs2; xs2 = xs2->tl) {
+    let f2 = xs2->hd;
+    bool found = false;
+    for (let xs1 = fs1; xs1; xs1 = xs1->tl) {
+      let f1 = xs1->hd;
+      if (strptrcmp(f1->f,f2->f) == 0) {
+        common = new List{f1,common};
+        unify_ct(f1->qual,f2->qual);
+        unify_ct(f1->type,f2->type);
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      if (allow_f1_subset_f2) 
+        common = new List(f2,common);
+      else throw Unify_ct; 
+    }
+  }
+  for (let xs1 = fs1; xs1; xs1 = xs1->tl) {
+    let f1 = xs1->hd;
+    bool found = false;
+    for (let xs2 = fs2; xs2; xs2 = xs2->tl) {
+      let f2 = xs2->hd;
+      if (strptrcmp(f1->f,f2->f)) found = true;
+    }
+    if (!found)
+      common = new List(f1,common);
+  }
+  return common;
+}
+static bool unifies(ctype_t t1, ctype_t t2) {
+  try {
+    unify_ct(t1,t2);
+  } catch {
+  case Unify_ct: 
+#ifdef PORT_DEBUG
+    fprintf(stderr,"Unify failure: %s != %s\n",ctype2string(true,t1),
+            ctype2string(true,t2));
+#endif
+    return false;
+  }
+  return true;
+}
+//////////////////////////////////////////////////////////////////
+// Subtyping of C types
+static list_t<ctype_t> insert_upper(ctype_t v, ctype_t t, 
+                                    list_t<ctype_t,`H> uppers) {
+  t = compress_ct(t);
+  for (let us = uppers; us; us = us->tl) {
+    let t2 = compress_ct(us->hd);
+    if (t == t2) return uppers;
+    switch ($(t,t2)) {
+    case $(Notconst_ct,_): 
+    case $(Zero_ct,_):
+    case $(Thin_ct,_):
+    case $(Fat_ct,_):
+    case $(&Array_ct(_,_),_):
+    case $(&KnownAggr_ct(_,_),_):
+    case $(&Fn_ct(_,_),_):
+      unifies(v,t); 
+      return uppers;
+    case $(Void_ct,_): 
+    case $(Arith_ct,&Ptr_ct(_,_,_)): 
+    case $(Arith_ct,Zero_ct): 
+    case $(Arith_ct,&Array_ct(_,_)): 
+      return uppers;
+    default: break;
+    }
+  }
+  return new List{t,uppers};
+}
+
+static list_t<ctype_t> insert_lower(ctype_t v, ctype_t t, 
+                                    list_t<ctype_t,`H> lowers) {
+  t = compress_ct(t);
+  for (let ls = lowers; ls; ls = ls->tl) {
+    let t2 = compress_ct(ls->hd);
+    if (t == t2) return lowers;
+    switch ($(t,t2)) {
+    case $(Const_ct,_): 
+    case $(Thin_ct,_):
+    case $(Fat_ct,_):
+    case $(Void_ct,_):
+    case $(&KnownAggr_ct(_,_),_):
+    case $(&Fn_ct(_,_),_):
+      unifies(v,t);
+      return lowers;
+    case $(_,Void_ct):
+    case $(Zero_ct,Arith_ct):
+    case $(Zero_ct,&Ptr_ct(_,_,_)):
+    case $(&Ptr_ct(_,_,_),Arith_ct):
+    case $(&Array_ct(_,_),Arith_ct):
+      return lowers;
+    default: break;
+    }
+  }
+  return new List{t,lowers};
+}
+
+
+static bool leq(ctype_t t1, ctype_t t2) {
+  if (t1 == t2) return true;
+  t1 = compress_ct(t1);
+  t2 = compress_ct(t2);
+  switch ($(t1,t2)) {
+  case $(Notconst_ct,Const_ct): return true;
+  case $(Const_ct,Notconst_ct): return false;
+  case $(&Var_ct(_),Const_ct): return true;
+  case $(&Var_ct(_), Void_ct): return true;
+  case $(Void_ct, _): return false;
+  case $(Zero_ct,Arith_ct): return true;
+  case $(Zero_ct,&Ptr_ct(_,_,_)): return true;
+  case $(Zero_ct,Void_ct): return true;
+  case $(&Ptr_ct(_,_,_),Arith_ct): return true;
+  case $(&Ptr_ct(_,_,_),Void_ct): return true;
+  case $(&Array_ct(_,_),Arith_ct): return true;
+  case $(&Array_ct(_,_),Void_ct): return true;
+  case $(&Ptr_ct(t1,q1,k1), &Ptr_ct(t2,q2,k2)): 
+    return leq(t1,t2) && leq(q1,q2) && unifies(k1,k2);
+  case $(&Array_ct(t1,q1),&Array_ct(t2,q2)):
+    return leq(t1,t2) && leq(q1,q2);
+  case $(&Array_ct(t1,q1),&Ptr_ct(t2,q2,k2)):
+    return leq(t1,t2) && leq(q1,q2) && unifies(Fat_ct,k2);
+  case $(&Var_ct(v1),&Var_ct(v2)): 
+    v1->uppers = insert_upper(t1,t2,v1->uppers);
+    v2->lowers = insert_lower(t2,t1,v2->lowers);
+    return true;
+  case $(&Var_ct(v1), _):
+    v1->uppers = insert_upper(t1,t2,v1->uppers);
+    return true;
+  case $(_, &Var_ct(v2)):
+    v2->lowers = insert_lower(t2,t1,v2->lowers);
+    return true;
+  default: return unifies(t1,t2); 
+  }
+}
+
+//////////////////////////////////////////////////////////////////
+// Porting Environment
+typedef struct GlobalCenv {
+  // Typedefs
+  Dict::dict_t<typedef_name_t, $(type_t,ctype_t)@> typedef_dict;
+  // Structs
+  Dict::dict_t<typedef_name_t, $(struct Aggrdecl @,cfields_t)@> struct_dict;
+  // Unions
+  Dict::dict_t<typedef_name_t, $(struct Aggrdecl @,cfields_t)@> union_dict;
+  // Return type for a function
+  ctype_t return_type;
+  // The edits record (a) the ctype variable that is inserted during
+  // constraint satisfaction, (b) the ctype that reflects what was
+  // originally in the code, (c) the location where the ctype occurred
+  // in the original code.  If, after constraint solving, (a) and (b)
+  // do not unify, we emit an Edit.
+  list_t<$(ctype_t,ctype_t,seg_t)@>  qualifier_edits;
+  list_t<$(ctype_t,ctype_t,seg_t)@>  pointer_edits;
+  bool porting; // true when we are processing unported C code, false otherwise
+} @gcenv_t;
+
+typedef struct Cenv {
+  // Global environment
+  gcenv_t gcenv;
+  // Local variables -- we need the original type so we can do promotion
+  // for arrays and functions.
+  Dict::dict_t<qvar_t, $(type_t,$(ctype_t,ctype_t)@)@> var_dict;
+}@ cenv_t;
+
+static cenv_t initial_cenv() {
+  gcenv_t g = new GlobalCenv { .typedef_dict = Dict::empty(qvar_cmp),
+                               .struct_dict = Dict::empty(qvar_cmp),
+                               .union_dict = Dict::empty(qvar_cmp),
+                               .qualifier_edits = NULL,
+                               .pointer_edits = NULL,
+                               .porting = false,
+                               .return_type = void_ct() };
+  return new Cenv {.gcenv = g, 
+                   .var_dict = Dict::empty(qvar_cmp) };
+}
+
+// Environment Lookup 
+static ctype_t lookup_return_type(cenv_t env) { 
+  return env->gcenv->return_type; 
+}
+static type_t lookup_typedef(cenv_t env, typedef_name_t n) {
+  try {
+    let $(t,_) = *Dict::lookup(env->gcenv->typedef_dict,n);
+    return t;
+  } catch {
+  case Dict::Absent: 
+#ifdef PORT_DEBUG
+    fprintf(stderr,"can't find typedef %s\n",qvar2string(n));
+#endif
+    return sint_typ;
+  }
+}
+static ctype_t lookup_typedef_ctype(cenv_t env, typedef_name_t n) {
+  try {
+    let $(_,ct) = *Dict::lookup(env->gcenv->typedef_dict,n);
+    return ct;
+  } catch {
+  case Dict::Absent: 
+#ifdef PORT_DEBUG
+    fprintf(stderr,"can't find typedef %s\n",qvar2string(n));
+#endif
+    return var();
+  }
+}
+// next two always succeed but may return null pointers
+static $(struct Aggrdecl @,cfields_t) lookup_struct_decl(cenv_t env,
+                                                         typedef_name_t n){
+  let popt = Dict::lookup_opt(env->gcenv->struct_dict,n);
+  if (popt) 
+    return *popt->v;
+  else {
+    let ad = new Aggrdecl{.kind = StructA, .sc = Public, .name = n,
+                          .tvs = NULL, .impl = NULL, .attributes = NULL};
+    $(struct Aggrdecl @,cfields_t)@ p = new $(ad,NULL);
+    env->gcenv->struct_dict = Dict::insert(env->gcenv->struct_dict, n, p);
+    return *p;
+  }
+}
+
+static $(struct Aggrdecl @,cfields_t) lookup_union_decl(cenv_t env,
+                                                        typedef_name_t n) {
+  let popt = Dict::lookup_opt(env->gcenv->union_dict,n);
+  if (popt) 
+    return *popt->v;
+  else {
+    let ad = new Aggrdecl{.kind = UnionA, .sc = Public, .name = n,
+                          .tvs = NULL, .impl = NULL, .attributes = NULL};
+    $(struct Aggrdecl @,cfields_t)@ p = new $(ad,NULL);
+    env->gcenv->union_dict = Dict::insert(env->gcenv->union_dict, n, p);
+    return *p;
+  }
+}
+
+static $(ctype_t, ctype_t) lookup_var(cenv_t env, qvar_t x) {
+  try {
+    let $(_,p) = *Dict::lookup(env->var_dict,x);
+    return *p;
+  } catch {
+  case Dict::Absent: 
+#ifdef PORT_DEBUG
+    fprintf(stderr,"can't find variable %s\n",qvar2string(x));
+#endif
+    return $(var(),var());
+  }
+}
+static bool declared_var(cenv_t env, qvar_t x) {
+  return Dict::member(env->var_dict,x);
+}
+static bool isfn(cenv_t env, qvar_t x) {
+  try {
+    let $(t,_) = *Dict::lookup(env->var_dict,x);
+  LOOP: switch (t) {
+  case &TypedefType(n,_,_,_): t = lookup_typedef(env,n); goto LOOP;
+  case &FnType(_): return true;
+  default: return false;
+  }
+  } catch {
+  case Dict::Absent:
+#ifdef PORT_DEBUG
+    fprintf(stderr,"can't find variable %s\n",qvar2string(x));
+#endif
+    return false;
+  }
+}
+static bool isarray(cenv_t env, qvar_t x) {
+  try {
+    let $(t,_) = *Dict::lookup(env->var_dict,x);
+  LOOP: switch (t) {
+  case &TypedefType(n,_,_,_): t = lookup_typedef(env,n); goto LOOP;
+  case &ArrayType(_): return true;
+  default: return false;
+  }
+  } catch {
+  case Dict::Absent:
+#ifdef PORT_DEBUG
+    fprintf(stderr,"can't find variable %s\n",qvar2string(x));
+#endif
+    return false;
+  }
+}
+
+// Environment Addition
+static void add_return_type(cenv_t env, ctype_t t) {
+  env->gcenv->return_type = t;
+}
+static cenv_t add_var(cenv_t env, qvar_t x, type_t t, ctype_t qual, 
+                      ctype_t ctype) {
+  return new Cenv{env->gcenv,
+                  Dict::insert(env->var_dict,x,new $(t,new $(qual,ctype)))};
+}
+static void add_typedef(cenv_t env, typedef_name_t n, type_t t, ctype_t ct) {
+  env->gcenv->typedef_dict = Dict::insert(env->gcenv->typedef_dict,
+                                          n, new $(t,ct));
+}
+static void add_struct_decl(cenv_t env,typedef_name_t n,
+                              struct Aggrdecl @`H ad,cfields_t cfs) {
+  $(struct Aggrdecl @,cfields_t)@ p = new $(ad,cfs);
+  env->gcenv->struct_dict = Dict::insert(env->gcenv->struct_dict,n,p);
+                                         
+}
+static void add_union_decl(cenv_t env,typedef_name_t n,
+                      struct Aggrdecl @`H ad,cfields_t cfs) {
+  $(struct Aggrdecl @,cfields_t)@ p = new $(ad,cfs);
+  env->gcenv->union_dict = Dict::insert(env->gcenv->union_dict,n,p);
+}
+static void register_const_cvar(cenv_t env, ctype_t new_qual, 
+                                ctype_t orig_qual, seg_t loc) {
+  env->gcenv->qualifier_edits = new List(new $(new_qual,orig_qual,loc),
+                                         env->gcenv->qualifier_edits);
+}
+static void register_ptr_cvars(cenv_t env, ctype_t new_ptr, 
+                        ctype_t orig_ptr, seg_t loc) {
+  env->gcenv->pointer_edits = new List(new $(new_ptr,orig_ptr,loc),
+                                       env->gcenv->pointer_edits);
+}
+
+//////////////////////////////////////////////////////////////////
+// Generation of constraints by walking AST
+static ctype_t gen_exp(cenv_t env, exp_t e);
+static void gen_stmt(cenv_t env, stmt_t s);
+static cenv_t gen_localdecl(cenv_t env, decl_t d);
+
+// Convert an Absyn type to a ctype
+static ctype_t type_to_ctype(cenv_t env, type_t t) {
+  switch (t) {
+  case &TypedefType(n,_,_,_): 
+    (*n)[0] = Loc_n;
+    return lookup_typedef_ctype(env,n);
+  case VoidType: return void_ct();
+  case &PointerType(PtrInfo{et,tq,PtrAtts{_,n,b,zt,ptr_loc}}):
+    // What we do here is insert soft constraints that correspond to
+    // what the user wrote down -- these soft constraints might change
+    // in which case we have to change the user's annotations.  
+    let cet = type_to_ctype(env,et);
+    let orig_fat = (conref_val(b) == Unknown_b);
+    if (env->gcenv->porting) {
+      let cqv = var(); 
+      register_const_cvar(env,cqv,tq.print_const ? const_ct() : notconst_ct(),
+                          tq.loc); 
+      // Trust the user if they make a pointer const
+      if (tq.print_const) unify_ct(cqv,const_ct());
+#ifdef PORT_DEBUG
+      if (tq.loc == NULL) 
+        fprintf(stderr,"hmmm...qualifier has bad loc for type %s\n",
+                typ2string(t));
+#endif
+      let cbv = var();
+      // Register cbv and cnv as the variables that control what kind of 
+      // pointer this should be, using the location of the pointer. 
+      register_ptr_cvars(env, cbv, orig_fat ? fat_ct() : thin_ct(), ptr_loc);
+      // Trust the user if they make a pointer fat
+      if (orig_fat) unify_ct(cbv,fat_ct());
+      return ptr_ct(cet,cqv,cbv);
+    } else {
+      return ptr_ct(cet,tq.print_const ? const_ct() : notconst_ct(),
+                    orig_fat ? fat_ct() : thin_ct());
+    }
+  case &IntType(_,_):
+  case FloatType:
+  case &DoubleType(_): return arith_ct();
+  case &ArrayType(ArrayInfo{et,tq,_,_}):
+    let cet = type_to_ctype(env,et);
+    if (env->gcenv->porting) {
+      let cqv = var(); 
+      register_const_cvar(env,cqv,tq.print_const ? const_ct() : notconst_ct(),
+                          tq.loc); 
+#ifdef PORT_DEBUG
+      if (tq.loc == NULL)
+        fprintf(stderr,"uhm, array type %s qualifier missing location...\n",
+                typ2string(t));
+#endif
+      return array_ct(cet,cqv);
+    } else {
+      return array_ct(cet,tq.print_const ? const_ct() : notconst_ct());
+    }
+  case &FnType(FnInfo{_,_,rt,args,_,_,_,_}):
+    let crt = type_to_ctype(env,rt);
+    list_t<ctype_t> cargs = NULL;
+    for (; args != NULL; args = args->tl) {
+      let $(_,tq,t) = *args->hd; // FIX: what about qualifiers?
+      cargs = new List{type_to_ctype(env,t),cargs};
+    }
+    return fn_ct(crt,List::imp_rev(cargs));
+  case &AggrType(AggrInfo{ai,_}):
+    switch (ai) {
+    case &UnknownAggr(StructA,n): 
+      (*n)[0] = Loc_n;
+      let $(ad,fs) = lookup_struct_decl(env,n);
+      return known_aggr_ct(ad,fs);
+    case &UnknownAggr(UnionA,n): 
+      (*n)[0] = Loc_n;
+      let $(ad,fs) = lookup_union_decl(env,n);
+      return known_aggr_ct(ad,fs);
+    case &KnownAggr(adp): 
+      let ad = *adp;
+      switch (ad->kind) {
+      case StructA: 
+        let $(_,fs) = lookup_struct_decl(env,ad->name);
+        return known_aggr_ct(ad,fs);
+      case UnionA:  
+        let $(_,fs) = lookup_union_decl(env,ad->name);
+        return known_aggr_ct(ad,fs);
+      }
+    }
+  case &EnumType(_,_): return arith_ct();
+  case &AnonEnumType(fs): 
+    // add in an enum declaration
+    for (; fs; fs = fs->tl) {
+      (*fs->hd->name)[0] = Loc_n;
+      env = add_var(env, fs->hd->name, sint_typ, const_ct(), arith_ct());
+    }
+    return arith_ct();
+  default: return arith_ct();
+  }
+}
+
+// Calculate the ctype for a primop given the ctypes of the arguments
+static ctype_t gen_primop(cenv_t env, primop_t p, list_t<ctype_t> args) {
+  let arg1 = compress_ct(args->hd);
+  let arg2s = args->tl;
+  switch (p) {
+  case Plus:
+    // we could have arith + arith -> arith
+    //            or arith + fatptr -> fatptr
+    //            or ptr + arith -> fatptr
+    let arg2 = compress_ct(arg2s->hd);
+    if (leq(arg1,ptr_ct(var(),var(),fat_ct()))) {
+      leq(arg2,arith_ct());
+      return arg1;
+    } else if (leq(arg2,ptr_ct(var(),var(),fat_ct()))) {
+      leq(arg1,arith_ct());
+      return arg2;
+    } else {
+      leq(arg1,arith_ct());
+      leq(arg2,arith_ct());
+      return arith_ct();
+    }
+  case Minus:
+    // we could have arith -> arith
+    //            or  arith - arith -> arith
+    //            or fatptr - fatptr -> arith
+    //            or fatptr - arith -> fatptr
+    if (arg2s == NULL) {
+      leq(arg1,arith_ct());
+      return arith_ct();
+    } else {
+      let arg2 = compress_ct(arg2s->hd);
+      if (leq(arg1,ptr_ct(var(),var(),fat_ct()))) {
+        if (leq(arg2,ptr_ct(var(),var(),fat_ct())))
+          return arith_ct();
+        else {
+          leq(arg2,arith_ct());
+          return arg1;
+        }
+      } else {
+        leq(arg1,arith_ct());
+        leq(arg1,arith_ct());
+        return arith_ct();
+      }
+    }
+  case Times: case Div: case Mod: case Eq: case Neq: case Lt: case Gt: 
+  case Lte: case Gte: case Bitand: case Bitor: case Bitxor: case Bitlshift:
+  case Bitlrshift: case Bitarshift:
+    leq(arg1,arith_ct());
+    leq(arg2s->hd,arith_ct());
+    return arith_ct();
+  case Not:
+  case Bitnot:
+    leq(arg1,arith_ct());
+    return arith_ct();
+  case Size: impos(".size primop");
+  }
+}
+
+// generate constraints for a LHS expression and return the qualifier & type
+static $(ctype_t qual,ctype_t type) gen_lhs(cenv_t env, exp_t e) {
+  switch (e->r) {
+  case &Var_e(x,_):       fallthru(x);
+  case &UnknownId_e(x): 
+    (*x)[0] = Loc_n;
+    return lookup_var(env,x);
+  case &Subscript_e(e1,e2): 
+    let v = var();
+    let q = var();
+    let t1 = gen_exp(env, e1);
+    leq(gen_exp(env,e2),arith_ct());
+    let p = ptr_ct(v,q,fat_ct());
+    leq(t1,p);
+    return $(q,v);
+  case &Deref_e(e1):
+    let v = var();
+    let q = var();
+    let p = ptr_ct(v,q,var());
+    leq(gen_exp(env,e1),p);
+    return $(q,v);
+  case &AggrMember_e(e1,f):
+    let v = var();
+    let q = var();
+    let t1 = gen_exp(env, e1);
+    leq(gen_exp(env,e1),unknown_aggr_ct(list(new Cfield(q,f,v))));
+    return $(q,v);
+  case &AggrArrow_e(e1,f):
+    let v = var();
+    let q = var();
+    let t1 = gen_exp(env, e1);
+    leq(gen_exp(env,e1),ptr_ct(unknown_aggr_ct(list(new Cfield(q,f,v))),
+                               var(),var()));
+    return $(q,v);
+  default: impos(aprintf("gen_lhs: %s",exp2string(e)));
+  }
+}
+
+// generate constraints for a RHS expression and return the constraint type
+static ctype_t gen_exp(cenv_t env, exp_t e) {
+  switch (e->r) {
+  case &Const_e(&Char_c(_,_)): 
+  case &Const_e(&Short_c(_,_)):
+  case &Const_e(&LongLong_c(_,_)):
+  case &Sizeoftyp_e(_): 
+  case &Sizeofexp_e(_):
+  case &Offsetof_e(_,_):
+  case &Enum_e(_,_,_): 
+  case &AnonEnum_e(_,_,_):
+  case &Const_e(&Float_c(_)):  return arith_ct();
+  case &Const_e(&Int_c(_,0)): return zero_ct();
+  case &Const_e(&Int_c(_,_)): return arith_ct();
+  case &Const_e(&String_c(_)): return ptr_ct(arith_ct(),const_ct(),fat_ct());
+  case &Const_e(Null_c):  return zero_ct();
+  case &Var_e(x,_):       fallthru(x);
+  case &UnknownId_e(x):
+    (*x)[0] = Loc_n;
+    let $(_,t) = lookup_var(env,x);
+    if (isfn(env,x)) {
+      return ptr_ct(t,var(),var()); // promote to fn pointer
+    }
+    else if (isarray(env,x)) { // must promote from array to pointer type
+      let elt_type = var();
+      let qual = var();
+      let array_type = array_ct(elt_type,qual);
+      unifies(t,array_type);
+      let ptr_type = ptr_ct(elt_type,qual,fat_ct());
+      return ptr_type;
+    } else return t;
+  case &Primop_e(p,es): return gen_primop(env,p,map_c(gen_exp,env,es));
+  case &AssignOp_e(e1,popt,e2):
+    let $(q,t1) = gen_lhs(env,e1);
+    unifies(q,notconst_ct());
+    let t2 = gen_exp(env,e2);
+    if (popt) {
+      struct List<ctype_t> x2 = List{t2,NULL};
+      struct List<ctype_t> x1 = List{t1,&x2};
+      let t3 = gen_primop(env,popt->v,&x1);
+      leq(t3,t1);
+      return t1;
+    } else {
+      leq(t2,t1);
+      return t1;
+    }
+  case &Increment_e(e1,inc): 
+    let $(q,t) = gen_lhs(env,e1);
+    unifies(q,notconst_ct());
+    // could have a fatptr or an arith
+    leq(t,ptr_ct(var(),var(),fat_ct()));
+    leq(t,arith_ct());
+    return t;
+  case &Conditional_e(e1,e2,e3):
+    let v = var();
+    leq(gen_exp(env,e1),arith_ct());
+    leq(gen_exp(env,e2),v);
+    leq(gen_exp(env,e3),v);
+    return v;
+  case &And_e(e1,e2): fallthru(e1,e2);
+  case &Or_e(e1,e2):
+    leq(gen_exp(env,e1),arith_ct());
+    leq(gen_exp(env,e2),arith_ct());
+    return arith_ct();
+  case &SeqExp_e(e1,e2):
+    gen_exp(env,e1);
+    return gen_exp(env,e2);
+  case &UnknownCall_e(e1,es): fallthru(e1,es);
+  case &FnCall_e(e1,es,_):
+    let v = var();
+    let t1 = gen_exp(env,e1);
+    let ts = map_c(gen_exp,env,es);
+    let vs = map(new_var,ts);
+    unifies(t1,ptr_ct(fn_ct(v,vs),var(),var()));
+    for (; ts != NULL; ts = ts->tl, vs = vs->tl) {
+      leq(ts->hd,vs->hd);
+    }
+    return v;
+  case &Throw_e(_): impos("throw");
+  case &NoInstantiate_e(e1): return gen_exp(env,e1);
+  case &Instantiate_e(_,_): impos("instantiate");
+  case &Cast_e(t,e1,_,_):
+    let t1 = type_to_ctype(env,t);
+    let t2 = gen_exp(env,e1);
+    leq(t1,t2);
+    return t2;
+  case &Address_e(e1):
+    let $(q,t) = gen_lhs(env,e1);
+    return ptr_ct(t,q,var());
+  case &Subscript_e(e1,e2):
+    let v = var();
+    leq(gen_exp(env,e2),arith_ct());
+    let t = gen_exp(env,e1);
+    leq(t,ptr_ct(v,var(),fat_ct()));
+    return v;
+  case &Deref_e(e1):
+    let v = var();
+    leq(gen_exp(env,e1),ptr_ct(v,var(),var()));
+    return v;
+  case &AggrMember_e(e1,f):
+    let v = var();
+    let t = gen_exp(env,e1);
+    leq(gen_exp(env,e1), unknown_aggr_ct(list(new Cfield{var(),f,v})));
+    return v;
+  case &AggrArrow_e(e1,f):
+    let v = var();
+    let t = gen_exp(env,e1);
+    leq(gen_exp(env,e1),ptr_ct(unknown_aggr_ct(list(new Cfield{var(),f,v})),
+                               var(),var()));
+    return v;
+  case &Malloc_e(MallocInfo{_,_,topt,e1,_}):
+    leq(gen_exp(env,e1),arith_ct());
+    let t = (topt) ? type_to_ctype(env,*topt) : var();
+    return ptr_ct(t,var(),fat_ct());
+  case &Gentyp_e(_,_): impos("Gen");
+  case &New_e(_,_): impos("New_e");
+  case &Tuple_e(_): impos("Tuple_e");
+  case &CompoundLit_e(_,_): impos("CompoundLit_e");
+  case &Array_e(_): impos("Array_e");
+  case &Comprehension_e(_,_,_,_): impos("Comprehension_e");
+  case &Struct_e(_,_,_,_): impos("Struct_e");
+  case &AnonStruct_e(_,_): impos("AnonStruct_e");
+  case &Tunion_e(_,_,_): impos("Tunion_e");
+  case &UnresolvedMem_e(_,_): impos("UnresolvedMem_e");
+  case &StmtExp_e(s): impos("StmtExp_e");
+  }
+}
+
+// generate constraints for a statement
+static void gen_stmt(cenv_t env, stmt_t s) {
+  switch (s->r) {
+  case Skip_s: return;
+  case &Exp_s(e): gen_exp(env,e); return;
+  case &Seq_s(s1,s2): gen_stmt(env,s1); gen_stmt(env,s2); return;
+  case &Return_s(eopt):
+    let v = lookup_return_type(env);
+    let t = eopt ? gen_exp(env,eopt) : void_ct();
+    leq(t,v);
+    return;
+  case &IfThenElse_s(e,s1,s2):
+    leq(gen_exp(env,e),arith_ct());
+    gen_stmt(env,s1); 
+    gen_stmt(env,s2);
+    return;
+  case &While_s($(e,_),s): 
+    leq(gen_exp(env,e),arith_ct());
+    gen_stmt(env,s); 
+    return;
+  case &Break_s(_):
+  case &Continue_s(_):
+  case &Goto_s(_,_): return;
+  case &For_s(e1,$(e2,_),$(e3,_),s):
+    gen_exp(env,e1); 
+    leq(gen_exp(env,e2),arith_ct());
+    gen_exp(env,e3); 
+    gen_stmt(env,s);
+    return;
+  case &Switch_s(e,scs):
+    leq(gen_exp(env,e),arith_ct());
+    for (; scs; scs = scs->tl) {
+      // ignore the patterns...
+      gen_stmt(env,scs->hd->body);
+    }
+    return;
+  case &Fallthru_s(_,_): impos("fallthru");
+  case &Decl_s(d,s): env = gen_localdecl(env,d); gen_stmt(env,s); return;
+  case &Label_s(_,s): gen_stmt(env,s); return;
+  case &Do_s(s,$(e,_)): 
+    gen_stmt(env,s); 
+    leq(gen_exp(env,e),arith_ct()); 
+    return;
+  case &TryCatch_s(_,_): impos("try/catch");
+  case &Region_s(_,_,_,_): impos("region");
+  case &ResetRegion_s(_): impos("reset region");
+  }
+}
+
+// generate constraints for an initializer, given the parsed type
+static ctype_t gen_initializer(cenv_t env, type_t t, exp_t e) {
+  switch (e->r) {
+  case &UnresolvedMem_e(_,dles): fallthru(dles);
+  case &Array_e(dles): fallthru(dles);
+  case &CompoundLit_e(_,dles):
+  LOOP:
+    switch (t) {
+    case &TypedefType(n,_,_,_): 
+      (*n)[0] = Loc_n;
+      t = lookup_typedef(env,n); goto LOOP;
+    case &ArrayType(ArrayInfo{et,_,_,_}):
+      let v = var();
+      let q = var();
+      let t = type_to_ctype(env,et);
+      for (; dles != 0; dles = dles->tl) {
+        let $(d,e) = *dles->hd;
+        if (d) impos("designators in initializers");
+        let te = gen_initializer(env,et,e);
+        leq(te,v);
+      }
+      return array_ct(v,q);
+    case &AggrType(AggrInfo{&UnknownAggr(StructA, n),_}):
+      (*n)[0] = Loc_n;
+      let $(ad,_) = lookup_struct_decl(env,n);
+      if (ad == NULL) impos("struct is not yet defined");
+      fallthru(ad);
+    case &AggrType(AggrInfo{&KnownAggr(&ad),_}):
+      let fields = ad->impl->fields;
+      for (; dles != 0; dles = dles->tl) {
+        let $(d,e) = *dles->hd;
+        if (d) impos("designators in initializers");
+        let f = fields->hd;
+        fields = fields->tl;
+        let te = gen_initializer(env,f->type,e);
+      }
+      return type_to_ctype(env,t);
+    default: impos("bad type for aggregate initializer");
+    }
+  case &Const_e(&String_c(s)):
+  LOOP2:
+    switch (t) {
+    case &TypedefType(n,_,_,_): 
+      (*n)[0] = Loc_n;
+      t = lookup_typedef(env,n); goto LOOP2;
+    case &ArrayType(_): return array_ct(arith_ct(), const_ct());
+    default: return gen_exp(env,e);
+    }
+  default: return gen_exp(env, e);
+  }
+}
+
+// generate constraints for a local declaration 
+static cenv_t gen_localdecl(cenv_t env, decl_t d) {
+  switch (d->r) {
+  case &Var_d(vd):
+    let t = var();
+    ctype_t q;
+    if (env->gcenv->porting) {
+      q = var(); 
+      register_const_cvar(env,q,
+                          vd->tq.print_const ? const_ct() : notconst_ct(),
+                          vd->tq.loc);
+#ifdef PORT_DEBUG
+      if (vd->tq.loc == NULL)
+        fprintf(stderr,"uhm, variable %s qualifier missing location...\n",
+                qvar2string(vd->name));
+#endif
+    } else {
+      q = vd->tq.print_const ? const_ct() : notconst_ct();
+    }
+    (*vd->name)[0] = Loc_n;
+    env = add_var(env, vd->name, vd->type, q, t);
+    unifies(t, type_to_ctype(env, vd->type));
+    if (vd->initializer) {
+      exp_t e = (exp_t)vd->initializer;
+      ctype_t t2 = gen_initializer(env, vd->type, e);
+      leq(t,t2);
+    }
+    return env;
+  default: impos("non-local decl that isn't a variable");
+  }
+}
+
+static $(opt_t<var_t>,tqual_t,type_t)@ make_targ($(var_t,tqual_t,type_t)@ arg){
+  let $(x,q,t) = *arg;
+  return new $(NULL,q,t);
+}
+
+static cenv_t gen_topdecls(cenv_t env, list_t<decl_t> ds);
+// generate constraints for a top-level declaration
+static cenv_t gen_topdecl(cenv_t env, decl_t d) {
+  switch (d->r) {
+  case Porton_d:
+    env->gcenv->porting = true;
+    return env;
+  case Portoff_d:
+    env->gcenv->porting = true;
+    return env;
+  case &Var_d(vd): 
+    (*vd->name)[0] = Loc_n;
+#ifdef PORT_DEBUG
+    fprintf(stderr,"processing var decl %s\n",qvar2string(vd->name));
+#endif
+    if (declared_var(env,vd->name)) {
+      let $(q,t) = lookup_var(env,vd->name);
+      ctype_t q2; 
+      if (env->gcenv->porting && !isfn(env,vd->name)) {
+        q2 = var(); 
+        register_const_cvar(env,q2,
+                            vd->tq.print_const ? const_ct():notconst_ct(),
+                            vd->tq.loc); 
+#ifdef PORT_DEBUG
+        if (vd->tq.loc == NULL)
+          fprintf(stderr,"uhm, top variable %s qual missing location...\n",
+                  qvar2string(vd->name));
+#endif
+      } else {
+        q2 = vd->tq.print_const ? const_ct() : notconst_ct();
+      }
+      unifies(q,q2);
+      unifies(t,type_to_ctype(env,vd->type));
+      if (vd->initializer) {
+        exp_t e = (exp_t)vd->initializer;
+        leq(gen_initializer(env, vd->type, e), t);
+      }
+      return env;
+    } else {
+      return gen_localdecl(env,d);
+    }
+  case &Fn_d(fd):
+#ifdef PORT_DEBUG
+    fprintf(stderr,"processing fn decl %s\n",qvar2string(fd->name));
+#endif
+    (*fd->name)[0] = Loc_n;
+    $(ctype_t,ctype_t) *predeclared = NULL;
+    if (declared_var(env,fd->name)) {
+      predeclared = new lookup_var(env,fd->name);
+    } 
+    let rettype = fd->ret_type;
+    let args = fd->args;
+    let targs = map(make_targ,args);
+    let fntype = 
+      new FnType(FnInfo{NULL,NULL,rettype,targs,false,NULL,NULL,NULL});
+    let c_rettype = type_to_ctype(env, rettype);
+    list_t<$(var_t,type_t,ctype_t,ctype_t)@> c_args = NULL;
+    list_t<ctype_t> c_arg_types = NULL;
+    for (let xs = args; xs; xs = xs->tl) {
+      let $(x,tq,t) = *xs->hd;
+      let ct = type_to_ctype(env,t);
+      ctype_t tqv;
+      if (env->gcenv->porting) {
+        tqv = var();
+        register_const_cvar(env,tqv,tq.print_const?const_ct():notconst_ct(),
+                            tq.loc); 
+#ifdef PORT_DEBUG
+        if (tq.loc == NULL)
+          fprintf(stderr,"uhm, fn %s, param %s qualifier missing location.\n",
+                  qvar2string(fd->name), *x);
+#endif
+      } else {
+        tqv = tq.print_const ? const_ct() : notconst_ct();
+      }
+      c_args = new List{new $(x,t,tqv,ct), c_args};
+      c_arg_types = new List{ct, c_arg_types};
+    }
+    c_args = List::imp_rev(c_args);
+    c_arg_types = List::imp_rev(c_arg_types);
+    let ctype = fn_ct(c_rettype, c_arg_types);
+    if (predeclared) {
+      let $(q2,t2) = *predeclared;
+      unifies(q2,const_ct());
+      unifies(ctype,t2);
+    }
+    (*fd->name)[0] = Loc_n;
+    env = add_var(env, fd->name, fntype, const_ct(), ctype);
+    add_return_type(env,c_rettype);
+    let env2 = env;
+    for (let xs = c_args; xs; xs = xs->tl) {
+      let $(x,t,q,ct) = *xs->hd;
+      env2 = add_var(env2, new $(Loc_n,x), t, q, ct);
+    }
+    gen_stmt(env2,fd->body);
+    return env;
+  case &Typedef_d(td):
+#ifdef PORT_DEBUG
+    fprintf(stderr,"processing typedef %s\n",qvar2string(td->name));
+#endif
+    // FIX: what about typedef qualifier?
+    let t = td->defn->v;
+    let ct = type_to_ctype(env,t);
+    (*td->name)[0] = Loc_n;
+    add_typedef(env, td->name, t, ct);
+    return env;
+  case &Aggr_d(ad):
+#ifdef PORT_DEBUG
+    fprintf(stderr,"processing %s decl %s\n",
+            (ad->kind == StructA) ? "struct" : "union",qvar2string(ad->name));
+#endif
+    let name = ad->name;
+    (*ad->name)[0] = Loc_n;
+    $(struct Aggrdecl @,cfields_t) previous;
+    cfields_t curr = NULL;
+    void (@add_decl)(cenv_t, typedef_name_t, struct Aggrdecl @, cfields_t);
+    switch (ad->kind) {
+    case StructA: 
+      previous = lookup_struct_decl(env,name); 
+      add_decl = add_struct_decl;
+      break;
+    case UnionA:  
+      previous = lookup_union_decl(env,name); 
+      add_decl = add_union_decl;
+      break;
+    }
+    if (ad->impl) {
+      let cf = previous[1];
+      for (let fields = ad->impl->fields; fields; fields = fields->tl) {
+        let f = fields->hd;
+        ctype_t qv;
+        if (env->gcenv->porting) {
+          qv = var();
+          register_const_cvar(env,qv,
+                              f->tq.print_const?const_ct():notconst_ct(),
+                              f->tq.loc); 
+#ifdef PORT_DEBUG
+          if (f->tq.loc == NULL)
+            fprintf(stderr,"uhm, struct %s, field %s qualifier missing"
+                    "location...\n", qvar2string(ad->name), *f->name);
+#endif
+        } else {
+          qv = f->tq.print_const ? const_ct() : notconst_ct();
+        }
+        let ct = type_to_ctype(env,f->type);
+        if (cf != NULL) {
+          let Cfield{qv2,_,ct2} = *cf->hd;
+          cf = cf->tl;
+          unifies(qv,qv2);
+          unifies(ct,ct2);
+        }
+        curr = new List{new Cfield{.qual = qv, .f = f->name, .type = ct},curr};
+      }
+      curr = List::imp_rev(curr);
+      if (!previous[1]) 
+        add_decl(env,name,ad,curr);
+    }
+    return env;
+  case &Enum_d(ed):
+#ifdef PORT_DEBUG
+    fprintf(stderr,"processing enum decl %s\n",qvar2string(ed->name));
+#endif
+    (*ed->name)[0] = Loc_n;
+    // just insert the enum's identifiers as constant arithmetic values
+    if (ed->fields) 
+      for(let fs = ed->fields->v; fs; fs = fs->tl) {
+        (*fs->hd->name)[0] = Loc_n;
+        env = add_var(env, fs->hd->name, new EnumType(ed->name,ed),
+                      const_ct(), arith_ct());
+      }
+    return env;
+  default: 
+    if (env->gcenv->porting) 
+      fprintf(stderr,"Warning: Cyclone declaration found in code to be ported -- skipping.");
+    return env;
+  }
+}
+
+// Generate all constraints by crawling over a list of declarations
+static cenv_t gen_topdecls(cenv_t env, list_t<decl_t> ds) {
+  for (; ds; ds = ds->tl)
+    env = gen_topdecl(env,ds->hd);
+  return env;
+}
+
+
+static edits_t gen_edits(list_t<decl_t> ds) {
+  list_t<edit_t> edits = NULL;
+  // generate the constraints
+  cenv_t env = gen_topdecls(initial_cenv(), ds);
+  // extract the constraints that might produce edits
+  let ptrs = env->gcenv->pointer_edits;
+  let consts = env->gcenv->qualifier_edits;
+  // force the constraints
+  for (let ps = ptrs; ps; ps = ps->tl) {
+    let $(new_ctype, orig_ctype, loc) = *ps->hd;
+    unifies(new_ctype, orig_ctype);
+  }
+  for (let cs = consts; cs; cs = cs->tl) {
+    let $(new_qual, old_qual, loc) = *cs->hd;
+    unifies(new_qual, old_qual);
+  }
+
+  // insert any edits for the pointers
+  for (; ptrs; ptrs = ptrs->tl) {
+    let $(new_ctype, orig_ctype, loc) = *ptrs->hd;
+    if (!unifies(new_ctype,orig_ctype) && loc) {
+      switch (compress_ct(orig_ctype)) {
+      case Thin_ct: 
+        edits = new List{new Edit{loc,"?","*"}, edits};
+        break;
+      case Fat_ct:
+        edits = new List{new Edit{loc,"*","?"}, edits};
+        break;
+      default: break;
+      }
+    }
+  }
+  // insert any edits for the consts 
+  for (; consts; consts = consts->tl) {
+    let $(new_qual, old_qual, loc) = *consts->hd;
+    if (!unifies(new_qual,old_qual) && loc) {
+      switch (compress_ct(old_qual)) {
+      case Notconst_ct:
+        edits = new List{new Edit{loc,"const ",""}, edits}; break;
+      case Const_ct:
+        edits = new List{new Edit{loc,"","const "}, edits}; break;
+      default: break;
+      }
+    }
+  }
+  // sort the edits
+  edits = merge_sort(cmp_edit, edits);
+  // Hack to get rid of spurious 0 location
+  while (edits && edits->hd->loc->start == 0) {
+#ifdef PORT_DEBUG
+    fprintf(stderr,"found 0 location\n");
+#endif
+    edits = edits->tl;
+  }
+  return edits;
+}
+
+static seg_t get_seg(edit_t e) {
+  return e->loc;
+}
+
+// given a list of declarations, emits a sorted list of edits
+// which should help bring the code in line.
+void port(list_t<decl_t> ds) {
+  let edits = gen_edits(ds);
+  let locs = map(get_seg,edits);
+  Position::use_gcc_style_location = false;
+  let slocs = List::imp_rev(Position::strings_of_segments(locs));
+  for (; edits; edits = edits->tl, slocs = slocs->tl) {
+    let Edit{loc,s1,s2} = *edits->hd;
+    string_t sloc = *slocs->hd;
+    printf("%s: insert `%s' for `%s'\n",sloc,s1,s2);
+  }
+}
+
+

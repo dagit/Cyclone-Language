@@ -896,7 +896,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
       let typ = tagged_typ(t, param_rgn, tq, false_conref);
       let vd = new{Vardecl{.sc = Public,
                            .name = new $((nmspace_t)Loc_n,nopt->v),
-                           .tq = empty_tqual(),
+                           .tq = empty_tqual(NULL),
                            .type = typ,
                            .initializer = NULL,
                            .rgn = new Opt(param_rgn),

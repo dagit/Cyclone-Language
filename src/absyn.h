@@ -158,10 +158,11 @@ namespace Absyn {
   //   attributes with respect to type-checking.  After type-well-formedness,
   //   it should be that print_const implies real_const
   EXTERN_ABSYN struct Tqual { 
-    bool print_const :1; 
-    bool q_volatile :1; 
-    bool q_restrict :1; 
-    bool real_const :1;
+    bool print_const; 
+    bool q_volatile; 
+    bool q_restrict; 
+    bool real_const;
+    seg_t loc;
   };
 
   // FIX: we should make this char, short, int, etc.  -- something
@@ -223,6 +224,7 @@ namespace Absyn {
     conref_t<bool>     nullable;  // type admits NULL (* vs. @)
     conref_t<bounds_t> bounds;    // legal bounds for pointer indexing
     conref_t<bool>     zero_term; // true => zero terminated array
+    seg_t              loc;       // location of *,@, or ?
   };
 
   // information about a pointer type
@@ -729,6 +731,8 @@ namespace Absyn {
     Using_d(qvar_t,list_t<decl_t>);  // using Foo { ... }
     ExternC_d(list_t<decl_t>); // extern "C" { ... }
     ExternCinclude_d(list_t<decl_t>,list_t<$(seg_t,qvar_t,bool)@>); 
+    Porton_d;
+    Portoff_d;
     // extern "C include" { <decls> } export { <vars> }
     // the bool in the vars is used to warn when an export doesn't appear
     // in the declarations.
@@ -762,9 +766,9 @@ namespace Absyn {
   extern bool is_qvar_qualified(qvar_t);
 
   ///////////////////////// Qualifiers ////////////////////////////
-  extern tqual_t const_tqual();
+  extern tqual_t const_tqual(seg_t);
   extern tqual_t combine_tqual(tqual_t x,tqual_t y);
-  extern tqual_t empty_tqual();
+  extern tqual_t empty_tqual(seg_t);
   
   //////////////////////////// Constraints /////////////////////////
   extern conref_t<`a> new_conref(`a x); 
@@ -988,6 +992,9 @@ namespace Absyn {
 
   // for testing typerep; temporary
   extern void print_decls(list_t<decl_t>);
+
+  // used to control whether we're compiling or porting c code
+  extern bool porting_c_code;
   }
 
 #endif

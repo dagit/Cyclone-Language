@@ -428,6 +428,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     case &Typedef_d(_):       unimp_msg_part = "typedef";   break;
     case &ExternC_d(_):       unimp_msg_part = "extern \"C\""; break;
     case &ExternCinclude_d(_,_):unimp_msg_part = "extern \"C include\""; break;
+    case Porton_d:            unimp_msg_part = "__cyclone_port_on__"; break;
+    case Portoff_d:           unimp_msg_part = "__cyclone_port_off__"; break;
     }
     throw impos("tcStmt: nested %s declarations unimplemented",unimp_msg_part);
 

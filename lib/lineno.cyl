@@ -67,7 +67,6 @@ static opt_t<$(mstring_t,int)@> parse_linedef(mstring_t line) {
     while (k < line.size && line[k] != '"') ++k;
     if (j == line.size || k == line.size) return NULL; // if there's no name
     mstring_t fname = substring(line,j,k-j);
-
     return new Opt(new $(fname,number));
   } catch {
   default:
@@ -98,7 +97,7 @@ void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@,`H> places) {
         /* NOTE: eol is the index of the char AFTER the lexeme */
 	this_line = lexeme(lbuf); // FIX: expensive string copy
 
-	if (next == END || eol > (*places->hd)[0])
+	if (next == END || eol > (*places->hd)[0]) 
 	  break;
 
         if (next == NEWLINE) ++line;

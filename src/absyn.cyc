@@ -95,11 +95,12 @@ tqual_t combine_tqual(tqual_t x,tqual_t y) {
   return Tqual(x.print_const || y.print_const,
 	       x.q_volatile || y.q_volatile,
 	       x.q_restrict || y.q_restrict,
-               x.real_const || y.real_const);
+               x.real_const || y.real_const,
+               segment_join(x.loc,y.loc));
 }
 
-tqual_t empty_tqual() { return Tqual(false,false,false,false); }
-tqual_t const_tqual() { return Tqual(true, false,false,true); }
+tqual_t empty_tqual(seg_t loc) { return Tqual(false,false,false,false,loc); }
+tqual_t const_tqual(seg_t loc) { return Tqual(true, false,false,true,loc); }
 
 // a static &Upper_b(&Exp(NULL,&Const_e(&Int_c(Unsigned,1)),NULL))
 static tunion Cnst.Int_c      one_intc  = Int_c(Unsigned,1);
@@ -252,9 +253,10 @@ qvar_t tunion_scanf_arg_qvar = &tunion_scanf_arg_qvar_p;
 static type_t* string_t_opt = NULL;
 type_t string_typ(type_t rgn) {
   if (rgn != HeapRgn)
-    return starb_typ(char_typ,rgn,empty_tqual(),Unknown_b,true_conref);
+    return starb_typ(char_typ,rgn,empty_tqual(NULL),Unknown_b,true_conref);
   if (string_t_opt == NULL) {
-    type_t t = starb_typ(char_typ,HeapRgn,empty_tqual(),Unknown_b,true_conref);
+    type_t t = starb_typ(char_typ,HeapRgn,empty_tqual(NULL),
+                         Unknown_b,true_conref);
     string_t_opt = new t;
   }
   return *string_t_opt;
@@ -262,9 +264,10 @@ type_t string_typ(type_t rgn) {
 static type_t* const_string_t_opt = NULL;
 type_t const_string_typ(type_t rgn) {
   if (rgn != HeapRgn)
-    return starb_typ(char_typ,rgn,const_tqual(),Unknown_b,true_conref);
+    return starb_typ(char_typ,rgn,const_tqual(NULL),Unknown_b,true_conref);
   if (const_string_t_opt == NULL) {
-    type_t t = starb_typ(char_typ,HeapRgn,const_tqual(),Unknown_b,true_conref);
+    type_t t = starb_typ(char_typ,HeapRgn,const_tqual(NULL),
+                         Unknown_b,true_conref);
     const_string_t_opt = new t;
   }
   return *const_string_t_opt;
@@ -276,40 +279,41 @@ type_t starb_typ(type_t t, type_t r, tqual_t tq, bounds_t b,
   return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
 				  PtrAtts{.rgn = r, .nullable = true_conref, 
 					  .bounds = new_conref(b),
-					  .zero_term = zeroterm}});
+					  .zero_term = zeroterm, .loc=NULL}});
 }
 type_t atb_typ(type_t t, type_t r, tqual_t tq, bounds_t b,
 	       conref_t<bool> zeroterm) {
   return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
 				  PtrAtts{.rgn = r, .nullable = false_conref, 
 					  .bounds = new_conref(b),
-					  .zero_term = zeroterm}});
+					  .zero_term = zeroterm, .loc=NULL}});
 }
 
 type_t star_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) { 
   return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
 				  PtrAtts{.rgn = r, .nullable = true_conref, 
 					  .bounds = bounds_one_conref,
-					  .zero_term = zeroterm}});
+					  .zero_term = zeroterm, .loc=NULL}});
 }
 type_t cstar_typ(type_t t, tqual_t tq) { 
   return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
 				  PtrAtts{.rgn = HeapRgn, 
 					  .nullable = true_conref, 
 					  .bounds = bounds_one_conref,
-					  .zero_term = false_conref}});
+					  .zero_term = false_conref,
+                                          .loc=NULL}});
 }
 type_t at_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) {
   return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
 				  PtrAtts{.rgn = r, .nullable = false_conref, 
 					  .bounds = bounds_one_conref,
-					  .zero_term = zeroterm}});
+					  .zero_term = zeroterm, .loc=NULL}});
 }
 type_t tagged_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) {
   return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
 				  PtrAtts{.rgn = r, .nullable = true_conref, 
 					  .bounds = bounds_unknown_conref,
-					  .zero_term = zeroterm}});
+					  .zero_term = zeroterm, .loc=NULL}});
 }
 
 type_t array_typ(type_t elt_type, tqual_t tq, exp_opt_t num_elts, 
@@ -331,7 +335,8 @@ type_t file_typ() {
     typedef_name_t file_t_name = new $((tunion Nmspace)&std_namespace, sf);
     aggrdecl_t sd = new Aggrdecl(StructA,Abstract,file_t_name,NULL,NULL,NULL);
     type_t file_struct_typ = new AggrType(AggrInfo(new KnownAggr(new sd),NULL));
-    file_t_opt = new at_typ(file_struct_typ,HeapRgn,empty_tqual(),false_conref);
+    file_t_opt = new at_typ(file_struct_typ,HeapRgn,empty_tqual(NULL),
+                            false_conref);
   }
   return *file_t_opt;
 }
@@ -340,7 +345,8 @@ type_t void_star_typ() {
   static type_t* void_star_t_opt = NULL;
 
   if (void_star_t_opt == NULL)
-    void_star_t_opt = new star_typ(VoidType,HeapRgn,empty_tqual(),false_conref);
+    void_star_t_opt = new star_typ(VoidType,HeapRgn,empty_tqual(NULL),
+                                   false_conref);
   return *void_star_t_opt;
 }
 static tunion Type.JoinEff empty_eff = JoinEff(NULL);
@@ -580,12 +586,12 @@ decl_t letv_decl(list_t<vardecl_t,`H> vds, seg_t loc) {
   return new_decl(new Letv_d(vds),loc);
 }
 vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init) {
-  return new Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
+  return new Vardecl{.sc=Public, .name=x, .tq=empty_tqual(NULL),
                         .type=t, .initializer=init, .rgn=NULL, 
                         .attributes=NULL, .escapes=false};
 }
 vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init) {
-  return new Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
+  return new Vardecl{.sc=Static, .name=x, .tq=empty_tqual(NULL),
                         .type=t, .initializer=init, .rgn=NULL,
                         .attributes=NULL, .escapes=false};
 }
@@ -645,7 +651,7 @@ type_t function_typ(list_t<tvar_t,`H> tvs, opt_t<type_t,`H> eff_typ,
 }
 type_t pointer_expand(type_t t) {
   switch (Tcutil::compress(t)) {
-  case &FnType(_): return at_typ(t,HeapRgn,empty_tqual(),false_conref);
+  case &FnType(_): return at_typ(t,HeapRgn,empty_tqual(NULL),false_conref);
   default: return t;
   }
 }
@@ -787,6 +793,8 @@ bool is_union_type(type_t t) {
     Marshal::print_type(decls_rep,&decls);
     printf("\n");
   }
+
+bool porting_c_code = false;
   
 }
 

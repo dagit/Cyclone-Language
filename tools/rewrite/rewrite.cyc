@@ -1,0 +1,190 @@
+#include <core.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <list.h>
+#include <filename.h>
+using Core;
+using List;
+
+xtunion exn { Eof };
+
+void read_filename(char ?buf) {
+  int i = 0;
+  int c = fgetc(stdin);
+  while (c != '(' && c != EOF) {
+    buf[i] = (char)c;
+    i++;
+    c = fgetc(stdin);
+  }
+  if (c == EOF) throw Eof;
+}
+
+void read_num(int @j) {
+  char buffer[11]ZEROTERM = {for i < 10 : 0};
+  char ?buf = (char ?)buffer;
+  int i = 0;
+  int c = fgetc(stdin);
+  while (c >= '0' && c <= '9') {
+    buf[i] = (char)c;
+    i++;
+    c = fgetc(stdin);
+  }
+  if (c == EOF) throw Eof;
+  *j = atoi(buf);
+}
+
+void read_line(FILE @f) {
+  int c = fgetc(f);
+  while (c != '\n' && c != EOF) 
+    c = fgetc(f);
+  if (c == EOF) throw Eof;
+}
+
+typedef struct Rewrite {
+  int line;
+  int offset;
+  string_t old_str;
+  string_t new_str;
+} @rewrite_t;
+
+int cmp_rewrite(rewrite_t r1, rewrite_t r2) {
+  if (r1->line < r2->line) return -1;
+  if (r2->line < r1->line) return 1;
+  if (r1->offset < r2->offset) return -1;
+  if (r2->offset < r1->offset) return 1;
+  return 0;
+}
+
+void seekit(FILE @f, int cur_line, int cur_off, int new_line, int new_off) {
+  while (cur_line != new_line) {
+    read_line(f);
+    cur_line++; 
+    cur_off = 0;
+  }
+  while (cur_off != new_off) {
+    fgetc(f); 
+    cur_off++;
+  }
+}
+
+void read_up_to(char ?buf, int c) {
+  int c2 = fgetc(stdin);
+  while (c2 != c) {
+    *buf = (char)c2;
+    buf++;
+    c2 = fgetc(stdin);
+  }
+  *buf = (char)0;
+}
+
+void skip_past(int c) {
+  int c2 = fgetc(stdin);
+  while (c2 != c) {
+    c2 = fgetc(stdin);
+  }
+}
+
+void copy_up_to(FILE @fin, FILE @fout, int @curr_line, int @curr_off,
+                int desired_line, int desired_off) {
+  int c;
+  while (*curr_line != desired_line || *curr_off != desired_off) {
+    c = fgetc(fin);
+    fputc(c,fout);
+    if (c == '\n') {
+      *curr_line = *curr_line + 1;
+      *curr_off = 0;
+    } else 
+      *curr_off = *curr_off + 1;
+  }
+}
+
+void skip_input(FILE @fin, int @curr_line, int @curr_off, int count) {
+  int c;
+  while (count != 0) {
+    c = fgetc(fin);
+    count--;
+    if (c == '\n') {
+      *curr_line = *curr_line + 1;
+      *curr_off = 1;
+    } else 
+      *curr_off = *curr_off + 1;
+  }
+}
+
+void copy_rest(FILE @fin, FILE @fout) {
+  int c = fgetc(fin);
+  while (c != EOF) {
+    fputc(c,fout);
+    c = fgetc(fin);
+  }
+}
+
+int main(int argc, const char ?`H? argv) {
+  char filename[1026]ZEROTERM = {for i < 1025 : 0};
+  char delta[1026]ZEROTERM = {for i < 1025 : 0};
+  int line1 = 0, line2 = 0;
+  int offset1 = 0, offset2 = 0;
+  int i = 0;
+  string_t old_str = "";
+  string_t new_str = "";
+
+  // list of files and associated rewrites
+  list_t<$(char ?, list_t<rewrite_t>)@> fs = NULL;
+
+  try {
+    while (true) {
+      read_filename(filename);
+      read_num(&line1);
+      read_num(&offset1);
+      read_num(&line2);
+      read_num(&offset2);
+      skip_past('`');
+      read_up_to(delta,'\'');
+      new_str = aprintf("%s",delta);
+      skip_past('`');
+      read_up_to(delta,'\'');
+      old_str = aprintf("%s",delta);
+      read_line(stdin);
+      // insert into fs
+      let f = fs;
+      while (f != NULL) {
+        if (strcmp((*f->hd)[0],filename) == 0) break;
+        f = f->tl;
+      }
+      if (f == NULL) {
+        fs = f = new List{new $(strdup(filename), NULL), fs}; 
+      }
+      (*f->hd)[1] = new List(new Rewrite{line1,offset1,old_str,new_str},
+                             (*f->hd)[1]);
+    }
+  } catch {
+  case Eof: break;
+  }
+  printf("done parsing rewrites.\n");
+  for (let xs = fs; xs != NULL; xs = xs->tl) {
+    let $(file,rewrites) = *xs->hd;
+    let basename = Filename::chop_extension(file);
+    let fileout = strconcat(basename,"_new.cyc");
+    rewrites = rimp_merge_sort(cmp_rewrite, rewrites);
+    printf("Rewriting file %s to %s\n",file,fileout);
+    FILE @fin = (FILE @)fopen(file,"r");
+    FILE @fout = (FILE @)fopen(fileout,"w");
+    int cur_line = 1;
+    int cur_off = 0;
+    for (; rewrites; rewrites = rewrites->tl) {
+      printf("line %d, offset %d: `%s' -> `%s'\n", 
+             rewrites->hd->line,rewrites->hd->offset,
+             rewrites->hd->old_str,rewrites->hd->new_str);
+      copy_up_to(fin,fout,&cur_line,&cur_off,
+                 rewrites->hd->line, rewrites->hd->offset);
+      fprintf(fout,"%s",rewrites->hd->new_str);
+      skip_input(fin,&cur_line,&cur_off,strlen(rewrites->hd->old_str));
+    }
+    copy_rest(fin,fout);
+    fclose(fin);
+    fclose(fout);
+  }
+  return 0;
+}
+

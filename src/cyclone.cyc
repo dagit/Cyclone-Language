@@ -38,6 +38,9 @@
 #include "new_control_flow.h"
 #include "interface.h"
 
+namespace Port {
+  extern void port(List::list_t<Absyn::decl_t>);
+}
 namespace Lex {
   extern void lex_init(bool use_cyclone_keywords);
 }
@@ -74,6 +77,13 @@ static bool print_full_evars_r = false;
 static bool print_all_tvars_r = false;
 static bool print_all_kinds_r = false;
 static bool print_all_effects_r = false;
+
+void set_port_c_code() {
+  Absyn::porting_c_code = true;
+  Position::max_errors = 65535; // allow a lot of errors
+  save_c_r = true; // save temp files
+  parseonly_r = true; // stop after parsing
+}
 
 
 static string_t *output_file = NULL;
@@ -709,6 +719,11 @@ static void process_file(string_t<`H> filename) {
     return;
   } 
 
+  if (Absyn::porting_c_code) {
+    Port::port(tds);
+    return;
+  }
+
   let te = Tcenv::tc_init(); // Must declare BEFORE the goto 
   if (parseonly_r) goto PRINTC;
 
@@ -1003,7 +1018,10 @@ int main(int argc, string_t<`H> ?`H argv) {
 	       "Treat register storage class as public"),
          new $("-detailedlocation", false, "",
                new Clear_spec(&Position::use_gcc_style_location),
-               "Try to give more detailed location information for errors")
+               "Try to give more detailed location information for errors"),
+         new $("-port", false, "",
+               new Unit_spec(set_port_c_code),
+               "Suggest how to port C code to Cyclone")
          );
 
   Arg::parse(options, add_other, "Options:", argv);

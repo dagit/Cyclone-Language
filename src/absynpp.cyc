@@ -596,7 +596,7 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
       return cat(rest, tvars2doc(ts));
 
     // FIX? What about attributes that we parse before tq2??
-  case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt),tq2):
+  case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt,_),tq2):
     doc_t ptr;
     switch(conref_def(bounds_one,bd)) {
     case Unknown_b: ptr = question(); break;
@@ -932,7 +932,7 @@ doc_t typedef_name2bolddoc(qvar_t v) {
 }
 
 doc_t typ2doc(type_t t) {
-  return tqtd2doc(empty_tqual(), t, NULL);
+  return tqtd2doc(empty_tqual(NULL), t, NULL);
 }
 
 // higher precedence means binds more tightly
@@ -1605,7 +1605,7 @@ doc_t decl2doc(decl_t d) {
     doc_t scopedoc  = scope2doc(fd->sc);
     doc_t beforenamedoc = (to_VC ? callconv2doc(fd->attributes) : attsdoc);
     doc_t namedoc   = typedef_name2doc(fd->name);
-    doc_t tqtddoc   = tqtd2doc(empty_tqual(), t,
+    doc_t tqtddoc   = tqtd2doc(empty_tqual(NULL), t,
 			       new Opt(cat(beforenamedoc,namedoc)));
     doc_t bodydoc   = cat(blank_doc(),lb(),
 			  nest(2,cat(line_doc(),stmt2doc(fd->body))),
@@ -1778,6 +1778,13 @@ doc_t decl2doc(decl_t d) {
               rb(),
               text(" */"));
     break;
+  case Porton_d:
+    s = cat(text("__cyclone_port_on__;"), lb());
+    break;
+  case Portoff_d:
+    s = cat(text("__cyclone_port_off__;"), lb());
+    break;
+
   }
   return s;
 }
@@ -1872,7 +1879,7 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
     }
 
     // discard tq because you can't qualify a function
-    let $(tq3,t3,tml3) = to_tms(empty_tqual(),t2);
+    let $(tq3,t3,tml3) = to_tms(empty_tqual(NULL),t2);
     list_t<type_modifier_t> tms = tml3;
     // mess with attributes and arguments:
     // * for gcc: we put all attributes after the args

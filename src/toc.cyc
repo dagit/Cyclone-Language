@@ -171,7 +171,7 @@ static tunion Type.AggrType tagged_arr_typ_v =
                            AggrType(AggrInfo(&tagged_arr_typ_u,NULL));
 static tunion Type tagged_arr_typ = &tagged_arr_typ_v;
 
-static tqual_t mt_tq = Tqual(false,false,false,false);
+static tqual_t mt_tq = Tqual(false,false,false,false,NULL);
 
 static stmt_t skip_stmt_dl() {
   static stmt_t * skip_stmt_opt = NULL;
@@ -209,7 +209,7 @@ static bool is_zero(exp_t e) {
 // return true if t is a nullable pointer type i.e., *
 static bool is_nullable(type_t t) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_))): return conref_def(false,n);
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_,_))): return conref_def(false,n);
   default: toc_impos("is_nullable");
   }
 }
@@ -355,7 +355,7 @@ static type_t typ_to_c(type_t t) {
       else return uint_typ;
     else return strctq(collapse_qvar_tag(tuf->name,"_struct"));
   case &TunionFieldType(_): toc_impos("unresolved TunionFieldType");
-  case &PointerType(PtrInfo(t2,tq,PtrAtts(_,_,bnds,_))):
+  case &PointerType(PtrInfo(t2,tq,PtrAtts(_,_,bnds,_,_))):
     // t2? maps to struct tagged_arr.
     // t2* and t2@ map to t2*.  Regions and zero-term are irrelevant.
     t2 = typ_to_c_array(t2);
@@ -736,7 +736,7 @@ static CfFlowInfo::relns_t get_relns(exp_t e) { // e must be pre-translation!
 static bool check_const_array(unsigned i, type_t t) {
   //fprintf(stderr,"checking const array %d and %s\n",i,typ2string(t));
   switch (compress(t)) {
-  case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,zt))):
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,zt,_))):
     switch (conref_def(bounds_one,b)) {
     case Unknown_b: return false;
     case &Upper_b(e):
@@ -1246,7 +1246,7 @@ static struct PtrInfo get_ptr_type(type_t t) {
 static bool is_zero_ptr_type(type_t t, type_t @ptr_type, 
                              bool @is_fat, type_t @elt_type) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo{elt,_,PtrAtts(_,_,bnds,zt)}):
+  case &PointerType(PtrInfo{elt,_,PtrAtts(_,_,bnds,zt,_)}):
     if (conref_def(false,zt)) {
       *ptr_type = t;
       *elt_type = elt;
@@ -1264,7 +1264,7 @@ static bool is_zero_ptr_type(type_t t, type_t @ptr_type,
 	new PointerType(PtrInfo(elt,tq, 
 				PtrAtts(HeapRgn,false_conref,
 					new_conref(new Upper_b((exp_t)n)),
-					zt)));
+					zt,NULL)));
       return true;
     } else return false;
   default: return false;
@@ -1461,7 +1461,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       case &ArrayType(ArrayInfo{_,_,e2,_}): 
         // FIX: copy the expression e2 here.
         e->r = e2->r;  break;
-      case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,nbl,bound,zt))):
+      case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,nbl,bound,zt,_))):
 	switch(conref_def(bounds_one,bound)) {
 	case Unknown_b: // retrieve (last_plus_one - curr) via runtime call
 	  e->r = fncall_exp(_get_arr_size_e,
@@ -1492,7 +1492,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       //   _tag_arr_plus(e1,sizeof(elt_typ),e2)
       // FIX: allow arithmetic on t ? types at top-level!
       switch (compress(old_typs->hd)) {
-      case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,_,b,zt))):
+      case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,_,b,zt,_))):
         switch (conref_def(bounds_one,b)) {
         case Unknown_b:
           exp_t e1 = es->hd;
@@ -2007,7 +2007,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       let s = init_array(nv, xexp, dles0, exp_stmt(xexp,DL));
       type_t old_elt_typ;
       switch (compress(old_typ)) {
-      case &PointerType(PtrInfo{et,tq,PtrAtts(_,_,_,zt)}):
+      case &PointerType(PtrInfo{et,tq,PtrAtts(_,_,_,zt,_)}):
 	old_elt_typ = et; break;
       default:
 	old_elt_typ =
@@ -2041,7 +2041,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       //    b; })
       bool is_tagged_ptr = false;
       switch (compress(old_typ)) {
-      case &PointerType(PtrInfo{et,tq,PtrAtts(_,_,b,zt)}):
+      case &PointerType(PtrInfo{et,tq,PtrAtts(_,_,b,zt,_)}):
         is_tagged_ptr = (conref_def(bounds_one,b) == Unknown_b);
         break;
       default: toc_impos("exp_to_c: comprehension not an array type");
@@ -2131,8 +2131,8 @@ static void exp_to_c(env_t nv, exp_t e) {
       switch(e1->r) {
       case &Cast_e(t2,e2,_,_):
 	switch($(compress(t2),compress(e2->topt->v))) {
-	case $(&PointerType(PtrInfo{arr_typ,_,PtrAtts(_,_,bc,_)}),
-	       &PointerType(PtrInfo{_,_,PtrAtts(_,_,be,_)})):
+	case $(&PointerType(PtrInfo{arr_typ,_,PtrAtts(_,_,bc,_,_)}),
+	       &PointerType(PtrInfo{_,_,PtrAtts(_,_,be,_,_)})):
 	  switch($(conref_def(bounds_one,bc),conref_def(bounds_one,be))) {
 	  case $(Unknown_b,&Upper_b(arr_sz)):
 	    exp_to_c(nv,e2);
@@ -2194,7 +2194,7 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Deref_e(e1):
     let e1_typ = compress(e1->topt->v);
     switch (e1_typ) {
-    case &PointerType(PtrInfo{t2,tq,PtrAtts(rgn,cr,b,zt)}):
+    case &PointerType(PtrInfo{t2,tq,PtrAtts(rgn,cr,b,zt,_)}):
       switch (conref_def(bounds_one,b)) {
       case &Upper_b(_):
 	bool do_null_check = need_null_check(e1);
@@ -2235,7 +2235,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     bool do_null_check = need_null_check(e1);
     exp_to_c(nv, e1);
     bool is_poly = is_poly_project(e); // decide before mutating e
-    let PtrInfo{ta,tq,PtrAtts(rgn,bcr,b,zt)} = get_ptr_type(e1typ);
+    let PtrInfo{ta,tq,PtrAtts(rgn,bcr,b,zt,_)} = get_ptr_type(e1typ);
     switch (conref_def(bounds_one,b)) {
     case &Upper_b(esz):
       // the type-checker should've ensured the size is at least 1
@@ -2292,7 +2292,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	impos("unknown tuple subscript in translation to C");
       e->r = aggrmember_exp(e1,fieldname(i+1),DL)->r;
       break;
-    case &PointerType(PtrInfo{ta,tq,PtrAtts(rgn,bcr,b,zt)}):
+    case &PointerType(PtrInfo{ta,tq,PtrAtts(rgn,bcr,b,zt,_)}):
       let relns = get_relns(e1);
       bool in_bnds = false;
       switch (conref_def(bounds_one,b)) {
@@ -3608,6 +3608,9 @@ static void decltypes_to_c(decl_t d) {
   case &ExternCinclude_d(_,_): 
     Tcutil::terr(d->loc,"Cyclone declaration within C code");
     break;
+  case Porton_d:
+  case Portoff_d: 
+    break;
   }
 }
 
@@ -3710,6 +3713,9 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top, bool cinclude) {
         }
       }
       result_decls = new List(d,result_decls);
+      break;
+    case Porton_d:
+    case Portoff_d:
       break;
     case &Namespace_d(_,ds2): fallthru(ds2);
     case &Using_d(_,ds2):     fallthru(ds2);

@@ -514,7 +514,7 @@ void dumpfunargs(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, bool c_varargs,
 }
 
 void dumptyp(type_t t) {
-  dumptqtd(empty_tqual(),t,ignore,0);
+  dumptqtd(empty_tqual(NULL),t,ignore,0);
 }
 
 void dumpdesignator(designator_t d) {
@@ -1031,7 +1031,7 @@ void dumpdecl(decl_t d) {
                                  List::map(Absynpp::arg_mk_opt,fd->args), 
                                  fd->c_varargs, fd->cyc_varargs,
                                  fd->rgn_po, NULL});
-    dumptqtd(empty_tqual(), t,
+    dumptqtd(empty_tqual(NULL), t,
 	     to_VC ? dump_callconv_fdqvar : dump_atts_qvar,fd);
     dump_char('{');
     dumpstmt(fd->body);
@@ -1145,6 +1145,12 @@ void dumpdecl(decl_t d) {
       dump("}");
     }
     break;
+  case Porton_d:
+    dump(" __cyclone_port_on__; ");
+    break;
+  case Portoff_d:
+    dump(" __cyclone_port_off__; ");
+    break;
   }
 }
 
@@ -1163,7 +1169,7 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
   switch(tms->hd) {
     // FIX: doesn't invert zeroterm default when elt type is char!! (never did)
     // FIX? What about attributes that we parse before tq2??
-  case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt),tq2):
+  case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt,_),tq2):
     switch(conref_def(bounds_one,bd)) {
     case Unknown_b: dump_char('?'); break;
     case &Upper_b(e):
