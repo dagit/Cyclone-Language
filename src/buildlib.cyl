@@ -64,11 +64,13 @@ string_t current_line = NULL;
 
 typedef $(string_t,list_t<stringptr_t>,list_t<stringptr_t>,string_t) *spec_t;
 extern spec_t spec(Lexbuf<`a>);
-extern int startsymbols(Lexbuf<`a>);
+extern int commands(Lexbuf<`a>);
+extern int snarfsymbols(Lexbuf<`a>);
 extern int block(Lexbuf<`a>);
 extern int block_string(Lexbuf<`a>);
 extern int block_comment(Lexbuf<`a>);
 string_t current_header = NULL;
+list_t<stringptr_t> snarfed_symbols = NULL;
 list_t<stringptr_t> current_symbols = NULL;
 list_t<stringptr_t> current_omit_symbols = NULL;
 struct Buffer::t *specblock = NULL;
@@ -373,7 +375,7 @@ and spec "spec_t" = parse
   current_symbols = NULL;
   current_omit_symbols = NULL;
   specblock = Buffer::create(255);
-  startsymbols(lexbuf);
+  if (commands(lexbuf)) return NULL;
   return new $(current_header,current_symbols,current_omit_symbols,
                (string_t)Buffer::contents((Buffer::T)specblock));
 }
@@ -382,30 +384,59 @@ and spec "spec_t" = parse
 | eof
 { return NULL; }
 | _
-{ return NULL; }
+{ fprintf(stderr,
+          "Error in .cys file: expected header file name, found '%c' instead\n",
+          lexeme_char(lexbuf,0));
+  return NULL; }
 
-and startsymbols = parse
-  "**OMIT_VARIABLE" [' ''\t''\n''\r']+ ['A'-'Z''a'-'z''0'-'9''_']+
-{ let s = lexeme(lexbuf);
-  let j = strrchr(s,' ');
-  if (j == NULL) j = strrchr(s,'\t');
-  if (j == NULL) j = strrchr(s,'\n');
-  if (j == NULL) j = strrchr(s,'\r');
-  j = strpbrk(j,
-              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-              "abcdefghijklmnopqrstuvwxyz"
-              "0123456789_");
-  current_omit_symbols = new List(new (string_t)j,current_omit_symbols);
-  return startsymbols(lexbuf); }
-| ['A'-'Z''a'-'z''0'-'9''_']+
-{ current_symbols = new List(new (string_t)lexeme(lexbuf),current_symbols);
-  return startsymbols(lexbuf); }
+and commands = parse
+  "include" [' ''\t''\n''\r']+ '{'
+{ snarfed_symbols = NULL;
+  if (snarfsymbols(lexbuf)) return 1;
+  current_symbols = append(snarfed_symbols,current_symbols);
+  return commands(lexbuf); }
+| "omitvariables" [' ''\t''\n''\r']+ '{'
+{ snarfed_symbols = NULL;
+  if (snarfsymbols(lexbuf)) return 1;
+  current_omit_symbols = append(snarfed_symbols,current_omit_symbols);
+  return commands(lexbuf); }
+| "epilogue" [' ''\t''\n''\r']+ '{'
+{ braces_to_match = 1;
+  if (block(lexbuf)) return 1;
+  return commands(lexbuf); }
 | [' ''\t''\n''\r']+
-{ return startsymbols(lexbuf); }
-| '{'
-{ braces_to_match = 1; return block(lexbuf); }
+{ return commands(lexbuf); }
 | eof
 { return 0; }
+| ';'
+{ return 0; }
+| _
+{ fprintf(stderr,
+          "Error in .cys file: expected command, found '%c' instead\n",
+          lexeme_char(lexbuf,0));
+  return 1; }
+
+and snarfsymbols =
+/* Expects to be entered just after a left brace, searches for the
+   a sequence of symbols and the matching right brace, stores the
+   symbols in snarfed_symbols. */
+parse
+  ['A'-'Z''a'-'z''0'-'9''_']+
+{ snarfed_symbols = new List(new (string_t)lexeme(lexbuf),snarfed_symbols);
+  return snarfsymbols(lexbuf); }
+| [' ''\t''\n''\r']+
+{ return snarfsymbols(lexbuf); }
+| '}'
+{ return 0; }
+| eof
+{ fprintf(stderr,
+          "Error in .cys file: unexpected end-of-file\n");
+  return 1; }
+| _
+{ fprintf(stderr,
+          "Error in .cys file: expected symbol, found '%c' instead\n",
+          lexeme_char(lexbuf,0));
+  return 1; }
 
 and block =
 /* Expects to be entered just after a left brace, searches for the
@@ -541,9 +572,12 @@ and block_comment = parse
       scan_exp(e1);
       add_target(fn);
       return;
-    case &Offsetof_e(t1,fn):
+    case &Offsetof_e(t1,f):
       scan_type(t1);
-      add_target(fn);
+      switch (f) {
+      case &StructField(fn): add_target(fn); break;
+      case &TupleIndex(_): break;
+      }        
       return;
     case &Const_e(_):
       return;
@@ -553,7 +587,6 @@ and block_comment = parse
         scan_exp(e1);
       }
       return;
-
     case &StmtExp_e(_):
       fprintf(stderr,"Error: unexpected Stmt_e\n");
       exit(1); return;
@@ -566,10 +599,10 @@ and block_comment = parse
     case &Instantiate_e(_,_):
       fprintf(stderr,"Error: unexpected Instantiate_e\n");
       exit(1); return;
-    case &New_e(_, _):
+    case &New_e(_,_):
       fprintf(stderr,"Error: unexpected New_e\n");
       exit(1); return;
-    case &Gentyp_e(_):
+    case &Gentyp_e(_,_):
       fprintf(stderr,"Error: unexpected Gentyp_e\n");
       exit(1); return;
     case &Tuple_e(_):
@@ -595,6 +628,9 @@ and block_comment = parse
       exit(1); return;
     case &Enum_e(_,_,_):
       fprintf(stderr,"Error: unexpected Enum_e\n");
+      exit(1); return;
+    case &AnonEnum_e(_,_,_):
+      fprintf(stderr,"Error: unexpected AnonEnum_e\n");
       exit(1); return;
     case &Codegen_e(_):
       fprintf(stderr,"Error: unexpected Codegen_e\n");
@@ -641,6 +677,8 @@ and block_comment = parse
         scan_type(sfs->hd->type);
         scan_exp_opt(sfs->hd->width);
       }
+      return;
+    case &AnonEnumType(_):
       return;
     case &StructType(NULL,_,_):
       return;
@@ -838,10 +876,14 @@ and block_comment = parse
   }
 
   int force_directory(string_t d) {
-    /* I'd rather do this with stat but that isn't working yet */
+    /* We could do this with stat, but stat is more
+       platform dependent; this is more portable. */
     let fd = open(d,O_RDONLY);
     if (fd == -1) {
-      if (mkdir(d,0700) == -1) return 1;
+      if (mkdir(d,0700) == -1) {
+        fprintf(stderr,"Error: could not create directory %s\n",d);
+        return 1;
+      }
     }
     else close(fd);
     return 0;
@@ -866,29 +908,77 @@ and block_comment = parse
     return 0;
   }
 
-  int process_file(string_t filename, string_t dir,
+  int process_file(string_t filename,
+                   string_t dir,
                    list_t<stringptr_t<`H,`H>,`H> start_symbols,
                    list_t<stringptr_t<`H,`H>,`H> omit_symbols,
                    string_t epilogue) {
     fprintf(stderr,
-            "*********************************  working on %s...\n",filename);
+            "********************************* %s...\n",filename);
 
+    /* Cd into dir, where the header files will be built.  Remember
+       the current dir so we can cd back after we're done. */
     char ?buf = new {for i<1024: '\0'};
     let cwd = getcwd(buf,buf.size);
-    if (chdir(dir)) return 1;
-    let basename = Filename::chop_extension(Filename::basename(filename));
-    let preprocfile = strconcat(basename, ".i");
-    let filteredfile = strconcat(basename, ".iX");
+    if (chdir(dir)) {
+      fprintf(stderr,"Error: can't change directory to %s\n",dir);
+      return 1;
+    }
+    /* Calculate necessary file names.  For example:
+       filename = sys/types.h
+       basename = types.h
+       choppedname = types
+       preprocfile = types.i
+       filteredfile = types.iX
+       dirname = sys
+       cfilename = sys/ctypes.h
+    */
+    let basename = Filename::basename(filename);
+    let choppedname = Filename::chop_extension(basename);
+    let preprocfile = strconcat(choppedname, ".i");
+    let filteredfile = strconcat(choppedname, ".iX");
+    let dirname = Filename::dirname(filename);
+    let cfilename = 
+      (dirname.size == 0)?
+      (aprintf("c%s", basename)):
+      (Filename::concat(dirname, aprintf("c%s", basename)));
+
+    /* Make sure we'll be able to create files in the right directories */
+    if (force_directory_prefixes(filename)) return 1;
 
     /* Table to hold the dependencies */
     dep_t t = new_deps();
 
     /* Get the macros out of the file */
+    FILE *maybe;
     let cmd = aprintf("echo '#include <%s>' | gcc -E -dM -o %s -",
                       filename,preprocfile);
-    if (system(string_to_Cstring(cmd)) != 0)
-      return 1;
-    FILE *maybe = fopen(preprocfile,"r");
+    if (system(string_to_Cstring(cmd)) != 0) {
+      /* The header probably doesn't exist on this system;
+         create a default header. */
+      maybe = fopen(filename,"w");
+      if (!maybe) {
+        fprintf(stderr,"Error: could not create file %s\n",filename);
+        return 1;
+      }
+      fprintf((FILE@)maybe,
+              "#include <%s>\n",
+              cfilename);
+      fclose((FILE@)maybe);
+      maybe = fopen(cfilename,"w");
+      if (!maybe) {
+        fprintf(stderr,"Error: could not create file %s\n",cfilename);
+        return 1;
+      }
+      fprintf((FILE@)maybe,
+              "#error -- %s is not supported on this platform\n",
+              filename);
+      fclose((FILE@)maybe);
+      fprintf(stderr,"Warning: %s will not be supported on this platform\n",
+              filename);
+      return 0;
+    }
+    maybe = fopen(preprocfile,"r");
     if (!maybe) return 1;
     FILE @in_file = (FILE@)maybe;
     let l = Lexing::from_file(in_file);
@@ -1008,15 +1098,8 @@ and block_comment = parse
         reachable_decls = new List(decl,reachable_decls);
     }
     reachable_decls = imp_rev(reachable_decls);
-    if (force_directory_prefixes(filename)) return 1;
     let out_file = fopen(filename,"w");
     if (out_file == NULL) return 1;
-    let dirname = Filename::dirname(filename);
-    let cfilename = 
-      (dirname.size == 0)?
-      (aprintf("c%s", Filename::basename(filename))):
-      (Filename::concat(dirname,
-                        aprintf("c%s", Filename::basename(filename))));
     fprintf((FILE @)out_file,"#include <%s>\nusing Std;\n",cfilename);
     fclose((FILE @)out_file);
     out_file = fopen(cfilename, "w");
@@ -1058,10 +1141,10 @@ and block_comment = parse
     fprintf((FILE @)out_file,"#endif\n");
     fclose((FILE @)out_file);
 
-    fprintf(stderr,
-            "*********************************  %s finished!\n",filename);
-
-    if (chdir(cwd)) return 1;
+    if (chdir(cwd)) {
+      fprintf(stderr,"Error: could not change directory to %s\n", cwd);
+      return 1;
+    }
     return 0;
   }
 
@@ -1081,7 +1164,13 @@ and block_comment = parse
   }
 
   int main(int argc, char ??argv) {
-    if (argc < 3) return 1;
+    if (argc < 3) {
+      fprintf(stderr,
+              "Usage: buildlib <dir> <spec>\n"
+              " where <dir> the output directory"
+              " and <spec> is a .cys specification file.\n");
+      return 1;
+    }
     let dir = argv[1];
     if (force_directory_prefixes(dir)) return 1;
     if (force_directory(dir)) return 1;

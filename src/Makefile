@@ -38,7 +38,7 @@ LIBR:=$(CYC_LIB_PATH)/$(OUT_PREFIX)$(CYCLIB)
 
 CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))
 
-all: $(OUT_PREFIX)$(CYCCOMP) cycdoc$(EXE)
+all: $(OUT_PREFIX)$(CYCCOMP) cycdoc$(EXE) buildlib$(EXE)
 
 # Note: although cyclone now automatically adds CYCLIB to the command
 # line when calling gcc, we leave in an explicit $(LIBR) below so that
@@ -59,9 +59,9 @@ cycdoc.cyc: cycdoc.cyl
 	$(CYCLEX) $< $@
 
 buildlib$(EXE): buildlib.$(O) lex.$(O) parse_tab.$(O) tcutil.$(O) \
-  absynpp.$(O) tcexp.$(O) tcstmt.$(O) formatstr.$(O) evexp.$(O) \
-  tcenv.$(O) tcpat.$(O) new_control_flow.$(O) cf_flowinfo.$(O) \
-  cf_absexp.$(O) absyn.$(O)
+  absynpp.$(O) tc.$(O) tcdecl.$(O) tcgenrep.$(O) tcexp.$(O) \
+  tcstmt.$(O) formatstr.$(O) evexp.$(O) tcenv.$(O) tcpat.$(O) \
+  new_control_flow.$(O) cf_flowinfo.$(O) absyn.$(O)
 	$(CYCC) -v -B$(CYC_LIB_PATH) -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
 
 buildlib.cyc: buildlib.cyl
@@ -132,6 +132,7 @@ clean:
 	$(RM) $(addprefix *, $(C_SRCS) $(O_SRCS) $(CYCCOMP))
 	$(RM) $(addprefix *, lex.cyc parse_tab.cyc parse_tab.h)
 	$(RM) cycdoc cycdoc.exe cycdoc.cyc cycdoc.$(O) cycdoc.c
+	$(RM) buildlib buildlib.exe buildlib.cyc buildlib.$(O) buildlib.c
 	$(RM) *~ *.output *.stackdump *.d amon.out .target* install_path.c
 
 # Produce dependencies

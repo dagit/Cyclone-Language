@@ -1,4 +1,653 @@
+ctype.h:
+epilogue {
+namespace Std {
+extern "C" {
+int isalnum(int);
+int isalpha(int);
+int isascii(int);
+int iscntrl(int);
+int isdigit(int);
+int isgraph(int);
+int islower(int);
+int isprint(int);
+int ispunct(int);
+int isspace(int);
+int isupper(int);
+int isxdigit(int);
+int toascii(int);
+int tolower(int);
+int toupper(int);
+int _tolower(int);
+int _toupper(int);
+}
+}
+}
+;
+
+dirent.h:
+include {
+DIR
+dirent
+ino_t
+NAME_MAX
+}
+epilogue {
+namespace Std {
+extern "C" {
+int closedir(DIR @);
+struct dirent @readdir(DIR @);
+// FIX: the third arg is an array, need a wrapper
+//int readdir_r(DIR *, struct dirent *, struct dirent **);
+void rewinddir(DIR @);
+void seekdir(DIR @, long);
+long telldir(DIR @);
+}
+// FIX: need a wrapper
+extern DIR @opendir(const char ?);
+}
+}
+;
+
+errno.h:
+include {
+E2BIG
+EACCES
+EADDRINUSE
+EADDRNOTAVAIL
+EAFNOSUPPORT
+EAGAIN
+EALREADY
+EBADF
+EBADMSG
+EBUSY
+ECANCELED
+ECHILD
+ECONNABORTED
+ECONNREFUSED
+ECONNRESET
+EDEADLK
+EDESTADDRREQ
+EDOM
+EDQUOT
+EEXIST
+EFAULT
+EFBIG
+EHOSTUNREACH
+EIDRM
+EILSEQ
+EINPROGRESS
+EINTR
+EINVAL
+EIO
+EISCONN
+EISDIR
+ELOOP
+EMFILE
+EMSGSIZE
+EMULTIHOP
+ENAMETOOLONG
+ENETDOWN
+ENETUNREACH
+ENFILE
+ENOBUFS
+ENODATA
+ENODEV
+ENOENT
+ENOEXEC
+ENOLCK
+ENOLINK
+ENOMEM
+ENOMSG
+ENOPROTOOPT
+ENOSPC
+ENOSR
+ENOSTR
+ENOSYS
+ENOTCONN
+ENOTDIR
+ENOTEMPTY
+ENOTSOCK
+ENOTSUP
+ENOTTY
+ENXIO
+EOPNOTSUPP
+EOVERFLOW
+EPERM
+EPIPE
+EPROTO
+EPROTONOSUPPORT
+EPROTOTYPE
+ERANGE
+EROFS
+ESPIPE
+ESRCH
+ESTALE
+ETIME
+ETIMEDOUT
+ETXTBSY
+EWOULDBLOCK
+EXDEV
+}
+epilogue {
+namespace Std {
+extern "C" int __CYCLONE_ERRNO();
+#define errno (__CYCLONE_ERRNO())
+// FIX: NEED STUB CODE
+// // We do this because errno is probably a C macro
+// #include <errno.h>
+// int __CYCLONE_ERRNO() {
+//   return errno;
+// }
+}
+}
+;
+
+fcntl.h:
+include {
+F_DUPFD
+F_GETFD
+F_SETFD
+F_GETFL
+F_SETFL
+F_GETLK
+F_SETLK
+F_SETLKW
+F_GETOWN
+F_SETOWN
+FD_CLOEXEC
+F_RDLCK
+F_UNLCK
+F_WRLCK
+SEEK_SET
+SEEK_CUR
+SEEK_END
+O_CREAT
+O_EXCL
+O_NOCTTY
+O_TRUNC
+O_APPEND
+O_DSYNC
+O_NONBLOCK
+O_RSYNC
+O_SYNC
+O_ACCMODE
+O_RDONLY
+O_RDWR
+O_WRONLY
+flock
+mode_t
+off_t
+pid_t
+}
+epilogue {
+namespace Std {
+tunion FcntlArg<`r::R> {
+  Flock(struct flock @`r);
+  Long(long);
+};
+typedef tunion `r FcntlArg<`r> fcntlarg_t<`r>;
+
+extern int fcntl(int fd, int cmd, ... inject fcntlarg_t);
+extern int open(const char ?,int,... mode_t);
+extern int creat(const char ?,mode_t);
+}
+}
+;
+
+float.h:
+include {
+FLT_ROUNDS
+FLT_EVAL_METHOD
+FLT_RADIX
+FLT_MANT_DIG
+DBL_MANT_DIG
+LDBL_MANT_DIG
+DECIMAL_DIG
+FLT_DIG
+DBL_DIG
+LDBL_DIG
+FLT_MIN_EXP
+DBL_MIN_EXP
+LDBL_MIN_EXP
+FLT_MIN_10_EXP
+DBL_MIN_10_EXP
+LDBL_MIN_10_EXP
+FLT_MAX_EXP
+DBL_MAX_EXP
+LDBL_MAX_EXP
+FLT_MAX_10_EXP
+DBL_MAX_10_EXP
+LDBL_MAX_10_EXP
+FLT_MAX
+DBL_MAX
+LDBL_MAX
+FLT_EPSILON
+DBL_EPSILON
+LDBL_EPSILON
+FLT_MIN
+DBL_MIN
+LDBL_MIN
+}
+;
+
+iso646.h:
+include {
+and
+and_eq
+bitand
+bitor
+compl
+not
+not_eq
+or
+or_eq
+xor
+xor_eq
+}
+;
+
+limits.h:
+include {
+AIO_LISTIO_MAX
+_POSIX_AIO_LISTIO_MAX
+AIO_MAX
+_POSIX_AIO_MAX
+AIO_PRIO_DELTA_MAX
+ARG_MAX
+_POSIX_ARG_MAX
+ATEXIT_MAX
+CHILD_MAX
+_POSIX_CHILD_MAX
+DELAYTIMER_MAX
+_POSIX_DELAYTIMER_MAX
+HOST_NAME_MAX
+_POSIX_HOST_NAME_MAX
+IOV_MAX
+_XOPEN_IOV_MAX
+LOGIN_NAME_MAX
+_POSIX_LOGIN_NAME_MAX
+MQ_OPEN_MAX
+_POSIX_MQ_OPEN_MAX
+MQ_PRIO_MAX
+_POSIX_MQ_PRIO_MAX
+OPEN_MAX
+_POSIX_OPEN_MAX
+PAGESIZE
+PAGE_SIZE
+PTHREAD_DESTRUCTOR_ITERATIONS
+_POSIX_THREAD_DESTRUCTOR_ITERATIONS
+PTHREAD_KEYS_MAX
+_POSIX_THREAD_KEYS_MAX
+PTHREAD_STACK_MIN
+PTHREAD_THREADS_MAX
+_POSIX_THREAD_THREADS_MAX
+RE_DUP_MAX
+_POSIX2_RE_DUP_MAX
+RTSIG_MAX
+_POSIX_RTSIG_MAX
+SEM_NSEMS_MAX
+_POSIX_SEM_NSEMS_MAX
+SEM_VALUE_MAX
+_POSIX_SEM_VALUE_MAX
+SIGQUEUE_MAX
+_POSIX_SIGQUEUE_MAX
+SS_REPL_MAX
+_POSIX_SS_REPL_MAX
+STREAM_MAX
+_POSIX_STREAM_MAX
+SYMLOOP_MAX
+_POSIX_SYMLOOP_MAX
+TIMER_MAX
+_POSIX_TIMER_MAX
+TRACE_EVENT_NAME_MAX
+_POSIX_TRACE_EVENT_NAME_MAX
+TRACE_NAME_MAX
+_POSIX_TRACE_NAME_MAX
+TRACE_SYS_MAX
+_POSIX_TRACE_SYS_MAX
+TRACE_USER_EVENT_MAX
+_POSIX_TRACE_USER_EVENT_MAX
+TTY_NAME_MAX
+_POSIX_TTY_NAME_MAX
+TZNAME_MAX
+_POSIX_TZNAME_MAX
+FILESIZEBITS
+LINK_MAX
+_POSIX_LINK_MAX
+MAX_CANON
+_POSIX_MAX_CANON
+MAX_INPUT
+_POSIX_MAX_INPUT
+NAME_MAX
+_POSIX_NAME_MAX
+_XOPEN_NAME_MAX
+PATH_MAX
+_POSIX_PATH_MAX
+_XOPEN_PATH_MAX
+PIPE_BUF
+_POSIX_PIPE_BUF
+POSIX_ALLOC_SIZE_MIN
+POSIX_REC_INCR_XFER_SIZE
+POSIX_REC_MAX_XFER_SIZE
+POSIX_REC_MIN_XFER_SIZE
+POSIX_REC_XFER_ALIGN
+SYMLINK_MAX
+_POSIX_SYMLINK_MAX
+BC_BASE_MAX
+_POSIX2_BC_BASE_MAX
+BC_DIM_MAX
+_POSIX2_BC_DIM_MAX
+BC_SCALE_MAX
+_POSIX2_BC_SCALE_MAX
+BC_STRING_MAX
+_POSIX2_BC_STRING_MAX
+CHARCLASS_NAME_MAX
+_POSIX2_CHARCLASS_NAME_MAX
+COLL_WEIGHTS_MAX
+_POSIX2_COLL_WEIGHTS_MAX
+EXPR_NEST_MAX
+_POSIX2_EXPR_NEST_MAX
+LINE_MAX
+_POSIX2_LINE_MAX
+NGROUPS_MAX
+_POSIX_NGROUPS_MAX
+RE_DUP_MAX
+_POSIX2_RE_DUP_MAX
+_POSIX_CLOCKRES_MIN
+_POSIX_AIO_LISTIO_MAX
+_POSIX_AIO_MAX
+_POSIX_ARG_MAX
+_POSIX_CHILD_MAX
+_POSIX_DELAYTIMER_MAX
+_POSIX_HOST_NAME_MAX
+_POSIX_LINK_MAX
+_POSIX_LOGIN_NAME_MAX
+_POSIX_MAX_CANON
+_POSIX_MAX_INPUT
+_POSIX_MQ_OPEN_MAX
+_POSIX_MQ_PRIO_MAX
+_POSIX_NAME_MAX
+_POSIX_NGROUPS_MAX
+_POSIX_OPEN_MAX
+_POSIX_PATH_MAX
+_POSIX_PIPE_BUF
+_POSIX_RE_DUP_MAX
+_POSIX_RTSIG_MAX
+_POSIX_SEM_NSEMS_MAX
+_POSIX_SEM_VALUE_MAX
+_POSIX_SIGQUEUE_MAX
+_POSIX_SSIZE_MAX
+_POSIX_STREAM_MAX
+_POSIX_SS_REPL_MAX
+_POSIX_SYMLINK_MAX
+_POSIX_SYMLOOP_MAX
+_POSIX_THREAD_DESTRUCTOR_ITERATIONS
+_POSIX_THREAD_KEYS_MAX
+_POSIX_THREAD_THREADS_MAX
+_POSIX_TIMER_MAX
+_POSIX_TRACE_EVENT_NAME_MAX
+_POSIX_TRACE_NAME_MAX
+_POSIX_TRACE_SYS_MAX
+_POSIX_TRACE_USER_EVENT_MAX
+_POSIX_TTY_NAME_MAX
+_POSIX_TZNAME_MAX
+_POSIX2_BC_BASE_MAX
+_POSIX2_BC_DIM_MAX
+_POSIX2_BC_SCALE_MAX
+_POSIX2_BC_STRING_MAX
+_POSIX2_CHARCLASS_NAME_MAX
+_POSIX2_COLL_WEIGHTS_MAX
+_POSIX2_EXPR_NEST_MAX
+_POSIX2_LINE_MAX
+_POSIX2_RE_DUP_MAX
+_XOPEN_IOV_MAX
+_XOPEN_NAME_MAX
+_XOPEN_PATH_MAX
+CHAR_BIT
+CHAR_MAX
+CHAR_MIN
+INT_MAX
+LONG_BIT
+LONG_MAX
+MB_LEN_MAX
+SCHAR_MAX
+SHRT_MAX
+SSIZE_MAX
+_POSIX_SSIZE_MAX
+UCHAR_MAX
+UINT_MAX
+ULONG_MAX
+USHRT_MAX
+WORD_BIT
+INT_MIN
+LONG_MIN
+SCHAR_MIN
+SHRT_MIN
+LLONG_MIN
+LLONG_MAX
+ULLONG_MAX
+CHARCLASS_NAME_MAX
+NL_ARGMAX
+NL_LANGMAX
+NL_MSGMAX
+NL_NMAX
+NL_SETMAX
+NL_TEXTMAX
+_POSIX2_LINE_MAX
+NZERO
+}
+;
+
+poll.h:
+include {
+pollfd
+nfds_t
+POLLIN
+POLLRDNORM
+POLLRDBAND
+POLLPRI
+POLLOUT
+POLLWRNORM
+POLLWRBAND
+POLLERR
+POLLHUP
+POLLNVAL
+}
+epilogue {
+namespace Std {
+// FIX: need a stub
+int poll (struct pollfd?, nfds_t, int);
+}
+}
+;
+
+signal.h:
+omitvariables { sigaction }
+include {
+SIG_HOLD
+sig_atomic_t
+sigset_t
+pid_t
+sigevent
+SIGEV_NONE
+SIGEV_SIGNAL
+SIGEV_THREAD
+sigval
+SIGABRT
+SIGALRM
+SIGBUS
+SIGCHLD
+SIGCONT
+SIGFPE
+SIGHUP
+SIGILL
+SIGINT
+SIGKILL
+SIGPIPE
+SIGQUIT
+SIGSEGV
+SIGSTOP
+SIGTERM
+SIGTSTP
+SIGTTIN
+SIGTTOU
+SIGUSR1
+SIGUSR2
+SIGPOLL
+SIGPROF
+SIGSYS
+SIGTRAP
+SIGURG
+SIGVTALRM
+SIGXCPU
+SIGXFSZ
+sigaction
+SA_NOCLDSTOP
+SIG_BLOCK
+SIG_UNBLOCK
+SIG_SETMASK
+SA_ONSTACK
+SA_RESETHAND
+SA_RESTART
+SA_SIGINFO
+SA_NOCLDWAIT
+SA_NODEFER
+SA_ONSTACK
+SA_DISABLE
+MINSIGSTACKSZ
+SIGSTACKSZ
+ucontext_t
+mcontext_t
+stack_t
+sigstack
+siginfo_t
+}
+epilogue {
+namespace Std {
+extern "C" int sigaddset(sigset_t@, int);
+extern "C" int sigdelset(sigset_t@, int);
+extern "C" int sigemptyset(sigset_t@);
+extern "C" int sigfillset(sigset_t@);
+extern "C" int sighold(int);
+extern "C" int sigignore(int);
+extern "C" int siginterrupt(int,int);
+extern "C" int sigismember(sigset_t@, int);
+extern "C" int sigpause(int);
+extern "C" int sigrelse(int);
+
+extern tunion SigArg {
+  SIG_DFL;
+  SIG_ERR;
+  SIG_HOLD; // Not defined on most systems
+  SIG_IGN;
+  __SIG_HANDLER(void (@)(int)); // Note, must be heap allocated
+};
+typedef tunion SigArg sigarg_t;
+extern sigarg_t sigset(int, sigarg_t);
+extern sigarg_t signal(int, sigarg_t);
+// FIX: struct sigaction needs to be fixed so that field
+// sa_handler has type sigarg_t
+extern "C" sigaction(int, const struct sigaction *, struct sigaction *);
+}
+}
+;
+
+stddef.h:
+include {
+ptrdiff_t
+wchar_t
+size_t
+}
+;
+
+stdlib.h:
+include {
+EXIT_FAILURE
+EXIT_SUCCESS
+RAND_MAX
+div_t
+ldiv_t
+lldiv_t
+size_t
+wchar_t
+WNOHANG
+WUNTRACED
+WEXITSTATUS
+WIFEXITED
+WIFSIGNALED
+WIFSTOPPED
+WSTOPSIG
+WTERMSIG
+}
+epilogue {
+/* Get size_t from <stddef.h> */
+#include <cstddef.h>
+#include <core.h>
+
+namespace Std {
+extern "C" {
+int system(Cstring);
+
+/* Return the absolute value of X.  */
+extern int abs (int __x);
+
+/* Register a function to be called when `exit' is called.  */
+extern int atexit (void (*__func) (void));
+
+/* Return the `div_t' or `ldiv_t' representation
+   of the value of NUMER over DENOM. */
+/* GCC may have built-ins for these someday.  */
+extern div_t div (int __numer, int __denom);
+extern ldiv_t ldiv (long int __numer, long int __denom);
+
+/* These are the functions that actually do things.  The `random', `srandom',
+   `initstate' and `setstate' functions are those from BSD Unices.
+   The `rand' and `srand' functions are required by the ANSI standard.
+   We provide both interfaces to the same random number generator.  */
+/* Return a random long integer between 0 and RAND_MAX inclusive.  */
+extern long int random (void);
+
+/* Seed the random number generator with the given number.  */
+extern void srandom (unsigned int __seed);
+
+/* Return a random integer between 0 and RAND_MAX inclusive.  */
+extern int rand (void);
+/* Seed the random number generator with the given number.  */
+extern void srand (unsigned int __seed);
+/* Reentrant interface according to POSIX.1.  */
+extern int rand_r (unsigned int *__seed);
+
+  // THE NEXT TWO FUNCTIONS MIGHT NEED TO BE COMMENTED OUT IN LINUX
+/* Chown the slave to the calling user.  */
+extern int grantpt (int __fd);
+
+/* Release an internal lock so the slave can be opened.
+   Call after grantpt().  */
+extern int unlockpt (int __fd);
+}
+
+/* Convert a string to a floating-point number.  */
+extern double atof(const char ?`r);
+/* Convert a string to an integer.  */
+extern int atoi(const char ?`r);
+/* Convert a string to a long integer.  */
+extern long atol(const char ?`r);
+
+/* Return the value of envariable NAME, or NULL if it doesn't exist.  */
+extern char ?getenv(const char ?);
+
+/* Convert a string to a floating-point number.  */
+extern double strtod(const char ?`r n, const char ?`r *`r2 end);
+/* Convert a string to a long integer.  */
+extern long strtol(const char ?`r n, const char ?`r *`r2 end, int base);
+/* Convert a string to an unsigned long integer.  */
+extern unsigned long strtoul(const char ?`r n,const char ?`r *`r2 end, int base);
+}
+}
+;
+
 stdio.h:
+include {
 BUFSIZ
 _IOFBF
 _IOLBF
@@ -12,13 +661,14 @@ EOF
 fpos_t
 size_t
 wchar_t
-{
+}
+epilogue {
 #include <core.h>
 namespace Std {
 using Core;
 /* The name __sFILE is derived from Cygwin but we have our own
    implementation in runtime_cyc.c */
-extern struct __sFILE;  
+extern struct __sFILE;
 typedef struct __sFILE FILE;
 
 /* Standard streams.  */
@@ -129,7 +779,7 @@ extern void setbuffer (FILE @__stream, char ?__buf, size_t __size);
 /* Make STREAM line-buffered.  */
 extern void setlinebuf (FILE @__stream);
 
-// 
+//
 // Routines added for Cyclone
 //
 extern xtunion exn {
@@ -142,15 +792,15 @@ extern void file_close(FILE @`r);
 extern void file_delete(const char ?`r);
 extern void file_length(const char ?`r);
 // these two provided in cyc_runtime.c
-extern int file_string_read(FILE @`r1 fd, char ?`r2 dest, int dest_offset, 
+extern int file_string_read(FILE @`r1 fd, char ?`r2 dest, int dest_offset,
 			    int max_count);
-extern int file_string_write(FILE @`r1 fd, const char?`r2 src, int src_offset, 
+extern int file_string_write(FILE @`r1 fd, const char?`r2 src, int src_offset,
 			     int max_count);
 
 //////////////////////////////////////////////////////////////
 // printf and friends:  see printf.cyc
 //////////////////////////////////////////////////////////////
-// vararg union for printf, fprintf, sprintf 
+// vararg union for printf, fprintf, sprintf
 extern tunion PrintArg<`r::R> {
   String_pa(const char ?`r);
   Int_pa(unsigned long);
@@ -174,7 +824,7 @@ extern int sprintf(char ?`r1 s, const char ?`r2 fmt, ... inject parg_t<`r4>)
 extern char ? aprintf(const char ?`r2 fmt, ... inject parg_t<`r4>)
   __attribute__((format(printf,1,2)))
   ;
-extern char ?`r1 rprintf(region_t<`r1>, const char ?`r2 fmt, 
+extern char ?`r1 rprintf(region_t<`r1>, const char ?`r2 fmt,
                          ... inject parg_t<`r4> ap)
   __attribute__((format(printf,2,3)))
   ;
@@ -189,7 +839,7 @@ extern int vprintf(const char ?`r fmt, parg_t<`r2> ? `r1)
 extern int vsprintf(char ?`r1 s, const char ?`r2 fmt, parg_t<`r4> ? `r3)
   __attribute__((format(printf,2,0)))
   ;
-extern char ?`r1 vrprintf(region_t<`r1> r1, const char ?`r2 fmt, 
+extern char ?`r1 vrprintf(region_t<`r1> r1, const char ?`r2 fmt,
                           parg_t<`r4> ? `r3 ap)
   __attribute__((format(printf,2,0)))
   ;
@@ -213,32 +863,35 @@ typedef tunion `r2 ScanfArg<`r1> sarg_t<`r1,`r2>;
 extern int scanf(const char ?`r1 fmt, ... inject sarg_t<`r3,`r4>)
   __attribute__((format(scanf,1,2)))
   ;
-extern int fscanf(FILE @`r1 stream, const char ?`r2 fmt, 
+extern int fscanf(FILE @`r1 stream, const char ?`r2 fmt,
                      ... inject sarg_t<`r4,`r5>)
   __attribute__((format(scanf,2,3)))
   ;
-extern int sscanf(const char ?`r src, const char ?`r1 fmt, 
+extern int sscanf(const char ?`r src, const char ?`r1 fmt,
                      ... inject sarg_t<`r3,`r4>)
   __attribute__((format(scanf,2,3)))
   ;
 
 
 // Same as above but suitable for calling from a user's vararg function
-extern int vfscanf(FILE @`r1 stream, const char ?`r2 fmt, 
+extern int vfscanf(FILE @`r1 stream, const char ?`r2 fmt,
                    sarg_t<`r3,`r4> ? `r5)
   __attribute__((format(scanf,2,0)))
   ;
-extern int vsscanf(const char ?`r src, const char ?`r1 fmt, 
+extern int vsscanf(const char ?`r src, const char ?`r1 fmt,
                    sarg_t<`r3,`r4> ? `r2)
   __attribute__((format(scanf,2,0)))
   ;
 }
 }
+;
 
 stdlib.h:
+include {
 EXIT_FAILURE
 EXIT_SUCCESS
 RAND_MAX
+MB_CUR_MAX
 div_t
 ldiv_t
 lldiv_t
@@ -252,80 +905,262 @@ WIFSIGNALED
 WIFSTOPPED
 WSTOPSIG
 WTERMSIG
-{
-/* Get size_t from <stddef.h> */
-#include <cstddef.h>
-#include <core.h>
-
+}
+epilogue {
 namespace Std {
-extern "C" {
-int system(Cstring);
+extern "C" void _Exit(int);
+extern "C" int atexit(void (@`H)(void)); // Note function must be on heap
+extern "C" void abort(void);
+extern "C" int abs(int);
+extern "C" div_t div(int, int);
+extern "C" double drand48(void);
+extern "C" double erand48(unsigned short @{3});
+extern "C" void exit(int);
+extern "C" int grantpt(int);
+extern "C" long jrand48(unsigned short @{3});
+extern "C" long labs(long);
+extern "C" void lcong48(unsigned short @{7});
+extern "C" ldiv_t ldiv(long, long);
+extern "C" long long llabs(long long);
+extern "C" lldiv_t lldiv(long long, long long);
+extern "C" long lrand48(void);
+extern "C" long mrand48(void);
+extern "C" int posix_openpt(int);
+extern "C" int rand(void);
+extern "C" int rand_r(unsigned @);
+extern "C" long random(void);
+extern "C" unsigned short seed48(unsigned short @{3});
+extern "C" void srand(unsigned);
+extern "C" void srand48(long);
+extern "C" void srandom(unsigned);
+extern "C" int unlockpt(int);
+extern "C" long nrand48(unsigned short @{3});
 
-/* Return the absolute value of X.  */
-extern int abs (int __x);
+/* These need stubs */
+extern long a64l(const char ?); // Probably not present
+extern double atof(const char ?);
+extern int atoi(const char ?);
+extern long atol(const char ?);
+extern long long atoll(const char ?);
+extern char ? getenv(const char ?);
+extern char ? initstate(unsigned, char ?`H, size_t);
+extern char ? l64a(long); // Probably not present
+extern int mkstemp(char ?);
+extern char ? ptsname(int);
+extern int putenv(const char ?); // We will copy the string, so the semantics won't be the same
+extern char ?`r realpath(char ?, char ?`r);
+extern int setenv(const char ?, const char ?, int);
+extern char ?setstate(char ?`H);
+extern int system(const char ?);
+extern int unsetenv(const char ?);
 
-/* Register a function to be called when `exit' is called.  */
-extern int atexit (void (*__func) (void));
+/* Omitted because too annoying */
+//int getsubopt(char **, char *const *, char **);
 
-/* Return the `div_t' or `ldiv_t' representation
-   of the value of NUMER over DENOM. */
-/* GCC may have built-ins for these someday.  */
-extern div_t div (int __numer, int __denom);
-extern ldiv_t ldiv (long int __numer, long int __denom);
+/* Omitted because they return (by the char ** arg) a pointer into
+   the input string */
+//double strtod(const char *restrict, char **restrict);
+//float strtof(const char *restrict, char **restrict);
+//long strtol(const char *restrict, char **restrict, int);
+//long double strtold(const char *restrict, char **restrict);
+//long long strtoll(const char *restrict, char **restrict, int);
+//unsigned long strtoul(const char *restrict, char **restrict, int);
+//unsigned long long strtoull(const char *restrict, char **restrict, int);
 
-/* These are the functions that actually do things.  The `random', `srandom',
-   `initstate' and `setstate' functions are those from BSD Unices.
-   The `rand' and `srand' functions are required by the ANSI standard.
-   We provide both interfaces to the same random number generator.  */
-/* Return a random long integer between 0 and RAND_MAX inclusive.  */
-extern long int random (void);
+/* Omitted because LEGACY */
+//char         *ecvt(double, int, int *restrict, int *restrict); (LEGACY)
+//char         *fcvt(double, int, int *restrict, int *restrict); (LEGACY)
+//char         *gcvt(double, int, char *); (LEGACY)
+//char         *mktemp(char *); (LEGACY)
 
-/* Seed the random number generator with the given number.  */
-extern void srandom (unsigned int __seed);
+/* Omitted because of whcar_t */
+//int           mblen(const char *, size_t);
+//size_t        mbstowcs(wchar_t *restrict, const char *restrict, size_t);
+//int           mbtowc(wchar_t *restrict, const char *restrict, size_t);
+//size_t wcstombs(char *restrict, const wchar_t *restrict, size_t);
+//int wctomb(char *, wchar_t);
 
-/* Return a random integer between 0 and RAND_MAX inclusive.  */
-extern int rand (void);
-/* Seed the random number generator with the given number.  */
-extern void srand (unsigned int __seed);
-/* Reentrant interface according to POSIX.1.  */
-extern int rand_r (unsigned int *__seed);
+/* Omitted because we can't handle these in Cyclone */
+//void         *bsearch(const void *, const void *, size_t, size_t,
+//                  int (*)(const void *, const void *));
+//void         *calloc(size_t, size_t);
+//void          free(void *);
+//void         *malloc(size_t);
+//int           posix_memalign(void **, size_t, size_t);
+//void          qsort(void *, size_t, size_t, int (*)(const void *,
+//                  const void *));
+//void         *realloc(void *, size_t);
 
-  // THE NEXT TWO FUNCTIONS MIGHT NEED TO BE COMMENTED OUT IN LINUX
-/* Chown the slave to the calling user.  */
-extern int grantpt (int __fd);
-
-/* Release an internal lock so the slave can be opened.
-   Call after grantpt().  */
-extern int unlockpt (int __fd);
+/* This one's just screwed up.  Standard doesn't say if its argument
+   is retained after the call; furthermore it ought to return an int. */
+//void setkey(const char *);
 }
-
-/* Convert a string to a floating-point number.  */
-extern double atof(const char ?`r);
-/* Convert a string to an integer.  */
-extern int atoi(const char ?`r);
-/* Convert a string to a long integer.  */
-extern long atol(const char ?`r);
-
-/* Return the value of envariable NAME, or NULL if it doesn't exist.  */
-extern char ?getenv(const char ?);
-
-/* Convert a string to a floating-point number.  */
-extern double strtod(const char ?`r n, const char ?`r *`r2 end);
-/* Convert a string to a long integer.  */
-extern long strtol(const char ?`r n, const char ?`r *`r2 end, int base);
-/* Convert a string to an unsigned long integer.  */
-extern unsigned long strtoul(const char ?`r n,const char ?`r *`r2 end, int base);
 }
-}
+;
 
-stddef.h:
-ptrdiff_t
-size_t
-{}
+sys/resource.h:
+include {
+PRIO_PROCESS
+PRIO_PGRP
+PRIO_USER
+rlim_t
+RLIM_INFINITY
+RLIM_SAVED_MAX
+RLIM_SAVED_CUR
+RUSAGE_SELF
+RUSAGE_CHILDREN
+rusage
+timeval
+RLIMIT_CORE
+RLIMIT_CPU
+RLIMIT_DATA
+RLIMIT_FSIZE
+RLIMIT_NOFILE
+RLIMIT_STACK
+RLIMIT_AS
+id_t
+}
+epilogue {
+extern "C" int getpriority(int, id_t);
+extern "C" int getrlimit(int, struct rlimit @);
+extern "C" int getrusage(int, struct rusage @);
+extern "C" int setpriority(int, id_t, int);
+extern "C" int setrlimit(int, const struct rlimit @);
+}
+;
+
+sys/select.h:
+include {
+time_t
+suseconds_t
+timeval
+sigset_t
+timespec
+fd_set
+FD_SETSIZE
+}
+epilogue {
+extern "C" int pselect(int, fd_set @, fd_set @, fd_set @,
+                       const struct timespec @, const sigset_t @);
+extern "C" int select(int, fd_set @, fd_set @, fd_set @, struct timeval @);
+/* FIX: these might be defined as macros only */
+extern "C" void FD_CLR(int fd, fd_set @);
+extern "C" int FD_ISSET(int fd, fd_set @);
+extern "C" void FD_SET(int fd, fd_set @);
+extern "C" void FD_ZERO(fd_set @);
+}
+;
+
+sys/socket.h:
+include {
+socklen_t
+sa_family_t
+iovec
+cmsghdr
+SCM_RIGHTS
+CMSG_DATA
+CMSG_NXTHDR
+CMSG_FIRSTHDR
+linger
+SOCK_DGRAM
+SOCK_RAW
+SOCK_SEQPACKET
+SOCK_STREAM
+SOL_SOCKET
+SO_ACCEPTCONN
+SO_BROADCAST
+SO_DEBUG
+SO_DONTROUTE
+SO_ERROR
+SO_KEEPALIVE
+SO_LINGER
+SO_OOBINLINE
+SO_RCVBUF
+SO_RCVLOWAT
+SO_RCVTIMEO
+SO_REUSEADDR
+SO_SNDBUF
+SO_SNDLOWAT
+SO_SNDTIMEO
+SO_TYPE
+SOMAXCONN
+MSG_CTRUNC
+MSG_DONTROUTE
+MSG_EOR
+MSG_OOB
+MSG_PEEK
+MSG_TRUNC
+MSG_WAITALL
+AF_INET
+AF_INET6
+AF_UNIX
+AF_UNSPEC
+SHUT_RD
+SHUT_RDWR
+SHUT_WR
+ssize_t
+}
+epilogue {
+/* We've omitted struct sockaddr because we don't use it in Cyclone */
+/* We also omitted struct sockaddr_storage */
+/* We omit msghdr because it contains a void * field */
+extern tunion SockAddr<`r::R> {
+  SA_sockaddr_in(struct sockaddr_in @`r);
+  /* We will add other cases as necessary, e.g., SockAddr_In6 */
+
+  /* The remaining cases are for the argument following the type-varying
+     argument; they could be eliminated if we had per-arg injection. */
+  /* NOTE: ORDER MATTERS! on these inject things */
+  SA_socklenptr(socklen_t @`r); // accept, getpeername, getsockname, recvfrom
+  SA_socklen(socklen_t); // bind, connect, sendto
+};
+typedef tunion `r SockAddr<`r> SA<`r>;
+
+extern "C" int socket(int domain, int type, int protocol);
+extern "C" int sockatmark(int);
+extern "C" int socketpair(int domain, int type, int protocol, int @{2} fds);
+
+extern int accept(int fd, ... inject SA);
+extern int bind(int fd, ... inject SA);
+extern int connect(int fd, ... inject SA);
+extern int getpeername(int fd, ... inject SA);
+extern int getsockname(int fd, ... inject SA);
+extern "C" int listen(int fd, int n);
+extern "C" int shutdown(int fd, int how);
+
+extern ssize_t send(int fd, const char ?buf, size_t n, int flags);
+extern ssize_t recv(int fd, char ?buf, size_t n, int flags);
+
+extern ssize_t sendto(int fd, const char ?buf, size_t n, int flags,
+                      ... inject SA);
+extern ssize_t recvfrom(int fd, char ?buf, size_t n, int flags,
+                        ... inject SA);
+
+/* These aren't available in Cygwin */
+  /*
+extern ssize_t sendmsg(int fd, const struct msghdr *message, int flags);
+extern ssize_t recvmsg(int fd, struct msghdr *message, int flags);
+  */
+
+extern tunion SockOpt<`r::R> {
+  SO_int(int @`r);
+  SO_timeval(struct timeval @`r);
+  /* The remaining cases are for the argument following the type-varying
+     argument; they could be eliminated if we had per-arg injection. */
+  SO_socklenptr(socklen_t @`r); // getsockopt
+  SO_socklen(socklen_t);        // setsockopt
+};
+typedef tunion `r SockOpt<`r> SO<`r>;
+
+extern int getsockopt(int fd, int level, int optname, ... inject SO);
+extern int setsockopt(int fd, int level, int optname, ... inject SO);
+}
+;
 
 sys/stat.h:
+omitvariables { stat }
+include {
 stat
-**OMIT_VARIABLE stat
 S_IFBLK
 S_IFCHR
 S_IFIFO
@@ -359,33 +1194,577 @@ S_TYPEISMQ
 S_TYPEISSEM
 S_TYPEISSHM
 S_TYPEISTMO
-{
-#include <Core.h> // for string_t
+}
+epilogue {
 namespace Std {
-  extern int chmod(string_t, mode_t);
+  extern int chmod(const char ?, mode_t);
   extern "C" int fchmod(int, mode_t);
   extern "C" int fstat(int fd, struct stat @buf);
-  extern int lstat(string_t filename, struct stat @buf);
-  extern int mkdir(string_t pathname, mode_t mode);
-  extern int mkfifo(string_t pathname, mode_t mode);
-  extern int mknod(string_t pathname, mode_t mode, dev_t);
-  extern int stat(string_t filename, struct stat @buf);
+  extern int lstat(const char ? filename, struct stat @buf);
+  extern int mkdir(const char ? pathname, mode_t mode);
+  extern int mkfifo(const char ? pathname, mode_t mode);
+  extern int mknod(const char ? pathname, mode_t mode, dev_t);
+  extern int stat(const char ? filename, struct stat @buf);
   extern "C" mode_t umask(mode_t mask);
 }
 }
+;
+
+sys/time.h:
+include {
+time_t
+suseconds_t
+timeval
+itimerval
+fd_set
+ITIMER_REAL
+ITIMER_VIRTUAL
+ITIMER_PROF
+}
+epilogue {
+#include <sys/cselect.h> // For select, FD_CLR, FD_ISSET, FD_SET, FD_ZERO
+
+namespace Std {
+
+extern "C" int getitimer(int, struct itimerval @);
+extern "C" int setitimer(int, const struct itimerval @, struct itimerval *);
+
+/* The second arg here looks like it is a legacy feature.  The POSIX
+   docs say that if it is non-NULL, then the behavior is undefined.
+   Therefore, we should have a stub that forces the argument to be
+   NULL. */
+extern int gettimeofday(struct timeval @, struct timezone *);
+
+/* We need a stub to handle the ? */
+extern int utimes(const char ?, const struct timeval @{2}); // (LEGACY)
+}
+}
+;
+
+sys/timeb.h:
+include {
+time_t
+timeb
+}
+epilogue {
+namespace Std {
+extern "C" ftime(struct timeb @);
+}
+}
+;
+
+sys/times.h:
+include {
+clock_t
+tms
+}
+epilogue {
+namespace Std {
+extern "C" clock_t times(struct tms @);
+}
+}
+;
 
 sys/types.h:
+include {
 blkcnt_t
 blksize_t
+clock_t
+clockid_t
 dev_t
+fsblkcnt_t
+fsfilcnt_t
 gid_t
+id_t
 ino_t
+key_t
 mode_t
 nlink_t
 off_t
 pid_t
 size_t
 ssize_t
+suseconds_t
 time_t
+timer_t
 uid_t
-{}
+useconds_t
+}
+epilogue {
+/* The pthread types are omitted for now since we don't support
+   threads */
+/* The trace types are also omitted */
+}
+;
+
+sys/un.h:
+include {
+sockaddr_un
+sa_family_t
+}
+;
+
+sys/utsname.h:
+include {
+utsname
+}
+epilogue {
+namespace Std {
+extern "C" int uname(struct utsname @);
+}
+}
+;
+
+sys/wait.h:
+include {
+WNOHANG
+WUNTRACED
+WEXITSTATUS
+WIFCONTINUED
+WIFEXITED
+WIFSIGNALED
+WIFSTOPPED
+WSTOPSIG
+WTERMSIG
+WEXITED
+WSTOPPED
+WCONTINUED
+WNOHANG
+WNOWAIT
+idtype_t
+id_t
+pid_t
+siginfo_t
+rusage
+}
+epilogue {
+namespace Std {
+extern "C" pid_t wait(int *);
+extern "C" pid_t waitpid(pid_t, int *, int);
+
+/* This one isn't present in Cygwin */
+extern "C" int waitid(idtype_t, id_t, siginfo_t @, int);
+}
+}
+;
+
+time.h:
+include {
+tm
+CLOCKS_PER_SEC
+CLOCK_PROCESS_CPUTIME_ID
+CLOCK_THREAD_CPUTIME_ID
+timespec
+itimerspec
+CLOCK_REALTIME
+TIMER_ABSTIME
+CLOCK_MONOTONIC
+clock_t
+size_t
+time_t
+clockid_t
+timer_t
+}
+epilogue {
+/* Missing a declarations for
+   getdate_err
+   asctime_r
+   clock_getcpuclockid
+   clock_getres
+   clock_gettime
+   clock_nanosleep
+   clock_settime
+   ctime_r
+   getdate
+   gmtime_r
+   localtime_r
+   nanosleep
+   strftime
+   strptime
+   timer_create
+   timer_delete
+   timer_gettime
+   timer_getoverrun
+   timer_settime
+   tzset
+   tzname;
+ */
+namespace Std {
+extern "C" char @{26} asctime(const struct tm @);
+extern "C" clock_t clock(void);
+extern "C" char @{26} ctime(const time_t @);
+extern "C" double difftime(time_t,time_t);
+extern "C" struct tm @gmtime(const time_t @);
+extern "C" struct tm @localtime(const time_t @);
+extern "C" time_t mktime(const struct tm @);
+extern "C" time_t time(time_t *);
+extern "C" long timezone;
+extern "C" int daylight;
+}
+}
+;
+
+unistd.h:
+include {
+_POSIX_VERSION
+_POSIX2_VERSION
+_XOPEN_VERSION
+_POSIX_ADVISORY_INFO
+_POSIX_ASYNCHRONOUS_IO
+_POSIX_BARRIERS
+_POSIX_CHOWN_RESTRICTED
+_POSIX_CLOCK_SELECTION
+_POSIX_CPUTIME
+_POSIX_FSYNC
+_POSIX_JOB_CONTROL
+_POSIX_MAPPED_FILES
+_POSIX_MEMLOCK
+_POSIX_MEMLOCK_RANGE
+_POSIX_MEMORY_PROTECTION
+_POSIX_MESSAGE_PASSING
+_POSIX_MONOTONIC_CLOCK
+_POSIX_NO_TRUNC
+_POSIX_PRIORITIZED_IO
+_POSIX_PRIORITY_SCHEDULING
+_POSIX_RAW_SOCKETS
+_POSIX_READER_WRITER_LOCKS
+_POSIX_REALTIME_SIGNALS
+_POSIX_REGEXP
+_POSIX_SAVED_IDS
+_POSIX_SEMAPHORES
+_POSIX_SHARED_MEMORY_OBJECTS
+_POSIX_SHELL
+_POSIX_SPAWN
+_POSIX_SPIN_LOCKS
+_POSIX_SPORADIC_SERVER
+_POSIX_SYNCHRONIZED_IO
+_POSIX_THREAD_ATTR_STACKADDR
+_POSIX_THREAD_ATTR_STACKSIZE
+_POSIX_THREAD_CPUTIME
+_POSIX_THREAD_PRIO_INHERIT
+_POSIX_THREAD_PRIO_PROTECT
+_POSIX_THREAD_PRIORITY_SCHEDULING
+_POSIX_THREAD_PROCESS_SHARED
+_POSIX_THREAD_SAFE_FUNCTIONS
+_POSIX_THREAD_SPORADIC_SERVER
+_POSIX_THREADS
+_POSIX_TIMEOUTS
+_POSIX_TIMERS
+_POSIX_TRACE
+_POSIX_TRACE_EVENT_FILTER
+_POSIX_TRACE_INHERIT
+_POSIX_TRACE_LOG
+_POSIX_TYPED_MEMORY_OBJECTS
+_POSIX_VDISABLE
+_POSIX2_C_BIND
+_POSIX2_C_DEV
+_POSIX2_CHAR_TERM
+_POSIX2_FORT_DEV
+_POSIX2_FORT_RUN
+_POSIX2_LOCALEDEF
+_POSIX2_PBS
+_POSIX2_PBS_ACCOUNTING
+_POSIX2_PBS_CHECKPOINT
+_POSIX2_PBS_LOCATE
+_POSIX2_PBS_MESSAGE
+_POSIX2_PBS_TRACK
+_POSIX2_SW_DEV
+_POSIX2_UPE
+_V6_ILP32_OFF32
+_V6_ILP32_OFFBIG
+_V6_LP64_OFF64
+_V6_LPBIG_OFFBIG
+_XBS5_ILP32_OFF32
+_XBS5_ILP32_OFFBIG
+_XBS5_LP64_OFF64
+_XBS5_LPBIG_OFFBIG
+_XOPEN_CRYPT
+_XOPEN_ENH_I18N
+_XOPEN_LEGACY
+_XOPEN_REALTIME
+_XOPEN_REALTIME_THREADS
+_XOPEN_SHM
+_XOPEN_STREAMS
+_XOPEN_UNIX
+_POSIX_ASYNC_IO
+_POSIX_PRIO_IO
+_POSIX_SYNC_IO
+F_OK
+R_OK
+W_OK
+X_OK
+_CS_PATH
+_CS_POSIX_V6_ILP32_OFF32_CFLAGS
+_CS_POSIX_V6_ILP32_OFF32_LDFLAGS
+_CS_POSIX_V6_ILP32_OFF32_LIBS
+_CS_POSIX_V6_ILP32_OFFBIG_CFLAGS
+_CS_POSIX_V6_ILP32_OFFBIG_LDFLAGS
+_CS_POSIX_V6_ILP32_OFFBIG_LIBS
+_CS_POSIX_V6_LP64_OFF64_CFLAGS
+_CS_POSIX_V6_LP64_OFF64_LDFLAGS
+_CS_POSIX_V6_LP64_OFF64_LIBS
+_CS_POSIX_V6_LPBIG_OFFBIG_CFLAGS
+_CS_POSIX_V6_LPBIG_OFFBIG_LDFLAGS
+_CS_POSIX_V6_LPBIG_OFFBIG_LIBS
+_CS_POSIX_V6_WIDTH_RESTRICTED_ENVS
+SEEK_CUR
+SEEK_END
+SEEK_SET
+F_LOCK
+F_TEST
+F_TLOCK
+F_ULOCK
+_PC_ALLOC_SIZE_MIN
+_PC_ASYNC_IO
+_PC_CHOWN_RESTRICTED
+_PC_FILESIZEBITS
+_PC_LINK_MAX
+_PC_MAX_CANON
+_PC_MAX_INPUT
+_PC_NAME_MAX
+_PC_NO_TRUNC
+_PC_PATH_MAX
+_PC_PIPE_BUF
+_PC_PRIO_IO
+_PC_REC_INCR_XFER_SIZE
+_PC_REC_MAX_XFER_SIZE
+_PC_REC_MIN_XFER_SIZE
+_PC_REC_XFER_ALIGN
+_PC_SYNC_IO
+_PC_VDISABLE
+_SC_2_C_BIND
+_SC_2_C_DEV
+_SC_2_C_VERSION
+_SC_2_CHAR_TERM
+_SC_2_FORT_DEV
+_SC_2_FORT_RUN
+_SC_2_LOCALEDEF
+_SC_2_PBS
+_SC_2_PBS_ACCOUNTING
+_SC_2_PBS_CHECKPOINT
+_SC_2_PBS_LOCATE
+_SC_2_PBS_MESSAGE
+_SC_2_PBS_TRACK
+_SC_2_SW_DEV
+_SC_2_UPE
+_SC_2_VERSION
+_SC_ADVISORY_INFO
+_SC_ARG_MAX
+_SC_AIO_LISTIO_MAX
+_SC_AIO_MAX
+_SC_AIO_PRIO_DELTA_MAX
+_SC_ASYNCHRONOUS_IO
+_SC_ATEXIT_MAX
+_SC_BARRIERS
+_SC_BC_BASE_MAX
+_SC_BC_DIM_MAX
+_SC_BC_SCALE_MAX
+_SC_BC_STRING_MAX
+_SC_CHILD_MAX
+_SC_CLK_TCK
+_SC_CLOCK_SELECTION
+_SC_COLL_WEIGHTS_MAX
+_SC_CPUTIME
+_SC_DELAYTIMER_MAX
+_SC_EXPR_NEST_MAX
+_SC_FILE_LOCKING
+_SC_FSYNC
+_SC_GETGR_R_SIZE_MAX
+_SC_GETPW_R_SIZE_MAX
+_SC_HOST_NAME_MAX
+_SC_IOV_MAX
+_SC_JOB_CONTROL
+_SC_LINE_MAX
+_SC_LOGIN_NAME_MAX
+_SC_MAPPED_FILES
+_SC_MEMLOCK
+_SC_MEMLOCK_RANGE
+_SC_MEMORY_PROTECTION
+_SC_MESSAGE_PASSING
+_SC_MONOTONIC_CLOCK
+_SC_MQ_OPEN_MAX
+_SC_MQ_PRIO_MAX
+_SC_NGROUPS_MAX
+_SC_OPEN_MAX
+_SC_PAGE_SIZE
+_SC_PAGESIZE
+_SC_PRIORITIZED_IO
+_SC_PRIORITY_SCHEDULING
+_SC_RE_DUP_MAX
+_SC_READER_WRITER_LOCKS
+_SC_REALTIME_SIGNALS
+_SC_REGEXP
+_SC_RTSIG_MAX
+_SC_SAVED_IDS
+_SC_SEMAPHORES
+_SC_SEM_NSEMS_MAX
+_SC_SEM_VALUE_MAX
+_SC_SHARED_MEMORY_OBJECTS
+_SC_SHELL
+_SC_SIGQUEUE_MAX
+_SC_SPAWN
+_SC_SPIN_LOCKS
+_SC_SPORADIC_SERVER
+_SC_STREAM_MAX
+_SC_SYNCHRONIZED_IO
+_SC_THREAD_ATTR_STACKADDR
+_SC_THREAD_ATTR_STACKSIZE
+_SC_THREAD_CPUTIME
+_SC_THREAD_DESTRUCTOR_ITERATIONS
+_SC_THREAD_KEYS_MAX
+_SC_THREAD_PRIO_INHERIT
+_SC_THREAD_PRIO_PROTECT
+_SC_THREAD_PRIORITY_SCHEDULING
+_SC_THREAD_PROCESS_SHARED
+_SC_THREAD_SAFE_FUNCTIONS
+_SC_THREAD_SPORADIC_SERVER
+_SC_THREAD_STACK_MIN
+_SC_THREAD_THREADS_MAX
+_SC_TIMEOUTS
+_SC_THREADS
+_SC_TIMER_MAX
+_SC_TIMERS
+_SC_TRACE
+_SC_TRACE_EVENT_FILTER
+_SC_TRACE_INHERIT
+_SC_TRACE_LOG
+_SC_TTY_NAME_MAX
+_SC_TYPED_MEMORY_OBJECTS
+_SC_TZNAME_MAX
+_SC_V6_ILP32_OFF32
+_SC_V6_ILP32_OFFBIG
+_SC_V6_LP64_OFF64
+_SC_V6_LPBIG_OFFBIG
+_SC_VERSION
+_SC_XBS5_ILP32_OFF32
+_SC_XBS5_ILP32_OFFBIG
+_SC_XBS5_LP64_OFF64
+_SC_XBS5_LPBIG_OFFBIG
+_SC_XOPEN_CRYPT
+_SC_XOPEN_ENH_I18N
+_SC_XOPEN_LEGACY
+_SC_XOPEN_REALTIME
+_SC_XOPEN_REALTIME_THREADS
+_SC_XOPEN_SHM
+_SC_XOPEN_STREAMS
+_SC_XOPEN_UNIX
+_SC_XOPEN_VERSION
+_SC_XOPEN_XCU_VERSION
+STDERR_FILENO
+STDIN_FILENO
+STDOUT_FILENO
+size_t
+ssize_t
+uid_t
+gid_t
+off_t
+pid_t
+useconds_t
+}
+epilogue {
+/* We're supposed to declare these:
+int                  access(const char *, int);
+unsigned             alarm(unsigned);
+int                  chdir(const char *);
+int                  chown(const char *, uid_t, gid_t);
+int                  close(int);
+size_t      confstr(int, char *, size_t);
+char       *crypt(const char *, const char *);
+char       *ctermid(char *);
+int         dup(int);
+int         dup2(int, int);
+void        encrypt(char[64], int);
+int         execl(const char *, const char *, ...);
+int         execle(const char *, const char *, ...);
+int         execlp(const char *, const char *, ...);
+int         execv(const char *, char *const []);
+int         execve(const char *, char *const [], char *const []);
+int         execvp(const char *, char *const []);
+void       _exit(int);
+int         fchown(int, uid_t, gid_t);
+int         fchdir(int);
+int         fdatasync(int);
+pid_t       fork(void);
+long        fpathconf(int, int);
+int         fsync(int);
+int         ftruncate(int, off_t);
+char       *getcwd(char *, size_t);
+gid_t       getegid(void);
+uid_t       geteuid(void);
+gid_t       getgid(void);
+int         getgroups(int, gid_t []);
+long        gethostid(void);
+int         gethostname(char *, size_t);
+char       *getlogin(void);
+int         getlogin_r(char *, size_t);
+int         getopt(int, char * const [], const char *);
+pid_t       getpgid(pid_t);
+pid_t       getpgrp(void);
+pid_t       getpid(void);
+pid_t       getppid(void);
+pid_t       getsid(pid_t);
+uid_t       getuid(void);
+char       *getwd(char *); (LEGACY)
+int         isatty(int);
+int         lchown(const char *, uid_t, gid_t);
+int         link(const char *, const char *);
+int         lockf(int, int, off_t);
+off_t       lseek(int, off_t, int);
+int         nice(int);
+long        pathconf(const char *, int);
+int         pause(void);
+int         pipe(int [2]);
+ssize_t     pread(int, void *, size_t, off_t);
+ssize_t     pwrite(int, const void *, size_t, off_t);
+ssize_t     read(int, void *, size_t);
+ssize_t     readlink(const char *restrict, char *restrict, size_t);
+int         rmdir(const char *);
+int         setegid(gid_t);
+int                 seteuid(uid_t);
+int                 setgid(gid_t);
+int                 setpgid(pid_t, pid_t);
+pid_t               setpgrp(void);
+int                 setregid(gid_t, gid_t);
+int                 setreuid(uid_t, uid_t);
+pid_t               setsid(void);
+int                 setuid(uid_t);
+unsigned            sleep(unsigned);
+void                swab(const void *restrict, void *restrict, ssize_t);
+int                 symlink(const char *, const char *);
+void                sync(void);
+long                sysconf(int);
+pid_t               tcgetpgrp(int);
+int                 tcsetpgrp(int, pid_t);
+int                 truncate(const char *, off_t);
+char               *ttyname(int);
+int                 ttyname_r(int, char *, size_t);
+useconds_t          ualarm(useconds_t, useconds_t);
+int                 unlink(const char *);
+int                 usleep(useconds_t);
+pid_t               vfork(void);
+ssize_t             write(int, const void *, size_t);
+
+*/
+/* intptr_t is omitted */
+/* optarg is omitted */
+extern "C" int optind;
+extern "C" int opterr;
+extern "C" int optopt;
+}
+;
+
+utime.h:
+include {
+utimbuf
+time_t
+}
+epilogue {
+namespace Std {
+/* Need stub */
+extern int utime(const char ?, const struct utimbuf *);
+}
+}
+;
+
+monetary.h:
+;
