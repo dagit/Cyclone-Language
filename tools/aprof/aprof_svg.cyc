@@ -35,7 +35,7 @@ using List;
 using Aprof;
 using Fn;
 
-//#define DEBUG_ME
+// #define DEBUG_ME
 
 /* Dimensions of the graph on the printed page, in points (pt).
    The title, legend, etc., appear outside these dimensions. */
@@ -172,9 +172,9 @@ static void mark_delta(curve_t b, clock_t x, int delta_y) {
   if (b->max_y < y) b->max_y = y;
 #ifdef DEBUG_ME
   fprintf(stderr,"%s = %d @ %d\n",b->name,y,x);
-  fprintf(stderr,"%s->area += %s*events\n",
-          b->name,
-          print_bytes(((double)(x - b->last_x)) * b->last_y));
+  //  fprintf(stderr,"%s->area += %s*events\n",
+  //          b->name,
+  //          print_bytes(((double)(x - b->last_x)) * b->last_y));
 #endif
   b->last_x = x;
   b->last_y = y;
@@ -281,7 +281,6 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
 
   case &AllocE(AllocEvent(time,_,rname,count,*rstats,addr)):
     mark_gc_over();
-    num_alloc_events++;
     if (!strcmp(rname,"unique")) {
       if (!omitted("unique"))
         mark_delta(env->unique_live,time,count);
@@ -507,7 +506,7 @@ static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t 
   /* the fills */
   printf("<!-- curves -->\n");
   // bottom curve first...
-  printf("<path d='M");
+  printf("<path id='%s' d='M",nth(all_curves,0)->name);
   for (int x=0; x < xres; x++) {
     printf("%d,%d ",x,yv[0][x]);
   }
@@ -516,7 +515,7 @@ static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t 
 
   // ... then the other curves, going up
   for (int i=1; i < num_curves; i++) {
-    printf("<path d='M");
+    printf("<path id='%s' d='M",nth(all_curves,i)->name);
     // top border is the curve
     for (int x=0; x < xres; x++) {
       printf("%d,%d ",x,yv[i][x]);
@@ -579,61 +578,56 @@ static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t 
   */
 }
 
+#define PLURAL(x) x,(((x)!=1)?"s":"")
 static void comment_stats() {
-  output_comment(aprintf("Total events:\t%u",
+  output_comment(aprintf("Total events: %6u",
                          (num_create_events+num_alloc_events
                           +num_free_events+num_reclaim_events
                           +num_resize_events+num_gc_events)));
-  output_comment(aprintf("\tCreate:\t%u",num_create_events));
-  output_comment(aprintf("\tAlloc:\t%u",num_alloc_events));
-  output_comment(aprintf("\tFree:\t%u",num_free_events));
-  output_comment(aprintf("\tReclaim:\t%u",num_reclaim_events));
-  output_comment(aprintf("\tResize:\t%u",num_resize_events));
-  output_comment(aprintf("\tGc:\t%u",num_gc_events));
-  if (num_alloc_heap) {
-    output_comment(aprintf("%u objects (%u bytes) allocated in `H",
-                           num_alloc_heap, bytes_alloc_heap));
-    output_comment(aprintf("%u objects [%d%%] (%u bytes [%d%%]) collected from `H",
-                           num_reclaim_heap,
-                           percent(num_reclaim_heap,num_alloc_heap),
+  output_comment(aprintf("* Create:     %6u",num_create_events));
+  output_comment(aprintf("* Alloc:      %6u",num_alloc_events));
+  output_comment(aprintf("* Free:       %6u",num_free_events));
+  output_comment(aprintf("* Reclaim:    %6u",num_reclaim_events));
+  output_comment(aprintf("* Resize:     %6u",num_resize_events));
+  output_comment(aprintf("* Gc:         %6u",num_gc_events));
+
+  output_comment("         _____ALLOCATED_____       ___________COLLECTED___________       _____________FREED_____________");
+  output_comment("Region   Objects       Bytes       Objects     %       Bytes     %       Objects     %       Bytes     %");
+  output_comment("========================================================================================================");
+
+  if (num_alloc_heap)
+    output_comment(aprintf("%6s%10u%12u%14u%5d%%%12u%5d%%",
+                           "`H",num_alloc_heap,bytes_alloc_heap,
+                           num_reclaim_heap,percent(num_reclaim_heap,num_alloc_heap),
                            bytes_reclaim_heap,
                            percent(bytes_reclaim_heap,bytes_alloc_heap)));
-  }
-  if (num_alloc_unique) {
-    output_comment(aprintf("%u objects (%u bytes) allocated in `U",
-                           num_alloc_unique, bytes_alloc_unique));
-    output_comment(aprintf("%u objects [%d%%] (%u bytes [%d%%]) freed from `U",
+  if (num_alloc_unique)
+    output_comment(aprintf("%6s%10u%12u%14u%5d%%%12u%5d%%%14u%5d%%%12u%5d%%",
+                           "`U",num_alloc_unique,bytes_alloc_unique,
+                           num_reclaim_unique,
+                           percent(num_reclaim_unique,num_alloc_unique),
+                           bytes_reclaim_unique,
+                           percent(bytes_reclaim_unique,bytes_alloc_unique),
                            num_freed_unique,
                            percent(num_freed_unique,num_alloc_unique),
                            bytes_freed_unique,
                            percent(bytes_freed_unique,bytes_alloc_unique)));
-    output_comment(aprintf("%u objects [%d%%] (%u bytes [%d%%]) collected from `U",
-                           num_reclaim_unique,
-                           percent(num_reclaim_unique,num_alloc_unique),
-                           bytes_reclaim_unique,
-                           percent(bytes_reclaim_unique,bytes_alloc_unique)));
-  }
-  if (num_alloc_refcnt) {
-    output_comment(aprintf("%u objects (%u bytes) allocated in `RC",
-                           num_alloc_refcnt, bytes_alloc_refcnt));
-    output_comment(aprintf("%u objects [%d%%] (%u bytes [%d%%]) freed from `RC",
+  if (num_alloc_refcnt)
+    output_comment(aprintf("%6s%10u%12u%14u%5d%%%12u%5d%%%14u%5d%%%12u%5d%%",
+                           "`RC",num_alloc_refcnt,bytes_alloc_refcnt,
+                           num_reclaim_refcnt,
+                           percent(num_reclaim_refcnt,num_alloc_refcnt),
+                           bytes_reclaim_refcnt,
+                           percent(bytes_reclaim_refcnt,bytes_alloc_refcnt),
                            num_freed_refcnt,
                            percent(num_freed_refcnt,num_alloc_refcnt),
                            bytes_freed_refcnt,
                            percent(bytes_freed_refcnt,bytes_alloc_refcnt)));
-    output_comment(aprintf("%u objects [%d%%] (%u bytes [%d%%]) collected from `RC",
-                           num_reclaim_refcnt,
-                           percent(num_reclaim_refcnt,num_alloc_refcnt),
-                           bytes_reclaim_refcnt,
-                           percent(bytes_reclaim_refcnt,bytes_alloc_refcnt)));
-  }
-  if (num_alloc_other) {
-    output_comment(aprintf("%u objects (%u bytes) allocated in other regions",
-                           num_alloc_other, bytes_alloc_other));
-    output_comment(aprintf("%u bytes [%d%%] freed from other regions",
+  if (num_alloc_other)
+    output_comment(aprintf("%6s%10u%12u                                                          %12u%5d%%",
+                           "other",num_alloc_other,bytes_alloc_other,
                            bytes_freed_other,
                            percent(bytes_freed_other,bytes_alloc_other)));
-  }
 }
 
 namespace Aprof;
@@ -806,6 +800,12 @@ int main() {
   return 0;
 }
 */
+
+/**********************************************************************/
+/*                                                                    */
+/*                PLOT OBJECT ADDRESS RANGE BY TIME                   */
+/*                                                                    */
+/**********************************************************************/
 
 /* Map address to time and amount of allocation */
 static struct Hashtable::Table<unsigned int,$(const char ?,clock_t,unsigned int)@> *
@@ -1084,8 +1084,10 @@ int generate_svg2(string_t<`H> file) {
 
   output_comment("Allocation distribution profile produced by aprof");
 
-  output_comment(aprintf("min_x = %u, max_x = %u",min_x,max_x));
-  output_comment(aprintf("min_y = %u, max_y = %u",min_y,max_y));
+  output_comment(aprintf("min_x = %u, max_x = %u, range = %u",
+                         min_x, max_x, max_x-min_x));
+  output_comment(aprintf("min_y = %u, max_y = %u, range = %u",
+                         min_y, max_y, max_y-min_y));
 
   comment_stats();
 
@@ -1173,7 +1175,11 @@ int generate_svg2(string_t<`H> file) {
 }
 
 
-/* Distribution of lifetimes */
+/**********************************************************************/
+/*                                                                    */
+/*                    DISTRIBUTION OF LIFETIMES                       */
+/*                                                                    */
+/**********************************************************************/
 
 /* Map address to time that address was allocated */
 static struct Hashtable::Table<unsigned int,clock_t> *
@@ -1395,6 +1401,121 @@ int generate_svg3(string_t<`H> file) {
   if (use_events) CE = "events";
   printf("<text x='%f' y='%f' text-anchor='middle'>%d %s</text>\n",
          WIDTH, HEIGHT+18, max_lifetime, CE);
+
+  printf("<!-- title -->\n");
+  printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",
+         WIDTH/2, HEIGHT+30, title);
+  printf("</svg>\n");
+
+  return 0;
+}
+
+
+/**********************************************************************/
+/*                                                                    */
+/*                   DISTRIBUTION OF OBJECT SIZE                      */
+/*                                                                    */
+/**********************************************************************/
+
+/* Map object size to number of objects with that size */
+static struct Hashtable::Table<unsigned int,unsigned int> *
+  sizes_table = NULL;
+
+static unsigned int max_size = 0;
+static unsigned int max_scount = 0;
+
+static void
+init_globals4() {
+  sizes_table = Hashtable::create(101,uint_cmp,uint_hash);
+}
+
+static void increment_size(unsigned int size) {
+  unsigned int scount = 0;
+  if (Hashtable::try_lookup((_@)sizes_table, size, &scount))
+    Hashtable::remove((_@)sizes_table, size);
+  scount++;
+  Hashtable::insert((_@)sizes_table, size, scount);
+  if (max_size < size) max_size = size;
+  if (max_scount < scount) max_scount = scount;
+}
+
+static bool proc_event4(aprof_event_t event) {
+  switch (event) {
+  case &AllocE(AllocEvent(time,_,rname,count,*rstats,addr)):
+    increment_size(count);
+    break;
+
+  case &ReclaimE(_):
+  case &CreateE(_):
+  case &FreeE(_):
+  case &MarkE(_):
+  case &ResizeE(_):
+  case &GcE(_):
+  case &GcAddToHeapE(_):
+    break;
+  }
+
+  return true;
+}
+
+static unsigned int cumulative_scount = 0;
+
+int generate_svg4(string_t<`H> file) {
+
+  init_globals4();
+
+  fn_t clos = fp2fn(proc_event4);
+  int ret = proc_file(file,clos);
+  if (ret != 0) return ret;
+
+  unsigned int ?sizes_arr = calloc(max_size+1,sizeof(unsigned int));
+  for (let size = 0; size < max_size+1; size++) {
+    unsigned int scount = 0;
+    Hashtable::try_lookup((_@)sizes_table, size, &scount);
+    sizes_arr[size] = scount;
+  }
+
+  /* print the XML header */
+  printf("<?xml version='1.0' encoding='ISO-8859-1'?>\n"
+         "<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.0//EN'\n"
+         " 'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>\n");
+
+  let title = "Number of objects with a given size";
+  output_comment("Allocation size profile produced by aprof");
+  output_comment(title);
+  output_comment(aprintf("max_size = %u",max_size));
+  comment_stats();
+
+  /* start of svg stuff */
+  printf("<svg xmlns='http://www.w3.org/2000/svg'\n"
+         "     xmlns:xlink='http://www.w3.org/1999/xlink'>\n");
+
+  double xscale = (double)WIDTH/(double)(max_size+1);
+  double yscale = 1.0;
+  if (max_scount != 0)
+    yscale = (double)HEIGHT/(double)max_scount;
+
+  printf("<!-- graph -->\n");
+  printf("<g transform='translate(0,%d) scale(%.12f,-%.12f)'>\n",
+         (int)HEIGHT,
+         xscale, yscale);
+  for (let i = 0; i<max_size+1; i++) {
+    if (sizes_arr[i]) // to prevent lots of zero-height bars
+      printf("<rect fill='red' x='%d' y='0' width='1' height='%d'/>\n",
+             i,sizes_arr[i]);
+  }
+  printf("</g>\n");
+
+  printf("<!-- x and y axes -->\n");
+  printf("<path d='M-5,0 0,0' fill='none'"
+         " stroke='black' stroke-width='0.1'/>\n"
+         "<path d='M 0,%f %f,%f %f,%f' fill='none'"
+         " stroke='black' stroke-width='0.1'/>\n",
+         HEIGHT, WIDTH, HEIGHT, WIDTH, HEIGHT+5);
+  printf("<text x='-10' y='3' text-anchor='end'>%d objects</text>\n",
+         max_scount);
+  printf("<text x='%f' y='%f' text-anchor='middle'>size %d</text>\n",
+         WIDTH, HEIGHT+18, max_size);
 
   printf("<!-- title -->\n");
   printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",

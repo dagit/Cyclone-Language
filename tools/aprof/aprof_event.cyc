@@ -430,7 +430,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
           num_freed_unique++;
         }
       }
-      if (strcmp(rname,"refcnt") == 0) {
+      else if (strcmp(rname,"refcnt") == 0) {
         if (*amt > 0) {
           bytes_alloc_refcnt += *amt;
           num_alloc_refcnt++;

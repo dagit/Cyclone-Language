@@ -40,6 +40,7 @@ static void usage(string_t<`H> argv0) __attribute__((noreturn)) {
           "  -svg   generate an svg graph of cumulative memory usage over time\n"
           "  -svg2  generate an svg graph of exact memory usage over time\n"
           "  -svg3  generate an svg graph of object lifetimes\n"
+          "  -svg4  generate an svg graph of object sizes\n"
           "  -sizes generate a report on object sizes\n"
           "  -q     quiet output\n"
           "  -cd X  use X as a clock divisor\n"
@@ -84,6 +85,7 @@ int main(int argc, string_t<`H> ?`H argv) {
   bool do_svg = false;
   bool do_svg2 = false;
   bool do_svg3 = false;
+  bool do_svg4 = false;
   bool do_sizes = false;
   unsigned int clockdivisor_override = 0;
   string_t<`H> file;
@@ -127,6 +129,9 @@ int main(int argc, string_t<`H> ?`H argv) {
     }
     else if ( strcmp( argv[argn], "-svg3" ) == 0 ) {
       do_svg3 = true;
+    }
+    else if ( strcmp( argv[argn], "-svg4" ) == 0 ) {
+      do_svg4 = true;
     }
     else if ( strcmp( argv[argn], "-sizes" ) == 0 ) {
       do_sizes = true;
@@ -197,6 +202,8 @@ int main(int argc, string_t<`H> ?`H argv) {
     ret = generate_svg2(file);
   else if (do_svg3)
     ret = generate_svg3(file);
+  else if (do_svg4)
+    ret = generate_svg4(file);
   else if (do_sizes)
     ret = generate_sizes(file);
   else
