@@ -228,41 +228,15 @@ static resolved_t lookup_ordinary_global_f(genv_t ge,var v) {
 }
 static resolved_t lookup_ordinary_global(tenv te,segment loc,qvar q) {
   let &$(nsl,v) = q;
-//  if (!String::strcmp(*v,"Failure")) {
-//    fprintf(stderr,"Looking up %s\n",Absynpp::qvar2string(q));
-//    fprintf(stderr,"Current namespace: %s\n",
-//            String::str_sepstr(te->ns,"::"));
-//    fprintf(stderr,"Available namespaces:\n");
-//    for (let nss = Dict::lookup(te->ae,te->ns)->availables; nss != null; nss = nss->tl) {
-//      fprintf(stderr,"%s\n",
-//              String::str_sepstr(nss->hd,"::"));
-//    }
-//    fprintf(stderr,"Defined namespaces:\n");
-//    for (let vs = Set::elements(Dict::lookup(te->ae,te->ns)->namespaces); vs != null; vs = vs->tl) {
-//      fprintf(stderr,"%s\n",*vs->hd);
-//    }
-//    fflush(stderr);
-//  }
-  try
-    switch (nsl) {
-    case Loc_n: fallthru;
-    case Rel_n(null):
-      return scoped_lookup(te, loc, lookup_ordinary_global_f, v);
-    case Rel_n(&cons(x,y)):
-      //      fprintf(stderr,"Looking up namespace %s\n",
-      //              String::str_sepstr(&cons(x,y),"::"));
-      let ge = lookup_namespace(te,loc,x,y);
-      //      fprintf(stderr,"Got it -- looking up var %s\n",*v);
-      let x = lookup_ordinary_global_f(ge,v); 
-      //      fprintf(stderr,"Got it\n");
-      //      fflush(stderr);
-      return x;
-    case Abs_n(y):
-      return lookup_ordinary_global_f(Dict::lookup(te->ae,y),v);
-    }
-  catch {
-  case Dict::Absent:
-    return VarRes(Unresolved_b);
+  switch (nsl) {
+  case Loc_n: fallthru;
+  case Rel_n(null):
+    return scoped_lookup(te, loc, lookup_ordinary_global_f, v);
+  case Rel_n(&cons(x,y)):
+    let ge = lookup_namespace(te,loc,x,y);
+    return lookup_ordinary_global_f(ge,v);
+  case Abs_n(y):
+    return lookup_ordinary_global_f(Dict::lookup(te->ae,y),v);
   }
 }
 
@@ -520,27 +494,18 @@ tenv add_pat_var(segment loc, tenv te, vardecl vd) {
 
 resolved_t lookup_ordinary(tenv te,segment loc,qvar q) {
   let &$(nsl,v) = q;
-//  if (!String::strcmp(*v,"Failure")) {
-//    fprintf(stderr,"lookup_ordinary on Failure\n"); fflush(stderr);
-//  }
-  _ r;
   switch (nsl) {
   case Loc_n:
-    if (te->le == null) { throw Dict::Absent; break; }
+    if (te->le == null) { throw Dict::Absent; }
     else fallthru;
   case Rel_n(null) && te->le != null:
     let fe = get_fenv(te);
-    try r = VarRes(Dict::lookup(fe->locals,v));
-    catch {case Dict::Absent: r = lookup_ordinary_global(te,loc,q); break;}
-    break;
+    // NB a local overrides any global, without an ambiguity warning
+    try return VarRes(Dict::lookup(fe->locals,v));
+    catch {case Dict::Absent: return lookup_ordinary_global(te,loc,q);}
   default:
-    r = lookup_ordinary_global(te,loc,q);    
-    break;
+    return lookup_ordinary_global(te,loc,q);    
   }
-//  if (!String::strcmp(*v,"Failure")) {
-//    fprintf(stderr,"lookup_ordinary DONE\n"); fflush(stderr);
-//  }
-  return r;
 }
 
 void process_continue(tenv te, stmt s, stmt_opt @sopt) {

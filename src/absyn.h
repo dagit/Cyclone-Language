@@ -6,16 +6,32 @@
 // B. Result of type-checking
 // C. Result of translation to C
 // Each stage obeys different invariants of which the compiler hacker
-// (that's you) must be aware.  For example, here is an incomplete list
-// of things that must be true after type-checking:
-//  B1. All qvars have the correct namespace list in them
-//  B2. All "destination fields" and non_local_preds fields in stmt objects
-//      must be correct.
-//  B3. Every expression must have a non-null and correct type field.
-//  B4. None of the "unresolved" variants are used.  (There may be 
+// (that's you) must be aware.
+// Here are some invariants after parsing:
+//  A1. None of the following are used:
+//        Var_e, FnCall_e, Struct_e, Enum_e, Xenum_e
+//      Instead, there will be
+//        UnknownId_e, UnknownCall_e, UnresolvedMem_e
+//  A2. qvars may be Rel_n, Abs_n, or Loc_n.
+//      Rel_n is used for most variable references and declarations.
+//      Abs_n is used for some globals (Null_Exception, etc).
+//      Loc_n is used for some locals (comprehension and pattern variables).
+// Here are some invariants after type checking:
+//  B1. None of the following are used:
+//        UnknownId_e, UnknownCall_e, UnresolvedMem_e
+//      They have all been replaced by
+//        Var_e, FnCall_e, Struct_e, Enum_e, Xenum_e
+//      In Var_e, Unresolved_b is not used.
+//  B2. All qvars are either Loc_n or Abs_n.  Any Rel_n has been
+//      replaced by Loc_n or Abs_n.
+//  B3. All "destination fields" and non_local_preds fields in stmt objects
+//      are correct.
+//  B4. Every expression has a non-null and correct type field.
+//  B5. None of the "unresolved" variants are used.  (There may be 
 //      underconstrained Evars for types.)
-//  B5. The pat_vars field of switch_caluse is non-null and correct.
-// Note that translation to C willfully violates B2 and B3, but that's okay.
+//  B6. The pat_vars field of switch_clause is non-null and correct.
+// Note that translation to C willfully violates B3 and B4, but that's okay.
+
 
 // A cute hack to avoid defining the abstract syntax twice.
 #ifdef ABSYN_CYC
@@ -340,7 +356,7 @@ namespace Absyn {
 
   // only local and pat cases need to worry about shadowing
   EXTERN_DEFINITION enum Binding {
-    Unresolved_b;
+    Unresolved_b; // Only used by Toc.  I'd like to get rid of it completely.
     Global_b(vardecl);
     Funname_b(fndecl); // good distinction between functions and function ptrs
     Param_b($(var,tqual,typ)@);

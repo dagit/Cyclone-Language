@@ -233,29 +233,23 @@ static typ tcConst<`r>(tenv te, segment loc, typ *`r topt, cnst_t c, exp e) {
 }
 
 // variables
-static typ tcVar<`r>(tenv te, segment loc, typ *`r topt, qvar q, exp e) {
-  switch (lookup_ordinary(te,loc,q)) {
-  case VarRes(b):
-    switch(b) {
-    case Unresolved_b:
-      return expr_err(te,loc,xprintf("unbound identifier %s",qvar2string(q)));
-    case Global_b(vd):
-      q[0] = vd->name[0];
-      return vd->type;
-    case Funname_b(fd):
-      q[0] = fd->name[0];
-      return fndecl2typ(fd);
-    case Pat_b(vd): fallthru(vd);
-    case Local_b(vd):
-      typ t = vd->type;
-      fallthru(t);
-    case Param_b(&$(_,_,t)):
-      (*q)[0] = Loc_n;
-      return t;
-    }
-  case StructRes(_):  throw impos("StructRes in tcVar");
-  case EnumRes(_,_):  throw impos("EnumRes in tcVar");
-  case XenumRes(_,_): throw impos("XenumRes in tcVar");
+static typ tcVar<`r>(tenv te, segment loc, qvar q, binding_t b) {
+  switch(b) {
+  case Unresolved_b:
+    return expr_err(te,loc,xprintf("unbound identifier %s",qvar2string(q)));
+  case Global_b(vd):
+    q[0] = vd->name[0];
+    return vd->type;
+  case Funname_b(fd):
+    q[0] = fd->name[0];
+    return fndecl2typ(fd);
+  case Pat_b(vd): fallthru(vd);
+  case Local_b(vd):
+    typ t = vd->type;
+    fallthru(t);
+  case Param_b(&$(_,_,t)):
+    (*q)[0] = Loc_n;
+    return t;
   }
 }
 
@@ -1320,8 +1314,8 @@ static void tcExpNoInst<`r>(tenv te, typ *`r topt, exp e) {
   case Const_e(c):
     t = tcConst(te,loc,topt,c,e);
     break;
-  case Var_e(q,vd):
-    t = tcVar(te,loc,topt,q,e);
+  case Var_e(q,b):
+    t = tcVar(te,loc,q,b);
     break;
   case Primop_e(p,es):
     t = tcPrimop(te,loc,topt,p,es);

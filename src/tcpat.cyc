@@ -177,7 +177,7 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p, typ *`p region_opt) {
     break;
 
   case UnknownId_p(q):
-    switch (lookup_ordinary(te,p->loc,q)) {
+    try switch (lookup_ordinary(te,p->loc,q)) {
     case StructRes(_):
       terr(p->loc,"struct tag used without arguments in pattern");
       t = wildtyp();
@@ -188,13 +188,20 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p, typ *`p region_opt) {
     case XenumRes(xed,ef):
       p->r = Xenum_p(ef->name,null,null,xed,ef);
       return tcPat(te,p,region_opt);
-    default: // LocalRes, GlobalRes, UnknownRes
+    case VarRes(_):
+      // The pattern variable has already been declared
       switch ((*q)[0]) {
+        // If the variable is not qualified, then we consider
+        // this a declaration that shadows the outer declaration,
+        // without warning.
+      case Loc_n: fallthru;
       case Rel_n(null):
         (*q)[0] = Loc_n;        
         p->r = Var_p(new_vardecl(q,VoidType,null));
         return tcPat(te,p,region_opt); // sets the vardecl's fields correctly
       default:
+        // Otherwise the variable is qualified and it has already
+        // been declared.  We don't allow this.
         terr(p->loc,"qualified variable in pattern");
         break;
       }
@@ -202,10 +209,28 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p, typ *`p region_opt) {
            xprintf("unresolved identifier %s in pattern",qvar2string(q)));
       t = wildtyp();
       break;
-    }
+    } catch {
+    case Dict::Absent:
+      // unbound variable in pattern
+      switch ((*q)[0]) {
+        // If the variable is unqualified, it declares a new variable
+      case Loc_n: fallthru;
+      case Rel_n(null):
+        (*q)[0] = Loc_n;        
+        p->r = Var_p(new_vardecl(q,VoidType,null));
+        return tcPat(te,p,region_opt); // sets the vardecl's fields correctly
+      default:
+        // Otherwise it's an error
+        terr(p->loc,
+             xprintf("unbound identifier %s in pattern",qvar2string(q)));
+        t = wildtyp();
+        break;
+      }
+      break;
+    }  
     break;
   case UnknownCall_p(q,tvs,ps):
-    switch (lookup_ordinary(te,p->loc,q)) {
+    try switch (lookup_ordinary(te,p->loc,q)) {
     case StructRes(sd):
       let x = List::map(null_designator, ps);
       p->r = Struct_p(sd,null,tvs,x);
@@ -216,15 +241,15 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p, typ *`p region_opt) {
     case XenumRes(xed,ef):
       p->r = Xenum_p(ef->name,tvs,ps,xed,ef);
       return tcPat(te,p,region_opt);
-    default: // LocalRes, GlobalRes, UnknownRes
-      terr(p->loc,
-           xprintf("unresolved identifier %s in pattern",qvar2string(q)));
-      t = wildtyp();
+    case VarRes(_):
       break;
-    }
+    } catch {case Dict::Absent: break;}
+    terr(p->loc,
+         xprintf("%s is not a constructor in pattern",qvar2string(q)));
+    t = wildtyp();
     break;
   case UnknownFields_p(q,tvs,dps):
-    switch (lookup_ordinary(te,p->loc,q)) {
+    try switch (lookup_ordinary(te,p->loc,q)) {
     case StructRes(sd):
       p->r = Struct_p(sd,null,tvs,dps);
       return tcPat(te,p,region_opt);
@@ -236,12 +261,17 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p, typ *`p region_opt) {
       terr(p->loc,"xenum with designators not implemented");
       t = wildtyp();
       break;
-    default: // LocalRes, GlobalRes, UnknownRes
+    case VarRes(_):
       terr(p->loc,
-           xprintf("unresolved identifier %s in pattern",qvar2string(q)));
+           xprintf("unbound struct %s in pattern",qvar2string(q)));
       t = wildtyp();
       break;
-    }
+    } catch {case Dict::Absent:
+      terr(p->loc,
+           xprintf("unbound struct %s in pattern",qvar2string(q)));
+      t = wildtyp();
+      break;
+    }      
     break;
   }
   p->topt = &Opt(t);

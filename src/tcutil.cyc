@@ -1470,32 +1470,26 @@ $(bool,typ) addressof_props(tenv te, exp e) {
   // in some situations, the pointer must actually be const
   $(bool,typ) bogus_ans = $(false,HeapRgnType);
   switch (e->r) {
-  case Var_e(q,_):
-    switch (lookup_ordinary(te,e->loc,q)) {
-    case VarRes(x):
-      // where oh where does my variable live?
-      switch(x) {
-      case Unresolved_b: return bogus_ans;
-      case Funname_b(_): return $(true,            HeapRgnType); 
-      case Global_b(vd): 
-	switch (compress(e->topt->v)) {
+  case Var_e(q,x):
+    // where oh where does my variable live?
+    switch(x) {
+    case Unresolved_b: return bogus_ans;
+    case Funname_b(_): return $(true, HeapRgnType); 
+    case Global_b(vd): 
+      switch (compress(e->topt->v)) {
 	// arrays cannot be modified
-	case ArrayType(_,_,_): return $(true, HeapRgnType);
-	default: return $(vd->tq->q_const, HeapRgnType);
-	}
-      case Local_b(vd):  
-	switch (compress(e->topt->v)) {
-	case ArrayType(_,_,_): return $(true, block_to_typ(te,vd->block));
-	default: return $(vd->tq->q_const, block_to_typ(te,vd->block));
-	}
-      case Pat_b(vd):    
-	return $(vd->tq->q_const, block_to_typ(te,vd->block));
-	// KLUDGE: assumes parameters are block 0
-      case Param_b(&$(_,tq,_)): return $(tq->q_const, block_to_typ(te,0));
+      case ArrayType(_,_,_): return $(true, HeapRgnType);
+      default: return $(vd->tq->q_const, HeapRgnType);
       }
-    case StructRes(_):  fallthru;
-    case EnumRes(_,_):  fallthru;
-    case XenumRes(_,_): return bogus_ans;
+    case Local_b(vd):  
+      switch (compress(e->topt->v)) {
+      case ArrayType(_,_,_): return $(true, block_to_typ(te,vd->block));
+      default: return $(vd->tq->q_const, block_to_typ(te,vd->block));
+      }
+    case Pat_b(vd):    
+      return $(vd->tq->q_const, block_to_typ(te,vd->block));
+      // KLUDGE: assumes parameters are block 0
+    case Param_b(&$(_,tq,_)): return $(tq->q_const, block_to_typ(te,0));
     }
   case StructMember_e(e1,f):
     // we have an unboxed thing, so we inherit e2's region

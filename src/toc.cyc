@@ -16,10 +16,7 @@
 // type translation is functional.
 
 // We need to figure out how to do the name mangling systematically,
-// especially for namespaces.  Right now, I'm using identifers that
-// start with a dollar sign (e.g., "$foo") for "reserved" words and
-// temps, and using a dollar sign to separate namespaces (which
-// is obviously broken).  This needs to be thought through more carefully.
+// especially for namespaces.
 
 // Look for "unimp" or comments that start with FIX: for missing
 // or broken pieces.
