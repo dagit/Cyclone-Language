@@ -636,9 +636,8 @@ datatype exn { TooLarge };
 datatype exn.TooLarge too_large = TooLarge;
 
 //FIX: add a way for the user to control this.
-unsigned int max_paths = 17;
+unsigned int max_paths = 33;
 unsigned int max_paths_seen = 0;
-unsigned int max_parallel_assn = 4;
 
 // given a set of graphs gs representing A1 or A2 or ... or An
 // and given assertion a, compute the set of graphs representing
@@ -851,13 +850,10 @@ assn_t merge_assn(assn_t a1, assn_t a2){
   //turn a1 or a2 to DNF normal form, represented by a set of graphs
   let g = cgraph(true_graph(), or(a1,a2));
   if (g == NULL) return &false_assn;
-  if (num_graphs(g) > max_parallel_assn){
-    let row = g->rows;
-    for(let row1 = g->next; row1 != NULL; row1 = row1->next){
-      row = or2rows(row, row1->rows);
-    }
-    return row2assn(row);
-  }else{
-    return or(a1, a2);
+  let row = g->rows;
+  for(let row1 = g->next; row1 != NULL; row1 = row1->next){
+    row = or2rows(row, row1->rows);
   }
+  return row2assn(row);
+
 }

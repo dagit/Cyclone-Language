@@ -972,7 +972,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     // if  the expression has type unsigned, then we may conclude
     // t == t1 % t2 u< t2
     if ((p == Absyn::Mod) && (is_unsigned_int_exp(e))){
-      fprintf(stderr,"e1 mod e2 is unsigned\n");
+      //      fprintf(stderr,"e1 mod e2 is unsigned\n");
       switch (ts){
       case &List(t1, &List(t2, NULL)):
 	aout = and(aout, ult(t, t2));
