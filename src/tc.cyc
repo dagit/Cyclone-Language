@@ -440,8 +440,6 @@ static void tcStructdecl(tenv te, genv_t ge, seg_t loc, structdecl sd) {
   *sdp = sd;
 }
 
-// FIX: for now, ensure all instantiations are packable (see comments
-//      with tcStructdecl)
 static void tcEnumdecl(tenv te, genv_t ge, seg_t loc, enumdecl ed) {
   // reject anonymous top-level
   if (ed->name == null) {

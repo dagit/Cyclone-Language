@@ -49,9 +49,12 @@ extern hdict_t<`a,`b,`e> singleton(int comp(`a,`a;`e),`a key,`b data);
 // is not present, raise Absent.
 extern `b lookup(hdict_t<`a,`b,`e> d,`a key);
 
-// Same as lookup but doesnt raise an exception -- rather, returns an
-// option.
+// Same as lookup but doesnt raise an exception -- rather, returns an option.
 extern Core::opt_t<`b> lookup_opt(hdict_t<`a,`b,`e> d,`a key);
+
+// A third version of lookup that if present assigns through its third param
+// and returns true, else returns false.
+extern bool lookup_bool(hdict_t<`a,`b,`d> d, `a key, `b @`r ans_place);
 
 // Fold a function f across the dictionary yielding an accumulator. 
 extern `c fold(`c f(`a,`b,`c),hdict_t<`a,`b,`e> d,`c accum);

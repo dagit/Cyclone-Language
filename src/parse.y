@@ -686,9 +686,8 @@ static list_t<decl> make_declarations(decl_spec_t ds,
         return &List(&Decl(Struct_d(sd),loc),null);
       case EnumType(n,ts,_):
         let ts2 = List::map_c(typ2tvar,loc,ts);
-        let ed  = &Enumdecl{.sc = s, .name = &Opt((typedef_name_t)n), 
-                            .tvs = ts2, .fields = null};
-        return &List(&Decl(Enum_d(ed),loc),null);
+        let ed  = enum_decl(s,&Opt((typedef_name_t)n),ts2,null,loc);
+        return &List(ed,null);
       case XenumType(n,_):
         let ed = &Xenumdecl{.sc=s, .name=n, .fields=null};
         return &List(&Decl(Xenum_d(ed),loc),null);

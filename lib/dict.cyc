@@ -67,6 +67,20 @@ Core::opt_t<`b> lookup_opt(hdict_t<`a,`b,`e> d, `a key) {
   }
   return null;
 }
+bool lookup_bool(hdict_t<`a,`b,`d> d, `a key, `b @`r ans_place) {
+  let rel = d->rel;
+  let t   = d->t;
+  while(t != null) {
+    let i = rel(key,t->key_val[0]);
+    if(i < 0) t = t->left;
+    else if (i > 0) t = t->right;
+    else {
+      *ans_place = t->key_val[1];
+      return true;
+    }
+  }
+  return false;
+} 
 
 static tree<`a,`b> 
 balance($(enum Color, tree<`a,`b>, tree<`a,`b>, $(`a,`b)) quad) {

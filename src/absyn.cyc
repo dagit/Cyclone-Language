@@ -403,7 +403,7 @@ decl struct_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
 }
 decl enum_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
 	       opt_t<list_t<enumfield>> fs,seg_t loc) {
-  return new_decl(Enum_d(&Enumdecl {.sc=s, .name=n, .tvs=ts, .fields=fs}),loc);
+  return new_decl(Enum_d(&Enumdecl{.sc=s, .name=n, .tvs=ts, .fields=fs}),loc);
 }
 decl xenum_decl(scope s,typedef_name_t n,list_t<enumfield> fs,seg_t loc) {
  return new_decl(Xenum_d(&Xenumdecl{.sc=s, .name=n, .fields=fs}),loc);

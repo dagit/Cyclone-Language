@@ -78,6 +78,7 @@ TC_H           := tc.h           $(ABSYN_H) $(TCENV_H)
 CONTROL_FLOW_H := control_flow.h $(ABSYN_H)
 TOC_H          := toc.h          $(ABSYN_H)
 NEW_CONTROL_FLOW_H := new_control_flow.h
+CF_ABSEXP_H := $(NEW_CONTROL_FLOW_H)
 
 $(OUT_PREFIX)absyn.c: $(ABSYN_H)
 $(OUT_PREFIX)parse_tab.c: $(ABSYN_H)
@@ -96,5 +97,5 @@ $(OUT_PREFIX)control_flow.c: $(ABSYN_H) $(ABSYNPP_H) $(TCUTIL_H) $(CONTROL_FLOW_
 $(OUT_PREFIX)toc.c: $(TOC_H) $(ABSYN_H) $(TCUTIL_H) $(EVEXP_H) $(ABSYNPP_H) $(FORMATSTR_H)
 $(OUT_PREFIX)cyclone.c: $(ABSYN_H) $(ABSYNPP_H) $(ABSYNDUMP_H) $(TCUTIL_H) $(TCENV_H) $(TC_H) $(CONTROL_FLOW_H) $(TOC_H) $(NEW_CONTROL_FLOW_H)
 
-$(OUT_PREFIX)new_control_flow.c: $(ABSYN_H) $(ABSYNPP_H) $(TCUTIL_H) $(EVEXP_H)
-
+$(OUT_PREFIX)new_control_flow.c: $(NEW_CONTROL_FLOW_H) $(ABSYN_H) $(ABSYNPP_H) $(TCUTIL_H) $(EVEXP_H)
+$(OUT_PREFIX)cf_absexp.c: $(CF_ABSEXP_H)

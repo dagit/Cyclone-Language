@@ -983,10 +983,10 @@ static typ tcComprehension(tenv te,seg_t loc,typ *`r topt,
   te = Tcenv::new_block(te);
   te = add_local_var(loc, te, vd);
   _ pinfo;
-  _ topt2 = null;
-  _ nopt  = null;
-  _ tqopt = null;
-  _ bopt  = null;
+  let topt2 = null;
+  let nopt  = null;
+  let tqopt = null;
+  let bopt  = null;
 
   if (topt != null) {
     switch (compress(*topt)) {
@@ -1014,17 +1014,17 @@ static typ tcComprehension(tenv te,seg_t loc,typ *`r topt,
 	   (Evexp::eval_const_uint_exp(e)<=Evexp::eval_const_uint_exp(bound))) {
 	 b_result = Upper_b(e);
 	 break;
-       } else fallthru;
+       } 
+       fallthru;
      default:
        b_result = bound_is_const ? Upper_b(bound) : Unknown_b;
        break;
      }
-   else b_result = bound_is_const ? Upper_b(bound) : Unknown_b;
+   else 
+     b_result = bound_is_const ? Upper_b(bound) : Unknown_b;
    tqual tq_result = (tqopt != null) ? *tqopt : empty_tqual();
-  return 
-    (b_result == Unknown_b) ?
-    starb_typ(body->topt->v,HeapRgn,tq_result,b_result) :
-      atb_typ(body->topt->v,HeapRgn,tq_result,b_result);
+   let ptr_maker = (b_result == Unknown_b) ? starb_typ : atb_typ;
+  return ptr_maker(body->topt->v,HeapRgn,tq_result,b_result);
 }
 
  //////////////////// Struct (f{e1,...,en}) ///////////////////

@@ -1,15 +1,14 @@
 // TO DO: Share more lvalues and rvalues by putting in shared.
 // TO DO: Get patterns right rather than require fully initialized
-// TO DO: Look up the "real" rules for order-of-evaluation rexstrictions.
-// For debugging, may want to put unique ints in the MallocPts
+//        At very least, special case let x = e !!!
+// TO DO: Use the real C rules for order-of-evaluation restrictions.
 
 // The previous pass (type-checking) sets up:
 // * decorating all stmts with their correct non_local_preds
 // * decorating each stmt with CFAnnot
 // * setting all the encloser fields (note the list ends with a self-loop,
 //   not a null!
-// (The latter two activities are performed via the appropriate call to 
-//  set_encloser.)
+// (The latter two activities are performed via calls to set_encloser.)
 
 // We now do two conceptual passes here:
 // * First we:
@@ -26,17 +25,6 @@
 //   the analysis for sake of comparison -- change the abstraction translation, 
 //   not the flow analysis.
 
-// Here's the grammar for absexp_t.  A literal translation to Cyclone does a lot
-// of allocation, but that's alright at least for a prototype.
-// 
-// absexp ::= SkipAE | UseAE(rvalue) | MallocAE(exp) | AssignAE(lvalue,rvalue)
-//          | GroupAE(absexpgroup,list_t<absexp>) | StmtAE(stmt)
-// absexpgroup ::= Ordered | Unordered | Oneof
-// rvalue ::= & addressable | lvalue
-// lvalue ::= noaddress | Unknown
-// addressable ::= x | malloc_op(exp) | noaddress.f
-// noaddress ::= addressable | *noaddress
-
 #include "core.h"
 #include "list.h"
 #include "dict.h"
@@ -45,6 +33,8 @@
 #include "absyn.h"
 #include "tcutil.h"
 #include "evexp.h"
+#include "cf_absexp.h"
+#include "new_control_flow.h"
 
 // for debugging
 #include "absynpp.h"
@@ -53,6 +43,7 @@
 using Core;
 using List;
 using Absyn;
+using CFabsexp;
 namespace NewControlFlow;
 
 typedef vardecl             vardecl_t;
@@ -61,179 +52,21 @@ typedef Dict::dict_t<`a,`b> dict_t<`a,`b>;
 
 enum LocalRoot {
   VarRoot(vardecl_t);
-  MallocPt(exp); // maybe allow enums and put variant explicitly here?
-  // even now, maybe Enum_e should be a MallocPt so fields can be 
-  // initialized later??? (nothing to be gained in porting though)
+  MallocPt(exp); //includes Enum_e and Xenum_e (in both cases, variant is known)
 };
 enum Field {
   StructF(field_name_t);
   TupleF(int); // also used for enum and xenum field slots
   // maybe add some array support some day
 };
-typedef enum Field field_t;
-typedef $(enum LocalRoot, list_t<field_t>) @path_t;
 
-enum Absexp;
-enum Absexpgroup;
-enum Rvalue;
-enum Lvalue;
-enum Addressable;
-enum Noaddress;
-typedef enum Absexp absexp_t;
-typedef enum Absexpgroup absexpgroup_t;
-typedef enum Rvalue rvalue_t;
-typedef enum Lvalue lvalue_t;
-typedef enum Addressable addressable_t;
-typedef enum Noaddress noaddress_t;
-enum Absexp {
-  SkipAE;
-  UseAE(rvalue_t);
-  MallocAE(exp);
-  AssignAE(lvalue_t,rvalue_t);
-  GroupAE(absexpgroup_t,list_t<absexp_t>);
-  StmtAE(stmt);
-  BottomAE; // for throw and statically known guards
-};
-enum Absexpgroup { OrderedG; UnorderedG; OneofG };
-enum Rvalue {
-  AddressOp(addressable_t);
-  LvalueOp(lvalue_t);
-  UnknownROp;
-};
-enum Lvalue {
-  NoaddressOp(noaddress_t);
-  UnknownLOp;
-};
-enum Addressable { 
-  LocalOp(enum LocalRoot);
-  MemberOp(noaddress_t, field_t);
-};
-enum Noaddress {
-  DerefOp(noaddress_t);
-  OtherOp(addressable_t);
-};
-
-// really dumb printers for debugging -- note only absexp splits lines
-string addr2string(addressable_t a);
-string noaddr2string(noaddress_t n) {
-  switch(n) {
-  case DerefOp(n2): return xprintf("(*%s)", noaddr2string(n2));
-  case OtherOp(a):  return addr2string(a);
-  }
-}
-string addr2string(addressable_t a) {
-  switch(a) {
-  case LocalOp(VarRoot(vd)): return *(*vd->name)[1];
-  case LocalOp(MallocPt(e)): return "<<mpt>>";//return xprintf("mpt %p", e);
-  case MemberOp(n,f): 
-    _ fs;
-    switch(f) {
-    case StructF(field): fs = *field; break;
-    case TupleF(i):      fs = xprintf("%d",i); break;
-    }
-    return xprintf("%s.%s", noaddr2string(n), fs);
-  }
-}
-string lval2string(lvalue_t l) { 
-  switch(l) {
-  case NoaddressOp(n): return noaddr2string(n);
-  case UnknownLOp:     return "Unknownlop";
-  }
-}
-string rval2string(rvalue_t r) { 
-  switch(r) {
-  case AddressOp(a): return xprintf("& %s",addr2string(a));
-  case LvalueOp(l):  return lval2string(l);
-  case UnknownROp:   return "Uknownrop";
-  }
-}
-string absexp2string(absexp_t ae, int depth) {
-  string ans = new_string(depth);
-  for(int i=0; i < ans.size; ++i)
-    ans[i] = ' ';
-  switch(ae) {
-  case SkipAE:   ans = xprintf("%sskip",ans); break;
-  case UseAE(r): ans = xprintf("%suse %s",ans,rval2string(r)); break;
-  case MallocAE(e): ans = xprintf("%s<<malloc>>",ans); break;
-  case AssignAE(l,r): ans = xprintf("%sassign %s %s",ans,
-				    lval2string(l), rval2string(r)); break;
-  case GroupAE(g,l):
-    switch(g) {
-    case OrderedG:   ans = xprintf("%sordered",ans);   break;
-    case UnorderedG: ans = xprintf("%sunordered",ans); break;
-    case OneofG:     ans = xprintf("%soneof",ans);     break;
-    }
-    for(; l != null; l = l->tl)
-      ans = xprintf("%s\n%s",ans,absexp2string(l->hd, depth+1));
-    break;
-    
-  case StmtAE(s): ans = xprintf("%s<<malloc>>",ans); break;
-  case BottomAE: ans = xprintf("%sbottom",ans); break;
-  }
-  return ans;
-}
-
-// we use these functions instead of the constructors in order to do
-// some easy local simplification while translating.  Not necessary.
-// TO DO: simplify more w.r.t. BottomAE??
-absexp_t make_assignexp(lvalue_t op1, rvalue_t op2) {
-  switch ($(op1,op2)) {
-  case $(UnknownLOp, UnknownROp): return SkipAE;
-  case $(UnknownLOp, _):          return UseAE(op2);
-  default:                        return AssignAE(op1,op2);
-  }
-}
-// Note: could be a bit more aggressive here, but I imagine this will suffice.
-absexp_t make_groupexp(absexpgroup_t g, absexp_t ae1, absexp_t ae2) {
-  switch ($(g,ae1,ae2)) {
-  case $(_,_,SkipAE) && g != OneofG: return ae1;
-  case $(_,SkipAE,_) && g != OneofG: return ae2;
-  case $(OneofG,_,BottomAE):         return ae1;
-  case $(OneofG,BottomAE,_):         return ae2;
-  case $(OrderedG,BottomAE,_):       return BottomAE;
-  case $(g,GroupAE(g1,l1),GroupAE(g2,l2)) && g == g1 && g == g2:
-    return GroupAE(g,append(l1,l2));
-  case $(g,GroupAE(g1,l1),_) && g == g1 && g != OrderedG:
-    return GroupAE(g, new{List(ae2,l1)});
-  case $(OrderedG,GroupAE(OrderedG,l1),_):
-    return GroupAE(OrderedG, append(l1, new{List(ae2,null)}));
-  case $(g,_,GroupAE(g2,l2)) && g == g2:
-    return GroupAE(g, new {List(ae1,l2)});
-  default:
-    return GroupAE(g, new {List(ae1, new {List(ae2,null)})});
-  }
-}
-
-// Note: We may want to trim lhsides to avoid repeats (such as UnknownOp).
-// Note: More than one lhside indicates we should make a OneofG.
-// Note: return ???, at least when_true, when_false absexp_t I think.
-//       But what about ops??
-absexp_t make_assigns(list_t<lvalue_t> lhsides, rvalue_t ae) {
-  if(lhsides == null)
-    return SkipAE;
-  if(lhsides->tl == null)
-    return make_assignexp(lhsides->hd, ae);
-  let l = null;
-  for(; lhsides != null; lhsides = lhsides->tl)
-    l = new {List(make_assignexp(lhsides->hd, ae), l)};
-  return GroupAE(OneofG, l);
-}
-
-// Note: may not assign partial init to Uninit b/c of aliasing!!
 enum InitState {
   Uninit;
-  // add partially init pointer to unknown here?!?!
-  Init;
-  MustPointTo(path_t); // uh-oh, might not be a leaf!
-  Bottom; // initial value, when_false for true and when_true for false
+  ThisInit;
+  AllInit;
+  MustPointTo(path_t); // must be a leaf! even though absop's may not be!!!
+  Bottom; 
 };
-typedef enum InitState init_state_t;
-
-// Note: Because the dictionary has a known domain (all "local path leaves" for
-// a function), there might be a better data structure than a dict_t.  Then
-// again, it needs to be persistent in the functional sense.  
-// Unknown not in domain
-typedef dict_t<path_t,init_state_t> flow_info_t;
 
 struct CFStmtAnnot {
   stmt             encloser;
@@ -245,7 +78,6 @@ struct CFStmtAnnot {
 };
 typedef struct CFStmtAnnot cf_stmt_annot_t;
 xenum StmtAnnot { CFAnnot(cf_stmt_annot_t); };
-
 static cf_stmt_annot_t @ get_stmt_annot(stmt s) {
   switch(s->annot) {
   case CFAnnot(*x): return x;
@@ -264,82 +96,108 @@ struct SharedAbsEnv {
 };
 struct AbsEnv {
   struct SharedAbsEnv @ shared;
-  list_t<lvalue_t>      lhsides; 
+  list_t<absop_t>       lhsides; 
   list_t<exp>           access_path; // stays "normalized"
 };
 typedef struct AbsEnv absenv_t; // NOT a pointer!
 struct AbsSyn {
-  absexp_t         when_true;
-  absexp_t         when_false;
-  list_t<lvalue_t> lvalues;
+  absexp_t        when_true;
+  absexp_t        when_false;
+  list_t<absop_t> lvalues;
 };
 typedef struct AbsSyn abssyn_t; // NOT a pointer!
 
-absenv_t change_lhs(absenv_t src, list_t<lvalue_t> new_lhs) {
+absenv_t change_lhs(absenv_t src, list_t<absop_t> new_lhs) {
   return AbsEnv(src.shared, new_lhs, src.access_path);
 }
-static struct List<lvalue_t,`H> unknownl_list = List(UnknownLOp,null);
-static list_t<lvalue_t> use_it_list = &unknownl_list;
+static list_t<absop_t> unknown_list = null; 
+static list_t<absop_t> use_it_list() {
+  if(unknown_list == null)
+    unknown_list = new{List(mkUnknownOp(),null)};
+  return unknown_list;
+}
 // return an environment that will require any expressions translated
 // under it to be fully initialized (b/c they w/o any access path will
 // be assigned to an unknown lvalue).
 // It should be sound, but perhaps conservative to drop the access path here.
 absenv_t use_it_env(absenv_t src) {
-  let ans = change_lhs(src, use_it_list);
+  let ans = change_lhs(src, use_it_list());
   ans.access_path = null;
   return ans;
+}
+// Note: We may want to trim lhsides to avoid repeats (such as UnknownOp).
+// Note: More than one lhside indicates we should make a OneofG.
+// Note: return ???, at least when_true, when_false absexp_t I think.
+//       But what about ops??
+absexp_t make_assigns(list_t<absop_t> lhsides, absop_t ae) {
+  if(lhsides == null)
+    return mkSkipAE();
+  if(lhsides->tl == null)
+    return mkAssignAE(lhsides->hd, ae);
+  let l = null;
+  for(; lhsides != null; lhsides = lhsides->tl)
+    l = new {List(mkAssignAE(lhsides->hd, ae), l)};
+  return mkGroupAE_l(OneofG, l);
 }
 absexp_t meet_absexp(abssyn_t syn) {
   if(syn.when_true == syn.when_false)
     return syn.when_true;
-  return make_groupexp(OneofG, syn.when_true, syn.when_false);
+  return mkGroupAE(OneofG, syn.when_true, syn.when_false);
 }
 
-abssyn_t abstract_exp(absenv_t env, exp e);
+abssyn_t abstract_exp (absenv_t env, exp  e);
 void     abstract_stmt(absenv_t env, stmt s); 
 
 // WARNING: Should only be called when each element of es is used,
 //          there are no synthesized lvalues, and the overall exp
 //          is fully initialized. 
-abssyn_t use_exp_unordered(absenv_t env, list_t<exp> es, list_t<lvalue_t> lhs) {
+abssyn_t use_exp_unordered(absenv_t env, list_t<exp> es, list_t<absop_t> lhs) {
   absenv_t elt_env = use_it_env(env);
-  absexp_t ansexp  = SkipAE;
+  absexp_t ansexp  = mkSkipAE();
   for(; es != null; es = es->tl) {
     let next_ae = meet_absexp(abstract_exp(elt_env, es->hd));
-    ansexp = make_groupexp(UnorderedG, next_ae, ansexp);
+    ansexp = mkGroupAE(UnorderedG, next_ae, ansexp);
   }
-  ansexp = make_groupexp(OrderedG,ansexp,make_assigns(env.lhsides,UnknownROp));
+  ansexp = mkGroupAE(OrderedG,ansexp,make_assigns(env.lhsides,mkUnknownOp()));
   return AbsSyn(ansexp,ansexp,lhs);
 }
 
 abssyn_t abstract_exp(absenv_t env, exp e) {
   switch(e->r) {
 
-  // FIX?? careful if we do anything type-directed! think about subtyping!!!
   case NoInstantiate_e(e1): fallthru(e1);
-  case Instantiate_e(e1,_): fallthru(e1);
-  case Cast_e(_,e1):        return abstract_exp(env, e1);
+  case Instantiate_e(e1,_): return abstract_exp(env, e1);
+
+  case Cast_e(_,e1):        
+    // This is conservative, but reasonable.  Without it, we need to
+    // "translate" all the paths through, say, a struct to struct cast.
+    // So the bottom line is you can only cast initialized things and you
+    // lose their alias relationships.
+    // IS THIS RIGHT?
+    let ansexp = meet_absexp(abstract_exp(use_it_env(env),e1));
+    ansexp = mkGroupAE(OrderedG,ansexp,make_assigns(env.lhsides,mkUnknownOp()));
+    return AbsSyn(ansexp,ansexp,null);
 
   // these things are fully initialized non-lvalues that "jump one way"
   case Const_e(Int_c(Signed,0)): 
     assert(env.access_path==null);
-    return AbsSyn(BottomAE,make_assigns(env.lhsides, UnknownROp),null);
+    return AbsSyn(mkBottomAE(),make_assigns(env.lhsides, mkUnknownOp()),null);
   case Const_e(Int_c(Signed,1)): 
     assert(env.access_path==null);
-    return AbsSyn(make_assigns(env.lhsides, UnknownROp),BottomAE,null);
+    return AbsSyn(make_assigns(env.lhsides, mkUnknownOp()),mkBottomAE(),null);
 
   // these things are fully initialized non-lvalues
   case Sizeof_e(_): fallthru;
   case Const_e(_):  fallthru;
   case Var_e(_,Funname_b(_)):
     assert(env.access_path==null);
-    let ansexp = make_assigns(env.lhsides, UnknownROp);
+    let ansexp = make_assigns(env.lhsides, mkUnknownOp());
     return AbsSyn(ansexp,ansexp,null);
   
   // globals are fully initialized lvalues. B/c fully init, ignore acess path
   case Var_e(_,Global_b(_)):
-    let ansexp = make_assigns(env.lhsides, UnknownROp);
-    return AbsSyn(ansexp, ansexp, use_it_list);
+    let ansexp = make_assigns(env.lhsides, mkUnknownOp());
+    return AbsSyn(ansexp, ansexp, use_it_list());
 
   // locals can be uninit. 
   // We take the access-path and use it to make the rvalue and lvalue.
@@ -350,34 +208,27 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
   case Var_e(_,Local_b(vd)): fallthru(vd);
   case Var_e(_,Pat_b(vd)):
 
-    noaddress_t absop = OtherOp(LocalOp(VarRoot(vd)));
+    absop_t absop = mkLocalOp(vd);
     
     for(list_t<exp> path = env.access_path; path != null; path = path->tl)
       switch (path->hd->r) {
       case Address_e(_): 
 	// address can only appear last and we can't be an lvalue.
 	assert(path->tl == null);
-	switch(absop) {
-	case OtherOp(a):
-	  let rval = AddressOp(a);
-	  let ae   = make_assigns(env.lhsides, rval);
-	  return AbsSyn(ae,ae,null);
-	default: throw Impossible("abstract_exp: * under & in access path");
-	}
-      case Deref_e(_):          absop=DerefOp(absop); break;
-      case StructArrow_e(_,f):  absop=DerefOp(absop); fallthru(f);
-      case StructMember_e(_,f): absop=OtherOp(MemberOp(absop,StructF(f)));break;
+	let rval = mkAddressOp(absop);
+	let ae   = make_assigns(env.lhsides, rval);
+	return AbsSyn(ae,ae,null);
+      case Deref_e(_):          absop = mkDerefOp(absop); break;
+      case StructArrow_e(_,f):  absop = mkDerefOp(absop); fallthru(f);
+      case StructMember_e(_,f): absop = mkMemberOp(absop,StructF(f)); break;
       case Subscript_e(_,e2):    
 	let i = Evexp::eval_const_uint_exp(e2);
-	absop=OtherOp(MemberOp(absop,TupleF(i)));
+	absop = mkMemberOp(absop,TupleF(i));
 	break;
       default: throw Impossible("abstract_exp: unexpected acces path element");
       }
-    
-    lvalue_t lval = NoaddressOp(absop);
-    rvalue_t rval = LvalueOp(lval);
-    absexp_t ae   = make_assigns(env.lhsides, rval);
-    return AbsSyn(ae,ae,new{List(lval,null)});
+    absexp_t ae = make_assigns(env.lhsides, absop);
+    return AbsSyn(ae,ae,new{List(absop,null)});
 
   // These are malloc points, which allow you to do funky stuff where
   // enum fields point to uninitialized data.  Of course, malloc is even
@@ -386,23 +237,20 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
   case Enum_e(_,_,es,_,_): fallthru(es);
   case Xenum_e(_,es,_,_):
     assert(env.access_path == null);
-    let root   = MallocPt(e);
-    let noaddr = OtherOp(LocalOp(root));
+    let malloc_op = mkMallocOp(e);
     
-    env.shared->all_roots = new{List(root,env.shared->all_roots)};
-    let ansexp = SkipAE;
+    env.shared->all_roots = new{List(MallocPt(e),env.shared->all_roots)};
+    let ansexp = mkSkipAE();
     for(int i = 0; es != null; es = es->tl, ++i) {
-      // Gulp: this is a lot of allocation, no?
-      let lhs = NoaddressOp(OtherOp(MemberOp(noaddr,TupleF(i))));
+      let lhs = mkMemberOp(malloc_op,TupleF(i));
       let field_env = change_lhs(env, new{List(lhs,null)});
-      ansexp = make_groupexp(UnorderedG,
-			     meet_absexp(abstract_exp(field_env,es->hd)),
-			     ansexp);
+      ansexp = mkGroupAE(UnorderedG,
+			 meet_absexp(abstract_exp(field_env,es->hd)),
+			 ansexp);
     }
-    ansexp = make_groupexp(OrderedG, MallocAE(e), ansexp);
-    let ae = make_assigns(env.lhsides, 
-			  LvalueOp(NoaddressOp(OtherOp(LocalOp(MallocPt(e))))));
-    ansexp = make_groupexp(OrderedG, ansexp, ae);
+    ansexp = mkGroupAE(OrderedG, mkMallocAE(e), ansexp);
+    let ae = make_assigns(env.lhsides, mkAddressOp(malloc_op));
+    ansexp = mkGroupAE(OrderedG, ansexp, ae);
     return AbsSyn(ansexp,ansexp,null);
 
     // I don't think order is quite right here for nested assignment.
@@ -411,11 +259,11 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
     // there is no result lhs b/c = associates to the right.
   case AssignOp_e(e1,null,e2):
     let syn1 = abstract_exp(env, e1);
-    let lhs  = syn1.lvalues == null ? use_it_list : syn1.lvalues;
+    let lhs  = syn1.lvalues == null ? use_it_list() : syn1.lvalues;
     let syn2 = abstract_exp(change_lhs(env,lhs), e2);
-    let ansexp = make_groupexp(UnorderedG,
-			       meet_absexp(syn1),
-			       meet_absexp(syn2));
+    let ansexp = mkGroupAE(UnorderedG,
+			   meet_absexp(syn1),
+			   meet_absexp(syn2));
     return AbsSyn(ansexp,ansexp,null);
 
   // For e1+=e2 and company, we need to use e1 and e2 and this already
@@ -454,7 +302,7 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
     // initialized arrays must have initialized elts.
     // the result is a legal lhs
       return use_exp_unordered(env, new{List(e1, new{List(e2,null)})},
-			       use_it_list);
+			       use_it_list());
     }
 
   case Address_e(e1):
@@ -463,13 +311,12 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
     switch(e1->r) {
     case Struct_e(_,_,_,_): fallthru;
     case Tuple_e(_):
-      let root  = MallocPt(e);
-      let lvals = new{List(NoaddressOp(OtherOp(LocalOp(root))),null)};
-      env.shared->all_roots = new{List(root,env.shared->all_roots)};
+      let lvals = new{List(mkMallocOp(e),null)};
+      env.shared->all_roots = new{List(MallocPt(e),env.shared->all_roots)};
       env = change_lhs(env,lvals);
       env.access_path = null; 
       let ansexp = meet_absexp(abstract_exp(env, e1));
-      ansexp = make_groupexp(OrderedG, MallocAE(e), ansexp);
+      ansexp = mkGroupAE(OrderedG, mkMallocAE(e), ansexp);
       return AbsSyn(ansexp,ansexp,null);
     default: break;
     }
@@ -496,7 +343,7 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
     }
     let syn1 = abstract_exp(env,e1);
     if(syn1.lvalues == null)
-      syn1.lvalues = use_it_list;
+      syn1.lvalues = use_it_list();
     return syn1;
 
   case StructArrow_e(e1,f):
@@ -504,14 +351,14 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
     env.access_path = new{List(e,env.access_path)}; 
     let syn1 = abstract_exp(env,e1);
     if(syn1.lvalues == null)
-      syn1.lvalues = use_it_list;
+      syn1.lvalues = use_it_list();
     return syn1;
 
   case StructMember_e(e1,f):
     env.access_path = new{List(e,env.access_path)}; 
     let syn1 = abstract_exp(env,e1);
     if(syn1.lvalues == null)
-      syn1.lvalues = use_it_list;
+      syn1.lvalues = use_it_list();
     return syn1;
 
     // All complicated b/c of x = $(1,2) which has to translate to
@@ -525,28 +372,23 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
       let other_env = change_lhs(env,null);
       other_env.access_path = null;
       env.access_path = tl;
-      let ansexp = SkipAE;
+      let ansexp = mkSkipAE();
       for(int j=0; es != null; es = es->tl, ++j) {
 	let next = meet_absexp(abstract_exp((i==j ? env : other_env), es->hd));
-	ansexp = make_groupexp(UnorderedG, next, ansexp);
+	ansexp = mkGroupAE(UnorderedG, next, ansexp);
       }
       return AbsSyn(ansexp,ansexp,null);
     case null:
-      let ansexp = SkipAE;
+      let ansexp = mkSkipAE();
       for(int j=0; es != null; es = es->tl, ++j) {
 	let ith_lvals = null;
 	for(_ ls = env.lhsides; ls != null; ls = ls->tl)
-	  switch(ls->hd) {
-	  case UnknownLOp: 
-	    ith_lvals = new{List(UnknownLOp,ith_lvals)}; 
-	    break;
-	  case NoaddressOp(na):
-	    ith_lvals = new{List(NoaddressOp(OtherOp(MemberOp(na,TupleF(j)))),
-				 ith_lvals)};
-	    break;
-	  }
+	  if(isUnknownOp(ls->hd))
+	    ith_lvals = new{List(mkUnknownOp(),ith_lvals)}; 
+	  else 
+	    ith_lvals = new{List(mkMemberOp(ls->hd,TupleF(j)), ith_lvals)};
 	let next = meet_absexp(abstract_exp(change_lhs(env,ith_lvals),es->hd));
-	ansexp = make_groupexp(UnorderedG, next, ansexp);
+	ansexp = mkGroupAE(UnorderedG, next, ansexp);
       }
       return AbsSyn(ansexp,ansexp,null);
 
@@ -560,7 +402,7 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
       let other_env = change_lhs(env,null);
       other_env.access_path = null;
       env.access_path = tl;
-      let ansexp = SkipAE;
+      let ansexp = mkSkipAE();
       for(; des != null; des = des->tl) {
 	bool used = false;
 	for(_ ds = (*des->hd)[0]; ds != null; ds = ds->tl)
@@ -573,33 +415,27 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
 	  }
 	let next = meet_absexp(abstract_exp((used ? env : other_env), 
 					    (*des->hd)[1]));
-	ansexp = make_groupexp(UnorderedG, next, ansexp);
+	ansexp = mkGroupAE(UnorderedG, next, ansexp);
 	}
       return AbsSyn(ansexp,ansexp,null);
     case null:
-      let ansexp = SkipAE;
+      let ansexp = mkSkipAE();
       for(; des != null; des = des->tl) {
 	let ith_lvals = null;
 	for(_ ls = env.lhsides; ls != null; ls = ls->tl)
-	  switch(ls->hd) {
-	  case UnknownLOp: 
-	    ith_lvals = new{List(UnknownLOp,ith_lvals)}; 
-	    break;
-	  case NoaddressOp(na):
+	  if(isUnknownOp(ls->hd))
+	    ith_lvals = new{List(mkUnknownOp(),ith_lvals)}; 
+	  else 
 	    for(_ ds = (*des->hd)[0]; ds != null; ds = ds->tl)
 	      switch (ds->hd) {
 	      case ArrayElement(_): throw Impossible("bad struct designator");
 	      case FieldName(f):
-		ith_lvals = 
-		  new{List(NoaddressOp(OtherOp(MemberOp(na, StructF(f)))),
-			   ith_lvals)};
+		ith_lvals = new{List(mkMemberOp(ls->hd,StructF(f)), ith_lvals)};
 		break;
 	      }
-	    break;
-	  }
 	let next = meet_absexp(abstract_exp(change_lhs(env,ith_lvals),
 					    (*des->hd)[1]));
-	ansexp = make_groupexp(UnorderedG, next, ansexp);
+	ansexp = mkGroupAE(UnorderedG, next, ansexp);
       }
       return AbsSyn(ansexp,ansexp,null);
 
@@ -619,7 +455,7 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
   case Throw_e(e1): 
     env = use_it_env(env);
     let esyn   = abstract_exp(env,e1);
-    let ansexp = make_groupexp(OrderedG, meet_absexp(esyn), BottomAE);
+    let ansexp = mkGroupAE(OrderedG, meet_absexp(esyn), mkBottomAE());
     return AbsSyn(ansexp,ansexp,esyn.lvalues);
 
   case Conditional_e(e1,e2,e3):
@@ -627,9 +463,9 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
     let e2syn = abstract_exp(env,e2);
     let e3syn = abstract_exp(env,e3);
     _ ans_true_exp = 
-      make_groupexp(OneofG, 
-		    make_groupexp(OrderedG,e1syn.when_true, e2syn.when_true),
-		    make_groupexp(OrderedG,e1syn.when_false,e3syn.when_true));
+      mkGroupAE(OneofG, 
+		mkGroupAE(OrderedG,e1syn.when_true, e2syn.when_true),
+		mkGroupAE(OrderedG,e1syn.when_false,e3syn.when_true));
     _ ans_false_exp;
     // the conditional is an optimization to get more sharing.
     if(e2syn.when_true == e2syn.when_true 
@@ -637,16 +473,16 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
       ans_false_exp = ans_true_exp;
     else 
       ans_false_exp = 
-	make_groupexp(OneofG, 
-	      make_groupexp(OrderedG,e1syn.when_true, e2syn.when_false),
-	      make_groupexp(OrderedG,e1syn.when_false,e3syn.when_false));
+	mkGroupAE(OneofG, 
+		  mkGroupAE(OrderedG,e1syn.when_true, e2syn.when_false),
+		  mkGroupAE(OrderedG,e1syn.when_false,e3syn.when_false));
     // could be more aggressive about removing repeats
     // Note: it's okay to ignore access_path when adding unknown, 
     //       because path of unknown is still unknown
     let lvalues = append(e2syn.lvalues, e3syn.lvalues);
-    if((e2syn.lvalues == null && !List::memq(e3syn.lvalues,UnknownLOp))
-       || (e3syn.lvalues == null && !List::memq(e2syn.lvalues,UnknownLOp)))
-      lvalues = new{List(UnknownLOp,lvalues)};
+    if((e2syn.lvalues == null && !List::memq(e3syn.lvalues,mkUnknownOp()))
+       || (e3syn.lvalues == null && !List::memq(e2syn.lvalues,mkUnknownOp())))
+      lvalues = new{List(mkUnknownOp(),lvalues)};
     return AbsSyn(ans_true_exp, ans_false_exp, lvalues);
 
   // Technically we're being too conservative here because we could
@@ -672,7 +508,7 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
       case Exp_s(e):     
 	// FIX: STUBBED OUT B/C WE HAVE THE OLD ANNOTATION ON THE STMT
 	//	get_stmt_annot(s)->absexps->hd = meet_absexp(abstract_exp(env,e));
-	let ae = StmtAE(s);
+	let ae = mkStmtAE(s);
 	return AbsSyn(ae,ae,null);
       default: throw Impossible("abstract_exp: ill-formed StmtExp");
       }
@@ -683,8 +519,8 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
     env.access_path = null;
     let syn1 = abstract_exp(env,e1);
     let ae1  = meet_absexp(syn1);
-    return AbsSyn(make_groupexp(OrderedG, ae1, syn2.when_true),
-		  make_groupexp(OrderedG, ae1, syn2.when_false),
+    return AbsSyn(mkGroupAE(OrderedG, ae1, syn2.when_true),
+		  mkGroupAE(OrderedG, ae1, syn2.when_false),
 		  null);
 
     // remember that the second exp might never get executed
@@ -696,9 +532,9 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
     env = use_it_env(env);
     let ae1 = meet_absexp(abstract_exp(env,e1));
     let ae2 = meet_absexp(abstract_exp(env,e2));
-    let ansexp = make_groupexp(OrderedG,
-			       ae1,
-			       make_groupexp(OneofG,ae2,SkipAE));
+    let ansexp = mkGroupAE(OrderedG,
+			   ae1,
+			   mkGroupAE(OneofG,ae2,mkSkipAE()));
     return AbsSyn(ansexp,ansexp,null);
 
     // impossible variants
@@ -719,6 +555,10 @@ Stdio::FILE @@ dump_file = &Stdio::stdout;
 
 void dump_exp(absenv_t env, exp e) {
   let syn = abstract_exp(env,e);
+  check_absexp(syn.when_true);
+  if(syn.when_true != syn.when_false)
+    check_absexp(syn.when_false);
+/*
   if(syn.when_true == syn.when_false)
     fprintf(*dump_file,
 	    "%s\n%s\n",
@@ -731,7 +571,8 @@ void dump_exp(absenv_t env, exp e) {
 	    absexp2string(syn.when_true,4),
 	    absexp2string(syn.when_false,5));
 	    }
-
+*/
+}
 void abstract_scs(absenv_t env, list_t<switch_clause> scs) {
   for(; scs != null; scs = scs->tl) {
     let &Switch_clause(_,vds_opt,wherec,body,_) = scs->hd;
@@ -766,7 +607,7 @@ void abstract_stmt(absenv_t env, stmt s) {
     dump_exp(env,e);
     abstract_stmt(env,s2);
     return;
-  case Break_s(_): return;
+  case Break_s(_):    return;
   case Continue_s(_): return;
   case Goto_s(_,null): throw Impossible("abstract_stmt: goto w/o destination");
   case Goto_s(v,s1): 
@@ -790,14 +631,13 @@ void abstract_stmt(absenv_t env, stmt s) {
   case Decl_s(&Decl(Var_d(vd),_),s1):
     env.shared->all_roots = new{List(VarRoot(vd), env.shared->all_roots)};
     if(vd->initializer != null)
-      dump_exp(change_lhs(env,
-			  new{List(NoaddressOp(OtherOp(LocalOp(VarRoot(vd)))),
-				   null)}),
+      dump_exp(change_lhs(env, new{List(mkLocalOp(vd), null)}),
 	       (exp)vd->initializer);
     abstract_stmt(env,s1);
     return;
   case Decl_s(&Decl(Let_d(_,&Opt(vds),_,e,_),_),s1):
     // FIX: interpret patterns
+    // FIX: in short term, need to special-case let x = e !!!
     for(; vds != null; vds = vds->tl)
 	env.shared->all_roots = new{List(VarRoot(vds->hd),
 					 env.shared->all_roots)};
@@ -823,7 +663,7 @@ void abstract_stmt(absenv_t env, stmt s) {
 void abstract_fun(fndecl fd) {
   // really shouldn't build vardecls in each pass (change args to something
   // appropriate -- maybe Vardecl should become an enum?)
-  fprintf(*dump_file,"\n FUN %s\n", *(*fd->name)[1]);
+  //  fprintf(*dump_file,"\n FUN %s\n", *(*fd->name)[1]);
   let arg_roots = null;
   for(_ args = fd->args; args != null; args = args->tl)
     arg_roots = new{List(VarRoot(new{Vardecl(Public, 
@@ -835,13 +675,13 @@ void abstract_fun(fndecl fd) {
 
   absenv_t env = AbsEnv(new{SharedAbsEnv(arg_roots)},null,null);
   abstract_stmt(env,fd->body);
-  fprintf(*dump_file,"\n ROOTS");
+  //  fprintf(*dump_file,"\n ROOTS");
   for(_ roots = env.shared->all_roots; roots != null; roots = roots->tl)
-    switch(roots->hd) {
+    ;/*switch(roots->hd) {
     case VarRoot(vd): fprintf(*dump_file, " %s ", *(*vd->name)[1]); break;
     case MallocPt(e): 
       fprintf(*dump_file, "<<mpt>>"); break;
-    }
+      }*/
 }
 
 void abstract_decls(list_t<decl> ds) {
