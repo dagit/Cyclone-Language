@@ -2362,7 +2362,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       // e.g, x++ becomes _zero_arr_inplace_plus_post(x,1)
       //let fn_e = (incr == PostInc) ? _zero_arr_inplace_plus_post_e :
       //  _zero_arr_inplace_plus_e;
-      let fnSet = (incr==PostInc) ? &_zero_arr_inplace_plus_functionSet
+      let fnSet = (incr!=PostInc) ? &_zero_arr_inplace_plus_functionSet
 	                          : &_zero_arr_inplace_plus_post_functionSet;
       exp_t fn_e = getFunctionRemovePointer(fnSet, e2);
       e->r = fncall_exp_r(fn_e, list(push_address_exp(e2),

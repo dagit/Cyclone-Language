@@ -1,0 +1,61 @@
+#include <core.h>
+#include <string.h>
+#include <stdio.h>
+#include <assert.h>
+
+// Test out the zero-terminated pointers and a few other things
+const char foo[3] = "foo";  // should get a warning here, but still compile
+const char bar[4]@zeroterm = "bar";
+char baz[4]@zeroterm = "baz";
+
+#define should_fail(s,e) { try {s; __assert_fail(__STRING(s), __FILE2__, __LINE__); } catch { case &e: break; }}
+
+const char *f() { return NULL; }
+
+int main() {
+  char *baz_ptr = baz;
+  const char *bar_ptr = bar;
+  const char *bar_ptr2;
+  assert(strlen(bar_ptr) == 3);
+  bar_ptr2 = bar_ptr++;
+  assert(strlen(bar_ptr) == 2);
+  assert(strlen(bar_ptr2) == 3);
+  bar_ptr = bar_ptr + 1;
+  assert(strlen(bar_ptr) == 1);
+  bar_ptr2 = ++bar_ptr;
+  assert(strlen(bar_ptr) == 0);
+  assert(strlen(bar_ptr2) == 0);
+  bar_ptr = bar + 3;
+  assert(strlen(bar_ptr) == 0);
+  should_fail(++bar_ptr,Array_bounds);
+  should_fail(bar_ptr2 = bar_ptr++,Array_bounds);
+  should_fail(bar_ptr = bar_ptr+1,Array_bounds);
+  assert((bar[0] == 'b' && bar[3] == 0));
+  int i = 5;
+  should_fail(bar[i] == 'a',Array_bounds);
+  bar_ptr2 = f();
+  should_fail(*bar_ptr2,Null_Exception);
+  should_fail(bar_ptr2++,Null_Exception);
+  should_fail(bar_ptr = ++bar_ptr2,Null_Exception);
+  bar_ptr2 = f();
+  // FIX:  this should throw the Null_Exception!
+  should_fail(bar_ptr = (bar_ptr2 + 3),Array_bounds);
+  baz[0] = 'a';
+  baz[1] = 'b';
+  baz[2] = 'c';
+  baz[3] = 0;
+  baz[3] = '\0';
+  *baz_ptr++ = 'd';
+  *baz_ptr++ = 'e';
+  *baz_ptr++ = 'f';
+  assert(strcmp(baz,"def") == 0);
+  should_fail(*baz_ptr++ = 'g',Array_bounds);
+  baz_ptr = baz + 2;
+  *baz_ptr++ = 0;
+  assert(strcmp(baz,"de") == 0);
+  baz_ptr = baz;
+  *(++baz_ptr) = 'a';
+  should_fail(*(++baz_ptr) = 'b',Array_bounds);
+  printf("zeroterm tests succeeded.\n");
+  return 0;
+}
