@@ -69,11 +69,11 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
 	 && ~(synth.s.colors | inner_synth.s.colors)) {
 	do_split = true;
 	// a bit-twiddle trick may be called for here
-	int sizes = synth.s.sizes | inner_synth.s.sizes;
+	int colors = synth.s.colors | inner_synth.s.colors;
 	// ASSUMES r_tag is least and colors are consecutive.  Very destructive.
 	split_tag = r_tag;
-	while(sizes & 1 != 0) {
-	  sizes >>= 1;
+	while(colors & 1 != 0) {
+	  colors >>= 1;
 	  ++split_tag;
 	}
       }
@@ -115,7 +115,7 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
       OPT(color); 
       // assumes r_tag is least tag and they're consecutive
       if(!useless)
-	synth.s.sizes = ~(1 << (tag - r_tag));
+	synth.s.colors = ~(1 << (tag - r_tag));
       break;
     case B_tag:  OPT(bold); break;
     case EM_tag: useless = synth.s.strong; break;
