@@ -915,40 +915,40 @@ case 'p': _LL57: _ulong=(unsigned long)Cyc_va_arg_long(ap);
 _dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);base=Cyc_HEX;flags |=64;ch=(int)'x';
 goto nosign;case 's': _LL58: {struct _dyneither_ptr b=Cyc_va_arg_string(ap);
 _dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);which_cp=3;cp3=b;if(prec >= 0){
-struct _dyneither_ptr p=Cyc_my_nzmemchr(cp3,'\000',prec);if(p.curr != ((struct
-_dyneither_ptr)_tag_dyneither(0,0,0)).curr){size=(p.curr - cp3.curr)/ sizeof(char);
-if(size > prec)size=prec;}else{size=prec;}}else{size=(int)Cyc_my_strlen(cp3);}
-sign='\000';break;}case 'U': _LL59: flags |=1;goto _LL5A;case 'u': _LL5A: _ulong=flags & 
-1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(
-ap)):(unsigned long)Cyc_va_arg_uint(ap));_dyneither_ptr_inplace_plus(& ap,sizeof(
-void*),1);base=Cyc_DEC;goto nosign;case 'X': _LL5B: goto _LL5C;case 'x': _LL5C: _ulong=
-flags & 1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(
-ap)):(unsigned long)Cyc_va_arg_uint(ap));_dyneither_ptr_inplace_plus(& ap,sizeof(
-void*),1);base=Cyc_HEX;if(flags & 8  && _ulong != 0)flags |=64;nosign: sign='\000';
-number: if((dprec=prec)>= 0)flags &=~ 32;cp=_dyneither_ptr_plus(({char*_tmp2D=buf;
-_tag_dyneither(_tmp2D,sizeof(char),_get_zero_arr_size_char(_tmp2D,349));}),
-sizeof(char),(308 + 39)+ 1);if(_ulong != 0  || prec != 0){struct _dyneither_ptr xdigs;
-switch(base){case Cyc_OCT: _LL5E: do{({struct _dyneither_ptr _tmp2E=
-_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp2F=*((char*)
-_check_dyneither_subscript(_tmp2E,sizeof(char),0));char _tmp30=(char)((_ulong & 7)
-+ '0');if(_get_dyneither_size(_tmp2E,sizeof(char))== 1  && (_tmp2F == '\000'  && 
-_tmp30 != '\000'))_throw_arraybounds();*((char*)_tmp2E.curr)=_tmp30;});_ulong >>=3;}while((
-int)_ulong);if(flags & 8  && *((char*)_check_dyneither_subscript(cp,sizeof(char),0))
-!= '0')({struct _dyneither_ptr _tmp31=_dyneither_ptr_inplace_plus(& cp,sizeof(char),
--1);char _tmp32=*((char*)_check_dyneither_subscript(_tmp31,sizeof(char),0));char
-_tmp33='0';if(_get_dyneither_size(_tmp31,sizeof(char))== 1  && (_tmp32 == '\000'
- && _tmp33 != '\000'))_throw_arraybounds();*((char*)_tmp31.curr)=_tmp33;});break;
-case Cyc_DEC: _LL5F: while(_ulong >= 10){({struct _dyneither_ptr _tmp34=
-_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp35=*((char*)
-_check_dyneither_subscript(_tmp34,sizeof(char),0));char _tmp36=(char)(_ulong % 10 + '0');
-if(_get_dyneither_size(_tmp34,sizeof(char))== 1  && (_tmp35 == '\000'  && _tmp36 != '\000'))
-_throw_arraybounds();*((char*)_tmp34.curr)=_tmp36;});_ulong /=10;}({struct
-_dyneither_ptr _tmp37=_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp38=*((
-char*)_check_dyneither_subscript(_tmp37,sizeof(char),0));char _tmp39=(char)(
-_ulong + '0');if(_get_dyneither_size(_tmp37,sizeof(char))== 1  && (_tmp38 == '\000'
- && _tmp39 != '\000'))_throw_arraybounds();*((char*)_tmp37.curr)=_tmp39;});break;
-case Cyc_HEX: _LL60: if(ch == 'X')xdigs=({const char*_tmp3A="0123456789ABCDEF";
-_tag_dyneither(_tmp3A,sizeof(char),17);});else{xdigs=({const char*_tmp3B="0123456789abcdef";
+struct _dyneither_ptr p=Cyc_my_nzmemchr(cp3,'\000',prec);if(p.curr != (
+_tag_dyneither(0,0,0)).curr){size=(p.curr - cp3.curr)/ sizeof(char);if(size > prec)
+size=prec;}else{size=prec;}}else{size=(int)Cyc_my_strlen(cp3);}sign='\000';
+break;}case 'U': _LL59: flags |=1;goto _LL5A;case 'u': _LL5A: _ulong=flags & 1?Cyc_va_arg_ulong(
+ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(ap)):(unsigned long)
+Cyc_va_arg_uint(ap));_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);base=Cyc_DEC;
+goto nosign;case 'X': _LL5B: goto _LL5C;case 'x': _LL5C: _ulong=flags & 1?Cyc_va_arg_ulong(
+ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(ap)):(unsigned long)
+Cyc_va_arg_uint(ap));_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);base=Cyc_HEX;
+if(flags & 8  && _ulong != 0)flags |=64;nosign: sign='\000';number: if((dprec=prec)>= 
+0)flags &=~ 32;cp=_dyneither_ptr_plus(({char*_tmp2D=buf;_tag_dyneither(_tmp2D,
+sizeof(char),_get_zero_arr_size_char(_tmp2D,349));}),sizeof(char),(308 + 39)+ 1);
+if(_ulong != 0  || prec != 0){struct _dyneither_ptr xdigs;switch(base){case Cyc_OCT:
+_LL5E: do{({struct _dyneither_ptr _tmp2E=_dyneither_ptr_inplace_plus(& cp,sizeof(
+char),-1);char _tmp2F=*((char*)_check_dyneither_subscript(_tmp2E,sizeof(char),0));
+char _tmp30=(char)((_ulong & 7)+ '0');if(_get_dyneither_size(_tmp2E,sizeof(char))
+== 1  && (_tmp2F == '\000'  && _tmp30 != '\000'))_throw_arraybounds();*((char*)
+_tmp2E.curr)=_tmp30;});_ulong >>=3;}while((int)_ulong);if(flags & 8  && *((char*)
+_check_dyneither_subscript(cp,sizeof(char),0))!= '0')({struct _dyneither_ptr
+_tmp31=_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp32=*((char*)
+_check_dyneither_subscript(_tmp31,sizeof(char),0));char _tmp33='0';if(
+_get_dyneither_size(_tmp31,sizeof(char))== 1  && (_tmp32 == '\000'  && _tmp33 != '\000'))
+_throw_arraybounds();*((char*)_tmp31.curr)=_tmp33;});break;case Cyc_DEC: _LL5F:
+while(_ulong >= 10){({struct _dyneither_ptr _tmp34=_dyneither_ptr_inplace_plus(& cp,
+sizeof(char),-1);char _tmp35=*((char*)_check_dyneither_subscript(_tmp34,sizeof(
+char),0));char _tmp36=(char)(_ulong % 10 + '0');if(_get_dyneither_size(_tmp34,
+sizeof(char))== 1  && (_tmp35 == '\000'  && _tmp36 != '\000'))_throw_arraybounds();*((
+char*)_tmp34.curr)=_tmp36;});_ulong /=10;}({struct _dyneither_ptr _tmp37=
+_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp38=*((char*)
+_check_dyneither_subscript(_tmp37,sizeof(char),0));char _tmp39=(char)(_ulong + '0');
+if(_get_dyneither_size(_tmp37,sizeof(char))== 1  && (_tmp38 == '\000'  && _tmp39 != '\000'))
+_throw_arraybounds();*((char*)_tmp37.curr)=_tmp39;});break;case Cyc_HEX: _LL60: if(
+ch == 'X')xdigs=({const char*_tmp3A="0123456789ABCDEF";_tag_dyneither(_tmp3A,
+sizeof(char),17);});else{xdigs=({const char*_tmp3B="0123456789abcdef";
 _tag_dyneither(_tmp3B,sizeof(char),17);});}do{({struct _dyneither_ptr _tmp3C=
 _dyneither_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp3D=*((char*)
 _check_dyneither_subscript(_tmp3C,sizeof(char),0));char _tmp3E=*((const char*)

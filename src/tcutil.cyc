@@ -4228,8 +4228,8 @@ bool is_noalias_pointer_or_aggr(type_t t) {
       // * it's flat and has a field with a unique pointer
       // * it's not flat and lives in a no-alias region
       if (!flat) {
-	if (r == NULL)
-	  impos("got tunion with no region");
+	if (r == NULL) return false; // FIX: implies a tag with no
+				     // data; could be unique
 	return is_noalias_region(r->v);
       }
       else {
@@ -4337,6 +4337,7 @@ static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
   case &Subscript_e(e1,e2):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo(t,_,_)):
+    // FIX: dynamic arrays not allowed!  Must know size to track it
 #ifdef NO_POINTER_PATHS
       return false;
 #else

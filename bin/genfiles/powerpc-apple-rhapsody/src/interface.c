@@ -1216,8 +1216,8 @@ _tag_dyneither(_tmp26F,sizeof(char),50))),_tag_dyneither(_tmp26E,sizeof(void*),2
 static void Cyc_Interface_static_err(struct _dyneither_ptr obj1,struct _tuple0*name1,
 struct _dyneither_ptr obj2,struct _tuple0*name2);static void Cyc_Interface_static_err(
 struct _dyneither_ptr obj1,struct _tuple0*name1,struct _dyneither_ptr obj2,struct
-_tuple0*name2){if(obj1.curr != ((struct _dyneither_ptr)_tag_dyneither(0,0,0)).curr){
-const char*_tmp276;void*_tmp275[4];struct Cyc_String_pa_struct _tmp274;struct Cyc_String_pa_struct
+_tuple0*name2){if(obj1.curr != (_tag_dyneither(0,0,0)).curr){const char*_tmp276;
+void*_tmp275[4];struct Cyc_String_pa_struct _tmp274;struct Cyc_String_pa_struct
 _tmp273;struct Cyc_String_pa_struct _tmp272;struct Cyc_String_pa_struct _tmp271;Cyc_Interface_err((
 struct _dyneither_ptr)((_tmp271.tag=0,((_tmp271.f1=(struct _dyneither_ptr)((struct
 _dyneither_ptr)Cyc_Absynpp_qvar2string(name2)),((_tmp272.tag=0,((_tmp272.f1=(
@@ -1230,8 +1230,8 @@ _tag_dyneither(_tmp276,sizeof(char),44))),_tag_dyneither(_tmp275,sizeof(void*),4
 static void Cyc_Interface_abstract_err(struct _dyneither_ptr obj1,struct _tuple0*
 name1,struct _dyneither_ptr obj2,struct _tuple0*name2);static void Cyc_Interface_abstract_err(
 struct _dyneither_ptr obj1,struct _tuple0*name1,struct _dyneither_ptr obj2,struct
-_tuple0*name2){if(obj1.curr != ((struct _dyneither_ptr)_tag_dyneither(0,0,0)).curr){
-const char*_tmp27D;void*_tmp27C[4];struct Cyc_String_pa_struct _tmp27B;struct Cyc_String_pa_struct
+_tuple0*name2){if(obj1.curr != (_tag_dyneither(0,0,0)).curr){const char*_tmp27D;
+void*_tmp27C[4];struct Cyc_String_pa_struct _tmp27B;struct Cyc_String_pa_struct
 _tmp27A;struct Cyc_String_pa_struct _tmp279;struct Cyc_String_pa_struct _tmp278;Cyc_Interface_err((
 struct _dyneither_ptr)((_tmp278.tag=0,((_tmp278.f1=(struct _dyneither_ptr)((struct
 _dyneither_ptr)Cyc_Absynpp_qvar2string(name2)),((_tmp279.tag=0,((_tmp279.f1=(

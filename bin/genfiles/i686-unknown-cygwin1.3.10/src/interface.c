@@ -1201,26 +1201,26 @@ _dyneither_ptr)sc);{void*_tmp1E[2]={& _tmp20,& _tmp21};Cyc_aprintf(({const char*
 _tmp1F="the body of %s function %s has never been defined";_tag_dyneither(_tmp1F,
 sizeof(char),50);}),_tag_dyneither(_tmp1E,sizeof(void*),2));}}}));}static void Cyc_Interface_static_err(
 struct _dyneither_ptr obj1,struct _tuple0*name1,struct _dyneither_ptr obj2,struct
-_tuple0*name2){if(obj1.curr != ((struct _dyneither_ptr)_tag_dyneither(0,0,0)).curr)
-Cyc_Interface_err((struct _dyneither_ptr)({struct Cyc_String_pa_struct _tmp27;
-_tmp27.tag=0;_tmp27.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Absynpp_qvar2string(
-name2));{struct Cyc_String_pa_struct _tmp26;_tmp26.tag=0;_tmp26.f1=(struct
-_dyneither_ptr)((struct _dyneither_ptr)obj2);{struct Cyc_String_pa_struct _tmp25;
-_tmp25.tag=0;_tmp25.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Absynpp_qvar2string(
-name1));{struct Cyc_String_pa_struct _tmp24;_tmp24.tag=0;_tmp24.f1=(struct
-_dyneither_ptr)((struct _dyneither_ptr)obj1);{void*_tmp22[4]={& _tmp24,& _tmp25,&
-_tmp26,& _tmp27};Cyc_aprintf(({const char*_tmp23="declaration of %s %s relies on static %s %s";
-_tag_dyneither(_tmp23,sizeof(char),44);}),_tag_dyneither(_tmp22,sizeof(void*),4));}}}}}));}
+_tuple0*name2){if(obj1.curr != (_tag_dyneither(0,0,0)).curr)Cyc_Interface_err((
+struct _dyneither_ptr)({struct Cyc_String_pa_struct _tmp27;_tmp27.tag=0;_tmp27.f1=(
+struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Absynpp_qvar2string(name2));{
+struct Cyc_String_pa_struct _tmp26;_tmp26.tag=0;_tmp26.f1=(struct _dyneither_ptr)((
+struct _dyneither_ptr)obj2);{struct Cyc_String_pa_struct _tmp25;_tmp25.tag=0;_tmp25.f1=(
+struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Absynpp_qvar2string(name1));{
+struct Cyc_String_pa_struct _tmp24;_tmp24.tag=0;_tmp24.f1=(struct _dyneither_ptr)((
+struct _dyneither_ptr)obj1);{void*_tmp22[4]={& _tmp24,& _tmp25,& _tmp26,& _tmp27};Cyc_aprintf(({
+const char*_tmp23="declaration of %s %s relies on static %s %s";_tag_dyneither(
+_tmp23,sizeof(char),44);}),_tag_dyneither(_tmp22,sizeof(void*),4));}}}}}));}
 static void Cyc_Interface_abstract_err(struct _dyneither_ptr obj1,struct _tuple0*
-name1,struct _dyneither_ptr obj2,struct _tuple0*name2){if(obj1.curr != ((struct
-_dyneither_ptr)_tag_dyneither(0,0,0)).curr)Cyc_Interface_err((struct
-_dyneither_ptr)({struct Cyc_String_pa_struct _tmp2D;_tmp2D.tag=0;_tmp2D.f1=(struct
-_dyneither_ptr)((struct _dyneither_ptr)Cyc_Absynpp_qvar2string(name2));{struct Cyc_String_pa_struct
-_tmp2C;_tmp2C.tag=0;_tmp2C.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)obj2);{
-struct Cyc_String_pa_struct _tmp2B;_tmp2B.tag=0;_tmp2B.f1=(struct _dyneither_ptr)((
-struct _dyneither_ptr)Cyc_Absynpp_qvar2string(name1));{struct Cyc_String_pa_struct
-_tmp2A;_tmp2A.tag=0;_tmp2A.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)obj1);{
-void*_tmp28[4]={& _tmp2A,& _tmp2B,& _tmp2C,& _tmp2D};Cyc_aprintf(({const char*_tmp29="declaration of %s %s relies on fields of abstract %s %s";
+name1,struct _dyneither_ptr obj2,struct _tuple0*name2){if(obj1.curr != (
+_tag_dyneither(0,0,0)).curr)Cyc_Interface_err((struct _dyneither_ptr)({struct Cyc_String_pa_struct
+_tmp2D;_tmp2D.tag=0;_tmp2D.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Absynpp_qvar2string(
+name2));{struct Cyc_String_pa_struct _tmp2C;_tmp2C.tag=0;_tmp2C.f1=(struct
+_dyneither_ptr)((struct _dyneither_ptr)obj2);{struct Cyc_String_pa_struct _tmp2B;
+_tmp2B.tag=0;_tmp2B.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Absynpp_qvar2string(
+name1));{struct Cyc_String_pa_struct _tmp2A;_tmp2A.tag=0;_tmp2A.f1=(struct
+_dyneither_ptr)((struct _dyneither_ptr)obj1);{void*_tmp28[4]={& _tmp2A,& _tmp2B,&
+_tmp2C,& _tmp2D};Cyc_aprintf(({const char*_tmp29="declaration of %s %s relies on fields of abstract %s %s";
 _tag_dyneither(_tmp29,sizeof(char),56);}),_tag_dyneither(_tmp28,sizeof(void*),4));}}}}}));}
 struct Cyc_Interface_Seen{struct Cyc_Dict_Dict aggrs;struct Cyc_Dict_Dict tunions;};
 static struct Cyc_Interface_Seen*Cyc_Interface_new_seen(){return({struct Cyc_Interface_Seen*

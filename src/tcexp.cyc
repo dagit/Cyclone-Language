@@ -492,21 +492,24 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
   if (e1_is_num && e2_is_num)
     return sint_typ;
   // okay if same types and boxed
-  else if (unify(t1,t2) && 
-           ((typ_kind(t1) == BoxKind) || 
-            (unify(t1,new_evar(&bk,lookup_opt_type_vars(te))))))
-    return sint_typ;
-  // okay if t1 can be silently cast to t2 or vice versa 
-  else if (silent_castable(te,loc,t2,t1)) {
-    unchecked_cast(te,e2,t1, Other_coercion);
-    return sint_typ;
-  } else if (silent_castable(te,loc,t1,t2)) {
-    unchecked_cast(te,e1,t2, Other_coercion);
-    return sint_typ;
-  } else if (zero_to_null(te,t2,e1) || zero_to_null(te,t1,e2))
-    return sint_typ;
-  // support comparisons on pointers
+  else if ((typ_kind(t1) == BoxKind) || 
+	   (unify(t1,new_evar(&bk,lookup_opt_type_vars(te))))) {
+    if (unify(t1,t2))
+      return sint_typ;
+    // okay if t1 can be silently cast to t2 or vice versa 
+    else if (silent_castable(te,loc,t2,t1)) {
+      unchecked_cast(te,e2,t1, Other_coercion);
+      return sint_typ;
+    } else if (silent_castable(te,loc,t1,t2)) {
+      unchecked_cast(te,e1,t2, Other_coercion);
+      return sint_typ;
+    } else if (zero_to_null(te,t2,e1) || zero_to_null(te,t1,e2))
+      return sint_typ;
+    else goto pointer_cmp;
+  }
+  // support comparisons on pointers (which can be MemKind)
   else {
+  pointer_cmp:
     switch ($(compress(t1), compress(t2))) {
     case $(&PointerType(PtrInfo{t1a,_,_}),
 	   &PointerType(PtrInfo{t2a,_,_})):

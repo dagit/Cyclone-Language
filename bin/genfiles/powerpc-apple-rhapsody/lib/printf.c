@@ -912,21 +912,21 @@ goto nosign;case 'p': _LL57: _ulong=(unsigned long)Cyc_va_arg_long(ap);
 _dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);base=Cyc_HEX;flags |=64;ch=(int)'x';
 goto nosign;case 's': _LL58: {struct _dyneither_ptr b=Cyc_va_arg_string(ap);
 _dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);which_cp=3;cp3=b;if(prec >= 0){
-struct _dyneither_ptr p=Cyc_my_nzmemchr(cp3,'\000',prec);if(p.curr != ((struct
-_dyneither_ptr)_tag_dyneither(0,0,0)).curr){size=(p.curr - cp3.curr)/ sizeof(char);
-if(size > prec)size=prec;}else{size=prec;}}else{size=(int)Cyc_my_strlen(cp3);}
-sign='\000';break;}case 'U': _LL59: flags |=1;goto _LL5A;case 'u': _LL5A: _ulong=flags & 
-1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(
-ap)):(unsigned long)Cyc_va_arg_uint(ap));_dyneither_ptr_inplace_plus(& ap,sizeof(
-void*),1);base=Cyc_DEC;goto nosign;case 'X': _LL5B: goto _LL5C;case 'x': _LL5C: _ulong=
-flags & 1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(
-ap)):(unsigned long)Cyc_va_arg_uint(ap));_dyneither_ptr_inplace_plus(& ap,sizeof(
-void*),1);base=Cyc_HEX;if(flags & 8  && _ulong != 0)flags |=64;nosign: sign='\000';
-number: if((dprec=prec)>= 0)flags &=~ 32;{char*_tmpDB;cp=_dyneither_ptr_plus(((
-_tmpDB=buf,_tag_dyneither(_tmpDB,sizeof(char),_get_zero_arr_size_char(_tmpDB,349)))),
-sizeof(char),(308 + 39)+ 1);}if(_ulong != 0  || prec != 0){struct _dyneither_ptr xdigs;
-switch(base){case Cyc_OCT: _LL5E: do{{char _tmpDE;char _tmpDD;struct _dyneither_ptr
-_tmpDC;(_tmpDC=_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1),((_tmpDD=*((char*)
+struct _dyneither_ptr p=Cyc_my_nzmemchr(cp3,'\000',prec);if(p.curr != (
+_tag_dyneither(0,0,0)).curr){size=(p.curr - cp3.curr)/ sizeof(char);if(size > prec)
+size=prec;}else{size=prec;}}else{size=(int)Cyc_my_strlen(cp3);}sign='\000';
+break;}case 'U': _LL59: flags |=1;goto _LL5A;case 'u': _LL5A: _ulong=flags & 1?Cyc_va_arg_ulong(
+ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(ap)):(unsigned long)
+Cyc_va_arg_uint(ap));_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);base=Cyc_DEC;
+goto nosign;case 'X': _LL5B: goto _LL5C;case 'x': _LL5C: _ulong=flags & 1?Cyc_va_arg_ulong(
+ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(ap)):(unsigned long)
+Cyc_va_arg_uint(ap));_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);base=Cyc_HEX;
+if(flags & 8  && _ulong != 0)flags |=64;nosign: sign='\000';number: if((dprec=prec)>= 
+0)flags &=~ 32;{char*_tmpDB;cp=_dyneither_ptr_plus(((_tmpDB=buf,_tag_dyneither(
+_tmpDB,sizeof(char),_get_zero_arr_size_char(_tmpDB,349)))),sizeof(char),(308 + 39)
++ 1);}if(_ulong != 0  || prec != 0){struct _dyneither_ptr xdigs;switch(base){case Cyc_OCT:
+_LL5E: do{{char _tmpDE;char _tmpDD;struct _dyneither_ptr _tmpDC;(_tmpDC=
+_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1),((_tmpDD=*((char*)
 _check_dyneither_subscript(_tmpDC,sizeof(char),0)),((_tmpDE=(char)((_ulong & 7)+ '0'),((
 _get_dyneither_size(_tmpDC,sizeof(char))== 1  && (_tmpDD == '\000'  && _tmpDE != '\000')?
 _throw_arraybounds(): 1,*((char*)_tmpDC.curr)=_tmpDE)))))));}_ulong >>=3;}while((
