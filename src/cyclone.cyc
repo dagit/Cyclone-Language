@@ -141,6 +141,22 @@ static void add_cpparg(string_t<`H> s) {
   cppargs = new List(new s,cppargs);
 }
 
+static void add_iprefix(string_t<`H> s) {
+  add_cpparg(aprintf("-iprefix %s",s));
+}
+static void add_iwithprefix(string_t<`H> s) {
+  add_cpparg(aprintf("-iwithprefix %s",s));
+}
+static void add_iwithprefixbefore(string_t<`H> s) {
+  add_cpparg(aprintf("-iwithprefixbefore %s",s));
+}
+static void add_isystem(string_t<`H> s) {
+  add_cpparg(aprintf("-isystem %s",s));
+}
+static void add_idirafter(string_t<`H> s) {
+  add_cpparg(aprintf("-idirafter %s",s));
+}
+
 static string_t target_arch = NULL;
 static void set_target_arch(string_t<`H> s) {
   toc_r = true;
@@ -1295,7 +1311,22 @@ int main(int argc, string_t<`H> ?`H argv) {
                "Suggest how to port C code to Cyclone"),
          rnew(r)$("-noregions", false, "",
                rnew(r)Set_spec(&Absyn::no_regions),
-               "Generate code that doesn't use regions")
+               "Generate code that doesn't use regions"),
+         rnew(r) $("-iprefix",true,"<prefix>", 
+                   rnew(r)Flag_spec(add_iprefix),
+                   "Specify <prefix> as the prefix for subsequent -iwithprefix options"),
+         rnew(r) $("-iwithprefix",true,"<dir>",
+                   rnew(r)Flag_spec(add_iwithprefix),
+                   "Add <prefix>/<dir> to the second include path."),
+         rnew(r) $("-iwithprefixbefore",true,"<dir>",
+                    rnew(r)Flag_spec(add_iwithprefixbefore),
+                   "Add <prefix>/<dir> to the main include path."),
+         rnew(r) $("-isystem",true,"<dir>",
+                    rnew(r)Flag_spec(add_isystem),
+                   "Add <dir> to the beginning of the second include path and treat it as a\nsystem directory."),
+         rnew(r) $("-idirafter",true,"<dir>",
+                   rnew(r)Flag_spec(add_idirafter),
+                   "Add the directory to the second include path.")
          );
 
   string_t optstring = "Options:";
