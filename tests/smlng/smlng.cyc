@@ -3,6 +3,7 @@
 using Core;
 using Stdio;
 #include "smlng.h"
+#include "tag_elim.h"
 
 string_t start_tags[] = {
   "<0>", "<1>", "<2>", "<3>", "<4>", "<5>", "<6>", "<7>", "<8>", "<9>",
@@ -153,6 +154,7 @@ doc_t down_opt(context_t ctxt, doc_t d) {
 
 
 int main(int argc, char ??argv) {
+  TagElim::tag_elim_test();
   printf("hello\n");
   return 0;
 }

@@ -12,4 +12,6 @@ extern tunion Document {
   Text(char ?);
   Tagged(tag_t,doc_t);
 };
+
+void dump(doc_t d);
 #endif _SMLNG_H_

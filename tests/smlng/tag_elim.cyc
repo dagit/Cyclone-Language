@@ -1,0 +1,96 @@
+
+#include "core.h"
+#include "stdio.h"
+#include "smlng.h"
+
+namespace TagElim;
+
+// field is true if all text in the doc is guarded by an appropriate tag,
+// making an outer tag unnecessary.  Hopefully, the parser or another pass
+// gets the top-down things.  (Eg. This pass makes <r><r>x</r><r><y></r> into
+// <r>x</r><r><y></r> instead of <r>xy</r>)
+struct SynthS {
+  bool sz: 1;
+  bool bold: 1;
+  bool emph: 1;
+  bool ital: 1;
+  bool strong: 1;
+  bool plain: 1;
+  bool tt: 1;
+  bool u1: 1; // invariant: true if u2 is true
+  bool u2: 1; // invariant: true if u3 is true
+  bool u3: 1;
+  bool color: 1;
+};
+union Synth {
+  struct SynthS s;
+  short i;
+};
+typedef union Synth synth_t; // not a pointer
+
+// currently destructive (of doc), but could easily be made functional
+$(doc_t, synth_t) tag_elim(doc_t doc) {
+  switch(doc) {
+  case &Seq(ds): 
+    synth_t synth;
+    synth.i = 0;
+    if(ds.size == 0)
+      return $(doc,synth);
+    for(int i=0; i < ds.size; ++i) {
+      let $(newd, inner_synth) = tag_elim(ds[i]);
+      ds[i] = newd; // destructive here
+      synth.i = (short)(synth.i & inner_synth.i); // cast avoids warning
+    }
+    return $(doc,synth);
+  case &Text(_): 
+    synth_t synth;
+    synth.i = 0;
+    return $(doc,synth);
+  case &Tagged(tag,d):
+    let $(d2, synth) = tag_elim(d);
+    bool useless = false;
+#define OPT(FIELD) do { useless = synth.s.FIELD; synth.s.FIELD = true;} while(0)
+    switch(tag) {
+    case Zero: case One: case  Two: case  Three: case  Four: case  Five: 
+    case Six: case  Seven: case  Eight: case  Nine:
+      OPT(sz); break;
+    case r_tag: case g_tag: case b_tag: case c_tag: case  m_tag: 
+    case y_tag: case k_tag: case w_tag:
+      OPT(color); break;
+    case B_tag:  OPT(bold); break;
+    case EM_tag: OPT(emph); break;
+    case I_tag:  OPT(ital); break;
+    case S_tag:  OPT(strong); break;
+    case TT_tag: OPT(tt); break;
+    case PL_tag: // only color and size matter from outer tags
+      OPT(plain);
+      int color = synth.s.color;
+      int sz    = synth.s.sz;
+      synth.i = (short)~0; // cast avoids warning
+      synth.s.color = color;
+      synth.s.sz    = sz;
+      break;
+    case U_tag:
+      OPT(u3);
+      if(synth.s.u2)
+	synth.s.u3 = true;
+      if(synth.s.u1)
+	synth.s.u2 = true;
+      break;
+    }
+#undef OPT
+    if(useless)
+      return $(d2,synth);
+    else
+      return $(doc,synth);
+  }
+}
+
+void tag_elim_test() {
+  unsigned char ? s = new {for i < 3: 'a'};
+  doc_t d1 = new Tagged(B_tag, new Tagged(B_tag, new Text(s)));
+  dump(d1);
+  Stdio::fputs("\n\n", Stdio::stdout);
+  d1 = tag_elim(d1)[0];
+  dump(d1);
+}
