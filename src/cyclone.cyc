@@ -727,8 +727,10 @@ int main(int argc, string_t<`H> ?`H argv) {
 
   // set up default ccargs
   string_t cflags = Cstring_to_string(Ccflags);
-  if (strlen(cflags) != 0)
+  if (strlen(cflags) != 0) {
     add_ccarg(cflags);
+    add_cpparg(cflags);
+  }
 
   // now parse the arguments
   Arg::speclist_t<`H,`H> options =

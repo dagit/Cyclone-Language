@@ -1256,11 +1256,11 @@ int argc, struct _tagged_arr argv){ struct _tagged_arr comp=( struct _tagged_arr
 Cstring_to_string( Ccomp); Cyc_set_cpp(( struct _tagged_arr) Cyc_Std_strconcat(
 comp, _tag_arr(" -x c -E -U__GNUC__ -nostdinc", sizeof( unsigned char), 30u)));{
 struct _tagged_arr cflags=( struct _tagged_arr) Cstring_to_string( Ccflags); if(
-Cyc_Std_strlen( cflags) !=  0){ Cyc_add_ccarg( cflags);}{ struct Cyc_List_List*
-options=({ struct _tuple10* _temp302[ 41u]; _temp302[ 40u]=({ struct _tuple10*
-_temp423=( struct _tuple10*) _cycalloc( sizeof( struct _tuple10)); _temp423->f1=
-_tag_arr("-printfullevars", sizeof( unsigned char), 16u); _temp423->f2= 0;
-_temp423->f3= _tag_arr("", sizeof( unsigned char), 1u); _temp423->f4=( void*)({
+Cyc_Std_strlen( cflags) !=  0){ Cyc_add_ccarg( cflags); Cyc_add_cpparg( cflags);}{
+struct Cyc_List_List* options=({ struct _tuple10* _temp302[ 41u]; _temp302[ 40u]=({
+struct _tuple10* _temp423=( struct _tuple10*) _cycalloc( sizeof( struct _tuple10));
+_temp423->f1= _tag_arr("-printfullevars", sizeof( unsigned char), 16u); _temp423->f2=
+0; _temp423->f3= _tag_arr("", sizeof( unsigned char), 1u); _temp423->f4=( void*)({
 struct Cyc_Arg_Set_spec_struct* _temp424=( struct Cyc_Arg_Set_spec_struct*)
 _cycalloc( sizeof( struct Cyc_Arg_Set_spec_struct)); _temp424[ 0]=({ struct Cyc_Arg_Set_spec_struct
 _temp425; _temp425.tag= Cyc_Arg_Set_spec; _temp425.f1=& Cyc_print_full_evars_r;
