@@ -2169,8 +2169,6 @@ string_t coercion2string(coercion_t c) {
   }
 }
 
-static bool is_nonunique_region(type_t r);
-
 bool warn_alias_coerce = false;
 
 // returns a pair by doing the following
@@ -2208,15 +2206,17 @@ static bool can_insert_alias(exp_t e, type_t e_typ,
 			     type_t wants_typ, seg_t loc) {
   // check if the given expression is a pointer into a no-alias region
   region r;
-  if (is_noalias_path(r,e) && is_noalias_pointer(e_typ)) {
-    // check if the expected type is a pointer type not into the
-    // unique region (i.e.  it will be consumed) and not the heap
-    // region; FIX: can we add in any polymorphism here?
+  if (is_noalias_path(r,e) && is_noalias_pointer(e_typ) &&
+      is_pointer_type(e_typ)) {
+    // check if the expected type is has a pointer type into an
+    // aliasable region but not the heap region
     switch (compress(wants_typ)) {
     case &PointerType(PtrInfo(_,_,PtrAtts(r2,_,_,_,_))):
       switch (compress(r2)) {
       case &HeapRgn: return false;
-      default: return is_nonunique_region(r2);
+      default:
+	let k = typ_kind(r2);
+	return k->kind == RgnKind && k->aliasqual == Aliasable;
       }
     case &TypedefType(_,_,_,_):
       impos("got typedef %s in can_insert_alias at %s\n",
@@ -4568,20 +4568,6 @@ bool is_tagged_pointer_typ(type_t t) {
 /***************************************************/
 /* Routines for dealing with non-aliasing pointers */
 /***************************************************/
-
-// FIX: code duplication with is_noalias_region below.
-static bool is_nonunique_region(type_t r) {
-  switch (compress(r)) {
-  case &UniqueRgn: return false;
-  case &VarType(tv):
-    let k = tvar_kind(tv,&rk);
-    if (k->kind == RgnKind && k->aliasqual == Unique)
-      return false;
-    break;
-  default: break;
-  }
-  return true;
-}
 
 // warning: not just a predicate; side-effects VarTypes to be of non-unique
 //   flavor if they are not yet set
