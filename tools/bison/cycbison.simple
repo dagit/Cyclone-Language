@@ -347,7 +347,8 @@ yyreduce:
 #endif
 
 $    /* the action file gets copied in place of this dollarsign */
- default: throw Yyimpossible;
+ default: // throw Yyimpossible;
+    break;
   }
 
 #line 371 "cyc_bison.simple"

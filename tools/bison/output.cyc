@@ -260,7 +260,7 @@ output()
     }
   reader_output_yylsp(ftable);
   if (debugflag)
-    fprintf((FILE @)ftable, "#ifndef YYDEBUG\n#define YYDEBUG %d\n#endif\n\n",
+    fprintf((FILE @)ftable, "\n#ifndef YYDEBUG\n#define YYDEBUG %d\n#endif\n\n",
 	    !!debugflag);
 
   if (semantic_parser)
