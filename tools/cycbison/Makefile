@@ -25,7 +25,8 @@
 # along with Bison; see the file COPYING.  If not, write to
 # the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
-PROG=cycbison.exe
+include ../../Makefile.inc
+PROG=cycbison$(EXE)
 BINDIR=../../bin
 
 # hack so executable can find cycbison.simple
@@ -59,7 +60,7 @@ $(PROG): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^
 
 clean:
-	rm -f *.o core cycbison *~ cycbison.exe
+	rm -f *.o core cycbison *~ cycbison cycbison.exe
 
 # This file is different to pass the parser file names to the compiler.
 files.o: files.c

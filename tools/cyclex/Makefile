@@ -8,11 +8,11 @@
 
 include ../../Makefile.inc
 
-PROG=cyclex.exe
+PROG=cyclex$(EXE)
 BINDIR=../../bin
 
-CYCC=../../bin/cyclone.exe
-CYCBISON=../../bin/cycbison.exe
+CYCC=../../bin/cyclone$(EXE)
+CYCBISON=../../bin/cycbison$(EXE)
 
 CYC_FLAGS=
 
@@ -62,7 +62,7 @@ endif
 
 clean:
 	rm -f *.o *.c lexer.cyc parser_tab.cyc parser_tab.h *.output *.stackdump
-	rm -f $(PROG)
+	rm -f $(PROG) cyclex
 
 lexer.cyc: parser_tab.h
 parser_tab.c: parser.y
