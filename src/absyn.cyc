@@ -3,6 +3,7 @@
 #define ABSYN_CYC 
 #include "absyn.h"
 #include "string.h"
+#include "tcutil.h"
 
 using Core;
 using List;
@@ -25,13 +26,13 @@ int varlist_cmp(list<var> vs1, list<var> vs2) {
   return zstrlist_cmp(vs1,vs2);
 }
 int qvar_cmp(qvar q1, qvar q2) {
-  int i = zstrlist_cmp(q1[0],q2[0]);
+  int i = zstrlist_cmp((*q1)[0],(*q2)[0]);
   if (i != 0) return i;
-  else return zstrptrcmp(q1[1],q2[1]);
+  else return zstrptrcmp((*q1)[1],(*q2)[1]);
 }
 // WARNING: Ignores the kinds.
 int tvar_cmp(tvar tv1, tvar tv2) {
-  return String::zstrptrcmp(tv1[0],tv2[0]);
+  return String::zstrptrcmp((*tv1)[0],(*tv2)[0]);
 }
 
 static int new_type_counter = 0;
@@ -111,13 +112,42 @@ xenumdecl               exn_xed    = &exn_xed_v;
 typ                     exn_typ    = XenumType(&exn_name_v,&exn_xed);
 // string
 static Opt_t<typ> string_t_opt = null;
-typ string_typ() {
+typ string_typ(typ rgn) {
   if (string_t_opt == null) {
-    typ t = ArrayType(uchar_t,empty_tqual(),TaggedArray);
+    typ t = starb_typ(uchar_t,rgn,empty_tqual(),Unknown_b);
     string_t_opt = &Opt(t);
   }
   return string_t_opt->v;
 }
+// pointers
+
+typ starb_typ(typ t, typ r, tqual tq, bounds_t b) {
+  return PointerType(PtrInfo {.elt_typ = t, .rgn_typ = r,
+				 .nullable = new_conref(true), .tq = tq, 
+				 .bounds = new_conref(b)});
+}
+typ atb_typ(typ t, typ r, tqual tq, bounds_t b) {
+  return 
+    PointerType(PtrInfo {
+      .elt_typ = t, .rgn_typ = r, .nullable = new_conref(false), .tq = tq, 
+	 .bounds = new_conref(b)});
+}
+typ star_typ(typ t, typ r, tqual tq) { 
+  return starb_typ(t, r, tq, Upper_b(signed_int_exp(1,null)));
+}
+typ cstar_typ(typ t, tqual tq) { 
+  return starb_typ(t, HeapRgnType, tq, Upper_b(signed_int_exp(1,null)));
+}
+typ at_typ(typ t, typ r, tqual tq) {
+  return atb_typ(t, r, tq, Upper_b(signed_int_exp(1,null)));
+}
+typ tagged_typ(typ t, typ r, tqual tq) {
+  return 
+    PointerType(PtrInfo {
+      .elt_typ = t, .rgn_typ = r, .nullable = new_conref(true), .tq = tq,
+	 .bounds = new_conref(Unknown_b) });
+}
+
 // FILE
 static Opt_t<typ> file_t_opt = null;
 // Maybe someday we'll allow FILE objects to live somewhere other than
@@ -130,32 +160,18 @@ typ file_typ() {
       &$((list<var>)&cons(allocstr("Cyc"),
 			     &cons(allocstr("Stdio"),null)),
 	 allocstr("__sFILE"));
-    structdecl     sd              = &Structdecl(Abstract,&Opt(file_t_name),
-						 null, null);
-    typ            file_struct_typ = StructType(&Opt(file_t_name),
-                                                null,
-                                                (structdecl*)(&$(sd)));
-    file_t_opt = &Opt(PointerType(file_struct_typ,
-				  HeapRgnType,
-				  new_conref(false),
-				  empty_tqual()));
+    structdecl sd = &Structdecl(Abstract,&Opt(file_t_name),null, null);
+    typ file_struct_typ = StructType(&Opt(file_t_name),null,
+				     (structdecl*)(&$(sd)));
+    file_t_opt = &Opt(at_typ(file_struct_typ, HeapRgnType, empty_tqual()));
   }
   return file_t_opt->v;
-}
-// pointers
-
-// FIX: add versions that take region arguments
-typ nullableptr_typ(typ t, tqual tq) {
-  return PointerType(t,HeapRgnType,new_conref(true),tq);
-}
-typ nonnullableptr_typ(typ t, tqual tq) {
-  return PointerType(t,HeapRgnType,new_conref(false),tq);
 }
 
 static Opt_t<typ> void_star_t_opt = null;
 typ void_star_typ() {
   if (void_star_t_opt == null)
-    void_star_t_opt = &Opt(nullableptr_typ(VoidType, empty_tqual()));
+    void_star_t_opt = &Opt(star_typ(VoidType, HeapRgnType, empty_tqual()));
   return void_star_t_opt->v;
 }
 
@@ -189,7 +205,9 @@ exp true_exp(segment loc)  { return bool_exp(true, loc); }
 exp false_exp(segment loc) { return bool_exp(false, loc); }
 exp char_exp(char c, segment loc)    {return const_exp(Char_c(Unsigned,c),loc);}
 exp float_exp(string f, segment loc) {return const_exp(Float_c(f),loc);}
-exp string_exp(string s, segment loc){return const_exp(String_c(s),loc);}
+exp string_exp(bool heap_allocate, string s, segment loc){
+  return const_exp(String_c(heap_allocate,s),loc);
+}
 
 exp var_exp(qvar q, segment loc) { return new_exp(Var_e(q,Unresolved_b), loc); }
 exp varb_exp(qvar q, binding_t b, segment loc) {
@@ -279,12 +297,12 @@ exp stmt_exp(stmt s,segment loc) { return new_exp(StmtExp_e(s), loc); }
 exp null_pointer_exn_exp(segment loc) { 
   return var_exp(&$(null,allocstr("Null_Exception")), loc); 
 }
-exp array_exp(list<exp> es, segment loc) {
+exp array_exp(bool heap_allocate, list<exp> es, segment loc) {
   let dles = null;
   for (; es != null; es = es->tl)
     dles = &cons(&$(null,es->hd),dles);
   dles = List::imp_rev(dles);
-  return new_exp(Array_e(dles),loc);
+  return new_exp(Array_e(heap_allocate,dles),loc);
 }
 exp unresolvedmem_exp(Opt_t<typedef_name_t> n,
                       list<$(list<designator>,exp)@> dles,segment loc) {
@@ -387,7 +405,7 @@ decl xenum_decl(scope s,typedef_name_t n,list<enumfield> fs,segment loc) {
 // We do this by constructing every function type using function_typ,
 // rather than mucking with the typechecker/unifier/etc.
 static $(Opt_t<var>,tqual,typ)@ expand_arg($(Opt_t<var>,tqual,typ)@ a) {
-  return &$(a[0],a[1],pointer_expand(a[2]));
+  return &$((*a)[0],(*a)[1],pointer_expand((*a)[2]));
 }
 
 typ function_typ(list<tvar> tvs, typ t, list<$(Opt_t<var>,tqual,typ)@> args,
@@ -397,7 +415,7 @@ typ function_typ(list<tvar> tvs, typ t, list<$(Opt_t<var>,tqual,typ)@> args,
 typ pointer_expand(typ t) {
   //  switch (compress(t)) {
   switch (t) {
-  case FnType(_,_,_,_): return nonnullableptr_typ(t,empty_tqual());
+  case FnType(_,_,_,_): return at_typ(t,HeapRgnType,empty_tqual());
 // Disabled for now because it is incompatible with C
 //  case ArrayType*(_,_,ak): 
 //    return
@@ -412,7 +430,7 @@ typ pointer_expand(typ t) {
 //
 //    exp      where
 //    ---------------------------
-//    name     name is a variable -- and not a function name!
+//    name     name is a variable -- and not a function name or array!
 //    e[k]
 //    (e)      e is an lvalue
 //    e.name   e is an lvalue
@@ -424,8 +442,15 @@ typ pointer_expand(typ t) {
 // must be called after the expression is type-checked.
 bool is_lvalue(exp e) {
   switch (e->r) {
+    // shouldn't allow assignment to function names or arrays
   case Var_e(_,Funname_b(_)): return false;
-  case Var_e(_,_):            return true;
+  case Var_e(_,Global_b(vd)): fallthru(vd);
+  case Var_e(_,Local_b(vd)):
+    switch (Tcutil::compress(vd->type)) {
+    case ArrayType(_,_,_): return false;
+    default: return true; 
+    }
+  case Var_e(_,_): return true;
   case Subscript_e(e1,e2):    return true;
   case StructMember_e(e1,f):  return is_lvalue(e1);
   case StructArrow_e(e1,f):   return true;
@@ -441,7 +466,7 @@ $(field_name,tqual,typ) * lookup_struct_field(structdecl sd, var v) {
     return null;
   for(_ fs = sd->fields->v; fs != null; fs = fs->tl) {
     _ f = fs->hd;
-    if (String::zstrptrcmp(f[0],v) == 0)
+    if (String::zstrptrcmp((*f)[0],v) == 0)
       return f;
   }
   return null;

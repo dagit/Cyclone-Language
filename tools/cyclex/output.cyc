@@ -34,7 +34,7 @@ void copy_chunk(string sourcename, FILE @ ic, FILE @ oc, Syntax::location_t loc)
   }
 }
 
-void output_array(FILE @ oc, int v[?]) { // Doesn't work for really short arrays?
+void output_array(FILE @ oc, int ?v) { // Doesn't work for really short arrays?
   fprintf(oc, "{");
   for(int i=0; i < v.size-1; ++i)
     fprintf(oc, "%d,", v[i]);
@@ -43,11 +43,11 @@ void output_array(FILE @ oc, int v[?]) { // Doesn't work for really short arrays
 
 void output_tables(FILE @oc, Compact::lex_tables_t tbl) {
   fprintf(oc, "struct lex_tables *lt = null;\n");
-  fprintf(oc, "int lbase[?] = ");       output_array(oc, tbl->base);
-  fprintf(oc, ";\nint lbacktrk[?] = "); output_array(oc, tbl->backtrk);
-  fprintf(oc, ";\nint ldefault[?] = "); output_array(oc, tbl->defaultX);
-  fprintf(oc, ";\nint ltrans[?] = ");   output_array(oc, tbl->trans);
-  fprintf(oc, ";\nint lcheck[?] = ");   output_array(oc, tbl->check);
+  fprintf(oc, "int lbase[] = ");       output_array(oc, tbl->base);
+  fprintf(oc, ";\nint lbacktrk[] = "); output_array(oc, tbl->backtrk);
+  fprintf(oc, ";\nint ldefault[] = "); output_array(oc, tbl->defaultX);
+  fprintf(oc, ";\nint ltrans[] = ");   output_array(oc, tbl->trans);
+  fprintf(oc, ";\nint lcheck[] = ");   output_array(oc, tbl->check);
   fprintf(oc, ";\n");
 }
 

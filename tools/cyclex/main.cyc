@@ -14,7 +14,7 @@ using Core;
 using Stdio;
 
 int main() {
-  string argv[?] = std_args();
+  string ?argv = std_args();
   int    arglen  = argv.size;
   if(arglen < 2 || arglen > 3) {
     fprintf(stderr, "Usage: cycocamllex <input file> [<output file>]");

@@ -189,7 +189,6 @@ void compile_file(string filename) {
     Stdio::remove(preprocfile);
     return;
   }
-  Stdio::remove(preprocfile);
   // print
   FILE @out_file;
   try {
@@ -201,6 +200,7 @@ void compile_file(string filename) {
   case FileOpenError(_): 
     fprintf(stderr,"\nCould not open output file: %s\n",*out_file_name_opt);
     fflush(stderr);
+    Stdio::remove(preprocfile);
     compile_failure=true;
     return;
   }
@@ -221,11 +221,13 @@ void compile_file(string filename) {
   if (Position::error_p()) {
     fprintf(stderr,"COMPILATION FAILED!\n");
     fflush(stderr);
+    Stdio::remove(preprocfile);
     compile_failure=true;
   } else {
     Tcutil::flush_warnings();
   }
   file_close(f);
+  Stdio::remove(preprocfile);
   if (out_file_name_opt != null) file_close(out_file);
   return;
 }
@@ -233,32 +235,32 @@ void compile_file(string filename) {
 int main() {
 
   list<$(string,Arg::spec,string)@> options =
-    &cons(&$((string)"-o",String_spec(set_out_file_name),
-             (string)"output file name"),
-    &cons(&$((string)"-pp",Set_spec(pp), 
-             (string)"pretty print"),
-    &cons(&$((string)"-up",Set_spec(up), 
-             (string)"ugly print"),
-    &cons(&$((string)"-noexpandtypedefs",Set_spec(noexpand),
-             (string)"don't expand typedefs in pretty printing"),
-    &cons(&$((string)"-noremoveunused",Set_spec(noshake),
-             (string)"don't remove externed variables that aren't used"),
-    &cons(&$((string)"-tc",Set_spec(tc), 
-             (string)"type check"),
-    &cons(&$((string)"-toc",Set_spec(toc), 
-             (string)"translate to C"),
-    &cons(&$((string)"-I",String_spec(add_include), 
-             (string)"include directory"),
-    &cons(&$((string)"-D",String_spec(add_define), 
-             (string)"pass definition to pre-processor"),
-    &cons(&$((string)"-check_null",Unit_spec(set_check_null), 
-             (string)"turn on null-checking in generated C code"),
-    &cons(&$((string)"-v",Set_spec(v), 
-             (string)"print compilation stages verbosely"),
-    &cons(&$((string)"-q",Set_spec(q), 
-             (string)"compile quietly"),
-    &cons(&$((string)"-nocyc",Clear_spec(add_cyc_namespace), 
-	     (string)"does not add implicit namespace Cyc"),
+    &cons(&$("-o",String_spec(set_out_file_name),
+             "output file name"),
+    &cons(&$("-pp",Set_spec(pp), 
+             "pretty print"),
+    &cons(&$("-up",Set_spec(up), 
+             "ugly print"),
+    &cons(&$("-noexpandtypedefs",Set_spec(noexpand),
+             "don't expand typedefs in pretty printing"),
+    &cons(&$("-noremoveunused",Set_spec(noshake),
+             "don't remove externed variables that aren't used"),
+    &cons(&$("-tc",Set_spec(tc), 
+             "type check"),
+    &cons(&$("-toc",Set_spec(toc), 
+             "translate to C"),
+    &cons(&$("-I",String_spec(add_include), 
+             "include directory"),
+    &cons(&$("-D",String_spec(add_define), 
+             "pass definition to pre-processor"),
+    &cons(&$("-check_null",Unit_spec(set_check_null), 
+             "turn on null-checking in generated C code"),
+    &cons(&$("-v",Set_spec(v), 
+             "print compilation stages verbosely"),
+    &cons(&$("-q",Set_spec(q), 
+             "compile quietly"),
+    &cons(&$("-nocyc",Clear_spec(add_cyc_namespace), 
+	     "does not add implicit namespace Cyc"),
           null)))))))))))));
 
   Lex::lex_init();

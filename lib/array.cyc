@@ -46,7 +46,7 @@ namespace Array;
 static int sp[40] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-void qsort<`a>(int less_eq(`a,`a),`a arr[?],int base_ofs, int len)
+void qsort<`a>(int less_eq(`a,`a),`a ?arr,int base_ofs, int len)
 {
   `a temp;
   // int sp[40]; // FIX: complains not initialized
@@ -124,7 +124,7 @@ void qsort<`a>(int less_eq(`a,`a),`a arr[?],int base_ofs, int len)
 #define PUT(a) to[dest++] = from[a++]
 
 
-void msort<`a>(int less_eq(`a,`a),`a arr[?],int base_ofs, int len) {
+void msort<`a>(int less_eq(`a,`a),`a ?arr,int base_ofs, int len) {
 
   if (base_ofs < 0 || base_ofs + len > arr.size || len < 0)
     throw Core::InvalidArg("Array::msort");
@@ -137,9 +137,9 @@ void msort<`a>(int less_eq(`a,`a),`a arr[?],int base_ofs, int len) {
   // update would compare with the cost of the extra copy and space
   // usage, but it really made my head hurt to think about, so I
   // decided not to do it both ways just to benchmark.
-  `a from[?] = new {for i < len : arr[0]}; // fill with junk
-  `a to[?] = new {for i < len : arr[i+base_ofs]};
-  `a swap[?];
+  `a ?from = new {for i < len : arr[0]}; // fill with junk
+  `a ?to   = new {for i < len : arr[i+base_ofs]};
+  `a ?swap;
    
   int stepsize; // Non-recursive mergesort repeatedly walks over
                 // the array, each time in bigger steps.
@@ -195,39 +195,39 @@ void msort<`a>(int less_eq(`a,`a),`a arr[?],int base_ofs, int len) {
 
 //////// Below are bunches of stuff mimicking the List library
 
-`a from_list<`a>(List::list<`a> x) [?] {
+`a ?from_list<`a>(List::list<`a> x) {
   return List::to_array(x);
 }
 
-list<`a> to_list<`a>(`a x[?]) {
+list<`a> to_list<`a>(`a ?x) {
   return List::from_array(x);
 }
 
 // return a fresh copy of the array (same as map of the identity) 
-`a copy<`a>(`a x[?]) [?] {
+`a ?copy<`a>(`a ?x) {
   int sx = x.size;
   return new {for i < sx : x[i]};
 }
 
 // Apply a function to each element in an array, returning a new array. 
-`b map<`a,`b>(`b f(`a),`a x[?]) [?] {
+`b ?map<`a,`b>(`b f(`a),`a ?x) {
   int sx = x.size;
   return new {for i < sx : f(x[i])};
 }
 // Apply a function to each element in an array, returning a new array. 
 // This uses an additional argument to simulate function closures.
-`b map_c<`a,`b,`c>(`b f(`c,`a),`c env,`a x[?]) [?] {
+`b ?map_c<`a,`b,`c>(`b f(`c,`a),`c env,`a ?x) {
   int sx = x.size;
   return new {for i < sx : f(env,x[i])};
 }
 
 // Apply a function to each element in an array, writing the results
 // back into the array.
-void imp_map<`a>(`a f(`a),`a x[?]) {
+void imp_map<`a>(`a f(`a),`a ?x) {
   int sx = x.size;
   for (int i = 0; i<sx; i++) x[i]=f(x[i]);
 }
-void imp_map_c<`a,`b>(`a f(`b,`a),`b env,`a x[?]) {
+void imp_map_c<`a,`b>(`a f(`b,`a),`b env,`a ?x) {
   int sx = x.size;
   for (int i = 0; i<sx; i++) x[i]=f(env,x[i]);
 }
@@ -238,7 +238,7 @@ xenum exn {Array_mismatch};
 // Given two arrays of the same length and a function, apply the function
 // to each pair of elements (in order) and collect the results in a new array.
 // Throws Array_mismatch if the sizes of the arrays aren't the same.
-`c map2<`a,`b,`c>(`c f(`a,`b),`a x[?],`b y[?]) [?] {
+`c ?map2<`a,`b,`c>(`c f(`a,`b),`a ?x,`b ?y) {
   int sx = x.size;
   if (sx != y.size) throw Array_mismatch;
   return new {for i < sx : f(x[i],y[i])};
@@ -249,11 +249,11 @@ xenum exn {Array_mismatch};
 // Apply some function to each element of the array, but don't bother to
 // save the result.  Similar to Ocaml's List.iter but doesn't require
 // void type for the result of the function.
-void app<`a,`b>(`b f(`a),`a x[?]) {
+void app<`a,`b>(`b f(`a),`a ?x) {
   int sx = x.size;
   for (int i = 0; i < sx; i++) f(x[i]);
 }
-void app_c<`a,`b,`c>(`c f(`a,`b),`a env,`b x[?]) {
+void app_c<`a,`b,`c>(`c f(`a,`b),`a env,`b ?x) {
   int sx = x.size;
   for (int i = 0; i < sx; i++) f(env,x[i]);
 }
@@ -261,26 +261,26 @@ void app_c<`a,`b,`c>(`c f(`a,`b),`a env,`b x[?]) {
 // same as app but with void functions -- unlike Popcorn, the iter
 // functions are no longer needed because we treat "void" as a boxed
 // type.  
-void iter<`a>(void f(`a),`a x[?]) {
+void iter<`a>(void f(`a),`a ?x) {
   int sx = x.size;
   for (int i = 0; i < sx; i++) f(x[i]);
 }
 
 // same as app_c but with void functions
-void iter_c<`a,`b>(void f(`b,`a),`b env,`a x[?]) {
+void iter_c<`a,`b>(void f(`b,`a),`b env,`a ?x) {
   int sx = x.size;
   for (int i = 0; i < sx; i++) f(env,x[i]);
 }
 
 // Same as app, but generalized to a pair of arrays.  Throws Array_mismatch
 // if the lengths of the arrays aren't the same.  
-void app2<`a,`b,`c>(`c f(`a,`b),`a x[?],`b y[?]) {
+void app2<`a,`b,`c>(`c f(`a,`b),`a ?x,`b ?y) {
   int sx = x.size;
   if (sx != y.size) throw Array_mismatch;
   for (int i=0; i < sx; i++) f(x[i],y[i]);
 }
 
-void app2_c<`a,`b,`c,`d>(`d f(`a,`b,`c),`a env,`b x[?],`c y[?]) {
+void app2_c<`a,`b,`c,`d>(`d f(`a,`b,`c),`a env,`b ?x,`c ?y) {
   int sx = x.size;
   if (sx != y.size) throw Array_mismatch;
   for (int i=0; i < sx; i++) f(env,x[i],y[i]);
@@ -288,13 +288,13 @@ void app2_c<`a,`b,`c,`d>(`d f(`a,`b,`c),`a env,`b x[?],`c y[?]) {
 
 // Same as iter, but generalized to a pair of arrays.  Throws Array_mismatch
 // if the lengths of the arrays aren't the same.  
-void iter2<`a,`b>(void f(`a,`b),`a x[?],`b y[?]) {
+void iter2<`a,`b>(void f(`a,`b),`a ?x,`b ?y) {
   int sx = x.size;
   if (sx != y.size) throw Array_mismatch;
   for (int i=0; i < sx; i++) f(x[i],y[i]);
 }
 
-void iter2_c<`a,`b,`c>(void f(`a,`b,`c),`a env,`b x[?],`c y[?]) {
+void iter2_c<`a,`b,`c>(void f(`a,`b,`c),`a env,`b ?x,`c ?y) {
   int sx = x.size;
   if (sx != y.size) throw Array_mismatch;
   for (int i=0; i < sx; i++) f(env,x[i],y[i]);
@@ -305,7 +305,7 @@ void iter2_c<`a,`b,`c>(void f(`a,`b,`c),`a env,`b x[?],`c y[?]) {
 // Given an array [|x1,x2,...,xn-1,xn|], a function f, and an accumulator
 // a, return f(f(...(f(x2,f(x1,a))),xn-1),xn).  Notice that the function
 // is first applied to the left-most element of the array.
-`a fold_left<`a,`b>(`a f(`a,`b),`a accum,`b x[?]) {
+`a fold_left<`a,`b>(`a f(`a,`b),`a accum,`b ?x) {
   int sx = x.size;
   for(int i=0; i < sx; i++) {
     accum = f(accum,x[i]);
@@ -313,7 +313,7 @@ void iter2_c<`a,`b,`c>(void f(`a,`b,`c),`a env,`b x[?],`c y[?]) {
   return accum;
 }
 
-`a fold_left_c<`a,`b,`c>(`a f(`c,`a,`b),`c env,`a accum,`b x[?]) {
+`a fold_left_c<`a,`b,`c>(`a f(`c,`a,`b),`c env,`a accum,`b ?x) {
   int sx = x.size;
   for(int i=0; i < sx; i++) {
     accum = f(env,accum,x[i]);
@@ -324,13 +324,13 @@ void iter2_c<`a,`b,`c>(void f(`a,`b,`c),`a env,`b x[?],`c y[?]) {
 // Given an array [|x1,x2,....,xn-1,xn|], a function f, and an accumulator
 // a, return f(x1,f(x2,...,f(xn-1,f(xn,a))...)).  Notice that the function
 // is first applied to the right-most element of the list. 
-`b fold_right<`a,`b>(`b f(`a,`b),`a x[?],`b accum) {
+`b fold_right<`a,`b>(`b f(`a,`b),`a ?x,`b accum) {
   for(int i=x.size-1; i >= 0; i--) {
     accum = f(x[i],accum);
   }
   return accum;
 }
-`b fold_right_c<`a,`b,`c>(`b f(`c,`a,`b),`c env,`a x[?],`b accum) {
+`b fold_right_c<`a,`b,`c>(`b f(`c,`a,`b),`c env,`a ?x,`b accum) {
   for(int i=x.size-1; i>=0; i--) {
     accum = f(env,x[i],accum);
   }
@@ -338,14 +338,14 @@ void iter2_c<`a,`b,`c>(void f(`a,`b,`c),`a env,`b x[?],`c y[?]) {
 }
 
 // Return a copy of an array in reverse.
-`a rev_copy<`a>(`a x[?]) [?] {
+`a? rev_copy<`a>(`a ?x) {
   int sx = x.size;
   int n = sx - 1;
   return new {for i < sx : x[n-i]};
 }
 
 // Imperatively reverse an array.
-void imp_rev<`a>(`a x[?]) {
+void imp_rev<`a>(`a ?x) {
   `a temp;
   int i = 0;
   int j = x.size-1;
@@ -360,14 +360,14 @@ void imp_rev<`a>(`a x[?]) {
 
 // Given a predicate on 'a values, determine whether every element in an
 // array satisfies the predicate.
-bool forall<`a>(bool pred(`a),`a x[?]) {
+bool forall<`a>(bool pred(`a),`a ?x) {
   int sx = x.size;
   for(int i=0; i < sx; i++) {
     if (! pred(x[i])) return false;
   }
   return true;
 }
-bool forall_c<`a,`b>(bool pred(`a,`b),`a env,`b x[?]) {
+bool forall_c<`a,`b>(bool pred(`a,`b),`a env,`b ?x) {
   int sx = x.size;
   for(int i=0; i < sx; i++) {
     if (! pred(env,x[i])) return false;
@@ -377,14 +377,14 @@ bool forall_c<`a,`b>(bool pred(`a,`b),`a env,`b x[?]) {
 
 // Given a predicate on 'a values, determine whether there exists an element
 // in the array that satisfies the predicate.
-bool exists<`a>(bool pred(`a),`a x[?]) {
+bool exists<`a>(bool pred(`a),`a ?x) {
   int sx = x.size;
   for(int i=0; i < sx; i++) {
     if (pred(x[i])) return true;
   }
   return false;
 }
-bool exists_c<`a,`b>(bool pred(`a,`b),`a env,`b x[?]) {
+bool exists_c<`a,`b>(bool pred(`a,`b),`a env,`b ?x) {
   int sx = x.size;
   for(int i=0; i < sx; i++) {
     if (pred(env,x[i])) return true;
@@ -394,7 +394,7 @@ bool exists_c<`a,`b>(bool pred(`a,`b),`a env,`b x[?]) {
 
 // Given [|x1,...,xn|] and [|y1,...,yn|], return [|(x1,y1),...,(xn,yn)|].  
 // Throws Array_mismatch if the lengths are not the same.
-$(`a,`b) zip<`a,`b>(`a x[?],`b y[?]) [?] {
+$(`a,`b)? zip<`a,`b>(`a ?x,`b ?y) {
   int sx = x.size;
   if (sx != y.size) throw Array_mismatch;
 
@@ -402,7 +402,7 @@ $(`a,`b) zip<`a,`b>(`a x[?],`b y[?]) [?] {
 }
 
 // Given [|(x1,y1),...,(xn,yn)|], return ([|x1,...,xn|],[|y1,...,yn|]) 
-$(`a [?],`b[?]) split<`a,`b>($(`a,`b) x[?]) {
+$(`a?,`b?) split<`a,`b>($(`a,`b) ?x) {
   int sx = x.size;
   return $(new {for i < sx : (x[i])[0]},
            new {for i < sx : (x[i])[1]});
@@ -411,7 +411,7 @@ $(`a [?],`b[?]) split<`a,`b>($(`a,`b) x[?]) {
 
 // Given an array [|x1,...,xn|] and x, determine if x is in the array.
 // Uses physical equality for comparison.
-bool memq<`a>(`a l[?], `a x) {
+bool memq<`a>(`a ?l, `a x) {
   int s = l.size;
   for(int i = 0; i < s; i++) {
     if (l[i] == x) return true;
@@ -419,7 +419,7 @@ bool memq<`a>(`a l[?], `a x) {
   return false;
 }
 
-bool mem<`a>(int compare(`a,`a), `a l[?], `a x) {
+bool mem<`a>(int compare(`a,`a), `a ?l, `a x) {
   int s = l.size;
   for(int i = 0; i < s; i++) {
     if (0==compare(l[i],x)) return true;
@@ -430,7 +430,7 @@ bool mem<`a>(int compare(`a,`a), `a l[?], `a x) {
 // Creates a new (smaller) array containing the specified slice of the
 // target array.  The last parameter is an int option of the number of 
 // elements to take, or null for "take until the end of the array".
-`a extract<`a>(`a x[?],int start,Core::Opt_t<int> n_opt) [?] {
+`a? extract<`a>(`a ?x,int start,Core::Opt_t<int> n_opt) {
   int sx = x.size;
   int n = (n_opt == null ? sx - start : n_opt->v);
 

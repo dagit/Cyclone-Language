@@ -36,11 +36,11 @@ typedef struct function_lexbuf_state<`b> @Function_lexbuf_state<`b>;
 
 extern struct lex_tables { 
 // for space this should probably be shorts, but who cares
-  int lex_base   [?];
-  int lex_backtrk[?];
-  int lex_default[?];
-  int lex_trans  [?];
-  int lex_check  [?];
+  int ?lex_base;
+  int ?lex_backtrk;
+  int ?lex_default;
+  int ?lex_trans;
+  int ?lex_check;
 };
 typedef struct lex_tables @LexTables;
 

@@ -30,7 +30,7 @@ typedef enum Automata_move automata_move_t;
 
 LEXGEN_EXTERN_DEFINITION enum Automata { 
   Perform(int); 
-  Shift(automata_trans_t, automata_move_t[?]);
+  Shift(automata_trans_t, automata_move_t?);
 };
 typedef enum Automata automata_t;
 
@@ -42,7 +42,7 @@ LEXGEN_EXTERN_DEFINITION struct Automata_entry {
 typedef struct Automata_entry @ automata_entry_t;
 
 extern 
-$(list<automata_entry_t>,automata_t[?])@ make_dfa(Syntax::lexer_definition_t);
+$(list<automata_entry_t>,automata_t?)@ make_dfa(Syntax::lexer_definition_t);
 
 }}}
 #endif

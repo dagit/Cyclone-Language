@@ -421,12 +421,12 @@ $(list<`a>,list<`b>) split<`a,`b>(list<$(`a,`b)@> x) {
   
   if (x == null) return $(null,null);
 
-  prev1 = result1 = &cons(x->hd[0],null);
-  prev2 = result2 = &cons(x->hd[1],null);
+  prev1 = result1 = &cons(x->hd[0][0],null);
+  prev2 = result2 = &cons(x->hd[0][1],null);
 
   for (x=x->tl; x != null; x=x->tl) {
-    prev1->tl = &cons(x->hd[0],null);
-    prev2->tl = &cons(x->hd[1],null);
+    prev1->tl = &cons(x->hd[0][0],null);
+    prev2->tl = &cons(x->hd[0][1],null);
     prev1 = prev1->tl;
     prev2 = prev2->tl;
   }
@@ -442,14 +442,14 @@ $(list<`a>,list<`b>,list<`c>) split3<`a,`b,`c>(list<$(`a,`b,`c)@> x) {
   
   if (x == null) return $(null,null,null);
 
-  prev1 = result1 = &cons(x->hd[0],null);
-  prev2 = result2 = &cons(x->hd[1],null);
-  prev3 = result3 = &cons(x->hd[2],null);
+  prev1 = result1 = &cons(x->hd[0][0],null);
+  prev2 = result2 = &cons(x->hd[0][1],null);
+  prev3 = result3 = &cons(x->hd[0][2],null);
 
   for (x=x->tl; x != null; x=x->tl) {
-    prev1->tl = &cons(x->hd[0],null);
-    prev2->tl = &cons(x->hd[1],null);
-    prev3->tl = &cons(x->hd[2],null);
+    prev1->tl = &cons(x->hd[0][0],null);
+    prev2->tl = &cons(x->hd[0][1],null);
+    prev3->tl = &cons(x->hd[0][2],null);
     prev1 = prev1->tl;
     prev2 = prev2->tl;
     prev3 = prev3->tl;
@@ -484,7 +484,7 @@ bool mem<`a>(int compare(`a,`a), list<`a> l, `a x) {
 // Throws Not_found if no such ki exists.
 `b assoc<`a,`b>(list<$(`a,`b)@> l,`a x) {
   while (l != null) {
-    if (l->hd[0] == x) return(l->hd[1]);
+    if (l->hd[0][0] == x) return(l->hd[0][1]);
     l = l->tl;
   }
   throw Core::Not_found;
@@ -492,7 +492,7 @@ bool mem<`a>(int compare(`a,`a), list<`a> l, `a x) {
 
 `b assoc_cmp<`a,`b>(int compare(`a,`a),list<$(`a,`b)@> l,`a x) {
   while (l != null) {
-    if (compare(x,l->hd[0]) == 0) return(l->hd[1]);
+    if (compare(x,l->hd[0][0]) == 0) return(l->hd[0][1]);
     l = l->tl;
   }
   throw Core::Not_found;
@@ -502,7 +502,7 @@ bool mem<`a>(int compare(`a,`a), list<`a> l, `a x) {
 // returns true iff there exists a ki = x.
 bool mem_assoc<`a,`b>(list<$(`a,`b)@> l,`a x) {
   while (l != null) {
-    if (l->hd[0] == x) return(true);
+    if (l->hd[0][0] == x) return(true);
     l = l->tl;
   }
   return(false);
@@ -521,9 +521,9 @@ Core::Opt_t<`a> check_unique<`a>(int compare(`a,`a),list<`a> x) {
 }
 
 // makes a new array with index i being the ith element of the list
-`a to_array<`a>(list<`a> x)[?] {
+`a ?to_array<`a>(list<`a> x) {
   int s;
-  `a arr[?];
+  `a ?arr;
 
   s = length(x);
   arr = new {for i < s : x->hd};
@@ -533,7 +533,7 @@ Core::Opt_t<`a> check_unique<`a>(int compare(`a,`a),list<`a> x) {
 }
 
 // makes a new list with ith element arr[i]
-list<`a> from_array<`a>(`a arr[?]) {
+list<`a> from_array<`a>(`a ?arr) {
   list<`a> ans = null;
   for(unsigned int i = arr.size-1; i >= 0; --i)
     ans = &cons(arr[i],ans);

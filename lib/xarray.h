@@ -12,7 +12,7 @@ namespace Xarray {
 using Core;
 
 struct xarray<`a> {
-  `a elmts[?];
+  `a ?elmts;
   int num_elmts;
 };
 typedef struct xarray<`a> @Xarray<`a>;
@@ -33,9 +33,9 @@ extern void add<`a>(Xarray<`a>, `a);
 
 extern int add_ind<`a>(Xarray<`a>, `a);
 
-extern `a to_array<`a>(Xarray<`a>) [?];
+extern `a ?to_array<`a>(Xarray<`a>);
 
-extern Xarray<`a> from_array<`a>(`a arr[?]);
+extern Xarray<`a> from_array<`a>(`a ?arr);
 
 extern Xarray<`a> append<`a>(Xarray<`a>, Xarray<`a>); // functional
 

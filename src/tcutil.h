@@ -34,6 +34,7 @@ extern typ fd_type(fndecl fd);
 
 extern typ compress(typ t);
 extern conref<`a> compress_conref<`a>(conref<`a> x);
+extern `a conref_val<`a>(conref<`a> x);
 extern void unchecked_cast(tenv, exp, typ);
 extern bool coerce_arg(tenv, exp, typ); 
 extern bool coerce_assign(tenv, exp, typ);
@@ -75,12 +76,28 @@ extern void check_fndecl_valid_type(segment,tenv,fndecl);
 extern void check_unique_vars(list<var> vs, segment loc, string err_msg);
 extern void check_unique_tvars(segment,list<tvar>);
 
+// Check that bounds are not zero -- constrain to 1 if necessary
+extern void check_nonzero_bound(segment, conref<bounds_t>);
+// Check that bounds are greater than i -- constrain to i+1 if necessary
+extern void check_bound(segment, unsigned int i, conref<bounds_t>);
+
 extern bool equal_tqual(tqual tq1, tqual tq2);
 
 extern list<$($(field_name,tqual,typ)@,`a)@>
 resolve_struct_designators<`a>(seg_t loc,
 			       list<$(list<designator>,`a)@> des, 
 			       structdecl sd);
-extern bool is_tagged_array_typ(typ);
+// returns true if this is a t ? -- side effect unconstrained bounds
+extern bool is_tagged_pointer_typ(typ);
+
+// if exp is of array type, cast it to an appropriate pointer type --
+// assumes the expression has already been type-checked and that t is
+// the type of the expression e
+extern typ array_to_ptr(tenv, typ t, exp e);
+
+// Ensure e is an lvalue or function designator -- return whether
+// or not &e is const and what region e is in.
+extern $(bool,typ) addressof_props(tenv te, exp e);
+
 }
 #endif

@@ -12,6 +12,7 @@
 #include "tcstmt.h"
 #include "evexp.h"
 #include "tc.h"
+#include "stdio.h"
 using Core;
 using List;
 using Position;
@@ -19,6 +20,7 @@ using Absyn;
 using Absynpp;
 using Tcutil;
 using Tcenv;
+using Stdio;
 
 namespace Tc;
 
@@ -61,10 +63,10 @@ static void field_redecl_okay(enumfield f1, enumfield f2,
 			      string t, stringptr v) {
   segment loc = f1->loc;
   // must have same name
-  if (String::zstrptrcmp(f1->name[1],f2->name[1]) != 0)
+  if (String::zstrptrcmp((*f1->name)[1],(*f2->name)[1]) != 0)
     terr(loc,xprintf("redeclaration of %s %s: field name mismatch %s != %s",
-		     t, derefstr(v), derefstr(f1->name[1]), 
-		     derefstr(f2->name[1])));
+		     t, derefstr(v), derefstr((*f1->name)[1]), 
+		     derefstr((*f2->name)[1])));
   // must have same tag
   if ((f1->tag == null && f2->tag != null) ||
       (f1->tag != null && f2->tag == null) ||
@@ -72,13 +74,13 @@ static void field_redecl_okay(enumfield f1, enumfield f2,
        Evexp::eval_const_uint_exp(f1->tag->v) !=
        Evexp::eval_const_uint_exp(f2->tag->v))) {
     terr(loc,xprintf("redeclaration of %s %s: tag mismatch for field %s",
-		     t, derefstr(v), derefstr(f1->name[1])));
+		     t, derefstr(v), derefstr((*f1->name)[1])));
   }
   _ tvs1 = f1->tvs;
   _ tvs2 = f2->tvs;
   if (List::length(tvs1) != List::length(tvs2))
     terr(loc,xprintf("redeclaration of %s %s, field %s: type parameter number "
-		     "mismatch", t, derefstr(v), derefstr(f1->name[1])));
+		     "mismatch", t, derefstr(v), derefstr((*f1->name)[1])));
   for (; tvs1 != null; tvs1 = tvs1->tl, tvs2 = tvs2->tl)
     inst = &cons(&$(tvs2->hd,VarType(tvs1->hd)),inst);
   // must have same number of types
@@ -86,20 +88,20 @@ static void field_redecl_okay(enumfield f1, enumfield f2,
   _ typs2 = f2->typs;
   if (List::length(typs1) != List::length(typs2))
     terr(loc,xprintf("redeclaration of %s %s, field %s: parameter number "
-		     "mismatch", t, derefstr(v), derefstr(f1->name[1])));
+		     "mismatch", t, derefstr(v), derefstr((*f1->name)[1])));
   // for all types
   for (; typs1 != null; typs1 = typs1->tl, typs2 = typs2->tl) {
      // must have same qualifier
-    if (!equal_tqual(typs1->hd[0],typs2->hd[0]))
+    if (!equal_tqual((*typs1->hd)[0],(*typs2->hd)[0]))
       terr(loc,xprintf("redeclaration of %s %s, field %s: parameter qualifier",
-		       t, derefstr(v), derefstr(f1->name[1])));
-    typ subst_t2 = substitute(inst,typs2->hd[1]);
+		       t, derefstr(v), derefstr((*f1->name)[1])));
+    typ subst_t2 = substitute(inst,(*typs2->hd)[1]);
     // and be the same type FIX: (?) is unification appropriate here?
-    if (!unify(typs1->hd[1],subst_t2))
+    if (!unify((*typs1->hd)[1],subst_t2))
       terr(loc,xprintf("redeclaration of %s %s, field %s: parameter type "
 		       "mismatch %s != %s",
-		       t, derefstr(v), derefstr(f1->name[1]),
-		       typ2string(typs1->hd[1]), typ2string(subst_t2)));
+		       t, derefstr(v), derefstr((*f1->name)[1]),
+		       typ2string((*typs1->hd)[1]), typ2string(subst_t2)));
   }
 }
 
@@ -122,13 +124,13 @@ static bool ok_field_type(segment loc, tenv te, typ t) {
   case FloatType(_):         return true;
   case DoubleType(_):        return true;
   case ArrayType(_,_,_):     return true;
-  case PointerType(_,_,_,_): return true;
+  case PointerType(_):       return true;
   case EnumType(_,_,_):      return true;
   case XenumType(_,_):       return true;
 
   case TupleType(tq_ts):
     for (; tq_ts != null; tq_ts = tq_ts->tl) 
-      if(!ok_field_type(loc, te, tq_ts->hd[1]))
+      if(!ok_field_type(loc, te, (*tq_ts->hd)[1]))
 	return false;
     return true;
   case StructType(tdnopt,_,sdp):
@@ -155,8 +157,8 @@ static bool var_redecl_okay(genv_t ge, segment loc, var name, typ t, scope sc) {
   Opt_t<$(resolved_t,bool)@> ans = Dict::lookup_opt(ge->ordinaries,name);
   if(ans == null)
     return false;
-  ans->v[1] = true; // this is very important or we'd shake out too much
-  switch (ans->v[0]) {
+  (*ans->v)[1] = true; // this is very important or we'd shake out too much
+  switch ((*ans->v)[0]) {
   case VarRes(Global_b(vd)):
     if (sc == Static && vd->sc != Static) 
       warn(loc,
@@ -194,17 +196,17 @@ static bool is_function_type(typ t) {
 }
 
 static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
-  var   v  = vd->name[1]; 
+  var   v  = (*vd->name)[1]; 
   typ   t  = vd->type;
   scope sc = vd->sc;
 
   // reject explicitly qualified name
-  if(vd->name[0] != null) {
+  if((*vd->name)[0] != null) {
     terr(loc,"qualified declarations are not implemented"); // FIX
     return;
   }
   // expand to qualified name
-  vd->name[0] = te->ns;
+  (*vd->name)[0] = te->ns;
   // reject ill-formed type
   check_valid_type(loc,te,null,t);
   // check for redeclaration
@@ -220,10 +222,29 @@ static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
     if(vd->initializer == null) {
       e = default_initializer(te,t,loc);
       vd->initializer = &Opt(e);
-    } else
+    } else {
       e = vd->initializer->v;
+      // special case for t[] -- fill in the size for the user
+      switch (compress(t)) {
+      case ArrayType(telt,tq,sz):
+	if (Evexp::eval_const_uint_exp(sz) == 0) {
+	  switch (e->r) {
+	  case Const_e(String_c(_,s)):
+	    t = vd->type = ArrayType(telt,tq,uint_exp(s.size,null)); 
+	    break;
+	  case UnresolvedMem_e(_,es): fallthru(es);
+	  case Array_e(_,es):
+	    t = vd->type = ArrayType(telt,tq,uint_exp(List::length(es),null));
+	    break;
+	  default: break;
+	  }
+	}
+	break;
+      default: break;
+      }
+    }
     // type-check the initializer
-    _ t2 = synth_typ(Tcexp::tcExp(te,&Opt(t),e));
+    _ t2 = synth_typ(Tcexp::tcExpInitializer(te,&t,e));
     if (!coerce_assign(te,e,t)) 
       terr(loc,
 	   xprintf("%s is declared with type %s but initialized with type %s",
@@ -238,17 +259,17 @@ static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
 }
 
 static void tcFndecl(tenv te, genv_t ge, segment loc, fndecl fd) {
-  var   v  = fd->name[1];
+  var   v  = (*fd->name)[1];
   typ   t  = fndecl2typ(fd);
   scope sc = fd->sc;
 
   // reject explicitly qualified name
-  if(fd->name[0] != null) {
+  if((*fd->name)[0] != null) {
     terr(loc,"qualified declarations are not implemented"); // FIX
     return;
   }
   // expand to qualified name
-  fd->name[0] = te->ns;
+  (*fd->name)[0] = te->ns;
   // reject ill-formed type
   check_fndecl_valid_type(loc,te,fd);
   // check for redeclaration
@@ -270,9 +291,9 @@ static void tcFndecl(tenv te, genv_t ge, segment loc, fndecl fd) {
 }
 
 static void tcTypedefdecl(tenv te, genv_t ge, segment loc, typedefdecl td) {
-  var v = td->name[1];
+  var v = (*td->name)[1];
   // reject explicitly qualified name
-  if (td->name[0] != null) {
+  if ((*td->name)[0] != null) {
     terr(loc,"qualified declarations are not implemented"); // FIX
     return;
   }
@@ -282,7 +303,7 @@ static void tcTypedefdecl(tenv te, genv_t ge, segment loc, typedefdecl td) {
     return;
   }
   // expand to qualified name
-  td->name[0] = te->ns;
+  (*td->name)[0] = te->ns;
   // reject ill-formed type
   check_unique_tvars(loc,td->tvs);
   check_valid_type(loc,te,td->tvs,td->defn);
@@ -299,15 +320,15 @@ static void tcStructdecl(tenv te, genv_t ge, segment loc, structdecl sd) {
     terr(loc,"anonymous structs are not allowed at top level");
     return;
   }
-  var        v   = sd->name->v[1];
+  var        v   = (*sd->name->v)[1];
   list<tvar> tvs = sd->tvs;
   // reject explicitly qualified name
-  if (sd->name->v[0] != null) {
+  if ((*sd->name->v)[0] != null) {
     terr(loc,"qualified declarations are not implemented"); // FIX
     return;
   }
   // expand to qualified name
-  sd->name->v[0] = te->ns;
+  (*sd->name->v)[0] = te->ns;
   // reject ill-formed type 
   check_unique_tvars(loc,tvs);
 
@@ -318,8 +339,8 @@ static void tcStructdecl(tenv te, genv_t ge, segment loc, structdecl sd) {
     ge->structdecls = Dict::insert(ge->structdecls, v, (structdecl@)(&$(sd)));
     if(sd->fields == null) {
       for(; tvs != null; tvs = tvs->tl)
-	switch(tvs->hd[1]) {
-	case UnresolvedKind: tvs->hd[1] = BoxPKind; break;
+	switch((*tvs->hd)[1]) {
+	case UnresolvedKind: (*tvs->hd)[1] = BoxPKind; break;
 	default: break;
 	}
       return;
@@ -373,10 +394,10 @@ static void tcStructdecl(tenv te, genv_t ge, segment loc, structdecl sd) {
       // check for field-number mismatch
       if (f2s != null)
 	terr(loc,xprintf("redeclaration of struct %s is missing field %s", 
-			 derefstr(v), derefstr(f2s->hd[0])));
+			 derefstr(v), derefstr((*f2s->hd)[0])));
       if (f1s != null)
 	terr(loc,xprintf("redeclaration of struct %s has extra field %s", 
-			 derefstr(v), derefstr(f1s->hd[0])));
+			 derefstr(v), derefstr((*f1s->hd)[0])));
       return;
     }
     break;
@@ -414,15 +435,15 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
     terr(loc,"anonymous enums are not allowed at top level");
     return;
   }
-  var        v   = ed->name->v[1];
+  var        v   = (*ed->name->v)[1];
   list<tvar> tvs = ed->tvs;
   // reject explicitly qualified name
-  if (ed->name->v[0] != null) {
+  if ((*ed->name->v)[0] != null) {
     terr(loc,"qualified declarations are not implemented"); // FIX
     return;
   }
   // expand to qualified name
-  ed->name->v[0] = te->ns;
+  (*ed->name->v)[0] = te->ns;
   // reject ill-formed type
   check_unique_tvars(loc,tvs);
 
@@ -434,8 +455,8 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
     ge->enumdecls = Dict::insert(ge->enumdecls, v, (enumdecl@)(&$(ed)));
     if(ed->fields == null) {
       for(; tvs != null; tvs = tvs->tl)
-	switch(tvs->hd[1]) {
-	case UnresolvedKind: tvs->hd[1] = BoxPKind; break;
+	switch((*tvs->hd)[1]) {
+	case UnresolvedKind: (*tvs->hd)[1] = BoxPKind; break;
 	default: break;
 	}
       return;
@@ -470,22 +491,24 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
       // side effects
       
       for (; f1s != null && f2s != null; f1s = f1s->tl, f2s = f2s->tl) {
-	f1s->hd->name[0] = te->ns;
+	(*f1s->hd->name)[0] = te->ns;
 	// check f1s->hd types for the important side effects
 	list<tvar> alltvs = List::append(tvs, f1s->hd->tvs);
 	check_unique_tvars(f1s->hd->loc,alltvs);
-	for(_ typs = f1s->hd->typs; typs != null; typs = typs->tl)
-	  check_valid_type(f1s->hd->loc,te,alltvs,typs->hd[1]);
+	for(_ typs = f1s->hd->typs; typs != null; typs = typs->tl) {
+	  _ t = (*typs->hd)[1];
+	  check_valid_type(f1s->hd->loc,te,alltvs,t);
+	}
 	// now we can check against previous definition of field
 	field_redecl_okay(f1s->hd, f2s->hd, inst, te, "enum", v);
       }
       // check for field-number mismatch
       if (f1s != null)
 	terr(loc,xprintf("redeclaration of enum %s has extra field %s",
-			 derefstr(v), derefstr(f1s->hd->name[1])));
+			 derefstr(v), derefstr((*f1s->hd->name)[1])));
       if (f2s != null)
 	terr(loc,xprintf("redeclaration of enum %s is missing field %s",
-			 derefstr(v), derefstr(f2s->hd->name[1])));
+			 derefstr(v), derefstr((*f2s->hd->name)[1])));
       return;
     }
     break;
@@ -502,18 +525,20 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
   list<field_name> prev_fields = null;
   for(_ fs = ed->fields->v; fs != null; fs = fs->tl) {
     _ f = fs->hd;
-    if (List::mem(String::zstrptrcmp,prev_fields,f->name[1])) 
-      terr(f->loc,xprintf("duplicate field name %s",derefstr(f->name[1])));
-    prev_fields = &cons(f->name[1],prev_fields);
+    if (List::mem(String::zstrptrcmp,prev_fields,(*f->name)[1])) 
+      terr(f->loc,xprintf("duplicate field name %s",derefstr((*f->name)[1])));
+    prev_fields = &cons((*f->name)[1],prev_fields);
     if (f->tag != null) 
       Evexp::eval_const_uint_exp(f->tag->v); 
     list<tvar> alltvs = List::append(tvs,f->tvs);
     check_unique_tvars(loc,alltvs);
-    for (list<$(tqual,typ)@> typs = f->typs; typs != null; typs=typs->tl)
-      check_valid_type(f->loc,te,alltvs,typs->hd[1]);
+    for (list<$(tqual,typ)@> typs = f->typs; typs != null; typs=typs->tl) {
+      _ t = (*typs->hd)[1];
+      check_valid_type(f->loc,te,alltvs,t);
+    }
     // FIX: check valid tquals?
-    f->name[0] = te->ns;
-    ge->ordinaries = Dict::insert(ge->ordinaries, f->name[1], 
+    (*f->name)[0] = te->ns;
+    ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1], 
 				  &$(EnumRes(ed,f), true));
   }
   // add the decl to the environment -- must be after variant-checking
@@ -525,7 +550,7 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
 
 // FIX: ensure the types are packable (see comment with tcStructdecl).
 static void tcXenumdecl(tenv te, genv_t ge, segment loc, xenumdecl xd) {
-  var v = xd->name[1];
+  var v = (*xd->name)[1];
   Opt_t<xenumdecl@> xd2o;
   try xd2o = lookup_xenumdecl(te,loc,xd->name);
   catch { case Dict::Absent:
@@ -534,8 +559,8 @@ static void tcXenumdecl(tenv te, genv_t ge, segment loc, xenumdecl xd) {
     return;
   }
   // expand to qualified name, if not already qualified
-  if(xd->name[0] == null)
-    xd->name[0] = te->ns;
+  if((*xd->name)[0] == null)
+    (*xd->name)[0] = te->ns;
   // if we're a new xenum, then make a fresh "already there" xenumdecl
   //       and add it to the environment
   // if we're not new, compare scopes
@@ -558,17 +583,19 @@ static void tcXenumdecl(tenv te, genv_t ge, segment loc, xenumdecl xd) {
   for(list<enumfield> fs = xd->fields; fs != null; fs = fs->tl) {
     enumfield f = fs->hd;
     // expand field name if not explicitly qualified
-    if(f->name[0] == null)
-      f->name[0] = te->ns;
+    if((*f->name)[0] == null)
+      (*f->name)[0] = te->ns;
     // reject if there is an ill-formed type
     list<tvar>tvs = f->tvs;
     check_unique_tvars(loc,tvs);
-    for(let typs = f->typs; typs != null; typs = typs->tl)
-      check_valid_type(f->loc,te,tvs,typs->hd[1]);
+    for(let typs = f->typs; typs != null; typs = typs->tl) {
+      _ t = (*typs->hd)[1];
+      check_valid_type(f->loc,te,tvs,t);
+    }
     // notice we now allow duplicates, they just have to have the same type
     // also, we can be totally re-ordered from a different declaration
     bool dup = false;
-    for(let prev_fs = xd_result->fields; prev_fs!=null; prev_fs = prev_fs->tl) {
+    for(let prev_fs = xd_result->fields; prev_fs!=null; prev_fs = prev_fs->tl){
       let prev = prev_fs->hd;
       if(qvar_cmp(f->name, prev->name)==0) {
 	field_redecl_okay(prev, f, null, te, "xenum", v);
@@ -583,13 +610,13 @@ static void tcXenumdecl(tenv te, genv_t ge, segment loc, xenumdecl xd) {
     xd_result->fields = &cons(f, xd_result->fields);
     // notice we allow adding to another namespace via qualified field
     genv_t ge_f;
-    try ge_f = Dict::lookup(te->ae, f->name[0]);
+    try ge_f = Dict::lookup(te->ae, (*f->name)[0]);
     catch { case Dict::Absent:
       terr(f->loc, xprintf("bad namespace for xenum field %s",
 			   qvar2string(f->name)));
       return;
     }
-    ge_f->ordinaries = Dict::insert(ge_f->ordinaries, f->name[1],
+    ge_f->ordinaries = Dict::insert(ge_f->ordinaries, (*f->name)[1],
 				    &$(XenumRes(xd_result, f), true));
   }
 }
@@ -710,7 +737,7 @@ static bool vardecl_needed(tenv te, decl d) {
       return true;
     let &$(nsl,name) = vd->name;
     _ ge = Dict::lookup(te->ae,nsl);
-    return Dict::lookup(ge->ordinaries,name)[1];
+    return (*Dict::lookup(ge->ordinaries,name))[1];
   case Using_d(_,*ds2p): fallthru(ds2p);
   case Namespace_d(_,*ds2p):
     *ds2p = treeshake(te,*ds2p);

@@ -86,7 +86,6 @@ extern structdecl@       lookup_structdecl_abs(tenv_t,seg_t,qvar);
 extern enumdecl@         lookup_enumdecl_abs(tenv_t,seg_t,qvar);
 extern Opt_t<xenumdecl@> lookup_xenumdecl_abs(tenv_t,seg_t,qvar);
 
-
 extern typ  return_typ(tenv_t);
 
 extern tenv_t add_local_var(seg_t,tenv_t,vardecl);
@@ -118,6 +117,7 @@ extern bool all_labels_resolved(tenv_t);
 extern tenv_t new_block(tenv_t);
 extern int  curr_block(tenv_t);
 extern typ  block_to_typ(tenv_t,int);
+extern bool valid_block(tenv_t,int);
 extern void check_rgn_accessible(tenv_t,seg_t,typ);
 
 // what we synthesize when type-checking a statement or expression:

@@ -317,7 +317,7 @@ Doc concats(list<Doc> doclist) {
   else return concat(doclist->hd,concats(doclist->tl));
 }
 
-static Out concats_arr_f(Doc docs[?], Ppstate st) {
+static Out concats_arr_f(Doc ?docs, Ppstate st) {
   list<Out> os = null;
   int sz = docs.size;
   for (int i=0; i < sz; ++i) {
@@ -337,7 +337,7 @@ static Out concats_arr_f(Doc docs[?], Ppstate st) {
   return &out(newcc,newcl,s,links);
 }
 
-Doc concats_arr(Doc docs[?]) {
+Doc concats_arr(Doc ?docs) {
   int sz = docs.size;
   if(sz==0)
     throw Failure("concats_arr -- size zero array");

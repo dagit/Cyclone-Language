@@ -14,15 +14,15 @@ using Lexgen;
 namespace Compact;
 
 struct Lex_tables {
-  int base[?];     // perform/shift
-  int backtrk[?];  // No_remember / Remember
-  int defaultX[?]; // Default transition
-  int trans[?];    // Transitions (compacted)
-  int check[?];    // Check (compacted)
+  int ?base;     // perform/shift
+  int ?backtrk;  // No_remember / Remember
+  int ?defaultX; // Default transition
+  int ?trans;    // Transitions (compacted)
+  int ?check;    // Check (compacted)
 };
 
 // Determine the integer occurring most frequently in an array
-static int most_frequent_elt(int v[?]) {
+static int most_frequent_elt(int ?v) {
   Hashtable::Table<int,Ref::ref<int>> frequencies = 
      Hashtable::create(17, intcmp, identity);
   int max_freq  = 0;
@@ -49,7 +49,7 @@ static int most_frequent_elt(int v[?]) {
 
 // Transform an array into a list of (position, non-default element)
 
-static list<$(int,int)@> non_default_elements(int def, int v[?]) {
+static list<$(int,int)@> non_default_elements(int def, int ?v) {
   list<$(int,int)@> ans = null;
   for(int i=v.size-1; i >= 0; --i) {
     int e = v[i];
@@ -60,13 +60,13 @@ static list<$(int,int)@> non_default_elements(int def, int v[?]) {
 }
 
 // Compact the transition and check arrays (initialized in compact_tables)??
-static int trans[?] = {};
-static int check[?] = {};
+static int ?trans = null;
+static int ?check = null;
 static int last_used = 0;
 
 static void grow_transitions() {
-  int old_trans[?] = trans;
-  int old_check[?] = check;
+  int ?old_trans = trans;
+  int ?old_check = check;
   int n = old_trans.size;
   trans = new {for i < 2*n : i < last_used ? old_trans[i] : 0};
   check = new {for i < 2*n : i < last_used ? old_check[i] : -1};
@@ -91,8 +91,8 @@ static int pack_from(list<$(int,int)@> nondef, int b) {
   return try_pack(nondef, nondef, b);
 }
 
-static $(int,int)@ pack_moves(int state_num, automata_move_t moves[?]) {
-  int moves_v[?] = new {for i < 257 : 
+static $(int,int)@ pack_moves(int state_num, automata_move_t ?moves) {
+  int ?moves_v = new {for i < 257 : 
 		       ({int x; 
 		       switch(moves[i]) { 
 		       case Backtrack: x = -1; break;
@@ -114,13 +114,13 @@ static $(int,int)@ pack_moves(int state_num, automata_move_t moves[?]) {
   return &$(base, def);
 }
 
-lex_tables_t compact_tables(Lexgen::automata_t state_v[?]) {
+lex_tables_t compact_tables(Lexgen::automata_t ?state_v) {
   trans = new {for i < 1024 : 0};
   check = new {for i < 1024 : -1};
   int n = state_v.size;
-  int base[?]     = new {for i < n : 0};
-  int backtrk[?]  = new {for i < n : -1};
-  int defaultX[?] = new {for i < n : 0};
+  int ?base     = new {for i < n : 0};
+  int ?backtrk  = new {for i < n : -1};
+  int ?defaultX = new {for i < n : 0};
   for(int i = 0; i < n; ++i)
     switch (state_v[i]) {
     case Perform(m): base[i] = -(m+1); break;

@@ -10,7 +10,7 @@
 (*                                                                     *)
 (***********************************************************************)
 
-(* $Id: output.ml,v 1.2 2000-11-06 16:41:31 danieljg Exp $ *)
+(* $Id: output.ml,v 1.3 2001-01-30 21:50:23 jgm Exp $ *)
 
 (* Output the DFA tables and its entry points *)
 
@@ -79,11 +79,11 @@ let output_array oc v = (* doesn't work for really short arrays *)
 
 let output_tables oc tbl =
   fprintf oc "struct lex_tables *lt = null;\n";
-  fprintf oc "int lbase[?] = %a;\n" output_array tbl.tbl_base;
-  fprintf oc "int lbacktrk[?] = %a;\n" output_array tbl.tbl_backtrk;
-  fprintf oc "int ldefault[?] = %a;\n" output_array tbl.tbl_default;
-  fprintf oc "int ltrans[?] = %a;\n" output_array tbl.tbl_trans;
-  fprintf oc "int lcheck[?] = %a;\n" output_array tbl.tbl_check
+  fprintf oc "int lbase[] = %a;\n" output_array tbl.tbl_base;
+  fprintf oc "int lbacktrk[] = %a;\n" output_array tbl.tbl_backtrk;
+  fprintf oc "int ldefault[] = %a;\n" output_array tbl.tbl_default;
+  fprintf oc "int ltrans[] = %a;\n" output_array tbl.tbl_trans;
+  fprintf oc "int lcheck[] = %a;\n" output_array tbl.tbl_check
 
 (* Output the entries *)
 

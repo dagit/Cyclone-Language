@@ -18,7 +18,7 @@
 // The rest is defined in Cyclone, in core.cyc
 namespace Core {
 extern string get_env(string);
-extern string std_args()[?];
+extern string ?std_args();
 struct Opt<`a> { `a v; };
 typedef struct Opt<`a> *Opt_t<`a>;
 extern Opt_t<`b> opt_map<`a,`b>(`b f(`a), Opt_t<`a> x);

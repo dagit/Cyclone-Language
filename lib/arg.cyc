@@ -42,8 +42,8 @@ static enum error {
 
 static spec lookup (list<$(string,spec,string)@> l, string x) {
   while (l != null) {
-    if (String::strcmp(x,l->hd[0]) == 0)
-      return l->hd[1];
+    if (String::strcmp(x,(*l->hd)[0]) == 0)
+      return (*l->hd)[1];
     l = l->tl;
   }
   throw Not_found;
@@ -52,13 +52,13 @@ static spec lookup (list<$(string,spec,string)@> l, string x) {
 void usage(list<$(string,spec,string)@> speclist, string errmsg) {
   fprintf(stderr, "%s\n", errmsg);
   while (speclist != null) {
-    fprintf(stderr, " %s %s\n", speclist->hd[0], speclist->hd[2]);
+    fprintf(stderr, " %s %s\n", (*speclist->hd)[0], (*speclist->hd)[2]);
     speclist = speclist->tl;
   }
 }
 
 int current = 0;
-static string args[?] = {};
+static string ?args = null;
 
 static void stop(int prog_pos, enum error e,
 		 list<$(string,spec,string)@> speclist, string errmsg) {

@@ -6,6 +6,8 @@
 #include "buffer.h"
 #include "string.h"
 #include "absynpp.h"
+#include "evexp.h"
+#include "tcutil.h"
 
 namespace Absynpp;
 
@@ -14,6 +16,7 @@ using Stdio;
 using PP;
 using Absyn;
 using List;
+using Tcutil;
 
 // forward references
 extern Doc egroup(string start, string stop, string sep, list<Doc> ss);
@@ -198,7 +201,7 @@ Doc tvars2doc(list<tvar> tvs) {
 }
 
 Doc arg2doc($(tqual,typ)@ t) {
-  return tqtd2doc(t[0],t[1],null);
+  return tqtd2doc((*t)[0],(*t)[1],null);
 }
 
 Doc args2doc(list<$(tqual,typ)@> ts) {
@@ -223,9 +226,6 @@ Doc dtms2doc(Doc d,list<type_modifier> tms) {
   case Carray_mod:
     if (next_is_pointer(tms->tl)) rest = p_rest;
     return cat2(rest,text("[]"));
-  case Array_mod:
-    if (next_is_pointer(tms->tl)) rest = p_rest;
-    return cat2(rest,text("[?]"));
   case ConstArray_mod(e):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     return cat4(rest, text("["), exp2doc(e), text("]"));
@@ -244,8 +244,18 @@ Doc dtms2doc(Doc d,list<type_modifier> tms) {
   case Pointer_mod(ps, rgn, tq2):
     _ ptr;
     switch (ps) {
-    case Nullable_ps: ptr = text("*"); break;
-    case NonNullable_ps: ptr = text("@"); break;
+    case Nullable_ps(e): 
+      if (Evexp::eval_const_uint_exp(e) == 1)
+	ptr = text("*"); 
+      else 
+	ptr = cat4(text("*"),text("{"),exp2doc(e),text("}"));
+      break;
+    case NonNullable_ps(e): 
+      if (Evexp::eval_const_uint_exp(e) == 1)
+	ptr = text("@"); 
+      else 
+	ptr = cat4(text("@"),text("{"),exp2doc(e),text("}"));
+      break;
     case TaggedArray_ps: ptr = text("?"); break;
     }
     _ r   = ntyp2doc(rgn);
@@ -258,9 +268,9 @@ Doc ntyp2doc(typ t) {
   Doc s;
   switch (t) {
     // The first three cases never turn up in normalized types.
-  case ArrayType(_,_,_):   return text("[[[array]]]"); //nil_doc();
+  case ArrayType(_,_,_): return text("[[[array]]]"); //nil_doc();
   case FnType(_,_,_,_):    return nil_doc();
-  case PointerType(_,_,_,_): return nil_doc();
+  case PointerType(_):     return nil_doc();
     // The remaining cases are possible.
   case VoidType: s = text("void"); break;
   case Evar(k,topt,i):
@@ -350,8 +360,8 @@ Doc vo2doc(Opt_t<var> vo) {
 }
 
 Doc funarg2doc($(Opt_t<var>,tqual,typ)@ t) {
-  Opt_t<Doc> dopt = (t[0]==null)?null:&Opt(text(derefstr(t[0]->v)));
-  return tqtd2doc(t[1],t[2],dopt);
+  Opt_t<Doc> dopt = ((*t)[0]==null)?null:&Opt(text(derefstr((*t)[0]->v)));
+  return tqtd2doc((*t)[1],(*t)[2],dopt);
 }
 
 Doc funargs2doc(list<$(Opt_t<var>,tqual,typ)@> args,bool varargs) {
@@ -364,20 +374,21 @@ Doc funargs2doc(list<$(Opt_t<var>,tqual,typ)@> args,bool varargs) {
 }
 
 $(Opt_t<var>,tqual,typ)@ arg_mk_opt($(var,tqual,typ)@ arg) {
-  return &$((Opt_t<var>)&Opt(arg[0]), // FIX: can we get rid of the cast?
-            arg[1],arg[2]);
+  return &$((Opt_t<var>)&Opt((*arg)[0]), // FIX: can we get rid of the cast?
+            (*arg)[1],(*arg)[2]);
 }
 
 Doc var2doc(var v) { return text(derefstr(v)); }
 
 Doc qvar2doc(qvar q) {
-  if(q[0] == null)
-    return var2doc(q[1]);
+  if((*q)[0] == null)
+    return var2doc((*q)[1]);
   if (qvar_to_Cids) {
-    return text(String::str_sepstr(List::append(q[0],&cons(q[1],null)),"_"));
+    return text(String::str_sepstr(List::append((*q)[0],
+						&cons((*q)[1],null)),"_"));
   } else {
-    return cat2(egroup("","::","::",List::map(var2doc,q[0])),
-		var2doc(q[1]));
+    return cat2(egroup("","::","::",List::map(var2doc,(*q)[0])),
+		var2doc((*q)[1]));
   }
 }
 
@@ -451,7 +462,7 @@ int exp_prec(exp e) {
   case Subscript_e(_,_):     return 140;
   case Tuple_e(_):         return 150;
   case CompoundLit_e(_,_):   return 140;
-  case Array_e(_):         return 140;
+  case Array_e(_,_):         return 140;
   case Comprehension_e(_,_,_): return 140;
   case Struct_e(_,_,_,_):    return 140;
   case Enum_e(_,_,_,_,_):    return 140;
@@ -581,16 +592,16 @@ Doc exp2doc_prec(int inprec, exp e) {
     break;
   case CompoundLit_e(vat,des):
     s = cat4(text("("),
-             typ2doc(vat[2]), // OK to ignore qualifiers??
+             typ2doc((*vat)[2]), // OK to ignore qualifiers??
              text(")"),
              group("{","}",",",List::map(de2doc,des)));
     break;
-  case Array_e(des):
+  case Array_e(_,des): // FIX:  what about heap/rgn flag?
     s = group("new {","}",",",List::map(de2doc,des));
     break;
   case Comprehension_e(vd,e1,e2):
     s = cat7(text("new {for "),
-             text(derefstr(vd->name[1])),
+             text(derefstr((*vd->name)[1])),
              text(" < "),
              exp2doc(e1),
              text(" : "),
@@ -639,9 +650,9 @@ Doc designator2doc(designator d) {
 }
 
 Doc de2doc($(list<designator>,exp)@ de) {
-  if (de[0] == null) return exp2doc(de[1]);
-  else return cat2(egroup("","=","=",List::map(designator2doc,de[0])),
-		   exp2doc(de[1]));
+  if ((*de)[0] == null) return exp2doc((*de)[1]);
+  else return cat2(egroup("","=","=",List::map(designator2doc,(*de)[0])),
+		   exp2doc((*de)[1]));
 }
 
 Doc exps2doc_prec(int inprec, list<exp> es) {
@@ -658,7 +669,10 @@ Doc cnst2doc(cnst_t c) {
   case LongLong_c(sg,i):  return text("<<FIX LONG LONG CONSTANT>>"); // FIX
   case Float_c(x):  return text(x);
   case Null_c:      return text("null");
-  case String_c(s): return cat3(text("\""), text(string_escape(s)), text("\""));
+  case String_c(true,s): 
+    return cat3(text("new \""), text(string_escape(s)), text("\""));
+  case String_c(_,s): 
+    return cat3(text("\""), text(string_escape(s)), text("\""));
   }
 }
 
@@ -725,11 +739,11 @@ Doc prim2doc(primop p) {
 }
 
 Doc structarg2doc($(Opt_t<var>,exp)@ t) {
-  if (t[0] == null)
-     return exp2doc(t[1]);
-  else return cat3(textptr(t[0]->v),
+  if ((*t)[0] == null)
+     return exp2doc((*t)[1]);
+  else return cat3(textptr((*t)[0]->v),
                    text(" = "),
-                   exp2doc(t[1]));
+                   exp2doc((*t)[1]));
 }
 
 Doc cat2(Doc d1,Doc d2) {
@@ -1064,8 +1078,8 @@ Doc pat2doc(pat p) {
 }
 
 Doc dp2doc($(list<designator>,pat)@ dp) {
-  return cat2(egroup("","=","=",List::map(designator2doc,dp[0])),
-              pat2doc(dp[1]));
+  return cat2(egroup("","=","=",List::map(designator2doc,(*dp)[0])),
+              pat2doc((*dp)[1]));
 }
 
 Doc switchclause2doc(switch_clause c) {
@@ -1226,30 +1240,30 @@ Doc scope2doc(scope sc) {
 // Conversion between alternate forms of types
 $(tqual,typ,list<type_modifier>)@ to_tms(tqual tq,typ t) {
   switch (t) {
-  case ArrayType(t2,tq2,k):
+  case ArrayType(t2,tq2,e):
     // Throw away tq, can't qualify an array
     let &$(tq3,t3,tml3) = to_tms(tq2,t2);
     type_modifier tm;
-    switch (k) {
-    case UntaggedArray: tm = Carray_mod;        break;
-    case TaggedArray:   tm = Array_mod;         break;
-    case FixedArray(e): tm = ConstArray_mod(e); break;
-    }
+    if (Evexp::eval_const_uint_exp(e) == 0)
+      tm = Carray_mod;
+    else 
+      tm = ConstArray_mod(e); 
     return &$(tq3, t3, (list<type_modifier>)&cons(tm,tml3)); 
 
-  case PointerType(t2,rgntyp,nullable,tq2):
+  case PointerType(PtrInfo{.elt_typ = t2, .rgn_typ = rgntyp,
+			   .nullable = nullable, .tq = tq2, .bounds = b}):
     let &$(tq3,t3,tml3) = to_tms(tq2,t2);
-    bool nl = false;
-    bool still_working = true;
-    while (still_working) {
-      switch (nullable->v) {
-      case Forward_constr(y): nullable = y;  break;
-      case Eq_constr(x1):     nl = (bool)x1; still_working = false; break;
-      case No_constr:         nl = false;    still_working = false; break;
-      }
+    enum Pointer_Sort ps;
+    switch ($(compress_conref(nullable)->v,compress_conref(b)->v)) {
+    case $(Eq_constr(true), Eq_constr(Upper_b(e))): 
+      ps = Nullable_ps(e); break;
+    case $(Eq_constr(false), Eq_constr(Upper_b(e))): 
+      ps = NonNullable_ps(e); break;
+    case $(_, Eq_constr(Unknown_b)): 
+      ps = TaggedArray_ps; break;
+    default: ps = impos("bad pointer type in Absynpp::to_tms"); break;
     }
-    type_modifier tm = 
-      Pointer_mod(nl ? Nullable_ps : NonNullable_ps,rgntyp,tq);
+    type_modifier tm = Pointer_mod(ps,rgntyp,tq);
     return &$(tq3, t3, (list<type_modifier>)&cons(tm,tml3)); 
 
   case FnType(typvars,t2,args,varargs):
@@ -1278,19 +1292,19 @@ $(tqual,typ,list<type_modifier>)@ to_tms(tqual tq,typ t) {
 
 Doc tqtd2doc(tqual tq, typ t, Opt_t<Doc> dopt) {
   $(tqual,typ,list<type_modifier>)@ x = to_tms(tq,t);
-  list<type_modifier> tms = List::rev(x[2]);
+  list<type_modifier> tms = List::rev((*x)[2]);
   if (tms==null && dopt==null)
-    return cat2(tqual2doc(x[0]),ntyp2doc(x[1]));
+    return cat2(tqual2doc((*x)[0]),ntyp2doc((*x)[1]));
   else
     return
-      cat4(tqual2doc(x[0]),
-           ntyp2doc(x[1]),
+      cat4(tqual2doc((*x)[0]),
+           ntyp2doc((*x)[1]),
            text(" "),
            dtms2doc((dopt==null)?nil_doc():dopt->v,tms));
 }
 
 Doc structfield2doc($(field_name,tqual,typ)@ f) {
-  return cat2(tqtd2doc(f[1],f[2],&Opt(textptr(f[0]))),
+  return cat2(tqtd2doc((*f)[1],(*f)[2],&Opt(textptr((*f)[0]))),
               text(";"));
 }
 

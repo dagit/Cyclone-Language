@@ -21,7 +21,7 @@ void set<`a>(Xarray<`a> xarr, int i, `a a) {
 }
 
 Xarray<`a> create_empty<`a>() {
-  `a x[?] = new { };
+  `a ?x = new { };
   return &xarray{.elmts=x,.num_elmts=0};
 }
 
@@ -44,7 +44,7 @@ void add<`a>(Xarray<`a> xarr, `a a) {
     if (xarr->num_elmts == 0)
       xarr->elmts = new {for i < 10 : a};
     else {
-      `a newarr[?] = new {for i < xarr->num_elmts*2 : xarr->elmts[0]};
+      `a ?newarr = new {for i < xarr->num_elmts*2 : xarr->elmts[0]};
       for (int i=1; i < xarr->num_elmts; ++i)
         newarr[i] = xarr->elmts[i];
       xarr->elmts = newarr;
@@ -58,14 +58,14 @@ int add_ind<`a>(Xarray<`a> xarr, `a a) {
   return xarr->num_elmts-1;
 }
 
-`a to_array<`a>(Xarray<`a> xarr)[?] {
+`a ?to_array<`a>(Xarray<`a> xarr) {
   if (xarr->num_elmts == 0)
     return new {};
-  `a ans[?] = new {for i < xarr->num_elmts : xarr->elmts[i]};
+  `a ?ans = new {for i < xarr->num_elmts : xarr->elmts[i]};
   return ans;
 }
 
-Xarray<`a> from_array<`a>(`a arr[?]) {
+Xarray<`a> from_array<`a>(`a ?arr) {
   if (arr.size == 0)
     return create_empty();
   Xarray<`a> ans = &xarray{.elmts=new {for i<arr.size : arr[i]},

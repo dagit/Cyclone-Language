@@ -141,12 +141,12 @@ static void unimp2(string msg,segment sg) {
 /* Functions for creating abstract syntax */
 static $(var,tqual,typ)@
 make_struct_field(segment loc,$(qvar,tqual,typ,list<tvar>)@ field) {
-  if (field[3] != null)
+  if ((*field)[3] != null)
     err("bad type params in struct field",loc);
-  _ qid = field[0];
-  if (qid[0] != null)
+  _ qid = (*field)[0];
+  if ((*qid)[0] != null)
     err("struct field cannot be qualified with a module name",loc);
-  return &$(qid[1],field[1],field[2]);
+  return &$((*qid)[1],(*field)[1],(*field)[2]);
 }
 
 static $(Opt_t<var>,tqual,typ)@ 
@@ -154,8 +154,8 @@ make_param(segment loc, $(Opt_t<qvar>,tqual,typ,list<tvar>)@ field){
   let &$(qv_opt,tq,t,tvs) = field;
   _ idopt = null;
   if (qv_opt != null) {
-    idopt = &Opt(qv_opt->v[1]);
-    if (qv_opt->v[0] != null)
+    idopt = &Opt((*qv_opt->v)[1]);
+    if ((*qv_opt->v)[0] != null)
       err("parameter cannot be qualified with a module name",loc);
   }
   if (tvs != null)
@@ -170,25 +170,25 @@ static type_specifier_t type_spec(typ t,segment loc) {
 /* Functions for converting strange C-like declarative constructs into
  * abstract syntax.  */
 
+/* convert any array types to pointer types */
+static typ array2ptr(typ t) {
+  switch (t) {
+  case ArrayType(t1,tq,e):
+    return starb_typ(t1,HeapRgnType,tq,Upper_b(e));
+  default: return t;
+  }
+}
+
+/* convert an argument's type from arrays to pointers */
+static void arg_array2ptr($(Opt_t<var>,tqual,typ) @x) {
+  (*x)[2] = array2ptr((*x)[2]);
+}
+
 /* given an optional variable, tqual, type, and list of type
  * variables, return the tqual and type and check that the type
  * variables are null -- used when we have a tuple type specification.  */
 static $(tqual,typ)@ get_tqual_typ(segment loc,$(Opt_t<var>,tqual,typ) @t) {
-  return &$(t[1],t[2]);
-}
-
-/* Given a variable option, tqual, type, and type var list, make sure
- * the variable is present and the type var list is empty and return
- * the variable, tqual and type.  Used in producing function
- * arguments. 
- * ???? This is not currently used.
-*/
-static $(var,tqual,typ)@ make_fn_args(segment loc,$(Opt_t<qvar>,tqual,typ)@ t) {
-  if (t[0] == null)
-    return abort("missing variable in function prototype",loc);
-  if (t[0]->v[0] != null)
-    err("function arguments cannot be qualified with a module name",loc);
-  return &$(t[0]->v[1],t[1],t[2]);
+  return &$((*t)[1],(*t)[2]);
 }
 
 static void only_vardecl(list<stringptr> params,decl x) {
@@ -197,18 +197,18 @@ static void only_vardecl(list<stringptr> params,decl x) {
   case Var_d(vd):
     if (vd->initializer != null)
       abort("initializers are not allowed in parameter declarations",x->loc);
-    if (vd->name[0] != null)
+    if ((*vd->name)[0] != null)
       err("module names not allowed on parameter declarations",x->loc);
     // for sanity-checking of old-style parameter declarations
     bool found = false;
     for(; params != null; params = params->tl)
-      if(zstrptrcmp(vd->name[1], params->hd)==0) {
+      if(zstrptrcmp((*vd->name)[1], params->hd)==0) {
 	found = true;
 	break;
       }
     if (!found)
-      abort(xprintf("%s is not listed as a parameter",derefstr(vd->name[1])),
-	    x->loc);
+      abort(xprintf("%s is not listed as a parameter",
+		    derefstr((*vd->name)[1])),x->loc);
     return;
   case Let_d(_,_,_,_):   decl_kind = "let declaration";        break;
   case Fn_d(_):          decl_kind = "function declaration";   break;
@@ -234,11 +234,11 @@ static $(Opt_t<var>,tqual,typ)@ get_param_type($(list<decl>,segment)@ env,
     return(abort(xprintf("missing type for parameter %s",derefstr(x)),loc));
   switch (tdl->hd->r) {
   case Var_d(vd):
-    if (vd->name[0] != null)
+    if ((*vd->name)[0] != null)
       err("module name not allowed on parameter",loc);
-    if (zstrptrcmp(vd->name[1],x)==0)
+    if (zstrptrcmp((*vd->name)[1],x)==0)
       // Fix: cast needed here
-      return &$((Opt_t<var>)&Opt(vd->name[1]),vd->tq,vd->type);
+      return &$((Opt_t<var>)&Opt((*vd->name)[1]),vd->tq,vd->type);
     else 
       return get_param_type(&$(tdl->tl,loc),x);
   default:
@@ -355,11 +355,11 @@ static fndecl make_function(Opt_t<decl_spec_t> dso, declarator_t d,
 
 static $(var,tqual,typ)@ fnargspec_to_arg(segment loc,
 					  $(Opt_t<var>,tqual,typ)@ t) {
-  if (t[0] == null) {
+  if ((*t)[0] == null) {
     err("missing argument variable in function prototype",loc);
-    return &$(allocstr("?"),t[1],t[2]);     // Fix: explicit cast needed
+    return &$(allocstr("?"),(*t)[1],(*t)[2]);     // Fix: explicit cast needed
   } else
-    return &$(t[0]->v,t[1],t[2]);
+    return &$((*t)[0]->v,(*t)[1],(*t)[2]);
 }
 
 /* Given a type-specifier list, determines the type and any declared
@@ -513,11 +513,9 @@ static $(tqual,typ,list<tvar>) apply_tms(tqual tq, typ t,
   if (tms==null) return $(tq,t,null);
   switch (tms->hd) {
     case Carray_mod:
-      return apply_tms(empty_tqual(),ArrayType(t,tq,UntaggedArray),tms->tl);
-    case Array_mod:
-      return apply_tms(empty_tqual(),ArrayType(t,tq,TaggedArray),tms->tl);
+      return apply_tms(empty_tqual(),ArrayType(t,tq,uint_exp(0,null)),tms->tl);
     case ConstArray_mod(e):
-      return apply_tms(empty_tqual(),ArrayType(t,tq,FixedArray(e)),tms->tl);
+      return apply_tms(empty_tqual(),ArrayType(t,tq,e),tms->tl);
     case Function_mod(args): {
       switch (args) {
       case WithTypes(args2,vararg):
@@ -537,11 +535,15 @@ static $(tqual,typ,list<tvar>) apply_tms(tqual tq, typ t,
         if (!vararg                // not vararg function
             && args2 != null      // not empty arg list
             && args2->tl == null   // not >1 arg
-            && args2->hd[0] == null // not f(void x)
-            && args2->hd[2] == VoidType) {
+            && (*args2->hd)[0] == null // not f(void x)
+            && (*args2->hd)[2] == VoidType) {
 	  args2 = null;
 	  vararg = false;
 	}
+	// convert result type from array to pointer result
+	t = array2ptr(t);
+	// convert any array arguments to pointer arguments
+	List::iter(arg_array2ptr,args2);
         // Note, we throw away the tqual argument.  An example where
         // this comes up is "const int f(char c)"; it doesn't really
         // make sense to think of the function as returning a const
@@ -569,16 +571,12 @@ static $(tqual,typ,list<tvar>) apply_tms(tqual tq, typ t,
     }
     case Pointer_mod(ps,rgntyp,tq2): {
       switch (ps) {
-      case NonNullable_ps:
-	return apply_tms(tq2,PointerType(t,rgntyp,new_conref(false),tq),
-			 tms->tl);
-      case Nullable_ps:
-	return apply_tms(tq2,PointerType(t,rgntyp,new_conref(true),tq),
-			 tms->tl);
+      case NonNullable_ps(ue):
+	return apply_tms(tq2,atb_typ(t,rgntyp,tq,Upper_b(ue)),tms->tl);
+      case Nullable_ps(ue):
+	return apply_tms(tq2,starb_typ(t,rgntyp,tq,Upper_b(ue)),tms->tl);
       case TaggedArray_ps:
-	if (rgntyp != HeapRgnType)
-	  throw abort("region types not allowed on ? types yet", DUMMYLOC);
-	return apply_tms(tq2,ArrayType(t,tq,TaggedArray),tms->tl);
+	return apply_tms(tq2,tagged_typ(t,rgntyp,tq),tms->tl);
       }
     }
   }
@@ -725,10 +723,11 @@ static list<decl> make_declarations(decl_spec_t ds,
 /* TJ: the tqual should make it into the typedef as well,
    e.g., typedef const int CI; */
 static decl v_typ_to_typedef(segment loc, $(qvar,tqual,typ,list<tvar>)@ t) {
-  qvar x = t[0];
+  qvar x = (*t)[0];
   // tell the lexer that x is a typedef identifier
   Lex::register_typedef(x);
-  return new_decl(Typedef_d(&Typedefdecl{.name=x, .tvs=t[3], .defn=t[2]}),loc);
+  return new_decl(Typedef_d(&Typedefdecl{.name=x, .tvs=(*t)[3], 
+					 .defn=(*t)[2]}),loc);
 }
 } // end namespace Parse
 using Parse;
@@ -851,7 +850,7 @@ using Parse;
 %type <StructFieldDeclList_tok> struct_declaration_list struct_declaration
 %type <StructFieldDeclListList_tok> struct_declaration_list0
 %type <TypeModifierList_tok> pointer
-%type <Rgn_tok> rgn
+%type <Rgn_tok> rgn_opt
 %type <Declarator_tok> declarator direct_declarator struct_declarator
 %type <DeclaratorList_tok> struct_declarator_list struct_declarator_list0
 %type <AbstractDeclarator_tok> abstract_declarator direct_abstract_declarator
@@ -1178,8 +1177,8 @@ struct_declaration:
        * declarations.  We must check that each id is actually present
        * and then convert this to a list of struct fields: (1) id,
        * (2) tqual, (3) type. */
-      tqual tq = $1[0];
-      _ tss = $1[1];
+      tqual tq = (*$1)[0];
+      _ tss = (*$1)[1];
       _ ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
       if (ts_info[1] != null)
         warn("struct declaration contains nested type declaration",LOC(@1,@1));
@@ -1194,11 +1193,11 @@ specifier_qualifier_list:
     // FIX: casts needed
     { $$=^$(&$(empty_tqual(),(list<type_specifier_t>)(&cons($1,null)))); }
 | type_specifier specifier_qualifier_list
-    { $$=^$(&$($2[0],(list<type_specifier_t>)(&cons($1,$2[1])))); }
+    { $$=^$(&$((*$2)[0],(list<type_specifier_t>)(&cons($1,(*$2)[1])))); }
 | type_qualifier
     { $$=^$(&$($1,null)); }
 | type_qualifier specifier_qualifier_list
-    { $$=^$(&$(combine_tqual($1,$2[0]),$2[1])); }
+    { $$=^$(&$(combine_tqual($1,(*$2)[0]),(*$2)[1])); }
 
 struct_declarator_list:
   struct_declarator_list0 { $$=^$(List::imp_rev($1)); }
@@ -1273,10 +1272,12 @@ direct_declarator:
     { $$=^$(&Declarator($1,null)); }
 | '(' declarator ')'
     { $$=$!2; }
-| direct_declarator '[' ']'
-    { $$=^$(&Declarator($1->id,&cons(Carray_mod,$1->tms))); }
-| direct_declarator '[' assignment_expression ']'
-    { $$=^$(&Declarator($1->id,&cons(ConstArray_mod($3),$1->tms))); }
+| direct_declarator '[' ']' 
+    { $$=^$(&Declarator($1->id,&cons(Carray_mod,$1->tms)));
+    }
+| direct_declarator '[' assignment_expression ']' 
+    { $$=^$(&Declarator($1->id,&cons(ConstArray_mod($3),$1->tms)));
+    }
 | direct_declarator '(' parameter_type_list ')'
     { let &$(lis,b) = $3;
       $$=^$(&Declarator($1->id,&cons(Function_mod(WithTypes(lis,b)),
@@ -1289,9 +1290,6 @@ direct_declarator:
 | direct_declarator '(' identifier_list ')'
     { $$=^$(&Declarator($1->id,&cons(Function_mod(NoTypes($3,LOC(@1,@4))),
 				     $1->tms))); }
-/* Cyc: new kind of array */
-| direct_declarator '[' '?' ']'
-    { $$=^$(&Declarator($1->id,&cons(Array_mod,$1->tms))); }
 /* Cyc: added type parameters */
 | direct_declarator '<' type_name_list '>'
     { _ ts = List::map_c(typ2tvar,LOC(@2,@4),List::imp_rev($3));
@@ -1307,26 +1305,39 @@ direct_declarator:
 
 /* CYC: region annotations allowed */
 pointer:
-  pointer_char rgn
+  pointer_char rgn_opt
     { $$=^$(&cons(Pointer_mod($1,$2,empty_tqual()),null)); }
-| pointer_char rgn type_qualifier_list
+| pointer_char rgn_opt type_qualifier_list
     { $$=^$(&cons(Pointer_mod($1,$2,$3),null)); }
-| pointer_char rgn pointer
+| pointer_char rgn_opt pointer
     { $$=^$(&cons(Pointer_mod($1,$2,empty_tqual()),$3)); }
-| pointer_char rgn type_qualifier_list pointer
+| pointer_char rgn_opt type_qualifier_list pointer
     { $$=^$(&cons(Pointer_mod($1,$2,$3),$4)); }
 ;
 
 pointer_char:
-  '*' { $$=^$(Nullable_ps);  }
+  '*' { $$=^$(Nullable_ps(signed_int_exp(1,LOC(@1,@1))));  }
 /* CYC: pointers that cannot be null */
-| '@' { $$=^$(NonNullable_ps); }
+| '@' { $$=^$(NonNullable_ps(signed_int_exp(1,LOC(@1,@1)))); }
+/* possibly null, with array bound given by the expresion */
+| '*' '{' assignment_expression '}' {$$=^$(Nullable_ps($3));}
+/* not null, with array bound given by the expresion */
+| '@' '{' assignment_expression '}' {$$=^$(NonNullable_ps($3));}
+/* tagged pointer -- bounds maintained dynamically */
 | '?' { $$=^$(TaggedArray_ps); }
 
-rgn:
+rgn_opt:
     /* empty */ { $$ = ^$(HeapRgnType); }
-| TYPE_VAR      { $$ = ^$(VarType(&$(allocstr($1),RgnKind))); }
-| '_'           { $$ = ^$(wildtyp()); }
+| TYPE_VAR      
+  { 
+    string tv = $1;
+    if (zstrcmp(tv,"`H") == 0) // Heap region treated specially
+      $$ = ^$(HeapRgnType);
+    else 
+      $$ = ^$(VarType(&$(allocstr(tv),RgnKind))); 
+  }
+| '_'           { $$ = ^$(new_evar(RgnKind)); }
+;
 
 type_qualifier_list:
   type_qualifier
@@ -1353,38 +1364,38 @@ parameter_list:
 /* TODO: differs from grammar in K&R */
 parameter_declaration:
   specifier_qualifier_list declarator
-    { _ tss = $1[1];
+    { _ tss = (*$1)[1];
       _ ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
       if (ts_info[1] != null)
         warn("parameter contains nested type declaration",LOC(@1,@1));
       _ t = ts_info[0];
-      _ tq = $1[0];
+      _ tq = (*$1)[0];
       _ tms = $2->tms;
       _ t_info = apply_tms(tq,t,tms);
       if (t_info[2] != null)
         err("parameter with bad type params",LOC(@2,@2));
       _ q = $2->id;
-      if (q[0] != null)
+      if ((*q)[0] != null)
         err("parameter cannot be qualified with a module name",LOC(@1,@1));
-      _ idopt = (Opt_t<var>)&Opt(q[1]);
+      _ idopt = (Opt_t<var>)&Opt((*q)[1]);
       $$=^$(&$(idopt,t_info[0],t_info[1]));
     }
 | specifier_qualifier_list
-    { _ tss = $1[1];
+    { _ tss = (*$1)[1];
       _ ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
       if (ts_info[1] != null)
         warn("nested type declaration, ignoring",LOC(@1,@1));
       _ t = ts_info[0];
-      _ tq = $1[0];
+      _ tq = (*$1)[0];
       $$=^$(&$(null,tq,t));
     }
 | specifier_qualifier_list abstract_declarator
-    { _ tss = $1[1];
+    { _ tss = (*$1)[1];
       _ ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
       if (ts_info[1] != null)
         warn("nested type declaration, ignoring",LOC(@1,@1));
       _ t = ts_info[0];
-      _ tq = $1[0];
+      _ tq = (*$1)[0];
       _ tms = $2->tms;
       _ t_info = apply_tms(tq,t,tms);
       if (t_info[2] != null)
@@ -1453,21 +1464,21 @@ designator:
 
 type_name:
   specifier_qualifier_list
-    { _ tss = $1[1];
+    { _ tss = (*$1)[1];
       _ ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
       if (ts_info[1] != null)
         warn("nested type declaration, ignoring",LOC(@1,@1));
       _ t = ts_info[0];
-      _ tq = $1[0];
+      _ tq = (*$1)[0];
       $$=^$(&$(null,tq,t));
     }
 | specifier_qualifier_list abstract_declarator
-    { _ tss = $1[1];
+    { _ tss = (*$1)[1];
       _ ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
       if (ts_info[1] != null)
         warn("nested type declaration, ignoring",LOC(@1,@1));
       _ t = ts_info[0];
-      _ tq = $1[0];
+      _ tq = (*$1)[0];
       _ tms = $2->tms;
       _ t_info = apply_tms(tq,t,tms);
       if (t_info[2] != null)
@@ -1481,9 +1492,9 @@ type_name:
 /* NB: returns list in reverse order */
 type_name_list:
   type_name
-    {$$=^$(&cons($1[2],null)); }
+    {$$=^$(&cons((*$1)[2],null)); }
 | type_name_list ',' type_name
-    {$$=^$(&cons($3[2],$1)); }
+    {$$=^$(&cons((*$3)[2],$1)); }
 ;
 
 abstract_declarator:
@@ -1505,7 +1516,8 @@ direct_abstract_declarator:
 | '[' assignment_expression ']'
     { $$=^$(&Abstractdeclarator(&cons(ConstArray_mod($2),null))); }
 | direct_abstract_declarator '[' assignment_expression ']'
-    { $$=^$(&Abstractdeclarator(&cons(ConstArray_mod($3),$1->tms))); }
+    { $$=^$(&Abstractdeclarator(&cons(ConstArray_mod($3),$1->tms))); 
+    }
 | '(' ')'
     { $$=^$(&Abstractdeclarator(&cons(Function_mod(WithTypes(null,false)),
 				      null)));
@@ -1523,11 +1535,6 @@ direct_abstract_declarator:
       $$=^$(&Abstractdeclarator(&cons(Function_mod(WithTypes(lis,b)),
 				      $1->tms)));
     }
-/* Cyc: new */
-| '[' '?' ']'
-    { $$=^$(&Abstractdeclarator(&cons(Array_mod,null))); }
-| direct_abstract_declarator '[' '?' ']'
-    { $$=^$(&Abstractdeclarator(&cons(Array_mod,$1->tms))); }
 /* Cyc: new */
 | direct_abstract_declarator '<' type_name_list '>'
     { let ts = List::map_c(typ2tvar,LOC(@2,@4),List::imp_rev($3));
@@ -1721,9 +1728,9 @@ pattern:
 | '(' pattern ')'
     { $$=$!2; }
 | INTEGER_CONSTANT
-    { $$=^$(new_pat(Int_p($1[0],$1[1]),LOC(@1,@1))); }
+    { $$=^$(new_pat(Int_p((*$1)[0],(*$1)[1]),LOC(@1,@1))); }
 | '-' INTEGER_CONSTANT
-    { $$=^$(new_pat(Int_p(Signed,-($2[1])),LOC(@1,@2))); }
+    { $$=^$(new_pat(Int_p(Signed,-((*$2)[1])),LOC(@1,@2))); }
 | FLOATING_CONSTANT
     { $$=^$(new_pat(Float_p($1),LOC(@1,@1)));}
 /* TODO: we should allow negated floating constants too */
@@ -1939,7 +1946,7 @@ cast_expression:
   unary_expression
     { $$=$!1; }
 | '(' type_name ')' cast_expression
-    { $$=^$(cast_exp($2[2],$4,LOC(@1,@4))); }
+    { $$=^$(cast_exp((*$2)[2],$4,LOC(@1,@4))); }
 ;
 
 unary_expression:
@@ -1954,7 +1961,7 @@ unary_expression:
     { $$ = ^$(prim2_exp(Minus,signed_int_exp(0,LOC(@1,@2)), $2,LOC(@1,@2))); }
 */
 | unary_operator cast_expression { $$=^$(prim1_exp($1,$2,LOC(@1,@2))); }
-| SIZEOF '(' type_name ')'       { $$=^$(sizeof_exp($3[2],LOC(@1,@4))); }
+| SIZEOF '(' type_name ')'       { $$=^$(sizeof_exp((*$3)[2],LOC(@1,@4))); }
 | SIZEOF unary_expression        { $$=^$(prim1_exp(Size,$2,LOC(@1,@2))); }
 /* Cyc: throw, printf, fprintf, sprintf */
 | THROW unary_expression
@@ -1992,18 +1999,18 @@ postfix_expression:
 // Hack to allow typedef names and field names to overlap
 | postfix_expression '.' QUAL_TYPEDEF_NAME
     { qvar q = $3;
-      if (q[0] != null)
+      if ((*q)[0] != null)
 	err("struct field name is qualified",LOC(@3,@3));
-      $$=^$(structmember_exp($1,q[1],LOC(@1,@3)));
+      $$=^$(structmember_exp($1,(*q)[1],LOC(@1,@3)));
     }
 | postfix_expression PTR_OP IDENTIFIER
     { $$=^$(structarrow_exp($1,allocstr($3),LOC(@1,@3))); }
 // Hack to allow typedef names and field names to overlap
 | postfix_expression PTR_OP QUAL_TYPEDEF_NAME
     { qvar q = $3;
-      if (q[0] != null)
+      if ((*q)[0] != null)
 	err("struct field is qualified with module name",LOC(@3,@3));
-      $$=^$(structarrow_exp($1,q[1],LOC(@1,@3)));
+      $$=^$(structarrow_exp($1,(*q)[1],LOC(@1,@3)));
     }
 | postfix_expression INC_OP
     { $$=^$(post_inc_exp($1,LOC(@1,@2))); }
@@ -2016,18 +2023,20 @@ postfix_expression:
 /* Cyc: expressions to build arrays */
 | NEW '{' '}'
   /* empty arrays */
-    { $$=^$(new_exp(Array_e(null),LOC(@1,@3))); }
+    { $$=^$(new_exp(Array_e(true,null),LOC(@1,@3))); }
   /* constant-sized arrays */
 | NEW '{' initializer_list '}'
-    { $$=^$(new_exp(Array_e(List::imp_rev($3)),LOC(@1,@3))); }
+    { $$=^$(new_exp(Array_e(true,List::imp_rev($3)),LOC(@1,@3))); }
 | NEW '{' initializer_list ',' '}'
-    { $$=^$(new_exp(Array_e(List::imp_rev($3)),LOC(@1,@4))); }
+    { $$=^$(new_exp(Array_e(true,List::imp_rev($3)),LOC(@1,@4))); }
   /* array comprehension */
 | NEW '{' FOR IDENTIFIER '<' expression ':' expression '}'
     { $$=^$(new_exp(Comprehension_e(new_vardecl(&$(null,allocstr($4)), uint_t,
 						&Opt(uint_exp(0,LOC(@4,@4)))),
 				    $6, $8),
 		    LOC(@1,@9))); }
+| NEW STRING
+    { $$=^$(string_exp(true,$2,LOC(@1,@2))); }
 /* Cyc: added fill and codegen */
 | FILL '(' expression ')'
     { $$=^$(new_exp(Fill_e($3),LOC(@1,@4))); }
@@ -2043,7 +2052,7 @@ primary_expression:
 | constant
     { $$= $!1; }
 | STRING
-    { $$=^$(string_exp($1,LOC(@1,@1))); }
+    { $$=^$(string_exp(false,$1,LOC(@1,@1))); }
 | '(' expression ')'
     { $$= $!2; }
 /* Cyc: stop instantiation */
@@ -2075,7 +2084,7 @@ argument_expression_list0:
 /* NB: We've had to move enumeration constants into primary_expression
    because the lexer can't tell them from ordinary identifiers */
 constant:
-  INTEGER_CONSTANT   { $$=^$(int_exp($1[0],$1[1],LOC(@1,@1))); }
+  INTEGER_CONSTANT   { $$=^$(int_exp((*$1)[0],(*$1)[1],LOC(@1,@1))); }
 | CHARACTER_CONSTANT { $$=^$(char_exp($1,        LOC(@1,@1))); }
 | FLOATING_CONSTANT  { $$=^$(float_exp($1,       LOC(@1,@1))); }
 /* Cyc: null */

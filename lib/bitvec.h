@@ -6,7 +6,7 @@
 #include "dict.h"
 
 namespace Bitvec {
-typedef int BITVEC[?];
+typedef int ?BITVEC;
 extern bool get(BITVEC, int);
 extern void set(BITVEC, int);
 extern void clear(BITVEC, int);

@@ -63,7 +63,7 @@ static regexp_t encode_casedef(list<acase_t> casedef) {
 }
 
 static 
-$(list<int>[?], list<lexer_entry_t>)@ encode_lexdef(lexer_definition_t def) {
+$(list<int>?, list<lexer_entry_t>)@ encode_lexdef(lexer_definition_t def) {
   chars       = null;
   chars_count = 0;
   list<lexer_entry_t> entry_list_rev = null;
@@ -75,7 +75,7 @@ $(list<int>[?], list<lexer_entry_t>)@ encode_lexdef(lexer_definition_t def) {
     entry_list_rev = &cons(&Lexer_entry(entry_name, re, rev(actions)),
 			   entry_list_rev);
   }
-  list<int> chr[?] = to_array(rev(chars));
+  list<int> ?chr = to_array(rev(chars));
   chars   = null;
   actions = null;
   return &$(chr, imp_rev(entry_list_rev));
@@ -135,7 +135,7 @@ static Set<transition_t> lastpos(regexp_t r) {
 }
 
 static 
-void fill_pos($(Set<transition_t> [?], Set<transition_t>)@env, transition_t t) {
+void fill_pos($(Set<transition_t> ?, Set<transition_t>)@env, transition_t t) {
   let &$(v, first) = env;
   switch (t) {
   case OnChars(pos): v[pos] = union_two(v[pos], first); break;
@@ -143,7 +143,7 @@ void fill_pos($(Set<transition_t> [?], Set<transition_t>)@env, transition_t t) {
   }
 }
 
-static void fill_it(regexp_t r, Set<transition_t> v[?]) {
+static void fill_it(regexp_t r, Set<transition_t> ?v) {
   switch (r) {
   case Seq(r1,r2): 
     fill_it(r1,v);
@@ -163,8 +163,8 @@ static void fill_it(regexp_t r, Set<transition_t> v[?]) {
   }
 }
 
-static Set<transition_t> followpos(int sz, list<lexer_entry_t> entry_list) [?] {
-  Set<transition_t> v[?] = new {for i < sz : Set::empty(transition_cmp)};
+static Set<transition_t> ?followpos(int sz, list<lexer_entry_t> entry_list) {
+  Set<transition_t> ?v = new {for i < sz : Set::empty(transition_cmp)};
   for(; entry_list != null; entry_list = entry_list->tl) 
     fill_it(entry_list->hd->regexp, v);
   return v;
@@ -215,11 +215,11 @@ static automata_move_t goto_state(Set<transition_t> st) {
     return Goto(get_state(st));
 }
 
-static automata_move_t transition_from(list<int>         chars[?], 
-	     			       Set<transition_t> follow[?], 
-				       list<int>         pos_set)   [?] {
-  Set<transition_t> tr[?]    = new {for i < 257 : Set::empty(transition_cmp)};
-  automata_move_t   shift[?] = new {for i < 257 : Backtrack};
+static automata_move_t ?transition_from(list<int>         ?chars,
+					Set<transition_t> ?follow,
+					list<int>         pos_set) {
+  Set<transition_t> ?tr    = new {for i < 257 : Set::empty(transition_cmp)};
+  automata_move_t   ?shift = new {for i < 257 : Backtrack};
   for(; pos_set != null; pos_set = pos_set->tl) {
     int pos = pos_set->hd;
     for(list<int> cs_pos = chars[pos]; cs_pos != null; cs_pos = cs_pos->tl) {
@@ -232,8 +232,8 @@ static automata_move_t transition_from(list<int>         chars[?],
   return shift;
 }
 
-static automata_t translate_state(list<int>         chars[?], 
-				  Set<transition_t> follow[?], 
+static automata_t translate_state(list<int>         ?chars, 
+				  Set<transition_t> ?follow, 
 				  Set<transition_t> state) {
   switch (split_trans_set(state)) {
   case &$(n,null): return Perform(n);
@@ -242,10 +242,10 @@ static automata_t translate_state(list<int>         chars[?],
   }
 }
 
-$(list<automata_entry_t>,automata_t[?])@ 
+$(list<automata_entry_t>,automata_t?)@ 
 make_dfa(Syntax::lexer_definition_t lexdef) {
   let &$(chars, entry_list) = encode_lexdef(lexdef);
-  Set<transition_t> follow[?] = followpos(chars.size, entry_list);
+  Set<transition_t> ?follow = followpos(chars.size, entry_list);
   reset_state_mem();
   list<automata_entry_t> initial_states = null;
   for(; entry_list != null; entry_list = entry_list->tl) {

@@ -36,7 +36,7 @@ struct _tagged_string xprintf(char *fmt, ...) {
   }
 
   // Careful: we need space for a trailing zero (???)
-  result.base     = (char *)GC_malloc(len1+1);
+  result.base     = (char *)GC_malloc_atomic(len1+1);
   result.base[len1] = '\0';
   result.curr     = result.base;
   result.last_plus_one = result.base + (len1+1);
@@ -159,7 +159,7 @@ if (!e) {
 struct _tagged_string Cstring_to_string(Cstring s) {
   struct _tagged_string str;
   int sz=(s?strlen(s):0);
-  str.base = (char *)GC_malloc(sz);
+  str.base = (char *)GC_malloc_atomic(sz);
   str.curr = str.base;
   str.last_plus_one = str.base + sz;
 
@@ -170,6 +170,17 @@ struct _tagged_string Cstring_to_string(Cstring s) {
   return str;
 }
 
+char *Cyc_new_string(char *s) {
+  char *n = GC_malloc_atomic(strlen(s));
+  char *t = n;
+  while (*s) {
+    *t = *s;
+    t++;
+    s++;
+  };
+  return n;
+}
+
 Cstring string_to_Cstring(string s) {
   int i;
   char *contents = s.curr;
@@ -178,7 +189,7 @@ Cstring string_to_Cstring(string s) {
 
   if (s.curr < s.base || s.curr >= s.last_plus_one)
     throw(Null_Exception);
-  str = (char *)GC_malloc(sz+1);
+  str = (char *)GC_malloc_atomic(sz+1);
   if (str == NULL) {
     fprintf(stderr,"internal error: out of memory in string_to_Cstring\n");
     exit(1);

@@ -42,8 +42,8 @@ int file_gets(string buf,int ofs,FILE @f) {
 }
 */
 
-string std_args()[?] {
-  string args[?] = new { for i < cyc_argc : (string)"" };
+string ?std_args() {
+  string ?args = new { for i < cyc_argc : "" };
   start_args();
   for (int i = 0; i < cyc_argc; i++)
     args[i] = next_arg();
@@ -63,7 +63,7 @@ Opt_t<`b> opt_map<`a,`b>(`b f(`a), Opt_t<`a> o) {
 }
 
 string new_string(int i) {
-  return (string)(new {for j < i : '\000'});
+  return (new {for j < i : '\000'});
 }
 
 bool true_f<`a>(`a x)  {  return true;  }
@@ -77,11 +77,11 @@ int ptrcmp<`a>(`a @ a, `a @ b) {
   return -1;
 }
 
-`a fst<`a,`b>($(`a,`b) @pair) { return(pair[0]); }
-`b snd<`a,`b>($(`a,`b) @pair) { return(pair[1]); }
+`a fst<`a,`b>($(`a,`b) @pair) { return((*pair)[0]); }
+`b snd<`a,`b>($(`a,`b) @pair) { return((*pair)[1]); }
 
 `c third<`a,`b,`c>($(`a,`b,`c) @triple) {
-  return(triple[2]);
+  return((*triple)[2]);
 }
 
 `a identity<`a>(`a x) {

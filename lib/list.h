@@ -153,10 +153,10 @@ extern bool mem_assoc<`a,`b>(list<$(`a,`b)@> l,`a x);
 extern Core::Opt_t<`c> check_unique<`c>(int compare(`c,`c),list<`c> x);
 
 // makes a new array with index i being the ith element of the list
-extern `a to_array<`a>(list<`a> x) [?];
+extern `a ?to_array<`a>(list<`a> x);
 
 // makes a new list with ith element arr[i]
-extern list<`a> from_array<`a>(`a arr[?]);
+extern list<`a> from_array<`a>(`a ?arr);
 
 extern list<`a> tabulate<`a>(int n, `a f(int));
 extern list<`a> tabulate_c<`a,`b>(int n, `a f(`b,int), `b env);

@@ -303,7 +303,7 @@ list<typ> get_format_typs(string s,segment loc) {
 //         terr(loc,"length modifiers not allowed with %%s");
 //         return null;
 //       }
-      typs = &cons(string_typ(),typs);
+      typs = &cons(string_typ(new_evar(RgnKind)),typs);
       break;
     case 'p':
       // We don't support pointer printing
@@ -322,13 +322,13 @@ list<typ> get_format_typs(string s,segment loc) {
       }
       switch (lenmod) {
       case null:
-        t = nonnullableptr_typ(sint_t,empty_tqual()); break;
+        t = at_typ(sint_t,new_evar(RgnKind),empty_tqual()); break;
       case &cons(x,null) && x=='l':
-        t = nonnullableptr_typ(ulong_t,empty_tqual()); break;
+        t = at_typ(ulong_t,new_evar(RgnKind),empty_tqual()); break;
       case &cons(x,null) && x=='h':
-        t = nonnullableptr_typ(sshort_t,empty_tqual()); break;
+        t = at_typ(sshort_t,new_evar(RgnKind),empty_tqual()); break;
       case &cons(x,&cons(y,null)) && (x=='h' && y=='h'):
-          t = nonnullableptr_typ(schar_t,empty_tqual()); break;
+          t = at_typ(schar_t,new_evar(RgnKind),empty_tqual()); break;
       // We don't support ll
       default:
         terr(loc,xprintf("length modifier '%s' not allowed with %%n",
@@ -481,13 +481,13 @@ list<typ> get_scanf_typs(string s,segment loc) {
     case 'i':
       switch (lenmod) {
       case null:
-        t = nonnullableptr_typ(sint_t,empty_tqual()); break;
+        t = at_typ(sint_t,new_evar(RgnKind),empty_tqual()); break;
       case &cons(x,null) && x=='l':
-        t = nonnullableptr_typ(slong_t,empty_tqual()); break;
+        t = at_typ(slong_t,new_evar(RgnKind),empty_tqual()); break;
       case &cons(x,null) && x=='h':
-        t = nonnullableptr_typ(sshort_t,empty_tqual()); break;
+        t = at_typ(sshort_t,new_evar(RgnKind),empty_tqual()); break;
       case &cons(x,&cons(y,null)) && (x=='h' && y=='h'):
-        t = nonnullableptr_typ(schar_t,empty_tqual()); break;
+        t = at_typ(schar_t,new_evar(RgnKind),empty_tqual()); break;
       // We don't support ll
       default:
         terr(loc,
@@ -504,14 +504,14 @@ list<typ> get_scanf_typs(string s,segment loc) {
     case 'X':
       switch (lenmod) {
       case null:
-        t = nonnullableptr_typ(uint_t,empty_tqual()); break;
+        t = at_typ(uint_t,new_evar(RgnKind),empty_tqual()); break;
       case &cons(x,null) && x=='l':
-        t = nonnullableptr_typ(ulong_t,empty_tqual()); break;
+        t = at_typ(ulong_t,new_evar(RgnKind),empty_tqual()); break;
       case &cons(x,null) && x=='h':
-        t = nonnullableptr_typ(ushort_t,empty_tqual()); break;
+        t = at_typ(ushort_t,new_evar(RgnKind),empty_tqual()); break;
       case &cons(x,&cons(y,null))
         && (x=='h' && y=='h'):
-          t = nonnullableptr_typ(uchar_t,empty_tqual()); break;
+          t = at_typ(uchar_t,new_evar(RgnKind),empty_tqual()); break;
       // We don't support ll
       default:
         terr(loc,
@@ -532,9 +532,9 @@ list<typ> get_scanf_typs(string s,segment loc) {
       switch (lenmod) {
       case null:
         // Note, %f means float in scanf, double in printf!!
-        t = nonnullableptr_typ(float_t,empty_tqual()); break;
+        t = at_typ(float_t,new_evar(RgnKind),empty_tqual()); break;
       case &cons(x,null) && x=='l':
-        t = nonnullableptr_typ(double_t,empty_tqual()); break;
+        t = at_typ(double_t,new_evar(RgnKind),empty_tqual()); break;
       // We don't support L
       default:
         terr(loc,
@@ -559,13 +559,13 @@ list<typ> get_scanf_typs(string s,segment loc) {
     case 'n':
       switch (lenmod) {
       case null:
-        t = nonnullableptr_typ(sint_t,empty_tqual()); break;
+        t = at_typ(sint_t,new_evar(RgnKind),empty_tqual()); break;
       case &cons(x,null) && x=='l':
-        t = nonnullableptr_typ(ulong_t,empty_tqual()); break;
+        t = at_typ(ulong_t,new_evar(RgnKind),empty_tqual()); break;
       case &cons(x,null) && x=='h':
-        t = nonnullableptr_typ(sshort_t,empty_tqual()); break;
+        t = at_typ(sshort_t,new_evar(RgnKind),empty_tqual()); break;
       case &cons(x,&cons(y,null)) && (x=='h' && y=='h'):
-          t = nonnullableptr_typ(schar_t,empty_tqual()); break;
+	t = at_typ(schar_t,new_evar(RgnKind),empty_tqual()); break;
       // We don't support ll
       default:
         terr(loc,xprintf("length modifier '%s' not allowed with %%n",

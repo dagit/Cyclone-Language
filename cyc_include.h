@@ -49,5 +49,7 @@ extern void _throw(exn e);
 //extern exn _trycatch();
 
 extern void *GC_malloc(int);
+extern void *GC_malloc_atomic(int);
+extern char *Cyc_new_string(char *);
 
 #endif

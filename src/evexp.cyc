@@ -129,7 +129,13 @@ unsigned int szof(typ t, segment loc) {
   case Evar(_,_,_): terr(loc,"cannot apply sizeof to unknown type"); return 0u;
   case EnumType(_,_,_):  return 4u;
   case XenumType(_,_):   return 4u;
-  case PointerType(_,_,_,_):  return 4u;
+  case PointerType(PtrInfo{_,_,_,_,b}):  
+    switch (compress_conref(b)->v) {
+    case Eq_constr(Unknown_b): return 12u;
+    case Eq_constr(_): return 4u;
+    default: 
+      terr(loc,"bounds information not known for pointer type"); return 0u;
+    }
   case IntType(_,_, Boxed):   return 4u;
   case IntType(_,B1,Unboxed): return 1u;
   case IntType(_,B2,Unboxed): return 1u;
@@ -138,19 +144,15 @@ unsigned int szof(typ t, segment loc) {
   case FloatType(_):          return 4u;
   case DoubleType(Boxed):     return 4u;
   case DoubleType(Unboxed):   return 8u;
-  case ArrayType(_,_,TaggedArray):    return 4u;
-  case ArrayType(t2,_,FixedArray(e)): 
+  case ArrayType(t2,_,e): 
     // FIX: insert padding for alignment
     return szof(t2,loc) * eval_const_uint_exp(e);
-  case ArrayType(_,_,UntaggedArray):  
-    terr(loc,"cannot apply sizeof to untagged array type");
-    return 0u;
   case FnType(_,_,_,_): return 4u;
   case TupleType(tqs):
     // FIX: we need to insert padding to ensure alignment
     unsigned int s = 0;
     for (; tqs != null; tqs = tqs->tl)
-      s += szof(tqs->hd[1],loc);
+      s += szof((*tqs->hd)[1],loc);
     return s;
   case RgnHandleType(_): return 4u;
   case StructType(tdnopt,ts,sdp):
@@ -162,7 +164,7 @@ unsigned int szof(typ t, segment loc) {
       terr(loc,"cannot apply sizeof to abstract struct type");
     unsigned int s = 0;
     for(let fs = sd->fields->v; fs != null; fs = fs->tl)
-      s += szof(fs->hd[2],loc);
+      s += szof((*fs->hd)[2],loc);
     return s;
   case HeapRgnType: terr(loc, "cannot apply sizoef to a region"); return 0u;
   case TypedefType(_,_,_): return Tcutil::impos("szof typedeftype");

@@ -34,9 +34,10 @@ static $(list<designator>,pat)@ null_designator(pat p) {
   return &$(null,p);
 }
 static var get_name(vardecl vd) {
-  return vd->name[1];
+  return (*vd->name)[1];
 }
-$(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p,typ *`p region_opt) {
+// FIX:  should pass in a topt and use it as we do with tcExp
+$(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p, typ *`p region_opt) {
   typ t;
   list<tvar>    tv_result = null;
   list<vardecl> v_result  = null;
@@ -48,7 +49,8 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p,typ *`p region_opt) {
   case Char_p(c):   t = uchar_t; break;
   case Float_p(s):  t = float_t; break;
   case Null_p:
-    t = PointerType(wildtyp(),wildtyp(),new_conref(true),empty_tqual()); 
+    t = PointerType(PtrInfo{wildtyp(),wildtyp(),
+			    new_conref(true),empty_tqual(),empty_conref()}); 
     break;
   case Var_p(vd):
     t = wildtyp();
@@ -63,7 +65,8 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p,typ *`p region_opt) {
       terr(p->loc, "* pattern would point into an unknown region");
       break;
     }
-    vd->type   = PointerType(t,*region_opt,new_conref(false),empty_tqual());
+    vd->type   = PointerType(PtrInfo{t,*region_opt,new_conref(false),
+				     empty_tqual(),empty_conref()});
     vd->tq     = empty_tqual();
     vd->shadow = 0; // FIX?!?!?
     v_result = &cons(vd,v_result);
@@ -76,7 +79,8 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p,typ *`p region_opt) {
     let &$(sub_tvs,sub_vs) = tcPat(te,p2,&ptr_rgn);
     tv_result = List::append(tv_result, sub_tvs);
     v_result  = List::append(v_result,  sub_vs);
-    t = PointerType(p2->topt->v, ptr_rgn, empty_conref(), empty_tqual());
+    t = PointerType(PtrInfo{p2->topt->v, ptr_rgn, empty_conref(), 
+			    empty_tqual(), empty_conref()});
     break;
 
   case Tuple_p(ps):
@@ -95,7 +99,7 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p,typ *`p region_opt) {
       return impos("tcPat: struct<...> not implemented");
     // type check the argument patterns
     for (_ dps0 = dps; dps0 != null; dps0 = dps0->tl) {
-      let &$(sub_tvs,sub_vs) = tcPat(te,dps0->hd[1],region_opt);
+      let &$(sub_tvs,sub_vs) = tcPat(te,(*dps0->hd)[1],region_opt);
       tv_result = List::append(tv_result, sub_tvs);
       v_result  = List::append(v_result,  sub_vs);
     }
@@ -132,7 +136,7 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p,typ *`p region_opt) {
       let &$(sub_tvs,sub_vs) = tcPat(te2,p2,&heap);
       tv_result = List::append(tv_result, sub_tvs);
       v_result  = List::append(v_result,  sub_vs);
-      _ field_typ = substitute(all_inst,tqts->hd[1]);
+      _ field_typ = substitute(all_inst,(*tqts->hd)[1]);
       if (!unify(p2->topt->v,field_typ))
         terr(p2->loc, xprintf("%s expects argument type %s, not %s",
 			      qvar2string(q), 
@@ -157,7 +161,7 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p,typ *`p region_opt) {
       let &$(sub_tvs,sub_vs) = tcPat(te2,p2,&heap);
       tv_result = List::append(tv_result, sub_tvs);
       v_result  = List::append(v_result,  sub_vs);
-      _ field_typ = tqts->hd[1];
+      _ field_typ = (*tqts->hd)[1];
       if (!unify(p2->topt->v,field_typ))
         terr(p2->loc,
              xprintf("%s expects argument type %s, not %s",
@@ -185,7 +189,7 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p,typ *`p region_opt) {
       p->r = Xenum_p(ef->name,null,null,xed,ef);
       return tcPat(te,p,region_opt);
     default: // LocalRes, GlobalRes, UnknownRes
-      if (q[0] == null) {
+      if ((*q)[0] == null) {
         p->r = Var_p(new_vardecl(q,VoidType,null));
         return tcPat(te,p,region_opt); // sets the vardecl's fields correctly
       }
@@ -246,7 +250,7 @@ void check_pat_regions(tenv_t te, pat p) {
   case Pointer_p(p2):
     check_pat_regions(te,p2);
     switch (p->topt->v) {
-    case PointerType(_,rt,_,_):
+    case PointerType(PtrInfo{_,rt,_,_,_}):
       check_rgn_accessible(te,p->loc,rt);
       return;
     default: throw Core::Impossible("check_pat_regions: bad pointer type");
@@ -391,7 +395,7 @@ static simple_pat_t compile_pat(pat p) {
   case Pointer_p(pp):
     simple_pat_t ss = compile_pat(pp);
     switch (compress(p->topt->v)) {
-    case PointerType(_,_,n,_):
+    case PointerType(PtrInfo{_,_,n,_,_}):
       bool is_nullable = false;
       bool still_working = true;
       while (still_working) {
@@ -426,7 +430,7 @@ static simple_pat_t compile_pat(pat p) {
 	let &$(dl,p) = dlps0->hd;
 	switch (dl) {
 	case &cons{.hd=FieldName(f), .tl=null}: 
-	  if(String::zstrptrcmp(f,fields->hd[0]) == 0) {
+	  if(String::zstrptrcmp(f,(*fields->hd)[0]) == 0) {
 	    ps = &cons(compile_pat(p),ps);
 	    found = true;
 	  }
@@ -441,11 +445,12 @@ static simple_pat_t compile_pat(pat p) {
     break;
   case Enum_p(_,_,_,ps,ed,ef):
     int span = List::length(ed->fields->v);
-    s = con_pat(derefstr(ef->name[1]),&Opt(span),
+    s = con_pat(derefstr((*ef->name)[1]),&Opt(span),
 		List::map(compile_pat,ps)); 
     break;
   case Xenum_p(_,_,ps,xd,ef):
-    s = con_pat(derefstr(ef->name[1]),null,List::map(compile_pat,ps)); break;
+    s = con_pat(derefstr((*ef->name)[1]),null,List::map(compile_pat,ps)); 
+    break;
   case UnknownId_p(_):         s = impos("compile_pat: unknownid");     break;
   case UnknownCall_p(_,_,_):   s = impos("compile_pat: unknowncall");   break;
   case UnknownFields_p(_,_,_): s = impos("compile_pat: unknownfields"); break;
@@ -707,7 +712,7 @@ static void not_exhaust_err(seg_t loc) {
   terr(loc,"patterns may not be exhaustive");
 }
 static void rule_occurs(int dummy, $(bool,seg_t)@ rhs) {
-  rhs[0] = true;
+  (*rhs)[0] = true;
 }
 void check_switch_exhaustive(seg_t loc, list<switch_clause> swcs) {
   // We represent "pat && e" as (simple_pat,i) where i is a unique integer.
@@ -718,7 +723,7 @@ void check_switch_exhaustive(seg_t loc, list<switch_clause> swcs) {
   _ dec_tree    = match_compile(match_rules);
   check_exhaust_overlap(dec_tree, not_exhaust_err, loc, rule_occurs, 0);
   for (; match_rules != null; match_rules = match_rules->tl) {
-    let &$(b,loc) = match_rules->hd[1];
+    let &$(b,loc) = (*match_rules->hd)[1];
     if (!b)
       terr(loc,"redundant pattern");
   }
@@ -729,8 +734,8 @@ void check_switch_exhaustive(seg_t loc, list<switch_clause> swcs) {
 // something that's redundant (unless we add support for "or" patterns
 // of some sort.)
 static void not_exhaust_warn($(seg_t, bool) @ pr) {
-  pr[1] = false;
-  warn(pr[0],"pattern not exhaustive");
+  (*pr)[1] = false;
+  warn((*pr)[0],"pattern not exhaustive");
 }
 static void dummy_fn(int i,int j) {
   return;
@@ -740,7 +745,7 @@ bool check_let_pat_exhaustive(seg_t loc,pat p) {
   _ dec_tree    = match_compile(match_rules);
   _ exhaust_env = &$(loc,true);
   check_exhaust_overlap(dec_tree, not_exhaust_warn, exhaust_env, dummy_fn, 0);
-  return exhaust_env[1];
+  return (*exhaust_env)[1];
 }
 
 // Check that the patterns in a catch switch are non-overlapping.
@@ -760,8 +765,8 @@ void check_catch_overlap(seg_t loc, list<switch_clause> swcs) {
   _ dec_tree    = match_compile(match_rules);
   check_exhaust_overlap(dec_tree, not_exhaust_err2, loc, rule_occurs, 0);
   for (; match_rules != null; match_rules = match_rules->tl) {
-    _ pair = match_rules->hd[1];
-    if (!pair[0])
-      terr(pair[1],"redundant pattern");
+    _ pair = (*match_rules->hd)[1];
+    if (!(*pair)[0])
+      terr((*pair)[1],"redundant pattern");
   }
 }

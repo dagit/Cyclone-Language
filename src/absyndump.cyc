@@ -9,6 +9,7 @@
 #include "list.h"
 #include "absyn.h"
 #include "absynpp.h"
+#include "evexp.h"
 
 using Core;
 using Stdio;
@@ -97,12 +98,12 @@ void egroup<`a>(void f(`a), list<`a> l,
 // is this backwards for nested namespaces? Consistent either way, but
 // should do the right thing!
 void dumpqvar(qvar v) {
-  if(v[0] == null) {
-    dump_str(v[1]);
+  if((*v)[0] == null) {
+    dump_str((*v)[1]);
     return;
   }
 
-  let nsl = v[0];
+  let nsl = (*v)[0];
   dump_str(nsl->hd);
   for(nsl = nsl->tl; nsl != null; nsl = nsl->tl) {
     if(Absynpp::qvar_to_Cids) dump_nospace("_");
@@ -111,7 +112,7 @@ void dumpqvar(qvar v) {
   }
   if(Absynpp::qvar_to_Cids) dump_nospace("_");
   else dump_nospace("::");
-  dump_nospace(derefstr(v[1]));
+  dump_nospace(derefstr((*v)[1]));
 }
 
 void dumptq(tqual tq) {
@@ -145,14 +146,14 @@ void dumptps(list<typ> ts) {
   egroup(dumptyp,ts,"<",">",",");
 }
 void dumptvar(tvar tv) {
-  dump_str(tv[0]); // FIX: may want explicit kind
+  dump_str((*tv)[0]); // FIX: may want explicit kind
 }
 void dumptvars(list<tvar> tvs) {
   egroup(dumptvar,tvs,"<",">",",");
 }
 
 void dumparg($(tqual,typ)@ pr) {
-  dumptqtd(pr[0],pr[1],ignore,0);
+  dumptqtd((*pr)[0],(*pr)[1],ignore,0);
 }
 void dumpargs(list<$(tqual,typ)@> ts) {
   group(dumparg,ts,"(",")",",");
@@ -170,9 +171,9 @@ bool next_is_pointer(list<type_modifier> tms) {
 void dumpntyp(typ t) {
   switch (t) {
     // The first three cases never turn up in normalized types.
-  case ArrayType(_,_,_):     return;
+  case ArrayType(_,_,_):   return;
   case FnType(_,_,_,_):      return;
-  case PointerType(_,_,_,_): return;
+  case PointerType(_):       return;
   case VoidType:         dump("void"); return;
   case VarType(&$(v,k)): dump_str(v); return; // FIX: may want explicit kinds
   case Evar(k,null,i): dump("?"); dumpkind(k); dump(xprintf("(%d)",i)); return;
@@ -201,10 +202,12 @@ void dumpntyp(typ t) {
   case DoubleType(Boxed):   dump("Double"); return;
   case DoubleType(Unboxed): dump("double"); return;
   case TupleType(ts): dump("$"); dumpargs(ts); return;
-  case StructType(null,ts,_):   dump("struct");             dumptps(ts); return;
-  case StructType(&Opt(n),ts,_):dump("struct");dumpqvar(n); dumptps(ts); return;
+  case StructType(null,ts,_):   dump("struct"); dumptps(ts); return;
+  case StructType(&Opt(n),ts,_):
+    dump("struct");dumpqvar(n); dumptps(ts); return;
   case TypedefType(n,ts,topt):  dumpqvar(n), dumptps(ts); return;
-  case RgnHandleType(rgn): dump("<<REGION HANDLE UNIMPLEMENTED>>"); return;//FIX
+  case RgnHandleType(rgn): 
+    dump("<<REGION HANDLE UNIMPLEMENTED>>"); return;//FIX
   case HeapRgnType: return; // FIX: may want explicit rgn some times
   case UnionType: dump("union {/* unimplemented */}"); return;
   }
@@ -214,7 +217,7 @@ void dumpvaropt(Opt_t<var> vo) {
   if(vo != null) dump_str(vo->v);
 }
 void dumpfunarg($(Opt_t<var>,tqual,typ)@ t) {
-  dumptqtd(t[1],t[2],dumpvaropt,t[0]);
+  dumptqtd((*t)[1],(*t)[2],dumpvaropt,(*t)[0]);
 }
 void dumpfunargs(list<$(Opt_t<var>,tqual,typ)@> args, bool varargs) {
   if(varargs) {
@@ -240,8 +243,8 @@ void dumpdesignator(designator d) {
 }
 
 void dumpde($(list<designator>,exp)@ de) {
-  egroup(dumpdesignator,de[0],"","=","=");
-  dumpexp(de[1]);
+  egroup(dumpdesignator,(*de)[0],"","=","=");
+  dumpexp((*de)[1]);
 }
 
 void dumpexps_prec(int inprec, list<exp> es) {
@@ -265,7 +268,9 @@ void dumpexp_prec(int inprec, exp e) {
     dump("<<FIX LONG LONG CONSTANT>>"); break; // FIX
   case Const_e(Float_c(x)):    dump(x);      break;
   case Const_e(Null_c):        dump("null"); break;
-  case Const_e(String_c(s)):
+  case Const_e(String_c(heap_allocate,s)):
+    if (heap_allocate) 
+      dump("new ");
     dump("\""); dump_nospace(Absynpp::string_escape(s)); dump_nospace("\""); 
     break;
 
@@ -366,17 +371,17 @@ void dumpexp_prec(int inprec, exp e) {
 
   case CompoundLit_e(vat,des):
     dump("("); 
-    dumptyp(vat[2]); // OK to ignore qualifiers??
+    dumptyp((*vat)[2]); // OK to ignore qualifiers??
     dump(")");
     group(dumpde,des,"{","}",",");
     break;
 
-  case Array_e(des):
+  case Array_e(b,des):  // FIX:  what about heap/local flag?
     group(dumpde,des,"new {","}",",");
     break;
 
   case Comprehension_e(vd,e1,e2):
-    dump("new {for"); dump_str(vd->name[1]); dump("<"); dumpexp(e1);
+    dump("new {for"); dump_str((*vd->name)[1]); dump("<"); dumpexp(e1);
     dump(":"); dumpexp(e2); dump("}");
     break;
 
@@ -510,8 +515,8 @@ void dumpstmt(stmt s) {
 }
 
 void dumpdp($(list<designator>,pat)@ dp) {
-  egroup(dumpdesignator,dp[0],"","=","=");
-  dumppat(dp[1]);
+  egroup(dumpdesignator,(*dp)[0],"","=","=");
+  dumppat((*dp)[1]);
 }
 
 void dumppat(pat p) {
@@ -671,6 +676,13 @@ void dumpdecl(decl d) {
     break;
   }
 }
+
+static void dump_upperbound(exp e) {
+  unsigned int i = Evexp::eval_const_uint_exp(e);
+  if (i != 1) {
+    dump("{"); dumpexp(e); dump("}");
+  }
+}
     
 void dumptms<`a>(list<type_modifier> tms, void f(`a), `a a) {
   if(tms == null) {
@@ -679,16 +691,18 @@ void dumptms<`a>(list<type_modifier> tms, void f(`a), `a a) {
   }
   switch(tms->hd) {
     // FIX?? What about tq2?
-  case Pointer_mod(Nullable_ps,  HeapRgnType,  tq2): 
-    dump_nospace("*"); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(NonNullable_ps, HeapRgnType,  tq2): 
-    dump_nospace("@"); dumptms(tms->tl,f,a); return;
+  case Pointer_mod(Nullable_ps(ue),  HeapRgnType,  tq2): 
+    dump_nospace("*"); dump_upperbound(ue); dumptms(tms->tl,f,a); return;
+  case Pointer_mod(NonNullable_ps(ue), HeapRgnType,  tq2): 
+    dump_nospace("@"); dump_upperbound(ue); dumptms(tms->tl,f,a); return;
   case Pointer_mod(TaggedArray_ps, HeapRgnType,  tq2): 
     dump_nospace("?"); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(Nullable_ps,  VarType(&$(r,k)), tq2):  
-    dump_nospace("*"); dump_str(r); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(NonNullable_ps, VarType(&$(r,k)), tq2): 
-    dump_nospace("@"); dump_str(r); dumptms(tms->tl,f,a); return;
+  case Pointer_mod(Nullable_ps(ue),  VarType(&$(r,k)), tq2):  
+    dump_nospace("*"); dump_upperbound(ue); dump_str(r); 
+    dumptms(tms->tl,f,a); return;
+  case Pointer_mod(NonNullable_ps(ue), VarType(&$(r,k)), tq2): 
+    dump_nospace("@"); dump_upperbound(ue); 
+    dump_str(r); dumptms(tms->tl,f,a); return;
   case Pointer_mod(TaggedArray_ps, VarType(&$(r,k)), tq2): 
     dump_nospace("?"); dump_str(r); dumptms(tms->tl,f,a); return;
   case Pointer_mod(_,_,_): throw Impossible("dumptms: bad Pointer_mod");
@@ -707,8 +721,8 @@ void dumptms<`a>(list<type_modifier> tms, void f(`a), `a a) {
       dump(")");
     switch(tms->hd) {
     case Carray_mod: dump("[]"); break;
-    case Array_mod:  dump("[?]"); break;
-    case ConstArray_mod(e): dump("["); dumpexp(e); dump("]"); break;
+    case ConstArray_mod(e): 
+      dump("["); dumpexp(e); dump("]"); break;
     case Function_mod(WithTypes(args,varargs)):
       dumpfunargs(args,varargs); break;
     case Function_mod(NoTypes(sl,loc)):

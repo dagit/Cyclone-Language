@@ -6,7 +6,7 @@ using Core;
 
 static enum R {
   String_rope(string),
-  Array_rope(rope[?])
+  Array_rope(rope?)
 };
 abstract struct Rope_node {
   enum R v;
@@ -18,7 +18,7 @@ rope from_string(string s) {
 rope concat(rope r1,rope r2) {
   return &Rope_node{Array_rope(new {r1,r2})};
 }
-rope concata(rope rs[?]) {
+rope concata(rope ?rs) {
   return &Rope_node(Array_rope(rs));
 }
 rope concatl(List::list<rope> l) {
@@ -62,4 +62,3 @@ string to_string(rope r) {
 int cmp(rope r1, rope r2) {
   return String::strcmp(to_string(r1), to_string(r2));
 }
-

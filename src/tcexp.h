@@ -9,7 +9,8 @@ namespace Tcexp{
 using Absyn;
 using Tcenv;
 
-extern synth tcExp(tenv, Core::Opt_t<typ>, exp);
+extern synth tcExp<`r>(tenv, typ *`r, exp);
+extern synth tcExpInitializer<`r>(tenv, typ *`r, exp);
 extern void tcTest(tenv te, exp e, string msg_part);
 extern bool is_const_exp(tenv, exp);
 }

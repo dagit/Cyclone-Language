@@ -66,7 +66,8 @@ list<stringptr> strings_of_segments(list<segment> segs) {
     if(segs->hd == null)
       ans = &cons(allocstr(xprintf("%s(unknown)", source)), ans);
     else {
-      ans = &cons(allocstr(string_of_pos_pr(places->hd[1], places->tl->hd[1])),
+      ans = &cons(allocstr(string_of_pos_pr((*places->hd)[1], 
+					    (*places->tl->hd)[1])),
 		  ans);
       places = places->tl->tl;
     }
@@ -176,11 +177,11 @@ void post_error(error_t e) {
   if (print_context) {
     try {
       $(string,int,int)@ x = get_context(e->seg);
-      string marker_str = new {for i < x[2]+1 : '\000'};
+      string marker_str = new {for i < (*x)[2]+1 : '\000'};
       int i = -1;
-      while (++i < x[1]) marker_str[i] = ' ';
-      while (++i < x[2]) marker_str[i] = '^';
-      fprintf(stderr, "  %s\n  %s\n", x[0], marker_str);
+      while (++i < (*x)[1]) marker_str[i] = ' ';
+      while (++i < (*x)[2]) marker_str[i] = '^';
+      fprintf(stderr, "  %s\n  %s\n", (*x)[0], marker_str);
     } catch {
     case Nocontext: break; 
     }

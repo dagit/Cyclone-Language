@@ -49,6 +49,8 @@ namespace Absyn {
   extern enum Box;
   extern struct Conref<`a>;
   extern enum Constraint<`a>;
+  extern enum Bounds;
+  extern struct PtrInfo;
   extern enum Typ;
   extern enum Funcparams;
   extern enum Type_modifier;
@@ -80,11 +82,12 @@ namespace Absyn {
   typedef enum Size_of size_of_t;
   typedef enum Kind kind_t;
   typedef $(tvarname_t,kind_t)@ tvar; // resolved kind via in-place mutation
-  typedef enum Array_kind array_kind_t;
   typedef enum Sign sign;
   typedef enum Box boxed;
   typedef struct Conref<`a> @conref<`a>;
   typedef enum Constraint<`a> constraint_t<`a>;
+  typedef enum Bounds bounds_t;
+  typedef struct PtrInfo ptr_info_t;
   typedef enum Typ typ;
   typedef enum Funcparams funcparams_t;
   typedef enum Type_modifier type_modifier;
@@ -136,14 +139,24 @@ namespace Absyn {
     RgnKind,
     UnresolvedKind
   };
-  EXTERN_DEFINITION enum Array_kind { 
-    UntaggedArray, TaggedArray, FixedArray(exp) 
-  };
   EXTERN_DEFINITION enum Sign { Signed, Unsigned };
   EXTERN_DEFINITION enum Box  { Boxed,  Unboxed };
   EXTERN_DEFINITION struct Conref<`a> { constraint_t<`a> v; };
   EXTERN_DEFINITION enum Constraint<`a> { 
     Eq_constr(`a), Forward_constr(conref<`a>), No_constr 
+  };
+
+  EXTERN_DEFINITION enum Bounds {
+    Unknown_b;    // t?
+    Upper_b(exp); // t*{x:x>=0 && x < e} and t@{x:x>=0 && x < e}
+  };
+
+  EXTERN_DEFINITION struct PtrInfo {
+    typ              elt_typ;   // typ of value to which pointer points
+    typ              rgn_typ;   // region of value to which pointer points
+    conref<bool>     nullable;  // * or @
+    tqual            tq;
+    conref<bounds_t> bounds;    // legal bounds for pointer indexing
   };
 
   // Note: The last fields of EnumType, XenumType, StructType and TypedefType
@@ -164,11 +177,11 @@ namespace Absyn {
     VarType(tvar); // kind induced by tvar
     EnumType(Opt_t<typedef_name_t>,list<typ>,enumdecl *);
     XenumType(typedef_name_t,xenumdecl *);
-    PointerType(typ/* mem kind */,typ/* RgnKind */,conref<bool>,tqual);
+    PointerType(ptr_info_t);
     IntType(sign,size_of_t,boxed);
     FloatType(boxed);
     DoubleType(boxed);
-    ArrayType(typ,tqual,array_kind_t);
+    ArrayType(typ/* element typ*/,tqual,exp /* size */);
     FnType(list<tvar>,typ,list<$(Opt_t<var>,tqual,typ)@>,bool);
     TupleType(list<$(tqual,typ)@>);
     StructType(Opt_t<typedef_name_t>,list<typ>,structdecl *);
@@ -184,12 +197,13 @@ namespace Absyn {
   };
 
   EXTERN_DEFINITION enum Pointer_Sort {
-    NonNullable_ps, Nullable_ps, TaggedArray_ps;
+    NonNullable_ps(exp), // exp is upper bound
+    Nullable_ps(exp),    // exp is upper bound
+    TaggedArray_ps
   };
 
   EXTERN_DEFINITION enum Type_modifier {
     Carray_mod; 
-    Array_mod; 
     ConstArray_mod(exp);
     // for Pointer_mod, the typ has RgnKind, default is RgnType(HeapRgn)
     Pointer_mod(enum Pointer_Sort,typ,tqual); 
@@ -203,7 +217,7 @@ namespace Absyn {
     Int_c(sign,int);
     LongLong_c(sign,long long);
     Float_c(string);
-    String_c(string);
+    String_c(bool,string); // bool is true when heap allocate
     Null_c;
   };
 
@@ -238,7 +252,7 @@ namespace Absyn {
     Subscript_e(exp,exp);
     Tuple_e(list<exp>);
     CompoundLit_e($(Opt_t<var>,tqual,typ)@,list<$(list<designator>,exp)@>);
-    Array_e(list<$(list<designator>,exp)@>);
+    Array_e(bool,list<$(list<designator>,exp)@>);//true == came with "new"
     Comprehension_e(vardecl,exp,exp); // much of vardecl is known
     Struct_e(typedef_name_t,Opt_t<list<typ>>,list<$(list<designator>,exp)@>,
 	     struct Structdecl *);
@@ -445,12 +459,16 @@ namespace Absyn {
   extern xenumdecl exn_xed;
   extern typ exn_typ;
   // string (char[?])
-  extern typ string_typ();
+  extern typ string_typ(typ rgn);
   // FILE
   extern typ file_typ();
   // pointers
-  extern typ nullableptr_typ(typ t, tqual tq);
-  extern typ nonnullableptr_typ(typ t, tqual tq);
+  extern typ starb_typ(typ t, typ rgn, tqual tq, bounds_t b);
+  extern typ atb_typ(typ t, typ rgn, tqual tq, bounds_t b);
+  extern typ star_typ(typ t, typ rgn, tqual tq); // bounds = Upper(1)
+  extern typ at_typ(typ t, typ rgn, tqual tq);   // bounds = Upper(1)
+  extern typ cstar_typ(typ t, tqual tq); // *t -- always heap
+  extern typ tagged_typ(typ t, typ rgn, tqual tq);
   extern typ void_star_typ();
   // structs
   extern typ strct(var  name);
@@ -469,7 +487,7 @@ namespace Absyn {
   extern exp uint_exp(unsigned int, segment);
   extern exp char_exp(char c, segment);
   extern exp float_exp(string f, segment);
-  extern exp string_exp(string s, segment);
+  extern exp string_exp(bool heap_allocate, string s, segment);
   extern exp var_exp(qvar, segment);
   extern exp varb_exp(qvar, binding_t, segment);
   extern exp unknownid_exp(qvar, segment);
@@ -511,7 +529,7 @@ namespace Absyn {
   extern exp tuple_exp(list<exp>, segment);
   extern exp stmt_exp(stmt, segment);
   extern exp null_pointer_exn_exp(segment);
-  extern exp array_exp(list<exp>, segment);
+  extern exp array_exp(bool heap_allocate, list<exp>, segment);
   extern exp unresolvedmem_exp(Opt_t<typedef_name_t>,
 			       list<$(list<designator>,exp)@>,segment);
   /////////////////////////// Statements ///////////////////////////////

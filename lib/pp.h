@@ -26,7 +26,7 @@ extern Doc line_doc();
 extern Doc nest(int k, Doc d);
 extern Doc concat(Doc d1, Doc d2);
 extern Doc concats(list<Doc> doclist);
-extern Doc concats_arr(Doc docs[?]);
+extern Doc concats_arr(Doc ?docs);
 extern Doc doc_union(Doc d, Doc d2);
 extern Doc oline_doc();
 extern Doc tab(Doc d);

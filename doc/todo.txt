@@ -1,5 +1,11 @@
 Todo now:
 
+* when we have a pattern:
+
+  case PointerType(PtrInfo{*elttype,_,_,_,_}):
+
+  then elttype isn't compiled correctly
+
 * now that we have ? pointer syntax, we really ought to distinguish
   between pointers and arrays, as in C.  This is mostly a top-level
   thing because we need to allow top-level arrays in constant expressions.

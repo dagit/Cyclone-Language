@@ -291,9 +291,9 @@ output_token_translations()
 	      max_user_token_number, nsyms);
     
       if (ntokens < 127)  /* play it very safe; check maximum element value.  */
-        fprintf(ftable, "\nstatic short yytranslate[?] = {     0");
+        fprintf(ftable, "\nstatic short yytranslate[] = {     0");
       else
-	fprintf(ftable, "\nstatic short yytranslate[?] = {     0");
+	fprintf(ftable, "\nstatic short yytranslate[] = {     0");
     
       j = 10;
       for (i = 1; i <= max_user_token_number; i++)
@@ -335,7 +335,7 @@ output_gram()
   if (! semantic_parser  && ! noparserflag)
     fprintf(ftable, "\n#if YYDEBUG != 0");
 
-  fprintf(ftable, "\nstatic short yyprhs[?] = {     0");
+  fprintf(ftable, "\nstatic short yyprhs[] = {     0");
 
   j = 10;
   for (i = 1; i <= nrules; i++)
@@ -357,7 +357,7 @@ output_gram()
 
   fprintf(ftable, "\n};\n");
 
-  fprintf(ftable, "\nstatic short yyrhs[?] = {%6d", ritem[0]);
+  fprintf(ftable, "\nstatic short yyrhs[] = {%6d", ritem[0]);
 
   j = 10;
   for (sp = ritem + 1; *sp; sp++)
@@ -393,7 +393,7 @@ output_stos()
   register int i;
   register int j;
 
-  fprintf(ftable, "\nstatic const short yystos[?] = {     0");
+  fprintf(ftable, "\nstatic const short yystos[] = {     0");
 
   j = 10;
   for (i = 1; i < nstates; i++)
@@ -424,7 +424,7 @@ output_rule_data()
   register int j;
 
   fprintf(ftable, "\n#if YYDEBUG != 0\n");
-  fprintf(ftable, "static short yyrline[?] = { 0");
+  fprintf(ftable, "static short yyrline[] = { 0");
 
   j = 10;
   for (i = 1; i <= nrules; i++)
@@ -460,7 +460,7 @@ output_rule_data()
   /* Output the table of symbol names.  */
 
   fprintf(ftable,
-          "static string yytname[?] = {   \"%s\"",
+          "static string yytname[] = {   \"%s\"",
           tags[0]);
 
   j = strlen (tags[0]) + 44;
@@ -525,7 +525,7 @@ output_rule_data()
 
   if (toknumflag) 
     {
-      fprintf(ftable, "static const short yytoknum[?] = { 0");
+      fprintf(ftable, "static const short yytoknum[] = { 0");
       j = 10;
       for (i = 1; i <= ntokens; i++) {
           putc(',', ftable);
@@ -541,7 +541,7 @@ output_rule_data()
       fprintf(ftable, "\n};\n\n");
     }
 
-  fprintf(ftable, "static short yyr1[?] = {     0");
+  fprintf(ftable, "static short yyr1[] = {     0");
 
   j = 10;
   for (i = 1; i <= nrules; i++)
@@ -563,7 +563,7 @@ output_rule_data()
 
   FREE(rlhs + 1);
 
-  fprintf(ftable, "\n};\n\nstatic short yyr2[?] = {     0");
+  fprintf(ftable, "\n};\n\nstatic short yyr2[] = {     0");
 
   j = 10;
   for (i = 1; i < nrules; i++)
@@ -651,7 +651,7 @@ token_actions()
   actrow = NEW2(ntokens, short);
 
   k = action_row(0);
-  fprintf(ftable, "\nstatic short yydefact[?] = {%6d", k);
+  fprintf(ftable, "\nstatic short yydefact[] = {%6d", k);
   save_row(0);
 
   j = 10;
@@ -910,7 +910,7 @@ goto_actions()
   state_count = NEW2(nstates, short);
 
   k = default_goto(ntokens);
-  fprintf(ftable, "\nstatic short yydefgoto[?] = {%6d", k);
+  fprintf(ftable, "\nstatic short yydefgoto[] = {%6d", k);
   save_column(ntokens, k);
 
   j = 10;
@@ -1229,7 +1229,7 @@ output_base()
   register int i;
   register int j;
 
-  fprintf(ftable, "\nstatic short yypact[?] = {%6d", base[0]);
+  fprintf(ftable, "\nstatic short yypact[] = {%6d", base[0]);
 
   j = 10;
   for (i = 1; i < nstates; i++)
@@ -1249,7 +1249,7 @@ output_base()
       fprintf(ftable, "%6d", base[i]);
     }
 
-  fprintf(ftable, "\n};\n\nstatic short yypgoto[?] = {%6d", base[nstates]);
+  fprintf(ftable, "\n};\n\nstatic short yypgoto[] = {%6d", base[nstates]);
 
   j = 10;
   for (i = nstates + 1; i < nvectors; i++)
@@ -1281,7 +1281,7 @@ output_table()
   register int j;
 
   fprintf(ftable, "\n\n#define\tYYLAST\t\t%d\n\n", high);
-  fprintf(ftable, "\nstatic short yytable[?] = {%6d", table[0]);
+  fprintf(ftable, "\nstatic short yytable[] = {%6d", table[0]);
 
   j = 10;
   for (i = 1; i <= high; i++)
@@ -1312,7 +1312,7 @@ output_check()
   register int i;
   register int j;
 
-  fprintf(ftable, "\nstatic short yycheck[?] = {%6d", check[0]);
+  fprintf(ftable, "\nstatic short yycheck[] = {%6d", check[0]);
 
   j = 10;
   for (i = 1; i <= high; i++)

@@ -104,7 +104,7 @@ Dict<`a,`b> insert_new<`a,`b>(Dict<`a,`b> d,`a key,`b data) {
 
 Dict<`a,`b> inserts<`a,`b>(Dict<`a,`b> d,List::list<$(`a,`b)@> kds) {
   for(; kds != null; kds = kds->tl)
-    d = insert(d, kds->hd[0], kds->hd[1]);
+    d = insert(d, kds->hd[0][0], kds->hd[0][1]);
   return d;
 }
 

@@ -139,18 +139,13 @@ static kind_t typ_kind(typ t) {
   // an existential bound variable cannot have RgnKind, so it can't be hidden
   // FIX: That assumption will change if the ability to name ever doesn't
   // imply the capability to access.
-  case PointerType(t,rgntyp,_,_): return is_packable(t) ? BoxPKind : BoxUKind;
-
-  // C arrays are always just pointers so we can treat them as boxed
-  case ArrayType(t,_,UntaggedArray): 
-    return is_packable(t) ? BoxPKind : BoxUKind;
-  // TaggedArrays are structs with 3 components so they can't be boxed
-  // FIX:  FixedArray's can be boxed as long as they're not in data
-  // structures...
+  case PointerType(pinfo):
+    return is_packable(pinfo.elt_typ) ? BoxPKind : BoxUKind;
+  // Arrays are always of memkind
   case ArrayType(t,_,_): return is_packable(t) ? MemPKind : MemUKind;
   case TupleType(tqts):
     for(; tqts != null; tqts = tqts->tl)
-      if(!is_packable(tqts->hd[1]))
+      if(!is_packable((*tqts->hd)[1]))
 	return MemUKind;
     return MemPKind;
 
@@ -194,16 +189,17 @@ static void occurs(typ evar, typ t) {
     if (t == evar) throw Unify;
     else if (r != null) occurs(evar,r->v);
     break;
-  case PointerType(t2,rt,_,_): occurs(evar,t2); occurs(evar,rt); break;
-  case ArrayType(t2,_,_):      occurs(evar,t2);                  break;
+  case PointerType(pinfo): 
+    occurs(evar,pinfo.elt_typ); occurs(evar,pinfo.rgn_typ); break;
+  case ArrayType(t2,_,_): occurs(evar,t2); break;
   case FnType(tvs,rt,args,varargs): // FIX: OK to ignore binding of type vars?
     occurs(evar,rt);
     for(; args != null; args = args->tl)
-      occurs(evar,args->hd[2]);
+      occurs(evar,(*args->hd)[2]);
     break;
   case TupleType(args):
     for(; args != null; args = args->tl)
-      occurs(evar,args->hd[1]);
+      occurs(evar,(*args->hd)[1]);
     break;
   case RgnHandleType(rt): occurs(evar,rt); break;
   case TypedefType(_,ts,topt): fallthru(ts);
@@ -283,6 +279,20 @@ static bool unify_conrefs<`a>(int cmp(`a,`a), conref<`a> x, conref<`a> y) {
   } catch { case Unify: return false; }
 }
 
+static int boundscmp(bounds_t b1, bounds_t b2) {
+  switch ($(b1,b2)) {
+  case $(Unknown_b,Unknown_b): return 0;
+  case $(Unknown_b,_): return -1;
+  case $(_,Unknown_b): return 1;
+  case $(Upper_b(e1),Upper_b(e2)): 
+    int i1 = Evexp::eval_const_uint_exp(e1);
+    int i2 = Evexp::eval_const_uint_exp(e2);
+    if (i1 == i2) return 0;
+    if (i1 < i2) return -1;
+    return 1;
+  }
+}
+
 // the real work of unification
 void unify_it(typ t1, typ t2) {
   t1 = compress(t1);
@@ -351,11 +361,20 @@ void unify_it(typ t1, typ t2) {
       return;
     break;
 
-  case $(PointerType(t2a,rgn2,null2a,tqual2a),
-	 PointerType(t1a,rgn1,null1a,tqual1a)):
+  case $(PointerType(PtrInfo{.elt_typ=t2a,.rgn_typ=rgn2,
+			     .nullable=null2a,.tq=tqual2a,.bounds=b2}),
+	 PointerType(PtrInfo{.elt_typ=t1a,.rgn_typ=rgn1,
+			     .nullable=null1a,.tq=tqual1a,.bounds=b1})):
     unify_it(t1a,t2a);
     unify_it(rgn2,rgn1); // the whole reason regions are "types"
     unify_tqual(tqual1a,tqual2a);
+    unify_it_conrefs(boundscmp,b1,b2);
+    // There's no need to force the nullable's to be the same when
+    // the bounds are ?.
+    switch (compress_conref(b1)->v) {
+    case Eq_constr(Unknown_b): return;
+    default: break;
+    }
     unify_it_conrefs(intcmp,null1a,null2a);
     return;
 
@@ -368,18 +387,11 @@ void unify_it(typ t1, typ t2) {
   case $(DoubleType(Boxed),   DoubleType(Boxed)):   return;
   case $(DoubleType(Unboxed), DoubleType(Unboxed)): return;
 
-  case $(ArrayType(t2a,tq2a,ak2a), ArrayType(t1a,tq1a,ak1a)):
+  case $(ArrayType(t2a,tq2a,e1), ArrayType(t1a,tq1a,e2)):
     unify_it(t1a,t2a);
     unify_tqual(tq1a,tq2a);
-    switch ($(ak1a,ak2a)) {
-    case $(UntaggedArray,  UntaggedArray):  return;
-    case $(TaggedArray,    TaggedArray):    return;
-    case $(FixedArray(e1), FixedArray(e2)):
-      if (Evexp::eval_const_uint_exp(e1) == Evexp::eval_const_uint_exp(e2)) 
-	return;
-      break;
-    default: break;
-    }
+    if (Evexp::eval_const_uint_exp(e1) == Evexp::eval_const_uint_exp(e2)) 
+      return;
     break;
 
   case $(FnType(tvs2,rt2,args2,vararg2), FnType(tvs1,rt1,args1,vararg1)):
@@ -398,8 +410,8 @@ void unify_it(typ t1, typ t2) {
     } 
     unify_it(rt1,rt2);
     for (; args1!=null && args2!=null; args1 = args1->tl, args2 = args2->tl) {
-      unify_tqual(args1->hd[1],args2->hd[1]);
-      unify_it(args1->hd[2],args2->hd[2]);
+      unify_tqual((*args1->hd)[1],(*args2->hd)[1]);
+      unify_it((*args1->hd)[2],(*args2->hd)[2]);
     }
     if ((args1 != null) || (args2 != null)) break;
     if (vararg1 == vararg2) return;
@@ -407,8 +419,8 @@ void unify_it(typ t1, typ t2) {
 
   case $(TupleType(ts2), TupleType(ts1)):
     for (; ts1 != null && ts2 != null; ts1 = ts1->tl, ts2 = ts2->tl) {
-      unify_tqual(ts1->hd[0],ts2->hd[0]);
-      unify_it(ts1->hd[1],ts2->hd[1]);
+      unify_tqual((*ts1->hd)[0],(*ts2->hd)[0]);
+      unify_it((*ts1->hd)[1],(*ts2->hd)[1]);
     }
     if (ts1 == null && ts2 == null) return;
     break;
@@ -514,7 +526,7 @@ bool coerce_list(tenv te, typ t, list<exp> es) {
 bool coerce_to_bool(tenv te, exp e) {
   if (!coerce_sint_typ(te,e)) {
     switch (compress(e->topt->v)) {
-    case PointerType(_,_,_,_): unchecked_cast(te,e,uint_t); break;
+    case PointerType(_): unchecked_cast(te,e,uint_t); break;
     default: return false;
     }
   }
@@ -569,41 +581,51 @@ bool coerce_sint_typ(tenv te, exp e) {
 }
 
 // Can t1 be (implicitly) cast to t2? Assumes types are well-formed 
-// FIX: allow cast between t@ and t[],t[1].
 bool silent_castable(tenv te, segment loc, typ t1, typ t2) {
   t1 = compress(t1);
   t2 = compress(t2);
   switch ($(t1,t2)) {
  
-  case $(PointerType(t_a,r_a,null_a,q_a),PointerType(t_b,r_b,null_b,q_b)):
-    // can cast t@ to t* but not vice versa.  can cast a non-const pointer
-    // to a const pointer.  Regions must unify.
+  case $(PointerType(pinfo_a), PointerType(pinfo_b)):
     bool okay = true;
-    if (!unify_conrefs(intcmp,null_a,null_b)) {
-      switch (compress_conref(null_a)->v) {
+    // can coerce @ to *
+    if (!unify_conrefs(intcmp,pinfo_a.nullable,pinfo_b.nullable)) {
+      switch(compress_conref(pinfo_a.nullable)->v) {
       case Eq_constr(b): okay = !b; break;
-      default: throw impos("silent_castable: conref not eq");
+      default: throw impos("silent_castable conref not eq");
       }
     }
-    return (okay 
-	    && unify(t_a,t_b) 
-	    && unify(r_a,r_b)
-	    && (!q_a->q_const || q_b->q_const));
-  
-  case $(ArrayType(t1a,tq1a,ak1a),ArrayType(t2a,tq2a,ak2a)):
-    bool okay;
-    switch ($(ak1a,ak2a)) {
-    case $(UntaggedArray,  UntaggedArray): okay = true;  break;
-    case $(TaggedArray,    UntaggedArray): okay = true;  break;
-    case $(TaggedArray,    TaggedArray):   okay = true;  break;
-    case $(FixedArray(e1), FixedArray(e2)):
-      okay = (Evexp::eval_const_uint_exp(e1) == Evexp::eval_const_uint_exp(e2));
-      break;
-    case $(FixedArray(_),  _):             okay = true;  break;
-    default:                               okay = false; break;
+    // can coerce *{e} to ? and *{e1} to *{e2} when e2 <= e1
+    if (!unify_conrefs(boundscmp,pinfo_a.bounds,pinfo_b.bounds)) {
+      switch ($(compress_conref(pinfo_a.bounds)->v, 
+		compress_conref(pinfo_b.bounds)->v)) {
+      case $(Eq_constr(Upper_b(_)),Eq_constr(Unknown_b)): 
+	// Can cast to ? regardless of nullable
+	okay = true; break;
+	// JGM:  the following would be legal, but perhaps we don't
+	// want to allow it to make porting easier -- I'm afraid
+	// that writing t *x = y, where y is an array will go through
+	// to easily...
+	//case $(Eq_constr(Upper_b(e1)),Eq_constr(Upper_b(e2))):
+	//okay = okay && (Evexp::eval_const_uint_exp(e1) >= 
+	//		Evexp::eval_const_uint_exp(e2)); 
+	//break;
+      case $(Eq_constr(Unknown_b),Eq_constr(Unknown_b)):
+	// Can cast ? to ? regardless of nullable
+	okay = true; break;
+      default:
+	okay = false; break;
+      }
     }
+    return (okay && unify(pinfo_a.elt_typ,pinfo_b.elt_typ) &&
+	    unify(pinfo_a.rgn_typ,pinfo_b.rgn_typ) &&
+	    (!pinfo_a.tq->q_const || pinfo_b.tq->q_const));
+
+  case $(ArrayType(t1a,tq1a,e1),ArrayType(t2a,tq2a,e2)):
+    bool okay;
+    okay = (Evexp::eval_const_uint_exp(e1)>=Evexp::eval_const_uint_exp(e2));
     return (okay && unify(t1a,t2a) && (!tq1a->q_const || tq2a->q_const));
-  
+
   default: return unify(t1,t2);
   }
 }
@@ -710,7 +732,7 @@ bool coerceable(typ t) {
 // do this.
 static $(tqual,typ)@ flatten_typ_f(list<$(tvar,typ)@> inst,
                                    $(field_name,tqual,typ)@ x) {
-  return &$(x[1],substitute(inst,x[2]));
+  return &$((*x)[1],substitute(inst,(*x)[2]));
 }
 static list<$(tqual,typ)@> flatten_typ(tenv te,typ t1) {
   t1 = compress(t1);
@@ -734,12 +756,13 @@ static bool ptrsubtype(tenv te, list<$(typ,typ)@> assume, typ t1, typ t2);
 static bool subtype(tenv te, list<$(typ,typ)@> assume, typ t1, typ t2) {
   if (unify(t1,t2)) return true;
   for (_ a = assume; a != null; a = a->tl)
-    if (unify(t1,a->hd[0]) && unify(t2,a->hd[1])) 
+    if (unify(t1,(*a->hd)[0]) && unify(t2,(*a->hd)[1])) 
       return true;
   t1 = compress(t1);
   t2 = compress(t2);
   switch ($(t1,t2)) {
-  case $(PointerType(t_a,rt_a,null_a,q_a), PointerType(t_b,rt_b,null_b,q_b)):
+    case $(PointerType(PtrInfo{t_a, rt_a, null_a, q_a, b_a}),
+	   PointerType(PtrInfo{t_b, rt_b, null_b, q_b, b_b})):
     // if t1 is const then t2 must be const
     if (q_a->q_const && !q_b->q_const) 
       return false;
@@ -752,6 +775,17 @@ static bool subtype(tenv te, list<$(typ,typ)@> assume, typ t1, typ t2) {
     switch (rt_a) {
     case HeapRgnType: break;
     default: unify(rt_a,rt_b); break;
+    }
+    // need to check that the bounds match up
+    if (!unify_conrefs(boundscmp,b_a,b_b)) {
+      switch ($(conref_val(b_a),conref_val(b_b))) {
+      case $(Upper_b(_), Unknown_b): break;
+      case $(Upper_b(e1), Upper_b(e2)): 
+	if (Evexp::eval_const_uint_exp(e1) < Evexp::eval_const_uint_exp(e2))
+	  return false;
+	break;
+      default: return false;
+      }
     }
     return ptrsubtype(te, &cons(&$(t1,t2),assume), t_a, t_b);
   default: return false;
@@ -787,41 +821,40 @@ bool castable(tenv te, segment loc, typ t1, typ t2) {
   switch (t1) {
   case EnumType(name_opt,ts,ed):
     // can cast an enum to an int -- extracts the tag
+    // FIX:  when the enum carries a value?!?
     return (coerceable(t2));
     // FIX: look at regions!
-  case PointerType(t_a,rt_a,null_a,q_a):
+  case PointerType(PtrInfo{t_a,rt_a,null_a,q_a,b_a}):
     // can cast t* to t@ and vice versa.  
     // can cast a non-const pointer to a const pointer.  
     // can cast a t heap pointer to a t[],t[1], or t[?]
     // can cast a pointer in the heap to a pointer to some other region
     switch (t2) {
-    case PointerType(t_b,rt_b,null_b,q_b):
+    case PointerType(PtrInfo{t_b,rt_b,null_b,q_b,b_b}):
       _ assump = &cons(&$(t1,t2),null);
       _ ptrsub =
 	ptrsubtype(te,assump,t_a,t_b) && (!q_a->q_const || q_b->q_const);
-      return ptrsub && (rt_a == HeapRgnType || unify(rt_a,rt_b));
-    case ArrayType(t_b,q_b,ak):
-      _ assump = &cons(&$(t1,t2),null);
-      if (!(ptrsubtype(te,assump,t_a,t_b) && (!q_a->q_const || q_b->q_const)))
-	return false;
-      switch (ak) {
-      case FixedArray(e): return (Evexp::eval_const_uint_exp(e) == 1);
-      default: return true;
+      bool bounds_ok = unify_conrefs(boundscmp,b_a,b_b);
+      if (!bounds_ok) {
+	switch ($(conref_val(b_a),conref_val(b_b))) {
+	  // We allow casts of any form as long as we can't statically
+	  // tell that the bounds will be violated.
+	case $(Upper_b(e_a),Upper_b(e_b)): 
+	  if (Evexp::eval_const_uint_exp(e_a) >= 
+	      Evexp::eval_const_uint_exp(e_b)) 
+	    bounds_ok = true;
+	  break;
+	default: bounds_ok = true; break;
+	}
       }
+      return bounds_ok && ptrsub && (rt_a == HeapRgnType || unify(rt_a,rt_b));
     default: return false;
     }
-  case ArrayType(t1a,tq1a,ak1a):
+  case ArrayType(t1a,tq1a,e1):
     switch (t2) {
-    case ArrayType(t2a,tq2a,ak2a):
+    case ArrayType(t2a,tq2a,e2):
       bool okay;
-      switch ($(ak1a,ak2a)) {
-      case $(FixedArray(e1),FixedArray(e2)):
-	okay=(Evexp::eval_const_uint_exp(e1) >= Evexp::eval_const_uint_exp(e2));
-	break;
-      case $(UntaggedArray, _): okay = false; break;
-      case $(_, UntaggedArray): okay = false; break; // FIX! Toc should allow!
-      default: okay = true; break;
-      }
+      okay=(Evexp::eval_const_uint_exp(e1) >= Evexp::eval_const_uint_exp(e2));
       return (okay && unify(t1a,t2a) && (!tq1a->q_const || tq2a->q_const));
     default: return false;
     }
@@ -968,11 +1001,11 @@ void check_fndecl_valid_type(segment loc,tenv te,fndecl fd) {
   check_unique_tvars(loc,fd->tvs);
   check_valid_type(loc,te,fd->tvs,fd->ret_type);
   for (_ x = fd->args; x != null; x = x->tl)
-    check_valid_type(loc,te,fd->tvs,x->hd[2]);
+    check_valid_type(loc,te,fd->tvs,(*x->hd)[2]);
 }
 
 static $(Opt_t<var>,tqual,typ)@ fndecl2typ_f($(var,tqual,typ)@ x) {
-  return &$((Opt_t<var>)&Opt(x[0]), x[1], x[2]);
+  return &$((Opt_t<var>)&Opt((*x)[0]), (*x)[1], (*x)[2]);
 }
 typ fndecl2typ(fndecl fd) {
   return FnType(fd->tvs,
@@ -982,10 +1015,12 @@ typ fndecl2typ(fndecl fd) {
 }
 
 static $($(Opt_t<var>,tqual)@,typ)@ substitute_f1($(Opt_t<var>,tqual,typ)@ y) {
-  return &$(&$(y[0],y[1]),y[2]);
+  return &$(&$((*y)[0],(*y)[1]),(*y)[2]);
 }
 static $(Opt_t<var>,tqual,typ)@ substitute_f2($($(Opt_t<var>,tqual)@,typ)@ w) {
-  return &$(w[0][0],w[0][1],w[1]);
+  let $(p,t) = *w;
+  let $(vopt,tq) = *p;
+  return &$(vopt,tq,t);
 }
 static list<typ> substs(list<$(tvar,typ)@> inst, list<typ> ts);
 typ substitute(list<$(tvar,typ)@> inst, typ t) {
@@ -997,9 +1032,9 @@ typ substitute(list<$(tvar,typ)@> inst, typ t) {
   case StructType(no,ts,sd):   return StructType(no,substs(inst,ts),sd);
   case EnumType(no,ts,ed):     return EnumType(no,substs(inst,ts),ed);
   case TypedefType(n,ts,topt): return TypedefType(n,substs(inst,ts),topt);
-  case ArrayType(t1,tq,eopt):  return ArrayType(substitute(inst,t1),tq,eopt);
-  case PointerType(t1,r,n,tq): 
-    return PointerType(substitute(inst,t1),substitute(inst,r),n,tq);
+  case ArrayType(t1,tq,e):     return ArrayType(substitute(inst,t1),tq,e);
+  case PointerType(PtrInfo{t1,r,n,tq,b}): 
+    return PointerType(PtrInfo{substitute(inst,t1),substitute(inst,r),n,tq,b});
   case FnType(vs,rtyp,args,varargs):
     for (let p = vs; p != null; p = p->tl)
       inst = &cons(&$(p->hd,VarType(p->hd)),inst);
@@ -1035,7 +1070,7 @@ exp default_initializer(tenv te, typ t, segment loc) {
   exp e = new_exp(Const_e(Null_c),loc);
 
   switch (compress(t)) {
-  case PointerType(_,_,_,_): break; // FIX: non-nullable is an error!
+  case PointerType(_): break; // FIX: non-nullable is an error!
   case IntType(sg,B1,Unboxed):
     e->r = Const_e(Char_c(Signed,'\000'));
     break;
@@ -1160,17 +1195,24 @@ void check_valid_rgn(segment loc,tenv te,list<tvar> bound_vars, typ t){
     }
   case VarType(pr):
     let &$(tv,k) = pr;
-    for(; bound_vars != null; bound_vars = bound_vars->tl)
-      if(String::zstrptrcmp(bound_vars->hd[0],tv)==0) {
-	_ bk = bound_vars->hd[1];
+    for(; bound_vars != null; bound_vars = bound_vars->tl) 
+      if(String::zstrptrcmp((*bound_vars->hd)[0],tv)==0) {
+	_ bk = (*bound_vars->hd)[1];
 	if((bk != RgnKind && bk != UnresolvedKind)
 	   || (k != RgnKind && k != UnresolvedKind)) {
 	  terr(loc, "Type variable used as region");
 	  return;
 	}
-	pr[1] = bound_vars->hd[1] = RgnKind;
+	(*pr)[1] = (*bound_vars->hd)[1] = RgnKind;
 	return;
       }
+    // it might be a local block region
+    try {
+      int i = String::to_int(derefstr(tv),null);
+      if (valid_block(te,i)) return;
+    } catch {
+    case InvalidArg(_): break;
+    }
     terr(loc,xprintf("unbound type variable %s",derefstr(tv)));
     return;
     
@@ -1191,20 +1233,20 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
   case VarType(pr):
     let &$(tv,k) = pr;
     for(; bound_vars != null; bound_vars = bound_vars->tl)
-      if(String::zstrptrcmp(bound_vars->hd[0],tv)==0)
-	switch ($(bound_vars->hd[1],k)) {
+      if(String::zstrptrcmp((*bound_vars->hd)[0],tv)==0)
+	switch ($((*bound_vars->hd)[1],k)) {
 	case $(_,RgnKind): fallthru;
 	case $(RgnKind,_): terr(loc,"Region variable used as type"); return;
 	case $(UnresolvedKind,BoxPKind): fallthru;
 	case $(UnresolvedKind,UnresolvedKind):
-	  pr[1] = bound_vars->hd[1] = BoxPKind;
+	  (*pr)[1] = (*bound_vars->hd)[1] = BoxPKind;
 	  return;
 	case $(UnresolvedKind,_):
 	  terr(loc,"Wrong kind for type variable");
 	  return;
 	case $(bk,_):
 	  if(k==UnresolvedKind || bk==k)
-	    pr[1] = bk;
+	    (*pr)[1] = bk;
 	  else
 	    terr(loc,"Wrong kind for type variable");
 	  return;
@@ -1260,10 +1302,16 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
     // Make relative name absolute (or replace absolute name with itself)
     tdn[0] = xed->name[0];
     break;
-  case PointerType(t1,rgn_typ,nullable,tq):
+  case PointerType(PtrInfo{.elt_typ=t1,.rgn_typ=rgn_typ,.nullable=nullable,
+			      .tq=tq,.bounds=b}):
     // FIX: check that tqual is valid?
     check_valid_type(loc,te,bound_vars,t1);
     check_valid_rgn(loc,te,bound_vars,rgn_typ);
+    // check that any bound is a constant expression
+    switch (compress_conref(b)->v) {
+    case Eq_constr(Upper_b(e)): Evexp::eval_const_uint_exp(e); break;
+    default: break;
+    }
     break;
   case RgnHandleType(rgn_typ):
     check_valid_rgn(loc,te,bound_vars,rgn_typ);
@@ -1271,39 +1319,34 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
   case IntType(_,_,_): break; 
   case FloatType(_):   break; 
   case DoubleType(_):  break; 
-  case ArrayType(t1,tq,ak):
+  case ArrayType(t1,tq,e):
     // FIX: check that tqual is valid?
     check_valid_type(loc,te,bound_vars,t1);
-    switch (ak) {
-    case UntaggedArray: break; // skip
-    case TaggedArray  : break; // skip
-    case FixedArray(e):
-      // FIX: should memoize the size so that we don't have to worry about
-      // evaluating it during unification
-      Evexp::eval_const_uint_exp(e); // check that e is of constant size
-      break;
-    }
+    // FIX: should memoize the size so that we don't have to worry about
+    // evaluating it during unification
+    Evexp::eval_const_uint_exp(e); // check that e is of constant size
     break;
   case FnType(btvs,tr,args,vararg):
+    // FIX:  make sure that `H is not a bound variable...
     check_unique_tvars(loc,btvs);
     list<tvar> new_bound_vars = List::append(btvs,bound_vars);
     check_valid_type(loc,te,new_bound_vars,tr);
     for (; args != null; args = args->tl) {
       // FIX: should check that variables are unique and that tquals are okay
-      check_valid_type(loc,te,new_bound_vars,args->hd[2]);
+      check_valid_type(loc,te,new_bound_vars,(*args->hd)[2]);
     }
     // if any kinds are still unresolved, warn and make them BoxPKind
     for(; btvs != null; btvs = btvs->tl)
-      if(btvs->hd[1] == UnresolvedKind) {
+      if((*btvs->hd)[1] == UnresolvedKind) {
 	warn(loc,xprintf("Type variable %s unused, assuming boxed",
-			 derefstr(btvs->hd[0])));
-	btvs->hd[1] = BoxPKind;
+			 derefstr((*btvs->hd)[0])));
+	(*btvs->hd)[1] = BoxPKind;
       }
     break;
   case TupleType(tq_ts):
     // FIX: check the tquals
     for (; tq_ts != null; tq_ts = tq_ts->tl)
-      check_valid_type(loc,te,bound_vars,tq_ts->hd[1]);
+      check_valid_type(loc,te,bound_vars,(*tq_ts->hd)[1]);
     break;
   case StructType(tdnopt,targs,*sdp):
     if (tdnopt == null) {
@@ -1419,10 +1462,10 @@ resolve_struct_designators<`a>(seg_t loc,
       // grab first unused
       _ fields2 = fields;
       for(; fields2 != null; fields2 = fields2->tl)
-	if(!fields2->hd[1]) {
-	  fields2->hd[1] = true;
-	  des->hd[0] = &cons(FieldName(fields2->hd[0][0]), null);
-	  ans = &cons(&$(fields2->hd[0],a), ans);
+	if(!(*fields2->hd)[1]) {
+	  (*fields2->hd)[1] = true;
+	  (*des->hd)[0] = &cons(FieldName((*(*fields2->hd)[0])[0]), null);
+	  ans = &cons(&$((*fields2->hd)[0],a), ans);
 	  break;
 	}
       if(fields2 == null)
@@ -1439,13 +1482,13 @@ resolve_struct_designators<`a>(seg_t loc,
       case FieldName(v):
 	_ fields2 = fields;
 	for(; fields2 != null; fields2 = fields2->tl)
-	  if(String::zstrptrcmp(v,fields2->hd[0][0]) == 0) {
-	    if(fields2->hd[1])
+	  if(String::zstrptrcmp(v,(*(*fields2->hd)[0])[0]) == 0) {
+	    if((*fields2->hd)[1])
 	      terr(loc, 
 		   xprintf("field %s has already been used as an argument", 
 			   derefstr(v)));
-	    fields2->hd[1] = true;
-	    ans = &cons(&$(fields2->hd[0],a), ans);
+	    (*fields2->hd)[1] = true;
+	    ans = &cons(&$((*fields2->hd)[0],a), ans);
 	    break;
 	  }
 	if(fields2 == null)
@@ -1456,7 +1499,7 @@ resolve_struct_designators<`a>(seg_t loc,
   
   // make sure we used all the fields
   for(; fields != null; fields = fields->tl)
-    if(!fields->hd[1]) {
+    if(!(*fields->hd)[1]) {
       terr(loc, "too few arguments to struct");
       break;
     }
@@ -1464,9 +1507,169 @@ resolve_struct_designators<`a>(seg_t loc,
   return imp_rev(ans);
 }
 
-bool is_tagged_array_typ(typ t) {
+bool is_tagged_pointer_typ(typ t) {
   switch (compress(t)) {
-  case ArrayType(_,_,TaggedArray): return true;
+  case PointerType(PtrInfo{_,_,_,_,b}):
+    _ b = compress_conref(b);
+    switch (compress_conref(b)->v) {
+    case Eq_constr(Unknown_b): return true;
+    case No_constr: 
+      b->v = Eq_constr(Unknown_b); return true;
+    default: return false;
+    }
   default: return false;
   }
 }
+
+// used by address of.  
+// Ensure e is an lvalue or function designator.
+// Return if &e is const (true for const) and what region e is in (via a type
+//    of RgnKind).
+// FIX: not sure const is sufficient to prevent assigning to a function
+//      designator???
+// Type errors should already have been reported, so we often silently return
+//   a bogus answer to avoid duplicate errors.
+// Note: regions might not be resolved (unification is order-dependent),
+//   but that's okay because a later unification will ensure soundness.
+// Note: As explained below, if e1 is a FixedArray, then &e1[e2] is only
+//   legal if e1 is an lvalue.  This is not true in C, but I need it, at least
+//   for now, and I doubt anyone minds.
+$(bool,typ) addressof_props(tenv te, exp e) {
+  // in some situations, the pointer must actually be const
+  $(bool,typ) bogus_ans = $(false,HeapRgnType);
+  switch (e->r) {
+  case Var_e(q,_):
+    switch (lookup_ordinary(te,e->loc,q)) {
+    case VarRes(x):
+      // where oh where does my variable live?
+      switch(x) {
+      case Unresolved_b: return bogus_ans;
+      case Funname_b(_): return $(true,            HeapRgnType); 
+      case Global_b(vd): 
+	switch (compress(e->topt->v)) {
+	// arrays cannot be modified
+	case ArrayType(_,_,_): return $(true, HeapRgnType);
+	default: return $(vd->tq->q_const, HeapRgnType);
+	}
+      case Local_b(vd):  
+	switch (compress(e->topt->v)) {
+	case ArrayType(_,_,_): return $(true, block_to_typ(te,vd->block));
+	default: return $(vd->tq->q_const, block_to_typ(te,vd->block));
+	}
+      case Pat_b(vd):    
+	return $(vd->tq->q_const, block_to_typ(te,vd->block));
+	// KLUDGE: assumes parameters are block 0
+      case Param_b(&$(_,tq,_)): return $(tq->q_const, block_to_typ(te,0));
+      }
+    case StructRes(_):  fallthru;
+    case EnumRes(_,_):  fallthru;
+    case XenumRes(_,_): return bogus_ans;
+    }
+  case StructMember_e(e1,f):
+    // we have an unboxed thing, so we inherit e2's region
+    switch (compress(e1->topt->v)) {
+    case StructType(_,_,&sd):
+      _ finfo = lookup_struct_field(sd,f);
+      if(finfo != null)
+	return $((*finfo)[1]->q_const, addressof_props(te,e1)[1]);
+      fallthru;
+    default: return bogus_ans;
+    }
+  case StructArrow_e(e1,f): 
+    // we have a boxed thing, so the region is in the pointer-type.
+    switch (compress(e1->topt->v)) {
+    case PointerType(PtrInfo{t1,r,_,_,_}): 
+      switch (compress(t1)) {
+      case StructType(_,_,&sd):
+	_ finfo = lookup_struct_field(sd,f);
+	if(finfo != null)
+	  return $((*finfo)[1]->q_const, r);
+	fallthru;
+      default: return bogus_ans;
+      }
+    default: return bogus_ans;
+    }
+  case Deref_e(e1):
+    // we have a boxed thing, so the region is in the pointer-type.
+    switch (compress(e1->topt->v)) {
+    case PointerType(PtrInfo{_,r,_,tq,_}): 
+      return $(tq->q_const, r); // FIX: is tq set correctly?
+    default: return bogus_ans;
+    }
+
+  case Subscript_e(e1,e2):
+    // here we need to figure out whether we've got a boxed thing
+    // or not because [] is overloaded for all array kinds, tuples, and
+    // tuple pointers.
+    // FIX: eventually a tagged array's elements may live in a region, for now, 
+    // they always in the heap
+    typ t = compress(e1->topt->v);
+    switch (t) {
+    case ArrayType(_,tq,_): 
+      // NOTE: Unlike C, we cannot allow any e1 -- it must be an lvalue.
+      // (C doesn't need to know the region and we do!)
+      return $(tq->q_const, addressof_props(te,e1)[1]);
+    case TupleType(ts):
+      // We need an lvalue in this unboxed case whereas "C w/ tuples" wouldn't.
+      _ finfo = lookup_tuple_field(ts,Evexp::eval_const_uint_exp(e2));
+      if(finfo != null)
+	return $((*finfo)[0]->q_const, addressof_props(te,e1)[1]);
+      return bogus_ans;
+    case PointerType(PtrInfo{t2,r,_,_,b}): 
+      // boxed tuple case -- so the region is in the pointer type.
+      switch(compress(t2)) {
+      case TupleType(ts):
+	_ finfo = lookup_tuple_field(ts,Evexp::eval_const_uint_exp(e2));
+	if(finfo != null)
+	  return $((*finfo)[0]->q_const, r);
+	fallthru;
+      default: return bogus_ans;
+      }
+    default: return bogus_ans;
+    }
+  default: 
+    terr(e->loc,"invalid portion in left-hand-side"); 
+    return bogus_ans;
+  }
+}
+
+// Coerce an expression of array type to a pointer type.  In
+// certain situations, we undo this coercion, notably when e is
+// a string constant or Array_e expression occurring as follows:
+//    t x[c] = e
+//    {.... e ... }  where the {...} is an Array_e
+//    Foo(.... e ....)  where Foo is a struct or enum with a corresponding 
+//         field that has type t 
+
+typ array_to_ptr(tenv te, typ e_typ, exp e) {
+  switch (compress(e_typ)) {
+  case ArrayType(t,tq,_):
+    let $(_,rgn) = addressof_props(te,e);
+    return atb_typ(t,rgn,tq,Upper_b(e));
+  default: 
+    return e_typ;
+  }
+}
+
+// give an error when we can statically tell that the array bounds
+// aren't large enough -- if the bounds are unconstrained, set them
+// to i+1.
+void check_bound(segment loc, unsigned int i, conref<bounds_t> b) {
+  b = compress_conref(b);
+  switch (b->v) {
+  case Eq_constr(Unknown_b): return; // checked dynamically
+  case Eq_constr(Upper_b(e)):
+    if (Evexp::eval_const_uint_exp(e) <= i)
+      terr(loc, "dereference is out of bounds");
+    return;
+  default:
+    // constrain the bounds to be i+1
+    b->v = Eq_constr(Upper_b(uint_exp(i+1,null)));
+    return;
+  }
+}
+
+void check_nonzero_bound(segment loc, conref<bounds_t> b) {
+  check_bound(loc, 0, b);
+}
+

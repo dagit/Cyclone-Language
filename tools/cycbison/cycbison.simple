@@ -121,15 +121,15 @@ int yyparse(YYPARSE_PARAM_ARG)
 
   int yyssp_offset;
   /*  the state stack     */
-  short yyss[?] = new {for i < YYINITDEPTH : 0};
+  short ?yyss = new {for i < YYINITDEPTH : 0};
   /*  the semantic value stack */
   int yyvsp_offset;
-  xenum YYSTYPE yyvs[?] = new {for i < YYINITDEPTH : yylval}; 
+  xenum YYSTYPE ?yyvs = new {for i < YYINITDEPTH : yylval}; 
 
 #ifdef YYLSP_NEEDED
   /*  the location stack */
   int yylsp_offset;
-  YYLTYPE yyls[?] = new {for i < YYINITDEPTH: yynewloc()};
+  YYLTYPE ?yyls = new {for i < YYINITDEPTH: yynewloc()};
 #define YYPOPSTACK   (yyvsp_offset--, yyssp_offset--, yylsp_offset--)
 #else
 #define YYPOPSTACK   (yyvsp_offset--, yyssp_offset--)
@@ -189,10 +189,10 @@ yynewstate:
     yystacksize *= 2;
     if (yystacksize > YYMAXDEPTH)
       yystacksize = YYMAXDEPTH;
-    short yyss1[?] = new {for i < yystacksize : 0};
-    xenum YYSTYPE yyvs1[?] = new {for i < yystacksize : yylval};
+    short ?yyss1 = new {for i < yystacksize : 0};
+    xenum YYSTYPE ?yyvs1 = new {for i < yystacksize : yylval};
 #ifdef YYLSP_NEEDED
-    YYLTYPE yyls1[?] = new {for i < yystacksize : yynewloc()};
+    YYLTYPE ?yyls1 = new {for i < yystacksize : yynewloc()};
 #endif
     for (int i=0; i <= yyssp_offset; i++) {
       yyss1[i] = yyss[i];
@@ -419,7 +419,7 @@ yyerrlab:   /* here on detecting error */
 	  count = 0;
 	  /* Start X at -yyn if nec to avoid negative indexes in yycheck.  */
 	  for (x = (yyn < 0 ? -yyn : 0);
-	       x < (sizeof(yytname) / sizeof(char *)); x++)
+	       x < (yytname.size / sizeof(char *)); x++)
 	    if (yycheck[x + yyn] == x)
 	      sze += strlen(yytname[x]) + 15, count++;
 	  msg = new {for i < sze + 15 : '\000'};

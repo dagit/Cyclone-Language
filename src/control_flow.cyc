@@ -242,11 +242,11 @@ cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
   case Xenum_e(_,es,_,_):  return cf_check_explist_unordered(env,es);
 
   case CompoundLit_e(_,des): fallthru(des);
-  case Array_e(des):         fallthru(des);
+  case Array_e(_,des):       fallthru(des);
   case Struct_e(_,_,des,_):
     cfexpsyn_t accum = CFExpSyn(env,env);
     for(; des != null; des = des->tl)
-      accum = meet_expsynth(cf_check_exp(env,des->hd[1]),accum);
+      accum = meet_expsynth(cf_check_exp(env,(*des->hd)[1]),accum);
     return accum;
 
     // I'm assuming C insists e1 before e2, but I didn't look it up.

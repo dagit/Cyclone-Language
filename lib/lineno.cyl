@@ -58,7 +58,7 @@ static Opt_t<$(string,int)@> parse_linedef(string line) {
 }
 
 int place_cmp($(int,Pos)@ place1, $(int,Pos)@ place2) {
-  return intcmp(place1[0],place2[0]);
+  return intcmp((*place1)[0],(*place2)[0]);
 }
 
 // mutates its second argument's elements
@@ -77,7 +77,7 @@ void poss_of_abss(string filename, List::list<$(int,Pos)@> places) {
 	next      = token(lbuf);
 	eol       = lexeme_end(lbuf);
 	this_line = lexeme(lbuf); // FIX: expensive string copy
-	if (eol >= places->hd[0]) 
+	if (eol >= (*places->hd)[0]) 
 	  break;
 	
 	switch (next) {
@@ -89,19 +89,19 @@ void poss_of_abss(string filename, List::list<$(int,Pos)@> places) {
 	    ++line;
 	    fprintf(stderr, "Unknown directive: %s\n", this_line);
 	  } else {
-	    source_file = fno->v[0]; 
-	    line        = fno->v[1];
+	    source_file = (*fno->v)[0]; 
+	    line        = (*fno->v)[1];
 	  }
 	  break;
 	default: throw Failure("Lineno: Impossible");
 	}
       }
-      while(places != null && eol >= places->hd[0]) {
-	let p = places->hd[1];
+      while(places != null && eol >= (*places->hd)[0]) {
+	let p = (*places->hd)[1];
 	p->logical_file = source_file;
 	p->line         = this_line;
 	p->line_no      = line;
-	p->col          = strlen(this_line)-(eol-places->hd[0]);
+	p->col          = strlen(this_line)-(eol-(*places->hd)[0]);
 	places = places->tl;
       }
       ++line;
