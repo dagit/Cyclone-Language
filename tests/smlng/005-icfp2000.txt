@@ -1,0 +1,2490 @@
+
+
+The Third Annual ICFP Programming Contest 
+(Version 1.18)
+
+
+
+
+
+
+
+
+
+
+
+
+<7><PL><B>The Third Annual ICFP Programming Contest
+(Version 1.18)</B></PL></7>
+
+
+
+
+If you are viewing this document using Netscape, you may need to configure
+your browser to see the symbols properly.
+See <U><b><TT>http://para.inria.fr/~maranget/hevea/doc/browser.html</TT></b></U>
+for details.
+This document is also available in <U><b>pdf</b></U>
+and <U><b>postscript</b></U> formats.
+
+
+
+
+<6><PL><B>1   The problem</B></PL></6>
+
+
+This year's ICFP programming challenge is to implement a
+ray tracer.
+The input to the ray tracer is a scene description written in a
+simple functional language, called GML.
+Execution of a GML program produces zero, or more, <EM>image files</EM>,
+which are in <U><b>PPM format</b></U>.
+A web page of sample images, along with the GML inputs that were used
+to produce them, is linked off of the
+<U><b>contest home page</b></U>.
+The feature set of GML is organized into
+<U><b>three <EM>tiers</EM></b></U>.
+Submissions must implement
+the first tier of features and extra credit will be given to
+submissions that implement the second or third tiers.
+Submissions will be evaluated on three scales: correctness of the
+produced images, run-time performance, and the
+tier of implemented GML features.
+
+GML has primitives for defining
+<U><b>simple geometric objects</b></U> (<EM>e.g.</EM>, planes, spheres,
+and cubes) and <U><b>lighting sources</b></U>.
+The <U><b>surface properties</b></U> used to render the objects
+are specified as functions in GML itself.
+In addition to supporting scene description, GML also has a
+<U><b><TT>render</TT> operator</b></U> that renders a scene to an
+image file.
+For each pixel in the output image, the <TT>render</TT> command
+must compute a color.
+Conceptually, this color is computed by tracing the path of the
+light backwards from the eye of the viewer, to where it bounced off an
+object, and ultimately back to the light sources.
+
+This document is organized as follows.
+Section <U><b>2</b></U> describes the syntax and general semantics of the
+modeling language.
+It is followed by Section <U><b>3</b></U>, which describes those aspects of
+the language that are specific to ray tracing.
+Section <U><b>4</b></U> specifies the submission requirements
+and Section <U><b>5</b></U> provides hints about algorithms and pointers
+to online resources to get you started.
+The <U><b>Appendix</b></U> gives a summary of the operators in the
+modeling language.
+
+This document is a bit on the long side because we have tried to make it
+complete and self-contained.
+(In fact, the L<c>A</c>T<g>E</g>X source for this document is longer than our
+sample implementation!)
+
+
+
+<6><PL><B>2   The modeling language</B></PL></6>
+
+<U><b></b></U>
+The input to the ray tracer is a <EM>scene description</EM> (or <EM>model</EM>)
+written in a functional modeling language called GML.
+The language has a syntax and execution model that is similar to
+PostScript (and Forth), but GML is <EM>lexically</EM> scoped and
+does not have side effects.
+
+
+
+<5>2.1   Syntax</5>
+
+A GML program is written using a subset of the printable ASCII
+character set (including space), plus tab, return, linefeed and vertical
+tab characters.
+The space, tab, return, linefeed and vertical
+tab characters are called <EM>whitespace</EM>.
+
+The characters <B><TT>%</TT></B>, <B><TT>[</TT></B>,
+<B><TT>]</TT></B>, <B><TT>{</TT></B>, <B><TT>}</TT></B> are <EM>special</EM>
+characters.
+
+Any occurrence of the character ``<B><TT>%</TT></B>'' not inside a string
+literal (see below) starts a comment, which runs to the end of the
+current line.
+Comments are treated as whitespace when tokenizing the input file.
+
+The syntax of GML is given in <U><b>Figure 1</b></U> (an <I>opt</I>
+superscript means an optional item and a <I>*</I> superscript means
+a sequence of zero or more items).
+
+
+ 
+ 
+ 
+ 
+
+ <U><b></b></U>
+ <I>TokenList</I>
+ 
+
+ 
+ 
+ 
+
+ 
+
+ ::=
+ 
+
+ <U><b><I>TokenGroup</I></b></U><c><2>*</2></c>
+ 
+
+ 
+ 
+
+
+
+ 
+ 
+
+ 
+ 
+
+ <U><b></b></U>
+ <I>TokenGroup</I>
+ 
+
+ 
+ 
+ 
+
+ 
+
+ ::=
+ 
+
+ <U><b><I>Token</I></b></U>
+ 
+
+ 
+ 
+
+
+ 
+ 
+
+ 
+
+ |
+ 
+
+ <B><TT>{</TT></B> <U><b><I>TokenList</I></b></U> <B><TT>}</TT></B>
+ 
+
+ 
+ 
+
+
+ 
+ 
+
+ 
+
+ |
+ 
+
+ <B><TT>[</TT></B> <U><b><I>TokenList</I></b></U> <B><TT>]</TT></B>
+ 
+
+ 
+ 
+
+
+
+ 
+ 
+
+ 
+ 
+
+ <U><b></b></U>
+ <I>Token</I>
+ 
+
+ 
+ 
+ 
+
+ 
+
+ ::=
+ 
+
+ <I>Operator</I>
+ 
+
+ 
+ 
+
+
+ 
+ 
+
+ 
+
+ |
+ 
+
+ <I>Identifier</I>
+ 
+
+ 
+ 
+
+
+ 
+ 
+
+ 
+
+ |
+ 
+
+ <I>Binder</I>
+ 
+
+ 
+ 
+
+
+ 
+ 
+
+ 
+
+ |
+ 
+
+ <I>Boolean</I>
+ 
+
+ 
+ 
+
+
+ 
+ 
+
+ 
+
+ |
+ 
+
+ <U><b><I>Number</I></b></U>
+ 
+
+ 
+ 
+
+
+ 
+ 
+
+ 
+
+ |
+ 
+
+ <I>String</I>
+ 
+
+ 
+ 
+
+
+
+
+
+
+Figure 1: GML grammar
+
+
+<U><b></b></U>
+A GML program is a <EM>token list</EM>, which is a sequence of
+zero or more <EM>token groups</EM>.
+A token group is either a single token, a <EM>function</EM> (a token
+list enclosed in `<B><TT>{</TT></B>' `<B><TT>}</TT></B>'), or an <EM>array</EM> (a token
+list enclosed in `<B><TT>[</TT></B>' `<B><TT>]</TT></B>').
+Tokens do not have to be separated by white space when it is
+unambiguous.
+Whitespace is not allowed in numbers, identifiers, or binders.
+
+Identifiers must start with an letter and can contain letters, digits,
+dashes (`<B><TT>-</TT></B>'), and underscores (`<B><TT>_</TT></B>').
+A subset of the identifiers are used as predefined <EM>operators</EM>, which
+may not be rebound.
+A list of the operators can be found in the appendix.
+A binder is an identifier prefixed with a `<B><TT>/</TT></B>' character.
+
+Booleans are either the literal <B><TT>true</TT></B> or the literal <B><TT>false</TT></B>.
+Like operators, <B><TT>true</TT></B> and <B><TT>false</TT></B> may not be rebound.
+
+Numbers are either integers or reals.
+The syntax of numbers is given by the following grammar:
+
+ 
+ 
+ 
+ 
+
+ <U><b></b></U>
+ <I>Number</I>
+ 
+
+ 
+ 
+ 
+
+ 
+
+ ::=
+ 
+
+ <U><b><I>Integer</I></b></U>
+ 
+
+ 
+ 
+
+
+ 
+ 
+
+ 
+
+ |
+ 
+
+ <U><b><I>Real</I></b></U>
+ 
+
+ 
+ 
+
+
+
+ 
+ 
+
+ 
+ 
+
+ <U><b></b></U>
+ <I>Integer</I>
+ 
+
+ 
+ 
+ 
+
+ 
+
+ ::=
+ 
+
+ <B><TT>-</TT></B><c><2><I>opt</I></2></c> <I>DecimalNumber</I>
+ 
+
+ 
+ 
+
+
+
+ 
+ 
+
+ 
+ 
+
+ <U><b></b></U>
+ <I>Real</I>
+ 
+
+ 
+ 
+ 
+
+ 
+
+ ::=
+ 
+
+ <B><TT>-</TT></B><c><2><I>opt</I></2></c> <I>DecimalNumber</I> <B><TT>.</TT></B> <U><b><I>DecimalNumber</I></b></U>
+ <U><b><I>Exponent</I></b></U><c><2><I>opt</I></2></c>
+ 
+
+ 
+ 
+
+
+ 
+ 
+
+ 
+
+ |
+ 
+
+ <B><TT>-</TT></B><c><2><I>opt</I></2></c> <I>DecimalNumber</I> <U><b><I>Exponent</I></b></U>
+ 
+
+ 
+ 
+
+
+
+ 
+ 
+
+ 
+ 
+
+ <U><b></b></U>
+ <I>Exponent</I>
+ 
+
+ 
+ 
+ 
+
+ 
+
+ ::=
+ 
+
+ <B><TT>e</TT></B> <B><TT>-</TT></B><c><2><I>opt</I></2></c> <I>DecimalNumber</I>
+ 
+
+ 
+ 
+
+
+ 
+ 
+
+ 
+
+ |
+ 
+
+ <B><TT>E</TT></B> <B><TT>-</TT></B><c><2><I>opt</I></2></c> <I>DecimalNumber</I>
+ 
+
+ 
+ 
+
+
+
+
+where a <I>DecimalNumber</I> is a sequence of one or more decimal digits.
+Integers should have at least 24-bits of precision and reals should
+be represented by double-precision IEEE floating-point values.
+
+Strings are written enclosed in double quotes (`<B><TT>"</TT></B>') and may contain
+any printable character other than the double quote (but including the
+space character).
+There are no escape sequences.
+
+
+
+<5>2.2   Evaluation</5>
+
+<U><b></b></U>
+We define the evaluation semantics of a GML program using an abstract machine.
+The state of the machine is a triple &lt;<B><I>ENV</I></B>; <EM>a</EM>; <I><I>c</I></I>&gt;, where
+<B><I>ENV</I></B> is an environment mapping identifiers to values, <EM>a</EM> is a stack of
+values, and <I><I>c</I></I> is a sequence of token groups.
+More formally, we use the following semantic definitions:
+
+
+ 
+
+<I>i</I>		
+<B><I>in</I></B>
+<I>Int</I>
+
+<EM>i</EM>	
+<B><I>in</I></B>
+<I>BaseValue</I> = 			<I><I>Boolean</I></I> <EM>E</EM> <I>Int</I> <EM>E</EM> <I>Real</I> <EM>E</EM> <I>String</I>
+
+<I><I>v</I></I>	
+<B><I>in</I></B>
+<I>Value</I> = <I>BaseValue</I> <EM>E</EM> <I>Closure</I> <EM>E</EM> <I>Array</I>
+			<EM>E</EM> <I>Point</I> <EM>E</EM> <I>Object</I> <EM>E</EM> <I>Light</I>
+
+(<B><I>ENV</I></B>, <I><I>c</I></I>)
+	 	
+<B><I>in</I></B>
+<I>Closure</I> = <I>Env</I> # <I>Code</I>
+
+<I><I>a</I></I>,[<I><I>v</I></I><g><2>1</2></g> ... <I><I>v</I></I><g><2><I>n</I></2></g>]
+		
+<B><I>in</I></B>
+<I>Array</I> = <I>Value</I><c><2>*</2></c>
+
+<B><I>ENV</I></B>	
+<B><I>in</I></B>
+<I>Env</I> = <I>Id</I> --&gt; <I>Value</I>
+
+<EM>a</EM>,<EM>b</EM>	
+<B><I>in</I></B>
+<I>Stack</I> = <I>Value</I><c><2>*</2></c>
+
+<I><I>c</I></I>	
+<B><I>in</I></B>
+<I>Code</I> = <U><b><I><I>TokenList</I></I></b></U>
+
+
+Evaluation from one state to another is written as
+&lt;<B><I>ENV</I></B>; <EM>a</EM>; <I><I>c</I></I>&gt; <EM>=</EM> &lt;<B><I>ENV</I></B>'; <EM>a</EM>'; <I><I>c</I></I>'&gt;
+.
+We define <EM>=</EM><c><2>*</2></c> to be the transitive closure of <EM>=</EM>.
+<U><b>Figure 2</b></U> gives the GML evaluation rules.
+
+ 
+
+<U><b> </b></U>
+ &lt;<B><I>ENV</I></B>; <EM>a</EM>; <TT><EM>i</EM></TT> <I><I>c</I></I>&gt; <EM>=</EM> &lt;<B><I>ENV</I></B>; <EM>a</EM> <EM>i</EM>; <I><I>c</I></I>&gt;
+
+     (1)
+
+<U><b> </b></U>
+ &lt;<B><I>ENV</I></B>; <EM>a</EM> <I><I>v</I></I>; <TT><I>/<I>x</I></I></TT> <I><I>c</I></I>&gt; <EM>=</EM> &lt;<B><I>ENV</I></B>{<I><I>x</I></I> := <I><I>v</I></I>}; <EM>a</EM>; <I><I>c</I></I>&gt;
+
+     (2)
+
+<U><b> </b></U>
+ &lt;<B><I>ENV</I></B>; <EM>a</EM>; <TT><I><I>x</I></I></TT> <I><I>c</I></I>&gt; <EM>=</EM> &lt;<B><I>ENV</I></B>; <EM>a</EM> <B><I>ENV</I></B>(<I><I>x</I></I>); <I><I>c</I></I>&gt;
+
+     (3)
+
+<U><b> </b></U>
+ &lt;<B><I>ENV</I></B>; <EM>a</EM>; <TT>{</TT><TT><I><I>c</I></I></TT><TT>'</TT><TT>}</TT> <I><I>c</I></I>&gt; <EM>=</EM> &lt;<B><I>ENV</I></B>; <EM>a</EM> (<B><I>ENV</I></B>, <I><I>c</I></I>'); <I><I>c</I></I>&gt;
+
+     (4)
+
+
+<U><b> </b></U>
+ 
+
+ 
+ &lt;<B><I>ENV</I></B>'; <EM>a</EM>; <I><I>c</I></I>'&gt; <EM>=</EM><c><2>*</2></c> &lt;<B><I>ENV</I></B>''; <EM>b</EM>; &gt;
+
+  
+
+
+
+ 
+ &lt;<B><I>ENV</I></B>; <EM>a</EM> (<B><I>ENV</I></B>', <I><I>c</I></I>'); <TT><I>apply</I></TT> <I><I>c</I></I>&gt; <EM>=</EM> &lt;<B><I>ENV</I></B>; <EM>b</EM>; <I><I>c</I></I>&gt;
+
+  
+
+
+     (5)
+
+
+
+<U><b> </b></U>
+ 
+
+ 
+ &lt;<B><I>ENV</I></B>; ; <I><I>c</I></I>'&gt; <EM>=</EM><c><2>*</2></c> &lt;<B><I>ENV</I></B>'; <I><I>v</I></I><g><2>1</2></g> ... <I><I>v</I></I><g><2><I>n</I></2></g>; &gt;
+
+  
+
+
+
+ 
+ &lt;<B><I>ENV</I></B>; <EM>a</EM>; [<I><I>c</I></I>'] <I><I>c</I></I>&gt; <EM>=</EM> &lt;<B><I>ENV</I></B>; 	<EM>a</EM> [<I><I>v</I></I><g><2>1</2></g> ... <I><I>v</I></I><g><2><I>n</I></2></g>]; <I><I>c</I></I>&gt;
+
+  
+
+
+     (6)
+
+
+
+<U><b> </b></U>
+ 
+
+ 
+	&lt;<B><I>ENV</I></B><g><2>1</2></g>; <EM>a</EM>; <I><I>c</I></I><g><2>1</2></g>&gt; <EM>=</EM><c><2>*</2></c> &lt;<B><I>ENV</I></B>''; <EM>b</EM>; &gt;
+
+  
+
+
+
+ 
+ &lt;<B><I>ENV</I></B>; 	<EM>a</EM> <B><I>true</I></B> (<B><I>ENV</I></B><g><2>1</2></g>, <I><I>c</I></I><g><2>1</2></g>) (<B><I>ENV</I></B><g><2>2</2></g>, <I><I>c</I></I><g><2>2</2></g>); 	<TT><I>if</I></TT> <I><I>c</I></I>&gt; <EM>=</EM> &lt;<B><I>ENV</I></B>; <EM>b</EM>; <I><I>c</I></I>&gt;
+
+  
+
+
+     (7)
+
+
+
+<U><b> </b></U>
+ 
+
+ 
+ &lt;<B><I>ENV</I></B><g><2>2</2></g>; <EM>a</EM>; <I><I>c</I></I><g><2>2</2></g>&gt; <EM>=</EM><c><2>*</2></c> &lt;<B><I>ENV</I></B>''; <EM>b</EM>; &gt;
+
+  
+
+
+
+ 
+ &lt;	<B><I>ENV</I></B>; <EM>a</EM> <B><I>false</I></B> (<B><I>ENV</I></B><g><2>1</2></g>, <I><I>c</I></I><g><2>1</2></g>) (<B><I>ENV</I></B><g><2>2</2></g>, <I><I>c</I></I><g><2>2</2></g>); 	<TT><I>if</I></TT> <I><I>c</I></I>&gt; <EM>=</EM> &lt;<B><I>ENV</I></B>; <EM>b</EM>; <I><I>c</I></I>&gt;
+
+  
+
+
+     (8)
+
+
+
+<U><b> </b></U>
+ 
+
+ 
+ <EM>a</EM>  <TT><I>OPERATOR</I></TT>  <EM>a</EM>'
+  
+
+
+
+ 
+ &lt;<B><I>ENV</I></B>; <EM>b</EM> <EM>a</EM>; <TT><I>OPERATOR</I></TT> <I><I>c</I></I>&gt; <EM>=</EM> &lt;<B><I>ENV</I></B>; <EM>b</EM> <EM>a</EM>'; <I><I>c</I></I>&gt;
+
+  
+
+
+     (9)
+
+
+
+ 
+
+Figure 2: Evaluation rules for GML
+
+
+ <U><b></b></U>
+In these rules, we write stacks with the top to the right (<EM>e.g.</EM>;
+<EM>a</EM> <I>x</I> is a stack with <I>x</I> as its top element) and token
+sequences are written with the first token on the left.
+We use  to signify the empty stack and the empty code sequence.
+
+Rule <U><b>1</b></U> describes the evaluation of a literal token, which is
+pushed on the stack.
+The next two rules describe the semantics of variable binding and
+reference.
+Rules <U><b>4</b></U> and <U><b>5</b></U> describe function-closure
+creation and the <TT>apply</TT> operator.
+Rule <U><b>6</b></U> describes the evaluation of an array expression; note
+that body of the array expression is evaluated on an initially empty
+stack.
+The semantics of the <TT>if</TT> operator are given by
+Rules <U><b>7</b></U>
+and <U><b>8</b></U>.
+The last evaluation rule (Rule <U><b>9</b></U>) describes how an
+operator (other than one of the control operators) is evaluated.
+We write
+
+ <EM>a</EM>  <TT><I>OPERATOR</I></TT>  <EM>a</EM>'
+
+to mean that the
+operator <TT><I>OPERATOR</I></TT> transforms the stack <EM>a</EM> to the stack <EM>a</EM>'.
+This notation is used below to specify the GML operators.
+
+We write
+<I>Eval</I>(<I><I>c</I></I>, <I><I>v</I></I><g><2>1</2></g>, ..., <I><I>v</I></I><g><2><I>n</I></2></g>) = (<I><I>v</I></I>'<g><2>1</2></g>, ..., <I><I>v</I></I>'<g><2><I>n</I></2></g>)
+for when a program <I><I>c</I></I> yields (<I><I>v</I></I>'<g><2>1</2></g>, ..., <I><I>v</I></I>'<g><2><I>n</I></2></g>) when applied
+to the values <I><I>v</I></I><g><2>1</2></g>, ..., <I><I>v</I></I><g><2><I>n</I></2></g>; <EM>i.e.</EM>, when
+&lt;{}; <I><I>v</I></I><g><2>1</2></g>  <I><I>v</I></I><g><2><I>n</I></2></g>; <I><I>c</I></I>&gt; <EM>=</EM><c><2>*</2></c> &lt;<B><I>ENV</I></B>; <I><I>v</I></I>'<g><2>1</2></g> ,<I><I>v</I></I>'<g><2><I>n</I></2></g>; &gt;
+.
+
+There is no direct support for recursion in GML, but one can program
+recursive functions by explicitly passing the function as an
+extra argument to itself (see <U><b>Section 2.7</b></U> for an example).
+
+
+
+<5>2.3   Control operators</5>
+
+<U><b></b></U>
+GML contains two <EM>control</EM> operators that can be used to
+implement control structures.
+These operators are formally defined in <U><b>Figure 2</b></U>, but we
+provide an informal description here.
+
+The <TT>apply</TT> operator takes a function closure,
+(<B><I>ENV</I></B>, <I><I>c</I></I>), off the stack and evaluates <I><I>c</I></I> using the
+environment <B><I>ENV</I></B> and the current stack.
+When evaluation of <I><I>c</I></I> is complete (<EM>i.e.</EM>, there are no more
+instructions left), the previous environment is restored and
+execution continues with the instruction after the <TT>apply</TT>.
+Argument and result passing is done via the stack.
+For example:
+
+1 { /x x x } apply addi
+
+will evaluate to 2.
+Note that functions bind their variables according to the environment where
+they are defined; not where they are applied.
+For example the following code evaluates to 3:
+
+1 /x          % bind x to 1
+{ x } /f      % the function f pushes the value of x
+2 /x          % rebind x to 2
+f apply x addi
+
+
+The <TT>if</TT> operator takes two closures and a boolean off the
+stack and evaluates the first closure if the boolean is <B>true</B>, and
+the second if the boolean is <B>false</B>.
+For example,
+
+b { 1 } { 2 } if
+
+will result in 1 on the top of the stack if <I>b</I> is <B>true</B>, and 2
+if it is <B>false</B>
+
+
+
+<5>2.4   Numbers</5>
+
+<U><b></b></U>
+GML supports both integer and real numbers (which are represented by
+IEEE double-precision floating-point numbers).
+Many of the numeric operators have both integer and real versions, so
+we combine their descriptions in the following:
+
+ <U><b><I>n</I><g><2>1</2></g> <I>n</I><g><2>2</2></g>  <B><TT>addi</TT></B><B><TT>/</TT></B><B><TT>addf</TT></B>  <I>n</I><g><2>3</2></g></b></U>
+ computes the sum <I>n</I><g><2>3</2></g> of the numbers <I>n</I><g><2>1</2></g> and <I>n</I><g><2>2</2></g>.
+ <U><b><I>r</I><g><2>1</2></g>  <B><TT>acos</TT></B>  <I>r</I><g><2>2</2></g></b></U>
+ computes the arc cosine <I>r</I><g><2>2</2></g> in degrees of <I>r</I><g><2>1</2></g>.
+ The result is undefined if <I>r</I><g><2>1</2></g> &lt; -1 or 1 &lt; <I>r</I><g><2>1</2></g>.
+ <U><b><I>r</I><g><2>1</2></g>  <B><TT>asin</TT></B>  <I>r</I><g><2>2</2></g></b></U>
+ computes the arc sine <I>r</I><g><2>2</2></g> in degrees of <I>r</I><g><2>1</2></g>.
+ The result is undefined if <I>r</I><g><2>1</2></g> &lt; -1 or 1 &lt; <I>r</I><g><2>1</2></g>.
+ <U><b><I>r</I><g><2>1</2></g>  <B><TT>clampf</TT></B>  <I>r</I><g><2>2</2></g></b></U>
+ computes <I>r</I><g><2>2</2></g> = 
+<EM>
+
+
+i</EM>
+
+	0.0
+<I>r</I><g><2>1</2></g> &lt; 0.0
+
+	1.0
+<I>r</I><g><2>1</2></g> &gt; 1.0
+
+	<I>r</I><g><2>1</2></g>
+<I>otherwise</I>
+
+.
+ <U><b><I>r</I><g><2>1</2></g>  <B><TT>cos</TT></B>  <I>r</I><g><2>2</2></g></b></U>
+ computes the cosine <I>r</I><g><2>2</2></g> of <I>r</I><g><2>1</2></g> in degrees.
+ <U><b><I>n</I><g><2>1</2></g> <I>n</I><g><2>2</2></g>  <B><TT>divi</TT></B><B><TT>/</TT></B><B><TT>divf</TT></B>  <I>n</I><g><2>3</2></g></b></U>
+ computes the quotient <I>n</I><g><2>3</2></g> of dividing the number <I>n</I><g><2>1</2></g> by <I>n</I><g><2>2</2></g>.
+ The <TT>divi</TT> operator rounds its result towards 0.
+ For the <TT>divi</TT> operator, if <I>n</I><g><2>2</2></g> is zero, then the program
+ halts.
+ For <TT>divf</TT>, the effect of division by zero is undefined.
+ <U><b><I>n</I><g><2>1</2></g> <I>n</I><g><2>2</2></g>  <B><TT>eqi</TT></B><B><TT>/</TT></B><B><TT>eqf</TT></B>  <I>b</I></b></U>
+ compares the numbers <I>n</I><g><2>1</2></g> and <I>n</I><g><2>2</2></g> and pushes <B>true</B> if <I>n</I><g><2>1</2></g>
+ is equal to <I>n</I><g><2>2</2></g>; otherwise <B>false</B> is pushed.
+ <U><b><I>r</I>  <B><TT>floor</TT></B>  <I>i</I></b></U>
+ converts the real <I>r</I> to the greatest integer <I>i</I> that is less than or
+ equal to <I>r</I>.
+ <U><b><I>r</I><g><2>1</2></g>  <B><TT>frac</TT></B>  <I>r</I><g><2>2</2></g></b></U>
+ computes the fractional part <I>r</I><g><2>2</2></g> of the real number <I>r</I><g><2>1</2></g>.
+ The result <I>r</I><g><2>2</2></g> will always have the same sign as the argument <I>r</I><g><2>1</2></g>.
+ <U><b><I>n</I><g><2>1</2></g> <I>n</I><g><2>2</2></g>  <B><TT>lessi</TT></B><B><TT>/</TT></B><B><TT>lessf</TT></B>  <I>b</I></b></U>
+ compares the numbers <I>n</I><g><2>1</2></g> and <I>n</I><g><2>2</2></g> and pushes <B>true</B> if <I>n</I><g><2>1</2></g>
+ is less than <I>n</I><g><2>2</2></g>; otherwise <B>false</B> is pushed.
+ <U><b><I>i</I><g><2>1</2></g> <I>i</I><g><2>2</2></g>  <B><TT>modi</TT></B>  <I>i</I><g><2>3</2></g></b></U>
+ computes the remainder <I>i</I><g><2>3</2></g> of dividing <I>i</I><g><2>1</2></g> by <I>i</I><g><2>2</2></g>.
+ The following relation holds between <TT>divi</TT> and <TT>modi</TT>:
+ 
+ <I>i</I>2 (<I>i</I>1 <TT><I>divi</I></TT> <I>i</I>2) + (<I>i</I>1 <TT><I>mod</I></TT> <I>i</I>2) = <I>i</I>1
+ 
+ <U><b><I>n</I><g><2>1</2></g> <I>n</I><g><2>2</2></g>  <B><TT>muli</TT></B><B><TT>/</TT></B><B><TT>mulf</TT></B>  <I>n</I><g><2>3</2></g></b></U>
+ computes the product <I>n</I><g><2>3</2></g> of the numbers <I>n</I><g><2>1</2></g> and <I>n</I><g><2>2</2></g>.
+ <U><b><I>n</I><g><2>1</2></g>  <B><TT>negi</TT></B><B><TT>/</TT></B><B><TT>negf</TT></B>  <I>n</I><g><2>2</2></g></b></U>
+ computes the negation <I>n</I><g><2>2</2></g> of the number <I>n</I><g><2>1</2></g>.
+ <U><b><I>i</I>  <B><TT>real</TT></B>  <I>r</I></b></U>
+ converts the integer <I>i</I> to its real representation <I>r</I>.
+ <U><b><I>r</I><g><2>1</2></g>  <B><TT>sin</TT></B>  <I>r</I><g><2>2</2></g></b></U>
+ computes the sine <I>r</I><g><2>2</2></g> of <I>r</I><g><2>1</2></g> in degrees.
+ <U><b><I>r</I><g><2>1</2></g>  <B><TT>sqrt</TT></B>  <I>r</I><g><2>2</2></g></b></U>
+ computes the square root <I>r</I><g><2>2</2></g> of <I>r</I><g><2>1</2></g>.
+ If <I>r</I><g><2>1</2></g> is negative, then the interpreter should halt.
+ <U><b><I>n</I><g><2>1</2></g> <I>n</I><g><2>2</2></g>  <B><TT>subi</TT></B><B><TT>/</TT></B><B><TT>subf</TT></B>  <I>n</I><g><2>3</2></g></b></U>
+ computes the difference <I>n</I><g><2>3</2></g> of subtracting the number <I>n</I><g><2>2</2></g> from <I>n</I><g><2>1</2></g>.
+
+
+
+
+<5>2.5   Points</5>
+
+<U><b></b></U>
+A <EM>point</EM> is comprised of three real numbers.
+Points are used to represent positions, vectors, and colors (in the latter
+case, the range of the components is restricted to [0.0, 1.0]).
+There are four operations on points:
+
+<U><b><I>p</I>  <B><TT>getx</TT></B>  <I>x</I></b></U>
+ gets the first component <I>x</I> of the point <I>p</I>.
+ <U><b><I>p</I>  <B><TT>gety</TT></B>  <I>y</I></b></U>
+ gets the second component <I>y</I> of the point <I>p</I>.
+ <U><b><I>p</I>  <B><TT>getz</TT></B>  <I>z</I></b></U>
+ gets the third component <I>z</I> of the point <I>p</I>.
+<U><b><I>x</I> <I>y</I> <I>z</I>  <B><TT>point</TT></B>  <I>p</I></b></U>
+ creates a point <I>p</I> from the reals <I>x</I>, <I>y</I>, and <I>z</I>.
+
+
+
+
+<5>2.6   Arrays</5>
+
+<U><b></b></U>
+There are two operations on arrays:
+
+ <U><b><I><I>arr</I></I> <I>i</I>  <B><TT>get</TT></B>  <I>v</I><g><2><I>i</I></2></g></b></U>
+ gets the <I>i</I>th element of the array <I><I>arr</I></I>.
+ Array indexing is zero based in GML.
+ If <I>i</I> is out of bounds, the GML interpreter should terminate.
+ <U><b><I><I>arr</I></I>  <B><TT>length</TT></B>  <I>n</I></b></U>
+ gets the number of elements in the array <I><I>arr</I></I>.
+
+The elements of an array do not have to have the same type and
+arrays can be used to construct data structures.
+For example, we can implement lists using two-element arrays for
+cons cells and the zero-length array for nil.
+
+[] /nil
+{ /cdr /car [ car cdr ] } /cons
+
+We can also write a function that ``<EM>pattern matches</EM>'' on the head
+of a list.
+
+{ /if-cons /if-nil /lst
+  lst length 0 eqi
+  if-nil
+  { lst 0 get lst 1 get if-cons apply }
+  if
+}
+
+
+
+
+<5>2.7   Examples</5>
+
+<U><b></b></U>
+Some simple function definitions written in GML:
+
+{ } /id                            % the identity function
+{ 1 addi } /inc                    % the increment function
+{ /x /y x y } /swap                % swap the top two stack locations
+{ /x x x } /dup                    % duplicate the top of the stack
+{ dup apply muli } /sq             % the squaring function
+{ /a /b a { true } { b } if } /or  % logical-or function
+{ /p                               % negate a point value
+  p getx negf
+  p gety negf
+  p getz negf point
+} /negp
+A more substantial example is the GML version of the recursive
+factorial function:
+
+{ /self /n
+  n 2 lessi
+  { 1 }
+  { n 1 subi self self apply n muli }
+  if
+} /fact
+Notice that this function follows the convention of passing itself as
+the top-most argument on the stack.
+We can compute the factorial of <TT>12</TT> with the expression
+
+12 fact fact apply
+
+
+
+
+<6><PL><B>3   Ray tracing</B></PL></6>
+
+<U><b></b></U>
+In this section, we describe how the GML interpreter supports ray tracing.
+
+
+
+<5>3.1   Coordinate systems</5>
+
+GML models are defined in terms of two coordinate systems:
+<EM>world coordinates</EM> and <EM>object coordinates</EM>.
+World coordinates are used to specify the position of lights
+while object coordinates are used to specify primitive objects.
+There are six <EM>transformation</EM> operators (described in
+<U><b>Section <U><b>3.3</b></U></b></U>) that are used to map
+object space to world space.
+
+The world-coordinate system is <EM>left-handed</EM>.
+The <I>X</I>-axis goes to the right, the <I>Y</I>-axis goes up, and the <I>Z</I>-axis
+goes away from the viewer.
+
+
+
+<5>3.2   Geometric primitives</5>
+
+<U><b></b></U>
+There are five operations in GML for constructing primitive
+solids: <TT>sphere</TT>, <TT>cube</TT>, <TT>cylinder</TT>, <TT>cone</TT>, and
+<TT>plane</TT>.
+Each of these operations takes a single function as an argument, which defines
+the primitive's surface properties (see <U><b>Section <U><b>3.6</b></U></b></U>).
+
+ <U><b><I><I>surface</I></I>  <B><TT>sphere</TT></B>  <I><I>obj</I></I></b></U>
+ creates a sphere of radius 1 centered at the origin with surface
+ properties specified by the function <I><I>surface</I></I>.
+ Formally, the sphere is defined by <I>x</I><c><2>2</2></c> + <I>y</I><c><2>2</2></c> + <I>z</I><c><2>2</2></c> <EM></EM> 1.
+ <U><b><I><I>surface</I></I>  <B><TT>cube</TT></B>  <I><I>obj</I></I></b></U>
+ creates a unit cube with opposite corners (0,0,0) and (1,1,1).
+ The function <I><I>surface</I></I> specifies the cube's surface properties.
+ Formally, the cube is defined by 0 <EM></EM> <I>x</I> <EM></EM> 1,
+ 0 <EM></EM> <I>y</I> <EM></EM> 1, and 0 <EM></EM> <I>z</I> <EM></EM> 1.
+ Cubes are a <U><b>Tier-2</b></U> feature.
+ <U><b><I><I>surface</I></I>  <B><TT>cylinder</TT></B>  <I><I>obj</I></I></b></U>
+ creates a cylinder of radius 1 and height 1 with surface properties
+ specified by the function <I><I>surface</I></I>.
+ The base of the cylinder is centered at (0, 0, 0) and the top is centered
+ at (0, 1, 0) (<EM>i.e.</EM>, the axis of the cylinder is the <I>Y</I>-axis).
+ Formally, the cylinder is defined by <I>x</I><c><2>2</2></c> + <I>z</I><c><2>2</2></c> <EM></EM> 1 and
+ 0 <EM></EM> <I>y</I> <EM></EM> 1.
+ Cylinders are a <U><b>Tier-2</b></U> feature.
+ <U><b><I><I>surface</I></I>  <B><TT>cone</TT></B>  <I><I>obj</I></I></b></U>
+ creates a cone with base radius 1 and height 1 with surface
+ properties specified by the function <I><I>surface</I></I>.
+ The apex of the cone is at (0, 0, 0) and the base of the cone
+ is centered at (0, 1, 0).
+ Formally, the cone is defined by <I>x</I><c><2>2</2></c> + <I>z</I><c><2>2</2></c> - <I>y</I><c><2>2</2></c> <EM></EM> 0 and
+ 0 <EM></EM> <I>y</I> <EM></EM> 1.
+ Cones are a <U><b>Tier-2</b></U> feature.
+ <U><b><I><I>surface</I></I>  <B><TT>plane</TT></B>  <I><I>obj</I></I></b></U>
+ creates a plane object with the equation <I>y</I> = 0 with surface
+ properties specified by the function <I><I>surface</I></I>.
+ Formally, the plane is the half-space <I>y</I> <EM></EM> 0.
+
+
+
+
+
+<5>3.3   Transformations</5>
+
+<U><b></b></U>
+Fixed size objects at the origin are not very interesting, so GML provides
+<EM>transformation</EM> operations to place objects in world space.
+Each transformation operator takes an object and one or more reals as arguments
+and returns the transformed object.
+The operations are:
+
+ <U><b><I><I>obj</I></I> <I>r</I><g><2><I><I>tx</I></I></2></g> <I>r</I><g><2><I><I>ty</I></I></2></g> <I>r</I><g><2><I><I>tz</I></I></2></g>  <B><TT>translate</TT></B>  <I><I>obj</I></I>'</b></U>
+ translates <I><I>obj</I></I> by the vector
+ (<I>r</I><g><2><I><I>tx</I></I></2></g>, <I>r</I><g><2><I><I>ty</I></I></2></g>, <I>r</I><g><2><I><I>tz</I></I></2></g>).
+ I.e., if <I><I>obj</I></I> is at position (<I>p</I><g><2><I>x</I></2></g>, <I>p</I><g><2><I>y</I></2></g>, <I>p</I><g><2><I>z</I></2></g>), then
+ <I><I>obj</I>'</I> is at position
+ (<I>p</I><g><2><I>x</I></2></g>+<I>r</I><g><2><I><I>tx</I></I></2></g>, <I>p</I><g><2><I>y</I></2></g>+<I>r</I><g><2><I><I>ty</I></I></2></g>, <I>p</I><g><2><I>z</I></2></g>+<I>r</I><g><2><I><I>tz</I></I></2></g>).
+ <U><b><I><I>obj</I></I> <I>r</I><g><2><I><I>sx</I></I></2></g> <I>r</I><g><2><I><I>sy</I></I></2></g> <I>r</I><g><2><I><I>sz</I></I></2></g>  <B><TT>scale</TT></B>  <I><I>obj</I></I>'</b></U>
+ scales <I><I>obj</I></I> by <I>r</I><g><2><I><I>sx</I></I></2></g> in the <I>X</I>-dimension,
+ <I>r</I><g><2><I><I>sy</I></I></2></g> in the
+ <I>Y</I>-dimension, and <I>r</I><g><2><I><I>sz</I></I></2></g> in the <I>Z</I> dimension.
+ <U><b><I><I>obj</I></I> <I>r</I><g><2><I>s</I></2></g>  <B><TT>uscale</TT></B>  <I><I>obj</I></I>'</b></U>
+ uniformly scales <I><I>obj</I></I> by <I>r</I><g><2><I>s</I></2></g> in each dimension.
+ This operation is called <EM>Isotropic scaling</EM>.
+ <U><b><I><I>obj</I></I> <EM>q</EM>  <B><TT>rotatex</TT></B>  <I><I>obj</I></I>'</b></U>
+ rotates <I><I>obj</I></I> around the <I>X</I>-axis by <EM>q</EM> degrees.
+ Rotation is measured counterclockwise when looking along the <I>X</I>-axis
+ from the origin towards +<EM></EM>.
+ <U><b><I><I>obj</I></I> <EM>q</EM>  <B><TT>rotatey</TT></B>  <I><I>obj</I></I>'</b></U>
+ rotates <I><I>obj</I></I> around the <I>Y</I>-axis by <EM>q</EM> degrees.
+ Rotation is measured counterclockwise when looking along the <I>Y</I>-axis
+ from the origin towards +<EM></EM>.
+ <U><b><I><I>obj</I></I> <EM>q</EM>  <B><TT>rotatez</TT></B>  <I><I>obj</I></I>'</b></U>
+ rotates <I><I>obj</I></I> around the <I>Z</I>-axis by <EM>q</EM> degrees.
+ Rotation is measured counterclockwise when looking along the <I>Z</I>-axis
+ from the origin towards +<EM></EM>.
+
+For example, if we want to put a sphere of radius 2.0 at (5.0, 5.0, 5.0),
+we can use the following GML code:
+
+{ ... } sphere
+2.0 uscale
+5.0 5.0 5.0 translate
+The first line creates the sphere (as described in <U><b>Section <U><b>3.2</b></U></b></U>,
+the <TT>sphere</TT> operator takes a single function argument).
+The second line uniformly scales the sphere by a factor of 2.0, and the
+third line translates the sphere to (5.0, 5.0, 5.0).
+
+These transformations are all <EM>affine</EM> transformations and they
+have the property of preserving the straightness of lines and parallelism
+between lines, but they can alter the distance between points and the
+angle between lines.
+Using <EM>homogeneous coordinates</EM>, these transformations can be
+expressed as multiplication by a 4#4 matrix.
+<U><b>Figure <U><b>3</b></U></b></U> describes the matrices that correspond to
+each of the transformation operators.
+
+ 
+ 
+
+<EM>
+e
+e
+e
+e
+e</EM>
+
+1
+0
+0
+<I>r</I><g><2><I><I>tx</I></I></2></g>
+
+0
+1
+0
+<I>r</I><g><2><I><I>ty</I></I></2></g>
+
+0
+0
+1
+<I>r</I><g><2><I><I>tz</I></I></2></g>
+
+0
+0
+0
+1
+
+<EM>
+
+
+
+
+u</EM>
+
+
+<EM>
+e
+e
+e
+e
+e</EM>
+
+<I>r</I><g><2><I><I>sx</I></I></2></g>
+0
+0
+0
+
+0
+<I>r</I><g><2><I><I>sy</I></I></2></g>
+0
+0
+
+0
+0
+<I>r</I><g><2><I><I>sz</I></I></2></g>
+0
+
+0
+0
+0
+1
+
+<EM>
+
+
+
+
+u</EM>
+
+
+<EM>
+e
+e
+e
+e
+e</EM>
+
+<I>r</I><g><2><I>s</I></2></g>
+0
+0
+0
+
+0
+<I>r</I><g><2><I>s</I></2></g>
+0
+0
+
+0
+0
+<I>r</I><g><2><I>s</I></2></g>
+0
+
+0
+0
+0
+1
+
+<EM>
+
+
+
+
+u</EM>
+
+
+Translation
+Scale matrix
+Isotropic scale matrix
+
+ 
+
+
+<EM>
+e
+e
+e
+e
+e</EM>
+
+1
+0
+0
+0
+
+0
+cos(<EM>q</EM>)
+-sin(<EM>q</EM>)
+0
+
+0
+sin(<EM>q</EM>)
+cos(<EM>q</EM>)
+0
+
+0
+0
+0
+1
+
+<EM>
+
+
+
+
+u</EM>
+
+
+<EM>
+e
+e
+e
+e
+e</EM>
+
+cos(<EM>q</EM>)
+0
+sin(<EM>q</EM>)
+0
+
+0
+1
+0
+0
+
+-sin(<EM>q</EM>)
+0
+cos(<EM>q</EM>)
+0
+
+0
+0
+0
+1
+
+<EM>
+
+
+
+
+u</EM>
+
+
+<EM>
+e
+e
+e
+e
+e</EM>
+
+cos(<EM>q</EM>)
+-sin(<EM>q</EM>)
+0
+0
+
+sin(<EM>q</EM>)
+cos(<EM>q</EM>)
+0
+0
+
+0
+0
+1
+0
+
+0
+0
+0
+1
+
+<EM>
+
+
+
+
+u</EM>
+
+
+Rotation (<I>X</I>-axis)
+Rotation (<I>Y</I>-axis)
+Rotation (<I>Z</I>-axis)
+
+ 
+
+Figure 3: Transformation matrices
+
+
+ <U><b></b></U>
+
+For example, translating the point (2.6, 3.0, -5.0) by (-1.6, -2.0, 6.0) is
+expressed as the following multiplication:
+
+
+ 
+
+<EM>
+e
+e
+e
+e
+e</EM>
+
+1.0
+0.0
+0.0
+-1.6
+
+0.0
+1.0
+0.0
+-2.0
+
+0.0
+0.0
+1.0
+6.0
+
+0.0
+0.0
+0.0
+1.0
+
+<EM>
+
+
+
+
+u</EM>
+
+
+ 
+<EM>
+e
+e
+e
+e
+e</EM>
+
+2.6
+
+3.0
+
+-5.0
+
+1.0
+
+<EM>
+
+
+
+
+u</EM>
+=
+ 
+<EM>
+e
+e
+e
+e
+e</EM>
+
+1.0
+
+1.0
+
+1.0
+
+1.0
+
+<EM>
+
+
+
+
+u</EM>
+
+Observe that points have a fourth coordinate of 1, whereas vectors
+have a fourth coordinate of 0.
+Thus, translation has no effect on vectors.
+
+
+
+<5>3.4   Illumination model</5>
+
+<U><b></b></U>
+When the ray that shoots from the eye position through a pixel hits a surface,
+we need to apply the illumination equation to determine what color the
+pixel should have.
+<U><b>Figure <U><b>4</b></U></b></U> shows a situation where a ray from the viewer has
+hit a surface.
+
+ 
+
+ 
+
+Figure 4: A ray intersecting a surface
+
+
+ <U><b></b></U>
+The illumination at this point is given by the following equation:
+
+<U><b> </b></U>
+
+<I>I</I> = <I>k</I><g><2><I>d</I></2></g> <I>I</I><g><2><I>a</I></2></g> <I>C</I>
+ + <I>k</I><g><2><I>d</I></2></g> 
+
+<2><I>ls</I></2>
+
+<7><EM></EM></7>
+
+<2><I>j</I>=1</2>
+
+(<B><I>N</I></B><5></5><B><I>L</I></B>
+<g><2><I>j</I></2></g>) <I>I</I><g><2><I>j</I></2></g> <I>C</I>
+ + <I>k</I><g><2><I>s</I></2></g> 
+
+<2><I>ls</I></2>
+
+<7><EM></EM></7>
+
+<2><I>j</I>=1</2>
+
+(<B><I>N</I></B><5></5><B><I>H</I></B><g><2><I>j</I></2></g>)<c><2><I>n</I></2></c> <I>I</I><g><2><I>j</I></2></g> <I>C</I>
+ + <I>k</I><g><2><I>s</I></2></g> <I>I</I><g><2><I>s</I></2></g> <I>C</I>
+    (10)
+
+where
+
+
+ 
+
+<I>C</I>		
+=
+surface color
+
+<I>I</I><g><2><I>a</I></2></g>		
+=
+intensity of ambient lighting
+
+<I>k</I><g><2><I>d</I></2></g>		
+=
+diffuse reflection coefficient
+
+<B><I>N</I></B>	
+=
+unit surface normal
+
+<B><I>L</I></B><g><2><I>j</I></2></g>	
+=
+unit vector in direction of <I>j</I>th light source
+
+<I>I</I><g><2><I>j</I></2></g>		
+=
+intensity of <I>j</I>th light source
+
+<I>k</I><g><2><I>s</I></2></g>		
+=
+specular reflection coefficient
+
+<B><I>H</I></B><g><2><I>j</I></2></g>	
+=
+unit vector in the direction halfway between the viewer
+		 and <B><I>L</I></B><g><2><I>j</I></2></g>
+
+<I>n</I>		
+=
+Phong exponent
+
+<I>I</I><g><2><I>s</I></2></g>		
+=
+intensity of light from direction <B><I>S</I></B>
+
+
+The view vector, <B><I>N</I></B>, and <B><I>S</I></B> all lie in the same plane.
+The vector <B><I>S</I></B> is called the
+<EM>reflection</EM> vector and forms same angle with <B><I>N</I></B> as the
+vector to the viewer does (this angle is labeled <EM>q</EM>
+in <U><b>Figure <U><b>4</b></U></b></U>).
+Light intensity is represented as point in GML and multiplication of
+points is component wise.
+The values of <I>C</I>, <I>k</I><g><2><I>d</I></2></g>, <I>k</I><g><2><I>s</I></2></g>, and <I>n</I> are the <EM>surface properties</EM>
+of the object at the point of reflection.
+<U><b>Section <U><b>3.6</b></U></b></U> describes the mechanism for specifying these values
+for an object.
+
+Computing the contribution of lights (the <I>I</I><g><2><I>j</I></2></g> part of the above equation)
+requires casting a <U><b></b></U><EM>shadow ray</EM> from the
+intersection point to the light's position.
+If the ray hits an object that is closer than the light, then the light
+does not contribute to the illumination of the intersection point.
+
+Ray tracing is a recursive process.
+Computing the value of <I>I</I><g><2><I>s</I></2></g> requires shooting a ray in the direction of <I>S</I>
+and seeing what object (if any) it intersects.
+To avoid infinite recursion, we limit the tracing to some <EM>depth</EM>.
+The depth limit is given as an argument to the <TT>render</TT>
+operator (see <U><b>Section <U><b>3.8</b></U></b></U>).
+
+
+
+<5>3.5   Lights</5>
+
+<U><b></b></U>
+GML supports three types of light sources: <EM>directional lights</EM>,
+<EM>point lights</EM> and <EM>spotlights</EM>.
+Directional lights are assumed to be infinitely far away and have only
+a direction.
+Point lights have a position and an intensity (specified as a color triple),
+and they emit light uniformly in all directions.
+Spotlights emit a cone of light in a given direction.
+The light cone is specified by three parameters: the light's direction,
+the light's cutoff angle, and an attenuation exponent (see <U><b>Figure <U><b>5</b></U></b></U>).
+
+ 
+
+ 
+
+Figure 5: Spotlight
+
+
+ <U><b></b></U>
+Unlike geometric objects, lights are defined in terms of world
+coordinates.
+
+
+ <U><b><I><I>dir</I></I> <I><I>color</I></I>  <B><TT>light</TT></B>  <I>l</I></b></U>
+ creates a directional light source at infinity with direction <I><I>dir</I></I>
+ and intensity <I><I>color</I></I>.
+ Both <I><I>dir</I></I> and <I><I>color</I></I> are specified as point values.
+ <U><b><I><I>pos</I></I> <I><I>color</I></I>  <B><TT>pointlight</TT></B>  <I>l</I></b></U>
+ creates a point-light source at the world coordinate position <I><I>pos</I></I>
+ with intensity <I><I>color</I></I>.
+ Both <I><I>pos</I></I> and <I><I>color</I></I> are specified as point values.
+ Pointlights are a <U><b>Tier-2</b></U> feature.
+ <U><b><I><I>pos</I></I> <I><I>at</I></I> <I><I>color</I></I> <I><I>cutoff</I></I> <I><I>exp</I></I>  <B><TT>spotlight</TT></B>  <I>l</I></b></U>
+ creates a spotlight source at the world coordinate position <I><I>pos</I></I>
+ pointing towards the position <I><I>at</I></I>.
+ The light's color is given by <I><I>color</I></I>.
+ The spotlight's cutoff angle is given in degrees by <I><I>cutoff</I></I> and
+ the attenuation exponent is given by <I><I>exp</I></I> (these are real
+ numbers).
+ The intensity of the light from a spotlight at a point <I>Q</I> is determined
+ by the angle between the light's direction vector (<EM>i.e.</EM>, the vector from
+ <I><I>pos</I></I> to <I><I>at</I></I>) and the vector from <I><I>pos</I></I> to <I>Q</I>.
+ If the angle is greater than the cutoff angle, then intensity is zero;
+ otherwise the intensity is given by the equation
+ 
+
+ <I>I</I> = 
+<EM>
+
+c
+c
+e</EM>
+
+	
+
+<I><I>at</I></I>-<I><I>pos</I></I>
+
+
+
+|<I><I>at</I></I>-<I><I>pos</I></I>|
+
+
+ <5></5>
+
+<I>Q</I>-<I><I>pos</I></I>
+
+
+
+|<I>Q</I>-<I><I>pos</I></I>|
+
+
+ 
+<EM>
+
+
+
+</EM>
+
+<2><I><I>exp</I></I></2>
+
+
+
+
+
+
+ 
+
+ <I><I>color</I></I>
+     (11)
+
+ Spotlights are a <U><b>Tier-3</b></U> feature.
+
+The light from point lights and spotlights is attenuated by the distance
+from the light to the surface.
+The attenuation equation is:
+
+
+<I>I</I><g><2><I><I>surface</I></I></2></g> = 
+
+100 <I>I</I>
+
+
+
+99 + <I>d</I><c><2>2</2></c>
+
+
+    (12)
+
+where <I>d</I> is the distance from the light to the surface and <I>I</I> is the
+intensity of the light.
+Thus at a distance of 5 units the strength of the light will be about
+85% and at 10 units it will be about 50%.
+Note that the light reflected from surfaces (the <I>k</I><g><2><I>s</I></2></g> <I>I</I><g><2><I>s</I></2></g> <I>C</I> term in
+Equation <U><b>10</b></U>) is <EM>not</EM> attenuated; nor is the light
+from directional sources.
+
+
+
+<5>3.6   Surface functions</5>
+
+<U><b></b></U>
+GML uses <EM>procedural texturing</EM> to describe the surface properties
+of objects.
+The basic idea is that the model provides a function for each object, which maps
+positions on the object to the surface properties that determine
+how the object is illuminated (see <U><b>Section <U><b>3.4</b></U></b></U>).
+
+A surface function takes three arguments: an integer
+specifying an object's face and two texture coordinates.
+For all objects, except planes, the texture coordinates are restricted to the
+range 0 <EM></EM> <I>u</I>,<I>v</I> <EM></EM> 1.
+The <U><b>Table <U><b>1</b></U></b></U> specifies how these coordinates map to
+points in object-space for the various builtin graphical objects.
+
+ 
+
+Table 1: Texture coordinates for primitives
+
+
+ <U><b></b></U>
+ 
+ 
+
+
+SPHERE
+
+
+
+(0, <I>u</I>, <I>v</I>)
+(<I>sqrt</I>(1 - <I>y</I><c><2>2</2></c>)sin(360 <I>u</I>), <I>y</I>, <I>sqrt</I>(1 - <I>y</I><c><2>2</2></c>)cos(360 <I>u</I>)),
+where <I>y</I> = 2 <I>v</I> - 1
+
+
+
+CUBE
+
+
+
+(0, <I>u</I>, <I>v</I>)	
+(<I>u</I>, <I>v</I>, 0)
+front
+
+(1, <I>u</I>, <I>v</I>)	
+(<I>u</I>, <I>v</I>, 1)
+back
+
+(2, <I>u</I>, <I>v</I>)	
+(0, <I>v</I>, <I>u</I>)
+left
+
+(3, <I>u</I>, <I>v</I>)	
+(1, <I>v</I>, <I>u</I>)
+right
+
+(4, <I>u</I>, <I>v</I>)	
+(<I>u</I>, 1, <I>v</I>)
+top
+
+(5, <I>u</I>, <I>v</I>)	
+(<I>u</I>, 0, <I>v</I>)
+bottom
+
+
+
+CYLINDER
+
+
+
+(0, <I>u</I>, <I>v</I>)	
+(sin(360 <I>u</I>), <I>v</I>, cos(360 <I>u</I>))
+side
+
+(1, <I>u</I>, <I>v</I>)	
+(2 <I>u</I> - 1, 1, 2 <I>v</I> - 1)
+top
+
+(2, <I>u</I>, <I>v</I>)	
+(2 <I>u</I> - 1, 0, 2 <I>v</I> - 1)
+bottom
+
+
+
+CONE
+
+
+
+(0, <I>u</I>, <I>v</I>)	
+(<I>v</I> sin(360 <I>u</I>), <I>v</I>, <I>v</I> cos(360 <I>u</I>))
+side
+
+(1, <I>u</I>, <I>v</I>)	
+(2 <I>u</I> - 1, 1, 2 <I>v</I> - 1)
+base
+
+
+
+PLANE
+
+
+
+(0, <I>u</I>, <I>v</I>)	
+(<I>u</I>, 0, <I>v</I>)
+
+
+
+Note that (as always in GML), the arguments to the sin and cos functions
+are in degrees.
+The GML implementation is responsible for the inverse mapping; <EM>i.e.</EM>,
+given a point on a solid, compute the texture coordinates.
+
+A surface function returns a point representing the
+surface color (<I>C</I>), and three real numbers: the diffuse reflection
+coefficient (<I>k</I><g><2><I>d</I></2></g>), the specular reflection
+coefficient (<I>k</I><g><2><I>s</I></2></g>), and the Phong exponent (<I>n</I>).
+For example, the code in <U><b>Figure <U><b>6</b></U></b></U> defines a cube with a
+matte 3#3 black and white checked pattern on each face.
+
+
+0.0 0.0 0.0 point /black
+1.0 1.0 1.0 point /white
+
+[                                 % 3x3 pattern
+  [ black white black ]
+  [ white black white ]
+  [ black white black ]
+] /texture
+
+{ /v /u /face                     % bind parameters
+  {                               % toIntCoord : float -&gt; int
+    3.0 mulf floor /i               % i = floor(3.0*r)
+    i 3 eqi { 2 } { i } if           % make sure i is not 3
+  } /toIntCoord
+  texture u toIntCoord apply get  % color = texture[u][v]
+    v toIntCoord apply get
+  1.0                             % kd = 1.0
+  0.0                             % ks = 0.0
+  1.0                             % n = 1.0
+} cube
+
+
+Figure 6: A checked pattern on a cube
+
+
+ <U><b></b></U>
+
+
+
+
+<5>3.7   Constructive solid geometry</5>
+
+<U><b></b></U>
+Solid objects may be combined using boolean set operations
+to form more complex solids.
+There are three composition operations:
+
+ <U><b><I><I>obj</I></I><g><2>1</2></g> <I><I>obj</I></I><g><I><2>2</2></I></g>  <B><TT>union</TT></B>  <I><I>obj</I></I><g><I><2>3</2></I></g></b></U>
+ forms the union <I><I>obj</I></I><g><I><2>3</2></I></g> of the two solids <I><I>obj</I></I><g><2>1</2></g>
+ and <I><I>obj</I></I><g><2>2</2></g>.
+ <U><b><I><I>obj</I></I><g><2>1</2></g> <I><I>obj</I></I><g><I><2>2</2></I></g>  <B><TT>intersect</TT></B>  <I><I>obj</I></I><g><I><2>3</2></I></g></b></U>
+ forms the intersection <I><I>obj</I></I><g><I><2>3</2></I></g> of the two solids <I><I>obj</I></I><g><2>1</2></g>
+ and <I><I>obj</I></I><g><2>2</2></g>.
+ The <TT>intersect</TT> operator is a <U><b>Tier-3</b></U> feature.
+ <U><b><I><I>obj</I></I><g><2>1</2></g> <I><I>obj</I></I><g><I><2>2</2></I></g>  <B><TT>difference</TT></B>  <I><I>obj</I></I><g><I><2>3</2></I></g></b></U>
+ forms the solid <I><I>obj</I></I><g><2>3</2></g> that is the solid <I><I>obj</I></I><g><2>1</2></g>
+ minus the solid <I><I>obj</I></I><g><2>2</2></g>.
+ The <TT>difference</TT> operator is a <U><b>Tier-3</b></U> feature.
+
+
+We can determine the intersection of a ray and a compound solid by
+recursively computing the intersections of the ray and the solid's 
+pieces (both entries and exits) and then merging the information
+according to the boolean composition operator.
+<U><b>Figure <U><b>7</b></U></b></U> illustrates this process for two objects (this picture is
+called a <EM>Roth diagram</EM>).
+
+ 
+
+ 
+
+Figure 7: Tracing a ray through a compound solid
+
+
+ <U><b></b></U>
+
+
+When rendering a composite object, the surface properties are determined by the
+primitive that defines the surface.
+If the surfaces of two primitives coincide, then which primitive defines
+the surface properties is unspecified.
+
+
+
+<5>3.8   Rendering</5>
+
+<U><b></b></U>
+The <TT>render</TT> operator causes the scene to be rendered to a file.
+
+ <U><b><I><I>amb</I></I> <I><I>lights</I></I> <I><I>obj</I></I> <I><I>depth</I></I> <I><I>fov</I></I> 
+ <I><I>wid</I></I> <I><I>ht</I></I> <I><I>file</I></I>
+   <B><TT>render</TT></B>  ---</b></U>
+
+The render operator renders a scene to a file.
+It takes eight arguments:
+
+ <B><I><I>amb</I></I></B> the intensity of ambient light (a point).
+ <B><I><I>lights</I></I></B> is an array of lights used to illuminate the scene.
+ <B><I><I>obj</I></I></B> is the scene to render.
+ <B><I><I>depth</I></I></B> is an integer limit on the recursive depth of the
+ ray tracing owing to specular reflection.
+ I.e., when <I><I>depth</I></I> = 0, we do not recursively compute
+ the contribution from the direction of reflection (<B><I>S</I></B> in
+ <U><b>Figure <U><b>4</b></U></b></U>).
+ <B><I><I>fov</I></I></B> is the horizontal field of view in
+ degrees (a real number).
+ <B><I><I>wid</I></I></B> is the width of the rendered image in
+ pixels (an integer).
+ <B><I><I>ht</I></I></B> is the height of the rendered image in
+ pixels (an integer).
+ <B><I><I>file</I></I></B> is a string specifying output file for
+ the rendered image.
+
+The <TT>render</TT> operator is the only GML operator with side effects
+(<EM>i.e.</EM>, it modifies the host file system).
+A GML program may contain multiple <TT>render</TT> operators (for
+animation effects), but the order in which the output files are generated
+is implementation dependent.
+The results of evaluating the <TT>render</TT> operator during the evaluation
+of a surface function are undefined (<EM>i.e.</EM>, your program may choose to exit
+with an error, or execute the operation, or do something else).
+
+When rendering a scene, the eye position is fixed at (0, 0, -1) looking
+down the <I>Z</I>-axis and the image plane is the <I>XY</I>-plane (see
+<U><b>Figure <U><b>8</b></U></b></U>).
+The horizontal field of view (<I><I>fov</I></I>) determines the width of the
+image in world space (<EM>i.e.</EM>, it is 2 tan(0.5 <I><I>fov</I></I>)), and the
+height is determined from the aspect ratio.
+If the upper-left corner of the image is at (<I>x</I>, <I>y</I>, 0) and the width of
+a pixel is <EM>D</EM>, then the ray through the <I>j</I>th pixel in the <I>i</I>th row
+has a direction of (<I>x</I> + (<I>j</I>+0.5)<EM>D</EM>, <I>y</I> - (<I>i</I>+0.5)<EM>D</EM>, 1).
+
+ 
+
+ 
+
+Figure 8: View coordinate system
+
+
+ <U><b></b></U>
+
+
+When the render operation detects that a ray has intersected the surface of
+an object, it must compute the texture coordinates at the point of
+intersection and apply the surface function to them.
+Let (<I><I>face</I></I>, <I>u</I>, <I>v</I>) be the texture coordinates and <I><I>surf</I></I> be the
+surface function at the point of intersection, and let
+
+ <I>Eval</I>(<I><I>surf</I></I> <TT><I>apply</I></TT>, <I><I>face</I></I>, <I>u</I>, <I>v</I>) = (<I>C</I>, <I>k</I><g><2><I>d</I></2></g>, <I>k</I><g><2><I>s</I></2></g>, <I>n</I>)
+
+Then the surface properties for the illumination equation (see
+<U><b>Section <U><b>3.4</b></U></b></U>) are <I>C</I>, <I>k</I><g><2><I>d</I></2></g>, <I>k</I><g><2><I>s</I></2></g>, and <I>n</I>.
+
+
+
+<5>3.9   The output format</5>
+
+<U><b></b></U>
+The output format is the <EM>Portable Pixmap</EM> (PPM) file format.<U><b><c><2>1</2></c></b></U>
+The format consists of a ASCII header followed by the pixel data in binary form.
+The format of the header is
+
+
+ The magic number, which are the two characters ``<TT>P6</TT>.''
+ 
+A width, formatted as ASCII characters in decimal.
+ 
+A height, again in ASCII decimal.
+ 
+The ASCII text ``<TT>255</TT>,'' which is the maximum color-component value.
+
+These items are separated by whitespace (blanks, TABs, CRs, and LFs).
+After the maximum color value, there is a single whitespace character
+(usually a newline), which is followed by the pixel data.
+The pixel data is a sequence of three-byte pixel values (red, green, blue)
+in row-major order.
+Light intensity values (represented as
+GML points) are converted to RGB format by clamping the range and scaling.
+
+In the header, characters from a ``<TT>#</TT>'' to the next end-of-line are
+ignored (comments).
+This comment mechanism should be used to include the group's name immediately
+following the line with the magic number.
+For example, the sample implementation produces the following header:
+
+P6
+# GML Sample Implementation
+256 256
+255
+
+
+
+
+<6><PL><B>4   Requirements</B></PL></6>
+
+<U><b></b></U>
+Your program should take its input from standard input (<EM>i.e.</EM>, UNIX file
+descriptor <TT>0</TT>).
+Execution of the input specification will result in zero or more images being
+rendered to files.
+If your implementation detects an error, it should return a non-zero exit
+status; otherwise it should return a zero exit status upon successful
+termination.
+Our test harness relies on this error status being set correctly, so be sure
+to get them right!
+
+Your program should detect syntactically incorrect input and run-time type
+errors (the latter may be detected statically, if you wish).
+It should also catch array accesses that are out of range.
+Other errors, such as integer overflows and division by zero,
+may be detected and reported, but it is not necessary.
+In particular, implementations are free to generate NaNs and Infs
+when doing floating-point computations.
+
+The submission requirements are described in detail
+at <U><b><TT>http://www.cs.cornell.edu/icfp/submission.htm</TT></b></U>,
+but we summarize them here.
+Your submission should include a <TT>README</TT> file
+containing a brief description of the submission, programming
+language(s) used, and anything else that you want to bring to the
+attention of the judges.
+
+Submissions will be evaluated on their correctness, speed of execution,
+and set of implemented GML features.
+For the latter metric, we have grouped the features of GML into
+three tiers as follows:<U><b></b></U>
+
+ <U><b><B>Tier 1</B></b></U>
+ The first tier consists of the operations described in <U><b>Section <U><b>2</b></U></b></U>, plus
+ planes, spheres, and directional lights. 
+ All GML operators <EM>except</EM> <TT>cone</TT>, <TT>cube</TT>,
+ <TT>cylinder</TT>, <TT>difference</TT>, <TT>intersect</TT>,
+ <TT>pointlight</TT>, and <TT>spotlight</TT> should be implemented.
+ <U><b><B>Tier 2</B></b></U>
+ This tier adds more primitive solids and additional lighting to Tier 1.
+ The additional operators are: <TT>cone</TT>, <TT>cube</TT>,
+ <TT>cylinder</TT>, and <TT>pointlight</TT>.
+ <U><b><B>Tier 3</B></b></U>
+ This tier adds constructive solid geometry and additional lighting to Tier 2.
+ The additional operators are:
+ <TT>difference</TT>, <TT>intersect</TT>, and <TT>spotlight</TT>.
+
+Your <TT>README</TT> file should specify which tier
+your submission implements.
+
+Judging of the contest entries will proceed in three phases.
+First, we will evaluate each submission for basic correctness
+using very simple Tier-1 test cases.
+Programs that fail to run, dump core, etc. will be disqualified
+at the end of this phase.
+The second phase tests the basic correctness of submissions (without
+regards to performance).
+We will use a selection of Tier-1 test cases and compare the output
+with that generated by our sample implementations.
+Submissions that deviate significantly from the the reference outputs
+will be disqualified.
+The third phase will compare the performance and implemented features
+of the submissions.
+When comparing submissions, a program that implements Tier-1 will have to
+be significantly faster than a Tier-2 program to beat it.
+Likewise, a Tier-2 program will have to be significantly faster than
+a Tier-3 program to beat it.
+Image quality also matters; for example, a program that has
+<U><b>surface acne</b></U> will be penalized.
+Consideration will be given for interesting sample images.
+
+
+
+<6><PL><B>5   Hints</B></PL></6>
+
+<U><b></b></U>
+
+
+
+<5>5.1   Basic facts</5>
+
+The dot product of two vectors <I>v</I><g><2>1</2></g> = (<I>x</I><g><2>1</2></g>, <I>y</I><g><2>1</2></g>, <I>z</I><g><2>1</2></g>) and
+<I>v</I><g><2>2</2></g> = (<I>x</I><g><2>2</2></g>, <I>y</I><g><2>2</2></g>, <I>z</I><g><2>2</2></g>)
+is <I>v</I><g><2>1</2></g><5></5><I>v</I><g><2>2</2></g> = (<I>x</I><g><2>1</2></g> <I>x</I><g><2>2</2></g> + <I>y</I><g><2>1</2></g> <I>y</I><g><2>2</2></g> + <I>z</I><g><2>1</2></g> <I>z</I><g><2>2</2></g>).
+When <I>v</I><g><2>1</2></g> and <I>v</I><g><2>2</2></g> are <EM>unit</EM> vectors, then <I>v</I><g><2>1</2></g><5></5><I>v</I><g><2>2</2></g>
+is the cosine of the angle formed by the two vectors.
+More generally, <I>v</I><g><2>1</2></g><5></5><I>v</I><g><2>2</2></g> = |<I>v</I><g><2>1</2></g>| |<I>v</I><g><2>2</2></g>| cos(<EM>q</EM>), where
+<EM>q</EM> is the angle between the vectors.
+
+
+
+<5>5.2   Intersection testing</5>
+
+
+A plane <I>P</I> can be defined by its unit normal <B><I>P</I></B><g><2><I>n</I></2></g> and the distance <I>d</I>
+from the plane to the origin.
+The half-space that <I>P</I> = (<B><I>P</I></B><g><2><I>n</I></2></g>, <I>d</I>) defines are those points <I>Q</I> such that
+<I>Q</I><5></5><B><I>P</I></B><g><2><I>n</I></2></g> + <I>d</I> <EM></EM> 0.
+Given this definition,
+the intersection of a ray <B><I>R</I></B>(<I>t</I>) = (<B><I>R</I></B><g><2><I>o</I></2></g> + <I>t</I> <B><I>R</I></B><g><2><I>d</I></2></g>) and
+a plane (<B><I>P</I></B><g><2><I>n</I></2></g>, <I>d</I>) is given by the equation
+
+
+<I>t</I><g><2><I><I>intersection</I></I></2></g> = 
+
+-(<B><I>P</I></B><g><2><I>n</I></2></g> <5></5> <B><I>R</I></B><g><2><I>o</I></2></g> + <I>d</I>)
+
+
+
+<B><I>P</I></B><g><2><I>n</I></2></g><5></5><B><I>R</I></B><g><2><I>d</I></2></g>
+
+
+    (13)
+
+If <B><I>P</I></B><g><2><I>n</I></2></g><5></5><B><I>R</I></B><g><2><I>d</I></2></g> = 0, then the ray is parallel to the plane
+(it might lie in the plane, but we can ignore that case for our purposes).
+If <I>t</I><g><2><I><I>intersection</I></I></2></g> &lt; 0, then the line defined by the ray
+intersects the plane behind the ray's origin; otherwise the point of
+intersection is <B><I>R</I></B>(<I>t</I><g><2><I><I>intersection</I></I></2></g>).
+We can tell which side of the plane <B><I>R</I></B><g><2><I>o</I></2></g> lies by examining the sign of
+<B><I>P</I></B><g><2><I>n</I></2></g><5></5><B><I>R</I></B><g><2><I>d</I></2></g>; if it is positive, then <B><I>R</I></B><g><2><I>o</I></2></g> is in the half-space defined
+by <I>P</I>.
+
+Computing the intersection of a ray <B><I>R</I></B>(<I>t</I>) = (<B><I>R</I></B><g><2><I>o</I></2></g> + <I>t</I> <B><I>R</I></B><g><2><I>d</I></2></g>) and
+a sphere <I>S</I> centered at <B><I>S</I></B><g><2><I>c</I></2></g> with radius <I>r</I> is more complicated.
+Let <I>l</I><g><2><I><I>oc</I></I></2></g> be the length of the vector from the ray's origin
+to the center of the sphere; then if <I>l</I><g><2><I><I>oc</I></I></2></g> &lt; <I>r</I>, the ray
+originates inside the sphere.
+We can compute the distance along the ray from the ray's origin
+to the closest approach to the sphere's center by the equation
+<I>t</I><g><2><I><I>ca</I></I></2></g> = (<B><I>S</I></B><g><2><I>c</I></2></g> - <B><I>R</I></B><g><2><I>o</I></2></g>)<5></5><B><I>R</I></B><g><2><I>d</I></2></g> (see
+<U><b>Figure <U><b>9</b></U></b></U>).
+If <I>t</I><g><2><I><I>ca</I></I></2></g> &lt; 0, then the ray is pointing away from the
+sphere's center, which means that if the ray's origin is outside the sphere
+then there is no intersection.
+Once we have computed <I>t</I><g><2><I><I>ca</I></I></2></g>, we can compute the square of
+the distance from the ray to the center at the point of closest approach
+by the <I>d</I><c><2>2</2></c> = <I>l</I><g><2><I><I>oc</I></I></2></g><c><2>2</2></c> - <I>t</I><g><2><I><I>ca</I></I></2></g><c><2>2</2></c>.
+From this, we can compute the square of the half chord
+distance
+<I>t</I><g><2><I><I>hc</I></I></2></g><c><2>2</2></c> = <I>r</I><c><2>2</2></c> - <I>d</I><c><2>2</2></c> = <I>r</I><c><2>2</2></c> - <I>l</I><g><2><I><I>oc</I></I></2></g><c><2>2</2></c> + <I>t</I><g><2><I><I>ca</I></I></2></g><c><2>2</2></c>.
+As can be seen in <U><b>Figure <U><b>9</b></U></b></U>, if <I>t</I><g><2><I><I>hc</I></I></2></g>&lt;0, then
+the ray does not intersect the sphere, otherwise the points of intersection
+are given by <B><I>R</I></B>(<I>t</I><g><2><I><I>ca</I></I></2></g><I>t</I><g><2><I><I>hc</I></I></2></g>) (assuming the ray
+originates outside the sphere).
+
+ 
+
+ 
+
+Figure 9: Ray/sphere intersection
+
+
+ <U><b></b></U>
+
+
+The intersection of a ray and a cube can be determined by using the
+technique given for planes (test against the planes containing the
+faces of the cube).
+Intersections for cones and cylinders can be determined by plugging the
+ray equation (<B><I>R</I></B>(<I>t</I>) = <B><I>R</I></B><g><2><I>o</I></2></g> + <I>t</I> <B><I>R</I></B><g><2><I>d</I></2></g>) into the equations for the
+surface.
+In both cases (as for spheres) the solution requires pluggin values into the
+quadratic formula.
+
+One approach to ray tracing with a modeling language that supports affine
+transformations (such as GML) is to transform the rays into object space
+and do the intersection tests there.
+This approach allows the intersection tests to be specialized to the
+standard objects, which can greatly simplify the tests.
+Remember, however, that affine transformations do not preserve lengths ---
+applying an affine transformation to a unit vector will not yield a unit
+vector in general.
+
+
+
+<5>5.3   Surface acne</5>
+
+<U><b></b></U>
+
+One problem that you are likely to encounter is called <EM>surface acne</EM>
+and results from precision errors.
+The problem arises from when the origin of a <U><b>shadow ray</b></U> is
+on the wrong side of its originating surface, and thus intersets the surface.
+The visual result is usually a black dot at that pixel.
+The <U><b>sample images</b></U>
+include an example that illustrates this problem.
+One solution is to offset the shadow ray's origin by a small amount in the ray's
+direction.
+Another solution is not to test intersection's against the originating surface.
+
+
+
+<5>5.4   Optimizations</5>
+
+There are opportunities for performance improvements both in the the
+implementation of the GML interpreter and in the ray tracing engine.
+
+While the time spent to compute the objects in a scene is typically
+small compared to the rendering time, the GML functions that define
+the surface properties get evaluated for every ray intersection.
+You may find it useful to analyse surface functions for the common
+case where they are constant.
+
+The resources listed below include information on techniques for improving
+the efficiency of ray tracing.
+Most of these techniques focus on reducing the cost or number of ray/solid
+intersection tests.
+For example, if you precompute a bounding volume for a complex object,
+then a quick test against the bounding volume may allow you to avoid a
+more expensive test against the object.
+If your implementation supports the Tier-3 CSG operators, then you probably
+want to have a version of your intersection testing code that is
+specialized for <U><b>shadow rays</b></U>.
+
+
+
+<5>5.5   Resources</5>
+
+Here are a few pointers to on-line sources of information about graphical
+algorithms and ray tracing.
+
+
+ <U><b><B><TT>http://www.cs.cornell.edu/icfp/</TT></B></b></U>
+is the ICFP'00 contest home page.
+ <U><b><B><TT>http://www.cs.bell-labs.com/~jhr/icfp/examples.html</TT></B></b></U>
+is a page of example GML specifications with the expected images.
+ <U><b><B><TT>http://www.cs.bell-labs.com/~jhr/icfp/operators.txt</TT></B></b></U>
+is a text file that lists all of the GML operators.
+ <U><b><B><TT>http://www.realtimerendering.com/int/</TT></B></b></U>
+is the <EM>3D Object Intersection</EM> page with pointers to papers and code
+ describing various intersection algorithms.
+ <U><b><B><TT>http://www.acm.org/tog/resources/RTNews/html/</TT></B></b></U>
+is the home page of the <EM>Ray Tracing News</EM>, which is an online
+ journal about ray tracing techniques.
+ <U><b><B><TT>http://www.cs.utah.edu/~bes/papers/fastRT/</TT></B></b></U>
+is a paper by Brian Smits on efficiency issues in implementing ray tracers.
+ <U><b><B><TT>http://www.acm.org/pubs/tog/GraphicsGems/</TT></B></b></U>
+is the source-code repository for the <EM>Graphics Gems</EM> series.
+ <U><b><B><TT>http://www.exaflop.org/docs/cgafaq/</TT></B></b></U>
+is the FAQ for the <TT>comp.graphics.algorithms</TT> news group.
+ <U><b><B><TT>http://www.magic-software.com</TT></B></b></U>
+has source code for various graphical algorithms.
+
+
+
+
+<6><PL><B>Operator summary</B></PL></6>
+
+<U><b></b></U>
+
+The following is an alphabetical listing of the GML operators
+with brief descriptions.
+The third column lists the section where the operator is defined and the
+fourth column specifies which implementation tier the operator belongs to.
+
+
+
+ 
+<B>Name</B>
+<B>Description</B>
+<B>Section</B>
+<B>Tier</B>
+
+
+
+<U><b><TT>acos</TT></b></U>
+arc cosine function
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>addi</TT></b></U>
+integer addition
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>addf</TT></b></U>
+real addition
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>apply</TT></b></U>
+function application operator
+<U><b>2.3</b></U>
+*
+
+<U><b><TT>asin</TT></b></U>
+arc sine function
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>clampf</TT></b></U>
+clamp the range of a real number
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>cone</TT></b></U>
+a unit cone
+<U><b>3.2</b></U>
+**
+
+<U><b><TT>cos</TT></b></U>
+cosine function
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>cube</TT></b></U>
+a unit cube
+<U><b>3.2</b></U>
+**
+
+<U><b><TT>cylinder</TT></b></U>
+a unit cylinder
+<U><b>3.2</b></U>
+**
+
+<U><b><TT>difference</TT></b></U>
+difference of two solids
+<U><b>3.7</b></U>
+***
+
+<U><b><TT>divi</TT></b></U>
+integer division
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>divf</TT></b></U>
+real division
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>eqi</TT></b></U>
+integer equality comparison
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>eqf</TT></b></U>
+real equality comparison
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>floor</TT></b></U>
+real to integer conversion
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>frac</TT></b></U>
+fractional part of real number
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>get</TT></b></U>
+get an array element
+<U><b>2.6</b></U>
+*
+
+<U><b><TT>getx</TT></b></U>
+get <I>x</I> component of point
+<U><b>2.5</b></U>
+*
+
+<U><b><TT>gety</TT></b></U>
+get <I>y</I> component of point
+<U><b>2.5</b></U>
+*
+
+<U><b><TT>getz</TT></b></U>
+get <I>z</I> component of point
+<U><b>2.5</b></U>
+*
+
+<U><b><TT>if</TT></b></U>
+conditional control operator
+<U><b>2.3</b></U>
+*
+
+<U><b><TT>intersect</TT></b></U>
+intersection of two solids
+<U><b>3.7</b></U>
+***
+
+<U><b><TT>length</TT></b></U>
+array length
+<U><b>2.6</b></U>
+*
+
+<U><b><TT>lessi</TT></b></U>
+integer less-than comparison
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>lessf</TT></b></U>
+real less-than comparison
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>light</TT></b></U>
+defines a directional light source
+<U><b>3.5</b></U>
+*
+
+<U><b><TT>modi</TT></b></U>
+integer remainder
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>muli</TT></b></U>
+integer multiplication
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>mulf</TT></b></U>
+real multiplication
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>negi</TT></b></U>
+integer negation
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>negf</TT></b></U>
+real negation
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>plane</TT></b></U>
+the <I>XZ</I>-plane
+<U><b>3.2</b></U>
+*
+
+<U><b><TT>point</TT></b></U>
+create a point value
+<U><b>2.5</b></U>
+*
+
+<U><b><TT>pointlight</TT></b></U>
+defines a point-light source
+<U><b>3.5</b></U>
+**
+
+<U><b><TT>real</TT></b></U>
+convert an integer to a real number
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>render</TT></b></U>
+render a scene to a file
+<U><b>3.8</b></U>
+*
+
+<U><b><TT>rotatex</TT></b></U>
+rotation around the <I>X</I>-axis
+<U><b>3.3</b></U>
+*
+
+<U><b><TT>rotatey</TT></b></U>
+rotation around the <I>Y</I>-axis
+<U><b>3.3</b></U>
+*
+
+<U><b><TT>rotatez</TT></b></U>
+rotation around the <I>Z</I>-axis
+<U><b>3.3</b></U>
+*
+
+<U><b><TT>scale</TT></b></U>
+scaling transform
+<U><b>3.3</b></U>
+*
+
+<U><b><TT>sin</TT></b></U>
+sine function
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>sphere</TT></b></U>
+a unit sphere
+<U><b>3.2</b></U>
+*
+
+<U><b><TT>spotlight</TT></b></U>
+defines a spotlight source
+<U><b>3.5</b></U>
+***
+
+<U><b><TT>sqrt</TT></b></U>
+square root
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>subi</TT></b></U>
+integer subtraction
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>subf</TT></b></U>
+real subtraction
+<U><b>2.4</b></U>
+*
+
+<U><b><TT>translate</TT></b></U>
+translation transform
+<U><b>3.3</b></U>
+*
+
+<U><b><TT>union</TT></b></U>
+union of two solids
+<U><b>3.7</b></U>
+*
+
+<U><b><TT>uscale</TT></b></U>
+uniform scaling transform
+<U><b>3.3</b></U>
+*
+
+
+
+
+
+
+
+<6><PL><B>Change history</B></PL></6>
+
+
+ <B>1.18</B> A bunch of HTML rendering workarounds.
+ <B>1.17</B> Description of how surface functions are applied was missing the
+ face argument.
+ <B>1.16</B> Corrected sloppy language about illumination vectors.
+ <B>1.15</B> Clarified who rendering depth limit works; corrected
+ text about light attenuation; and fixed texture equations for cone
+ and cylinder end caps.
+ <B>1.14</B> Got the attenuation equation fix into the document this time.
+ <B>1.13</B> Clarified definition of <TT>modi</TT>; fixed typo in
+ description of initial ray direction; clarified types of light
+ operators; corrected typo in attenuation equation (should be <I>d</I><c><2>2</2></c>,
+ not <I>d</I><c><2>3</2></c>); and added note about conversion to RGB format.
+ <B>1.12</B> Added note about number sizes and fixed texture coordinates
+ of planes.
+ <B>1.11</B> Many fixes:
+ added specification of the <TT>render</TT> operation's types;
+ fixed typo in definition of dot product; added clarification about
+ illumination equation and vector
+ multiplication; fixed typo in equation for square of half-chord distance;
+ and fixed texture coordinate equations for spheres and cones.
+ <B>1.10</B> Clarified definition of <TT>frac</TT> operator.
+ <B>1.9</B> Added note about rebinding <TT>true</TT> and <TT>false</TT>.
+ <B>1.8</B> Added discussion about applying <TT>render</TT> in a surface
+ function.
+ <B>1.7</B> Fixed <TT>inc</TT> example.
+ <B>1.6</B> Fixed <TT>swap</TT> example.
+ <B>1.5</B> Fixed typo in <TT>divi</TT>/<TT>divf</TT> description; added text
+ to clarify syntax.
+ <B>1.4</B> Fixed mistake in factorial example.
+ <B>1.3</B> Added version number and change history.
+ <B>1.2</B> Fixed rule cross references in HTML version.
+ <B>1.1</B> Fixed bug in example; <TT>sub</TT> should have been <TT>get</TT>.
+ <B>1.0</B> First release.
+
+
+
+<U><b><5>1</5></b></U>
+ The <B>xv</B> program, available on most <b>Unix</b> systems,
+ and the <B>IrfanView</B> viewer for Microsoft Windows (available from
+ <U><b><TT>http://www.irfanview.com/</TT></b></U>) both understand the PPM format.
+
+
+
+
+
+
+
+
+<EM>This document was translated from L<c>A</c>T<g>E</g>X by
+</EM><U><b><EM>H</EM><EM><2><c>E</c></2></EM><EM>V</EM><EM><2><c>E</c></2></EM><EM>A</EM></b></U><EM>.
+</EM>
+
