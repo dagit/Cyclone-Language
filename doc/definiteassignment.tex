@@ -25,7 +25,7 @@ Here we begin with idioms that the analysis does and does not permit.
 With a basic sense of the idea, we expect programmers can generally
 not worry about the exact rules of the analysis.  However, when the
 compiler rejects code because memory may be uninitialized, the
-programmer needs to know how to re-write the code in order to pass the
+programmer needs to know how to rewrite the code in order to pass the
 analysis.  For this reason, we also give a more complete description
 of the rules.
 
@@ -134,10 +134,9 @@ However, this code is rejected even though it is safe:
 \end{verbatim}
 
 The problem is that the analysis loses too much information after the
-conditional, remembering only that ``\texttt{y} points somewhere that
-may be uninitialized.''  After such a loss of information, only an
-assignment to \texttt{*y} would be enough to convince the analysis that
-\texttt{*y} is initialized.
+conditional.  Because \texttt{y} may allow (in fact, does allow)
+access to uninitialized memory and the analysis does not know exactly
+where \texttt{y} points, the conditional is rejected.
 
 A compelling use of pointers to uninitialized memory is porting C code
 that uses \texttt{malloc}, such as the following (the cast is not
@@ -145,9 +144,10 @@ necessary in Cyclone):
 \begin{verbatim}
   struct IntPair { int x; int y; };
   struct IntPair * same(int z) {
-     struct IntPair * ans = 
+    struct IntPair * ans = 
           (struct IntPair *)malloc(sizeof(struct IntPair));
-    ans->x = ans->y = z;
+    ans->x = z;
+    ans->y = z;
     return ans;
   }
 \end{verbatim}
@@ -177,7 +177,7 @@ each such field a place. For example, in this code:
   struct B { int * x; $(int*,int*) y;}; 
   void f() {
     struct B b;
-    struct B @ bp = malloc(sizeof(B));
+    struct B * bp = malloc(sizeof(B));
     ...
   }
 \end{verbatim}
@@ -196,16 +196,14 @@ point to it.  For example, both of the following fragments would cause
 all the places starting with \texttt{<1>} to be escaped afterwards
 (assuming \texttt{bp} must point to \texttt{<1>}):
 \begin{verbatim}
-  struct B @ bp2;                some_fun(bp);                      
-   if(maybe()) 
-      bp2 = bp;
+  struct B * bp2;                some_fun(bp);                      
+  if(maybe()) 
+     bp2 = bp;
 \end{verbatim}
 
 Note that if ``p must point to P,'' then p is implicitly unescaped
 because we cannot know that p points to P if we don't know all the
-pointers to p.  The initialization level is one of None, This, or All.
-None means the place may be uninitialized.  This means the place is an
-initialized pointer, but everything it points to may be uninitialized.
+pointers to p.  The initialization level is either None or All.
 All means p and everying reachable from p (following as many pointers
 as you want) is initialized.
 
@@ -214,60 +212,57 @@ alias'' forces us to reject some safe programs, such as this one:
 \begin{verbatim}
   int f() {
     int * x, int *y;
-    int *@p1, *@p2;
+    int **p1;
     if(maybe())
      p1 = &x;
     else
      p1 = &y;
-    p2 = p1;
-    *p2 = new 7;
+    *p1 = new 7;
     return *p1;
   }
 \end{verbatim}
 
-Even though \texttt{p1} and \texttt{p2} have not escaped, our analysis
-says that they each point to an unknown place without saying that they
-point to the \emph{same} unknown place.
+Even though \texttt{p1} has not escaped, our analysis must give it
+initialization-level None.  Moreover, \texttt{x} and \texttt{y} escape
+before they are initialized, so the conditional is rejected.
 
 For safety reasons, once a place is escaped, any assignment to it must
 be a value that is fully initialized, meaning everything reachable
 from the value is initialized. This phenomenon is why the first
-function below is accepted but not the second (the \texttt{list_t} and
-\texttt{glist_t} typedefs are defined in the \texttt{List} library):
+function below is accepted but not the second (the \texttt{list_t}
+typedefs is defined in the \texttt{List} library):
 \begin{verbatim}
-  list_t<`a> copy(glist_t<`a,`r> x) {
-    list_t<`a> result, prev;
+  list_t<`a,`H> copy(list_t<`a> x) {
+    struct List *@nonnull result, *@nonnull prev;
 
-    if (x == null) return null;
-    result = malloc(sizeof(_));
-    result->hd = x->hd;
-    result->tl = null;
+    if (x == NULL) return NULL;
+    result = new List{.hd=x->hd,.tl=NULL};
     prev = result;
-    for (x=x->tl; x != null; x=x->tl) {
-      list_t<`a> next = malloc(sizeof(_));
-      next->hd = x->hd;
-      next->tl = null;
-      prev->tl = next;
+    for (x=x->tl; x != NULL; x=x->tl) {
+      struct List *@nonnull temp = malloc(sizeof(struct List));
+      temp->hd = x->hd;
+      temp->tl = NULL;
+      prev->tl = temp;
+      prev = temp;
+    }
+    return result;
+  }  
+
+  list_t<`a,`r2> rcopy(region_t<`r2> r2, list_t<`a> x) {
+    struct List *@nonnull result, *@nonnull prev;
+
+    if (x == NULL) return NULL;
+    result = rnew(r2) List{.hd=x->hd,.tl=NULL};
+    prev = result;
+    for (x=x->tl; x != NULL; x=x->tl) {
+      prev->tl = malloc(sizeof(struct List));
+      prev->tl->hd = x->hd;
+      prev->tl->tl = NULL;
       prev = prev->tl;
     }
     return result;
-  } 
+  }  
 
-  list_t<`a> copy(glist_t<`a,`r> x) {
-    list_t<`a> result, prev;
-
-    if (x == null) return null;
-    result = malloc(sizeof(_));
-    result->hd = x->hd;
-    result->tl = null;
-    prev = result;
-    for (x=x->tl; x != null; x=x->tl) {
-      prev->tl = malloc(sizeof(_));
-      prev->tl->hd = x->hd;
-      prev->tl->tl = null;
-    }
-    return result;
-  } 
 \end{verbatim}
 
 In the for body, we do not know where prev must point (on the first

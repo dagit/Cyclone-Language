@@ -24,7 +24,7 @@ such a value, expressions of any appropriate type suffice:
 Optionally, you can explicitly give the type being used for
 \texttt{`a}:
 \begin{verbatim}
-  struct T x = T{<int@> new 3, new 4};
+  struct T x = T{<int*@nonnull> new 3, new 4};
 \end{verbatim}
 As with other lists of type variables, multiple existentially bound
 types should be comma-separated.
@@ -37,8 +37,9 @@ determine the types at which it was used.  For example,
 The only way to read fields of a \texttt{struct} with existentially
 bound type variables is pattern matching.  That is, the
 field-projection operators (\texttt{.} and \texttt{->}) will
-\emph{not} type-check.  The pattern must give names to the correct
-number of type variables.
+\emph{not} type-check.  The pattern can give names to the correct
+number of type variables or have the type-checker generate names for
+omitted ones.
 Continuing our useless example, we can write:
 \begin{verbatim}
   void f(struct T t) {
@@ -130,21 +131,22 @@ effect and \texttt{r} is a region name.
 We now describe the capability at each program point.  On function
 entry, the capability is the function's effect (typically the regions
 of the parameters and result, but fully described below).  In
-a local block or a dynamic-region statement, the capability is the
+a local block or a growable-region statement, the capability is the
 capability of the enclosing context plus the block/statement's region
 name.
 
-The known region bounds at a program point are described similarly:
-On function entry, the bounds are the function prototype's explicit
+The known region bounds at a program point are described similarly: On
+function entry, the bounds are the function prototype's explicit
 bounds (typically none, but fully described below).  In a local block
-or a dynamic-region statement, we add \texttt{e > `r} where \texttt{e}
-is the capability of the enclosing context and \texttt{`r} is the
-block/statement's region name.  That is, we add that the set of region names
-for the enclosing context describes only regions that will outlive the
-region described by \texttt{`r}.  (As usual, the compiler generates
-\texttt{`r} in the common case that none is explicitly provided.)
-There is one exception: when a dynamic region is declared
-\texttt{resettable}, no bound is introduced.
+or a growable-region statement, we add \texttt{e > `r} where
+\texttt{e} is the capability of the enclosing context and \texttt{`r}
+is the block/statement's region name.  That is, we add that the set of
+region names for the enclosing context describes only regions that
+will outlive the region described by \texttt{`r}.  (As usual, the
+compiler generates \texttt{`r} in the common case that none is
+explicitly provided.)  Creating a dynamic region does not introduce
+any region bounds, but opening one does.  Creating a
+\texttt{resettable} growable region does not introduce any bounds.
 
 We can now describe an expression's effect: If it reads or writes to
 memory described by a region name \texttt{`r}, then the effect
@@ -213,7 +215,7 @@ at the call site.  But with the bound, we know that
 \subsection{Interprocedural Memory Initialization}
 
 We currently have limited support for functions that initialize
-parameters.  if you have an @{1} parameter (pointing into any region),
+parameters.  if you have an *@nonnulll{1} parameter (pointing into any region),
 you can use an attribute __attribute__((initializes(1))) (where it's
 the first parameter, use a different number otherwise) to indicate
 that the function initializes through the parameter.
@@ -223,12 +225,15 @@ callee and the call-site.  In the callee, we know the parameter is
 initialized, but not what it points to.  The memory pointed to must be
 initialized before returning.  Care must be taken to reject this code:
 \begin{verbatim}
-void f(int @@x) __attribute__((initializes(1))) { 
+void f(int *@nonnull*@nonnull x) __attribute__((initializes(1))) { 
   x = new (new 0); 
   return x; 
 }
 \end{verbatim}
-        
+In the caller, the actual argument must point to a known location.
+Furthermore, this location must not be reachable from any other actual
+arguments, i.e., there must be no aliases available to the callee.
+
 Two common idioms not yet supported are: 
 \begin{enumerate}
 \item The parameter is

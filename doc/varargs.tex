@@ -41,10 +41,10 @@ call-site, Cyclone will ensure that each vararg has the correct type,
 in this case \texttt{string_t}.
 
 Accessing the varargs is simpler than in C.  Continuing our example,
-\texttt{args} has type \texttt{string_t ? `foo} in the body of
+\texttt{args} has type \texttt{string_t *@fat `foo} in the body of
 \texttt{foo}.  You retrieve the first argument (\texttt{"hi"}) with
 \texttt{args[0]}, the second argument (\texttt{"mom"}) with
-\texttt{args[1]}, and so on.  Of course, \texttt{args.size} tells you
+\texttt{args[1]}, and so on.  Of course, \texttt{numelts(args)} tells you
 how many arguments there are.
 
 This style is implemented as follows: At the call-site, the compiler
@@ -53,13 +53,14 @@ passes a ``fat pointer'' to the callee with bounds indicating the
 number of elements in the array.  Compared to C-style varargs, this
 style is less efficient because there is a bounds-check and an extra
 level of indirection for each vararg access.  But we get safety and
-using vararg functions is just as convenient.
+using vararg functions is just as convenient.  No heap allocation
+occurs.
 
-A very useful example of this style is in the list library:
+A useful example of this style is in the list library:
 \begin{verbatim}
 list_t<`a> list(... `a argv) {
   list_t result = NULL;
-  for (int i = argv.size - 1; i >= 0; i--) 
+  for (int i = numelts(argv) - 1; i >= 0; i--) 
     result = new List{argv[i],result};
   return result;
 }
@@ -70,41 +71,42 @@ elements.
 The third style addresses the problem that it's often desirable to
 have a function take a variable number of arguments of
 \emph{different} types.  For example, \texttt{printf} works this way.
-In Cyclone, we could use a \texttt{tunion} in conjunction with the
+In Cyclone, we could use a \texttt{datatype} in conjunction with the
 second style.  The callee then uses an array subscript to access a
-vararg and a switch statement to determine its \texttt{tunion}
+vararg and a switch statement to determine its \texttt{datatype}
 variant.  But this would not be very convenient for the caller---it
-would have to explicitly ``wrap'' each vararg in the \texttt{tunion}
+would have to explicitly ``wrap'' each vararg in the \texttt{datatype}
 type.  The third style makes this wrapping implicit.  For example, the
 type of printf in Cyclone is:
 
 \begin{verbatim}
-extern tunion PrintArg<`r::R> {
-  String_pa(const char ?`r);
+extern datatype PrintArg<`r::R> {
+  String_pa(const char ? *@nonnull @nozeroterm`r);
   Int_pa(unsigned long);
   Double_pa(double);
-  ShortPtr_pa(short @`r);
-  IntPtr_pa(unsigned long @`r);
+  LongDouble_pa(long double);
+  ShortPtr_pa(short *@nonnull `r);
+  IntPtr_pa(unsigned long *@nonnull `r);
 };
-typedef tunion `r PrintArg<`r> parg_t<`r>;
-printf(const char ? fmt, ... inject parg_t);
+typedef datatype PrintArg<`r> *@nonnull `r parg_t<`r>;
+int printf(const char *@fat fmt, ... inject parg_t);
 \end{verbatim}
 
 The special syntax ``\texttt{inject}'' is the syntactic distinction
-for the third style.  The type must be a \texttt{tunion} type.  In the
-body of the vararg function, the array holding the vararg elements has
-this \texttt{tunion} type, with the function's region.  (That is, the
+for the third style.  The type must be a \texttt{datatype} type.  In the
+body of the vararg function, the array holding the vararg elements have
+this \texttt{datatype} type, with the function's region.  (That is, the
 wrappers are stack-allocated just as the vararg array is.)
 
 At the call-site, the compiler implicitly wraps each vararg by finding
-a \texttt{tunion} variant that has the expression's type and using
+a \texttt{datatype} variant that has the expression's type and using
 it.  The exact rules for finding the variant are as follows:  Look in
 order for a variant that carries exactly the type of the expression.
 Use the first variant that matches.  If none, make a second pass and
 find the first variant that carries a type to which the expression can
 be coerced.  If none, it is a compile-time error.
 
-In practice, the \texttt{tunion} types used for this style of vararg
+In practice, the \texttt{datatype} types used for this style of vararg
 tend to be quite specialized and used only for vararg purposes.
 
 Compared to the other styles, the third style is less efficient
