@@ -1209,6 +1209,9 @@ int main(int argc, string_t<`H> ?`H argv) {
                rnew(r)Set_spec(&elim_se_r),
                "Avoid statement expressions in C output"
                " (implies --inline-checks)"),
+         rnew(r)$("-no-elim-statement-expressions",false,"",
+               rnew(r)Clear_spec(&elim_se_r),
+               "Do not avoid statement expressions in C output"),
          rnew(r)$("-un-gcc",false,"",
                rnew(r)Unit_spec(set_tovc),
                "Avoid gcc extensions in C output (except for attributes)"),

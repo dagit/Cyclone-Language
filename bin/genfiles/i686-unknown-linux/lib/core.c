@@ -738,20 +738,29 @@ struct Cyc_Core_SysError_struct{char*tag;int f1;};char Cyc_Core_Failure[8]="Fail
 char Cyc_Core_Impossible[11]="Impossible";char Cyc_Core_Not_found[10]="Not_found";
 struct Cyc_Core_Not_found_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found};char
 Cyc_Core_Unreachable[12]="Unreachable";struct Cyc_Core_Opt;struct Cyc_Core_Opt*Cyc_Core_opt_map(
-void*(*f)(void*),struct Cyc_Core_Opt*o){if(o == 0)return 0;return({struct Cyc_Core_Opt*
-_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->v=(void*)f((void*)o->v);_tmp1;});}struct
-_dyneither_ptr Cyc_Core_new_string(unsigned int i){return({unsigned int _tmp2=i;
-char*_tmp3=_cyccalloc_atomic(sizeof(char),_tmp2);_tag_dyneither(_tmp3,sizeof(
-char),_tmp2);});}struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*r,
-unsigned int i){return({unsigned int _tmp4=i;char*_tmp5=_region_calloc(r,sizeof(
-char),_tmp4);_tag_dyneither(_tmp5,sizeof(char),_tmp4);});}struct Cyc_Core_NewRegion
-Cyc_Core_new_dynregion(){return Cyc_Core_rnew_dynregion(Cyc_Core_heap_region);}
-int Cyc_Core_true_f(void*x){return 1;}int Cyc_Core_false_f(void*x){return 0;}int Cyc_Core_intcmp(
-int a,int b){return a - b;}int Cyc_Core_charcmp(char a,char b){return(int)a - (int)b;}
-int Cyc_Core_nptrcmp(void*a,void*b){if(a == b)return 0;if(a > b)return 1;return - 1;}
-int Cyc_Core_ptrcmp(void*a,void*b){if(a == b)return 0;if(a > b)return 1;return - 1;}
-void*Cyc_Core_fst(struct _tuple0*pair){return(*pair).f1;}void*Cyc_Core_snd(struct
-_tuple0*pair){return(*pair).f2;}void*Cyc_Core_third(struct _tuple1*triple){return(*
-triple).f3;}void*Cyc_Core_identity(void*x){return x;}struct _dyneither_ptr
-Cyc_Core_mkfat(void*arr,unsigned int s,unsigned int n){struct _dyneither_ptr res;res.curr=
-arr;res.base=arr;res.last_plus_one=arr + s * n;return res;}
+void*(*f)(void*),struct Cyc_Core_Opt*o);struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*
+f)(void*),struct Cyc_Core_Opt*o){if(o == 0)return 0;{struct Cyc_Core_Opt*_tmp6;
+return(_tmp6=_cycalloc(sizeof(*_tmp6)),((_tmp6->v=(void*)f((void*)o->v),_tmp6)));};}
+struct _dyneither_ptr Cyc_Core_new_string(unsigned int i);struct _dyneither_ptr Cyc_Core_new_string(
+unsigned int i){char*_tmp8;unsigned int _tmp7;return(_tmp7=i,((_tmp8=
+_cyccalloc_atomic(sizeof(char),_tmp7),_tag_dyneither(_tmp8,sizeof(char),_tmp7))));}
+struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*r,unsigned int i);
+struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*r,unsigned int i){
+char*_tmpA;unsigned int _tmp9;return(_tmp9=i,((_tmpA=_region_calloc(r,sizeof(char),
+_tmp9),_tag_dyneither(_tmpA,sizeof(char),_tmp9))));}struct Cyc_Core_NewRegion Cyc_Core_new_dynregion();
+struct Cyc_Core_NewRegion Cyc_Core_new_dynregion(){return Cyc_Core_rnew_dynregion(
+Cyc_Core_heap_region);}int Cyc_Core_true_f(void*x);int Cyc_Core_true_f(void*x){
+return 1;}int Cyc_Core_false_f(void*x);int Cyc_Core_false_f(void*x){return 0;}int Cyc_Core_intcmp(
+int a,int b);int Cyc_Core_intcmp(int a,int b){return a - b;}int Cyc_Core_charcmp(char a,
+char b);int Cyc_Core_charcmp(char a,char b){return(int)a - (int)b;}int Cyc_Core_nptrcmp(
+void*a,void*b);int Cyc_Core_nptrcmp(void*a,void*b){if(a == b)return 0;if(a > b)
+return 1;return - 1;}int Cyc_Core_ptrcmp(void*a,void*b);int Cyc_Core_ptrcmp(void*a,
+void*b){if(a == b)return 0;if(a > b)return 1;return - 1;}void*Cyc_Core_fst(struct
+_tuple0*pair);void*Cyc_Core_fst(struct _tuple0*pair){return(*pair).f1;}void*Cyc_Core_snd(
+struct _tuple0*pair);void*Cyc_Core_snd(struct _tuple0*pair){return(*pair).f2;}void*
+Cyc_Core_third(struct _tuple1*triple);void*Cyc_Core_third(struct _tuple1*triple){
+return(*triple).f3;}void*Cyc_Core_identity(void*x);void*Cyc_Core_identity(void*x){
+return x;}struct _dyneither_ptr Cyc_Core_mkfat(void*arr,unsigned int s,unsigned int n);
+struct _dyneither_ptr Cyc_Core_mkfat(void*arr,unsigned int s,unsigned int n){struct
+_dyneither_ptr res;res.curr=arr;res.base=arr;res.last_plus_one=arr + s * n;return
+res;}

@@ -182,7 +182,7 @@ precore_c.h: core.h $(CYCC) cyc_include.h cycspecs
 %.$(O): %.c precore_c.h cyc_include.h cyc_setjmp.h cycspecs
 	$(CC) -c -o $@ $(CFLAGS) -I. $<
 
-# These two rules always uses -compile-for-boot, but we really shouldn't
+# These two rules always use -compile-for-boot, but we really shouldn't
 # use it for library files not in the minimal boot library.
 %.c: %.cyc $(CYCC) cyc_include.h cyc_setjmp.h cycspecs
 	$(CYCC) -c -o $@ -compile-for-boot $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -stopafter-toc $<

@@ -38,14 +38,6 @@
    undefined.  The current hack is to hand-define it in that special
    case.
 
-   The #include <setjmp.h> in precore_c.h pollutes the namespace.
-   Specifically, it defines some of the signal functions in Cygwin in
-   a way that conflicts with the definitions I make in Cyclone.
-   (precore_c.h is included in the output of the compiler for every
-   Cyclone file.)  Maybe we can use buildlib to extract just the
-   definitions we need from setjmp.h -- we need a flag in the parser
-   that disables Cyclone keywords, so that we can parse more C code.
-
    Cyclone does not currently handle long double complex, which is
    needed in <complex.h>.
 

@@ -35,6 +35,10 @@ case "$OS" in
     CYCDIR=`cygpath -u "$PWD"`
     WHICH='which'
   ;;
+  freebsd*)
+    CYCDIR=`pwd`
+    WHICH='which'
+  ;;
   *)
     CYCDIR=`pwd`
     WHICH='command -v'

@@ -45,7 +45,7 @@ cyclone: \
 	$(addprefix $(CYC_BIN_PATH)/, cyclone$(EXE) cycdoc$(EXE) buildlib$(EXE)) \
 	$(addprefix $(CYC_LIB_PATH)/cyc-lib/, $(addsuffix /cycspecs, $(ALL_ARCHS))) \
 	$(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/, nogc.a $(RUNTIME).$(O)) \
-	$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cyc_setjmp.h \
+	$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/cyc_setjmp.h \
 	$(CYC_LIB_PATH)/$(CYCLIB)
 
 tools:
@@ -66,7 +66,7 @@ endif
 nocheck:
 	$(MAKE) -C bin/genfiles install_nocheck 
 
-.PHONY: tools cyclone aprof libs nocheck
+.PHONY: all tools cyclone aprof gprof libs nocheck
 
 # Executables for the bin directory
 $(CYC_BIN_PATH)/cyclone$(EXE): \
@@ -155,7 +155,7 @@ bin/genfiles/$(ARCH)/src/install_path.c: $(CYCDIR)/Makefile.inc
 	  echo "char *Cversion = \"$(VERSION)\";") > $@
 
 $(CYC_LIB_PATH)/$(CYCLIB): $(CYC_INCLUDE_H)
-$(CYC_LIB_PATH)/$(CYCLIB): $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cyc_setjmp.h
+$(CYC_LIB_PATH)/$(CYCLIB): $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/cyc_setjmp.h
 $(CYC_LIB_PATH)/$(CYCLIB): \
   $(addprefix lib/, $(O_LIBS)) \
   $(addprefix bin/genfiles/$(ARCH)/lib/, $(O_BOOT_LIBS)) \
@@ -222,7 +222,8 @@ $(addprefix $(CYC_LIB_PATH)/cyc-lib/, $(addsuffix /cycspecs, $(ALL_ARCHS))): \
 # on the architecture.  So, we give just three targets: cstubs.c,
 # cycstubs.cyc, and cyc_setjmp.h, which are always made by buildlib no
 # matter what.
-$(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/, cstubs.c cycstubs.cyc cyc_setjmp.h): \
+$(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/, cstubs.c cycstubs.cyc) \
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/cyc_setjmp.h: \
   $(CYCDIR)/bin/genfiles/$(ARCH).headers.tgz \
   $(CYC_INCLUDE_H) \
   bin/cyc-lib/libc.cys
