@@ -1,0 +1,41 @@
+The comp.lang.compilers repository of "public benchmarks" is at
+ftp://ftp.nosc.mil/pub/aburto/.  The *-orig.c files in this
+directory are not the original files, rather they are what was
+left after ripping out the timing code, cleaning up the C a bit,
+etc., as necessary to make it possible to port directly to
+Cyclone.  The *.cyc files are direct ports -- the output should
+be the same as the corresponding C file, and `diff` should give
+relatively few changes.
+
+
+
+Looking through the original files, licensing issues are mostly
+not discussed.  If there's anything at all, it's either just a
+"by" or sometimes an explicit "copyright".  There are a few
+exceptions none of which I've yet ported to Cyclone (Heapsort and
+Sieve of Eratosthenes are noted as being based on published --
+book or magazine -- code, and FFT mentions patents, the GPL,
+Stanford, and an unnamed company, but then the guy concludes "If
+it were up to me, I'd say go do whatever you want with it; but it
+would be polite to give credit to [...]") anyway.  And the
+maintainer _does_ refer to them as "public".
+
+And I (Jeff Vinocur) hereby make the ported versions as free as
+I'm allowed to under the original licenses.
+
+
+
+The relevant portion of the original README:
+
+##########################################################################
+This directory contains a collection of the source code and the results
+of a number of public benchmarks (in 'c').  It is maintained by Al Aburto
+of the Naval Command, Control and Ocean Surveillance Center (NCCOSC)
+RDT&E Division (NRaD) in San Diego, CA.  If you have contributions
+(program results or programs) or any comments please send them to 
+aburto@nosc.mil.
+
+All 'c' programs and tables of results ('.tbl') are available via
+anonymous ftp to 'ftp.nosc.mil' in directory 'pub/aburto'. The IP
+address for ftp.nosc.mil is: 128.49.192.51
+

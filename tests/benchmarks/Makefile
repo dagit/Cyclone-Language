@@ -7,8 +7,8 @@ PROGS := fib hanoi shuffle nsieve tfftdp
 CYCFLAGS := -lm
 CFLAGS   := -lm
 
-#CYCFLAGS := $(CYCFLAGS) -O3
-#CFLAGS   := $(CFLAGS)   -O3
+CYCFLAGS := $(CYCFLAGS) -O3
+CFLAGS   := $(CFLAGS)   -O3
 
 #########################################################
 
@@ -32,7 +32,7 @@ clean:
 %-orig: %-orig.c
 	$(CC) $(CFLAGS) -Wall -o $@ $<
 
-%: %.cyc
+%: %.cyc $(CYCC)
 	$(CYCC) $(CYCFLAGS) -o $@ $<
 
 #I tried this to get the labels to work automatically...
