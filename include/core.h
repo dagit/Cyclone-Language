@@ -162,6 +162,11 @@ extern "C" int region_alloc_bytes(region_t<`r>);
       yields the "wasted" bytes: space in non-current region
       pages that won't be used for new Cyclone objects. */
 
+extern region_t<`C> current_handle(void);
+  /** [current_handle()] returns the region handle on the top of the
+      LIFO region stack.  If the region stack is empty, then this will
+      be the heap region. */
+
 extern region_t<`H> heap_region;
   /** [heap_region] is the region handle of the heap. */
 

@@ -26,6 +26,8 @@
 #include "relations-ap.h"
 #include "warn.h"
 #include "tctyp.h"
+#include "absynpp.h"
+
 using List;
 using Core;
 using Warn; // put Warn first so Absyn shadows

@@ -1,0 +1,48 @@
+#include <core.h>
+using Core;
+
+int @ `C f2() {
+  let r = current_handle();
+  int @ `C x = rnew(r) 3;
+  return x;
+}
+
+int @ `C f3() {
+  let r = current_handle();
+  int @ `C x = (int @ `C)rmalloc(r, sizeof(int));
+  *x = 3;
+  return x;
+}
+
+struct Point { int x; int y; };
+
+struct Point @ `C f4() {
+  let r = current_handle();
+  struct Point @ `C p = rmalloc(r, sizeof(struct Point));
+  p->x = 0;
+  p->y = 1;
+  return p;
+}
+
+int f5() {
+  int z = 0;
+  for (int j = 0; j < 10000; j++) {
+    region<`r> x;
+    for (int i = 0; i < 200; i++) {
+      let p = rnew(x) Point(i,i+1);
+      let q1 = f4(); // allocates in `r
+      region <`r2>y;
+      let q2 = f4(); // allocates in `r2
+      let s = rnew(x) "hello";
+      z = p->x + p->y + q1->x + q2->y + *(f3()) + *(f2());
+      q1 = p; // OK, same region
+      q2 = p; // OK due to outlives
+    }
+  }
+  return z;
+}
+
+int main(int argc, string_t ?argv) {
+  f5();
+  return 0;
+}

@@ -184,6 +184,7 @@ int typecmp(type_t, type_t);
 int aggrfield_cmp(aggrfield_t, aggrfield_t); // used in toc.cyc
 
 type_t substitute(list_t<$(tvar_t,type_t)@`H,`H>, type_t);
+type_t substitute_nofun(list_t<$(tvar_t,type_t)@`H,`H> inst, type_t t);
   // could also have a version with two regions, but doesn't seem useful
 type_t rsubstitute(region_t<`r>,list_t<$(tvar_t,type_t)@`r,`r>,type_t);
 list_t<$(type_t,type_t)@> rsubst_rgnpo(region_t<`r>,

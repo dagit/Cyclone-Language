@@ -184,6 +184,11 @@ struct _RegionHandle *Cyc_Core_heap_region = CYC_CORE_HEAP_REGION;
 struct _RegionHandle *Cyc_Core_unique_region = CYC_CORE_UNIQUE_REGION;
 struct _RegionHandle *Cyc_Core_refcnt_region = CYC_CORE_REFCNT_REGION;
 
+struct _RegionHandle *Cyc_Core_current_handle(void) {
+  struct _RegionHandle *h = (struct _RegionHandle *)_frame_until(1,0);
+  return h == NULL ? Cyc_Core_heap_region : h;
+}
+
 /////// UNIQUE REGION //////////
 
 // for freeing unique pointers; might want to make this "free"

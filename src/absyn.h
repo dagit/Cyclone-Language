@@ -901,6 +901,10 @@ namespace Absyn {
   // def as the result.
   bool type2bool(bool def, type_t);
 
+  // returns standard Tvar for current region `C
+  type_t curr_rgn_type(void);
+  tvar_t curr_rgn_tvar(void);
+
   type_t app_type(tycon_t, ...type_t);
   // return a fresh type variable of the given kind that can be unified
   // only with types whose free type variables are drawn from tenv.

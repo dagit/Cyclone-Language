@@ -319,6 +319,14 @@ extern int file_string_write(FILE @, const char ?src, int src_offset,
   extern "C" void exit(int) __attribute__((noreturn)) ;
   extern "C" `a abort() __attribute__((noreturn));
 
+
+/***** <sys/time.h> *****/
+  struct timeval {
+    long tv_sec;
+    long tv_usec;
+  };
+  extern "C" int gettimeofday(struct timeval *fp,void *);
+
 /***** <sys/stat.h> *****/
   extern "C" int mkdir(const char @ pathname, mode_t mode);
 
@@ -329,5 +337,6 @@ extern int file_string_write(FILE @, const char ?src, int src_offset,
 
 /***** <limits.h> -- needed for ap.cyc *****/
   extern const long long_max, long_min;
+
 
 #endif

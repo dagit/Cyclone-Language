@@ -2528,6 +2528,10 @@ list_t<$(type_t,type_t)@> rsubst_rgnpo(region_t<`r> rgn,
   return List::zip(rpo2a,rpo2b);
 }
 
+// FIX!! hack to avoid substituting in function types during current
+// region resolution
+static bool skip_fntypes = false;
+
 type_t rsubstitute(region_t<`r> rgn,
 		   list_t<$(tvar_t,type_t)@`r,`r> inst,
 		   type_t t) {
@@ -2555,6 +2559,7 @@ type_t rsubstitute(region_t<`r> rgn,
     return pointer_type(PtrInfo(new_t1,tq,PtrAtts(new_r,n,new_b,new_zt,NULL)));
   case &FnType(FnInfo{vs,eff,rtq,rtyp,args,c_varargs,cyc_varargs,rgn_po,atts,
                         req,_,ens,_,ret_value}):
+    if (skip_fntypes) return t;
     // FIX: capture???
     for (let p = vs; p != NULL; p = p->tl)
       inst = rnew(rgn) List(rnew(rgn) $(p->hd,var_type(p->hd)),inst);
@@ -2608,7 +2613,9 @@ type_t rsubstitute(region_t<`r> rgn,
   case &TypeofType(e):
     let new_e = rsubsexp(rgn,inst,e);
     return (new_e==e) ? t : new TypeofType(new_e);
-  case &TypeDeclType(...): Warn::impos2("found typedecltype in rsubs");
+  case &TypeDeclType(...): 
+    if (skip_fntypes) return t;
+    else Warn::impos2("found typedecltype in rsubs");
   }
 }
 // This is just a map beefed up to avoid unnecessary allocation.
@@ -2626,8 +2633,15 @@ static list_t<type_t,`r2> substs(region_t<`r> rgn,
   return (list_t<type_t,`r2>)(new List(new_hd,new_tl));
 }
 
-extern type_t substitute(list_t<$(tvar_t,type_t)@`H,`H> inst, type_t t) {
+type_t substitute(list_t<$(tvar_t,type_t)@`H,`H> inst, type_t t) {
   return (inst==NULL) ? t : rsubstitute(heap_region, inst, t);
+}
+
+type_t substitute_nofun(list_t<$(tvar_t,type_t)@`H,`H> inst, type_t t) {
+  skip_fntypes = true;
+  let new_t = substitute(inst,t);
+  skip_fntypes = false;
+  return new_t;
 }
 
 // Generate an appropriate evar for an instantiation of a type var

@@ -68,7 +68,7 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
   let rgns = (p==NULL) ? NULL : map(fst,filter(snd,(*p)[0]));
   tenv_t te2 = add_type_vars(loc,te,tvs);
   for (; rgns != NULL; rgns=rgns->tl)
-    te2 = add_region(te2,new VarType(rgns->hd),false);
+    te2 = add_region(te2,new VarType(rgns->hd),false,false);
   te2 = new_outlives_constraints(te2,bds,loc);
   if(new_block)
     te2 = Tcenv::new_block(loc,te2);
@@ -475,11 +475,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	    !Unify::unify(outer_rgn,refcnt_rgn_type))
 	  terr(s0->loc,"open is only allowed on unique or reference-counted keys");
 	*t = rgn_handle_type(rgn_typ);
-	te2 = add_region(te2, rgn_typ, true);
+	te2 = add_region(te2, rgn_typ, true,false);
       } else {
 	rgn_typ = new VarType(tv);
 	te2 = add_type_vars(s0->loc,te2,new List(tv,NULL));
-	te2 = add_region(te2, rgn_typ, false);
+	te2 = add_region(te2, rgn_typ, false,true);
       }
       check_type(s0->loc,te,lookup_type_vars(te2),&bk,true,false,*t);
       if (!Unify::unify(*t,rgn_handle_type(rgn_typ)))

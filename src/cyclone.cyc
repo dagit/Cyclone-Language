@@ -24,6 +24,7 @@
 #include "absynpp.h"
 #include "absyndump.h"
 #include "binding.h"
+#include "currgn.h"
 #include "tcutil.h"
 #include "tc.h"
 #include "toc.h"
@@ -414,12 +415,24 @@ FILE *try_file_open(string_t filename, string_t mode, string_t msg_part) {
   }
 }
 
+void endtime(struct timeval *start) {
+  struct timeval end;
+  gettimeofday(&end,NULL);
+  end.tv_sec -= start->tv_sec;
+  end.tv_usec -= start->tv_usec;
+  if (end.tv_usec < 0)
+    end.tv_usec += 1000000;
+  if (v_r) fprintf(stderr,"(%d.%06d secs)\n",end.tv_sec,end.tv_usec);
+}
+
 extern "C" void CYCALLOCPROFILE_mark(const char *s);
 
 `b do_stage(string_t stage_name, list_t<Absyn::decl_t,`H> tds,
 	    `b f(`a, list_t<Absyn::decl_t,`H>), `a env,
 	    void on_fail(`c), `c failenv) {
   CYCALLOCPROFILE_mark(stage_name);
+  struct timeval start;
+  gettimeofday(&start,NULL);
 
   let ans;
   try ans = f(env,tds);
@@ -436,6 +449,7 @@ extern "C" void CYCALLOCPROFILE_mark(const char *s);
       fprintf(stderr,"COMPILER STAGE %s\n",stage_name);
       on_fail(failenv);
     }
+    endtime(&start);
     Core::rethrow(x);
     break;
   }
@@ -445,13 +459,16 @@ extern "C" void CYCALLOCPROFILE_mark(const char *s);
     on_fail(failenv);
     fprintf(stderr,"\nCOMPILATION FAILED!\n");
     fflush(stderr);
+    endtime(&start);
     return ans;
   }
   else if (v_r) {
-    fprintf(stderr,"%s completed.\n",stage_name);
+    fprintf(stderr,"%s completed ",stage_name);
     fflush(stderr);
+    endtime(&start);
     return ans;
   }
+  endtime(&start);
   return ans;
 }
 
@@ -475,6 +492,11 @@ list_t<Absyn::decl_t> do_parse(FILE @ f, list_t<Absyn::decl_t,`H> ignore) {
 
 bool do_binding(bool ignore, list_t<Absyn::decl_t,`H> tds) {
   Binding::resolve_all(tds);
+  return true;
+}
+
+bool do_adjust(bool ignore, list_t<Absyn::decl_t,`H> tds) {
+  CurRgn::adjust_all(tds);
   return true;
 }
 
@@ -859,6 +881,18 @@ static void process_file(string_t<`H> filename) {
   // Binding resolution
   do_stage("binding", tds, do_binding, true, remove_fileptr, preprocfileptr);
   if(compile_failure) return;
+
+  // Current Region Metavariable substitution
+  try {
+  do_stage("current region resolution", tds, do_adjust, true,
+	   remove_fileptr, preprocfileptr);
+  if(compile_failure) return;  
+  } catch {
+  case &Core::Failure(s):
+    fprintf(stderr,"Got exception Failure(%s)\n",s);
+    return;
+  case e: rethrow(e);
+  }
 
   let jump_tables;
   { let te = Tcenv::tc_init(); // Must declare BEFORE the goto

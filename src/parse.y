@@ -57,6 +57,7 @@ extern void yyprint(int i, union YYSTYPE<`yy> v);
 #include <string.h>
 #include "warn.h"
 #include "tcutil.h"
+#include "currgn.h"
 #include "absynpp.h"
 using Core;
 using List;
@@ -432,8 +433,30 @@ static type_t id2type(string_t<`H> s, kindbound_t k) {
     return unique_rgn_type;
   else if (zstrcmp(s,"`RC") == 0)
     return refcnt_rgn_type;
+  else if (zstrcmp(s,CurRgn::curr_rgn_name) == 0)
+    return CurRgn::curr_rgn_type();
   else
     return var_type(new Tvar(new s,-1,k));
+}
+
+static bool tvar_ok(string_t<`H> s,string_t<`H> @err) {
+  if (zstrcmp(s,"`H") == 0) {
+    *err = "bad occurrence of heap region";
+    return false;
+  }
+  if (zstrcmp(s,"`U") == 0) {
+    *err = "bad occurrence of unique region";
+    return false;
+  }
+  if (zstrcmp(s,"`RC") == 0) {
+    *err = "bad occurrence of refcounted region";
+    return false;
+  }
+  if (zstrcmp(s,CurRgn::curr_rgn_name) == 0) {
+    *err = "bad occurrence of \"current\" region";
+    return false;
+  }
+  return true;
 }
 
 // convert a list of types to a list of typevars -- the parser can't
@@ -1396,11 +1419,8 @@ declaration:
 /* region <`r> h;  */
 | REGION '<' TYPE_VAR '>' IDENTIFIER ';'
   { let three = $3;
-    // FIX: need to check for `RC as well?  Should factor these out?
-    if (zstrcmp(three,"`H") == 0)
-      Warn::err(SLOC(@3),"bad occurrence of heap region");
-    if (zstrcmp(three,"`U") == 0)
-      Warn::err(SLOC(@3),"bad occurrence of unique region");
+    string_t err = "";
+    if (!tvar_ok(three,&err)) Warn::err(SLOC(@3),err);
     tvar_t tv = new Tvar(new three,-1,Tcutil::kind_to_bound(&Tcutil::rk));
     type_t t  = var_type(tv);
     vardecl_t vd = new_vardecl(SLOC(@5), new $(Loc_n,new $5),rgn_handle_type(t),NULL);
@@ -2785,6 +2805,8 @@ pattern:
     { if (strcmp($1,"alias") != 0) 
         Warn::err(SLOC(@2),"expecting `alias'");
       let location = LOC(@1,@6);
+      string_t err = "";
+      if (!tvar_ok($3,&err)) Warn::err(location,err);
       tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Tcutil::rk));
       vardecl_t vd = new_vardecl(SLOC(@1),new $(Loc_n, new $6),
 				 type_name_to_type($5,SLOC(@5)),NULL);
@@ -2794,6 +2816,8 @@ pattern:
     { if (strcmp($1,"alias") != 0) 
         Warn::err(SLOC(@2),"expecting `alias'");
       let location = LOC(@1,@6);
+      string_t err = "";
+      if (!tvar_ok($3,&err)) Warn::err(location,err);
       tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Tcutil::rk));
       vardecl_t vd = new_vardecl(SLOC(@1),new $(Loc_n, new $6),
 				 type_name_to_type($5,SLOC(@5)),NULL);

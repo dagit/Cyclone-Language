@@ -39,6 +39,7 @@
 #include "rgnorder.h"
 #include "tcutil.h"
 #include "tcenv.h"
+#include "currgn.h"
 using Core;
 using List;
 using Absyn;
@@ -107,6 +108,7 @@ abstract struct Fenv {
   ftclause_t          ctrl_env;
   type_t              capability;
   type_t              curr_rgn;   // current block's region
+  type_t              curr_lifo_rgn; // top of LIFO region stack
   struct FenvFlags    flags;
 };
 
@@ -320,7 +322,7 @@ tenv_t clear_tempest(tenv_t te) {
 bool in_tempest(tenv_t te) {
   return te->in_tempest;
 }
-tenv_t add_region(tenv_t te, type_t rgn, bool opened) {
+tenv_t add_region(tenv_t te, type_t rgn, bool opened, bool lifo) {
   let ans = new *get_fenv(te,"add_region");
   let region_order = ans->region_order;
   switch (compress(rgn)) {
@@ -332,6 +334,8 @@ tenv_t add_region(tenv_t te, type_t rgn, bool opened) {
   ans->region_order = region_order;
   ans->capability   = join_eff(new List(access_eff(rgn),
 					   new List(ans->capability,NULL)));
+  // FIX: add || opened to support dynamic regions
+  if (lifo) ans->curr_lifo_rgn = rgn;
   return put_fenv(te,ans);
 }
 
@@ -399,6 +403,11 @@ type_t curr_rgn(tenv_t te) {
   let le = te->le;
   if (le == NULL) return heap_rgn_type;
   return le->curr_rgn;
+}
+type_t curr_lifo_rgn(tenv_t te) {
+  let le = te->le;
+  if (le == NULL) return heap_rgn_type;
+  return le->curr_lifo_rgn;
 }
 rgn_po_opt_t curr_rgnpo(tenv_t te) {
   let le = te->le;
@@ -493,10 +502,11 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   tvar_t rgn0 =
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
              new_tvar_id(), &rgn_kb);
-  let tvs = new List(rgn0,fd->i.tvars);
+  let $(tvs1,cap) = CurRgn::add_curr_tvar(fd->i.tvars,(type_t)fd->i.effect);
+  let tvs = new List(rgn0,tvs1);
   Tcutil::check_unique_tvars(loc,tvs);
 //   fprintf(stderr,"checking fn %s\n",qvar2string(fd->name));
-  let rgn_po = initial_fn_po(fd->i.tvars,fd->i.rgn_po, (type_t)fd->i.effect,rgn0,loc);
+  let rgn_po = initial_fn_po(tvs1,fd->i.rgn_po,cap,rgn0,loc);
   type_t param_rgn = new VarType(rgn0);
   for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) 
     vds->hd->rgn = param_rgn;
@@ -513,13 +523,14 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   }
   return new
     Fenv{.shared = new_shared_fenv(fd->i.ret_type),
-         .type_vars   = tvs,
-         .region_order = rgn_po,
-         .ctrl_env    = NULL,
-         .capability  = join_eff(new List(access_eff(param_rgn),
-                                             new List((type_t)fd->i.effect,NULL))),
-         .curr_rgn    = param_rgn,
-	 .flags       = FenvFlags{NoneNew,false,false,false,false}
+         .type_vars     = tvs,
+         .region_order  = rgn_po,
+         .ctrl_env      = NULL,
+         .capability    = join_eff(new List(access_eff(param_rgn),
+					    new List(cap,NULL))),
+         .curr_rgn      = param_rgn,
+	 .curr_lifo_rgn = CurRgn::curr_rgn_type(),
+	 .flags         = FenvFlags{NoneNew,false,false,false,false}
        };
 }
 
@@ -564,6 +575,7 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
          .capability  = join_eff(new List(access_eff(param_rgn),
 					  new List((type_t)fd->i.effect,NULL))),
          .curr_rgn    = param_rgn,
+	 .curr_lifo_rgn = CurRgn::curr_rgn_type(),
 	 .flags       = FenvFlags{NoneNew,false,false,false,false}
        };
 }
@@ -581,6 +593,7 @@ fenv_t bogus_fenv(type_t ret_type,
          .ctrl_env    = NULL,
          .capability  = join_eff(new List(access_eff(param_rgn),NULL)),
          .curr_rgn    = param_rgn,
+	 .curr_lifo_rgn = CurRgn::curr_rgn_type(),
 	 .flags       = FenvFlags{NoneNew,false,false,false,false}
        };
 }

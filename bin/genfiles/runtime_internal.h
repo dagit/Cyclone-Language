@@ -119,5 +119,6 @@ struct _RuntimeStack * _top_frame();
 // pops off frames until a frame with the given tag is reached.  This
 // frame is returned, or else NULL if none found.
 struct _RuntimeStack * _pop_frame_until(int tag);
+struct _RuntimeStack * _frame_until(int tag,int do_pop);
 
 #endif

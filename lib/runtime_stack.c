@@ -87,15 +87,20 @@ struct _RuntimeStack * _top_frame() {
   return get_current_frame();
 }
 
-// set _current_frame to the first frame with the given tag.
-// If no such frame is found, _current_frame is set to NULL.
-struct _RuntimeStack * _pop_frame_until(int tag) {
+struct _RuntimeStack * _frame_until(int tag, int do_pop) {
   struct _RuntimeStack *current_frame = get_current_frame();
   while (current_frame != NULL && current_frame->tag != tag) {
     if (current_frame->cleanup != NULL)
       current_frame->cleanup(current_frame);
-    set_current_frame(current_frame->next);
-    current_frame = get_current_frame();
+    current_frame = current_frame->next;
   }
+  if (do_pop)
+    set_current_frame(current_frame);
   return current_frame;
 }
+// set _current_frame to the first frame with the given tag.
+// If no such frame is found, _current_frame is set to NULL.
+struct _RuntimeStack * _pop_frame_until(int tag) {
+  return _frame_until(tag,1);
+}
+
