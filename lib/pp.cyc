@@ -410,13 +410,13 @@ doc_t tab(doc_t d) {
 
 
 /* Sequences */
-static doc_t ppseq_f(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l) {
+static doc_t ppseq_f(doc_t pp(`a), string_t<`H> sep, list_t<`a> l) {
   if (l==NULL) return nil_doc();
   else if (l->tl==NULL) return pp(l->hd);
   else return cat(pp(l->hd), text(sep), oline_doc(), ppseq_f(pp, sep,l->tl));
                   
 }
-doc_t ppseq(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l) {
+doc_t ppseq(doc_t pp(`a), string_t<`H> sep, list_t<`a> l) {
   return tab(ppseq_f(pp,sep,l));
 }
 
@@ -445,12 +445,12 @@ doc_t seq(string_t<`H> sep, list_t<doc_t,`H> l) {
 }
 
 // Sequences broken by lines 
-doc_t ppseql_f(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l) {
+doc_t ppseql_f(doc_t pp(`a), string_t<`H> sep, list_t<`a> l) {
   if (l==NULL) return nil_doc();
   else if (l->tl==NULL) return pp(l->hd);
   else return cat(pp(l->hd), text(sep), line_doc(), ppseql_f(pp,sep,l->tl));
 }
-doc_t ppseql(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l) {
+doc_t ppseql(doc_t pp(`a), string_t<`H> sep, list_t<`a> l) {
   return tab(ppseql_f(pp,sep,l));
 }
 

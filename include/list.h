@@ -351,11 +351,11 @@ namespace List {
   extern list_t<`a,`r> rtabulate(region_t<`r> r, int n, `a f(int));
   extern list_t<`a,`r> rtabulate_c(region_t<`r> r,int n,`a f(`b,int),`b env);
 
-  extern int list_cmp(int cmp(`a,`a), list_t<`a> l1, list_t<`a> l2);
+  extern int list_cmp(int cmp(`a,`b), list_t<`a> l1, list_t<`b> l2);
   /** [list_cmp(cmp,l1,l2)] is a comparison function on lists,
       parameterized by a comparison function [cmp] on list elements.  */
 
-  extern bool list_prefix(int cmp(`a,`a), list_t<`a> l1, list_t<`a> l2);
+  extern bool list_prefix(int cmp(`a,`b), list_t<`a> l1, list_t<`b> l2);
   /** [list_prefix(cmp,l1,l2)] returns true if [l1] is a prefix of
       [l2], using [cmp] to compare the elements of [l1] and [l2].  */
 

@@ -66,7 +66,7 @@ bool eval_const_bool_exp(exp_t e) {
 // called by tcSizeof (which ignores result) and eval_szof.
 // Note in the latter case, this code really needs to be in sync with the
 // type translation to C.
-// Note that a StructType better be checked so we can get the structdecl
+// Note that an AggrType better be checked so we can get the aggrdecl
 bool okay_szofarg(type_t t) {
   switch (Tcutil::compress(t)) {
   case VoidType: return false;
@@ -88,52 +88,40 @@ bool okay_szofarg(type_t t) {
 
   case &TunionFieldType(_): return false;
 
-  case &PointerType(PtrInfo{_,_,_,_,b}):  
+  case &PointerType(PtrInfo{_,_,_,_,b}):  // ???
     switch (compress_conref(b)->v) {
-    case &Eq_constr(Unknown_b): return true;
     case &Eq_constr(_): return true;
     default: return false;
     }
-  case &SizeofType(_): return true;
-  case &IntType(_,_): return true;
-  case FloatType:     return true;
-  case &DoubleType(_):    return true;
+  case &SizeofType(_):
+  case &IntType(_,_): 
+  case FloatType:    
+  case &DoubleType(_): return true;
   case &ArrayType(t2,_,e): // assume e constant checked elsewhere
     return (e != NULL); 
   case &FnType(_): return false;
   case &RgnHandleType(_): return true;
-  case &StructType(_,_,sdp):
-    if(sdp == NULL)
-      return Tcutil::impos("szof on unchecked StructType");
-    let sd = *sdp;
-    if(sd->fields == NULL)
+  case &AggrType(AggrInfo(info,_)):
+    _ ad;
+    switch(info) {
+    case &UnknownAggr(_,_): impos("szof on unchecked StructType");
+    case &KnownAggr(&ad2): ad = ad2;
+    }
+    if(ad->fields == NULL)
       return false;
-    fallthru(sd->fields->v);
-  case &AnonStructType(fs):
+    fallthru(ad->fields->v);
+  case &AnonAggrType(_,fs):
     for(; fs != NULL; fs = fs->tl)
       if(!okay_szofarg(fs->hd->type))
 	return false;
     return true;
-  case &UnionType(_,ts,udp):
-    if (udp == NULL)
-      return Tcutil::impos("szof on unchecked UnionType");
-    let ud = *udp;
-    if (ud->fields == NULL)
-      return false;
-    fallthru(ud->fields->v);
-  case &AnonUnionType(fs):
-    for(; fs != NULL; fs = fs->tl)
-      if(!okay_szofarg(fs->hd->type))
-	return false;
-    return true;
-  case &EnumType(_,_): return true;
+  case &EnumType(_,_):
   case &AnonEnumType(_): return true;
-  case HeapRgn: return false;
-  case &JoinEff(_):   return false;
-  case &AccessEff(_): return false;
+  case HeapRgn: 
+  case &JoinEff(_):
+  case &AccessEff(_):
   case &RgnsEff(_):   return false;
-  case &TypedefType(_,_,_): 
-    return Tcutil::impos(aprintf("szof typedeftype %s",typ2string(t)));
+  case &TypedefType(_,_,_): impos(aprintf("szof typedeftype %s",typ2string(t)));
   }
 }
 
@@ -141,10 +129,10 @@ cnst_t eval_const_unprimop(primop_t p,exp_t e) {
   cnst_t cn = promote_const(eval_const_exp(e));
   switch ($(p,cn)) {
   case $(Plus,_): return cn;
-  case $(Minus,  &Int_c(s,i)):   return new Int_c(Signed,  -i);
-  case $(Bitnot, &Int_c(s,i)):   return new Int_c(Unsigned,~i);
-  case $(Not,    &Int_c(_,i)):   return new Int_c(Signed,  i == 0 ? 1 : 0);
-  case $(Not,    Null_c)     :   return new Int_c(Signed,  1);
+  case $(Minus,  &Int_c(s,i)): return new Int_c(Signed,  -i);
+  case $(Bitnot, &Int_c(s,i)): return new Int_c(Unsigned,~i);
+  case $(Not,    &Int_c(_,i)): return new Int_c(Signed,  i == 0 ? 1 : 0);
+  case $(Not,    Null_c):      return new Int_c(Signed,  1);
   default: 
     terr(e->loc,"bad constant expression");
     return cn;
@@ -166,7 +154,7 @@ cnst_t eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
   default: terr(e2->loc, "bad constant expression"); return cn1;
   }
   switch (p) {
-  case Div: fallthru;
+  case Div:
   case Mod: 
     if (i2 == 0) {
       terr(e2->loc,"division by zero in constant expression");
@@ -216,7 +204,7 @@ cnst_t eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
   if(use_i3) return new Int_c(Signed,   i3);
   if(use_u3) return new Int_c(Unsigned, (int)u3);
   if(use_b3) return new Int_c(Signed, b3 ? 1 : 0);
-  throw new Unreachable("Evexp::eval_const_binop");
+  impos("Evexp::eval_const_binop");
 }
 
 // The main routine -- side-effects the expression e, overwriting its
@@ -241,14 +229,14 @@ cnst_t eval_const_exp(exp_t e) {
     } else 
       cn = eval_const_binprimop(p,es->hd,es->tl->hd);
     break;
-  case &Sizeoftyp_e(_): fallthru;
+  case &Sizeoftyp_e(_): 
   case &Sizeofexp_e(_):
-    terr(e->loc, 
-	    "sizeof(...) is not an integral constant expression in Cyclone");
+    terr(e->loc,
+	 "sizeof(...) is not an integral constant expression in Cyclone");
     return new Int_c(Signed,0);
   case &Offsetof_e(_,_):
-    terr(e->loc, 
-	    "offsetof(...) is not an integral constant expression in Cyclone");
+    terr(e->loc,
+	 "offsetof(...) is not an integral constant expression in Cyclone");
     return new Int_c(Signed,0);
   case &Cast_e(t,e2):
     // FIX: this needs to be generalized
@@ -266,8 +254,7 @@ cnst_t eval_const_exp(exp_t e) {
     }
     break;
   case &AnonEnum_e(_,_,ef): fallthru(ef);
-  case &Enum_e(_,_,ef):
-    return eval_const_exp((exp_t)ef->tag);
+  case &Enum_e(_,_,ef): return eval_const_exp((exp_t)ef->tag);
   default: 
     terr(e->loc,"bad static expression");
     return new Int_c(Signed,0);

@@ -77,16 +77,16 @@ namespace Interface {
   extern struct I * get_and_merge_list(i_t (@get)(`a), list_t<`a,`H> la, list_t<stringptr_t<`H,`H>,`H> linfo);
 
   // pretty print to a text file 
-  extern void print(i_t, FILE @`H);
+  extern void print(i_t, FILE @);
 
   // load from a text file
-  extern i_t parse(FILE @`H);
+  extern i_t parse(FILE @);
 
   // binary save to a file
-  extern void save(i_t, FILE @`H);
+  extern void save(i_t, FILE @);
 
   // load from a text file
-  extern i_t load(FILE @`H);
+  extern i_t load(FILE @);
 }
 
 typedef Interface::i_t interface_t;

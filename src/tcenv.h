@@ -39,7 +39,7 @@ using Position;
 // Used to tell what an ordinary identifer refers to 
 extern tunion Resolved {
   VarRes(binding_t); // includes unresolved variant
-  StructRes(structdecl_t);
+  AggrRes(aggrdecl_t);
   TunionRes(tuniondecl_t,tunionfield_t);
   EnumRes(enumdecl_t,enumfield_t);
   AnonEnumRes(type_t,enumfield_t);
@@ -52,8 +52,7 @@ typedef tunion Resolved resolved_t;
 // FIX: We should tree-shake the type declarations too!
 extern struct Genv {
   set_t<var_t>                   namespaces;
-  dict_t<var_t,structdecl_t@>    structdecls;
-  dict_t<var_t,uniondecl_t@>     uniondecls;
+  dict_t<var_t,aggrdecl_t@>      aggrdecls;
   dict_t<var_t,tuniondecl_t@>    tuniondecls;
   dict_t<var_t,enumdecl_t@>      enumdecls;
   dict_t<var_t,typedefdecl_t>    typedefs; // indirection unneeded b/c no redeclaration
@@ -98,8 +97,7 @@ extern tenv_t enter_ns(tenv_t, var_t);
 
 extern list_t<var_t> resolve_namespace(tenv_t,seg_t,var_t,list_t<var_t,`H>);
 extern resolved_t        lookup_ordinary(tenv_t,seg_t,qvar_t);
-extern structdecl_t@     lookup_structdecl(tenv_t,seg_t,qvar_t);
-extern uniondecl_t@      lookup_uniondecl(tenv_t,seg_t,qvar_t);
+extern aggrdecl_t@       lookup_aggrdecl(tenv_t,seg_t,qvar_t);
 extern tuniondecl_t@     lookup_tuniondecl(tenv_t,seg_t,qvar_t);
 extern opt_t<tuniondecl_t@> lookup_xtuniondecl(tenv_t,seg_t,qvar_t);
 extern enumdecl_t@       lookup_enumdecl(tenv_t,seg_t,qvar_t);
@@ -111,7 +109,7 @@ extern tenv_t add_local_var(seg_t,tenv_t,vardecl_t);
 extern tenv_t add_pat_var  (seg_t,tenv_t,vardecl_t);
 
 extern list_t<tvar_t> lookup_type_vars(tenv_t);
-extern tenv_t     add_type_vars(seg_t,tenv_t,list_t<tvar_t>);
+extern tenv_t         add_type_vars(seg_t,tenv_t,list_t<tvar_t>);
 
 extern tenv_t set_in_loop(tenv_t te, stmt_t continue_dest);
 extern tenv_t set_in_switch(tenv_t);

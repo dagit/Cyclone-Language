@@ -65,9 +65,6 @@ namespace Lex {
 namespace Parse {
 
 ////////////////////// Type definitions needed only during parsing ///////////
-enum Struct_or_union { Struct_su, Union_su };
-typedef enum Struct_or_union struct_or_union_t;
-
 tunion Type_specifier {
   Signed_spec(seg_t);
   Unsigned_spec(seg_t);
@@ -138,17 +135,17 @@ qvar_t gensym_enum() {
 	       new (string_t)aprintf("__anonymous_enum_%d__", enum_counter++));
 }
 
-static structfield_t
-make_struct_field(seg_t loc,
-                  $($(qvar_t,tqual_t,type_t,list_t<tvar_t>,
-                      list_t<attribute_t,`H>)@,exp_opt_t)@ field_info) {
+static aggrfield_t
+make_aggr_field(seg_t loc,
+		$($(qvar_t,tqual_t,type_t,list_t<tvar_t>,
+		    list_t<attribute_t,`H>)@,exp_opt_t)@ field_info) {
   let &$(&$(qid,tq,t,tvs,atts),expopt) = field_info;
   if (tvs != NULL)
     err("bad type params in struct field",loc);
   if(is_qvar_qualified(qid))
-    err("struct field cannot be qualified with a namespace",loc);
-  return new Structfield{.name = (*qid)[1], .tq = tq, .type = t,
-			 .width = expopt, .attributes = atts};
+    err("struct or union field cannot be qualified with a namespace",loc);
+  return new Aggrfield{.name = (*qid)[1], .tq = tq, .type = t,
+		       .width = expopt, .attributes = atts};
 }
 
 static type_specifier_t type_spec(type_t t,seg_t loc) {
@@ -383,7 +380,7 @@ static string_t msg4 =
 // probably more permissive than is strictly legal here.  For
 // instance, one can write "unsigned const int" instead of "const
 // unsigned int" and so forth.  I don't think anyone will care...
-// (famous last words.)
+// (famous last words)
 static $(type_t,opt_t<decl_t>)
   collapse_type_specifiers(list_t<type_specifier_t> ts, seg_t loc) {
 
@@ -444,7 +441,7 @@ static $(type_t,opt_t<decl_t>)
       seen_size = true;
       break;
     case &Decl_spec(d):
-      // we've got a struct or [x]tunion declaration embedded in here -- return
+      // we've got a type declaration embedded in here -- return
       // the declaration as well as a copy of the type -- this allows
       // us to declare structs as a side effect inside typedefs
       // Note: Leave the last fields NULL so check_valid_type knows the type
@@ -453,20 +450,15 @@ static $(type_t,opt_t<decl_t>)
       if (declopt == NULL && !seen_type) {
 	seen_type = true;
         switch (d->r) {
-        case &Struct_d(sd):
-          let args = List::map(tvar2typ,List::map(copy_tvar,sd->tvs));
-          t = new StructType(sd->name->v,args,NULL);
-          if (sd->fields!=NULL) declopt = new Opt(d);
+        case &Aggr_d(ad):
+          let args = List::map(tvar2typ,List::map(copy_tvar,ad->tvs));
+          t = new AggrType(AggrInfo(new UnknownAggr(ad->kind,ad->name),args));
+          if (ad->fields!=NULL) declopt = new Opt(d);
 	  break;
         case &Tunion_d(tud):
           let args = List::map(tvar2typ,List::map(copy_tvar,tud->tvs));
           t = new TunionType(TunionInfo(new KnownTunion(new tud),args,HeapRgn));
 	  if(tud->fields != NULL) declopt = new Opt(d);
-	  break;
-        case &Union_d(ud):
-          let args = List::map(tvar2typ,List::map(copy_tvar,ud->tvs));
-          t = new UnionType(ud->name->v,args,NULL);
-          if (ud->fields!=NULL) declopt = new Opt(d);
 	  break;
         case &Enum_d(ed):
           t = new EnumType(ed->name,NULL);
@@ -519,89 +511,89 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
             list_t<type_modifier_t> tms) {
   if (tms==NULL) return $(tq,t,NULL,atts);
   switch (tms->hd) {
-    case Carray_mod:
-      return apply_tms(empty_tqual(),new ArrayType(t,tq,NULL),atts,tms->tl);
-    case &ConstArray_mod(e):
-      return apply_tms(empty_tqual(),new ArrayType(t,tq,e),atts,tms->tl);
-    case &Function_mod(args): {
-      switch (args) {
-      case &WithTypes(args2,c_vararg,cyc_vararg,eff,rgn_po):
-        list_t<tvar_t> typvars = NULL;
-        // function type attributes seen thus far get put in the function type
-        attributes_t fn_atts = NULL, new_atts = NULL;
-        for (_ as = atts; as != NULL; as = as->tl) {
-          if (fntype_att(as->hd))
-            fn_atts = new List(as->hd,fn_atts);
-          else
-            new_atts = new List(as->hd,new_atts);
-        }
-        // functions consume type parameters
-        if (tms->tl != NULL) {
-          switch (tms->tl->hd) {
-          case &TypeParams_mod(ts,_,_):
-            typvars = ts;
-            tms=tms->tl; // skip TypeParams on call of apply_tms below
-	    break;
-          default:
-            break;
-          }
-        }
-        // special case where the parameters are void, e.g., int f(void)
-        if (!c_vararg && cyc_vararg == NULL // not vararg function
-            && args2 != NULL      // not empty arg list
-            && args2->tl == NULL   // not >1 arg
-            && (*args2->hd)[0] == NULL // not f(void x)
-            && (*args2->hd)[2] == VoidType) {
-	  args2 = NULL;
+  case Carray_mod:
+    return apply_tms(empty_tqual(),new ArrayType(t,tq,NULL),atts,tms->tl);
+  case &ConstArray_mod(e):
+    return apply_tms(empty_tqual(),new ArrayType(t,tq,e),atts,tms->tl);
+  case &Function_mod(args): {
+    switch (args) {
+    case &WithTypes(args2,c_vararg,cyc_vararg,eff,rgn_po):
+      list_t<tvar_t> typvars = NULL;
+      // function type attributes seen thus far get put in the function type
+      attributes_t fn_atts = NULL, new_atts = NULL;
+      for (_ as = atts; as != NULL; as = as->tl) {
+	if (fntype_att(as->hd))
+	  fn_atts = new List(as->hd,fn_atts);
+	else
+	  new_atts = new List(as->hd,new_atts);
+      }
+      // functions consume type parameters
+      if (tms->tl != NULL) {
+	switch (tms->tl->hd) {
+	case &TypeParams_mod(ts,_,_):
+	  typvars = ts;
+	  tms=tms->tl; // skip TypeParams on call of apply_tms below
+	  break;
+	default:
+	  break;
 	}
-	// convert result type from array to pointer result
-	t = array2ptr(t,false);
-	// convert any array arguments to pointer arguments
-	List::iter(arg_array2ptr,args2);
-        // Note, we throw away the tqual argument.  An example where
-        // this comes up is "const int f(char c)"; it doesn't really
-        // make sense to think of the function as returning a const
-        // (or volatile, or restrict).  The result will be copied
-        // anyway.  TODO: maybe we should issue a warning.  But right
-        // now we don't have a loc so the warning will be confusing.
-        return apply_tms(empty_tqual(),
-			 function_typ(typvars,eff,t,args2,
-                                      c_vararg,cyc_vararg,rgn_po,fn_atts),
-                         new_atts,
-                         tms->tl);
-      case &NoTypes(_,loc):
-	abort(loc,"function declaration without parameter types");
       }
-    }
-    case &TypeParams_mod(ts,loc,_): {
-      // If we are the last type modifier, this could be the list of
-      // type parameters to a typedef:
-      // typedef struct foo<`a,int> foo_t<`a>
-      if (tms->tl==NULL)
-        return $(tq,t,ts,atts);
-      // Otherwise, it is an error in the program if we get here;
-      // TypeParams should already have been consumed by an outer
-      // Function (see last case).
-      abort(loc, "type parameters must appear before function arguments "
-	    "in declarator");
-    }
-    case &Pointer_mod(ps,rgntyp,tq2): {
-      switch (ps) {
-      case &NonNullable_ps(ue):
-	return apply_tms(tq2,atb_typ(t,rgntyp,tq,
-                                     new Upper_b(ue)),atts,tms->tl);
-      case &Nullable_ps(ue):
-	return apply_tms(tq2,starb_typ(t,rgntyp,tq,
-                                       new Upper_b(ue)),atts,tms->tl);
-      case TaggedArray_ps:
-	return apply_tms(tq2,tagged_typ(t,rgntyp,tq),atts,tms->tl);
+      // special case where the parameters are void, e.g., int f(void)
+      if (!c_vararg && cyc_vararg == NULL // not vararg function
+	  && args2 != NULL      // not empty arg list
+	  && args2->tl == NULL   // not >1 arg
+	  && (*args2->hd)[0] == NULL // not f(void x)
+	  && (*args2->hd)[2] == VoidType) {
+	args2 = NULL;
       }
+      // convert result type from array to pointer result
+      t = array2ptr(t,false);
+      // convert any array arguments to pointer arguments
+      List::iter(arg_array2ptr,args2);
+      // Note, we throw away the tqual argument.  An example where
+      // this comes up is "const int f(char c)"; it doesn't really
+      // make sense to think of the function as returning a const
+      // (or volatile, or restrict).  The result will be copied
+      // anyway.  TODO: maybe we should issue a warning.  But right
+      // now we don't have a loc so the warning will be confusing.
+      return apply_tms(empty_tqual(),
+		       function_typ(typvars,eff,t,args2,
+				    c_vararg,cyc_vararg,rgn_po,fn_atts),
+		       new_atts,
+		       tms->tl);
+    case &NoTypes(_,loc):
+      abort(loc,"function declaration without parameter types");
     }
-    case &Attributes_mod(loc,atts2):
-      // FIX: get this in line with GCC
-      // attributes get attached to function types -- I doubt that this
-      // is GCC's behavior but what else to do?
-      return apply_tms(tq,t,List::append(atts,atts2),tms->tl);
+  }
+  case &TypeParams_mod(ts,loc,_): {
+    // If we are the last type modifier, this could be the list of
+    // type parameters to a typedef:
+    // typedef struct foo<`a,int> foo_t<`a>
+    if (tms->tl==NULL)
+      return $(tq,t,ts,atts);
+    // Otherwise, it is an error in the program if we get here;
+    // TypeParams should already have been consumed by an outer
+    // Function (see last case).
+    abort(loc, "type parameters must appear before function arguments "
+	  "in declarator");
+  }
+  case &Pointer_mod(ps,rgntyp,tq2): {
+    switch (ps) {
+    case &NonNullable_ps(ue):
+      return apply_tms(tq2,atb_typ(t,rgntyp,tq,
+				   new Upper_b(ue)),atts,tms->tl);
+    case &Nullable_ps(ue):
+      return apply_tms(tq2,starb_typ(t,rgntyp,tq,
+				     new Upper_b(ue)),atts,tms->tl);
+    case TaggedArray_ps:
+      return apply_tms(tq2,tagged_typ(t,rgntyp,tq),atts,tms->tl);
+    }
+  }
+  case &Attributes_mod(loc,atts2):
+    // FIX: get this in line with GCC
+    // attributes get attached to function types -- I doubt that this
+    // is GCC's behavior but what else to do?
+    return apply_tms(tq,t,List::append(atts,atts2),tms->tl);
   }
 }
 
@@ -650,11 +642,7 @@ static stmt_t flatten_declarations(list_t<decl_t> ds, stmt_t s){
 static list_t<decl_t> make_declarations(decl_spec_t ds,
 					list_t<$(declarator_t,exp_opt_t)@> ids,
 					seg_t loc) {
-  list_t<type_specifier_t> tss     = ds->type_specs;
-  tqual_t                tq        = ds->tq;
-  bool                   istypedef = false;  // updated below if necessary
-  scope_t                s         = Public; // updated below if necessary
-  list_t<attribute_t>    atts      = ds->attributes;
+  let &Declaration_spec(_,tq,tss,_,atts) = ds;
 
   if (ds->is_inline)
     err("inline is allowed only on function definitions",loc);
@@ -663,6 +651,8 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
     return NULL;
   }
 
+  scope_t s = Public;
+  bool istypedef = false;
   if (ds->sc != NULL)
     switch (ds->sc->v) {
     case Typedef_sc:  istypedef = true; break;
@@ -685,7 +675,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
     }
 
   // Collapse the type specifiers to get the base type and any
-  // optional nested declarations
+  // nested declarations
   let ts_info = collapse_type_specifiers(tss,loc);
   if (declarators == NULL) {
     // here we have a type declaration -- either a struct, union,
@@ -696,22 +686,23 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
       switch (d->r) {
       case &Enum_d(ed):
         ed->sc = s;
-        if (atts != NULL) err("bad attributes on enum",loc); break;
-      case &Struct_d(sd): sd->sc = s; sd->attributes = atts; break;
-      case &Union_d(ud):  ud->sc = s; ud->attributes = atts; break;
+        if (atts != NULL) err("bad attributes on enum",loc); 
+	break;
+      case &Aggr_d(ad): ad->sc = s; ad->attributes = atts; break;
       case &Tunion_d(tud):
         tud->sc = s;
-        if (atts != NULL) err("bad attributes on tunion",loc); break;
+        if (atts != NULL) err("bad attributes on tunion",loc); 
+	break;
       default: err("bad declaration",loc); return NULL;
       }
       return new List(d,NULL);
     } else {
       switch (t) {
-      case &StructType(n,ts,_):
-        let ts2 = List::map_c(typ2tvar,loc,ts);
-        let sd = new Structdecl{s,new Opt((typedef_name_t)n),ts2,NULL,NULL};
-        if (atts != NULL) err("bad attributes on struct",loc);
-        return new List(new_decl(new Struct_d(sd),loc),NULL);
+      case &AggrType(AggrInfo(&UnknownAggr(k,n),ts)):
+	let ts2 = List::map_c(typ2tvar,loc,ts);
+	let ad  = new Aggrdecl(k,s,n,ts2,NULL,NULL,NULL);
+	if (atts != NULL) err("bad attributes on type declaration",loc);
+	return new List(new_decl(new Aggr_d(ad),loc),NULL);
       case &TunionType(TunionInfo(&KnownTunion(tudp),_,_)):
 	if(atts != NULL) err("bad attributes on tunion", loc);
 	return new List(new_decl(new Tunion_d(*tudp),loc),NULL);
@@ -720,11 +711,6 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
         let tud = tunion_decl(s, n, ts2, NULL, isx, loc);
         if (atts != NULL) err("bad attributes on tunion",loc);
         return new List(tud,NULL);
-      case &UnionType(n,ts,_):
-        let ts2 = List::map_c(typ2tvar,loc,ts);
-        let ud = new Uniondecl{s,new Opt((typedef_name_t)n),ts2,NULL,NULL};
-        if (atts != NULL) err("bad attributes on union",loc);
-        return new List(new Decl(new Union_d(ud),loc),NULL);
       case &EnumType(n,_):
         let ed = new Enumdecl{s,n,NULL};
         if (atts != NULL) err("bad attributes on enum",loc);
@@ -752,10 +738,9 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
       if (ts_info[1] != NULL) {
         decl_t d = ts_info[1]->v;
         switch (d->r) {
-        case &Struct_d(sd):
-          sd->sc = s; sd->attributes = atts; atts = NULL; break;
+        case &Aggr_d(ad):
+          ad->sc = s; ad->attributes = atts; atts = NULL; break;
         case &Tunion_d(tud): tud->sc = s; break;
-        case &Union_d(ud):   ud->sc  = s; break;
         case &Enum_d(ed):    ed->sc  = s; break;
         default:
           err("declaration within typedef is not a struct, union, tunion, "
@@ -876,8 +861,8 @@ using Parse;
   TypeSpecifier_tok(type_specifier_t);
   QualSpecList_tok($(tqual_t,list_t<type_specifier_t>,attributes_t)@);
   TypeQual_tok(tqual_t);
-  StructFieldDeclList_tok(list_t<structfield_t>);
-  StructFieldDeclListList_tok(list_t<list_t<structfield_t>>);
+  AggrFieldDeclList_tok(list_t<aggrfield_t>);
+  AggrFieldDeclListList_tok(list_t<list_t<aggrfield_t>>);
   Declarator_tok(declarator_t);
   AbstractDeclarator_tok(abstractdeclarator_t);
   TunionField_tok(tunionfield_t);
@@ -885,7 +870,7 @@ using Parse;
   ParamDecl_tok($(opt_t<var_t>,tqual_t,type_t)@);
   ParamDeclList_tok(list_t<$(opt_t<var_t>,tqual_t,type_t)@>);
   ParamDeclListBool_tok($(list_t<$(opt_t<var_t>,tqual_t,type_t)@>,bool,vararg_info_t *,opt_t<type_t>,list_t<$(type_t,type_t)@>)@);
-  StructOrUnion_tok(struct_or_union_t);
+  StructOrUnion_tok(aggr_kind_t);
   IdList_tok(list_t<var_t>);
   Designator_tok(designator_t);
   DesignatorList_tok(list_t<designator_t>);
@@ -930,9 +915,9 @@ using Parse;
 %type <list_t<switch_clause_t>> switch_clauses
 %type <list_t<switchC_clause_t>> switchC_clauses
 %type <pat_t> pattern
-%type <list_t<pat_t>> tuple_pattern_list tuple_pattern_list0
+%type <list_t<pat_t>> tuple_pattern_list
 %type <$(list_t<designator_t>,pat_t)@> field_pattern
-%type <list_t<$(list_t<designator_t>,pat_t)@>> field_pattern_list field_pattern_list0
+%type <list_t<$(list_t<designator_t>,pat_t)@>> field_pattern_list
 %type <fndecl_t> function_definition function_definition2
 %type <list_t<decl_t>> declaration declaration_list
 %type <list_t<decl_t>> prog translation_unit external_declaration
@@ -942,10 +927,10 @@ using Parse;
 %type <storage_class_t> storage_class_specifier
 %type <type_specifier_t> type_specifier enum_specifier
 %type <type_specifier_t> struct_or_union_specifier tunion_specifier
-%type <struct_or_union_t> struct_or_union
+%type <aggr_kind_t> struct_or_union
 %type <tqual_t> type_qualifier type_qualifier_list
-%type <list_t<structfield_t>> struct_declaration_list struct_declaration
-%type <list_t<list_t<structfield_t>>> struct_declaration_list0
+%type <list_t<aggrfield_t>> struct_declaration_list struct_declaration
+%type <list_t<list_t<aggrfield_t>>> struct_declaration_list0
 %type <list_t<type_modifier_t>> pointer
 %type <declarator_t> declarator direct_declarator
 %type <$(declarator_t,exp_opt_t)@> struct_declarator
@@ -961,7 +946,7 @@ using Parse;
 %type <list_t<$(opt_t<var_t>,tqual_t,type_t)@>> parameter_list
 %type <$(list_t<$(opt_t<var_t>,tqual_t,type_t)@>, bool,vararg_info_t *,opt_t<type_t>, list_t<$(type_t,type_t)@>)@> parameter_type_list
 %type <list_t<type_t>> type_name_list type_params_opt effect_set region_set
-%type <list_t<type_t>> atomic_effect
+%type <list_t<type_t>> atomic_effect exist_vars_opt
 %type <list_t<designator_t>> designation designator_list
 %type <designator_t> designator
 %type <kind_t> kind
@@ -1305,34 +1290,24 @@ enum_declaration_list:
 /* parsing of struct and union specifiers. */
 struct_or_union_specifier:
   struct_or_union '{' struct_declaration_list '}'
-    { type_t t;
-      switch ($1) {
-      case Struct_su: t = new AnonStructType($3); break;
-      case Union_su:  t = new AnonUnionType($3);  break;
-      }
-      $$=^$(type_spec(t,LOC(@1,@4)));
-    }
+  { $$=^$(type_spec(new AnonAggrType($1,$3),LOC(@1,@4))); }
 /* Cyc:  type_params_opt are added */
-| struct_or_union struct_union_name type_params_opt '{' struct_declaration_list '}'
+| struct_or_union struct_union_name type_params_opt '{'  exist_vars_opt struct_declaration_list '}'
     { let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
-      _ decl_maker;
-      switch ($1) {
-      case Struct_su: decl_maker = struct_decl; break;
-      case Union_su:  decl_maker = union_decl;  break;
-      }
-      $$=^$(new Decl_spec(decl_maker(Public,new Opt($2),ts,new Opt($5),NULL,
-				     LOC(@1,@6))));
+      let exist_ts = List::map_c(typ2tvar,LOC(@5,@5),$5);
+      $$=^$(new Decl_spec(aggr_decl($1, Public, $2, ts, new Opt(exist_ts), 
+				    new Opt($6), NULL, LOC(@1,@7))));
     }
 /* Cyc:  type_params_opt are added */
 | struct_or_union struct_union_name type_params_opt 
-    { type_t t;
-      switch ($1) {
-      case Struct_su: t = new StructType($2,$3,NULL); break;
-      case Union_su:  t = new UnionType($2,$3,NULL);  break;
-      }
-      $$=^$(type_spec(t,LOC(@1,@3)));
+    { $$=^$(type_spec(new AggrType(AggrInfo(new UnknownAggr($1,$2),$3)),
+		      LOC(@1,@3)));
     }
 ;
+
+exist_vars_opt: 
+/* empty */ { $$=^$(NULL); }
+|  '<' type_name_list '>' { $$=^$(List::imp_rev($2)); }
 
 type_params_opt:
   /* empty */
@@ -1342,8 +1317,8 @@ type_params_opt:
 ;
 
 struct_or_union:
-  STRUCT { $$=^$(Struct_su); }
-| UNION  { $$=^$(Union_su); }
+  STRUCT { $$=^$(StructA); }
+| UNION  { $$=^$(UnionA); }
 ;
 
 struct_declaration_list:
@@ -1391,7 +1366,7 @@ struct_declaration:
       let $(decls, widths) = List::split($2);
       let t = speclist2typ(tspecs, LOC(@1,@1));
       let info = List::zip(apply_tmss(tq,t,decls,atts),widths);
-      $$=^$(List::map_c(make_struct_field,LOC(@1,@2),info));
+      $$=^$(List::map_c(make_aggr_field,LOC(@1,@2),info));
     }
 ;
 
@@ -2075,19 +2050,17 @@ pattern:
     {$$=^$(new_pat(Null_p,LOC(@1,@1)));}
 | qual_opt_identifier
     { $$=^$(new_pat(new UnknownId_p($1),LOC(@1,@1))); }
-| qual_opt_identifier type_params_opt '(' tuple_pattern_list ')'
-    { let tvs = List::map_c(typ2tvar,LOC(@2,@2),$2);
-      $$=^$(new_pat(new UnknownCall_p($1,tvs,$4),LOC(@1,@5)));
-    }
 | '$' '(' tuple_pattern_list ')'
-    {$$=^$(new_pat(new Tuple_p($3),LOC(@1,@4)));}
-| qual_opt_identifier type_params_opt '{' '}'
-    { let tvs = List::map_c(typ2tvar,LOC(@2,@2),$2);
-      $$=^$(new_pat(new UnknownFields_p($1,tvs,NULL),LOC(@1,@4)));
-    }
-| qual_opt_identifier type_params_opt '{' field_pattern_list '}'
-    { let tvs = List::map_c(typ2tvar,LOC(@2,@2),$2);
-      $$=^$(new_pat(new UnknownFields_p($1,tvs,$4),LOC(@1,@5)));
+    {$$=^$(new_pat(new Tuple_p(List::imp_rev($3)),LOC(@1,@4)));}
+| qual_opt_identifier type_params_opt '(' tuple_pattern_list ')'
+{ // $2 gets deleted real soon now!
+  let tvs = List::map_c(typ2tvar,LOC(@2,@2),$2);
+      $$=^$(new_pat(new UnknownCall_p($1,tvs,List::imp_rev($4)),LOC(@1,@5))); }
+| qual_opt_identifier '{' exist_vars_opt field_pattern_list '}'
+{ let exist_ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
+      $$=^$(new_pat(new Aggr_p(AggrInfo(new UnknownAggr(StructA,$1),NULL),
+			       exist_ts, List::imp_rev($4)),
+		    LOC(@1,@5)));
     }
 | '&' pattern
     {$$=^$(new_pat(new Pointer_p($2),LOC(@1,@2)));}
@@ -2098,15 +2071,9 @@ pattern:
 ;
 
 tuple_pattern_list:
-  /* empty */
-    { $$=^$(NULL); }
-| tuple_pattern_list0
-    { $$=^$(List::imp_rev($1)); }
-;
-tuple_pattern_list0:
   pattern
     {$$=^$(new List($1,NULL));}
-| tuple_pattern_list0 ',' pattern
+| tuple_pattern_list ',' pattern
     {$$=^$(new List($3,$1));}
 ;
 
@@ -2117,13 +2084,9 @@ field_pattern:
     {$$=^$(new $($1,$2));}
 
 field_pattern_list:
-  field_pattern_list0
-    {$$=^$(List::imp_rev($1));}
-;
-field_pattern_list0:
   field_pattern
     { $$=^$(new List($1,NULL));}
-| field_pattern_list0 ',' field_pattern
+| field_pattern_list ',' field_pattern
     {$$=^$(new List($3,$1)); }
 ;
 
@@ -2318,9 +2281,9 @@ postfix_expression:
 | postfix_expression '(' argument_expression_list ')'
     { $$=^$(unknowncall_exp($1,$3,LOC(@1,@4))); }
 | postfix_expression '.' field_name
-    { $$=^$(structmember_exp($1,new $3,LOC(@1,@3))); }
+    { $$=^$(aggrmember_exp($1,new $3,LOC(@1,@3))); }
 | postfix_expression PTR_OP field_name
-    { $$=^$(structarrow_exp($1,new $3,LOC(@1,@3))); }
+    { $$=^$(aggrarrow_exp($1,new $3,LOC(@1,@3))); }
 | postfix_expression INC_OP
     { $$=^$(post_inc_exp($1,LOC(@1,@2))); }
 | postfix_expression DEC_OP
@@ -2358,7 +2321,7 @@ primary_expression:
     { $$=^$(tuple_exp($3,LOC(@1,@4))); }
 /* Cyc: structure expressions */
 | qual_opt_identifier '{' initializer_list '}'
-    { $$=^$(new_exp(new Struct_e($1,NULL,List::imp_rev($3),NULL),LOC(@1,@4))); }
+    { $$=^$(new_exp(new Struct_e($1,List::imp_rev($3),NULL),LOC(@1,@4))); }
 /* Cyc: compound statement expressions, as in gcc */
 | '(' '{' block_item_list '}' ')'
     { $$=^$(stmt_exp($3,LOC(@1,@5))); }

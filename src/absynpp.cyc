@@ -38,10 +38,10 @@ using Tcutil;
 
 // forward references
 extern doc_t dp2doc($(list_t<designator_t>,pat_t)@ dp);
-extern doc_t switchclauses2doc(list_t<switch_clause_t,`H> cs);
-extern doc_t switchCclauses2doc(list_t<switchC_clause_t,`H> cs);
+extern doc_t switchclauses2doc(list_t<switch_clause_t> cs);
+extern doc_t switchCclauses2doc(list_t<switchC_clause_t> cs);
 extern doc_t typ2doc(type_t);
-extern doc_t structfields2doc(list_t<structfield_t,`H> fields);
+extern doc_t aggrfields2doc(list_t<aggrfield_t> fields);
 extern doc_t scope2doc(scope_t);
 extern doc_t stmt2doc(stmt_t);
 extern doc_t exp2doc(exp_t);
@@ -58,8 +58,8 @@ extern doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,
                          bool c_varargs,vararg_info_t *cyc_varargs,
                          opt_t<type_t> effopt, 
                          list_t<$(type_t,type_t)@> rgn_po);
-extern doc_t tunionfields2doc(list_t<tunionfield_t,`H> fields);
-extern doc_t enumfields2doc(list_t<enumfield_t,`H> fs);
+extern doc_t tunionfields2doc(list_t<tunionfield_t> fields);
+extern doc_t enumfields2doc(list_t<enumfield_t> fs);
 extern doc_t vardecl2doc(vardecl_t vd);
 // Flag controlling whether typedefs are expanded during printing
 static bool expand_typedefs;
@@ -77,7 +77,7 @@ static bool add_cyc_prefix;
 // (Differences: long long vs. __int64 and inline vs. __inline)
 static bool to_VC;
 
-// Flag controlling whether declarations have to be at the beginning of the blocks
+// Flag controlling whether declarations have to be at the beginning of blocks
 static bool decls_first;
 
 // Flag controlling whether to rewrite temporary type variables
@@ -128,7 +128,7 @@ struct Params {
   list_t<var_t> curr_namespace;
 };
 
-void set_params(struct Params @ `r fs) {
+void set_params(struct Params @ fs) {
   expand_typedefs = fs->expand_typedefs;
   qvar_to_Cids = fs->qvar_to_Cids;
   add_cyc_prefix = fs->add_cyc_prefix;
@@ -222,7 +222,7 @@ static void curr_namespace_add(var_t v) {
   curr_namespace = imp_append(curr_namespace, new List(v, NULL));
 }
 
-static void suppr_last(list_t<`a> @ `r l) {// could be in List
+static void suppr_last(list_t<`a> @ l) {// could be in List
   if ((*l) -> tl == NULL) {
     *l = NULL;
   } else {
@@ -283,14 +283,14 @@ string_t string_escape(string_t<`H> s) {
   int len = 0;
   for (int i=0; i<=n; i++)
     switch (s[i]) {
-    case '\a': fallthru;
-    case '\b': fallthru;
-    case '\f': fallthru;
-    case '\n': fallthru;
-    case '\r': fallthru;
-    case '\t': fallthru;
-    case '\v': fallthru;
-    case '\\': fallthru;
+    case '\a': 
+    case '\b': 
+    case '\f': 
+    case '\n': 
+    case '\r': 
+    case '\t': 
+    case '\v': 
+    case '\\': 
     case '\"': len += 2; break;
     case c:
       if (c>=' ' && c<='~') len++;
@@ -342,11 +342,11 @@ doc_t tqual2doc(tqual_t tq) {
 
 string_t kind2string(kind_t k) {
   switch (k) {
-  case AnyKind:        return "A";
-  case MemKind:        return "M";
-  case BoxKind:        return "B";
-  case RgnKind:        return "R";
-  case EffKind:        return "E";
+  case AnyKind: return "A";
+  case MemKind: return "M";
+  case BoxKind: return "B";
+  case RgnKind: return "R";
+  case EffKind: return "E";
   }
 }
 
@@ -367,11 +367,10 @@ doc_t tps2doc(list_t<type_t> ts) {
 
 doc_t ktvar2doc(tvar_t tv) {
   switch (compress_kb(tv->kind)) {
-  case &Unknown_kb(_): fallthru;
+  case &Unknown_kb(_): 
   case &Eq_kb(BoxKind): return textptr(tv->name);
-  case &Less_kb(_,k): fallthru(k);
-  case &Eq_kb(k): 
-    return cat(textptr(tv->name), text("::"), kind2doc(k));
+  case &Less_kb(_,k):   fallthru(k);
+  case &Eq_kb(k):       return cat(textptr(tv->name), text("::"), kind2doc(k));
   }
 }
 
@@ -399,8 +398,8 @@ doc_t args2doc(list_t<$(tqual_t,type_t)@> ts) {
 
 doc_t noncallatt2doc(attribute_t att) {
   switch(att) {
-  case Stdcall_att:  return nil_doc();
-  case Cdecl_att:    return nil_doc();
+  case Stdcall_att:  
+  case Cdecl_att:    
   case Fastcall_att: return nil_doc();
   default: return text(attribute2string(att));
   }
@@ -421,8 +420,8 @@ doc_t noncallconv2doc(attributes_t atts) { // for MS only
   bool hasatt = false;
    for(_ atts2 = atts; atts2 != NULL; atts2 = atts2->tl)
     switch(atts2->hd) {
-    case Stdcall_att:  break;
-    case Cdecl_att:    break;
+    case Stdcall_att:  
+    case Cdecl_att:    
     case Fastcall_att: break;
     default: hasatt = true; break;
     }
@@ -547,13 +546,20 @@ static void effects2docs(list_t<doc_t,`H> @ `r rgions,
 doc_t eff2doc(type_t t) {
   list_t <doc_t> rgions = NULL, effects = NULL;
   effects2docs(&rgions, &effects, t);
-  rgions = List::imp_rev(rgions);
+  rgions  = List::imp_rev(rgions);
   effects = List::imp_rev(effects);
   if (rgions == NULL && effects != NULL) {
     return group("","","+",effects);
   } else {
     let doc1 = group("{","}",",",rgions);
     return group("","","+",List::imp_append(effects,new List(doc1,NULL)));
+  }
+}
+
+doc_t aggr_kind2doc(aggr_kind_t k) {
+  switch(k) {
+  case StructA: return text("struct ");
+  case UnionA:  return text("union ");
   }
 }
 
@@ -610,9 +616,9 @@ doc_t ntyp2doc(type_t t) {
     switch(tuf_info) {
     case &UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
       fallthru(tname,is_x,fname);
-      case &KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x),
-                             &Tunionfield(fname,_,_,_,_)):
-                               let kw = text(is_x ? "xtunion " : "tunion ");
+    case &KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x),
+			   &Tunionfield(fname,_,_,_,_)):
+			     let kw = text(is_x ? "xtunion " : "tunion ");
       s = cat(kw, qvar2doc(tname),text("."),qvar2doc(fname));
       break;
     }
@@ -648,30 +654,13 @@ doc_t ntyp2doc(type_t t) {
   case &TupleType(ts):
     s = cat(text("$"),args2doc(ts));
     break;
-  case &StructType(n,ts,_):
-    if (n == NULL)
-      s = cat(text("struct "),tps2doc(ts));
-    else
-      s = cat(text("struct "),
-              (n==NULL) ? nil_doc() : qvar2doc((qvar_t)n),
-              tps2doc(ts));
+  case &AggrType(AggrInfo(info,ts)):
+    let $(k,n) = aggr_kinded_name(info);
+    s = cat(aggr_kind2doc(k), qvar2doc(n), tps2doc(ts));
     break;
-  case &UnionType(n,ts,_):
-    if (n == NULL)
-      s = cat(text("union "),tps2doc(ts));
-    else
-      s = cat(text("union "),
-              (n==NULL) ? nil_doc() : qvar2doc((qvar_t)n),
-              tps2doc(ts));
-    break;
-  case &AnonStructType(fs):
-    s = cat(text("struct {"),
-            nest(2, structfields2doc(fs)),
-            text("}"));
-    break;
-  case &AnonUnionType(fs):
-    s = cat(text("union {"),
-            nest(2, structfields2doc(fs)),
+  case &AnonAggrType(k,fs):
+    s = cat(aggr_kind2doc(k), text("{"),
+            nest(2, aggrfields2doc(fs)),
             text("}"));
     break;
   case &AnonEnumType(fs):
@@ -818,23 +807,23 @@ doc_t typ2doc(type_t t) {
 // BIGGER WARNING: Absyndump::dumpexp_prec has to use the same constants!!!
 int exp_prec(exp_t e) {
   switch (e->r) {
-  case &Const_e(_):       return 10000;
-  case &Var_e(_,_):       return 10000;
-  case &UnknownId_e(_):   return 10000;
+  case &Const_e(_):    
+  case &Var_e(_,_):    
+  case &UnknownId_e(_): return 10000;
   case &Primop_e(p,_):
     switch (p) {
     case Plus:           return 100;
     case Times:          return 110;
     case Minus:          return 100;
-    case Div:            return 110;
+    case Div:            
     case Mod:            return 110;
-    case Eq:             return  70;
+    case Eq:             
     case Neq:            return  70;
-    case Gt:             return  80;
-    case Lt:             return  80;
-    case Gte:            return  80;
+    case Gt:             
+    case Lt:             
+    case Gte:            
     case Lte:            return  80;
-    case Not:            return 130;
+    case Not:            
     case Bitnot:         return 130;
     case Bitand:         return  60;
     case Bitor:          return  40;
@@ -848,35 +837,35 @@ int exp_prec(exp_t e) {
   case &Increment_e(_,_):       return 130;
   case &Conditional_e(_,_,_):   return  30; // note || and && are hiding here!
   case &SeqExp_e(_,_):          return  10;
-  case &UnknownCall_e(_,_):     return 140;
+  case &UnknownCall_e(_,_):     
   case &FnCall_e(_,_,_):        return 140;
   case &Throw_e(_):             return 130;
   case &NoInstantiate_e(e2):    return exp_prec(e2);
   case &Instantiate_e(e2,_):    return exp_prec(e2);
   case &Cast_e(_,_):            return 120;
   case &New_e(_,_):             return 15; // ???
-  case &Address_e(_):           return 130;
-  case &Sizeoftyp_e(_):         return 130;
-  case &Sizeofexp_e(_):         return 130;
-  case &Offsetof_e(_,_):        return 130;
-  case &Gentyp_e(_,_):            return 130;
+  case &Address_e(_):           
+  case &Sizeoftyp_e(_):         
+  case &Sizeofexp_e(_):         
+  case &Offsetof_e(_,_):        
+  case &Gentyp_e(_,_):          
   case &Deref_e(_):             return 130;
-  case &StructMember_e(_,_):    return 140;
-  case &StructArrow_e(_,_):     return 140; // ???
+  case &AggrMember_e(_,_):    
+  case &AggrArrow_e(_,_):     
   case &Subscript_e(_,_):       return 140;
   case &Tuple_e(_):             return 150;
-  case &CompoundLit_e(_,_):     fallthru;
-  case &Array_e(_):             fallthru;
-  case &Comprehension_e(_,_,_): fallthru;
-  case &Struct_e(_,_,_,_):      fallthru;
-  case &AnonStruct_e(_,_):      fallthru;
-  case &Tunion_e(_,_,_,_,_):    fallthru;
-  case &Enum_e(_,_,_):          fallthru;
-  case &AnonEnum_e(_,_,_):      fallthru;
-  case &Malloc_e(_):            return 140;
+  case &CompoundLit_e(_,_):     
+  case &Array_e(_):             
+  case &Comprehension_e(_,_,_): 
+  case &Struct_e(_,_,_):      
+  case &AnonStruct_e(_,_):      
+  case &Tunion_e(_,_,_):    
+  case &Enum_e(_,_,_):          
+  case &AnonEnum_e(_,_,_):      
+  case &Malloc_e(_):            
   case &UnresolvedMem_e(_,_):   return 140; // ???
   case &StmtExp_e(_):           return 10000;
-  case &Codegen_e(_):           return 140;
+  case &Codegen_e(_):           
   case &Fill_e(_):              return 140;
   }
 }
@@ -982,10 +971,10 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &Deref_e(e1):
     s = cat(text("*"), exp2doc_prec(myprec,e1));
     break;
-  case &StructMember_e(e1,n):
+  case &AggrMember_e(e1,n):
     s = cat(exp2doc_prec(myprec,e1), text("."), textptr(n));
     break;
-  case &StructArrow_e(e1,n):
+  case &AggrArrow_e(e1,n):
     s = cat(exp2doc_prec(myprec,e1), text("->"), textptr(n));
     break;
   case &Subscript_e(e1,e2):
@@ -1017,19 +1006,19 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
             exp2doc(e2),
             text("}"));
     break;
-  case &Struct_e(n,_,des,_):
+  case &Struct_e(n,des,_):
     s = cat(qvar2doc(n),
             group("{","}",",",List::map(de2doc,des)));
     break;
   case &AnonStruct_e(_,des):
     s = group("{","}",",",List::map(de2doc,des));
     break;
-  case &Tunion_e(_,_,es,_,ef):
+  case &Tunion_e(es,_,tuf):
     if (es == NULL)
       // special case: a nullary tunion constant is printed "foo" not "foo()"
-      s = qvar2doc(ef->name);
+      s = qvar2doc(tuf->name);
     else
-      s = cat(qvar2doc(ef->name),
+      s = cat(qvar2doc(tuf->name),
               egroup("(",")",",",List::map(exp2doc,es)));
     break;
   case &Enum_e(n,_,_):
@@ -1174,14 +1163,6 @@ doc_t prim2doc(primop_t p) {
   return text(prim2str(p));
 }
 
-doc_t structarg2doc($(opt_t<var_t>,exp_t)@ t) {
-  if ((*t)[0] == NULL)
-    return exp2doc((*t)[1]);
-  else return cat(textptr((*t)[0]->v),
-                  text(" = "),
-                  exp2doc((*t)[1]));
-}
-
 bool is_declaration(stmt_t s) {
   switch (s->r) {
   case &Decl_s(_,_): return true;
@@ -1192,10 +1173,8 @@ bool is_declaration(stmt_t s) {
 doc_t stmt2doc(stmt_t st) {
   doc_t s;
   switch (st->r) {
-  case Skip_s:
-    s = text(";"); break;
-  case &Exp_s(e):
-    s = cat(exp2doc(e),text(";")); break;
+  case Skip_s: s = text(";"); break;
+  case &Exp_s(e): s = cat(exp2doc(e),text(";")); break;
   case &Seq_s(s1,s2):
     if (decls_first) {
       if (is_declaration(s1))
@@ -1397,30 +1376,19 @@ doc_t pat2doc(pat_t p) {
             tvars2doc(tvs),
             group("(",")",",",List::map(pat2doc,ps)));
     break;
-  case &UnknownFields_p(q,tvs,dps):
-    s = cat(qvar2doc(q),
-            tvars2doc(tvs),
-            group("{","}",",",List::map(dp2doc,dps)));
+  case &Aggr_p(AggrInfo(info,_),exists,dps):
+    let $(_,n) = aggr_kinded_name(info);
+    s = cat(qvar2doc(n), text("{"),
+	    egroup("[","]",",",List::map(textptr,List::map(get_name,exists))),
+	    group("","}",",",List::map(dp2doc,dps)));
     break;
-  case &Struct_p(sd,_,tvs,dps):
-    s = cat(sd->name==NULL?nil_doc():qvar2doc(sd->name->v),
-            tvars2doc(tvs),
-            group("{","}",",",List::map(dp2doc,dps)));
-    break;
-  case &Enum_p(_,ef):
-    s = qvar2doc(ef->name);
-    break;
-  case &AnonEnum_p(_,ef):
-    s = qvar2doc(ef->name);
-    break;
+  case &Enum_p(_,ef): fallthru(ef);
+  case &AnonEnum_p(_,ef): s = qvar2doc(ef->name); break;
+  case &Tunion_p(_,tuf,_,NULL): s = qvar2doc(tuf->name); break;
   case &Tunion_p(_,tuf,tvs,ps):
-    if (ps == NULL)
-      // special case: a nullary tunion constant is printed "foo" not "foo()"
-      s = qvar2doc(tuf->name);
-    else
-      s = cat(qvar2doc(tuf->name),
-              tvars2doc(tvs),
-              egroup("(",")",",",List::map(pat2doc,ps)));
+    s = cat(qvar2doc(tuf->name),
+	    tvars2doc(tvs),
+	    egroup("(",")",",",List::map(pat2doc,ps)));
     break;
   }
   return s;
@@ -1449,7 +1417,7 @@ doc_t switchclause2doc(switch_clause_t c) {
 	       nest(2,cat(line_doc(),stmt2doc(c->body))));
 }
 
-doc_t switchclauses2doc(list_t<switch_clause_t,`H> cs) {
+doc_t switchclauses2doc(list_t<switch_clause_t> cs) {
   return ppseql(switchclause2doc,"",cs);
 }
 
@@ -1465,7 +1433,7 @@ doc_t switchCclause2doc(switchC_clause_t c) {
 	       nest(2,cat(line_doc(),stmt2doc(s))));
 }
 
-doc_t switchCclauses2doc(list_t<switchC_clause_t,`H> cs) {
+doc_t switchCclauses2doc(list_t<switchC_clause_t> cs) {
   return ppseql(switchCclause2doc,"",cs);
 }
 
@@ -1476,7 +1444,7 @@ doc_t enumfield2doc(enumfield_t f) {
     return cat(qvar2doc(f->name),text(" = "),exp2doc((exp_t)f->tag));
 }
 
-doc_t enumfields2doc(list_t<enumfield_t,`H> fs) {
+doc_t enumfields2doc(list_t<enumfield_t> fs) {
   return ppseql(enumfield2doc,",",fs);
 }
 
@@ -1484,7 +1452,7 @@ static doc_t id2doc(vardecl_t v) {
   return qvar2doc(v->name);
 }
 
-static doc_t ids2doc(list_t<vardecl_t,`H> vds) {
+static doc_t ids2doc(list_t<vardecl_t> vds) {
   return ppseq(id2doc,",",vds);
 }
 
@@ -1548,45 +1516,24 @@ doc_t decl2doc(decl_t d) {
       s = cat(attsdoc,s);
     break;
     
-  case &Struct_d(sd):
-    if (sd->fields==NULL)
-      s = cat(scope2doc(sd->sc),
-              text("struct "),
-              (sd->name==NULL)?text(""):typedef_name2doc(sd->name->v),
-              ktvars2doc(sd->tvs),
+  case &Aggr_d(ad):
+    if (ad->fields==NULL)
+      s = cat(scope2doc(ad->sc),
+	      aggr_kind2doc(ad->kind),
+	      qvar2doc(ad->name),
+              ktvars2doc(ad->tvs),
               text(";"));
-    else {
-      s = cat(scope2doc(sd->sc),
-              text("struct "),
-              (sd->name==NULL)?text(""):typedef_name2doc(sd->name->v),
-              ktvars2doc(sd->tvs),
+    else
+      s = cat(scope2doc(ad->sc),
+	      aggr_kind2doc(ad->kind),
+	      qvar2doc(ad->name),
+              ktvars2doc(ad->tvs),
               text(" {"),
-              nest(2, cat(line_doc(),structfields2doc(sd->fields->v))),
+              nest(2, cat(line_doc(),aggrfields2doc(ad->fields->v))),
               line_doc(),
               text("}"),
-              atts2doc(sd->attributes),
+              atts2doc(ad->attributes),
               text(";"));
-    }
-    break;
-  case &Union_d(ud):
-    if (ud->fields==NULL)
-      s = cat(scope2doc(ud->sc),
-              text("union "),
-              (ud->name==NULL)?text(""):qvar2doc(ud->name->v),
-              tvars2doc(ud->tvs),
-              text(";"));
-    else {
-      s = cat(scope2doc(ud->sc),
-              text("union "),
-              (ud->name==NULL)?text(""):qvar2doc(ud->name->v),
-              tvars2doc(ud->tvs),
-              text(" {"),
-              nest(2, cat(line_doc(),structfields2doc(ud->fields->v))),
-              line_doc(),
-              text("}"),
-              atts2doc(ud->attributes),
-              text(";"));
-    }
     break;
   case &Var_d(vd):
     s = vardecl2doc(vd);
@@ -1616,9 +1563,7 @@ doc_t decl2doc(decl_t d) {
             text(";"));
     break;
   case &Letv_d(vds):
-    s = cat(text("let "),
-            ids2doc(vds),
-            text(";"));
+    s = cat(text("let "), ids2doc(vds), text(";"));
     break;
   case &Enum_d(&Enumdecl{sc,n,fields}):
     if (fields == NULL)
@@ -1655,7 +1600,7 @@ doc_t decl2doc(decl_t d) {
     if (use_curr_namespace) curr_namespace_drop();
     break;
   case &Using_d(q,tdl):
-    if (print_using_stmts) {
+    if (print_using_stmts)
       s = cat(text("using "),
               qvar2doc(q),
               text(" {"),
@@ -1663,7 +1608,7 @@ doc_t decl2doc(decl_t d) {
               ppseql(decl2doc,"",tdl),
               line_doc(),
               text("}"));
-    } else {
+    else
       s = cat(text("/* using "),
               qvar2doc(q),
               text(" { */"),
@@ -1671,22 +1616,20 @@ doc_t decl2doc(decl_t d) {
               ppseql(decl2doc,"",tdl),
               line_doc(),
               text("/* } */"));
-    }
     break;
   case &ExternC_d(tdl):
-    if (print_externC_stmts) {
+    if (print_externC_stmts)
       s = cat(text("extern \"C\" {"),
               line_doc(),
               ppseql(decl2doc,"",tdl),
               line_doc(),
               text("}"));
-    } else {
+    else
       s = cat(text("/* extern \"C\" { */"),
               line_doc(),
               ppseql(decl2doc,"",tdl),
               line_doc(),
               text("/* } */"));
-    }
     break;
   }
   return s;
@@ -1706,7 +1649,7 @@ doc_t scope2doc(scope_t sc) {
 bool exists_temp_tvar_in_effect(type_t t) {
   switch (t) {
   case &VarType(tv): return is_temp_tvar(tv);
-  case &JoinEff(l): return exists(exists_temp_tvar_in_effect, l);
+  case &JoinEff(l):  return exists(exists_temp_tvar_in_effect, l);
   default: return false;
   }
 }
@@ -1715,19 +1658,13 @@ bool exists_temp_tvar_in_effect(type_t t) {
    expand a typedef of an anonymous function even if expand_typedefs
    is true, because we end up with anonymous structs in, e.g.,
    function parameters where gcc does not like them. */
-bool is_anon_structtype(type_t t) {
+bool is_anon_aggrtype(type_t t) {
   switch (t) {
-  case &StructType(NULL,_,_):
-    /* FIX: is this case even possible now that we have AnonStructType ?? */
-    return true;
-  case &AnonStructType(_):
-    return true;
-  case &TypedefType(_,_,NULL):
-    return false;
-  case &TypedefType(_,_,x):
+  case &AnonAggrType(_,_): return true;
+  case &TypedefType(_,_,&Opt(x)):
     /* This won't loop if the types come from a .cyc file,
        because typedefs in Cyclone (or C) can't be recursive */
-    return is_anon_structtype(x->v);
+    return is_anon_aggrtype(x);
   default: return false;
   }
 }
@@ -1821,7 +1758,7 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
       return to_tms(tq,topt->v);
 
   case &TypedefType(n,ts,topt):
-    if (topt == NULL || !expand_typedefs || is_anon_structtype(topt->v))
+    if (topt == NULL || !expand_typedefs || is_anon_aggrtype(topt->v))
       return $(tq,t,NULL);
     else
       return to_tms(tq,topt->v);
@@ -1843,7 +1780,7 @@ doc_t tqtd2doc(tqual_t tq, type_t t, opt_t<doc_t> dopt) {
           dtms2doc((dopt==NULL)?nil_doc():dopt->v,tms));
 }
 
-doc_t structfield2doc(structfield_t f) {
+doc_t aggrfield2doc(aggrfield_t f) {
   if (f->width != NULL)
     return cat(tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
                text(":"), exp2doc((exp_t)f->width),
@@ -1853,8 +1790,8 @@ doc_t structfield2doc(structfield_t f) {
                atts2doc(f->attributes), text(";"));
 }
 
-doc_t structfields2doc(list_t<structfield_t,`H> fields) {
-  return ppseql(structfield2doc,"",fields);
+doc_t aggrfields2doc(list_t<aggrfield_t> fields) {
+  return ppseql(aggrfield2doc,"",fields);
 }
 
 doc_t tunionfield2doc(tunionfield_t f) {
@@ -1863,7 +1800,7 @@ doc_t tunionfield2doc(tunionfield_t f) {
              (f->typs==NULL)?nil_doc():args2doc(f->typs));
 }
 
-doc_t tunionfields2doc(list_t<tunionfield_t,`H> fields) {
+doc_t tunionfields2doc(list_t<tunionfield_t> fields) {
   return ppseql(tunionfield2doc,",",fields);
 }
 
@@ -1894,19 +1831,9 @@ string_t typ2cstring(type_t t) {
   string_t s = typ2string(t);
   qvar_to_Cids = old_qvar_to_Cids;
   add_cyc_prefix = old_add_cyc_prefix;
-  //  printf("for %s, add_cyc_prefix = %s, qvar_to_cids = %s\n", s, add_cyc_prefix ? "true " : "false", qvar_to_Cids ? "true " : "false");
   return s;
 }
 string_t prim2string(primop_t p) {return string_of_doc(prim2doc(p), PP_WIDTH);}
 string_t pat2string(pat_t p)     {return string_of_doc(pat2doc(p),  PP_WIDTH);}
+string_t scope2string(scope_t sc){return string_of_doc(scope2doc(sc),PP_WIDTH);}
 
-// used for error messages
-string_t scope2string(scope_t sc) {
-  switch (sc) {
-  case Static:   return "static";
-  case Public:   return "public";
-  case Extern:   return "extern";
-  case ExternC:  return "extern \"C\"";
-  case Abstract: return "abstract";
-  }
-}

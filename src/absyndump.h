@@ -25,7 +25,7 @@
 #include <list.h>
 #include "absyn.h"
 
-// not re-entrant.  Entire file ends up on one line!
+// not re-entrant.
 
 namespace Absyndump {
 extern void set_params(struct Absynpp::Params @ `r fs);

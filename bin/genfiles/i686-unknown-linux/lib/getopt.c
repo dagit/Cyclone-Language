@@ -274,8 +274,8 @@ extern unsigned char Cyc_Array_Array_mismatch[19];struct Cyc_Std__Div{int quot;i
 rem;};struct Cyc_Std__Ldiv{int quot;int rem;};extern struct _tagged_arr Cyc_Std_getenv(
 struct _tagged_arr);struct Cyc_Std_timeval{int tv_sec;int tv_usec;};struct Cyc_Std_timezone{
 int tz_minuteswest;int tz_dsttime;};struct Cyc_Std_itimerval{struct Cyc_Std_timeval
-it_interval;struct Cyc_Std_timeval it_value;};typedef struct {unsigned int __val[64];
-}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;struct Cyc_Std_timespec{
+it_interval;struct Cyc_Std_timeval it_value;};typedef struct{unsigned int __val[64];}
+Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;struct Cyc_Std_timespec{
 int tv_sec;int tv_nsec;};struct Cyc_Std_timeval;struct Cyc_Std___fd_set{int
 __fds_bits[32];};extern struct _tagged_arr Cyc_Std_optarg;extern int Cyc_Std_optind;
 extern int Cyc_Std_opterr;extern int Cyc_Std_optopt;struct Cyc_Std_option{struct

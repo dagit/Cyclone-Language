@@ -60,11 +60,12 @@ static attributes_t transfer_fn_type_atts(type_t t, attributes_t atts) {
         res_atts = new List(atts->hd,res_atts); 
     }
     return res_atts;
-  default: return impos("transfer_fn_type_atts"); 
+  default: impos("transfer_fn_type_atts"); 
   }
 }
 
-static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_var_init) {
+static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, 
+		      vardecl_t vd, bool check_var_init) {
   var_t   v  = (*vd->name)[1];
 #ifdef DEBUG
   fprintf(stderr,"type-checking vardecl_t %s",*v); 
@@ -76,9 +77,9 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
   vd->escapes = true; // top-level variables all "escape" except for arrays --
   // see below
 
-  // reject explicitly qualified name
+  // reject explicitly qualified name FIX: prevents re-type-checking
   switch ((*vd->name)[0]) {
-  case &Rel_n(NULL): break;
+  case &Rel_n(NULL): 
   case &Abs_n(NULL): break; // allowed for top-level constants
   default:
     terr(loc,"qualified variable declarations are not implemented (%s)",qvar2string(vd->name)); // FIX
@@ -114,10 +115,9 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
   case &ArrayType(_,_,_): vd->escapes = false; break;
   default: break;
   }
-  if (is_function_type(t)) {
-    // move any function type attributes into the function's type
+  // move any function type attributes into the function's type
+  if (is_function_type(t))
     atts = transfer_fn_type_atts(t,atts);
-  }
   // if extern, make sure it has no initializer
   if (sc == Extern || sc == ExternC) {
     if(vd->initializer != NULL)
@@ -137,7 +137,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
       case Unused_att:     
       case Weak_att:       
       case Dllimport_att:  
-      case Dllexport_att:  continue;
+      case Dllexport_att: continue;
       default:
         terr(loc,"bad attribute %s for variable %s",
              attribute2string(atts->hd), qvar2string(vd->name));
@@ -173,8 +173,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
       case Noreturn_att: 
       case &Format_att(_,_,_): fallthru;
       case Const_att:
-        impos("tcVardecl: fn type attributes in function var decl");
-        break;
+	impos("tcVardecl: fn type attributes in function var decl");
       // C doesn't allow these attributes on functions
       case &Aligned_att(_):
       case Packed_att:
@@ -199,8 +198,8 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
       ge->ordinaries = Dict::insert(ge->ordinaries, v,
 				    new $(new VarRes(b), true));
       break;
-    case &StructRes(_):
-      // warn(loc,"variable declaration shadows previous struct declaration");
+    case &AggrRes(_): 
+      warn(loc,"variable declaration shadows previous struct declaration");
       break;
     case &TunionRes(_,_): 
       warn(loc,"variable declaration shadows previous [x]tunion constructor");
@@ -229,10 +228,9 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
   // reject explicitly qualified name
   switch ((*fd->name)[0]) {
   case &Rel_n(NULL): break;
-  case &Abs_n(y):
-    throw new Impossible("tc: Abs_n in tcFndecl");
-  default:
-    terr(loc,"qualified function declarations are not implemented (%s)",qvar2string(fd->name)); // FIX
+  case &Abs_n(y): impos("tc: Abs_n in tcFndecl");
+  default: terr(loc,"qualified function declarations are not implemented (%s)",
+		qvar2string(fd->name)); // FIX
     return;
   }
   // expand to qualified name
@@ -246,7 +244,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
   // check that packed and aligned don't show up in the attributes
   for (_ atts = fd->attributes; atts != NULL; atts = atts->tl) {
     switch (atts->hd) {
-    case Packed_att: fallthru;
+    case Packed_att:
     case &Aligned_att(_): 
       terr(loc,"bad attribute %s for function",attribute2string(atts->hd));
       break;
@@ -267,8 +265,8 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
       ge->ordinaries = Dict::insert(ge->ordinaries, v,
 				    new $(new VarRes(b), true));
       break;
-    case &StructRes(_):
-      // warn(loc,"function declaration shadows previous struct declaration");
+    case &AggrRes(_):
+      warn(loc,"function declaration shadows previous type declaration");
       break;
     case &TunionRes(_,_): 
       warn(loc,"function declaration shadows previous [x]tunion constructor");
@@ -306,7 +304,7 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
 #endif
   // reject explicitly qualified name
   switch ((*td->name)[0]) {
-  case &Rel_n(NULL): break;
+  case &Rel_n(NULL): 
   case &Abs_n(NULL): break; // allowed for top-level constants
   default:
     terr(loc,"qualified typedef declarations are not implemented (%s)",qvar2string(td->name)); // FIX
@@ -327,20 +325,18 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   ge->typedefs = Dict::insert(ge->typedefs,v,td);
 }
 
-static void tcStructFields(tenv_t te, genv_t ge, seg_t loc, 
-                           string_t obj,
-			   list_t<structfield_t> fields, 
-                           list_t<tvar_t,`H> tvs) {
+static void tcAggrFields(tenv_t te, genv_t ge, seg_t loc,
+			 list_t<aggrfield_t> fields, list_t<tvar_t,`H> tvs) {
   // check fields, rejecting ill-formed types, bad fields, and duplicates
   // (unless the field name is empty)
   region uprev_rgn {
     list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
 
     for (let fs = fields; fs != NULL; fs = fs->tl) {
-      let &Structfield(fn,tq,t,width,atts) = fs->hd;
+      let &Aggrfield(fn,tq,t,width,atts) = fs->hd;
       
       if (List::mem(zstrptrcmp,prev_fields,fn))
-	terr(loc, "duplicate field %s in %s", *fn, obj);
+	terr(loc, "duplicate field %s", *fn);
       // add the field to previous fields only if it's not an empty name
       // (empty names arise for bitfield padding.)
       if (strcmp(*fn,"") != 0)
@@ -355,164 +351,111 @@ static void tcStructFields(tenv_t te, genv_t ge, seg_t loc,
   }
 }
 
-static void tcStructOrUniondecl(tenv_t te, genv_t ge, string_t obj, seg_t loc, structdecl_t sd) {
-  let v = (*sd->name->v)[1];
+void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
+  let v = (*ad->name)[1];
 #ifdef DEBUG
-  fprintf(stderr,"type-checking %sdecl %s",obj,*v);
+  fprintf(stderr,"type-checking type decl %s",*v);
   fflush(stderr);
 #endif
-  // reject anonymous top-level
-  if (sd->name == NULL) {
-    terr(loc, "anonymous %ss are not allowed at top level", obj);
-    return;
-  }
-
-  // only allow packed and aligned attributes
-  for (_ atts = sd->attributes; atts != NULL; atts = atts->tl) {
+  // allow only packed and aligned attributes
+  for (_ atts = ad->attributes; atts != NULL; atts = atts->tl) {
     switch (atts->hd) {
-    case Packed_att: continue;
+    case Packed_att: 
     case &Aligned_att(_): continue;
-    default: terr(loc,"bad attribute %s in %s %s definition",
-                  attribute2string(atts->hd), obj, *v);
+    default: terr(loc,"bad attribute %s in  %s definition",
+                  attribute2string(atts->hd), *v);
     break;
     }
   }
 
   // disallow MemKinds and set unconstrained kinds to BoxKind
-  for(_ tvs = sd->tvs; tvs != NULL; tvs = tvs->tl) {
-    switch (compress_kb(tvs->hd->kind)) {
+  let tvs = ad->tvs;
+  for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
+    switch (compress_kb(tvs2->hd->kind)) {
     case &Unknown_kb(*f): fallthru(f);
     case &Less_kb(*f,MemKind): fallthru(f);
     case &Less_kb(*f,AnyKind):
       *f = new Opt(new Eq_kb(BoxKind)); continue;
     case &Eq_kb(MemKind):
-      terr(loc,"%s %s attempts to abstract type variable %s of kind M", 
-           obj, *v, *tvs->hd->name); continue;
+      terr(loc,"type %s attempts to abstract type variable %s of kind M", 
+           *v, *tvs2->hd->name); continue;
     default: continue;
     }
   }
 
   // reject explicitly qualified name
-  switch ((*sd->name->v)[0]) {
-  case &Rel_n(NULL): break;
+  switch ((*ad->name)[0]) {
+  case &Rel_n(NULL): 
   case &Abs_n(NULL): break; // allowed for top-level constants
-  default:
-    terr(loc,"qualified struct declarations are not implemented (%s)",qvar2string(sd->name->v)); // FIX
+  default: terr(loc,"qualified struct declarations are not implemented (%s)",
+		qvar2string(ad->name)); // FIX
     return;
   }
 
   // expand to qualified name
-  (*sd->name->v)[0] = new Abs_n(te->ns);
+  (*ad->name)[0] = new Abs_n(te->ns);
 
   // reject ill-formed type
-  check_unique_tvars(loc, sd->tvs);
+  check_unique_tvars(loc, ad->tvs);
   // give the bound type variables identities
-  add_tvar_identities(sd->tvs);
-
-}
-
-void tcStructdecl(tenv_t te, genv_t ge, seg_t loc, structdecl_t sd) {
-  let v = (*sd->name->v)[1];
-  let obj = "struct";
-
-  tcStructOrUniondecl(te, ge, obj, loc, sd);
-
-  let tvs = sd->tvs;
+  add_tvar_identities(ad->tvs);
 
   // check the fields and update the environment
   // may not be the first declaration, so must not overwrite the dict entry!
-  switch ($(sd->fields, Dict::lookup_opt(ge->structdecls, v))) {
+  switch ($(ad->fields, Dict::lookup_opt(ge->aggrdecls, v))) {
   case $(NULL, NULL):
-    // insert sd in the environment
-    ge->structdecls = Dict::insert(ge->structdecls, v, new sd);
+    // insert ad in the environment
+    ge->aggrdecls = Dict::insert(ge->aggrdecls, v, new ad);
     break;
   case $(&Opt(fs), NULL):
     // for the sake of recursive fields, make name abstract in body
-    let sdp = new (new Structdecl(Extern, sd->name, tvs, NULL, NULL));
-    ge->structdecls = Dict::insert(ge->structdecls, v, sdp);
+    let adp = new (new Aggrdecl(ad->kind, Extern, ad->name, tvs,
+				NULL, NULL, ad->attributes));
+    ge->aggrdecls = Dict::insert(ge->aggrdecls, v, adp);
     
-    tcStructFields(te, ge, loc, obj, fs, tvs);
+    tcAggrFields(te, ge, loc, fs, tvs);
 
-    *sdp = sd; //insert sd in the environment
+    // reject ill-formed type
+    check_unique_tvars(loc, ad->exist_vars->v);
+    // give the bound type variables identities
+    add_tvar_identities(ad->exist_vars->v);
+
+    if(ad->kind == UnionA)
+          // must check that fields are bits-only
+      for (_ f = fs; f != NULL; f = f->tl)
+	if (!bits_only(f->hd->type))
+	  terr(loc,"field %s of union %s has type %s which is not `bits-only'",
+	       *f->hd->name,*v, typ2string(f->hd->type));
+
+    *adp = ad; //insert sd in the environment
     break;
-  case $(&Opt(fs), &Opt(sdp)):
-    let sd0 = *sdp;
+  case $(&Opt(fs), &Opt(adp)):
+    if(ad->kind != (*adp)->kind)
+      terr(loc,"cannot reuse struct names for unions and vice-versa");
+    let ad0 = *adp;
     // for the sake of recursive fields, make name abstract in body
-    *sdp = new Structdecl(Extern, sd->name, tvs, NULL, NULL);
+    *adp = new Aggrdecl(ad->kind, Extern, ad->name, tvs, 
+			NULL, NULL, ad->attributes);
     
-    tcStructFields(te, ge, loc, obj, fs, tvs);
+    tcAggrFields(te, ge, loc, fs, tvs);
 
-    *sdp = sd0; // restore the previous declaration and go update the environment
-    fallthru(sdp);
-  case $(NULL, &Opt(sdp)):
+    *adp = ad0;// restore the previous declaration and go update the environment
+    fallthru(adp);
+  case $(NULL, &Opt(adp)):
     // try to merge the declarations
-    let sd2 = Tcdecl::merge_structdecl(*sdp, sd, loc, tc_msg);
+    let ad2 = Tcdecl::merge_aggrdecl(*adp, ad, loc, tc_msg);
     
-    if (sd2 == NULL)
+    if (ad2 == NULL)
       return; // error in redeclaration
     else {
-      *sdp = (structdecl_t) sd2; // make the update
-
-      sd = (structdecl_t) sd2; // update sd so that we add the right constructor below
+      *adp = (aggrdecl_t)ad2; // make the update
+      ad = (aggrdecl_t)ad2; // update ad so we add the right constructor below
       break;
     }
   }
   // add the constructor to the environment
   ge->ordinaries = Dict::insert(ge->ordinaries,  v,
-				  new $(new StructRes(sd), true));
-}
-
-void tcUniondecl(tenv_t te, genv_t ge, seg_t loc, uniondecl_t ud) {
-  let v = (*ud->name->v)[1];
-  let obj = "union";
-
-  tcStructOrUniondecl(te, ge, obj, loc, (structdecl_t) ud);
-
-  let tvs = ud->tvs;
-
-  // check the fields and update the environment
-  // may not be the first declaration, so must not overwrite the dict entry!
-  switch ($(ud->fields, Dict::lookup_opt(ge->uniondecls, v))) {
-  case $(NULL, NULL):
-    // insert ud in the environment
-    ge->uniondecls = Dict::insert(ge->uniondecls, v, new ud);
-    break;
-  case $(&Opt(fs), NULL):
-    // for the sake of recursive fields, make name abstract in body
-    let udp = new (new Uniondecl(Extern, ud->name, tvs, NULL, ud->attributes));
-    ge->uniondecls = Dict::insert(ge->uniondecls, v, udp);
-    
-    tcStructFields(te, ge, loc, obj, fs, tvs);
-    // must check that fields are bits-only
-    for (_ f = fs; f != NULL; f = f->tl) {
-      if (!bits_only(f->hd->type))
-        terr(loc,"field %s of union %s has type %s which "
-             "is not `bits-only'",*f->hd->name,*v,
-             typ2string(f->hd->type));
-    }
-
-    *udp = ud; //insert ud in the environment
-    break;
-  case $(&Opt(fs), &Opt(udp)):
-    let ud0 = *udp;
-    // for the sake of recursive fields, make name abstract in body
-    *udp = new Uniondecl(Extern, ud->name, tvs, NULL, ud->attributes);
-    
-    tcStructFields(te, ge, loc, obj, fs, tvs);
-
-    *udp = ud0; // restore the previous declaration and go update the environment
-    fallthru(udp);
-  case $(NULL, &Opt(udp)):
-    // try to merge the declarations
-    let ud2 = Tcdecl::merge_uniondecl(*udp, ud, loc, tc_msg);
-    
-    if (ud2 == NULL)
-      return; // error in redeclaration
-    else {
-      *udp = (uniondecl_t) ud2; // make the update
-      break;
-    }
-  }
+				  new $(new AggrRes(ad), true));
 }
 
 static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge, 
@@ -523,8 +466,7 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
 					    list_t<tunionfield_t,`H> fields,
 					    list_t<tvar_t,`H> tvs,
 					    tuniondecl_t tudres) {
-  // check variants, rejecting ill-formed types,
-  // repeated tyvars
+  // check variants, rejecting ill-formed types and repeated tyvars
   for(let fs = fields; fs != NULL; fs = fs->tl) {
     let f = fs->hd;
 
@@ -547,9 +489,8 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
     // give the bound type variables identities
     add_tvar_identities(f->tvs);
 
-    for (_ typs = f->typs; typs != NULL; typs=typs->tl) {
+    for (_ typs = f->typs; typs != NULL; typs=typs->tl)
       check_type(f->loc, te, alltvs, MemKind, false, (*typs->hd)[1]);
-    }
 
     switch((*f->name)[0]) {
     case &Rel_n(NULL): 
@@ -559,12 +500,11 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
 	(*f->name)[0] = (*name)[0];
       break;
     case &Rel_n(_): 
-      terr(f->loc, "qualified tunionfield declarations are not allowed (%s)",qvar2string(f->name)); //FIX ?
+      terr(f->loc, "qualified tunionfield declarations are not allowed (%s)",
+	   qvar2string(f->name)); //FIX ?
       break;
     case &Abs_n(_): break;
-    case Loc_n:
-      throw new Impossible("tcTunionFields: Loc_n");
-      break;
+    case Loc_n: impos("tcTunionFields: Loc_n");
     }
   }
 
@@ -609,12 +549,7 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
 
 void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
   var_t v = (*tud->name)[1];
-  string_t obj;
-  if (tud->is_xtunion) {
-    obj = "xtunion";
-  } else {
-    obj = "tunion";
-  }
+  string_t obj = tud->is_xtunion ? "xtunion" : "tunion";
 #ifdef DEBUG
   fprintf(stderr,"type-checking %sdecl %s\n",obj,*v);
   fflush(stderr);
@@ -660,7 +595,8 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
     case &Rel_n(NULL): (*tud->name)[0] = new Abs_n(te->ns); break;
     case &Abs_n(_): fallthru;
     default:
-      terr(loc,"qualified tunion declarations are not implemented (%s)",qvar2string(tud->name)); // FIX
+      terr(loc,"qualified tunion declarations are not implemented (%s)",
+	   qvar2string(tud->name)); // FIX
       return;
     }
     tud_opt = Dict::lookup_opt(ge->tuniondecls, v);
@@ -675,11 +611,11 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
     break;
   case $(&Opt(*fs), NULL):
     // for the sake of recursive fields, make name abstract in body
-    let tudp = new (new Tuniondecl(Extern, tud->name, tvs, NULL, tud->is_xtunion));
+    let tudp = new (new Tuniondecl(Extern,tud->name,tvs,NULL,tud->is_xtunion));
     ge->tuniondecls = Dict::insert(ge->tuniondecls, v, tudp);
    
     // check the fields (and sort them if this is a xtunion)
-    *fs = tcTunionFields(te, ge, loc, obj, tud->is_xtunion, tud->name, *fs, tvs, tud);
+    *fs = tcTunionFields(te,ge,loc,obj,tud->is_xtunion,tud->name,*fs,tvs,tud);
 
     *tudp = tud; //insert tud in the environment
     break;
@@ -689,9 +625,9 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
     *tudp = new Tuniondecl(Extern, tud->name, tvs, NULL, tud->is_xtunion);
     
     // check the fields (and sort them if this is a xtunion)
-    *fs = tcTunionFields(te, ge, loc, obj, tud->is_xtunion, tud->name, *fs, tvs, tud);
+    *fs = tcTunionFields(te,ge,loc,obj,tud->is_xtunion,tud->name,*fs,tvs,tud);
 
-    *tudp = tud0; // restore the previous declaration and go update the environment
+    *tudp = tud0; // restore previous declaration and go update the environment
     fallthru(tudp);
   case $(NULL, &Opt(tudp)):
     // try to merge the declarations
@@ -714,10 +650,11 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
 #endif
   // reject explicitly qualified name
   switch ((*ed->name)[0]) {
-  case &Rel_n(NULL): break;
+  case &Rel_n(NULL): 
   case &Abs_n(NULL): break; // allowed for top-level constants
   default:
-    terr(loc,"qualified enum declarations are not implemented (%s)",qvar2string(ed->name)); // FIX
+    terr(loc,"qualified enum declarations are not implemented (%s)",
+	 qvar2string(ed->name)); // FIX
     return;
   }
   // expand to qualified name
@@ -778,10 +715,8 @@ static bool okay_externC(seg_t loc, scope_t sc) {
   case Abstract:
     warn(loc,"abstract declaration nested within extern \"C\"");
     return false;
-  case Public: return true;
-  case Extern:
-    // warn(loc,"converting extern declaration to extern \"C\"");
-    return true;
+  case Public:
+  case Extern: return true;
   case ExternC:
     warn(loc,"nested extern \"C\" declaration");
     return true;
@@ -793,7 +728,8 @@ static bool okay_externC(seg_t loc, scope_t sc) {
 // absolute, so later passes just recurse through namespace and using
 // New: a second pass shakes out unnecessary vardecls.
 // FIX: shake out type definitions too.
-static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0, bool in_externC, bool check_var_init) {
+static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0, 
+		     bool in_externC, bool check_var_init) {
 
   genv_t ge = Dict::lookup(te->ae,te->ns); // no longer a copy!!!
   list_t<decl_t,`H> last = NULL;
@@ -847,8 +783,7 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0, bool in_externC, bool che
 	  /* continue the loop */
 	  //printf("==============AFTER=================\n%s\n====================AFTER=====================\n",decllist2string(ds0));
 	  continue;
-	default:
-	  break;
+	default: break;
 	}
       }
       // catches the non gen() cases
@@ -862,22 +797,16 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0, bool in_externC, bool che
     case &Typedef_d(td):
       tcTypedefdecl(te,ge,loc,td);
       break;
-    case &Struct_d(sd):
-      if (in_externC && okay_externC(d->loc,sd->sc))
-	sd->sc = ExternC;
-      tcStructdecl(te,ge,loc,sd);
-      break;
-    case &Union_d(ud):
-      if (in_externC && okay_externC(d->loc,ud->sc))
-        ud->sc = ExternC;
-      tcUniondecl(te,ge,loc,ud);
+    case &Aggr_d(ad):
+      if (in_externC && okay_externC(d->loc,ad->sc))
+	ad->sc = ExternC;
+      tcAggrdecl(te,ge,loc,ad);
       break;
     case &Tunion_d(tud):
       if (in_externC && okay_externC(d->loc,tud->sc))
 	tud->sc = ExternC;
       tcTuniondecl(te,ge,loc,tud);
       break;
-
     case &Enum_d(ed):
       if (in_externC && okay_externC(d->loc,ed->sc))
         ed->sc = ExternC;

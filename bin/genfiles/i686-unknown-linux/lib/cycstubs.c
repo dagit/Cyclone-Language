@@ -288,7 +288,7 @@ unsigned int))>= 1){return open_with_mode(string_to_Cstring(s),i,*((unsigned int
 _check_unknown_subscript(ms,sizeof(unsigned int),0)));}else{return
 open_without_mode(string_to_Cstring(s),i);}}struct Cyc_Std_timeval{int tv_sec;int
 tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;int tz_dsttime;};struct Cyc_Std_itimerval{
-struct Cyc_Std_timeval it_interval;struct Cyc_Std_timeval it_value;};typedef struct {
+struct Cyc_Std_timeval it_interval;struct Cyc_Std_timeval it_value;};typedef struct{
 unsigned int __val[64];}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;
 struct Cyc_Std_timespec{int tv_sec;int tv_nsec;};struct Cyc_Std_timeval;struct Cyc_Std___fd_set{
 int __fds_bits[32];};struct Cyc_Std_sockaddr_in;struct Cyc_Std_sockaddr{

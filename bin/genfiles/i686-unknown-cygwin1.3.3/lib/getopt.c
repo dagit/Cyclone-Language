@@ -275,7 +275,7 @@ extern unsigned char Cyc_List_Nth[8];extern unsigned char Cyc_Array_Array_mismat
 extern struct _tagged_arr Cyc_Std_getenv(struct _tagged_arr);struct Cyc_Std_timeval{
 int tv_sec;int tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;int tz_dsttime;};
 struct Cyc_Std_itimerval{struct Cyc_Std_timeval it_interval;struct Cyc_Std_timeval
-it_value;};typedef struct {unsigned int __val[64];}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t
+it_value;};typedef struct{unsigned int __val[64];}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t
 Cyc_Std_sigset_t;struct Cyc_Std_timespec{int tv_sec;int tv_nsec;};struct Cyc_Std_timeval;
 extern struct _tagged_arr Cyc_Std_optarg;extern int Cyc_Std_optind;extern int Cyc_Std_opterr;
 extern int Cyc_Std_optopt;struct Cyc_Std_option{struct _tagged_arr name;int has_arg;

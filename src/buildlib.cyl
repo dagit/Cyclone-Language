@@ -882,9 +882,9 @@ and block_comment = parse
     case &Sizeoftyp_e(t1):
       scan_type(t1);
       return;
-    case &StructMember_e(e1,fn):
+    case &AggrMember_e(e1,fn):
       fallthru(e1,fn);
-    case &StructArrow_e(e1,fn):
+    case &AggrArrow_e(e1,fn):
       scan_exp(e1);
       add_target(fn);
       return;
@@ -933,13 +933,13 @@ and block_comment = parse
     case &Comprehension_e(_,_,_):
       fprintf(stderr,"Error: unexpected Comprehension_e\n");
       exit(1); return;
-    case &Struct_e(_,_,_,_):
+    case &Struct_e(_,_,_):
       fprintf(stderr,"Error: unexpected Struct_e\n");
       exit(1); return;
     case &AnonStruct_e(_,_):
       fprintf(stderr,"Error: unexpected AnonStruct_e\n");
       exit(1); return;
-    case &Tunion_e(_,_,_,_,_):
+    case &Tunion_e(_,_,_):
       fprintf(stderr,"Error: unexpected Tunion_e\n");
       exit(1); return;
     case &Enum_e(_,_,_):
@@ -986,9 +986,7 @@ and block_comment = parse
       if (x.cyc_varargs != NULL)
         scan_type(x.cyc_varargs->type);
       return;
-    case &AnonStructType(sfs):
-      fallthru(sfs);
-    case &AnonUnionType(sfs):
+    case &AnonAggrType(_,sfs):
       for (; sfs != NULL; sfs = sfs->tl) {
         scan_type(sfs->hd->type);
         scan_exp_opt(sfs->hd->width);
@@ -996,13 +994,8 @@ and block_comment = parse
       return;
     case &AnonEnumType(_):
       return;
-    case &StructType(NULL,_,_):
-      return;
-    case &UnionType(NULL,_,_):
-      return;
-    case &StructType(&$(_,v),_,_):
-      fallthru(v);
-    case &UnionType(&$(_,v),_,_):
+    case &AggrType(AggrInfo(info,_)):
+      let $(_,&$(_,v)) = aggr_kinded_name(info);
       fallthru(v);
     case &EnumType(&$(_,v),_):
       fallthru(v);
@@ -1069,33 +1062,12 @@ and block_comment = parse
         fprintf(stderr,"Warning: ignoring inline function\n");
       }
       break;
-    case &Struct_d(x):
-      if (!x->name) return NULL;
-      let &$(_,v) = x->name->v;
+    case &Aggr_d(x):
+      let &$(_,v) = x->name;
       current_source = v;
       if (x->fields) {
         for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
           let f = fs->hd;
-          scan_type(f->type);
-          scan_exp_opt(f->width);
-        }
-        // That takes care of what the decl depends on.  Now must add
-        // that each field depends on the decl.
-        for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
-          // FIX!!
-        }
-      }
-      break;
-    case &Union_d(x):
-      // This case is identical to the last, but x has a different type
-      // so we can't fallthru
-      if (!x->name) return NULL;
-      let &$(_,v) = x->name->v;
-      current_source = v;
-      if (x->fields) {
-        for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
-          let f = fs->hd;
-          add_target(f->name);
           scan_type(f->type);
           scan_exp_opt(f->width);
         }
@@ -1428,16 +1400,8 @@ and block_comment = parse
         if (mem(strptrcmp,omit_symbols,v)) name = NULL;
         else name = v;
         break;
-      case &Struct_d(x):
-        if (!x->name) name = NULL;
-        let &$(_,v) = x->name->v;
-        name = v;
-        break;
-      case &Union_d(x):
-        // This case is identical to the last, but x has a different type
-        // so we can't fallthru
-        if (!x->name) name = NULL;
-        let &$(_,v) = x->name->v;
+      case &Aggr_d(x):
+        let &$(_,v) = x->name;
         name = v;
         break;
       case &Enum_d(x):
@@ -1530,16 +1494,8 @@ and block_comment = parse
         let &$(_,v) = x->name;
         name = v;
         break;
-      case &Struct_d(x):
-        if (!x->name) name = NULL;
-        let &$(_,v) = x->name->v;
-        name = v;
-        break;
-      case &Union_d(x):
-        // This case is identical to the last, but x has a different type
-        // so we can't fallthru
-        if (!x->name) name = NULL;
-        let &$(_,v) = x->name->v;
+      case &Aggr_d(x):
+        let &$(_,v) = x->name;
         name = v;
         break;
       case &Enum_d(x):

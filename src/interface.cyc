@@ -48,8 +48,7 @@ typedef Tcdecl::xtunionfielddecl_t xtunionfielddecl_t;
 
 // clone of Genv, but with only what we need
 struct Ienv {
-  Dict::dict_t<var_t,structdecl_t>  structdecls;
-  Dict::dict_t<var_t,uniondecl_t>   uniondecls;
+  Dict::dict_t<var_t,aggrdecl_t>    aggrdecls;
   Dict::dict_t<var_t,tuniondecl_t>  tuniondecls;
   Dict::dict_t<var_t,enumdecl_t>    enumdecls;
   Dict::dict_t<var_t,typedefdecl_t> typedefdecls;
@@ -67,8 +66,7 @@ struct I {
 
 static ienv_t new_ienv() {
   return new Ienv {
-    .structdecls  = Dict::empty(Std::zstrptrcmp),
-    .uniondecls   = Dict::empty(Std::zstrptrcmp),
+    .aggrdecls    = Dict::empty(Std::zstrptrcmp),
     .tuniondecls  = Dict::empty(Std::zstrptrcmp),
     .enumdecls    = Dict::empty(Std::zstrptrcmp),
     .typedefdecls = Dict::empty(Std::zstrptrcmp),
@@ -79,9 +77,8 @@ static ienv_t new_ienv() {
 
 static ienv_t lazy_new_ienv() {
   static struct Ienv * ie = NULL;
-  if (ie == NULL) {
+  if (ie == NULL)
     ie = new_ienv();
-  }
   return (ienv_t) ie;
 }
 
@@ -89,7 +86,7 @@ static ienv_t skel2i_f(`a ignored) {
   return new_ienv();
 }
 
-static i_t skel2i(Dict::dict_t<list_t<var_t,`H>,`a,`H> skel) {
+static i_t skel2i(Dict::dict_t<list_t<var_t,`H>,`a> skel) {
   return new I(Dict::map(skel2i_f, skel), Dict::map(skel2i_f, skel));
 }
 
@@ -151,123 +148,101 @@ i_t final() {
 
 /* ------ throwing an error ------ */
 
-// note : we need to call reset_position(file_name) before all
+// note: we need to call reset_position(file_name) before all
 static void err(string_t msg) {
   Tcutil::terr(NULL, msg);
 }
-
-#define invalid_arg(s) throw(new Core::Invalid_argument(s))
-//better than a function regarding to the control flow
-
+static `a invalid_arg(string_t<`H> s) __attribute__((noreturn)) {
+  throw new Core::Invalid_argument(s);
+}
 static void fields_err(string_t sc, string_t t, qvar_t n) {
   err(aprintf("fields of %s %s %s have never been defined",
 	      sc, t, Absynpp::qvar2string(n)));
 }
-
 static void body_err(string_t sc, qvar_t n) {
   err(aprintf("the body of %s function %s has never been defined",
 	      sc, Absynpp::qvar2string(n)));
 }
 
 // don't print anything if obj1 == NULL
-static void static_err(string_t obj1, qvar_t name1, string_t obj2, qvar_t name2) {
-  if (obj1 != NULL) {
+static void static_err(string_t obj1,qvar_t name1,string_t obj2,qvar_t name2) {
+  if (obj1 != NULL)
     err(aprintf("declaration of %s %s relies on static %s %s",
-		obj1, Absynpp::qvar2string(name1), obj2, Absynpp::qvar2string(name2)));
-  }
+		obj1, Absynpp::qvar2string(name1), 
+		obj2, Absynpp::qvar2string(name2)));
 }
 
 // id.
-static void abstract_err(string_t obj1, qvar_t name1, string_t obj2, qvar_t name2) {
-  if (obj1 != NULL) {
+static void abstract_err(string_t obj1,qvar_t name1,string_t obj2,qvar_t name2){
+  if (obj1 != NULL)
     err(aprintf("declaration of %s %s relies on fields of abstract %s %s",
-		obj1, Absynpp::qvar2string(name1), obj2, Absynpp::qvar2string(name2)));
-  }
+		obj1, Absynpp::qvar2string(name1), 
+		obj2, Absynpp::qvar2string(name2)));
 }
 
 /* ------ checking that a given type can be safely exported ----- */
 
 /* --- to keep a track of already checked structures --- */
 struct Seen {
-  Dict::dict_t<qvar_t, bool> structs;
-  Dict::dict_t<qvar_t, bool> unions;
+  Dict::dict_t<qvar_t, bool> aggrs;
   Dict::dict_t<qvar_t, bool> tunions;
 };
 
 typedef struct Seen @ seen_t;
 
 static seen_t new_seen() {
-  return new Seen(Dict::empty(qvar_cmp), Dict::empty(qvar_cmp), Dict::empty(qvar_cmp));
+  return new Seen(Dict::empty(qvar_cmp), 
+		  Dict::empty(qvar_cmp));
 }
 
 /* --- functions that actually perform the check --- */
 typedef Dict::dict_t<list_t<var_t>, genv_t> aenv_t;
 
-static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name, type_t t);
+static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, 
+			      qvar_t name, type_t t);
 
-static bool check_public_type_list(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
-			      type_t (@f)(`a), list_t<`a> l) {
+static bool check_public_type_list(aenv_t ae, seen_t seen, string_t obj, 
+				   qvar_t name, type_t (@f)(`a), list_t<`a> l) {
   let res = true;
-  for (; l != NULL; l = l->tl) {
-    if (! check_public_type(ae, seen, obj, name, f(l->hd))) res = false;
-  }
+  for (; l != NULL; l = l->tl)
+    if (! check_public_type(ae, seen, obj, name, f(l->hd))) 
+      res = false;
   return res;
 }
+static bool check_public_aggrdecl(aenv_t ae, seen_t seen, aggrdecl_t d) {
+  try return Dict::lookup(seen->aggrs, d->name);
+  catch { case Dict::Absent: break; }
+  let res = true;
+  seen->aggrs = Dict::insert(seen->aggrs, d->name, res); // necessary for recursive datas
+  if (d->fields != NULL)
+    for(let fs = d->fields->v; fs != NULL; fs=fs->tl)
+      if (!check_public_type(ae, seen, "type", d->name, fs->hd->type)) 
+	res = false;
 
-static bool check_public_structdecl(aenv_t ae, seen_t seen, structdecl_t d) {
-  try {
-    return Dict::lookup(seen->structs, d->name->v);
-  } catch {
-  case Dict::Absent:
-    let res = true;
-    seen->structs = Dict::insert(seen->structs, d->name->v, res); // necessary for recursive datas
-    if (d->fields != NULL)
-      for(let fs = d->fields->v; fs != NULL; fs=fs->tl) {
-	if (!check_public_type(ae, seen, "struct", d->name->v, fs->hd->type)) res = false;
-      }
-
-    seen->structs = Dict::insert(seen->structs, d->name->v, res); // save the result
-    return res;
-  }
-}
-
-static bool check_public_uniondecl(aenv_t ae, seen_t seen, uniondecl_t d) {
-  try {
-    return Dict::lookup(seen->unions, d->name->v);
-  } catch {
-  case Dict::Absent:
-    let res = true;
-    seen->unions = Dict::insert(seen->unions, d->name->v, res); // necessary for recursive datas
-    if (d->fields != NULL)
-      for(let fs = d->fields->v; fs != NULL; fs=fs->tl) {
-	if (!check_public_type(ae, seen, "union", d->name->v, fs->hd->type)) res = false;
-      }
-
-    seen->unions = Dict::insert(seen->unions, d->name->v, res); // save the result
-    return res;
-  }
+  seen->aggrs = Dict::insert(seen->aggrs, d->name, res); // save the result
+  return res;
 }
 
 static type_t get_type1($(tqual_t,type_t) @ x) {
   return (*x)[1];
 }
+static type_t get_type2($(opt_t<string_t @>, struct Tqual, type_t) @ x) {
+  return (*x)[2];
+}
 
 static bool check_public_tuniondecl(aenv_t ae, seen_t seen, tuniondecl_t d) {
-  try {
-    return Dict::lookup(seen->tunions, d->name);
-  } catch {
-  case Dict::Absent:
-    let res = true;
-    seen->tunions = Dict::insert(seen->tunions, d->name, res); // necessary for recursive datas
-    if (d->fields != NULL)
-      for(let fs = d->fields->v; fs != NULL; fs=fs->tl) {
-	if (!check_public_type_list(ae, seen, "[x]tunion", d->name,
-				get_type1, fs->hd->typs)) res = false;
-      }
+  try return Dict::lookup(seen->tunions, d->name);
+  catch { case Dict::Absent: break; }
+  let res = true;
+  seen->tunions = Dict::insert(seen->tunions, d->name, res); // necessary for recursive datas
+  if (d->fields != NULL)
+    for(let fs = d->fields->v; fs != NULL; fs=fs->tl)
+      if (!check_public_type_list(ae, seen, "[x]tunion", d->name,
+				  get_type1, fs->hd->typs)) 
+	res = false;
 
-    seen->tunions = Dict::insert(seen->tunions, d->name, res); // save the result
-    return res;
-  }
+  seen->tunions = Dict::insert(seen->tunions, d->name, res); // save result
+  return res;
 }
 
 static bool check_public_enumdecl(aenv_t ae, seen_t seen, enumdecl_t d) {
@@ -276,15 +251,11 @@ static bool check_public_enumdecl(aenv_t ae, seen_t seen, enumdecl_t d) {
 
 static bool check_public_typedefdecl(aenv_t ae, seen_t seen, typedefdecl_t d) {
   return check_public_type(ae, seen, NULL /*"typedef"*/, d->name, d->defn);
-  // don't print an error message for typedefs (we'll just not export the typedef) 
+  // don't print an error message for typedefs (we'll just not export the decl)
 }
 
 static bool check_public_vardecl(aenv_t ae, seen_t seen, vardecl_t d) {
   return check_public_type(ae, seen, "variable", d->name, d->type);
-}
-
-static type_t get_type2($(opt_t<string_t @>, struct Tqual, type_t) @ x) {
-  return (*x)[2];
 }
 
 static list_t<var_t> get_abs_ns(tunion Nmspace ns) {
@@ -296,12 +267,8 @@ static list_t<var_t> get_abs_ns(tunion Nmspace ns) {
 
 static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name, type_t t) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo(t,_,_,_,_)):
-    return check_public_type(ae, seen, obj, name, t);
-
-  case &ArrayType(t,_,_):
-    return check_public_type(ae, seen, obj, name, t);
-
+  case &PointerType(PtrInfo(t,_,_,_,_)): fallthru(t);
+  case &ArrayType(t,_,_): fallthru(t);
   case &TypedefType(_,_, &Opt(t)):
     return check_public_type(ae, seen, obj, name, t);
 
@@ -317,21 +284,14 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
   case &TupleType(lt):
     return check_public_type_list(ae, seen, obj, name, get_type1, lt);
 
-  case &StructType(_,targs,&sd):
-    if (sd->sc == Static) {
-      static_err(obj, name, "struct", sd->name->v);
+  case &AggrType(AggrInfo(info,targs)):
+    let ad = get_known_aggrdecl(info);
+    if (ad->sc == Static) {
+      static_err(obj, name, "type", ad->name);
       return false;
     }
     return check_public_type_list(ae, seen, obj, name, identity, targs)
-      && check_public_structdecl(ae, seen, sd);
-
-  case &UnionType(_,targs,&ud):
-    if (ud->sc == Static) {
-      static_err(obj, name, "union", ud->name->v);
-      return false;
-    }
-    return check_public_type_list(ae, seen, obj, name, identity, targs)
-      && check_public_uniondecl(ae, seen, ud);
+      && check_public_aggrdecl(ae, seen, ad);
 
   case &EnumType(name, _):
     let &$(tns, v) = name;
@@ -341,8 +301,9 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
       let ge = Dict::lookup(ae, ns);
       ed = *Dict::lookup(ge->enumdecls, v);
     } catch {
-    case Dict::Absent: invalid_arg(aprintf("check_public_type (can't find enum %s)",
-					   qvar2string(name)));
+    case Dict::Absent: 
+      invalid_arg(aprintf("check_public_type (can't find enum %s)",
+			  qvar2string(name)));
     }
     if (ed->sc == Static) {
       static_err(obj, name, "enum", ed->name);
@@ -357,9 +318,9 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
     try {
       let ge = Dict::lookup(ae, ns);
       tud = *Dict::lookup(ge->tuniondecls, v);
-    } catch {
-    case Dict::Absent: invalid_arg(aprintf("check_public_type (can't find [x]tunion %s)",
-					   qvar2string(tud0->name)));
+    } catch { case Dict::Absent: 
+      invalid_arg(aprintf("check_public_type (can't find [x]tunion %s)",
+			  qvar2string(tud0->name)));
     }
     if (tud->sc == Static) {
       static_err(obj, name, "[x]tunion", tud->name);
@@ -380,8 +341,9 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
       invalid_arg(aprintf("check_public_type (can't find [x]tunion %s and search its fields)",
 			  qvar2string(tud0->name)));
     }
-    if (tud->fields == NULL) invalid_arg(aprintf("check_public_type ([x]tunion %s has no fields)",
-						 qvar2string(tud->name)));
+    if (tud->fields == NULL) 
+      invalid_arg(aprintf("check_public_type ([x]tunion %s has no fields)",
+			  qvar2string(tud->name)));
 
     struct Tunionfield * tuf1 = NULL;
     for (let fs = tud->fields->v; fs != NULL; fs = fs->tl)
@@ -390,8 +352,9 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
 	  break;
 	}
   
-    if (tuf1 == NULL) invalid_arg(aprintf("check_public_type (can't find [x]tunionfield %s)",
-					  qvar2string(tuf0->name)));
+    if (tuf1 == NULL) 
+      invalid_arg(aprintf("check_public_type (can't find [x]tunionfield %s)",
+			  qvar2string(tuf0->name)));
     tunionfield_t tuf = (tunionfield_t) tuf1;
 
     if (tud->sc == Static) {
@@ -403,7 +366,8 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
       return false;
     }
     if (tuf->sc == Static) {
-      static_err(obj, name, aprintf("field %s of", qvar2string(tuf->name)),tud->name);
+      static_err(obj, name, 
+		 aprintf("field %s of", qvar2string(tuf->name)),tud->name);
       return false;
     }
     return check_public_type_list(ae, seen, obj, name, identity, targs)
@@ -415,23 +379,23 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
 
 /* ------ extracting an interface from a global environment ------ */
 
-// Mathieu : I know this is very ugly
-// but sharing the same code using a function required too many closures
-#define EXTRACT_DECL(OBJ, NAMEOPT)\
-static void extract_##OBJ##decl($(ienv_t, ienv_t, bool, aenv_t, seen_t, i_t) @ `r env, var_t x, OBJ##decl_t@ dp) {\
+// FIX: Make this hack go away (it won't be that bad)
+#define EXTRACT_DECL(OBJ)\
+static void extract_##OBJ##decl($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env,\
+				var_t x, OBJ##decl_t@ dp) {\
   let &$(imp, exp, check_complete_defs, ae, seen, _) = env;\
   let d = *dp;\
 \
   switch(d->sc) {\
   case Static:\
     if (check_complete_defs && d->fields == NULL) {\
-      fields_err("static", #OBJ, d->name NAMEOPT);\
+      fields_err("static", #OBJ, d->name);\
     }\
     break;\
   case Abstract:\
     if (d->fields == NULL) {\
       if (check_complete_defs) {\
-	fields_err("abstract", #OBJ, d->name NAMEOPT);\
+	fields_err("abstract", #OBJ, d->name);\
       }\
     } else {\
       d = new *d;\
@@ -442,7 +406,7 @@ static void extract_##OBJ##decl($(ienv_t, ienv_t, bool, aenv_t, seen_t, i_t) @ `
     break;\
   case Public:\
     if (d->fields == NULL) {\
-      fields_err("public", #OBJ, d->name NAMEOPT);\
+      fields_err("public", #OBJ, d->name);\
       d = new *d;\
       d->sc = Abstract;\
     }\
@@ -459,11 +423,8 @@ static void extract_##OBJ##decl($(ienv_t, ienv_t, bool, aenv_t, seen_t, i_t) @ `
   }\
 }
 
-EXTRACT_DECL(struct, -> v)
-
-EXTRACT_DECL(union,->v)
-
-EXTRACT_DECL(enum, )
+EXTRACT_DECL(aggr)
+EXTRACT_DECL(enum)
 
 static void
 extract_xtunionfielddecl(i_t i, tuniondecl_t d, tunionfield_t f) {
@@ -494,7 +455,8 @@ extract_xtunionfielddecl(i_t i, tuniondecl_t d, tunionfield_t f) {
     Dict::insert(env->xtunionfielddecls, (*(f->name))[1] , new Tcdecl::Xtunionfielddecl(d, f));
 }
 
-static void extract_tuniondecl($(ienv_t, ienv_t, bool, aenv_t, seen_t, i_t) @ `r env, var_t x, tuniondecl_t@ dp) {
+static void extract_tuniondecl($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env, 
+			       var_t x, tuniondecl_t@ dp) {
   let &$(imp, exp, check_complete_defs, ae, seen, i) = env;
   let d = *dp;
 
@@ -550,13 +512,14 @@ static void extract_tuniondecl($(ienv_t, ienv_t, bool, aenv_t, seen_t, i_t) @ `r
   }
 }
 
-static void extract_typedef($(ienv_t, ienv_t, bool, aenv_t, seen_t, i_t) @ `r env, var_t x, typedefdecl_t d) {
+static void extract_typedef($(ienv_t, ienv_t, bool, aenv_t, seen_t, i_t) @ env,
+			    var_t x, typedefdecl_t d) {
   let &$(_, exp, _, ae, seen, _) = env;
   if (check_public_typedefdecl(ae, seen, d))
     exp->typedefdecls = Dict::insert(exp->typedefdecls, x, d);
 }
 
-static void extract_ordinarie($(ienv_t, ienv_t, bool, aenv_t, seen_t, i_t) @ `r env,
+static void extract_ordinarie($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env,
 			      var_t x, $(resolved_t,bool)@ v) {
   let &$(imp, exp, check_complete_defs, ae, seen, _) = env;
   let r = (* v)[0];
@@ -610,22 +573,23 @@ static void extract_ordinarie($(ienv_t, ienv_t, bool, aenv_t, seen_t, i_t) @ `r 
   }
 }
 
-static void extract_f($(i_t, bool, aenv_t, seen_t) @ `r env_f, list_t<var_t,`H> ns, genv_t ge) {
+static void extract_f($(i_t, bool, aenv_t, seen_t) @ env_f, 
+		      list_t<var_t,`H> ns, genv_t ge) {
   let &$(i, check_complete_defs, ae, seen) = env_f;
   let env = $(Dict::lookup(i->imports, ns),
 	      Dict::lookup(i->exports, ns),
 	      check_complete_defs,
 	      ae, seen,
 	      i);
-  Dict::iter_c(extract_structdecl, &env,  ge->structdecls);
-  Dict::iter_c(extract_uniondecl,  &env,  ge->uniondecls);
+  Dict::iter_c(extract_aggrdecl,   &env,  ge->aggrdecls);
   Dict::iter_c(extract_tuniondecl, &env,  ge->tuniondecls);
   Dict::iter_c(extract_enumdecl,   &env,  ge->enumdecls);
   Dict::iter_c(extract_typedef,    &env,  ge->typedefs);
   Dict::iter_c(extract_ordinarie,  &env,  ge->ordinaries);
 }
 
-static i_t gen_extract(Dict::dict_t<list_t<var_t,`H>, genv_t,`H> ae, bool check_complete_defs) {
+static i_t gen_extract(Dict::dict_t<list_t<var_t,`H>, genv_t,`H> ae, 
+		       bool check_complete_defs) {
   let env = $(skel2i(ae), check_complete_defs, ae, new_seen());
   Dict::iter_c(extract_f, &env, ae);
   return env[0];
@@ -645,7 +609,7 @@ static void incl_dict_f($(bool,
 			  Dict::dict_t<var_t, `a,`H>,
 			  bool (@)(`a, `a, string_t<`H> *`H),
 			  string_t<`H>,
-			  string_t<`H> *`H) @ `r env,
+			  string_t<`H> *`H) @ env,
 			var_t x,
 			`a y1) {
   let &$(*res, dic2, incl_f, t, msg) = env;
@@ -670,6 +634,7 @@ static bool incl_dict(Dict::dict_t<var_t, `a,`H> dic1,
   return env[0];
 }
 
+// FIX: Make this hack go away
 #define INCL_DECL(OBJ, TYPEOBJ, NAMEOPT) \
 static bool incl_##OBJ##decl(OBJ##decl_t d0, OBJ##decl_t d1, string_t<`H> *`H msg) { \
   let d = Tcdecl::merge_##OBJ##decl(d0, d1, NULL, msg); \
@@ -682,9 +647,7 @@ static bool incl_##OBJ##decl(OBJ##decl_t d0, OBJ##decl_t d1, string_t<`H> *`H ms
   return true; \
 }
 
-INCL_DECL(struct, "struct", ->name->v)
-
-INCL_DECL(union, "union", ->name->v)
+INCL_DECL(aggr, "type", ->name)
 
 INCL_DECL(tunion, "tunion", ->name)
 
@@ -699,42 +662,40 @@ INCL_DECL(xtunionfield, "xtunionfield", ->field->name)
 #define INCL_DICT(OBJ, NAMEOBJ)\
   incl_dict(ie1->OBJ##decls, ie2->OBJ##decls, incl_##OBJ##decl, NAMEOBJ, msg)
 
-opt_t<Dict::dict_t<var_t, `a::A @>> compat_merge_dict(Dict::dict_t<var_t, `a @`H,`H> dic1,
-						   Dict::dict_t<var_t, `a @`H,`H> dic2,
-						   Dict::dict_t<var_t, `a @`H,`H> excl,
-						   `a * (@merge_f)(`a @`H, `a @`H, Position::seg_t, string_t<`H> *`H),
-						   string_t<`H> t,
-						   string_t<`H> *`H msg);
+opt_t<Dict::dict_t<var_t, `a::A @>> 
+compat_merge_dict(Dict::dict_t<var_t, `a @`H,`H> dic1,
+		  Dict::dict_t<var_t, `a @`H,`H> dic2,
+		  Dict::dict_t<var_t, `a @`H,`H> excl,
+		  `a * (@merge_f)(`a@`H, `a@`H, Position::seg_t,
+				  string_t<`H> *`H),
+		  string_t<`H> t,
+		  string_t<`H> *`H msg);
 
 static bool incl_ienv(ienv_t ie1, ienv_t ie2, string_t<`H> *`H msg) {
-  let r1 = INCL_DICT(struct, "struct");
-  let r2 = INCL_DICT(union, "union");
-  let r3 = INCL_DICT(tunion, "tunion");
-  let r4 = INCL_DICT(enum, "enum");
+  let r1 = INCL_DICT(aggr, "type");
+  let r2 = INCL_DICT(tunion, "tunion");
+  let r3 = INCL_DICT(enum, "enum");
   /* special case for typedefs */
-  let r5 = (compat_merge_dict(ie1->typedefdecls, ie2->typedefdecls,
+  let r4 = (compat_merge_dict(ie1->typedefdecls, ie2->typedefdecls,
 			      Dict::empty(strptrcmp), Tcdecl::merge_typedefdecl,
 			      "typedef", msg) != NULL);
-  let r6 = INCL_DICT(var, "variable");
-  let r7 = INCL_DICT(xtunionfield, "xtunionfield");
-  return (r1 && r2 && r3 && r4 && r5 && r6 && r7);
+  let r5 = INCL_DICT(var, "variable");
+  let r6 = INCL_DICT(xtunionfield, "xtunionfield");
+  return (r1 && r2 && r3 && r4 && r5 && r6);
 }
 
 static void incl_ns_f($(bool,
 			Dict::dict_t<list_t<var_t,`H>,ienv_t,`H>,
-			string_t<`H> *`H) @ `r env,
+			string_t<`H> *`H) @ env,
 		      list_t<var_t,`H> ns,
 		      ienv_t ie1) {
   let &$(*res, dic2, msg) = env;
 
   ienv_t ie2;
 
-  try {
-    ie2 = Dict::lookup(dic2, ns);
-  } catch {
-  case Dict::Absent:
-    ie2 = lazy_new_ienv(); break; // it's OK to use lazy_new_ienv because everything's functional
-  }
+  // it's OK to use lazy_new_ienv because everything's functional
+  try ie2 = Dict::lookup(dic2, ns);
+  catch {case Dict::Absent: ie2 = lazy_new_ienv(); break;}
 
   if (! incl_ienv(ie1, ie2, msg)) *res = false;
 }
@@ -743,13 +704,11 @@ static bool incl_ns(Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> dic1,
 		    Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> dic2,
 		    string_t<`H> *`H msg) {
   let env = $(true, dic2, msg);
-
   Dict::iter_c(incl_ns_f, &env, dic1);
-
   return (env[0]);
 }
 
-bool is_subinterface(i_t i1, i_t i2, $(string_t<`H>, string_t<`H>) * `r info) {
+bool is_subinterface(i_t i1, i_t i2, $(string_t<`H>, string_t<`H>) * info) {
   try {
     let res = true;
     string_t * msg = NULL;
@@ -777,7 +736,7 @@ void compat_merge_dict_f($(bool,
 			   Dict::dict_t<var_t, `a @`H,`H>,
 			   Dict::dict_t<var_t, `a @`H,`H>,
 			   `a * (@)(`a @`H, `a @`H, Position::seg_t, string_t<`H> *`H),
-			   string_t<`H>, string_t<`H> *`H ) @ `r env,
+			   string_t<`H>, string_t<`H> *`H ) @ env,
 			 var_t x, `a @`H y2) {
   let &$(*res, *res_dic, dic1, excl, merge_f, t, msg) = env;
   `a @ y;
@@ -811,27 +770,27 @@ void compat_merge_dict_f($(bool,
     }
   } catch {
   case Dict::Absent:
-    if (*res) {
+    if (*res)
       *res_dic = Dict::insert(*res_dic, x, y);
-    }
     break;
   }
 }
 
-opt_t<Dict::dict_t<var_t, `a::A @>> compat_merge_dict(Dict::dict_t<var_t, `a @`H,`H> dic1,
-						   Dict::dict_t<var_t, `a @`H,`H> dic2,
-						   Dict::dict_t<var_t, `a @`H,`H> excl,
-						   `a * (@merge_f)(`a @`H, `a @`H, Position::seg_t, string_t<`H> *`H),
-						   string_t<`H> t,
-						   string_t<`H> *`H msg) {
+opt_t<Dict::dict_t<var_t, `a::A @>> 
+compat_merge_dict(Dict::dict_t<var_t, `a @`H,`H> dic1,
+		  Dict::dict_t<var_t, `a @`H,`H> dic2,
+		  Dict::dict_t<var_t, `a @`H,`H> excl,
+		  `a * (@merge_f)(`a @`H, `a @`H, 
+				  Position::seg_t, string_t<`H> *`H),
+		  string_t<`H> t,
+		  string_t<`H> *`H msg) {
   let env = $(true, dic1, dic1, excl, merge_f, t, msg);
 
   Dict::iter_c(compat_merge_dict_f, &env, dic2);
 
   if (env[0])
     return new Opt(env[1]);
-  else
-    return NULL;
+  return NULL;
 }
 
 #define COMPAT_MERGE_DICT(OBJ, NAME)\
@@ -840,35 +799,30 @@ opt_t<Dict::dict_t<var_t, `a::A @>> compat_merge_dict(Dict::dict_t<var_t, `a @`H
 		    NAME, msg)
 
 struct Ienv * compat_merge_ienv(ienv_t ie1, ienv_t ie2, ienv_t iexcl, string_t<`H> *`H msg) {
-  let r1 = COMPAT_MERGE_DICT(struct, "struct");
-  let r2 = COMPAT_MERGE_DICT(union, "union");
-  let r3 = COMPAT_MERGE_DICT(tunion, "tunion");
-  let r4 = COMPAT_MERGE_DICT(enum, "enum");
-  let r5 = COMPAT_MERGE_DICT(typedef, "typedef");
-  let r6 = COMPAT_MERGE_DICT(var, "variable");
-  let r7 = COMPAT_MERGE_DICT(xtunionfield, "xtunionfield");
-  if (!r1 || !r2 || !r3 || !r4 || !r5 || !r6 || !r7)
+  let r1 = COMPAT_MERGE_DICT(aggr, "type");
+  let r2 = COMPAT_MERGE_DICT(tunion, "tunion");
+  let r3 = COMPAT_MERGE_DICT(enum, "enum");
+  let r4 = COMPAT_MERGE_DICT(typedef, "typedef");
+  let r5 = COMPAT_MERGE_DICT(var, "variable");
+  let r6 = COMPAT_MERGE_DICT(xtunionfield, "xtunionfield");
+  if (!r1 || !r2 || !r3 || !r4 || !r5 || !r6 )
     return NULL;
-  else
-    return new Ienv(r1->v, r2->v, r3->v, r4->v, r5->v, r6->v, r7->v);
+  return new Ienv(r1->v, r2->v, r3->v, r4->v, r5->v, r6->v);
 }
 
 void compat_merge_ns_f($(bool,
 			 Dict::dict_t<list_t<var_t,`H>, ienv_t,`H>,
 			 Dict::dict_t<list_t<var_t,`H>, ienv_t,`H>,
 			 Dict::dict_t<list_t<var_t,`H>, ienv_t,`H>,
-			 string_t<`H> *`H) @ `r env,
+			 string_t<`H> *`H) @ env,
 		       list_t<var_t,`H> ns, ienv_t ie2) {
   let &$(*res, *res_dic, dic1, excl, msg) = env;
 
   ienv_t ie1, iexcl;
 
-  try {
-    iexcl = Dict::lookup(excl, ns);
-  } catch {
-  case Dict::Absent:
-    iexcl = lazy_new_ienv(); break; // it's OK to use lazy_new_ienv because everything's functional
-  }
+  // it's OK to use lazy_new_ienv because everything's functional
+  try iexcl = Dict::lookup(excl, ns);
+  catch {case Dict::Absent: iexcl = lazy_new_ienv(); break;}
 
   try {
     ie1 = Dict::lookup(dic1, ns);
@@ -878,26 +832,22 @@ void compat_merge_ns_f($(bool,
       return;
     }
     ie1 = (ienv_t) ie;
-  } catch {
-  case Dict::Absent:
-    ie1 = lazy_new_ienv(); break;
-  }
+  } catch {case Dict::Absent: ie1 = lazy_new_ienv(); break;}
 
   let ie = compat_merge_ienv(ie1, ie2, iexcl, msg);
 
-  if (ie == NULL) {
+  if (ie == NULL)
     *res = false;
-  } else {
-    if (*res) {
+  else
+    if (*res)
       *res_dic = Dict::insert(*res_dic, ns, (ienv_t) ie);
-    }
-  }
 }
 
-opt_t<Dict::dict_t<list_t<var_t>, ienv_t>> compat_merge_ns(Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> dic1,
-							   Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> dic2,
-							   Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> excl,
-							   string_t<`H> *`H msg) {
+opt_t<Dict::dict_t<list_t<var_t>, ienv_t>> 
+compat_merge_ns(Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> dic1,
+		Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> dic2,
+		Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> excl,
+		string_t<`H> *`H msg) {
   Dict::dict_t<list_t<var_t,`H>, ienv_t, `H> d = Dict::empty(varlist_cmp);
   let env = $(true, d, dic1, excl, msg);
 
@@ -905,13 +855,12 @@ opt_t<Dict::dict_t<list_t<var_t>, ienv_t>> compat_merge_ns(Dict::dict_t<list_t<v
 
   if (env[0])
     return new Opt(env[1]);
-  else
-    return NULL;
+  return NULL;
 }
 
 /* --- functions for disjoint union --- */
-void disj_merge_dict_f($(bool, Dict::dict_t<var_t, `a, `H>,
-			 Dict::dict_t<var_t, `a, `H>, string_t<`H>, string_t<`H> *`H) @ `r env,
+void disj_merge_dict_f($(bool, Dict::dict_t<var_t,`a,`H>,
+			 Dict::dict_t<var_t,`a,`H>,string_t<`H>,string_t<`H> *`H) @ env,
 		       var_t x, `a y) {
   let &$(*res, *res_dic, dic1, t, msg) = env;
   if (Dict::member(dic1, x)) {
@@ -924,95 +873,85 @@ void disj_merge_dict_f($(bool, Dict::dict_t<var_t, `a, `H>,
 
 opt_t<Dict::dict_t<var_t, `a>> disj_merge_dict(Dict::dict_t<var_t, `a,`H> dic1,
 					       Dict::dict_t<var_t, `a,`H> dic2,
-					       string_t<`H> t, string_t<`H> *`H msg) {
+					       string_t<`H> t, 
+					       string_t<`H> *`H msg) {
   let env = $(true, dic1, dic1, t, msg);
-
   Dict::iter_c(disj_merge_dict_f, &env, dic2);
-
   if (env[0])
     return new Opt(env[1]);
-  else
-    return NULL;
+  return NULL;
 }
 
 struct Ienv * disj_merge_ienv(ienv_t ie1, ienv_t ie2, string_t<`H> *`H msg) {
-//    let r1 = disj_merge_dict(ie1->structdecls, ie2->structdecls, "struct", msg);
-  let r1 = compat_merge_dict(ie1->structdecls, ie2->structdecls, Dict::empty(zstrptrcmp),
-			     Tcdecl::merge_structdecl, "struct", msg);
-  let r2 = disj_merge_dict(ie1->uniondecls, ie2->uniondecls, "union", msg);
-  let r3 = disj_merge_dict(ie1->tuniondecls, ie2->tuniondecls, "[x]tunion", msg);
-  let r4 = disj_merge_dict(ie1->enumdecls, ie2->enumdecls, "enum", msg);
+  let r1 = compat_merge_dict(ie1->aggrdecls, ie2->aggrdecls, 
+			     Dict::empty(zstrptrcmp),
+			     Tcdecl::merge_aggrdecl, "type", msg);
+  let r2 = disj_merge_dict(ie1->tuniondecls,ie2->tuniondecls,"[x]tunion",msg);
+  let r3 = disj_merge_dict(ie1->enumdecls, ie2->enumdecls, "enum", msg);
   /* special case for typedefs */
-  let r5 = compat_merge_dict(ie1->typedefdecls, ie2->typedefdecls, Dict::empty(zstrptrcmp),
+  let r4 = compat_merge_dict(ie1->typedefdecls, ie2->typedefdecls, 
+			     Dict::empty(zstrptrcmp),
 			     Tcdecl::merge_typedefdecl, "typedef", msg);
-  let r6 = disj_merge_dict(ie1->vardecls, ie2->vardecls, "variable", msg);
-  let r7 = disj_merge_dict(ie1->xtunionfielddecls, ie2->xtunionfielddecls, "xtunionfield", msg);
+  let r5 = disj_merge_dict(ie1->vardecls, ie2->vardecls, "variable", msg);
+  let r6 = disj_merge_dict(ie1->xtunionfielddecls, ie2->xtunionfielddecls,
+			   "xtunionfield", msg);
 
-  if (!r1 || !r2 || !r3 || !r4 || !r5 || !r6 || !r7)
+  if (!r1 || !r2 || !r3 || !r4 || !r5 || !r6)
     return NULL;
-  else
-    return new Ienv(r1->v, r2->v, r3->v, r4->v, r5->v, r6->v, r7->v);
+  return new Ienv(r1->v, r2->v, r3->v, r4->v, r5->v, r6->v);
 }
 
 void disj_merge_ns_f($(bool, Dict::dict_t<list_t<var_t,`H>, ienv_t,`H>,
-		       Dict::dict_t<list_t<var_t,`H>, ienv_t,`H>, string_t<`H> *`H) @ `r env,
+		       Dict::dict_t<list_t<var_t,`H>, ienv_t,`H>, string_t<`H> *`H) @ env,
 		     list_t<var_t,`H> ns, ienv_t ie2) {
   let &$(*res, *res_dic, dic1, msg) = env;
 
   ienv_t ie1;
 
-  try {
-    ie1 = Dict::lookup(dic1, ns);
-  } catch {
-  case Dict::Absent:
-    ie1 = lazy_new_ienv(); break;
-  }
+  try ie1 = Dict::lookup(dic1, ns);
+  catch { case Dict::Absent: ie1 = lazy_new_ienv(); break; }
 
   let ie = disj_merge_ienv(ie1, ie2, msg);
 
-  if (ie == NULL) {
+  if (ie == NULL)
     *res = false;
-  } else {
-    if (*res) {
+  else
+    if (*res)
       *res_dic = Dict::insert(*res_dic, ns, (ienv_t) ie);
-    }
-  }
 }
 
-opt_t<Dict::dict_t<list_t<var_t>, ienv_t>> disj_merge_ns(Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> dic1,
-							 Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> dic2,
-							 string_t<`H> *`H msg) {
+opt_t<Dict::dict_t<list_t<var_t>, ienv_t>> 
+disj_merge_ns(Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> dic1,
+	      Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> dic2,
+	      string_t<`H> *`H msg) {
   let env = $(true, dic1, dic1, msg);
-
   Dict::iter_c(disj_merge_ns_f, &env, dic2);
-
   if (env[0])
     return new Opt(env[1]);
-  else
-    return NULL;
+  return NULL;
 }
 
 /* --- main function --- */
-struct I * merge(i_t i1, i_t i2, $(string_t<`H>, string_t<`H>) * `r info) {
+struct I * merge(i_t i1, i_t i2, $(string_t<`H>, string_t<`H>) * info) {
   try {
     string_t * msg = NULL;
 
     if (info != NULL)
-      msg = new ((string_t)aprintf("merging exports of %s and %s,", (*info)[0], (*info)[1]));
+      msg = new ((string_t)aprintf("merging exports of %s and %s,", 
+				   (*info)[0], (*info)[1]));
 
     let exp = disj_merge_ns(i1->exports, i2->exports, msg);
     if (exp == NULL) return NULL;
 
     if (info != NULL)
-      msg = new ((string_t)aprintf("merging imports of %s and %s,", (*info)[0], (*info)[1]));
+      msg = new ((string_t)aprintf("merging imports of %s and %s,", 
+				   (*info)[0], (*info)[1]));
 
     let imp = compat_merge_ns(i1->imports, i2->imports, exp->v, msg);
     if (imp == NULL) return NULL;
 
     return new I(imp->v, exp->v);
-  } catch {
-  case Tcdecl::Incompatible: return NULL;
-  }
+  } catch { case Tcdecl::Incompatible: return NULL; }
 }
 
 struct I * merge_list(list_t<i_t,`H> li, list_t<string_t<`H> @`H,`H> linfo) {
@@ -1059,31 +998,22 @@ struct I * get_and_merge_list(i_t (@get)(`a), list_t<`a,`H> la, list_t<string_t<
 
 /* ------- printing an interface ------ */
 
-static list_t<decl_t> add_namespace(list_t<decl_t,`H> tds, list_t<var_t,`H> ns) {
+static list_t<decl_t> add_namespace(list_t<decl_t,`H> tds, list_t<var_t,`H> ns){
   if (ns == NULL) return tds;
-  return new List(new_decl(new Namespace_d(ns->hd, add_namespace(tds, ns->tl)),NULL), NULL);
+  return new List(new_decl(new Namespace_d(ns->hd, add_namespace(tds, ns->tl)),
+			   NULL), NULL);
 }
 
-static list_t<decl_t> add_structdecl(var_t x, structdecl_t d, list_t<decl_t,`H> tds) {
-  return new List(new_decl(new Struct_d(d), NULL),tds);
+static list_t<decl_t> add_aggrdecl(var_t x,aggrdecl_t d,list_t<decl_t,`H> tds) {
+  return new List(new_decl(new Aggr_d(d), NULL),tds);
 }
 
-static list_t<decl_t> add_structdecl_header(var_t x, structdecl_t d, list_t<decl_t,`H> tds) {
+static list_t<decl_t> add_aggrdecl_header(var_t x, aggrdecl_t d, 
+					  list_t<decl_t,`H> tds) {
   d = new *d;
   d->fields = NULL;
   if (d->sc != ExternC) d->sc = Extern;
-  return new List(new_decl(new Struct_d(d), NULL),tds);
-}
-
-static list_t<decl_t> add_uniondecl(var_t x, uniondecl_t d, list_t<decl_t,`H> tds) {
-  return new List(new_decl(new Union_d(d), NULL),tds);
-}
-
-static list_t<decl_t> add_uniondecl_header(var_t x, uniondecl_t d, list_t<decl_t,`H> tds) {
-  d = new *d;
-  d->fields = NULL;
-  if (d->sc != ExternC) d->sc = Extern;
-  return new List(new_decl(new Union_d(d), NULL),tds);
+  return new List(new_decl(new Aggr_d(d), NULL),tds);
 }
 
 static list_t<decl_t> add_tuniondecl(var_t x, tuniondecl_t d, list_t<decl_t,`H> tds) {
@@ -1095,8 +1025,7 @@ static stringptr_t us_p = &us;
 
 static $(tqual_t,type_t)@ rewrite_tunionfield_type($(tqual_t,type_t)@`H x) {
   return new $(empty_tqual(),
-	       new VarType(new Tvar(us_p, NULL, new Eq_kb(BoxKind)))
-	       );
+	       new VarType(new Tvar(us_p, NULL, new Eq_kb(BoxKind))));
 }
 
 static tunionfield_t rewrite_tunionfield(tunionfield_t f) {
@@ -1105,7 +1034,8 @@ static tunionfield_t rewrite_tunionfield(tunionfield_t f) {
   return f;
 }
 
-static list_t<decl_t> add_tuniondecl_header(var_t x, tuniondecl_t d, list_t<decl_t,`H> tds) {
+static list_t<decl_t> add_tuniondecl_header(var_t x, tuniondecl_t d, 
+					    list_t<decl_t,`H> tds) {
   d = new *d;
   //d->fields = NULL;
   if (d->fields != NULL) d->fields = new Opt(map(rewrite_tunionfield, d->fields->v));
@@ -1113,18 +1043,20 @@ static list_t<decl_t> add_tuniondecl_header(var_t x, tuniondecl_t d, list_t<decl
   return new List(new_decl(new Tunion_d(d), NULL),tds);
 }
 
-static list_t<decl_t> add_enumdecl(var_t x, enumdecl_t d, list_t<decl_t,`H> tds) {
+static list_t<decl_t> add_enumdecl(var_t x,enumdecl_t d,list_t<decl_t,`H> tds) {
   return new List(new_decl(new Enum_d(d), NULL),tds);
 }
 
-static list_t<decl_t> add_enumdecl_header(var_t x, enumdecl_t d, list_t<decl_t,`H> tds) {
+static list_t<decl_t> add_enumdecl_header(var_t x, enumdecl_t d, 
+					  list_t<decl_t,`H> tds) {
   d = new *d;
   d->fields = NULL;
   if (d->sc != ExternC) d->sc = Extern;
   return new List(new_decl(new Enum_d(d), NULL),tds);
 }
 
-static list_t<decl_t> add_typedef(var_t x, typedefdecl_t d, list_t<decl_t,`H> tds) {
+static list_t<decl_t> add_typedef(var_t x, typedefdecl_t d, 
+				  list_t<decl_t,`H> tds) {
   return new List(new_decl(new Typedef_d(d), NULL),tds);
 }
 
@@ -1132,7 +1064,8 @@ static list_t<decl_t> add_vardecl(var_t x, vardecl_t d, list_t<decl_t,`H> tds) {
   return new List(new_decl(new Var_d(d), NULL),tds);
 }
 
-static list_t<decl_t> add_xtunionfielddecl(var_t x, xtunionfielddecl_t d, list_t<decl_t,`H> tds) {
+static list_t<decl_t> add_xtunionfielddecl(var_t x, xtunionfielddecl_t d, 
+					   list_t<decl_t,`H> tds) {
   let &Tcdecl::Xtunionfielddecl(b,f)=d;
   b = new *b;
   b->fields = new Opt(new List(f,NULL));
@@ -1140,7 +1073,8 @@ static list_t<decl_t> add_xtunionfielddecl(var_t x, xtunionfielddecl_t d, list_t
   return new List(new_decl(new Tunion_d(b), NULL),tds);
 }
 
-static list_t<decl_t> add_xtunionfielddecl_header(var_t x, xtunionfielddecl_t d, list_t<decl_t,`H> tds) {
+static list_t<decl_t> add_xtunionfielddecl_header(var_t x, xtunionfielddecl_t d,
+						  list_t<decl_t,`H> tds) {
   let &Tcdecl::Xtunionfielddecl(b,f)=d;
   b = new *b;
   f = rewrite_tunionfield(f);
@@ -1150,66 +1084,49 @@ static list_t<decl_t> add_xtunionfielddecl_header(var_t x, xtunionfielddecl_t d,
   return new List(new_decl(new Tunion_d(b), NULL),tds);
 }
 
-static void print_ns_headers(FILE @`H f, list_t<var_t,`H> ns, ienv_t ie) {
+static void print_ns_headers(FILE @ f, list_t<var_t,`H> ns, ienv_t ie) {
   let tds = NULL;
-
-  tds = Dict::fold(add_structdecl_header,  ie->structdecls,  tds);
-  tds = Dict::fold(add_uniondecl_header,   ie->uniondecls,   tds);
-  tds = Dict::fold(add_tuniondecl_header,  ie->tuniondecls,  tds);
-  tds = Dict::fold(add_enumdecl_header,    ie->enumdecls,    tds);
+  tds = Dict::fold(add_aggrdecl_header,   ie->aggrdecls,   tds);
+  tds = Dict::fold(add_tuniondecl_header, ie->tuniondecls, tds);
+  tds = Dict::fold(add_enumdecl_header,   ie->enumdecls,   tds);
 
   if (tds != NULL) {
     tds = imp_rev(tds);
-
     tds = add_namespace(tds, ns);
-
     Absynpp::decllist2file(tds, f);
   }
 }
 
-static void print_ns_xtunionfielddecl_headers(FILE @`H f, list_t<var_t,`H> ns, ienv_t ie) {
-  let tds = NULL;
-
-  tds = Dict::fold(add_xtunionfielddecl_header, ie->xtunionfielddecls, tds);
-
+static void print_ns_xtunionfielddecl_headers(FILE @ f, list_t<var_t,`H> ns,
+					      ienv_t ie) {
+  let tds = Dict::fold(add_xtunionfielddecl_header,ie->xtunionfielddecls,NULL);
   if (tds != NULL) {
     tds = imp_rev(tds);
-
     tds = add_namespace(tds, ns);
-
     Absynpp::decllist2file(tds, f);
   }
 }
 
-static void print_ns_typedefs(FILE @`H f, list_t<var_t,`H> ns, ienv_t ie) {
-  let tds = NULL;
-
-  tds = Dict::fold(add_typedef, ie->typedefdecls, tds);
-
+static void print_ns_typedefs(FILE @ f, list_t<var_t,`H> ns, ienv_t ie) {
+  let tds = Dict::fold(add_typedef, ie->typedefdecls, NULL);
   if (tds != NULL) {
     tds = imp_rev(tds);
-
     tds = add_namespace(tds, ns);
-
     Absynpp::decllist2file(tds, f);
   }
 }
 
-static void print_ns_decls(FILE @`H f, list_t<var_t,`H> ns, ienv_t ie) {
+static void print_ns_decls(FILE @ f, list_t<var_t,`H> ns, ienv_t ie) {
   let tds = NULL;
-
-  tds = Dict::fold(add_structdecl,  ie->structdecls,  tds);
-  tds = Dict::fold(add_uniondecl,   ie->uniondecls,   tds);
-  tds = Dict::fold(add_tuniondecl,  ie->tuniondecls,  tds);
-  tds = Dict::fold(add_enumdecl,    ie->enumdecls,    tds);
-  tds = Dict::fold(add_vardecl,     ie->vardecls,     tds);
+  tds = Dict::fold(add_aggrdecl,   ie->aggrdecls,   tds);
+  tds = Dict::fold(add_tuniondecl, ie->tuniondecls, tds);
+  tds = Dict::fold(add_enumdecl,   ie->enumdecls,   tds);
+  tds = Dict::fold(add_vardecl,    ie->vardecls,    tds);
   tds = Dict::fold(add_xtunionfielddecl, ie->xtunionfielddecls, tds);
 
   if (tds != NULL) {
     tds = imp_rev(tds);
-
     tds = add_namespace(tds, ns);
-
     Absynpp::decllist2file(tds, f);
   }
 }
@@ -1217,7 +1134,7 @@ static void print_ns_decls(FILE @`H f, list_t<var_t,`H> ns, ienv_t ie) {
 // everything is extremely verbose
 // but there's no other solution as long as we have to
 // declare structures before using them
-void print(i_t i, FILE @`H f) {
+void print(i_t i, FILE @ f) {
   Absynpp::set_params(&Absynpp::cyci_params_r);
   fprintf(f,   "/****** needed (headers) ******/\n");
   Dict::iter_c(print_ns_headers, f, i->imports);
@@ -1225,9 +1142,9 @@ void print(i_t i, FILE @`H f) {
   fprintf(f, "\n/****** provided (headers) ******/\n");
   Dict::iter_c(print_ns_headers, f, i->exports);
 
-  // we have to handle xtunionfields separately because they can be in a different
+  // we handle xtunionfields separately because they can be in a different
   // namespace from their corresponding xtuniondecls
-  fprintf(f,   "/****** needed (headers of xtunionfielddecls) ******/\n");
+  fprintf(f,   "\n/****** needed (headers of xtunionfielddecls) ******/\n");
   Dict::iter_c(print_ns_xtunionfielddecl_headers, f, i->imports);
 
   fprintf(f, "\n/****** provided (headers of xtunionfielddecls) ******/\n");
@@ -1246,25 +1163,22 @@ void print(i_t i, FILE @`H f) {
 
 /* ------ parsing a text file ------ */
 
-i_t parse(FILE @`H f) { // warning : Position::reset_position must be called before using parse
+// WARNING: Position::reset_position must be called before using parse
+i_t parse(FILE @ f) { 
   Lex::lex_init();
   let tds = Parse::parse_file(f);
-
-  let te = Tcenv::tc_init();
+  let te  = Tcenv::tc_init();
   Tc::tc(te, false, tds); // no "Cyc" prefix, no default initializer 
-
-  return gen_extract(te->ae, false); // don't check that definitions are complete
+  return gen_extract(te->ae, false); //don't check that definitions are complete
 }
 
 /* ------ binary loading and saving ------ */
 
-// Mathieu : so far, there's nothing binary here
-// but let's pretend it is :-)
-void save(i_t i, FILE @`H f) {
+// Mathieu : so far, there's nothing binary here, but let's pretend it is :-)
+void save(i_t i, FILE @ f) {
   print(i, f);  
 }
 
-i_t load(FILE @`H f) {
+i_t load(FILE @ f) {
   return parse(f);
 }
-

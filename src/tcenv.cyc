@@ -103,8 +103,7 @@ struct Tenv {
 // Global environments -- what's declared in a global scope
 struct Genv {
   set_t<var_t>                      namespaces;
-  Dict::dict_t<var_t,structdecl_t@> structdecls;
-  Dict::dict_t<var_t,uniondecl_t@>  uniondecls;
+  Dict::dict_t<var_t,aggrdecl_t@>   aggrdecls;
   Dict::dict_t<var_t,tuniondecl_t@> tuniondecls;
   Dict::dict_t<var_t,enumdecl_t@>   enumdecls;
   Dict::dict_t<var_t,typedefdecl_t> typedefs; // no indirection b/c no redeclaration
@@ -115,7 +114,7 @@ struct Genv {
 // Used to tell what an ordinary identifer refers to
 tunion Resolved {
   VarRes(binding_t); // includes unresolved variant
-  StructRes(structdecl_t);
+  AggrRes(aggrdecl_t);
   TunionRes(tuniondecl_t,tunionfield_t);
   EnumRes(enumdecl_t,enumfield_t);
   AnonEnumRes(type_t,enumfield_t);
@@ -151,8 +150,8 @@ typedef struct CtrlEnv @ ctrl_env_t;
 // Hence mutations are seen by all subsequent type-checking, which is easier
 // than threading labels which must be function-wide unique anyway.
 static struct SharedFenv {
-  type_t                             return_typ;
-  Dict::dict_t<var_t,stmt_t>         seen_labels;
+  type_t                                 return_typ;
+  Dict::dict_t<var_t,stmt_t>             seen_labels;
   SlowDict::dict_t<var_t,list_t<stmt_t>> needed_labels;
 };
 
@@ -315,39 +314,21 @@ list_t<var_t> resolve_namespace(tenv_t te, seg_t loc,
 // The absolute versions aren't being used right now, but it's
 // important to think about whether they are correct in certain contexts.
 
-static structdecl_t @ lookup_structdecl_f(genv_t ge,var_t v) {
-  return Dict::lookup(ge->structdecls,v);
+static aggrdecl_t @ lookup_aggrdecl_f(genv_t ge,var_t v) {
+  return Dict::lookup(ge->aggrdecls,v);
 }
-structdecl_t @ lookup_structdecl(tenv_t te,seg_t loc,qvar_t q) {
+aggrdecl_t @ lookup_aggrdecl(tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Loc_n: fallthru;
   case &Rel_n(NULL):
-    return scoped_lookup(te, loc, lookup_structdecl_f, v);
+    return scoped_lookup(te, loc, lookup_aggrdecl_f, v);
   case &Abs_n(y):
     let ge = Dict::lookup(te->ae,y);
-    return Dict::lookup(ge->structdecls,v);
+    return Dict::lookup(ge->aggrdecls,v);
   case &Rel_n(&List(x,y)):
     let ge = lookup_namespace(te,loc,x,y);
-    return Dict::lookup(ge->structdecls,v);
-  }
-}
-
-static uniondecl_t @ lookup_uniondecl_f(genv_t ge,var_t v) {
-  return Dict::lookup(ge->uniondecls,v);
-}
-uniondecl_t @ lookup_uniondecl(tenv_t te,seg_t loc,qvar_t q) {
-  let &$(nsl,v) = q;
-  switch (nsl) {
-  case Loc_n: fallthru;
-  case &Rel_n(NULL):
-    return scoped_lookup(te, loc, lookup_uniondecl_f, v);
-  case &Abs_n(y):
-    let ge = Dict::lookup(te->ae,y);
-    return Dict::lookup(ge->uniondecls,v);
-  case &Rel_n(&List(x,y)):
-    let ge = lookup_namespace(te,loc,x,y);
-    return Dict::lookup(ge->uniondecls,v);
+    return Dict::lookup(ge->aggrdecls,v);
   }
 }
 
@@ -402,20 +383,14 @@ opt_t<tuniondecl_t@> lookup_xtuniondecl(tenv_t te,seg_t loc,qvar_t q) {
     return new Opt(Dict::lookup(ge->tuniondecls,v));
   }
 }
-//// FIX: We probably need some of the lenience of lookup_xtuniondecl here too.
-////     I would add it, but I think xtunions are still generally sorta busted.
-//opt_t<xtuniondecl_t@> lookup_xtuniondecl_abs(tenv te, seg_t loc,qvar q) {
-//  return &Opt(Dict::lookup(Dict::lookup(te->ae,(*q)[0])->tuniondecls, (*q)[1]));
-//}
 
 static enumdecl_t @lookup_enumdecl_f(genv_t ge, var_t v) {
   return Dict::lookup(ge->enumdecls,v);
 }
-
 enumdecl_t @lookup_enumdecl(tenv_t te, seg_t loc, qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
-  case Loc_n: fallthru;
+  case Loc_n:
   case &Rel_n(NULL):
     return scoped_lookup(te, loc, lookup_enumdecl_f, v);
   case &Rel_n(&List(x,y)):
@@ -433,7 +408,7 @@ static typedefdecl_t lookup_typedefdecl_f(genv_t ge,var_t v) {
 typedefdecl_t lookup_typedefdecl(tenv_t te, seg_t loc, qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
-  case Loc_n: fallthru;
+  case Loc_n:
   case &Rel_n(NULL):
     return scoped_lookup(te, loc, lookup_typedefdecl_f, v);
   case &Rel_n(&List(x,y)):
@@ -446,15 +421,13 @@ typedefdecl_t lookup_typedefdecl(tenv_t te, seg_t loc, qvar_t q) {
 }
 
 genv_t empty_genv() {
-  return new 
-    Genv{.namespaces  = empty_var_set->v,
-            .structdecls   = Dict::empty(zstrptrcmp),
-            .uniondecls    = Dict::empty(zstrptrcmp),
-            .tuniondecls   = Dict::empty(zstrptrcmp),
-            .enumdecls     = Dict::empty(zstrptrcmp),
-            .typedefs      = Dict::empty(zstrptrcmp),
-            .ordinaries    = Dict::empty(zstrptrcmp),
-            .availables    = NULL};
+  return new Genv{.namespaces  = empty_var_set->v,
+		  .aggrdecls   = Dict::empty(zstrptrcmp),
+		  .tuniondecls = Dict::empty(zstrptrcmp),
+		  .enumdecls   = Dict::empty(zstrptrcmp),
+		  .typedefs    = Dict::empty(zstrptrcmp),
+		  .ordinaries  = Dict::empty(zstrptrcmp),
+		  .availables  = NULL};
 }
 
 ////////////////////////////// Frames Manipulation //////////////////////////
@@ -666,9 +639,9 @@ void process_continue(tenv_t te, stmt_t s, stmt_opt_t @sopt) {
     s2->non_local_preds = new List(s,s2->non_local_preds);
     *sopt = s2;
     return;
-  case NotLoop_j: terr(s->loc, "continue not in a loop");     return;
-  case CaseEnd_j: env_err("Tcenv: continue dest is CaseEnd"); return;
-  case FnEnd_j:   env_err("Tcenv: continue dest is CaseEnd"); return;
+  case NotLoop_j: terr(s->loc, "continue not in a loop"); return;
+  case CaseEnd_j: 
+  case FnEnd_j:   env_err("Tcenv: bad continue destination");
   }
 }
 void process_break(tenv_t te, stmt_t s, stmt_opt_t @sopt) {

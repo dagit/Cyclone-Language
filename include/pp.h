@@ -104,7 +104,7 @@ extern doc_t seq(string_t<`H> sep, list_t<doc_t,`H> l);
   /** [seq(sep,l)] returns a document consisting of each document of
       [l], in sequence, with string [sep] between each adjacent
       element of [l]. */
-extern doc_t ppseq(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l);
+extern doc_t ppseq(doc_t pp(`a), string_t<`H> sep, list_t<`a> l);
   /** [ppseq] is a more general form of [seq]: in [ppseq(pp,sep,l)],
       [l] is a list of values to pretty print in sequence, [pp] is a
       function that knows how to pretty print a value, and [sep] is a
@@ -112,7 +112,7 @@ extern doc_t ppseq(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l);
 extern doc_t seql(string_t<`H> sep, list_t<doc_t,`H> l0);
   /** [seql] is like [seq], except that the resulting document has
       line breaks after each separator. */
-extern doc_t ppseql(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l);
+extern doc_t ppseql(doc_t pp(`a), string_t<`H> sep, list_t<`a> l);
   /** [ppseql] is like [ppseq], except that the resulting document has
       line breaks after each separator. */
 extern doc_t group(string_t<`H> start, string_t<`H> stop, string_t<`H> sep, list_t<doc_t,`H> l);

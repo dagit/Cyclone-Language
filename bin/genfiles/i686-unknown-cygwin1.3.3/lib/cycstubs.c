@@ -288,8 +288,8 @@ struct _tagged_arr s,int i,struct _tagged_arr ms){if(_get_arr_size(ms,sizeof(int
 ms,sizeof(int),0)));}else{return open_without_mode(string_to_Cstring(s),i);}}
 struct Cyc_Std_timeval{int tv_sec;int tv_usec;};struct Cyc_Std_timezone{int
 tz_minuteswest;int tz_dsttime;};struct Cyc_Std_itimerval{struct Cyc_Std_timeval
-it_interval;struct Cyc_Std_timeval it_value;};typedef struct {unsigned int __val[64];
-}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;struct Cyc_Std_timespec{
+it_interval;struct Cyc_Std_timeval it_value;};typedef struct{unsigned int __val[64];}
+Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;struct Cyc_Std_timespec{
 int tv_sec;int tv_nsec;};struct Cyc_Std_timeval;struct Cyc_Std_sockaddr_in;struct Cyc_Std_sockaddr{
 unsigned short sa_family;unsigned char sa_data[14];};struct Cyc_Std_SA_sockaddr_in_struct{
 int tag;struct Cyc_Std_sockaddr_in*f1;};struct Cyc_Std_SA_sockaddr_struct{int tag;

@@ -778,7 +778,7 @@ list_t<`a> tabulate_c(int n, `a f(`b,int), `b env) {
   return rtabulate_c(heap_region, n, f, env);
 }
 
-int list_cmp(int cmp(`a,`a), list_t<`a> l1, list_t<`a> l2) {
+int list_cmp(int cmp(`a,`b), list_t<`a> l1, list_t<`b> l2) {
   for (; l1 != NULL && l2 != NULL; l1 = l1->tl, l2 = l2->tl) {
     /* The casts are needed here else the lists are forced into the
        same region. */
@@ -796,7 +796,7 @@ int list_cmp(int cmp(`a,`a), list_t<`a> l1, list_t<`a> l2) {
 }
 
 // idem
-bool list_prefix(int cmp(`a,`a), list_t<`a> l1, list_t<`a> l2) {
+bool list_prefix(int cmp(`a,`b), list_t<`a> l1, list_t<`b> l2) {
   for (; l1 != NULL && l2 != NULL; l1 = l1->tl, l2 = l2->tl) {
     /* The casts are needed here else the lists are forced into the
        same region. */
@@ -809,8 +809,7 @@ bool list_prefix(int cmp(`a,`a), list_t<`a> l1, list_t<`a> l2) {
   return (l1 == NULL);
 }
 
-list_t<`a,`r2> rfilter_c(region_t<`r2> r2, bool f(`b,`a), 
-                          `b env, list_t<`a> l) {
+list_t<`a,`r2> rfilter_c(region_t<`r2> r2, bool f(`b,`a), `b env, list_t<`a> l){
   if (l == NULL)
     return NULL;
   // First elt is purposefully junk!

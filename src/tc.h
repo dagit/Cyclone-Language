@@ -38,8 +38,7 @@ extern void tc(tenv_t te, bool var_default_init, list_t<decl_t,`H> ds);
 extern list_t<decl_t> treeshake(tenv_t te, list_t<decl_t>);
 
 // internal functions needed by tcutil
-extern void tcStructdecl(tenv_t, genv_t, seg_t, structdecl_t);
-extern void tcUniondecl(tenv_t, genv_t, seg_t, uniondecl_t);
+extern void tcAggrdecl(tenv_t, genv_t, seg_t, aggrdecl_t);
 extern void tcTuniondecl(tenv_t, genv_t, seg_t, tuniondecl_t);
 extern void tcEnumdecl(tenv_t, genv_t, seg_t, enumdecl_t);
 

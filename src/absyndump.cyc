@@ -52,7 +52,7 @@ static bool generate_line_directives;
 // (Differences: long long vs. __int64 and inline vs. __inline)
 static bool to_VC;
 
-void set_params(struct Absynpp::Params @ `r fs) {
+void set_params(struct Absynpp::Params @ fs) {
   expand_typedefs = fs->expand_typedefs;
   qvar_to_Cids = fs->qvar_to_Cids;
   add_cyc_prefix = fs->add_cyc_prefix;
@@ -80,7 +80,7 @@ void dumpvardecl(vardecl_t,Position::seg_t);
 void dumpdecl(decl_t);
 void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a);
 void dumptqtd(tqual_t, type_t, void f(`a), `a);
-void dumpstructfields(list_t<structfield_t> fields);
+void dumpaggrfields(list_t<aggrfield_t> fields);
 void dumpenumfields(list_t<enumfield_t> fields);
 // really want to change this to char[] (need a control character for format
 // prims and the ability to cast to untagged (from Tagged requires Toc hlep,
@@ -165,7 +165,7 @@ void dump_sep(void f(`a), list_t<`a> l, dump_string_t sep) {
     return;
   for(; l->tl != NULL; l = l->tl) {
     f(l->hd);
-    dump_nospace(sep); // still have the unnecessary space afterwards, though
+    dump_nospace(sep); 
   }
   f(l->hd);
 }
@@ -174,7 +174,7 @@ void dump_sep_c(void f(`b,`a), `b env, list_t<`a> l, dump_string_t sep) {
     return;
   for(; l->tl != NULL; l = l->tl) {
     f(env,l->hd);
-    dump_nospace(sep); // still have the unnecessary space afterwards, though
+    dump_nospace(sep); 
   }
   f(env,l->hd);
 }
@@ -201,8 +201,7 @@ void egroup(void f(`a), list_t<`a> l,
 void dumpqvar(qvar_t v) {
   let nsl = NULL;
   switch ((*v)[0]) {
-  case Loc_n:
-    fallthru(NULL);
+  case Loc_n: fallthru(NULL);
   case &Rel_n(x):
     nsl = x;
     break;
@@ -245,11 +244,18 @@ void dumpscope(scope_t sc) {
 
 void dumpkind(kind_t k) {
   switch (k) {
-  case AnyKind       : dump("A"); return;
-  case MemKind       : dump("M"); return;
-  case BoxKind       : dump("B"); return;
-  case RgnKind       : dump("R"); return;
-  case EffKind       : dump("E"); return;
+  case AnyKind: dump("A"); return;
+  case MemKind: dump("M"); return;
+  case BoxKind: dump("B"); return;
+  case RgnKind: dump("R"); return;
+  case EffKind: dump("E"); return;
+  }
+}
+
+void dumpaggr_kind(aggr_kind_t k) {
+  switch(k) {
+  case StructA: dump("struct"); return;
+  case UnionA:  dump("union");  return;
   }
 }
 
@@ -262,8 +268,8 @@ void dumptvar(tvar_t tv) {
 void dumpkindedtvar(tvar_t tv) {
   dump_str(tv->name);
   switch (compress_kb(tv->kind)) {
-  case &Eq_kb(BoxKind): fallthru;
-  case &Less_kb(_,_): fallthru;
+  case &Eq_kb(BoxKind):
+  case &Less_kb(_,_): 
   case &Unknown_kb(_): dump("::?"); break;
   case &Eq_kb(k): dump("::"); dumpkind(k); break;
   }
@@ -297,8 +303,8 @@ void dump_noncallconv(attributes_t atts) {
   bool hasatt = false;
   for(_ atts2 = atts; atts2 != NULL; atts2 = atts2->tl)
     switch(atts->hd) {
-    case Stdcall_att:  break;
-    case Cdecl_att:    break;
+    case Stdcall_att:  
+    case Cdecl_att:    
     case Fastcall_att: break;
     default: hasatt = true; break;
     }
@@ -307,8 +313,8 @@ void dump_noncallconv(attributes_t atts) {
   dump("__declspec(");
   for (; atts != NULL; atts = atts->tl)
     switch(atts->hd) {
-    case Stdcall_att:  break;
-    case Cdecl_att:    break;
+    case Stdcall_att:  
+    case Cdecl_att:    
     case Fastcall_att: break;
     default: dump(attribute2string(atts->hd)); break;
     }
@@ -382,12 +388,11 @@ static void dumpeff(type_t t) {
 void dumpntyp(type_t t) {
   switch (t) {
     // The first three cases never turn up in normalized types.
-  case &ArrayType(_,_,_): return;
-  case &FnType(_)       : return;
-  case &PointerType(_)  : return;
-  case VoidType:         dump("void"); return;
-  case &VarType(tv): 
-    dump_str(tv->name); return; // FIX: may want explicit kinds
+  case &ArrayType(_,_,_): 
+  case &FnType(_): 
+  case &PointerType(_): return;
+  case VoidType: dump("void"); return;
+  case &VarType(tv): dump_str(tv->name); return; // FIX: may want explicit kinds
   case &Evar(k,NULL,i,_): 
     dump("%"); 
     if (k == NULL) dump("?"); else dumpkind(k->v); 
@@ -421,7 +426,6 @@ void dumpntyp(type_t t) {
       break;
     }
     break;
-  case &EnumType(n,_): dump("enum "); dumpqvar(n); return;
   case &IntType(Signed,   B4): dump("int"); return;
   case &IntType(Signed,   B1): dump("signed char"); return;
   case &IntType(Unsigned, B1): dump("unsigned char"); return;
@@ -431,7 +435,7 @@ void dumpntyp(type_t t) {
   case &IntType(Signed,   B8) && to_VC: dump("__int64"); return;
   case &IntType(Signed,   B8): dump("long long"); return;
   case &IntType(Unsigned,B8) && to_VC: dump("unsigned __int64");return;
-  case &IntType(Unsigned, B8): dump("unsigned long long");    return;
+  case &IntType(Unsigned, B8): dump("unsigned long long"); return;
   case FloatType:  dump("float");  return;
   case &DoubleType(b): 
     if (b) 
@@ -440,25 +444,20 @@ void dumpntyp(type_t t) {
       dump("double");
     return;
   case &TupleType(ts): dump_char('$'); dumpargs(ts); return;
-  case &StructType(NULL,ts,_):   dump("struct"); dumptps(ts); return;
-  case &StructType(n,  ts,_):
-    dump("struct"); dumpqvar((qvar_t)n); dumptps(ts); return;
-  case &UnionType(NULL,ts,_):   dump("union"); dumptps(ts); return;
-  case &UnionType(n,  ts,_):
-    dump("union"); dumpqvar((qvar_t)n); dumptps(ts); return;
-  case &AnonStructType(fs):
-    dump("struct {"); dumpstructfields(fs); dump("}"); return;
-  case &AnonUnionType(fs):
-    dump("union {"); dumpstructfields(fs); dump("}"); return;
-  case &AnonEnumType(fs):
-    dump("enum {"); dumpenumfields(fs); dump("}"); return;
+  case &AggrType(AggrInfo(info,ts)):
+    let $(k,n) = aggr_kinded_name(info);
+    dumpaggr_kind(k); dumpqvar(n); dumptps(ts); 
+    return;
+  case &AnonAggrType(k,fs):
+    dumpaggr_kind(k); dump_char('{'); dumpaggrfields(fs); dump_char('}');return;
+  case &EnumType(n,_):    dump("enum "); dumpqvar(n); return;
+  case &AnonEnumType(fs): dump("enum {"); dumpenumfields(fs); dump("}"); return;
   case &TypedefType(n,ts,topt):  dumpqvar(n), dumptps(ts); return;
   case &SizeofType(t): dump("sizeof_t<"); dumpntyp(t); dump(">"); return;
-  case &RgnHandleType(rgn):
-    dumprgn(rgn); return;
-  case HeapRgn: return; 
-  case &AccessEff(_): return;
-  case &RgnsEff(_): return;
+  case &RgnHandleType(rgn): dumprgn(rgn); return;
+  case HeapRgn: 
+  case &AccessEff(_): 
+  case &RgnsEff(_): 
   case &JoinEff(_): return;
   }
 }
@@ -540,8 +539,8 @@ void dumpexp_prec(int inprec, exp_t e) {
     dump(aprintf("%u",(unsigned)i)); break;
   case &Const_e(&LongLong_c(sg,i)):
     dump("<<FIX LONG LONG CONSTANT>>"); break; // FIX
-  case &Const_e(&Float_c(x)):    dump(x);      break;
-  case &Const_e(Null_c):        dump("NULL"); break;
+  case &Const_e(&Float_c(x)): dump(x); break;
+  case &Const_e(Null_c): dump("NULL"); break;
   case &Const_e(&String_c(s)):
     dump_char('"'); dump_nospace(Absynpp::string_escape(s)); dump_char('"');
     break;
@@ -644,11 +643,11 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Deref_e(e1):
     dump_char('*'); dumpexp_prec(myprec,e1); break;
 
-  case &StructMember_e(e1,n):
+  case &AggrMember_e(e1,n):
     dumpexp_prec(myprec,e1); dump_char('.');  dump_nospace(*n);
     break;
 
-  case &StructArrow_e(e1,n):
+  case &AggrArrow_e(e1,n):
     dumpexp_prec(myprec,e1); dump_nospace("->"); dump_nospace(*n);
     break;
 
@@ -675,7 +674,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     dump_char(':'); dumpexp(e2); dump_char('}');
     break;
 
-  case &Struct_e(n,_,des,_):
+  case &Struct_e(n,des,_):
     dumpqvar(n);
     group(dumpde,des,"{","}",",");
     break;
@@ -684,7 +683,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     group(dumpde,des,"{","}",",");
     break;
 
-  case &Tunion_e(_,_,es,_,tuf):
+  case &Tunion_e(es,_,tuf):
     dumpqvar(tuf->name);
     if (es != NULL) group(dumpexp,es,"(",")",",");
     break;
@@ -875,8 +874,8 @@ void dumpdp($(list_t<designator_t>,pat_t)@ dp) {
 
 void dumppat(pat_t p) {
   switch(p->r) {
-  case Wild_p: dump_char('_');    break;
-  case Null_p: dump("NULL"); break;
+  case Wild_p: dump_char('_'); break;
+  case Null_p: dump("NULL");   break;
   case &Int_p(Signed,i):   dump(aprintf("%d",i)); break;
   case &Int_p(Unsigned,i): dump(aprintf("%u",i)); break;
   case &Char_p(ch):
@@ -889,20 +888,18 @@ void dumppat(pat_t p) {
   case &UnknownId_p(q):  dumpqvar(q); break;
   case &UnknownCall_p(q,tvs,ps):
     dumpqvar(q); dumptvars(tvs); group(dumppat,ps,"(",")",","); break;
-  case &UnknownFields_p(q,tvs,dps):
-    dumpqvar(q); dumptvars(tvs); group(dumpdp,dps,"{","}",","); break;
-  case &Struct_p(sd,_,tvs,dps):
-    if(sd->name != NULL)
-      dumpqvar(sd->name->v);
-    dumptvars(tvs);
-    group(dumpdp,dps,"{","}",",");
+  case &Aggr_p(AggrInfo(info,_),exists,dps):
+    let $(_,n) = aggr_kinded_name(info);
+    dumpqvar(n); dump_char('{');
+    egroup(dumptvar,exists,"[","]",",");
+    group(dumpdp,dps,"","}",",");
     break;
   case &Tunion_p(_,tuf,tvs,ps):
     dumpqvar(tuf->name); 
     dumptvars(tvs);
     if (ps != NULL) group(dumppat,ps,"(",")",",");
     break;
-  case &Enum_p(_,ef): dumpqvar(ef->name); break;
+  case &Enum_p(_,ef): fallthru(ef);
   case &AnonEnum_p(_,ef): dumpqvar(ef->name); break;
   }
 }
@@ -926,9 +923,9 @@ void dumpenumfields(list_t<enumfield_t> fields) {
   dump_sep(dumpenumfield,fields,",");
 }
 
-void dumpstructfields(list_t<structfield_t> fields) {
+void dumpaggrfields(list_t<aggrfield_t> fields) {
   for(; fields != NULL; fields = fields->tl) {
-    let &Structfield{name,tq,type,width,atts} = fields->hd;
+    let &Aggrfield{name,tq,type,width,atts} = fields->hd;
     dumptqtd(tq,type,dump_str,name);
     dumpatts(atts);
     if (width != NULL) {
@@ -1032,33 +1029,20 @@ void dumpdecl(decl_t d) {
     dumpstmt(fd->body);
     dump_char('}');
     break;
-  case &Struct_d(sd):
-    dumpscope(sd->sc);
-    dump("struct");
-    if(sd->name != NULL) dumpqvar(sd->name->v);
-    dumptvars(sd->tvs);
-    if(sd->fields == NULL)
+  case &Aggr_d(ad):
+    dumpscope(ad->sc);
+    dumpaggr_kind(ad->kind);
+    dumpqvar(ad->name);
+    dumptvars(ad->tvs);
+    if(ad->fields == NULL)
       dump_semi();
     else {
       dump_char('{');
-      dumpstructfields(sd->fields->v);
+      if(ad->exist_vars != NULL)
+	egroup(dumpkindedtvar,ad->exist_vars->v,"[","]",",");
+      dumpaggrfields(ad->fields->v);
       dump("}");
-      dumpatts(sd->attributes);
-      dump(";");
-    }
-    break;
-  case &Union_d(ud):
-    dumpscope(ud->sc);
-    dump("union");
-    if(ud->name != NULL) dumpqvar(ud->name->v);
-    dumptvars(ud->tvs);
-    if(ud->fields == NULL)
-      dump_semi();
-    else {
-      dump_char('{');
-      dumpstructfields(ud->fields->v);
-      dump("}");
-      dumpatts(ud->attributes);
+      dumpatts(ad->attributes);
       dump(";");
     }
     break;
@@ -1067,10 +1051,7 @@ void dumpdecl(decl_t d) {
     break;
   case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion)):
     dumpscope(sc);
-    if(is_xtunion)
-      dump("xtunion ");
-    else
-      dump("tunion ");
+    dump(is_xtunion ? "xtunion" : "tunion");
     dumpqvar(name);
     dumptvars(tvs);
     if(fields == NULL)
@@ -1106,7 +1087,7 @@ void dumpdecl(decl_t d) {
     dump_semi();
     break;
   case &Typedef_d(td):
-    if (!expand_typedefs || Absynpp::is_anon_structtype(td->defn)) {
+    if (!expand_typedefs || Absynpp::is_anon_aggrtype(td->defn)) {
       dump("typedef");
       dumptqtd(Tqual(false,false,false),td->defn,dumptypedefname,td);
       dump_semi();

@@ -22,7 +22,7 @@
 
 // This file defines the abstract syntax used by the Cyclone compiler
 // and related tools.  It is the crucial set of data structures that 
-// weave through the compiler.  
+// pervade the compiler.  
 
 // The abstract syntax has (at last count) three different "stages":
 // A. Result of parsing
@@ -70,7 +70,6 @@ namespace Absyn {
   using Core;
   using List;
   using Position;
-
   
   typedef stringptr_t<`H,`H> field_name_t; // field names (for structs, etc.)
   typedef stringptr_t<`H,`H> var_t;        // variables are string pointers
@@ -86,14 +85,14 @@ namespace Absyn {
 
   // Qualified variables
   typedef $(nmspace_t,var_t) @qvar_t, *qvar_opt_t;
-  typedef qvar_t typedef_name_t;         // typedef names
+  typedef qvar_t typedef_name_t;
   typedef qvar_opt_t typedef_name_opt_t; 
-  
-  // forward declarations -- see below
+
+  // forward declarations
   extern struct Conref<`a>;
   extern tunion Constraint<`a>;
 
-  // typedef's -- in general, we define foo_t to be struct Foo@ or tunion Foo.
+  // typedefs -- in general, we define foo_t to be struct Foo@ or tunion Foo.
   typedef tunion Scope scope_t;
   typedef struct Tqual tqual_t; // not a pointer
   typedef tunion Size_of size_of_t;
@@ -101,6 +100,7 @@ namespace Absyn {
   typedef tunion KindBound kindbound_t;
   typedef struct Tvar @tvar_t; 
   typedef tunion Sign sign_t;
+  typedef tunion AggrKind aggr_kind_t;
   typedef struct Conref<`a> @conref_t<`a>;
   typedef tunion Constraint<`a> constraint_t<`a>;
   typedef tunion Bounds bounds_t;
@@ -109,6 +109,7 @@ namespace Absyn {
   typedef struct FnInfo fn_info_t;
   typedef struct TunionInfo tunion_info_t;
   typedef struct TunionFieldInfo tunion_field_info_t;
+  typedef struct AggrInfo aggr_info_t;
   typedef tunion Type type_t, rgntype_t;
   typedef tunion Funcparams funcparams_t;
   typedef tunion Type_modifier type_modifier_t;
@@ -126,8 +127,7 @@ namespace Absyn {
   typedef struct Switch_clause @switch_clause_t;
   typedef struct SwitchC_clause @switchC_clause_t;
   typedef struct Fndecl @fndecl_t;
-  typedef struct Structdecl @structdecl_t;
-  typedef struct Uniondecl @uniondecl_t;
+  typedef struct Aggrdecl @aggrdecl_t;
   typedef struct Tunionfield @tunionfield_t;
   typedef struct Tuniondecl @tuniondecl_t;
   typedef struct Typedefdecl @typedefdecl_t;
@@ -138,10 +138,9 @@ namespace Absyn {
   typedef struct Decl @decl_t;
   typedef tunion Designator designator_t;
   typedef xtunion AbsynAnnot absyn_annot_t;
-  typedef tunion Format_Type format_type_t;
   typedef tunion Attribute attribute_t;
   typedef list_t<attribute_t> attributes_t;
-  typedef struct Structfield @structfield_t;
+  typedef struct Aggrfield @aggrfield_t;
   typedef tunion OffsetofField offsetof_field_t;
   typedef struct MallocInfo malloc_info_t;
   typedef struct ForArrayInfo forarray_info_t;
@@ -160,7 +159,7 @@ namespace Absyn {
     bool q_const :1; bool q_volatile :1; bool q_restrict :1; 
   };
 
-  // FIX:  we should make this char, short, int, etc.  -- something
+  // FIX: we should make this char, short, int, etc.  -- something
   // that's machine independent.
   // byte sizes -- 1, 2, 4, or 8 bytes
   EXTERN_ABSYN tunion Size_of { B1, B2, B4, B8 };
@@ -171,13 +170,15 @@ namespace Absyn {
     AnyKind,      // kind of all types, including abstract structs
     MemKind,      // same as AnyType but excludes abstract structs
     BoxKind,      // same as MemKind but excludes types whose 
-                  //   values do not go in a general purpose register
+                  //   values do not go in general-purpose registers
     RgnKind,      // regions
     EffKind       // effects
   };
 
   // signed or unsigned qualifiers on integral types
   EXTERN_ABSYN tunion Sign { Signed, Unsigned };
+
+  EXTERN_ABSYN tunion AggrKind { StructA, UnionA };
 
   // constraint refs are used during unification to figure out what
   // something should be when it's under-specified
@@ -255,11 +256,11 @@ namespace Absyn {
   };
   EXTERN_ABSYN tunion TunionInfoU {
     UnknownTunion(struct UnknownTunionInfo); // don't know definition yet
-    KnownTunion(tuniondecl_t@);              // know definition
+    KnownTunion(tuniondecl_t@);              // known definition
   };
   EXTERN_ABSYN struct TunionInfo {
     tunion TunionInfoU tunion_info; // we either know the definition or not
-    list_t<type_t>     targs;       // type parameters
+    list_t<type_t>     targs;       // actual type parameters
     rgntype_t          rgn;         // region into which tunion points
   };
   // information for [x]tunion Foo.Bar
@@ -277,7 +278,16 @@ namespace Absyn {
     list_t<type_t>          targs;
   };
 
-  // Note: The last fields of StructType, TypedefType, and the decl 
+  EXTERN_ABSYN tunion AggrInfoU {
+    UnknownAggr(aggr_kind_t,typedef_name_t);
+    KnownAggr(aggrdecl_t@);
+  };
+  EXTERN_ABSYN struct AggrInfo {
+    tunion AggrInfoU aggr_info;
+    list_t<type_t> targs; // actual type parameters
+  };
+
+  // Note: The last fields of AggrType, TypedefType, and the decl 
   // are set by check_valid_type which most of the compiler assumes
   // has been called.  Doing so avoids the need for some code to have and use
   // a type-name environment just like variable-binding fields avoid the need
@@ -304,17 +314,15 @@ namespace Absyn {
     ArrayType(type_t/* element typ*/,tqual_t,exp_opt_t/* size */); // MemKind
     FnType(fn_info_t); // MemKind
     TupleType(list_t<$(tqual_t,type_t)@>); // MemKind
-    StructType(typedef_name_opt_t,list_t<type_t>,structdecl_t *); // MemKind
-    UnionType(typedef_name_opt_t,list_t<type_t>,uniondecl_t *); // MemKind 
+    AggrType(aggr_info_t); // MemKind (named structs and unions)
+    AnonAggrType(aggr_kind_t,list_t<aggrfield_t>); // MemKind
     EnumType(typedef_name_t,struct Enumdecl *); // MemKind
+    AnonEnumType(list_t<enumfield_t>); // MemKind
     SizeofType(type_t); // AnyKind -> BoxKind
     // We treat anonymous structs, unions, and enums slightly differently
     // than C.  In particular, we treat structurally equivalent types as
     // equal, whereas C requires a name for each type and uses by-name
     // equivalence only.
-    AnonStructType(list_t<structfield_t>); // MemKind
-    AnonUnionType(list_t<structfield_t>); // MemKind
-    AnonEnumType(list_t<enumfield_t>); // MemKind
     RgnHandleType(type_t);   // a handle for allocating in a region.  BoxKind
     // An abbreviation -- the opt_t<typ> contains the definition if any
     TypedefType(typedef_name_t,list_t<type_t>,opt_t<type_t>);
@@ -343,9 +351,7 @@ namespace Absyn {
   };
 
   // Used in attributes below.
-  EXTERN_ABSYN tunion Format_Type {
-    Printf_ft, Scanf_ft
-  };
+  EXTERN_ABSYN tunion Format_Type { Printf_ft, Scanf_ft };
 
   // GCC attributes that we currently try to support:  this definition
   // is only used for parsing and pretty-printing.  See GCC info pages
@@ -370,7 +376,7 @@ namespace Absyn {
     Constructor_att;
     Destructor_att;
     No_check_memory_usage_att;
-    Format_att(format_type_t, 
+    Format_att(tunion Format_Type, 
                int,   // format string arg
                int);  // first arg to type-check
   };
@@ -463,8 +469,8 @@ namespace Absyn {
     Offsetof_e(type_t,offsetof_field_t); // offsetof(t,e)
     Gentyp_e(list_t<tvar_t>, type_t); // type-rep stuff
     Deref_e(exp_t); // *e
-    StructMember_e(exp_t,field_name_t); // e.f, also union member
-    StructArrow_e(exp_t,field_name_t);  // e->f, also union arrow
+    AggrMember_e(exp_t,field_name_t);
+    AggrArrow_e(exp_t,field_name_t);
     Subscript_e(exp_t,exp_t); // e1[e2]
     Tuple_e(list_t<exp_t>); // $(e1,...,en)
     CompoundLit_e($(opt_t<var_t>,tqual_t,type_t)@,
@@ -473,13 +479,13 @@ namespace Absyn {
     // {for i < e1 : e2}
     Comprehension_e(vardecl_t,exp_t,exp_t); // much of vardecl is known
     // Foo{.x1=e1,...,.xn=en}
-    Struct_e(typedef_name_t,opt_t<list_t<type_t>>,
-	     list_t<$(list_t<designator_t>,exp_t)@>, struct Structdecl *);
+    Struct_e(typedef_name_t,
+	     list_t<$(list_t<designator_t>,exp_t)@>, 
+	     struct Aggrdecl *);
     // {.x1=e1,....,.xn=en}
     AnonStruct_e(type_t, list_t<$(list_t<designator_t>,exp_t)@>);
     // Foo(e1,...,en)
-    Tunion_e(opt_t<list_t<type_t>>,opt_t<list_t<type_t>>,list_t<exp_t>,
-             tuniondecl_t,tunionfield_t);
+    Tunion_e(list_t<exp_t>,tuniondecl_t,tunionfield_t);
     Enum_e(qvar_t,struct Enumdecl *,struct Enumfield *);
     AnonEnum_e(qvar_t,type_t,struct Enumfield *);
     // malloc(e1), rmalloc(e1,e2), calloc(e1,e2), rcalloc(e1,e2,e3).  
@@ -491,7 +497,6 @@ namespace Absyn {
     Codegen_e(fndecl_t); // code generation stuff -- not used
     Fill_e(exp_t);       // code generation stuff -- not used
   };
-
   // expression with auxiliary information
   EXTERN_ABSYN struct Exp {
     opt_t<type_t> topt;  // type of expression -- filled in by type-checker
@@ -534,7 +539,6 @@ namespace Absyn {
     Region_s(tvar_t, vardecl_t, stmt_t); // region<`r> h {s}
     ForArray_s(forarray_info_t);
   };
-
   // statements with auxiliary info
   EXTERN_ABSYN struct Stmt {
     raw_stmt_t     r;               // raw statement
@@ -556,17 +560,13 @@ namespace Absyn {
     Tuple_p(list_t<pat_t>); // $(p1,...,pn)
     Pointer_p(pat_t); // &p
     Reference_p(vardecl_t);// *p. only name field is right until tcPat is called
-    Struct_p(structdecl_t,opt_t<list_t<type_t>>,list_t<tvar_t>,
-	     list_t<$(list_t<designator_t>,pat_t)@>);
+    Aggr_p(aggr_info_t,list_t<tvar_t>,list_t<$(list_t<designator_t>,pat_t)@>);
     Tunion_p(tuniondecl_t, tunionfield_t, list_t<tvar_t>, list_t<pat_t>);
     Enum_p(enumdecl_t,enumfield_t);
     AnonEnum_p(type_t,enumfield_t);
     UnknownId_p(qvar_t); // the rest are resolved by tcpat
     UnknownCall_p(qvar_t,list_t<tvar_t>,list_t<pat_t>); 
-    UnknownFields_p(qvar_t,list_t<tvar_t>,
-                    list_t<$(list_t<designator_t>,pat_t)@>);
   };
-
   // patterns with auxiliary information
   EXTERN_ABSYN struct Pat {
     raw_pat_t      r;    // raw pattern
@@ -641,7 +641,7 @@ namespace Absyn {
     attributes_t               attributes; 
   };
 
-  EXTERN_ABSYN struct Structfield {
+  EXTERN_ABSYN struct Aggrfield {
     field_name_t   name;     // empty-string when a bitfield used for padding
     tqual_t        tq;
     type_t         type;
@@ -651,54 +651,48 @@ namespace Absyn {
 
   // for structs and tunions, we should really memoize the string to 
   // field-number mapping!
-  EXTERN_ABSYN struct Structdecl {
-    scope_t                      sc;  // abstract possible here
-    opt_t<typedef_name_t>        name; // struct name
-    list_t<tvar_t>               tvs;  // bound type variables
-    opt_t<list_t<structfield_t>> fields; // fields
-    attributes_t                 attributes; 
-  };
-
-  EXTERN_ABSYN struct Uniondecl {
-    scope_t                      sc;   // similar to above
-    opt_t<typedef_name_t>        name;
-    list_t<tvar_t>               tvs;
-    opt_t<list_t<structfield_t>> fields;
-    attributes_t                 attributes;
+  EXTERN_ABSYN struct Aggrdecl {
+    aggr_kind_t                kind;
+    scope_t                    sc;  // abstract possible here
+    typedef_name_t             name; // struct name
+    list_t<tvar_t>             tvs;  // type parameters
+    opt_t<list_t<tvar_t>> exist_vars; // exist-bound tyvars, NULL when abstract
+    opt_t<list_t<aggrfield_t>> fields; // NULL when abstract
+    attributes_t               attributes; 
   };
 
   EXTERN_ABSYN struct Tunionfield {
     qvar_t                     name; 
-    list_t<tvar_t>             tvs;
+    list_t<tvar_t>             tvs; // exist vars -- days are numbered
     list_t<$(tqual_t,type_t)@> typs;
     seg_t                      loc;
-    scope_t                    sc; // only relevant for xtunions
+    scope_t                    sc; // relevant only for xtunions
   };
 
   EXTERN_ABSYN struct Tuniondecl { 
-    scope_t        sc;
-    typedef_name_t name;
-    list_t<tvar_t> tvs;
+    scope_t                      sc;
+    typedef_name_t               name;
+    list_t<tvar_t>               tvs;
     opt_t<list_t<tunionfield_t>> fields;
-    bool is_xtunion;
+    bool                         is_xtunion;
   };
 
   EXTERN_ABSYN struct Enumfield {
-    qvar_t                name;
-    exp_opt_t             tag;
-    seg_t                 loc;
+    qvar_t    name;
+    exp_opt_t tag;
+    seg_t     loc;
   };
 
   EXTERN_ABSYN struct Enumdecl {
-    scope_t             sc;
-    typedef_name_t      name;
+    scope_t                    sc;
+    typedef_name_t             name;
     opt_t<list_t<enumfield_t>> fields;
   };
 
   EXTERN_ABSYN struct Typedefdecl {
-    typedef_name_t   name;
-    list_t<tvar_t>   tvs;
-    type_t           defn;
+    typedef_name_t name;
+    list_t<tvar_t> tvs;
+    type_t         defn;
   };
 
   // raw declarations
@@ -711,8 +705,7 @@ namespace Absyn {
           exp_t,
           bool); // true => exhaustive
     Letv_d(list_t<vardecl_t>); // multi-let
-    Struct_d(structdecl_t);    // struct Foo { ... }
-    Union_d(uniondecl_t);      // union Foo { ... }
+    Aggr_d(aggrdecl_t);    // [struct|union] Foo { ... }
     Tunion_d(tuniondecl_t);    // [x]tunion Bar { ... }
     Enum_d(enumdecl_t);        // enum Baz { ... }
     Typedef_d(typedefdecl_t);  // typedef t n
@@ -740,7 +733,7 @@ namespace Absyn {
 
   // compare variables 
   extern int qvar_cmp(qvar_t, qvar_t);
-  extern int varlist_cmp(list_t<var_t,`r>, list_t<var_t,`r>);
+  extern int varlist_cmp(list_t<var_t>, list_t<var_t>);
   extern int tvar_cmp(tvar_t, tvar_t); // WARNING: ignores the kinds
 
   ///////////////////////// Namespaces ////////////////////////////
@@ -871,8 +864,8 @@ namespace Absyn {
   extern exp_t offsetof_exp(type_t, offsetof_field_t, seg_t);
   extern exp_t gentyp_exp(list_t<tvar_t,`H>,type_t, seg_t);
   extern exp_t deref_exp(exp_t, seg_t);
-  extern exp_t structmember_exp(exp_t, field_name_t, seg_t);
-  extern exp_t structarrow_exp(exp_t, field_name_t, seg_t);
+  extern exp_t aggrmember_exp(exp_t, field_name_t, seg_t);
+  extern exp_t aggrarrow_exp(exp_t, field_name_t, seg_t);
   extern exp_t subscript_exp(exp_t, exp_t, seg_t);
   extern exp_t tuple_exp(list_t<exp_t,`H>, seg_t);
   extern exp_t stmt_exp(stmt_t, seg_t);
@@ -880,7 +873,8 @@ namespace Absyn {
   extern exp_t match_exn_exp(seg_t);
   extern exp_t array_exp(list_t<exp_t,`H>, seg_t);
   extern exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H>,
-                                 list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>,seg_t);
+                                 list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>,
+				 seg_t);
   /////////////////////////// Statements ///////////////////////////////
   extern stmt_t new_stmt(raw_stmt_t s, seg_t loc);
   extern stmt_t skip_stmt(seg_t loc);
@@ -915,13 +909,18 @@ namespace Absyn {
   extern decl_t letv_decl(list_t<vardecl_t,`H>, seg_t loc);
   extern vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init);
   extern vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init);
-  extern decl_t struct_decl(scope_t s,opt_t<typedef_name_t,`H> n,
-                            list_t<tvar_t,`H> ts,
-                            opt_t<list_t<structfield_t,`H>,`H> fs, 
+  extern decl_t aggr_decl(aggr_kind_t k, scope_t s, typedef_name_t n,
+			  list_t<tvar_t,`H> ts, 
+			  opt_t<list_t<tvar_t,`H>,`H> exist_ts,
+			  opt_t<list_t<aggrfield_t,`H>,`H> fs, 
+			  attributes_t atts, seg_t loc);
+  extern decl_t struct_decl(scope_t s,typedef_name_t n, list_t<tvar_t,`H> ts, 
+			    opt_t<list_t<tvar_t,`H>,`H> exist_ts,
+                            opt_t<list_t<aggrfield_t,`H>,`H> fs, 
                             attributes_t atts, seg_t loc);
-  extern decl_t union_decl(scope_t s,opt_t<typedef_name_t,`H> n,
-                           list_t<tvar_t,`H> ts,
-                           opt_t<list_t<structfield_t,`H>,`H> fs, 
+  extern decl_t union_decl(scope_t s,typedef_name_t n, list_t<tvar_t,`H> ts, 
+			   opt_t<list_t<tvar_t,`H>,`H> exist_ts,
+                           opt_t<list_t<aggrfield_t,`H>,`H> fs, 
                            attributes_t atts,seg_t loc);
   extern decl_t tunion_decl(scope_t s, typedef_name_t n, list_t<tvar_t,`H> ts,
                             opt_t<list_t<tunionfield_t,`H>,`H> fs, 
@@ -940,12 +939,10 @@ namespace Absyn {
   // returns true when the expression is a valid left-hand-side
   extern bool is_lvalue(exp_t);
 
-  // find a struct field by name from a list of fields
-  extern struct Structfield *lookup_field(list_t<structfield_t,`H>,var_t);
-  // find a struct field by name from a struct declaration
-  extern struct Structfield *lookup_struct_field(structdecl_t,var_t);
-  // find a union field by name from a union declaration
-  extern struct Structfield *lookup_union_field(uniondecl_t,var_t);
+  // find a field by name from a list of fields
+  extern struct Aggrfield *lookup_field(list_t<aggrfield_t>,var_t);
+  // find a struct or union field by name from a declaration
+  extern struct Aggrfield *lookup_decl_field(aggrdecl_t,var_t);
   // find a tuple field form a list of qualifiers and types
   extern $(tqual_t,type_t)*lookup_tuple_field(list_t<$(tqual_t,type_t)@`H>,int);
   // turn an attribute into a string
@@ -954,9 +951,15 @@ namespace Absyn {
   extern bool fntype_att(attribute_t a);
   // int to field-name caching used by control-flow and toc
   extern field_name_t fieldname(int);
+  // get the name and aggr_kind of an aggregate type
+  extern $(aggr_kind_t,qvar_t) aggr_kinded_name(tunion AggrInfoU);
+  // given a checked type, bget the decl
+  extern aggrdecl_t get_known_aggrdecl(tunion AggrInfoU info);
+  // is a type a union-type (anonymous or otherwise)
+  extern bool is_union_type(type_t);
 
   // for testing typerep; temporary
   extern void print_decls(list_t<decl_t>);
-}
+  }
 
 #endif

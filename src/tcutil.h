@@ -37,7 +37,7 @@ using Tcenv;
 
 extern xtunion exn {extern TypeErr};
 extern `a impos(string_t fmt, ... inject parg_t<`r2> ap)
-   __attribute__((format(printf,1,2))) ;
+   __attribute__((format(printf,1,2), noreturn)) ;
 extern void terr(seg_t, string_t fmt, ... inject parg_t<`r2> ap)
    __attribute__((format(printf,2,3))) ;
 extern void warn(seg_t, string_t fmt, ... inject parg_t<`r2> ap)
@@ -115,14 +115,12 @@ extern bool region_in_effect(bool constrain, type_t r, type_t e);
 
 extern type_t fndecl2typ(fndecl_t);
 
-extern exp_t default_initializer(tenv_t,type_t,seg_t);
-
 // generate an appropriate evar for a type variable -- used in
 // instantiation.  The list of tvars is used to constrain the
 // evar.
 extern $(tvar_t,type_t)@   make_inst_var(list_t<tvar_t,`H>,tvar_t);
-extern $(tvar_t,type_t)@`r 
-  r_make_inst_var($(list_t<tvar_t,`H>,region_t<`r>)@`r2,tvar_t);
+extern $(tvar_t,type_t)@`r r_make_inst_var($(list_t<tvar_t,`H>,region_t<`r>)@,
+					   tvar_t);
                   
 
 // checks that a width given on a struct or union member is consistent
@@ -132,7 +130,6 @@ extern void check_bitfield(seg_t loc, tenv_t te, type_t field_typ,
 
 // prints a warning when an expression contains an assignment
 extern void check_contains_assign(exp_t);
-
 
 // Checks that a type is well-formed and lives in kind k.  The input
 // list of type variables is used to constrain the kinds and identities
@@ -183,10 +180,10 @@ extern bool is_bound_one(conref_t<bounds_t> b);
 
 extern bool equal_tqual(tqual_t tq1, tqual_t tq2);
 
-extern list_t<$(structfield_t,`a)@`r,`r> 
+extern list_t<$(aggrfield_t,`a)@`r,`r> 
 resolve_struct_designators(region_t<`r>rgn, seg_t loc,
-                           list_t<$(list_t<designator_t>,`a)@`r2,`r3> des, 
-                           list_t<structfield_t> fields);
+			   list_t<$(list_t<designator_t>,`a)@`r2,`r3> des, 
+			   list_t<aggrfield_t> fields);
 // returns true if this is a t ? -- side effect unconstrained bounds
 extern bool is_tagged_pointer_typ(type_t);
 // like above, but puts element type in elt_typ_dest when returning true.
@@ -204,7 +201,7 @@ extern $(bool,type_t) addressof_props(tenv_t te, exp_t e);
 // Given a function's effect (or capability) split it into a
 // list of effect type variables, and a list of region type
 // variables respectively.
-extern $(list_t<tvar_t>, list_t<tvar_t>) split_effect(Core::opt_t<type_t> effect);
+extern $(list_t<tvar_t>,list_t<tvar_t>) split_effect(Core::opt_t<type_t> effect);
 
 // Gensym a new type variable with kind bounded by k
 extern tvar_t new_tvar(kindbound_t k);

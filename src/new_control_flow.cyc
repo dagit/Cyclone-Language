@@ -319,17 +319,15 @@ static relns_t add_subscript_reln(relns_t relns, exp_t e1, exp_t e2) {
       case &Var_e(_,&Param_b(i)):fallthru(i);
       case &Var_e(_,&Global_b(i)):
         if (!i->escapes) {
-          // we have x[i] -- want to add i < x.size to relns if not already
-          // present.
+          // we have x[i] -- add i < x.size to relns if not already present.
           bool found = false;
           for (let rs = relns; rs != NULL; rs = rs->tl) {
             let r = rs->hd;
-            if (r->vd == i) {
+            if (r->vd == i)
               switch (r->rop) {
               case &LessSize(v) && v == x: return relns;
               default: continue;
               }
-            }
           }
           if (!found) return new List(new Reln(i,new LessSize(x)),relns);
         }
@@ -366,7 +364,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
   case &Const_e(&Int_c(Signed,_)): 
   case &Var_e(_,&Funname_b(_)):    return $(inflow, NotZeroAll);
 
-  case &Tunion_e(_,_,NULL,_,_): // FIX: distinguish zero/non-zero
+  case &Tunion_e(NULL,_,_): // FIX: distinguish zero/non-zero
   case &Const_e(_): 
   case &Sizeofexp_e(_): // note: the exp is NOT evaluated
   case &Sizeoftyp_e(_):  
@@ -387,7 +385,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 
     // Note: none of the primops cause things to escape or do a dereference!
     //       and they all return initialized ints of unknown value.
-  case &Primop_e(_,es):     return anal_use_ints(env,inflow,es);
+  case &Primop_e(_,es): return anal_use_ints(env,inflow,es);
 
   case &Increment_e(e1,_):   
     let $(f,_) = anal_use_ints(env,inflow,list(e1));
@@ -527,35 +525,28 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     return anal_derefR(env,inflow,f,e1,r);
 
     // KLUDGE: unions (see comment at top of file)
-  case &StructMember_e(e1,field):
+  case &AggrMember_e(e1,field):
     let $(f,r) = anal_Rexp(env,inflow,e1);
-    switch(Tcutil::compress(e1->topt->v)) {
-    case &AnonUnionType(_): 
-    case &UnionType(_,_,_): return $(f,typ_to_absrval(e->topt->v,unknown_all)); 
-    default: break;
-    }
+    if(is_union_type(e1->topt->v))
+      return $(f,typ_to_absrval(e->topt->v,unknown_all)); 
     switch(r) {
     case &Aggregate(rdict): return $(f,Dict::lookup(rdict,field));
-    default: throw new Core::Impossible("anal_Rexp: StructMember");
+    default: throw new Core::Impossible("anal_Rexp: AggrMember");
     }
     
-  case &StructArrow_e(e1,field): // composition of * and ., of course
+  case &AggrArrow_e(e1,field): // composition of * and ., of course
     let $(f1,r1) = anal_Rexp(env,inflow,e1);
     let $(f2,r2) = anal_derefR(env,inflow,f1,e1,r1);
     switch(Tcutil::compress(e1->topt->v)) {
     case &PointerType(PtrInfo(t2,_,_,_,_)):
-      switch(Tcutil::compress(t2)) {
-      case &AnonUnionType(_):
-      case &UnionType(_,_,_): 
+      if(is_union_type(t2))
 	return $(f2,typ_to_absrval(e->topt->v,unknown_all)); 
-      default: break;
-      }
       break;
-    default: throw new Core::Impossible("anal_Rexp: StructArrow ptr");
+    default: throw new Core::Impossible("anal_Rexp: AggrArrow ptr");
     }
     switch(r2) {
     case &Aggregate(rdict): return $(f2,Dict::lookup(rdict,field));
-    default: throw new Core::Impossible("anal_Rexp: StructArrow");
+    default: throw new Core::Impossible("anal_Rexp: AggrArrow");
     }  
       
   case &Conditional_e(e1,e2,e3): 
@@ -595,7 +586,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     // FIX: if we have x[i] then we can add i < x.size to relns
     return anal_derefR(env,inflow,f,e1,rvals->hd);
 
-  case &Tunion_e(_,_,es,_,_): fallthru(es); // NULL case handled above
+  case &Tunion_e(es,_,_): fallthru(es); // NULL case handled above
   case &Tuple_e(es):
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,es);
     aggrdict_t aggrdict = Dict::empty(zstrptrcmp);
@@ -604,7 +595,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     return $(f, new Aggregate(aggrdict));
 
   case &AnonStruct_e(_,des): fallthru(des);
-  case &Struct_e(_,_,des,_): // FIX: avoid more allocation
+  case &Struct_e(_,des,_): // FIX: avoid more allocation
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,map(Core::snd,des));
     aggrdict_t aggrdict = Dict::empty(zstrptrcmp);
     for(int i=0; rvals != NULL; rvals = rvals->tl, des = des->tl, ++i)
@@ -791,12 +782,9 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
 
   case &Var_e(_,&Global_b(vd)): return $(inflow,UnknownL);
 
-  case &StructArrow_e(e1,f):
-    switch(Tcutil::compress(e1->topt->v)) {
-    case &AnonUnionType(_): // just drop the field
-    case &UnionType(_,_,_): break;
-    default: flds = new List(f,flds);
-    }
+  case &AggrArrow_e(e1,f):
+    if(!is_union_type(e1->topt->v)) // for unions, just drop the field
+      flds = new List(f,flds);
     fallthru(e1);
   case &Deref_e(e1): 
     let $(f,r) = anal_Rexp(env,inflow,e1);
@@ -824,13 +812,10 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
     return anal_derefL(env,inflow,f,e1,rvals->hd,flds);
 
     // KLUDGE: unions (see comment at top of file)
-  case &StructMember_e(e1,fld): 
-    switch(Tcutil::compress(e1->topt->v)) {
-    case &AnonUnionType(_): 
-    case &UnionType(_,_,_): return $(inflow,UnknownL);
-    default: flds = new List(fld,flds);
-    }
-    return anal_Lexp_rec(env,inflow,e1,flds); 
+  case &AggrMember_e(e1,fld): 
+    if(is_union_type(e1->topt->v))
+      return $(inflow,UnknownL);
+    return anal_Lexp_rec(env,inflow,e1,new List(fld,flds)); 
 
   default: return $(BottomFL, UnknownL); // see comment before function
   }
@@ -1269,15 +1254,14 @@ static void check_fun(fndecl_t fd) {
   default: 
     // this is the case when the function "falls off the end"
     if (noreturn)
-      Tcutil::terr(fd->body->loc, 
-                   "`noreturn' function might (implicitly) return");
+      Tcutil::terr(fd->body->loc,
+		   "`noreturn' function might (implicitly) return");
     else {
       switch (Tcutil::compress(fd->ret_type)) {
       case VoidType: break;
-      case &DoubleType(_): fallthru;
-      case FloatType: fallthru;
+      case &DoubleType(_):
+      case FloatType: 
       case &IntType(_,_):
-        // we make these warnings to simplify porting
         Tcutil::warn(fd->body->loc, "function may not return a value");
         break;
       default:

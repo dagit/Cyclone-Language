@@ -12,6 +12,9 @@
 include $(CYCDIR)/Makefile.inc
 VPATH=$(CYCDIR)/lib $(CYCDIR)/src $(CYCDIR)
 export CYCFLAGS
+ifndef UPDATEARCH
+UPDATEARCH:=$(ARCH)
+endif
 
 # For bootstrapping, may want to override these with something appropriate
 CYCC:=$(CYCDIR)/bin/$(CYCCOMP)

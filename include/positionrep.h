@@ -24,5 +24,4 @@ using Typerep;
 // Type representation //
 extern tunion Typestruct.Struct struct_Position_Segment_rep;
 extern typestruct_t position_rep;
-
 #endif

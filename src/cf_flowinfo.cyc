@@ -97,29 +97,34 @@ static mstringptr_t place2string(place_t p) {
 //    instantiated types or not allow partial initialization of such fields.)
 // Note: We could memoize answers here.
 absRval_t typ_to_absrval(type_t t, absRval_t leafval) {
-  switch(Tcutil::compress(t)) {
-  case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
-    if(tuf->typs == NULL)
-      return leafval;
-    fallthru(tuf->typs);
-  case &TupleType(tqts):
-    aggrdict_t d = Dict::empty(Std::zstrptrcmp);
-    for(int i=0; tqts != NULL; tqts = tqts->tl, ++i)
-      d = Dict::insert(d, fieldname(i), typ_to_absrval((*tqts->hd)[1],leafval));
-    return new Aggregate(d);
+  if(!is_union_type(t))
+    switch(Tcutil::compress(t)) {
+    case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
+      if(tuf->typs == NULL)
+	return leafval;
+      fallthru(tuf->typs);
+    case &TupleType(tqts):
+      aggrdict_t d = Dict::empty(Std::zstrptrcmp);
+      for(int i=0; tqts != NULL; tqts = tqts->tl, ++i)
+	d = Dict::insert(d,fieldname(i),typ_to_absrval((*tqts->hd)[1],leafval));
+      return new Aggregate(d);
 
-  case &AnonStructType(fs): fallthru(fs);
-  case &StructType(_,_, & &Structdecl(_,_,_,&Core::Opt(fs),_)):
-    aggrdict_t d = Dict::empty(Std::zstrptrcmp);
-    for(; fs != NULL; fs = fs->tl) {
-      let &Structfield(n,_,t2,_,_) = fs->hd;
-      if((*n).size != 1) //empty name implies bit field so no need to include it
-        d = Dict::insert(d, n, typ_to_absrval(t2,leafval));
+    case &AggrType(AggrInfo(info,_)):
+      let ad = get_known_aggrdecl(info);
+      if(ad->fields==NULL)
+	break;
+      fallthru(ad->fields->v);
+    case &AnonAggrType(StructA,fs):
+      aggrdict_t d = Dict::empty(Std::zstrptrcmp);
+      for(; fs != NULL; fs = fs->tl) {
+	let &Aggrfield(n,_,t2,_,_) = fs->hd;
+	if((*n).size != 1) //empty name means bit field so no need to include it
+	  d = Dict::insert(d, n, typ_to_absrval(t2,leafval));
+      }
+      return new Aggregate(d);
+    default: break;
     }
-    return new Aggregate(d);
-
-  default: return Tcutil::bits_only(t) ? unknown_all : leafval;
-  }
+  return Tcutil::bits_only(t) ? unknown_all : leafval;
 }
 
 static bool prefix_of_member(place_t place, Set::set_t<place_t> set) {

@@ -166,7 +166,7 @@ void dumpexp_prec(int,exp_t);
 void dumpdecl(decl_t,string_t);
 void dumptms(list_t<type_modifier_t>, void f(`a), `a);
 void dumptqtd(tqual_t, type_t, void f(`a), `a);
-void dumpstructfields(list_t<structfield_t> fields);
+void dumpaggrfields(list_t<aggrfield_t> fields);
 void ignore(`a x) { return; }
 
 void dump_semi() {
@@ -258,11 +258,11 @@ void dumpscope(scope_t sc) {
 
 void dumpkind(kind_t k) {
   switch (k) {
-  case AnyKind       : dump_alpha("A"); return;
-  case MemKind       : dump_alpha("M"); return;
-  case BoxKind       : dump_alpha("B"); return;
-  case RgnKind       : dump_alpha("R"); return;
-  case EffKind       : dump_alpha("E"); return;
+  case AnyKind: dump_alpha("A"); return;
+  case MemKind: dump_alpha("M"); return;
+  case BoxKind: dump_alpha("B"); return;
+  case RgnKind: dump_alpha("R"); return;
+  case EffKind: dump_alpha("E"); return;
   }
 }
 
@@ -351,9 +351,9 @@ static void dumpeff(type_t t) {
 void dumpntyp(type_t t) {
   switch (t) {
     // The first three cases never turn up in normalized types.
-  case &ArrayType(_,_,_): return;
-  case &FnType(_)       : return;
-  case &PointerType(_)  : return;
+  case &ArrayType(_,_,_):
+  case &FnType(_): 
+  case &PointerType(_): return;
   case VoidType:         dump_alpha("void"); return;
   case &VarType(tv): 
     dump_alphastr(tv->name); return; // FIX: may want explicit kinds
@@ -418,24 +418,20 @@ void dumpntyp(type_t t) {
   case &SizeofType(t):
     dump_alpha("sizeof_t<"); dumptyp(t); dump_alpha(">"); return;
   case &TupleType(ts): dump_symbol("\\$"); dumpargs(ts); return;
-  case &StructType(NULL,ts,_):   dump_alpha("struct"); dumptps(ts); return;
-  case &StructType(n,  ts,_):
-    dump_alpha("struct"); dumpqvar((qvar_t)n); dumptps(ts); return;
-  case &UnionType(NULL,ts,_):   dump_alpha("union"); dumptps(ts); return;
-  case &UnionType(n,  ts,_):
-    dump_alpha("union"); dumpqvar((qvar_t)n); dumptps(ts); return;
-  case &AnonStructType(fs):
-    dump_alpha("struct"); dump_lb();
-    dumpstructfields(fs); dump_rb(); return;
-  case &AnonUnionType(fs):
-    dump_alpha("union"); dump_lb();
-    dumpstructfields(fs); dump_rb(); return;
+  case &AggrType(AggrInfo(info,ts)):
+    let $(k,n) = aggr_kinded_name(info);
+    dump_alpha(k==UnionA ? "union" : "struct");
+    dumpqvar(n);
+    dumptps(ts);
+    return;
+  case &AnonAggrType(k,fs):
+    dump_alpha(k==UnionA ? "union" : "struct");
+    dump_lb(); dumpaggrfields(fs); dump_rb(); return;
   case &TypedefType(n,ts,topt):  dumpqvar(n), dumptps(ts); return;
-  case &RgnHandleType(rgn):
-    dumprgn(rgn); return;
-  case HeapRgn: return; 
-  case &AccessEff(_): return;
-  case &RgnsEff(_): return;
+  case &RgnHandleType(rgn): dumprgn(rgn); return;
+  case HeapRgn: 
+  case &AccessEff(_):
+  case &RgnsEff(_): 
   case &JoinEff(_): return;
   }
 }
@@ -627,11 +623,11 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Deref_e(e1):
     dump_char('*'); dumpexp_prec(myprec,e1); break;
 
-  case &StructMember_e(e1,n):
+  case &AggrMember_e(e1,n):
     dumpexp_prec(myprec,e1); dump_char('.');  dump_alpha(*n);
     break;
 
-  case &StructArrow_e(e1,n):
+  case &AggrArrow_e(e1,n):
     dumpexp_prec(myprec,e1); dump_symbol("->"); dump_alpha(*n);
     break;
 
@@ -660,7 +656,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     dump_char(':'); dumpexp(e2); dump_char('}');
     break;
 
-  case &Struct_e(n,_,des,_):
+  case &Struct_e(n,des,_):
     dumpqvar(n);
     group(dumpde,des,"{","}",",");
     break;
@@ -669,7 +665,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     group(dumpde,des,"{","}",",");
     break;
 
-  case &Tunion_e(_,_,es,_,tuf):
+  case &Tunion_e(es,_,tuf):
     dumpqvar(tuf->name);
     if (es != NULL) group(dumpexp,es,"(",")",",");
     break;
@@ -741,10 +737,10 @@ void dumpenumfields(list_t<enumfield_t> fields) {
   dump_sep(dumpenumfield,fields,",\\\\\n~~");
 }
 
-void dumpstructfields(list_t<structfield_t> fields) {
+void dumpaggrfields(list_t<aggrfield_t> fields) {
   for(; fields != NULL; fields = fields->tl) {
     dump_symbol("~~");
-    let &Structfield{name,tq,type,width,atts} = fields->hd;
+    let &Aggrfield{name,tq,type,width,atts} = fields->hd;
     dumptqtd(tq,type,dump_alphastr,name);
     if (width != NULL) {
       dump_char(':');
@@ -887,38 +883,22 @@ void dump_comment(string_t s) {
 
 void dumpdecl(decl_t d, string_t comment) {
   switch(d->r) {
-  case &Struct_d(sd):
+  case &Aggr_d(ad):
     dump_begin();
-    dump_alpha("struct");
-    if (sd->name != NULL) dump_boldqvar(sd->name->v);
-    dumptvars(sd->tvs);
-    if (sd->fields == NULL)
+    dump_alpha(ad->kind==UnionA ? "union" : "struct");
+    dump_boldqvar(ad->name);
+    dumptvars(ad->tvs);
+    if (ad->fields == NULL)
       dump_symbol(";\n");
     else {
       dump_symbol(" ");
       dump_lb();
+      if(ad->exist_vars->v != NULL) {
+	egroup(dumptvar,ad->exist_vars->v,"[","]",",");
+	dump_alpha("");
+      }
       dump_symbol("\\\\\n");
-      dumpstructfields(sd->fields->v);
-      dump_rb();
-      dump_symbol(";\n");
-    }
-    dump_middle();
-    dump_comment(comment);
-    dump_symbol("\n");
-    dump_end();
-    break;
-  case &Union_d(ud):
-    dump_begin();
-    dump_alpha("union");
-    if (ud->name != NULL) dump_boldqvar(ud->name->v);
-    dumptvars(ud->tvs);
-    if (ud->fields == NULL)
-      dump_symbol(";\n");
-    else {
-      dump_symbol(" ");
-      dump_lb();
-      dump_symbol("\\\\\n");
-      dumpstructfields(ud->fields->v);
+      dumpaggrfields(ad->fields->v);
       dump_rb();
       dump_symbol(";\n");
     }
@@ -993,17 +973,11 @@ void dumpdecl(decl_t d, string_t comment) {
   /* The remaining cases won't appear in .h files or will be
      eliminated by the main loop. */
   case &Fn_d(_):
-    break;
   case &Let_d(_,_,_,_,_):
-    break;
   case &Letv_d(_):
-    break;
   case &Namespace_d(_,_):
-    break;
   case &Using_d(_,_):
-    break;
-  case &ExternC_d(_):
-    break;
+  case &ExternC_d(_): break;
   }
 }
 
@@ -1012,18 +986,18 @@ void dumpdecl(decl_t d, string_t comment) {
   /* Is a character special to /bin/sh (except for single quote)? */
   static bool is_other_special(char c) {
     switch (c) {
-    case '\\': fallthru;
-    case '"': fallthru;
-    case ';': fallthru;
-    case '&': fallthru;
-    case '(': fallthru;
-    case ')': fallthru;
-    case '|': fallthru;
-    case '^': fallthru;
-    case '<': fallthru;
-    case '>': fallthru;
-    case ' ': fallthru;
-    case '\n': fallthru;
+    case '\\': 
+    case '"': 
+    case ';': 
+    case '&': 
+    case '(': 
+    case ')': 
+    case '|': 
+    case '^': 
+    case '<': 
+    case '>': 
+    case ' ': 
+    case '\n': 
     case '\t': return true;
     default: return false;
     }
@@ -1108,8 +1082,7 @@ void dumpdecl(decl_t d, string_t comment) {
       case &ExternC_d(tdl):
         decls = append(tdl,decls->tl);
         break;
-      case &Struct_d(_):
-      case &Union_d(_):
+      case &Aggr_d(_):
       case &Var_d(_):
       case &Tunion_d(_):
       case &Enum_d(_):

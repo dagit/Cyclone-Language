@@ -86,6 +86,7 @@ static bool check_type(type_t t0, type_t t1) {
   return unify(t0, t1);
 }
 
+// FIX?: Why do we not use Evexp for this?
 static unsigned int get_uint_const_value(exp_t e) {
   switch(e->r) {
   case &Const_e(&Int_c(_, x)): return (unsigned int) x;
@@ -125,86 +126,88 @@ static bool check_atts(attributes_t atts0, attributes_t atts1,
 
 static list_t<$(tvar_t,type_t)@> build_tvs_map(list_t<tvar_t> tvs0, 
 					       list_t<tvar_t> tvs1) {
-  let inst = NULL;
-
+  list_t<$(tvar_t,type_t)@> inst = NULL;
   for(; tvs0 != NULL; tvs0 = tvs0->tl, tvs1 = tvs1->tl)
-    inst = new List(new $(tvs1->hd, (type_t) (new VarType(tvs0->hd))), inst);
-  // the cast up there seems necessary, bug ?
-  
+    inst = new List(new $(tvs1->hd, new VarType(tvs0->hd)), inst);
   return inst;
 }
 
-static struct Structdecl * 
-merge_struct_or_union_decl(structdecl_t d0, structdecl_t d1,
-			   string_t t, seg_t loc, string_t * msg) {
-  let v = Absynpp::qvar2string(d0->name->v); // build the complete name
+struct Aggrdecl * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1, 
+				 seg_t loc, string_t* msg) {
+  let v = Absynpp::qvar2string(d0->name); // build the complete name
   let res = true;
   // when an incompatibility is found, either we set res to false and continue,
   // or we return NULL immediately
 
+  // check aggrkind
+  if(!(d0->kind==d1->kind)) return NULL;
+
   // check type variables
-  if (! check_tvs(d0->tvs, d1->tvs, t, v, loc, msg)) return NULL;
+  if (! check_tvs(d0->tvs, d1->tvs, "type", v, loc, msg)) return NULL;
 
   // check scopes
-  let $(new_scope, res_scope) = merge_scope(d0->sc, d1->sc, t, v, loc, msg);
+  let $(new_scope, res_scope) = merge_scope(d0->sc,d1->sc,"type",v,loc,msg);
   if (! res_scope) res = false;
 
   // check attributes
-  if (! check_atts(d0->attributes, d1->attributes, t, v, loc, msg)) res = false;
+  if (! check_atts(d0->attributes,d1->attributes,"type",v,loc,msg)) res = false;
 
-  structdecl_t d2;  // futur result
-
+  aggrdecl_t d2;  // future result
   // check fields
   switch ($(d0->fields, d1->fields)) {
   case $(_, NULL): d2 = d0; break;
   case $(NULL, _): d2 = d1; break;
   case $(&Opt(f0s), &Opt(f1s)):
     // both declare fields, so they must agree (with renaming w.r.t. tyvars)
+    if(!check_tvs(d0->exist_vars->v, d1->exist_vars->v, "type", v, loc, msg)) 
+      return NULL;
  
     // build the map
-    let inst = build_tvs_map(d0->tvs, d1->tvs);
+    let inst = build_tvs_map(append(d0->tvs,d0->exist_vars->v), 
+			     append(d1->tvs,d1->exist_vars->v));
 
     // check each field under the map
     for(; f0s != NULL && f1s != NULL; f0s = f0s->tl, f1s = f1s->tl) {
-      let &Structfield(fn0,tq0,t0,width0,atts0) = f0s->hd;
-      let &Structfield(fn1,tq1,t1,width1,atts1) = f1s->hd;
+      let &Aggrfield(fn0,tq0,t0,width0,atts0) = f0s->hd;
+      let &Aggrfield(fn1,tq1,t1,width1,atts1) = f1s->hd;
       // names, qualifiers, types, widths, and attributes all must agree
       if (zstrptrcmp(fn0, fn1) != 0) {
-	merr(loc, msg, "%s %s : field name mismatch %s != %s", t,v,*fn0,*fn1);
+	merr(loc, msg, "%s %s : field name mismatch %s != %s", "type",
+	     v,*fn0,*fn1);
 	return NULL; // we don't need further messages
       }
       if (!same_atts(atts0,atts1)) {
-	merr(loc, msg, "%s %s : attribute mismatch on field %s", t, v, *fn0);
+	merr(loc, msg, "%s %s : attribute mismatch on field %s","type",v,*fn0);
 	res = false;
       }
       if (!equal_tqual(tq0,tq1)) {
-	merr(loc, msg, "%s %s : qualifier mismatch on field %s", t, v, *fn0);
+	merr(loc, msg, "%s %s : qualifier mismatch on field %s","type",v,*fn0);
 	res = false;
       }
       if ((width0 != NULL && width1 != NULL && 
 	   get_uint_const_value((exp_t)width0) != 
-	   get_uint_const_value((exp_t)width1)) ||
-	  (width0 == NULL && width1 != NULL) ||
-	  (width0 != NULL && width1 == NULL)) {
-	merr(loc, msg, "%s %s : bitfield mismatch on field %s", t, v, *fn0);
+	   get_uint_const_value((exp_t)width1)) 
+	  || (width0 == NULL && width1 != NULL) 
+	  || (width0 != NULL && width1 == NULL)) {
+	merr(loc, msg, "%s %s : bitfield mismatch on field %s","type",v,*fn0);
 	res = false;
       }
 
       type_t subst_t1 = substitute(inst, t1);
       if(! check_type(t0, subst_t1)) {
-	merr(loc, msg, "%s %s : type mismatch on field %s: %s != %s", 
-	     t, v, *fn0, typ2string(t0), typ2string(subst_t1));
+	merr(loc, msg, "type %s : type mismatch on field %s: %s != %s", 
+	     v, *fn0, typ2string(t0), typ2string(subst_t1));
         explain_failure();
 	res = false;
       }
     }
     // check for field-number mismatch
     if (f0s != NULL) {
-      merr(loc, msg, "%s %s is missing field %s", t, v, *(f0s->hd->name));
+      merr(loc, msg, "type %s is missing field %s", v, *(f0s->hd->name));
       res = false;
     }
     if (f1s != NULL) {
-      merr(loc, msg, "%s %s has extra field %s", t, v, *(f1s->hd->name));
+      merr(loc, msg, "type %s has extra field %s", v, *(f1s->hd->name));
       res = false;
     }
 
@@ -221,18 +224,6 @@ merge_struct_or_union_decl(structdecl_t d0, structdecl_t d1,
     d2->sc = new_scope; // update the scope
     return d2;
   }
-}
-
-struct Structdecl * merge_structdecl(structdecl_t d0, structdecl_t d1, 
-				     seg_t loc, string_t * msg) {
-  return merge_struct_or_union_decl(d0, d1, "struct", loc, msg);
-}
-
-struct Uniondecl * merge_uniondecl(uniondecl_t d0, uniondecl_t d1, 
-				   seg_t loc, string_t * msg) {
-  return (struct Uniondecl *) merge_struct_or_union_decl((structdecl_t) d0, 
-							 (structdecl_t) d1,
-							 "union", loc, msg);
 }
 
 static inline string_t is_x2string(bool is_x) {
@@ -451,7 +442,7 @@ struct Tuniondecl * merge_tuniondecl(tuniondecl_t d0, tuniondecl_t d1,
   let $(new_scope, res_scope) = merge_scope(d0->sc, d1->sc, t, v, loc, msg);
   if (! res_scope) res = false;
 
-  tuniondecl_t d2; // futur result
+  tuniondecl_t d2; // future result
 
   // check fields
   switch ($(d0->fields, d1->fields)) {
@@ -476,7 +467,8 @@ struct Tuniondecl * merge_tuniondecl(tuniondecl_t d0, tuniondecl_t d1,
       // we assume f0s and f1s are sorted and without repetition
       
       let incl = true;
-      let f2s = merge_xtunion_fields(f0s, f1s, inst, d0->tvs, d1->tvs, &res, &incl, t, v, loc, msg);
+      let f2s = merge_xtunion_fields(f0s, f1s, inst, d0->tvs, d1->tvs, 
+				     &res, &incl, t, v, loc, msg);
 
       if (incl) {
 	d2 = d0;
@@ -498,7 +490,6 @@ struct Tuniondecl * merge_tuniondecl(tuniondecl_t d0, tuniondecl_t d1,
 	merr(loc,msg, "%s %s is missing field %s", t,v,*((*f1s->hd->name)[1]));
 	res = false;
       }
-
       d2 = d0;
     }
     break;

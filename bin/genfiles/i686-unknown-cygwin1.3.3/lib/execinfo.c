@@ -270,7 +270,7 @@ Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Doubl
 int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_Std_timeval{
 int tv_sec;int tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;int tz_dsttime;};
 struct Cyc_Std_itimerval{struct Cyc_Std_timeval it_interval;struct Cyc_Std_timeval
-it_value;};typedef struct {unsigned int __val[64];}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t
+it_value;};typedef struct{unsigned int __val[64];}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t
 Cyc_Std_sigset_t;struct Cyc_Std_timespec{int tv_sec;int tv_nsec;};struct Cyc_Std_timeval;
 struct Cyc_Std_rlimit{unsigned int rlim_cur;unsigned int rlim_max;};struct Cyc_Std_rusage{
 struct Cyc_Std_timeval ru_utime;struct Cyc_Std_timeval ru_stime;int ru_maxrss;int

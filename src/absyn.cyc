@@ -17,8 +17,7 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-// we define ABSYN_CYC to avoid re-declaring the abstract syntax -- see
-// absyn.h
+// we define ABSYN_CYC to avoid redeclaring the abstract syntax -- see absyn.h
 #define ABSYN_CYC 
 #include "absyn.h"
 #include "absynrep.h"
@@ -33,27 +32,26 @@ using Position;
 namespace Absyn {
 
 // return a negative, zero, or positive int according to whether the
-// first string list is less than, equal to, or greater than the
-// second 
-static int zstrlist_cmp(list_t<stringptr_t<`H,`H>,`r> ss1,list_t<stringptr_t<`H,`H>,`r> ss2){
+// first string list is less than, equal to, or greater than the second 
+static int zstrlist_cmp(list_t<stringptr_t> ss1, list_t<stringptr_t> ss2) {
   return list_cmp(zstrptrcmp,ss1,ss2);
 }
-int varlist_cmp(list_t<var_t,`r> vs1, list_t<var_t,`r> vs2) {
+int varlist_cmp(list_t<var_t> vs1, list_t<var_t> vs2) {
   return zstrlist_cmp(vs1,vs2);
 }
 int qvar_cmp(qvar_t q1, qvar_t q2) {
   let n1 = (*q1)[0];
   let n2 = (*q2)[0];
   switch ($(n1,n2)) {
-  case $(Loc_n,    Loc_n):     break;
+  case $(Loc_n,     Loc_n): break;
   case $(&Rel_n(x1),&Rel_n(x2)): fallthru(x1,x2);
   case $(&Abs_n(x1),&Abs_n(x2)):
     int i = zstrlist_cmp(x1,x2);
     if (i != 0) return i;
     break;
   // we arbitrarily decide that Loc_n < Rel_n < Abs_n
-  case $(Loc_n,_): return -1;
-  case $(_,Loc_n): return 1;
+  case $(Loc_n,_):     return -1;
+  case $(_,Loc_n):     return 1;
   case $(&Rel_n(_),_): return -1;
   case $(_,&Rel_n(_)): return 1;
   }
@@ -69,7 +67,7 @@ int tvar_cmp(tvar_t tv1, tvar_t tv2) {
   else if (tv1->identity == NULL) return -1;
   else return 1;
 }
-
+  
 tunion Nmspace.Rel_n rel_ns_null_value = Rel_n(NULL);
 tunion Nmspace       rel_ns_null       = &rel_ns_null_value;
 
@@ -98,21 +96,15 @@ tqual_t combine_tqual(tqual_t x,tqual_t y) {
 	       x.q_restrict || y.q_restrict);
 }
 
-// FIX: fit in an int (with bitfields) rather than doing allocation
 tqual_t empty_tqual() { return Tqual(false,false,false); }
-tqual_t const_tqual() { return Tqual{.q_const = true,
-                                        .q_volatile = false,
-                                        .q_restrict = false}; }
+tqual_t const_tqual() { return Tqual(true, false,false); }
 
 //////////////////////////// Constraints /////////////////////////
-conref_t<`a> new_conref(`a x) {
-  return new Conref{.v = new Eq_constr(x)};
-}
-conref_t<`a> empty_conref() {
-  return new Conref{.v = No_constr};
-}
+conref_t<`a> new_conref(`a x) { return new Conref{.v = new Eq_constr(x)};}
+conref_t<`a> empty_conref()   { return new Conref{.v = No_constr};}
+
 // just to avoid some unnecessary allocation:
-static tunion Constraint.Eq_constr<bool> true_constraint = Eq_constr(true);
+static tunion Constraint.Eq_constr<bool> true_constraint  = Eq_constr(true);
 static tunion Constraint.Eq_constr<bool> false_constraint = Eq_constr(false);
 struct Conref<bool> true_conref_v  = Conref(&true_constraint);
 struct Conref<bool> false_conref_v = Conref(&false_constraint);
@@ -122,7 +114,7 @@ conref_t<bool> false_conref = &false_conref_v;
 // compress a conref
 conref_t<`a> compress_conref(conref_t<`a> x) {
   switch (x->v) {
-  case No_constr:    return x;
+  case No_constr:    
   case &Eq_constr(_): return x;
   case &Forward_constr(*y):
     let z = compress_conref(*y);
@@ -134,8 +126,7 @@ conref_t<`a> compress_conref(conref_t<`a> x) {
 `a conref_val(conref_t<`a> x) {
   switch (compress_conref(x)->v) {
   case &Eq_constr(v): return v;
-  default:
-    return Tcutil::impos("conref_val");
+  default: Tcutil::impos("conref_val");
   }
 }
 
@@ -148,8 +139,8 @@ conref_t<`a> compress_conref(conref_t<`a> x) {
 
 kindbound_t compress_kb(kindbound_t k) {
   switch (k) {
-  case &Eq_kb(_): return k;
-  case &Unknown_kb(NULL): return k;
+  case &Eq_kb(_): 
+  case &Unknown_kb(NULL):
   case &Less_kb(NULL,_): return k;
   case &Unknown_kb(&Opt(*k2)): fallthru(k2);
   case &Less_kb(&Opt(*k2),_): 
@@ -163,34 +154,33 @@ kind_t force_kb(kindbound_t kb) {
   case &Eq_kb(k): return k;
   case &Unknown_kb(*f): fallthru(f,BoxKind);
   case &Less_kb(*f,k):
-    *f = new Opt(new Eq_kb(k)); return k;
+    *f = new Opt(new Eq_kb(k)); 
+    return k;
   }
 }
 
 //////////////////////////// Types ///////////////////////////////
 // unsigned types
-static tunion Type.IntType uchar_tt  = IntType(Unsigned,B1);
-static tunion Type.IntType ushort_tt = IntType(Unsigned,B2);
-static tunion Type.IntType uint_tt   = IntType(Unsigned,B4);
-static tunion Type.IntType ulong_tt  = IntType(Unsigned,B4);
-static tunion Type.IntType ulonglong_tt  = IntType(Unsigned,B8);
-
-type_t uchar_t  = &uchar_tt;
-type_t ushort_t = &ushort_tt;
-type_t uint_t   = &uint_tt;
-type_t ulong_t  = &ulong_tt;
-type_t ulonglong_t  = &ulonglong_tt;
+static tunion Type.IntType uchar_tt     = IntType(Unsigned,B1);
+static tunion Type.IntType ushort_tt    = IntType(Unsigned,B2);
+static tunion Type.IntType uint_tt      = IntType(Unsigned,B4);
+static tunion Type.IntType ulong_tt     = IntType(Unsigned,B4);
+static tunion Type.IntType ulonglong_tt = IntType(Unsigned,B8);
+type_t uchar_t     = &uchar_tt;
+type_t ushort_t    = &ushort_tt;
+type_t uint_t      = &uint_tt;
+type_t ulong_t     = &ulong_tt;
+type_t ulonglong_t = &ulonglong_tt;
 // signed types
-static tunion Type.IntType schar_tt  = IntType(Signed,B1);
-static tunion Type.IntType sshort_tt = IntType(Signed,B2);
-static tunion Type.IntType sint_tt   = IntType(Signed,B4);
-static tunion Type.IntType slong_tt  = IntType(Signed,B4);
-static tunion Type.IntType slonglong_tt  = IntType(Signed,B8);
-
-type_t schar_t  = &schar_tt;
-type_t sshort_t = &sshort_tt;
-type_t sint_t   = &sint_tt;
-type_t slong_t  = &slong_tt;
+static tunion Type.IntType schar_tt     = IntType(Signed,B1);
+static tunion Type.IntType sshort_tt    = IntType(Signed,B2);
+static tunion Type.IntType sint_tt      = IntType(Signed,B4);
+static tunion Type.IntType slong_tt     = IntType(Signed,B4);
+static tunion Type.IntType slonglong_tt = IntType(Signed,B8);
+type_t schar_t     = &schar_tt;
+type_t sshort_t    = &sshort_tt;
+type_t sint_t      = &sint_tt;
+type_t slong_t     = &slong_tt;
 type_t slonglong_t = &slonglong_tt;
 // float, double
 type_t float_typ  = FloatType;
@@ -217,10 +207,10 @@ MAKE_BUILTIN_EXN(Match_Exception);
 MAKE_BUILTIN_EXN(Bad_alloc);
 #undef MAKE_BUILTIN_EXN
 
-static struct List<tunionfield_t,`H> exn_l0 = List(&Null_Exception_tuf_v, NULL);
-static struct List<tunionfield_t,`H> exn_l1 = List(&Array_bounds_tuf_v,   &exn_l0);
-static struct List<tunionfield_t,`H> exn_l2 = List(&Match_Exception_tuf_v,&exn_l1);
-static struct List<tunionfield_t,`H> exn_l3 = List(&Bad_alloc_tuf_v,      &exn_l2);
+static struct List<tunionfield_t> exn_l0 = List(&Null_Exception_tuf_v, NULL);
+static struct List<tunionfield_t> exn_l1 = List(&Array_bounds_tuf_v,   &exn_l0);
+static struct List<tunionfield_t> exn_l2 = List(&Match_Exception_tuf_v,&exn_l1);
+static struct List<tunionfield_t> exn_l3 = List(&Bad_alloc_tuf_v,      &exn_l2);
 
 static struct Opt<list_t<tunionfield_t>> exn_ol = Opt(&exn_l3);
 static struct Tuniondecl exn_tud_v = Tuniondecl(Extern, &exn_name_v, NULL,
@@ -283,14 +273,13 @@ tunion Bounds bounds_one = &one_bt;
 
 type_t starb_typ(type_t t, type_t r, tqual_t tq, bounds_t b) {
   return new PointerType(PtrInfo {.elt_typ = t, .rgn_typ = r,
-                                     .nullable = true_conref, .tq = tq, 
-                                     .bounds = new_conref(b)});
+                                  .nullable = true_conref, .tq = tq, 
+                                  .bounds = new_conref(b)});
 }
 type_t atb_typ(type_t t, type_t r, tqual_t tq, bounds_t b) {
-  return 
-    new PointerType(PtrInfo {
-      .elt_typ = t, .rgn_typ = r, .nullable = false_conref, .tq = tq, 
-	 .bounds = new_conref(b)});
+  return new PointerType(PtrInfo {.elt_typ = t, .rgn_typ = r, 
+				  .nullable = false_conref, .tq = tq, 
+				  .bounds = new_conref(b)});
 }
 type_t star_typ(type_t t, type_t r, tqual_t tq) { 
   return starb_typ(t, r, tq, bounds_one);
@@ -302,10 +291,9 @@ type_t at_typ(type_t t, type_t r, tqual_t tq) {
   return atb_typ(t, r, tq, bounds_one);
 }
 type_t tagged_typ(type_t t, type_t r, tqual_t tq) {
-  return 
-    new PointerType(PtrInfo {
-      .elt_typ = t, .rgn_typ = r, .nullable = true_conref, .tq = tq,
-	 .bounds = new_conref(Unknown_b) });
+  return new PointerType(PtrInfo {.elt_typ = t, .rgn_typ = r, 
+				     .nullable = true_conref, .tq = tq,
+				     .bounds = new_conref(Unknown_b) });
 }
 
 // FILE
@@ -315,16 +303,16 @@ static opt_t<type_t> file_t_opt = NULL;
 // in the heap (by making the runtime interface more flexible).  
 // If so, we'll need a rgn_t argument.
 static string_t sf_str = "__sFILE";
-static stringptr_t sf = &sf_str;
 static string_t st_str = "Std";
+static stringptr_t sf = &sf_str;
 static stringptr_t st = &st_str;
 
 type_t file_typ() {
   if(file_t_opt == NULL) {
     typedef_name_t file_t_name = new $(new Abs_n(list(st)), sf);
-    structdecl_t sd = new Structdecl(Abstract,new Opt(file_t_name),NULL,
-				     NULL,NULL);
-    type_t file_struct_typ = new StructType(file_t_name, NULL, new {sd});
+    aggrdecl_t sd = new Aggrdecl(StructA,Abstract,file_t_name,
+				 NULL,NULL,NULL,NULL);
+    type_t file_struct_typ = new AggrType(AggrInfo(new KnownAggr(new sd),NULL));
     file_t_opt = new Opt(at_typ(file_struct_typ, HeapRgn, empty_tqual()));
   }
   return file_t_opt->v;
@@ -346,19 +334,20 @@ type_t empty_effect = &empty_eff;
 
 // structs and unions
 // WARNING: currently only Toc calls these, so we don't need to set
-//          the structdecl field.  Beware using them anywhere else!
+//          the aggrdecl field.  Beware using them anywhere else!
 // (Probably we should require setting the third field even in Toc.)
-type_t strct(var_t name) {
-  return new StructType(new $(rel_ns_null, name),NULL,NULL);
+type_t aggr_typ(aggr_kind_t k, var_t name) {
+  return new AggrType(AggrInfo(new UnknownAggr(k, new $(rel_ns_null,name)),
+			       NULL));
 }
-type_t union_typ(var_t name) {
-  return new UnionType(new $(rel_ns_null, name),NULL,NULL);
-}
+type_t strct(var_t name)     { return aggr_typ(StructA,name); }
+type_t union_typ(var_t name) { return aggr_typ(UnionA,name);  }
+
 type_t strctq(qvar_t name) {
-  return new StructType(name,NULL,NULL);
+  return new AggrType(AggrInfo(new UnknownAggr(StructA,name), NULL));
 }
 type_t unionq_typ(qvar_t name) {
-  return new UnionType(name,NULL,NULL);
+  return new AggrType(AggrInfo(new UnknownAggr(UnionA,name), NULL));
 }
 
 ///////////////////////// Expressions //////////////////////////////
@@ -457,9 +446,9 @@ exp_t instantiate_exp(exp_t e, list_t<type_t,`H> ts, seg_t loc) {
 exp_t cast_exp(type_t t, exp_t e, seg_t loc) { 
   return new_exp(new Cast_e(t,e), loc);
 }
-exp_t throw_exp(exp_t e,   seg_t loc) { return new_exp(new Throw_e(e), loc); }
+exp_t throw_exp(exp_t e,   seg_t loc) { return new_exp(new Throw_e(e),   loc); }
 exp_t address_exp(exp_t e, seg_t loc) { return new_exp(new Address_e(e), loc); }
-exp_t sizeoftyp_exp(type_t t, seg_t loc) { 
+exp_t sizeoftyp_exp(type_t t, seg_t loc) {
   return new_exp(new Sizeoftyp_e(t), loc); 
 }
 exp_t sizeofexp_exp(exp_t e, seg_t loc) { 
@@ -472,14 +461,11 @@ exp_t gentyp_exp(list_t<tvar_t,`H> tvs, type_t t, seg_t loc) {
   return new_exp(new Gentyp_e(tvs,t), loc); 
 }
 exp_t deref_exp(exp_t e,   seg_t loc) { return new_exp(new Deref_e(e), loc); }
-exp_t structmember_exp(exp_t e, field_name_t n, seg_t loc) {
-  return new_exp(new StructMember_e(e,n), loc); 
+exp_t aggrmember_exp(exp_t e, field_name_t n, seg_t loc) {
+  return new_exp(new AggrMember_e(e,n), loc); 
 }
-exp_t structarrow_exp(exp_t e, field_name_t n, seg_t loc) {
-  return new_exp(new StructArrow_e(e,n), loc); 
-}
-exp_t arrow_exp(exp_t e, field_name_t n, seg_t loc) {
-  return deref_exp(structmember_exp(e, n, loc), loc);
+exp_t aggrarrow_exp(exp_t e, field_name_t n, seg_t loc) {
+  return new_exp(new AggrArrow_e(e,n), loc); 
 }
 exp_t subscript_exp(exp_t e1, exp_t e2, seg_t loc) {
   return new_exp(new Subscript_e(e1,e2), loc); 
@@ -509,7 +495,8 @@ exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H> n,
 ///////////////////////// Statements ///////////////////////////////
 stmt_t new_stmt(raw_stmt_t s, seg_t loc) { 
   return new Stmt{.r=s, .loc=loc, .non_local_preds=NULL, .try_depth = 0,
-                     .annot=EmptyAnnot }; }
+                  .annot=EmptyAnnot }; 
+}
 stmt_t skip_stmt(seg_t loc) { return new_stmt(Skip_s, loc); }
 stmt_t exp_stmt(exp_t e,seg_t loc) { return new_stmt(new Exp_s(e),loc); }
 stmt_t seq_stmts(list_t<stmt_t,`r> ss, seg_t loc) {
@@ -569,7 +556,8 @@ stmt_t goto_stmt(var_t lab, seg_t loc) {
 stmt_t assign_stmt(exp_t e1, exp_t e2, seg_t loc) {
   return exp_stmt(assign_exp(e1,e2,loc),loc);
 }
-stmt_t forarray_stmt(list_t<vardecl_t,`H> d,exp_t e1,exp_t e2,stmt_t s,seg_t loc) {
+stmt_t forarray_stmt(list_t<vardecl_t,`H> d, exp_t e1, exp_t e2,
+		     stmt_t s, seg_t loc) {
   return new_stmt(new ForArray_s(ForArrayInfo{d,$(e1,skip_stmt(e1->loc)),
                                                 $(e2,skip_stmt(e2->loc)),s}),
                   loc);
@@ -595,18 +583,26 @@ vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init) {
                         .type=t, .initializer=init, .rgn=NULL,
                         .attributes=NULL,false};
 }
-decl_t struct_decl(scope_t s,opt_t<typedef_name_t,`H> n,list_t<tvar_t,`H> ts,
-                   opt_t<list_t<structfield_t,`H>,`H> fs, attributes_t atts,
-                   seg_t loc) {
-  return new_decl(new Struct_d(new Structdecl {.sc=s,.name=n,
-                                                  .tvs=ts,.fields=fs,
-                                                  .attributes = atts}),loc);
+decl_t aggr_decl(aggr_kind_t k, scope_t s, typedef_name_t n,
+		 list_t<tvar_t,`H> ts, opt_t<list_t<tvar_t,`H>,`H> exist_ts,
+		 opt_t<list_t<aggrfield_t,`H>,`H> fs, attributes_t atts,
+		 seg_t loc) {
+  return new_decl(new Aggr_d(new Aggrdecl {.kind = k, .sc=s, .name=n,
+					   .tvs=ts, .exist_vars=exist_ts,
+					      .fields=fs, .attributes = atts}),
+		  loc);
 }
-decl_t union_decl(scope_t s,opt_t<typedef_name_t,`H> n,list_t<tvar_t,`H> ts,
-                  opt_t<list_t<structfield_t,`H>,`H> fs, attributes_t atts,
-                  seg_t loc) {
-  return new_decl(new Union_d(new Uniondecl {.sc=s,.name=n,.tvs=ts,.fields=fs,
-                                                .attributes = atts}),loc);
+decl_t struct_decl(scope_t s,typedef_name_t n,
+		   list_t<tvar_t,`H> ts, opt_t<list_t<tvar_t,`H>,`H> exist_ts,
+                   opt_t<list_t<aggrfield_t,`H>,`H> fs, attributes_t atts,
+                   seg_t loc) {
+  return aggr_decl(StructA,s,n,ts,exist_ts,fs,atts,loc);
+}
+decl_t union_decl(scope_t s,typedef_name_t n,
+		   list_t<tvar_t,`H> ts, opt_t<list_t<tvar_t,`H>,`H> exist_ts,
+                   opt_t<list_t<aggrfield_t,`H>,`H> fs, attributes_t atts,
+                   seg_t loc) {
+  return aggr_decl(UnionA,s,n,ts,exist_ts,fs,atts,loc);
 }
 decl_t tunion_decl(scope_t s, typedef_name_t n, list_t<tvar_t,`H> ts,
 		   opt_t<list_t<tunionfield_t,`H>,`H> fs, 
@@ -647,7 +643,7 @@ type_t pointer_expand(type_t t) {
   }
 }
 
-// According to Harbison and Steele these are the lvalues of C:
+// These are the lvalues of C:
 //
 //    exp      where
 //    ---------------------------
@@ -657,7 +653,6 @@ type_t pointer_expand(type_t t) {
 //    e.name   e is an lvalue
 //    e->name
 //    *e
-// (We may have more in Cyclone...)
 
 // must be called after the expression is type-checked.
 bool is_lvalue(exp_t e) {
@@ -670,35 +665,28 @@ bool is_lvalue(exp_t e) {
     case &ArrayType(_,_,_): return false;
     default: return true; 
     }
-  case &Var_e(_,_):           return true;
-  case &Subscript_e(e1,e2):   return true;
-  case &StructMember_e(e1,f): return is_lvalue(e1);
-  case &StructArrow_e(e1,f):  return true;
-  case &Deref_e(e1):          return true;
-  case &Instantiate_e(e1,_):  return is_lvalue(e1);
-  case &NoInstantiate_e(e1):  return is_lvalue(e1);
-  default:                    return false;
+  case &Var_e(_,_):    
+  case &AggrArrow_e(_,_):   
+  case &Deref_e(_):           
+  case &Subscript_e(_,_):    return true;
+  case &AggrMember_e(e1,_):  return is_lvalue(e1);
+  case &Instantiate_e(e1,_): return is_lvalue(e1);
+  case &NoInstantiate_e(e1): return is_lvalue(e1);
+  default:                   return false;
   }
 }
 
-struct Structfield * lookup_field(list_t<structfield_t,`H> fields, var_t v) {
-  for(_ fs = fields; fs != NULL; fs = fs->tl) {
-    let f = fs->hd;
-    if (zstrptrcmp(f->name,v) == 0)
-      return f;
-  }
+struct Aggrfield * lookup_field(list_t<aggrfield_t> fields, var_t v) {
+  for(let fs = fields; fs != NULL; fs = fs->tl)
+    if (zstrptrcmp(fs->hd->name,v) == 0)
+      return fs->hd;
   return NULL;
 }
-
-struct Structfield * lookup_struct_field(structdecl_t sd, var_t v) {
-  return (sd->fields == NULL) ? NULL : lookup_field(sd->fields->v,v);
-}
-struct Structfield * lookup_union_field(uniondecl_t ud, var_t v) {
-  return (ud->fields == NULL) ? NULL : lookup_field(ud->fields->v,v);
+struct Aggrfield * lookup_decl_field(aggrdecl_t ad, var_t v) {
+  return (ad->fields == NULL) ? NULL : lookup_field(ad->fields->v,v);
 }
 
-$(tqual_t,type_t) * lookup_tuple_field(list_t<$(tqual_t,type_t)@`H> ts, 
-                                       int i) {
+$(tqual_t,type_t) * lookup_tuple_field(list_t<$(tqual_t,type_t)@`H> ts, int i) {
   for(; i != 0; --i) {
     if(ts == NULL)
       return NULL;
@@ -748,7 +736,7 @@ bool fntype_att(attribute_t a) {
   case Cdecl_att:          
   case Noreturn_att:       
   case &Format_att(_,_,_): 
-  case Const_att:          return true;
+  case Const_att: return true;
   default: return false;
   }
 }
@@ -767,13 +755,36 @@ stringptr_t fieldname(int i) {
   return field_names[i];
 }
 
+$(aggr_kind_t,qvar_t) aggr_kinded_name(tunion AggrInfoU info) {
+  switch(info) {
+  case &UnknownAggr(k,n): return $(k,n);
+  case &KnownAggr(&(&Aggrdecl(k,_,n,_,_,_,_))): return $(k,n);
+  }
+}
+aggrdecl_t get_known_aggrdecl(tunion AggrInfoU info) {
+  switch(info) {
+  case &UnknownAggr(k,n): Tcutil::impos("unchecked aggrdecl");
+  case &KnownAggr(&ad): return ad;
+  }
+}
+bool is_union_type(type_t t) {
+  switch(Tcutil::compress(t)) {
+  case &AnonAggrType(UnionA,_):     return true;
+  case &AggrType(AggrInfo(info,_)): return aggr_kinded_name(info)[0]==UnionA;
+  default: return false;
+  }
+}
+
   void print_decls(list_t<decl_t> decls) {
     Marshal::print_type(decls_rep,&decls);
     printf("\n");
   }
+
   
 }
 
 
 using Typerep;
 typestruct_t decls_rep = __gen(list_t<Absyn::decl_t>);
+
+  

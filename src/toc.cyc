@@ -165,8 +165,10 @@ MAKE_VAR(_pop_region);
 #undef MAKE_STRING
 #undef MAKE_VAR
 
-static tunion Type.StructType tagged_arr_typ_v = 
-                                StructType(&_tagged_arr_pr,NULL,NULL);
+static tunion AggrInfoU.UnknownAggr tagged_arr_typ_u = 
+                           UnknownAggr(StructA,&_tagged_arr_pr);
+static tunion Type.AggrType tagged_arr_typ_v =
+                           AggrType(AggrInfo(&tagged_arr_typ_u,NULL));
 static tunion Type tagged_arr_typ = &tagged_arr_typ_v;
 
 static tqual_t mt_tq = Tqual(false,false,false);
@@ -183,7 +185,7 @@ static bool is_zero(exp_t e) {
   case &Cast_e(_,e1): return is_zero(e1);
   case &Tuple_e(es): return List::forall(is_zero,es);
   case &Array_e(dles): fallthru(dles);
-  case &Struct_e(_,_,dles,_):  fallthru(dles);
+  case &Struct_e(_,dles,_):  fallthru(dles);
   case &CompoundLit_e(_,dles): fallthru(dles);
   case &UnresolvedMem_e(_,dles):
     for (; dles != NULL; dles = dles->tl) 
@@ -196,8 +198,7 @@ static bool is_zero(exp_t e) {
 // return true if t is a nullable pointer type i.e., *
 static bool is_nullable(type_t t) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo{_,_,b,_,_}):
-    return conref_def(false,b);
+  case &PointerType(PtrInfo{_,_,b,_,_}): return conref_def(false,b);
   default: toc_impos("is_nullable");
   }
 }
@@ -228,11 +229,13 @@ static var_t add_tuple_type(list_t<$(tqual_t,type_t)@,`r> tqs0) {
   let fs = NULL;
   list_t<type_t> ts2 = ts;
   for (int i=1; ts2 != NULL; ts2 = ts2->tl, i++)
-    fs = new List(new Structfield(fieldname(i),mt_tq,ts2->hd,NULL,NULL),fs);
+    fs = new List(new Aggrfield(fieldname(i),mt_tq,ts2->hd,NULL,NULL),fs);
   fs = List::imp_rev(fs);
-  let sd = new Structdecl{.sc = Public, .name = new Opt(new $(rel_ns_null,x)),
-                       .tvs = NULL, .fields = new Opt(fs), .attributes = NULL};
-  result_decls = new List(new_decl(new Struct_d(sd),DL),result_decls);
+  let sd = new Aggrdecl{.kind=StructA, .sc = Public, 
+		       .name = new $(rel_ns_null,x), .tvs = NULL, 
+			.exist_vars = NULL, .fields = new Opt(fs), 
+			.attributes = NULL};
+  result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
   tuple_types  = new List(new $(x,ts),tuple_types);
   return x;
 }
@@ -309,9 +312,9 @@ static type_t typ_to_c_array(type_t t) {
   }
 }
 
-static structfield_t structfield_to_c(structfield_t f) {
-  return new Structfield{.name=f->name, .tq=f->tq, .type = typ_to_c(f->type),
-                            .width=f->width, .attributes=f->attributes};
+static aggrfield_t aggrfield_to_c(aggrfield_t f) {
+  return new Aggrfield{.name=f->name, .tq=f->tq, .type = typ_to_c(f->type),
+                       .width=f->width, .attributes=f->attributes};
 }
 
 static void enumfields_to_c(list_t<enumfield_t> fs) {
@@ -349,9 +352,9 @@ static type_t typ_to_c(type_t t) {
     case &Eq_constr(Unknown_b): return tagged_arr_typ;
     default: return star_typ(t2,HeapRgn,tq);
     }
-  case &IntType(_,_): return t;
-  case FloatType:     return t;
-  case &DoubleType(_):return t;
+  case &IntType(_,_): 
+  case FloatType:     
+  case &DoubleType(_): return t;
   case &ArrayType(t2,tq,e): return new ArrayType(typ_to_c_array(t2),tq,e);
   case &FnType(FnInfo{_,_,t2,args,c_vararg,cyc_vararg,_,atts}):
     // just drop the type arguments & effect and translate the nested types
@@ -383,18 +386,13 @@ static type_t typ_to_c(type_t t) {
     return strct(n);
   // FIX: we may have to actually declare these things and use them
   // consistently to make GCC happy.
-  case &AnonStructType(fs): 
-    return new AnonStructType(List::map(structfield_to_c,fs));
-  case &AnonUnionType(fs):
-    return new AnonUnionType(List::map(structfield_to_c,fs));
-  case &UnionType(tdnopt,_,_): 
-    if (tdnopt == NULL) unimp("anonymous union");
-    // just drop the type arguments and translate the nested types
-    return unionq_typ((typedef_name_t)tdnopt);
-  case &StructType(tdnopt,_,_):
-    if (tdnopt == NULL) unimp("anonymous struct");
-    // just drop the type arguments and translate the nested types
-    return strctq((typedef_name_t)tdnopt);
+  case &AnonAggrType(k,fs): 
+    return new AnonAggrType(k,List::map(aggrfield_to_c,fs));
+  case &AggrType(AggrInfo(info,ts)):
+    let ad = get_known_aggrdecl(info);
+    if(ad->kind==UnionA)
+      return unionq_typ(ad->name);
+    return strctq(ad->name);
   case &EnumType(tdn,_): return t;
   case &AnonEnumType(fs): enumfields_to_c(fs); return t;
   case &TypedefType(tdn,ts,topt):
@@ -423,30 +421,37 @@ static exp_t array_to_ptr_cast(type_t t,exp_t e,seg_t l) {
   }
 }
 
-// returns true when the type contains no pointers
+// returns true when the type contains no pointers. Is conservative
+// (does not look at instantiations)
 static bool atomic_typ(type_t t) {
   switch (compress(t)) {
   case VoidType:       return true;
   case &VarType(_):    return false;
-  case &IntType(_,_):  return true;
-  case &EnumType(_,_): return true;
-  case &AnonEnumType(_): return true;
-  case FloatType:      return true;
-  case &DoubleType(_): return true;
-  case &FnType(_):     return true;
+  case &IntType(_,_):  
+  case &EnumType(_,_): 
+  case &AnonEnumType(_): 
+  case FloatType:      
+  case &DoubleType(_): 
+  case &FnType(_):     
   case &SizeofType(_): return true;
   case &ArrayType(t,_,_): return atomic_typ(t);
     // FIX: really should compute in terms of the instantiation
     // to be as aggressive as possible.
     // note even without this we'll allocate Position::seg_t with atomic.
-  case &StructType(_,_,sdp): 
-    if(sdp == NULL || (*sdp)->fields == NULL)
+    // NOTE: cannot call get_known_aggrdecl b/c we sometimes call this
+    // post-translation (with unchecked C types)?? (We shouldn't)
+  case &AggrType(AggrInfo(info,_)):
+    switch(info) {
+    case &UnknownAggr(_,_): return false; // see above!
+    default: break;
+    }
+    let ad = get_known_aggrdecl(info);
+    if(ad->fields == NULL)
       return false;
-    for(let fs = (*sdp)->fields->v; fs != NULL; fs = fs->tl)
+    for(let fs = ad->fields->v; fs != NULL; fs = fs->tl)
       if (!atomic_typ(fs->hd->type)) return false;
     return true;
-  case &AnonStructType(fs): fallthru(fs);
-  case &AnonUnionType(fs):
+  case &AnonAggrType(_,fs):
     for (; fs != NULL; fs = fs->tl)
       if (!atomic_typ(fs->hd->type)) return false;
     return true;
@@ -459,9 +464,6 @@ static bool atomic_typ(type_t t) {
     // FIX: can do better if all variants are fieldless (but then they could
     //      have used an enum)
   case &TunionType(_):    
-    // FIX: could make this true now since we only allow bits in unions,
-    // but it would be an evil bug to track down if we had to deal with this.
-  case &UnionType(_,_,_): 
   case &PointerType(_):   
   case &RgnHandleType(_): return false;
   default: toc_impos("atomic_typ:  bad type %s",typ2string(t));
@@ -482,18 +484,16 @@ static bool is_void_star(type_t t) {
 // returns true when field f of the struct/union t has type void*.
 static bool is_poly_field(type_t t, field_name_t f) {
   switch (compress(t)) {
-  case &StructType(_,_,&sd):
-    if (sd->fields == NULL)
-      toc_impos("is_poly_field: struct missing fields");
-    fallthru(sd->fields->v);
-  case &AnonStructType(fs):
+  case &AggrType(AggrInfo(info,_)):
+    let ad = get_known_aggrdecl(info);
+    if (ad->fields == NULL)
+      toc_impos("is_poly_field: type missing fields");
+    fallthru(ad->fields->v);
+  case &AnonAggrType(_,fs):
     let field = lookup_field(fs,f);
     if (field == NULL) 
       toc_impos("is_poly_field: bad field %s",*f);
     return is_void_star(field->type);
-  // unions currently permit only bits, so no polytypes
-  case &AnonUnionType(_): 
-  case &UnionType(_,_,_): return false;
   default: toc_impos("is_poly_field: bad type %s",typ2string(t));
   }
 }
@@ -503,8 +503,8 @@ static bool is_poly_field(type_t t, field_name_t f) {
 // type `a before instantiation in struct cons.
 static bool is_poly_project(exp_t e) {
   switch (e->r) {
-  case &StructMember_e(e1,f): return is_poly_field(e1->topt->v,f);
-  case &StructArrow_e(e1,f):
+  case &AggrMember_e(e1,f): return is_poly_field(e1->topt->v,f);
+  case &AggrArrow_e(e1,f):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{t,_,_,_,_}): return is_poly_field(t,f);
     default: toc_impos("is_poly_project:  bad type %s",typ2string(e1->topt->v));
@@ -994,7 +994,7 @@ static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
       toc_impos("too many designators in anonymous struct");
     switch (ds->hd) {
     case &FieldName(f):
-      exp_t lval = structmember_exp(lhs,f,DL);
+      exp_t lval = aggrmember_exp(lhs,f,DL);
       switch (e->r) {
       case &Array_e(dles):
         s = init_array(nv, lval, dles, s); break;
@@ -1032,7 +1032,7 @@ static exp_t init_tuple(env_t nv, bool pointer,
     let xexp = var_exp(x,DL);
     let s    = exp_stmt(xexp,DL);
 
-    let lval_f = pointer ? structarrow_exp : structmember_exp;
+    let lval_f = pointer ? aggrarrow_exp : aggrmember_exp;
 
     bool is_atomic = true;
     let es = List::rrev(r,es);
@@ -1067,7 +1067,7 @@ static exp_t init_struct(env_t nv, type_t struct_type,
   let xexp = var_exp(x,DL);
   let s    = exp_stmt(xexp,DL);
 
-  let lval_f = pointer ? structarrow_exp : structmember_exp;
+  let lval_f = pointer ? aggrarrow_exp : aggrmember_exp;
 
   bool is_atomic = true;
 
@@ -1153,7 +1153,7 @@ static void lvalue_assign(exp_t e1, list_t<field_name_t> fs,
   switch (e1->r) {
   case &StmtExp_e(s): lvalue_assign_stmt(s,fs,f,f_env); break;
   case &Cast_e(t,e):  lvalue_assign(e,fs,f,f_env); break;
-  case &StructMember_e(e,fld):
+  case &AggrMember_e(e,fld):
     // Hack: strip off the struct member -- the base case adds it back in.
     e1->r = e->r;
     lvalue_assign(e1,new List(fld,fs),f,f_env);
@@ -1166,7 +1166,7 @@ static void lvalue_assign(exp_t e1, list_t<field_name_t> fs,
     exp_t e1_copy = copy_exp(e1);
     // add the path back on to the expression
     for (; fs != NULL; fs = fs->tl)
-      e1_copy = structmember_exp(e1_copy,fs->hd,e1_copy->loc);
+      e1_copy = aggrmember_exp(e1_copy,fs->hd,e1_copy->loc);
     e1->r = f(e1_copy, f_env)->r;
     break;
   }
@@ -1292,8 +1292,8 @@ static void exp_to_c(env_t nv, exp_t e) {
 	exp_t e1 = es->hd;
 	exp_t e2 = es->tl->hd;
 	if(is_tagged_pointer_typ(old_typs->tl->hd)) {
-	  e1->r = structmember_exp(new_exp(e1->r,DL),curr_sp,DL)->r;
-	  e2->r = structmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
+	  e1->r = aggrmember_exp(new_exp(e1->r,DL),curr_sp,DL)->r;
+	  e2->r = aggrmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
 	  e->r  = divide_exp(copy_exp(e),
 			     sizeoftyp_exp(typ_to_c(elt_typ),DL),DL)->r;
 	} else {
@@ -1315,9 +1315,9 @@ static void exp_to_c(env_t nv, exp_t e) {
       type_t t1 = old_typs->hd;
       type_t t2 = old_typs->tl->hd;
       if (is_tagged_pointer_typ(t1))
-	e1->r = structmember_exp(new_exp(e1->r,DL),curr_sp,DL)->r;
+	e1->r = aggrmember_exp(new_exp(e1->r,DL),curr_sp,DL)->r;
       if (is_tagged_pointer_typ(t2))
-	e2->r = structmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
+	e2->r = aggrmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
       break;
     default: break; //skip
     }
@@ -1464,10 +1464,10 @@ static void exp_to_c(env_t nv, exp_t e) {
           // struct qv_tag temp x;
           // x.tag = i; 
 	  // x.f1  = arg;
-          s = seq_stmt(assign_stmt(structmember_exp(varexp,fieldname(1),DL),
+          s = seq_stmt(assign_stmt(aggrmember_exp(varexp,fieldname(1),DL),
 				   arg,DL),
 		       s,DL);
-          s = seq_stmt(assign_stmt(structmember_exp(varexp,tag_sp,DL),
+          s = seq_stmt(assign_stmt(aggrmember_exp(varexp,tag_sp,DL),
 				   tunion_tag(tud,qv,true),DL),
 		       s,DL);
           s = declare_stmt(var,strctq(collapse_qvar_tag(qv,"_struct")), NULL,
@@ -1585,7 +1585,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     case $(&PointerType(p1), &IntType(_,_)):
       switch(conref_def(bounds_one,p1.bounds)) {
       case Unknown_b: // cast t? to int -- cast curr field to int
-	e1->r = structmember_exp(new_exp(e1->r,e1->loc),curr_sp,DL)->r; break;
+	e1->r = aggrmember_exp(new_exp(e1->r,e1->loc),curr_sp,DL)->r; break;
       default: break;
       }
       break;
@@ -1596,7 +1596,7 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Address_e(e1):
     // When e1 is a struct or a tuple, this is really a "new".
     switch (e1->r) {
-    case &Struct_e(tdn,_,es,_):
+    case &Struct_e(tdn,es,_):
       if (nv->toplevel)
 	unimp("%s: & on non-identifiers at the top-level",
               Position::string_of_segment(e1->loc));
@@ -1713,7 +1713,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         e->r = stmt_exp(s,DL)->r;
       }
       break;
-    case &Struct_e(tdn,_,es,_):
+    case &Struct_e(tdn,es,_):
       // try to avoid the GCC bug
       e->r = init_struct(nv, e1->topt->v, true, rgnopt, es, tdn)->r;
       break;
@@ -1782,22 +1782,16 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Sizeofexp_e(e1): exp_to_c(nv,e1); break;
   case &Sizeoftyp_e(t):  e->r = new Sizeoftyp_e(typ_to_c_array(t));  break;
   case &Gentyp_e(_,_): toc_impos("__gen() in code generator"); 
-  case &Offsetof_e(t,&StructField(n)): e->r = new Offsetof_e(typ_to_c_array(t),new StructField(n)); break;
+  case &Offsetof_e(t,&StructField(n)): 
+    e->r = new Offsetof_e(typ_to_c_array(t),new StructField(n)); break;
   case &Offsetof_e(t,&TupleIndex(n)): 
     switch(compress(t)) {
-    case &StructType(_,_,stdeclp): 
-      if(stdeclp == NULL || (*stdeclp)->fields == NULL)
+    case &AggrType(AggrInfo(info,_)):
+      let ad = get_known_aggrdecl(info);
+      if(ad->fields==NULL)
 	toc_impos("struct fields must be known");
-      fallthru((*stdeclp)->fields->v);
-    case &AnonStructType(fields):
-      let nth_field = List::nth(fields,n);
-      e->r = new Offsetof_e(typ_to_c_array(t),new StructField(nth_field->name));
-      break;
-    case &UnionType(_,_,udeclp): 
-      if(udeclp == NULL || (*udeclp)->fields == NULL)
-	toc_impos("union fields must be known");
-      fallthru((*udeclp)->fields->v);
-    case &AnonUnionType(fields):
+      fallthru(ad->fields->v);
+    case &AnonAggrType(_,fields):
       let nth_field = List::nth(fields,n);
       e->r = new Offsetof_e(typ_to_c_array(t),new StructField(nth_field->name));
       break;
@@ -1840,12 +1834,12 @@ static void exp_to_c(env_t nv, exp_t e) {
     default: toc_impos("exp_to_c: Deref: non-pointer");
     }
     break;
-  case &StructMember_e(e1,f):
+  case &AggrMember_e(e1,f):
     exp_to_c(nv, e1);
     if(is_poly_project(e))
       e->r = array_to_ptr_cast(typ_to_c(e->topt->v),new_exp(e->r,DL),DL)->r;
     break;
-  case &StructArrow_e(e1,f):
+  case &AggrArrow_e(e1,f):
     type_t e1typ = compress(e1->topt->v);
     bool do_null_check = need_null_check(e1);
     exp_to_c(nv, e1);
@@ -1855,13 +1849,13 @@ static void exp_to_c(env_t nv, exp_t e) {
     case &Upper_b(esz):
       // the type-checker should've ensured the size is at least 1
       if (Evexp::eval_const_uint_exp(esz) < 1)
-        impos("exp_to_c:  StructArrow_e on pointer of size 0");
+        impos("exp_to_c:  AggrArrow_e on pointer of size 0");
       if (do_null_check) {
 	// ((t *)_check_null(e))->f
-	e->r = structarrow_exp(cast_exp(typ_to_c(e1->topt->v),
-					fncall_exp(_check_null_e,
-						   new List(e1,NULL),DL), DL),
-			       f, DL)->r;
+	e->r = aggrarrow_exp(cast_exp(typ_to_c(e1->topt->v),
+				      fncall_exp(_check_null_e,
+						 new List(e1,NULL),DL), DL),
+			     f, DL)->r;
       }
       break;
     case Unknown_b:
@@ -1890,7 +1884,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_to_c(nv, e1);
       exp_to_c(nv, e2);
       unsigned int i = Evexp::eval_const_uint_exp(e2)+1;
-      e->r = structmember_exp(e1,fieldname(i),DL)->r;
+      e->r = aggrmember_exp(e1,fieldname(i),DL)->r;
       break;
     case &PointerType(PtrInfo{ta,rgn,bcr,tq,b}):
       let relns = get_relns(e1);
@@ -1936,7 +1930,7 @@ static void exp_to_c(env_t nv, exp_t e) {
           // a NULL ? pointer has size 0
           bounds_checks_eliminated++;
           e->r = subscript_exp(cast_exp(cstar_typ(ta1,tq),
-                                        structmember_exp(e1,curr_sp,DL),DL),
+                                        aggrmember_exp(e1,curr_sp,DL),DL),
                                e2,DL)->r;
         } else {
           // *((ta1 *) _check_unknown_subscript(e1, sizeof(ta1), e2))
@@ -1991,7 +1985,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     }
     e->r = unresolvedmem_exp(NULL,es,DL)->r;
     break;
-  case &Struct_e(tdn,ots,dles,sd):
+  case &Struct_e(tdn,dles,sd):
     // Due to a GCC bug w.r.t. to nested designators, we expand this out
     // to ({ t temp; t.f1 = e1, ..., t.fn = en; t}).
     if(!nv->toplevel)
@@ -2001,7 +1995,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       // and drop initializers (sorting okay b/c we're at top-level)
       if(sd == NULL)
 	toc_impos("Struct_e: missing structdecl pointer");
-      structdecl_t sd2 = (structdecl_t)sd;
+      aggrdecl_t sd2 = (aggrdecl_t)sd;
       region rgn {
       let fields = Tcutil::resolve_struct_designators(rgn, e->loc, dles, 
                                                       sd2->fields->v);
@@ -2025,9 +2019,9 @@ static void exp_to_c(env_t nv, exp_t e) {
     }
     break;
   case &AnonStruct_e(st,dles):
-    list_t<structfield_t,`H> fs;
+    list_t<aggrfield_t> fs;
     switch (compress(st)) {
-    case &AnonStructType(afs): fs = afs; break;
+    case &AnonAggrType(_,afs): fs = afs; break;
     default: toc_impos("anon struct has type %s",typ2string(st));
     }
     region rgn {
@@ -2047,13 +2041,13 @@ static void exp_to_c(env_t nv, exp_t e) {
     }
     break;
   
-  case &Tunion_e(_,_,NULL,tud,tuf):
+  case &Tunion_e(NULL,tud,tuf):
     qvar_t qv = tuf->name;
     // non-value-carrying constructor
     exp_t tag_exp = tud->is_xtunion ? var_exp(qv,DL) : tunion_tag(tud,qv,false);
     e->r = tag_exp->r;
     break;
-  case &Tunion_e(_,_,es,tud,tuf):
+  case &Tunion_e(es,tud,tuf):
     let qv   = tuf->name;
     let tqts = tuf->typs;
 
@@ -2081,7 +2075,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       // ({ struct qv_tag x; x.tag = i; x.f1 = e1; ...; x.fn = en; x; })
       // Due to GCC bug we can't just use a struct expression.
       let rev_assign =
-	new List(assign_stmt(structmember_exp(xexp,tag_sp,DL), tag_exp, DL),
+	new List(assign_stmt(aggrmember_exp(xexp,tag_sp,DL), tag_exp, DL),
                  NULL);
       for (int i = 1; es != NULL; es = es->tl, i++, tqts = tqts->tl) {
 	exp_t cur_e = es->hd;
@@ -2089,7 +2083,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	exp_to_c(nv,cur_e);
 	if (is_void_star(field_typ))
 	  cur_e = cast_exp(field_typ,cur_e,DL);
-	let a = assign_stmt(structmember_exp(xexp,fieldname(i), DL),
+	let a = assign_stmt(aggrmember_exp(xexp,fieldname(i), DL),
 			    cur_e,DL);
 	rev_assign = new List(a,rev_assign);
       }
@@ -2099,7 +2093,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     }
     break;
 
-  case &Enum_e(_,_,_): break;
+  case &Enum_e(_,_,_):
   case &AnonEnum_e(_,_,_): break;
 
   case &Malloc_e(MallocInfo{is_calloc,rgnopt,topt,num_elts,is_fat}): 
@@ -2266,7 +2260,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
       let t2  = p2->topt->v;
       let t2c = typ_to_c(t2);
       let lab = fresh_label();
-      let arrow_exp = structarrow_exp(rcast, fieldname(cnt), DL);
+      let arrow_exp = aggrarrow_exp(rcast, fieldname(cnt), DL);
       if(is_void_star(typ_to_c(tuf_typ)))
 	arrow_exp = cast_exp(t2c, arrow_exp, DL);
       decls = rnew(rgn) List(rnew (rgn) $(v,t2c),decls);
@@ -2324,13 +2318,13 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
       let lab = fresh_label();
       decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c(t2)),decls);
       let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),
-                             structmember_exp(path,fieldname(cnt),
-                                              DL),p2,succ_lab,fail_lab,decls);
+                             aggrmember_exp(path,fieldname(cnt),
+					    DL),p2,succ_lab,fail_lab,decls);
       nv = result[0];
       decls = result[1];
       let s2 = result[2];
       let s3 = seq_stmt(assign_stmt(var_exp(v,DL),
-                                    structmember_exp(r,fieldname(cnt),DL),DL),
+                                    aggrmember_exp(r,fieldname(cnt),DL),DL),
 			s2,DL);
       ss = new List(label_stmt(lab,s3,DL),ss);
       succ_lab = lab;
@@ -2339,7 +2333,8 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
       ss = new List(goto_stmt(succ_lab,DL),NULL);
     s = seq_stmts(ss,DL);
     break;
-  case &Struct_p(sd,ot,ts,dlps0):
+  case &Aggr_p(AggrInfo(info,_),_,dlps0):
+    let ad = get_known_aggrdecl(info);
     // similar to translation of tuple pattern
     list_t<stmt_t> ss = NULL;
     for (let dlps = List::rrev(rgn,dlps0); dlps != NULL; dlps = dlps->tl) {
@@ -2361,12 +2356,12 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
       let lab = fresh_label();
       decls = rnew(rgn) List(rnew(rgn) $(v,t2c),decls);
       let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),
-                             structmember_exp(path,f,DL),p2,
+                             aggrmember_exp(path,f,DL),p2,
                              succ_lab,fail_lab,decls);
       nv = result[0];
       decls = result[1];
-      let memexp = structmember_exp(r,f,DL);
-      if(is_void_star(lookup_field(sd->fields->v,f)->type))
+      let memexp = aggrmember_exp(r,f,DL);
+      if(is_void_star(lookup_field(ad->fields->v,f)->type))
 	memexp = cast_exp(t2c, memexp, DL);
       let s2 = result[2];
       let s3 = seq_stmt(assign_stmt(var_exp(v,DL), memexp, DL), s2, DL);
@@ -2398,7 +2393,6 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     break;
   case &UnknownId_p(_):         toc_impos("unknownid");
   case &UnknownCall_p(_,_,_):   toc_impos("unknowncall");
-  case &UnknownFields_p(_,_,_): toc_impos("unknownfields");
   }
   return $(nv,decls,s);
 }
@@ -2772,7 +2766,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       // wrap with the conditional, declarations, and setjmp
       let setjmp_call = // setjmp(h.handler)
         fncall_exp(setjmp_e,
-                   new List(structmember_exp(h_exp,handler_sp,DL), NULL),
+                   new List(aggrmember_exp(h_exp,handler_sp,DL), NULL),
                    DL);
       let pushhandler_call = // _pushhandler(h);
         exp_stmt(fncall_exp(_push_handler_e, 
@@ -2870,63 +2864,31 @@ static scope_t scope_to_c(scope_t s) {
 }
 
 // struct declarations -- straightforward
-opt_t<Dict::dict_t<var_t,structdecl_t>> structs_so_far = NULL;
-static void structdecl_to_c(structdecl_t s) {
-  let n = s->name->v;
-  if (structs_so_far == NULL) 
-    structs_so_far = new Opt(Dict::empty(zstrptrcmp));
+opt_t<Dict::dict_t<var_t,aggrdecl_t>> aggrs_so_far = NULL;
+static void aggrdecl_to_c(aggrdecl_t ad) {
+  let n = ad->name;
+  if (aggrs_so_far == NULL) 
+    aggrs_so_far = new Opt(Dict::empty(zstrptrcmp));
   bool seen_defn_before;
-  let dopt = Dict::lookup_opt(structs_so_far->v, (*n)[1]);
+  let dopt = Dict::lookup_opt(aggrs_so_far->v, (*n)[1]);
   if (dopt == NULL) {
     seen_defn_before = false;
-    structs_so_far->v = Dict::insert(structs_so_far->v,(*n)[1],s);
+    aggrs_so_far->v = Dict::insert(aggrs_so_far->v,(*n)[1],ad);
   } else {
     if (dopt->v->fields == NULL) {
-      structs_so_far->v = Dict::insert(structs_so_far->v,(*n)[1],s);
+      aggrs_so_far->v = Dict::insert(aggrs_so_far->v,(*n)[1],ad);
       seen_defn_before = false;
     } else
       seen_defn_before = true;
   }
 
-  s->sc   = Public; // gcc warns if we have Extern or Static on a struct
-  s->tvs  = NULL;
-  s->name = new Opt(n);
-  if (s->fields != NULL)
+  ad->sc   = Public; // gcc warns if we have Extern or Static here
+  ad->tvs  = NULL;
+  if (ad->fields != NULL)
     if (seen_defn_before)
-      s->fields = NULL;
+      ad->fields = NULL;
     else {
-      for (let fields = s->fields->v; fields != NULL; fields = fields->tl)
-        fields->hd->type = typ_to_c_array(fields->hd->type);
-    }
-}
-
-// union declarations -- straightforward
-opt_t<Dict::dict_t<var_t,uniondecl_t>> unions_so_far = NULL;
-static void uniondecl_to_c(uniondecl_t u) {
-  let n = u->name->v;
-  if (unions_so_far == NULL) unions_so_far =
-                               new Opt(Dict::empty(zstrptrcmp));
-  bool seen_defn_before;
-  let dopt = Dict::lookup_opt(unions_so_far->v, (*n)[1]);
-  if (dopt == NULL) {
-    seen_defn_before = false;
-    unions_so_far->v = Dict::insert(unions_so_far->v,(*n)[1],u);
-  } else {
-    if (dopt->v->fields == NULL) {
-      unions_so_far->v = Dict::insert(unions_so_far->v,(*n)[1],u);
-      seen_defn_before = false;
-    } else
-      seen_defn_before = true;
-  }
-
-  u->sc   = Public; // gcc warns if we have Extern or Static on a union
-  u->tvs  = NULL;
-  u->name = new Opt(n);
-  if (u->fields != NULL)
-    if (seen_defn_before)
-      u->fields = NULL;
-    else {
-      for (let fields = u->fields->v; fields != NULL; fields = fields->tl)
+      for (let fields = ad->fields->v; fields != NULL; fields = fields->tl)
         fields->hd->type = typ_to_c_array(fields->hd->type);
     }
 }
@@ -2934,18 +2896,14 @@ static void uniondecl_to_c(uniondecl_t u) {
 // tunion declarations -- tricky
 // for "tunion foo {Bar,Blah,Baz(t1,t2,t3),Baf(t4,t5)}" we generate
 //   typedef void *foo;
-//   static const int Bar  = 0;
-//   static const int Blah = 1;
-//   static const int Baz  = 0;
-//   struct _Baz_struct {
-//     int tag;  // always == Baz
+//   struct Baz_struct {
+//     int tag;  // always == 0
 //     t1 f1;
 //     t2 f2;
 //     t3 f3;
 //   }
-//   static const int Baf = 1;
-//   struct _Baf_struct {
-//     int tag;  // always == Baf
+//   struct Baf_struct {
+//     int tag;  // always == 1
 //     t4 f1;
 //     t5 f2;
 //   }
@@ -2964,49 +2922,31 @@ static void tuniondecl_to_c(tuniondecl_t tud) {
   if (tunions_so_far == NULL)
     tunions_so_far = new Opt(Set::empty(qvar_cmp));
   let n = tud->name;
-  if(tud->fields == NULL)
-    return;
-  if(Set::member(tunions_so_far->v, n))
+  if(tud->fields == NULL || Set::member(tunions_so_far->v, n))
     return;
   tunions_so_far->v = Set::insert(tunions_so_far->v, n);
 
-  // counters for the tags
-  int tag_count = 0;
-  int box_count = 0;
   for (let fields = tud->fields->v; fields != NULL; fields = fields->tl) {
     tunionfield_t f = fields->hd;
-    if (f->typs == NULL) {
-      // Declare an integer constant for the unboxed field
-      /*      exp_opt_t eopt = signed_int_exp(tag_count++,DL);
-      vardecl_t vd   = static_vardecl(f->name, sint_t, eopt);
-      vd->tq = Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
-      result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
-      */
-    } else {
-      // Declare an integer constant for the tag and a struct for the field
-      /*      exp_opt_t eopt = signed_int_exp(box_count++,DL);
-      vardecl_t vd   = static_vardecl(f->name, sint_t, eopt);
-      vd->tq = Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
-      result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
-      */
+    if (f->typs != NULL) {
       // compute the fields for the struct, adding in a tag field
       let fs = NULL;
       int i  = 1;
       for (let ts = f->typs; ts != NULL; ts = ts->tl, i++) {
 	let fname = fieldname(i);
-	let f = new Structfield(fname,(*ts->hd)[0],
-				typ_to_c_array((*ts->hd)[1]),NULL,NULL);
+	let f = new Aggrfield(fname,(*ts->hd)[0],
+			      typ_to_c_array((*ts->hd)[1]),NULL,NULL);
 	fs = new List(f,fs);
       }
       fs = List::imp_rev(fs);
-      fs = new List(new Structfield(tag_sp,mt_tq,sint_t,NULL,NULL),fs);
+      fs = new List(new Aggrfield(tag_sp,mt_tq,sint_t,NULL,NULL),fs);
       let sd = 
-	new Structdecl{.sc = Public,
-		       .name = new Opt(collapse_qvar_tag(f->name,"_struct")),
-		       .tvs = NULL, 
+	new Aggrdecl{.kind = StructA, .sc = Public,
+		       .name = collapse_qvar_tag(f->name,"_struct"),
+		     .tvs = NULL, .exist_vars = NULL,
 		       .fields = new Opt(fs), 
 		       .attributes = NULL};
-      result_decls = new List(new_decl(new Struct_d(sd),DL),result_decls);
+      result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
     }
   }
 }
@@ -3055,31 +2995,31 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
       xtunion_fields_so_far->v = 
 	Dict::insert(xtunion_fields_so_far->v, f->name, f->sc != Extern);
       if(f->typs != NULL) {
-	list_t<structfield_t> fields = NULL;
+	list_t<aggrfield_t> fields = NULL;
 	int i = 1;
 	for (let tqts = f->typs; tqts != NULL; tqts = tqts->tl,i++) {
 	  let field_n = new ((string_t)aprintf("f%d",i));
-	  let newf = new Structfield(field_n,(*tqts->hd)[0],
-				     typ_to_c_array((*tqts->hd)[1]),NULL,NULL);
+	  let newf = new Aggrfield(field_n,(*tqts->hd)[0],
+				   typ_to_c_array((*tqts->hd)[1]),NULL,NULL);
 	  fields = new List(newf,fields);
 	}
-	fields = new List(new Structfield(tag_sp,mt_tq,
-					  cstar_typ(uchar_t,mt_tq),NULL,NULL),
+	fields = new List(new Aggrfield(tag_sp,mt_tq,
+					cstar_typ(uchar_t,mt_tq),NULL,NULL),
 			  List::imp_rev(fields));
 	let strct_decl =
-	  new Structdecl{.sc = Public,
-			 .name = new Opt(collapse_qvar_tag(f->name,"_struct")),
-			 .tvs    = NULL,
-			 .fields = new Opt(fields),
-			 .attributes = NULL};
-	result_decls = new List(new_decl(new Struct_d(strct_decl),DL),
+	  new Aggrdecl{.kind = StructA, .sc = Public,
+		       .name = collapse_qvar_tag(f->name,"_struct"),
+		       .tvs    = NULL, .exist_vars = NULL,
+		       .fields = new Opt(fields), .attributes = NULL};
+	result_decls = new List(new_decl(new Aggr_d(strct_decl),DL),
 				result_decls);
       }
       break;
 
     case &Opt(false):
       if (f->sc != Extern) {
-	let initopt = string_exp(aprintf("%c%c%c%c%s",'\0','\0','\0','\0',*fn),DL);
+	let initopt = string_exp(aprintf("%c%c%c%c%s",'\0','\0','\0','\0',*fn),
+				 DL);
 	let tag_decl = new_vardecl(f->name, tag_typ, initopt);
 	tag_decl->sc = f->sc;
 	result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
@@ -3201,12 +3141,8 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
     case &Let_d(_,_,_,_,_): 
     case &Letv_d(_):
       toc_impos("letdecl at toplevel");
-    case &Struct_d(sd):
-      structdecl_to_c(sd);
-      result_decls = new List(d,result_decls);
-      break;
-    case &Union_d(ud):
-      uniondecl_to_c(ud);
+    case &Aggr_d(sd):
+      aggrdecl_to_c(sd);
       result_decls = new List(d,result_decls);
       break;
     case &Tunion_d(tud):
@@ -3242,7 +3178,7 @@ static void init() {
   tuple_type_counter = 0;
   temp_var_counter = 0;
   fresh_label_counter = 0;
-  structs_so_far = NULL;
+  aggrs_so_far = NULL;
   tunions_so_far = NULL;
   xtunion_fields_so_far = NULL;
   total_bounds_checks = 0;
