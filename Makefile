@@ -24,7 +24,7 @@ include Makefile.inc
 CYCC=../bin/$(CYCCOMP) # The .. is b/c this variable is used in lib and src
 OUT_PREFIX=
 
-all: bin/gc.a cyclone tools 
+all: bin/cyc-lib/gc.a cyclone tools 
 
 install: all
 
@@ -38,7 +38,7 @@ tools:
 #	$(MAKE) install -C tools/cycocamllex
 .PHONY: tools
 
-bin/gc.a:
+bin/cyc-lib/gc.a:
 	$(MAKE) -C gc gc.a CC=gcc
 	ln gc/gc.a $@
 
@@ -55,18 +55,21 @@ lib_src:
 diff: cyclone_src
 	for i in $(C_SRCS); do (diff bin/genfiles/src/$$i src/$$i) done
 	for i in $(C_LIBS); do (diff bin/genfiles/lib/$$i lib/$$i) done
+	for i in $(CYCLONE_H); do (diff include/$$i lib/$$i) done
 	diff bin/genfiles/lib/$(C_RUNTIME) lib/$(C_RUNTIME)
-	diff bin/genfiles/lib/precore_c.h  lib/precore_c.h
+	diff bin/genfiles/lib/precore_c.h lib/precore_c.h
 
 # This target compares the C files in bin/genfiles to those in src
 # Lack of difference means running the update would have no real effect.
 cmp: 
 	@for i in $(C_SRCS); do (cmp -s bin/genfiles/src/$$i src/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX src/$$i CHANGED) done
 	@for i in $(C_LIBS); do (cmp -s bin/genfiles/lib/$$i lib/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$$i CHANGED) done
-	@cmp -s bin/genfiles/lib/$(C_RUNTIME) lib/$(C_RUNTIME) || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX $(C_RUNTIME) CHANGED
-	@cmp -s bin/genfiles/lib/precore_c.h lib/precore_c.h || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX precore_c.h CHANGED
+	@for i in $(CYCLONE_H); do (cmp -s include/$$i lib/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$$i CHANGED) done
+	@cmp -s bin/genfiles/lib/$(C_RUNTIME) lib/$(C_RUNTIME) || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$(C_RUNTIME) CHANGED
+	@cmp -s bin/genfiles/lib/precore_c.h lib/precore_c.h || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/precore_c.h CHANGED
 
-# This target updates what is in bin/genfiles.  It would be "dangerous"
+# This target updates what is in bin/genfiles and include.
+# It would be "dangerous"
 # to invoke this target with "make -k" if we did not have version control.
 # I intend to put a "warning" waiting for user response in (and remind
 # to add files to Makefile.inc).
@@ -75,6 +78,7 @@ cmp:
 update: cyclone_src
 	@for i in $(C_SRCS); do (cmp -s src/$$i bin/genfiles/src/$$i || (echo UPDATING src/$$i; cp src/$$i bin/genfiles/src/$$i)) done
 	@for i in $(C_LIBS); do (cmp -s lib/$$i bin/genfiles/lib/$$i || (echo UPDATING lib/$$i; cp lib/$$i bin/genfiles/lib/$$i)) done
+	@for i in $(CYCLONE_H); do (cmp -s lib/$$i include/$$i || (echo UPDATING lib/$$i; cp lib/$$i include/$$i)) done
 	@cmp -s lib/$(C_RUNTIME) bin/genfiles/lib/$(C_RUNTIME) || (echo UPDATING lib/$(C_RUNTIME); cp lib/$(C_RUNTIME) bin/genfiles/lib/$(C_RUNTIME))
 	@cmp -s lib/precore_c.h  bin/genfiles/lib/precore_c.h || (echo UPDATING lib/precore_c.h; cp lib/precore_c.h bin/genfiles/lib/precore_c.h)
 
@@ -104,5 +108,5 @@ clean:
 	rm -f bin/$(RUNTIME).o
 	rm -f bin/cycbison.exe 
 	rm -f bin/cyclex.exe
-	rm -f bin/gc.a bin/gc_pg.a
+	rm -f bin/cyc-lib/gc.a bin/gc_pg.a
 	rm -f *~ doc/*~

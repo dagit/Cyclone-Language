@@ -8,11 +8,7 @@ CYCC=$(CYCDIR)/bin/cyclone.exe
 CYCBISON=$(CYCDIR)/bin/cycbison.exe
 CYCLEX=$(CYCDIR)/bin/cyclex.exe
 
-CFLAGS= -fwritable-strings -I$(CYCDIR)
-
-CYC_FLAGS=-I $(CYCDIR)/lib -tc -toc -pp
-
-LIB=../cyclib.a
+CYC_FLAGS=-I.. -B..
 
 SRCS=xml xmlparse_tab xmlscan xmldump
 
@@ -21,16 +17,15 @@ CSRCS=$(addsuffix .c, $(SRCS))
 
 all: xmlecho.exe libxml.a
 
-xmlecho.exe: $(OBJS) xmlecho.o $(LIB)
-	gcc -o $@ $^ $(CYCDIR)/bin/gc.a $(LDFLAGS)
+xmlecho.exe: $(OBJS) xmlecho.o
+	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 
 test: xmlecho.exe
 	./xmlecho test.xml
 
 libxml.a: $(OBJS)
 	-rm -f $@
-	ar qc $@ $^
-	ranlib $@
+	ar qcs $@ $^
 
 csrc: $(CSRCS)
 
@@ -41,8 +36,8 @@ clean:
 	rm -f libxml.a
 	rm -f xmlecho.exe
 
-%.c : %.cyc
-	$(CYCC) $(CYC_FLAGS) -o $@ $< 
+%.o : %.cyc
+	$(CYCC) $(CYC_FLAGS) -c $< 
 
 xmlparse_tab.cyc: xmlparse.y
 	$(CYCBISON) -v -d $< -o $@

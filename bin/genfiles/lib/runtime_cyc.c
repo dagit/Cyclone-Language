@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include "cyc_include.h"
+//#include "cyc_include.h"
 #include <errno.h>
 extern void exit(int);
 

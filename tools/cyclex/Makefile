@@ -14,16 +14,10 @@ BINDIR=../../bin
 CYCC=../../bin/cyclone.exe
 CYCBISON=../../bin/cycbison.exe
 
-CFLAGS= -fwritable-strings -I../..
-#CFLAGS=-O -fwritable-strings -I../..
-
-CYC_FLAGS=-I ../../lib -tc -toc -pp
-
-LIB=../../bin/cyclib.a
+CYC_FLAGS=
 
 SRCS=syntax parser_tab lexer lexgen compact output main
 
-C_SRCS=$(addsuffix .c, $(SRCS))
 O_SRCS=$(addsuffix .o, $(SRCS))
 
 install: all $(BINDIR)/$(PROG)
@@ -33,8 +27,8 @@ $(BINDIR)/$(PROG): $(PROG)
 
 all: $(PROG)
 
-$(PROG): $(O_SRCS) $(LIB)
-	gcc -g -o $@ $^ ../../bin/gc.a $(LDFLAGS)
+$(PROG): $(O_SRCS)
+	$(CYCC) -g -o $@ $^ $(LDFLAGS)
 
 boot:
 	-rm -f lexer.cyc
@@ -63,8 +57,8 @@ lexer.cyc: genfiles/lexer.cyc
 	cp $< $@
 endif
 
-%.c: %.cyc $(CYCC)
-	$(CYCC) $(CYC_FLAGS) -o $@ $< 
+%.o: %.cyc $(CYCC)
+	$(CYCC) $(CYC_FLAGS) -c $< 
 
 clean:
 	rm -f *.o *.c lexer.cyc parser_tab.cyc parser_tab.h *.output *.stackdump

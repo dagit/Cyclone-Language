@@ -11,7 +11,7 @@ CYCLEX:=../bin/cyclex.exe
 OUT_PREFIX:=
 
 ifdef PROFILE_REGIONS
-PROF_RGN_FLAG := -D CYC_REGION_PROFILE
+PROF_RGN_FLAG := -DCYC_REGION_PROFILE
 else
 PROF_RGN_FLAG := 
 endif
@@ -24,16 +24,12 @@ CFLAGS:=-fwritable-strings -I.. $(PROF_RGN_FLAG)
 CYC_LIBS:=$(addsuffix .cyc, $(CYCLONE_LIBS))
 
 ifdef MS
-TOC_FLAG = -toc -tovc
+TOC_FLAG = -tovc
 else
-TOC_FLAG = -toc
+TOC_FLAG =
 endif
 
-# uh, the precore_c.h building doesn't work with the ugly printer :-)
-CYC_FLAGS_PP := -tc $(TOC_FLAG) $(CYC_REGION_PROFILE) -pp
-
-#CYC_FLAGS:= -tc $(TOC_FLAG) -pp -I . 
-CYC_FLAGS:= -tc $(TOC_FLAG) -up -I . 
+CYC_FLAGS := -B. -save-c $(PROF_RGN_FLAG) $(TOC_FLAG)
 
 all: $(OUT_PREFIX)$(CYCLIB) xml/libxml.a
 
@@ -42,37 +38,38 @@ ifdef MS
 	lib /out:$@ $^
 else
 	-rm -f $@
-	ar qc $@ $^
-	ranlib $@
+	ar qcs $@ $^
 endif
 
 precore_c.h: precore.h $(CYCC)
-	$(CYCC) $(CYC_FLAGS_PP) -D _CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs $< > $@
+	cp precore.h precore.cyc
+	$(CYCC) -toc -pp $(CYC_REGION_PROFILE) -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ precore.cyc
+	rm -f precore.cyc
 
 xml/libxml.a: 
 	$(MAKE) -C xml CYCC=../$(CYCC)
 
 # For machine-generated we need special targets (the .cyc is prefixed)
-$(OUT_PREFIX)lineno.c : $(OUT_PREFIX)lineno.cyc $(CYCC)
-	$(CYCC) $(CYC_FLAGS) -o $@ $<
+$(OUT_PREFIX)lineno.o : $(OUT_PREFIX)lineno.cyc $(CYCC)
+	$(CYCC) $(CYC_FLAGS) -c $<
 $(OUT_PREFIX)lineno.cyc : lineno.cyl $(CYCLEX)
 	$(CYCLEX) $< $@
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
-$(OUT_PREFIX)%.c : %.cyc $(CYCC)
-	$(CYCC) $(CYC_FLAGS) -o $@ $<
+$(OUT_PREFIX)%.o : %.cyc $(CYCC)
+	$(CYCC) $(CYC_FLAGS) -c $<
 
 ifdef MS
 %.obj: %.c
 	cl /I.. /Dinline=__inline /c /w /nologo /Fo$@ $^
 endif
 
-# We need a special target becaue the .c file won't have the OUT_PREFIX
+# We need a special target because the .c file won't have the OUT_PREFIX
 $(OUT_PREFIX)$(RUNTIME).$(O): $(RUNTIME).c precore_c.h 
 ifdef MS
 	cl /I.. /Dinline=__inline /c /w /nologo /Fo$@ $(RUNTIME).c
 else
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(RUNTIME).c
+	$(CC) -c -o $@ -include include/cyc_include.h $(CPPFLAGS) $(CFLAGS) $(RUNTIME).c
 endif
 
 # delete generated files with a particular prefix

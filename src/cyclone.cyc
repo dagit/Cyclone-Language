@@ -3,6 +3,7 @@
 #include "arg.h"
 #include "core.h"
 #include "stdio.h"
+#include "stdlib.h"
 #include "list.h"
 #include "string.h"
 #include "dict.h"
@@ -31,39 +32,97 @@ using Arg;
 using String;
 
 static bool pp_r       = false;
-static bool up_r       = false;
 static bool noexpand_r = false;
 static bool noshake_r  = false;
+static bool stop_after_cpp_r = false;
+static bool parseonly_r = false;
 static bool tc_r       = false;
 static bool ic_r       = false;
 static bool toc_r      = false;
+static bool stop_after_objectfile_r = false;
 static bool tovc_r     = false;
 static bool v_r        = false;
-static bool q_r        = false;
+static bool save_temps_r = false;
+static bool save_c_r   = false;
 static bool add_cyc_namespace_r = true;
-bool @ pp       = &pp_r;
-bool @ up       = &up_r;
-bool @ noexpand = &noexpand_r;
-bool @ noshake  = &noshake_r;
-bool @ tc       = &tc_r;
-bool @ ic       = &ic_r;
-bool @ toc      = &toc_r;
-bool @ tovc     = &tovc_r;
-bool @ v        = &v_r;
-bool @ q        = &q_r;
-bool @ add_cyc_namespace = &add_cyc_namespace_r;
 
-static string *out_file_name_opt = null;
-static void set_out_file_name(string s) {
-  out_file_name_opt = (string *)(new s);
+static string *output_file = null;
+static void set_output_file(string s) {
+  output_file = new s;
 }
-static list_t<stringptr> includes = null;
-static void add_include(string s) {
-  includes = new List(new s,includes);
+
+static list_t<stringptr> cppargs = null;
+static void add_cpparg(string s) {
+  cppargs = new List(new s,cppargs);
 }
-static list_t<stringptr> defines = null;
-static void add_define(string s) {
-  defines = new List(new s,defines);
+
+static bool is_cyclone_sourcefile(string s) {
+  let len = strlen(s);
+  if (len <= 4) return false;
+  else return (strcmp(s+(len-4),".cyc") == 0);
+}
+
+static list_t<stringptr> cyclone_exec_prefix_path = null;
+static void add_cyclone_exec_prefix_path(string s) {
+  let len = strlen(s);
+  if (len <= 2) return;
+  let dir = substring(s,2,len-2);
+  cyclone_exec_prefix_path = new List(new dir,cyclone_exec_prefix_path);
+}
+
+// Arguments to pass to the C compiler
+static list_t<stringptr> ccargs = null;
+static void add_ccarg(string s) {
+  ccargs = new List(new s,ccargs);
+}
+static void add_ccarg2(string flag,string arg) {
+  ccargs = new List(new arg, new List(new flag,ccargs));
+}
+
+// Ideally we would simply pass library args as ccargs, preserving
+// their order with the other ccargs.  But if, e.g., -lm precedes
+// cyclib.a, then we get a "multiple definitions of main" error, via
+// libmain.c.  So, we separate out the library args from the ccargs
+// so that we can force cyclib.a to appear first.
+static list_t<stringptr> libargs = null;
+static void add_libarg(string s) {
+  libargs = new List(new s,libargs);
+}
+
+static void set_save_temps() {
+  save_temps_r = true;
+  add_ccarg("-save-temps");
+}
+
+static void set_produce_dependencies() {
+  stop_after_cpp_r = true;
+  add_cpparg("-M");
+}
+
+static void set_stop_after_objectfile() {
+  stop_after_objectfile_r = true;
+  add_ccarg("-c");
+}
+
+// Cyclone files given on the command line
+static list_t<stringptr> cyclone_files = null;
+// Like add_ccarg but intercepts .cyc files for special handling
+static void add_other(string s) {
+  if (is_cyclone_sourcefile(s)) {
+    // For processing by Cyclone
+    cyclone_files = new List(new s,cyclone_files);
+
+    // The C compiler wants the .c file, not the .cyc files
+    let basename = Filename::chop_extension(s);
+    let cfile    = strconcat(basename, ".c");
+    add_ccarg(cfile);
+  }
+  else add_ccarg(s);
+}
+
+static void remove_file(string s) {
+  if (save_temps_r) return;
+  else Stdio::remove(s);
 }
 
 bool compile_failure = false; // for exit code (helps Makefile)
@@ -79,11 +138,10 @@ FILE * try_file_open(string filename, string mode, string msg_part) {
   }
 }
 
-list_t<Absyn::decl_t> 
+list_t<Absyn::decl_t>
   do_stage(string stage_name,
-           list_t<Absyn::decl_t> f(`a, list_t<Absyn::decl_t>), 
-           `a env, list_t<Absyn::decl_t> tds, 
-           string preprocfile) {
+           list_t<Absyn::decl_t> f(`a, list_t<Absyn::decl_t>),
+           `a env, list_t<Absyn::decl_t> tds) {
   string exn_string     = "";
   string explain_string = "";
   bool other_exn = false;
@@ -92,39 +150,38 @@ list_t<Absyn::decl_t>
 
   try ans = f(env,tds);
   catch {
-  case &Core::Impossible(s): 
-    exn_string = "Exception Core::Impossible"; 
-    explain_string = s; 
+  case &Core::Impossible(s):
+    exn_string = "Exception Core::Impossible";
+    explain_string = s;
     break;
-  case Dict::Absent:  
-    exn_string = "Exception Dict::Absent"; 
+  case Dict::Absent:
+    exn_string = "Exception Dict::Absent";
     break;
-  case x: 
-    ex = x; 
-    other_exn = true; 
-    exn_string = "Uncaught exception"; 
+  case x:
+    ex = x;
+    other_exn = true;
+    exn_string = "Uncaught exception";
     break;
     }
-  if(Position::error_p())
+  if (Position::error_p())
     compile_failure = true;
-  if(strcmp(exn_string,"") != 0) {
+  if (strcmp(exn_string,"") != 0) {
     compile_failure = true;
-    fprintf(stderr,"\n%s thrown during %s: %s", 
+    fprintf(stderr,"\n%s thrown during %s: %s",
 	    exn_string, stage_name, explain_string);
   }
-  if(compile_failure) {
+  if (compile_failure) {
     fprintf(stderr,"\nCOMPILATION FAILED!\n");
     fflush(stderr);
-    Stdio::remove(preprocfile);
-    if(other_exn)
+    if (other_exn)
       throw ex;
     return ans;
   }
-  if(*v)
+  else if (v_r) {
     fprintf(stderr,"%s completed.\n",stage_name);
-  else if(!*q)
-    fprintf(stderr,".");
-  fflush(stderr);
+    fflush(stderr);
+    return ans;
+  }
   return ans;
 }
 
@@ -136,14 +193,14 @@ list_t<Absyn::decl_t> do_parse(FILE @ f, list_t<Absyn::decl_t> ignore) {
 }
 
 list_t<Absyn::decl_t> do_typecheck(Tcenv::tenv_t te,list_t<Absyn::decl_t> tds){
-  Absynpp::expand_typedefs = ! *noexpand;
-  add_cyc_namespace_r = add_cyc_namespace_r && toc_r; //don't add namespaces if we don't translate to C
-  if(add_cyc_namespace_r)
+  Absynpp::expand_typedefs = ! noexpand_r;
+  add_cyc_namespace_r = add_cyc_namespace_r && !tc_r; //don't add namespaces if we don't translate to C
+  if (add_cyc_namespace_r)
     Absyn::file_typ();
   else
     Absyn::file_typ_nocyc();
   Tc::tc(te, add_cyc_namespace_r, true, tds);
-  if(!*noshake)
+  if (!noshake_r)
     tds = Tc::treeshake(te,tds);
   return tds;
 }
@@ -171,152 +228,354 @@ list_t<Absyn::decl_t> do_tovc(bool ignore, list_t<Absyn::decl_t> tds) {
 }
 
 list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t> tds) {
-  Absynpp::expand_typedefs = ! *noexpand;
-  Absynpp::decls_first = Absynpp::qvar_to_Cids = *toc;
-  Absynpp::to_VC = *tovc;
-  Absynpp::print_using_stmts = Absynpp::print_externC_stmts = ! *tc;
-  // if the type-checking has already been done, then there's no need for
-  // the 'Using' statements, nor for the extern "C" {...}
+  Absynpp::expand_typedefs = ! noexpand_r;
+  Absynpp::decls_first = Absynpp::qvar_to_Cids = ! tc_r;
+  Absynpp::to_VC = tovc_r;
 
-  if (*toc) {
-    fprintf(out_file, "#include \"cyc_include.h\"\n\n");
-    Absynpp::qvar_to_Cids = true;
-  }
-  if(*pp)
+  //  fprintf(out_file, "#include \"cyc_include.h\"\n\n");
+  if (pp_r)
     Absynpp::decllist2file(tds,out_file);
-  else if(*up)
+  else
     Absyndump::dumpdecllist2file(tds,out_file);
   fflush(out_file);
   return tds;
 }
 
-void compile_file(string filename) {
+// We must remember what .c files are produced so that we can remove them
+// after we're done.
+static list_t<stringptr> cfiles = null;
+static void remove_cfiles() {
+  if (!save_c_r)
+    for (; cfiles != null; cfiles = cfiles->tl)
+      remove_file(*(cfiles->hd));
+}
+
+void process_file(string filename) {
 
   string basename      = Filename::chop_extension(filename);
-  string preprocfile   = strconcat(basename, ".i");
+  string preprocfile   = strconcat(basename, ".cyp");
   string interfacefile = strconcat(basename, ".cyci");
+  string cfile         = strconcat(basename, ".c");
 
-  if (!*q||*v) fprintf(stderr,"Compiling file: %s", basename);
-  if (*v) fprintf(stderr,"\n");
+  if (v_r) fprintf(stderr,"Compiling %s\n", filename);
 
-  // Run the preprocessor, by building and running a command-line
-  // Pass -I and -D things onto pre-processor
-  string inc_string = String::str_sepstr(new List(new "",
-                                                  rev(includes))," -I");
-  string def_string = String::str_sepstr(new List(new "",
-                                                  rev(defines)), " -D");
-  // check that the input file exists
+  // Check that the input file exists
   FILE * f0 = try_file_open(filename, "r", "input file");
-  if(compile_failure)
+  if (compile_failure)
     return;
   fclose((FILE @)f0);
-  // actually make the command call
-  // FIX: let user change how/which pre-processor is invoked
-  string cmd = xprintf("gcc -x c -E -U__GNUC__ %s %s %s > %s",
-                       inc_string, def_string, filename, preprocfile);
-  if (*v) fprintf(stderr,"%s\n",cmd);
+
+  // Run the preprocessor, by building and running a command-line
+  // Pass -I and -D things onto preprocessor
+  // FIX: let user change how/which preprocessor is invoked
+  let cppargs_string = String::str_sepstr(new List(new "",
+                                                   rev(cppargs))," ");
+  let stdinc_string = " -Ic:/cyclone/include";
+  let ofile_string;
+  if (stop_after_cpp_r) {
+    if (output_file != null)
+      ofile_string = xprintf(" -o %s", *output_file);
+    else // output to standard out
+      ofile_string = "";
+  }
+  else ofile_string = xprintf(" -o %s", preprocfile);
+
+  let cmd = xprintf("gcc -x c -E -U__GNUC__%s%s%s %s",
+                    cppargs_string, stdinc_string, ofile_string, filename);
+
+  if (v_r) fprintf(stderr,"%s\n",cmd);
   if (system(string_to_Cstring(cmd)) != 0) {
     compile_failure = true;
-    fprintf(stderr,"\nError: pre-processing failed!\n");
+    fprintf(stderr,"\nError: preprocessing\n");
     return;
   }
+  if (stop_after_cpp_r) return;
 
+  // Run the stages of the Cyclone compiler
   Position::reset_position(preprocfile); // necessary for good error messages!
-
-  // Actually process the file
+  // Set up for printing Cyclone
+  Absynpp::print_using_stmts = Absynpp::print_externC_stmts = true;
   FILE * in_file  = try_file_open(preprocfile,"r","file");
-  FILE * out_file = stdout; // possibly changed below
+  if (compile_failure) return;
 
-  if(compile_failure)
-    return;
   list_t<Absyn::decl_t> tds = null;
-  if(!compile_failure) {
-    tds = do_stage("parsing", do_parse, (FILE@)in_file, tds, preprocfile);
-    file_close((FILE@)in_file); // won't happen if exception is thrown
-  }
-  let te = Tcenv::tc_init();
-  if(!compile_failure && tds != null && *tc)
-    tds = do_stage("type checking", do_typecheck, te, tds, preprocfile);
-  if(!compile_failure && *tc)
-    tds = do_stage("control-flow checking", do_cfcheck, true, tds, preprocfile);
-  if(!compile_failure && *ic) {
-    FILE * inter_file = try_file_open(interfacefile, "w", "interface file");
-    // Position::reset_position(interfacefile);
-    tds = do_stage("interface checking", do_interface, 
-		   new $(te, (FILE @) inter_file), tds, preprocfile);
-    if (inter_file != null) file_close((FILE @) inter_file);
-  }
-  if(!compile_failure && *toc)
-    tds = do_stage("translation to C", do_translate, true, tds, preprocfile);
-  if(!compile_failure && *toc && *tovc)
-    tds = do_stage("post-pass to VC", do_tovc, true, tds, preprocfile);
-  if(!compile_failure && out_file_name_opt != null)
-    out_file = try_file_open(*out_file_name_opt, "w", "output file");
-  if(!compile_failure && tds != null && (*pp || *up))
-    tds = do_stage("printing", do_print, (FILE @)out_file, tds, preprocfile);
-  if (out_file != null && out_file != stdout) 
-    file_close((FILE @)out_file); // won't happen if exception is thrown
 
-  fprintf(stderr,"\n"); 
-  if(!compile_failure)
+  // Parsing
+  try
+    tds = do_stage("parsing", do_parse, (FILE@)in_file, tds);
+  catch {
+  case x:
+    file_close((FILE@)in_file);
     Tcutil::flush_warnings();
-  Stdio::remove(preprocfile);
-  return;
+    remove_file(preprocfile); // Can't remove this before warnings are flushed!
+    throw x;
+  }
+  file_close((FILE@)in_file);
+  if (compile_failure) {
+    Tcutil::flush_warnings();
+    remove_file(preprocfile); // Can't remove this before warnings are flushed!
+    return;
+  } 
+
+  let te = Tcenv::tc_init(); // Must declare BEFORE the goto 
+  if (parseonly_r) goto PRINTC;
+
+  // Type checking and control-flow checking
+  tds = do_stage("type checking", do_typecheck, te, tds);
+  if (compile_failure) {
+    Tcutil::flush_warnings();
+    remove_file(preprocfile); // Can't remove this before warnings are flushed!
+    return;
+  } 
+  tds = do_stage("control-flow checking", do_cfcheck, true, tds);
+  Tcutil::flush_warnings();
+  remove_file(preprocfile); // Can't remove this before warnings are flushed!
+  if (compile_failure) return;
+  // Once the type-checking has been done, there's no need for
+  // the 'Using' statements, nor for the extern "C" {...}
+  Absynpp::print_using_stmts = Absynpp::print_externC_stmts = false;
+
+  // Interface checking
+  if (ic_r) {
+    FILE *inter_file;
+    inter_file = try_file_open(interfacefile, "w", "interface file");
+    if (compile_failure) return;
+    // Position::reset_position(interfacefile);
+    tds = do_stage("interface checking", do_interface,
+                   new $(te, (FILE @) inter_file), tds);
+    if (inter_file != null) file_close((FILE @) inter_file);
+    if (compile_failure) return;
+  }
+
+  if (tc_r) goto PRINTC;
+
+  // Translation to C
+  tds = do_stage("translation to C", do_translate, true, tds);
+  if (compile_failure) return;
+  if (tovc_r) tds = do_stage("post-pass to VC", do_tovc, true, tds);
+  if (compile_failure) return;
+
+ PRINTC:
+  if (tds != null) {
+    FILE *out_file;
+
+    if (parseonly_r || tc_r)
+      if (output_file != null)
+        out_file = try_file_open(*output_file,"w","output file");
+      else
+        out_file = stdout;
+    else if (toc_r && output_file != null)
+      out_file = try_file_open(*output_file,"w","output file");
+    else
+      out_file = try_file_open(cfile,"w","output file");
+
+    if (compile_failure) return;
+
+    try
+      tds = do_stage("printing", do_print, (FILE @)out_file, tds);
+    catch {
+    case x:
+      compile_failure = true;
+      file_close((FILE @)out_file);
+      cfiles = new List(new cfile,cfiles);
+      throw x;
+    }
+    file_close((FILE @)out_file);
+    cfiles = new List(new cfile,cfiles);
+  }
+}
+
+/* Take as input a string, return the list of substrings separated by colons */
+static list_t<stringptr> split_by_char(string s, char c) {
+  if (s == null) return null;
+  let result = null;
+  let len = strlen(s);
+
+  while (len > 0) {
+    let end = strchr(s,c);
+    if (end == null) {
+      result = new List(new s,result);
+      break;
+    }
+    else {
+      result = new List(new substring(s,0,end-s),result);
+      len -= (end-s);
+      s = end+1;
+    }
+  }
+  return List::imp_rev(result);
+}
+
+/* FIX: once stat is ported we can use that instead */
+bool file_exists(string file) {
+  FILE *f = null;
+  try f = file_open(file,"r"); catch {default: break;}
+  if (f == null) return false;
+  else { fclose((FILE @)f); return true; }
+}
+
+string *find(list_t<stringptr> dirs, string file) {
+  if (file == null) return null;
+  for (; dirs != null; dirs = dirs->tl) {
+    let dir = *dirs->hd;
+    if (dir == null || strlen(dir)==0) continue;
+    let s = Filename::concat(dir,file);
+    if (file_exists(s)) return new s;
+  }
+  return null;
 }
 
 int main(int argc, string ? argv) {
-  $(string,spec_t,string) specs[16] = 
-    {$("-nocyc",new Clear_spec(add_cyc_namespace),
-       "does not add implicit namespace Cyc"),
-     $("-q",new Set_spec(q),
-       "compile quietly"),
-     $("-v",new Set_spec(v), 
-       "print compilation stages verbosely"),
-     $("-D",new String_spec(add_define), 
-       "pass definition to pre-processor"),
-     $("-I",new String_spec(add_include), 
-       "include directory"), 
-     $("-toc",new Set_spec(toc), 
-       "translate to C"),
-     $("-tc",new Set_spec(tc), 
-       "type check"),
-     $("-tovc",new Set_spec(tovc),
-       "avoid gcc extension in output"),
-     $("-ic",new Set_spec(ic), 
-       "interface check"),
-     $("-noremoveunused",new Set_spec(noshake),
-       "don't remove externed variables that aren't used"),
-     $("-noexpandtypedefs",new Set_spec(noexpand),
-       "don't expand typedefs in pretty printing"),
-     $("-printalltvars", new Set_spec(&Absynpp::print_all_tvars),
-       "print all type variables (even implicit default effects)"),
-     $("-printallkinds", new Set_spec(&Absynpp::print_all_kinds),
-       "always print kinds of type variables"),
-     $("-up",new Set_spec(up), 
-       "ugly print"),
-     $("-pp",new Set_spec(pp), 
-       "pretty print"),
-     $("-o",new String_spec(set_out_file_name),
-       "Output file name")};
-  let l1  = List(&specs[0], null);
-  let l2  = List(&specs[1], &l1);
-  let l3  = List(&specs[2], &l2);
-  let l4  = List(&specs[3], &l3);
-  let l5  = List(&specs[4], &l4);
-  let l6  = List(&specs[5], &l5);
-  let l7  = List(&specs[6], &l6);
-  let l8  = List(&specs[7], &l7);
-  let l9  = List(&specs[8], &l8);
-  let l10 = List(&specs[9], &l9);
-  let l11 = List(&specs[10],&l10);
-  let l12 = List(&specs[11],&l11);
-  let l13 = List(&specs[12],&l12);
-  let l14 = List(&specs[13],&l13);
-  let l15 = List(&specs[14],&l14);
-  let l16 = List(&specs[15],&l15);
-  let options = &l16;
-		 
-  Arg::parse(options, compile_file, "Options:", argv);
+//  let path = Stdlib::getenv("PATH");
+//  let x = split_by_char(path,':');
+//  printf("Components of PATH:\n");
+//  for (; x != null; x = x->tl) {
+//    printf("Part: %s\n", *x->hd);
+//  }
+//  let t = find(x,argv[1]);
+//  if (t == null) printf("Could not find %s\n",argv[1]);
+//  else printf("%s\n",*t);
+//  fflush(stdout);
+//
+//  printf("getenv(\"googoo\") is '%s'\n",Stdlib::getenv("googoo"));
+//  
+//  printf("Can a ? pointer be null => %d\n",null==Stdlib::getenv("googoo"));
+//
+//  string gg = "hello";
+//  gg = null;
+//
+//  printf("Can a ? pointer be null => %d\n",null==gg);
+//  printf("Does getenv return empty string? => %d\n",strcmp("",Stdlib::getenv("googoo")));
+
+
+  list_t<$(string,spec_t,string)@> options =
+    list(new $("-nocyc",new Clear_spec(&add_cyc_namespace_r),
+               "Do not add implicit namespace Cyc"),
+         new $("-v",new Set_spec(&v_r),
+               "Print compilation stages verbosely"),
+         new $("-toc",new Set_spec(&toc_r),
+               "Stop after translation to C"),
+         new $("-parseonly",new Set_spec(&parseonly_r),
+               "Stop after parsing"),
+         new $("-tc",new Set_spec(&tc_r),
+               "Stop after type checking"),
+         new $("-tovc",new Set_spec(&tovc_r),
+               "Avoid gcc extensions in C output"),
+         new $("-ic",new Set_spec(&ic_r),
+               "Interface check"),
+         new $("-noremoveunused",new Set_spec(&noshake_r),
+               "Don't remove externed variables that aren't used"),
+         new $("-noexpandtypedefs",new Set_spec(&noexpand_r),
+               "Don't expand typedefs in pretty printing"),
+         new $("-printalltvars", new Set_spec(&Absynpp::print_all_tvars),
+               "Print all type variables (even implicit default effects)"),
+         new $("-printallkinds", new Set_spec(&Absynpp::print_all_kinds),
+               "Always print kinds of type variables"),
+         new $("-up",new Clear_spec(&pp_r),
+               "Ugly print"),
+         new $("-pp",new Set_spec(&pp_r),
+               "Pretty print"),
+         new $("-save-temps",new Unit_spec(set_save_temps),
+               "Do not delete temporary files"),
+         new $("-save-c",new Set_spec(&save_c_r),
+               "Do not delete temporary C files"),
+         new $("-o",new String_spec(set_output_file),
+               "Output file name"),
+         new $("-D*",new Flag_spec(add_cpparg),
+               "Pass definition to preprocessor"),
+         new $("-B*",new Flag_spec(add_cyclone_exec_prefix_path),
+               "Add to the list of directories to search for compiler files"),
+         new $("-I*",new Flag_spec(add_cpparg),
+               "Add to the list of directories to search for include files"),
+         new $("-L*",new Flag_spec(add_cpparg),
+               "Add to the list of directories for -l"),
+         new $("-l*",new Flag_spec(add_libarg),
+               "Library file"),
+         new $("-c",new Unit_spec(set_stop_after_objectfile),
+               "Produce object file"),
+         new $("-O",new Flag_spec(add_ccarg),
+               "Optimize"),
+         new $("-O2",new Flag_spec(add_ccarg),
+               "Optimize"),
+         new $("-O3",new Flag_spec(add_ccarg),
+               "Optimize"),
+         new $("-g",new Flag_spec(add_ccarg),
+               "Compile for debugging"),
+         new $("-p",new Flag_spec(add_ccarg),
+               "Compile for prof"),
+         new $("-pg",new Flag_spec(add_ccarg),
+               "Compile for gprof"),
+         new $("-S",new Flag_spec(add_ccarg),
+               "Stop after producing assembly code"),
+         new $("-M",new Unit_spec(set_produce_dependencies),
+               "Produce dependencies"),
+         new $("-E",new Set_spec(&stop_after_cpp_r),
+               "Stop after preprocessing")
+         );
+
+  Arg::parse(options, add_other, "Options:", argv);
+
+  for (let l = rev(cyclone_files); l != null; l = l->tl) {
+    process_file(*(l->hd));
+    if (compile_failure) return 1;
+  }
+
+  if (stop_after_cpp_r || parseonly_r || tc_r || toc_r) return 0;
+
+  // Run the C compiler
+  // First, find the files cyclib.a, gc.a, cyc_include.h
+  let cyclone_exec_prefix = Stdlib::getenv("CYCLONE_EXEC_PREFIX");
+  if (cyclone_exec_prefix != null)
+    cyclone_exec_prefix_path = new List(new cyclone_exec_prefix,
+                                        cyclone_exec_prefix_path);
+  cyclone_exec_prefix_path = new List(new "c:/cyclone/bin/cyc-lib",
+                                        cyclone_exec_prefix_path);
+  cyclone_exec_prefix_path = List::imp_rev(cyclone_exec_prefix_path);
+  let cyc_include = find(cyclone_exec_prefix_path,"include/cyc_include.h");
+  if (cyc_include == null) {
+    fprintf(stderr,"Error: can't find internal compiler file cyc_include.h");
+    compile_failure = true;
+    remove_cfiles();
+    return 1;
+  }
+
+  let ccargs_string = String::str_sepstr(rev(ccargs), " ");
+  let libargs_string = String::str_sepstr(new List(new "",rev(libargs)), " ");
+  let stdlib_string;
+  if (stop_after_objectfile_r)
+    stdlib_string = (string)"";
+  else {
+    let cyclib = find(cyclone_exec_prefix_path,"cyclib.a");
+    let gc = find(cyclone_exec_prefix_path,"gc.a");
+    if (cyclib == null) {
+      fprintf(stderr,"Error: can't find internal compiler file cyclib.a");
+      compile_failure = true;
+      remove_cfiles();
+      return 1;
+    }
+    if (gc == null) {
+      fprintf(stderr,"Error: can't find internal compiler file gc.a");
+      compile_failure = true;
+      remove_cfiles();
+      return 1;
+    }
+    stdlib_string = xprintf(" %s %s",*cyclib,*gc);
+  }
+  let cccmd =
+    xprintf("gcc -fwritable-strings -include %s%s %s%s%s",
+            *cyc_include,
+            (output_file==null?(string)"":xprintf(" -o %s",*output_file)),
+            ccargs_string,
+            stdlib_string,
+            libargs_string);
+  if (v_r) fprintf(stderr,"%s\n",cccmd);
+  if (system(string_to_Cstring(cccmd)) != 0) {
+    fprintf(stderr,"Error: C compiler failed\n");
+    compile_failure = true;
+    remove_cfiles();
+    return 1;
+  }
+  remove_cfiles();
 
   return compile_failure ? 1 : 0;
 }

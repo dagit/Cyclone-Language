@@ -1,5 +1,3 @@
-#include "cyc_include.h"
-
  typedef int Cyc___int32_t; typedef unsigned int Cyc___uint32_t; typedef int Cyc_ptrdiff_t;
 typedef unsigned int Cyc_size_t; typedef unsigned short Cyc_wchar_t; typedef
 unsigned int Cyc_wint_t; typedef unsigned char Cyc_u_char; typedef

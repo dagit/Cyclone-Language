@@ -2,7 +2,7 @@
 
 include ../../../Makefile.inc
 
-CFLAGS=-fwritable-strings -I../../..
+CFLAGS=-fwritable-strings -include ../../cyc-lib/include/cyc_include.h
 #CFLAGS=-g -fwritable-strings -I../../..
 #CFLAGS=-O -fwritable-strings -I../../..
 

@@ -12,7 +12,7 @@ compile:
 copy: ../$(CYCLIB) ../cyclone.exe
 
 ../$(CYCLIB): lib/$(CYCLIB)
-	cp lib/$(CYCLIB) ..
+	cp lib/$(CYCLIB) ../cyc-lib
 
 ../cyclone.exe: src/cyclone.exe
 	cp src/cyclone.exe ..

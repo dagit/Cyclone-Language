@@ -1,7 +1,7 @@
 
 include ../../../Makefile.inc
 
-CFLAGS=-fwritable-strings -I../../..
+CFLAGS=-fwritable-strings -include ../../cyc-lib/include/cyc_include.h
 #CFLAGS=-g -fwritable-strings -I../../..
 #CFLAGS=-O -fwritable-strings -I../../..
 
@@ -11,7 +11,7 @@ all: $(PROG)
 
 $(PROG): $(O_SRCS)
 	$(MAKE) -C ../lib
-	gcc -O -o $@ $^ ../lib/$(CYCLIB) ../../gc.a $(LDFLAGS)
+	gcc -O -o $@ $^ ../lib/$(CYCLIB) ../../cyc-lib/gc.a $(LDFLAGS)
 
 clean::
 	rm -f $(O_SRCS) $(PROG) *~ 

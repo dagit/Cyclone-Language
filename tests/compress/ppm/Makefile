@@ -1,36 +1,27 @@
 
-# Note: We're not doing anything with t.cyc t2.cyc t3.cyc t4.cyc 
-#       testcases.cyc and toplev.cyc.  Should we be?
+# FIX: somehow we cause gcc to go into an infinite loop on model.c ??
 
-include ../../../Makefile.inc
+# Note: we use the compiler in lib and src, not in bin
 
-# Override this variables to use a bootstrapped compiler (you may want
-# an absolute path)
-CYCC=../../../bin/$(CYCCOMP)
+CYCDIR := ../../..
+CYCCOMP := cyclone.exe
 
-CYCBISON=../../../bin/cycbison.exe
+# include $(CYCDIR)/Makefile.inc
 
-# Override this prefix to check the compiler on itself w/o clobbering files
-OUT_PREFIX=
+CYCC=$(CYCDIR)/src/$(CYCCOMP)
 
-CFLAGS=-g -fwritable-strings -I../../.. 
+CYCBISON=$(CYCDIR)/bin/cycbison.exe
 
-CYC_FLAGS=-I ../../../lib -tc -toc -pp
-
-LIB=../../../bin/$(OUT_PREFIX)$(CYCLIB)
+CYC_FLAGS=-I$(CYCDIR)/lib -B$(CYCDIR)/lib -pp -v
 
 encode: arithcode.o model.o encode.o
-	gcc -g -o $@ arithcode.o model.o encode.o ../../../bin/cyclib.a ../../../bin/gc.a
+	$(CYCC) $(CYC_FLAGS) -g -o $@ $^
 
 decode: arithcode.o model.o decode.o
-	gcc -g -o $@ arithcode.o model.o decode.o  ../../../bin/cyclib.a ../../../bin/gc.a
+	$(CYCC) $(CYC_FLAGS) -g -o $@ $^
 
-# This takes care of non-machine-generated versions (the .cyc is already there)
-$(OUT_PREFIX)%.c : %.cyc $(CYCC)
-	$(CYCC) $(CYC_FLAGS) -o $@ $< 
-
-clean_prefix:
-	rm -f $(addprefix $(OUT_PREFIX), hello.o cyctest.o cyctest.c foo_tab.* foo.o foo.c *.exe)
+%.o : %.cyc
+	$(CYCC) $(CYC_FLAGS) -c $< 
 
 clean:
-	rm -f *.o *.c encode decode
+	rm -f *.o *.c *.exe encode decode
