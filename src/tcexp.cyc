@@ -1289,8 +1289,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0, type_t * topt, exp_t e){
   switch (e->r) {
   case &AggrMember_e(_,_,true,_):
   case &AggrArrow_e(_,_,true,_):
-    terr(e->loc,"cannot take the address of a @tagged union member");
-    break;
+    terr(e->loc,"cannot take the address of a @tagged union member"); break;
   default: break;
   }
 

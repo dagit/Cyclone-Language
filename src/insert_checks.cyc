@@ -24,15 +24,9 @@
 // representation details of the analysis and type system.
 
 // TO DO: 
-// * check toc.cyc for recursive calls to exp_to_c that update
-//   the ->r but need to also update the ->annot field
-//   for example, zero_ptr_assign_to_c needs to annotate with
-//     NullAndFatBound (and really should adjust statistics too)
-//   (also examining Swap_e carefully, but seems okay?)
 // * change toc.cyc to check dynamically that a flag is set by cases
 //   that look at non-nocheck.
-// * move over error messages from Deref_e and AggrArrow_e (and make uniform)
-//   (also Primop_e, Numelts case)
+// * use flow-analysis info uniformly in Cast_e and zeroterm-assign cases
 // * move tagged-union nonsense over to here??
 // * move zeroterm nonsense over to here??
 // * consider null-check elimination on patterns??
@@ -225,7 +219,7 @@ static void do_exp(env_t nv, exp_t e) {
 
   case &Datatype_e(es,...): fallthru(es);
   case &Tuple_e(es): fallthru(es);
-  case &Primop_e(_,es): // even Numelts and pointer-arith having nothing here
+  case &Primop_e(_,es): // even Numelts and pointer-arith have nothing here
     e->annot = &NoCheck_val;
     for(; es!=NULL; es=es->tl)
       do_exp(nv,es->hd);
@@ -250,10 +244,12 @@ static void do_exp(env_t nv, exp_t e) {
 
   case &Increment_e(e2,incr): 
     // do we need a null check?
-    // * thin-pointer: no, this never would have type-checked
+    // * thin non-zt pointer: no, this never would have type-checked
     // * fat-pointer: no, out-of-bounds is okay (affects curr, not base)
-    // * zeroterm-pointer: yes! (and toc.cyc also always checks for *e2 != 0)
-    if(is_zeroterm_pointer_type((type_t)e2->topt) && need_null_check(nv,e2))
+    // * thin zt pointer: yes! (and toc.cyc also always checks for *e2 != 0)
+    if(Tcutil::get_type_bound((type_t)e2->topt) != NULL
+       && is_zeroterm_pointer_type((type_t)e2->topt) 
+       && need_null_check(nv,e2))
       e->annot = &NullOnly_val;
     else
       e->annot = &NoCheck_val;
