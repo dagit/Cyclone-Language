@@ -634,7 +634,7 @@ void dumpdecl(decl d) {
       dump("};");
     }
     break;
-  case Let_d(p,_,e,_):
+  case Let_d(p,_,_,e,_):
     dump("let");
     dumppat(p);
     dump("=");

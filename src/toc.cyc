@@ -734,12 +734,18 @@ static env try_env(env e) {
 
 // env for a switch clause: give new label for break, and zero its pop counter
 static env non_last_switchclause_env(env e, var break_l, var fallthru_l,
-				     list<qvar> fallthru_binders,
+				     list<vardecl> fallthru_binders,
 				     env next_case_env) {
+  let fallthru_vars = null;
+  for(; fallthru_binders != null; fallthru_binders = fallthru_binders->tl)
+    fallthru_vars = &cons(fallthru_binders->hd->name, fallthru_vars);
+  List::imp_rev(fallthru_vars);
+    
   env ans = copy_env(e);
   ans->break_lab       = &Opt(break_l);
+  
   ans->fallthru_info   = &Opt(&$(fallthru_l,
-				 fallthru_binders,
+				 fallthru_vars,
 				 next_case_env->varmap));
   ans->to_pop_break    = 0;
   ans->to_pop_fallthru = 0;
@@ -944,11 +950,11 @@ static exp make_struct(qvar x, typ struct_typ, stmt s,
   return stmt_exp(declare_stmt(x,t,eo,s,DL),DL);
 }
 
-// Would be nice to share moare code with init_struct
+// Would be nice to share more code with init_struct
 // but the designators get in the way.
 static exp init_tuple(env nv, bool pointer, list<exp> es) {
   // $(e1,...,en)  -> ({ t x;   x.f1 = e1; ... x.fn = en; x})
-  // &$(e1,...,en) -> ({ t * x; x->f1 = e1; ... x->fn = en; x})
+  // &$(e1,...,en) -> ({ t * x=malloc(sizeof(t); x->f1 = e1; ... x->fn = en; x})
   let tqs = List::map(tup_to_c,es);
   let n   = add_tuple_type(tqs);
 
@@ -2306,7 +2312,7 @@ static void stmt_to_c(env nv, stmt s) {
       return;
     case Decl_s(d,s1):
       switch (d->r) {
-      case Let_d(p,topt,e,exhaust):
+      case Let_d(p,_,topt,e,exhaust):
         // Handle the special case where the pattern is a 
         // variable just like a variable declaration
         let var_case = false;
@@ -2377,15 +2383,16 @@ static void stmt_to_c(env nv, stmt s) {
       // add a default case which re-throws the exception
       let x    = temp_var();
       let xexp = var_exp(x,DL);
+      let x_vd = new_vardecl(x,exn_typ,null);
       xexp->topt = &Opt(exn_typ);
-      let p = &Pat{.r=Var_p(new_vardecl(x,exn_typ,null)),
+      let p = &Pat{.r=Var_p(x_vd),
 		   .topt=&Opt(exn_typ),
 		   .loc=DL};
       let te = throw_exp(xexp,DL);
       te->topt = &Opt(VoidType);
       let rs = exp_stmt(te,DL);
       let default_case =
-        &Switch_clause{.pattern=p,.pat_vars=&Opt((list<qvar>)&cons(x,null)),
+        &Switch_clause{.pattern=p,.pat_vars=&Opt(&cons(x_vd,null)),
 		       .where_clause=null,.body=rs,.loc=DL};
       let handler_stmt = switch_stmt(e_exp,
                                      List::append(scs,
@@ -2745,7 +2752,7 @@ static $(env,list<decl>) decls_to_c(env nv, list<decl> ds, bool top) {
       fndecl_to_c(nv, fd);
       res = &cons(d,res);
       break;
-    case Let_d(_,_,_,_):
+    case Let_d(_,_,_,_,_):
       // this is handled in stmt_to_c
       toc_impos("letdecl");
       break;
@@ -2821,3 +2828,4 @@ list<decl> toc(list<decl> ds) {
   }
   return ds;
 }
+

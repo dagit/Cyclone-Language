@@ -152,7 +152,7 @@ make_struct_field(segment loc,$(qvar,tqual,typ,list<tvar>)@ field) {
     err("struct field cannot be qualified with a module name",loc);    
     break;
   }
-  return &$((*qid)[1],(*field)[1],(*field)[2]);
+  return new {$((*qid)[1],(*field)[1],(*field)[2])};
 }
 
 static $(Opt_t<var>,tqual,typ)@ 
@@ -228,7 +228,7 @@ static void only_vardecl(list<stringptr> params,decl x) {
       abort(xprintf("%s is not listed as a parameter",
 		    *((*vd->name)[1])),x->loc);
     return;
-  case Let_d(_,_,_,_):   decl_kind = "let declaration";        break;
+  case Let_d(_,_,_,_,_): decl_kind = "let declaration";        break;
   case Fn_d(_):          decl_kind = "function declaration";   break;
   case Struct_d(_):      decl_kind = "struct declaration";     break;
   case Union_d:          decl_kind = "union declaration";      break;
@@ -261,8 +261,7 @@ static $(Opt_t<var>,tqual,typ)@ get_param_type($(list<decl>,segment)@ env,
       break;
     }
     if (zstrptrcmp((*vd->name)[1],x)==0)
-      // Fix: cast needed here
-      return &$((Opt_t<var>)&Opt((*vd->name)[1]),vd->tq,vd->type);
+      return new {$(new{Opt((*vd->name)[1])},vd->tq,vd->type)};
     else 
       return get_param_type(&$(tdl->tl,loc),x);
   default:

@@ -347,11 +347,11 @@ namespace Absyn {
   };
 
   EXTERN_DEFINITION struct Switch_clause {
-    pat               pattern;
-    Opt_t<list<qvar>> pat_vars; // set by type-checker, used by translation to C
-    exp_opt           where_clause;
-    stmt              body;
-    seg_t             loc;
+    pat                  pattern;
+    Opt_t<list<vardecl>> pat_vars; // set by type-checker, used downstream
+    exp_opt              where_clause;
+    stmt                 body;
+    seg_t                loc;
   };
 
   // only local and pat cases need to worry about shadowing
@@ -424,7 +424,11 @@ namespace Absyn {
   EXTERN_DEFINITION enum Raw_decl {
     Var_d(vardecl);
     Fn_d(fndecl);
-    Let_d(pat,Opt_t<typ>,exp,bool); // true => exhaustive
+    Let_d(pat,
+	  Opt_t<list<vardecl>>, // set by type-checker, used downstream
+	  Opt_t<typ>,
+	  exp,
+	  bool); // true => exhaustive
     Struct_d(structdecl);
     Union_d;
     Enum_d(enumdecl);

@@ -973,13 +973,13 @@ typ substitute(list<$(tvar,typ)@> inst, typ t) {
     for (let p = vs; p != null; p = p->tl)
       inst = &cons(&$(p->hd,VarType(p->hd)),inst);
     let $(qs,ts) = List::split(List::map(substitute_f1, args));
-    _   ts2      = substs(inst,ts);
-    _   args2    = List::map(substitute_f2, List::zip(qs,ts2));
+    let ts2      = substs(inst,ts);
+    let args2    = List::map(substitute_f2, List::zip(qs,ts2));
     return FnType(vs,substitute(inst,rtyp), args2, varargs);
   case TupleType(tqts):
     let $(tqs,ts) = List::split(tqts);
-    _   ts2       = substs(inst,ts);
-    _   tqts2     = List::zip(tqs,ts2);
+    let ts2       = substs(inst,ts);
+    let tqts2     = List::zip(tqs,ts2);
     return TupleType(tqts2);
   case Evar(_,r,_):
     if (r != null) return(substitute(inst,r->v));
@@ -1131,7 +1131,7 @@ void check_valid_rgn(segment loc,tenv te,list<tvar> bound_vars, typ t){
     let &$(tv,k) = pr;
     for(; bound_vars != null; bound_vars = bound_vars->tl) 
       if(String::zstrptrcmp((*bound_vars->hd)[0],tv)==0) {
-	_ bk = (*bound_vars->hd)[1];
+	let bk = (*bound_vars->hd)[1];
 	if((bk != RgnKind && bk != UnresolvedKind)
 	   || (k != RgnKind && k != UnresolvedKind)) {
 	  terr(loc, "Type variable used as region");
@@ -1392,7 +1392,7 @@ resolve_struct_designators<`a>(seg_t loc,
     let &$(dl,a) = des->hd;
     if(dl == null) {
       // grab first unused
-      _ fields2 = fields;
+      let fields2 = fields;
       for(; fields2 != null; fields2 = fields2->tl)
 	if(!(*fields2->hd)[1]) {
 	  (*fields2->hd)[1] = true;
@@ -1442,7 +1442,7 @@ resolve_struct_designators<`a>(seg_t loc,
 bool is_tagged_pointer_typ(typ t) {
   switch (compress(t)) {
   case PointerType(PtrInfo{_,_,_,_,b}):
-    _ b = compress_conref(b);
+    let b = compress_conref(b);
     switch (compress_conref(b)->v) {
     case Eq_constr(Unknown_b): return true;
     case No_constr: 
@@ -1495,7 +1495,7 @@ $(bool,typ) addressof_props(tenv te, exp e) {
     // we have an unboxed thing, so we inherit e2's region
     switch (compress(e1->topt->v)) {
     case StructType(_,_,&sd):
-      _ finfo = lookup_struct_field(sd,f);
+      let finfo = lookup_struct_field(sd,f);
       if(finfo != null)
 	return $((*finfo)[1]->q_const, addressof_props(te,e1)[1]);
       fallthru;
@@ -1507,7 +1507,7 @@ $(bool,typ) addressof_props(tenv te, exp e) {
     case PointerType(PtrInfo{t1,r,_,_,_}): 
       switch (compress(t1)) {
       case StructType(_,_,&sd):
-	_ finfo = lookup_struct_field(sd,f);
+	let finfo = lookup_struct_field(sd,f);
 	if(finfo != null)
 	  return $((*finfo)[1]->q_const, r);
 	fallthru;
@@ -1537,7 +1537,7 @@ $(bool,typ) addressof_props(tenv te, exp e) {
       return $(tq->q_const, addressof_props(te,e1)[1]);
     case TupleType(ts):
       // We need an lvalue in this unboxed case whereas "C w/ tuples" wouldn't.
-      _ finfo = lookup_tuple_field(ts,Evexp::eval_const_uint_exp(e2));
+      let finfo = lookup_tuple_field(ts,Evexp::eval_const_uint_exp(e2));
       if(finfo != null)
 	return $((*finfo)[0]->q_const, addressof_props(te,e1)[1]);
       return bogus_ans;
@@ -1545,7 +1545,7 @@ $(bool,typ) addressof_props(tenv te, exp e) {
       // boxed tuple case -- so the region is in the pointer type.
       switch(compress(t2)) {
       case TupleType(ts):
-	_ finfo = lookup_tuple_field(ts,Evexp::eval_const_uint_exp(e2));
+	let finfo = lookup_tuple_field(ts,Evexp::eval_const_uint_exp(e2));
 	if(finfo != null)
 	  return $((*finfo)[0]->q_const, r);
 	fallthru;

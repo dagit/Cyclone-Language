@@ -20,13 +20,14 @@ struct _xenum_struct _Match_Exception_struct = { _Match_Exception_tag };
 exn Match_Exception = &_Match_Exception_struct;
 
 struct _tagged_string xprintf(char *fmt, ...) {
+  char my_buff[1];
   va_list argp;
   int len1;
   int len2;
   struct _tagged_string result;
 
   va_start(argp,fmt);
-  len1 = vsnprintf(NULL,0,fmt,argp); // how much space do we need
+  len1 = vsnprintf(my_buff,0,fmt,argp); // how much space do we need
   va_end(argp);
 
   // Presumably the Cyclone typechecker rules this out, but check anyway

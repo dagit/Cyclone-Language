@@ -187,10 +187,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
 				  typ2string(t), typ2string(p->topt->v)));
       else
 	check_pat_regions(te,p);
-      let pvs = null;
-      for(let y=x; y!=null; y=y->tl)
-	pvs = &cons(y->hd->name, pvs);
-      scs->hd->pat_vars = &Opt(List::imp_rev(pvs));
+      scs->hd->pat_vars = &Opt(x);
       // type-checking the body will type-check any explicit fallthrus.
       pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body,
 		    scs->hd->where_clause, true);
@@ -215,10 +212,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
 				   typ2string(p->topt->v)));
       else
 	check_pat_regions(te,p);
-      let pvs = null;
-      for(_ y=x; y!=null; y=y->tl)
-	pvs = &cons(y->hd->name, pvs);
-      scs->hd->pat_vars = &Opt(List::imp_rev(pvs));
+      scs->hd->pat_vars = &Opt(x);
       // type-checking the body will type-check any explicit fallthrus
       pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body,
 		    scs->hd->where_clause, true);
@@ -278,12 +272,13 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
       tcStmt(set_encloser(add_local_var(s->loc,te,vd),s0),s,false);
       return;
 
-    case Let_d(p,*topt_ref,e,*exhaust):
+    case Let_d(p,*vds,*topt_ref,e,*exhaust):
       let topt = *topt_ref;
       // FIX:  should we use tcExpInitializer?
       tcExp(te,null,e);
       *topt_ref = e->topt; // side effect
       let &$(new_tvs,x) = tcPat(te,p,null);//FIX: can pass region if e an lvalue
+      *vds = &Opt(x);
       // FIX: if let-declarations were of the form "let pat = e in S" then
       // we could allow any type variables within e to be used within S.
       if (new_tvs != null)

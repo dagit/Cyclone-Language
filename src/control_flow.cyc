@@ -508,9 +508,20 @@ static flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
     exp_opt e = vd->initializer;
     if(e == null)
       return cf_check_stmt(add_unassigned(env,vd), s);
-    fallthru((exp)e,s);
-  case Decl_s(&Decl(Let_d(_,_,e,_),_),s):
-    return cf_check_stmt(expsynth_to_flow(cf_check_exp(env,e)), s);
+    // vd is unassigned in e (important only if e has a jump in it)
+    let e_env = add_unassigned(env,vd);
+    let s_env = remove_unassigned(expsynth_to_flow(cf_check_exp(e_env,(exp)e)),
+				  vd);
+    return cf_check_stmt(s_env,s);
+  case Decl_s(&Decl(Let_d(_,&Opt(vds),_,e,_),_),s):
+    // vds are unassigned in e (important only if e has a jump in it)
+    let e_env = env;
+    for(_ vds2 = vds; vds2 != null; vds2 = vds2->tl)
+      e_env = add_unassigned(env,vds2->hd);
+    let s_env = expsynth_to_flow(cf_check_exp(e_env,e));
+    for(_ vds2 = vds; vds2 != null; vds2 = vds2->tl)
+      s_env = remove_unassigned(env,vds2->hd);
+    return cf_check_stmt(s_env,s);
   // all the work necessary for non-local control flow is done by the jumpers
   case Label_s(_,s):
     return cf_check_stmt(env,s);

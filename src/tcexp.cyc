@@ -715,8 +715,18 @@ static typ tcAddress<`r>(tenv te, segment loc, typ *`r topt, exp e) {
   switch (e->r) {
   case Struct_e(_,_,_,_): fallthru;
   case Tuple_e(_):
-    typ t = at_typ(e->topt->v,HeapRgnType,tq2);
-    return t;
+    // We can avoid casts if we check if we've been passed down
+    // a nullable type.
+    let ptr_maker = at_typ;
+    if(topt != null)
+      switch (compress(*topt)) {
+      case PointerType(PtrInfo{_,_,n,_,_}): 
+	if(conref_val(n))
+	  ptr_maker = star_typ; 
+	break;
+      default: break;
+      }
+    return ptr_maker(e->topt->v,HeapRgnType,tq2);
   default: break;
   }
 
