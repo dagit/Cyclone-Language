@@ -265,6 +265,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
   case &FreeE(_):
   case &ResizeE(_):
   case &GcE(_): break;
+  case &GcAddToHeapE(_): break;
   }
   return true;
 } 

@@ -54,6 +54,12 @@ namespace Aprof {
     unsigned int num;
     struct RegionStats heap_region_stats;
   };
+  struct GcAddToHeapEvent {
+    clock_t time;
+    unsigned int address;
+    unsigned int amount;
+    struct RegionStats heap_region_stats;
+  };
   struct ReclaimEvent {
     clock_t time;
     unsigned int address;
@@ -77,6 +83,7 @@ namespace Aprof {
   };
   typedef struct AllocEvent alloc_event_t;
   typedef struct GcEvent gc_event_t;
+  typedef struct GcAddToHeapEvent gcaddtoheap_event_t;
   typedef struct ReclaimEvent reclaim_event_t;
   typedef struct CreateEvent create_event_t;
   typedef struct ResizeEvent resize_event_t;
@@ -87,6 +94,7 @@ namespace Aprof {
   EXTERN_APROF datatype AProfEvent {
     AllocE(alloc_event_t);
     GcE(gc_event_t);
+    GcAddToHeapE(gcaddtoheap_event_t);
     ReclaimE(reclaim_event_t);
     CreateE(create_event_t);
     ResizeE(resize_event_t);
@@ -114,10 +122,34 @@ namespace Aprof {
 
   extern int generate_newgraph(string_t<`H> file);
   extern int generate_svg(string_t<`H> file);
+  extern int generate_svg2(string_t<`H> file);
+  extern int generate_svg3(string_t<`H> file);
 
   // Uses proc_file above to generate a tabular summary of per-region
   // allocation information.
   extern int generate_summary(string_t<`H> file);
+
+  // Statistics
+  extern clock_t max_time;
+
+  extern unsigned int num_create_events;
+  extern unsigned int num_alloc_events;
+  extern unsigned int num_free_events;
+  extern unsigned int num_reclaim_events;
+  extern unsigned int num_resize_events;
+  extern unsigned int num_gc_events;
+  extern unsigned int num_gc_add_to_heap;
+
+  extern unsigned int num_alloc_heap;
+  extern unsigned int bytes_alloc_heap;
+  extern unsigned int num_reclaim_heap;
+
+  extern unsigned int num_alloc_unique;
+  extern unsigned int bytes_alloc_unique;
+  extern unsigned int num_freed_unique;
+  extern unsigned int bytes_freed_unique;
+  extern unsigned int num_reclaim_unique;
+
 }
 
 #endif

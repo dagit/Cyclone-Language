@@ -530,6 +530,10 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     env->gc_points = new List(new $(env->cnt,env->total_heap_size),
 			      env->gc_points);
     break;
+
+  case &GcAddToHeapE(GcAddToHeapEvent(time,addr,amt,*rstats)):
+    update_heap_stats(env,rstats);
+    break;
   }
 
   return true;

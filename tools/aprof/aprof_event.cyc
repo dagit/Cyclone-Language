@@ -37,6 +37,28 @@ namespace Aprof;
 using Core;
 using Aprof;
 
+///////////////////////////// STATISTICS /////////////////////////////
+
+clock_t max_time = 0;
+
+unsigned int num_create_events = 0;
+unsigned int num_alloc_events = 0;
+unsigned int num_free_events = 0;
+unsigned int num_reclaim_events = 0;
+unsigned int num_resize_events = 0;
+unsigned int num_gc_events = 0;
+unsigned int num_gc_add_to_heap = 0;
+
+unsigned int num_alloc_heap = 0;
+unsigned int bytes_alloc_heap = 0;
+unsigned int num_reclaim_heap = 0;
+
+unsigned int num_alloc_unique = 0;
+unsigned int bytes_alloc_unique = 0;
+unsigned int num_freed_unique = 0;
+unsigned int bytes_freed_unique = 0;
+unsigned int num_reclaim_unique = 0;
+
 //////////////////// LEXING/PARSING ROUTINES //////////////////////
 
 static char buf[1000]@zeroterm;
@@ -112,6 +134,8 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
     AllocE(AllocEvent(0,"@","@",0,RegionStats(0,0,0),0));
   static datatype AProfEvent.GcE __gc_event =
     GcE(GcEvent(0,0,RegionStats(0,0,0)));
+  static datatype AProfEvent.GcAddToHeapE __gcaddtoheap_event =
+    GcAddToHeapE(GcAddToHeapEvent(0,0,0,RegionStats(0,0,0)));
   static datatype AProfEvent.ReclaimE __reclaim_event =
     ReclaimE(ReclaimEvent(0,0));
   static datatype AProfEvent.CreateE __create_event =
@@ -153,6 +177,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
 
     // get the time
     clock_t t = atoi(buf);
+    if (max_time < t) max_time = t;
 
     // get the location
     if (!gettoken(f)) {
@@ -187,6 +212,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       *time = t;
       *loc = s;
       *rgn = rname;
+      num_create_events++;
       // invoke the handler
       if (!Fn::apply(callback,&__create_event)) {
 	fprintf(stderr,"callback failed for create event at %s\n",s);
@@ -206,6 +232,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       }
       *time = t;
       *rgn = rname;
+      num_free_events++;
       // invoke the handler
       if (!Fn::apply(callback,&__free_event)) {
 	fprintf(stderr,"callback failed for free event at %s\n",s);
@@ -229,6 +256,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       }
       *time = t;
       *rgn = rname;
+      num_resize_events++;
       // invoke the handler
       if (!Fn::apply(callback,&__resize_event)) {
 	fprintf(stderr,"callback failed for resize event at %s\n",s);
@@ -248,9 +276,38 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       }
       *time = t;
       *amt = *amt + 1;
+      num_gc_events++;
       // invoke the handler
       if (!Fn::apply(callback,&__gc_event)) {
 	fprintf(stderr,"callback failed for gc event at %s\n",s);
+	return -1;
+      }
+    }
+
+    /************/
+    /* GC add to heap event */
+    /************/
+    else if  (!strcmp(buf,"gc_add_to_heap")) {
+      // set up the event
+      let &GcAddToHeapE(GcAddToHeapEvent(*time,*addr,*amt,*stats)) =
+        &__gcaddtoheap_event;
+      if (!gethex(f, addr)) {
+	fprintf(stderr,"failed to get address for %s\n",s);
+	return -1;
+      }
+      if (!getint(f,amt)) {
+	fprintf(stderr,"failed to get alloc amount for %s\n",s);
+	return -1;
+      }
+      if (!get_region_stats(f, stats)) {
+	fprintf(stderr,"failed to get region stats for %s\n",s);
+	return -1;
+      }
+      *time = t;
+      num_gc_add_to_heap++;
+      // invoke the handler
+      if (!Fn::apply(callback,&__gcaddtoheap_event)) {
+	fprintf(stderr,"callback failed for gcaddtoheap event at %s\n",s);
 	return -1;
       }
     }
@@ -266,6 +323,13 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
 	return -1;
       }
       *time = t;
+      num_reclaim_events++;
+      if (strcmp("unique",rname) == 0) {
+        num_reclaim_unique++;
+      }
+      else if (strcmp("heap",rname) == 0) {
+        num_reclaim_heap++;
+      }
       // invoke the handler
       if (!Fn::apply(callback,&__reclaim_event)) {
 	fprintf(stderr,"callback failed for reclaim event at %s\n",s);
@@ -295,6 +359,21 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       *time = t;
       *loc = s;
       *rgn = rname;
+      num_alloc_events++;
+      if (strcmp(rname,"unique") == 0) {
+        if (*amt > 0) {
+          bytes_alloc_unique += *amt;
+          num_alloc_unique++;
+        }
+        else {
+          bytes_freed_unique -= *amt;
+          num_freed_unique++;
+        }
+      }
+      else if (!strcmp(rname,"heap")) {
+        bytes_alloc_heap += *amt;
+        num_alloc_heap++;
+      }
       // invoke the handler
       if (!Fn::apply(callback,&__alloc_event)) {
 	fprintf(stderr,"callback failed for alloc event at %s\n",s);

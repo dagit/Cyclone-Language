@@ -1124,6 +1124,19 @@ void * _profile_GC_malloc_atomic(int n, const char *file, const char *func,
 
 #endif
 
+// Called from gc/alloc.c for allocation profiling.  Must be
+// defined even if CYC_REGION_PROFILE is not.
+void CYCALLOCPROFILE_GC_add_to_heap(void *p,unsigned long bytes) {
+#ifdef CYC_REGION_PROFILE
+  if (alloc_log != NULL) {
+    fprintf(alloc_log,"%u @\theap\tgc_add_to_heap\t%x\t%u\t%d\t%d\t%d\n",
+            clock(),
+            (unsigned int)p,bytes,
+	    GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes());
+  }
+#endif
+}
+
 /******* for turning off gc warnings about blacklisted blocks *******/
 /* These type/macro defns are taken from gc/include/gc.h and must
    be kept in sync. */

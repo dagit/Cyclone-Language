@@ -306,29 +306,12 @@ static void update_heap_stats(struct ProcEnv @env,
   add_point(env->mem_total,s->region_size_bytes);
 }
 
-static unsigned int num_create_events = 0;
-static unsigned int num_alloc_events = 0;
-static unsigned int num_free_events = 0;
-static unsigned int num_reclaim_events = 0;
-static unsigned int num_resize_events = 0;
-static unsigned int num_gc_events = 0;
-
-static unsigned int num_alloc_heap = 0;
-static unsigned int bytes_alloc_heap = 0;
-static unsigned int num_reclaim_heap = 0;
 static unsigned int bytes_reclaim_heap = 0;
-
-static unsigned int num_alloc_unique = 0;
-static unsigned int bytes_alloc_unique = 0;
-static unsigned int num_freed_unique = 0;
-static unsigned int bytes_freed_unique = 0;
-static unsigned int num_reclaim_unique = 0;
 static unsigned int bytes_reclaim_unique = 0;
 
 static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
   switch (event) {
   case &CreateE(CreateEvent(time,_,rname,*rstats)):
-    num_create_events++;
     let rnameptr = new rname;
 
     assert(strcmp("unique",rname));
@@ -339,7 +322,6 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     break;
 
   case &AllocE(AllocEvent(time,_,rname,count,*rstats,addr)):
-    num_alloc_events++;
     if (!strcmp(rname,"unique")) {
       mark_delta(env->unique_live,count);
       update_heap_stats(env,rstats);
@@ -347,14 +329,10 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
         // remember count for addr in case gc reclaims addr
         Hashtable::insert((_@)allocation_at_address_table,
                           addr,new $("unique",(unsigned int)count));
-        bytes_alloc_unique += count;
-        num_alloc_unique++;
       }
       else {
         // gc did not reclaim, this is ufree, forget addr/count
         Hashtable::remove((_@)allocation_at_address_table, addr);
-        bytes_freed_unique += count;
-        num_freed_unique++;
       }
     }
     else if (!strcmp(rname,"refcnt")) {
@@ -366,8 +344,6 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
       update_heap_stats(env,rstats);
       Hashtable::insert((_@)allocation_at_address_table,
                         addr,new $("heap",(unsigned int)count));
-      bytes_alloc_heap += count;
-      num_alloc_heap++;
     }
     else {
       mark_delta(env->other_live,count);
@@ -388,7 +364,6 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     break;
 
   case &ReclaimE(ReclaimEvent(time,addr)):
-    num_reclaim_events++;
     // this is a unique pointer object that got garbage collected
     try {
       let &$(rname,count) =
@@ -398,12 +373,10 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
       if (strcmp("unique",rname) == 0) {
         mark_delta(env->unique_live,delta_y);
         bytes_reclaim_unique += count;
-        num_reclaim_unique++;
       }
       else if (strcmp("heap",rname) == 0) {
         mark_delta(env->heap_live,delta_y);
         bytes_reclaim_heap += count;
-        num_reclaim_heap++;
       }
     }
     catch {
@@ -421,7 +394,6 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     assert(strcmp("heap",rname));
     assert(strcmp("refcnt",rname));
 
-    num_free_events++;
     let rname_p = new rname;
     unsigned int x = 0;
     try {
@@ -440,7 +412,6 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     assert(strcmp("heap",rname));
     assert(strcmp("refcnt",rname));
 
-    num_resize_events++;
     // The count is the new size of the region -- ignore
     // mark_delta(env->other_live,count);
 
@@ -449,11 +420,14 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     break;
 
   case &GcE(GcEvent(time,n,*rstats)):
-    num_gc_events++;
     update_heap_stats(env,rstats);
     unsigned int x = Xarray::length((_@)events);
     env->gc_points = new List(new $(x,rstats->region_size_bytes),
 			      env->gc_points);
+    break;
+
+  case &GcAddToHeapE(GcAddToHeapEvent(time,addr,amt,*rstats)):
+    update_heap_stats(env,rstats);
     break;
   }
 
