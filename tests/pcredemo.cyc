@@ -1,0 +1,150 @@
+/* This file demonstrates how to interface Cyclone to an existing C library,
+ * notably the Perl-compatible regular expression library (pcre).  
+ *
+ * It is adapted from the man page for pcre which has the following
+ * copyright notice:
+ *
+ * AUTHOR
+ *    Philip Hazel <ph10@cam.ac.uk>
+ *    University Computing Service,
+ *    New Museums Site,
+ *    Cambridge CB2 3QG, England.
+ *    Phone: +44 1223 334714
+ *
+ *    Last updated: 15 August 2001
+ *    Copyright (c) 1997-2001 University of Cambridge.
+ */
+#include <core.h>   /* these includes ensure we get Cyclone's libraries */
+#include <stdio.h>  /* outside of the extern "C include".               */
+#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
+
+/* Put the unsafe C interface in a separate namespace. */
+namespace UnsafePcre {
+extern "C include" {  /* tell Cyclone that <pcre.h> is C code */
+#include <pcre.h>     /* include the pcre C interface */
+} export {
+  pcre_compile, pcre_exec; /* export these functions */
+}}
+
+
+/* Make a nice wrapper for the unsafe C code */
+namespace Pcre {
+  typedef UnsafePcre::pcre pcre;
+  typedef UnsafePcre::pcre_extra pcre_extra;
+
+  /* wrapper for pcre_compile -- doesn't do much */
+  pcre *pcre_compile(const char ?pattern, int options, 
+                     const char *`H *errptr, int *erroffset,
+                     unsigned char ?tableptr) {
+    return UnsafePcre::pcre_compile(pattern, options, errptr, erroffset,
+                                    tableptr == NULL ? NULL : 
+                                    (unsigned char *)tableptr);
+  }
+
+  /* wrapper for pcre_exec -- checks that sizes and offsets are in bounds */
+  int pcre_exec(const pcre @code, const pcre_extra *extra, 
+                const char ?subject, int length, int startoffset,
+                int options, int ?ovector, int ovecsize) {
+    assert(length >= 0 && subject.size >= length);
+    assert(startoffset >= 0 && startoffset < length);
+    assert(ovecsize >= 0 && ovector.size >= ovecsize);
+    return UnsafePcre::pcre_exec(code, extra, subject, length, startoffset,
+                                 options, ovector, ovecsize);
+  }
+}
+
+/* Open up the safe Pcre namespace for the client */
+using Pcre;
+  
+
+/* Here is the original demo for using the Pcre library */
+#define OVECCOUNT 30    /* should be a multiple of 3 */
+
+int main(int argc, const char ?`H ?`H argv)
+{
+  pcre *re;
+  const char *error = NULL;
+  int erroffset;
+  int ovector[OVECCOUNT];
+  int rc, i;
+  
+  if (argc != 3)
+    {
+      printf("Two arguments required: a regex and a "
+             "subject string\n");
+      return 1;
+    }
+
+  /* Compile the regular expression in the first argument */
+
+  re = pcre_compile(
+         argv[1],     /* the pattern */
+         0,           /* default options */
+         &error,      /* for error message */
+         &erroffset,  /* for error offset */
+         NULL);       /* use default character tables */
+
+  /* Compilation failed: print the error message and exit */
+
+  if (re == NULL)
+    {
+      printf("PCRE compilation failed at offset %d: %s\n",
+             erroffset, error);
+      return 1;
+    }
+
+  /* Compilation succeeded: match the subject in the second
+     argument */
+
+  rc = pcre_exec(
+         re,          /* the compiled pattern */
+         NULL,        /* we didn't study the pattern */
+         argv[2],     /* the subject string */
+         (int)strlen(argv[2]), /* the length of the subject */
+         0,           /* start at offset 0 in the subject */
+         0,           /* default options */
+         ovector,     /* vector for substring information */
+         OVECCOUNT);  /* number of elements in the vector */
+
+  /* Matching failed: handle error cases */
+
+  if (rc < 0)
+    {
+      switch(rc)
+        {
+        case PCRE_ERROR_NOMATCH: printf("No match\n"); break;
+          /*
+            Handle other special cases if you like
+          */
+        default: printf("Matching error %d\n", rc); break;
+        }
+      return 1;
+    }
+
+  /* Match succeded */
+  
+  printf("Match succeeded\n");
+
+  /* The output vector wasn't big enough */
+
+  if (rc == 0)
+    {
+      rc = OVECCOUNT/3;
+      printf("ovector only has room for %d captured substrings\n", rc - 1);
+    }
+
+  /* Show substrings stored in the output vector */
+  
+  for (i = 0; i < rc; i++)
+    {
+      const char ?substring_start = argv[2] + ovector[2*i];
+      int substring_length = ovector[2*i+1] - ovector[2*i];
+      printf("%2d: %.*s\n", i, substring_length,
+             substring_start);
+    }
+  
+  return 0;
+}
+

@@ -12,12 +12,13 @@ CYCC=../build/boot/cyclone$(EXE)
 CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c
 endif
 
-all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt)
+all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt pcredemo)
 	./test_regions
 	./cyctest
 	./foo < foo_input
 	./histogram histogram.txt
 	./test_getopt -abc123
+	./pcredemo "cat" "The cat in the hat walked in on the mat."
 
 hello$(EXE): hello.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
@@ -45,6 +46,9 @@ histogram$(EXE): histogram.o
 
 test_getopt$(EXE): test_getopt.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
+
+pcredemo$(EXE): pcredemo.o
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS) -lpcre
 
 unsafe_cast.o: unsafe_cast.c
 	$(CC) -c $< -o $@
@@ -77,7 +81,7 @@ genrep_test$(EXE):  genrep_test.o muttrep.o
 
 clean:
 	$(RM) $(addsuffix .[oc], genrep_test genrep_read genrep_write hello bytes cyctest foo histogram test_getopt typeref typerep_test test_regions)\
-	$(RM) foo_tab.* unsafe_cast.o
+	$(RM) foo_tab.* unsafe_cast.o pcredemo.o pcredemo.c pcredemo
 	$(RM) hello cyctest foo histogram merge_sort test_getopt
 	$(RM) test_regions genrep_write genrep_read genrep_test rep
 	$(RM) typerep_test
