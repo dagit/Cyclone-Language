@@ -116,6 +116,7 @@ CYCLONE_SRCS:=absyn\
          new_control_flow\
          interface\
 	 tcdecl\
+         port\
 	 cyclone
 
 CYCDOC_SRCS:=cycdoc\
