@@ -29,7 +29,8 @@ fi
 # Note: under Cygwin, pwd can return a path name containing a colon.
 #  Such path names don't work in make's VPATH, so we convert them
 #  to path names without colons using the cygpath command.
-if [[ $OS == cygwin* ]]; then
+IS_CYGWIN=`echo $OS | sed -n '/^cygwin/p'`
+if [ -n "$IS_CYGWIN" ]; then
   PWD=`pwd`
   CYCDIR=`cygpath -u "$PWD"`
 else
@@ -39,7 +40,7 @@ fi
 # Decide on a built-in command to find commands.  In ksh this is
 #  command -v and in bash it is type -p.  The 'which' command is
 #  giving me trouble on solaris so I resort to this.
-if [[ $BASH = "" ]]; then # ksh
+if [ $BASH = "" ]; then # ksh
   WHICH='command -v'
 else
   WHICH='type -p'

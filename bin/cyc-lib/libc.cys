@@ -2429,6 +2429,7 @@ EOF
 P_tmpdir
 fpos_t
 size_t
+off_t
 }
 hstub {
   // NOTES:
@@ -3693,7 +3694,7 @@ hstub {
   #endif
 }
 hstub {
-  /* FIX: OS X and OpenBSD define a struct fd_set and then a typedef
+  /* FIX: OS X and *BSD define a struct fd_set and then a typedef
      with the same name.  Our current scheme for omitting repeated
      declarations does not use separate namespaces for structs and
      typedefs, so the typedef is omitted by mistake.  This ugly hack
@@ -3704,6 +3705,9 @@ hstub {
   typedef struct fd_set fd_set;
   #endif
   #ifdef __OpenBSD__
+  typedef struct fd_set fd_set;
+  #endif
+  #ifdef __FreeBSD__
   typedef struct fd_set fd_set;
   #endif
   #endif

@@ -698,12 +698,11 @@ bool mem(int cmp(`a,`a), list_t<`a> l, `a x) {
 // and will return the whole list (in case it's the first
 // element that is removed).
 list_t<`a,`r::R> delete(list_t<`a,`r::R> l, `a x) {
-  if (l == NULL) throw Core::Not_found;
-  struct List @ prev = l;
+  list_t<`a,`r> prev = NULL;
   let iter = l;
   while (iter != NULL) {
     if (iter->hd == x) {
-      if (prev == l)
+      if (prev == NULL)
 	return l->tl;
       else {
 	prev->tl = iter->tl;

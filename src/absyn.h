@@ -387,6 +387,7 @@ namespace Absyn {
                int);  // first arg to type-check
     Initializes_att(int); // param that function initializes through
     Pure_att;
+    Mode_att(string_t);
   };
 
   // Type modifiers are used for parsing/pretty-printing

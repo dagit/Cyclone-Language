@@ -277,6 +277,22 @@ update_all_archs:
 update_devel_archs:
 	$(MAKE) update_all_archs ALL_ARCHS="$(DEVEL_ARCHS)"
 
+# to add a new architecture
+new_arch:
+	cd bin/genfiles; echo "ADDING ARCH $(UPDATEARCH)";\
+	./extract_patch $(PATCH_ARCH) $(UPDATEARCH);\
+	if [ $$? = 1 ]; then \
+	  mkdir $(UPDATEARCH); \
+	  mkdir $(UPDATEARCH)/src; \
+	  mkdir $(UPDATEARCH)/lib; \
+	else \
+	  echo "Error: architecture directory exists!"; \
+	  exit 1;\
+	fi;\
+	touch $(UPDATEARCH).patch;\
+	cd ../..; \
+	$(MAKE) UPDATEARCH=$(UPDATEARCH) update;
+
 # a little testing (much more is in the tests directory)
 test:
 	$(MAKE) -C tests CYCFLAGS="-g -save-c -pp"

@@ -615,8 +615,8 @@ static decl_t v_typ_to_typedef(seg_t loc, $(qvar_t,tqual_t,type_t,list_t<tvar_t,
   // tell the lexer that x is a typedef identifier
   Lex::register_typedef(x);
   if (atts != NULL)
-    err(aprintf("bad attribute %s within typedef", attribute2string(atts->hd)),
-	loc);
+    Tcutil::warn(loc,aprintf("attribute %s within in typedef",
+			     attribute2string(atts->hd)));
   // if the "type" is an evar, then the typedef is abstract
   opt_t<kind_t> kind;
   opt_t<type_t> type;
@@ -760,8 +760,8 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
         decls = new List(d,decls);
       }
       if (atts != NULL)
-        err(aprintf("bad attribute %s in typedef",attribute2string(atts->hd)),
-            loc);
+	Tcutil::warn(loc,aprintf("attribute %s in typedef; ignoring",
+				 attribute2string(atts->hd)));
       return decls;
     } else {
       // here, we have a bunch of variable declarations
@@ -1244,6 +1244,19 @@ attribute:
     attribute_t a;
     if (zstrcmp(s,"section") == 0 || zstrcmp(s,"__section__") == 0)
       a = new Section_att(str);
+    else {
+      err("unrecognized attribute",LOC(@1,@1));
+      a = Cdecl_att;
+    }
+    $$=^$(a);
+  }
+| IDENTIFIER '(' IDENTIFIER ')'
+  { let s = $1;
+    let str = $3;
+    attribute_t a;
+    // showed up in FreeBSD
+    if (zstrcmp(s,"__mode__") == 0)
+      a = new Mode_att(str);
     else {
       err("unrecognized attribute",LOC(@1,@1));
       a = Cdecl_att;

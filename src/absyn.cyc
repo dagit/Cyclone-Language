@@ -736,7 +736,8 @@ string_t attribute2string(attribute_t a) {
   case &Format_att(Scanf_ft,n,m):  return aprintf("format(scanf,%u,%u)", n,m);
   case &Initializes_att(n): return aprintf("initializes(%d)",n);
   case Pure_att: return "pure";
-  }
+  case &Mode_att(s): return aprintf("__mode__(\"%s\")",s); 
+ }
 }
 
 // returns true when a is an attribute for function types
