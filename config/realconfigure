@@ -31,7 +31,7 @@ fi
 #  to path names without colons using the cygpath command.
 if [[ $OS == cygwin* ]]; then
   PWD=`pwd`
-  CYCDIR=`cygpath -u $PWD`
+  CYCDIR=`cygpath -u "$PWD"`
 else
   CYCDIR=`pwd`
 fi
