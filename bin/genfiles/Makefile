@@ -16,6 +16,8 @@ install: $(ARCH) $(addprefix $(CYC_LIB_PATH)/, $(CYCLIB) nogc.a)\
 	if [ -f "$(ARCH).patch" ]; then $(RM) -r $(ARCH); fi
 $(CYC_LIB_PATH)/$(CYCLIB): $(ARCH)/lib/$(CYCLIB)
 	cp $< $@
+$(CYC_LIB_PATH)/nocheck_$(CYCLIB): $(ARCH)/lib/$(CYCLIB)
+	cp $< $@
 $(CYC_LIB_PATH)/nogc.a: $(ARCH)/lib/nogc.a
 	cp $< $@
 $(CYC_BIN_PATH)/cyclone$(EXE): $(ARCH)/src/cyclone$(EXE)
@@ -32,6 +34,12 @@ $(CYC_LIB_PATH)/libcyc_a.a: $(ARCH)/lib/libcyc_a.a
 $(CYC_LIB_PATH)/nogc_a.a: $(ARCH)/lib/nogc_a.a
 	cp $< $@
 
+
+install_nocheck: $(ARCH) $(CYC_LIB_PATH)/libcyc_nocheck.a $(CYC_LIB_PATH)/nogc.a
+
+$(CYC_LIB_PATH)/libcyc_nocheck.a: $(ARCH)/lib/libcyc_nocheck.a
+	cp $< $@
+
 # architecture-specific targets
 
 $(ARCH):
@@ -44,6 +52,12 @@ $(ARCH)/lib/$(CYCLIB): $(addprefix $(ARCH)/lib/, $(O_LIBS) $(RUNTIME).o)
 	-ranlib $@
 
 $(ARCH)/lib/libcyc_a.a: $(addprefix $(ARCH)/lib/, $(A_LIBS) a_$(RUNTIME).o)
+	-$(RM) $@
+	ar rc $@ $^
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
+
+$(ARCH)/lib/libcyc_nocheck.a: $(addprefix $(ARCH)/lib/, $(NOCHECK_LIBS) $(RUNTIME).o)
 	-$(RM) $@
 	ar rc $@ $^
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
@@ -78,7 +92,7 @@ $(ARCH)/src/install_path.c: ../../Makefile.inc
 	  echo "char *Ccomp = \"$(CC)\";") > $@
 
 clean_arch:
-	$(RM) $(addprefix $(ARCH)/lib/, $(CYCLIB) libcyc_a.a nogc.a $(O_LIBS) $(A_LIBS) nogc.o $(RUNTIME).o a_$(RUNTIME).o)
+	$(RM) $(addprefix $(ARCH)/lib/, $(CYCLIB) libcyc_nocheck.a libcyc_a.a nogc.a $(O_LIBS) $(A_LIBS) $(NOCHECK_LIBS) nogc.o $(RUNTIME).o a_$(RUNTIME).o nocheck_$(RUNTIME).o)
 	$(RM) $(addprefix $(ARCH)/src/, $(O_SRCS) cyclone$(EXE) install_path.*)
 
 clean:
@@ -95,6 +109,9 @@ $(ARCH)/src/%.o: $(ARCH)/src/%.c
 
 a_%.o: %.c
 	$(CC) -c -o $@ -DCYC_REGION_PROFILE $(CFLAGS) $<
+
+nocheck_%.o: %.c
+	$(CC) -c -o $@ -DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(CFLAGS) $<
 
 # for creating genfiles from patches
 

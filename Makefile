@@ -36,7 +36,7 @@ CYC_INC_PATH := $(CYCDIR)/lib
 CYCC:=$(CYC_BIN_PATH)/$(CYCCOMP) 
 OUT_PREFIX=
 
-build: $(CYC_LIB_PATH)/gc.a cyclone tools aprof libs
+build: $(CYC_LIB_PATH)/gc.a cyclone tools aprof nocheck libs
 
 # This target builds off the C files in bin/genfiles
 cyclone:
@@ -105,6 +105,10 @@ cyclone_src: lib_src
 	$(MAKE) -C src
 lib_src:
 	$(MAKE) -C lib
+
+#Non-null/bounds checked version of the library
+nocheck:
+	$(MAKE) install_nocheck -C bin/genfiles
 
 # Allocation profiler and its special version of the Cyclone library
 aprof:

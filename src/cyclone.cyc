@@ -62,6 +62,7 @@ static bool save_temps_r = false;
 static bool save_c_r   = false;
 static bool nogc_r     = false;
 static bool pa_r       = false;
+static bool nocheck_r  = false;
 static bool add_cyc_namespace_r = true;
 static bool generate_line_directives_r = false;
 static bool print_full_evars_r = false;
@@ -182,6 +183,7 @@ static void set_nonullchecks() {
 static void set_nochecks() {
   set_noboundschecks();
   set_nonullchecks();
+  nocheck_r = true;
 }
 
 static void set_nocyc() {
@@ -960,10 +962,21 @@ int main(int argc, string_t<`H> ?`H argv) {
 
     // FIX: -pg should get different versions of the libraries?
     //      What about -g?
-    string_t libcyc_filename = pa_r ? "libcyc_a.a" : "libcyc.a";
-    string_t nogc_filename = pa_r ? "nogc_a.a" : "nogc.a";
-    string_t gc_filename = "gc.a"; 
-
+    string_t libcyc_filename;
+    string_t nogc_filename;
+    string_t gc_filename; 
+    if(pa_r) {
+      libcyc_filename = "libcyc_a.a";
+      nogc_filename = "nogc_a.a";
+    } else if(nocheck_r) {
+      libcyc_filename = "libcyc_nocheck.a";
+      nogc_filename = "nogc_nocheck.a";
+    } else {
+      libcyc_filename = "libcyc.a";
+      nogc_filename = "nogc.a";
+    }
+    gc_filename = "gc.a";
+ 
     let libcyc = do_find(cyclone_lib_path,libcyc_filename);
     let gc = (nogc_r ?
               do_find(cyclone_lib_path,nogc_filename):
