@@ -1684,27 +1684,27 @@ return;}case 5: _Tmp4=((struct Cyc_Absyn_While_s_Absyn_Raw_stmt_struct*)_Tmp0)->
 Cyc_Port_gen_stmt(env,s);
 return;}case 6:
  goto _LL10;case 7: _LL10:
- goto _LL12;case 8: _LL12:
+ goto _LL12;case 11: _LL12:
+ goto _LL14;case 8: _LL14:
  return;case 9: _Tmp4=((struct Cyc_Absyn_For_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;_Tmp3=((struct Cyc_Absyn_For_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2.f0;_Tmp2=((struct Cyc_Absyn_For_s_Absyn_Raw_stmt_struct*)_Tmp0)->f3.f0;_Tmp1=((struct Cyc_Absyn_For_s_Absyn_Raw_stmt_struct*)_Tmp0)->f4;{struct Cyc_Absyn_Exp*e1=_Tmp4;struct Cyc_Absyn_Exp*e2=_Tmp3;struct Cyc_Absyn_Exp*e3=_Tmp2;struct Cyc_Absyn_Stmt*s=_Tmp1;
-# 1564
+# 1565
 Cyc_Port_gen_exp(0,env,e1);
 ({void*_Tmp5=Cyc_Port_gen_exp(0,env,e2);Cyc_Port_leq(_Tmp5,Cyc_Port_arith_ct());});
 Cyc_Port_gen_exp(0,env,e3);
 Cyc_Port_gen_stmt(env,s);
 return;}case 10: _Tmp4=((struct Cyc_Absyn_Switch_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;_Tmp3=((struct Cyc_Absyn_Switch_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Exp*e=_Tmp4;struct Cyc_List_List*scs=_Tmp3;
-# 1570
+# 1571
 ({void*_Tmp5=Cyc_Port_gen_exp(0,env,e);Cyc_Port_leq(_Tmp5,Cyc_Port_arith_ct());});
 for(1;(unsigned)scs;scs=scs->tl){
 Cyc_Port_gen_stmt(env,((struct Cyc_Absyn_Switch_clause*)scs->hd)->body);}
 return;}case 12: _Tmp4=((struct Cyc_Absyn_Decl_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;_Tmp3=((struct Cyc_Absyn_Decl_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Decl*d=_Tmp4;struct Cyc_Absyn_Stmt*s=_Tmp3;
-# 1575
+# 1576
 env=Cyc_Port_gen_localdecl(env,d,0);Cyc_Port_gen_stmt(env,s);return;}case 13: _Tmp4=((struct Cyc_Absyn_Label_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Stmt*s=_Tmp4;
 Cyc_Port_gen_stmt(env,s);return;}case 14: _Tmp4=((struct Cyc_Absyn_Do_s_Absyn_Raw_stmt_struct*)_Tmp0)->f1;_Tmp3=((struct Cyc_Absyn_Do_s_Absyn_Raw_stmt_struct*)_Tmp0)->f2.f0;{struct Cyc_Absyn_Stmt*s=_Tmp4;struct Cyc_Absyn_Exp*e=_Tmp3;
-# 1578
+# 1579
 Cyc_Port_gen_stmt(env,s);
 ({void*_Tmp5=Cyc_Port_gen_exp(0,env,e);Cyc_Port_leq(_Tmp5,Cyc_Port_arith_ct());});
-return;}case 11:
-({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("fallthru",sizeof(char),9U),_tag_fat(0U,sizeof(void*),0));default:
+return;}default:
 ({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("try/catch",sizeof(char),10U),_tag_fat(0U,sizeof(void*),0));};}struct _tuple18{struct Cyc_List_List*f0;struct Cyc_Absyn_Exp*f1;};
 # 1587
 static void*Cyc_Port_gen_initializer(struct Cyc_Port_Cenv*env,void*t,struct Cyc_Absyn_Exp*e){

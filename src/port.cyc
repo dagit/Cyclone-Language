@@ -1559,6 +1559,7 @@ static void gen_stmt(cenv_t env, stmt_t s) {
     return;
   case &Break_s:
   case &Continue_s:
+  case &Fallthru_s(_,_): 
   case &Goto_s(_): return;
   case &For_s(e1,$(e2,_),$(e3,_),s):
     gen_exp(false,env,e1);
@@ -1578,7 +1579,6 @@ static void gen_stmt(cenv_t env, stmt_t s) {
     gen_stmt(env,s);
     leq(gen_exp(false,env,e),arith_ct());
     return;
-  case &Fallthru_s(_,_): impos("fallthru");
   case &TryCatch_s(...): impos("try/catch");
   }
 }
@@ -1718,9 +1718,9 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
       return gen_localdecl(env,d,true);
     }
   case &Fn_d(fd):
-#ifdef PORT_DEBUG
+    #ifdef PORT_DEBUG
     fprintf(stderr,"processing fn decl %s\n",qvar2string(fd->name));
-#endif
+    #endif
     (*fd->name)[0] = Loc_n;
     $(type_t, $(ctype_t,ctype_t)@,seg_t) *predeclared = NULL;
 
