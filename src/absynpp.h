@@ -43,6 +43,7 @@ extern struct Params {
   bool print_using_stmts :1;
   bool print_externC_stmts :1;
   bool print_full_evars :1;
+  bool print_zeroterm :1;
   bool generate_line_directives:1;
   bool use_curr_namespace :1;
   list_t<var_t> curr_namespace;

@@ -410,7 +410,8 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
   default: return tcArithBinop(te, e1, e2, is_numeric);
   }
 }
-// Minus needs to support a tagged array and an int, and two tagged arrays
+// Minus needs to support a fat pointer and an int, and two pointers
+// of any flavor.
 static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
   type_t t1 = e1->topt->v;
   type_t t2 = e2->topt->v;
@@ -434,7 +435,13 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
       }
       return t1;
     }
-  } else return tcArithBinop(te, e1, e2, is_numeric);
+  } 
+  // if we have pointers at this point, cast them to ints 
+  if (is_pointer_type(t1)) 
+    unchecked_cast(te, e1, sint_typ);
+  if (is_pointer_type(t2))
+    unchecked_cast(te, e2, sint_typ);
+  return tcArithBinop(te, e1, e2, is_numeric);
 }
 
 static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
@@ -1640,7 +1647,7 @@ static void check_malloc_type(bool allow_zero, seg_t loc,
 }
 
 static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt, 
-                       type_t *@t, exp_t @e, bool is_calloc,
+                       type_t *@t, exp_t @e, bool @is_calloc,
                        bool @is_fat) {
   type_t rgn = HeapRgn;
   if (ropt != NULL) {
@@ -1668,7 +1675,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
   type_t elt_type; // the element type of the resulting pointer
   exp_t num_elts;  // the number of elements of the resulting pointer
   bool one_elt;
-  if (is_calloc) {
+  if (*is_calloc) {
     if (*t == NULL) impos("calloc with empty type");
     elt_type = **t;
     check_type(loc,te,lookup_type_vars(te),MemKind,true,elt_type);
@@ -1733,8 +1740,12 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
       zero_term = zt;
       if(conref_val(n))
 	ptr_maker = star_typ; 
-      if (conref_def(false,zt) && !is_calloc)
-        terr(loc,"must allocate zero-terminated array with calloc");
+      // for zero-terminated arrays, rewrite malloc to calloc to ensure
+      // we're actually zero-terminated.
+      if (conref_def(false,zt) && !(*is_calloc)) {
+        warn(loc,"converting malloc to calloc to ensure zero-termination");
+        *is_calloc = true;
+      }
       break;
     default: break;
     }
@@ -2091,7 +2102,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
   case &AnonEnum_e(*v,t2,ef):
     *v = ef->name;
     t = t2; break;
-  case &Malloc_e(MallocInfo{is_calloc,ropt,*t2,*e,*isfat}):
+  case &Malloc_e(MallocInfo{*is_calloc,ropt,*t2,*e,*isfat}):
     t = tcMalloc(te,loc,topt,ropt,t2,e,is_calloc,isfat); break;
   }
   e->topt = new Opt(t);

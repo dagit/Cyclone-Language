@@ -326,16 +326,16 @@ int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _tagged_arr f1;};
 extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{
 char*tag;struct _tagged_arr f1;};typedef struct{int quot;int rem;}Cyc_div_t;typedef
 struct{int quot;int rem;}Cyc_ldiv_t;void*abort();void exit(int);char*getenv(const
-char*);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[
+char*);extern struct _tagged_arr Cyc_optarg;extern int Cyc_optind;extern int Cyc_opterr;
+extern int Cyc_optopt;struct Cyc_option{struct _tagged_arr name;int has_arg;int*flag;
+int val;};int Cyc_getopt(int __argc,struct _tagged_arr __argv,struct _tagged_arr
+__shortopts);int Cyc__getopt_internal(int __argc,struct _tagged_arr __argv,struct
+_tagged_arr __shortopts,struct _tagged_arr __longopts,int*__longind,int __long_only);
+struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[
 18];extern char Cyc_List_Nth[8];unsigned int Cyc_strlen(struct _tagged_arr s);int Cyc_strcmp(
 struct _tagged_arr s1,struct _tagged_arr s2);int Cyc_strncmp(struct _tagged_arr s1,
 struct _tagged_arr s2,unsigned int len);struct _tagged_arr Cyc_strchr(struct
-_tagged_arr s,char c);extern struct _tagged_arr Cyc_optarg;extern int Cyc_optind;extern
-int Cyc_opterr;extern int Cyc_optopt;struct Cyc_option{struct _tagged_arr name;int
-has_arg;int*flag;int val;};int Cyc_getopt(int __argc,struct _tagged_arr __argv,struct
-_tagged_arr __shortopts);int Cyc__getopt_internal(int __argc,struct _tagged_arr
-__argv,struct _tagged_arr __shortopts,struct _tagged_arr __longopts,int*__longind,
-int __long_only);struct _tagged_arr Cyc_optarg;int Cyc_optind=1;int Cyc___getopt_initialized;
+_tagged_arr s,char c);struct _tagged_arr Cyc_optarg;int Cyc_optind=1;int Cyc___getopt_initialized;
 static struct _tagged_arr Cyc_nextchar;int Cyc_opterr=1;int Cyc_optopt=(int)'?';enum 
 Cyc_ordering_tag{Cyc_REQUIRE_ORDER  = 0,Cyc_PERMUTE  = 1,Cyc_RETURN_IN_ORDER  = 2};
 static enum Cyc_ordering_tag Cyc_ordering;static struct _tagged_arr Cyc_posixly_correct;

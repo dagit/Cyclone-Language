@@ -782,11 +782,12 @@ Cyc__PC_LINK_MAX  = 0,Cyc__PC_MAX_CANON  = 1,Cyc__PC_MAX_INPUT  = 2,Cyc__PC_NAME
  = 11,Cyc__PC_SOCK_MAXBUF  = 12,Cyc__PC_FILESIZEBITS  = 13,Cyc__PC_REC_INCR_XFER_SIZE
  = 14,Cyc__PC_REC_MAX_XFER_SIZE  = 15,Cyc__PC_REC_MIN_XFER_SIZE  = 16,Cyc__PC_REC_XFER_ALIGN
  = 17,Cyc__PC_ALLOC_SIZE_MIN  = 18,Cyc__PC_SYMLINK_MAX  = 19};enum Cyc___anonymous_enum_368__{
-Cyc__CS_PATH  = 0,Cyc__CS_V6_WIDTH_RESTRICTED_ENVS  = 1};int Cyc_execlp(const char*,
-const char*,struct _tagged_arr);int execvp(const char*file,const char**argv);struct
-_tagged_arr Cyc_getcwd(struct _tagged_arr buf,unsigned int size);int Cyc_gethostname(
-struct _tagged_arr,unsigned int);int Cyc_read(int,struct _tagged_arr,unsigned int);
-int Cyc_write(int,struct _tagged_arr,unsigned int);static char _tmp8D[36]="execlp arg list not NULL-terminated";
+Cyc__CS_PATH  = 0,Cyc__CS_V6_WIDTH_RESTRICTED_ENVS  = 1};struct Cyc_option{struct
+_tagged_arr name;int has_arg;int*flag;int val;};int Cyc_execlp(const char*,const char*,
+struct _tagged_arr);int execvp(const char*file,const char**argv);struct _tagged_arr
+Cyc_getcwd(struct _tagged_arr buf,unsigned int size);int Cyc_gethostname(struct
+_tagged_arr,unsigned int);int Cyc_read(int,struct _tagged_arr,unsigned int);int Cyc_write(
+int,struct _tagged_arr,unsigned int);static char _tmp8D[36]="execlp arg list not NULL-terminated";
 static struct Cyc_Core_Failure_struct Cyc___execlp_failure={Cyc_Core_Failure,{
 _tmp8D,_tmp8D,_tmp8D + 36}};int Cyc_execlp(const char*path,const char*arg0,struct
 _tagged_arr argv){if(*((const char**)_check_unknown_subscript(argv,sizeof(const

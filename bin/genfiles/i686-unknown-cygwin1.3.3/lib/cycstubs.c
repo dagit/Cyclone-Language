@@ -705,13 +705,14 @@ unsigned int Cyc_strftime(struct _tagged_arr s,unsigned int maxsize,struct
 _tagged_arr fmt,const struct Cyc_tm*t){if(maxsize > _get_arr_size(s,sizeof(char)))(
 int)_throw((void*)& Cyc___strftime_failure);return strftime((char*)_check_null(
 _untag_arr(s,sizeof(char),1)),maxsize,(const char*)_check_null(_untag_arr(fmt,
-sizeof(char),1)),t);}int Cyc_execlp(const char*,const char*,struct _tagged_arr);int
-execvp(const char*file,const char**argv);struct _tagged_arr Cyc_getcwd(struct
-_tagged_arr buf,unsigned int size);int Cyc_gethostname(struct _tagged_arr,
-unsigned int);int Cyc_read(int,struct _tagged_arr,unsigned int);int Cyc_write(int,
-struct _tagged_arr,unsigned int);static char _tmp86[36]="execlp arg list not NULL-terminated";
-static struct Cyc_Core_Failure_struct Cyc___execlp_failure={Cyc_Core_Failure,{
-_tmp86,_tmp86,_tmp86 + 36}};int Cyc_execlp(const char*path,const char*arg0,struct
+sizeof(char),1)),t);}struct Cyc_option{struct _tagged_arr name;int has_arg;int*flag;
+int val;};int Cyc_execlp(const char*,const char*,struct _tagged_arr);int execvp(const
+char*file,const char**argv);struct _tagged_arr Cyc_getcwd(struct _tagged_arr buf,
+unsigned int size);int Cyc_gethostname(struct _tagged_arr,unsigned int);int Cyc_read(
+int,struct _tagged_arr,unsigned int);int Cyc_write(int,struct _tagged_arr,
+unsigned int);static char _tmp86[36]="execlp arg list not NULL-terminated";static
+struct Cyc_Core_Failure_struct Cyc___execlp_failure={Cyc_Core_Failure,{_tmp86,
+_tmp86,_tmp86 + 36}};int Cyc_execlp(const char*path,const char*arg0,struct
 _tagged_arr argv){if(*((const char**)_check_unknown_subscript(argv,sizeof(const
 char*),(int)(_get_arr_size(argv,sizeof(const char*))- 1)))!= (const char*)0)(int)
 _throw((void*)& Cyc___execlp_failure);{const char**newargs=(const char**)_untag_arr(({

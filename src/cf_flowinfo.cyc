@@ -102,7 +102,8 @@ static mstringptr_t place2string(place_t p) {
 //   (If we ever have memory kinds, then we either need to figure out field's
 //    instantiated types or not allow partial initialization of such fields.)
 // Note: We could memoize answers here.
-absRval_t typ_to_absrval(type_t t, absRval_t leafval) {
+absRval_t i_typ_to_absrval(bool allow_zeroterm,
+                           type_t t, absRval_t leafval) {
   if(!is_union_type(t))
     switch(Tcutil::compress(t)) {
     case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
@@ -112,7 +113,8 @@ absRval_t typ_to_absrval(type_t t, absRval_t leafval) {
     case &TupleType(tqts):
       aggrdict_t d = Dict::empty(strptrcmp);
       for(int i=0; tqts != NULL; tqts = tqts->tl, ++i)
-	d = Dict::insert(d,fieldname(i),typ_to_absrval((*tqts->hd)[1],leafval));
+	d = Dict::insert(d,fieldname(i),
+                         i_typ_to_absrval(false,(*tqts->hd)[1],leafval));
       return new Aggregate(d);
 
     case &AggrType(AggrInfo(info,_)):
@@ -125,12 +127,21 @@ absRval_t typ_to_absrval(type_t t, absRval_t leafval) {
       for(; fs != NULL; fs = fs->tl) {
 	let &Aggrfield(n,_,t2,_,_) = fs->hd;
 	if((*n).size != 1) //empty name means bit field so no need to include it
-	  d = Dict::insert(d, n, typ_to_absrval(t2,leafval));
+	  d = Dict::insert(d, n, i_typ_to_absrval(false, t2,leafval));
       }
       return new Aggregate(d);
+    case &ArrayType(ArrayInfo{et,_,_,zeroterm}):
+      // special case for zero-terminated arrays of bits-only things -- 
+      // here, we initialize them at translation by putting a 0 in at
+      // the end.
+      return (allow_zeroterm && Tcutil::bits_only(et)) ? unknown_all : leafval;
     default: break;
     }
   return Tcutil::bits_only(t) ? unknown_all : leafval;
+}
+
+absRval_t typ_to_absrval(type_t t, absRval_t leafval) {
+  return i_typ_to_absrval(true, t, leafval);
 }
 
 static bool prefix_of_member(region_t<`r> r, place_t<`r2,`r3> place,

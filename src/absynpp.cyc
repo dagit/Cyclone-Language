@@ -108,6 +108,9 @@ static bool generate_line_directives;
 // Flag controlling whether to use the variable curr_namespace or not
 static bool use_curr_namespace;
 
+// Flag controlling whether to print [NO]ZEROTERM
+static bool print_zeroterm;
+
 // keep a track of the current namespace
 static list_t<var_t> curr_namespace = NULL;
 
@@ -123,6 +126,7 @@ struct Params {
   bool print_using_stmts :1;
   bool print_externC_stmts :1;
   bool print_full_evars :1;
+  bool print_zeroterm :1;
   bool generate_line_directives :1;
   bool use_curr_namespace :1;
   list_t<var_t> curr_namespace;
@@ -140,6 +144,7 @@ void set_params(struct Params @ fs) {
   print_using_stmts = fs->print_using_stmts;
   print_externC_stmts = fs->print_externC_stmts;
   print_full_evars = fs->print_full_evars;
+  print_zeroterm = fs->print_zeroterm;
   generate_line_directives = fs->generate_line_directives;
   use_curr_namespace = fs->use_curr_namespace;
   curr_namespace = fs->curr_namespace;
@@ -158,6 +163,7 @@ struct Params cyc_params_r =
     .print_using_stmts = true,
     .print_externC_stmts = true,
     .print_full_evars = false,
+    .print_zeroterm = true,
     .generate_line_directives = false,
     .use_curr_namespace = true,
     .curr_namespace = NULL
@@ -176,6 +182,7 @@ struct Params cyci_params_r =
     .print_using_stmts = true,
     .print_externC_stmts = true,
     .print_full_evars = false,
+    .print_zeroterm = true,
     .generate_line_directives = false,
     .use_curr_namespace = true,
     .curr_namespace = NULL
@@ -194,6 +201,7 @@ struct Params c_params_r =
     .print_using_stmts = false,
     .print_externC_stmts = false,
     .print_full_evars = false,
+    .print_zeroterm = false,
     .generate_line_directives = false,
     .use_curr_namespace = false,
     .curr_namespace = NULL
@@ -212,6 +220,7 @@ struct Params tc_params_r =
     .print_using_stmts = true,
     .print_externC_stmts = true,
     .print_full_evars = false,
+    .print_zeroterm = true,
     .generate_line_directives = false,
     .use_curr_namespace = false,
     .curr_namespace = NULL
@@ -513,9 +522,9 @@ doc_t group_braces(string_t<`H> sep, list_t<doc_t,`H> ss) {
   return cat(lb(), seq(sep,ss), rb());
 }
 
-doc_t dtms2doc(doc_t d,list_t<type_modifier_t> tms) {
+doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
   if (tms==NULL) return d;
-  doc_t rest = dtms2doc(d,tms->tl);
+  doc_t rest = dtms2doc(false,d,tms->tl);
   doc_t p_rest = cat(text("("),rest,text(")"));
   switch (tms->hd) {
   case &Carray_mod(zeroterm):
@@ -562,7 +571,12 @@ doc_t dtms2doc(doc_t d,list_t<type_modifier_t> tms) {
 	ptr = text("*");
       else
 	ptr = cat(text("*"),lb(),exp2doc(e),rb());
-      if (conref_def(false,zeroterm)) ptr = cat(ptr,text("ZEROTERM "));
+      if (print_zeroterm) {
+        if (!is_char_ptr && conref_def(false,zeroterm)) 
+          ptr = cat(ptr,text("ZEROTERM "));
+        else if (is_char_ptr && !conref_def(false,zeroterm))
+          ptr = cat(ptr,text("NOZEROTERM "));
+      }
       break;
     case &NonNullable_ps(e,zeroterm):
       $(unsigned int,bool) pr = Evexp::eval_const_uint_exp(e);
@@ -570,11 +584,21 @@ doc_t dtms2doc(doc_t d,list_t<type_modifier_t> tms) {
 	ptr = text("@");
       else
 	ptr = cat(text("@"),lb(),exp2doc(e),rb());
-      if (conref_def(false,zeroterm)) ptr = cat(ptr,text("ZEROTERM "));
+      if (print_zeroterm) {
+        if (!is_char_ptr && conref_def(false,zeroterm)) 
+          ptr = cat(ptr,text("ZEROTERM "));
+        else if (is_char_ptr && !conref_def(false,zeroterm))
+          ptr = cat(ptr,text("NOZEROTERM "));
+      }
       break;
     case &TaggedArray_ps(zeroterm): 
       ptr = question();
-      if (conref_def(false,zeroterm)) ptr = cat(ptr,text("ZEROTERM "));
+      if (print_zeroterm) {
+        if (!is_char_ptr && conref_def(false,zeroterm)) 
+          ptr = cat(ptr,text("ZEROTERM "));
+        else if (is_char_ptr && !conref_def(false,zeroterm))
+          ptr = cat(ptr,text("NOZEROTERM "));
+      }
       break;
     }
     switch (compress(rgn)) {
@@ -1914,8 +1938,24 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
   }
 }
 
-doc_t tqtd2doc(tqual_t tq, type_t t, opt_t<doc_t> dopt) {
-  let $(tq,t,tms) = to_tms(tq,t);
+static bool is_char_ptr(type_t t) {
+  // want to avoid compressing here when possible
+  switch (t) {
+  case &Evar(_,&Opt(def),_,_): return is_char_ptr(def);
+  case &PointerType(PtrInfo{elt_typ,_,_,_,_,_}):
+  L:
+    switch (elt_typ) {
+    case &Evar(_,&Opt(t),_,_): elt_typ = t; goto L;
+    case &TypedefType(_,_,_,&Opt(t)): elt_typ = t; goto L;
+    case &IntType(_,B1): return true;
+    default: return false;
+    }
+  default: return false;
+  }
+}
+
+doc_t tqtd2doc(tqual_t tq, type_t typ, opt_t<doc_t> dopt) {
+  let $(tq,t,tms) = to_tms(tq,typ);
   tms = List::imp_rev(tms);
   if (tms==NULL && dopt==NULL)
     return cat(tqual2doc(tq),ntyp2doc(t));
@@ -1924,7 +1964,7 @@ doc_t tqtd2doc(tqual_t tq, type_t t, opt_t<doc_t> dopt) {
       cat(tqual2doc(tq),
           ntyp2doc(t),
           text(" "),
-          dtms2doc((dopt==NULL)?nil_doc():dopt->v,tms));
+          dtms2doc(is_char_ptr(typ),(dopt==NULL)?nil_doc():dopt->v,tms));
 }
 
 doc_t aggrfield2doc(aggrfield_t f) {

@@ -400,8 +400,20 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	if(!is_local && !is_const_exp(te,(exp_t)initializer))
 	  terr(d->loc, "initializer needs to be a constant expression");
         if (!coerce_assign(te2,(exp_t)initializer,t)) {
-	  terr(d->loc, "%s declared with type \n%s\n but initialized with type \n%s",
-               *x, typ2string(t), typ2string(initializer->topt->v));
+          let varstr = *x;
+          let tstr = typ2string(t);
+          let estr = typ2string(initializer->topt->v);
+          if (varstr.size + tstr.size + estr.size + 50 < 80)
+            terr(d->loc, "%s declared with type %s but initialized with type %s.",
+               varstr, tstr, estr);
+          else if (varstr.size + tstr.size + 25 < 80 &&
+                   estr.size + 25 < 80)
+            terr(d->loc, "%s declared with type %s\n but initialized with type %s.",
+               varstr, tstr, estr);
+          else 
+            terr(d->loc, "%s declared with type \n%s\n but initialized with type \n%s.",
+               varstr, tstr, estr);
+          unify(t,initializer->topt->v);
           explain_failure();
         }
       }
@@ -416,6 +428,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       if (!unify(p->topt->v,e->topt->v)) {
 	terr(d->loc,"pattern type %s does not match definition type %s",
              typ2string(p->topt->v),typ2string(e->topt->v));
+        unify(p->topt->v,e->topt->v);
         explain_failure();
       }
       else

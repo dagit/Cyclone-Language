@@ -69,12 +69,11 @@ void explain_failure() {
     fprintf(stderr,"\n\t");
     pos = 8;
   }
-  fprintf(stderr,"failed to unify. ");
+  fprintf(stderr,"are not compatible. ");
   pos += 17;
   if (failure_reason != NULL) {
-    if (pos >= 80) {
+    if (pos+strlen(failure_reason) >= 80) {
       fprintf(stderr,"\n\t");
-      pos = 8;
     };
     fprintf(stderr,"%s",failure_reason);
   }
@@ -1104,16 +1103,16 @@ void unify_it(type_t t1, type_t t2) {
     unify_it(rgn2,rgn1); // the whole reason regions are "types"
     t1_failure = t1;
     t2_failure = t2;
+    unify_it_conrefs(intcmp,zt1,zt2,"(not both zero terminated)");
     unify_tqual(tqual1a,tqual2a);
     unify_it_conrefs(boundscmp,b1,b2,"(different pointer bounds)");
-    unify_it_conrefs(intcmp,zt1,zt2,"(not both zero terminated)");
     // There's no need to force the nullable's to be the same when
     // the bounds are ?.
     switch (compress_conref(b1)->v) {
     case &Eq_constr(Unknown_b): return;
     default: break;
     }
-    unify_it_conrefs(intcmp,null1a,null2a,"(different pointer types)");
+    unify_it_conrefs(intcmp,null1a,null2a,"(incompatible pointer types)");
     return;
 
   case $(&IntType(sn2,sz2), &IntType(sn1,sz1)):

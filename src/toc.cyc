@@ -3379,6 +3379,22 @@ static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s) {
         exp_to_c(init_nv, init);
       break;
     }
+  } else {
+    // must put in zero for zero-terminated arrays
+    switch (compress(old_typ)) {
+    case &ArrayType(ArrayInfo{et,_,num_elts_opt,zt}) && conref_def(false,zt):
+      if (num_elts_opt == NULL)
+        toc_impos("can't initialize zero-terminated array -- size unknown");
+      exp_t num_elts = (exp_t)num_elts_opt;
+      let lhs = subscript_exp(var_exp(vd->name,DL),
+                              add_exp(num_elts,signed_int_exp(-1,DL),DL),
+                              DL);
+      let rhs = signed_int_exp(0,DL);
+      s->r = seq_stmt(exp_stmt(assign_exp(lhs,rhs,DL),DL),
+                      new_stmt(s->r,DL),DL)->r;
+      break;
+    default: break;
+    }
   }
 }
 
