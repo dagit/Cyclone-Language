@@ -541,56 +541,55 @@ void*)({ struct Cyc_List_List* _temp253= x; if( _temp253 == 0){ _throw(
 Null_Exception);} _temp253->hd;});});}} return arr;} struct Cyc_List_List* Cyc_List_from_array(
 struct _tagged_ptr0 arr){ struct Cyc_List_List* ans= 0;{ unsigned int i=({
 struct _tagged_ptr0 _temp254= arr;( unsigned int)( _temp254.last_plus_one -
-_temp254.curr);}) -( unsigned int) 1; for( 0; i >=( unsigned int) 0; -- i){ ans=({
-struct Cyc_List_List* _temp255=( struct Cyc_List_List*) GC_malloc( sizeof(
-struct Cyc_List_List)); _temp255->hd=( void*)({ struct _tagged_ptr0 _temp256=
-arr; void** _temp258= _temp256.curr +( int) i; if( _temp256.base == 0? 1:(
-_temp258 < _temp256.base? 1: _temp258 >= _temp256.last_plus_one)){ _throw(
-Null_Exception);}* _temp258;}); _temp255->tl= ans; _temp255;});}} return ans;}
-struct Cyc_List_List* Cyc_List_tabulate( int n, void*(* f)( int)){ struct Cyc_List_List*
-res= 0;{ int i= 0; for( 0; i < n; ++ i){ res=({ struct Cyc_List_List* _temp259=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp259->hd=(
-void*) f( i); _temp259->tl= res; _temp259;});}} return(( struct Cyc_List_List*(*)(
-struct Cyc_List_List* x)) Cyc_List_imp_rev)( res);} struct Cyc_List_List* Cyc_List_tabulate_c(
-int n, void*(* f)( void*, int), void* env){ struct Cyc_List_List* res= 0;{ int i=
-0; for( 0; i < n; ++ i){ res=({ struct Cyc_List_List* _temp260=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp260->hd=( void*) f( env, i);
-_temp260->tl= res; _temp260;});}} return(( struct Cyc_List_List*(*)( struct Cyc_List_List*
-x)) Cyc_List_imp_rev)( res);} int Cyc_List_list_cmp( int(* cmp)( void*, void*),
-struct Cyc_List_List* l1, struct Cyc_List_List* l2){ for( 0; l1 != 0? l2 != 0: 0;
-l1=({ struct Cyc_List_List* _temp261= l1; if( _temp261 == 0){ _throw(
-Null_Exception);} _temp261->tl;}), l2=({ struct Cyc_List_List* _temp262= l2; if(
-_temp262 == 0){ _throw( Null_Exception);} _temp262->tl;})){ if( l1 == l2){
-return 0;}{ int i= cmp(( void*)({ struct Cyc_List_List* _temp263= l1; if(
-_temp263 == 0){ _throw( Null_Exception);} _temp263->hd;}),( void*)({ struct Cyc_List_List*
-_temp264= l2; if( _temp264 == 0){ _throw( Null_Exception);} _temp264->hd;}));
-if( i != 0){ return i;}}} if( l1 != 0){ return 1;} if( l2 != 0){ return - 1;}
-return 0;} int Cyc_List_list_prefix( int(* cmp)( void*, void*), struct Cyc_List_List*
+_temp254.curr);}) - 1; for( 0; i >= 0; -- i){ ans=({ struct Cyc_List_List*
+_temp255=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp255->hd=( void*)({ struct _tagged_ptr0 _temp256= arr; void** _temp258=
+_temp256.curr +( int) i; if( _temp256.base == 0? 1:( _temp258 < _temp256.base? 1:
+_temp258 >= _temp256.last_plus_one)){ _throw( Null_Exception);}* _temp258;});
+_temp255->tl= ans; _temp255;});}} return ans;} struct Cyc_List_List* Cyc_List_tabulate(
+int n, void*(* f)( int)){ struct Cyc_List_List* res= 0;{ int i= 0; for( 0; i < n;
+++ i){ res=({ struct Cyc_List_List* _temp259=( struct Cyc_List_List*) GC_malloc(
+sizeof( struct Cyc_List_List)); _temp259->hd=( void*) f( i); _temp259->tl= res;
+_temp259;});}} return(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+res);} struct Cyc_List_List* Cyc_List_tabulate_c( int n, void*(* f)( void*, int),
+void* env){ struct Cyc_List_List* res= 0;{ int i= 0; for( 0; i < n; ++ i){ res=({
+struct Cyc_List_List* _temp260=( struct Cyc_List_List*) GC_malloc( sizeof(
+struct Cyc_List_List)); _temp260->hd=( void*) f( env, i); _temp260->tl= res;
+_temp260;});}} return(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+res);} int Cyc_List_list_cmp( int(* cmp)( void*, void*), struct Cyc_List_List*
 l1, struct Cyc_List_List* l2){ for( 0; l1 != 0? l2 != 0: 0; l1=({ struct Cyc_List_List*
-_temp265= l1; if( _temp265 == 0){ _throw( Null_Exception);} _temp265->tl;}), l2=({
-struct Cyc_List_List* _temp266= l2; if( _temp266 == 0){ _throw( Null_Exception);}
-_temp266->tl;})){ if( l1 == l2){ return 1;}{ int i= cmp(( void*)({ struct Cyc_List_List*
-_temp267= l1; if( _temp267 == 0){ _throw( Null_Exception);} _temp267->hd;}),(
-void*)({ struct Cyc_List_List* _temp268= l2; if( _temp268 == 0){ _throw(
-Null_Exception);} _temp268->hd;})); if( i != 0){ return 0;}}} return l1 == 0;}
-struct Cyc_List_List* Cyc_List_filter_c( int(* f)( void*, void*), void* env,
-struct Cyc_List_List* l){ if( l == 0){ return 0;}{ struct Cyc_List_List* result=({
-struct Cyc_List_List* _temp269=( struct Cyc_List_List*) GC_malloc( sizeof(
-struct Cyc_List_List)); _temp269->hd=( void*)(( void*)({ struct Cyc_List_List*
-_temp270= l; if( _temp270 == 0){ _throw( Null_Exception);} _temp270->hd;}));
-_temp269->tl= 0; _temp269;}); struct Cyc_List_List* end= result; for( 0; l != 0;
-l=({ struct Cyc_List_List* _temp271= l; if( _temp271 == 0){ _throw(
-Null_Exception);} _temp271->tl;})){ if( f( env,( void*)({ struct Cyc_List_List*
-_temp272= l; if( _temp272 == 0){ _throw( Null_Exception);} _temp272->hd;}))){({
-struct Cyc_List_List* _temp273= end; if( _temp273 == 0){ _throw( Null_Exception);}
-_temp273->tl=({ struct Cyc_List_List* _temp274=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp274->hd=( void*)(( void*)({
-struct Cyc_List_List* _temp275= l; if( _temp275 == 0){ _throw( Null_Exception);}
-_temp275->hd;})); _temp274->tl= 0; _temp274;});}); end=({ struct Cyc_List_List*
-_temp276= end; if( _temp276 == 0){ _throw( Null_Exception);} _temp276->tl;});}}
-return({ struct Cyc_List_List* _temp277= result; if( _temp277 == 0){ _throw(
-Null_Exception);} _temp277->tl;});}} struct Cyc_List_List* Cyc_List_filter( int(*
-f)( void*), struct Cyc_List_List* l){ if( l == 0){ return 0;}{ struct Cyc_List_List*
+_temp261= l1; if( _temp261 == 0){ _throw( Null_Exception);} _temp261->tl;}), l2=({
+struct Cyc_List_List* _temp262= l2; if( _temp262 == 0){ _throw( Null_Exception);}
+_temp262->tl;})){ if( l1 == l2){ return 0;}{ int i= cmp(( void*)({ struct Cyc_List_List*
+_temp263= l1; if( _temp263 == 0){ _throw( Null_Exception);} _temp263->hd;}),(
+void*)({ struct Cyc_List_List* _temp264= l2; if( _temp264 == 0){ _throw(
+Null_Exception);} _temp264->hd;})); if( i != 0){ return i;}}} if( l1 != 0){
+return 1;} if( l2 != 0){ return - 1;} return 0;} int Cyc_List_list_prefix( int(*
+cmp)( void*, void*), struct Cyc_List_List* l1, struct Cyc_List_List* l2){ for( 0;
+l1 != 0? l2 != 0: 0; l1=({ struct Cyc_List_List* _temp265= l1; if( _temp265 == 0){
+_throw( Null_Exception);} _temp265->tl;}), l2=({ struct Cyc_List_List* _temp266=
+l2; if( _temp266 == 0){ _throw( Null_Exception);} _temp266->tl;})){ if( l1 == l2){
+return 1;}{ int i= cmp(( void*)({ struct Cyc_List_List* _temp267= l1; if(
+_temp267 == 0){ _throw( Null_Exception);} _temp267->hd;}),( void*)({ struct Cyc_List_List*
+_temp268= l2; if( _temp268 == 0){ _throw( Null_Exception);} _temp268->hd;}));
+if( i != 0){ return 0;}}} return l1 == 0;} struct Cyc_List_List* Cyc_List_filter_c(
+int(* f)( void*, void*), void* env, struct Cyc_List_List* l){ if( l == 0){
+return 0;}{ struct Cyc_List_List* result=({ struct Cyc_List_List* _temp269=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp269->hd=(
+void*)(( void*)({ struct Cyc_List_List* _temp270= l; if( _temp270 == 0){ _throw(
+Null_Exception);} _temp270->hd;})); _temp269->tl= 0; _temp269;}); struct Cyc_List_List*
+end= result; for( 0; l != 0; l=({ struct Cyc_List_List* _temp271= l; if(
+_temp271 == 0){ _throw( Null_Exception);} _temp271->tl;})){ if( f( env,( void*)({
+struct Cyc_List_List* _temp272= l; if( _temp272 == 0){ _throw( Null_Exception);}
+_temp272->hd;}))){({ struct Cyc_List_List* _temp273= end; if( _temp273 == 0){
+_throw( Null_Exception);} _temp273->tl=({ struct Cyc_List_List* _temp274=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp274->hd=(
+void*)(( void*)({ struct Cyc_List_List* _temp275= l; if( _temp275 == 0){ _throw(
+Null_Exception);} _temp275->hd;})); _temp274->tl= 0; _temp274;});}); end=({
+struct Cyc_List_List* _temp276= end; if( _temp276 == 0){ _throw( Null_Exception);}
+_temp276->tl;});}} return({ struct Cyc_List_List* _temp277= result; if( _temp277
+== 0){ _throw( Null_Exception);} _temp277->tl;});}} struct Cyc_List_List* Cyc_List_filter(
+int(* f)( void*), struct Cyc_List_List* l){ if( l == 0){ return 0;}{ struct Cyc_List_List*
 result=({ struct Cyc_List_List* _temp278=( struct Cyc_List_List*) GC_malloc(
 sizeof( struct Cyc_List_List)); _temp278->hd=( void*)(( void*)({ struct Cyc_List_List*
 _temp279= l; if( _temp279 == 0){ _throw( Null_Exception);} _temp279->hd;}));

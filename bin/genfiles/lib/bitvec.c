@@ -170,7 +170,6 @@ struct _tagged_ptr0 _temp83= bvec; int* _temp85= _temp83.curr + i; if( _temp83.b
 == 0? 1:( _temp85 < _temp83.base? 1: _temp85 >= _temp83.last_plus_one)){ _throw(
 Null_Exception);}* _temp85;}) != -1){ return 0;}}}{ int i= words * 32; for( 0; i
 < sz; i ++){ if( ! Cyc_Bitvec_get( bvec, i)){ return 0;}}} return 1;} void Cyc_Bitvec_print_bvec(
-struct _tagged_ptr0 bvec){{ int i= 0; for( 0;( unsigned int) i <( unsigned int)
-32 *({ struct _tagged_ptr0 _temp86= bvec;( unsigned int)( _temp86.last_plus_one
-- _temp86.curr);}); ++ i){ printf("%d", Cyc_Bitvec_get( bvec, i)? 1: 0);}}
-printf("\n");}
+struct _tagged_ptr0 bvec){{ int i= 0; for( 0; i < 32 *({ struct _tagged_ptr0
+_temp86= bvec;( unsigned int)( _temp86.last_plus_one - _temp86.curr);}); ++ i){
+printf("%d", Cyc_Bitvec_get( bvec, i)? 1: 0);}} printf("\n");}

@@ -1188,33 +1188,31 @@ void* _temp624= _temp620; _LL626: if(( int) _temp624 == Cyc_Absyn_B1){ goto
 _LL627;} else{ goto _LL628;} _LL628: if(( int) _temp624 == Cyc_Absyn_B2){ goto
 _LL629;} else{ goto _LL630;} _LL630: if(( int) _temp624 == Cyc_Absyn_B4){ goto
 _LL631;} else{ goto _LL632;} _LL632: if(( int) _temp624 == Cyc_Absyn_B8){ goto
-_LL633;} else{ goto _LL625;} _LL627: if( w >( unsigned int) 8){ Cyc_Tcutil_terr(
-loc,( struct _tagged_string)({ char* _temp634=( char*)"bitfield larger than type";
-struct _tagged_string _temp635; _temp635.curr= _temp634; _temp635.base= _temp634;
+_LL633;} else{ goto _LL625;} _LL627: if( w > 8){ Cyc_Tcutil_terr( loc,( struct
+_tagged_string)({ char* _temp634=( char*)"bitfield larger than type"; struct
+_tagged_string _temp635; _temp635.curr= _temp634; _temp635.base= _temp634;
 _temp635.last_plus_one= _temp634 + 26; _temp635;}));} goto _LL625; _LL629: if( w
->( unsigned int) 16){ Cyc_Tcutil_terr( loc,( struct _tagged_string)({ char*
-_temp636=( char*)"bitfield larger than type"; struct _tagged_string _temp637;
-_temp637.curr= _temp636; _temp637.base= _temp636; _temp637.last_plus_one=
-_temp636 + 26; _temp637;}));} goto _LL625; _LL631: if( w >( unsigned int) 32){
-Cyc_Tcutil_terr( loc,( struct _tagged_string)({ char* _temp638=( char*)"bitfield larger than type";
+> 16){ Cyc_Tcutil_terr( loc,( struct _tagged_string)({ char* _temp636=( char*)"bitfield larger than type";
+struct _tagged_string _temp637; _temp637.curr= _temp636; _temp637.base= _temp636;
+_temp637.last_plus_one= _temp636 + 26; _temp637;}));} goto _LL625; _LL631: if( w
+> 32){ Cyc_Tcutil_terr( loc,( struct _tagged_string)({ char* _temp638=( char*)"bitfield larger than type";
 struct _tagged_string _temp639; _temp639.curr= _temp638; _temp639.base= _temp638;
 _temp639.last_plus_one= _temp638 + 26; _temp639;}));} goto _LL625; _LL633: if( w
->( unsigned int) 64){ Cyc_Tcutil_terr( loc,( struct _tagged_string)({ char*
-_temp640=( char*)"bitfield larger than type"; struct _tagged_string _temp641;
-_temp641.curr= _temp640; _temp641.base= _temp640; _temp641.last_plus_one=
-_temp640 + 26; _temp641;}));} goto _LL625; _LL625:;} goto _LL615; _LL619: Cyc_Tcutil_terr(
-loc,({ struct _tagged_string _temp642=* _temp605; struct _tagged_string _temp643=
-Cyc_Absynpp_typ2string( _temp601); xprintf("bitfield %.*s must have integral type but has type %.*s",
-_temp642.last_plus_one - _temp642.curr, _temp642.curr, _temp643.last_plus_one -
-_temp643.curr, _temp643.curr);})); goto _LL615; _LL615:;}} for( 0; _temp597 != 0;
-_temp597=({ struct Cyc_List_List* _temp644= _temp597; if( _temp644 == 0){ _throw(
-Null_Exception);} _temp644->tl;})){ void* _temp646=( void*)({ struct Cyc_List_List*
-_temp645= _temp597; if( _temp645 == 0){ _throw( Null_Exception);} _temp645->hd;});
-int _temp654; _LL648: if(( int) _temp646 == Cyc_Absyn_Packed_att){ goto _LL649;}
-else{ goto _LL650;} _LL650: if(( unsigned int) _temp646 > 15u?(( struct
-_tunion_struct*) _temp646)->tag == Cyc_Absyn_Aligned_att_tag: 0){ _LL655:
-_temp654=( int)(( struct Cyc_Absyn_Aligned_att_struct*) _temp646)->f1; goto
-_LL651;} else{ goto _LL652;} _LL652: goto _LL653; _LL649: continue; _LL651:
+> 64){ Cyc_Tcutil_terr( loc,( struct _tagged_string)({ char* _temp640=( char*)"bitfield larger than type";
+struct _tagged_string _temp641; _temp641.curr= _temp640; _temp641.base= _temp640;
+_temp641.last_plus_one= _temp640 + 26; _temp641;}));} goto _LL625; _LL625:;}
+goto _LL615; _LL619: Cyc_Tcutil_terr( loc,({ struct _tagged_string _temp642=*
+_temp605; struct _tagged_string _temp643= Cyc_Absynpp_typ2string( _temp601);
+xprintf("bitfield %.*s must have integral type but has type %.*s", _temp642.last_plus_one
+- _temp642.curr, _temp642.curr, _temp643.last_plus_one - _temp643.curr, _temp643.curr);}));
+goto _LL615; _LL615:;}} for( 0; _temp597 != 0; _temp597=({ struct Cyc_List_List*
+_temp644= _temp597; if( _temp644 == 0){ _throw( Null_Exception);} _temp644->tl;})){
+void* _temp646=( void*)({ struct Cyc_List_List* _temp645= _temp597; if( _temp645
+== 0){ _throw( Null_Exception);} _temp645->hd;}); int _temp654; _LL648: if(( int)
+_temp646 == Cyc_Absyn_Packed_att){ goto _LL649;} else{ goto _LL650;} _LL650: if((
+unsigned int) _temp646 > 15u?(( struct _tunion_struct*) _temp646)->tag == Cyc_Absyn_Aligned_att_tag:
+0){ _LL655: _temp654=( int)(( struct Cyc_Absyn_Aligned_att_struct*) _temp646)->f1;
+goto _LL651;} else{ goto _LL652;} _LL652: goto _LL653; _LL649: continue; _LL651:
 continue; _LL653: Cyc_Tcutil_terr( loc,({ struct _tagged_string _temp657= Cyc_Absyn_attribute2string((
 void*)({ struct Cyc_List_List* _temp656= _temp597; if( _temp656 == 0){ _throw(
 Null_Exception);} _temp656->hd;})); struct _tagged_string _temp658=* v; struct
@@ -1473,27 +1471,26 @@ void* _temp864= _temp860; _LL866: if(( int) _temp864 == Cyc_Absyn_B1){ goto
 _LL867;} else{ goto _LL868;} _LL868: if(( int) _temp864 == Cyc_Absyn_B2){ goto
 _LL869;} else{ goto _LL870;} _LL870: if(( int) _temp864 == Cyc_Absyn_B4){ goto
 _LL871;} else{ goto _LL872;} _LL872: if(( int) _temp864 == Cyc_Absyn_B8){ goto
-_LL873;} else{ goto _LL865;} _LL867: if( w >( unsigned int) 8){ Cyc_Tcutil_terr(
-loc,( struct _tagged_string)({ char* _temp874=( char*)"bitfield larger than type";
-struct _tagged_string _temp875; _temp875.curr= _temp874; _temp875.base= _temp874;
+_LL873;} else{ goto _LL865;} _LL867: if( w > 8){ Cyc_Tcutil_terr( loc,( struct
+_tagged_string)({ char* _temp874=( char*)"bitfield larger than type"; struct
+_tagged_string _temp875; _temp875.curr= _temp874; _temp875.base= _temp874;
 _temp875.last_plus_one= _temp874 + 26; _temp875;}));} goto _LL865; _LL869: if( w
->( unsigned int) 16){ Cyc_Tcutil_terr( loc,( struct _tagged_string)({ char*
-_temp876=( char*)"bitfield larger than type"; struct _tagged_string _temp877;
-_temp877.curr= _temp876; _temp877.base= _temp876; _temp877.last_plus_one=
-_temp876 + 26; _temp877;}));} goto _LL865; _LL871: if( w >( unsigned int) 32){
-Cyc_Tcutil_terr( loc,( struct _tagged_string)({ char* _temp878=( char*)"bitfield larger than type";
+> 16){ Cyc_Tcutil_terr( loc,( struct _tagged_string)({ char* _temp876=( char*)"bitfield larger than type";
+struct _tagged_string _temp877; _temp877.curr= _temp876; _temp877.base= _temp876;
+_temp877.last_plus_one= _temp876 + 26; _temp877;}));} goto _LL865; _LL871: if( w
+> 32){ Cyc_Tcutil_terr( loc,( struct _tagged_string)({ char* _temp878=( char*)"bitfield larger than type";
 struct _tagged_string _temp879; _temp879.curr= _temp878; _temp879.base= _temp878;
 _temp879.last_plus_one= _temp878 + 26; _temp879;}));} goto _LL865; _LL873: if( w
->( unsigned int) 64){ Cyc_Tcutil_terr( loc,( struct _tagged_string)({ char*
-_temp880=( char*)"bitfield larger than type"; struct _tagged_string _temp881;
-_temp881.curr= _temp880; _temp881.base= _temp880; _temp881.last_plus_one=
-_temp880 + 26; _temp881;}));} goto _LL865; _LL865:;} goto _LL855; _LL859: Cyc_Tcutil_terr(
-loc,({ struct _tagged_string _temp882=* _temp847; struct _tagged_string _temp883=
-Cyc_Absynpp_typ2string( _temp843); xprintf("bitfield %.*s must have integral type but has type %.*s",
-_temp882.last_plus_one - _temp882.curr, _temp882.curr, _temp883.last_plus_one -
-_temp883.curr, _temp883.curr);})); goto _LL855; _LL855:;}} if( ! Cyc_Tcutil_bits_only(
-_temp843)){ Cyc_Tcutil_terr( loc,({ struct _tagged_string _temp884=* _temp847;
-struct _tagged_string _temp885=* v; xprintf("%.*s has a type that is possibly incompatible with other members of union %.*s",
+> 64){ Cyc_Tcutil_terr( loc,( struct _tagged_string)({ char* _temp880=( char*)"bitfield larger than type";
+struct _tagged_string _temp881; _temp881.curr= _temp880; _temp881.base= _temp880;
+_temp881.last_plus_one= _temp880 + 26; _temp881;}));} goto _LL865; _LL865:;}
+goto _LL855; _LL859: Cyc_Tcutil_terr( loc,({ struct _tagged_string _temp882=*
+_temp847; struct _tagged_string _temp883= Cyc_Absynpp_typ2string( _temp843);
+xprintf("bitfield %.*s must have integral type but has type %.*s", _temp882.last_plus_one
+- _temp882.curr, _temp882.curr, _temp883.last_plus_one - _temp883.curr, _temp883.curr);}));
+goto _LL855; _LL855:;}} if( ! Cyc_Tcutil_bits_only( _temp843)){ Cyc_Tcutil_terr(
+loc,({ struct _tagged_string _temp884=* _temp847; struct _tagged_string _temp885=*
+v; xprintf("%.*s has a type that is possibly incompatible with other members of union %.*s",
 _temp884.last_plus_one - _temp884.curr, _temp884.curr, _temp885.last_plus_one -
 _temp885.curr, _temp885.curr);}));} for( 0; _temp839 != 0; _temp839=({ struct
 Cyc_List_List* _temp886= _temp839; if( _temp886 == 0){ _throw( Null_Exception);}
@@ -1970,11 +1967,11 @@ _temp1216).f2; xprintf("redeclaration of enum %.*s, field %.*s: expression is no
 _temp1234.last_plus_one - _temp1234.curr, _temp1234.curr, _temp1235.last_plus_one
 - _temp1235.curr, _temp1235.curr);}));}}{ unsigned int t1= Cyc_Evexp_eval_const_uint_exp((
 struct Cyc_Absyn_Exp*)({ struct Cyc_Absyn_Exp* _temp1236=* _temp1215; if(
-_temp1236 == 0){ _throw( Null_Exception);} _temp1236;})); tag_count= t1 +(
-unsigned int) 1; if( t1 != Cyc_Evexp_eval_const_uint_exp(( struct Cyc_Absyn_Exp*)({
-struct Cyc_Absyn_Exp* _temp1237= _temp1224; if( _temp1237 == 0){ _throw(
-Null_Exception);} _temp1237;}))){ Cyc_Tcutil_terr( loc,({ struct _tagged_string
-_temp1238=* v; struct _tagged_string _temp1239=*(* _temp1216).f2; xprintf("redeclaration of enum %.*s, field %.*s, value mismatch",
+_temp1236 == 0){ _throw( Null_Exception);} _temp1236;})); tag_count= t1 + 1; if(
+t1 != Cyc_Evexp_eval_const_uint_exp(( struct Cyc_Absyn_Exp*)({ struct Cyc_Absyn_Exp*
+_temp1237= _temp1224; if( _temp1237 == 0){ _throw( Null_Exception);} _temp1237;}))){
+Cyc_Tcutil_terr( loc,({ struct _tagged_string _temp1238=* v; struct
+_tagged_string _temp1239=*(* _temp1216).f2; xprintf("redeclaration of enum %.*s, field %.*s, value mismatch",
 _temp1238.last_plus_one - _temp1238.curr, _temp1238.curr, _temp1239.last_plus_one
 - _temp1239.curr, _temp1239.curr);}));}}}} return;}} _LL1194:;}{ struct Cyc_List_List*
 prev_fields= 0; unsigned int tag_count= 0;{ struct Cyc_List_List* fs= ed->fields;
@@ -1997,8 +1994,8 @@ xprintf("enum %.*s, field %.*s: expression is not constant", _temp1245.last_plus
 - _temp1245.curr, _temp1245.curr, _temp1246.last_plus_one - _temp1246.curr,
 _temp1246.curr);}));}}{ unsigned int t1= Cyc_Evexp_eval_const_uint_exp(( struct
 Cyc_Absyn_Exp*)({ struct Cyc_Absyn_Exp* _temp1247= f->tag; if( _temp1247 == 0){
-_throw( Null_Exception);} _temp1247;})); tag_count= t1 +( unsigned int) 1;(* f->name).f1=(
-void*)({ struct Cyc_Absyn_Abs_n_struct* _temp1248=( struct Cyc_Absyn_Abs_n_struct*)
+_throw( Null_Exception);} _temp1247;})); tag_count= t1 + 1;(* f->name).f1=( void*)({
+struct Cyc_Absyn_Abs_n_struct* _temp1248=( struct Cyc_Absyn_Abs_n_struct*)
 GC_malloc( sizeof( struct Cyc_Absyn_Abs_n_struct)); _temp1248[ 0]=({ struct Cyc_Absyn_Abs_n_struct
 _temp1249; _temp1249.tag= Cyc_Absyn_Abs_n_tag; _temp1249.f1= te->ns; _temp1249;});
 _temp1248;}); ge->ordinaries=(( struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict*

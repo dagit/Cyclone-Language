@@ -88,20 +88,20 @@ struct Cyc_List_List* _temp10= speclist; if( _temp10 == 0){ _throw(
 Null_Exception);} _temp10->tl;});}} int Cyc_Arg_current= 0; static struct
 _tagged_ptr0 Cyc_Arg_args={ 0, 0, 0}; static void Cyc_Arg_stop( int prog_pos,
 void* e, struct Cyc_List_List* speclist, struct _tagged_string errmsg){ struct
-_tagged_string progname=( unsigned int) prog_pos <({ struct _tagged_ptr0 _temp11=
-Cyc_Arg_args;( unsigned int)( _temp11.last_plus_one - _temp11.curr);})?({ struct
-_tagged_ptr0 _temp12= Cyc_Arg_args; struct _tagged_string* _temp14= _temp12.curr
-+ prog_pos; if( _temp12.base == 0? 1:( _temp14 < _temp12.base? 1: _temp14 >=
-_temp12.last_plus_one)){ _throw( Null_Exception);}* _temp14;}):( struct
-_tagged_string)({ char* _temp15=( char*)"(?)"; struct _tagged_string _temp16;
-_temp16.curr= _temp15; _temp16.base= _temp15; _temp16.last_plus_one= _temp15 + 4;
-_temp16;});{ void* _temp17= e; struct _tagged_string _temp27; struct
-_tagged_string _temp29; struct _tagged_string _temp31; struct _tagged_string
-_temp33; struct _tagged_string _temp35; struct _tagged_string _temp37; _LL19:
-if((( struct _tunion_struct*) _temp17)->tag == Cyc_Arg_Unknown_tag){ _LL28:
-_temp27=( struct _tagged_string)(( struct Cyc_Arg_Unknown_struct*) _temp17)->f1;
-goto _LL20;} else{ goto _LL21;} _LL21: if((( struct _tunion_struct*) _temp17)->tag
-== Cyc_Arg_Missing_tag){ _LL30: _temp29=( struct _tagged_string)(( struct Cyc_Arg_Missing_struct*)
+_tagged_string progname= prog_pos <({ struct _tagged_ptr0 _temp11= Cyc_Arg_args;(
+unsigned int)( _temp11.last_plus_one - _temp11.curr);})?({ struct _tagged_ptr0
+_temp12= Cyc_Arg_args; struct _tagged_string* _temp14= _temp12.curr + prog_pos;
+if( _temp12.base == 0? 1:( _temp14 < _temp12.base? 1: _temp14 >= _temp12.last_plus_one)){
+_throw( Null_Exception);}* _temp14;}):( struct _tagged_string)({ char* _temp15=(
+char*)"(?)"; struct _tagged_string _temp16; _temp16.curr= _temp15; _temp16.base=
+_temp15; _temp16.last_plus_one= _temp15 + 4; _temp16;});{ void* _temp17= e;
+struct _tagged_string _temp27; struct _tagged_string _temp29; struct
+_tagged_string _temp31; struct _tagged_string _temp33; struct _tagged_string
+_temp35; struct _tagged_string _temp37; _LL19: if((( struct _tunion_struct*)
+_temp17)->tag == Cyc_Arg_Unknown_tag){ _LL28: _temp27=( struct _tagged_string)((
+struct Cyc_Arg_Unknown_struct*) _temp17)->f1; goto _LL20;} else{ goto _LL21;}
+_LL21: if((( struct _tunion_struct*) _temp17)->tag == Cyc_Arg_Missing_tag){
+_LL30: _temp29=( struct _tagged_string)(( struct Cyc_Arg_Missing_struct*)
 _temp17)->f1; goto _LL22;} else{ goto _LL23;} _LL23: if((( struct _tunion_struct*)
 _temp17)->tag == Cyc_Arg_Wrong_tag){ _LL36: _temp35=( struct _tagged_string)((
 struct Cyc_Arg_Wrong_struct*) _temp17)->f1; goto _LL34; _LL34: _temp33=( struct
@@ -138,29 +138,29 @@ _temp52.last_plus_one - _temp52.curr);}); ++ Cyc_Arg_current; while( Cyc_Arg_cur
 struct _tagged_string* _temp55= _temp53.curr + Cyc_Arg_current; if( _temp53.base
 == 0? 1:( _temp55 < _temp53.base? 1: _temp55 >= _temp53.last_plus_one)){ _throw(
 Null_Exception);}* _temp55;}); if(({ struct _tagged_string _temp56= s;(
-unsigned int)( _temp56.last_plus_one - _temp56.curr);}) >=( unsigned int) 1?(
-int)({ struct _tagged_string _temp57= s; char* _temp59= _temp57.curr + 0; if(
-_temp57.base == 0? 1:( _temp59 < _temp57.base? 1: _temp59 >= _temp57.last_plus_one)){
-_throw( Null_Exception);}* _temp59;}) ==( int)'-': 0){ void* action;{ struct
-_handler_cons _temp60; _push_handler(& _temp60);{ struct _xtunion_struct*
-_temp61=( struct _xtunion_struct*) setjmp( _temp60.handler); if( ! _temp61){
-action= Cyc_Arg_lookup( speclist, s);; _pop_handler();} else{ struct
-_xtunion_struct* _temp63= _temp61; _LL65: if( _temp63->tag == Cyc_Core_Not_found_tag){
-goto _LL66;} else{ goto _LL67;} _LL67: goto _LL68; _LL66: Cyc_Arg_stop( initpos,(
-void*)({ struct Cyc_Arg_Unknown_struct* _temp69=( struct Cyc_Arg_Unknown_struct*)
-GC_malloc( sizeof( struct Cyc_Arg_Unknown_struct)); _temp69[ 0]=({ struct Cyc_Arg_Unknown_struct
-_temp70; _temp70.tag= Cyc_Arg_Unknown_tag; _temp70.f1= s; _temp70;}); _temp69;}),
-speclist, errmsg); return; _LL68:( void) _throw( _temp63); _LL64:;}}}{ struct
-_handler_cons _temp71; _push_handler(& _temp71);{ struct _xtunion_struct*
-_temp72=( struct _xtunion_struct*) setjmp( _temp71.handler); if( ! _temp72){{
-void* _temp73= action; void(* _temp87)(); int* _temp89; int* _temp91; void(*
-_temp93)( struct _tagged_string); void(* _temp95)( int); void(* _temp97)( struct
-_tagged_string); _LL75: if((( struct _tunion_struct*) _temp73)->tag == Cyc_Arg_Unit_spec_tag){
-_LL88: _temp87=( void(*)())(( struct Cyc_Arg_Unit_spec_struct*) _temp73)->f1;
-goto _LL76;} else{ goto _LL77;} _LL77: if((( struct _tunion_struct*) _temp73)->tag
-== Cyc_Arg_Set_spec_tag){ _LL90: _temp89=( int*)(( struct Cyc_Arg_Set_spec_struct*)
-_temp73)->f1; goto _LL78;} else{ goto _LL79;} _LL79: if((( struct _tunion_struct*)
-_temp73)->tag == Cyc_Arg_Clear_spec_tag){ _LL92: _temp91=( int*)(( struct Cyc_Arg_Clear_spec_struct*)
+unsigned int)( _temp56.last_plus_one - _temp56.curr);}) >= 1?({ struct
+_tagged_string _temp57= s; char* _temp59= _temp57.curr + 0; if( _temp57.base ==
+0? 1:( _temp59 < _temp57.base? 1: _temp59 >= _temp57.last_plus_one)){ _throw(
+Null_Exception);}* _temp59;}) =='-': 0){ void* action;{ struct _handler_cons
+_temp60; _push_handler(& _temp60);{ struct _xtunion_struct* _temp61=( struct
+_xtunion_struct*) setjmp( _temp60.handler); if( ! _temp61){ action= Cyc_Arg_lookup(
+speclist, s);; _pop_handler();} else{ struct _xtunion_struct* _temp63= _temp61;
+_LL65: if( _temp63->tag == Cyc_Core_Not_found_tag){ goto _LL66;} else{ goto
+_LL67;} _LL67: goto _LL68; _LL66: Cyc_Arg_stop( initpos,( void*)({ struct Cyc_Arg_Unknown_struct*
+_temp69=( struct Cyc_Arg_Unknown_struct*) GC_malloc( sizeof( struct Cyc_Arg_Unknown_struct));
+_temp69[ 0]=({ struct Cyc_Arg_Unknown_struct _temp70; _temp70.tag= Cyc_Arg_Unknown_tag;
+_temp70.f1= s; _temp70;}); _temp69;}), speclist, errmsg); return; _LL68:( void)
+_throw( _temp63); _LL64:;}}}{ struct _handler_cons _temp71; _push_handler(&
+_temp71);{ struct _xtunion_struct* _temp72=( struct _xtunion_struct*) setjmp(
+_temp71.handler); if( ! _temp72){{ void* _temp73= action; void(* _temp87)(); int*
+_temp89; int* _temp91; void(* _temp93)( struct _tagged_string); void(* _temp95)(
+int); void(* _temp97)( struct _tagged_string); _LL75: if((( struct
+_tunion_struct*) _temp73)->tag == Cyc_Arg_Unit_spec_tag){ _LL88: _temp87=( void(*)())((
+struct Cyc_Arg_Unit_spec_struct*) _temp73)->f1; goto _LL76;} else{ goto _LL77;}
+_LL77: if((( struct _tunion_struct*) _temp73)->tag == Cyc_Arg_Set_spec_tag){
+_LL90: _temp89=( int*)(( struct Cyc_Arg_Set_spec_struct*) _temp73)->f1; goto
+_LL78;} else{ goto _LL79;} _LL79: if((( struct _tunion_struct*) _temp73)->tag ==
+Cyc_Arg_Clear_spec_tag){ _LL92: _temp91=( int*)(( struct Cyc_Arg_Clear_spec_struct*)
 _temp73)->f1; goto _LL80;} else{ goto _LL81;} _LL81: if((( struct _tunion_struct*)
 _temp73)->tag == Cyc_Arg_String_spec_tag){ _LL94: _temp93=( void(*)( struct
 _tagged_string))(( struct Cyc_Arg_String_spec_struct*) _temp73)->f1; goto _LL82;}

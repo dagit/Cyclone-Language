@@ -2213,6 +2213,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s, exp_t e, list_t<switch_clause
   let t = e->topt->v;
 
   // decide if we can leave it as a switch
+  // FIX: cannot have Float_p in any cases.
   bool leave_as_switch;
   switch (compress(t)) {
   case &IntType(_,_): leave_as_switch = true;  break;

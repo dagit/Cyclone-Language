@@ -38,83 +38,135 @@ static $(list_t<designator_t>,pat_t)@ null_designator(pat_t p) {
 static var_t get_name(vardecl_t vd) {
   return (*vd->name)[1];
 }
-// FIX:  should pass in a topt and use it as we do with tcExp
-$(list_t<tvar_t>, list_t<vardecl_t>)@ tcPat(tenv_t te,pat_t p, type_t *`p region_opt) {
+static type_t any_type(type_t *`r topt) {
+  if(topt != null)
+    return *topt;
+  return new_evar(MemKind);
+}
+// by setting to whatever topt is, unification will succeed.  And since
+// comparison between any two num types succeeds, this is fine (albeit kludgey)
+// FIX? Allow *topt to be an Enum ?
+static type_t num_type(type_t *`r topt, type_t numt) {
+  if(topt != null && coerceable(*topt))
+    return *topt;
+  return numt;
+}
+static void set_vd(vardecl_t vd, list_t<vardecl_t>@`r v_result_ptr, type_t t){
+  vd->type   = t;
+  vd->tq     = empty_tqual();
+  vd->shadow = 0; // FIX?
+  *v_result_ptr = new List(vd,*v_result_ptr);
+}
+$(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
+					   pat_t  p,
+					   type_t *`r1 topt,
+					   type_t *`r2 region_opt) {
   type_t t;
   list_t<tvar_t>    tv_result = null;
   list_t<vardecl_t> v_result  = null;
 
   // Figure out what t should be; assign to p->topt and return after switch
   switch (p->r) {
-  case Wild_p:      t = new_evar(MemKind); break;
-  case &Int_p(s,i):  t = (s == (sign_t)Unsigned) ? uint_t : sint_t; break;
-  case &Char_p(c):   t = uchar_t; break;
-  case &Float_p(s):  t = float_t; break;
+  case &Int_p(Unsigned,_): t = num_type(topt, uint_t);  break;
+  case &Int_p(Signed,_):   t = num_type(topt, sint_t);  break;
+  case &Char_p(_):         t = num_type(topt, uchar_t); break;
+  case &Float_p(_):        t = num_type(topt, float_t); break;
   case Null_p:
+    if(topt != null)
+      switch(compress(*topt)) {
+      case &PointerType(_): t = *topt; goto tcpat_end;
+      default: break;
+      }
     t = new PointerType(PtrInfo{new_evar(AnyKind),new_evar(RgnKind),
-                                new_conref(true),
-                                empty_tqual(),empty_conref()}); 
+				new_conref(true),empty_tqual(),empty_conref()});
+    break;
+
+  case Wild_p:       
+    t = any_type(topt);
     break;
   case &Var_p(vd):
-    t = new_evar(MemKind);
-    vd->type   = t;
-    vd->tq     = empty_tqual();
-    vd->shadow = 0; // FIX?!?!?
-    v_result = new List(vd,v_result);
+    t = any_type(topt);
+    set_vd(vd, &v_result, t);
     break;
   case &Reference_p(vd):
-    t = new_evar(MemKind);
+    t = any_type(topt);
     if(region_opt == null) {
       terr(p->loc, "* pattern would point into an unknown region");
       break;
     }
-    vd->type   = new PointerType(PtrInfo{t,*region_opt,new_conref(false),
-                                         empty_tqual(),empty_conref()});
-    vd->tq     = empty_tqual();
-    vd->shadow = 0; // FIX?!?!?
-    v_result = new List(vd,v_result);
+    set_vd(vd, &v_result, 
+	   new PointerType(PtrInfo{t,*region_opt,new_conref(false),
+				     empty_tqual(),empty_conref()}));
     break;
 
   case &Pointer_p(p2):
+    type_t inner_typ = VoidType;
+    let inner_topt = null;
+    if(topt != null)
+      switch(compress(*topt)) {
+      case &PointerType(PtrInfo(elt_typ,_,_,_,_)): 
+	inner_typ  = elt_typ; 
+	inner_topt = &inner_typ;
+	break;
+      default: break;
+      }
+    
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
     type_t ptr_rgn = new_evar(RgnKind);
-    let &$(sub_tvs,sub_vs) = tcPat(te,p2,&ptr_rgn);
+    let $(sub_tvs,sub_vs) = tcPat(te,p2,inner_topt,&ptr_rgn);
     tv_result = List::append(tv_result, sub_tvs);
     v_result  = List::append(v_result,  sub_vs);
     // if p2's type is a tunion field or xtunion field type, then we cast
-    // the type of p = &p2 to the appropriate tunion or xtunion type.
-    switch (compress(p2->topt->v)) {
-    case &TunionFieldType(TunionFieldInfo{n,tvs,fn,tud,tufd}):
-      t = new TunionType(TunionInfo{n,tvs,ptr_rgn,tud});
-      break;
-    case &XTunionFieldType(XTunionFieldInfo{n,fn,xtud,xtufd}):
-      t = new XTunionType(XTunionInfo{n,ptr_rgn,xtud});
-      break;
-    default:
+    // the type of p = &p2 to the appropriate tunion or xtunion type, unless
+    // topt suggests we do otherwise.
+    if(inner_topt == null) 
+      switch (compress(p2->topt->v)) {
+      case &TunionFieldType(TunionFieldInfo{n,tvs,fn,tud,tufd}):
+	t = new TunionType(TunionInfo{n,tvs,ptr_rgn,tud});
+	break;
+      case &XTunionFieldType(XTunionFieldInfo{n,fn,xtud,xtufd}):
+	t = new XTunionType(XTunionInfo{n,ptr_rgn,xtud});
+	break;
+      default:
+	t = new PointerType(PtrInfo{p2->topt->v, ptr_rgn, empty_conref(), 
+				    empty_tqual(), empty_conref()});
+	break;
+      }
+    else 
       t = new PointerType(PtrInfo{p2->topt->v, ptr_rgn, empty_conref(), 
-                                  empty_tqual(), empty_conref()});
-      break;
-    }
+      empty_tqual(), empty_conref()});
     break;
 
   case &Tuple_p(ps):
-    list_t<$(tqual_t,type_t)@> ts = null;
+    list_t<$(tqual_t,type_t)@> pat_ts  = null;
+    list_t<$(tqual_t,type_t)@> topt_ts = null;
+    if(topt != null)
+      switch(compress(*topt)) {
+      case &TupleType(tqts): topt_ts = tqts; break;
+      default: break;
+      }
     for(; ps != null; ps=ps->tl) {
-      let &$(sub_tvs,sub_vs) = tcPat(te,ps->hd,region_opt);
+      let inner_topt = null;
+      if(topt_ts != null) {
+	inner_topt = &(*topt_ts->hd)[1];
+	topt_ts    = topt_ts->tl;
+      }
+      let $(sub_tvs,sub_vs) = tcPat(te,ps->hd,inner_topt,region_opt);
       tv_result = List::append(tv_result, sub_tvs);
       v_result  = List::append(v_result,  sub_vs);
-      ts = new List(new $(empty_tqual(),ps->hd->topt->v),ts);
+      pat_ts = new List(new $(empty_tqual(),ps->hd->topt->v),pat_ts);
     }
-    t = new TupleType(List::imp_rev(ts));
+    t = new TupleType(List::imp_rev(pat_ts));
     break;
 
   case &Struct_p(sd,*topt_ref,tvs,dps): 
+    // FIX: USE TOPT!
     if (tvs != null)
-      return impos("tcPat: struct<...> not implemented");
+      throw impos("tcPat: struct<...> not implemented");
     // type check the argument patterns
     for (_ dps0 = dps; dps0 != null; dps0 = dps0->tl) {
-      let &$(sub_tvs,sub_vs) = tcPat(te,(*dps0->hd)[1],region_opt);
+      let $(sub_tvs,sub_vs) = tcPat(te,(*dps0->hd)[1],null,region_opt);
       tv_result = List::append(tv_result, sub_tvs);
       v_result  = List::append(v_result,  sub_vs);
     }
@@ -122,7 +174,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>)@ tcPat(tenv_t te,pat_t p, type_t *`p region
     let all_inst = List::map(make_inst_var,sd->tvs);
     let all_typs = List::map(snd,all_inst); 
     *topt_ref = new Opt(all_typs); // side effect
-    t = new StructType(sd->name->v,all_typs,(structdecl_t@)(new{sd}));
+    t = new StructType(sd->name->v, all_typs, new sd);
     // unify with the struct type
     list_t<$(structfield_t,pat_t)@> fields = 
       resolve_struct_designators(p->loc,dps,sd);
@@ -138,6 +190,8 @@ $(list_t<tvar_t>, list_t<vardecl_t>)@ tcPat(tenv_t te,pat_t p, type_t *`p region
     break;
 
   case &Tunion_p(q,_,tvs,ps,tud,tuf): 
+    // FIX: USE TOPT!
+
     // constrain the type variables to have box kind
     for (_ t = tvs; t != null; t = t->tl) {
       tvar_t tv = t->hd;
@@ -170,7 +224,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>)@ tcPat(tenv_t te,pat_t p, type_t *`p region
       _ p2 = ps->hd;
       // Note:  we don't pass in ptr_rgn here because for value-carrying
       // constructors, the pointer's region is passed down as region_opt.
-      let &$(sub_tvs,sub_vs) = tcPat(te2,p2,region_opt);
+      let $(sub_tvs,sub_vs) = tcPat(te2,p2,null,region_opt);
       tv_result = List::append(tv_result, sub_tvs);
       v_result  = List::append(v_result,  sub_vs);
       _ field_typ = substitute(all_inst,(*tqts->hd)[1]);
@@ -188,6 +242,8 @@ $(list_t<tvar_t>, list_t<vardecl_t>)@ tcPat(tenv_t te,pat_t p, type_t *`p region
 			  qvar2string(q)));
     break;
   case &XTunion_p(q,tvs,ps,xed,ef): 
+    // FIX: USE TOPT!
+
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
     tenv_t te2 = add_type_vars(p->loc,te,tvs);
@@ -199,7 +255,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>)@ tcPat(tenv_t te,pat_t p, type_t *`p region
       _ p2 = ps->hd;
       // Note:  we don't pass in ptr_rgn here because for value-carrying
       // constructors, the pointer's region is passed down as region_opt.
-      let &$(sub_tvs,sub_vs) = tcPat(te2,p2,region_opt);
+      let $(sub_tvs,sub_vs) = tcPat(te2,p2,null,region_opt);
       tv_result = List::append(tv_result, sub_tvs);
       v_result  = List::append(v_result,  sub_vs);
       _ field_typ = (*tqts->hd)[1];
@@ -217,7 +273,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>)@ tcPat(tenv_t te,pat_t p, type_t *`p region
 			  qvar2string(q)));
     break;
 
-  case &Enum_p(q,ed,ef):
+  case &Enum_p(q,ed,ef): // FIX? return numeric when topt is numeric??
     t = new EnumType(ed->name,ed);
     break;
 
@@ -225,70 +281,45 @@ $(list_t<tvar_t>, list_t<vardecl_t>)@ tcPat(tenv_t te,pat_t p, type_t *`p region
     try switch (lookup_ordinary(te,p->loc,q)) {
     case &StructRes(_):
       terr(p->loc,"struct tag used without arguments in pattern");
-      t = wildtyp();
-      break;
+      t = wildtyp();      
+      goto tcpat_end;
     case &TunionRes(tud,tuf):
       p->r = new Tunion_p(tuf->name,null,null,null,tud,tuf);
-      return tcPat(te,p,region_opt);
+      return tcPat(te,p,topt,region_opt);
     case &XTunionRes(xtud,xtuf):
       p->r = new XTunion_p(xtuf->name,null,null,xtud,xtuf);
-      return tcPat(te,p,region_opt);
+      return tcPat(te,p,topt,region_opt);
     case &EnumRes(ed,ef):
       p->r = new Enum_p(ef->name,ed,ef);
-      return tcPat(te,p,region_opt);
-    case &VarRes(_):
-      // The pattern variable has already been declared
-      switch ((*q)[0]) {
-        // If the variable is not qualified, then we consider
-        // this a declaration that shadows the outer declaration,
-        // without warning.
-      case Loc_n: fallthru;
-      case &Rel_n(null):
-        (*q)[0] = Loc_n;        
-        p->r = new Var_p(new_vardecl(q,VoidType,null));
-        return tcPat(te,p,region_opt); // sets the vardecl's fields correctly
-      default:
-        // Otherwise the variable is qualified and it has already
-        // been declared.  We don't allow this.
-        terr(p->loc,"qualified variable in pattern");
-        break;
-      }
-      terr(p->loc,
-           xprintf("unresolved identifier %s in pattern",qvar2string(q)));
+      return tcPat(te,p,topt,region_opt);
+    case &VarRes(_): // shadows an outer definition, but that's fine
+      break;
+    } catch { case &Dict::Absent: break; } // a new variable
+    // Unqualified variable is a declaration, qualified is an error
+    switch ((*q)[0]) {
+    case Loc_n: fallthru;
+    case &Rel_n(null):
+      (*q)[0] = Loc_n;        
+      p->r = new Var_p(new_vardecl(q,VoidType,null));
+      return tcPat(te,p,topt,region_opt);//sets the vardecl's fields correctly
+    default:
+      terr(p->loc,"qualified variable in pattern");
       t = wildtyp();
       break;
-    } catch {
-    case &Dict::Absent:
-      // unbound variable in pattern
-      switch ((*q)[0]) {
-        // If the variable is unqualified, it declares a new variable
-      case Loc_n: fallthru;
-      case &Rel_n(null):
-        (*q)[0] = Loc_n;        
-        p->r = new Var_p(new_vardecl(q,VoidType,null));
-        return tcPat(te,p,region_opt); // sets the vardecl's fields correctly
-      default:
-        // Otherwise it's an error
-        terr(p->loc,
-             xprintf("unbound identifier %s in pattern",qvar2string(q)));
-        t = wildtyp();
-        break;
-      }
-      break;
-    }  
+    }
     break;
   case &UnknownCall_p(q,tvs,ps):
     try switch (lookup_ordinary(te,p->loc,q)) {
     case &StructRes(sd):
       let x = List::map(null_designator, ps);
       p->r = new Struct_p(sd,null,tvs,x);
-      return tcPat(te,p,region_opt);
+      return tcPat(te,p,topt,region_opt);
     case &TunionRes(tud,tuf):
       p->r = new Tunion_p(tuf->name,null,tvs,ps,tud,tuf);
-      return tcPat(te,p,region_opt);
+      return tcPat(te,p,topt,region_opt);
     case &XTunionRes(xtud,xtuf):
       p->r = new XTunion_p(xtuf->name,tvs,ps,xtud,xtuf);
-      return tcPat(te,p,region_opt);
+      return tcPat(te,p,topt,region_opt);
     case &EnumRes(_,_):
       terr(p->loc,
            xprintf("bad enum constructor %s in pattern",qvar2string(q)));
@@ -305,37 +336,20 @@ $(list_t<tvar_t>, list_t<vardecl_t>)@ tcPat(tenv_t te,pat_t p, type_t *`p region
     try switch (lookup_ordinary(te,p->loc,q)) {
     case &StructRes(sd):
       p->r = new Struct_p(sd,null,tvs,dps);
-      return tcPat(te,p,region_opt);
-    case &TunionRes(_,_):
-      terr(p->loc,"tunion with designators not implemented");
-      t = wildtyp();
-      break;
-    case &XTunionRes(_,_):
-      terr(p->loc,"xtunion with designators not implemented");
-      t = wildtyp();
-      break;
-    case &VarRes(_):
-      terr(p->loc,
-           xprintf("unbound struct %s in pattern",qvar2string(q)));
-      t = wildtyp();
-      break;
-    case &EnumRes(_,_):
-      terr(p->loc,
-           xprintf("enum field %s used in struct pattern",qvar2string(q)));
-      t = wildtyp();
-      break;
-    } catch {case &Dict::Absent:
-      terr(p->loc,
-           xprintf("unbound struct %s in pattern",qvar2string(q)));
-      t = wildtyp();
-      break;
-    }      
+      return tcPat(te,p,topt,region_opt);
+    default: break;
+    } catch {case &Dict::Absent: break; }
+    terr(p->loc, xprintf("%s is not a struct name, but pattern has designators",
+			 qvar2string(q)));
+    t = wildtyp();
     break;
   }
+
+ tcpat_end:
   p->topt = new Opt(t);
   check_unique_vars(List::map(get_name, v_result), p->loc,
 		    "pattern contains a repeated variable");
-  return new $(tv_result,v_result);
+  return $(tv_result,v_result);
 }
 
 void check_pat_regions(tenv_t te, pat_t p) {
@@ -497,9 +511,9 @@ simple_pat_t con_pat(string con_name,opt_t<int> span,list_t<simple_pat_t> ps) {
 static simple_pat_t compile_pat(pat_t p) {
   simple_pat_t s;
   switch (p->r) {
-  case Wild_p:         s = Any; break;
+  case Wild_p:          s = Any; break;
   case &Var_p(_):       s = Any; break;
-  case Null_p:         s = null_pat(); break;
+  case Null_p:          s = null_pat(); break;
   case &Int_p(sn,i):    s = int_pat(i); break;
   case &Char_p(c):      s = char_pat(c); break;
   case &Float_p(f):     s = float_pat(f); break;

@@ -1616,17 +1616,17 @@ sizeof( struct Cyc_List_List)); _temp878->hd=( void*) d; _temp878->tl= decls;
 _temp878;});}}}} return(( struct Cyc_List_List*(*)( struct Cyc_List_List* x))
 Cyc_List_imp_rev)( decls);}}}}}}} static void* Cyc_Parse_id_to_kind( struct
 _tagged_string s, struct Cyc_Position_Segment* loc){ if( Cyc_String_strlen( s)
-!=( unsigned int) 1){ Cyc_Parse_err(({ struct _tagged_string _temp879= s;
-xprintf("bad kind: %.*s", _temp879.last_plus_one - _temp879.curr, _temp879.curr);}),
-loc); return( void*) Cyc_Absyn_BoxKind;} else{ switch(({ struct _tagged_string
-_temp880= s; char* _temp882= _temp880.curr + 0; if( _temp880.base == 0? 1:(
-_temp882 < _temp880.base? 1: _temp882 >= _temp880.last_plus_one)){ _throw(
-Null_Exception);}* _temp882;})){ case 'A': _LL883: return( void*) Cyc_Absyn_AnyKind;
-case 'M': _LL884: return( void*) Cyc_Absyn_MemKind; case 'B': _LL885: return(
-void*) Cyc_Absyn_BoxKind; case 'R': _LL886: return( void*) Cyc_Absyn_RgnKind;
-case 'E': _LL887: return( void*) Cyc_Absyn_EffKind; default: _LL888: Cyc_Parse_err(({
-struct _tagged_string _temp890= s; xprintf("bad kind: %.*s", _temp890.last_plus_one
-- _temp890.curr, _temp890.curr);}), loc); return( void*) Cyc_Absyn_BoxKind;}}}
+!= 1){ Cyc_Parse_err(({ struct _tagged_string _temp879= s; xprintf("bad kind: %.*s",
+_temp879.last_plus_one - _temp879.curr, _temp879.curr);}), loc); return( void*)
+Cyc_Absyn_BoxKind;} else{ switch(({ struct _tagged_string _temp880= s; char*
+_temp882= _temp880.curr + 0; if( _temp880.base == 0? 1:( _temp882 < _temp880.base?
+1: _temp882 >= _temp880.last_plus_one)){ _throw( Null_Exception);}* _temp882;})){
+case 'A': _LL883: return( void*) Cyc_Absyn_AnyKind; case 'M': _LL884: return(
+void*) Cyc_Absyn_MemKind; case 'B': _LL885: return( void*) Cyc_Absyn_BoxKind;
+case 'R': _LL886: return( void*) Cyc_Absyn_RgnKind; case 'E': _LL887: return(
+void*) Cyc_Absyn_EffKind; default: _LL888: Cyc_Parse_err(({ struct
+_tagged_string _temp890= s; xprintf("bad kind: %.*s", _temp890.last_plus_one -
+_temp890.curr, _temp890.curr);}), loc); return( void*) Cyc_Absyn_BoxKind;}}}
 static struct Cyc_List_List* Cyc_Parse_attopt_to_tms( struct Cyc_Position_Segment*
 loc, struct Cyc_List_List* atts, struct Cyc_List_List* tms){ if( atts == 0){
 return tms;} else{ return({ struct Cyc_List_List* _temp891=( struct Cyc_List_List*)
@@ -4073,13 +4073,13 @@ _temp2182[ _temp2183];}); if( yyn == - 32768){ goto yydefault;} if( Cyc_yychar
 0;} else{ yychar1=( Cyc_yychar > 0? Cyc_yychar <= 347: 0)?( int)({ short*
 _temp2184=( short*) Cyc_yytranslate; unsigned int _temp2185= Cyc_yychar; if(
 _temp2185 >= 348u){ _throw( Null_Exception);} _temp2184[ _temp2185];}): 227;}
-yyn += yychar1; if(( yyn < 0? 1: yyn > 4017)? 1:( int)({ short* _temp2186=(
-short*) Cyc_yycheck; unsigned int _temp2187= yyn; if( _temp2187 >= 4018u){
-_throw( Null_Exception);} _temp2186[ _temp2187];}) != yychar1){ goto yydefault;}
-yyn=( int)({ short* _temp2188=( short*) Cyc_yytable; unsigned int _temp2189= yyn;
-if( _temp2189 >= 4018u){ _throw( Null_Exception);} _temp2188[ _temp2189];}); if(
-yyn < 0){ if( yyn == - 32768){ goto yyerrlab;} yyn= - yyn; goto yyreduce;} else{
-if( yyn == 0){ goto yyerrlab;}} if( yyn == 728){ return 0;} if( Cyc_yychar != 0){
+yyn += yychar1; if(( yyn < 0? 1: yyn > 4017)? 1:({ short* _temp2186=( short*)
+Cyc_yycheck; unsigned int _temp2187= yyn; if( _temp2187 >= 4018u){ _throw(
+Null_Exception);} _temp2186[ _temp2187];}) != yychar1){ goto yydefault;} yyn=(
+int)({ short* _temp2188=( short*) Cyc_yytable; unsigned int _temp2189= yyn; if(
+_temp2189 >= 4018u){ _throw( Null_Exception);} _temp2188[ _temp2189];}); if( yyn
+< 0){ if( yyn == - 32768){ goto yyerrlab;} yyn= - yyn; goto yyreduce;} else{ if(
+yyn == 0){ goto yyerrlab;}} if( yyn == 728){ return 0;} if( Cyc_yychar != 0){
 Cyc_yychar= - 2;}({ struct _tagged_ptr2 _temp2190= yyvs; struct _xtunion_struct**
 _temp2192= _temp2190.curr +( ++ yyvsp_offset); if( _temp2190.base == 0? 1:(
 _temp2192 < _temp2190.base? 1: _temp2192 >= _temp2190.last_plus_one)){ _throw(
@@ -4974,9 +4974,8 @@ _temp2878 >= _temp2876.last_plus_one)){ _throw( Null_Exception);}* _temp2878;}).
 struct _tagged_ptr3 _temp2879= yyls; struct Cyc_Yyltype* _temp2881= _temp2879.curr
 +( yylsp_offset - 1); if( _temp2879.base == 0? 1:( _temp2881 < _temp2879.base? 1:
 _temp2881 >= _temp2879.last_plus_one)){ _throw( Null_Exception);}* _temp2881;}).last_line));}{
-unsigned int j=( unsigned int) _temp2852; for( 0;( j &( unsigned int) 1) ==(
-unsigned int) 0; j= j >>( unsigned int) 1){;} j= j >>( unsigned int) 1; if( j !=(
-unsigned int) 0){ Cyc_Parse_err(( struct _tagged_string)({ char* _temp2882=(
+unsigned int j=( unsigned int) _temp2852; for( 0;( j & 1) == 0; j= j >> 1){;} j=
+j >> 1; if( j != 0){ Cyc_Parse_err(( struct _tagged_string)({ char* _temp2882=(
 char*)"aligned requires positive power of two"; struct _tagged_string _temp2883;
 _temp2883.curr= _temp2882; _temp2883.base= _temp2882; _temp2883.last_plus_one=
 _temp2882 + 39; _temp2883;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
@@ -10488,15 +10487,15 @@ struct _tagged_ptr3 _temp7252= yyls; struct Cyc_Yyltype* _temp7254= _temp7252.cu
 _temp7252.base? 1: _temp7254 >= _temp7252.last_plus_one)){ _throw(
 Null_Exception);}* _temp7254;}).last_column;});} yyn=( int)({ short* _temp7255=(
 short*) Cyc_yyr1; unsigned int _temp7256= yyn; if( _temp7256 >= 389u){ _throw(
-Null_Exception);} _temp7255[ _temp7256];}); yystate=( int)({ short* _temp7257=(
-short*) Cyc_yypgoto; unsigned int _temp7258= yyn - 120; if( _temp7258 >= 107u){
-_throw( Null_Exception);} _temp7257[ _temp7258];}) +( int)({ struct _tagged_ptr1
-_temp7259= yyss; short* _temp7261= _temp7259.curr + yyssp_offset; if( _temp7259.base
-== 0? 1:( _temp7261 < _temp7259.base? 1: _temp7261 >= _temp7259.last_plus_one)){
-_throw( Null_Exception);}* _temp7261;}); if(( yystate >= 0? yystate <= 4017: 0)?(
-int)({ short* _temp7262=( short*) Cyc_yycheck; unsigned int _temp7263= yystate;
-if( _temp7263 >= 4018u){ _throw( Null_Exception);} _temp7262[ _temp7263];}) ==(
-int)({ struct _tagged_ptr1 _temp7264= yyss; short* _temp7266= _temp7264.curr +
+Null_Exception);} _temp7255[ _temp7256];}); yystate=({ short* _temp7257=( short*)
+Cyc_yypgoto; unsigned int _temp7258= yyn - 120; if( _temp7258 >= 107u){ _throw(
+Null_Exception);} _temp7257[ _temp7258];}) +({ struct _tagged_ptr1 _temp7259=
+yyss; short* _temp7261= _temp7259.curr + yyssp_offset; if( _temp7259.base == 0?
+1:( _temp7261 < _temp7259.base? 1: _temp7261 >= _temp7259.last_plus_one)){
+_throw( Null_Exception);}* _temp7261;}); if(( yystate >= 0? yystate <= 4017: 0)?({
+short* _temp7262=( short*) Cyc_yycheck; unsigned int _temp7263= yystate; if(
+_temp7263 >= 4018u){ _throw( Null_Exception);} _temp7262[ _temp7263];}) ==({
+struct _tagged_ptr1 _temp7264= yyss; short* _temp7266= _temp7264.curr +
 yyssp_offset; if( _temp7264.base == 0? 1:( _temp7266 < _temp7264.base? 1:
 _temp7266 >= _temp7264.last_plus_one)){ _throw( Null_Exception);}* _temp7266;}):
 0){ yystate=( int)({ short* _temp7267=( short*) Cyc_yytable; unsigned int
@@ -10507,25 +10506,24 @@ Null_Exception);} _temp7269[ _temp7270];});} goto yynewstate; yyerrlab: if(
 yyerrstatus == 0){ ++ Cyc_yynerrs; yyn=( int)({ short* _temp7271=( short*) Cyc_yypact;
 unsigned int _temp7272= yystate; if( _temp7272 >= 729u){ _throw( Null_Exception);}
 _temp7271[ _temp7272];}); if( yyn > - 32768? yyn < 4017: 0){ int sze= 0; struct
-_tagged_string msg; int x; int count; count= 0; for( x= yyn < 0? - yyn: 0;(
-unsigned int) x < 227u / sizeof( char*); x ++){ if(( int)({ short* _temp7273=(
-short*) Cyc_yycheck; unsigned int _temp7274= x + yyn; if( _temp7274 >= 4018u){
-_throw( Null_Exception);} _temp7273[ _temp7274];}) == x){( unsigned int)( sze +=
-Cyc_String_strlen(({ struct _tagged_string* _temp7275=( struct _tagged_string*)
-Cyc_yytname; unsigned int _temp7276= x; if( _temp7276 >= 227u){ _throw(
-Null_Exception);} _temp7275[ _temp7276];})) +( unsigned int) 15), count ++;}}
-msg=({ unsigned int _temp7277=( unsigned int)( sze + 15); char* _temp7278=( char*)
-GC_malloc_atomic( sizeof( char) * _temp7277); unsigned int i; struct
-_tagged_string _temp7279={ _temp7278, _temp7278, _temp7278 + _temp7277}; for( i=
-0; i < _temp7277; i ++){ _temp7278[ i]='\000';} _temp7279;}); Cyc_String_strcpy(
-msg,( struct _tagged_string)({ char* _temp7280=( char*)"parse error"; struct
-_tagged_string _temp7281; _temp7281.curr= _temp7280; _temp7281.base= _temp7280;
-_temp7281.last_plus_one= _temp7280 + 12; _temp7281;})); if( count < 5){ count= 0;
-for( x= yyn < 0? - yyn: 0;( unsigned int) x < 227u / sizeof( char*); x ++){ if((
-int)({ short* _temp7282=( short*) Cyc_yycheck; unsigned int _temp7283= x + yyn;
-if( _temp7283 >= 4018u){ _throw( Null_Exception);} _temp7282[ _temp7283];}) == x){
-Cyc_String_strcat( msg, count == 0?( struct _tagged_string)({ char* _temp7284=(
-char*)", expecting `"; struct _tagged_string _temp7285; _temp7285.curr=
+_tagged_string msg; int x; int count; count= 0; for( x= yyn < 0? - yyn: 0; x <
+227u / sizeof( char*); x ++){ if(({ short* _temp7273=( short*) Cyc_yycheck;
+unsigned int _temp7274= x + yyn; if( _temp7274 >= 4018u){ _throw( Null_Exception);}
+_temp7273[ _temp7274];}) == x){ sze += Cyc_String_strlen(({ struct
+_tagged_string* _temp7275=( struct _tagged_string*) Cyc_yytname; unsigned int
+_temp7276= x; if( _temp7276 >= 227u){ _throw( Null_Exception);} _temp7275[
+_temp7276];})) + 15, count ++;}} msg=({ unsigned int _temp7277=( unsigned int)(
+sze + 15); char* _temp7278=( char*) GC_malloc_atomic( sizeof( char) * _temp7277);
+unsigned int i; struct _tagged_string _temp7279={ _temp7278, _temp7278,
+_temp7278 + _temp7277}; for( i= 0; i < _temp7277; i ++){ _temp7278[ i]='\000';}
+_temp7279;}); Cyc_String_strcpy( msg,( struct _tagged_string)({ char* _temp7280=(
+char*)"parse error"; struct _tagged_string _temp7281; _temp7281.curr= _temp7280;
+_temp7281.base= _temp7280; _temp7281.last_plus_one= _temp7280 + 12; _temp7281;}));
+if( count < 5){ count= 0; for( x= yyn < 0? - yyn: 0; x < 227u / sizeof( char*);
+x ++){ if(({ short* _temp7282=( short*) Cyc_yycheck; unsigned int _temp7283= x +
+yyn; if( _temp7283 >= 4018u){ _throw( Null_Exception);} _temp7282[ _temp7283];})
+== x){ Cyc_String_strcat( msg, count == 0?( struct _tagged_string)({ char*
+_temp7284=( char*)", expecting `"; struct _tagged_string _temp7285; _temp7285.curr=
 _temp7284; _temp7285.base= _temp7284; _temp7285.last_plus_one= _temp7284 + 14;
 _temp7285;}):( struct _tagged_string)({ char* _temp7286=( char*)" or `"; struct
 _tagged_string _temp7287; _temp7287.curr= _temp7286; _temp7287.base= _temp7286;
@@ -10547,7 +10545,7 @@ _temp7296 < _temp7294.base? 1: _temp7296 >= _temp7294.last_plus_one)){ _throw(
 Null_Exception);}* _temp7296;}); yylsp_offset --; yyerrhandle: yyn=( int)({
 short* _temp7297=( short*) Cyc_yypact; unsigned int _temp7298= yystate; if(
 _temp7298 >= 729u){ _throw( Null_Exception);} _temp7297[ _temp7298];}); if( yyn
-== - 32768){ goto yyerrdefault;} yyn += 1; if(( yyn < 0? 1: yyn > 4017)? 1:( int)({
+== - 32768){ goto yyerrdefault;} yyn += 1; if(( yyn < 0? 1: yyn > 4017)? 1:({
 short* _temp7299=( short*) Cyc_yycheck; unsigned int _temp7300= yyn; if(
 _temp7300 >= 4018u){ _throw( Null_Exception);} _temp7299[ _temp7300];}) != 1){
 goto yyerrdefault;} yyn=( int)({ short* _temp7301=( short*) Cyc_yytable;

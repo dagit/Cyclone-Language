@@ -484,26 +484,25 @@ struct Cyc_Absyn_Exp*); extern int Cyc_Tcutil_coerce_use( struct Cyc_Tcenv_Tenv*
 struct Cyc_Absyn_Exp*, void*); extern int Cyc_Tcutil_coerceable( void*); extern
 int Cyc_Tcutil_silent_castable( struct Cyc_Tcenv_Tenv*, struct Cyc_Position_Segment*,
 void*, void*); extern int Cyc_Tcutil_castable( struct Cyc_Tcenv_Tenv*, struct
-Cyc_Position_Segment*, void*, void*); extern int Cyc_Tcutil_integral_promote(
-struct Cyc_Tcenv_Tenv*, struct Cyc_Absyn_Exp*); extern int Cyc_Tcutil_arithmetic_promote(
-struct Cyc_Tcenv_Tenv*, struct Cyc_Absyn_Exp*); extern int Cyc_Tcutil_comparison_promote(
-struct Cyc_Tcenv_Tenv*, struct Cyc_Absyn_Exp*); extern void* Cyc_Tcutil_max_arithmetic_type(
-void*, void*); extern int Cyc_Tcutil_unify( void*, void*); extern void* Cyc_Tcutil_substitute(
-struct Cyc_List_List*, void*); extern void* Cyc_Tcutil_fndecl2typ( struct Cyc_Absyn_Fndecl*);
-extern struct _tuple4* Cyc_Tcutil_make_inst_var( struct Cyc_Absyn_Tvar*); extern
-void Cyc_Tcutil_check_contains_assign( struct Cyc_Absyn_Exp*); extern void Cyc_Tcutil_check_type(
-struct Cyc_Position_Segment*, struct Cyc_Tcenv_Tenv*, struct Cyc_List_List*
-bound_tvars, void* k, void*); extern void Cyc_Tcutil_check_nonzero_bound( struct
-Cyc_Position_Segment*, struct Cyc_Absyn_Conref*); extern void Cyc_Tcutil_check_bound(
-struct Cyc_Position_Segment*, unsigned int i, struct Cyc_Absyn_Conref*); extern
-struct Cyc_List_List* Cyc_Tcutil_resolve_struct_designators( struct Cyc_Position_Segment*
-loc, struct Cyc_List_List* des, struct Cyc_Absyn_Structdecl* sd); extern int Cyc_Tcutil_is_tagged_pointer_typ(
-void*); extern struct _tuple5 Cyc_Tcutil_addressof_props( struct Cyc_Tcenv_Tenv*
-te, struct Cyc_Absyn_Exp* e); extern int Cyc_Tcutil_is_const_exp( struct Cyc_Tcenv_Tenv*
-te, struct Cyc_Absyn_Exp* e); extern unsigned int Cyc_Evexp_eval_const_uint_exp(
-struct Cyc_Absyn_Exp* e); extern unsigned int Cyc_Evexp_szof( void* t, struct
-Cyc_Position_Segment* loc); extern void Cyc_Tcstmt_tcStmt( struct Cyc_Tcenv_Tenv*
-te, struct Cyc_Absyn_Stmt* s, int new_block); extern struct Cyc_List_List* Cyc_Formatstr_get_format_typs(
+Cyc_Position_Segment*, void*, void*); extern int Cyc_Tcutil_is_integral( struct
+Cyc_Absyn_Exp*); extern int Cyc_Tcutil_is_numeric( struct Cyc_Absyn_Exp*);
+extern void* Cyc_Tcutil_max_arithmetic_type( void*, void*); extern int Cyc_Tcutil_unify(
+void*, void*); extern void* Cyc_Tcutil_substitute( struct Cyc_List_List*, void*);
+extern void* Cyc_Tcutil_fndecl2typ( struct Cyc_Absyn_Fndecl*); extern struct
+_tuple4* Cyc_Tcutil_make_inst_var( struct Cyc_Absyn_Tvar*); extern void Cyc_Tcutil_check_contains_assign(
+struct Cyc_Absyn_Exp*); extern void Cyc_Tcutil_check_type( struct Cyc_Position_Segment*,
+struct Cyc_Tcenv_Tenv*, struct Cyc_List_List* bound_tvars, void* k, void*);
+extern void Cyc_Tcutil_check_nonzero_bound( struct Cyc_Position_Segment*, struct
+Cyc_Absyn_Conref*); extern void Cyc_Tcutil_check_bound( struct Cyc_Position_Segment*,
+unsigned int i, struct Cyc_Absyn_Conref*); extern struct Cyc_List_List* Cyc_Tcutil_resolve_struct_designators(
+struct Cyc_Position_Segment* loc, struct Cyc_List_List* des, struct Cyc_Absyn_Structdecl*
+sd); extern int Cyc_Tcutil_is_tagged_pointer_typ( void*); extern struct _tuple5
+Cyc_Tcutil_addressof_props( struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Exp* e);
+extern int Cyc_Tcutil_is_const_exp( struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Exp*
+e); extern unsigned int Cyc_Evexp_eval_const_uint_exp( struct Cyc_Absyn_Exp* e);
+extern unsigned int Cyc_Evexp_szof( void* t, struct Cyc_Position_Segment* loc);
+extern void Cyc_Tcstmt_tcStmt( struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Stmt*
+s, int new_block); extern struct Cyc_List_List* Cyc_Formatstr_get_format_typs(
 struct _tagged_string, struct Cyc_Position_Segment*); extern struct Cyc_List_List*
 Cyc_Formatstr_get_scanf_typs( struct _tagged_string, struct Cyc_Position_Segment*);
 extern void* Cyc_Tcexp_tcExp( struct Cyc_Tcenv_Tenv*, void**, struct Cyc_Absyn_Exp*);
@@ -935,16 +934,16 @@ else{ goto _LL329;} _LL329: if(( int) _temp325 == Cyc_Absyn_Minus){ goto _LL330;
 else{ goto _LL331;} _LL331: if(( int) _temp325 == Cyc_Absyn_Not){ goto _LL332;}
 else{ goto _LL333;} _LL333: if(( int) _temp325 == Cyc_Absyn_Bitnot){ goto _LL334;}
 else{ goto _LL335;} _LL335: if(( int) _temp325 == Cyc_Absyn_Size){ goto _LL336;}
-else{ goto _LL337;} _LL337: goto _LL338; _LL328: goto _LL330; _LL330: if( ! Cyc_Tcutil_arithmetic_promote(
-te, e)){ Cyc_Tcutil_terr( loc,({ struct _tagged_string _temp339= Cyc_Absynpp_typ2string(
+else{ goto _LL337;} _LL337: goto _LL338; _LL328: goto _LL330; _LL330: if( ! Cyc_Tcutil_is_numeric(
+e)){ Cyc_Tcutil_terr( loc,({ struct _tagged_string _temp339= Cyc_Absynpp_typ2string(
 t); xprintf("expecting arithmetic type but found %.*s", _temp339.last_plus_one -
 _temp339.curr, _temp339.curr);}));} return( void*)({ struct Cyc_Core_Opt*
 _temp340= e->topt; if( _temp340 == 0){ _throw( Null_Exception);} _temp340->v;});
 _LL332: Cyc_Tcutil_check_contains_assign( e); if( ! Cyc_Tcutil_coerce_to_bool(
 te, e)){ Cyc_Tcutil_terr( loc,({ struct _tagged_string _temp341= Cyc_Absynpp_typ2string(
 t); xprintf("expecting integral or * type but found %.*s", _temp341.last_plus_one
-- _temp341.curr, _temp341.curr);}));} return Cyc_Absyn_sint_t; _LL334: if( ! Cyc_Tcutil_integral_promote(
-te, e)){ Cyc_Tcutil_terr( loc,({ struct _tagged_string _temp342= Cyc_Absynpp_typ2string(
+- _temp341.curr, _temp341.curr);}));} return Cyc_Absyn_sint_t; _LL334: if( ! Cyc_Tcutil_is_integral(
+e)){ Cyc_Tcutil_terr( loc,({ struct _tagged_string _temp342= Cyc_Absynpp_typ2string(
 t); xprintf("expecting integral type but found %.*s", _temp342.last_plus_one -
 _temp342.curr, _temp342.curr);}));} return( void*)({ struct Cyc_Core_Opt*
 _temp343= e->topt; if( _temp343 == 0){ _throw( Null_Exception);} _temp343->v;});
@@ -973,56 +972,53 @@ _tagged_string)({ char* _temp371=( char*)"Non-unary primop"; struct
 _tagged_string _temp372; _temp372.curr= _temp371; _temp372.base= _temp371;
 _temp372.last_plus_one= _temp371 + 17; _temp372;})); _LL326:;} static void* Cyc_Tcexp_tcArithBinop(
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Exp* e1, struct Cyc_Absyn_Exp* e2,
-int(* promoter)( struct Cyc_Tcenv_Tenv*, struct Cyc_Absyn_Exp*)){ if( ! promoter(
-te, e1)){ Cyc_Tcutil_terr( e1->loc,({ struct _tagged_string _temp374= Cyc_Absynpp_typ2string((
-void*)({ struct Cyc_Core_Opt* _temp373= e1->topt; if( _temp373 == 0){ _throw(
+int(* checker)( struct Cyc_Absyn_Exp*)){ if( ! checker( e1)){ Cyc_Tcutil_terr(
+e1->loc,({ struct _tagged_string _temp374= Cyc_Absynpp_typ2string(( void*)({
+struct Cyc_Core_Opt* _temp373= e1->topt; if( _temp373 == 0){ _throw(
 Null_Exception);} _temp373->v;})); xprintf("type %.*s cannot be used here",
 _temp374.last_plus_one - _temp374.curr, _temp374.curr);})); return Cyc_Absyn_wildtyp();}
-if( ! promoter( te, e2)){ Cyc_Tcutil_terr( e2->loc,({ struct _tagged_string
-_temp376= Cyc_Absynpp_typ2string(( void*)({ struct Cyc_Core_Opt* _temp375= e2->topt;
-if( _temp375 == 0){ _throw( Null_Exception);} _temp375->v;})); xprintf("type %.*s cannot be used here",
+if( ! checker( e2)){ Cyc_Tcutil_terr( e2->loc,({ struct _tagged_string _temp376=
+Cyc_Absynpp_typ2string(( void*)({ struct Cyc_Core_Opt* _temp375= e2->topt; if(
+_temp375 == 0){ _throw( Null_Exception);} _temp375->v;})); xprintf("type %.*s cannot be used here",
 _temp376.last_plus_one - _temp376.curr, _temp376.curr);})); return Cyc_Absyn_wildtyp();}{
 void* t1= Cyc_Tcutil_compress(( void*)({ struct Cyc_Core_Opt* _temp377= e1->topt;
 if( _temp377 == 0){ _throw( Null_Exception);} _temp377->v;})); void* t2= Cyc_Tcutil_compress((
 void*)({ struct Cyc_Core_Opt* _temp378= e2->topt; if( _temp378 == 0){ _throw(
-Null_Exception);} _temp378->v;})); void* res= Cyc_Tcutil_max_arithmetic_type( t1,
-t2); Cyc_Tcutil_unchecked_cast( te, e1, res); Cyc_Tcutil_unchecked_cast( te, e2,
-res); return res;}} static void* Cyc_Tcexp_tcPlus( struct Cyc_Tcenv_Tenv* te,
-struct Cyc_Absyn_Exp* e1, struct Cyc_Absyn_Exp* e2){ void* t1=( void*)({ struct
-Cyc_Core_Opt* _temp379= e1->topt; if( _temp379 == 0){ _throw( Null_Exception);}
-_temp379->v;}); if( Cyc_Tcutil_is_tagged_pointer_typ( t1)){ if( ! Cyc_Tcutil_coerce_sint_typ(
-te, e2)){ Cyc_Tcutil_terr( e2->loc,({ struct _tagged_string _temp381= Cyc_Absynpp_typ2string((
-void*)({ struct Cyc_Core_Opt* _temp380= e2->topt; if( _temp380 == 0){ _throw(
-Null_Exception);} _temp380->v;})); xprintf("expecting int but found %.*s",
-_temp381.last_plus_one - _temp381.curr, _temp381.curr);}));} return t1;} else{
-return Cyc_Tcexp_tcArithBinop( te, e1, e2, Cyc_Tcutil_arithmetic_promote);}}
-static void* Cyc_Tcexp_tcMinus( struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Exp*
-e1, struct Cyc_Absyn_Exp* e2){ void* t1=( void*)({ struct Cyc_Core_Opt* _temp382=
-e1->topt; if( _temp382 == 0){ _throw( Null_Exception);} _temp382->v;}); void* t2=(
-void*)({ struct Cyc_Core_Opt* _temp383= e2->topt; if( _temp383 == 0){ _throw(
-Null_Exception);} _temp383->v;}); if( Cyc_Tcutil_is_tagged_pointer_typ( t1)){
-if( Cyc_Tcutil_is_tagged_pointer_typ( t2)){ if( ! Cyc_Tcutil_unify( t1, t2)){
-Cyc_Tcutil_terr( e1->loc,({ struct _tagged_string _temp386= Cyc_Absynpp_typ2string((
-void*)({ struct Cyc_Core_Opt* _temp384= e1->topt; if( _temp384 == 0){ _throw(
-Null_Exception);} _temp384->v;})); struct _tagged_string _temp387= Cyc_Absynpp_typ2string((
-void*)({ struct Cyc_Core_Opt* _temp385= e2->topt; if( _temp385 == 0){ _throw(
-Null_Exception);} _temp385->v;})); xprintf("pointer arithmetic on values of different types (%.*s != %.*s)",
+Null_Exception);} _temp378->v;})); return Cyc_Tcutil_max_arithmetic_type( t1, t2);}}
+static void* Cyc_Tcexp_tcPlus( struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Exp*
+e1, struct Cyc_Absyn_Exp* e2){ void* t1=( void*)({ struct Cyc_Core_Opt* _temp379=
+e1->topt; if( _temp379 == 0){ _throw( Null_Exception);} _temp379->v;}); if( Cyc_Tcutil_is_tagged_pointer_typ(
+t1)){ if( ! Cyc_Tcutil_coerce_sint_typ( te, e2)){ Cyc_Tcutil_terr( e2->loc,({
+struct _tagged_string _temp381= Cyc_Absynpp_typ2string(( void*)({ struct Cyc_Core_Opt*
+_temp380= e2->topt; if( _temp380 == 0){ _throw( Null_Exception);} _temp380->v;}));
+xprintf("expecting int but found %.*s", _temp381.last_plus_one - _temp381.curr,
+_temp381.curr);}));} return t1;} else{ return Cyc_Tcexp_tcArithBinop( te, e1, e2,
+Cyc_Tcutil_is_numeric);}} static void* Cyc_Tcexp_tcMinus( struct Cyc_Tcenv_Tenv*
+te, struct Cyc_Absyn_Exp* e1, struct Cyc_Absyn_Exp* e2){ void* t1=( void*)({
+struct Cyc_Core_Opt* _temp382= e1->topt; if( _temp382 == 0){ _throw(
+Null_Exception);} _temp382->v;}); void* t2=( void*)({ struct Cyc_Core_Opt*
+_temp383= e2->topt; if( _temp383 == 0){ _throw( Null_Exception);} _temp383->v;});
+if( Cyc_Tcutil_is_tagged_pointer_typ( t1)){ if( Cyc_Tcutil_is_tagged_pointer_typ(
+t2)){ if( ! Cyc_Tcutil_unify( t1, t2)){ Cyc_Tcutil_terr( e1->loc,({ struct
+_tagged_string _temp386= Cyc_Absynpp_typ2string(( void*)({ struct Cyc_Core_Opt*
+_temp384= e1->topt; if( _temp384 == 0){ _throw( Null_Exception);} _temp384->v;}));
+struct _tagged_string _temp387= Cyc_Absynpp_typ2string(( void*)({ struct Cyc_Core_Opt*
+_temp385= e2->topt; if( _temp385 == 0){ _throw( Null_Exception);} _temp385->v;}));
+xprintf("pointer arithmetic on values of different types (%.*s != %.*s)",
 _temp386.last_plus_one - _temp386.curr, _temp386.curr, _temp387.last_plus_one -
 _temp387.curr, _temp387.curr);}));} return Cyc_Absyn_sint_t;} else{ if( ! Cyc_Tcutil_coerce_sint_typ(
 te, e2)){ Cyc_Tcutil_terr( e2->loc,({ struct _tagged_string _temp388= Cyc_Absynpp_typ2string(
 t1); struct _tagged_string _temp389= Cyc_Absynpp_typ2string( t2); xprintf("expecting either %.*s or int but found %.*s",
 _temp388.last_plus_one - _temp388.curr, _temp388.curr, _temp389.last_plus_one -
 _temp389.curr, _temp389.curr);}));} return t1;}} else{ return Cyc_Tcexp_tcArithBinop(
-te, e1, e2, Cyc_Tcutil_arithmetic_promote);}} static void* Cyc_Tcexp_tcAnyBinop(
-struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc, struct Cyc_Absyn_Exp*
-e1, struct Cyc_Absyn_Exp* e2){ int e1_is_unboxed_arith= Cyc_Tcutil_comparison_promote(
-te, e1); int e2_is_unboxed_arith= Cyc_Tcutil_comparison_promote( te, e2); void*
-t1= Cyc_Tcutil_compress(( void*)({ struct Cyc_Core_Opt* _temp390= e1->topt; if(
-_temp390 == 0){ _throw( Null_Exception);} _temp390->v;})); void* t2= Cyc_Tcutil_compress((
-void*)({ struct Cyc_Core_Opt* _temp391= e2->topt; if( _temp391 == 0){ _throw(
-Null_Exception);} _temp391->v;})); if( e1_is_unboxed_arith? e2_is_unboxed_arith:
-0){ void* res= Cyc_Tcutil_max_arithmetic_type( t1, t2); Cyc_Tcutil_unchecked_cast(
-te, e1, res); Cyc_Tcutil_unchecked_cast( te, e2, res); return Cyc_Absyn_sint_t;}
+te, e1, e2, Cyc_Tcutil_is_numeric);}} static void* Cyc_Tcexp_tcAnyBinop( struct
+Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc, struct Cyc_Absyn_Exp* e1,
+struct Cyc_Absyn_Exp* e2){ int e1_is_num= Cyc_Tcutil_is_numeric( e1); int
+e2_is_num= Cyc_Tcutil_is_numeric( e2); void* t1= Cyc_Tcutil_compress(( void*)({
+struct Cyc_Core_Opt* _temp390= e1->topt; if( _temp390 == 0){ _throw(
+Null_Exception);} _temp390->v;})); void* t2= Cyc_Tcutil_compress(( void*)({
+struct Cyc_Core_Opt* _temp391= e2->topt; if( _temp391 == 0){ _throw(
+Null_Exception);} _temp391->v;})); if( e1_is_num? e2_is_num: 0){ return Cyc_Absyn_sint_t;}
 else{ if( Cyc_Tcutil_unify( t1, t2)? Cyc_Tcutil_unify( t1, Cyc_Absyn_new_evar((
 void*) Cyc_Absyn_BoxKind)): 0){ return Cyc_Absyn_sint_t;} else{ if( Cyc_Tcutil_silent_castable(
 te, loc, t2, t1)){ Cyc_Tcutil_unchecked_cast( te, e2, t1); return Cyc_Absyn_sint_t;}
@@ -1078,12 +1074,12 @@ goto _LL462;} else{ goto _LL463;} _LL463: if(( int) _temp431 == Cyc_Absyn_Gte){
 goto _LL464;} else{ goto _LL465;} _LL465: if(( int) _temp431 == Cyc_Absyn_Lte){
 goto _LL466;} else{ goto _LL467;} _LL467: goto _LL468; _LL434: return Cyc_Tcexp_tcPlus(
 te, e1, e2); _LL436: return Cyc_Tcexp_tcMinus( te, e1, e2); _LL438: goto _LL440;
-_LL440: return Cyc_Tcexp_tcArithBinop( te, e1, e2, Cyc_Tcutil_arithmetic_promote);
+_LL440: return Cyc_Tcexp_tcArithBinop( te, e1, e2, Cyc_Tcutil_is_numeric);
 _LL442: goto _LL444; _LL444: goto _LL446; _LL446: goto _LL448; _LL448: goto
 _LL450; _LL450: goto _LL452; _LL452: goto _LL454; _LL454: return Cyc_Tcexp_tcArithBinop(
-te, e1, e2, Cyc_Tcutil_integral_promote); _LL456: goto _LL458; _LL458: goto
-_LL460; _LL460: goto _LL462; _LL462: goto _LL464; _LL464: goto _LL466; _LL466:
-return Cyc_Tcexp_tcAnyBinop( te, loc, e1, e2); _LL468:( void) _throw(( struct
+te, e1, e2, Cyc_Tcutil_is_integral); _LL456: goto _LL458; _LL458: goto _LL460;
+_LL460: goto _LL462; _LL462: goto _LL464; _LL464: goto _LL466; _LL466: return
+Cyc_Tcexp_tcAnyBinop( te, loc, e1, e2); _LL468:( void) _throw(( struct
 _xtunion_struct*)({ struct Cyc_Core_Failure_struct* _temp469=( struct Cyc_Core_Failure_struct*)
 GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp469[ 0]=({ struct Cyc_Core_Failure_struct
 _temp470; _temp470.tag= Cyc_Core_Failure_tag; _temp470.f1=( struct
@@ -1194,7 +1190,7 @@ te, loc,( struct _tagged_string)({ char* _temp543=( char*)"increment/decrement o
 struct _tagged_string _temp544; _temp544.curr= _temp543; _temp544.base= _temp543;
 _temp544.last_plus_one= _temp543 + 34; _temp544;}));}{ void* t=( void*)({ struct
 Cyc_Core_Opt* _temp545= e->topt; if( _temp545 == 0){ _throw( Null_Exception);}
-_temp545->v;}); if( ! Cyc_Tcutil_arithmetic_promote( te, e)? ! Cyc_Tcutil_is_tagged_pointer_typ(
+_temp545->v;}); if( ! Cyc_Tcutil_is_numeric( e)? ! Cyc_Tcutil_is_tagged_pointer_typ(
 t): 0){ Cyc_Tcutil_terr( e->loc,({ struct _tagged_string _temp546= Cyc_Absynpp_typ2string(
 t); xprintf("expecting arithmetic or pointer type but found %.*s", _temp546.last_plus_one
 - _temp546.curr, _temp546.curr);}));} return t;}} static void* Cyc_Tcexp_tcConditional(
@@ -1742,7 +1738,7 @@ _tagged_string)({ char* _temp992=( char*)"only array index designators are suppo
 struct _tagged_string _temp993; _temp993.curr= _temp992; _temp993.base= _temp992;
 _temp993.last_plus_one= _temp992 + 43; _temp993;})); goto _LL983; _LL987: Cyc_Tcexp_tcExpInitializer(
 te, 0, _temp990);{ unsigned int i= Cyc_Evexp_eval_const_uint_exp( _temp990); if(
-i !=( unsigned int) offset){ Cyc_Tcutil_terr( _temp990->loc, xprintf("expecting index designator %d but found %d",
+i != offset){ Cyc_Tcutil_terr( _temp990->loc, xprintf("expecting index designator %d but found %d",
 offset,( int) i));} goto _LL983;} _LL983:;}}} return res_t2;}} static void* Cyc_Tcexp_tcComprehension(
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc, void** topt, struct
 Cyc_Absyn_Vardecl* vd, struct Cyc_Absyn_Exp* bound, struct Cyc_Absyn_Exp* body){

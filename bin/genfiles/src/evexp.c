@@ -483,9 +483,9 @@ void*)(( struct Cyc_Absyn_LongLong_c_struct*) _temp33)->f1; goto _LL48; _LL48:
 _temp47=( long long)(( struct Cyc_Absyn_LongLong_c_struct*) _temp33)->f2; goto
 _LL38;} else{ goto _LL39;} _LL39: if(( int) _temp33 == Cyc_Absyn_Null_c){ goto
 _LL40;} else{ goto _LL41;} _LL41: goto _LL42; _LL36: return _temp43 != 0; _LL38:
-return _temp47 !=( long long) 0; _LL40: return 0; _LL42: Cyc_Evexp_exp_err( e->loc,(
-struct _tagged_string)({ char* _temp51=( char*)"expecting bool"; struct
-_tagged_string _temp52; _temp52.curr= _temp51; _temp52.base= _temp51; _temp52.last_plus_one=
+return _temp47 != 0; _LL40: return 0; _LL42: Cyc_Evexp_exp_err( e->loc,( struct
+_tagged_string)({ char* _temp51=( char*)"expecting bool"; struct _tagged_string
+_temp52; _temp52.curr= _temp51; _temp52.base= _temp51; _temp52.last_plus_one=
 _temp51 + 15; _temp52;})); return 0; _LL34:;} void* Cyc_Evexp_eval_const_exp(
 struct Cyc_Absyn_Exp* e){ void* cn;{ void* _temp53=( void*) e->r; void* _temp71;
 struct Cyc_Absyn_Exp* _temp73; struct Cyc_Absyn_Exp* _temp75; struct Cyc_Absyn_Exp*

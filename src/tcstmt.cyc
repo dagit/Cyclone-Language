@@ -192,19 +192,20 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     te = set_in_switch(te);
     te = clear_fallthru(te);
     for (_ scs = List::rev(scs0); scs != null; scs = scs->tl) {
-      let p       = scs->hd->pattern;
-      let pat_typ = tcPat(te,p,null); // FIX: can pass region if e is an lvalue
-      let &$(new_tvs,x) = pat_typ;
+      let p = scs->hd->pattern;
+      // FIX: can pass region if e is an lvalue
+      let $(new_tvs,vds) = tcPat(te,p,&t,null);
       if (!unify(p->topt->v,t))
-	terr(scs->hd->loc,xprintf("switch on type %s, but case expects type %s",
-				  typ2string(t), typ2string(p->topt->v)));
+	terr(scs->hd->loc,
+	     xprintf("switch on type %s, but case expects type %s",
+		     typ2string(t), typ2string(p->topt->v)));
       else
 	check_pat_regions(te,p);
-      scs->hd->pat_vars = new Opt(x);
+      scs->hd->pat_vars = new Opt(vds);
       // type-checking the body will type-check any explicit fallthrus.
-      pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body,
+      pattern_synth(scs->hd->loc, te, new_tvs, vds, scs->hd->body,
 		    scs->hd->where_clause, true);
-      te = set_fallthru(te, pat_typ, scs->hd);
+      te = set_fallthru(te, new_tvs, vds, scs->hd);
     }
     check_switch_exhaustive(s0->loc,scs0);
     return;
@@ -224,8 +225,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     te = clear_fallthru(te);
     for (let scs = List::rev(scs0); scs != null; scs = scs->tl) {
       let p       = scs->hd->pattern;
-      let pat_typ = tcPat(te,p,null);
-      let &$(new_tvs,x) = pat_typ;
+      let $(new_tvs,x) = tcPat(te,p,&exn_typ,null);
       if (!unify(p->topt->v,exn_typ))
         terr(scs->hd->loc, xprintf("expected xtunion exn but found %s",
 				   typ2string(p->topt->v)));
@@ -235,7 +235,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       // type-checking the body will type-check any explicit fallthrus
       pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body,
 		    scs->hd->where_clause, true);
-      te = set_fallthru(te, pat_typ, scs->hd);
+      te = set_fallthru(te, new_tvs, x, scs->hd);
     }
     check_catch_overlap(s0->loc,scs0);
     return;
@@ -296,7 +296,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let topt = *topt_ref;
       tcExpInitializer(te,null,e);
       *topt_ref = e->topt; // side effect
-      let &$(new_tvs,x) = tcPat(te,p,null);//FIX: can pass region if e an lvalue
+       //FIX: can pass region if e an lvalue
+      let $(new_tvs,x) = tcPat(te,p,&e->topt->v,null);
       *vds = new Opt(x);
       // FIX: if let-declarations were of the form "let pat = e in S" then
       // we could allow any type variables within e to be used within S.

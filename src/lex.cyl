@@ -244,13 +244,13 @@ $(sign_t, int)@ intconst(Lexbuf<`a> lbuf, int start, int base) {
     switch (c) {
         // incorrect to return as soon as we see 'u' 'U' if l isn't ignored
     case 'u': fallthru;
-    case 'U': return new {$((sign_t)Unsigned,(signed int)n)}; 
+    case 'U': return new $((sign_t)Unsigned,(signed int)n); 
     case 'l': break;
     case 'L': break;
     default: n = n*base + (unsigned int)int_of_char(c); break;
     }
   }
-  return new{$((sign_t)Signed, (signed int)n)};
+  return new $((sign_t)Signed, (signed int)n);
 }
 
 // *********************** CHARACTER CONSTANTS ***********************

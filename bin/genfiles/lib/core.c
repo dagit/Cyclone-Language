@@ -63,52 +63,49 @@ triple).f3;} void* Cyc_Core_identity( void* x){ return x;} int Cyc_Core_is_space
 char c){ switch(( int) c){ case 9: _LL5: return 1; case 10: _LL6: return 1; case
 11: _LL7: return 1; case 12: _LL8: return 1; case 13: _LL9: return 1; case 32:
 _LL10: return 1; default: _LL11: return 0;}} static int Cyc_Core_int_of_char(
-char c){ if(( int)'0' <=( int) c?( int) c <=( int)'9': 0){ return( int) c -( int)'0';}
-else{ if(( int)'a' <=( int) c?( int) c <=( int)'f': 0){ return( 10 +( int) c) -(
-int)'a';} else{ if(( int)'A' <=( int) c?( int) c <=( int)'F': 0){ return( 10 +(
-int) c) -( int)'A';} else{( void) _throw(( struct _xtunion_struct*)({ struct Cyc_Core_InvalidArg_struct*
+char c){ if('0' <= c? c <='9': 0){ return c -'0';} else{ if('a' <= c? c <='f': 0){
+return( 10 + c) -'a';} else{ if('A' <= c? c <='F': 0){ return( 10 + c) -'A';}
+else{( void) _throw(( struct _xtunion_struct*)({ struct Cyc_Core_InvalidArg_struct*
 _temp13=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
 _temp13[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp14; _temp14.tag= Cyc_Core_InvalidArg_tag;
 _temp14.f1=( struct _tagged_string)({ char* _temp15=( char*)"string to integer conversion";
 struct _tagged_string _temp16; _temp16.curr= _temp15; _temp16.base= _temp15;
 _temp16.last_plus_one= _temp15 + 29; _temp16;}); _temp14;}); _temp13;}));}}}}
 int Cyc_Core_int_of_string( struct _tagged_string s){ int n; int i; int base;
-int sign= 1; for( i= 0;( unsigned int) i <({ struct _tagged_string _temp17= s;(
-unsigned int)( _temp17.last_plus_one - _temp17.curr);})? Cyc_Core_is_space(({
-struct _tagged_string _temp18= s; char* _temp20= _temp18.curr + i; if( _temp18.base
-== 0? 1:( _temp20 < _temp18.base? 1: _temp20 >= _temp18.last_plus_one)){ _throw(
-Null_Exception);}* _temp20;})): 0; ++ i){;} while(( unsigned int) i <({ struct
-_tagged_string _temp21= s;( unsigned int)( _temp21.last_plus_one - _temp21.curr);})?(
-int)({ struct _tagged_string _temp22= s; char* _temp24= _temp22.curr + i; if(
-_temp22.base == 0? 1:( _temp24 < _temp22.base? 1: _temp24 >= _temp22.last_plus_one)){
-_throw( Null_Exception);}* _temp24;}) ==( int)'-'? 1:( int)({ struct
-_tagged_string _temp25= s; char* _temp27= _temp25.curr + i; if( _temp25.base ==
-0? 1:( _temp27 < _temp25.base? 1: _temp27 >= _temp25.last_plus_one)){ _throw(
-Null_Exception);}* _temp27;}) ==( int)'+': 0) { if(( int)({ struct
-_tagged_string _temp28= s; char* _temp30= _temp28.curr + i; if( _temp28.base ==
-0? 1:( _temp30 < _temp28.base? 1: _temp30 >= _temp28.last_plus_one)){ _throw(
-Null_Exception);}* _temp30;}) ==( int)'-'){ sign= - sign;} i ++;} if((
-unsigned int) i ==({ struct _tagged_string _temp31= s;( unsigned int)( _temp31.last_plus_one
-- _temp31.curr);})){( void) _throw(( struct _xtunion_struct*)({ struct Cyc_Core_InvalidArg_struct*
+int sign= 1; for( i= 0; i <({ struct _tagged_string _temp17= s;( unsigned int)(
+_temp17.last_plus_one - _temp17.curr);})? Cyc_Core_is_space(({ struct
+_tagged_string _temp18= s; char* _temp20= _temp18.curr + i; if( _temp18.base ==
+0? 1:( _temp20 < _temp18.base? 1: _temp20 >= _temp18.last_plus_one)){ _throw(
+Null_Exception);}* _temp20;})): 0; ++ i){;} while( i <({ struct _tagged_string
+_temp21= s;( unsigned int)( _temp21.last_plus_one - _temp21.curr);})?({ struct
+_tagged_string _temp22= s; char* _temp24= _temp22.curr + i; if( _temp22.base ==
+0? 1:( _temp24 < _temp22.base? 1: _temp24 >= _temp22.last_plus_one)){ _throw(
+Null_Exception);}* _temp24;}) =='-'? 1:({ struct _tagged_string _temp25= s; char*
+_temp27= _temp25.curr + i; if( _temp25.base == 0? 1:( _temp27 < _temp25.base? 1:
+_temp27 >= _temp25.last_plus_one)){ _throw( Null_Exception);}* _temp27;}) =='+':
+0) { if(({ struct _tagged_string _temp28= s; char* _temp30= _temp28.curr + i;
+if( _temp28.base == 0? 1:( _temp30 < _temp28.base? 1: _temp30 >= _temp28.last_plus_one)){
+_throw( Null_Exception);}* _temp30;}) =='-'){ sign= - sign;} i ++;} if( i ==({
+struct _tagged_string _temp31= s;( unsigned int)( _temp31.last_plus_one -
+_temp31.curr);})){( void) _throw(( struct _xtunion_struct*)({ struct Cyc_Core_InvalidArg_struct*
 _temp32=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
 _temp32[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp33; _temp33.tag= Cyc_Core_InvalidArg_tag;
 _temp33.f1=( struct _tagged_string)({ char* _temp34=( char*)"string to integer conversion";
 struct _tagged_string _temp35; _temp35.curr= _temp34; _temp35.base= _temp34;
-_temp35.last_plus_one= _temp34 + 29; _temp35;}); _temp33;}); _temp32;}));} if((
-unsigned int)( i + 1) ==({ struct _tagged_string _temp36= s;( unsigned int)(
-_temp36.last_plus_one - _temp36.curr);})? 1:( int)({ struct _tagged_string
-_temp37= s; char* _temp39= _temp37.curr + i; if( _temp37.base == 0? 1:( _temp39
-< _temp37.base? 1: _temp39 >= _temp37.last_plus_one)){ _throw( Null_Exception);}*
-_temp39;}) !=( int)'0'){ base= 10;} else{ switch(({ struct _tagged_string
-_temp40= s; char* _temp42= _temp40.curr +( ++ i); if( _temp40.base == 0? 1:(
-_temp42 < _temp40.base? 1: _temp42 >= _temp40.last_plus_one)){ _throw(
-Null_Exception);}* _temp42;})){ case 'x': _LL43: base= 16; ++ i; break; case 'o':
-_LL44: base= 8; ++ i; break; case 'b': _LL45: base= 2; ++ i; break; default:
-_LL46: base= 10; break;}} for( n= 0;( unsigned int) i <({ struct _tagged_string
-_temp48= s;( unsigned int)( _temp48.last_plus_one - _temp48.curr);})?( int)({
+_temp35.last_plus_one= _temp34 + 29; _temp35;}); _temp33;}); _temp32;}));} if( i
++ 1 ==({ struct _tagged_string _temp36= s;( unsigned int)( _temp36.last_plus_one
+- _temp36.curr);})? 1:({ struct _tagged_string _temp37= s; char* _temp39=
+_temp37.curr + i; if( _temp37.base == 0? 1:( _temp39 < _temp37.base? 1: _temp39
+>= _temp37.last_plus_one)){ _throw( Null_Exception);}* _temp39;}) !='0'){ base=
+10;} else{ switch(({ struct _tagged_string _temp40= s; char* _temp42= _temp40.curr
++( ++ i); if( _temp40.base == 0? 1:( _temp42 < _temp40.base? 1: _temp42 >=
+_temp40.last_plus_one)){ _throw( Null_Exception);}* _temp42;})){ case 'x': _LL43:
+base= 16; ++ i; break; case 'o': _LL44: base= 8; ++ i; break; case 'b': _LL45:
+base= 2; ++ i; break; default: _LL46: base= 10; break;}} for( n= 0; i <({ struct
+_tagged_string _temp48= s;( unsigned int)( _temp48.last_plus_one - _temp48.curr);})?({
 struct _tagged_string _temp49= s; char* _temp51= _temp49.curr + i; if( _temp49.base
 == 0? 1:( _temp51 < _temp49.base? 1: _temp51 >= _temp49.last_plus_one)){ _throw(
-Null_Exception);}* _temp51;}) !=( int)'\000': 0; ++ i){ int digit= Cyc_Core_int_of_char(({
+Null_Exception);}* _temp51;}) !='\000': 0; ++ i){ int digit= Cyc_Core_int_of_char(({
 struct _tagged_string _temp52= s; char* _temp54= _temp52.curr + i; if( _temp52.base
 == 0? 1:( _temp54 < _temp52.base? 1: _temp54 >= _temp52.last_plus_one)){ _throw(
 Null_Exception);}* _temp54;})); if( digit >= base){( void) _throw(( struct
@@ -124,23 +121,22 @@ int n, int minWidth){ int i; int len= 0; int negative= 0; if( n < 0){ negative=
 minWidth? len: minWidth;{ struct _tagged_string ans= Cyc_Core_new_string( len +
 1); for( i= len - 1; n > 0; -- i){({ struct _tagged_string _temp59= ans; char*
 _temp61= _temp59.curr + i; if( _temp59.base == 0? 1:( _temp61 < _temp59.base? 1:
-_temp61 >= _temp59.last_plus_one)){ _throw( Null_Exception);}* _temp61=( char)((
-int)'0' + n % 10);}); n /= 10;} for( 0; i >= 0; -- i){({ struct _tagged_string
-_temp62= ans; char* _temp64= _temp62.curr + i; if( _temp62.base == 0? 1:(
-_temp64 < _temp62.base? 1: _temp64 >= _temp62.last_plus_one)){ _throw(
-Null_Exception);}* _temp64='0';});} if( negative){({ struct _tagged_string
-_temp65= ans; char* _temp67= _temp65.curr + 0; if( _temp65.base == 0? 1:(
-_temp67 < _temp65.base? 1: _temp67 >= _temp65.last_plus_one)){ _throw(
-Null_Exception);}* _temp67='-';});} return ans;}}} struct _tagged_string Cyc_Core_string_of_int(
-int n){ return Cyc_Core_string_of_int_width( n, 0);} struct _tagged_string Cyc_Core_string_of_uint(
-unsigned int n){ int len= 0; unsigned int m= n; do { ++ len;} while (( m /= 10)
->( unsigned int) 0);{ struct _tagged_string ans= Cyc_Core_new_string( len + 1);{
-int i= len - 1; for( 0; i >= 0; -- i){({ struct _tagged_string _temp68= ans;
-char* _temp70= _temp68.curr + i; if( _temp68.base == 0? 1:( _temp70 < _temp68.base?
-1: _temp70 >= _temp68.last_plus_one)){ _throw( Null_Exception);}* _temp70=( char)((
-unsigned int)(( int)'0') + n %( unsigned int) 10);}); n /= 10;}} return ans;}}
-struct _tagged_string Cyc_Core_string_of_char( char c){ struct _tagged_string
-ans= Cyc_Core_new_string( 2);({ struct _tagged_string _temp71= ans; char*
-_temp73= _temp71.curr + 0; if( _temp71.base == 0? 1:( _temp73 < _temp71.base? 1:
-_temp73 >= _temp71.last_plus_one)){ _throw( Null_Exception);}* _temp73= c;});
-return ans;}
+_temp61 >= _temp59.last_plus_one)){ _throw( Null_Exception);}* _temp61=( char)('0'
++ n % 10);}); n /= 10;} for( 0; i >= 0; -- i){({ struct _tagged_string _temp62=
+ans; char* _temp64= _temp62.curr + i; if( _temp62.base == 0? 1:( _temp64 <
+_temp62.base? 1: _temp64 >= _temp62.last_plus_one)){ _throw( Null_Exception);}*
+_temp64='0';});} if( negative){({ struct _tagged_string _temp65= ans; char*
+_temp67= _temp65.curr + 0; if( _temp65.base == 0? 1:( _temp67 < _temp65.base? 1:
+_temp67 >= _temp65.last_plus_one)){ _throw( Null_Exception);}* _temp67='-';});}
+return ans;}}} struct _tagged_string Cyc_Core_string_of_int( int n){ return Cyc_Core_string_of_int_width(
+n, 0);} struct _tagged_string Cyc_Core_string_of_uint( unsigned int n){ int len=
+0; unsigned int m= n; do { ++ len;} while (( m /= 10) > 0);{ struct
+_tagged_string ans= Cyc_Core_new_string( len + 1);{ int i= len - 1; for( 0; i >=
+0; -- i){({ struct _tagged_string _temp68= ans; char* _temp70= _temp68.curr + i;
+if( _temp68.base == 0? 1:( _temp70 < _temp68.base? 1: _temp70 >= _temp68.last_plus_one)){
+_throw( Null_Exception);}* _temp70=( char)('0' + n % 10);}); n /= 10;}} return
+ans;}} struct _tagged_string Cyc_Core_string_of_char( char c){ struct
+_tagged_string ans= Cyc_Core_new_string( 2);({ struct _tagged_string _temp71=
+ans; char* _temp73= _temp71.curr + 0; if( _temp71.base == 0? 1:( _temp73 <
+_temp71.base? 1: _temp73 >= _temp71.last_plus_one)){ _throw( Null_Exception);}*
+_temp73= c;}); return ans;}

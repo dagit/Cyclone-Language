@@ -44,9 +44,8 @@ extern bool silent_castable(tenv_t,seg_t,type_t,type_t);
 // true when expressions of type t1 can be cast to t2 -- call silent first
 extern bool castable(tenv_t,seg_t,type_t,type_t);
 
-extern bool integral_promote(tenv_t, exp_t);
-extern bool arithmetic_promote(tenv_t, exp_t);
-extern bool comparison_promote(tenv_t, exp_t);
+extern bool is_integral(exp_t);
+extern bool is_numeric(exp_t);
 extern type_t max_arithmetic_type(type_t, type_t);
 
 extern bool unify(type_t, type_t);

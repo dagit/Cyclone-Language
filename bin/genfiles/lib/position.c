@@ -217,31 +217,30 @@ n, Cyc_String_substring( _temp81, 0,( unsigned int) _temp77)); struct
 _tagged_string sec_two= Cyc_Position_trunc( n, Cyc_String_substring( _temp81,
 _temp77,( unsigned int)( _temp88 - _temp77))); struct _tagged_string sec_three=
 Cyc_Position_trunc( n, Cyc_String_substring( _temp81, _temp77, Cyc_String_strlen(
-_temp81) -( unsigned int) _temp88)); return({ struct _tuple1* _temp96=( struct
-_tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp96->f1=({ struct
-_tagged_string _temp97= sec_one; struct _tagged_string _temp98= sec_two; struct
-_tagged_string _temp99= sec_three; xprintf("%.*s%.*s%.*s", _temp97.last_plus_one
-- _temp97.curr, _temp97.curr, _temp98.last_plus_one - _temp98.curr, _temp98.curr,
-_temp99.last_plus_one - _temp99.curr, _temp99.curr);}); _temp96->f2=( int) Cyc_String_strlen(
-sec_one); _temp96->f3=( int)( Cyc_String_strlen( sec_one) + Cyc_String_strlen(
-sec_two)); _temp96;});} else{ int n=( Cyc_Position_line_length - 3) / 4; struct
+_temp81) - _temp88)); return({ struct _tuple1* _temp96=( struct _tuple1*)
+GC_malloc( sizeof( struct _tuple1)); _temp96->f1=({ struct _tagged_string
+_temp97= sec_one; struct _tagged_string _temp98= sec_two; struct _tagged_string
+_temp99= sec_three; xprintf("%.*s%.*s%.*s", _temp97.last_plus_one - _temp97.curr,
+_temp97.curr, _temp98.last_plus_one - _temp98.curr, _temp98.curr, _temp99.last_plus_one
+- _temp99.curr, _temp99.curr);}); _temp96->f2=( int) Cyc_String_strlen( sec_one);
+_temp96->f3=( int)( Cyc_String_strlen( sec_one) + Cyc_String_strlen( sec_two));
+_temp96;});} else{ int n=( Cyc_Position_line_length - 3) / 4; struct
 _tagged_string sec_one= Cyc_Position_trunc( n, Cyc_String_substring( _temp81, 0,(
 unsigned int) _temp77)); struct _tagged_string sec_two= Cyc_Position_trunc( n,
-Cyc_String_substring( _temp81, _temp77, Cyc_String_strlen( _temp81) -(
-unsigned int) _temp77)); struct _tagged_string sec_three= Cyc_Position_trunc( n,
-Cyc_String_substring( _temp92, 0,( unsigned int) _temp88)); struct
-_tagged_string sec_four= Cyc_Position_trunc( n, Cyc_String_substring( _temp92,
-_temp88, Cyc_String_strlen( _temp92) -( unsigned int) _temp88)); return({ struct
-_tuple1* _temp100=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1));
-_temp100->f1=({ struct _tagged_string _temp101= sec_one; struct _tagged_string
-_temp102= sec_two; struct _tagged_string _temp103= sec_three; struct
-_tagged_string _temp104= sec_four; xprintf("%.*s%.*s.\\.%.*s%.*s", _temp101.last_plus_one
-- _temp101.curr, _temp101.curr, _temp102.last_plus_one - _temp102.curr, _temp102.curr,
-_temp103.last_plus_one - _temp103.curr, _temp103.curr, _temp104.last_plus_one -
-_temp104.curr, _temp104.curr);}); _temp100->f2=( int) Cyc_String_strlen( sec_one);
-_temp100->f3=( int)((( Cyc_String_strlen( sec_one) + Cyc_String_strlen( sec_two))
-+( unsigned int) 3) + Cyc_String_strlen( sec_three)); _temp100;});}}}}} static
-int Cyc_Position_error_b= 0; int Cyc_Position_error_p(){ return Cyc_Position_error_b;}
+Cyc_String_substring( _temp81, _temp77, Cyc_String_strlen( _temp81) - _temp77));
+struct _tagged_string sec_three= Cyc_Position_trunc( n, Cyc_String_substring(
+_temp92, 0,( unsigned int) _temp88)); struct _tagged_string sec_four= Cyc_Position_trunc(
+n, Cyc_String_substring( _temp92, _temp88, Cyc_String_strlen( _temp92) - _temp88));
+return({ struct _tuple1* _temp100=( struct _tuple1*) GC_malloc( sizeof( struct
+_tuple1)); _temp100->f1=({ struct _tagged_string _temp101= sec_one; struct
+_tagged_string _temp102= sec_two; struct _tagged_string _temp103= sec_three;
+struct _tagged_string _temp104= sec_four; xprintf("%.*s%.*s.\\.%.*s%.*s",
+_temp101.last_plus_one - _temp101.curr, _temp101.curr, _temp102.last_plus_one -
+_temp102.curr, _temp102.curr, _temp103.last_plus_one - _temp103.curr, _temp103.curr,
+_temp104.last_plus_one - _temp104.curr, _temp104.curr);}); _temp100->f2=( int)
+Cyc_String_strlen( sec_one); _temp100->f3=( int)((( Cyc_String_strlen( sec_one)
++ Cyc_String_strlen( sec_two)) + 3) + Cyc_String_strlen( sec_three)); _temp100;});}}}}}
+static int Cyc_Position_error_b= 0; int Cyc_Position_error_p(){ return Cyc_Position_error_b;}
 char Cyc_Position_Error_tag[ 6u]="Error"; struct Cyc_Position_Error_struct{ char*
 tag; struct Cyc_Position_Error* f1; } ; int Cyc_Position_print_context= 0; int
 Cyc_Position_first_error= 1; void Cyc_Position_post_error( struct Cyc_Position_Error*

@@ -276,7 +276,7 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t *`r topt, primop_t p, exp_
   switch (p) {
   case Plus: fallthru;
   case Minus:
-    if (!arithmetic_promote(te,e))
+    if (!is_numeric(e))
       terr(loc,xprintf("expecting arithmetic type but found %s",typ2string(t)));
     return e->topt->v;
   case Not:
@@ -286,7 +286,7 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t *`r topt, primop_t p, exp_
 		       typ2string(t)));
     return sint_t;
   case Bitnot:
-    if (!integral_promote(te,e))
+    if (!is_integral(e))
       terr(loc,xprintf("expecting integral type but found %s",typ2string(t)));
     return e->topt->v;
   case Size:
@@ -307,23 +307,21 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t *`r topt, primop_t p, exp_
 }
 
 // Note: promoter must return false for any non-arithmetic type.
-static type_t tcArithBinop(tenv_t te, exp_t e1, exp_t e2, bool promoter(tenv_t,exp_t)) {
-  if (!promoter(te,e1)) {
+static type_t tcArithBinop(tenv_t te, exp_t e1, exp_t e2, 
+			   bool checker(exp_t)) {
+  if (!checker(e1)) {
     terr(e1->loc,xprintf("type %s cannot be used here",
 			 typ2string(e1->topt->v)));
     return wildtyp();
   }
-  if (!promoter(te,e2)) {
+  if (!checker(e2)) {
     terr(e2->loc,xprintf("type %s cannot be used here",
 			 typ2string(e2->topt->v)));
     return wildtyp();
   }
-  type_t t1  = compress(e1->topt->v);
-  type_t t2  = compress(e2->topt->v);
-  type_t res = max_arithmetic_type(t1,t2);
-  unchecked_cast(te,e1,res);
-  unchecked_cast(te,e2,res);
-  return res;
+  type_t t1 = compress(e1->topt->v);
+  type_t t2 = compress(e2->topt->v);
+  return max_arithmetic_type(t1,t2);
 }
 // Plus needs to support a pointer and an int
 static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
@@ -333,7 +331,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
       terr(e2->loc,xprintf("expecting int but found %s",
 			   typ2string(e2->topt->v)));
     return t1;
-  } else return tcArithBinop(te, e1, e2, arithmetic_promote);
+  } else return tcArithBinop(te, e1, e2, is_numeric);
 }
 // Minus needs to support a tagged array and an int, and two tagged arrays
 static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
@@ -352,20 +350,16 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
 			     typ2string(t1),typ2string(t2)));
       return t1;
     }
-  } else return tcArithBinop(te, e1, e2, arithmetic_promote);
+  } else return tcArithBinop(te, e1, e2, is_numeric);
 }
 
 static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
-  bool e1_is_unboxed_arith = comparison_promote(te,e1);
-  bool e2_is_unboxed_arith = comparison_promote(te,e2);
+  bool e1_is_num = is_numeric(e1);
+  bool e2_is_num = is_numeric(e2);
   type_t t1 = compress(e1->topt->v);
   type_t t2 = compress(e2->topt->v);
-  if (e1_is_unboxed_arith && e2_is_unboxed_arith) {
-    type_t res = max_arithmetic_type(t1,t2);
-    unchecked_cast(te,e1,res);
-    unchecked_cast(te,e2,res);
+  if (e1_is_num && e2_is_num)
     return sint_t;
-  }
   // okay if same types and boxed
   else if (unify(t1,t2) && unify(t1,new_evar(BoxKind))) {
     return sint_t;
@@ -401,7 +395,7 @@ static type_t tcBinPrimop(tenv_t te, seg_t loc, type_t *`r topt,
   case Plus:       return tcPlus(te,e1,e2);
   case Minus:      return tcMinus(te,e1,e2);
   case Times:      fallthru;
-  case Div:        return tcArithBinop(te,e1,e2,arithmetic_promote);
+  case Div:        return tcArithBinop(te,e1,e2,is_numeric);
 
   case Mod:        fallthru;
   case Bitand:     fallthru;
@@ -409,7 +403,7 @@ static type_t tcBinPrimop(tenv_t te, seg_t loc, type_t *`r topt,
   case Bitxor:     fallthru;
   case Bitlshift:  fallthru;
   case Bitlrshift: fallthru;
-  case Bitarshift: return tcArithBinop(te,e1,e2,integral_promote);
+  case Bitarshift: return tcArithBinop(te,e1,e2,is_integral);
 
     // Note: comparing pointers relies on memory-manager properties
     //       (but darned useful for dictionaries)
@@ -516,7 +510,7 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t *`r topt,
     return expr_err(te,loc,"increment/decrement of non-lvalue");
   type_t t = e->topt->v;
   // FIX: this is not right -- for instance, it allows incrementing an enum!!
-  if (!arithmetic_promote(te,e) && !is_tagged_pointer_typ(t))
+  if (!is_numeric(e) && !is_tagged_pointer_typ(t))
     terr(e->loc,xprintf("expecting arithmetic or pointer type but found %s",
 			typ2string(t)));
   return t;
@@ -880,6 +874,7 @@ static type_t tcTuple(tenv_t te, seg_t loc, type_t *`r topt, list_t<exp_t> es) {
   if(topt != null)
     switch (compress(*topt)) {
     case &TupleType(ts):
+      // FIX: topt should never cause failure, just guides coercions.
       if(length(ts) != length(es)) {
 	terr(loc,"tuple expression has the wrong number of fields");
 	break;
@@ -917,10 +912,10 @@ static type_t tcCompoundLit(tenv_t te, seg_t loc, type_t *`r topt,
  // expected type of the array.  See tcNew and the call to tcArray.
 static type_t tcArray(tenv_t te,seg_t loc,type_t *`r elt_topt, 
                    list_t<$(list_t<designator_t>,exp_t)@> des) {
-  list_t<exp_t> es = List::map(snd,des);
-  type_t res      = new_evar(MemKind);
-  let sz_rexp  = new Const_e(new Int_c(Unsigned,List::length(es)));
-  exp_t sz_exp   = new_exp(sz_rexp,loc);
+  list_t<exp_t> es      = List::map(snd,des);
+  type_t        res     = new_evar(MemKind);
+  let           sz_rexp = new Const_e(new Int_c(Unsigned,List::length(es)));
+  exp_t         sz_exp  = new_exp(sz_rexp,loc);
   sz_exp->topt = new Opt(uint_t);
   type_t res_t2   = new ArrayType(res, empty_tqual(), sz_exp);
 

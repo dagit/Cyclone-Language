@@ -69,8 +69,8 @@ struct Cyc_Lexing_lex_tables; static char _temp2[ 1u]=""; static struct
 _tagged_string Cyc_Lexing_aux_buffer=( struct _tagged_string){ _temp2, _temp2,
 _temp2 + 1u}; void Cyc_Lexing_lex_refill( struct Cyc_Lexing_lexbuf* lexbuf){ if(({
 struct _tagged_string _temp3= Cyc_Lexing_aux_buffer;( unsigned int)( _temp3.last_plus_one
-- _temp3.curr);}) ==( unsigned int) 1){ Cyc_Lexing_aux_buffer= Cyc_Core_new_string(
-4096);}{ int read=((( struct Cyc_Lexing_function_lexbuf_state*) lexbuf->refill_state)->read_fun)(
+- _temp3.curr);}) == 1){ Cyc_Lexing_aux_buffer= Cyc_Core_new_string( 4096);}{
+int read=((( struct Cyc_Lexing_function_lexbuf_state*) lexbuf->refill_state)->read_fun)(
 Cyc_Lexing_aux_buffer,( int)({ struct _tagged_string _temp4= Cyc_Lexing_aux_buffer;(
 unsigned int)( _temp4.last_plus_one - _temp4.curr);}),( void*)(( struct Cyc_Lexing_function_lexbuf_state*)
 lexbuf->refill_state)->read_fun_state); int n= read > 0? read:( lexbuf->lex_eof_reached=
@@ -137,21 +137,20 @@ lbuf->lex_curr_pos >= lbuf->lex_buffer_len){ if( ! lbuf->lex_eof_reached){
 return( - state) - 1;} else{ c= 256;}} else{ c=( int)({ struct _tagged_string
 _temp21= lbuf->lex_buffer; char* _temp23= _temp21.curr +( lbuf->lex_curr_pos ++);
 if( _temp21.base == 0? 1:( _temp23 < _temp21.base? 1: _temp23 >= _temp21.last_plus_one)){
-_throw( Null_Exception);}* _temp23;}); if( c ==( int)(( char)( - 1))){ c= 256;}}
-if(({ struct _tagged_ptr0 _temp24= tbl->lex_check; int* _temp26= _temp24.curr +(
-base + c); if( _temp24.base == 0? 1:( _temp26 < _temp24.base? 1: _temp26 >=
-_temp24.last_plus_one)){ _throw( Null_Exception);}* _temp26;}) == state){ state=({
-struct _tagged_ptr0 _temp27= tbl->lex_trans; int* _temp29= _temp27.curr +( base
-+ c); if( _temp27.base == 0? 1:( _temp29 < _temp27.base? 1: _temp29 >= _temp27.last_plus_one)){
-_throw( Null_Exception);}* _temp29;});} else{ state=({ struct _tagged_ptr0
-_temp30= tbl->lex_default; int* _temp32= _temp30.curr + state; if( _temp30.base
-== 0? 1:( _temp32 < _temp30.base? 1: _temp32 >= _temp30.last_plus_one)){ _throw(
-Null_Exception);}* _temp32;});} if( state < 0){ lbuf->lex_curr_pos= lbuf->lex_last_pos;
-if( lbuf->lex_last_action == - 1){( void) _throw(( struct _xtunion_struct*)({
-struct Cyc_Lexing_Error_struct* _temp33=( struct Cyc_Lexing_Error_struct*)
-GC_malloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp33[ 0]=({ struct Cyc_Lexing_Error_struct
-_temp34; _temp34.tag= Cyc_Lexing_Error_tag; _temp34.f1=( struct _tagged_string)({
-char* _temp35=( char*)"empty token"; struct _tagged_string _temp36; _temp36.curr=
-_temp35; _temp36.base= _temp35; _temp36.last_plus_one= _temp35 + 12; _temp36;});
-_temp34;}); _temp33;}));} else{ return lbuf->lex_last_action;}} else{ if( c ==
-256){ lbuf->lex_eof_reached= 0;}}}}
+_throw( Null_Exception);}* _temp23;}); if( c ==( char)( - 1)){ c= 256;}} if(({
+struct _tagged_ptr0 _temp24= tbl->lex_check; int* _temp26= _temp24.curr +( base
++ c); if( _temp24.base == 0? 1:( _temp26 < _temp24.base? 1: _temp26 >= _temp24.last_plus_one)){
+_throw( Null_Exception);}* _temp26;}) == state){ state=({ struct _tagged_ptr0
+_temp27= tbl->lex_trans; int* _temp29= _temp27.curr +( base + c); if( _temp27.base
+== 0? 1:( _temp29 < _temp27.base? 1: _temp29 >= _temp27.last_plus_one)){ _throw(
+Null_Exception);}* _temp29;});} else{ state=({ struct _tagged_ptr0 _temp30= tbl->lex_default;
+int* _temp32= _temp30.curr + state; if( _temp30.base == 0? 1:( _temp32 < _temp30.base?
+1: _temp32 >= _temp30.last_plus_one)){ _throw( Null_Exception);}* _temp32;});}
+if( state < 0){ lbuf->lex_curr_pos= lbuf->lex_last_pos; if( lbuf->lex_last_action
+== - 1){( void) _throw(( struct _xtunion_struct*)({ struct Cyc_Lexing_Error_struct*
+_temp33=( struct Cyc_Lexing_Error_struct*) GC_malloc( sizeof( struct Cyc_Lexing_Error_struct));
+_temp33[ 0]=({ struct Cyc_Lexing_Error_struct _temp34; _temp34.tag= Cyc_Lexing_Error_tag;
+_temp34.f1=( struct _tagged_string)({ char* _temp35=( char*)"empty token";
+struct _tagged_string _temp36; _temp36.curr= _temp35; _temp36.base= _temp35;
+_temp36.last_plus_one= _temp35 + 12; _temp36;}); _temp34;}); _temp33;}));} else{
+return lbuf->lex_last_action;}} else{ if( c == 256){ lbuf->lex_eof_reached= 0;}}}}

@@ -1070,9 +1070,9 @@ _LL507;} else{ goto _LL508;} _LL508: if((( struct _tunion_struct*) _temp502)->ta
 struct Cyc_Absyn_StructArrow_e_struct*) _temp502)->f1; goto _LL519; _LL519:
 _temp518=( struct _tagged_string*)(( struct Cyc_Absyn_StructArrow_e_struct*)
 _temp502)->f2; goto _LL509;} else{ goto _LL510;} _LL510: goto _LL511; _LL505:
-Cyc_Evexp_eval_const_uint_exp( _temp512) ==( unsigned int) 0? 0:(( int(*)(
-struct _tagged_string msg)) Cyc_Assert_AssertFail)(( struct _tagged_string)({
-char* _temp522=( char*)"new_control_flow.cyc:410 Evexp::eval_const_uint_exp(e2) == 0";
+Cyc_Evexp_eval_const_uint_exp( _temp512) == 0? 0:(( int(*)( struct
+_tagged_string msg)) Cyc_Assert_AssertFail)(( struct _tagged_string)({ char*
+_temp522=( char*)"new_control_flow.cyc:410 Evexp::eval_const_uint_exp(e2) == 0";
 struct _tagged_string _temp523; _temp523.curr= _temp522; _temp523.base= _temp522;
 _temp523.last_plus_one= _temp522 + 61; _temp523;})); goto _LL507; _LL507: env.access_path=({
 struct Cyc_List_List* _temp524= env.access_path; if( _temp524 == 0){ _throw(
@@ -1135,9 +1135,9 @@ _LL566;} else{ goto _LL567;} _LL567: if((( struct _tunion_struct*) _temp561)->ta
 struct Cyc_Absyn_StructArrow_e_struct*) _temp561)->f1; goto _LL578; _LL578:
 _temp577=( struct _tagged_string*)(( struct Cyc_Absyn_StructArrow_e_struct*)
 _temp561)->f2; goto _LL568;} else{ goto _LL569;} _LL569: goto _LL570; _LL564:
-Cyc_Evexp_eval_const_uint_exp( _temp571) ==( unsigned int) 0? 0:(( int(*)(
-struct _tagged_string msg)) Cyc_Assert_AssertFail)(( struct _tagged_string)({
-char* _temp581=( char*)"new_control_flow.cyc:447 Evexp::eval_const_uint_exp(e2) == 0";
+Cyc_Evexp_eval_const_uint_exp( _temp571) == 0? 0:(( int(*)( struct
+_tagged_string msg)) Cyc_Assert_AssertFail)(( struct _tagged_string)({ char*
+_temp581=( char*)"new_control_flow.cyc:447 Evexp::eval_const_uint_exp(e2) == 0";
 struct _tagged_string _temp582; _temp582.curr= _temp581; _temp582.base= _temp581;
 _temp582.last_plus_one= _temp581 + 61; _temp582;})); goto _LL566; _LL566: env.access_path=({
 struct Cyc_List_List* _temp583= env.access_path; if( _temp583 == 0){ _throw(
@@ -1198,9 +1198,9 @@ _temp639.loc; goto _LL636; _LL636: _temp635=( struct Cyc_List_List*) _temp634.tl
 goto _LL601;} _LL602: goto _LL603; _LL595: env.access_path=({ struct Cyc_List_List*
 _temp650=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
 _temp650->hd=( void*) e; _temp650->tl= env.access_path; _temp650;}); goto _LL593;
-_LL597: Cyc_Evexp_eval_const_uint_exp( _temp614) ==( unsigned int) 0? 0:(( int(*)(
-struct _tagged_string msg)) Cyc_Assert_AssertFail)(( struct _tagged_string)({
-char* _temp651=( char*)"new_control_flow.cyc:475 Evexp::eval_const_uint_exp(e2) == 0";
+_LL597: Cyc_Evexp_eval_const_uint_exp( _temp614) == 0? 0:(( int(*)( struct
+_tagged_string msg)) Cyc_Assert_AssertFail)(( struct _tagged_string)({ char*
+_temp651=( char*)"new_control_flow.cyc:475 Evexp::eval_const_uint_exp(e2) == 0";
 struct _tagged_string _temp652; _temp652.curr= _temp651; _temp652.base= _temp651;
 _temp652.last_plus_one= _temp651 + 61; _temp652;})); _temp621= _temp605; goto
 _LL599; _LL599: env.access_path= _temp621; goto _LL593; _LL601: env.access_path=({

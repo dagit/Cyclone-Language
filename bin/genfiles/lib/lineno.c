@@ -130,39 +130,36 @@ int lexstate)) Cyc_Lineno_token_rec)( lexbuf, 0);} struct Cyc_Lineno_Pos; static
 struct Cyc_Core_Opt* Cyc_Lineno_parse_linedef( struct _tagged_string line){
 struct _handler_cons _temp21; _push_handler(& _temp21);{ struct _xtunion_struct*
 _temp22=( struct _xtunion_struct*) setjmp( _temp21.handler); if( ! _temp22){{
-int i= 0; while(( unsigned int) i <({ struct _tagged_string _temp23= line;(
-unsigned int)( _temp23.last_plus_one - _temp23.curr);})?( int)({ struct
-_tagged_string _temp24= line; char* _temp26= _temp24.curr + i; if( _temp24.base
-== 0? 1:( _temp26 < _temp24.base? 1: _temp26 >= _temp24.last_plus_one)){ _throw(
-Null_Exception);}* _temp26;}) <( int)'0'? 1:( int)({ struct _tagged_string
-_temp27= line; char* _temp29= _temp27.curr + i; if( _temp27.base == 0? 1:(
-_temp29 < _temp27.base? 1: _temp29 >= _temp27.last_plus_one)){ _throw(
-Null_Exception);}* _temp29;}) >( int)'9': 0) { ++ i;}{ int j= i; while(((
-unsigned int) j <({ struct _tagged_string _temp30= line;( unsigned int)( _temp30.last_plus_one
-- _temp30.curr);})?( int)({ struct _tagged_string _temp31= line; char* _temp33=
-_temp31.curr + j; if( _temp31.base == 0? 1:( _temp33 < _temp31.base? 1: _temp33
->= _temp31.last_plus_one)){ _throw( Null_Exception);}* _temp33;}) >=( int)'0': 0)?(
-int)({ struct _tagged_string _temp34= line; char* _temp36= _temp34.curr + j; if(
-_temp34.base == 0? 1:( _temp36 < _temp34.base? 1: _temp36 >= _temp34.last_plus_one)){
-_throw( Null_Exception);}* _temp36;}) <=( int)'9': 0) { ++ j;} if(( unsigned int)
-i ==({ struct _tagged_string _temp37= line;( unsigned int)( _temp37.last_plus_one
-- _temp37.curr);})){ struct Cyc_Core_Opt* _temp38= 0; _npop_handler( 0u); return
-_temp38;}{ int number= Cyc_Core_int_of_string( Cyc_String_substring( line, i,(
-unsigned int)( j - i))); while(( unsigned int) j <({ struct _tagged_string
-_temp39= line;( unsigned int)( _temp39.last_plus_one - _temp39.curr);})?( int)({
+int i= 0; while( i <({ struct _tagged_string _temp23= line;( unsigned int)(
+_temp23.last_plus_one - _temp23.curr);})?({ struct _tagged_string _temp24= line;
+char* _temp26= _temp24.curr + i; if( _temp24.base == 0? 1:( _temp26 < _temp24.base?
+1: _temp26 >= _temp24.last_plus_one)){ _throw( Null_Exception);}* _temp26;}) <'0'?
+1:({ struct _tagged_string _temp27= line; char* _temp29= _temp27.curr + i; if(
+_temp27.base == 0? 1:( _temp29 < _temp27.base? 1: _temp29 >= _temp27.last_plus_one)){
+_throw( Null_Exception);}* _temp29;}) >'9': 0) { ++ i;}{ int j= i; while(( j <({
+struct _tagged_string _temp30= line;( unsigned int)( _temp30.last_plus_one -
+_temp30.curr);})?({ struct _tagged_string _temp31= line; char* _temp33= _temp31.curr
++ j; if( _temp31.base == 0? 1:( _temp33 < _temp31.base? 1: _temp33 >= _temp31.last_plus_one)){
+_throw( Null_Exception);}* _temp33;}) >='0': 0)?({ struct _tagged_string _temp34=
+line; char* _temp36= _temp34.curr + j; if( _temp34.base == 0? 1:( _temp36 <
+_temp34.base? 1: _temp36 >= _temp34.last_plus_one)){ _throw( Null_Exception);}*
+_temp36;}) <='9': 0) { ++ j;} if( i ==({ struct _tagged_string _temp37= line;(
+unsigned int)( _temp37.last_plus_one - _temp37.curr);})){ struct Cyc_Core_Opt*
+_temp38= 0; _npop_handler( 0u); return _temp38;}{ int number= Cyc_Core_int_of_string(
+Cyc_String_substring( line, i,( unsigned int)( j - i))); while( j <({ struct
+_tagged_string _temp39= line;( unsigned int)( _temp39.last_plus_one - _temp39.curr);})?({
 struct _tagged_string _temp40= line; char* _temp42= _temp40.curr + j; if(
 _temp40.base == 0? 1:( _temp42 < _temp40.base? 1: _temp42 >= _temp40.last_plus_one)){
-_throw( Null_Exception);}* _temp42;}) !=( int)'"': 0) { ++ j;}{ int k= ++ j;
-while(( unsigned int) k <({ struct _tagged_string _temp43= line;( unsigned int)(
-_temp43.last_plus_one - _temp43.curr);})?( int)({ struct _tagged_string _temp44=
-line; char* _temp46= _temp44.curr + k; if( _temp44.base == 0? 1:( _temp46 <
-_temp44.base? 1: _temp46 >= _temp44.last_plus_one)){ _throw( Null_Exception);}*
-_temp46;}) !=( int)'"': 0) { ++ k;} if(( unsigned int) j ==({ struct
+_throw( Null_Exception);}* _temp42;}) !='"': 0) { ++ j;}{ int k= ++ j; while( k
+<({ struct _tagged_string _temp43= line;( unsigned int)( _temp43.last_plus_one -
+_temp43.curr);})?({ struct _tagged_string _temp44= line; char* _temp46= _temp44.curr
++ k; if( _temp44.base == 0? 1:( _temp46 < _temp44.base? 1: _temp46 >= _temp44.last_plus_one)){
+_throw( Null_Exception);}* _temp46;}) !='"': 0) { ++ k;} if( j ==({ struct
 _tagged_string _temp47= line;( unsigned int)( _temp47.last_plus_one - _temp47.curr);})?
-1:( unsigned int) k ==({ struct _tagged_string _temp48= line;( unsigned int)(
-_temp48.last_plus_one - _temp48.curr);})){ struct Cyc_Core_Opt* _temp49= 0;
-_npop_handler( 0u); return _temp49;}{ struct _tagged_string fname= Cyc_String_substring(
-line, j,( unsigned int)( k - j)); struct Cyc_Core_Opt* _temp52=({ struct Cyc_Core_Opt*
+1: k ==({ struct _tagged_string _temp48= line;( unsigned int)( _temp48.last_plus_one
+- _temp48.curr);})){ struct Cyc_Core_Opt* _temp49= 0; _npop_handler( 0u); return
+_temp49;}{ struct _tagged_string fname= Cyc_String_substring( line, j,(
+unsigned int)( k - j)); struct Cyc_Core_Opt* _temp52=({ struct Cyc_Core_Opt*
 _temp50=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
 _temp50->v=( void*)({ struct _tuple0* _temp51=( struct _tuple0*) GC_malloc(
 sizeof( struct _tuple0)); _temp51->f1= fname; _temp51->f2= number; _temp51;});
@@ -210,15 +207,15 @@ places; if( _temp81 == 0){ _throw( Null_Exception);} _temp81->hd;}))).f1: 0) {
 struct Cyc_Lineno_Pos* p=(*(( struct _tuple1*)({ struct Cyc_List_List* _temp82=
 places; if( _temp82 == 0){ _throw( Null_Exception);} _temp82->hd;}))).f2; p->logical_file=
 source_file; p->line= this_line; p->line_no= line; p->col=( int)( Cyc_String_strlen(
-this_line) -( unsigned int)( eol -(*(( struct _tuple1*)({ struct Cyc_List_List*
-_temp83= places; if( _temp83 == 0){ _throw( Null_Exception);} _temp83->hd;}))).f1));
-places=({ struct Cyc_List_List* _temp84= places; if( _temp84 == 0){ _throw(
-Null_Exception);} _temp84->tl;});} ++ line;}}; _pop_handler();} else{ struct
-_xtunion_struct* _temp86= _temp63; _LL88: goto _LL89; _LL90: goto _LL91; _LL89:
-Cyc_Stdio_file_close( f);( void) _throw( _temp86); _LL91:( void) _throw( _temp86);
-_LL87:;}}} Cyc_Stdio_file_close( f); return;}} struct Cyc_Lineno_Pos* Cyc_Lineno_pos_of_abs(
-struct _tagged_string filename, int abs){ struct Cyc_Lineno_Pos* ans=({ struct
-Cyc_Lineno_Pos* _temp92=( struct Cyc_Lineno_Pos*) GC_malloc( sizeof( struct Cyc_Lineno_Pos));
+this_line) -( eol -(*(( struct _tuple1*)({ struct Cyc_List_List* _temp83= places;
+if( _temp83 == 0){ _throw( Null_Exception);} _temp83->hd;}))).f1)); places=({
+struct Cyc_List_List* _temp84= places; if( _temp84 == 0){ _throw( Null_Exception);}
+_temp84->tl;});} ++ line;}}; _pop_handler();} else{ struct _xtunion_struct*
+_temp86= _temp63; _LL88: goto _LL89; _LL90: goto _LL91; _LL89: Cyc_Stdio_file_close(
+f);( void) _throw( _temp86); _LL91:( void) _throw( _temp86); _LL87:;}}} Cyc_Stdio_file_close(
+f); return;}} struct Cyc_Lineno_Pos* Cyc_Lineno_pos_of_abs( struct
+_tagged_string filename, int abs){ struct Cyc_Lineno_Pos* ans=({ struct Cyc_Lineno_Pos*
+_temp92=( struct Cyc_Lineno_Pos*) GC_malloc( sizeof( struct Cyc_Lineno_Pos));
 _temp92->logical_file=( struct _tagged_string)({ char* _temp95=( char*)"";
 struct _tagged_string _temp96; _temp96.curr= _temp95; _temp96.base= _temp95;
 _temp96.last_plus_one= _temp95 + 1; _temp96;}); _temp92->line=( struct

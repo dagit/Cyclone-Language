@@ -530,7 +530,7 @@ void unify_it(type_t t1, type_t t2) {
   case &Evar(kind1,*ref1_ref,_):
     // check that the evar doesn't occur in t2
     occurs(t1,t2);
-    _ kind2 = typ_kind(t2);
+    let kind2 = typ_kind(t2);
     // we can constrain the Evar to be equal to t2 only when the kind of the
     // evar is greater than or equal to the kind of t2 or t2 is an evar that
     // we can constrain to be equal to t1.
@@ -752,14 +752,14 @@ bool is_arithmetic_type(type_t t) {
 }
 
 // we're about to convert a value of type t1 to type t2 (both arithmetic types)
-// return true if we will potentially loose precision
+// return true if we will potentially lose precision
 bool will_lose_precision(type_t t1, type_t t2) {
   t1 = compress(t1);
   t2 = compress(t2);
   switch ($(t1,t2)) {
-  case $(DoubleType,    FloatType):        return true;
-  case $(DoubleType,    &IntType(_,_)):    return true;
-  case $(FloatType,     &IntType(_,_)):    return true;
+  case $(DoubleType,     FloatType):       return true;
+  case $(DoubleType,     &IntType(_,_)):   return true;
+  case $(FloatType,      &IntType(_,_)):   return true;
   case $(&IntType(_,B8), &IntType(_,B8)):  return false;
   case $(&IntType(_,B8), _):               return true; // see prev case
   case $(&IntType(_,B4), FloatType):       return true;
@@ -1042,9 +1042,9 @@ bool coerce_use(tenv_t te, exp_t e, type_t t2) {
 bool coerceable(type_t t) {
   switch (compress(t)) {
   case &IntType(_,_): return true;
-  case FloatType:    return true;
-  case DoubleType:   return true;
-  default:           return false;
+  case FloatType:     return true;
+  case DoubleType:    return true;
+  default:            return false;
   }
 }
 
@@ -1162,7 +1162,7 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
       if (unify(t1,substitute(inst,fs->hd->type))) return true;
     }
     break;
-  // we can cast t1 to an int of t1 is a boxed type.
+  // we can cast t1 to an int if t1 is a boxed type.
   case &IntType(_,B4):
     if (typ_kind(t2) == BoxKind) return true;
     break;
@@ -1175,8 +1175,8 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     // can cast a pointer in the heap to a pointer to some other region
     switch (t2) {
     case &PointerType(PtrInfo{t_b,rt_b,null_b,q_b,b_b}):
-      _ assump = new List(new $(t1,t2),null);
-      _ ptrsub =
+      let assump = new List(new $(t1,t2),null);
+      let ptrsub =
 	ptrsubtype(te,assump,t_a,t_b) && (!q_a->q_const || q_b->q_const);
       bool bounds_ok = unify_conrefs(boundscmp,b_a,b_b);
       if (!bounds_ok) {
@@ -1225,92 +1225,28 @@ void unchecked_cast(tenv_t te, exp_t e, type_t t) {
   }
 }
 
-bool comparison_promote(tenv_t te, exp_t e) {
-  type_t t;
+bool is_integral(exp_t e) {
   switch (compress(e->topt->v)) {
-  case &EnumType(_,_): t = sint_t; break;
-  case &IntType(sn,sz):
-    switch (sz) {
-    case B1: t = sint_t; break; // convert to unboxed, signed int
-    case B2: t = sint_t; break; // convert to unboxed, signed int
-    case B4: t = (sn == (sign_t)Unsigned) ? uint_t : sint_t; break; // make uboxed
-    case B8: return true;
-    }
-    break;
-  case FloatType: t = float_t; break; // make unboxed
-  case DoubleType: return true;
+  case &EnumType(_,_):  fallthru;
+  case &IntType(_,_): return true;
+  case &Evar(_,_,_):
+    if (unify(e->topt->v,sint_t))
+      return true;
+    return false;
   default: return false;
   }
-  unchecked_cast(te,e,t);
-  return true;
 }
 
-// check that the expression has an arithmetic type and, if it's 
-// a size that is smaller than an int, then promote it up to int.
-// Note that unsigned char or unsigned short will be promoted to
-// signed int.  Otherwise, the sign is preserved.
-bool arithmetic_promote(tenv_t te, exp_t e) {
-  type_t old_typ = compress(e->topt->v);
-  type_t t;
-  switch (old_typ) {
-  case &EnumType(_,_): t = sint_t; break;
-  case &IntType(sn,sz):
-    switch (sz) {
-    case B1:  t = sint_t; break; // convert to unboxed, signed int
-    case B2:  t = sint_t; break; // convert to unboxed, signed int
-    case B4: // make unboxed
-      t = (sn == (sign_t)Unsigned) ? uint_t : sint_t;
-      break;
-    case B8: // make unboxed
-      t = (sn == (sign_t)Unsigned) ? ulong_t : slong_t;
-      break;
-    }
-    break;
-  case FloatType:  t = float_t;  break; // make unboxed
-  case DoubleType: t = double_t; break; // make unboxed
-  case &Evar(_,_,_):
-    t = sint_t;
-    if (!unify(old_typ,t))
-      return false;
-    break;
-  default:
-    return false;
+bool is_numeric(exp_t e) {
+  if(is_integral(e))
+    return true;
+  switch (compress(e->topt->v)) {
+  case FloatType:  fallthru;
+  case DoubleType: return true;
+  default:         return false;
   }
-  unchecked_cast(te,e,t);
-  return true;
 }
 
-
-// Make sure that e has integral type; if it's a size that is
-// smaller than an int, then promote it up to int.  Note that unsigned
-// char or unsigned short will be promoted to signed int.  Otherwise,
-// the sign is preserved.
-bool integral_promote(tenv_t te, exp_t e) {
-  type_t old_typ = compress(e->topt->v);
-  type_t t;
-  switch (old_typ) {
-  case &EnumType(_,_): t = sint_t; break;
-  case &IntType(sn,sz):
-    switch (sz) {
-    case B1: t = sint_t; break; // convert to unboxed, signed int
-    case B2: t = sint_t; break; // convert to unboxed, signed int
-    case B4: 
-      t = (sn == (sign_t)Unsigned) ? uint_t  : sint_t;  break; // make unboxed
-    case B8: 
-      t = (sn == (sign_t)Unsigned) ? ulong_t : slong_t; break; // make unboxed
-    }
-    break;
-  case &Evar(_,_,_):
-    t = sint_t;
-    if (!unify(old_typ,t))
-      return false;
-    break;
-  default:
-    return false;
-  }
-  unchecked_cast(te,e,t);
-  return true;
-}
 type_t max_arithmetic_type(type_t t1, type_t t2) {
   switch ($(t1,t2)) {
   case $(DoubleType,_): fallthru;
@@ -1318,12 +1254,12 @@ type_t max_arithmetic_type(type_t t1, type_t t2) {
   case $(FloatType,_):  fallthru;
   case $(_,FloatType):  return FloatType;
   case $(&IntType(Unsigned,B8),_): fallthru;
-  case $(_,&IntType(Unsigned,B8)): return new IntType(Unsigned,B8);
+  case $(_,&IntType(Unsigned,B8)): return ulong_t;
   case $(&IntType(Signed,B8),_):   fallthru;
-  case $(_,&IntType(Signed,B8)):   return new IntType(Signed,B8);
+  case $(_,&IntType(Signed,B8)):   return slong_t;
   case $(&IntType(Unsigned,B4),_): fallthru;
-  case $(_,&IntType(Unsigned,B4)): return new IntType(Unsigned,B4);
-  default: return new IntType(Signed,B4);
+  case $(_,&IntType(Unsigned,B4)): return uint_t;
+  default: return sint_t;
   }
 }
 

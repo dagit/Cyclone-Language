@@ -405,6 +405,6 @@ bool flow_lessthan_approx(flow_info_t f1, flow_info_t f2) {
   case $(_,BottomFL): return false;
   case $(&InitsFL(d1),&InitsFL(d2)):
     if(d1 == d2) return true;
-    return Dict::forall_intersect(pinfo_lessthan_approx, d2, d1);
+    return Dict::forall_intersect(pinfo_lessthan_approx, d1, d2);
   }
 }

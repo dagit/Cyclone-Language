@@ -11,7 +11,7 @@
 
 <body><!--msnavigation--><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="1%">
 
-<nobr><a href="index.htm">Home</a></nobr><br><nobr><a href="quick_questions.htm">Quick&nbsp;Questions</a></nobr><br><nobr>Quick&nbsp;Answers</nobr><br><nobr><a href="known_bugs.htm">Known&nbsp;Bugs</a></nobr><br><nobr><a href="pointers.htm">Pointers</a></nobr><br><nobr><a href="discriminated_unions.htm">Discriminated&nbsp;Unions</a></nobr><br><nobr><a href="pattern-matching.htm">Pattern-Matching</a></nobr><br><nobr><a href="type_inference.htm">Type&nbsp;Inference</a></nobr><br><nobr><a href="polymorphism.htm">Polymorphism</a></nobr><br><nobr><a href="regions_and_effects.htm">Regions&nbsp;and&nbsp;Effects</a></nobr><br><nobr><a href="definite_assignment.htm">Definite&nbsp;Assignment</a></nobr><br><nobr><a href="namespaces.htm">Namespaces</a></nobr><br><nobr><a href="interfacing_with_c.htm">Interfacing&nbsp;with&nbsp;C</a></nobr>
+<nobr><a href="index.htm">Home</a></nobr><br><nobr><a href="quick_questions.htm">Quick&nbsp;Questions</a></nobr><br><nobr>Quick&nbsp;Answers</nobr><br><nobr><a href="known_bugs.htm">Known&nbsp;Bugs</a></nobr><br><nobr><a href="pointers.htm">Pointers</a></nobr><br><nobr><a href="discriminated_unions.htm">Discriminated&nbsp;Unions</a></nobr><br><nobr><a href="pattern_matching.htm">Pattern&nbsp;Matching</a></nobr><br><nobr><a href="type_inference.htm">Type&nbsp;Inference</a></nobr><br><nobr><a href="polymorphism.htm">Polymorphism</a></nobr><br><nobr><a href="regions_and_effects.htm">Regions&nbsp;and&nbsp;Effects</a></nobr><br><nobr><a href="definite_assignment.htm">Definite&nbsp;Assignment</a></nobr><br><nobr><a href="namespaces.htm">Namespaces</a></nobr><br><nobr><a href="interfacing_with_c.htm">Interfacing&nbsp;with&nbsp;C</a></nobr>
 
 </td><td valign="top" width="24"></td><!--msnavigation--><td valign="top">
 <h1 align="center">Quick Answers About Cyclone</h1>
@@ -120,8 +120,11 @@ region and produces a type.&nbsp; Examples are struct List&lt;int, `H&gt; and
 struct List&lt;struct List&lt;int,`H&gt;@, `H&gt;.&nbsp; In terms of the Cyclone
 library's struct List, the elements of the list have type `a and the cons cells
 are all in region `r.</p>
+<p><b><a name="types_discunion"></a>What do tunion and xtunion mean?</b></p>
+<p>tunion and xtunion are used to create <a href="discriminated_unions.htm">discriminated
+unions</a>.</p>
 <p><b><a name="types_abstract"></a>What does &quot;abstract&quot; mean?</b></p>
-<p>&quot;abstract&quot; is a scope declarator is a storage-class specifier, like
+<p>&quot;abstract&quot; is a storage-class specifier, like
 &quot;static&quot; or &quot;extern&quot;.&nbsp; When attached to a top-level
 type declaration, it means other files may only declare the type abstractly
 (e.g.. &quot;struct Foo;&quot;).&nbsp; Otherwise, abstract has the same meaning
@@ -148,7 +151,14 @@ a try block is implemented with setjmp.&nbsp; Creating an xtunion (exception
 packets are xtunion's) requires a heap allocation.&nbsp; Throwing an exception
 is implemented with longjmp.&nbsp; Pattern-matching an xtunion against each case
 variant in the catch clause is a pointer-comparsion.&nbsp; In short, exception
-handling is fairly lightweight.
+handling is fairly lightweight.<p align="left"><b><a name="add_under"></a>What does _ mean?</b><p align="left">As
+part of a type (or as a whole type), it means, &quot;determine what should go
+here and fill it in&quot;.&nbsp; Similarly, as an explicit region annotation it
+means, &quot;determine what region should go here and fill it in&quot;.&nbsp;
+Learn more in <a href="type_inference.htm">type inference</a>.&nbsp; As part of
+a pattern, it is a wild-card: Like an identifier, it matches any object.&nbsp;
+Unlike an identifier, it does not actually bind the matching object to
+anything.&nbsp; Learn more in <a href="pattern_matching.htm">pattern matching</a>.
 <p align="left"><b><a name="add_nottemplates"></a>Do functions with type variables get
 duplicated like C++
       template functions?&nbsp; Is there run-time overhead for using type
@@ -209,14 +219,24 @@ f1(int,int; `e1);</font></p>
 <p style="line-height: 50%"><font face="Courier New">};</font></p>
 <p>To understand what is going on here requires a pretty full understanding of
 regions and effects.</p>
+      <p align="left"><b><a name="io_xprintf"></a>What is xprintf?</b><p align="left">xprintf
+is a primitive taking the same arguments as printf.&nbsp; Instead of writing the
+result to stdout, it returns a heap-allocated string containing what would have
+printed to stdout had printf been called, plus a trailing null-character.&nbsp;
+      <p align="left"><b><a name="io_printf_literal"></a>Why doesn't printf(s) work?</b>
       <p align="left">Printf, fprintf, etc. are primitives in
-      Cyclone.&nbsp;&nbsp;
-      <p align="left"><b><a name="io_printf_literal"></a>Why doesn't printf(s) work?</b><p>The
+      Cyclone.&nbsp;&nbsp;The
 first argument to printf (second to fprintf) must be a literal string (eg.
 &quot;Your name is %s.&nbsp; Your age is %d&quot;); the type-checker ensures
 that the remaining arguments have the right types and are in the right
 order.&nbsp; Hence you cannot say printf(s) where s is some array of characters.
-(Allowing such calls is unsafe because s may contain '%' characters.)</p>
+(Allowing such calls is unsafe because s may contain '%' characters.)
+      <p align="left"><b><a name="io_cmdline"></a>How do I access command-line arguments?</b><p align="left">The
+type of main should be &quot;int main(int argc, char ?? argv)&quot;.&nbsp; (See
+&quot;what does int ? mean&quot;.)&nbsp; As in C, argc is the number of
+command-line arguments and argv[i] is a string with the ith argument.&nbsp;
+Unlike C, argv and each element of argv carry bounds information.&nbsp; Note
+that argc is redundant -- it is always equal to argv.size.
 <p><b><a name="pointer_stringlit"></a>What is the type of a literal string?</b></p>
 <p>The type of &quot;foo&quot; is char @{4} (remember the trailing '\0').&nbsp;
 However, there are implicit casts from char @{4} to char @{2}, char *{4}, and
@@ -238,7 +258,7 @@ a mess of temporary variables and goto statements.&nbsp;&nbsp; Array-bounds
 checks can clutter array-intensive code.&nbsp; All typedefs are expanded away
 before printing the output.</p>
 <p><b><a name="tools_gdb"></a>Can I use gdb on the output?</b></p>
-<p>Yes, but doing more than getting a stack trace on a segfault requires some
+<p>Yes, but doing more than getting a stack trace on a seg fault requires some
 sophistication.&nbsp; First, you have to know how Cyclone translates top-level
 identifiers to C identifiers (it prepends Cyc_ and separates namespaces by _
 instead of ::) so you can set breakpoints at functions.&nbsp; Second, it can be
@@ -250,7 +270,7 @@ appears to seg fault in GC_findlimit. This is correct and documented
 garbage-collector behavior (it handles the signal but gdb doesn't know that);
 simply continue execution.&nbsp; Second, a common use of gdb is to find the
 location of an uncaught exception.&nbsp; To do this, set a breakpoint at
-&quot;throw&quot; (a function in Cyclone runtime).</p>
+&quot;throw&quot; (a function in the Cyclone runtime).</p>
       <p align="left"><b><a name="tools_gprof"></a>Can I use gprof on the output?</b><p align="left">Yes,
 just compile the C code with the -pg flag.&nbsp; You should also
 rebuild the Cyclone libraries and the garbage collector with the -pg flag.&nbsp;

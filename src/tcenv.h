@@ -98,7 +98,8 @@ extern tenv_t     add_type_vars(seg_t,tenv_t,list_t<tvar_t>);
 extern tenv_t set_in_loop(tenv_t te, stmt_t continue_dest);
 extern tenv_t set_in_switch(tenv_t);
 extern tenv_t set_fallthru(tenv_t te, 
-			   $(list_t<tvar_t>,list_t<vardecl_t>) * pat_typ,
+			   list_t<tvar_t> new_tvs, 
+			   list_t<vardecl_t> vds,
 			   switch_clause_t clause);
 extern tenv_t clear_fallthru(tenv_t);
 extern tenv_t set_next(tenv_t, jumpee_t);

@@ -618,15 +618,15 @@ process_fallthru(tenv_t te,stmt_t s, switch_clause_t *@ clauseopt){
   return ans;
 }
 
-tenv_t set_fallthru(tenv_t te, $(list_t<tvar_t>,list_t<vardecl_t>) * pat_typ, 
-		  switch_clause_t clause) {
+tenv_t set_fallthru(tenv_t te, list_t<tvar_t> new_tvs, list_t<vardecl_t> vds, 
+		    switch_clause_t clause) {
   if(te->le == null) env_err("Tcenv: unexpected set_fallthru");
   let ft_typ = null;
-  for(let vds = (*pat_typ)[1]; vds!=null; vds=vds->tl)
+  for(; vds!=null; vds=vds->tl)
     ft_typ = new List(vds->hd->type,ft_typ);
   ft_typ = List::imp_rev(ft_typ);
   fenv_t fe = copy_fenv_new_ctrl(get_fenv(te));
-  fe->ctrl_env->fallthru_clause = new $(clause,(*pat_typ)[0],ft_typ);
+  fe->ctrl_env->fallthru_clause = new $(clause,new_tvs,ft_typ);
   return put_fenv(te,fe);
 }
 // fallthru is illegal in the last case
