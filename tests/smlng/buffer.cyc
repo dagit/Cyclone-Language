@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include "buffer.h"
+using Stdio;
+namespace Buffer;
+// Buffers for reading text
+#define DEF_BUFSIZE 1024
+
+typedef struct BufList {
+  struct BufList* next;
+  char data[DEF_BUFSIZE];
+} *buflist_t;
+
+struct Buf {
+  struct BufList @first; // pointer to first DEF_BUFSIZE chars
+  struct BufList @curr;  // pointer to current buffer to dump chars
+  unsigned int offset;   // offset into current buffer where to dump next char
+  unsigned int position; // absolute position within buffer of last char
+};
+
+buf_t init_buf() {
+  let bl = new BufList{null, {for i < DEF_BUFSIZE : '0'}};
+  return new Buf {bl, bl, 0, 0};
+}
+
+static void grow_buf(buf_t b) {
+  struct BufList @bl = new BufList{null, {for i < DEF_BUFSIZE : '0'}};
+  b->curr->next = bl;
+  b->curr = bl;
+  b->offset = 0;
+}
+
+void add_char(buf_t b, char c) {
+  if (b->offset >= DEF_BUFSIZE) grow_buf(b);
+  b->curr->data[b->offset++] = c;
+  b->position++;
+}
+
+unsigned int position(buf_t b) {
+  return b->position;
+}
+
+void write_buf(FILE @f, buf_t b, unsigned int start) {
+  struct BufList @bl = b->first;
+  while (start > DEF_BUFSIZE) {
+    start -= DEF_BUFSIZE;
+    bl = (struct BufList @)bl->next;
+  }
+  while (true) {
+    char c = bl->data[start++];
+    if (c == '\0') return;
+    fputc(c,f);
+    if (start >= DEF_BUFSIZE) {
+      start = 0;
+      bl = (struct BufList @)bl->next;
+    }
+  }
+}
+
+unsigned int size(buf_t b, unsigned int start) {
+  unsigned int sum = 0;
+  struct BufList @bl = b->first;
+  while (start > DEF_BUFSIZE) {
+    start -= DEF_BUFSIZE;
+    bl = (struct BufList @)bl->next;
+  }
+  while (true) {
+    char c = bl->data[start++];
+    if (c == '\0') return sum;
+    sum++;
+    if (start >= DEF_BUFSIZE) {
+      start = 0;
+      bl = (struct BufList @)bl->next;
+    }
+  }
+}
+
+char get_char(buf_t b, unsigned int start) {
+  struct BufList @bl = b->first;
+  while (start > DEF_BUFSIZE) {
+    start -= DEF_BUFSIZE;
+    bl = (struct BufList @)bl->next;
+  }
+  return bl->data[start];
+}
+

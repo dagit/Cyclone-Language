@@ -1,8 +1,8 @@
-
 #include "core.h"
 #include "stdio.h"
 #include "smlng.h"
 #include "tag_elim.h"
+using Core;
 namespace TagElim;
 
 // field is true if all text in the doc is guarded by an appropriate tag,
@@ -80,6 +80,7 @@ $(doc_t, synth_t) up_opt(doc_t doc) {
 	synth.s.u2 = true;
       synth.s.u1 = true;
       break;
+    default: throw new Impossible("tag_elim: tag");
     }
 #undef OPT
     if(useless)
@@ -91,12 +92,13 @@ $(doc_t, synth_t) up_opt(doc_t doc) {
   }
 }
 
-void up_opt_test1(doc_t d) {
+/*
+void up_opt_test1(buf_t b, doc_t d) {
   Stdio::fputs("\n\n", Stdio::stdout);
-  dump(d);
+  dump(b,d);
   d = up_opt(d)[0];
   Stdio::fputs("\n\n", Stdio::stdout);
-  dump(d);
+  dump(b,d);
 }
 
 void up_opt_test() {
@@ -110,3 +112,4 @@ void up_opt_test() {
   up_opt_test1(d3);
   up_opt_test1(d4);
 }
+*/

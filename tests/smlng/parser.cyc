@@ -1,57 +1,31 @@
-/* This is the parser.  It reads each character, and does something with it based on the
-   current parsing context.  It will do some compression while it reads stuff in. */
-
+// This is the parser.  It reads each character, and does something with it 
+// based on the current parsing context.  It will do some compression while 
+// it reads stuff in. 
 #include <core.h>
 #include <stdio.h>
 #include <string.h>
 #include <list.h>
+#include "parser.h"
 using Core;
 using Stdio;
 using String;
 using List;
-#include "smlng.h"
+using Buffer;
 
-/* The information part of a tag */
-string_t tag[] = {
+namespace Parser;
+
+// The information part of a tag 
+static string_t tag[] = {
   "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
   "B", "EM", "I", "PL", "S", "TT", "U", "r", "g",
   "b", "c", "m", "y", "k", "w"
 };
 
-/* buffers for parsing */
-
-#define DEF_BUFSIZE 1024
-typedef struct Buf { 
-  char ?buf;
-  int idx;
-} buf_t;
-
-buf_t @ alloc_buf() {
-  char ?buf = new { for i < DEF_BUFSIZE: 0 };
-  return new Buf{buf,0};
-}
-
-buf_t @expand_buf(buf_t @b) {
-  int newsz = b->buf.size * 2;
-  char ?buf = new { for i < newsz: 0 };
-  strcpy(buf,b->buf);
-  return new Buf{buf,b->idx};
-}
-
-void input_buf_char(buf_t @@`r b, char c) {
-  if ((*b)->idx == (*b)->buf.size)
-    *b = expand_buf(*b);
-  (*b)->buf[(*b)->idx] = c;
-  (*b)->idx++;
-}
-
-/* parser */
-
-int position = 1;
+static int position = 1;
 #define GETC(f) (position++, fgetc(f))
 #define UNGETC(c,f) (position--, ungetc(c,f))
 
-void die(const char ?`r desc, ...`r2 inject parg_t<`r4> ap) 
+static void die(const char ?`r desc, ...`r2 inject parg_t<`r4> ap) 
   __attribute__((format(printf,1,2)))
 {
   fprintf(stderr,"char %d: ",position);
@@ -62,29 +36,27 @@ void die(const char ?`r desc, ...`r2 inject parg_t<`r4> ap)
 /* keep going until you hit a tag or EOF 
  * and then return the text you've got so far.
    XXX should be able to region-ify this */
-doc_t get_text(FILE @f) {
+static doc_t get_text(buf_t b, FILE @f) {
   int c;
-  buf_t @b = alloc_buf();
-  while (1) {
+  unsigned int start = Buffer::position(b);
+  while (true) {
     c = GETC(f);
     switch (c) {
     case '<': /* tag */
       UNGETC(c,f);
-      input_buf_char(&b,'\0');
-      return new Text(b->buf);
+      Buffer::add_char(b, '\0');
+      return new Text(start);
     case EOF: /* eof */
-      input_buf_char(&b,'\0');
-      return new Text(b->buf);
+      Buffer::add_char(b, '\0');
+      return new Text(start);
     default:
-      input_buf_char(&b,(char)c);
+      Buffer::add_char(b,(char)c);
       break;
     }
   }
 }
 
-extern doc_t get_docs(FILE @);
-
-tag_t get_tag(FILE @f) {
+static tag_t get_tag(FILE @f) {
   // < has already been consumed
   int c = GETC(f);
   if (c == EOF) die("EOF within tag");
@@ -136,7 +108,7 @@ tag_t get_tag(FILE @f) {
   return t;
 }
 
-void get_endtag(FILE @f, tag_t t) {
+static void get_endtag(FILE @f, tag_t t) {
   // < has already been consumed.
   int c = GETC(f);
   if (c != '/')
@@ -146,7 +118,7 @@ void get_endtag(FILE @f, tag_t t) {
     die("end tag mismatch: %s != %s",tag[t],tag[t2]);
 }
 
-doc_t get_docs(FILE @f) {
+doc_t get_docs(buf_t b, FILE @f) {
   doc_t ? result;
   region r {
     glist_t<doc_t,`r> docs = null;
@@ -160,13 +132,13 @@ doc_t get_docs(FILE @f) {
           break;
         } else {
           let tag = get_tag(f);
-          let d = get_docs(f);
+          let d = get_docs(b, f);
           get_endtag(f,tag);
           docs = rnew(r) List(new Tagged(tag,d),docs);
         }
       } else {
         UNGETC(c,f);
-        docs = rnew(r) List(get_text(f),docs);
+        docs = rnew(r) List(get_text(b,f),docs);
       }
       c = GETC(f);
     }

@@ -2,6 +2,7 @@
 #include "core.h"
 #include "stdio.h"
 #include "smlng.h"
+#include "buffer.h"
 
 #define UNKNOWN_SIZE  DONT_KNOW
 #define UNKNOWN_COLOR DONT_KNOW
@@ -12,6 +13,7 @@
 // representations.
 using Core;
 using Stdio;
+using Buffer;
 
 // int is character position in d1 of first different character
 xtunion exn { NotEquivalent(int); };
@@ -34,7 +36,7 @@ struct OutputState<`r::R> {
 };
 typedef struct OutputState<`r> @`r out_state_t<`r>;
 
-void next_char(out_state_t<`r> s) {
+void next_char(buf_t b, out_state_t<`r> s) {
   s->prev_ctxt = s->ctxt;
   while(true) {
     if(s->stack_top == -1)
@@ -42,10 +44,12 @@ void next_char(out_state_t<`r> s) {
     struct DocStackElt @`r elt = &s->doc_stack[s->stack_top];
     let &DocStackElt(d,i,c) = elt;
     switch(d) {
-    case &Text(str): 
-      if(i < str.size && str[i] != '\0') { // may change as string rep changes!
+    case &Text(pos): 
+      let sz = Buffer::size(b,pos);
+      let k = Buffer::get_char(b,pos);
+      if(i < sz && k != '\0') { // may change as string rep changes!
 	s->ctxt = c;
-	s->this_char = str[i];
+	s->this_char = k;
 	elt->i = i+1;
 	return;
       } else {
@@ -77,10 +81,13 @@ void next_char(out_state_t<`r> s) {
 	case I_tag:  s->ctxt.I  = true; break;
 	case TT_tag: s->ctxt.TT = true; break;
 	case EM_tag: if(!s->ctxt.S) s->ctxt.EM = !s->ctxt.EM; break;
-	case PL_tag: s->ctxt.U = s->ctxt.S = s->ctxt.EM = s->ctxt.B = 
-		       s->ctxt.I = s->ctxt.TT = false; break;
+	case PL_tag: 
+	  s->ctxt.U = 0;
+	  s->ctxt.S = s->ctxt.EM = s->ctxt.B = 
+	    s->ctxt.I = s->ctxt.TT = false; break;
 	case S_tag:  s->ctxt.S = true; s->ctxt.EM = false; break;
 	case U_tag:  if(s->ctxt.U < 3) ++s->ctxt.U; break;
+	default: throw new Impossible("ast_validate");
 	}
 	if(s->stack_top == s->doc_stack.size-1) 
 	  s->doc_stack = rnew(s->rgn){for j < (s->stack_top+1)*2 : 
@@ -124,7 +131,7 @@ void check_space_context(out_state_t<`r1> s1, out_state_t<`r2> s2) {
 
 #undef CHECK
 
-void validate_rec(out_state_t<`r1> s1, out_state_t<`r2> s2){
+void validate_rec(buf_t b, out_state_t<`r1> s1, out_state_t<`r2> s2){
   do {
     // check from previous iteration
     if(s1->this_char != s2->this_char)
@@ -134,22 +141,22 @@ void validate_rec(out_state_t<`r1> s1, out_state_t<`r2> s2){
     else
       check_context(s1, s2);
     // get
-    next_char(s1);
-    next_char(s2);
+    next_char(b,s1);
+    next_char(b,s2);
   } while(s1->stack_top >= 0 && s2->stack_top >= 0);
 
   if(s1->stack_top >= 0 || s2->stack_top >= 0)
     throw new NotEquivalent(s1->pos); // one is longer than the other
 }
 
-void validate_docs(doc_t d1, doc_t d2) {
+void validate_docs(buf_t b, doc_t d1, doc_t d2) {
   region rgn {
-    let newc = Context(0,0,0,0,0,0,UNKNOWN_SIZE,UNKNOWN_COLOR);
+    let newc = init_context;
     let stack1 = rnew(rgn) {for i < 20 : DocStackElt(d1,0,newc)};
     let stack2 = rnew(rgn) {for i < 20 : DocStackElt(d2,0,newc)};
     let s1 = rnew(rgn) OutputState(rgn, newc, newc, 'X', 0, stack1, 0);
     let s2 = rnew(rgn) OutputState(rgn, newc, newc, 'X', 0, stack2, 0);
-    try validate_rec(s1,s2);
+    try validate_rec(b,s1,s2);
     catch { 
     case &NotEquivalent(i): fprintf(stderr,"NOT EQUIVALENT: %d", i); break; 
     }
