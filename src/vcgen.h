@@ -28,8 +28,11 @@
 
 
 namespace Vcgen {
-  extern void vcgen_fundecl(JumpAnalysis::jump_anal_res_t tables, 
-			    Absyn::fndecl_t fd);
   typedef Hashtable::table_t<Absyn::exp_t, $(AssnDef::assn_t, AssnDef::assn_t)@> *assn_info_t;
+  assn_info_t new_assn_info();
+  extern void vcgen_fundecl(JumpAnalysis::jump_anal_res_t tables, 
+			    Absyn::fndecl_t fd,
+			    assn_info_t assn_info);
+  $(AssnDef::assn_t, AssnDef::assn_t) exp2ctxt_assn(assn_info_t,Absyn::exp_t);
 }
 #endif

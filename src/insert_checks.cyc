@@ -38,6 +38,7 @@
 #include "flags.h"
 #include "insert_checks.h"
 #include "vcgen.h"
+#include "pratt_prover.h"
 
 //#define BCE_DEBUG
 #ifdef BCE_DEBUG
@@ -228,6 +229,10 @@ static void do_exp_opt(env_t nv, exp_opt_t eo) {
     do_exp(nv,eo);
 }
 
+static bool need_bounds_check_vcgen(env_t nv, exp_t a){
+  let $(ctxt, assn) = Vcgen::exp2ctxt_assn(nv.assn_info, a);
+  return !PrattProver::constraint_prove(ctxt, assn);
+}
 static void do_exp(env_t nv, exp_t e) {
   switch(e->r) {
   case &Asm_e(...):  //can do better -- check input expressions initialized
@@ -348,6 +353,15 @@ static void do_exp(env_t nv, exp_t e) {
     case &TupleType(_): e->annot = &NoCheck_val; break; // type-checker checks
     case &PointerType(PtrInfo(ta,tq,PtrAtts(rgn,n,b,zt,_))):
       bool bds_ck  = need_bounds_check(nv,get_relns(e1),e1,e2);
+      bool bds_ck_vcgen;
+      if (nv.vcgen_r){
+	bds_ck_vcgen = need_bounds_check_vcgen(nv, e1);
+	if (bds_ck_vcgen != bds_ck){
+	  fprintf(stderr, "exp: %s[%s]  reln: %s  vcgen: %s\n", Absynpp::exp2string(e1), 
+		  Absynpp::exp2string(e2), bds_ck?"true":"false", 
+		  bds_ck_vcgen?"true":"false");
+	}
+      }
       exp_opt_t bd = Tcutil::get_bounds_exp(bounds_one(),b);
       bool fat_ptr = (bd == NULL);
       bool null_ck;
@@ -440,10 +454,13 @@ static void do_decl(env_t nv, decl_t d) {
   switch(d->r) {
   case &Var_d(vd): do_exp_opt(nv,vd->initializer); break;
   case &Fn_d(fd): 
+    let nv = fn_body_env(nv);
+    nv.assn_info = Vcgen::new_assn_info();
     if (nv.vcgen_r){
-      Vcgen::vcgen_fundecl(nv.tables, fd);
+      Vcgen::vcgen_fundecl(nv.tables, fd, nv.assn_info);
     }
-    do_stmt(fn_body_env(nv),fd->body); break;//forgets if in sizeof
+    do_stmt(nv,fd->body); 
+    break;//forgets if in sizeof
   case &Let_d(_,_,e,_): do_exp(nv,e); break;    
   case &Letv_d(_): break;
   case &Region_d(_,_,eo): do_exp_opt(nv,eo); break; //key for open can't be NULL

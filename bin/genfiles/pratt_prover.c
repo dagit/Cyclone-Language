@@ -573,7 +573,7 @@ struct Cyc_PrattProver_Row*_tmp30=g->rows;struct Cyc_PrattProver_Row*ls=_tmp30;f
 void*_tmp31=ls->source;void*l=_tmp31;
 int*_tmp32=Cyc_PrattProver_lookup_distance(ks,is_signed,l);int*kl_dist=_tmp32;
 # 245
-if(kl_dist != 0 &&*kl_dist == -2147483648)continue;{
+if(kl_dist != 0 &&*kl_dist == (- 2147483647)- 1)continue;{
 # 247
 int*_tmp33=Cyc_PrattProver_lookup_distance(jrow,is_signed,l);int*jl_dist=_tmp33;
 if(jl_dist == 0)continue;
@@ -597,7 +597,7 @@ sum2=*jl_dist;}}
 if(overflow && sum1 < 0)continue;
 # 271
 if(overflow && sum1 >= 0){
-Cyc_PrattProver_insert_distance(ks,is_signed,l,-2147483648);
+Cyc_PrattProver_insert_distance(ks,is_signed,l,(- 2147483647)- 1);
 continue;}
 # 275
 new_dist=sum1 + sum2;
@@ -696,7 +696,7 @@ enum Cyc_AssnDef_Primreln _tmp47=p;switch(_tmp47){case Cyc_AssnDef_ULt: _LL28: _
 # 400
 struct Cyc_PrattProver_TooLarge_exn_struct Cyc_PrattProver_too_large={Cyc_PrattProver_TooLarge};
 # 403
-unsigned Cyc_PrattProver_max_paths=65U;
+unsigned Cyc_PrattProver_max_paths=17U;
 unsigned Cyc_PrattProver_max_paths_seen=0U;
 # 412
 static struct Cyc_PrattProver_Graph*Cyc_PrattProver_cgraph(struct Cyc_PrattProver_Graph*gs,void*a){

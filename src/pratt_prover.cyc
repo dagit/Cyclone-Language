@@ -190,8 +190,8 @@ static void insert_distance(row_t i, bool is_signed, term_t j, int dist) {
 }
 
 // FIX: 32-bit dependency!
-#define MAXINT (0x7fffffff)
-#define MININT (0x80000000)
+#define MAXINT  2147483647
+#define MININT (-MAXINT-1)
 
 // add an edge to a graph and close it off to find shortest paths.
 // returns true if the resulting graph remains consistent and false
@@ -400,7 +400,7 @@ datatype exn { TooLarge };
 datatype exn.TooLarge too_large = TooLarge;
 
 //FIX: add a way for the user to control this.
-unsigned int max_paths = 65;
+unsigned int max_paths = 17;
 unsigned int max_paths_seen = 0;
 
 // given a set of graphs gs representing A1 or A2 or ... or An

@@ -223,12 +223,13 @@ struct Env {
   // This will make it easier to collapse this into:
   //  [_x0==0 && _x0==y && (c && x == 4 || !c && x == 5)]
   state_counter_t state_counter;
+  assn_info_t assn_info;
 };
 
 static int hash_ptr(`a s) { return (int)s; }
 
 static env_t 
-initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd) {
+initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info) {
   let succ_table = Hashtable::lookup(tables->succ_tables,fd);
   let assn_table = Hashtable::create(57, Core::ptrcmp, hash_ptr);
   let senv =  new SharedEnv{.assn_table = assn_table,
@@ -238,7 +239,7 @@ initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd) {
                             .res_term = NULL,
                             .res_assn = &false_assn};
   let d = Dict::empty(Core::ptrcmp);
-  return new Env { .shared = senv, .state_counter = d };
+  return new Env { .shared = senv, .state_counter = d, .assn_info = assn_info};
 }
 
 static env_t copy_env(env_t env) {
@@ -334,6 +335,33 @@ static void update_return(env_t env, term_opt_t t, assn_t a) {
   } else {
     shared->res_assn = or(a,shared->res_assn);
   }
+}
+
+// functions related to maintain the information passed to insert_checks
+assn_info_t new_assn_info(void){
+  let assn_info =  Hashtable::create(57, Core::ptrcmp, hash_ptr);
+  return new assn_info;
+}
+
+$(AssnDef::assn_t, AssnDef::assn_t) exp2ctxt_assn(assn_info_t assn_info, Absyn::exp_t e){
+  let result = Hashtable::lookup_opt(*assn_info, e);
+  if (result == NULL){
+    return $(&true_assn, &false_assn);
+  }else{
+    return **result;
+  }
+}
+
+static void insert_assn_info(assn_info_t assn_info, Absyn::exp_t e, $(AssnDef::assn_t, AssnDef::assn_t) @`H ctxt_assn){
+  Hashtable::insert(*assn_info, e, ctxt_assn);
+  return;
+}
+
+static exp_t shared_zero_exp() {
+  static exp_opt_t ans = NULL;
+  if(!ans) 
+    ans = Absyn::uint_exp(0,0);
+  return (exp_t)ans;
 }
 
 // forward declarations for the analysis functions.
@@ -989,9 +1017,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Offsetof_e(_,_): return $(NULL,ain);
 
   // These can all throw exceptions
-  case &Absyn::Deref_e(e): fallthru(e);
   case &Absyn::AggrMember_e(e,...): fallthru(e);
-  case &Absyn::AggrArrow_e(e,...):
     ain = vcgen_rexp(env,e,ain)[1];
     update_try_assn(env,ain);
     return $(NULL,ain);
@@ -1000,16 +1026,24 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Address_e(e): 
     return $(NULL,vcgen_rexp(env,e,ain)[1]);
 
+  case &Absyn::Deref_e(e): fallthru(e);
+  case &Absyn::AggrArrow_e(e,...): fallthru(e, shared_zero_exp());
   case &Absyn::Subscript_e(e1,e2): 
     let $(t1,a1) = vcgen_rexp(env,e1,ain);
     let $(t2,a2) = vcgen_rexp(env,e2,a1);
     switch (Absyn::compress((type_t)e1->topt)) {
     case &Absyn::TupleType(_): break;
     default:
-      if (t1 != NULL) {
-        update_try_assn(env,ain);
-        a2 = and(a2,ult(t2,primop(Absyn::Numelts,list(t1))));
+      update_try_assn(env, ain);
+      assn_t additional;
+      if (t1 == NULL){
+	additional = &true_assn;
+      }else{
+	additional = ult(t2,primop(Absyn::Numelts,list(t1)));
       }
+      insert_assn_info(env->assn_info, e1, new $(a2, additional));
+		       
+      a2 = and(a2,additional);
     }
     return $(NULL,a2);
 
@@ -1083,9 +1117,10 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   }
 }
 
+
 // FIX? take into account top-level (const) variable intializers?
-void vcgen_fundecl(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd){
-  let env = initial_env(tables,fd);
+void vcgen_fundecl(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info){
+  let env = initial_env(tables,fd, assn_info);
   assn_t a = &true_assn;
   // put in the requires clause as an assumption.
   let $(args,reqopt,ensopt,ret_value) = get_requires_and_ensures_info(&fd->i);
