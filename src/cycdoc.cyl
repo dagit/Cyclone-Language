@@ -31,7 +31,7 @@
 #include "parse.h"
 #include "absynpp.h"
 namespace Lex {
-  extern void lex_init();
+  extern void lex_init(bool use_cyclone_keywords);
 }
 namespace Position {
   /* Bad boy.  Break abstraction bad! */
@@ -296,9 +296,9 @@ rule token "$(int,comment_t)*" = parse
     /* Parse the file into a list of declarations */
     Position::reset_position(preprocfile);
     FILE @in_file = (FILE@)fopen(preprocfile,"r");
-    Lex::lex_init(); // must forget typedefs, may as well flush symbols too
+    Lex::lex_init(true); // must forget typedefs, may as well flush symbols too
     let decls = Parse::parse_file(in_file);
-    Lex::lex_init(); // garbage collect those big tries
+    Lex::lex_init(true); // garbage collect those big tries
     file_close((FILE@)in_file);
     decls = flatten_decls(decls);
     /* Find the location (pos_t) of each declaration */

@@ -60,6 +60,7 @@
    Some systems define typedefs with macros -- e.g., socklen_t in
    cygwin.
 
+   [JGM: fixed]
    OS X defines a struct with no members [/usr/include/net/if_var.h]
    and we don't parse it:
         struct tqdummy {
@@ -89,7 +90,7 @@
 #include <ctype.h>
 
 namespace Lex {
-  extern void lex_init();
+  extern void lex_init(bool use_cyclone_keywords);
 }
 
 using Lexing;
@@ -1302,9 +1303,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     if (!maybe) return 1;
     in_file = (FILE@)maybe;
     Position::reset_position(filtereddeclsfile);
-    Lex::lex_init(); // must forget typedefs, may as well flush symbols too
+    Lex::lex_init(false);// must forget typedefs, may as well flush symbols too
     let decls = Parse::parse_file(in_file);
-    Lex::lex_init(); // garbage collect those big tries
+    Lex::lex_init(false); // garbage collect those big tries
     fclose(in_file);
     remove(filtereddeclsfile);
 

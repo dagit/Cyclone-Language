@@ -809,10 +809,10 @@ int tag;struct Cyc_flock*f1;};struct Cyc_Long_struct{int tag;int f1;};int Cyc_op
 const char*,int,struct _tagged_arr);struct Cyc_option{struct _tagged_arr name;int
 has_arg;int*flag;int val;};int chdir(const char*);int close(int);struct _tagged_arr
 Cyc_getcwd(struct _tagged_arr buf,unsigned int size);int isspace(int);int toupper(int);
-void Cyc_Lex_lex_init();extern char*Ccomp;struct Cyc___cycFILE*Cyc_log_file=0;
-struct Cyc___cycFILE*Cyc_cstubs_file=0;struct Cyc___cycFILE*Cyc_cycstubs_file=0;
-int Cyc_log(struct _tagged_arr fmt,struct _tagged_arr ap){if(Cyc_log_file == 0){({void*
-_tmp0[0]={};Cyc_fprintf(Cyc_stderr,({const char*_tmp1="Internal error: log file is NULL\n";
+void Cyc_Lex_lex_init(int use_cyclone_keywords);extern char*Ccomp;struct Cyc___cycFILE*
+Cyc_log_file=0;struct Cyc___cycFILE*Cyc_cstubs_file=0;struct Cyc___cycFILE*Cyc_cycstubs_file=
+0;int Cyc_log(struct _tagged_arr fmt,struct _tagged_arr ap){if(Cyc_log_file == 0){({
+void*_tmp0[0]={};Cyc_fprintf(Cyc_stderr,({const char*_tmp1="Internal error: log file is NULL\n";
 _tag_arr(_tmp1,sizeof(char),_get_zero_arr_size(_tmp1,34));}),_tag_arr(_tmp0,
 sizeof(void*),0));});exit(1);}{int _tmp2=Cyc_vfprintf((struct Cyc___cycFILE*)
 _check_null(Cyc_log_file),fmt,ap);Cyc_fflush((struct Cyc___cycFILE*)((struct Cyc___cycFILE*)
@@ -2113,8 +2113,8 @@ if(Cyc_mode != (void*)3)remove(_tmp181);maybe=Cyc_fopen(_tmp182,(const char*)"r"
 if(!((unsigned int)maybe)){int _tmp1D2=1;_npop_handler(0);return _tmp1D2;}in_file=(
 struct Cyc___cycFILE*)_check_null(maybe);Cyc_Position_reset_position(({const char*
 _tmp1D3=_tmp182;_tag_arr(_tmp1D3,sizeof(char),_get_zero_arr_size(_tmp1D3,1));}));
-Cyc_Lex_lex_init();{struct Cyc_List_List*_tmp1D4=Cyc_Parse_parse_file(in_file);
-Cyc_Lex_lex_init();Cyc_fclose(in_file);remove(_tmp182);{struct Cyc_List_List*
+Cyc_Lex_lex_init(0);{struct Cyc_List_List*_tmp1D4=Cyc_Parse_parse_file(in_file);
+Cyc_Lex_lex_init(0);Cyc_fclose(in_file);remove(_tmp182);{struct Cyc_List_List*
 _tmp1D5=_tmp1D4;for(0;_tmp1D5 != 0;_tmp1D5=_tmp1D5->tl){struct _tuple11*_tmp1D6=
 Cyc_scan_decl((struct Cyc_Absyn_Decl*)_tmp1D5->hd);if(_tmp1D6 == 0)continue;{
 struct _tuple11 _tmp1D8;struct _tagged_arr*_tmp1D9;struct Cyc_Set_Set*_tmp1DA;struct

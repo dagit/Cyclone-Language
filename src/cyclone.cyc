@@ -39,7 +39,7 @@
 #include "interface.h"
 
 namespace Lex {
-  extern void lex_init();
+  extern void lex_init(bool use_cyclone_keywords);
 }
 namespace Toc {
   bool warn_bounds_checks;
@@ -338,9 +338,9 @@ list_t<Absyn::decl_t>
 }
 
 list_t<Absyn::decl_t> do_parse(FILE @ f, list_t<Absyn::decl_t> ignore) {
-  Lex::lex_init(); // must forget typedefs, may as well flush symbols too
+  Lex::lex_init(true); // must forget typedefs, may as well flush symbols too
   let ans = Parse::parse_file(f);
-  Lex::lex_init(); // garbage collect those big tries
+  Lex::lex_init(true); // garbage collect those big tries
   return ans;
 }
 

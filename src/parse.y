@@ -974,7 +974,21 @@ prog:
 
 translation_unit:
   external_declaration translation_unit
-    { $$=^$(List::imp_append($1,$2)); }
+    { list_t<decl_t> x, y;
+      try {
+        x = $1;
+      } catch {
+      case &Core::Failure(_):
+        x = NULL; break;
+      }
+      try {
+        y = $2;
+      } catch {
+      case &Core::Failure(_):
+        y = NULL; break;
+      }
+      $$=^$(List::imp_append(x,y)); 
+    }
 /* Cyc: added using and namespace */
 /* NB: using_action calls Lex::enter_using */
 | using_action ';' translation_unit
@@ -989,7 +1003,20 @@ translation_unit:
       Lex::leave_namespace();
     }
 | namespace_action '{' translation_unit unnamespace_action translation_unit
-    { $$=^$(new List(new Decl(new Namespace_d(new $1,$3),LOC(@1,@4)),$5)); }
+    { 
+      string_t nspace;
+      list_t<decl_t> x, y;
+      try { nspace = $1; } catch {
+      case &Core::Failure(_): nspace = ""; break;
+      }
+      try { x = $3; } catch {
+      case &Core::Failure(_): x = NULL; break;
+      }
+      try { y = $5; } catch {
+      case &Core::Failure(_): y = NULL; break;
+      }
+      $$=^$(new List(new Decl(new Namespace_d(new nspace,x),LOC(@1,@4)),y)); 
+    }
 | EXTERN STRING '{' translation_unit '}' translation_unit
     { if (strcmp($2,"C") != 0)
         err("only extern \"C\" { ... } is allowed",LOC(@1,@2));
@@ -1001,6 +1028,7 @@ translation_unit:
 external_declaration:
   function_definition {$$=^$(new List(new_decl(new Fn_d($1),LOC(@1,@1)),NULL));}
 | declaration         {$$=$!1;}
+| error               {$$=^$(NULL);}
 ;
 
 function_definition:
@@ -1353,7 +1381,9 @@ struct_or_union:
 ;
 
 struct_declaration_list:
-  struct_declaration_list0 { $$=^$(List::flatten(List::imp_rev($1))); }
+  /* empty */
+  { $$=^$(NULL); }
+| struct_declaration_list0 { $$=^$(List::flatten(List::imp_rev($1))); }
 ;
 
 /* NB: returns list in reverse order */
@@ -1527,8 +1557,8 @@ direct_declarator:
 | qual_opt_identifier qual_opt_identifier
 { err("identifier has not been declared as a typedef",LOC(@1,@1));
   $$=^$(new Declarator($2,NULL)); }   
-| error 
-  { $$=^$(new Declarator(exn_name,NULL)); }
+/* | error 
+   { $$=^$(new Declarator(exn_name,NULL)); } */
 ;
 
 /* CYC: region annotations allowed, as is zero-termination qualifier */
@@ -1917,11 +1947,13 @@ labeled_statement:
 expression_statement:
   ';'            { $$=^$(skip_stmt(LOC(@1,@1))); }
 | expression ';' { $$=^$(exp_stmt($1,LOC(@1,@2))); }
+| error ';'      { $$=^$(skip_stmt(LOC(@1,@1))); } 
 ;
 
 compound_statement:
   '{' '}'                 { $$=^$(skip_stmt(LOC(@1,@2))); }
 | '{' block_item_list '}' { $$=$!2; }
+| '{' error '}'           { $$=^$(skip_stmt(LOC(@1,@2))); }
 ;
 
 block_item_list:
@@ -1940,10 +1972,14 @@ selection_statement:
     { $$=^$(ifthenelse_stmt($3,$5,skip_stmt(DUMMYLOC),LOC(@1,@5))); }
 | IF '(' expression ')' statement ELSE statement
     { $$=^$(ifthenelse_stmt($3,$5,$7,LOC(@1,@7))); }
+| IF error
+    { $$=^$(skip_stmt(LOC(@1,@2))); }
 /* Cyc: the body of the switch statement cannot be an arbitrary
  * statement; it must be a list of switch_clauses */
 | SWITCH '(' expression ')' '{' switch_clauses '}'
     { $$=^$(switch_stmt($3,$6,LOC(@1,@7))); }
+| SWITCH error
+    { $$=^$(skip_stmt(LOC(@1,@2))); }
 | SWITCH STRING  '(' expression ')' '{' switchC_clauses '}'
   { if(strcmp($2,"C") != 0)
      err("only switch \"C\" { ... } is allowed",LOC(@1,@8));
@@ -1951,6 +1987,8 @@ selection_statement:
   }
 | TRY statement CATCH '{' switch_clauses '}'
     { $$=^$(trycatch_stmt($2,$5,LOC(@1,@6))); }
+| TRY error
+    { $$=^$(skip_stmt(LOC(@1,@2))); }
 ;
 
 /* Cyc: unlike C, we only allow default or case statements within
@@ -1979,6 +2017,8 @@ switch_clauses:
                                        LOC(@1,@6)),$6)); }
 | CASE pattern AND_OP expression ':' block_item_list switch_clauses
     { $$=^$(new List(new Switch_clause($2,NULL,$4,$6,LOC(@1,@7)),$7)); }
+| CASE error ':' block_item_list
+   { $$=^$(NULL); }
 ;
 
 /* we leave the exps unevaluated so enum tags can be used, but we go ahead
@@ -2003,12 +2043,19 @@ switchC_clauses:
 						   NULL),
 				       LOC(@1,@5)),
 		    $5)); }
+| CASE error ':' block_item_list
+   { $$=^$(NULL); }
+;
 
 iteration_statement:
   WHILE '(' expression ')' statement
     { $$=^$(while_stmt($3,$5,LOC(@1,@5))); }
+| WHILE error
+    { $$=^$(skip_stmt(LOC(@1,@2))); }
 | DO statement WHILE '(' expression ')' ';'
     { $$=^$(do_stmt($2,$5,LOC(@1,@7))); }
+| DO error
+    { $$=^$(skip_stmt(LOC(@1,@2))); }
 | FOR '(' ';' ';' ')' statement
     { $$=^$(for_stmt(false_exp(DUMMYLOC),true_exp(DUMMYLOC),false_exp(DUMMYLOC),
 		     $6,LOC(@1,@6))); }
@@ -2057,6 +2104,8 @@ iteration_statement:
                            $8,LOC(@1,@8));
       $$=^$(flatten_declarations(decls,s));
     }
+| FOR error
+    { $$=^$(skip_stmt(LOC(@1,@2))); }
 | FORARRAY '(' declaration ';' expression ';' expression ')' statement
     { let vardecls = map(decl2vardecl,$3);
       $$=^$(forarray_stmt(vardecls,$5,$7,$9,LOC(@1,@9))); 
@@ -2350,6 +2399,8 @@ primary_expression:
     { $$=^$(string_exp($1,LOC(@1,@1))); }
 | '(' expression ')'
     { $$= $!2; }
+| '(' error ')'
+    { $$=^$(null_exp(LOC(@2,@2))); }
 /* Cyc: stop instantiation */
 | primary_expression LEFT_RIGHT
     { $$=^$(noinstantiate_exp($1, LOC(@1,@2)));}

@@ -826,7 +826,7 @@ i2,struct _tuple10*info);struct Cyc_Interface_I*Cyc_Interface_get_and_merge_list
 struct Cyc_Interface_I*(*get)(void*),struct Cyc_List_List*la,struct Cyc_List_List*
 linfo);struct Cyc_Interface_I*Cyc_Interface_parse(struct Cyc___cycFILE*);void Cyc_Interface_save(
 struct Cyc_Interface_I*,struct Cyc___cycFILE*);struct Cyc_Interface_I*Cyc_Interface_load(
-struct Cyc___cycFILE*);void Cyc_Lex_lex_init();int Cyc_Toc_warn_bounds_checks;
+struct Cyc___cycFILE*);void Cyc_Lex_lex_init(int use_cyclone_keywords);int Cyc_Toc_warn_bounds_checks;
 static int Cyc_pp_r=0;static int Cyc_noexpand_r=0;static int Cyc_noshake_r=0;static int
 Cyc_stop_after_cpp_r=0;static int Cyc_parseonly_r=0;static int Cyc_tc_r=0;static int
 Cyc_ic_r=0;static int Cyc_toc_r=0;static int Cyc_stop_after_objectfile_r=0;static int
@@ -993,8 +993,8 @@ _tagged_arr)stage_name);{void*_tmp56[1]={& _tmp58};Cyc_fprintf(Cyc_stderr,({cons
 char*_tmp57="%s completed.\n";_tag_arr(_tmp57,sizeof(char),_get_zero_arr_size(
 _tmp57,15));}),_tag_arr(_tmp56,sizeof(void*),1));}});Cyc_fflush((struct Cyc___cycFILE*)
 Cyc_stderr);return _tmp40;}}return _tmp40;}struct Cyc_List_List*Cyc_do_parse(struct
-Cyc___cycFILE*f,struct Cyc_List_List*ignore){Cyc_Lex_lex_init();{struct Cyc_List_List*
-_tmp5E=Cyc_Parse_parse_file(f);Cyc_Lex_lex_init();return _tmp5E;}}struct Cyc_List_List*
+Cyc___cycFILE*f,struct Cyc_List_List*ignore){Cyc_Lex_lex_init(1);{struct Cyc_List_List*
+_tmp5E=Cyc_Parse_parse_file(f);Cyc_Lex_lex_init(1);return _tmp5E;}}struct Cyc_List_List*
 Cyc_do_typecheck(struct Cyc_Tcenv_Tenv*te,struct Cyc_List_List*tds){Cyc_Tc_tc(te,1,
 tds);if(!Cyc_noshake_r)tds=Cyc_Tc_treeshake(te,tds);return tds;}struct Cyc_List_List*
 Cyc_do_cfcheck(int ignore,struct Cyc_List_List*tds){Cyc_NewControlFlow_cf_check(
