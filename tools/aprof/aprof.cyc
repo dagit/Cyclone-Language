@@ -61,6 +61,8 @@ static void usage(string_t<`H> argv0) __attribute__((noreturn)) {
           "         use <c> as a color in -svg instead of the defaults\n"
           "         Examples: black, rgb(148,208,84)\n"
           "         You must specify enough colors\n"
+          "  -bw\n"
+          "         print graph in black and white\n"
           "  -curve_stroke <s>\n"
           "         use <s> as the curve stroke in -svg\n"
           "         Examples: none (default), black\n"
@@ -70,6 +72,18 @@ static void usage(string_t<`H> argv0) __attribute__((noreturn)) {
           "  -gc_opacity <o>\n"
           "         use <o> as the opacity of the gc bars in -svg\n"
           "         Default is 0.5\n"
+          "  -gc-caps\n"
+          "         print extra caps on the gc bars\n"
+          "  -translate <x>,<y>\n"
+          "         translate svg output <x> to the right, <y> down\n"
+          "  -x-caption <s>\n"
+          "         use <s> as the x axis caption\n"
+          "  -x-caption-gap <h>\n"
+          "         place the x caption <h> units below the x axis\n"
+          "  -y-caption <s>\n"
+          "         use <s> as the y axis caption\n"
+          "  -y-caption-gap <w>\n"
+          "         place the x caption <w> units to the left of the y axis\n"
           "  -d X   show dynamic regions that are >= X (a fraction) of the total heap (def=%g)\n",
           argv0,
           dyn_threshhold);
@@ -110,6 +124,9 @@ int main(int argc, string_t<`H> ?`H argv) {
     else if ( strcmp( argv[argn], "-color" ) == 0 && argn+1 < argc ) {
       user_colors = new List::List(&argv[++argn],user_colors);
     }
+    else if ( strcmp( argv[argn], "-bw" ) == 0) {
+      black_and_white = true;
+    }
     else if ( strcmp( argv[argn], "-curve_stroke" ) == 0 && argn+1 < argc ) {
       curve_stroke = argv[++argn];
     }
@@ -118,6 +135,24 @@ int main(int argc, string_t<`H> ?`H argv) {
     }
     else if ( strcmp( argv[argn], "-gc_opacity" ) == 0 && argn+1 < argc ) {
       gc_opacity = argv[++argn];
+    }
+    else if ( strcmp( argv[argn], "-gc-caps" ) == 0) {
+      gc_caps = true;
+    }
+    else if ( strcmp( argv[argn], "-translate" ) == 0 && argn+1 < argc ) {
+      graph_translate = argv[++argn];
+    }
+    else if ( strcmp( argv[argn], "-x-caption" ) == 0 && argn+1 < argc ) {
+      x_caption = argv[++argn];
+    }
+    else if ( strcmp( argv[argn], "-x-caption-gap" ) == 0 && argn+1 < argc ) {
+      x_caption_gap = strtod(strdup(argv[++argn]),NULL);
+    }
+    else if ( strcmp( argv[argn], "-y-caption" ) == 0 && argn+1 < argc ) {
+      y_caption = argv[++argn];
+    }
+    else if ( strcmp( argv[argn], "-y-caption-gap" ) == 0 && argn+1 < argc ) {
+      y_caption_gap = strtod(strdup(argv[++argn]),NULL);
     }
     else if ( strcmp( argv[argn], "-svg" ) == 0 ) {
       do_svg = true;

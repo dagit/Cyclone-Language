@@ -37,6 +37,45 @@ using Fn;
 
 // #define DEBUG_ME
 
+const char ?graph_translate = NULL;
+double x_caption_gap = 50.0;
+double y_caption_gap = 50.0;
+const char ?x_caption;
+const char ?y_caption;
+bool black_and_white = false;
+bool gc_caps = false;
+
+static const char ?default_colors[] =
+//  {"red", "orange", "yellow", "green", "blue", "indigo", "violet" };
+  {
+    "rgb(148,208,84)",
+    "rgb(0,104,96)",
+    "rgb(0,101,0)",
+    "rgb(88,80,0)",
+    "rgb(0,67,58)",
+    "rgb(0,56,0)",
+    "rgb(0,0,208)"
+  };
+
+static const char ?bw_colors[] =
+  {
+    "rgb(50,50,50)",
+    "rgb(110,110,110)",
+    "rgb(170,170,170)",
+    "rgb(80,80,80)",
+    "rgb(140,140,140)",
+    "rgb(200,200,200)",
+    "rgb(20,20,20)"
+  };
+
+const char ??colors = default_colors;
+
+static const char ?color(unsigned int i) {
+  if (i < numelts(colors)) return colors[i];
+  fprintf(stderr,"aprof: ran out of colors (<%u)\n",i);
+  exit(1);
+}
+
 /* Dimensions of the graph on the printed page, in points (pt).
    The title, legend, etc., appear outside these dimensions. */
 double WIDTH = 300.0;
@@ -133,6 +172,7 @@ static int uint_hash(unsigned int i) {
 }
 static void
 init_globals() {
+  if (black_and_white) colors = bw_colors;
   allocation_at_address_table =
     Hashtable::create(101,uint_cmp,uint_hash);
   allocation_in_region_table =
@@ -478,26 +518,6 @@ static int curve_cmp(curve_t x, curve_t y) {
   else return 1;
 }
 
-static const char ?default_colors[] =
-//  {"red", "orange", "yellow", "green", "blue", "indigo", "violet" };
-  {
-    "rgb(148,208,84)",
-    "rgb(0,104,96)",
-    "rgb(0,101,0)",
-    "rgb(88,80,0)",
-    "rgb(0,67,58)",
-    "rgb(0,56,0)",
-    "rgb(0,0,208)"
-  };
-
-const char ??colors = default_colors;
-
-static const char ?color(unsigned int i) {
-  if (i < numelts(colors)) return colors[i];
-  fprintf(stderr,"aprof: ran out of colors (<%u)\n",i);
-  exit(1);
-}
-
 #define SEPARATION 15
 static void output_legend(list_t<$(const char ?,const char ?)@> items) {
   // items is a list of (name,color) pairs
@@ -536,7 +556,8 @@ static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t 
     printf("%d,%d ",x,yv[0][x]);
   }
   printf("%d,0 0,0 ",xres-1); // bottom border is x axis
-  printf("' stroke='%s' stroke-width='0.1' fill='%s' opacity='0.7'/>\n",curve_stroke,color(0));
+  printf("' stroke='%s' stroke-width='0.1' fill='%s' opacity='0.7'/>\n",
+         curve_stroke,color(0));
 
   // ... then the other curves, going up
   for (int i=1; i < num_curves; i++) {
@@ -561,6 +582,10 @@ static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t 
     printf("<rect x='%d' y='0' width='%d' height='%d'"
            " fill='%s' stroke='none' opacity='%s'/>\n",
            x1,x2-x1,max_y,gc_fill,gc_opacity);
+    if (gc_caps)
+      printf("<polygon points='%d,%d %d,%d %f,%f'"
+             " fill='black' stroke='none'/>\n",
+             x1,max_y,x2,max_y,((x2-x1)/2.0+x1),1.01*max_y);
   }
 
   printf("<!-- marks -->\n");
@@ -716,18 +741,8 @@ int generate_svg(string_t<`H> file) {
   double data_footprint =
     env->heap_live->area + env->unique_live->area
     + env->refcnt_live->area + env->other_live->area;
-  let title = "";
   const char ?CE = "clocks";
   if (use_events) CE = "events";
-  if (memory_footprint > 0.0)
-    title =
-      aprintf("Memory footprint %s*%s, data footprint %s*%s (%d%%)",
-              print_bytes(memory_footprint),CE,
-              print_bytes(data_footprint),CE,
-              (int)((data_footprint * 100.0)/memory_footprint));
-  else
-    /* With -nogc we don't get measurement of memory footprint */
-    title = aprintf("Data footprint %s*%s", print_bytes(data_footprint),CE);
 
   /* print the XML header */
   printf("<?xml version='1.0' encoding='ISO-8859-1'?>\n"
@@ -750,7 +765,10 @@ int generate_svg(string_t<`H> file) {
   printf("<svg xmlns='http://www.w3.org/2000/svg'\n"
          "     xmlns:xlink='http://www.w3.org/1999/xlink'>\n");
 
-  if (landscape) printf("<g transform='rotate(-90)'>\n");
+  if (landscape)
+    printf("<g transform='rotate(-90)'>\n");
+  if (graph_translate)
+    printf("<g transform='translate(%s)'>\n",graph_translate);
 
   /* print the curves and garbage collections */
   output_curves(xres,num_curves,max_y,zz);
@@ -784,11 +802,29 @@ int generate_svg(string_t<`H> file) {
   printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",
          WIDTH, HEIGHT+18, print_units(max_time,CE));
 
-  /* print the title of the graph */
-  printf("<!-- graph title -->\n");
+  printf("<!-- x axis caption -->\n");
+  if (!x_caption)
+    if (memory_footprint > 0.0)
+      x_caption =
+        aprintf("Memory footprint %s*%s, data footprint %s*%s (%d%%)",
+                print_bytes(memory_footprint),CE,
+                print_bytes(data_footprint),CE,
+                (int)((data_footprint * 100.0)/memory_footprint));
+    else
+      x_caption =
+        aprintf("Data footprint %s*%s", print_bytes(data_footprint),CE);
   printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",
-         WIDTH/2,HEIGHT+50,title);
+         WIDTH/2,HEIGHT+x_caption_gap,x_caption);
 
+  printf("<!-- y axis caption -->\n");
+  if (y_caption) {
+    printf("<g transform='translate(%f,%f) rotate(-90)'>\n",
+           -y_caption_gap,HEIGHT/2);
+    printf("<text x='0' y='0' text-anchor='middle'>%s</text>\n",y_caption);
+    printf("</g>\n");
+  }
+
+  if (graph_translate) printf("</g>\n");
   if (landscape) printf("</g>\n");
   printf("</svg>\n");
 
@@ -808,6 +844,11 @@ void try2() {
          "<svg xmlns='http://www.w3.org/2000/svg'\n"
          "     xmlns:xlink='http://www.w3.org/1999/xlink'>\n");
 
+  if (landscape)
+    printf("<g transform='rotate(-90)'>\n");
+  if (graph_translate)
+    printf("<g transform='translate(%s)'>\n",graph_translate);
+
   printf("<g transform='scale(0.005)'>\n");
   printf("<path d='M");
   for (int x=0; x <= 40000; x++) {
@@ -817,6 +858,8 @@ void try2() {
   printf("' stroke='none' fill='blue' opacity='0.7'/>\n");
 
   printf("</g>\n");
+  if (graph_translate) printf("</g>\n");
+  if (landscape) printf("</g>\n");
   printf("</svg>\n");
 }
 
@@ -854,6 +897,7 @@ static struct Xarray::Xarray<rect_t> *rects = NULL;
 
 static void
 init_globals2() {
+  if (black_and_white) colors = bw_colors;
   allocations_table =
     Hashtable::create(101,uint_cmp,uint_hash);
   regionaddresses_table =
@@ -1122,6 +1166,11 @@ int generate_svg2(string_t<`H> file) {
   printf("<svg xmlns='http://www.w3.org/2000/svg'\n"
          "     xmlns:xlink='http://www.w3.org/1999/xlink'>\n");
 
+  if (landscape)
+    printf("<g transform='rotate(-90)'>\n");
+  if (graph_translate)
+    printf("<g transform='translate(%s)'>\n",graph_translate);
+
   unsigned int visible_height = max_y - min_y;
   unsigned int visible_width = max_x - min_x;
   double xscale = 1.0;
@@ -1192,10 +1241,23 @@ int generate_svg2(string_t<`H> file) {
   output_legend(color_map);
   printf("</g>\n");
 
-  /* print the title of the graph */
-  let title = "Memory usage, time x address";
+  printf("<!-- x axis caption -->\n");
+  if (!x_caption)
+    x_caption = "Memory usage, time x address";
   printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",
-         WIDTH/2,HEIGHT+20,title);
+         WIDTH/2,HEIGHT+x_caption_gap,x_caption);
+
+  printf("<!-- y axis caption -->\n");
+  if (y_caption) {
+    printf("<g transform='translate(%f,%f) rotate(-90)'>\n",
+           -y_caption_gap,HEIGHT/2);
+    printf("<text x='0' y='0' text-anchor='middle'>%s</text>\n",y_caption);
+    printf("</g>\n");
+  }
+
+
+  if (graph_translate) printf("</g>\n");
+  if (landscape) printf("</g>\n");
   printf("</svg>\n");
 
   return 0;
@@ -1218,6 +1280,7 @@ static struct Hashtable::Table<unsigned int,unsigned int> *
 
 static void
 init_globals3() {
+  if (black_and_white) colors = bw_colors;
   starttimes_table =
     Hashtable::create(101,uint_cmp,uint_hash);
   lifetimes_table =
@@ -1382,9 +1445,8 @@ int generate_svg3(string_t<`H> file) {
          "<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.0//EN'\n"
          " 'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>\n");
 
-  let title = "Number of objects with a given lifetime";
   output_comment("Allocation lifetime profile produced by aprof");
-  output_comment(title);
+  output_comment("Number of objects with a given lifetime");
   output_comment(aprintf("cumulative_lcount = %u",cumulative_lcount));
   output_comment(aprintf("cumulative_lifetime = %u",cumulative_lifetime));
   output_comment(aprintf("max_lifetime = %u",max_lifetime));
@@ -1393,6 +1455,11 @@ int generate_svg3(string_t<`H> file) {
   /* start of svg stuff */
   printf("<svg xmlns='http://www.w3.org/2000/svg'\n"
          "     xmlns:xlink='http://www.w3.org/1999/xlink'>\n");
+
+  if (landscape)
+    printf("<g transform='rotate(-90)'>\n");
+  if (graph_translate)
+    printf("<g transform='translate(%s)'>\n",graph_translate);
 
   double xscale = (double)WIDTH/(double)(max_lifetime+1);
   double yscale = 1.0;
@@ -1430,9 +1497,22 @@ int generate_svg3(string_t<`H> file) {
   printf("<text x='%f' y='%f' text-anchor='middle'>%d %s</text>\n",
          WIDTH, HEIGHT+18, max_lifetime, CE);
 
-  printf("<!-- title -->\n");
+  printf("<!-- x axis caption -->\n");
+  if (!x_caption)
+    x_caption = "Number of objects with a given lifetime";
   printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",
-         WIDTH/2, HEIGHT+30, title);
+         WIDTH/2,HEIGHT+x_caption_gap,x_caption);
+
+  printf("<!-- y axis caption -->\n");
+  if (y_caption) {
+    printf("<g transform='translate(%f,%f) rotate(-90)'>\n",
+           -y_caption_gap,HEIGHT/2);
+    printf("<text x='0' y='0' text-anchor='middle'>%s</text>\n",y_caption);
+    printf("</g>\n");
+  }
+
+  if (graph_translate) printf("</g>\n");
+  if (landscape) printf("</g>\n");
   printf("</svg>\n");
 
   return 0;

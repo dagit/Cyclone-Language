@@ -184,6 +184,13 @@ extern const char ??colors;
 extern const char ?curve_stroke;
 extern const char ?gc_fill;
 extern const char ?gc_opacity;
+extern const char ?graph_translate;
+extern double x_caption_gap;
+extern double y_caption_gap;
+extern const char ?x_caption;
+extern const char ?y_caption;
+extern bool black_and_white;
+extern bool gc_caps;
 
 
 #endif
