@@ -38,7 +38,7 @@ mstring_t contents(T b) {
 }
 
 size_t length (T b) {
-  return b->position;
+  return (size_t)b->position;
 }
 
 void clear (T b) {

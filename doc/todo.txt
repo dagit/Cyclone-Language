@@ -153,6 +153,9 @@ THINGS NEEDED TO SIMPLIFY PORTING:
 
 * better evaluation in evexp.pop
 
+* remove cyc_include.h's dependency on setjmp.h, since that really
+  pollutes the namespace
+
 THINGS NEEDED TO MAKE REGIONS MORE REAL:
 ----------------------------------------
 
