@@ -33,17 +33,21 @@ typedef enum DistanceInfo {
 
 typedef struct Distance {
   struct Distance *next;  // ptr to next entry in sparse matrix
-  term_t t1;
-  term_t t2;
+  term_t target;
   distance_info_t dinfo;  // whether unsigned_dist or signed_dist are valid.
   int    unsigned_dist;
   int    signed_dist;
 } *distance_t;
 
+typedef struct Row {
+  struct Row *next;
+  term_t source;
+  distance_t distance;
+} *row_t;
+
 typedef struct Graph {
   struct Graph *next;    // ptr to next graph in disjunction
-  list_t<term_t> nodes;
-  distance_t distance;
+  row_t rows;
 } graph_t;
 
 // print out a set of graphs
@@ -51,21 +55,25 @@ static void print_graphs(graph_t* gs) {
   fprintf(stderr,"Graphs:\n");
   for (; gs != NULL; gs = gs->next) {
     fprintf(stderr,"\t{");
-    for (let ds = gs->distance; ds != NULL; ds = ds->next) {
-      if (ds->dinfo == Both_valid) {
-        fprintf(stderr,"%s - %s U<= %d, %s - %s S<= %d",term2string(ds->t1),
-                term2string(ds->t2),ds->unsigned_dist,term2string(ds->t1),
-                term2string(ds->t2),ds->signed_dist);
-      } else if (ds->dinfo == Signed_valid) {
-        fprintf(stderr,"%s - %s S<= %d",term2string(ds->t1),
-                term2string(ds->t2),ds->signed_dist);
-      } else {
-        fprintf(stderr,"%s - %s U<= %d",term2string(ds->t1),
-                term2string(ds->t2),ds->unsigned_dist);
+    for (let ns = gs->rows; ns != NULL; ns = ns->next) {
+      let t1 = ns->source;
+      for (let ds = ns->distance; ds != NULL; ds = ds->next) {
+        let t2 = ds->target;
+        if (ds->dinfo == Both_valid) {
+          fprintf(stderr,"%s - %s U<= %d, %s - %s S<= %d",term2string(t1),
+                  term2string(t2),ds->unsigned_dist,term2string(t1),
+                  term2string(t2),ds->signed_dist);
+        } else if (ds->dinfo == Signed_valid) {
+          fprintf(stderr,"%s - %s S<= %d",term2string(t1),
+                  term2string(t2),ds->signed_dist);
+        } else {
+          fprintf(stderr,"%s - %s U<= %d",term2string(t1),
+                  term2string(t2),ds->unsigned_dist);
+        }
+        if (ds->next != NULL) fprintf(stderr,",");
       }
-      if (ds->next != NULL) fprintf(stderr,",");
+      fprintf(stderr,"}\n");
     }
-    fprintf(stderr,"}\n");
   }
 }
 
@@ -79,7 +87,7 @@ static unsigned int num_graphs(graph_t *`H gs) {
 
 // represents "true" -- a singleton graph with no edges (everything
 // is infinitely far apart.)
-static graph_t @true_graph() { return new Graph{NULL,NULL,NULL};}
+static graph_t @true_graph() { return new Graph{NULL,NULL};}
 
 // used in copying of graphs
 static distance_t copy_distance(distance_t ds) {
@@ -92,16 +100,26 @@ static distance_t copy_distance(distance_t ds) {
   return res;
 }
 
-// copies a whole set of graphs -- used when we have a disjunction
-static graph_t *copy_graph(graph_t * g) {
-  graph_t *res = NULL;
-  for (; g != NULL; g = g->next) {
-    res = new Graph{res,g->nodes,copy_distance(g->distance)};
+static row_t copy_rows(row_t ns) {
+  row_t res = NULL;
+  for (; ns != NULL; ns = ns->next) {
+    let newns = new *ns;
+    newns->next = res;
+    res = newns;
   }
   return res;
 }
 
-// appends to sets of graphs -- could be smarter and try to remove
+// copies a whole set of graphs -- used when we have a disjunction
+static graph_t *copy_graph(graph_t * g) {
+  graph_t *res = NULL;
+  for (; g != NULL; g = g->next) {
+    res = new Graph{res,copy_rows(g->rows)};
+  }
+  return res;
+}
+
+// appends two sets of graphs -- could be smarter and try to remove
 // duplicates...
 static graph_t *graph_append(graph_t *`H g1, graph_t *`H g2) {
   if (g1 == NULL) return g2;
@@ -112,49 +130,63 @@ static graph_t *graph_append(graph_t *`H g1, graph_t *`H g2) {
   return g1;
 }
 
-// add a node to a single graph if not already present
+// add a row to a single graph if not already present
 static void add_node(graph_t @g, term_t n) {
-  if (!List::mem(cmp_term,g->nodes,n))
-    g->nodes = new List{n,g->nodes};
+  for (let ns = g->rows; ns != NULL; ns = ns->next) {
+    if (cmp_term(ns->source,n) == 0) return;
+  }
+  g->rows = new Row{g->rows,n,NULL};
 }
 
-// lookup the distance between two nodes in the graph -- returns NULL
-// if the distance is infinite.
-static int* lookup_distance(graph_t @g, bool is_signed, term_t i, term_t j) {
-  static int zero = 0;
-  if (cmp_term(i,j) == 0) return &zero; // same term always at distance 0
-  for (let ds = g->distance; ds != NULL; ds = ds->next) {
-    if (cmp_term(i,ds->t1) == 0 && cmp_term(j,ds->t2) == 0) {
-      if (is_signed && (ds->dinfo & Signed_valid))
-        return &ds->signed_dist;
-      else if (!is_signed && (ds->dinfo & Unsigned_valid))
-        return &ds->unsigned_dist;
-      else
-        return NULL;
-    }
-  }
+static row_t lookup_row(graph_t @g, term_t i) {
+  for (let ns = g->rows; ns != NULL; ns = ns->next)
+    if (cmp_term(i,ns->source) == 0) return ns;
   return NULL;
 }
 
-// Assumes the signed or unsigned edge is not already in the graph.
+static distance_t lookup_col(row_t n, term_t j) {
+  for (let ds = n->distance; ds != NULL; ds = ds->next)
+    if (cmp_term(j,ds->target) == 0) return ds;
+  return NULL;
+}
+
+// lookup the distance between i and j in the row -- returns NULL
+// if the distance is infinite.
+static int* lookup_distance(row_t i, bool is_signed, term_t j) {
+  static int zero = 0;
+  if (cmp_term(i->source,j) == 0) 
+    return &zero; // same term always at distance 0
+  let ds = lookup_col(i,j);
+  if (ds != NULL) {
+    if (is_signed && (ds->dinfo & Signed_valid))
+      return &ds->signed_dist;
+    else if (!is_signed && (ds->dinfo & Unsigned_valid))
+      return &ds->unsigned_dist;
+    else
+      return NULL;
+  } else 
+    return NULL;
+}
+
+// Assumes the signed or unsigned edge is not already in the graph,
+// but that the nodes are already added in the graph.
 // Inserts the edge as appropriate.  Must look through the Distance
 // list to see if there's already an entry for i and j and update
 // it instead of adding a new Distance node.
-static void insert_distance(graph_t @g, bool is_signed, term_t i, term_t j, int dist) {
-  if (cmp_term(i,j) == 0) return; // same term always at distance 0
-  for (let ds = g->distance; ds != NULL; ds = ds->next) {
-    if (cmp_term(i,ds->t1) == 0 && cmp_term(j,ds->t2) == 0) {
-      if (is_signed) { 
-        ds->dinfo |= Signed_valid;
-        ds->signed_dist = dist;
-      } else {
-        ds->dinfo |= Unsigned_valid;
-        ds->unsigned_dist = dist;
-      }
-      return;
+static void insert_distance(row_t i, bool is_signed, term_t j, int dist) {
+  if (cmp_term(i->source,j) == 0) return; // same term always at distance 0
+  let ds = lookup_col(i,j);
+  if (ds != NULL) {
+    if (is_signed) { 
+      ds->dinfo |= Signed_valid;
+      ds->signed_dist = dist;
+    } else {
+      ds->dinfo |= Unsigned_valid;
+      ds->unsigned_dist = dist;
     }
+    return;
   }
-  g->distance = new Distance{g->distance,i,j,is_signed ? Signed_valid : Unsigned_valid,dist,dist};
+  i->distance = new Distance{i->distance,j,is_signed ? Signed_valid : Unsigned_valid,dist,dist};
 }
 
 // FIX: 32-bit dependency!
@@ -172,11 +204,11 @@ static void insert_distance(graph_t @g, bool is_signed, term_t i, term_t j, int 
 static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist){
   add_node(g,i);
   add_node(g,j);
-  int* ij_dist = lookup_distance(g,is_signed,i,j);
+  int* ij_dist = lookup_distance(lookup_row(g,i),is_signed,j);
   // if we already have a shorter path, then this constraint is redundant
   if (ij_dist != NULL && *ij_dist < dist) 
     return true;
-  int* ji_dist = lookup_distance(g,is_signed,j,i);
+  int* ji_dist = lookup_distance(lookup_row(g,j),is_signed,i);
   // if  j -n-> i -dist-> j  and n+dist is negative, we have a contradiction.
   // FIX -- distance could overflow
   if (ji_dist != NULL){
@@ -200,15 +232,16 @@ static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist){
   }
 
   // update shortest path for each pair of nodes
-  for (let ks = g->nodes; ks != NULL; ks = ks->tl) {
-    let k = ks->hd;
-    let ki_dist = lookup_distance(g,is_signed,k,i);
+  let jrow = lookup_row(g,j);
+  for (let ks = g->rows; ks != NULL; ks = ks->next) {
+    let k = ks->source;
+    let ki_dist = lookup_distance(ks,is_signed,i);
     if (ki_dist == NULL) continue;
-    for (let ls = g->nodes; ls != NULL; ls = ls->tl) {
-      let l = ls->hd;
-      let jl_dist = lookup_distance(g,is_signed,j,l);
+    for (let ls = g->rows; ls != NULL; ls = ls->next) {
+      let l = ls->source;
+      let jl_dist = lookup_distance(jrow,is_signed,l);
       if (jl_dist != NULL) {
-        let kl_dist = lookup_distance(g,is_signed,k,l);
+        let kl_dist = lookup_distance(ks,is_signed,l);
         // FIX -- distance could overflow
 	int sum1, sum2;
 	if(*ki_dist ^ dist >> 31){
@@ -247,7 +280,7 @@ static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist){
         if (kl_dist == NULL && !overflow) {
 	  //when distance is too big to be represented by int,
 	  //just throw out the edge.
-          insert_distance(g,is_signed,k,l,new_dist);
+          insert_distance(ks,is_signed,l,new_dist);
         } else if (*kl_dist > new_dist && !overflow) {
 	  //when the distance is too small to be represented by int,
 	  //it 's actually sound to replace it with an edge with
@@ -354,7 +387,7 @@ datatype exn { TooLarge };
 datatype exn.TooLarge too_large = TooLarge;
 
 //FIX: add a way for the user to control this.
-unsigned int max_paths = 33;
+unsigned int max_paths = 65;
 unsigned int max_paths_seen = 0;
 
 // given a set of graphs gs representing A1 or A2 or ... or An
