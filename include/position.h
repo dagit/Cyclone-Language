@@ -60,6 +60,7 @@ namespace Position {
   //////// Error Reporting ///////////
   extern xtunion exn {extern Nocontext};
   extern bool print_context;
+  extern int num_errors;
   extern int max_errors;
   extern void post_error(error_t);
   extern bool error_p();

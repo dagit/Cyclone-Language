@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-openbsd2.8/lib/execinfo.c
 *** i686-unknown-linux/lib/execinfo.c	Fri Nov  9 06:28:46 2001
---- i386-unknown-openbsd2.8/lib/execinfo.c	Sat Nov 10 16:16:28 2001
+--- i386-unknown-openbsd2.8/lib/execinfo.c	Sat Nov 10 18:19:28 2001
 ***************
 *** 242,361 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
@@ -165,7 +165,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-openbsd
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-openbsd2.8/lib/getopt.c
 *** i686-unknown-linux/lib/getopt.c	Fri Nov  9 06:28:46 2001
---- i386-unknown-openbsd2.8/lib/getopt.c	Sat Nov 10 16:16:28 2001
+--- i386-unknown-openbsd2.8/lib/getopt.c	Sat Nov 10 18:19:28 2001
 ***************
 *** 271,327 ****
   __fd); extern struct _tagged_arr Cyc_Std_getenv( struct _tagged_arr); struct Cyc_Std_timeval{
@@ -281,7 +281,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-openbsd2.
   len; i ++){ tem=*(( struct _tagged_arr*) _check_unknown_subscript( argv, sizeof(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c i386-unknown-openbsd2.8/lib/in.c
 *** i686-unknown-linux/lib/in.c	Fri Nov  9 06:28:46 2001
---- i386-unknown-openbsd2.8/lib/in.c	Sat Nov 10 16:16:28 2001
+--- i386-unknown-openbsd2.8/lib/in.c	Sat Nov 10 18:19:29 2001
 ***************
 *** 243,267 ****
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
@@ -333,7 +333,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c i386-unknown-openbsd2.8/li
   sin_addr; unsigned char sin_zero[ 8u]; } ; extern unsigned int htonl(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c i386-unknown-openbsd2.8/lib/inet.c
 *** i686-unknown-linux/lib/inet.c	Fri Nov  9 06:28:46 2001
---- i386-unknown-openbsd2.8/lib/inet.c	Sat Nov 10 16:16:28 2001
+--- i386-unknown-openbsd2.8/lib/inet.c	Sat Nov 10 18:19:29 2001
 ***************
 *** 243,267 ****
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
@@ -385,7 +385,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c i386-unknown-openbsd2.8/
   sin_addr; unsigned char sin_zero[ 8u]; } ; extern unsigned int htonl(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c i386-unknown-openbsd2.8/lib/netdb.c
 *** i686-unknown-linux/lib/netdb.c	Fri Nov  9 06:28:46 2001
---- i386-unknown-openbsd2.8/lib/netdb.c	Sat Nov 10 16:16:28 2001
+--- i386-unknown-openbsd2.8/lib/netdb.c	Sat Nov 10 18:19:29 2001
 ***************
 *** 243,267 ****
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
@@ -437,7 +437,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c i386-unknown-openbsd2.8
   sin_addr; unsigned char sin_zero[ 8u]; } ; extern unsigned int htonl(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c i386-unknown-openbsd2.8/lib/socket.c
 *** i686-unknown-linux/lib/socket.c	Fri Nov  9 06:28:46 2001
---- i386-unknown-openbsd2.8/lib/socket.c	Sat Nov 10 16:16:28 2001
+--- i386-unknown-openbsd2.8/lib/socket.c	Sat Nov 10 18:19:29 2001
 ***************
 *** 243,276 ****
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
@@ -506,7 +506,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c i386-unknown-openbsd2.
   int optname, struct _tagged_arr); struct Cyc_Std_in_addr{ unsigned int s_addr; }
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-openbsd2.8/lib/stat.c
 *** i686-unknown-linux/lib/stat.c	Wed Nov  7 10:41:10 2001
---- i386-unknown-openbsd2.8/lib/stat.c	Sat Nov 10 16:16:28 2001
+--- i386-unknown-openbsd2.8/lib/stat.c	Sat Nov 10 18:19:29 2001
 ***************
 *** 245,256 ****
   tm_wday; int tm_yday; int tm_isdst; } ; extern void tzset(); extern int time(
@@ -534,7 +534,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-openbsd2.8/
   filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c i386-unknown-openbsd2.8/lib/time.c
 *** i686-unknown-linux/lib/time.c	Fri Nov  9 06:28:46 2001
---- i386-unknown-openbsd2.8/lib/time.c	Sat Nov 10 16:16:29 2001
+--- i386-unknown-openbsd2.8/lib/time.c	Sat Nov 10 18:19:29 2001
 ***************
 *** 253,280 ****
   struct _tagged_arr); extern int timezone; extern int daylight; struct Cyc_Std_timeval{
@@ -592,7 +592,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c i386-unknown-openbsd2.8/
   _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp1=( struct Cyc_Core_Invalid_argument_struct*)
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c i386-unknown-openbsd2.8/lib/unistd.c
 *** i686-unknown-linux/lib/unistd.c	Fri Nov  9 06:28:46 2001
---- i386-unknown-openbsd2.8/lib/unistd.c	Sat Nov 10 16:16:29 2001
+--- i386-unknown-openbsd2.8/lib/unistd.c	Sat Nov 10 18:19:29 2001
 ***************
 *** 243,267 ****
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
@@ -643,7 +643,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c i386-unknown-openbsd2.
   _tagged_arr path, struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execlp(
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c i386-unknown-openbsd2.8/src/buildlib.c
 *** i686-unknown-linux/src/buildlib.c	Sat Nov 10 16:10:10 2001
---- i386-unknown-openbsd2.8/src/buildlib.c	Sat Nov 10 16:16:29 2001
+--- i386-unknown-openbsd2.8/src/buildlib.c	Sat Nov 10 18:19:29 2001
 ***************
 *** 331,418 ****
   tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*

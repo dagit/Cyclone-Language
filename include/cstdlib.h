@@ -133,6 +133,6 @@ extern int system(string_t);
 
 /* This doesn't do anything: it's just here so that we don't have to erase existing free's in C code */
 /* Maybe there should be a warning if you actually use this. */
-extern void free(`a*);
+extern void free(`a::A *);
 }
 #endif

@@ -54,6 +54,7 @@ const char ? failure_reason = NULL;
 // occurred -- this augments the high-level information with
 // low-level specific details.
 void explain_failure() {
+  if(Position::num_errors >= Position::max_errors) return;
   fflush(stderr);
   string_t s1 = typ2string(t1_failure);
   string_t s2 = typ2string(t2_failure);
