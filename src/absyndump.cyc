@@ -448,7 +448,7 @@ void dumpntyp(type_t t) {
     dump("%"); 
     if (k == NULL) dump("?"); else dumpkind(k->v); 
     dump(aprintf("(%d)",i)); return;
-  case &Evar(k,&Opt(t),i,_): dumpntyp(t); return; // shouldn't happen!
+  case &Evar(k,t,i,_): dumpntyp((type_t)t); return; // shouldn't happen!
   case &DatatypeType(DatatypeInfo(tu_info,ts)):
     switch(tu_info) {
     case {.UnknownDatatype = UnknownDatatypeInfo(n,is_x)}: fallthru(n,is_x);
@@ -537,10 +537,10 @@ void dumpntyp(type_t t) {
   }
 }
 
-void dumpvaropt(opt_t<var_t> vo) {
-  if(vo != NULL) dump_str(vo->v);
+void dumpvaropt(var_opt_t vo) {
+  if(vo != NULL) dump_str((var_t)vo);
 }
-void dumpfunarg($(opt_t<var_t>,tqual_t,type_t)@ t) {
+void dumpfunarg($(var_opt_t,tqual_t,type_t)@ t) {
   dumptqtd((*t)[1],(*t)[2],dumpvaropt,(*t)[0]);
 }
 void dump_rgncmp($(type_t,type_t)@ cmp) {
@@ -550,8 +550,8 @@ void dump_rgncmp($(type_t,type_t)@ cmp) {
 void dump_rgnpo(list_t<$(type_t,type_t)@> rgn_po) {
   dump_sep(dump_rgncmp,rgn_po,",");
 }
-void dumpfunargs(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, bool c_varargs, 
-                 vararg_info_t *cyc_varargs, opt_t<type_t> effopt,
+void dumpfunargs(list_t<$(var_opt_t,tqual_t,type_t)@> args, bool c_varargs, 
+                 vararg_info_t *cyc_varargs, type_opt_t effopt,
                  list_t<$(type_t,type_t)@> rgn_po) {
   dump_char('(');
   for (; args != NULL; args = args->tl) {
@@ -568,7 +568,7 @@ void dumpfunargs(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, bool c_varargs,
   }
   if (effopt != NULL) {
     dump_semi();
-    dumpeff(effopt->v);
+    dumpeff(effopt);
   }
   if (rgn_po != NULL) {
     dump_char(':');
@@ -621,7 +621,6 @@ void dumpexp_prec(int inprec, exp_t e) {
     dump("L\""); dump_nospace(s); dump_char('"');
     break;
 
-  case &UnknownId_e(x): fallthru(x);
   case &Var_e(x,_):     dumpqvar(x); break;
 
   case &Primop_e(p,es):
@@ -681,8 +680,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     dump_char(')');
     break;
 
-  case &UnknownCall_e(e1,es): fallthru(e1,es);
-  case &FnCall_e(e1,es,_):
+  case &FnCall_e(e1,es,...):
     dumpexp_prec(myprec,e1);
     dump_nospace("(");
     dumpexps_prec(20,es);
@@ -1262,7 +1260,7 @@ void dumpdecl(decl_t d) {
       if (td->defn == NULL) 
         t = new_evar(td->kind,NULL);
       else 
-        t = td->defn->v;
+        t = (type_t)td->defn;
       dumptqtd(td->tq,t,dumptypedefname,td);
       dumpatts(td->atts);
       dump_semi();

@@ -80,7 +80,7 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
     te2 = new_outlives_constraints(r,te2,bds,loc);
     if(new_block)
       te2 = Tcenv::new_block(r,loc,te2);
-    let ropt = new Opt(Tcenv::curr_rgn(te2));
+    let ropt = Tcenv::curr_rgn(te2);
     for(let vs2 = vs; vs2 != NULL; vs2 = vs2->tl) {
       te2 = add_pat_var(r,loc, te2, vs2->hd);
       vs2->hd->rgn = ropt;
@@ -184,7 +184,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       tcExp(te,&t,e);
       if (!coerce_arg(te,e,t,&bogus)) {
         terr(s0->loc, "returns value of type %s but requires %s",
-             typ2string(e->topt->v), typ2string(t));
+             typ2string((type_t)e->topt), typ2string(t));
         explain_failure();
       }
       TEMP_RGN(te, temp) {
@@ -267,7 +267,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       if(!coerce_arg(te,es->hd,ts->hd,&bogus)) {
 	terr(s0->loc, "fallthru argument has type %s "
              "but pattern variable has type %s",
-             typ2string(es->hd->topt->v), typ2string(ts->hd));
+             typ2string((type_t)es->hd->topt), typ2string(ts->hd));
         explain_failure();
       }
       TEMP_RGN(te, temp) {
@@ -298,7 +298,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
   case &Switch_s(e,scs0):
     tcExp(te,NULL,e);
-    let t = e->topt->v;
+    let t = (type_t)e->topt;
     // type-check the cases in reverse order, a fallthru therefore transfers
     // control to the case most recently type-checked. For the last case,
     // fallthru is not allowed.
@@ -312,9 +312,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         let pat_res = tcPat(te,p,&t);
         let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
           : (*pat_res.tvars_and_bounds_opt)[0];
-        if (!unify(p->topt->v,t)) { // allow silent_castable?
+        if (!unify((type_t)p->topt,t)) { // allow silent_castable?
           terr(scs->hd->loc, "switch on type %s, but case expects type %s",
-               typ2string(t), typ2string(p->topt->v));
+               typ2string(t), typ2string((type_t)p->topt));
           explain_failure();
         }
         else
@@ -356,9 +356,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         let pat_res = tcPat(te,p,&exception_type);
         let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
           : (*pat_res.tvars_and_bounds_opt)[0];
-        if (!unify(p->topt->v,exception_type))
+        if (!unify((type_t)p->topt,exception_type))
           terr(scs->hd->loc, "expected datatype exn but found %s",
-               typ2string(p->topt->v));
+               typ2string((type_t)p->topt));
         else
           check_pat_regions(te,p);
         scs->hd->pat_vars = new Opt(pat_res.patvars);
@@ -400,7 +400,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         case Public: is_local = true; break;
         }
         // side effect
-        *rgn_ptr = is_local ? new Opt(curr_bl) : new Opt(&HeapRgn_val); 
+        *rgn_ptr = is_local ? curr_bl : &HeapRgn_val; 
         switch (nsl) {
         case {.Loc_n = _}: break;
         case {.Rel_n = NULL}:
@@ -458,7 +458,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           if (!coerce_assign(te2,(exp_t)initializer,t)) {
             let varstr = *x;
             let tstr = typ2string(t);
-            let estr = typ2string(initializer->topt->v);
+            let estr = typ2string((type_t)initializer->topt);
             if (numelts(varstr) + numelts(tstr) + numelts(estr) + 50 < 80)
               terr(d->loc, "%s declared with type %s but initialized "
                    "with type %s.",varstr, tstr, estr);                   
@@ -469,7 +469,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
             else 
               terr(d->loc, "%s declared with type \n%s\n but initialized "
                    "with type \n%s.",varstr, tstr, estr);
-            unify(t,initializer->topt->v);
+            unify(t,(type_t)initializer->topt);
             explain_failure();
           }
         }
@@ -479,13 +479,14 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       case &Let_d(p,*vds,e):
         tcExpInitializer(te,NULL,e);
         //FIX: can pass region if e an lvalue
-        let pat_res = tcPat(te,p,&e->topt->v);
+        type_t pat_type = (type_t)e->topt;
+        let pat_res = tcPat(te,p,&pat_type);
         *vds = new Opt(pat_res.patvars);
-        if (!unify(p->topt->v,e->topt->v)
-            && !coerce_assign(te,e,p->topt->v)) {
+        if (!unify((type_t)p->topt,(type_t)e->topt)
+            && !coerce_assign(te,e,(type_t)p->topt)) {
           terr(d->loc,"pattern type %s does not match definition type %s",
-               typ2string(p->topt->v),typ2string(e->topt->v));
-          unify(p->topt->v,e->topt->v);
+               typ2string((type_t)p->topt),typ2string((type_t)e->topt));
+          unify((type_t)p->topt,(type_t)e->topt);
           explain_failure();
         }
         else
@@ -500,7 +501,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         for (; vds != NULL; vds = vds->tl) {
           let vd = vds->hd;
           let &Vardecl(_,&$(nsl,_),_,t,_,*rgn_ptr,_,_) = vd;
-          *rgn_ptr = new Opt(curr_bl); // side effect
+          *rgn_ptr = curr_bl; // side effect
           switch (nsl) {
           case {.Loc_n = _}: break;
           case {.Rel_n = NULL}:
@@ -525,7 +526,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         let te2 = te;
         let &Vardecl(_,_,_,*t,_,*rgn_ptr,_,_) = vd;
         let curr_bl = Tcenv::curr_rgn(te);
-        *rgn_ptr = new Opt(curr_bl); // side effect
+        *rgn_ptr = curr_bl; // side effect
         type_t rgn_typ;
         if (open_opt != NULL) {
           exp_t open_exp = (exp_t)open_opt;
@@ -537,7 +538,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           if (!unify(tcExp(te,&expected,open_exp), expected)) {
             terr(open_exp->loc,"expecting %s but found %s",
                  typ2string(expected),
-                 typ2string(open_exp->topt->v));
+                 typ2string((type_t)open_exp->topt));
           }
           // check that we have access to rgn2
           check_rgn_accessible(te,open_exp->loc,rgn2_typ);
@@ -571,16 +572,16 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           tcExpInitializer(te2,NULL,e);
 
           // can only alias pointer types
-          if (!is_pointer_type(e->topt->v)) {
+          if (!is_pointer_type((type_t)e->topt)) {
             terr(e->loc,"%s is not a pointer type",
-                 Absynpp::typ2string(e->topt->v));
+                 Absynpp::typ2string((type_t)e->topt));
             return;
           }
 
           // create the local variable
-          vd->type = copy_type(e->topt->v);
+          vd->type = copy_type((type_t)e->topt);
           check_type(e->loc,te,lookup_type_vars(te2),&mk,true,vd->type);
-          vd->rgn = new Opt(Tcenv::curr_rgn(te2));
+          vd->rgn = Tcenv::curr_rgn(te2);
           te2 = add_local_var(r,s0->loc, te2, vd);
           te2 = set_encloser(r,te2,s); // for substatements inside of s
 
@@ -618,7 +619,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         vardecl_t vd = new Vardecl {fd->sc, fd->name, const_tqual(0), 
                                     at_typ(t,curr_bl,empty_tqual(0), 
                                            false_conref),
-                                    NULL, new Opt(curr_bl), NULL, false};
+                                    NULL, curr_bl, NULL, false};
         fd->fn_vardecl = vd;
         te = add_local_var(decl_rgn,d->loc,te,vd);
         fenv_t old_fenv = (fenv_t)te->le;
@@ -651,7 +652,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     type_t rgn_type = new_evar(&rko,lookup_opt_type_vars(te));
     type_t etype = new RgnHandleType(rgn_type);
     if (!unify(tcExp(te,&etype,e),etype))
-      terr(e->loc, "expecting region_t but found %s", typ2string(e->topt->v));
+      terr(e->loc, "expecting region_t but found %s", typ2string((type_t)e->topt));
     // check that `r is resetable
     check_rgn_resetable(te,s0->loc,rgn_type);
     return;

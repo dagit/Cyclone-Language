@@ -609,7 +609,8 @@ tenv_t<`g,`r> add_local_var(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te, vardec
   let &Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
               capability,curr_rgn,in_notreadctxt,lhs,_} =
     get_fenv(te,"add_local_var");
-  let new_locals = rnew(r) Bindings{v,new Local_b(vd),(bnds_t<`r>)locals};
+  let b = new Local_b(vd);
+  let new_locals = rnew(r) Bindings{v,b,(bnds_t<`r>)locals};
   let fe = rnew(r) Fenv(shared,type_vars,region_order,new_locals,
                         encloser,ctrl_env,capability,curr_rgn,in_notreadctxt,
                         lhs,r);
@@ -679,7 +680,8 @@ tenv_t<`g,`r> add_pat_var(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te,
   let &Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
               capability,curr_rgn,in_notreadctxt,lhs,_} =
     get_fenv(te,"add_pat_var");
-  let new_locals = rnew(r) Bindings{v,new Pat_b(vd),(bnds_t<`r>)locals};
+  let b = new Pat_b(vd);
+  let new_locals = rnew(r) Bindings{v,b,(bnds_t<`r>)locals};
   let fe = rnew(r) Fenv(shared,type_vars,region_order,new_locals,
                         encloser,ctrl_env,capability,curr_rgn,in_notreadctxt,
                         lhs,r);
@@ -696,8 +698,9 @@ resolved_t<`r> lookup_ordinary(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q) {
   case {.Rel_n = NULL} && le != NULL:
     let &Fenv{<`f,`c> .locals = locals,...} = (fenv_t)le;
     // NB a local overrides any global, without an ambiguity warning
-    try return rnew(r) VarRes(lookup_binding(locals,v));
-    catch {case &NoBinding: return lookup_ordinary_global(te,loc,q);}
+    try {
+      return rnew(r) VarRes(lookup_binding(locals,v));
+    } catch {case &NoBinding: return lookup_ordinary_global(te,loc,q);}
   default:
     try return lookup_ordinary_global(te,loc,q);
     catch {case &Dict::Absent:
@@ -1164,9 +1167,9 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
   let tvs = new List(rgn0,fd->tvs);
   Tcutil::check_unique_tvars(loc,tvs);
 //   fprintf(stderr,"checking fn %s\n",qvar2string(fd->name));
-  let rgn_po = initial_fn_po(r, fd->tvs,fd->rgn_po,fd->effect->v,rgn0,loc);
+  let rgn_po = initial_fn_po(r, fd->tvs,fd->rgn_po,
+                             (type_t)fd->effect,rgn0,loc);
   type_t param_rgn = new VarType(rgn0);
-  opt_t<type_t> param_rgn_opt = new Opt(param_rgn);
   let vds = NULL;
   for(let args = fd->args; args != NULL; args = args->tl) {
     let vd = new{Vardecl{.sc = Public,
@@ -1174,24 +1177,28 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
 			 .tq = (*args->hd)[1],
 			 .type = (*args->hd)[2],
 			 .initializer = NULL,
-                         .rgn = param_rgn_opt,
+                         .rgn = param_rgn,
                          .attributes = NULL, .escapes = false}};
     vds = new{List(vd, vds)};
-    locals = rnew(r) Bindings{(*args->hd)[0], new Param_b(vd), locals};
+    let b = new Param_b(vd);
+    let var = (*args->hd)[0];
+    locals = rnew(r) Bindings{var, b, locals};
   }
   if (fd->cyc_varargs != NULL) {
     let VarargInfo{nopt,tq,t,i} = *fd->cyc_varargs;
     if (nopt != NULL) {
       let typ = dyneither_typ(t, param_rgn, tq, false_conref);
       let vd = new{Vardecl{.sc = Public,
-                           .name = new $((nmspace_t)Loc_n,nopt->v),
+                           .name = new $((nmspace_t)Loc_n,(var_t)nopt),
                            .tq = empty_tqual(0),
                            .type = typ,
                            .initializer = NULL,
-                           .rgn = param_rgn_opt,
+                           .rgn = param_rgn,
                            .attributes = NULL, .escapes = false}};
       vds = new List(vd,vds);
-      locals = rnew(r) Bindings{nopt->v, new Param_b(vd), locals};
+      let b = new Param_b(vd);
+      let var = (var_t)nopt;
+      locals = rnew(r) Bindings{var, b, locals};
     }
     else terr(loc,"missing name for varargs");
   }
@@ -1211,7 +1218,7 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
          .encloser    = fd->body, // careful -- self loop at top!!!
          .ctrl_env    = rnew(r) CtrlEnv(r, &NotLoop_j_val, &NotLoop_j_val, NULL, &FnEnd_j_val, 0),
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),
-                                             new List(fd->effect->v,NULL))),
+                                             new List((type_t)fd->effect,NULL))),
          .curr_rgn    = param_rgn,
          .in_notreadctxt = false,
          .in_lhs      = false,
@@ -1240,7 +1247,6 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
   let tvs = new List(rgn0,List::append(fd->tvs,type_vars));
   Tcutil::check_unique_tvars(loc,tvs);
   type_t param_rgn = new VarType(rgn0);
-  opt_t<type_t> param_rgn_opt = new Opt(param_rgn);
   let vds = NULL;
   for(let args = fd->args; args != NULL; args = args->tl) {
     let vd = new{Vardecl{.sc = Public,
@@ -1248,24 +1254,28 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
 			 .tq = (*args->hd)[1],
 			 .type = (*args->hd)[2],
 			 .initializer = NULL,
-                         .rgn = param_rgn_opt,
+                         .rgn = param_rgn,
                          .attributes = NULL, .escapes = false}};
     vds = new{List(vd, vds)};
-    locals = rnew(r) Bindings{(*args->hd)[0], new Param_b(vd), locals};
+    let b = new Param_b(vd);
+    let var = (*args->hd)[0];
+    locals = rnew(r) Bindings{var, b, locals};
   }
   if (fd->cyc_varargs != NULL) {
     let VarargInfo{nopt,tq,t,i} = *fd->cyc_varargs;
     if (nopt != NULL) {
       let typ = dyneither_typ(t, param_rgn, tq, false_conref);
       let vd = new{Vardecl{.sc = Public,
-                           .name = new $((nmspace_t)Loc_n,nopt->v),
+                           .name = new $((nmspace_t)Loc_n,(var_t)nopt),
                            .tq = empty_tqual(0),
                            .type = typ,
                            .initializer = NULL,
-                           .rgn = param_rgn_opt,
+                           .rgn = param_rgn,
                            .attributes = NULL, .escapes = false}};
       vds = new List(vd,vds);
-      locals = rnew(r) Bindings{nopt->v, new Param_b(vd), locals};
+      let var = (var_t)nopt;
+      let b = new Param_b(vd);
+      locals = rnew(r) Bindings{var, b, locals};
     }
     else terr(loc,"missing name for varargs");
   }
@@ -1285,7 +1295,7 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
          .encloser    = fd->body, // careful -- self loop at top!!!
          .ctrl_env    = rnew(r) CtrlEnv(r, &NotLoop_j_val, &NotLoop_j_val, NULL, &FnEnd_j_val, 0),
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),
-                                             new List(fd->effect->v,NULL))),
+                                             new List((type_t)fd->effect,NULL))),
          .curr_rgn    = param_rgn,
          .in_notreadctxt = false,
          .in_lhs      = false,

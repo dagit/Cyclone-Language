@@ -1042,7 +1042,7 @@ char ?`r vrprintf(region_t<`r> r1, const char ? fmt, parg_t ? ap)
 {
   // figure out the size of the resulting string -- add one for 0 terminator
   int size = _IO_vfprintf(putc_void, 0, fmt, ap) + 1;
-  char ?`r s = rnew(r1) {for i < size : '\0'};
+  char ?`r s = calloc(size+1,sizeof(char));
   vsprintf((char ? @nozeroterm)s, fmt, ap);
   return s;
 }

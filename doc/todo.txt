@@ -7,6 +7,9 @@ CONFIGURATION BUGS:
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
+* Bug in nested tagged unions:  f.y.z = 3  where both y and z are
+  tagged members.
+
 * Get rid of any left-over C warnings.
 
 * Test failures of type-checker, so that we always recover and exit properly.

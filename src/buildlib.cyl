@@ -787,9 +787,6 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   void scan_exp(exp_opt_t e, dep_t dep) {
     switch (e->r) {
     case &Var_e(&$(_,v),_):
-      // This case is actually impossible after only parse
-      fallthru(v);
-    case &UnknownId_e(&$(_,v)):
       add_target(v);
       return;
     case &Primop_e(_,x):
@@ -824,10 +821,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       scan_exp(e1,dep);
       scan_exp(e2,dep);
       return;
-    case &FnCall_e(e1,x,_):
-      // This case is actually impossible after only parse
-      fallthru(e1,x);
-    case &UnknownCall_e(e1,x):
+    case &FnCall_e(e1,x,_,_):
       scan_exp(e1,dep);
       for (; x != NULL; x = x->tl) {
         scan_exp(x->hd,dep);
@@ -1087,7 +1081,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       let &$(_,v) = x->name;
       current_source = v;
       if (x->defn)
-        scan_type(x->defn->v,dep);
+        scan_type((type_t)x->defn,dep);
       break;
     case &Region_d(...):
       fprintf(stderr,"Error: unexpected region declaration");

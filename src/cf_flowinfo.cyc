@@ -272,7 +272,9 @@ static struct Aggrfield@`t
 }
 
 // this is the same as aggrfields_to_aggrdict, except that it
-// performs a type substitution.
+// performs a type substitution -- this is necessary to deal
+// with abstract type parameters that are instantiated with
+// structs or other aggregates.  
 static aggrdict_t<`r> substitute_aggrfields_to_aggrdict(flow_env_t<`r> fenv,
                                                         list_t<tvar_t> tvs,
                                                         list_t<type_t> targs,
@@ -280,18 +282,35 @@ static aggrdict_t<`r> substitute_aggrfields_to_aggrdict(flow_env_t<`r> fenv,
 							bool no_init_bits_only,
                                                         absRval_t<`r> leafval){
   region temp;
-  list_t<$(tvar_t,type_t)@`temp,`temp> inst = List::rzip(temp,temp,tvs,targs);
-  let env = $(temp,inst);
-  list_t<struct Aggrfield@`temp,`temp> subs_fs = rmap_c(temp,substitute_field,&env,fs);
-  return aggrfields_to_aggrdict(fenv,subs_fs,no_init_bits_only,leafval);
+  // zip up tvs and targs, but filter out any type parameters that aren't 
+  // types (e.g., regions) so as to avoid having to substitute.
+  list_t<$(tvar_t,type_t)@`temp,`temp> inst = NULL;
+  for (; tvs != NULL; tvs = tvs->tl, targs = targs->tl) {
+    let tv = tvs->hd;
+    let t = targs->hd;
+    switch (Tcutil::tvar_kind(tv,&Tcutil::bk)) {
+    case &{.kind = RgnKind, ...}:
+    case &{.kind = EffKind, ...}:
+    case &{.kind = IntKind, ...}: continue;
+    default: break;
+    }
+    inst = rnew(temp) List(rnew(temp) $(tv,t), inst);
+  }
+  if (inst != NULL) {
+    let env = $(temp,List::imp_rev(inst));
+    list_t<struct Aggrfield@`temp,`temp> subs_fs = rmap_c(temp,substitute_field,&env,fs);
+    return aggrfields_to_aggrdict(fenv,subs_fs,no_init_bits_only,leafval);
+  } else {
+    return aggrfields_to_aggrdict(fenv,fs,no_init_bits_only,leafval);
+  }
 }
 
 static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
                                       bool allow_zeroterm,
 				      bool no_init_bits_only,
                                       type_t t, absRval_t<`r> leafval) {
-  if(is_nontagged_union_type(t))
-    return fenv->unknown_all;
+  //if(is_nontagged_union_type(t))
+  //return fenv->unknown_all;
 
   switch(Tcutil::compress(t)) {
   case &DatatypeFieldType(DatatypeFieldInfo({.KnownDatatypefield=$(_,tuf)},_)):
@@ -310,6 +329,7 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
     return rnew(fenv->r) Aggregate(UnionRInfo(false,-1),d);
   case &AggrType(AggrInfo(info,targs)):
     let ad = get_known_aggrdecl(info);
+    if (ad->kind == UnionA && !ad->impl->tagged) return fenv->unknown_all;
     if(ad->impl==NULL)
       break;
     let fields = ad->impl->fields;
@@ -320,6 +340,7 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
     DEBUG_PRINT("typ_to_absrval: type=%s, leaf_val=",
 		Absynpp::typ2string(t));
     DEBUG_PRINT_F(print_absrval,leafval);
+    if (k == UnionA) return fenv->unknown_all;
     return rnew(fenv->r) Aggregate(UnionRInfo(k==UnionA,-1),aggrfields_to_aggrdict(fenv,fs,k==UnionA,leafval));
   case &ArrayType(ArrayInfo{et,_,_,zeroterm,_}) && conref_def(false,zeroterm):
     // special case for zero-terminated arrays of bits-only things --

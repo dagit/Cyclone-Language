@@ -29,21 +29,46 @@ using Absyn {
 using List {
 using Lexing {
 namespace Parse {
-extern list_t<decl_t> parse_file(FILE @f);
-extern bool no_register;
+  extern list_t<decl_t> parse_file(FILE @f);
+  extern bool no_register;
 }
-extern datatype Type_specifier;
-typedef datatype Type_specifier @type_specifier_t;
-extern enum Storage_class {
- Typedef_sc, Extern_sc, ExternC_sc, Static_sc, Auto_sc, Register_sc, Abstract_sc
-};
-typedef enum Storage_class storage_class_t;
-extern struct Declaration_spec;
-typedef struct Declaration_spec @decl_spec_t;
-extern struct Declarator;
-typedef struct Declarator @declarator_t;
-extern struct Abstractdeclarator;
-typedef struct Abstractdeclarator @abstractdeclarator_t;
+  struct FlatList<`a::A,`r> { struct FlatList<`a,`r> *`r tl; `a hd; };
+  typedef struct FlatList<`a,`r> *`r flat_list_t<`a,`r>;
+  extern struct Type_specifier {
+    bool Signed_spec     : 1;
+    bool Unsigned_spec   : 1;
+    bool Short_spec      : 1;
+    bool Long_spec       : 1;
+    bool Long_Long_spec  : 1;
+    bool Valid_type_spec : 1;
+    type_t Type_spec;
+    Position::seg_t loc;
+  };
+  typedef struct Type_specifier type_specifier_t;
+  struct Declarator<`yy::R> {
+    qvar_t                  id;
+    List::list_t<type_modifier_t<`yy>,`yy> tms;
+  };
+  typedef struct Declarator<`yy> declarator_t<`yy>;
+  typedef flat_list_t<$(declarator_t<`yy>,exp_opt_t),`yy> declarator_list_t<`yy>;
+
+  extern enum Storage_class {
+    Typedef_sc, Extern_sc, ExternC_sc, Static_sc, Auto_sc, Register_sc, 
+      Abstract_sc
+  };
+  typedef enum Storage_class storage_class_t;
+  extern struct Declaration_spec {
+    storage_class_t*         sc;
+    tqual_t                  tq;
+    type_specifier_t         type_specs;
+    bool                     is_inline;
+    list_t<attribute_t>      attributes;
+  };
+  typedef struct Declaration_spec decl_spec_t;
+  struct Abstractdeclarator<`yy::R> {
+    list_t<type_modifier_t<`yy>,`yy> tms;
+  };
+  typedef struct Abstractdeclarator<`yy> abstractdeclarator_t<`yy>;
 #include "parse_tab.h"
 }}}}
 #endif

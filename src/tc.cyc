@@ -289,9 +289,11 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
       break;
     }
   } catch { case &Dict::Absent:
-    if (exports == NULL || export_member(fd->name,*exports))
+    if (exports == NULL || export_member(fd->name,*exports)) {
+      let b = new Funname_b(fd);
       ge->ordinaries = Dict::insert(ge->ordinaries, v,
                                     new $(new VarRes(new Funname_b(fd)), false));
+    }
     break;
   }
 
@@ -393,9 +395,9 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   check_unique_tvars(loc,td->tvs);
   add_tvar_identities(td->tvs);
   if (td->defn != NULL) {
-    check_type(loc,te,td->tvs,&tak,false,td->defn->v);
+    check_type(loc,te,td->tvs,&tak,false,(type_t)td->defn);
     td->tq.real_const = 
-      extract_const_from_typedef(loc,td->tq.print_const,td->defn->v);
+      extract_const_from_typedef(loc,td->tq.print_const,(type_t)td->defn);
     // FIX: check that attributes are okay for this kind of type
   } 
   // run through and constrain the kinds of unconstrained tvs

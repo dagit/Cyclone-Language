@@ -56,9 +56,9 @@ extern doc_t prim2doc(primop_t);
 extern doc_t primapp2doc(int inprec, primop_t p,list_t<exp_t> es);
 extern doc_t de2doc($(list_t<designator_t>,exp_t)@ de);
 extern doc_t tqtd2doc(tqual_t tq, type_t t, opt_t<doc_t> dopt);
-extern doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,
+extern doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,
                          bool c_varargs,vararg_info_t *cyc_varargs,
-                         opt_t<type_t> effopt,
+                         type_opt_t effopt,
                          list_t<$(type_t,type_t)@> rgn_po);
 extern doc_t datatypefields2doc(list_t<datatypefield_t> fields);
 extern doc_t enumfields2doc(list_t<enumfield_t> fs);
@@ -572,7 +572,7 @@ static void print_tms(list_t<type_modifier_t> tms) {
       for (; ys != NULL; ys = ys->tl) {
         let v = (*ys->hd)[0];
         if (v == NULL) fprintf(stderr,"?");
-        else fprintf(stderr,*v->v);
+        else fprintf(stderr,*v);
         if (ys->tl != NULL) fprintf(stderr,",");
       }
       fprintf(stderr,") ");
@@ -712,7 +712,7 @@ doc_t ntyp2doc(type_t t) {
   case &Evar(k,topt,i,tvs):
     if (topt != NULL)
       // This is an error case, topt should be NULL in a normalized type
-      return(ntyp2doc(topt->v));
+      return(ntyp2doc(topt));
     else {
 //        switch (k->v) {
 //        case RgnKind:
@@ -854,8 +854,8 @@ doc_t ntyp2doc(type_t t) {
   return s;
 }
 
-doc_t vo2doc(opt_t<var_t> vo) {
-  return (vo==NULL)?nil_doc():text(*(vo->v));
+doc_t vo2doc(var_opt_t vo) {
+  return (vo==NULL)?nil_doc():text(*(var_t)(vo));
 }
 
 doc_t rgn_cmp2doc($(type_t,type_t)@ cmp) {
@@ -867,13 +867,14 @@ doc_t rgnpo2doc(list_t<$(type_t,type_t)@> po) {
   return group("","",",",List::map(rgn_cmp2doc,po));
 }
 
-doc_t funarg2doc($(opt_t<var_t>,tqual_t,type_t)@ t) {
-  opt_t<doc_t> dopt = ((*t)[0]==NULL)?NULL:(new Opt(text(*((*t)[0]->v))));
+doc_t funarg2doc($(var_opt_t,tqual_t,type_t)@ t) {
+  let vo = (*t)[0];
+  opt_t<doc_t> dopt = (vo==NULL)?NULL:(new Opt(text(*vo)));
   return tqtd2doc((*t)[1],(*t)[2],dopt);
 }
 
-doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,bool c_varargs,
-                  vararg_info_t *cyc_varargs, opt_t<type_t> effopt,
+doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,bool c_varargs,
+                  vararg_info_t *cyc_varargs, type_opt_t effopt,
                   list_t<$(type_t,type_t)@> rgn_po) {
   let arg_docs = List::map(funarg2doc,args);
   doc_t eff_doc;
@@ -888,15 +889,15 @@ doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,bool c_varargs,
   }
   let arg_doc = group("","",",",arg_docs);
   if (effopt != NULL && print_all_effects)
-    arg_doc = cat(arg_doc,text(";"),eff2doc(effopt->v));
+    arg_doc = cat(arg_doc,text(";"),eff2doc(effopt));
   if (rgn_po != NULL)
     arg_doc = cat(arg_doc,text(":"),rgnpo2doc(rgn_po));
   return cat(text("("),arg_doc,text(")"));
 }
 
-$(opt_t<var_t>,tqual_t,type_t)@ arg_mk_opt($(var_t,tqual_t,type_t)@ arg) {
-  return new $(new Opt((*arg)[0]),
-               (*arg)[1],(*arg)[2]);
+$(var_opt_t,tqual_t,type_t)@ arg_mk_opt($(var_t,tqual_t,type_t)@ arg) {
+  let &$(v,tq,t) = arg;
+  return new $((var_opt_t)v,tq,t);
 }
 
 doc_t var2doc(var_t v) { return text(*v); }
@@ -994,8 +995,7 @@ doc_t typ2doc(type_t t) {
 int exp_prec(exp_t e) {
   switch (e->r) {
   case &Const_e(...):
-  case &Var_e(...):
-  case &UnknownId_e(...): return 10000;
+  case &Var_e(...): return 10000;
   case &Primop_e(p,_):
     switch (p) {
     case Plus:           return 100;
@@ -1025,7 +1025,6 @@ int exp_prec(exp_t e) {
   case &And_e(...):             return  35; // FIX: right precedence for &&
   case &Or_e(...):              return  30; // FIX: right precedence for ||
   case &SeqExp_e(...):          return  10;
-  case &UnknownCall_e(...):
   case &FnCall_e(...):        return 140;
   case &Throw_e(...):             return 130;
   case &NoInstantiate_e(e2):    return exp_prec(e2);
@@ -1068,8 +1067,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   doc_t s;
   switch (e->r) {
   case &Const_e(c):     s = cnst2doc(c); break;
-  case &Var_e(x,_):     fallthru(x);
-  case &UnknownId_e(x): s = qvar2doc(x); break;
+  case &Var_e(x,_):     s = qvar2doc(x); break;
   case &Primop_e(p,es): s = primapp2doc(myprec,p,es); break;
   case &AssignOp_e(e1,popt,e2):
     s = cat(exp2doc_prec(myprec,e1),
@@ -1102,13 +1100,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     // our recursive descent doesn't know if we're in an initializer.
     s = cat(text("("), exp2doc(e1), text(", "), exp2doc(e2), text(")"));
     break;
-  case &UnknownCall_e(e1,es):
-    s = cat(exp2doc_prec(myprec,e1),
-            text("("),
-            exps2doc_prec(20,es),
-            text(")"));
-    break;
-  case &FnCall_e(e1,es,_):
+  case &FnCall_e(e1,es,...):
     s = cat(exp2doc_prec(myprec,e1),
             text("("),
             exps2doc_prec(20,es),
@@ -1822,7 +1814,7 @@ doc_t decl2doc(decl_t d) {
   case &Typedef_d(td):
     type_t t;
     if (td->defn != NULL)
-      t = td->defn->v;
+      t = (type_t)td->defn;
     else
       t = new_evar(td->kind,NULL);
     s = cat(text("typedef "),
@@ -1953,10 +1945,10 @@ bool is_anon_aggrtype(type_t t) {
   switch (t) {
   case &AnonAggrType(_,_): return true;
   case &AnonEnumType(_): return true;
-  case &TypedefType(_,_,td,&x):
+  case &TypedefType(_,_,td,x) && x != NULL:
     // This won't loop if the types come from a .cyc file,
     // because typedefs in Cyclone (or C) can't be recursive
-    return is_anon_aggrtype(x);
+    return is_anon_aggrtype((type_t)x);
   default: return false;
   }
 }
@@ -2001,7 +1993,7 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
       // don't print default effects
       // WARNING: this is our criterion to detect default effect,
       // so it'd better be right
-      if (effopt == NULL || exists_temp_tvar_in_effect(effopt->v)) {
+      if (effopt == NULL || exists_temp_tvar_in_effect(effopt)) {
 	effopt = NULL;	//drop the existing effect
 	typvars = NULL;	//drop the tvars, but they could be useful b/c of kinds!
       }
@@ -2063,17 +2055,17 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
     if (topt == NULL)
       return $(tq,t,NULL);
     else
-      return to_tms(r,tq,topt->v);
+      return to_tms(r,tq,topt);
 
   case &TypedefType(n,ts,td,topt):
     // we don't want to expand when either the flag is set, it's
     // an anonymous aggregate, or it's qualified in some way...
-    if (topt == NULL || !expand_typedefs || is_anon_aggrtype(*topt))
+    if (topt == NULL || !expand_typedefs || is_anon_aggrtype((type_t)topt))
       return $(tq,t,NULL);
     else {
       if (tq.real_const)
         tq.print_const = tq.real_const;
-      return to_tms(r,tq,*topt);
+      return to_tms(r,tq,(type_t)topt);
     }
 
   default: return $(tq,t,NULL);
@@ -2083,12 +2075,12 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
 static bool is_char_ptr(type_t t) {
   // want to avoid compressing here when possible
   switch (t) {
-  case &Evar(_,&Opt(def),_,_): return is_char_ptr(def);
+  case &Evar(_,def,_,_) && def != NULL: return is_char_ptr((type_t)def);
   case &PointerType(PtrInfo{elt_typ,_,_}):
   L:
     switch (elt_typ) {
-    case &Evar(_,&Opt(t),_,_): elt_typ = t; goto L;
-    case &TypedefType(_,_,_,&t): elt_typ = t; goto L;
+    case &Evar(_,t,_,_) && t != NULL: elt_typ = (type_t)t; goto L;
+    case &TypedefType(_,_,_,t) && t != NULL: elt_typ = (type_t)t; goto L;
     case &IntType(_,Char_sz): return true;
     default: return false;
     }

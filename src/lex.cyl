@@ -584,6 +584,7 @@ static short process_qual_id(Lexbuf<`a> lbuf) {
   int       end = lbuf->lex_curr_pos;
   mstring_t s   = lbuf->lex_buffer;
 
+  string_t<`H> *v = NULL;
   list_t<var_t> rev_vs = NULL;
 
   while (i<end) {
@@ -593,16 +594,16 @@ static short process_qual_id(Lexbuf<`a> lbuf) {
     if (start == i) // no progress -- first char is ':'
       throw new Impossible("bad namespace");
     int vlen = i - start;
-    var_t v    = get_symbol(str_index(s, start, vlen));
-    rev_vs = new List(v,rev_vs);
+    if (v != NULL)
+      rev_vs = new List((var_t)v,rev_vs);
+    v = get_symbol(str_index(s, start, vlen));
     i += 2;
   }
-  if (rev_vs == NULL)
+  if (v == NULL)
     throw new Impossible("bad namespace");
-  var_t         v  = rev_vs->hd;
-  list_t<var_t> vs = List::imp_rev(rev_vs->tl);
-  token_qvar = new $(Rel_n(vs),v);
-  if (is_typedef(vs,v))
+  list_t<var_t> vs = List::imp_rev(rev_vs);
+  token_qvar = new $(Rel_n(vs),(var_t)v);
+  if (is_typedef(vs,(var_t)v))
     return QUAL_TYPEDEF_NAME;
   return QUAL_IDENTIFIER;
 }
@@ -618,43 +619,37 @@ int snarf_asm(Lexbuf<`a>);
 int snarf_asm_body(Lexbuf<`a>);
 } // namespace Lex
 
-static union YYSTYPE String_tok(string_t<`H> s) {
-  return YYSTYPE{.String_tok = s};
-}
-static union YYSTYPE Stringopt_tok(opt_t<stringptr_t<`H,`H>,`H> s) {
-  return YYSTYPE{.Stringopt_tok = s};
-}
-static union YYSTYPE Int_tok($(sign_t,int) s) {
-  return YYSTYPE{.Int_tok = s};
-}
-static union YYSTYPE Char_tok(char s) {
-  return YYSTYPE{.Char_tok = s};
-}
-static union YYSTYPE QualId_tok(qvar_t s) {
-  return YYSTYPE{.QualId_tok = s};
-}
-static union YYSTYPE Asm_tok($(bool,string_t<`H>) p) {
-  return YYSTYPE{.Asm_tok = p};
-}
-
 // for parser -- must not be prefixed
-int yylex(Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> lbuf) { 
+int yylex(Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> lbuf,
+          union YYSTYPE<`yy>@ yylval) { 
  int ans = Lex::token(lbuf);
  yylloc.first_line = lexeme_start(lbuf);
  yylloc.last_line  = lexeme_end(lbuf);
  switch (ans) {
- case IDENTIFIER        : yylval = String_tok(Lex::token_string); break;
- case TYPEDEF_NAME      : yylval = String_tok(Lex::token_string); break;
- case QUAL_IDENTIFIER   : yylval = QualId_tok(Lex::token_qvar);   break;
- case QUAL_TYPEDEF_NAME : yylval = QualId_tok(Lex::token_qvar);   break;
- case TYPE_VAR          : yylval = String_tok(Lex::token_string); break;
- case INTEGER_CONSTANT  : yylval = Int_tok(Lex::token_int);       break;
- case CHARACTER_CONSTANT: yylval = Char_tok(Lex::token_char);     break;
- case WCHARACTER_CONSTANT:yylval = String_tok(Lex::token_string);  break;
- case FLOATING_CONSTANT : yylval = String_tok(Lex::token_string); break;
- case STRING            : yylval = String_tok(Lex::token_string); break;
- case WSTRING           : yylval = String_tok(Lex::token_string); break;
- case ASM               : yylval = Asm_tok(Lex::token_asm);       break;
+ case IDENTIFIER        : 
+   *yylval = YYSTYPE{.String_tok = Lex::token_string}; break;
+ case TYPEDEF_NAME      : 
+   *yylval = YYSTYPE{.String_tok = Lex::token_string}; break;
+ case QUAL_IDENTIFIER   : 
+   *yylval = YYSTYPE{.QualId_tok = Lex::token_qvar};   break;
+ case QUAL_TYPEDEF_NAME : 
+   *yylval = YYSTYPE{.QualId_tok = Lex::token_qvar};   break;
+ case TYPE_VAR          : 
+   *yylval = YYSTYPE{.String_tok = Lex::token_string}; break;
+ case INTEGER_CONSTANT  : 
+   *yylval = YYSTYPE{.Int_tok = Lex::token_int};       break;
+ case CHARACTER_CONSTANT: 
+   *yylval = YYSTYPE{.Char_tok = Lex::token_char};     break;
+ case WCHARACTER_CONSTANT:
+   *yylval = YYSTYPE{.String_tok = Lex::token_string};  break;
+ case FLOATING_CONSTANT : 
+   *yylval = YYSTYPE{.String_tok = Lex::token_string}; break;
+ case STRING            : 
+   *yylval = YYSTYPE{.String_tok = Lex::token_string}; break;
+ case WSTRING           : 
+   *yylval = YYSTYPE{.String_tok = Lex::token_string}; break;
+ case ASM               : 
+   *yylval = YYSTYPE{.Asm_tok = Lex::token_asm};       break;
  default: break;
  }
  return ans;

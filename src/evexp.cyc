@@ -248,8 +248,34 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
     terr(e->loc,"bad static expression %s", exp2string(e));
     return $(Int_c(Signed,0), true);
   }
-  if(ans[1])
-    e->r = new Const_e(ans[0]);
+  if(ans[1]) {
+    raw_exp_t c;
+    let cnst = ans[0];
+    switch (cnst) {
+    case Cnst{.Int_c = $(Unsigned,0)}:
+      static datatype Raw_exp.Const_e uzero = 
+        Const_e(Cnst{.Int_c = $(Unsigned,0)});
+      c = &uzero;
+      break;
+    case Cnst{.Int_c = $(Unsigned,1)}:
+      static datatype Raw_exp.Const_e uone = 
+        Const_e(Cnst{.Int_c = $(Unsigned,1)});
+      c = &uone;
+      break;
+    case Cnst{.Int_c = $(Signed,0)}:
+      static datatype Raw_exp.Const_e szero = 
+        Const_e(Cnst{.Int_c = $(Signed,0)});
+      c = &szero;
+      break;
+    case Cnst{.Int_c = $(Signed,1)}:
+      static datatype Raw_exp.Const_e sone = 
+        Const_e(Cnst{.Int_c = $(Signed,1)});
+      c = &sone;
+      break;
+    default: c = new Const_e(cnst); break;
+    }
+    e->r = c;
+  }
   return ans;
 }
 
@@ -326,19 +352,23 @@ int const_exp_cmp(exp_t e1, exp_t e2) {
     return 0; // list lengths must be the same -- it's the same primop
   case $(&Sizeoftyp_e(t1), &Sizeoftyp_e(t2)):  return typecmp(t1,t2);
   case $(&Sizeoftyp_e(t1), &Sizeofexp_e(e2a)):
-    if(e2a->topt == NULL)
+    let e2atopt = e2a->topt;
+    if(e2atopt == NULL)
       terr(e2->loc, "cannot handle sizeof(exp) here -- use sizeof(type)");
-    return typecmp(t1,e2a->topt->v);
+    return typecmp(t1,(type_t)e2atopt);
   case $(&Sizeofexp_e(e1a), &Sizeoftyp_e(t2)):
-    if(e1a->topt == NULL)
+    let e1atopt = e1a->topt;
+    if(e1atopt == NULL)
       terr(e1->loc, "cannot handle sizeof(exp) here -- use sizeof(type)");
-    return typecmp(e1a->topt->v,t2);
+    return typecmp((type_t)e1atopt,t2);
   case $(&Sizeofexp_e(e1a), &Sizeofexp_e(e2a)):
-    if(e1a->topt == NULL)
+    let e1atopt = e1a->topt;
+    let e2atopt = e2a->topt;
+    if(e1atopt == NULL)
       terr(e1->loc, "cannot handle sizeof(exp) here -- use sizeof(type)");
-    if(e2a->topt == NULL)
+    if(e2atopt == NULL)
       terr(e2->loc, "cannot handle sizeof(exp) here -- use sizeof(type)");
-    return typecmp(e1a->topt->v,e2a->topt->v);
+    return typecmp((type_t)e1atopt,(type_t)e2atopt);
   case $(&Offsetof_e(t1,f1), &Offsetof_e(t2,f2)):
     let c1 = typecmp(t1,t2);
     if(c1 != 0) return c1;

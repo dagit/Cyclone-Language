@@ -148,7 +148,7 @@ static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
 
     // everything else is just recursive descent
   case &Const_e(_): return;
-  case &FnCall_e(e1,es,_):
+  case &FnCall_e(e1,es,...):
     box_free_vars_exp(env,e1); fallthru(es);
   case &Primop_e(_,es):
     for (; es != NULL; es = es->tl)
@@ -319,7 +319,7 @@ static void apply_varmap(Dict::dict_t<var_t,exp_t,`r> varmap, exp_t e) {
 
     // everything else is just recursive descent
   case &Const_e(_): return;
-  case &FnCall_e(e1,es,_):
+  case &FnCall_e(e1,es,...):
     apply_varmap(varmap,e1); fallthru(es);
   case &Primop_e(_,es):
     for (; es != NULL; es = es->tl)
@@ -437,7 +437,7 @@ static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
   case &Const_e(_): return;
   case &Var_e(_,_): return;
 
-  case &FnCall_e(e1,es,_):
+  case &FnCall_e(e1,es,...):
     exp_to_vc(env, e1); fallthru(es);
   case &Primop_e(_, es):
     for (; es != NULL; es = es->tl)

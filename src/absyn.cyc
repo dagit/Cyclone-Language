@@ -42,23 +42,30 @@ namespace Absyn {
 // return a negative, zero, or positive int according to whether the
 // first string list is less than, equal to, or greater than the second 
 static int strlist_cmp(list_t<stringptr_t> ss1, list_t<stringptr_t> ss2) {
-  return list_cmp(strptrcmp,ss1,ss2);
+  for (; ss1 != NULL; ss1 = ss1->tl) {
+    if (ss2 == NULL) return 1;
+    int i = strptrcmp(ss1->hd,ss2->hd);
+    if (i != 0) return i;
+    ss2 = ss2->tl;
+  }
+  if (ss2 != NULL) return -1;
+  return 0;
 }
 int varlist_cmp(list_t<var_t> vs1, list_t<var_t> vs2) {
   if((int)vs1==(int)vs2) return 0;
   return strlist_cmp(vs1,vs2);
 }
 int qvar_cmp(qvar_t q1, qvar_t q2) {
-  let n1 = (*q1)[0];
-  let n2 = (*q2)[0];
+  if (q1 == q2) return 0;
+  let &$(n1,v1) = q1;
+  let &$(n2,v2) = q2;
+  int i = strptrcmp(v1,v2);
+  if (i != 0) return i;
   switch ($(n1,n2)) {
-  case $({.Loc_n = _},{.Loc_n = _}): break;
-  case $({.Rel_n = x1},{.Rel_n = x2}): fallthru(x1,x2);
-  case $({.Abs_n = x1},{.Abs_n = x2}): fallthru(x1,x2);
-  case $({.C_n = x1},{.C_n = x2}): 
-    int i = strlist_cmp(x1,x2);
-    if (i != 0) return i;
-    break;
+  case $({.Loc_n = _},{.Loc_n = _}): return 0;
+  case $({.Rel_n = x1},{.Rel_n = x2}): return strlist_cmp(x1,x2);
+  case $({.Abs_n = x1},{.Abs_n = x2}): return strlist_cmp(x1,x2);
+  case $({.C_n = x1},{.C_n = x2}): return strlist_cmp(x1,x2);
   // we arbitrarily decide that Loc_n < Rel_n < Abs_n < C_n
   case $({.Loc_n = _},_): return -1;
   case $(_,{.Loc_n = _}): return 1;
@@ -67,7 +74,6 @@ int qvar_cmp(qvar_t q1, qvar_t q2) {
   case $({.Abs_n = _},_): return -1;
   case $(_,{.Abs_n = _}): return 1; 
   }
-  return strptrcmp((*q1)[1],(*q2)[1]);
 }
 // WARNING: Ignores the kinds.
 int tvar_cmp(tvar_t tv1, tvar_t tv2) {
@@ -180,9 +186,10 @@ conref_t<`a> compress_conref(conref_t<`a> x) {
 }
 
 `a conref_def(`a y, conref_t<`a> x) {
-  switch (compress_conref(x)) {
+  switch (x) {
   case &Constraint{.Eq_constr = v}: return v;
-  default: return y;
+  case &Constraint{.No_constr = _}: return y;
+  default: return conref_def(y,compress_conref(x));
   }
 }
 
@@ -392,9 +399,8 @@ static datatype Binding.Global_b uniquergn_bind_p = Global_b(&uniquergn_var_d);
 static datatype Raw_exp.Var_e uniquergn_exp_r =
   Var_e(&uniquergn_qvar_p,&uniquergn_bind_p);
 
-static struct Opt<type_t> uniquergn_typ_opt = Opt(&uniquergn_typ);
 static struct Exp uniquergn_exp_p =
-  Exp(&uniquergn_typ_opt, &uniquergn_exp_r, 0, &EmptyAnnot_val);
+  Exp(&uniquergn_typ, &uniquergn_exp_r, 0, &EmptyAnnot_val);
 
 exp_t uniquergn_exp = &uniquergn_exp_p;
 
@@ -550,11 +556,28 @@ exp_t New_exp(exp_opt_t rgn_handle, exp_t e, seg_t loc) {
 exp_t copy_exp(exp_t e) {
   return new *e;
 }
-exp_t const_exp(cnst_t c, seg_t loc) { return new_exp(new Const_e(c), loc); }
-exp_t null_exp(seg_t loc) { return new_exp(new Const_e(Null_c), loc); }
+exp_t const_exp(cnst_t c, seg_t loc) { 
+  return new_exp(new Const_e(c), loc); 
+}
+exp_t null_exp(seg_t loc) { 
+  static datatype Raw_exp.Const_e null_const = Const_e(Cnst{.Null_c = 0});
+  return new_exp(&null_const, loc); 
+}
 exp_t int_exp(sign_t s,int i,seg_t seg) {return const_exp(Int_c(s,i),seg);}
-exp_t signed_int_exp(int i,    seg_t loc) {return int_exp(Signed,i,loc);}
-exp_t uint_exp(unsigned int i, seg_t loc) {return int_exp(Unsigned,i,loc);}
+exp_t signed_int_exp(int i, seg_t loc) {
+  static datatype Raw_exp.Const_e szero = Const_e(Cnst{.Int_c = $(Signed,0)});
+  static datatype Raw_exp.Const_e sone = Const_e(Cnst{.Int_c = $(Signed,1)});
+  if (i == 0) return new_exp(&szero, loc);
+  else if (i == 1) return new_exp(&sone, loc);
+  return int_exp(Signed,i,loc);
+}
+exp_t uint_exp(unsigned int i, seg_t loc) {
+  static datatype Raw_exp.Const_e uzero = Const_e(Cnst{.Int_c =$(Unsigned,0)});
+  static datatype Raw_exp.Const_e uone = Const_e(Cnst{.Int_c = $(Unsigned,1)});
+  if (i == 0) return new_exp(&uzero, loc);
+  else if (i == 1) return new_exp(&uone,loc);
+  else return int_exp(Unsigned,i,loc);
+}
 exp_t bool_exp(bool b, seg_t loc) { return signed_int_exp(b ? 1 : 0, loc); }
 exp_t true_exp(seg_t loc)  { return bool_exp(true, loc); }
 exp_t false_exp(seg_t loc) { return bool_exp(false, loc); }
@@ -571,15 +594,15 @@ exp_t wstring_exp(string_t<`H> s, seg_t loc){ return const_exp(Wstring_c(s),loc)
 datacon(Binding,Unresolved_b);
 
 // This should only be used after type checking.
-// Right now it's only used in Toc and is the only source of Unresolved_b.
 exp_t var_exp(qvar_t q, seg_t loc) {
   return new_exp(new Var_e(q,&Unresolved_b_val), loc);
 }
 exp_t varb_exp(qvar_t q, binding_t b, seg_t loc) {
   return new_exp(new Var_e(q, b), loc);
 }
+// Used for unresolved variables now
 exp_t unknownid_exp(qvar_t q, seg_t loc) { 
-  return new_exp(new UnknownId_e(q), loc); 
+  return new_exp(new Var_e(q,&Unresolved_b_val), loc);
 }
 exp_t primop_exp(primop_t p, list_t<exp_t,`H> es, seg_t loc) {
   return new_exp(new Primop_e(p,es),loc);
@@ -629,10 +652,10 @@ exp_t seq_exp(exp_t e1, exp_t e2, seg_t loc) {
   return new_exp(new SeqExp_e(e1,e2), loc);
 }
 exp_t unknowncall_exp(exp_t e, list_t<exp_t,`H> es, seg_t loc) {
-  return new_exp(new UnknownCall_e(e,es), loc);
+  return new_exp(new FnCall_e(e,es,NULL,false), loc);
 }
 exp_t fncall_exp(exp_t e, list_t<exp_t,`H> es, seg_t loc) {
-  return new_exp(new FnCall_e(e,es,NULL), loc);
+  return new_exp(new FnCall_e(e,es,NULL,true), loc);
 }
 exp_t noinstantiate_exp(exp_t e, seg_t loc) {
   return new_exp(new NoInstantiate_e(e), loc);
@@ -840,23 +863,26 @@ type_decl_t datatype_tdecl(scope_t s, typedef_name_t n, list_t<tvar_t,`H> ts,
 //   int (@f(void (@g)()))(float)
 // We do this by constructing every function type using function_typ,
 // rather than mucking with the typechecker/unifier/etc.
-static
- $(opt_t<var_t>,tqual_t,type_t)@ expand_arg($(opt_t<var_t,`H>,tqual_t,type_t)@ a) {
-  return new $((*a)[0],(*a)[1],pointer_expand((*a)[2],true));
+static void expand_arg($(var_opt_t,tqual_t,type_t)@ a) {
+  let t = (*a)[2];
+  let t_new = pointer_expand(t,true);
+  if (t != t_new) 
+    (*a)[2] = t_new;
 }
 
-type_t function_typ(list_t<tvar_t,`H> tvs, opt_t<type_t,`H> eff_typ, 
+type_t function_typ(list_t<tvar_t,`H> tvs, type_opt_t eff_typ, 
                     tqual_t ret_tqual,
                     type_t ret_typ, 
-                    list_t<$(opt_t<var_t,`H>,tqual_t,type_t)@`H,`H> args, 
+                    list_t<$(var_opt_t,tqual_t,type_t)@`H,`H> args, 
                     bool c_varargs, vararg_info_t *`H cyc_varargs,
                     list_t<$(type_t,type_t)@`H,`H> rgn_po,
                     attributes_t atts) {
+  List::iter(expand_arg,args);
   return new FnType(FnInfo{.tvars = tvs, 
                               .ret_tqual = ret_tqual,
                               .ret_typ = pointer_expand(ret_typ,false),
                               .effect = eff_typ, 
-                              .args = List::map(expand_arg,args), 
+                              .args = args, 
                               .c_varargs = c_varargs, 
                               .cyc_varargs = cyc_varargs,
                               .rgn_po = rgn_po,

@@ -850,5 +850,5 @@ Cyc_String_pa_struct _tmp57;return(struct _dyneither_ptr)((_tmp57.tag=0,((_tmp57
 struct _dyneither_ptr)((struct _dyneither_ptr)pos_s->logical_file),((_tmp58.tag=1,((
 _tmp58.f1=(unsigned long)pos_s->line_no,((_tmp59[0]=& _tmp58,((_tmp59[1]=& _tmp57,
 Cyc_aprintf(((_tmp5A="\n#line %d \"%s\"\n",_tag_dyneither(_tmp5A,sizeof(char),16))),
-_tag_dyneither(_tmp59,sizeof(void*),2))))))))))))));}else{return(struct
-_dyneither_ptr)_tag_dyneither(0,0,0);}}
+_tag_dyneither(_tmp59,sizeof(void*),2))))))))))))));}else{return _tag_dyneither(0,
+0,0);}}

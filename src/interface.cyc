@@ -225,7 +225,7 @@ static bool check_public_aggrdecl(aenv_t ae, seen_t seen, aggrdecl_t d) {
 static type_t get_type1($(tqual_t,type_t) @ x) {
   return (*x)[1];
 }
-static type_t get_type2($(opt_t<string_t @>, struct Tqual, type_t) @ x) {
+static type_t get_type2($(var_opt_t, struct Tqual, type_t) @ x) {
   return (*x)[2];
 }
 
@@ -250,7 +250,7 @@ static bool check_public_enumdecl(aenv_t ae, seen_t seen, enumdecl_t d) {
 
 static bool check_public_typedefdecl(aenv_t ae, seen_t seen, typedefdecl_t d) {
   if (d->defn != NULL)
-    return check_public_type(ae, seen, NULL/*"typedef"*/, d->name, d->defn->v);
+    return check_public_type(ae, seen, NULL/*"typedef"*/, d->name, (type_t)d->defn);
   else return true;
   // don't print an error message for typedefs (we'll just not export the decl)
 }
@@ -271,8 +271,8 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
   switch (compress(t)) {
   case &PointerType(PtrInfo{t,_,_}): fallthru(t);
   case &ArrayType(ArrayInfo{t,_,_,_,_}): fallthru(t);
-  case &TypedefType(_,_,_, &t):
-    return check_public_type(ae, seen, obj, name, t);
+  case &TypedefType(_,_,_, t) && t != NULL:
+    return check_public_type(ae, seen, obj, name, (type_t)t);
 
   case &FnType(FnInfo(_,_,_,ret,args,_,cyc_varargs,_,_)):
     bool b = check_public_type_list(ae, seen, obj, name, get_type2, args)
@@ -570,7 +570,7 @@ static void extract_ordinarie($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env,
 	.sc = fd->sc,
 	.name = fd->name,
 	.tq = empty_tqual(0),
-	.type = (fd->cached_typ)->v,
+	.type = (type_t)fd->cached_typ,
 	.initializer = NULL,
 	.rgn = NULL,
 	.attributes = NULL,

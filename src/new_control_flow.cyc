@@ -466,7 +466,7 @@ static $(flow_t<`r>,absRval_t<`r>)
   anal_derefR(analenv_t<`r> env, flow_t<`r> inflow,
               flow_t<`r> f, exp_t e, absRval_t<`r> r) {
 
-  switch(Tcutil::compress(e->topt->v)) {
+  switch(Tcutil::compress((type_t)e->topt)) {
   case &PointerType(PtrInfo(elttype,_,PtrAtts(_,_,bd,zt,_))):
     switch(f) {
     case {.BottomFL = _}:
@@ -616,7 +616,7 @@ static $(flow_t<`r>,absRval_t<`r>)
       relns   = reln_assign_exp(fenv->r,relns,lexp,rexp);
       outflow = ReachableFL(outdict,relns);
       if (warn_lose_unique &&
-          Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,lexp->topt->v)) {
+          Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,(type_t)lexp->topt)){
         // check to see if we're over-writing a unique pointer
         switch (lookup_place(indict,p)) {
         case &UnknownR(NoneIL):
@@ -648,7 +648,7 @@ static bool is_local_var_rooted_path(Absyn::exp_t e) {
   case &AggrArrow_e(e,...):
     return is_local_var_rooted_path(e);
   case &Subscript_e(e,...):
-    switch (Tcutil::compress(e->topt->v)) {
+    switch (Tcutil::compress((type_t)e->topt)) {
     case &TupleType(...): return is_local_var_rooted_path(e);
     default: return false;
     }
@@ -679,9 +679,9 @@ anal_stmt_exp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, stmt_t s) {
       case $({.ReachableFL = $(fd,relns)},{.PlaceL = p}):
         let old_rval = lookup_place(fd,p);
         // HACK -- if e is cast, then get at the underlying expression's type
-        type_t t = e->topt->v;
+        type_t t = (type_t)e->topt;
         switch (e->r) {
-        case &Cast_e(_,e2,...): t = e2->topt->v; break;
+        case &Cast_e(_,e2,...): t = (type_t)e2->topt; break;
         default: break;
         }
         let new_rval = make_unique_consumed(fenv,t,e,env->iteration_num,old_rval);
@@ -742,7 +742,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
   // destroyed.  Note that we could push this into the var, deref,
   // member, and arrow cases...
   if (copy_ctxt && is_local_var_rooted_path(e) &&
-      Tcutil::is_noalias_pointer_or_aggr(env->r,e->topt->v)) {
+      Tcutil::is_noalias_pointer_or_aggr(env->r,(type_t)e->topt)) {
     DEBUG_PRINT("copy of unique pointer(s)\n");
     // if e is a copy of a unique pointer, then we want to treat this
     // as if it were:
@@ -776,7 +776,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 	return $(flval,make_unique_unconsumed(fenv,old_rval));
       }
       else {
-	let new_rval = make_unique_consumed(fenv,e->topt->v,e,env->iteration_num,old_rval);
+	let new_rval = make_unique_consumed(fenv,(type_t)e->topt,e,env->iteration_num,old_rval);
 	let outdict = assign_place(fenv,e->loc,fd,env->all_changed,p,new_rval);
 	DEBUG_PRINT("place is ");
 	DEBUG_PRINT_F(print_place,p);
@@ -820,7 +820,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
   case &Enum_e(_,_,_): return $(inflow, fenv->unknown_all);
 
   case &Var_e(_,&Global_b(_)): // globals are init and may be aggregates
-    return $(inflow, typ_to_absrval(fenv,e->topt->v, false,fenv->unknown_all));
+    return $(inflow, typ_to_absrval(fenv,(type_t)e->topt, false,fenv->unknown_all));
 
     // FIX: avoid allocation of VarRoot
     // Note: if Esc we return that even though it isn't an absRval.  That's
@@ -854,7 +854,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     return $(f,fenv->unknown_all);
 
   case &AssignOp_e(l,&_,r):
-    if (copy_ctxt && Tcutil::is_noalias_pointer_or_aggr(env->r,e->topt->v)) {
+    if (copy_ctxt && Tcutil::is_noalias_pointer_or_aggr(env->r,(type_t)e->topt)) {
       Tcutil::terr(e->loc,"cannot track unique pointers through multiple assignments");
       return $(BottomFL(), fenv->unknown_all);
     }
@@ -886,7 +886,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 
   case &AssignOp_e(e1,NULL,e2):
     DEBUG_PRINT("in Rexp:AssignOp_e for |%s|\n",Absynpp::exp2string(e));
-    if (copy_ctxt && Tcutil::is_noalias_pointer_or_aggr(env->r,e->topt->v)) {
+    if (copy_ctxt && Tcutil::is_noalias_pointer_or_aggr(env->r,(type_t)e->topt)) {
       Tcutil::terr(e->loc,"cannot track unique pointers through multiple assignments");
       return $(BottomFL(), fenv->unknown_all);
     }
@@ -925,9 +925,9 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
   case &Throw_e(e1):
     let $(f,r) = anal_Rexp(env,true,inflow,e1);
     use_Rval(env,e1->loc,f,r); // result irrelevant so long as initialized
-    return $(BottomFL(),typ_to_absrval(fenv,e->topt->v,false,fenv->unknown_all));
+    return $(BottomFL(),typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
 
-  case &FnCall_e(e1,es,_):
+  case &FnCall_e(e1,es,...):
     ANAL_RGN(env,temp) {
       let $(fst_outflow,rvals) = anal_unordered_Rexps(temp,env,inflow,rnew(temp) List(e1,rcopy(temp,es)),false,true);
       // for strange reasons, use_Rval is fine for the function pointer:
@@ -936,7 +936,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       // we just just "use" each arg except for the "initializes" attribute
       list_t<int> init_params = NULL;
       list_t<int> nolive_unique_params = NULL;
-      switch(Tcutil::compress(e1->topt->v)) {
+      switch(Tcutil::compress((type_t)e1->topt)) {
       case &PointerType(PtrInfo(t,_,_)):
         switch(Tcutil::compress(t)) {
         case &FnType(FnInfo(_,_,_,_,_,_,_,_,atts)):
@@ -962,7 +962,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
         if (List::memq(nolive_unique_params,i)) {
           DEBUG_PRINT("using unique argument, inflow is {\n");
           DEBUG_PRINT_F(print_flow,outflow);
-          outflow = use_nounique_Rval(env,es->hd->loc,es->hd->topt->v,
+          outflow = use_nounique_Rval(env,es->hd->loc,(type_t)es->hd->topt,
                                       outflow,rvals->hd);
           DEBUG_PRINT("}\n and outflow is {\n");
           DEBUG_PRINT_F(print_flow,outflow);
@@ -981,7 +981,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
             let ans_d = escape_deref(fenv, d, env->all_changed, rvals->hd);
             switch(rvals->hd) {
             case &AddressOf(p):
-              switch(Tcutil::compress(es->hd->topt->v)) {
+              switch(Tcutil::compress((type_t)es->hd->topt)) {
               case &PointerType(PtrInfo(t,_,_)):
                 ans_d = assign_place(fenv, es->hd->loc, ans_d,
                                      env->all_changed,
@@ -999,13 +999,13 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
         }
       }
       // if the called function doesn't return, we get BottomFL out
-      if (Tcutil::is_noreturn(e1->topt->v))
-        return $(BottomFL(),typ_to_absrval(fenv,e->topt->v,false,fenv->unknown_all));
+      if (Tcutil::is_noreturn((type_t)e1->topt))
+        return $(BottomFL(),typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
       else
-        return $(outflow,typ_to_absrval(fenv,e->topt->v,false,fenv->unknown_all));
+        return $(outflow,typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
     }
   case &Malloc_e(MallocInfo{iscalloc,eopt,topt,exp,isfat}):
-    root_t    root      = rnew(fenv->r) MallocPt(exp,e->topt->v);
+    root_t    root      = rnew(fenv->r) MallocPt(exp,(type_t)e->topt);
     place_t   place     = rnew(fenv->r) Place(root,NULL);
     absRval_t rval      = rnew(fenv->r) AddressOf(place);
     absRval_t place_val;
@@ -1076,7 +1076,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     return $(outflow,fenv->unknown_all);
 
   case &New_e(eopt,e2):
-    root_t    root      = rnew(fenv->r) MallocPt(e2,e->topt->v);
+    root_t    root      = rnew(fenv->r) MallocPt(e2,(type_t)e->topt);
     place_t   place     = rnew(fenv->r) Place(root,NULL);
     absRval_t rval      = rnew(fenv->r) AddressOf(place);
     update_place_set(env->all_changed,place,0);
@@ -1114,13 +1114,13 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     // KLUDGE: unions (see comment at top of file)
   case &AggrMember_e(e1,field,...):
     let $(f,r) = anal_Rexp(env,false,inflow,e1);
-    if(is_nontagged_union_type(e1->topt->v))
-      return $(f,typ_to_absrval(fenv,e->topt->v,false,fenv->unknown_all));
+    if(is_nontagged_union_type((type_t)e1->topt))
+      return $(f,typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
     switch (r) {
     case &Aggregate(UnionRInfo(is_union,fnum),rdict):
-      let field_no = get_field_index(e1->topt->v,field);
+      let field_no = get_field_index((type_t)e1->topt,field);
       if (is_union && fnum != -1 && fnum != field_no)
-	return $(f, typ_to_absrval(fenv,e->topt->v,true,fenv->unknown_none));
+	return $(f, typ_to_absrval(fenv,(type_t)e->topt,true,fenv->unknown_none));
       return $(f,rdict[field_no]);
     default:
       throw new Core::Impossible(aprintf("anal_Rexp: AggrMember: %s",
@@ -1131,11 +1131,11 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     // similar to above, but result is a non-zero integer unless the
     // field is already known
     let $(f,r) = anal_Rexp(env,false,inflow,e1);
-    if(is_nontagged_union_type(e1->topt->v))
+    if(is_nontagged_union_type((type_t)e1->topt))
       return $(f,fenv->unknown_all);
     switch (r) {
     case &Aggregate(UnionRInfo(is_union,fnum),rdict):
-      let field_no = get_field_index(e1->topt->v,field);
+      let field_no = get_field_index((type_t)e1->topt,field);
       if (is_union && fnum != -1)
 	if (fnum != field_no)
 	  return $(f, fenv->zero);
@@ -1155,15 +1155,15 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     let $(f2,r2) = anal_derefR(env,inflow,f1,e1,r1);
     DEBUG_PRINT("\nf2 flow is ");
     DEBUG_PRINT_F(print_flow,f2);
-    switch(Tcutil::compress(e1->topt->v)) {
+    switch(Tcutil::compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo{t2,_,_}):
       if(is_nontagged_union_type(t2))
-	return $(f2,typ_to_absrval(fenv,e->topt->v,false,fenv->unknown_all));
+	return $(f2,typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
       switch (r2) {
       case &Aggregate(UnionRInfo(is_union,fnum),rdict):
         let field_no = get_field_index(t2,field);
 	if (is_union && fnum != -1 && fnum != field_no)
-	  return $(f2, typ_to_absrval(fenv,e->topt->v,true,fenv->unknown_none));
+	  return $(f2, typ_to_absrval(fenv,(type_t)e->topt,true,fenv->unknown_none));
         return $(f2,rdict[field_no]);
       default: throw new Core::Impossible("anal_Rexp: AggrArrow");
       }
@@ -1210,7 +1210,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
         break;
       default: break;
       }
-      switch(Tcutil::compress(e1->topt->v)) {
+      switch(Tcutil::compress((type_t)e1->topt)) {
       case &TupleType(tqts):
         switch(rvals->hd) {
         case &Aggregate(_,rdict):
@@ -1243,7 +1243,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     }
   case &AnonStruct_e(_,des):
     list_t<Absyn::aggrfield_t> fs;
-    switch (Tcutil::compress(e->topt->v)) {
+    switch (Tcutil::compress((type_t)e->topt)) {
     case &AnonAggrType(_,f): fs = f; break;
     default: throw new Core::Impossible("anal_Rexp:anon struct has bad type");
     }
@@ -1279,7 +1279,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       let $(outflow,rvals) = anal_unordered_Rexps(temp,env,inflow,es,true,true);
       for(; rvals != NULL; rvals = rvals->tl, es = es->tl)
         outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
-      return $(outflow,typ_to_absrval(fenv,e->topt->v,false,fenv->unknown_all));
+      return $(outflow,typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
     }
   case &Comprehension_e(vd,e1,e2,zt):
 
@@ -1364,8 +1364,6 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     }
   case &StmtExp_e(s): return anal_stmt_exp(env,copy_ctxt,inflow,s);
   case &Var_e(_,&Unresolved_b):
-  case &UnknownId_e(_):
-  case &UnknownCall_e(_,_):
   case &UnresolvedMem_e(_,_):
   case &CompoundLit_e(_,_):
   case &Valueof_e(_):
@@ -1387,7 +1385,7 @@ static $(flow_t<`r>,absLval_t<`r>)
 	      absRval_t<`r> r,
               list_t<int,`r> flds) {
   let fenv = env->fenv;
-  switch(Tcutil::compress(e->topt->v)) {
+  switch(Tcutil::compress((type_t)e->topt)) {
   case &PointerType(PtrInfo{elttype,_,PtrAtts(_,_,bd,zt,_)}):
     switch(f) {
     case {.BottomFL = _}: return $(f,UnknownL());
@@ -1447,7 +1445,7 @@ static $(flow_t<`r>,absLval_t<`r>)
   case &Var_e(_,&Global_b(vd)): return $(inflow,UnknownL());
 
   case &AggrArrow_e(e1,f,...):
-    switch(Tcutil::compress(e1->topt->v)) {
+    switch(Tcutil::compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo{t2,_,_}):
       if(!is_nontagged_union_type(t2))
 	flds = rnew(env->r) List(get_field_index(t2,f),flds);
@@ -1456,7 +1454,7 @@ static $(flow_t<`r>,absLval_t<`r>)
     }
     fallthru(e1);
   case &Deref_e(e1):
-    if (expand_unique && Tcutil::is_noalias_pointer(e1->topt->v)) {
+    if (expand_unique && Tcutil::is_noalias_pointer((type_t)e1->topt)) {
       let $(f,lval) = anal_Lexp(env,inflow,true,e1);
       switch $(f,lval) {
       case $({.ReachableFL = $(fd,r)},{.PlaceL = p}):
@@ -1471,8 +1469,8 @@ static $(flow_t<`r>,absLval_t<`r>)
         default:
           initlevel_t il = initlevel(fenv,fd,rval);
           absRval_t leaf = (il == AllIL) ? fenv->unknown_all : fenv->unknown_none;
-          absRval_t new_rval = typ_to_absrval(fenv,Tcutil::pointer_elt_type(e1->topt->v),false,leaf);
-          root_t new_root = rnew(fenv->r) MallocPt(e,e->topt->v);
+          absRval_t new_rval = typ_to_absrval(fenv,Tcutil::pointer_elt_type((type_t)e1->topt),false,leaf);
+          root_t new_root = rnew(fenv->r) MallocPt(e,(type_t)e->topt);
           place_t place = rnew(fenv->r) Place{new_root,NULL};
           absRval_t res = rnew(fenv->r) AddressOf(place);
           update_place_set(env->all_changed,place,0);
@@ -1491,7 +1489,7 @@ static $(flow_t<`r>,absLval_t<`r>)
     return anal_derefL(env,inflow,e1,f,r,flds);
   case &Subscript_e(e1,e2):
     // assumes that tuple-projection implies e2 is pure and is evaluable
-    switch(Tcutil::compress(e1->topt->v)) {
+    switch(Tcutil::compress((type_t)e1->topt)) {
     case &TupleType(_):
       let fld = Evexp::eval_const_uint_exp(e2)[0];
       return anal_Lexp_rec(env,inflow,expand_unique,e1,rnew(env->r) List(fld,flds));
@@ -1520,10 +1518,10 @@ static $(flow_t<`r>,absLval_t<`r>)
     }
     // KLUDGE: unions (see comment at top of file)
   case &AggrMember_e(e1,fld,...):
-    if(is_nontagged_union_type(e1->topt->v))
+    if(is_nontagged_union_type((type_t)e1->topt))
       return $(inflow,UnknownL());
     return anal_Lexp_rec(env,inflow,expand_unique,e1,
-                         rnew(env->r) List(get_field_index(e1->topt->v,fld),flds));
+                         rnew(env->r) List(get_field_index((type_t)e1->topt,fld),flds));
 
   default: return $(BottomFL(), UnknownL()); // see comment before function
   }
@@ -1624,7 +1622,7 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
       // this (hoisted) check shouldn't disable any of Greg's stuff because
       // it always used to either check for unsigned or require x.size,
       // which is unsigned
-      switch($(Tcutil::compress(e1->topt->v),Tcutil::compress(e2->topt->v))) {
+      switch($(Tcutil::compress((type_t)e1->topt),Tcutil::compress((type_t)e2->topt))) {
       case $(&IntType(Unsigned,_),_):
       case $(_,&IntType(Unsigned,_)):
       case $(&TagType(_),_):
@@ -2021,9 +2019,9 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
     case $({.ReachableFL = $(fd,relns)},{.PlaceL = p}):
       let old_rval = lookup_place(fd,p);
       // HACK -- if e is cast, then get at the underlying expression's type
-      type_t t = e->topt->v;
+      type_t t = (type_t)e->topt;
       switch (e->r) {
-      case &Cast_e(_,e2,...): t = e2->topt->v; break;
+      case &Cast_e(_,e2,...): t = (type_t)e2->topt; break;
       default: break;
       }
       let new_rval = make_unique_consumed(fenv,t,e,env->iteration_num,old_rval);
@@ -2076,7 +2074,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
   case &ResetRegion_s(e):
     let $(f,r) = anal_Rexp(env,true,inflow,e);
     let f2 = use_Rval(env,e->loc,f,r);
-    switch (Tcutil::compress(e->topt->v)) {
+    switch (Tcutil::compress((type_t)e->topt)) {
     case &RgnHandleType(r):
       return kill_flow_region(fenv,f,r);
     default: throw new Core::Impossible("anal_stmt -- reset_region");
@@ -2131,7 +2129,7 @@ static flow_t<`r> anal_decl(analenv_t<`r> env, flow_t<`r> inflow, decl_t decl) {
 
   case &Fn_d(fd):
     check_nested_fun(fenv,inflow,fd);
-    let t = fd->cached_typ->v;
+    type_t t = (type_t)fd->cached_typ;
     let vd = (vardecl_t)fd->fn_vardecl;
     // JGM: hmmmm.  nested functions can effect local variables, so if we
     // call one of these, then we should set all of the local variables
@@ -2216,7 +2214,7 @@ static void check_nested_fun(flow_env_t<`r> fenv,
     // NOTE: for reasons Dan doesn't understand, the attributes, are not
     // on the fndecl, only on the type.
     _ atts;
-    switch(Tcutil::compress(fd->cached_typ->v)) {
+    switch(Tcutil::compress((type_t)fd->cached_typ)) {
     case &FnType(FnInfo(_,_,_,_,_,_,_,_,as)): atts = as; break;
     default: Tcutil::impos("check_fun: non-function type cached with fndecl_t");
     }

@@ -411,7 +411,8 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
       fprintf(stderr,
 	      "error: reclaim event %x without (remembered) allocation\n",
               addr);
-      return false;
+      //return false;
+      break;
     }
     break;
 

@@ -80,6 +80,7 @@ namespace Absyn {
   typedef stringptr_t field_name_t; // field names (for structs, etc.)
   typedef stringptr_t var_t;        // variables are string pointers
   typedef stringptr_t tvarname_t;   // type variables
+  typedef string_t   *var_opt_t;    // variable options
 
   // Name spaces
   EXTERN_ABSYN @tagged union Nmspace {
@@ -117,7 +118,7 @@ namespace Absyn {
   typedef struct DatatypeFieldInfo datatype_field_info_t;
   typedef struct AggrInfo aggr_info_t;
   typedef struct ArrayInfo array_info_t;
-  typedef datatype Type @type_t, @rgntype_t;
+  typedef datatype Type @type_t, @rgntype_t, *type_opt_t;
   typedef union Cnst cnst_t;
   typedef enum Primop primop_t;
   typedef enum Incrementor incrementor_t;
@@ -276,12 +277,12 @@ namespace Absyn {
     Notnull_ptrqual;
     Nullable_ptrqual;
   };
-  typedef datatype Pointer_qual @pointer_qual_t;
-  typedef list_t<pointer_qual_t> pointer_quals_t;
+  typedef datatype Pointer_qual @`r pointer_qual_t<`r>;
+  typedef list_t<pointer_qual_t<`r>,`r> pointer_quals_t<`r>;
 
   // information about vararg functions
   EXTERN_ABSYN struct VarargInfo {
-    opt_t<var_t> name;
+    var_opt_t name;
     tqual_t tq;
     type_t  type;
     bool    inject;
@@ -291,11 +292,11 @@ namespace Absyn {
   EXTERN_ABSYN struct FnInfo {
     list_t<tvar_t>  tvars;   // abstracted type variables
     // effect describes those regions that must be live to call the fn
-    opt_t<type_t>   effect;  // null => default effect
+    type_opt_t      effect;  // null => default effect
     tqual_t         ret_tqual;   // return type qualifier
     type_t          ret_typ; // return type
     // arguments are optionally named
-    list_t<$(opt_t<var_t>,tqual_t,type_t)@>  args; 
+    list_t<$(var_opt_t,tqual_t,type_t)@>  args; 
     // if c_varargs is true, then cyc_varargs == null, and if 
     // cyc_varargs is non-null, then c_varargs is false.
     bool                                     c_varargs;
@@ -392,7 +393,7 @@ namespace Absyn {
     // The int is used as a unique identifier for printing messages.
     // The list of tvars is the set of free type variables that can
     // occur in the type to which the evar is constrained.  
-    Evar(opt_t<kind_t>,opt_t<type_t>,int,opt_t<list_t<tvar_t>>); 
+    Evar(opt_t<kind_t>,type_opt_t,int,opt_t<list_t<tvar_t>>); 
     VarType(tvar_t); // type variables, kind induced by tvar
     DatatypeType(datatype_info_t); // datatype Foo
     DatatypeFieldType(datatype_field_info_t); // datatype Foo.Bar
@@ -412,7 +413,7 @@ namespace Absyn {
     RgnHandleType(type_t);   // a handle for allocating in a region.  BoxKind
     DynRgnType(type_t,type_t); // RgnKing * RgnKind -> BoxKind
     // An abbreviation -- the type_t* contains the definition iff any
-    TypedefType(typedef_name_t,list_t<type_t>,struct Typedefdecl *,type_t*);
+    TypedefType(typedef_name_t,list_t<type_t>,struct Typedefdecl *,type_opt_t);
     ValueofType(exp_t);      // IntKind -- exp must be a type-level expression
     TagType(type_t);         // tag_t<t>.  IntKind -> BoxKind.
     HeapRgn;        // The heap region.  RgnKind 
@@ -434,10 +435,10 @@ namespace Absyn {
   // used when parsing/pretty-printing function definitions.
   EXTERN_ABSYN datatype Funcparams {
     NoTypes(list_t<var_t>,seg_t); // K&R style.  
-    WithTypes(list_t<$(opt_t<var_t>,tqual_t,type_t)@>, // args and types
+    WithTypes(list_t<$(var_opt_t,tqual_t,type_t)@>, // args and types
               bool,                                    // true ==> c_varargs
               vararg_info_t *,                         // cyc_varargs
-              opt_t<type_t>,                           // effect
+              type_opt_t,                              // effect
               list_t<$(type_t,type_t)@>);              // region partial order
   };
   typedef datatype Funcparams @`r funcparams_t<`r>;
@@ -584,7 +585,6 @@ namespace Absyn {
   EXTERN_ABSYN datatype Raw_exp {
     Const_e(cnst_t); // constants
     Var_e(qvar_t,binding_t); // variables -- binding_t gets filled in
-    UnknownId_e(qvar_t);     // used only during parsing
     Primop_e(primop_t,list_t<exp_t>); // application of primitive
     AssignOp_e(exp_t,opt_t<primop_t>,exp_t); // e1 = e2, e1 += e2, etc.
     Increment_e(exp_t,incrementor_t);  // e++, ++e, --e, e--
@@ -592,10 +592,11 @@ namespace Absyn {
     And_e(exp_t,exp_t); // e1 && e2
     Or_e(exp_t,exp_t);  // e1 || e2
     SeqExp_e(exp_t,exp_t);             // e1, e2
-    UnknownCall_e(exp_t,list_t<exp_t>); // used during parsing
+    // the resolved field is initially false and indicates that this
+    // could be a datatype constructor or aggregate constructor expression.
     // the vararg_call_info_t is non-null only if this is a vararg call
     // and is set during type-checking and used only for code generation.
-    FnCall_e(exp_t,list_t<exp_t>,vararg_call_info_t *); //fn call
+    FnCall_e(exp_t,list_t<exp_t>,vararg_call_info_t *,bool resolved); //fn call
     Throw_e(exp_t); // throw
     NoInstantiate_e(exp_t); // e@<>
     Instantiate_e(exp_t,list_t<type_t>); // instantiation of polymorphic defn
@@ -618,7 +619,7 @@ namespace Absyn {
     AggrArrow_e(exp_t,field_name_t,bool is_tagged, bool is_read);   // e->x
     Subscript_e(exp_t,exp_t); // e1[e2]
     Tuple_e(list_t<exp_t>); // $(e1,...,en)
-    CompoundLit_e($(opt_t<var_t>,tqual_t,type_t)@,
+    CompoundLit_e($(var_opt_t,tqual_t,type_t)@,
                   list_t<$(list_t<designator_t>,exp_t)@>); 
     Array_e(list_t<$(list_t<designator_t>,exp_t)@>); // {.0=e1,...,.n=en}
     // {for i < e1 : e2} -- the bool tells us whether it's zero-terminated
@@ -652,7 +653,7 @@ namespace Absyn {
   };
   // expression with auxiliary information
   EXTERN_ABSYN struct Exp {
-    opt_t<type_t> topt;  // type of expression -- filled in by type-checker
+    type_opt_t    topt;  // type of expression -- filled in by type-checker
     raw_exp_t     r;     // the real expression
     seg_t         loc;   // the location in the source code
     absyn_annot_t annot; // used during analysis
@@ -721,7 +722,7 @@ namespace Absyn {
   // patterns with auxiliary information
   EXTERN_ABSYN struct Pat {
     raw_pat_t      r;    // raw pattern
-    opt_t<type_t>  topt; // type -- filled in by tcpat
+    type_opt_t     topt; // type -- filled in by tcpat
     seg_t          loc;  // location in source code
   };
 
@@ -756,7 +757,7 @@ namespace Absyn {
     type_t             type;        // type of variable
     exp_opt_t          initializer; // optional initializer -- 
                                     // ignored for non-local/global variables
-    opt_t<type_t>      rgn;         // filled in by type-checker
+    type_opt_t         rgn;         // filled in by type-checker
     // attributes can include just about anything...but the type-checker
     // must ensure that they are properly accounted for.  For instance,
     // functions cannot be aligned or packed.  And non-functions cannot
@@ -774,7 +775,7 @@ namespace Absyn {
     bool                       is_inline;  // inline flag
     qvar_t                     name;       // function name
     list_t<tvar_t>             tvs;        // bound type variables
-    opt_t<type_t>              effect;     // null => default effect
+    type_opt_t                 effect;     // null => default effect
     tqual_t                    ret_tqual;  // return type qualifier
     type_t                     ret_type;   // return type
     list_t<$(var_t,tqual_t,type_t)@> args; // arguments & their quals and types
@@ -782,7 +783,7 @@ namespace Absyn {
     vararg_info_t*             cyc_varargs; // non-null if Cyclone vararg
     list_t<$(type_t,type_t)@>  rgn_po; // partial order on region params
     stmt_t                     body;   // body of function
-    opt_t<type_t>              cached_typ; // cached type of the function
+    type_opt_t                 cached_typ; // cached type of the function
     opt_t<list_t<vardecl_t>>   param_vardecls;// so we can use pointer equality
     struct Vardecl            *fn_vardecl; // used only for inner functions
     // any attributes except aligned or packed
@@ -846,7 +847,7 @@ namespace Absyn {
     tqual_t        tq;
     list_t<tvar_t> tvs;
     opt_t<kind_t>  kind;
-    opt_t<type_t>  defn;
+    type_opt_t     defn;
     attributes_t   atts;
   };
 
@@ -1126,10 +1127,10 @@ namespace Absyn {
                                     bool is_extensible, 
                                     seg_t loc);
 
-  extern type_t function_typ(list_t<tvar_t,`H> tvs,opt_t<type_t,`H> eff_typ,
+  extern type_t function_typ(list_t<tvar_t,`H> tvs,type_opt_t eff_typ,
                              tqual_t ret_tqual,
                              type_t ret_typ, 
-                             list_t<$(opt_t<var_t,`H>,tqual_t,type_t)@`H,`H> args,
+                             list_t<$(var_opt_t,tqual_t,type_t)@`H,`H> args,
                              bool c_varargs, vararg_info_t *`H cyc_varargs,
                              list_t<$(type_t,type_t)@`H,`H> rgn_po,
                              attributes_t atts);

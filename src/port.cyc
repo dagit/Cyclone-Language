@@ -983,9 +983,9 @@ static void register_zeroterm_cvars(cenv_t env, ctype_t new_zt,
 // Create a "good" type for main:  int main(int, char??) which will
 // end up constraining the C code.
 static type_t main_type() {
-  $(opt_t<var_t>,tqual_t,type_t)@ arg1 =
+  $(var_opt_t,tqual_t,type_t)@ arg1 =
     new $(NULL,empty_tqual(0),sint_typ);
-  $(opt_t<var_t>,tqual_t,type_t)@ arg2 =
+  $(var_opt_t,tqual_t,type_t)@ arg2 =
     new $(NULL,empty_tqual(0),
           dyneither_typ(string_typ(wildtyp(NULL)),wildtyp(NULL),
                                 empty_tqual(0), empty_conref()));
@@ -1328,8 +1328,7 @@ static ctype_t gen_primop(cenv_t env, primop_t p, list_t<ctype_t> args) {
 // generate constraints for a LHS expression and return the qualifier & type
 static $(ctype_t qual,ctype_t type) gen_lhs(cenv_t env, exp_t e) {
   switch (e->r) {
-  case &Var_e(x,_):       fallthru(x);
-  case &UnknownId_e(x):
+  case &Var_e(x,_):       
     (*x)[0] = Loc_n;
     return lookup_var(env,x);
   case &Subscript_e(e1,e2):
@@ -1383,8 +1382,7 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
   case &Const_e({.Wstring_c = _}):
     return ptr_ct(arith_ct(),const_ct(),fat_ct(),heap_ct(),zterm_ct());
   case &Const_e({.Null_c = _}):  return zero_ct();
-  case &Var_e(x,_):       fallthru(x);
-  case &UnknownId_e(x):
+  case &Var_e(x,_):       
     (*x)[0] = Loc_n;
     let $(_,t) = lookup_var(env,x);
     if (isfn(env,x)) {
@@ -1436,8 +1434,7 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
   case &SeqExp_e(e1,e2):
     gen_exp(env,e1);
     return gen_exp(env,e2);
-  case &UnknownCall_e(e1,es): fallthru(e1,es);
-  case &FnCall_e(e1,es,_):
+  case &FnCall_e(e1,es,...):
     let v = var();
     let t1 = gen_exp(env,e1);
     let ts = map_c(gen_exp,env,es);
@@ -1634,7 +1631,7 @@ static cenv_t gen_localdecl(cenv_t env, decl_t d) {
   }
 }
 
-static $(opt_t<var_t>,tqual_t,type_t)@ make_targ($(var_t,tqual_t,type_t)@ arg){
+static $(var_opt_t,tqual_t,type_t)@ make_targ($(var_t,tqual_t,type_t)@ arg){
   let $(x,q,t) = *arg;
   return new $(NULL,q,t);
 }
@@ -1772,7 +1769,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     fprintf(stderr,"processing typedef %s\n",qvar2string(td->name));
 #endif
     // FIX: what about typedef qualifier?
-    let t = td->defn->v;
+    let t = (type_t)td->defn;
     let ct = type_to_ctype(env,t);
     (*td->name)[0] = Loc_n;
     add_typedef(env, td->name, t, ct);
