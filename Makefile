@@ -282,10 +282,12 @@ test_boot:
 clean_test:
 	$(MAKE) -C tests clean
 
-# To do: a much safer way to clean build!
+# To do: a much safer and less kludgy way to clean build!
 # To do: a way to clean individual directories in build.
 clean_build:
+	mv build/CVS .build_CVS
 	$(RM) -rf build/*
+	mv .build_CVS build/CVS
 
 clean_nogc: clean_test clean_build
 	$(MAKE) -C tools/bison  clean
