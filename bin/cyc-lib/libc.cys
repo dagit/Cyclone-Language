@@ -4012,6 +4012,7 @@ hstub {
   extern datatype SockOpt<`r::R> {
     SO_int(int @`r);
     SO_timeval(struct timeval @`r);
+    SO_linger(struct linger@`r);
     /* The remaining cases are for the argument following the type-varying
        argument; they could be eliminated if we had per-arg injection. */
     SO_socklenptr(socklen_t @`r); // getsockopt
@@ -4186,7 +4187,8 @@ cycstub recv {
 }
 cstub recv {
   ssize_t recv_wrapped(int a, struct _dyneither_ptr b, size_t c, int d) {
-    char *p = _check_dyneither_subscript(b,1,0);
+    // JGM: -- it's okay to pass in NULL if c == 0
+    char *p = b.curr;  // _check_dyneither_subscript(b,1,0);
     unsigned n = _get_dyneither_size(b,1);  
     if (n<c) _throw_arraybounds();
     return recv(a,p,c,d);
@@ -4214,7 +4216,8 @@ cycstub recvfrom {
 cstub recvfrom {
   ssize_t recvfrom_in(int a, struct _dyneither_ptr b, size_t c, int d,
                       const struct sockaddr_in *e, socklen_t *f) {
-    char *p = _check_dyneither_subscript(b,1,0);
+    // JGM: -- it's okay to pass in NULL if c == 0
+    char *p = b.curr; // _check_dyneither_subscript(b,1,0);
     unsigned n = _get_dyneither_size(b,1);  
     if (n<c) _throw_arraybounds();
     return recvfrom(a,p,c,d,(struct sockaddr *)e,f);
@@ -4233,7 +4236,8 @@ cycstub send {
 }
 cstub send {
   ssize_t send_wrapped(int a, struct _dyneither_ptr b, size_t c, int d) {
-    char *p = _check_dyneither_subscript(b,1,0);
+    // JGM: -- it's okay to pass in NULL if c == 0
+    char *p = b.curr; // _check_dyneither_subscript(b,1,0);
     unsigned n = _get_dyneither_size(b,1);  
     if (n<c) _throw_arraybounds();
     return send(a,p,c,d);
@@ -4261,7 +4265,8 @@ cycstub sendto {
 cstub sendto {
   ssize_t sendto_in(int a, struct _dyneither_ptr b, size_t c, int d,
                     const struct sockaddr_in *e, socklen_t f) {
-    char *p = _check_dyneither_subscript(b,1,0);
+    // JGM: -- it's okay to pass in NULL if c == 0
+    char *p = b.curr; // _check_dyneither_subscript(b,1,0);
     unsigned n = _get_dyneither_size(b,1);  
     if (n<c) _throw_arraybounds();
     return sendto(a,p,c,d,(struct sockaddr *)e,f);
@@ -4274,6 +4279,7 @@ cycstub setsockopt {
   namespace Csocket {
     extern "C" int setsockopt_int(int, int, int, const int @, socklen_t);
     extern "C" int setsockopt_timeval(int, int, int, const struct timeval @, socklen_t);
+    extern "C" int setsockopt_linger(int, int, int, const struct linger @, socklen_t);
   }
   int setsockopt(int fd, int level, int optname, ... inject SO ap) {
     if (numelts(ap) != 2) throw &SocketError_val;
@@ -4282,6 +4288,8 @@ cycstub setsockopt {
       return Csocket::setsockopt_int(fd,level,optname,x,y);
     case $(&SO_timeval(x),&SO_socklen(y)):
       return Csocket::setsockopt_timeval(fd,level,optname,x,y);
+    case $(&SO_linger(x),&SO_socklen(y)):
+      return Csocket::setsockopt_linger(fd,level,optname,x,y);
     default: throw &SocketError_val;
     }
   }
@@ -4291,6 +4299,9 @@ cstub setsockopt {
     return setsockopt(a,b,c,d,e);
   }
   int setsockopt_timeval(int a, int b, int c, const struct timeval *d, socklen_t e) {
+    return setsockopt(a,b,c,d,e);
+  }
+  int setsockopt_linger(int a, int b, int c, const struct linger *d, socklen_t e) {
     return setsockopt(a,b,c,d,e);
   }
 }
@@ -4373,18 +4384,20 @@ hstub {
   #define _blksize_t_def_
   typedef __blksize_t blksize_t;
   #endif
+  /* JGM: no longer seems to be a problem for Cygwin so I'm getting
+  *  rid of this. */
   /* Cygwin needs these definitions to smooth out the interface */
-  #if defined(__CYGWIN32__) || defined(__CYGWIN__)
-  #ifdef __CYGWIN_USE_BIG_TYPES__
-  #define st_uid  __st_uid32
-  #define st_gid  __st_gid32
-  #define st_size __st_size64
-  #else
-  #define st_uid  __st_uid16
-  #define st_gid  __st_gid16
-  #define st_size __st_size32
-  #endif /* __CYGWIN_USE_BIG_TYPES__ */
-  #endif /* defined(__CYGWIN32__) || defined(__CYGWIN__) */
+  //#if defined(__CYGWIN32__) || defined(__CYGWIN__)
+  //#ifdef __CYGWIN_USE_BIG_TYPES__
+  //#define st_uid  __st_uid32
+  //#define st_gid  __st_gid32
+  //#define st_size __st_size64
+  //#else
+  //#define st_uid  __st_uid16
+  //#define st_gid  __st_gid16
+  //#define st_size __st_size32
+  //#endif /* __CYGWIN_USE_BIG_TYPES__ */
+  //#endif /* defined(__CYGWIN32__) || defined(__CYGWIN__) */
 }
 hstub chmod {
   extern "C" int chmod(const char @, mode_t);
