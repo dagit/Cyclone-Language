@@ -1693,13 +1693,13 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
   switch (e1->r) {
   case &Deref_e(ea):
     if (!is_dyneither) {
-      ea = cast_it(fat_ptr_type,ea); 
+      ea = cast_exp(fat_ptr_type,ea,false,Other_coercion,DL); 
       ea->topt = new Opt(fat_ptr_type);
     }
     exp_to_c(nv,ea); xinit = ea; break;
   case &Subscript_e(ea,eb):
     if (!is_dyneither) {
-      ea = cast_it(fat_ptr_type,ea); 
+      ea = cast_exp(fat_ptr_type,ea,false,Other_coercion,DL); 
       ea->topt = new Opt(fat_ptr_type);
     }
     exp_to_c(nv,ea); exp_to_c(nv,eb);
@@ -2441,7 +2441,7 @@ static void exp_to_c(env_t nv, exp_t e) {
             default:
               arg3 = fncall_exp(getFunctionRemovePointer(
                                  &_get_zero_arr_size_functionSet,e1),
-                                list(x_exp,e2),DL);
+                                list(cast_it(void_star_typ(),x_exp),e2),DL);
               break;
             }
             if (!zt2 && !p2.elt_tq.real_const) {
@@ -2892,7 +2892,7 @@ DynCast:
           // *((ta2)_zero_arr_plus(e1, esz, e2)
           if (!Evexp::c_can_eval(esz))
             terr(e->loc,"cannot determine subscript is in bounds");
-          exp_t function_e = getFunction(&_zero_arr_plus_functionSet,e1);
+          exp_t function_e = getFunctionRemovePointer(&_zero_arr_plus_functionSet,e1);
           e->r = deref_exp_r(cast_it(ta2,
                                      fncall_exp(function_e,
                                                 list(e1,esz,e2),DL)));

@@ -865,13 +865,13 @@ _check_dyneither_subscript(_tmp2E,sizeof(char),0))='\000';nread +=(_tmp2E.curr -
 _tmp2D.curr)/ sizeof(char);++ nassigned;};}continue;case 3: _LL4D: if(width == 0  || 
 width > sizeof(buf)- 1)width=(long long)(sizeof(buf)- 1);flags |=(64 | 128)| 512;{
 char*_tmp68;for(p=((_tmp68=buf,_tag_dyneither(_tmp68,sizeof(char),
-_get_zero_arr_size_char(_tmp68,351))));width != 0;-- width){c=(int)((unsigned char)
-_IO_peekc(fp));switch(c){case '0': _LL4F: if(base == 0){base=8;flags |=256;}if(flags & 
-512)flags &=~((64 | 512)| 128);else{flags &=~((64 | 256)| 128);}goto ok;case '1': _LL50:
-goto _LL51;case '2': _LL51: goto _LL52;case '3': _LL52: goto _LL53;case '4': _LL53: goto
-_LL54;case '5': _LL54: goto _LL55;case '6': _LL55: goto _LL56;case '7': _LL56: base=(int)
-basefix[_check_known_subscript_notnull(17,base)];flags &=~((64 | 256)| 128);goto ok;
-case '8': _LL57: goto _LL58;case '9': _LL58: base=(int)basefix[
+_get_zero_arr_size_char((void*)_tmp68,351))));width != 0;-- width){c=(int)((
+unsigned char)_IO_peekc(fp));switch(c){case '0': _LL4F: if(base == 0){base=8;flags |=
+256;}if(flags & 512)flags &=~((64 | 512)| 128);else{flags &=~((64 | 256)| 128);}goto
+ok;case '1': _LL50: goto _LL51;case '2': _LL51: goto _LL52;case '3': _LL52: goto _LL53;case '4':
+_LL53: goto _LL54;case '5': _LL54: goto _LL55;case '6': _LL55: goto _LL56;case '7': _LL56:
+base=(int)basefix[_check_known_subscript_notnull(17,base)];flags &=~((64 | 256)| 
+128);goto ok;case '8': _LL57: goto _LL58;case '9': _LL58: base=(int)basefix[
 _check_known_subscript_notnull(17,base)];if(base <= 8)break;flags &=~((64 | 256)| 
 128);goto ok;case 'A': _LL59: goto _LL5A;case 'B': _LL5A: goto _LL5B;case 'C': _LL5B: goto
 _LL5C;case 'D': _LL5C: goto _LL5D;case 'E': _LL5D: goto _LL5E;case 'F': _LL5E: goto _LL5F;
@@ -880,7 +880,7 @@ _LL62: goto _LL63;case 'e': _LL63: goto _LL64;case 'f': _LL64: if(base <= 10)bre
 ~((64 | 256)| 128);goto ok;case '+': _LL65: goto _LL66;case '-': _LL66: if(flags & 64){
 flags &=~ 64;goto ok;}break;case 'x': _LL67: goto _LL68;case 'X': _LL68:{char*_tmp69;if(
 flags & 256  && (char*)p.curr == (char*)(_dyneither_ptr_plus(((_tmp69=buf,
-_tag_dyneither(_tmp69,sizeof(char),_get_zero_arr_size_char(_tmp69,351)))),
+_tag_dyneither(_tmp69,sizeof(char),_get_zero_arr_size_char((void*)_tmp69,351)))),
 sizeof(char),1)).curr){base=16;flags &=~ 256;goto ok;}}break;default: _LL69: break;}
 break;ok: {char _tmp6C;char _tmp6B;struct _dyneither_ptr _tmp6A;(_tmp6A=
 _dyneither_ptr_inplace_plus_post(& p,sizeof(char),1),((_tmp6B=*((char*)
@@ -904,25 +904,25 @@ Cyc_va_arg_int_ptr(*((void**)_check_dyneither_subscript(ap,sizeof(void*),0)))=(
 int)res;else{*Cyc_va_arg_int_ptr(*((void**)_check_dyneither_subscript(ap,sizeof(
 void*),0)))=(int)res;}}}_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);++
 nassigned;}{char*_tmp70;nread +=(p.curr - ((_tmp70=buf,_tag_dyneither(_tmp70,
-sizeof(char),_get_zero_arr_size_char(_tmp70,351)))).curr)/ sizeof(char);}break;
-case 4: _LL4E: if(width == 0  || width > sizeof(buf)- 1)width=(long long)(sizeof(buf)- 
-1);flags |=((64 | 128)| 256)| 512;{char*_tmp71;for(p=((_tmp71=buf,_tag_dyneither(
-_tmp71,sizeof(char),_get_zero_arr_size_char(_tmp71,351))));width != 0;-- width){c=
-_IO_peekc(fp);switch(c){case '0': _LL6C: goto _LL6D;case '1': _LL6D: goto _LL6E;case '2':
-_LL6E: goto _LL6F;case '3': _LL6F: goto _LL70;case '4': _LL70: goto _LL71;case '5': _LL71:
-goto _LL72;case '6': _LL72: goto _LL73;case '7': _LL73: goto _LL74;case '8': _LL74: goto
-_LL75;case '9': _LL75: flags &=~(64 | 128);goto fok;case '+': _LL76: goto _LL77;case '-':
-_LL77: if(flags & 64){flags &=~ 64;goto fok;}break;case '.': _LL78: if(flags & 256){flags
-&=~(64 | 256);goto fok;}break;case 'e': _LL79: goto _LL7A;case 'E': _LL7A: if((flags & (
-128 | 512))== 512){flags=(flags & ~(512 | 256)| 64)| 128;goto fok;}break;default:
-_LL7B: break;}break;fok: {char _tmp74;char _tmp73;struct _dyneither_ptr _tmp72;(
-_tmp72=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1),((_tmp73=*((char*)
-_check_dyneither_subscript(_tmp72,sizeof(char),0)),((_tmp74=(char)c,((
-_get_dyneither_size(_tmp72,sizeof(char))== 1  && (_tmp73 == '\000'  && _tmp74 != '\000')?
-_throw_arraybounds(): 1,*((char*)_tmp72.curr)=_tmp74)))))));}_IO_getc(fp);if(
-_IO_peekc(fp)== - 1){++ seen_eof;break;}}}if(flags & 128){if(flags & 512){while((
-char*)p.curr > buf){_dyneither_ptr_inplace_plus(& p,sizeof(char),-1);_IO_ungetc((
-int)*((char*)_check_dyneither_subscript(p,sizeof(char),0)),fp);}goto
+sizeof(char),_get_zero_arr_size_char((void*)_tmp70,351)))).curr)/ sizeof(char);}
+break;case 4: _LL4E: if(width == 0  || width > sizeof(buf)- 1)width=(long long)(
+sizeof(buf)- 1);flags |=((64 | 128)| 256)| 512;{char*_tmp71;for(p=((_tmp71=buf,
+_tag_dyneither(_tmp71,sizeof(char),_get_zero_arr_size_char((void*)_tmp71,351))));
+width != 0;-- width){c=_IO_peekc(fp);switch(c){case '0': _LL6C: goto _LL6D;case '1':
+_LL6D: goto _LL6E;case '2': _LL6E: goto _LL6F;case '3': _LL6F: goto _LL70;case '4': _LL70:
+goto _LL71;case '5': _LL71: goto _LL72;case '6': _LL72: goto _LL73;case '7': _LL73: goto
+_LL74;case '8': _LL74: goto _LL75;case '9': _LL75: flags &=~(64 | 128);goto fok;case '+':
+_LL76: goto _LL77;case '-': _LL77: if(flags & 64){flags &=~ 64;goto fok;}break;case '.':
+_LL78: if(flags & 256){flags &=~(64 | 256);goto fok;}break;case 'e': _LL79: goto _LL7A;
+case 'E': _LL7A: if((flags & (128 | 512))== 512){flags=(flags & ~(512 | 256)| 64)| 128;
+goto fok;}break;default: _LL7B: break;}break;fok: {char _tmp74;char _tmp73;struct
+_dyneither_ptr _tmp72;(_tmp72=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1),((
+_tmp73=*((char*)_check_dyneither_subscript(_tmp72,sizeof(char),0)),((_tmp74=(
+char)c,((_get_dyneither_size(_tmp72,sizeof(char))== 1  && (_tmp73 == '\000'  && 
+_tmp74 != '\000')?_throw_arraybounds(): 1,*((char*)_tmp72.curr)=_tmp74)))))));}
+_IO_getc(fp);if(_IO_peekc(fp)== - 1){++ seen_eof;break;}}}if(flags & 128){if(flags & 
+512){while((char*)p.curr > buf){_dyneither_ptr_inplace_plus(& p,sizeof(char),-1);
+_IO_ungetc((int)*((char*)_check_dyneither_subscript(p,sizeof(char),0)),fp);}goto
 match_failure;}_dyneither_ptr_inplace_plus(& p,sizeof(char),-1);c=(int)*((char*)
 _check_dyneither_subscript(p,sizeof(char),0));if(c != 'e'  && c != 'E'){_IO_ungetc(
 c,fp);_dyneither_ptr_inplace_plus(& p,sizeof(char),-1);c=(int)*((char*)
@@ -936,16 +936,16 @@ sizeof(void*),0)))=res;else{*Cyc_va_arg_float_ptr(*((void**)
 _check_dyneither_subscript(ap,sizeof(void*),0)))=(float)res;}
 _dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);++ nassigned;}{char*_tmp78;nread
 +=(p.curr - ((_tmp78=buf,_tag_dyneither(_tmp78,sizeof(char),
-_get_zero_arr_size_char(_tmp78,351)))).curr)/ sizeof(char);}break;default: _LL6B: {
-struct Cyc_Core_Impossible_struct _tmp7E;const char*_tmp7D;struct Cyc_Core_Impossible_struct*
-_tmp7C;(int)_throw((void*)((_tmp7C=_cycalloc(sizeof(*_tmp7C)),((_tmp7C[0]=((
-_tmp7E.tag=Cyc_Core_Impossible,((_tmp7E.f1=((_tmp7D="scanf3",_tag_dyneither(
-_tmp7D,sizeof(char),7))),_tmp7E)))),_tmp7C)))));}}}eof_failure: ++ seen_eof;
-input_failure: if(nassigned == 0)nassigned=- 1;control_failure: match_failure: if((
-unsigned int)errp)*errp |=2;done: if((unsigned int)errp  && seen_eof)*errp |=1;
-return nassigned;};}static struct _dyneither_ptr Cyc___sccl(char*tab,struct
-_dyneither_ptr fmt);static struct _dyneither_ptr Cyc___sccl(char*tab,struct
-_dyneither_ptr fmt){int c;int n;int v;c=(int)*((const char*)
+_get_zero_arr_size_char((void*)_tmp78,351)))).curr)/ sizeof(char);}break;
+default: _LL6B: {struct Cyc_Core_Impossible_struct _tmp7E;const char*_tmp7D;struct
+Cyc_Core_Impossible_struct*_tmp7C;(int)_throw((void*)((_tmp7C=_cycalloc(sizeof(*
+_tmp7C)),((_tmp7C[0]=((_tmp7E.tag=Cyc_Core_Impossible,((_tmp7E.f1=((_tmp7D="scanf3",
+_tag_dyneither(_tmp7D,sizeof(char),7))),_tmp7E)))),_tmp7C)))));}}}eof_failure: ++
+seen_eof;input_failure: if(nassigned == 0)nassigned=- 1;control_failure:
+match_failure: if((unsigned int)errp)*errp |=2;done: if((unsigned int)errp  && 
+seen_eof)*errp |=1;return nassigned;};}static struct _dyneither_ptr Cyc___sccl(char*
+tab,struct _dyneither_ptr fmt);static struct _dyneither_ptr Cyc___sccl(char*tab,
+struct _dyneither_ptr fmt){int c;int n;int v;c=(int)*((const char*)
 _check_dyneither_subscript(_dyneither_ptr_inplace_plus_post(& fmt,sizeof(char),1),
 sizeof(char),0));if(c == '^'){v=1;c=(int)*((const char*)_check_dyneither_subscript(
 _dyneither_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0));}else{v=0;}
