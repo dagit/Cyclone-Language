@@ -2403,7 +2403,7 @@ env,struct Cyc_Absyn_Decl*d){void*_tmp36B=(void*)d->r;struct Cyc_Absyn_Vardecl*
 _tmp36C;struct Cyc_Absyn_Fndecl*_tmp36D;struct Cyc_Absyn_Typedefdecl*_tmp36E;
 struct Cyc_Absyn_Aggrdecl*_tmp36F;struct Cyc_Absyn_Enumdecl*_tmp370;_LL2B8: if((int)
 _tmp36B != 0)goto _LL2BA;_LL2B9:(env->gcenv)->porting=1;return env;_LL2BA: if((int)
-_tmp36B != 1)goto _LL2BC;_LL2BB:(env->gcenv)->porting=1;return env;_LL2BC: if(
+_tmp36B != 1)goto _LL2BC;_LL2BB:(env->gcenv)->porting=0;return env;_LL2BC: if(
 _tmp36B <= (void*)2)goto _LL2C6;if(*((int*)_tmp36B)!= 0)goto _LL2BE;_tmp36C=((
 struct Cyc_Absyn_Var_d_struct*)_tmp36B)->f1;_LL2BD:(*_tmp36C->name).f1=(union Cyc_Absyn_Nmspace_union)({
 union Cyc_Absyn_Nmspace_union _tmp371;(_tmp371.Loc_n).tag=0;_tmp371;});if(Cyc_Port_declared_var(

@@ -1637,7 +1637,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     env->gcenv->porting = true;
     return env;
   case Portoff_d:
-    env->gcenv->porting = true;
+    env->gcenv->porting = false;
     return env;
   case &Var_d(vd): 
     (*vd->name)[0] = Loc_n;
