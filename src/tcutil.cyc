@@ -5212,6 +5212,16 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
       case &FnType(_): return true;
       default: return var_okay;
       }
+    // local variables are OK if they are static
+    case &Local_b(vd):
+      if (vd->sc == Static)
+	switch (compress(vd->type)) {
+	case &ArrayType(_):
+	case &FnType(_): return true;
+	default: return var_okay;
+	}
+      else
+	return var_okay;
     case &Unresolved_b: return false;
     default: return var_okay;
     }
