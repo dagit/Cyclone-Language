@@ -1239,8 +1239,8 @@ return Cyc_Absyn_int_exp(Cyc_Absyn_Signed,i,loc);}
 struct Cyc_Absyn_Exp*Cyc_Absyn_uint_exp(unsigned int i,unsigned int loc){
 static struct Cyc_Absyn_Const_e_Absyn_Raw_exp_struct uzero={0U,{.Int_c={5,{Cyc_Absyn_Unsigned,0}}}};
 static struct Cyc_Absyn_Const_e_Absyn_Raw_exp_struct uone={0U,{.Int_c={5,{Cyc_Absyn_Unsigned,1}}}};
-if(i == 0)return Cyc_Absyn_new_exp((void*)& uzero,loc);else{
-if(i == 1)return Cyc_Absyn_new_exp((void*)& uone,loc);else{
+if(i == (unsigned int)0)return Cyc_Absyn_new_exp((void*)& uzero,loc);else{
+if(i == (unsigned int)1)return Cyc_Absyn_new_exp((void*)& uone,loc);else{
 return Cyc_Absyn_int_exp(Cyc_Absyn_Unsigned,(int)i,loc);}}}
 # 609
 struct Cyc_Absyn_Exp*Cyc_Absyn_bool_exp(int b,unsigned int loc){return Cyc_Absyn_signed_int_exp(b?1: 0,loc);}
@@ -1644,7 +1644,7 @@ static struct _dyneither_ptr*Cyc_Absyn_field_names_v[1U]={& Cyc_Absyn_f0};
 static struct _dyneither_ptr Cyc_Absyn_field_names={(void*)((struct _dyneither_ptr**)Cyc_Absyn_field_names_v),(void*)((struct _dyneither_ptr**)Cyc_Absyn_field_names_v),(void*)((struct _dyneither_ptr**)Cyc_Absyn_field_names_v + 1U)};
 struct _dyneither_ptr*Cyc_Absyn_fieldname(int i){
 unsigned int fsz=_get_dyneither_size(Cyc_Absyn_field_names,sizeof(struct _dyneither_ptr*));
-if(i >= fsz)
+if((unsigned int)i >= fsz)
 Cyc_Absyn_field_names=({unsigned int _tmpF8=(unsigned int)(i + 1);struct _dyneither_ptr**_tmpF7=_cycalloc(_check_times(_tmpF8,sizeof(struct _dyneither_ptr*)));({{unsigned int _tmp153=(unsigned int)(i + 1);unsigned int j;for(j=0;j < _tmp153;++ j){
 # 1088
 j < fsz?_tmpF7[j]=*((struct _dyneither_ptr**)_check_dyneither_subscript(Cyc_Absyn_field_names,sizeof(struct _dyneither_ptr*),(int)j)):({struct _dyneither_ptr*_tmp1DF=({struct _dyneither_ptr*_tmpF6=_cycalloc(sizeof(*_tmpF6));({struct _dyneither_ptr _tmp1DE=(struct _dyneither_ptr)({struct Cyc_Int_pa_PrintArg_struct _tmpF5=({struct Cyc_Int_pa_PrintArg_struct _tmp154;_tmp154.tag=1U,_tmp154.f1=(unsigned long)((int)j);_tmp154;});void*_tmpF3[1U];_tmpF3[0]=& _tmpF5;({struct _dyneither_ptr _tmp1DD=({const char*_tmpF4="f%d";_tag_dyneither(_tmpF4,sizeof(char),4U);});Cyc_aprintf(_tmp1DD,_tag_dyneither(_tmpF3,sizeof(void*),1U));});});*_tmpF6=_tmp1DE;});_tmpF6;});_tmpF7[j]=_tmp1DF;});}}0;});_tag_dyneither(_tmpF7,sizeof(struct _dyneither_ptr*),_tmpF8);});
@@ -1668,14 +1668,14 @@ return((struct Cyc_Absyn_Aggrfield*)_tmp10B->hd)->requires_clause == 0;}else{got
 # 1110
 union Cyc_Absyn_AggrInfo _tmp104=_tmp10C;enum Cyc_Absyn_AggrKind _tmp10A;int _tmp109;enum Cyc_Absyn_AggrKind _tmp108;struct Cyc_Absyn_Aggrdecl*_tmp107;if((_tmp104.KnownAggr).tag == 2){_LL8: _tmp107=*(_tmp104.KnownAggr).val;_LL9:
 # 1112
- if(_tmp107->kind != Cyc_Absyn_UnionA)return 0;{
+ if((int)_tmp107->kind != (int)Cyc_Absyn_UnionA)return 0;{
 struct Cyc_Absyn_AggrdeclImpl*_tmp105=_tmp107->impl;
 if(((struct Cyc_Absyn_AggrdeclImpl*)_check_null(_tmp105))->tagged)return 0;{
 struct Cyc_List_List*_tmp106=_tmp105->fields;
 if(_tmp106 == 0)return 1;
 return((struct Cyc_Absyn_Aggrfield*)_tmp106->hd)->requires_clause == 0;};};}else{if(((_tmp104.UnknownAggr).val).f3 == 0){_LLA: _tmp108=((_tmp104.UnknownAggr).val).f1;_LLB:
- return _tmp108 == Cyc_Absyn_UnionA;}else{_LLC: _tmp10A=((_tmp104.UnknownAggr).val).f1;_tmp109=(int)(((_tmp104.UnknownAggr).val).f3)->v;_LLD:
- return _tmp10A == Cyc_Absyn_UnionA  && !_tmp109;}}_LL7:;}}else{goto _LL5;}default: _LL5: _LL6:
+ return(int)_tmp108 == (int)Cyc_Absyn_UnionA;}else{_LLC: _tmp10A=((_tmp104.UnknownAggr).val).f1;_tmp109=(int)(((_tmp104.UnknownAggr).val).f3)->v;_LLD:
+ return(int)_tmp10A == (int)Cyc_Absyn_UnionA  && !_tmp109;}}_LL7:;}}else{goto _LL5;}default: _LL5: _LL6:
 # 1121
  return 0;}_LL0:;}
 # 1124
@@ -1687,7 +1687,7 @@ return((struct Cyc_Absyn_Aggrfield*)_tmp116->hd)->requires_clause != 0;}else{got
 # 1130
 union Cyc_Absyn_AggrInfo _tmp10F=_tmp117;enum Cyc_Absyn_AggrKind _tmp115;int _tmp114;enum Cyc_Absyn_AggrKind _tmp113;struct Cyc_Absyn_Aggrdecl*_tmp112;if((_tmp10F.KnownAggr).tag == 2){_LL8: _tmp112=*(_tmp10F.KnownAggr).val;_LL9:
 # 1132
- if(_tmp112->kind != Cyc_Absyn_UnionA)return 0;{
+ if((int)_tmp112->kind != (int)Cyc_Absyn_UnionA)return 0;{
 struct Cyc_Absyn_AggrdeclImpl*_tmp110=_tmp112->impl;
 if(((struct Cyc_Absyn_AggrdeclImpl*)_check_null(_tmp110))->tagged)return 0;{
 struct Cyc_List_List*_tmp111=_tmp110->fields;

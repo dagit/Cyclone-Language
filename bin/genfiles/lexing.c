@@ -449,10 +449,10 @@ static char Cyc_Lexing_aux_buffer_v[1U]={'\000'};
 static struct _dyneither_ptr Cyc_Lexing_aux_buffer={(void*)((char*)Cyc_Lexing_aux_buffer_v),(void*)((char*)Cyc_Lexing_aux_buffer_v),(void*)((char*)Cyc_Lexing_aux_buffer_v + 1U)};
 # 80
 void Cyc_Lexing_lex_refill(struct Cyc_Lexing_lexbuf*lexbuf){
-if(_get_dyneither_size(Cyc_Lexing_aux_buffer,sizeof(char))== 1)Cyc_Lexing_aux_buffer=Cyc_Core_new_string((unsigned int)(4096 + 1));{
+if(_get_dyneither_size(Cyc_Lexing_aux_buffer,sizeof(char))== (unsigned int)1)Cyc_Lexing_aux_buffer=Cyc_Core_new_string((unsigned int)(4096 + 1));{
 int read=
 (((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun)(Cyc_Lexing_aux_buffer,(int)(
-_get_dyneither_size(Cyc_Lexing_aux_buffer,sizeof(char))- 1),((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun_state);
+_get_dyneither_size(Cyc_Lexing_aux_buffer,sizeof(char))- (unsigned int)1),((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun_state);
 # 86
 int n=read > 0?read:(lexbuf->lex_eof_reached=1,0);
 if(lexbuf->lex_start_pos < n){

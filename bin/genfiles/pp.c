@@ -747,7 +747,7 @@ struct Cyc_Fn_Function*_tmpCA=((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f
 # 343
 struct Cyc_PP_Doc*Cyc_PP_cat(struct _dyneither_ptr l){
 struct Cyc_PP_Doc*_tmp7E=Cyc_PP_nil_doc();
-{int i=(int)(_get_dyneither_size(l,sizeof(struct Cyc_PP_Doc*))- 1);for(0;i >= 0;-- i){
+{int i=(int)(_get_dyneither_size(l,sizeof(struct Cyc_PP_Doc*))- (unsigned int)1);for(0;i >= 0;-- i){
 _tmp7E=Cyc_PP_concat(*((struct Cyc_PP_Doc**)_check_dyneither_subscript(l,sizeof(struct Cyc_PP_Doc*),i)),_tmp7E);}}
 # 348
 return _tmp7E;}

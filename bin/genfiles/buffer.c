@@ -450,8 +450,8 @@ struct _dyneither_ptr Cyc_zstrncpy(struct _dyneither_ptr,struct _dyneither_ptr,u
 struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,unsigned long n);struct Cyc_Buffer_t{struct _dyneither_ptr buffer;unsigned int position;unsigned int length;struct _dyneither_ptr initial_buffer;};
 # 49 "buffer.cyc"
 struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned int n){
-if(n < 1)n=1U;{
-struct _dyneither_ptr s=Cyc_Core_new_string(n + 1);
+if(n < (unsigned int)1)n=1U;{
+struct _dyneither_ptr s=Cyc_Core_new_string(n + (unsigned int)1);
 return({struct Cyc_Buffer_t*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->buffer=s,_tmp0->position=0U,_tmp0->length=n,_tmp0->initial_buffer=s;_tmp0;});};}
 # 55
 struct _dyneither_ptr Cyc_Buffer_contents(struct Cyc_Buffer_t*b){
@@ -467,7 +467,7 @@ return;}
 void Cyc_Buffer_reset(struct Cyc_Buffer_t*b){
 b->position=0U;
 b->buffer=b->initial_buffer;
-b->length=_get_dyneither_size(b->buffer,sizeof(char))- 1;
+b->length=_get_dyneither_size(b->buffer,sizeof(char))- (unsigned int)1;
 return;}
 # 75
 static void Cyc_Buffer_resize(struct Cyc_Buffer_t*b,unsigned int more){
@@ -475,9 +475,9 @@ unsigned long len=b->length;
 unsigned long new_len=len;
 struct _dyneither_ptr new_buffer;
 while(b->position + more > new_len){
-new_len=2 * new_len;}
+new_len=(unsigned long)2 * new_len;}
 # 82
-new_buffer=Cyc_Core_new_string(new_len + 1);
+new_buffer=Cyc_Core_new_string(new_len + (unsigned long)1);
 ({struct _dyneither_ptr _tmp7=_dyneither_ptr_decrease_size(new_buffer,sizeof(char),1U);struct _dyneither_ptr _tmp6=(struct _dyneither_ptr)b->buffer;Cyc_strncpy(_tmp7,_tmp6,b->position);});
 b->buffer=new_buffer;
 b->length=new_len;
@@ -485,24 +485,24 @@ return;}
 # 89
 void Cyc_Buffer_add_char(struct Cyc_Buffer_t*b,char c){
 int pos=(int)b->position;
-if(pos >= b->length)Cyc_Buffer_resize(b,1U);
+if((unsigned int)pos >= b->length)Cyc_Buffer_resize(b,1U);
 ({struct _dyneither_ptr _tmp1=_dyneither_ptr_plus(b->buffer,sizeof(char),pos);char _tmp2=*((char*)_check_dyneither_subscript(_tmp1,sizeof(char),0U));char _tmp3=c;if(_get_dyneither_size(_tmp1,sizeof(char))== 1U  && (_tmp2 == 0  && _tmp3 != 0))_throw_arraybounds();*((char*)_tmp1.curr)=_tmp3;});
 b->position=(unsigned int)(pos + 1);
 return;}
 # 100
 void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*b,struct _dyneither_ptr s,int offset,int len){
-if((offset < 0  || len < 0) || offset + len > _get_dyneither_size(s,sizeof(char)))
+if((offset < 0  || len < 0) || (unsigned int)(offset + len)> _get_dyneither_size(s,sizeof(char)))
 (int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp5=_cycalloc(sizeof(*_tmp5));_tmp5->tag=Cyc_Core_Invalid_argument,({struct _dyneither_ptr _tmp8=({const char*_tmp4="Buffer::add_substring";_tag_dyneither(_tmp4,sizeof(char),22U);});_tmp5->f1=_tmp8;});_tmp5;}));{
-int new_position=(int)(b->position + len);
-if(new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);
+int new_position=(int)(b->position + (unsigned int)len);
+if((unsigned int)new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);
 ({struct _dyneither_ptr _tmpA=_dyneither_ptr_decrease_size(_dyneither_ptr_plus(b->buffer,sizeof(char),(int)b->position),sizeof(char),1U);struct _dyneither_ptr _tmp9=(struct _dyneither_ptr)_dyneither_ptr_plus(s,sizeof(char),offset);Cyc_zstrncpy(_tmpA,_tmp9,(unsigned long)len);});
 b->position=(unsigned int)new_position;
 return;};}
 # 111
 void Cyc_Buffer_add_string(struct Cyc_Buffer_t*b,struct _dyneither_ptr s){
 int len=(int)Cyc_strlen((struct _dyneither_ptr)s);
-int new_position=(int)(b->position + len);
-if(new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);
+int new_position=(int)(b->position + (unsigned int)len);
+if((unsigned int)new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);
 ({struct _dyneither_ptr _tmpD=({struct _dyneither_ptr _tmpB=_dyneither_ptr_decrease_size(b->buffer,sizeof(char),1U);_dyneither_ptr_plus(_tmpB,sizeof(char),(int)b->position);});struct _dyneither_ptr _tmpC=(struct _dyneither_ptr)s;Cyc_strncpy(_tmpD,_tmpC,(unsigned long)len);});
 b->position=(unsigned int)new_position;
 return;}

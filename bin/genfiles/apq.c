@@ -482,7 +482,7 @@ return Cyc_reduce(q);};}
 struct Cyc_APQ_T*Cyc_APQ_fromstr(struct _dyneither_ptr str,int base){
 struct Cyc_APQ_T*q=_cycalloc(sizeof(struct Cyc_APQ_T));
 struct _dyneither_ptr _tmp2=str;
-while((int)*((const char*)_check_dyneither_subscript(_tmp2,sizeof(char),0U)) && *((const char*)_check_dyneither_subscript(_tmp2,sizeof(char),0U))!= '/'){_dyneither_ptr_inplace_plus(& _tmp2,sizeof(char),1);}
+while((int)*((const char*)_check_dyneither_subscript(_tmp2,sizeof(char),0U)) && (int)*((const char*)_check_dyneither_subscript(_tmp2,sizeof(char),0U))!= (int)'/'){_dyneither_ptr_inplace_plus(& _tmp2,sizeof(char),1);}
 ({struct Cyc_AP_T*_tmp21=Cyc_AP_fromstr((const char*)_untag_dyneither_ptr(str,sizeof(char),1U),base);q->n=_tmp21;});
 if((int)*((const char*)_check_dyneither_subscript(_tmp2,sizeof(char),0U))){
 struct Cyc_AP_T*_tmp3=Cyc_AP_fromstr((const char*)_untag_dyneither_ptr(_dyneither_ptr_plus(_tmp2,sizeof(char),1),sizeof(char),1U),base);

@@ -707,9 +707,9 @@ int _tmp27=Cyc_Tcutil_force_type2bool(0,(_tmp3E.ptr_atts).nullable);
 int _tmp28=Cyc_Tcutil_force_type2bool(0,(_tmp3D.ptr_atts).nullable);
 struct Cyc_Absyn_Exp*_tmp29=({void*_tmpB8=Cyc_Absyn_bounds_one();Cyc_Tcutil_get_bounds_exp(_tmpB8,(_tmp3E.ptr_atts).bounds);});
 struct Cyc_Absyn_Exp*_tmp2A=({void*_tmpB9=Cyc_Absyn_bounds_one();Cyc_Tcutil_get_bounds_exp(_tmpB9,(_tmp3D.ptr_atts).bounds);});
-if((_tmp27  && !_tmp28) && _tmp61 != Cyc_Absyn_Null_to_NonNull)
+if((_tmp27  && !_tmp28) && (int)_tmp61 != (int)Cyc_Absyn_Null_to_NonNull)
 ({void*_tmp2B=0U;({unsigned int _tmpBB=e->loc;struct _dyneither_ptr _tmpBA=({const char*_tmp2C="null-check conversion mis-classified";_tag_dyneither(_tmp2C,sizeof(char),37U);});((int(*)(unsigned int loc,struct _dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Warn_impos_loc)(_tmpBB,_tmpBA,_tag_dyneither(_tmp2B,sizeof(void*),0U));});});else{
-if(((unsigned int)_tmp29  && !((unsigned int)_tmp2A)) && _tmp61 == Cyc_Absyn_Null_to_NonNull)
+if(((unsigned int)_tmp29  && !((unsigned int)_tmp2A)) && (int)_tmp61 == (int)Cyc_Absyn_Null_to_NonNull)
 ({void*_tmp2D=0U;({unsigned int _tmpBD=e->loc;struct _dyneither_ptr _tmpBC=({const char*_tmp2E="conversion mis-classified as null-check";_tag_dyneither(_tmp2E,sizeof(char),40U);});((int(*)(unsigned int loc,struct _dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Warn_impos_loc)(_tmpBD,_tmpBC,_tag_dyneither(_tmp2D,sizeof(void*),0U));});});}
 {struct _tuple12 _tmp2F=({struct _tuple12 _tmpA4;_tmpA4.f1=_tmp29,_tmpA4.f2=_tmp2A;_tmpA4;});struct _tuple12 _tmp30=_tmp2F;if(_tmp30.f1 != 0){if(_tmp30.f2 != 0){_LL5B: _LL5C:
 # 284

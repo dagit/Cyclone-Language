@@ -424,6 +424,17 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
   }
 }
 
+// Makes arithmetic conversions explicit.  Both e1 and e2 must already
+// be typechecked.
+static type_t arith_convert(tenv_t te, exp_t e1, exp_t e2) {
+  let t1 = (type_t) e1->topt;
+  let t2 = (type_t) e2->topt;
+  let new_t = max_arithmetic_type(t1, t2);
+  if (!unify(t1, new_t)) unchecked_cast(te, e1, new_t, No_coercion);
+  if (!unify(t2, new_t)) unchecked_cast(te, e2, new_t, No_coercion);
+  return new_t;
+}
+
 // Note: checker must return false for any non-arithmetic type.
 static type_t tcArithBinop(tenv_t te, exp_t e1, exp_t e2,
 			   bool checker(exp_t)) {
@@ -436,9 +447,7 @@ static type_t tcArithBinop(tenv_t te, exp_t e1, exp_t e2,
     terr(e2->loc,"type %s cannot be used here",typ2string((type_t)e2->topt));
     return wildtyp(lookup_opt_type_vars(te));
   }
-  type_t t1 = compress((type_t)e1->topt);
-  type_t t2 = compress((type_t)e2->topt);
-  return max_arithmetic_type(t1,t2);
+  return arith_convert(te, e1, e2);
 }
 // Plus needs to support a pointer and an int
 static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
@@ -549,8 +558,10 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
   bool e2_is_num = is_numeric(e2);
   type_t t1 = compress((type_t)e1->topt);
   type_t t2 = compress((type_t)e2->topt);
-  if (e1_is_num && e2_is_num)
+  if (e1_is_num && e2_is_num) {
+    arith_convert(te, e1, e2);
     return sint_type;
+  }
   // okay if same types and boxed
   else if ((type_kind(t1)->kind == BoxKind) ||
 	   (unify(t1,new_evar(&bko,lookup_opt_type_vars(te))))) {
@@ -880,8 +891,11 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
     }
   } else {
     let p        = po->v;
-    let t_result = tcBinPrimop(te,loc,NULL,p,e1,e2);
-    if (!(unify(t_result,t1) || is_arithmetic_type(t_result) && is_arithmetic_type(t1))) {
+    let e1copy   = copy_exp(e1);
+    let t_result = tcBinPrimop(te,loc,NULL,p,e1copy,e2);
+    if (!unify(t_result, t1) && is_arithmetic_type(t_result) && is_arithmetic_type(t1))
+      t_result = t1;
+    else if (!(unify(t_result,t1) || is_arithmetic_type(t_result) && is_arithmetic_type(t1))) {
       let result =
         expr_err(te,loc,topt, "Cannot use this operator in an assignment when "
 		      "the arguments have types %s and %s",typ2string(t1),

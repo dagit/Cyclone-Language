@@ -489,8 +489,8 @@ Cyc_Specsfile_target_arch=s;}
 struct Cyc_List_List*Cyc_Specsfile_cyclone_exec_path=0;
 void Cyc_Specsfile_add_cyclone_exec_path(struct _dyneither_ptr s){
 unsigned long _tmp0=Cyc_strlen((struct _dyneither_ptr)s);
-if(_tmp0 <= 2)return;{
-struct _dyneither_ptr _tmp1=(struct _dyneither_ptr)Cyc_substring((struct _dyneither_ptr)s,2,_tmp0 - 2);
+if(_tmp0 <= (unsigned long)2)return;{
+struct _dyneither_ptr _tmp1=(struct _dyneither_ptr)Cyc_substring((struct _dyneither_ptr)s,2,_tmp0 - (unsigned long)2);
 Cyc_Specsfile_cyclone_exec_path=({struct Cyc_List_List*_tmp3=_cycalloc(sizeof(*_tmp3));({struct _dyneither_ptr*_tmp64=({struct _dyneither_ptr*_tmp2=_cycalloc(sizeof(*_tmp2));*_tmp2=_tmp1;_tmp2;});_tmp3->hd=_tmp64;}),_tmp3->tl=Cyc_Specsfile_cyclone_exec_path;_tmp3;});};}struct _tuple0{struct _dyneither_ptr*f1;struct _dyneither_ptr*f2;};
 # 57
 struct Cyc_List_List*Cyc_Specsfile_read_specs(struct _dyneither_ptr file){
@@ -510,7 +510,7 @@ while(1){
 while(1){
 c=Cyc_fgetc(spec_file);
 if( isspace(c))continue;
-if(c == '*')break;
+if(c == (int)'*')break;
 if(c != - 1){
 ({struct Cyc_String_pa_PrintArg_struct _tmpA=({struct Cyc_String_pa_PrintArg_struct _tmp59;_tmp59.tag=0U,_tmp59.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)file);_tmp59;});struct Cyc_Int_pa_PrintArg_struct _tmpB=({struct Cyc_Int_pa_PrintArg_struct _tmp58;_tmp58.tag=1U,_tmp58.f1=(unsigned long)c;_tmp58;});void*_tmp8[2U];_tmp8[0]=& _tmpA,_tmp8[1]=& _tmpB;({struct Cyc___cycFILE*_tmp68=Cyc_stderr;struct _dyneither_ptr _tmp67=({const char*_tmp9="Error reading spec file %s: unexpected character '%c'\n";_tag_dyneither(_tmp9,sizeof(char),55U);});Cyc_fprintf(_tmp68,_tmp67,_tag_dyneither(_tmp8,sizeof(void*),2U));});});
 # 80
@@ -528,7 +528,7 @@ if(c == - 1){
 Cyc_fflush(Cyc_stderr);
 goto CLEANUP_AND_RETURN;}
 # 95
-if(c == ':'){
+if(c == (int)':'){
 *((char*)_check_known_subscript_notnull(strname,256U,sizeof(char),i))='\000';
 break;}
 # 99
@@ -545,7 +545,7 @@ c=Cyc_fgetc(spec_file);
 if( isspace(c))continue;
 break;}
 # 114
-if(c == '*'){
+if(c == (int)'*'){
 # 116
 _tmp4=({struct Cyc_List_List*_tmp16=_cycalloc(sizeof(*_tmp16));({struct _tuple0*_tmp71=({struct _tuple0*_tmp15=_cycalloc(sizeof(*_tmp15));({struct _dyneither_ptr*_tmp70=({struct _dyneither_ptr*_tmp12=_cycalloc(sizeof(*_tmp12));({struct _dyneither_ptr _tmp6F=(struct _dyneither_ptr)Cyc_strdup(_tag_dyneither(strname,sizeof(char),256U));*_tmp12=_tmp6F;});_tmp12;});_tmp15->f1=_tmp70;}),({
 struct _dyneither_ptr*_tmp6E=({struct _dyneither_ptr*_tmp14=_cycalloc(sizeof(*_tmp14));({struct _dyneither_ptr _tmp6D=(struct _dyneither_ptr)Cyc_strdup(({const char*_tmp13="";_tag_dyneither(_tmp13,sizeof(char),1U);}));*_tmp14=_tmp6D;});_tmp14;});_tmp15->f2=_tmp6E;});_tmp15;});
@@ -558,7 +558,7 @@ strvalue[0]=(char)c;
 i=1;
 while(1){
 c=Cyc_fgetc(spec_file);
-if((c == - 1  || c == '\n') || c == '\r'){*((char*)_check_known_subscript_notnull(strvalue,4096U,sizeof(char),i))='\000';break;}
+if((c == - 1  || c == (int)'\n') || c == (int)'\r'){*((char*)_check_known_subscript_notnull(strvalue,4096U,sizeof(char),i))='\000';break;}
 *((char*)_check_known_subscript_notnull(strvalue,4096U,sizeof(char),i))=(char)c;
 ++ i;
 if(i >= 4096){
@@ -586,26 +586,26 @@ struct Cyc_List_List*_tmp20=0;
 char buf[4096U];
 int i=0;
 int j=0;
-if(_tmp1F > 4096)goto DONE;
+if(_tmp1F > (unsigned long)4096)goto DONE;
 while(1){
 # 158
 while(1){
-if(i >= _tmp1F)goto DONE;
-if(*((const char*)_check_dyneither_subscript(cmdline,sizeof(char),i))== 0)goto DONE;
+if((unsigned long)i >= _tmp1F)goto DONE;
+if((int)*((const char*)_check_dyneither_subscript(cmdline,sizeof(char),i))== 0)goto DONE;
 if(! isspace((int)*((const char*)_check_dyneither_subscript(cmdline,sizeof(char),i))))break;
 ++ i;}
 # 164
 j=0;
 # 169
 while(1){
-if(i >= _tmp1F)break;
-if(*((const char*)_check_dyneither_subscript(cmdline,sizeof(char),i))== 0)break;
+if((unsigned long)i >= _tmp1F)break;
+if((int)*((const char*)_check_dyneither_subscript(cmdline,sizeof(char),i))== 0)break;
 if( isspace((int)*((const char*)_check_dyneither_subscript(cmdline,sizeof(char),i))))break;
-if(*((const char*)_check_dyneither_subscript(cmdline,sizeof(char),i))== '\\'){
+if((int)*((const char*)_check_dyneither_subscript(cmdline,sizeof(char),i))== (int)'\\'){
 # 175
 ++ i;
-if(i >= _tmp1F)break;
-if(*((const char*)_check_dyneither_subscript(cmdline,sizeof(char),i))== 0)break;
+if((unsigned long)i >= _tmp1F)break;
+if((int)*((const char*)_check_dyneither_subscript(cmdline,sizeof(char),i))== 0)break;
 ({char _tmp7B=*((const char*)_check_dyneither_subscript(cmdline,sizeof(char),i));*((char*)_check_known_subscript_notnull(buf,4096U,sizeof(char),j))=_tmp7B;});
 ++ j;}else{
 # 182
@@ -679,7 +679,7 @@ struct _dyneither_ptr cyclone_exec_prefix=({char*_tmp41= getenv("CYCLONE_EXEC_PR
 if(({char*_tmp8C=(char*)cyclone_exec_prefix.curr;_tmp8C != (char*)(_tag_dyneither(0,0,0)).curr;}))
 Cyc_Specsfile_cyclone_exec_path=({struct Cyc_List_List*_tmp3C=_cycalloc(sizeof(*_tmp3C));({struct _dyneither_ptr*_tmp8D=({struct _dyneither_ptr*_tmp3B=_cycalloc(sizeof(*_tmp3B));*_tmp3B=cyclone_exec_prefix;_tmp3B;});_tmp3C->hd=_tmp8D;}),_tmp3C->tl=Cyc_Specsfile_cyclone_exec_path;_tmp3C;});
 Cyc_Specsfile_def_lib_path=({char*_tmp3D= Cdef_lib_path;_tag_dyneither(_tmp3D,sizeof(char),_get_zero_arr_size_char((void*)_tmp3D,1U));});
-if(Cyc_strlen((struct _dyneither_ptr)Cyc_Specsfile_def_lib_path)> 0)
+if(Cyc_strlen((struct _dyneither_ptr)Cyc_Specsfile_def_lib_path)> (unsigned long)0)
 Cyc_Specsfile_cyclone_exec_path=({struct Cyc_List_List*_tmp40=_cycalloc(sizeof(*_tmp40));
 ({struct _dyneither_ptr*_tmp90=({struct _dyneither_ptr*_tmp3F=_cycalloc(sizeof(*_tmp3F));({struct _dyneither_ptr _tmp8F=(struct _dyneither_ptr)({struct _dyneither_ptr _tmp8E=Cyc_Specsfile_def_lib_path;Cyc_Filename_concat(_tmp8E,({const char*_tmp3E="cyc-lib";_tag_dyneither(_tmp3E,sizeof(char),8U);}));});*_tmp3F=_tmp8F;});_tmp3F;});_tmp40->hd=_tmp90;}),_tmp40->tl=Cyc_Specsfile_cyclone_exec_path;_tmp40;});
 # 295
@@ -697,7 +697,7 @@ static struct _dyneither_ptr*Cyc_Specsfile_find(struct Cyc_List_List*dirs,struct
 if(({char*_tmp92=(char*)file.curr;_tmp92 == (char*)(_tag_dyneither(0,0,0)).curr;}))return 0;
 for(0;dirs != 0;dirs=dirs->tl){
 struct _dyneither_ptr _tmp4D=*((struct _dyneither_ptr*)dirs->hd);
-if(({char*_tmp93=(char*)_tmp4D.curr;_tmp93 == (char*)(_tag_dyneither(0,0,0)).curr;}) || Cyc_strlen((struct _dyneither_ptr)_tmp4D)== 0)continue;{
+if(({char*_tmp93=(char*)_tmp4D.curr;_tmp93 == (char*)(_tag_dyneither(0,0,0)).curr;}) || Cyc_strlen((struct _dyneither_ptr)_tmp4D)== (unsigned long)0)continue;{
 struct _dyneither_ptr s=(struct _dyneither_ptr)Cyc_Filename_concat(_tmp4D,file);
 if(Cyc_Specsfile_file_exists(s))return({struct _dyneither_ptr*_tmp4E=_cycalloc(sizeof(*_tmp4E));*_tmp4E=s;_tmp4E;});};}
 # 318
@@ -707,7 +707,7 @@ static struct _dyneither_ptr Cyc_Specsfile_sprint_list(struct Cyc_List_List*dirs
 struct _dyneither_ptr tmp=({const char*_tmp51="";_tag_dyneither(_tmp51,sizeof(char),1U);});
 for(0;dirs != 0;dirs=dirs->tl){
 struct _dyneither_ptr _tmp4F=*((struct _dyneither_ptr*)dirs->hd);
-if(({char*_tmp94=(char*)_tmp4F.curr;_tmp94 == (char*)(_tag_dyneither(0,0,0)).curr;}) || Cyc_strlen((struct _dyneither_ptr)_tmp4F)== 0)continue;
+if(({char*_tmp94=(char*)_tmp4F.curr;_tmp94 == (char*)(_tag_dyneither(0,0,0)).curr;}) || Cyc_strlen((struct _dyneither_ptr)_tmp4F)== (unsigned long)0)continue;
 _tmp4F=(struct _dyneither_ptr)({struct _dyneither_ptr _tmp95=(struct _dyneither_ptr)_tmp4F;Cyc_strconcat(_tmp95,({const char*_tmp50=":";_tag_dyneither(_tmp50,sizeof(char),2U);}));});
 tmp=(struct _dyneither_ptr)Cyc_strconcat((struct _dyneither_ptr)_tmp4F,(struct _dyneither_ptr)tmp);}
 # 330

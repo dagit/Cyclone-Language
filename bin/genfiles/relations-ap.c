@@ -607,7 +607,7 @@ struct Cyc_List_List*Cyc_Relations_add_relation(struct _RegionHandle*rgn,union C
 # 71
 {struct Cyc_List_List*_tmpE=relns;for(0;_tmpE != 0;_tmpE=_tmpE->tl){
 struct Cyc_Relations_Reln*_tmpF=(struct Cyc_Relations_Reln*)_tmpE->hd;
-if((Cyc_Relations_same_relop(_tmpF->rop1,rop1) && _tmpF->relation == relation) && 
+if((Cyc_Relations_same_relop(_tmpF->rop1,rop1) && (int)_tmpF->relation == (int)relation) && 
 Cyc_Relations_same_relop(_tmpF->rop2,rop2))return relns;}}
 # 76
 return({struct Cyc_List_List*_tmp11=_region_malloc(rgn,sizeof(*_tmp11));({struct Cyc_Relations_Reln*_tmpF3=({struct Cyc_Relations_Reln*_tmp10=_region_malloc(rgn,sizeof(*_tmp10));_tmp10->rop1=rop1,_tmp10->relation=relation,_tmp10->rop2=rop2;_tmp10;});_tmp11->hd=_tmpF3;}),_tmp11->tl=relns;_tmp11;});}
@@ -647,7 +647,7 @@ struct Cyc_Relations_Reln*_tmp1A=(struct Cyc_Relations_Reln*)r1s->hd;
 int found=0;
 {struct Cyc_List_List*_tmp1B=r2s;for(0;_tmp1B != 0;_tmp1B=_tmp1B->tl){
 struct Cyc_Relations_Reln*_tmp1C=(struct Cyc_Relations_Reln*)_tmp1B->hd;
-if(_tmp1A == _tmp1C  || (Cyc_Relations_same_relop(_tmp1A->rop1,_tmp1C->rop1) && _tmp1A->relation == _tmp1C->relation) && 
+if(_tmp1A == _tmp1C  || (Cyc_Relations_same_relop(_tmp1A->rop1,_tmp1C->rop1) && (int)_tmp1A->relation == (int)_tmp1C->relation) && 
 # 119
 Cyc_Relations_same_relop(_tmp1A->rop2,_tmp1C->rop2)){
 found=1;
@@ -667,7 +667,7 @@ struct Cyc_Relations_Reln*_tmp1E=(struct Cyc_Relations_Reln*)_tmp1D->hd;
 int found=0;
 {struct Cyc_List_List*_tmp1F=r2s;for(0;_tmp1F != 0;_tmp1F=_tmp1F->tl){
 struct Cyc_Relations_Reln*_tmp20=(struct Cyc_Relations_Reln*)_tmp1F->hd;
-if(_tmp1E == _tmp20  || (Cyc_Relations_same_relop(_tmp1E->rop1,_tmp20->rop1) && _tmp1E->relation == _tmp20->relation) && 
+if(_tmp1E == _tmp20  || (Cyc_Relations_same_relop(_tmp1E->rop1,_tmp20->rop1) && (int)_tmp1E->relation == (int)_tmp20->relation) && 
 # 141
 Cyc_Relations_same_relop(_tmp1E->rop2,_tmp20->rop2)){
 res=({struct Cyc_List_List*_tmp21=_region_malloc(r,sizeof(*_tmp21));_tmp21->hd=_tmp1E,_tmp21->tl=res;_tmp21;});
@@ -779,7 +779,7 @@ int Cyc_Relations_same_relns(struct Cyc_List_List*r1,struct Cyc_List_List*r2){
 for(0;r1 != 0  && r2 != 0;(r1=r1->tl,r2=r2->tl)){
 struct Cyc_Relations_Reln*_tmp42=(struct Cyc_Relations_Reln*)r1->hd;
 struct Cyc_Relations_Reln*_tmp43=(struct Cyc_Relations_Reln*)r2->hd;
-if((!Cyc_Relations_same_relop(_tmp42->rop1,_tmp43->rop1) || _tmp42->relation != _tmp43->relation) || !
+if((!Cyc_Relations_same_relop(_tmp42->rop1,_tmp43->rop1) || (int)_tmp42->relation != (int)_tmp43->relation) || !
 # 271
 Cyc_Relations_same_relop(_tmp42->rop2,_tmp43->rop2))return 0;}
 # 273
@@ -926,10 +926,10 @@ G=G2;}
 goto _LL0;}}else{_LLB: _tmpA1=((_tmp91->rop1).RConst).val;_tmpA0=_tmp91->relation;_tmp9F=_tmp91->rop2;_LLC: {
 # 485
 union Cyc_Pratt_Node _tmp97=Cyc_Relations_rop2node(_tmp9F);
-if(_tmpA0 == Cyc_Relations_Rlt)_tmpA1=_tmpA1 + 1;
+if((int)_tmpA0 == (int)Cyc_Relations_Rlt)_tmpA1=_tmpA1 + (unsigned int)1;
 G=({struct Cyc_Pratt_Graph*_tmp126=G;union Cyc_Pratt_Node _tmp125=Cyc_Pratt_zero_node;union Cyc_Pratt_Node _tmp124=_tmp97;Cyc_Pratt_add_edge(_tmp126,_tmp125,_tmp124,Cyc_AP_neg(Cyc_AP_fromint((long)_tmpA1)));});
 # 490
-if((unsigned int)G  && _tmpA0 == Cyc_Relations_Req)
+if((unsigned int)G  && (int)_tmpA0 == (int)Cyc_Relations_Req)
 # 495
 G=({struct Cyc_Pratt_Graph*_tmp129=G;union Cyc_Pratt_Node _tmp128=_tmp97;union Cyc_Pratt_Node _tmp127=Cyc_Pratt_zero_node;Cyc_Pratt_add_edge(_tmp129,_tmp128,_tmp127,Cyc_AP_fromint((long)_tmpA1));});
 # 502
@@ -950,20 +950,20 @@ G=G2;}
 goto _LL0;}}}else{if(((((struct Cyc_Relations_Reln*)_tmp91)->rop2).RConst).tag == 1){_LL9: _tmpA8=_tmp91->rop1;_tmpA7=_tmp91->relation;_tmpA6=((_tmp91->rop2).RConst).val;_LLA: {
 # 472
 union Cyc_Pratt_Node _tmp96=Cyc_Relations_rop2node(_tmpA8);
-if(_tmpA7 == Cyc_Relations_Rlt)_tmpA6=_tmpA6 - 1;
+if((int)_tmpA7 == (int)Cyc_Relations_Rlt)_tmpA6=_tmpA6 - (unsigned int)1;
 G=({struct Cyc_Pratt_Graph*_tmp132=G;union Cyc_Pratt_Node _tmp131=_tmp96;union Cyc_Pratt_Node _tmp130=Cyc_Pratt_zero_node;Cyc_Pratt_add_edge(_tmp132,_tmp131,_tmp130,Cyc_AP_fromint((long)_tmpA6));});
 # 476
-if((unsigned int)G  && _tmpA7 == Cyc_Relations_Req)
+if((unsigned int)G  && (int)_tmpA7 == (int)Cyc_Relations_Req)
 G=({struct Cyc_Pratt_Graph*_tmp135=G;union Cyc_Pratt_Node _tmp134=Cyc_Pratt_zero_node;union Cyc_Pratt_Node _tmp133=_tmp96;Cyc_Pratt_add_edge(_tmp135,_tmp134,_tmp133,Cyc_AP_neg(Cyc_AP_fromint((long)_tmpA6)));});
 goto _LL0;}}else{_LLD: _tmpAB=_tmp91->rop1;_tmpAA=_tmp91->relation;_tmpA9=_tmp91->rop2;_LLE: {
 # 505
 union Cyc_Pratt_Node _tmp98=Cyc_Relations_rop2node(_tmpAB);
 union Cyc_Pratt_Node _tmp99=Cyc_Relations_rop2node(_tmpA9);
-int i=_tmpAA == Cyc_Relations_Rlt?- 1: 0;
+int i=(int)_tmpAA == (int)Cyc_Relations_Rlt?- 1: 0;
 # 510
 G=({struct Cyc_Pratt_Graph*_tmp138=G;union Cyc_Pratt_Node _tmp137=_tmp98;union Cyc_Pratt_Node _tmp136=_tmp99;Cyc_Pratt_add_edge(_tmp138,_tmp137,_tmp136,Cyc_AP_fromint(i));});
 # 512
-if((unsigned int)G  && _tmpAA == Cyc_Relations_Req)
+if((unsigned int)G  && (int)_tmpAA == (int)Cyc_Relations_Req)
 G=({struct Cyc_Pratt_Graph*_tmp13B=G;union Cyc_Pratt_Node _tmp13A=_tmp99;union Cyc_Pratt_Node _tmp139=_tmp98;Cyc_Pratt_add_edge(_tmp13B,_tmp13A,_tmp139,Cyc_AP_fromint(i));});
 goto _LL0;}}}}_LL0:;};}
 # 517

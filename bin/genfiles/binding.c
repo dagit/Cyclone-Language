@@ -688,7 +688,7 @@ void Cyc_Binding_absolutize_decl(unsigned int loc,struct Cyc_Binding_Env*env,str
 union Cyc_Absyn_Nmspace _tmp65=(*qv).f1;union Cyc_Absyn_Nmspace _tmp66=_tmp65;switch((_tmp66.Abs_n).tag){case 1U: if((_tmp66.Rel_n).val == 0){_LL1: _LL2:
 # 277
  if(Cyc_Binding_at_toplevel(env))
-({union Cyc_Absyn_Nmspace _tmp2D8=({struct Cyc_List_List*_tmp2D7=(env->ns)->curr_ns;Cyc_Absyn_Abs_n(_tmp2D7,Cyc_Binding_in_cinclude(env) || sc == Cyc_Absyn_ExternC);});(*qv).f1=_tmp2D8;});else{
+({union Cyc_Absyn_Nmspace _tmp2D8=({struct Cyc_List_List*_tmp2D7=(env->ns)->curr_ns;Cyc_Absyn_Abs_n(_tmp2D7,Cyc_Binding_in_cinclude(env) || (int)sc == (int)Cyc_Absyn_ExternC);});(*qv).f1=_tmp2D8;});else{
 # 280
 (*qv).f1=Cyc_Absyn_Loc_n;}
 goto _LL0;}else{goto _LL7;}case 4U: _LL3: _LL4:
@@ -1075,9 +1075,9 @@ union Cyc_Absyn_AggrInfo _tmp17D=*_tmp1B4;union Cyc_Absyn_AggrInfo _tmp17E=_tmp1
 # 694
 struct _handler_cons _tmp17F;_push_handler(& _tmp17F);{int _tmp181=0;if(setjmp(_tmp17F.handler))_tmp181=1;if(!_tmp181){
 {struct Cyc_Absyn_Aggrdecl*_tmp182=((struct Cyc_Absyn_Aggrdecl*(*)(unsigned int loc,struct Cyc_Binding_NSCtxt*ctxt,struct _tuple0*qv,struct Cyc_Absyn_Aggrdecl*(*lookup)(struct Cyc_Binding_ResolveNSEnv*,struct _dyneither_ptr*)))Cyc_Binding_resolve_lookup)(loc,env->ns,_tmp18A,Cyc_Binding_lookup_aggrdecl);
-if(_tmp182->kind != _tmp18B)
+if((int)_tmp182->kind != (int)_tmp18B)
 ({void*_tmp183=0U;({unsigned int _tmp31C=loc;struct _dyneither_ptr _tmp31B=({const char*_tmp184="struct vs. union mismatch with earlier declaration";_tag_dyneither(_tmp184,sizeof(char),51U);});Cyc_Warn_err(_tmp31C,_tmp31B,_tag_dyneither(_tmp183,sizeof(void*),0U));});});
-if(((_tmp18B == Cyc_Absyn_UnionA  && _tmp189 != 0) && _tmp182->impl != 0) && ((struct Cyc_Absyn_AggrdeclImpl*)_check_null(_tmp182->impl))->tagged != (int)_tmp189->v)
+if((((int)_tmp18B == (int)Cyc_Absyn_UnionA  && _tmp189 != 0) && _tmp182->impl != 0) && ((struct Cyc_Absyn_AggrdeclImpl*)_check_null(_tmp182->impl))->tagged != (int)_tmp189->v)
 # 700
 ({void*_tmp185=0U;({unsigned int _tmp31E=loc;struct _dyneither_ptr _tmp31D=({const char*_tmp186="@tagged mismatch with earlier declaration";_tag_dyneither(_tmp186,sizeof(char),42U);});Cyc_Warn_err(_tmp31E,_tmp31D,_tag_dyneither(_tmp185,sizeof(void*),0U));});});
 ({union Cyc_Absyn_AggrInfo _tmp31F=Cyc_Absyn_UnknownAggr(_tmp18B,_tmp182->name,_tmp189);*_tmp1B4=_tmp31F;});

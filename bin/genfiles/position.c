@@ -465,8 +465,8 @@ int Cyc_Position_use_gcc_style_location=1;static char _tmp0[1U]="";
 static struct _dyneither_ptr Cyc_Position_source={_tmp0,_tmp0,_tmp0 + 1U};
 # 39
 unsigned int Cyc_Position_segment_join(unsigned int s1,unsigned int s2){
-if(s1 == 0)return s2;
-if(s2 == 0)return s1;
+if(s1 == (unsigned int)0)return s2;
+if(s2 == (unsigned int)0)return s1;
 return s1;}
 # 44
 int Cyc_Position_segment_equals(unsigned int s1,unsigned int s2){

@@ -1003,8 +1003,8 @@ struct Cyc_Absyn_Tvar*rgn0=({struct Cyc_Absyn_Tvar*_tmpD3=_cycalloc(sizeof(*_tmp
 int _tmp13B=Cyc_Tcutil_new_tvar_id();_tmpD3->identity=_tmp13B;}),_tmpD3->kind=(void*)& Cyc_Tcenv_rgn_kb;_tmpD3;});
 {struct Cyc_List_List*_tmpB8=fd->tvs;for(0;_tmpB8 != 0;_tmpB8=_tmpB8->tl){
 struct Cyc_Absyn_Kind*_tmpB9=Cyc_Tcutil_tvar_kind((struct Cyc_Absyn_Tvar*)_tmpB8->hd,& Cyc_Tcutil_bk);struct Cyc_Absyn_Kind*_tmpBA=_tmpB9;enum Cyc_Absyn_KindQual _tmpBE;enum Cyc_Absyn_AliasQual _tmpBD;_LL4: _tmpBE=_tmpBA->kind;_tmpBD=_tmpBA->aliasqual;_LL5:;
-if(_tmpBE == Cyc_Absyn_RgnKind){
-if(_tmpBD == Cyc_Absyn_Aliasable)
+if((int)_tmpBE == (int)Cyc_Absyn_RgnKind){
+if((int)_tmpBD == (int)Cyc_Absyn_Aliasable)
 _tmpD6=Cyc_RgnOrder_add_unordered(_tmpD6,(struct Cyc_Absyn_Tvar*)_tmpB8->hd);else{
 # 552
 ({void*_tmpBB=0U;({struct _dyneither_ptr _tmp13F=({const char*_tmpBC="non-intuitionistic tvar in nested_fenv";_tag_dyneither(_tmpBC,sizeof(char),39U);});((int(*)(struct _dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Tcutil_impos)(_tmp13F,_tag_dyneither(_tmpBB,sizeof(void*),0U));});});}}}}

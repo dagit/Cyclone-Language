@@ -602,13 +602,13 @@ return x->tl;}
 # 54
 struct Cyc_List_List*Cyc_List_rlist(struct _RegionHandle*r,struct _dyneither_ptr argv){
 struct Cyc_List_List*result=0;
-{unsigned int i=_get_dyneither_size(argv,sizeof(void*))- 1;for(0;i < _get_dyneither_size(argv,sizeof(void*));-- i){
+{unsigned int i=_get_dyneither_size(argv,sizeof(void*))- (unsigned int)1;for(0;i < _get_dyneither_size(argv,sizeof(void*));-- i){
 result=({struct Cyc_List_List*_tmp0=_region_malloc(r,sizeof(*_tmp0));_tmp0->hd=*((void**)_check_dyneither_subscript(argv,sizeof(void*),(int)i)),_tmp0->tl=result;_tmp0;});}}
 return result;}
 # 63
 struct Cyc_List_List*Cyc_List_list(struct _dyneither_ptr argv){
 struct Cyc_List_List*result=0;
-{int i=(int)(_get_dyneither_size(argv,sizeof(void*))- 1);for(0;i >= 0;-- i){
+{int i=(int)(_get_dyneither_size(argv,sizeof(void*))- (unsigned int)1);for(0;i >= 0;-- i){
 result=({struct Cyc_List_List*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->hd=*((void**)_check_dyneither_subscript(argv,sizeof(void*),i)),_tmp1->tl=result;_tmp1;});}}
 return result;}
 # 71
@@ -1196,7 +1196,7 @@ return Cyc_List_rto_array(Cyc_Core_heap_region,x);}
 # 818
 struct Cyc_List_List*Cyc_List_rfrom_array(struct _RegionHandle*r2,struct _dyneither_ptr arr){
 struct Cyc_List_List*ans=0;
-{int i=(int)(_get_dyneither_size(arr,sizeof(void*))- 1);for(0;i >= 0;-- i){
+{int i=(int)(_get_dyneither_size(arr,sizeof(void*))- (unsigned int)1);for(0;i >= 0;-- i){
 ans=({struct Cyc_List_List*_tmp2B=_region_malloc(r2,sizeof(*_tmp2B));_tmp2B->hd=*((void**)_check_dyneither_subscript(arr,sizeof(void*),i)),_tmp2B->tl=ans;_tmp2B;});}}
 return ans;}
 # 825

@@ -462,7 +462,7 @@ int open_with_mode(const char*,int,unsigned short);
 # 31
 int Cyc_open(const char*s,int i,struct _dyneither_ptr ms){
 # 34
-if(_get_dyneither_size(ms,sizeof(unsigned short))>= 1)
+if(_get_dyneither_size(ms,sizeof(unsigned short))>= (unsigned int)1)
 return open_with_mode(s,i,*((unsigned short*)_check_dyneither_subscript(ms,sizeof(unsigned short),0)));else{
 # 37
 return open_without_mode(s,i);}}struct  __abstractFILE;struct Cyc___cycFILE{struct  __abstractFILE*file;};

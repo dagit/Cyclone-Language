@@ -545,10 +545,10 @@ static struct _dyneither_ptr Cyc_Toseqc_pure_funs[8U]={{_tmp7,_tmp7,_tmp7 + 20U}
 static struct _dyneither_ptr Cyc_Toseqc_exn_effect_funs[6U]={{_tmpF,_tmpF,_tmpF + 12U},{_tmp10,_tmp10,_tmp10 + 28U},{_tmp11,_tmp11,_tmp11 + 31U},{_tmp12,_tmp12,_tmp12 + 27U},{_tmp13,_tmp13,_tmp13 + 21U},{_tmp14,_tmp14,_tmp14 + 15U}};
 # 82
 static enum Cyc_Toseqc_SideEffect Cyc_Toseqc_fun_effect(struct _dyneither_ptr fn){
-{int i=0;for(0;i < 8U;++ i){
+{int i=0;for(0;(unsigned int)i < 8U;++ i){
 if(!Cyc_strcmp((struct _dyneither_ptr)Cyc_Toseqc_pure_funs[i],(struct _dyneither_ptr)fn))return Cyc_Toseqc_NoEffect;}}
 # 86
-{int i=0;for(0;i < 6U;++ i){
+{int i=0;for(0;(unsigned int)i < 6U;++ i){
 if(!Cyc_strcmp((struct _dyneither_ptr)Cyc_Toseqc_exn_effect_funs[i],(struct _dyneither_ptr)fn))return Cyc_Toseqc_ExnEffect;}}
 # 89
 return Cyc_Toseqc_AnyEffect;}
@@ -562,7 +562,7 @@ enum Cyc_Toseqc_SideEffect res=0U;
 enum Cyc_Toseqc_SideEffect _tmp15=Cyc_Toseqc_exp_effect((struct Cyc_Absyn_Exp*)x->hd);
 res=Cyc_Toseqc_join_side_effect(_tmp15,res);
 # 103
-if(res == Cyc_Toseqc_AnyEffect)
+if((int)res == (int)Cyc_Toseqc_AnyEffect)
 # 105
 return res;}}
 # 109
@@ -673,7 +673,7 @@ static struct Cyc_Absyn_Stmt*Cyc_Toseqc_exps_to_seqc(struct Cyc_Absyn_Exp*e,stru
 # 245
 ((void(*)(void(*f)(struct Cyc_Absyn_Exp*),struct Cyc_List_List*x))Cyc_List_iter)(Cyc_Toseqc_exp_to_seqc,es);
 # 248
-if(((int(*)(struct Cyc_List_List*x))Cyc_List_length)(es)<= 1  || Cyc_Toseqc_exps_effect(es)!= Cyc_Toseqc_AnyEffect)return 0;{
+if(((int(*)(struct Cyc_List_List*x))Cyc_List_length)(es)<= 1  || (int)Cyc_Toseqc_exps_effect(es)!= (int)Cyc_Toseqc_AnyEffect)return 0;{
 # 252
 struct Cyc_Absyn_Stmt*stmt=({struct Cyc_Absyn_Exp*_tmpDE=Cyc_Absyn_copy_exp(e);Cyc_Absyn_exp_stmt(_tmpDE,e->loc);});
 struct Cyc_Absyn_Stmt*laststmt=stmt;
