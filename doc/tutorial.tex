@@ -118,7 +118,7 @@ Cyclone:
 \item There is one other way to crash a C program using pointers: you
   can dereference the \texttt{NULL} pointer or try to update the 
   \texttt{NULL} location.
-  Cyclone prevents this by inserting a \texttt{NULL}-check whenever you
+  Cyclone prevents this by inserting a null check whenever you
   dereference a \texttt{*} pointer (that is, whenever you use the
   \texttt{*}, \texttt{->}, or subscript operation on a pointer.)
 \end{itemize}
@@ -167,7 +167,7 @@ difference between an unqualified pointer and a \texttt{@fat}\ pointer is
 that a \texttt{@fat}\ pointer comes with bounds information and is thus
 ``fatter'' than a traditional pointer.  Each time a
 fat pointer is dereferenced or its contents are assigned to,
-Cyclone inserts both a \texttt{NULL} check and a bounds check.  This
+Cyclone inserts both a null check and a bounds check.  This
 guarantees that a \texttt{@fat}\ pointer can never cause a buffer
 overflow.
 
@@ -199,8 +199,9 @@ instead of the more verbose:
 
 \subsubsection*{Non-NULL pointers}
 
-There is one other kind of pointer in Cyclone: the non-NULL pointer.
-A non-null pointer is indicated by the qualifier \texttt{@nonnull}.  A
+
+Another kind of pointer in Cyclone is the non-NULL pointer.
+A non-NULL pointer is indicated by the qualifier \texttt{@nonnull}.  A
 \texttt{@nonnull} pointer is like an unqualified pointer, except that it is
 guaranteed not to be NULL\@.  This means that when you dereference a
 \texttt{@nonnull} pointer or assign to its contents, a null check is
@@ -233,18 +234,21 @@ that you insert a check before the actual call:
     FILE *f = fopen("/etc/passwd","r");
     int c = getc((FILE *@nonnull)f);
 \end{verbatim}
-Here \texttt{f} will be \texttt{NULL} if the file \texttt{/etc/passwd} doesn't
-exist or can't be read.  So, in Cyclone \texttt{f} must be cast to
-\texttt{FILE @} before the call to \texttt{getc}.  The cast causes a
-\texttt{NULL} check.  If you try to call \texttt{getc} without the cast,
-Cyclone will insert one for you automatically, and warn you that it is
-doing so.  
+Here \texttt{f} will be \texttt{NULL} if the file \texttt{/etc/passwd}
+doesn't exist or can't be read.  So, in Cyclone \texttt{f} must be
+cast to \texttt{FILE *@nonnull} before the call to \texttt{getc}.  The
+cast causes a null check.  If you try to call \texttt{getc} without
+the cast, Cyclone will insert one for you automatically, and warn you
+that it is doing so.
 
-You should pay attention to these warnings and attempt
-to get rid of them by rewriting the code.  Not only will this make
-your code more crash-proof, it will tend to make it faster.  For
-instance, if we rewrite the code above so that we explicitly
-test whether or not \texttt{fopen} succeeds in returning a
+These warnings do not mean that your program is unsafe---after all,
+Cyclone has inserted the check for you.  However, you should pay
+attention to the warnings because they indicate a place where your
+program could suddenly halt (if the check fails), and because the
+inserted checks can slow down your program.  It's worth rewriting your
+code to handle the error case better, or even eliminate the null
+check.  For instance, if we rewrite the code above so that we
+explicitly test whether or not \texttt{fopen} succeeds in returning a
 non-\texttt{NULL} file descriptor:
 \begin{verbatim}
     FILE *f = fopen("/etc/passwd","r");
@@ -255,7 +259,7 @@ non-\texttt{NULL} file descriptor:
     int c = getc(f);
 \end{verbatim}
 then Cyclone no longer issues a warning at the call to \texttt{getc}
-and the resulting code does not have to do a \texttt{NULL}-check.
+and the resulting code does not have to do a null check.
 
 If you call \texttt{getc} with a \texttt{FILE *@nonnull}, of course, no check
 is required.  For example, \texttt{stdin} is a \texttt{FILE *@nonnull} in
@@ -266,64 +270,62 @@ neither the caller nor the called function needs to do null
 checks---and this is perfectly safe.
 
 Like \texttt{@fat} pointers, \texttt{@nonnull} pointers are so useful,
-that there is an abbreviation.  Instead of writing \texttt{FILE*@nonnull}
-you can simply write \texttt{FILE@} when you want to write the
-type of a non-\texttt{NULL} pointer to a \texttt{FILE}.
+Cyclone provides an abbreviation.  Instead of writing \texttt{FILE
+*@nonnull}, you can simply write \texttt{FILE @} when you want to
+write the type of a non-\texttt{NULL} pointer to a \texttt{FILE}.
 
 \subsubsection*{Zero-Terminated Pointers}
 
-Fat pointers support arbitrary pointer arithmetic and subscripting
+Fat pointers support arbitrary pointer arithmetic and subscripting,
 but they don't have the same representation as pointers in C.  This
 is because we need extra information to determine the bounds and
-ensure a subscript or dereference is in bounds.  Unfortunately,
+ensure that a subscript or dereference is in bounds.  Unfortunately,
 this change in representations can make it difficult to interface
 with legacy C code where the representations might not be easily
 changed.  
 
 Fortunately, Cyclone supports one more pointer type where the
-representation matches C's and yet supports a limited form of
-pointer arithmetic and subscripting:  the zero-terminated pointer.
-A zero-terminated pointer is a pointer to a sequence of elements
-that are guaranteed to be terminated with a zero.  A good
-example of such a sequence is C's strings.  In Cyclone, we
-the type of C's strings can be written as \texttt{char *@zeroterm}.
-The \texttt{@zeroterm} qualifier indicates that the pointer
-points to a zero-terminated sequence.  The qualifier is
-orthogonal to other qualifiers, such as \texttt{@fat} or
+representation matches C's and yet supports a limited form of pointer
+arithmetic and subscripting: the zero-terminated pointer.  A
+zero-terminated pointer is a pointer to a sequence of elements that
+are guaranteed to be terminated with a zero.  C's strings are a good
+example.  In Cyclone, the type of C's strings can be written as
+\texttt{char *@zeroterm}.  The \texttt{@zeroterm} qualifier indicates
+that the pointer points to a zero-terminated sequence.  The qualifier
+is orthogonal to other qualifiers, such as \texttt{@fat} or
 \texttt{@nonnull}, so you can freely combine them.
 
-Because C strings arise so frequently, the types \texttt{char*}, 
-\texttt{char *@nonnull} and \texttt{char *@fat} are by default qualified
-with \texttt{@zeroterm}.  Other types (e.g., \texttt{int*}) are
-not but you can put the qualifier in explicitly when you want
-this property.  You can override the \texttt{@zeroterm} qualifier
-on \texttt{char} pointers by putting in an explicit
-\texttt{@nozeroterm} qualifier (e.g., \texttt{char*@nozeroterm}.)
+Because C strings arise so frequently, the types \texttt{char *},
+\texttt{char *@nonnull}, and \texttt{char *@fat} are by default
+qualified with \texttt{@zeroterm}.  You can override the
+\texttt{@zeroterm} qualifier on \texttt{char} pointers by putting in
+an explicit \texttt{@nozeroterm} qualifier (e.g., \texttt{char
+*@nozeroterm}).  Pointers to other types (e.g., \texttt{int *})
+have a default qualifier of \texttt{@nozeroterm}.
 
-If \texttt{x} is a thin, zero-terminated pointer, then you can
-do a subscript (e.g., \texttt{x[i]}) or pointer arithmetic
-(e.g., \texttt{x+i}) but the compiler inserts checks
-to ensure that (a) \texttt{i} is non-negative and (b) there is no
-zero between \texttt{x[0]} and \texttt{x[i-1]} inclusive.
-This ensures that you can't read past the zero.  
-In addition, when writing to a zero-terminated pointer, the
-compiler inserts checks to ensure that you don't replace
-the final zero with some other value.  This is crucial for
-ensuring that a buffer overrun cannot occur.  
+If \texttt{x} is a \texttt{* @zeroterm} pointer, you can use pointer
+arithmetic on it, as in \texttt{x+i}.  However, the compiler inserts
+checks to ensure that (a) \texttt{i} is non-negative and (b) there is
+no zero between \texttt{x[0]} and \texttt{x[i-1]} inclusive.  This
+ensures that you can't read past the terminating zero.  In addition,
+when writing to a zero-terminated pointer, the compiler inserts checks
+to ensure that you don't replace the final zero with some other value.
+This is crucial for ensuring that a buffer overrun cannot occur.
+As in C, \texttt{x[i]} is equivalent to \texttt{x+i}, so subscripts
+come with the same checks.
 
-Because subscripts and pointer arithmetic on zero-terminated
-thin pointers must check to see if you pass a zero, these operations
-can be fairly expensive.  In particular, if you are not careful,
-you can turn what appears to be an \emph{O(n)} algorithm into
-an \emph{O(n-squared)} one.  You can avoid this overhead by
-casting the pointer to a \texttt{@fat} zero-terminated pointer.  This
-computes the length of the sequence once and then then uses
-the bounds information associated with the fat pointer to do
-any bounds checks.  
+Because of these checks, subscripts and pointer arithmetic on
+\texttt{* @zeroterm} can be fairly expensive.  In particular, if you
+are not careful, you can turn what appears to be an \emph{O(n)}
+algorithm into an \emph{O(n-squared)} one.  You can avoid this
+overhead by casting the pointer to a \texttt{@fat} zero-terminated
+pointer.  This computes the length of the sequence once and then uses
+the bounds information associated with the fat pointer to do any
+bounds checks.
 
-These constraints on zero-terminated pointers mean that you
-have to be careful when porting code.  For instance, consider
-the following function:
+Cyclone's constraints on zero-terminated pointers mean that you have
+to be careful when porting code from C\@.  For instance, consider the
+following function:
 \begin{verbatim}
   void foo(char *s, int offset) {
      unsigned int len = strlen(s);
@@ -347,24 +349,23 @@ rewriting the code as follows:
 Now the compiler is only checking that \texttt{*s} is not
 zero when it does the increment \texttt{s++}.  In addition,
 however, the compiler is checking each time you do \texttt{*s = 'a'}
-that \texttt{*s} is not zero, for then you could overwrite
+that \texttt{*s} is not zero, because then you could overwrite
 the zero with an \texttt{'a'} and potentially step outside
 the bounds of the buffer. 
 
-One way to get rid of all of this check is to cast \texttt{s}
-to a non-zero-terminated fat pointer before entering the loop.
-When you cast a zero-terminated pointer to a non-zero-terminated
-fat pointer, the compiler calculates the length of the sequence
-once, decrements it by one and then builds an appropriate
-fat pointer with this bounds information.  Now when doing 
-updates the bounds check on the array keep you from writing
-any value into the last location.  Furthermore, if you write
-the code in a straightforward fashion using subscripting,
-the compiler is more likely to eliminate the bounds checks.
-Here is an example:
+One way to get rid of all of these checks is to cast \texttt{s} to a
+non-zero-terminated fat pointer before entering the loop.  When you
+cast a zero-terminated pointer to a non-zero-terminated fat pointer,
+the compiler calculates the length of the sequence once, decrements it
+by one, and then builds an appropriate fat pointer with this bounds
+information.  When you write using the fat poiner, bounds checks (not
+zero checks) keep you from writing any value over the zero.
+Furthermore, if you write the code in a straightforward fashion using
+subscripting, the compiler is more likely to eliminate the bounds
+checks.  Here is an example:
 \begin{verbatim}
   void foo(char *s, int offset) {
-    char *@fat @nozeroterm fat_s = (char @fat @nozeroterm)s;
+    char *@fat @nozeroterm fat_s = (char *@fat @nozeroterm)s;
     unsigned int len; 
     fat_s += offset;
     len = numelts(fat_s);    
@@ -372,7 +373,7 @@ Here is an example:
       fat_s[i] = 'a';
   }
 \end{verbatim}
-The C code generated by the compiler looks something like this:      
+The Cyclone compiler generates code that works like the following C code:
 \begin{verbatim}
 struct _tagged_arr { 
   char *base;
@@ -381,7 +382,7 @@ struct _tagged_arr {
 };
 
 void Cyc_foo(char *s,int offset){
-  struct _tagged_arr fat_s = {s, s, strlen(s)};
+  struct _tagged_arr fat_s = {s, s, s+strlen(s)};
   unsigned int len;
   fat_s.curr += offset;
   if (fat_s.curr < fat_s.base || fat_s.curr >= fat_s.last) 
@@ -430,7 +431,7 @@ We explain pointers in more detail in
 \subsection{Regions}
 
 Another potential way to crash a program or violate security is
-to dereference a dangling pointer---a pointer to storage that
+to dereference a \emph{dangling pointer}: a pointer to storage that
 has been deallocated.  These are particularly insidious bugs
 because the error might not manifest itself immediately.  
 For example, consider the following C code:
@@ -473,19 +474,22 @@ is that the Cyclone compiler tracks object lifetimes and ensures that
 a pointer to an object can only be dereferenced if that object 
 has not been deallocated.  
 
-The way that Cyclone achieves this is by assigning each object a
-symbolic \emph{region} that corresponds to the lexical block in which
-the object is declared, and each pointer type reflects the region
-into which a pointer points.  For instance, the variable \texttt{result}
-lives within a region that corresponds to the
-invocation of the function \texttt{newPoint}.  We write the
-name of the region explicitly using a back-quote as in \texttt{`newPoint}.
+Cyclone achieves this by assigning each object a symbolic
+\emph{region} that corresponds to the lexical block in which the
+object is declared.  Cyclone also tracks, for every pointer, what
+region it points into.  The region pointed to can be written as part
+of the pointer type, but usually the region can be omitted---the
+compiler is smart enough to discover the region automatically in most
+cases.
 
-Because \texttt{result} lives in region \texttt{`newPoint}, the
-expression \texttt{\&result} is a pointer into region
-\texttt{`newPoint}.  If we like, we can write the type of
-\texttt{\&result} with the explicit region as ``\texttt{struct Point *
-@region(`newPoint)}''.  
+For example, the variable \texttt{result} in our code above lives
+within a region that corresponds to the invocation of the function
+\texttt{newPoint}.  We write the name of the region explicitly using a
+back-quote, as in \texttt{`newPoint}.  Because \texttt{result} lives
+in region \texttt{`newPoint}, the expression \texttt{\&result} is a
+pointer into region \texttt{`newPoint}.  The full Cyclone type of
+\texttt{\&result}, with the explicit region, is \texttt{struct Point
+* @region(`newPoint)}.
 
 When control flow exits a block, the storage (\emph{i.e.}, 
 the region) for that 
@@ -508,24 +512,25 @@ In the function \texttt{f} above, the variables \texttt{x} and
 declared in the outermost block of the function.  The storage for
 those variables will live as long as the invocation of the function.
 Note that since \texttt{y} is a pointer to \texttt{x}, the type of
-\texttt{y} is \texttt{int *@region(`f)} reflecting that \texttt{y} 
+\texttt{y} is \texttt{int *@region(`f)}, indicating that \texttt{y} 
 points into region \texttt{`f}.
 
-The variable \texttt{a} does \emph{not} live in region \texttt{`f} because
-it is declared in an inner block, which we have labeled with
+The variable \texttt{a} does \emph{not} live in region \texttt{`f},
+because it is declared in an inner block, which we have labeled with
 \texttt{L}.  The storage for the inner block \texttt{L} may be
-deallocated upon exit of the block.  To be more precise, the
-storage for \texttt{a} is deallocated
-at line 7 in the code.  Thus, it is an error to try to access
-this storage in the rest of the computation, as is done on line 7.
+deallocated upon exit of the block, before the function itself
+returns.  To be more precise, the storage for \texttt{a} is
+deallocated at line 7 in the code.  Thus, it is an error to try to
+access this storage in the rest of the computation, as is done on line
+7.
 
-Cyclone detects the error because it gives the expression \texttt{\&a} the
-type \texttt{int *@region(`L)} reflecting the fact that the value is
-a pointer into region \texttt{`L}.  So, the assignment 
-\texttt{y = \&a} fails to type-check because \texttt{y} expects
-to hold a pointer into region \texttt{`f}, not region \texttt{`L}.
-The restriction, compared to C, is that a pointer's type indicates
-\emph{one} region instead of \emph{all} regions.
+Cyclone detects the error because it gives the expression \texttt{\&a}
+the type \texttt{int *@region(`L)}, meaning that the value is a
+pointer into region \texttt{`L}.  So, the assignment \texttt{y = \&a}
+fails to type-check because \texttt{y} expects to hold a pointer into
+region \texttt{`f}, not region \texttt{`L}.  The restriction, compared
+to C, is that a pointer's type indicates \emph{one} region instead of
+\emph{all} regions.
 
 \subsubsection*{Region Inference}
 
@@ -540,8 +545,8 @@ as you put the region name after any other qualifiers.  For
 instance, instead of writing ``\texttt{int *@nonnull @region(`r)}''
 we can simply write ``\texttt{int @`r}''.  In this document,
 we will use an explicit \texttt{@region} qualifier, but
-you'll find that the libraries and other sample codes tend
-to use the (cryptic) abbreviations.  
+you'll find that the libraries and other example programs tend
+to use the abbreviations.  
 
 In addition, Cyclone often figures out the region of a pointer
 without the programmer providing the information.  This is called {\em
@@ -691,11 +696,11 @@ void foo(struct Point *@region(`r) p) {
   return;
 }
 \end{verbatim}
-The function is parameterized by a region \emph{variable} \texttt{`r}
+The function is parameterized by a \emph{region variable} \texttt{`r},
 and accepts a pointer to a \texttt{Point} that lives in region
-\texttt{`r}.  Note that \texttt{`r} can be instantiated with
-any region you like, including the heap, or a region local to
-a function.  So, for instance, we can write the following:
+\texttt{`r}.  Note that \texttt{`r} can be instantiated with any
+region you like, including the heap, or a region local to a function.
+So, for instance, we can write the following:
 \begin{verbatim}
 void g() {
   struct Point p = {0,1};
@@ -709,7 +714,7 @@ Note that in the first call to \texttt{foo}, we are passing
 a pointer into region \texttt{`g}, and in the second call to 
 \texttt{foo}, we are passing in a pointer into the heap.  In
 the first call, \texttt{`r} is implicitly instantiated with
-\texttt{`g} and in the second call, with \texttt{`H}.  
+\texttt{`g}, and in the second call, with \texttt{`H}.  
 
 Cyclone automatically inserts region parameters for function
 arguments, so you rarely have to write them.  For instance,
@@ -766,8 +771,8 @@ different regions, in which case the code would be incorrect.
 But you can make them the same by putting in the same explicit region
 for each pointer.  Thus, the following code does type-check:
 \begin{verbatim}
-void j(struct Point *@region(`r1) p1, 
-       struct Point *@region(`r1) p2) {
+void j(struct Point *@region(`r) p1, 
+       struct Point *@region(`r) p2) {
   p1 = p2;
 }
 \end{verbatim}
@@ -851,13 +856,12 @@ similar, except that a dynamic number of objects can be allocated
 within the region using the region's handle.  The heap is a
 special region that is garbage collected.  
 
-Region polymorphism makes it possible to omit many region 
-annotations on types.  Cyclone assumes that pointers passed
-to functions may live in distinct regions, and assumes that
-result pointers are in the heap.  These assumptions are not
-perfect, but (a) programmers can fix the assumptions by providing
-explicit region annotations, (b) it permits Cyclone files
-to be separately compiled.
+Region polymorphism and region inference make it possible to omit many
+region annotations on types.  Cyclone assumes that pointers passed to
+functions may live in distinct regions, and assumes that result
+pointers are in the heap.  These assumptions are not perfect, but (a)
+programmers can fix the assumptions by providing explicit region
+annotations, (b) it permits Cyclone files to be separately compiled.
 
 The region-based type system of Cyclone is perhaps the most
 complicated aspect of the language.  In large part, this is
@@ -870,7 +874,7 @@ garbage collection.
 For more information about regions, see
 \hyperref[{sec:regions}]{Section~\ref{sec:regions}}.
 
-\subsection{Tagged Unions and Pattern Matching}
+\subsection{Datatypes and Pattern Matching}
 
 It's often necessary to write a function that accepts an argument with
 more than one possible type.  For example, in
@@ -888,7 +892,7 @@ instead of a pointer \texttt{x}, the program will likely crash.
 To prevent this, most C compilers treat \texttt{printf} specially:
 they examine the first argument and require that the remaining
 arguments have the appropriate types.  However, a compiler can't check
-this if \texttt{printf} isn't called with a literal string:
+this if \texttt{printf} isn't called with a literal format string:
 \begin{verbatim}
     printf(s,x);
 \end{verbatim}
@@ -900,41 +904,47 @@ call \texttt{printf} with arguments that don't match the format
 string.  This is called a \emph{format string attack}, and it's an
 increasingly common exploit.
 
-Cyclone provides \emph{tagged unions} so that you can safely write
+Cyclone provides \emph{datatypes} so that you can safely write
 functions that accept an argument with more than one possible type.
-Like a C \texttt{union}, a Cyclone \texttt{tunion} is a type that has
+Like a C \texttt{union}, a Cyclone \texttt{datatype} is a type that has
 several possible cases.  Here's a simple example:
 \begin{verbatim}
-    tunion t {
+    datatype t {
       Integer(int);
       String(const char ?);
     };
-    tunion t x = new Integer(3);
-    tunion t y = new String("hello, world");
+    datatype t @x = new Integer(3);
+    datatype t @y = new String("hello, world");
 \end{verbatim}
-This declares a new type, \texttt{tunion t}, that can hold either an
+This declares a new type, \texttt{datatype t}, that can hold either an
 integer or a string (remember, a string is a \texttt{char ?}\ in
 Cyclone).  \texttt{Integer} and \texttt{String} are \emph{tags} for
 the two possibilities.  The tags are used to build values of type
-\texttt{tunion t}, as in the declarations of \texttt{x} and
-\texttt{y}.
+\texttt{datatype t}.  For example, \texttt{x} is initialized with
+\texttt{new Integer(3)}, which allocates storage on the heap,
+initializes it with the tag \texttt{Integer} and the integer 3, and
+returns a pointer to the storage.  Therefore, \texttt{x} has type
+``non-NULL pointer to a value of type \texttt{datatype t}'', or
+\texttt{datatype t @} for short.  The next declaration is
+similar, except that \texttt{y} is initialized with the
+\texttt{String} case.
 
 \emph{Pattern matching} is used to determine the tag of a value of
-type \texttt{tunion t}, and to extract the underlying value.  For
+type \texttt{datatype t}, and to extract the underlying value.  For
 example, here is a function that will print either an integer or a
 string:
 \begin{verbatim}
-    void print(tunion t a) {
+    void print(datatype t a) {
       switch (a) {
       case &Integer(i): printf("%d",i); return;
       case &String(s): printf("%s",s); return;
       }
     }
 \end{verbatim}
-The argument \texttt{a} has type \texttt{tunion t}, so it is either
+The argument \texttt{a} has type \texttt{datatype t}, so it is either
 built with tag \texttt{Integer} or tag \texttt{String}.  Cyclone
-extends switch statements with \emph{patterns} that
-distinguish between the cases.  The first case,
+extends switch statements with \emph{patterns} that distinguish
+between the cases.  The first case,
 \begin{verbatim}
    case &Integer(i): printf("%d",i); return;
 \end{verbatim}
@@ -945,27 +955,27 @@ the body of the case.  For example, \texttt{print(x)} will print 3,
 since \texttt{x} holds \texttt{new Integer(3)}, and
 \texttt{print(y)} will print \texttt{hello, world}.
 
-The cases of a \texttt{tunion} can carry any number of values,
+The cases of a \texttt{datatype} can carry any number of values,
 including none, and they can be recursive.  For example, we can define
 a tree datatype as follows.
 \begin{verbatim}
-    tunion tree {
+    datatype tree {
       Empty;
       Leaf(int);
-      Node(tunion tree, tunion tree);
+      Node(datatype tree @, datatype tree @);
     };
 \end{verbatim}
 A tree can be empty, or it can be a single (leaf) node holding an
-integer, or it can be an internal node with a left and a right
-subtree.  In other words, \texttt{tunion tree} is the type of possibly
-empty binary trees with integer leaves.
+integer, or it can be an internal node that points to a left and a
+right subtree.  In other words, \texttt{datatype tree} is the type of
+possibly empty binary trees with integer leaves.
 
 Here's a function, \texttt{sum}, that calculates the sum of the leaves
 of a tree:
 \begin{verbatim}
-    int sum(tunion tree x) {
+    int sum(datatype tree @x) {
       switch (x) {
-      case Empty: return 0;
+      case &Empty: return 0;
       case &Leaf(i): return i;
       case &Node(y,z): return sum(y)+sum(z);
       }
@@ -973,61 +983,24 @@ of a tree:
 \end{verbatim}
 
 It's written in a straightforward way, with a case for each possible
-tag in the type \texttt{tunion tree}.  The \texttt{Empty} case is
-noticeably different than the other two cases: the pattern does not
-use the \texttt{\&} character.  The reason has to do with how
-\texttt{tunion} is implemented.  Every value of \texttt{tunion} type
-must have the same size; for example, the \texttt{Node} case
-recursively calls \texttt{sum} on the subtrees \texttt{y} and
-\texttt{z}, \emph{without knowing} whether they are empty, leaves, or
-internal nodes.  The only way that it can extract \texttt{y} and
-\texttt{z} from \texttt{x} without knowing this is if all possible
-cases of \texttt{tunion tree} have the same size.
+tag in the type \texttt{datatype tree}.  One thing to notice is that
+the argument \texttt{x} is passed as a \emph{pointer} to a
+\texttt{datatype t}, instead of just a \texttt{datatype t}.  This is
+because each case of a Cyclone datatype can occupy
+a different size in memory (in contrast to a C union).  For example,
+the \texttt{Empty} case only needs to hold a tag (\texttt{Empty}),
+while a value \texttt{Leaf(i)} must hold both a tag and an integer,
+and a value \texttt{Node(y,z)} must hold a tag and two pointers.
+So, \texttt{x} is passed as a function.
 
-At the same time, each tag of a \texttt{tunion} can carry a different
-number of values, so obviously each can require a different amount of
-space.  To make it all work, the value-carrying cases of a
-\texttt{tunion} are represented as pointers to structures containing a
-distinguishing integer plus the values, and the non-value-carrying
-cases of a \texttt{tunion} are represented just as distinguishing
-integers.  Since integers and pointers have the same size in Cyclone,
-this achieves the goal.
+Similarly, the subtrees \texttt{x} and \texttt{y} of
+\texttt{Node(x,y)} are pointers as well.  If we tried to make them
+just \texttt{datatype tree}, then the compiler would not know the size
+of a \texttt{Node} value.
 
-The data representation is reflected both in how \texttt{tunion}
-values are constructed and in the patterns used to take them apart.
-Value-carrying cases are built using the \texttt{new} keyword, which
-performs a heap allocation and results in a pointer to the new
-storage.  Non-value-carrying cases don't require any allocation, and
-so they don't use \texttt{new}.  For example,
-\begin{verbatim}
-   new Node(Empty,new Leaf(5))
-\end{verbatim}
-builds a tree consisting of an internal node with an empty left
-subtree, and a right subtree consisting of a single leaf, 5.  We use
-\texttt{new} for the value-carrying cases, \texttt{Node} and
-\texttt{Leaf}, but not for \texttt{Empty}.
-
-In pattern matching, we use the \texttt{\&} character to match a
-pointer.  So in the function \texttt{sum}, since \texttt{Leaf} and
-\texttt{Node} are constructed as pointers, the \texttt{\&} is required
-to match them.  Since \texttt{Empty} is not built as a pointer, the
-\texttt{\&} must not appear.
-
-You might be wondering, ``how does Cyclone tell whether a
-\texttt{tunion} comes from a value-carrying case or a
-non-value-carrying case?''  In particular, how can Cyclone tell the
-integers used for non-value-carrying cases apart from the pointers
-used for the other cases?  Here's how we do it in our current
-implementation:  We reserve a space in the low part of memory where we
-will never allocate Cyclone objects using \texttt{new}.  If a value of
-a \texttt{tunion} is an address in this space, then it represents a
-tag without values, and if it is an address outside of this space, it
-represents a pointer to a structure containing a tag plus the values
-that it carries.
-  
 You can find out more about patterns in
 \hyperref[{sec:patterns}]{Section~\ref{sec:patterns}}; for more about
-\texttt{tunion} and memory management, see
+\texttt{datatype} and memory management, see
 \hyperref[{sec:regions}]{Section~\ref{sec:regions}}.
 
 %%% For example, \texttt{connect} is a C
@@ -1095,7 +1068,7 @@ halt with an error message,
     Uncaught exception Null_Exception
 \end{verbatim}
 \texttt{Null_Exception} is one of a handful of standard exceptions
-used in Cyclone.  Each exception is like a case of a \texttt{tunion}:
+used in Cyclone.  Each exception is like a case of a \texttt{datatype}:
 it can carry along some values with it.  For example, the standard
 exception \texttt{InvalidArg} carries a string.  Exceptions can be
 handled in \texttt{try}-\texttt{catch} statements, using pattern
@@ -1107,7 +1080,7 @@ matching:
       c = getc((FILE @)f);
     }
     catch {
-    case Null_Exception:
+    case &Null_Exception:
       printf("Error: can't open /etc/passwd\n");
       exit(1);
     case &InvalidArg(s):
@@ -1126,32 +1099,44 @@ exception is pattern matched against the cases.  Since the thrown
 exception is \texttt{Null_Exception}, the first case is executed here.
 
 There is one important difference between an exception and a case of a
-\texttt{tunion}: with \texttt{tunion}, all of the cases have to be
+\texttt{datatype}: with \texttt{datatype}, all of the cases have to be
 declared at once, while a new exception can be declared at any time.
-So, exceptions are an \emph{extensible} \texttt{tunion}, or
-\texttt{xtunion}.  Here's how to declare a new exception:
+So, exceptions are an \emph{extensible} \texttt{datatype}.  You can
+specify that a datatype is extensible when you declare it, using the
+\texttt{@extensible} qualifier.  For example, 
+here's how to declare a new exception:
 \begin{verbatim}
-    xtunion exn {
+    @extensible datatype exn {
       My_Exception(char ?);
     };
 \end{verbatim}
-The type \texttt{xtunion exn} is the type of exceptions, and this
-declaration introduces a new case for the \texttt{xtunion exn} type:
-\texttt{My_Exception}, which carries a single value (a string).
-Exception values are created just like \texttt{tunion} values---using
-\texttt{new} for value-carrying tags only---and are thrown with a
-\texttt{throw} statement.  For example,
+The type \texttt{@extensible datatype exn} is the type of exceptions,
+and this declaration introduces a new case for the \texttt{@extensible
+datatype exn} type: \texttt{My_Exception}, which carries a single
+value (a string).  Exception values are created just like
+\texttt{datatype} values, and are thrown with a \texttt{throw}
+statement.  For example,
 \begin{verbatim}
     throw new My_Exception("some kind of error");
 \end{verbatim}
 or
 \begin{verbatim}
-    throw Null_Exception;
+    throw new Null_Exception;
+\end{verbatim}
+
+In practice, ``\texttt{@extensible datatype}'' is quite a mouthful.
+So, Cyclone allows you abbreviate it with just \texttt{datatype},
+as long as you've declared a datatype as \texttt{@extensible} once.
+So a more typical way to declare a new exception in Cyclone is
+\begin{verbatim}
+    datatype exn {
+      My_Exception(char ?);
+    };
 \end{verbatim}
 
 \subsection{Additional Features of Cyclone}
 
-Thus far, we have mentioned a number of advanced features of
+So far we've mentioned a number of advanced features of
 Cyclone that provide facilities needed to avoid common bugs
 or security holes in C.  
 But there are many other features in Cyclone that are
@@ -1163,13 +1148,14 @@ example, like Java, Cyclone lets you declare variables within
 the initializer of a \texttt{for}-statement.  
 
 In addition, Cyclone adds advanced typing support in the form of (a)
-parametric polymorphism, (b) structural subtyping, (c) some
+parametric polymorphism, (b) structural subtyping, and (c) some
 unification-based, local-type inference.  These features are necessary
 to type-check or port a number of (potentially) unsafe C idioms,
-usually involving ``\texttt{void*}'' or the like.  Similarly, \texttt{tunion}
-types can be used to code around many of the uses for C's \texttt{union} types
--- another potential source of unsoundness.  
-In what follows, we give a brief overview of these added features.
+usually involving ``\texttt{void *}'' or the like.  Similarly,
+\texttt{datatype} types can be used to code around many of the uses
+for C's \texttt{union} types -- another potential source of
+unsoundness.  The rest of this section is a brief overview of these
+added features.
 
 \subsection{GCC and C99 Additions}
 
@@ -1357,22 +1343,22 @@ subtyping on function pointers, bounded subtyping, etc.)
 
 %%% \subsection{Tagged Unions}
 %%% 
-%%% Cyclone's tagged unions (\texttt{tunion}) are based on the algebraic
+%%% Cyclone's tagged unions (\texttt{datatype}) are based on the algebraic
 %%% datatypes that first appeared in functional languages such as Hope,
 %%% Miranda, ML, and Haskell.  They provide a safe way for building data
 %%% structures that contain possibly many different types and can be used
 %%% to build algebraic or inductively defined structures, such as lists,
-%%% trees, graphs, etc.  For instance, the following tunion declarations
+%%% trees, graphs, etc.  For instance, the following datatype declarations
 %%% give a way to construct abstract syntax trees for a simple calculator
 %%% language:
 %%% \begin{verbatim}
-%%%   tunion operator { Plus, Times, Minus, Divide }
-%%%   tunion absyn {
+%%%   datatype operator { Plus, Times, Minus, Divide }
+%%%   datatype absyn {
 %%%     Integer(int);
-%%%     Term(tunion absyn, tunion operator, tunion absyn);
+%%%     Term(datatype absyn, datatype operator, datatype absyn);
 %%%   }
-%%%   tunion absyn e1 = new Term(new Integer(3),Plus,new Integer(4));
-%%%   tunion absyn e2 = new Term(e1,Times,new Integer(5));
+%%%   datatype absyn e1 = new Term(new Integer(3),Plus,new Integer(4));
+%%%   datatype absyn e2 = new Term(e1,Times,new Integer(5));
 %%% \end{verbatim}
 %%% 
 %%% The operator definition is like an enum---it just defines symbolic
@@ -1386,17 +1372,17 @@ subtyping on function pointers, bounded subtyping, etc.)
 %%% term ``3 + 4'' while \texttt{e2} is a tree representing the term ``(3 +
 %%% 4) * 5.''
 %%% 
-%%% Internally, \texttt{tunion} constructors are either represented as an
+%%% Internally, \texttt{datatype} constructors are either represented as an
 %%% integer value (as with \texttt{Plus}, \texttt{Times}, \texttt{Minus}, and
 %%% \texttt{Divide}) or a pointer to an object containing a tag and the
 %%% arguments to the constructor.  The object is always allocated on the
 %%% heap.  To traverse the tree, we use pattern matching, again in the
 %%% style of functional languages such as ML or Haskell.
 %%% 
-%%% In the future, we plan to make the representation of tunions explicit
+%%% In the future, we plan to make the representation of datatypes explicit
 %%% and to allow programmers to control tag placement and do explicit
 %%% tests on the tag to refine the type of an object in a more
-%%% traditional, data-flow fashion.  We will probably keep the tunion
+%%% traditional, data-flow fashion.  We will probably keep the datatype
 %%% construct as is for convenience.
 
 %%% \subsection{Pattern Matching}
@@ -1406,7 +1392,7 @@ subtyping on function pointers, bounded subtyping, etc.)
 %%% example, the following function takes in an abstract syntax tree and
 %%% prints the tree to stdout:
 %%% \begin{verbatim}
-%%%   void print_absyn(tunion absyn tree) {
+%%%   void print_absyn(datatype absyn tree) {
 %%%      switch (tree) {
 %%%      case &Integer(i)       : printf("%d",i); break;
 %%%      case &Term(t1,Plus,t2) : printf("("; print_absyn(t1);
@@ -1454,7 +1440,7 @@ subtyping on function pointers, bounded subtyping, etc.)
 %%% you need to give values for those variables.  For instance, in the
 %%% following code:
 %%% \begin{verbatim}
-%%%   void foo(tunion absyn tree) {
+%%%   void foo(datatype absyn tree) {
 %%%      switch (tree) {
 %%%      case &Integer(i)       : printf("%d ",i); break;
 %%%      case &Term(t1,Plus,t2) : printf("It's a plus \n");
@@ -1558,8 +1544,8 @@ treated uniformly.  This ensures that we can use the same code for
 different types.  The general rule is that values of the types that
 instantiate a type variable must fit into a machine word and must be
 passed in general-purpose (as opposed to floating-point) registers.
-Examples of such types include \texttt{int}, pointers, \texttt{tunion},
-and \texttt{xtunion} types.  Other types, including \texttt{char},
+Examples of such types include \texttt{int}, pointers, \texttt{datatype},
+and \texttt{xdatatype} types.  Other types, including \texttt{char},
 \texttt{short}, \texttt{long long}, \texttt{float}, \texttt{double},
 \texttt{struct}, and \texttt{tuple} types violate this rule and thus
 values of these types cannot be passed to a function like swap in
@@ -1581,7 +1567,7 @@ this, but in the short run, we're happy not to have it.
 
 \subsection{Polymorphic Data Structures}
 Just as function definitions can be parameterized by types, so can
-\texttt{struct} definitions, \texttt{tunion} definitions, and even
+\texttt{struct} definitions, \texttt{datatype} definitions, and even
 \texttt{typedef}s.  For instance, the following \texttt{struct} definition
 is similar to the one used in the standard library for lists:
 \begin{verbatim}
@@ -1632,9 +1618,9 @@ are currently putting together.)  Typically, the provider of the
 \end{verbatim}
 The abstract keyword in the implementation ensures that the definition
 does not leak to a client.  
-% One can also declare \texttt{tunion}s to be
+% One can also declare \texttt{datatype}s to be
 % abstract, though I find it more useful to always use a \texttt{struct}
-% to encapsulate the tunion, and make the \texttt{tunion} static, and the
+% to encapsulate the datatype, and make the \texttt{datatype} static, and the
 % struct \texttt{abstract}.  That way, clients are always given an
 % abstract struct to manipulate.
 
@@ -1705,7 +1691,7 @@ Here is a list of the major restrictions:
   doubles, structs of bits, or tuples of bits. Pointer types are not
   supported.  This avoids the situation where an arbitrary bit pattern
   is cast to a pointer and then dereferenced. If you want to use
-  multiple types, then use tagged unions (\texttt{tunion}s).
+  multiple types, then use tagged unions (\texttt{datatype}s).
 
 \item Cyclone only supports a limited form of \texttt{malloc} which is
   baked in. Tuples and structs can be allocated via \texttt{malloc}
@@ -1765,11 +1751,11 @@ instance:
 \begin{itemize}
 \item Cyclone currently does not support nested type declarations
   within a function. All \texttt{struct}, \texttt{union}, \texttt{enum},
-  \texttt{tunion}, \texttt{xtunion}, and \texttt{typedef} definitions must
+  \texttt{datatype}, \texttt{xdatatype}, and \texttt{typedef} definitions must
   be at the top-level.
 
-\item Cyclone does not allow you to use a \texttt{struct}, \texttt{tunion},
-  \texttt{union}, \texttt{xtunion}, or \texttt{enum} type without first
+\item Cyclone does not allow you to use a \texttt{struct}, \texttt{datatype},
+  \texttt{union}, \texttt{xdatatype}, or \texttt{enum} type without first
   declaring it.  We do support one special case of this where you embed
   a declaration within a typedef as in:
 \begin{verbatim}
