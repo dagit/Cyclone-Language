@@ -286,7 +286,7 @@ aggrdict_t<`r> aggrfields_to_aggrdict(flow_env_t<`r> fenv,
 static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
                                       bool allow_zeroterm,
                                       type_t t, absRval_t<`r> leafval) {
-  if(is_union_type(t))
+  if(is_nontagged_union_type(t))
     return fenv->unknown_all;
 
   switch(Tcutil::compress(t)) {
@@ -303,14 +303,14 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
       d[i] = i_typ_to_absrval(fenv,false,(*tqts->hd)[1],leafval);
       tqts = tqts->tl;
     }
-    return rnew(fenv->r) Aggregate(d);
+    return rnew(fenv->r) Aggregate(false,d);
   case &AggrType(AggrInfo(info,_)):
     let ad = get_known_aggrdecl(info);
     if(ad->impl==NULL)
       break;
-    fallthru(ad->impl->fields);
-  case &AnonAggrType(StructA,fs):
-    return rnew(fenv->r) Aggregate(aggrfields_to_aggrdict(fenv,fs,leafval));
+    fallthru(ad->kind,ad->impl->fields);
+  case &AnonAggrType(k,fs):
+    return rnew(fenv->r) Aggregate(k == UnionA, aggrfields_to_aggrdict(fenv,fs,leafval));
   case &ArrayType(ArrayInfo{et,_,_,zeroterm,_}) && conref_def(false,zeroterm):
     // special case for zero-terminated arrays of bits-only things -- 
     // here, we initialize them at translation by putting a 0 in at the end.
@@ -385,7 +385,7 @@ static void add_place(escpile_t<`r,`r2,`rpile> pile, place_t<`r,`r2> place) {
 static void add_places(escpile_t<`r,`r> pile, absRval_t<`r> r) {
   switch(r) {
   case &AddressOf(p): add_place(pile, p); return;
-  case &Aggregate(d): 
+  case &Aggregate(is_union,d): 
     for (int i = 0; i < numelts(d); i++) 
       add_places(pile, d[i]);
     return;
@@ -399,10 +399,10 @@ static void add_places(escpile_t<`r,`r> pile, absRval_t<`r> r) {
 static absRval_t<`r> insert_place_inner(region_t<`r> r, absRval_t<`r> new_val,
                                         absRval_t<`r> old_val) {
   switch(old_val) {
-  case &Aggregate(d): 
+  case &Aggregate(is_union,d): 
     aggrdict_t d2 = rnew(r) { for i < numelts(d) : 
                               insert_place_inner(r,new_val,d[i]) };
-    return rnew(r) Aggregate(d2);
+    return rnew(r) Aggregate(is_union,d2);
   default: return new_val;
   }
 }
@@ -430,11 +430,11 @@ static absRval_t<`r> insert_place_outer(region_t<`r> r,
   if(fs==NULL) 
     return insert_place_inner(r,new_val,old_val);
   switch($(fs,old_val)) {
-  case $(&List(hd,tl),&Aggregate(d)):
+  case $(&List(hd,tl),&Aggregate(is_union,d)):
     let new_child = insert_place_outer(r,tl,d[hd],new_val);
     let new_d = aggr_dict_insert(r, d, hd,new_child);
     if (new_d == d) return old_val;
-    else return rnew(r) Aggregate(new_d);
+    else return rnew(r) Aggregate(is_union,new_d);
   default: throw new Core::Impossible("bad insert place");
   }
 }
@@ -497,7 +497,14 @@ static initlevel_t initlevel_rec(struct InitlevelEnv<`r,`e> @ env,
   initlevel_t this_ans;
   if(acc == NoneIL) return NoneIL;
   switch(r) {
-  case &Aggregate(d): 
+  case &Aggregate(true,d): // union case
+    // if one of the members is AllIL then we're okay
+    let sz = numelts(d);
+    this_ans = NoneIL;
+    for (int i = 0; i < sz; i++) 
+      this_ans = initlevel_rec(env,d[i],AllIL);
+    break;
+  case &Aggregate(false,d): // struct case -- they all have to be init'd
     let sz = numelts(d);
     this_ans = AllIL;
     for (int i = 0; i < sz; i++) 
@@ -532,7 +539,7 @@ absRval_t<`r> lookup_place(flowdict_t<`r> d, place_t<`r,`r> place) {
   let ans = Dict::lookup(d,root);
   for(; fields != NULL; fields = fields->tl)
     switch($(ans,fields->hd)) {
-    case $(&Aggregate(d2), fname): 
+    case $(&Aggregate(is_union,d2), fname): 
       ans = d2[fname];
       break;
     default: throw new Core::Impossible("bad lookup_place");
@@ -543,7 +550,7 @@ absRval_t<`r> lookup_place(flowdict_t<`r> d, place_t<`r,`r> place) {
 static bool is_rval_unescaped(absRval_t rval) {
   switch(rval) {
   case &Esc(_):       return false;
-  case &Aggregate(d): 
+  case &Aggregate(is_union,d): 
     unsigned sz = numelts(d);
     for (int i = 0; i < sz; i++) 
       if (!is_rval_unescaped(d[i])) return false;
@@ -582,7 +589,7 @@ static absRval_t<`r2> assign_place_inner(struct AssignEnv<`r,`r2> @ env,
       Tcutil::terr(env->loc, "assignment puts possibly-uninitialized data in "
 		   "an escaped location");
     return env->fenv->esc_all;
-  case $(&Aggregate(d1), &Aggregate(d2)):
+  case $(&Aggregate(is_union1,d1), &Aggregate(is_union2,d2)):
     aggrdict_t new_d = 
       rnew(env->fenv->r) {for i < numelts(d1) : assign_place_inner(env,d1[i],d2[i]) };
     // try to preserve sharing by returning one of the original arrays
@@ -601,7 +608,7 @@ static absRval_t<`r2> assign_place_inner(struct AssignEnv<`r,`r2> @ env,
       }
     if (!change)
       return newval;
-    return rnew(env->fenv->r) Aggregate(new_d);
+    return rnew(env->fenv->r) Aggregate(is_union1,new_d);
   case $(_, &Esc(il)): // we already know we don't have an escaped location
     switch(il) {
     case NoneIL: return env->fenv->unknown_none;
@@ -617,11 +624,11 @@ static absRval_t<`r2> assign_place_outer(struct AssignEnv<`r,`r2> @ env,
                                          absRval_t<`r2> newval) {
   if(fs == NULL) return assign_place_inner(env,oldval,newval);
   switch($(fs,oldval)) {
-  case $(&List(hd,tl),&Aggregate(d)):
+  case $(&List(hd,tl),&Aggregate(is_union,d)):
     let new_child = assign_place_outer(env,tl,d[hd],newval);
     let new_child_agg = aggr_dict_insert(env->fenv->r, d, hd, new_child);
     if (new_child_agg == d) return oldval;
-    else return rnew(env->fenv->r) Aggregate(new_child_agg);
+    else return rnew(env->fenv->r) Aggregate(is_union,new_child_agg);
   default: throw new Core::Impossible("bad assign place");
   }
 }
@@ -713,7 +720,7 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
   case $(NotZeroAll,  NotZeroThis):
   case $(NotZeroThis, NotZeroAll): return NotZeroThis;
 
-  case $(&Aggregate(d1), &Aggregate(d2)):
+  case $(&Aggregate(is_union1,d1), &Aggregate(is_union2,d2)):
     aggrdict_t new_d = 
       rnew(rgn) {for i < numelts(d1) : join_absRval(env,0,d1[i],d2[i]) };
 
@@ -733,7 +740,7 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
       }
     if (!change)
       return r2;
-    return rnew(rgn) Aggregate(new_d);
+    return rnew(rgn) Aggregate(is_union1,new_d);
   case $(&TagCmps(l1),&TagCmps(l2)):
     let new_l = join_tag_cmps(rgn,l1,l2);
     if(new_l==l1) return r1;
@@ -925,7 +932,7 @@ static absRval_t<`r> after_absRval(afterenv_t<`r1,`r2,`r> env, absRval_t<`r> r1,
   // neither one change, but they are not pointer equal.  Thus we assume
   // that they point to things that have changed.
   switch($(r1,r2)) {
-  case $(&Aggregate(d1),&Aggregate(d2)):
+  case $(&Aggregate(is_union1,d1),&Aggregate(is_union2,d2)):
     aggrdict_t new_d = 
       rnew(env->joinenv.fenv->r) 
         {for i < numelts(d1) : after_absRval_d(env,i,d1[i],d2[i]) };
@@ -946,7 +953,7 @@ static absRval_t<`r> after_absRval(afterenv_t<`r1,`r2,`r> env, absRval_t<`r> r1,
       }
     if (!change)
       return r2;
-    return rnew(env->joinenv.fenv->r) Aggregate(new_d);
+    return rnew(env->joinenv.fenv->r) Aggregate(is_union1,new_d);
   default: throw new Core::Impossible("after_absRval -- non-aggregates!");
   }
 }
@@ -1029,7 +1036,7 @@ static bool absRval_lessthan_approx(`a::B ignore, absRval_t<`r> r1, absRval_t<`r
   case $(&AddressOf(p1), &AddressOf(p2)): return place_cmp(p1,p2)==0;
   case $(&AddressOf(_),_):
   case $(_,&AddressOf(_)): return false;
-  case $(&Aggregate(d1), &Aggregate(d2)):
+  case $(&Aggregate(is_union1,d1), &Aggregate(is_union2,d2)):
     if (d1 == d2) return true;
     for (int i = 0; i < numelts(d1); i++) 
       if (!absRval_lessthan_approx(0,d1[i],d2[i])) return false;
@@ -1362,8 +1369,9 @@ void print_absrval(absRval_t rval) {
   case &AddressOf(p): fprintf(stderr,"AddrOf("); print_place(p); 
     fprintf(stderr,")"); break;
   case &TagCmps(_): fprintf(stderr,"TagCmps(?)"); break;
-  case &Aggregate(d): 
-    fprintf(stderr,"Aggregate{"); 
+  case &Aggregate(is_union,d): 
+    if (is_union) fprintf(stderr,"AggrUnion{");
+    else fprintf(stderr,"AggrStruct{");
     for (int i = 0; i < numelts(d); i++) {
       print_absrval(d[i]);
       if (i+1 < numelts(d)) fprintf(stderr,",");
@@ -1549,7 +1557,7 @@ unique_place_of_rec(region_t<`r> r, exp_t e,
 
   case &Var_e(_,&Global_b(vd)): throw new Core::Impossible("non-unique path");
 
-  case &AggrArrow_e(e1,f):
+  case &AggrArrow_e(e1,f,...):
     switch(Tcutil::compress(e1->topt->v)) {
     case &PointerType(PtrInfo{t2,_,_}):
       if(!is_union_type(t2))
@@ -1574,7 +1582,7 @@ unique_place_of_rec(region_t<`r> r, exp_t e,
       throw new Core::Impossible("unique place subscript -- bad type");
     }
     // KLUDGE: unions (see comment at top of file)
-  case &AggrMember_e(e1,fld): 
+  case &AggrMember_e(e1,fld,...): 
     if(is_union_type(e1->topt->v))
       throw new Core::Impossible("unions can't contain unique places");
     let idx = get_field_index(e1->topt->v,fld);

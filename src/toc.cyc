@@ -86,7 +86,7 @@ struct TocState {
   dynregion_t<`d> dyn;
   // tuple types seen so far and the struct they map to
   list_t<$(type_t,list_t<type_t,`d>)@`d,`d> @`d tuple_types;
-  // aggregates seen so far, their declaration, and C type
+  // (non-tagged) aggregates seen so far, their declaration, and C type
   Dict::dict_t<qvar_t,$(aggrdecl_t,type_t)@`d,`d> @`d aggrs_so_far;
   // datatypes seen so far
   Set::set_t<qvar_t,`d> @`d                    datatypes_so_far;
@@ -261,6 +261,7 @@ static stmt_t skip_stmt_dl() {
     skip_stmt_opt = new skip_stmt(DL);
   return *skip_stmt_opt;
 }
+
 // These constructors are useful when we want to just update the
 // raw part of an expression or statement.
 static exp_t cast_it(type_t t, exp_t e) {
@@ -294,10 +295,10 @@ static raw_exp_t conditional_exp_r(exp_t e1, exp_t e2, exp_t e3) {
   return new Conditional_e(e1,e2,e3);
 }
 static raw_exp_t aggrmember_exp_r(exp_t e, field_name_t n) {
-  return new AggrMember_e(e,n);
+  return new AggrMember_e(e,n,false,false);
 }
 static raw_exp_t aggrarrow_exp_r(exp_t e, field_name_t n) {
-  return new AggrArrow_e(e,n);
+  return new AggrArrow_e(e,n,false,false);
 }
 static raw_exp_t unresolvedmem_exp_r(opt_t<typedef_name_t,`H> tdopt,
                                      list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> ds)
@@ -409,7 +410,7 @@ static bool is_zero(exp_t e) {
   case &Cast_e(_,e1,_,_): return is_zero(e1);
   case &Tuple_e(es): return List::forall(is_zero,es);
   case &Array_e(dles):         fallthru(dles);
-  case &Struct_e(_,_,dles,_):  fallthru(dles);
+  case &Aggregate_e(_,_,dles,_):  fallthru(dles);
   case &CompoundLit_e(_,dles): fallthru(dles);
   case &UnresolvedMem_e(_,dles):
     for (; dles != NULL; dles = dles->tl) 
@@ -800,8 +801,8 @@ static bool is_poly_field(type_t t, field_name_t f) {
 // type `a before instantiation in struct cons.
 static bool is_poly_project(exp_t e) {
   switch (e->r) {
-  case &AggrMember_e(e1,f): return is_poly_field(e1->topt->v,f);
-  case &AggrArrow_e(e1,f):
+  case &AggrMember_e(e1,f,_,_): return is_poly_field(e1->topt->v,f);
+  case &AggrArrow_e(e1,f,_,_):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{t,_,_}): return is_poly_field(t,f);
     default: toc_impos("is_poly_project: bad type %s",typ2string(e1->topt->v));
@@ -844,6 +845,14 @@ static exp_t rcalloc_exp(exp_t rgn, exp_t s, exp_t n) {
 static exp_t newthrow_exp(exp_t e) {
   return fncall_exp(_throw_e, new List(e,NULL), DL);
 }
+// throw a match exception
+static stmt_t throw_match_stmt() {
+  static stmt_t* throw_match_stmt_opt = NULL;
+  if(throw_match_stmt_opt==NULL)
+    throw_match_stmt_opt = new exp_stmt(newthrow_exp(match_exn_exp(DL)),DL);
+  return *throw_match_stmt_opt;
+}
+
 
 // t*{sz} -> t? at top-level
 static exp_t make_toplevel_dyn_arr(type_t t, exp_t sz, exp_t e) {
@@ -1434,6 +1443,16 @@ static exp_t init_tuple(env_t nv, bool pointer,
   }
 }
 
+static int get_member_offset(aggrdecl_t ad, field_name_t f) {
+  int i = 1;
+  for (let fields = ad->impl->fields; fields != NULL; fields = fields->tl) {
+    let field = fields->hd;
+    if (strcmp(*field->name,*f) == 0) return i;
+    ++i;
+  }
+  toc_impos(aprintf("get_member_offset %s failed",*f));
+}
+
 static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
                          bool pointer, exp_opt_t rgnopt, 
                          list_t<$(list_t<designator_t>,exp_t)@> dles, 
@@ -1453,6 +1472,7 @@ static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
     break;
   default: toc_impos("init_struct: bad struct type");
   }
+  bool is_tagged_union = ad->impl->tagged;
   TOC_RGN(nv,r) {
     for(let es = List::rrev(r,dles); es != NULL; es = es->tl) {
       let &$(ds,e) = es->hd;
@@ -1482,6 +1502,14 @@ static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
         switch (ds->hd) {
         case &FieldName(f):
           exp_t lval = lval_f(xexp,f,DL);
+          if (is_tagged_union) {
+            int i = get_member_offset(ad,f);
+            exp_t f_tag_exp = signed_int_exp(i,DL);
+            exp_t lhs = aggrmember_exp(lval,tag_sp,NULL);
+            exp_t assn_exp = assign_exp(lhs,f_tag_exp,NULL);
+            s = seq_stmt(exp_stmt(assn_exp,NULL),s,NULL);
+            lval = aggrmember_exp(lval,val_sp,NULL);
+          }
           switch (e->r) {
           case &Array_e(dles):
             s = init_array(nv, lval, dles, s); break;
@@ -1535,7 +1563,7 @@ static void lvalue_assign(exp_t e1, list_t<field_name_t> fs,
   switch (e1->r) {
   case &StmtExp_e(s): lvalue_assign_stmt(s,fs,f,f_env); break;
   case &Cast_e(t,e,_,_):  lvalue_assign(e,fs,f,f_env); break;
-  case &AggrMember_e(e,fld):
+  case &AggrMember_e(e,fld,is_tagged,is_read):
     // Hack: strip off the struct member -- the base case adds it back in.
     e1->r = e->r;
     lvalue_assign(e1,new List(fld,fs),f,f_env);
@@ -1720,6 +1748,105 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
   }
 }
 
+// we have a read of e1.f or e1->f where e1 does any needed null checks, 
+// but we now have to do a tag-check.  We translate this to:
+//  ({ temp = e1;
+//     if (temp->f.tag != f_tag) throw_match();
+//     temp->f.val;
+//  })
+static raw_exp_t check_tagged_union(exp_t e1,type_t e1_c_type,
+                                    type_t aggrtype,field_name_t f,
+                                    exp_t aggrproj(exp_t,field_name_t,seg_t)) {
+  aggrdecl_t ad;
+  switch (compress(aggrtype)) {
+  case &AggrType(AggrInfo(info,_)):
+    ad = get_known_aggrdecl(info); break;
+  default: impos(aprintf("expecting union but found %s in check_tagged_union",
+                         typ2string(aggrtype)));
+  }
+  let temp = temp_var();
+  let temp_exp = var_exp(temp,DL);
+  let temp_f_tag = aggrmember_exp(aggrproj(temp_exp,f,DL),tag_sp,DL);
+  let f_tag = signed_int_exp(get_member_offset(ad,f),DL);
+  let test_exp = neq_exp(temp_f_tag,f_tag,DL);
+  let temp_f_val = aggrmember_exp(aggrproj(temp_exp,f,DL),val_sp,DL);
+  let sres = exp_stmt(temp_f_val,DL);
+  let ifs = ifthenelse_stmt(test_exp,throw_match_stmt(),skip_stmt_dl(),DL);
+  let s = declare_stmt(temp,e1_c_type,e1,seq_stmt(ifs,sres,DL),DL);
+  return stmt_exp_r(s);
+}
+
+// return true if e is e1.f or e1->f where e1 is a (pointer to a)
+// tagged union.  While we're at it, calculate the tag for the 
+// corresponding member f_tag.
+static bool is_tagged_union_project(exp_t e, int @f_tag, 
+                                    type_t @ tagged_member_type,
+                                    bool clear_read) {
+  switch (e->r) {
+  case &Cast_e(_,e1,_,_): toc_impos("cast on lhs!");
+  case &AggrMember_e(e1,f,_,*is_read):
+    switch (compress(e1->topt->v)) {
+    case &AggrType(AggrInfo(info,...)): 
+      let ad = get_known_aggrdecl(info); 
+      *f_tag = get_member_offset(ad,f);
+      // FIX: we need to get unique names for these damned structs...
+      string_t str = aprintf("_union_%s_%s",qvar2string(ad->name),*f);
+      *tagged_member_type = strct(new str);
+      if (clear_read) *is_read = false;
+      return ad->impl->tagged;
+    default: return false;
+    }
+  case &AggrArrow_e(e1,f,_,*is_read):
+    switch (compress(e1->topt->v)) {
+    case &PointerType(PtrInfo{.elt_typ = et,...}):
+      switch (compress(et)) {
+      case &AggrType(AggrInfo(info,...)): 
+        let ad = get_known_aggrdecl(info); 
+        *f_tag = get_member_offset(ad,f);
+        // FIX: we need to get unique names for these damned structs...
+        string_t str = aprintf("_union_%s_%s",qvar2string(ad->name),*f);
+        *tagged_member_type = strct(new str);
+        if (clear_read) *is_read = false;
+        return ad->impl->tagged;
+      default: return false;
+      }
+    default: return false;
+    }
+  default: return false;
+  }
+}
+
+// special case for assignment to a tagged union member (either e1.f
+// or e1->f.  In particular, when we have e1->f = e2, we rewrite to:
+// ({ temp = &e1->f;
+//    temp->tag = f_tag;
+//    temp->val = e2; }) 
+// and if we have e1->f op= e2 we rewrite to:
+// ({ temp = &e1->f;
+//    if (temp->tag != f_tag) throw_match();
+//    temp->val op= e2; })
+static raw_exp_t tagged_union_assignop(exp_t e1, type_t e1_cyc_type,
+                                       opt_t<primop_t,`H> popt,
+                                       exp_t e2, type_t e2_cyc_type,
+                                       int tag_num, type_t member_type) {
+  let temp = temp_var();
+  exp_t temp_exp = var_exp(temp,DL);
+  exp_t temp_val = aggrarrow_exp(temp_exp,val_sp,DL);
+  exp_t temp_tag = aggrarrow_exp(temp_exp,tag_sp,DL);
+  exp_t f_tag = signed_int_exp(tag_num,DL);
+  stmt_t s3 = exp_stmt(assignop_exp(temp_val,popt,e2,DL),DL);
+  stmt_t s2;
+  if (popt == NULL) 
+    s2 = exp_stmt(assign_exp(temp_tag,f_tag,DL),DL);
+  else {
+    let test_exp = neq_exp(temp_tag,f_tag,DL);
+    s2 = ifthenelse_stmt(test_exp,throw_match_stmt(),skip_stmt_dl(),DL);
+  }
+  stmt_t s1 = declare_stmt(temp,cstar_typ(member_type,mt_tq),
+                           address_exp(e1,DL),seq_stmt(s2,s3,DL),DL);
+  return stmt_exp_r(s1);
+}
+
 static void exp_to_c(env_t nv, exp_t e) {
   let r = e->r;
   if(e->topt == NULL)
@@ -1864,6 +1991,9 @@ static void exp_to_c(env_t nv, exp_t e) {
     // then we need to know that the inc/dec doesn't destroy the
     // trailing 0.  See the special code in the AssignOp_e case.
     // To combat this, I'm simply disallowing it.  
+    // 
+    // Similarly, we need to worry about the case where e2 is a
+    // tagged union projection.  
     type_t ptr_type = VoidType;
     type_t elt_type = VoidType;
     bool is_dyneither = false;
@@ -1871,7 +2001,27 @@ static void exp_to_c(env_t nv, exp_t e) {
     if (incr == PreDec || incr == PostDec) incr_str = "decrement";
     if (is_zero_ptr_deref(e2,&ptr_type,&is_dyneither,&elt_type)) {
       Tcutil::terr(e->loc,"in-place %s is not supported when dereferencing a zero-terminated pointer", incr_str);
-      toc_impos("in-place inc on zero-term");
+      toc_impos("in-place inc/dec on zero-term");
+    }
+    type_t tunion_member_type = VoidType;
+    int f_tag = 0;
+    if (is_tagged_union_project(e2,&f_tag,&tunion_member_type,true)) {
+      let one = signed_int_exp(1,DL);
+      one->topt = new Opt(sint_typ);
+      switch (incr) {
+      case PreInc:
+        e->r = new AssignOp_e(e2,new Opt(Plus),one);
+        exp_to_c(nv,e);
+        return;
+      case PreDec:
+        e->r = new AssignOp_e(e2,new Opt(Minus),one);
+        exp_to_c(nv,e);
+        return;
+      default:
+        Tcutil::terr(e->loc,"in-place post-%s is not supported on @tagged "
+                     "union members", incr_str);
+        toc_impos("in-place inc/dec on @tagged union");
+      }
     }
     exp_to_c(nv,e2);
     // only t ? or zero-terminated types are translated funny, 
@@ -1951,6 +2101,11 @@ static void exp_to_c(env_t nv, exp_t e) {
     // can't point to the last element or e2 must be 0.  If we have
     // *ea op= e2 then we need to know that either ea can't point to
     // the last element or (0 op= e2) is 0.
+    // 
+    // Similarly, when e1 is a tagged union member, then we need to 
+    // update its tag as well as the value.  This is problematic when
+    // we have something like e.x += 1 which is both a read and a write
+    // of the member.  
     type_t ptr_type = VoidType;
     type_t elt_type = VoidType;
     bool is_dyneither = false;
@@ -1964,8 +2119,19 @@ static void exp_to_c(env_t nv, exp_t e) {
     bool e1_poly    = is_poly_project(e1);
     type_t  e1_old_typ = e1->topt->v;
     type_t  e2_old_typ = e2->topt->v;
+    // See if e1 is a projection on a tagged union member.
+    int f_tag = 0; // bogus unless e1_tagged_proj
+    type_t tagged_member_struct_type = VoidType; // bogus unless e1_tagged_proj
+    bool e1_tagged_union_proj = 
+      is_tagged_union_project(e1,&f_tag,&tagged_member_struct_type,true);
     exp_to_c(nv,e1); 
     exp_to_c(nv,e2);
+    // special case for assignment to a tagged union member. 
+    if (e1_tagged_union_proj) {
+      e->r = tagged_union_assignop(e1,e1_old_typ,popt,e2,e2_old_typ,f_tag,
+                                   tagged_member_struct_type);
+      return;
+    }
     // special case for pointer arithmetic of t ? or zero-terminated types
     bool done = false;
     if(popt != NULL) {
@@ -2334,7 +2500,7 @@ DynCast:
   case &Address_e(e1):
     // When e1 is a struct or a tuple, this is really a "new".
     switch (e1->r) {
-    case &Struct_e(tdn,ts,es,_):
+    case &Aggregate_e(tdn,ts,es,_):
       if (is_toplevel(nv))
 	unimp("%s: & on non-identifiers at the top-level",
               Position::string_of_segment(e1->loc));
@@ -2460,7 +2626,7 @@ DynCast:
         e->r = stmt_exp_r(s);
       }
       break;
-    case &Struct_e(tdn,ts,es,_):
+    case &Aggregate_e(tdn,ts,es,ad):
       // try to avoid the GCC bug
       e->r = init_struct(nv, e1->topt->v, ts != NULL, true, rgnopt, es, tdn)->r;
       break;
@@ -2598,12 +2764,18 @@ DynCast:
     default: toc_impos("exp_to_c: Deref: non-pointer");
     }
     break;
-  case &AggrMember_e(e1,f):
+  case &AggrMember_e(e1,f,is_tagged,is_read):
+    bool is_poly = is_poly_project(e);
+    type_t e1_cyc_type = e1->topt->v;
     exp_to_c(nv, e1);
-    if(is_poly_project(e))
+    if (is_tagged && is_read) {
+      e->r = check_tagged_union(e1,typ_to_c(e1_cyc_type),e1_cyc_type,f,
+                                aggrmember_exp);
+    }
+    if(is_poly)
       e->r = array_to_ptr_cast(typ_to_c(e->topt->v),new_exp(e->r,DL),DL)->r;
     break;
-  case &AggrArrow_e(e1,f):
+  case &AggrArrow_e(e1,f,is_tagged,is_read):
     type_t e1typ = compress(e1->topt->v);
     bool do_null_check = need_null_check(e1);
     exp_to_c(nv, e1);
@@ -2621,32 +2793,36 @@ DynCast:
           if (warn_all_null_deref)
             warn(e->loc, "inserted null check due to dereference");
 	  // ((t *)_check_null(e))->f
-	  e->r = aggrarrow_exp_r(cast_it(typ_to_c(e1->topt->v),
-                                         fncall_exp(_check_null_e,
-                                                    new List(e1,NULL),DL)),f);
+	  e1->r = cast_it_r(typ_to_c(e1typ),
+                            fncall_exp(_check_null_e,
+                                       list(new_exp(e1->r,NULL)),DL));
 	}
       } else {
         if (!Evexp::c_can_eval(esz))
           terr(e->loc,"cannot determine pointer dereference in bounds");
-	// very strang case: they may have used sizeof or offsetof to make
+	// very strange case: they may have used sizeof or offsetof to make
 	// a zero-size array.  Yeah, that'll happen never.
-	e->r = aggrarrow_exp_r(cast_it(typ_to_c(e1->topt->v),
-	      fncall_exp(_check_known_subscript_null_e,
-                         list(e1,esz,sizeoftyp_exp(ta,DL),uint_exp(0,DL)),
-                         DL)), f);
+	e1->r = cast_it_r(typ_to_c(e1typ),
+                          fncall_exp(_check_known_subscript_null_e,
+                                     list(new_exp(e1->r,NULL),esz,
+                                          sizeoftyp_exp(ta,DL),
+                                          uint_exp(0,DL)),DL));
       }
       break;
     case DynEither_b:
       // ((ta1 *)_check_unknown_subscript(e1, sizeof(ta1), 0))->f
-      let _check_f = _check_dyneither_subscript_e;
       type_t ta1 = typ_to_c_array(ta);
       e1->r = cast_it_r(cstar_typ(ta1,tq),
-                        fncall_exp(_check_f,
-                                   list(copy_exp(e1),
+                        fncall_exp(_check_dyneither_subscript_e,
+                                   list(new_exp(e1->r,DL),
                                         sizeoftyp_exp(ta1,DL),
-                                        uint_exp(0,DL)),
-                                   DL));
+                                        uint_exp(0,DL)),DL));
+                                        
+                                   
       break;
+    }
+    if (is_tagged && is_read) {
+      e->r = check_tagged_union(e1,typ_to_c(e1typ),ta,f,aggrarrow_exp);
     }
     if(is_poly)
       e->r = array_to_ptr_cast(typ_to_c(e->topt->v),new_exp(e->r,DL),DL)->r;
@@ -2784,7 +2960,7 @@ DynCast:
     }
     e->r = unresolvedmem_exp_r(NULL,es);
     break;
-  case &Struct_e(tdn,ts,dles,sd):
+  case &Aggregate_e(tdn,ts,dles,sd):
     // Due to a GCC bug w.r.t. to nested designators, we expand this out
     // to ({ t temp; t.f1 = e1, ..., t.fn = en; t}).
     if(!is_toplevel(nv))
@@ -2792,29 +2968,52 @@ DynCast:
     else {
       // At top-level must create an initializer.  For MSVC, sort fields
       // and drop initializers (sorting okay b/c we're at top-level)
+      //
+      // JGM: unfortunately, doesn't work for tagged unions -- we need
+      // the designators to distinguish the various cases.
       if(sd == NULL)
-	toc_impos("Struct_e: missing aggrdecl pointer");
+	toc_impos("Aggregate_e: missing aggrdecl pointer");
       aggrdecl_t sd2 = (aggrdecl_t)sd;
+
       TOC_RGN(nv,rgn) {
-      let fields = Tcutil::resolve_struct_designators(rgn, e->loc, dles, 
-                                                      sd2->impl->fields);
-      // here is where we now sort
-      let newdles = NULL;
-      let sdfields = sd2->impl->fields;
-      for(; sdfields!=NULL; sdfields=sdfields->tl)
-	for (let fields2 = fields; fields2 != NULL; fields2 = fields2->tl) {
-	  if((*fields2->hd)[0] == sdfields->hd) {
-	    let &$(field,fieldexp) = fields2->hd;
-	    let fieldtyp = field->type;
-	    exp_to_c(nv,fieldexp);
-	    if (is_void_star(fieldtyp))
-	      fieldexp->r = 
-                cast_it_r(void_star_typ(),new_exp(fieldexp->r,DL));
-	    newdles = new List(new $(NULL,fieldexp), newdles);
-	    break;
-	  }
-	}
-      e->r = unresolvedmem_exp_r(NULL,imp_rev(newdles));
+      let fields = Tcutil::resolve_aggregate_designators(rgn, e->loc, dles, 
+                                                         sd2->kind,
+                                                         sd2->impl->fields);
+      if (sd->impl->tagged) {
+        // should only be one field
+        let &$(field,fieldexp) = fields->hd;
+        let fieldtyp = field->type;
+        exp_to_c(nv,fieldexp);
+        if (is_void_star(fieldtyp))
+          fieldexp->r = 
+            cast_it_r(void_star_typ(),new_exp(fieldexp->r,DL));
+        // for tagged unions, must insert tag here
+        int i = get_member_offset(sd,field->name);
+        exp_t field_tag_exp = signed_int_exp(i,NULL);
+        let newdles = list(new $(NULL,field_tag_exp), new $(NULL,fieldexp));
+        exp_t umem = unresolvedmem_exp(NULL,newdles,NULL);
+        list_t<designator_t> ds = list(new FieldName(field->name));
+        list_t<$(list_t<designator_t>,exp_t)@> dles = list(new $(ds,umem));
+        e->r = unresolvedmem_exp_r(NULL,dles);
+      } else { // not tagged
+        // here is where we now sort
+        let newdles = NULL;
+        let sdfields = sd2->impl->fields;
+        for(; sdfields!=NULL; sdfields=sdfields->tl)
+          for (let fields2 = fields; fields2 != NULL; fields2 = fields2->tl) {
+            if((*fields2->hd)[0] == sdfields->hd) {
+              let &$(field,fieldexp) = fields2->hd;
+              let fieldtyp = field->type;
+              exp_to_c(nv,fieldexp);
+              if (is_void_star(fieldtyp))
+                fieldexp->r = 
+                  cast_it_r(void_star_typ(),new_exp(fieldexp->r,DL));
+              newdles = new List(new $(NULL,fieldexp), newdles);
+              break;
+            }
+          }
+        e->r = unresolvedmem_exp_r(NULL,imp_rev(newdles));
+      }
       }
     }
     break;
@@ -2825,7 +3024,7 @@ DynCast:
     default: toc_impos("anon struct has type %s",typ2string(st));
     }
     TOC_RGN(nv,rgn) {
-      let fields = Tcutil::resolve_struct_designators(rgn, e->loc, dles, fs);
+      let fields = Tcutil::resolve_aggregate_designators(rgn, e->loc, dles, StructA, fs);
       for (; fields != NULL; fields = fields->tl) {
         let &$(field,fieldexp) = fields->hd;
         let fieldtyp = field->type;
@@ -3854,7 +4053,14 @@ static scope_t scope_to_c(scope_t s) {
   }
 }
 
-// struct declarations -- straightforward
+// struct & union declarations -- straightforward except when we have 
+// a tagged union.  When we have:
+//   @tagged union Foo { T1 m1; ... Tn mn; };
+// this is translated to:
+//   struct _union_Foo_m1 { int tag; T1 val; };
+//   ...
+//   struct _union_Foo_mn { int tag; Tn val; };
+//   union Foo { struct _union_Foo_m1 m1; ... struct _union_Foo_mn mn; };
 static void aggrdecl_to_c(aggrdecl_t ad) {
   let n = ad->name;
   let TocState{.dyn = dyn, .aggrs_so_far = aggrs_so_far, ...} = *toc_state;
@@ -3865,9 +4071,9 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
       seen_defn_before = false;
       $(aggrdecl_t,type_t)@ v;
       if (ad->kind == StructA)
-        v = rnew(d) $(ad,strctq(ad->name));
+        v = rnew(d) $(ad,strctq(n));
       else 
-        v = rnew(d) $(ad,unionq_typ(ad->name));
+        v = rnew(d) $(ad,unionq_typ(n));
       *aggrs_so_far = Dict::insert(*aggrs_so_far,n,v);
     } else {
       let &$(ad2,t) = *dopt;
@@ -3890,6 +4096,24 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
           // locations...
           fields->hd->tq = mt_tq;
           fields->hd->type = typ_to_c_array(fields->hd->type);
+          // This is a tagged union -- rewrite the member type from T
+          // to struct _union_Foo_f {int tag; T value;} where Foo is the name
+          // of the union, and f is the name of the member.
+          if (ad->impl->tagged) {
+            let T = fields->hd->type;
+            let f = fields->hd->name;
+            string_t s = aprintf("_union_%s_%s",qvar2string(ad->name),*f);
+            var_t str = new s;
+            let value_field = new Aggrfield(val_sp,mt_tq,T,NULL,NULL);
+            let tag_field = new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL);
+            let fs = list(tag_field,value_field);
+            let ad2 = new Aggrdecl{.kind = StructA, .sc = Public,
+                                   .name = new $(Loc_n,str), .tvs = NULL,
+                                  .impl = new AggrdeclImpl(NULL,NULL,fs,false),
+                                   .attributes = NULL};
+            result_decls = new List(new_decl(new Aggr_d(ad2),DL),result_decls);
+            fields->hd->type = strct(str);
+          }
         }
     }
   }
@@ -4131,12 +4355,6 @@ static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s) {
   }
 }
 
-static stmt_t* throw_match_stmt_opt = NULL;
-static stmt_t throw_match_stmt() {
-  if(throw_match_stmt_opt==NULL)
-    throw_match_stmt_opt = new exp_stmt(newthrow_exp(match_exn_exp(DL)),DL);
-  return *throw_match_stmt_opt;
-}
 // let declarations -- tricky
 // Unlike other declarations, lets need to execute statements and
 // so return a statement.  (See stmt_to_c, case for Decl above.)
@@ -4167,8 +4385,8 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, type_t t, exp_t e, stmt_t s) {
 static void exptypes_to_c(exp_t e) {
   switch (e->r) {
   case &Deref_e(e):          fallthru(e);
-  case &AggrMember_e(e,_):   fallthru(e);
-  case &AggrArrow_e(e,_):    fallthru(e);
+  case &AggrMember_e(e,...):   fallthru(e);
+  case &AggrArrow_e(e,...):    fallthru(e);
   case &Address_e(e):        fallthru(e);
   case &Throw_e(e):          fallthru(e);
   case &NoInstantiate_e(e):  fallthru(e);
@@ -4213,7 +4431,7 @@ static void exptypes_to_c(exp_t e) {
 
   case &AnonStruct_e(_, _): fallthru;
   case &Datatype_e(_,_,_):    fallthru;
-  case &Struct_e(_,_,_,_):  fallthru;
+  case &Aggregate_e(_,_,_,_):  fallthru;
   case &Comprehension_e(_,_,_,_): fallthru;
   case &Tuple_e(_):         fallthru;
   case &Instantiate_e(_,_): fallthru;

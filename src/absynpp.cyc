@@ -956,9 +956,9 @@ doc_t typ2doc(type_t t) {
 // BIGGER WARNING: Absyndump::dumpexp_prec has to use the same constants!!!
 int exp_prec(exp_t e) {
   switch (e->r) {
-  case &Const_e(_):    
-  case &Var_e(_,_):    
-  case &UnknownId_e(_): return 10000;
+  case &Const_e(...):    
+  case &Var_e(...):    
+  case &UnknownId_e(...): return 10000;
   case &Primop_e(p,_):
     switch (p) {
     case Plus:           return 100;
@@ -982,42 +982,42 @@ int exp_prec(exp_t e) {
     case Bitarshift:     return  80; // doesn't actually exist (see grammar)
     case Numelts:           return 140; // numelts(foo)
     }
-  case &AssignOp_e(_,_,_):      return  20;
-  case &Increment_e(_,_):       return 130;
-  case &Conditional_e(_,_,_):   return  30;
-  case &And_e(_,_):             return  35; // FIX: right precedence for &&
-  case &Or_e(_,_):              return  30; // FIX: right precedence for ||
-  case &SeqExp_e(_,_):          return  10;
-  case &UnknownCall_e(_,_):     
-  case &FnCall_e(_,_,_):        return 140;
-  case &Throw_e(_):             return 130;
+  case &AssignOp_e(...):      return  20;
+  case &Increment_e(...):       return 130;
+  case &Conditional_e(...):   return  30;
+  case &And_e(...):             return  35; // FIX: right precedence for &&
+  case &Or_e(...):              return  30; // FIX: right precedence for ||
+  case &SeqExp_e(...):          return  10;
+  case &UnknownCall_e(...):     
+  case &FnCall_e(...):        return 140;
+  case &Throw_e(...):             return 130;
   case &NoInstantiate_e(e2):    return exp_prec(e2);
   case &Instantiate_e(e2,_):    return exp_prec(e2);
-  case &Cast_e(_,_,_,_):        return 120;
-  case &New_e(_,_):             return 15; // ???
+  case &Cast_e(...):        return 120;
+  case &New_e(...):             return 15; // ???
   case &Address_e(_):           
   case &Sizeoftyp_e(_):         
   case &Sizeofexp_e(_):         
   case &Valueof_e(_):
-  case &Offsetof_e(_,_):        
-  case &Gentyp_e(_,_):          
-  case &Deref_e(_):             return 130;
-  case &AggrMember_e(_,_):    
-  case &AggrArrow_e(_,_):     
-  case &Subscript_e(_,_):       return 140;
-  case &Tuple_e(_):             return 150;
-  case &CompoundLit_e(_,_):     
-  case &Array_e(_):             
-  case &Comprehension_e(_,_,_,_): 
-  case &Struct_e(_,_,_,_):      
-  case &AnonStruct_e(_,_):      
-  case &Datatype_e(_,_,_):    
-  case &Enum_e(_,_,_):          
-  case &AnonEnum_e(_,_,_):      
+  case &Offsetof_e(...):        
+  case &Gentyp_e(...):          
+  case &Deref_e(...):             return 130;
+  case &AggrMember_e(...):    
+  case &AggrArrow_e(...):     
+  case &Subscript_e(...):       return 140;
+  case &Tuple_e(...):             return 150;
+  case &CompoundLit_e(...):     
+  case &Array_e(...):             
+  case &Comprehension_e(...): 
+  case &Aggregate_e(...):      
+  case &AnonStruct_e(...):      
+  case &Datatype_e(...):    
+  case &Enum_e(...):          
+  case &AnonEnum_e(...):      
   case &Malloc_e(_):            
-  case &Swap_e(_,_):            
-  case &UnresolvedMem_e(_,_):   return 140; // ???
-  case &StmtExp_e(_):           return 10000;
+  case &Swap_e(...):            
+  case &UnresolvedMem_e(...):   return 140; // ???
+  case &StmtExp_e(...):           return 10000;
   }
 }
 
@@ -1115,10 +1115,10 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &Deref_e(e1):
     s = cat(text("*"), exp2doc_prec(myprec,e1));
     break;
-  case &AggrMember_e(e1,n):
+  case &AggrMember_e(e1,n,...):
     s = cat(exp2doc_prec(myprec,e1), text("."), textptr(n));
     break;
-  case &AggrArrow_e(e1,n):
+  case &AggrArrow_e(e1,n,...):
     s = cat(exp2doc_prec(myprec,e1), text("->"), textptr(n));
     break;
   case &Subscript_e(e1,e2):
@@ -1151,7 +1151,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
             exp2doc(e2),
             rb());
     break;
-  case &Struct_e(n,ts,des,_):
+  case &Aggregate_e(n,ts,des,_):
     let des_doc = List::map(de2doc,des);
     s = cat(qvar2doc(n),
             group_braces(",",

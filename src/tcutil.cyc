@@ -4037,12 +4037,14 @@ void check_unique_tvars(seg_t loc, list_t<tvar_t> tvs) {
 //  * match up the correct member of sd->fields with the `a.  If the list
 //    is empty, take the first unused field. ?????
 //    Bang in the corresponding designator in the des list element
-//  * ensure that each field is used exactly once.
+//  * for structs, ensure that each field is used exactly once.
+//  * for unions, ensure that at most one field is used.
 // FIX: Pass in a flag to allow multiple field names ??
 list_t<$(aggrfield_t,`a)@`r,`r>
-resolve_struct_designators(region_t<`r> rgn, seg_t loc,
-                           list_t<$(list_t<designator_t>,`a)@> des, 
-                           list_t<aggrfield_t> sdfields) {
+resolve_aggregate_designators(region_t<`r> rgn, seg_t loc,
+                              list_t<$(list_t<designator_t>,`a)@> des, 
+                              aggr_kind_t aggr_kind,
+                              list_t<aggrfield_t> sdfields) {
 
   // grab all the fields and mark them unused unless the field has an
   // empty name -- these are bitfields for padding and shouldn't be
@@ -4053,6 +4055,8 @@ resolve_struct_designators(region_t<`r> rgn, seg_t loc,
       fields = new List(new $(sd_fields->hd,false), fields);
   }
   fields = imp_rev(fields);
+
+  string_t aggr_str = (aggr_kind == StructA) ? "struct" : "union";
 
   // match up each element of des
   list_t<$(aggrfield_t,`a)@`r,`r> ans = NULL;
@@ -4069,22 +4073,22 @@ resolve_struct_designators(region_t<`r> rgn, seg_t loc,
 	  break;
 	}
       if(fields2 == NULL)
-	terr(loc, "too many arguments to struct");
+	terr(loc, "too many arguments to %s",aggr_str);
     } else if(dl->tl != NULL)
       // we don't support multiple designators
-      terr(loc, "multiple designators are not supported");
+      terr(loc, "multiple designators are not yet supported");
     else
       // find the right field based on the designator
       switch (dl->hd) {
       case &ArrayElement(_): 
-	terr(loc, "array designator used in argument to struct");
+	terr(loc, "array designator used in argument to %s",aggr_str);
 	break;
       case &FieldName(v):
 	let fields2 = fields;
 	for(; fields2 != NULL; fields2 = fields2->tl)
 	  if(strptrcmp(v,((*fields2->hd)[0])->name) == 0) {
 	    if((*fields2->hd)[1])
-	      terr(loc, "field %s has already been used as an argument", *v);
+	      terr(loc, "member %s has already been used as an argument", *v);
 	    (*fields2->hd)[1] = true;
 	    ans = rnew(rgn) List(rnew(rgn) $((*fields2->hd)[0],a), ans);
 	    break;
@@ -4094,13 +4098,24 @@ resolve_struct_designators(region_t<`r> rgn, seg_t loc,
 	break;
       }
   }
-  
-  // make sure we used all the fields
-  for(; fields != NULL; fields = fields->tl)
-    if(!(*fields->hd)[1]) {
-      terr(loc, "too few arguments to struct");
-      break;
+  if (aggr_kind == StructA) {
+    // make sure we used all the fields
+    for(; fields != NULL; fields = fields->tl)
+      if(!(*fields->hd)[1]) {
+        terr(loc, "too few arguments to struct");
+        break;
+      }
+  } else {
+    // make sure we used exactly one of the fields
+    bool found = false;
+    for (; fields != NULL; fields = fields->tl) {
+      if ((*fields->hd)[1]) {
+        if (found) terr(loc,"only one member of a union is allowed");
+        found = true;
+      }
     }
+    if (!found) terr(loc,"missing member for union");
+  }
 
   return imp_rev(ans);
 }
@@ -4173,8 +4188,8 @@ bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type,
   case &Deref_e(e1a): fallthru(e1a);
   case &Subscript_e(e1a,_):
     return is_zero_ptr_type(e1a->topt->v,ptr_type,is_dyneither,elt_type);
-  case &AggrArrow_e(e1a,_): fallthru(e1a);
-  case &AggrMember_e(e1a,_):
+  case &AggrArrow_e(e1a,...): fallthru(e1a);
+  case &AggrMember_e(e1a,...):
     // sanity check
     if (is_zero_ptr_type(e1a->topt->v,ptr_type,is_dyneither,elt_type))
       impos("found zero pointer aggregate member assignment: %s",
@@ -4341,12 +4356,12 @@ static bool is_noalias_path_aux(region_t<`r> r, exp_t e,bool ignore_leaf) {
   case &Primop_e(_,_): return false;
 #ifdef NO_POINTER_PATHS
   case &Deref_e(_):
-  case &AggrArrow_e(_,_): return false;
+  case &AggrArrow_e(...): return false;
 #else
   case &Deref_e(e1):
     return (ignore_leaf || is_noalias_pointer_or_aggr(r,e->topt->v)) && 
            is_noalias_path_aux(r, e1, false);
-  case &AggrArrow_e(e1,f):
+  case &AggrArrow_e(e1,f,...):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo(t2,_,_)): 
       return (ignore_leaf || is_noalias_field(r,t2,f)) &&
@@ -4357,7 +4372,7 @@ static bool is_noalias_path_aux(region_t<`r> r, exp_t e,bool ignore_leaf) {
 #endif
   // Flat aggregates are always directly available, so are considered part
   // of a unique path if they contain unique pointers
-  case &AggrMember_e(e1,f):
+  case &AggrMember_e(e1,f,...):
     return (ignore_leaf || is_noalias_field(r,e1->topt->v,f)) &&
       is_noalias_path_aux(r, e1,false);
   case &Subscript_e(e1,e2):
@@ -4384,7 +4399,7 @@ static bool is_noalias_path_aux(region_t<`r> r, exp_t e,bool ignore_leaf) {
     }
   case &Datatype_e(_,_,_):
   case &Tuple_e(_):  
-  case &Struct_e(_,_,_,_):
+  case &Aggregate_e(_,_,_,_):
   case &AnonStruct_e(_,_):
   case &Const_e(_):
   case &Malloc_e(_):
@@ -4478,7 +4493,9 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       vd->escapes = true;
       return $(vd->tq.real_const, vd->rgn->v);
     }
-  case &AggrMember_e(e1,f):
+  case &AggrMember_e(e1,f,is_tagged,_):
+    // disallow & on @tagged union members -- see Dan's ESOP paper
+    if (is_tagged) return bogus_ans;
     // we have an unboxed thing, so we inherit e2's region
     // must check that f isn't a bitfield.
     switch (compress(e1->topt->v)) {
@@ -4494,7 +4511,9 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       return bogus_ans;
     default: return bogus_ans;
     }
-  case &AggrArrow_e(e1,f): 
+  case &AggrArrow_e(e1,f,is_tagged,_): 
+    // disallow & on @tagged union members -- see Dan's ESOP paper
+    if (is_tagged) return bogus_ans;
     // we have a boxed thing, so the region is in the pointer-type.
     // must check that f isn't a bitfield. DAN: why?  JGM: because
     // you can't get a pointer to a bitfield in C.
@@ -4683,7 +4702,7 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
     return cnst_exp(te,false,e1) && cnst_exp(te,false,e2);
   case &Array_e(des): fallthru(des);
   case &AnonStruct_e(_,des): fallthru(des);
-  case &Struct_e(_,_,des,_):
+  case &Aggregate_e(_,_,des,_):
     for (; des != NULL; des = des->tl)
       if (!cnst_exp(te,false,(*des->hd)[1]))
         return false;

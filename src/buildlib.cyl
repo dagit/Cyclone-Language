@@ -836,9 +836,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Sizeoftyp_e(t1):
       scan_type(t1);
       return;
-    case &AggrMember_e(e1,fn):
+    case &AggrMember_e(e1,fn,...):
       fallthru(e1,fn);
-    case &AggrArrow_e(e1,fn):
+    case &AggrArrow_e(e1,fn,...):
       scan_exp(e1);
       add_target(fn);
       return;
@@ -890,8 +890,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Comprehension_e(_,_,_,_):
       fprintf(stderr,"Error: unexpected Comprehension_e\n");
       exit(1); return;
-    case &Struct_e(_,_,_,_):
-      fprintf(stderr,"Error: unexpected Struct_e\n");
+    case &Aggregate_e(_,_,_,_):
+      fprintf(stderr,"Error: unexpected Aggregate_e\n");
       exit(1); return;
     case &AnonStruct_e(_,_):
       fprintf(stderr,"Error: unexpected AnonStruct_e\n");

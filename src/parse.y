@@ -2768,7 +2768,7 @@ primary_expression:
     { $$=^$(tuple_exp($3,LOC(@1,@4))); }
 /* Cyc: structure expressions */
 | qual_opt_identifier '{' type_params_opt initializer_list '}'
-    { $$=^$(new_exp(new Struct_e($1,$3,List::imp_rev($4),NULL),LOC(@1,@5))); }
+    { $$=^$(new_exp(new Aggregate_e($1,$3,List::imp_rev($4),NULL),LOC(@1,@5))); }
 /* Cyc: compound statement expressions, as in gcc */
 | '(' '{' block_item_list '}' ')'
     { $$=^$(stmt_exp($3,LOC(@1,@5))); }

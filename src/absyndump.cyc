@@ -693,11 +693,11 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Deref_e(e1):
     dump_char('*'); dumpexp_prec(myprec,e1); break;
 
-  case &AggrMember_e(e1,n):
+  case &AggrMember_e(e1,n,...):
     dumpexp_prec(myprec,e1); dump_char('.');  dump_nospace(*n);
     break;
 
-  case &AggrArrow_e(e1,n):
+  case &AggrArrow_e(e1,n,...):
     dumpexp_prec(myprec,e1); dump_nospace("->"); dump_nospace(*n);
     break;
 
@@ -724,7 +724,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     dump_char(':'); dumpexp(e2); dump_char('}');
     break;
 
-  case &Struct_e(n,ts,des,_):
+  case &Aggregate_e(n,ts,des,_):
     dumpqvar(n);
     dump_char('{');
     if(ts != NULL)

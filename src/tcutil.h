@@ -189,9 +189,10 @@ extern bool is_bound_one(conref_t<bounds_t> b);
 extern bool equal_tqual(tqual_t tq1, tqual_t tq2);
 
 extern list_t<$(aggrfield_t,`a)@`r,`r> 
-resolve_struct_designators(region_t<`r>rgn, seg_t loc,
-			   list_t<$(list_t<designator_t>,`a)@`r2,`r3> des, 
-			   list_t<aggrfield_t> fields);
+resolve_aggregate_designators(region_t<`r>rgn, seg_t loc,
+                              list_t<$(list_t<designator_t>,`a)@`r2,`r3> des, 
+                              aggr_kind_t, // struct or union
+                              list_t<aggrfield_t> fields);
 // returns true if this is a t ? -- side effect unconstrained bounds
 extern bool is_tagged_pointer_typ(type_t);
 // like above, but puts element type in elt_typ_dest when returning true.

@@ -534,10 +534,10 @@ exp_t gentyp_exp(list_t<tvar_t,`H> tvs, type_t t, seg_t loc) {
 }
 exp_t deref_exp(exp_t e,   seg_t loc) { return new_exp(new Deref_e(e), loc); }
 exp_t aggrmember_exp(exp_t e, field_name_t n, seg_t loc) {
-  return new_exp(new AggrMember_e(e,n), loc); 
+  return new_exp(new AggrMember_e(e,n,false,false), loc); 
 }
 exp_t aggrarrow_exp(exp_t e, field_name_t n, seg_t loc) {
-  return new_exp(new AggrArrow_e(e,n), loc); 
+  return new_exp(new AggrArrow_e(e,n,false,false), loc); 
 }
 exp_t subscript_exp(exp_t e1, exp_t e2, seg_t loc) {
   return new_exp(new Subscript_e(e1,e2), loc); 
@@ -752,12 +752,12 @@ bool is_lvalue(exp_t e) {
     case &ArrayType(_): return false;
     default: return true; 
     }
-  case &Var_e(_,_):    
-  case &AggrArrow_e(_,_):   
-  case &Deref_e(_):           
-  case &Subscript_e(_,_):    return true;
-  case &AggrMember_e(e1,_):  return is_lvalue(e1);
-  case &Instantiate_e(e1,_): return is_lvalue(e1);
+  case &Var_e(...):    
+  case &AggrArrow_e(...):   
+  case &Deref_e(...):           
+  case &Subscript_e(...):    return true;
+  case &AggrMember_e(e1,...):  return is_lvalue(e1);
+  case &Instantiate_e(e1,...): return is_lvalue(e1);
   case &NoInstantiate_e(e1): return is_lvalue(e1);
   default:                   return false;
   }
@@ -864,6 +864,18 @@ bool is_union_type(type_t t) {
   switch(Tcutil::compress(t)) {
   case &AnonAggrType(UnionA,_):     return true;
   case &AggrType(AggrInfo(info,_)): return aggr_kinded_name(info)[0]==UnionA;
+  default: return false;
+  }
+}
+bool is_nontagged_union_type(type_t t) {
+  switch(Tcutil::compress(t)) {
+  case &AnonAggrType(UnionA,_):     return true;
+  case &AggrType(AggrInfo(info,_)): 
+    switch (info) {
+    case KnownAggr(&ad): 
+      return (ad->kind == UnionA) && (ad->impl->tagged == false);
+    case UnknownAggr(k,_): return k == UnionA;
+    }
   default: return false;
   }
 }

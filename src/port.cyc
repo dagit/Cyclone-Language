@@ -1339,13 +1339,13 @@ static $(ctype_t qual,ctype_t type) gen_lhs(cenv_t env, exp_t e) {
     let p = ptr_ct(v,q,var(),var(),var());
     leq(gen_exp(env,e1),p);
     return $(q,v);
-  case &AggrMember_e(e1,f):
+  case &AggrMember_e(e1,f,...):
     let v = var();
     let q = var();
     let t1 = gen_exp(env, e1);
     leq(gen_exp(env,e1),unknown_aggr_ct(list(new Cfield(q,f,v))));
     return $(q,v);
-  case &AggrArrow_e(e1,f):
+  case &AggrArrow_e(e1,f,...):
     let v = var();
     let q = var();
     let t1 = gen_exp(env, e1);
@@ -1458,12 +1458,12 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
     let v = var();
     leq(gen_exp(env,e1),ptr_ct(v,var(),var(),var(),var()));
     return v;
-  case &AggrMember_e(e1,f):
+  case &AggrMember_e(e1,f,...):
     let v = var();
     let t = gen_exp(env,e1);
     leq(gen_exp(env,e1), unknown_aggr_ct(list(new Cfield{var(),f,v})));
     return v;
-  case &AggrArrow_e(e1,f):
+  case &AggrArrow_e(e1,f,...):
     let v = var();
     let t = gen_exp(env,e1);
     leq(gen_exp(env,e1),ptr_ct(unknown_aggr_ct(list(new Cfield{var(),f,v})),
@@ -1480,7 +1480,7 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
   case &CompoundLit_e(_,_): impos("CompoundLit_e");
   case &Array_e(_): impos("Array_e");
   case &Comprehension_e(_,_,_,_): impos("Comprehension_e");
-  case &Struct_e(_,_,_,_): impos("Struct_e");
+  case &Aggregate_e(_,_,_,_): impos("Aggregate_e");
   case &AnonStruct_e(_,_): impos("AnonStruct_e");
   case &Datatype_e(_,_,_): impos("Datatype_e");
   case &UnresolvedMem_e(_,_): impos("UnresolvedMem_e");

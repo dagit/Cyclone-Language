@@ -1235,16 +1235,16 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     return anal_derefR(env,inflow,f,e1,r);
 
     // KLUDGE: unions (see comment at top of file)
-  case &AggrMember_e(e1,field):
+  case &AggrMember_e(e1,field,...):
     let $(f,r) = anal_Rexp(env,inflow,e1);
     // we can drop these here because this has to be a unique path
     f = drop_unique_rvals(e->loc, f);
     f = may_consume_exp(env,f,e);
     // FIX: what to do about datatypes and unique sub-elements?
-    if(is_union_type(e1->topt->v))
+    if(is_nontagged_union_type(e1->topt->v))
       return $(f,typ_to_absrval(fenv,e->topt->v,fenv->unknown_all)); 
     switch (r) {
-    case &Aggregate(rdict):
+    case &Aggregate(is_union,rdict):
       let field_no = get_field_index(e1->topt->v,field);
       return $(f,rdict[field_no]);
     default: 
@@ -1252,16 +1252,16 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
                                          Absynpp::exp2string(e)));
     }
     
-  case &AggrArrow_e(e1,field): // composition of * and ., of course
+  case &AggrArrow_e(e1,field,...): // composition of * and ., of course
     let $(f1,r1) = anal_Rexp(env,inflow,e1);
     f1 = readthrough_unique_rvals(e->loc, f1); // read struct pointer
     let $(f2,r2) = anal_derefR(env,inflow,f1,e1,r1);
     switch(Tcutil::compress(e1->topt->v)) {
     case &PointerType(PtrInfo{t2,_,_}):
-      if(is_union_type(t2))
+      if(is_nontagged_union_type(t2))
 	return $(f2,typ_to_absrval(fenv,e->topt->v,fenv->unknown_all)); 
       switch (r2) {
-      case &Aggregate(rdict):
+      case &Aggregate(is_union,rdict):
         let field_no = get_field_index(t2,field);
         return $(f2,rdict[field_no]);
       default: throw new Core::Impossible("anal_Rexp: AggrArrow");
@@ -1322,7 +1322,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
       switch(Tcutil::compress(e1->topt->v)) {
       case &TupleType(tqts):
         switch(rvals->hd) {
-        case &Aggregate(rdict): 
+        case &Aggregate(is_union,rdict): 
 	  f2 = may_consume_exp(env,f2,e);
           unsigned int i = Evexp::eval_const_uint_exp(e2)[0];
           return $(f2,rdict[i]);
@@ -1375,7 +1375,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
                  rvals = rvals->tl;
                  temp; })};
 
-      return $(f, rnew(env->r) Aggregate(aggrdict));
+      return $(f, rnew(env->r) Aggregate(false,aggrdict));
     }
   case &AnonStruct_e(_,des): 
     list_t<Absyn::aggrfield_t> fs;
@@ -1383,8 +1383,8 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     case &AnonAggrType(_,f): fs = f; break;
     default: throw new Core::Impossible("anal_Rexp:anon struct has bad type");
     }
-    fallthru(des,fs);
-  case &Struct_e(_,_,des,&Aggrdecl{.impl = &AggrdeclImpl{.fields=fs,...},...}):
+    fallthru(des,StructA,fs);
+  case &Aggregate_e(_,_,des,&Aggrdecl{.kind = kind, .impl = &AggrdeclImpl{.fields=fs,...},...}):
     ANAL_RGN(env, temp) {
       let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,
                                             rmap(temp,Core::snd,des),false);
@@ -1394,15 +1394,15 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
       for(int i=0; rvals != NULL; rvals = rvals->tl, des = des->tl, ++i)
         for(_ ds = (*des->hd)[0]; ds != NULL; ds = ds->tl)
           switch (ds->hd) {
-          case &ArrayElement(_): throw new Core::Impossible("anal_Rexp:Struct_e");
+          case &ArrayElement(_): throw new Core::Impossible("anal_Rexp:Aggregate_e");
           case &FieldName(fld): 
             // find the field and update the aggrdict imperatively
             let field_no = get_field_index_fs(fs,fld);
             aggrdict[field_no] = rvals->hd;
           }
-      return $(f, rnew(env->r) Aggregate(aggrdict));
+      return $(f, rnew(env->r) Aggregate(kind == UnionA, aggrdict));
     }
-  case &Struct_e(_,_,_,_):
+  case &Aggregate_e(_,_,_,_):
     throw new Core::Impossible("anal_Rexp:missing aggrdeclimpl");
   case &Array_e(dles): 
     ANAL_RGN(env, temp) {
@@ -1601,10 +1601,10 @@ static $(flow_t<`r>,absLval_t<`r>)
 
   case &Var_e(_,&Global_b(vd)): return $(inflow,UnknownL);
 
-  case &AggrArrow_e(e1,f):
+  case &AggrArrow_e(e1,f,...):
     switch(Tcutil::compress(e1->topt->v)) {
     case &PointerType(PtrInfo{t2,_,_}):
-      if(!is_union_type(t2))
+      if(!is_nontagged_union_type(t2))
 	flds = rnew(env->r) List(get_field_index(t2,f),flds);
       break;
     default: throw new Core::Impossible("anal_Rexp: AggrArrow ptr");
@@ -1662,8 +1662,8 @@ static $(flow_t<`r>,absLval_t<`r>)
     default: throw new Core::Impossible("anal_Lexp: Subscript -- bad type");
     }
     // KLUDGE: unions (see comment at top of file)
-  case &AggrMember_e(e1,fld): 
-    if(is_union_type(e1->topt->v))
+  case &AggrMember_e(e1,fld,...): 
+    if(is_nontagged_union_type(e1->topt->v))
       return $(inflow,UnknownL);
     return anal_Lexp_rec(env,inflow,e1,
                          rnew(env->r) List(get_field_index(e1->topt->v,fld),flds)); 
@@ -1916,7 +1916,7 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     case &UnknownR(il): return splitzero(env,inflow,f,e,il);
     case &Esc(_):       return $(f,f);
     case &TagCmps(_):   return $(f,f); // may be better to splitzero?
-    case &Aggregate(_): throw new Core::Impossible("anal_test");
+    case &Aggregate(...): throw new Core::Impossible("anal_test");
     }
   }
 }
@@ -1980,7 +1980,6 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
   let $(annot,sflow) = pre_stmt_check(env,inflow,s);
   inflow = *sflow;
   let fenv = env->fenv;
-  
   switch(s->r) {
   case Skip_s: return inflow;
   case &Return_s(NULL): 

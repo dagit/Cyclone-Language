@@ -136,8 +136,9 @@ EXTERN_CFFLOW datatype AbsRVal<`r::R> {
   // and joins punt to UnknownR/Esc when comparing a TagCmp w/ something else
   // Can always add zero-ness as another field.
   TagCmps(List::list_t<tag_cmp_t<`r>,`r>);
-  Aggregate(aggrdict_t<`r>); // if you're a struct or tuple, you should always
+  // if you're a tagged union, struct, or tuple, you should always
   // evaluate to an Aggregate in the abstract interpretation (datatype?)
+  Aggregate(bool is_union, aggrdict_t<`r>);
 };
 
 typedef Dict::dict_t<`a,Position::seg_t,`r> dict_set_t<`a,`r>;

@@ -82,11 +82,6 @@ static void resolve_pat(tenv_t te, pat_t p) {
       TEMP_RGN(te, r) {
         switch (lookup_ordinary(r,te,p->loc,q)) {
         case &AggrRes(ad):
-          if(ad->kind == UnionA) {
-            p->r = Wild_p;
-            terr(p->loc,"cannot pattern-match a union");
-            return;
-          }
           let new_ps = NULL;
           for(; ps != NULL; ps = ps->tl)
             new_ps = new List(new $(NULL,ps->hd), new_ps);
@@ -110,13 +105,9 @@ static void resolve_pat(tenv_t te, pat_t p) {
     try { 
       let adp = lookup_aggrdecl(te,p->loc,n);
       let ad = *adp;
-      if(ad->kind == UnionA) {
-	terr(p->loc,"cannot pattern-match a union");
-        p->r = Wild_p;
-	return;
-      }
       if(ad->impl==NULL) {
-	terr(p->loc, "can't destructure an abstract struct");
+	terr(p->loc, "can't destructure an abstract %s",
+             (ad->kind == StructA) ? "struct" : "union");
         p->r = Wild_p;
 	return;
       }
@@ -137,7 +128,7 @@ static void resolve_pat(tenv_t te, pat_t p) {
       p->r = new Aggr_p(AggrInfo(KnownAggr(adp), targs), *exist_ts, dps,
                         dots);
     } catch { case Dict::Absent: 
-      terr(p->loc, "Non-struct name has designator patterns"); 
+      terr(p->loc, "Non-aggregate name has designator patterns"); 
       p->r = Wild_p;
       break;
     }
@@ -358,13 +349,14 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 
   case &Aggr_p(AggrInfo(KnownAggr(&ad),*tsp),exist_ts,*dps_p,dots):
     let dps = *dps_p;
+    string_t aggr_str = (ad->kind == StructA) ? "struct" : "union";
     if(ad->impl==NULL) {
-      terr(p->loc,"can't destructure an abstract struct");
+      terr(p->loc,"can't destructure an abstract %s",aggr_str);
       t = wildtyp(lookup_opt_type_vars(te));
       break;
     }
-    // don't allow reference patterns for existentials -- see Dan's ESOP paper
-    if (exist_ts != NULL)
+    // don't allow reference patterns for existentials or tagged unions -- see Dan's ESOP paper
+    if (exist_ts != NULL || (ad->kind == UnionA && ad->impl->tagged))
       rgn_opt = NULL;
     region<`rgn> rgn; {
       // constrain type variables to have at least the kind they were abstracted over
@@ -382,7 +374,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 	switch(kb2) {
 	case &Less_kb(_,k): fallthru(k);
 	case &Eq_kb(k): k2 = k; break;
-	default: impos("unconstrained existential type variable in struct");
+	default: impos("unconstrained existential type variable in aggregate");
 	}
 	switch (kb1) {
 	  // ensure that kind of quantified var <:: kind of pattern var
@@ -443,7 +435,9 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 
         *tsp = all_typs;
         t = new AggrType(AggrInfo(KnownAggr(new ad),*tsp));
-        if (dots) {
+        if (dots && ad->kind == UnionA) 
+          warn(p->loc,"`...' pattern not allowed in union pattern");
+        else if (dots) {
           // fill in wild patterns for the missing fields
           let ldps = List::length(dps);
           let lfields = List::length(ad->impl->fields);
@@ -457,7 +451,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
             warn(p->loc,"unnecessary ... in struct pattern");
         }
         list_t<$(aggrfield_t,pat_t)@`rgn,`rgn> fields =
-          resolve_struct_designators(rgn,p->loc,dps,ad->impl->fields);
+          resolve_aggregate_designators(rgn,p->loc,dps,ad->kind,ad->impl->fields);
         for(; fields != NULL; fields = fields->tl) {
           let &$(field,pat)     = fields->hd;
           let inst_fieldtyp     = rsubstitute(rgn,inst,field->type);
@@ -466,8 +460,8 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
           // against the exp we're matching against.  Even if we succeed now,
           // we could be constraining so as to catch an error later.
           if (!unify(pat->topt->v,inst_fieldtyp))
-            terr(p->loc,"field %s of struct pattern expects type %s != %s",
-                 *field->name, typ2string(inst_fieldtyp), 
+            terr(p->loc,"field %s of %s pattern expects type %s != %s",
+                 *field->name, aggr_str, typ2string(inst_fieldtyp), 
                  typ2string(pat->topt->v));
         }
       }
@@ -819,26 +813,41 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
 
   case &Aggr_p(AggrInfo(KnownAggr(&ad),_),_,dlps,_):
     // FIX: doesn't look like multiple designators are right
-    list_t<simple_pat_t<`r>,`r> ps = NULL;
-    for (_ fields = ad->impl->fields; fields != NULL; fields = fields->tl) {
-      // leave out bit fields without a name
-      bool found = (strcmp(*fields->hd->name,"") == 0);
-      for(_ dlps0 = dlps; !found && dlps0 != NULL; dlps0 = dlps0->tl) {
-	let &$(dl,p) = dlps0->hd;
-	switch (dl) {
-	case &List{.hd=&FieldName(f), .tl=NULL}: 
-	  if(strptrcmp(f,fields->hd->name) == 0) {
-	    ps = rnew(r) List(compile_pat(r,p),ps);
-	    found = true;
-	  }
-	  break;
-	default: impos("bad designator(s)"); 
-	}
+    // we do different things for structs and unions:
+    if (ad->kind == StructA) {
+      list_t<simple_pat_t<`r>,`r> ps = NULL;
+      for (_ fields = ad->impl->fields; fields != NULL; fields = fields->tl) {
+        // leave out bit fields without a name
+        bool found = (strcmp(*fields->hd->name,"") == 0);
+        for(_ dlps0 = dlps; !found && dlps0 != NULL; dlps0 = dlps0->tl) {
+          let &$(dl,p) = dlps0->hd;
+          switch (dl) {
+          case &List{.hd=&FieldName(f), .tl=NULL}: 
+            if(strptrcmp(f,fields->hd->name) == 0) {
+              ps = rnew(r) List(compile_pat(r,p),ps);
+              found = true;
+            }
+            break;
+          default: impos("bad designator(s)"); 
+          }
+        }
+        if(!found)
+          impos("bad designator");
       }
-      if(!found)
-	impos("bad designator");
+      s = tuple_pat(r,ps,p);
+    } else {
+      // ad->kind == UnionA-- want to treat this like a datatype
+      if (!ad->impl->tagged) 
+        terr(p->loc,"patterns on untagged unions not yet supported.");
+      int *`r span = rnew(r) List::length(ad->impl->fields);
+      _ field_name;
+      switch (dlps) {
+      case &List{.hd=&$(&List{.hd=&FieldName(f),.tl=NULL},p2),.tl=NULL}:
+        s = con_pat(r,*f,span,rnew(r) List{compile_pat(r,p2),NULL},p);
+        break;
+      default: impos("bad union pattern");
+      }
     }
-    s = tuple_pat(r,ps,p);
     break;
       
   case &Enum_p(ed,ef):
@@ -926,10 +935,13 @@ typedef datatype Answer answer_t;
 static term_desc_t<`r> add_neg(region_t<`r> r, term_desc_t<`r> td, con_t<`r> c) {
   switch (td) {
   case &Neg(cs):
+    /* JGM: I'm commenting these out to avoid spurious compiler errors
+     * when someone has a bad pattern. 
     if (Set::member(cs,c))
       impos("add_neg called when constructor already in set");
     if (c->span != NULL && (Set::cardinality(cs) + 1) >= *c->span)
       impos("add_neg called when |cs U {c}| >= span(c)");
+    */
     return rnew(r) Neg(Set::rinsert(r,cs,c));
   case &Pos(_,_): impos("add_neg called when td is Positive");
   }
@@ -1170,7 +1182,15 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
       return aprintf("&%s(%s)",qvar2string(tuf->name),descs2string(r,ds));
     case &Pointer_p(_):
       return aprintf("&%s",descs2string(r,ds));
-    case &Aggr_p(AggrInfo(KnownAggr(&ad),_),_,_,_): 
+    case &Aggr_p(AggrInfo(KnownAggr(&ad),_),_,dlps,_): 
+      if (ad->kind == UnionA) {
+        switch (dlps) {
+        case &List{&$(&List{&FieldName(f),_},_),_}:
+          return aprintf("%s{.%s = %s}",qvar2string(ad->name),*f,
+                         descs2string(r,ds));
+        default: break;
+        }
+      }
       return aprintf("%s{%s}",qvar2string(ad->name),descs2string(r,ds));
     case &Datatype_p(_, tuf, _, _): 
       return aprintf("%s",qvar2string(tuf->name));
@@ -1230,6 +1250,16 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
             else 
               return aprintf("&%s(...)",n);
         }
+      }
+      throw Desc2string;
+    case &AggrType(AggrInfo{KnownAggr(&ad),_}) && ad->kind == UnionA:
+      let fields = ad->impl->fields;
+      int span = List::length(fields);
+      let &$(_,&union_name) = ad->name;
+      for (; fields; fields = fields->tl) {
+        string_t n = *fields->hd->name;
+        if (!Set::member(s,new Con_s(Name_v(n), 0, NULL, orig_pat)))
+          return aprintf("%s{.%s = _}",union_name,n);
       }
       throw Desc2string;
     default: throw Desc2string;

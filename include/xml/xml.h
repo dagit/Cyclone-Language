@@ -73,7 +73,7 @@ datatype content {
 // various routines to help document processing */
 
 EXTERN_DEFINITION 
-datatype @extensible exn { EXTERN_DEFINITION procXMLdocFailed(string_t) };
+datatype exn { EXTERN_DEFINITION procXMLdocFailed(string_t) };
   /** [procXMLdocFailed] is thrown if one of the following routines
       fails to process the document as specified. **/
 

@@ -120,7 +120,7 @@ static void resolve_unknown_fn(tenv_t te,exp_t e,exp_t e1,list_t<exp_t,`H> es) {
           return;
         case &AggrRes(ad):
           let des = List::map(make_struct_arg,es);
-          e->r = new Struct_e(ad->name,NULL,des,ad);
+          e->r = new Aggregate_e(ad->name,NULL,des,ad);
           return;
         case &AnonEnumRes(_,_):
         case &EnumRes(_,_):
@@ -154,7 +154,7 @@ void resolve_unresolved_mem(tenv_t te, seg_t loc, type_t * topt, exp_t e,
   case &AggrType(AggrInfo(info,_)):
     switch(info) {
     case UnknownAggr(_,_): impos("struct type not properly set");
-    case KnownAggr(&ad):   e->r = new Struct_e(ad->name,NULL,des,ad);
+    case KnownAggr(&ad):   e->r = new Aggregate_e(ad->name,NULL,des,ad);
     }
     break;
   case &ArrayType(ArrayInfo{at,aq,_,_,_}): e->r = new Array_e(des); break;
@@ -649,7 +649,7 @@ static void check_writable(tenv_t te, exp_t e) {
     default: break;
     }
     break;
-  case &AggrMember_e(e1,f):
+  case &AggrMember_e(e1,f,...):
     switch (compress(e1->topt->v)) {
     case &AggrType(AggrInfo(KnownAggr(adp),_)):
       struct Aggrfield *sf = 
@@ -663,7 +663,7 @@ static void check_writable(tenv_t te, exp_t e) {
     default: break;
     }
     break;
-  case &AggrArrow_e(e1,f):
+  case &AggrArrow_e(e1,f,...):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{elt_typ,_,_}):
       switch (compress(elt_typ)) {
@@ -1161,6 +1161,15 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
   default: break;
   }
 
+  // check that e is not a tagged union projection
+  switch (e->r) {
+  case &AggrMember_e(_,_,true,_): 
+  case &AggrArrow_e(_,_,true,_):
+    terr(e->loc,"cannot take the address of a @tagged union member");
+    break;
+  default: break;
+  }
+
   // we've got an address-of
   let $(is_const,rgn) = addressof_props(te,e);
   tqual_t tq = empty_tqual(NULL);
@@ -1293,9 +1302,12 @@ static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
 
 // e.f
 static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
-			   exp_t outer_e, exp_t e, field_name_t f) {
+			   exp_t outer_e, exp_t e, field_name_t f,
+                           bool @is_tagged, bool @is_read) {
   // As per K&R, don't promote e from array to pointer type
   tcExpNoPromote(te,NULL,e);
+  // record whether or not we're in a read context
+  *is_read = !in_notreadctxt(te);
   switch (compress(e->topt->v)) {
   case &AggrType(AggrInfo(KnownAggr(&ad),ts)):
     let finfo = lookup_decl_field(ad,f);
@@ -1303,6 +1315,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
       return expr_err(te,loc,topt,"type %s has no %s field",
                       qvar2string(ad->name), *f);
     // must do after previous check else could dereference NULL
+    if (ad->impl->tagged) *is_tagged = true;
     if(ad->impl->exist_vars != NULL)
       return expr_err(te,loc,topt,"must use pattern-matching to access fields "
 		      "of existential types");
@@ -1340,10 +1353,13 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
 
 // e->f
 static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt, 
-			  exp_t e, field_name_t f) {
+			  exp_t e, field_name_t f, 
+                          bool @is_tagged, bool @is_read) {
   TEMP_RGN(te, r) {
     tcExp(clear_notreadctxt(r,te),NULL,e);
   }
+  // record whether or not we're in a read context
+  *is_read = !in_notreadctxt(te);
   switch (compress(e->topt->v)) {
   case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_))):
     check_nonzero_bound(loc, b);
@@ -1354,6 +1370,7 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
 	return expr_err(te,loc,topt,"type %s has no %s field",
 			qvar2string(ad->name), *f);
       // must do after previous check else could dereference NULL
+      if (ad->impl->tagged) *is_tagged = true;
       if(ad->impl->exist_vars != NULL)
 	return expr_err(te,loc,topt,
                         "must use pattern-matching to access fields "
@@ -1363,7 +1380,7 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
 	let inst = List::rzip(rgn,rgn,ad->tvs,ts);
 	t3 = rsubstitute(rgn,inst,finfo->type);
       }
-      if (ad->kind == UnionA && !in_notreadctxt(te) && !bits_only(t3))
+      if (ad->kind == UnionA && !ad->impl->tagged && !in_notreadctxt(te) && !bits_only(t3))
         return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
       return t3;
     case &AnonAggrType(k,fs):
@@ -1619,7 +1636,7 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
   }
 }
 
- //////////////////// Struct (f{e1,...,en}) ///////////////////
+ //////////////////// Struct/Union (f{e1,...,en}) ///////////////////
  // FIX:
  // Right now, we only allow one field name designator on an argument.
  // In addition, we assume any undesignated argument is associated with
@@ -1629,26 +1646,24 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
  //  Foo{.c=3,.d=4,1,2,5};
  // then this is the same as Foo{.a=1,.b=2,.c=3,.d=4,.e=5};
  // Later, we should support array designators and so forth.
-static type_t tcStruct(tenv_t te, seg_t loc, type_t * topt,
-                       typedef_name_t @tn, list_t<type_t,`H> @ ts,
-                       list_t<$(list_t<designator_t>,exp_t)@> args,
-                       struct Aggrdecl *`H @`H ad_opt) {
+static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
+                          typedef_name_t @tn, list_t<type_t,`H> @ ts,
+                          list_t<$(list_t<designator_t>,exp_t)@> args,
+                          struct Aggrdecl *`H @`H ad_opt) {
   aggrdecl_t ad;
   if (*ad_opt != NULL)
     ad = (aggrdecl_t)(*ad_opt);
   else {
     try ad = *lookup_aggrdecl(te,loc,*tn);
     catch { case Dict::Absent:
-      terr(loc, "unbound struct name %s",qvar2string(*tn));
+      terr(loc, "unbound struct/union name %s",qvar2string(*tn));
       return topt != NULL ? *topt : VoidType;
     }
     *ad_opt = ad;
     *tn = ad->name;
   }
-  if(ad->kind == UnionA)
-    terr(loc, "expecting struct but found union");
   if (ad->impl == NULL) {
-    terr(loc,"can't build abstract struct");
+    terr(loc,"can't construct abstract %s",(ad->kind == StructA) ? "struct" : "union");
     return wildtyp(lookup_opt_type_vars(te));
   }
   TEMP_RGN(te, rgn) {
@@ -1682,14 +1697,15 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t * topt,
   if (topt != NULL) unify(res_typ,*topt);
   // make sure each argument has the right type
   list_t<$(aggrfield_t,exp_t)@/*`rgn,`rgn*/> fields =
-    resolve_struct_designators(rgn,loc,args,ad->impl->fields);
+    resolve_aggregate_designators(rgn,loc,args,ad->kind,ad->impl->fields);
   for(; fields != NULL; fields = fields->tl) {
     let &$(field,field_exp) = fields->hd;
     let inst_fieldtyp = rsubstitute(rgn,inst,field->type);
     tcExpInitializer(te, &inst_fieldtyp, field_exp);
     if (!coerce_arg(te,field_exp,inst_fieldtyp)) {
-      terr(field_exp->loc,"field %s of struct %s expects type %s != %s",
-           *(field->name),qvar2string(*tn),typ2string(inst_fieldtyp),
+      terr(field_exp->loc,"field %s of %s %s expects type %s != %s",
+           *(field->name),((ad->kind == StructA) ? "struct" : "union"),
+           qvar2string(*tn),typ2string(inst_fieldtyp),
            typ2string(field_exp->topt->v));
       explain_failure();
     }
@@ -1713,7 +1729,7 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
       if(k==UnionA)
 	terr(loc,"expecting struct but found union");
       list_t<$(aggrfield_t,exp_t)@/*`rgn,`rgn*/> fields = 
-        resolve_struct_designators(rgn,loc,args,fs);
+        resolve_aggregate_designators(rgn,loc,args,StructA,fs);
       for (; fields != NULL; fields = fields->tl) {
         let &$(field,field_exp) = fields->hd;
         tcExpInitializer(te, &field->type, field_exp);
@@ -2392,10 +2408,10 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     return;
   case &Deref_e(e1):
     t = tcDeref(te,loc,topt,e1); break;
-  case &AggrMember_e(e1,f):
-    t = tcAggrMember(te,loc,topt,e,e1,f); break;
-  case &AggrArrow_e(e1,f):
-    t = tcAggrArrow(te,loc,topt,e1,f); break;
+  case &AggrMember_e(e1,f,*is_tagged,*is_read):
+    t = tcAggrMember(te,loc,topt,e,e1,f,is_tagged,is_read); break;
+  case &AggrArrow_e(e1,f,*is_tagged,*is_read):
+    t = tcAggrArrow(te,loc,topt,e1,f,is_tagged,is_read); break;
   case &Subscript_e(e1,e2):
     t = tcSubscript(te,loc,topt,e1,e2); break;
   case &Tuple_e(es):
@@ -2421,8 +2437,8 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcStmtExp(te,loc,topt,s); break;
   case &Comprehension_e(vd,e1,e2,*iszeroterm):
     t = tcComprehension(te,loc,topt,vd,e1,e2,iszeroterm); break;
-  case &Struct_e(*tn,*ts,args,*sd_opt):
-    t = tcStruct(te,loc,topt,tn,ts,args,sd_opt); break;
+  case &Aggregate_e(*tn,*ts,args,*sd_opt):
+    t = tcAggregate(te,loc,topt,tn,ts,args,sd_opt); break;
   case &AnonStruct_e(ts,args):
     t = tcAnonStruct(te,loc,ts,args); break;
   case &Datatype_e(es,tud,tuf):

@@ -513,8 +513,15 @@ namespace Absyn {
     Offsetof_e(type_t,offsetof_field_t); // offsetof(t,e)
     Gentyp_e(list_t<tvar_t>, type_t); // type-rep stuff
     Deref_e(exp_t); // *e
-    AggrMember_e(exp_t,field_name_t);
-    AggrArrow_e(exp_t,field_name_t);
+    // For the next two cases, the is_read field determines whether
+    // or not the expression is in a "read" (as opposed to write)
+    // position.  For tagged unions in a read position, we must check
+    // that the tag agrees with the member.  The is_read flag is set
+    // by the type-checker.  The is_tagged field determines whether this
+    // is a projection off of a tagged union and is also set by the type-
+    // checker.
+    AggrMember_e(exp_t,field_name_t,bool is_tagged, bool is_read);  // e.x
+    AggrArrow_e(exp_t,field_name_t,bool is_tagged, bool is_read);   // e->x
     Subscript_e(exp_t,exp_t); // e1[e2]
     Tuple_e(list_t<exp_t>); // $(e1,...,en)
     CompoundLit_e($(opt_t<var_t>,tqual_t,type_t)@,
@@ -523,10 +530,10 @@ namespace Absyn {
     // {for i < e1 : e2} -- the bool tells us whether it's zero-terminated
     Comprehension_e(vardecl_t,exp_t,exp_t,bool); // much of vardecl is known
     // Foo{.x1=e1,...,.xn=en} (with optional witness types)
-    Struct_e(typedef_name_t,
-	     list_t<type_t>, // witness types, maybe fewer before type-checking
-	     list_t<$(list_t<designator_t>,exp_t)@>, 
-	     struct Aggrdecl *);
+    Aggregate_e(typedef_name_t,
+                list_t<type_t>, // witness types, maybe fewer before type-checking
+                list_t<$(list_t<designator_t>,exp_t)@>, 
+                struct Aggrdecl *);
     // {.x1=e1,....,.xn=en}
     AnonStruct_e(type_t, list_t<$(list_t<designator_t>,exp_t)@>);
     // Foo(e1,...,en)
@@ -1023,8 +1030,10 @@ namespace Absyn {
   extern $(aggr_kind_t,qvar_t) aggr_kinded_name(datatype AggrInfoU);
   // given a checked type, get the decl
   extern aggrdecl_t get_known_aggrdecl(datatype AggrInfoU info);
-  // is a type a union-type (anonymous or otherwise)
+  // is a type a union-type (tagged, anonymous or otherwise)
   extern bool is_union_type(type_t);
+  // ditto except rule out tagged unions
+  extern bool is_nontagged_union_type(type_t);
   // is a type an aggregate type (i.e. struct, tuple, etc.)
   extern bool is_aggr_type(type_t t);
 
