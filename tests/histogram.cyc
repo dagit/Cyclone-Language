@@ -2,6 +2,7 @@
 #include <string.h>
 #include <hashtable.h>
 #include <stdio.h>
+#include <stdlib.h>
 // A little histogram program.
 // Usage:  histogram [filename]
 // The file (or stdin if no file is specified) should be a text file,
@@ -72,7 +73,7 @@ int main(int argc, string_t ?argv) {
     }
     int count;
     try {
-      count = to_int(buf,NULL);
+      count = atoi(buf);
     } catch {
     default: fprintf(stderr,"bad integer %s\n",buf); return -1;
     }

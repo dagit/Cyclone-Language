@@ -185,6 +185,5 @@ O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS))
 O_LIBS:=$(addsuffix .$(O), $(CYCLONE_LIBS))
 C_RUNTIME:=$(addsuffix .c, $(RUNTIME))
 
-LDFLAGS:=-lm
 PATCH_ARCH=i686-unknown-linux
 DEVEL_ARCHS := i686-unknown-linux i686-unknown-cygwin1.3.2

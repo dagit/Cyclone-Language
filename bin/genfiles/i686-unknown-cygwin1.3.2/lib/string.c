@@ -280,51 +280,12 @@ extern unsigned int Cyc_Std_strspn( struct _tagged_arr s, struct _tagged_arr
 accept); extern struct Cyc_List_List* Cyc_Std_explode( struct _tagged_arr s);
 extern struct Cyc_List_List* Cyc_Std_rexplode( struct _RegionHandle*, struct
 _tagged_arr s); extern struct _tagged_arr Cyc_Std_implode( struct Cyc_List_List*
-c); extern int Cyc_Std_to_int( struct _tagged_arr s, int* offset); extern double
-Cyc_Std_to_double( struct _tagged_arr s, int* offset); extern int Cyc_Std_strcasecmp(
-struct _tagged_arr, struct _tagged_arr); extern int Cyc_Std_strncasecmp( struct
-_tagged_arr s1, struct _tagged_arr s2, unsigned int len); extern double acos(
-double); extern float acosf( float); extern double acosh( double); extern float
-acoshf( float); extern double asin( double); extern float asinf( float); extern
-double asinh( double); extern float asinhf( float); extern double atan( double);
-extern double atan2( double, double); extern float atan2f( float, float); extern
-float atanf( float); extern double atanh( double); extern float atanhf( float);
-extern double cbrt( double); extern float cbrtf( float); extern double ceil(
-double); extern float ceilf( float); extern double copysign( double, double);
-extern float copysignf( float, float); extern double cos( double); extern float
-cosf( float); extern double cosh( double); extern float coshf( float); extern
-double drem( double, double); extern float dremf( float, float); extern double
-erf( double); extern double erfc( double); extern float erfcf( float); extern
-float erff( float); extern double exp( double); extern float expf( float);
-extern double expm1( double); extern float expm1f( float); extern double fabs(
-double); extern float fabsf( float); extern int finite( double); extern int
-finitef( float); extern double floor( double); extern float floorf( float);
-extern double fmod( double, double); extern float fmodf( float, float); extern
-double frexp( double, int*); extern float frexpf( float, int*); extern double
-gamma( double); extern float gammaf( float); extern double hypot( double, double);
-extern float hypotf( float, float); extern int ilogb( double); extern int ilogbf(
-float); extern int isinf( double); extern int isinff( float); extern int isnan(
-double); extern int isnanf( float); extern double j0( double); extern float j0f(
-float); extern double j1( double); extern float j1f( float); extern double jn(
-int, double); extern float jnf( int, float); extern double ldexp( double, int);
-extern float ldexpf( float, int); extern double lgamma( double); extern float
-lgammaf( float); extern double log( double); extern float logf( float); extern
-double log10( double); extern float log10f( float); extern double log1p( double);
-extern float log1pf( float); extern double modf( double, double*); extern float
-modff( float, float*); extern double nextafter( double, double); extern float
-nextafterf( float, float); extern double pow( double, double); extern float powf(
-float, float); extern double remainder( double, double); extern float remainderf(
-float, float); extern double rint( double); extern float rintf( float); extern
-double scalbn( double, int); extern float scalbnf( float, int); extern double
-sin( double); extern float sinf( float); extern double sinh( double); extern
-float sinhf( float); extern double sqrt( double); extern float sqrtf( float);
-extern double tan( double); extern float tanf( float); extern double tanh(
-double); extern float tanhf( float); extern double y0( double); extern float y0f(
-float); extern double y1( double); extern float y1f( float); extern double yn(
-int, double); extern float ynf( int, float); extern unsigned char* strerror( int
-errnum); struct _tagged_arr Cyc_Std_strerror( int errnum){ return( struct
-_tagged_arr) Cstring_to_string( strerror( errnum));} unsigned int Cyc_Std_strlen(
-struct _tagged_arr s){ unsigned int i; for( i= 0; i <  _get_arr_size( s, sizeof(
+c); extern int Cyc_Std_strcasecmp( struct _tagged_arr, struct _tagged_arr);
+extern int Cyc_Std_strncasecmp( struct _tagged_arr s1, struct _tagged_arr s2,
+unsigned int len); extern unsigned char* strerror( int errnum); struct
+_tagged_arr Cyc_Std_strerror( int errnum){ return( struct _tagged_arr)
+Cstring_to_string( strerror( errnum));} unsigned int Cyc_Std_strlen( struct
+_tagged_arr s){ unsigned int i; for( i= 0; i <  _get_arr_size( s, sizeof(
 unsigned char)); i ++){ if(*(( const unsigned char*) _check_unknown_subscript( s,
 sizeof( unsigned char),( int) i)) == '\000'){ return i;}} return i;} static
 unsigned int Cyc_Std_int_strleno( struct _tagged_arr s, struct _tagged_arr error){
@@ -595,72 +556,14 @@ chars){ struct _tagged_arr s= Cyc_Core_new_string((( int(*)( struct Cyc_List_Lis
 x)) Cyc_List_length)( chars)); unsigned int i= 0; while( chars !=  0) {*((
 unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char),( int) i ++))=(
 unsigned char)(( int)(( struct Cyc_List_List*) _check_null( chars))->hd); chars=((
-struct Cyc_List_List*) _check_null( chars))->tl;} return s;} int Cyc_Std_to_int(
-struct _tagged_arr s, int* offset){ int ans= 0; int sn= 1; int digit_seen= 0;
-int i= offset ==  0? 0:*(( int*) _check_null( offset)); while( i < 
-_get_arr_size( s, sizeof( unsigned char))? isspace(( int)*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i))): 0) { i ++;} if( i < 
-_get_arr_size( s, sizeof( unsigned char))?*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)) == '-': 0){ i ++; sn= -
-1;} while( i <  _get_arr_size( s, sizeof( unsigned char))? isspace(( int)*((
-const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), i))):
-0) { i ++;} while( i <  _get_arr_size( s, sizeof( unsigned char))? isdigit(( int)*((
-const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), i))):
-0) { digit_seen= 1; ans= ans *  10 + ( int)(*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)) - '0'); i ++;} ans= ans
-*  sn; if( ! digit_seen){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp32=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
-Cyc_Core_Invalid_argument_struct)); _temp32[ 0]=({ struct Cyc_Core_Invalid_argument_struct
-_temp33; _temp33.tag= Cyc_Core_Invalid_argument; _temp33.f1= _tag_arr("Std::to_int",
-sizeof( unsigned char), 12u); _temp33;}); _temp32;}));} if( offset !=  0){*((
-int*) _check_null( offset))= i;} return ans;} double Cyc_Std_to_double( struct
-_tagged_arr s, int* offset){ double ans=( double) 0.0; int sn= 1; int digit_seen=
-0; int i= offset ==  0? 0:*(( int*) _check_null( offset)); while( i < 
-_get_arr_size( s, sizeof( unsigned char))? isspace(( int)*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i))): 0) { i ++;} if( i < 
-_get_arr_size( s, sizeof( unsigned char))?*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)) == '-': 0){ i ++; sn= -
-1;} while( i <  _get_arr_size( s, sizeof( unsigned char))? isdigit(( int)*((
-const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), i))):
-0) { digit_seen= 1; ans= ans *  10.0 + ( double)(*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)) - '0'); i ++;} if( i < 
-_get_arr_size( s, sizeof( unsigned char))?*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)) == '.': 0){ i ++;{
-double divisor=( double) 0.1; while( i <  _get_arr_size( s, sizeof(
-unsigned char))? isdigit(( int)*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i))): 0) { digit_seen= 1;
-ans= ans + ( double)(*(( const unsigned char*) _check_unknown_subscript( s,
-sizeof( unsigned char), i)) - '0') *  divisor; divisor= divisor /  10.0; i ++;}}}
-if( ! digit_seen){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp34=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
-Cyc_Core_Invalid_argument_struct)); _temp34[ 0]=({ struct Cyc_Core_Invalid_argument_struct
-_temp35; _temp35.tag= Cyc_Core_Invalid_argument; _temp35.f1= _tag_arr("Std::to_double",
-sizeof( unsigned char), 15u); _temp35;}); _temp34;}));} if( i <  _get_arr_size(
-s, sizeof( unsigned char))?*(( const unsigned char*) _check_unknown_subscript( s,
-sizeof( unsigned char), i)) == 'e'? 1:*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)) == 'E': 0){ i ++;{ int
-exponent= 0; int exp_sign= 1; digit_seen= 0; if( i <  _get_arr_size( s, sizeof(
-unsigned char))?*(( const unsigned char*) _check_unknown_subscript( s, sizeof(
-unsigned char), i)) == '-': 0){ i ++; exp_sign= - 1;} else{ if( i < 
-_get_arr_size( s, sizeof( unsigned char))?*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)) == '+': 0){ i ++;}}
-while( i <  _get_arr_size( s, sizeof( unsigned char))? isdigit(( int)*(( const
-unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), i))): 0) {
-digit_seen= 1; exponent= exponent *  10 + ( int)(*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i)) - '0'); i ++;} if( !
-digit_seen){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp36=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
-Cyc_Core_Invalid_argument_struct)); _temp36[ 0]=({ struct Cyc_Core_Invalid_argument_struct
-_temp37; _temp37.tag= Cyc_Core_Invalid_argument; _temp37.f1= _tag_arr("Std::to_double",
-sizeof( unsigned char), 15u); _temp37;}); _temp36;}));} ans= ans *  pow(( double)
-10.0,( double)( exponent *  exp_sign));}} if( offset !=  0){*(( int*)
-_check_null( offset))= i;} return ans *  sn;} int Cyc_Std_strcasecmp( struct
-_tagged_arr s1, struct _tagged_arr s2){ if( s1.curr ==  s2.curr){ return 0;}{
-unsigned int len1= Cyc_Std_int_strleno( s1, _tag_arr("Std::strcasecmp", sizeof(
-unsigned char), 16u)); unsigned int len2= Cyc_Std_int_strleno( s2, _tag_arr("Std::strcasecmp",
-sizeof( unsigned char), 16u)); return Cyc_Std_cmp( s1, len1, s2, len2, Cyc_Std_case_cmp);}}
-static int Cyc_Std_nocase_cmp( unsigned char c1, unsigned char c2){ return Cyc_Std_case_cmp((
-unsigned char) toupper(( int) c1),( unsigned char) toupper(( int) c2));} int Cyc_Std_strncasecmp(
+struct Cyc_List_List*) _check_null( chars))->tl;} return s;} int Cyc_Std_strcasecmp(
+struct _tagged_arr s1, struct _tagged_arr s2){ if( s1.curr ==  s2.curr){ return
+0;}{ unsigned int len1= Cyc_Std_int_strleno( s1, _tag_arr("Std::strcasecmp",
+sizeof( unsigned char), 16u)); unsigned int len2= Cyc_Std_int_strleno( s2,
+_tag_arr("Std::strcasecmp", sizeof( unsigned char), 16u)); return Cyc_Std_cmp(
+s1, len1, s2, len2, Cyc_Std_case_cmp);}} static int Cyc_Std_nocase_cmp(
+unsigned char c1, unsigned char c2){ return Cyc_Std_case_cmp(( unsigned char)
+toupper(( int) c1),( unsigned char) toupper(( int) c2));} int Cyc_Std_strncasecmp(
 struct _tagged_arr s1, struct _tagged_arr s2, unsigned int n){ unsigned int len1=
 Cyc_Std_int_strleno( s1, _tag_arr("Std::strncasecmp", sizeof( unsigned char), 17u));
 unsigned int len2= Cyc_Std_int_strleno( s2, _tag_arr("Std::strncasecmp", sizeof(

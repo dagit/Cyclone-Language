@@ -21,6 +21,7 @@
 #include <string.h>
 #include <hashtable.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <array.h>
 
 using Core;
@@ -135,7 +136,7 @@ int main(int argc, string_t ?argv) {
     }
     int count;
     try {
-      count = to_int(buf,NULL);
+      count = atoi(buf);
     } catch {
     default: fprintf(stderr,"bad integer %s\n",buf); return -1;
     }
@@ -154,22 +155,6 @@ int main(int argc, string_t ?argv) {
       insert(table, s, new $(count,1)); break;
     }
   }
-//   snarfline(f); gettoken(f);
-//   region_count = to_int(buf,NULL);
-//   snarfline(f); gettoken(f);
-//   free_count = to_int(buf,NULL);
-//   snarfline(f); gettoken(f);
-//   region_bytes = to_int(buf,NULL);
-//   snarfline(f); gettoken(f);
-//   region_allocs = to_int(buf,NULL);
-//   snarfline(f); gettoken(f);
-//   heap_bytes = to_int(buf,NULL);
-//   snarfline(f); gettoken(f);
-//   heap_allocs = to_int(buf,NULL);
-//   snarfline(f); gettoken(f);
-//   heapatomic_bytes = to_int(buf,NULL);
-//   snarfline(f); gettoken(f);
-//   heapatomic_allocs = to_int(buf,NULL);
 
   iter(inccount, table);
   results = new {for i < count : new $((stringptr_t)(new ""),0,0)};

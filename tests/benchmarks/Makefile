@@ -2,14 +2,6 @@ include ../../Makefile.inc
 
 PROGS := fib hanoi shuffle nsieve tfftdp
 
-ifndef CYGWIN
-ifneq ($(OS),Windows_NT)
-ifneq ($(OSTYPE),cygwin)
-CFLAGS   := -lm
-endif
-endif
-endif
-
 CYC_BIN_PATH := $(CYCDIR)/bin
 CYC_LIB_PATH := $(CYCDIR)/bin/cyc-lib
 CYC_INC_PATH := $(CYCDIR)/include
@@ -40,10 +32,10 @@ clean:
 #########################################################
 
 %-orig$(EXE): %-orig.c
-	$(CC) $(CFLAGS) -Wall -o $@ $<
+	$(CC) $(CFLAGS) -Wall -o $@ $< -lm
 
 %$(EXE): %.cyc $(CYCC)
-	$(CYCC) $(CYC_FLAGS) -o $@ $<
+	$(CYCC) $(CYC_FLAGS) -o $@ $< -lm
 
 #I tried this to get the labels to work automatically...
 #

@@ -23,7 +23,7 @@ static int position = 1;
 #define GETC(f) (position++, fgetc(f))
 #define UNGETC(c,f) (position--, ungetc(c,f))
 
-static void die(const char ?`r desc, ...`r2 inject parg_t<`r4> ap) 
+static void die(const char ?`r desc, ... inject parg_t<`r4> ap) 
   __attribute__((format(printf,1,2)))
 {
   fprintf(stderr,"char %d: ",position);

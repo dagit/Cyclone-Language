@@ -56,7 +56,7 @@ $(OUT_PREFIX)test_regions$(EXE): $(OUT_PREFIX)test_regions.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 
 $(OUT_PREFIX)cyctest$(EXE): $(OUT_PREFIX)cyctest.o
-	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
+	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS) -lm
 
 $(OUT_PREFIX)foo$(EXE): $(OUT_PREFIX)foo_tab.o $(OUT_PREFIX)foo.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)

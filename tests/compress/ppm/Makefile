@@ -12,10 +12,10 @@ CYCC=$(CYCDIR)/bin/$(CYCCOMP)
 override CYC_FLAGS += -I$(CYCDIR)/lib -B$(CYCDIR)/lib 
 
 encode$(EXE): arithcode.o model.o encode.o
-	$(CYCC) $(CYC_FLAGS) -g -o $@ $^ -lm
+	$(CYCC) $(CYC_FLAGS) -g -o $@ $^
 
 decode$(EXE): arithcode.o model.o decode.o
-	$(CYCC) $(CYC_FLAGS) -g -o $@ $^ -lm
+	$(CYCC) $(CYC_FLAGS) -g -o $@ $^
 
 %.o : %.cyc
 	$(CYCC) $(CYC_FLAGS) -c $< 

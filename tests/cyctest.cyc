@@ -429,21 +429,6 @@ void string_test() {
 
   test_begin("String");
 
-  okfailn(1,to_int("1234",NULL) == 1234);
-  okfailn(2,to_int("-1234",NULL) == -1234);
-  okfailn(3,to_int("  -1234   ",NULL) == -1234);
-  int x = 1;
-  okfailn(4,to_int("-1234  ",&x) == 1234);
-  okfailn(5,x == 5);
-  okfailn(6,to_double("0",NULL) == 0.0);
-  okfailn(7,to_double(".0",NULL) == 0.0);
-  okfailn(8,to_double("1.",NULL) == 1.0);
-  okfailn(9,(to_double("3.14159",NULL) - 3.14159) < 0.000000001);
-  okfailn(10,(to_double("-3.14159",NULL) - -3.14159) < 0.000000001);
-  okfailn(11,(to_double("3.14e3",NULL) - 3.14e3) < 0.000000001);
-  okfailn(12,(to_double("3.14e-3",NULL) - 3.14e-3) < 0.000000001);
-  okfailn(13,(to_double("  \t3.14e-3",NULL) - 3.14e-3) < 0.000000001);
-
   okfailn(14,strcmp("hello","world") < 0);
   okfailn(15,strcmp("hello","hello") == 0);
   okfailn(16,strcmp("world","hello") > 0);

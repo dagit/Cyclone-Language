@@ -106,17 +106,6 @@ extern list_t<int>    explode(string_t s);
 extern list_t<int,`r> rexplode(region_t<`r>,string_t s);
 extern mstring_t      implode(list_t<int> c);
 
-// convert s to an int.  if offset is NULL, starts at offset 0. 
-// otherwise, starts at *offset.  Skips leading whitespace.  Raises
-// Invalid_argument if no valid int is found.  If offset is non-NULL, 
-// returns the index of the last character consumed + 1.
-extern int to_int(string_t s, int * offset);
-
-// convert s to a double.  if offset is NULL, starts at offset 0. 
-// otherwise, starts at *offset.  Skips leading whitespace.  Raises
-// Invalid_argument if no valid int is found.  If offset is non-NULL, 
-// returns the index of the last character consumed + 1.
-extern double to_double(string_t s, int * offset); // raises Invalid_argument
 }
 
 #endif

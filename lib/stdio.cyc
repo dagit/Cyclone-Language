@@ -30,8 +30,8 @@ extern struct __sFILE;
 typedef struct Cstdio::__sFILE __sFILE;
 int remove(Cstring);
 int rename(Cstring, Cstring);
-__sFILE *tmpfile();
-Cstring	tmpnam(Cstring);
+//__sFILE *tmpfile();
+//Cstring	tmpnam(Cstring);
 int fclose(__sFILE @`r);
 int fflush(__sFILE *`r);
 __sFILE *fopen (Cstring __filename, Cstring __modes);
@@ -83,6 +83,7 @@ int rename(const char ?`r1 old_filename, const char ?`r2 new_filename) {
   return Cstdio::rename(s2c(old_filename), s2c(new_filename));
 }
 
+/*
 FILE *tmpfile() {
   Cstdio::__sFILE *cf = Cstdio::tmpfile();
   return cf ? new __sFILE(cf) : NULL;
@@ -92,6 +93,7 @@ char ?`H tmpnam(char ?`H s) {
   char ?name = Cstring_to_string(Cstdio::tmpnam(NULL));
   return s ? strcpy(s, name) : name;
 }
+*/
 
 int fclose(FILE @`r f) {
   int r = Cstdio::fclose((Cstdio::__sFILE @) f->file);
