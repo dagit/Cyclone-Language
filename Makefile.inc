@@ -116,7 +116,6 @@ CYCLONE_H:=arg.h\
 	precore.h\
 	reent.h\
 	signal.h\
-	snprintf.h\
 	stddef.h\
 	sys/features.h\
 	sys/mman.h\
