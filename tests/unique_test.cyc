@@ -103,17 +103,17 @@ int *`U h(int b) {
   int zz;
   zz = ({ z; *y; y; }); // consumed = { y, z }
 
-  y = (z = unew 4, unew 1); // consumed = { z } DUE TO ANALYSIS INACCURACY
+  y = (z = unew 4, unew 1); // consumed = { }
 
   while (i < 5) {
-    x = y; // consumed = { y, z }
-    y = x; // consumed = { x, z }
+    x = y; // consumed = { y }
+    y = x; // consumed = { x }
     i++;
   }
-  // @join: consumed = { x, z }
+  // @join: consumed = { x }
 
-  do {
-    z = y; // consumed = { x, y, z }
+  do { // consumed = { x, z }
+    z = y; // consumed = { x, y }
     y = z; // consumed = { x, z }
     i--;
   } while ((x = unew 4) && (i > 0));

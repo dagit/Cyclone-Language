@@ -165,6 +165,8 @@ static int get_field_index(type_t t, field_name_t f) {
 // context to an outer one, I think).  The fix is to keep all the changed
 // lists in the env and find the right one for the dest (by following
 // enclosers somehow), but again, it is a really strange thing.
+// Another KLUDGE: may_consume info should never be relevant in a
+// catch block, so we clear it here, rather than cleaning it up elsewhere.
 static void update_tryflow(analenv_t<`r> env, flow_t<`r> new_flow) {
   if(env->in_try) {
     DEBUG_PRINT("update_tryflow: before flow:\n");
@@ -174,6 +176,9 @@ static void update_tryflow(analenv_t<`r> env, flow_t<`r> new_flow) {
     DEBUG_PRINT_F(print_flow,new_flow);
     DEBUG_PRINT("\n");
     env->tryflow = join_flow(env->fenv, env->all_changed, new_flow, env->tryflow, true);
+    let $(ConsumeInfo(c,mc),_) = save_consume_info(env->fenv, env->tryflow, 
+						   false);
+    env->tryflow = restore_consume_info(env->tryflow, ConsumeInfo(c,NULL));
     DEBUG_PRINT("update_tryflow: joined flow:\n");
     DEBUG_PRINT_F(print_flow,env->tryflow);
     DEBUG_PRINT("\n");
@@ -832,6 +837,42 @@ static list_t<place_t<`r,`r>,`r> noalias_ptrs_rec(analenv_t<`r> env,
   }
 }
 
+// called once for each legal flow in an assignment: left to right order,
+// and right to left order.  See anal_Rexp's AssignOp_e case below.
+static $(flow_t<`r>,absRval_t<`r>) 
+  do_assign(flow_env_t<`r> fenv,
+	    analenv_t<`r> env,
+	    flow_t<`r> outflow,
+	    exp_t lexp, absLval_t<`r> lval,
+	    exp_t rexp, absRval_t<`r> rval,
+	    Position::seg_t loc) {
+
+  outflow = consume_unique_rvals(loc, outflow); // consume rhs
+  switch(outflow) {
+  case BottomFL:
+    DEBUG_PRINT("leaving AssignOp_e\n");
+    return $(BottomFL,rval);
+  case ReachableFL(outdict,relns,cinfo):
+    switch(lval) {
+    case PlaceL(p): 
+      cinfo = consume_assignment(env,p,cinfo,outdict,lexp);
+      outdict = assign_place(fenv,loc,outdict,env->all_changed,p,rval);
+      relns   = reln_assign_exp(fenv->r,relns,lexp,rexp);
+      outflow = ReachableFL(outdict,relns,cinfo);
+      DEBUG_PRINT("in AssignOp_e; calling update_tryflow\n");
+      update_tryflow(env, outflow);
+      DEBUG_PRINT("leaving AssignOp_e\n");
+      return $(outflow, rval);
+    case UnknownL: 
+      // if we don't know the place, then this an unconsumed location
+      // accessible via a non-unique path (either a global, or
+      // a nested definition).  Can do nothing in this case.
+      DEBUG_PRINT("leaving AssignOp_e\n");
+      return $(use_Rval(env,rexp->loc,outflow,rval), rval);
+    }
+  }
+}
+
 // Note: must deal with try-flow in all "base" cases!!!
 static $(flow_t<`r>,absRval_t<`r>) 
 anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
@@ -949,89 +990,35 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     }
     return $(f,fenv->unknown_all);
 
-  case &AssignOp_e(e1,NULL,e2): // really annoying we don't have e1 before e2!
+  case &AssignOp_e(e1,NULL,e2):
     DEBUG_PRINT("in Rexp:AssignOp_e for |%s|\n",Absynpp::exp2string(e));
     let outer_all_changed = env->all_changed;
-    let $(outer_cinfo,inflow) = save_consume_info(fenv,inflow,true);
-    consume_t<`r> empty_consume = { fenv->mt_place_set, NULL };
-    consume_t<`r> outflow_consume = empty_consume;
-    bool init_consume = false;
-    while(true) { // local iteration
-      env->all_changed  = rnew(env->r) fenv->mt_place_set;
-      let $(left_out, lval) = anal_Lexp(env,inflow,e1);
-      let left_changed      = *env->all_changed;
-      env->all_changed      = rnew(env->r) fenv->mt_place_set;
-      let $(right_out,rval) = anal_Rexp(env,inflow,e2);
-      let right_changed     = *env->all_changed;
-      let outflow = after_flow(fenv,&left_changed, left_out,right_out,
-			       left_changed, right_changed);
-      // FIX: need to kill any variables assigned in e1 or e2?
-      let new_inflow = join_flow(fenv,outer_all_changed,inflow,outflow,true);
-
-      // restore consume information to old inflow if necessary
-      let $(c,_) = save_consume_info(fenv,new_inflow,false);
-      if (init_consume) {
-#ifdef SANITY
-	if (consume_approx(c, outflow_consume)) {
-	  DEBUG_PRINT("sanity consumed: ");
-	  DEBUG_PRINT_F(print_place_set,outflow_consume.consumed);
-	  DEBUG_PRINT("\ncurrent consumed: ");
-	  DEBUG_PRINT_F(print_place_set,c.consumed);
-	  DEBUG_PRINT("\nsanity may_consume: ");
-	  DEBUG_PRINT_F(print_place_list,outflow_consume.may_consume);
-	  DEBUG_PRINT("\ncurrent may_consume: ");
-	  DEBUG_PRINT_F(print_place_list,c.may_consume);
-	  DEBUG_PRINT("\n");
-	  Tcutil::impos("assignOp_e failed to preserve consume info");
-	}
-#endif
-	inflow = restore_consume_info(inflow, outflow_consume);
-      }
-      outflow_consume = c;
-      init_consume = true;
-//        DEBUG_PRINT("assignOp: old_inflow=\n");
-//        DEBUG_PRINT_F(print_flow,inflow);
-//        DEBUG_PRINT("assignOp: joined flow=\n");
-//        DEBUG_PRINT_F(print_flow,new_inflow);
-      // see if we've reached a fixpoint
-      if(flow_lessthan_approx(new_inflow,inflow)) {
-	if(outer_all_changed == NULL)
-	  env->all_changed = NULL;
-	else
-	  *env->all_changed = union_place_set(*outer_all_changed,
-			      union_place_set(left_changed, right_changed,
-					      false), false);
-	outflow = consume_unique_rvals(e->loc, outflow); // consume rhs
-	// now actually do the assignment!
-	switch(outflow) {
-	case BottomFL:
-	  DEBUG_PRINT("leaving AssignOp_e\n");
-	  return $(BottomFL,rval);
-	case ReachableFL(outdict,relns,cinfo):
-	  // make sure we haven't used a unique value > 1 time
-	  cinfo = and_consume(fenv->r,outer_cinfo,cinfo);
-	  switch(lval) {
-	  case PlaceL(p): 
-	    cinfo = consume_assignment(env,p,cinfo,outdict,e1);
-	    outdict = assign_place(fenv,e->loc,outdict,env->all_changed,p,rval);
-	    relns   = reln_assign_exp(fenv->r,relns,e1,e2);
-	    outflow = ReachableFL(outdict,relns,cinfo);
-	    update_tryflow(env, outflow);
-	    DEBUG_PRINT("leaving AssignOp_e\n");
-	    return $(outflow, rval);
-	  case UnknownL: 
-	    // if we don't know the place, then this an unconsumed location
-	    // accessible via a non-unique path (either a global, or
-	    // a nested definition).  Can do nothing in this case.
-	    DEBUG_PRINT("leaving AssignOp_e\n");
-	    return $(use_Rval(env,e2->loc,outflow,rval), rval);
-	  }
-	}
-      }
-      // iterate again; need to go back to empty consume info
-      inflow = restore_consume_info(new_inflow,empty_consume);
-      DEBUG_PRINT("inflow changed; recalculating\n");
-    }
+    // First try left to right eval order
+    let $(left_out, lval_lr)   = anal_Lexp(env,inflow,e1);
+    let $(outflow_lr, rval_lr) = anal_Rexp(env,left_out,e2);
+    let fl                     = do_assign(fenv,env,outflow_lr,e1,lval_lr,
+					   e2,rval_lr,e->loc);
+    let all_changed_l = env->all_changed;
+    // Now do right to left eval order
+    env->all_changed = outer_all_changed;
+    let $(right_out, rval_rl)  = anal_Rexp(env,inflow,e2);
+    let $(outflow_rl, lval_rl) = anal_Lexp(env,right_out,e1);
+    let fr                     = do_assign(fenv,env,outflow_rl,e1,lval_rl,
+					   e2,rval_rl,e->loc);
+    // Now join the flows
+    if(outer_all_changed == NULL)
+      env->all_changed = NULL;
+    else
+      *env->all_changed = union_place_set(*all_changed_l, *env->all_changed,
+					  false);
+    let ret = join_flow_and_rval(fenv, outer_all_changed, fl, fr, true);
+    DEBUG_PRINT("ltor flow is ");
+    DEBUG_PRINT_F(print_flow,fr[0]);
+    DEBUG_PRINT("rtol flow is ");
+    DEBUG_PRINT_F(print_flow,fl[0]);
+    DEBUG_PRINT("joined flow is ");
+    DEBUG_PRINT_F(print_flow,ret[0]);
+    return ret;
 
   case &SeqExp_e(e1,e2): 
     let $(f,r) = anal_Rexp(env,inflow,e1);

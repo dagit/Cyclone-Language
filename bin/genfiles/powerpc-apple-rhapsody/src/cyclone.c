@@ -1544,14 +1544,14 @@ _tag_dynforward(_tmp3A1,sizeof(char),_get_zero_arr_size_char(_tmp3A1,50)))),
 _tag_dynforward(_tmp3A0,sizeof(void*),1)))))));}Cyc_fflush((struct Cyc___cycFILE*)
 Cyc_stderr);goto CLEANUP_AND_RETURN;}}while(1){c=Cyc_fgetc((struct Cyc___cycFILE*)
 spec_file);if(isspace(c))continue;break;}if(c == '*'){{struct _tuple12*_tmp3AE;
-struct _dynforward_ptr*_tmp3AD;const char*_tmp3AC;struct _dynforward_ptr*_tmp3AB;
+const char*_tmp3AD;struct _dynforward_ptr*_tmp3AC;struct _dynforward_ptr*_tmp3AB;
 struct Cyc_List_List*_tmp3AA;_tmp3A=((_tmp3AA=_cycalloc(sizeof(*_tmp3AA)),((
-_tmp3AA->hd=((_tmp3AE=_cycalloc(sizeof(*_tmp3AE)),((_tmp3AE->f1=((_tmp3AD=
-_cycalloc(sizeof(*_tmp3AD)),((_tmp3AD[0]=(struct _dynforward_ptr)Cyc_strdup(
-_tag_dynforward(strname,sizeof(char),256)),_tmp3AD)))),((_tmp3AE->f2=((_tmp3AB=
-_cycalloc(sizeof(*_tmp3AB)),((_tmp3AB[0]=(struct _dynforward_ptr)Cyc_strdup(((
-_tmp3AC="",_tag_dynforward(_tmp3AC,sizeof(char),_get_zero_arr_size_char(_tmp3AC,
-1))))),_tmp3AB)))),_tmp3AE)))))),((_tmp3AA->tl=_tmp3A,_tmp3AA))))));}goto
+_tmp3AA->hd=((_tmp3AE=_cycalloc(sizeof(*_tmp3AE)),((_tmp3AE->f1=((_tmp3AB=
+_cycalloc(sizeof(*_tmp3AB)),((_tmp3AB[0]=(struct _dynforward_ptr)Cyc_strdup(
+_tag_dynforward(strname,sizeof(char),256)),_tmp3AB)))),((_tmp3AE->f2=((_tmp3AC=
+_cycalloc(sizeof(*_tmp3AC)),((_tmp3AC[0]=(struct _dynforward_ptr)Cyc_strdup(((
+_tmp3AD="",_tag_dynforward(_tmp3AD,sizeof(char),_get_zero_arr_size_char(_tmp3AD,
+1))))),_tmp3AC)))),_tmp3AE)))))),((_tmp3AA->tl=_tmp3A,_tmp3AA))))));}goto
 JUST_AFTER_STAR;}strvalue[0]=(char)c;i=1;while(1){c=Cyc_fgetc((struct Cyc___cycFILE*)
 spec_file);if((c == - 1  || c == '\n') || c == '\r'){strvalue[
 _check_known_subscript_notnull(4096,i)]='\000';break;}strvalue[
@@ -1566,11 +1566,11 @@ _tag_dynforward(_tmp3B2,sizeof(void*),2)))))))))))));}Cyc_fflush((struct Cyc___c
 Cyc_stderr);goto CLEANUP_AND_RETURN;}}{struct _tuple12*_tmp3BC;struct
 _dynforward_ptr*_tmp3BB;struct _dynforward_ptr*_tmp3BA;struct Cyc_List_List*
 _tmp3B9;_tmp3A=((_tmp3B9=_cycalloc(sizeof(*_tmp3B9)),((_tmp3B9->hd=((_tmp3BC=
-_cycalloc(sizeof(*_tmp3BC)),((_tmp3BC->f1=((_tmp3BB=_cycalloc(sizeof(*_tmp3BB)),((
-_tmp3BB[0]=(struct _dynforward_ptr)Cyc_strdup(_tag_dynforward(strname,sizeof(char),
-256)),_tmp3BB)))),((_tmp3BC->f2=((_tmp3BA=_cycalloc(sizeof(*_tmp3BA)),((_tmp3BA[
+_cycalloc(sizeof(*_tmp3BC)),((_tmp3BC->f1=((_tmp3BA=_cycalloc(sizeof(*_tmp3BA)),((
+_tmp3BA[0]=(struct _dynforward_ptr)Cyc_strdup(_tag_dynforward(strname,sizeof(char),
+256)),_tmp3BA)))),((_tmp3BC->f2=((_tmp3BB=_cycalloc(sizeof(*_tmp3BB)),((_tmp3BB[
 0]=(struct _dynforward_ptr)Cyc_strdup(_tag_dynforward(strvalue,sizeof(char),4096)),
-_tmp3BA)))),_tmp3BC)))))),((_tmp3B9->tl=_tmp3A,_tmp3B9))))));}if(c == - 1)goto
+_tmp3BB)))),_tmp3BC)))))),((_tmp3B9->tl=_tmp3A,_tmp3B9))))));}if(c == - 1)goto
 CLEANUP_AND_RETURN;}CLEANUP_AND_RETURN: Cyc_fclose((struct Cyc___cycFILE*)
 spec_file);return _tmp3A;}struct _dynforward_ptr Cyc_split_specs(struct
 _dynforward_ptr cmdline);static void _tmp3C6(struct _dynforward_ptr*_tmp5B,
@@ -1697,10 +1697,10 @@ _tmp8D=params;_tmp8E=*_tmp8D;_tmp8F=_tmp8E.f1;_tmp90=_tmp8E.f2;_tmp91=_tmp8E.f3;
 struct Cyc_Interface_I*_tmp92=Cyc_Interface_extract(_tmp8F->ae);if(_tmp90 == 0)Cyc_Interface_save(
 _tmp92,_tmp91);else{struct Cyc_Interface_I*_tmp93=Cyc_Interface_parse((struct Cyc___cycFILE*)
 _tmp90);const char*_tmp3EB;const char*_tmp3EA;struct _tuple11*_tmp3E9;if(!Cyc_Interface_is_subinterface(
-_tmp93,_tmp92,((_tmp3E9=_cycalloc(sizeof(*_tmp3E9)),((_tmp3E9->f1=((_tmp3EA="written interface",
-_tag_dynforward(_tmp3EA,sizeof(char),_get_zero_arr_size_char(_tmp3EA,18)))),((
-_tmp3E9->f2=((_tmp3EB="maximal interface",_tag_dynforward(_tmp3EB,sizeof(char),
-_get_zero_arr_size_char(_tmp3EB,18)))),_tmp3E9))))))))Cyc_compile_failure=1;
+_tmp93,_tmp92,((_tmp3E9=_cycalloc(sizeof(*_tmp3E9)),((_tmp3E9->f1=((_tmp3EB="written interface",
+_tag_dynforward(_tmp3EB,sizeof(char),_get_zero_arr_size_char(_tmp3EB,18)))),((
+_tmp3E9->f2=((_tmp3EA="maximal interface",_tag_dynforward(_tmp3EA,sizeof(char),
+_get_zero_arr_size_char(_tmp3EA,18)))),_tmp3E9))))))))Cyc_compile_failure=1;
 else{Cyc_Interface_save(_tmp93,_tmp91);}}return tds;}}struct Cyc_List_List*Cyc_do_translate(
 int ignore,struct Cyc_List_List*tds);struct Cyc_List_List*Cyc_do_translate(int
 ignore,struct Cyc_List_List*tds){return Cyc_Toc_toc(tds);}struct Cyc_List_List*Cyc_do_tovc(
@@ -2136,617 +2136,617 @@ _check_dynforward_subscript(argv,sizeof(struct _dynforward_ptr),i));else{*((
 struct _dynforward_ptr*)_check_dynforward_subscript(_tmp14F,sizeof(struct
 _dynforward_ptr),k ++))=*((struct _dynforward_ptr*)_check_dynforward_subscript(
 argv,sizeof(struct _dynforward_ptr),i));}}{struct _tuple15*_tmp91E;const char*
-_tmp91D;const char*_tmp91C;struct Cyc_Arg_Set_spec_struct _tmp91B;struct Cyc_Arg_Set_spec_struct*
-_tmp91A;const char*_tmp919;struct _tuple15*_tmp918;const char*_tmp917;const char*
-_tmp916;struct Cyc_Arg_Unit_spec_struct _tmp915;struct Cyc_Arg_Unit_spec_struct*
-_tmp914;const char*_tmp913;struct _tuple15*_tmp912;const char*_tmp911;const char*
-_tmp910;struct Cyc_Arg_String_spec_struct _tmp90F;struct Cyc_Arg_String_spec_struct*
-_tmp90E;const char*_tmp90D;struct _tuple15*_tmp90C;const char*_tmp90B;const char*
-_tmp90A;struct Cyc_Arg_Flag_spec_struct _tmp909;struct Cyc_Arg_Flag_spec_struct*
-_tmp908;const char*_tmp907;struct _tuple15*_tmp906;const char*_tmp905;const char*
-_tmp904;struct Cyc_Arg_Flag_spec_struct _tmp903;struct Cyc_Arg_Flag_spec_struct*
-_tmp902;const char*_tmp901;struct _tuple15*_tmp900;const char*_tmp8FF;const char*
-_tmp8FE;struct Cyc_Arg_Flag_spec_struct _tmp8FD;struct Cyc_Arg_Flag_spec_struct*
-_tmp8FC;const char*_tmp8FB;struct _tuple15*_tmp8FA;const char*_tmp8F9;const char*
-_tmp8F8;struct Cyc_Arg_Flag_spec_struct _tmp8F7;struct Cyc_Arg_Flag_spec_struct*
-_tmp8F6;const char*_tmp8F5;struct _tuple15*_tmp8F4;const char*_tmp8F3;const char*
-_tmp8F2;struct Cyc_Arg_Flag_spec_struct _tmp8F1;struct Cyc_Arg_Flag_spec_struct*
-_tmp8F0;const char*_tmp8EF;struct _tuple15*_tmp8EE;const char*_tmp8ED;const char*
-_tmp8EC;struct Cyc_Arg_Flag_spec_struct _tmp8EB;struct Cyc_Arg_Flag_spec_struct*
-_tmp8EA;const char*_tmp8E9;struct _tuple15*_tmp8E8;const char*_tmp8E7;const char*
-_tmp8E6;struct Cyc_Arg_Unit_spec_struct _tmp8E5;struct Cyc_Arg_Unit_spec_struct*
-_tmp8E4;const char*_tmp8E3;struct _tuple15*_tmp8E2;const char*_tmp8E1;const char*
-_tmp8E0;struct Cyc_Arg_String_spec_struct _tmp8DF;struct Cyc_Arg_String_spec_struct*
-_tmp8DE;const char*_tmp8DD;struct _tuple15*_tmp8DC;const char*_tmp8DB;const char*
-_tmp8DA;struct Cyc_Arg_Flag_spec_struct _tmp8D9;struct Cyc_Arg_Flag_spec_struct*
-_tmp8D8;const char*_tmp8D7;struct _tuple15*_tmp8D6;const char*_tmp8D5;const char*
-_tmp8D4;struct Cyc_Arg_Flag_spec_struct _tmp8D3;struct Cyc_Arg_Flag_spec_struct*
-_tmp8D2;const char*_tmp8D1;struct _tuple15*_tmp8D0;const char*_tmp8CF;const char*
-_tmp8CE;struct Cyc_Arg_Flag_spec_struct _tmp8CD;struct Cyc_Arg_Flag_spec_struct*
-_tmp8CC;const char*_tmp8CB;struct _tuple15*_tmp8CA;const char*_tmp8C9;const char*
-_tmp8C8;struct Cyc_Arg_Flag_spec_struct _tmp8C7;struct Cyc_Arg_Flag_spec_struct*
-_tmp8C6;const char*_tmp8C5;struct _tuple15*_tmp8C4;const char*_tmp8C3;const char*
-_tmp8C2;struct Cyc_Arg_Flag_spec_struct _tmp8C1;struct Cyc_Arg_Flag_spec_struct*
-_tmp8C0;const char*_tmp8BF;struct _tuple15*_tmp8BE;const char*_tmp8BD;const char*
-_tmp8BC;struct Cyc_Arg_Flag_spec_struct _tmp8BB;struct Cyc_Arg_Flag_spec_struct*
-_tmp8BA;const char*_tmp8B9;struct _tuple15*_tmp8B8;const char*_tmp8B7;const char*
-_tmp8B6;struct Cyc_Arg_Flag_spec_struct _tmp8B5;struct Cyc_Arg_Flag_spec_struct*
-_tmp8B4;const char*_tmp8B3;struct _tuple15*_tmp8B2;const char*_tmp8B1;const char*
-_tmp8B0;struct Cyc_Arg_Flag_spec_struct _tmp8AF;struct Cyc_Arg_Flag_spec_struct*
-_tmp8AE;const char*_tmp8AD;struct _tuple15*_tmp8AC;const char*_tmp8AB;const char*
-_tmp8AA;struct Cyc_Arg_Unit_spec_struct _tmp8A9;struct Cyc_Arg_Unit_spec_struct*
-_tmp8A8;const char*_tmp8A7;struct _tuple15*_tmp8A6;const char*_tmp8A5;const char*
-_tmp8A4;struct Cyc_Arg_Unit_spec_struct _tmp8A3;struct Cyc_Arg_Unit_spec_struct*
-_tmp8A2;const char*_tmp8A1;struct _tuple15*_tmp8A0;const char*_tmp89F;const char*
-_tmp89E;struct Cyc_Arg_Unit_spec_struct _tmp89D;struct Cyc_Arg_Unit_spec_struct*
-_tmp89C;const char*_tmp89B;struct _tuple15*_tmp89A;const char*_tmp899;const char*
-_tmp898;struct Cyc_Arg_Unit_spec_struct _tmp897;struct Cyc_Arg_Unit_spec_struct*
-_tmp896;const char*_tmp895;struct _tuple15*_tmp894;const char*_tmp893;const char*
-_tmp892;struct Cyc_Arg_Flag_spec_struct _tmp891;struct Cyc_Arg_Flag_spec_struct*
-_tmp890;const char*_tmp88F;struct _tuple15*_tmp88E;const char*_tmp88D;const char*
-_tmp88C;struct Cyc_Arg_String_spec_struct _tmp88B;struct Cyc_Arg_String_spec_struct*
-_tmp88A;const char*_tmp889;struct _tuple15*_tmp888;const char*_tmp887;const char*
-_tmp886;struct Cyc_Arg_String_spec_struct _tmp885;struct Cyc_Arg_String_spec_struct*
-_tmp884;const char*_tmp883;struct _tuple15*_tmp882;const char*_tmp881;const char*
-_tmp880;struct Cyc_Arg_Unit_spec_struct _tmp87F;struct Cyc_Arg_Unit_spec_struct*
-_tmp87E;const char*_tmp87D;struct _tuple15*_tmp87C;const char*_tmp87B;const char*
-_tmp87A;struct Cyc_Arg_Set_spec_struct _tmp879;struct Cyc_Arg_Set_spec_struct*
-_tmp878;const char*_tmp877;struct _tuple15*_tmp876;const char*_tmp875;const char*
-_tmp874;struct Cyc_Arg_Set_spec_struct _tmp873;struct Cyc_Arg_Set_spec_struct*
-_tmp872;const char*_tmp871;struct _tuple15*_tmp870;const char*_tmp86F;const char*
-_tmp86E;struct Cyc_Arg_Set_spec_struct _tmp86D;struct Cyc_Arg_Set_spec_struct*
-_tmp86C;const char*_tmp86B;struct _tuple15*_tmp86A;const char*_tmp869;const char*
-_tmp868;struct Cyc_Arg_Set_spec_struct _tmp867;struct Cyc_Arg_Set_spec_struct*
-_tmp866;const char*_tmp865;struct _tuple15*_tmp864;const char*_tmp863;const char*
-_tmp862;struct Cyc_Arg_Set_spec_struct _tmp861;struct Cyc_Arg_Set_spec_struct*
-_tmp860;const char*_tmp85F;struct _tuple15*_tmp85E;const char*_tmp85D;const char*
-_tmp85C;struct Cyc_Arg_Set_spec_struct _tmp85B;struct Cyc_Arg_Set_spec_struct*
-_tmp85A;const char*_tmp859;struct _tuple15*_tmp858;const char*_tmp857;const char*
-_tmp856;struct Cyc_Arg_Set_spec_struct _tmp855;struct Cyc_Arg_Set_spec_struct*
-_tmp854;const char*_tmp853;struct _tuple15*_tmp852;const char*_tmp851;const char*
-_tmp850;struct Cyc_Arg_Set_spec_struct _tmp84F;struct Cyc_Arg_Set_spec_struct*
-_tmp84E;const char*_tmp84D;struct _tuple15*_tmp84C;const char*_tmp84B;const char*
-_tmp84A;struct Cyc_Arg_Clear_spec_struct _tmp849;struct Cyc_Arg_Clear_spec_struct*
-_tmp848;const char*_tmp847;struct _tuple15*_tmp846;const char*_tmp845;const char*
-_tmp844;struct Cyc_Arg_Set_spec_struct _tmp843;struct Cyc_Arg_Set_spec_struct*
-_tmp842;const char*_tmp841;struct _tuple15*_tmp840;const char*_tmp83F;const char*
-_tmp83E;struct Cyc_Arg_Unit_spec_struct _tmp83D;struct Cyc_Arg_Unit_spec_struct*
-_tmp83C;const char*_tmp83B;struct _tuple15*_tmp83A;const char*_tmp839;const char*
-_tmp838;struct Cyc_Arg_String_spec_struct _tmp837;struct Cyc_Arg_String_spec_struct*
-_tmp836;const char*_tmp835;struct _tuple15*_tmp834;const char*_tmp833;const char*
-_tmp832;struct Cyc_Arg_Unit_spec_struct _tmp831;struct Cyc_Arg_Unit_spec_struct*
-_tmp830;const char*_tmp82F;struct _tuple15*_tmp82E;const char*_tmp82D;const char*
-_tmp82C;struct Cyc_Arg_Set_spec_struct _tmp82B;struct Cyc_Arg_Set_spec_struct*
-_tmp82A;const char*_tmp829;struct _tuple15*_tmp828;const char*_tmp827;const char*
-_tmp826;struct Cyc_Arg_Unit_spec_struct _tmp825;struct Cyc_Arg_Unit_spec_struct*
-_tmp824;const char*_tmp823;struct _tuple15*_tmp822;const char*_tmp821;const char*
-_tmp820;struct Cyc_Arg_Unit_spec_struct _tmp81F;struct Cyc_Arg_Unit_spec_struct*
-_tmp81E;const char*_tmp81D;struct _tuple15*_tmp81C;const char*_tmp81B;const char*
-_tmp81A;struct Cyc_Arg_Unit_spec_struct _tmp819;struct Cyc_Arg_Unit_spec_struct*
-_tmp818;const char*_tmp817;struct _tuple15*_tmp816;const char*_tmp815;const char*
-_tmp814;struct Cyc_Arg_Unit_spec_struct _tmp813;struct Cyc_Arg_Unit_spec_struct*
-_tmp812;const char*_tmp811;struct _tuple15*_tmp810;const char*_tmp80F;const char*
-_tmp80E;struct Cyc_Arg_Unit_spec_struct _tmp80D;struct Cyc_Arg_Unit_spec_struct*
-_tmp80C;const char*_tmp80B;struct _tuple15*_tmp80A;const char*_tmp809;const char*
-_tmp808;struct Cyc_Arg_String_spec_struct _tmp807;struct Cyc_Arg_String_spec_struct*
-_tmp806;const char*_tmp805;struct _tuple15*_tmp804;const char*_tmp803;const char*
-_tmp802;struct Cyc_Arg_Unit_spec_struct _tmp801;struct Cyc_Arg_Unit_spec_struct*
-_tmp800;const char*_tmp7FF;struct _tuple15*_tmp7FE;const char*_tmp7FD;const char*
-_tmp7FC;struct Cyc_Arg_Unit_spec_struct _tmp7FB;struct Cyc_Arg_Unit_spec_struct*
-_tmp7FA;const char*_tmp7F9;struct _tuple15*_tmp7F8;const char*_tmp7F7;const char*
-_tmp7F6;struct Cyc_Arg_Set_spec_struct _tmp7F5;struct Cyc_Arg_Set_spec_struct*
-_tmp7F4;const char*_tmp7F3;struct _tuple15*_tmp7F2;const char*_tmp7F1;const char*
-_tmp7F0;struct Cyc_Arg_Set_spec_struct _tmp7EF;struct Cyc_Arg_Set_spec_struct*
-_tmp7EE;const char*_tmp7ED;struct _tuple15*_tmp7EC;const char*_tmp7EB;const char*
-_tmp7EA;struct Cyc_Arg_Set_spec_struct _tmp7E9;struct Cyc_Arg_Set_spec_struct*
-_tmp7E8;const char*_tmp7E7;struct _tuple15*_tmp7E6;const char*_tmp7E5;const char*
-_tmp7E4;struct Cyc_Arg_Set_spec_struct _tmp7E3;struct Cyc_Arg_Set_spec_struct*
-_tmp7E2;const char*_tmp7E1;struct _tuple15*_tmp7E0;const char*_tmp7DF;const char*
-_tmp7DE;struct Cyc_Arg_Set_spec_struct _tmp7DD;struct Cyc_Arg_Set_spec_struct*
-_tmp7DC;const char*_tmp7DB;struct _tuple15*_tmp7DA;const char*_tmp7D9;const char*
-_tmp7D8;struct Cyc_Arg_Set_spec_struct _tmp7D7;struct Cyc_Arg_Set_spec_struct*
-_tmp7D6;const char*_tmp7D5;struct _tuple15*_tmp7D4;const char*_tmp7D3;const char*
-_tmp7D2;struct Cyc_Arg_Set_spec_struct _tmp7D1;struct Cyc_Arg_Set_spec_struct*
-_tmp7D0;const char*_tmp7CF;struct _tuple15*_tmp7CE;const char*_tmp7CD;const char*
-_tmp7CC;struct Cyc_Arg_Set_spec_struct _tmp7CB;struct Cyc_Arg_Set_spec_struct*
-_tmp7CA;const char*_tmp7C9;struct _tuple15*_tmp7C8;const char*_tmp7C7;const char*
-_tmp7C6;struct Cyc_Arg_String_spec_struct _tmp7C5;struct Cyc_Arg_String_spec_struct*
-_tmp7C4;const char*_tmp7C3;struct _tuple15*_tmp7C2;const char*_tmp7C1;const char*
-_tmp7C0;struct Cyc_Arg_Set_spec_struct _tmp7BF;struct Cyc_Arg_Set_spec_struct*
-_tmp7BE;const char*_tmp7BD;struct _tuple15*_tmp7BC;const char*_tmp7BB;const char*
-_tmp7BA;struct Cyc_Arg_Set_spec_struct _tmp7B9;struct Cyc_Arg_Set_spec_struct*
-_tmp7B8;const char*_tmp7B7;struct _tuple15*_tmp7B6;const char*_tmp7B5;const char*
-_tmp7B4;struct Cyc_Arg_Set_spec_struct _tmp7B3;struct Cyc_Arg_Set_spec_struct*
-_tmp7B2;const char*_tmp7B1;struct _tuple15*_tmp7B0;const char*_tmp7AF;const char*
-_tmp7AE;struct Cyc_Arg_Clear_spec_struct _tmp7AD;struct Cyc_Arg_Clear_spec_struct*
-_tmp7AC;const char*_tmp7AB;struct _tuple15*_tmp7AA;const char*_tmp7A9;const char*
-_tmp7A8;struct Cyc_Arg_Unit_spec_struct _tmp7A7;struct Cyc_Arg_Unit_spec_struct*
-_tmp7A6;const char*_tmp7A5;struct _tuple15*_tmp7A4;const char*_tmp7A3;const char*
-_tmp7A2;struct Cyc_Arg_Set_spec_struct _tmp7A1;struct Cyc_Arg_Set_spec_struct*
-_tmp7A0;const char*_tmp79F;struct _tuple15*_tmp79E[64];struct Cyc_List_List*options=(
-_tmp79E[63]=((_tmp7A4=_region_malloc(r,sizeof(*_tmp7A4)),((_tmp7A4->f1=((_tmp7A3="-noregions",
-_tag_dynforward(_tmp7A3,sizeof(char),_get_zero_arr_size_char(_tmp7A3,11)))),((
-_tmp7A4->f2=0,((_tmp7A4->f3=((_tmp7A2="",_tag_dynforward(_tmp7A2,sizeof(char),
-_get_zero_arr_size_char(_tmp7A2,1)))),((_tmp7A4->f4=(void*)((_tmp7A0=
-_region_malloc(r,sizeof(*_tmp7A0)),((_tmp7A0[0]=((_tmp7A1.tag=3,((_tmp7A1.f1=&
-Cyc_Absyn_no_regions,_tmp7A1)))),_tmp7A0)))),((_tmp7A4->f5=((_tmp79F="Generate code that doesn't use regions",
-_tag_dynforward(_tmp79F,sizeof(char),_get_zero_arr_size_char(_tmp79F,39)))),
-_tmp7A4)))))))))))),((_tmp79E[62]=((_tmp7AA=_region_malloc(r,sizeof(*_tmp7AA)),((
-_tmp7AA->f1=((_tmp7A9="-port",_tag_dynforward(_tmp7A9,sizeof(char),
-_get_zero_arr_size_char(_tmp7A9,6)))),((_tmp7AA->f2=0,((_tmp7AA->f3=((_tmp7A8="",
-_tag_dynforward(_tmp7A8,sizeof(char),_get_zero_arr_size_char(_tmp7A8,1)))),((
-_tmp7AA->f4=(void*)((_tmp7A6=_region_malloc(r,sizeof(*_tmp7A6)),((_tmp7A6[0]=((
-_tmp7A7.tag=0,((_tmp7A7.f1=Cyc_set_port_c_code,_tmp7A7)))),_tmp7A6)))),((_tmp7AA->f5=((
-_tmp7A5="Suggest how to port C code to Cyclone",_tag_dynforward(_tmp7A5,sizeof(
-char),_get_zero_arr_size_char(_tmp7A5,38)))),_tmp7AA)))))))))))),((_tmp79E[61]=((
-_tmp7B0=_region_malloc(r,sizeof(*_tmp7B0)),((_tmp7B0->f1=((_tmp7AF="-detailedlocation",
-_tag_dynforward(_tmp7AF,sizeof(char),_get_zero_arr_size_char(_tmp7AF,18)))),((
-_tmp7B0->f2=0,((_tmp7B0->f3=((_tmp7AE="",_tag_dynforward(_tmp7AE,sizeof(char),
-_get_zero_arr_size_char(_tmp7AE,1)))),((_tmp7B0->f4=(void*)((_tmp7AC=
-_region_malloc(r,sizeof(*_tmp7AC)),((_tmp7AC[0]=((_tmp7AD.tag=4,((_tmp7AD.f1=&
-Cyc_Position_use_gcc_style_location,_tmp7AD)))),_tmp7AC)))),((_tmp7B0->f5=((
-_tmp7AB="Try to give more detailed location information for errors",
-_tag_dynforward(_tmp7AB,sizeof(char),_get_zero_arr_size_char(_tmp7AB,58)))),
-_tmp7B0)))))))))))),((_tmp79E[60]=((_tmp7B6=_region_malloc(r,sizeof(*_tmp7B6)),((
-_tmp7B6->f1=((_tmp7B5="-noregister",_tag_dynforward(_tmp7B5,sizeof(char),
-_get_zero_arr_size_char(_tmp7B5,12)))),((_tmp7B6->f2=0,((_tmp7B6->f3=((_tmp7B4="",
-_tag_dynforward(_tmp7B4,sizeof(char),_get_zero_arr_size_char(_tmp7B4,1)))),((
-_tmp7B6->f4=(void*)((_tmp7B2=_region_malloc(r,sizeof(*_tmp7B2)),((_tmp7B2[0]=((
-_tmp7B3.tag=3,((_tmp7B3.f1=& Cyc_Parse_no_register,_tmp7B3)))),_tmp7B2)))),((
-_tmp7B6->f5=((_tmp7B1="Treat register storage class as public",_tag_dynforward(
-_tmp7B1,sizeof(char),_get_zero_arr_size_char(_tmp7B1,39)))),_tmp7B6)))))))))))),((
-_tmp79E[59]=((_tmp7BC=_region_malloc(r,sizeof(*_tmp7BC)),((_tmp7BC->f1=((_tmp7BB="-warnnullchecks",
-_tag_dynforward(_tmp7BB,sizeof(char),_get_zero_arr_size_char(_tmp7BB,16)))),((
-_tmp7BC->f2=0,((_tmp7BC->f3=((_tmp7BA="",_tag_dynforward(_tmp7BA,sizeof(char),
-_get_zero_arr_size_char(_tmp7BA,1)))),((_tmp7BC->f4=(void*)((_tmp7B8=
-_region_malloc(r,sizeof(*_tmp7B8)),((_tmp7B8[0]=((_tmp7B9.tag=3,((_tmp7B9.f1=&
-Cyc_Toc_warn_all_null_deref,_tmp7B9)))),_tmp7B8)))),((_tmp7BC->f5=((_tmp7B7="Warn when any null check can't be eliminated",
-_tag_dynforward(_tmp7B7,sizeof(char),_get_zero_arr_size_char(_tmp7B7,45)))),
-_tmp7BC)))))))))))),((_tmp79E[58]=((_tmp7C2=_region_malloc(r,sizeof(*_tmp7C2)),((
-_tmp7C2->f1=((_tmp7C1="-warnboundschecks",_tag_dynforward(_tmp7C1,sizeof(char),
-_get_zero_arr_size_char(_tmp7C1,18)))),((_tmp7C2->f2=0,((_tmp7C2->f3=((_tmp7C0="",
-_tag_dynforward(_tmp7C0,sizeof(char),_get_zero_arr_size_char(_tmp7C0,1)))),((
-_tmp7C2->f4=(void*)((_tmp7BE=_region_malloc(r,sizeof(*_tmp7BE)),((_tmp7BE[0]=((
-_tmp7BF.tag=3,((_tmp7BF.f1=& Cyc_Toc_warn_bounds_checks,_tmp7BF)))),_tmp7BE)))),((
-_tmp7C2->f5=((_tmp7BD="Warn when bounds checks can't be eliminated",
-_tag_dynforward(_tmp7BD,sizeof(char),_get_zero_arr_size_char(_tmp7BD,44)))),
-_tmp7C2)))))))))))),((_tmp79E[57]=((_tmp7C8=_region_malloc(r,sizeof(*_tmp7C8)),((
-_tmp7C8->f1=((_tmp7C7="-CI",_tag_dynforward(_tmp7C7,sizeof(char),
-_get_zero_arr_size_char(_tmp7C7,4)))),((_tmp7C8->f2=0,((_tmp7C8->f3=((_tmp7C6=" <file>",
-_tag_dynforward(_tmp7C6,sizeof(char),_get_zero_arr_size_char(_tmp7C6,8)))),((
-_tmp7C8->f4=(void*)((_tmp7C4=_region_malloc(r,sizeof(*_tmp7C4)),((_tmp7C4[0]=((
-_tmp7C5.tag=5,((_tmp7C5.f1=Cyc_set_cyc_include,_tmp7C5)))),_tmp7C4)))),((_tmp7C8->f5=((
-_tmp7C3="Set cyc_include.h to be <file>",_tag_dynforward(_tmp7C3,sizeof(char),
-_get_zero_arr_size_char(_tmp7C3,31)))),_tmp7C8)))))))))))),((_tmp79E[56]=((
-_tmp7CE=_region_malloc(r,sizeof(*_tmp7CE)),((_tmp7CE->f1=((_tmp7CD="-nocyc_setjmp",
-_tag_dynforward(_tmp7CD,sizeof(char),_get_zero_arr_size_char(_tmp7CD,14)))),((
-_tmp7CE->f2=0,((_tmp7CE->f3=((_tmp7CC="",_tag_dynforward(_tmp7CC,sizeof(char),
-_get_zero_arr_size_char(_tmp7CC,1)))),((_tmp7CE->f4=(void*)((_tmp7CA=
-_region_malloc(r,sizeof(*_tmp7CA)),((_tmp7CA[0]=((_tmp7CB.tag=3,((_tmp7CB.f1=&
-Cyc_nocyc_setjmp_r,_tmp7CB)))),_tmp7CA)))),((_tmp7CE->f5=((_tmp7C9="Do not use compiler special file cyc_setjmp.h",
-_tag_dynforward(_tmp7C9,sizeof(char),_get_zero_arr_size_char(_tmp7C9,46)))),
-_tmp7CE)))))))))))),((_tmp79E[55]=((_tmp7D4=_region_malloc(r,sizeof(*_tmp7D4)),((
-_tmp7D4->f1=((_tmp7D3="-printalleffects",_tag_dynforward(_tmp7D3,sizeof(char),
-_get_zero_arr_size_char(_tmp7D3,17)))),((_tmp7D4->f2=0,((_tmp7D4->f3=((_tmp7D2="",
-_tag_dynforward(_tmp7D2,sizeof(char),_get_zero_arr_size_char(_tmp7D2,1)))),((
-_tmp7D4->f4=(void*)((_tmp7D0=_region_malloc(r,sizeof(*_tmp7D0)),((_tmp7D0[0]=((
-_tmp7D1.tag=3,((_tmp7D1.f1=& Cyc_print_all_effects_r,_tmp7D1)))),_tmp7D0)))),((
-_tmp7D4->f5=((_tmp7CF="Print effects for functions (type debugging)",
-_tag_dynforward(_tmp7CF,sizeof(char),_get_zero_arr_size_char(_tmp7CF,45)))),
-_tmp7D4)))))))))))),((_tmp79E[54]=((_tmp7DA=_region_malloc(r,sizeof(*_tmp7DA)),((
-_tmp7DA->f1=((_tmp7D9="-printfullevars",_tag_dynforward(_tmp7D9,sizeof(char),
-_get_zero_arr_size_char(_tmp7D9,16)))),((_tmp7DA->f2=0,((_tmp7DA->f3=((_tmp7D8="",
-_tag_dynforward(_tmp7D8,sizeof(char),_get_zero_arr_size_char(_tmp7D8,1)))),((
-_tmp7DA->f4=(void*)((_tmp7D6=_region_malloc(r,sizeof(*_tmp7D6)),((_tmp7D6[0]=((
-_tmp7D7.tag=3,((_tmp7D7.f1=& Cyc_print_full_evars_r,_tmp7D7)))),_tmp7D6)))),((
-_tmp7DA->f5=((_tmp7D5="Print full information for evars (type debugging)",
-_tag_dynforward(_tmp7D5,sizeof(char),_get_zero_arr_size_char(_tmp7D5,50)))),
-_tmp7DA)))))))))))),((_tmp79E[53]=((_tmp7E0=_region_malloc(r,sizeof(*_tmp7E0)),((
-_tmp7E0->f1=((_tmp7DF="-printallkinds",_tag_dynforward(_tmp7DF,sizeof(char),
-_get_zero_arr_size_char(_tmp7DF,15)))),((_tmp7E0->f2=0,((_tmp7E0->f3=((_tmp7DE="",
-_tag_dynforward(_tmp7DE,sizeof(char),_get_zero_arr_size_char(_tmp7DE,1)))),((
-_tmp7E0->f4=(void*)((_tmp7DC=_region_malloc(r,sizeof(*_tmp7DC)),((_tmp7DC[0]=((
-_tmp7DD.tag=3,((_tmp7DD.f1=& Cyc_print_all_kinds_r,_tmp7DD)))),_tmp7DC)))),((
-_tmp7E0->f5=((_tmp7DB="Always print kinds of type variables",_tag_dynforward(
-_tmp7DB,sizeof(char),_get_zero_arr_size_char(_tmp7DB,37)))),_tmp7E0)))))))))))),((
-_tmp79E[52]=((_tmp7E6=_region_malloc(r,sizeof(*_tmp7E6)),((_tmp7E6->f1=((_tmp7E5="-printalltvars",
-_tag_dynforward(_tmp7E5,sizeof(char),_get_zero_arr_size_char(_tmp7E5,15)))),((
-_tmp7E6->f2=0,((_tmp7E6->f3=((_tmp7E4="",_tag_dynforward(_tmp7E4,sizeof(char),
-_get_zero_arr_size_char(_tmp7E4,1)))),((_tmp7E6->f4=(void*)((_tmp7E2=
-_region_malloc(r,sizeof(*_tmp7E2)),((_tmp7E2[0]=((_tmp7E3.tag=3,((_tmp7E3.f1=&
-Cyc_print_all_tvars_r,_tmp7E3)))),_tmp7E2)))),((_tmp7E6->f5=((_tmp7E1="Print all type variables (even implicit default effects)",
-_tag_dynforward(_tmp7E1,sizeof(char),_get_zero_arr_size_char(_tmp7E1,57)))),
-_tmp7E6)))))))))))),((_tmp79E[51]=((_tmp7EC=_region_malloc(r,sizeof(*_tmp7EC)),((
-_tmp7EC->f1=((_tmp7EB="-noexpandtypedefs",_tag_dynforward(_tmp7EB,sizeof(char),
-_get_zero_arr_size_char(_tmp7EB,18)))),((_tmp7EC->f2=0,((_tmp7EC->f3=((_tmp7EA="",
-_tag_dynforward(_tmp7EA,sizeof(char),_get_zero_arr_size_char(_tmp7EA,1)))),((
-_tmp7EC->f4=(void*)((_tmp7E8=_region_malloc(r,sizeof(*_tmp7E8)),((_tmp7E8[0]=((
-_tmp7E9.tag=3,((_tmp7E9.f1=& Cyc_noexpand_r,_tmp7E9)))),_tmp7E8)))),((_tmp7EC->f5=((
-_tmp7E7="Don't expand typedefs in pretty printing",_tag_dynforward(_tmp7E7,
-sizeof(char),_get_zero_arr_size_char(_tmp7E7,41)))),_tmp7EC)))))))))))),((
-_tmp79E[50]=((_tmp7F2=_region_malloc(r,sizeof(*_tmp7F2)),((_tmp7F2->f1=((_tmp7F1="-noremoveunused",
-_tag_dynforward(_tmp7F1,sizeof(char),_get_zero_arr_size_char(_tmp7F1,16)))),((
-_tmp7F2->f2=0,((_tmp7F2->f3=((_tmp7F0="",_tag_dynforward(_tmp7F0,sizeof(char),
-_get_zero_arr_size_char(_tmp7F0,1)))),((_tmp7F2->f4=(void*)((_tmp7EE=
-_region_malloc(r,sizeof(*_tmp7EE)),((_tmp7EE[0]=((_tmp7EF.tag=3,((_tmp7EF.f1=&
-Cyc_noshake_r,_tmp7EF)))),_tmp7EE)))),((_tmp7F2->f5=((_tmp7ED="Don't remove externed variables that aren't used",
-_tag_dynforward(_tmp7ED,sizeof(char),_get_zero_arr_size_char(_tmp7ED,49)))),
-_tmp7F2)))))))))))),((_tmp79E[49]=((_tmp7F8=_region_malloc(r,sizeof(*_tmp7F8)),((
-_tmp7F8->f1=((_tmp7F7="-nogc",_tag_dynforward(_tmp7F7,sizeof(char),
-_get_zero_arr_size_char(_tmp7F7,6)))),((_tmp7F8->f2=0,((_tmp7F8->f3=((_tmp7F6="",
-_tag_dynforward(_tmp7F6,sizeof(char),_get_zero_arr_size_char(_tmp7F6,1)))),((
-_tmp7F8->f4=(void*)((_tmp7F4=_region_malloc(r,sizeof(*_tmp7F4)),((_tmp7F4[0]=((
-_tmp7F5.tag=3,((_tmp7F5.f1=& Cyc_nogc_r,_tmp7F5)))),_tmp7F4)))),((_tmp7F8->f5=((
-_tmp7F3="Don't link in the garbage collector",_tag_dynforward(_tmp7F3,sizeof(
-char),_get_zero_arr_size_char(_tmp7F3,36)))),_tmp7F8)))))))))))),((_tmp79E[48]=((
-_tmp7FE=_region_malloc(r,sizeof(*_tmp7FE)),((_tmp7FE->f1=((_tmp7FD="-nocyc",
-_tag_dynforward(_tmp7FD,sizeof(char),_get_zero_arr_size_char(_tmp7FD,7)))),((
-_tmp7FE->f2=0,((_tmp7FE->f3=((_tmp7FC="",_tag_dynforward(_tmp7FC,sizeof(char),
-_get_zero_arr_size_char(_tmp7FC,1)))),((_tmp7FE->f4=(void*)((_tmp7FA=
-_region_malloc(r,sizeof(*_tmp7FA)),((_tmp7FA[0]=((_tmp7FB.tag=0,((_tmp7FB.f1=Cyc_set_nocyc,
-_tmp7FB)))),_tmp7FA)))),((_tmp7FE->f5=((_tmp7F9="Don't add implicit namespace Cyc",
-_tag_dynforward(_tmp7F9,sizeof(char),_get_zero_arr_size_char(_tmp7F9,33)))),
-_tmp7FE)))))))))))),((_tmp79E[47]=((_tmp804=_region_malloc(r,sizeof(*_tmp804)),((
-_tmp804->f1=((_tmp803="-no-cpp-precomp",_tag_dynforward(_tmp803,sizeof(char),
-_get_zero_arr_size_char(_tmp803,16)))),((_tmp804->f2=0,((_tmp804->f3=((_tmp802="",
-_tag_dynforward(_tmp802,sizeof(char),_get_zero_arr_size_char(_tmp802,1)))),((
-_tmp804->f4=(void*)((_tmp800=_region_malloc(r,sizeof(*_tmp800)),((_tmp800[0]=((
-_tmp801.tag=0,((_tmp801.f1=Cyc_set_nocppprecomp,_tmp801)))),_tmp800)))),((
-_tmp804->f5=((_tmp7FF="Don't do smart preprocessing (mac only)",_tag_dynforward(
-_tmp7FF,sizeof(char),_get_zero_arr_size_char(_tmp7FF,40)))),_tmp804)))))))))))),((
-_tmp79E[46]=((_tmp80A=_region_malloc(r,sizeof(*_tmp80A)),((_tmp80A->f1=((_tmp809="-use-cpp",
-_tag_dynforward(_tmp809,sizeof(char),_get_zero_arr_size_char(_tmp809,9)))),((
-_tmp80A->f2=0,((_tmp80A->f3=((_tmp808="<path>",_tag_dynforward(_tmp808,sizeof(
-char),_get_zero_arr_size_char(_tmp808,7)))),((_tmp80A->f4=(void*)((_tmp806=
-_region_malloc(r,sizeof(*_tmp806)),((_tmp806[0]=((_tmp807.tag=5,((_tmp807.f1=Cyc_set_cpp,
-_tmp807)))),_tmp806)))),((_tmp80A->f5=((_tmp805="Indicate which preprocessor to use",
-_tag_dynforward(_tmp805,sizeof(char),_get_zero_arr_size_char(_tmp805,35)))),
-_tmp80A)))))))))))),((_tmp79E[45]=((_tmp810=_region_malloc(r,sizeof(*_tmp810)),((
-_tmp810->f1=((_tmp80F="--inline-checks",_tag_dynforward(_tmp80F,sizeof(char),
-_get_zero_arr_size_char(_tmp80F,16)))),((_tmp810->f2=0,((_tmp810->f3=((_tmp80E="",
-_tag_dynforward(_tmp80E,sizeof(char),_get_zero_arr_size_char(_tmp80E,1)))),((
-_tmp810->f4=(void*)((_tmp80C=_region_malloc(r,sizeof(*_tmp80C)),((_tmp80C[0]=((
-_tmp80D.tag=0,((_tmp80D.f1=Cyc_set_inline_functions,_tmp80D)))),_tmp80C)))),((
-_tmp810->f5=((_tmp80B="Inline bounds checks instead of #define",_tag_dynforward(
-_tmp80B,sizeof(char),_get_zero_arr_size_char(_tmp80B,40)))),_tmp810)))))))))))),((
-_tmp79E[44]=((_tmp816=_region_malloc(r,sizeof(*_tmp816)),((_tmp816->f1=((_tmp815="--noboundschecks",
-_tag_dynforward(_tmp815,sizeof(char),_get_zero_arr_size_char(_tmp815,17)))),((
-_tmp816->f2=0,((_tmp816->f3=((_tmp814="",_tag_dynforward(_tmp814,sizeof(char),
-_get_zero_arr_size_char(_tmp814,1)))),((_tmp816->f4=(void*)((_tmp812=
-_region_malloc(r,sizeof(*_tmp812)),((_tmp812[0]=((_tmp813.tag=0,((_tmp813.f1=Cyc_set_noboundschecks,
-_tmp813)))),_tmp812)))),((_tmp816->f5=((_tmp811="Disable bounds checks",
-_tag_dynforward(_tmp811,sizeof(char),_get_zero_arr_size_char(_tmp811,22)))),
-_tmp816)))))))))))),((_tmp79E[43]=((_tmp81C=_region_malloc(r,sizeof(*_tmp81C)),((
-_tmp81C->f1=((_tmp81B="--nonullchecks",_tag_dynforward(_tmp81B,sizeof(char),
-_get_zero_arr_size_char(_tmp81B,15)))),((_tmp81C->f2=0,((_tmp81C->f3=((_tmp81A="",
-_tag_dynforward(_tmp81A,sizeof(char),_get_zero_arr_size_char(_tmp81A,1)))),((
-_tmp81C->f4=(void*)((_tmp818=_region_malloc(r,sizeof(*_tmp818)),((_tmp818[0]=((
-_tmp819.tag=0,((_tmp819.f1=Cyc_set_nonullchecks,_tmp819)))),_tmp818)))),((
-_tmp81C->f5=((_tmp817="Disable null checks",_tag_dynforward(_tmp817,sizeof(char),
-_get_zero_arr_size_char(_tmp817,20)))),_tmp81C)))))))))))),((_tmp79E[42]=((
-_tmp822=_region_malloc(r,sizeof(*_tmp822)),((_tmp822->f1=((_tmp821="--nochecks",
-_tag_dynforward(_tmp821,sizeof(char),_get_zero_arr_size_char(_tmp821,11)))),((
-_tmp822->f2=0,((_tmp822->f3=((_tmp820="",_tag_dynforward(_tmp820,sizeof(char),
-_get_zero_arr_size_char(_tmp820,1)))),((_tmp822->f4=(void*)((_tmp81E=
-_region_malloc(r,sizeof(*_tmp81E)),((_tmp81E[0]=((_tmp81F.tag=0,((_tmp81F.f1=Cyc_set_nochecks,
-_tmp81F)))),_tmp81E)))),((_tmp822->f5=((_tmp81D="Disable bounds/null checks",
-_tag_dynforward(_tmp81D,sizeof(char),_get_zero_arr_size_char(_tmp81D,27)))),
-_tmp822)))))))))))),((_tmp79E[41]=((_tmp828=_region_malloc(r,sizeof(*_tmp828)),((
-_tmp828->f1=((_tmp827="--lineno",_tag_dynforward(_tmp827,sizeof(char),
-_get_zero_arr_size_char(_tmp827,9)))),((_tmp828->f2=0,((_tmp828->f3=((_tmp826="",
-_tag_dynforward(_tmp826,sizeof(char),_get_zero_arr_size_char(_tmp826,1)))),((
-_tmp828->f4=(void*)((_tmp824=_region_malloc(r,sizeof(*_tmp824)),((_tmp824[0]=((
-_tmp825.tag=0,((_tmp825.f1=Cyc_set_lineno,_tmp825)))),_tmp824)))),((_tmp828->f5=((
-_tmp823="Generate line numbers for debugging",_tag_dynforward(_tmp823,sizeof(
-char),_get_zero_arr_size_char(_tmp823,36)))),_tmp828)))))))))))),((_tmp79E[40]=((
-_tmp82E=_region_malloc(r,sizeof(*_tmp82E)),((_tmp82E->f1=((_tmp82D="-save-c",
-_tag_dynforward(_tmp82D,sizeof(char),_get_zero_arr_size_char(_tmp82D,8)))),((
-_tmp82E->f2=0,((_tmp82E->f3=((_tmp82C="",_tag_dynforward(_tmp82C,sizeof(char),
-_get_zero_arr_size_char(_tmp82C,1)))),((_tmp82E->f4=(void*)((_tmp82A=
-_region_malloc(r,sizeof(*_tmp82A)),((_tmp82A[0]=((_tmp82B.tag=3,((_tmp82B.f1=&
-Cyc_save_c_r,_tmp82B)))),_tmp82A)))),((_tmp82E->f5=((_tmp829="Don't delete temporary C files",
-_tag_dynforward(_tmp829,sizeof(char),_get_zero_arr_size_char(_tmp829,31)))),
-_tmp82E)))))))))))),((_tmp79E[39]=((_tmp834=_region_malloc(r,sizeof(*_tmp834)),((
-_tmp834->f1=((_tmp833="-save-temps",_tag_dynforward(_tmp833,sizeof(char),
-_get_zero_arr_size_char(_tmp833,12)))),((_tmp834->f2=0,((_tmp834->f3=((_tmp832="",
-_tag_dynforward(_tmp832,sizeof(char),_get_zero_arr_size_char(_tmp832,1)))),((
-_tmp834->f4=(void*)((_tmp830=_region_malloc(r,sizeof(*_tmp830)),((_tmp830[0]=((
-_tmp831.tag=0,((_tmp831.f1=Cyc_set_save_temps,_tmp831)))),_tmp830)))),((_tmp834->f5=((
-_tmp82F="Don't delete temporary files",_tag_dynforward(_tmp82F,sizeof(char),
-_get_zero_arr_size_char(_tmp82F,29)))),_tmp834)))))))))))),((_tmp79E[38]=((
-_tmp83A=_region_malloc(r,sizeof(*_tmp83A)),((_tmp83A->f1=((_tmp839="-c-comp",
-_tag_dynforward(_tmp839,sizeof(char),_get_zero_arr_size_char(_tmp839,8)))),((
-_tmp83A->f2=0,((_tmp83A->f3=((_tmp838=" <compiler>",_tag_dynforward(_tmp838,
-sizeof(char),_get_zero_arr_size_char(_tmp838,12)))),((_tmp83A->f4=(void*)((
-_tmp836=_region_malloc(r,sizeof(*_tmp836)),((_tmp836[0]=((_tmp837.tag=5,((
-_tmp837.f1=Cyc_set_c_compiler,_tmp837)))),_tmp836)))),((_tmp83A->f5=((_tmp835="Produce C output for the given compiler",
-_tag_dynforward(_tmp835,sizeof(char),_get_zero_arr_size_char(_tmp835,40)))),
-_tmp83A)))))))))))),((_tmp79E[37]=((_tmp840=_region_malloc(r,sizeof(*_tmp840)),((
-_tmp840->f1=((_tmp83F="-un-gcc",_tag_dynforward(_tmp83F,sizeof(char),
-_get_zero_arr_size_char(_tmp83F,8)))),((_tmp840->f2=0,((_tmp840->f3=((_tmp83E="",
-_tag_dynforward(_tmp83E,sizeof(char),_get_zero_arr_size_char(_tmp83E,1)))),((
-_tmp840->f4=(void*)((_tmp83C=_region_malloc(r,sizeof(*_tmp83C)),((_tmp83C[0]=((
-_tmp83D.tag=0,((_tmp83D.f1=Cyc_set_tovc,_tmp83D)))),_tmp83C)))),((_tmp840->f5=((
-_tmp83B="Avoid gcc extensions in C output",_tag_dynforward(_tmp83B,sizeof(char),
-_get_zero_arr_size_char(_tmp83B,33)))),_tmp840)))))))))))),((_tmp79E[36]=((
-_tmp846=_region_malloc(r,sizeof(*_tmp846)),((_tmp846->f1=((_tmp845="-elim-statement-expressions",
-_tag_dynforward(_tmp845,sizeof(char),_get_zero_arr_size_char(_tmp845,28)))),((
-_tmp846->f2=0,((_tmp846->f3=((_tmp844="",_tag_dynforward(_tmp844,sizeof(char),
-_get_zero_arr_size_char(_tmp844,1)))),((_tmp846->f4=(void*)((_tmp842=
-_region_malloc(r,sizeof(*_tmp842)),((_tmp842[0]=((_tmp843.tag=3,((_tmp843.f1=&
-Cyc_elim_se_r,_tmp843)))),_tmp842)))),((_tmp846->f5=((_tmp841="Avoid statement expressions in C output (implies --inline-checks)",
-_tag_dynforward(_tmp841,sizeof(char),_get_zero_arr_size_char(_tmp841,66)))),
-_tmp846)))))))))))),((_tmp79E[35]=((_tmp84C=_region_malloc(r,sizeof(*_tmp84C)),((
-_tmp84C->f1=((_tmp84B="-up",_tag_dynforward(_tmp84B,sizeof(char),
-_get_zero_arr_size_char(_tmp84B,4)))),((_tmp84C->f2=0,((_tmp84C->f3=((_tmp84A="",
-_tag_dynforward(_tmp84A,sizeof(char),_get_zero_arr_size_char(_tmp84A,1)))),((
-_tmp84C->f4=(void*)((_tmp848=_region_malloc(r,sizeof(*_tmp848)),((_tmp848[0]=((
-_tmp849.tag=4,((_tmp849.f1=& Cyc_pp_r,_tmp849)))),_tmp848)))),((_tmp84C->f5=((
-_tmp847="Ugly print",_tag_dynforward(_tmp847,sizeof(char),
-_get_zero_arr_size_char(_tmp847,11)))),_tmp84C)))))))))))),((_tmp79E[34]=((
-_tmp852=_region_malloc(r,sizeof(*_tmp852)),((_tmp852->f1=((_tmp851="-pp",
-_tag_dynforward(_tmp851,sizeof(char),_get_zero_arr_size_char(_tmp851,4)))),((
-_tmp852->f2=0,((_tmp852->f3=((_tmp850="",_tag_dynforward(_tmp850,sizeof(char),
-_get_zero_arr_size_char(_tmp850,1)))),((_tmp852->f4=(void*)((_tmp84E=
-_region_malloc(r,sizeof(*_tmp84E)),((_tmp84E[0]=((_tmp84F.tag=3,((_tmp84F.f1=&
-Cyc_pp_r,_tmp84F)))),_tmp84E)))),((_tmp852->f5=((_tmp84D="Pretty print",
-_tag_dynforward(_tmp84D,sizeof(char),_get_zero_arr_size_char(_tmp84D,13)))),
-_tmp852)))))))))))),((_tmp79E[33]=((_tmp858=_region_malloc(r,sizeof(*_tmp858)),((
-_tmp858->f1=((_tmp857="-ic",_tag_dynforward(_tmp857,sizeof(char),
-_get_zero_arr_size_char(_tmp857,4)))),((_tmp858->f2=0,((_tmp858->f3=((_tmp856="",
-_tag_dynforward(_tmp856,sizeof(char),_get_zero_arr_size_char(_tmp856,1)))),((
-_tmp858->f4=(void*)((_tmp854=_region_malloc(r,sizeof(*_tmp854)),((_tmp854[0]=((
-_tmp855.tag=3,((_tmp855.f1=& Cyc_ic_r,_tmp855)))),_tmp854)))),((_tmp858->f5=((
-_tmp853="Activate the link-checker",_tag_dynforward(_tmp853,sizeof(char),
-_get_zero_arr_size_char(_tmp853,26)))),_tmp858)))))))))))),((_tmp79E[32]=((
-_tmp85E=_region_malloc(r,sizeof(*_tmp85E)),((_tmp85E->f1=((_tmp85D="-stopafter-toc",
-_tag_dynforward(_tmp85D,sizeof(char),_get_zero_arr_size_char(_tmp85D,15)))),((
-_tmp85E->f2=0,((_tmp85E->f3=((_tmp85C="",_tag_dynforward(_tmp85C,sizeof(char),
-_get_zero_arr_size_char(_tmp85C,1)))),((_tmp85E->f4=(void*)((_tmp85A=
-_region_malloc(r,sizeof(*_tmp85A)),((_tmp85A[0]=((_tmp85B.tag=3,((_tmp85B.f1=&
-Cyc_toc_r,_tmp85B)))),_tmp85A)))),((_tmp85E->f5=((_tmp859="Stop after translation to C",
-_tag_dynforward(_tmp859,sizeof(char),_get_zero_arr_size_char(_tmp859,28)))),
-_tmp85E)))))))))))),((_tmp79E[31]=((_tmp864=_region_malloc(r,sizeof(*_tmp864)),((
-_tmp864->f1=((_tmp863="-stopafter-cf",_tag_dynforward(_tmp863,sizeof(char),
-_get_zero_arr_size_char(_tmp863,14)))),((_tmp864->f2=0,((_tmp864->f3=((_tmp862="",
-_tag_dynforward(_tmp862,sizeof(char),_get_zero_arr_size_char(_tmp862,1)))),((
-_tmp864->f4=(void*)((_tmp860=_region_malloc(r,sizeof(*_tmp860)),((_tmp860[0]=((
-_tmp861.tag=3,((_tmp861.f1=& Cyc_cf_r,_tmp861)))),_tmp860)))),((_tmp864->f5=((
-_tmp85F="Stop after control-flow checking",_tag_dynforward(_tmp85F,sizeof(char),
-_get_zero_arr_size_char(_tmp85F,33)))),_tmp864)))))))))))),((_tmp79E[30]=((
-_tmp86A=_region_malloc(r,sizeof(*_tmp86A)),((_tmp86A->f1=((_tmp869="-noprint",
-_tag_dynforward(_tmp869,sizeof(char),_get_zero_arr_size_char(_tmp869,9)))),((
-_tmp86A->f2=0,((_tmp86A->f3=((_tmp868="",_tag_dynforward(_tmp868,sizeof(char),
-_get_zero_arr_size_char(_tmp868,1)))),((_tmp86A->f4=(void*)((_tmp866=
-_region_malloc(r,sizeof(*_tmp866)),((_tmp866[0]=((_tmp867.tag=3,((_tmp867.f1=&
-Cyc_noprint_r,_tmp867)))),_tmp866)))),((_tmp86A->f5=((_tmp865="Do not print output (when stopping early)",
-_tag_dynforward(_tmp865,sizeof(char),_get_zero_arr_size_char(_tmp865,42)))),
-_tmp86A)))))))))))),((_tmp79E[29]=((_tmp870=_region_malloc(r,sizeof(*_tmp870)),((
-_tmp870->f1=((_tmp86F="-stopafter-tc",_tag_dynforward(_tmp86F,sizeof(char),
-_get_zero_arr_size_char(_tmp86F,14)))),((_tmp870->f2=0,((_tmp870->f3=((_tmp86E="",
-_tag_dynforward(_tmp86E,sizeof(char),_get_zero_arr_size_char(_tmp86E,1)))),((
-_tmp870->f4=(void*)((_tmp86C=_region_malloc(r,sizeof(*_tmp86C)),((_tmp86C[0]=((
-_tmp86D.tag=3,((_tmp86D.f1=& Cyc_tc_r,_tmp86D)))),_tmp86C)))),((_tmp870->f5=((
-_tmp86B="Stop after type checking",_tag_dynforward(_tmp86B,sizeof(char),
-_get_zero_arr_size_char(_tmp86B,25)))),_tmp870)))))))))))),((_tmp79E[28]=((
-_tmp876=_region_malloc(r,sizeof(*_tmp876)),((_tmp876->f1=((_tmp875="-stopafter-parse",
-_tag_dynforward(_tmp875,sizeof(char),_get_zero_arr_size_char(_tmp875,17)))),((
-_tmp876->f2=0,((_tmp876->f3=((_tmp874="",_tag_dynforward(_tmp874,sizeof(char),
-_get_zero_arr_size_char(_tmp874,1)))),((_tmp876->f4=(void*)((_tmp872=
-_region_malloc(r,sizeof(*_tmp872)),((_tmp872[0]=((_tmp873.tag=3,((_tmp873.f1=&
-Cyc_parseonly_r,_tmp873)))),_tmp872)))),((_tmp876->f5=((_tmp871="Stop after parsing",
-_tag_dynforward(_tmp871,sizeof(char),_get_zero_arr_size_char(_tmp871,19)))),
-_tmp876)))))))))))),((_tmp79E[27]=((_tmp87C=_region_malloc(r,sizeof(*_tmp87C)),((
-_tmp87C->f1=((_tmp87B="-E",_tag_dynforward(_tmp87B,sizeof(char),
-_get_zero_arr_size_char(_tmp87B,3)))),((_tmp87C->f2=0,((_tmp87C->f3=((_tmp87A="",
-_tag_dynforward(_tmp87A,sizeof(char),_get_zero_arr_size_char(_tmp87A,1)))),((
-_tmp87C->f4=(void*)((_tmp878=_region_malloc(r,sizeof(*_tmp878)),((_tmp878[0]=((
-_tmp879.tag=3,((_tmp879.f1=& Cyc_stop_after_cpp_r,_tmp879)))),_tmp878)))),((
-_tmp87C->f5=((_tmp877="Stop after preprocessing",_tag_dynforward(_tmp877,sizeof(
-char),_get_zero_arr_size_char(_tmp877,25)))),_tmp87C)))))))))))),((_tmp79E[26]=((
-_tmp882=_region_malloc(r,sizeof(*_tmp882)),((_tmp882->f1=((_tmp881="-Wall",
-_tag_dynforward(_tmp881,sizeof(char),_get_zero_arr_size_char(_tmp881,6)))),((
-_tmp882->f2=0,((_tmp882->f3=((_tmp880="",_tag_dynforward(_tmp880,sizeof(char),
-_get_zero_arr_size_char(_tmp880,1)))),((_tmp882->f4=(void*)((_tmp87E=
-_region_malloc(r,sizeof(*_tmp87E)),((_tmp87E[0]=((_tmp87F.tag=0,((_tmp87F.f1=Cyc_set_all_warnings,
-_tmp87F)))),_tmp87E)))),((_tmp882->f5=((_tmp87D="Turn on all warnings",
-_tag_dynforward(_tmp87D,sizeof(char),_get_zero_arr_size_char(_tmp87D,21)))),
-_tmp882)))))))))))),((_tmp79E[25]=((_tmp888=_region_malloc(r,sizeof(*_tmp888)),((
-_tmp888->f1=((_tmp887="-b",_tag_dynforward(_tmp887,sizeof(char),
-_get_zero_arr_size_char(_tmp887,3)))),((_tmp888->f2=0,((_tmp888->f3=((_tmp886="<arch>",
-_tag_dynforward(_tmp886,sizeof(char),_get_zero_arr_size_char(_tmp886,7)))),((
-_tmp888->f4=(void*)((_tmp884=_region_malloc(r,sizeof(*_tmp884)),((_tmp884[0]=((
-_tmp885.tag=5,((_tmp885.f1=Cyc_set_target_arch,_tmp885)))),_tmp884)))),((_tmp888->f5=((
-_tmp883="Set target architecture; implies -stopafter-toc",_tag_dynforward(
-_tmp883,sizeof(char),_get_zero_arr_size_char(_tmp883,48)))),_tmp888)))))))))))),((
-_tmp79E[24]=((_tmp88E=_region_malloc(r,sizeof(*_tmp88E)),((_tmp88E->f1=((_tmp88D="-MT",
-_tag_dynforward(_tmp88D,sizeof(char),_get_zero_arr_size_char(_tmp88D,4)))),((
-_tmp88E->f2=0,((_tmp88E->f3=((_tmp88C=" <target>",_tag_dynforward(_tmp88C,
-sizeof(char),_get_zero_arr_size_char(_tmp88C,10)))),((_tmp88E->f4=(void*)((
-_tmp88A=_region_malloc(r,sizeof(*_tmp88A)),((_tmp88A[0]=((_tmp88B.tag=5,((
-_tmp88B.f1=Cyc_set_dependencies_target,_tmp88B)))),_tmp88A)))),((_tmp88E->f5=((
-_tmp889="Give target for dependencies",_tag_dynforward(_tmp889,sizeof(char),
-_get_zero_arr_size_char(_tmp889,29)))),_tmp88E)))))))))))),((_tmp79E[23]=((
-_tmp894=_region_malloc(r,sizeof(*_tmp894)),((_tmp894->f1=((_tmp893="-MG",
-_tag_dynforward(_tmp893,sizeof(char),_get_zero_arr_size_char(_tmp893,4)))),((
-_tmp894->f2=0,((_tmp894->f3=((_tmp892="",_tag_dynforward(_tmp892,sizeof(char),
-_get_zero_arr_size_char(_tmp892,1)))),((_tmp894->f4=(void*)((_tmp890=
-_region_malloc(r,sizeof(*_tmp890)),((_tmp890[0]=((_tmp891.tag=1,((_tmp891.f1=Cyc_add_cpparg,
-_tmp891)))),_tmp890)))),((_tmp894->f5=((_tmp88F="When producing dependencies assume that missing files are generated",
-_tag_dynforward(_tmp88F,sizeof(char),_get_zero_arr_size_char(_tmp88F,68)))),
-_tmp894)))))))))))),((_tmp79E[22]=((_tmp89A=_region_malloc(r,sizeof(*_tmp89A)),((
-_tmp89A->f1=((_tmp899="-M",_tag_dynforward(_tmp899,sizeof(char),
-_get_zero_arr_size_char(_tmp899,3)))),((_tmp89A->f2=0,((_tmp89A->f3=((_tmp898="",
-_tag_dynforward(_tmp898,sizeof(char),_get_zero_arr_size_char(_tmp898,1)))),((
-_tmp89A->f4=(void*)((_tmp896=_region_malloc(r,sizeof(*_tmp896)),((_tmp896[0]=((
-_tmp897.tag=0,((_tmp897.f1=Cyc_set_produce_dependencies,_tmp897)))),_tmp896)))),((
-_tmp89A->f5=((_tmp895="Produce dependencies",_tag_dynforward(_tmp895,sizeof(char),
-_get_zero_arr_size_char(_tmp895,21)))),_tmp89A)))))))))))),((_tmp79E[21]=((
-_tmp8A0=_region_malloc(r,sizeof(*_tmp8A0)),((_tmp8A0->f1=((_tmp89F="-S",
-_tag_dynforward(_tmp89F,sizeof(char),_get_zero_arr_size_char(_tmp89F,3)))),((
-_tmp8A0->f2=0,((_tmp8A0->f3=((_tmp89E="",_tag_dynforward(_tmp89E,sizeof(char),
-_get_zero_arr_size_char(_tmp89E,1)))),((_tmp8A0->f4=(void*)((_tmp89C=
-_region_malloc(r,sizeof(*_tmp89C)),((_tmp89C[0]=((_tmp89D.tag=0,((_tmp89D.f1=Cyc_set_stop_after_asmfile,
-_tmp89D)))),_tmp89C)))),((_tmp8A0->f5=((_tmp89B="Stop after producing assembly code",
-_tag_dynforward(_tmp89B,sizeof(char),_get_zero_arr_size_char(_tmp89B,35)))),
-_tmp8A0)))))))))))),((_tmp79E[20]=((_tmp8A6=_region_malloc(r,sizeof(*_tmp8A6)),((
-_tmp8A6->f1=((_tmp8A5="-pa",_tag_dynforward(_tmp8A5,sizeof(char),
-_get_zero_arr_size_char(_tmp8A5,4)))),((_tmp8A6->f2=0,((_tmp8A6->f3=((_tmp8A4="",
-_tag_dynforward(_tmp8A4,sizeof(char),_get_zero_arr_size_char(_tmp8A4,1)))),((
-_tmp8A6->f4=(void*)((_tmp8A2=_region_malloc(r,sizeof(*_tmp8A2)),((_tmp8A2[0]=((
-_tmp8A3.tag=0,((_tmp8A3.f1=Cyc_set_pa,_tmp8A3)))),_tmp8A2)))),((_tmp8A6->f5=((
-_tmp8A1="Compile for profiling with aprof",_tag_dynforward(_tmp8A1,sizeof(char),
-_get_zero_arr_size_char(_tmp8A1,33)))),_tmp8A6)))))))))))),((_tmp79E[19]=((
-_tmp8AC=_region_malloc(r,sizeof(*_tmp8AC)),((_tmp8AC->f1=((_tmp8AB="-pg",
-_tag_dynforward(_tmp8AB,sizeof(char),_get_zero_arr_size_char(_tmp8AB,4)))),((
-_tmp8AC->f2=0,((_tmp8AC->f3=((_tmp8AA="",_tag_dynforward(_tmp8AA,sizeof(char),
-_get_zero_arr_size_char(_tmp8AA,1)))),((_tmp8AC->f4=(void*)((_tmp8A8=
-_region_malloc(r,sizeof(*_tmp8A8)),((_tmp8A8[0]=((_tmp8A9.tag=0,((_tmp8A9.f1=Cyc_set_pg,
-_tmp8A9)))),_tmp8A8)))),((_tmp8AC->f5=((_tmp8A7="Compile for profiling with gprof",
-_tag_dynforward(_tmp8A7,sizeof(char),_get_zero_arr_size_char(_tmp8A7,33)))),
-_tmp8AC)))))))))))),((_tmp79E[18]=((_tmp8B2=_region_malloc(r,sizeof(*_tmp8B2)),((
-_tmp8B2->f1=((_tmp8B1="-p",_tag_dynforward(_tmp8B1,sizeof(char),
-_get_zero_arr_size_char(_tmp8B1,3)))),((_tmp8B2->f2=0,((_tmp8B2->f3=((_tmp8B0="",
-_tag_dynforward(_tmp8B0,sizeof(char),_get_zero_arr_size_char(_tmp8B0,1)))),((
-_tmp8B2->f4=(void*)((_tmp8AE=_region_malloc(r,sizeof(*_tmp8AE)),((_tmp8AE[0]=((
-_tmp8AF.tag=1,((_tmp8AF.f1=Cyc_add_ccarg,_tmp8AF)))),_tmp8AE)))),((_tmp8B2->f5=((
-_tmp8AD="Compile for profiling with prof",_tag_dynforward(_tmp8AD,sizeof(char),
-_get_zero_arr_size_char(_tmp8AD,32)))),_tmp8B2)))))))))))),((_tmp79E[17]=((
-_tmp8B8=_region_malloc(r,sizeof(*_tmp8B8)),((_tmp8B8->f1=((_tmp8B7="-g",
-_tag_dynforward(_tmp8B7,sizeof(char),_get_zero_arr_size_char(_tmp8B7,3)))),((
-_tmp8B8->f2=0,((_tmp8B8->f3=((_tmp8B6="",_tag_dynforward(_tmp8B6,sizeof(char),
-_get_zero_arr_size_char(_tmp8B6,1)))),((_tmp8B8->f4=(void*)((_tmp8B4=
-_region_malloc(r,sizeof(*_tmp8B4)),((_tmp8B4[0]=((_tmp8B5.tag=1,((_tmp8B5.f1=Cyc_add_ccarg,
-_tmp8B5)))),_tmp8B4)))),((_tmp8B8->f5=((_tmp8B3="Compile for debugging",
-_tag_dynforward(_tmp8B3,sizeof(char),_get_zero_arr_size_char(_tmp8B3,22)))),
-_tmp8B8)))))))))))),((_tmp79E[16]=((_tmp8BE=_region_malloc(r,sizeof(*_tmp8BE)),((
-_tmp8BE->f1=((_tmp8BD="-fomit-frame-pointer",_tag_dynforward(_tmp8BD,sizeof(char),
-_get_zero_arr_size_char(_tmp8BD,21)))),((_tmp8BE->f2=0,((_tmp8BE->f3=((_tmp8BC="",
-_tag_dynforward(_tmp8BC,sizeof(char),_get_zero_arr_size_char(_tmp8BC,1)))),((
-_tmp8BE->f4=(void*)((_tmp8BA=_region_malloc(r,sizeof(*_tmp8BA)),((_tmp8BA[0]=((
-_tmp8BB.tag=1,((_tmp8BB.f1=Cyc_add_ccarg,_tmp8BB)))),_tmp8BA)))),((_tmp8BE->f5=((
-_tmp8B9="Omit frame pointer",_tag_dynforward(_tmp8B9,sizeof(char),
-_get_zero_arr_size_char(_tmp8B9,19)))),_tmp8BE)))))))))))),((_tmp79E[15]=((
-_tmp8C4=_region_malloc(r,sizeof(*_tmp8C4)),((_tmp8C4->f1=((_tmp8C3="-O3",
-_tag_dynforward(_tmp8C3,sizeof(char),_get_zero_arr_size_char(_tmp8C3,4)))),((
-_tmp8C4->f2=0,((_tmp8C4->f3=((_tmp8C2="",_tag_dynforward(_tmp8C2,sizeof(char),
-_get_zero_arr_size_char(_tmp8C2,1)))),((_tmp8C4->f4=(void*)((_tmp8C0=
-_region_malloc(r,sizeof(*_tmp8C0)),((_tmp8C0[0]=((_tmp8C1.tag=1,((_tmp8C1.f1=Cyc_add_ccarg,
-_tmp8C1)))),_tmp8C0)))),((_tmp8C4->f5=((_tmp8BF="Even more optimization",
-_tag_dynforward(_tmp8BF,sizeof(char),_get_zero_arr_size_char(_tmp8BF,23)))),
-_tmp8C4)))))))))))),((_tmp79E[14]=((_tmp8CA=_region_malloc(r,sizeof(*_tmp8CA)),((
-_tmp8CA->f1=((_tmp8C9="-O2",_tag_dynforward(_tmp8C9,sizeof(char),
-_get_zero_arr_size_char(_tmp8C9,4)))),((_tmp8CA->f2=0,((_tmp8CA->f3=((_tmp8C8="",
-_tag_dynforward(_tmp8C8,sizeof(char),_get_zero_arr_size_char(_tmp8C8,1)))),((
-_tmp8CA->f4=(void*)((_tmp8C6=_region_malloc(r,sizeof(*_tmp8C6)),((_tmp8C6[0]=((
-_tmp8C7.tag=1,((_tmp8C7.f1=Cyc_add_ccarg,_tmp8C7)))),_tmp8C6)))),((_tmp8CA->f5=((
-_tmp8C5="A higher level of optimization",_tag_dynforward(_tmp8C5,sizeof(char),
-_get_zero_arr_size_char(_tmp8C5,31)))),_tmp8CA)))))))))))),((_tmp79E[13]=((
-_tmp8D0=_region_malloc(r,sizeof(*_tmp8D0)),((_tmp8D0->f1=((_tmp8CF="-O",
-_tag_dynforward(_tmp8CF,sizeof(char),_get_zero_arr_size_char(_tmp8CF,3)))),((
-_tmp8D0->f2=0,((_tmp8D0->f3=((_tmp8CE="",_tag_dynforward(_tmp8CE,sizeof(char),
-_get_zero_arr_size_char(_tmp8CE,1)))),((_tmp8D0->f4=(void*)((_tmp8CC=
-_region_malloc(r,sizeof(*_tmp8CC)),((_tmp8CC[0]=((_tmp8CD.tag=1,((_tmp8CD.f1=Cyc_add_ccarg,
-_tmp8CD)))),_tmp8CC)))),((_tmp8D0->f5=((_tmp8CB="Optimize",_tag_dynforward(
-_tmp8CB,sizeof(char),_get_zero_arr_size_char(_tmp8CB,9)))),_tmp8D0)))))))))))),((
-_tmp79E[12]=((_tmp8D6=_region_malloc(r,sizeof(*_tmp8D6)),((_tmp8D6->f1=((_tmp8D5="-O0",
-_tag_dynforward(_tmp8D5,sizeof(char),_get_zero_arr_size_char(_tmp8D5,4)))),((
-_tmp8D6->f2=0,((_tmp8D6->f3=((_tmp8D4="",_tag_dynforward(_tmp8D4,sizeof(char),
-_get_zero_arr_size_char(_tmp8D4,1)))),((_tmp8D6->f4=(void*)((_tmp8D2=
-_region_malloc(r,sizeof(*_tmp8D2)),((_tmp8D2[0]=((_tmp8D3.tag=1,((_tmp8D3.f1=Cyc_add_ccarg,
-_tmp8D3)))),_tmp8D2)))),((_tmp8D6->f5=((_tmp8D1="Don't optimize",_tag_dynforward(
-_tmp8D1,sizeof(char),_get_zero_arr_size_char(_tmp8D1,15)))),_tmp8D6)))))))))))),((
-_tmp79E[11]=((_tmp8DC=_region_malloc(r,sizeof(*_tmp8DC)),((_tmp8DC->f1=((_tmp8DB="-s",
-_tag_dynforward(_tmp8DB,sizeof(char),_get_zero_arr_size_char(_tmp8DB,3)))),((
-_tmp8DC->f2=0,((_tmp8DC->f3=((_tmp8DA="",_tag_dynforward(_tmp8DA,sizeof(char),
-_get_zero_arr_size_char(_tmp8DA,1)))),((_tmp8DC->f4=(void*)((_tmp8D8=
-_region_malloc(r,sizeof(*_tmp8D8)),((_tmp8D8[0]=((_tmp8D9.tag=1,((_tmp8D9.f1=Cyc_add_ccarg,
-_tmp8D9)))),_tmp8D8)))),((_tmp8DC->f5=((_tmp8D7="Remove all symbol table and relocation info from executable",
-_tag_dynforward(_tmp8D7,sizeof(char),_get_zero_arr_size_char(_tmp8D7,60)))),
-_tmp8DC)))))))))))),((_tmp79E[10]=((_tmp8E2=_region_malloc(r,sizeof(*_tmp8E2)),((
-_tmp8E2->f1=((_tmp8E1="-x",_tag_dynforward(_tmp8E1,sizeof(char),
-_get_zero_arr_size_char(_tmp8E1,3)))),((_tmp8E2->f2=0,((_tmp8E2->f3=((_tmp8E0=" <language>",
-_tag_dynforward(_tmp8E0,sizeof(char),_get_zero_arr_size_char(_tmp8E0,12)))),((
-_tmp8E2->f4=(void*)((_tmp8DE=_region_malloc(r,sizeof(*_tmp8DE)),((_tmp8DE[0]=((
-_tmp8DF.tag=5,((_tmp8DF.f1=Cyc_set_inputtype,_tmp8DF)))),_tmp8DE)))),((_tmp8E2->f5=((
-_tmp8DD="Specify <language> for the following input files",_tag_dynforward(
-_tmp8DD,sizeof(char),_get_zero_arr_size_char(_tmp8DD,49)))),_tmp8E2)))))))))))),((
-_tmp79E[9]=((_tmp8E8=_region_malloc(r,sizeof(*_tmp8E8)),((_tmp8E8->f1=((_tmp8E7="-c",
-_tag_dynforward(_tmp8E7,sizeof(char),_get_zero_arr_size_char(_tmp8E7,3)))),((
-_tmp8E8->f2=0,((_tmp8E8->f3=((_tmp8E6="",_tag_dynforward(_tmp8E6,sizeof(char),
-_get_zero_arr_size_char(_tmp8E6,1)))),((_tmp8E8->f4=(void*)((_tmp8E4=
-_region_malloc(r,sizeof(*_tmp8E4)),((_tmp8E4[0]=((_tmp8E5.tag=0,((_tmp8E5.f1=Cyc_set_stop_after_objectfile,
-_tmp8E5)))),_tmp8E4)))),((_tmp8E8->f5=((_tmp8E3="Produce an object file instead of an executable; do not link",
-_tag_dynforward(_tmp8E3,sizeof(char),_get_zero_arr_size_char(_tmp8E3,61)))),
-_tmp8E8)))))))))))),((_tmp79E[8]=((_tmp8EE=_region_malloc(r,sizeof(*_tmp8EE)),((
-_tmp8EE->f1=((_tmp8ED="-m",_tag_dynforward(_tmp8ED,sizeof(char),
-_get_zero_arr_size_char(_tmp8ED,3)))),((_tmp8EE->f2=1,((_tmp8EE->f3=((_tmp8EC="<option>",
-_tag_dynforward(_tmp8EC,sizeof(char),_get_zero_arr_size_char(_tmp8EC,9)))),((
-_tmp8EE->f4=(void*)((_tmp8EA=_region_malloc(r,sizeof(*_tmp8EA)),((_tmp8EA[0]=((
-_tmp8EB.tag=1,((_tmp8EB.f1=Cyc_add_marg,_tmp8EB)))),_tmp8EA)))),((_tmp8EE->f5=((
-_tmp8E9="GCC specific: pass machine-dependent flag on to gcc",_tag_dynforward(
-_tmp8E9,sizeof(char),_get_zero_arr_size_char(_tmp8E9,52)))),_tmp8EE)))))))))))),((
-_tmp79E[7]=((_tmp8F4=_region_malloc(r,sizeof(*_tmp8F4)),((_tmp8F4->f1=((_tmp8F3="-l",
-_tag_dynforward(_tmp8F3,sizeof(char),_get_zero_arr_size_char(_tmp8F3,3)))),((
-_tmp8F4->f2=1,((_tmp8F4->f3=((_tmp8F2="<libname>",_tag_dynforward(_tmp8F2,
-sizeof(char),_get_zero_arr_size_char(_tmp8F2,10)))),((_tmp8F4->f4=(void*)((
-_tmp8F0=_region_malloc(r,sizeof(*_tmp8F0)),((_tmp8F0[0]=((_tmp8F1.tag=1,((
-_tmp8F1.f1=Cyc_add_libarg,_tmp8F1)))),_tmp8F0)))),((_tmp8F4->f5=((_tmp8EF="Library file",
-_tag_dynforward(_tmp8EF,sizeof(char),_get_zero_arr_size_char(_tmp8EF,13)))),
-_tmp8F4)))))))))))),((_tmp79E[6]=((_tmp8FA=_region_malloc(r,sizeof(*_tmp8FA)),((
-_tmp8FA->f1=((_tmp8F9="-L",_tag_dynforward(_tmp8F9,sizeof(char),
-_get_zero_arr_size_char(_tmp8F9,3)))),((_tmp8FA->f2=1,((_tmp8FA->f3=((_tmp8F8="<dir>",
-_tag_dynforward(_tmp8F8,sizeof(char),_get_zero_arr_size_char(_tmp8F8,6)))),((
-_tmp8FA->f4=(void*)((_tmp8F6=_region_malloc(r,sizeof(*_tmp8F6)),((_tmp8F6[0]=((
-_tmp8F7.tag=1,((_tmp8F7.f1=Cyc_add_ccarg,_tmp8F7)))),_tmp8F6)))),((_tmp8FA->f5=((
-_tmp8F5="Add to the list of directories for -l",_tag_dynforward(_tmp8F5,sizeof(
-char),_get_zero_arr_size_char(_tmp8F5,38)))),_tmp8FA)))))))))))),((_tmp79E[5]=((
-_tmp900=_region_malloc(r,sizeof(*_tmp900)),((_tmp900->f1=((_tmp8FF="-I",
-_tag_dynforward(_tmp8FF,sizeof(char),_get_zero_arr_size_char(_tmp8FF,3)))),((
-_tmp900->f2=1,((_tmp900->f3=((_tmp8FE="<dir>",_tag_dynforward(_tmp8FE,sizeof(
-char),_get_zero_arr_size_char(_tmp8FE,6)))),((_tmp900->f4=(void*)((_tmp8FC=
-_region_malloc(r,sizeof(*_tmp8FC)),((_tmp8FC[0]=((_tmp8FD.tag=1,((_tmp8FD.f1=Cyc_add_cpparg,
-_tmp8FD)))),_tmp8FC)))),((_tmp900->f5=((_tmp8FB="Add to the list of directories to search for include files",
-_tag_dynforward(_tmp8FB,sizeof(char),_get_zero_arr_size_char(_tmp8FB,59)))),
-_tmp900)))))))))))),((_tmp79E[4]=((_tmp906=_region_malloc(r,sizeof(*_tmp906)),((
-_tmp906->f1=((_tmp905="-B",_tag_dynforward(_tmp905,sizeof(char),
-_get_zero_arr_size_char(_tmp905,3)))),((_tmp906->f2=1,((_tmp906->f3=((_tmp904="<file>",
-_tag_dynforward(_tmp904,sizeof(char),_get_zero_arr_size_char(_tmp904,7)))),((
-_tmp906->f4=(void*)((_tmp902=_region_malloc(r,sizeof(*_tmp902)),((_tmp902[0]=((
-_tmp903.tag=1,((_tmp903.f1=Cyc_add_cyclone_exec_path,_tmp903)))),_tmp902)))),((
-_tmp906->f5=((_tmp901="Add to the list of directories to search for compiler files",
-_tag_dynforward(_tmp901,sizeof(char),_get_zero_arr_size_char(_tmp901,60)))),
-_tmp906)))))))))))),((_tmp79E[3]=((_tmp90C=_region_malloc(r,sizeof(*_tmp90C)),((
-_tmp90C->f1=((_tmp90B="-D",_tag_dynforward(_tmp90B,sizeof(char),
-_get_zero_arr_size_char(_tmp90B,3)))),((_tmp90C->f2=1,((_tmp90C->f3=((_tmp90A="<name>[=<value>]",
-_tag_dynforward(_tmp90A,sizeof(char),_get_zero_arr_size_char(_tmp90A,17)))),((
-_tmp90C->f4=(void*)((_tmp908=_region_malloc(r,sizeof(*_tmp908)),((_tmp908[0]=((
-_tmp909.tag=1,((_tmp909.f1=Cyc_add_cpparg,_tmp909)))),_tmp908)))),((_tmp90C->f5=((
-_tmp907="Pass definition to preprocessor",_tag_dynforward(_tmp907,sizeof(char),
-_get_zero_arr_size_char(_tmp907,32)))),_tmp90C)))))))))))),((_tmp79E[2]=((
-_tmp912=_region_malloc(r,sizeof(*_tmp912)),((_tmp912->f1=((_tmp911="-o",
-_tag_dynforward(_tmp911,sizeof(char),_get_zero_arr_size_char(_tmp911,3)))),((
-_tmp912->f2=0,((_tmp912->f3=((_tmp910=" <file>",_tag_dynforward(_tmp910,sizeof(
-char),_get_zero_arr_size_char(_tmp910,8)))),((_tmp912->f4=(void*)((_tmp90E=
-_region_malloc(r,sizeof(*_tmp90E)),((_tmp90E[0]=((_tmp90F.tag=5,((_tmp90F.f1=Cyc_set_output_file,
-_tmp90F)))),_tmp90E)))),((_tmp912->f5=((_tmp90D="Set the output file name to <file>",
-_tag_dynforward(_tmp90D,sizeof(char),_get_zero_arr_size_char(_tmp90D,35)))),
-_tmp912)))))))))))),((_tmp79E[1]=((_tmp918=_region_malloc(r,sizeof(*_tmp918)),((
-_tmp918->f1=((_tmp917="--version",_tag_dynforward(_tmp917,sizeof(char),
-_get_zero_arr_size_char(_tmp917,10)))),((_tmp918->f2=0,((_tmp918->f3=((_tmp916="",
-_tag_dynforward(_tmp916,sizeof(char),_get_zero_arr_size_char(_tmp916,1)))),((
-_tmp918->f4=(void*)((_tmp914=_region_malloc(r,sizeof(*_tmp914)),((_tmp914[0]=((
-_tmp915.tag=0,((_tmp915.f1=Cyc_print_version,_tmp915)))),_tmp914)))),((_tmp918->f5=((
-_tmp913="Print version information and exit",_tag_dynforward(_tmp913,sizeof(char),
-_get_zero_arr_size_char(_tmp913,35)))),_tmp918)))))))))))),((_tmp79E[0]=((
-_tmp91E=_region_malloc(r,sizeof(*_tmp91E)),((_tmp91E->f1=((_tmp91D="-v",
-_tag_dynforward(_tmp91D,sizeof(char),_get_zero_arr_size_char(_tmp91D,3)))),((
-_tmp91E->f2=0,((_tmp91E->f3=((_tmp91C="",_tag_dynforward(_tmp91C,sizeof(char),
-_get_zero_arr_size_char(_tmp91C,1)))),((_tmp91E->f4=(void*)((_tmp91A=
-_region_malloc(r,sizeof(*_tmp91A)),((_tmp91A[0]=((_tmp91B.tag=3,((_tmp91B.f1=&
-Cyc_v_r,_tmp91B)))),_tmp91A)))),((_tmp91E->f5=((_tmp919="Print compilation stages verbosely",
-_tag_dynforward(_tmp919,sizeof(char),_get_zero_arr_size_char(_tmp919,35)))),
-_tmp91E)))))))))))),((struct Cyc_List_List*(*)(struct _RegionHandle*,struct
+_tmp91D;struct Cyc_Arg_Set_spec_struct _tmp91C;struct Cyc_Arg_Set_spec_struct*
+_tmp91B;const char*_tmp91A;const char*_tmp919;struct _tuple15*_tmp918;const char*
+_tmp917;struct Cyc_Arg_Unit_spec_struct _tmp916;struct Cyc_Arg_Unit_spec_struct*
+_tmp915;const char*_tmp914;const char*_tmp913;struct _tuple15*_tmp912;const char*
+_tmp911;struct Cyc_Arg_Clear_spec_struct _tmp910;struct Cyc_Arg_Clear_spec_struct*
+_tmp90F;const char*_tmp90E;const char*_tmp90D;struct _tuple15*_tmp90C;const char*
+_tmp90B;struct Cyc_Arg_Set_spec_struct _tmp90A;struct Cyc_Arg_Set_spec_struct*
+_tmp909;const char*_tmp908;const char*_tmp907;struct _tuple15*_tmp906;const char*
+_tmp905;struct Cyc_Arg_Set_spec_struct _tmp904;struct Cyc_Arg_Set_spec_struct*
+_tmp903;const char*_tmp902;const char*_tmp901;struct _tuple15*_tmp900;const char*
+_tmp8FF;struct Cyc_Arg_Set_spec_struct _tmp8FE;struct Cyc_Arg_Set_spec_struct*
+_tmp8FD;const char*_tmp8FC;const char*_tmp8FB;struct _tuple15*_tmp8FA;const char*
+_tmp8F9;struct Cyc_Arg_String_spec_struct _tmp8F8;struct Cyc_Arg_String_spec_struct*
+_tmp8F7;const char*_tmp8F6;const char*_tmp8F5;struct _tuple15*_tmp8F4;const char*
+_tmp8F3;struct Cyc_Arg_Set_spec_struct _tmp8F2;struct Cyc_Arg_Set_spec_struct*
+_tmp8F1;const char*_tmp8F0;const char*_tmp8EF;struct _tuple15*_tmp8EE;const char*
+_tmp8ED;struct Cyc_Arg_Set_spec_struct _tmp8EC;struct Cyc_Arg_Set_spec_struct*
+_tmp8EB;const char*_tmp8EA;const char*_tmp8E9;struct _tuple15*_tmp8E8;const char*
+_tmp8E7;struct Cyc_Arg_Set_spec_struct _tmp8E6;struct Cyc_Arg_Set_spec_struct*
+_tmp8E5;const char*_tmp8E4;const char*_tmp8E3;struct _tuple15*_tmp8E2;const char*
+_tmp8E1;struct Cyc_Arg_Set_spec_struct _tmp8E0;struct Cyc_Arg_Set_spec_struct*
+_tmp8DF;const char*_tmp8DE;const char*_tmp8DD;struct _tuple15*_tmp8DC;const char*
+_tmp8DB;struct Cyc_Arg_Set_spec_struct _tmp8DA;struct Cyc_Arg_Set_spec_struct*
+_tmp8D9;const char*_tmp8D8;const char*_tmp8D7;struct _tuple15*_tmp8D6;const char*
+_tmp8D5;struct Cyc_Arg_Set_spec_struct _tmp8D4;struct Cyc_Arg_Set_spec_struct*
+_tmp8D3;const char*_tmp8D2;const char*_tmp8D1;struct _tuple15*_tmp8D0;const char*
+_tmp8CF;struct Cyc_Arg_Set_spec_struct _tmp8CE;struct Cyc_Arg_Set_spec_struct*
+_tmp8CD;const char*_tmp8CC;const char*_tmp8CB;struct _tuple15*_tmp8CA;const char*
+_tmp8C9;struct Cyc_Arg_Set_spec_struct _tmp8C8;struct Cyc_Arg_Set_spec_struct*
+_tmp8C7;const char*_tmp8C6;const char*_tmp8C5;struct _tuple15*_tmp8C4;const char*
+_tmp8C3;struct Cyc_Arg_Unit_spec_struct _tmp8C2;struct Cyc_Arg_Unit_spec_struct*
+_tmp8C1;const char*_tmp8C0;const char*_tmp8BF;struct _tuple15*_tmp8BE;const char*
+_tmp8BD;struct Cyc_Arg_Unit_spec_struct _tmp8BC;struct Cyc_Arg_Unit_spec_struct*
+_tmp8BB;const char*_tmp8BA;const char*_tmp8B9;struct _tuple15*_tmp8B8;const char*
+_tmp8B7;struct Cyc_Arg_String_spec_struct _tmp8B6;struct Cyc_Arg_String_spec_struct*
+_tmp8B5;const char*_tmp8B4;const char*_tmp8B3;struct _tuple15*_tmp8B2;const char*
+_tmp8B1;struct Cyc_Arg_Unit_spec_struct _tmp8B0;struct Cyc_Arg_Unit_spec_struct*
+_tmp8AF;const char*_tmp8AE;const char*_tmp8AD;struct _tuple15*_tmp8AC;const char*
+_tmp8AB;struct Cyc_Arg_Unit_spec_struct _tmp8AA;struct Cyc_Arg_Unit_spec_struct*
+_tmp8A9;const char*_tmp8A8;const char*_tmp8A7;struct _tuple15*_tmp8A6;const char*
+_tmp8A5;struct Cyc_Arg_Unit_spec_struct _tmp8A4;struct Cyc_Arg_Unit_spec_struct*
+_tmp8A3;const char*_tmp8A2;const char*_tmp8A1;struct _tuple15*_tmp8A0;const char*
+_tmp89F;struct Cyc_Arg_Unit_spec_struct _tmp89E;struct Cyc_Arg_Unit_spec_struct*
+_tmp89D;const char*_tmp89C;const char*_tmp89B;struct _tuple15*_tmp89A;const char*
+_tmp899;struct Cyc_Arg_Unit_spec_struct _tmp898;struct Cyc_Arg_Unit_spec_struct*
+_tmp897;const char*_tmp896;const char*_tmp895;struct _tuple15*_tmp894;const char*
+_tmp893;struct Cyc_Arg_Set_spec_struct _tmp892;struct Cyc_Arg_Set_spec_struct*
+_tmp891;const char*_tmp890;const char*_tmp88F;struct _tuple15*_tmp88E;const char*
+_tmp88D;struct Cyc_Arg_Unit_spec_struct _tmp88C;struct Cyc_Arg_Unit_spec_struct*
+_tmp88B;const char*_tmp88A;const char*_tmp889;struct _tuple15*_tmp888;const char*
+_tmp887;struct Cyc_Arg_String_spec_struct _tmp886;struct Cyc_Arg_String_spec_struct*
+_tmp885;const char*_tmp884;const char*_tmp883;struct _tuple15*_tmp882;const char*
+_tmp881;struct Cyc_Arg_Unit_spec_struct _tmp880;struct Cyc_Arg_Unit_spec_struct*
+_tmp87F;const char*_tmp87E;const char*_tmp87D;struct _tuple15*_tmp87C;const char*
+_tmp87B;struct Cyc_Arg_Set_spec_struct _tmp87A;struct Cyc_Arg_Set_spec_struct*
+_tmp879;const char*_tmp878;const char*_tmp877;struct _tuple15*_tmp876;const char*
+_tmp875;struct Cyc_Arg_Clear_spec_struct _tmp874;struct Cyc_Arg_Clear_spec_struct*
+_tmp873;const char*_tmp872;const char*_tmp871;struct _tuple15*_tmp870;const char*
+_tmp86F;struct Cyc_Arg_Set_spec_struct _tmp86E;struct Cyc_Arg_Set_spec_struct*
+_tmp86D;const char*_tmp86C;const char*_tmp86B;struct _tuple15*_tmp86A;const char*
+_tmp869;struct Cyc_Arg_Set_spec_struct _tmp868;struct Cyc_Arg_Set_spec_struct*
+_tmp867;const char*_tmp866;const char*_tmp865;struct _tuple15*_tmp864;const char*
+_tmp863;struct Cyc_Arg_Set_spec_struct _tmp862;struct Cyc_Arg_Set_spec_struct*
+_tmp861;const char*_tmp860;const char*_tmp85F;struct _tuple15*_tmp85E;const char*
+_tmp85D;struct Cyc_Arg_Set_spec_struct _tmp85C;struct Cyc_Arg_Set_spec_struct*
+_tmp85B;const char*_tmp85A;const char*_tmp859;struct _tuple15*_tmp858;const char*
+_tmp857;struct Cyc_Arg_Set_spec_struct _tmp856;struct Cyc_Arg_Set_spec_struct*
+_tmp855;const char*_tmp854;const char*_tmp853;struct _tuple15*_tmp852;const char*
+_tmp851;struct Cyc_Arg_Set_spec_struct _tmp850;struct Cyc_Arg_Set_spec_struct*
+_tmp84F;const char*_tmp84E;const char*_tmp84D;struct _tuple15*_tmp84C;const char*
+_tmp84B;struct Cyc_Arg_Set_spec_struct _tmp84A;struct Cyc_Arg_Set_spec_struct*
+_tmp849;const char*_tmp848;const char*_tmp847;struct _tuple15*_tmp846;const char*
+_tmp845;struct Cyc_Arg_Set_spec_struct _tmp844;struct Cyc_Arg_Set_spec_struct*
+_tmp843;const char*_tmp842;const char*_tmp841;struct _tuple15*_tmp840;const char*
+_tmp83F;struct Cyc_Arg_Unit_spec_struct _tmp83E;struct Cyc_Arg_Unit_spec_struct*
+_tmp83D;const char*_tmp83C;const char*_tmp83B;struct _tuple15*_tmp83A;const char*
+_tmp839;struct Cyc_Arg_String_spec_struct _tmp838;struct Cyc_Arg_String_spec_struct*
+_tmp837;const char*_tmp836;const char*_tmp835;struct _tuple15*_tmp834;const char*
+_tmp833;struct Cyc_Arg_String_spec_struct _tmp832;struct Cyc_Arg_String_spec_struct*
+_tmp831;const char*_tmp830;const char*_tmp82F;struct _tuple15*_tmp82E;const char*
+_tmp82D;struct Cyc_Arg_Flag_spec_struct _tmp82C;struct Cyc_Arg_Flag_spec_struct*
+_tmp82B;const char*_tmp82A;const char*_tmp829;struct _tuple15*_tmp828;const char*
+_tmp827;struct Cyc_Arg_Unit_spec_struct _tmp826;struct Cyc_Arg_Unit_spec_struct*
+_tmp825;const char*_tmp824;const char*_tmp823;struct _tuple15*_tmp822;const char*
+_tmp821;struct Cyc_Arg_Unit_spec_struct _tmp820;struct Cyc_Arg_Unit_spec_struct*
+_tmp81F;const char*_tmp81E;const char*_tmp81D;struct _tuple15*_tmp81C;const char*
+_tmp81B;struct Cyc_Arg_Unit_spec_struct _tmp81A;struct Cyc_Arg_Unit_spec_struct*
+_tmp819;const char*_tmp818;const char*_tmp817;struct _tuple15*_tmp816;const char*
+_tmp815;struct Cyc_Arg_Unit_spec_struct _tmp814;struct Cyc_Arg_Unit_spec_struct*
+_tmp813;const char*_tmp812;const char*_tmp811;struct _tuple15*_tmp810;const char*
+_tmp80F;struct Cyc_Arg_Flag_spec_struct _tmp80E;struct Cyc_Arg_Flag_spec_struct*
+_tmp80D;const char*_tmp80C;const char*_tmp80B;struct _tuple15*_tmp80A;const char*
+_tmp809;struct Cyc_Arg_Flag_spec_struct _tmp808;struct Cyc_Arg_Flag_spec_struct*
+_tmp807;const char*_tmp806;const char*_tmp805;struct _tuple15*_tmp804;const char*
+_tmp803;struct Cyc_Arg_Flag_spec_struct _tmp802;struct Cyc_Arg_Flag_spec_struct*
+_tmp801;const char*_tmp800;const char*_tmp7FF;struct _tuple15*_tmp7FE;const char*
+_tmp7FD;struct Cyc_Arg_Flag_spec_struct _tmp7FC;struct Cyc_Arg_Flag_spec_struct*
+_tmp7FB;const char*_tmp7FA;const char*_tmp7F9;struct _tuple15*_tmp7F8;const char*
+_tmp7F7;struct Cyc_Arg_Flag_spec_struct _tmp7F6;struct Cyc_Arg_Flag_spec_struct*
+_tmp7F5;const char*_tmp7F4;const char*_tmp7F3;struct _tuple15*_tmp7F2;const char*
+_tmp7F1;struct Cyc_Arg_Flag_spec_struct _tmp7F0;struct Cyc_Arg_Flag_spec_struct*
+_tmp7EF;const char*_tmp7EE;const char*_tmp7ED;struct _tuple15*_tmp7EC;const char*
+_tmp7EB;struct Cyc_Arg_Flag_spec_struct _tmp7EA;struct Cyc_Arg_Flag_spec_struct*
+_tmp7E9;const char*_tmp7E8;const char*_tmp7E7;struct _tuple15*_tmp7E6;const char*
+_tmp7E5;struct Cyc_Arg_Flag_spec_struct _tmp7E4;struct Cyc_Arg_Flag_spec_struct*
+_tmp7E3;const char*_tmp7E2;const char*_tmp7E1;struct _tuple15*_tmp7E0;const char*
+_tmp7DF;struct Cyc_Arg_String_spec_struct _tmp7DE;struct Cyc_Arg_String_spec_struct*
+_tmp7DD;const char*_tmp7DC;const char*_tmp7DB;struct _tuple15*_tmp7DA;const char*
+_tmp7D9;struct Cyc_Arg_Unit_spec_struct _tmp7D8;struct Cyc_Arg_Unit_spec_struct*
+_tmp7D7;const char*_tmp7D6;const char*_tmp7D5;struct _tuple15*_tmp7D4;const char*
+_tmp7D3;struct Cyc_Arg_Flag_spec_struct _tmp7D2;struct Cyc_Arg_Flag_spec_struct*
+_tmp7D1;const char*_tmp7D0;const char*_tmp7CF;struct _tuple15*_tmp7CE;const char*
+_tmp7CD;struct Cyc_Arg_Flag_spec_struct _tmp7CC;struct Cyc_Arg_Flag_spec_struct*
+_tmp7CB;const char*_tmp7CA;const char*_tmp7C9;struct _tuple15*_tmp7C8;const char*
+_tmp7C7;struct Cyc_Arg_Flag_spec_struct _tmp7C6;struct Cyc_Arg_Flag_spec_struct*
+_tmp7C5;const char*_tmp7C4;const char*_tmp7C3;struct _tuple15*_tmp7C2;const char*
+_tmp7C1;struct Cyc_Arg_Flag_spec_struct _tmp7C0;struct Cyc_Arg_Flag_spec_struct*
+_tmp7BF;const char*_tmp7BE;const char*_tmp7BD;struct _tuple15*_tmp7BC;const char*
+_tmp7BB;struct Cyc_Arg_Flag_spec_struct _tmp7BA;struct Cyc_Arg_Flag_spec_struct*
+_tmp7B9;const char*_tmp7B8;const char*_tmp7B7;struct _tuple15*_tmp7B6;const char*
+_tmp7B5;struct Cyc_Arg_Flag_spec_struct _tmp7B4;struct Cyc_Arg_Flag_spec_struct*
+_tmp7B3;const char*_tmp7B2;const char*_tmp7B1;struct _tuple15*_tmp7B0;const char*
+_tmp7AF;struct Cyc_Arg_String_spec_struct _tmp7AE;struct Cyc_Arg_String_spec_struct*
+_tmp7AD;const char*_tmp7AC;const char*_tmp7AB;struct _tuple15*_tmp7AA;const char*
+_tmp7A9;struct Cyc_Arg_Unit_spec_struct _tmp7A8;struct Cyc_Arg_Unit_spec_struct*
+_tmp7A7;const char*_tmp7A6;const char*_tmp7A5;struct _tuple15*_tmp7A4;const char*
+_tmp7A3;struct Cyc_Arg_Set_spec_struct _tmp7A2;struct Cyc_Arg_Set_spec_struct*
+_tmp7A1;const char*_tmp7A0;const char*_tmp79F;struct _tuple15*_tmp79E[64];struct Cyc_List_List*
+options=(_tmp79E[63]=((_tmp91E=_region_malloc(r,sizeof(*_tmp91E)),((_tmp91E->f1=((
+_tmp919="-noregions",_tag_dynforward(_tmp919,sizeof(char),
+_get_zero_arr_size_char(_tmp919,11)))),((_tmp91E->f2=0,((_tmp91E->f3=((_tmp91A="",
+_tag_dynforward(_tmp91A,sizeof(char),_get_zero_arr_size_char(_tmp91A,1)))),((
+_tmp91E->f4=(void*)((_tmp91B=_region_malloc(r,sizeof(*_tmp91B)),((_tmp91B[0]=((
+_tmp91C.tag=3,((_tmp91C.f1=& Cyc_Absyn_no_regions,_tmp91C)))),_tmp91B)))),((
+_tmp91E->f5=((_tmp91D="Generate code that doesn't use regions",_tag_dynforward(
+_tmp91D,sizeof(char),_get_zero_arr_size_char(_tmp91D,39)))),_tmp91E)))))))))))),((
+_tmp79E[62]=((_tmp918=_region_malloc(r,sizeof(*_tmp918)),((_tmp918->f1=((_tmp913="-port",
+_tag_dynforward(_tmp913,sizeof(char),_get_zero_arr_size_char(_tmp913,6)))),((
+_tmp918->f2=0,((_tmp918->f3=((_tmp914="",_tag_dynforward(_tmp914,sizeof(char),
+_get_zero_arr_size_char(_tmp914,1)))),((_tmp918->f4=(void*)((_tmp915=
+_region_malloc(r,sizeof(*_tmp915)),((_tmp915[0]=((_tmp916.tag=0,((_tmp916.f1=Cyc_set_port_c_code,
+_tmp916)))),_tmp915)))),((_tmp918->f5=((_tmp917="Suggest how to port C code to Cyclone",
+_tag_dynforward(_tmp917,sizeof(char),_get_zero_arr_size_char(_tmp917,38)))),
+_tmp918)))))))))))),((_tmp79E[61]=((_tmp912=_region_malloc(r,sizeof(*_tmp912)),((
+_tmp912->f1=((_tmp90D="-detailedlocation",_tag_dynforward(_tmp90D,sizeof(char),
+_get_zero_arr_size_char(_tmp90D,18)))),((_tmp912->f2=0,((_tmp912->f3=((_tmp90E="",
+_tag_dynforward(_tmp90E,sizeof(char),_get_zero_arr_size_char(_tmp90E,1)))),((
+_tmp912->f4=(void*)((_tmp90F=_region_malloc(r,sizeof(*_tmp90F)),((_tmp90F[0]=((
+_tmp910.tag=4,((_tmp910.f1=& Cyc_Position_use_gcc_style_location,_tmp910)))),
+_tmp90F)))),((_tmp912->f5=((_tmp911="Try to give more detailed location information for errors",
+_tag_dynforward(_tmp911,sizeof(char),_get_zero_arr_size_char(_tmp911,58)))),
+_tmp912)))))))))))),((_tmp79E[60]=((_tmp90C=_region_malloc(r,sizeof(*_tmp90C)),((
+_tmp90C->f1=((_tmp907="-noregister",_tag_dynforward(_tmp907,sizeof(char),
+_get_zero_arr_size_char(_tmp907,12)))),((_tmp90C->f2=0,((_tmp90C->f3=((_tmp908="",
+_tag_dynforward(_tmp908,sizeof(char),_get_zero_arr_size_char(_tmp908,1)))),((
+_tmp90C->f4=(void*)((_tmp909=_region_malloc(r,sizeof(*_tmp909)),((_tmp909[0]=((
+_tmp90A.tag=3,((_tmp90A.f1=& Cyc_Parse_no_register,_tmp90A)))),_tmp909)))),((
+_tmp90C->f5=((_tmp90B="Treat register storage class as public",_tag_dynforward(
+_tmp90B,sizeof(char),_get_zero_arr_size_char(_tmp90B,39)))),_tmp90C)))))))))))),((
+_tmp79E[59]=((_tmp906=_region_malloc(r,sizeof(*_tmp906)),((_tmp906->f1=((_tmp901="-warnnullchecks",
+_tag_dynforward(_tmp901,sizeof(char),_get_zero_arr_size_char(_tmp901,16)))),((
+_tmp906->f2=0,((_tmp906->f3=((_tmp902="",_tag_dynforward(_tmp902,sizeof(char),
+_get_zero_arr_size_char(_tmp902,1)))),((_tmp906->f4=(void*)((_tmp903=
+_region_malloc(r,sizeof(*_tmp903)),((_tmp903[0]=((_tmp904.tag=3,((_tmp904.f1=&
+Cyc_Toc_warn_all_null_deref,_tmp904)))),_tmp903)))),((_tmp906->f5=((_tmp905="Warn when any null check can't be eliminated",
+_tag_dynforward(_tmp905,sizeof(char),_get_zero_arr_size_char(_tmp905,45)))),
+_tmp906)))))))))))),((_tmp79E[58]=((_tmp900=_region_malloc(r,sizeof(*_tmp900)),((
+_tmp900->f1=((_tmp8FB="-warnboundschecks",_tag_dynforward(_tmp8FB,sizeof(char),
+_get_zero_arr_size_char(_tmp8FB,18)))),((_tmp900->f2=0,((_tmp900->f3=((_tmp8FC="",
+_tag_dynforward(_tmp8FC,sizeof(char),_get_zero_arr_size_char(_tmp8FC,1)))),((
+_tmp900->f4=(void*)((_tmp8FD=_region_malloc(r,sizeof(*_tmp8FD)),((_tmp8FD[0]=((
+_tmp8FE.tag=3,((_tmp8FE.f1=& Cyc_Toc_warn_bounds_checks,_tmp8FE)))),_tmp8FD)))),((
+_tmp900->f5=((_tmp8FF="Warn when bounds checks can't be eliminated",
+_tag_dynforward(_tmp8FF,sizeof(char),_get_zero_arr_size_char(_tmp8FF,44)))),
+_tmp900)))))))))))),((_tmp79E[57]=((_tmp8FA=_region_malloc(r,sizeof(*_tmp8FA)),((
+_tmp8FA->f1=((_tmp8F5="-CI",_tag_dynforward(_tmp8F5,sizeof(char),
+_get_zero_arr_size_char(_tmp8F5,4)))),((_tmp8FA->f2=0,((_tmp8FA->f3=((_tmp8F6=" <file>",
+_tag_dynforward(_tmp8F6,sizeof(char),_get_zero_arr_size_char(_tmp8F6,8)))),((
+_tmp8FA->f4=(void*)((_tmp8F7=_region_malloc(r,sizeof(*_tmp8F7)),((_tmp8F7[0]=((
+_tmp8F8.tag=5,((_tmp8F8.f1=Cyc_set_cyc_include,_tmp8F8)))),_tmp8F7)))),((_tmp8FA->f5=((
+_tmp8F9="Set cyc_include.h to be <file>",_tag_dynforward(_tmp8F9,sizeof(char),
+_get_zero_arr_size_char(_tmp8F9,31)))),_tmp8FA)))))))))))),((_tmp79E[56]=((
+_tmp8F4=_region_malloc(r,sizeof(*_tmp8F4)),((_tmp8F4->f1=((_tmp8EF="-nocyc_setjmp",
+_tag_dynforward(_tmp8EF,sizeof(char),_get_zero_arr_size_char(_tmp8EF,14)))),((
+_tmp8F4->f2=0,((_tmp8F4->f3=((_tmp8F0="",_tag_dynforward(_tmp8F0,sizeof(char),
+_get_zero_arr_size_char(_tmp8F0,1)))),((_tmp8F4->f4=(void*)((_tmp8F1=
+_region_malloc(r,sizeof(*_tmp8F1)),((_tmp8F1[0]=((_tmp8F2.tag=3,((_tmp8F2.f1=&
+Cyc_nocyc_setjmp_r,_tmp8F2)))),_tmp8F1)))),((_tmp8F4->f5=((_tmp8F3="Do not use compiler special file cyc_setjmp.h",
+_tag_dynforward(_tmp8F3,sizeof(char),_get_zero_arr_size_char(_tmp8F3,46)))),
+_tmp8F4)))))))))))),((_tmp79E[55]=((_tmp8EE=_region_malloc(r,sizeof(*_tmp8EE)),((
+_tmp8EE->f1=((_tmp8E9="-printalleffects",_tag_dynforward(_tmp8E9,sizeof(char),
+_get_zero_arr_size_char(_tmp8E9,17)))),((_tmp8EE->f2=0,((_tmp8EE->f3=((_tmp8EA="",
+_tag_dynforward(_tmp8EA,sizeof(char),_get_zero_arr_size_char(_tmp8EA,1)))),((
+_tmp8EE->f4=(void*)((_tmp8EB=_region_malloc(r,sizeof(*_tmp8EB)),((_tmp8EB[0]=((
+_tmp8EC.tag=3,((_tmp8EC.f1=& Cyc_print_all_effects_r,_tmp8EC)))),_tmp8EB)))),((
+_tmp8EE->f5=((_tmp8ED="Print effects for functions (type debugging)",
+_tag_dynforward(_tmp8ED,sizeof(char),_get_zero_arr_size_char(_tmp8ED,45)))),
+_tmp8EE)))))))))))),((_tmp79E[54]=((_tmp8E8=_region_malloc(r,sizeof(*_tmp8E8)),((
+_tmp8E8->f1=((_tmp8E3="-printfullevars",_tag_dynforward(_tmp8E3,sizeof(char),
+_get_zero_arr_size_char(_tmp8E3,16)))),((_tmp8E8->f2=0,((_tmp8E8->f3=((_tmp8E4="",
+_tag_dynforward(_tmp8E4,sizeof(char),_get_zero_arr_size_char(_tmp8E4,1)))),((
+_tmp8E8->f4=(void*)((_tmp8E5=_region_malloc(r,sizeof(*_tmp8E5)),((_tmp8E5[0]=((
+_tmp8E6.tag=3,((_tmp8E6.f1=& Cyc_print_full_evars_r,_tmp8E6)))),_tmp8E5)))),((
+_tmp8E8->f5=((_tmp8E7="Print full information for evars (type debugging)",
+_tag_dynforward(_tmp8E7,sizeof(char),_get_zero_arr_size_char(_tmp8E7,50)))),
+_tmp8E8)))))))))))),((_tmp79E[53]=((_tmp8E2=_region_malloc(r,sizeof(*_tmp8E2)),((
+_tmp8E2->f1=((_tmp8DD="-printallkinds",_tag_dynforward(_tmp8DD,sizeof(char),
+_get_zero_arr_size_char(_tmp8DD,15)))),((_tmp8E2->f2=0,((_tmp8E2->f3=((_tmp8DE="",
+_tag_dynforward(_tmp8DE,sizeof(char),_get_zero_arr_size_char(_tmp8DE,1)))),((
+_tmp8E2->f4=(void*)((_tmp8DF=_region_malloc(r,sizeof(*_tmp8DF)),((_tmp8DF[0]=((
+_tmp8E0.tag=3,((_tmp8E0.f1=& Cyc_print_all_kinds_r,_tmp8E0)))),_tmp8DF)))),((
+_tmp8E2->f5=((_tmp8E1="Always print kinds of type variables",_tag_dynforward(
+_tmp8E1,sizeof(char),_get_zero_arr_size_char(_tmp8E1,37)))),_tmp8E2)))))))))))),((
+_tmp79E[52]=((_tmp8DC=_region_malloc(r,sizeof(*_tmp8DC)),((_tmp8DC->f1=((_tmp8D7="-printalltvars",
+_tag_dynforward(_tmp8D7,sizeof(char),_get_zero_arr_size_char(_tmp8D7,15)))),((
+_tmp8DC->f2=0,((_tmp8DC->f3=((_tmp8D8="",_tag_dynforward(_tmp8D8,sizeof(char),
+_get_zero_arr_size_char(_tmp8D8,1)))),((_tmp8DC->f4=(void*)((_tmp8D9=
+_region_malloc(r,sizeof(*_tmp8D9)),((_tmp8D9[0]=((_tmp8DA.tag=3,((_tmp8DA.f1=&
+Cyc_print_all_tvars_r,_tmp8DA)))),_tmp8D9)))),((_tmp8DC->f5=((_tmp8DB="Print all type variables (even implicit default effects)",
+_tag_dynforward(_tmp8DB,sizeof(char),_get_zero_arr_size_char(_tmp8DB,57)))),
+_tmp8DC)))))))))))),((_tmp79E[51]=((_tmp8D6=_region_malloc(r,sizeof(*_tmp8D6)),((
+_tmp8D6->f1=((_tmp8D1="-noexpandtypedefs",_tag_dynforward(_tmp8D1,sizeof(char),
+_get_zero_arr_size_char(_tmp8D1,18)))),((_tmp8D6->f2=0,((_tmp8D6->f3=((_tmp8D2="",
+_tag_dynforward(_tmp8D2,sizeof(char),_get_zero_arr_size_char(_tmp8D2,1)))),((
+_tmp8D6->f4=(void*)((_tmp8D3=_region_malloc(r,sizeof(*_tmp8D3)),((_tmp8D3[0]=((
+_tmp8D4.tag=3,((_tmp8D4.f1=& Cyc_noexpand_r,_tmp8D4)))),_tmp8D3)))),((_tmp8D6->f5=((
+_tmp8D5="Don't expand typedefs in pretty printing",_tag_dynforward(_tmp8D5,
+sizeof(char),_get_zero_arr_size_char(_tmp8D5,41)))),_tmp8D6)))))))))))),((
+_tmp79E[50]=((_tmp8D0=_region_malloc(r,sizeof(*_tmp8D0)),((_tmp8D0->f1=((_tmp8CB="-noremoveunused",
+_tag_dynforward(_tmp8CB,sizeof(char),_get_zero_arr_size_char(_tmp8CB,16)))),((
+_tmp8D0->f2=0,((_tmp8D0->f3=((_tmp8CC="",_tag_dynforward(_tmp8CC,sizeof(char),
+_get_zero_arr_size_char(_tmp8CC,1)))),((_tmp8D0->f4=(void*)((_tmp8CD=
+_region_malloc(r,sizeof(*_tmp8CD)),((_tmp8CD[0]=((_tmp8CE.tag=3,((_tmp8CE.f1=&
+Cyc_noshake_r,_tmp8CE)))),_tmp8CD)))),((_tmp8D0->f5=((_tmp8CF="Don't remove externed variables that aren't used",
+_tag_dynforward(_tmp8CF,sizeof(char),_get_zero_arr_size_char(_tmp8CF,49)))),
+_tmp8D0)))))))))))),((_tmp79E[49]=((_tmp8CA=_region_malloc(r,sizeof(*_tmp8CA)),((
+_tmp8CA->f1=((_tmp8C5="-nogc",_tag_dynforward(_tmp8C5,sizeof(char),
+_get_zero_arr_size_char(_tmp8C5,6)))),((_tmp8CA->f2=0,((_tmp8CA->f3=((_tmp8C6="",
+_tag_dynforward(_tmp8C6,sizeof(char),_get_zero_arr_size_char(_tmp8C6,1)))),((
+_tmp8CA->f4=(void*)((_tmp8C7=_region_malloc(r,sizeof(*_tmp8C7)),((_tmp8C7[0]=((
+_tmp8C8.tag=3,((_tmp8C8.f1=& Cyc_nogc_r,_tmp8C8)))),_tmp8C7)))),((_tmp8CA->f5=((
+_tmp8C9="Don't link in the garbage collector",_tag_dynforward(_tmp8C9,sizeof(
+char),_get_zero_arr_size_char(_tmp8C9,36)))),_tmp8CA)))))))))))),((_tmp79E[48]=((
+_tmp8C4=_region_malloc(r,sizeof(*_tmp8C4)),((_tmp8C4->f1=((_tmp8BF="-nocyc",
+_tag_dynforward(_tmp8BF,sizeof(char),_get_zero_arr_size_char(_tmp8BF,7)))),((
+_tmp8C4->f2=0,((_tmp8C4->f3=((_tmp8C0="",_tag_dynforward(_tmp8C0,sizeof(char),
+_get_zero_arr_size_char(_tmp8C0,1)))),((_tmp8C4->f4=(void*)((_tmp8C1=
+_region_malloc(r,sizeof(*_tmp8C1)),((_tmp8C1[0]=((_tmp8C2.tag=0,((_tmp8C2.f1=Cyc_set_nocyc,
+_tmp8C2)))),_tmp8C1)))),((_tmp8C4->f5=((_tmp8C3="Don't add implicit namespace Cyc",
+_tag_dynforward(_tmp8C3,sizeof(char),_get_zero_arr_size_char(_tmp8C3,33)))),
+_tmp8C4)))))))))))),((_tmp79E[47]=((_tmp8BE=_region_malloc(r,sizeof(*_tmp8BE)),((
+_tmp8BE->f1=((_tmp8B9="-no-cpp-precomp",_tag_dynforward(_tmp8B9,sizeof(char),
+_get_zero_arr_size_char(_tmp8B9,16)))),((_tmp8BE->f2=0,((_tmp8BE->f3=((_tmp8BA="",
+_tag_dynforward(_tmp8BA,sizeof(char),_get_zero_arr_size_char(_tmp8BA,1)))),((
+_tmp8BE->f4=(void*)((_tmp8BB=_region_malloc(r,sizeof(*_tmp8BB)),((_tmp8BB[0]=((
+_tmp8BC.tag=0,((_tmp8BC.f1=Cyc_set_nocppprecomp,_tmp8BC)))),_tmp8BB)))),((
+_tmp8BE->f5=((_tmp8BD="Don't do smart preprocessing (mac only)",_tag_dynforward(
+_tmp8BD,sizeof(char),_get_zero_arr_size_char(_tmp8BD,40)))),_tmp8BE)))))))))))),((
+_tmp79E[46]=((_tmp8B8=_region_malloc(r,sizeof(*_tmp8B8)),((_tmp8B8->f1=((_tmp8B3="-use-cpp",
+_tag_dynforward(_tmp8B3,sizeof(char),_get_zero_arr_size_char(_tmp8B3,9)))),((
+_tmp8B8->f2=0,((_tmp8B8->f3=((_tmp8B4="<path>",_tag_dynforward(_tmp8B4,sizeof(
+char),_get_zero_arr_size_char(_tmp8B4,7)))),((_tmp8B8->f4=(void*)((_tmp8B5=
+_region_malloc(r,sizeof(*_tmp8B5)),((_tmp8B5[0]=((_tmp8B6.tag=5,((_tmp8B6.f1=Cyc_set_cpp,
+_tmp8B6)))),_tmp8B5)))),((_tmp8B8->f5=((_tmp8B7="Indicate which preprocessor to use",
+_tag_dynforward(_tmp8B7,sizeof(char),_get_zero_arr_size_char(_tmp8B7,35)))),
+_tmp8B8)))))))))))),((_tmp79E[45]=((_tmp8B2=_region_malloc(r,sizeof(*_tmp8B2)),((
+_tmp8B2->f1=((_tmp8AD="--inline-checks",_tag_dynforward(_tmp8AD,sizeof(char),
+_get_zero_arr_size_char(_tmp8AD,16)))),((_tmp8B2->f2=0,((_tmp8B2->f3=((_tmp8AE="",
+_tag_dynforward(_tmp8AE,sizeof(char),_get_zero_arr_size_char(_tmp8AE,1)))),((
+_tmp8B2->f4=(void*)((_tmp8AF=_region_malloc(r,sizeof(*_tmp8AF)),((_tmp8AF[0]=((
+_tmp8B0.tag=0,((_tmp8B0.f1=Cyc_set_inline_functions,_tmp8B0)))),_tmp8AF)))),((
+_tmp8B2->f5=((_tmp8B1="Inline bounds checks instead of #define",_tag_dynforward(
+_tmp8B1,sizeof(char),_get_zero_arr_size_char(_tmp8B1,40)))),_tmp8B2)))))))))))),((
+_tmp79E[44]=((_tmp8AC=_region_malloc(r,sizeof(*_tmp8AC)),((_tmp8AC->f1=((_tmp8A7="--noboundschecks",
+_tag_dynforward(_tmp8A7,sizeof(char),_get_zero_arr_size_char(_tmp8A7,17)))),((
+_tmp8AC->f2=0,((_tmp8AC->f3=((_tmp8A8="",_tag_dynforward(_tmp8A8,sizeof(char),
+_get_zero_arr_size_char(_tmp8A8,1)))),((_tmp8AC->f4=(void*)((_tmp8A9=
+_region_malloc(r,sizeof(*_tmp8A9)),((_tmp8A9[0]=((_tmp8AA.tag=0,((_tmp8AA.f1=Cyc_set_noboundschecks,
+_tmp8AA)))),_tmp8A9)))),((_tmp8AC->f5=((_tmp8AB="Disable bounds checks",
+_tag_dynforward(_tmp8AB,sizeof(char),_get_zero_arr_size_char(_tmp8AB,22)))),
+_tmp8AC)))))))))))),((_tmp79E[43]=((_tmp8A6=_region_malloc(r,sizeof(*_tmp8A6)),((
+_tmp8A6->f1=((_tmp8A1="--nonullchecks",_tag_dynforward(_tmp8A1,sizeof(char),
+_get_zero_arr_size_char(_tmp8A1,15)))),((_tmp8A6->f2=0,((_tmp8A6->f3=((_tmp8A2="",
+_tag_dynforward(_tmp8A2,sizeof(char),_get_zero_arr_size_char(_tmp8A2,1)))),((
+_tmp8A6->f4=(void*)((_tmp8A3=_region_malloc(r,sizeof(*_tmp8A3)),((_tmp8A3[0]=((
+_tmp8A4.tag=0,((_tmp8A4.f1=Cyc_set_nonullchecks,_tmp8A4)))),_tmp8A3)))),((
+_tmp8A6->f5=((_tmp8A5="Disable null checks",_tag_dynforward(_tmp8A5,sizeof(char),
+_get_zero_arr_size_char(_tmp8A5,20)))),_tmp8A6)))))))))))),((_tmp79E[42]=((
+_tmp8A0=_region_malloc(r,sizeof(*_tmp8A0)),((_tmp8A0->f1=((_tmp89B="--nochecks",
+_tag_dynforward(_tmp89B,sizeof(char),_get_zero_arr_size_char(_tmp89B,11)))),((
+_tmp8A0->f2=0,((_tmp8A0->f3=((_tmp89C="",_tag_dynforward(_tmp89C,sizeof(char),
+_get_zero_arr_size_char(_tmp89C,1)))),((_tmp8A0->f4=(void*)((_tmp89D=
+_region_malloc(r,sizeof(*_tmp89D)),((_tmp89D[0]=((_tmp89E.tag=0,((_tmp89E.f1=Cyc_set_nochecks,
+_tmp89E)))),_tmp89D)))),((_tmp8A0->f5=((_tmp89F="Disable bounds/null checks",
+_tag_dynforward(_tmp89F,sizeof(char),_get_zero_arr_size_char(_tmp89F,27)))),
+_tmp8A0)))))))))))),((_tmp79E[41]=((_tmp89A=_region_malloc(r,sizeof(*_tmp89A)),((
+_tmp89A->f1=((_tmp895="--lineno",_tag_dynforward(_tmp895,sizeof(char),
+_get_zero_arr_size_char(_tmp895,9)))),((_tmp89A->f2=0,((_tmp89A->f3=((_tmp896="",
+_tag_dynforward(_tmp896,sizeof(char),_get_zero_arr_size_char(_tmp896,1)))),((
+_tmp89A->f4=(void*)((_tmp897=_region_malloc(r,sizeof(*_tmp897)),((_tmp897[0]=((
+_tmp898.tag=0,((_tmp898.f1=Cyc_set_lineno,_tmp898)))),_tmp897)))),((_tmp89A->f5=((
+_tmp899="Generate line numbers for debugging",_tag_dynforward(_tmp899,sizeof(
+char),_get_zero_arr_size_char(_tmp899,36)))),_tmp89A)))))))))))),((_tmp79E[40]=((
+_tmp894=_region_malloc(r,sizeof(*_tmp894)),((_tmp894->f1=((_tmp88F="-save-c",
+_tag_dynforward(_tmp88F,sizeof(char),_get_zero_arr_size_char(_tmp88F,8)))),((
+_tmp894->f2=0,((_tmp894->f3=((_tmp890="",_tag_dynforward(_tmp890,sizeof(char),
+_get_zero_arr_size_char(_tmp890,1)))),((_tmp894->f4=(void*)((_tmp891=
+_region_malloc(r,sizeof(*_tmp891)),((_tmp891[0]=((_tmp892.tag=3,((_tmp892.f1=&
+Cyc_save_c_r,_tmp892)))),_tmp891)))),((_tmp894->f5=((_tmp893="Don't delete temporary C files",
+_tag_dynforward(_tmp893,sizeof(char),_get_zero_arr_size_char(_tmp893,31)))),
+_tmp894)))))))))))),((_tmp79E[39]=((_tmp88E=_region_malloc(r,sizeof(*_tmp88E)),((
+_tmp88E->f1=((_tmp889="-save-temps",_tag_dynforward(_tmp889,sizeof(char),
+_get_zero_arr_size_char(_tmp889,12)))),((_tmp88E->f2=0,((_tmp88E->f3=((_tmp88A="",
+_tag_dynforward(_tmp88A,sizeof(char),_get_zero_arr_size_char(_tmp88A,1)))),((
+_tmp88E->f4=(void*)((_tmp88B=_region_malloc(r,sizeof(*_tmp88B)),((_tmp88B[0]=((
+_tmp88C.tag=0,((_tmp88C.f1=Cyc_set_save_temps,_tmp88C)))),_tmp88B)))),((_tmp88E->f5=((
+_tmp88D="Don't delete temporary files",_tag_dynforward(_tmp88D,sizeof(char),
+_get_zero_arr_size_char(_tmp88D,29)))),_tmp88E)))))))))))),((_tmp79E[38]=((
+_tmp888=_region_malloc(r,sizeof(*_tmp888)),((_tmp888->f1=((_tmp883="-c-comp",
+_tag_dynforward(_tmp883,sizeof(char),_get_zero_arr_size_char(_tmp883,8)))),((
+_tmp888->f2=0,((_tmp888->f3=((_tmp884=" <compiler>",_tag_dynforward(_tmp884,
+sizeof(char),_get_zero_arr_size_char(_tmp884,12)))),((_tmp888->f4=(void*)((
+_tmp885=_region_malloc(r,sizeof(*_tmp885)),((_tmp885[0]=((_tmp886.tag=5,((
+_tmp886.f1=Cyc_set_c_compiler,_tmp886)))),_tmp885)))),((_tmp888->f5=((_tmp887="Produce C output for the given compiler",
+_tag_dynforward(_tmp887,sizeof(char),_get_zero_arr_size_char(_tmp887,40)))),
+_tmp888)))))))))))),((_tmp79E[37]=((_tmp882=_region_malloc(r,sizeof(*_tmp882)),((
+_tmp882->f1=((_tmp87D="-un-gcc",_tag_dynforward(_tmp87D,sizeof(char),
+_get_zero_arr_size_char(_tmp87D,8)))),((_tmp882->f2=0,((_tmp882->f3=((_tmp87E="",
+_tag_dynforward(_tmp87E,sizeof(char),_get_zero_arr_size_char(_tmp87E,1)))),((
+_tmp882->f4=(void*)((_tmp87F=_region_malloc(r,sizeof(*_tmp87F)),((_tmp87F[0]=((
+_tmp880.tag=0,((_tmp880.f1=Cyc_set_tovc,_tmp880)))),_tmp87F)))),((_tmp882->f5=((
+_tmp881="Avoid gcc extensions in C output",_tag_dynforward(_tmp881,sizeof(char),
+_get_zero_arr_size_char(_tmp881,33)))),_tmp882)))))))))))),((_tmp79E[36]=((
+_tmp87C=_region_malloc(r,sizeof(*_tmp87C)),((_tmp87C->f1=((_tmp877="-elim-statement-expressions",
+_tag_dynforward(_tmp877,sizeof(char),_get_zero_arr_size_char(_tmp877,28)))),((
+_tmp87C->f2=0,((_tmp87C->f3=((_tmp878="",_tag_dynforward(_tmp878,sizeof(char),
+_get_zero_arr_size_char(_tmp878,1)))),((_tmp87C->f4=(void*)((_tmp879=
+_region_malloc(r,sizeof(*_tmp879)),((_tmp879[0]=((_tmp87A.tag=3,((_tmp87A.f1=&
+Cyc_elim_se_r,_tmp87A)))),_tmp879)))),((_tmp87C->f5=((_tmp87B="Avoid statement expressions in C output (implies --inline-checks)",
+_tag_dynforward(_tmp87B,sizeof(char),_get_zero_arr_size_char(_tmp87B,66)))),
+_tmp87C)))))))))))),((_tmp79E[35]=((_tmp876=_region_malloc(r,sizeof(*_tmp876)),((
+_tmp876->f1=((_tmp871="-up",_tag_dynforward(_tmp871,sizeof(char),
+_get_zero_arr_size_char(_tmp871,4)))),((_tmp876->f2=0,((_tmp876->f3=((_tmp872="",
+_tag_dynforward(_tmp872,sizeof(char),_get_zero_arr_size_char(_tmp872,1)))),((
+_tmp876->f4=(void*)((_tmp873=_region_malloc(r,sizeof(*_tmp873)),((_tmp873[0]=((
+_tmp874.tag=4,((_tmp874.f1=& Cyc_pp_r,_tmp874)))),_tmp873)))),((_tmp876->f5=((
+_tmp875="Ugly print",_tag_dynforward(_tmp875,sizeof(char),
+_get_zero_arr_size_char(_tmp875,11)))),_tmp876)))))))))))),((_tmp79E[34]=((
+_tmp870=_region_malloc(r,sizeof(*_tmp870)),((_tmp870->f1=((_tmp86B="-pp",
+_tag_dynforward(_tmp86B,sizeof(char),_get_zero_arr_size_char(_tmp86B,4)))),((
+_tmp870->f2=0,((_tmp870->f3=((_tmp86C="",_tag_dynforward(_tmp86C,sizeof(char),
+_get_zero_arr_size_char(_tmp86C,1)))),((_tmp870->f4=(void*)((_tmp86D=
+_region_malloc(r,sizeof(*_tmp86D)),((_tmp86D[0]=((_tmp86E.tag=3,((_tmp86E.f1=&
+Cyc_pp_r,_tmp86E)))),_tmp86D)))),((_tmp870->f5=((_tmp86F="Pretty print",
+_tag_dynforward(_tmp86F,sizeof(char),_get_zero_arr_size_char(_tmp86F,13)))),
+_tmp870)))))))))))),((_tmp79E[33]=((_tmp86A=_region_malloc(r,sizeof(*_tmp86A)),((
+_tmp86A->f1=((_tmp865="-ic",_tag_dynforward(_tmp865,sizeof(char),
+_get_zero_arr_size_char(_tmp865,4)))),((_tmp86A->f2=0,((_tmp86A->f3=((_tmp866="",
+_tag_dynforward(_tmp866,sizeof(char),_get_zero_arr_size_char(_tmp866,1)))),((
+_tmp86A->f4=(void*)((_tmp867=_region_malloc(r,sizeof(*_tmp867)),((_tmp867[0]=((
+_tmp868.tag=3,((_tmp868.f1=& Cyc_ic_r,_tmp868)))),_tmp867)))),((_tmp86A->f5=((
+_tmp869="Activate the link-checker",_tag_dynforward(_tmp869,sizeof(char),
+_get_zero_arr_size_char(_tmp869,26)))),_tmp86A)))))))))))),((_tmp79E[32]=((
+_tmp864=_region_malloc(r,sizeof(*_tmp864)),((_tmp864->f1=((_tmp85F="-stopafter-toc",
+_tag_dynforward(_tmp85F,sizeof(char),_get_zero_arr_size_char(_tmp85F,15)))),((
+_tmp864->f2=0,((_tmp864->f3=((_tmp860="",_tag_dynforward(_tmp860,sizeof(char),
+_get_zero_arr_size_char(_tmp860,1)))),((_tmp864->f4=(void*)((_tmp861=
+_region_malloc(r,sizeof(*_tmp861)),((_tmp861[0]=((_tmp862.tag=3,((_tmp862.f1=&
+Cyc_toc_r,_tmp862)))),_tmp861)))),((_tmp864->f5=((_tmp863="Stop after translation to C",
+_tag_dynforward(_tmp863,sizeof(char),_get_zero_arr_size_char(_tmp863,28)))),
+_tmp864)))))))))))),((_tmp79E[31]=((_tmp85E=_region_malloc(r,sizeof(*_tmp85E)),((
+_tmp85E->f1=((_tmp859="-stopafter-cf",_tag_dynforward(_tmp859,sizeof(char),
+_get_zero_arr_size_char(_tmp859,14)))),((_tmp85E->f2=0,((_tmp85E->f3=((_tmp85A="",
+_tag_dynforward(_tmp85A,sizeof(char),_get_zero_arr_size_char(_tmp85A,1)))),((
+_tmp85E->f4=(void*)((_tmp85B=_region_malloc(r,sizeof(*_tmp85B)),((_tmp85B[0]=((
+_tmp85C.tag=3,((_tmp85C.f1=& Cyc_cf_r,_tmp85C)))),_tmp85B)))),((_tmp85E->f5=((
+_tmp85D="Stop after control-flow checking",_tag_dynforward(_tmp85D,sizeof(char),
+_get_zero_arr_size_char(_tmp85D,33)))),_tmp85E)))))))))))),((_tmp79E[30]=((
+_tmp858=_region_malloc(r,sizeof(*_tmp858)),((_tmp858->f1=((_tmp853="-noprint",
+_tag_dynforward(_tmp853,sizeof(char),_get_zero_arr_size_char(_tmp853,9)))),((
+_tmp858->f2=0,((_tmp858->f3=((_tmp854="",_tag_dynforward(_tmp854,sizeof(char),
+_get_zero_arr_size_char(_tmp854,1)))),((_tmp858->f4=(void*)((_tmp855=
+_region_malloc(r,sizeof(*_tmp855)),((_tmp855[0]=((_tmp856.tag=3,((_tmp856.f1=&
+Cyc_noprint_r,_tmp856)))),_tmp855)))),((_tmp858->f5=((_tmp857="Do not print output (when stopping early)",
+_tag_dynforward(_tmp857,sizeof(char),_get_zero_arr_size_char(_tmp857,42)))),
+_tmp858)))))))))))),((_tmp79E[29]=((_tmp852=_region_malloc(r,sizeof(*_tmp852)),((
+_tmp852->f1=((_tmp84D="-stopafter-tc",_tag_dynforward(_tmp84D,sizeof(char),
+_get_zero_arr_size_char(_tmp84D,14)))),((_tmp852->f2=0,((_tmp852->f3=((_tmp84E="",
+_tag_dynforward(_tmp84E,sizeof(char),_get_zero_arr_size_char(_tmp84E,1)))),((
+_tmp852->f4=(void*)((_tmp84F=_region_malloc(r,sizeof(*_tmp84F)),((_tmp84F[0]=((
+_tmp850.tag=3,((_tmp850.f1=& Cyc_tc_r,_tmp850)))),_tmp84F)))),((_tmp852->f5=((
+_tmp851="Stop after type checking",_tag_dynforward(_tmp851,sizeof(char),
+_get_zero_arr_size_char(_tmp851,25)))),_tmp852)))))))))))),((_tmp79E[28]=((
+_tmp84C=_region_malloc(r,sizeof(*_tmp84C)),((_tmp84C->f1=((_tmp847="-stopafter-parse",
+_tag_dynforward(_tmp847,sizeof(char),_get_zero_arr_size_char(_tmp847,17)))),((
+_tmp84C->f2=0,((_tmp84C->f3=((_tmp848="",_tag_dynforward(_tmp848,sizeof(char),
+_get_zero_arr_size_char(_tmp848,1)))),((_tmp84C->f4=(void*)((_tmp849=
+_region_malloc(r,sizeof(*_tmp849)),((_tmp849[0]=((_tmp84A.tag=3,((_tmp84A.f1=&
+Cyc_parseonly_r,_tmp84A)))),_tmp849)))),((_tmp84C->f5=((_tmp84B="Stop after parsing",
+_tag_dynforward(_tmp84B,sizeof(char),_get_zero_arr_size_char(_tmp84B,19)))),
+_tmp84C)))))))))))),((_tmp79E[27]=((_tmp846=_region_malloc(r,sizeof(*_tmp846)),((
+_tmp846->f1=((_tmp841="-E",_tag_dynforward(_tmp841,sizeof(char),
+_get_zero_arr_size_char(_tmp841,3)))),((_tmp846->f2=0,((_tmp846->f3=((_tmp842="",
+_tag_dynforward(_tmp842,sizeof(char),_get_zero_arr_size_char(_tmp842,1)))),((
+_tmp846->f4=(void*)((_tmp843=_region_malloc(r,sizeof(*_tmp843)),((_tmp843[0]=((
+_tmp844.tag=3,((_tmp844.f1=& Cyc_stop_after_cpp_r,_tmp844)))),_tmp843)))),((
+_tmp846->f5=((_tmp845="Stop after preprocessing",_tag_dynforward(_tmp845,sizeof(
+char),_get_zero_arr_size_char(_tmp845,25)))),_tmp846)))))))))))),((_tmp79E[26]=((
+_tmp840=_region_malloc(r,sizeof(*_tmp840)),((_tmp840->f1=((_tmp83B="-Wall",
+_tag_dynforward(_tmp83B,sizeof(char),_get_zero_arr_size_char(_tmp83B,6)))),((
+_tmp840->f2=0,((_tmp840->f3=((_tmp83C="",_tag_dynforward(_tmp83C,sizeof(char),
+_get_zero_arr_size_char(_tmp83C,1)))),((_tmp840->f4=(void*)((_tmp83D=
+_region_malloc(r,sizeof(*_tmp83D)),((_tmp83D[0]=((_tmp83E.tag=0,((_tmp83E.f1=Cyc_set_all_warnings,
+_tmp83E)))),_tmp83D)))),((_tmp840->f5=((_tmp83F="Turn on all warnings",
+_tag_dynforward(_tmp83F,sizeof(char),_get_zero_arr_size_char(_tmp83F,21)))),
+_tmp840)))))))))))),((_tmp79E[25]=((_tmp83A=_region_malloc(r,sizeof(*_tmp83A)),((
+_tmp83A->f1=((_tmp835="-b",_tag_dynforward(_tmp835,sizeof(char),
+_get_zero_arr_size_char(_tmp835,3)))),((_tmp83A->f2=0,((_tmp83A->f3=((_tmp836="<arch>",
+_tag_dynforward(_tmp836,sizeof(char),_get_zero_arr_size_char(_tmp836,7)))),((
+_tmp83A->f4=(void*)((_tmp837=_region_malloc(r,sizeof(*_tmp837)),((_tmp837[0]=((
+_tmp838.tag=5,((_tmp838.f1=Cyc_set_target_arch,_tmp838)))),_tmp837)))),((_tmp83A->f5=((
+_tmp839="Set target architecture; implies -stopafter-toc",_tag_dynforward(
+_tmp839,sizeof(char),_get_zero_arr_size_char(_tmp839,48)))),_tmp83A)))))))))))),((
+_tmp79E[24]=((_tmp834=_region_malloc(r,sizeof(*_tmp834)),((_tmp834->f1=((_tmp82F="-MT",
+_tag_dynforward(_tmp82F,sizeof(char),_get_zero_arr_size_char(_tmp82F,4)))),((
+_tmp834->f2=0,((_tmp834->f3=((_tmp830=" <target>",_tag_dynforward(_tmp830,
+sizeof(char),_get_zero_arr_size_char(_tmp830,10)))),((_tmp834->f4=(void*)((
+_tmp831=_region_malloc(r,sizeof(*_tmp831)),((_tmp831[0]=((_tmp832.tag=5,((
+_tmp832.f1=Cyc_set_dependencies_target,_tmp832)))),_tmp831)))),((_tmp834->f5=((
+_tmp833="Give target for dependencies",_tag_dynforward(_tmp833,sizeof(char),
+_get_zero_arr_size_char(_tmp833,29)))),_tmp834)))))))))))),((_tmp79E[23]=((
+_tmp82E=_region_malloc(r,sizeof(*_tmp82E)),((_tmp82E->f1=((_tmp829="-MG",
+_tag_dynforward(_tmp829,sizeof(char),_get_zero_arr_size_char(_tmp829,4)))),((
+_tmp82E->f2=0,((_tmp82E->f3=((_tmp82A="",_tag_dynforward(_tmp82A,sizeof(char),
+_get_zero_arr_size_char(_tmp82A,1)))),((_tmp82E->f4=(void*)((_tmp82B=
+_region_malloc(r,sizeof(*_tmp82B)),((_tmp82B[0]=((_tmp82C.tag=1,((_tmp82C.f1=Cyc_add_cpparg,
+_tmp82C)))),_tmp82B)))),((_tmp82E->f5=((_tmp82D="When producing dependencies assume that missing files are generated",
+_tag_dynforward(_tmp82D,sizeof(char),_get_zero_arr_size_char(_tmp82D,68)))),
+_tmp82E)))))))))))),((_tmp79E[22]=((_tmp828=_region_malloc(r,sizeof(*_tmp828)),((
+_tmp828->f1=((_tmp823="-M",_tag_dynforward(_tmp823,sizeof(char),
+_get_zero_arr_size_char(_tmp823,3)))),((_tmp828->f2=0,((_tmp828->f3=((_tmp824="",
+_tag_dynforward(_tmp824,sizeof(char),_get_zero_arr_size_char(_tmp824,1)))),((
+_tmp828->f4=(void*)((_tmp825=_region_malloc(r,sizeof(*_tmp825)),((_tmp825[0]=((
+_tmp826.tag=0,((_tmp826.f1=Cyc_set_produce_dependencies,_tmp826)))),_tmp825)))),((
+_tmp828->f5=((_tmp827="Produce dependencies",_tag_dynforward(_tmp827,sizeof(char),
+_get_zero_arr_size_char(_tmp827,21)))),_tmp828)))))))))))),((_tmp79E[21]=((
+_tmp822=_region_malloc(r,sizeof(*_tmp822)),((_tmp822->f1=((_tmp81D="-S",
+_tag_dynforward(_tmp81D,sizeof(char),_get_zero_arr_size_char(_tmp81D,3)))),((
+_tmp822->f2=0,((_tmp822->f3=((_tmp81E="",_tag_dynforward(_tmp81E,sizeof(char),
+_get_zero_arr_size_char(_tmp81E,1)))),((_tmp822->f4=(void*)((_tmp81F=
+_region_malloc(r,sizeof(*_tmp81F)),((_tmp81F[0]=((_tmp820.tag=0,((_tmp820.f1=Cyc_set_stop_after_asmfile,
+_tmp820)))),_tmp81F)))),((_tmp822->f5=((_tmp821="Stop after producing assembly code",
+_tag_dynforward(_tmp821,sizeof(char),_get_zero_arr_size_char(_tmp821,35)))),
+_tmp822)))))))))))),((_tmp79E[20]=((_tmp81C=_region_malloc(r,sizeof(*_tmp81C)),((
+_tmp81C->f1=((_tmp817="-pa",_tag_dynforward(_tmp817,sizeof(char),
+_get_zero_arr_size_char(_tmp817,4)))),((_tmp81C->f2=0,((_tmp81C->f3=((_tmp818="",
+_tag_dynforward(_tmp818,sizeof(char),_get_zero_arr_size_char(_tmp818,1)))),((
+_tmp81C->f4=(void*)((_tmp819=_region_malloc(r,sizeof(*_tmp819)),((_tmp819[0]=((
+_tmp81A.tag=0,((_tmp81A.f1=Cyc_set_pa,_tmp81A)))),_tmp819)))),((_tmp81C->f5=((
+_tmp81B="Compile for profiling with aprof",_tag_dynforward(_tmp81B,sizeof(char),
+_get_zero_arr_size_char(_tmp81B,33)))),_tmp81C)))))))))))),((_tmp79E[19]=((
+_tmp816=_region_malloc(r,sizeof(*_tmp816)),((_tmp816->f1=((_tmp811="-pg",
+_tag_dynforward(_tmp811,sizeof(char),_get_zero_arr_size_char(_tmp811,4)))),((
+_tmp816->f2=0,((_tmp816->f3=((_tmp812="",_tag_dynforward(_tmp812,sizeof(char),
+_get_zero_arr_size_char(_tmp812,1)))),((_tmp816->f4=(void*)((_tmp813=
+_region_malloc(r,sizeof(*_tmp813)),((_tmp813[0]=((_tmp814.tag=0,((_tmp814.f1=Cyc_set_pg,
+_tmp814)))),_tmp813)))),((_tmp816->f5=((_tmp815="Compile for profiling with gprof",
+_tag_dynforward(_tmp815,sizeof(char),_get_zero_arr_size_char(_tmp815,33)))),
+_tmp816)))))))))))),((_tmp79E[18]=((_tmp810=_region_malloc(r,sizeof(*_tmp810)),((
+_tmp810->f1=((_tmp80B="-p",_tag_dynforward(_tmp80B,sizeof(char),
+_get_zero_arr_size_char(_tmp80B,3)))),((_tmp810->f2=0,((_tmp810->f3=((_tmp80C="",
+_tag_dynforward(_tmp80C,sizeof(char),_get_zero_arr_size_char(_tmp80C,1)))),((
+_tmp810->f4=(void*)((_tmp80D=_region_malloc(r,sizeof(*_tmp80D)),((_tmp80D[0]=((
+_tmp80E.tag=1,((_tmp80E.f1=Cyc_add_ccarg,_tmp80E)))),_tmp80D)))),((_tmp810->f5=((
+_tmp80F="Compile for profiling with prof",_tag_dynforward(_tmp80F,sizeof(char),
+_get_zero_arr_size_char(_tmp80F,32)))),_tmp810)))))))))))),((_tmp79E[17]=((
+_tmp80A=_region_malloc(r,sizeof(*_tmp80A)),((_tmp80A->f1=((_tmp805="-g",
+_tag_dynforward(_tmp805,sizeof(char),_get_zero_arr_size_char(_tmp805,3)))),((
+_tmp80A->f2=0,((_tmp80A->f3=((_tmp806="",_tag_dynforward(_tmp806,sizeof(char),
+_get_zero_arr_size_char(_tmp806,1)))),((_tmp80A->f4=(void*)((_tmp807=
+_region_malloc(r,sizeof(*_tmp807)),((_tmp807[0]=((_tmp808.tag=1,((_tmp808.f1=Cyc_add_ccarg,
+_tmp808)))),_tmp807)))),((_tmp80A->f5=((_tmp809="Compile for debugging",
+_tag_dynforward(_tmp809,sizeof(char),_get_zero_arr_size_char(_tmp809,22)))),
+_tmp80A)))))))))))),((_tmp79E[16]=((_tmp804=_region_malloc(r,sizeof(*_tmp804)),((
+_tmp804->f1=((_tmp7FF="-fomit-frame-pointer",_tag_dynforward(_tmp7FF,sizeof(char),
+_get_zero_arr_size_char(_tmp7FF,21)))),((_tmp804->f2=0,((_tmp804->f3=((_tmp800="",
+_tag_dynforward(_tmp800,sizeof(char),_get_zero_arr_size_char(_tmp800,1)))),((
+_tmp804->f4=(void*)((_tmp801=_region_malloc(r,sizeof(*_tmp801)),((_tmp801[0]=((
+_tmp802.tag=1,((_tmp802.f1=Cyc_add_ccarg,_tmp802)))),_tmp801)))),((_tmp804->f5=((
+_tmp803="Omit frame pointer",_tag_dynforward(_tmp803,sizeof(char),
+_get_zero_arr_size_char(_tmp803,19)))),_tmp804)))))))))))),((_tmp79E[15]=((
+_tmp7FE=_region_malloc(r,sizeof(*_tmp7FE)),((_tmp7FE->f1=((_tmp7F9="-O3",
+_tag_dynforward(_tmp7F9,sizeof(char),_get_zero_arr_size_char(_tmp7F9,4)))),((
+_tmp7FE->f2=0,((_tmp7FE->f3=((_tmp7FA="",_tag_dynforward(_tmp7FA,sizeof(char),
+_get_zero_arr_size_char(_tmp7FA,1)))),((_tmp7FE->f4=(void*)((_tmp7FB=
+_region_malloc(r,sizeof(*_tmp7FB)),((_tmp7FB[0]=((_tmp7FC.tag=1,((_tmp7FC.f1=Cyc_add_ccarg,
+_tmp7FC)))),_tmp7FB)))),((_tmp7FE->f5=((_tmp7FD="Even more optimization",
+_tag_dynforward(_tmp7FD,sizeof(char),_get_zero_arr_size_char(_tmp7FD,23)))),
+_tmp7FE)))))))))))),((_tmp79E[14]=((_tmp7F8=_region_malloc(r,sizeof(*_tmp7F8)),((
+_tmp7F8->f1=((_tmp7F3="-O2",_tag_dynforward(_tmp7F3,sizeof(char),
+_get_zero_arr_size_char(_tmp7F3,4)))),((_tmp7F8->f2=0,((_tmp7F8->f3=((_tmp7F4="",
+_tag_dynforward(_tmp7F4,sizeof(char),_get_zero_arr_size_char(_tmp7F4,1)))),((
+_tmp7F8->f4=(void*)((_tmp7F5=_region_malloc(r,sizeof(*_tmp7F5)),((_tmp7F5[0]=((
+_tmp7F6.tag=1,((_tmp7F6.f1=Cyc_add_ccarg,_tmp7F6)))),_tmp7F5)))),((_tmp7F8->f5=((
+_tmp7F7="A higher level of optimization",_tag_dynforward(_tmp7F7,sizeof(char),
+_get_zero_arr_size_char(_tmp7F7,31)))),_tmp7F8)))))))))))),((_tmp79E[13]=((
+_tmp7F2=_region_malloc(r,sizeof(*_tmp7F2)),((_tmp7F2->f1=((_tmp7ED="-O",
+_tag_dynforward(_tmp7ED,sizeof(char),_get_zero_arr_size_char(_tmp7ED,3)))),((
+_tmp7F2->f2=0,((_tmp7F2->f3=((_tmp7EE="",_tag_dynforward(_tmp7EE,sizeof(char),
+_get_zero_arr_size_char(_tmp7EE,1)))),((_tmp7F2->f4=(void*)((_tmp7EF=
+_region_malloc(r,sizeof(*_tmp7EF)),((_tmp7EF[0]=((_tmp7F0.tag=1,((_tmp7F0.f1=Cyc_add_ccarg,
+_tmp7F0)))),_tmp7EF)))),((_tmp7F2->f5=((_tmp7F1="Optimize",_tag_dynforward(
+_tmp7F1,sizeof(char),_get_zero_arr_size_char(_tmp7F1,9)))),_tmp7F2)))))))))))),((
+_tmp79E[12]=((_tmp7EC=_region_malloc(r,sizeof(*_tmp7EC)),((_tmp7EC->f1=((_tmp7E7="-O0",
+_tag_dynforward(_tmp7E7,sizeof(char),_get_zero_arr_size_char(_tmp7E7,4)))),((
+_tmp7EC->f2=0,((_tmp7EC->f3=((_tmp7E8="",_tag_dynforward(_tmp7E8,sizeof(char),
+_get_zero_arr_size_char(_tmp7E8,1)))),((_tmp7EC->f4=(void*)((_tmp7E9=
+_region_malloc(r,sizeof(*_tmp7E9)),((_tmp7E9[0]=((_tmp7EA.tag=1,((_tmp7EA.f1=Cyc_add_ccarg,
+_tmp7EA)))),_tmp7E9)))),((_tmp7EC->f5=((_tmp7EB="Don't optimize",_tag_dynforward(
+_tmp7EB,sizeof(char),_get_zero_arr_size_char(_tmp7EB,15)))),_tmp7EC)))))))))))),((
+_tmp79E[11]=((_tmp7E6=_region_malloc(r,sizeof(*_tmp7E6)),((_tmp7E6->f1=((_tmp7E1="-s",
+_tag_dynforward(_tmp7E1,sizeof(char),_get_zero_arr_size_char(_tmp7E1,3)))),((
+_tmp7E6->f2=0,((_tmp7E6->f3=((_tmp7E2="",_tag_dynforward(_tmp7E2,sizeof(char),
+_get_zero_arr_size_char(_tmp7E2,1)))),((_tmp7E6->f4=(void*)((_tmp7E3=
+_region_malloc(r,sizeof(*_tmp7E3)),((_tmp7E3[0]=((_tmp7E4.tag=1,((_tmp7E4.f1=Cyc_add_ccarg,
+_tmp7E4)))),_tmp7E3)))),((_tmp7E6->f5=((_tmp7E5="Remove all symbol table and relocation info from executable",
+_tag_dynforward(_tmp7E5,sizeof(char),_get_zero_arr_size_char(_tmp7E5,60)))),
+_tmp7E6)))))))))))),((_tmp79E[10]=((_tmp7E0=_region_malloc(r,sizeof(*_tmp7E0)),((
+_tmp7E0->f1=((_tmp7DB="-x",_tag_dynforward(_tmp7DB,sizeof(char),
+_get_zero_arr_size_char(_tmp7DB,3)))),((_tmp7E0->f2=0,((_tmp7E0->f3=((_tmp7DC=" <language>",
+_tag_dynforward(_tmp7DC,sizeof(char),_get_zero_arr_size_char(_tmp7DC,12)))),((
+_tmp7E0->f4=(void*)((_tmp7DD=_region_malloc(r,sizeof(*_tmp7DD)),((_tmp7DD[0]=((
+_tmp7DE.tag=5,((_tmp7DE.f1=Cyc_set_inputtype,_tmp7DE)))),_tmp7DD)))),((_tmp7E0->f5=((
+_tmp7DF="Specify <language> for the following input files",_tag_dynforward(
+_tmp7DF,sizeof(char),_get_zero_arr_size_char(_tmp7DF,49)))),_tmp7E0)))))))))))),((
+_tmp79E[9]=((_tmp7DA=_region_malloc(r,sizeof(*_tmp7DA)),((_tmp7DA->f1=((_tmp7D5="-c",
+_tag_dynforward(_tmp7D5,sizeof(char),_get_zero_arr_size_char(_tmp7D5,3)))),((
+_tmp7DA->f2=0,((_tmp7DA->f3=((_tmp7D6="",_tag_dynforward(_tmp7D6,sizeof(char),
+_get_zero_arr_size_char(_tmp7D6,1)))),((_tmp7DA->f4=(void*)((_tmp7D7=
+_region_malloc(r,sizeof(*_tmp7D7)),((_tmp7D7[0]=((_tmp7D8.tag=0,((_tmp7D8.f1=Cyc_set_stop_after_objectfile,
+_tmp7D8)))),_tmp7D7)))),((_tmp7DA->f5=((_tmp7D9="Produce an object file instead of an executable; do not link",
+_tag_dynforward(_tmp7D9,sizeof(char),_get_zero_arr_size_char(_tmp7D9,61)))),
+_tmp7DA)))))))))))),((_tmp79E[8]=((_tmp7D4=_region_malloc(r,sizeof(*_tmp7D4)),((
+_tmp7D4->f1=((_tmp7CF="-m",_tag_dynforward(_tmp7CF,sizeof(char),
+_get_zero_arr_size_char(_tmp7CF,3)))),((_tmp7D4->f2=1,((_tmp7D4->f3=((_tmp7D0="<option>",
+_tag_dynforward(_tmp7D0,sizeof(char),_get_zero_arr_size_char(_tmp7D0,9)))),((
+_tmp7D4->f4=(void*)((_tmp7D1=_region_malloc(r,sizeof(*_tmp7D1)),((_tmp7D1[0]=((
+_tmp7D2.tag=1,((_tmp7D2.f1=Cyc_add_marg,_tmp7D2)))),_tmp7D1)))),((_tmp7D4->f5=((
+_tmp7D3="GCC specific: pass machine-dependent flag on to gcc",_tag_dynforward(
+_tmp7D3,sizeof(char),_get_zero_arr_size_char(_tmp7D3,52)))),_tmp7D4)))))))))))),((
+_tmp79E[7]=((_tmp7CE=_region_malloc(r,sizeof(*_tmp7CE)),((_tmp7CE->f1=((_tmp7C9="-l",
+_tag_dynforward(_tmp7C9,sizeof(char),_get_zero_arr_size_char(_tmp7C9,3)))),((
+_tmp7CE->f2=1,((_tmp7CE->f3=((_tmp7CA="<libname>",_tag_dynforward(_tmp7CA,
+sizeof(char),_get_zero_arr_size_char(_tmp7CA,10)))),((_tmp7CE->f4=(void*)((
+_tmp7CB=_region_malloc(r,sizeof(*_tmp7CB)),((_tmp7CB[0]=((_tmp7CC.tag=1,((
+_tmp7CC.f1=Cyc_add_libarg,_tmp7CC)))),_tmp7CB)))),((_tmp7CE->f5=((_tmp7CD="Library file",
+_tag_dynforward(_tmp7CD,sizeof(char),_get_zero_arr_size_char(_tmp7CD,13)))),
+_tmp7CE)))))))))))),((_tmp79E[6]=((_tmp7C8=_region_malloc(r,sizeof(*_tmp7C8)),((
+_tmp7C8->f1=((_tmp7C3="-L",_tag_dynforward(_tmp7C3,sizeof(char),
+_get_zero_arr_size_char(_tmp7C3,3)))),((_tmp7C8->f2=1,((_tmp7C8->f3=((_tmp7C4="<dir>",
+_tag_dynforward(_tmp7C4,sizeof(char),_get_zero_arr_size_char(_tmp7C4,6)))),((
+_tmp7C8->f4=(void*)((_tmp7C5=_region_malloc(r,sizeof(*_tmp7C5)),((_tmp7C5[0]=((
+_tmp7C6.tag=1,((_tmp7C6.f1=Cyc_add_ccarg,_tmp7C6)))),_tmp7C5)))),((_tmp7C8->f5=((
+_tmp7C7="Add to the list of directories for -l",_tag_dynforward(_tmp7C7,sizeof(
+char),_get_zero_arr_size_char(_tmp7C7,38)))),_tmp7C8)))))))))))),((_tmp79E[5]=((
+_tmp7C2=_region_malloc(r,sizeof(*_tmp7C2)),((_tmp7C2->f1=((_tmp7BD="-I",
+_tag_dynforward(_tmp7BD,sizeof(char),_get_zero_arr_size_char(_tmp7BD,3)))),((
+_tmp7C2->f2=1,((_tmp7C2->f3=((_tmp7BE="<dir>",_tag_dynforward(_tmp7BE,sizeof(
+char),_get_zero_arr_size_char(_tmp7BE,6)))),((_tmp7C2->f4=(void*)((_tmp7BF=
+_region_malloc(r,sizeof(*_tmp7BF)),((_tmp7BF[0]=((_tmp7C0.tag=1,((_tmp7C0.f1=Cyc_add_cpparg,
+_tmp7C0)))),_tmp7BF)))),((_tmp7C2->f5=((_tmp7C1="Add to the list of directories to search for include files",
+_tag_dynforward(_tmp7C1,sizeof(char),_get_zero_arr_size_char(_tmp7C1,59)))),
+_tmp7C2)))))))))))),((_tmp79E[4]=((_tmp7BC=_region_malloc(r,sizeof(*_tmp7BC)),((
+_tmp7BC->f1=((_tmp7B7="-B",_tag_dynforward(_tmp7B7,sizeof(char),
+_get_zero_arr_size_char(_tmp7B7,3)))),((_tmp7BC->f2=1,((_tmp7BC->f3=((_tmp7B8="<file>",
+_tag_dynforward(_tmp7B8,sizeof(char),_get_zero_arr_size_char(_tmp7B8,7)))),((
+_tmp7BC->f4=(void*)((_tmp7B9=_region_malloc(r,sizeof(*_tmp7B9)),((_tmp7B9[0]=((
+_tmp7BA.tag=1,((_tmp7BA.f1=Cyc_add_cyclone_exec_path,_tmp7BA)))),_tmp7B9)))),((
+_tmp7BC->f5=((_tmp7BB="Add to the list of directories to search for compiler files",
+_tag_dynforward(_tmp7BB,sizeof(char),_get_zero_arr_size_char(_tmp7BB,60)))),
+_tmp7BC)))))))))))),((_tmp79E[3]=((_tmp7B6=_region_malloc(r,sizeof(*_tmp7B6)),((
+_tmp7B6->f1=((_tmp7B1="-D",_tag_dynforward(_tmp7B1,sizeof(char),
+_get_zero_arr_size_char(_tmp7B1,3)))),((_tmp7B6->f2=1,((_tmp7B6->f3=((_tmp7B2="<name>[=<value>]",
+_tag_dynforward(_tmp7B2,sizeof(char),_get_zero_arr_size_char(_tmp7B2,17)))),((
+_tmp7B6->f4=(void*)((_tmp7B3=_region_malloc(r,sizeof(*_tmp7B3)),((_tmp7B3[0]=((
+_tmp7B4.tag=1,((_tmp7B4.f1=Cyc_add_cpparg,_tmp7B4)))),_tmp7B3)))),((_tmp7B6->f5=((
+_tmp7B5="Pass definition to preprocessor",_tag_dynforward(_tmp7B5,sizeof(char),
+_get_zero_arr_size_char(_tmp7B5,32)))),_tmp7B6)))))))))))),((_tmp79E[2]=((
+_tmp7B0=_region_malloc(r,sizeof(*_tmp7B0)),((_tmp7B0->f1=((_tmp7AB="-o",
+_tag_dynforward(_tmp7AB,sizeof(char),_get_zero_arr_size_char(_tmp7AB,3)))),((
+_tmp7B0->f2=0,((_tmp7B0->f3=((_tmp7AC=" <file>",_tag_dynforward(_tmp7AC,sizeof(
+char),_get_zero_arr_size_char(_tmp7AC,8)))),((_tmp7B0->f4=(void*)((_tmp7AD=
+_region_malloc(r,sizeof(*_tmp7AD)),((_tmp7AD[0]=((_tmp7AE.tag=5,((_tmp7AE.f1=Cyc_set_output_file,
+_tmp7AE)))),_tmp7AD)))),((_tmp7B0->f5=((_tmp7AF="Set the output file name to <file>",
+_tag_dynforward(_tmp7AF,sizeof(char),_get_zero_arr_size_char(_tmp7AF,35)))),
+_tmp7B0)))))))))))),((_tmp79E[1]=((_tmp7AA=_region_malloc(r,sizeof(*_tmp7AA)),((
+_tmp7AA->f1=((_tmp7A5="--version",_tag_dynforward(_tmp7A5,sizeof(char),
+_get_zero_arr_size_char(_tmp7A5,10)))),((_tmp7AA->f2=0,((_tmp7AA->f3=((_tmp7A6="",
+_tag_dynforward(_tmp7A6,sizeof(char),_get_zero_arr_size_char(_tmp7A6,1)))),((
+_tmp7AA->f4=(void*)((_tmp7A7=_region_malloc(r,sizeof(*_tmp7A7)),((_tmp7A7[0]=((
+_tmp7A8.tag=0,((_tmp7A8.f1=Cyc_print_version,_tmp7A8)))),_tmp7A7)))),((_tmp7AA->f5=((
+_tmp7A9="Print version information and exit",_tag_dynforward(_tmp7A9,sizeof(char),
+_get_zero_arr_size_char(_tmp7A9,35)))),_tmp7AA)))))))))))),((_tmp79E[0]=((
+_tmp7A4=_region_malloc(r,sizeof(*_tmp7A4)),((_tmp7A4->f1=((_tmp79F="-v",
+_tag_dynforward(_tmp79F,sizeof(char),_get_zero_arr_size_char(_tmp79F,3)))),((
+_tmp7A4->f2=0,((_tmp7A4->f3=((_tmp7A0="",_tag_dynforward(_tmp7A0,sizeof(char),
+_get_zero_arr_size_char(_tmp7A0,1)))),((_tmp7A4->f4=(void*)((_tmp7A1=
+_region_malloc(r,sizeof(*_tmp7A1)),((_tmp7A1[0]=((_tmp7A2.tag=3,((_tmp7A2.f1=&
+Cyc_v_r,_tmp7A2)))),_tmp7A1)))),((_tmp7A4->f5=((_tmp7A3="Print compilation stages verbosely",
+_tag_dynforward(_tmp7A3,sizeof(char),_get_zero_arr_size_char(_tmp7A3,35)))),
+_tmp7A4)))))))))))),((struct Cyc_List_List*(*)(struct _RegionHandle*,struct
 _dynforward_ptr))Cyc_List_rlist)(r,_tag_dynforward(_tmp79E,sizeof(struct _tuple15*),
 64)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));
 const char*_tmp91F;struct _dynforward_ptr optstring=(_tmp91F="Options:",
@@ -2905,10 +2905,10 @@ _npop_handler(0);return _tmp320;}}Cyc_Interface_save((struct Cyc_Interface_I*)
 _tmp31A,(struct Cyc___cycFILE*)_tmp31F);Cyc_file_close((struct Cyc___cycFILE*)
 _tmp31F);}}else{const char*_tmp962;const char*_tmp961;struct _tuple11*_tmp960;if(!
 Cyc_Interface_is_subinterface(Cyc_Interface_empty(),(struct Cyc_Interface_I*)
-_tmp31A,((_tmp960=_cycalloc(sizeof(*_tmp960)),((_tmp960->f1=((_tmp961="empty interface",
-_tag_dynforward(_tmp961,sizeof(char),_get_zero_arr_size_char(_tmp961,16)))),((
-_tmp960->f2=((_tmp962="global interface",_tag_dynforward(_tmp962,sizeof(char),
-_get_zero_arr_size_char(_tmp962,17)))),_tmp960)))))))){{const char*_tmp965;void*
+_tmp31A,((_tmp960=_cycalloc(sizeof(*_tmp960)),((_tmp960->f1=((_tmp962="empty interface",
+_tag_dynforward(_tmp962,sizeof(char),_get_zero_arr_size_char(_tmp962,16)))),((
+_tmp960->f2=((_tmp961="global interface",_tag_dynforward(_tmp961,sizeof(char),
+_get_zero_arr_size_char(_tmp961,17)))),_tmp960)))))))){{const char*_tmp965;void*
 _tmp964;(_tmp964=0,Cyc_fprintf(Cyc_stderr,((_tmp965="Error: some objects are still undefined\n",
 _tag_dynforward(_tmp965,sizeof(char),_get_zero_arr_size_char(_tmp965,41)))),
 _tag_dynforward(_tmp964,sizeof(void*),0)));}Cyc_compile_failure=1;Cyc_remove_cfiles();{

@@ -1073,15 +1073,15 @@ _tmp44;struct _dynforward_ptr*_tmp45;int _tmp46;struct _dynforward_ptr _tmp47;st
 _dynforward_ptr*_tmp48;int _tmp49;struct _dynforward_ptr _tmp4A;_LL1F: if(_tmp31 <= (
 void*)2)goto _LL21;if(*((int*)_tmp31)!= 0)goto _LL21;_tmp32=((struct Cyc_Typerep_Int_struct*)
 _tmp31)->f1;_tmp33=((struct Cyc_Typerep_Int_struct*)_tmp31)->f2;_LL20:{const char*
-_tmp19B;void*_tmp19A[2];const char*_tmp199;const char*_tmp198;struct Cyc_String_pa_struct
+_tmp19B;const char*_tmp19A;const char*_tmp199;void*_tmp198[2];struct Cyc_String_pa_struct
 _tmp197;struct Cyc_Int_pa_struct _tmp196;(_tmp196.tag=1,((_tmp196.f1=(
 unsigned long)((int)_tmp33),((_tmp197.tag=0,((_tmp197.f1=(struct _dynforward_ptr)((
-struct _dynforward_ptr)(_tmp32?(struct _dynforward_ptr)((_tmp198="signed",
-_tag_dynforward(_tmp198,sizeof(char),_get_zero_arr_size_char(_tmp198,7)))):(
-struct _dynforward_ptr)((_tmp199="unsigned",_tag_dynforward(_tmp199,sizeof(char),
-_get_zero_arr_size_char(_tmp199,9)))))),((_tmp19A[0]=& _tmp197,((_tmp19A[1]=&
-_tmp196,Cyc_printf(((_tmp19B="Int(%s,%d)",_tag_dynforward(_tmp19B,sizeof(char),
-_get_zero_arr_size_char(_tmp19B,11)))),_tag_dynforward(_tmp19A,sizeof(void*),2)))))))))))));}
+struct _dynforward_ptr)(_tmp32?(struct _dynforward_ptr)((_tmp19A="signed",
+_tag_dynforward(_tmp19A,sizeof(char),_get_zero_arr_size_char(_tmp19A,7)))):(
+struct _dynforward_ptr)((_tmp19B="unsigned",_tag_dynforward(_tmp19B,sizeof(char),
+_get_zero_arr_size_char(_tmp19B,9)))))),((_tmp198[0]=& _tmp197,((_tmp198[1]=&
+_tmp196,Cyc_printf(((_tmp199="Int(%s,%d)",_tag_dynforward(_tmp199,sizeof(char),
+_get_zero_arr_size_char(_tmp199,11)))),_tag_dynforward(_tmp198,sizeof(void*),2)))))))))))));}
 goto _LL1E;_LL21: if((int)_tmp31 != 0)goto _LL23;_LL22:{const char*_tmp19E;void*
 _tmp19D;(_tmp19D=0,Cyc_printf(((_tmp19E="Float",_tag_dynforward(_tmp19E,sizeof(
 char),_get_zero_arr_size_char(_tmp19E,6)))),_tag_dynforward(_tmp19D,sizeof(void*),
