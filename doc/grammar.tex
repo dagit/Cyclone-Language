@@ -33,20 +33,42 @@
 \newcommand{\tk}[1]{\texttt{#1}}                 % Token (terminal)
 \newcommand{\opt}{\ensuremath{_{\it\textcolor{bluegray}{opt}}}}
 
-The grammar of Cyclone is derived from ISO C99 and GCC.
-It has the following additional keywords beyond those of GCC:
-\texttt{abstract}, \texttt{alias}, \texttt{calloc}, 
-\texttt{catch}, \texttt{datatype}, \texttt{dynregion_t},
-\texttt{export}, 
-\texttt{fallthru}, 
-\texttt{let}, \texttt{malloc},
-\texttt{namespace}, \texttt{new}, \texttt{NULL}, \texttt{numelts},
-\texttt{rcalloc}, \texttt{region_t}, \texttt{region}, \texttt{regions}, 
-\texttt{reset_region}, 
-\texttt{rmalloc}, \texttt{rnew}, \texttt{tagcheck}, \texttt{tag_t},
-\texttt{throw}, \texttt{try}, \texttt{using}, \texttt{valueof}
-\texttt{valueof_t}.  As in gcc,
-\texttt{__attribute__} is reserved as well.
+The grammar of Cyclone is derived from ISO C99.
+It has the following additional keywords:
+\texttt{abstract},
+\texttt{alias},
+\texttt{as},
+\texttt{calloc},
+\texttt{catch},
+\texttt{datatype},
+\texttt{dynregion_t},
+\texttt{export},
+\texttt{fallthru},
+\texttt{inject},
+\texttt{let},
+\texttt{malloc},
+\texttt{namespace},
+\texttt{new},
+\texttt{NULL},
+\texttt{numelts},
+\texttt{offsetof},
+\texttt{rcalloc},
+\texttt{region_t},
+\texttt{region},
+\texttt{regions},
+\texttt{reset_region},
+\texttt{rmalloc},
+\texttt{rnew},
+\texttt{tagcheck},
+\texttt{tag_t},
+\texttt{throw},
+\texttt{try},
+\texttt{using},
+\texttt{valueof},
+\texttt{valueof_t}.
+As in gcc,
+\texttt{__attribute__}
+is reserved as well.
 
 The non-terminals
 \hypertarget{character-constant}{\textit{character-constant}},
@@ -54,10 +76,12 @@ The non-terminals
 \hypertarget{identifier}{\textit{identifier}},
 \hypertarget{integer-constant}{\textit{integer-constant}},
 \hypertarget{string}{\textit{string}},
-\hypertarget{type-var}{\textit{type-var}},
 and
 \hypertarget{typedef-name}{\textit{typedef-name}}
 are defined lexically as in C\@.
+A \hypertarget{type-var}{\textit{type-var}} is defined as
+a C \textit{identifier} preceded by a \tk{`} (backquote), 
+optionally followed by \tk{::}\nt{kind}.
 
 The start symbol is \textit{translation-unit}.
 
@@ -84,7 +108,7 @@ Jump to:~\nt{declaration} $\cdot$
   \tk{namespace} \nt{identifier} \tk{;} \nt{translation-unit}\\
   \tk{using} \nt{identifier} {\lb} \nt{translation-unit} {\rb} \nt{translation-unit}\\
   \tk{namespace} \nt{identifier} {\lb} \nt{translation-unit} {\rb} \nt{translation-unit} \\
-  \tk{extern} \tk{"C"} {\lb} \nt{translation-unit} {\rb} \nt{translation-unit} \\
+  \tk{extern} \tk{"C"} {\lb} \nt{translation-unit} {\rb} \nt{translation-unit}\\
   \tk{extern} \tk{"C include"} {\lb} \nt{translation-unit} {\rb} \nt{translation-unit}
 \end{rules}
 \begin{rules}{external-declaration}
@@ -98,10 +122,14 @@ Jump to:~\nt{declaration} $\cdot$
 \begin{rules}{declaration}
   \nt{declaration-specifiers} \nt{init-declarator-list}\opt\ \tk{;}\\
   \tk{let} \nt{pattern} \tk{=} \nt{expression} \tk{;}\\
-  \tk{let} \nt{identifier-list} \tk{;} \\
-  \tk{region} \nt{identifier} \tk{;} \\
-  \tk{region} \tk{<} \nt{type-var} \tk{>} \nt{identifier} \tk{;} \\
-  \tk{region} \nt{identifier} \tk{=} \tk{open(} \nt{expression} \tk{)}\tk{;} \\
+  \tk{let} \nt{identifier-list} \tk{;}\\
+  \tk{resetable}\opt\ \tk{region} \tk{<} \nt{type-var} \tk{>}
+  \nt{identifier} \tk{;}\\
+  \tk{resetable}\opt\ \tk{region} \nt{identifier} \tk{;}\\
+  \tk{resetable}\opt\ \tk{region} \nt{identifier} \tk{=} \tk{(}
+  \nt{expression} \tk{)} \tk{;}\\
+  \tk{alias} \tk{<} \nt{type-var} \tk{>} \nt{identifier} \tk{=}
+  \nt{expression} \tk{;}
 \end{rules}
 \begin{rules}{declaration-list}
   \nt{declaration}\\
@@ -113,16 +141,18 @@ Jump to:~\nt{declaration} $\cdot$
   \nt{type-qualifier} \nt{declaration-specifiers}\opt\\
   \nt{function-specifier} \nt{declaration-specifiers}\opt
 \end{rules}
-\begin{rulesoneof}{storage-class-specifier}
-  \tk{auto} ~
-  \tk{register} ~
-  \tk{static} ~
-  \tk{extern} ~
-  \tk{typedef} ~
+\begin{rules}{storage-class-specifier}
+  \tk{auto}\\
+  \tk{register}\\
+  \tk{static}\\
+  \tk{extern}\\
+  \tk{extern} \tk{"C"}\\
+  \tk{typedef}\\
   \tk{abstract}
-\end{rulesoneof}
+\end{rules}
 \begin{rules}{type-specifier}
   \tk{_}\\
+  \tk{_}\tk{::}\nt{kind}\\
   \tk{void}\\
   \tk{char}\\
   \tk{short}\\
@@ -135,26 +165,36 @@ Jump to:~\nt{declaration} $\cdot$
   \nt{enum-specifier}\\
   \nt{struct-or-union-specifier}\\
   \nt{datatype-specifier}\\
-  \nt{typedef-name} \nt{type-params}\opt\\
   \nt{type-var}\\
-  \nt{type-var} \nt{kind}\\
   \tk{\$(} \nt{parameter-list} \tk{)}\\
-  \tk{region_t} \tk{<} \nt{any-type-name} \tk{>} \\
-  \tk{dynregion_t} \tk{<} \nt{any-type-name} \tk{>} \\
-  \tk{dynregion_t} \tk{<} \nt{any-type-name} \tk{,} \nt{any-type-name} \tk{>}\\
-  \tk{tag_t} \tk{<} \nt{any-type-name} \tk{>} \\
-  \tk{valueof_t} \tk{(} \nt{expression} \tk{)} 
+  \tk{region_t}\\
+  \tk{region_t} \tk{<} \nt{any-type-name} \tk{>}\\
+  \tk{dynregion_t} \tk{<} \nt{any-type-name} \tk{>}\\
+  \tk{dynregion_t} \tk{<} \nt{any-type-name}\tk{,} \nt{any-type-name} \tk{>}\\
+  \tk{tag_t}\\
+  \tk{tag_t} \tk{<} \nt{any-type-name} \tk{>}\\
+  \tk{valueof_t} \tk{(} \nt{expression} \tk{)}\\
+  \nt{typedef-name} \nt{type-params}\opt
 \end{rules}
-\begin{rulesoneof}{kind}
-  \tk{::A} ~ \tk{::B} ~ \tk{::M} ~ \tk{::R} ~ \tk{::I} ~ \tk{::TR} ~ \tk{::UR}
-\end{rulesoneof}
-\begin{rulesoneof}{type-qualifier}
-  \tk{const} ~
-  \tk{restrict} ~
-  \tk{volatile}
-\end{rulesoneof}
+\begin{rules}{kind}
+  \nt{identifier}\\
+  \nt{typedef-name}
+\end{rules}
+\begin{rules}{type-qualifier}
+  \tk{const}\\
+  \tk{restrict}\\
+  \tk{volatile}\\
+  \tk{@numelts} \tk{(} \nt{assignment-expression} \tk{)}\\
+  \tk{@region} \tk{(} \nt{any-type-name} \tk{)}\\
+  \tk{@thin}\\
+  \tk{@fat}\\
+  \tk{@zeroterm}\\
+  \tk{@nozeroterm}\\
+  \tk{@notnull}\\
+  \tk{@nullable}
+\end{rules}
 \begin{rules}{enum-specifier}
-  \tk{enum} \nt{identifier} {\lb} \nt{enum-declaration-list} {\rb}\\
+  \tk{enum} \nt{identifier}\opt\ {\lb} \nt{enum-declaration-list} {\rb}\\
   \tk{enum} \nt{identifier}
 \end{rules}
 \begin{rules}{enum-field}
@@ -170,8 +210,8 @@ Jump to:~\nt{declaration} $\cdot$
 \end{rules}
 \begin{rules}{struct-or-union-specifier}
   \nt{struct-or-union} {\lb} \nt{struct-declaration-list} {\rb}\\
-  \nt{struct-or-union} \nt{identifier} \nt{type-params}\opt\ {\lb} \nt{type_params}\opt \nt{region_order}\opt \nt{struct-declaration-list} {\rb}\\
-    \nt{struct-or-union} \nt{identifier} \nt{type-params}\opt
+  \nt{struct-or-union} \nt{identifier} \nt{type-params}\opt\ {\lb} \nt{struct-declaration-list} {\rb}\\
+  \nt{struct-or-union} \nt{identifier} \nt{type-params}\opt
 \end{rules}
 \begin{rules}{type-params}
   \tk{<} \nt{type-name-list} \tk{>}
@@ -209,13 +249,9 @@ Jump to:~\nt{declaration} $\cdot$
   \nt{declarator}\opt\ \tk{:} \nt{constant-expression}
 \end{rules}
 \begin{rules}{datatype-specifier}
-  \nt{xdatatype} \nt{identifier} \nt{type-params}\opt\ {\lb} \nt{datatypefield-list} {\rb}\\
-  \nt{xdatatype} \nt{identifier} \nt{type-params}\opt\\
-  \nt{xdatatype}  \nt{identifier} \tk{.} \nt{identifier} \nt{type-params}\opt
-\end{rules}
-\begin{rules}{xdatatype}
-  \tk{datatype} \\
-  \tk{@extensible} \tk{datatype}
+  \tk{@extensible}\opt\ \tk{datatype} \nt{identifier} \nt{type-params}\opt\ {\lb} \nt{datatypefield-list} {\rb}\\
+  \tk{@extensible}\opt\ \tk{datatype} \nt{identifier} \nt{type-params}\opt\\
+  \tk{@extensible}\opt\ \tk{datatype} \nt{identifier} \tk{.} \nt{identifier} \nt{type-params}\opt
 \end{rules}
 \begin{rules}{datatypefield-list}
   \nt{datatypefield}\\
@@ -228,8 +264,8 @@ Jump to:~\nt{declaration} $\cdot$
   \tk{static}
 \end{rulesoneof}
 \begin{rules}{datatypefield}
-  \nt{datatypefield-scope} \nt{identifier}\\
-  \nt{datatypefield-scope} \nt{identifier} \nt{type-params}\opt\ \tk{(} \nt{parameter-list} \tk{)}
+  \nt{datatypefield-scope}\opt\ \nt{identifier}\\
+  \nt{datatypefield-scope}\opt\ \nt{identifier} \tk{(} \nt{parameter-list} \tk{)}
 \end{rules}
 \begin{rules}{declarator}
   \nt{pointer}\opt\ \nt{direct-declarator}
@@ -237,58 +273,48 @@ Jump to:~\nt{declaration} $\cdot$
 \begin{rules}{direct-declarator}
   \nt{identifier}\\
   \tk{(} \nt{declarator} \tk{)}\\
-  \nt{direct-declarator} \tk{[} \nt{assignment-expression}\opt\ \tk{]} \nt{array-qualifier}\opt \\
+  \nt{direct-declarator} \tk{[} \nt{assignment-expression}\opt\ \tk{]} \nt{zeroterm-qualifier}\opt\\
   \nt{direct-declarator} \tk{(} \nt{parameter-type-list} \tk{)}\\
-  \nt{direct-declarator} \tk{(} \tk{;} \nt{effect-set} \tk{)}\\
+  \nt{direct-declarator} \tk{(} \nt{effect}\opt\ \nt{region-order}\opt\ \tk{)}\\
   \nt{direct-declarator} \tk{(} \nt{identifier-list}\opt\ \tk{)}\\
   \nt{direct-declarator} \tk{<} \nt{type-name-list} \tk{>}
 \end{rules}
-\begin{rules}{pointer}
-  \tk{*}\ \nt{pointer-qualifier-list} \nt{range}\opt\ \nt{region}\opt\ \nt{type-qualifier-list}\opt\ \nt{pointer}\opt\\
-  \tk{@}\ \nt{pointer-qualifier-list} \nt{range}\opt\ \nt{region}\opt\ \nt{type-qualifier-list}\opt\ \nt{pointer}\opt\\
-  \tk{?}\ \nt{pointer-qualifier-list} \nt{region}\opt\ \nt{type-qualifier-list}\opt\ \nt{pointer}\opt
+\begin{rules}{effect}
+  \tk{;} \nt{effect-set}
 \end{rules}
-\begin{rulesoneof}{array-qualifier}
-  \tk{@zeroterm} ~
-  \tk{@nozeroterm}
+\begin{rules}{region-order}
+  \tk{:} \nt{region-order-list}
+\end{rules}
+\begin{rules}{region-order-list}
+  \nt{atomic-effect} \tk{>} \nt{type-var}\\
+  \nt{atomic-effect} \tk{>} \nt{type-var}, \nt{region-order-list}
+\end{rules}
+\begin{rulesoneof}{zeroterm-qualifier}
+  \tk{@zeroterm} ~ \tk{@nozeroterm}
 \end{rulesoneof}
-\begin{rules}{pointer-qualifier-list}
-  (empty) \\
-  \nt{pointer-qualifier} \nt{pointer-qualifier-list}
-\end{rules}
-\begin{rules}{pointer-qualifier}
-  \nt{array-qualifier} \\
-  \tk{@numelts(} \nt{assignment-expression} \tk{)} \\
-  \tk{@region(} \nt{any-type-name} \tk{)} \\
-  \tk{@thin} \\
-  \tk{@fat} \\
-  \tk{@notnull} \\
-  \tk{@nullable} 
+\begin{rules}{pointer}
+  \tk{*}\ \nt{range}\opt\ \nt{region}\opt\ \nt{type-qualifier-list}\opt\ \nt{pointer}\opt\\
+  \tk{@}\ \nt{range}\opt\ \nt{region}\opt\ \nt{type-qualifier-list}\opt\ \nt{pointer}\opt\\
+  \tk{?}\ \nt{region}\opt\ \nt{type-qualifier-list}\opt\ \nt{pointer}\opt
 \end{rules}
 \begin{rules}{range}
   {\lb} \nt{assignment-expression} {\rb}
 \end{rules}
 \begin{rules}{region}
   \tk{_} \\
-  \tk{'H}\\
-  \nt{type-var}\\
-  \nt{type-var} \tk{::} \nt{kind}
+  \nt{type-var}
 \end{rules}
 \begin{rules}{type-qualifier-list}
   \nt{type-qualifier}\\
   \nt{type-qualifier-list} \nt{type-qualifier}
 \end{rules}
 \begin{rules}{parameter-type-list}
-  \nt{parameter-list}\\
-  \nt{parameter-list} \tk{,} \tk{...}
-\end{rules}
-\begin{rules}{optional-effect}
-  (empty)\\
-  \tk{;} \nt{effect-set}
-\end{rules}
-\begin{rules}{optional-inject}
-  (empty)\\
-  \nt{identifier}
+  \nt{parameter-list} \nt{effect}\opt\ \nt{region-order}\opt\\
+  \nt{parameter-list} \tk{,} \tk{...} \nt{effect}\opt\ \nt{region-order}\opt\\
+  \tk{...} \tk{inject}\opt\
+  \nt{parameter-declaration} \nt{effect}\opt\ \nt{region-order}\opt\\
+  \nt{parameter-list} \tk{,} \tk{...} \tk{inject}\opt\
+  \nt{parameter-declaration} \nt{effect}\opt\ \nt{region-order}\opt
 \end{rules}
 \begin{rules}{effect-set}
   \nt{atomic-effect}\\
@@ -298,13 +324,11 @@ Jump to:~\nt{declaration} $\cdot$
   {\lb} {\rb}\\
   {\lb} \nt{region-set} {\rb}\\
   \nt{type-var}\\
-  \nt{type-var} \tk{::} \nt{kind}
+  \tk{regions} \tk{(} \nt{any-type-name} \tk{)}\\
 \end{rules}
 \begin{rules}{region-set}
   \nt{type-var}\\
-  \nt{type-var} \tk{,} \nt{region-set}\\
-  \nt{type-var} \nt{kind}\\
-  \nt{type-var} \nt{kind} \tk{,} \nt{region-set}
+  \nt{type-var} \tk{,} \nt{region-set}
 \end{rules}
 \begin{rules}{parameter-list}
   \nt{parameter-declaration}\\
@@ -339,7 +363,7 @@ Jump to:~\nt{declaration} $\cdot$
   \nt{designator-list} \nt{designator}
 \end{rules}
 \begin{rules}{designator}
-  \tk{[} \nt{constant-expression} \tk{]} \\
+  \tk{[} \nt{constant-expression} \tk{]}\\
   \tk{.} \nt{identifier}
 \end{rules}
 \begin{rules}{type-name}
@@ -352,7 +376,7 @@ Jump to:~\nt{declaration} $\cdot$
   \nt{any-type-name} \tk{+} \nt{atomic-effect}
 \end{rules}
 \begin{rules}{type-name-list}
-  \nt{type-name}\\
+  \nt{any-type-name}\\
   \nt{type-name-list} \tk{,} \nt{type-name}
 \end{rules}
 \begin{rules}{abstract-declarator}
@@ -361,10 +385,9 @@ Jump to:~\nt{declaration} $\cdot$
 \end{rules}
 \begin{rules}{direct-abstract-declarator}
   \tk{(} \nt{abstract-declarator} \tk{)}\\
-  \nt{direct-abstract-declarator}\opt\ \tk{[} \nt{assignment-expression}\opt\ \tk{]} \nt{array-qualifier}\opt \\
+  \nt{direct-abstract-declarator}\opt\ \tk{[} \nt{assignment-expression}\opt\ \tk{]}\nt{zeroterm-qualifier}\opt\\
   \nt{direct-abstract-declarator}\opt\ \tk{(} \nt{parameter-type-list}\opt\ \tk{)}\\
-  \nt{direct-abstract-declarator}\opt\ \tk{(} \tk{;} \nt{effect-set} \tk{)}\\
-  \nt{direct-abstract-declarator}\opt\ \tk{[} \tk{]} \nt{array-qualifier}\opt \\
+  \nt{direct-abstract-declarator}\opt\ \tk{(} \nt{effect}\opt\ \nt{region-order}\opt\ \tk{)}\\
   \nt{direct-abstract-declarator} \tk{<} \nt{type-name-list} \tk{>}
 \end{rules}
 \begin{rules}{statement}
@@ -373,7 +396,8 @@ Jump to:~\nt{declaration} $\cdot$
   \nt{compound-statement}\\
   \nt{selection-statement}\\
   \nt{iteration-statement}\\
-  \nt{jump-statement}
+  \nt{jump-statement}\\
+  \tk{reset_region} \tk{(} \nt{expression} \tk{)} \tk{;}
 \end{rules}
 \begin{rules}{labeled-statement}
   \nt{identifier} \tk{:} \nt{statement}
@@ -421,36 +445,36 @@ Jump to:~\nt{declaration} $\cdot$
 \end{rules}
 \begin{rules}{pattern}
   \tk{_}\\
-  \tk{(} \nt{expression} \tk{)}\\
+  \tk{(} \nt{pattern} \tk{)}\\
   \nt{integer-constant}\\
   \tk{-} \nt{integer-constant}\\
   \nt{floating-constant}\\
   \nt{character-constant}\\
   \tk{NULL}\\
   \nt{identifier}\\
-  \nt{identifier} \tk{as} \nt{pattern} \\
   \nt{identifier} \nt{type-params}\opt\ \tk{(} \nt{tuple-pattern-list} \tk{)}\\
-  \nt{identifier} \nt{type-params}\opt\ \tk{(} \nt{tuple-pattern-list} \tk{, ...}\tk{)}\\
-  \tk{\$\tk{(}} \nt{tuple-pattern-list} \tk{)}\\
-  \tk{\$\tk{(}} \nt{tuple-pattern-list} \tk{, ...} \tk{)}\\
-  \nt{identifier} \nt{type-params}\opt\ {\lb} {\rb}\\
-  \nt{identifier} \nt{type-params}\opt\ {\lb} \nt{field-pattern-list} {\rb}\\
-  \nt{identifier} \nt{type-params}\opt\ {\lb} \nt{field-pattern-list} \tk{, ...} {\rb}\\
+  \tk{\$} \tk{(} \nt{tuple-pattern-list} \tk{)}\\
+  \nt{identifier} \tk{(} \nt{tuple-pattern-list} \tk{)}\\
+  \nt{identifier}\opt\ {\lb} \nt{type-params}\opt\ \nt{field-pattern-list}\opt\ {\rb}\\
   \tk{\&} \nt{pattern}\\
-  \tk{*} \nt{identifier}
+  \tk{*} \nt{identifier}\\
+  \nt{identifier} \tk{as} \nt{pattern}\\
+  \nt{identifier} \tk{<} \nt{type-var} \tk{>}\\
+  \nt{identifier} \tk{<} \tk{_} \tk{>}
 \end{rules}
 \begin{rules}{tuple-pattern-list}
-  (empty)\\
+  \tk{...}\\
   \nt{pattern}\\
-  \nt{tuple-pattern-list} \tk{,} \nt{pattern}
+  \nt{pattern} \tk{,} \nt{tuple-pattern-list}
 \end{rules}
 \begin{rules}{field-pattern}
   \nt{pattern}\\
   \nt{designation} \nt{pattern}
 \end{rules}
 \begin{rules}{field-pattern-list}
+  \tk{...}\\
   \nt{field-pattern}\\
-  \nt{field-pattern-list} \tk{,} \nt{field-pattern}
+  \nt{field-pattern} \tk{,} \nt{field-pattern-list}
 \end{rules}
 \begin{rules}{expression}
   \nt{assignment-expression}\\
@@ -458,7 +482,8 @@ Jump to:~\nt{declaration} $\cdot$
 \end{rules}
 \begin{rules}{assignment-expression}
   \nt{conditional-expression}\\
-  \nt{unary-expression} \nt{assignment-operator} \nt{assignment-expression}
+  \nt{unary-expression} \nt{assignment-operator} \nt{assignment-expression}\\
+  \nt{unary-expression} \tk{:=:} \nt{assignment-expression}
 \end{rules}
 \begin{rulesoneof}{assignment-operator}
   \tk{=} ~
@@ -533,7 +558,7 @@ Jump to:~\nt{declaration} $\cdot$
   \nt{additive-expression} \tk{-} \nt{multiplicative-expression}
 \end{rules}
 \begin{rules}{multiplicative-expression}
-  \nt{cast-expression}
+  \nt{cast-expression}\\
   \nt{multiplicative-expression} \tk{*} \nt{cast-expression}\\
   \nt{multiplicative-expression} \tk{/} \nt{cast-expression}\\
   \nt{multiplicative-expression} \tk{\%} \nt{cast-expression}
@@ -549,14 +574,16 @@ Jump to:~\nt{declaration} $\cdot$
   \nt{unary-operator} \nt{cast-expression}\\
   \tk{sizeof} \nt{unary-expression}\\
   \tk{sizeof} \tk{(} \nt{type-name} \tk{)}\\
-  \tk{malloc} \tk{(} \nt{expression} \tk{)} \\
-  \tk{rmalloc} \tk{(} \nt{assignment-expression} \tk{,} \nt{expression} \tk{)} \\
-  \tk{calloc} \tk{(} \nt{assignment-expression} \tk{,} \tk{sizeof(} \nt{type-name} \tk{)} \tk{)} \\
-  \tk{rcalloc} \tk{(} \nt{assignment-expression} \tk{,} \nt{assignment-expression} \tk{,} \tk{sizeof(} \nt{type-name} \tk{)} \tk{)} \\
-  \tk{numelts} \tk{(} \nt{expression} \tk{)} \\
-  \tk{tagcheck} \tk{(} \nt{postfix-expression} \tk{.} \nt{identifier} \tk{)} \\
-  \tk{tagcheck} \tk{(} \nt{postfix-expression} \tk{->} \nt{identifier} \tk{)} \\
-  \tk{valueof} \tk{(} \nt{type-name} \tk{)} \\
+  \tk{offsetof} \tk{(} \nt{type-name} \tk{,} \nt{identifier} \tk{)}\\
+  \tk{offsetof} \tk{(} \nt{type-name} \tk{,} \nt{integer-constant} \tk{)}\\
+  \tk{malloc} \tk{(} \nt{expression} \tk{)}\\
+  \tk{rmalloc} \tk{(} \nt{assignment-expression} \tk{,} \nt{expression} \tk{)}\\
+  \tk{calloc} \tk{(} \nt{assignment-expression} \tk{,} \tk{sizeof} \tk{(} \nt{type-name} \tk{)} \tk{)}\\
+  \tk{rcalloc} \tk{(} \nt{assignment-expression} \tk{,} \nt{assignment-expression} \tk{,} \tk{sizeof} \tk{(} \nt{type-name} \tk{)} \tk{)}\\
+  \tk{numelts} \tk{(} \nt{expression} \tk{)}\\
+  \tk{tagcheck} \tk{(} \nt{postfix-expression} \tk{.} \nt{identifier} \tk{)}\\
+  \tk{tagcheck} \tk{(} \nt{postfix-expression} \tk{->} \nt{identifier} \tk{)}\\
+  \tk{valueof} \tk{(} \nt{type-name} \tk{)}\\
 \end{rules}
 \begin{rulesoneof}{unary-operator}
   \tk{\&} ~
@@ -572,8 +599,7 @@ Jump to:~\nt{declaration} $\cdot$
 \begin{rules}{postfix-expression}
   \nt{primary-expression}\\
   \nt{postfix-expression} \tk{[} \nt{expression} \tk{]}\\
-  \nt{postfix-expression} \tk{(} \tk{)}\\
-  \nt{postfix-expression} \tk{(} \nt{argument-expression-list} \tk{)}\\
+  \nt{postfix-expression} \tk{(} \nt{argument-expression-list}\opt\ \tk{)}\\
   \nt{postfix-expression} \tk{.} \nt{identifier}\\
   \nt{postfix-expression} \tk{->} \nt{identifier}\\
   \nt{postfix-expression} \tk{++}\\
@@ -586,10 +612,10 @@ Jump to:~\nt{declaration} $\cdot$
   \nt{constant}\\
   \nt{string}\\
   \tk{(} \nt{expression} \tk{)}\\
-  \nt{identifier} \tk{<>}\\
-  \nt{identifier} \tk{@} \tk{<} \nt{type-name-list} \tk{>}\\
+  \nt{primary-expression} \tk{<>}\\
+  \nt{primary-expression} \tk{@} \tk{<} \nt{type-name-list} \tk{>}\\
   \tk{\$(} \nt{argument-expression-list} \tk{)}\\
-  \nt{identifier} {\lb} \nt{initializer-list} {\rb}\\
+  \nt{identifier} {\lb} \nt{type-params}\opt\ \nt{initializer-list} {\rb}\\
   \tk{(} {\lb} \nt{block-item-list} {\rb} \tk{)}
 \end{rules}
 \begin{rules}{argument-expression-list}

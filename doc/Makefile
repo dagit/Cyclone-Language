@@ -1,4 +1,26 @@
 CYCDOC=../bin/cycdoc
+INPUTS= advanced.tex \
+	aprof.tex \
+	buildlib.tex \
+	compiler.tex \
+	definiteassignment.tex \
+	faq.tex \
+	gen-libdoc.tex \
+	generics.tex \
+	grammar.tex \
+	installing.tex \
+	intro.tex \
+	libraries.tex \
+	main-stub.tex \
+	namespaces.tex \
+	patterns.tex \
+	pointers.tex \
+	porting.tex \
+	regions.tex \
+	taggedunions.tex \
+	tutorial.tex \
+	typeinference.tex \
+	varargs.tex
 
 all: screen html
 
@@ -15,23 +37,23 @@ tarball: online-manual letter
 	  tar cvf cyclone-$VERSION-docs.tar online-manual main-letter.pdf
 	  gzip cyclone-$VERSION-docs.tar)
 
-online-manual: main-screen.html gen-libdoc.tex
+online-manual: main-screen.html
 	$(RM) -r online-manual
 	mkdir online-manual
 	cp *.html online-manual
 	(cd online-manual; hacha main-screen.html)
 
-%.html: %.tex gen-libdoc.tex
+%.html: %.tex $(INPUTS)
 	hevea $<
 	hevea $<
 
-%.pdf: %.tex gen-libdoc.tex
+%.pdf: %.tex $(INPUTS)
 	pdflatex '\nonstopmode\input' $<
 	makeindex $<
 	pdflatex '\nonstopmode\input' $<
 	pdflatex '\nonstopmode\input' $<
 
-%.dvi: %.tex gen-libdoc.tex
+%.dvi: %.tex $(INPUTS)
 	latex '\nonstopmode\input' $<
 	makeindex $<
 	latex '\nonstopmode\input' $<

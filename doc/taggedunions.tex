@@ -107,11 +107,11 @@ can be treated as a sub-type of a pointer to a
   datatype Color.Red red = Red;
   datatype Color *c = &red;
 \end{verbatim}
-
 In this simple example, we are splitting hairs, but we will soon find
-all these distinctions useful.  Unlike \texttt{enum}, \texttt{datatype}
-variants may carry any fixed number of values, as in this example:
+all these distinctions useful.
 
+Unlike \texttt{enum}, \texttt{datatype} variants may carry any fixed
+number of values, as in this example:
 \begin{verbatim}
   datatype Shape {
     Point,
@@ -150,9 +150,9 @@ as if they are \texttt{Shape} pointers:
   datatype Shape *s2 = new Circle(3.0);
 \end{verbatim}
 
-\texttt{datatype} types are particularly useful for building recursive
-structures.  For example, a small language of arithmetic expressions
-might look like this:
+Datatypes are particularly useful for building recursive structures.
+For example, a small language of arithmetic expressions might look
+like this:
 \begin{verbatim}
   enum Unops { Negate, Invert};
   enum Binops { Add, Subtract, Multiply, Divide };
@@ -166,7 +166,7 @@ might look like this:
 \end{verbatim}
 
 A function returning an expression representing the multiplication of
-its parameter by two could like this:
+its parameter by two can be written like this:
 \begin{verbatim}
   exp_t double_exp(datatype Exp e) {
     return new Binop(Multiply, e, new Int(2));
@@ -178,7 +178,7 @@ type, such as \texttt{datatype Shape}, we do not know which variant it is.
 It could be a \texttt{Circle} or \texttt{Shape}, etc.  In Cyclone, we
 use \emph{pattern matching} to determine which variant a given datatype
 value actually is, and to extract the arguments that were used to
-build the datatype value  For example, here is how you could define
+build the datatype value.  For example, here is how you could define
 \texttt{isCircle}:
 \begin{verbatim}
   bool isCircle(datatype Shape *s) {
@@ -189,9 +189,8 @@ build the datatype value  For example, here is how you could define
   }
 \end{verbatim}
 
-When a \texttt{switch} statement's argument has a \texttt{datatype} 
-pointer type,
-the cases describe variants.  One variant of \texttt{datatype Shape*} is a
+When a \texttt{switch} statement's argument is a pointer to a datatype,
+the cases describe variants.  One variant of \texttt{datatype Shape *} is a
 pointer to a \texttt{Circle}, which carries one value.  The
 corresponding pattern has \texttt{\&} for the pointer, \texttt{Circle} for
 the constructor name, and one identifier for each value carried by
