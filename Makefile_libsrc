@@ -32,6 +32,11 @@ LIBR:=$(CYCLIB)
 #   directory, and the -B. ensures we use that one.
 override CYCFLAGS += $(addprefix -I, $(INC_PATH)) -B. -B$(LIB_PATH) -save-c
 
+# cross compilation -- will be changed to use -b shortly
+ifneq ($(UPDATEARCH),$(ARCH))
+override CYCFLAGS += -use-cpp '$(addprefix $(CYCDIR)/config/, cyccpp arch/$(ARCH) arch/$(UPDATEARCH))'
+endif
+
 CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))
 
 all: libs $(CYCCOMP) cycdoc$(EXE) buildlib$(EXE) 
@@ -121,7 +126,7 @@ ifdef MS
 	cl /I$(CYCDIR) /Dinline=__inline /c /w /nologo /Fo$@ $^
 endif
 
-#This klduge replaces the PLATFORM_INCLUDE kludge -- we hope buildlib comes soon
+#This kludge replaces the PLATFORM_INCLUDE kludge -- we hope buildlib comes soon
 cstdio.h: cstdio.h_in arch/$(UPDATEARCH).h
 	-$(RM) $@
 	echo "#ifndef _STDIO_H" >> $@

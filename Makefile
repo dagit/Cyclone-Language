@@ -136,7 +136,7 @@ lib_src:
 	$(DO_LIBSRC) libs
 cfiles:
 	-mkdir $(BUILDDIR) >& /dev/null
-	$(DO_LIBSRC) CYCFLAGS="$(CYCFLAGS) -stopafter-toc" cfiles
+	$(DO_LIBSRC) cfiles
 
 # Note: Tried doing this stuff with target-specific variables instead
 #       of recursive invocations, but it crashes gnumake 3.79.1
@@ -259,8 +259,7 @@ update_all_archs:
 	  $(MAKE) update\
 	 NODEPS=X\
 	 BUILDDIR=build/$(PATCH_ARCH)\
-	 UPDATEARCH=$(PATCH_ARCH)\
-	 CYCFLAGS="$(CYCFLAGS) -use-cpp '$(addprefix $(CYCDIR)/config/, cyccpp arch/$(ARCH) arch/$(PATCH_ARCH))'";\
+	 UPDATEARCH=$(PATCH_ARCH);\
 	else\
 	  $(MAKE) update;\
 	fi;
@@ -270,8 +269,7 @@ update_all_archs:
 	      $(MAKE) update\
 	 NODEPS=X\
 	 BUILDDIR=build/$$arch\
-	 UPDATEARCH=$$arch\
-	 CYCFLAGS="$(CYCFLAGS) -use-cpp '$(addprefix $(CYCDIR)/config/, cyccpp arch/$(ARCH) arch/$$arch)'";\
+	 UPDATEARCH=$$arch;\
 	    else\
 	      $(MAKE) update;\
 	    fi;\
