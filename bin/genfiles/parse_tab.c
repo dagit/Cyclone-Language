@@ -1271,7 +1271,7 @@ decls=({struct Cyc_List_List*_tmp15C=_cycalloc(sizeof(*_tmp15C));_tmp15C->hd=d,_
 # 947
 struct Cyc_List_List*_tmp15F=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(decls);_npop_handler(0U);return _tmp15F;}}}}}}}}}
 # 843
-;_pop_region(mkrgn);}
+;_pop_region();}
 # 953
 static struct Cyc_Absyn_Kind*Cyc_Parse_id_to_kind(struct _fat_ptr s,unsigned loc){
 if(Cyc_strlen((struct _fat_ptr)s)== (unsigned long)1 || Cyc_strlen((struct _fat_ptr)s)== (unsigned long)2){
@@ -2689,7 +2689,7 @@ yyval=Cyc_YY24(((struct Cyc_List_List*(*)(struct Cyc_Absyn_Aggrfield*(*f)(unsign
 # 1833
 _npop_handler(0U);goto _LL0;}}}}
 # 1815
-;_pop_region(temp);}case 139U: _LL111: _LL112:
+;_pop_region();}case 139U: _LL111: _LL112:
 # 1841 "parse.y"
  yyval=Cyc_YY35(({struct _tuple26 _tmp736;({struct Cyc_Absyn_Tqual _tmp932=Cyc_Absyn_empty_tqual((unsigned)((yyyvsp[0]).l).first_line);_tmp736.f1=_tmp932;}),({struct Cyc_Parse_Type_specifier _tmp931=Cyc_yyget_YY21(&(yyyvsp[0]).v);_tmp736.f2=_tmp931;}),_tmp736.f3=0;_tmp736;}));
 goto _LL0;case 140U: _LL113: _LL114: {
@@ -4444,7 +4444,7 @@ int _tmp6AC=0;_npop_handler(0U);return _tmp6AC;}
 # 551
 goto yynewstate;}
 # 149 "cycbison.simple"
-;_pop_region(yyregion);}
+;_pop_region();}
 # 3260 "parse.y"
 void Cyc_yyprint(int i,union Cyc_YYSTYPE v){
 union Cyc_YYSTYPE _tmp6B0=v;struct Cyc_Absyn_Stmt*_tmp6B1;struct Cyc_Absyn_Exp*_tmp6B2;struct _tuple0*_tmp6B3;struct _fat_ptr _tmp6B4;char _tmp6B5;union Cyc_Absyn_Cnst _tmp6B6;switch((_tmp6B0.Stmt_tok).tag){case 1U: _LL1: _tmp6B6=(_tmp6B0.Int_tok).val;_LL2: {union Cyc_Absyn_Cnst c=_tmp6B6;
@@ -4474,4 +4474,4 @@ struct _RegionHandle _tmp6CC=_new_region("yyr");struct _RegionHandle*yyr=& _tmp6
 ({struct _RegionHandle*_tmpC57=yyr;Cyc_yyparse(_tmpC57,Cyc_Lexing_from_file(f));});{
 struct Cyc_List_List*_tmp6CD=Cyc_Parse_parse_result;_npop_handler(0U);return _tmp6CD;}
 # 3289
-;_pop_region(yyr);}}
+;_pop_region();}}

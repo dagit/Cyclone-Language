@@ -750,7 +750,7 @@ if(!({struct Cyc_List_List*_tmp642=relns;Cyc_NewControlFlow_relns_ok(_tmp642,Cyc
 Cyc_Relations_print_relns(Cyc_stderr,relns);
 ({void*_tmp3A=0U;({struct Cyc___cycFILE*_tmp649=Cyc_stderr;struct _fat_ptr _tmp648=({const char*_tmp3B="]\n";_tag_fat(_tmp3B,sizeof(char),3U);});Cyc_fprintf(_tmp649,_tmp648,_tag_fat(_tmp3A,sizeof(void*),0U));});});}}
 # 307
-;_pop_region(temp);}
+;_pop_region();}
 # 316
 goto _LL5;}}else{goto _LLA;}case 7U: _LL8: _tmp2C=((struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)_tmp2B)->f2;_LL9: {struct Cyc_List_List*fs=_tmp2C;
 # 318
@@ -764,7 +764,7 @@ if(!({struct Cyc_List_List*_tmp64A=relns;Cyc_NewControlFlow_relns_ok(_tmp64A,Cyc
 Cyc_Relations_print_relns(Cyc_stderr,relns);
 ({void*_tmp45=0U;({struct Cyc___cycFILE*_tmp651=Cyc_stderr;struct _fat_ptr _tmp650=({const char*_tmp46="]\n";_tag_fat(_tmp46,sizeof(char),3U);});Cyc_fprintf(_tmp651,_tmp650,_tag_fat(_tmp45,sizeof(void*),0U));});});}
 # 322
-;_pop_region(temp);}
+;_pop_region();}
 # 329
 goto _LL5;}default: _LLA: _LLB:
  goto _LL5;}_LL5:;}
@@ -806,7 +806,7 @@ Cyc_NewControlFlow_check_nounique(env,loc,t,((void**)d.curr)[i]);}}
 # 378
 _npop_handler(0U);return;}
 # 372
-;_pop_region(temp);}}}else{goto _LL13;}default: goto _LL13;}case 6U: if(((struct Cyc_CfFlowInfo_Aggregate_CfFlowInfo_AbsRVal_struct*)_tmp4F.f2)->tag == 6U){_LLB: _tmp53=((struct Cyc_Absyn_TupleType_Absyn_Type_struct*)_tmp4F.f1)->f1;_tmp54=((struct Cyc_CfFlowInfo_Aggregate_CfFlowInfo_AbsRVal_struct*)_tmp4F.f2)->f2;_LLC: {struct Cyc_List_List*tqts=_tmp53;struct _fat_ptr ad=_tmp54;
+;_pop_region();}}}else{goto _LL13;}default: goto _LL13;}case 6U: if(((struct Cyc_CfFlowInfo_Aggregate_CfFlowInfo_AbsRVal_struct*)_tmp4F.f2)->tag == 6U){_LLB: _tmp53=((struct Cyc_Absyn_TupleType_Absyn_Type_struct*)_tmp4F.f1)->f1;_tmp54=((struct Cyc_CfFlowInfo_Aggregate_CfFlowInfo_AbsRVal_struct*)_tmp4F.f2)->f2;_LLC: {struct Cyc_List_List*tqts=_tmp53;struct _fat_ptr ad=_tmp54;
 # 361
 unsigned sz=(unsigned)((int(*)(struct Cyc_List_List*x))Cyc_List_length)(tqts);
 {int i=0;for(0;(unsigned)i < sz;(i ++,tqts=tqts->tl)){
@@ -2696,7 +2696,7 @@ noconsume_roots=({struct Cyc_List_List*_tmp561=_cycalloc(sizeof(*_tmp561));_tmp5
 # 2940
 struct Cyc_List_List*_tmp564=noconsume_roots;_npop_handler(0U);return _tmp564;}}}
 # 2922
-;_pop_region(r);}
+;_pop_region();}
 # 2943
 static void Cyc_NewControlFlow_check_nested_fun(struct Cyc_JumpAnalysis_Jump_Anal_Result*tables,struct Cyc_CfFlowInfo_FlowEnv*fenv,union Cyc_CfFlowInfo_FlowInfo inflow,struct Cyc_Absyn_Fndecl*fd){
 # 2947

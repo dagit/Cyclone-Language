@@ -3609,7 +3609,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
                  declare_stmt(x_var, rh_struct_ptr_typ,address_exp(rh_exp,DL),
 		 seq_stmt(exp_stmt(fncall_exp_dl(_push_region_e, x_exp),DL),
                  seq_stmt(body, 
-		 exp_stmt(fncall_exp_dl(_pop_region_e,x_exp),
+		 exp_stmt(fncall_exp_dl(_pop_region_e),
 			  DL),DL),DL),DL),DL)->r;
         } 
         return;

@@ -70,10 +70,10 @@ static spec_t<`r1> lookup(speclist_t<`r1,`r2> l, string_t x) {
     let flag = (*l->hd)[0];
     let len = strlen(flag);
     if (len > 0 && (*l->hd)[1]) {
-      if (strncmp(x,(*l->hd)[0],len) == 0)
+      if (strncmp(x,(*l->hd)[0],len) == 0) 
         return (*l->hd)[3];
     }
-    else if (strcmp(x,(*l->hd)[0]) == 0)
+    else if (strcmp(x,(*l->hd)[0]) == 0) 
       return (*l->hd)[3];
     l = l->tl;
   }

@@ -524,8 +524,8 @@ void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
 enum Cyc_Cyclone_C_Compilers{Cyc_Cyclone_Gcc_c =0U,Cyc_Cyclone_Vc_c =1U};
 # 32
 extern enum Cyc_Cyclone_C_Compilers Cyc_Cyclone_c_compiler;
-# 45 "evexp.h"
-int Cyc_Evexp_const_exp_cmp(struct Cyc_Absyn_Exp*e1,struct Cyc_Absyn_Exp*e2);
+# 46 "evexp.h"
+int Cyc_Evexp_exp_cmp(struct Cyc_Absyn_Exp*e1,struct Cyc_Absyn_Exp*e2);
 # 30 "absyn.cyc"
 struct _fat_ptr Cyc_Absynpp_exp2string(struct Cyc_Absyn_Exp*e);
 # 37
@@ -1364,7 +1364,7 @@ return Cyc_Core_intcmp(i1,i2);}}else{goto _LLB;}case 6U: if(((struct Cyc_Absyn_A
 if(e1 == e2)return 0;
 if(e1 == 0)return - 1;
 if(e2 == 0)return 1;
-return Cyc_Evexp_const_exp_cmp(e1,e2);}}else{goto _LLB;}case 8U: if(((struct Cyc_Absyn_Section_att_Absyn_Attribute_struct*)_tmp10D.f2)->tag == 8U){_LL7: _tmp114=((struct Cyc_Absyn_Section_att_Absyn_Attribute_struct*)_tmp10D.f1)->f1;_tmp115=((struct Cyc_Absyn_Section_att_Absyn_Attribute_struct*)_tmp10D.f2)->f1;_LL8: {struct _fat_ptr s1=_tmp114;struct _fat_ptr s2=_tmp115;
+return Cyc_Evexp_exp_cmp(e1,e2);}}else{goto _LLB;}case 8U: if(((struct Cyc_Absyn_Section_att_Absyn_Attribute_struct*)_tmp10D.f2)->tag == 8U){_LL7: _tmp114=((struct Cyc_Absyn_Section_att_Absyn_Attribute_struct*)_tmp10D.f1)->f1;_tmp115=((struct Cyc_Absyn_Section_att_Absyn_Attribute_struct*)_tmp10D.f2)->f1;_LL8: {struct _fat_ptr s1=_tmp114;struct _fat_ptr s2=_tmp115;
 return Cyc_strcmp((struct _fat_ptr)s1,(struct _fat_ptr)s2);}}else{goto _LLB;}case 19U: if(((struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*)_tmp10D.f2)->tag == 19U){_LL9: _tmp10E=((struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*)_tmp10D.f1)->f1;_tmp10F=((struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*)_tmp10D.f1)->f2;_tmp110=((struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*)_tmp10D.f1)->f3;_tmp111=((struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*)_tmp10D.f2)->f1;_tmp112=((struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*)_tmp10D.f2)->f2;_tmp113=((struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*)_tmp10D.f2)->f3;_LLA: {enum Cyc_Absyn_Format_Type ft1=_tmp10E;int i1=_tmp10F;int j1=_tmp110;enum Cyc_Absyn_Format_Type ft2=_tmp111;int i2=_tmp112;int j2=_tmp113;
 # 1018
 int _tmp11C=Cyc_Core_intcmp((int)((unsigned)ft1),(int)((unsigned)ft2));int ftc=_tmp11C;

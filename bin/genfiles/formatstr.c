@@ -730,7 +730,7 @@ struct Cyc_List_List*_tmp94=0;_npop_handler(0U);return _tmp94;}}_LL12:;}}}}}{
 # 368
 struct Cyc_List_List*_tmp95=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(typs);_npop_handler(0U);return _tmp95;}
 # 169
-;_pop_region(temp);}struct _tuple12{int f1;struct Cyc_List_List*f2;struct Cyc_List_List*f3;char f4;int f5;};
+;_pop_region();}struct _tuple12{int f1;struct Cyc_List_List*f2;struct Cyc_List_List*f3;char f4;int f5;};
 # 379 "formatstr.cyc"
 struct Cyc_Core_Opt*Cyc_Formatstr_parse_inputformat(struct _RegionHandle*r,struct _fat_ptr s,int i){
 # 381
@@ -960,6 +960,6 @@ goto _LL8;default: _LL31: _LL32: {
 # 599
 struct Cyc_List_List*_tmp100=0;_npop_handler(0U);return _tmp100;}}_LL8:;}}}}}
 # 465
-;_pop_region(temp);}
+;_pop_region();}
 # 603
 return((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(typs);}

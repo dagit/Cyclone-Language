@@ -1245,11 +1245,13 @@ using Arg {
             &opt1, &opt2, &opt3, &opt4, &opt5, &opt6, &opt7, &opt8, &opt9,
     &opt10,&opt11,&opt12,&opt13,&opt14,&opt15,&opt16,&opt17,&opt18,&opt19,
     &opt20,&opt21,&opt22,&opt23,&opt24,&opt25,&opt26,&opt27,&opt28,&opt29,
-    &opt30,&opt31,&opt32,&opt74,&opt75,&opt33,&opt34,&opt35,&opt36,&opt37,&opt38,&opt39,
+    &opt30,&opt31,&opt32,
+              //&opt74,&opt75, // used to go here for some reason
+                         &opt33,&opt34,&opt35,&opt36,&opt37,&opt38,&opt39,
     &opt40,&opt41,&opt42,&opt43,&opt44,&opt45,&opt46,&opt47,&opt48,&opt49,
     &opt50,&opt51,&opt52,&opt53,&opt54,&opt55,&opt56,&opt57,&opt58,&opt59,
     &opt60,&opt61,&opt62,&opt63,&opt64,&opt65,&opt66,&opt67,&opt68,&opt69,
-    &opt70,&opt71,&opt72,&opt73/*,&opt74,&opt75,&opt76*/
+    &opt70,&opt71,&opt72,&opt73,&opt74,&opt75,&opt76
   };
 
   void print_options() {

@@ -775,7 +775,7 @@ ans_tree=(const struct Cyc_Dict_T*)({struct _RegionHandle*_tmp118=d2.r;int(*_tmp
 # 457
 struct Cyc_Dict_Dict _tmpB1=({struct Cyc_Dict_Dict _tmpE6;_tmpE6.rel=d2.rel,_tmpE6.r=d2.r,_tmpE6.t=ans_tree;_tmpE6;});_npop_handler(0U);return _tmpB1;}
 # 442
-;_pop_region(temp);}}
+;_pop_region();}}
 # 460
 static void*Cyc_Dict_intersect_f(void*(*f)(void*,void*,void*),void*a,void*b1,void*b2){
 return f(a,b1,b2);}

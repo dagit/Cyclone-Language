@@ -2168,7 +2168,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
       if (eopt != NULL && !one_elt) {
         let upper_exp = (exp_t)eopt;
         let is_constant = Evexp::c_can_eval(num_elts);
-        if (is_constant && Evexp::same_const_exp(upper_exp,num_elts)) {
+        if (is_constant && Evexp::same_uint_const_exp(upper_exp,num_elts)) {
           *is_fat = false;
           return atb_type(elt_type,rgn,empty_tqual(0),b,zero_term);
         }
@@ -2176,7 +2176,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
         case &AppType(&TagCon,&List(tagtyp,_)):
           let tagtyp_exp = cast_exp(uint_type,valueof_exp(tagtyp,0),false,
                                     No_coercion,0);
-          if (Evexp::same_const_exp(tagtyp_exp,upper_exp)) {
+          if (Evexp::same_uint_const_exp(tagtyp_exp,upper_exp)) {
             *is_fat = false;
             return atb_type(elt_type,rgn,empty_tqual(0),b,zero_term);
           }

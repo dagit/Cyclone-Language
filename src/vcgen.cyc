@@ -129,8 +129,8 @@ string_t term2string(term_t t) {
   }
 }
 
-term_t cnst(Absyn::exp_t c) { return new Const(c); }
-term_t zero() {
+static term_t cnst(Absyn::exp_t c) { return new Const(c); }
+static term_t zero() {
   static term_opt_t z = NULL;
   if (z == NULL) {
     let e = Absyn::int_exp(Absyn::None,0,0);
@@ -140,7 +140,7 @@ term_t zero() {
     return r;
   } else return (term_t)z;
 }
-term_t one() {
+static term_t one() {
   static term_opt_t z = NULL;
   if (z == NULL) {
     let e = Absyn::int_exp(Absyn::None,1,0);
@@ -151,36 +151,35 @@ term_t one() {
   } else return (term_t)z;
 }
   
-term_t var(vardecl_t vd) { return new Var(vd); }
-term_t primop(Absyn::primop_t p, list_t<term_t,`H> ts) {
+static term_t var(vardecl_t vd) { return new Var(vd); }
+static term_t primop(Absyn::primop_t p, list_t<term_t,`H> ts) {
   return new Primop(p,ts);
 }
-term_t fresh_var() {
+static term_t fresh_var() {
   static int counter = 0;
   return new LogicVar(NULL,counter++);
 }
 
-bool same_term(term_t t1, term_t t2) {
+int cmp_term(term_t t1, term_t t2) {
   switch $(t1,t2) {
-  case $(&Const(c1),&Const(c2)): return Evexp::same_const_exp(c1,c2);
-  case $(&Var(vd1),&Var(vd2)): return (vd1 == vd2);
-  case $(&LogicVar(vd1,i),&LogicVar(vd2,j)): return (vd1 == vd2) && (i == j);
+  case $(&Const(c1),&Const(c2)): return Evexp::exp_cmp(c1,c2) == 0;
+  case $(&Const(_),_): return -1;
+  case $(_,&Const(_)): return 1;
+  case $(&Var(vd1),&Var(vd2)): return (int)vd1 - (int)vd2;
+  case $(&Var(_),_): return -1;
+  case $(_,&Var(_)): return 1;
+  case $(&LogicVar(vd1,i),&LogicVar(vd2,j)): 
+    if (vd1 == vd2) return (i - j);
+    return (int)vd1 - (int)vd2;
+  case $(&LogicVar(_,_),_): return -1;
+  case $(_,&LogicVar(_,_)): return 1;
   case $(&Primop(p1,ts1),&Primop(p2,ts2)):
-    if (p1 != p2) return false;
-    for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl,ts2=ts2->tl) {
-      if (!same_term(ts1->hd,ts2->hd)) return false;
-    }
-    if (ts2 != NULL || ts1 != NULL) return false;
-    return true;
-  default: return false;
+    if (p1 != p2) return (int)p1 - (int)p2;
+    return list_cmp(cmp_term, ts1, ts2);
   }
 }
 
-// HACK -- need to produce a proper term comparison
-int termcmp(term_t t1, term_t t2) {
-  if (same_term) return 0;
-  return (int)t1 - (int)t2;
-}
+bool same_term(term_t t1, term_t t2) { return cmp_term(t1,t2) == 0; }
 
 ///////////////////// Assertions /////////////////////
 typedef datatype Assn @assn_t;
@@ -193,9 +192,14 @@ datatype Assn {
   Prim(term_t,prim_reln_t,term_t);
   And(assn_t,assn_t);
   Or(assn_t,assn_t);
+  Subst(vardecl_t x,term_t t,assn_t a); // a[t/x] -- lazy substitution
+  Kill(assn_t); // replace all escaping variables with fresh logic variables
 };
 
-unsigned int assn_size_loop(assn_t a, unsigned int c, list_t<assn_t,`H>@ prev){
+// inner loop for calculating the size of an assertion -- we
+// take care to figure out the size as a dag and not a tree.
+static unsigned int 
+  assn_size_loop(assn_t a, unsigned int c, list_t<assn_t,`H>@ prev){
   if (memq(*prev,a)) return c;
   *prev = new List(a,*prev);
   switch (a) {
@@ -205,22 +209,28 @@ unsigned int assn_size_loop(assn_t a, unsigned int c, list_t<assn_t,`H>@ prev){
   case &And(a1,a2): fallthru(a1,a2);
   case &Or(a1,a2): 
     return assn_size_loop(a1,assn_size_loop(a2,1+c,prev),prev);
+  case &Subst(vd,t,a):
+    return assn_size_loop(a,c+1,prev);
+  case &Kill(a): return assn_size_loop(a,c+1,prev);
   }
 }
 
+// counter used for reporting purposes
 static unsigned int max_assn_size = 0;
 
-unsigned int assn_size(assn_t a) {
+// calculate the size of an assertion
+static unsigned int assn_size(assn_t a) {
   list_t<assn_t,`H> prev = NULL;
   let c = assn_size_loop(a,0,&prev);
   if (c > max_assn_size) {
     max_assn_size = c;
-    fprintf(stderr,"Max Assn Size = %d\n",max_assn_size);
   }
   return c;
 }
 
-string_t a2string(assn_t a, int prec, int@ size) {
+// calculate a string representation (and total tree node count) for an
+// assertion.  the prec field (precedent) is used to avoid some parens.
+static string_t a2string(assn_t a, int prec, int@ size) {
   switch (a) {
   case &True: return "true";
   case &False: return "false";
@@ -244,18 +254,27 @@ string_t a2string(assn_t a, int prec, int@ size) {
   case &And(a1,a2): 
     *size += 1;
     return aprintf("%s && %s",a2string(a1,10,size),a2string(a2,10,size));
+  case &Subst(vd,t,a):
+    *size += 1;
+    return aprintf("Subst[%s:=%s](%s)",Absynpp::qvar2string(vd->name),
+                   term2string(t),a2string(a,0,size));
+  case &Kill(a):
+    *size += 1;
+    return aprintf("Kill(%s)",a2string(a,0,size));
   }
 }
 
 static int tree_size = 0;
 
+// convert an assertion to a string.
 string_t assn2string(assn_t a) {
   tree_size = 0;
   return a2string(a,0,&tree_size);
 }
 
-datatype Assn.True true_assn = True;
-datatype Assn.False false_assn = False;
+// assertion constants for true and false
+static datatype Assn.True true_assn = True;
+static datatype Assn.False false_assn = False;
 
 //////////////////////////////////////////////////////////////
 // hash-consing to try to preserve as much sharing as we
@@ -266,7 +285,7 @@ datatype Assn.False false_assn = False;
 // type for hashtable lookup (as we did with dictionaries.)
 
 // FIX: need a good hash function...
-int assnhash(datatype Assn @a) {
+static int assnhash(datatype Assn @a) {
   switch (a) {
   case &False: return 0;
   case &True: return 1;
@@ -274,10 +293,15 @@ int assnhash(datatype Assn @a) {
     return (unsigned int)t1 ^ (unsigned int)p ^ (unsigned int)t2;
   case &And(a1,a2): return (unsigned int)a1 ^ (unsigned int)a2;
   case &Or(a1,a2): return ((unsigned int)a1 ^ (unsigned int)a2) | 1;
+  case &Subst(vd,t,a): return ((unsigned int)a ^ (unsigned int)vd ^
+                               (unsigned int)t) | 3;
+  case &Kill(a): return (unsigned int)a + 37;
   }
 }
 
-int assncmp(datatype Assn @a1, datatype Assn @a2) {
+// compare two assertions for structural equality -- does not assume
+// the components have been hash-consed, but probably could.
+static int assncmp(datatype Assn @a1, datatype Assn @a2) {
   if (a1 == a2) return 0;
   switch $(a1,a2) {
   case $(&True,&True): return 0;
@@ -298,50 +322,108 @@ int assncmp(datatype Assn @a1, datatype Assn @a2) {
   case $(&Prim(t11,p1,t12),&Prim(t21,p2,t22)):
     int c = (int)p1 - (int)p2;
     if (c != 0) return c;
-    c = termcmp(t11,t21);
+    c = cmp_term(t11,t21);
     if (c != 0) return c;
-    return termcmp(t12,t22);
+    return cmp_term(t12,t22);
+  case $(&Prim(...),_): return -1;
+  case $(_,&Prim(...)): return 1;
+  case $(&Kill(a1),&Kill(a2)): return assncmp(a1,a2);
+  case $(&Kill(_),_): return -1;
+  case $(_,&Kill(_)): return 1;
+  case $(&Subst(vd1,t1,a1),&Subst(vd2,t2,a2)):
+    int c = (int)vd1 - (int)vd2;
+    if (c != 0) return c;
+    c = cmp_term(t1,t2);
+    if (c != 0) return c;
+    return assncmp(a1,a2);
   }
 }
 
-static struct Hashtable::Table<assn_t,assn_t> *hash_cons_table = NULL;
+// a hash-table to hold all of the assertion nodes to maximize
+// sharing.  we also record whether or not a node has delayed
+// substitutions or kills within it.
+static struct Hashtable::Table<assn_t,$(assn_t,bool reduced)@> 
+*hash_cons_table = NULL;
 
-assn_t copy_assn(datatype Assn@`r a){
+// lookup an assertion to see if it has delayed substitutions or
+// kills with in it.  
+static bool is_reduced(assn_t a) {
+  let resopt = Hashtable::lookup_opt((Hashtable::table_t)hash_cons_table,a);
+  if (resopt == NULL) return false;
+  let &$(_,b) = *resopt;
+  return b;
+}
+
+// shallow copy of an assertion from region `r to the heap and 
+// simultaneously determine whether or not the assertion is
+// reduced so that we can put the information in the table.
+static $(assn_t,bool reduced) copy_assn(datatype Assn@`r a){
   switch (a) {
-  case &True: return &true_assn;
-  case &False: return &false_assn;
-  case &And(a1,a2): return new And(a1,a2);
-  case &Or(a1,a2): return new Or(a1,a2);
-  case &Prim(t1,p,t2): return new Prim(t1,p,t2);
+  case &True: return $(&true_assn,true);
+  case &False: return $(&false_assn,false);
+  case &And(a1,a2): 
+    return $(new And(a1,a2),is_reduced(a1) && is_reduced(a2));
+  case &Or(a1,a2): 
+    return $(new Or(a1,a2),is_reduced(a1) && is_reduced(a2));
+  case &Prim(t1,p,t2): return $(new Prim(t1,p,t2),true);
+  case &Subst(vd1,t1,a1): return $(new Subst(vd1,t1,a1),false);
+  case &Kill(a): return $(new Kill(a),false);
   }
 }
 
-assn_t hash_cons(datatype Assn@`r a) {
+// given an assertion node, look it up in the hash-table.  If it's
+// not already there, then make a shallow copy and enter it (along
+// with info regarding whether or not it's been reduced) into the
+// hash table.
+static assn_t hash_cons(datatype Assn@`r a) {
   Hashtable::table_t h;
   if (hash_cons_table == NULL) {
     h = Hashtable::create(123, assncmp, assnhash);
     hash_cons_table = h;
+    // make sure true and false are in the table so we can
+    // ask if they are reduced.
+    Hashtable::insert(h,&true_assn,new $(&true_assn,true));
+    Hashtable::insert(h,&false_assn,new $(&false_assn,true));
   } else 
     h = (Hashtable::table_t)hash_cons_table;
   let resopt = Hashtable::lookup_other_opt(h,a,assncmp,assnhash);
   if (resopt == NULL) {
-    assn_t res = copy_assn(a);
-    Hashtable::insert(h,res,res);
+    let $(res,reduced) = copy_assn(a);
+    Hashtable::insert(h,res,new $(res,reduced));
     return res;
-  } else return *resopt;
+  } else {
+    let &$(res,_) = *resopt;
+    return res;
+  }
 }
 
-// try to maintain maximal sharing through hash consing.
-// i tried sorting and right-associating, but that chews
-// up more time than not.  
-assn_t and(assn_t a1, assn_t a2) {
+// build a kill node.
+static assn_t kill(assn_t a) {
+  switch (a) {
+  case &True: 
+  case &False:
+  case &Kill(_): return a; // Kill(Kill(a)) = Kill(a)
+  default:
+    let p = Kill(a);
+    return hash_cons(&p);
+  }
+}
+
+// build an and node.
+static assn_t and(assn_t a1, assn_t a2) {
   if (a1 == a2) return a1;
   switch $(a1,a2) {
   case $(&True,_): return a2;
   case $(_,&True): return a1;
   case $(&False,_): return a1;
   case $(_,&False): return a2;
+  case $(&Kill(a1),&Kill(a2)): 
+    // And(Kill(a1),Kill(a2)) = Kill(And(a1,a2))
+    return kill(and(a1,a2));
   default: 
+    // Sort the two operands so that we're more likely to share.
+    // Note that we could do more than this and, for instance,
+    // right-associate and's but this doesn't seem to be a win.
     if ((int)a1 > (int)a2)
       a1 :=: a2;
     let a = And(a1,a2);
@@ -349,14 +431,19 @@ assn_t and(assn_t a1, assn_t a2) {
   }
 }
 
-assn_t or(assn_t a1, assn_t a2) {
+// build an or-node.
+static assn_t or(assn_t a1, assn_t a2) {
   if (a1 == a2) return a1;
   switch $(a1,a2) {
   case $(&True,_): return a1;
   case $(_,&True): return a2;
   case $(&False,_): return a2;
   case $(_,&False): return a1;
+  case $(&Kill(a1),&Kill(a2)): 
+    // Or(Kill(a1),Kill(a2)) = Kill(Or(a1,a2))
+    return kill(or(a1,a2));
   default: 
+    // sort the operands and hash-cons.
     if ((int)a1 > (int)a2)
       a1 :=: a2;
     let a = Or(a1,a2);
@@ -364,12 +451,25 @@ assn_t or(assn_t a1, assn_t a2) {
   }
 }
 
-assn_t prim(term_t t1, prim_reln_t p, term_t t2) {
+// build a lazy substitution node.  
+static assn_t subst(vardecl_t x, term_t newx, assn_t a) {
+  switch (a) {
+  case &True:
+  case &False: return a;
+  default:
+    let p = Subst(x,newx,a); 
+    return hash_cons(&p);
+  }
+}
+
+// build a primitive relation node.
+static assn_t prim(term_t t1, prim_reln_t p, term_t t2) {
   let ptr = Prim(t1,p,t2);
   return hash_cons(&ptr);
 }
 
-#define prim_assn(p,P) assn_t p(term_opt_t t1, term_opt_t t2) { \
+// some macros and functions for particular primitive relations.
+#define prim_assn(p,P) static assn_t p(term_opt_t t1, term_opt_t t2) { \
   if (t1 == NULL || t2 == NULL) return &true_assn; \
   return prim((term_t)t1,P,(term_t)t2); \
 }
@@ -379,29 +479,142 @@ prim_assn(lt,Lt)
 prim_assn(lte,Lte)
 #define gte(t1,t2) (lte(t2,t1))
 #define gt(t1,t2) (lt(t2,t1))
+  
+////// Push Through Subst and Kill nodes ////
+// These functions take care of eliminating all of the Kill and
+// Subst nodes in an assertion in one pass.  It is, unfortunately,
+// something that requires crawling over the tree, not just the dag.
+// However, we could improve things by memoizing the results, since
+// it's likely that we'll hit the same substitutions for various
+// assertion nodes.  The problem is that we will generally have
+// different environments built up when we run into them.
 
-assn_t not(assn_t a) {
-  switch (a) {
-  case &True: return &false_assn;
-  case &False: return &true_assn;
-  case &Prim(t1,pr,t2):
-    switch (pr) {
-    case Eq:  return neq(t1,t2);
-    case Neq: return eq(t1,t2);
-    case Lt:  return gte(t1,t2);
-    case Lte: return gt(t1,t2);
-    default: Tcutil::impos("vcgen not");
+// Both reduce_term and reduce_assn take in a substitution for 
+// non-escaping variables, as well as a pointer to a substitution
+// for escaping variables.  We want to reduce Kill(a) to something
+// like substitute fresh logic variables for each escaping variable
+// in a.  We do this by accumulating a substitution for the escaping
+// variables as we go.  So, the esc_subst pointer is non-NULL when
+// we are under a Kill node.
+
+// TRY: we could try using dictionaries here instead of lists.
+static term_t 
+reduce_term(term_t t, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
+            list_t<$(vardecl_t,term_t)@`H,`H> *esc_subst) {
+  switch (t) {
+  case &Const(_):
+  case &LogicVar(...): return t;
+  case &Primop(p,ts):
+    list_t<term_t> res = NULL;
+    bool change = false;
+    for (let ptr = ts; ptr != NULL; ptr = ptr->tl) {
+      let old_term = ptr->hd;
+      let new_term = reduce_term(old_term,non_esc_subst,esc_subst);
+      res = new List{new_term,res};
+      if (new_term != old_term) change = true;
     }
-  case &And(a1,a2): return or(not(a1),not(a2));
-  case &Or(a1,a2): return and(not(a1),not(a2));
+    if (!change) return t;
+    return new Primop(p,imp_rev(res));
+  case &Var(vd):
+    if (vd->escapes && esc_subst != NULL) {
+      // it's an escaping variable and we're under a Kill node.
+      // see if we've already assigned it a fresh variable in the esc_subst.
+      let s = *esc_subst;
+      for (; s != NULL; s = s->tl) {
+        let $(vd2,t2) = *s->hd;
+        if (vd2 == vd) return t;
+      }
+      // if not, then assign it a fresh variable and record it in the
+      // esc_subst.
+      let t = fresh_var();
+      *esc_subst = new List{new $(vd,t),*esc_subst};
+      return fresh_var();
+    } else if (!vd->escapes) {
+      // it's a non-escaping variable -- look it up in non_esc_subst.
+      for (; non_esc_subst != NULL; non_esc_subst = non_esc_subst->tl) {
+        let $(vd2,t2) = *non_esc_subst->hd;
+        if (vd == vd2) return t2;
+      }
+    }
+    return t;
   }
+}
+
+static assn_t 
+reduce_assn(assn_t a, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst, 
+            list_t<$(vardecl_t,term_t)@`H,`H> *esc_subst) {
+  switch (a) {
+  case &True:
+  case &False: return a;
+  case &Prim(t1,p,t2):
+    let newt1 = reduce_term(t1,non_esc_subst,esc_subst);
+    let newt2 = reduce_term(t2,non_esc_subst,esc_subst);
+    if (t1 == newt1 && t2 == newt2) return a;
+    return prim(newt1,p,newt2);
+  case &And(a1,a2):
+    let newa1 = reduce_assn(a1,non_esc_subst,esc_subst);
+    let newa2 = reduce_assn(a2,non_esc_subst,esc_subst);
+    if (a1 == newa1 && a2 == newa2) return a;
+    return and(newa1,newa2);
+  case &Or(a1,a2):
+    let newa1 = reduce_assn(a1,non_esc_subst,esc_subst);
+    let newa2 = reduce_assn(a2,non_esc_subst,esc_subst);
+    if (a1 == newa1 && a2 == newa2) return a;
+    return or(newa1,newa2);
+  case &Kill(a): 
+    // start a new esc_subst for a.  not sure this is necessary
+    // when esc_subst is non-null...
+    list_t<$(vardecl_t,term_t)@> new_esc_subst = NULL;
+    return reduce_assn(a,non_esc_subst,&new_esc_subst);
+  case &Subst(vd,t,a):
+    // add vd->t to the non_esc_subst
+    t = reduce_term(t,non_esc_subst,esc_subst);
+    non_esc_subst = new List(new $(vd,t),non_esc_subst);
+    return reduce_assn(a,non_esc_subst,esc_subst);
+  }
+}
+
+// get rid of all Kill and Subst nodes.
+static assn_t reduce(assn_t a) {
+  // check to see if we've already eliminated them.
+  if (is_reduced(a)) return a;
+  return reduce_assn(a,NULL,NULL);
+}
+
+// a one-shot substitution -- needed in the assignment code below.
+static term_t subst_term(term_t t, vardecl_t x, term_t newx) {
+  switch (t) {
+  case &Const(_):
+  case &LogicVar(...): return t;
+  case &Primop(p,ts):
+    list_t<term_t> res = NULL;
+    bool change = false;
+    for (let ptr = ts; ptr != NULL; ptr = ptr->tl) {
+      let old_term = ptr->hd;
+      let new_term = subst_term(old_term,x,newx);
+      res = new List{new_term,res};
+      if (new_term != old_term) change = true;
+    }
+    if (!change) return t;
+    return new Primop(p,imp_rev(res));
+  case &Var(vd):
+    if (vd == x) return newx;
+    return t;
+  }
+}
+
+// an eager kill for terms (we don't bother to do terms lazily, only assns)
+static term_t kill_mem_term(term_t t) {
+  let esc_subst = NULL;
+  return reduce_term(t,NULL,&esc_subst);
 }
 
 ////////// Implication for Assertions //////////////
 
 // returns true when ctxt |- t1 p t2
-// uses only very local, syntactic matching
-bool find_ctxt(assn_t ctxt, term_t t1, prim_reln_t p1, term_t u1) {
+// uses only very local, syntactic matching.
+// assumes ctxt is reduced.
+static bool find_ctxt(assn_t ctxt, term_t t1, prim_reln_t p1, term_t u1) {
   switch (ctxt) {
   case &False: return true;
   case &True: return false;
@@ -423,39 +636,44 @@ bool find_ctxt(assn_t ctxt, term_t t1, prim_reln_t p1, term_t u1) {
       return same_term(t1,t2) && same_term(u1,u2);
     default: return false;
     }
+  default: Tcutil::impos("Vcgen::find_ctxt");
   }
 }
 
 // returns true when ctxt |- a
-// uses only very local, syntactic matching
-bool simple_prove(assn_t ctxt, assn_t a) {
+// uses only very local, syntactic matching.
+// assumes a is reduced.
+static bool simple_prove(assn_t ctxt, assn_t a) {
   if (ctxt == a) return true;
   switch (a) {
   case &True: return true;
   case &False: return false;
   case &And(a1,a2): return simple_prove(ctxt,a1) && simple_prove(ctxt,a2);
   case &Or(a1,a2): return simple_prove(ctxt,a1) || simple_prove(ctxt,a2);
-  case &Prim(t1,p,t2): return find_ctxt(ctxt,t1,p,t2);
+  case &Prim(t1,p,t2): return find_ctxt(reduce(ctxt),t1,p,t2); 
+  default: Tcutil::impos("Vcgen::simple_prove");
   }
 }
 
-bool constraint_prove(assn_t ctxt, assn_t a) {
+static bool constraint_prove(assn_t ctxt, assn_t a) {
   // FIX: here's where we want to use the pratt stuff.
   return false;
 }
 
 // returns true if a2 is provable from a1 (i.e., a1 |- a2)
 // tries simple_prove first and then tries the constraint solver
-bool implies(assn_t a1, assn_t a2) {
-  return simple_prove(a1,a2) || constraint_prove(a1,a2);
+static bool implies(assn_t a1, assn_t a2) {
+  return simple_prove(a1,reduce(a2)) || constraint_prove(a1,a2);
 }
+
 
 ////////// Widening for Assertions ////////////////////
 
 // We want to find an assertion a' such that ctxt => a' and a => a'.
 // (so or(ctxt,a) => a'.)  In addition, we want a' to have size less
 // than or equal to a.  
-assn_t weaken(assn_t ctxt, assn_t a) {
+static assn_t weaken(assn_t ctxt, assn_t a) {
+  a = reduce(a);
   if (implies(ctxt,a)) return a;
   switch (a) {
   case &And(a1,a2):
@@ -472,6 +690,7 @@ assn_t weaken(assn_t ctxt, assn_t a) {
   case &True: 
   case &False: 
   case &Prim(...): return &true_assn;
+  default: Tcutil::impos("Vcgen::weaken");
   }
 }
 
@@ -481,138 +700,31 @@ assn_t weaken(assn_t ctxt, assn_t a) {
 // A is "smaller" than A2.  The widen operation ensures that
 // either we get back A2 or else the assertion is smaller
 // (or as a technical hitch, we flip once from false to true.)
-assn_t widen_assn(assn_t a1, assn_t a2) {
+static assn_t widen_assn(assn_t a1, assn_t a2) {
   return weaken(a1,a2);
 }
 
 ////////// Updating an Assertion //////////////////
-
-// substitute newx for x within t
-term_t subst_term(term_t t, vardecl_t x, term_t newx) {
-  switch (t) {
-  case &Const(_): return t;
-  case &Var(vd) && vd == x: return newx;
-  case &Var(_): return t;
-  case &LogicVar(_,_): return t;
-  case &Primop(p,ts):
-    list_t<term_t> res = NULL;
-    bool change = false;
-    for (let ptr = ts; ptr != NULL; ptr = ptr->tl) {
-      let old_term = ptr->hd;
-      let new_term = subst_term(old_term,x,newx);
-      res = new List{new_term,res};
-      if (new_term != old_term) change = true;
-    }
-    if (!change) return t;
-    return new Primop(p,imp_rev(res));
-  }
-}
-
-// substitute newx for x in assertion a.
-assn_t subst_assn(assn_t a, vardecl_t x, term_t newx) {
-  switch (a) {
-  case &True:
-  case &False: return a;
-  case &Prim(t1,p,t2):
-    let newt1 = subst_term(t1,x,newx);
-    let newt2 = subst_term(t2,x,newx);
-    if (newt1 == t1 && newt2 == t2) return a;
-    return hash_cons(new Prim(newt1,p,newt2));
-  case &And(a1,a2):
-    let newa1 = subst_assn(a1,x,newx);
-    let newa2 = subst_assn(a2,x,newx);
-    if (newa1 == a1 && newa2 == a2) return a;
-    return and(newa1,newa2);
-  case &Or(a1,a2):
-    let newa1 = subst_assn(a1,x,newx);
-    let newa2 = subst_assn(a2,x,newx);
-    if (newa1 == a1 && newa2 == a2) return a;
-    return or(newa1,newa2);
-  }
-}
-
-// replace all escaping vars with fresh variables.
-// newvds accumulates the mapping from escaping variables to fresh terms.
-term_t term_kill_vars(term_t t, list_t<$(vardecl_t,term_t)@`H,`H> @newvds) {
-  switch (t) {
-  case &Var(vd) && vd->escapes: 
-    try {
-      return assoc(*newvds,vd);
-    } catch {
-    case &Core::Not_found:
-      let newv = fresh_var();
-      *newvds = new List{new $(vd,newv),*newvds};
-      return newv;
-    }
-  case &Primop(p,ts):
-    list_t<term_t> res = NULL;
-    bool change = false;
-    for (let ptr = ts; ptr != NULL; ptr = ptr->tl) {
-      let old_term = ptr->hd;
-      let new_term = term_kill_vars(old_term,newvds);
-      res = new List{new_term,res};
-      if (new_term != old_term) change = true;
-    }
-    if (!change) return t;
-    return new Primop(p,imp_rev(res));
-  default: return t;
-  }
-}
-
-// same as above but for assertions.
-assn_t assn_kill_vars(assn_t a, list_t<$(vardecl_t,term_t)@`H,`H> @`H accum) {
-  switch (a) {
-  case &True:
-  case &False: return a;
-  case &Prim(t1,p,t2): 
-    let newt1 = term_kill_vars(t1,accum);
-    let newt2 = term_kill_vars(t2,accum);
-    if (newt1 == t1 && newt2 == t2) return a;
-    return hash_cons(new Prim(newt1,p,newt2));
-  case &And(a1,a2):
-    let newa1 = assn_kill_vars(a1,accum);
-    let newa2 = assn_kill_vars(a2,accum);
-    if (newa1 == a1 && newa2 == a2) return a;
-    return and(newa1,newa2);
-  case &Or(a1,a2):
-    let newa1 = assn_kill_vars(a1,accum);
-    let newa2 = assn_kill_vars(a2,accum);
-    if (newa1 == a1 && newa2 == a2) return a;
-    return or(newa1,newa2);
-  }
-}
-
-// replace each escaping variable with a fresh variable -- simulates
-// a write to an unknown location.
-assn_t kill_mem(assn_t a) {
-  list_t<$(vardecl_t,term_t)@`H,`H>@`H accum = new(NULL);
-  return assn_kill_vars(a,accum);
-}
-
-term_t kill_mem_term(term_t t) {
-  list_t<$(vardecl_t,term_t)@`H,`H> accum = NULL;
-  return term_kill_vars(t,&accum);
-}
-
-term_t fresh_nonescvar(env_t env, vardecl_t vd);
+static term_t fresh_nonescvar(env_t env, vardecl_t vd);
 
 // We are executing tgt := src
-assn_t do_assign(env_t env, assn_t a, term_opt_t tgt, term_opt_t src) {
+static assn_t do_assign(env_t env, assn_t a, term_opt_t tgt, term_opt_t src) {
   switch (tgt) {
   case NULL: 
     // We don't know what the target is except that it's not a non-escaping
     // variable, so we must kill those references.
-    return kill_mem(a);
+    return kill(a);
   case &Var(vd):
     // We know what the target is -- if it escapes then we kill all 
-    // escaping variables, otherwise we just kill the target vd.
+    // escaping variables, otherwise we just kill the target vd by
+    // substituting a fresh logic variable.
     // We must make sure to also kill within the src term.
     if (vd->escapes) {
-      a = kill_mem(a);
+      a = kill(a);
       src = (src == NULL) ? NULL : kill_mem_term(src);
     } else {
       let v2 = fresh_nonescvar(env,vd);
-      a = subst_assn(a,vd,v2);
+      a = subst(vd,v2,a);
       src = (src == NULL) ? NULL : subst_term(src,vd,v2);
     }
     // Finally, add in tgt == src.
@@ -625,8 +737,7 @@ assn_t do_assign(env_t env, assn_t a, term_opt_t tgt, term_opt_t src) {
 
 ////////// Analysis Environment /////////////////////
 struct SharedEnv {
-  // a mapping from statements to accumulated pre-conditions and a state
-  // counter table (see below)
+  // a mapping from statements to accumulated pre-conditions 
   Hashtable::table_t<stmt_t,assn_t@> assn_table;
   // a mapping for successors in the control-flow graph (from jump_analysis)
   Hashtable::table_t<stmt_t,stmt_opt_t> succ_table;
@@ -658,7 +769,8 @@ struct Env {
 
 static int hash_ptr(`a s) { return (int)s; }
 
-env_t initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd) {
+static env_t 
+initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd) {
   let succ_table = Hashtable::lookup(tables->succ_tables,fd);
   let assn_table = Hashtable::create(57, Core::ptrcmp, hash_ptr);
   let senv =  new SharedEnv{.assn_table = assn_table,
@@ -671,21 +783,25 @@ env_t initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd) {
   return new Env { .shared = senv, .state_counter = d };
 }
 
-env_t copy_env(env_t env) {
+static env_t copy_env(env_t env) {
   return new(*env);
 }
 
-int max_counter(int dummy, vardecl_t vd, int i, int j) {
+// we have to merge environments at a join-point to get the
+// next in a sequence.
+static int max_counter(int dummy, vardecl_t vd, int i, int j) {
   return (i < j) ? j : i;
 }
 
-void merge_env(env_t old_env, env_t new_env) {
+static void merge_env(env_t old_env, env_t new_env) {
   old_env->state_counter = Dict::union_two_c(max_counter, 0, 
                                              old_env->state_counter, 
                                              new_env->state_counter);
 }
 
-term_t fresh_nonescvar(env_t env, vardecl_t vd) {
+// generate a fresh logic variable for a non-escaping variable --
+// the next one in a sequence.
+static term_t fresh_nonescvar(env_t env, vardecl_t vd) {
   int res = 0;
   Dict::lookup_bool(env->state_counter,vd,&res);
   env->state_counter = Dict::insert(env->state_counter,vd,res+1);
@@ -694,64 +810,62 @@ term_t fresh_nonescvar(env_t env, vardecl_t vd) {
 
 // each statement may have an assertion associated with it from
 // other incoming edges -- we must take into account all paths.
-assn_t pre_stmt_update(env_t env, stmt_t s, assn_t ain) {
-  try {
-    let p = Hashtable::lookup(env->shared->assn_table,s);
+static assn_t pre_stmt_update(env_t env, stmt_t s, assn_t ain) {
+  let popt = Hashtable::lookup_opt(env->shared->assn_table,s);
+  if (popt != NULL) {
+    assn_t @p = *popt;
     let new_precondition = or(ain,*p);
     *p = new_precondition;
     return new_precondition;
-  } catch {
-  case &Core::Not_found: return ain;
-  }
+  } else 
+    return ain;
 }
 
-assn_t get_assn(env_t env, stmt_t s) {
-  try { 
-    return *Hashtable::lookup(env->shared->assn_table,s);
-   } catch {
-   case &Core::Not_found: return &false_assn;
-   }
+// get the pre-condition currently associated with a statement.
+static assn_t get_assn(env_t env, stmt_t s) {
+  assn_t @* popt = Hashtable::lookup_opt(env->shared->assn_table,s);
+  if (popt != NULL)
+    return **popt;
+  else
+    return &false_assn;
 }
 
-// this is used in situations where we loop -- note that we
-// call widen() instead of or().  
-assn_t loop_assn(env_t env, stmt_t s, assn_t ain) {
-  // FIX? need to deal with alpha variance of logic vars and so forth?
-  try {
-    let aprev = Hashtable::lookup(env->shared->assn_table,s);
+// similar to pre_stmt_update except that we use widen instead of or
+// since this is part of a loop back-edge.
+static assn_t loop_assn(env_t env, stmt_t s, assn_t ain) {
+  assn_t @* aprevopt = Hashtable::lookup_opt(env->shared->assn_table,s);
+  if (aprevopt != NULL) {
+    let aprev = *aprevopt;
     ain = widen_assn(ain,*aprev);
     *aprev = ain;
-  } catch {
-  case &Core::Not_found:
+  } else {
     Hashtable::insert(env->shared->assn_table,s,new ain);
-    break;
   }
   return ain;
 }
 
 // similar to pre_stmt_update but makes sure to put the
 // result on the statement.
-assn_t forward_assn(env_t env, stmt_t s, assn_t ain) {
-  try {
-    let aprev = Hashtable::lookup(env->shared->assn_table,s);
+static assn_t forward_assn(env_t env, stmt_t s, assn_t ain) {
+  assn_t@* aprevopt = Hashtable::lookup_opt(env->shared->assn_table,s);
+  if (aprevopt != NULL) {
+    let aprev = *aprevopt;
     ain = or(ain,*aprev);
     *aprev = ain;
-  } catch {
-  case &Core::Not_found:
+  } else {
     Hashtable::insert(env->shared->assn_table,s,new ain);
-    break;
   }
   return ain;
 }
 
 // update the assertion associated with the current 
 // exception handler.
-void update_try_assn(env_t env, assn_t a) {
+static void update_try_assn(env_t env, assn_t a) {
   env->shared->try_assn = or(env->shared->try_assn,a);
 }
 
 // update the return information for a function
-void update_return(env_t env, term_opt_t t, assn_t a) {
+static void update_return(env_t env, term_opt_t t, assn_t a) {
   let shared = env->shared;
   if (shared->res_term != NULL || t != NULL) {
     let v = fresh_var();
@@ -767,42 +881,42 @@ void update_return(env_t env, term_opt_t t, assn_t a) {
 // Vcgen for statements.  ain is an assertion describing the state
 // on input to the statement, and this returns an assertion describing 
 // the output state. 
-assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain);
+static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain);
 // Analyze a term given precondition ain and generate an optional term
 // and post-condition representing the value of the expression and
 // the resulting machine state.
-$(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain);
+static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain);
 // If the term is "undefined" then we return a fresh variable.
-$(term_t,assn_t) vcgen_rexp_always(env_t env, exp_t e, assn_t ain);
+static $(term_t,assn_t) vcgen_rexp_always(env_t env, exp_t e, assn_t ain);
 // Same as above, but for lhs-expressions.
-$(term_opt_t,assn_t) vcgen_lexp(env_t env, exp_t e, assn_t ain);
+static $(term_opt_t,assn_t) vcgen_lexp(env_t env, exp_t e, assn_t ain);
 // Analyze a test expression returning two assertions corresponding
 // to the test succeeding (true-case) or failing (false-case).
-$(assn_t t,assn_t f) vcgen_test(env_t env, exp_t e, assn_t ain);
+static $(assn_t t,assn_t f) vcgen_test(env_t env, exp_t e, assn_t ain);
 // Analyze a list of expressions returning an optional list of
 // terms and the output assertion.  If any of the expressions'
 // is unknown, then so is the whole thing.
-$(list_t<term_t>*,assn_t) vcgen_rexps(env_t env, list_t<exp_t> es, assn_t a);
+static $(list_t<term_t>*,assn_t) vcgen_rexps(env_t env, list_t<exp_t> es, assn_t a);
 // Similar to above but here we don't care what the resulting terms
 // are at all.
-assn_t vcgen_rexps_nosave(env_t env, list_t<exp_t> es, assn_t a);
+static assn_t vcgen_rexps_nosave(env_t env, list_t<exp_t> es, assn_t a);
 // Folds vcgen_rexp_always across the list.
-$(list_t<term_t>,assn_t) vcgen_rexps_always(env_t env, list_t<exp_t> es, assn_t ain);
+static $(list_t<term_t>,assn_t) vcgen_rexps_always(env_t env, list_t<exp_t> es, assn_t ain);
 // Do vcgen for all of the cases in a switch.  
-assn_t vcgen_switch(env_t env, list_t<switch_clause_t> scs, assn_t ain);
+static assn_t vcgen_switch(env_t env, list_t<switch_clause_t> scs, assn_t ain);
 // Do vcgen for a local declaration
-assn_t vcgen_local_decl(env_t env, decl_t d, assn_t a);
+static assn_t vcgen_local_decl(env_t env, decl_t d, assn_t a);
 
 #ifdef VCGEN_DEBUG
 //#define vcgen_rexp(env,e,a) vcgen_rexp_debug(env,e,a)
 #define vcgen_rexp(env,e,a) vcgen_rexp_nodebug(env,e,a)
 #define vcgen_stmt(env,s,a) vcgen_stmt_debug(env,s,a)
 static unsigned int indent = 0;
-void print_tabs() {
+static void print_tabs() {
   for (unsigned i = indent; i > 0; i--)
     fprintf(stderr," ");
 }
-string_t stmt2shortstring(stmt_t s) {
+static string_t stmt2shortstring(stmt_t s) {
   switch (s->r) {
   case &Absyn::IfThenElse_s(e,...): 
     return aprintf("if (%s) ...",Absynpp::exp2string(e));
@@ -820,7 +934,7 @@ string_t stmt2shortstring(stmt_t s) {
   default: return Absynpp::stmt2string(s);
   }
 }
-assn_t vcgen_stmt_debug(env_t env, stmt_t s, assn_t ain) {
+static assn_t vcgen_stmt_debug(env_t env, stmt_t s, assn_t ain) {
   switch (s->r) {
   case &Absyn::Seq_s(_,_): 
   case &Absyn::Decl_s(...):
@@ -839,7 +953,7 @@ assn_t vcgen_stmt_debug(env_t env, stmt_t s, assn_t ain) {
     return aout;
   }
 }
-$(term_opt_t,assn_t) vcgen_rexp_debug(env_t env, exp_t e, assn_t ain) {
+static $(term_opt_t,assn_t) vcgen_rexp_debug(env_t env, exp_t e, assn_t ain) {
   print_tabs();
   fprintf(stderr,"exp %s, pre=%s\n",Absynpp::exp2string(e),assn2string(ain));
   indent += 2;
@@ -862,11 +976,11 @@ $(term_opt_t,assn_t) vcgen_rexp_debug(env_t env, exp_t e, assn_t ain) {
 // local iteration for loops and so forth to generate invariants,
 // since the only back-edges in the simplified graph are always
 // part of the control constructs.  
-assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
+static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
   // merge the pre-condition with any pre-recorded assertions.
   // we'll have one if there was some control-flow to this statement.
   ain = pre_stmt_update(env,s,ain);
-  assn_size(ain);
+  //assn_size(ain);
   // don't bother analyzing if we can show the assertion is false
   // (effectively an unreachable state.)
   switch (ain) {
@@ -993,7 +1107,7 @@ assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
   }
 }
 
-assn_t vcgen_switch(env_t env, list_t<switch_clause_t> scs, assn_t ain) {
+static assn_t vcgen_switch(env_t env, list_t<switch_clause_t> scs, assn_t ain) {
   // note that all of the clauses should explicitly jump (via break)
   // or something else outside of the clause so the result should always
   // be false...
@@ -1017,7 +1131,7 @@ assn_t vcgen_switch(env_t env, list_t<switch_clause_t> scs, assn_t ain) {
   return res;
 }
 
-assn_t add_vardecl(env_t env, vardecl_t vd, assn_t a) {
+static assn_t add_vardecl(env_t env, vardecl_t vd, assn_t a) {
   // stupid C semantics means I have to put in a dummy value for vd first,
   // then run the initializer.  
   let tv = new Var(vd);
@@ -1029,7 +1143,7 @@ assn_t add_vardecl(env_t env, vardecl_t vd, assn_t a) {
   return a;
 }
 
-assn_t vcgen_local_decl(env_t env, decl_t d, assn_t a) {
+static assn_t vcgen_local_decl(env_t env, decl_t d, assn_t a) {
   switch (d->r) {
   case &Absyn::Var_d(vd): return add_vardecl(env,vd,a);
   case &Absyn::Let_d(p,vds,e,_): 
@@ -1062,7 +1176,7 @@ assn_t vcgen_local_decl(env_t env, decl_t d, assn_t a) {
   }
 }
 
-$(assn_t,assn_t) vcgen_test(env_t env, exp_t e, assn_t ain) {
+static $(assn_t,assn_t) vcgen_test(env_t env, exp_t e, assn_t ain) {
   switch (e->r) {
   case &Absyn::Conditional_e(e1,e2,e3):
     let $(a1t,a1f) = vcgen_test(env,e1,ain);
@@ -1093,8 +1207,8 @@ $(assn_t,assn_t) vcgen_test(env_t env, exp_t e, assn_t ain) {
     case Absyn::Neq: at = and(at,neq(t1,t2)); af = and(af,eq(t1,t2)); break;
     case Absyn::Lt:  at = and(at,lt(t1,t2));  af = and(af,gte(t1,t2)); break;
     case Absyn::Lte: at = and(at,lte(t1,t2)); af = and(af,gt(t1,t2)); break;
-    case Absyn::Gt:  at = and(at,gt(t1,t2));  af = and(at,lte(t1,t2)); break;
-    case Absyn::Gte: at = and(at,gte(t1,t2)); af = and(at,lt(t1,t2)); break;
+    case Absyn::Gt:  at = and(at,gt(t1,t2));  af = and(af,lte(t1,t2)); break;
+    case Absyn::Gte: at = and(at,gte(t1,t2)); af = and(af,lt(t1,t2)); break;
     default: break;
     }
     return $(at,af);
@@ -1104,13 +1218,13 @@ $(assn_t,assn_t) vcgen_test(env_t env, exp_t e, assn_t ain) {
   }
 }
 
-assn_t vcgen_rexps_nosave(env_t env, list_t<exp_t> es, assn_t a) {
+static assn_t vcgen_rexps_nosave(env_t env, list_t<exp_t> es, assn_t a) {
   for (; es != NULL; es = es->tl) 
     a = vcgen_rexp(env,es->hd,a)[1];
   return a;
 }
 
-$(list_t<term_t>*,assn_t) vcgen_rexps(env_t env, list_t<exp_t> es, assn_t a) {
+static $(list_t<term_t>*,assn_t) vcgen_rexps(env_t env, list_t<exp_t> es, assn_t a) {
   list_t<term_t> res = NULL;
   bool valid = true;
   for (; es != NULL; es = es->tl) {
@@ -1125,12 +1239,12 @@ $(list_t<term_t>*,assn_t) vcgen_rexps(env_t env, list_t<exp_t> es, assn_t a) {
   return $(valid ? new (imp_rev(res)) : NULL, a);
 }
 
-$(term_t,assn_t) vcgen_rexp_always(env_t env, exp_t e, assn_t ain) {
+static $(term_t,assn_t) vcgen_rexp_always(env_t env, exp_t e, assn_t ain) {
   let $(topt,a) = vcgen_rexp(env,e,ain);
   return $(topt == NULL ? fresh_var() : (term_t)topt, a);
 }
 
-$(list_t<term_t>,assn_t) vcgen_rexps_always(env_t env, list_t<exp_t> es, assn_t ain) {
+static $(list_t<term_t>,assn_t) vcgen_rexps_always(env_t env, list_t<exp_t> es, assn_t ain) {
   list_t<term_t> res = NULL;
   for (; es != NULL; es = es->tl) {
     let $(t,a) = vcgen_rexp_always(env,es->hd,ain);
@@ -1140,7 +1254,7 @@ $(list_t<term_t>,assn_t) vcgen_rexps_always(env_t env, list_t<exp_t> es, assn_t 
   return $(res,ain);
 }
 
-vardecl_t bind2vardecl(Absyn::binding_t b) {
+static vardecl_t bind2vardecl(Absyn::binding_t b) {
   switch (b) {
   case &Absyn::Global_b(vd): return vd;
   case &Absyn::Funname_b(fd): return (vardecl_t)fd->fn_vardecl;
@@ -1151,7 +1265,7 @@ vardecl_t bind2vardecl(Absyn::binding_t b) {
   }
 }
 
-$(term_opt_t,assn_t) vcgen_lexp(env_t env, exp_t e, assn_t ain) {
+static $(term_opt_t,assn_t) vcgen_lexp(env_t env, exp_t e, assn_t ain) {
   switch (e->r) {
   case &Absyn::Var_e(b): 
       return $(new Var(bind2vardecl(b)),ain);
@@ -1159,11 +1273,11 @@ $(term_opt_t,assn_t) vcgen_lexp(env_t env, exp_t e, assn_t ain) {
   }
 }
 
-term_opt_t deref_lterm(env_t env, term_opt_t lt, assn_t ain) {
+static term_opt_t deref_lterm(env_t env, term_opt_t lt, assn_t ain) {
   return lt;
 }
 
-$(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
+static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   if (Tcutil::is_const_exp(e)) return $(new Const(e),ain);
   switch (e->r) {
   case &Absyn::Const_e(c): 
@@ -1246,7 +1360,7 @@ $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     let $(_,a2) = vcgen_rexp(env,e,ain);
     // kill every variable that points into memory -- could refine
     // this to only those reachable from globals or the parameters.
-    a2 = kill_mem(a2);
+    a2 = kill(a2);
     // FIX: take pre- and post-condition into account
     // must update exception handler.
     update_try_assn(env,a2);
@@ -1376,8 +1490,8 @@ void vcgen_topdecls(JumpAnalysis::jump_anal_res_t tables, list_t<Absyn::decl_t> 
   for (; ds != NULL; ds = ds->tl) {
     switch (ds->hd->r) {
     case &Absyn::Fn_d(fd):
-      fprintf(stderr,"Vcgen function %s\n",Absynpp::qvar2string(fd->name));
-      fprintf(stderr,"---------------------------------------\n");
+      //fprintf(stderr,"Vcgen function %s\n",Absynpp::qvar2string(fd->name));
+      //fprintf(stderr,"---------------------------------------\n");
       let env = initial_env(tables,fd);
       // FIX: put in pre-condition and check post-condition
       vcgen_stmt(env,fd->body,&true_assn);

@@ -590,7 +590,7 @@ lens=lens->tl;}}}{
 # 245
 struct _fat_ptr _tmp22=ans;_npop_handler(0U);return _tmp22;}
 # 222
-;_pop_region(temp);}
+;_pop_region();}
 # 248
 struct _fat_ptr Cyc_strconcat_l(struct Cyc_List_List*strs){
 return Cyc_rstrconcat_l(Cyc_Core_heap_region,strs);}
@@ -630,7 +630,7 @@ lens=lens->tl;}
 ({struct _fat_ptr _tmp91=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _tmp90=(struct _fat_ptr)*((struct _fat_ptr*)strs->hd);Cyc_strncpy(_tmp91,_tmp90,(unsigned long)((struct Cyc_List_List*)_check_null(lens))->hd);});{
 struct _fat_ptr _tmp27=ans;_npop_handler(0U);return _tmp27;}}}}
 # 259
-;_pop_region(temp);}}
+;_pop_region();}}
 # 291
 struct _fat_ptr Cyc_str_sepstr(struct Cyc_List_List*strs,struct _fat_ptr separator){
 return Cyc_rstr_sepstr(Cyc_Core_heap_region,strs,separator);}

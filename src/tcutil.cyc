@@ -1205,7 +1205,7 @@ static int type_case_number(type_t t) {
 static int enumfield_cmp(enumfield_t e1, enumfield_t e2) {
   let qc = qvar_cmp(e1->name,e2->name);
   if(qc != 0) return qc;
-  return star_cmp(Evexp::const_exp_cmp,e1->tag,e2->tag);
+  return star_cmp(Evexp::uint_exp_cmp,e1->tag,e2->tag);
 }
 static qvar_t get_datatype_qvar(datatype_info_t i) {
   switch (i) {
@@ -1286,9 +1286,9 @@ int aggrfield_cmp(aggrfield_t f1, aggrfield_t f2) {
   if(tc != 0) return tc;
   let ac = list_cmp(attribute_cmp,f1->attributes, f2->attributes);
   if(ac != 0) return ac;
-  ac = star_cmp(Evexp::const_exp_cmp,f1->width, f2->width);
+  ac = star_cmp(Evexp::uint_exp_cmp,f1->width, f2->width);
   if(ac != 0) return ac;
-  return star_cmp(Evexp::const_exp_cmp,f1->requires_clause, f2->requires_clause);
+  return star_cmp(Evexp::uint_exp_cmp,f1->requires_clause, f2->requires_clause);
 }
 
 // the real work of comparison
@@ -1343,7 +1343,7 @@ int typecmp(type_t t1, type_t t2) {
     if (e1 == NULL || e2 == NULL) {
       impos("missing expression in array index");
     }
-    return star_cmp(Evexp::const_exp_cmp,e1,e2);
+    return star_cmp(Evexp::uint_exp_cmp,e1,e2);
 
   case $(&FnType(f1), &FnType(f2)):
     if (unify(t1,t2)) return 0;
@@ -1387,9 +1387,9 @@ int typecmp(type_t t1, type_t t2) {
     }
     if (rpo1 != NULL) return 1;
     if (rpo2 != NULL) return -1;
-    r = star_cmp(Evexp::const_exp_cmp,f1.requires_clause,f2.requires_clause);
+    r = star_cmp(Evexp::uint_exp_cmp,f1.requires_clause,f2.requires_clause);
     if (r != 0) return r;
-    r = star_cmp(Evexp::const_exp_cmp,f1.ensures_clause,f2.ensures_clause);
+    r = star_cmp(Evexp::uint_exp_cmp,f1.ensures_clause,f2.ensures_clause);
     if (r != 0) return r;
     // we did unify above, so if the types are actually equal, we
     // should never have gotten here...
@@ -1406,7 +1406,7 @@ int typecmp(type_t t1, type_t t2) {
 
   case $(&ValueofType(e1), &ValueofType(e2)): fallthru(e1,e2);
   case $(&TypeofType(e1), &TypeofType(e2)): 
-    return Evexp::const_exp_cmp(e1,e2);
+    return Evexp::uint_exp_cmp(e1,e2);
   default: impos("Unmatched case in typecmp");
   }
 }
@@ -1673,7 +1673,7 @@ bool silent_castable(RgnOrder::rgn_po_opt_t po,seg_t loc,type_t t1,type_t t2) {
     // we could allow e1 >= e2 but I think it's best to give an error
     // DJG: I think you need e1==e2; these are not pointers here!
     okay = unify(zt1,zt2) &&
-      (e1 != NULL && e2 != NULL && Evexp::same_const_exp((exp_t)e1,(exp_t)e2));
+      (e1 != NULL && e2 != NULL && Evexp::same_uint_const_exp((exp_t)e1,(exp_t)e2));
     // FIX: we need to take qualifiers into account on typedefs
     return (okay && unify(t1a,t2a) && (!tq1a.real_const || tq2a.real_const));
 

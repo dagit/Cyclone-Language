@@ -1408,7 +1408,7 @@ struct _tuple22 _tmp241=({struct _tuple22 _tmp2F7;_tmp2F7.f1=call_conv,_tmp2F7.f
 ({int _tmp354=is_cp;((void(*)(int is_char_ptr,struct Cyc_List_List*,void(*f)(struct _tuple22*),struct _tuple22*a))Cyc_Absyndump_dumptms)(_tmp354,((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(tms),Cyc_Absyndump_dump_callconv_qvar,& pr);});
 _npop_handler(0U);goto _LL3;}}}
 # 1073
-;_pop_region(temp);}}_LL3:;}
+;_pop_region();}}_LL3:;}
 # 1097
 if(initializer != 0){
 Cyc_Absyndump_dump_char((int)'=');Cyc_Absyndump_dumpexp(initializer);}
@@ -1608,7 +1608,7 @@ Cyc_Absyndump_dumptq(tq);
 Cyc_Absyndump_dumpntyp(t);
 ({int _tmp36E=cp;struct Cyc_List_List*_tmp36D=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(tms);void(*_tmp36C)(void*)=f;Cyc_Absyndump_dumptms(_tmp36E,_tmp36D,_tmp36C,a);});}}
 # 1312
-;_pop_region(temp);}
+;_pop_region();}
 # 1318
 void Cyc_Absyndump_dumpdecllist2file(struct Cyc_List_List*tdl,struct Cyc___cycFILE*f){
 # 1320

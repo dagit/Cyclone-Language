@@ -643,7 +643,7 @@ struct _fat_ptr _tmp49=Cyc_CfFlowInfo_aggrfields_to_aggrdict(fenv,subs_fs,no_ini
 # 224
 struct _fat_ptr _tmp4A=Cyc_CfFlowInfo_aggrfields_to_aggrdict(fenv,fs,no_init_bits_only,leafval);_npop_handler(0U);return _tmp4A;}}
 # 208
-;_pop_region(temp);}struct _tuple15{struct Cyc_Absyn_Tqual f1;void*f2;};
+;_pop_region();}struct _tuple15{struct Cyc_Absyn_Tqual f1;void*f2;};
 # 228
 static void*Cyc_CfFlowInfo_i_typ_to_absrval(struct Cyc_CfFlowInfo_FlowEnv*fenv,int allow_zeroterm,int no_init_bits_only,void*t,void*leafval){
 # 234
@@ -789,7 +789,7 @@ int _tmp9D=1;_npop_handler(0U);return _tmp9D;}}}}{
 # 397
 int _tmp9E=0;_npop_handler(0U);return _tmp9E;}}
 # 384
-;_pop_region(r);}struct Cyc_CfFlowInfo_EscPile{struct Cyc_List_List*places;};
+;_pop_region();}struct Cyc_CfFlowInfo_EscPile{struct Cyc_List_List*places;};
 # 407
 static void Cyc_CfFlowInfo_add_place(struct Cyc_CfFlowInfo_EscPile*pile,struct Cyc_CfFlowInfo_Place*place){
 # 410
@@ -971,7 +971,7 @@ struct _RegionHandle _tmpFE=_new_region("rgn");struct _RegionHandle*rgn=& _tmpFE
 Cyc_CfFlowInfo_add_places(pile,r);{
 struct Cyc_Dict_Dict _tmpFF=Cyc_CfFlowInfo_escape_these(fenv,pile,d);_npop_handler(0U);return _tmpFF;}}
 # 630
-;_pop_region(rgn);}struct Cyc_CfFlowInfo_AssignEnv{struct Cyc_CfFlowInfo_FlowEnv*fenv;struct Cyc_CfFlowInfo_EscPile*pile;struct Cyc_Dict_Dict d;unsigned loc;struct Cyc_CfFlowInfo_Place*root_place;};
+;_pop_region();}struct Cyc_CfFlowInfo_AssignEnv{struct Cyc_CfFlowInfo_FlowEnv*fenv;struct Cyc_CfFlowInfo_EscPile*pile;struct Cyc_Dict_Dict d;unsigned loc;struct Cyc_CfFlowInfo_Place*root_place;};
 # 642
 static void*Cyc_CfFlowInfo_assign_place_inner(struct Cyc_CfFlowInfo_AssignEnv*env,void*oldval,void*newval){
 # 647

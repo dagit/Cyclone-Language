@@ -38,11 +38,16 @@ extern bool c_can_eval(Absyn::exp_t e);
   // be the same or lessthan -- we just don't know.
   // For all of these, the exp should have been type-checked b/c of 
   //   sizeofexp_e
-extern bool same_const_exp(Absyn::exp_t e1, Absyn::exp_t e2);
+extern bool same_uint_const_exp(Absyn::exp_t e1, Absyn::exp_t e2);
 extern bool lte_const_exp(Absyn::exp_t e1, Absyn::exp_t e2);
-  // usable for sorting, trees, etc.  returns 0 iff same_const_exp returns true
-  // we need this for type_cmp unfortunately
-extern int  const_exp_cmp(Absyn::exp_t e1, Absyn::exp_t e2);
+
+// usable for sorting, trees, etc.  evaluates constant expressions
+// where it can -- shouldn't produce an error.
+extern int exp_cmp(Absyn::exp_t e1, Absyn::exp_t e2);
+
+// similar to above but expects that the expression is (or can be coerced to)
+// an unsigned int.  
+extern int  uint_exp_cmp(Absyn::exp_t e1, Absyn::exp_t e2);
 
   // only in this module for historical reasons
 extern bool okay_szofarg(Absyn::type_t t);

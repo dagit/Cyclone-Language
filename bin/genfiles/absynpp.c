@@ -2319,7 +2319,7 @@ struct Cyc_PP_Doc*_tmp8B4=Cyc_Absynpp_ntyp2doc(t);_tmp546[1]=_tmp8B4;}),({
 struct Cyc_PP_Doc*_tmp8B3=Cyc_PP_text(({const char*_tmp547=" ";_tag_fat(_tmp547,sizeof(char),2U);}));_tmp546[2]=_tmp8B3;}),({
 struct Cyc_PP_Doc*_tmp8B2=({int _tmp8B1=Cyc_Absynpp_is_char_ptr(typ);struct Cyc_PP_Doc*_tmp8B0=dopt == 0?Cyc_PP_nil_doc():(struct Cyc_PP_Doc*)dopt->v;Cyc_Absynpp_dtms2doc(_tmp8B1,_tmp8B0,tms);});_tmp546[3]=_tmp8B2;});Cyc_PP_cat(_tag_fat(_tmp546,sizeof(struct Cyc_PP_Doc*),4U));});_npop_handler(0U);return _tmp548;}}}
 # 2135
-;_pop_region(temp);}
+;_pop_region();}
 # 2148
 struct Cyc_PP_Doc*Cyc_Absynpp_aggrfield2doc(struct Cyc_Absyn_Aggrfield*f){
 struct Cyc_PP_Doc*requires_doc;

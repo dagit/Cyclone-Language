@@ -637,8 +637,8 @@ struct _tuple16 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);
 # 32
 int Cyc_Evexp_c_can_eval(struct Cyc_Absyn_Exp*e);
 # 41 "evexp.h"
-int Cyc_Evexp_same_const_exp(struct Cyc_Absyn_Exp*e1,struct Cyc_Absyn_Exp*e2);
-# 48
+int Cyc_Evexp_same_uint_const_exp(struct Cyc_Absyn_Exp*e1,struct Cyc_Absyn_Exp*e2);
+# 53
 int Cyc_Evexp_okay_szofarg(void*t);struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;const struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[8U];struct Cyc_Dict_Present_exn_struct{char*tag;};extern char Cyc_Dict_Absent[7U];struct Cyc_Dict_Absent_exn_struct{char*tag;};extern char Cyc_Tcenv_Env_error[10U];struct Cyc_Tcenv_Env_error_exn_struct{char*tag;};struct Cyc_Tcenv_Genv{struct Cyc_Dict_Dict aggrdecls;struct Cyc_Dict_Dict datatypedecls;struct Cyc_Dict_Dict enumdecls;struct Cyc_Dict_Dict typedefs;struct Cyc_Dict_Dict ordinaries;};struct Cyc_Tcenv_Fenv;struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Tcenv_Genv*ae;struct Cyc_Tcenv_Fenv*le;int allow_valueof: 1;int in_extern_c_include: 1;int in_tempest: 1;int tempest_generalize: 1;int in_extern_c_inc_repeat: 1;};
 # 76 "tcenv.h"
 void*Cyc_Tcenv_lookup_ordinary_global(struct Cyc_Tcenv_Tenv*,unsigned,struct _tuple1*,int is_use);
@@ -2475,7 +2475,7 @@ struct Cyc_Absyn_Exp*_tmp443=({void*_tmp87D=Cyc_Absyn_bounds_one();Cyc_Tcutil_ge
 if(eopt != 0 && !one_elt){
 struct Cyc_Absyn_Exp*_tmp444=eopt;struct Cyc_Absyn_Exp*upper_exp=_tmp444;
 int _tmp445=Cyc_Evexp_c_can_eval(num_elts);int is_constant=_tmp445;
-if(is_constant && Cyc_Evexp_same_const_exp(upper_exp,num_elts)){
+if(is_constant && Cyc_Evexp_same_uint_const_exp(upper_exp,num_elts)){
 *is_fat=0;
 return({void*_tmp881=elt_type;void*_tmp880=rgn;struct Cyc_Absyn_Tqual _tmp87F=Cyc_Absyn_empty_tqual(0U);void*_tmp87E=b;Cyc_Absyn_atb_type(_tmp881,_tmp880,_tmp87F,_tmp87E,zero_term);});}{
 # 2175
@@ -2483,7 +2483,7 @@ void*_tmp446=Cyc_Tcutil_compress((void*)_check_null(num_elts->topt));void*_stmtt
 # 2177
 struct Cyc_Absyn_Exp*_tmp449=({void*_tmp882=Cyc_Absyn_uint_type;Cyc_Absyn_cast_exp(_tmp882,Cyc_Absyn_valueof_exp(tagtyp,0U),0,Cyc_Absyn_No_coercion,0U);});struct Cyc_Absyn_Exp*tagtyp_exp=_tmp449;
 # 2179
-if(Cyc_Evexp_same_const_exp(tagtyp_exp,upper_exp)){
+if(Cyc_Evexp_same_uint_const_exp(tagtyp_exp,upper_exp)){
 *is_fat=0;
 return({void*_tmp886=elt_type;void*_tmp885=rgn;struct Cyc_Absyn_Tqual _tmp884=Cyc_Absyn_empty_tqual(0U);void*_tmp883=b;Cyc_Absyn_atb_type(_tmp886,_tmp885,_tmp884,_tmp883,zero_term);});}
 # 2183

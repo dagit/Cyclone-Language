@@ -64,9 +64,10 @@ void _npop_frame(unsigned int n) {
     if(current_frame == NULL) {
       errquit("internal error: empty frame stack\n");
     } 
-    if (current_frame->cleanup != NULL)
+    if (current_frame->cleanup != NULL) 
       current_frame->cleanup(current_frame);
-    set_current_frame(current_frame->next);
+    current_frame = current_frame->next;
+    set_current_frame(current_frame);
   }
 }
 

@@ -1021,7 +1021,7 @@ prev_relations=({struct Cyc_List_List*_tmp110=_region_malloc(uprev_rgn,sizeof(*_
 if(prev_relations != 0)
 ({void*_tmp111=0U;({unsigned _tmp2D5=loc;struct _fat_ptr _tmp2D4=({const char*_tmp112="if one field has a @requires clause, they all must";_tag_fat(_tmp112,sizeof(char),51U);});Cyc_Tcutil_terr(_tmp2D5,_tmp2D4,_tag_fat(_tmp111,sizeof(void*),0U));});});}}}}}
 # 467
-;_pop_region(uprev_rgn);}
+;_pop_region();}
 # 539
 static void Cyc_Tc_rule_out_memkind(unsigned loc,struct _tuple0*n,struct Cyc_List_List*tvs,int constrain_top_kind){
 # 541
@@ -1196,7 +1196,7 @@ f->sc=Cyc_Absyn_Public;}}}
 # 750
 fields2=fields;}
 # 737
-;_pop_region(uprev_rgn);}
+;_pop_region();}
 # 752
 return fields2;}}struct _tuple18{struct Cyc_Core_Opt*f1;struct Cyc_Absyn_Datatypedecl***f2;};
 # 755
@@ -1285,7 +1285,7 @@ if(Cyc_Tcutil_is_const_exp((struct Cyc_Absyn_Exp*)_check_null(f->tag))){
 struct _tuple11 _tmp1A0=Cyc_Evexp_eval_const_uint_exp((struct Cyc_Absyn_Exp*)_check_null(f->tag));struct _tuple11 _stmttmp17=_tmp1A0;struct _tuple11 _tmp1A1=_stmttmp17;int _tmp1A3;unsigned _tmp1A2;_LL1: _tmp1A2=_tmp1A1.f1;_tmp1A3=_tmp1A1.f2;_LL2: {unsigned t1=_tmp1A2;int known=_tmp1A3;
 if(known)tag_count=t1 + (unsigned)1;}}}}}
 # 853
-;_pop_region(uprev_rgn);}
+;_pop_region();}
 # 879
 {struct _handler_cons _tmp1A4;_push_handler(& _tmp1A4);{int _tmp1A6=0;if(setjmp(_tmp1A4.handler))_tmp1A6=1;if(!_tmp1A6){
 {struct Cyc_Absyn_Enumdecl**_tmp1A7=((struct Cyc_Absyn_Enumdecl**(*)(struct Cyc_Dict_Dict d,struct _tuple0*k))Cyc_Dict_lookup)((te->ae)->enumdecls,q);struct Cyc_Absyn_Enumdecl**edp=_tmp1A7;

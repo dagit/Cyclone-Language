@@ -32,6 +32,7 @@ using Tcutil;
 
 namespace Evexp;
 
+
 static $(cnst_t,bool) eval_const_exp(exp_t); // needed due to mutual recursion
 
 static cnst_t promote_const(cnst_t cn) {
@@ -57,8 +58,8 @@ $(unsigned int,bool) eval_const_uint_exp(exp_t e) {
     else return $((unsigned int)x,true);
   case {.Float_c = _}: return $(0,false);
   case {.Null_c = _}: return $(0,true);
-  default: 
-    terr(e->loc,"expecting unsigned int found %s",exp2string(e)); return $(0,true);
+  default: return $(0,false);
+    //terr(e->loc,"expecting unsigned int found %s",exp2string(e)); return $(0,true);
   }
 }
 
@@ -71,7 +72,8 @@ static $(bool,bool) eval_const_bool_exp(exp_t e) {
   case {.LongLong_c = $(_,b)}:  return $(b != 0, true);
   case {.Null_c = _}:           return $(false,  false);
   case {.Float_c = _}:return $(0,true);
-  default: terr(e->loc,"expecting bool"); return $(false, false);
+  default: return $(0,false);
+    //default: terr(e->loc,"expecting bool"); return $(false, false);
   }
 }
 
@@ -361,11 +363,11 @@ static int cmp_cnst(cnst_t c1, cnst_t c2) {
 // equal.  For integral expressions, we get more information
 // (e.g., e1 < e2) but this really shouldn't be used in this
 // way because other expressions don't have this kind of ordering.
-int const_exp_cmp(exp_t e1, exp_t e2);
+int exp_cmp(exp_t e1, exp_t e2);
 
 int designator_cmp(designator_t d1, designator_t d2) {
   switch $(d1,d2) {
-  case $(&ArrayElement(e1),&ArrayElement(e2)): return const_exp_cmp(e1,e2);
+  case $(&ArrayElement(e1),&ArrayElement(e2)): return exp_cmp(e1,e2);
   case $(&ArrayElement(e1),_): return -1;
   case $(_,&ArrayElement(e1)): return 1;
   case $(&FieldName(v1),&FieldName(v2)): return strcmp(*v1,*v2);
@@ -376,7 +378,7 @@ int designator_exp_cmp($(list_t<designator_t>,exp_t)@ d1,
                        $(list_t<designator_t>,exp_t)@ d2) {
   let $(des1,e1) = *d1;
   let $(des2,e2) = *d2;
-  let c1 = const_exp_cmp(e1,e2);
+  let c1 = exp_cmp(e1,e2);
   if (c1 != 0) return c1;
   return list_cmp(designator_cmp, des1, des2);
 }
@@ -403,21 +405,13 @@ int cmp_binding(binding_t b1, binding_t b2) {
   }
 }
 
-// FIX: we use this in inconstent ways.  Some functions need
-// a total order on expressions and this code sort of provides
-// that, but because we evaluate the integral expressions to
-// unsigned ints, we get out strange results.  
-int const_exp_cmp(exp_t e1, exp_t e2) {
-  // strip off unnecessary casts
-  e1 = strip_cast(e1);
-  e2 = strip_cast(e2);
+// Used only for sorting and lookups, but tries to
+// evaluate constant expressions -- ideally, this should
+// never fail...
+int exp_cmp(exp_t e1, exp_t e2) {
   let $(c1,known1) = eval_const_exp(e1);
   let $(c2,known2) = eval_const_exp(e2);
-  if(known1 && known2) {
-    let $(i1,_) = eval_const_uint_exp(e1);
-    let $(i2,_) = eval_const_uint_exp(e2);
-    return i1 - i2;
-  }
+  if(known1 && known2) return cmp_cnst(c1,c2);
   let e1case = Absyn::exp_case_number(e1);
   let e2case = Absyn::exp_case_number(e2);
   if(e1case != e2case)
@@ -430,23 +424,25 @@ int const_exp_cmp(exp_t e1, exp_t e2) {
   case $(&Conditional_e(e11,e12,e13), &Conditional_e(e21,e22,e23)):
     // FIX: not quite right -- if e11 and e21 are known and equal, then only
     // one of the remaining pairs should matter. Anybody care?
-    let c1 = const_exp_cmp(e13,e23);
+    let c1 = exp_cmp(e11,e21);
     if (c1 != 0) return c1;
-    fallthru(e11,e12,e21,e22);
-  case $(&Comprehension_e(_,e11,e12,_), &Comprehension_e(_,e21,e22,_)):
+    c1 = exp_cmp(e12,e22);
+    if (c1 != 0) return c1;
+    return exp_cmp(e13,e23);
+  case $(&Comprehension_e(vd1,e11,e12,_), &Comprehension_e(vd2,e21,e22,_)):
+    if (vd1 != vd2) return (int)vd1 - (int)vd2;
     fallthru(e11,e12,e21,e22);
   case $(&And_e(e11,e12),&And_e(e21,e22)): fallthru(e11,e12,e21,e22);
-  case $(&Or_e(e11,e12),&Or_e(e21,e22)):
-    let c1 = const_exp_cmp(e11,e21);
+  case $(&Or_e(e11,e12),&Or_e(e21,e22)): fallthru(e11,e12,e21,e22);
+  case $(&SeqExp_e(e11,e12),&SeqExp_e(e21,e22)): 
+    let c1 = exp_cmp(e11,e21);
     if(c1 != 0) return c1;
-    fallthru(e12,e22);
-  case $(&SeqExp_e(_,e12),&SeqExp_e(_,e22)): 
-    return const_exp_cmp(e12,e22);
+    return exp_cmp(e12,e22);
   case $(&Primop_e(p1,es1), &Primop_e(p2,es2)):
     let c1 = (int)p1 - (int)p2;
     if(c1 != 0) return c1;
     for(; es1 != NULL && es2 != NULL; es1=es1->tl, es2=es2->tl) {
-      let c2 = const_exp_cmp(es1->hd, es2->hd);
+      let c2 = exp_cmp(es1->hd, es2->hd);
       if(c2 != 0)
 	return c2;
     }
@@ -495,24 +491,24 @@ int const_exp_cmp(exp_t e1, exp_t e2) {
   case $(&Cast_e(t1,e1a,_,_), &Cast_e(t2,e2a,_,_)):
     let c1 = typecmp(t1,t2);
     if(c1 != 0) return c1;
-    return const_exp_cmp(e1a,e2a);
+    return exp_cmp(e1a,e2a);
   case $(&Valueof_e(t1), &Valueof_e(t2)):
     if (Unify::unify(t1,t2)) return 0;
     return typecmp(t1,t2);
   case $(&Extension_e(e1),&Extension_e(e2)): fallthru(e1,e2);
   case $(&NoInstantiate_e(e1),&NoInstantiate_e(e2)): 
-    return const_exp_cmp(e1,e2);
+    return exp_cmp(e1,e2);
   case $(&Instantiate_e(e1,t1),&Instantiate_e(e2,t2)):
-    let c1 = const_exp_cmp(e1,e2);
+    let c1 = exp_cmp(e1,e2);
     if (c1 != 0) return c1;
     return list_cmp(typecmp, t1, t2);
-  case $(&Address_e(e1),&Address_e(e2)): return const_exp_cmp(e1,e2);
+  case $(&Address_e(e1),&Address_e(e2)): return exp_cmp(e1,e2);
   case $(&ComprehensionNoinit_e(e1,t1,b1),&ComprehensionNoinit_e(e2,t2,b2)):
     let c1 = (b1 - b2);
     if (c1 != 0) return c1;
     c1 = typecmp(t1,t2);
     if (c1 != 0) return c1;
-    return const_exp_cmp(e1,e2);
+    return exp_cmp(e1,e2);
   case $(&AnonStruct_e(t1,des1),&AnonStruct_e(t2,des2)):
     let c1 = typecmp(t1,t2); 
     if (c1 != 0) return c1;
@@ -526,29 +522,43 @@ int const_exp_cmp(exp_t e1, exp_t e2) {
     if (c1 != 0) return c1;
     return list_cmp(designator_exp_cmp,des1,des1);
   case $(&Tuple_e(es1),&Tuple_e(es2)):
-    return list_cmp(const_exp_cmp,es1,es2);
+    return list_cmp(exp_cmp,es1,es2);
   case $(&Datatype_e(es1,dd1,df1),&Datatype_e(es2,dd2,df2)):
     let c1 = (int)dd1 - (int)dd2;
     if (c1 != 0) return c1;
     c1 = (int)df1 - (int)df2;
     if (c1 != 0) return c1;
-    return list_cmp(const_exp_cmp,es1,es2);
-    // next two cases we shouldn't have to deal with since we've 
-    // evaluated things...
+    return list_cmp(exp_cmp,es1,es2);
+    // FIX:  need to add these two cases in.
   case $(&Enum_e(_,_),&Enum_e(_,_)):  
   case $(&AnonEnum_e(_,_),&AnonEnum_e(_,_)):
-  default: impos("Evexp::const_exp_cmp, unexpected case");
+  default: impos("Evexp::exp_cmp, unexpected case");
   }
 }
-bool same_const_exp(exp_t e1, exp_t e2) {
-  return const_exp_cmp(e1,e2)==0;
+
+int uint_exp_cmp(exp_t e1, exp_t e2) {
+  // strip off unnecessary casts
+  e1 = strip_cast(e1);
+  e2 = strip_cast(e2);
+  let $(c1,known1) = eval_const_exp(e1);
+  let $(c2,known2) = eval_const_exp(e2);
+  if(known1 && known2) {
+    let $(i1,_) = eval_const_uint_exp(e1);
+    let $(i2,_) = eval_const_uint_exp(e2);
+    return i1 - i2;
+  }
+  return exp_cmp(e1,e2);
+}
+
+bool same_uint_const_exp(exp_t e1, exp_t e2) {
+  return uint_exp_cmp(e1,e2)==0;
 }
 bool lte_const_exp(exp_t e1, exp_t e2) {
   let $(i1,known1) = eval_const_uint_exp(e1);
   let $(i2,known2) = eval_const_uint_exp(e2);
   if(known1 && known2)
     return i1 <= i2;
-  return same_const_exp(e1,e2);
+  return same_uint_const_exp(e1,e2);
 }
 
 // called by tcSizeof (which ignores result)

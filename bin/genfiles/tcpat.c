@@ -1028,7 +1028,7 @@ struct _fat_ptr _tmp4E3=({const char*_tmpFB=" pattern expects type ";_tag_fat(_t
 # 526
 if((unsigned)new_access_exp)new_access_exp->topt=pat->topt;}}}}}
 # 420
-;_pop_region(rgn);}
+;_pop_region();}
 # 529
 goto _LL0;}}else{_LL25: _LL26:
 # 578

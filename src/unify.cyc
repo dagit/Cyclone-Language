@@ -275,7 +275,7 @@ static bool unify_const_exp_opt(exp_opt_t e1, exp_opt_t e2) {
     return true;
   if(e1==NULL || e2==NULL)
     return false;
-  return Evexp::same_const_exp(e1,e2);
+  return Evexp::same_uint_const_exp(e1,e2);
 }
 
 
@@ -381,7 +381,7 @@ static void unify_it(type_t t1, type_t t2) {
     }
 
   case $(&ValueofType(e1), &ValueofType(e2)):
-    if (!Evexp::same_const_exp(e1,e2))
+    if (!Evexp::same_uint_const_exp(e1,e2))
       fail_because("(cannot prove expressions are the same)");
     return;
 

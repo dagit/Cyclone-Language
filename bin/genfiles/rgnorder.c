@@ -663,7 +663,7 @@ int _tmp80=0;_npop_handler(0U);return _tmp80;}}_LL18:;}}else{goto _LL5;}default:
 # 369
 int _tmp81=0;_npop_handler(0U);return _tmp81;}}_LL0:;}
 # 284 "rgnorder.cyc"
-;_pop_region(listrgn);}
+;_pop_region();}
 # 376 "rgnorder.cyc"
 int Cyc_RgnOrder_effect_outlives(struct Cyc_RgnOrder_RgnPO*po,void*eff,void*rgn){
 eff=Cyc_Tcutil_normalize_effect(eff);{

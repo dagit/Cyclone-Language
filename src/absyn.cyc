@@ -1012,7 +1012,7 @@ int attribute_cmp(attribute_t att1, attribute_t att2) {
     if (e1 == e2) return 0;
     if (e1 == NULL) return -1;
     if (e2 == NULL) return 1;
-    return Evexp::const_exp_cmp(e1,e2);
+    return Evexp::exp_cmp(e1,e2);
   case $(&Section_att(s1),&Section_att(s2)): return strcmp(s1,s2);
   case $(&Format_att(ft1,i1,j1),&Format_att(ft2,i2,j2)):
     let ftc = intcmp((unsigned int)ft1, (unsigned int)ft2);
