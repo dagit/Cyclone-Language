@@ -48,7 +48,11 @@ void merr(seg_t loc,string_t<`r2> * msg1,string_t fmt, ... inject parg_t<`r> ap
 {
   if (msg1 == NULL)
     throw &Incompatible_val;
-  string_t fmt2 = strconcat("%s ", fmt);
+  string_t fmt2;
+  if (strlen(*msg1) == 0) 
+    fmt2 = strconcat("%s", fmt);
+  else 
+    fmt2 = strconcat("%s ", fmt);
   parg_t<`r> ? ap2 = new {for i < numelts(ap)+1 : 
 		     i==0 ? ((parg_t<`r>)(new String_pa((string_t<`r>)(*msg1)))) : ap[i-1]};
   Position::post_error(Position::mk_err_elab(loc,
@@ -59,10 +63,10 @@ void merr(seg_t loc,string_t<`r2> * msg1,string_t fmt, ... inject parg_t<`r> ap
 
 static void merge_scope_err(scope_t s0, scope_t s1, string_t t, string_t v, 
 			    seg_t loc, string_t * msg) {
-  string_t s0_str = (s0 == Public) ? "public" : scope2string(s0);
-  string_t s1_str = (s1 == Public) ? "public" : scope2string(s1);
-  merr(loc, msg, "%s %s is %s whereas expected scope is %s",
-       t, v, scope2string(s1), scope2string(s0));
+  string_t s0_str = (s0 == Public) ? "public " : scope2string(s0);
+  string_t s1_str = (s1 == Public) ? "public " : scope2string(s1);
+  merr(loc, msg, "%s %s is %sbut expected scope is %s",
+       t, v, s1_str, s0_str);
 }
 
 $(scope_t, bool) merge_scope(scope_t s0, scope_t s1, string_t t, string_t v,
@@ -297,7 +301,7 @@ merge_datatypefield(datatypefield_t f0, datatypefield_t f1,
     res = false;
   }
   // for all types
-  for (; typs0 != NULL; typs0 = typs0->tl, typs1 = typs1->tl) {
+  for (; typs0 != NULL && typs1 != NULL; typs0 = typs0->tl, typs1 = typs1->tl) {
      // must have same qualifier
     if (!equal_tqual((*typs0->hd)[0], (*typs1->hd)[0])) {
       merr(loc, msg, "%s %s, field %s: parameter qualifier", t, v, name);
@@ -481,11 +485,11 @@ struct Datatypedecl * merge_datatypedecl(datatypedecl_t d0, datatypedecl_t d1,
 	merge_datatypefield(f0s->hd, f1s->hd, inst, t, v, msg);
       }
       if (f0s != NULL) {
-	merr(loc,msg, "%s %s has extra field %s", t, v, *((*f1s->hd->name)[1]));
+	merr(loc,msg, "%s %s is missing field %s", t, v, *((*f0s->hd->name)[1]));
 	res = false;
       }
       if (f1s != NULL) {
-	merr(loc,msg, "%s %s is missing field %s", t,v,*((*f1s->hd->name)[1]));
+	merr(loc,msg, "%s %s has extra field %s", t,v,*((*f1s->hd->name)[1]));
 	res = false;
       }
       d2 = d0;
@@ -563,8 +567,15 @@ check_var_or_fn_decl(scope_t sc0, type_t t0, tqual_t tq0, attributes_t atts0,
 
   // check type
   if (! check_type(t0, t1)) {
-    merr(loc, msg, "%s %s has type \n%s\n instead of \n%s\n",
-	 t, v, typ2string(t1), typ2string(t0));
+    let s1 = typ2string(t0);
+    let s2 = typ2string(t1);
+    if (strlen(s1) + strlen(s2) + strlen(t) + strlen(v) + 
+        strlen("  was declared  instead of ") > 70)
+      merr(loc, msg, "%s %s was declared \n\t%s\n instead of \n\t%s",
+           t, v, s2, s1);
+    else
+      merr(loc, msg, "%s %s was declared %s instead of %s",
+           t, v, s2, s1);
     explain_failure();
     res = false;
   }
@@ -578,10 +589,10 @@ check_var_or_fn_decl(scope_t sc0, type_t t0, tqual_t tq0, attributes_t atts0,
   // check attribute
   if (! same_atts(atts0, atts1)) {
     merr(loc, msg, "%s %s has different attributes", t, v);
-    fprintf(stderr,"previous attributes: ");
+    fprintf(stderr,"\tprevious attributes: ");
     for (; atts0 != NULL; atts0 = atts0->tl)
       fprintf(stderr,"%s ",attribute2string(atts0->hd));
-    fprintf(stderr,"\ncurrent attributes: ");
+    fprintf(stderr,"\n\tcurrent attributes: ");
     for (; atts1 != NULL; atts1 = atts1->tl)
       fprintf(stderr,"%s ",attribute2string(atts1->hd));
     fprintf(stderr,"\n");

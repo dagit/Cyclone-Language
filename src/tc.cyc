@@ -208,15 +208,30 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
     } else {
       let e = (exp_t)initializer;
       // type-check the initializer
-      let t2 = Tcexp::tcExpInitializer(te,&t,e);
-      if (!coerce_assign(te,e,t)) {
-        terr(loc,"%s declared with type \n%s\n but initialized with type \n%s",
-             qvar2string(vd->name), typ2string(t), typ2string(t2));
-        explain_failure();
-      }
-      // reject non-constant initializers
-      if (!Tcutil::is_const_exp(e))
+      // have to look out for an Env_error when the expression
+      // is not a valid-toplevel one.
+      try {
+        let t2 = Tcexp::tcExpInitializer(te,&t,e);
+        if (!coerce_assign(te,e,t)) {
+          let s0 = qvar2string(vd->name);
+          let s1 = " declared with type ";
+          let s2 = typ2string(t);
+          let s3 = " but initialized with type ";
+          let s4 = typ2string(t2);
+          if (strlen(s0)+strlen(s1)+strlen(s2)+strlen(s3)+strlen(s4) > 70)
+            terr(loc,"%s%s\n\t%s\n%s\n\t%s",s0,s1,s2,s3,s4);
+          else 
+            terr(loc,"%s%s%s%s%s",s0,s1,s2,s3,s4);
+          explain_failure();
+          // reject non-constant initializers
+          if (!Tcutil::is_const_exp(e))
+            terr(loc,"initializer is not a constant expression");
+        }
+      } catch {
+      case &Tcenv::Env_error: 
         terr(loc,"initializer is not a constant expression");
+        break;
+      }
     }
   } else {
     // it is a function type -- check that the attributes are okay
@@ -362,15 +377,20 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
     let fenv = new_fenv(fnrgn,loc,fd);
     let te = rnew(fnrgn) Tenv{te->ns, te->ae, fenv, false};
     // check the body, then get rid of local environment
-    Tcstmt::tcStmt(te,fd->body,false);
-    // we've delayed checking some capabilities and constraints so that inference
-    // works a bit better, and now it's time to check them:
-    check_delayed_effects(te);
-    check_delayed_constraints(te);
-
-    // check for undefined labels FIX: get better error message
-    if(!all_labels_resolved(te))
-      terr(loc,"function has goto statements to undefined labels");
+    try {
+      Tcstmt::tcStmt(te,fd->body,false);
+      // we've delayed checking some capabilities and constraints so that inference
+      // works a bit better, and now it's time to check them:
+      check_delayed_effects(te);
+      check_delayed_constraints(te);
+      
+      // check for undefined labels FIX: get better error message
+      if(!all_labels_resolved(te))
+        terr(loc,"function has goto statements to undefined labels");
+    } catch {
+    case &Tcutil::AbortTypeCheckingFunction: break;
+    case e: Core::rethrow(e);
+    }
   }
   // look for main and check that it has a good type
   if (is_main(fd->name)) {
@@ -527,27 +547,29 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc,
           terr(requires_clause->loc,
                "@requires clause has type %s instead of integral type",
                typ2string((type_t)requires_clause->topt));
-        check_type(requires_clause->loc,te,tvs,&ik,false,new ValueofType(requires_clause));
+        else {
+          check_type(requires_clause->loc,te,tvs,&ik,false,new ValueofType(requires_clause));
         // convert the requires expression to a CNF formula
-        let relns = Relations::exp2relns(uprev_rgn,requires_clause);
+          let relns = Relations::exp2relns(uprev_rgn,requires_clause);
 
-        //fprintf(stderr,"relations for %s: ",*fn);
-        //Relations::print_relns(stderr,relns);
-        //fprintf(stderr,"\n");
+          //fprintf(stderr,"relations for %s: ",*fn);
+          //Relations::print_relns(stderr,relns);
+          //fprintf(stderr,"\n");
 
-        // warn if the relations aren't consistent
-        if (!Relations::consistent_relations(relns))
-          terr(requires_clause->loc,"@requires clause may be unsatisfiable");
+          // warn if the relations aren't consistent
+          if (!Relations::consistent_relations(relns))
+            terr(requires_clause->loc,"@requires clause may be unsatisfiable");
 
-        // run through all of the previous formulae and see if
-        // this one is consistent with those.  If so, there may
-        // be an overlap and we must reject.
-        for (let p = prev_relations; p != NULL; p = p->tl) {
-          if (Relations::consistent_relations(rappend(uprev_rgn,relns,p->hd)))
-            terr(requires_clause->loc,
-                 "@requires clause may overlap with previous clauses");
+          // run through all of the previous formulae and see if
+          // this one is consistent with those.  If so, there may
+          // be an overlap and we must reject.
+          for (let p = prev_relations; p != NULL; p = p->tl) {
+            if (Relations::consistent_relations(rappend(uprev_rgn,relns,p->hd)))
+              terr(requires_clause->loc,
+                   "@requires clause may overlap with previous clauses");
+          }
+          prev_relations = rnew(uprev_rgn) List(relns,prev_relations);
         }
-        prev_relations = rnew(uprev_rgn) List(relns,prev_relations);
       } else /* no requires clause */ {
         if (prev_relations != NULL)
           terr(loc,"if one field has a @requires clause, they all must");
@@ -594,8 +616,8 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     case &Packed_att: 
     case &Aligned_att(_): continue;
     default: 
-      terr(loc,"bad attribute %s in  %s definition",
-	   attribute2string(atts->hd), *v);
+      terr(loc,"bad attribute %s in %s definition",
+           attribute2string(atts->hd), *v);
       break;
     }
   
@@ -621,6 +643,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
   case $(NULL, NULL):
     // insert ad in the environment
     rule_out_memkind(loc,v,tvs,false);
+    // FIX: ignores @tagged qualifier which may be on struct!
     ge->aggrdecls = Dict::insert(ge->aggrdecls, v, new ad);
     break;
   case $(&AggrdeclImpl(exist_vars,rgn_po,fs,tagged), NULL):
@@ -631,6 +654,8 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     ge->aggrdecls = Dict::insert(ge->aggrdecls, v, adp);
 
     // reject ill-formed type
+    // FIX: should be distinct from tvs but these already have
+    // identities so they will never compare the same.
     check_unique_tvars(loc, exist_vars);
     // give the bound type variables identities
     add_tvar_identities(exist_vars);
@@ -666,6 +691,8 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
 			NULL, ad->attributes);
 
     // reject ill-formed type
+    // FIX: should be distinct from tvs but these already have
+    // identities so they will never compare the same.
     check_unique_tvars(loc, exist_vars);
     // give the bound type variables identities
     add_tvar_identities(exist_vars);
@@ -931,7 +958,7 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
       let f = fs->hd;
       // check for duplicate fields
       if (List::mem(strptrcmp,prev_fields,(*f->name)[1]))
-	terr(f->loc,"duplicate field name %s",*((*f->name)[1]));
+	terr(f->loc,"duplicate enum constructor %s",*((*f->name)[1]));
       else
 	prev_fields = rnew(uprev_rgn) List((*f->name)[1],prev_fields);
       // check for shadowing of global variables

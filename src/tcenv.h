@@ -36,6 +36,10 @@ using Dict;
 using Absyn;
 using Position;
 
+// This is thrown whenever we try to lookup a local variable but we're
+// not within a function definition...
+datatype exn {extern Env_error};
+
 extern struct CList<`a,`r::R> { `a hd; struct CList<`a,`r> const *`r const tl; };
 typedef struct CList<`a,`r> const *`r mclist_t<`a,`r>;
 typedef mclist_t<`a,`r> const clist_t<`a,`r>;

@@ -153,7 +153,7 @@ testenv_t<`r> tcTest(tenv_t<`g,`r> te, exp_t e, string_t msg_part) {
   check_contains_assign(e);
   tcExp(te,&sint_typ,e);
   if (!coerce_to_bool(te,e))
-    terr(e->loc,"test of %s has type %s instead of integral or * type",
+    terr(e->loc,"test of %s has type %s instead of integral or pointer type",
          msg_part, typ2string((type_t)e->topt));
   // FIX: Hack alert!!!  Should do something more principled to
   //   allow this sort of information to flow upward from the test
@@ -424,7 +424,7 @@ void check_format_args(tenv_t<`g,`r> te, exp_t fmt,
       exp_t  e = args->hd;
       tcExp(te,&t,e);
       if (!coerce_arg(te,e,t,&alias_coercion)) {
-        terr(e->loc,"descriptor has type \n%s\n but argument has type \n%s",
+        terr(e->loc,"descriptor has type %s but argument has type %s",
              typ2string(t), typ2string((type_t)e->topt));
         explain_failure();
       }
@@ -438,8 +438,10 @@ void check_format_args(tenv_t<`g,`r> te, exp_t fmt,
     // check arity
     if (desc_types != NULL)
       terr(fmt->loc,"too few arguments");
-    if (args != NULL)
+    if (args != NULL) {
       terr(args->hd->loc,"too many arguments");
+      throw new Tcutil::AbortTypeCheckingFunction;
+    }
   }
 }
 static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
@@ -449,7 +451,7 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
   case Plus:
   case Minus:
     if (!is_numeric(e))
-      terr(loc,"expecting arithmetic type but found %s",typ2string(t));
+      terr(loc,"expecting numeric type but found %s",typ2string(t));
     return (type_t)e->topt;
   case Not:
     check_contains_assign(e);
@@ -703,8 +705,13 @@ static type_t tcPrimop(tenv_t te, seg_t loc, type_t * topt,
   // we're losing precision).
   // HOWEVER it should be nuked when we re-write the type checker
   // to solve the general problem.
-  if (p == Minus && List::length(es) == 1)
-    return tcExp(te,topt,es->hd);
+  if (p == Minus && List::length(es) == 1) {
+    let e = es->hd;
+    let t = tcExp(te,topt,e);
+    if (!is_numeric(e))
+      terr(e->loc,"expecting numeric type but found %s",typ2string(t));
+    return t;
+  }
   tcExpList(te,es);
   type_t t;
   switch (List::length(es)) {
@@ -720,7 +727,11 @@ static bool check_writable_aggr(seg_t loc, type_t t) {
   let t = compress(t);
   switch (t) {
   case &AggrType(AggrInfo({.KnownAggr = &ad},_)):
-    fallthru(ad->impl->fields);
+    if (ad->impl == NULL) {
+      terr(loc, "attempt to write an abstract aggregate");
+      return false;
+    } else 
+      fallthru(ad->impl->fields);
   case &AnonAggrType(_,fs):
     for (; fs != NULL; fs = fs->tl) {
       let f = fs->hd;
@@ -1051,10 +1062,14 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
           type_t t2 = (*args_info->hd)[2];
           tcExp(te, &t2, e1);
           if (!coerce_arg(te,e1,t2,&alias_coercion)) {
-            terr(e1->loc,
-                 "actual argument has type \n"
-		 "\t%s\n but formal has type \n\t%s.",
-                 typ2string((type_t)e1->topt),typ2string(t2));
+            string_t s0 = "actual argument has type ";
+            string_t s1 = typ2string((type_t)e1->topt);
+            string_t s2 = " but formal has type ";
+            string_t s3 = typ2string(t2);
+            if (strlen(s0) + strlen(s1) + strlen(s2) + strlen(s3) >= 70)
+              terr(e1->loc,aprintf("%s\n\t%s\n%s\n\t%s.",s0,s1,s2,s3));
+            else 
+              terr(e1->loc,aprintf("%s%s%s%s.",s0,s1,s2,s3));
             unify((type_t)e1->topt,t2);
             explain_failure();
           }
@@ -1199,9 +1214,9 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
           Tcenv::check_effect_accessible(te, loc, (type_t)eff);
         }
         return res_typ;
-      default: return expr_err(te,loc,topt,"expected pointer to function");
+      default: return expr_err(te,loc,topt,"expected pointer to function but found %s",typ2string(t));
       }
-    default: return expr_err(te,loc,topt,"expected pointer to function");
+    default: return expr_err(te,loc,topt,"expected pointer to function but found %s",typ2string(t));
     }
   }
 }
@@ -1372,6 +1387,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
 
   // we've got an address-of
   let $(is_const,rgn) = addressof_props(te,e);
+  // JGM: don't see how this can happen given the earlier tests but oh well...
   if (is_noalias_region(rgn,false))
     terr(e->loc,"using & would manufacture an alias to an alias-free pointer");
 
@@ -1555,7 +1571,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
   case &AggrType(AggrInfo({.KnownAggr = &ad},ts)):
     let finfo = lookup_decl_field(ad,f);
     if (finfo == NULL)
-      return expr_err(te,loc,topt,"type %s has no %s field",
+      return expr_err(te,loc,topt,"%s has no %s member",
                       qvar2string(ad->name), *f);
     // must do after previous check else could dereference NULL
     if (ad->impl->tagged) *is_tagged = true;
@@ -1580,26 +1596,16 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
   case &AnonAggrType(k,fs):
     let finfo = lookup_field(fs,f);
     if (finfo == NULL)
-      return expr_err(te,loc,topt,"type has no %s field",*f);
+      return expr_err(te,loc,topt,"type has no %s member",*f);
     // if this is a non-tagged union and we are reading a pointer,
     // then either we need to be writing to this spot
     if (k == UnionA && !bits_only(finfo->type) && !in_notreadctxt(te) &&
         finfo->requires_clause == NULL)
         return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
     return finfo->type;
-  case &ArrayType(_)   && (strcmp(*f,"size") == 0):
-  case &PointerType(_) && (strcmp(*f,"size") == 0):
-    warn(e->loc,"deprecated `.size' used here -- change to numelts(%s)",exp2string(e));
-    outer_e->r = new Primop_e(Numelts,new List(e,NULL));
-    return uint_typ;
   default:
-    if (strcmp(*f,"size") == 0)
-      return expr_err(te,loc,topt,
-                      "expecting struct, union, or array, found %s",
-                      typ2string((type_t)e->topt));
-    else
-      return expr_err(te,loc,topt,"expecting struct or union, found %s",
-		      typ2string((type_t)e->topt));
+    return expr_err(te,loc,topt,"expecting struct or union, found %s",
+                    typ2string((type_t)e->topt));
   }
 }
 
@@ -1620,7 +1626,7 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
     case &AggrType(AggrInfo({.KnownAggr = &ad},ts)):
       let finfo = lookup_decl_field(ad,f);
       if (finfo == NULL)
-	return expr_err(te,loc,topt,"type %s has no %s field",
+	return expr_err(te,loc,topt,"type %s has no %s member",
 			qvar2string(ad->name), *f);
       // must do after previous check else could dereference NULL
       if (ad->impl->tagged) *is_tagged = true;
@@ -1902,6 +1908,11 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
       }
     // type-check the body in the new environment
     type_t t = tcExp(te,topt2,body);
+    // must ensure unique pointers aren't copied out of non-unique paths
+    TEMP_RGN(te, temp) {
+      if (is_noalias_pointer_or_aggr(temp,t) && !is_noalias_path(temp,body))
+        terr(body->loc, UNIQUE_ERR_MSG);
+    }
     if (te->le == NULL) {
       // the bound and the body must both be constant expressions at top-level
       if (!is_const_exp(bound))
@@ -2121,6 +2132,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
   }
 }
 
+// JGM: question -- how do you build an anonymous struct?
 static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
                            list_t<$(list_t<designator_t>,exp_t)@> args) {
   TEMP_RGN(te, rgn) {
@@ -2446,9 +2458,9 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
   // (e.g., foo.x += 3).
   TEMP_RGN(te, r) {
     let te2 = enter_lhs(r,enter_notreadctxt(r,te));
-    tcExp(te2,NULL,e1);
+    tcExpNoPromote(te2,NULL,e1);
     let t1 = (type_t)e1->topt;
-    tcExp(te2,&t1,e2);
+    tcExpNoPromote(te2,&t1,e2);
   }
   type_t t1 = (type_t)e1->topt;
   type_t t2 = (type_t)e2->topt;
@@ -2677,6 +2689,12 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
 	}
       }
       type_t telt = tcExp(te,topt2,e1);
+      // must prevent copy of unique pointer
+      TEMP_RGN(te, temp) {
+        if (is_noalias_pointer_or_aggr(temp,telt) && 
+            !is_noalias_path(temp,e1))
+          terr(e1->loc, UNIQUE_ERR_MSG);
+      }
       type_t res_typ =
 	new PointerType(PtrInfo(telt,empty_tqual(0),
 				PtrAtts(rgn,empty_conref(),

@@ -2971,7 +2971,7 @@ unary_expression:
 | DEC_OP unary_expression { $$=^$(pre_dec_exp($2,LOC(@1,@2))); }
 | '&' cast_expression     { $$=^$(address_exp($2,LOC(@1,@2))); }
 | '*' cast_expression     { $$=^$(deref_exp  ($2,LOC(@1,@2))); }
-| '+' cast_expression     { $$=$!2; }
+| '+' cast_expression     { $$=^$(prim1_exp(Plus,$2,LOC(@1,@2))); }
 | unary_operator cast_expression { $$=^$(prim1_exp($1,$2,LOC(@1,@2))); }
 | SIZEOF '(' type_name ')'       
   { let t = type_name_to_type($3,SLOC(@3));

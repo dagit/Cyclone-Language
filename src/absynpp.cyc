@@ -230,7 +230,7 @@ struct Params tc_params_r =
     .add_cyc_prefix = false,
     .to_VC = false,
     .decls_first = false,
-    .rewrite_temp_tvars = false,
+    .rewrite_temp_tvars = true,
     .print_all_tvars = false,
     .print_all_kinds = false,
     .print_all_effects = false,
@@ -427,10 +427,18 @@ doc_t tps2doc(list_t<type_t> ts) {
 
 doc_t tvar2doc(tvar_t tv) {
   let n = *tv->name;
-  // FIX:  we're rewriting internally-generated tvars to `TTTxxx
+  // FIX:  we're rewriting internally-generated tvars to `Gxxx
   // which might conflict...
   if (rewrite_temp_tvars && Tcutil::is_temp_tvar(tv))
-    return cat(text("`TTT"),text(n+1));
+    { 
+      string_t kstring = "K";
+      switch (compress_kb(tv->kind)) {
+      case &Less_kb(_,k): fallthru(k);
+      case &Eq_kb(k): kstring = kind2string(k); break;
+      default: break;
+      }
+      return text(aprintf("`G%s%s",kstring,n+1));
+    }
   return text(n);
 }
 
@@ -634,6 +642,10 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
     // FIX? What about attributes that we parse before tq2??
   case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt,_),tq2):
     doc_t ptr;
+    doc_t mt = nil_doc();
+    doc_t ztd = mt;
+    doc_t rgd = mt;
+    doc_t tqd = tqual2doc(tq2);
     switch(conref_def(bounds_one,bd)) {
     case &DynEither_b: ptr = question(); break;
     case &Upper_b(e):
@@ -645,17 +657,18 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
     }
     if (print_zeroterm) {
       if (!is_char_ptr && conref_def(false,zt))
-	ptr = cat(ptr,text("@zeroterm "));
+        ztd = text("@zeroterm");
       else if (is_char_ptr && !conref_def(false,zt))
-	ptr = cat(ptr,text("@nozeroterm "));
+	ztd = text("@nozeroterm");
     }
     switch(compress(rgn)) {
     case &HeapRgn: break;
     case &Evar(_,_,_,_) && print_for_cycdoc: break;
-    default: ptr = cat(ptr,rgn2doc(rgn),text(" "));
+    default: rgd = rgn2doc(rgn);
     }
-    ptr = cat(ptr,tqual2doc(tq2));
-    return cat(ptr,rest);
+    doc_t spacer1 = (tqd != mt && (ztd != mt || rgd != mt)) ? text(" ") : mt;
+    doc_t spacer2 = (rest != mt) ? text(" ") : mt;
+    return cat(ptr,ztd,rgd,spacer1,tqd,spacer2,rest);
   }
 }
 
@@ -664,8 +677,8 @@ doc_t rgn2doc(type_t t) {
   case &HeapRgn: return text("`H");
   case &UniqueRgn: return text("`U");
   case &RefCntRgn: return text("`RC");
-  case &VarType(_): return ntyp2doc(t);
-  default: return cat(text("@region("),ntyp2doc(t),text(")"));
+  default: return ntyp2doc(t);
+    //default: return cat(text("@region("),ntyp2doc(t),text(")"));
   }
 }
 
@@ -719,20 +732,23 @@ doc_t ntyp2doc(type_t t) {
       // This is an error case, topt should be NULL in a normalized type
       return(ntyp2doc(topt));
     else {
+      string_t kindstring = (k == NULL) ? "K" : kind2string(k->v);
+      s = text(aprintf("`E%s%d",kindstring,i));
+    }
 //        switch (k->v) {
 //        case RgnKind:
 //  	s = cat(text("`r"),
 //  		text(aprintf("%d",i)));
 //  	  break;
 //        default:
-	s = cat(print_for_cycdoc?text("\\%"):text("%"),
-		text("("),
-		text(aprintf("%d",i)),
-		(!print_full_evars || tvs == NULL) ?
-		nil_doc() : tvars2doc(tvs->v),
-		text(")::"),k == NULL ? question() : kind2doc(k->v));
+//	s = cat(print_for_cycdoc?text("\\%"):text("%"),
+//		text("("),
+//		text(aprintf("%d",i)),
+//		(!print_full_evars || tvs == NULL) ?
+//		nil_doc() : tvars2doc(tvs->v),
+//		text(")::"),k == NULL ? question() : kind2doc(k->v));
 //        }
-    }
+//    }
     break;
   case &VarType(tv):
     s = tvar2doc(tv);

@@ -1,0 +1,290 @@
+
+fail1.cyc:8: cannot alias value of type int to type int *`r
+fail1.cyc:13: cannot alias value of type int *`U to type int
+fail1.cyc:18: cannot alias value of type int *`U to type int * *`r
+fail1.cyc:23: must return a value of type int *
+fail1.cyc:33: returns value of type int but requires int *
+  int and int * are not compatible. 
+fail1.cyc:38: Cannot consume non-unique paths; do swap instead
+fail1.cyc:45: fallthru not in a non-last case
+fail1.cyc:52: fallthru argument has type int but pattern variable has type int *
+  int and int * are not compatible. 
+fail1.cyc:60: too many arguments in explicit fallthru
+fail1.cyc:68: too few arguments in explicit fallthru
+fail1.cyc:75: Cannot consume non-unique paths; do swap instead
+fail1.cyc:83: switch on type int, but case expects type `EA127 *`ETR128
+  `EA127 *`ETR128 and int are not compatible. 
+fail1.cyc:93: expected datatype exn@ but found int
+fail1.cyc:99: bad abstract scope for local variable
+fail1.cyc:105: cannot declare a qualified local variable
+fail1.cyc:111: extern declarations are not yet supported within functions
+fail1.cyc:118: initializer for static variable needs to be a constant expression
+fail1.cyc:123: x was declared with type int * but initialized with type int.
+  int * and int are not compatible. 
+fail1.cyc:128: pattern type `EM130 *`ETR129 does not match definition type int
+  `EM130 *`ETR129 and int are not compatible. 
+fail1.cyc:133: expecting dynregion_t<`ER131,`ER132> but found int
+fail1.cyc:138: type mismatch: int *`r2 != int *`r
+  `r and `r2 are not compatible. (variable types are not the same)
+fail1.cyc:143: alias declaration requires initializer
+fail1.cyc:148: bad scope for alias declaration
+fail1.cyc:154: cannot declare a qualified local variable
+fail1.cyc:160: bad storage class for inner function
+fail1.cyc:168: explicit namespace not allowed on inner function declaration
+fail1.cyc:174: bad attribute packed for function
+fail1.cyc:180: bad attribute aligned for function
+fail1.cyc:186: function has goto statements to undefined labels
+fail1.cyc:193: function has goto statements to undefined labels
+fail1.cyc:208: expecting region_t but found int
+fail1.cyc:208: Region `f38 is not resetable
+fail1.cyc:213: Region `r is not resetable
+fail1.cyc:218: undeclared identifier x
+fail1.cyc:224: F41 is a constant, not a function
+fail1.cyc:230: F42 is an enum constructor, not a function
+fail1.cyc:235: undeclared identifier x
+fail1.cyc:241: test of if statement has type $(int,int) instead of integral or pointer type
+fail1.cyc:247: test of conditional expression has type $(int,int) instead of integral or pointer type
+fail1.cyc:253: Cannot consume non-unique paths; do swap instead
+fail1.cyc:258: descriptor has type const char ?@nozeroterm`ER165 but argument has type int
+  int and const char ?@nozeroterm`ER165 are not compatible. 
+fail1.cyc:263: descriptor has type int but argument has type $(int,int)
+  $(int,int) and int are not compatible. 
+fail1.cyc:263: can't find a field in datatype PrintArg<`GR120> to inject a value of type $(int,int)
+fail1.cyc:268: descriptor has type double but argument has type $(int,int)
+  $(int,int) and double are not compatible. 
+fail1.cyc:268: can't find a field in datatype PrintArg<`GR121> to inject a value of type $(int,int)
+fail1.cyc:273: too many arguments
+fail1.cyc:278: too few arguments
+fail1.cyc:283: expecting numeric type but found $(int,int)
+fail1.cyc:288: expecting numeric type but found $(int,int)
+fail1.cyc:294: attempt to write a const location: p.x
+fail1.cyc:300: attempt to write a const location: p.x
+fail1.cyc:306: attempt to write a const location: p[0]
+fail1.cyc:312: attempt to over-write a tuple field with a const member
+fail1.cyc:318: attempt to over-write an aggregate with const member i
+fail1.cyc:326: attempt to over-write a datatype field (F59) with a const member
+fail1.cyc:333: attempt to over-write a const array
+fail1.cyc:338: tuple projection cannot use sizeof or offsetof
+fail1.cyc:343: type struct F4 has kind A but as used here needs kind TM
+fail1.cyc:343: struct F4 is not a known struct/union type
+fail1.cyc:343: tuple projection cannot use sizeof or offsetof
+fail1.cyc:348: valueof(-) can only occur within types
+fail1.cyc:348: tuple projection cannot use sizeof or offsetof
+fail1.cyc:353: attempt to write a const location: *x
+fail1.cyc:358: can't perform arithmetic on abstract pointer type
+fail1.cyc:363: can't perform arithmetic on abstract pointer type
+fail1.cyc:368: can't perform arithmetic on non-aliasing pointer type
+fail1.cyc:373: can't perform arithmetic on non-aliasing pointer type
+fail1.cyc:378: can't perform arithmetic on non-aliasing pointer type
+fail1.cyc:383: expecting arithmetic or ? type but found $(int,int)
+fail1.cyc:388: expecting arithmetic or ? type but found $(int,int)
+fail1.cyc:393: type mismatch: expecting char ?`r1 but found char ?`r2
+fail1.cyc:393: conditional clause types do not match: char ?`r1 != char ?`r2
+  `r2 and `r1 are not compatible. (variable types are not the same)
+fail1.cyc:400: cannot assign to an array
+fail1.cyc:400: assignment to non-lvalue
+fail1.cyc:405: assignment to non-lvalue
+fail1.cyc:411: actual argument has type int *`r but formal has type int *.
+  `H and `r are not compatible. 
+fail1.cyc:417: Cannot consume non-unique paths; do swap instead
+fail1.cyc:422: too many arguments for function
+fail1.cyc:427: too few arguments for function
+fail1.cyc:433: vararg requires type int but argument has type $(int,int)
+  $(int,int) and int are not compatible. 
+fail1.cyc:438: Cannot consume non-unique paths; do swap instead
+fail1.cyc:443: expected @extensible datatype exn @ but found int
+fail1.cyc:449: Cannot take the address of an alias-free path
+fail1.cyc:454: Cannot take the address of an alias-free path
+fail1.cyc:458: noalias pointers in datatypes are not allowed (F12)
+fail1.cyc:460: unbound field F88 in type datatype F88
+fail1.cyc:467: Cannot take the address of an alias-free path
+fail1.cyc:473: Cannot take the address of an alias-free path
+fail1.cyc:479: cannot take the address of a @tagged union member
+fail1.cyc:484: type F91 has no x member
+fail1.cyc:491: type struct F92 has kind A but as used here needs kind TM
+fail1.cyc:491: sizeof applied to type struct F92, which has unknown size here
+fail1.cyc:496: type struct F92 has kind A but as used here needs kind TM
+fail1.cyc:496: struct F92 is not a known struct/union type
+fail1.cyc:502: no field of struct/union has name z
+fail1.cyc:504: tuple has too few components: 2 <= 3
+fail1.cyc:509: can't dereference abstract pointer type
+fail1.cyc:515: can't dereference abstract pointer type
+fail1.cyc:520: expecting *, @, or ? type but found int
+fail1.cyc:525: can't subscript an abstract pointer
+fail1.cyc:530: zero-terminated array doesn't end with zero.
+fail1.cyc:536: type mismatch: expecting double but found $(int,int)
+fail1.cyc:536: elements of array do not all have the same type (double)
+fail1.cyc:541: expecting unsigned int, found $(int,int)
+fail1.cyc:546: unbound struct/union name F102
+fail1.cyc:553: can't construct abstract struct
+fail1.cyc:560: too many explicit witness types
+fail1.cyc:565: field x of struct F104 expects type int != $(int,int)
+  $(int,int) and int are not compatible. 
+fail1.cyc:572: field y of struct expects type int != $(int,int)
+  $(int,int) and int are not compatible. 
+fail1.cyc:579: datatype constructor F107 expects argument of type int but this argument has type $(int,int)
+  $(int,int) and int are not compatible. 
+fail1.cyc:584: malloc cannot be used with type int @
+	(type needs initialization)
+fail1.cyc:589: expecting region_t type but found int
+fail1.cyc:596: malloc with existential types not yet implemented
+fail1.cyc:605: cannot assign to an array
+fail1.cyc:605: Swap not allowed for non-pointer or non-word-sized types.
+fail1.cyc:615: can't dereference abstract pointer type
+fail1.cyc:615: can't dereference abstract pointer type
+fail1.cyc:615: Swap not allowed for non-pointer or non-word-sized types.
+fail1.cyc:615: attempt to write an abstract aggregate
+fail1.cyc:615: attempt to write an abstract aggregate
+fail1.cyc:620: statement expression returns type tag_t<`i>
+  `ETM194 and tag_t<`i> are not compatible. (type variable would escape scope)
+fail1.cyc:626: statement expression must end with expression
+fail1.cyc:631: expecting @tagged union but found int
+fail1.cyc:636: expecting region_t type but found int
+fail1.cyc:641: Cannot consume non-unique paths; do swap instead
+fail1.cyc:643: Cannot consume non-unique paths; do swap instead
+fail1.cyc:648: Cannot consume non-unique paths; do swap instead
+fail1.cyc:648: Cannot consume non-unique paths; do swap instead
+fail1.cyc:654: Cannot consume non-unique paths; do swap instead
+fail1.cyc:659: valueof(-) can only occur within types
+fail1.cyc:664: asm expressions cannot occur within Cyclone code.
+fail1.cyc:670: bad occurrence of type name F122
+fail1.cyc:675: increment/decrement of non-lvalue
+fail1.cyc:680: assignment to non-lvalue
+fail1.cyc:686: type mismatch: int != $(int,int)
+  int and $(int,int) are not compatible. 
+fail1.cyc:692: type mismatch: int * != const int *
+  (qualifiers don't match)
+fail1.cyc:698: type mismatch: int * != int *`r
+  `r and `H are not compatible. 
+fail1.cyc:704: type mismatch: int *{4}`r != int *{3}`r
+  int *{4}`r and int *{3}`r are not compatible. (different pointer bounds)
+fail1.cyc:710: type mismatch: $(int,int) *`r != int *`r
+  $(int,int) and int are not compatible. 
+fail1.cyc:715: type $(int,int) cannot be used here
+fail1.cyc:720: type $(int,int) cannot be used here
+fail1.cyc:725: expected pointer to function but found int
+fail1.cyc:730: expected pointer to function but found int @
+fail1.cyc:736: too many type variables in instantiation
+fail1.cyc:741: expecting polymorphic type but found int
+fail1.cyc:746: cannot cast int to $(int,int)
+  int and $(int,int) are not compatible. 
+fail1.cyc:752: F138 has no y member
+fail1.cyc:755: type struct F139 has kind A but as used here needs kind TM
+fail1.cyc:757: F139 has no y member
+fail1.cyc:762: cannot read union member x since it is not `bits-only'
+fail1.cyc:767: must use pattern-matching to access field x
+	due to existential type variables.
+fail1.cyc:771: type has no y member
+fail1.cyc:775: cannot read union member x since it is not `bits-only'
+fail1.cyc:779: expecting struct or union, found int
+fail1.cyc:783: type F141 has no y member
+fail1.cyc:788: subscript applied to struct {int x;}
+fail1.cyc:794: too many arguments for datatype constructor F147
+fail1.cyc:796: too few arguments for datatype constructor F147
+fail1.cyc:801: swap non-lvalue
+fail1.cyc:803: swap non-lvalue
+fail1.cyc:805: swap value in zeroterm array
+fail1.cyc:807: swap value in zeroterm array
+fail1.cyc:811: incompatible initializes() and noliveunique() attributes on parameter 1
+fail1.cyc:813: incompatible initializes() and noliveunique() attributes on parameter 1
+fail1.cyc:815: incompatible initializes() and noconsume() attributes on parameter 1
+fail1.cyc:817: incompatible initializes() and noconsume() attributes on parameter 1
+fail1.cyc:820: extern declaration should not have initializer
+fail1.cyc:823: bad attribute stdcall for variable f157
+fail1.cyc:825: bad attribute cdecl for variable f158
+fail1.cyc:827: bad attribute fastcall for variable f159
+fail1.cyc:829: bad attribute noreturn for variable f160
+fail1.cyc:831: bad attribute const for variable f161
+fail1.cyc:833: bad attribute constructor for variable f162
+fail1.cyc:835: bad attribute no_instrument_function for variable f163
+fail1.cyc:837: bad attribute destructor for variable f164
+fail1.cyc:839: bad attribute format(printf,0,0) for variable f165
+fail1.cyc:841: bad attribute no_check_memory_usage for variable f166
+fail1.cyc:843: bad attribute initializes(1) for variable f167
+fail1.cyc:845: bad attribute noliveunique(1) for variable f168
+fail1.cyc:847: bad attribute noconsume(1) for variable f169
+fail1.cyc:849: bad attribute pure for variable f170
+fail1.cyc:851: bad attribute aligned in function declaration
+fail1.cyc:853: bad attribute packed in function declaration
+fail1.cyc:855: bad attribute packed for variable f182
+fail1.cyc:857: initializer required for variable f183 of type int @
+fail1.cyc:859: f184 declared with type int @ but initialized with type int
+  int and int @ are not compatible. 
+fail1.cyc:862: initializer is not a constant expression
+fail1.cyc:864: bad attribute aligned for function
+fail1.cyc:866: bad attribute packed for function
+fail1.cyc:870: variable f189 was declared $(int,int) instead of int
+  int and $(int,int) are not compatible. 
+fail1.cyc:874: variable f190 is static but expected scope is public 
+fail1.cyc:876: variable f190 has different attributes
+	previous attributes: 
+	current attributes: shared 
+fail1.cyc:878: variable f190 has different type qualifiers
+fail1.cyc:882: redefinition of function f191
+fail1.cyc:885: unbound type variable `a
+fail1.cyc:887: type int has kind B but as used here needs kind I
+fail1.cyc:889: type struct F194 has kind A but as used here needs kind TM
+fail1.cyc:893: extern "C" functions cannot be implemented in Cyclone
+fail1.cyc:896: type int has kind B but as used here needs kind I
+fail1.cyc:898: function declaration has repeated parameter: x
+fail1.cyc:900: unbound type variable `a
+fail1.cyc:902: unbound type variable `a
+fail1.cyc:904: duplicate type variable: `a
+fail1.cyc:906: type variable `a is used with inconsistent kinds R and <=TM
+fail1.cyc:908: type variable `a is used with inconsistent kinds A and <=TM
+fail1.cyc:910: main declared with first argument of type int @ instead of int
+fail1.cyc:913: redefinition of function main
+fail1.cyc:913: main declared with return type $(int,int) instead of int or void
+fail1.cyc:915: redefinition of function main
+fail1.cyc:915: second argument of main has type int instead of char??
+fail1.cyc:917: redefinition of function main
+fail1.cyc:917: main declared with varargs
+fail1.cyc:919: redefinition of function main
+fail1.cyc:919: main declared with too many arguments
+fail1.cyc:921: duplicate type variable: `a
+fail1.cyc:923: type variable `r is used with inconsistent kinds B and <=TR
+fail1.cyc:925: duplicate type variable: `a
+fail1.cyc:927: duplicate member x
+fail1.cyc:929: type variable `r is used with inconsistent kinds R and <=TA
+fail1.cyc:931: duplicate type variable: `r
+fail1.cyc:937: type variable `a is used with inconsistent kinds A and <=TM
+fail1.cyc:939: bitfield x must have integral type but has type $(int,int)
+fail1.cyc:941: bitfield larger than type
+fail1.cyc:943: bitfield larger than type
+fail1.cyc:945: @requires clauses are only allowed on union members
+fail1.cyc:947: @requires clause has type $(int,int) instead of integral type
+fail1.cyc:949: unbound type variable `i in type valueof_t((unsigned int)(valueof(`i) == 1))
+fail1.cyc:952: @requires clause has type int @ instead of integral type
+fail1.cyc:954: unbound type variable `a in type `a
+fail1.cyc:956: type F220 attempts to abstract type variable `a of kind M
+fail1.cyc:958: bad attribute cdecl in F221 definition
+fail1.cyc:964: @tagged qualifier is only allowed on union declarations
+fail1.cyc:967: type F224 : type mismatch on field x: $(int,int) != int
+  $(int,int) and int are not compatible. 
+fail1.cyc:969: type F224 has a different number of type parameters
+fail1.cyc:972: type F225 has a different number of type parameters
+fail1.cyc:974: type F225 has a different kind (R) for type parameter `r (A)
+fail1.cyc:976: type F225 has a different kind (R) for type parameter `r (A)
+fail1.cyc:978: type F225 has extra field y
+fail1.cyc:980: duplicate field name C226 in datatype
+fail1.cyc:982: unbound type variable `i in type tag_t<`i>
+fail1.cyc:984: type variable `r is used with inconsistent kinds <=M and <=TR
+fail1.cyc:986: noalias pointers in datatypes are not allowed (C229)
+fail1.cyc:988: qualified datatypefield declarations are not allowed (Foo::C230)
+fail1.cyc:990: @extensible datatype F231, field C231: parameter number mismatch
+fail1.cyc:994: type F233 attempts to abstract type variable `a of kind M
+fail1.cyc:996: duplicate type variable: `a
+fail1.cyc:998: type F235 attempts to abstract type variable `a of kind TR
+fail1.cyc:1002: datatype F236: field name mismatch C237 != C236
+fail1.cyc:1002: datatype F236: field name mismatch C236 != C237
+fail1.cyc:1004: datatype F236, field C236: parameter qualifier
+fail1.cyc:1006: datatype F236 is missing field C237
+fail1.cyc:1008: datatype F236 has extra field C238
+fail1.cyc:1011: @extensible datatype F239, field C239: parameter number mismatch
+fail1.cyc:1013: @extensible datatype F239, field C239: parameter number mismatch
+fail1.cyc:1015: duplicate enum constructor C240
+fail1.cyc:1017: bad static expression $(3,3)
+fail1.cyc:1020: enum field name F242 shadows global name
+fail1.cyc:1023: enum field name F243 shadows global name
+
+COMPILATION FAILED!

@@ -14,7 +14,7 @@ endif
 
 EXES=$(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist require md5 streambufftest)
 
-all: $(EXES)
+all: $(EXES) failtest
 	./test_regions
 	./cyctest
 	./foo < foo_input
@@ -26,6 +26,12 @@ all: $(EXES)
 	./require
 	./test_getopt -abc123
 	./streambufftest
+
+# tests things that should be type errors
+failtest:
+	@echo ignore error for failtest
+	-$(CYCC) -c --manyerrors fail1.cyc 2> fail1.tmp
+	cmp fail1.tmp fail1.out
 
 hello$(EXE): hello.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
@@ -84,9 +90,9 @@ streambufftest$(EXE): streambufftest.o streambuff.o
 	$(CYCC) $(CYCFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
-	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions unique_test zeroterm structarray flatlist md5 require streambufftest streambuff)\
+	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions unique_test zeroterm structarray flatlist md5 require streambufftest streambuff)
 	$(RM) foo_tab.* unsafe_cast.o pcredemo.o pcredemo.c pcredemo
-	$(RM) $(EXES)
+	$(RM) $(EXES) fail1.tmp
 	$(RM) *~ *.exe *.output *.stackdump
 #	$(MAKE) clean -C benchmarks
 #	$(MAKE) clean -C compress/cacm

@@ -326,7 +326,12 @@ void dumptps(list_t<type_t> ts) {
 void dumptvar(tvar_t tv) {
   const char ?n = *tv->name;
   if (n[0] == '#') {
-    dump("`TTT");
+    dump("`G");
+    switch (compress_kb(tv->kind)) {
+    case &Eq_kb(k): fallthru(k);
+    case &Less_kb(_,k): dumpkind(k); break;
+    default: dump_nospace("K"); break;
+    }
     dump_nospace(n+1);
   } else 
     dump(n);
@@ -473,9 +478,9 @@ void dumpntyp(type_t t) {
   case &VoidType: dump("void"); return;
   case &VarType(tv): dumptvar(tv); return; // FIX: may want explicit kinds
   case &Evar(k,NULL,i,_): 
-    dump("%"); 
-    if (k == NULL) dump("?"); else dumpkind(k->v); 
-    dump(aprintf("(%d)",i)); return;
+    dump("`E"); 
+    if (k == NULL) dump("K"); else dumpkind(k->v); 
+    dump(aprintf("%d",i)); return;
   case &Evar(k,t,i,_): dumpntyp((type_t)t); return; // shouldn't happen!
   case &DatatypeType(DatatypeInfo(tu_info,ts)):
     switch(tu_info) {

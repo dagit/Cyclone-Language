@@ -1,0 +1,1023 @@
+
+/* Regression tests for type-checking failures.
+ * Be sure to compile with --manyerrors
+ * tries to exercise all terr(...) and expr_err(...) paths.
+ */
+void f1(int x) {
+  // alias requires pointer type
+  alias<`r> int *`r y = x;
+}
+
+void f2(int *`U x) {
+  // alias requires pointer type
+  alias<`r> int y = x;
+}
+
+void f3(int *`U x) {
+  // cannot alias value of type int*`U to int*`H*`U
+  alias<`r> int*`H*`r y = x;
+}
+
+int* f4() {
+  // must return a value of type int*`H
+  return;
+}
+
+int f5() {
+  // should return a value of type int*`H
+  return;
+}
+
+int* f6() {
+  // returns value of type int but requires int*
+  return 3;
+}
+
+int*`U f7($(int*`U)@p) {
+  // Cannot consume non-unique paths; do swap instead
+  return (*p)[0];
+}
+
+enum T1 { T1C };
+void f8(enum T1 i) {
+  switch (i) {
+    // fallthru not in a non-last case
+  case T1: fallthru;
+  }
+}
+
+void f9(int *`H p) {
+  switch (p) {
+    // fallthru argument has type int but pattern variable has type int *
+  case NULL: fallthru(3);
+  case j: break;
+  }
+}
+
+void f10(int *`H p) {
+  switch (p) {
+    // too many arguments in explicit fallthru
+  case NULL: fallthru(3);
+  default: break;
+  }
+}
+
+void f11(int *`H p) {
+  switch (p) {
+    // too few arguments in explicit fallthru
+  case NULL: fallthru;
+  case j: break;
+  }
+}
+
+void f12(int *`U*`H p) {
+  // Cannot consume non-unique paths; do swap instead
+  switch (*p) {
+  default: break;
+  }
+}
+
+void f13(int x) {
+  switch (x) {
+    // switch on type int, but case expects type `EA126 *`ER127
+  case NULL: break;
+  default: break;
+  }
+}
+
+void f14() {
+  try {
+    3;
+  } catch {
+    // expected datatype exn@ but found int
+  case 2: break;
+  }
+}
+
+void f15() {
+  // bad abstract scope for local variable
+  abstract int x;
+}
+
+namespace Foo {
+void f16() {
+  // cannot declare a qualified local variable
+  int Foo::x = 3;
+}
+}
+
+void f17() {
+  // extern declarations are not yet supported within functions
+  extern int foo();
+}
+
+extern int* f18();
+
+void f19() {
+  // initializer for static variable needs to be a constant expression
+  static int* x = f18();
+}
+
+void f20() {
+  // x was declared with type int * but initialized with type int.
+  int *`H x = 3;
+}
+
+void f21(int x) {
+  // pattern type `EM129 *`ETR128 does not match definition type int
+  let &_ = x;
+}
+
+void f22(int x) {
+  // expecting dynregion_t<`ER130,`ER131> but found int
+  region r = open(x);
+}
+
+void f23(int*`r2 x,region_t<`r> r) {
+  // type mismatch: int *`r2 != int *`r
+  x = rnew(r) 3;
+}
+
+void f24(int *`U x) {
+  // alias declaration requires initializer
+  alias<`r> int*`r y;
+}
+
+void f25(int *`U x) {
+  // bad scope for alias declaration
+  alias<`r> static int*`r y = x;
+}
+
+namespace Foo {
+void f26(int *`U x) {
+  // cannot declare a qualified local variable
+  alias<`r> int*`r Foo::y = x;
+}
+}
+
+void f27() {
+  // bad storage class for inner function
+  static void f28() {
+    return;
+  }
+  return;
+}
+
+void f29() {
+  // explicit namespace not allowed on inner function declaration
+  void Foo::f30() { return; }
+  return;
+}
+
+void f31() {
+  // bad attribute packed for function
+  void f32() __attribute__((packed)) { return; }
+  return;
+}
+
+void f33() {
+  // bad attribute aligned for function
+  void f34() __attribute__((aligned)) { return; }
+  return;
+}
+
+void f35() {
+  // function has goto statements to undefined labels
+  void f36() { goto L; }
+  return;
+}
+
+void f36() {
+ L: {
+   // function has goto statements to undefined labels
+   void f2() {
+     goto L;
+   }
+ }
+}
+
+/*
+void f37() {
+  Namespace Foo {}
+}
+*/
+
+void f38(int x) {
+  // expecting region_t but found int
+  // Region `f38 is not resetable
+  reset_region(x);
+}
+
+void f39(region_t<`r> r) {
+  // Region `r is not reseable
+  reset_region(r);
+}
+
+void f40() {
+  // undeclared identifier x
+  int y = x();
+}
+
+datatype f41 { F41 };
+void f41() {
+  // F41 is a constant, not a function
+  datatype f41.F41 x = F41();
+}
+
+enum f42 { F42 };
+void f42() {
+  // F42 is an enum constructor, not a function
+  F42();
+}
+
+void f43() {
+  // undeclared identifier x
+  x;
+}
+
+void f44() {
+  $(int,int) x = $(3,3);
+  // test of if statement has type $(int,int) instead of integral or pointer type
+  if (x) return;
+}
+
+void f45() {
+  $(int,int) x = $(3,3);
+  // test of conditional expression has type $(int,int) instead of integral or pointer type
+  x ? 3 : 4;
+}
+
+#include <stdio.h>
+void f46(int*`U* x, const char ?s) {
+  // Cannot consume non-unique paths; do swap instead
+  printf(s,*x);
+}
+
+void f47() {
+  // descriptor has type const char ?@nozeroterm`ER125 but argument has type int
+  printf("%s",3);
+}
+
+void f48() {
+  // descriptor has type int but argument has type $(int,int)
+  printf("%d",$(1,2));
+}
+
+void f49() {
+  // descriptor has type double but argument has type $(int,int)
+  printf("%g",$(1,2));
+}
+
+void f50(const char ?s,int*`U*x) {
+  // too many arguments
+  printf("hello",*x);
+}
+
+void f51() {
+  // too few arguments
+  printf("%s");
+}
+
+void f52() {
+  // expecting numeric type but found $(int,int)
+  + $(1,2);
+}
+
+void f53() {
+  // expecting numeric type but found $(int,int)
+  - $(1,2);
+}
+
+void f54() {
+  struct { const int x; } p = { 0 };
+  // attempt to write a const location: p.x
+  p.x = 1;
+}
+
+void f55() {
+  struct F55 { const int x; } p = { 0 };
+  // attempt to write a const location: p.x
+  p.x = 1;
+}
+
+void f56() {
+  $(const int) p = $(0);
+  // attempt to write a const location: p[0]
+  p[0] = 1;
+}
+
+void f57() {
+  struct F57 { $(const int) z; } b = { .z = $(0) };
+  // attempt to over-write a tuple field with a const member
+  b = F57{$(3)};
+}
+
+void f58() {
+  struct F58 { struct {const int i;} z; } b = { .z = {.i = 0} };
+  // attempt to over-write an aggregate with const member i
+  b = F58{.z = {.i = 3}};
+}
+
+datatype F59 { F59(const int) };
+
+void f59() {
+  datatype F59.F59 x = F59(3);
+  // attempt to over-write a datatype field (F59) with a const member
+  x = F59(4);
+}
+
+void f60() {
+  struct F60 {const int x[4]; } p = { .x = {0,1,2,3}};
+  struct F60 p2 = {.x = {1,2,3,4}};
+  // attempt to over-write a const array
+  p = p2;
+}
+
+void f61($(int,int,int)x) {
+  // tuple projection cannot use sizeof or offsetof
+  x[sizeof(int)];
+}
+
+void f62($(int,int,int)x) {
+  // tuple projection cannot use sizeof or offsetof
+  x[offsetof(struct F4,x)];
+}
+
+void f63($(int,int,int)x, tag_t<`i> p) {
+  // valueof(-) can only occur within types
+  x[valueof(`i)];
+}
+
+void f64(const int *x) {
+  // attempt to write a const location: *x
+  *x = 3;
+}
+
+void f65(`a::A ?x) {
+  // can't perform arithmetic on abstract pointer type
+  x++;
+}
+
+void f66(struct F13 ?x) {
+  // can't perform arithmetic on abstract pointer type
+  x++;
+}
+
+void f67(int ?`U x) {
+  // can't perform arithmetic on non-aliasing pointer type
+  x++;
+}
+
+void f68(int ?`U x) {
+  // can't perform arithmetic on non-aliasing pointer type
+  ++x;
+}
+
+void f69(int ?`r::TR x) {
+  // can't perform arithmetic on non-aliasing pointer type
+  ++x;
+}
+
+void f70($(int,int) x) {
+  // expecting arithmetic or ? type but found $(int,int)
+  ++x;
+}
+
+void f71($(int,int) x) {
+  // expecting arithmetic or ? type but found $(int,int)
+  x++;
+}
+
+void f72(int x, char ?`r1 a, char ?`r2 b) {
+  // conditional clause types do not match: char ?`r1 != char ?`r2
+  x ? a : b;
+}
+
+void f73() {
+  int x[3];
+  int y[3];
+  // cannot assign to an array
+  x = y;
+}
+
+void f74() {
+  // assignment to non-lvalue
+  3 = 4;
+}
+
+void f75(int *`H);
+void f76(int *`r x) { 
+  // actual argument has type int*`r but formal has type int *.
+  f75(x);
+}
+
+void f77(int *`U);
+void f78(int*`U*x) {
+  // Cannot consume non-unique paths; do swap instead
+  f77(*x);
+}
+
+void f79(int *`U x) {
+  // too many arguments for function
+  f77(x,x);
+}
+
+void f80() {
+  // too few arguments for function
+  f79();
+}
+
+void f81(...int x);
+void f82() {
+  // vararg requires type int but argument has type $(int,int)
+  f81($(3,3));
+}
+void f83(...int*`U);
+void f84(int*`U*x) {
+  // Cannot consume non-unique paths; do swap instead
+  f83(*x);
+}
+
+void f85() {
+  // expected @extensible datatype exn @ but found int
+  throw 3;
+}
+
+struct F86 { int*`U x; };
+void f86(struct F86 y) {
+  // Cannot take the address of an alias-free path
+  let z = &y;
+}
+
+void f87($(int*`U) y) {
+  // Cannot take the address of an alias-free path
+  let z = &y;
+}
+
+// noalias pointers in datatypes are not allowed (F88)
+datatype F88 { F12(int *`U); };
+
+void f88(datatype F88.F88 y) {
+  // unbound field F88 in type datatype F88
+  let z = &y;
+}
+
+void f88_2(datatype F88.F12 y) {
+  // Cannot take the address of an alias-free path
+  let z = &y;
+}
+
+union F89 { int *`U x; };
+void f89(union F89 y) {
+  // Cannot take the address of an alias-free path
+  let z = &y;
+}
+
+@tagged union F90 { int x; int y;};
+void f90(union F90 z) {
+  // cannot take the address of a @tagged union member
+  let w = &z.x;
+}
+
+void f91(union F91 @z) {
+  // cannot take the address of a @tagged union member
+  let w = &z->x;
+}
+
+struct F92;
+void f92() {
+  // type struct Foo has kind A but as used here needs kind TM
+  // sizeof applied to type struct Foo, which has unknown size here
+  sizeof(struct F92);
+}
+
+void f93() {
+  // struct F92 is not a known struct/union type
+  offsetof(struct F92,x);
+}
+
+struct F94 { int x; };
+void f94() {
+  // no field of struct/union has name z
+  offsetof(struct F94, z);
+  // tuple has too few components: 2 <= 3
+  offsetof($(int,int), 3);
+}
+
+void f95(struct F92* x) {
+  // can't dereference abstract pointer type
+  *x;
+}
+
+struct F96<`i> { int x[valueof(`i)]; };
+void f96(struct F96<`i> *p) {
+  // can't dereference abstract pointer type
+  *p;
+}
+
+void f97(int p) {
+  // expecting *, @, or ? type but found int
+  *p;
+}
+
+void f98(struct F92 ?x) {
+  // can't subscript an abstract pointer
+  x[3];
+}
+
+void f99() {
+  // zero-terminated array doesn't end with zero.
+  int x[3]@zeroterm = {1,2,3};
+}
+
+void f100() {
+  // type mismatch: expecting double but found $(int,int)
+  // elements of array do not all have the same type (double)
+  _ x[3] = {$(1,2), 3.1415, 5};
+}
+
+void f101() {
+  // expecting unsigned int, found $(int,int)
+  int ?x = new {for i < $(1,2) : 3};
+}
+
+void f102() {
+  // unbound struct/union name F102
+  new F102{.x = 3};
+}
+
+struct F103;
+
+void f103() {
+  // can't construct abstract struct
+  F103{.z = 3};
+}
+
+struct F104{<`a,`b> `a x; `b y; `a z;};
+
+void f104() {
+  // too many explicit witness types
+  F104{<int,int,int> 3,3,3};
+}
+
+void f105() {
+  // field x of struct F104 expects type int != $(int,int)
+  F104{<int,int> $(1,2),3,4};
+}
+
+struct F106 { struct {int x; int y;} p; };
+
+void f106() {
+  // field y of struct expects type int != $(int,int)
+  F106 { {.x = 3, .y = $(1,2)} };
+}
+
+datatype F107 { F107(int) };
+
+void f107() {
+  // datatype constructor F107 expects argument of type int but this argument has type $(int,int)
+  F107($(3,3));
+}
+
+void f108() {
+  // malloc cannot be used with type int @
+  int@?x = malloc(sizeof(int@`H)*10);
+}
+
+void f109() {
+  // expecting region_t type but found int
+  rmalloc(3,sizeof(int));
+}
+
+struct F110 {<`a::B> `a x;};
+
+void f110() {
+  // malloc with existential types not yet implemented
+  malloc(sizeof(struct F110));
+}
+
+struct F111 { int x[3]; };
+
+void f111() {
+  struct F111 x,y;
+  // cannot assign to an array
+  // Swap not allowed for non-pointer or non-word-sized types.
+  x.x :=: y.x;
+}
+
+struct F112;
+void f112(struct F112*`r x, struct F112*`r y) {
+  // can't dereference abstract pointer type
+  // can't dereference abstract pointer type
+  // Swap not allowed for non-pointer or non-word-sized types.
+  // attempt to write an abstract aggregate
+  // attempt to write an abstract aggregate
+  *x :=: *y;
+}
+
+void f113(int z) {
+  // statement expression returns type tag_t<`i>
+  let x = ({ let i<`i> = z; i; });
+}
+
+
+void f114() {
+  // statement expression must end with expression
+  let x = ({ ; });
+}
+
+void f115(int z) {
+  // expecting @tagged union but found int
+  tagcheck(z.x);
+}
+
+void f116(int z) {
+  // expecting region_t type but found int
+  rnew(z) 3;
+}
+
+void f117(region_t r, int*`U@`r2 x) {
+  // Cannot consume non-unique paths; do swap instead
+  int*`U@`r p = rnew(r) (*x);
+  // Cannot consume non-unique paths; do swap instead
+  int*`U?`r p = rnew(r) {*x};
+}
+
+void f118(int *`U*x) {
+  // Cannot consume non-unique paths; do swap instead
+  int*`U arr[3] = {for i < 3 : *x};
+}
+struct F119 {int *`U x;};
+void f119(int *`U*y) {
+  struct F119 p;
+  // Cannot consume non-unique paths; do swap instead
+  p = F119{.x = *y};
+}
+
+void f120(tag_t<`i> t) {
+  // valueof(-) can only occur within types
+  valueof(`i);
+}
+
+void f121() {
+  // asm expressions cannot occur within Cyclone code.
+  asm("stuff");
+}
+
+struct F122 { int x; };
+void f122() {
+  // bad occurrence of type name F122
+  F122;
+}
+
+void f123() {
+  // increment/decrement of non-lvalue
+  ++3;
+}
+
+void f124() {
+  // assignment to non-lvalue
+  3 = 4;
+}
+
+void f125() {
+  int x;
+  // type mismatch: int != $(int,int)
+  x = $(1,2);
+}
+
+void f126(const int*`H y) {
+  int *`H x;
+  // type mismatch: int * != const int *
+  x = y;
+}
+
+void f127(int *`r y) {
+  int *`H x;
+  // type mismatch: int * != int *`r
+  x = y;
+}
+
+void f128(int *{3}`r y) {
+  int *{4}`r x;
+  // type mismatch: int *{4}`r != int *{3}`r
+  x = y;
+}
+
+void f129($(int,int)*`r y) {
+  int *`r x = NULL;
+  // type mismatch: $(int,int) *`r != int *`r
+  y = x;
+}
+
+void f130($(int,int) x) {
+  // type $(int,int) cannot be used here
+  x += 3;
+}
+
+void f131(int x) {
+  // type $(int,int) cannot be used here
+  x += $(3,3);
+}
+
+void f132(int x) {
+  // expected pointer to function but found int
+  x(3);
+}
+
+void f133(int @`H x) {
+  // expected pointer to function but found int @
+  x(3);
+}
+
+void f134<`a,`b>();
+void f135() {
+  // too many type variables in instantiation
+  let g = f134@<int,int,int>;
+}
+
+void f136(int x) {
+  // expecting polymorphic type but found int
+  x@<int,int>;
+}
+
+void f137(int x) {
+  // cannot cast int to $(int,int)
+  ($(int,int))x;
+}
+
+struct F138 {int x;};
+void f138(struct F138 x) {
+  // F138 has no y member
+  x.y;
+}
+struct F139;
+void f139(struct F139 x) {
+  // F139 has no y member
+  x.y;
+}
+union F140 { int @x; };
+void f140(union F140 x) {
+  // cannot read union member x since it is not `bits-only'
+  x.x;
+}
+struct F141 { <`i> tag_t<`i> x; };
+void f141(struct F141 x) {
+  // must use pattern-matching to access field x due to existential type variables.
+  x.x;
+}
+void f142(struct {int x;} x) {
+  // type has no y member
+  x.y;
+}
+void f143(union {int @x;} x) {
+  // cannot read union member x since it is not `bits-only'
+  x.x;
+}
+void f144(int x) {
+  // expecting struct or union, found int
+  x.x;
+}
+void f145(struct F141@ x) {
+  // type F141 has no y member
+  x->y;
+}
+
+void f146(struct {int x;} y) {
+  // subscript applied to struct {int x;}
+  y[13];
+}
+
+datatype F147 { F147(int); };
+void f147() {
+  // too many arguments for datatype constructor F147
+  F147(3,4);
+  // too few arguments for datatype constructor F147
+  F147();
+}
+
+void f148(int x, int ?@zeroterm y) {
+  // swap non-lvalue
+  3 :=: x;
+  // swap non-lvalue
+  x :=: 3;
+  // swap value in zeroterm array
+  x :=: y[0];
+  // swap value in zeroterm array
+  *y :=: x;
+}
+
+// incompatible initializes() and noliveunique() attributes on parameter 1
+void f149(int @`U x) __attribute__((initializes(1),noliveunique(1)));
+// incompatible initializes() and noliveunique() attributes on parameter 1
+void f150(int @`U x) __attribute__((noliveunique(1),initializes(1)));
+// incompatible initializes() and noconsume() attributes on parameter 1
+void f151(int @`U x) __attribute__((initializes(1),noconsume(1)));
+// incompatible initializes() and noconsume() attributes on parameter 1
+void f152(int @`U x) __attribute__((noconsume(1),initializes(1)));
+
+// extern declaration should not have initializer
+extern int f156 = 0;
+
+// bad attribute stdcall for variable f
+int f157 __attribute__((stdcall));
+// bad attribute cdecl for variable f
+int f158 __attribute__((cdecl));
+// bad attribute fastcall for variable f
+int f159 __attribute__((fastcall));
+// bad attribute noreturn for variable f
+int f160 __attribute__((noreturn));
+// bad attribute const for variable f
+int f161 __attribute__((const));
+// bad attribute constructor for variable f
+int f162 __attribute__((constructor));
+// bad attribute no_instrument_function for variable f
+int f163 __attribute__((no_instrument_function));
+// bad attribute destructor for variable f
+int f164 __attribute__((destructor));
+// bad attribute format(printf,0,0) for variable f
+int f165 __attribute__((format(printf,0,0)));
+// bad attribute no_check_memory_usage for variable f
+int f166 __attribute__((no_check_memory_usage));
+// bad attribute initializes(1) for variable f
+int f167 __attribute__((initializes(1)));
+// bad attribute noliveunique(1) for variable f
+int f168 __attribute__((noliveunique(1)));
+// bad attribute noconsume(1) for variable f
+int f169 __attribute__((noconsume(1)));
+// bad attribute pure for variable f
+int f170 __attribute__((pure));
+// bad attribute aligned in function declaration
+int f180() __attribute__((aligned));
+// bad attribute packed in function declaration
+int f181() __attribute__((packed));
+// bad attribute packed for variable f182
+int f182 __attribute__((packed));
+// initializer required for variable f183 of type int @
+int @f183;
+// f184 declared with type int @ but initialized with type int
+int @f184 = 3;
+int f185();
+// initializer is not a constant expression
+int f186 = f185();
+// bad attribute aligned for function
+int f187() __attribute__((aligned)) { return 3; }
+// bad attribute packed for function
+int f188() __attribute__((packed)) { return 3; }
+
+int f189;
+// variable f189 was declared $(int,int) instead of int
+$(int,int) f189;
+
+int f190;
+// variable f190 is static but expected scope is public 
+static f190;
+// variable f190 has different attributes
+int f190 __attribute__((shared));
+// variable f190 has different type qualifiers
+const int f190;
+
+int f191() { return 3; }
+// redefinition of function f191
+int f191() { return 3; }
+
+// unbound type variable `a
+extern `a f192;
+// type int has kind B but as used here needs kind I
+extern tag_t<int> f193;
+// type struct F194 has kind A but as used here needs kind TM
+extern struct F194 f194;
+
+extern "C" {
+  // extern "C" functions cannot be implemented in Cyclone
+  int f195() { return; }
+}
+// type int has kind B but as used here needs kind I
+void f196(tag_t<int> x) { return; }
+// function declaration has repeated parameter: x
+void f197(int x, int x) { return; }
+// unbound type variable `a
+`a f198<`b>(`b x);
+// unbound type variable `a
+void f199<`b>(`a x) { return; }
+// duplicate type variable: `a
+void f200<`a,`a>(`a x);
+// type variable `a is used with inconsistent kinds R and <=TM
+void f201<`a::R>(`a x);
+// type variable `a is used with inconsistent kinds A and <=TM
+void f202<`a::A>(`a x);
+// main declared with first argument of type int @ instead of int
+void main(int @`H x) { return x; }
+// redefinition of function main
+// main declared with return type $(int,int) instead of int or void
+$(int,int) main() { return $(3,3); }
+// second argument of main has type int instead of char??
+int main(int x, int y) { return x; }
+// main declared with varargs
+int main(int x, ...int z) { return x; }
+// main declared with too many arguments
+int main(int x, char??argv, int z) { return x; }
+// duplicate type variable: `a
+typedef `a f203_t<`a,`a>;
+// type variable `r is used with inconsistent kinds B and <=TR
+typedef int@`r f204_t<`r::B>;
+// duplicate type variable: `a
+struct F205<`a,`a>;
+// duplicate member x
+struct F206 { int x; int x; };
+// type variable `r is used with inconsistent kinds R and <=TA
+struct F207<`r::R> { `r x; };
+// duplicate type variable: `r
+struct F208 {<`r,`r> int@`r x;};
+///////////////////////////////////////////////////////////////////////////////
+// FIX!  -- this is allowed!
+struct F209<`r> {<`r> int@`r x;};
+///////////////////////////////////////////////////////////////////////////////
+// type variable `a is used with inconsistent kinds A and <=TM
+struct F210<`a::A> { `a x; int y;};
+// bitfield x must have integral type but has type $(int,int)
+struct F211 { $(int,int) x:32; };
+// bitfield larger than type
+struct F212 { int x:-1; };
+// bitfield larger than type
+struct F213 { int x:33; };
+// @requires clauses are only allowed on union members
+struct F214 { int x @requires 3 == 3; };
+// @requires clause has type $(int,int) instead of integral type
+union F215 { int x @requires $(1,1); };
+// unbound type variable `i in type valueof_t((unsigned int)(valueof(`i) == 1))
+union F216 { int x @requires valueof(`i) == 1; };
+int F218;
+// @requires clause has type int @ instead of integral type
+union F217 { int x @requires &F218; };
+// unbound type variable `a in type `a
+union F219 { `a x; };
+// type F220 attempts to abstract type variable `a of kind M
+struct F220<`a::M> {`a x; int y; }; 
+// bad attribute cdecl in  F221 definition
+struct F221 { int x; int y; } __attribute__((cdecl));
+///////////////////////////////////////////////////////////////////////////////
+// FIX!  -- this is allowed because we drop the @tagged
+@tagged struct F222;
+///////////////////////////////////////////////////////////////////////////////
+// @tagged qualifier is only allowed on union declarations
+@tagged struct F223 { int x; };
+struct F224 { $(int,int) x;};
+// type F224 : type mismatch on field x: $(int,int) != int
+struct F224 { int x;};
+// type F224 has a different number of type parameters
+struct F224<`a> { $(int,int) x; };
+struct F225<`r::R> { int@`H x; };
+// type F225 has a different number of type parameters
+struct F225 { int@`H x;};
+// type F225 has a different kind (R) for type parameter `r (A)
+struct F225<`r::A>;
+// type F225 has a different kind (R) for type parameter `r (A)
+struct F225<`r::A> { int@`H x; };
+// type F225 has extra field y
+struct F225<`r> { int@`H x; int@`r y; };
+// duplicate field name C226 in datatype
+datatype F226 { C226, C226 };
+// unbound type variable `i in type tag_t<`i>
+datatype F227 { C227(tag_t<`i>) };
+// type variable `r is used with inconsistent kinds <=M and <=TR
+datatype F228<`r> { C228(`r), D228(int@`r) };
+// noalias pointers in datatypes are not allowed (C229)
+datatype F229 { C229(int@`U) };
+// qualified datatypefield declarations are not allowed (Foo::C230)
+datatype F230 { Foo::C230 };
+// @extensible datatype F231, field C231: parameter number mismatch
+@extensible datatype F231 { C231(int), C231(int,int) };
+// FIX? -- gives no error
+datatype F232 { static C232 };
+// type F233 attempts to abstract type variable `a of kind M
+datatype F233<`a::M>;
+// duplicate type variable: `a
+datatype F234<`a,`a>;
+// type F235 attempts to abstract type variable `a of kind TR
+datatype F235<`a::TR>;
+// datatype F236: field name mismatch C237 != C236
+// datatype F236: field name mismatch C236 != C237
+datatype F236 { C236(int), C237(int,int) };
+datatype F236 { C237(int,int), C236(int,int)  };
+// datatype F236, field C236: parameter qualifier
+datatype F236 { C236(const int), C237(int,int) };
+// datatype F236 is missing field C237
+datatype F236 { C236(int) };
+// datatype F236 has extra field C238
+datatype F236 { C236(int), C237(int,int), C238 };
+@extensible datatype F239 { C239(int,int) };
+// @extensible datatype F239, field C239: parameter number mismatch
+datatype F239 { C239(int) };
+// @extensible datatype F239, field C239: parameter number mismatch
+datatype F239 { C239(int,int,int) };
+// duplicate enum constructor C240
+enum F240 { C240, C240 };
+// bad static expression $(3,3)
+enum F241 { C241 = $(3,3) };
+int F242;
+// enum field name F242 shadows global name
+enum F242 { F242 };
+
+static enum F243 { F243 };
+extern enum F243 { F243 };

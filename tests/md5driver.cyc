@@ -29,6 +29,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "md5.h" */
 
 /* Prints message digest buffer in mdContext as 32 hexadecimal digits.
@@ -43,30 +44,36 @@ static void MDPrint (MD5_CTX *mdContext)
     printf ("%02x", mdContext->digest[i]);
 }
 
-/* Computes the message digest for string inString.
-   Prints out message digest, a space, the string (in quotes) and a
-   carriage return.
+/* Computes the message digest for string inString concatenated with
+   itself n times.
+   Prints out message digest, a newline, the string (in quotes) and then
+   a carriage return.
  */
-static void MDString (char ?inString)
+static void MDString (char ?inString, unsigned int n)
 {
   MD5_CTX mdContext;
   unsigned int len = strlen (inString);
 
   MD5Init (&mdContext);
-  MD5Update (&mdContext, (unsigned char ?@nozeroterm)inString, len);
+  for (unsigned i = 0; i < n; i++)
+    MD5Update (&mdContext, (unsigned char ?@nozeroterm)inString, len);
   MD5Final (&mdContext);
+  printf ("%d copies of \"%s\" yields digest:\n", n, inString);
   MDPrint (&mdContext);
-  printf (" \"%s\"\n\n", inString);
+  printf ("\n");
 }
 
 int main (int argc, char *@fat *@fat argv)
 {
+  unsigned int n = 1;
   if(argc==2)
-    MDString (argv[1]);
+    MDString (argv[1],n);
+  else if (argc==3) 
+    MDString (argv[1],atoi(argv[2]));
   else
   {
-    printf("Usage: md5 string\n");
-    printf("For Example: md5 abc\n");
+    printf("Usage: md5 string <n> where n is the number of copies\n of the string (default is 1 copy)\n");
+    printf("For Example: md5 abc 42\n");
   }
 
   return 0;

@@ -88,8 +88,8 @@ datatype exn {Env_error};
 datacon(exn,Env_error);
 
 `a env_err(string_t msg) __attribute__((noreturn)) {
-  fprintf(stderr,"Internal error in tcenv: %s\n",msg);
-  fflush(stderr);
+  //fprintf(stderr,"Internal error in tcenv: %s\n",msg);
+  //fflush(stderr);
   throw &Env_error_val;
 }
 
@@ -513,7 +513,7 @@ typedefdecl_t lookup_typedefdecl(tenv_t te, seg_t loc, qvar_t q) {
 
 static fenv_t<`r> get_fenv(tenv_t<`g,`r> te, const char ?err_msg) {
   let le = te->le;
-  if (te == NULL) env_err(err_msg);
+  if (le == NULL) env_err(err_msg);
   return (fenv_t)le;
 }
 

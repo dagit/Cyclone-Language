@@ -64,10 +64,14 @@ const char ? failure_reason = NULL;
 void explain_failure() {
   if(Position::num_errors >= Position::max_errors) return;
   fflush(stderr);
-  string_t s1 = aprintf("%s%s",tq1_const ? "const " : "",
-                        typ2string(t1_failure));
-  string_t s2 = aprintf("%s%s",tq2_const ? "const " : "",
-                        typ2string(t2_failure));
+
+  // for qualifier mismatches, there's no need to print out the types
+  if (strcmp("(qualifiers don't match)", failure_reason) == 0) {
+    fprintf(stderr, "  %s\n",failure_reason);
+    return;
+  }
+  string_t s1 = typ2string(t1_failure);
+  string_t s2 = typ2string(t2_failure);
   int pos = 2;
   fprintf(stderr,"  %s",s1);
   pos += numelts(s1);
@@ -116,6 +120,8 @@ void terr(seg_t loc, string_t fmt, ... inject parg_t ap)
   fflush(stderr);
   throw new Impossible(msg);
 }
+
+datatype exn { AbortTypeCheckingFunction };
 
 static string_t tvar2string(tvar_t tv) {
   return *tv->name;
@@ -5035,11 +5041,13 @@ bool is_noalias_pointer_or_aggr(region_t<`r> rgn, type_t t) {
     }
     return false;
   case &AggrType(AggrInfo({.UnknownAggr = _},_)):
-    impos("got unknown aggr in is_noalias_aggr");
+    // impos("got unknown aggr in is_noalias_aggr");
+    return false;
   case &DatatypeType(DatatypeInfo(tinfo,ts)):
     switch (tinfo) {
     case {.UnknownDatatype = UnknownDatatypeInfo(nm,isxt)}:
-      impos("got unknown datatype in is_noalias_aggr");
+      // impos("got unknown datatype in is_noalias_aggr");
+      return false;
     case {.KnownDatatype = &&Datatypedecl(_,_,tvs,flds,_)}:
       // FIX: ...?
       return false;
@@ -5047,7 +5055,8 @@ bool is_noalias_pointer_or_aggr(region_t<`r> rgn, type_t t) {
   case &DatatypeFieldType(DatatypeFieldInfo(tinfo,ts)):
     switch (tinfo) {
     case {.UnknownDatatypefield = _}:
-      impos("got unknown datatype field in is_noalias_aggr");
+      // impos("got unknown datatype field in is_noalias_aggr");
+      return false;
     case {.KnownDatatypefield = $(td,fld)}:
       let inst = List::rzip(rgn,rgn,td->tvs,ts);
       let typs = fld->typs;

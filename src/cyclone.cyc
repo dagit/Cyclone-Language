@@ -170,6 +170,10 @@ static void set_target_arch(string_t<`H> s) {
   target_arch = s;
 }
 
+static void set_many_errors() {
+  Position::max_errors = 65535;
+}
+
 // Prints the version # and exits
 static void print_version() {
   printf("The Cyclone compiler, version %s\n", Cstring_to_string(Cversion));
@@ -546,7 +550,12 @@ list_t<Absyn::decl_t>
 list_t<Absyn::decl_t> do_parse(FILE @ f, list_t<Absyn::decl_t> ignore) {
   Lex::lex_init(true); // must forget typedefs, may as well flush symbols too
   Lex::pos_init();
-  let ans = Parse::parse_file(f);
+  list_t<Absyn::decl_t> ans = NULL;
+  try {
+    ans = Parse::parse_file(f);
+  } catch {
+  case &Position::Exit: compile_failure = true; break;
+  }
   Lex::lex_init(true); // garbage collect those big tries
   return ans;
 }
@@ -1350,7 +1359,10 @@ int main(int argc, string_t<`H> ?`H argv) {
                    "Generate interface files"),
          rnew(r) $("--interface",false," <file>",
                    rnew(r)String_spec(set_specified_interface),
-                   "Set the interface file to be <file>.")
+                   "Set the interface file to be <file>."),
+          rnew(r) $("--manyerrors",false, "",
+                    rnew(r)Unit_spec(set_many_errors),
+                    "don't stop after only a few errors.")
          );
 
   string_t optstring = "Options:";

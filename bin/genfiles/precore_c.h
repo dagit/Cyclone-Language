@@ -751,19 +751,19 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
-typedef char *Cstring;
-typedef char *CstringNN;
+typedef char * Cstring;
+typedef char * CstringNN;
 typedef struct _dyneither_ptr string_t;
 typedef struct _dyneither_ptr mstring_t;
-typedef string_t *stringptr_t;
-typedef mstring_t *mstringptr_t;
-typedef char *Cbuffer_t;
-typedef char *CbufferNN_t;
+typedef string_t * stringptr_t;
+typedef mstring_t * mstringptr_t;
+typedef char * Cbuffer_t;
+typedef char * CbufferNN_t;
 typedef struct _dyneither_ptr buffer_t;
 typedef struct _dyneither_ptr mbuffer_t;
 typedef int bool;
 extern void exit(int);
-extern void *abort();
+extern void * abort();
 struct Core_NewRegion{
-  struct _DynRegionHandle *dynregion;
+  struct _DynRegionHandle * dynregion;
 };
