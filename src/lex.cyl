@@ -54,18 +54,16 @@ union TrieChildren<`r> One(int i,trie_t<`r> t) {
 union TrieChildren<`r> Many(trie_t<`r>@{64}`r ts) {
   return TrieChildren{.Many = ts}; 
 }
-struct Trie<`r::R> {
+struct Trie<`r> {
   union TrieChildren<`r> children;
   int shared_str; // meaning depends on which trie -- see below
 };
-struct DynTrie {
-  <`d::R> 
+struct DynTrie {<`d> 
   uregion_key_t<`d>  dyn;
   trie_t<`d>         t;
 };
 typedef struct DynTrie *`U dyn_trie_t;
-struct DynTrieSymbols {
-  <`d::R> 
+struct DynTrieSymbols {<`d> 
   uregion_key_t<`d>  dyn;
   trie_t<`d>         t;  //int field is symbol index, 0 for not there
   Xarray::xarray_t<stringptr_t,`d> symbols;
@@ -718,9 +716,8 @@ static void process_directive(char ?line) {
   pos_info = rnew_filepos(heap_region, filename, linenumber, pos_info);
 }
 
-// translate an absolute character offset to a file and line number
-// given position information.  If it's an invalid offset (e.g. 0)
-// return $(NULL,0).
+// translate an absolute character offset to a file and line number given
+// position information.  If it's an invalid offset (e.g. 0) return $(NULL,0).
 $(const char ?, unsigned int) xlate_pos(seg_t char_offset) {
   for (pinfo_opt_t p = pos_info; p != NULL; p = p->next) {
     seg_t first_char_offset = p->linenumpos[0];
@@ -744,7 +741,6 @@ $(const char ?, unsigned int) xlate_pos(seg_t char_offset) {
   return $(NULL,0);
 }
 
-
 // Forward declarations of lexing functions 
 int token(Lexbuf);
 int scan_charconst(Lexbuf);
@@ -759,35 +755,23 @@ int snarf_asm_body(Lexbuf);
 
 // for parser -- must not be prefixed
 int yylex(Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> lbuf,
-          union YYSTYPE<`yy>@ yylval, YYLTYPE @yyllocptr) { 
+          union YYSTYPE@ yylval, YYLTYPE @yyllocptr) { 
  int ans = Lex::token(lbuf);
  yylloc.first_line = yyllocptr->first_line = lexeme_start(lbuf);
- yylloc.last_line = yyllocptr->last_line  = lexeme_end(lbuf);
+ yylloc.last_line  = yyllocptr->last_line  = lexeme_end(lbuf);
  switch (ans) {
- case IDENTIFIER        : 
-   *yylval = YYSTYPE{.String_tok = Lex::token_string}; break;
- case TYPEDEF_NAME      : 
-   *yylval = YYSTYPE{.String_tok = Lex::token_string}; break;
- case QUAL_IDENTIFIER   : 
-   *yylval = YYSTYPE{.QualId_tok = Lex::token_qvar};   break;
- case QUAL_TYPEDEF_NAME : 
-   *yylval = YYSTYPE{.QualId_tok = Lex::token_qvar};   break;
- case TYPE_VAR          : 
-   *yylval = YYSTYPE{.String_tok = Lex::token_string}; break;
- case INTEGER_CONSTANT  : 
-   *yylval = YYSTYPE{.Int_tok = Lex::token_int};       break;
- case CHARACTER_CONSTANT: 
-   *yylval = YYSTYPE{.Char_tok = Lex::token_char};     break;
+ case TYPE_VAR: 
  case WCHARACTER_CONSTANT:
-   *yylval = YYSTYPE{.String_tok = Lex::token_string};  break;
- case FLOATING_CONSTANT : 
-   *yylval = YYSTYPE{.String_tok = Lex::token_string}; break;
- case STRING            : 
-   *yylval = YYSTYPE{.String_tok = Lex::token_string}; break;
- case WSTRING           : 
-   *yylval = YYSTYPE{.String_tok = Lex::token_string}; break;
- case ASM               : 
-   *yylval = YYSTYPE{.Asm_tok = Lex::token_asm};       break;
+ case FLOATING_CONSTANT: 
+ case STRING: 
+ case WSTRING: 
+ case IDENTIFIER: 
+ case TYPEDEF_NAME: *yylval = YYSTYPE{.String_tok=Lex::token_string}; break;
+ case QUAL_IDENTIFIER: 
+ case QUAL_TYPEDEF_NAME:  *yylval = YYSTYPE{.QualId_tok=Lex::token_qvar}; break;
+ case INTEGER_CONSTANT:   *yylval = YYSTYPE{.Int_tok=Lex::token_int};     break;
+ case CHARACTER_CONSTANT: *yylval = YYSTYPE{.Char_tok=Lex::token_char};   break;
+ case ASM:                *yylval = YYSTYPE{.Asm_tok=Lex::token_asm};     break;
  default: break;
  }
  return ans;

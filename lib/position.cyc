@@ -16,8 +16,6 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
-#include <core.h>
-#include <list.h>
 #include <string.h>
 #include <lineno.h>
 #include <cycboot.h>
@@ -150,7 +148,6 @@ void post_error(error_t e) {
 void reset_position(string_t<`H> s)    { source = s; error_b = false; }
 void set_position_file(string_t<`H> s) { source = s; error_b = false; }
 string_t get_position_file() { return source; }
-
 
 string_t get_line_directive(seg_t s) {
   Lineno::pos_t pos_s = Lineno::pos_of_abs(source,s);

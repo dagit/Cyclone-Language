@@ -17,8 +17,6 @@
    330, Boston, MA 02111-1307 USA. */
 
 {
-#include <core.h>
-#include <cycboot.h>
 #include <lexing.h>
 #include <string.h>
 #include <lineno.h>
@@ -64,7 +62,7 @@ struct Pos {
   int    col;
 };
 
-static opt_t<$(mstring_t,int)@> parse_linedef(mstring_t line) {
+static $(mstring_t,int)* parse_linedef(mstring_t line) {
   try {
     int i = 0;
     while (i < numelts(line) && (line[i] < '0' || line[i] > '9')) ++i;
@@ -77,20 +75,17 @@ static opt_t<$(mstring_t,int)@> parse_linedef(mstring_t line) {
     while (j < numelts(line) && line[j] != '"') ++j;
     int k = ++j;
     while (k < numelts(line) && line[k] != '"') ++k;
-    if (j == numelts(line) || k == numelts(line)) return NULL; // if there's no name
+    if (j == numelts(line) || k == numelts(line)) return NULL; // if no name
     mstring_t fname = substring(line,j,k-j);
-    return new Opt(new $(fname,number));
-  } catch {
-  default:
-    return NULL;
-  }
+    return new $(fname,number);
+  } catch { default: return NULL; }
 }
 
 int place_cmp($(int,pos_t)@ place1, $(int,pos_t)@ place2) {
   return intcmp((*place1)[0],(*place2)[0]);
 }
 
-// mutates its second argument's elements
+// mutates second argument's elements
 void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@,`H> places) {
   places = List::merge_sort(place_cmp, places);
   FILE @f = file_open(filename, "r");
@@ -114,16 +109,14 @@ void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@,`H> places) {
 
         if (next == NEWLINE) ++line;
         else {
-	  opt_t<$(mstring_t,int)@> fno = parse_linedef(this_line);
+	  $(mstring_t,int)* fno = parse_linedef(this_line);
 	  if (fno == NULL) {
 	    ++line;
-            /* Commented out because it produces spurious warnings
-               in cycdoc.
-	    fprintf(stderr, "Unknown directive: %s\n", this_line);
-            */
+            // Commented out because it produces spurious warnings in cycdoc.
+	    // fprintf(stderr, "Unknown directive: %s\n", this_line);
 	  } else {
-	    source_file = (*fno->v)[0];
-	    line        = (*fno->v)[1];
+	    source_file = (*fno)[0];
+	    line        = (*fno)[1];
 	  }
         }
       }

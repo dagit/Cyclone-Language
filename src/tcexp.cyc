@@ -34,12 +34,13 @@
 #include "tcstmt.h"
 #include "formatstr.h"
 #include "tc.h"
+#include "tctyp.h"
 #include "tcexp.h"
-#include "new_control_flow.h"
 using Core;
 using List;
 using Absyn;
 using Absynpp;
+using Tctyp;
 using Tcenv;
 using Tcutil;
 namespace Tcexp;

@@ -35,6 +35,7 @@
 // other things (structs etc.) at top level only; Tovc relies on this.
 
 #include <string.h>
+#include <set.h>
 #include <dict.h>
 #include <xarray.h>
 #include "warn.h"

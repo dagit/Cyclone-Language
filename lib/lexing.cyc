@@ -31,12 +31,9 @@
 
 // Run-time library for files created by cyclex
 
-#include <core.h>
 #include <lexing.h>
 #include <string.h>
-
 using Core;
-
 namespace Lexing;
 
 // AUX_SIZE should be half BUFFER_SIZE
@@ -45,7 +42,6 @@ namespace Lexing;
 
 datatype exn { Error(string_t) };
 struct lexbuf<`a::B> { // use `a for state that refill_buff might need 
-
   void   (@refill_buff)(struct lexbuf<`a> @);
   `a     refill_state;
 
@@ -77,7 +73,7 @@ struct lex_tables {
 static char aux_buffer_v[1]@zeroterm = {'\0'};
 static char ?aux_buffer = aux_buffer_v;
 
-void lex_refill(Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
+void lex_refill(Lexbuf<Function_lexbuf_state> lexbuf) {
   if (numelts(aux_buffer)==1) aux_buffer = new_string(AUX_SIZE + 1);
   int read =
     lexbuf->refill_state->read_fun(aux_buffer,
@@ -109,8 +105,7 @@ void lex_refill(Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
 }
 
 Lexbuf<Function_lexbuf_state<`b>>
-from_function(int (@`H read_fun)(mstring_t<`H>,int,`b),
-                  `b read_fun_state) {
+from_function(int (@`H read_fun)(mstring_t<`H>,int,`b), `b read_fun_state) {
   return new lexbuf(lex_refill, // @ <`b>,
                     new function_lexbuf_state(read_fun, read_fun_state),
                     new_string(BUFFER_SIZE + 1),
@@ -120,8 +115,7 @@ from_function(int (@`H read_fun)(mstring_t<`H>,int,`b),
                     false);
 }
 
-int read_from_file(mstring_t<`H> aux, int n, FILE @`r f) {
-//                           <<FILE>function_lexbuf_state>lexbuf lbuf) {
+static int read_from_file(mstring_t aux, int n, FILE @ f) {
   return file_string_read(f, aux, 0, n);
 }
 
@@ -130,18 +124,17 @@ Lexbuf<Function_lexbuf_state<FILE@`r>> from_file(FILE @`r f) {
   return from_function(read_from_file, f);
 }
 
-static void set_eof(Lexbuf<bool> lbuf) {
+static void set_eof(Lexbuf lbuf) {
   lbuf->lex_eof_reached = true;
 }
 
 Lexbuf<bool> from_string(mstring_t s) {
-  return 
-    new lexbuf(set_eof,
-               false,     //ignored but can't instantiate with void
-               strdup(s), // copy to keep lexer shielded from updates
-               numelts(s),
-               0,0,0,0,0,
-               true);
+  return new lexbuf(set_eof,
+		    false,     // ignored but can't instantiate with void
+		    strdup(s), // copy to keep lexer shielded from updates
+		    numelts(s),
+		    0,0,0,0,0,
+		    true);
 }
 
 mstring_t<`r> rlexeme(region_t<`r> r, Lexbuf lbuf) {
@@ -149,26 +142,18 @@ mstring_t<`r> rlexeme(region_t<`r> r, Lexbuf lbuf) {
    mstring_t s   = rnew_string(r,len+1);
    zstrncpy((char ? @nozeroterm)s, lbuf->lex_buffer + lbuf->lex_start_pos, len);
    s[len] = '\000';
-//     if (len == 0) {
-//       fprintf(cyc_stderr,"Lexing::lexeme: 0 length!!\n");
-//     } else if (strlen(s)==0) {
-//       fprintf(cyc_stderr,"!! Lexing::lexeme: 0 length!!\n");
-//     }
    return s;
 }
 
 mstring_t lexeme(Lexbuf lbuf) {
-  return rlexeme(Core::heap_region,lbuf);
+  return rlexeme(heap_region,lbuf);
 }
-
 char lexeme_char(Lexbuf lbuf, int i) {
-   return lbuf->lex_buffer[lbuf->lex_start_pos + i];
+  return lbuf->lex_buffer[lbuf->lex_start_pos + i];
 }
-
 int lexeme_start(Lexbuf lbuf) {
    return lbuf->lex_abs_pos + lbuf->lex_start_pos;
 }
-
 int lexeme_end(Lexbuf lbuf) {
    return lbuf->lex_abs_pos + lbuf->lex_curr_pos;
 }

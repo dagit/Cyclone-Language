@@ -116,6 +116,7 @@ CYCLONE_SRCS:=absyn\
 	 rgnorder\
          tcenv\
          tcutil\
+         tctyp\
          relations-ap\
          tcstmt\
          tcpat\
@@ -148,6 +149,7 @@ CYCDOC_SRCS:=cycdoc\
 	parse_tab\
 	absyn\
 	tcutil\
+	tctyp\
 	rgnorder\
         relations-ap\
 	tcenv\
@@ -176,6 +178,7 @@ BUILDLIB_SRCS:=buildlib\
 	lex\
 	parse_tab\
 	tcutil\
+	tctyp\
 	absynpp\
         relations-ap\
         callgraph\

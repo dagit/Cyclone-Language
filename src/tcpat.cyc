@@ -17,9 +17,11 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 #include <dict.h>
+#include <set.h>
 #include <string.h>
 #include "absynpp.h"
 #include "tcutil.h"
+#include "tctyp.h"
 #include "tcexp.h"
 #include "tcpat.h"
 #include "evexp.h"
@@ -206,7 +208,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
       res.tvars_and_bounds_opt = new $(NULL,NULL);
     (*res.tvars_and_bounds_opt)[0] = 
       append((*res.tvars_and_bounds_opt)[0],new List(new $(tv,true),NULL));
-    check_type(p->loc,te2,lookup_type_vars(te2),&tmk,true,false,vd->type);
+    Tctyp::check_type(p->loc,te2,lookup_type_vars(te2),&tmk,true,false,vd->type);
     // Now we repeat checks for the Var_p case above (except the var's type)
     //   this is the type of the access expression
     if (topt != NULL) t = *topt;

@@ -674,9 +674,9 @@ namespace Absyn {
 
   // statements with auxiliary info
   EXTERN_ABSYN struct Stmt {
-    raw_stmt_t     r;               // raw statement
-    seg_t          loc;             // location in source code
-    absyn_annot_t  annot;           // used by analysis
+    raw_stmt_t    r;               // raw statement
+    seg_t         loc;             // location in source code
+    absyn_annot_t annot;           // used by analysis
   };
 
   // raw patterns
@@ -1059,83 +1059,83 @@ namespace Absyn {
   extern qvar_t uniquergn_qvar();
   extern exp_t uniquergn_exp(); // refers to the unique region in Core::
   /////////////////////////// Statements ///////////////////////////////
-  extern stmt_t new_stmt(raw_stmt_t s, seg_t loc);
-  extern stmt_t skip_stmt(seg_t loc);
-  extern stmt_t exp_stmt(exp_t e, seg_t loc);
-  extern stmt_t seq_stmt(stmt_t s1, stmt_t s2, seg_t loc);
-  extern stmt_t seq_stmts(list_t<stmt_t>, seg_t loc);
-  extern stmt_t return_stmt(exp_opt_t e,seg_t loc);
-  extern stmt_t ifthenelse_stmt(exp_t e,stmt_t s1,stmt_t s2,seg_t loc);
-  extern stmt_t while_stmt(exp_t e,stmt_t s,seg_t loc);
-  extern stmt_t break_stmt(seg_t loc);
-  extern stmt_t continue_stmt(seg_t loc);
-  extern stmt_t for_stmt(exp_t e1,exp_t e2,exp_t e3,stmt_t s, seg_t loc);
-  extern stmt_t switch_stmt(exp_t e, list_t<switch_clause_t,`H>, seg_t loc);
-  extern stmt_t fallthru_stmt(list_t<exp_t,`H> el, seg_t loc);
-  extern stmt_t decl_stmt(decl_t d, stmt_t s, seg_t loc); 
-  extern stmt_t declare_stmt(qvar_t,type_t,exp_opt_t init,stmt_t,seg_t loc);
-  extern stmt_t cut_stmt(stmt_t s, seg_t loc);
-  extern stmt_t splice_stmt(stmt_t s, seg_t loc);
-  extern stmt_t label_stmt(var_t v, stmt_t s, seg_t loc);
-  extern stmt_t do_stmt(stmt_t s, exp_t e, seg_t loc);
-  extern stmt_t goto_stmt(var_t lab, seg_t loc);
-  extern stmt_t assign_stmt(exp_t e1, exp_t e2, seg_t loc);
-  extern stmt_t trycatch_stmt(stmt_t,list_t<switch_clause_t,`H>,seg_t);
+  stmt_t new_stmt(raw_stmt_t s, seg_t loc);
+  stmt_t skip_stmt(seg_t loc);
+  stmt_t exp_stmt(exp_t e, seg_t loc);
+  stmt_t seq_stmt(stmt_t s1, stmt_t s2, seg_t loc);
+  stmt_t seq_stmts(list_t<stmt_t>, seg_t loc);
+  stmt_t return_stmt(exp_opt_t e,seg_t loc);
+  stmt_t ifthenelse_stmt(exp_t e,stmt_t s1,stmt_t s2,seg_t loc);
+  stmt_t while_stmt(exp_t e,stmt_t s,seg_t loc);
+  stmt_t break_stmt(seg_t loc);
+  stmt_t continue_stmt(seg_t loc);
+  stmt_t for_stmt(exp_t e1,exp_t e2,exp_t e3,stmt_t s, seg_t loc);
+  stmt_t switch_stmt(exp_t e, list_t<switch_clause_t,`H>, seg_t loc);
+  stmt_t fallthru_stmt(list_t<exp_t,`H> el, seg_t loc);
+  stmt_t decl_stmt(decl_t d, stmt_t s, seg_t loc); 
+  stmt_t declare_stmt(qvar_t,type_t,exp_opt_t init,stmt_t,seg_t loc);
+  stmt_t cut_stmt(stmt_t s, seg_t loc);
+  stmt_t splice_stmt(stmt_t s, seg_t loc);
+  stmt_t label_stmt(var_t v, stmt_t s, seg_t loc);
+  stmt_t do_stmt(stmt_t s, exp_t e, seg_t loc);
+  stmt_t goto_stmt(var_t lab, seg_t loc);
+  stmt_t assign_stmt(exp_t e1, exp_t e2, seg_t loc);
+  stmt_t trycatch_stmt(stmt_t,list_t<switch_clause_t,`H>,seg_t);
 
   /////////////////////////// Patterns //////////////////////////////
-  extern pat_t new_pat(raw_pat_t p, seg_t s);
-  extern pat_t exp_pat(exp_t);
+  pat_t new_pat(raw_pat_t p, seg_t s);
+  pat_t exp_pat(exp_t);
 
   ////////////////////////// Declarations ///////////////////////////
-  extern decl_t new_decl(raw_decl_t r, seg_t loc);
-  extern decl_t let_decl(pat_t p, exp_t e, seg_t loc);
-  extern decl_t letv_decl(list_t<vardecl_t,`H>, seg_t loc);
-  extern decl_t region_decl(tvar_t,vardecl_t,exp_opt_t open_exp, seg_t); 
-  extern decl_t alias_decl(tvar_t,vardecl_t,exp_t,seg_t);
-  extern vardecl_t new_vardecl(seg_t varloc, qvar_t x, type_t t, exp_opt_t init);
-  extern vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init);
-  extern struct AggrdeclImpl @ aggrdecl_impl(list_t<tvar_t,`H> exists,
-					     list_t<$(type_t,type_t)@`H,`H> po,
-					     list_t<aggrfield_t,`H> fs,
-                                             bool tagged);
-  extern decl_t aggr_decl(aggr_kind_t k, scope_t s, typedef_name_t n,
-			  list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
-			  attributes_t atts, seg_t loc);
-  extern type_decl_t aggr_tdecl(aggr_kind_t k, scope_t s, typedef_name_t n,
-                                list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
+  decl_t new_decl(raw_decl_t r, seg_t loc);
+  decl_t let_decl(pat_t p, exp_t e, seg_t loc);
+  decl_t letv_decl(list_t<vardecl_t,`H>, seg_t loc);
+  decl_t region_decl(tvar_t,vardecl_t,exp_opt_t open_exp, seg_t); 
+  decl_t alias_decl(tvar_t,vardecl_t,exp_t,seg_t);
+  vardecl_t new_vardecl(seg_t varloc, qvar_t x, type_t t, exp_opt_t init);
+  vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init);
+  struct AggrdeclImpl @ aggrdecl_impl(list_t<tvar_t,`H> exists,
+				     list_t<$(type_t,type_t)@`H,`H> po,
+				     list_t<aggrfield_t,`H> fs,
+				     bool tagged);
+  decl_t aggr_decl(aggr_kind_t k, scope_t s, typedef_name_t n,
+		   list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
+		   attributes_t atts, seg_t loc);
+  type_decl_t aggr_tdecl(aggr_kind_t k, scope_t s, typedef_name_t n,
+			 list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
                                 attributes_t atts, seg_t loc);
-  extern decl_t struct_decl(scope_t s, typedef_name_t n,
-			    list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
-                            attributes_t atts, seg_t loc);
-  extern decl_t union_decl(scope_t s,typedef_name_t n,
-			   list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
-			   attributes_t atts, seg_t loc);
-  extern decl_t datatype_decl(scope_t s, typedef_name_t n, 
-                              list_t<tvar_t,`H> ts,
-                              opt_t<list_t<datatypefield_t,`H>,`H> fs, 
-                              bool is_extensible, 
-                              seg_t loc);
-  extern type_decl_t datatype_tdecl(scope_t s, typedef_name_t n, 
-                                    list_t<tvar_t,`H> ts,
-                                    opt_t<list_t<datatypefield_t,`H>,`H> fs, 
-                                    bool is_extensible, 
-                                    seg_t loc);
+  decl_t struct_decl(scope_t s, typedef_name_t n,
+		     list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
+		     attributes_t atts, seg_t loc);
+  decl_t union_decl(scope_t s,typedef_name_t n,
+		    list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
+		    attributes_t atts, seg_t loc);
+  decl_t datatype_decl(scope_t s, typedef_name_t n, 
+		       list_t<tvar_t,`H> ts,
+		       opt_t<list_t<datatypefield_t,`H>,`H> fs, 
+		       bool is_extensible, 
+		       seg_t loc);
+  type_decl_t datatype_tdecl(scope_t s, typedef_name_t n, 
+			     list_t<tvar_t,`H> ts,
+			     opt_t<list_t<datatypefield_t,`H>,`H> fs, 
+			     bool is_extensible, 
+			     seg_t loc);
 
-  extern type_t function_type(list_t<tvar_t,`H> tvs,type_opt_t eff_typ,
-                              tqual_t ret_tqual,
-                              type_t ret_type, 
-                              list_t<$(var_opt_t,tqual_t,type_t)@`H,`H> args,
-                              bool c_varargs, vararg_info_t *`H cyc_varargs,
-                              list_t<$(type_t,type_t)@`H,`H> rgn_po,
-                              attributes_t atts, 
-                              exp_opt_t requires_clause,
-                              exp_opt_t ensures_clause);
+  type_t function_type(list_t<tvar_t,`H> tvs,type_opt_t eff_typ,
+		       tqual_t ret_tqual,
+		       type_t ret_type, 
+		       list_t<$(var_opt_t,tqual_t,type_t)@`H,`H> args,
+		       bool c_varargs, vararg_info_t *`H cyc_varargs,
+		       list_t<$(type_t,type_t)@`H,`H> rgn_po,
+		       attributes_t atts, 
+		       exp_opt_t requires_clause,
+		       exp_opt_t ensures_clause);
   // turn t f(t1,...,tn) into t (@f)(t1,...,tn) -- when fresh_evar is
   // true, generates a fresh evar for the region of f else plugs in the
   // heap.
-  extern type_t pointer_expand(type_t, bool fresh_evar);
+  type_t pointer_expand(type_t, bool fresh_evar);
   // returns true when the expression is a valid left-hand-side
-  extern bool is_lvalue(exp_t);
+  bool is_lvalue(exp_t);
 
   // find a field by name from a list of fields
   extern struct Aggrfield *lookup_field(list_t<aggrfield_t>,var_t);

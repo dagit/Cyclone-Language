@@ -19,17 +19,19 @@
 #include <string.h>
 #include "absynpp.h"
 #include "tcutil.h"
+#include "tctyp.h"
 #include "tcexp.h"
 #include "tcstmt.h"
 #include "evexp.h"
-#include "tc.h"
 #include "tcdecl.h"
-#include "relations-ap.h"
 #include "callgraph.h"
+#include "relations-ap.h"
+#include "tc.h"
 using Core;
 using List;
 using Absyn;
 using Absynpp;
+using Tctyp;
 using Tcutil;
 using Tcenv;
 namespace Tc;
@@ -255,9 +257,8 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
     let ans = Dict::lookup(te->ae->ordinaries, q);
     let b0 = (*ans)[0];
     let b1 = new Global_b(vd);
-    let bp = Tcdecl::merge_binding(b0, b1, loc, tc_msg);
-    if (bp == NULL) return; // error in merging
-    let b = *bp;
+    let b = Tcdecl::merge_binding(b0, b1, loc, tc_msg);
+    if (b == NULL) return; // error in merging
     // make the update if the variable is exported
     if (exports == NULL || export_member(vd->name,*exports)) 
       if (b != b0 || (*ans)[1]) 
@@ -311,9 +312,8 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
     let ans = Dict::lookup(te->ae->ordinaries, q);
     let b0 = (*ans)[0];
     let b1 = new Funname_b(fd);
-    let bp = Tcdecl::merge_binding(b0, b1, loc, tc_msg);
-    if (bp != NULL) { // NULL implies error in merging (error reported already)
-      let b = *bp;
+    let b = Tcdecl::merge_binding(b0, b1, loc, tc_msg);
+    if (b != NULL) { // NULL implies error in merging (error reported already)
       // make the update if the function is exported
       if (exports == NULL || export_member(q,*exports))
 	if (!(b == b0 && (*ans)[1])) // no need to reinsert the entry
@@ -654,7 +654,7 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
 	rule_out_memkind(loc, q, ad->impl->exist_vars, true);
     
       *adp = (aggrdecl_t)ad2; // make the update
-      ad = (aggrdecl_t)ad2; // update ad so we add the right constructor below
+      ad = ad2; // update ad so we add the right constructor below
       break;
     }
   }

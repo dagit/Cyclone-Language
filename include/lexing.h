@@ -41,7 +41,6 @@ using Core;
 extern datatype exn { extern Error(string_t) };
 
 extern struct lexbuf<`a::B>{ /* use 'a for state that refill_buff might need */
-
   void   (@refill_buff)(struct lexbuf<`a> @);
   `a     refill_state;
 
@@ -73,7 +72,6 @@ extern struct lex_tables {
 };
 typedef struct lex_tables @LexTables;
 
-
 extern Lexbuf<Function_lexbuf_state<`b>>
   from_function(int (@`H read_fun)(mstring_t<`H>,int,`b), `b);
 
@@ -81,10 +79,10 @@ extern Lexbuf<Function_lexbuf_state<FILE@`r>> from_file(FILE@`r);
 extern Lexbuf<bool> from_string(mstring_t);
 
 extern mstring_t<`r> rlexeme (region_t<`r>,Lexbuf<`a>);
-extern mstring_t lexeme      (Lexbuf<`a>);
-extern char      lexeme_char (Lexbuf<`a>, int);
-extern int       lexeme_start(Lexbuf<`a>);
-extern int       lexeme_end  (Lexbuf<`a>);
+extern mstring_t lexeme      (Lexbuf);
+extern char      lexeme_char (Lexbuf, int);
+extern int       lexeme_start(Lexbuf);
+extern int       lexeme_end  (Lexbuf);
 
 }
 

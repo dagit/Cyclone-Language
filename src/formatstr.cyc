@@ -79,8 +79,7 @@ parse_conversionspecification(region_t<`r> r, string_t s, int i) {
   c = s[i]; // not redundant
   if (c == '.') {
     precision = rnew(r) List((int)c,precision);
-    i++;
-    if (i>=len) return NULL;
+    if (++i>=len) return NULL;
     c = s[i];    
     if (c == '*') {
       precision = rnew(r) List((int)c,precision);
@@ -102,15 +101,13 @@ parse_conversionspecification(region_t<`r> r, string_t s, int i) {
   switch (c) {
   case 'h':
     lenmod = rnew(r) List((int)c,lenmod);
-    i++;
-    if (i>=len) return NULL;
+    if (++i>=len) return NULL;
     c = s[i];
     if (c == 'h') { lenmod = rnew(r) List((int)c,lenmod); i++; }
     break;
   case 'l':
     lenmod = rnew(r) List((int)c,lenmod);
-    i++;
-    if (i>=len) return NULL;
+    if (++i>=len) return NULL;
     c = s[i];
     if (c == 'l') { lenmod = rnew(r) List((int)c,lenmod); i++; }
     break;

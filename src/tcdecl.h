@@ -25,9 +25,8 @@
 namespace Tcdecl {
   using Absyn;
 
-  extern datatype exn {extern Incompatible};
-
   // used by Interface
+  extern datatype exn {extern Incompatible};
   struct Xdatatypefielddecl {
     datatypedecl_t base; //no fields here
     datatypefield_t field;
@@ -36,52 +35,45 @@ namespace Tcdecl {
 
   // if msg0 == null, don't print any message; just throw exception Incompatible
   // otherwise call terr(loc, msg) where msg is *msg0 + " " + msg1
-extern void merr(seg_t loc, string_t<`r2> * msg1, string_t fmt,
-		 ... inject parg_t<`r> ap : {`r2} > `r) 
-  __attribute__((format(printf,3,4)));
+  void merr(seg_t loc, string_t<`r2> * msg1, string_t fmt,
+	  ... inject parg_t<`r> ap : {`r2} > `r)
+    __attribute__((format(printf,3,4)));
+  
+  // used by Interface and Tc
 
   // all these functions work the same way :
   // _ they check compatibility between d0 (previous top-level declaration)
   //   and d1 (new top-level declaration)
-  // _ if something's wrong, call merge_err and return null (or Unresolved_b for merge_binding)
+  // _ if something's wrong, call merr and return Error
   // _ don't modify d0 or d1
-  // _ if d1 is included in d0 (i.e. d1 doesn't bring any new information w.r.t d0), return d0 itself
-  //   hence the test for inclusion d1 <= d0 can be written : d0 == merge(d0, d1)
+  // _ if d0 or d1 is the answer return First or Second (respectively)
+  //   hence the test for inclusion d1 <= d0 can be written is 
+  //      merge(d0, d1) is First
   // _ from a 'semantic' point of view, merge(d0, d1) = merge(d1, d0)
   // _ we assume the declarations have already been type-checked
+struct Aggrdecl * merge_aggrdecl(aggrdecl_t, aggrdecl_t,
+				 seg_t, string_t * msg);
 
-  // t and v describe the type and the name of the object involved
-  // we allow externC and extern on aggregate or enum definitions
-extern $(scope_t, bool) merge_scope(scope_t s0, scope_t s1,  
-				    string_t t, string_t v,
-				    seg_t loc, string_t * msg,
-                                    bool allow_externC_extern_merge);
+struct Datatypedecl * merge_datatypedecl(datatypedecl_t,datatypedecl_t,
+					 seg_t, string_t * msg);
+struct Enumdecl * merge_enumdecl(enumdecl_t,enumdecl_t, 
+				 seg_t, string_t * msg);
+struct Vardecl * merge_vardecl(vardecl_t, vardecl_t, seg_t, 
+			       string_t * msg);
+struct Typedefdecl * merge_typedefdecl(typedefdecl_t, typedefdecl_t,
+				       seg_t, string_t * msg);
 
-extern struct Aggrdecl  * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
-					 seg_t loc, string_t * msg);
-
-extern struct Datatypedecl  * merge_datatypedecl(datatypedecl_t d0, datatypedecl_t d1,
-					     seg_t loc, string_t * msg);
-extern struct Enumdecl    * merge_enumdecl(enumdecl_t d0, enumdecl_t d1, 
-					   seg_t loc, string_t * msg);
-extern struct Vardecl     * merge_vardecl(vardecl_t d0, vardecl_t d1, 
-					  seg_t loc, string_t * msg);
-extern struct Typedefdecl * merge_typedefdecl(typedefdecl_t d0,
-					      typedefdecl_t d1,
-					      seg_t loc, string_t * msg);
-
-extern binding_t * merge_binding(binding_t d0, binding_t d1,
-				 seg_t loc, string_t * msg);
+datatype Binding * merge_binding(binding_t,binding_t,seg_t,string_t*msg);
   
-extern struct Xdatatypefielddecl * 
-  merge_xdatatypefielddecl (xdatatypefielddecl_t d0, xdatatypefielddecl_t d1, 
-                          seg_t loc, string_t * msg);
+struct Xdatatypefielddecl *
+ merge_xdatatypefielddecl (xdatatypefielddecl_t, xdatatypefielddecl_t, 
+			   seg_t, string_t * msg);
 
   // sort the list of fields, trying to merge the duplicate
   // *res is set to false if something's wrong
-extern List::list_t<datatypefield_t> 
+List::list_t<datatypefield_t>
 sort_xdatatype_fields(List::list_t<datatypefield_t,`H> f, bool @ res,
-		    var_t v, seg_t loc, string_t * msg);
+		      var_t v, seg_t, string_t * msg);
 }
 
 #endif /* _TCDECL_H_ */

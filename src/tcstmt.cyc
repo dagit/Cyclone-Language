@@ -19,6 +19,7 @@
 
 #include "absynpp.h"
 #include "tcutil.h"
+#include "tctyp.h"
 #include "tcexp.h"
 #include "tcpat.h"
 #include "new_control_flow.h"
@@ -37,6 +38,7 @@ using Absyn;
 using Absynpp;
 using Tcutil;
 using Tcenv;
+using Tctyp;
 using Tcexp;
 using Tcpat;
 namespace Tcstmt;
