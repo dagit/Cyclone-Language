@@ -183,10 +183,17 @@ doc_t down_opt(context_t ctxt, doc_t d) {
 extern void validate_docs(buf_t,doc_t,doc_t);
 
 int main(int argc, char ??argv) {
-  string_t tlimit = Stdlib::getenv("TLIMIT");
-  if (tlimit == null) {
-    fprintf(stderr,"please set the TLIMIT environment variable\n");
-    exit(1);
+  string_t tlimit = "182";
+
+  if (argc <= 1) {
+    tlimit = Stdlib::getenv("TLIMIT");
+    if (tlimit == null) {
+      fprintf(stderr,"please set the TLIMIT environment variable\n"
+	      "or give a time limit command argument.\n");
+      exit(1);
+    }
+  } else {
+    tlimit = argv[1];
   }
   start_timer(tlimit);
   buf_t b = init_buf();
