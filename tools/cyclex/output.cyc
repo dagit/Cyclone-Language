@@ -6,7 +6,7 @@
 namespace Output;
 using Stdio;
 
-static mstring_t copy_buffer = null; // initialized in output_lexdef
+static mstring_t copy_buffer = NULL; // initialized in output_lexdef
 
 /*void copy_chars(FILE @ ic, FILE @ oc, int start, int stop) {
   int n = stop - start;
@@ -114,7 +114,7 @@ void output_entry(string_t sourcename, FILE @ ic, FILE @ oc,
   // (int switch can't get the value being switched on??)
   fprintf(oc, "  lexstate = lex_engine(lexstate,lexbuf);\n");
   fprintf(oc, "  switch (lexstate) {\n");
-  for(let actions=e->actions; actions!=null; actions=actions->tl) {
+  for(let actions=e->actions; actions!=NULL; actions=actions->tl) {
     let &$(num,loc) = actions->hd;
     fprintf(oc, "\ncase %d: \n", num);
     copy_chunk(sourcename, ic, oc, loc);
@@ -148,7 +148,7 @@ void output_lexdef(string_t sourcename,
   copy_chunk(sourcename, ic, oc, header);
   fprintf(oc, "using Lexing {\n\n");
   output_tables(oc, tables);
-  for(; entry_points != null; entry_points = entry_points->tl)
+  for(; entry_points != NULL; entry_points = entry_points->tl)
     output_entry(sourcename, ic, oc, entry_points->hd);
   fprintf(oc, "\n}\n");
   copy_chunk(sourcename, ic, oc, trailer);

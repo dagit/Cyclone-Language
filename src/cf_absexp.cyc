@@ -140,9 +140,9 @@ static void ok_lvalue(absop_t ao) {
 // Note: exceessive to grow this dict for the file rather than for a function.
 // FIX: use exp loc not, unique ints (good for error messages)
 static int num_mallocpts = 0;
-static dict_t<exp_t,int> * mallocpt_dict = null;
+static dict_t<exp_t,int> * mallocpt_dict = NULL;
 int mallocpt_int(exp_t e) {
-  if(mallocpt_dict == null) {
+  if(mallocpt_dict == NULL) {
     dict_t<exp_t,int> d = Dict::empty(Core::ptrcmp);
     mallocpt_dict = new{d};
   }
@@ -223,18 +223,18 @@ absexp_t mkGroupAE(absexpgroup_t g, absexp_t ae1, absexp_t ae2) {
   case $(g,&GroupAE(g1,l1),_) && g == g1 && g != (absexpgroup_t)OrderedG:
     return new GroupAE(g, new{List::List(ae2,l1)});
   case $(OrderedG,&GroupAE(OrderedG,l1),_):
-    return new GroupAE(OrderedG, List::append(l1, new{List::List(ae2,null)}));
+    return new GroupAE(OrderedG, List::append(l1, new{List::List(ae2,NULL)}));
   case $(g,_,&GroupAE(g2,l2)) && g == g2:
     return new GroupAE(g, new {List::List(ae1,l2)});
   default:
-    return new GroupAE(g, new {List::List(ae1, new {List::List(ae2,null)})});
+    return new GroupAE(g, new {List::List(ae1, new {List::List(ae2,NULL)})});
   }
 }
 absexp_t mkGroupAE_l(absexpgroup_t g, list_t<absexp_t,`H> ael) {
   // Note: Maybe should optimize more here?
-  if(ael == null) // g really shouldn't be OneofG in this case??
+  if(ael == NULL) // g really shouldn't be OneofG in this case??
     return SkipAE;
-  if(ael->tl == null)
+  if(ael->tl == NULL)
     return ael->hd;
   return new GroupAE(g, ael);
 }
@@ -276,7 +276,7 @@ string_t absexp2string(absexp_t ae, int depth) {
     case UnorderedG: ans = aprintf("%sunordered",ans); break;
     case OneofG:     ans = aprintf("%soneof",ans);     break;
     }
-    for(; l != null; l = l->tl)
+    for(; l != NULL; l = l->tl)
       ans = aprintf("%s\n%s",ans,absexp2string(l->hd, depth+1));
     break;
     
@@ -305,7 +305,7 @@ void check_absexp(absexp_t ae) {
   case &MallocAE(_,_): return;
   case &StmtAE(s):     return;
   case &GroupAE(_,l):  
-    for(; l != null; l = l->tl) 
+    for(; l != NULL; l = l->tl) 
       check_absexp(l->hd); 
     return;
   case &UseAE(ao):     check_absop(ao); return;
@@ -329,16 +329,16 @@ path_info_t eval_absop_r(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao);
 init_state_t eval_absop_l(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
   switch(ao) {
   case &LocalOp(vd):   
-    return new MustPointTo(new Place(new VarRoot(vd),null));
+    return new MustPointTo(new Place(new VarRoot(vd),NULL));
   case &MallocOp(e,_): 
-    return new MustPointTo(new Place(new MallocPt(e),null));
+    return new MustPointTo(new Place(new MallocPt(e),NULL));
   case &MemberOp(ao2,n):
     let inner_state = eval_absop_l(pinfo_dict,ao2); 
     switch(inner_state) {
     case &UnknownIS(_,_): return inner_state;
     case &MustPointTo(&Place(root,field_list)): // too much allocation!!!
       return new MustPointTo(new Place(root, 
-				       append(field_list, new List(n,null))));
+				       append(field_list, new List(n,NULL))));
     }
   case &DerefOp(ao2): 
     let inner_pinfo = eval_absop_r(pinfo_dict,ao2);
@@ -422,8 +422,8 @@ bool is_ok_malloc_assign(absop_t lval, list_t<exp_t,`r> ok_mallocs) {
 //Note: descent through Unordered means O(n^2) overall.  Should be unnecessary??
 static $(list_t<absexp_t,`r>, list_t<exp_t,`r>) 
 unordered_mallocs(region_t<`r> rgn, absexp_t ae, list_t<exp_t,`r> ok_mallocs) {
-  let assigns = null;
-  let mallocs = null;
+  let assigns = NULL;
+  let mallocs = NULL;
   switch (ae) {
   case BottomAE:  break;
   case SkipAE:    break;
@@ -439,7 +439,7 @@ unordered_mallocs(region_t<`r> rgn, absexp_t ae, list_t<exp_t,`r> ok_mallocs) {
     throw new Core::Impossible("local variable in MallocAE");
   case &StmtAE(s): break; // conservative
   case &GroupAE(OrderedG, ael):
-    for(; ael != null; ael = ael->tl) {
+    for(; ael != NULL; ael = ael->tl) {
       let $(next_assigns, next_mallocs) =  
 	unordered_mallocs(rgn, ael->hd, rappend(rgn, mallocs, ok_mallocs));
       assigns = rappend(rgn, next_assigns, assigns);
@@ -451,7 +451,7 @@ unordered_mallocs(region_t<`r> rgn, absexp_t ae, list_t<exp_t,`r> ok_mallocs) {
     //      what we have here is sound though
     break;
   case &GroupAE(UnorderedG, ael):
-    for(; ael != null; ael = ael->tl) {
+    for(; ael != NULL; ael = ael->tl) {
       let $(next_assigns, next_mallocs) = 
 	unordered_mallocs(rgn, ael->hd, ok_mallocs);
       assigns = rappend(rgn, next_assigns, assigns);
@@ -491,9 +491,9 @@ flow_info_t eval_absexp(analenv_t env, seg_t loc,
 	break;
       default: break;
       }
-      let escaping_pinfos = null;
+      let escaping_pinfos = NULL;
       let new_pinfo = assign_escape(&escaping_pinfos, old_pinfo, r_pinfo);
-      for(; escaping_pinfos != null; escaping_pinfos = escaping_pinfos->tl) {
+      for(; escaping_pinfos != NULL; escaping_pinfos = escaping_pinfos->tl) {
 	let esc_pinfo = escaping_pinfos->hd;
 	if(!isAllInit(pinfo_dict, esc_pinfo)) {
 	  Tcutil::terr(loc,"uninitialized value assigned to escaped place");
@@ -549,12 +549,12 @@ flow_info_t eval_absexp(analenv_t env, seg_t loc,
   case &StmtAE(s): return cf_analyze_stmt(env,s,in_flow);
 
   case &GroupAE(OrderedG,ael):
-    for(; ael != null; ael = ael->tl)
+    for(; ael != NULL; ael = ael->tl)
       in_flow = eval_absexp(env,loc,ael->hd,in_flow);
     return in_flow;
   case &GroupAE(OneofG,ael):
     flow_info_t out_flow = BottomFL; 
-    for(; ael != null; ael = ael->tl)
+    for(; ael != NULL; ael = ael->tl)
       out_flow = join_flow(out_flow, eval_absexp(env,loc,ael->hd,in_flow));
     return out_flow;
   case &GroupAE(UnorderedG,ael): 
@@ -569,7 +569,7 @@ flow_info_t eval_absexp(analenv_t env, seg_t loc,
     // distinct exp, but this should be true!!
     do {
       in_flow  = out_flow;
-      for(_ ael2 = ael; ael2 != null; ael2 = ael2->tl)
+      for(_ ael2 = ael; ael2 != NULL; ael2 = ael2->tl)
 	out_flow = join_flow(out_flow, eval_absexp(env,loc,ael2->hd, out_flow));
     } while(!flow_lessthan_approx(out_flow,in_flow));
     pinfo_dict_t<local_root_t> pinfo_dict;
@@ -579,15 +579,15 @@ flow_info_t eval_absexp(analenv_t env, seg_t loc,
     }
     // UGLY, UGLY, UGLY
     region spine_rgn {
-    let $(assigns,mallocs) = unordered_mallocs(spine_rgn,ae,null);
-    for(; mallocs != null; mallocs = mallocs->tl) {
+    let $(assigns,mallocs) = unordered_mallocs(spine_rgn,ae,NULL);
+    for(; mallocs != NULL; mallocs = mallocs->tl) {
       let malloc_pt = new MallocPt(mallocs->hd); // avoid repeated allocation!
       pinfo_dict = Dict::insert(pinfo_dict, malloc_pt, 
 				Dict::lookup(env->roots, malloc_pt));
     }
     out_flow = new InitsFL(pinfo_dict);
     // notice how we do these before the "outer" use/assigns -- good!
-    for(; assigns != null; assigns = assigns->tl)
+    for(; assigns != NULL; assigns = assigns->tl)
       out_flow = eval_absexp(env,loc,assigns->hd,out_flow);
     }
     return out_flow;

@@ -35,8 +35,8 @@ struct Segment { int start; int end; };
 
 seg_t segment_of_abs(int start, int end) { return new Segment(start,end); }
 seg_t segment_join(seg_t s1, seg_t s2) { 
-  if(s1 == null) return s2;
-  if(s2 == null) return s1;
+  if(s1 == NULL) return s2;
+  if(s2 == NULL) return s1;
   return new Segment(s1->start,s2->end); 
 }
 
@@ -57,7 +57,7 @@ static mstring_t string_of_pos_pr(Lineno::pos_t pos_s, Lineno::pos_t pos_e) {
 }
 
 mstring_t string_of_segment(seg_t s) {
-  if(s == null)
+  if(s == NULL)
     return aprintf("%s",source);
   Lineno::pos_t pos_s = Lineno::pos_of_abs(source,s->start);
   Lineno::pos_t pos_e = Lineno::pos_of_abs(source,s->end);
@@ -69,19 +69,19 @@ static Lineno::pos_t new_pos() {
 }
 
 list_t<mstringptr_t> strings_of_segments(list_t<seg_t,`r> segs) {
-  list_t<$(int,Lineno::pos_t)@> places = null;
-  for(let segs2 = segs; segs2 != null; segs2 = segs2->tl) {
-    if(segs2->hd == null)
+  list_t<$(int,Lineno::pos_t)@> places = NULL;
+  for(let segs2 = segs; segs2 != NULL; segs2 = segs2->tl) {
+    if(segs2->hd == NULL)
       continue;
     places = new List(new $(segs2->hd->end,   new_pos()),
                       new List(new $(segs2->hd->start, new_pos()),
                                places));
   }
   Lineno::poss_of_abss(source, places); // mutates places
-  list_t<mstringptr_t> ans = null;
+  list_t<mstringptr_t> ans = NULL;
   places = List::imp_rev(places);
-  for(; segs != null; segs = segs->tl) 
-    if(segs->hd == null)
+  for(; segs != NULL; segs = segs->tl) 
+    if(segs->hd == NULL)
       ans = new List(new aprintf("%s(unknown)", source), ans);
     else {
       ans = new List(new string_of_pos_pr((*places->hd)[1],
@@ -136,7 +136,7 @@ static int line_length = 76;
 // Produce a one line string that shows the peice of the source file containing
 // the error; return also the column numbers the error starts and finishes at.
 static $(mstring_t,int,int)@ get_context(seg_t seg) {
-  if(seg == null)
+  if(seg == NULL)
     throw Nocontext;
   Lineno::pos_t pos_s, pos_e;
   try {

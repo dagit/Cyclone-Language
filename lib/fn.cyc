@@ -98,8 +98,8 @@ fn<$(`a,`b)@,`c,`e1+`e2> uncurry(fn<`a,fn<`b,`c,`e1>,`e2> f) {
 // map a closure across a list
 List::list_t<`b,`H> map_fn(fn<`a,`b,`e> f,List::list_t<`a> x) {
   // return List::map_c(apply,f,x);
-  List::list_t res = null;
-  for (; x != null; x = x->tl) 
+  List::list_t res = NULL;
+  for (; x != NULL; x = x->tl) 
     res = new List::List(apply(f,x->hd), res);
   res = List::imp_rev(res);
   return res;

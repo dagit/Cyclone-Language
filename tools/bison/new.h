@@ -22,7 +22,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define NEW(t) (malloc(sizeof(t)))
 //#define	NEW2(n, t)	((t *) xmalloc((unsigned) ((n) * sizeof(t))))
 #define NEW2(n,t) (new {for _new2_cyclone<n: (t)0})
-#define NEW2P(n,t) (new {for _new2p_cyclone<n: (t)null})
+#define NEW2P(n,t) (new {for _new2p_cyclone<n: (t)NULL})
 /*
 #ifdef __STDC__
 #define	FREE(x)		(x ? (void) free((char *) (x)) : (void)0)
@@ -31,8 +31,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 */
 #ifdef __STDC__
-#define	FREE(x)		(x) = null
+#define	FREE(x)		(x) = NULL
 #else
-#define FREE(x) 	(x) = null
+#define FREE(x) 	(x) = NULL
 #endif
 

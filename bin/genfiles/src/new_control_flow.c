@@ -543,7 +543,7 @@ _LL61;} else{ goto _LL62;} _LL62: if(*(( int*) _temp52) ==  Cyc_Absyn_Subscript_
 _LL71: _temp70=(( struct Cyc_Absyn_Subscript_e_struct*) _temp52)->f2; goto _LL63;}
 else{ goto _LL64;} _LL64: goto _LL65; _LL55:(( struct Cyc_List_List*)
 _check_null( path))->tl ==  0? 0:(( int(*)( struct _tagged_arr msg)) Cyc_Assert_AssertFail)(
-_tag_arr("new_control_flow.cyc:238 path->tl == null", sizeof( unsigned char), 42u));
+_tag_arr("new_control_flow.cyc:238 path->tl == NULL", sizeof( unsigned char), 42u));
 return Cyc_CfAbsexp_mkAddressOp( absop); _LL57: absop= Cyc_CfAbsexp_mkDerefOp(
 absop); goto _LL53; _LL59: absop= Cyc_CfAbsexp_mkDerefOp( absop); _temp68=
 _temp66; goto _LL61; _LL61: absop= Cyc_CfAbsexp_mkMemberOp( absop,( void*)({
@@ -735,7 +735,7 @@ goto _LL201;} else{ goto _LL202;} _LL202: if(*(( int*) _temp116) ==  Cyc_Absyn_C
 goto _LL203;} else{ goto _LL204;} _LL204: if(*(( int*) _temp116) ==  Cyc_Absyn_Fill_e){
 goto _LL205;} else{ goto _LL117;} _LL119: _temp208= _temp206; goto _LL121;
 _LL121: return Cyc_NewControlFlow_abstract_exp( env, _temp208); _LL123: env.access_path
-==  0? 0:(( int(*)( struct _tagged_arr msg)) Cyc_Assert_AssertFail)( _tag_arr("new_control_flow.cyc:303 env.access_path==null",
+==  0? 0:(( int(*)( struct _tagged_arr msg)) Cyc_Assert_AssertFail)( _tag_arr("new_control_flow.cyc:303 env.access_path==NULL",
 sizeof( unsigned char), 47u)); return({ struct Cyc_NewControlFlow_AbsSyn
 _temp310; _temp310.when_true=({ struct Cyc_NewControlFlow_AbsSynOne _temp312;
 _temp312.inner_exp=( void*) Cyc_CfAbsexp_mkBottomAE(); _temp312.assigns=( void*)
@@ -743,7 +743,7 @@ Cyc_CfAbsexp_mkBottomAE(); _temp312;}); _temp310.when_false=({ struct Cyc_NewCon
 _temp311; _temp311.inner_exp=( void*) Cyc_CfAbsexp_mkSkipAE(); _temp311.assigns=(
 void*) Cyc_NewControlFlow_make_assigns( env, Cyc_CfAbsexp_mkUnknownOp());
 _temp311;}); _temp310.lvalues= 0; _temp310;}); _LL125: env.access_path ==  0? 0:((
-int(*)( struct _tagged_arr msg)) Cyc_Assert_AssertFail)( _tag_arr("new_control_flow.cyc:308 env.access_path==null",
+int(*)( struct _tagged_arr msg)) Cyc_Assert_AssertFail)( _tag_arr("new_control_flow.cyc:308 env.access_path==NULL",
 sizeof( unsigned char), 47u)); return({ struct Cyc_NewControlFlow_AbsSyn
 _temp313; _temp313.when_true=({ struct Cyc_NewControlFlow_AbsSynOne _temp315;
 _temp315.inner_exp=( void*) Cyc_CfAbsexp_mkSkipAE(); _temp315.assigns=( void*)
@@ -910,7 +910,7 @@ _temp474=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Cor
 _temp474[ 0]=({ struct Cyc_Core_Impossible_struct _temp475; _temp475.tag= Cyc_Core_Impossible;
 _temp475.f1= _tag_arr("NewControlFlow: bad type in StructMember", sizeof(
 unsigned char), 41u); _temp475;}); _temp474;})); _LL462:;} _LL171: env.access_path
-==  0? 0:(( int(*)( struct _tagged_arr msg)) Cyc_Assert_AssertFail)( _tag_arr("new_control_flow.cyc:506 env.access_path == null",
+==  0? 0:(( int(*)( struct _tagged_arr msg)) Cyc_Assert_AssertFail)( _tag_arr("new_control_flow.cyc:506 env.access_path == NULL",
 sizeof( unsigned char), 49u)); if( _temp276 ==  0){ return Cyc_NewControlFlow_mkSyn_tf(
 Cyc_CfAbsexp_mkSkipAE(), Cyc_NewControlFlow_use_it_list(), Cyc_NewControlFlow_make_assigns(
 env, Cyc_CfAbsexp_mkUnknownOp()));} _temp278= _temp276; goto _LL173; _LL173: {
@@ -1129,7 +1129,7 @@ void*) Cyc_CfAbsexp_mkGroupAE(( void*) Cyc_CfAbsexp_OrderedG,( void*) _temp655.i
 void*)( _temp654.when_false).inner_exp); _temp657.assigns=( void*)(( void*)(
 _temp654.when_false).assigns); _temp657;}); _temp656.lvalues= 0; _temp656;});}}
 _LL191: env.access_path ==  0? 0:(( int(*)( struct _tagged_arr msg)) Cyc_Assert_AssertFail)(
-_tag_arr("new_control_flow.cyc:726 env.access_path==null", sizeof( unsigned char),
+_tag_arr("new_control_flow.cyc:726 env.access_path==NULL", sizeof( unsigned char),
 47u)); Cyc_NewControlFlow_add_var_root( env, _temp306);( env.shared)->comprehension_vars=({
 struct Cyc_List_List* _temp659=( struct Cyc_List_List*) GC_malloc( sizeof(
 struct Cyc_List_List)); _temp659->hd=( void*) _temp306; _temp659->tl=( env.shared)->comprehension_vars;
@@ -1191,9 +1191,9 @@ GC_malloc( sizeof( struct Cyc_List_List)); _temp703->hd=( void*) _temp698;
 _temp703->tl= _temp684; _temp703;}); _temp702;});} Cyc_NewControlFlow_cf_prepass(
 env, _temp688);} return Cyc_List_imp_rev( _temp684);} void Cyc_NewControlFlow_cf_prepass(
 struct Cyc_NewControlFlow_AbsEnv env, struct Cyc_Absyn_Stmt* s){ env.lhsides == 
-0? 0:(( int(*)( struct _tagged_arr msg)) Cyc_Assert_AssertFail)( _tag_arr("new_control_flow.cyc:778 env.lhsides == null",
+0? 0:(( int(*)( struct _tagged_arr msg)) Cyc_Assert_AssertFail)( _tag_arr("new_control_flow.cyc:778 env.lhsides == NULL",
 sizeof( unsigned char), 45u)); env.access_path ==  0? 0:(( int(*)( struct
-_tagged_arr msg)) Cyc_Assert_AssertFail)( _tag_arr("new_control_flow.cyc:779 env.access_path == null",
+_tagged_arr msg)) Cyc_Assert_AssertFail)( _tag_arr("new_control_flow.cyc:779 env.access_path == NULL",
 sizeof( unsigned char), 49u));{ void* _temp704=( void*) s->r; struct Cyc_Absyn_Exp*
 _temp756; struct Cyc_Absyn_Stmt* _temp758; struct Cyc_Absyn_Stmt* _temp760;
 struct Cyc_Absyn_Exp* _temp762; struct Cyc_Absyn_Exp* _temp764; struct Cyc_Absyn_Stmt*

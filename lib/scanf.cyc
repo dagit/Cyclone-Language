@@ -171,11 +171,11 @@ _IO_vfscanf (_IO_getc, _IO_ungetc, _IO_peekc, fp, fmt0, ap, errp)
 	const u_char ? `r1 fmt = fmt0;
 	int c;		/* character from format, or conversion */
 	_IO_ssize_t width;	/* field width, or 0 */
-	char ? _ p = null; /* points into all kinds of strings */
+	char ? _ p = NULL; /* points into all kinds of strings */
 	int n;		/* handy integer */
 	int flags = 0;	/* flags as defined above */
         /* saves original value of p when necessary */
-	char ? _ p0 = null;
+	char ? _ p0 = NULL;
         int nassigned;		/* number of fields assigned */
 	int nread;		/* number of characters consumed from fp */
 	/* Assignments to base and ccfn are just to suppress warnings from gcc.*/
@@ -873,7 +873,7 @@ doswitch:
 static int string_getc(const char ?`r @`r2 sptr) {
   char c;
   const char ?`r s = *sptr;
-  if (s == null || s.size == 0 || (c = s[0]) == '\0') return EOF;
+  if (s == NULL || s.size == 0 || (c = s[0]) == '\0') return EOF;
   *sptr = s+1;
   return c;
 }
@@ -887,7 +887,7 @@ static int string_ungetc(int ignore, const char ?`r @`r2 sptr) {
 static int string_peekc(const char ?`r @ `r2 sptr) {
   char c;
   const char ?`r s = *sptr;
-  if (s == null || s.size == 0 || (c = s[0]) == '\0') return EOF;
+  if (s == NULL || s.size == 0 || (c = s[0]) == '\0') return EOF;
   return c;
 }
 

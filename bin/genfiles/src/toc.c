@@ -2008,7 +2008,7 @@ _temp1176= _temp1156.f2; if(( unsigned int) _temp1176 >  1u?*(( int*) _temp1176)
 ==  Cyc_Absyn_Upper_b: 0){ _LL1179: _temp1178=(( struct Cyc_Absyn_Upper_b_struct*)
 _temp1176)->f1; goto _LL1163;} else{ goto _LL1164;} _LL1164: goto _LL1165;
 _LL1159: if( _temp1151? ! _temp1152: 0){ if( nv->toplevel){({ void* _temp1182[ 0u]={};((
-int(*)( struct _tagged_arr fmt, struct _tagged_arr ap)) Cyc_Toc_unimp)( _tag_arr("can't do null-check conversion at top-level",
+int(*)( struct _tagged_arr fmt, struct _tagged_arr ap)) Cyc_Toc_unimp)( _tag_arr("can't do NULL-check conversion at top-level",
 sizeof( unsigned char), 44u), _tag_arr( _temp1182, sizeof( void*), 0u));});}(
 void*)( e->r=( void*)(( void*)( Cyc_Absyn_cast_exp(* _temp947, Cyc_Absyn_fncall_exp(
 Cyc_Toc__check_null_e,({ struct Cyc_List_List* _temp1183=( struct Cyc_List_List*)

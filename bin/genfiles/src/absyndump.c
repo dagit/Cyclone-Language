@@ -1036,7 +1036,7 @@ struct _tagged_arr) Cyc_Core_string_of_int( _temp483)); Cyc_Absyndump_dump_nospa
 _tag_arr("u", sizeof( unsigned char), 2u)); goto _LL370; _LL380: Cyc_Absyndump_dump(
 _tag_arr("<<FIX LONG LONG CONSTANT>>", sizeof( unsigned char), 27u)); goto
 _LL370; _LL382: Cyc_Absyndump_dump( _temp495); goto _LL370; _LL384: Cyc_Absyndump_dump(
-_tag_arr("null", sizeof( unsigned char), 5u)); goto _LL370; _LL386: Cyc_Absyndump_dump_char((
+_tag_arr("NULL", sizeof( unsigned char), 5u)); goto _LL370; _LL386: Cyc_Absyndump_dump_char((
 int)'"'); Cyc_Absyndump_dump_nospace( Cyc_Absynpp_string_escape( _temp501)); Cyc_Absyndump_dump_char((
 int)'"'); goto _LL370; _LL388: _temp505= _temp503; goto _LL390; _LL390: Cyc_Absyndump_dumpqvar(
 _temp505); goto _LL370; _LL392: { struct _tagged_arr _temp629= Cyc_Absynpp_prim2str(
@@ -1372,7 +1372,7 @@ struct Cyc_Absyn_Tunion_p_struct*) _temp775)->f4; goto _LL806;} else{ goto
 _LL807;} _LL807: if(( unsigned int) _temp775 >  2u?*(( int*) _temp775) ==  Cyc_Absyn_Enum_p:
 0){ _LL856: _temp855=(( struct Cyc_Absyn_Enum_p_struct*) _temp775)->f2; goto
 _LL808;} else{ goto _LL776;} _LL778: Cyc_Absyndump_dump_char(( int)'_'); goto
-_LL776; _LL780: Cyc_Absyndump_dump( _tag_arr("null", sizeof( unsigned char), 5u));
+_LL776; _LL780: Cyc_Absyndump_dump( _tag_arr("NULL", sizeof( unsigned char), 5u));
 goto _LL776; _LL782: Cyc_Absyndump_dump(( struct _tagged_arr)({ struct Cyc_Stdio_Int_pa_struct
 _temp858; _temp858.tag= Cyc_Stdio_Int_pa; _temp858.f1=( int)(( unsigned int)
 _temp809);{ void* _temp857[ 1u]={& _temp858}; Cyc_Stdio_aprintf( _tag_arr("%d",

@@ -112,13 +112,13 @@ bitvec_t new_copy(bitvec_t old) {
 bitvec_t from_list(Dict::dict_t<`a,`b,`e> d, int f(`b), 
                    int sz, List::list_t<`a> l) {
   bitvec_t ans = new {for i < (sz % INTSZ)+1 : 0};
-  for(; l!=null;l=l->tl)
+  for(; l!=NULL;l=l->tl)
     set(ans, f(Dict::lookup(d,l->hd)));
   return ans;
 }
 
 List::list_t<int> to_sorted_list(bitvec_t bvec,int sz) {
-  List::list_t<int> ans = null;
+  List::list_t<int> ans = NULL;
   for(int pos=sz-1; pos >= 0; ) {
     int word = POS_TO_WORD(pos);
     int bits = bvec[word];

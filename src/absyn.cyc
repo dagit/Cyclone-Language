@@ -64,19 +64,19 @@ int tvar_cmp(tvar_t tv1, tvar_t tv2) {
   int i = String::zstrptrcmp(tv1->name,tv2->name);
   if (i != 0) return i;
   if (tv1->identity == tv2->identity) return 0;
-  if (tv1->identity != null && tv2->identity != null) 
+  if (tv1->identity != NULL && tv2->identity != NULL) 
     return (*tv1->identity) - (*tv2->identity);
-  else if (tv1->identity == null) return -1;
+  else if (tv1->identity == NULL) return -1;
   else return 1;
 }
 
-tunion Nmspace.Rel_n rel_ns_null_value = Rel_n(null);
+tunion Nmspace.Rel_n rel_ns_null_value = Rel_n(NULL);
 tunion Nmspace       rel_ns_null       = &rel_ns_null_value;
 
 bool is_qvar_qualified(qvar_t qv) {
   switch((*qv)[0]) {
-  case &Rel_n(null):
-  case &Abs_n(null):
+  case &Rel_n(NULL):
+  case &Abs_n(NULL):
   case Loc_n: return false;
   default:    return true;
   }
@@ -85,7 +85,7 @@ bool is_qvar_qualified(qvar_t qv) {
 static int new_type_counter = 0;
 
 type_t new_evar(opt_t<kind_t,`H> k, opt_t<list_t<tvar_t,`H>,`H> env) {
-  return new Evar(k,null,new_type_counter++,env);
+  return new Evar(k,NULL,new_type_counter++,env);
 }
 static struct Opt<kind_t> mk = {MemKind};
 type_t wildtyp(opt_t<list_t<tvar_t,`H>,`H> tenv) {
@@ -176,7 +176,7 @@ type_t slonglong_t = &slonglong_tt;
 type_t float_t  = FloatType;
 type_t double_t = DoubleType;
 // exceptions
-static tunion Nmspace.Abs_n abs_null = Abs_n(null);
+static tunion Nmspace.Abs_n abs_null = Abs_n(NULL);
 static string_t exn_str = "exn";
 static $(nmspace_t,var_t) exn_name_v = $((nmspace_t)&abs_null,&exn_str);
 qvar_t exn_name   = &exn_name_v;
@@ -189,23 +189,23 @@ static $(nmspace_t,var_t) match_exn_name_v =
 qvar_t null_pointer_exn_name   = &null_pointer_exn_name_v;
 qvar_t match_exn_name   = &match_exn_name_v;
 static struct Tunionfield null_pointer_exn_tuf_v =
-  Tunionfield(&null_pointer_exn_name_v, null, null, null, Extern);
+  Tunionfield(&null_pointer_exn_name_v, NULL, NULL, NULL, Extern);
 static struct Tunionfield match_exn_tuf_v =
-  Tunionfield(&match_exn_name_v, null, null, null, Extern);
+  Tunionfield(&match_exn_name_v, NULL, NULL, NULL, Extern);
 tunionfield_t null_pointer_exn_tuf = &null_pointer_exn_tuf_v;
 tunionfield_t match_exn_tuf = &match_exn_tuf_v;
-static struct List<tunionfield_t, `H> exn_l0 = List(&null_pointer_exn_tuf_v, null);
+static struct List<tunionfield_t, `H> exn_l0 = List(&null_pointer_exn_tuf_v, NULL);
 static struct List<tunionfield_t, `H> exn_l1= List(&match_exn_tuf_v, &exn_l0);
 static struct Opt<list_t<tunionfield_t>> exn_ol = Opt(&exn_l1);
 static struct Tuniondecl exn_tud_v = Tuniondecl(Extern,
 						&exn_name_v,
-						null,
+						NULL,
 						&exn_ol,
 						true);
 tuniondecl_t exn_tud = &exn_tud_v;
 static tunion TunionInfoU.KnownTunion exn_tinfou = KnownTunion(&exn_tud_v);
 static tunion Type.TunionType exn_typ_tt =
-                  TunionType(TunionInfo(&exn_tinfou,null,HeapRgn));
+                  TunionType(TunionInfo(&exn_tinfou,NULL,HeapRgn));
 type_t exn_typ = &exn_typ_tt;
 
 // tunion PrintArg and tunion ScanfArg qvars
@@ -213,7 +213,7 @@ static string_t printarg_str = "PrintArg";
 static string_t scanfarg_str = "ScanfArg";
 static string_t cyc_str = "Cyc";
 static string_t stdio_str = "Stdio";
-static struct List<var_t,`H> stdio_list = {&stdio_str, null};
+static struct List<var_t,`H> stdio_list = {&stdio_str, NULL};
 static tunion Nmspace.Abs_n stdio_namespace = Abs_n(&stdio_list);
 static $(nmspace_t,var_t) tunion_print_arg_qvar_p = 
   $((tunion Nmspace)&stdio_namespace, &printarg_str);
@@ -223,24 +223,24 @@ qvar_t tunion_print_arg_qvar = &tunion_print_arg_qvar_p;
 qvar_t tunion_scanf_arg_qvar = &tunion_scanf_arg_qvar_p;
 
 // string
-static opt_t<type_t> string_t_opt = null;
+static opt_t<type_t> string_t_opt = NULL;
 type_t string_typ(type_t rgn) {
   if (rgn != HeapRgn)
     return starb_typ(uchar_t,rgn,empty_tqual(),Unknown_b);
   else {
-    if (string_t_opt == null) {
+    if (string_t_opt == NULL) {
       type_t t = starb_typ(uchar_t,HeapRgn,empty_tqual(),Unknown_b);
       string_t_opt = new Opt(t);
     }
     return string_t_opt->v;
   }
 }
-static opt_t<type_t> const_string_t_opt = null;
+static opt_t<type_t> const_string_t_opt = NULL;
 type_t const_string_typ(type_t rgn) {
   if (rgn != HeapRgn)
     return starb_typ(uchar_t,rgn,const_tqual(),Unknown_b);
   else {
-    if (const_string_t_opt == null) {
+    if (const_string_t_opt == NULL) {
       type_t t = starb_typ(uchar_t,HeapRgn,const_tqual(),Unknown_b);
       const_string_t_opt = new Opt(t);
     }
@@ -249,10 +249,10 @@ type_t const_string_typ(type_t rgn) {
 }
 // pointers
 
-// a static &Upper_b(&Exp(null,&Const_e(&Int_c(Unsigned,1)),null))
+// a static &Upper_b(&Exp(NULL,&Const_e(&Int_c(Unsigned,1)),NULL))
 static tunion Cnst.Int_c      one_intc  = Int_c(Unsigned,1);
 static tunion Raw_exp.Const_e one_b_raw = Const_e(&one_intc);
-struct Exp exp_unsigned_one_v = {null,&one_b_raw,null};
+struct Exp exp_unsigned_one_v = {NULL,&one_b_raw,NULL};
 exp_t exp_unsigned_one = &exp_unsigned_one_v;
 static tunion Bounds.Upper_b one_bt = Upper_b(&exp_unsigned_one_v);
 tunion Bounds bounds_one = &one_bt;
@@ -285,7 +285,7 @@ type_t tagged_typ(type_t t, type_t r, tqual_t tq) {
 }
 
 // FILE
-static opt_t<type_t> file_t_opt = null;
+static opt_t<type_t> file_t_opt = NULL;
 
 // Maybe someday we'll allow FILE objects to live somewhere other than
 // in the heap (by making the runtime interface more flexible).  
@@ -296,28 +296,28 @@ static string_t st_str = "Stdio";
 static stringptr_t st = &st_str;
 
 type_t file_typ() {
-  if(file_t_opt == null) {
+  if(file_t_opt == NULL) {
     typedef_name_t file_t_name = new $(new Abs_n(list(st)), sf);
-    structdecl_t sd = new Structdecl(Abstract,new Opt(file_t_name),null,
-				     null,null);
-    type_t file_struct_typ = new StructType(file_t_name, null, new {sd});
+    structdecl_t sd = new Structdecl(Abstract,new Opt(file_t_name),NULL,
+				     NULL,NULL);
+    type_t file_struct_typ = new StructType(file_t_name, NULL, new {sd});
     file_t_opt = new Opt(at_typ(file_struct_typ, HeapRgn, empty_tqual()));
   }
   return file_t_opt->v;
 }
 
-static opt_t<type_t> void_star_t_opt = null;
+static opt_t<type_t> void_star_t_opt = NULL;
 type_t void_star_typ() {
-  if (void_star_t_opt == null)
+  if (void_star_t_opt == NULL)
     void_star_t_opt = new Opt(star_typ(VoidType, HeapRgn, empty_tqual()));
   return void_star_t_opt->v;
 }
 opt_t<type_t> void_star_typ_opt() {
-  if (void_star_t_opt == null)
+  if (void_star_t_opt == NULL)
     void_star_t_opt = new Opt(star_typ(VoidType, HeapRgn, empty_tqual()));
   return void_star_t_opt;
 }
-static tunion Type.JoinEff empty_eff = JoinEff(null);
+static tunion Type.JoinEff empty_eff = JoinEff(NULL);
 type_t empty_effect = &empty_eff;
 
 // structs and unions
@@ -325,21 +325,21 @@ type_t empty_effect = &empty_eff;
 //          the structdecl field.  Beware using them anywhere else!
 // (Probably we should require setting the third field even in Toc.)
 type_t strct(var_t name) {
-  return new StructType(new $(rel_ns_null, name),null,null);
+  return new StructType(new $(rel_ns_null, name),NULL,NULL);
 }
 type_t union_typ(var_t name) {
-  return new UnionType(new $(rel_ns_null, name),null,null);
+  return new UnionType(new $(rel_ns_null, name),NULL,NULL);
 }
 type_t strctq(qvar_t name) {
-  return new StructType(name,null,null);
+  return new StructType(name,NULL,NULL);
 }
 type_t unionq_typ(qvar_t name) {
-  return new UnionType(name,null,null);
+  return new UnionType(name,NULL,NULL);
 }
 
 ///////////////////////// Expressions //////////////////////////////
 exp_t new_exp(raw_exp_t r, seg_t loc) {
-  return new Exp{.topt=null, .r=r, .loc=loc};
+  return new Exp{.topt=NULL, .r=r, .loc=loc};
 }
 exp_t New_exp(exp_opt_t rgn_handle, exp_t e, seg_t loc) {
   return new_exp(new New_e(rgn_handle,e), loc);
@@ -378,10 +378,10 @@ exp_t primop_exp(primop_t p, list_t<exp_t,`H> es, seg_t loc) {
   return new_exp(new Primop_e(p,es),loc);
 }
 exp_t prim1_exp(primop_t p, exp_t e, seg_t loc) {
-  return primop_exp(p, new List(e,null), loc);
+  return primop_exp(p, new List(e,NULL), loc);
 }
 exp_t prim2_exp(primop_t p, exp_t e1, exp_t e2, seg_t loc) {
-  return primop_exp(p, new List(e1,new List(e2,null)), loc);
+  return primop_exp(p, new List(e1,new List(e2,NULL)), loc);
 }
 exp_t add_exp(exp_t e1,exp_t e2,seg_t loc)   {return prim2_exp(Plus,e1,e2,loc);}
 exp_t times_exp(exp_t e1,exp_t e2,seg_t loc){return prim2_exp(Times,e1,e2,loc);}
@@ -397,7 +397,7 @@ exp_t assignop_exp(exp_t e1, opt_t<primop_t,`H> popt, exp_t e2, seg_t loc) {
   return new_exp(new AssignOp_e(e1,popt,e2),loc);
 }
 exp_t assign_exp(exp_t e1, exp_t e2, seg_t loc) {
-  return assignop_exp(e1,null,e2,loc);
+  return assignop_exp(e1,NULL,e2,loc);
 }
 exp_t increment_exp(exp_t e,incrementor_t i,seg_t loc) {
   return new_exp(new Increment_e(e,i),loc);
@@ -422,7 +422,7 @@ exp_t unknowncall_exp(exp_t e, list_t<exp_t,`H> es, seg_t loc) {
   return new_exp(new UnknownCall_e(e,es), loc);
 }
 exp_t fncall_exp(exp_t e, list_t<exp_t,`H> es, seg_t loc) {
-  return new_exp(new FnCall_e(e,es,null), loc);
+  return new_exp(new FnCall_e(e,es,NULL), loc);
 }
 exp_t noinstantiate_exp(exp_t e, seg_t loc) {
   return new_exp(new NoInstantiate_e(e), loc);
@@ -471,10 +471,10 @@ exp_t match_exn_exp(seg_t loc) {
 }
 
 exp_t array_exp(list_t<exp_t,`H> es, seg_t loc) {
-  // FIX:  this doesn't work let dles = null;
-  list_t<$(list_t<designator_t,`H>,exp_t)@`H> dles = null;
-  for (; es != null; es = es->tl)
-    dles = new List(new $(null,es->hd),dles);
+  // FIX:  this doesn't work let dles = NULL;
+  list_t<$(list_t<designator_t,`H>,exp_t)@`H> dles = NULL;
+  for (; es != NULL; es = es->tl)
+    dles = new List(new $(NULL,es->hd),dles);
   dles = List::imp_rev(dles);
   return new_exp(new Array_e(dles),loc);
 }
@@ -485,13 +485,13 @@ exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H> n,
 }
 ///////////////////////// Statements ///////////////////////////////
 stmt_t new_stmt(raw_stmt_t s, seg_t loc) { 
-  return new Stmt{.r=s, .loc=loc, .non_local_preds=null, .try_depth = 0,
+  return new Stmt{.r=s, .loc=loc, .non_local_preds=NULL, .try_depth = 0,
                      .annot=EmptyAnnot }; }
 stmt_t skip_stmt(seg_t loc) { return new_stmt(Skip_s, loc); }
 stmt_t exp_stmt(exp_t e,seg_t loc) { return new_stmt(new Exp_s(e),loc); }
 stmt_t seq_stmts(list_t<stmt_t,`r> ss, seg_t loc) {
-  if (ss == null) return skip_stmt(loc);
-  else if (ss->tl == null) return ss->hd;
+  if (ss == NULL) return skip_stmt(loc);
+  else if (ss->tl == NULL) return ss->hd;
   else return seq_stmt(ss->hd,seq_stmts(ss->tl,loc),loc);
 }
 stmt_t return_stmt(exp_opt_t e,seg_t loc) { 
@@ -503,8 +503,8 @@ stmt_t ifthenelse_stmt(exp_t e,stmt_t s1,stmt_t s2,seg_t loc) {
 stmt_t while_stmt(exp_t e,stmt_t s,seg_t loc) { 
   return new_stmt(new While_s($(e,skip_stmt(e->loc)),s), loc);
 }
-stmt_t break_stmt   (seg_t loc) { return new_stmt(new Break_s(null), loc); }
-stmt_t continue_stmt(seg_t loc) { return new_stmt(new Continue_s(null), loc); }
+stmt_t break_stmt   (seg_t loc) { return new_stmt(new Break_s(NULL), loc); }
+stmt_t continue_stmt(seg_t loc) { return new_stmt(new Continue_s(NULL), loc); }
 stmt_t for_stmt(exp_t e1,exp_t e2,exp_t e3,stmt_t s,seg_t loc) {
   return new_stmt(new For_s(e1,$(e2,skip_stmt(e3->loc)),
                             $(e3,skip_stmt(e3->loc)),s),
@@ -520,7 +520,7 @@ stmt_t seq_stmt(stmt_t s1, stmt_t s2, seg_t loc) {
   }
 }
 stmt_t fallthru_stmt(list_t<exp_t,`H> el, seg_t loc) { 
-  return new_stmt(new Fallthru_s(el,null), loc); 
+  return new_stmt(new Fallthru_s(el,NULL), loc); 
 }
 stmt_t decl_stmt(decl_t d, stmt_t s, seg_t loc) {
   return new_stmt(new Decl_s(d,s), loc);
@@ -541,31 +541,31 @@ stmt_t trycatch_stmt(stmt_t s, list_t<switch_clause_t,`H> scs, seg_t loc) {
   return new_stmt(new TryCatch_s(s,scs), loc);
 }
 stmt_t goto_stmt(var_t lab, seg_t loc) {
-  return new_stmt(new Goto_s(lab,null), loc);
+  return new_stmt(new Goto_s(lab,NULL), loc);
 }
 stmt_t assign_stmt(exp_t e1, exp_t e2, seg_t loc) {
   return exp_stmt(assign_exp(e1,e2,loc),loc);
 }
 /////////////////////////// Patterns //////////////////////////////
-pat_t new_pat(raw_pat_t p, seg_t s) { return new Pat(p,null,s); }
+pat_t new_pat(raw_pat_t p, seg_t s) { return new Pat(p,NULL,s); }
 
 ////////////////////////// Declarations ///////////////////////////
 decl_t new_decl(raw_decl_t r, seg_t loc) { return new Decl{.r=r, .loc=loc}; }
 decl_t let_decl(pat_t p, opt_t<type_t,`H> t_opt, exp_t e, seg_t loc) {
-  return new_decl(new Let_d(p,null,t_opt,e,false),loc);
+  return new_decl(new Let_d(p,NULL,t_opt,e,false),loc);
 }
 decl_t letv_decl(list_t<vardecl_t,`H> vds, seg_t loc) {
   return new_decl(new Letv_d(vds),loc);
 }
 vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init) {
   return new Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
-                        .type=t, .initializer=init, .rgn=null, 
-                        .attributes=null};
+                        .type=t, .initializer=init, .rgn=NULL, 
+                        .attributes=NULL};
 }
 vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init) {
   return new Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
-                        .type=t, .initializer=init, .rgn=null,
-                        .attributes=null};
+                        .type=t, .initializer=init, .rgn=NULL,
+                        .attributes=NULL};
 }
 decl_t struct_decl(scope_t s,opt_t<typedef_name_t,`H> n,list_t<tvar_t,`H> ts,
                    opt_t<list_t<structfield_t,`H>,`H> fs, attributes_t atts,
@@ -654,30 +654,30 @@ bool is_lvalue(exp_t e) {
 }
 
 struct Structfield * lookup_field(list_t<structfield_t,`H> fields, var_t v) {
-  for(_ fs = fields; fs != null; fs = fs->tl) {
+  for(_ fs = fields; fs != NULL; fs = fs->tl) {
     let f = fs->hd;
     if (String::zstrptrcmp(f->name,v) == 0)
       return f;
   }
-  return null;
+  return NULL;
 }
 
 struct Structfield * lookup_struct_field(structdecl_t sd, var_t v) {
-  return (sd->fields == null) ? null : lookup_field(sd->fields->v,v);
+  return (sd->fields == NULL) ? NULL : lookup_field(sd->fields->v,v);
 }
 struct Structfield * lookup_union_field(uniondecl_t ud, var_t v) {
-  return (ud->fields == null) ? null : lookup_field(ud->fields->v,v);
+  return (ud->fields == NULL) ? NULL : lookup_field(ud->fields->v,v);
 }
 
 $(tqual_t,type_t) * lookup_tuple_field(list_t<$(tqual_t,type_t)@`H,`H> ts, 
                                        int i) {
   for(; i != 0; --i) {
-    if(ts == null)
-      return null;
+    if(ts == NULL)
+      return NULL;
     ts = ts->tl;
   }
-  if(ts == null)
-    return null;
+  if(ts == NULL)
+    return NULL;
   return ts->hd;
 }
 

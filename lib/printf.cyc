@@ -223,7 +223,7 @@ static const char ?`r1 memchr(const char ?`r1 s, char c, int n) {
   for (; n != 0; n--, s++) {
     if (*s == c) return s;
   }
-  return null;
+  return NULL;
 }
 
 /* Generic printf function.  ioputc and ioputc_env form a closure for doing
@@ -238,10 +238,10 @@ int _IO_vfprintf (int (@ioputc)(int,`a), `a ioputc_env,
 	register int ch;	/* character from fmt */
 	register int n;		/* handy integer (short term usage) */
         /* cp is a handy char pointer (short term usage) for a local buffer */
-	register char ?`_IO_vfprintf cp = null;	
+	register char ?`_IO_vfprintf cp = NULL;	
         /* cp2 is a handy char pointer (short term usage) for the case when
          * the argument is a string -- that lives in a different region. */
-	register const char ?`r2 cp2 = null;
+	register const char ?`r2 cp2 = NULL;
         /* the flag use_cp2 controls whether or not we PRINT from cp or cp2 */
         bool use_cp2; 
 	const char ?`r1 fmark;	/* for remembering a place in fmt */
@@ -464,7 +464,7 @@ reswitch:	use_cp2 = false;
                         use_cp2 = true;
                         cp2 = va_arg_string(ap); ap++;
 			if (cp2 == NULL)
-				cp2 = "(null)";
+				cp2 = "(NULL)";
 			if (prec >= 0) {
 				/*
 				 * can't use strlen; can only look for the

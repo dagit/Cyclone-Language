@@ -28,7 +28,7 @@ using Core;
 using List;
 using Stdio; // for size_t
 
-// A string is a char[?].  Most functions consider a zero (null)
+// A string is a char[?].  Most functions consider a zero (NUL)
 // character as an end of string marker, so we may have
 // strlen(s) < size(s).  Functions that do not follow this convention
 // have names starting with 'z'.  Many functions accept a string
@@ -49,7 +49,7 @@ extern size_t strlen(const char ? s);
 // strncmp is like strcmp but compares no more than n characters.
 //   (If n<0 strncmp returns 0) 
 // strncasecmp is like strncmp but is case insensitive.
-// zstrcmp and zstrncmp do not consider zero (null) characters
+// zstrcmp and zstrncmp do not consider zero (NUL) characters
 //   to be end-of-string markers. 
 extern int strcmp(const char ? s1, const char ? s2);
 extern int strptrcmp(const char ?@ s1, const char ?@ s2);
@@ -108,15 +108,15 @@ extern list_t<int> explode(const char ? s);
 extern list_t<int,`r> rexplode(region_t<`r>,const char ? s);
 extern char ? implode(list_t<int> c);
 
-// convert s to an int.  if offset is null, starts at offset 0. 
+// convert s to an int.  if offset is NULL, starts at offset 0. 
 // otherwise, starts at *offset.  Skips leading whitespace.  Raises
-// InvalidArg if no valid int is found.  If offset is non-null, 
+// InvalidArg if no valid int is found.  If offset is non-NULL, 
 // returns the index of the last character consumed + 1.
 extern int to_int(const char ? s, int * offset);
 
-// convert s to a double.  if offset is null, starts at offset 0. 
+// convert s to a double.  if offset is NULL, starts at offset 0. 
 // otherwise, starts at *offset.  Skips leading whitespace.  Raises
-// InvalidArg if no valid int is found.  If offset is non-null, 
+// InvalidArg if no valid int is found.  If offset is non-NULL, 
 // returns the index of the last character consumed + 1.
 extern double to_double(const char ? s, int * offset); // raises InvalidArg
 }

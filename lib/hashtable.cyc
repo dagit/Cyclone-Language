@@ -42,7 +42,7 @@ struct Table<`a,`b> {
 
 table_t<`a,`b> create(int sz, int cmp(`a,`a), 
                               int hash(`a)) {
-  list_t<$(`a,`b)@> mt = null;
+  list_t<$(`a,`b)@> mt = NULL;
   return new Table(cmp, hash, 3, new {for i<sz :mt});
 }
 
@@ -69,7 +69,7 @@ void remove(table_t<`a,`b> t, `a key) {
   int         (@cmp)(`a,`a)   = t->cmp;
   int              bucket   = (*t->hash)(key) % tab.size;
   list_t<$(`a,`b)@> l         = tab[bucket];
-  if(l == null)
+  if(l == NULL)
     return;
   if((*cmp)(key,l->hd[0][0])==0) {
     tab[bucket] = l->tl;
@@ -77,7 +77,7 @@ void remove(table_t<`a,`b> t, `a key) {
   }
   list_t<$(`a,`b)@> prev = l;
   l = l->tl;
-  for(; l->tl!=null; prev = l, l=l->tl)
+  for(; l->tl!=NULL; prev = l, l=l->tl)
     if((*cmp)(key,l->hd[0][0])==0) {
       prev->tl = l->tl;
       return;
@@ -105,7 +105,7 @@ int hash_stringptr(stringptr_t s) {
 // For resizing
 void insert_bucket(list_t<$(`a,`b)@> ?tab, int (@hash)(`a),
                    list_t<$(`a,`b)@> elems) {
-  if (elems == null) return;
+  if (elems == NULL) return;
   insert_bucket(tab,hash,elems->tl); // preserve the original order
   `a  key  = elems->hd[0][0];
   `b  val  = elems->hd[0][1];
@@ -117,7 +117,7 @@ void resize(table_t<`a,`b> t) {
   list_t<$(`a,`b)@> ?odata   = t->tab;
   int             osize    = odata.size;
   int             nsize    = 2 * osize + 1;
-  list_t<$(`a,`b)@`H,`H> mt = null;
+  list_t<$(`a,`b)@`H,`H> mt = NULL;
   list_t<$(`a,`b)@`H> ?`H ndata  = new {for i < nsize : mt};
   for (int i = 0; i<osize; i++)
     insert_bucket(ndata,t->hash,odata[i]);
@@ -130,7 +130,7 @@ void iter(void f(`a,`b), table_t<`a,`b> t) {
   list_t<$(`a,`b)@> ?odata   = t->tab;
   int             osize    = odata.size;
   for (int i = 0; i<osize; i++) 
-    for(list_t<$(`a,`b)@> iter = odata[i]; iter != null; iter = iter->tl) 
+    for(list_t<$(`a,`b)@> iter = odata[i]; iter != NULL; iter = iter->tl) 
       f(iter->hd[0][0],iter->hd[0][1]);
 }
 
@@ -141,7 +141,7 @@ void print_table_map(table_t<`a,`b> t,
   int osize = odata.size;
   for (int i = 0; i<osize; i++) {
     printf("%d: ",i);
-    for(list_t<$(`a,`b)@> iter = odata[i]; iter != null; iter = iter->tl) {
+    for(list_t<$(`a,`b)@> iter = odata[i]; iter != NULL; iter = iter->tl) {
       printf("(");
       prn_key(iter->hd[0][0]);
       printf(",");

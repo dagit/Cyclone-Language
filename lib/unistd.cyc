@@ -26,16 +26,16 @@ char ?`r getcwd(char ?`r buf, size_t size) {
     throw new Failure("getcwd: invalid buf argument");
   }
   Cstring response = Cunistd::getcwd((Cstring)buf, size);
-  return response ? buf : null;
+  return response ? buf : NULL;
 }
 
 // This is untested; I'd be surprised if it actually works
 int execl(string_t path, string_t arg0, ...`r string_t argv) {
-  if (argv[argv.size - 1] != null)
-    throw new Failure("execl: arg list must be null-terminated");
+  if (argv[argv.size - 1] != NULL)
+    throw new Failure("execl: arg list must be NULL-terminated");
 
   // We allocate 1+argv.size because we need to prepend arg0
-  Cstring ?newargs = new {for i < 1 + argv.size : null};
+  Cstring ?newargs = new {for i < 1 + argv.size : NULL};
   newargs[0] = string_to_Cstring(arg0);
   for (int i = 0; i < argv.size; i++)
     newargs[i+1] = string_to_Cstring(argv[i]);
@@ -43,11 +43,11 @@ int execl(string_t path, string_t arg0, ...`r string_t argv) {
 }
 
 int execlp(string_t path, string_t arg0, ...`r string_t argv) {
-  if (argv[argv.size - 1] != null)
-    throw new Failure("execl: arg list must be null-terminated");
+  if (argv[argv.size - 1] != NULL)
+    throw new Failure("execl: arg list must be NULL-terminated");
 
   // We allocate 1+argv.size because we need to prepend arg0
-  Cstring ?newargs = new {for i < 1 + argv.size : null};
+  Cstring ?newargs = new {for i < 1 + argv.size : NULL};
   newargs[0] = string_to_Cstring(arg0);
   for (int i = 0; i < argv.size; i++)
     newargs[i+1] = string_to_Cstring(argv[i]);
@@ -55,14 +55,14 @@ int execlp(string_t path, string_t arg0, ...`r string_t argv) {
 }
 
 int execve(string_t filename, string_t const ?argv, string_t const ?envp) {
-  if (argv[argv.size - 1] != null)
-    throw new Failure("execve: arg list must be null-terminated");
+  if (argv[argv.size - 1] != NULL)
+    throw new Failure("execve: arg list must be NULL-terminated");
 
-  Cstring ?newargs = new {for i < argv.size : null};
+  Cstring ?newargs = new {for i < argv.size : NULL};
   for (int i = 0; i < argv.size; i++)
     newargs[i] = string_to_Cstring(argv[i]);
 
-  Cstring ?newenvp = new {for i < envp.size : null};
+  Cstring ?newenvp = new {for i < envp.size : NULL};
   for (int i = 0; i < envp.size; i++)
     newenvp[i] = string_to_Cstring(envp[i]);
 

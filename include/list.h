@@ -198,7 +198,7 @@ namespace List {
   
   // checks that a list of elements is unique -- assumes they're sorted
   // returns an element that is duplicated if one exists, otherwise returns
-  // null.
+  // NULL.
   extern Core::opt_t<`c> check_unique(int compare(`c,`c),list_t<`c> x);
   
   // makes a new array with index i being the ith element of the list

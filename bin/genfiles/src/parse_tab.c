@@ -1292,7 +1292,7 @@ _LL594: _temp593= _temp588.f3; goto _LL592; _LL592: _temp591= _temp588.f4; goto
 _LL590; _LL590: _temp589= _temp588.f5; goto _LL587; _LL587: if( _temp591 !=  0){
 Cyc_Parse_warn( _tag_arr("bad type params, ignoring", sizeof( unsigned char), 26u),
 loc);} if( _temp460 ==  0){(( int(*)( struct _tagged_arr msg, struct Cyc_Position_Segment*
-sg)) Cyc_Parse_abort)( _tag_arr("unexpected null in parse!", sizeof(
+sg)) Cyc_Parse_abort)( _tag_arr("unexpected NULL in parse!", sizeof(
 unsigned char), 26u), loc);}{ struct Cyc_Absyn_Exp* _temp599=( struct Cyc_Absyn_Exp*)((
 struct Cyc_List_List*) _check_null( _temp460))->hd; struct Cyc_Absyn_Vardecl*
 _temp600= Cyc_Absyn_new_vardecl( _temp597, _temp593, _temp599); _temp600->tq=
@@ -9058,7 +9058,7 @@ _temp7429.tag= Cyc_Stdio_String_pa; _temp7429.f1=( struct _tagged_arr) _temp7406
 void* _temp7428[ 1u]={& _temp7429}; Cyc_Stdio_fprintf( Cyc_Stdio_stderr,
 _tag_arr("\"%s\"", sizeof( unsigned char), 5u), _tag_arr( _temp7428, sizeof(
 void*), 1u));}}); goto _LL7380; _LL7390:({ void* _temp7430[ 0u]={}; Cyc_Stdio_fprintf(
-Cyc_Stdio_stderr, _tag_arr("null", sizeof( unsigned char), 5u), _tag_arr(
+Cyc_Stdio_stderr, _tag_arr("NULL", sizeof( unsigned char), 5u), _tag_arr(
 _temp7430, sizeof( void*), 0u));}); goto _LL7380; _LL7392:({ struct Cyc_Stdio_String_pa_struct
 _temp7432; _temp7432.tag= Cyc_Stdio_String_pa; _temp7432.f1=( struct _tagged_arr)*
 _temp7413;{ void* _temp7431[ 1u]={& _temp7432}; Cyc_Stdio_fprintf( Cyc_Stdio_stderr,

@@ -31,8 +31,8 @@ xtunion exn { Not_found };
 xtunion exn { Unreachable(string_t) };
 struct Opt<`a> { `a v; };
 opt_t<`b,`H> opt_map(`b f(`a), opt_t<`a> o) {
-  if (o==null)
-    return null;
+  if (o==NULL)
+    return NULL;
   return new Opt(f(o->v));
 }
 

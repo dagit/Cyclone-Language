@@ -40,8 +40,8 @@ void dumpAttribute(FILE @fd, attribute_t a) {
 
 void dumpAttributes(FILE @fd, list_t<attribute_t> al) {
   switch (al) {
-  case null: break;
-  case &List(a,null): dumpAttribute(fd,a); break;
+  case NULL: break;
+  case &List(a,NULL): dumpAttribute(fd,a); break;
   case &List(hd,tl):
       dumpAttribute(fd,hd);
       fprintf(fd," ");
@@ -54,7 +54,7 @@ void dumpElement(FILE @fd, element_t e) {
   switch (e) {
   case &StartEnd(n,al,cl):
     fprintf(fd,"<%s",n);
-    if (al != null) fprintf(fd," ");
+    if (al != NULL) fprintf(fd," ");
     dumpAttributes(fd,al);
     fprintf(fd,">");
     dumpContents(fd,cl);
@@ -62,7 +62,7 @@ void dumpElement(FILE @fd, element_t e) {
     break;
   case &Empty(n,al):
     fprintf(fd,"<%s",n);
-    if (al != null) fprintf(fd," ");
+    if (al != NULL) fprintf(fd," ");
     dumpAttributes(fd,al);
     fprintf(fd,"/>");
     break;
@@ -94,9 +94,9 @@ void dumpContent(FILE @fd, content_t c) {
 
 void dumpContents(FILE @fd, list_t<content_t> cl) {
   switch (cl) {
-  case null:
+  case NULL:
     break;
-  case &List(c,null):
+  case &List(c,NULL):
     dumpContent(fd,c);
     break;
   case &List(hd,tl):

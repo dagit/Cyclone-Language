@@ -69,7 +69,7 @@ static void resolve_unknown_id(tenv_t te, exp_t e, qvar_t q) {
   try switch (lookup_ordinary(te,e->loc,q)) {
   case &VarRes(b):          e->r = new Var_e(q,b); break;
   case &EnumRes(ed,ef):     e->r = new Enum_e(q,ed,ef); break;
-  case &TunionRes(tud,tuf): e->r = new Tunion_e(null,null,null,tud,tuf); break;
+  case &TunionRes(tud,tuf): e->r = new Tunion_e(NULL,NULL,NULL,tud,tuf); break;
   case &StructRes(_):
     terr(e->loc,"bad occurrence of struct name %s",qvar2string(q));
     e->r = new Var_e(q,Unresolved_b);
@@ -84,7 +84,7 @@ static void resolve_unknown_id(tenv_t te, exp_t e, qvar_t q) {
 }
 
 static $(list_t<designator_t>,exp_t)@ make_struct_arg(exp_t e) {
-  return new $(null,e);
+  return new $(NULL,e);
 }
 // Resolve whether this is a function call or tunion, xtunion, or struct
 // constructor -- let normal type-checking do the rest of the work.
@@ -95,23 +95,23 @@ static void resolve_unknown_fn(tenv_t te, exp_t e, exp_t e1, list_t<exp_t,`H> es
     try {
       switch (lookup_ordinary(te,e1->loc,q)) {
       case &VarRes(b):        
-	e->r = new FnCall_e(e1,es,null); 
+	e->r = new FnCall_e(e1,es,NULL); 
 	return;
       case &TunionRes(tud,tuf):
-        if (tuf->typs == null)
+        if (tuf->typs == NULL)
           // Don't allow "foo()", require "foo"
           terr(e->loc,"%s is a constant, not a function",
                qvar2string(tuf->name));
-        e->r = new Tunion_e(null,null,es,tud,tuf); 
+        e->r = new Tunion_e(NULL,NULL,es,tud,tuf); 
 	return;
 	return;
       case &StructRes(sd):
 	let des = List::map(make_struct_arg,es);
-	if (sd->name != null)
-	  e->r = new Struct_e(sd->name->v,null,des,sd);
+	if (sd->name != NULL)
+	  e->r = new Struct_e(sd->name->v,NULL,des,sd);
 	else {
 	  terr(e->loc,"missing struct name");
-	  e->r = new Struct_e(q,null,des,sd);
+	  e->r = new Struct_e(q,NULL,des,sd);
 	}
 	return;
       case &EnumRes(_,_):
@@ -122,11 +122,11 @@ static void resolve_unknown_fn(tenv_t te, exp_t e, exp_t e1, list_t<exp_t,`H> es
     } catch {
     case Dict::Absent:
       terr(e1->loc, "unbound identifier %s",qvar2string(q));
-      e->r = new FnCall_e(e1,es,null);
+      e->r = new FnCall_e(e1,es,NULL);
       return;
     }
   default: 
-    e->r = new FnCall_e(e1,es,null); 
+    e->r = new FnCall_e(e1,es,NULL); 
     return;
   }
 }
@@ -134,7 +134,7 @@ static void resolve_unknown_fn(tenv_t te, exp_t e, exp_t e1, list_t<exp_t,`H> es
 static void resolve_unresolved_mem(tenv_t te, seg_t loc, type_t *`r topt, exp_t e,
                                    list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> des) {
   // NOTE: must always bang e->r or caller will loop!
-  if (topt == null) {
+  if (topt == NULL) {
     // guess it is an array
     e->r = new Array_e(des);
     return;
@@ -145,9 +145,9 @@ static void resolve_unresolved_mem(tenv_t te, seg_t loc, type_t *`r topt, exp_t 
     e->r = new Array_e(des);
     break;
   case &StructType(tdnopt,ts,sdp):
-    if(sdp==null || tdnopt == null)
+    if(sdp==NULL || tdnopt == NULL)
       terr(loc,"Compiler bug: struct type not properly set");
-    e->r = new Struct_e((typedef_name_t)tdnopt,null,des,*sdp);
+    e->r = new Struct_e((typedef_name_t)tdnopt,NULL,des,*sdp);
     break;
   case &AnonStructType(_):
     e->r = new AnonStruct_e(t,des);
@@ -167,8 +167,8 @@ static type_t tcExpNoPromote(tenv_t te, type_t *`r topt, exp_t e);
 
 // Type check a list of expressions
 static void tcExpList(tenv_t te, list_t<exp_t> es) {
-  for(; es != null; es = es->tl)
-    tcExp(te,null,es->hd);
+  for(; es != NULL; es = es->tl)
+    tcExp(te,NULL,es->hd);
 }
 
 // Type check the if expressions, the loop guards, and the where clauses
@@ -192,7 +192,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t *`r topt, cnst_t c, exp_t e){
     t = (sn == (sign_t)Unsigned) ? ulonglong_t  : slonglong_t;  break;
   case &Float_c(_) : t = float_t; break;
   case &Int_c(sn,i):
-    if (topt == null)
+    if (topt == NULL)
       t = (sn == (sign_t)Unsigned) ? uint_t : sint_t;
     else
         // If *topt calls for a shorter int, we assume it's ok to
@@ -225,7 +225,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t *`r topt, cnst_t c, exp_t e){
     // allocated and return a pointer to that string.  However, if the 
     // string is used as an initializer, then we should return an array type.
     t = atb_typ(uchar_t, HeapRgn, const_tqual(), new Upper_b(elen));
-    if (topt != null) {
+    if (topt != NULL) {
       switch (compress(*topt)) {
       case &ArrayType(telt,tq,e2):
         return new ArrayType(uchar_t, tq, elen);
@@ -294,10 +294,10 @@ static void check_format_args(tenv_t te, exp_t fmt,
     // don't have a string literal argument, so we can't check the args
     return;
   }
-  if (opt_args != null) {
+  if (opt_args != NULL) {
     let args = opt_args->v;
     // check that each expression has the right type
-    for (; desc_types != null && args != null; desc_types = desc_types->tl,
+    for (; desc_types != NULL && args != NULL; desc_types = desc_types->tl,
            args = args->tl) {
       type_t t = desc_types->hd;
       exp_t e = args->hd;
@@ -306,9 +306,9 @@ static void check_format_args(tenv_t te, exp_t fmt,
              typ2string(t), typ2string(e->topt->v));
     }
     // check arity
-    if (desc_types != null)
+    if (desc_types != NULL)
       terr(fmt->loc,"too few arguments");
-    if (args != null)
+    if (args != NULL)
       terr(args->hd->loc,"too many arguments");
   }
 }
@@ -526,18 +526,18 @@ static void check_writable(tenv_t te, exp_t e) {
     switch (compress(e1->topt->v)) {
     case &StructType(_,_,sd):
       struct Structfield *sf = 
-        (sd == null) ? null : lookup_struct_field((structdecl_t) *sd, f);
-      if (sf == null || !sf->tq.q_const) return;
+        (sd == NULL) ? NULL : lookup_struct_field((structdecl_t) *sd, f);
+      if (sf == NULL || !sf->tq.q_const) return;
       break;
     case &AnonUnionType(fs): fallthru(fs);
     case &AnonStructType(fs):
       struct Structfield *sf = lookup_field(fs, f);
-      if (sf == null || !sf->tq.q_const) return;
+      if (sf == NULL || !sf->tq.q_const) return;
       break;
     case &UnionType(_,_,ud):
       struct Structfield *sf = 
-        (ud == null) ? null : lookup_union_field((uniondecl_t) *ud, f);
-      if (sf == null || !sf->tq.q_const) return;
+        (ud == NULL) ? NULL : lookup_union_field((uniondecl_t) *ud, f);
+      if (sf == NULL || !sf->tq.q_const) return;
       break;
     default: break;
     }
@@ -548,18 +548,18 @@ static void check_writable(tenv_t te, exp_t e) {
       switch (compress(elt_typ)) {
       case &StructType(_,_,sd):
         struct Structfield *sf = 
-          (sd == null) ? null : lookup_struct_field((structdecl_t) *sd,f);
-        if (sf == null || !sf->tq.q_const) return;
+          (sd == NULL) ? NULL : lookup_struct_field((structdecl_t) *sd,f);
+        if (sf == NULL || !sf->tq.q_const) return;
         break;
       case &UnionType(_,_,ud):
         struct Structfield *sf = 
-          (ud == null) ? null : lookup_union_field((uniondecl_t) *ud,f);
-        if (sf == null || !sf->tq.q_const) return;
+          (ud == NULL) ? NULL : lookup_union_field((uniondecl_t) *ud,f);
+        if (sf == NULL || !sf->tq.q_const) return;
         break;
       case &AnonStructType(fs): fallthru(fs);
       case &AnonUnionType(fs): 
         struct Structfield *sf = lookup_field(fs, f);
-        if (sf == null || !sf->tq.q_const) return;
+        if (sf == NULL || !sf->tq.q_const) return;
         break;
       default: break;
       }
@@ -584,7 +584,7 @@ static void check_writable(tenv_t te, exp_t e) {
 static type_t tcIncrement(tenv_t te, seg_t loc, type_t *`r topt,
                           exp_t e, incrementor_t i) {
   // Don't promote any arrays to pointers, as per K&R
-  tcExpNoPromote(te,null,e);
+  tcExpNoPromote(te,NULL,e);
   if(!is_lvalue(e))
     return expr_err(te,loc,"increment/decrement of non-lvalue");
   check_writable(te, e);
@@ -603,7 +603,7 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t *`r topt,
   tcExp(te,topt,e2);
   tcExp(te,topt,e3);
   type_t t = new_evar(&mk,new Opt(lookup_type_vars(te)));
-  let l1 = new List(e3,null);
+  let l1 = new List(e3,NULL);
   let l2 = new List(e2,l1);
   if (!coerce_list(te,t,l2))
     terr(loc,"conditional clause types do not match: %s != %s",
@@ -616,7 +616,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t *`r topt,
                          exp_t e1, opt_t<primop_t> po, exp_t e2) {
   // FIX: Not right b/c of funcions vs. function pointers???
   // As per K&R, don't promote any array types to pointer types in the lhs
-  tcExpNoPromote(te,null,e1);
+  tcExpNoPromote(te,NULL,e1);
   tcExp(te,&e1->topt->v,e2);
   type_t t1 = e1->topt->v;
   type_t t2 = e2->topt->v;
@@ -631,13 +631,13 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t *`r topt,
   if (!is_lvalue(e1))
     return expr_err(te,loc,"assignment to non-lvalue");
   check_writable(te, e1);
-  if (po == null) {
+  if (po == NULL) {
     if (!coerce_assign(te,e2,t1))
       return expr_err(te,loc,"type mismatch: %s != %s",
                       typ2string(t1), typ2string(t2));
   } else {
     let p        = po->v;
-    let t_result = tcBinPrimop(te,loc,null,p,e1,e2);
+    let t_result = tcBinPrimop(te,loc,NULL,p,e1,e2);
     if (!(unify(t_result,t1) || coerceable(t_result) && coerceable(t1)))
       return expr_err(te,loc, "Cannot use this operator in an assignment when "
 		      "the arguments have types %s and %s",typ2string(t1),
@@ -649,7 +649,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t *`r topt,
 
 // e1,e2
 static type_t tcSeqExp(tenv_t te, seg_t loc, type_t *`r topt, exp_t e1, exp_t e2) {
-  tcExp(te,null,e1);
+  tcExp(te,NULL,e1);
   tcExp(te,topt,e2);
   return e2->topt->v;
 }
@@ -670,11 +670,11 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
   default: break;
   }
   // try to find an exact match first
-  for (fields = fs; fields != null; fields = fields->tl) {
+  for (fields = fs; fields != NULL; fields = fields->tl) {
     let Tunionfield{n,tvs,typs,loc,sc} = *fields->hd;
     // should have exactly one argument and I don't want to deal with
     // existential types
-    if (typs == null || typs->tl != null || tvs != null) continue;
+    if (typs == NULL || typs->tl != NULL || tvs != NULL) continue;
     type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
     // I hate doing this because it has side-effects, but oh well...
     if (unify(t1,t2)) {
@@ -682,11 +682,11 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
     }
   }
   // now try to find a match supported by silent conversions
-  for (fields = fs; fields != null; fields = fields->tl) {
+  for (fields = fs; fields != NULL; fields = fields->tl) {
     let Tunionfield{n,tvs,typs,loc,sc} = *fields->hd;
     // should have exactly one argument and I don't want to deal with
     // existential types
-    if (typs == null || typs->tl != null || tvs != null) continue;
+    if (typs == NULL || typs->tl != NULL || tvs != NULL) continue;
     type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
     // I hate doing this because it has side-effects, but oh well...
     if (coerce_arg(te,e,t2)) {
@@ -695,7 +695,7 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
   }
   terr(e->loc,"can't find a field in %s to inject a value of type %s",
        typ2string(tu), typ2string(t1));
-  return null;
+  return NULL;
 }
 
 // e(es)
@@ -704,7 +704,7 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
   // region block -- we just do it always here.
   let es = args;
   te = new_block(loc,te); // needed for regions of params
-  tcExp(te,null,e);
+  tcExp(te,NULL,e);
   type_t t = compress(e->topt->v);
   // NB: we should really unify t with an unconstrained FnType with the
   // right arity but there may be coercions involved with the arguments
@@ -723,10 +723,10 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
       //FIX: handle tvars??
       // unify the result type with the expected type to get better
       // information while type-checking the arguments.
-      if (topt != null) unify(res_typ,*topt);
+      if (topt != NULL) unify(res_typ,*topt);
       // check that each argument has the right type or can be coerced to it
-      // FIX: need to deal with null!!!
-      while ((es != null) && (args_info != null)) {
+      // FIX: need to deal with NULL!!!
+      while ((es != NULL) && (args_info != NULL)) {
         exp_t e1 = es->hd;
         type_t t2 = (*args_info->hd)[2];
 	tcExp(te, &t2, e1);
@@ -736,18 +736,18 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
         es = es->tl;
         args_info = args_info->tl;
       }
-      if (args_info != null) terr(loc,"too few arguments for function");
+      if (args_info != NULL) terr(loc,"too few arguments for function");
       // if we have left-over arguments, then check for varargs
-      else if (es != null || c_vararg || cyc_vararg != null) {
+      else if (es != NULL || c_vararg || cyc_vararg != NULL) {
 	if(c_vararg)
-	  for(; es != null; es = es->tl)
-	    tcExp(te, null, es->hd);
-	else if(cyc_vararg == null)
+	  for(; es != NULL; es = es->tl)
+	    tcExp(te, NULL, es->hd);
+	else if(cyc_vararg == NULL)
 	  terr(loc, "too many arguments for function");
 	else {
           let VarargInfo{_,_,vt,vr,inject} = *cyc_vararg;
           let vci = new VarargCallInfo {.num_varargs = 0, 
-                                        .injectors = null,
+                                        .injectors = NULL,
                                         .vai = (vararg_info_t @)cyc_vararg};
           *vararg_call_info = vci;
           if (!unify(curr_rgn(te),vr))
@@ -759,7 +759,7 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
 
           if (!inject) {
             // all the rest of the arguments are the same type
-            for (; es != null; es = es->tl) {
+            for (; es != NULL; es = es->tl) {
               exp_t e1 = es->hd;
               vci->num_varargs++;
               tcExp(te, &vt, e1);
@@ -777,21 +777,21 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
               let td = *lookup_tuniondecl(te,loc,td->name);
               if (!unify(tur,vr)) 
                 terr(loc,"bad region for injected varargs");
-              list_t<tunionfield_t> fields = null;
-              if (td->fields == null) 
+              list_t<tunionfield_t> fields = NULL;
+              if (td->fields == NULL) 
                 terr(loc,"can't inject into %s",typ2string(vt));
               else fields = td->fields->v;
               region rgn {
                 let inst = List::rzip(rgn,rgn,td->tvs,targs);
-                for (; es != null; es = es->tl) {
+                for (; es != NULL; es = es->tl) {
                   vci->num_varargs++;
                   exp_t e1 = es->hd;
-                  tcExp(te,null,e1);
+                  tcExp(te,NULL,e1);
                   let f = tcInjection(te,e1,vt,rgn,inst,fields);
-                  if (f != null)
+                  if (f != NULL)
                     vci->injectors = 
                       List::append(vci->injectors,
-                                   new List{(tunionfield_t)f,null});
+                                   new List{(tunionfield_t)f,NULL});
                 }
               }
               break;
@@ -801,7 +801,7 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
         }
       }
       // check for a format attribute
-      for (_ a = atts; a != null; a = a->tl) {
+      for (_ a = atts; a != NULL; a = a->tl) {
         switch (a->hd) {
         case &Format_att(ft,fmt_arg_pos,arg_start_pos):
           try {
@@ -810,7 +810,7 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
             // get the varargs
             opt_t<list_t<exp_t>> fmt_args;
             if (arg_start_pos == 0)
-              fmt_args = null;
+              fmt_args = NULL;
             else
               fmt_args = new Opt(nth_tail(args,arg_start_pos - 1));
             switch (ft) {
@@ -854,7 +854,7 @@ static type_t tcThrow(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
 // explicit instantiation
 static type_t tcInstantiate(tenv_t te, seg_t loc, type_t *`r topt,
                             exp_t e, list_t<type_t> ts) {
-  tcExpNoInst(te,null,e);
+  tcExpNoInst(te,NULL,e);
   // turn any functions into function pointers
   e->topt->v = pointer_expand(e->topt->v);
   type_t t1 = compress(e->topt->v);
@@ -862,17 +862,17 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t *`r topt,
   case &PointerType(PtrInfo{t0,rt,x,tq,b}):
     switch (compress(t0)) {
     case &FnType(FnInfo{tvars,eff,rtyp,args,c_varargs,cyc_varargs,rpo,atts}):
-      list_t<$(tvar_t,type_t)@> instantiation = null;
+      list_t<$(tvar_t,type_t)@> instantiation = NULL;
       if (List::length(ts) != List::length(tvars))
 	return expr_err(te,loc,"type instantiation mismatch");
-      for (; ts != null; ts = ts->tl, tvars = tvars->tl) {
+      for (; ts != NULL; ts = ts->tl, tvars = tvars->tl) {
 	kind_t k = conref_val(tvars->hd->kind);
 	check_type(loc,te,lookup_type_vars(te),k,true,ts->hd);
 	instantiation = new List(new $(tvars->hd,ts->hd),instantiation);
       }
       type_t new_fn_typ = 
         substitute(instantiation,
-                   new FnType(FnInfo{null,eff,rtyp,args,c_varargs,
+                   new FnType(FnInfo{NULL,eff,rtyp,args,c_varargs,
                                      cyc_varargs,rpo,atts}));
       type_t new_typ = new PointerType(PtrInfo{new_fn_typ,rt,x,tq,b});
       return new_typ;
@@ -888,7 +888,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t *`r topt,
 // (t)e
 static type_t tcCast(tenv_t te, seg_t loc, type_t *`r topt, type_t t, exp_t e) {
   check_type(loc,te,lookup_type_vars(te),MemKind,true,t);
-  tcExp(te,null,e);
+  tcExp(te,NULL,e);
   type_t t2 = e->topt->v;
   if (!silent_castable(te,loc,t2,t) && !castable(te,loc,t2,t))
     return expr_err(te,loc,"cannot cast %s to %s",
@@ -900,9 +900,9 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t *`r topt, type_t t, exp_t e) {
 static type_t tcAddress(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
   // This is really two things b/c we're still overloading
   // & throughout the compiler as address-of and malloc-and-initialize.
-  let topt2 = null;
+  let topt2 = NULL;
   let tq2 = empty_tqual();
-  if (topt != null) {
+  if (topt != NULL) {
     switch (compress(*topt)) {
     case &PointerType(PtrInfo{elttype,_,_,tq,_}):
       //FIX: this allocation is needed because *elttype is compiled incorrectly!
@@ -927,7 +927,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
     warn(loc,"& used to allocate");
     // Avoid casts when we're passed down a nullable type
     let ptr_maker = at_typ;
-    if(topt != null)
+    if(topt != NULL)
       switch (compress(*topt)) {
       case &PointerType(PtrInfo{_,_,n,_,_}): 
 	if(conref_val(n))
@@ -967,9 +967,9 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t *`r topt,
   bool bad_type = true;
   switch(compress(t)) {
   case &StructType(_,_,sdp):
-    if(sdp == null)
+    if(sdp == NULL)
       return Tcutil::impos("offsetof on unchecked StructType");
-    if((*sdp)->fields == null)
+    if((*sdp)->fields == NULL)
       break;
     fallthru;
   case &AnonStructType(_):
@@ -984,7 +984,7 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t *`r topt,
 
  // *e
 static type_t tcDeref(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
-  tcExp(te,null,e);
+  tcExp(te,NULL,e);
   type_t t = compress(e->topt->v);
   switch (t) {
   case &PointerType(PtrInfo{t2,rt,_,_,b}):
@@ -1000,14 +1000,14 @@ static type_t tcDeref(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
 static type_t tcStructMember(tenv_t te, seg_t loc, type_t *`r topt,
 			     exp_t outer_e, exp_t e, field_name_t f) {
   // As per K&R, don't promote e from array to pointer type
-  tcExpNoPromote(te,null,e);
+  tcExpNoPromote(te,NULL,e);
   type_t t = compress(e->topt->v);
   switch (t) {
   case &StructType(tdnopt,ts,&sd):
-    if (tdnopt == null)
+    if (tdnopt == NULL)
       return expr_err(te,loc,"unresolved struct type (COMPILER ERROR)");
     let finfo = lookup_struct_field(sd,f);
-    if (finfo == null)
+    if (finfo == NULL)
       return expr_err(te,loc,"struct %s has no %s field",
                       qvar2string((qvar_t)tdnopt), *f);
     _ t2;
@@ -1018,30 +1018,30 @@ static type_t tcStructMember(tenv_t te, seg_t loc, type_t *`r topt,
     return t2;
   case &AnonStructType(fs):
     let finfo = lookup_field(fs,f);
-    if (finfo == null)
+    if (finfo == NULL)
       return expr_err(te,loc,"struct has no %s field",*f);
     return finfo->type;
   case &AnonUnionType(fs):
     let finfo = lookup_field(fs,f);
-    if (finfo == null)
+    if (finfo == NULL)
       return expr_err(te,loc,"union has no %s field",*f);
     return finfo->type;
     
   case &UnionType(tdnopt,ts,&ud):
-    if (tdnopt == null)
+    if (tdnopt == NULL)
       return expr_err(te,loc,"unresolved union type (COMPILER ERROR)");
     let finfo = lookup_union_field(ud,f);
-    if (finfo == null)
+    if (finfo == NULL)
       return expr_err(te,loc,"union %s has no %s field",
                       qvar2string((qvar_t)tdnopt), *f);
     let inst = List::zip(ud->tvs,ts);
     let t2   = substitute(inst,finfo->type);
     return t2;
   case &ArrayType(_,_,_) && (String::zstrcmp(*f,"size") == 0):
-    outer_e->r = new Primop_e(Size,new List(e,null));
+    outer_e->r = new Primop_e(Size,new List(e,NULL));
     return uint_t;
   case &PointerType(_) && (String::zstrcmp(*f,"size") == 0):
-    outer_e->r = new Primop_e(Size,new List(e,null));
+    outer_e->r = new Primop_e(Size,new List(e,NULL));
     return uint_t;
   default:
     if (String::zstrcmp(*f,"size") == 0)
@@ -1056,7 +1056,7 @@ static type_t tcStructMember(tenv_t te, seg_t loc, type_t *`r topt,
 // e->f
 static type_t tcStructArrow(tenv_t te, seg_t loc, type_t *`r topt, 
 			    exp_t e, field_name_t f) {
-  tcExp(te,null,e);
+  tcExp(te,NULL,e);
   type_t t = compress(e->topt->v);
   switch (t) {
   case &PointerType(PtrInfo{t2,rt,_,_,b}):
@@ -1064,7 +1064,7 @@ static type_t tcStructArrow(tenv_t te, seg_t loc, type_t *`r topt,
     switch (compress(t2)) {
     case &StructType(tdnopt,ts,&sd):
       let finfo = lookup_struct_field(sd,f);
-      if (finfo == null)
+      if (finfo == NULL)
 	return expr_err(te,loc,"struct %s has no %s field",
                         qvar2string((qvar_t)tdnopt),*f);
       _ t3;
@@ -1076,7 +1076,7 @@ static type_t tcStructArrow(tenv_t te, seg_t loc, type_t *`r topt,
       return t3;
     case &UnionType(tdnopt,ts,&ud):
       let finfo = lookup_union_field(ud,f);
-      if (finfo == null)
+      if (finfo == NULL)
 	return expr_err(te,loc,"union %s has no %s field",
                         qvar2string((qvar_t)tdnopt),*f);
       let inst = List::zip(ud->tvs,ts);
@@ -1085,12 +1085,12 @@ static type_t tcStructArrow(tenv_t te, seg_t loc, type_t *`r topt,
       return t3;
     case &AnonStructType(fs):
       let finfo = lookup_field(fs,f);
-      if (finfo == null)
+      if (finfo == NULL)
 	return expr_err(te,loc,"struct has no %s field",*f);
       return finfo->type;
     case &AnonUnionType(fs):
       let finfo = lookup_field(fs,f);
-      if (finfo == null)
+      if (finfo == NULL)
 	return expr_err(te,loc,"union has no %s field",*f);
       return finfo->type;
     default:
@@ -1117,8 +1117,8 @@ static type_t ithTupleType(tenv_t te, seg_t loc,
  // FIX: look at topt
 static type_t tcSubscript(tenv_t te, seg_t loc, type_t *`r topt, 
 			  exp_t e1, exp_t e2) {
-  tcExp(te,null,e1);
-  tcExp(te,null,e2);
+  tcExp(te,NULL,e1);
+  tcExp(te,NULL,e2);
   type_t t1 = compress(e1->topt->v);
   type_t t2 = compress(e2->topt->v);
   if (!coerce_sint_typ(te,e2))
@@ -1154,8 +1154,8 @@ static type_t tcSubscript(tenv_t te, seg_t loc, type_t *`r topt,
 // $(es)
 static type_t tcTuple(tenv_t te, seg_t loc, type_t *`r topt, list_t<exp_t> es) {
   bool done = false;
-  list_t<$(tqual_t,type_t)@> fields = null;
-  if(topt != null)
+  list_t<$(tqual_t,type_t)@> fields = NULL;
+  if(topt != NULL)
     switch (compress(*topt)) {
     case &TupleType(ts):
       // FIX: topt should never cause failure, just guides coercions.
@@ -1163,7 +1163,7 @@ static type_t tcTuple(tenv_t te, seg_t loc, type_t *`r topt, list_t<exp_t> es) {
 	terr(loc,"tuple expression has the wrong number of fields");
 	break;
       }
-      for(; es != null; es = es->tl, ts = ts->tl) {
+      for(; es != NULL; es = es->tl, ts = ts->tl) {
 	let topt2 = (*ts->hd)[1];
 	tcExpInitializer(te,&topt2,es->hd);
 	fields = new List(new $((*ts->hd)[0], es->hd->topt->v), fields);
@@ -1174,8 +1174,8 @@ static type_t tcTuple(tenv_t te, seg_t loc, type_t *`r topt, list_t<exp_t> es) {
       break;
     }
   if(!done)
-    for(; es != null; es = es->tl) {
-      tcExpInitializer(te,null,es->hd);
+    for(; es != NULL; es = es->tl) {
+      tcExpInitializer(te,NULL,es->hd);
       fields = new List(new $(empty_tqual(), es->hd->topt->v), fields);
     }
   return new TupleType(List::imp_rev(fields));
@@ -1203,24 +1203,24 @@ static type_t tcArray(tenv_t te,seg_t loc,type_t *`r elt_topt,
   sz_exp->topt = new Opt(uint_t);
   type_t res_t2   = new ArrayType(res, empty_tqual(), sz_exp);
 
-  for (_ es2 = es; es2 != null; es2 = es2->tl)
+  for (_ es2 = es; es2 != NULL; es2 = es2->tl)
     tcExpInitializer(te,elt_topt,es2->hd);
 
   if (!coerce_list(te,res,es))
     terr(es->hd->loc,"elements of array do not all have the same type (%s)",
          typ2string(res));
   // check that any designators make sense
-  for(int offset = 0; des != null; offset++, des = des->tl) {
+  for(int offset = 0; des != NULL; offset++, des = des->tl) {
     list_t<designator_t> ds = (*des->hd)[0];
-    if (ds != null)
-      //   if (ds->hd->tl != null)
+    if (ds != NULL)
+      //   if (ds->hd->tl != NULL)
       //     terr(ds->hd[1]->loc,"only array index designators are supported");
       switch (ds->hd) {
       case &FieldName(_):
 	terr(loc,"only array index designators are supported");
 	break;
       case &ArrayElement(e):
-	tcExpInitializer(te,null,e);
+	tcExpInitializer(te,NULL,e);
 	unsigned int i = Evexp::eval_const_uint_exp(e);
 	if (i != offset)
 	  terr(e->loc, "expecting index designator %d but found %d",
@@ -1229,7 +1229,7 @@ static type_t tcArray(tenv_t te,seg_t loc,type_t *`r elt_topt,
       }
   }
   
-  //if (topt != null) {
+  //if (topt != NULL) {
   // if (!unify(*topt,res_t2) && silent_castable(te,loc,res_t2,*topt)) {
   //    e->topt = &Opt(res_t2);
   //    unchecked_cast(te, e, *topt);
@@ -1242,7 +1242,7 @@ static type_t tcArray(tenv_t te,seg_t loc,type_t *`r elt_topt,
  // {for x < e1 : e2}
 static type_t tcComprehension(tenv_t te,seg_t loc,type_t *`r topt,
                               vardecl_t vd,exp_t bound,exp_t body) {
-  tcExp(te,null,bound);
+  tcExp(te,NULL,bound);
   if (!coerce_uint_typ(te,bound))
     terr(bound->loc,"expecting unsigned int, found %s",
          typ2string(bound->topt->v));
@@ -1250,8 +1250,8 @@ static type_t tcComprehension(tenv_t te,seg_t loc,type_t *`r topt,
   if (!vd->tq.q_const)
     impos("comprehension index variable is not declared const!");
   // add x to the environment with the type unsigned int only if te->le
-  // is not null.
-  if (te->le != null) {
+  // is not NULL.
+  if (te->le != NULL) {
     te = Tcenv::new_block(loc,te);
     te = add_local_var(loc, te, vd);
   } else {
@@ -1263,10 +1263,10 @@ static type_t tcComprehension(tenv_t te,seg_t loc,type_t *`r topt,
       terr(bound->loc,"body is not constant");
   }
   _ pinfo;
-  let topt2 = null;
-  let tqopt = null;
+  let topt2 = NULL;
+  let tqopt = NULL;
 
-  if (topt != null) {
+  if (topt != NULL) {
     switch (compress(*topt)) {
     case &PointerType(x):
       pinfo = x;
@@ -1283,7 +1283,7 @@ static type_t tcComprehension(tenv_t te,seg_t loc,type_t *`r topt,
    }
    // type-check the body in the new environment
    type_t t = tcExp(te,topt2,body);
-   return new ArrayType(t,(tqopt == null) ? empty_tqual() : *tqopt, bound);
+   return new ArrayType(t,(tqopt == NULL) ? empty_tqual() : *tqopt, bound);
 }
 
  //////////////////// Struct (f{e1,...,en}) ///////////////////
@@ -1302,7 +1302,7 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t *`r topt,
                        list_t<$(list_t<designator_t>,exp_t)@> args,
                        struct Structdecl *`H @`H sd_opt) {
   structdecl_t sd;
-  if (*sd_opt != null)
+  if (*sd_opt != NULL)
     sd = (structdecl_t)(*sd_opt);
   else {
     try
@@ -1310,10 +1310,10 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t *`r topt,
     catch { 
     case Dict::Absent:
       terr(loc, "unbound struct name %s",qvar2string(*tn));
-      return topt != null ? *topt : VoidType;
+      return topt != NULL ? *topt : VoidType;
     }
     *sd_opt = sd;
-    if (sd->name != null)
+    if (sd->name != NULL)
       *tn = sd->name->v;
   }
   region rgn {
@@ -1324,16 +1324,16 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t *`r topt,
   let res_typ = new StructType(*tn,typs,new sd);
   // this will instantiate the struct if we have type information in topt
   // unfortunately, I think it allows topt to cause failure
-  if (topt != null) unify(res_typ,*topt);
+  if (topt != NULL) unify(res_typ,*topt);
   *otyps = new Opt(typs);
   // make sure each argument has the right type
-  if (sd->fields == null) {
+  if (sd->fields == NULL) {
     terr(loc,"can't build abstract struct");
     return res_typ;
   }
   list_t<$(structfield_t,exp_t)@`rgn,`rgn> fields =
     resolve_struct_designators(rgn,loc,args,sd->fields->v);
-  for(; fields != null; fields = fields->tl) {
+  for(; fields != NULL; fields = fields->tl) {
     let &$(field,field_exp) = fields->hd;
     let inst_fieldtyp = rsubstitute(rgn,inst,field->type);
     tcExpInitializer(te, &inst_fieldtyp, field_exp);
@@ -1353,7 +1353,7 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
     case &AnonStructType(fs):
       list_t<$(structfield_t,exp_t)@`rgn,`rgn> fields = 
         resolve_struct_designators(rgn,loc,args,fs);
-      for (; fields != null; fields = fields->tl) {
+      for (; fields != NULL; fields = fields->tl) {
         let &$(field,field_exp) = fields->hd;
         tcExpInitializer(te, &field->type, field_exp);
         if (!coerce_arg(te,field_exp,field->type))
@@ -1389,15 +1389,15 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t *`r topt,
     new TunionFieldType(TunionFieldInfo{new KnownTunionfield(tud,tuf),
 					all_typs});
   // this instantiates the type variables if we have top-down type info
-  if (topt != null) {
+  if (topt != NULL) {
     switch (compress(*topt)) {
     case &TunionFieldType(_): unify(*topt,res); break;
     case &TunionType(TunionInfo{_,targs,r}):
-      for (_ a = all_typs; a != null && targs != null; a=a->tl,targs=targs->tl)
+      for (_ a = all_typs; a != NULL && targs != NULL; a=a->tl,targs=targs->tl)
         unify(a->hd,targs->hd);
       // top-down, we're looking for a Tunion, not a Tunion field.
       // we can cast up here if there are no arguments to the constructor.
-      if (tuf->typs == null && es == null) {
+      if (tuf->typs == NULL && es == NULL) {
         e->topt = new Opt(res);
         res = new TunionType(TunionInfo{new KnownTunion(tud),
 					all_typs,r});
@@ -1409,7 +1409,7 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t *`r topt,
     }
   }
   list_t<$(tqual_t,type_t)@> ts = tuf->typs;
-  for(; es != null && ts != null; es = es->tl, ts = ts->tl) {
+  for(; es != NULL && ts != NULL; es = es->tl, ts = ts->tl) {
     exp_t  e = es->hd;
     type_t t = rsubstitute(rgn,inst,(*ts->hd)[1]);
     tcExpInitializer(te, &t, e);
@@ -1417,13 +1417,13 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t *`r topt,
       terr(e->loc,"tunion constructor %s expects argument of type %s "
            "but this argument has type %s",
            qvar2string(tuf->name),typ2string(t),
-           (e->topt == null) ? (string_t)"?" : typ2string(e->topt->v));
+           (e->topt == NULL) ? (string_t)"?" : typ2string(e->topt->v));
   }
-  if (es != null)
+  if (es != NULL)
     return expr_err(te,es->hd->loc,
                     "too many arguments for tunion constructor %s",
                     qvar2string(tuf->name));
-  if (ts != null)
+  if (ts != NULL)
     return expr_err(te,loc,"too few arguments for tunion constructor %s",
                     qvar2string(tuf->name));
   return res;
@@ -1433,7 +1433,7 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t *`r topt,
 static type_t tcMalloc(tenv_t te, seg_t loc, type_t *`r topt, exp_opt_t ropt, 
                        type_t t) {
   type_t rgn = HeapRgn;
-  if (ropt != null) {
+  if (ropt != NULL) {
     // check that the region handle is still valid
     type_t expected_type = 
       new RgnHandleType(new_evar(&rk,new Opt(lookup_type_vars(te))));
@@ -1454,14 +1454,14 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t *`r topt, exp_opt_t ropt,
   // and here generate fresh evars).
   switch(t) {
   case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
-    if(tuf->tvs != null)
+    if(tuf->tvs != NULL)
       terr(loc,"malloc with existential types not yet implemented");
     break;
   default: break;
   }
   // Avoid casts when we're passed down a nullable type
   let ptr_maker = at_typ;
-  if(topt != null)
+  if(topt != NULL)
     switch (compress(*topt)) {
     case &PointerType(PtrInfo{_,_,n,_,_}): 
       if(conref_val(n))
@@ -1500,7 +1500,7 @@ static type_t tcFill(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
 static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt, 
                     exp_opt_t rgn_handle, exp_t e, exp_t e1) {
   type_t rgn = HeapRgn;
-  if (rgn_handle != null) {
+  if (rgn_handle != NULL) {
     // check that the region handle is still valid
     type_t expected_type = 
       new RgnHandleType(new_evar(&rk,new Opt(lookup_type_vars(te))));
@@ -1528,7 +1528,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt,
       type_t res_typ = 
         new PointerType(PtrInfo{et_arr,rgn,empty_conref(),tq_arr,
                                 new_conref(b)});
-      if (topt != null) {
+      if (topt != NULL) {
         if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
           e->topt = new Opt(res_typ);
           unchecked_cast(te, e, *topt);
@@ -1542,8 +1542,8 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt,
     e1->r = new Array_e(des);
     fallthru(des);
   case &Array_e(des):
-    type_t *elt_typ_opt = null;
-    if (topt != null) {
+    type_t *elt_typ_opt = NULL;
+    if (topt != NULL) {
       switch (compress(*topt)) {
       case &PointerType(PtrInfo{*elt_typ,_,_,tq,_}):
         // tcArray only needs the element type, so the bound is bogus
@@ -1558,7 +1558,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt,
     case &ArrayType(et,tq,sz): 
       res_typ = new PointerType(PtrInfo{et,rgn,empty_conref(),tq,
                                         new_conref(new Upper_b((exp_t)sz))});
-      if (topt != null) {
+      if (topt != NULL) {
         // try unifying res_typ and topt -- if that fails, then see if we
         // can cast res_typ to topt, and insert the cast so that the code
         // generator knows what to do.
@@ -1579,13 +1579,13 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt,
     // is a total hack...
     let topt2 = atb_typ(uchar_t, rgn, const_tqual(), Unknown_b);
     let t = tcExp(te,&topt2,e1);
-    return atb_typ(t, rgn, empty_tqual(), new Upper_b(uint_exp(1,null)));
+    return atb_typ(t, rgn, empty_tqual(), new Upper_b(uint_exp(1,NULL)));
   default:
     // code that's equivalent to "new {e1}" -- i.e., an array of size 1.
     // Note that we could simplify everything by rewriting the expression
     // to use an Array_e, but this would involve more allocation.
-    type_t *topt2 = null;
-    if (topt != null) {
+    type_t *topt2 = NULL;
+    if (topt != NULL) {
       switch (compress(*topt)) {
       case &PointerType(PtrInfo{*elttype,_,tq,_,_}):
         topt2 = elttype; break;
@@ -1601,8 +1601,8 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt,
     type_t res_typ =
       new PointerType(PtrInfo{telt,rgn,empty_conref(),
                               empty_tqual(),
-                              new_conref(new Upper_b(uint_exp(1,null)))});
-    if (topt != null) {
+                              new_conref(new Upper_b(uint_exp(1,NULL)))});
+    if (topt != NULL) {
       if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
         e->topt = new Opt(res_typ);
         unchecked_cast(te,e,*topt);
@@ -1619,7 +1619,7 @@ type_t tcExp(tenv_t te, type_t *`r topt, exp_t e) {
   switch (t) {
   case &ArrayType(elt_typ,tq,e2):
     let $(_,rgn) = addressof_props(te,e);
-    let b = (e2 == null) ? (bounds_t)Unknown_b : new Upper_b((exp_t)e2);
+    let b = (e2 == NULL) ? (bounds_t)Unknown_b : new Upper_b((exp_t)e2);
     t = atb_typ(elt_typ,rgn,tq,b);
     e->topt->v = t;
     return t;
@@ -1642,7 +1642,7 @@ type_t tcExpInitializer(tenv_t te, type_t *`r topt, exp_t e) {
     switch (t) {
     case &ArrayType(elt_typ,tq,e2):
       let $(_,rgn) = addressof_props(te,e);
-      bounds_t b = (e2 == null) ? (bounds_t)Unknown_b : new Upper_b((exp_t)e2);
+      bounds_t b = (e2 == NULL) ? (bounds_t)Unknown_b : new Upper_b((exp_t)e2);
       t = atb_typ(elt_typ,rgn,tq,b);
       unchecked_cast(te,e,t);
       return t;
@@ -1676,14 +1676,14 @@ static type_t tcExpNoPromote(tenv_t te, type_t *`r topt, exp_t e) {
     case &PointerType(PtrInfo{t,rt,x,tq,b}):
       switch (compress(t)) {
       case &FnType(FnInfo{tvs,eff,rtyp,args,c_varargs,cyc_varargs,rpo,atts}):
-	if (tvs != null)    // then, instantiate if necessary
+	if (tvs != NULL)    // then, instantiate if necessary
 	  region rgn {
            let env = $(lookup_type_vars(te),rgn);
 	   list_t<$(tvar_t,type_t)@`rgn,`rgn> inst = 
 	     List::rmap_c(rgn,r_make_inst_var,&env,tvs);
 	   list_t<type_t> ts = List::map(snd,inst);
 	   type_t ftyp = rsubstitute(rgn, inst,
-				     new FnType(FnInfo{null,eff,rtyp,args,
+				     new FnType(FnInfo{NULL,eff,rtyp,args,
 						       c_varargs,cyc_varargs,
                                                        rpo,atts}));
 	   type_t new_typ = new PointerType(PtrInfo{ftyp,rt,x,tq,b});
@@ -1712,7 +1712,7 @@ static void tcExpNoInst(tenv_t te, type_t *`r topt, exp_t e) {
   case &NoInstantiate_e(e2):
     // This would handle two NoInstantiates in a row; but note that
     // for now the parser does not produce this ( x<><> won't parse ).
-    tcExpNoInst(te,null,e2);
+    tcExpNoInst(te,NULL,e2);
     return;
 
   case &UnknownId_e(q):
@@ -1759,7 +1759,7 @@ static void tcExpNoInst(tenv_t te, type_t *`r topt, exp_t e) {
   case &New_e(rgn_handle,e1):
     t = tcNew(te,loc,topt,rgn_handle,e,e1); break;
   case &Sizeofexp_e(e1):
-    let t1 = tcExpNoPromote(te, null, e1);
+    let t1 = tcExpNoPromote(te, NULL, e1);
     t = tcSizeof(te,loc,topt,t1); break;
   case &Sizeoftyp_e(t1):
     t = tcSizeof(te,loc,topt,t1); break;
@@ -1780,8 +1780,8 @@ static void tcExpNoInst(tenv_t te, type_t *`r topt, exp_t e) {
   case &Array_e(des):
     // tcArray expects us to pass in an optional element type, not
     // the array type.  See also tcNew.
-    type_t *elt_topt = null;
-    if (topt != null) {
+    type_t *elt_topt = NULL;
+    if (topt != NULL) {
       switch (compress(*topt)) {
       case &ArrayType(*et,_,_): elt_topt = et; break;
       default: break;

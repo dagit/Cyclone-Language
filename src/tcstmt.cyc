@@ -58,19 +58,19 @@ static void pattern_synth(seg_t loc, tenv_t te, list_t<tvar_t> tvs,
   if(new_block)
     te2 = Tcenv::new_block(loc,te2);
   let ropt = new Opt(Tcenv::curr_rgn(te2));
-  for(let vs2 = vs; vs2 != null; vs2 = vs2->tl) {
+  for(let vs2 = vs; vs2 != NULL; vs2 = vs2->tl) {
     te2 = add_pat_var(loc, te2, vs2->hd);
     vs2->hd->rgn = ropt;
   }
 
-  if(where_opt != null)
+  if(where_opt != NULL)
     tcTest(te2,(exp_t)where_opt,"switch clause guard");
 
-  if(vs != null)
+  if(vs != NULL)
     te2 = set_encloser(te2,s); // for substatements inside of s
   tcStmt(te2,s,false); // pattern vars are in a different region from body ??
   // The encloser of s is not s, so reset it properly.
-  if(vs != null)
+  if(vs != NULL)
     NewControlFlow::set_encloser(s,get_encloser(te));
 }
 
@@ -90,7 +90,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
   case Skip_s: return;
 
-  case &Exp_s(e): tcExp(te,null,e); return;
+  case &Exp_s(e): tcExp(te,NULL,e); return;
 
   case &Seq_s(s1,s2):
     let te2 = set_next(te,new Stmt_j(s2));
@@ -113,7 +113,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
   case &Return_s(eopt):
     type_t t = return_typ(te);
-    if (eopt == null) {
+    if (eopt == NULL) {
       switch (compress(t)) {
       case VoidType: break;
       default:
@@ -148,11 +148,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   case &For_s(e1,$(e2,guard_s),$(e3,cont_s),s):
     decorate_stmt(te,guard_s);
     decorate_stmt(te,cont_s);
-    tcExp(te,null,e1);
+    tcExp(te,NULL,e1);
     tcTest(te,e2,"for loop");
     te = set_in_loop(te,cont_s);
     tcStmt(te,s,true);
-    tcExp(te,null,e3); // ??? what does a break/continue in e3 mean ???
+    tcExp(te,NULL,e3); // ??? what does a break/continue in e3 mean ???
     return;
 
   case &Do_s(s,$(e,cont_s)):
@@ -169,7 +169,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
   case &Fallthru_s(es,*clauseopt):
     let trip_opt = process_fallthru(te,s0,clauseopt);
-    if(trip_opt == null) {
+    if(trip_opt == NULL) {
       terr(s0->loc,"fallthru not in a non-last case");
       return;
     }
@@ -177,16 +177,16 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     list_t<$(tvar_t,type_t)@> instantiation = 
       List::map_c(make_inst_var,lookup_type_vars(te),tvs);
     ts = List::map_c(substitute,instantiation,ts);
-    for(; ts != null && es != null; ts = ts->tl, es = es->tl) {
-      tcExp(te,null,es->hd);
+    for(; ts != NULL && es != NULL; ts = ts->tl, es = es->tl) {
+      tcExp(te,NULL,es->hd);
       if(!coerce_arg(te,es->hd,ts->hd))
 	terr(s0->loc, "fallthru argument has type %s "
              "but pattern variable has type %s",
              typ2string(es->hd->topt->v), typ2string(ts->hd));
     }
-    if (es != null)
+    if (es != NULL)
       terr(s0->loc, "too many arguments to explicit fallthru");
-    if (ts != null)
+    if (ts != NULL)
       terr(s0->loc, "too few arguments to explicit fallthru");
     return;
 
@@ -202,17 +202,17 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     return;
 
   case &Switch_s(e,scs0):
-    tcExp(te,null,e);
+    tcExp(te,NULL,e);
     let t = e->topt->v;
     // type-check the cases in reverse order, a fallthru therefore transfers
     // control to the case most recently type-checked. For the last case,
     // fallthru is not allowed.
     te = set_in_switch(te);
     te = clear_fallthru(te);
-    for (_ scs = List::rev(scs0); scs != null; scs = scs->tl) {
+    for (_ scs = List::rev(scs0); scs != NULL; scs = scs->tl) {
       let p = scs->hd->pattern;
       // FIX: can pass region if e is an lvalue
-      let $(new_tvs,vds) = tcPat(te,p,&t,null);
+      let $(new_tvs,vds) = tcPat(te,p,&t,NULL);
       if (!unify(p->topt->v,t))
 	terr(scs->hd->loc, "switch on type %s, but case expects type %s",
              typ2string(t), typ2string(p->topt->v));
@@ -231,19 +231,19 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // translate to switch after evaluating the case expressions (which must
     // be constant)
     // FIX: not right for e an enum type b/c we produce int patterns
-    let scs = null;
-    for(; scsC !=null; scsC = scsC->tl) {
+    let scs = NULL;
+    for(; scsC !=NULL; scsC = scsC->tl) {
       let &SwitchC_clause(e1,body1,loc1) = scsC->hd;
       _ pat;
-      if(e1 != null) {
-	tcExp(te,null,(exp_t)e1);
+      if(e1 != NULL) {
+	tcExp(te,NULL,(exp_t)e1);
 	pat = new_pat(new Int_p(Signed,Evexp::eval_const_uint_exp((exp_t)e1)),
 		      e1->loc);
       } else
 	pat = new_pat(Wild_p, loc1);
-      scs = new List(new Switch_clause(pat, null, null, body1, loc1), scs);
+      scs = new List(new Switch_clause(pat, NULL, NULL, body1, loc1), scs);
     }
-    s0->r = switch_stmt(e, imp_rev(scs), null)->r;
+    s0->r = switch_stmt(e, imp_rev(scs), NULL)->r;
     tcStmt(te, s0, new_block);
     return;
 
@@ -260,9 +260,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // similar to Switch_s -- check the patterns in reverse order:
     te = set_in_switch(te);
     te = clear_fallthru(te);
-    for (let scs = List::rev(scs0); scs != null; scs = scs->tl) {
+    for (let scs = List::rev(scs0); scs != NULL; scs = scs->tl) {
       let p       = scs->hd->pattern;
-      let $(new_tvs,x) = tcPat(te,p,&exn_typ,null);
+      let $(new_tvs,x) = tcPat(te,p,&exn_typ,NULL);
       if (!unify(p->topt->v,exn_typ))
         terr(scs->hd->loc, "expected xtunion exn but found %s",
              typ2string(p->topt->v));
@@ -301,7 +301,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       *rgn_ptr = is_local ? new Opt(curr_bl) : new Opt(HeapRgn); // side effect
       switch (nsl) {
       case Loc_n: break;
-      case &Rel_n(null):
+      case &Rel_n(NULL):
         (*vd->name)[0] = Loc_n;
         break;
       case &Abs_n(y): throw impos("tcstmt: Abs_n declaration");
@@ -311,10 +311,10 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       }
       // if it's an array or string, fill in the size on the type
       switch (compress(t)) {
-      case &ArrayType(telt,tq,null) && vd->initializer != null:
+      case &ArrayType(telt,tq,NULL) && vd->initializer != NULL:
         switch (vd->initializer->r) {
           case &Const_e(&String_c(s)):
-          t = vd->type = new ArrayType(telt,tq,uint_exp(s.size,null));
+          t = vd->type = new ArrayType(telt,tq,uint_exp(s.size,NULL));
           break;
 	  case &Comprehension_e(_,e,_):
 	  // FIX: copy e here!
@@ -322,7 +322,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           case &UnresolvedMem_e(_,es): fallthru(es);
           case &Array_e(es):
           t = vd->type = 
-            new ArrayType(telt,tq,uint_exp(List::length(es),null));
+            new ArrayType(telt,tq,uint_exp(List::length(es),NULL));
           break;
           default: break;
         }
@@ -333,15 +333,15 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       // type safety demands static variables are closed (like globals)
       // (the error message may be confusing b/c it *looks* like tyvars
       //  are in scope)
-      let bound_vars = (!is_local) ? null : lookup_type_vars(te);
+      let bound_vars = (!is_local) ? NULL : lookup_type_vars(te);
       let allow_evars = (!is_local) ? false : true;
       check_type(s0->loc,te,bound_vars,MemKind,allow_evars,t);
       let te2 = add_local_var(s->loc,te,vd);
       if (sc == Extern || sc == ExternC)
         terr(d->loc,"local extern declarations not yet supported");
-      //      if (sc == Static && !supports_default(t) && initializer == null)
+      //      if (sc == Static && !supports_default(t) && initializer == NULL)
       //        terr(d->loc,"static local declaration requires an initializer");
-      if (initializer != null) {
+      if (initializer != NULL) {
         tcExpInitializer(te2,&t,(exp_t)initializer);
         if (!coerce_assign(te2,(exp_t)initializer,t))
 	  terr(d->loc, "%s declared with type %s, initialized with type %s",
@@ -352,12 +352,12 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
     case &Let_d(p,*vds,*topt_ref,e,*exhaust):
       let topt = *topt_ref;
-      tcExpInitializer(te,null,e);
+      tcExpInitializer(te,NULL,e);
       *topt_ref = e->topt; // side effect
        //FIX: can pass region if e an lvalue
-      let $(new_tvs,x) = tcPat(te,p,&e->topt->v,null);
+      let $(new_tvs,x) = tcPat(te,p,&e->topt->v,NULL);
       *vds = new Opt(x);
-      if (topt != null && !unify(p->topt->v,topt->v))
+      if (topt != NULL && !unify(p->topt->v,topt->v))
         terr(d->loc,"type of pattern does not match declared type");
       if (!unify(p->topt->v,e->topt->v))
 	terr(d->loc,"pattern type %s does not match definition type %s",
@@ -365,19 +365,19 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       else
 	check_pat_regions(te,p);
       *exhaust = check_let_pat_exhaustive(p->loc,p); // side effect
-      pattern_synth(s0->loc, te, new_tvs, x, s, null, false);
+      pattern_synth(s0->loc, te, new_tvs, x, s, NULL, false);
       return;
 
     case &Letv_d(vds):
       let curr_bl = Tcenv::curr_rgn(te);
       let te2 = te;
-      for (; vds != null; vds = vds->tl) {
+      for (; vds != NULL; vds = vds->tl) {
         let vd = vds->hd;
         let &Vardecl(_,&$(nsl,_),_,t,_,*rgn_ptr,_) = vd;
         *rgn_ptr = new Opt(curr_bl); // side effect
         switch (nsl) {
         case Loc_n: break;
-        case &Rel_n(null):
+        case &Rel_n(NULL):
           (*vd->name)[0] = Loc_n;
           break;
         case &Abs_n(y): throw impos("tcstmt: Abs_n declaration");
@@ -413,7 +413,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     let curr_bl = Tcenv::curr_rgn(te);
     type_t rgn_typ = new VarType(tv);
     *rgn_ptr = new Opt(curr_bl); // side effect
-    te = add_type_vars(s0->loc,te,new List(tv,null));
+    te = add_type_vars(s0->loc,te,new List(tv,NULL));
     check_type(s0->loc,te,lookup_type_vars(te),BoxKind,true,t);
     te = add_region(te, rgn_typ);
     if (!unify(t,new RgnHandleType(rgn_typ)))

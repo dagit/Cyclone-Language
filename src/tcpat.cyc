@@ -58,7 +58,7 @@ static void resolve_pat(tenv_t te, pat_t p) {
       terr(p->loc,"struct tag used without arguments in pattern");
       return;
     case &TunionRes(tud,tuf):
-      p->r = new Tunion_p(tud,tuf,null,null);
+      p->r = new Tunion_p(tud,tuf,NULL,NULL);
       return;
     case &EnumRes(ed,ef):
       p->r = new Enum_p(ed,ef);
@@ -69,9 +69,9 @@ static void resolve_pat(tenv_t te, pat_t p) {
     // Unqualified variable is a declaration, qualified is an error
     switch ((*q)[0]) {
     case Loc_n: fallthru;
-    case &Rel_n(null):
+    case &Rel_n(NULL):
       (*q)[0] = Loc_n;        
-      p->r = new Var_p(new_vardecl(q,VoidType,null));//type set later
+      p->r = new Var_p(new_vardecl(q,VoidType,NULL));//type set later
       return;
     default:
       terr(p->loc,"qualified variable in pattern");
@@ -80,10 +80,10 @@ static void resolve_pat(tenv_t te, pat_t p) {
   case &UnknownCall_p(q,tvs,ps):
     try switch (lookup_ordinary(te,p->loc,q)) {
     case &StructRes(sd):
-      let new_ps = null;
-      for(; ps != null; ps = ps->tl)
-	new_ps = new List(new $(null,ps->hd), new_ps);
-      p->r = new Struct_p(sd,null,tvs,List::imp_rev(new_ps));
+      let new_ps = NULL;
+      for(; ps != NULL; ps = ps->tl)
+	new_ps = new List(new $(NULL,ps->hd), new_ps);
+      p->r = new Struct_p(sd,NULL,tvs,List::imp_rev(new_ps));
       return;
     case &TunionRes(tud,tuf):
       p->r = new Tunion_p(tud,tuf,tvs,ps);
@@ -99,7 +99,7 @@ static void resolve_pat(tenv_t te, pat_t p) {
   case &UnknownFields_p(q,tvs,dps):
     try switch (lookup_ordinary(te,p->loc,q)) {
     case &StructRes(sd):
-      p->r = new Struct_p(sd,null,tvs,dps);
+      p->r = new Struct_p(sd,NULL,tvs,dps);
       return;
     default: break;
     } catch {case Dict::Absent: break; }
@@ -118,7 +118,7 @@ static struct Opt<kind_t> rk = {RgnKind};
 static struct Opt<kind_t> ak = {AnyKind};
 
 static type_t any_type(list_t<tvar_t,`H> s, type_t *`r topt) {
-  if(topt != null)
+  if(topt != NULL)
     return *topt;
   return new_evar(&mk,new Opt(s));
 }
@@ -126,11 +126,11 @@ static type_t num_type(type_t *`r topt, type_t numt) {
   // by setting to whatever topt is, unification will succeed.  Because
   // comparison between any two num types succeeds, this is fine (but kludgey)
   // FIX:? Allow *topt to be an Enum ?
-  if(topt != null && coerceable(*topt))
+  if(topt != NULL && coerceable(*topt))
     return *topt;
   // now allow enum to be cast up too
   switch(compress(numt)) {
-  case &EnumType(_,_): if(topt != null) return *topt; break;
+  case &EnumType(_,_): if(topt != NULL) return *topt; break;
   default: break;
   }
   return numt;
@@ -146,8 +146,8 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
 					      type_t *`r2 region_opt) {
   resolve_pat(te,p);
   type_t t;
-  list_t<tvar_t>    tv_result = null;
-  list_t<vardecl_t> v_result  = null;
+  list_t<tvar_t>    tv_result = NULL;
+  list_t<vardecl_t> v_result  = NULL;
 
   // Figure out what t should be; assign to p->topt and return after switch
   switch (p->r) {
@@ -161,7 +161,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
     break;
   case &Reference_p(vd):
     t = any_type(lookup_type_vars(te),topt);
-    if(region_opt == null) {
+    if(region_opt == NULL) {
       terr(p->loc, "* pattern would point into an unknown region");
       break;
     }
@@ -176,7 +176,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
   case &Float_p(_):        t = num_type(topt, float_t); break;
   case &Enum_p(ed,ef):     t = num_type(topt, new EnumType(ed->name,ed)); break;
   case Null_p:
-    if(topt != null)
+    if(topt != NULL)
       switch(compress(*topt)) {
       case &PointerType(_): t = *topt; goto tcpat_end;
       default: break;
@@ -193,8 +193,8 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
     // the type instantiation information in topt!!!
 
     type_t inner_typ  = VoidType;
-    let    inner_topt = null;
-    if(topt != null)
+    let    inner_topt = NULL;
+    if(topt != NULL)
       switch(compress(*topt)) {
       case &PointerType(PtrInfo(elt_typ,_,_,_,_)): 
 	inner_typ  = elt_typ; 
@@ -212,7 +212,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
     // if p2's type is a tunion field type, then we cast
     // the type of p = &p2 to the appropriate tunion type, unless
     // topt suggests we do otherwise.
-    if(inner_topt == null) 
+    if(inner_topt == NULL) 
       switch (compress(p2->topt->v)) {
       case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud,tuf),targs}):
 	t = new TunionType(TunionInfo{new KnownTunion(tud),targs,ptr_rgn});
@@ -228,16 +228,16 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
     break;
 
   case &Tuple_p(ps):
-    list_t<$(tqual_t,type_t)@> pat_ts  = null;
-    list_t<$(tqual_t,type_t)@> topt_ts = null;
-    if(topt != null)
+    list_t<$(tqual_t,type_t)@> pat_ts  = NULL;
+    list_t<$(tqual_t,type_t)@> topt_ts = NULL;
+    if(topt != NULL)
       switch(compress(*topt)) {
       case &TupleType(tqts): topt_ts = tqts; break;
       default: break;
       }
-    for(; ps != null; ps=ps->tl) {
-      let inner_topt = null;
-      if(topt_ts != null) {
+    for(; ps != NULL; ps=ps->tl) {
+      let inner_topt = NULL;
+      if(topt_ts != NULL) {
 	inner_topt = &(*topt_ts->hd)[1];
 	topt_ts    = topt_ts->tl;
       }
@@ -251,7 +251,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
 
   case &Struct_p(sd,*topt_ref,tvs,dps): 
     // most of this is similar to Tcexp::tcStruct
-    if (tvs != null)
+    if (tvs != NULL)
       throw impos("tcPat: struct<...> not implemented");
     // type check the argument patterns
     region rgn {
@@ -260,15 +260,15 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
       let all_typs = List::map(snd,inst);
       t = new StructType(sd->name->v,all_typs,new sd);
       // FIX:? I think topt could cause a failure as a result of the unify
-      if(topt != null) unify(t,*topt);
+      if(topt != NULL) unify(t,*topt);
       *topt_ref = new Opt(all_typs); // side effect
-      if (sd->fields == null) {
+      if (sd->fields == NULL) {
         terr(p->loc,"can't destructure an abstract struct");
         break;
       }
       list_t<$(structfield_t,pat_t)@`rgn,`rgn> fields =
 	resolve_struct_designators(rgn,p->loc,dps,sd->fields->v);
-      for(; fields != null; fields = fields->tl) {
+      for(; fields != NULL; fields = fields->tl) {
 	let &$(field,pat)     = fields->hd;
 	let inst_fieldtyp     = rsubstitute(rgn,inst,field->type);
 	let $(sub_tvs,sub_vs) = tcPatRec(te,pat,&inst_fieldtyp,region_opt);
@@ -291,8 +291,8 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
     region rgn {
 
       // constrain the type variables to have box kind
-      let var_tvs = null;
-      for (_ t = tvs; t != null; t = t->tl) {
+      let var_tvs = NULL;
+      for (_ t = tvs; t != NULL; t = t->tl) {
 	tvar_t tv = t->hd;
 	switch (compress_conref(tv->kind)->v) {
 	case &Eq_constr(BoxKind): break;
@@ -323,14 +323,14 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
       let exist_typs = List::map(snd,exist_inst);
       let inst       = List::rappend(rgn,all_inst,exist_inst);
       // unless topt says otherwise, guess we want Tunion when there are no args
-      if(tqts == null)
+      if(tqts == NULL)
 	t = new TunionType(TunionInfo{new KnownTunion(tud),
 				      all_typs,
 				      new_evar(&rk,new Opt(tenv_tvs))});
       else
 	t = new TunionFieldType(TunionFieldInfo{new KnownTunionfield(tud,tuf),
 						all_typs});
-      if(topt != null && tqts == null)
+      if(topt != NULL && tqts == NULL)
 	switch(compress(*topt)) {
 	case &TunionFieldType(_): 
 	  t = new TunionFieldType(TunionFieldInfo{new KnownTunionfield(tud,tuf),
@@ -339,13 +339,13 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
 	case &TunionType(TunionInfo{_,targs,_}):
 	  // these unifies could make topt cause an error
 	  let a = all_typs;
-	  for (; a != null && targs != null; a=a->tl,targs=targs->tl)
+	  for (; a != NULL && targs != NULL; a=a->tl,targs=targs->tl)
 	    unify(a->hd,targs->hd);
 	  break;
 	default: break;
 	}
 
-      for(; ps != null && tqts != null; ps = ps->tl, tqts = tqts->tl) {
+      for(; ps != NULL && tqts != NULL; ps = ps->tl, tqts = tqts->tl) {
 	let p2 = ps->hd;
 	// Note:  we don't pass in ptr_rgn here because for value-carrying
 	// constructors, the pointer's region is passed down as region_opt.
@@ -361,10 +361,10 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
                qvar2string(tud->name), typ2string(field_typ),
                typ2string(p2->topt->v));
       }
-      if (ps != null)
+      if (ps != NULL)
 	terr(p->loc,"too many arguments for tunion constructor %s",
              qvar2string(tud->name));
-      if (tqts != null)
+      if (tqts != NULL)
 	terr(p->loc,"too few arguments for tunion constructor %s",
              qvar2string(tud->name));
     }
@@ -405,7 +405,7 @@ void check_pat_regions(tenv_t te, pat_t p) {
     default: throw new Core::Impossible("check_pat_regions: bad pointer type");
     }
   case &Tunion_p(_,_,_,ps): 
-    for(; ps != null; ps = ps->tl) check_pat_regions(te,ps->hd);
+    for(; ps != NULL; ps = ps->tl) check_pat_regions(te,ps->hd);
     switch (p->topt->v) {
     case &TunionType(TunionInfo{_,_,rt}):
       check_rgn_accessible(te,p->loc,rt);
@@ -416,7 +416,7 @@ void check_pat_regions(tenv_t te, pat_t p) {
     }
   case &Struct_p(_,_,_,dps):  fallthru(List::map(snd,dps));
   case &Tuple_p(ps):
-    for(; ps != null; ps = ps->tl)
+    for(; ps != NULL; ps = ps->tl)
       check_pat_regions(te,ps->hd);
     return;
   default: return;
@@ -425,7 +425,7 @@ void check_pat_regions(tenv_t te, pat_t p) {
 
 //static void print_pats(string s, list_t<pat_t> ps) {
 //  fprintf(cyc_stderr,"---pat list: %s---\n",s);
-//  for (; ps != null; ps = ps->tl)
+//  for (; ps != NULL; ps = ps->tl)
 //    fprintf(cyc_stderr,"%s\n",pat2string(ps->hd));
 //  fprintf(cyc_stderr,"--------------------------------\n\n");
 //}
@@ -458,7 +458,7 @@ void check_pat_regions(tenv_t te, pat_t p) {
 // span is the total number of constructors for the given type.
 // Constant patterns (e.g., 1, true, 3[0]4) have 0 arity.  The span
 // for bool is 2, for char is 256, and for integers, floats, and
-// Xtunions is infinite (i.e., null).
+// Xtunions is infinite (i.e., NULL).
 static tunion Name_value { Name_v(string_t); Int_v(int); };
 typedef tunion Name_value name_value_t;
 static struct Con_s {
@@ -493,7 +493,7 @@ static struct Opt<int> one_opt = { 1 };
 static struct Opt<int> two_opt = { 2 };
 static opt_t<int> one_opt_ptr = &one_opt;
 
-static tunion Name_value.Name_v null_name_value  = Name_v("null");
+static tunion Name_value.Name_v null_name_value  = Name_v("NULL");
 static tunion Name_value.Name_v ptr_name_value   = Name_v("ptr");
 static tunion Name_value.Name_v tuple_name_value = Name_v("tuple");
 static struct Con_s null_con0     = { &null_name_value,  0, &two_opt };
@@ -504,8 +504,8 @@ static con_t null_con     = &null_con0;
 static con_t null_ptr_con = &null_ptr_con0;
 static con_t ptr_con      = &ptr_con0;
 
-static con_t int_con(int i)       { return new Con_s(new Int_v(i), 0, null); }
-static con_t float_con(string_t<`H> f)  { return new Con_s(new Name_v(f), 0, null); }
+static con_t int_con(int i)       { return new Con_s(new Int_v(i), 0, NULL); }
+static con_t float_con(string_t<`H> f)  { return new Con_s(new Name_v(f), 0, NULL); }
 static con_t char_con(char c) { 
   return new Con_s(new Int_v((int)c), 0,new Opt(256));
 }
@@ -514,15 +514,15 @@ static con_t tuple_con(int i)     {
 }
 
 // build various simple patterns
-static simple_pat_t null_pat()           {return new Con(null_con,     null); }
-static simple_pat_t int_pat(int i)       {return new Con(int_con(i),   null); }
-static simple_pat_t char_pat(char c)     {return new Con(char_con(c),  null); }
-static simple_pat_t float_pat(string_t<`H> f)  {return new Con(float_con(f), null); }
+static simple_pat_t null_pat()           {return new Con(null_con,     NULL); }
+static simple_pat_t int_pat(int i)       {return new Con(int_con(i),   NULL); }
+static simple_pat_t char_pat(char c)     {return new Con(char_con(c),  NULL); }
+static simple_pat_t float_pat(string_t<`H> f)  {return new Con(float_con(f), NULL); }
 static simple_pat_t null_ptr_pat(simple_pat_t p) {
-  return new Con(null_ptr_con,new List(p,null));
+  return new Con(null_ptr_con,new List(p,NULL));
 }
 static simple_pat_t ptr_pat(simple_pat_t p) { 
-  return new Con(ptr_con,new List(p,null)); 
+  return new Con(ptr_con,new List(p,NULL)); 
 }
 static simple_pat_t tuple_pat(list_t<simple_pat_t,`H> ss) {
   return new Con(tuple_con(List::length(ss)),ss);
@@ -576,7 +576,7 @@ static simple_pat_t compile_pat(pat_t p) {
       case &Tunion_p(tud,tuf,_,ps):
 	opt_t<int> span;
 	if(tud->is_xtunion)
-	  span = null;
+	  span = NULL;
 	else
 	  span = new Opt(List::length(tud->fields->v));
 	s =con_pat(*((*tuf->name)[1]),span,List::map(compile_pat,ps)); 
@@ -588,33 +588,33 @@ static simple_pat_t compile_pat(pat_t p) {
     }
     break;
 
-  case &Tunion_p(tud,tuf,_,null):
+  case &Tunion_p(tud,tuf,_,NULL):
     opt_t<int,`H> span;
     switch(compress(p->topt->v)) {
     case &TunionType(_):     
       if(tud->is_xtunion)
-	span = null;
+	span = NULL;
       else
 	span = new Opt(List::length(tud->fields->v)); 
       break;
     case &TunionFieldType(_): span = new Opt(1); break;
     default: span = impos("void tunion pattern has bad type"); break;
     }
-    s = con_pat(*((*tuf->name)[1]),span, null); 
+    s = con_pat(*((*tuf->name)[1]),span, NULL); 
     break;
     
-  case &Tunion_p(_,_,_,ps): fallthru(ps); // ps != null
+  case &Tunion_p(_,_,_,ps): fallthru(ps); // ps != NULL
   case &Tuple_p(ps): s = tuple_pat(List::map(compile_pat,ps)); break;
 
   case &Struct_p(sd,_,_,dlps):
-    list_t<simple_pat_t> ps = null;
-    for (_ fields = sd->fields->v; fields != null; fields = fields->tl) {
+    list_t<simple_pat_t> ps = NULL;
+    for (_ fields = sd->fields->v; fields != NULL; fields = fields->tl) {
       // leave out bit fields without a name
       bool found = (String::strcmp(*fields->hd->name,"") == 0);
-      for(_ dlps0 = dlps; !found && dlps0 != null; dlps0 = dlps0->tl) {
+      for(_ dlps0 = dlps; !found && dlps0 != NULL; dlps0 = dlps0->tl) {
 	let &$(dl,p) = dlps0->hd;
 	switch (dl) {
-	case &List{.hd=&FieldName(f), .tl=null}: 
+	case &List{.hd=&FieldName(f), .tl=NULL}: 
 	  if(String::zstrptrcmp(f,fields->hd->name) == 0) {
 	    ps = new List(compile_pat(p),ps);
 	    found = true;
@@ -633,7 +633,7 @@ static simple_pat_t compile_pat(pat_t p) {
     // FIX: two different enum constructors can have the same value so we
     // might not get a duplicate warning when we should.
     int span = List::length(ed->fields->v);
-    s = con_pat(*((*ef->name)[1]), new Opt(span), null);
+    s = con_pat(*((*ef->name)[1]), new Opt(span), NULL);
     break;
   case &UnknownId_p(_):         s = impos("compile_pat: unknownid");     break;
   case &UnknownCall_p(_,_,_):   s = impos("compile_pat: unknowncall");   break;
@@ -696,7 +696,7 @@ static term_desc_t add_neg(term_desc_t td, con_t c) {
   case &Neg(cs):
     if (Set::member(cs,c))
       impos("add_neg called when constructor already in set");
-    if (c->span != null && (Set::cardinality(cs) + 1) >= c->span->v)
+    if (c->span != NULL && (Set::cardinality(cs) + 1) >= c->span->v)
 	impos("add_neg called when |cs U {c}| >= span(c)");
     return new Neg(Set::insert(cs,c));
   case &Pos(_,_): return impos("add_neg called when td is Positive");
@@ -716,7 +716,7 @@ static answer_t static_match(con_t c, term_desc_t td) {
     if (Set::member(cs,c)) return No;
     // when there are n possible starting constructors, c is not in cs,
     // and |cs| = n-1, then we know that c has to be in the set described by td
-    else if ((c->span != null) && (c->span->v == Set::cardinality(cs) + 1))
+    else if ((c->span != NULL) && (c->span->v == Set::cardinality(cs) + 1))
       return Yes;
     // otherwise, we can't be sure.
     else return Maybe;
@@ -729,7 +729,7 @@ static answer_t static_match(con_t c, term_desc_t td) {
 // cons the dsc onto the first con's list of sub-term-desc's.
 static context_t augment(context_t ctxt, term_desc_t dsc) {
   switch (ctxt) {
-  case null: return null; // ???
+  case NULL: return NULL; // ???
   case &List{.hd=&$(c,args), .tl=rest}:
     return new List(new $(c,(list_t<term_desc_t>)(new List(dsc, args))),rest);
   }
@@ -740,7 +740,7 @@ static context_t augment(context_t ctxt, term_desc_t dsc) {
 // into a positive descriptor Pos(c,[d1,d2,...,dn-1,dn]).
 static context_t norm_context(context_t ctxt) {
   switch (ctxt) {
-  case null: return impos("norm_context: empty context");
+  case NULL: return impos("norm_context: empty context");
   case &List{.hd=&$(c,args), .tl=rest}: 
     return augment(rest, new Pos(c, List::rev(args)));
   }
@@ -754,9 +754,9 @@ static context_t norm_context(context_t ctxt) {
 static term_desc_t build_desc(context_t ctxt,term_desc_t dsc,work_stack_t work)
 {
   switch ($(ctxt,work)) {
-  case $(null,null): return dsc;
-  case $(null,_):    return impos("build_desc: ctxt and work don't match");
-  case $(_,   null): return impos("build_desc: ctxt and work don't match");
+  case $(NULL,NULL): return dsc;
+  case $(NULL,_):    return impos("build_desc: ctxt and work don't match");
+  case $(_,   NULL): return impos("build_desc: ctxt and work don't match");
   case $(&List{.hd=&$(c,args), .tl=rest}, &List{.hd=&$(_,_,dargs), .tl=work2}):
     let td = new Pos(c, List::append(List::rev(args), new List(dsc,dargs)));
     return build_desc(rest, td, work2);
@@ -772,9 +772,9 @@ match(simple_pat_t p, access_t obj, term_desc_t dsc, context_t ctx,
 static decision_t<`rhs> or_match(term_desc_t dsc, match_t<`rhs> allmrules)
 {
   switch(allmrules) {
-  case null: return Tcpat::Failure;
+  case NULL: return Tcpat::Failure;
   case &List{.hd = &$(pat1, rhs1), .tl = rulerest}:
-    return match(pat1, null, dsc, null, null, rhs1, rulerest);
+    return match(pat1, NULL, dsc, NULL, NULL, rhs1, rulerest);
   }
 }
 
@@ -789,11 +789,11 @@ static decision_t<`rhs> match_compile(match_t<`rhs> allmrules) {
 static decision_t<`rhs> and_match(context_t ctx, work_stack_t work,
 				    `rhs right_hand_side, match_t<`rhs> rules) {
   switch (work) {
-  case null: return new Success(right_hand_side);
-  case &List{.hd = &$(null,null,null), .tl = workr }:
+  case NULL: return new Success(right_hand_side);
+  case &List{.hd = &$(NULL,NULL,NULL), .tl = workr }:
     return and_match(norm_context(ctx), workr, right_hand_side, rules);
   case &List{.hd = &$(pats,objs,dscs), .tl = workr }:
-    if (pats == null || objs == null || dscs == null)
+    if (pats == NULL || objs == NULL || dscs == NULL)
       return impos("tcpat:and_match: malformed work frame");    
     let &List(pat1,patr) = (_@)(pats);
     let &List(obj1,objr) = (_@)(objs);
@@ -811,7 +811,7 @@ static list_t<term_desc_t> getdargs(con_t pcon, term_desc_t dsc) {
     // So return Neg{} for each argument, reflecting that no information
     // is known about the arguments.
     term_desc_t any = new Neg(empty_con_set());
-    let res = null;
+    let res = NULL;
     for (int i = 0; i < pcon->arity; ++i)
       res = new List(any,res);
     return res;
@@ -839,14 +839,14 @@ match(simple_pat_t p, access_t obj, term_desc_t dsc,
   case &Con(pcon, pargs):
     switch (static_match(pcon, dsc)) {
     case Yes:
-      let ctx2       = new List(new $(pcon,null), ctx);
+      let ctx2       = new List(new $(pcon,NULL), ctx);
       let work_frame = new $(pargs, getoargs(pcon, obj), getdargs(pcon, dsc));
       let work2      = new List(work_frame, work);
       return and_match(ctx2, work2, right_hand_side, rules);
     case No:
       return or_match(build_desc(ctx, dsc, work), rules);
     case Maybe:
-      let ctx2       = new List(new $(pcon,null), ctx);
+      let ctx2       = new List(new $(pcon,NULL), ctx);
       let work_frame = new $(pargs, getoargs(pcon, obj), getdargs(pcon, dsc));
       let work2      = new List(work_frame, work);
       let s          = and_match(ctx2, work2, right_hand_side, rules);
@@ -883,11 +883,11 @@ $(simple_pat_t, $(bool,seg_t)@)@ get_match(int @`r r, switch_clause_t swc) {
   simple_pat_t   sp0 = compile_pat(swc->pattern);
   $(bool,seg_t)@ rhs = new $(false,swc->pattern->loc);
   simple_pat_t sp;
-  if (swc->where_clause != null) {
-    sp = tuple_pat(new List(sp0,new List(int_pat(*r),null)));
+  if (swc->where_clause != NULL) {
+    sp = tuple_pat(new List(sp0,new List(int_pat(*r),NULL)));
     *r = (*r) + 1;
   } else
-    sp = tuple_pat(new List(sp0,new List(Any,null)));
+    sp = tuple_pat(new List(sp0,new List(Any,NULL)));
   return new $(sp, rhs);
 }
 static void not_exhaust_err(seg_t loc) {
@@ -905,7 +905,7 @@ void check_switch_exhaustive(seg_t loc, list_t<switch_clause_t> swcs) {
   let match_rules = List::map_c(get_match,&where_ctr,swcs);
   let dec_tree    = match_compile(match_rules);
   check_exhaust_overlap(dec_tree, not_exhaust_err, loc, rule_occurs, 0);
-  for (; match_rules != null; match_rules = match_rules->tl) {
+  for (; match_rules != NULL; match_rules = match_rules->tl) {
     let &$(_,&$(b,loc2)) = match_rules->hd;
     if (!b)
       terr(loc2,"redundant pattern");
@@ -924,7 +924,7 @@ static void dummy_fn(int i,int j) {
   return;
 }
 bool check_let_pat_exhaustive(seg_t loc,pat_t p) {
-  let match_rules = new List(new $(compile_pat(p),0),null);
+  let match_rules = new List(new $(compile_pat(p),0),NULL);
   let dec_tree    = match_compile(match_rules);
   let exhaust_env = new $(loc,true);
   check_exhaust_overlap(dec_tree, not_exhaust_warn, exhaust_env, dummy_fn, 0);
@@ -947,7 +947,7 @@ void check_catch_overlap(seg_t loc, list_t<switch_clause_t> swcs) {
   let match_rules = List::map(get_match2,swcs);
   let dec_tree    = match_compile(match_rules);
   check_exhaust_overlap(dec_tree, not_exhaust_err2, loc, rule_occurs, 0);
-  for (; match_rules != null; match_rules = match_rules->tl) {
+  for (; match_rules != NULL; match_rules = match_rules->tl) {
     let &$(_,&$(b,loc2)) = match_rules->hd;
     if (!b)
       terr(loc2,"redundant pattern");

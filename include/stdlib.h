@@ -23,10 +23,6 @@ typedef struct _Ldiv
   long rem; /* remainder */
 } ldiv_t;
 
-#ifndef NULL
-#define NULL 0
-#endif
-
 #define EXIT_FAILURE 1
 #define EXIT_SUCCESS 0
 

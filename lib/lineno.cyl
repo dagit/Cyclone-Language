@@ -42,18 +42,18 @@ static opt_t<$(mstring_t,int)@> parse_linedef(mstring_t line) {
     while (i < line.size && (line[i] < '0' || line[i] > '9')) ++i;
     int j = i;
     while (j < line.size && line[j] >= '0' && line[j] <= '9') ++j;
-    if (i == line.size) return null; // if there's no number
+    if (i == line.size) return NULL; // if there's no number
     int number = int_of_string(substring(line,i,j-i));
     while (j < line.size && line[j] != '"') ++j;
     int k = ++j;
     while (k < line.size && line[k] != '"') ++k;
-    if (j == line.size || k == line.size) return null; // if there's no name
+    if (j == line.size || k == line.size) return NULL; // if there's no name
     mstring_t fname = substring(line,j,k-j);
 
     return new Opt(new $(fname,number));
   } catch {
   default:
-    return null;
+    return NULL;
   }      
 }
 
@@ -72,7 +72,7 @@ void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@,`H> places) {
 
     mstring_t this_line;
     int eol, next;
-    while(places != null) {
+    while(places != NULL) {
       while (true) {
 	next      = token(lbuf);
 	eol       = lexeme_end(lbuf);
@@ -85,7 +85,7 @@ void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@,`H> places) {
 	case NEWLINE: ++line; break;
 	case LINEDEF: 
 	  opt_t<$(mstring_t,int)@> fno = parse_linedef(this_line);
-	  if (fno == null) {
+	  if (fno == NULL) {
 	    ++line;
 	    fprintf(stderr, "Unknown directive: %s\n", this_line);
 	  } else {
@@ -96,7 +96,7 @@ void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@,`H> places) {
 	default: throw new Failure("Lineno: Impossible");
 	}
       }
-      while(places != null && eol >= (*places->hd)[0]) {
+      while(places != NULL && eol >= (*places->hd)[0]) {
 	let p = (*places->hd)[1];
 	p->logical_file = String::strdup(source_file);
 	p->line         = this_line;
@@ -113,7 +113,7 @@ void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@,`H> places) {
 
 pos_t pos_of_abs(string_t filename, int abs) {
   pos_t ans = new Pos("",new_string(0),0,0);
-  poss_of_abss(filename, new List::List(new $(abs,ans),null));
+  poss_of_abss(filename, new List::List(new $(abs,ans),NULL));
   return ans;
 }
 

@@ -91,7 +91,7 @@ namespace Getopt {
    Also, when `ordering' is RETURN_IN_ORDER,
    each non-option ARGV-element is returned here.  */
 
-char ?optarg=null ;
+char ?optarg=NULL ;
 
 /* Index in ARGV of the next element to be scanned.
    This is used for communication to and from the caller
@@ -112,7 +112,7 @@ int optind = 0;
    in which the last option character we returned was found.
    This allows us to pick up the scan where we left off.
 
-   If this is zero, or a null string, it means resume the scan
+   If this is zero, or a NULL string, it means resume the scan
    by advancing to the next ARGV-element.  */
 
 static char ?nextchar;
@@ -237,12 +237,6 @@ static int nonoption_flags_len;
 
 #if defined (__STDC__) && __STDC__
 static void exchange (char ??);
-#endif
-#ifdef NULL
-#undef NULL
-#define NULL null
-#else
-#define NULL null
 #endif
 
 
@@ -466,7 +460,7 @@ const struct option ?`r1 longopts, int *`r2 longind, int long_only)
 	}
 
       /* The special ARGV-element `--' means premature end of options.
-	 Skip it like a null option,
+	 Skip it like a NULL option,
 	 then exchange with previous non-options as if it were an option,
 	 then skip everything else like a non-option.  */
 

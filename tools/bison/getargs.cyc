@@ -43,20 +43,20 @@ struct option longopts[] =
 {
   {"debug", 0, &debugflag, 1},
   {"defines", 0, &definesflag, 1},
-  {"file-prefix", 1, null, 'b'},
+  {"file-prefix", 1, NULL, 'b'},
   {"fixed-output-files", 0, &fixed_outfiles, 1},
-  {"help", 0, null, 'h'},
-  {"name-prefix", 1, null, 'p'}, /* was 'a';  apparently unused -wjh */
+  {"help", 0, NULL, 'h'},
+  {"name-prefix", 1, NULL, 'p'}, /* was 'a';  apparently unused -wjh */
   {"no-lines", 0, &nolinesflag, 1},
   {"no-parser", 0, &noparserflag, 1},
-  {"output", 1, null, 'o'},
-  {"output-file", 1, null, 'o'},
+  {"output", 1, NULL, 'o'},
+  {"output-file", 1, NULL, 'o'},
   {"raw", 0, &rawtoknumflag, 1},
   {"token-table", 0, &toknumflag, 1},
   {"verbose", 0, &verboseflag, 1},
-  {"version", 0, null, 'V'},
+  {"version", 0, NULL, 'V'},
   {"yacc", 0, &fixed_outfiles, 1},
-  {null, 0, null, 0}
+  {NULL, 0, NULL, 0}
 };
 
 void usage (FILE @stream)
@@ -84,7 +84,7 @@ getargs(int argc, char?`H ?`H argv)
   toknumflag = 0;
   fixed_outfiles = 0;
 
-  while ((c = getopt_long (argc, argv, "yvdhrltknVo:b:p:", longopts, (int *)null))
+  while ((c = getopt_long (argc, argv, "yvdhrltknVo:b:p:", longopts, (int *)NULL))
 	 != EOF)
     {
       switch (c)

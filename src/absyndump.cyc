@@ -123,18 +123,18 @@ void dump_semi() {
 }
 
 void dump_sep(void f(`a), list_t<`a> l, dump_string_t sep) {
-  if(l == null)
+  if(l == NULL)
     return;
-  for(; l->tl != null; l = l->tl) {
+  for(; l->tl != NULL; l = l->tl) {
     f(l->hd);
     dump_nospace(sep); // still have the unnecessary space afterwards, though
   }
   f(l->hd);
 }
 void dump_sep_c(void f(`b,`a), `b env, list_t<`a> l, dump_string_t sep) {
-  if(l == null)
+  if(l == NULL)
     return;
-  for(; l->tl != null; l = l->tl) {
+  for(; l->tl != NULL; l = l->tl) {
     f(env,l->hd);
     dump_nospace(sep); // still have the unnecessary space afterwards, though
   }
@@ -154,17 +154,17 @@ void group_c(void f(`b,`a), `b env, list_t<`a> l,
 }
 void egroup(void f(`a), list_t<`a> l,
             dump_string_t start, dump_string_t end, dump_string_t sep) {
-  if(l != null)
+  if(l != NULL)
     group(f,l,start,end,sep);
 }
 
 // is this backwards for nested namespaces? Consistent either way, but
 // should do the right thing!
 void dumpqvar(qvar_t v) {
-  let nsl = null;
+  let nsl = NULL;
   switch ((*v)[0]) {
   case Loc_n:
-    fallthru(null);
+    fallthru(NULL);
   case &Rel_n(x):
     nsl = x;
     break;
@@ -172,9 +172,9 @@ void dumpqvar(qvar_t v) {
     nsl = qvar_to_Cids && add_cyc_prefix ? new List(Absynpp::cyc_stringptr, x) : x;
     break;
   }
-  if (nsl != null) {
+  if (nsl != NULL) {
     dump_str(nsl->hd);
-    for(nsl = nsl->tl; nsl != null; nsl = nsl->tl) {
+    for(nsl = nsl->tl; nsl != NULL; nsl = nsl->tl) {
       // Note: This is the most common reason the result goes over 80 columns,
       //       but who really cares.
       if(qvar_to_Cids) dump_char('_');
@@ -244,7 +244,7 @@ void dumpargs(list_t<$(tqual_t,type_t)@> ts) {
 }
 
 void dump_callconv(attributes_t atts) {
-  for(; atts != null; atts = atts->tl)
+  for(; atts != NULL; atts = atts->tl)
     switch(atts->hd) {
     case Stdcall_att:  dump("_stdcall");  return;
     case Cdecl_att:    dump("_cdecl");    return;
@@ -256,7 +256,7 @@ void dump_callconv(attributes_t atts) {
 void dump_noncallconv(attributes_t atts) {
   // NOTE: Only for to_VC.  Ignore a calling-convention attribute.
   bool hasatt = false;
-  for(_ atts2 = atts; atts2 != null; atts2 = atts2->tl)
+  for(_ atts2 = atts; atts2 != NULL; atts2 = atts2->tl)
     switch(atts->hd) {
     case Stdcall_att:  break;
     case Cdecl_att:    break;
@@ -266,7 +266,7 @@ void dump_noncallconv(attributes_t atts) {
   if(!hasatt)
     return;
   dump("__declspec(");
-  for (; atts != null; atts = atts->tl)
+  for (; atts != NULL; atts = atts->tl)
     switch(atts->hd) {
     case Stdcall_att:  break;
     case Cdecl_att:    break;
@@ -277,21 +277,21 @@ void dump_noncallconv(attributes_t atts) {
 }
 
 void dumpatts(attributes_t atts) {
-  if (atts == null) return;
+  if (atts == NULL) return;
   if(to_VC) {
     dump_noncallconv(atts);
     return;
   }
   dump(" __attribute__((");
-  for (; atts != null; atts = atts->tl) {
+  for (; atts != NULL; atts = atts->tl) {
     dump(attribute2string(atts->hd));
-    if (atts->tl != null) dump(",");
+    if (atts->tl != NULL) dump(",");
   }
   dump(")) ");
 }
 
 bool next_is_pointer(list_t<type_modifier_t> tms) {
-  if (tms==null) return false;
+  if (tms==NULL) return false;
   switch (tms->hd) {
   case &Pointer_mod(_,_,_): return true;
   default: return false;
@@ -306,13 +306,13 @@ static void dumprgn(type_t t) {
 }
 
 static $(list_t<type_t>, list_t<type_t>) effects_split(type_t t) {
-  list_t<type_t> rgions = null;
-  list_t<type_t> effects = null;
+  list_t<type_t> rgions = NULL;
+  list_t<type_t> effects = NULL;
 
   switch (Tcutil::compress(t)) {
   case &AccessEff(r): rgions = new List(r,rgions); break;
   case &JoinEff(ts):
-    for (; ts != null; ts = ts->tl) {
+    for (; ts != NULL; ts = ts->tl) {
       let $(rs,es) = effects_split(ts->hd);
       rgions = List::imp_append(rs,rgions);
       effects = List::imp_append(es,effects);
@@ -327,14 +327,14 @@ static void dumpeff(type_t t) {
   let $(rgions,effects) = effects_split(t);
   rgions = List::imp_rev(rgions);
   effects = List::imp_rev(effects);
-  for (; effects != null; effects = effects->tl) {
+  for (; effects != NULL; effects = effects->tl) {
     dumpntyp(effects->hd);
     dump_char('+');
   }
   dump_char('{');
-  for (; rgions != null; rgions = rgions->tl) {
+  for (; rgions != NULL; rgions = rgions->tl) {
     dumprgn(rgions->hd);
-    if (rgions->tl != null) dump_char(',');
+    if (rgions->tl != NULL) dump_char(',');
   }
   dump_char('}');
 }
@@ -349,9 +349,9 @@ void dumpntyp(type_t t) {
   case VoidType:         dump("void"); return;
   case &VarType(tv): 
     dump_str(tv->name); return; // FIX: may want explicit kinds
-  case &Evar(k,null,i,_): 
+  case &Evar(k,NULL,i,_): 
     dump("%"); 
-    if (k == null) dump("?"); else dumpkind(k->v); 
+    if (k == NULL) dump("?"); else dumpkind(k->v); 
     dump(aprintf("(%d)",i)); return;
   case &Evar(k,&Opt(t),i,_): dumpntyp(t); return; // shouldn't happen!
   case &TunionType(TunionInfo(tu_info,ts,r)):
@@ -396,10 +396,10 @@ void dumpntyp(type_t t) {
   case FloatType:  dump("float");  return;
   case DoubleType: dump("double"); return;
   case &TupleType(ts): dump_char('$'); dumpargs(ts); return;
-  case &StructType(null,ts,_):   dump("struct"); dumptps(ts); return;
+  case &StructType(NULL,ts,_):   dump("struct"); dumptps(ts); return;
   case &StructType(n,  ts,_):
     dump("struct"); dumpqvar((qvar_t)n); dumptps(ts); return;
-  case &UnionType(null,ts,_):   dump("union"); dumptps(ts); return;
+  case &UnionType(NULL,ts,_):   dump("union"); dumptps(ts); return;
   case &UnionType(n,  ts,_):
     dump("union"); dumpqvar((qvar_t)n); dumptps(ts); return;
   case &AnonStructType(fs):
@@ -417,7 +417,7 @@ void dumpntyp(type_t t) {
 }
 
 void dumpvaropt(opt_t<var_t> vo) {
-  if(vo != null) dump_str(vo->v);
+  if(vo != NULL) dump_str(vo->v);
 }
 void dumpfunarg($(opt_t<var_t>,tqual_t,type_t)@ t) {
   dumptqtd((*t)[1],(*t)[2],dumpvaropt,(*t)[0]);
@@ -433,24 +433,24 @@ void dumpfunargs(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, bool c_varargs,
                  vararg_info_t *cyc_varargs, opt_t<type_t> effopt,
                  list_t<$(type_t,type_t)@> rgn_po) {
   dump_char('(');
-  for (; args != null; args = args->tl) {
+  for (; args != NULL; args = args->tl) {
     dumpfunarg(args->hd);
-    if (args->tl != null || c_varargs || cyc_varargs != null) dump_char(',');
+    if (args->tl != NULL || c_varargs || cyc_varargs != NULL) dump_char(',');
   }
   if (c_varargs) 
     dump("...");
-  else if (cyc_varargs != null) {
+  else if (cyc_varargs != NULL) {
     let arg = new $(cyc_varargs->name, cyc_varargs->tq, cyc_varargs->type);
     dump("...");
     dumptyp(cyc_varargs->rgn);
     if (cyc_varargs->inject) dump(" inject ");
     dumpfunarg(arg);
   }
-  if (effopt != null) {
+  if (effopt != NULL) {
     dump_semi();
     dumpeff(effopt->v);
   }
-  if (rgn_po != null) {
+  if (rgn_po != NULL) {
     dump_char(':');
     dump_rgnpo(rgn_po);
   }
@@ -494,7 +494,7 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Const_e(&LongLong_c(sg,i)):
     dump("<<FIX LONG LONG CONSTANT>>"); break; // FIX
   case &Const_e(&Float_c(x)):    dump(x);      break;
-  case &Const_e(Null_c):        dump("null"); break;
+  case &Const_e(Null_c):        dump("NULL"); break;
   case &Const_e(&String_c(s)):
     dump_char('"'); dump_nospace(Absynpp::string_escape(s)); dump_char('"');
     break;
@@ -527,7 +527,7 @@ void dumpexp_prec(int inprec, exp_t e) {
 
   case &AssignOp_e(e1,popt,e2):
     dumpexp_prec(myprec,e1);
-    if(popt != null)
+    if(popt != NULL)
       dump(Absynpp::prim2str(popt->v));
     dump_nospace("=");
     dumpexp_prec(myprec,e2);
@@ -631,13 +631,13 @@ void dumpexp_prec(int inprec, exp_t e) {
 
   case &Tunion_e(_,_,es,_,tuf):
     dumpqvar(tuf->name);
-    if (es != null) group(dumpexp,es,"(",")",",");
+    if (es != NULL) group(dumpexp,es,"(",")",",");
     break;
 
   case &Enum_e(n,_,_): dumpqvar(n); break;
 
   case &Malloc_e(ropt,t):
-    if (ropt != null) {
+    if (ropt != NULL) {
       dump("rmalloc(");
       dumpexp((exp_t)ropt); dump(",");
     } else {
@@ -649,7 +649,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     break;
 
   case &UnresolvedMem_e(n,des):
-    // Currently n is always null from the parser ???
+    // Currently n is always NULL from the parser ???
     group(dumpde, des, "{","}",",");
     break;
 
@@ -673,14 +673,14 @@ void dumpexp(exp_t e) {
 }
 
 void dumpswitchclauses(list_t<switch_clause_t> scs) {
-  for(; scs != null; scs = scs->tl) {
+  for(; scs != NULL; scs = scs->tl) {
     let c = scs->hd;
-    if(c->where_clause == null && c->pattern->r == (raw_pat_t)Wild_p)
+    if(c->where_clause == NULL && c->pattern->r == (raw_pat_t)Wild_p)
       dump("default:");
     else {
       dump("case");
       dumppat(c->pattern);
-      if(c->where_clause != null) {
+      if(c->where_clause != NULL) {
 	dump("&&");
 	dumpexp((exp_t)c->where_clause);
       }
@@ -707,7 +707,7 @@ void dumpstmt(stmt_t s) {
     } else
       dumpstmt(s2);
     break;
-  case &Return_s(null): dump("return;"); break;
+  case &Return_s(NULL): dump("return;"); break;
   case &Return_s(e): dump("return"); dumpexp((exp_t)e); dump_semi(); break;
   case &IfThenElse_s(e,s1,s2):
     dump("if("); dumpexp(e); dump_nospace("){");
@@ -757,9 +757,9 @@ void dumpstmt(stmt_t s) {
 
   case &SwitchC_s(e,ss): 
     dump("switch \"C\" ("); dumpexp(e); dump_nospace("){");
-    for(; ss != null; ss = ss->tl) {
+    for(; ss != NULL; ss = ss->tl) {
       let &SwitchC_clause(e,s,_) = ss->hd;
-      if(e == null)
+      if(e == NULL)
 	dump("default: ");
       else {
 	dump("case "); dumpexp((exp_t)e); dump_char(':');
@@ -769,7 +769,7 @@ void dumpstmt(stmt_t s) {
     dump_char('}');
     break;
 
-  case &Fallthru_s(null,_): dump("fallthru;");     break;
+  case &Fallthru_s(NULL,_): dump("fallthru;");     break;
   case &Fallthru_s(es,_):
     dump("fallthru("); dumpexps_prec(20,es); dump_nospace(");"); break;
 
@@ -796,7 +796,7 @@ void dumpdp($(list_t<designator_t>,pat_t)@ dp) {
 void dumppat(pat_t p) {
   switch(p->r) {
   case Wild_p: dump_char('_');    break;
-  case Null_p: dump("null"); break;
+  case Null_p: dump("NULL"); break;
   case &Int_p(Signed,i):   dump(aprintf("%d",i)); break;
   case &Int_p(Unsigned,i): dump(aprintf("%u",i)); break;
   case &Char_p(ch):
@@ -812,7 +812,7 @@ void dumppat(pat_t p) {
   case &UnknownFields_p(q,tvs,dps):
     dumpqvar(q); dumptvars(tvs); group(dumpdp,dps,"{","}",","); break;
   case &Struct_p(sd,_,tvs,dps):
-    if(sd->name != null)
+    if(sd->name != NULL)
       dumpqvar(sd->name->v);
     dumptvars(tvs);
     group(dumpdp,dps,"{","}",",");
@@ -820,7 +820,7 @@ void dumppat(pat_t p) {
   case &Tunion_p(_,tuf,tvs,ps):
     dumpqvar(tuf->name); 
     dumptvars(tvs);
-    if (ps != null) group(dumppat,ps,"(",")",",");
+    if (ps != NULL) group(dumppat,ps,"(",")",",");
     break;
   case &Enum_p(_,ef): dumpqvar(ef->name); break;
   }
@@ -828,7 +828,7 @@ void dumppat(pat_t p) {
 
 void dumptunionfield(tunionfield_t ef) {
   dumpqvar(ef->name);
-  if(ef->typs != null)
+  if(ef->typs != NULL)
     dumpargs(ef->typs);
 }
 void dumptunionfields(list_t<tunionfield_t> fields) {
@@ -836,7 +836,7 @@ void dumptunionfields(list_t<tunionfield_t> fields) {
 }
 void dumpenumfield(enumfield_t ef) {
   dumpqvar(ef->name);
-  if (ef->tag != null) {
+  if (ef->tag != NULL) {
     dump(" = ");
     dumpexp((exp_t)ef->tag);
   }
@@ -846,11 +846,11 @@ void dumpenumfields(list_t<enumfield_t> fields) {
 }
 
 void dumpstructfields(list_t<structfield_t> fields) {
-  for(; fields != null; fields = fields->tl) {
+  for(; fields != NULL; fields = fields->tl) {
     let &Structfield{name,tq,type,width,atts} = fields->hd;
     dumptqtd(tq,type,dump_str,name);
     dumpatts(atts);
-    if (width != null) {
+    if (width != NULL) {
       dump_char(':');
       dumpexp((exp_t)width);
     }
@@ -883,9 +883,9 @@ static void dump_callconv_fdqvar(fndecl_t fd) {
 }
 
 static void dumpids(list_t<vardecl_t> vds) {
-  for (; vds != null; vds = vds->tl) {
+  for (; vds != NULL; vds = vds->tl) {
     dumpqvar(vds->hd->name);
-    if (vds->tl != null) dump_char(',');
+    if (vds->tl != NULL) dump_char(',');
   }
 }
 
@@ -904,7 +904,7 @@ void dumpdecl(decl_t d) {
     type_t t = new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_type,
                                  List::map(Absynpp::arg_mk_opt,fd->args), 
                                  fd->c_varargs, fd->cyc_varargs,
-                                 fd->rgn_po, null});
+                                 fd->rgn_po, NULL});
     dumptqtd(Tqual(false,false,false),t,
 	     to_VC ? dump_callconv_fdqvar : dump_atts_qvar,fd);
     dump_char('{');
@@ -914,9 +914,9 @@ void dumpdecl(decl_t d) {
   case &Struct_d(sd):
     dumpscope(sd->sc);
     dump("struct");
-    if(sd->name != null) dumpqvar(sd->name->v);
+    if(sd->name != NULL) dumpqvar(sd->name->v);
     dumptvars(sd->tvs);
-    if(sd->fields == null)
+    if(sd->fields == NULL)
       dump_semi();
     else {
       dump_char('{');
@@ -929,9 +929,9 @@ void dumpdecl(decl_t d) {
   case &Union_d(ud):
     dumpscope(ud->sc);
     dump("union");
-    if(ud->name != null) dumpqvar(ud->name->v);
+    if(ud->name != NULL) dumpqvar(ud->name->v);
     dumptvars(ud->tvs);
-    if(ud->fields == null)
+    if(ud->fields == NULL)
       dump_semi();
     else {
       dump_char('{');
@@ -948,10 +948,10 @@ void dumpdecl(decl_t d) {
       let $(tq,t,tms) = Absynpp::to_tms(tq,type);
       // a kludge -- seems to work -- Unused_att is just a hack for "no spec"
       attribute_t call_conv = Unused_att;
-      for(_ tms2 = tms; tms2 != null; tms2 = tms2->tl)
+      for(_ tms2 = tms; tms2 != NULL; tms2 = tms2->tl)
 	switch(tms2->hd) {
 	case &Attributes_mod(_,atts):
-	  for(; atts != null; atts = atts->tl)
+	  for(; atts != NULL; atts = atts->tl)
 	    switch(atts->hd) {
 	    case Stdcall_att:  call_conv = Stdcall_att;  break;
 	    case Cdecl_att:    call_conv = Cdecl_att;    break;
@@ -970,7 +970,7 @@ void dumpdecl(decl_t d) {
       dumptqtd(tq, type, dumpqvar, name);
       dumpatts(atts);
     }
-    if(initializer != null) {
+    if(initializer != NULL) {
       dump_char('=');
       dumpexp((exp_t)initializer);
     }
@@ -984,7 +984,7 @@ void dumpdecl(decl_t d) {
       dump("tunion ");
     dumpqvar(name);
     dumptvars(tvs);
-    if(fields == null)
+    if(fields == NULL)
       dump_semi();
     else  {
       dump_char('{');
@@ -996,7 +996,7 @@ void dumpdecl(decl_t d) {
     dumpscope(sc);
     dump("enum ");
     dumpqvar(nm);
-    if (fields == null)
+    if (fields == NULL)
       dump_semi();
     else {
       dump_char('{');
@@ -1027,7 +1027,7 @@ void dumpdecl(decl_t d) {
     dump("namespace");
     dump_str(v);
     dump_char('{');
-    for(; tdl != null; tdl = tdl->tl)
+    for(; tdl != NULL; tdl = tdl->tl)
       dumpdecl(tdl->hd);
     dump_char('}');
     break;
@@ -1035,13 +1035,13 @@ void dumpdecl(decl_t d) {
     dump("using");
     dumpqvar(q);
     dump_char('{');
-    for(; tdl != null; tdl = tdl->tl)
+    for(; tdl != NULL; tdl = tdl->tl)
       dumpdecl(tdl->hd);
     dump_char('}');
     break;
   case &ExternC_d(tdl):
     dump("extern \"C\" {");
-    for(; tdl != null; tdl = tdl->tl)
+    for(; tdl != NULL; tdl = tdl->tl)
       dumpdecl(tdl->hd);
     dump_char('}');
     break;
@@ -1056,7 +1056,7 @@ static void dump_upperbound(exp_t e) {
 }
 
 void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
-  if(tms == null) {
+  if(tms == NULL) {
     f(a);
     return;
   }
@@ -1080,7 +1080,7 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
 
   default:
     bool next_is_pointer = false;
-    if(tms->tl != null)
+    if(tms->tl != NULL)
       switch (tms->tl->hd) {
       case &Pointer_mod(_,_,_): next_is_pointer = true; break;
       default: break;
@@ -1117,7 +1117,7 @@ void dumptqtd(tqual_t tq, type_t t, void f(`a), `a a) {
 void dumpdecllist2file(list_t<decl_t> tdl, FILE @`H f) {
   pos = 0;
   *dump_file = f;
-  for(; tdl != null; tdl = tdl->tl)
+  for(; tdl != NULL; tdl = tdl->tl)
     dumpdecl(tdl->hd);
   fprintf(f,"\n");
 }

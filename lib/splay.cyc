@@ -106,8 +106,8 @@ static void rotate_right(region_t<`r> r, struct noderef<`a,`b,`r> @`r nr) {
 
 static void lift(region_t<`r> r,
                  list_t<$(tunion direction,struct noderef<`a,`b,`r> @`r)@> dnl) {
-  while (dnl != null) {
-    if (dnl->tl == null) {
+  while (dnl != NULL) {
+    if (dnl->tl == NULL) {
       switch (dnl->hd) {
       case &$(LEFT,nr):  rotate_left(r,nr);  break;
       case &$(RIGHT,nr): rotate_right(r,nr); break;
@@ -139,7 +139,7 @@ static void lift(region_t<`r> r,
 bool rsplay(region_t<`r> r, 
             int reln(`a,`a), `a reln_first_arg, tunion `r tree<`a,`b,`r> tree) {
   region temp {
-    list_t<$(tunion direction, struct noderef<`a,`b,`r>@`r)@`temp,`temp> path = null;
+    list_t<$(tunion direction, struct noderef<`a,`b,`r>@`r)@`temp,`temp> path = NULL;
     while(true) {
       switch (tree) {
       case &Node(nr):
@@ -157,7 +157,7 @@ bool rsplay(region_t<`r> r,
         }
         break;
       case Leaf:
-        if (path != null) {
+        if (path != NULL) {
           lift(r, path->tl); // b/c of Dict::delete for example
         }
         return false;

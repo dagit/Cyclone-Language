@@ -46,10 +46,6 @@ namespace Getopt;
 /*char *getenv (); --wangyl*/
 #endif
 
-#ifndef	NULL
-#define NULL 0
-#endif
-
 int
 getopt_long (int argc, char ?`H ? argv, const char? options, const struct option ?`r1 long_options, int *`r2 opt_index)
 {
@@ -80,13 +76,13 @@ using Stdio;
 
 static struct option long_options[]=
 {
-  {"add", 1, null, 0},
-  {"append", 0, null, 0},
-  {"delete", 1, null, 0},
-  {"verbose", 0, null, 0},
-  {"create", 0, null, 0},
-  {"file", 1, null, 0},
-  {null, 0, null, 0}
+  {"add", 1, NULL, 0},
+  {"append", 0, NULL, 0},
+  {"delete", 1, NULL, 0},
+  {"verbose", 0, NULL, 0},
+  {"create", 0, NULL, 0},
+  {"file", 1, NULL, 0},
+  {NULL, 0, NULL, 0}
 };
 
 int
@@ -102,13 +98,13 @@ main (int argc, char ??argv)
       /*
       static struct option long_options[] =
       {
-	{"add", 1, null, 0},
-	{"append", 0, null, 0},
-	{"delete", 1, null, 0},
-	{"verbose", 0, null, 0},
-	{"create", 0, null, 0},
-	{"file", 1, null, 0},
-	{null, 0, null, 0}
+	{"add", 1, NULL, 0},
+	{"append", 0, NULL, 0},
+	{"delete", 1, NULL, 0},
+	{"verbose", 0, NULL, 0},
+	{"create", 0, NULL, 0},
+	{"file", 1, NULL, 0},
+	{NULL, 0, NULL, 0}
       };
       */
  

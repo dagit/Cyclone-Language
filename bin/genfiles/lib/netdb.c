@@ -32,8 +32,8 @@ name, struct _tagged_arr proto); extern struct Cyc_NetDB_hostent* Cyc_NetDB_geth
 struct _tagged_arr name); extern void Cyc_NetDB_herror( struct _tagged_arr);
 struct Cyc_Cnetdb_Cservent{ unsigned char* s_name; unsigned char** s_aliases;
 unsigned short s_port; unsigned char* s_proto; } ; struct Cyc_Cnetdb_Chostent{
-unsigned char* h_name; unsigned char** h_aliases; short h_addrtype; short
-h_length; struct Cyc_Inet_in_addr** h_addr_list; } ; extern struct Cyc_Cnetdb_Cservent*
+unsigned char* h_name; unsigned char** h_aliases; int h_addrtype; int h_length;
+struct Cyc_Inet_in_addr** h_addr_list; } ; extern struct Cyc_Cnetdb_Cservent*
 getservbyname( unsigned char* name, unsigned char* proto); extern struct Cyc_Cnetdb_Chostent*
 gethostbyname( unsigned char* name); extern void herror( unsigned char*); extern
 struct _tagged_arr pntlp_toCyc( struct Cyc_Inet_in_addr**); struct Cyc_NetDB_servent*
@@ -51,8 +51,8 @@ string_to_Cstring( name)); return( unsigned int) src?({ struct Cyc_NetDB_hostent
 _temp1=( struct Cyc_NetDB_hostent*) GC_malloc( sizeof( struct Cyc_NetDB_hostent));
 _temp1->h_name= Cstring_to_string((( struct Cyc_Cnetdb_Chostent*) _check_null(
 src))->h_name); _temp1->h_aliases= ntCsl_to_ntsl((( struct Cyc_Cnetdb_Chostent*)
-_check_null( src))->h_aliases); _temp1->h_addrtype=( int)(( struct Cyc_Cnetdb_Chostent*)
-_check_null( src))->h_addrtype; _temp1->h_length=( int)(( struct Cyc_Cnetdb_Chostent*)
+_check_null( src))->h_aliases); _temp1->h_addrtype=(( struct Cyc_Cnetdb_Chostent*)
+_check_null( src))->h_addrtype; _temp1->h_length=(( struct Cyc_Cnetdb_Chostent*)
 _check_null( src))->h_length; _temp1->h_addr_list= pntlp_toCyc((( struct Cyc_Cnetdb_Chostent*)
 _check_null( src))->h_addr_list); _temp1;}): 0;} void Cyc_NetDB_herror( struct
 _tagged_arr s){ herror( string_to_Cstring( s));}

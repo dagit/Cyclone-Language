@@ -36,9 +36,9 @@ static struct Lexer_entry {
 typedef struct Lexer_entry @ lexer_entry_t;
 
 // From shallow to deep syntax
-static list_t<list_t<int>>          chars         = null;
+static list_t<list_t<int>>          chars         = NULL;
 static int                      chars_count   = 0;
-static list_t<$(int,location_t)@> actions       = null;
+static list_t<$(int,location_t)@> actions       = NULL;
 static int                      actions_count = 0;
 
 static regexp_t encode_regexp(regular_expression_t r) {
@@ -57,7 +57,7 @@ static regexp_t encode_regexp(regular_expression_t r) {
 
 static regexp_t encode_casedef(list_t<acase_t> casedef) {
   regexp_t ans = Empty;
-  for(; casedef != null; casedef = casedef->tl) {
+  for(; casedef != NULL; casedef = casedef->tl) {
     let &$(expr,act) = casedef->hd;
     actions = new List(new $(actions_count, act), actions);
     ans = new Alt(ans, new Seq(encode_regexp(expr), 
@@ -69,20 +69,20 @@ static regexp_t encode_casedef(list_t<acase_t> casedef) {
 
 static 
 $(list_t<int>?, list_t<lexer_entry_t>)@ encode_lexdef(lexer_definition_t def) {
-  chars       = null;
+  chars       = NULL;
   chars_count = 0;
-  list_t<lexer_entry_t> entry_list_rev = null;
-  for(let entries = def->entrypoints; entries!=null; entries=entries->tl) {
+  list_t<lexer_entry_t> entry_list_rev = NULL;
+  for(let entries = def->entrypoints; entries!=NULL; entries=entries->tl) {
     let &$(entry_name, casedef) = entries->hd;
-    actions       = null;
+    actions       = NULL;
     actions_count = 0;
     let re = encode_casedef(casedef); // mutates actions
     entry_list_rev = new List(new Lexer_entry(entry_name, re, rev(actions)),
                               entry_list_rev);
   }
   list_t<int> ?chr = to_array(rev(chars));
-  chars   = null;
-  actions = null;
+  chars   = NULL;
+  actions = NULL;
   return new $(chr, imp_rev(entry_list_rev));
 }
 
@@ -170,7 +170,7 @@ static void fill_it(regexp_t r, set_t<transition_t,`H> ?`H v) {
 
 static set_t<transition_t> ?followpos(int sz, list_t<lexer_entry_t> entry_list) {
   set_t<transition_t> ?v = new {for i < sz : Set::empty(transition_cmp)};
-  for(; entry_list != null; entry_list = entry_list->tl) 
+  for(; entry_list != NULL; entry_list = entry_list->tl) 
     fill_it(entry_list->hd->regexp, v);
   return v;
 }
@@ -190,18 +190,18 @@ static $(int,list_t<int>)@ split_trans(transition_t      trans,
 }
 
 static $(int, list_t<int>)@ split_trans_set(set_t<transition_t,`H> trans_set) {
-  return Set::fold(split_trans, trans_set, new $(NO_ACTION,null));
+  return Set::fold(split_trans, trans_set, new $(NO_ACTION,NULL));
 }
 
 // The Ocaml I'm porting from isn't functional (re-entrant) here either:
 // (It doesn't look too hard to pass the state around functionally.)
-static opt_t<dict_t<set_t<transition_t>, int>> state_map      = null;
-static list_t<$(set_t<transition_t>,int)@>     todo           = null;
+static opt_t<dict_t<set_t<transition_t>, int>> state_map      = NULL;
+static list_t<$(set_t<transition_t>,int)@>     todo           = NULL;
 static int                                 next_state_num = 0;
 
 static void reset_state_mem() {
   state_map      = new Opt(Dict::empty(Set::compare));
-  todo           = null;
+  todo           = NULL;
   next_state_num = 0;
 }
 
@@ -227,9 +227,9 @@ static automata_move_t ?transition_from(list_t<int>         ?chars,
 					list_t<int>         pos_set) {
   set_t<transition_t> ?tr    = new {for i < 257 : Set::empty(transition_cmp)};
   automata_move_t   ?shift = new {for i < 257 : (automata_move_t)Backtrack};
-  for(; pos_set != null; pos_set = pos_set->tl) {
+  for(; pos_set != NULL; pos_set = pos_set->tl) {
     int pos = pos_set->hd;
-    for(list_t<int> cs_pos = chars[pos]; cs_pos != null; cs_pos = cs_pos->tl) {
+    for(list_t<int> cs_pos = chars[pos]; cs_pos != NULL; cs_pos = cs_pos->tl) {
       int c = cs_pos->hd;
       tr[c] = Set::union_two(tr[c], follow[pos]);
     }
@@ -243,7 +243,7 @@ static automata_t translate_state(list_t<int>         ?chars,
 				  set_t<transition_t,`H> ?follow, 
 				  set_t<transition_t,`H> state) {
   switch (split_trans_set(state)) {
-  case &$(n,null): return new Perform(n);
+  case &$(n,NULL): return new Perform(n);
   case &$(n,ps):   return new Shift((n == NO_ACTION ? 
                                      ((automata_trans_t)No_remember) : 
                                      (new Remember(n))),
@@ -256,8 +256,8 @@ make_dfa(Syntax::lexer_definition_t lexdef) {
   let &$(chars, entry_list) = encode_lexdef(lexdef);
   set_t<transition_t> ?follow = followpos(chars.size, entry_list);
   reset_state_mem();
-  list_t<automata_entry_t> initial_states = null;
-  for(; entry_list != null; entry_list = entry_list->tl) {
+  list_t<automata_entry_t> initial_states = NULL;
+  for(; entry_list != NULL; entry_list = entry_list->tl) {
     let le = entry_list->hd;
     initial_states = new List(new Automata_entry{le->name,
 			 		   get_state(firstpos(le->regexp)),
@@ -266,15 +266,15 @@ make_dfa(Syntax::lexer_definition_t lexdef) {
 			   initial_states);
   }
   initial_states = List::imp_rev(initial_states);
-  list_t<$(automata_t,int)@> states = null;
-  while(todo != null) {
+  list_t<$(automata_t,int)@> states = NULL;
+  while(todo != NULL) {
     let &$(st,i) = todo->hd;
     todo = todo->tl;
     states = new List(new $(translate_state(chars, follow, st), i), states);
   }
   states = List::imp_rev(states);
   let actions = new {for i < next_state_num : (automata_t)(new Perform(0))};
-  for(; states != null; states = states->tl) {
+  for(; states != NULL; states = states->tl) {
     let &$(act,i) = states->hd;
     actions[i] = act;
   }

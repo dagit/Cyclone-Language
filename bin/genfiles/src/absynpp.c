@@ -1576,7 +1576,7 @@ void* _temp918[ 1u]={& _temp919}; Cyc_Stdio_aprintf( _tag_arr("%u", sizeof(
 unsigned char), 3u), _tag_arr( _temp918, sizeof( void*), 1u));}})); _LL883:
 return Cyc_PP_text( _tag_arr("<<FIX LONG LONG CONSTANT>>", sizeof( unsigned char),
 27u)); _LL885: return Cyc_PP_text( _temp910); _LL887: return Cyc_PP_text(
-_tag_arr("null", sizeof( unsigned char), 5u)); _LL889: return({ struct Cyc_PP_Doc*
+_tag_arr("NULL", sizeof( unsigned char), 5u)); _LL889: return({ struct Cyc_PP_Doc*
 _temp920[ 3u]; _temp920[ 2u]= Cyc_PP_text( _tag_arr("\"", sizeof( unsigned char),
 2u)); _temp920[ 1u]= Cyc_PP_text( Cyc_Absynpp_string_escape( _temp912));
 _temp920[ 0u]= Cyc_PP_text( _tag_arr("\"", sizeof( unsigned char), 2u)); Cyc_PP_cat(
@@ -1961,7 +1961,7 @@ _temp1214=(( struct Cyc_Absyn_Tunion_p_struct*) _temp1140)->f2; goto _LL1213;
 _LL1213: _temp1212=(( struct Cyc_Absyn_Tunion_p_struct*) _temp1140)->f3; goto
 _LL1211; _LL1211: _temp1210=(( struct Cyc_Absyn_Tunion_p_struct*) _temp1140)->f4;
 goto _LL1171;} else{ goto _LL1141;} _LL1143: s= Cyc_PP_text( _tag_arr("_",
-sizeof( unsigned char), 2u)); goto _LL1141; _LL1145: s= Cyc_PP_text( _tag_arr("null",
+sizeof( unsigned char), 2u)); goto _LL1141; _LL1145: s= Cyc_PP_text( _tag_arr("NULL",
 sizeof( unsigned char), 5u)); goto _LL1141; _LL1147: if( _temp1174 == ( void*)
 Cyc_Absyn_Signed){ s= Cyc_PP_text(( struct _tagged_arr)({ struct Cyc_Stdio_Int_pa_struct
 _temp1217; _temp1217.tag= Cyc_Stdio_Int_pa; _temp1217.f1=( int)(( unsigned int)

@@ -86,7 +86,7 @@ namespace Stdlib {
   }
   */
   static void check_valid_cstring(const char ?`r s) {
-    if (s == null) throw new InvalidArg("strtox null pointer");
+    if (s == NULL) throw new InvalidArg("strtox NULL pointer");
     bool found_zero = false;
     for (int i = s.size - 1; i >= 0; i--) 
       if (s[i] == '\0') { found_zero = true; break; }
@@ -99,9 +99,9 @@ namespace Stdlib {
     check_valid_cstring(nptr);
     // FIX:  TOTAL HACK ALERT
     Cstring c = underlying_Cstring(nptr); // so far so good
-    Cstring e = (endptr == null) ? null : c; 
+    Cstring e = (endptr == NULL) ? NULL : c; 
     double d = Cstdlib::strtod(c, &e); 
-    if (endptr != null) { 
+    if (endptr != NULL) { 
       // need to adjust the endptr -- the best we can do is calculate
       // the diff between e and c.  And our pointer arithmetic doesn't
       // support subtraction on * types.  So I'm casting to unsigned int.
@@ -117,9 +117,9 @@ namespace Stdlib {
     check_valid_cstring(n);
     // FIX:  TOTAL HACK ALERT
     Cstring c = underlying_Cstring(n); // so far so good
-    Cstring e = (endptr == null) ? null : c; 
+    Cstring e = (endptr == NULL) ? NULL : c; 
     long r = Cstdlib::strtol(c, &e, base); 
-    if (endptr != null) { 
+    if (endptr != NULL) { 
       // need to adjust the end -- the best we can do is calculate
       // the diff between e and c.  And our pointer arithmetic doesn't
       // support subtraction on * types.  So I'm casting to unsigned int.
@@ -135,9 +135,9 @@ namespace Stdlib {
     check_valid_cstring(n);
     // FIX:  TOTAL HACK ALERT
     Cstring c = underlying_Cstring(n); // so far so good
-    Cstring e = (endptr == null) ? null : c; 
+    Cstring e = (endptr == NULL) ? NULL : c; 
     unsigned long r = Cstdlib::strtoul(c, &e, base); 
-    if (endptr != null) { 
+    if (endptr != NULL) { 
       // need to adjust the end -- the best we can do is calculate
       // the diff between e and c.  And our pointer arithmetic doesn't
       // support subtraction on * types.  So I'm casting to unsigned int.

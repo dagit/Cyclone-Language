@@ -37,14 +37,14 @@ abstract struct Set<`a,`r::R> {
 
 /* Given a comparison function, return an empty set. */
 set_t<`a> empty(int comp(`a,`a)) {
-  return new Set(comp,0,null);
+  return new Set(comp,0,NULL);
 }
 set_t<`a,`r> rempty(region_t<`r> rgn, int comp(`a,`a)) {
-  return rnew(rgn) Set(comp,0,null);
+  return rnew(rgn) Set(comp,0,NULL);
 }
 
 set_t<`a> singleton(int comp(`a,`a),`a x) {
-  return new Set(comp,1,new List(x,null));
+  return new Set(comp,1,new List(x,NULL));
 }
 
 int cardinality(set_t s) {
@@ -58,7 +58,7 @@ bool is_empty(set_t s) {
 
 /* Return true if element is present, false otherwise */
 static bool member_b(int compare(`a,`a),list_t<`a> n,`a elt) {
-  while (n != null) {
+  while (n != NULL) {
     int i = compare(elt,n->hd);
     if (i == 0) return(true);
     else if (i < 0) return(false);
@@ -78,18 +78,18 @@ bool member(set_t<`a> s,`a elt) {
 static list_t<`a,`r> insert_b(region_t<`r> rgn,
                               int compare(`a,`a),list_t<`a,`r> n,`a elt) {
 
-  if (n == null)
-    return rnew(rgn) List(elt,null);
+  if (n == NULL)
+    return rnew(rgn) List(elt,NULL);
   else {
     int i = compare(elt,n->hd);
     if (i < 0) 
       return rnew(rgn) List(elt,n);
     else {
-      list_t<`a,`r> result = rnew(rgn) List(n->hd,null);
+      list_t<`a,`r> result = rnew(rgn) List(n->hd,NULL);
       list_t<`a,`r> prev = result;
       n = n->tl;
-      while (n != null && (i = compare(n->hd,elt)) < 0) {
-	prev->tl = rnew(rgn) List(n->hd,null);
+      while (n != NULL && (i = compare(n->hd,elt)) < 0) {
+	prev->tl = rnew(rgn) List(n->hd,NULL);
 	prev = prev->tl;
 	n = n->tl;
       }
@@ -120,53 +120,53 @@ set_t<`a> union_two(set_t<`a,`H> s1,set_t<`a,`H> s2) {
   if(s2->cardinality == 0)
     return s1;
 
-  list_t<`a> nodes = null;
+  list_t<`a> nodes = NULL;
   int cardinality = 0;
   int (@comp)(`a,`a) = s1->compare;
 
   list_t<`a> x1 = s1->nodes;
   list_t<`a> x2 = s2->nodes;
-  list_t<`a> curr = null;
+  list_t<`a> curr = NULL;
 
-  while ((x1 != null) && (x2 != null)) {
+  while ((x1 != NULL) && (x2 != NULL)) {
     int i = comp(x1->hd,x2->hd);
     if (i == 0) {
       // they're equal -- discard one copy
       x2 = x2->tl;
     } else if (i < 0) {
       // x1->hd <= x2->hd -- insert x1 into nodes
-      if (curr == null) {
-	nodes = new List(x1->hd,null);
+      if (curr == NULL) {
+	nodes = new List(x1->hd,NULL);
 	curr = nodes;
       } else {
-	curr->tl = new List(x1->hd,null);
+	curr->tl = new List(x1->hd,NULL);
 	curr = curr->tl;
       }
       x1 = x1->tl;
       ++cardinality;
     } else {
       // x2->hd <= x1->hd -- insert x2 into nodes
-      if (curr == null) {
-	nodes = new List(x2->hd,null);
+      if (curr == NULL) {
+	nodes = new List(x2->hd,NULL);
 	curr = nodes;
       } else {
-	curr->tl = new List(x2->hd,null);
+	curr->tl = new List(x2->hd,NULL);
 	curr = curr->tl;
       }
       x2 = x2->tl;
       ++cardinality;
     }
   }
-  if (x1 != null) {
+  if (x1 != NULL) {
     // splice x1 into the tail
-    if (curr == null)
+    if (curr == NULL)
       nodes = x1;
     else 
       curr->tl = x1;
     cardinality += List::length(x1);
-  } else if (x2 != null) {
+  } else if (x2 != NULL) {
     // splice x2 into the tail
-    if (curr == null)
+    if (curr == NULL)
       nodes = x2;
     else 
       curr->tl = x2;
@@ -181,11 +181,11 @@ set_t<`a> union_two(set_t<`a,`H> s1,set_t<`a,`H> s2) {
 static list_t<`a> delete_b(int compare(`a,`a),list_t<`a,`H> n,`a elt) {
   if (compare(n->hd,elt) == 0) return(n->tl);
 
-  list_t<`a> result = new List(n->hd,null);
+  list_t<`a> result = new List(n->hd,NULL);
   list_t<`a> prev = result;
   n = n->tl;
-  while (n != null && (compare(n->hd,elt) != 0)) {
-    prev->tl = new List(n->hd,null);
+  while (n != NULL && (compare(n->hd,elt) != 0)) {
+    prev->tl = new List(n->hd,NULL);
     prev = prev->tl;
     n = n->tl;
   }
@@ -212,7 +212,7 @@ list_t<`a,`r> elements(set_t<`a,`r> s) {
 `b fold(`b f(`a,`b),set_t<`a> s,`b accum) {
   list_t n = s->nodes;
 
-  while (n != null) {
+  while (n != NULL) {
     accum = f(n->hd,accum);
     n = n->tl;
   }
@@ -221,7 +221,7 @@ list_t<`a,`r> elements(set_t<`a,`r> s) {
 `b fold_c(`b f(`c,`a,`b),`c env,set_t<`a> s,`b accum) {
   list_t n = s->nodes;
 
-  while (n != null) {
+  while (n != NULL) {
     accum = f(env,n->hd,accum);
     n = n->tl;
   }
@@ -249,21 +249,21 @@ set_t<`a> intersect(set_t<`a,`H> s1,set_t<`a,`H> s2) {
   int (@comp)(`a,`a) = s1->compare;
   list_t<`a> x1 = s1->nodes;
   list_t<`a> x2 = s2->nodes;
-  list_t<`a> result=null,prev=null;
+  list_t<`a> result=NULL,prev=NULL;
   int card = 0;
-  if(x1 == null)
+  if(x1 == NULL)
     return s1;
-  if(x2 == null)
+  if(x2 == NULL)
     return s2;
 
-  while (x1 != null && x2 != null) {
+  while (x1 != NULL && x2 != NULL) {
     int i = comp(x1->hd,x2->hd);
     if (i == 0) {
-      if (result == null) {
-	result = new List(x1->hd,null);
+      if (result == NULL) {
+	result = new List(x1->hd,NULL);
 	prev = result;
       } else {
-	prev->tl = new List(x1->hd,null);
+	prev->tl = new List(x1->hd,NULL);
 	prev = prev->tl;
       }
       ++card;
@@ -281,8 +281,8 @@ set_t<`a> intersect(set_t<`a,`H> s1,set_t<`a,`H> s2) {
 set_t<`a> from_list(int comp(`a,`a),list_t<`a,`r> x) {
   list_t<`a> z = List::merge_sort(comp,x);
   // remove duplicates
-  for (list_t<`a> y=z; y!=null; y=y->tl) {
-    if ((y->tl != null) && (comp(y->hd,y->tl->hd) == 0))
+  for (list_t<`a> y=z; y!=NULL; y=y->tl) {
+    if ((y->tl != NULL) && (comp(y->hd,y->tl->hd) == 0))
       y->tl = y->tl->tl;
   }
   return new Set(comp,List::length(z),z);
@@ -294,8 +294,8 @@ bool subset(set_t<`a> s1,set_t<`a> s2) {
   list_t<`a> x2 = s2->nodes;
 
   while (true) {
-    if (x1 == null) return true;
-    if (x2 == null) return false;
+    if (x1 == NULL) return true;
+    if (x2 == NULL) return false;
     int i = comp(x1->hd,x2->hd);
     if (i == 0) {
       x1 = x1->tl;
@@ -313,9 +313,9 @@ set_t<`a> diff(set_t<`a,`H> s1,set_t<`a,`H> s2) {
   list_t<`a> x2 = s2->nodes;
   int card = s1->cardinality;
 
-  if (x2 == null) return(s1); 
+  if (x2 == NULL) return(s1); 
 
-  while (x2 != null) {
+  while (x2 != NULL) {
     `a elt = x2->hd;  
 
     if (member_b(comp,x1,elt)) {
@@ -335,7 +335,7 @@ int compare(set_t<`a> s1,set_t<`a> s2) {
   list_t<`a> x1 = s1->nodes;
   list_t<`a> x2 = s2->nodes;
   int (@comp)(`a,`a) = s1->compare;
-  while (x1 != null) {
+  while (x1 != NULL) {
     int diff = comp(x1->hd,x2->hd);
     if (diff != 0) return diff;
     x1 = x1->tl;
@@ -354,6 +354,6 @@ xtunion exn {Absent};
  * If the set is empty, throw Absent.
  */
 `a choose(set_t<`a> s) {
-  if (s->nodes == null) throw Absent;
+  if (s->nodes == NULL) throw Absent;
   return(s->nodes->hd);
 }

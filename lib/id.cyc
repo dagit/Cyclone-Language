@@ -63,7 +63,7 @@ mstring_t id_to_string(Id x) {
   return strconcat_l(new List(new {x->s},
                               new List(new ((string_t)"$"), 
                                        new List(new {(string_t)string_of_int(x->i)},
-                                                null))));
+                                                NULL))));
 }
 void id_prn(FILE @f, Id x) { fprintf(f, "%s", id_to_string(x)); }
 

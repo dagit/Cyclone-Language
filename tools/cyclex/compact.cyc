@@ -50,7 +50,7 @@ static int most_frequent_elt(int ?v) {
 // Transform an array into a list of (position, non-default element)
 
 static list_t<$(int,int)@> non_default_elements(int def, int ?v) {
-  list_t<$(int,int)@> ans = null;
+  list_t<$(int,int)@> ans = NULL;
   for(int i=v.size-1; i >= 0; --i) {
     int e = v[i];
     if(e != def)
@@ -60,8 +60,8 @@ static list_t<$(int,int)@> non_default_elements(int def, int ?v) {
 }
 
 // Compact the transition and check arrays (initialized in compact_tables)??
-static int ?trans = null;
-static int ?check = null;
+static int ?trans = NULL;
+static int ?check = NULL;
 static int last_used = 0;
 
 static void grow_transitions() {
@@ -76,7 +76,7 @@ static int pack_from(list_t<$(int,int)@> nondef, int b); // forward declaration
 
 static int try_pack(list_t<$(int,int)@> nondef, list_t<$(int,int)@> rem, int b) {
   switch (rem) {
-  case null: return b;
+  case NULL: return b;
   case &List{.hd= &$(pos,v), .tl= rem2}:
     if(check[b+pos] == -1)
       return try_pack(nondef, rem2, b);
@@ -104,7 +104,7 @@ static $(int,int)@ pack_moves(int state_num, automata_move_t ?moves) {
   list_t<$(int,int)@> nondef = non_default_elements(def, moves_v);
   int               base   = pack_from(nondef,0);
 
-  for(; nondef != null; nondef = nondef->tl) {
+  for(; nondef != NULL; nondef = nondef->tl) {
     let &$(pos,v) = nondef->hd;
     trans[base+pos] = v;
     check[base+pos] = state_num;

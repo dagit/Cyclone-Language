@@ -101,7 +101,7 @@ dict_t<`a,`b> insert_new(dict_t<`a,`b> d, `a key, `b data) {
 
 dict_t<`a,`b> inserts(dict_t<`a,`b> d,
                           List::list_t<$(`a,`b)@> kds) {  
-  for (; kds != null; kds = kds->tl)
+  for (; kds != NULL; kds = kds->tl)
     d = insert(d, (*kds->hd)[0], (*kds->hd)[1]);
   return d;
 }
@@ -125,7 +125,7 @@ Core::opt_t<`b> lookup_opt(dict_t<`a,`b> d,`a key) {
     case &Node(nr): return new Core::Opt(nr->v->data);
     case Leaf:     throw new Core::Impossible("Dict::lookup");
   }
-  return null;
+  return NULL;
 }
 
 static int get_largest(`a x, `a y) { return 1; }
@@ -290,6 +290,6 @@ List::list_t<$(`a,`b)@> to_list_f(`a k, `b v, List::list_t<$(`a,`b)@`H,`H> accum
 }
 
 List::list_t<$(`a,`b)@> to_list(dict_t<`a,`b> d) {
-  return fold(to_list_f, d, null);
+  return fold(to_list_f, d, NULL);
 }
 

@@ -32,7 +32,7 @@ struct Queue<`a,`r::R> { list_t<`a,`r> front; list_t<`a,`r> rear; };
 
 // true when the queue is empty
 bool is_empty(queue_t q)  {
-   return(q->front == null);
+   return(q->front == NULL);
 }
 
 // raised by take and peek
@@ -40,14 +40,14 @@ xtunion exn { Empty };
 
 // create a new queue
 queue_t create() {
-  return new Queue(null,null);
+  return new Queue(NULL,NULL);
 }
 
 // insert an element into the rear of the queue (side effect)
 void radd(region_t<`r> r, queue_t<`a,`r> q,`a x) {
-  list_t cell = rnew(r) List(x,null);
+  list_t cell = rnew(r) List(x,NULL);
 
-  if (q->front == null) {
+  if (q->front == NULL) {
     q->front = cell;
     q->rear = cell;
   } else {
@@ -62,14 +62,14 @@ void add(queue_t<`a,`H> q, `a x) {
 
 // get and remove an element from the front of the queue (side effect)
 `a take(queue_t<`a> q) {
-  if (q->front == null)
+  if (q->front == NULL)
     throw Empty; // FIX: toc problems if we try to return this.
   //    return (throw Empty);
   else {
     let x = q->front->hd;
     q->front = q->front->tl;
-    if (q->front == null) {  // necessary to ensure last cell is
-      q->rear = null;        // garbage collected
+    if (q->front == NULL) {  // necessary to ensure last cell is
+      q->rear = NULL;        // garbage collected
     }
     return x;
   }
@@ -77,7 +77,7 @@ void add(queue_t<`a,`H> q, `a x) {
 
 // return the first element in the queue without removing it
 `a peek(queue_t<`a> q) {
-  if (q->front == null)
+  if (q->front == NULL)
     throw Empty; // FIX: toc problems if we try to return this.
   else {
     return(q->front->hd);
@@ -86,8 +86,8 @@ void add(queue_t<`a,`H> q, `a x) {
 
 // clear out the entire queue (side effect)
 void clear(queue_t<`a> q) {
-  q->front = null;
-  q->rear = null;
+  q->front = NULL;
+  q->rear = NULL;
 }
 
 // return the number of elements in the queue
@@ -97,12 +97,12 @@ int length(queue_t<`a> q) {
 
 // apply f to each element in the queue from the front to the back
 void iter(void f(`a), queue_t<`a> q) {
-  for (list_t<`a> x = q->front; x != null; x = x->tl) {
+  for (list_t<`a> x = q->front; x != NULL; x = x->tl) {
     f(x->hd);
   }
 }
 void app(`b f(`a), queue_t<`a> q) {
-  for (list_t<`a> x = q->front; x != null; x = x->tl) {
+  for (list_t<`a> x = q->front; x != NULL; x = x->tl) {
     f(x->hd);
   }
 }

@@ -65,10 +65,10 @@ static struct Trie {
 
 // These must be (re-)initialized in lex_init.
 static int    num_kws  = 0;
-static int ?  kw_nums  = null;
-static struct Xarray::Xarray<stringptr_t> * symbols  = null;
-static trie_t ids_trie      = null;//int field is symbol index, 0 for not there
-static trie_t typedefs_trie = null;//int field true iff path is a typedef
+static int ?  kw_nums  = NULL;
+static struct Xarray::Xarray<stringptr_t> * symbols  = NULL;
+static trie_t ids_trie      = NULL;//int field is symbol index, 0 for not there
+static trie_t typedefs_trie = NULL;//int field true iff path is a typedef
 
 static int comment_depth = 0;
 
@@ -127,7 +127,7 @@ static $(string_t,short) rw_array[] = {
   $("malloc", MALLOC),
   $("namespace", NAMESPACE),
   $("new", NEW),
-  $("null", NULL_kw),
+  $("NULL", NULL_kw),
   $("offsetof", OFFSETOF),
   $("region_t", REGION_T),
   $("region", REGION),
@@ -173,7 +173,7 @@ static trie_t trie_lookup(trie_t t, string_t buff, int offset, int len) {
     case &Many(arr):
       // walk down one level
       int ch = trie_char(buff[i]);
-      if(arr[ch] == null)
+      if(arr[ch] == NULL)
 	arr[ch] = new Trie(Zero,0);
       t = arr[ch];
       ++i;
@@ -183,7 +183,7 @@ static trie_t trie_lookup(trie_t t, string_t buff, int offset, int len) {
       if(one_ch == buff[i]) {
 	t = one_trie;
       } else {
-	let arr = new {for j < 64: null};
+	let arr = new {for j < 64: NULL};
 	arr[trie_char(one_ch)] = one_trie;
 	let ch = trie_char(buff[i]);
 	arr[ch] = new Trie(Zero,0);
@@ -318,15 +318,15 @@ static struct Lstate {
 };
 typedef struct Lstate @lstate_t;
 
-static opt_t<lstate_t> lstate = null;
+static opt_t<lstate_t> lstate = NULL;
 
 static void typedef_init() {
-  let init_lvis   = new Lvis{.current_namespace=null,
-                             .imported_namespaces=null};
-  let init_lstack = new List(init_lvis, null);
+  let init_lvis   = new Lvis{.current_namespace=NULL,
+                             .imported_namespaces=NULL};
+  let init_lstack = new List(init_lvis, NULL);
   Dict::dict_t<list_t<var_t,`H>,ldecls_t> init_decls = 
     Dict::insert(Dict::empty(varlist_cmp),
-                 null,
+                 NULL,
                  new Ldecls{.typedefs=Set::empty(zstrptrcmp),
                                .namespaces=Set::empty(zstrptrcmp)});
   lstate = new Opt(new Lstate{.lstack=init_lstack,.decls=init_decls});
@@ -336,12 +336,12 @@ static list_t<var_t> get_absolute_namespace(List_t<var_t,`H> ns) {
   // ns is a relative namespace, we return the absolute namespace
   var_t n = ns->hd;
   // For each enclosing scope...
-  for (list_t<lvis_t> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
+  for (list_t<lvis_t> ls = lstate->v->lstack; ls != NULL; ls = ls->tl) {
     lvis_t lv = ls->hd; // ... see what namespaces are visible
     // ... and look in each such visible namespace
     list_t<list_t<var_t>> x = new List(lv->current_namespace,
                                        lv->imported_namespaces);
-    for (; x != null; x = x->tl) {
+    for (; x != NULL; x = x->tl) {
       ldecls_t ld = Dict::lookup(lstate->v->decls,x->hd);
       // ... for namespace n
       if (Set::member(ld->namespaces,n))
@@ -350,7 +350,7 @@ static list_t<var_t> get_absolute_namespace(List_t<var_t,`H> ns) {
     }
   }
   yyerror(aprintf("undeclared namespace %s",String::str_sepstr(ns,"::")));
-  return null; 
+  return NULL; 
 }
 
 static void recompute_typedefs() {
@@ -358,11 +358,11 @@ static void recompute_typedefs() {
   typedefs_trie = new Trie(Zero,false);
   
  //For each enclosing scope, get the visible namespaces and add all the typedefs
-  for (list_t<lvis_t> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
+  for (list_t<lvis_t> ls = lstate->v->lstack; ls != NULL; ls = ls->tl) {
     lvis_t lv = ls->hd; 
     list_t<list_t<var_t>> x = new List(lv->current_namespace, 
                                        lv->imported_namespaces);
-    for (; x != null; x = x->tl) {
+    for (; x != NULL; x = x->tl) {
       ldecls_t ld = Dict::lookup(lstate->v->decls,x->hd);
       Set::iter(insert_typedef,ld->typedefs);
     }
@@ -380,7 +380,7 @@ static bool is_typedef_in_namespace(List_t<var_t,`H> ns, var_t v) {
   }
 }
 static bool is_typedef(List::list_t<var_t,`H> ns, var_t v) {
-  if (ns != null)
+  if (ns != NULL)
     return is_typedef_in_namespace((List_t<var_t,`H>)ns,v);
   // all unqualified typedefs must be in the trie 
   // look ma -- fast lookup
@@ -394,7 +394,7 @@ static bool is_typedef(List::list_t<var_t,`H> ns, var_t v) {
     case &One(_,      one_trie): t = one_trie; break;
     case &Many(arr):
       let next = arr[trie_char(s[i])];
-      if(next == null)
+      if(next == NULL)
 	return false;
       t = next;
       break;
@@ -404,10 +404,10 @@ static bool is_typedef(List::list_t<var_t,`H> ns, var_t v) {
 
 void enter_namespace(var_t s) {
   list_t<var_t> ns = lstate->v->lstack->hd->current_namespace;
-  list_t<var_t> new_ns = List::append(ns,new List(s,null));
+  list_t<var_t> new_ns = List::append(ns,new List(s,NULL));
   // Push the new namespace on the stack
   lstate->v->lstack =
-    new List(new Lvis{.current_namespace = new_ns,.imported_namespaces = null},
+    new List(new Lvis{.current_namespace = new_ns,.imported_namespaces = NULL},
              lstate->v->lstack);
   // If this is the first time the new namespace has been encountered,
   // make sure it is bound in the old namespace, and add an empty
@@ -442,11 +442,11 @@ void enter_using(qvar_t q) {
   _ ns;
   switch ((*q)[0]) {
   case Loc_n:
-    ns = (List_t<stringptr_t>)(new List((*q)[1],null));
+    ns = (List_t<stringptr_t>)(new List((*q)[1],NULL));
     break;
   case &Rel_n(y): fallthru(y);
   case &Abs_n(y):
-    ns = (List_t<stringptr_t>)List::append(y,new List((*q)[1],null));
+    ns = (List_t<stringptr_t>)List::append(y,new List((*q)[1],NULL));
     break;
   }
 
@@ -491,7 +491,7 @@ static short process_id(Lexbuf<`a> lbuf) {
   let s = get_symbol(symbol_num);
 
   // maybe it's a typedef
-  if (is_typedef(null,s)) {
+  if (is_typedef(NULL,s)) {
     token_qvar = new $(rel_ns_null, s);
     return QUAL_TYPEDEF_NAME;
   }
@@ -506,7 +506,7 @@ static short process_qual_id(Lexbuf<`a> lbuf) {
   int       end = lbuf->lex_curr_pos;
   mstring_t s   = lbuf->lex_buffer;
 
-  list_t<var_t> rev_vs = null;
+  list_t<var_t> rev_vs = NULL;
 
   while (i<end) {
     int start = i;
@@ -519,7 +519,7 @@ static short process_qual_id(Lexbuf<`a> lbuf) {
     rev_vs = new List(v,rev_vs);
     i += 2;
   }
-  if (rev_vs == null)
+  if (rev_vs == NULL)
     throw new Impossible("bad namespace");
   var_t         v  = rev_vs->hd;
   list_t<var_t> vs = List::imp_rev(rev_vs->tl);

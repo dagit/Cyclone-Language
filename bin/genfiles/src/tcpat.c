@@ -985,7 +985,7 @@ Cyc_Set_Set*(*)( int(* comp)( struct Cyc_Tcpat_Con_s*, struct Cyc_Tcpat_Con_s*))
 Cyc_Set_empty)( Cyc_Tcpat_compare_con);} static struct Cyc_Core_Opt Cyc_Tcpat_one_opt={(
 void*) 1}; static struct Cyc_Core_Opt Cyc_Tcpat_two_opt={( void*) 2}; static
 struct Cyc_Core_Opt* Cyc_Tcpat_one_opt_ptr=( struct Cyc_Core_Opt*)& Cyc_Tcpat_one_opt;
-static unsigned char _temp479[ 5u]="null"; static struct Cyc_Tcpat_Name_v_struct
+static unsigned char _temp479[ 5u]="NULL"; static struct Cyc_Tcpat_Name_v_struct
 Cyc_Tcpat_null_name_value={ 0u,{ _temp479, _temp479, _temp479 +  5u}}; static
 unsigned char _temp481[ 4u]="ptr"; static struct Cyc_Tcpat_Name_v_struct Cyc_Tcpat_ptr_name_value={
 0u,{ _temp481, _temp481, _temp481 +  4u}}; static unsigned char _temp483[ 6u]="tuple";

@@ -121,7 +121,7 @@ int strncmp(const char ? s1, const char? s2, size_t n) {
   return ncmp(s1,0,len1,s2,0,len2,n,case_cmp);
 }
 
-// Like strcmp but don't consider zeros (null characters) as marking
+// Like strcmp but don't consider zeros (NUL characters) as marking
 // the end of strings.
 int zstrcmp(const char ? a, const char ? b) {
   if(a == b)
@@ -219,18 +219,18 @@ char ?`r rstrconcat_l(region_t<`r> r,list_t<const char ?@>strs)
   region temp {
     list_t<size_t,`temp> lens = 
       rnew(temp) List((size_t)0,        // save length of each string
-                      null);            // (with junk 0 on front)
+                      NULL);            // (with junk 0 on front)
     list_t<size_t,`temp> end = lens;   // last cons cell in 'lens'
-    for(_ p = strs; p!=null; p = p->tl) {
+    for(_ p = strs; p!=NULL; p = p->tl) {
       len = strlen(*(p->hd));
       total_len += len;
-      end->tl = rnew(temp) List(len,null);
+      end->tl = rnew(temp) List(len,NULL);
       end = end->tl;
     } 
     lens = lens->tl;                      // remove junk/temporary 0
     ans = rnew_string(r,total_len+1);
     size_t i = 0;
-    while (strs != null) {
+    while (strs != NULL) {
       let next    = *(strs->hd);
       len            = lens->hd;
       strncpy(ans+i,next,len);
@@ -250,19 +250,19 @@ mstring_t strconcat_l(list_t<const char ?@> strs)
 // Allocate a new string and fill it with the concatenation of strs,
 // using separator between each element
 char ?`r rstr_sepstr(region_t<`r> r,list_t<const char ?@> strs, const char ? separator) {
-  if (strs == null)    return rnew_string(r,0);
-  if (strs->tl == null) return rstrdup(r,*(strs->hd));
+  if (strs == NULL)    return rnew_string(r,0);
+  if (strs->tl == NULL) return rstrdup(r,*(strs->hd));
   let p = strs;
   region temp {
-    list_t lens = rnew(temp) List((size_t)0,null);// see comments in strconcat_l
+    list_t lens = rnew(temp) List((size_t)0,NULL);// see comments in strconcat_l
     list_t end = lens;
     size_t len        = 0;   // initialized to avoid warning
     size_t total_len  = 0;
     size_t list_len   = 0;
-    for(;p!=null;p=p->tl) {
+    for(;p!=NULL;p=p->tl) {
       len = strlen(*(p->hd));
       total_len += len;
-      end->tl = rnew(temp) List(len,null);
+      end->tl = rnew(temp) List(len,NULL);
       end = end->tl;
       ++list_len;
     }
@@ -271,7 +271,7 @@ char ?`r rstr_sepstr(region_t<`r> r,list_t<const char ?@> strs, const char ? sep
     total_len += (list_len - 1)*seplen;
     char ? ans = rnew_string(r,total_len);
     size_t i = 0;
-    while (strs->tl != null) {
+    while (strs->tl != NULL) {
       let next    = *(strs->hd);
       len            = lens->hd;
       strncpy(ans+i,next,len);
@@ -413,7 +413,7 @@ mstring_t realloc_str(mstring_t<`H> str, size_t sz) {
 
 ///////////////////////// TRANSFORMATIONS
 // Return a substring of a string, by allocation.
-// FIX: This adds an extra null character at the end of the string.
+// FIX: This adds an extra NUL character at the end of the string.
 // I'd like to remove it but it causes a bug in the lexer on bootstrapping.
 char ?`r rsubstring(region_t<`r> r,const char ? s, 
                      int start, size_t amt) {
@@ -453,7 +453,7 @@ mstring_t replace_suffix (const char ? src, const char ? curr_suffix, const char
 ////////////////////////// SEARCHING
 
 // Search for any character of accept in s.
-// Return a ? pointer to the first such character, or null if none.
+// Return a ? pointer to the first such character, or NULL if none.
 char ?`r strpbrk(char ?`r s, const char ? accept) {
   int len = int_strleno(s,0,"String::strpbrk");
   char c = '\000';
@@ -463,11 +463,11 @@ char ?`r strpbrk(char ?`r s, const char ? accept) {
       if (c == accept[j])
 	return s;
   }
-  return null;
+  return NULL;
 }
 
 // Return a pointer to the first occurrence of c in s, 
-// or null if none.
+// or NULL if none.
 const char ?`r1 strchr(const char ?`r1 s, char c) {
   int len = int_strleno(s,0,"String::strchr");
   char c2 = '\000';
@@ -476,11 +476,11 @@ const char ?`r1 strchr(const char ?`r1 s, char c) {
     if (c2 == c)
       return s;
   }
-  return null;
+  return NULL;
 }
 
 // Return a pointer to the last occurrence of c in s,
-// or null if none.
+// or NULL if none.
 char ?`r1 strrchr(char ?`r1 s, char c) {
   int len = int_strleno(s,0,"String::strrchr");
   int i = len - 1;
@@ -490,7 +490,7 @@ char ?`r1 strrchr(char ?`r1 s, char c) {
     if (*s == c)
       return s;
   }
-  return null;
+  return NULL;
 }
 
 // Return a pointer to the beginning of the substring needle within
@@ -529,7 +529,7 @@ size_t strspn(const char ?`r1 s, const char ? accept) {
 
 ////////////////////////// CONVERSIONS
 list_t<int,`r> rexplode(region_t<`r> r,const char ? s) {
-  list_t result = null;
+  list_t result = NULL;
   for (int i = strlen(s) - 1; i >= 0; i--)
     result = rnew(r) List((int)s[i],result);
   return result;
@@ -542,7 +542,7 @@ list_t<int> explode(const char ? s) {
 mstring_t implode(list_t<int> chars) {
   mstring_t s = new_string(List::length(chars));
   size_t i = 0;
-  while (chars != null) {
+  while (chars != NULL) {
     s[i++] = (char)chars->hd;
     chars = chars->tl;
   }
@@ -555,7 +555,7 @@ int to_int(const char ? s, int * offset) {
   int ans = 0;
   int sn = 1;
   bool digit_seen = false;
-  int i = (offset == null) ? 0 : *offset;
+  int i = (offset == NULL) ? 0 : *offset;
 
   // skip any white space
   while (i < s.size && Ctype::isspace(s[i])) i++;
@@ -574,7 +574,7 @@ int to_int(const char ? s, int * offset) {
   }
   ans = ans*sn;
   if (!digit_seen) throw new InvalidArg("String::to_int");
-  if (offset != null) *offset = i;
+  if (offset != NULL) *offset = i;
   return ans;
 }
 
@@ -586,7 +586,7 @@ double to_double(const char ? s, int * offset) {
   double ans = 0.0;
   int sn = 1;
   bool digit_seen = false;
-  int i = (offset == null) ? 0 : *offset;
+  int i = (offset == NULL) ? 0 : *offset;
   
   // skip any white space
   while (i < s.size && Ctype::isspace(s[i])) i++;
@@ -634,7 +634,7 @@ double to_double(const char ? s, int * offset) {
     if (!digit_seen) throw new InvalidArg("String::to_double");
     ans = ans * Math::pow(10.0, (double)(exponent*exp_sign));
   }
-  if (offset != null) *offset = i;
+  if (offset != NULL) *offset = i;
   return ans*sn;
 }
 

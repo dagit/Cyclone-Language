@@ -29,8 +29,8 @@ using Lexing;
 
 // global state (we're not re-entrant)
 namespace XmlParse {
-Core::opt_t<Lexbuf<Function_lexbuf_state<Stdio::FILE@>>> lbuf = null;
-static list_t<content_t> parse_result = null;
+Core::opt_t<Lexbuf<Function_lexbuf_state<Stdio::FILE@>>> lbuf = NULL;
+static list_t<content_t> parse_result = NULL;
 void error(string_t<`H> msg) {
   throw new Core::Failure(msg);
 }
@@ -129,7 +129,7 @@ opn:
   OPEN { setContext(InTag); $$ = $!1; }
 
 attributes:
-  /* empty */          { $$ = ^$(null); }
+  /* empty */          { $$ = ^$(NULL); }
 | attribute attributes { $$ = ^$(new List($1,$2)); }
 
 attribute:
@@ -140,7 +140,7 @@ cls:
   CLOSE { setContext(Normal); }
 
 content:
-  /* empty */       { $$ = ^$(null); }
+  /* empty */       { $$ = ^$(NULL); }
 | element content   { $$ = ^$(new List(new Element($1),$2)); }
 | CHARDATA content  { $$ = ^$(new List(new Chardata($1),$2)); }
 | REFERENCE content { $$ = ^$(new List(new Reference($1),$2)); }
@@ -166,7 +166,7 @@ void yyerror(string_t s) { return; }
 
 namespace XmlParse{
   list_t<content_t> parse_file(Stdio::FILE @`H f) {
-    parse_result = null;
+    parse_result = NULL;
     lbuf = new Core::Opt(from_file(f));
     XmlScan::init();
     yyparse();

@@ -442,12 +442,12 @@ bool mem(int compare(`a,`a), `a ?`r l, `a x) {
 
 // Creates a new (smaller) array containing the specified slice of the
 // target array.  The last parameter is an int option of the number of 
-// elements to take, or null for "take until the end of the array".
+// elements to take, or NULL for "take until the end of the array".
 `a? extract(`a::B ?`r1 x,int start,int *`r2 n_opt) {
   int sx = x.size;
-  int n = (n_opt == null ? sx - start : *n_opt);
+  int n = (n_opt == NULL ? sx - start : *n_opt);
 
-  if (start < 0 || n <= 0 || start + (n_opt == null ? 0 : n) > sx)
+  if (start < 0 || n <= 0 || start + (n_opt == NULL ? 0 : n) > sx)
     throw new Core::InvalidArg("Array::extract");
 
   return new {for i < n : x[start+i]};

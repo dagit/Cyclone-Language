@@ -51,8 +51,8 @@ static string_t * tc_msg = &tc_msg_c;
 static attributes_t transfer_fn_type_atts(type_t t, attributes_t atts) {
   switch (compress(t)) {
   case &FnType(FnInfo{_,_,_,_,_,_,_,*fnatts}):
-    let res_atts = null;
-    for (; atts != null; atts = atts->tl) {
+    let res_atts = NULL;
+    for (; atts != NULL; atts = atts->tl) {
       if (fntype_att(atts->hd))
         *fnatts = new List(atts->hd,*fnatts); 
       else
@@ -75,8 +75,8 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
 
   // reject explicitly qualified name
   switch ((*vd->name)[0]) {
-  case &Rel_n(null): break;
-  case &Abs_n(null): break; // allowed for top-level constants
+  case &Rel_n(NULL): break;
+  case &Abs_n(NULL): break; // allowed for top-level constants
   default:
     terr(loc,"qualified declarations are not implemented"); // FIX
     return;
@@ -85,10 +85,10 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
   (*vd->name)[0] = new Abs_n(te->ns);
   // if it's an array or string, fill in the size on the type
   switch (compress(t)) {
-  case &ArrayType(telt,tq,null) && vd->initializer != null:
+  case &ArrayType(telt,tq,NULL) && vd->initializer != NULL:
     switch (vd->initializer->r) {
     case &Const_e(&String_c(s)):
-      t = vd->type = new ArrayType(telt,tq,uint_exp(s.size,null));
+      t = vd->type = new ArrayType(telt,tq,uint_exp(s.size,NULL));
       break;
     case &Comprehension_e(_,e,_):
     // FIX: need to copy e here!
@@ -96,7 +96,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
       break;
     case &UnresolvedMem_e(_,es): fallthru(es);
     case &Array_e(es):
-      t = vd->type = new ArrayType(telt,tq,uint_exp(List::length(es),null));
+      t = vd->type = new ArrayType(telt,tq,uint_exp(List::length(es),NULL));
       break;
     default: break;
     }
@@ -111,13 +111,13 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
   }
   // if extern, make sure it has no initializer
   if (sc == Extern || sc == ExternC) {
-    if(vd->initializer != null)
+    if(vd->initializer != NULL)
       terr(loc,"extern declaration should not have initializer");
   } else if (!is_function_type(t)) {
     // we skip over function types -- these are function protypes.
     // otherwise, we compute default initializer, if necessary
     // first check that the attributes are okay
-    for (; atts != null; atts = atts->tl) {
+    for (; atts != NULL; atts = atts->tl) {
       switch (atts->hd) {
       case &Aligned_att(_): continue;
         // GCC doesn't allow variables to be packed
@@ -136,7 +136,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
       }
     }
 
-    if(vd->initializer == null) {
+    if(vd->initializer == NULL) {
       if (check_var_init && !supports_default(t))
         terr(loc,"initializer required for variable %s of type %s",
              qvar2string(vd->name), typ2string(t));
@@ -153,7 +153,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
     }
   } else {
     // it is a function type -- check that the attributes are okay
-    for (; atts != null; atts = atts->tl) {
+    for (; atts != NULL; atts = atts->tl) {
       switch (atts->hd) {
       // these attributes should be in the function's type
       case &Regparm_att(_): fallthru;
@@ -217,7 +217,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
 
   // reject explicitly qualified name
   switch ((*fd->name)[0]) {
-  case &Rel_n(null): break;
+  case &Rel_n(NULL): break;
   case &Abs_n(y):
     throw new Impossible("tc: Abs_n in tcFndecl");
   default:
@@ -233,7 +233,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
   // move any function type attributes into the function's type
   fd->attributes = transfer_fn_type_atts(t,fd->attributes);
   // check that packed and aligned don't show up in the attributes
-  for (_ atts = fd->attributes; atts != null; atts = atts->tl) {
+  for (_ atts = fd->attributes; atts != NULL; atts = atts->tl) {
     switch (atts->hd) {
     case Packed_att: fallthru;
     case &Aligned_att(_): 
@@ -283,7 +283,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
   if(!all_labels_resolved(te))
     terr(loc,"function has goto statements to undefined labels");
 
-  te->le = null;
+  te->le = NULL;
 }
 
 static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
@@ -294,8 +294,8 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
 #endif
   // reject explicitly qualified name
   switch ((*td->name)[0]) {
-  case &Rel_n(null): break;
-  case &Abs_n(null): break; // allowed for top-level constants
+  case &Rel_n(NULL): break;
+  case &Abs_n(NULL): break; // allowed for top-level constants
   default:
     terr(loc,"qualified declarations are not implemented"); // FIX
     return;
@@ -322,9 +322,9 @@ static void tcStructFields(tenv_t te, genv_t ge, seg_t loc,
   // check fields, rejecting ill-formed types, bad fields, and duplicates
   // (unless the field name is empty)
   region uprev_rgn {
-    list_t<field_name_t, `uprev_rgn> prev_fields = null;
+    list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
 
-    for (let fs = fields; fs != null; fs = fs->tl) {
+    for (let fs = fields; fs != NULL; fs = fs->tl) {
       let &Structfield(fn,tq,t,width,atts) = fs->hd;
       
       if (List::mem(String::zstrptrcmp,prev_fields,fn))
@@ -336,7 +336,7 @@ static void tcStructFields(tenv_t te, genv_t ge, seg_t loc,
       
       check_type(loc,te,tvs,MemKind,false,t);
 
-      // if width is non-null then t must be of integral type
+      // if width is non-NULL then t must be of integral type
       check_bitfield(loc, te, t, width, fn);
       // FIX : check for consistent tquals
     }
@@ -350,13 +350,13 @@ static void tcStructOrUniondecl(tenv_t te, genv_t ge, string_t obj, seg_t loc, s
   fflush(stderr);
 #endif
   // reject anonymous top-level
-  if (sd->name == null) {
+  if (sd->name == NULL) {
     terr(loc, "anonymous %ss are not allowed at top level", obj);
     return;
   }
 
   // only allow packed and aligned attributes
-  for (_ atts = sd->attributes; atts != null; atts = atts->tl) {
+  for (_ atts = sd->attributes; atts != NULL; atts = atts->tl) {
     switch (atts->hd) {
     case Packed_att: continue;
     case &Aligned_att(_): continue;
@@ -367,7 +367,7 @@ static void tcStructOrUniondecl(tenv_t te, genv_t ge, string_t obj, seg_t loc, s
   }
 
   // disallow MemKinds and set unconstrained kinds to BoxKind
-  for(_ tvs = sd->tvs; tvs != null; tvs = tvs->tl) {
+  for(_ tvs = sd->tvs; tvs != NULL; tvs = tvs->tl) {
     let c = compress_conref(tvs->hd->kind);
     switch (c->v) {
     case No_constr:
@@ -381,8 +381,8 @@ static void tcStructOrUniondecl(tenv_t te, genv_t ge, string_t obj, seg_t loc, s
 
   // reject explicitly qualified name
   switch ((*sd->name->v)[0]) {
-  case &Rel_n(null): break;
-  case &Abs_n(null): break; // allowed for top-level constants
+  case &Rel_n(NULL): break;
+  case &Abs_n(NULL): break; // allowed for top-level constants
   default:
     terr(loc,"qualified declarations are not implemented"); // FIX
     return;
@@ -409,13 +409,13 @@ static void tcStructdecl(tenv_t te, genv_t ge, seg_t loc, structdecl_t sd) {
   // check the fields and update the environment
   // may not be the first declaration, so must not overwrite the dict entry!
   switch ($(sd->fields, Dict::lookup_opt(ge->structdecls, v))) {
-  case $(null, null):
+  case $(NULL, NULL):
     // insert sd in the environment
     ge->structdecls = Dict::insert(ge->structdecls, v, new sd);
     break;
-  case $(&Opt(fs), null):
+  case $(&Opt(fs), NULL):
     // for the sake of recursive fields, make name abstract in body
-    let sdp = new (new Structdecl(Extern, sd->name, tvs, null, null));
+    let sdp = new (new Structdecl(Extern, sd->name, tvs, NULL, NULL));
     ge->structdecls = Dict::insert(ge->structdecls, v, sdp);
     
     tcStructFields(te, ge, loc, obj, fs, tvs);
@@ -425,17 +425,17 @@ static void tcStructdecl(tenv_t te, genv_t ge, seg_t loc, structdecl_t sd) {
   case $(&Opt(fs), &Opt(sdp)):
     let sd0 = *sdp;
     // for the sake of recursive fields, make name abstract in body
-    *sdp = new Structdecl(Extern, sd->name, tvs, null, null);
+    *sdp = new Structdecl(Extern, sd->name, tvs, NULL, NULL);
     
     tcStructFields(te, ge, loc, obj, fs, tvs);
 
     *sdp = sd0; // restore the previous declaration and go update the environment
     fallthru(sdp);
-  case $(null, &Opt(sdp)):
+  case $(NULL, &Opt(sdp)):
     // try to merge the declarations
     let sd2 = Tcdecl::merge_structdecl(*sdp, sd, loc, tc_msg);
     
-    if (sd2 == null)
+    if (sd2 == NULL)
       return; // error in redeclaration
     else {
       *sdp = (structdecl_t) sd2; // make the update
@@ -461,18 +461,18 @@ static void tcUniondecl(tenv_t te, genv_t ge, seg_t loc, uniondecl_t ud) {
   // check the fields and update the environment
   // may not be the first declaration, so must not overwrite the dict entry!
   switch ($(ud->fields, Dict::lookup_opt(ge->uniondecls, v))) {
-  case $(null, null):
+  case $(NULL, NULL):
     // insert ud in the environment
     ge->uniondecls = Dict::insert(ge->uniondecls, v, new ud);
     break;
-  case $(&Opt(fs), null):
+  case $(&Opt(fs), NULL):
     // for the sake of recursive fields, make name abstract in body
-    let udp = new (new Uniondecl(Extern, ud->name, tvs, null, ud->attributes));
+    let udp = new (new Uniondecl(Extern, ud->name, tvs, NULL, ud->attributes));
     ge->uniondecls = Dict::insert(ge->uniondecls, v, udp);
     
     tcStructFields(te, ge, loc, obj, fs, tvs);
     // must check that fields are bits-only
-    for (_ f = fs; f != null; f = f->tl) {
+    for (_ f = fs; f != NULL; f = f->tl) {
       if (!bits_only(f->hd->type))
         terr(loc,"field %s of union %s has type %s which "
              "is not `bits-only'",*f->hd->name,*v,
@@ -484,17 +484,17 @@ static void tcUniondecl(tenv_t te, genv_t ge, seg_t loc, uniondecl_t ud) {
   case $(&Opt(fs), &Opt(udp)):
     let ud0 = *udp;
     // for the sake of recursive fields, make name abstract in body
-    *udp = new Uniondecl(Extern, ud->name, tvs, null, ud->attributes);
+    *udp = new Uniondecl(Extern, ud->name, tvs, NULL, ud->attributes);
     
     tcStructFields(te, ge, loc, obj, fs, tvs);
 
     *udp = ud0; // restore the previous declaration and go update the environment
     fallthru(udp);
-  case $(null, &Opt(udp)):
+  case $(NULL, &Opt(udp)):
     // try to merge the declarations
     let ud2 = Tcdecl::merge_uniondecl(*udp, ud, loc, tc_msg);
     
-    if (ud2 == null)
+    if (ud2 == NULL)
       return; // error in redeclaration
     else {
       *udp = (uniondecl_t) ud2; // make the update
@@ -513,10 +513,10 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
 					    tuniondecl_t tudres) {
   // check variants, rejecting ill-formed types,
   // repeated tyvars
-  for(let fs = fields; fs != null; fs = fs->tl) {
+  for(let fs = fields; fs != NULL; fs = fs->tl) {
     let f = fs->hd;
 
-    for (_ tvs = f->tvs; tvs != null; tvs = tvs->tl) {
+    for (_ tvs = f->tvs; tvs != NULL; tvs = tvs->tl) {
       let tv = tvs->hd;
       let c = compress_conref(tv->kind);
       switch (c->v) {
@@ -533,12 +533,12 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
     // give the bound type variables identities
     add_tvar_identities(f->tvs);
 
-    for (_ typs = f->typs; typs != null; typs=typs->tl) {
+    for (_ typs = f->typs; typs != NULL; typs=typs->tl) {
       check_type(f->loc, te, alltvs, MemKind, false, (*typs->hd)[1]);
     }
 
     switch((*f->name)[0]) {
-    case &Rel_n(null): 
+    case &Rel_n(NULL): 
       if(is_xtunion)
 	(*f->name)[0] = new Abs_n(te->ns);
       else
@@ -562,11 +562,11 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
     if (res)
       fields2 = fs;
     else
-      fields2 = null; // should it be fs anyway ?
+      fields2 = NULL; // should it be fs anyway ?
   } else region uprev_rgn { 
     // for tunions, check there's no duplicate field
-    list_t<var_t, `uprev_rgn> prev_fields = null;
-    for (_ fs = fields; fs != null; fs = fs-> tl) {
+    list_t<var_t, `uprev_rgn> prev_fields = NULL;
+    for (_ fs = fields; fs != NULL; fs = fs-> tl) {
       let f = fs->hd;
       if (List::mem(String::zstrptrcmp, prev_fields, (*f->name)[1]))
 	terr(f->loc,"duplicate field name %s in %s", *((*f->name)[1]), obj);
@@ -584,7 +584,7 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
   // finally add the variants
   // (for xtunion, only the new fields; this is important because tudres
   // may not define the old ones or the tvars may not be the same)
-  for(let fs = fields; fs != null; fs = fs->tl) {
+  for(let fs = fields; fs != NULL; fs = fs->tl) {
     let f = fs->hd;
     ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
                                   new $(new TunionRes(tudres,f), true));
@@ -608,7 +608,7 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
 
   list_t<tvar_t> tvs = tud->tvs;
   // disallow MemKinds and set unconstrained kinds to BoxKind
-  for(_ tvs2 = tvs; tvs2 != null; tvs2 = tvs2->tl) {
+  for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
     conref_t<kind_t> c = compress_conref(tvs2->hd->kind);
     switch (c->v) {
     case No_constr: c->v = new Eq_constr((kind_t)BoxKind); break;
@@ -635,14 +635,14 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
            qvar2string(tud->name));
       return;
     }
-    if (tud_opt != null) {
+    if (tud_opt != NULL) {
       tud->name = (*(tud_opt->v))->name;
     } else {
       (*tud->name)[0] = new Abs_n(te->ns); 
     }
   } else {
     switch ((*tud->name)[0]) {
-    case &Rel_n(null): (*tud->name)[0] = new Abs_n(te->ns); break;
+    case &Rel_n(NULL): (*tud->name)[0] = new Abs_n(te->ns); break;
     case &Abs_n(_): fallthru;
     default:
       terr(loc,"qualified declarations are not implemented"); // FIX
@@ -654,13 +654,13 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
   // check the fields and update the environment
   // may not be the first declaration, so must not overwrite the dict entry!
   switch ($(tud->fields, tud_opt)) {
-  case $(null, null):
+  case $(NULL, NULL):
     // insert tud in the environment
     ge->tuniondecls = Dict::insert(ge->tuniondecls, v, new tud);
     break;
-  case $(&Opt(*fs), null):
+  case $(&Opt(*fs), NULL):
     // for the sake of recursive fields, make name abstract in body
-    let tudp = new (new Tuniondecl(Extern, tud->name, tvs, null, tud->is_xtunion));
+    let tudp = new (new Tuniondecl(Extern, tud->name, tvs, NULL, tud->is_xtunion));
     ge->tuniondecls = Dict::insert(ge->tuniondecls, v, tudp);
     
     // check the fields (and sort them if this is a xtunion)
@@ -671,18 +671,18 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
   case $(&Opt(*fs), &Opt(tudp)):
     let tud0 = *tudp;
     // for the sake of recursive fields, make name abstract in body
-    *tudp = new Tuniondecl(Extern, tud->name, tvs, null, tud->is_xtunion);
+    *tudp = new Tuniondecl(Extern, tud->name, tvs, NULL, tud->is_xtunion);
     
     // check the fields (and sort them if this is a xtunion)
     *fs = tcTunionFields(te, ge, loc, obj, tud->is_xtunion, tud->name, *fs, tvs, tud);
 
     *tudp = tud0; // restore the previous declaration and go update the environment
     fallthru(tudp);
-  case $(null, &Opt(tudp)):
+  case $(NULL, &Opt(tudp)):
     // try to merge the declarations
     let tud2 = Tcdecl::merge_tuniondecl(*tudp, tud, loc, tc_msg);
     
-    if (tud2 == null)
+    if (tud2 == NULL)
       return; // error in redeclaration
     else {
       *tudp = (tuniondecl_t) tud2; // make the update
@@ -699,8 +699,8 @@ static void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
 #endif
   // reject explicitly qualified name
   switch ((*ed->name)[0]) {
-  case &Rel_n(null): break;
-  case &Abs_n(null): break; // allowed for top-level constants
+  case &Rel_n(NULL): break;
+  case &Abs_n(NULL): break; // allowed for top-level constants
   default:
     terr(loc,"qualified declarations are not implemented"); // FIX
     return;
@@ -709,10 +709,10 @@ static void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
   (*ed->name)[0] = new Abs_n(te->ns);
 
   // check the fields.
-  if (ed->fields != null) region uprev_rgn {
-    list_t<field_name_t, `uprev_rgn> prev_fields = null;
+  if (ed->fields != NULL) region uprev_rgn {
+    list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
     unsigned int tag_count = 0;
-    for (_ fs = ed->fields->v; fs != null; fs = fs->tl) {
+    for (_ fs = ed->fields->v; fs != NULL; fs = fs->tl) {
       let f = fs->hd;
       
       if (List::mem(String::zstrptrcmp,prev_fields,(*f->name)[1]))
@@ -720,7 +720,7 @@ static void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
       else
 	prev_fields = rnew(uprev_rgn) List((*f->name)[1],prev_fields);
       
-      if (f->tag == null)
+      if (f->tag == NULL)
 	f->tag = uint_exp(tag_count, f->loc);
       else if (!Tcutil::is_const_exp(te,(exp_t)f->tag))
 	terr(loc,"enum %s, field %s: expression is not constant",
@@ -737,7 +737,7 @@ static void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
   try {
     let edp = Dict::lookup(ge->enumdecls, v);
     let ed2 = Tcdecl::merge_enumdecl(*edp, ed, loc, tc_msg);
-    if (ed2 == null) return;
+    if (ed2 == NULL) return;
     *edp = (enumdecl_t) ed2; // if there's no error, make the update
   } catch {
   case Dict::Absent:
@@ -746,8 +746,8 @@ static void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
     break;
   }
 
-  if (ed->fields != null) {
-    for (_ fs = ed->fields->v; fs != null; fs = fs->tl) {
+  if (ed->fields != NULL) {
+    for (_ fs = ed->fields->v; fs != NULL; fs = fs->tl) {
       let f = fs->hd;
       ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
 				    new $(new EnumRes(ed,f), true));
@@ -782,7 +782,7 @@ static void tc_decls(tenv_t te, list_t<decl_t> ds0, bool in_externC, bool check_
 
   genv_t ge = Dict::lookup(te->ae,te->ns); // no longer a copy!!!
 
-  for (let ds = ds0; ds != null; ds = ds->tl) {
+  for (let ds = ds0; ds != NULL; ds = ds->tl) {
     decl_t    d   = ds->hd;
     seg_t loc = d->loc;
 
@@ -831,7 +831,7 @@ static void tc_decls(tenv_t te, list_t<decl_t> ds0, bool in_externC, bool check_
     case &Namespace_d(v,ds2):
       // DAN: This case is much more imperative than it used to be.
       let ns  = te->ns;
-      let ns2 = List::append(ns,new List(v,null));
+      let ns2 = List::append(ns,new List(v,NULL));
       // Make sure namespace v has been declared in the current namespace
       if (!Set::member(ge->namespaces,v)) {
         ge->namespaces = Set::insert(ge->namespaces,v);
@@ -849,12 +849,12 @@ static void tc_decls(tenv_t te, list_t<decl_t> ds0, bool in_externC, bool check_
       list_t<var_t> rest;
       switch (nsl) {
       case Loc_n:       fallthru;
-      case &Rel_n(null): fallthru;
-      case &Abs_n(null):
-        first = v; rest = null; break;
+      case &Rel_n(NULL): fallthru;
+      case &Abs_n(NULL):
+        first = v; rest = NULL; break;
       case &Rel_n(&List(x,y)): fallthru(x,y);
       case &Abs_n(&List(x,y)):
-        first = x; rest = List::append(y,new List(v,null)); break;
+        first = x; rest = List::append(y,new List(v,NULL)); break;
       }
       let ns2 = resolve_namespace(te,loc,first,rest);
       ge->availables = new List(ns2,ge->availables);
@@ -899,7 +899,7 @@ static bool vardecl_needed(treeshake_env_t env, decl_t d) {
     let &$(nsl,name) = vd->name;
     list_t<var_t> ns;
     switch (nsl) {
-    case Loc_n:    ns = null; break;
+    case Loc_n:    ns = NULL; break;
     case &Rel_n(y): ns = y; break;
     case &Abs_n(y): ns = y; break;
     }

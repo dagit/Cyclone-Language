@@ -141,7 +141,7 @@ extern bool mem(int compare(`a,`a), `a ? l, `a x);
 
 // Creates a new (smaller) array containing the specified slice of the
 // target array.  The last parameter is an int option of the number of 
-// elements to take, or null for "take until the end of the array".
+// elements to take, or NULL for "take until the end of the array".
 extern `a ?extract(`a::B ? x,int start,int * n_opt);
 
 

@@ -1618,7 +1618,7 @@ gensym()
 
 /* Parse the input grammar into a one symbol_list structure.
 Each rule is represented by a sequence of symbols: the left hand side
-followed by the contents of the right hand side, followed by a null pointer
+followed by the contents of the right hand side, followed by a NULL pointer
 instead of a symbol to terminate the rule.
 The next symbol is the lhs of the following rule.
 
@@ -1759,17 +1759,17 @@ readgram()
 		  nitems++;
 		  record_rule_line ();
 		  p = NEW(symbol_list);
-                  p->ruleprec = null;
-                  p->next = null;
-                  p->sym = null;
+                  p->ruleprec = NULL;
+                  p->next = NULL;
+                  p->sym = NULL;
 		  if (crule1)
 		    crule1->next = p;
 		  else grammar = p;
 		  p->sym = sdummy;
 		  crule1 = NEW(symbol_list);
-                  crule1->ruleprec = null;
-                  crule1->next = null;
-                  crule1->sym = null;
+                  crule1->ruleprec = NULL;
+                  crule1->next = NULL;
+                  crule1->sym = NULL;
 		  p->next = crule1;
 		  crule1->next = crule;
 
@@ -1777,8 +1777,8 @@ readgram()
 		  nitems++;
 		  p = NEW(symbol_list);
 		  p->sym = sdummy;
-                  p->next = null;
-                  p->ruleprec = null;
+                  p->next = NULL;
+                  p->ruleprec = NULL;
 		  p1->next = p;
 		  p1 = p;
 
@@ -1790,8 +1790,8 @@ readgram()
 		  nitems++;
 		  p = NEW(symbol_list);
 		  p->sym = symval;
-                  p->next = null;
-                  p->ruleprec = null;
+                  p->next = NULL;
+                  p->ruleprec = NULL;
 		  p1->next = p;
 		  p1 = p;
 		}
@@ -1806,9 +1806,9 @@ readgram()
 
 	  /* Put an empty link in the list to mark the end of this rule  */
 	  p = NEW(symbol_list);
-          p->next = null;
-          p->sym = null;
-          p->ruleprec = null;
+          p->next = NULL;
+          p->sym = NULL;
+          p->ruleprec = NULL;
 	  p1->next = p;
 	  p1 = p;
 

@@ -76,7 +76,7 @@ using Stdio;
 using Absyn;
 namespace Tovc;
 
-#define DL null
+#define DL NULL
 
 // have varmaps because hoisted decls should be renamed to avoid conflicts.
 
@@ -109,11 +109,11 @@ static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
       continue;
     }
     // now determine if it's free or bound
-    for(; env.boundvars != null; env.boundvars = env.boundvars->tl)
+    for(; env.boundvars != NULL; env.boundvars = env.boundvars->tl)
       if(String::zstrptrcmp(v,(*env.boundvars->hd->name)[1])==0)
 	return;
     // okay, it's free
-    for(; env.all_locals != null; env.all_locals = env.all_locals->tl) {
+    for(; env.all_locals != NULL; env.all_locals = env.all_locals->tl) {
       let vd = env.all_locals->hd;
       if(String::zstrptrcmp(v,(*vd->name)[1])==0) {
 	// don't deref if it's a stack-allocated array 
@@ -133,7 +133,7 @@ static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
   case &FnCall_e(e1,es,_):
     box_free_vars_exp(env,e1); fallthru(es);
   case &Primop_e(_,es):
-    for(; es != null; es = es->tl)
+    for(; es != NULL; es = es->tl)
       box_free_vars_exp(env,es->hd);
     return;
 
@@ -162,7 +162,7 @@ static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
   case &Enum_e(_,_,_):   return;
 
   case &UnresolvedMem_e(_,dles):
-    for(; dles != null; dles = dles->tl)
+    for(; dles != NULL; dles = dles->tl)
       box_free_vars_exp(env,(*dles->hd)[1]);
     return;
 
@@ -187,7 +187,7 @@ static void box_free_vars_stmt(boxingenv_t<`r,`r2> env, stmt_t s) {
       continue;
     case &Return_s(eopt):
       // FIX: reject this -- it won't be in the right function.
-      if(eopt == null)
+      if(eopt == NULL)
 	return;
       fallthru((exp_t)eopt);
     case &Exp_s(e):
@@ -219,7 +219,7 @@ static void box_free_vars_stmt(boxingenv_t<`r,`r2> env, stmt_t s) {
     case &Switch_s(e,scs):
       // most switches have been translated away -- so no binding occurrences!
       box_free_vars_exp(env, e);
-      for(; scs != null; scs = scs->tl)
+      for(; scs != NULL; scs = scs->tl)
 	box_free_vars_stmt(env, scs->hd->body);
       return;
     case &Decl_s(d,s2):
@@ -227,7 +227,7 @@ static void box_free_vars_stmt(boxingenv_t<`r,`r2> env, stmt_t s) {
       case &Var_d(vd):
 	env.boundvars = rnew(env.rgn) List(vd,env.boundvars);
 	env.varmap    = Dict::rdelete_same(env.varmap, (*vd->name)[1]);
-	if(vd->initializer != null)
+	if(vd->initializer != NULL)
 	  box_free_vars_exp(env, (exp_t)vd->initializer);
 	s = s2;
 	continue;
@@ -243,13 +243,13 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
   // vardecl types have not been boxed (yet)
   // free_vars must only be locals b/c ingoring namespaces!
   Set::set_t<vardecl_t,`r> freevars = Set::rempty(env.rgn,Core::ptrcmp);
-  let boxenv = BoxingEnv(env.rgn,env.all_locals,env.varmap,null,&freevars);
+  let boxenv = BoxingEnv(env.rgn,env.all_locals,env.varmap,NULL,&freevars);
   box_free_vars_stmt(boxenv,s);
-  list_t<$(var_t,tqual_t,type_t)@> params = null;
-  list_t<exp_t> args = null;
+  list_t<$(var_t,tqual_t,type_t)@> params = NULL;
+  list_t<exp_t> args = NULL;
   
   list_t<vardecl_t,`r> free_vars = Set::elements(freevars);
-  for(; free_vars != null; free_vars = free_vars->tl) {
+  for(; free_vars != NULL; free_vars = free_vars->tl) {
     vardecl_t vd = free_vars->hd;
     // don't box if it's a stack-allocated array
     switch(vd->type) {
@@ -269,9 +269,9 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
   }
   qvar_t funname = Toc::temp_var();
   *env.gen_ds=new List(new_decl(new Fn_d(new Fndecl(Static,true,funname,
-					    null,null,rettype,params,
-					    false,null,null,s,null,null,
-                                            null)),DL),
+					    NULL,NULL,rettype,params,
+					    false,NULL,NULL,s,NULL,NULL,
+                                            NULL)),DL),
 		       *env.gen_ds);
   return fncall_exp(var_exp(funname,DL), args, DL);
 }
@@ -291,7 +291,7 @@ static void apply_varmap(Dict::dict_t<var_t,exp_t,`r> varmap, exp_t e) {
   case &FnCall_e(e1,es,_):
     apply_varmap(varmap,e1); fallthru(es);
   case &Primop_e(_,es):
-    for(; es != null; es = es->tl)
+    for(; es != NULL; es = es->tl)
       apply_varmap(varmap,es->hd);
     return;
 
@@ -320,7 +320,7 @@ static void apply_varmap(Dict::dict_t<var_t,exp_t,`r> varmap, exp_t e) {
   case &Enum_e(_,_,_):   return;
 
   case &UnresolvedMem_e(_,dles):
-    for(; dles != null; dles = dles->tl)
+    for(; dles != NULL; dles = dles->tl)
       apply_varmap(varmap,(*dles->hd)[1]);
     return;
 
@@ -347,7 +347,7 @@ static exp_t stmt_to_exp(toexpenv_t<`r> env, stmt_t s) {
       let newqvar = Toc::temp_var();
       vd->name = newqvar;
       env.varmap = Dict::insert(env.varmap, oldname, var_exp(newqvar, DL));
-      if(vd->initializer != null) {
+      if(vd->initializer != NULL) {
 	apply_varmap(env.varmap, (exp_t)vd->initializer);
 	// we can't convert to an assignment if it's an initializer that's not
 	// a legal expression.  Bummer. So we generate a function!
@@ -364,10 +364,10 @@ static exp_t stmt_to_exp(toexpenv_t<`r> env, stmt_t s) {
       env.all_locals = rnew(env.rgn) List(vd, env.all_locals);
       // hoist decl, but not initializer
       let initializer = vd->initializer;
-      vd->initializer = null;
+      vd->initializer = NULL;
       env.encloser->r = decl_stmt(d, new_stmt(env.encloser->r, DL), DL)->r;
       let e = stmt_to_exp(env,s2);
-      if(initializer != null)
+      if(initializer != NULL)
 	e = seq_exp(assign_exp(var_exp(vd->name,DL),(exp_t)initializer, DL),
 		    e, DL);
       return e;
@@ -388,7 +388,7 @@ static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
   case &FnCall_e(e1,es,_):
     exp_to_vc(env, e1); fallthru(es);
   case &Primop_e(_, es):
-    for(; es != null; es = es->tl)
+    for(; es != NULL; es = es->tl)
       exp_to_vc(env, es->hd);
     return;
 
@@ -420,7 +420,7 @@ static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
     // these get generated by the translation in sorta weird ways
     // it's not clear to me the translation to C can't put these in illegal
     // places, but that wouldn't be a VC-specific problem.
-    for(; dles != null; dles = dles->tl)
+    for(; dles != NULL; dles = dles->tl)
       exp_to_vc(env, (*dles->hd)[1]);
     return;
 
@@ -450,7 +450,7 @@ static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s) {
       s = s2;
       continue;
     case &Return_s(eopt):
-      if(eopt == null)
+      if(eopt == NULL)
 	return;
       fallthru((exp_t)eopt);
     case &Exp_s(e):
@@ -483,7 +483,7 @@ static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s) {
       // most switches have been translated away -- only C switches remain.
       // there should be no where clauses, so ignore them.
       exp_to_vc(env, e);
-      for(; scs != null; scs = scs->tl)
+      for(; scs != NULL; scs = scs->tl)
 	stmt_to_vc(env, scs->hd->body);
       return;
     case &Decl_s(d,s2):
@@ -495,14 +495,14 @@ static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s) {
 	// FIX: ignores designators (assumes sorted already)
 	switch(Tcutil::compress(vd->type)) {
 	case &ArrayType(_,_,_):
-	  if(vd->initializer != null)
+	  if(vd->initializer != NULL)
 	    switch(vd->initializer->r) {
 	    case &UnresolvedMem_e(_,dles):
-	      vd->initializer = null;
+	      vd->initializer = NULL;
 	      // reverse order, but we promised nothing. :-)
 	      exp_t  arr = var_exp(vd->name,DL);
 	      stmt_t s3  = new_stmt(s2->r,DL);
-	      for(unsigned i=0; dles != null; dles = dles->tl, ++i)
+	      for(unsigned i=0; dles != NULL; dles = dles->tl, ++i)
 		s3 = seq_stmt(exp_stmt(assign_exp(subscript_exp(arr,
 								uint_exp(i,DL),
 								DL),
@@ -516,7 +516,7 @@ static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s) {
 	default: break;
 	}
 	env.all_locals = rnew(env.rgn) List(vd, env.all_locals);
-	if(vd->initializer != null)
+	if(vd->initializer != NULL)
 	  exp_to_vc(env, (exp_t)vd->initializer);
 	s = s2;
 	continue;
@@ -529,14 +529,14 @@ static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s) {
 }
 
 list_t<decl_t> tovc(list_t<decl_t> old_ds) {
-  let new_ds = null;
-  for(; old_ds != null; old_ds = old_ds->tl) {
+  let new_ds = NULL;
+  for(; old_ds != NULL; old_ds = old_ds->tl) {
     let next_d = old_ds->hd;
     switch(next_d->r) {
     case &Fn_d(fd):
   // fprintf(Stdio::stderr,"%s",*(*fd->name)[1]); Stdio::fflush(Stdio::stdout);
       region rgn {
-	let gen_ds = rnew(rgn) null;
+	let gen_ds = rnew(rgn) NULL;
 	stmt_to_vc(ToExpEnv(rgn,
 			    rcopy(rgn,fd->param_vardecls->v),
 			    Dict::rempty(rgn,String::zstrptrcmp), // ptr eq possible?

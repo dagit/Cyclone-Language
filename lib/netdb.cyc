@@ -40,7 +40,7 @@ struct servent *getservbyname(string_t name, string_t proto) {
                            .s_aliases = ntCsl_to_ntsl(src->s_aliases),
                            .s_port = src->s_port,
                            .s_proto = c2s(src->s_proto)}
-    : null;
+    : NULL;
 }
 
 struct hostent *gethostbyname(string_t name) {
@@ -50,7 +50,7 @@ struct hostent *gethostbyname(string_t name) {
                            .h_addrtype = src->h_addrtype,
                            .h_length = src->h_length,
                            .h_addr_list = Cnetdb::pntlp_toCyc(src->h_addr_list)}
-    : null;
+    : NULL;
 }
 
 void herror(const char ?`r s) { Cnetdb::herror(s2c(s)); }

@@ -9,7 +9,7 @@ namespace Mman {
   // decide to map anything there.  So it probably should have been
   // NULL all along.
 
-#define MAP_FAILED null
+#define MAP_FAILED NULL
 
   // Of course, there are safety problems with mmap'ing: don't try to
   // access the memory in a way that violates the protection you

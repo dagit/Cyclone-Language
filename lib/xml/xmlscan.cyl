@@ -35,8 +35,8 @@ using Lexing;
 using Stdio;
   
 namespace XmlScan {
-string_t token_string = null;
-string_t token_pi = null;
+string_t token_string = NULL;
+string_t token_pi = NULL;
 // Forward declarations of lexing functions 
 extern int data(Lexbuf<`a>);
 extern int comment(Lexbuf<`a>);
@@ -80,17 +80,17 @@ void init() { setContext(Normal); }
 
 static string_t get(Lexbuf<`a> b) { return lexeme(b); }
 
-static list_t<stringptr_t> buffer = null;
+static list_t<stringptr_t> buffer = NULL;
 
 static void gobble(Lexbuf<`a> b) {
   buffer = new List(new {get(b)},buffer);
 }
 
-static void purge() { buffer = null; }
+static void purge() { buffer = NULL; }
 
 static string_t regurgitate() { return String::strconcat_l(List::rev(buffer)); }
 
-static string_t pi_cell = null;
+static string_t pi_cell = NULL;
 static void pi_set(string_t<`H> s) { pi_cell = s; }
 static string_t pi_get() { return pi_cell; }
 

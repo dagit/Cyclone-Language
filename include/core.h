@@ -56,7 +56,7 @@ extern mstring_t<`H> string_of_char(char);
 extern region_t<`H> heap_region;
 // copies the string, making sure there's a zero at the end
 extern "C" Cstring<`H> string_to_Cstring(string_t);
-// extracts the underlying char[] from the char[?] -- returns null
+// extracts the underlying char[] from the char[?] -- returns NULL
 // when the string is empty
 extern "C" Cstring<`r> underlying_Cstring(string_t<`r>);
 extern "C" mstring_t<`H> Cstring_to_string(Cstring);

@@ -69,7 +69,7 @@ static tunion error {
 };
 
 static spec_t lookup(speclist_t<`r1,`r2> l, string_t x) {
-  while (l != null) {
+  while (l != NULL) {
     let flag = (*l->hd)[0];
     let len = String::strlen(flag);
     if (len > 0 && (*l->hd)[1]) {
@@ -90,12 +90,12 @@ namespace Justify {
    Write the portion before the break into a buffer
    and return the remainder. */
 static string_t<`r> break_line(Buffer::T b, int howmuch, string_t<`r> s) {
-  if (s == null) return null;
+  if (s == NULL) return NULL;
   if (howmuch<0) howmuch = 0;
   let len = strlen(s);
   if (howmuch>len) {
     Buffer::add_string(b,s);
-    return null;
+    return NULL;
   }
 
   /* Look for the first space before posn howmuch */
@@ -113,7 +113,7 @@ static string_t<`r> break_line(Buffer::T b, int howmuch, string_t<`r> s) {
   Buffer::add_substring(b,s,0,i);
 
   /* Return the portion after */
-  string_t whatsleft = null;
+  string_t whatsleft = NULL;
   /* advance to non-whitespace */
   for (; i<len && s[i] && isspace(s[i]); i++)
     /* skip */ ;
@@ -128,8 +128,8 @@ static string_t<`r> break_line(Buffer::T b, int howmuch, string_t<`r> s) {
    up in buffer b. */
 void
 justify_b(Buffer::T b, int indent, int margin, string_t item, string_t desc) {
-  if (item != null) Buffer::add_string(b,item);
-  if (desc == null) return;
+  if (item != NULL) Buffer::add_string(b,item);
+  if (desc == NULL) return;
   if (indent < 0) indent = 0;
   if (margin < 0) margin = 0;
 
@@ -146,9 +146,9 @@ justify_b(Buffer::T b, int indent, int margin, string_t item, string_t desc) {
 
   Buffer::add_string(b,itemsep);
 
-  while (desc != null) {
+  while (desc != NULL) {
     desc = break_line(b,margin-indent,desc);
-    if (desc != null)
+    if (desc != NULL)
       Buffer::add_string(b,indentstr);
     else
       Buffer::add_string(b,"\n");
@@ -161,7 +161,7 @@ void usage(speclist_t<`r1,`r2> speclist,
            string_t errmsg) {
   fprintf(stderr, "%s\n", errmsg);
   let b = Buffer::create(1024);
-  while (speclist != null) {
+  while (speclist != NULL) {
     Justify::justify_b(b,12,72,
                        strconcat((*speclist->hd)[0],(*speclist->hd)[2]),
                        (*speclist->hd)[4]);
@@ -171,7 +171,7 @@ void usage(speclist_t<`r1,`r2> speclist,
 }
 
 int current = 0;
-static string_t ?args = null;
+static string_t ?args = NULL;
 
 static void stop(int prog_pos, tunion error e,
 		 speclist_t<`r1,`r2> speclist,

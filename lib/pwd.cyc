@@ -31,7 +31,7 @@ struct passwd *getpwnam(string_t name) {
                              .pw_gecos = c2s(src->pw_gecos),
                              .pw_dir = c2s(src->pw_dir),
                              .pw_shell = c2s(src->pw_shell)}
-    : null;
+    : NULL;
 }
 
 struct passwd *getpwuid(uid_t uid) {
@@ -43,5 +43,5 @@ struct passwd *getpwuid(uid_t uid) {
                              .pw_gecos = c2s(src->pw_gecos),
                              .pw_dir = c2s(src->pw_dir),
                              .pw_shell = c2s(src->pw_shell)}
-    : null;
+    : NULL;
 }

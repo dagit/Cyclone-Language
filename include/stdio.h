@@ -48,10 +48,6 @@ typedef long fpos_t;
 #define	_IOLBF	1		// setvbuf should set line buffered 
 #define	_IONBF	2		// setvbuf should set unbuffered 
 
-#ifndef NULL
-#define	NULL	null
-#endif
-
 #define	BUFSIZ	1024
 #define	EOF	(-1)
 

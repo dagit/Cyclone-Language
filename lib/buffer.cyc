@@ -96,7 +96,7 @@ void add_char(T b, char c) {
 
 
 // Note: like String::substring, this does not check for
-// null terminators within the specified substring
+// NUL terminators within the specified substring
 void add_substring(T b, string_t s, int offset, int len) {
   if (offset < 0 || len < 0 || offset + len > s.size)
     throw new InvalidArg("Buffer::add_substring");
@@ -107,7 +107,7 @@ void add_substring(T b, string_t s, int offset, int len) {
   return;
 }
 
-// This DOES check for null terminators
+// This DOES check for NUL terminators
 void add_string (T b, string_t s) {
   int len = String::strlen(s);
   int new_position = b->position + len;

@@ -82,7 +82,7 @@ bool okay_szofarg(type_t t) {
   case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(_,tuf),_}):
     fallthru(tuf->typs);
   case &TupleType(tqs):
-    for (; tqs != null; tqs = tqs->tl)
+    for (; tqs != NULL; tqs = tqs->tl)
       if(!okay_szofarg((*tqs->hd)[1]))
 	return false;
     return true;
@@ -99,30 +99,30 @@ bool okay_szofarg(type_t t) {
   case FloatType:     return true;
   case DoubleType:    return true;
   case &ArrayType(t2,_,e): // assume e constant checked elsewhere
-    return (e != null); 
+    return (e != NULL); 
   case &FnType(_): return false;
   case &RgnHandleType(_): return true;
   case &StructType(_,_,sdp):
-    if(sdp == null)
+    if(sdp == NULL)
       return Tcutil::impos("szof on unchecked StructType");
     let sd = *sdp;
-    if(sd->fields == null)
+    if(sd->fields == NULL)
       return false;
     fallthru(sd->fields->v);
   case &AnonStructType(fs):
-    for(; fs != null; fs = fs->tl)
+    for(; fs != NULL; fs = fs->tl)
       if(!okay_szofarg(fs->hd->type))
 	return false;
     return true;
   case &UnionType(_,ts,udp):
-    if (udp == null)
+    if (udp == NULL)
       return Tcutil::impos("szof on unchecked UnionType");
     let ud = *udp;
-    if (ud->fields == null)
+    if (ud->fields == NULL)
       return false;
     fallthru(ud->fields->v);
   case &AnonUnionType(fs):
-    for(; fs != null; fs = fs->tl)
+    for(; fs != NULL; fs = fs->tl)
       if(!okay_szofarg(fs->hd->type))
 	return false;
     return true;
@@ -150,7 +150,7 @@ cnst_t eval_const_unprimop(primop_t p,exp_t e) {
   }
 }
 
-// FIX: should allow pointer-comparison of non-integers (eg. null==null)
+// FIX: should allow pointer-comparison of non-integers (e.g., NULL==NULL)
 cnst_t eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
   let cn1 = promote_const(eval_const_exp(e1));
   let cn2 = promote_const(eval_const_exp(e2));
@@ -228,13 +228,13 @@ cnst_t eval_const_exp(exp_t e) {
     cn = (eval_const_bool_exp(e1) ? eval_const_exp(e2) : eval_const_exp(e3));
     break;
   case &Primop_e(p,es):
-    if (es == null) {
+    if (es == NULL) {
       terr(e->loc,"bad static expression (no args to primop)");
       return new Int_c(Signed,0);
     }
-    if (es->tl == null) 
+    if (es->tl == NULL) 
       cn = eval_const_unprimop(p,es->hd);
-    else if (es->tl->tl != null) {
+    else if (es->tl->tl != NULL) {
       terr(e->loc,"bad static expression (too many args to primop)");
       return new Int_c(Signed,0);
     } else 

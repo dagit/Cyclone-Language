@@ -3141,7 +3141,7 @@ struct Cyc_List_List* tvs, struct Cyc_Absyn_Tvar* tv){ if( tv->identity ==  0){(
 struct Cyc_Stdio_String_pa_struct _temp2557; _temp2557.tag= Cyc_Stdio_String_pa;
 _temp2557.f1=( struct _tagged_arr) Cyc_Tcutil_tvar2string( tv);{ void* _temp2556[
 1u]={& _temp2557};(( int(*)( struct _tagged_arr fmt, struct _tagged_arr ap)) Cyc_Tcutil_impos)(
-_tag_arr("bound tvar id for %s is null", sizeof( unsigned char), 29u), _tag_arr(
+_tag_arr("bound tvar id for %s is NULL", sizeof( unsigned char), 29u), _tag_arr(
 _temp2556, sizeof( void*), 1u));}});} return({ struct Cyc_List_List* _temp2558=(
 struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2558->hd=(
 void*) tv; _temp2558->tl= tvs; _temp2558;});} static struct Cyc_List_List* Cyc_Tcutil_add_free_evar(

@@ -513,7 +513,7 @@ static unsigned char _temp23[ 5u]="goto"; static unsigned char _temp24[ 3u]="if"
 static unsigned char _temp25[ 7u]="inline"; static unsigned char _temp26[ 4u]="int";
 static unsigned char _temp27[ 4u]="let"; static unsigned char _temp28[ 5u]="long";
 static unsigned char _temp29[ 7u]="malloc"; static unsigned char _temp30[ 10u]="namespace";
-static unsigned char _temp31[ 4u]="new"; static unsigned char _temp32[ 5u]="null";
+static unsigned char _temp31[ 4u]="new"; static unsigned char _temp32[ 5u]="NULL";
 static unsigned char _temp33[ 9u]="offsetof"; static unsigned char _temp34[ 9u]="region_t";
 static unsigned char _temp35[ 7u]="region"; static unsigned char _temp36[ 8u]="regions";
 static unsigned char _temp37[ 9u]="register"; static unsigned char _temp38[ 9u]="restrict";

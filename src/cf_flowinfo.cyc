@@ -107,12 +107,12 @@ int place_cmp(place_t p1, place_t p2) {
 path_info_t typ_to_unesc_none_pinfo(type_t t) {
   switch(Tcutil::compress(t)) {
   case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
-    if(tuf->typs == null)
+    if(tuf->typs == NULL)
       return leaf_unesc_none;
     fallthru(tuf->typs);
   case &TupleType(tqts):
     pinfo_dict_t<_> d = Dict::empty(Core::intcmp);
-    for(int i=0; tqts != null; tqts = tqts->tl, ++i) {
+    for(int i=0; tqts != NULL; tqts = tqts->tl, ++i) {
       let &$(_,t2) = tqts->hd;
       d = Dict::insert(d, i, typ_to_unesc_none_pinfo(t2));
     }
@@ -120,7 +120,7 @@ path_info_t typ_to_unesc_none_pinfo(type_t t) {
   case &AnonStructType(fs): fallthru(fs);
   case &StructType(_,_, & &Structdecl(_,_,_,&Core::Opt(fs),_)):
     pinfo_dict_t<field_name_t> d = Dict::empty(String::zstrptrcmp);
-    for(; fs != null; fs = fs->tl) {
+    for(; fs != NULL; fs = fs->tl) {
       let &Structfield{n,_,t2,_,_} = fs->hd;
       // don't insert the field if the name is empty -- it's a bit field
       if (String::strcmp(*n,"") != 0)
@@ -137,7 +137,7 @@ path_info_t typ_to_unesc_none_pinfo(type_t t) {
 path_info_t lookup_place(pinfo_dict_t<local_root_t> d, place_t place) {
   let &Place(root,fields) = place;
   let ans = Dict::lookup(d,root);
-  for(; fields != null; fields = fields->tl)
+  for(; fields != NULL; fields = fields->tl)
     switch($(ans,fields->hd)) {
     case $(&TuplePI(d2), &TupleF(i)):  ans = Dict::lookup(d2,i); break;
     case $(&StructPI(d2),&StructF(n)): ans = Dict::lookup(d2,n); break;
@@ -150,7 +150,7 @@ path_info_t lookup_place(pinfo_dict_t<local_root_t> d, place_t place) {
 path_info_t insert_place_rec(path_info_t insert_path,
 			     list_t<field_t> fields, 
 			     path_info_t pinfo){
-  if(fields == null)
+  if(fields == NULL)
     return pinfo;
   switch($(insert_path,fields)) {
   case $(&TuplePI(d), &List(&TupleF(i), tl)): 
@@ -201,7 +201,7 @@ bool isAllInit_pinfo($(pinfo_dict_t<local_root_t>,list_t<place_t>)@`r env,
 }
 
 bool isAllInit(pinfo_dict_t<local_root_t> pinfo_dict, path_info_t pinfo) {
-  let isInitEnv = $(pinfo_dict,null);
+  let isInitEnv = $(pinfo_dict,NULL);
   return isAllInit_pinfo(&isInitEnv, pinfo);
 }
 
@@ -257,7 +257,7 @@ void pinfo_getplaces($(list_t<place_t,`r3>@`r2, region_t<`r3>) @`r1 env,
 pinfo_dict_t<local_root_t> escape_these(region_t<`r> rgn,
 					list_t<place_t,`r> places, 
 					pinfo_dict_t<local_root_t> d) {
-  while(places != null) {
+  while(places != NULL) {
     let place = places->hd;
     places = places->tl;
     path_info_t place_old_pinfo;
@@ -275,7 +275,7 @@ pinfo_dict_t<local_root_t> escape_these(region_t<`r> rgn,
 pinfo_dict_t<local_root_t> escape_pointsto(path_info_t pinfo,
 					   pinfo_dict_t<local_root_t> d) {
   region r {
-    let places = null;
+    let places = NULL;
     let env = $(&places,r);
     pinfo_getplaces(&env, 0, pinfo);
     return escape_these(r,places,d);
@@ -337,7 +337,7 @@ path_info_t join_initstate(join_env_t<`r1,`r2,`r3> env,
   case $(&UnknownIS(esc1,il1),&MustPointTo(place2)):
     // note: esc1 is irrelevant in the sense that place2 and downstream
     //       escapes b/c we no longer know all the pointers to it.
-    let isInitEnv = $(env->d2,null);
+    let isInitEnv = $(env->d2,NULL);
     if(il1==(init_level_t)AllIL && isAllInit_pinfo(&isInitEnv,lookup_place(env->d2,place2))) {
       add_place(env->rgn, env->places, place2);
       return mkLeafPI(esc1,il1);
@@ -347,7 +347,7 @@ path_info_t join_initstate(join_env_t<`r1,`r2,`r3> env,
   case $(&MustPointTo(place1),&UnknownIS(esc2,il2)):
     // note: esc2 is irrelevant in the sense that place2 and downstream
     //       escapes b/c we no longer know all the pointers to it.
-    let isInitEnv = $(env->d1,null);
+    let isInitEnv = $(env->d1,NULL);
     if(il2 == (init_level_t)AllIL 
        && isAllInit_pinfo(&isInitEnv,lookup_place(env->d1,place1))) {
       add_place(env->rgn, env->places, place1);
@@ -357,8 +357,8 @@ path_info_t join_initstate(join_env_t<`r1,`r2,`r3> env,
 
   case $(&MustPointTo(place1),&MustPointTo(place2)):
     if(place_cmp(place1,place2) == 0) return new LeafPI(state1);
-    let isInitEnv1 = $(env->d1,null);
-    let isInitEnv2 = $(env->d2,null);
+    let isInitEnv1 = $(env->d1,NULL);
+    let isInitEnv2 = $(env->d2,NULL);
     if(isAllInit_pinfo(&isInitEnv1, lookup_place(env->d1,place1))
        && isAllInit_pinfo(&isInitEnv2, lookup_place(env->d2,place2))) {
       add_place(env->rgn, env->places, place1);
@@ -402,7 +402,7 @@ flow_info_t join_flow(flow_info_t f1, flow_info_t f2) {
     if(flow_lessthan_approx(f2,f1))
       return f1;
     region r {
-      let places  = null;
+      let places  = NULL;
       let joinenv = JoinEnv(d1,d2,&places,r);
       let outdict = Dict::intersect_c(join_pathinfo,&joinenv,d1,d2);
       return new InitsFL(escape_these(r,places,outdict));

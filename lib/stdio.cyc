@@ -64,31 +64,31 @@ int rename(const char ?`r1 old_filename, const char ?`r2 new_filename) {
 
 FILE *tmpfile() {
   Cstdio::__sFILE *cf = Cstdio::tmpfile();
-  return cf ? new __sFILE(cf) : null;
+  return cf ? new __sFILE(cf) : NULL;
 }
 
 char ?`H tmpnam(char ?`H s) {
-  char ?name = Cstring_to_string(Cstdio::tmpnam(null));
+  char ?name = Cstring_to_string(Cstdio::tmpnam(NULL));
   return s ? String::strcpy(s, name) : name;
 }
 
 int fclose(FILE @`r f) {
   int r = Cstdio::fclose((Cstdio::__sFILE @) f->file);
   if (r == 0) {
-    f->file = null;
+    f->file = NULL;
   }
   return r;
 }
 
 int fflush(FILE *`r f) {
-  // This works even if f->file == null; there's no implicit null check.
-  return f ? Cstdio::fflush(f->file) : Cstdio::fflush(null);
+  // This works even if f->file == NULL; there's no implicit NULL check.
+  return f ? Cstdio::fflush(f->file) : Cstdio::fflush(NULL);
 }
 
 FILE *freopen(const char ?`r1 x, const char ?`r2 y, FILE @`r3 f) {
   Cstdio::__sFILE *cf = Cstdio::freopen(s2c(x), s2c(y),
                                         (Cstdio::__sFILE @) f->file);
-  return cf ? new __sFILE(cf) : null;
+  return cf ? new __sFILE(cf) : NULL;
 }
 
 void setbuf(FILE @`r1 f, char ?`r2 buf) {
@@ -100,7 +100,7 @@ void setbuffer(FILE @`r1 f, char ?`r2 buf, size_t size) {
 }
 
 void setlinebuf(FILE @`r f) {
-  setvbuf(f, null, _IOLBF, 0);
+  setvbuf(f, NULL, _IOLBF, 0);
 }
 
 int setvbuf(FILE @`r1 f, char ?`r2 buf, int mode, size_t size) {
@@ -119,8 +119,8 @@ char ?`r fgets(char ?`r s, int n, FILE @`r2 f) {
   unsigned int len = s.size;
   n = (len < n) ? len : n;
   result = Cstdio::fgets(buffer, n, (Cstdio::__sFILE @) f->file);
-  if (result == null) 
-    return null;
+  if (result == NULL) 
+    return NULL;
   else 
     return s;
 }
@@ -187,12 +187,12 @@ void perror(const char ?`r s) { Cstdio::perror(s2c(s)); }
 
 FILE *fopen(const char ?`r1 name, const char ?`r2 type) {
   Cstdio::__sFILE *cf = Cstdio::fopen(s2c(name), s2c(type));
-  return cf ? new __sFILE(cf) : null;
+  return cf ? new __sFILE(cf) : NULL;
 }
 
 FILE *fdopen(int i, const char ?`r1 s) {
   Cstdio::__sFILE *cf = Cstdio::fdopen(i,s2c(s));
-  return cf ? new __sFILE(cf) : null;
+  return cf ? new __sFILE(cf) : NULL;
 }
 
 int fileno(FILE @`r f) { return Cstdio::fileno((Cstdio::__sFILE @) f->file); }
@@ -203,7 +203,7 @@ int getw(FILE @`r f) { return Cstdio::getw((Cstdio::__sFILE @) f->file); }
 
 //FILE *popen(string s, string m) {
 //  Cstdio::__sFILE *cf = Cstdio::popen(s2c(s),s2c(m));
-//  return cf ? new __sFILE(cf) : null;
+//  return cf ? new __sFILE(cf) : NULL;
 //}
 
 int putw(int i, FILE @`r f) {
@@ -217,7 +217,7 @@ xtunion exn {
 
 FILE @ file_open(const char ?`r1 fname, const char ?`r2 mode) {
   FILE *f = fopen(fname, mode);
-  if (f == null) {
+  if (f == NULL) {
     const char ? fn = new {for i < fname.size : fname[i]};
     throw new FileOpenError(fn);
   }

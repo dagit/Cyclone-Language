@@ -63,7 +63,7 @@ list_t<`a> list_of_alist_f(alist_t<`a> y,list_t<`a,`H> l) {
   }
 }
 list_t<`a> list_of_alist(alist_t<`a> x) {
-  return list_of_alist_f(x,null);
+  return list_of_alist_f(x,NULL);
 }
 
 // I've inlined the type link as $(int,int,int,string)@ below;
@@ -132,10 +132,10 @@ $(string_t,list_t<$(int,int,int,string_t)@>) @string_and_links(doc_t d, int w) {
                list_of_alist(o->links));
 }
 
-static opt_t<table_t<int,stringptr_t>> bhashtbl = null;
+static opt_t<table_t<int,stringptr_t>> bhashtbl = NULL;
 
 string_t nlblanks(int i) {  // a newline followed by i blanks
-  if (bhashtbl == null)
+  if (bhashtbl == NULL)
     bhashtbl = new Opt(Hashtable::create(61,intcmp,identity));
   if (i<0) throw new Failure("nlblanks");
   try
@@ -157,7 +157,7 @@ string_t nlblanks(int i) {  // a newline followed by i blanks
 }
 
 // hash the strings...
-static opt_t<table_t<stringptr_t,doc_t>> str_hashtbl = null;
+static opt_t<table_t<stringptr_t,doc_t>> str_hashtbl = NULL;
 
 int infinity = 9999999;
 
@@ -179,7 +179,7 @@ static doc_t text_doc(string_t<`H> s) {
 }
 doc_t text(string_t<`H> s) {
   table_t<stringptr_t<`H,`H>,doc_t> t;
-  if (str_hashtbl == null) {
+  if (str_hashtbl == NULL) {
     t = Hashtable::create(101,zstrptrcmp,hash_stringptr);
     str_hashtbl = new Opt(t);
   } else {
@@ -196,21 +196,21 @@ doc_t text(string_t<`H> s) {
 }
 doc_t textptr(stringptr_t<`H> s) { return text(*s); }
 
-opt_t<doc_t> nil_doc_opt   = null;
-opt_t<doc_t> blank_doc_opt = null;
-opt_t<doc_t> line_doc_opt  = null;
+opt_t<doc_t> nil_doc_opt   = NULL;
+opt_t<doc_t> blank_doc_opt = NULL;
+opt_t<doc_t> line_doc_opt  = NULL;
 
 // FIX: ineffecient to create an out_t for the empty string!!
 // This is made a function because non-constant initializers not allowed
 doc_t nil_doc() {
-  if (nil_doc_opt == null) 
+  if (nil_doc_opt == NULL) 
     nil_doc_opt = new Opt(text(""));
   return nil_doc_opt->v;
 }
 
 // This is made a function because non-constant initializers not allowed
 doc_t blank_doc() {
-  if (blank_doc_opt == null) 
+  if (blank_doc_opt == NULL) 
     blank_doc_opt = new Opt(text(""));
   return blank_doc_opt->v;
 }
@@ -237,7 +237,7 @@ static out_t line_f(ppstate_t st) {
                  Empty);
 }
 doc_t line_doc() {
-  if (line_doc_opt == null) 
+  if (line_doc_opt == NULL) 
     line_doc_opt = new Opt(new Doc(0,0,fp2fn(line_f)));
   return line_doc_opt->v;
 }
@@ -299,8 +299,8 @@ doc_t cat(...`r doc_t l) {
 // good places in here for passing address of locals (eg. st)
 
 static out_t long_cats_f(list_t<doc_t> ds0, ppstate_t st) {
-  list_t<out_t> os = null;
-  for (let ds = ds0; ds != null; ds = ds->tl) {
+  list_t<out_t> os = NULL;
+  for (let ds = ds0; ds != NULL; ds = ds->tl) {
     doc_t d = ds->hd;
     out_t o = apply(d->f,st);
     st = new Ppstate(st->ci,o->newcc,o->newcl,st->pw,st->epw-d->mwo);
@@ -310,7 +310,7 @@ static out_t long_cats_f(list_t<doc_t> ds0, ppstate_t st) {
   int newcl = os->hd->newcl;
   alist_t<stringptr_t> s = Empty;
   alist_t<$(int,int,int,string_t)@> links = Empty;
-  for(; os != null; os = os->tl) {
+  for(; os != NULL; os = os->tl) {
     s = append(os->hd->ppout,s);
     links = append(os->hd->links,links);
   }
@@ -326,7 +326,7 @@ static doc_t long_cats(list_t<doc_t,`H> doclist) {
   int mw  = d->mw;
   int mwo = d->mw;
 
-  for (let ds = doclist; ds != null; ds = ds->tl) {
+  for (let ds = doclist; ds != NULL; ds = ds->tl) {
     int mw2  = min(mw, mwo+ds->hd->mwo);
     int mwo2 = min(mw, mwo+ds->hd->mw);
     mw  = mw2;
@@ -336,15 +336,15 @@ static doc_t long_cats(list_t<doc_t,`H> doclist) {
 }
 
 doc_t cats(list_t<doc_t,`H> doclist) {
-  if (doclist==null) return nil_doc();
-  else if (doclist->tl==null) return doclist->hd;
+  if (doclist==NULL) return nil_doc();
+  else if (doclist->tl==NULL) return doclist->hd;
   // JGM: a hack to avoid stack overflow
   else if (List::length(doclist) > 30) return long_cats(doclist);
   else return concat(doclist->hd,cats(doclist->tl));
 }
 
 static out_t cats_arr_f(doc_t ?`H @docs_ptr, ppstate_t st) {
-  list_t<out_t> os = null;
+  list_t<out_t> os = NULL;
   doc_t ?docs = *docs_ptr;
   int sz = docs.size;
   for (int i=0; i < sz; ++i) {
@@ -357,7 +357,7 @@ static out_t cats_arr_f(doc_t ?`H @docs_ptr, ppstate_t st) {
   int newcl = os->hd->newcl;
   alist_t<stringptr_t> s = Empty;
   alist_t<$(int,int,int,string_t)@> links = Empty;
-  for(; os != null; os = os->tl) {
+  for(; os != NULL; os = os->tl) {
     s = append(os->hd->ppout,s);
     links = append(os->hd->links,links);
   }
@@ -413,8 +413,8 @@ doc_t tab(doc_t d) {
 
 /* Sequences */
 static doc_t ppseq_f(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l) {
-  if (l==null) return nil_doc();
-  else if (l->tl==null) return pp(l->hd);
+  if (l==NULL) return nil_doc();
+  else if (l->tl==NULL) return pp(l->hd);
   else return cat(pp(l->hd), text(sep), oline_doc(), ppseq_f(pp, sep,l->tl));
                   
 }
@@ -423,13 +423,13 @@ doc_t ppseq(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l0) {
 }
 
 doc_t seq_f(string_t<`H> sep, list_t<doc_t,`H> l) {
-  if (l==null) return nil_doc();
-  else if (l->tl==null) return l->hd;
+  if (l==NULL) return nil_doc();
+  else if (l->tl==NULL) return l->hd;
   else {
     doc_t sep2 = text(sep);
     doc_t oline = oline_doc();
     let x = l;
-    while (x->tl != null) {
+    while (x->tl != NULL) {
       let temp = x->tl;
       x->tl = new List(sep2,new List(oline,temp));
       x = temp;
@@ -439,7 +439,7 @@ doc_t seq_f(string_t<`H> sep, list_t<doc_t,`H> l) {
     //return cats(new List(l->hd,
     //                     new List(text(sep),
     //                              new List(oline_doc(),
-    //                                       new List(f(sep,l->tl),null)))));
+    //                                       new List(f(sep,l->tl),NULL)))));
   }
 }
 doc_t seq(string_t<`H> sep, list_t<doc_t,`H> l0) {
@@ -448,8 +448,8 @@ doc_t seq(string_t<`H> sep, list_t<doc_t,`H> l0) {
 
 // Sequences broken by lines 
 doc_t ppseql_f(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l) {
-  if (l==null) return nil_doc();
-  else if (l->tl==null) return pp(l->hd);
+  if (l==NULL) return nil_doc();
+  else if (l->tl==NULL) return pp(l->hd);
   else return cat(pp(l->hd), text(sep), line_doc(), ppseql_f(pp,sep,l->tl));
 }
 doc_t ppseql(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l0) {
@@ -457,8 +457,8 @@ doc_t ppseql(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l0) {
 }
 
 static doc_t seql_f(string_t<`H> sep, list_t<doc_t,`H> l) {
-  if (l==null) return nil_doc();
-  else if (l->tl==null) return l->hd;
+  if (l==NULL) return nil_doc();
+  else if (l->tl==NULL) return l->hd;
   else return cat(l->hd, text(sep), line_doc(), seql_f(sep,l->tl));
 }
 doc_t seql(string_t<`H> sep, list_t<doc_t,`H> l0) {
@@ -474,7 +474,7 @@ doc_t group(string_t<`H> start, string_t<`H> stop, string_t<`H> sep, list_t<doc_
 
 // Like group but return the empty doc if the list is empty
 doc_t egroup(string_t<`H> start, string_t<`H> stop, string_t<`H> sep, list_t<doc_t,`H> ss) {
-  if (ss==null) return nil_doc();
+  if (ss==NULL) return nil_doc();
   else return cat(text(start),
                   seq(sep,ss),
                   text(stop));

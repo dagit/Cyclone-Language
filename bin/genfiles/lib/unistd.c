@@ -56,7 +56,7 @@ int)( _get_arr_size( argv, sizeof( struct _tagged_arr)) -  1)))).curr != ((
 struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){( int) _throw(( void*)({ struct
 Cyc_Core_Failure_struct* _temp2=( struct Cyc_Core_Failure_struct*) GC_malloc(
 sizeof( struct Cyc_Core_Failure_struct)); _temp2[ 0]=({ struct Cyc_Core_Failure_struct
-_temp3; _temp3.tag= Cyc_Core_Failure; _temp3.f1= _tag_arr("execl: arg list must be null-terminated",
+_temp3; _temp3.tag= Cyc_Core_Failure; _temp3.f1= _tag_arr("execl: arg list must be NULL-terminated",
 sizeof( unsigned char), 40u); _temp3;}); _temp2;}));}{ struct _tagged_arr
 newargs=({ unsigned int _temp4= 1 +  _get_arr_size( argv, sizeof( struct
 _tagged_arr)); unsigned char** _temp5=( unsigned char**) GC_malloc( sizeof(
@@ -76,7 +76,7 @@ sizeof( struct _tagged_arr),( int)( _get_arr_size( argv, sizeof( struct
 _tagged_arr)) -  1)))).curr != (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){(
 int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp8=( struct Cyc_Core_Failure_struct*)
 GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp8[ 0]=({ struct Cyc_Core_Failure_struct
-_temp9; _temp9.tag= Cyc_Core_Failure; _temp9.f1= _tag_arr("execl: arg list must be null-terminated",
+_temp9; _temp9.tag= Cyc_Core_Failure; _temp9.f1= _tag_arr("execl: arg list must be NULL-terminated",
 sizeof( unsigned char), 40u); _temp9;}); _temp8;}));}{ struct _tagged_arr
 newargs=({ unsigned int _temp10= 1 +  _get_arr_size( argv, sizeof( struct
 _tagged_arr)); unsigned char** _temp11=( unsigned char**) GC_malloc( sizeof(
@@ -97,7 +97,7 @@ _get_arr_size( argv, sizeof( struct _tagged_arr)) -  1)))).curr != (( struct
 _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
 _temp14=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
 _temp14[ 0]=({ struct Cyc_Core_Failure_struct _temp15; _temp15.tag= Cyc_Core_Failure;
-_temp15.f1= _tag_arr("execve: arg list must be null-terminated", sizeof(
+_temp15.f1= _tag_arr("execve: arg list must be NULL-terminated", sizeof(
 unsigned char), 41u); _temp15;}); _temp14;}));}{ struct _tagged_arr newargs=({
 unsigned int _temp20= _get_arr_size( argv, sizeof( struct _tagged_arr));
 unsigned char** _temp21=( unsigned char**) GC_malloc( sizeof( unsigned char*) * 

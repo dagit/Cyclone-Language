@@ -68,12 +68,12 @@ static bool print_full_evars_r = false;
 static bool print_all_tvars_r = false;
 static bool print_all_kinds_r = false;
 
-static string_t *output_file = null;
+static string_t *output_file = NULL;
 static void set_output_file(string_t<`H> s) {
   output_file = new s;
 }
 
-static list_t<stringptr_t> cppargs = null;
+static list_t<stringptr_t> cppargs = NULL;
 static void add_cpparg(string_t<`H> s) {
   cppargs = new List(new s,cppargs);
 }
@@ -84,7 +84,7 @@ static bool is_cyclone_sourcefile(string_t s) {
   else return (strcmp(s+(len-4),".cyc") == 0);
 }
 
-static list_t<stringptr_t> cyclone_exec_prefix_path = null;
+static list_t<stringptr_t> cyclone_exec_prefix_path = NULL;
 static void add_cyclone_exec_prefix_path(string_t s) {
   let len = strlen(s);
   if (len <= 2) return;
@@ -93,7 +93,7 @@ static void add_cyclone_exec_prefix_path(string_t s) {
 }
 
 // Arguments to pass to the C compiler
-static list_t<stringptr_t> ccargs = null;
+static list_t<stringptr_t> ccargs = NULL;
 static void add_ccarg(string_t<`H> s) {
   ccargs = new List(new s,ccargs);
 }
@@ -106,7 +106,7 @@ static void add_ccarg2(string_t<`H> flag,string_t<`H> arg) {
 // libcyc.a, then we get a "multiple definitions of main" error, via
 // libmain.c.  So, we separate out the library args from the ccargs
 // so that we can force libcyc.a to appear first.
-static list_t<stringptr_t> libargs = null;
+static list_t<stringptr_t> libargs = NULL;
 static void add_libarg(string_t<`H> s) {
   libargs = new List(new s,libargs);
 }
@@ -123,7 +123,7 @@ static void set_produce_dependencies() {
   add_cpparg("-M");
 }
 
-static string_t *dependencies_target = null;
+static string_t *dependencies_target = NULL;
 static void set_dependencies_target(string_t<`H> s) {
   dependencies_target = new s;
 }
@@ -149,7 +149,7 @@ static void set_stop_after_asmfile() {
 }
 
 // Cyclone files given on the command line
-static list_t<stringptr_t> cyclone_files = null;
+static list_t<stringptr_t> cyclone_files = NULL;
 // Like add_ccarg but intercepts .cyc files for special handling
 static void add_other(string_t<`H> s) {
   if (is_cyclone_sourcefile(s)) {
@@ -178,7 +178,7 @@ FILE * try_file_open(string_t filename, string_t mode, string_t msg_part) {
     compile_failure = true;
     fprintf(stderr, "\nError: couldn't open %s %s\n", msg_part, filename);
     fflush(stderr);
-    return null;
+    return NULL;
   }
 }
 
@@ -190,7 +190,7 @@ list_t<Absyn::decl_t>
   string_t explain_string = "";
   bool other_exn = false;
   xtunion exn ex = new Core::Impossible(""); // definite assignment doesn't track data
-  let ans = null;
+  let ans = NULL;
 
   try ans = f(env,tds);
   catch {
@@ -255,7 +255,7 @@ list_t<Absyn::decl_t> do_cfcheck(bool ignore, list_t<Absyn::decl_t,`H> tds) {
 list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE *`H, FILE @`H) @`H params, list_t<Absyn::decl_t,`H> tds) {
   let &$(te, fi, fo) = params;
   let i1 = Interface::extract(te -> ae);
-  if (fi == null) {
+  if (fi == NULL) {
     Interface::save(i1, fo);
   } else {
     let i0 = Interface::parse((FILE @) fi);
@@ -303,22 +303,22 @@ list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
 
 // We must remember what .c files are produced so that we can remove them
 // after we're done.
-static list_t<stringptr_t> cfiles = null;
+static list_t<stringptr_t> cfiles = NULL;
 static void remove_cfiles() {
   if (!save_c_r)
-    for (; cfiles != null; cfiles = cfiles->tl)
+    for (; cfiles != NULL; cfiles = cfiles->tl)
       remove_file(*(cfiles->hd));
 }
 
 /* Take as input a string, return the list of substrings separated by colons */
 static list_t<stringptr_t> split_by_char(string_t<`H> s, char c) {
-  if (s == null) return null;
-  let result = null;
+  if (s == NULL) return NULL;
+  let result = NULL;
   let len = strlen(s);
 
   while (len > 0) {
     let end = strchr(s,c);
-    if (end == null) {
+    if (end == NULL) {
       result = new List(new s,result);
       break;
     }
@@ -333,26 +333,26 @@ static list_t<stringptr_t> split_by_char(string_t<`H> s, char c) {
 
 /* FIX: once stat is ported we can use that instead */
 static bool file_exists(string_t file) {
-  FILE *f = null;
+  FILE *f = NULL;
   try f = file_open(file,"r"); catch {default: break;}
-  if (f == null) return false;
+  if (f == NULL) return false;
   else { fclose((FILE @)f); return true; }
 }
 
 static string_t *find(list_t<stringptr_t> dirs, string_t file) {
-  if (file == null) return null;
-  for (; dirs != null; dirs = dirs->tl) {
+  if (file == NULL) return NULL;
+  for (; dirs != NULL; dirs = dirs->tl) {
     let dir = *dirs->hd;
-    if (dir == null || strlen(dir)==0) continue;
+    if (dir == NULL || strlen(dir)==0) continue;
     string_t s = Filename::concat(dir,file);
     if (file_exists(s)) return new s;
   }
-  return null;
+  return NULL;
 }
 
 static string_t do_find(list_t<stringptr_t> dirs, string_t file) {
   let f = find(dirs, file);
-  if (f == null) {
+  if (f == NULL) {
     fprintf(stderr,"Error: can't find internal compiler file %s", file);
     compile_failure = true;
     remove_cfiles();
@@ -404,7 +404,7 @@ static string_t sh_escape_string(string_t<`H> s) {
 
   /* We'll quote all special chars by prefixing with a backslash */
   let len2 = len + single_quotes + other_special;
-  let s2 = new {for i < len2+1 : '\0'}; // add trailing null
+  let s2 = new {for i < len2+1 : '\0'}; // add trailing NUL
   let i = 0;
   let j = 0;
   for (; i < len; i++) {
@@ -444,7 +444,7 @@ static void process_file(string_t<`H> filename) {
                        " ");
   string_t stdinc_string = " -Ic:/cyclone/include";
   let cyclone_include_path = Stdlib::getenv("CYCLONE_INCLUDE_PATH");
-  if (cyclone_include_path != null) {
+  if (cyclone_include_path != NULL) {
     let x = split_by_char(cyclone_include_path,':');
     let s = String::str_sepstr(new List(new (string_t)"",
                                         List::map(sh_escape_stringptr,x)),
@@ -453,7 +453,7 @@ static void process_file(string_t<`H> filename) {
   }
   string_t ofile_string;
   if (stop_after_cpp_r) {
-    if (output_file != null)
+    if (output_file != NULL)
       ofile_string = aprintf(" > %s", *output_file);
     else // output to standard out
       ofile_string = "";
@@ -464,7 +464,7 @@ static void process_file(string_t<`H> filename) {
   if (produce_dependencies)
     // Both of the below hacks can probably be eliminated when we move
     // to gcc 3.0
-    if (dependencies_target == null)
+    if (dependencies_target == NULL)
       // Hack to fix up dependency output of gcc 2.95: the target of
       // the dependency produced by cpp will be something like foo.cyc.o,
       // but we want it to be foo.o.
@@ -497,7 +497,7 @@ static void process_file(string_t<`H> filename) {
   FILE * in_file  = try_file_open(preprocfile,"r","file");
   if (compile_failure) return;
 
-  list_t<Absyn::decl_t> tds = null;
+  list_t<Absyn::decl_t> tds = NULL;
 
   // Parsing
   try
@@ -534,14 +534,14 @@ static void process_file(string_t<`H> filename) {
   if (ic_r) {
     FILE *inter_file = fopen(interfacefile, "r");
     FILE *inter_objfile = try_file_open(interfaceobjfile, "w", "interface object file");
-    if (inter_objfile == null) {
+    if (inter_objfile == NULL) {
       compile_failure = true;
       return;
     }
     Position::reset_position(interfacefile);
     tds = do_stage("interface checking", do_interface,
                    new $(te, inter_file, (FILE@) inter_objfile), tds);
-    if (inter_file != null) {
+    if (inter_file != NULL) {
       file_close((FILE @) inter_file);
     }
     file_close((FILE @) inter_objfile);
@@ -556,14 +556,14 @@ static void process_file(string_t<`H> filename) {
    if (compile_failure) return;
 
  PRINTC:
-  if (tds != null) {
+  if (tds != NULL) {
     FILE *out_file;
     if (parseonly_r || tc_r)
-      if (output_file != null)
+      if (output_file != NULL)
         out_file = try_file_open(*output_file,"w","output file");
       else
         out_file = stdout;
-    else if (toc_r && output_file != null)
+    else if (toc_r && output_file != NULL)
       out_file = try_file_open(*output_file,"w","output file");
     else
       out_file = try_file_open(cfile,"w","output file");
@@ -599,7 +599,7 @@ static interface_t read_cycio(string_t<`H> @ n) {
   }
   let nf = strconcat(basename, ".cycio");
   let f = try_file_open(nf, "r", "interface object file");
-  if (f == null) {
+  if (f == NULL) {
     compile_failure = true;
     remove_cfiles();
     exit(1);
@@ -734,7 +734,7 @@ int main(int argc, string_t<`H> ?`H argv) {
 
   Arg::parse(options, add_other, "Options:", argv);
 
-  for (let l = rev(cyclone_files); l != null; l = l->tl) {
+  for (let l = rev(cyclone_files); l != NULL; l = l->tl) {
     process_file(*(l->hd));
     if (compile_failure) return 1;
   }
@@ -743,12 +743,12 @@ int main(int argc, string_t<`H> ?`H argv) {
 
   // If there are no files for the C compiler to process don't bother
   // to run it.
-  if (ccargs == null) return 0;
+  if (ccargs == NULL) return 0;
 
   // Run the C compiler
   // First, find the files libcyc.a, gc.a, cyc_include.h
   string_t cyclone_exec_prefix = Stdlib::getenv("CYCLONE_EXEC_PREFIX");
-  if (cyclone_exec_prefix != null)
+  if (cyclone_exec_prefix != NULL)
     cyclone_exec_prefix_path = new List(new cyclone_exec_prefix,
                                         cyclone_exec_prefix_path);
   cyclone_exec_prefix_path = new List(new ((string_t)"c:/cyclone/bin/cyc-lib"),
@@ -767,10 +767,10 @@ int main(int argc, string_t<`H> ?`H argv) {
   let is_not_executable =
     stop_after_asmfile_r ||
     stop_after_objectfile_r ||
-    (output_file != null && Filename::check_suffix(*output_file, ".a")) ||
-    (output_file != null && Filename::check_suffix(*output_file, ".lib")); 
+    (output_file != NULL && Filename::check_suffix(*output_file, ".a")) ||
+    (output_file != NULL && Filename::check_suffix(*output_file, ".lib")); 
   if (is_not_executable) {
-    stdlib = null;
+    stdlib = NULL;
     stdlib_string = (string_t)"";
   } else {
 
@@ -795,17 +795,17 @@ int main(int argc, string_t<`H> ?`H argv) {
     }
 
     let i = Interface::get_and_merge_list(read_cycio, lf, lf);
-    if (i == null) {
+    if (i == NULL) {
       fprintf(stderr,"Error: interfaces incompatible\n");
       compile_failure = true;
       remove_cfiles();
       return 1;
     }
     if (is_not_executable) {
-      if (output_file != null) {
+      if (output_file != NULL) {
 	let output_file_io = aprintf("%s.cycio", Filename::chop_extension(*output_file));
 	let f = try_file_open(output_file_io, "w", "interface object file");
-	if (f == null) {
+	if (f == NULL) {
 	  compile_failure = true;
 	  remove_cfiles();
 	  return 1;
@@ -853,7 +853,7 @@ int main(int argc, string_t<`H> ?`H argv) {
   let cccmd =
     aprintf("gcc -include %s%s %s%s%s",
             cyc_include,
-            (output_file==null?((string_t)""):aprintf(" -o %s",sh_escape_string(*output_file))),
+            (output_file==NULL?((string_t)""):aprintf(" -o %s",sh_escape_string(*output_file))),
             ccargs_string,
             stdlib_string,
             libargs_string);

@@ -14,7 +14,7 @@ namespace Mman;
 
 char ?mmap(size_t length, int prot, int flags, int fd, off_t offset) {
   return
-    wrap_Cstring_as_string(Cmman::mmap(null, length, prot, flags, fd, offset),
+    wrap_Cstring_as_string(Cmman::mmap(NULL, length, prot, flags, fd, offset),
                            length);
 }
 

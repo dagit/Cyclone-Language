@@ -26,41 +26,41 @@ namespace Lexer {
 
 namespace Parser {
 
-opt_t<Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>>> lbuf = null;
+opt_t<Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>>> lbuf = NULL;
 
 xtunion exn {Parser_error(string_t)};
 typedef struct Hashtable::Table<stringptr_t,regular_expression_t> htbl;
   // must be initialized!
-htbl * named_regexps = null;
-lexer_definition_t parse_result = null;
+htbl * named_regexps = NULL;
+lexer_definition_t parse_result = NULL;
 
 regular_expression_t regexp_for_string(string_t s) {
   int len = String::strlen(s);
   if(len == 0)
     return Epsilon;
-  regular_expression_t ans = new Characters(new List((int)(s[len-1]), null));
+  regular_expression_t ans = new Characters(new List((int)(s[len-1]), NULL));
   for(int n = len - 2; n >= 0; --n)
-    ans = new Sequence(new Characters(new List((int)(s[n]), null)), ans);
+    ans = new Sequence(new Characters(new List((int)(s[n]), NULL)), ans);
   return ans;
 }
 
 list_t<int> char_class(int c1, int c2) {
-  list_t<int> ans = null;
+  list_t<int> ans = NULL;
   for(int n = c2; n >= c1; --n)
     ans = new List(n,ans);
   return ans;
 }
 
-static list_t<int> all_chars_s = null;
+static list_t<int> all_chars_s = NULL;
 static list_t<int> all_chars() {  
-  if(all_chars_s == null)
+  if(all_chars_s == NULL)
     all_chars_s = char_class(0,255);
   return all_chars_s;
 }
 
 static list_t<int> subtract(list_t<int> l1, list_t<int> l2) {
-  list_t<int> rev_ans = null;
-  for(; l1 != null; l1 = l1->tl)
+  list_t<int> rev_ans = NULL;
+  for(; l1 != NULL; l1 = l1->tl)
     if(!memq(l2, l1->hd))
       rev_ans = new List(l1->hd, rev_ans);
   return imp_rev(rev_ans);
@@ -132,7 +132,7 @@ named_regexps:
 other_definitions:
   other_definitions TAND definition 
      { $$=^$(new List($3,$1)); }
-| /* empty */ { $$=^$(null); }
+| /* empty */ { $$=^$(NULL); }
 
 definition: TIDENT TEQUAL entry { $$=^$(new $($1,$3)); }
 
@@ -142,15 +142,15 @@ entry:
 
 rest_of_entry:
   rest_of_entry TOR acase { $$=^$(new List($3,$1)); }
-| /* empty */ { $$=^$(null); }
+| /* empty */ { $$=^$(NULL); }
 
 acase: regexp TACTION { $$=^$(new $($1,$2)); }
 
 regexp:
   TUNDERSCORE { $$=^$(new Characters(all_chars())); }
 | TEOF        { /* FIX: may change to -1 like C library? */ 
-                $$=^$(new Characters(new List(256,null))); }
-| TCHAR       { $$=^$(new Characters(new List((int)($1),null))); }
+                $$=^$(new Characters(new List(256,NULL))); }
+| TCHAR       { $$=^$(new Characters(new List((int)($1),NULL))); }
 | TSTRING     { $$=^$(regexp_for_string($1)); }
 | TLBRACKET char_class TRBRACKET { $$=^$(new Characters($2)); }
 | regexp TSTAR      { $$=^$(new Repetition($1)); }
@@ -174,7 +174,7 @@ char_class:
 
 char_class1:
   TCHAR TDASH TCHAR                    { $$=^$(char_class($1,$3)); }
-| TCHAR                                { $$=^$(new List((int)($1),null)); }
+| TCHAR                                { $$=^$(new List((int)($1),NULL)); }
 | char_class1 char_class1 %prec CONCAT { $$=^$(append($1,$2)); }
 
 %%
@@ -183,7 +183,7 @@ namespace Parser {
 lexer_definition_t parse_file(FILE @`H f) {
   named_regexps = Hashtable::create(13, String::strptrcmp, 
 				    Hashtable::hash_stringptr);
-  parse_result = null;
+  parse_result = NULL;
   lbuf = new Opt(Lexing::from_file(f));
   yyparse();
   return parse_result;
