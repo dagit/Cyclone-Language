@@ -844,13 +844,13 @@ static void process_file(string_t<`H> filename) {
     Port::port(tds);
     return;
   }
-
   // Binding resolution
   do_stage("binding", tds, do_binding, true, remove_fileptr, preprocfileptr);
   if(compile_failure) return;
 
   let jump_tables;
   { let te = Tcenv::tc_init(); // Must declare BEFORE the goto
+
     if (parseonly_r) goto PRINTC;
 
     // Type checking

@@ -894,7 +894,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
  let base_type = collapse_type_specifiers(tss,loc);
  if (declarators == NULL) {
    // here we should have a type declaration -- either a struct, union,
-   // or datatype as in: "struct Foo { ... };"
+   // enum, or datatype as in: "struct Foo { ... };"
    switch (base_type) {
    case &TypeDeclType(&{.r = &Aggr_td(ad),...},_): 
      ad->attributes = List::append(ad->attributes,atts);

@@ -74,6 +74,7 @@ CYCLONE_H:=ap.h\
 	binding.h\
 	bitvec.h\
 	buffer.h\
+        callgraph.h\
 	core.h\
 	crypt.h\
 	dict.h\
@@ -118,6 +119,7 @@ CYCLONE_SRCS:=absyn\
          tcexp\
 	 formatstr\
          evexp\
+         callgraph\
          tc\
          binding\
          pratt-ap\
@@ -149,6 +151,7 @@ CYCDOC_SRCS:=cycdoc\
         binding\
 	tcstmt\
 	tcpat\
+        callgraph\
         tc\
 	tcdecl\
         pratt\
@@ -169,6 +172,7 @@ BUILDLIB_SRCS:=buildlib\
 	tcutil\
 	absynpp\
         relations\
+        callgraph\
 	tc\
 	tcdecl\
 	tcexp\

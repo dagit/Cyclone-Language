@@ -1337,7 +1337,7 @@ blocks.
 \item For regions in function prototypes, you can provide explicit
 ``outlives'' as in this example:
 \begin{verbatim}
-void f(int *`r1*`r2 x,int *`r3 y; {`r2} > `r1, {`r3} > `r2);
+void f(int *`r1*`r2 x,int *`r3 y : {`r2} > `r1, {`r3} > `r2);
 \end{verbatim}
 This says that \texttt{`r1} outlives \texttt{`r2} and \texttt{`r2}
 outlives \texttt{`r3}.  The body will be checked under these

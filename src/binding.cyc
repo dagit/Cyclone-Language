@@ -750,10 +750,13 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
   case &AppType(&AnonEnumCon(fs),_): 
     // FIX: absolutize names? create declarations? what scope? DO ME
     //  share code with Enum_d once we are sure what this means!
+    let decl_ns_data = get_ns_data(env->ns,Abs_n(env->ns->curr_ns,
+                                                 in_cinclude(env)));
     for(; fs != NULL; fs = fs->tl) {
       let f = fs->hd;
       if(f->tag != NULL)
 	resolve_exp(env,(exp_t)f->tag);
+      decl_ns_data->ordinaries = Dict::insert(decl_ns_data->ordinaries,(*f->name)[1],new AnonEnumRes(t,f));
     }
     return; 
   case &Evar(_,to,_,_): if(to != NULL) resolve_type(loc,env,(type_t)to); return;

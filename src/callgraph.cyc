@@ -1,0 +1,332 @@
+/* Constructing call graphs.
+   Copyright (C) 2004 Greg Morrisett, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+#include "callgraph.h"
+#include <set.h>
+#include "absynpp.h"
+
+// code for constructing a callgraph -- more properly, we construct a
+// callgraph_t that for each (defined) function f, maps f to the set
+// of (defined) functions S such that each member g of S appears within
+// f.  Note that g may not be actually called by f.  We also have to
+// build a map from qvars to top-level function definitions so that
+// when we see a free occurrence of f, we can map it to its function
+// definition (in case f was defined earlier using a prototype.)
+namespace Callgraph;
+using Absyn;
+using List;
+
+typedef Hashtable::table_t<qvar_t,fndecl_t> fndefns_t;
+
+// these next few functions take the mapping from qvars to function
+// declarations (fds), some syntax, and an accumulator set of function
+// declarations, and insert any free occurrence of a function f that
+// occurs within the syntax, returning the updated set.
+static fndecl_set_t cg_stmt(fndefns_t fds, stmt_t, fndecl_set_t s);
+static fndecl_set_t cg_exp(fndefns_t fds, exp_t, fndecl_set_t s);
+
+static fndecl_set_t cg_exps(fndefns_t fds, list_t<exp_t> es, fndecl_set_t s) {
+  for (; es != NULL; es = es->tl)
+    s = cg_exp(fds,es->hd,s);
+  return s;
+}
+
+static fndecl_set_t cg_exp(fndefns_t fds, exp_t e, fndecl_set_t s) {
+  switch (e->r) {
+  case &Var_e(&Funname_b(fd)): return Set::insert(s,fd);
+  case &Var_e(&Global_b(vd)):
+    try {
+      return Set::insert(s,Hashtable::lookup(fds,vd->name));
+    } catch {
+    case &Core::Not_found: return s;
+    }
+  case &Var_e(_):         case &Const_e(_):       case &Pragma_e(_):
+  case &Sizeoftype_e(_):  case &Sizeofexp_e(_):   case &Offsetof_e(...):
+  case &Enum_e(...):      case &AnonEnum_e(...):  case &Valueof_e(_):
+  case &Asm_e(...):       case &Extension_e(...): return s;
+  case &Primop_e(_,es):   return cg_exps(fds,es,s);
+  case &And_e(e1,e2):               fallthru(e1,e2);
+  case &Or_e(e1,e2):                fallthru(e1,e2);
+  case &SeqExp_e(e1,e2):            fallthru(e1,e2);
+  case &Swap_e(e1,e2):              fallthru(e1,e2);
+  case &Subscript_e(e1,e2):         fallthru(e1,e2);
+  case &Comprehension_e(_,e1,e2,_): fallthru(e1,e2);
+  case &AssignOp_e(e1,_,e2):        return cg_exp(fds,e2,cg_exp(fds,e1,s));
+  case &Throw_e(e,_):                 fallthru(e);
+  case &NoInstantiate_e(e):           fallthru(e);
+  case &Instantiate_e(e,...):         fallthru(e);
+  case &Cast_e(_,e,...):              fallthru(e);
+  case &Address_e(e):                 fallthru(e);
+  case &Deref_e(e):                   fallthru(e);
+  case &AggrMember_e(e,...):          fallthru(e);
+  case &AggrArrow_e(e,...):           fallthru(e);
+  case &Tagcheck_e(e,...):            fallthru(e);
+  case &ComprehensionNoinit_e(e,...): fallthru(e);
+  case &Increment_e(e,_):             return cg_exp(fds,e,s);
+  case &Conditional_e(e1,e2,e3): 
+    return cg_exp(fds,e3,cg_exp(fds,e2,cg_exp(fds,e1,s)));
+  case &FnCall_e(e,es,...):      return cg_exps(fds,es,cg_exp(fds,e,s));
+  case &Malloc_e(mi):  fallthru(mi.rgn,mi.num_elts);
+  case &New_e(eopt,e): 
+    return cg_exp(fds,e,(eopt == NULL) ? s : cg_exp(fds,(exp_t)eopt,s));
+  case &Datatype_e(es,...): fallthru(es);
+  case &Tuple_e(es):        return cg_exps(fds,es,s);
+  case &UnresolvedMem_e(_,dles): fallthru(dles);
+  case &CompoundLit_e(_,dles):   fallthru(dles);
+  case &Aggregate_e(_,_,dles,_): fallthru(dles);
+  case &AnonStruct_e(_,dles):    fallthru(dles);
+  case &Array_e(dles):
+    for (; dles != NULL; dles = dles->tl) {
+      let &$(_,e) = dles->hd;
+      s = cg_exp(fds,e,s);
+    }
+    return s;
+  case &StmtExp_e(stmt): return cg_stmt(fds,stmt,s);
+  }
+}
+
+static fndecl_set_t cg_decl(fndefns_t fds, decl_t d, fndecl_set_t s) {
+  switch (d->r) {
+  case &Var_d(vd):
+    let eopt = vd->initializer;
+    return (eopt == NULL) ? s : cg_exp(fds,(exp_t)eopt,s);
+  case &Let_d(_,_,e,_): return cg_exp(fds,e,s);
+  case &Letv_d(vds):
+    for (; vds != NULL; vds = vds->tl) {
+      let eopt = vds->hd->initializer;
+      s = (eopt == NULL) ? s : cg_exp(fds,(exp_t)eopt,s);
+    }
+    return s;
+  case &Region_d(_,vd,eopt):
+    s = (vd->initializer == NULL) ? s : cg_exp(fds,(exp_t)vd->initializer,s);
+    return (eopt == NULL) ? s : cg_exp(fds,(exp_t)eopt,s);
+  default: return s;
+  }
+}
+
+static fndecl_set_t cg_stmt(fndefns_t fds, stmt_t stmt, fndecl_set_t s) {
+  switch (stmt->r) {
+  case &Break_s:
+  case &Continue_s:
+  case &Goto_s(_):
+  case &Skip_s: return s;
+  case &Exp_s(e): return cg_exp(fds,e,s);
+  case &Seq_s(s1,s2): return cg_stmt(fds,s2,cg_stmt(fds,s1,s));
+  case &Return_s(eopt): return (eopt != NULL) ? cg_exp(fds,(exp_t)eopt,s) : s;
+  case &IfThenElse_s(e,s1,s2): 
+    return cg_stmt(fds,s2,cg_stmt(fds,s1,cg_exp(fds,e,s)));
+  case &While_s($(e,_),s1): return cg_stmt(fds,s1,cg_exp(fds,e,s));
+  case &For_s(e1,$(e2,_),$(e3,_),s1):
+    return cg_stmt(fds,s1,cg_exp(fds,e3,cg_exp(fds,e2,cg_exp(fds,e1,s))));
+  case &Switch_s(e,scs,_):
+    s = cg_exp(fds,e,s);
+    for (; scs != NULL; scs = scs->tl)
+      // pattern and &&-clause cannot have function call in it...
+      s = cg_stmt(fds,scs->hd->body,s);
+    return s;
+  case &Fallthru_s(es,_): return cg_exps(fds,es,s);
+  case &Decl_s(d,s1): return cg_stmt(fds,s1,cg_decl(fds,d,s));
+  case &Do_s(s1,$(e,_)): return cg_exp(fds,e,cg_stmt(fds,s1,s));
+  case &TryCatch_s(s1,scs,...):
+    s = cg_stmt(fds,s1,s);
+    for (; scs != NULL; scs = scs->tl)
+      // pattern and &&-clause cannot have function call in it...
+      s = cg_stmt(fds,scs->hd->body,s);
+    return s;
+  case &Label_s(_,s1): return cg_stmt(fds,s1,s);
+  }
+}
+
+static int fndecl_cmp(fndecl_t fd1, fndecl_t fd2) {return (int)fd1 - (int)fd2;}
+
+static void cg_topdecls(fndefns_t fds, callgraph_t cg, list_t<decl_t> ds) {
+  let mt = Set::empty(fndecl_cmp);
+  for (let ds = ds; ds != NULL; ds = ds->tl) {
+    switch (ds->hd->r) {
+    case &Fn_d(fd): Hashtable::insert(cg,fd,cg_stmt(fds,fd->body,mt)); break;
+    case &Using_d(_,ds): fallthru(ds);
+    case &Namespace_d(_,ds): cg_topdecls(fds,cg,ds); break;
+    default: break;
+    }
+  }
+}
+
+// build the map from qvars to fndecls.
+static void enter_fndecls(fndefns_t fds, list_t<decl_t> ds) {
+  for (let ds = ds; ds != NULL; ds = ds->tl) {
+    switch (ds->hd->r) {
+    case &Fn_d(f): Hashtable::insert(fds,f->name,f); break;
+    case &Using_d(_,ds): fallthru(ds);
+    case &Namespace_d(_,ds): enter_fndecls(fds,ds); break;
+    default: break;
+    }
+  }
+}
+
+static int hash_qvar(qvar_t q) { return Hashtable::hash_string(*((*q)[1])); }
+static int hash_fndecl(fndecl_t fd) { return (int)fd; }
+
+callgraph_t compute_callgraph(list_t<decl_t> ds) {
+  // build a map from qvars to function declarations
+  fndefns_t fd = Hashtable::create(51, qvar_cmp, hash_qvar);
+  enter_fndecls(fd, ds);
+  callgraph_t cg = Hashtable::create(51, fndecl_cmp, hash_fndecl);
+  cg_topdecls(fd,cg,ds);
+  return cg;
+}
+
+static void print_fndecl(fndecl_t fd) {
+  fprintf(stderr,"%s ",Absynpp::qvar2string(fd->name));
+}
+
+static void print_fn(fndecl_t fd, fndecl_set_t s) {
+  fprintf(stderr,"%s -> {",Absynpp::qvar2string(fd->name));
+  Set::iter(print_fndecl, s);
+  fprintf(stderr,"}\n");
+}
+
+void print_callgraph(callgraph_t cg) { 
+  fprintf(stderr,"Callgraph:\n");
+  fprintf(stderr,"----------\n");
+  Hashtable::iter(print_fn, cg); 
+}
+
+struct FnInfo {
+  fndecl_t f;
+  list_t<fndecl_t> children;
+  unsigned int dfsnum;
+  unsigned int low;
+  bool visited;
+  bool finished;
+};
+
+typedef struct FnInfo @fninfo_t;
+typedef Hashtable::table_t<fndecl_t,fninfo_t> fninfo_table_t;
+
+static void add_member(list_t<`a,`H>@ p, `a x) { *p = new List{x,*p}; }
+
+static list_t<`a> set_to_list(Set::set_t<`a> s) {
+  list_t<`a> res = NULL;
+  Set::iter_c(add_member,&res,s);
+  return res;
+}
+
+void insert_info(fndecl_t fd, fndecl_set_t s, fninfo_table_t t) {
+  Hashtable::insert(t,fd,new FnInfo{.f = fd, .children = set_to_list(s),
+                                    .dfsnum = 0, .low = 0,
+                                    .visited = false, .finished = false});
+}
+
+#ifdef DEBUG
+static void print_fninfo(fninfo_t f) {
+  printf("dfsnum=%d, low=%d, visited=%d, finished=%d, children=[",f->dfsnum,
+         f->low,f->visited,f->finished);
+  for (let c = f->children; c != NULL; c = c->tl)
+    print_fndecl(c->hd);
+  printf("]\n");
+}
+#endif
+
+fninfo_table_t build_fninfo(callgraph_t cg) {
+  fninfo_table_t t = Hashtable::create(51, fndecl_cmp, hash_fndecl);
+  Hashtable::iter_c(insert_info,cg,t);
+#ifdef DEBUG
+  printf("TABLE:\n");
+  printf("------\n");
+  Hashtable::print_table_map(t, print_fndecl, print_fninfo);
+  printf("------\n");
+#endif
+  return t;
+}
+
+typedef struct Env {
+  fninfo_table_t fninfo;
+  unsigned int N;
+  list_t<fninfo_t> L;
+  list_t<fndecl_set_t> result;
+} env_t;
+
+unsigned int min(unsigned int i, unsigned int j) {
+  return (i < j) ? i : j;
+}
+
+void visit(env_t @env, fndecl_t f, fninfo_t finfo) {
+#ifdef DEBUG
+  fprintf(stderr,"visiting %s (%x) info (%x)\n",Absynpp::qvar2string(f->name), f,finfo);
+#endif
+  env->L = new List{finfo,env->L};
+  finfo->visited = true;
+  finfo->dfsnum = finfo->low = env->N;
+  env->N = env->N + 1;
+  for (let children=finfo->children; children!=NULL; children=children->tl) {
+    let g = children->hd;
+    let ginfo = Hashtable::lookup(env->fninfo, g);
+#ifdef DEBUG
+    fprintf(stderr,"  child %s (%x) info (%x): fin = %d, visited = %d\n",
+            Absynpp::qvar2string(g->name), g, ginfo,
+            ginfo->finished, ginfo->visited);
+#endif
+    if (ginfo->finished) continue;
+    if (ginfo->visited) {
+      finfo->low = min(finfo->low, ginfo->dfsnum);
+    } else {
+      visit(env,g,ginfo);
+      finfo->low = min(finfo->low, ginfo->low);
+    }
+  }
+  if (finfo->low == finfo->dfsnum) {
+    fninfo_t v;
+    fndecl_set_t peers = Set::empty(fndecl_cmp);
+    do {
+      v = env->L->hd;
+      peers = Set::insert(peers,v->f);
+      env->L = env->L->tl;
+      v->finished = true;
+    } while (v != finfo);
+    env->result = new List{peers,env->result};
+  }
+}
+
+static void visit_fndecls(fndecl_t f, fninfo_t finfo, env_t @env) {
+  if (!finfo->finished && !finfo->visited)
+    visit(env,f,finfo);
+}
+
+static void add_component($(components_t,fndecl_set_t)@ env, fndecl_t f) {
+  let &$(t,s) = env;
+  Hashtable::insert(t,f,s);
+}
+
+components_t strongly_connected_components(callgraph_t cg) {
+  fninfo_table_t finfo = build_fninfo(cg);
+  env_t env = Env{.fninfo = finfo, .N = 0, .L = NULL, .result = NULL};
+  Hashtable::iter_c(visit_fndecls,finfo,&env);
+  components_t t = Hashtable::create(51, fndecl_cmp, hash_fndecl);
+  for (let cs = env.result; cs != NULL; cs = cs->tl) {
+    let s = cs->hd;
+    let env = $(t,s);
+    Set::iter_c(add_component,&env,s);
+  }
+  return t;
+}
+
+void print_components(components_t cs) {
+  fprintf(stderr,"Components:\n");
+  fprintf(stderr,"----------\n");
+  Hashtable::iter(print_fn, cs);
+}

@@ -1333,12 +1333,13 @@ if(Cyc_compile_failure)return;
 if(Cyc_Absyn_porting_c_code){
 Cyc_Port_port(tds);
 return;}
-# 849
+# 848
 ({struct _dyneither_ptr _tmp321=({const char*_tmpE2="binding";_tag_dyneither(_tmpE2,sizeof(char),8U);});struct Cyc_List_List*_tmp320=tds;((int(*)(struct _dyneither_ptr stage_name,struct Cyc_List_List*tds,int(*f)(int,struct Cyc_List_List*),int env,void(*on_fail)(struct _dyneither_ptr*),struct _dyneither_ptr*failenv))Cyc_do_stage)(_tmp321,_tmp320,Cyc_do_binding,1,Cyc_remove_fileptr,_tmpC4);});
 if(Cyc_compile_failure)return;{
-# 852
+# 851
 struct Cyc_JumpAnalysis_Jump_Anal_Result*jump_tables;
 {struct Cyc_Tcenv_Tenv*_tmpE3=Cyc_Tcenv_tc_init();
+# 854
 if(Cyc_parseonly_r)goto PRINTC;
 # 857
 tds=({struct _dyneither_ptr _tmp324=({const char*_tmpE4="type checking";_tag_dyneither(_tmpE4,sizeof(char),14U);});struct Cyc_List_List*_tmp323=tds;struct Cyc_Tcenv_Tenv*_tmp322=_tmpE3;((struct Cyc_List_List*(*)(struct _dyneither_ptr stage_name,struct Cyc_List_List*tds,struct Cyc_List_List*(*f)(struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*),struct Cyc_Tcenv_Tenv*env,void(*on_fail)(struct _dyneither_ptr*),struct _dyneither_ptr*failenv))Cyc_do_stage)(_tmp324,_tmp323,Cyc_do_typecheck,_tmp322,Cyc_remove_fileptr,_tmpC4);});
