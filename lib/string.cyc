@@ -46,10 +46,11 @@ size_t strlen(buffer_t s) @ensures(return_value <= numelts(s))
 
 static inline unsigned int umin(unsigned int i, unsigned int j) 
   @ensures(return_value <= i && return_value <= j) {
-  if (i < j)
-    return i;
-  else
-    return j;
+  if (i < j) return i; else return j;
+}
+static inline unsigned int umax(unsigned int i, unsigned int j) 
+  @ensures(return_value >= i && return_value >= j) {
+  if (i > j) return i; else return j;
 }
 
 ///////////////////////// COMPARISONS
@@ -83,17 +84,14 @@ int strptrcmp(stringptr_t s1, stringptr_t s2) {
 }
 
 static inline int ncmp(buffer_t s1, size_t len1, buffer_t s2, size_t len2, 
-                       size_t n) //@requires(len1 <= numelts(s1) && len2 <= numelts(s2))
+                       size_t n) @requires(len1 <= numelts(s1) && len2 <= numelts(s2))
 {
   if (n <= 0) return 0;
 
   size_t min_len = umin(len1,len2);
-  //@assert__(min_len <= numelts(s1) && min_len <= numelts(s2));
   size_t bound = umin(min_len,n);
 
-  //@assert__(bound <= numelts(s1) && bound <= numelts(s2));
-
-  for (int i=0; i < bound; i++) {
+  for (unsigned int i=0; i < bound; i++) {
     int retc;
     if ((retc = (s1[i] - s2[i])) != 0)
       return retc;
@@ -121,10 +119,10 @@ int zstrcmp(buffer_t a, buffer_t b) {
     return 0;
   size_t as = numelts(a);
   size_t bs = numelts(b);
-  size_t min_length = (as < bs) ? as : bs;
+  size_t min_length = umin(as,bs);
   int i  = -1;
 
-  assert(min_length <= numelts(a) && min_length <= numelts(b));
+  @assert__(min_length <= numelts(a) && min_length <= numelts(b));
 
   while (++i, i < min_length) {
     int diff = (int)(a[i]) - (int)(b[i]);
@@ -139,10 +137,10 @@ int zstrncmp(buffer_t s1, buffer_t s2,size_t n) {
 
   size_t s1size = numelts(s1);
   size_t s2size = numelts(s2);
-  size_t min_size = (s1size > s2size) ? s2size : s1size;
-  size_t bound = (min_size > n) ? n : min_size;
+  size_t min_size = umin(s1size,s2size);
+  size_t bound = umin(n,min_size);
 
-  assert(bound <= numelts(s1) && bound <= numelts(s2));
+  @assert__(bound <= numelts(s1) && bound <= numelts(s2));
 
   for (int i=0; i < bound; i++) {
     if (s1[i] < s2[i])
@@ -177,7 +175,7 @@ static inline mstring_t<`r> int_strcato(mstring_t<`r> dest,buffer_t src) {
   slen = strlen(src);
   
   if ((slen + dlen) <= dsize) {
-    assert(slen <= numelts(src));
+    @assert__(slen <= numelts(src));
     for (i = 0; i<slen; i++) {
       dest[i+dlen] = src[i];
     }
@@ -201,9 +199,10 @@ mstring_t<`r> rstrconcat(region_t<`r> r, buffer_t a, buffer_t b) {
   let blen = strlen(b);
   mstring_t<`r> ans = rnew_string(r,alen+blen+1);
   int i, j;
-  assert(alen <= numelts(ans) && alen <= numelts(a));
+  assert(alen <= numelts(ans));
+  @assert__(alen <= numelts(a));
   for (i=0; i < alen; ++i) ans[i]   = a[i];
-  assert(blen <= numelts(b));
+  @assert__(blen <= numelts(b));
   for (j=0; j < blen; ++j) ans[i+j] = b[j];
   return ans;
 }
@@ -397,7 +396,7 @@ mstring_t<`r> cond_rrealloc_str(region_t<`r::TR> r, mstring_t<`r> str, size_t sz
   let res = NULL;
 
   if (maxsizeP == 0) {
-    maxsizeP = (30>sz)?30:sz;	/* arbitrary */
+    maxsizeP = umax(30,sz);	/* arbitrary */
     res = rnew_string(r,maxsizeP);
     res[0] = '\000';
   }
@@ -575,14 +574,14 @@ mstring_t<`r> mstrstr(mstring_t<`r> haystack, string_t needle) {
 // Return the offset to the first such character, or the length
 // of s if none.
 size_t strspn(string_t s, string_t accept) {
-  size_t len = strlen(s);
+  buffer_t b = (buffer_t)s;
+  size_t len = strlen(b);
   unsigned asize = numelts(accept);
-
-  assert(len <= numelts(s));
+  @assert__(len <= numelts(b));
   for (size_t i=0; i<len; i++) {
     int j;
     for (j=0; j<asize; j++)
-      if (s[i] == accept[j])
+      if (b[i] == accept[j])
 	break; /* inner loop */
     if (j == asize) /* didn't find it */
       return i;
@@ -595,14 +594,15 @@ size_t strspn(string_t s, string_t accept) {
 // Return the offset to the first such character, or the length
 // of s if none.
 size_t strcspn(string_t s, string_t accept) {
-  size_t len = strlen(s);
+  buffer_t b = (buffer_t)s;
+  size_t len = strlen(b);
   unsigned asize = numelts(accept);
 
-  assert(len <= numelts(s));
+  @assert__(len <= numelts(b));
   for (size_t i=0; i<len; i++) {
     int j;
     for (j=0; j<asize; j++)
-      if (s[i] == accept[j]) return i;
+      if (b[i] == accept[j]) return i;
   }
   return len;
 }
@@ -650,7 +650,7 @@ mstring_t<`H> strtok (mstring_t<`H> s, string_t delim)
 ////////////////////////// CONVERSIONS
 list_t<int,`r> rexplode(region_t<`r> r,buffer_t s) {
   list_t result = NULL;
-  for (int i = strlen(s) - 1; i >= 0; i--)
+  for (int i = strlen(s) - 1; i >= 0; i--) 
     result = rnew(r) List((int)s[i],result);
   return result;
 }
@@ -671,11 +671,12 @@ mstring_t implode(list_t<int> chars) {
 
 // Like strcmp, but case insensitive.
 static inline int casecmp(buffer_t s1, size_t len1,
-                          buffer_t s2, size_t len2)
+                          buffer_t s2, size_t len2) 
+  @requires(len1 <= numelts(s1) && len2 <= numelts(s2))
 {
-  size_t min_length = (len1 < len2) ? len1 : len2;
+  size_t min_length = umin(len1,len2);
 
-  assert(min_length <= numelts(s1) && min_length <= numelts(s2));
+  @assert__(min_length <= numelts(s1) && min_length <= numelts(s2));
 
   int i = -1;
   while (++i, i < min_length) {
@@ -696,13 +697,14 @@ int strcasecmp(buffer_t s1, buffer_t s2) {
 
 static inline int caseless_ncmp(buffer_t s1, size_t len1,buffer_t s2, 
                                 size_t len2, size_t n)
+  @requires(len1 <= numelts(s1) && len2 <= numelts(s2))
 {
   if (n <= 0) return 0;
 
-  size_t min_len = (len1 > len2) ? len2 : len1;
-  size_t bound = (min_len > n) ? n : min_len;
+  size_t min_len = umin(len1,len2);
+  size_t bound = umin(min_len,n);
 
-  assert(bound <= numelts(s1) && bound <= numelts(s2));
+  @assert__(bound <= numelts(s1) && bound <= numelts(s2));
 
   for (int i=0; i < bound; i++) {
     int retc;

@@ -666,7 +666,7 @@ switch((int)base){case Cyc_OCT:
 ({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=(char)((_ulong & 7U)+ 48U);if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 _ulong >>=3U;}while((int)_ulong);
 # 579
-if(flags & 8 &&(int)*((char*)_check_fat_subscript(cp,sizeof(char),0U))!=48)
+if(flags & 8 &&(int)*((char*)cp.curr)!=48)
 ({struct _fat_ptr _Tmp0=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='0';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 goto _LL4F;case Cyc_DEC:
 # 585

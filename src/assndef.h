@@ -85,6 +85,7 @@ namespace AssnDef{
     Prim(term_t,prim_reln_t,term_t);
     And(assn_t,assn_t);
     Or(assn_t,assn_t);
+    Not(assn_t);  // logical negation
     Subst(vardecl_t x,term_t t,assn_t a); // a[t/x] -- lazy substitution
     Kill(assn_t); // replace all escaping variables with fresh logic variables
   };
@@ -116,6 +117,7 @@ namespace AssnDef{
   
   assn_t and(assn_t a1, assn_t a2);
   assn_t or(assn_t a1, assn_t a2);
+  assn_t not(assn_t a);
   assn_t subst(vardecl_t x, term_t newx, assn_t a);
 
   assn_t prim(term_t t1, prim_reln_t p, term_t t2);
@@ -129,7 +131,6 @@ namespace AssnDef{
     
   assn_t reduce(assn_t a);
   term_t subst_term(term_t t, vardecl_t x, term_t newx);
-  assn_t not(assn_t a);
   bool simple_prove(assn_t ctxt, assn_t a);
 
   term_t kill_mem_term(term_t t);

@@ -5,56 +5,6 @@ using AssnDef;
 using List;
 
 namespace PrattProver;
-//////////////////// Constraint Solving //////////////////
-// We use a variation of the Pratt algorithm here where we keep
-// track of a signed distance and an unsigned distance between terms 
-// and find the minimal length signed and unsigned paths between any 
-// two terms.  If we ever get a negative-length cycle,
-// then the constraints are inconsistent.  
-//
-// We represent a conjunction of constraints as a sparse matrix of
-// the distances.  We consider distance(i,j) == 0 implicitly, and
-// otherwise, if (i,j) are not in the graph, the distance is infinite.
-//
-// To deal with an entire assertion, we must collect a set of graphs.
-// representing alternative states.  This effectively converts the 
-// assertion to DNF which is an exponential blowup.  To avoid running
-// out of time or memory, we limit the blowup according to the
-// variable max_paths.
-
-// The edges in the graph record both signed and unsigned distance
-// values, but only one of them may be valid, or both of them may
-// be valid.
-typedef enum DistanceInfo { 
-  Unsigned_valid = 1,
-  Signed_valid = 2,
-  Both_valid = 3,
-} distance_info_t;
-
-typedef struct Dist{
-  int length;
-  assn_opt_t prim; //to record a single edge shortest path's origin
-} dist_t;
-typedef struct Distance {
-  struct Distance *next;  // ptr to next entry in sparse matrix
-  term_t target;
-  distance_info_t dinfo;  // whether unsigned_dist or signed_dist are valid.
-  dist_t    unsigned_dist;
-  dist_t    signed_dist;
-} *distance_t;
-
-typedef struct Row {
-  struct Row *next;
-  term_t source;
-  distance_t distance;
-} *row_t;
-
-
-typedef struct Graph {
-  struct Graph *next;    // ptr to next graph in disjunction
-  row_t rows;
-} graph_t;
-
 
 // FIX: 32-bit dependency!
 #define MAXINT  (2147483647)
@@ -62,113 +12,154 @@ typedef struct Graph {
 #define MININT (-MAXINT-1)
 #define MAXUINT (0xFFFFFFFF)
 
-// print out a set of graphs
-static void print_graphs(graph_t* gs) {
-  fprintf(stderr,"Graphs:\n");
-  for (; gs != NULL; gs = gs->next) {
-    fprintf(stderr,"\t{");
-    for (let ns = gs->rows; ns != NULL; ns = ns->next) {
-      let t1 = ns->source;
-      let ds = ns->distance;
-      if (ds == NULL) continue;
-      for (; ds != NULL; ds = ds->next) {
-        let t2 = ds->target;
-        if (ds->dinfo == Both_valid) {
-          fprintf(stderr,"%s - %s U<= %d, %s - %s S<= %d",term2string(t1),
-                  term2string(t2),ds->unsigned_dist.length,term2string(t1),
-                  term2string(t2),ds->signed_dist.length);
-        } else if (ds->dinfo == Signed_valid) {
-          fprintf(stderr,"%s - %s S<= %d",term2string(t1),
-                  term2string(t2),ds->signed_dist.length);
-        } else {
-          fprintf(stderr,"%s - %s U<= %d",term2string(t1),
-                  term2string(t2),ds->unsigned_dist.length);
-        }
-        if (ds->next != NULL) fprintf(stderr,",");
-      }
-      if (ns->next != NULL) fprintf(stderr,",\n\t ");
-    }
-    fprintf(stderr,"}\n");
-  }
-}
+/* Not quite right yet -- when we lookup a term Prim(p,[t1,...,tn]),
+we should lookup a *node* of the form PrimNode(p,[N1,...,Nn]).  
+Furthermore, when we unify two nodes N1 == N2, then we should
+collapse any nodes that end up being the same.  For instance,
+if we unify N1 and N2, then we should also equate PrimNode(Numelts,[N1])
+and PrimNode(Numelts,[N2]). */
 
-// determine the number of graphs
-static unsigned int num_graphs(graph_t *`H gs) {
-  unsigned n = 0;
+///////////////////////// Constraint Solving ///////////////////////////
+//
+// This is a simple constraint solver that can determine the satisfiability
+// of the conjunction of a set of constraints of the form (t1 - t2 <= c).
+//
+// We use a variation of the Pratt algorithm here where we keep track of a 
+// signed distance and an unsigned distance between equivalence classes of 
+// terms and find the minimal length signed and unsigned paths between any 
+// two terms.  If we ever get a negative-length cycle, then the constraints 
+// are inconsistent.  
+//
+// We represent a conjunction of constraints as a sparse matrix of
+// the distances.  We consider distance(i,j) == 0 implicitly, and
+// otherwise, if (i,j) are not in the graph, the distance is infinite.
+//
+// We deal with equality specially -- terms can be unified into an equivalence
+// class (essentially a forwarding pointer to a representative term for the
+// class.)  
+//
+// To deal with an entire assertion, we must collect a set of graphs.
+// representing alternative states.  This effectively converts the 
+// assertion to DNF which is an exponential blowup.  To avoid the blowup,
+// we aggressively prune inconsistent graphs.  
+
+// Forward declaration -- represents an equivalence class for terms
+// (and also a row within a graph.)
+struct Node;
+typedef struct Node node_t;
+
+
+// An entry in the sparse matrix -- records the target node of the
+// edge and the distance as a (signed) integer.
+typedef struct Distance {
+  struct Distance *next;
+  node_t @target;
+  int    dist;
+} distance_t;
+
+
+// Represents an equivalence class for terms, and is used as a row
+// within a graph.  If equiv_class is NULL, then this node represents 
+// an equivalence class of terms.  If the equiv_class is non-NULL, then 
+// we should always follow the pointer to get to the equiv_class, doing 
+// path compression along the way.  
+struct Node {
+  node_t     *next;
+  node_t     *equiv_class;
+  term_t      rep;
+  distance_t *unsigned_distances;
+  distance_t *signed_distances;
+};
+
+// A graph is essentially a pair of sparse matrices of 
+// (node_t,node_t)->distance.  We represent the matrices by having
+// a node row for each term, but only those term-nodes with a NULL
+// equiv_class are actually in the matrices.  The other nodes (with
+// non-NULL equiv_class members) are kept so that we can lookup the
+// appropriate node associated with a term.
+typedef struct Graph {
+  struct Graph *next;
+  node_t       *rows;
+} graph_t;
+
+static unsigned num_graphs(graph_t *gs) {
+  unsigned c = 0;
   for (; gs != NULL; gs = gs->next)
-    ++n;
-  return n;
+    ++c;
+  return c;
 }
 
-// represents "true" -- a singleton graph with no edges (everything
-// is infinitely far apart.)
-static graph_t @true_graph() { return new Graph{NULL,NULL};}
+// An empty graph represents the proposition "true".
+static graph_t@ true_graph() { return new Graph{NULL,NULL}; }
 
-// used in copying of graphs
-static distance_t copy_distance(distance_t ds) {
-  distance_t res = NULL;
-  for (; ds != NULL; ds = ds->next) {
-    let newds = new *ds;
-    newds->next = res;
-    res = newds;
+// Given a node, look up its equivalence class and do path compression.
+static node_t @compress(node_t @`H n) {
+  let e = n->equiv_class;
+  if (e == NULL) return n;
+  let parent = compress(e);
+  n->equiv_class = parent;
+  return parent;
+}
+
+// Print out a graph.
+void print_graph(graph_t @g) {
+  fprintf(stderr,"{");
+  if (g->rows == NULL) fprintf(stderr,"<true>");
+  else {
+    for (let rs = g->rows; rs != NULL; rs = rs->next) {
+      let &Node{_,equiv_class,rep,uds,sds} = (node_t@)rs;
+      if (equiv_class != NULL) {
+        let p = compress(equiv_class)->rep;
+        fprintf(stderr,"%s == %s\n ",term2string(rep),term2string(p));
+      } else {
+        for (; uds != NULL; uds = uds->next)
+          fprintf(stderr,"%s - %s U<= %d\n ",term2string(rep),
+                  term2string(compress(uds->target)->rep),uds->dist);
+        for (; sds != NULL; sds = sds->next) 
+          fprintf(stderr,"%s - %s S<= %d\n ",term2string(rep),
+                  term2string(compress(sds->target)->rep),sds->dist);
+      }
+    }
   }
-  return res;
+  fprintf(stderr,"}\n");
 }
 
-static row_t copy_rows(row_t ns) {
-  row_t res = NULL;
-  for (; ns != NULL; ns = ns->next) {
-    res = new Row{.next = res, 
-		  .source = ns->source, 
-		  .distance=copy_distance(ns->distance)};
+// Print out a list of graphs.
+void print_graphs(graph_t *g) {
+  fprintf(stderr,"Graphs:-----------\n");
+  if (g == NULL) fprintf(stderr,"<false>\n");
+  else {
+    for (; g != NULL; g = g->next) print_graph(g);
   }
-  return res;
+  fprintf(stderr,"------------------\n");
 }
 
-// copies a whole set of graphs -- used when we have a disjunction
-static graph_t *copy_graph(graph_t * g) {
-  graph_t *res = NULL;
-  for (; g != NULL; g = g->next) {
-    res = new Graph{res,copy_rows(g->rows)};
-  }
-  return res;
-}
-
-// appends two sets of graphs -- could be smarter and try to remove
-// duplicates...
-static graph_t *graph_append(graph_t *`H g1, graph_t *`H g2) {
-  if (g1 == NULL) return g2;
-  if (g2 == NULL) return g1;
-  graph_t @p = g1;
-  for (let x = p->next; x != NULL; p = x, x=p->next) /* skip */ ;
-  p->next = g2;
-  return g1;
-}
-
-static bool add_edge(graph_t @, bool, term_t, term_t, int, assn_opt_t);
+// forward declarations
+static node_t *term2node_opt(graph_t @g, term_t t);
+static bool set_distance(graph_t @g, term_t s, term_t t, int dist, bool is_signed);
 static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2);
+static bool add_eq(graph_t @g, term_t t1, term_t t2);
 
-static bool add_node(graph_t @g, term_t n);
-
-static bool add_eq(graph_t @g, term_t t1, term_t t2) {
-  return add_node(g,t2) &&
-    add_constraint(g, t1, ULte, t2) &&
-    add_constraint(g, t1, SLte, t2) &&
-    add_constraint(g, t2, ULte, t1) &&
-    add_constraint(g, t2, SLte, t1);
-}
-
-// check n to see if its type reveals its numelts is known and if so,
-// add the information to the graph.  similarly, check if n's type
-// is tag_t<valueof(e)> and if so, add n == e.  
-// an unsigned term, then add n >= 0
-static int add_type_info(graph_t @g, term_t n) {
-  let topt = get_term_type(n);
+// check term to see if its type reveals its numelts is known and if so,
+// add the information to the graph.  similarly, check if term's type
+// is tag_t<valueof(e)> and if so, add term == e and if term is unsigned, 
+// then add term >= 0
+static int add_type_info(graph_t @g, term_t term) {
+  switch (term) {
+  case &Primop(Absyn::Numelts, &List(x,_), _):
+    // add term s< MAXINT and term u< MAXINT and 0 u<= term
+    if (!set_distance(g, term, zero(), MAXINT-1, true) ||
+        !set_distance(g, term, zero(), MAXINT-1, false) ||
+        !set_distance(g, zero(), term, 0, false)) return false;
+    break;
+  default: break;
+  }
+  let topt = get_term_type(term);
   if (topt != NULL) {
     type_t t = (type_t)topt;
     let eopt = Tcutil::get_type_bound(t);
     if (eopt != NULL) {
-      term_t t1 = primop(Absyn::Numelts, list(n), Absyn::uint_type);
+      term_t t1 = primop(Absyn::Numelts, list(term), Absyn::uint_type);
       // sigh -- must get rid of a cast to int/long
       exp_t e = (exp_t)eopt;
     loop:
@@ -191,13 +182,14 @@ static int add_type_info(graph_t @g, term_t n) {
     }
     switch (Absyn::compress(t)) {
     case &Absyn::AppType(&Absyn::IntCon(Absyn::Unsigned,_),_):
-      if (!add_constraint(g, zero(), ULte, n)) return false;
+      if (!add_constraint(g, zero(), ULte, term)) return false;
       break;
     case &Absyn::AppType(&Absyn::TagCon,&List{v,_}):
       switch (Absyn::compress(v)) {
-      case &Absyn::ValueofType(e): add_eq(g,n,cnst(e)); break;
+      case &Absyn::ValueofType(e): add_eq(g,term,cnst(e)); break;
       case v2: 
-        if (!add_eq(g,n,cnst(Absyn::valueof_exp(v2,0)))) return false; break;
+        if (!add_eq(g,term,cnst(Absyn::valueof_exp(v2,0)))) return false; 
+        break;
       }
       break;
     default: break;
@@ -206,102 +198,115 @@ static int add_type_info(graph_t @g, term_t n) {
   return true;
 }
 
-// add a row to a single graph if not already present
-static int add_node(graph_t @g, term_t n) {
-  for (let ns = g->rows; ns != NULL; ns = ns->next) {
-    if (cmp_term(ns->source,n) == 0) return true;
+// After adding a term to the graph, we want to see if we can equate
+// it to any other term in the graph that is congruent.  
+static node_t *find_equiv_term(graph_t @g, node_t @`H n) {
+  let t = n->rep;
+  switch (t) {
+  case &Primop(p,ts,tp):
+    let new_ts = NULL;
+    bool change = false;
+    for (; ts != NULL; ts = ts->tl) {
+      let t1 = ts->hd;
+      let n1 = term2node_opt(g,t1);
+      if (n1 == NULL) return NULL;
+      if (t1 != n1->rep) change = true;
+      new_ts = new List{n1->rep,new_ts};
+    }
+    if (change) {
+      let newt = new Primop(p,List::imp_rev(new_ts),tp);
+      for (let r = g->rows; r != NULL; r = r->next) {
+        if (cmp_term(newt,r->rep) == 0) {
+          let m = compress(r);
+          if (m != n)
+            n->equiv_class = m;
+          break;
+        }
+      }
+    }
+    break;
+  case &Cast(tp,t1):
+    let n1 = term2node_opt(g,t1);
+    if (n1 == NULL) return NULL;
+    if (t1 != n1->rep) {
+      let newt = new Cast(tp,n1->rep);
+      for (let r = g->rows; r != NULL; r = r->next) {
+        if (cmp_term(newt,r->rep) == 0) {
+          let m = compress(r);
+          if (m != n) n->equiv_class = m;
+          break;
+        }
+      }
+    }
+    break;
+  default: 
+    break;
   }
-  g->rows = new Row{g->rows,n,NULL};
-  switch (n){
-  case &Primop(Absyn::Numelts, &List(x,_),_):
-    // if n is numelts(x) then add n <s MAXINT and n <u MAXINT and 0 <=u n
-    return add_edge(g, false, n, zero(), MAXINT-1, NULL) &&
-      add_edge(g, true, n, zero(), MAXINT-1, NULL) &&
-      add_edge(g, false, zero(), n, 0, NULL) &&
-      // if x has type T*{e}, then add numelts(n) == e.
-      add_type_info(g,x);
-  default:   
-    return add_type_info(g,n);
+  return compress(n);
+} 
+
+// Given a term, look up its equivalence class node and if not found,
+// then add the term to the graph.
+static node_t *term2node_opt(graph_t @g, term_t t) {
+  // first see if we can find it directly.
+  for (let r = g->rows; r != NULL; r = r->next) {
+    if (cmp_term(t,r->rep) == 0) return compress(r);
   }
+  // term not directly found -- insert it in the graph.  
+  let n = new Node{g->rows, NULL, t, NULL, NULL};
+  g->rows = n;
+  // try to find an equivalent term via congruence.
+  n = find_equiv_term(g,n);
+  if (n == NULL) return NULL;
+  // add in any type information.
+  if (!add_type_info(g,t)) return NULL;
+  return n;
 }
 
-static row_t lookup_row(graph_t @g, term_t i) {
-  for (let ns = g->rows; ns != NULL; ns = ns->next)
-    if (cmp_term(i,ns->source) == 0) return ns;
+static node_t @term2node(graph_t @g, term_t t) {
+  return (node_t @)term2node_opt(g,t);
+}
+
+// Given a pair of nodes, look up their distance (if any) -- return
+// NULL if no distance is found.  Special case when source and target
+// are the same -- we always return a distance of zero.
+static int *lookup_dist(node_t @`H source, node_t @`H target, bool is_signed) {
+  static int zero = 0;
+  source = compress(source);
+  target = compress(target);
+  if (source == target) return &zero;
+  distance_t *ds = is_signed ? source->signed_distances : 
+    source->unsigned_distances;
+  for (; ds != NULL; ds = ds->next) 
+    if (ds->target == target) return &ds->dist;
   return NULL;
 }
 
-static distance_t lookup_col(row_t n, term_t j) {
-  for (let ds = n->distance; ds != NULL; ds = ds->next)
-    if (cmp_term(j,ds->target) == 0) return ds;
+// Same as above, but also delete the distance edge from the source -- used
+// when unifying terms.  Also, this assumes that source and target are not
+// equal and that they represent their equivalence classes.
+static int *lookup_and_delete_dist(node_t @`H source, node_t @`H target, bool is_signed) {
+  distance_t *@dsp = is_signed ? &source->signed_distances : 
+    &source->unsigned_distances;
+  for (let ds = *dsp; ds != NULL; ds = ds->next) {
+    if (ds->target == target) {
+      *dsp = ds->next;
+      return &ds->dist;
+    }
+    dsp = &ds->next;
+  }
   return NULL;
 }
 
-// lookup the distance between i and j in the row -- returns NULL
-// if the distance is infinite.
-static dist_t* lookup_distance(row_t i, bool is_signed, term_t j) {
-  static dist_t zero = Dist{0, NULL};
-  if (i == NULL) return NULL;
-  if (cmp_term(i->source,j) == 0) 
-    return &zero; // same term always at distance 0
-  let ds = lookup_col(i,j);
-  if (ds != NULL) {
-    if (is_signed && (ds->dinfo & Signed_valid))
-      return &ds->signed_dist;
-    else if (!is_signed && (ds->dinfo & Unsigned_valid))
-      return &ds->unsigned_dist;
-    else
-      return NULL;
-  } else 
-    return NULL;
+// Append two lists of graphs, representing a disjunction
+static graph_t *graph_append(graph_t *`H g1, graph_t *`H g2) {
+  if (g1 == NULL) return g2;
+  if (g2 == NULL) return g1;
+  graph_t @p = g1;
+  for (let x = p->next; x != NULL; p = x, x = p->next) /* skip */ ;
+  p->next = g2;
+  return g1;
 }
-
-// Assumes the signed or unsigned edge is not already in the graph,
-// but that the nodes are already added in the graph.
-// Inserts the edge as appropriate.  Must look through the Distance
-// list to see if there's already an entry for i and j and update
-// it instead of adding a new Distance node.
-static bool insert_distance(row_t i, bool is_signed, term_t j, int dist,assn_opt_t origin) {
-  if (cmp_term(i->source,j) == 0) {
-    // same term should always be at distance 0
-    if (dist != 0) { 
-      fprintf(stderr,"WARNING: distance %s--0-->%s is changing to %d!\n",
-              term2string(i->source),term2string(j),dist);
-      return false;
-    }
-    return true;
-  }
-  let ds = lookup_col(i,j);
-  if (ds != NULL) {
-    if (is_signed) { 
-      if ((ds->dinfo & Signed_valid) && ds->signed_dist.length < dist) {
-        fprintf(stderr,"WARNING: signed distance %s--%d-->%s is growing to %d!\n",
-                term2string(i->source),ds->signed_dist.length,
-                term2string(j),dist);
-        return false;
-      }
-      ds->dinfo |= Signed_valid;
-      ds->signed_dist.length = dist;
-      ds->signed_dist.prim = origin;
-    } else {
-      if ((ds->dinfo & Unsigned_valid) && ds->unsigned_dist.length < dist) {
-        fprintf(stderr,"WARNING: unsigned distance %s--%d-->%s is growing to %d!\n",
-                      term2string(i->source),ds->unsigned_dist.length,
-                      term2string(j),dist);
-        return false;
-      }
-      ds->dinfo |= Unsigned_valid;
-      ds->unsigned_dist.length = dist;
-      ds->unsigned_dist.prim = origin;
-    }
-    return true;
-  }
-  dist_t d = Dist{.length = dist, .prim = origin};
-  i->distance = new Distance{i->distance,j,is_signed ? Signed_valid : Unsigned_valid,d,d};
-  return true;
-}
-
-
 
 typedef $(bool, int) overflow_info_t;
 
@@ -355,125 +360,265 @@ is_unsigned_overflow(unsigned c1, operator_t op,unsigned c2){
   }
 }
 
-// add an edge to a graph and close it off to find shortest paths.
-// returns true if the resulting graph remains consistent and false
-// otherwise.
-// wangyl: here we are using signed integer to represent weight of
-// the edges in the graph, we need to check if any overflow happens
-// while computing shoterst path of all pairs and looking for negative
-// weight cycles.
-static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist, assn_opt_t origin){
-  if (!add_node(g,i)) return false;
-  if (!add_node(g,j)) return false;
-  dist_t* ij_dist = lookup_distance(lookup_row(g,i),is_signed,j);
-  // if we already have a shorter path, then this constraint is redundant
-  if (ij_dist != NULL && ij_dist->length < dist) 
-    return true;
-  dist_t* ji_dist = lookup_distance(lookup_row(g,j),is_signed,i);
-  // if  j -n-> i -dist-> j  and n+dist is negative, we have a contradiction.
-  if (ji_dist != NULL){
-    let $(overflow, sum) = is_signed_overflow(ji_dist->length, PLUS, dist);
-    if (sum < 0){
-      //underflowed or not, there is a negative loop indeed
-      return false;
-    }else if (overflow && sum > 0){
-      //the edge will create a very positive loop and the 
-      //weight of the loop will overflow, so we will have to 
-      //ignore the edge (by not adding it)
-      return true;
-    }
-    //all other cases, proceed by adding the edge into the graph.
+// assumes source and target do not have a distance between them in the
+// graph.  inserts a new distance reflecting source - target <= d.
+static void new_distance(node_t @`H source, node_t @`H target, bool is_signed, int d) {
+  let dist = new Distance{NULL,target,d};
+  if (is_signed) {
+    dist->next = source->signed_distances;
+    source->signed_distances = dist;
+  } else {
+    dist->next = source->unsigned_distances;
+    source->unsigned_distances = dist;
   }
+}
 
-  // adding a new edge, update shortest path
-  let jrow = lookup_row(g,j);
-  for (let ks = g->rows; ks != NULL; ks = ks->next) {
-    let k = ks->source;
-    let ki_dist = lookup_distance(ks,is_signed,i);
-    if (ki_dist == NULL) continue;//no new path through ij
-    for (let ls = g->rows; ls != NULL; ls = ls->next) {
-      let l = ls->source;
-      let kl_dist = lookup_distance(ks,is_signed,l);
-      //if kl_dist is the smallest, no need to update.
-      if (kl_dist != NULL && kl_dist->length == (int)MININT) continue;
-
-      let jl_dist = lookup_distance(jrow,is_signed,l);
-      if (jl_dist == NULL) continue;//no new path through ij
-
+// Tries to set the distance between two terms it and jt to dist, and
+// update the shortest paths between any two nodes in the graph.  Returns
+// true iff the resulting graph is consistent with this new constraint.  
+// Care must be taken when computing shortest paths to ensure that we
+// don't end up with an overflow or underflow.
+static bool set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_signed) {
+  // equivalent terms are always at distance 0.
+  if (i == j && dist != 0) return false;
+  let ij_dist = lookup_dist(i, j, is_signed);
+  // if we already have a shorter parth, then this constraint is redundant
+  if (ij_dist != NULL && *ij_dist < dist) return true;
+  let ji_dist = lookup_dist(j, i, is_signed);
+  // if  j --n--> i --dist--> j  and n+dist is negative, contradiction.
+  if (ji_dist != NULL) {
+    let $(overflow,sum) = is_signed_overflow(*ji_dist, PLUS, dist);
+    if (sum < 0) return false; // overflow or not, there is a negative loop 
+    // the edge will create a very positive loop and the weight of the loop
+    // will overflow, so we will have to ignore the edge.
+    else if (overflow && sum > 0) return true;
+    // all other cases, proceed by adding the edge into the graph and
+    // update the shortest paths.
+  }
+  for (let k = g->rows; k != NULL; k = k->next) {
+    // skip nodes that aren't the representative of the equiv class
+    if (k->equiv_class != NULL) continue;
+    let ki_dist = lookup_dist(k, i, is_signed);
+    if (ki_dist == NULL) continue; // no new path through ij
+    for (let l = g->rows; l != NULL; l = l->next) {
+      // skip nodes that aren't the representatives of the equiv class
+      // and any node equal to k
+      if (k == l || l->equiv_class != NULL) continue;
+      let kl_dist = lookup_dist(k, l, is_signed);
+      // if kl_dist is already MININT, no need to update.
+      if (kl_dist != NULL && *kl_dist == (int)MININT) continue;
+      let jl_dist = lookup_dist(j, l, is_signed);
+      if (jl_dist == NULL) continue; // no new path through i->j
       // computing w(kj) = w(ki) + w(ij)
-      bool final;
-      int sum;
-      let $(of1, sum1) = is_signed_overflow(ki_dist->length, PLUS, dist);
-      if (!of1){
-	//computing w(kl) = w(kj) + w(jl)
-	let $(of2, sum2) = is_signed_overflow(sum1, PLUS, jl_dist->length);
-	final = of2;
-	sum = sum2;
-      }else {
-	//now we know that ki_dist, ij_dist have the same sign
-	//that's the only way the sum can cause overflow
-	let $(of1, sum1) = is_signed_overflow(ki_dist->length, PLUS, jl_dist->length);
-	if (!of1){
-	  let $(of2, sum2) = is_signed_overflow(sum1, PLUS, dist);
-	  final = of2;
-	  sum = sum;
-	}else {
-	  //now we know that ki_dist, ij_dist, jl_dist have the same sign
-	  //that's the only way both of1's are true
-	  final = true;
-	  if (dist < 0){
-	    //it's an underflow, because everything is negative
-	    sum = MININT;
-	  }else{
-	    //it's an overflow, everything is too big 
-	    sum = MAXINT;
-	  }
-	}
+      $(bool,int) final_sum;
+      let $(of1,sum1) = is_signed_overflow(*ki_dist, PLUS, dist);
+      if (!of1) { // computing w(kl) = w(kj) + w(jl)
+        final_sum = is_signed_overflow(sum1, PLUS, *jl_dist);
+      } else {
+        // now we know that ki_dist, ij_dist have the same sign
+        // that's the only way the sum can cause overflow
+        let $(of1,sum1) = is_signed_overflow(*ki_dist, PLUS, *jl_dist);
+        if (!of1) {
+          // FIX?  original code had sum here...
+          final_sum = is_signed_overflow(sum1, PLUS, dist);
+        } else {
+          // now we know that ki_dist, ij_dist, jl_dist have the same sign
+          // that's the only way both of1's are true.  If dist < 0 then
+          // it must be an underflow, and if > 0 it must be an overflow.
+          final_sum = $(true, dist < 0 ? MININT : MAXINT);
+        }
       }
-      if (!final || (sum < 0)){
-	//either ther is no overflow in computing the sums,
-	//or there is an underflow, so the true_sum < MININT
-	if ((kl_dist == NULL) || (kl_dist->length > sum))
-	  insert_distance(ks,is_signed,l,sum, NULL);
+      let $(final_overflow,sum) = final_sum;
+      // either there is no overflow in computing the sums, or there is
+      // an underflow, so the true_sum < MININT
+      if (!final_overflow || sum < 0) {
+        // same node should always be at distance 0 from itself
+        if (k == l && sum != 0) return false;
+        // old k->l distance is infinite -- try adding a new edge.
+        else if (kl_dist == NULL) new_distance(k,l,is_signed,sum);
+        // old k->l distance is greater than new dist -- update edge.
+        else if (*kl_dist > sum) *kl_dist = sum;
       }
     }
   }
   return true;
 }
 
-// useful for debugging... just checks that there aren't shorter
-// paths.
-static bool check_graph_consistent(graph_t @g) {
-  for (let i = g->rows; i != NULL; i = i->next) {
-    for (let j = g->rows; j != NULL; j = j->next) {
-      if (i == j) continue;
-      let ij_signed = lookup_distance(i,true,j->source);
-      let ij_unsigned = lookup_distance(i,false,j->source);
-      for (let k = g->rows; k != NULL; k = k->next) {
-        if (i == k || j == k) continue;
-        let ik_signed = lookup_distance(i,true,k->source);
-        let ik_unsigned = lookup_distance(i,false,k->source);
-        let kj_signed = lookup_distance(k,true,j->source);
-        let kj_unsigned = lookup_distance(k,false,j->source);
-        if (ik_signed != NULL && kj_signed != NULL) {
-          let $(of1,sum1) = 
-            is_signed_overflow(ik_signed->length, PLUS, kj_signed->length);
-          if (!of1) {
-            if (ij_signed == NULL || ij_signed->length > sum1) {
-              if (!add_edge(g,true,i->source,j->source,sum1,NULL)) 
-                return false;
+// same as above but maps terms to nodes first.
+static bool set_distance(graph_t @g, term_t it, term_t jt, int dist, bool is_signed) {
+  let iopt = term2node_opt(g,it);
+  let jopt = term2node_opt(g,jt);
+  if (iopt == NULL || jopt == NULL) return false;
+  let i = (node_t@)iopt;
+  let j = (node_t@)jopt;
+  //fprintf(stderr,"calling set_dist on graph\n");
+  //print_graph(g);
+  return set_dist(g,i,j,dist,is_signed);
+}
+
+// Used in copy_graphs below to copy a set of edges from one graph to another.
+static distance_t *copy_distances(graph_t @newg, distance_t *ds) {
+  distance_t *res = NULL;
+  for (; ds != NULL; ds = ds->next) {
+    let t = compress(ds->target)->rep;
+    res = new Distance{res,term2node(newg,t),ds->dist};
+  }
+  return res;
+}
+
+// Reverse a list of nodes in place.
+static node_t *revnodes(node_t *`H n) {
+  if (n == NULL) return NULL;
+  node_t *first = n;
+  node_t *second = n->next;
+  n->next = NULL;
+  while (second != NULL) {
+    node_t *temp = second->next;
+    second->next = first;
+    first = second;
+    second = temp;
+  }
+  return first;
+}
+
+// Produce a copy of the list of graphs -- care must be taken to get the
+// sharing right in order to preserve equivalence classes and edges.
+static graph_t *copy_graphs(graph_t *gopt) {
+  if (gopt == NULL) return NULL;
+  let g = (graph_t@)gopt;
+  graph_t @newg = new Graph{.next = copy_graphs(g->next), .rows = NULL};
+  // insert a row for each term
+  node_t *newrs = NULL;
+  for (let rs = g->rows; rs != NULL; rs = rs->next) {
+    newrs = new Node{newrs,NULL,rs->rep,NULL,NULL};
+  }
+  newrs = revnodes(newrs);
+  newg->rows = newrs;
+  // process each row again, setting equivalence class pointers and
+  // adding in distance edges.
+  for (let rs = g->rows; rs != NULL; rs = rs->next, newrs=newrs->next){
+    if (rs->equiv_class != NULL) 
+      // In this case, r doesn't represent the equivalence class, so
+      // find r's equivalence class in g, then look up the corresponding 
+      // node in newg and set newr's equiv_class pointer to it.
+      newrs->equiv_class = term2node(newg,compress(rs)->rep);
+    else {
+      // In this csae, r represents an equivalence class, so copy all of 
+      // the distance edges.
+      newrs->unsigned_distances = copy_distances(newg,rs->unsigned_distances);
+      newrs->signed_distances = copy_distances(newg,rs->unsigned_distances);
+    }
+  }
+  return newg;
+}
+
+// Try to merge two nodes into a single equivalence class within the 
+// graph g, returning false if the resulting graph has an inconsistency
+// and true otherwise.
+static bool unify_nodes(graph_t @g, node_t @`H n1, node_t @`H n2) {
+  n1 = compress(n1);
+  n2 = compress(n2);
+  if (n1 == n2) return true;
+  node_t @source, @target;
+
+  // try to pick a good candidate for the representative of the equivalence
+  // class -- a constant is best.
+  switch $(n1->rep, n2->rep) {
+  case $(&Uint(i1),&Uint(i2)): if (i1 != i2) return false; fallthru;
+  case $(_,&Uint(_)): 
+  case $(&Var(_),_):
+  case $(&LogicVar(...),_):
+    source = n1;
+    target = n2;
+    break;
+  default:
+    source = n2;
+    target = n1;
+    break;
+  }
+
+  // add all of the source edges to the target.
+  for (let sds = source->signed_distances; sds != NULL; sds = sds->next) 
+    if (!set_dist(g, target, sds->target, sds->dist, true)) return false;
+  // might as well nuke out the source edges as well.
+  source->signed_distances = NULL;
+  for (let uds = source->unsigned_distances; uds != NULL; uds = uds->next) 
+    if (!set_dist(g, target, uds->target, uds->dist, false)) return false;
+  source->unsigned_distances = NULL;
+
+  // Now we need to get rid of the source column.  So we look at each
+  // row r to see if there is an edge r--d-->source, and if so, delete that
+  // edge and add in r--d-->target.  
+  for (let r = g->rows; r != NULL; r = r->next) {
+    // skip source row or non-equivalence-class row
+    if (r == source || r->equiv_class != NULL) continue;
+    // Process the signed edges first:
+    // See if there is an edge from r-->target
+    let rt_signed = lookup_dist(r,target,true);
+    // If not, we don't have to do anything since source will now point to
+    // target.  Otherwise, we have to lookup and delete any r->source edge,
+    // adding it back in to point to target.
+    if (rt_signed != NULL) {
+      let rs_signed = lookup_and_delete_dist(r,source,true);
+      if (rs_signed != NULL && (rt_signed == NULL || *rt_signed > *rs_signed))
+        if (!set_dist(g, r, target, *rs_signed, true)) return false;
+    }
+    // Process the unsigned edges:
+    let rt_unsigned = lookup_dist(r,target,false);
+    if (rt_unsigned != NULL) {
+      let rs_unsigned = lookup_and_delete_dist(r,source,false);
+      if (rs_unsigned != NULL && (rt_unsigned == NULL || *rt_unsigned > *rs_unsigned))
+        if (!set_dist(g, r, target, *rs_unsigned, false)) return false;
+    }
+  }
+  // finally, set the source's equivalence class to be the target. 
+  // subsequent lookups should now find the target.
+  source->equiv_class = target;
+  return true;
+}
+
+// If we have two nodes with representatives of the form Prim(p,[t11,...,tn1])
+// and Prim(p,[t12,...,tn2]) and the sub-terms ti1 and ti2 map to equivalent
+// nodes, then these equivalence classes should be collapsed.
+//
+// This is a truly horrible implementation -- worst case is cubic.  That
+// could be reduced to quadratic by processing the nodes in a bottom up
+// fashion.  I wish there was a more incremental solution.
+static bool congruence_close_graph(graph_t @g) {
+  bool changed = true;
+  while (changed) {
+    changed = false;
+    for (let rs = g->rows; rs != NULL; rs = rs->next) {
+      let rs_class = compress(rs);
+      for (let ts = rs->next; ts != NULL; ts = ts->next) {
+        let ts_class = compress(ts);
+        if (rs_class == ts_class) continue;
+        switch $(rs->rep,ts->rep) {
+        case $(&Primop(p1,ts1,_),&Primop(p2,ts2,_)) && p1 == p2:
+          bool same = true;
+          for (; ts1 != NULL && ts2 != NULL; ts1 = ts1->tl, ts2 = ts2->tl) {
+            let n1 = term2node_opt(g,ts1->hd);
+            let n2 = term2node_opt(g,ts2->hd);
+            if (n1 == NULL || n2 == NULL) return false;
+            if (n1 != n2) { same = false; break; }
+          }
+          if (same && ts1 == ts2) {
+            changed = true;
+            if (!unify_nodes(g,rs,ts)) return false;
+          }
+          break;
+        case $(&Cast(tp1,t1),&Cast(tp2,t2)):
+          if (Tcutil::typecmp(tp1,tp2) == 0) {
+            let n1 = term2node_opt(g,t1);
+            let n2 = term2node_opt(g,t2);
+            if (n1 == NULL || n2 == NULL) return false;
+            if (n1 == n2) {
+              changed = true;
+              if (!unify_nodes(g,rs,ts)) return false;
             }
           }
-        }
-        if (ik_unsigned != NULL && kj_unsigned != NULL) {
-          let $(of2,sum2) = 
-            is_signed_overflow(ik_unsigned->length, PLUS, kj_unsigned->length);
-          if (!of2) {
-            if (ij_unsigned == NULL || ij_unsigned->length > sum2) {
-              if (!add_edge(g,false,i->source,j->source,sum2,NULL)) 
-                return false;
-            }
-          }
+          break;
+        default: break;
         }
       }
     }
@@ -481,6 +626,7 @@ static bool check_graph_consistent(graph_t @g) {
   return true;
 }
 
+// used in break_term and elsewhere to try to evaluate a term to a constant
 static $(unsigned int,bool) eval_term(term_t t) {
   switch (t) {
   case &Uint(i): return $(i, true);
@@ -489,6 +635,7 @@ static $(unsigned int,bool) eval_term(term_t t) {
   }
 }
 
+// break up a compound term that involves addition/subtraction of a constant
 static $(term_t, int) break_term(graph_t @g, bool is_signed,term_t t){
   int c = 0;
   unsigned cu = 0u;
@@ -527,15 +674,15 @@ static $(term_t, int) break_term(graph_t @g, bool is_signed,term_t t){
     if (c == 0) return $(res, 0); //no over/underflow
     else if (c > 0){
       // only overflow could possibily happen
-      let dist = lookup_distance(lookup_row(g, res), true, zero());
-      if (dist == NULL || dist->length > MAXINT - c){
+      let dist = lookup_dist(term2node(g, res), term2node(g,zero()), true);
+      if (dist == NULL || *dist > MAXINT - c){
 	return $(t, 0);
       }else {// dist->length <= MAXINT-c, so value_s(t) + value_s(c) in bound
 	return $(res, c);
       }
     }else {//c < 0 
-      let dist = lookup_distance(lookup_row(g,zero()), true, res);
-      if (dist == NULL || dist->length > c - MININT){
+      let dist = lookup_dist(term2node(g,zero()), term2node(g,res), true);
+      if (dist == NULL || *dist > c - MININT){
 	return $(t, 0);
       }else {
 	//dist->length <= c - MININT
@@ -546,10 +693,10 @@ static $(term_t, int) break_term(graph_t @g, bool is_signed,term_t t){
     }
   }else {//is unsigned
     if (p == Absyn::Plus){
-      let dist = lookup_distance(lookup_row(g, res), false, zero());
+      let dist = lookup_dist(term2node(g, res), term2node(g,zero()), false);
       if (dist == NULL) return $(t,0);
-      if (dist->length <=0) return $(res, cu);
-      if (dist->length > 0 && (unsigned)dist->length <= MAXUINT - cu)
+      if (*dist <=0) return $(res, cu);
+      if (*dist > 0 && (unsigned)(*dist) <= MAXUINT - cu)
 	return $(res, cu);
     }
     else { // p == Absyn::Minus
@@ -561,12 +708,13 @@ static $(term_t, int) break_term(graph_t @g, bool is_signed,term_t t){
 
 // convert a primitive assertion to a constraint and add it to the graph.
 // returns true if the resulting graph remains consistent, false otherwise.
+// This does not deal with equality constraints -- those should've already
+// been eliminated.
 static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
   // first see if t1 or t2 is a constant as we can put in better
   // constraints then.
   let $(c1,okay1) = eval_term(t1);
   let $(c2,okay2) = eval_term(t2);
-  let origin = AssnDef::prim(t1, p, t2);
   if (okay1 && okay2) {
     // we have c1 p c2 -- reduce to true or false immediately.
     switch (p) {
@@ -587,13 +735,13 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
     case ULte:
       // must check that c2 can be represented by an int.
       if (c2 <= (unsigned)MAXINT) {
-	if (!add_edge(g,false,t1,zero(),(int)c2, origin)) return false;
+	if (!set_distance(g,t1,zero(),(int)c2,false)) return false;
 	// since t1 U<= c2 U<= MAXINT, we know t1 S<= c2 as well!
-	return add_edge(g,true,t1,zero(),(int)c2, NULL);
+	return set_distance(g,t1,zero(),(int)c2,true);
       } else {// t u<= c2, and (int)c2 s< 0
-	dist_t *c1 = lookup_distance(lookup_row(g, t1), true, zero());
-	if (c1 != NULL && c1->length <= -1){
-	  return add_edge(g, true, t1, zero(), (int)c2, NULL);
+	int *c1 = lookup_dist(term2node(g, t1), term2node(g,zero()), true);
+	if (c1 != NULL && *c1 <= -1){
+	  return set_distance(g, t1, zero(), (int)c2, true);
 	}
       }
       return true;
@@ -604,13 +752,13 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
       fallthru;
     case SLte:
       // the value of (int)c2 should be representable by an integer.
-      if (!add_edge(g,true,t1,zero(),(int)c2, origin)) return false;
+      if (!set_distance(g,t1,zero(),(int)c2,true)) return false;
       if ((int)c2 > 0){
 	// 0 - t s<= c1  impies t >= -c1
-	dist_t * c1 = lookup_distance(lookup_row(g, zero()), true, t1);
-	if (c1 != NULL && c1->length <= 0) // then t >= -c1 >= 0, so t>=0
+	int *c1 = lookup_dist(term2node(g,zero()), term2node(g,t1), true);
+	if (c1 != NULL && *c1 <= 0) // then t >= -c1 >= 0, so t>=0
 	  // 0 <= t s<= c2, then t u<= c2
-	  return add_edge(g, false, t1, zero(), (int)c2, NULL);
+	  return set_distance(g, t1, zero(), (int)c2, false);
       }
       return true;
     default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
@@ -628,16 +776,16 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
       if (c1 > MAXINT) {
 	//MAXINT u< c1 u<= t u<= MAXUINT, 
 	// (int)c1 s<= t s<= -1
-	if (!add_edge(g, true, t2, zero(), -1, NULL)) return false;
+	if (!set_distance(g, t2, zero(), -1, true)) return false;
 	int k = -((int)c1);
 	if (k > 0){
-	  if (!add_edge(g, true, zero(), t2, k, NULL)) return false;
+	  if (!set_distance(g, zero(), t2, k, true)) return false;
 	}
       }
       if (c1 <= MAXINT + 1u){
 	//-c1 can be representable by a signed int
 	int k = -((int)c1);
-	return add_edge(g,false,zero(),t2,k, origin);
+	return set_distance(g,zero(),t2,k,false);
       }
       return true;
     case SLt: 
@@ -652,9 +800,9 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
 	int k = -((int)c1);
 	if ((int)c1 >=0){
 	  //0 s<= c1 s<= t2
-	  if (!add_edge(g, false, zero(), t2, k, NULL)) return false;
+	  if (!set_distance(g, zero(), t2, k, false)) return false;
 	}
-	return add_edge(g,true,zero(),t2,k, origin);
+	return set_distance(g,zero(),t2,k,true);
       }
     default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
     }
@@ -672,11 +820,11 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
     if (!of) {
       let $(of, dist) = is_unsigned_overflow((unsigned)dist, MINUS, 1u);
       if (!of){
-	if (!add_edge(g, false, tt1, tt2, dist, origin))
+	if (!set_distance(g, tt1, tt2, dist, false))
 	  return false;
       }
     }
-    return add_edge(g,false,t1,t2,-1, origin);
+    return set_distance(g,t1,t2,-1,false);
   case ULte:
     // add t1 - t2 U<= 0
     let $(tt1, c1) = break_term(g, false, t1);
@@ -685,10 +833,10 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
     if (!of){
       //      fprintf(stderr, "break terms into %s - %s <= %d\n",
       //	      term2string(tt1), term2string(tt2), dist);
-      if (!add_edge(g, false, tt1, tt2, dist, origin))
+      if (!set_distance(g, tt1, tt2, dist, false))
 	return false;
     }
-    return add_edge(g,false,t1,t2,0, origin);
+    return set_distance(g,t1,t2,0,false);
   case SLt:
     let $(tt1, c1) = break_term(g, true, t1);
     let $(tt2, c2) = break_term(g, true, t2);
@@ -696,23 +844,35 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
     if (!of) {
       let $(of, dist) = is_signed_overflow((int)dist, MINUS, 1);
       if (!of){
-	if (!add_edge(g, true, tt1, tt2, dist, origin))
+	if (!set_distance(g, tt1, tt2, dist, true))
 	  return false;
       }
     }
-    return add_edge(g,true,t1,t2,-1, origin);
+    return set_distance(g,t1,t2,-1,true);
   case SLte: 
     // add t1 - t2 S<= 0
     let $(tt1, c1) = break_term(g, true,t1);
     let $(tt2, c2) = break_term(g, true,t2);
     let $(of, dist) = is_signed_overflow(c2, MINUS, c1);
     if (!of){
-      if(!add_edge(g, true, tt1, tt2, dist, origin))
+      if(!set_distance(g, tt1, tt2, dist, true))
 	return false;
     }
-    return add_edge(g,true,t1,t2,0, origin);
+    return set_distance(g,t1,t2,0,true);
   default: Tcutil::impos("Vcgen:found bad primop in add_constraint");
   }
+}
+
+static bool add_eq(graph_t @g, term_t t1, term_t t2) {
+  let n1 = term2node_opt(g,t1);
+  let n2 = term2node_opt(g,t2);
+  if (n1 == NULL || n2 == NULL) return false;
+  return 
+    unify_nodes(g,n1,n2) &&
+    add_constraint(g, t1, ULte, t2) &&
+    add_constraint(g, t2, ULte, t1) &&
+    add_constraint(g, t1, SLte, t2) &&
+    add_constraint(g, t2, SLte, t1);
 }
 
 datatype exn { TooLarge };
@@ -749,7 +909,7 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
     }
     // must copy the graphs since we mutate them in place
     graph_t *gs1 = gs;
-    graph_t *gs2 = copy_graph(gs);
+    graph_t *gs2 = copy_graphs(gs);
     // compute (gs and a1)
     gs1 = cgraph(gs1,a1);
     // compute (gs and a2)
@@ -762,16 +922,21 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
     // and unsigned.)
     a = and(or(slt(t1,t2),slt(t2,t1)),or(ult(t1,t2),ult(t2,t1)));
     goto LOOP;
-  case &Prim(t1,Eq,t2):
+    //case &Prim(t1,Eq,t2):
     // explode t1 == t2 into t1 <= t2 and t2 <= t1 (both signed and unsigned)
-    a = and(and(and(slte(t1,t2),slte(t2,t1)),ulte(t1,t2)),ulte(t2,t1));
-    goto LOOP;
+    //a = and(and(and(slte(t1,t2),slte(t2,t1)),ulte(t1,t2)),ulte(t2,t1));
+    //goto LOOP;
   case &Prim(t1,p,t2):
     // add the primitive relation to each graph, pruning out the
     // inconsistent ones.
     graph_t *prev = NULL;
     for (let g = gs; g != NULL; g = g->next) {
-      if (!add_constraint(g,t1,p,t2)) {
+      bool res;
+      if (p == Eq) 
+        res = add_eq(g,t1,t2);
+      else
+        res = add_constraint(g,t1,p,t2);
+      if (!res) {
         if (prev == NULL) {
           gs = g->next;
         } else {
@@ -781,9 +946,12 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
         prev = g;
       }
     }
+    //fprintf(stderr,"after inserting primitive assn %s, graphs are\n",
+    //        assn2string(a));
+    //print_graphs(gs);
     break;
   default: 
-    // reduce any substitutions and go around the loop.
+    // reduce any substitutions or negations and go around the loop.
     a = reduce(a);
     goto LOOP;
   }
@@ -826,130 +994,4 @@ bool constraint_prove(assn_t ctxt, assn_t a) {
   //fprintf(stderr, "##### trying to prove: ######\n");
   //fprintf(stderr, "%s ###=>### %s\n", assn2string(ctxt), assn2string(a));
   return !consistent(b);
-}
-
-static row_t lookup_row_in_rows(row_t r, term_t i){
-  for(; r != NULL; r = r->next){
-    if (cmp_term(i, r->source) == 0) return r;
-  }
-  return NULL;
-}
-
-static row_t or2rows(row_t g1, row_t g2){
-  row_t res = NULL;
-  for(; g1 != NULL; g1 = g1->next){
-    let r = lookup_row_in_rows(g2, g1->source);
-    if (r != NULL){
-      /* copy the row, but null the distance */
-      let newrow = new *g1;
-      newrow->next = res;
-      res = newrow;
-      res->distance = NULL;
-      /* now merge the distance from two graphs */
-      for (let d = g1->distance; d != NULL; d = d->next){
-	distance_t dist_res = NULL;
-	if (d -> dinfo & Signed_valid){
-	  let d1 = d->signed_dist.length;
-	  let d2_ptr = lookup_distance(r, true, d->target);
-	  if (d2_ptr != NULL){
-	    let d2 = d2_ptr->length;
-	    let newd = d1 > d2 ? d->signed_dist:*d2_ptr;
-	    dist_res = new Distance{.target = d->target, 
-				    .next=res->distance, 
-				    .dinfo = Signed_valid,
-				    .unsigned_dist = Dist{0, NULL},
-				    .signed_dist = newd};
-	  }
-	}
-	if (d -> dinfo & Unsigned_valid){
-	  let d1 = d->unsigned_dist.length;
-	  let d2_ptr = lookup_distance(r, false, d->target);
-	  if (d2_ptr != NULL){
-	    let d2 = d2_ptr->length;
-	    let newd = d1 > d2 ? d->unsigned_dist: *d2_ptr;
-	    if (dist_res != NULL){
-	      dist_res->unsigned_dist = newd;
-	      dist_res->dinfo = Both_valid;
-	    }else{
-	      dist_res = new Distance{.target = d->target,
-				      .next = res->distance,
-				      .dinfo = Unsigned_valid,
-				      .unsigned_dist = newd,
-				      .signed_dist = Dist{0, NULL}};
-	    }
-	  }
-	}
-	if (dist_res != NULL){
-	  res->distance = dist_res;
-	}
-      }
-    }
-  }
-  return res;
-}
-
-term_t int2term(bool is_signed, int c){
-  let s = is_signed?Absyn::Signed : Absyn::Unsigned;
-  let e = Absyn::int_exp(s, c, 0);
-  e->topt = Absyn::int_type(s, Absyn::Int_sz);
-  return cnst(e);
-}
-
-assn_t edge2assn(term_t source, term_t target, int weight, bool is_signed){
-  let s = is_signed ? SLte : ULte;
-  let s1 = is_signed? SLt: ULt;
-  assn_t result = &AssnDef::true_assn;
-  if (source == zero()){
-    result = prim(int2term(is_signed, -weight), s, target);
-  }else if( target == zero()){
-    result = prim(source, s, int2term(is_signed, weight));
-  }else{
-    switch (weight){
-    case 0: result = prim(source, s, target); break;
-    case -1: result = prim(source, s1, target); break;
-    default: 
-      //currently, the prim of the form t1 <= t2 + c where c!=0, or 1
-      //is not going to get any extra benefit when being turned into edges
-      //      fprintf(stderr, "## %s <= %s + (%d)\n", 
-      //	      term2string(source),term2string(target), weight); 
-      break;
-    }
-  }
-  return result;
-}
-
-
-assn_t row2assn(row_t r){
-  assn_t a = &AssnDef::true_assn;
-  for( ;r!= NULL; r = r->next){
-    for(let d = r->distance; d!=NULL; d=d->next){
-      if (d->dinfo & Signed_valid){
-	if (d->signed_dist.prim != NULL){
-	  a = and(a, (assn_t)d->signed_dist.prim);
-	}else{
-	  a = and(a, edge2assn(r->source, d->target, d->signed_dist.length, true));
-	}
-      }
-      if (d->dinfo & Unsigned_valid){
-	if (d->unsigned_dist.prim != NULL){
-	  a = and(a, (assn_t)d->unsigned_dist.prim);
-	}else{
-	  a = and(a, edge2assn(r->source, d->target, d->unsigned_dist.length, false));
-	}
-      }
-    }
-  }
-  return a;
-}
-
-assn_t merge_assn(assn_t a1, assn_t a2){
-  //turn a1 or a2 to DNF normal form, represented by a set of graphs
-  let g = cgraph(true_graph(), or(a1,a2));
-  if (g == NULL) return &false_assn;
-  let row = g->rows;
-  for(let row1 = g->next; row1 != NULL; row1 = row1->next){
-    row = or2rows(row, row1->rows);
-  }
-  return row2assn(row);
-
 }

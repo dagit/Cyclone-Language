@@ -393,34 +393,34 @@ void*Cyc_AssnDef_fresh_var(void*);
 void*Cyc_AssnDef_get_term_type(void*);
 # 80
 enum Cyc_AssnDef_Primreln{Cyc_AssnDef_Eq =0U,Cyc_AssnDef_Neq =1U,Cyc_AssnDef_SLt =2U,Cyc_AssnDef_SLte =3U,Cyc_AssnDef_ULt =4U,Cyc_AssnDef_ULte =5U};struct Cyc_AssnDef_True_AssnDef_Assn_struct{int tag;};struct Cyc_AssnDef_False_AssnDef_Assn_struct{int tag;};struct Cyc_AssnDef_Prim_AssnDef_Assn_struct{int tag;void*f1;enum Cyc_AssnDef_Primreln f2;void*f3;};struct Cyc_AssnDef_And_AssnDef_Assn_struct{int tag;void*f1;void*f2;};struct Cyc_AssnDef_Or_AssnDef_Assn_struct{int tag;void*f1;void*f2;};
-# 92
+# 93
 int Cyc_AssnDef_assncmp(void*,void*);
-# 94
+# 95
 struct _fat_ptr Cyc_AssnDef_assn2string(void*);
-# 97
+# 98
 extern struct Cyc_AssnDef_True_AssnDef_Assn_struct Cyc_AssnDef_true_assn;
 extern struct Cyc_AssnDef_False_AssnDef_Assn_struct Cyc_AssnDef_false_assn;
-# 108 "assndef.h"
+# 109 "assndef.h"
 void Cyc_AssnDef_reset_hash_cons_table (void);
-# 115
+# 116
 void*Cyc_AssnDef_kill(void*);
-# 117
+# 118
 void*Cyc_AssnDef_and(void*,void*);
 void*Cyc_AssnDef_or(void*,void*);
+# 121
 void*Cyc_AssnDef_subst(struct Cyc_Absyn_Vardecl*,void*,void*);
-# 122
+# 124
 void*Cyc_AssnDef_eq(void*,void*);
 void*Cyc_AssnDef_neq(void*,void*);
 void*Cyc_AssnDef_slt(void*,void*);
 void*Cyc_AssnDef_slte(void*,void*);
 void*Cyc_AssnDef_ult(void*,void*);
 void*Cyc_AssnDef_ulte(void*,void*);
-# 130
+# 132
 void*Cyc_AssnDef_reduce(void*);
 void*Cyc_AssnDef_subst_term(void*,struct Cyc_Absyn_Vardecl*,void*);
-# 133
 int Cyc_AssnDef_simple_prove(void*,void*);
-# 135
+# 136
 void*Cyc_AssnDef_kill_mem_term(void*);
 # 52 "attributes.h"
 int Cyc_Atts_is_noreturn_fn_type(void*);
