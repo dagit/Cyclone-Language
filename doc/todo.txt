@@ -165,11 +165,6 @@ Todo now:
   However, there is still the question of whether to DISallow things
   like   void f(int x[4])   which in C involves a cast to a int *.
 
-Some things Dan has noticed:
-
-* should allow function prototypes with storage class specifiers other
-  than extern (avoid gcc warnings about static following extern)
-
 Todo later:
 
 * dependent types for arrays (and lots more?)
