@@ -1311,7 +1311,7 @@ declaration:
     { let location=SLOC(@1);
       $$=^$(make_declarations($1,NULL,location,location)); }
 | declaration_specifiers init_declarator_list ';'
-    { $$=^$(make_declarations($1,$2,SLOC(@1),LOC(@1,@3))); }
+{ $$=^$(make_declarations($1,$2,SLOC(@1),LOC(@1,@3))); }
 /* Cyc: let declaration */
 | LET pattern '=' expression ';'
     { $$=^$(new List(let_decl($2,$4,LOC(@1,@5)),NULL)); }
