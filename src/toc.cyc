@@ -1763,6 +1763,13 @@ static bool init_variable_array(type_t @typ) {
   return false;
 }
 
+static bool is_array_type(type_t t) {
+  switch (compress(t)) {
+  case &ArrayType(_): return true;
+  default: return false;
+  }
+}
+
 aggrdecl_t update_aggr_type(aggrdecl_t ad, field_name_t fn,
                             type_t new_field_type) {
   list_t<aggrfield_t> new_fields = NULL;
@@ -1771,11 +1778,15 @@ aggrdecl_t update_aggr_type(aggrdecl_t ad, field_name_t fn,
        fields = fields->tl) {
     if (!strptrcmp(fields->hd->name,fn)) {
       let old_field = fields->hd;
+      let old_atts = old_field->attributes;
+      let old_type = old_field->type;
+      if (!is_array_type(old_type), kind_leq(&ak,typ_kind(old_type)))
+        old_atts = new List(new Aligned_att(-1),old_atts);
       let new_field = new Aggrfield{.name= old_field->name,
 				    .tq = mt_tq,
 				    .type = new_field_type,
 				    .width = old_field->width,
-				    .attributes = old_field->attributes,
+				    .attributes = old_atts,
                                     .requires_clause = NULL};
       new_fields = new List(new_field,new_fields);
     }
@@ -3143,6 +3154,10 @@ DynCast:
 	lvalue_assign(e1,NULL,address_lvalue,true);
 	// the wrong cast got pushed out, so as a kludge, just re-cast
 	e->r = cast_it_r(typ_to_c((type_t)e->topt),e1);
+      } else if (kind_leq(&ak,typ_kind((type_t)e1->topt))) {
+        // we could be taking the address of an abstract member, so
+        // insert a cast here.
+        e->r = cast_it_r(typ_to_c((type_t)e->topt),e1);
       }
       break;
     }
@@ -4063,10 +4078,21 @@ xlate_pat(env_t<`rgn> nv,
         let t2 = (type_t)p2->topt;
         let t2c = typ_to_c_array(t2);
         let memexp = member_exp(r,f,DL);
-        if(is_void_star_or_boxed_tvar(lookup_field(ad->impl->fields,f)->type))
-          memexp = cast_it(typ_to_c_array(t2c), memexp);
-        let result = xlate_pat(nv,rgn,t2,memexp,
-                               member_exp(path,f,DL),p2,fail_stmt,decls);
+        let ftype = lookup_field(ad->impl->fields,f)->type;
+        let new_path = member_exp(path,f,DL);
+        if (is_void_star_or_boxed_tvar(ftype))
+          memexp = cast_it(t2c, memexp);
+        else if (!is_array_type(ftype) && kind_leq(&ak,typ_kind(ftype))) {
+          // for abstract members, we have to convert to the right
+          // pointer type...
+          memexp = deref_exp(cast_it(cstar_typ(t2c,mt_tq), 
+                                     address_exp(memexp,DL)),DL);
+          
+          new_path = push_address_exp(new_path);
+          new_path = cast_it(cstar_typ(t2c,mt_tq),new_path);
+          new_path = deref_exp(new_path, DL);
+        }
+        let result = xlate_pat(nv,rgn,t2,memexp,new_path,p2,fail_stmt,decls);
         nv = result[0];
         decls = result[1];
         s = seq_stmt(s, result[2], DL);
