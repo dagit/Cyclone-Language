@@ -23,8 +23,8 @@
 #include <cstddef.h>  // for size_t
 
 namespace std {
-extern int strcasecmp(const char ?`r, const char ?`s);
-extern int strncasecmp(const char ?`r, const char ?`s, size_t);
+extern int strcasecmp(string_t, string_t);
+extern int strncasecmp(string_t s1, string_t s2, size_t len);
 }
 
 #endif
