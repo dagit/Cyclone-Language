@@ -70,7 +70,7 @@ static void resolve_pat(tenv_t te, pat_t p) {
     // Unqualified variable is a declaration, qualified is an error
     switch ((*q)[0]) {
     case Loc_n: 
-    case &Rel_n(NULL):
+    case Rel_n(NULL):
       (*q)[0] = Loc_n;        
       p->r = new Var_p(new_vardecl(q,VoidType,NULL),// type set later
                        new_pat(Wild_p,NULL)); 

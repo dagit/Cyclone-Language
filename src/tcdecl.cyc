@@ -94,7 +94,7 @@ static bool check_type(type_t t0, type_t t1) {
 // FIX?: Why do we not use Evexp for this?
 static unsigned int get_uint_const_value(exp_t e) {
   switch(e->r) {
-  case &Const_e(&Int_c(_, x)): return (unsigned int) x;
+  case &Const_e(Int_c(_, x)): return (unsigned int) x;
   default: throw new Invalid_argument("Tcdecl::get_uint_const_value");
   }
 }

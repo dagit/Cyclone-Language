@@ -83,6 +83,6 @@ extern string_t scope2string(scope_t sc);
   extern bool is_declaration(stmt_t s);
   extern $(Core::opt_t<var_t>,tqual_t,type_t)@ 
                   arg_mk_opt($(var_t,tqual_t,type_t)@ arg);
-  extern $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t);
+  extern $(tqual_t,type_t,list_t<type_modifier_t,`r>) to_tms(region_t<`r>,tqual_t tq,type_t t);
 }
 #endif

@@ -42,8 +42,8 @@ static $(cnst_t,bool) eval_const_exp(exp_t); // needed due to mutual recursion
 
 static cnst_t promote_const(cnst_t cn) {
   switch (cn) {
-  case &Char_c(sn,c):  return new Int_c(sn,(int)c);
-  case &Short_c(sn,s): return new Int_c(sn,(int)s); 
+  case Char_c(sn,c):  return Int_c(sn,(int)c);
+  case Short_c(sn,s): return Int_c(sn,(int)s); 
   default:             return cn;
   }
 }
@@ -53,7 +53,7 @@ $(unsigned int,bool) eval_const_uint_exp(exp_t e) {
   if(!known)
     return $(0,false);
   switch (promote_const(cn)) {
-  case &Int_c(_,i): return $((unsigned int)i,true);
+  case Int_c(_,i): return $((unsigned int)i,true);
   default:          terr(e->loc,"expecting unsigned int"); return $(0,true);
   }
 }
@@ -63,8 +63,8 @@ static $(bool,bool) eval_const_bool_exp(exp_t e) {
   if(!known)
     return $(false,false);
   switch (promote_const(cn)) {
-  case &Int_c(_,b):      return $(b != 0, true);
-  case &LongLong_c(_,b): return $(b != 0, true);
+  case Int_c(_,b):      return $(b != 0, true);
+  case LongLong_c(_,b): return $(b != 0, true);
   case Null_c:           return $(false,  false);
   default: terr(e->loc,"expecting bool"); return $(false, false);
   }
@@ -76,10 +76,10 @@ static $(cnst_t,bool) eval_const_unprimop(primop_t p,exp_t e) {
     return $(cn,false);
   switch ($(p,cn)) {
   case $(Plus,_): break;
-  case $(Minus,  &Int_c(s,i)): cn = new Int_c(Signed,  -i); break;
-  case $(Bitnot, &Int_c(s,i)): cn = new Int_c(Unsigned,~i); break;
-  case $(Not,    &Int_c(_,i)): cn = new Int_c(Signed,  i == 0 ? 1 : 0); break;
-  case $(Not,    Null_c):      cn = new Int_c(Signed,  1); break;
+  case $(Minus,  Int_c(s,i)): cn = Int_c(Signed,  -i); break;
+  case $(Bitnot, Int_c(s,i)): cn = Int_c(Unsigned,~i); break;
+  case $(Not,    Int_c(_,i)): cn = Int_c(Signed,  i == 0 ? 1 : 0); break;
+  case $(Not,    Null_c):      cn = Int_c(Signed,  1); break;
   default: terr(e->loc,"bad constant expression"); break;
   }
   return $(cn,true);
@@ -96,11 +96,11 @@ static $(cnst_t,bool) eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
   sign_t s1, s2;
   int    i1, i2;
   switch (cn1) {
-  case &Int_c(x,y): s1 = x; i1 = y; break;
+  case Int_c(x,y): s1 = x; i1 = y; break;
   default: terr(e1->loc, "bad constant expression"); return $(cn1,true);
   }
   switch (cn2) {
-  case &Int_c(x,y): s2 = x; i2 = y; break;
+  case Int_c(x,y): s2 = x; i2 = y; break;
   default: terr(e2->loc, "bad constant expression"); return $(cn1,true);
   }
   switch (p) {
@@ -151,9 +151,9 @@ static $(cnst_t,bool) eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
   case $(Bitarshift,   _): terr(e1->loc, ">>> NOT IMPLEMENTED"); fallthru;
   default: terr(e1->loc, "bad constant expression"); return $(cn1,true);
   }
-  if(use_i3) return $(new Int_c(Signed,   i3),       true);
-  if(use_u3) return $(new Int_c(Unsigned, (int)u3),  true);
-  if(use_b3) return $(new Int_c(Signed, b3 ? 1 : 0), true);
+  if(use_i3) return $(Int_c(Signed,   i3),       true);
+  if(use_u3) return $(Int_c(Unsigned, (int)u3),  true);
+  if(use_b3) return $(Int_c(Signed, b3 ? 1 : 0), true);
   impos("Evexp::eval_const_binop");
 }
 
@@ -169,7 +169,7 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
     if(!known1) {
       eval_const_exp(e2);
       eval_const_exp(e3);
-      return $(new Int_c(Signed,0),false);
+      return $(Int_c(Signed,0),false);
     }
     ans = bool1 ? eval_const_exp(e2) : eval_const_exp(e3);
     break;
@@ -177,24 +177,24 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
     let $(bool1,known1) = eval_const_bool_exp(e1);
     if (!known1) {
       eval_const_exp(e2);
-      return $(new Int_c(Signed,0),false);
+      return $(Int_c(Signed,0),false);
     }
     if (bool1) ans = eval_const_exp(e2);
-    else ans = $(new Int_c(Signed,0),true);
+    else ans = $(Int_c(Signed,0),true);
     break;
   case &Or_e(e1,e2):
     let $(bool1,known1) = eval_const_bool_exp(e1);
     if (!known1) {
       eval_const_exp(e2);
-      return $(new Int_c(Signed,0),false);
+      return $(Int_c(Signed,0),false);
     }
     if (!bool1) ans = eval_const_exp(e2);
-    else ans = $(new Int_c(Signed,1),true);
+    else ans = $(Int_c(Signed,1),true);
     break;
   case &Primop_e(p,es):
     if (es == NULL) {
       terr(e->loc,"bad static expression (no args to primop)");
-      return $(new Int_c(Signed,0), true);
+      return $(Int_c(Signed,0), true);
     }
     if (es->tl == NULL) {
       ans = eval_const_unprimop(p,es->hd);
@@ -205,28 +205,28 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
       break;
     }
     terr(e->loc,"bad static expression (too many args to primop)");
-    return $(new Int_c(Signed,0), true);
+    return $(Int_c(Signed,0), true);
   case &Sizeoftyp_e(_): 
   case &Sizeofexp_e(_):
-  case &Offsetof_e(_,_): ans = $(new Int_c(Signed,0), false); break;
+  case &Offsetof_e(_,_): ans = $(Int_c(Signed,0), false); break;
   case &Cast_e(t,e2,_,_):
     // FIX: this needs to be generalized
     ans = eval_const_exp(e2);
     if(ans[1])
       switch ($(compress(t),ans[0])) {
-      case $(&IntType(sn,sz),&Char_c(sn2,x)):  fallthru(sn,sz,sn2,x);
-      case $(&IntType(sn,sz),&Short_c(sn2,x)): fallthru(sn,sz,sn2,x);
-      case $(&IntType(sn,sz),&Int_c(sn2,x)): 
+      case $(&IntType(sn,sz),Char_c(sn2,x)):  fallthru(sn,sz,sn2,x);
+      case $(&IntType(sn,sz),Short_c(sn2,x)): fallthru(sn,sz,sn2,x);
+      case $(&IntType(sn,sz),Int_c(sn2,x)): 
 	if(sn != sn2)
-	  ans[0] = new Int_c(sn,x); 
+	  ans[0] = Int_c(sn,x); 
 	break;
-      case $(&TagType(it),&Char_c(sn2,x)):  fallthru(it,sn2,x);
-      case $(&TagType(it),&Short_c(sn2,x)): fallthru(it,sn2,x);
-      case $(&TagType(it),&Int_c(sn2,x)): 
+      case $(&TagType(it),Char_c(sn2,x)):  fallthru(it,sn2,x);
+      case $(&TagType(it),Short_c(sn2,x)): fallthru(it,sn2,x);
+      case $(&TagType(it),Int_c(sn2,x)): 
 	if(x < 0)
 	  terr(e->loc,"cannot cast negative number to a tag type");
 	unify(it, new TypeInt(x));
-	ans[0] = new Int_c(Unsigned,x);
+	ans[0] = Int_c(Unsigned,x);
 	break;
       default: terr(e->loc,"cannot cast to %s",typ2string(t)); break;
       }
@@ -235,7 +235,7 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
   case &Enum_e(_,_,ef): ans = eval_const_exp((exp_t)ef->tag); break;
   default: 
     terr(e->loc,"bad static expression %s", exp2string(e));
-    return $(new Int_c(Signed,0), true);
+    return $(Int_c(Signed,0), true);
   }
   if(ans[1])
     e->r = new Const_e(ans[0]);

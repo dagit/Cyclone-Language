@@ -322,12 +322,12 @@ static resolved_t lookup_ordinary_global(tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Loc_n: fallthru;
-  case &Rel_n(NULL):
+  case Rel_n(NULL):
     return scoped_lookup(te, loc, lookup_ordinary_global_f, v);
-  case &Rel_n(&List(x,y)):
+  case Rel_n(&List(x,y)):
     let ge = lookup_namespace(te,loc,x,y);
     return lookup_ordinary_global_f(ge,v);
-  case &Abs_n(y):
+  case Abs_n(y):
     return lookup_ordinary_global_f(Dict::lookup(te->ae,y),v);
   }
 }
@@ -380,12 +380,12 @@ aggrdecl_t @ lookup_aggrdecl(tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Loc_n: fallthru;
-  case &Rel_n(NULL):
+  case Rel_n(NULL):
     return scoped_lookup(te, loc, lookup_aggrdecl_f, v);
-  case &Abs_n(y):
+  case Abs_n(y):
     let ads = Dict::lookup(te->ae,y)->aggrdecls;
     return Dict::lookup(ads,v);
-  case &Rel_n(&List(x,y)):
+  case Rel_n(&List(x,y)):
     let ads = lookup_namespace(te,loc,x,y)->aggrdecls;
     return Dict::lookup(ads,v);
   }
@@ -399,12 +399,12 @@ tuniondecl_t @ lookup_tuniondecl(tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Loc_n: fallthru;
-  case &Rel_n(NULL):
+  case Rel_n(NULL):
     return scoped_lookup(te, loc, lookup_tuniondecl_f, v);
-  case &Rel_n(&List(x,y)):
+  case Rel_n(&List(x,y)):
     let tds = lookup_namespace(te,loc,x,y)->tuniondecls;
     return Dict::lookup(tds,v);
-  case &Abs_n(y):
+  case Abs_n(y):
     let tds = Dict::lookup(te->ae,y)->tuniondecls;
     return Dict::lookup(tds,v);
   }
@@ -418,14 +418,14 @@ static tuniondecl_t @ lookup_xtuniondecl_f(genv_t ge,var_t v) {
 opt_t<tuniondecl_t@,`r> lookup_xtuniondecl(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
-  case &Rel_n(NULL):
+  case Rel_n(NULL):
     // unqualified name, okay to fail -- that just means we have a new xtunion
     try return rnew(r) Opt(scoped_lookup(te, loc, lookup_xtuniondecl_f, v));
     catch { case Dict::Absent: return NULL; }
   case Loc_n: // impossible case
     terr(loc,"lookup_xtuniondecl: impossible");
     return NULL;
-  case &Rel_n(&List(x,y)):
+  case Rel_n(&List(x,y)):
     // qualified name, it's an error if the namespace is bad or the
     // xtunion doesn't already exist.  In either case, we'll raise
     // Dict::Absent, so we give a more descriptive message for the
@@ -439,7 +439,7 @@ opt_t<tuniondecl_t@,`r> lookup_xtuniondecl(region_t<`r> r, tenv_t te,seg_t loc,q
     }
     let tds = ge->tuniondecls;
     return rnew(r) Opt(Dict::lookup(tds,v));
-  case &Abs_n(y):
+  case Abs_n(y):
     let tds = Dict::lookup(te->ae,y)->tuniondecls;
     return rnew(r) Opt(Dict::lookup(tds,v));
   }
@@ -453,12 +453,12 @@ enumdecl_t @lookup_enumdecl(tenv_t te, seg_t loc, qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Loc_n:
-  case &Rel_n(NULL):
+  case Rel_n(NULL):
     return scoped_lookup(te, loc, lookup_enumdecl_f, v);
-  case &Rel_n(&List(x,y)):
+  case Rel_n(&List(x,y)):
     let eds = lookup_namespace(te,loc,x,y)->enumdecls;
     return Dict::lookup(eds,v);
-  case &Abs_n(y):
+  case Abs_n(y):
     let eds = Dict::lookup(te->ae,y)->enumdecls;
     return Dict::lookup(eds,v);
   }
@@ -472,12 +472,12 @@ typedefdecl_t lookup_typedefdecl(tenv_t te, seg_t loc, qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Loc_n:
-  case &Rel_n(NULL):
+  case Rel_n(NULL):
     return scoped_lookup(te, loc, lookup_typedefdecl_f, v);
-  case &Rel_n(&List(x,y)):
+  case Rel_n(&List(x,y)):
     let tds = lookup_namespace(te,loc,x,y)->typedefs;
     return Dict::lookup(tds,v);
-  case &Abs_n(y):
+  case Abs_n(y):
     let tds = Dict::lookup(te->ae,y)->typedefs;
     return Dict::lookup(tds,v);
   }
@@ -626,7 +626,7 @@ resolved_t<`r> lookup_ordinary(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q) {
   case Loc_n:
     if (le == NULL) throw Dict::Absent;
     fallthru;
-  case &Rel_n(NULL) && le != NULL:
+  case Rel_n(NULL) && le != NULL:
     let &Fenv{<`f,`c> .locals = locals,...} = (fenv_t)le;
     // NB a local overrides any global, without an ambiguity warning
     try return rnew(r) VarRes(lookup_binding(locals,v));

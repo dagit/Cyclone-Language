@@ -165,6 +165,15 @@ int root_cmp(root_t r1, root_t r2) {
   case $(&InitParam(i1,_), &InitParam(i2,_)): return i1-i2;
   }
 }
+
+flowdict_t empty_flowdict() {
+  static flowdict_t *fd = NULL;
+  if (fd == NULL) {
+    fd = new Dict::empty(root_cmp);
+  }
+  return *fd;
+}
+
 int place_cmp(place_t p1, place_t p2) {
   if(((int)p1) == ((int)p2))
     return 0;
@@ -198,6 +207,14 @@ static mstringptr_t place2string(place_t p) {
 //   (If we ever have memory kinds, then we either need to figure out field's
 //    instantiated types or not allow partial initialization of such fields.)
 // Note: We could memoize answers here.
+aggrdict_t empty_aggrdict() {
+  static aggrdict_t *d = NULL;
+  if (d == NULL) {
+    d = new Dict::empty(strptrcmp);
+  }
+  return *d;
+}
+
 static absRval_t i_typ_to_absrval(bool allow_zeroterm,
 				  type_t t, absRval_t leafval) {
   if(is_union_type(t))
@@ -209,7 +226,7 @@ static absRval_t i_typ_to_absrval(bool allow_zeroterm,
       return leafval;
     fallthru(tuf->typs);
   case &TupleType(tqts):
-    aggrdict_t d = Dict::empty(strptrcmp);
+    aggrdict_t d = empty_aggrdict();
     for(int i=0; tqts != NULL; tqts = tqts->tl, ++i)
       d = Dict::insert(d,fieldname(i),
 		       i_typ_to_absrval(false,(*tqts->hd)[1],leafval));
@@ -221,7 +238,7 @@ static absRval_t i_typ_to_absrval(bool allow_zeroterm,
       break;
     fallthru(ad->impl->fields);
   case &AnonAggrType(StructA,fs):
-    aggrdict_t d = Dict::empty(strptrcmp);
+    aggrdict_t d = empty_aggrdict();
     for(; fs != NULL; fs = fs->tl) {
       let &Aggrfield(n,_,t2,_,_) = fs->hd;
       if((*n).size != 1) //empty name means bit field so no need to include it
@@ -594,13 +611,12 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
 }
 
 static bool same_relop(reln_op_t r1,reln_op_t r2) {
-  if (r1 == r2) return true;
   switch ($(r1,r2)) {
-  case $(&EqualConst(c1),&EqualConst(c2)): return c1 == c2;
-  case $(&LessVar(v1),   &LessVar(v2)):    return v1 == v2;
-  case $(&LessSize(v1),  &LessSize(v2)):   return v1 == v2;
-  case $(&LessConst(c1), &LessConst(c2)):  return c1 == c2;
-  case $(&LessEqSize(v1),&LessEqSize(v2)): return v1 == v2;
+  case $(EqualConst(c1),EqualConst(c2)): return c1 == c2;
+  case $(LessVar(v1),   LessVar(v2)):    return v1 == v2;
+  case $(LessSize(v1),  LessSize(v2)):   return v1 == v2;
+  case $(LessConst(c1), LessConst(c2)):  return c1 == c2;
+  case $(LessEqSize(v1),LessEqSize(v2)): return v1 == v2;
   default: return false;
   }
 }
@@ -683,11 +699,11 @@ consume_t and_consume(consume_t c1, consume_t c2) {
 
 flow_t join_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
 		 bool or_consumed){
-  if(f1 == f2) return f1;
+  // if(f1 == f2) return f1;
   switch($(f1,f2)) {
   case $(BottomFL,_): return f2;
   case $(_,BottomFL): return f1;
-  case $(&ReachableFL(d1,r1,c1), &ReachableFL(d2,r2,c2)):
+  case $(ReachableFL(d1,r1,c1), ReachableFL(d2,r2,c2)):
     // A lot of computation to avoid allocation, but profiling suggests
     // that's the right thing to do.
     if(d1 == d2 && r1 == r2 && 
@@ -700,7 +716,7 @@ flow_t join_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
       let outdict = Dict::intersect_c(join_absRval,&env,d1,d2);
       let r       = join_relns(r1,r2);
       let c       = or_consumed ? or_consume(c1,c2) : and_consume(c1,c2);
-      return new ReachableFL(escape_these(env.pile, all_changed, outdict),r,c);
+      return ReachableFL(escape_these(env.pile, all_changed, outdict),r,c);
     }
   }
 }
@@ -717,15 +733,15 @@ $(flow_t,absRval_t) join_flow_and_rval(place_set_t* all_changed,
   switch($(f1,f2,outflow)) {
   case $(BottomFL,_,_): return $(outflow,r2);
   case $(_,BottomFL,_): return $(outflow,r1);
-  case $(&ReachableFL(d1,_,_),&ReachableFL(d2,_,_), 
-	 &ReachableFL(outd,relns,cinfo)):
+  case $(ReachableFL(d1,_,_),ReachableFL(d2,_,_), 
+	 ReachableFL(outd,relns,cinfo)):
     if(absRval_lessthan_approx(0,r1,r2)) return $(outflow,r2);
     if(absRval_lessthan_approx(0,r2,r1)) return $(outflow,r1);
     region rgn {
       let env  = JoinEnv(rnew(rgn) EscPile(rgn,NULL),d1,d2);
       let outr = join_absRval(&env,0,r1,r2);
-      return $(new ReachableFL(escape_these(env.pile,all_changed,outd),
-			       relns,cinfo), outr);
+      return $(ReachableFL(escape_these(env.pile,all_changed,outd),
+                           relns,cinfo), outr);
     }
   default: throw new Core::Impossible("join_flow_and_rval: BottomFL outflow");
   }
@@ -789,11 +805,11 @@ flow_t after_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
   static struct Exp dummy_exp = Exp(NULL,&dummy_rawexp,NULL,EmptyAnnot);
   static tunion Root.MallocPt dummy_root = MallocPt(&dummy_exp,VoidType);
 
-  if(f1 == f2) return f1;
+  //if(f1 == f2) return f1;
   switch($(f1,f2)) {
   case $(BottomFL,_): 
   case $(_,BottomFL): return BottomFL;
-  case $(&ReachableFL(d1,r1,c1),&ReachableFL(d2,r2,c2)):
+  case $(ReachableFL(d1,r1,c1),ReachableFL(d2,r2,c2)):
     if(d1 == d2 && r1 == r2 && 
        c1.may_consume == c2.may_consume &&
        c1.consumed == c2.consumed) return f1;
@@ -808,7 +824,7 @@ flow_t after_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
       let new_d = Dict::union_two_c(after_root,&env,d1,d2);
       let new_r = join_relns(r1,r2);
       let new_c = and_consume(c1,c2);
-      return new ReachableFL(escape_these(env.joinenv.pile,all_changed,new_d),
+      return ReachableFL(escape_these(env.joinenv.pile,all_changed,new_d),
                              new_r,new_c);
     }
   }
@@ -906,11 +922,11 @@ bool consume_approx(consume_t c1, consume_t c2) {
 //  when the two flows are equal.  That's what the approx means.
 // (As a result of the approx, we don't have to allocate here.)
 bool flow_lessthan_approx(flow_t f1, flow_t f2) {
-  if(f1 == f2) return true;
+  //if(f1 == f2) return true;
   switch($(f1,f2)) {
   case $(BottomFL,_): return true;
   case $(_,BottomFL): return false;
-  case $(&ReachableFL(d1,r1,c1),&ReachableFL(d2,r2,c2)):
+  case $(ReachableFL(d1,r1,c1),ReachableFL(d2,r2,c2)):
     if(d1 == d2 && r1 == r2 &&
        c1.may_consume == c2.may_consume &&
        c1.consumed == c2.consumed) return true;
@@ -926,9 +942,9 @@ relns_t reln_kill_var(relns_t rs, vardecl_t v) {
     let r = p->hd;
     if (r->vd == v) { found = true; break; }
     switch (r->rop) {
-    case &LessVar(v2):   fallthru(v2);
-    case &LessSize(v2):  fallthru(v2);
-    case &LessEqSize(v2): if(v==v2) found = true; break;
+    case LessVar(v2):   fallthru(v2);
+    case LessSize(v2):  fallthru(v2);
+    case LessEqSize(v2): if(v==v2) found = true; break;
     default: break;
     }
   }
@@ -939,9 +955,9 @@ relns_t reln_kill_var(relns_t rs, vardecl_t v) {
     let r = p->hd;
     if (r->vd != v) {
       switch (r->rop) {
-      case &LessVar(v2):   fallthru(v2);
-      case &LessSize(v2):  fallthru(v2);
-      case &LessEqSize(v2): if (v == v2) continue; break;
+      case LessVar(v2):   fallthru(v2);
+      case LessSize(v2):  fallthru(v2);
+      case LessEqSize(v2): if (v == v2) continue; break;
       default: break;
       }
       new_rs = new List(r,new_rs);
@@ -986,7 +1002,7 @@ relns_t reln_assign_var(relns_t r, vardecl_t v, exp_t e) {
     case &Var_e(_,&Param_b(n)): fallthru(n);
     case &Var_e(_,&Global_b(n)): 
       if (n->escapes) return r;
-      return new List(new Reln{n,new LessEqSize(v)},r);
+      return new List(new Reln{n,LessEqSize(v)},r);
     default: return r;
     }
   default: break;
@@ -1002,8 +1018,8 @@ relns_t reln_assign_var(relns_t r, vardecl_t v, exp_t e) {
  loop:
   switch (e->r) {
   case &Cast_e(_,e1,_,_): e = e1; goto loop;
-  case &Const_e(&Int_c(_,i)): 
-    return new List(new Reln(v,new EqualConst(i)),r);
+  case &Const_e(Int_c(_,i)): 
+    return new List(new Reln(v,EqualConst(i)),r);
   case &Primop_e(Mod, &List(_,&List(e2,_))):
     // FIX: is this safe?  what if e modifies v2?
     // when we have x = e % v2.size, add x < v2.size
@@ -1015,7 +1031,7 @@ relns_t reln_assign_var(relns_t r, vardecl_t v, exp_t e) {
       case &Var_e(_,&Param_b(v2)):  fallthru(v2);
       case &Var_e(_,&Pat_b(v2)):
         if (v2->escapes) return r;
-        return new List(new Reln(v,new LessSize(v2)),r);
+        return new List(new Reln(v,LessSize(v2)),r);
       default: break;
       }
       break;
@@ -1029,7 +1045,7 @@ relns_t reln_assign_var(relns_t r, vardecl_t v, exp_t e) {
     case &Var_e(_,&Param_b(v2)):  fallthru(v2);
     case &Var_e(_,&Pat_b(v2)):
       if (v2->escapes) return r;
-      return new List(new Reln(v,new LessEqSize(v2)),r);
+      return new List(new Reln(v,LessEqSize(v2)),r);
     default: break;
     }
     break;
@@ -1055,11 +1071,11 @@ relns_t reln_assign_exp(relns_t r, exp_t e1, exp_t e2) {
 static void print_reln(reln_t r) {
   fprintf(stderr,"%s",qvar2string(r->vd->name));
   switch (r->rop) {
-  case &EqualConst(c): fprintf(stderr,"==%d",c); break;
-  case &LessVar(vd):   fprintf(stderr,"<%s",qvar2string(vd->name)); break;
-  case &LessSize(vd):  fprintf(stderr,"<%s.size",qvar2string(vd->name)); break;
-  case &LessConst(c):  fprintf(stderr,"<%d",c); break;
-  case &LessEqSize(vd): fprintf(stderr,"<=%s.size",qvar2string(vd->name));break;
+  case EqualConst(c): fprintf(stderr,"==%d",c); break;
+  case LessVar(vd):   fprintf(stderr,"<%s",qvar2string(vd->name)); break;
+  case LessSize(vd):  fprintf(stderr,"<%s.size",qvar2string(vd->name)); break;
+  case LessConst(c):  fprintf(stderr,"<%d",c); break;
+  case LessEqSize(vd): fprintf(stderr,"<=%s.size",qvar2string(vd->name));break;
   }
 }
 void print_relns(relns_t r) {
@@ -1148,7 +1164,7 @@ void print_flowdict(flowdict_t d) {
 void print_flow(flow_t f) {
   switch (f) {
   case BottomFL: fprintf(stderr,"  BottomFL\n"); break;
-  case &ReachableFL(fd,_,cinfo):
+  case ReachableFL(fd,_,cinfo):
     fprintf(stderr,"  ReachableFL:\n");
     Dict::iter(print_flow_mapping,fd);
     fprintf(stderr,"\n    consumed: ");
@@ -1256,12 +1272,12 @@ static flowdict_t kill_flowdict_region(flowdict_t fd, type_t rgn) {
   case &VarType(tv): 
     tunion KillRgn.Region_k v = Region_k(tv);
     tunion _ KillRgn v2 = &v;
-    $(flowdict_t,killrgn_t) env = $(Dict::empty(root_cmp),v2);
+    $(flowdict_t,killrgn_t) env = $(empty_flowdict(),v2);
     Dict::iter_c(kill_root,&env,fd);
     return env[0];
     
   case UniqueRgn: 
-    $(flowdict_t,killrgn_t) env = $(Dict::empty(root_cmp),UniqueRgn_k);
+    $(flowdict_t,killrgn_t) env = $(empty_flowdict(),UniqueRgn_k);
     Dict::iter_c(kill_root,&env,fd);
     return env[0];
 
@@ -1280,11 +1296,11 @@ static relns_t kill_relns_region(relns_t relns, type_t rgn) {
 flow_t kill_flow_region(flow_t f, type_t rgn) {
   switch (f) {
   case BottomFL: return f;
-  case &ReachableFL(fd,r,c): 
+  case ReachableFL(fd,r,c): 
     let fd2 = kill_flowdict_region(fd,rgn);
     let r2 = kill_relns_region(r,rgn);
     // FIX: deal with killing consumed values?
-    return new ReachableFL(fd2,r2,c);
+    return ReachableFL(fd2,r2,c);
   }
 }
 
@@ -1307,11 +1323,11 @@ static void consume_f($(place_set_t @, Position::seg_t) @env,
 flow_t consume_unique_rvals(Position::seg_t loc, flow_t f) {
   switch(f) {
   case BottomFL: return f;
-  case &ReachableFL(fd,relns,cinfo):
+  case ReachableFL(fd,relns,cinfo):
     if (cinfo.may_consume == NULL) return f;
     let x = cinfo.consumed;
     List::iter_c(consume_f,new $(&x,loc),cinfo.may_consume);
-    return new ReachableFL(fd,relns,ConsumeInfo(x,NULL));
+    return ReachableFL(fd,relns,ConsumeInfo(x,NULL));
   }
 }
 
@@ -1320,7 +1336,7 @@ flow_t consume_unique_rvals(Position::seg_t loc, flow_t f) {
 void check_unique_rvals(Position::seg_t loc, flow_t f) {
   switch (f) {
   case BottomFL: return;
-  case &ReachableFL(d,r,c):
+  case ReachableFL(d,r,c):
     let x = c.may_consume;
     // make sure these haven't been consumed
     while (x != NULL) {
@@ -1343,9 +1359,9 @@ void check_unique_rvals(Position::seg_t loc, flow_t f) {
 flow_t drop_unique_rvals(Position::seg_t loc, flow_t f) {
   switch (f) {
   case BottomFL: return f;
-  case &ReachableFL(d,r,c):
+  case ReachableFL(d,r,c):
     c.may_consume = NULL;
-    return new ReachableFL(d,r,c);
+    return ReachableFL(d,r,c);
   }
 }
 
@@ -1355,9 +1371,9 @@ flow_t readthrough_unique_rvals(Position::seg_t loc, flow_t f) {
   check_unique_rvals(loc,f);
   switch (f) {
   case BottomFL: return f;
-  case &ReachableFL(d,r,c):
+  case ReachableFL(d,r,c):
     c.may_consume = NULL;
-    return new ReachableFL(d,r,c);
+    return ReachableFL(d,r,c);
   }
 }
 
@@ -1368,9 +1384,9 @@ $(consume_t,flow_t) save_consume_info(flow_t f, bool clear) {
     if (empty_info == NULL)
       empty_info = new mt_place_set();
     return $(ConsumeInfo(*empty_info,NULL),f);
-  case &ReachableFL(d,r,c):
+  case ReachableFL(d,r,c):
     if (clear)
-      return $(c,new ReachableFL(d,r,ConsumeInfo(mt_place_set(),NULL)));
+      return $(c,ReachableFL(d,r,ConsumeInfo(mt_place_set(),NULL)));
     else
       return $(c,f);
   }
@@ -1379,8 +1395,8 @@ $(consume_t,flow_t) save_consume_info(flow_t f, bool clear) {
 flow_t restore_consume_info(flow_t f, consume_t c) {
   switch (f) {
   case BottomFL: return f;
-  case &ReachableFL(d,r,_):
-    return new ReachableFL(d,r,c);
+  case ReachableFL(d,r,_):
+    return ReachableFL(d,r,c);
   }
 }
 

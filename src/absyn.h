@@ -73,7 +73,7 @@ namespace Absyn {
   typedef stringptr_t tvarname_t;   // type variables
 
   // Name spaces
-  EXTERN_ABSYN tunion Nmspace {
+  EXTERN_ABSYN __flat__ tunion Nmspace {
     Loc_n,                // Local name
     Rel_n(list_t<var_t>), // Relative name
     Abs_n(list_t<var_t>)  // Absolute name
@@ -88,6 +88,7 @@ namespace Absyn {
   // forward declarations
   EXTERN_ABSYN struct Conref<`a>;
   EXTERN_ABSYN tunion Constraint<`a>;
+  EXTERN_ABSYN __flat__ tunion Cnst;
 
   // typedefs -- in general, we define foo_t to be struct Foo@ or tunion Foo.
   typedef tunion Scope scope_t;
@@ -419,7 +420,7 @@ namespace Absyn {
   };
 
   // Constants
-  EXTERN_ABSYN tunion Cnst {
+  EXTERN_ABSYN __flat__ tunion Cnst {
     Char_c(sign_t,char);          // chars
     Short_c(sign_t,short);        // shorts
     Int_c(sign_t,int);            // ints
@@ -777,8 +778,6 @@ namespace Absyn {
   extern int tvar_cmp(tvar_t, tvar_t); // WARNING: ignores the kinds
 
   ///////////////////////// Namespaces ////////////////////////////
-  extern tunion Nmspace.Rel_n rel_ns_null_value; // for sharing
-  extern nmspace_t rel_ns_null; // for sharing
   extern bool is_qvar_qualified(qvar_t);
 
   ///////////////////////// Qualifiers ////////////////////////////

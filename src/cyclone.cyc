@@ -59,6 +59,8 @@ static bool noshake_r  = false;
 static bool stop_after_cpp_r = false;
 static bool parseonly_r = false;
 static bool tc_r       = false;
+static bool cf_r       = false;
+static bool noprint_r  = false;
 static bool ic_r       = false;
 static bool toc_r      = false;
 static bool stop_after_objectfile_r = false;
@@ -738,6 +740,7 @@ static void process_file(string_t<`H> filename) {
       remove_file(preprocfile); // Can't flush warnings after removal
       return;
     } 
+    if (tc_r) goto PRINTC;
     tds = do_stage("control-flow checking", do_cfcheck, true, tds);
     if (compile_failure) {
       remove_file(preprocfile); // Can't flush warnings after removal
@@ -760,7 +763,7 @@ static void process_file(string_t<`H> filename) {
       file_close(inter_objfile);
     }
   }
-  if (tc_r) goto PRINTC;
+  if (cf_r) goto PRINTC;
 
   // Translation to C
   tds = do_stage("translation to C", do_translate, true, tds);
@@ -780,7 +783,7 @@ static void process_file(string_t<`H> filename) {
     if (tds != NULL) */
  PRINTC: {
   FILE *out_file;
-  if (parseonly_r || tc_r)
+  if (parseonly_r || tc_r || cf_r)
     if (output_file != NULL)
       out_file = try_file_open(*output_file,"w","output file");
     else
@@ -793,7 +796,8 @@ static void process_file(string_t<`H> filename) {
   if (compile_failure || !out_file) return;
   
   try
-    tds = do_stage("printing", do_print, out_file, tds);
+    if (!noprint_r)
+      tds = do_stage("printing", do_print, out_file, tds);
   catch {
   case x:
     compile_failure = true;
@@ -943,6 +947,12 @@ int main(int argc, string_t<`H> ?`H argv) {
          new $("-stopafter-tc",false,"",
                new Set_spec(&tc_r),
                "Stop after type checking"),
+         new $("-noprint",false,"",
+               new Set_spec(&noprint_r),
+               "Do not print output (when stopping early)"),
+         new $("-stopafter-cf",false,"",
+               new Set_spec(&cf_r),
+               "Stop after control-flow checking"),
          new $("-stopafter-toc",false,"",
                new Set_spec(&toc_r),
                "Stop after translation to C"),

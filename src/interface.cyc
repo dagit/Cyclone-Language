@@ -112,7 +112,7 @@ i_t final() {
   i->exports = Dict::insert(i->exports, NULL, ie1);
   // add requirement of function main
   let ie2 = new_ienv();
-  qvar_t qmain = new $(new Abs_n(NULL), new ((string_t)"main"));
+  qvar_t qmain = new $(Abs_n(NULL), new ((string_t)"main"));
   let vd = new_vardecl(qmain,
 		       function_typ(NULL, NULL, sint_typ,
 				    new List(new $(NULL, empty_tqual(NULL), uint_typ),
@@ -261,7 +261,7 @@ static bool check_public_vardecl(aenv_t ae, seen_t seen, vardecl_t d) {
 
 static list_t<var_t> get_abs_ns(tunion Nmspace ns) {
   switch (ns) {
-  case &Abs_n(l): return l;
+  case Abs_n(l): return l;
   default: invalid_arg("get_abs_ns");
   }
 }
@@ -463,8 +463,8 @@ static void
 extract_xtunionfielddecl(i_t i, tuniondecl_t d, tunionfield_t f) {
   let ns = NULL;
   switch ((*(f->name))[0]) {
-  case &Rel_n(l): fallthru(l);
-  case &Abs_n(l): ns = l; break;
+  case Rel_n(l): fallthru(l);
+  case Abs_n(l): ns = l; break;
   default: break;
   }
   _ dict;

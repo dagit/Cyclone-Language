@@ -182,15 +182,15 @@ void tcTest(tenv_t te, exp_t e, string_t msg_part) {
 static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
   type_t t;
   switch (c) {
-  case &Char_c(Signed,_):   t = schar_typ; break;
-  case &Char_c(Unsigned,_): t = uchar_typ; break;
-  case &Char_c(None,_):     t = char_typ;  break;
-  case &Short_c(sn,_):    
+  case Char_c(Signed,_):   t = schar_typ; break;
+  case Char_c(Unsigned,_): t = uchar_typ; break;
+  case Char_c(None,_):     t = char_typ;  break;
+  case Short_c(sn,_):    
     t = (sn == Unsigned) ? ushort_typ : sshort_typ; break;
-  case &LongLong_c(sn,_): 
+  case LongLong_c(sn,_): 
     t = (sn == Unsigned) ? ulonglong_typ  : slonglong_typ;  break;
-  case &Float_c(_) : t = float_typ; break;
-  case &Int_c(sn,i):
+  case Float_c(_) : t = float_typ; break;
+  case Int_c(sn,i):
     if (topt == NULL)
       t = (sn == Unsigned) ? uint_typ : sint_typ;
     else
@@ -205,11 +205,11 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
 	case Signed: t = schar_typ; break;
 	case None: t = char_typ; break;
 	}
-        e->r = new Const_e(new Char_c(sn,(char)(i))); // i gets truncated here
+        e->r = new Const_e(Char_c(sn,(char)(i))); // i gets truncated here
         break;
       case &IntType(sn,Short_sz):
 	t = (sn == Unsigned) ? ushort_typ : sshort_typ;
-        e->r = new Const_e(new Short_c(sn,(short)(i))); // i gets truncated here
+        e->r = new Const_e(Short_c(sn,(short)(i))); // i gets truncated here
         break;
       case &IntType(sn,Int_sz):
         t = (sn == Unsigned) ? uint_typ : sint_typ;
@@ -241,9 +241,9 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
         break;
     }
     break;
-  case &String_c(s):
+  case String_c(s):
     int len = s.size; // includes the trailing 0 character
-    exp_t elen = const_exp(new Int_c(Unsigned, len), loc);
+    exp_t elen = const_exp(Int_c(Unsigned, len), loc);
     elen->topt = new Opt(uint_typ);
     // The default is to treat a string as if it's statically heap 
     // allocated and return a pointer to that string.  However, if the 
@@ -312,8 +312,8 @@ void check_format_args(tenv_t<`g,`r> te, exp_t fmt,
   // check the format string and get the types it requires
   list_t<type_t> desc_types;
   switch (fmt->r) {
-  case &Const_e(&String_c(s)): fallthru(s);
-  case &Cast_e(_,&Exp(_,&Const_e(&String_c(s)),_,_),_,_):
+  case &Const_e(String_c(s)): fallthru(s);
+  case &Cast_e(_,&Exp(_,&Const_e(String_c(s)),_,_),_,_):
     desc_types = type_getter(te,s,fmt->loc); break;
   default: 
     // without a string literal argument, we can't check the args against
@@ -1409,7 +1409,7 @@ static type_t tcArray(tenv_t te,seg_t loc,type_t * elt_topt, bool zero_term,
   list_t<exp_t> es      = List::map(snd,des);
   type_t        res     = new_evar(&mk,new Opt(lookup_type_vars(te)));
   let           num_es  = List::length(es);
-  let           sz_rexp = new Const_e(new Int_c(Unsigned,num_es));
+  let           sz_rexp = new Const_e(Int_c(Unsigned,num_es));
   exp_t         sz_exp  = new_exp(sz_rexp,loc);
   // if zero_term, check that last element in array is zero terminated.
   // Note that if we ever fix designators, then we need to fix this too.
@@ -1980,7 +1980,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     // be fine, but we're not permitting them for now.
 //      check_no_unique_region(loc, te, res_typ, true);
     return res_typ;
-  case &Const_e(&String_c(s)):
+  case &Const_e(String_c(s)):
     // here I'm going to guess that the user wants a char *@ instead of
     // a char @{n}@.  They can get the char@{n}@ by using a cast.  This
     // is a total hack...
@@ -2051,7 +2051,7 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   switch (e->r) {
   case &Array_e(_): 
   case &Comprehension_e(_,_,_,_):
-  case &Const_e(&String_c(_)): return t;
+  case &Const_e(String_c(_)): return t;
   default:
     t = compress(t);
     switch (t) {

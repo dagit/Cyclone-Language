@@ -44,17 +44,17 @@ int qvar_cmp(qvar_t q1, qvar_t q2) {
   let n1 = (*q1)[0];
   let n2 = (*q2)[0];
   switch ($(n1,n2)) {
-  case $(Loc_n,     Loc_n): break;
-  case $(&Rel_n(x1),&Rel_n(x2)): fallthru(x1,x2);
-  case $(&Abs_n(x1),&Abs_n(x2)):
+  case $(Loc_n,    Loc_n): break;
+  case $(Rel_n(x1),Rel_n(x2)): fallthru(x1,x2);
+  case $(Abs_n(x1),Abs_n(x2)):
     int i = strlist_cmp(x1,x2);
     if (i != 0) return i;
     break;
   // we arbitrarily decide that Loc_n < Rel_n < Abs_n
   case $(Loc_n,_):     return -1;
   case $(_,Loc_n):     return 1;
-  case $(&Rel_n(_),_): return -1;
-  case $(_,&Rel_n(_)): return 1;
+  case $(Rel_n(_),_): return -1;
+  case $(_,Rel_n(_)): return 1;
   }
   return strptrcmp((*q1)[1],(*q2)[1]);
 }
@@ -69,13 +69,12 @@ int tvar_cmp(tvar_t tv1, tvar_t tv2) {
   else return 1;
 }
   
-tunion Nmspace.Rel_n rel_ns_null_value = Rel_n(NULL);
-tunion Nmspace       rel_ns_null       = &rel_ns_null_value;
+tunion Nmspace       rel_ns_null       = Rel_n(NULL);
 
 bool is_qvar_qualified(qvar_t qv) {
   switch((*qv)[0]) {
-  case &Rel_n(NULL):
-  case &Abs_n(NULL):
+  case Rel_n(NULL):
+  case Abs_n(NULL):
   case Loc_n: return false;
   default:    return true;
   }
@@ -103,8 +102,8 @@ tqual_t empty_tqual(seg_t loc) { return Tqual(false,false,false,false,loc); }
 tqual_t const_tqual(seg_t loc) { return Tqual(true, false,false,true,loc); }
 
 // a static &Upper_b(&Exp(NULL,&Const_e(&Int_c(Unsigned,1)),NULL))
-static tunion Cnst.Int_c      one_intc  = Int_c(Unsigned,1);
-static tunion Raw_exp.Const_e one_b_raw = Const_e(&one_intc);
+  //static tunion Cnst.Int_c      one_intc  = Int_c(Unsigned,1);
+static tunion Raw_exp.Const_e one_b_raw = Const_e(Int_c(Unsigned,1));
 struct Exp exp_unsigned_one_v = {NULL,&one_b_raw,NULL,EmptyAnnot};
 exp_t exp_unsigned_one = &exp_unsigned_one_v;
 static tunion Bounds.Upper_b one_bt = Upper_b(&exp_unsigned_one_v);
@@ -205,14 +204,13 @@ type_t double_typ(bool b) {
   return new DoubleType(b);
 }
 // exceptions
-static tunion Nmspace.Abs_n abs_null = Abs_n(NULL);
 static string_t exn_str = "exn";
-static $(nmspace_t,var_t) exn_name_v = $((nmspace_t)&abs_null,&exn_str);
+static $(nmspace_t,var_t) exn_name_v = $(Abs_n(NULL),&exn_str);
 qvar_t exn_name   = &exn_name_v;
 
 #define MAKE_BUILTIN_EXN(str)\
   static string_t            str##_str   = #str;\
-  static $(nmspace_t, var_t) str##_pr    = $((nmspace_t)&abs_null, &str##_str);\
+  static $(nmspace_t, var_t) str##_pr    = $(Abs_n(NULL), &str##_str);\
   qvar_t                     str##_name  = &str##_pr;\
   static struct Tunionfield  str##_tuf_v = Tunionfield(&str##_pr,\
 				 		       NULL,NULL,Extern);\
@@ -243,11 +241,10 @@ type_t exn_typ = &exn_typ_tt;
 // tunion PrintArg and tunion ScanfArg qvars
 static string_t printarg_str = "PrintArg";
 static string_t scanfarg_str = "ScanfArg";
-static tunion Nmspace.Abs_n std_namespace = Abs_n(NULL);
 static $(nmspace_t,var_t) tunion_print_arg_qvar_p = 
-  $((tunion Nmspace)&std_namespace, &printarg_str);
+  $(Abs_n(NULL), &printarg_str);
 static $(nmspace_t,var_t) tunion_scanf_arg_qvar_p = 
-  $((tunion Nmspace)&std_namespace, &scanfarg_str);
+  $(Abs_n(NULL), &scanfarg_str);
 qvar_t tunion_print_arg_qvar = &tunion_print_arg_qvar_p;
 qvar_t tunion_scanf_arg_qvar = &tunion_scanf_arg_qvar_p;
 
@@ -346,7 +343,7 @@ type_t file_typ() {
   static stringptr_t sf = &sf_str;
 
   if(file_t_opt == NULL) {
-    typedef_name_t file_t_name = new $((tunion Nmspace)&std_namespace, sf);
+    typedef_name_t file_t_name = new $(Abs_n(NULL), sf);
     aggrdecl_t sd = new Aggrdecl(StructA,Abstract,file_t_name,NULL,NULL,NULL);
     type_t file_struct_typ = new AggrType(AggrInfo(new KnownAggr(new sd),NULL));
     file_t_opt = new at_typ(file_struct_typ,HeapRgn,empty_tqual(NULL),
@@ -396,17 +393,17 @@ exp_t copy_exp(exp_t e) {
 }
 exp_t const_exp(cnst_t c, seg_t loc) { return new_exp(new Const_e(c), loc); }
 exp_t null_exp(seg_t loc) { return new_exp(new Const_e(Null_c), loc); }
-exp_t int_exp(sign_t s,int i,seg_t seg) {return const_exp(new Int_c(s,i),seg);}
+exp_t int_exp(sign_t s,int i,seg_t seg) {return const_exp(Int_c(s,i),seg);}
 exp_t signed_int_exp(int i,    seg_t loc) {return int_exp(Signed,i,loc);}
 exp_t uint_exp(unsigned int i, seg_t loc) {return int_exp(Unsigned,i,loc);}
 exp_t bool_exp(bool b, seg_t loc) { return signed_int_exp(b ? 1 : 0, loc); }
 exp_t true_exp(seg_t loc)  { return bool_exp(true, loc); }
 exp_t false_exp(seg_t loc) { return bool_exp(false, loc); }
 exp_t char_exp(char c, seg_t loc) {
-  return const_exp(new Char_c(None,c),loc);
+  return const_exp(Char_c(None,c),loc);
 }
-exp_t float_exp(string_t<`H> f, seg_t loc) { return const_exp(new Float_c(f),loc);  }
-exp_t string_exp(string_t<`H> s, seg_t loc){ return const_exp(new String_c(s),loc); }
+exp_t float_exp(string_t<`H> f, seg_t loc) { return const_exp(Float_c(f),loc);  }
+exp_t string_exp(string_t<`H> s, seg_t loc){ return const_exp(String_c(s),loc); }
 
 // This should only be used after type checking.
 // Right now it's only used in Toc and is the only source of Unresolved_b.

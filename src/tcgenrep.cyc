@@ -113,14 +113,17 @@ static tunionfield_t getField(tuniondecl_t td, qvar_t fieldname) {
 }
 
 // defines the Tcgenrep namespace as an absyn value
+/*
 static string_t tcgenrep_nm = "Tcgenrep";
 static struct List<var_t,`H> l = { .hd=&tcgenrep_nm, .tl=NULL };
 static tunion Nmspace.Abs_n tcgenrep_nmspace = Abs_n(&l);
 static nmspace_t tcgenrep_nmspace2 = (tunion Nmspace)&tcgenrep_nmspace;
+*/
 // defines the Tcgenrep namespace as an absyn value
 static string_t typerep_nm = "Typerep";
 static struct List<var_t,`H> l2 = { .hd=&typerep_nm, .tl=NULL };
-static tunion Nmspace.Abs_n typerep_nmspace = Abs_n(&l2);
+#define typerep_nmspace Abs_n(&l2)
+//static tunion Nmspace.Abs_n typerep_nmspace = Abs_n(&l2);
 
 /*------------------------------------------------------------------------*/
 // depth-first-search on repinfo_t's, based on the dependency edges.
@@ -187,7 +190,7 @@ static string_t enum_str = "Enum";
 static string_t name_t_str = "name_t";
 static $(nmspace_t,var_t) @
 typerep_name(var_t name) {
-  return new $((tunion Nmspace)&typerep_nmspace, name);
+  return new $(typerep_nmspace, name);
 }
 
 static int gen_id_counter = 0;
@@ -215,15 +218,12 @@ static void print_tvars(list_t<tvar_t>l) {
   printf(">\n");
 }
 
-static tunion Nmspace.Rel_n top_nm_0 = Rel_n(NULL);
-static tunion Nmspace top_nm = (tunion Nmspace)&top_nm_0;
 static qvar_t toplevel_name(var_t name) {
-  return new $(top_nm, (var_t)name);
+  return new $(Rel_n(NULL), (var_t)name);
 }
 
 static qvar_t relative_name(list_t<var_t,`H> pathl, var_t name) {
-  tunion Nmspace.Rel_n@ path = new Rel_n(pathl);
-  return new $((tunion Nmspace)path, (var_t)name);
+  return new $(Rel_n(pathl), (var_t)name);
 }
 static decl_t gen_decl(stringptr_t<`H,`H> name, type_t type, exp_opt_t init,seg_t seg)
 {
@@ -247,24 +247,24 @@ static decl_t gen_vardecl(qvar_t name, type_t type, exp_opt_t init,scope_t sc,se
 
 
 static exp_t cnst_string(string_t<`H> s,seg_t seg) {
-  return const_exp((tunion Cnst)(new String_c(s)),seg);
+  return const_exp((tunion Cnst)(String_c(s)),seg);
 }
 
 static exp_t cnst_string_cls(seg_t seg,var_t s) {
-  return const_exp((tunion Cnst)(new String_c(*s)),seg);
+  return const_exp((tunion Cnst)(String_c(*s)),seg);
 }
 
 static exp_t cnst_qvar_string_cls(seg_t seg,qvar_t s) {
-  return const_exp((tunion Cnst)(new String_c(*(*s)[1])),seg);
+  return const_exp((tunion Cnst)(String_c(*(*s)[1])),seg);
 }
 
 
 static exp_t cnst_int(int i,seg_t seg) {
-  return const_exp((tunion Cnst)(new Int_c(Signed,i)),seg);
+  return const_exp((tunion Cnst)(Int_c(Signed,i)),seg);
 }
 
 static exp_t cnst_int_cls(seg_t seg,int i) {
-  return const_exp((tunion Cnst)(new Int_c(Signed,i)),seg);
+  return const_exp((tunion Cnst)(Int_c(Signed,i)),seg);
 }
 
 static int size_of2int(size_of_t sz) {

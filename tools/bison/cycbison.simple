@@ -111,6 +111,8 @@ static int yynerrs = 0;		/*  number of parse errors so far       */
 #endif
 int yyparse(YYPARSE_PARAM_ARG)
 {
+  // the arrays are allocated in this region
+region yyregion {
   int yystate;
   int yyn=0;
   int yyerrstatus;//  number of tokens to shift before error messages enabled 
@@ -119,17 +121,17 @@ int yyparse(YYPARSE_PARAM_ARG)
   int yyssp_offset;
   /*  the state stack     */
   short @{YYMAXDEPTH} yyss = 
-	(short @{YYMAXDEPTH})(new {for i < YYMAXDEPTH : (short)0});
+	(short @{YYMAXDEPTH})(rnew(yyregion) {for i < YYMAXDEPTH : (short)0});
   /*  the semantic value stack */
   int yyvsp_offset;
   tunion YYSTYPE @{YYMAXDEPTH} yyvs = 
-	(tunion YYSTYPE @{YYMAXDEPTH})(new {for i < YYMAXDEPTH : yylval}); 
+	(tunion YYSTYPE @{YYMAXDEPTH})(rnew(yyregion) {for i < YYMAXDEPTH : yylval}); 
 
 #ifdef YYLSP_NEEDED
   /*  the location stack */
   int yylsp_offset;
   YYLTYPE @{YYMAXDEPTH} yyls = 
-	(YYLTYPE @{YYMAXDEPTH})(new {for i < YYMAXDEPTH: yynewloc()});
+	(YYLTYPE @{YYMAXDEPTH})(rnew(yyregion) {for i < YYMAXDEPTH: yynewloc()});
 #define YYPOPSTACK   (yyvsp_offset--, yyssp_offset--, yylsp_offset--)
 #else
 #define YYPOPSTACK   (yyvsp_offset--, yyssp_offset--)
@@ -190,10 +192,10 @@ yynewstate:
     yystacksize *= 2;
     if (yystacksize > YYMAXDEPTH)
       yystacksize = YYMAXDEPTH;
-    short ?yyss1 = new {for i < yystacksize : 0};
-    tunion YYSTYPE ?yyvs1 = new {for i < yystacksize : yylval};
+    short ?yyss1 = rnew(yyregion) {for i < yystacksize : 0};
+    tunion YYSTYPE ?yyvs1 = rnew(yyregion) {for i < yystacksize : yylval};
 #ifdef YYLSP_NEEDED
-    YYLTYPE ?yyls1 = new {for i < yystacksize : yynewloc()};
+    YYLTYPE ?yyls1 = rnew(yyregion) {for i < yystacksize : yynewloc()};
 #endif
     for (int i=0; i <= yyssp_offset; i++) {
       yyss1[i] = yyss[i];
@@ -424,7 +426,7 @@ yyerrlab:   /* here on detecting error */
 	       x < (yytname.size / sizeof(char *)); x++)
 	    if (yycheck[x + yyn] == x)
 	      sze += strlen(yytname[x]) + 15, count++;
-	  msg = new {for i < sze + 15 : '\000'};
+	  msg = rnew(yyregion) {for i < sze + 15 : '\000'};
 	  strcpy(msg, "parse error");
 
 	  if (count < 5)
@@ -537,4 +539,5 @@ yyerrhandle:
 #endif
 
   goto yynewstate;
+} /* end of region yyregion */
 }

@@ -328,10 +328,10 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         *rgn_ptr = is_local ? new Opt(curr_bl) : new Opt(HeapRgn); 
         switch (nsl) {
         case Loc_n: break;
-        case &Rel_n(NULL):
+        case Rel_n(NULL):
           (*vd->name)[0] = Loc_n;
           break;
-        case &Abs_n(y): throw impos("tcstmt: Abs_n declaration");
+        case Abs_n(y): throw impos("tcstmt: Abs_n declaration");
         default:
           terr(d->loc, "cannot declare a qualified local variable");
           break;
@@ -340,7 +340,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         switch (compress(t)) {
         case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && vd->initializer != NULL:
           switch (vd->initializer->r) {
-            case &Const_e(&String_c(s)):
+            case &Const_e(String_c(s)):
             t = vd->type = array_typ(telt,tq,uint_exp(s.size,NULL),zt,ztl);
             break;
             case &Comprehension_e(_,e,_,_):
@@ -422,10 +422,10 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           *rgn_ptr = new Opt(curr_bl); // side effect
           switch (nsl) {
           case Loc_n: break;
-          case &Rel_n(NULL):
+          case Rel_n(NULL):
             (*vd->name)[0] = Loc_n;
             break;
-          case &Abs_n(y): throw impos("tcstmt: Abs_n declaration");
+          case Abs_n(y): throw impos("tcstmt: Abs_n declaration");
           default:
             terr(d->loc, "cannot declare a qualified local variable");
             break;
@@ -442,8 +442,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           terr(d->loc,"bad storage class for inner function");
         // reject explicitly qualified name
         switch ((*fd->name)[0]) {
-        case &Rel_n(NULL): break;
-        case &Abs_n(y): impos("tc: Abs_n in tcStmt var decl");
+        case Rel_n(NULL): break;
+        case Abs_n(y): impos("tc: Abs_n in tcStmt var decl");
         default: terr(d->loc,"explicit namespace not allowed on inner function declaration");
         }
         (*fd->name)[0] = Loc_n;

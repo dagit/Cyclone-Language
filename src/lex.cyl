@@ -49,7 +49,7 @@ namespace Lex {
 
 static struct Trie;
 typedef struct Trie * trie_t;
-tunion TrieChildren {
+__flat__ tunion TrieChildren {
   Zero;
   One(int, trie_t);
   Many(trie_t @{64}); // enough room for id chars and `
@@ -73,7 +73,7 @@ static int comment_depth = 0;
 // These needn't be set by lex_init -- they're set while finding a token.
 static $(sign_t,int)        token_int_pair = $(Signed,0);
 static string_t             bogus_string   = "*bogus*";
-static $(nmspace_t,var_t)   token_id_pair = $((nmspace_t)&rel_ns_null_value,
+static $(nmspace_t,var_t)   token_id_pair = $(Loc_n,
 					      &bogus_string);
 
 static char           token_char   = '\000';
@@ -186,7 +186,7 @@ static trie_t trie_lookup(trie_t t, string_t buff, int offset, int len) {
   int    last = offset + len - 1;
   while(i <= last) {
     switch(t->children) {
-    case &Many(arr):
+    case Many(arr):
       // walk down one level
       int ch = trie_char(buff[i]);
       if(arr[ch] == NULL)
@@ -194,7 +194,7 @@ static trie_t trie_lookup(trie_t t, string_t buff, int offset, int len) {
       t = arr[ch];
       ++i;
       break;
-    case &One(one_ch, one_trie):
+    case One(one_ch, one_trie):
       // walk down one level
       if(one_ch == buff[i]) {
 	t = one_trie;
@@ -203,7 +203,7 @@ static trie_t trie_lookup(trie_t t, string_t buff, int offset, int len) {
 	arr[trie_char(one_ch)] = one_trie;
 	let ch = trie_char(buff[i]);
 	arr[ch] = new Trie(Zero,0);
-	t->children = new Many(arr); 
+	t->children = Many(arr); 
 	t = arr[ch];
       }
       ++i;
@@ -212,7 +212,7 @@ static trie_t trie_lookup(trie_t t, string_t buff, int offset, int len) {
       // new string -- extend the trie
       while(i <= last) {
 	let next = new Trie(Zero,0);
-	t->children = new One(buff[i++], next);
+	t->children = One(buff[i++], next);
 	t = next;
       }
       return t;
@@ -406,9 +406,9 @@ static bool is_typedef(List::list_t<var_t,`H> ns, var_t v) {
   for(int i = 0; i < len; ++i)
     switch (t->children) {
     case Zero: return false;
-    case &One(one_ch, one_trie) && one_ch != s[i]: return false;
-    case &One(_,      one_trie): t = one_trie; break;
-    case &Many(arr):
+    case One(one_ch, one_trie) && one_ch != s[i]: return false;
+    case One(_,      one_trie): t = one_trie; break;
+    case Many(arr):
       let next = arr[trie_char(s[i])];
       if(next == NULL)
 	return false;
@@ -460,8 +460,8 @@ void enter_using(qvar_t q) {
   case Loc_n:
     ns = (List_t<stringptr_t>)(new List((*q)[1],NULL));
     break;
-  case &Rel_n(y): fallthru(y);
-  case &Abs_n(y):
+  case Rel_n(y): fallthru(y);
+  case Abs_n(y):
     ns = (List_t<stringptr_t>)List::append(y,new List((*q)[1],NULL));
     break;
   }
@@ -537,7 +537,7 @@ static short process_qual_id(Lexbuf<`a> lbuf) {
     throw new Impossible("bad namespace");
   var_t         v  = rev_vs->hd;
   list_t<var_t> vs = List::imp_rev(rev_vs->tl);
-  token_qvar = new $(new Rel_n(vs),v);
+  token_qvar = new $(Rel_n(vs),v);
   if (is_typedef(vs,v))
     return QUAL_TYPEDEF_NAME;
   return QUAL_IDENTIFIER;

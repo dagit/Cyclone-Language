@@ -1900,10 +1900,10 @@ bool is_pointer_type(type_t t) {
 
 bool is_zero(exp_t e) {
   switch (e->r) {
-  case &Const_e(&Int_c(_,0)): 
-  case &Const_e(&Char_c(_,0)): 
-  case &Const_e(&Short_c(_,0)): 
-  case &Const_e(&LongLong_c(_,0)): return true;
+  case &Const_e(Int_c(_,0)): 
+  case &Const_e(Char_c(_,0)): 
+  case &Const_e(Short_c(_,0)): 
+  case &Const_e(LongLong_c(_,0)): return true;
   case &Cast_e(t,e2,_,_): return is_zero(e2) && admits_zero(t);
   default: return false;
   }
@@ -2878,7 +2878,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         
         unsigned int t1 = Evexp::eval_const_uint_exp((exp_t)f->tag)[0];
         tag_count = t1+1;
-        (*f->name)[0] = new Abs_n(te->ns);
+        (*f->name)[0] = Abs_n(te->ns);
         ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
                                       new $(new AnonEnumRes(t,f), true));
       }

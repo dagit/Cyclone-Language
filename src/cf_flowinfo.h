@@ -62,7 +62,7 @@ EXTERN_CFFLOW tunion InitLevel {
 typedef tunion InitLevel initlevel_t;
 
 // primitive relations that we track for non-escaping, integral variables
-EXTERN_CFFLOW tunion RelnOp {
+EXTERN_CFFLOW __flat__ tunion RelnOp {
   EqualConst(unsigned int);     // == c
   LessVar(Absyn::vardecl_t);    // < y
   LessSize(Absyn::vardecl_t);   // < y.size
@@ -98,6 +98,8 @@ typedef tunion AbsLVal absLval_t;
 typedef tunion AbsRVal absRval_t;
 typedef Dict::dict_t<root_t,             absRval_t> flowdict_t;
 typedef Dict::dict_t<Absyn::field_name_t,absRval_t> aggrdict_t;
+extern aggrdict_t empty_aggrdict();
+extern flowdict_t empty_flowdict();
 EXTERN_CFFLOW tunion AbsRVal {
   Zero;      // the value is zero and initialized
   NotZeroAll; // the value is not zero & everything reachable from it is init
@@ -142,7 +144,7 @@ extern bool consume_approx(consume_t c1, consume_t c2);
 //       of the analysis must be that at least these roots stay in the dict;
 //       for scalability, we don't have others.
 // join takes the intersection of the dictionaries.
-EXTERN_CFFLOW tunion FlowInfo {
+EXTERN_CFFLOW __flat__ tunion FlowInfo {
   BottomFL;
   ReachableFL(flowdict_t,relns_t,consume_t);
 };

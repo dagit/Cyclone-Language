@@ -71,20 +71,20 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
 
   // reject explicitly qualified name FIX: prevents re-type-checking
   switch (ns) {
-  case &Rel_n(NULL): 
-  case &Abs_n(NULL): break; // allowed for top-level constants
+  case Rel_n(NULL): 
+  case Abs_n(NULL): break; // allowed for top-level constants
   default:
     terr(loc,"qualified variable declarations are not implemented (%s)",
 	 qvar2string(vd->name)); // FIX
     return;
   }
   // expand to qualified name
-  (*vd->name)[0] = new Abs_n(te->ns);
+  (*vd->name)[0] = Abs_n(te->ns);
   // if it's an array or string, fill in the size on the type
   switch (compress(t)) {
   case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && initializer != NULL:
     switch (initializer->r) {
-      case &Const_e(&String_c(s)):
+      case &Const_e(String_c(s)):
       t = vd->type = array_typ(telt,tq,uint_exp(s.size,NULL),zt,ztl);
       break;
       case &Comprehension_e(_,e,_,_):
@@ -214,7 +214,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
 static bool is_main(qvar_t n) {
   let &$(nms,v) = n;
   switch (nms) {
-  case &Abs_n(NULL):
+  case Abs_n(NULL):
     return (strcmp(*v,"main") == 0);
   default: return false;
   }
@@ -232,14 +232,14 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
 
   // reject explicitly qualified name
   switch ((*fd->name)[0]) {
-  case &Rel_n(NULL): break;
-  case &Abs_n(y): impos("tc: Abs_n in tcFndecl");
+  case Rel_n(NULL): break;
+  case Abs_n(y): impos("tc: Abs_n in tcFndecl");
   default: terr(loc,"qualified function declarations are not implemented (%s)",
 		qvar2string(fd->name)); // FIX
     return;
   }
   // expand to qualified name
-  (*fd->name)[0] = new Abs_n(te->ns);
+  (*fd->name)[0] = Abs_n(te->ns);
   // reject ill-formed type
   check_fndecl_valid_type(loc,te,fd);
   // check for redeclaration
@@ -369,8 +369,8 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
 #endif
   // reject explicitly qualified name
   switch ((*td->name)[0]) {
-  case &Rel_n(NULL): 
-  case &Abs_n(NULL): break; // allowed for top-level constants
+  case Rel_n(NULL): 
+  case Abs_n(NULL): break; // allowed for top-level constants
   default:
     terr(loc,"qualified typedef declarations are not implemented (%s)",qvar2string(td->name)); // FIX
     return;
@@ -381,7 +381,7 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
     return;
   }
   // expand to qualified name
-  (*td->name)[0] = new Abs_n(te->ns);
+  (*td->name)[0] = Abs_n(te->ns);
   // reject ill-formed type
   check_unique_tvars(loc,td->tvs);
   add_tvar_identities(td->tvs);
@@ -480,15 +480,15 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
 
   // reject explicitly qualified name
   switch ((*ad->name)[0]) {
-  case &Rel_n(NULL): 
-  case &Abs_n(NULL): break; // allowed for top-level constants
+  case Rel_n(NULL): 
+  case Abs_n(NULL): break; // allowed for top-level constants
   default: 
     terr(loc,"qualified struct declarations are not implemented (%s)",
 	 qvar2string(ad->name)); // FIX
     return;
   }
   // expand to qualified name
-  (*ad->name)[0] = new Abs_n(te->ns);
+  (*ad->name)[0] = Abs_n(te->ns);
 
   // reject ill-formed type
   check_unique_tvars(loc, ad->tvs);
@@ -581,17 +581,17 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
     }
 
     switch((*f->name)[0]) {
-    case &Rel_n(NULL): 
+    case Rel_n(NULL): 
       if(is_xtunion)
-	(*f->name)[0] = new Abs_n(te->ns);
+	(*f->name)[0] = Abs_n(te->ns);
       else
 	(*f->name)[0] = (*name)[0];
       break;
-    case &Rel_n(_): 
+    case Rel_n(_): 
       terr(f->loc, "qualified tunionfield declarations are not allowed (%s)",
 	   qvar2string(f->name)); //FIX ?
       break;
-    case &Abs_n(_): break;
+    case Abs_n(_): break;
     case Loc_n: impos("tcTunionFields: Loc_n");
     }
   }
@@ -678,12 +678,12 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
       if (tud_opt != NULL) {
         tud->name = (*(tud_opt->v))->name;
       } else {
-        (*tud->name)[0] = new Abs_n(te->ns); 
+        (*tud->name)[0] = Abs_n(te->ns); 
       }
     } else {
       switch ((*tud->name)[0]) {
-      case &Rel_n(NULL): (*tud->name)[0] = new Abs_n(te->ns); break;
-      case &Abs_n(_): fallthru;
+      case Rel_n(NULL): (*tud->name)[0] = Abs_n(te->ns); break;
+      case Abs_n(_): fallthru;
       default:
         terr(loc,"qualified tunion declarations are not implemented (%s)",
              qvar2string(tud->name)); // FIX
@@ -742,15 +742,15 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
 #endif
   // reject explicitly qualified name
   switch ((*ed->name)[0]) {
-  case &Rel_n(NULL): 
-  case &Abs_n(NULL): break; // allowed for top-level constants
+  case Rel_n(NULL): 
+  case Abs_n(NULL): break; // allowed for top-level constants
   default:
     terr(loc,"qualified enum declarations are not implemented (%s)",
 	 qvar2string(ed->name)); // FIX
     return;
   }
   // expand to qualified name
-  (*ed->name)[0] = new Abs_n(te->ns);
+  (*ed->name)[0] = Abs_n(te->ns);
 
   // check the fields.
   if (ed->fields != NULL) region uprev_rgn {
@@ -776,7 +776,7 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
 	terr(loc,"Cyclone enum tags cannot use sizeof or offsetof");
       tag_count = t1+1;
       
-      (*f->name)[0] = new Abs_n(te->ns);
+      (*f->name)[0] = Abs_n(te->ns);
     }
   }
 
@@ -821,15 +821,15 @@ static void resolve_export_namespace(tenv_t te, $(seg_t,qvar_t,bool)@ exp) {
   let $(loc,q,_) = *exp;
   let &$(ns,v) = q;
   switch (ns) {
-  case &Rel_n(NULL):
-  case &Abs_n(NULL): break;
+  case Rel_n(NULL):
+  case Abs_n(NULL): break;
   default:
     terr(loc,"qualified export variables are not implemented (%s)",
          qvar2string(q));
     return;
   }
   // expand to qualified name
-  (*q)[0] = new Abs_n(te->ns);
+  (*q)[0] = Abs_n(te->ns);
 }
 
 // Typecheck a list, ds, of declarations in environment te.
@@ -952,11 +952,11 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
       list_t<var_t> rest;
       switch (nsl) {
       case Loc_n:       
-      case &Rel_n(NULL):
-      case &Abs_n(NULL):
+      case Rel_n(NULL):
+      case Abs_n(NULL):
         first = v; rest = NULL; break;
-      case &Rel_n(&List(x,y)): fallthru(x,y);
-      case &Abs_n(&List(x,y)):
+      case Rel_n(&List(x,y)): fallthru(x,y);
+      case Abs_n(&List(x,y)):
         first = x; rest = List::append(y,new List(v,NULL)); break;
       }
       let ns2 = resolve_namespace(te,loc,first,rest);
@@ -1023,8 +1023,8 @@ static bool vardecl_needed(treeshake_env_t env, decl_t d) {
     list_t<var_t> ns;
     switch (nsl) {
     case Loc_n:     ns = NULL; break;
-    case &Rel_n(y): ns = y;    break;
-    case &Abs_n(y): ns = y;    break;
+    case Rel_n(y): ns = y;    break;
+    case Abs_n(y): ns = y;    break;
     }
     let nsenv = Dict::lookup(env->nsdict,ns);
     let ge = (*nsenv)[0];

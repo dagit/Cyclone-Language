@@ -869,11 +869,11 @@ string_t qvar2string(qvar_t q) {
   switch ((*q)[0]) {
   case Loc_n:
     fallthru(NULL);
-  case &Rel_n(x):
+  case Rel_n(x):
     match = false;
     prefix = x;
     break;
-  case &Abs_n(x):
+  case Abs_n(x):
     match = use_curr_namespace && list_prefix(strptrcmp, x, curr_namespace);
     prefix = qvar_to_Cids && add_cyc_prefix ? new List(cyc_stringptr, x) : x;
     break;
@@ -912,8 +912,8 @@ string_t typedef_name2string(qvar_t v) {
   if (use_curr_namespace) {
     switch ((*v)[0]) {
     case Loc_n: fallthru;
-    case &Rel_n(NULL): return *((*v)[1]);
-    case &Abs_n(l):
+    case Rel_n(NULL): return *((*v)[1]);
+    case Abs_n(l):
       if (list_cmp(strptrcmp, l, curr_namespace) == 0) {
 	return *((*v)[1]);
       } else {
@@ -1226,15 +1226,15 @@ doc_t exps2doc_prec(int inprec, list_t<exp_t> es) {
 // FIX: take care of sign for Char_c and Short_c
 doc_t cnst2doc(cnst_t c) {
   switch (c) {
-  case &Char_c(sg,ch):     return text(aprintf("'%s'",char_escape(ch)));
-  case &Short_c(sg,s):     return text(aprintf("%d",(int)s));
-  case &Int_c(None,i):     fallthru(i);
-  case &Int_c(Signed,i):   return text(aprintf("%d",i));
-  case &Int_c(Unsigned,i): return text(aprintf("%u",(unsigned)i));
-  case &LongLong_c(sg,i):  return text("<<FIX LONG LONG CONSTANT>>"); // FIX
-  case &Float_c(x):  return text(x);
+  case Char_c(sg,ch):     return text(aprintf("'%s'",char_escape(ch)));
+  case Short_c(sg,s):     return text(aprintf("%d",(int)s));
+  case Int_c(None,i):     fallthru(i);
+  case Int_c(Signed,i):   return text(aprintf("%d",i));
+  case Int_c(Unsigned,i): return text(aprintf("%u",(unsigned)i));
+  case LongLong_c(sg,i):  return text("<<FIX LONG LONG CONSTANT>>"); // FIX
+  case Float_c(x):  return text(x);
   case Null_c:      return text("NULL");
-  case &String_c(s):
+  case String_c(s):
     return cat(text("\""), text(string_escape(s)), text("\""));
   }
 }
@@ -1848,34 +1848,36 @@ bool is_anon_aggrtype(type_t t) {
 
 // bubble the attribute modifier past a running series of 
 // Pointer_mod Function_mod's
-static list_t<type_modifier_t> bubble_attributes(type_modifier_t atts,
-                                                 list_t<type_modifier_t,`H> tms) {
+static list_t<type_modifier_t,`r> 
+bubble_attributes(region_t<`r> r,type_modifier_t atts,
+                  list_t<type_modifier_t,`r> tms) {
   if (tms != NULL && tms->tl != NULL) {
     switch ($(tms->hd,tms->tl->hd)) {
     case $(&Pointer_mod(_,_),&Function_mod(_)):
-      return new List(tms->hd,new List(tms->tl->hd,bubble_attributes(atts,tms->tl->tl)));
-    default: return new List(atts,tms);
+      return rnew(r) List(tms->hd,rnew(r) List(tms->tl->hd,bubble_attributes(r,atts,tms->tl->tl)));
+    default: return rnew(r) List(atts,tms);
     }
-  } else return new List(atts,tms);
+  } else return rnew(r) List(atts,tms);
 }
 
 
 // Conversion between alternate forms of types
-$(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
+$(tqual_t,type_t,list_t<type_modifier_t,`r>) to_tms(region_t<`r> r, 
+                                                    tqual_t tq,type_t t) {
   switch (t) {
   case &ArrayType(ArrayInfo{t2,tq2,e,zeroterm,ztl}):
     // Throw away tq, can't qualify an array
-    let $(tq3,t3,tml3) = to_tms(tq2,t2);
+    let $(tq3,t3,tml3) = to_tms(r,tq2,t2);
     type_modifier_t tm;
     if (e == NULL)
       tm = new Carray_mod(zeroterm,ztl);
     else
       tm = new ConstArray_mod((exp_t)e,zeroterm,ztl);
-    return $(tq3, t3, new List(tm,tml3));
+    return $(tq3, t3, rnew(r) List(tm,tml3));
 
   case &PointerType(PtrInfo(t2,tq2,ptratts)):
-    let $(tq3,t3,tml3) = to_tms(tq2,t2);
-    tml3 = new List(new Pointer_mod(ptratts,tq),tml3);
+    let $(tq3,t3,tml3) = to_tms(r,tq2,t2);
+    tml3 = rnew(r) List(new Pointer_mod(ptratts,tq),tml3);
     return $(tq3, t3, tml3);
 
   case &FnType(FnInfo{typvars,effopt,t2,args,c_varargs,cyc_varargs,
@@ -1897,8 +1899,8 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
     }
 
     // discard tq because you can't qualify a function
-    let $(tq3,t3,tml3) = to_tms(empty_tqual(NULL),t2);
-    list_t<type_modifier_t> tms = tml3;
+    let $(tq3,t3,tml3) = to_tms(r,empty_tqual(NULL),t2);
+    list_t<type_modifier_t,`r> tms = tml3;
     // mess with attributes and arguments:
     // * for gcc: we put all attributes after the args
     // * for VC: 
@@ -1910,38 +1912,39 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
     if (fn_atts != NULL && !to_VC) {
       // if the return type is a function pointer, then we have to
       // move the attributes past that function modifier and so forth
-      tms = bubble_attributes(new Attributes_mod(NULL,fn_atts),tms);
+      tms = bubble_attributes(r,new Attributes_mod(NULL,fn_atts),tms);
     }
-    tms = new List(new Function_mod(new WithTypes(args,c_varargs,
-                                                  cyc_varargs,effopt,
-                                                  rgn_po)),tms);
+    tms = rnew(r) List(new Function_mod(new WithTypes(args,c_varargs,
+                                                      cyc_varargs,effopt,
+                                                      rgn_po)),tms);
     if(to_VC)
       for(; fn_atts != NULL; fn_atts = fn_atts->tl)
 	switch(fn_atts->hd) {
 	case Stdcall_att: 
 	case Cdecl_att:   
 	case Fastcall_att:
-	  tms = new List(new Attributes_mod(NULL,new List(fn_atts->hd,NULL)),
-			 tms);
+	  tms = rnew(r) List(new Attributes_mod(NULL,
+                                                new List(fn_atts->hd,NULL)),
+                             tms);
 	  goto AfterAtts;
 	default: break;
 	}
   AfterAtts:
     if (typvars != NULL)
-      tms = new List(new TypeParams_mod(typvars,NULL,true),tms);
+      tms = rnew(r) List(new TypeParams_mod(typvars,NULL,true),tms);
     return $(tq3,t3,tms);
 
   case &Evar(k,topt,i,_):
     if (topt == NULL)
       return $(tq,t,NULL);
     else
-      return to_tms(tq,topt->v);
+      return to_tms(r,tq,topt->v);
 
   case &TypedefType(n,ts,_,topt):
     if (topt == NULL || !expand_typedefs || is_anon_aggrtype(*topt))
       return $(tq,t,NULL);
     else
-      return to_tms(tq,*topt);
+      return to_tms(r,tq,*topt);
 
   default: return $(tq,t,NULL);
   }
@@ -1964,16 +1967,18 @@ static bool is_char_ptr(type_t t) {
 }
 
 doc_t tqtd2doc(tqual_t tq, type_t typ, opt_t<doc_t> dopt) {
-  let $(tq,t,tms) = to_tms(tq,typ);
-  tms = List::imp_rev(tms);
-  if (tms==NULL && dopt==NULL)
-    return cat(tqual2doc(tq),ntyp2doc(t));
-  else 
-    return 
-      cat(tqual2doc(tq),
-          ntyp2doc(t),
-          text(" "),
-          dtms2doc(is_char_ptr(typ),(dopt==NULL)?nil_doc():dopt->v,tms));
+  region temp {
+    let $(tq,t,tms) = to_tms(temp,tq,typ);
+    tms = List::imp_rev(tms);
+    if (tms==NULL && dopt==NULL)
+      return cat(tqual2doc(tq),ntyp2doc(t));
+    else 
+      return 
+        cat(tqual2doc(tq),
+            ntyp2doc(t),
+            text(" "),
+            dtms2doc(is_char_ptr(typ),(dopt==NULL)?nil_doc():dopt->v,tms));
+  }
 }
 
 doc_t aggrfield2doc(aggrfield_t f) {

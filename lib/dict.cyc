@@ -429,20 +429,21 @@ dict_t<`a,`b,`r> intersect_c(`b (@f)(`c,`a,`b,`b), `c env,
 				 dict_t<`a,`b,`r> d1, 
 				 dict_t<`a,`b,`r> d2) {
   if (d1 == d2 || d2->t == NULL) return d2;
-  // resizing array used as queue (array means fewer mallocs)
-  // could region allocate, but it's probably too small to want to
-  Tree_t<`a,`b,`r> ? queue = new {for i < 16 : (Tree_t<`a,`b,`r>)d2->t};
-  int ind = 0;
   let ans_tree = NULL;
-  while(ind != -1) {
-    let &T(_,l,r,$(k,v)) = queue[ind--];
-    if(ind + 2 >= queue.size)
-      queue = new {for i < queue.size*2 : 
-		   i < queue.size ? queue[i] : (Tree_t<`a,`b,`r>)d2->t};
-    if(l != NULL) queue[++ind] = (Tree_t<`a,`b,`r>)l;
-    if(r != NULL) queue[++ind] = (Tree_t<`a,`b,`r>)r;
-    if(Dict::member(d1,k))
-      ans_tree = ins(d2->r,d2->rel,$(k,f(env,k,Dict::lookup(d1,k),v)),ans_tree);
+  region temp {
+    // resizing array used as queue (array means fewer mallocs)
+    Tree_t<`a,`b,`r> ? queue = rnew(temp) {for i < 16 : (Tree_t<`a,`b,`r>)d2->t};
+    int ind = 0;
+    while(ind != -1) {
+      let &T(_,l,r,$(k,v)) = queue[ind--];
+      if(ind + 2 >= queue.size)
+        queue = rnew(temp) {for i < queue.size*2 : 
+                            i < queue.size ? queue[i] : (Tree_t<`a,`b,`r>)d2->t};
+      if(l != NULL) queue[++ind] = (Tree_t<`a,`b,`r>)l;
+      if(r != NULL) queue[++ind] = (Tree_t<`a,`b,`r>)r;
+      if(Dict::member(d1,k))
+        ans_tree = ins(d2->r,d2->rel,$(k,f(env,k,Dict::lookup(d1,k),v)),ans_tree);
+    }
   }
   return rnew(d2->r) Dict(d2->rel, d2->r, ans_tree);
 }

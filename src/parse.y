@@ -150,7 +150,7 @@ static void unimp(string_t msg,seg_t sg) {
 static int enum_counter = 0;
 // FIX:  need to guarantee this won't conflict with a user name
 qvar_t gensym_enum() {
-  return new $(new Rel_n(NULL), 
+  return new $(Rel_n(NULL), 
 	       new (string_t)aprintf("__anonymous_enum_%d__", enum_counter++));
 }
 
@@ -1108,7 +1108,7 @@ declaration:
     { let vds = NULL;
       for (let ids = $2; ids != NULL; ids = ids->tl) {
         let id = ids->hd;
-        let qv = new $(rel_ns_null, id);
+        qvar_t qv = new $(Rel_n(NULL), id);
         let vd = new_vardecl(qv,wildtyp(NULL),NULL);
         vds = new List(vd,vds);
       }
@@ -1530,7 +1530,7 @@ struct_declarator:
 | ':' constant_expression
     { // HACK: give the field an empty name -- see elsewhere in the
       // compiler where we use this invariant
-      $$=^$(new $((new Declarator(new $(rel_ns_null, new ""), NULL)),
+      $$=^$(new $((new Declarator(new $(Rel_n(NULL), new ""), NULL)),
                   (exp_opt_t)$2));
     }
 | declarator_withtypedef ':' constant_expression
@@ -2373,19 +2373,19 @@ pattern:
 | constant
   { exp_t e = $1;
     switch (e->r) {
-    case &Const_e(&Char_c(s,i)): 
+    case &Const_e(Char_c(s,i)): 
       $$=^$(new_pat(new Char_p(i),e->loc)); break;
-    case &Const_e(&Short_c(s,i)):
+    case &Const_e(Short_c(s,i)):
       $$=^$(new_pat(new Int_p(s,i),e->loc)); break;
-    case &Const_e(&Int_c(s,i)):
+    case &Const_e(Int_c(s,i)):
       $$=^$(new_pat(new Int_p(s,i),e->loc)); break;
-    case &Const_e(&Float_c(s)):
+    case &Const_e(Float_c(s)):
       $$=^$(new_pat(new Float_p(s),e->loc)); break;
     case &Const_e(Null_c):
       $$=^$(new_pat(Null_p,e->loc)); break;
-    case &Const_e(&String_c(_)): 
+    case &Const_e(String_c(_)): 
       err("strings cannot occur within patterns",LOC(@1,@1)); break;
-    case &Const_e(&LongLong_c(_,_)): 
+    case &Const_e(LongLong_c(_,_)): 
       unimp("long long's in patterns",LOC(@1,@1)); break;
     default: 
       err("bad constant in case",LOC(@1,@1));
@@ -2727,11 +2727,11 @@ constant:
 ;
 
 qual_opt_identifier:
-  IDENTIFIER      { $$=^$(new $(rel_ns_null, new $1)); }
+  IDENTIFIER      { $$=^$(new $(Rel_n(NULL), new $1)); }
 | QUAL_IDENTIFIER { $$=$!1; }
 ;
 qual_opt_typedef:
-  TYPEDEF_NAME      { $$=^$(new $(rel_ns_null, new $1)); }
+  TYPEDEF_NAME      { $$=^$(new $(Rel_n(NULL), new $1)); }
 | QUAL_TYPEDEF_NAME { $$=$!1; }
 ;
 // Hacks to allow typedef nanmes to overlap with struct/union names and
@@ -2758,8 +2758,8 @@ void yyprint(int i, tunion YYSTYPE v) {
   case QualId_tok(&$(p,v2)):
     let prefix = NULL;
     switch (p) {
-    case &Rel_n(x): prefix = x; break;
-    case &Abs_n(x): prefix = x; break;
+    case Rel_n(x): prefix = x; break;
+    case Abs_n(x): prefix = x; break;
     case Loc_n: break;
     }
     for (; prefix != NULL; prefix = prefix->tl)

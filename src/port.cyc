@@ -1341,18 +1341,18 @@ static $(ctype_t qual,ctype_t type) gen_lhs(cenv_t env, exp_t e) {
 // generate constraints for a RHS expression and return the constraint type
 static ctype_t gen_exp(cenv_t env, exp_t e) {
   switch (e->r) {
-  case &Const_e(&Char_c(_,_)): 
-  case &Const_e(&Short_c(_,_)):
-  case &Const_e(&LongLong_c(_,_)):
+  case &Const_e(Char_c(_,_)): 
+  case &Const_e(Short_c(_,_)):
+  case &Const_e(LongLong_c(_,_)):
   case &Sizeoftyp_e(_): 
   case &Sizeofexp_e(_):
   case &Offsetof_e(_,_):
   case &Enum_e(_,_,_): 
   case &AnonEnum_e(_,_,_):
-  case &Const_e(&Float_c(_)):  return arith_ct();
-  case &Const_e(&Int_c(_,0)): return zero_ct();
-  case &Const_e(&Int_c(_,_)): return arith_ct();
-  case &Const_e(&String_c(_)): 
+  case &Const_e(Float_c(_)):  return arith_ct();
+  case &Const_e(Int_c(_,0)): return zero_ct();
+  case &Const_e(Int_c(_,_)): return arith_ct();
+  case &Const_e(String_c(_)): 
     return ptr_ct(arith_ct(),const_ct(),fat_ct(),heap_ct(),zterm_ct());
   case &Const_e(Null_c):  return zero_ct();
   case &Var_e(x,_):       fallthru(x);
@@ -1558,7 +1558,7 @@ static ctype_t gen_initializer(cenv_t env, type_t t, exp_t e) {
       return type_to_ctype(env,t);
     default: impos("bad type for aggregate initializer");
     }
-  case &Const_e(&String_c(s)):
+  case &Const_e(String_c(s)):
   LOOP2:
     switch (t) {
     case &TypedefType(n,_,_,_): 

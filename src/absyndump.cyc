@@ -201,17 +201,25 @@ void egroup(void f(`a), list_t<`a> l,
 // should do the right thing!
 void dumpqvar(qvar_t v) {
   let nsl = NULL;
+  stringptr_t *prefix = NULL;
   switch ((*v)[0]) {
   case Loc_n: fallthru(NULL);
-  case &Rel_n(x):
+  case Rel_n(x):
     nsl = x;
     break;
-  case &Abs_n(x):
-    nsl = qvar_to_Cids && add_cyc_prefix ? new List(Absynpp::cyc_stringptr, x) : x;
+  case Abs_n(x):
+    if (qvar_to_Cids && add_cyc_prefix) 
+      prefix = &Absynpp::cyc_stringptr;
+    nsl = x;
     break;
   }
+  if (prefix != NULL) {
+    dump_str(*prefix);
+    if(qvar_to_Cids) dump_char('_');
+    else dump_nospace("::");
+  }
   if (nsl != NULL) {
-    dump_str(nsl->hd);
+    dump_nospace(*(nsl->hd));
     for(nsl = nsl->tl; nsl != NULL; nsl = nsl->tl) {
       // Note: This is the most common reason the result goes over 80 columns,
       //       but who really cares.
@@ -223,7 +231,10 @@ void dumpqvar(qvar_t v) {
     else dump_nospace("::");
     dump_nospace(*((*v)[1]));
   } else {
-    dump_str((*v)[1]);
+    if (prefix != NULL)
+      dump_nospace(*((*v)[1]));
+    else 
+      dump_str((*v)[1]);
   }
 }
 
@@ -544,18 +555,18 @@ void dumpexp_prec(int inprec, exp_t e) {
   if(inprec >= myprec)
     dump_nospace("(");
   switch (e->r) {
-  case &Const_e(&Char_c(sg,ch)):
+  case &Const_e(Char_c(sg,ch)):
     dump_char('\''); dump_nospace(Absynpp::char_escape(ch)); dump_char('\''); 
     break;
-  case &Const_e(&Short_c(sg,s)):     dump(aprintf("%d",s)); break;
-  case &Const_e(&Int_c(None,i)):     fallthru(i);
-  case &Const_e(&Int_c(Signed,i)):   dump(aprintf("%d",i)); break;
-  case &Const_e(&Int_c(Unsigned,i)): dump(aprintf("%u",(unsigned)i)); break;
-  case &Const_e(&LongLong_c(sg,i)):
+  case &Const_e(Short_c(sg,s)):     dump(aprintf("%d",s)); break;
+  case &Const_e(Int_c(None,i)):     fallthru(i);
+  case &Const_e(Int_c(Signed,i)):   dump(aprintf("%d",i)); break;
+  case &Const_e(Int_c(Unsigned,i)): dump(aprintf("%u",(unsigned)i)); break;
+  case &Const_e(LongLong_c(sg,i)):
     dump("<<FIX LONG LONG CONSTANT>>"); break; // FIX
-  case &Const_e(&Float_c(x)): dump(x); break;
+  case &Const_e(Float_c(x)): dump(x); break;
   case &Const_e(Null_c): dump("NULL"); break;
-  case &Const_e(&String_c(s)):
+  case &Const_e(String_c(s)):
     dump_char('"'); dump_nospace(Absynpp::string_escape(s)); dump_char('"');
     break;
 
@@ -987,26 +998,28 @@ void dumpvardecl(vardecl_t vd,Position::seg_t loc) {
   if(to_VC) {
     dumpatts(atts);
     dumpscope(sc);
-    let $(tq,t,tms) = Absynpp::to_tms(tq,type);
-    // a kludge -- seems to work -- Unused_att is just a hack for "no spec"
-    attribute_t call_conv = Unused_att;
-    for(_ tms2 = tms; tms2 != NULL; tms2 = tms2->tl)
-      switch(tms2->hd) {
-      case &Attributes_mod(_,atts):
-        for(; atts != NULL; atts = atts->tl)
-          switch(atts->hd) {
-          case Stdcall_att:  call_conv = Stdcall_att;  break;
-          case Cdecl_att:    call_conv = Cdecl_att;    break;
-          case Fastcall_att: call_conv = Fastcall_att; break;
-          default: break;
-          }
-        break;
-      default: break;
-      }
-    dumptq(tq);
-    dumpntyp(t);
-    let pr = $(call_conv,name);
-    dumptms(List::imp_rev(tms), dump_callconv_qvar, &pr);
+    region temp {
+      let $(tq,t,tms) = Absynpp::to_tms(temp,tq,type);
+      // a kludge -- seems to work -- Unused_att is just a hack for "no spec"
+      attribute_t call_conv = Unused_att;
+      for(_ tms2 = tms; tms2 != NULL; tms2 = tms2->tl)
+        switch(tms2->hd) {
+        case &Attributes_mod(_,atts):
+          for(; atts != NULL; atts = atts->tl)
+            switch(atts->hd) {
+            case Stdcall_att:  call_conv = Stdcall_att;  break;
+            case Cdecl_att:    call_conv = Cdecl_att;    break;
+            case Fastcall_att: call_conv = Fastcall_att; break;
+            default: break;
+            }
+          break;
+        default: break;
+        }
+      dumptq(tq);
+      dumpntyp(t);
+      let pr = $(call_conv,name);
+      dumptms(List::imp_rev(tms), dump_callconv_qvar, &pr);
+    }
   } else {
     // hack to avoid writing so many useless externs:
     if(sc == Extern && qvar_to_Cids)
@@ -1245,10 +1258,12 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
 }
 
 void dumptqtd(tqual_t tq, type_t t, void f(`a), `a a) {
-  let $(tq,t,tms) = Absynpp::to_tms(tq,t);
-  dumptq(tq);
-  dumpntyp(t);
-  dumptms(List::imp_rev(tms),f,a);
+  region temp {
+    let $(tq,t,tms) = Absynpp::to_tms(temp,tq,t);
+    dumptq(tq);
+    dumpntyp(t);
+    dumptms(List::imp_rev(tms),f,a);
+  }
 }
 
 void dumpdecllist2file(list_t<decl_t> tdl, FILE @`H f) {
