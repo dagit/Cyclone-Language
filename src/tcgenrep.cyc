@@ -34,6 +34,7 @@
 
 
 using Absyn;
+using Absynpp;
 using Core;
 using Tcenv;
 using Dict;
@@ -73,9 +74,9 @@ typedef struct RepInfo {
 //   two strings.  This is not as robust as it could be, but
 //   we'll see how it goes ...
 static int typecmp(type_t t1, type_t t2) {
-  Absynpp::set_params(&Absynpp::c_params_r);
-  string_t t1str = Absynpp::typ2string(t1);
-  string_t t2str = Absynpp::typ2string(t2);
+  set_params(&c_params_r);
+  string_t t1str = typ2string(t1);
+  string_t t2str = typ2string(t2);
   return strcmp(t1str,t2str);
 }
 
@@ -84,7 +85,7 @@ dict_t<type_t,repinfo_t> empty_typerep_dict() {
 }
 
 void print_dict_entry(type_t type, repinfo_t info) {
-  printf("(%s,%x:%d,",Absynpp::typ2string(type),(unsigned int)info,info->emitted);
+  printf("(%s,%x:%d,",typ2string(type),(unsigned int)info,info->emitted);
   for(_ p = info->dependencies; p != NULL; p = p->tl) {
     printf("%x",(unsigned int)p->hd);
     if(p->tl != NULL) printf(",");
@@ -165,7 +166,7 @@ dfsvisit(repinfo_t ri, Hashtable::table_t<repinfo_t, int> visited) {
       return imp_append(ds,l);
     }
     else {
-      //printf("Skipping ... { \n%s\n }\n", Absynpp::decllist2string(ri->decls));
+      //printf("Skipping ... { \n%s\n }\n", decllist2string(ri->decls));
       return ds;
     }
   }
@@ -205,7 +206,7 @@ static void print_params(list_t<type_t>l) {
   for(list_t<type_t> p = l ; 
       p != NULL;
       p = p->tl) {
-    printf("%s%c",Absynpp::typ2string(p->hd),(p->tl != NULL)? ',' : ' ');
+    printf("%s%c",typ2string(p->hd),(p->tl != NULL)? ',' : ' ');
   }
   printf(">\n");
 }
@@ -399,7 +400,7 @@ update_info(dict_t<type_t,repinfo_t,`H> dict,
   // is there an info record there already?
   let info = lookup_opt(dict,type);
   if(info != NULL ) { // if so, update it with new information
-    //printf("Updated ri for %s(%s)\n",Absynpp::typ2string(type),Absynpp::exp2string(exp));
+    //printf("Updated ri for %s(%s)\n",typ2string(type),exp2string(exp));
     if(info->v->decls != NULL) {
       print_typerep_dict(dict);
       Tcutil::impos("Updating non-forward declaration");
@@ -411,7 +412,7 @@ update_info(dict_t<type_t,repinfo_t,`H> dict,
     return dict;
   }
   else {
-    //printf("Added ri for %s (%s)\n",Absynpp::typ2string(type),Absynpp::exp2string(exp) );
+    //printf("Added ri for %s (%s)\n",typ2string(type),exp2string(exp) );
     return insert(dict,type,new RepInfo{.decls=decls,
 					   .exp=exp,
 					   .dependencies=dependencies,
@@ -502,7 +503,7 @@ tunionfield_t substitute_tunionfield_type(list_t<$(tvar_t,type_t)@`H,`H> subst,
 
 
 type_t monomorphize_type(type_t type) {
-  //printf("monomorphizing %s\n",Absynpp::typ2string(type));
+  //printf("monomorphizing %s\n",typ2string(type));
   switch(Tcutil::compress(type)) {
   case &StructType(name,params,stdeclopt):
     if(stdeclopt == NULL)
@@ -554,8 +555,8 @@ type_t monomorphize_type(type_t type) {
     
     let loc = segment_of_abs(0,0);
     //printf("before: %s\n after: %s\n", 
-    //Absynpp::decllist2string(list(new_decl(new Tunion_d(tud),loc))),
-    //Absynpp::decllist2string(list(new_decl(new Tunion_d(tud2),loc))));
+    //decllist2string(list(new_decl(new Tunion_d(tud),loc))),
+    //decllist2string(list(new_decl(new Tunion_d(tud2),loc))));
     return type2;
   
   default:
@@ -671,7 +672,7 @@ buildRepTunion(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, var_t var
 static $(dict_t<type_t,repinfo_t,`H>,repinfo_t) @
 lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 {
-  //  printf("Type %s (%x)\n", Absynpp::typ2string(type),type);
+  //  printf("Type %s (%x)\n", typ2string(type),type);
 
   if (typestruct_decl == NULL)
     lookup_tuniondecl(te,loc,&typestruct_name);
@@ -679,7 +680,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
   Core::opt_t<repinfo_t> info = lookup_opt(dict,type);
 
   if (info != NULL) {
-    //printf("Done %s\n",Absynpp::typ2string(type));
+    //printf("Done %s\n",typ2string(type));
     let ret = new $(dict,info->v);
     return ret;
   }
@@ -715,7 +716,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       break;
 
     case &PointerType(pt): // ptr_info_t
-      //printf("Pointer type: %s (%x)\n", Absynpp::typ2string(pt.elt_typ),pt.elt_typ);
+      //printf("Pointer type: %s (%x)\n", typ2string(pt.elt_typ),pt.elt_typ);
       switch(conref_val(pt.bounds)) {
       case &Upper_b(e):
 	let varname = new_gen_id("rep");
@@ -803,7 +804,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       let &$(dict2,info2) = lookupRep(te,dict,loc,def->v);
       dict = insert(dict2,type,info2);
       break;
-    case &StructType(tydefname,params,stdeclopt): // MemKind
+    case &StructType(name,params,stdeclopt): // MemKind
       if(stdeclopt == NULL)
 	Tcutil::impos("gen(): struct declaration must be present by now");
       // Almost identical to Tuple case.
@@ -817,7 +818,23 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 		print_tvars(stdecl->tvs);
 		}*/
       if (stdecl->fields == NULL) {
-	Tcutil::impos("gen(): external structs not yet handled");
+	// This indicates an imported struct.
+	// Generate a forward decl of the imported typerep
+	// Generate a reference to a standard name.
+	if(name == NULL) 
+	  Tcutil::impos("struct must have name by now");
+	string_t s = strconcat(qvar2cstring((qvar_t)name),"_struct_typerep");
+	let varname = new s;
+	let fwd_decl = new Opt{.v=gen_vardecl_sc(varname,tunionfield_typ(&typestruct_str,&tuple_str),NULL,Extern,loc)};
+	dict = update_info(dict,
+			   type,
+			   NULL,
+			   address_exp(unknownid_exp(toplevel_name(varname),
+						     loc),loc),
+			   NULL,fwd_decl);
+	break;
+
+	//Tcutil::impos("gen(): external structs not yet handled");
       }
       if(stdecl->fields->v != NULL && forall(has_bitfield,stdecl->fields->v)) {
 	let bits = fold_left(add_bitfield_sizes,0,stdecl->fields->v);
@@ -978,7 +995,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       //      Tcutil::impos("gen() expression not yet supported");
       //      throw Tcutil::TypeErr; // redundant, as impos will do this
     }
-    //printf("Done %s\n",Absynpp::typ2string(type));
+    //printf("Done %s\n",typ2string(type));
     return new $(dict,lookup(dict,type));
   }
 }
@@ -1006,7 +1023,7 @@ $(dict_t<type_t,repinfo_t,`H>,list_t<decl_t>,exp_t)
   // generate the declarations
   let &$(dict,ri) = lookupRep(te, dict, loc, type);  
   let decls = dfs(ri);
-  printf("Emitting...\n%s\n",Absynpp::decllist2string(decls));
+  printf("Emitting...\n%s\n",decllist2string(decls));
   
 
   return $(dict,decls, (exp_t)ri->exp);

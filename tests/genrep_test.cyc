@@ -10,8 +10,8 @@ using List;
 using Typerep;
 using Marshal;
 
-#define NEW
-//#define TEST
+//#define NEW
+#define TEST
 
 
 typedef union Bar {
@@ -172,13 +172,7 @@ union cast<`r::R> {
 tunion Typestruct cast_rep = __gen(union cast<`H>);
 
 
-
-#endif
-
-#ifdef NEW
-
 // test structs with bitfields
-
 struct bitfield {
   int z : 1;
   int x : 2;
@@ -186,6 +180,19 @@ struct bitfield {
 };
 
 tunion Typestruct bitfield_rep = __gen(struct bitfield);
+
+
+#endif
+
+#ifdef NEW
+
+// test external declarations
+extern struct Mutt;
+struct Woof {
+  struct Mutt *a,*b;
+};
+tunion Typestruct woof_rep = __gen(struct Woof);
+
 
 //tunion Typestruct decl_rep = __gen(Absyn::scope_t);
 //tunion Typestruct decl2_rep = __gen(Absyn::tqual_t);
@@ -197,7 +204,7 @@ tunion Typestruct bitfield_rep = __gen(struct bitfield);
 //tunion Typestruct decl8_rep = __gen(Absyn::ptr_info_t);
 //tunion Typestruct decl9_rep = __gen(Absyn::vararg_info_t); fndecl
 //tunion Typestruct decl10_rep = __gen(Absyn::fn_info_t); fndecl
-tunion Typestruct decl11_rep = __gen(Absyn::decl_t);
+//tunion Typestruct decl11_rep = __gen(Absyn::decl_t);
 #endif
 
 

@@ -62,6 +62,7 @@ extern string_t ckind2string(conref_t<kind_t>);
 extern string_t exp2string(exp_t);
 extern string_t stmt2string(stmt_t);
 extern string_t qvar2string(qvar_t);
+extern string_t qvar2cstring(qvar_t);
 extern string_t decllist2string(list_t<decl_t> tdl);
 extern string_t prim2string(primop_t p);
 extern string_t pat2string(pat_t p);

@@ -1800,6 +1800,13 @@ string_t exp2string(exp_t e)     {return string_of_doc(exp2doc(e),  PP_WIDTH);}
 string_t stmt2string(stmt_t s)   {return string_of_doc(stmt2doc(s), PP_WIDTH);}
 string_t typ2string(type_t t)    {return string_of_doc(typ2doc(t),  PP_WIDTH);}
 string_t qvar2string(qvar_t v)   {return string_of_doc(qvar2doc(v), PP_WIDTH);}
+string_t qvar2cstring(qvar_t v) {
+  bool old_qvar_to_Cids = qvar_to_Cids;
+  qvar_to_Cids = true;
+  string_t s = qvar2string(v);
+  qvar_to_Cids = old_qvar_to_Cids;
+  return s;
+}
 string_t prim2string(primop_t p) {return string_of_doc(prim2doc(p), PP_WIDTH);}
 string_t pat2string(pat_t p)     {return string_of_doc(pat2doc(p),  PP_WIDTH);}
 
