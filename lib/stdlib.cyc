@@ -5,7 +5,9 @@ namespace Cstdlib {
   extern "C" {
     double _EXFUN(atof,(const Cstring _nptr));
 #ifndef __STRICT_ANSI__
+/*
     float _EXFUN(atoff,(const Cstring _nptr));
+*/
 #endif __STRICT_ANSI__
     int   _EXFUN(atoi,(const Cstring _nptr));
     long  _EXFUN(atol,(const Cstring _nptr));
@@ -32,9 +34,11 @@ namespace Stdlib {
     return Cstdlib::atof(s2c(_nptr));
   }
 #ifndef __STRICT_ANSI__
+/*
   float atoff(string _nptr) {
     return Cstdlib::atoff(s2c(_nptr));
   }
+*/
 #endif __STRICT_ANSI__
   int atoi(string _nptr) {
     return Cstdlib::atoi(s2c(_nptr));

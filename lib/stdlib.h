@@ -181,7 +181,9 @@ _VOID	_EXFUN(__eprintf,(const char *, const char *, unsigned int, const char *))
 */
 }
 extern double atof(string);
+/*
 extern float atoff(string);
+*/
 extern int atoi(string);
 extern long atol(string);
 extern string getenv(string);

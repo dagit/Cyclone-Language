@@ -101,8 +101,8 @@ clean_nogc:
 	$(MAKE) clean -C lib
 	$(MAKE) clean -C bin/genfiles
 	$(MAKE) clean -C tests
-	$(MAKE) clean -C gc
-	rm -f gc/*.exe gc/base_lib gc/*.obj gc/gc.lib
+#	$(MAKE) clean -C gc
+#	rm -f gc/*.exe gc/base_lib gc/*.obj gc/gc.lib
 	rm -f bin/cyclone.exe 
 	rm -f bin/$(CYCLIB)
 	rm -f bin/$(RUNTIME).o
