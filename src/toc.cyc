@@ -2,9 +2,9 @@
 // Toc.pop:  copyright (c) 2000, Greg Morrisett and Trevor Jim
 //
 // Translation of Cyclone abstract syntax to C abstract syntax.
-// Assumes that the type-checker has been successfully run on 
+// Assumes that the type-checker has been successfully run on
 // the Cyclone AST.  Uses lots of GCC-specific features (that should
-// be in C-9X) to simplify the translation -- in particular, we use 
+// be in C-9X) to simplify the translation -- in particular, we use
 // struct expressions "(struct foo){.f1=e1,.f2=e2,...,.fn=en}" and
 // statement expressions "({int temp = e;  temp++})".  The
 // latter is crucial for declaring temps needed in the translation
@@ -14,7 +14,7 @@
 // The translation is mostly done in place in an imperative style
 // (i.e., we overwrite AST nodes) so it's fairly crucial that we
 // don't have sharing in the AST.  The one exception is that the
-// type translation is functional.  
+// type translation is functional.
 
 // We need to figure out how to do the name mangling systematically,
 // especially for namespaces.  Right now, I'm using identifers that
@@ -112,11 +112,11 @@ static var add_tuple_type(list<$(tqual,typ)@> tqs0) {
     bool okay = true;
     let  tqs  = tqs0;
     for (; tqs != null && ts != null; tqs = tqs->tl, ts = ts->tl)
-      if (!unify(tqs->hd[1],ts->hd)) { 
-	okay = false; 
-	break; 
+      if (!unify(tqs->hd[1],ts->hd)) {
+	okay = false;
+	break;
       }
-    if (!okay || tqs != null || ts != null) 
+    if (!okay || tqs != null || ts != null)
       continue;
     return x;
   }
@@ -177,6 +177,32 @@ static $(Opt_t<var>,tqual,typ)@ arg_to_c($(Opt_t<var>,tqual,typ)@ a) {
 static $(tqual,typ)@ typ_to_c_f($(tqual,typ)@ x) {
   return &$(x[0],typ_to_c(x[1]));
 }
+// Sometimes we translate arrays t[] and t[N] to t*, and sometimes
+// we leave them alone.  We must leave them alone in the following
+// circumstances:
+// 1. as the argument of sizeof
+// 2. in typedef
+// 3. in declarations
+// 4. as the element type of an array
+// 5. as the type part of a C9X compound literal
+// 6. as the type of a struct field
+// We must change them to pointers in the following circumstances:
+// 1. as the argument of cast
+// We can do either in the following circumstances:
+// 1. as the parameter of a function
+// The function typ_to_c_array leaves them alone, while typ_to_c
+// changes them to pointers.
+static typ typ_to_c_array(typ t) {
+  switch(t) {
+  case ArrayType(t2,tq,UntaggedArray): // FIX: do we handle tq correctly?
+    return ArrayType(typ_to_c_array(t2),tq,UntaggedArray);
+  case ArrayType(t2,tq,FixedArray(x)): // FIX: do we handle tq correctly?
+    return ArrayType(typ_to_c_array(t2),tq,FixedArray(x));
+  case Evar(_,&Opt{.v=t2},_): return typ_to_c_array(t2);
+  default:
+    return typ_to_c(t);
+  }
+}
 static typ typ_to_c(typ t) {
   switch (t) {
   case VoidType:              return t;
@@ -202,7 +228,7 @@ static typ typ_to_c(typ t) {
     return PointerType(typ_to_c(t2),HeapRgn,new_conref(true),tq);
   // We assume that these are suitably defined already in an appropriate
   // include file -- especially the boxed versions and the bools.
-  case IntType(sn,B8,Boxed): return longlong_typ; 
+  case IntType(sn,B8,Boxed): return longlong_typ;
   case IntType(_,_,_):       return t;
   case FloatType(_):         return t;
   case DoubleType(_):        return t;
@@ -210,15 +236,14 @@ static typ typ_to_c(typ t) {
     // t2[?] maps to struct tagged_array_t2*, where we define
     // struct tagged_array_t2 { unsigned int sz; t2 contents[]; };
     // t2[] and t2[3] map to t2*.
-    t2 = typ_to_c(t2);
+    t2 = typ_to_c_array(t2);
     switch (ak) {
     case TaggedArray:
       // returns the name of a struct type for the array
       let n = add_tagged_array_type(t2,tq);
       return nullableptr_typ(strct(n),empty_tqual());
-      // FIX:  fixed-size arrays aren't quite right... C's rules for
-      // when you can and can't use these types are strange.
-    default: return nullableptr_typ(t2,tq);
+    default:
+      return nullableptr_typ(t2,tq);
     }
   case FnType(_,t2,args,vararg):
     // just drop the type arguments and translate the nested types
@@ -238,21 +263,12 @@ static typ typ_to_c(typ t) {
   case TypedefType(tdn,ts,topt):
     if (topt == null) return toc_impos("Toc::typ_to_c: unresolved TypedefType");
     // just drop the type arguments and translate the nested types
-    return TypedefType(collapse_qvar(tdn),null, &Opt(typ_to_c(topt->v)));
+    return TypedefType(collapse_qvar(tdn),null, &Opt(typ_to_c_array(topt->v)));
   case RgnHandleType(r):
     // FIX?
     return void_star_typ();
-  case UnionType: 
+  case UnionType:
     return toc_impos("uniontype");
-  }
-}
-
-// Same as above but t[] and t[e] are not translated to t* at the top-level.
-typ top_typ_to_c(typ t) {
-  switch (compress(t)) {
-  case ArrayType(_,_,TaggedArray): return typ_to_c(t);
-  case ArrayType(t2,tq,ak):        return ArrayType(typ_to_c(t2),tq,ak);
-  default:                         return typ_to_c(t);
   }
 }
 
@@ -301,7 +317,7 @@ static bool atomic_typ(typ t) {
   case UnionType: return false;
   case PointerType(_,_,_,_): return false;
   case RgnHandleType(_): return false;
-  default: 
+  default:
     toc_impos(xprintf("atomic_typ:  bad type %s",typ2string(t)));
     return false;
   }
@@ -322,7 +338,7 @@ static exp malloc_atomic(exp s) {
 static exp malloc_exp(typ t,exp s) {
   if (atomic_typ(t))
     return malloc_atomic(s);
-  else 
+  else
     return malloc_ptr(s);
 }
 
@@ -331,7 +347,7 @@ static exp malloc_exp(typ t,exp s) {
 ///////////////////////////////////////////////////////////////
 // This section implements the various casts from one Cyclone
 // type to another (e.g., boxing, unboxing, tagging, etc.)
-static enum Conv { 
+static enum Conv {
   BoxLongLong;      // long long -> Long Long
   UnboxLongLong;    // Long Long -> long long
   BoxFloat;         // float -> Float
@@ -356,13 +372,13 @@ static list<conv> conversion(typ t1, typ t2) {
   t2 = compress(t2);
   switch ($(t1,t2)) {
     // large boxed t1's must be unboxed
-  case $(IntType(_,B8,Boxed), IntType(_,B8,Boxed)): 
+  case $(IntType(_,B8,Boxed), IntType(_,B8,Boxed)):
     return null;
   case $(IntType(_,B8,Boxed), FloatType(Boxed)):
     return &cons(BoxFloat,&cons(UnboxLongLong,null));
   case $(IntType(_,B8,Boxed), DoubleType(Boxed)):
     return &cons(BoxDouble,&cons(UnboxLongLong,null));
-  case $(IntType(_,B8,Boxed), _): 
+  case $(IntType(_,B8,Boxed), _):
     return &cons(UnboxLongLong,null);
 
   case $(FloatType(Boxed), IntType(_,B8,Boxed)):
@@ -403,7 +419,7 @@ static list<conv> conversion(typ t1, typ t2) {
 
   default: return null;
   }
-}    
+}
 
 // long long -> Long Long
 static exp box_longlong_conv(bool toplevel, exp e) {
@@ -416,7 +432,7 @@ static exp box_longlong_conv(bool toplevel, exp e) {
     temp_topdecls = &cons(new_decl(Var_d(vd),DL),temp_topdecls);
     return address_exp(var_exp(x,DL),DL);
   } else {
-    // ({ _LongLong x = 
+    // ({ _LongLong x =
     //        (_LongLong)malloc(sizeof(struct _boxed_long_long_struct));
     //    x->v = e; x; })
     qvar x = temp_var();
@@ -520,7 +536,7 @@ static exp null_check_conv(bool toplevel, typ t, exp e) {
     unimp("can't do null-check conversion at top-level");
   // ({ t* x = e; if (x == 0) throw(Null); x })
   qvar x = temp_var();
-  stmt s = 
+  stmt s =
     ifthenelse_stmt(eq_exp(var_exp(x,DL),signed_int_exp(0,DL),DL),
 		    exp_stmt(newthrow_exp(null_pointer_exn_exp(DL)),DL),
 		    skip_stmt(DL),DL);
@@ -536,14 +552,20 @@ static exp tag_fixedarray_conv(bool toplevel,typ t, exp sz, exp e) {
   typ strt_typ;
   typ elt_typ;
   switch (compress(t)) {
+  //  case ArrayType(elt,tq,FixedArray(_)):
+  //    // FIX:  what about tqual ??
+  //    elt_typ = elt;
+  //    let n = add_tagged_array_type(elt,empty_tqual());
+  //    strt_typ = strct(n);
+  //    break;
   case PointerType(elt,_,_,_):
     // FIX:  what about tqual ??
     elt_typ = elt;
     let n = add_tagged_array_type(elt,empty_tqual());
     strt_typ = strct(n);
     break;
-  default: 
-    return toc_impos("tag_fixedarray_conv: not a pointer");
+  default:
+    return toc_impos("tag_fixedarray_conv: not a fixed array");
   }
   typ pstrt_typ = nullableptr_typ(strt_typ,empty_tqual());
   if (toplevel) {
@@ -561,7 +583,7 @@ static exp tag_fixedarray_conv(bool toplevel,typ t, exp sz, exp e) {
 			        temp_topdecls));
     return address_exp(var_exp(b,DL),DL);
   } else {
-    // ({ t a = e;  
+    // ({ t a = e;
     //    t b = (t)malloc(sizeof(struct tagged_arrayt));
     //    b->sz = sz;
     //    b->contents = a;
@@ -629,7 +651,7 @@ static exp convert_exp(bool toplevel, typ t1, typ t2, exp e) {
 // This is primarily used in the pattern match compilation.
 //
 // to_pop_XXX where XXX is break, continue, or return, is the number
-//   of exception handlers to pop before XXX. 
+//   of exception handlers to pop before XXX.
 // All the to_pop values are incremented on entry to try.
 // to_pop_return is set to zero at the beginning of functions.
 // to_pop_break is set to zero at do, for, while, and switch.
@@ -639,16 +661,16 @@ static exp convert_exp(bool toplevel, typ t1, typ t2, exp e) {
 // nothing to do with switch.  Fallthru is like a continue for a switch.
 //
 // Translation of fallthru(e1,...,en) is
-// varmap'(qv1) = trans(e1); ... varmap'(qvn) = trans(en); 
+// varmap'(qv1) = trans(e1); ... varmap'(qvn) = trans(en);
 // goto fallthru_info->v[0]
-// where the ith element of fallthru_info->v[1] is qvi 
+// where the ith element of fallthru_info->v[1] is qvi
 // and varmap' is fallthru_info->v[2]
 // (We also have to pop handlers as explained above.)
-// 
+//
 // Note that the varmap has to take into account the shadow number
 // from bindings -- hence the domain of the map is qvar*int.
 static struct Env {
-  Opt_t<var> break_lab;   
+  Opt_t<var> break_lab;
   Opt_t<var> continue_lab;
   Opt_t<$(var,list<qvar>,Dict::Dict<qvar,exp>)@> fallthru_info;
   Dict::Dict<qvar,exp> varmap;
@@ -728,12 +750,12 @@ static env try_env(env e) {
 }
 
 // env for a switch clause: give new label for break, and zero its pop counter
-static env non_last_switchclause_env(env e, var break_l, var fallthru_l, 
+static env non_last_switchclause_env(env e, var break_l, var fallthru_l,
 				     list<qvar> fallthru_binders,
 				     env next_case_env) {
   return &Env{.break_lab     = &Opt(break_l),
               .continue_lab  = e->continue_lab,
-	      .fallthru_info = &Opt(&$(fallthru_l, 
+	      .fallthru_info = &Opt(&$(fallthru_l,
 				       fallthru_binders,
 				       next_case_env->varmap)),
               .varmap = e->varmap,
@@ -776,7 +798,7 @@ static env switch_as_switch_env(env e, var next_l) {
 //   aopt is &Opt(e) if p is fprintf and e is its first arg
 //   args are the remaining args, already translated
 //   typs are the types of the translated args
-// 
+//
 //
 // Most of the work has been done in the typechecker, which inserted
 // casts on all the args.  The only remaining thing to do is handle
@@ -792,7 +814,7 @@ static env switch_as_switch_env(env e, var next_l) {
 // becomes
 //   ({ int t1 = g(x);
 //      string t2 = f(e);
-//      int t3 = y; 
+//      int t3 = y;
 //      printf("%d%.*s%d\n",t1,t2->sz,t2->contents,t3);
 //   })
 // We introduce temps for all vars to preserve order of evaluation.
@@ -901,7 +923,7 @@ static $(list<designator>,exp)@ add_designator(env nv, exp e) {
   return &$(null,e);
 }
 
-static exp make_struct(qvar x, typ struct_typ, stmt s, 
+static exp make_struct(qvar x, typ struct_typ, stmt s,
 		       bool pointer, bool is_atomic) {
   Opt_t<exp> eo;
   typ        t;
@@ -916,7 +938,7 @@ static exp make_struct(qvar x, typ struct_typ, stmt s,
   return stmt_exp(declare_stmt(x,t,eo,s,DL),DL);
 }
 
-// Would be nice to share moare code with init_struct 
+// Would be nice to share moare code with init_struct
 // but the designators get in the way.
 static exp init_tuple(env nv, bool pointer, list<exp> es) {
   // $(e1,...,en)  -> ({ t x;   x.f1 = e1; ... x.fn = en; x})
@@ -927,7 +949,7 @@ static exp init_tuple(env nv, bool pointer, list<exp> es) {
   let x    = temp_var();
   let xexp = var_exp(x,DL);
   let s    = exp_stmt(xexp,DL);
-  
+
   let lval_f = pointer ? structarrow_exp : structmember_exp;
 
   bool is_atomic = true;
@@ -935,14 +957,14 @@ static exp init_tuple(env nv, bool pointer, list<exp> es) {
   for (int i = length(es); es != null; es = es->tl, --i) {
     exp_to_c(nv,es->hd);
     is_atomic = is_atomic && atomic_typ(es->hd->topt->v);
-    s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,xprintf("f%d",i),DL), 
-				     es->hd, DL), DL), 
+    s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,xprintf("f%d",i),DL),
+				     es->hd, DL), DL),
 		 s, DL);
   }
   return make_struct(x,strct(n),s,pointer,is_atomic);
 }
 
-static exp init_struct(env nv, bool pointer, 
+static exp init_struct(env nv, bool pointer,
 			list<$(list<designator>,exp)@> dles, typedef_name tdn) {
   let x    = temp_var();
   let xexp = var_exp(x,DL);
@@ -961,7 +983,7 @@ static exp init_struct(env nv, bool pointer,
       // untested
       let y    = temp_var();
       let yexp = var_exp(y,DL);
-      for(; ds != null; ds = ds->tl) 
+      for(; ds != null; ds = ds->tl)
 	switch (ds->hd) {
 	case FieldName(f):
 	  s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,f,DL), yexp, DL), DL),
@@ -971,7 +993,7 @@ static exp init_struct(env nv, bool pointer,
 	}
       exp_to_c(nv,e);
       s = seq_stmt(exp_stmt(assign_exp(yexp, e, DL), DL), s, DL);
-    } else 
+    } else
       switch (ds->hd) {
       case FieldName(f):
 	exp_to_c(nv,e);
@@ -988,7 +1010,7 @@ extern void lvalue_assign_stmt(stmt s,list<field_name> fs,
 			       Opt_t<primop> popt,exp e2);
 // e1 is the result of translating an lvalue.  fs is the path of struct
 // fields that we're assigning to on e1 (if any).  The translation
-//  may have inserted null checks, etc., but buried within e is an lvalue.  
+//  may have inserted null checks, etc., but buried within e is an lvalue.
 // These two functions find that lvalue and insert an assignment to it.
 // We assume that variables of e2 will not be captured by any
 // declarations in e1 (they should all be temps).
@@ -1010,7 +1032,7 @@ static void lvalue_assign(exp e1,list<field_name> fs,Opt_t<primop> popt,exp e2) 
     // make a copy so we don't create a loop
     exp e1_copy = copy_exp(e1);
     // add the path back on to the expression
-    for (; fs != null; fs = fs->tl) 
+    for (; fs != null; fs = fs->tl)
       e1_copy = structmember_exp(e1_copy,fs->hd,e1_copy->loc);
     e1->r = assignop_exp(e1_copy,popt,e2,DL)->r;
     break;
@@ -1037,15 +1059,15 @@ static void exp_to_c(env nv, exp e) {
   }
   typ old_typ = e->topt->v;
   switch (r) {
-  case Const_e(Null_c): 
+  case Const_e(Null_c):
     // null -> 0  -- this is okay according to C's rules!
     e->r = signed_int_exp(0,DL)->r; break;
   case Const_e(_): break;
-  case Var_e(qv,b): 
+  case Var_e(qv,b):
     switch (b) {
     case Local_b(vd): fallthru(vd);
-    case Pat_b(vd): 
-      if (vd->shadow != 0) 
+    case Pat_b(vd):
+      if (vd->shadow != 0)
 	warn(e->loc,xprintf("shadowed variable %s won't be translated correctly",qvar2string(qv)));
       break;
     default: break;
@@ -1054,7 +1076,7 @@ static void exp_to_c(env nv, exp e) {
     // must look variables up in the nv->varmap
     try
       e->r = Dict::lookup(nv->varmap,qv)->r;
-    catch { 
+    catch {
     case Dict::Absent:
        toc_impos(xprintf("Can't find %s in exp_to_c, Var\n", qvar2string(qv)));
        return;
@@ -1084,38 +1106,38 @@ static void exp_to_c(env nv, exp e) {
     default: break; //skip
     }
     break;
-  case Increment_e(e2,_): 
+  case Increment_e(e2,_):
     // FIX:  works for boxed types?
     exp_to_c(nv,e2);
     break;
-  case AssignOp_e(e1,popt,e2): 
+  case AssignOp_e(e1,popt,e2):
     // FIX:  works for boxed types?
     exp_to_c(nv,e1); exp_to_c(nv,e2);
     // The typechecker guarantees that e1 starts out as an lvalue, but
     // the translation might have to insert casts, null checks,
-    // declarations of temps, bound checks, etc.  If so we look into e1, 
+    // declarations of temps, bound checks, etc.  If so we look into e1,
     // find the lvalue, and put the assignment there.
     if (!is_lvalue(e1)) {
       lvalue_assign(e1,null,popt,e2);
       e->r = e1->r;
     }
     break;
-  case Conditional_e(e1,e2,e3): 
-    exp_to_c(nv,e1); 
-    exp_to_c(nv,e2); 
-    exp_to_c(nv,e3); 
+  case Conditional_e(e1,e2,e3):
+    exp_to_c(nv,e1);
+    exp_to_c(nv,e2);
+    exp_to_c(nv,e3);
     break;
-  case SeqExp_e(e1,e2): 
-    exp_to_c(nv,e1); 
-    exp_to_c(nv,e2); 
+  case SeqExp_e(e1,e2):
+    exp_to_c(nv,e1);
+    exp_to_c(nv,e2);
     break;
   case UnknownCall_e(e1,es):
     exp_to_c(nv,e1);
     List::iter_c(exp_to_c,nv,es);
     break;
-  case FnCall_e(e1,es): 
-    exp_to_c(nv,e1); 
-    List::iter_c(exp_to_c,nv,es); 
+  case FnCall_e(e1,es):
+    exp_to_c(nv,e1);
+    List::iter_c(exp_to_c,nv,es);
     break;
   case Throw_e(e1):
     // throw e -> (t)(throw(e)), the latter being a function call to throw
@@ -1126,34 +1148,34 @@ static void exp_to_c(env nv, exp e) {
   case Instantiate_e(e1,opt_type):
     exp_to_c(nv,e1);
     typ t_inst = typ_to_c(e->topt->v);
-    e->r = array_to_ptr_cast(t_inst,e1,DL)->r; 
+    e->r = array_to_ptr_cast(t_inst,e1,DL)->r;
     break;
   case Cast_e(*t,*e1):
     typ old_t2  = (*e1)->topt->v;
     typ new_typ = *t;
     *t = typ_to_c(new_typ);
     exp_to_c(nv, *e1);
-    *e1 = convert_exp(nv->toplevel, old_t2, new_typ, *e1); 
+    *e1 = convert_exp(nv->toplevel, old_t2, new_typ, *e1);
     break;
-  case Address_e(e1): 
+  case Address_e(e1):
     // When e1 is a struct or a tuple, this is really a "new".
     switch (e1->r) {
-    case Struct_e(tdn,_,es,_): 
+    case Struct_e(tdn,_,es,_):
       if (nv->toplevel)
 	unimp(xprintf("%s: & on non-identifiers at the top-level",
                       Position::string_of_segment(e1->loc)));
       e->r = init_struct(nv, true, es, tdn)->r;
       break;
-    case Tuple_e(es):        
+    case Tuple_e(es):
       if (nv->toplevel)
 	unimp(xprintf("%s: & on non-identifiers at the top-level",
                       Position::string_of_segment(e1->loc)));
       e->r = init_tuple(nv, true, es)->r;
       break;
       // FIX: This isn't unsafe after regions are hacked in.
-    case NoInstantiate_e(&Exp(_,Var_e(x,_),_)): 
+    case NoInstantiate_e(&Exp(_,Var_e(x,_),_)):
       fallthru(x); // FIX: nested NoInst???
-    case Instantiate_e(&Exp(_,Var_e(x,_),_),_): 
+    case Instantiate_e(&Exp(_,Var_e(x,_),_),_):
       fallthru(x); // FIX: nested Inst???
     case Var_e(x,_):
       if (!nv->toplevel)
@@ -1164,8 +1186,8 @@ static void exp_to_c(env nv, exp e) {
     default: unimp("& on non-struct/tuple/variable"); break;
     }
     break;
-  case Sizeof_e(t): e->r = Sizeof_e(typ_to_c(t)); break;
-  case Deref_e(e1): 
+  case Sizeof_e(t): e->r = Sizeof_e(typ_to_c_array(t)); break;
+  case Deref_e(e1):
     exp_to_c(nv, e1);
     switch (compress(e1->topt->v)) {
     case PointerType(t2,rgn,cr,tq):
@@ -1207,10 +1229,10 @@ static void exp_to_c(env nv, exp e) {
     break;
   case Subscript_e(e1,e2):
     let e1_typ = compress(e1->topt->v);
-    exp_to_c(nv, e1); 
+    exp_to_c(nv, e1);
     exp_to_c(nv, e2);
     // cast e1 to have the right type so that we can do the projection
-    // note:  casts to array types t[] or t[3] should be casts to pointer 
+    // note:  casts to array types t[] or t[3] should be casts to pointer
     // types *t
     e1->r = array_to_ptr(typ_to_c(e1_typ),new_exp(e1->r,DL),DL)->r;
     // e1 could be a tuple, pointer to tuple, or an array of various sorts
@@ -1220,7 +1242,7 @@ static void exp_to_c(env nv, exp e) {
       unsigned int i = eval_const_uint_exp(e2)+1;
       e->r = structmember_exp(e1,xprintf("f%d",i),DL)->r;
       break;
-    case PointerType(t,rgn,bcr,tq): 
+    case PointerType(t,rgn,bcr,tq):
       // The type checker ensures that this must be a pointer to a tuple
       string fname = xprintf("f%d",eval_const_uint_exp(e2)+1);
       bool nullable = is_nullable(e1->topt->v);
@@ -1247,7 +1269,7 @@ static void exp_to_c(env nv, exp e) {
 	qvar x = temp_var();
 	qvar i = temp_var();
 	qvar a = temp_var();
-	let ta1 = typ_to_c(ta);
+	let ta1 = typ_to_c_array(ta);
 	let n = add_tagged_array_type(ta1,q);
 	typ tx  = nullableptr_typ(strct(n),empty_tqual());
 	typ ta2 = nullableptr_typ(ta1,q);
@@ -1290,7 +1312,7 @@ static void exp_to_c(env nv, exp e) {
       break;
     }
     break;
-  case Tuple_e(es): 
+  case Tuple_e(es):
     if(!nv->toplevel)
       e->r = init_tuple(nv,false,es)->r;
     else {
@@ -1308,11 +1330,11 @@ static void exp_to_c(env nv, exp e) {
       e->r = cast_exp(strct(n),unresolvedmem_exp(null,dles,DL),DL)->r;
     }
     break;
-  case CompoundLit_e(_,_): 
+  case CompoundLit_e(_,_):
     // the type-checker doesn't deal with these yet...
     unimp("compoundlit");
     break;
-  case Array_e(dles0): 
+  case Array_e(dles0):
     // FIX: May be susceptible to gcc bug!
     if (nv->toplevel) {
       // {e1,...,en}
@@ -1324,7 +1346,7 @@ static void exp_to_c(env nv, exp e) {
       switch (compress(old_typ)) {
       case ArrayType(et,tq,ak):
 	switch (ak) {
-	case TaggedArray: 
+	case TaggedArray:
 	  // The front-end always turns tagged array initializers into
 	  // casts of fixed array initializers.
 	  toc_impos("tagged array at top-level!");
@@ -1355,7 +1377,7 @@ static void exp_to_c(env nv, exp e) {
 	  if (dl->tl != null) unimp("multiple designators in array");
 	  let d = dl->hd;
 	  switch (d) {
-	  case ArrayElement(e3): 
+	  case ArrayElement(e3):
 	    exp_to_c(nv,e3);
 	    e_index = e3;
             break;
@@ -1373,7 +1395,7 @@ static void exp_to_c(env nv, exp e) {
       switch (compress(old_typ)) {
       case ArrayType(et,tq,ak):
 	old_elt_typ = et; break;
-      default: 
+      default:
 	old_elt_typ=toc_impos("exp_to_c:array expression doesn't have array type");
         break;
       }
@@ -1386,7 +1408,7 @@ static void exp_to_c(env nv, exp e) {
       e->r = stmt_exp(declare_stmt(x,ptr_typ,&Opt(e0),s,DL),DL)->r;
     }
     break;
-  case Comprehension_e(vd,e1,e2): 
+  case Comprehension_e(vd,e1,e2):
     // Drop the "tagged_array_t" struct stuff when type is a fixed-size array
     // ({ unsigned int max = e1;
     //    unsigned int x ;
@@ -1432,7 +1454,7 @@ static void exp_to_c(env nv, exp e) {
       let b = temp_var();
       let t = typ_to_c(old_typ);
       typ strt_typ;
-      switch (compress(t)) { 
+      switch (compress(t)) {
       case PointerType(st,_,_,_): strt_typ = st; break;
       default: strt_typ = toc_impos("comprehension: not a pointer"); break;
       }
@@ -1446,12 +1468,12 @@ static void exp_to_c(env nv, exp e) {
     } else // not a tagged array -- just return a
       s = seq_stmt(s,exp_stmt(var_exp(a,DL),DL),DL);
     for (let ds = decls; ds != null; ds = ds->tl) {
-      let d = ds->hd; 
+      let d = ds->hd;
       s = declare_stmt(d[0],d[1],d[2],s,DL);
     }
     e->r = stmt_exp(s,DL)->r;
     break;
-  case Struct_e(tdn,ots,dles,sdopt): 
+  case Struct_e(tdn,ots,dles,sdopt):
     // Due to a GCC bug w.r.t. to nested designators, we expand this out
     // to ({ t temp; t.f1 = e1, ..., t.fn = en; t}).
     if(!nv->toplevel)
@@ -1459,13 +1481,13 @@ static void exp_to_c(env nv, exp e) {
     else {
       // At top-level must use deisignators
       let n = collapse_qvar(tdn);
-      for (let es = dles; es != null; es = es->tl) 
+      for (let es = dles; es != null; es = es->tl)
 	exp_to_c(nv,es->hd[1]);
       e->r = cast_exp(strctq(n), unresolvedmem_exp(null,dles,DL),DL)->r;
     }
     break;
 
-  case Enum_e(qv,_,_,es,ed,ef): 
+  case Enum_e(qv,_,_,es,ed,ef):
     if (es == null) {
       // non-value-carrying constructor -- just use the constructor name
       // (see enumdecl_to_c below)
@@ -1561,7 +1583,7 @@ static void exp_to_c(env nv, exp e) {
 //       e->r = stmt_exp(declare_stmt(x,pstrct_t,&Opt(e1),s2,DL),DL)->r;
     }
     break;
-  case Xenum_e(qv,_,es,xd,ef): 
+  case Xenum_e(qv,_,es,xd,ef):
     // FIX:
     let x = temp_var();
     let xexp = var_exp(x,DL);
@@ -1616,8 +1638,8 @@ static void exp_to_c(env nv, exp e) {
 // Translate a pattern generating tests which jump to the succ_lab
 // upon successful match and to the fail_lab othewise.  Returns:
 // * a new translation environment (mapping variables bound in the pattern
-//   to temps generated) 
-// * a list of temps to be declared (along with their types.)  
+//   to temps generated)
+// * a list of temps to be declared (along with their types.)
 //   This list contains the decls parameter
 // * The statement for actually doing the test.
 //
@@ -1636,7 +1658,7 @@ static void exp_to_c(env nv, exp e) {
 // FIX: adapt the decision tree code in the type-checker so that we
 // have much more efficient traversal of patterns.
 // FIX: I think the Address pattern (*) code is too liberal -- lets
-// you get pointers to a local variable if you do a switch on a 
+// you get pointers to a local variable if you do a switch on a
 // local variable...
 // DO NOT FIX:  though it looks like all of the goto's are bad and
 // we could collapse a lot of if-then-else's and avoid some of the
@@ -1649,28 +1671,28 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
   stmt s;
   switch (p->r) {
   case Wild_p: s = goto_stmt(succ_lab, DL); break;
-  case Null_p: 
+  case Null_p:
     // if (r == 0) goto succ_lab else goto fail_lab;
     s = ifthenelse_stmt(eq_exp(r,signed_int_exp(0,DL),DL),
-			goto_stmt(succ_lab,DL), 
+			goto_stmt(succ_lab,DL),
 			goto_stmt(fail_lab,DL), DL);
     break;
   case Int_p(sn,i):
     // if (r == p) goto succ_lab else goto fail_lab;
     s = ifthenelse_stmt(eq_exp(r,int_exp(sn,i,DL),DL),
-			goto_stmt(succ_lab,DL), 
+			goto_stmt(succ_lab,DL),
 			goto_stmt(fail_lab,DL), DL);
     break;
   case Char_p(c):
     // if (r == c) goto succ_lab else goto fail_lab;
     s = ifthenelse_stmt(eq_exp(r,char_exp(c,DL),DL),
-			goto_stmt(succ_lab,DL), 
+			goto_stmt(succ_lab,DL),
 			goto_stmt(fail_lab,DL), DL);
     break;
   case Float_p(f):
     // if (r == f) goto succ_lab else goto fail_lab;
     s = ifthenelse_stmt(eq_exp(r,float_exp(f,DL),DL),
-			goto_stmt(succ_lab,DL), 
+			goto_stmt(succ_lab,DL),
 			goto_stmt(fail_lab,DL), DL);
     break;
   case Tuple_p(ps):
@@ -1694,7 +1716,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
       nv    = result[0];
       decls = result[1];
       let s2 = result[2];
-      let s3 = seq_stmt(assign_stmt(var_exp(v,DL), 
+      let s3 = seq_stmt(assign_stmt(var_exp(v,DL),
 				 structmember_exp(r,xprintf("f%d",cnt),DL),DL),
 			s2,DL);
       ss = &cons(label_stmt(lab,s3,DL),ss);
@@ -1712,7 +1734,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
     decls = result[1];
     let s2 = result[2];
     let s3 = seq_stmt(assign_stmt(var_exp(v,DL),deref_exp(r,DL),DL),s2,DL);
-    if (really_is_nullable(t)) 
+    if (really_is_nullable(t))
       s = ifthenelse_stmt(eq_exp(r,signed_int_exp(0,DL),DL),
 			  goto_stmt(fail_lab,DL),
 			  s3,DL);
@@ -1751,7 +1773,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
       nv    = result[0];
       decls = result[1];
       let s2 = result[2];
-      let s3 = seq_stmt(assign_stmt(var_exp(v,DL),structmember_exp(r,f,DL),DL), 
+      let s3 = seq_stmt(assign_stmt(var_exp(v,DL),structmember_exp(r,f,DL),DL),
                         s2, DL);
       ss = &cons(label_stmt(lab,s3,DL),ss);
       succ_lab = lab;
@@ -1761,7 +1783,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
   case Enum_p(qv,ot,ts,ps,ed,ef):
     // when ps == null:  if (r == qv) goto succ_lab else goto fail_lab;
     // when ps == p1,...,pn:
-    //   if (r > max_tag && ((t)r)->tag == qv_tag) 
+    //   if (r > max_tag && ((t)r)->tag == qv_tag)
     //      <similar to tuple and struct patterns>
     //   else goto fail_lab
     // It's unfortunate that we have to always check that r > max_tag.
@@ -1783,7 +1805,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
       nv    = result[0];
       decls = result[1];
       let s3 = result[2];
-      let s1 = assign_stmt(var_exp(v,DL), 
+      let s1 = assign_stmt(var_exp(v,DL),
 			   structarrow_exp(rcast,xprintf("f%d",cnt),DL),DL);
       let s2 = seq_stmt(s1,s3,DL);
       ss = &cons(label_stmt(lab,s2,DL),ss);
@@ -1810,11 +1832,11 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
       exp e  = var_exp(collapse_qvar_tag(qv,"_tag"),DL);
       if(max_tag > 0)
 	s = ifthenelse_stmt(and_exp(e5,eq_exp(e1,e,DL),DL),
-			    seq_stmts(ss,DL), 
+			    seq_stmts(ss,DL),
 			    goto_stmt(fail_lab,DL), DL);
       else
 	s = ifthenelse_stmt(eq_exp(e1,e,DL),
-			    seq_stmts(ss,DL), 
+			    seq_stmts(ss,DL),
 			    goto_stmt(fail_lab,DL), DL);
     }
     break;
@@ -1841,7 +1863,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
       nv    = result[0];
       decls = result[1];
       let s3 = result[2];
-      let s1 = assign_stmt(var_exp(v,DL), 
+      let s1 = assign_stmt(var_exp(v,DL),
 			 structarrow_exp(rcast,xprintf("f%d",cnt),DL),DL);
       let s2 = seq_stmt(s1,s3,DL);
       ss = &cons(label_stmt(lab,s2,DL),ss);
@@ -1850,7 +1872,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
     if (ps == null) {
       s = ifthenelse_stmt(eq_exp(structarrow_exp(r,"tag",DL),
                                  var_exp(collapse_qvar_tag(qv,"_tag"),DL),DL),
-                          goto_stmt(succ_lab,DL), 
+                          goto_stmt(succ_lab,DL),
 			  goto_stmt(fail_lab,DL), DL);
     } else {
       exp e3 = cast_exp(nullableptr_typ(strct("_xenum_struct"),empty_tqual()),
@@ -1859,7 +1881,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
       exp e1 = structmember_exp(e2,"tag",DL);
       exp e  = var_exp(collapse_qvar_tag(qv,"_tag"),DL);
       s = ifthenelse_stmt(eq_exp(e1,e,DL),
-			  seq_stmts(ss,DL), 
+			  seq_stmts(ss,DL),
 			  goto_stmt(fail_lab,DL), DL);
     }
     break;
@@ -1878,14 +1900,14 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
 //   (Could also do enum without value contructors, but we didn't pass in
 //    access to the type definitions!)
 // * No switch_clause has any variables. (reject switch(3) { case x: ... }
-// The hitch is we could still have something like 
+// The hitch is we could still have something like
 //    switch(e) { case 0: if(b) fallthru; else return; }
-// Therefore, we give each case body 
+// Therefore, we give each case body
 // a fresh label so we can translate fallthru to
 // goto.  Then we just hope gcc cleans up the mess and can still use jump
 // tables.
 //
-// For all other switches, 
+// For all other switches,
 // switch (e) { case p1: s1 ... case pn:sn } turns into (roughly)
 //
 //  x = e;
@@ -1895,8 +1917,8 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
 // L4:if matches(p3,x) goto L5 else goto L6;
 //     ...
 // L2n-2:if matches(pn,x) goto L2n-1 else goto L2n;
-// L1: s1; 
-// L3: s2; 
+// L1: s1;
+// L3: s2;
 // L5: s3;
 // ...
 // L2n-1: sn;
@@ -1939,11 +1961,11 @@ static void xlate_switch(env nv, stmt whole_s, exp e, list<switch_clause> scs) {
   exp  path  = address_exp(var_exp(v,DL),DL);
   var  end_l = fresh_label();
   // for each case, generate a test label and an entry label
-  list<$(var,var,switch_clause)@> lscs = List::map(gen_label,scs); 
+  list<$(var,var,switch_clause)@> lscs = List::map(gen_label,scs);
   list<stmt>                test_stmts = null;
   list<env>                 nvs        = null;
   list<$(qvar,typ)@>        decls      = null;
-  // generate the tests for each case, branching to the case's 
+  // generate the tests for each case, branching to the case's
   // label on success and to the next test on false.
   // do tests backwards so as to get vars for fallthrus
   for (let lscs2 = lscs; lscs2 != null; lscs2 = lscs2->tl) {
@@ -1965,7 +1987,7 @@ static void xlate_switch(env nv, stmt whole_s, exp e, list<switch_clause> scs) {
       stmt s2 = ifthenelse_stmt(e,goto_stmt(succ_lab,DL),
 				  goto_stmt(fail_lab,DL),DL);
       stmt s3 = label_stmt(intermed_lab, s2, DL);
-      test_stmts = &cons(label_stmt(lscs2->hd[0],seq_stmt(res[2], s3, DL),DL), 
+      test_stmts = &cons(label_stmt(lscs2->hd[0],seq_stmt(res[2], s3, DL),DL),
 			 test_stmts);
     }
   }
@@ -1991,8 +2013,8 @@ static void xlate_switch(env nv, stmt whole_s, exp e, list<switch_clause> scs) {
     clauses = seq_stmt(clauses, label_stmt(lscs->hd[1], s, DL), DL);
   }
   // glue the test statements, the case statements, and the end label together
-  stmt res = seq_stmt(test_stmt, 
-		      seq_stmt(clauses, 
+  stmt res = seq_stmt(test_stmt,
+		      seq_stmt(clauses,
 			       label_stmt(end_l, skip_stmt(DL),DL),DL),DL);
   // add in all of the variable declarations with a wide enough scope
   for (decls; decls != null; decls = decls->tl) {
@@ -2020,20 +2042,20 @@ static void stmt_to_c(env nv, stmt s) {
     warn(s->loc,"translating statement");
 #endif
     switch (s->r) {
-    case Skip_s: 
-      return; 
-    case Exp_s(e): 
-      exp_to_c(nv, e); 
+    case Skip_s:
       return;
-    case Seq_s(s1,s2): 
-      stmt_to_c(nv,s1); 
-      s = s2; 
+    case Exp_s(e):
+      exp_to_c(nv, e);
+      return;
+    case Seq_s(s1,s2):
+      stmt_to_c(nv,s1);
+      s = s2;
       continue;
     case Return_s(eopt):
       Opt_t<typ> topt = null;
-      if (eopt != null) { 
-	topt = &Opt(typ_to_c(eopt->v->topt->v)); 
-	exp_to_c(nv,eopt->v); 
+      if (eopt != null) {
+	topt = &Opt(typ_to_c(eopt->v->topt->v));
+	exp_to_c(nv,eopt->v);
       }
       // reset handler
       // FIX:  share code between break, continue, return, fallthru
@@ -2054,17 +2076,17 @@ static void stmt_to_c(env nv, stmt s) {
 	}
       }
       return;
-    case IfThenElse_s(e,s1,s2): 
-      exp_to_c(nv,e); 
-      stmt_to_c(nv,s1); 
-      s = s2; 
+    case IfThenElse_s(e,s1,s2):
+      exp_to_c(nv,e);
+      stmt_to_c(nv,s1);
+      s = s2;
       continue;
     case While_s($(e,_),s2):
-      exp_to_c(nv,e); 
+      exp_to_c(nv,e);
       stmt_to_c(loop_env(nv),s2);
       return;
-    case Break_s(_): 
-      if (nv->break_lab != null) 
+    case Break_s(_):
+      if (nv->break_lab != null)
 	s->r = goto_stmt(nv->break_lab->v, DL)->r;
       // reset handler
       // FIX:  share code between break, continue, return, fallthru
@@ -2076,8 +2098,8 @@ static void stmt_to_c(env nv, stmt s) {
 	s->r = seq_stmt(call_stmt,new_stmt(s->r,DL),DL)->r;
       }
       return;
-    case Continue_s(_): 
-      if (nv->continue_lab != null) 
+    case Continue_s(_):
+      if (nv->continue_lab != null)
 	s->r = goto_stmt(nv->continue_lab->v, DL)->r;
       // reset handler
       // FIX:  share code between break, continue, return, fallthru
@@ -2089,16 +2111,16 @@ static void stmt_to_c(env nv, stmt s) {
 	s->r = seq_stmt(call_stmt,new_stmt(s->r,DL),DL)->r;
       }
       return;
-    case Goto_s(_,_): return; 
-    case For_s(e1,$(e2,_),$(e3,_),s2): 
+    case Goto_s(_,_): return;
+    case For_s(e1,$(e2,_),$(e3,_),s2):
       // FIX:  should e3 be translated in nv?
-      exp_to_c(nv,e1); exp_to_c(nv,e2); exp_to_c(nv,e3); 
+      exp_to_c(nv,e1); exp_to_c(nv,e2); exp_to_c(nv,e3);
       stmt_to_c(loop_env(nv),s2);
       return;
-    case Switch_s(e,scs): 
+    case Switch_s(e,scs):
       xlate_switch(nv,s,e,scs);
       return;
-    case Fallthru_s(es,_): 
+    case Fallthru_s(es,_):
       if(nv->fallthru_info == null) {
 	toc_impos("fallthru in unexpected place"); return;
       }
@@ -2123,16 +2145,16 @@ static void stmt_to_c(env nv, stmt s) {
 	s->r = seq_stmt(call_stmt,new_stmt(s->r,DL),DL)->r;
       }
       return;
-    case Decl_s(d,s1): 
+    case Decl_s(d,s1):
       switch (d->r) {
-      case Let_d(p,topt,e,exhaust): 
-	// we treat let declarations specially because they may need 
+      case Let_d(p,topt,e,exhaust):
+	// we treat let declarations specially because they may need
 	// statements in addition to declarations, so we splice them in
 	// as a statement.  Other declarations only produce declarations.
 	s->r = letdecl_to_c(nv, p, topt, e, exhaust, s1)->r;
         break;
       default:
-	let $(nv,decls) = decls_to_c(nv,&cons(d,null),false); 
+	let $(nv,decls) = decls_to_c(nv,&cons(d,null),false);
 	stmt_to_c(nv,s1);
 	for (; decls != null; decls = decls->tl)
 	  s1 = decl_stmt(decls->hd,s1,DL);
@@ -2142,7 +2164,7 @@ static void stmt_to_c(env nv, stmt s) {
       return;
     case Cut_s(_):    unimp("cut");    return;
     case Splice_s(_): unimp("splice"); return;
-    case Label_s(lab,s1): 
+    case Label_s(lab,s1):
       s = s1; continue;
     case Do_s(s2,$(e,_)):
       stmt_to_c(loop_env(nv),s2);
@@ -2179,14 +2201,14 @@ static void stmt_to_c(env nv, stmt s) {
       //    let trycatch_exp = var_exp(&$(null,(string)"_trycatch"),DL);
       stmt_to_c(try_env(nv),body);
       let tryandpop_stmt = seq_stmt(body,
-				  exp_stmt(fncall_exp(pophandler_exp, null, 
+				  exp_stmt(fncall_exp(pophandler_exp, null,
 						      DL), DL),DL);
       // add a default case which re-throws the exception
       let x    = temp_var();
       let xexp = var_exp(x,DL);
       xexp->topt = &Opt(exn_typ);
       let p = &Pat{.r=Var_p(new_vardecl(x,exn_typ,null)),
-		   .topt=&Opt(exn_typ), 
+		   .topt=&Opt(exn_typ),
 		   .loc=DL};
       let te = throw_exp(xexp,DL);
       te->topt = &Opt(VoidType);
@@ -2195,7 +2217,7 @@ static void stmt_to_c(env nv, stmt s) {
         &Switch_clause{.pattern=p,.pat_vars=&Opt((list<qvar>)&cons(x,null)),
 		       .where_clause=null,.body=rs,.loc=DL};
       let handler_stmt = switch_stmt(e_exp,
-				     List::append(scs, 
+				     List::append(scs,
 						  &cons(default_case,null)),DL);
       stmt_to_c(nv,handler_stmt);
       let setjmp_call = // (exn)setjmp(h->handler)
@@ -2246,7 +2268,7 @@ static scope scope_to_c(scope s) {
 Opt_t<Dict::Dict<var,structdecl>> structs_so_far = null;
 static void structdecl_to_c(structdecl s) {
   let n = collapse_qvar(s->name->v);
-  if (structs_so_far == null) structs_so_far = 
+  if (structs_so_far == null) structs_so_far =
 				&Opt(Dict::empty(String::zstrcmp));
   bool seen_defn_before;
   let dopt = Dict::lookup_opt(structs_so_far->v, n[1]);
@@ -2268,11 +2290,11 @@ static void structdecl_to_c(structdecl s) {
   s->tvs  = null;
   s->name = &Opt(n);
   if (s->fields != null) {
-    if (seen_defn_before) 
+    if (seen_defn_before)
       s->fields = null;
     else {
       for (let fields = s->fields->v; fields != null; fields = fields->tl) {
-	fields->hd[2] = typ_to_c(fields->hd[2]);
+	fields->hd[2] = typ_to_c_array(fields->hd[2]);
       }
     }
   }
@@ -2284,7 +2306,7 @@ static void structdecl_to_c(structdecl s) {
 //   foo Bar = (foo)0;
 //   foo Blah = (foo)1;
 //   int _Baz_tag = 0;
-//   struct _Baz_struct { 
+//   struct _Baz_struct {
 //     int tag;  // always _Baz_tag
 //     t1 f1;
 //     t2 f2;
@@ -2298,8 +2320,8 @@ static void structdecl_to_c(structdecl s) {
 //   }
 // When the enum is "extern" then we don't generate initializers
 // for the tags (that should be done elsewhere.)
-// 
-// Then "Bar" maps to "Bar" and "Baz(e1,e2,e3)" maps to 
+//
+// Then "Bar" maps to "Bar" and "Baz(e1,e2,e3)" maps to
 // ({ struct _Baz_struct *t = (struct _Baz_struct*)malloc(sizeof(_Baz_struct));
 //    *t = (struct _Baz_struct){->tag = _Baz_tag, ->f1 = e1, ->f2 = e2, ->f3 = e3};
 //    t; })
@@ -2314,7 +2336,7 @@ static void structdecl_to_c(structdecl s) {
 static Opt_t<Dict::Dict<var,enumdecl>> enums_so_far = null;
 static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
   let n = collapse_qvar(ed->name->v);
-  if (enums_so_far == null) 
+  if (enums_so_far == null)
     enums_so_far = &Opt(Dict::empty(String::zstrcmp));
   bool seen_before;
   bool seen_defn_before;
@@ -2338,7 +2360,7 @@ static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
     res = &cons(new_decl(Typedef_d(tdef),DL),res);
   }
   typ t = TypedefType(n,null,&Opt(void_star_typ()));
-  // counters for the tags 
+  // counters for the tags
   // FIX:  need to deal with explicit tags
   int tag_count = 0;
   int box_count = 0;
@@ -2349,7 +2371,7 @@ static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
     if (f->tag != null) toc_impos("can't deal with enum tags yet");
     if (f->typs == null) {
       // Declare an integer constant for the unboxed field
-      let eopt = (ed->sc == Extern) ? null : 
+      let eopt = (ed->sc == Extern) ? null :
 	        &Opt(cast_exp(t,signed_int_exp(tag_count++,DL),DL));
       let vd = new_vardecl(collapse_qvar(f->name), t, eopt);
       vd->sc = scope_to_c(ed->sc);
@@ -2369,11 +2391,11 @@ static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
         int i = 1;
         for (let ts = f->typs; ts != null; ts = ts->tl, i++) {
           let fname = xprintf("f%d",i);
-          fs = &cons(&$(fname,ts->hd[0],typ_to_c(ts->hd[1])),fs);
+          fs = &cons(&$(fname,ts->hd[0],typ_to_c_array(ts->hd[1])),fs);
         }
         fs = List::imp_rev(fs);
         fs = &cons(&$((string)"tag",empty_tqual(),sint_t),fs);
-        let sd = &Structdecl{.sc = Public, 
+        let sd = &Structdecl{.sc = Public,
                              .name = &Opt(collapse_qvar_tag(f->name,"_struct")),
                              .tvs = null, .fields = &Opt(fs)};
         res = &cons(new_decl(Struct_d(sd),DL),res);
@@ -2400,7 +2422,7 @@ static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
 // When the xenum is extern, then we don't do initializers for the tags.
 //
 // Thus "Baz(e1,e2)" maps to
-// ({struct _Baz_struct *t = 
+// ({struct _Baz_struct *t =
 //     (struct _Baz_struct*)malloc(sizeof(struct _Baz_struct));
 //   *t = (struct _Baz_struct){->tag=_Baz_tag, ->f1 = e1, ->f2 = e2};
 //   t;})
@@ -2418,7 +2440,7 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
     let td = &Typedefdecl{.name = n, .tvs = null, .defn = t};
     res = &cons(new_decl(Typedef_d(td),DL),res);
   } else {
-    if (xenums_so_far == null) 
+    if (xenums_so_far == null)
       xenums_so_far = &Opt(Dict::empty(String::zstrcmp));
     for (let fs = xd->fields; fs != null; fs = fs->tl) {
       enumfield f = fs->hd;
@@ -2427,7 +2449,7 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
       let    sz_exp  = uint_exp(fn.size,DL);
       let    tag_typ = ArrayType(uchar_t,empty_tqual(),FixedArray(sz_exp));
       Opt_t<exp> initopt = null;
-      if (xd->sc != Extern) 
+      if (xd->sc != Extern)
 	initopt = &Opt(string_exp(fn,DL));
       let tag_decl = new_vardecl(collapse_qvar_tag(f->name,"_tag"),
 				 tag_typ, initopt);
@@ -2454,16 +2476,16 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
         list<$(field_name,tqual,typ)@> fields = null;
         int i = 1;
         for (list<$(tqual,typ)@> ts = f->typs; ts != null; ts = ts->tl, i++) {
-          let newf = &$(xprintf("f%d",i),ts->hd[0],typ_to_c(ts->hd[1]));
+          let newf = &$(xprintf("f%d",i),ts->hd[0],typ_to_c_array(ts->hd[1]));
           fields = &cons(newf,fields);
         }
         fields = &cons(&$((string)"tag",empty_tqual(),
 			  nullableptr_typ(uchar_t,empty_tqual())),
         List::rev(fields));
-        let strct_decl = 
+        let strct_decl =
 	  &Structdecl{.sc     = Public,
 		      .name   = &Opt(collapse_qvar_tag(f->name,"_struct")),
-		      .tvs    = null, 
+		      .tvs    = null,
 		      .fields = &Opt(fields)};
         res = &cons(new_decl(Struct_d(strct_decl),DL),res);
       }
@@ -2478,14 +2500,14 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
 // We treat this similar to the compilation of a switch (see xlate_switch
 // above) with one case, but where the failure throws the exception
 // Match_Exception
-static stmt letdecl_to_c(env nv, pat p, Opt_t<typ> topt, exp e, 
+static stmt letdecl_to_c(env nv, pat p, Opt_t<typ> topt, exp e,
 			 bool exhaust, stmt s) {
   typ t = topt->v;
   exp_to_c(nv,e);
   qvar x = temp_var();
   var  succ_lab = fresh_label();
   var  fail_lab = exhaust ? succ_lab : fresh_label();
-  let $(nv,vars,test_stmt) = 
+  let $(nv,vars,test_stmt) =
     xlate_pat(nv, t, var_exp(x,DL),address_exp(var_exp(x,DL),DL),p,
 	      succ_lab, fail_lab, null);
   stmt_to_c(nv,s);
@@ -2507,19 +2529,19 @@ static stmt letdecl_to_c(env nv, pat p, Opt_t<typ> topt, exp e,
 }
 
 // Translate the given declarations, producing a new list of declarations
-// and a new translation environment.  All source-level variables should 
+// and a new translation environment.  All source-level variables should
 // be entered in the varmap of the env.  Note that top-level variable
 // declarations are treated differently.
 //
 // FIX:  the translation of top-level variable declarations needs to be
-// fixed to make expressions "constant" initializers for C (e.g., 
+// fixed to make expressions "constant" initializers for C (e.g.,
 // constructor expressions, new structs, etc.)
 static $(env,list<decl>) decls_to_c(env nv, list<decl> ds, bool top) {
   list<decl> res = null;
   for (; ds != null; ds = ds->tl) {
     decl d = ds->hd;
     switch (d->r) {
-    case Var_d(vd): 
+    case Var_d(vd):
       let n = collapse_qvar(vd->name);
       if (vd->initializer != null)
 	exp_to_c(nv, vd->initializer->v);
@@ -2529,11 +2551,12 @@ static $(env,list<decl>) decls_to_c(env nv, list<decl> ds, bool top) {
       }
       if (top)
 	nv = add_varmap(nv,vd->name,varb_exp(n,Global_b(vd),DL));
-      else 
+      else
 	nv = add_varmap(nv,vd->name,varb_exp(n,Local_b(vd),DL));
       vd->name = n;
       vd->sc   = scope_to_c(vd->sc);
-      vd->type = top ? top_typ_to_c(vd->type) : typ_to_c(vd->type);
+      //vd->type = top ? typ_to_c_array(vd->type) : typ_to_c(vd->type);
+      vd->type = typ_to_c_array(vd->type);
       res = &cons(d,res);
       break;
     case Fn_d(fd):
@@ -2541,7 +2564,7 @@ static $(env,list<decl>) decls_to_c(env nv, list<decl> ds, bool top) {
       fndecl_to_c(nv, fd);
       res = &cons(d,res);
       break;
-    case Let_d(_,_,_,_): 
+    case Let_d(_,_,_,_):
       // this is handled in stmt_to_c
       toc_impos("letdecl");
       break;
@@ -2550,23 +2573,23 @@ static $(env,list<decl>) decls_to_c(env nv, list<decl> ds, bool top) {
       res = &cons(d,res);
       break;
     case Union_d: toc_impos("uniondecl"); break;
-    case Enum_d(ed): 
+    case Enum_d(ed):
       res = enumdecl_to_c(ed,res);
       break;
-    case Xenum_d(xd): 
+    case Xenum_d(xd):
       res = xenumdecl_to_c(xd,res); break;
-    case Typedef_d(td): 
+    case Typedef_d(td):
       td->name = collapse_qvar(td->name);
       td->tvs = null;
-      td->defn = typ_to_c(td->defn);
+      td->defn = typ_to_c_array(td->defn);
       res = &cons(d,res);
       break;
-    case Namespace_d(v,ds2): 
+    case Namespace_d(v,ds2):
       let p = decls_to_c(nv,ds2,top);
       nv = p[0];
       res = List::append(List::rev(p[1]),res);
       break;
-    case Using_d(q,ds2): 
+    case Using_d(q,ds2):
       let p = decls_to_c(nv,ds2,top);
       nv = p[0];
       res = List::append(List::rev(p[1]),res);
@@ -2587,12 +2610,12 @@ static void init() {
   temp_topdecls = null;
 }
 
-// The entry point:  translate the list of Cyclone declarations to 
+// The entry point:  translate the list of Cyclone declarations to
 // a list of C declarations.
 //
 // FIX:  right now, any types that are generated for tuple types or
 // tagged array types are added at the beginning of the declaration
-// list.  It's not clear that this respects C's scope rules.  For 
+// list.  It's not clear that this respects C's scope rules.  For
 // instance, one of the tuple types might contain a forward reference
 // to a struct type...  (I think this is okay, though.)
 list<decl> toc(list<decl> ds) {
@@ -2614,7 +2637,7 @@ list<decl> toc(list<decl> ds) {
   for (; tuple_types != null; tuple_types = tuple_types->tl) {
     let &$(x,ts) = tuple_types->hd;
     let fs = null;
-    for (int i = 1; ts != null; ts = ts->tl, i++) 
+    for (int i = 1; ts != null; ts = ts->tl, i++)
       fs = &cons(&$(xprintf("f%d",i),empty_tqual(),ts->hd),fs);
     fs = List::imp_rev(fs);
     let sd = &Structdecl{.sc = Public, .name = &Opt(&$(null,x)),

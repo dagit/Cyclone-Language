@@ -20,7 +20,7 @@ extern FILE @cyc_stderr;
 
 typedef unsigned int uint;
 //typedef unsigned int size_t;
-typedef char Cstring[];
+typedef char *Cstring;
 // a boxed and tagged string: struct {uint sz; Cstring *contents;}@
 typedef char string[?];
 typedef int bool;
