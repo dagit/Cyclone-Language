@@ -4,6 +4,7 @@ CVS
 TAGS
 NOTES
 cyclone/.inst
+cyclone/doc
 cyclone/tools/cyclex/qdist
 cyclone/tools/cycocamllex
 cyclone/tools/cycbison

@@ -36,7 +36,7 @@ CYC_INC_PATH := $(CYCDIR)/lib
 CYCC:=$(CYC_BIN_PATH)/$(CYCCOMP) 
 OUT_PREFIX=
 
-build: $(CYC_LIB_PATH)/gc.a cyclone tools aprof nocheck libs
+build: $(CYC_LIB_PATH)/gc.a cyclone tools aprof libs
 
 # This target builds off the C files in bin/genfiles
 cyclone:
