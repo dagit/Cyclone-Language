@@ -307,7 +307,9 @@ static void update_heap_stats(struct ProcEnv @env,
 }
 
 static unsigned int bytes_reclaim_heap = 0;
+static unsigned int num_reclaim_heap = 0;
 static unsigned int bytes_reclaim_unique = 0;
+static unsigned int num_reclaim_unique = 0;
 
 static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
   switch (event) {
@@ -372,10 +374,12 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
       int delta_y = -1*((int)count);
       if (strcmp("unique",rname) == 0) {
         mark_delta(env->unique_live,delta_y);
+        num_reclaim_unique++;
         bytes_reclaim_unique += count;
       }
       else if (strcmp("heap",rname) == 0) {
         mark_delta(env->heap_live,delta_y);
+        num_reclaim_heap++;
         bytes_reclaim_heap += count;
       }
     }

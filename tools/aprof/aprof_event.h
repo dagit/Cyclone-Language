@@ -155,13 +155,16 @@ namespace Aprof {
 
   extern unsigned int num_alloc_heap;
   extern unsigned int bytes_alloc_heap;
-  extern unsigned int num_reclaim_heap;
 
   extern unsigned int num_alloc_unique;
   extern unsigned int bytes_alloc_unique;
   extern unsigned int num_freed_unique;
   extern unsigned int bytes_freed_unique;
-  extern unsigned int num_reclaim_unique;
+
+  extern unsigned int num_alloc_refcnt;
+  extern unsigned int bytes_alloc_refcnt;
+  extern unsigned int num_freed_refcnt;
+  extern unsigned int bytes_freed_refcnt;
 
   extern unsigned int num_alloc_other;
   extern unsigned int bytes_alloc_other;

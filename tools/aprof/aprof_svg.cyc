@@ -246,7 +246,11 @@ static void comment_curve_stats(curve_t b) { // for debugging
 }
 
 static unsigned int bytes_reclaim_heap = 0;
+static unsigned int num_reclaim_heap = 0;
 static unsigned int bytes_reclaim_unique = 0;
+static unsigned int num_reclaim_unique = 0;
+static unsigned int bytes_reclaim_refcnt = 0;
+static unsigned int num_reclaim_refcnt = 0;
 static unsigned int bytes_freed_other = 0;
 
 static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
@@ -281,6 +285,15 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     else if (!strcmp(rname,"refcnt")) {
       mark_delta(env->refcnt_live,time,count);
       update_heap_stats(env,time,rstats);
+      if (count>0) {
+        // remember count for addr in case gc reclaims addr
+        Hashtable::insert((_@)allocation_at_address_table,
+                          addr,new $("refcnt",(unsigned int)count));
+      }
+      else {
+        // gc did not reclaim, this is free, forget addr/count
+        Hashtable::remove((_@)allocation_at_address_table, addr);
+      }
     }
     else if (!strcmp(rname,"heap")) {
       mark_delta(env->heap_live,time,count);
@@ -317,6 +330,11 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
         // this is a unique pointer object that got garbage collected
         mark_delta(env->unique_live,time,delta_y);
         bytes_reclaim_unique += count;
+      }
+      if (strcmp("refcnt",rname) == 0) {
+        // this is a refcounted pointer object that got garbage collected
+        mark_delta(env->refcnt_live,time,delta_y);
+        bytes_reclaim_refcnt += count;
       }
       else if (strcmp("heap",rname) == 0) {
         mark_delta(env->heap_live,time,delta_y);
@@ -567,6 +585,20 @@ static void comment_stats() {
                            percent(num_reclaim_unique,num_alloc_unique),
                            bytes_reclaim_unique,
                            percent(bytes_reclaim_unique,bytes_alloc_unique)));
+  }
+  if (num_alloc_refcnt) {
+    output_comment(aprintf("%u objects (%u bytes) allocated in `RC",
+                           num_alloc_refcnt, bytes_alloc_refcnt));
+    output_comment(aprintf("%u objects [%d%%] (%u bytes [%d%%]) freed from `RC",
+                           num_freed_refcnt,
+                           percent(num_freed_refcnt,num_alloc_refcnt),
+                           bytes_freed_refcnt,
+                           percent(bytes_freed_refcnt,bytes_alloc_refcnt)));
+    output_comment(aprintf("%u objects [%d%%] (%u bytes [%d%%]) collected from `RC",
+                           num_reclaim_refcnt,
+                           percent(num_reclaim_refcnt,num_alloc_refcnt),
+                           bytes_reclaim_refcnt,
+                           percent(bytes_reclaim_refcnt,bytes_alloc_refcnt)));
   }
   if (num_alloc_other) {
     output_comment(aprintf("%u objects (%u bytes) allocated in other regions",
@@ -858,10 +890,12 @@ static bool proc_event2(aprof_event_t event) {
       Hashtable::remove((_@)allocations_table, addr);
       if (strcmp(rname,"unique") == 0) {
         // this is a unique pointer object that got garbage collected
+        num_reclaim_unique++;
         bytes_reclaim_unique += count;
         add_rect("unique",start_time,addr,time,count);
       }
       else if (strcmp(rname,"heap") == 0) {
+        num_reclaim_heap++;
         bytes_reclaim_heap += count;
         add_rect("heap",start_time,addr,time,count);
       }

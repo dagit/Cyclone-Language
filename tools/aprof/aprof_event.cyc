@@ -53,13 +53,16 @@ unsigned int num_gc_add_to_heap = 0;
 
 unsigned int num_alloc_heap = 0;
 unsigned int bytes_alloc_heap = 0;
-unsigned int num_reclaim_heap = 0;
 
 unsigned int num_alloc_unique = 0;
 unsigned int bytes_alloc_unique = 0;
 unsigned int num_freed_unique = 0;
 unsigned int bytes_freed_unique = 0;
-unsigned int num_reclaim_unique = 0;
+
+unsigned int num_alloc_refcnt = 0;
+unsigned int bytes_alloc_refcnt = 0;
+unsigned int num_freed_refcnt = 0;
+unsigned int bytes_freed_refcnt = 0;
 
 unsigned int num_alloc_other = 0;
 unsigned int bytes_alloc_other = 0;
@@ -386,12 +389,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       }
       *time = t;
       num_reclaim_events++;
-      if (strcmp("unique",rname) == 0) {
-        num_reclaim_unique++;
-      }
-      else if (strcmp("heap",rname) == 0) {
-        num_reclaim_heap++;
-      }
+
       // invoke the handler
       if (!Fn::apply(callback,&__reclaim_event)) {
 	fprintf(stderr,"callback failed for reclaim event at %s on line %d\n",s,lineno);
@@ -432,12 +430,19 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
           num_freed_unique++;
         }
       }
+      if (strcmp(rname,"refcnt") == 0) {
+        if (*amt > 0) {
+          bytes_alloc_refcnt += *amt;
+          num_alloc_refcnt++;
+        }
+        else {
+          bytes_freed_refcnt -= *amt;
+          num_freed_refcnt++;
+        }
+      }
       else if (!strcmp(rname,"heap")) {
         bytes_alloc_heap += *amt;
         num_alloc_heap++;
-      }
-      else if (!strcmp(rname,"refcnt")) {
-        // TODO
       }
       else {
         bytes_alloc_other += *amt;
