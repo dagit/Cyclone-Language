@@ -524,165 +524,148 @@ _temp131= Cyc_PP_concat(*(( struct Cyc_PP_Doc**) _check_unknown_subscript( l,
 sizeof( struct Cyc_PP_Doc*), i)), _temp131);}} return _temp131;} static struct
 Cyc_PP_Out* Cyc_PP_long_cats_f( struct Cyc_List_List* ds0, struct Cyc_PP_Ppstate*
 st){ struct Cyc_List_List* os= 0;{ struct Cyc_List_List* _temp132= ds0; for( 0;
-_temp132 !=  0; _temp132=(( struct Cyc_List_List*) _check_null( _temp132))->tl){
-struct Cyc_PP_Doc* d=( struct Cyc_PP_Doc*)(( struct Cyc_List_List*) _check_null(
-_temp132))->hd; struct Cyc_PP_Out* o=(( struct Cyc_PP_Out*(*)( void* f, struct
-Cyc_PP_Ppstate* x)) Cyc_Fn_apply)(( void*) d->f, st); st=({ struct Cyc_PP_Ppstate*
-_temp133=( struct Cyc_PP_Ppstate*) _cycalloc_atomic( sizeof( struct Cyc_PP_Ppstate));
+_temp132 !=  0; _temp132= _temp132->tl){ struct Cyc_PP_Doc* d=( struct Cyc_PP_Doc*)
+_temp132->hd; struct Cyc_PP_Out* o=(( struct Cyc_PP_Out*(*)( void* f, struct Cyc_PP_Ppstate*
+x)) Cyc_Fn_apply)(( void*) d->f, st); st=({ struct Cyc_PP_Ppstate* _temp133=(
+struct Cyc_PP_Ppstate*) _cycalloc_atomic( sizeof( struct Cyc_PP_Ppstate));
 _temp133->ci= st->ci; _temp133->cc= o->newcc; _temp133->cl= o->newcl; _temp133->pw=
 st->pw; _temp133->epw= st->epw -  d->mwo; _temp133;}); os=({ struct Cyc_List_List*
 _temp134=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
 _temp134->hd=( void*) o; _temp134->tl= os; _temp134;});}}{ int newcc=(( struct
 Cyc_PP_Out*)(( struct Cyc_List_List*) _check_null( os))->hd)->newcc; int newcl=((
-struct Cyc_PP_Out*)(( struct Cyc_List_List*) _check_null( os))->hd)->newcl; void*
-s=( void*) Cyc_PP_Empty; void* links=( void*) Cyc_PP_Empty; for( 0; os !=  0; os=((
-struct Cyc_List_List*) _check_null( os))->tl){ s=(( void*(*)( void* a1, void* a2))
-Cyc_PP_append)(( void*)(( struct Cyc_PP_Out*)(( struct Cyc_List_List*)
-_check_null( os))->hd)->ppout, s); links=(( void*(*)( void* a1, void* a2)) Cyc_PP_append)((
-void*)(( struct Cyc_PP_Out*)(( struct Cyc_List_List*) _check_null( os))->hd)->links,
-links);} return({ struct Cyc_PP_Out* _temp135=( struct Cyc_PP_Out*) _cycalloc(
-sizeof( struct Cyc_PP_Out)); _temp135->newcc= newcc; _temp135->newcl= newcl;
-_temp135->ppout=( void*) s; _temp135->links=( void*) links; _temp135;});}}
+struct Cyc_PP_Out*) os->hd)->newcl; void* s=( void*) Cyc_PP_Empty; void* links=(
+void*) Cyc_PP_Empty; for( 0; os !=  0; os= os->tl){ s=(( void*(*)( void* a1,
+void* a2)) Cyc_PP_append)(( void*)(( struct Cyc_PP_Out*) os->hd)->ppout, s);
+links=(( void*(*)( void* a1, void* a2)) Cyc_PP_append)(( void*)(( struct Cyc_PP_Out*)
+os->hd)->links, links);} return({ struct Cyc_PP_Out* _temp135=( struct Cyc_PP_Out*)
+_cycalloc( sizeof( struct Cyc_PP_Out)); _temp135->newcc= newcc; _temp135->newcl=
+newcl; _temp135->ppout=( void*) s; _temp135->links=( void*) links; _temp135;});}}
 static struct Cyc_PP_Doc* Cyc_PP_long_cats( struct Cyc_List_List* doclist){
 struct Cyc_List_List* orig= doclist; struct Cyc_PP_Doc* d=( struct Cyc_PP_Doc*)((
-struct Cyc_List_List*) _check_null( doclist))->hd; doclist=(( struct Cyc_List_List*)
-_check_null( doclist))->tl;{ int mw= d->mw; int mwo= d->mw;{ struct Cyc_List_List*
-_temp136= doclist; for( 0; _temp136 !=  0; _temp136=(( struct Cyc_List_List*)
-_check_null( _temp136))->tl){ int mw2= Cyc_PP_min( mw, mwo + (( struct Cyc_PP_Doc*)((
-struct Cyc_List_List*) _check_null( _temp136))->hd)->mwo); int mwo2= Cyc_PP_min(
-mw, mwo + (( struct Cyc_PP_Doc*)(( struct Cyc_List_List*) _check_null( _temp136))->hd)->mw);
-mw= mw2; mwo= mwo2;}} return({ struct Cyc_PP_Doc* _temp137=( struct Cyc_PP_Doc*)
-_cycalloc( sizeof( struct Cyc_PP_Doc)); _temp137->mwo= mw; _temp137->mw= mwo;
-_temp137->f=( void*)(( void*(*)( struct Cyc_PP_Out*(* f)( struct Cyc_List_List*,
-struct Cyc_PP_Ppstate*), struct Cyc_List_List* x)) Cyc_Fn_make_fn)( Cyc_PP_long_cats_f,
-orig); _temp137;});}} struct Cyc_PP_Doc* Cyc_PP_cats( struct Cyc_List_List*
-doclist){ if( doclist ==  0){ return Cyc_PP_nil_doc();} else{ if((( struct Cyc_List_List*)
-_check_null( doclist))->tl ==  0){ return( struct Cyc_PP_Doc*)(( struct Cyc_List_List*)
-_check_null( doclist))->hd;} else{ if((( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(
-doclist) >  30){ return Cyc_PP_long_cats( doclist);} else{ return Cyc_PP_concat((
-struct Cyc_PP_Doc*)(( struct Cyc_List_List*) _check_null( doclist))->hd, Cyc_PP_cats(((
-struct Cyc_List_List*) _check_null( doclist))->tl));}}}} static struct Cyc_PP_Out*
-Cyc_PP_cats_arr_f( struct _tagged_arr* docs_ptr, struct Cyc_PP_Ppstate* st){
-struct Cyc_List_List* os= 0; struct _tagged_arr docs=* docs_ptr; int sz=( int)
-_get_arr_size( docs, sizeof( struct Cyc_PP_Doc*));{ int i= 0; for( 0; i <  sz;
-++ i){ struct Cyc_PP_Doc* d=*(( struct Cyc_PP_Doc**) _check_unknown_subscript(
-docs, sizeof( struct Cyc_PP_Doc*), i)); struct Cyc_PP_Out* o=(( struct Cyc_PP_Out*(*)(
-void* f, struct Cyc_PP_Ppstate* x)) Cyc_Fn_apply)(( void*) d->f, st); st=({
-struct Cyc_PP_Ppstate* _temp138=( struct Cyc_PP_Ppstate*) _cycalloc_atomic(
-sizeof( struct Cyc_PP_Ppstate)); _temp138->ci= st->ci; _temp138->cc= o->newcc;
-_temp138->cl= o->newcl; _temp138->pw= st->pw; _temp138->epw= st->epw -  d->mwo;
-_temp138;}); os=({ struct Cyc_List_List* _temp139=( struct Cyc_List_List*)
-_cycalloc( sizeof( struct Cyc_List_List)); _temp139->hd=( void*) o; _temp139->tl=
-os; _temp139;});}}{ int newcc=(( struct Cyc_PP_Out*)(( struct Cyc_List_List*)
-_check_null( os))->hd)->newcc; int newcl=(( struct Cyc_PP_Out*)(( struct Cyc_List_List*)
-_check_null( os))->hd)->newcl; void* s=( void*) Cyc_PP_Empty; void* links=( void*)
-Cyc_PP_Empty; for( 0; os !=  0; os=(( struct Cyc_List_List*) _check_null( os))->tl){
-s=(( void*(*)( void* a1, void* a2)) Cyc_PP_append)(( void*)(( struct Cyc_PP_Out*)((
-struct Cyc_List_List*) _check_null( os))->hd)->ppout, s); links=(( void*(*)(
-void* a1, void* a2)) Cyc_PP_append)(( void*)(( struct Cyc_PP_Out*)(( struct Cyc_List_List*)
-_check_null( os))->hd)->links, links);} return({ struct Cyc_PP_Out* _temp140=(
-struct Cyc_PP_Out*) _cycalloc( sizeof( struct Cyc_PP_Out)); _temp140->newcc=
-newcc; _temp140->newcl= newcl; _temp140->ppout=( void*) s; _temp140->links=(
-void*) links; _temp140;});}} struct Cyc_PP_Doc* Cyc_PP_cats_arr( struct
-_tagged_arr docs){ int sz=( int) _get_arr_size( docs, sizeof( struct Cyc_PP_Doc*));
-if( sz ==  0){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp141=(
-struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
-_temp141[ 0]=({ struct Cyc_Core_Failure_struct _temp142; _temp142.tag= Cyc_Core_Failure;
-_temp142.f1= _tag_arr("cats_arr -- size zero array", sizeof( unsigned char), 28u);
-_temp142;}); _temp141;}));}{ struct Cyc_PP_Doc* d=*(( struct Cyc_PP_Doc**)
-_check_unknown_subscript( docs, sizeof( struct Cyc_PP_Doc*), 0)); int mw= d->mw;
-int mwo= d->mw;{ int i= 1; for( 0; i <  sz; ++ i){ int mw2= Cyc_PP_min( mw, mwo
-+ (*(( struct Cyc_PP_Doc**) _check_unknown_subscript( docs, sizeof( struct Cyc_PP_Doc*),
-i)))->mwo); int mwo2= Cyc_PP_min( mw, mwo + (*(( struct Cyc_PP_Doc**)
-_check_unknown_subscript( docs, sizeof( struct Cyc_PP_Doc*), i)))->mw); mw= mw2;
-mwo= mwo2;}} return({ struct Cyc_PP_Doc* _temp143=( struct Cyc_PP_Doc*)
-_cycalloc( sizeof( struct Cyc_PP_Doc)); _temp143->mwo= mw; _temp143->mw= mwo;
-_temp143->f=( void*)(( void*(*)( struct Cyc_PP_Out*(* f)( struct _tagged_arr*,
-struct Cyc_PP_Ppstate*), struct _tagged_arr* x)) Cyc_Fn_make_fn)( Cyc_PP_cats_arr_f,({
-struct _tagged_arr* _temp144=( struct _tagged_arr*) _cycalloc( sizeof( struct
-_tagged_arr) *  1); _temp144[ 0]= docs; _temp144;})); _temp143;});}} static
-struct Cyc_PP_Out* Cyc_PP_doc_union_f( struct _tuple5* clo, struct Cyc_PP_Ppstate*
-st){ struct _tuple5 _temp147; struct Cyc_PP_Doc* _temp148; struct Cyc_PP_Doc*
-_temp150; struct _tuple5* _temp145= clo; _temp147=* _temp145; _LL151: _temp150=
-_temp147.f1; goto _LL149; _LL149: _temp148= _temp147.f2; goto _LL146; _LL146: {
-int dfits= st->cc +  _temp150->mwo <=  st->epw? 1: st->cc +  _temp150->mw <=  st->pw;
-if( dfits){ return(( struct Cyc_PP_Out*(*)( void* f, struct Cyc_PP_Ppstate* x))
-Cyc_Fn_apply)(( void*) _temp150->f, st);} else{ return(( struct Cyc_PP_Out*(*)(
-void* f, struct Cyc_PP_Ppstate* x)) Cyc_Fn_apply)(( void*) _temp148->f, st);}}}
-struct Cyc_PP_Doc* Cyc_PP_doc_union( struct Cyc_PP_Doc* d, struct Cyc_PP_Doc* d2){
-return({ struct Cyc_PP_Doc* _temp152=( struct Cyc_PP_Doc*) _cycalloc( sizeof(
-struct Cyc_PP_Doc)); _temp152->mwo= Cyc_PP_min( d->mwo, d2->mwo); _temp152->mw=
-Cyc_PP_min( d->mw, d2->mw); _temp152->f=( void*)(( void*(*)( struct Cyc_PP_Out*(*
-f)( struct _tuple5*, struct Cyc_PP_Ppstate*), struct _tuple5* x)) Cyc_Fn_make_fn)(
-Cyc_PP_doc_union_f,({ struct _tuple5* _temp153=( struct _tuple5*) _cycalloc(
-sizeof( struct _tuple5)); _temp153->f1= d; _temp153->f2= d2; _temp153;}));
-_temp152;});} struct Cyc_PP_Doc* Cyc_PP_oline_doc(){ return Cyc_PP_doc_union(
-Cyc_PP_nil_doc(), Cyc_PP_line_doc());} static struct Cyc_PP_Out* Cyc_PP_tab_f(
-struct Cyc_PP_Doc* d, struct Cyc_PP_Ppstate* st){ struct Cyc_PP_Ppstate* st2=({
-struct Cyc_PP_Ppstate* _temp154=( struct Cyc_PP_Ppstate*) _cycalloc_atomic(
-sizeof( struct Cyc_PP_Ppstate)); _temp154->ci= st->cc; _temp154->cc= st->cc;
-_temp154->cl= st->cl; _temp154->pw= st->pw; _temp154->epw= st->epw; _temp154;});
+struct Cyc_List_List*) _check_null( doclist))->hd; doclist= doclist->tl;{ int mw=
+d->mw; int mwo= d->mw;{ struct Cyc_List_List* _temp136= doclist; for( 0;
+_temp136 !=  0; _temp136= _temp136->tl){ int mw2= Cyc_PP_min( mw, mwo + ((
+struct Cyc_PP_Doc*) _temp136->hd)->mwo); int mwo2= Cyc_PP_min( mw, mwo + ((
+struct Cyc_PP_Doc*) _temp136->hd)->mw); mw= mw2; mwo= mwo2;}} return({ struct
+Cyc_PP_Doc* _temp137=( struct Cyc_PP_Doc*) _cycalloc( sizeof( struct Cyc_PP_Doc));
+_temp137->mwo= mw; _temp137->mw= mwo; _temp137->f=( void*)(( void*(*)( struct
+Cyc_PP_Out*(* f)( struct Cyc_List_List*, struct Cyc_PP_Ppstate*), struct Cyc_List_List*
+x)) Cyc_Fn_make_fn)( Cyc_PP_long_cats_f, orig); _temp137;});}} struct Cyc_PP_Doc*
+Cyc_PP_cats( struct Cyc_List_List* doclist){ if( doclist ==  0){ return Cyc_PP_nil_doc();}
+else{ if( doclist->tl ==  0){ return( struct Cyc_PP_Doc*) doclist->hd;} else{
+if((( int(*)( struct Cyc_List_List* x)) Cyc_List_length)( doclist) >  30){
+return Cyc_PP_long_cats( doclist);} else{ return Cyc_PP_concat(( struct Cyc_PP_Doc*)
+doclist->hd, Cyc_PP_cats( doclist->tl));}}}} static struct Cyc_PP_Out* Cyc_PP_cats_arr_f(
+struct _tagged_arr* docs_ptr, struct Cyc_PP_Ppstate* st){ struct Cyc_List_List*
+os= 0; struct _tagged_arr docs=* docs_ptr; int sz=( int) _get_arr_size( docs,
+sizeof( struct Cyc_PP_Doc*));{ int i= 0; for( 0; i <  sz; ++ i){ struct Cyc_PP_Doc*
+d=*(( struct Cyc_PP_Doc**) _check_unknown_subscript( docs, sizeof( struct Cyc_PP_Doc*),
+i)); struct Cyc_PP_Out* o=(( struct Cyc_PP_Out*(*)( void* f, struct Cyc_PP_Ppstate*
+x)) Cyc_Fn_apply)(( void*) d->f, st); st=({ struct Cyc_PP_Ppstate* _temp138=(
+struct Cyc_PP_Ppstate*) _cycalloc_atomic( sizeof( struct Cyc_PP_Ppstate));
+_temp138->ci= st->ci; _temp138->cc= o->newcc; _temp138->cl= o->newcl; _temp138->pw=
+st->pw; _temp138->epw= st->epw -  d->mwo; _temp138;}); os=({ struct Cyc_List_List*
+_temp139=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp139->hd=( void*) o; _temp139->tl= os; _temp139;});}}{ int newcc=(( struct
+Cyc_PP_Out*)(( struct Cyc_List_List*) _check_null( os))->hd)->newcc; int newcl=((
+struct Cyc_PP_Out*) os->hd)->newcl; void* s=( void*) Cyc_PP_Empty; void* links=(
+void*) Cyc_PP_Empty; for( 0; os !=  0; os= os->tl){ s=(( void*(*)( void* a1,
+void* a2)) Cyc_PP_append)(( void*)(( struct Cyc_PP_Out*) os->hd)->ppout, s);
+links=(( void*(*)( void* a1, void* a2)) Cyc_PP_append)(( void*)(( struct Cyc_PP_Out*)
+os->hd)->links, links);} return({ struct Cyc_PP_Out* _temp140=( struct Cyc_PP_Out*)
+_cycalloc( sizeof( struct Cyc_PP_Out)); _temp140->newcc= newcc; _temp140->newcl=
+newcl; _temp140->ppout=( void*) s; _temp140->links=( void*) links; _temp140;});}}
+struct Cyc_PP_Doc* Cyc_PP_cats_arr( struct _tagged_arr docs){ int sz=( int)
+_get_arr_size( docs, sizeof( struct Cyc_PP_Doc*)); if( sz ==  0){( int) _throw((
+void*)({ struct Cyc_Core_Failure_struct* _temp141=( struct Cyc_Core_Failure_struct*)
+_cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp141[ 0]=({ struct Cyc_Core_Failure_struct
+_temp142; _temp142.tag= Cyc_Core_Failure; _temp142.f1= _tag_arr("cats_arr -- size zero array",
+sizeof( unsigned char), 28u); _temp142;}); _temp141;}));}{ struct Cyc_PP_Doc* d=*((
+struct Cyc_PP_Doc**) _check_unknown_subscript( docs, sizeof( struct Cyc_PP_Doc*),
+0)); int mw= d->mw; int mwo= d->mw;{ int i= 1; for( 0; i <  sz; ++ i){ int mw2=
+Cyc_PP_min( mw, mwo + (*(( struct Cyc_PP_Doc**) _check_unknown_subscript( docs,
+sizeof( struct Cyc_PP_Doc*), i)))->mwo); int mwo2= Cyc_PP_min( mw, mwo + (*((
+struct Cyc_PP_Doc**) _check_unknown_subscript( docs, sizeof( struct Cyc_PP_Doc*),
+i)))->mw); mw= mw2; mwo= mwo2;}} return({ struct Cyc_PP_Doc* _temp143=( struct
+Cyc_PP_Doc*) _cycalloc( sizeof( struct Cyc_PP_Doc)); _temp143->mwo= mw; _temp143->mw=
+mwo; _temp143->f=( void*)(( void*(*)( struct Cyc_PP_Out*(* f)( struct
+_tagged_arr*, struct Cyc_PP_Ppstate*), struct _tagged_arr* x)) Cyc_Fn_make_fn)(
+Cyc_PP_cats_arr_f,({ struct _tagged_arr* _temp144=( struct _tagged_arr*)
+_cycalloc( sizeof( struct _tagged_arr) *  1); _temp144[ 0]= docs; _temp144;}));
+_temp143;});}} static struct Cyc_PP_Out* Cyc_PP_doc_union_f( struct _tuple5* clo,
+struct Cyc_PP_Ppstate* st){ struct _tuple5 _temp147; struct Cyc_PP_Doc* _temp148;
+struct Cyc_PP_Doc* _temp150; struct _tuple5* _temp145= clo; _temp147=* _temp145;
+_LL151: _temp150= _temp147.f1; goto _LL149; _LL149: _temp148= _temp147.f2; goto
+_LL146; _LL146: { int dfits= st->cc +  _temp150->mwo <=  st->epw? 1: st->cc + 
+_temp150->mw <=  st->pw; if( dfits){ return(( struct Cyc_PP_Out*(*)( void* f,
+struct Cyc_PP_Ppstate* x)) Cyc_Fn_apply)(( void*) _temp150->f, st);} else{
 return(( struct Cyc_PP_Out*(*)( void* f, struct Cyc_PP_Ppstate* x)) Cyc_Fn_apply)((
-void*) d->f, st2);} struct Cyc_PP_Doc* Cyc_PP_tab( struct Cyc_PP_Doc* d){ struct
-Cyc_PP_Doc* d2=({ struct Cyc_PP_Doc* _temp155=( struct Cyc_PP_Doc*) _cycalloc(
-sizeof( struct Cyc_PP_Doc)); _temp155->mwo= d->mwo; _temp155->mw= d->mw;
-_temp155->f=( void*)(( void*(*)( struct Cyc_PP_Out*(* f)( struct Cyc_PP_Doc*,
-struct Cyc_PP_Ppstate*), struct Cyc_PP_Doc* x)) Cyc_Fn_make_fn)( Cyc_PP_tab_f, d);
-_temp155;}); return d2;} static struct Cyc_PP_Doc* Cyc_PP_ppseq_f( struct Cyc_PP_Doc*(*
-pp)( void*), struct _tagged_arr sep, struct Cyc_List_List* l){ if( l ==  0){
-return Cyc_PP_nil_doc();} else{ if((( struct Cyc_List_List*) _check_null( l))->tl
-==  0){ return pp(( void*)(( struct Cyc_List_List*) _check_null( l))->hd);}
-else{ return({ struct Cyc_PP_Doc* _temp156[ 4u]; _temp156[ 3u]= Cyc_PP_ppseq_f(
-pp, sep,(( struct Cyc_List_List*) _check_null( l))->tl); _temp156[ 2u]= Cyc_PP_oline_doc();
-_temp156[ 1u]= Cyc_PP_text( sep); _temp156[ 0u]= pp(( void*)(( struct Cyc_List_List*)
-_check_null( l))->hd); Cyc_PP_cat( _tag_arr( _temp156, sizeof( struct Cyc_PP_Doc*),
-4u));});}}} struct Cyc_PP_Doc* Cyc_PP_ppseq( struct Cyc_PP_Doc*(* pp)( void*),
-struct _tagged_arr sep, struct Cyc_List_List* l){ return Cyc_PP_tab( Cyc_PP_ppseq_f(
-pp, sep, l));} struct Cyc_PP_Doc* Cyc_PP_seq_f( struct _tagged_arr sep, struct
-Cyc_List_List* l){ if( l ==  0){ return Cyc_PP_nil_doc();} else{ if((( struct
-Cyc_List_List*) _check_null( l))->tl ==  0){ return( struct Cyc_PP_Doc*)((
-struct Cyc_List_List*) _check_null( l))->hd;} else{ struct Cyc_PP_Doc* sep2= Cyc_PP_text(
-sep); struct Cyc_PP_Doc* oline= Cyc_PP_oline_doc(); struct Cyc_List_List*
-_temp157= l; while((( struct Cyc_List_List*) _check_null( _temp157))->tl !=  0) {
-struct Cyc_List_List* _temp158=(( struct Cyc_List_List*) _check_null( _temp157))->tl;((
-struct Cyc_List_List*) _check_null( _temp157))->tl=({ struct Cyc_List_List*
-_temp159=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
-_temp159->hd=( void*) sep2; _temp159->tl=({ struct Cyc_List_List* _temp160=(
-struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp160->hd=(
-void*) oline; _temp160->tl= _temp158; _temp160;}); _temp159;}); _temp157=
-_temp158;} return Cyc_PP_cats( l);}}} struct Cyc_PP_Doc* Cyc_PP_seq( struct
-_tagged_arr sep, struct Cyc_List_List* l){ return Cyc_PP_tab( Cyc_PP_seq_f( sep,
-l));} struct Cyc_PP_Doc* Cyc_PP_ppseql_f( struct Cyc_PP_Doc*(* pp)( void*),
+void*) _temp148->f, st);}}} struct Cyc_PP_Doc* Cyc_PP_doc_union( struct Cyc_PP_Doc*
+d, struct Cyc_PP_Doc* d2){ return({ struct Cyc_PP_Doc* _temp152=( struct Cyc_PP_Doc*)
+_cycalloc( sizeof( struct Cyc_PP_Doc)); _temp152->mwo= Cyc_PP_min( d->mwo, d2->mwo);
+_temp152->mw= Cyc_PP_min( d->mw, d2->mw); _temp152->f=( void*)(( void*(*)(
+struct Cyc_PP_Out*(* f)( struct _tuple5*, struct Cyc_PP_Ppstate*), struct
+_tuple5* x)) Cyc_Fn_make_fn)( Cyc_PP_doc_union_f,({ struct _tuple5* _temp153=(
+struct _tuple5*) _cycalloc( sizeof( struct _tuple5)); _temp153->f1= d; _temp153->f2=
+d2; _temp153;})); _temp152;});} struct Cyc_PP_Doc* Cyc_PP_oline_doc(){ return
+Cyc_PP_doc_union( Cyc_PP_nil_doc(), Cyc_PP_line_doc());} static struct Cyc_PP_Out*
+Cyc_PP_tab_f( struct Cyc_PP_Doc* d, struct Cyc_PP_Ppstate* st){ struct Cyc_PP_Ppstate*
+st2=({ struct Cyc_PP_Ppstate* _temp154=( struct Cyc_PP_Ppstate*)
+_cycalloc_atomic( sizeof( struct Cyc_PP_Ppstate)); _temp154->ci= st->cc;
+_temp154->cc= st->cc; _temp154->cl= st->cl; _temp154->pw= st->pw; _temp154->epw=
+st->epw; _temp154;}); return(( struct Cyc_PP_Out*(*)( void* f, struct Cyc_PP_Ppstate*
+x)) Cyc_Fn_apply)(( void*) d->f, st2);} struct Cyc_PP_Doc* Cyc_PP_tab( struct
+Cyc_PP_Doc* d){ struct Cyc_PP_Doc* d2=({ struct Cyc_PP_Doc* _temp155=( struct
+Cyc_PP_Doc*) _cycalloc( sizeof( struct Cyc_PP_Doc)); _temp155->mwo= d->mwo;
+_temp155->mw= d->mw; _temp155->f=( void*)(( void*(*)( struct Cyc_PP_Out*(* f)(
+struct Cyc_PP_Doc*, struct Cyc_PP_Ppstate*), struct Cyc_PP_Doc* x)) Cyc_Fn_make_fn)(
+Cyc_PP_tab_f, d); _temp155;}); return d2;} static struct Cyc_PP_Doc* Cyc_PP_ppseq_f(
+struct Cyc_PP_Doc*(* pp)( void*), struct _tagged_arr sep, struct Cyc_List_List*
+l){ if( l ==  0){ return Cyc_PP_nil_doc();} else{ if( l->tl ==  0){ return pp((
+void*) l->hd);} else{ return({ struct Cyc_PP_Doc* _temp156[ 4u]; _temp156[ 3u]=
+Cyc_PP_ppseq_f( pp, sep, l->tl); _temp156[ 2u]= Cyc_PP_oline_doc(); _temp156[ 1u]=
+Cyc_PP_text( sep); _temp156[ 0u]= pp(( void*) l->hd); Cyc_PP_cat( _tag_arr(
+_temp156, sizeof( struct Cyc_PP_Doc*), 4u));});}}} struct Cyc_PP_Doc* Cyc_PP_ppseq(
+struct Cyc_PP_Doc*(* pp)( void*), struct _tagged_arr sep, struct Cyc_List_List*
+l){ return Cyc_PP_tab( Cyc_PP_ppseq_f( pp, sep, l));} struct Cyc_PP_Doc* Cyc_PP_seq_f(
 struct _tagged_arr sep, struct Cyc_List_List* l){ if( l ==  0){ return Cyc_PP_nil_doc();}
-else{ if((( struct Cyc_List_List*) _check_null( l))->tl ==  0){ return pp(( void*)((
-struct Cyc_List_List*) _check_null( l))->hd);} else{ return({ struct Cyc_PP_Doc*
-_temp161[ 4u]; _temp161[ 3u]= Cyc_PP_ppseql_f( pp, sep,(( struct Cyc_List_List*)
-_check_null( l))->tl); _temp161[ 2u]= Cyc_PP_line_doc(); _temp161[ 1u]= Cyc_PP_text(
-sep); _temp161[ 0u]= pp(( void*)(( struct Cyc_List_List*) _check_null( l))->hd);
-Cyc_PP_cat( _tag_arr( _temp161, sizeof( struct Cyc_PP_Doc*), 4u));});}}} struct
-Cyc_PP_Doc* Cyc_PP_ppseql( struct Cyc_PP_Doc*(* pp)( void*), struct _tagged_arr
-sep, struct Cyc_List_List* l){ return Cyc_PP_tab( Cyc_PP_ppseql_f( pp, sep, l));}
-static struct Cyc_PP_Doc* Cyc_PP_seql_f( struct _tagged_arr sep, struct Cyc_List_List*
-l){ if( l ==  0){ return Cyc_PP_nil_doc();} else{ if((( struct Cyc_List_List*)
-_check_null( l))->tl ==  0){ return( struct Cyc_PP_Doc*)(( struct Cyc_List_List*)
-_check_null( l))->hd;} else{ return({ struct Cyc_PP_Doc* _temp162[ 4u]; _temp162[
-3u]= Cyc_PP_seql_f( sep,(( struct Cyc_List_List*) _check_null( l))->tl);
-_temp162[ 2u]= Cyc_PP_line_doc(); _temp162[ 1u]= Cyc_PP_text( sep); _temp162[ 0u]=(
-struct Cyc_PP_Doc*)(( struct Cyc_List_List*) _check_null( l))->hd; Cyc_PP_cat(
-_tag_arr( _temp162, sizeof( struct Cyc_PP_Doc*), 4u));});}}} struct Cyc_PP_Doc*
-Cyc_PP_seql( struct _tagged_arr sep, struct Cyc_List_List* l0){ return Cyc_PP_tab(
-Cyc_PP_seql_f( sep, l0));} struct Cyc_PP_Doc* Cyc_PP_group( struct _tagged_arr
-start, struct _tagged_arr stop, struct _tagged_arr sep, struct Cyc_List_List* ss){
-return({ struct Cyc_PP_Doc* _temp163[ 3u]; _temp163[ 2u]= Cyc_PP_text( stop);
-_temp163[ 1u]= Cyc_PP_seq( sep, ss); _temp163[ 0u]= Cyc_PP_text( start); Cyc_PP_cat(
-_tag_arr( _temp163, sizeof( struct Cyc_PP_Doc*), 3u));});} struct Cyc_PP_Doc*
-Cyc_PP_egroup( struct _tagged_arr start, struct _tagged_arr stop, struct
-_tagged_arr sep, struct Cyc_List_List* ss){ if( ss ==  0){ return Cyc_PP_nil_doc();}
-else{ return({ struct Cyc_PP_Doc* _temp164[ 3u]; _temp164[ 2u]= Cyc_PP_text(
-stop); _temp164[ 1u]= Cyc_PP_seq( sep, ss); _temp164[ 0u]= Cyc_PP_text( start);
-Cyc_PP_cat( _tag_arr( _temp164, sizeof( struct Cyc_PP_Doc*), 3u));});}} struct
-Cyc_PP_Doc* Cyc_PP_groupl( struct _tagged_arr start, struct _tagged_arr stop,
-struct _tagged_arr sep, struct Cyc_List_List* ss){ return({ struct Cyc_PP_Doc*
-_temp165[ 3u]; _temp165[ 2u]= Cyc_PP_text( stop); _temp165[ 1u]= Cyc_PP_seql(
-sep, ss); _temp165[ 0u]= Cyc_PP_text( start); Cyc_PP_cat( _tag_arr( _temp165,
-sizeof( struct Cyc_PP_Doc*), 3u));});}
+else{ if( l->tl ==  0){ return( struct Cyc_PP_Doc*) l->hd;} else{ struct Cyc_PP_Doc*
+sep2= Cyc_PP_text( sep); struct Cyc_PP_Doc* oline= Cyc_PP_oline_doc(); struct
+Cyc_List_List* _temp157= l; while( _temp157->tl !=  0) { struct Cyc_List_List*
+_temp158= _temp157->tl; _temp157->tl=({ struct Cyc_List_List* _temp159=( struct
+Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp159->hd=( void*)
+sep2; _temp159->tl=({ struct Cyc_List_List* _temp160=( struct Cyc_List_List*)
+_cycalloc( sizeof( struct Cyc_List_List)); _temp160->hd=( void*) oline; _temp160->tl=
+_temp158; _temp160;}); _temp159;}); _temp157= _temp158;} return Cyc_PP_cats( l);}}}
+struct Cyc_PP_Doc* Cyc_PP_seq( struct _tagged_arr sep, struct Cyc_List_List* l){
+return Cyc_PP_tab( Cyc_PP_seq_f( sep, l));} struct Cyc_PP_Doc* Cyc_PP_ppseql_f(
+struct Cyc_PP_Doc*(* pp)( void*), struct _tagged_arr sep, struct Cyc_List_List*
+l){ if( l ==  0){ return Cyc_PP_nil_doc();} else{ if( l->tl ==  0){ return pp((
+void*) l->hd);} else{ return({ struct Cyc_PP_Doc* _temp161[ 4u]; _temp161[ 3u]=
+Cyc_PP_ppseql_f( pp, sep, l->tl); _temp161[ 2u]= Cyc_PP_line_doc(); _temp161[ 1u]=
+Cyc_PP_text( sep); _temp161[ 0u]= pp(( void*) l->hd); Cyc_PP_cat( _tag_arr(
+_temp161, sizeof( struct Cyc_PP_Doc*), 4u));});}}} struct Cyc_PP_Doc* Cyc_PP_ppseql(
+struct Cyc_PP_Doc*(* pp)( void*), struct _tagged_arr sep, struct Cyc_List_List*
+l){ return Cyc_PP_tab( Cyc_PP_ppseql_f( pp, sep, l));} static struct Cyc_PP_Doc*
+Cyc_PP_seql_f( struct _tagged_arr sep, struct Cyc_List_List* l){ if( l ==  0){
+return Cyc_PP_nil_doc();} else{ if( l->tl ==  0){ return( struct Cyc_PP_Doc*) l->hd;}
+else{ return({ struct Cyc_PP_Doc* _temp162[ 4u]; _temp162[ 3u]= Cyc_PP_seql_f(
+sep, l->tl); _temp162[ 2u]= Cyc_PP_line_doc(); _temp162[ 1u]= Cyc_PP_text( sep);
+_temp162[ 0u]=( struct Cyc_PP_Doc*) l->hd; Cyc_PP_cat( _tag_arr( _temp162,
+sizeof( struct Cyc_PP_Doc*), 4u));});}}} struct Cyc_PP_Doc* Cyc_PP_seql( struct
+_tagged_arr sep, struct Cyc_List_List* l0){ return Cyc_PP_tab( Cyc_PP_seql_f(
+sep, l0));} struct Cyc_PP_Doc* Cyc_PP_group( struct _tagged_arr start, struct
+_tagged_arr stop, struct _tagged_arr sep, struct Cyc_List_List* ss){ return({
+struct Cyc_PP_Doc* _temp163[ 3u]; _temp163[ 2u]= Cyc_PP_text( stop); _temp163[ 1u]=
+Cyc_PP_seq( sep, ss); _temp163[ 0u]= Cyc_PP_text( start); Cyc_PP_cat( _tag_arr(
+_temp163, sizeof( struct Cyc_PP_Doc*), 3u));});} struct Cyc_PP_Doc* Cyc_PP_egroup(
+struct _tagged_arr start, struct _tagged_arr stop, struct _tagged_arr sep,
+struct Cyc_List_List* ss){ if( ss ==  0){ return Cyc_PP_nil_doc();} else{ return({
+struct Cyc_PP_Doc* _temp164[ 3u]; _temp164[ 2u]= Cyc_PP_text( stop); _temp164[ 1u]=
+Cyc_PP_seq( sep, ss); _temp164[ 0u]= Cyc_PP_text( start); Cyc_PP_cat( _tag_arr(
+_temp164, sizeof( struct Cyc_PP_Doc*), 3u));});}} struct Cyc_PP_Doc* Cyc_PP_groupl(
+struct _tagged_arr start, struct _tagged_arr stop, struct _tagged_arr sep,
+struct Cyc_List_List* ss){ return({ struct Cyc_PP_Doc* _temp165[ 3u]; _temp165[
+2u]= Cyc_PP_text( stop); _temp165[ 1u]= Cyc_PP_seql( sep, ss); _temp165[ 0u]=
+Cyc_PP_text( start); Cyc_PP_cat( _tag_arr( _temp165, sizeof( struct Cyc_PP_Doc*),
+3u));});}

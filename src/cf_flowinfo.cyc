@@ -71,7 +71,7 @@ int place_cmp(place_t p1, place_t p2) {
   return list_cmp(Std::zstrptrcmp,p1->fields,p2->fields);
 }
 
-// for debugging -- for errors, convert e->loc to a string!
+// for debugging
 static mstringptr_t place2string(place_t p) {
   list_t<mstringptr_t> sl = NULL;
   switch(p->root) {
@@ -417,8 +417,8 @@ flow_t join_flow(place_set_t* all_changed, flow_t f1, flow_t f2){
     if(flow_lessthan_approx(f1,f2)) return f2;
     if(flow_lessthan_approx(f2,f1)) return f1;
     region rgn {
-      struct JoinEnv<`rgn> env = JoinEnv(rnew(rgn) EscPile(rgn,NULL),d1,d2);
-      flowdict_t outdict = Dict::intersect_c(join_absRval,&env,d1,d2);
+      struct JoinEnv<`rgn> env     = JoinEnv(rnew(rgn) EscPile(rgn,NULL),d1,d2);
+      flowdict_t           outdict = Dict::intersect_c(join_absRval,&env,d1,d2);
       return new ReachableFL(escape_these(env.pile, all_changed, outdict));
     }
   }
@@ -426,8 +426,8 @@ flow_t join_flow(place_set_t* all_changed, flow_t f1, flow_t f2){
 
 static absRval_t after_absRval_d(afterenv_t,field_name_t,absRval_t,absRval_t);
 static absRval_t after_absRval(afterenv_t env, absRval_t r1, absRval_t r2) {
-  let changed1 = env->changed == One || Set::member(env->chg1,env->curr_place);
-  let changed2 = env->changed == Two || Set::member(env->chg2,env->curr_place);
+  bool changed1 = env->changed == One || Set::member(env->chg1,env->curr_place);
+  bool changed2 = env->changed == Two || Set::member(env->chg2,env->curr_place);
   if(changed1 && changed2)
     return join_absRval(&env->joinenv, 0, r1, r2);
   // checking for "is a contained object changed in the other pinfo" is
@@ -477,8 +477,8 @@ static absRval_t after_root(afterenv_t env, root_t root,
 flow_t after_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
 		  place_set_t chg1, place_set_t chg2) {
   static tunion Raw_exp.Const_e dummy_rawexp = Const_e(Null_c);
-  static struct Exp             dummy_exp    = Exp(NULL,&dummy_rawexp,NULL);
-  static tunion Root.MallocPt   dummy_root   = MallocPt(&dummy_exp);
+  static struct Exp dummy_exp = Exp(NULL,&dummy_rawexp,NULL,EmptyAnnot);
+  static tunion Root.MallocPt dummy_root = MallocPt(&dummy_exp);
 
   if(f1 == f2) return f1;
   switch($(f1,f2)) {
@@ -515,8 +515,6 @@ static bool absRval_lessthan_approx(`a ignore, absRval_t r1, absRval_t r2) {
   case $(_, NotZeroAll): return false;
   case $(&Esc(_),&Esc(_)): break;
   case $(&Esc(_),_): return false;
-    /*  case $(&Aggregate(_),_):
-	case $(_,&Aggregate(_)): fprintf(stderr,"ACK!"); */
   default: break;
   }
   switch($(initlevel_approx(r1), initlevel_approx(r2))) {

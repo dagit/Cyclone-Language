@@ -305,20 +305,18 @@ _temp1->end= end; _temp1;});} struct Cyc_Position_Segment* Cyc_Position_segment_
 struct Cyc_Position_Segment* s1, struct Cyc_Position_Segment* s2){ if( s1 ==  0){
 return s2;} if( s2 ==  0){ return s1;} return({ struct Cyc_Position_Segment*
 _temp2=( struct Cyc_Position_Segment*) _cycalloc_atomic( sizeof( struct Cyc_Position_Segment));
-_temp2->start=(( struct Cyc_Position_Segment*) _check_null( s1))->start; _temp2->end=((
-struct Cyc_Position_Segment*) _check_null( s2))->end; _temp2;});} struct
-_tagged_arr Cyc_Position_string_of_loc( int loc){ struct Cyc_Lineno_Pos* pos=
-Cyc_Lineno_pos_of_abs( Cyc_Position_source, loc); return({ struct Cyc_Std_Int_pa_struct
-_temp6; _temp6.tag= Cyc_Std_Int_pa; _temp6.f1=( int)(( unsigned int) pos->col);{
-struct Cyc_Std_Int_pa_struct _temp5; _temp5.tag= Cyc_Std_Int_pa; _temp5.f1=( int)((
-unsigned int) pos->line_no);{ struct Cyc_Std_String_pa_struct _temp4; _temp4.tag=
-Cyc_Std_String_pa; _temp4.f1=( struct _tagged_arr) pos->logical_file;{ void*
-_temp3[ 3u]={& _temp4,& _temp5,& _temp6}; Cyc_Std_aprintf( _tag_arr("%s (%d:%d)",
-sizeof( unsigned char), 11u), _tag_arr( _temp3, sizeof( void*), 3u));}}}});}
-static struct _tagged_arr Cyc_Position_string_of_pos_pr( struct Cyc_Lineno_Pos*
-pos_s, struct Cyc_Lineno_Pos* pos_e){ if( Cyc_Std_strcmp( pos_s->logical_file,
-pos_e->logical_file) ==  0){ return({ struct Cyc_Std_Int_pa_struct _temp12;
-_temp12.tag= Cyc_Std_Int_pa; _temp12.f1=( int)(( unsigned int) pos_e->col);{
+_temp2->start= s1->start; _temp2->end= s2->end; _temp2;});} struct _tagged_arr
+Cyc_Position_string_of_loc( int loc){ struct Cyc_Lineno_Pos* pos= Cyc_Lineno_pos_of_abs(
+Cyc_Position_source, loc); return({ struct Cyc_Std_Int_pa_struct _temp6; _temp6.tag=
+Cyc_Std_Int_pa; _temp6.f1=( int)(( unsigned int) pos->col);{ struct Cyc_Std_Int_pa_struct
+_temp5; _temp5.tag= Cyc_Std_Int_pa; _temp5.f1=( int)(( unsigned int) pos->line_no);{
+struct Cyc_Std_String_pa_struct _temp4; _temp4.tag= Cyc_Std_String_pa; _temp4.f1=(
+struct _tagged_arr) pos->logical_file;{ void* _temp3[ 3u]={& _temp4,& _temp5,&
+_temp6}; Cyc_Std_aprintf( _tag_arr("%s (%d:%d)", sizeof( unsigned char), 11u),
+_tag_arr( _temp3, sizeof( void*), 3u));}}}});} static struct _tagged_arr Cyc_Position_string_of_pos_pr(
+struct Cyc_Lineno_Pos* pos_s, struct Cyc_Lineno_Pos* pos_e){ if( Cyc_Std_strcmp(
+pos_s->logical_file, pos_e->logical_file) ==  0){ return({ struct Cyc_Std_Int_pa_struct
+_temp12; _temp12.tag= Cyc_Std_Int_pa; _temp12.f1=( int)(( unsigned int) pos_e->col);{
 struct Cyc_Std_Int_pa_struct _temp11; _temp11.tag= Cyc_Std_Int_pa; _temp11.f1=(
 int)(( unsigned int) pos_e->line_no);{ struct Cyc_Std_Int_pa_struct _temp10;
 _temp10.tag= Cyc_Std_Int_pa; _temp10.f1=( int)(( unsigned int) pos_s->col);{
@@ -343,51 +341,47 @@ struct Cyc_Position_Segment* s){ if( s ==  0){ return({ struct Cyc_Std_String_pa
 _temp21; _temp21.tag= Cyc_Std_String_pa; _temp21.f1=( struct _tagged_arr) Cyc_Position_source;{
 void* _temp20[ 1u]={& _temp21}; Cyc_Std_aprintf( _tag_arr("%s", sizeof(
 unsigned char), 3u), _tag_arr( _temp20, sizeof( void*), 1u));}});}{ struct Cyc_Lineno_Pos*
-pos_s= Cyc_Lineno_pos_of_abs( Cyc_Position_source,(( struct Cyc_Position_Segment*)
-_check_null( s))->start); struct Cyc_Lineno_Pos* pos_e= Cyc_Lineno_pos_of_abs(
-Cyc_Position_source,(( struct Cyc_Position_Segment*) _check_null( s))->end);
-return Cyc_Position_string_of_pos_pr( pos_s, pos_e);}} static struct Cyc_Lineno_Pos*
-Cyc_Position_new_pos(){ return({ struct Cyc_Lineno_Pos* _temp22=( struct Cyc_Lineno_Pos*)
-_cycalloc( sizeof( struct Cyc_Lineno_Pos)); _temp22->logical_file= _tag_arr("",
-sizeof( unsigned char), 1u); _temp22->line= Cyc_Core_new_string( 0); _temp22->line_no=
-0; _temp22->col= 0; _temp22;});} struct _tuple2{ int f1; struct Cyc_Lineno_Pos*
-f2; } ; struct Cyc_List_List* Cyc_Position_strings_of_segments( struct Cyc_List_List*
+pos_s= Cyc_Lineno_pos_of_abs( Cyc_Position_source, s->start); struct Cyc_Lineno_Pos*
+pos_e= Cyc_Lineno_pos_of_abs( Cyc_Position_source, s->end); return Cyc_Position_string_of_pos_pr(
+pos_s, pos_e);}} static struct Cyc_Lineno_Pos* Cyc_Position_new_pos(){ return({
+struct Cyc_Lineno_Pos* _temp22=( struct Cyc_Lineno_Pos*) _cycalloc( sizeof(
+struct Cyc_Lineno_Pos)); _temp22->logical_file= _tag_arr("", sizeof(
+unsigned char), 1u); _temp22->line= Cyc_Core_new_string( 0); _temp22->line_no= 0;
+_temp22->col= 0; _temp22;});} struct _tuple2{ int f1; struct Cyc_Lineno_Pos* f2;
+} ; struct Cyc_List_List* Cyc_Position_strings_of_segments( struct Cyc_List_List*
 segs){ struct Cyc_List_List* places= 0;{ struct Cyc_List_List* _temp23= segs;
-for( 0; _temp23 !=  0; _temp23=(( struct Cyc_List_List*) _check_null( _temp23))->tl){
-if(( struct Cyc_Position_Segment*)(( struct Cyc_List_List*) _check_null( _temp23))->hd
-==  0){ continue;} places=({ struct Cyc_List_List* _temp24=( struct Cyc_List_List*)
-_cycalloc( sizeof( struct Cyc_List_List)); _temp24->hd=( void*)({ struct _tuple2*
-_temp27=( struct _tuple2*) _cycalloc( sizeof( struct _tuple2)); _temp27->f1=((
-struct Cyc_Position_Segment*) _check_null(( struct Cyc_Position_Segment*)((
-struct Cyc_List_List*) _check_null( _temp23))->hd))->end; _temp27->f2= Cyc_Position_new_pos();
-_temp27;}); _temp24->tl=({ struct Cyc_List_List* _temp25=( struct Cyc_List_List*)
-_cycalloc( sizeof( struct Cyc_List_List)); _temp25->hd=( void*)({ struct _tuple2*
-_temp26=( struct _tuple2*) _cycalloc( sizeof( struct _tuple2)); _temp26->f1=((
-struct Cyc_Position_Segment*) _check_null(( struct Cyc_Position_Segment*)((
-struct Cyc_List_List*) _check_null( _temp23))->hd))->start; _temp26->f2= Cyc_Position_new_pos();
-_temp26;}); _temp25->tl= places; _temp25;}); _temp24;});}} Cyc_Lineno_poss_of_abss(
-Cyc_Position_source, places);{ struct Cyc_List_List* ans= 0; places=(( struct
-Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)( places); for( 0;
-segs !=  0; segs=(( struct Cyc_List_List*) _check_null( segs))->tl){ if(( struct
-Cyc_Position_Segment*)(( struct Cyc_List_List*) _check_null( segs))->hd ==  0){
-ans=({ struct Cyc_List_List* _temp28=( struct Cyc_List_List*) _cycalloc( sizeof(
-struct Cyc_List_List)); _temp28->hd=( void*)({ struct _tagged_arr* _temp29=(
-struct _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp29[ 0]=({
-struct Cyc_Std_String_pa_struct _temp31; _temp31.tag= Cyc_Std_String_pa; _temp31.f1=(
-struct _tagged_arr) Cyc_Position_source;{ void* _temp30[ 1u]={& _temp31}; Cyc_Std_aprintf(
-_tag_arr("%s(unknown)", sizeof( unsigned char), 12u), _tag_arr( _temp30, sizeof(
-void*), 1u));}}); _temp29;}); _temp28->tl= ans; _temp28;});} else{ ans=({ struct
-Cyc_List_List* _temp32=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
-_temp32->hd=( void*)({ struct _tagged_arr* _temp33=( struct _tagged_arr*)
-_cycalloc( sizeof( struct _tagged_arr)); _temp33[ 0]= Cyc_Position_string_of_pos_pr((*((
-struct _tuple2*)(( struct Cyc_List_List*) _check_null( places))->hd)).f2,(*((
-struct _tuple2*)(( struct Cyc_List_List*) _check_null((( struct Cyc_List_List*)
+for( 0; _temp23 !=  0; _temp23= _temp23->tl){ if(( struct Cyc_Position_Segment*)
+_temp23->hd ==  0){ continue;} places=({ struct Cyc_List_List* _temp24=( struct
+Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp24->hd=( void*)({
+struct _tuple2* _temp27=( struct _tuple2*) _cycalloc( sizeof( struct _tuple2));
+_temp27->f1=(( struct Cyc_Position_Segment*) _check_null(( struct Cyc_Position_Segment*)
+_temp23->hd))->end; _temp27->f2= Cyc_Position_new_pos(); _temp27;}); _temp24->tl=({
+struct Cyc_List_List* _temp25=( struct Cyc_List_List*) _cycalloc( sizeof( struct
+Cyc_List_List)); _temp25->hd=( void*)({ struct _tuple2* _temp26=( struct _tuple2*)
+_cycalloc( sizeof( struct _tuple2)); _temp26->f1=(( struct Cyc_Position_Segment*)
+_check_null(( struct Cyc_Position_Segment*) _temp23->hd))->start; _temp26->f2=
+Cyc_Position_new_pos(); _temp26;}); _temp25->tl= places; _temp25;}); _temp24;});}}
+Cyc_Lineno_poss_of_abss( Cyc_Position_source, places);{ struct Cyc_List_List*
+ans= 0; places=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+places); for( 0; segs !=  0; segs= segs->tl){ if(( struct Cyc_Position_Segment*)
+segs->hd ==  0){ ans=({ struct Cyc_List_List* _temp28=( struct Cyc_List_List*)
+_cycalloc( sizeof( struct Cyc_List_List)); _temp28->hd=( void*)({ struct
+_tagged_arr* _temp29=( struct _tagged_arr*) _cycalloc( sizeof( struct
+_tagged_arr)); _temp29[ 0]=({ struct Cyc_Std_String_pa_struct _temp31; _temp31.tag=
+Cyc_Std_String_pa; _temp31.f1=( struct _tagged_arr) Cyc_Position_source;{ void*
+_temp30[ 1u]={& _temp31}; Cyc_Std_aprintf( _tag_arr("%s(unknown)", sizeof(
+unsigned char), 12u), _tag_arr( _temp30, sizeof( void*), 1u));}}); _temp29;});
+_temp28->tl= ans; _temp28;});} else{ ans=({ struct Cyc_List_List* _temp32=(
+struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp32->hd=(
+void*)({ struct _tagged_arr* _temp33=( struct _tagged_arr*) _cycalloc( sizeof(
+struct _tagged_arr)); _temp33[ 0]= Cyc_Position_string_of_pos_pr((*(( struct
+_tuple2*)(( struct Cyc_List_List*) _check_null( places))->hd)).f2,(*(( struct
+_tuple2*)(( struct Cyc_List_List*) _check_null((( struct Cyc_List_List*)
 _check_null( places))->tl))->hd)).f2); _temp33;}); _temp32->tl= ans; _temp32;});
-places=(( struct Cyc_List_List*) _check_null((( struct Cyc_List_List*)
-_check_null( places))->tl))->tl;}} return ans;}} struct Cyc_Position_Error;
-struct Cyc_Position_Error* Cyc_Position_mk_err_lex( struct Cyc_Position_Segment*
-l, struct _tagged_arr desc){ return({ struct Cyc_Position_Error* _temp34=(
-struct Cyc_Position_Error*) _cycalloc( sizeof( struct Cyc_Position_Error));
+places=(( struct Cyc_List_List*) _check_null( places->tl))->tl;}} return ans;}}
+struct Cyc_Position_Error; struct Cyc_Position_Error* Cyc_Position_mk_err_lex(
+struct Cyc_Position_Segment* l, struct _tagged_arr desc){ return({ struct Cyc_Position_Error*
+_temp34=( struct Cyc_Position_Error*) _cycalloc( sizeof( struct Cyc_Position_Error));
 _temp34->source= Cyc_Position_source; _temp34->seg= l; _temp34->kind=( void*)((
 void*) Cyc_Position_Lex); _temp34->desc= desc; _temp34;});} struct Cyc_Position_Error*
 Cyc_Position_mk_err_parse( struct Cyc_Position_Segment* l, struct _tagged_arr
@@ -414,9 +408,8 @@ int f2; int f3; } ; static struct _tuple3* Cyc_Position_get_context( struct Cyc_
 seg){ if( seg ==  0){( int) _throw(( void*) Cyc_Position_Nocontext);}{ struct
 Cyc_Lineno_Pos* pos_s; struct Cyc_Lineno_Pos* pos_e;{ struct _handler_cons
 _temp37; _push_handler(& _temp37);{ int _temp39= 0; if( setjmp( _temp37.handler)){
-_temp39= 1;} if( ! _temp39){ pos_s= Cyc_Lineno_pos_of_abs( Cyc_Position_source,((
-struct Cyc_Position_Segment*) _check_null( seg))->start); pos_e= Cyc_Lineno_pos_of_abs(
-Cyc_Position_source,(( struct Cyc_Position_Segment*) _check_null( seg))->end);;
+_temp39= 1;} if( ! _temp39){ pos_s= Cyc_Lineno_pos_of_abs( Cyc_Position_source,
+seg->start); pos_e= Cyc_Lineno_pos_of_abs( Cyc_Position_source, seg->end);;
 _pop_handler();} else{ void* _temp38=( void*) _exn_thrown; void* _temp41=
 _temp38; _LL43: goto _LL44; _LL45: goto _LL46; _LL44:( int) _throw(( void*) Cyc_Position_Nocontext);
 _LL46:( void) _throw( _temp41); _LL42:;}}}{ struct Cyc_Lineno_Pos _temp49; int

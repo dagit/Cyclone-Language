@@ -254,7 +254,7 @@ type_t const_string_typ(type_t rgn) {
 // a static &Upper_b(&Exp(NULL,&Const_e(&Int_c(Unsigned,1)),NULL))
 static tunion Cnst.Int_c      one_intc  = Int_c(Unsigned,1);
 static tunion Raw_exp.Const_e one_b_raw = Const_e(&one_intc);
-struct Exp exp_unsigned_one_v = {NULL,&one_b_raw,NULL};
+struct Exp exp_unsigned_one_v = {NULL,&one_b_raw,NULL,EmptyAnnot};
 exp_t exp_unsigned_one = &exp_unsigned_one_v;
 static tunion Bounds.Upper_b one_bt = Upper_b(&exp_unsigned_one_v);
 tunion Bounds bounds_one = &one_bt;
@@ -341,13 +341,13 @@ type_t unionq_typ(qvar_t name) {
 
 ///////////////////////// Expressions //////////////////////////////
 exp_t new_exp(raw_exp_t r, seg_t loc) {
-  return new Exp{.topt=NULL, .r=r, .loc=loc};
+  return new Exp{.topt=NULL, .r=r, .loc=loc, .annot=EmptyAnnot};
 }
 exp_t New_exp(exp_opt_t rgn_handle, exp_t e, seg_t loc) {
   return new_exp(new New_e(rgn_handle,e), loc);
 }
 exp_t copy_exp(exp_t e) {
-  return new Exp{.topt=e->topt, .r=e->r, .loc=e->loc};
+  return new Exp{.topt=e->topt, .r=e->r, .loc=e->loc, .annot=EmptyAnnot};
 }
 exp_t const_exp(cnst_t c, seg_t loc) { return new_exp(new Const_e(c), loc); }
 exp_t null_exp(seg_t loc) { return new_exp(new Const_e(Null_c), loc); }
@@ -740,10 +740,10 @@ stringptr_t fieldname(int i) {
   return field_names[i];
 }
 
-void print_decls(list_t<decl_t> decls) {
-  Marshal::print_type(decls_rep,&decls);
-  printf("\n");
-}
+  void print_decls(list_t<decl_t> decls) {
+    Marshal::print_type(decls_rep,&decls);
+    printf("\n");
+  }
   
 }
 

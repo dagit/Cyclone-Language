@@ -368,65 +368,57 @@ _new_region(); struct _RegionHandle* temp=& _temp4; _push_region( temp);{ struct
 Cyc_List_List* lens=({ struct Cyc_List_List* _temp7=( struct Cyc_List_List*)
 _region_malloc( temp, sizeof( struct Cyc_List_List)); _temp7->hd=( void*)((
 unsigned int) 0); _temp7->tl= 0; _temp7;}); struct Cyc_List_List* end= lens;{
-struct Cyc_List_List* p= strs; for( 0; p !=  0; p=(( struct Cyc_List_List*)
-_check_null( p))->tl){ len= Cyc_Std_strlen(*(( struct _tagged_arr*)(( struct Cyc_List_List*)
-_check_null( p))->hd)); total_len += len;(( struct Cyc_List_List*) _check_null(
-end))->tl=({ struct Cyc_List_List* _temp5=( struct Cyc_List_List*)
+struct Cyc_List_List* p= strs; for( 0; p !=  0; p= p->tl){ len= Cyc_Std_strlen(*((
+struct _tagged_arr*) p->hd)); total_len += len;(( struct Cyc_List_List*)
+_check_null( end))->tl=({ struct Cyc_List_List* _temp5=( struct Cyc_List_List*)
 _region_malloc( temp, sizeof( struct Cyc_List_List)); _temp5->hd=( void*) len;
 _temp5->tl= 0; _temp5;}); end=(( struct Cyc_List_List*) _check_null( end))->tl;}}
-lens=(( struct Cyc_List_List*) _check_null( lens))->tl; ans= Cyc_Core_rnew_string(
-r,( int)( total_len +  1));{ unsigned int i= 0; while( strs !=  0) { struct
-_tagged_arr _temp6=*(( struct _tagged_arr*)(( struct Cyc_List_List*) _check_null(
-strs))->hd); len=( unsigned int)(( struct Cyc_List_List*) _check_null( lens))->hd;
-Cyc_Std_strncpy( _tagged_arr_plus( ans, sizeof( unsigned char),( int) i), _temp6,
-len); i += len; strs=(( struct Cyc_List_List*) _check_null( strs))->tl; lens=((
-struct Cyc_List_List*) _check_null( lens))->tl;}}}; _pop_region( temp);} return
-ans;} struct _tagged_arr Cyc_Std_strconcat_l( struct Cyc_List_List* strs){
-return Cyc_Std_rstrconcat_l( Cyc_Core_heap_region, strs);} struct _tagged_arr
-Cyc_Std_rstr_sepstr( struct _RegionHandle* r, struct Cyc_List_List* strs, struct
-_tagged_arr separator){ if( strs ==  0){ return Cyc_Core_rnew_string( r, 0);}
-if((( struct Cyc_List_List*) _check_null( strs))->tl ==  0){ return Cyc_Std_rstrdup(
-r,*(( struct _tagged_arr*)(( struct Cyc_List_List*) _check_null( strs))->hd));}{
-struct Cyc_List_List* _temp8= strs; struct _RegionHandle _temp9= _new_region();
-struct _RegionHandle* temp=& _temp9; _push_region( temp);{ struct Cyc_List_List*
-lens=({ struct Cyc_List_List* _temp13=( struct Cyc_List_List*) _region_malloc(
-temp, sizeof( struct Cyc_List_List)); _temp13->hd=( void*)(( unsigned int) 0);
-_temp13->tl= 0; _temp13;}); struct Cyc_List_List* end= lens; unsigned int len= 0;
-unsigned int total_len= 0; unsigned int list_len= 0; for( 0; _temp8 !=  0;
-_temp8=(( struct Cyc_List_List*) _check_null( _temp8))->tl){ len= Cyc_Std_strlen(*((
-struct _tagged_arr*)(( struct Cyc_List_List*) _check_null( _temp8))->hd));
-total_len += len;(( struct Cyc_List_List*) _check_null( end))->tl=({ struct Cyc_List_List*
-_temp10=( struct Cyc_List_List*) _region_malloc( temp, sizeof( struct Cyc_List_List));
-_temp10->hd=( void*) len; _temp10->tl= 0; _temp10;}); end=(( struct Cyc_List_List*)
-_check_null( end))->tl; ++ list_len;} lens=(( struct Cyc_List_List*) _check_null(
-lens))->tl;{ unsigned int seplen= Cyc_Std_strlen( separator); total_len +=(
+lens= lens->tl; ans= Cyc_Core_rnew_string( r,( int)( total_len +  1));{
+unsigned int i= 0; while( strs !=  0) { struct _tagged_arr _temp6=*(( struct
+_tagged_arr*) strs->hd); len=( unsigned int)(( struct Cyc_List_List*)
+_check_null( lens))->hd; Cyc_Std_strncpy( _tagged_arr_plus( ans, sizeof(
+unsigned char),( int) i), _temp6, len); i += len; strs= strs->tl; lens= lens->tl;}}};
+_pop_region( temp);} return ans;} struct _tagged_arr Cyc_Std_strconcat_l( struct
+Cyc_List_List* strs){ return Cyc_Std_rstrconcat_l( Cyc_Core_heap_region, strs);}
+struct _tagged_arr Cyc_Std_rstr_sepstr( struct _RegionHandle* r, struct Cyc_List_List*
+strs, struct _tagged_arr separator){ if( strs ==  0){ return Cyc_Core_rnew_string(
+r, 0);} if( strs->tl ==  0){ return Cyc_Std_rstrdup( r,*(( struct _tagged_arr*)
+strs->hd));}{ struct Cyc_List_List* _temp8= strs; struct _RegionHandle _temp9=
+_new_region(); struct _RegionHandle* temp=& _temp9; _push_region( temp);{ struct
+Cyc_List_List* lens=({ struct Cyc_List_List* _temp13=( struct Cyc_List_List*)
+_region_malloc( temp, sizeof( struct Cyc_List_List)); _temp13->hd=( void*)((
+unsigned int) 0); _temp13->tl= 0; _temp13;}); struct Cyc_List_List* end= lens;
+unsigned int len= 0; unsigned int total_len= 0; unsigned int list_len= 0; for( 0;
+_temp8 !=  0; _temp8= _temp8->tl){ len= Cyc_Std_strlen(*(( struct _tagged_arr*)
+_temp8->hd)); total_len += len;(( struct Cyc_List_List*) _check_null( end))->tl=({
+struct Cyc_List_List* _temp10=( struct Cyc_List_List*) _region_malloc( temp,
+sizeof( struct Cyc_List_List)); _temp10->hd=( void*) len; _temp10->tl= 0;
+_temp10;}); end=(( struct Cyc_List_List*) _check_null( end))->tl; ++ list_len;}
+lens= lens->tl;{ unsigned int seplen= Cyc_Std_strlen( separator); total_len +=(
 list_len -  1) *  seplen;{ struct _tagged_arr ans= Cyc_Core_rnew_string( r,( int)
-total_len); unsigned int i= 0; while((( struct Cyc_List_List*) _check_null( strs))->tl
-!=  0) { struct _tagged_arr _temp11=*(( struct _tagged_arr*)(( struct Cyc_List_List*)
-_check_null( strs))->hd); len=( unsigned int)(( struct Cyc_List_List*)
+total_len); unsigned int i= 0; while( strs->tl !=  0) { struct _tagged_arr
+_temp11=*(( struct _tagged_arr*) strs->hd); len=( unsigned int)(( struct Cyc_List_List*)
 _check_null( lens))->hd; Cyc_Std_strncpy( _tagged_arr_plus( ans, sizeof(
 unsigned char),( int) i), _temp11, len); i += len; Cyc_Std_strncpy(
 _tagged_arr_plus( ans, sizeof( unsigned char),( int) i), separator, seplen); i +=
-seplen; strs=(( struct Cyc_List_List*) _check_null( strs))->tl; lens=(( struct
-Cyc_List_List*) _check_null( lens))->tl;} Cyc_Std_strncpy( _tagged_arr_plus( ans,
-sizeof( unsigned char),( int) i),*(( struct _tagged_arr*)(( struct Cyc_List_List*)
-_check_null( strs))->hd),( unsigned int)(( struct Cyc_List_List*) _check_null(
-lens))->hd);{ struct _tagged_arr _temp12= ans; _npop_handler( 0u); return
-_temp12;}}}}; _pop_region( temp);}} struct _tagged_arr Cyc_Std_str_sepstr(
-struct Cyc_List_List* strs, struct _tagged_arr separator){ return Cyc_Std_rstr_sepstr(
-Cyc_Core_heap_region, strs, separator);} struct _tagged_arr Cyc_Std_strncpy(
-struct _tagged_arr dest, struct _tagged_arr src, unsigned int n){ unsigned int
-_temp14= _get_arr_size( dest, sizeof( unsigned char)); unsigned int _temp15=
-_get_arr_size( src, sizeof( unsigned char)); if( n <=  0){ return dest;} if( n > 
-_temp14? 1: n >  _temp15){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp16=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
-Cyc_Core_Invalid_argument_struct)); _temp16[ 0]=({ struct Cyc_Core_Invalid_argument_struct
-_temp17; _temp17.tag= Cyc_Core_Invalid_argument; _temp17.f1= _tag_arr("Std::strncpy",
-sizeof( unsigned char), 13u); _temp17;}); _temp16;}));}{ int i; for( i= 0; i < 
-n; i ++){ unsigned char _temp18=*(( const unsigned char*)
-_check_unknown_subscript( src, sizeof( unsigned char), i)); if( _temp18 == '\000'){
-break;}*(( unsigned char*) _check_unknown_subscript( dest, sizeof( unsigned char),
-i))= _temp18;} for( 0; i <  n; i ++){*(( unsigned char*)
+seplen; strs= strs->tl; lens= lens->tl;} Cyc_Std_strncpy( _tagged_arr_plus( ans,
+sizeof( unsigned char),( int) i),*(( struct _tagged_arr*) strs->hd),(
+unsigned int)(( struct Cyc_List_List*) _check_null( lens))->hd);{ struct
+_tagged_arr _temp12= ans; _npop_handler( 0u); return _temp12;}}}}; _pop_region(
+temp);}} struct _tagged_arr Cyc_Std_str_sepstr( struct Cyc_List_List* strs,
+struct _tagged_arr separator){ return Cyc_Std_rstr_sepstr( Cyc_Core_heap_region,
+strs, separator);} struct _tagged_arr Cyc_Std_strncpy( struct _tagged_arr dest,
+struct _tagged_arr src, unsigned int n){ unsigned int _temp14= _get_arr_size(
+dest, sizeof( unsigned char)); unsigned int _temp15= _get_arr_size( src, sizeof(
+unsigned char)); if( n <=  0){ return dest;} if( n >  _temp14? 1: n >  _temp15){(
+int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp16=( struct
+Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
+_temp16[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp17; _temp17.tag= Cyc_Core_Invalid_argument;
+_temp17.f1= _tag_arr("Std::strncpy", sizeof( unsigned char), 13u); _temp17;});
+_temp16;}));}{ int i; for( i= 0; i <  n; i ++){ unsigned char _temp18=*(( const
+unsigned char*) _check_unknown_subscript( src, sizeof( unsigned char), i)); if(
+_temp18 == '\000'){ break;}*(( unsigned char*) _check_unknown_subscript( dest,
+sizeof( unsigned char), i))= _temp18;} for( 0; i <  n; i ++){*(( unsigned char*)
 _check_unknown_subscript( dest, sizeof( unsigned char), i))='\000';} return dest;}}
 struct _tagged_arr Cyc_Std_zstrncpy( struct _tagged_arr dest, struct _tagged_arr
 src, unsigned int n){ unsigned int _temp19= _get_arr_size( dest, sizeof(
@@ -562,8 +554,7 @@ Cyc_Core_heap_region, s);} struct _tagged_arr Cyc_Std_implode( struct Cyc_List_L
 chars){ struct _tagged_arr s= Cyc_Core_new_string((( int(*)( struct Cyc_List_List*
 x)) Cyc_List_length)( chars)); unsigned int i= 0; while( chars !=  0) {*((
 unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char),( int) i ++))=(
-unsigned char)(( int)(( struct Cyc_List_List*) _check_null( chars))->hd); chars=((
-struct Cyc_List_List*) _check_null( chars))->tl;} return s;} int Cyc_Std_strcasecmp(
+unsigned char)(( int) chars->hd); chars= chars->tl;} return s;} int Cyc_Std_strcasecmp(
 struct _tagged_arr s1, struct _tagged_arr s2){ if( s1.curr ==  s2.curr){ return
 0;}{ unsigned int len1= Cyc_Std_int_strleno( s1, _tag_arr("Std::strcasecmp",
 sizeof( unsigned char), 16u)); unsigned int len2= Cyc_Std_int_strleno( s2,

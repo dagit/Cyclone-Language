@@ -318,13 +318,12 @@ unsigned int _temp8=( unsigned int)( sz %  32 +  1); int* _temp9=( int*)
 _cycalloc_atomic( _check_times( sizeof( int), _temp8)); struct _tagged_arr
 _temp11= _tag_arr( _temp9, sizeof( int),( unsigned int)( sz %  32 +  1));{
 unsigned int _temp10= _temp8; unsigned int i; for( i= 0; i <  _temp10; i ++){
-_temp9[ i]= 0;}}; _temp11;}); for( 0; l !=  0; l=(( struct Cyc_List_List*)
-_check_null( l))->tl){ Cyc_Bitvec_set( ans, f( Cyc_Dict_lookup( d,( void*)((
-struct Cyc_List_List*) _check_null( l))->hd)));} return ans;} struct Cyc_List_List*
-Cyc_Bitvec_to_sorted_list( struct _tagged_arr bvec, int sz){ struct Cyc_List_List*
-ans= 0;{ int pos= sz -  1; for( 0; pos >=  0; 0){ int word= pos >>  5; int bits=*((
-int*) _check_unknown_subscript( bvec, sizeof( int), word)); int offset= pos & 
-31; for( 0; offset >=  0;( -- offset, -- pos)){ if(( bits >>  offset &  1) ==  1){
+_temp9[ i]= 0;}}; _temp11;}); for( 0; l !=  0; l= l->tl){ Cyc_Bitvec_set( ans, f(
+Cyc_Dict_lookup( d,( void*) l->hd)));} return ans;} struct Cyc_List_List* Cyc_Bitvec_to_sorted_list(
+struct _tagged_arr bvec, int sz){ struct Cyc_List_List* ans= 0;{ int pos= sz - 
+1; for( 0; pos >=  0; 0){ int word= pos >>  5; int bits=*(( int*)
+_check_unknown_subscript( bvec, sizeof( int), word)); int offset= pos &  31;
+for( 0; offset >=  0;( -- offset, -- pos)){ if(( bits >>  offset &  1) ==  1){
 ans=({ struct Cyc_List_List* _temp12=( struct Cyc_List_List*) _cycalloc( sizeof(
 struct Cyc_List_List) *  1); _temp12[ 0]=({ struct Cyc_List_List _temp13;
 _temp13.hd=( void*) pos; _temp13.tl= ans; _temp13;}); _temp12;});}}}} return ans;}

@@ -122,7 +122,7 @@ namespace Absyn {
   typedef tunion Raw_decl raw_decl_t;
   typedef struct Decl @decl_t;
   typedef tunion Designator designator_t;
-  typedef xtunion StmtAnnot stmt_annot_t;
+  typedef xtunion AbsynAnnot absyn_annot_t;
   typedef tunion Format_Type format_type_t;
   typedef tunion Attribute attribute_t;
   typedef list_t<attribute_t> attributes_t;
@@ -403,6 +403,7 @@ namespace Absyn {
     opt_t<type_t> topt;
     raw_exp_t     r;
     seg_t         loc;
+    absyn_annot_t annot;
   };
 
   // The $(exp,stmt) in loops are just a hack for holding the
@@ -438,7 +439,7 @@ namespace Absyn {
     list_t<stmt_t> non_local_preds; // set by type-checking, should go in the
                                     // appropriate CFStmtAnnot, not here!
     int            try_depth;
-    stmt_annot_t   annot;
+    absyn_annot_t  annot;
   };
 
   EXTERN_ABSYN tunion Raw_pat {
@@ -616,7 +617,7 @@ namespace Absyn {
     FieldName(var_t);
   };
 
-  EXTERN_ABSYN xtunion StmtAnnot { EXTERN_ABSYN EmptyAnnot; };
+  EXTERN_ABSYN xtunion AbsynAnnot { EXTERN_ABSYN EmptyAnnot; };
 
   // compare variables 
   extern int qvar_cmp(qvar_t, qvar_t);

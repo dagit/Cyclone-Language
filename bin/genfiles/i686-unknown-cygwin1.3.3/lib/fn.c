@@ -268,8 +268,7 @@ Cyc_Fn_outer, f);} static void* Cyc_Fn_lambda( void* f, struct _tuple0* arg){
 return Cyc_Fn_apply( Cyc_Fn_apply( f,(* arg).f1),(* arg).f2);} void* Cyc_Fn_uncurry(
 void* f){ return(( void*(*)( void*(* f)( void*, struct _tuple0*), void* x)) Cyc_Fn_make_fn)(
 Cyc_Fn_lambda, f);} struct Cyc_List_List* Cyc_Fn_map_fn( void* f, struct Cyc_List_List*
-x){ struct Cyc_List_List* res= 0; for( 0; x !=  0; x=(( struct Cyc_List_List*)
-_check_null( x))->tl){ res=({ struct Cyc_List_List* _temp18=( struct Cyc_List_List*)
-_cycalloc( sizeof( struct Cyc_List_List)); _temp18->hd=( void*) Cyc_Fn_apply( f,(
-void*)(( struct Cyc_List_List*) _check_null( x))->hd); _temp18->tl= res; _temp18;});}
+x){ struct Cyc_List_List* res= 0; for( 0; x !=  0; x= x->tl){ res=({ struct Cyc_List_List*
+_temp18=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp18->hd=( void*) Cyc_Fn_apply( f,( void*) x->hd); _temp18->tl= res; _temp18;});}
 res= Cyc_List_imp_rev( res); return res;}

@@ -58,6 +58,7 @@
 #include "tcutil.h"
 #include "evexp.h"
 #include "formatstr.h"
+#include "cf_flowinfo.h"
 #include "toc.h"
 using Core;
 using List;
@@ -124,7 +125,7 @@ MAKE_STRING(_RegionHandle);
   static $(nmspace_t, var_t)   str##_pr  = $((nmspace_t)&rel_ns_null_value,\
 					     &str##_str);\
   static tunion Raw_exp.Var_e  str##_re  = Var_e(&str##_pr,Unresolved_b);\
-  static struct Exp            str##_ev  = Exp{NULL, &str##_re, NULL};\
+  static struct Exp            str##_ev  = Exp{NULL,&str##_re,NULL,EmptyAnnot};\
   static exp_t                 str##_e   = &str##_ev
 
 MAKE_VAR(_throw);
@@ -455,7 +456,7 @@ static bool is_poly_field(type_t t, field_name_t f) {
   case &AnonStructType(fs):
     let field = lookup_field(fs,f);
     if (field == NULL) 
-      toc_impos("is_poly_field: bad field %s",*field->name);
+      toc_impos("is_poly_field: bad field %s",*f);
     return is_void_star(field->type);
   // unions currently permit only bits, so no polytypes
   case &AnonUnionType(_): return false;
@@ -648,6 +649,20 @@ static env_t switch_as_switch_env(env_t e, var_t next_l) {
 ///////////////////////////////////////////////////////////////
 static void exp_to_c(env_t nv, exp_t e); // forward declaration
 static void stmt_to_c(env_t nv, stmt_t s); // forward declaration
+
+static bool need_null_check(exp_t e) { // e must be pre-translation!
+  switch(e->annot) {
+  case CfFlowInfo::UnknownZ: return is_nullable(e->topt->v);
+  case CfFlowInfo::NotZero:  return false;
+  case CfFlowInfo::IsZero: 
+    Tcutil::terr(e->loc,"dereference of NULL pointer"); 
+    return false;
+  case EmptyAnnot: fprintf(stderr,"!"); 
+    Tcutil::warn(e->loc,"unreachable dereference");
+    return false;
+  default: throw new Core::Impossible("need_null_check");
+  }
+}
 
 static type_t get_c_typ(exp_t e) {
   if (e->topt == NULL) toc_impos("Missing type in primop ");
@@ -1340,6 +1355,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  if(nv->toplevel)
 	    unimp("can't do NULL-check conversion at top-level");
 	  // cast from t* to t@ -- run-time check: (t*)_check_null(e)
+	  // flow analysis may not set annotation correctly here!
 	  e->r = cast_exp(*t,fncall_exp(_check_null_e,
 					new List(e1,NULL),DL),DL)->r;
 	}
@@ -1607,8 +1623,9 @@ static void exp_to_c(env_t nv, exp_t e) {
     case &PointerType(PtrInfo{t2,rgn,cr,tq,b}):
       switch (conref_def(bounds_one,b)) {
       case &Upper_b(_):
+	bool do_null_check = need_null_check(e1);
 	exp_to_c(nv,e1);
-	if (is_nullable(e1_typ)) {
+	if (do_null_check) {
 	  // *((t *)_check_null(e))
 	  e->r = deref_exp(cast_exp(typ_to_c(e1->topt->v),
 				    fncall_exp(_check_null_e,
@@ -1634,6 +1651,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &StructArrow_e(e1,f):
     type_t e1typ = compress(e1->topt->v);
+    bool do_null_check = need_null_check(e1);
     exp_to_c(nv, e1);
     bool is_poly = is_poly_project(e); // decide before mutating e
     let PtrInfo{ta,rgn,bcr,tq,b} = get_ptr_type(e1typ);
@@ -1642,8 +1660,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       // the type-checker should've ensured the size is at least 1
       if (Evexp::eval_const_uint_exp(esz) < 1)
         impos("exp_to_c:  StructArrow_e on pointer of size 0");
-      bool possibly_null = conref_def(false,bcr);
-      if (is_nullable(e1->topt->v)) {
+      if (do_null_check) {
 	// ((t *)_check_null(e))->f
 	e->r = structarrow_exp(cast_exp(typ_to_c(e1->topt->v),
 					fncall_exp(_check_null_e,

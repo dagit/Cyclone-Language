@@ -297,7 +297,7 @@ static void check_format_args(tenv_t te, exp_t fmt,
   list_t<type_t> desc_types;
   switch (fmt->r) {
   case &Const_e(&String_c(s)): fallthru(s);
-  case &Cast_e(_,&Exp(_,&Const_e(&String_c(s)),_)):
+  case &Cast_e(_,&Exp(_,&Const_e(&String_c(s)),_,_)):
     desc_types = type_getter(te,s,fmt->loc); break;
   default: 
     // don't have a string literal argument, so we can't check the args

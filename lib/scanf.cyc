@@ -780,6 +780,7 @@ literal:
                   throw new Impossible("scanf3");
 		}
 	}
+
 eof_failure:
 	seen_eof++;
 input_failure:
@@ -789,9 +790,9 @@ control_failure:
 match_failure:
 	if (errp)
 	    *errp |= 2;
-done:
+done: 
 	if (errp && seen_eof)
-		*errp |= 1;
+	  *errp |= 1;
 	return (nassigned);
 }
 

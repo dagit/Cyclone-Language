@@ -464,12 +464,12 @@ _check_unknown_subscript( pfound, sizeof( struct Cyc_Std_option), 0u))->val;
 return( int)(*(( const unsigned char*) _check_unknown_subscript( optstring,
 sizeof( unsigned char), 0)) == ':'?':':'?');}}} _tagged_arr_inplace_plus(& Cyc_Std_nextchar,
 sizeof( unsigned char),( int) Cyc_Std_strlen(( struct _tagged_arr) Cyc_Std_nextchar));
-if( longind !=  0){*(( int*) _check_null( longind))= option_index;} if((
-unsigned int)(( const struct Cyc_Std_option*) _check_unknown_subscript( pfound,
-sizeof( struct Cyc_Std_option), 0u))->flag){*(( int*) _check_null((( const
-struct Cyc_Std_option*) _check_unknown_subscript( pfound, sizeof( struct Cyc_Std_option),
-0u))->flag))=(( const struct Cyc_Std_option*) _check_unknown_subscript( pfound,
-sizeof( struct Cyc_Std_option), 0u))->val; return 0;} return(( const struct Cyc_Std_option*)
+if( longind !=  0){* longind= option_index;} if(( unsigned int)(( const struct
+Cyc_Std_option*) _check_unknown_subscript( pfound, sizeof( struct Cyc_Std_option),
+0u))->flag){*(( int*) _check_null((( const struct Cyc_Std_option*)
+_check_unknown_subscript( pfound, sizeof( struct Cyc_Std_option), 0u))->flag))=((
+const struct Cyc_Std_option*) _check_unknown_subscript( pfound, sizeof( struct
+Cyc_Std_option), 0u))->val; return 0;} return(( const struct Cyc_Std_option*)
 _check_unknown_subscript( pfound, sizeof( struct Cyc_Std_option), 0u))->val;}
 if(( ! long_only? 1:*(( unsigned char*) _check_unknown_subscript(*(( struct
 _tagged_arr*) _check_unknown_subscript( argv, sizeof( struct _tagged_arr), Cyc_Std_optind)),
@@ -596,8 +596,8 @@ _tagged_arr_inplace_plus(& Cyc_Std_nextchar, sizeof( unsigned char),( int) Cyc_S
 struct _tagged_arr) Cyc_Std_nextchar)); return( int)(*(( const unsigned char*)
 _check_unknown_subscript( optstring, sizeof( unsigned char), 0)) == ':'?':':'?');}}}
 _tagged_arr_inplace_plus(& Cyc_Std_nextchar, sizeof( unsigned char),( int) Cyc_Std_strlen((
-struct _tagged_arr) Cyc_Std_nextchar)); if( longind !=  0){*(( int*) _check_null(
-longind))= option_index;} if(( unsigned int)(( const struct Cyc_Std_option*)
+struct _tagged_arr) Cyc_Std_nextchar)); if( longind !=  0){* longind=
+option_index;} if(( unsigned int)(( const struct Cyc_Std_option*)
 _check_unknown_subscript( pfound, sizeof( struct Cyc_Std_option), 0u))->flag){*((
 int*) _check_null((( const struct Cyc_Std_option*) _check_unknown_subscript(
 pfound, sizeof( struct Cyc_Std_option), 0u))->flag))=(( const struct Cyc_Std_option*)

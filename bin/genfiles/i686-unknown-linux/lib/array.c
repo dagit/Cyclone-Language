@@ -503,14 +503,14 @@ sizeof( void*));{ int i= 0; for( 0; i <  s; i ++){ if( 0 ==  compare(*(( void**)
 _check_unknown_subscript( l, sizeof( void*), i)), x)){ return 1;}}} return 0;}
 struct _tagged_arr Cyc_Array_extract( struct _tagged_arr x, int start, int*
 n_opt){ int sx=( int) _get_arr_size( x, sizeof( void*)); int n= n_opt ==  0? sx
--  start:*(( int*) _check_null( n_opt)); if(( start <  0? 1: n <=  0)? 1: start
-+ ( n_opt ==  0? 0: n) >  sx){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp42=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
-Cyc_Core_Invalid_argument_struct)); _temp42[ 0]=({ struct Cyc_Core_Invalid_argument_struct
-_temp43; _temp43.tag= Cyc_Core_Invalid_argument; _temp43.f1= _tag_arr("Array::extract",
-sizeof( unsigned char), 15u); _temp43;}); _temp42;}));} return({ unsigned int
-_temp44=( unsigned int) n; void** _temp45=( void**) _cycalloc( _check_times(
-sizeof( void*), _temp44)); struct _tagged_arr _temp47= _tag_arr( _temp45,
-sizeof( void*),( unsigned int) n);{ unsigned int _temp46= _temp44; unsigned int
-i; for( i= 0; i <  _temp46; i ++){ _temp45[ i]=*(( void**)
-_check_unknown_subscript( x, sizeof( void*),( int)( start +  i)));}}; _temp47;});}
+-  start:* n_opt; if(( start <  0? 1: n <=  0)? 1: start + ( n_opt ==  0? 0: n)
+>  sx){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp42=(
+struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
+_temp42[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp43; _temp43.tag= Cyc_Core_Invalid_argument;
+_temp43.f1= _tag_arr("Array::extract", sizeof( unsigned char), 15u); _temp43;});
+_temp42;}));} return({ unsigned int _temp44=( unsigned int) n; void** _temp45=(
+void**) _cycalloc( _check_times( sizeof( void*), _temp44)); struct _tagged_arr
+_temp47= _tag_arr( _temp45, sizeof( void*),( unsigned int) n);{ unsigned int
+_temp46= _temp44; unsigned int i; for( i= 0; i <  _temp46; i ++){ _temp45[ i]=*((
+void**) _check_unknown_subscript( x, sizeof( void*),( int)( start +  i)));}};
+_temp47;});}

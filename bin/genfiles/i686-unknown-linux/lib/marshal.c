@@ -465,30 +465,29 @@ _LL155: env= _temp157; if( ! _temp159){({ struct Cyc_Std_Int_pa_struct _temp162;
 _temp162.tag= Cyc_Std_Int_pa; _temp162.f1=* xtunionp;{ void* _temp161[ 1u]={&
 _temp162}; Cyc_Std_printf( _tag_arr("(@%x)", sizeof( unsigned char), 6u),
 _tag_arr( _temp161, sizeof( void*), 1u));}});{ unsigned int* xtstructp=((
-unsigned int*(*)( unsigned int x)) unsafe_cast)(* xtunionp); if(*(( unsigned int*)
-_check_null( xtstructp)) !=  0){ unsigned char* xtnamec=(( unsigned char*(*)(
-unsigned int x)) unsafe_cast)(*(( unsigned int*) _check_null( xtstructp)) +  4);
+unsigned int*(*)( unsigned int x)) unsafe_cast)(* xtunionp); if(* xtstructp != 
+0){ unsigned char* xtnamec=(( unsigned char*(*)( unsigned int x)) unsafe_cast)(*
+xtstructp +  4); struct _tagged_arr xtname=( struct _tagged_arr)
+Cstring_to_string( xtnamec);({ struct Cyc_Std_String_pa_struct _temp164;
+_temp164.tag= Cyc_Std_String_pa; _temp164.f1=( struct _tagged_arr) xtname;{ void*
+_temp163[ 1u]={& _temp164}; Cyc_Std_printf( _tag_arr("&%s[( ", sizeof(
+unsigned char), 7u), _tag_arr( _temp163, sizeof( void*), 1u));}});{ void* typ=
+Cyc_Marshal_get_xtunionbranch( xtname, _temp80); env=(( struct Cyc_Set_Set*(*)(
+void* rep, struct Cyc_Set_Set* env, unsigned int* val)) Cyc_Marshal_print_type_base)(
+typ, env,( unsigned int*) _check_null( xtstructp));}} else{ unsigned char*
+xtnamec=(( unsigned char*(*)( unsigned int x)) unsafe_cast)(* xtunionp +  4);
 struct _tagged_arr xtname=( struct _tagged_arr) Cstring_to_string( xtnamec);({
-struct Cyc_Std_String_pa_struct _temp164; _temp164.tag= Cyc_Std_String_pa;
-_temp164.f1=( struct _tagged_arr) xtname;{ void* _temp163[ 1u]={& _temp164}; Cyc_Std_printf(
-_tag_arr("&%s[( ", sizeof( unsigned char), 7u), _tag_arr( _temp163, sizeof( void*),
-1u));}});{ void* typ= Cyc_Marshal_get_xtunionbranch( xtname, _temp80); env=((
-struct Cyc_Set_Set*(*)( void* rep, struct Cyc_Set_Set* env, unsigned int* val))
-Cyc_Marshal_print_type_base)( typ, env,( unsigned int*) _check_null( xtstructp));}}
-else{ unsigned char* xtnamec=(( unsigned char*(*)( unsigned int x)) unsafe_cast)(*
-xtunionp +  4); struct _tagged_arr xtname=( struct _tagged_arr)
-Cstring_to_string( xtnamec);({ struct Cyc_Std_String_pa_struct _temp166;
-_temp166.tag= Cyc_Std_String_pa; _temp166.f1=( struct _tagged_arr) xtname;{ void*
-_temp165[ 1u]={& _temp166}; Cyc_Std_printf( _tag_arr("&%s[( ", sizeof(
-unsigned char), 7u), _tag_arr( _temp165, sizeof( void*), 1u));}});}}} else{({
-struct Cyc_Std_Int_pa_struct _temp168; _temp168.tag= Cyc_Std_Int_pa; _temp168.f1=*
-xtunionp;{ void* _temp167[ 1u]={& _temp168}; Cyc_Std_printf( _tag_arr("(#%x)",
-sizeof( unsigned char), 6u), _tag_arr( _temp167, sizeof( void*), 1u));}});}({
-void* _temp169[ 0u]={}; Cyc_Std_printf( _tag_arr(" )]", sizeof( unsigned char),
-4u), _tag_arr( _temp169, sizeof( void*), 0u));}); goto _LL47;} _LL65:({ void*
-_temp170[ 0u]={}; Cyc_Std_printf( _tag_arr("[[", sizeof( unsigned char), 3u),
-_tag_arr( _temp170, sizeof( void*), 0u));});{ int i= 0; for( 0; i < 
-_get_arr_size( _temp82, sizeof( void**)); i ++){ Cyc_Marshal_print_type_base(*(*((
+struct Cyc_Std_String_pa_struct _temp166; _temp166.tag= Cyc_Std_String_pa;
+_temp166.f1=( struct _tagged_arr) xtname;{ void* _temp165[ 1u]={& _temp166}; Cyc_Std_printf(
+_tag_arr("&%s[( ", sizeof( unsigned char), 7u), _tag_arr( _temp165, sizeof( void*),
+1u));}});}}} else{({ struct Cyc_Std_Int_pa_struct _temp168; _temp168.tag= Cyc_Std_Int_pa;
+_temp168.f1=* xtunionp;{ void* _temp167[ 1u]={& _temp168}; Cyc_Std_printf(
+_tag_arr("(#%x)", sizeof( unsigned char), 6u), _tag_arr( _temp167, sizeof( void*),
+1u));}});}({ void* _temp169[ 0u]={}; Cyc_Std_printf( _tag_arr(" )]", sizeof(
+unsigned char), 4u), _tag_arr( _temp169, sizeof( void*), 0u));}); goto _LL47;}
+_LL65:({ void* _temp170[ 0u]={}; Cyc_Std_printf( _tag_arr("[[", sizeof(
+unsigned char), 3u), _tag_arr( _temp170, sizeof( void*), 0u));});{ int i= 0;
+for( 0; i <  _get_arr_size( _temp82, sizeof( void**)); i ++){ Cyc_Marshal_print_type_base(*(*((
 void***) _check_unknown_subscript( _temp82, sizeof( void**), i))), env, val);
 if( i <  _get_arr_size( _temp82, sizeof( void**)) -  1){({ void* _temp171[ 0u]={};
 Cyc_Std_printf( _tag_arr(" | ", sizeof( unsigned char), 4u), _tag_arr( _temp171,

@@ -241,18 +241,14 @@ unsigned int group); struct Cyc_Std_group* Cyc_Std_getgrnam( struct _tagged_arr
 name){ struct Cyc_Cgrp_Cgroup* src= getgrnam( string_to_Cstring( name)); return(
 unsigned int) src?({ struct Cyc_Std_group* _temp0=( struct Cyc_Std_group*)
 _cycalloc( sizeof( struct Cyc_Std_group)); _temp0->gr_name=( struct _tagged_arr)
-Cstring_to_string((( struct Cyc_Cgrp_Cgroup*) _check_null( src))->gr_name);
-_temp0->gr_passwd=( struct _tagged_arr) Cstring_to_string((( struct Cyc_Cgrp_Cgroup*)
-_check_null( src))->gr_passwd); _temp0->gr_gid=(( struct Cyc_Cgrp_Cgroup*)
-_check_null( src))->gr_gid; _temp0->gr_mem= ntCsl_to_ntsl((( struct Cyc_Cgrp_Cgroup*)
-_check_null( src))->gr_mem); _temp0;}): 0;} struct Cyc_Std_group* Cyc_Std_getgrgid(
+Cstring_to_string( src->gr_name); _temp0->gr_passwd=( struct _tagged_arr)
+Cstring_to_string( src->gr_passwd); _temp0->gr_gid= src->gr_gid; _temp0->gr_mem=
+ntCsl_to_ntsl( src->gr_mem); _temp0;}): 0;} struct Cyc_Std_group* Cyc_Std_getgrgid(
 unsigned int gid){ struct Cyc_Cgrp_Cgroup* src= getgrgid( gid); return(
 unsigned int) src?({ struct Cyc_Std_group* _temp1=( struct Cyc_Std_group*)
 _cycalloc( sizeof( struct Cyc_Std_group)); _temp1->gr_name=( struct _tagged_arr)
-Cstring_to_string((( struct Cyc_Cgrp_Cgroup*) _check_null( src))->gr_name);
-_temp1->gr_passwd=( struct _tagged_arr) Cstring_to_string((( struct Cyc_Cgrp_Cgroup*)
-_check_null( src))->gr_passwd); _temp1->gr_gid=(( struct Cyc_Cgrp_Cgroup*)
-_check_null( src))->gr_gid; _temp1->gr_mem= ntCsl_to_ntsl((( struct Cyc_Cgrp_Cgroup*)
-_check_null( src))->gr_mem); _temp1;}): 0;} int Cyc_Std_initgroups( struct
+Cstring_to_string( src->gr_name); _temp1->gr_passwd=( struct _tagged_arr)
+Cstring_to_string( src->gr_passwd); _temp1->gr_gid= src->gr_gid; _temp1->gr_mem=
+ntCsl_to_ntsl( src->gr_mem); _temp1;}): 0;} int Cyc_Std_initgroups( struct
 _tagged_arr user, unsigned int group){ return initgroups( string_to_Cstring(
 user), group);}

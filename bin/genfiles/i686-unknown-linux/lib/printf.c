@@ -560,9 +560,9 @@ unsigned char*) _check_unknown_subscript( end, sizeof( unsigned char), 0u))) <= 
 break;}*(( unsigned char*) _check_unknown_subscript( end, sizeof( unsigned char),
 0u))='0'; if( end.curr ==  start.curr){ if(( unsigned int) exp){*((
 unsigned char*) _check_unknown_subscript( end, sizeof( unsigned char), 0u))='1';
-++(*(( int*) _check_null( exp)));} else{*(( unsigned char*)
-_check_unknown_subscript( _tagged_arr_inplace_plus(& end, sizeof( unsigned char),
--1), sizeof( unsigned char), 0u))='1'; _tagged_arr_inplace_plus(& start, sizeof(
+++(* exp);} else{*(( unsigned char*) _check_unknown_subscript(
+_tagged_arr_inplace_plus(& end, sizeof( unsigned char), -1), sizeof(
+unsigned char), 0u))='1'; _tagged_arr_inplace_plus(& start, sizeof(
 unsigned char), -1);} break;}}} else{ if(* signp == '-'){ for( 0; 1;
 _tagged_arr_inplace_plus(& end, sizeof( unsigned char), -1)){ if(*((
 unsigned char*) _check_unknown_subscript( end, sizeof( unsigned char), 0u)) == '.'){

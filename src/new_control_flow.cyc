@@ -23,6 +23,8 @@
 // TO DO: complain about dereference of definitely NULL -- cannot do this
 // until we've reached a fixpoint!!!
 
+// TO DO: Exploit @ types to know NotZero!
+
 // KLUDGE: For unions, we just merge all fields, so you can read
 // longer after writing shorter, but because they're bits, safety is
 // not compromised.
@@ -65,7 +67,7 @@ struct CFStmtAnnot {
   flow_t flow;     // flow to merge in when we check again
 };
 typedef struct CFStmtAnnot cf_stmt_annot_t;
-xtunion StmtAnnot { CFAnnot(cf_stmt_annot_t); };
+xtunion AbsynAnnot { static CFAnnot(cf_stmt_annot_t); };
 
 // to be used by the type-checking pass to get things set up for us
 // must be called on EVERY stmt in the abstract syntax (even the dummy ones)
@@ -263,12 +265,19 @@ static $(flow_t,absRval_t) anal_derefR(analenv_t env, flow_t inflow,
       // else cannot be known: FIX: determine notzero as appropriate
       if(Tcutil::is_bound_one(bd))
 	switch(r) {
-	case &AddressOf(p): return $(f,lookup_place(outdict,p));
-	   // may not be at fixpoint
-	case Zero: return $(BottomFL,typ_to_absrval(elttype,unknown_all));
-	case &UnknownR(il): f = notzero(env,inflow,f,e,il); break;
-	default: break;
+	case NotZeroAll: 
+	case NotZeroThis: e->annot = NotZero; break;
+	case &AddressOf(p): 
+	  e->annot = NotZero; 
+	  return $(f,lookup_place(outdict,p));
+	case Zero: 
+	  e->annot = IsZero;
+	  return $(BottomFL,typ_to_absrval(elttype,unknown_all));
+	case &UnknownR(il): f = notzero(env,inflow,f,e,il); fallthru;
+	default: e->annot = UnknownZ;
 	}
+      else
+	e->annot = UnknownZ; // FIX: too conservative?
       switch(initlevel(outdict,r)) {
       case NoneIL:
 	Tcutil::terr(e->loc,"dereference of possibly uninitialized pointer");
@@ -325,9 +334,30 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     // Note: none of the primops cause things to escape or do a dereference!
     //       and they all return initialized ints of unknown value.
   case &Primop_e(_,es):     return anal_use_ints(env,inflow,es);
-  case &Increment_e(e,_):   return anal_use_ints(env,inflow,list(e));
-  case &AssignOp_e(l,&_,r): return anal_use_ints(env,inflow,list(l,r));
-  
+
+  case &Increment_e(e1,_):   
+    let $(f,_) = anal_use_ints(env,inflow,list(e1));
+    let $(_,lval) = anal_Lexp(env,f,e1);
+    switch($(lval,f)) {
+    case $(&PlaceL(p),&ReachableFL(outdict)): 
+      f = new ReachableFL(assign_place(e1->loc,outdict,
+				       env->all_changed,p,unknown_all));
+      break;
+    default: break;
+    }
+    return $(f,unknown_all);
+  case &AssignOp_e(l,&_,r): 
+    let $(f,_) = anal_use_ints(env,inflow,list(l,r));
+    let $(_,lval) = anal_Lexp(env,f,e);
+    switch($(lval,f)) {
+    case $(&PlaceL(p),&ReachableFL(outdict)): 
+      f = new ReachableFL(assign_place(l->loc,outdict,
+				       env->all_changed,p,unknown_all));
+      break;
+    default: break;
+    }
+    return $(f,unknown_all);
+
   case &AssignOp_e(e1,NULL,e2): // really annoying we don't have e1 before e2!
     let outer_all_changed = env->all_changed;
     while(true) { // local iteration
@@ -596,12 +626,19 @@ static $(flow_t,absLval_t) anal_derefL(analenv_t env, flow_t inflow, flow_t f,
       // else cannot be known: FIX: determine notzero as appropriate
       if(Tcutil::is_bound_one(bd))
 	switch(r) {
+	case NotZeroAll:
+	case NotZeroThis: e->annot = NotZero; break;
 	case &AddressOf(&Place(root,flds2)): 
+	  e->annot = NotZero;
 	  return $(f, new PlaceL(new Place(root, append(flds2,flds))));
-	case Zero: return $(BottomFL,UnknownL); // may not be at fixpoint
-	case &UnknownR(il): f = notzero(env,inflow,f,e,il); break;
-	default: break;
+	case Zero: 
+	  e->annot = IsZero;
+	  return $(BottomFL,UnknownL);
+	case &UnknownR(il): f = notzero(env,inflow,f,e,il); fallthru;
+	default: e->annot = UnknownZ;
 	}
+      else
+	e->annot = UnknownZ; // FIX: too conservative?
       if(initlevel(outdict,r)==NoneIL)
 	Tcutil::terr(e->loc,"dereference of possibly uninitialized pointer");
       return $(f,UnknownL);
@@ -630,6 +667,8 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
   case &Var_e(_,&Local_b(vd)): fallthru(vd);
   case &Var_e(_,&Pat_b(vd)):
     return $(inflow, new PlaceL(new Place(new VarRoot(vd), flds)));
+
+  case &Var_e(_,&Global_b(vd)): return $(inflow,UnknownL);
 
   case &StructArrow_e(e1,f):
     switch(Tcutil::compress(e1->topt->v)) {
@@ -772,8 +811,9 @@ static flow_t anal_scs(analenv_t env,flow_t inflow,list_t<switch_clause_t> scs){
 	anal_test(env,clause_inflow,(exp_t)where_opt);
       inflow = false_flow; // affects remaining clauses
       clause_outflow = anal_stmt(env,true_flow,body);
-    } else
+    } else {
       clause_outflow = anal_stmt(env,clause_inflow,body);
+    }
     switch(clause_outflow) {
     case BottomFL: break;
     default:
@@ -980,11 +1020,11 @@ static void postpass(stmt_t s) {
 //        check them on return and on fall off void)
 static void check_fun(fndecl_t fd) {
   //  fprintf(stderr," %s ",*(*fd->name)[1]);
-  flow_t inflow = add_vars(new ReachableFL(Dict::empty(root_cmp)),
-			   fd->param_vardecls->v,
-			   unknown_all);
-  analenv_t env = new AnalEnv(true,0,false,inflow,NULL);
-  flow_t outflow = inflow;
+  flow_t    inflow  = add_vars(new ReachableFL(Dict::empty(root_cmp)),
+			       fd->param_vardecls->v,
+			       unknown_all);
+  analenv_t env     = new AnalEnv(true,0,false,inflow,NULL);
+  flow_t    outflow = inflow;
   while(env->iterate_again) {
     ++(env->iteration_num);
     env->iterate_again = false;

@@ -269,16 +269,15 @@ _temp3;}); _temp2;}));}}} double Cyc_Std_strtod( struct _tagged_arr nptr, struct
 _tagged_arr* endptr){ Cyc_Std_check_valid_cstring( nptr);{ unsigned char* c=
 underlying_Cstring( nptr); unsigned char* e= endptr ==  0? 0: c; double d=
 strtod( c,( unsigned char**)& e); if( endptr !=  0){ int n=( int)(( unsigned int)
-e - ( unsigned int) c);*(( struct _tagged_arr*) _check_null( endptr))=
-_tagged_arr_plus( nptr, sizeof( unsigned char), n);} return d;}} int Cyc_Std_strtol(
-struct _tagged_arr n, struct _tagged_arr* endptr, int base){ Cyc_Std_check_valid_cstring(
-n);{ unsigned char* c= underlying_Cstring( n); unsigned char* e= endptr ==  0? 0:
-c; int r= strtol( c,( unsigned char**)& e, base); if( endptr !=  0){ int m=( int)((
-unsigned int) e - ( unsigned int) c);*(( struct _tagged_arr*) _check_null(
-endptr))= _tagged_arr_plus( n, sizeof( unsigned char), m);} return r;}}
-unsigned int Cyc_Std_strtoul( struct _tagged_arr n, struct _tagged_arr* endptr,
-int base){ Cyc_Std_check_valid_cstring( n);{ unsigned char* c=
-underlying_Cstring( n); unsigned char* e= endptr ==  0? 0: c; unsigned int r=
+e - ( unsigned int) c);* endptr= _tagged_arr_plus( nptr, sizeof( unsigned char),
+n);} return d;}} int Cyc_Std_strtol( struct _tagged_arr n, struct _tagged_arr*
+endptr, int base){ Cyc_Std_check_valid_cstring( n);{ unsigned char* c=
+underlying_Cstring( n); unsigned char* e= endptr ==  0? 0: c; int r= strtol( c,(
+unsigned char**)& e, base); if( endptr !=  0){ int m=( int)(( unsigned int) e - (
+unsigned int) c);* endptr= _tagged_arr_plus( n, sizeof( unsigned char), m);}
+return r;}} unsigned int Cyc_Std_strtoul( struct _tagged_arr n, struct
+_tagged_arr* endptr, int base){ Cyc_Std_check_valid_cstring( n);{ unsigned char*
+c= underlying_Cstring( n); unsigned char* e= endptr ==  0? 0: c; unsigned int r=
 strtoul( c,( unsigned char**)& e, base); if( endptr !=  0){ int m=( int)((
-unsigned int) e - ( unsigned int) c);*(( struct _tagged_arr*) _check_null(
-endptr))= _tagged_arr_plus( n, sizeof( unsigned char), m);} return r;}}
+unsigned int) e - ( unsigned int) c);* endptr= _tagged_arr_plus( n, sizeof(
+unsigned char), m);} return r;}}

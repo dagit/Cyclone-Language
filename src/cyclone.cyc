@@ -626,15 +626,14 @@ static void process_file(string_t<`H> filename) {
   // Type checking and control-flow checking
   tds = do_stage("type checking", do_typecheck, te, tds);
   if (compile_failure) {
-    //    Tcutil::flush_warnings();
     remove_file(preprocfile); // Can't flush warnings after removal
     return;
   } 
   tds = do_stage("control-flow checking", do_cfcheck, true, tds);
-  if(!compile_failure)
-    Tcutil::flush_warnings();
-  remove_file(preprocfile); // Can't flush warnings after removal
-  if (compile_failure) return;
+  if (compile_failure) {
+    remove_file(preprocfile); // Can't flush warnings after removal
+    return;
+  } 
 
   // Interface checking
   if (ic_r) {
@@ -657,9 +656,16 @@ static void process_file(string_t<`H> filename) {
 
   // Translation to C
   tds = do_stage("translation to C", do_translate, true, tds);
+  if (compile_failure) {
+    remove_file(preprocfile); // Can't flush warnings after removal
+    return;
+  } 
+  if (!compile_failure)
+    Tcutil::flush_warnings();
+  remove_file(preprocfile);
+  if(compile_failure) return;
+  if (tovc_r) tds = do_stage("post-pass to VC", do_tovc, true, tds);
   if (compile_failure) return;
-   if (tovc_r) tds = do_stage("post-pass to VC", do_tovc, true, tds);
-   if (compile_failure) return;
 
  PRINTC:
   if (tds != NULL) {

@@ -241,25 +241,17 @@ Cyc_Cpwd_Cpasswd* getpwuid( unsigned short uid); struct Cyc_Std_passwd* Cyc_Std_
 struct _tagged_arr name){ struct Cyc_Cpwd_Cpasswd* src= getpwnam(
 string_to_Cstring( name)); return( unsigned int) src?({ struct Cyc_Std_passwd*
 _temp0=( struct Cyc_Std_passwd*) _cycalloc( sizeof( struct Cyc_Std_passwd));
-_temp0->pw_name=( struct _tagged_arr) Cstring_to_string((( struct Cyc_Cpwd_Cpasswd*)
-_check_null( src))->pw_name); _temp0->pw_passwd=( struct _tagged_arr)
-Cstring_to_string((( struct Cyc_Cpwd_Cpasswd*) _check_null( src))->pw_passwd);
-_temp0->pw_uid=(( struct Cyc_Cpwd_Cpasswd*) _check_null( src))->pw_uid; _temp0->pw_gid=((
-struct Cyc_Cpwd_Cpasswd*) _check_null( src))->pw_gid; _temp0->pw_gecos=( struct
-_tagged_arr) Cstring_to_string((( struct Cyc_Cpwd_Cpasswd*) _check_null( src))->pw_gecos);
-_temp0->pw_dir=( struct _tagged_arr) Cstring_to_string((( struct Cyc_Cpwd_Cpasswd*)
-_check_null( src))->pw_dir); _temp0->pw_shell=( struct _tagged_arr)
-Cstring_to_string((( struct Cyc_Cpwd_Cpasswd*) _check_null( src))->pw_shell);
-_temp0;}): 0;} struct Cyc_Std_passwd* Cyc_Std_getpwuid( unsigned short uid){
-struct Cyc_Cpwd_Cpasswd* src= getpwuid( uid); return( unsigned int) src?({
-struct Cyc_Std_passwd* _temp1=( struct Cyc_Std_passwd*) _cycalloc( sizeof(
-struct Cyc_Std_passwd)); _temp1->pw_name=( struct _tagged_arr) Cstring_to_string(((
-struct Cyc_Cpwd_Cpasswd*) _check_null( src))->pw_name); _temp1->pw_passwd=(
-struct _tagged_arr) Cstring_to_string((( struct Cyc_Cpwd_Cpasswd*) _check_null(
-src))->pw_passwd); _temp1->pw_uid=(( struct Cyc_Cpwd_Cpasswd*) _check_null( src))->pw_uid;
-_temp1->pw_gid=(( struct Cyc_Cpwd_Cpasswd*) _check_null( src))->pw_gid; _temp1->pw_gecos=(
-struct _tagged_arr) Cstring_to_string((( struct Cyc_Cpwd_Cpasswd*) _check_null(
-src))->pw_gecos); _temp1->pw_dir=( struct _tagged_arr) Cstring_to_string(((
-struct Cyc_Cpwd_Cpasswd*) _check_null( src))->pw_dir); _temp1->pw_shell=( struct
-_tagged_arr) Cstring_to_string((( struct Cyc_Cpwd_Cpasswd*) _check_null( src))->pw_shell);
-_temp1;}): 0;}
+_temp0->pw_name=( struct _tagged_arr) Cstring_to_string( src->pw_name); _temp0->pw_passwd=(
+struct _tagged_arr) Cstring_to_string( src->pw_passwd); _temp0->pw_uid= src->pw_uid;
+_temp0->pw_gid= src->pw_gid; _temp0->pw_gecos=( struct _tagged_arr)
+Cstring_to_string( src->pw_gecos); _temp0->pw_dir=( struct _tagged_arr)
+Cstring_to_string( src->pw_dir); _temp0->pw_shell=( struct _tagged_arr)
+Cstring_to_string( src->pw_shell); _temp0;}): 0;} struct Cyc_Std_passwd* Cyc_Std_getpwuid(
+unsigned short uid){ struct Cyc_Cpwd_Cpasswd* src= getpwuid( uid); return(
+unsigned int) src?({ struct Cyc_Std_passwd* _temp1=( struct Cyc_Std_passwd*)
+_cycalloc( sizeof( struct Cyc_Std_passwd)); _temp1->pw_name=( struct _tagged_arr)
+Cstring_to_string( src->pw_name); _temp1->pw_passwd=( struct _tagged_arr)
+Cstring_to_string( src->pw_passwd); _temp1->pw_uid= src->pw_uid; _temp1->pw_gid=
+src->pw_gid; _temp1->pw_gecos=( struct _tagged_arr) Cstring_to_string( src->pw_gecos);
+_temp1->pw_dir=( struct _tagged_arr) Cstring_to_string( src->pw_dir); _temp1->pw_shell=(
+struct _tagged_arr) Cstring_to_string( src->pw_shell); _temp1;}): 0;}

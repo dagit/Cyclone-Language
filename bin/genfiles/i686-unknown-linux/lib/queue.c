@@ -261,14 +261,10 @@ Cyc_List_List*) _check_null( q->front))->tl; if( q->front ==  0){ q->rear= 0;} q
 Cyc_List_List*) _check_null( q->front))->hd;}} void Cyc_Queue_clear( struct Cyc_Queue_Queue*
 q){ q->front= 0; q->rear= 0; q->len= 0;} void Cyc_Queue_remove( struct Cyc_Queue_Queue*
 q, void* v){ struct Cyc_List_List* x; struct Cyc_List_List* y; for(( x= q->front,
-y= 0); x !=  0;( y= x, x=(( struct Cyc_List_List*) _check_null( x))->tl)){ if((
-void*)(( struct Cyc_List_List*) _check_null( x))->hd ==  v){ if( q->front ==  x){
-q->front=(( struct Cyc_List_List*) _check_null( x))->tl;} else{(( struct Cyc_List_List*)
-_check_null( y))->tl=(( struct Cyc_List_List*) _check_null( x))->tl;} if( q->rear
-==  x){ q->rear= y;} break;}}} int Cyc_Queue_length( struct Cyc_Queue_Queue* q){
-return( int) q->len;} void Cyc_Queue_iter( void(* f)( void*), struct Cyc_Queue_Queue*
-q){ struct Cyc_List_List* x= q->front; for( 0; x !=  0; x=(( struct Cyc_List_List*)
-_check_null( x))->tl){ f(( void*)(( struct Cyc_List_List*) _check_null( x))->hd);}}
+y= 0); x !=  0;( y= x, x= x->tl)){ if(( void*) x->hd ==  v){ if( q->front ==  x){
+q->front= x->tl;} else{(( struct Cyc_List_List*) _check_null( y))->tl= x->tl;}
+if( q->rear ==  x){ q->rear= y;} break;}}} int Cyc_Queue_length( struct Cyc_Queue_Queue*
+q){ return( int) q->len;} void Cyc_Queue_iter( void(* f)( void*), struct Cyc_Queue_Queue*
+q){ struct Cyc_List_List* x= q->front; for( 0; x !=  0; x= x->tl){ f(( void*) x->hd);}}
 void Cyc_Queue_app( void*(* f)( void*), struct Cyc_Queue_Queue* q){ struct Cyc_List_List*
-x= q->front; for( 0; x !=  0; x=(( struct Cyc_List_List*) _check_null( x))->tl){
-f(( void*)(( struct Cyc_List_List*) _check_null( x))->hd);}}
+x= q->front; for( 0; x !=  0; x= x->tl){ f(( void*) x->hd);}}

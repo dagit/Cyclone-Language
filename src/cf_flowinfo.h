@@ -56,10 +56,15 @@ typedef struct Place<`r1> @`r2 place_t<`r1,`r2>;
 EXTERN_CFFLOW tunion InitLevel { NoneIL, ThisIL, AllIL };
 typedef tunion InitLevel initlevel_t;
 
+xtunion Absyn::AbsynAnnot { 
+  EXTERN_CFFLOW IsZero;
+  EXTERN_CFFLOW NotZero;
+  EXTERN_CFFLOW UnknownZ;
+};
+
 EXTERN_CFFLOW tunion AbsLVal { PlaceL(place_t); UnknownL; };
 typedef tunion AbsLVal absLval_t;
 
-EXTERN_CFFLOW tunion AbsRVal;
 typedef tunion AbsRVal absRval_t;
 typedef Dict::dict_t<root_t,             absRval_t> flowdict_t;
 typedef Dict::dict_t<Absyn::field_name_t,absRval_t> aggrdict_t;

@@ -376,29 +376,26 @@ this_line; int eol; void* next; while( places !=  0) { while( 1) { next=(( void*
 struct Cyc_Lexing_lexbuf* lexbuf)) Cyc_Lineno_token)( lbuf); eol=(( int(*)(
 struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme_end)( lbuf); this_line=(( struct
 _tagged_arr(*)( struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme)( lbuf); if( next
-== ( void*) Cyc_Lineno_END? 1: eol > (*(( struct _tuple1*)(( struct Cyc_List_List*)
-_check_null( places))->hd)).f1){ break;} if( next == ( void*) Cyc_Lineno_NEWLINE){
-++ _temp31;} else{ struct Cyc_Core_Opt* fno= Cyc_Lineno_parse_linedef( this_line);
-if( fno ==  0){ ++ _temp31;} else{ _temp30=( struct _tagged_arr)(*(( struct
-_tuple0*)(( struct Cyc_Core_Opt*) _check_null( fno))->v)).f1; _temp31=(*((
-struct _tuple0*)(( struct Cyc_Core_Opt*) _check_null( fno))->v)).f2;}}} while(
-places !=  0? next == ( void*) Cyc_Lineno_END? 1: eol > (*(( struct _tuple1*)((
-struct Cyc_List_List*) _check_null( places))->hd)).f1: 0) { struct Cyc_Lineno_Pos*
-_temp32=(*(( struct _tuple1*)(( struct Cyc_List_List*) _check_null( places))->hd)).f2;
-_temp32->logical_file=( struct _tagged_arr) Cyc_Std_strdup( _temp30); _temp32->line=
-this_line; _temp32->line_no= _temp31; _temp32->col=( int)( Cyc_Std_strlen((
-struct _tagged_arr) this_line) - ( eol - (*(( struct _tuple1*)(( struct Cyc_List_List*)
-_check_null( places))->hd)).f1)); if( _temp32->col <  0){ _temp32->col= 0;}
-places=(( struct Cyc_List_List*) _check_null( places))->tl;} ++ _temp31;}};
-_pop_handler();} else{ void* _temp28=( void*) _exn_thrown; void* _temp34=
-_temp28; _LL36: goto _LL37; _LL38: goto _LL39; _LL37: Cyc_Std_file_close( f);(
-int) _throw( _temp34); _LL39:( void) _throw( _temp34); _LL35:;}}} Cyc_Std_file_close(
-f); return;}} struct Cyc_Lineno_Pos* Cyc_Lineno_pos_of_abs( struct _tagged_arr
-filename, int abs){ struct Cyc_Lineno_Pos* ans=({ struct Cyc_Lineno_Pos* _temp42=(
-struct Cyc_Lineno_Pos*) _cycalloc( sizeof( struct Cyc_Lineno_Pos)); _temp42->logical_file=
-_tag_arr("", sizeof( unsigned char), 1u); _temp42->line= Cyc_Core_new_string( 0);
-_temp42->line_no= 0; _temp42->col= 0; _temp42;}); Cyc_Lineno_poss_of_abss(
-filename,({ struct Cyc_List_List* _temp40=( struct Cyc_List_List*) _cycalloc(
-sizeof( struct Cyc_List_List)); _temp40->hd=( void*)({ struct _tuple1* _temp41=(
-struct _tuple1*) _cycalloc( sizeof( struct _tuple1)); _temp41->f1= abs; _temp41->f2=
-ans; _temp41;}); _temp40->tl= 0; _temp40;})); return ans;}
+== ( void*) Cyc_Lineno_END? 1: eol > (*(( struct _tuple1*) places->hd)).f1){
+break;} if( next == ( void*) Cyc_Lineno_NEWLINE){ ++ _temp31;} else{ struct Cyc_Core_Opt*
+fno= Cyc_Lineno_parse_linedef( this_line); if( fno ==  0){ ++ _temp31;} else{
+_temp30=( struct _tagged_arr)(*(( struct _tuple0*) fno->v)).f1; _temp31=(*((
+struct _tuple0*) fno->v)).f2;}}} while( places !=  0? next == ( void*) Cyc_Lineno_END?
+1: eol > (*(( struct _tuple1*) places->hd)).f1: 0) { struct Cyc_Lineno_Pos*
+_temp32=(*(( struct _tuple1*) places->hd)).f2; _temp32->logical_file=( struct
+_tagged_arr) Cyc_Std_strdup( _temp30); _temp32->line= this_line; _temp32->line_no=
+_temp31; _temp32->col=( int)( Cyc_Std_strlen(( struct _tagged_arr) this_line) - (
+eol - (*(( struct _tuple1*) places->hd)).f1)); if( _temp32->col <  0){ _temp32->col=
+0;} places= places->tl;} ++ _temp31;}}; _pop_handler();} else{ void* _temp28=(
+void*) _exn_thrown; void* _temp34= _temp28; _LL36: goto _LL37; _LL38: goto _LL39;
+_LL37: Cyc_Std_file_close( f);( int) _throw( _temp34); _LL39:( void) _throw(
+_temp34); _LL35:;}}} Cyc_Std_file_close( f); return;}} struct Cyc_Lineno_Pos*
+Cyc_Lineno_pos_of_abs( struct _tagged_arr filename, int abs){ struct Cyc_Lineno_Pos*
+ans=({ struct Cyc_Lineno_Pos* _temp42=( struct Cyc_Lineno_Pos*) _cycalloc(
+sizeof( struct Cyc_Lineno_Pos)); _temp42->logical_file= _tag_arr("", sizeof(
+unsigned char), 1u); _temp42->line= Cyc_Core_new_string( 0); _temp42->line_no= 0;
+_temp42->col= 0; _temp42;}); Cyc_Lineno_poss_of_abss( filename,({ struct Cyc_List_List*
+_temp40=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp40->hd=( void*)({ struct _tuple1* _temp41=( struct _tuple1*) _cycalloc(
+sizeof( struct _tuple1)); _temp41->f1= abs; _temp41->f2= ans; _temp41;});
+_temp40->tl= 0; _temp40;})); return ans;}

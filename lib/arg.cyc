@@ -213,10 +213,10 @@ void parse(speclist_t<`r1,`r2> speclist,
       }
       try
 	switch (action) {
-	case &Unit_spec(f)  : f();        break;
-	case &Flag_spec(f)  : f(s);       break;
-	case &Set_spec(r)   : *r = true;  break;
-	case &Clear_spec(r) : *r = false; break;
+	case &Unit_spec(f):  f();        break;
+	case &Flag_spec(f):  f(s);       break;
+	case &Set_spec(r):   *r = true;  break;
+	case &Clear_spec(r): *r = false; break;
 	case &FlagString_spec(f):
 	  if (current+1 < l) {
 	    f(s,args[current+1]);
