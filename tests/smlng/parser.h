@@ -6,6 +6,6 @@
 namespace Parser {
 using Buffer;
 using Stdio;
-extern doc_t get_docs(buf_t b, FILE @f);
+extern doc_t get_docs(context_t, buf_t b, FILE @f);
 }
 #endif

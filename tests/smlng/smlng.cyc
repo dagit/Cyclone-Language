@@ -190,15 +190,15 @@ int main(int argc, char ??argv) {
   //start_timer(argv[1]);
   //time_test(argv[1]);
   buf_t b = init_buf();
-  doc_t d = get_docs(b,stdin);
-  doc_t orig = copy_doc(d);
-  fprintf(stderr,"copy: ");
-  validate_docs(b,d,orig); // checks the validator (one direction)
+  doc_t d = get_docs(init_context,b,stdin);
+  // doc_t orig = copy_doc(d);
+  // fprintf(stderr,"copy: ");
+  // validate_docs(b,d,orig); // checks the validator (one direction)
   //  doc_t d2 = new Text(new {for i < 3: 'a'});
   //  validate_docs(d,d2);
-      d = down_opt(init_context,d);
-	       fprintf(stderr,"down: ");
-	       validate_docs(b,d,orig);
+  //    d = down_opt(init_context,d);
+      //	       fprintf(stderr,"down: ");
+      //       validate_docs(b,d,orig);
 	       /*  let $(d,_) = TagElim::up_opt(d);
   fprintf(stderr,"up: ");
   validate_docs(d,orig);*/

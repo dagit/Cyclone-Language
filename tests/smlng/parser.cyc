@@ -15,7 +15,7 @@ using Buffer;
 namespace Parser;
 
 // The information part of a tag 
-static string_t tag[] = {
+static string_t tag_strings[] = {
   "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
   "B", "EM", "I", "PL", "S", "TT", "U", "r", "g",
   "b", "c", "m", "y", "k", "w"
@@ -36,8 +36,9 @@ static void die(const char ?`r desc, ...`r2 inject parg_t<`r4> ap)
 /* keep going until you hit a tag or EOF 
  * and then return the text you've got so far.
    XXX should be able to region-ify this */
-static doc_t get_text(buf_t b, FILE @f) {
+static doc_t get_text(context_t ctxt, buf_t b, FILE @f) {
   int c;
+  bool in_tt = ctxt.TT;
   unsigned int start = Buffer::position(b);
   while (true) {
     c = GETC(f);
@@ -49,6 +50,21 @@ static doc_t get_text(buf_t b, FILE @f) {
     case EOF: /* eof */
       Buffer::add_char(b, '\0');
       return new Text(start);
+    case 0x20:
+    case 0x0D:
+    case 0x0A:
+    case 0x09:
+      // white space treated specially
+      Buffer::add_char(b,(char)c);
+      if (!in_tt) {
+	while (true) {
+	  c = GETC(f);
+	  if (c == 0x20 || c == 0x0D || c == 0x0A || c == 0x09) continue;
+	  break;
+	}
+	UNGETC(c,f);
+      }
+      break;
     default:
       Buffer::add_char(b,(char)c);
       break;
@@ -104,7 +120,7 @@ static tag_t get_tag(FILE @f) {
     t = TT_tag; break;
   }
   if ((c = GETC(f)) != '>')
-    die("missing > on tag %s",tag[t]);
+    die("missing > on tag %s",tag_strings[t]);
   return t;
 }
 
@@ -115,10 +131,76 @@ static void get_endtag(FILE @f, tag_t t) {
     die("expecting end tag /");
   tag_t t2 = get_tag(f);
   if (t != t2)
-    die("end tag mismatch: %s != %s",tag[t],tag[t2]);
+    die("end tag mismatch: %s != %s",tag_strings[t],tag_strings[t2]);
 }
 
-doc_t get_docs(buf_t b, FILE @f) {
+static bool check_redundant(context_t @`r ctxt, tag_t tag) {
+  switch (tag) {
+  case B_tag:
+    if (ctxt->B) return true;
+    ctxt->B = true; 
+    break;
+  case EM_tag:
+    if (ctxt->S) return true;
+    ctxt->EM = !ctxt->EM; 
+    break;
+  case I_tag:
+    if (ctxt->I) return true;
+    ctxt->I = true;
+    break;
+  case PL_tag:
+    // PL clears the U, B, EM, I, S, and TT attributes
+    if (ctxt->U == 0 && !ctxt->B && !ctxt->EM && !ctxt->I && !ctxt->S && 
+	!ctxt->TT)
+      return true;
+    ctxt->U = 0; ctxt->B = false; ctxt->EM = false; ctxt->I = false;
+    ctxt->S = false; ctxt->TT = false;
+    break;
+  case S_tag:
+    if (ctxt->S) return true;
+    ctxt->S = true;
+    ctxt->EM = false; 
+    break;
+  case TT_tag:
+    if (ctxt->TT) return true;
+    ctxt->TT = true;
+    break;
+  case U_tag:
+    if (ctxt->U == 3) return true;
+    ctxt->U++;
+    break;
+  case Zero:
+  case One:
+  case Two:
+  case Three:
+  case Four:
+  case Five:
+  case Six:
+  case Seven:
+  case Eight:
+  case Nine:
+    char sz = (char)tag;
+    if (ctxt->size == sz) return true;
+    ctxt->size = sz;
+    break;
+  case r_tag:
+  case g_tag:
+  case b_tag:
+  case c_tag:
+  case m_tag:
+  case y_tag:
+  case k_tag:
+  case w_tag:
+    char color = (char)tag;
+    if (ctxt->color == color) return true;
+    ctxt->color = color;
+    break;
+  default: throw new Impossible("down_opt");
+  }
+  return false;
+}
+
+doc_t get_docs(context_t ctxt, buf_t b, FILE @f) {
   doc_t ? result;
   region r {
     glist_t<doc_t,`r> docs = null;
@@ -132,13 +214,17 @@ doc_t get_docs(buf_t b, FILE @f) {
           break;
         } else {
           let tag = get_tag(f);
-          let d = get_docs(b, f);
+	  let new_ctxt = ctxt;
+	  let redundant = check_redundant(&new_ctxt,tag);
+          let d = get_docs(new_ctxt, b, f);
           get_endtag(f,tag);
-          docs = rnew(r) List(new Tagged(tag,d),docs);
+	  if (!redundant)
+	    d = new Tagged(tag,d);
+          docs = rnew(r) List(d,docs);
         }
       } else {
         UNGETC(c,f);
-        docs = rnew(r) List(get_text(b,f),docs);
+        docs = rnew(r) List(get_text(ctxt, b,f),docs);
       }
       c = GETC(f);
     }
