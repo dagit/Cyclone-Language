@@ -105,8 +105,8 @@ void copy_up_to(FILE @fin, FILE @fout, int @curr_line, int @curr_off,
     c = fgetc(fin);
     fputc(c,fout);
     if (c == EOF) {
-      fprintf(stderr,"oops!  Ran out of file!\n");
-      exit(1);
+      fprintf(stderr,"copy_up_to:  oops!  Ran out of file!\n");
+      break;
     }
     if (c == '\n') {
       *curr_line = *curr_line + 1;
@@ -137,11 +137,11 @@ void copy_up_to(FILE @fin, FILE @fout, int @curr_line, int @curr_off,
     c = fgetc(fin);
     fputc(c,fout);
     if (c == EOF) {
-      fprintf(stderr,"oops!  Ran out of file!\n");
-      exit(1);
+      fprintf(stderr,"copy_up_to: oops!  Ran out of file 2!\n");
+      break;
     }      
     if (c == '\n') {
-      fprintf(stderr,"oops! Ran off the end of line %d!\n",*curr_line);
+      fprintf(stderr,"copy_up_to: oops! Ran off the end of line %d!\n",*curr_line);
       *curr_line = *curr_line + 1;
       *curr_off = 0;
       *firstspcs = true;
@@ -175,8 +175,8 @@ void skip_input(FILE @fin, int @curr_line, int @curr_off, int count,
   while (count != 0) {
     c = fgetc(fin);
     if (c == EOF) {
-      fprintf(stderr,"oops!  Ran out of file!\n");
-      exit(1);
+      fprintf(stderr,"skip_input: oops!  Ran out of file!\n");
+      break;
     }
     if (c == '\n') {
       *curr_line = *curr_line + 1;
