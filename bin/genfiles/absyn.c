@@ -1220,7 +1220,7 @@ int tag;struct Cyc_Absyn_Stmt*f1;};struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns
 struct Cyc_Dict_Dict ae;struct Cyc_Tcenv_Fenv*le;int allow_valueof;};void*Cyc_Tcutil_impos(
 struct _dyneither_ptr fmt,struct _dyneither_ptr ap);void*Cyc_Tcutil_compress(void*t);
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_rk;extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-extern struct Cyc_Core_Opt Cyc_Tcutil_mko;void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*
+extern struct Cyc_Core_Opt Cyc_Tcutil_tmko;void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*
 k);extern int Cyc_Cyclone_tovc_r;enum Cyc_Cyclone_C_Compilers{Cyc_Cyclone_Gcc_c  = 
 0,Cyc_Cyclone_Vc_c  = 1};extern enum Cyc_Cyclone_C_Compilers Cyc_Cyclone_c_compiler;
 int Cyc_Cyclone_tovc_r=0;enum Cyc_Cyclone_C_Compilers Cyc_Cyclone_c_compiler=Cyc_Cyclone_Gcc_c;
@@ -1278,7 +1278,7 @@ return(void*)((_tmp214=_cycalloc(sizeof(*_tmp214)),((_tmp214[0]=((_tmp215.tag=1,
 _tmp215.f1=k,((_tmp215.f2=0,((_tmp215.f3=Cyc_Absyn_new_type_counter ++,((_tmp215.f4=
 env,_tmp215)))))))))),_tmp214))));}void*Cyc_Absyn_wildtyp(struct Cyc_Core_Opt*
 tenv);void*Cyc_Absyn_wildtyp(struct Cyc_Core_Opt*tenv){return Cyc_Absyn_new_evar((
-struct Cyc_Core_Opt*)& Cyc_Tcutil_mko,tenv);}struct Cyc_Absyn_Tqual Cyc_Absyn_combine_tqual(
+struct Cyc_Core_Opt*)& Cyc_Tcutil_tmko,tenv);}struct Cyc_Absyn_Tqual Cyc_Absyn_combine_tqual(
 struct Cyc_Absyn_Tqual x,struct Cyc_Absyn_Tqual y);struct Cyc_Absyn_Tqual Cyc_Absyn_combine_tqual(
 struct Cyc_Absyn_Tqual x,struct Cyc_Absyn_Tqual y){struct Cyc_Absyn_Tqual _tmp216;
 return(_tmp216.print_const=x.print_const  || y.print_const,((_tmp216.q_volatile=x.q_volatile

@@ -46,7 +46,7 @@ namespace Lexing;
 
 datatype exn { Error(string_t) };
 
-struct lexbuf<`a> { // use `a for state that refill_buff might need 
+struct lexbuf<`a::B> { // use `a for state that refill_buff might need 
 
   void   (@refill_buff)(struct lexbuf<`a> @);
   `a     refill_state;

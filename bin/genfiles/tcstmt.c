@@ -1085,24 +1085,24 @@ void*t);int Cyc_Tcutil_coerce_arg(struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Exp*,v
 int Cyc_Tcutil_coerce_assign(struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Exp*,void*);
 int Cyc_Tcutil_is_pointer_type(void*t);extern struct Cyc_Absyn_Kind Cyc_Tcutil_rk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;extern struct Cyc_Absyn_Kind Cyc_Tcutil_mk;
-extern struct Cyc_Core_Opt Cyc_Tcutil_rko;void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*
-k);void Cyc_Tcutil_explain_failure();int Cyc_Tcutil_unify(void*,void*);void*Cyc_Tcutil_substitute(
-struct Cyc_List_List*,void*);void*Cyc_Tcutil_fndecl2typ(struct Cyc_Absyn_Fndecl*);
-struct _tuple10*Cyc_Tcutil_make_inst_var(struct Cyc_List_List*,struct Cyc_Absyn_Tvar*);
-void Cyc_Tcutil_check_fndecl_valid_type(struct Cyc_Position_Segment*,struct Cyc_Tcenv_Tenv*,
-struct Cyc_Absyn_Fndecl*);void Cyc_Tcutil_check_type(struct Cyc_Position_Segment*,
-struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*bound_tvars,struct Cyc_Absyn_Kind*k,int
-allow_evars,void*);int Cyc_Tcutil_is_noalias_path(struct _RegionHandle*,struct Cyc_Absyn_Exp*
-e);int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct _RegionHandle*,void*t);int Cyc_Tcutil_new_tvar_id();
-int Cyc_Tcutil_is_const_exp(struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Exp*e);struct
-Cyc_List_List*Cyc_Tcutil_transfer_fn_type_atts(void*t,struct Cyc_List_List*atts);
-void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);void*Cyc_Tcexp_tcExpInitializer(
-struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);struct _tuple11{void*f1;void*
-f2;};struct Cyc_Tcexp_TestEnv{struct _tuple11*eq;int isTrue;};struct Cyc_Tcexp_TestEnv
-Cyc_Tcexp_tcTest(struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Exp*e,struct
-_dyneither_ptr msg_part);extern int Cyc_Tcexp_in_stmt_exp;struct _tuple12{struct Cyc_List_List*
-f1;struct Cyc_List_List*f2;};struct Cyc_Tcpat_TcPatResult{struct _tuple12*
-tvars_and_bounds_opt;struct Cyc_List_List*patvars;};struct Cyc_Tcpat_TcPatResult
+extern struct Cyc_Absyn_Kind Cyc_Tcutil_tmk;extern struct Cyc_Core_Opt Cyc_Tcutil_rko;
+void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);void Cyc_Tcutil_explain_failure();
+int Cyc_Tcutil_unify(void*,void*);void*Cyc_Tcutil_substitute(struct Cyc_List_List*,
+void*);void*Cyc_Tcutil_fndecl2typ(struct Cyc_Absyn_Fndecl*);struct _tuple10*Cyc_Tcutil_make_inst_var(
+struct Cyc_List_List*,struct Cyc_Absyn_Tvar*);void Cyc_Tcutil_check_fndecl_valid_type(
+struct Cyc_Position_Segment*,struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Fndecl*);void
+Cyc_Tcutil_check_type(struct Cyc_Position_Segment*,struct Cyc_Tcenv_Tenv*,struct
+Cyc_List_List*bound_tvars,struct Cyc_Absyn_Kind*k,int allow_evars,void*);int Cyc_Tcutil_is_noalias_path(
+struct _RegionHandle*,struct Cyc_Absyn_Exp*e);int Cyc_Tcutil_is_noalias_pointer_or_aggr(
+struct _RegionHandle*,void*t);int Cyc_Tcutil_new_tvar_id();int Cyc_Tcutil_is_const_exp(
+struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Exp*e);struct Cyc_List_List*Cyc_Tcutil_transfer_fn_type_atts(
+void*t,struct Cyc_List_List*atts);void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,
+struct Cyc_Absyn_Exp*);void*Cyc_Tcexp_tcExpInitializer(struct Cyc_Tcenv_Tenv*,void**,
+struct Cyc_Absyn_Exp*);struct _tuple11{void*f1;void*f2;};struct Cyc_Tcexp_TestEnv{
+struct _tuple11*eq;int isTrue;};struct Cyc_Tcexp_TestEnv Cyc_Tcexp_tcTest(struct Cyc_Tcenv_Tenv*
+te,struct Cyc_Absyn_Exp*e,struct _dyneither_ptr msg_part);extern int Cyc_Tcexp_in_stmt_exp;
+struct _tuple12{struct Cyc_List_List*f1;struct Cyc_List_List*f2;};struct Cyc_Tcpat_TcPatResult{
+struct _tuple12*tvars_and_bounds_opt;struct Cyc_List_List*patvars;};struct Cyc_Tcpat_TcPatResult
 Cyc_Tcpat_tcPat(struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Pat*p,void**topt);void
 Cyc_Tcpat_check_pat_regions(struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Pat*p);void
 Cyc_Tcpat_check_switch_exhaustive(struct Cyc_Position_Segment*,struct Cyc_Tcenv_Tenv*,
@@ -1459,8 +1459,8 @@ _tmpE8,(struct Cyc_Absyn_Exp*)Cyc_Absyn_uint_exp((unsigned int)((int(*)(struct C
 x))Cyc_List_length)(_tmpF5),0),_tmpEA,_tmpEB));goto _LL6A;_LL73:;_LL74: goto _LL6A;
 _LL6A:;}goto _LL65;_LL68:;_LL69: goto _LL65;_LL65:;}{struct Cyc_List_List*_tmpF6=!
 is_local?0: Cyc_Tcenv_lookup_type_vars(_tmpA6);int _tmpF7=!is_local?0: 1;Cyc_Tcutil_check_type(
-s0->loc,_tmpA6,_tmpF6,& Cyc_Tcutil_mk,_tmpF7,_tmpD2);{struct Cyc_Tcenv_Tenv*_tmpF8=
-Cyc_Tcenv_add_local_var(_tmpA5,_tmp51->loc,_tmpA6,_tmpA9);if(_tmpCC == Cyc_Absyn_Extern
+s0->loc,_tmpA6,_tmpF6,& Cyc_Tcutil_tmk,_tmpF7,_tmpD2);{struct Cyc_Tcenv_Tenv*
+_tmpF8=Cyc_Tcenv_add_local_var(_tmpA5,_tmp51->loc,_tmpA6,_tmpA9);if(_tmpCC == Cyc_Absyn_Extern
  || _tmpCC == Cyc_Absyn_ExternC){const char*_tmp1CC;void*_tmp1CB;(_tmp1CB=0,Cyc_Tcutil_terr(
 _tmp50->loc,((_tmp1CC="local extern declarations not yet supported",
 _tag_dyneither(_tmp1CC,sizeof(char),44))),_tag_dyneither(_tmp1CB,sizeof(void*),0)));}
@@ -1543,7 +1543,7 @@ _tag_dyneither(_tmp1EB,sizeof(char),26))),_tag_dyneither(_tmp1EA,sizeof(void*),0
 _LL7C:;_LL7D:{const char*_tmp1EE;void*_tmp1ED;(_tmp1ED=0,Cyc_Tcutil_terr(_tmp50->loc,((
 _tmp1EE="cannot declare a qualified local variable",_tag_dyneither(_tmp1EE,
 sizeof(char),42))),_tag_dyneither(_tmp1ED,sizeof(void*),0)));}goto _LL75;_LL75:;}
-Cyc_Tcutil_check_type(s0->loc,_tmp116,Cyc_Tcenv_lookup_type_vars(_tmp116),& Cyc_Tcutil_mk,
+Cyc_Tcutil_check_type(s0->loc,_tmp116,Cyc_Tcenv_lookup_type_vars(_tmp116),& Cyc_Tcutil_tmk,
 1,_tmp11D);_tmp116=Cyc_Tcenv_add_local_var(_tmpA5,_tmp51->loc,_tmp116,_tmp117);}
 Cyc_Tcstmt_tcStmt(Cyc_Tcenv_set_encloser(_tmpA5,_tmp116,s0),_tmp51,0);return;}
 _LL3B: {struct Cyc_Absyn_Region_d_struct*_tmpB1=(struct Cyc_Absyn_Region_d_struct*)

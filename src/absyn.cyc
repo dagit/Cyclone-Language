@@ -93,7 +93,7 @@ type_t new_evar(opt_t<kind_t,`H> k, opt_t<list_t<tvar_t,`H>,`H> env) {
   return new Evar(k,NULL,new_type_counter++,env);
 }
 type_t wildtyp(opt_t<list_t<tvar_t,`H>,`H> tenv) {
-  return new_evar(&Tcutil::mko,tenv); 
+  return new_evar(&Tcutil::tmko,tenv); 
 }
 
 tqual_t combine_tqual(tqual_t x,tqual_t y) { 

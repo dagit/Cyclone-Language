@@ -291,7 +291,7 @@ extern `c marshal(region_t<`r> rgn,
 		  dict_t<`a,`b> dict);
 
 extern dict_t<`a,`b> unmarshal(region_t<`r> rgn,
-			       `c @`H env,
+			       `c::A @`H env,
 			       int (@`H cmp)(`a,`a),
 			       `a (read_key<`a,`c::A>)(`c @`H, FILE @`r2),
 			       `b (read_val<`b,`c::A>)(`c @`H, FILE @`r2),

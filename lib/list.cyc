@@ -29,7 +29,7 @@ namespace List;
 using Core;
 
 // Return the length of a list. 
-int length(list_t x) {
+int length(list_t<`a::TB> x) {
   int i = 0;
 
   while (x != NULL) {
@@ -46,7 +46,7 @@ int length(list_t x) {
 }
 
 // return the tail of a list, if any, throw Failure otherwise. 
-list_t<`a,`r> tl(List_t<`a,`r> x) {
+list_t<`a,`r> tl(List_t<`a::TB,`r> x) {
   if (x == NULL) throw new Failure("tl");
   return x->tl;
 }
@@ -293,7 +293,7 @@ list_t<`a> rev(list_t<`a> x) {
 }
 
 // Imperatively reverse a list 
-list_t<`a,`r> imp_rev(list_t<`a,`r> x) {
+list_t<`a,`r> imp_rev(list_t<`a::TB,`r> x) {
   if (x == NULL) return x;
   else {
     list_t<`a,`r> first  = x;
@@ -333,7 +333,7 @@ list_t<`a> append(list_t<`a> x,list_t<`a,`H> y) {
 
 // Modify x so that y is appended to it -- if x is empty, return y else
 // return the modified list x.
-list_t<`a,`r> imp_append(list_t<`a,`r> x,list_t<`a,`r> y) {
+list_t<`a,`r> imp_append(list_t<`a::TB,`r> x,list_t<`a,`r> y) {
   list_t z;
 
   if (x == NULL) return y;

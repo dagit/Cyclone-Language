@@ -208,32 +208,33 @@ void f3(int b) {
 int *`U vary = NULL;
 int *`H varh = NULL;
 
-// void refine(region_t<`r::TR> r, int *`r::TR x) {
-//   if (r == Core::heap_region) {
-//     printf("here\n");
-//     varh = x;
-//   }
-//   else if (r == Core::unique_region) {
-//     printf("unique here\n");
-//     vary = x;
-//   }
-// //   y = x; // will fail
-//   let z = NULL;
-//   z :=: vary;
-//   Core::ufree(z);
-// }
+// for testing polymorphism
 
-// void bar(region_t<`r> r, int *`r x) {
-//   if (r == unique_region) {
-//     y = x;
-//   }
-// }
+// Return the length of a list. 
+int poly_length(List::list_t<`a::TB> x) {
+  int i = 0;
+
+  while (x != NULL) {
+    ++i;
+    x = x->tl;
+  }
+  return i;
+}
+
+void poly() {
+  List::list_t<int *`U> l = new List::List(unew 1,NULL);
+//   let l1 = List::length(l); // fails
+  let l2 = poly_length(l);
+}
+
+struct MyList<`a,`r>{`a hd; struct MyList<`a,`r> *`r tl;};
+
+void mylist() {
+  struct MyList<int,`U> *`U l = new MyList(1,NULL);
+}
 
 int main() {
   int *`U v = h(1);
   Core::ufree(v);
-//   int *`U x = new 1;
-//   refine(Core::unique_region,x);
-//   refine(Core::heap_region,new 1);
   return 0;
 }

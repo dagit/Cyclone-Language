@@ -260,9 +260,24 @@ void dumpscope(scope_t sc) {
 void dumpkind(kind_t ka) {
   let &Kind(k,a) = ka;
   switch (k) {
-  case AnyKind: dump("A"); return;
-  case MemKind: dump("M"); return;
-  case BoxKind: dump("B"); return;
+  case AnyKind:
+    switch (a) {
+    case Aliasable: dump("A"); return;
+    case Unique: dump("UA"); return;
+    case Top: dump("TA"); return;
+    }
+  case MemKind:
+    switch (a) {
+    case Aliasable: dump("M"); return;
+    case Unique: dump("UM"); return;
+    case Top: dump("TM"); return;
+    }
+  case BoxKind:
+    switch (a) {
+    case Aliasable: dump("B"); return;
+    case Unique: dump("UB"); return;
+    case Top: dump("TB"); return;
+    }
   case RgnKind: 
     switch (a) {
     case Aliasable: dump("R"); return;

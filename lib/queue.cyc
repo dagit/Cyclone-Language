@@ -35,7 +35,7 @@ struct Queue<`a,`r::R> {
 };
 
 // true when the queue is empty
-bool is_empty(queue_t q)  {
+bool is_empty(queue_t<`a::TB> q)  {
    return(q->front == NULL);
 }
 
@@ -44,12 +44,12 @@ datatype exn { Empty };
 datatype exn.Empty Empty_val = Empty;
 
 // create a new queue
-queue_t create() {
+queue_t<`a::TB> create() {
   return new Queue(NULL,NULL,0);
 }
 
 // insert an element into the rear of the queue (side effect)
-void radd(region_t<`r> r, queue_t<`a,`r> q,`a x) {
+void radd(region_t<`r> r, queue_t<`a::TB,`r> q,`a x) {
   list_t cell = rnew(r) List(x,NULL);
 
   if (q->front == NULL) {
@@ -62,27 +62,26 @@ void radd(region_t<`r> r, queue_t<`a,`r> q,`a x) {
   q->len++;
 }
 
-void add(queue_t<`a,`H> q, `a x) {
+void add(queue_t<`a::TB,`H> q, `a x) {
   radd(Core::heap_region,q,x);
 }
 
 // insert an element into the front of the queue (side effect)
-void rpush(region_t<`r> r, queue_t<`a,`r> q,`a x) {
+void rpush(region_t<`r> r, queue_t<`a::TB,`r> q,`a x) {
   q->front = rnew(r) List(x,q->front);
   if (q->rear == NULL)
     q->rear = q->front;
   q->len++;
 }
 
-void push(queue_t<`a,`H> q, `a x) {
+void push(queue_t<`a::TB,`H> q, `a x) {
   rpush(Core::heap_region,q,x);
 }
 
 // get and remove an element from the front of the queue (side effect)
 `a take(queue_t<`a> q) {
   if (q->front == NULL)
-    throw &Empty_val; // FIX: toc problems if we try to return this.
-  //    return (throw Empty);
+    throw &Empty_val;
   else {
     let x = q->front->hd;
     q->front = q->front->tl;
@@ -92,6 +91,24 @@ void push(queue_t<`a,`H> q, `a x) {
     q->len--;
     return x;
   }
+}
+
+`a noalias_take(queue_t<`a::TB> q, `a null_elem) {
+  if (q->front == NULL)
+    throw &Empty_val;
+  else {
+    null_elem :=: q->front->hd;
+    q->front = q->front->tl;
+    if (q->front == NULL) {  // necessary to ensure last cell is
+      q->rear = NULL;        // garbage collected
+    }
+    q->len--;
+    return null_elem;
+  }
+}
+
+`a *`U ptr_take(queue_t<`a::TA *`U> q) {
+  return noalias_take(q,NULL);
 }
 
 // return the first element in the queue without removing it
@@ -104,7 +121,7 @@ void push(queue_t<`a,`H> q, `a x) {
 }
 
 // clear out the entire queue (side effect)
-void clear(queue_t<`a> q) {
+void clear(queue_t<`a::TB> q) {
   q->front = NULL;
   q->rear = NULL;
   q->len = 0;
@@ -135,7 +152,7 @@ list_t<`a,`r> rfilter_c(region_t<`r> r, bool f(`b,`a), `b env, queue_t<`a> q){
 }
 
 // return the number of elements in the queue
-int length(queue_t<`a> q) {
+int length(queue_t<`a::TB> q) {
 //    return(List::length(q->front));
   return q->len;
 }

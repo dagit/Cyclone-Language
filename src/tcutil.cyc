@@ -411,8 +411,10 @@ kind_t typ_kind(type_t t) {
   case &AnonAggrType(_,_): return &mk;
   case &PointerType(pinfo):
     switch (conref_def((bounds_t)&DynEither_b_val,pinfo.ptr_atts.bounds)) {
-    case &DynEither_b: return &mk;
-    case &Upper_b(_): return &bk;
+    case &DynEither_b: 
+      return new Kind(MemKind,typ_kind(pinfo.ptr_atts.rgn)->aliasqual);
+    case &Upper_b(_):
+      return new Kind(BoxKind,typ_kind(pinfo.ptr_atts.rgn)->aliasqual);
     }
   case &ValueofType(_): return &ik;
   case &TagType(_): return &bk;
@@ -677,7 +679,6 @@ static type_t rgns_of_field(aggrfield_t af) {
 static $(tvar_t,type_t)@ region_free_subst(tvar_t tv) {
   type_t t;
   switch (tvar_kind(tv,&bk)) {
-  // MWH: what to do with Top RgnKind?
   case &Kind(RgnKind,Unique):    t = &UniqueRgn_val; break;
   case &Kind(RgnKind,Aliasable): t = &HeapRgn_val;   break;
   case &Kind(EffKind,_):         t = empty_effect;   break;
@@ -2501,9 +2502,6 @@ void check_contains_assign(exp_t e) {
 // point to the most constrained kind -- if they're compatible
 // return true, otherwise return false.
 static bool constrain_kinds(kindbound_t c1, kindbound_t c2) {
-//   fprintf(stderr,"constraining kinds c1=%s c2=%s\n",
-// 	  Absynpp::kindbound2string(c1),
-// 	  Absynpp::kindbound2string(c2));
   c1 = compress_kb(c1);
   c2 = compress_kb(c2);
   switch ($(c1,c2)) {
@@ -2851,7 +2849,6 @@ static list_t<tvar_t> add_free_tvar(seg_t loc,
                                     list_t<tvar_t,`H> tvs, 
                                     tvar_t tv)
 {
-//   fprintf(stderr,"adding free tvar %s\n",*(tv->name));
   for (_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
     if (strptrcmp(tvs2->hd->name, tv->name) == 0) {
       kindbound_t k1 = tvs2->hd->kind;
@@ -2873,7 +2870,6 @@ static list_t<tvar_t> add_free_tvar(seg_t loc,
 // This assumes the identities and kinds are set, and simply adds
 // the tvar if it's not already present.  
 static list_t<tvar_t> fast_add_free_tvar(list_t<tvar_t,`H> tvs, tvar_t tv) {
-//   fprintf(stderr,"Adding fast free tvar %s\n",*(tv->name));
   // sanity
   if (tv->identity == -1)
     impos("fast_add_free_tvar: bad identity in tv");
@@ -2896,7 +2892,6 @@ static list_t<$(tvar_t,bool)@`r,`r>
 fast_add_free_tvar_bool(region_t<`r> r,
                         list_t<$(tvar_t,bool)@`r,`r> tvs, tvar_t tv, bool b) {
                    
-//   fprintf(stderr,"Adding fast free tvar %s\n",*(tv->name));
   // sanity
   if (tv->identity == -1)
     impos("fast_add_free_tvar_bool: bad identity in tv");
@@ -2915,7 +2910,6 @@ fast_add_free_tvar_bool(region_t<`r> r,
 
 // will shadow other variables
 static list_t<tvar_t> add_bound_tvar(list_t<tvar_t,`H> tvs, tvar_t tv) {
-//   fprintf(stderr,"adding bound tvar %s\n",*(tv->name));
   // sanity
   if (tv->identity == -1) 
     impos("bound tvar id for %s is NULL", tvar2string(tv));
@@ -3063,6 +3057,52 @@ bool extract_const_from_typedef(seg_t loc, bool declared_const, type_t t) {
   }
 }
 
+static bool typedef_tvar_is_ptr_rgn(tvar_t tvar, struct Typedefdecl *td) {
+  if (td != NULL) {
+    if (td->defn != NULL) {
+      switch (compress(td->defn->v)) {
+      case &PointerType(PtrInfo(_,_,PtrAtts(r,_,_,_,_))):
+	switch (compress(r)) {
+	case &VarType(tv):
+	  return tvar_cmp(tvar,tv) == 0;
+	default: break;
+	}
+	break;
+      default: break;
+      }
+    }
+  }
+  else
+    return true; // conservative for non-typedefs
+  return false;
+}
+
+static kind_t tvar_inst_kind(tvar_t tvar, kind_t def_kind, 
+			     kind_t expected_kind,
+			     struct Typedefdecl *td) {
+  switch (compress_kb(tvar->kind)) {
+  case &Less_kb(_,&Kind(RgnKind,Top)):
+  case &Eq_kb(&Kind(RgnKind,Top)):
+    // we may have to adjust the kind constraint of the
+    // introduced evar from that of the given tvar so that the
+    // overall kind constraint can be met.  This is only necessary
+    // when the expected type could be a pointer, and the
+    // the tvar is a region variable that would affect that pointer's
+    // overall kind (i.e. TB, UB, B, etc.).
+    if ((expected_kind->kind == BoxKind ||
+	 expected_kind->kind == MemKind ||
+	 expected_kind->kind == AnyKind) &&
+	typedef_tvar_is_ptr_rgn(tvar,td)) {
+      if (expected_kind->aliasqual == Aliasable)
+	return &rk;
+      else if (expected_kind->aliasqual == Unique)
+	return &urk;
+    }
+    return &trk;
+  default: return tvar_kind(tvar,def_kind);
+  }
+}
+
 // Checks that a type is well-formed and lives in kind expected_kind.  
 // Takes as input a location (for error reporting), a type environment 
 // (for looking up struct, enum, datatype, etc. decls), a check-valid-type
@@ -3103,10 +3143,15 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
   static struct Opt<type_t> urgn = Opt(&UniqueRgn_val);
   static struct Opt<type_t> hrgn = Opt(&HeapRgn_val);
 
+//   fprintf(stderr,"checking type %s with expected kind %s\n",
+// 	  Absynpp::typ2string(t), kind2string(expected_kind));
   switch (compress(t)) {
   case &VoidType: break;
   case &Evar(*k,*ref,_,_): 
-    if (*k == NULL) *k = kind_to_opt(expected_kind); 
+    // if we have some latitude with moving the type var, do it here
+    if ((*k == NULL) || 
+	(kind_leq(expected_kind,(*k)->v) && !kind_leq((*k)->v,expected_kind)))
+      *k = kind_to_opt(expected_kind); 
     if (cvtenv.fn_result && cvtenv.generalize_evars &&
 	expected_kind->kind == RgnKind) {
       if (expected_kind->aliasqual == Unique)
@@ -3124,14 +3169,11 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
   case &VarType(v):
     switch (compress_kb(v->kind)) {
     case &Unknown_kb(*f): 
-//       fprintf(stderr,"Setting kind bound to be %s\n",Absynpp::kind2string(expected_kind));
       *f = new Opt(new Less_kb(NULL,expected_kind)); break;
     default: break;
     }
     // this constrains the variable's kind according to other occurrences
     // of that variable and makes sure they share the same tvar identity.
-//     fprintf(stderr,"VarType: calling add_free_tvar for %s (env=%x)\n",
-// 	    *(v->name),(unsigned int)cvtenv.kind_env);
     cvtenv.kind_env = add_free_tvar(loc, cvtenv.kind_env, v);
     // no need to constrain things here, but want to add it only if
     // it hasn't already been added.
@@ -3242,10 +3284,10 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 	terr(loc,"too many type arguments for datatype %s",
              qvar2string(tud->name));
       if (tvs != NULL) {
-        // fill in missing parameters
+        // fill in missing type parameters
         list_t<type_t> hidden_ts = NULL;
         for (; tvs != NULL; tvs = tvs->tl) {
-          kind_t k1 = tvar_kind(tvs->hd,&bk);
+          kind_t k1 = tvar_inst_kind(tvs->hd, &bk, expected_kind, NULL);
           type_t e = new_evar(NULL,NULL);
           hidden_ts = new List(e,hidden_ts);
           cvtenv = i_check_valid_type(loc,te,cvtenv,k1,e,true);
@@ -3320,9 +3362,15 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // FIX: check that tqual is valid?
     bool is_zero_terminated;
     // note that here, we allow AnyKind types under the pointer
-    cvtenv = i_check_valid_type(loc,te,cvtenv,&ak,t1,true);
+    cvtenv = i_check_valid_type(loc,te,cvtenv,&tak,t1,true);
     tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t1);
-    cvtenv = i_check_valid_type(loc,te,cvtenv,&trk,rgn_typ,true);
+    kind_t k;
+    switch (expected_kind->aliasqual) {
+    case Aliasable: k = &rk; break;
+    case Unique: k = &urk; break;
+    case Top: k = &trk; break;
+    }
+    cvtenv = i_check_valid_type(loc,te,cvtenv,k,rgn_typ,true);
     switch (compress_conref(zt)) {
     case &Constraint{.No_constr = _}:
       // if zero_term is unconstrained, then set it to false unless
@@ -3387,7 +3435,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // FIX: check that tqual is valid?
     // we don't allow abstract mem types as the elt type of an array type
     let e = *eptr;
-    cvtenv = i_check_valid_type(loc,te,cvtenv,&mk,t1,true);
+    cvtenv = i_check_valid_type(loc,te,cvtenv,&tmk,t1,true);
     tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t1);
     bool is_zero_terminated;
     switch (compress_conref(zt)) {
@@ -3509,12 +3557,12 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 
       // results and arguments of functions cannot be abstract mem types
       // FIX?: should check that variables are unique and that tquals are ok
-      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&mk,tr,true);
+      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&tmk,tr,true);
       new_cvtenv.fn_result = false;
       for (_ a = args; a != NULL; a = a->tl) {
         let trip = a->hd;
         let t = (*trip)[2];
-        new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&mk,t,true);
+        new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&tmk,t,true);
         (*trip)[1].real_const = extract_const_from_typedef(loc,(*trip)[1].print_const,t);
       }
 
@@ -3522,7 +3570,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       if (cyc_vararg != NULL) {
         if (c_vararg) impos("both c_vararg and cyc_vararg"); // sanity
         let VarargInfo{_,_,vt,vi} = *cyc_vararg;
-        new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&mk,vt,true);
+        new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&tmk,vt,true);
         cyc_vararg->tq.real_const = extract_const_from_typedef(loc,cyc_vararg->tq.print_const,vt);
         // if inject, then check the type is an appropriate datatype
         if (vi)
@@ -3647,30 +3695,32 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       // Warn if afterwards any kind is still unconstrained and set it to 
       // BoxKind. In addition, drive any MemKind or AnyKind bounded type
       // variables to BoxKind to ensure that we don't abstract a MemKind
-      // variable.
+      // variable.  Also drive Top kinds to Aliasable.
       if (*btvs != NULL)
-        for(list_t<tvar_t> bs = *btvs; bs != NULL; bs = bs->tl)
+        for(list_t<tvar_t> bs = *btvs; bs != NULL; bs = bs->tl) {
           switch (compress_kb(bs->hd->kind)) {
           case &Unknown_kb(*f): 
             warn(loc,"Type variable %s unconstrained, assuming boxed",
                  *bs->hd->name);
+	    fallthru(f);
+          case &Less_kb(*f,&Kind(BoxKind,Top)): fallthru(f);
+          case &Less_kb(*f,&Kind(MemKind,Top)): fallthru(f);
+          case &Less_kb(*f,&Kind(MemKind,Aliasable)): fallthru(f);
+          case &Less_kb(*f,&Kind(AnyKind,Top)): fallthru(f);
+          case &Less_kb(*f,&Kind(AnyKind,Aliasable)):
 	    *f = kind_to_bound_opt(&bk); break;
-          case &Less_kb(*f,&Kind(MemKind,a)):
-	    *f = kind_to_bound_opt(new Kind(BoxKind,a)); break;
-          case &Less_kb(*f,&Kind(AnyKind,a)):
-// 	    fprintf(stderr,"Constraining %s of AnyKind to BoxKind\n",
-// 		    *(bs->hd->name));
-	    *f = kind_to_bound_opt(new Kind(BoxKind,a)); break;
+	  case &Less_kb(*f,&Kind(MemKind,Unique)): fallthru(f);
+	  case &Less_kb(*f,&Kind(AnyKind,Unique)):
+	    *f = kind_to_bound_opt(&ubk); break;
           case &Less_kb(*f,&Kind(RgnKind,Top)):
 	    *f = kind_to_bound_opt(&rk); break;
           case &Less_kb(*f,k):
-// 	    fprintf(stderr,"Fixing %s at %s\n",
-// 		    *(bs->hd->name), kind2string(k));
 	    *f = kind_to_bound_opt(k); break;
           case &Eq_kb(&Kind(MemKind,_)):
             terr(loc,"functions can't abstract M types"); break;
           default: break;
           }
+	}
       // remove the bound vars from the kind environment and the list of free vars
       cvtenv.kind_env = remove_bound_tvars(Core::heap_region,new_cvtenv.kind_env,*btvs);
       new_cvtenv.free_vars = remove_bound_tvars_bool(new_cvtenv.r,new_cvtenv.free_vars,*btvs);
@@ -3690,7 +3740,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
   case &TupleType(tq_ts):
     for (; tq_ts != NULL; tq_ts = tq_ts->tl) {
       let p = tq_ts->hd;
-      cvtenv = i_check_valid_type(loc,te,cvtenv,&mk,(*p)[1],true);
+      cvtenv = i_check_valid_type(loc,te,cvtenv,&tmk,(*p)[1],true);
       (*p)[0].real_const = 
         extract_const_from_typedef(loc,(*p)[0].print_const,(*p)[1]);
     }
@@ -3706,7 +3756,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
           terr(loc,"duplicate field %s",*fn);
         if (strcmp(*fn,"") != 0)
           prev_fields = rnew(aprev_rgn) List(fn,prev_fields);
-        cvtenv = i_check_valid_type(loc,te,cvtenv,&mk,t,true);
+        cvtenv = i_check_valid_type(loc,te,cvtenv,&tmk,t,true);
         tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t);
 	if(k==UnionA && !bits_only(t))
           // FIX: bad error message when t is a zero-terminated type
@@ -3781,7 +3831,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 	// add in hidden type parameters
 	list_t<type_t> hidden_ts = NULL;
 	for (; tvs != NULL; tvs = tvs->tl) {
-	  kind_t k = tvar_kind(tvs->hd,&bk);
+          kind_t k = tvar_inst_kind(tvs->hd, &bk, expected_kind, NULL);
 	  type_t e = new_evar(NULL,NULL);
 	  hidden_ts = new List(e,hidden_ts);
 	  cvtenv = i_check_valid_type(loc,te,cvtenv,k,e,true);
@@ -3809,7 +3859,10 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       list_t<$(tvar_t,type_t)@/*`temp,`temp*/> inst = NULL;
       // check type arguments
       for (; ts != NULL && tvs != NULL; ts = ts->tl, tvs = tvs->tl) {
-        kind_t k = tvar_kind(tvs->hd,&bk);
+	kind_t k = tvar_inst_kind(tvs->hd, &tbk, expected_kind, td);
+// 	fprintf(stderr,"inst-var for typedef: tvar_kind=%s, inst_kind=%s\n",
+// 		kind2string(tvar_kind(tvs->hd,&tbk)),
+// 		kind2string(k));
         cvtenv = i_check_valid_type(loc,te,cvtenv,k,ts->hd,true);
         inst = rnew(temp) List(rnew(temp) $(tvs->hd,ts->hd),inst);
       }
@@ -3817,10 +3870,10 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         terr(loc,"too many parameters for typedef %s",qvar2string(tdn));
       if (tvs != NULL) {
         list_t<type_t> hidden_ts = NULL;
-        // too few parameters -- plug them in for the user using evars
+        // fill in missing type parameters
         for (; tvs != NULL; tvs = tvs->tl) {
-          kind_t k = tvar_kind(tvs->hd,&bk);
-          type_t e = new_evar(NULL,NULL);
+	  kind_t k = tvar_inst_kind(tvs->hd, &bk, expected_kind, td);
+	  type_t e = new_evar(NULL,NULL);
           hidden_ts = new List(e,hidden_ts);
           cvtenv = i_check_valid_type(loc,te,cvtenv,k,e,true);
           inst = new List(new $(tvs->hd,e),inst);
@@ -3846,7 +3899,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
   case &AccessEff(t2):
     cvtenv = i_check_valid_type(loc,te,cvtenv,&trk,t2,true); break;
   case &RgnsEff(t2):
-    cvtenv = i_check_valid_type(loc,te,cvtenv,&ak,t2,true); break;
+    cvtenv = i_check_valid_type(loc,te,cvtenv,&tak,t2,true); break;
   case &JoinEff(ts):
     for (; ts != NULL; ts = ts->tl)
       cvtenv = i_check_valid_type(loc,te,cvtenv,&ek,ts->hd,true);
@@ -3902,11 +3955,11 @@ i_check_valid_type_level_exp(exp_t e, tenv_t te, cvtenv_t<`r> cvtenv) {
     break;
   case &Cast_e(t,e1,_,_):
     cvtenv = i_check_valid_type_level_exp(e1,te,cvtenv);
-    cvtenv = i_check_valid_type(e->loc,te,cvtenv,&ak,t,true);
+    cvtenv = i_check_valid_type(e->loc,te,cvtenv,&tak,t,true);
     break;
   case &Offsetof_e(t,_): fallthru(t);
   case &Sizeoftyp_e(t):
-    cvtenv = i_check_valid_type(e->loc,te,cvtenv,&ak,t,true);
+    cvtenv = i_check_valid_type(e->loc,te,cvtenv,&tak,t,true);
     break;
   case &Valueof_e(t):    
     cvtenv = i_check_valid_type(e->loc,te,cvtenv,&ik,t,true);
@@ -3969,7 +4022,7 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
     let cvt = check_valid_type(loc, te, 
                                CVTEnv{temp, te_vars, NULL, NULL,
                                       generalize_evars,false},
-                               &mk, t);
+                               &tmk, t);
     let free_tvars = List::rmap(temp,fst,cvt.free_vars);
     let free_evars = List::rmap(temp,fst,cvt.free_evars);
 
@@ -3992,24 +4045,20 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
     // type variable, make it RgnKind
     for (_ x = free_tvars; x != NULL; x = x->tl) {
       switch (compress_kb(x->hd->kind)) {
-      case &Unknown_kb(*f):
+      case &Unknown_kb(*f): fallthru(f);
+      case &Less_kb(*f,&Kind(BoxKind,Top)): fallthru(f);
+      case &Less_kb(*f,&Kind(MemKind,Top)): fallthru(f);
+      case &Less_kb(*f,&Kind(MemKind,Aliasable)):
 	*f = kind_to_bound_opt(&bk); break;
-//       case &Less_kb(*f,&Kind(AnyKind,a)):
-// 	fprintf(stderr,"Constraining var %s to BoxKind\n",
-// 		*(x->hd->name));
-// 	*f = kind_to_bound_opt(new Kind(BoxKind,a)); break;
-      case &Less_kb(*f,&Kind(MemKind,a)):
-// 	fprintf(stderr,"Constraining var %s to BoxKind\n",
-// 		*(x->hd->name));
-	*f = kind_to_bound_opt(new Kind(BoxKind,a)); break;
+      case &Less_kb(*f,&Kind(MemKind,Unique)):
+	*f = kind_to_bound_opt(&ubk); break;
       case &Less_kb(*f,&Kind(RgnKind,Top)):
 	*f = kind_to_bound_opt(&rk); break;
       case &Less_kb(*f,k):
-// 	fprintf(stderr,"Fixing toplevel var %s at %s\n",
-// 		*(x->hd->name), kind2string(k));
 	*f = kind_to_bound_opt(k);       break;
-      case &Eq_kb(&Kind(MemKind,_)):
-        terr(loc,"type variable %s cannot have kind M",tvar2string(x->hd));
+      case &Eq_kb(&Kind(MemKind,a)):
+        terr(loc,"type variable %s cannot have kind %s",
+	     tvar2string(x->hd), kind2string(new Kind(MemKind,a)));
         break;
       default: break;
       }
@@ -4054,7 +4103,6 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
         }
     }
   }
-//    fprintf(stderr,"Finished checking toplevel type %s\n",typ2string(t));
 }
 
 // Check that the function declaration has a valid type:  all
@@ -4086,10 +4134,6 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
 void check_type(seg_t loc, tenv_t te, 
                 list_t<tvar_t,`H> bound_tvars, 
                 kind_t expected_kind, bool allow_evars, type_t t) {
-//   fprintf(stderr,"type %s, bound_tvars = %x, expected kind = %s\n",
-// 	  Absynpp::typ2string(t),
-// 	  (unsigned int)bound_tvars,
-// 	  Absynpp::kind2string(expected_kind));
   TEMP_RGN(te, r) {
     let cvt = check_valid_type(loc, te, 
                                CVTEnv{r,bound_tvars, NULL, NULL, false,false},
@@ -4339,6 +4383,8 @@ bool is_tagged_pointer_typ(type_t t) {
 /* Routines for dealing with non-aliasing pointers */
 /***************************************************/
 
+// warning: not just a predicate; side-effects VarTypes to be of non-unique
+//   flavor if they are not yet set
 static bool is_noalias_region(type_t r) {
   switch (compress(r)) {
   case &UniqueRgn: return true;
@@ -4357,10 +4403,29 @@ static bool is_noalias_region(type_t r) {
   }
 }
 
+// warning: not just a predicate; side-effects VarTypes to be of non-unique
+//   flavor if they are not yet solidly bounded
 bool is_noalias_pointer(type_t t) {
   switch (compress(t)) {
   case &PointerType(PtrInfo(_,_,PtrAtts(r,_,_,_,_))):
     return is_noalias_region(r);
+  case &VarType(tv):
+    let &Kind(k,a) = tvar_kind(tv,&bk);
+    switch (k) {
+    case BoxKind: case AnyKind: case MemKind:
+      if (a == Unique || a == Top) {
+	switch (compress_kb(tv->kind)) {
+	case &Less_kb(*x,&Kind(k,Top)):
+	  *x = new Opt(new Less_kb(NULL,new Kind(k,Aliasable)));
+	  return false;
+	default: 
+// 	  fprintf(stderr,"|%s| is a no-alias path?\n",typ2string(t));
+	  return true;
+	}
+      }
+      return false;
+    default: return false;
+    }
   default: return false;
   }
 }

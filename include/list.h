@@ -28,7 +28,7 @@ namespace List {
        various operations over them, following the conventions of the
        Objective Caml list library as much as possible. */
 
-  struct List<`a,`r::TR>{`a hd; struct List<`a,`r> *`r tl;};
+  struct List<`a,`r>{`a hd; struct List<`a,`r> *`r tl;};
   /** A [struct List] is a memory cell with a head field containing an
       element and a tail field that points to the rest of the list.
       Such a structure is traditionally called a cons cell.  Note that
@@ -58,13 +58,13 @@ namespace List {
   /** [rlist(r, x1,...,xn)] builds a list with elements [x1] through
       [xn], allocated in the region with handle [r]. */
 
-  extern int length(list_t x);
+  extern int length(list_t<`a::TB> x);
   /** [length(x)] returns the number of elements in list [x].  */
 
   extern `a hd(List_t<`a> x);
   /** [hd(x)] returns the first element of list [x]. */
 
-  extern list_t<`a,`r> tl(List_t<`a,`r> x);
+  extern list_t<`a,`r> tl(List_t<`a::TB,`r> x);
   /** [tl(x)] returns the tail of list [x]. */
 
   extern list_t<`a> copy(list_t<`a> x);
@@ -163,7 +163,7 @@ namespace List {
   extern list_t<`a,`r> rrev(region_t<`r>,list_t<`a> x);
   /** [rrev(r,x)] is like [rev(x)], except that the result is
       allocated in the region with handle [r].  */
-  extern list_t<`a,`r> imp_rev(list_t<`a,`r> x);
+  extern list_t<`a,`r> imp_rev(list_t<`a::TB,`r> x);
   /** [imp_rev(x)] imperatively reverses list [x] (the list is
       side-effected).  Note that [imp_rev] returns a list.  This is
       because the first cons cell of the result is the last cons cell
@@ -180,7 +180,7 @@ namespace List {
       allocated in the region with handle [r], and the result is
       allocated in the same region.  */
 
-  extern list_t<`a,`r> imp_append(list_t<`a,`r> x,list_t<`a,`r> y);
+  extern list_t<`a,`r> imp_append(list_t<`a::TB,`r> x,list_t<`a,`r> y);
   /** [imp_append(x,y)] modifies [x] to append [y] to it,
       destructively.  Note that [imp_append] returns a list.  This is
       because [x] might be NULL, in which case, [imp_append(x,y)]

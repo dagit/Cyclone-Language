@@ -103,13 +103,21 @@ extern struct Kind ubk;
 extern struct Kind umk;
 
 extern struct Core::Opt<kind_t> rko;
-extern struct Core::Opt<kind_t> trko;
-extern struct Core::Opt<kind_t> urko;
 extern struct Core::Opt<kind_t> ako;
 extern struct Core::Opt<kind_t> bko;
 extern struct Core::Opt<kind_t> mko;
-extern struct Core::Opt<kind_t> eko;
 extern struct Core::Opt<kind_t> iko;
+extern struct Core::Opt<kind_t> eko;
+
+extern struct Core::Opt<kind_t> trko;
+extern struct Core::Opt<kind_t> tako;
+extern struct Core::Opt<kind_t> tbko;
+extern struct Core::Opt<kind_t> tmko;
+
+extern struct Core::Opt<kind_t> urko;
+extern struct Core::Opt<kind_t> uako;
+extern struct Core::Opt<kind_t> ubko;
+extern struct Core::Opt<kind_t> umko;
 
 extern Core::opt_t<kind_t> kind_to_opt(kind_t k);
 extern kindbound_t kind_to_bound(kind_t k);

@@ -35,7 +35,7 @@ namespace Fn {
        type, but you need them to have the same type; you can do this
        by hiding the environment from the type of the pair. */
 
-extern struct Function<`arg,`res,`bd::R> { <`env> : regions(`env) > `bd
+extern struct Function<`arg,`res,`bd::R> { <`env::B> : regions(`env) > `bd
   `res (@`bd f)(`env,`arg);
   `env env;
 };

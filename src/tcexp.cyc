@@ -244,7 +244,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
         // we're treating 0 as if it's NULL
         e->r = new Const_e(Null_c);
         let tenv_tvs = lookup_type_vars(te);
-        t = new PointerType(PtrInfo(new_evar(&ako,new Opt(tenv_tvs)), 
+        t = new PointerType(PtrInfo(new_evar(&tako,new Opt(tenv_tvs)), 
 				    empty_tqual(NULL),
 				    PtrAtts(new_evar(&trko,new Opt(tenv_tvs)), 
 					    true_conref,
@@ -303,7 +303,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
   case {.Null_c = _}:
     let tenv_tvs = lookup_type_vars(te);
     // FIX: take advantage of topt
-    t = new PointerType(PtrInfo(new_evar(&ako,new Opt(tenv_tvs)), 
+    t = new PointerType(PtrInfo(new_evar(&tako,new Opt(tenv_tvs)), 
                                 empty_tqual(NULL),
 				PtrAtts(new_evar(&trko,new Opt(tenv_tvs)), 
 					true_conref,
@@ -735,7 +735,7 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t * topt,
   let TestEnv(eq,isT) = tcTest(te, e1, "conditional expression");
   tcExp(te,topt,e2);
   tcExp(te,topt,e3);
-  type_t t = new_evar(&mko,lookup_opt_type_vars(te));
+  type_t t = new_evar(&tmko,lookup_opt_type_vars(te));
   let l1 = List(e3,NULL);
   let l2 = List(e2,&l1);
   if (!coerce_list(te,t,&l2)) {
@@ -1092,7 +1092,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
 // (t)e
 static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
                      coercion_t *c) {
-  check_type(loc,te,lookup_type_vars(te),&mk,true,t);
+  check_type(loc,te,lookup_type_vars(te),&tmk,true,t);
   //  tcExp(te,NULL,e);
   tcExp(te,&t,e);
   type_t t2 = e->topt->v;
@@ -1212,7 +1212,7 @@ static type_t tcSizeof(tenv_t te, seg_t loc, type_t * topt, type_t t) {
     // we shouldn't check the type yet -- it will be done later.
     return uint_typ;
   }
-  check_type(loc,te,lookup_type_vars(te),&mk,true,t);
+  check_type(loc,te,lookup_type_vars(te),&tmk,true,t);
   if(!Evexp::okay_szofarg(t))
     terr(loc, "sizeof applied to type %s, which has unknown size here",
          typ2string(t));
@@ -1238,7 +1238,7 @@ bool structfield_has_name(field_name_t n, aggrfield_t sf) {
 // FIX?: check if t is allowed to be a union type
 static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt, 
 			 type_t t, offsetof_field_t n) {
-  check_type(loc,te,lookup_type_vars(te),&mk,true,t);
+  check_type(loc,te,lookup_type_vars(te),&tmk,true,t);
   switch(n) {
   case &StructField(n):
     bool bad_type = true;
@@ -1549,7 +1549,7 @@ static type_t tcArray(tenv_t te,seg_t loc,type_t * elt_topt, bool zero_term,
   TEMP_RGN(te, r) {
     let           num_es  = List::length(des);
     list_t<exp_t> es  = List::rmap(r,snd,des);
-    type_t        res     = new_evar(&mko,lookup_opt_type_vars(te));
+    type_t        res     = new_evar(&tmko,lookup_opt_type_vars(te));
     let           sz_rexp = new Const_e(Int_c(Unsigned,num_es));
     exp_t         sz_exp  = new_exp(sz_rexp,loc);
     // if zero_term, check that last element in array is zero terminated.
@@ -1934,7 +1934,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
   if (*is_calloc) {
     if (*t == NULL) impos("calloc with empty type");
     elt_type = **t;
-    check_type(loc,te,lookup_type_vars(te),&mk,true,elt_type);
+    check_type(loc,te,lookup_type_vars(te),&tmk,true,elt_type);
     check_malloc_type(true,loc,topt,elt_type);
     num_elts = *e;
     one_elt = false;

@@ -386,21 +386,27 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   check_unique_tvars(loc,td->tvs);
   add_tvar_identities(td->tvs);
   if (td->defn != NULL) {
-    check_type(loc,te,td->tvs,&ak,false,td->defn->v);
+    check_type(loc,te,td->tvs,&tak,false,td->defn->v);
     td->tq.real_const = 
       extract_const_from_typedef(loc,td->tq.print_const,td->defn->v);
     // FIX: check that attributes are okay for this kind of type
   } 
-  // run through and constrain the kinds of unconstrained tvs to boxkind
+  // run through and constrain the kinds of unconstrained tvs
   for (_ tvs = td->tvs; tvs != NULL; tvs = tvs->tl)
     switch (compress_kb(tvs->hd->kind)) {
     case &Unknown_kb(*f): 
       if (td->defn != NULL)
         warn(loc,"type variable %s is not used in typedef definition",
              *tvs->hd->name);
-      *f = new Opt(kind_to_bound(&bk)); break;
+      *f = new Opt(kind_to_bound(&tbk)); break;
     case &Less_kb(*f,k):
-      *f = new Opt(kind_to_bound(k)); break;
+      // treat region kinds specially; unconstrained region kinds
+      //   should be made Aliasable
+//       if (k->kind == RgnKind && k->aliasqual == Top)
+// 	*f = new Opt(kind_to_bound(new Kind(RgnKind,Aliasable)));
+//       else
+	*f = new Opt(kind_to_bound(k));
+      break;
     default: continue;
     }
   
@@ -433,7 +439,7 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, list_t<tvar_t,`H> tvs,
       if (strcmp(*fn,"") != 0)
 	prev_fields = rnew(uprev_rgn) List(fn,prev_fields);
 
-      check_type(loc,te,tvs,&mk,false,t);
+      check_type(loc,te,tvs,&tmk,false,t);
 
       fs->hd->tq.real_const = extract_const_from_typedef(loc,fs->hd->tq.print_const,t);
 
@@ -444,21 +450,30 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, list_t<tvar_t,`H> tvs,
   }
 }
 
-static void rule_out_memkind(seg_t loc, var_t n, list_t<tvar_t> tvs) {
-  for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
+static void rule_out_memkind(seg_t loc, var_t n, list_t<tvar_t> tvs,
+			     bool constrain_top_kind) {
+  for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
     switch (compress_kb(tvs2->hd->kind)) {
-    case &Unknown_kb(*f):      fallthru(f);
-    case &Less_kb(*f,&Kind(MemKind,Aliasable)):
+    case &Unknown_kb(*f):
       *f = new Opt(kind_to_bound(&bk)); continue;
+    case &Less_kb(*f,&Kind(MemKind,a)):
+      if (constrain_top_kind && a == Top)
+	*f = new Opt(kind_to_bound(new Kind(BoxKind,Aliasable)));
+      else
+	*f = new Opt(kind_to_bound(new Kind(BoxKind,a)));
+      continue;
+    case &Less_kb(*f,&Kind(BoxKind,Top)) && constrain_top_kind:
+      *f = new Opt(kind_to_bound(new Kind(BoxKind,Aliasable)));
+      continue;
     case &Less_kb(*f,k): 
-//       fprintf(stderr,"fixing kind of %s at %s\n",
-// 	      *(tvs2->hd->name),Absynpp::kind2string(k));
       *f = new Opt(kind_to_bound(k)); continue;
-    case &Eq_kb(&Kind(MemKind,_)):
-      terr(loc,"type %s attempts to abstract type variable %s of kind M", 
-           *n, *tvs2->hd->name); continue;
+    case &Eq_kb(&Kind(MemKind,a)):
+      terr(loc,"type %s attempts to abstract type variable %s of kind %s", 
+           *n, *tvs2->hd->name, Absynpp::kind2string(new Kind(MemKind,a)));
+      continue;
     default: continue;
     }
+  }
 }
 
 void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
@@ -502,7 +517,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
   switch ($(ad->impl, Dict::lookup_opt(ge->aggrdecls, v))) {
   case $(NULL, NULL):
     // insert ad in the environment
-    rule_out_memkind(loc,v,tvs);
+    rule_out_memkind(loc,v,tvs,false);
     ge->aggrdecls = Dict::insert(ge->aggrdecls, v, new ad);
     break;
   case $(&AggrdeclImpl(exist_vars,rgn_po,fs,tagged), NULL):
@@ -522,8 +537,10 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
       terr(loc,"@tagged qualifier is only allowed on union declarations");
     tcAggrImpl(te, ge, loc, append(tvs,exist_vars), rgn_po, fs);
 
-    rule_out_memkind(loc, v, tvs);
-    rule_out_memkind(loc, v, exist_vars);
+    rule_out_memkind(loc, v, tvs, false);
+    // we constrain existential variables to be Aliasable if
+    //   they have not yet been fixed
+    rule_out_memkind(loc, v, exist_vars, true);
 
     if(ad->kind == UnionA && !tagged)
       // warn when fields of unions are not bits-only -- these can
@@ -559,14 +576,15 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
   case $(NULL, &adp):
     // try to merge the declarations
     let ad2 = Tcdecl::merge_aggrdecl(*adp, ad, loc, tc_msg);
-    
-    rule_out_memkind(loc, v, tvs);
-    if (ad->impl != NULL) 
-      rule_out_memkind(loc, v, ad->impl->exist_vars);
-    
     if (ad2 == NULL)
       return; // error in redeclaration
     else {
+      rule_out_memkind(loc, v, tvs, false);
+      // we constrain existential variables to be Aliasable if
+      //   they have not yet been fixed
+      if (ad->impl != NULL) 
+	rule_out_memkind(loc, v, ad->impl->exist_vars, true);
+    
       *adp = (aggrdecl_t)ad2; // make the update
       ad = (aggrdecl_t)ad2; // update ad so we add the right constructor below
       break;
@@ -580,25 +598,28 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
 static void rule_out_mem_and_unique(seg_t loc, var_t v, list_t<tvar_t> tvs) {
   for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
     switch (compress_kb(tvs2->hd->kind)) {
-    case &Unknown_kb(*f): 
+    case &Unknown_kb(*f): fallthru(f);
+//     case &Less_kb(*f,&Kind(BoxKind,Top)): fallthru(f);
+    case &Less_kb(*f,&Kind(MemKind,Top)): fallthru(f);
+    case &Less_kb(*f,&Kind(MemKind,Aliasable)): 
       *f = new Opt(kind_to_bound(&bk)); break;
-//       fallthru(f); XXX
-    case &Less_kb(*f,&Kind(MemKind,a)): 
-      *f = new Opt(kind_to_bound(new Kind(BoxKind,a))); break;
-    case &Less_kb(*f,&Kind(AnyKind,a)): 
-      *f = new Opt(kind_to_bound(new Kind(AnyKind,a))); break;
+    case &Less_kb(*f,&Kind(AnyKind,Top)): fallthru(f);
+    case &Less_kb(*f,&Kind(AnyKind,Aliasable)): 
+      *f = new Opt(kind_to_bound(&ak)); break;
     case &Less_kb(*f,&Kind(RgnKind,Top)):
       *f = new Opt(kind_to_bound(&rk)); break;
     case &Eq_kb(&Kind(RgnKind,Top)):
       terr(loc,"type %s attempts to abstract type "
            "variable %s of kind TR",*v,*tvs2->hd->name); break;
-    case &Less_kb(*f,&Kind(RgnKind,Unique)): fallthru;
-    case &Eq_kb(&Kind(RgnKind,Unique)):
+    case &Less_kb(*f,&Kind(k,Unique)): fallthru(k);
+    case &Eq_kb(&Kind(k,Unique)):
       terr(loc,"type %s attempts to abstract type "
-           "variable %s of kind UR",*v,*tvs2->hd->name); break;
-    case &Eq_kb(&Kind(MemKind,_)):
+           "variable %s of kind %s",
+	   *v,*tvs2->hd->name,kind2string(new Kind(k,Unique))); break;
+    case &Eq_kb(&Kind(MemKind,a)):
       terr(loc,"type %s attempts to abstract type "
-           "variable %s of kind M",*v,*tvs2->hd->name); break;
+           "variable %s of kind %s",*v,*tvs2->hd->name,
+	   Absynpp::kind2string(new Kind(MemKind,a))); break;
     default: break;
     }
   }
@@ -618,7 +639,7 @@ static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, genv_t ge,
     let f = fs->hd;
 
     for (_ typs = f->typs; typs != NULL; typs=typs->tl) {
-      check_type(f->loc, te, tvs, &mk, false, (*typs->hd)[1]);
+      check_type(f->loc, te, tvs, &tmk, false, (*typs->hd)[1]);
       // make sure no no-alias fields in datatype
       TEMP_RGN(te, temp) {
         if (is_noalias_pointer_or_aggr(temp,(*typs->hd)[1]))

@@ -351,8 +351,7 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
     case &VarType(tv):
       // This is similar to the VarType case, above, except that we
       // check that for each variable `r in todo, whether regions(`tv)
-      // outlives it.  This isn't really used now, since we don't allow
-      // regions(`a) to outlive something of non-R kind at the moment.
+      // outlives it.
       let env = initial_env(listrgn,po,rgn);
       let &Kind(k,a) = typ_kind(rgn);
       if ((k == RgnKind) && (a == Aliasable || a == Top))

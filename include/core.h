@@ -90,7 +90,7 @@ typedef tag_t<valueof_t(sizeof(`a::A))> sizeof_t<`a>;
   /** [sizeof_typ<T>] is the singleton type of [sizeof(T)].  */
 extern struct Opt<`a> { `a v; };
   /** A [struct Opt] is a cell with a single field, [v] (for value). */
-typedef struct Opt<`a> *`r::TR opt_t<`a,`r>;
+typedef struct Opt<`a> *`r opt_t<`a,`r>;
   /** An [opt_t] is a pointer to a [struct Opt].  An [opt_t] can be
       used to pass an optional value to a function, or return an
       optional result.  For example, to return no result, return NULL;
@@ -108,7 +108,7 @@ extern mstring_t<`H> new_string(unsigned int);
   /** [new_string(n)] allocates space for [n] characters on the heap
       and returns a pointer to the space.  All of the characters are
       set to NUL (0). */
-extern mstring_t<`r> rnew_string(region_t<`r>,unsigned int);
+extern mstring_t<`r::TR> rnew_string(region_t<`r>,unsigned int);
   /** [rnew_string(r,n)] allocates space for [n] characters in the
       region with handle [r], and returns a pointer to the space.  All
       of the characters are set to NUL (0). */
@@ -117,7 +117,7 @@ extern bool true_f(`a);
       [true] regardless of the value of [x]. */
 extern bool false_f(`a);
   /** [false_f] is the constant [false] function. */
-extern `a fst($(`a,`b)@`r);
+extern `a fst($(`a,`b)@);
   /** [fst(x)] returns the first element of the pair pointed to by
       [x].  */
 extern `b snd($(`a,`b)@);
@@ -126,7 +126,7 @@ extern `b snd($(`a,`b)@);
 extern `c third($(`a,`b,`c)@);
   /** [third(x)] returns the third element of the triple pointed to by
       [x].  */
-extern `a identity(`a);
+extern `a identity(`a::TB);
   /** [identity] is the identity function: [identity(x)] returns [x].  */
 extern int intcmp(int,int);
   /** [intcmp] is a comparison function on integers: [intcmp(i1,i2)]
@@ -135,9 +135,9 @@ extern int intcmp(int,int);
       than [i2].  */
 extern int charcmp(char,char);
   /** [charcmp] is a comparison function on [char]. */
-extern int ptrcmp(`a::A @ `r, `a::A @ `r);
+extern int ptrcmp(`a::TA @ `r, `a @ `r);
   /** [ptrcmp] is a comparison function on pointers. */
-extern int nptrcmp(`a::A * `r, `a::A * `r);
+extern int nptrcmp(`a::TA * `r, `a * `r);
   /** [nptrcmp] is a comparison function on nullable pointers. */
 extern datatype exn  { extern Invalid_argument(string_t) };
   /** [Invalid_argument] is an exception thrown by library functions
@@ -165,7 +165,7 @@ extern region_t<`U> unique_region;
 #define umalloc rmalloc (Core::unique_region)
   /** [unew] and [umalloc] are for allocating uniquely-pointed-to data. */
 
-extern void ufree(`a::A ?`U ptr);
+extern void ufree(`a::TA ?`U ptr);
   /** [ufree] frees a unique pointer. */
 
 extern struct NewRegion<`r2> rnew_dynregion(region_t<`r2>);
