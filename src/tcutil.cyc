@@ -1986,7 +1986,7 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     // can cast a non-const pointer to a const pointer.  
     // can cast a pointer in region r1 to a pointer in region r2 as
     // long as r1 outlives r2.
-    // can cast a "bits-only" pointer to a char pointer ?
+    // can cast a "bits-only" pointer to a char pointer ?NOZEROTERM
     // can cast a zero-terminated pointer to a non-zero terminated pointer
     switch (t2) {
     case &PointerType(PtrInfo{t_b,rt_b,null_b,q_b,b_b,zt_b}):
@@ -1995,6 +1995,7 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	ptrsubtype(te,assump,t_a,t_b) && (!q_a.q_const || q_b.q_const);
       bool zeroterm_ok = unify_conrefs(intcmp,zt_a,zt_b) || !conref_val(zt_b);
       let bitcase = ptrsub ? false : (bits_only(t_a) && is_char_type(t_b)
+                                      && !conref_def(false,zt_b) 
                                       && (q_b.q_const || !q_a.q_const));
       bool bounds_ok = unify_conrefs(boundscmp,b_a,b_b);
       if (!bounds_ok && !bitcase) {
@@ -3022,6 +3023,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
           prev_fields = rnew(aprev_rgn) List(fn,prev_fields);
         cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t);
 	if(k==UnionA && !bits_only(t))
+          // FIX: bad error message when t is a zero-terminated type
 	  terr(loc,"union member %s has a non-integral type", *fn);
         check_bitfield(loc,te,t,width,fn);
         check_field_atts(loc,fn,atts);
@@ -3592,7 +3594,12 @@ bool bits_only(type_t t) {
   case &DoubleType(_): return true;
   case &EnumType(_,_): 
   case &AnonEnumType(_): return false; //could be true but for pattern exhaustion!
-  case &ArrayType(ArrayInfo{t,_,_,_}): return bits_only(t);
+  case &ArrayType(ArrayInfo{t,_,_,zero_term}): 
+    // can't allow a zero-terminated array to be treated as bits only
+    // for initialization purposes
+    // FIX: for now, I'm allowing this because otherwise we can't
+    // operate with buildlib properly.
+    return /*(!conref_def(false,zero_term)) && */ bits_only(t);
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl) 
       if (!bits_only((*tqs->hd)[1])) return false;
