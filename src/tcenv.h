@@ -17,22 +17,13 @@ using Dict;
 using Absyn;
 using Position;
 
-extern struct Var_info {
-  scope sc;
-  tqual tq;
-  typ   t;
-};
-typedef struct Var_info @var_info;
-
 // Flags that control whether an operation (e.g., break) is okay 
 extern struct Ok_ctrl;
 typedef struct Ok_ctrl @ok_ctrl_t;
 
 // Used to tell what an ordinary identifer refers to 
 extern enum Resolved {
-  UnknownRes;
-  LocalRes(var_info);
-  GlobalRes(qvar,var_info);
+  VarRes(binding_t); // includes unresolved variant
   StructRes(structdecl);
   EnumRes(enumdecl,enumfield);
   XenumRes(xenumdecl,enumfield);
@@ -53,12 +44,12 @@ typedef struct Genv @genv;
 
 // Local function environments 
 extern struct Fenv {
-  list<var>             labels;
-  Dict<var,var_info>    locals;
-  ok_ctrl_t             ok;
-  Set<var>              uv; // maybe-unassigned variables
-  typ                   return_typ;
-  list<tvar>            type_vars; // type variables that can occur free
+  list<var>           labels;
+  Dict<var,binding_t> locals;
+  ok_ctrl_t           ok;
+  Set<var>            uv; // maybe-unassigned variables
+  typ                 return_typ;
+  list<tvar>          type_vars; // type variables that can occur free
 };
 typedef struct Fenv @fenv; 
 
@@ -102,7 +93,9 @@ extern list<tvar>  lookup_type_vars(tenv);
 
 extern Opt_t<$(tqual,typ)@> lookup_struct_field(structdecl,var);
 
-extern tenv add_local_var(segment,tenv,var,tqual,typ,bool);
+extern tenv add_local_var(segment,tenv,vardecl);
+extern tenv add_pat_var  (segment,tenv,vardecl);
+extern tenv add_param_var(segment,tenv,$(var,tqual,typ)@);
 
 extern tenv add_type_vars(segment,tenv,list<tvar>);
 

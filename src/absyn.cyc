@@ -151,11 +151,10 @@ typ strct(var name) {
 
 ///////////////////////// Expressions //////////////////////////////
 exp new_exp(raw_exp r, segment loc) {
-  return &Exp{.topt=null, .r=r, .loc=loc, .preds=null, .succs=null};
+  return &Exp{.topt=null, .r=r, .loc=loc};
 }
 exp copy_exp(exp e) {
-  return &Exp{.topt=e->topt, .r=e->r, .loc=e->loc,
-	      .preds=e->preds, .succs=e->succs};
+  return &Exp{.topt=e->topt, .r=e->r, .loc=e->loc};
 }
 exp const_exp(cnst c, segment loc) { return new_exp(Const_e(c), loc); }
 exp null_exp(segment loc) { return new_exp(Const_e(Null_c), loc); }
@@ -165,22 +164,13 @@ exp false_exp(segment loc) { return bool_exp(false, loc); }
 exp int_exp(sign s,int i,segment seg) { 
   return const_exp(Int_c(s,i),seg);
 }
-exp signed_int_exp(int i,segment loc) { 
-  return int_exp(Signed,i,loc);
-}
-exp uint_exp(unsigned int i,segment loc) { 
-  return int_exp(Unsigned,i,loc);
-}
-exp char_exp(char c,segment loc) {
-  return const_exp(Char_c(Unsigned,c),loc);
-}
-exp float_exp(string f,segment loc) {
-  return const_exp(Float_c(f),loc);
-}
-exp string_exp(string s,segment loc) {
-  return const_exp(String_c(s),loc);
-}
-exp var_exp(qvar q, segment loc) { return new_exp(Var_e(q,null), loc); }
+exp signed_int_exp(int i,    segment loc) {return int_exp(Signed,i,loc);}
+exp uint_exp(unsigned int i, segment loc) {return int_exp(Unsigned,i,loc);}
+exp char_exp(char c, segment loc)    { return const_exp(Char_c(Unsigned,c),loc);}
+exp float_exp(string f, segment loc) { return const_exp(Float_c(f),loc);}
+exp string_exp(string s, segment loc){ return const_exp(String_c(s),loc);}
+
+exp var_exp(qvar q, segment loc) { return new_exp(Var_e(q,Unresolved_b), loc); }
 exp unknownid_exp(qvar q, segment loc) { 
   return new_exp(UnknownId_e(q), loc); 
 }
@@ -193,45 +183,23 @@ exp prim1_exp(primop p, exp e, segment loc) {
 exp prim2_exp(primop p, exp e1, exp e2, segment loc) {
   return primop_exp(p, &cons(e1,&cons(e2,null)), loc);
 }
-exp times_exp(exp e1, exp e2, segment loc) {
-  return prim2_exp(Times, e1, e2, loc);
-}
-exp eq_exp(exp e1, exp e2, segment loc) {
-  return prim2_exp(Eq, e1, e2, loc);
-}
-exp neq_exp(exp e1, exp e2, segment loc) {
-  return prim2_exp(Neq, e1, e2, loc);
-}
-exp gt_exp(exp e1, exp e2, segment loc) {
-  return prim2_exp(Gt, e1, e2, loc);
-}
-exp lt_exp(exp e1, exp e2, segment loc) {
-  return prim2_exp(Lt, e1, e2, loc);
-}
-exp gte_exp(exp e1, exp e2, segment loc) {
-  return prim2_exp(Gte, e1, e2, loc);
-}
-exp lte_exp(exp e1, exp e2, segment loc) {
-  return prim2_exp(Lte, e1, e2, loc);
-}
+exp times_exp(exp e1, exp e2, segment loc){return prim2_exp(Times, e1, e2, loc);}
+exp eq_exp(exp e1,  exp e2, segment loc) {return prim2_exp(Eq,  e1, e2, loc);}
+exp neq_exp(exp e1, exp e2, segment loc) {return prim2_exp(Neq, e1, e2, loc);}
+exp gt_exp(exp e1,  exp e2, segment loc) {return prim2_exp(Gt,  e1, e2, loc);}
+exp lt_exp(exp e1,  exp e2, segment loc) {return prim2_exp(Lt,  e1, e2, loc);}
+exp gte_exp(exp e1, exp e2, segment loc) {return prim2_exp(Gte, e1, e2, loc);}
+exp lte_exp(exp e1, exp e2, segment loc) {return prim2_exp(Lte, e1, e2, loc);}
 exp assignop_exp(exp e1, Opt_t<primop> popt, exp e2, segment loc) {
   return new_exp(AssignOp_e(e1,popt,e2),loc);
 }
 exp assign_exp(exp e1, exp e2, segment loc) {
   return assignop_exp(e1,null,e2,loc);
 }
-exp post_inc_exp(exp e, segment loc) {
-  return new_exp(Increment_e(e,PostInc),loc);
-}
-exp pre_inc_exp(exp e, segment loc) {
-  return new_exp(Increment_e(e,PreInc),loc);
-}
-exp pre_dec_exp(exp e, segment loc) {
-  return new_exp(Increment_e(e,PreDec),loc);
-}
-exp post_dec_exp(exp e, segment loc) {
-  return new_exp(Increment_e(e,PostDec),loc);
-}
+exp post_inc_exp(exp e, segment loc){return new_exp(Increment_e(e,PostInc),loc);}
+exp pre_inc_exp(exp e,  segment loc) {return new_exp(Increment_e(e,PreInc),loc);}
+exp pre_dec_exp(exp e,  segment loc) {return new_exp(Increment_e(e,PreDec),loc);}
+exp post_dec_exp(exp e, segment loc){return new_exp(Increment_e(e,PostDec),loc);}
 exp conditional_exp(exp e1,exp e2,exp e3,segment loc) {
   return new_exp(Conditional_e(e1,e2,e3), loc);
 }
@@ -250,9 +218,6 @@ exp unknowncall_exp(exp e, list<exp> es, segment loc) {
 exp fncall_exp(exp e, list<exp> es, segment loc) {
   return new_exp(FnCall_e(e,es), loc);
 }
-exp throw_exp(exp e, segment loc) {
-  return new_exp(Throw_e(e), loc);
-}
 exp noinstantiate_exp(exp e, segment loc) {
   return new_exp(NoInstantiate_e(e), loc);
 }
@@ -262,9 +227,10 @@ exp instantiate_exp(exp e, Opt_t<list<typ>> ts, segment loc) {
 exp cast_exp(typ t, exp e, segment loc) { 
   return new_exp(Cast_e(t,e), loc);
 }
+exp throw_exp(exp e,   segment loc) { return new_exp(Throw_e(e), loc); }
 exp address_exp(exp e, segment loc) { return new_exp(Address_e(e), loc); }
-exp sizeof_exp(typ t, segment loc) { return new_exp(Sizeof_e(t), loc); }
-exp deref_exp(exp e, segment loc) { return new_exp(Deref_e(e), loc); }
+exp sizeof_exp(typ t,  segment loc) { return new_exp(Sizeof_e(t), loc); }
+exp deref_exp(exp e,   segment loc) { return new_exp(Deref_e(e), loc); }
 exp structmember_exp(exp e, field_name n, segment loc) {
   return new_exp(StructMember_e(e,n), loc); 
 }
@@ -298,14 +264,13 @@ exp unresolvedmem_exp(Opt_t<typedef_name> n,
 }
 ///////////////////////// Statements ///////////////////////////////
 stmt new_stmt(raw_stmt s, segment loc) { 
-  return &Stmt{.r=s, .loc=loc, .preds=null, .succs=null}; }
+  return &Stmt{.r=s, .loc=loc }; }
 stmt skip_stmt(segment loc) { return new_stmt(Skip_s, loc); }
 stmt exp_stmt(exp e,segment loc) { return new_stmt(Exp_s(e),loc); }
 stmt seq_stmt(stmt s1, stmt s2, segment loc) { 
   switch (s1->r) {
   case Skip_s: return s2;
-  default: 
-    return new_stmt(Seq_s(s1,s2), loc); 
+  default:     return new_stmt(Seq_s(s1,s2), loc); 
   }
 }
 stmt seq_stmts(list<stmt> ss, segment loc) {
@@ -321,7 +286,7 @@ stmt ifthenelse_stmt(exp e,stmt s1,stmt s2,segment loc) {
 stmt while_stmt(exp e,stmt s,segment loc) { 
   return new_stmt(While_s(e,s), loc); 
 }
-stmt break_stmt(segment loc) { return new_stmt(Break_s, loc); }
+stmt break_stmt   (segment loc) { return new_stmt(Break_s, loc); }
 stmt continue_stmt(segment loc) { return new_stmt(Continue_s, loc); }
 stmt for_stmt(exp e1,exp e2,exp e3,stmt s, segment loc) {
   return new_stmt(For_s(e1,e2,e3,s), loc);
@@ -329,7 +294,9 @@ stmt for_stmt(exp e1,exp e2,exp e3,stmt s, segment loc) {
 stmt switch_stmt(exp e, list<switch_clause> scs, segment loc) {
   return new_stmt(Switch_s(e,scs), loc);
 }
-stmt fallthru_stmt(segment loc) { return new_stmt(Fallthru_s, loc); }
+stmt fallthru_stmt(list<exp> el, segment loc) { 
+  return new_stmt(Fallthru_s(el), loc); 
+}
 stmt decl_stmt(decl d, stmt s, segment loc) {
   return new_stmt(Decl_s(d,s), loc);
 }
@@ -337,8 +304,8 @@ stmt declare_stmt(qvar x, typ t, Opt_t<exp> init, stmt s, segment loc) {
   decl d = new_decl(Var_d(new_vardecl(x,t,init)),loc);
   return new_stmt(Decl_s(d,s),loc);
 }
-stmt cut_stmt(stmt s, segment loc) { return new_stmt(Cut_s(s), loc); }
-stmt splice_stmt(stmt s, segment loc) { return new_stmt(Splice_s(s), loc);}
+stmt cut_stmt   (stmt s, segment loc) { return new_stmt(Cut_s(s),    loc); }
+stmt splice_stmt(stmt s, segment loc) { return new_stmt(Splice_s(s), loc); }
 stmt label_stmt(var v, stmt s, segment loc) {
   return new_stmt(Label_s(v,s), loc);
 }
@@ -365,11 +332,11 @@ decl let_decl(pat p, Opt_t<typ> t_opt, exp e, segment loc) {
 }
 vardecl new_vardecl(qvar x, typ t, Opt_t<exp> init) {
   return &Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
-		  .type=t, .initializer=init, .shadow_depth=-1};
+		  .type=t, .initializer=init, .shadow=0};
 }
 vardecl static_vardecl(qvar x, typ t, Opt_t<exp> init) {
   return &Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
-                  .type=t, .initializer=init, .shadow_depth=-1};
+                  .type=t, .initializer=init, .shadow=0};
 }
 decl struct_decl(scope s,Opt_t<typedef_name> n,list<var> ts,
 		 Opt_t<list<$(field_name,tqual,typ)@>> fs,segment loc) {
@@ -449,7 +416,7 @@ typ pointer_expand(typ t) {
 //
 //    exp      where
 //    ---------------------------
-//    name     name is a variable
+//    name     name is a variable -- and not a function name!
 //    e[k]
 //    (e)      e is an lvalue
 //    e.name   e is an lvalue
@@ -458,16 +425,19 @@ typ pointer_expand(typ t) {
 //
 // (We may have more in Cyclone...)
 //
+
+// must be called after the expression is type-checked.
 bool is_lvalue(exp e) {
   switch (e->r) {
-  case Var_e(_,_): return true;
-  case Subscript_e(e1,e2): return true;
-  case StructMember_e(e1,f): return is_lvalue(e1);
-  case StructArrow_e(e1,f): return true;
-  case Deref_e(e1): return true;
+  case Var_e(_,Funname_b(_)): return false;
+  case Var_e(_,_):            return true;
+  case Subscript_e(e1,e2):    return true;
+  case StructMember_e(e1,f):  return is_lvalue(e1);
+  case StructArrow_e(e1,f):   return true;
+  case Deref_e(e1):           return true;
     //  case Instantiate*(e1,_): return is_lvalue(e1);
     //  case NoInstantiate(e1): return is_lvalue(e1);
-  default: return false;
+  default:                    return false;
   }
 }
 

@@ -111,7 +111,6 @@ extern $(Opt_t<var>,tqual,typ)@ make_param(segment loc,
 extern type_specifier_t type_spec(typ t,segment loc);
 extern $(tqual,typ)@ get_tqual_typ(segment loc,$(Opt_t<var>,tqual,typ)@ t);
 extern $(var,tqual,typ)@ make_fn_args(segment loc,$(Opt_t<qvar>,tqual,typ)@ t);
-extern bool exists_param(string x, list<string> params);
 extern void only_vardecl(list<string> params,decl x);
 extern $(Opt_t<var>,tqual,typ)@ get_param_type($(list<decl>,segment)@ env,
 					       string x);
@@ -179,16 +178,16 @@ make_struct_field(segment loc,$(qvar,tqual,typ,list<tvar>)@ field) {
 
 static $(Opt_t<var>,tqual,typ)@
   make_param(segment loc,$(Opt_t<qvar>,tqual,typ,list<tvar>)@ field) {
-
+  let &$(qv_opt,tq,t,tvs) = field;
   let idopt = null;
-  if (field[0] != null) {
-    idopt = &Opt(field[0]->v[1]);
-    if (field[0]->v[0] != null)
+  if (qv_opt != null) {
+    idopt = &Opt(qv_opt->v[1]);
+    if (qv_opt->v[0] != null)
       err("parameter cannot be qualified with a module name",loc);
   }
-  if (field[3] != null)
+  if (tvs != null)
     abort("parameter should have no type parameters",loc);
-  return &$(idopt,field[1],field[2]);
+  return &$(idopt,tq,t);
 }
 
 /* Functions for creating abstract syntax */
@@ -210,8 +209,7 @@ static $(tqual,typ)@ get_tqual_typ(segment loc,$(Opt_t<var>,tqual,typ) @t) {
  * the variable is present and the type var list is empty and return
  * the variable, tqual and type.  Used in producing function
  * arguments. */
-static $(var,tqual,typ)@
-make_fn_args(segment loc,$(Opt_t<qvar>,tqual,typ)@ t) {
+static $(var,tqual,typ)@ make_fn_args(segment loc,$(Opt_t<qvar>,tqual,typ)@ t) {
   if (t[0] == null)
     return abort("missing variable in function prototype",loc);
   if (t[0]->v[0] != null)
@@ -219,52 +217,35 @@ make_fn_args(segment loc,$(Opt_t<qvar>,tqual,typ)@ t) {
   return &$(t[0]->v[1],t[1],t[2]);
 }
 
-// For sanity-checking of old-style parameter declarations
-static bool exists_param(string x, list<string> params) {
-  while (params!=null) {
-    if (strcmp(x,params->hd)==0) return true;
-    params=params->tl;
-  }
-  return false;
-}
 static void only_vardecl(list<string> params,decl x) {
+  string decl_kind;
   switch (x->r) {
   case Var_d(vd):
     if (vd->initializer!=null)
       abort("initializers are not allowed in parameter declarations",x->loc);
     if (vd->name[0] != null)
       err("module names not allowed on parameter declarations",x->loc);
-    if (!exists_param(vd->name[1],params))
+    // for sanity-checking of old-style parameter declarations
+    bool found = false;
+    for(; params != null; params = params->tl)
+      if(strcmp(vd->name[1], params->hd)==0) {
+	found = true;
+	//	break; // DEF ASSIGN BROKEN -- THINKS BREAKS SWITCH!
+      }
+    if (!found)
       abort(xprintf("%s is not listed as a parameter",vd->name[1]),x->loc);
-    break;
-  case Let_d(_,_,_,_):
-    abort("let declaration appears in parameter type",x->loc);
-    break;
-  case Fn_d(_):
-    abort("function declaration appears in parameter type",x->loc);
-    break;
-  case Struct_d(_):
-    abort("struct declaration appears in parameter type",x->loc);
-    break;
-  case Union_d:
-    abort("union declaration appears in parameter type",x->loc);
-    break;
-  case Enum_d(_):
-    abort("enum declaration appears in parameter type",x->loc);
-    break;
-  case Typedef_d(_):
-    abort("typedef appears in parameter type",x->loc);
-    break;
-  case Xenum_d(_):
-    abort("xenum declaration appears in parameter type",x->loc);
-    break;
-  case Namespace_d(_,_):
-    abort("namespace declaration appears in parameter type",x->loc);
-    break;
-  case Using_d(_,_):
-    abort("using declaration appears in parameter type",x->loc);
-    break;
+    return;
+  case Let_d(_,_,_,_):   decl_kind = "let declaration";        break;
+  case Fn_d(_):          decl_kind = "function declaration";   break;
+  case Struct_d(_):      decl_kind = "struct declaration";     break;
+  case Union_d:          decl_kind = "union declaration";      break;
+  case Enum_d(_):        decl_kind = "enum declaration";       break;
+  case Typedef_d(_):     decl_kind = "typedef";                break;
+  case Xenum_d(_):       decl_kind = "xenum declaration";      break;
+  case Namespace_d(_,_): decl_kind = "namespace declaration";  break;
+  case Using_d(_,_):     decl_kind = "using declaration";      break;
   }
+  abort(xprintf("%s appears in parameter type", decl_kind), x->loc);
   return;
 }
 
@@ -272,8 +253,7 @@ static void only_vardecl(list<string> params,decl x) {
 // get a parameter type from a list of declarations
 static $(Opt_t<var>,tqual,typ)@ get_param_type($(list<decl>,segment)@ env,
 					       string x) {
-  let tdl = env[0];
-  let loc = env[1];
+  let &$(tdl,loc) = env;
   if (tdl==null)
     return(abort(xprintf("missing type for parameter %s",x),loc));
   switch (tdl->hd->r) {
@@ -342,13 +322,11 @@ oldstyle2newstyle(list<type_modifier> tms, list<decl> tds, segment loc) {
  * a declarator (the function name and args),
  * a declaration list (for old-style function definitions),
  * and a statement */
-static fndecl
-make_function(Opt_t<decl_spec_t> dso, declarator_t d,
-              list<decl> tds, stmt body, segment loc) {
+static fndecl make_function(Opt_t<decl_spec_t> dso, declarator_t d,
+			    list<decl> tds, stmt body, segment loc) {
   // Handle old-style parameter declarations
-  if (tds!=null) {
+  if (tds!=null) 
     d = &Declarator(d->id,oldstyle2newstyle(d->tms,tds,loc));
-  }
 
   scope sc = Public;
   list<type_specifier_t> tss = null;
@@ -367,27 +345,23 @@ make_function(Opt_t<decl_spec_t> dso, declarator_t d,
       default: err("bad storage class on function",loc); break;
       }
   }
-  let ts_info = collapse_type_specifiers(tss,loc);
-  if (ts_info[1] != null)
+  let &$(t,decl_opt)         = collapse_type_specifiers(tss,loc);
+  let &$(fn_tqual,fn_type,x) = apply_tms(tq,t,d->tms);
+  if (decl_opt != null)
     warn("nested type declaration within function prototype",loc);
-  typ t = ts_info[0];
-  $(tqual,typ,list<tvar>)@ info = apply_tms(tq,t,d->tms);
-  if (info[2] != null)
+  if (x != null)
     // Example:   `a f<`b><`a>(`a x) {...}
     // Here info[2] will be the list `b.
     warn("bad type params, ignoring",loc);
-  let fn_name = d->id;
-  let fn_tqual = info[0];
-  let fn_type = info[1];
-  /* fn_type had better be a FnType */
+  // fn_type had better be a FnType
   switch (fn_type) {
     case FnType(tvs,ret_type,args,varargs):
       let args2 = List::map_c(fnargspec_to_arg,loc,args);
-      return &Fndecl {.sc=sc,.name=fn_name,.tvs=tvs,
+      return &Fndecl {.sc=sc,.name=d->id,.tvs=tvs,
                       .is_inline=is_inline,.ret_type=ret_type,
                       .args=args2,.varargs=varargs,.body=body};
     default:
-      return (abort("declarator is not a function prototype",loc));
+      return abort("declarator is not a function prototype",loc);
   }
 }
 
@@ -404,9 +378,8 @@ fnargspec_to_arg(segment loc,$(Opt_t<var>,tqual,typ)@ t) {
 static typ change_signed(bool s,typ t,segment seg) {
   switch (t) {
   case IntType(sn,b,x): return IntType(s ? Signed : Unsigned, b, x);
-  default: abort("parse:make_sign_s:",seg); break;
+  default: return abort("parse:make_sign_s:",seg);
   }
-  return t;
 }
 
 /* given a numeric type, sz (B[1|2|4|8]), and a boxed-ness, check
@@ -416,17 +389,14 @@ static typ change_size(size_of sz, bool is_boxed, typ t,segment seg) {
   switch (t) {
   case IntType(sn,szi,b):
     if (b == Boxed && !is_boxed)
-      abort("unboxed size qualifier on boxed integral type",seg);
+      return abort("unboxed size qualifier on boxed integral type",seg);
     else if (b == Unboxed && is_boxed)
-      abort("boxed size qualifier on unboxed integral type",seg);
+      return abort("boxed size qualifier on unboxed integral type",seg);
     else
       return IntType(sn,sz,b);
-    break;
   default:
-    abort("size qualifier on non-integral type",seg);
-    break;
+    return abort("size qualifier on non-integral type",seg);
   }
-  return t;
 }
 
 /* create a new (boxed) unification variable */
@@ -819,7 +789,7 @@ make_declarations(Opt_t<decl_spec_t> dso,list<$(declarator_t,Opt_t<exp>)@> ids,
         let eopt = exprs->hd;
         exprs = exprs->tl;
         let vd = &Vardecl {.sc = s, .name = x, .tq = tq2, .type = t2,
-			   .initializer = eopt, .shadow_depth = -1};
+			   .initializer = eopt, .shadow = 0};
         let d = &Decl(Var_d(vd),loc);
         decls = &cons(d,decls);
       }
@@ -1859,18 +1829,20 @@ iteration_statement:
 
 jump_statement:
   GOTO IDENTIFIER ';'
-    { $$=^$(new_stmt(Goto_s($2),LOC(@1,@2))); }
+    { $$=^$(goto_stmt($2,LOC(@1,@2))); }
 | CONTINUE ';'
-    { $$=^$(new_stmt(Continue_s,LOC(@1,@1)));}
+    { $$=^$(continue_stmt(LOC(@1,@1)));}
 | BREAK ';'
-    { $$=^$(new_stmt(Break_s,LOC(@1,@1)));}
+    { $$=^$(break_stmt(LOC(@1,@1)));}
 | RETURN ';'
-    { $$=^$(new_stmt(Return_s(null),LOC(@1,@1)));}
+    { $$=^$(return_stmt(null,LOC(@1,@1)));}
 | RETURN expression ';'
-    { $$=^$(new_stmt(Return_s(&Opt($2)),LOC(@1,@2)));}
+    { $$=^$(return_stmt(&Opt($2),LOC(@1,@2)));}
 /* Cyc:  explicit fallthru for switches */
 | FALLTHRU ';'
-    { $$=^$(new_stmt(Fallthru_s,LOC(@1,@1)));}
+    { $$=^$(fallthru_stmt(null,LOC(@1,@1)));}
+| FALLTHRU '(' argument_expression_list ')' ';'
+    { $$=^$(fallthru_stmt($3,LOC(@1,@1)));}
 ;
 
 /***************************** PATTERNS *****************************/
@@ -2207,7 +2179,10 @@ postfix_expression:
     { $$=^$(new_exp(Array_e(List::imp_rev($3)),LOC(@1,@4))); }
   /* array comprehension */
 | NEW '{' FOR IDENTIFIER '<' expression ':' expression '}'
-    { $$=^$(new_exp(Comprehension_e($4,$6,$8),LOC(@1,@9))); }
+    { $$=^$(new_exp(Comprehension_e(new_vardecl(&$(null,$4), uint_t,
+						&Opt(uint_exp(0,LOC(@4,@4)))),
+				    $6, $8),
+		    LOC(@1,@9))); }
 /* Cyc: added fill and codegen */
 | FILL '(' expression ')'
     { $$=^$(new_exp(Fill_e($3),LOC(@1,@4))); }

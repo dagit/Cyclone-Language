@@ -109,12 +109,10 @@ tenv tc_init() {
   empty_unassigned = &Opt(Always(empty_var_set->v));
 
   // Set up initial environment so that xenum exn is defined
-  string exn_v = "exn";
-  let xed = &Xenumdecl{.sc=Extern,
-                       .name=&$(null,exn_v),
-                       .fields=null};
-  let ge = empty_genv();
-  let top_ns = null;
+  string exn_v  = "exn";
+  let    xed    = &Xenumdecl{.sc=Extern, .name=&$(null,exn_v), .fields=null};
+  let    ge     = empty_genv();
+  let    top_ns = null;
   ge->xenumdecls = Dict::insert(ge->xenumdecls, exn_v, xed);
   let ae = Dict::insert(Dict::empty(varlist_cmp), top_ns, ge);
   return &Tenv(top_ns,ae,null);
@@ -133,7 +131,7 @@ ok_ctrl_t default_ok_ctrl = &def_ok_ctrl;
 // Local function environments 
 struct Fenv {
   list<var>             labels;
-  Dict<var,var_info>    locals;
+  Dict<var,binding_t>   locals; // binding will be Param_b, Local_b, or Pat_b
   ok_ctrl_t             ok;
     // maybe-unassigned variables -- going away from this pass soon
   Set<var>              uv; 
@@ -190,21 +188,11 @@ tenv put_fenv(tenv te, fenv fe) {
 
 // Used to tell what an ordinary identifer refers to 
 enum Resolved {
-  UnknownRes;
-  LocalRes(var_info);
-  GlobalRes(qvar,var_info);
+  VarRes(binding_t); // includes unresolved variant
   StructRes(structdecl);
   EnumRes(enumdecl,enumfield);
   XenumRes(xenumdecl,enumfield);
 };
-
-struct Var_info {
-  scope sc;
-  tqual tq;
-  typ   t;
-};
-
-static int var_info_counter = 1;
 
 // lookup functions 
 static list<var> outer_namespace(list<var> ns) {
@@ -262,16 +250,16 @@ static resolved lookup_ordinary_global(tenv te,segment loc,qvar q) {
     genv ge = lookup_namespace(te,loc,q[0]);
     return Dict::lookup(ge->ordinaries,q[1]);
   } catch {
-  case Dict::Absent: return UnknownRes;
+  case Dict::Absent: return VarRes(Unresolved_b);
   }
 }
 
 resolved lookup_ordinary(tenv te,segment loc,qvar q) {
   if (q[0] != null || te->le == null)
     return lookup_ordinary_global(te,loc,q);
-  var v = q[1];
+  var  v  = q[1];
   fenv fe = get_fenv(te);
-  try return LocalRes(Dict::lookup(fe->locals,v));
+  try return VarRes(Dict::lookup(fe->locals,v));
   catch {case Dict::Absent: return lookup_ordinary_global(te,loc,q);}
 }
 
@@ -369,18 +357,48 @@ typedefdecl lookup_typedefdecl(tenv te, segment loc, qvar q) {
   return Dict::lookup(ge->typedefs,v);
 }
 
-tenv add_local_var(segment loc,tenv te, var v, tqual tq, typ t, bool init) {
-  if (te->le == null) env_err("Tcenv: unexpected add_local_var");
-  fenv     fe = get_fenv(te);
+static int shadow_ctr = 1;
+
+tenv add_local_var(segment loc, tenv te, vardecl vd) {
+  if(te->le == null) env_err("Tcenv: unexpected add_local_var");
+  fenv fe = get_fenv(te);
+  var  v  = vd->name[1];
+  if(Dict::member(fe->locals,v))
+    vd->shadow = ++shadow_ctr;
   Set<var> uv = fe->uv;
-  if (!init)
+  if(vd->initializer == null)
     uv = Set::insert(uv,v);
-  let vi = &Var_info(Public,tq,t);
-  let new_locals = Dict::insert(fe->locals,v,vi);
   fenv fe2 = &Fenv(fe->labels,
-                   new_locals,
+		   Dict::insert(fe->locals,v,Local_b(vd)),
                    fe->ok,
                    uv,
+                   fe->return_typ,
+		   fe->type_vars);
+  return put_fenv(te,fe2);
+}
+// assume uniqueness has been checked elsewhere, never uninitialized
+tenv add_param_var(segment loc, tenv te, $(var,tqual,typ)@ trip) {
+  if(te->le == null) env_err("Tcenv: unexpected add_param_var");
+  fenv fe  = get_fenv(te);
+  fenv fe2 = &Fenv(fe->labels,
+		   Dict::insert(fe->locals,trip[0],Param_b(trip)),
+                   fe->ok,
+                   fe->uv,
+                   fe->return_typ,
+		   fe->type_vars);
+  return put_fenv(te,fe2);
+}
+// assume uniqueness has been checked elsewhere, never uninitialized
+tenv add_pat_var(segment loc, tenv te, vardecl vd) {
+  if(te->le == null) env_err("Tcenv: unexpected add_param_var");
+  fenv fe = get_fenv(te);
+  var  v  = vd->name[1];
+  if(Dict::member(fe->locals,v))
+    vd->shadow = ++shadow_ctr;
+  fenv fe2 = &Fenv(fe->labels,
+		   Dict::insert(fe->locals,v,Pat_b(vd)),
+                   fe->ok,
+                   fe->uv,
                    fe->return_typ,
 		   fe->type_vars);
   return put_fenv(te,fe2);
@@ -572,15 +590,14 @@ synth seq_synth(synth s1, synth s2) {
     return s2;
   else {
     // control may or may not flow through s2
-    ctrl_t c = 
-      &Ctrl{.forward_jump = 
-	         s1->control->forward_jump || s2->control->forward_jump,
-	    .implicit_fallthru = s2->control->implicit_fallthru,
-	    .explicit_fallthru = s2->control->explicit_fallthru};
+    ctrl_t c = &Ctrl{.forward_jump =
+		          s1->control->forward_jump || s2->control->forward_jump,
+		     .implicit_fallthru = s2->control->implicit_fallthru,
+		     .explicit_fallthru = s2->control->explicit_fallthru};
     unassigned_t nu = s2->norm_unas;
     Set<var> ju = Set::union_two(s1->jump_unas, s2->jump_unas);
     return &Synth{.type = s2->type, .control = c,
-                     .norm_unas = nu, .jump_unas = ju};
+                  .norm_unas = nu, .jump_unas = ju};
   }
 }
 

@@ -36,10 +36,9 @@ Alist<`a> append<`a>(Alist<`a> a1, Alist<`a> a2) {
 
 list<`a> list_of_alist_f<`a>(Alist<`a> y,list<`a> l) {
   switch (y) {
-  case Empty: return l;
-  case Single(z): return &cons(z,l);
-  case Append(a1,a2):
-    return list_of_alist_f(a1,list_of_alist_f(a2,l));
+  case Empty:         return l;
+  case Single(z):     return &cons(z,l);
+  case Append(a1,a2): return list_of_alist_f(a1,list_of_alist_f(a2,l));
   }
 }
 list<`a> list_of_alist<`a>(Alist<`a> x) {
@@ -76,10 +75,9 @@ static void dump_out(FILE @f,list<Alist<string>> stack) {
     let x = stack->hd;
     stack = stack->tl;
     switch (x) {
-    case Empty: continue;
-    case Single(s): fprintf(f,"%s",s); continue;
-    case Append(a1,a2):
-      stack = &cons(a1,&cons(a2,stack)); continue;
+    case Empty:         continue;
+    case Single(s):     fprintf(f,"%s",s); continue;
+    case Append(a1,a2): stack = &cons(a1,&cons(a2,stack)); continue;
     }
   }
 }
@@ -104,27 +102,17 @@ $(string,list<$(int,int,int,string)@>) @string_and_links(Doc d, int w) {
             list_of_alist(o->links));
 }
 
-int int_cmp(int i, int j) {
-  if (i<j) return -1;
-  else if (j<i) return 1;
-  else return 0;
-}
-
-int ihash(int x) {
-  return x;
-}
-
 static Opt_t<Table<int,string>> bhashtbl = null;
 
 string nlblanks(int i) {  // a newline followed by i blanks
   if (bhashtbl == null)
-    bhashtbl = &Opt(Hashtable::create(61,int_cmp,ihash));
+    bhashtbl = &Opt(Hashtable::create(61,intcmp,identity));
   if (i<0) throw Failure("nlblanks");
   try
     return Hashtable::lookup(bhashtbl->v,i);
   catch {
   case Not_found:
-    let num_tabs = i / 8;
+    let num_tabs   = i / 8;
     let num_spaces = i % 8;
     let total = 1 + num_tabs + num_spaces;
     string nlb = new_string(total);
@@ -177,24 +165,21 @@ Doc text(string s) {
   }
 }
 
-
-Opt_t<Doc> nil_doc_opt = null;
+Opt_t<Doc> nil_doc_opt   = null;
 Opt_t<Doc> blank_doc_opt = null;
-Opt_t<Doc> line_doc_opt = null;
+Opt_t<Doc> line_doc_opt  = null;
 
 // This is made a function because non-constant initializers not allowed
 Doc nil_doc() {
-  if (nil_doc_opt == null) {
+  if (nil_doc_opt == null) 
     nil_doc_opt = &Opt(text(""));
-  }
   return nil_doc_opt->v;
 }
 
 // This is made a function because non-constant initializers not allowed
 Doc blank_doc() {
-  if (blank_doc_opt == null) {
+  if (blank_doc_opt == null) 
     blank_doc_opt = &Opt(text(""));
-  }
   return blank_doc_opt->v;
 }
 
@@ -207,12 +192,9 @@ static Out hyperlink_f($(int,string,string) @clo, Ppstate st) {
 }
 Doc hyperlink(string shrt, string full) {
   int slen = String::strlen(shrt);
-  return &doc
-    (slen,
-     infinity,
-     make_fn
-     (hyperlink_f,
-      &$(slen,shrt,full)));
+  return &doc(slen,
+	      infinity,
+	      make_fn (hyperlink_f, &$(slen,shrt,full)));
 }
 
 // This is made a function because non-constant initializers not allowed
@@ -260,25 +242,20 @@ int max(int x, int y) {
 static Out concat_f($(Doc,Doc) @clo, Ppstate st) {
   let &$(d1,d2) = clo;
   int epw2 = max(st->pw-d2->mw, st->epw-d1->mwo);
-  Ppstate st2 = 
-    &ppstate(st->ci,st->cc,st->cl,st->pw,epw2);
-  Out o1 = apply(d1->f,st2);
-  Ppstate st3 =
-    &ppstate(st->ci,o1->newcc,o1->newcl,st->pw,epw2);
-  Out o2 = apply(d2->f,st3);
-  Out o3 = 
-    &out(o2->newcc,
-         o2->newcl,
-         append(o1->ppout, o2->ppout),
-         append(o1->links, o2->links));
+  Ppstate st2 = &ppstate(st->ci,st->cc,st->cl,st->pw,epw2);
+  Out     o1  = apply(d1->f,st2);
+  Ppstate st3 = &ppstate(st->ci,o1->newcc,o1->newcl,st->pw,epw2);
+  Out     o2  = apply(d2->f,st3);
+  Out     o3  = &out(o2->newcc,
+		     o2->newcl,
+		     append(o1->ppout, o2->ppout),
+		     append(o1->links, o2->links));
   return o3;
 }
 Doc concat(Doc d1, Doc d2) {
   return &doc(min(d1->mw, d1->mwo+d2->mwo),
               min(d1->mw, d1->mwo+d2->mw),
-              make_fn
-              (concat_f,
-               &$(d1,d2)));
+              make_fn(concat_f, &$(d1,d2)));
 }    
 
 static Out long_concats_f(list<Doc> ds0, Ppstate st) {
@@ -306,13 +283,13 @@ static Doc long_concats(list<Doc> doclist) {
   list<Doc> orig = doclist;
   Doc d = doclist->hd;
   doclist = doclist->tl;
-  int mw = d->mw;
+  int mw  = d->mw;
   int mwo = d->mw;
 
   for (let ds = doclist; ds != null; ds = ds->tl) {
-    int mw2 = min(mw, mwo+ds->hd->mwo);
+    int mw2  = min(mw, mwo+ds->hd->mwo);
     int mwo2 = min(mw, mwo+ds->hd->mw);
-    mw = mw2;
+    mw  = mw2;
     mwo = mwo2;
   }
   return &doc(mw,mwo,make_fn(long_concats_f,orig));
@@ -334,12 +311,9 @@ static Out doc_union_f($(Doc,Doc) @clo, Ppstate st) {
   else return apply(d2->f,st);
 }
 Doc doc_union(Doc d, Doc d2) {
-  return &doc
-    (min(d->mwo, d2->mwo),
-     min(d->mw, d2->mw),
-     make_fn
-     (doc_union_f,
-      &$(d,d2)));
+  return &doc(min(d->mwo, d2->mwo),
+	      min(d->mw, d2->mw),
+	      make_fn (doc_union_f, &$(d,d2)));
 }
 
 // This is made a function because non-constant initializers not allowed
@@ -355,9 +329,7 @@ Doc tab(Doc d) {
   Doc d2 =
     &doc(d->mwo,
          d->mw,
-         make_fn
-         (tab_f,
-          d));
+         make_fn (tab_f, d));
   return d2;
 }
 
@@ -399,7 +371,7 @@ Doc seq(string sep, list<Doc> l0) {
   return tab(seq_f(sep,l0));
 }
 
-/* Sequences broken by lines */
+// Sequences broken by lines 
 Doc ppseql_f<`a>(Doc pp(`a), string sep, list<`a> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return pp(l->hd);

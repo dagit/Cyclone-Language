@@ -74,7 +74,6 @@ $(list<tvar>, list<vardecl>)@ tcPat(tenv te,pat p) {
     t = wildtyp();
     vd->type = PointerType(t,new_conref((Bool)false),empty_tqual());
     vd->tq   = empty_tqual();
-    vd->shadow_depth = -1; // FIX: COMPUTE CORRECT SHADOW DEPTH
     v_result = &cons(vd,v_result);
     break;
   case Tuple_p(ps):
@@ -151,9 +150,9 @@ $(list<tvar>, list<vardecl>)@ tcPat(tenv te,pat p) {
     break;
   case Var_p(vd):
     t = wildtyp();
-    vd->type = t;
-    vd->tq   = empty_tqual();
-    vd->shadow_depth = -1; // FIX: COMPUTE CORRECT SHADOW DEPTH
+    vd->type   = t;
+    vd->tq     = empty_tqual();
+    vd->shadow = 0; 
     v_result = &cons(vd,v_result);
     break;
   case Struct_p(sd, *topt_ref,tvs,dps): 

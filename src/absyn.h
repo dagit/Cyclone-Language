@@ -44,6 +44,7 @@ namespace Absyn {
   extern struct Stmt;
   extern enum Raw_pat; 
   extern struct Pat;
+  extern enum Binding;
   extern struct Switch_clause;
   extern struct Fndecl;
   extern struct Structdecl;
@@ -55,7 +56,6 @@ namespace Absyn {
   extern enum Raw_decl;
   extern struct Decl;
   extern enum Designator;
-  extern enum WireDest;
 
   typedef enum Scope scope;
   typedef struct Tqual @tqual;
@@ -78,6 +78,7 @@ namespace Absyn {
   typedef struct Stmt @stmt;
   typedef enum Raw_pat raw_pat;
   typedef struct Pat @pat;
+  typedef enum Binding binding_t;
   typedef struct Switch_clause @switch_clause;
   typedef struct Fndecl @fndecl;
   typedef struct Structdecl @structdecl;
@@ -89,7 +90,6 @@ namespace Absyn {
   typedef enum Raw_decl raw_decl;
   typedef struct Decl @decl;
   typedef enum Designator designator;
-  typedef enum WireDest wiredest_t;
 
   EXTERN_DEFINITION enum Scope { Static, Abstract, Public, Extern };
   EXTERN_DEFINITION struct Tqual { 
@@ -161,8 +161,7 @@ namespace Absyn {
 
   EXTERN_DEFINITION enum Raw_exp {
     Const_e(cnst);
-          // ptr to binder disambiguates shadowing (null means not set yet)
-    Var_e(qvar,struct Vardecl *); 
+    Var_e(qvar,binding_t); 
     UnknownId_e(qvar);
     Primop_e(primop,list<exp>);
     AssignOp_e(exp,Opt_t<primop>,exp);
@@ -184,7 +183,7 @@ namespace Absyn {
     Tuple_e(list<exp>);
     CompoundLit_e($(Opt_t<string>,tqual,typ)@,list<$(list<designator>,exp)@>);
     Array_e(list<$(list<designator>,exp)@>);
-    Comprehension_e(var,exp,exp);
+    Comprehension_e(vardecl,exp,exp); // much of vardecl is known
     Struct_e(typedef_name,Opt_t<list<typ>>,list<$(list<designator>,exp)@>,
 	     Opt_t<structdecl>);
     Enum_e(qvar,Opt_t<list<typ>>,Opt_t<list<typ>>,list<exp>,
@@ -200,8 +199,6 @@ namespace Absyn {
     Opt_t<typ> topt;
     raw_exp    r;
     segment    loc;
-    list<wiredest_t> preds;
-    list<wiredest_t> succs;
   };
 
   EXTERN_DEFINITION enum Raw_stmt {
@@ -216,7 +213,7 @@ namespace Absyn {
     Goto_s(var);
     For_s(exp,exp,exp,stmt);
     Switch_s(exp,list<switch_clause>);
-    Fallthru_s;
+    Fallthru_s(list<exp>);
     Decl_s(decl,stmt);
     Cut_s(stmt);
     Splice_s(stmt);
@@ -228,8 +225,6 @@ namespace Absyn {
   EXTERN_DEFINITION struct Stmt {
     raw_stmt r;
     segment  loc;
-    list<wiredest_t> preds;
-    list<wiredest_t> succs;
   };
 
   EXTERN_DEFINITION enum Raw_pat {
@@ -265,15 +260,23 @@ namespace Absyn {
     segment    loc;
   };
 
+  // only local and pat cases need to worry about shadowing
+  EXTERN_DEFINITION enum Binding {
+    Unresolved_b;
+    Global_b(vardecl);
+    Funname_b(fndecl); // good distinction between functions and function ptrs
+    Param_b($(var,tqual,typ)@);
+    Local_b(vardecl);
+    Pat_b(vardecl); // may use a specialized type later
+  };
+
   EXTERN_DEFINITION struct Vardecl {
     scope      sc; 
     qvar       name;
     tqual      tq;
     typ        type;
     Opt_t<exp> initializer; // ignored for pattern variables
-    int        shadow_depth; 
-    // -1 not computed, 0 global, 
-    // 1 local not shadowing other local, 2 shadows a 1, ...
+    int        shadow; // 0 => doesn't shadow non-global, else unique int
   };
 
   EXTERN_DEFINITION struct Fndecl {
@@ -342,13 +345,6 @@ namespace Absyn {
   EXTERN_DEFINITION enum Designator {
     ArrayElement(exp);
     FieldName(var);
-  };
-
-  EXTERN_DEFINITION enum WireDest {
-    Exp_w(exp);
-    Stmt_w(stmt);
-    Entry_w;
-    Exit_w;
   };
 
   // compare variables 
@@ -464,7 +460,7 @@ namespace Absyn {
   extern stmt continue_stmt(segment loc);
   extern stmt for_stmt(exp e1,exp e2,exp e3,stmt s, segment loc);
   extern stmt switch_stmt(exp e, list<switch_clause>, segment loc);
-  extern stmt fallthru_stmt(segment loc);
+  extern stmt fallthru_stmt(list<exp> el, segment loc);
   extern stmt decl_stmt(decl d, stmt s, segment loc); 
   extern stmt declare_stmt(qvar, typ, Opt_t<exp> init, stmt, segment loc);
   extern stmt cut_stmt(stmt s, segment loc);

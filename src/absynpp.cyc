@@ -85,37 +85,36 @@ bool special(string s){
 string escape(Bool in_string,Char c) {
   switch ((char)c) {
   case '\a': return("\\a");
-  case '\b':   return("\\b");
+  case '\b': return("\\b");
   case '\f': return("\\f");
-  case '\n':   return("\\n");
-  case '\r':   return("\\r");
-  case '\t':   return("\\t");
+  case '\n': return("\\n");
+  case '\r': return("\\r");
+  case '\t': return("\\t");
   case '\v': return("\\v");
-  case '\\':   return("\\\\");
+  case '\\': return("\\\\");
   case '\"':
-    /* Double quote is escaped in a string but not in a char */
+    // Double quote is escaped in a string but not in a char 
     if (in_string) return("\\\"");
     else return("\"");
   case '\'':
-    /* Single quote is escaped in a char but not in a string */
+    // Single quote is escaped in a char but not in a string
     if (in_string) return("\'");
     else return("\\'");
   default:
-    if (c>=' ' && c<='~')
-      return(xprintf("%c",c));
-    else
-      return(xprintf("\\x%x",c));
+    if (c>=' ' && c<='~') return(xprintf("%c",c));
+    else return(xprintf("\\x%x",c));
   }
 }
 
 string char_escape(Char c) {
-  return escape(false,c);
+  return escape((Bool)false,c);
 }
 
 string string_escape(string s) {
   if (special(s))
-    /* Inefficient but I'm having trouble linking in the buffer stuff */
-    return String::strconcat_l(List::map_c(escape,true,String::explode(s)));
+    // Inefficient but I'm having trouble linking in the buffer stuff
+    return String::strconcat_l(List::map_c(escape, (Bool)true,
+					   String::explode(s)));
   else return s;
 }
 
@@ -421,12 +420,18 @@ Doc exp2doc_prec(int inprec, exp e) {
   case Const_e(c): s = cnst2doc(c); break;
     // FIX:
     //  case Var_e(x,null): throw Failure("var reference without pointer to binder");
-  case Var_e(x,vd):
-    s = qvar2doc(x); 
-    if(vd != null && vd->shadow_depth > 0)
-//    if(d > 0)
-      s = cat2(text(xprintf("%d",vd->shadow_depth)),s);
-    // DO PUT ID IN IF IT'S > 0
+  case Var_e(x,Local_b(vd)):
+    s = qvar2doc(x);
+    if(vd->shadow > 0)
+      s = cat2(s,text(xprintf("%d",vd->shadow)));
+    break;
+  case Var_e(x,Pat_b(vd)):
+    s = qvar2doc(x);
+    if(vd->shadow > 0)
+      s = cat2(s,text(xprintf("%d",vd->shadow)));
+    break;
+  case Var_e(x,_):
+    s = qvar2doc(x);
     break;
   case UnknownId_e(x): s = qvar2doc(x); break;
   case Primop_e(p,es): s = primapp2doc(myprec,p,es); break;
@@ -448,23 +453,18 @@ Doc exp2doc_prec(int inprec, exp e) {
     break;
   case Conditional_e(e1,e2,e3):
     // decompile to && and || if possible
-    bool is_and = false;
-    bool is_or  = false;
-    switch (e2->r) {
-    case Const_e(Bool_c(true)):  is_or  = true; break;
-    default: break;
-    }
-    switch (e3->r) {
-    case Const_e(Bool_c(false)): is_and = true; break;
-    default: break;
-    }
-    if (is_or) 
-      s = cat3(exp2doc_prec(33,e1), text(" || "), exp2doc_prec(33,e3));
-    else if(is_and)
-      s = cat3(exp2doc_prec(37,e1), text(" && "), exp2doc_prec(37,e2));
-    else 
+    switch ($(e2->r,e3->r)) {
+    case $(Const_e(Bool_c(true)),_):  
+      s = cat3(exp2doc_prec(33,e1), text(" || "), exp2doc_prec(33,e3)); 
+      break;
+    case $(_,Const_e(Bool_c(false))):
+      s = cat3(exp2doc_prec(37,e1), text(" && "), exp2doc_prec(37,e2)); 
+      break;
+    default:
       s = cat5(exp2doc_prec(myprec,e1), text(" ? "), exp2doc_prec(0,e2),
-	       text(" : "), exp2doc_prec(myprec,e3));
+	                                text(" : "), exp2doc_prec(myprec,e3));
+      break;
+    }
     break;
   case SeqExp_e(e1,e2):
     s = cat3(exp2doc_prec(myprec,e1), text(", "), exp2doc_prec(myprec,e2));
@@ -513,7 +513,7 @@ Doc exp2doc_prec(int inprec, exp e) {
     s = cat3(exp2doc_prec(myprec,e1), text("."), text(n));
     break;
   case StructArrow_e(e1,n):
-    s = cat3(exp2doc_prec(myprec,e1),text("->"),text(n));
+    s = cat3(exp2doc_prec(myprec,e1), text("->"), text(n));
     break;
   case Subscript_e(e1,e2):
     s = cat4(exp2doc_prec(myprec,e1),
@@ -535,9 +535,9 @@ Doc exp2doc_prec(int inprec, exp e) {
   case Array_e(des):
     s = group("new {","}",",",List::map(de2doc,des));
     break;
-  case Comprehension_e(x,e1,e2):
+  case Comprehension_e(vd,e1,e2):
     s = cat7(text("new {for "),
-             text(x),
+             text(vd->name[1]),
              text(" < "),
              exp2doc(e1),
              text(" : "),
@@ -583,49 +583,33 @@ Doc exp2doc_prec(int inprec, exp e) {
 
 Doc designator2doc(designator d) {
   switch (d) {
-  case ArrayElement(e):
-    return cat3(text(".["), exp2doc(e), text("]"));
-  case FieldName(v):
-    return cat2(text("."),text(v));
+  case ArrayElement(e): return cat3(text(".["), exp2doc(e), text("]"));
+  case FieldName(v):    return cat2(text("."), text(v));
   }
 }
 
 Doc de2doc($(list<designator>,exp)@ de) {
   if (de[0] == null) return exp2doc(de[1]);
-  else 
-    return cat2(egroup("","=","=",List::map(designator2doc,de[0])),
-		exp2doc(de[1]));
+  else return cat2(egroup("","=","=",List::map(designator2doc,de[0])),
+		   exp2doc(de[1]));
 }
 
 Doc exps2doc_prec(int inprec, list<exp> es) {
   return group("","",",",List::map_c(exp2doc_prec,inprec,es));
 }
 
+// FIX: take care of sign for Char_c and Short_c
 Doc cnst2doc(cnst c) {
   switch (c) {
-  case Char_c(sg,ch):
-    // FIX: take care of sign
-    return text(xprintf("'%s'",char_escape(ch)));
-  case Short_c(sg,s):
-    // FIX: take care of sign
-    return text(xprintf("(short)%d",(int)s));
-  case Int_c(sg,i):
-    // TODO: This should take into account the signedness of the integer;
-    // it won't be possible until the %u conversion is added to xprintf.
-    if (sg == Signed)
-      return text(xprintf("%d",i));
-    else return text(xprintf("%u",(unsigned)i));
-  case LongLong_c(sg,i):
-    // FIX
-    return text("<<FIX LONG LONG CONSTANT>>");
-  case Float_c(x): return text(x);
-  case Null_c: return text("null");
-  case Bool_c(b): return text(b ? (string)"true" : (string)"false");
-  case String_c(s):
-    return
-      cat3(text("\""),
-           text(string_escape(s)),
-           text("\""));
+  case Char_c(sg,ch):     return text(xprintf("'%s'",char_escape(ch)));
+  case Short_c(sg,s):     return text(xprintf("(short)%d",(int)s));
+  case Int_c(Signed,i):   return text(xprintf("%d",i));
+  case Int_c(Unsigned,i): return text(xprintf("%u",(unsigned)i));
+  case LongLong_c(sg,i):  return text("<<FIX LONG LONG CONSTANT>>"); // FIX
+  case Float_c(x):  return text(x);
+  case Null_c:      return text("null");
+  case Bool_c(b):   return text(b ? (string)"true" : (string)"false");
+  case String_c(s): return cat3(text("\""), text(string_escape(s)), text("\""));
   }
 }
 
@@ -858,7 +842,7 @@ Doc stmt2doc(stmt st) {
     bool print_else;
     switch (s2->r) {
     case Skip_s: print_else = false; break;
-    default: print_else = true; break;
+    default:     print_else = true;  break;
     }
     s = cat7(text("if ("),
              exp2doc(e),
@@ -882,9 +866,9 @@ Doc stmt2doc(stmt st) {
              line_doc(),
              text("}"));
     break;
-  case Break_s: s = text("break;"); break;
+  case Break_s:    s = text("break;"); break;
   case Continue_s: s = text("continue;"); break;
-  case Goto_s(x): s = text(xprintf("goto %s;",x)); break;
+  case Goto_s(x):  s = text(xprintf("goto %s;",x)); break;
   case For_s(e1,e2,e3,s1):
     s = cat10(text("for("),
 	      exp2doc(e1),
@@ -906,7 +890,9 @@ Doc stmt2doc(stmt st) {
              line_doc(),
              text("}"));
     break;
-  case Fallthru_s: s = text("fallthru;"); break;
+  case Fallthru_s(null): s = text("fallthru;"); break;
+  case Fallthru_s(es): 
+    s = cat3(text("fallthru("), exps2doc_prec(20,es), text(");")); break;
   case Decl_s(d,s1):
     s = cat3(decl2doc(d),
              line_doc(),
@@ -969,9 +955,9 @@ Doc pat2doc(pat p) {
     else s = text(xprintf("%u",i));
     break;
   case Char_p(ch): s = text(xprintf("'%s'",char_escape(ch))); break;
-  case Bool_p(b): s = text(b ? (string)"true" : (string)"false"); break;
+  case Bool_p(b):  s = text(b ? (string)"true" : (string)"false"); break;
   case Float_p(x): s = text(x); break;
-  case Var_p(vd): s = qvar2doc(vd->name); break;
+  case Var_p(vd):  s = qvar2doc(vd->name); break;
   case Tuple_p(ts):
     s = cat3(text("$("),
              ppseq(pat2doc,",",ts),
@@ -1160,65 +1146,56 @@ Doc decl2doc(decl d) {
 
 Doc scope2doc(scope sc) {
   switch (sc) {
-  case Static: return text("static ");
-  case Public: return nil_doc();
-  case Extern: return text("extern ");
+  case Static:   return text("static ");
+  case Public:   return nil_doc();
+  case Extern:   return text("extern ");
   case Abstract: return text("abstract ");
   }
 }
 
 // Conversion between alternate forms of types
-$(tqual,typ,list<type_modifier>)@
-to_tms(tqual tq,typ t)
-{
+$(tqual,typ,list<type_modifier>)@ to_tms(tqual tq,typ t) {
   switch (t) {
   case ArrayType(t2,tq2,k):
     // Throw away tq, can't qualify an array
-    $(tqual,typ,list<type_modifier>)@ x = to_tms(tq2,t2);
+    let &$(tq3,t3,tml3) = to_tms(tq2,t2);
     type_modifier tm;
     switch (k) {
-    case UntaggedArray:
-      tm = Carray_mod;
-      break;
-    case TaggedArray:
-      tm = Array_mod;
-      break;
-    case FixedArray(e):
-      tm = ConstArray_mod(e);
-      break;
+    case UntaggedArray: tm = Carray_mod;        break;
+    case TaggedArray:   tm = Array_mod;         break;
+    case FixedArray(e): tm = ConstArray_mod(e); break;
     }
-    return &$(x[0],x[1],
-              (list<type_modifier>)&cons(tm,x[2])); // FIX: can we get rid of the cast?
+    // FIX: can we get rid of the cast?
+    return &$(tq3,t3, (list<type_modifier>)&cons(tm,tml3)); 
 
   case PointerType(t2,nullable,tq2):
-    $(tqual,typ,list<type_modifier>)@ x = to_tms(tq2,t2);
+    let &$(tq3,t3,tml3) = to_tms(tq2,t2);
     bool nl = false;
     bool still_working = true;
     while (still_working) {
       switch (nullable->v) {
       case Forward_constr(y): nullable = y; continue;
-      case Eq_constr(x1): nl = x1; still_working = false; break;
+      case Eq_constr(x1): nl = (bool)x1; still_working = false; break;
       case No_constr: nl = false; still_working = false; break;
       }
     }
     type_modifier tm = Pointer_mod(nl,tq);
-    return &$(x[0],x[1],
-              (list<type_modifier>)&cons(tm,x[2])); // FIX: can we get rid of the cast?
+    // FIX: can we get rid of the cast?
+    return &$(tq3,t3, (list<type_modifier>)&cons(tm,tml3)); 
 
   case FnType(typvars,t2,args,varargs):
     // discard tq because you can't qualify a function
-    $(tqual,typ,list<type_modifier>)@ x = to_tms(empty_tqual(),t2);
-    list<type_modifier> tms =
-       &cons(Function_mod(WithTypes(args,varargs)),
-             x[2]);
+    let &$(tq3,t3,tml3) = to_tms(empty_tqual(),t2);
+    list<type_modifier> tms = &cons(Function_mod(WithTypes(args,varargs)),tml3);
     if (typvars != null)
       tms = &cons(TypeParams_mod(typvars,null),tms);
-    return &$(x[0],x[1],tms);
+    return &$(tq3,t3,tms);
 
   case Evar(k,topt,i):
     if (topt == null)
       return &$(tq,t,null);
-    else return to_tms(tq,topt->v);
+    else 
+      return to_tms(tq,topt->v);
 
   case TypedefType(n,ts,topt):
     if (topt == null || !expand_typedefs)
@@ -1255,11 +1232,8 @@ Doc structfields2doc(list<$(field_name,tqual,typ)@> fields) {
 
 Doc tuple2doc(typ t) {
   switch (t) {
-  case TupleType(ts):
-    return args2doc(ts);
-  default:
-    // FIX: This is an unexpected case
-    return typ2doc(t);
+  case TupleType(ts): return args2doc(ts);
+  default:            return typ2doc(t); // FIX: This is an unexpected case
   }
 }
 

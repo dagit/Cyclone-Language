@@ -31,16 +31,6 @@ using Tcenv;
 using Tcexp;
 using Tcpat;
 
-static tenv add_local_vars(segment loc, tenv te,
-                           list<vardecl> x, bool init) {
-  tenv te2 = te;
-  for (; x != null; x = x->tl) {
-    let &Vardecl(_,&$(_,v),tq,t,_,_) = x->hd;
-    te2 = add_local_var(loc,te2,v,tq,t,init);
-  }
-  return te2;
-}
-
 static synth remove_local_vars(tenv te, list<vardecl> x, synth ssyn) {
   Set::Set<var> vs = Set::empty(String::strcmp);
   for (; x != null; x = x->tl)
@@ -49,10 +39,25 @@ static synth remove_local_vars(tenv te, list<vardecl> x, synth ssyn) {
   return add_var_synth(shadowed,ssyn);
 }
 
-static synth decl_synth(tenv te, list<vardecl> x, bool init, stmt s) {
-  tenv  te2  = add_local_vars(s->loc,te,x,init);
-  synth ssyn = tcStmt(te2,s);
-  return remove_local_vars(te,x,ssyn);
+// used to type-check Let_d, switch clauses, and catch clauses
+static synth pattern_synth(segment loc, tenv te, list<tvar> tvs, 
+			   list<vardecl> x, stmt s, Opt_t<exp> where_opt,
+			   bool s_in_switch) {
+  tenv te2 = add_type_vars(loc,te,tvs);
+  for(; x != null; x = x->tl)
+    te2 = add_pat_var(loc, te2, x->hd);
+  if(where_opt != null) {
+    let esyn = tcExp(te2, &Opt(bool_t), where_opt->v);
+    if(!coerce_to_bool(te,where_opt->v))
+      terr(where_opt->v->loc,
+	   xprintf("where clause has type %s instead of bool",
+		   typ2string(synth_typ(esyn))));
+    // could only have the "true" part of esyn propagated
+    te2 = layer_synth(te2,esyn);
+  }
+  if(s_in_switch)
+    te2 = set_in_switch(te2);
+  return remove_local_vars(te,x,tcStmt(te2,s));
 }
 
 synth tcStmt(tenv te, stmt s0) {
@@ -169,34 +174,22 @@ synth tcStmt(tenv te, stmt s0) {
       if (!unify(p->topt->v,t))
 	terr(scs->hd->loc,xprintf("switch on type %s, but case expects type %s",
 				  typ2string(t), typ2string(p->topt->v)));
-      tenv te2 = add_local_vars(scs->hd->loc,
-				add_type_vars(scs->hd->loc,te,new_tvs),
-				x,true);
-      let where_opt = scs->hd->where_clause;
-      if (where_opt != null) {
-	let esyn1 = tcExp(te2,&Opt(bool_t),where_opt->v);
-	if (!coerce_to_bool(te,where_opt->v))
-	  terr(where_opt->v->loc,
-	       xprintf("where clause has type %s instead of bool",
-		       typ2string(synth_typ(esyn1))));
-	// could only have the "true" part of esyn propagated
-	te2 = layer_synth(te2,esyn1);
-      }
-      te2 = set_in_switch(te2);
-      let s    = scs->hd->body;
-      let ssyn = remove_local_vars(te,x,tcStmt(te2,s));
+      let ssyn = pattern_synth(scs->hd->loc, te, new_tvs, x,
+			       scs->hd->body, scs->hd->where_clause, true);
       if (synth_may_implicit_fallthru(ssyn))
-	terr(s->loc,
+	terr(scs->hd->body->loc,
 	     "switch case must not implicitly fall through to next case");
       if (!synth_may_explicit_fallthru(ssyn)) {
 	swsyn = join_synth(swsyn,ssyn);
       } else {
+	// FIX: binders must be explictly instantiated
 	// we need to record only the forward jump info in swsyn
 	swsyn = join_synth(swsyn,drop_fallthru_synth(ssyn));
 
 	// check that the bound type variables and pattern variables are
 	// the same in the next pattern (if any).
-	if (scs->tl == null) terr(s->loc,"last case of switch does a fallthru");
+	if (scs->tl == null) 
+	  terr(scs->hd->body->loc,"last case of switch does a fallthru");
 	else {
 	  let p2 = scs->tl->hd->pattern;
 	  let &$(new_tvs2,x2) = tcPat(te,p);
@@ -228,7 +221,7 @@ synth tcStmt(tenv te, stmt s0) {
     return seq_synth(esyn,switch_bottom(swsyn));
 
   case TryCatch_s(s,scs0):
-    let te1 = clear_fallthru(te);
+    let te1   = clear_fallthru(te);
     let ssyn1 = tcStmt(te1,s);
 
     synth swsyn = empty_synth(te);
@@ -236,33 +229,21 @@ synth tcStmt(tenv te, stmt s0) {
     for (let scs = scs0; scs != null; scs = scs->tl) {
       let p = scs->hd->pattern;
       let &$(new_tvs,x) = tcPat(te1,p);
-
       if (!unify(p->topt->v,exn_t))
         terr(scs->hd->loc, xprintf("expected xenum exn but found %s",
 				   typ2string(p->topt->v)));
-
-      tenv te2 = add_type_vars(scs->hd->loc,te1,new_tvs);
-      let where_opt = scs->hd->where_clause;
-      if (where_opt != null) {
-	let esyn = tcExp(te2,&Opt(bool_t),where_opt->v);
-	if (!coerce_to_bool(te1,where_opt->v))
-	  terr(where_opt->v->loc,
-	       xprintf("where clause has type %s instead of bool",
-		       typ2string(synth_typ(esyn))));
-	// could only have the "true" part of esyn propagated
-	te2 = layer_synth(te2,esyn);
-      }
-      te2 = set_in_switch(te2);
-
-      let s1 = scs->hd->body;
-      let ssyn = decl_synth(te2,x,true,s1);
+      let ssyn = pattern_synth(scs->hd->loc, te, new_tvs, x,
+			       scs->hd->body, scs->hd->where_clause, true);
       if (synth_may_implicit_fallthru(ssyn))
-	terr(s1->loc,"catch case must not implicitly fall through to next case");
+	terr(scs->hd->body->loc,
+	     "catch case must not implicitly fall through to next case");
       if (!synth_may_explicit_fallthru(ssyn)) {
 	swsyn = join_synth(swsyn,ssyn);
       } else {
+	// FIX: binders must be explicitly instantiated
 	swsyn = join_synth(swsyn,drop_fallthru_synth(ssyn));
-	if (scs->tl == null) terr(s1->loc,"last case of catch does a fallthru");
+	if (scs->tl == null) 
+	  terr(scs->hd->body->loc,"last case of catch does a fallthru");
 	else {
 	  let p2 = scs->tl->hd->pattern;
 	  let &$(new_tvs2,x2) = tcPat(te1,p);
@@ -313,15 +294,62 @@ synth tcStmt(tenv te, stmt s0) {
   case With(q): return tcWith(te,s0->loc,s0,q);
 */
 
-  case Fallthru_s:
+  case Fallthru_s(el):
     if (!is_ok_fallthru(te)) {
       terr(s0->loc,"bad explicit fallthru");
       return skip_synth(te);
-    } else
-      return fallthru_synth(te);
+    } else if(el != null) {
+      // FIX: do this case!
+      terr(s0->loc,"binding fallthrus unimplemented");
+      return skip_synth(te);
+    }
+    return fallthru_synth(te);
 
   case Decl_s(d,s):
     switch (d->r) {
+    case Var_d(vd):
+      let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_) = vd;
+      if (nsl != null)
+        terr(d->loc, "local variables cannot be qualified");
+      check_valid_type(s0->loc,te,lookup_type_vars(te),t);
+      if (initializer != null) {
+        let esyn = tcExp(te,&Opt(t),initializer->v);
+        if (!coerce_assign(te,initializer->v,t))
+            terr(d->loc,
+                 xprintf("%s declared with type %s, initialized with type %s",
+                         x, typ2string(t), typ2string(synth_typ(esyn))));
+        te = set_unassigned(te,maybe_unassigned(esyn));
+      }
+      tenv te2   = add_local_var(s->loc, te, vd);
+      synth ssyn = tcStmt(te2,s);
+      return remove_local_vars(te,&cons(vd,null),ssyn);
+
+    case Let_d(p,*topt_ref,e,*exhaust):
+      let topt = *topt_ref;
+      let esyn = tcExp(te,null,e);
+      *topt_ref = e->topt; // side effect
+      let &$(new_tvs,x) = tcPat(te,p);
+      // FIX: if let-declarations were of the form "let pat = e in S" then
+      // we could allow any type variables within e to be used within S.
+      if (new_tvs != null)
+	terr(d->loc, "can't introduce type variables in let-clause");
+      if (topt != null && !unify(p->topt->v,topt->v))
+        terr(d->loc, "type of pattern does not match declared type");
+      if (!unify(p->topt->v,synth_typ(esyn)))
+	terr(d->loc,
+	     xprintf("pattern type %s does not match definition type %s",
+		     typ2string(p->topt->v),typ2string(synth_typ(esyn))));
+      if(check_let_pat_exhaustive(s0->loc,p))
+	*exhaust = true; // side effect
+      return pattern_synth(s0->loc, te, null, x, s, null, false);
+
+    case Namespace_d(n,tds):
+      terr(d->loc,"namespace is allowed at top level only");
+      return skip_synth(te);
+    case Using_d(q,tds):
+      // FIX: we should allow "using" in limited scope
+      terr(d->loc,"using is allowed at top level only");
+      return skip_synth(te);
     case Fn_d(fd):
       return impos("tcStmt: nested function declarations are not implemented");
     case Struct_d(sd):
@@ -334,48 +362,6 @@ synth tcStmt(tenv te, stmt s0) {
       return impos("tcStmt: nested xenum declarations are not implemented");
     case Typedef_d(tdd):
       return impos("tcStmt: nested typedef declarations are not implemented");
-    case Var_d(vd):
-      let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_) = vd;
-      if (nsl != null)
-        terr(d->loc, "local variables cannot be qualified");
-      check_valid_type(s0->loc,te,lookup_type_vars(te),t);
-      bool init = false;
-      if (initializer != null) {
-        init = true;
-        let esyn = tcExp(te,&Opt(t),initializer->v);
-        if (!coerce_assign(te,initializer->v,t))
-            terr(d->loc,
-                 xprintf("%s declared with type %s, initialized with type %s",
-                         x, typ2string(t), typ2string(synth_typ(esyn))));
-        te = set_unassigned(te,maybe_unassigned(esyn));
-      }
-      return decl_synth(te,&cons(vd,null),init,s);
-    case Let_d(p,*topt_ref,e,*exhaust):
-      let topt = *topt_ref;
-      let esyn = tcExp(te,null,e);
-      *topt_ref = e->topt; // side effect
-      let &$(new_tvars,x) = tcPat(te,p);
-      // FIX: if let-declarations were of the form "let pat = e in S" then
-      // we could allow any type variables within e to be used within S.
-      if (new_tvars != null)
-	terr(d->loc,"can't introduce type variables in let-clause");
-      if (topt != null && !unify(p->topt->v,topt->v))
-        terr(d->loc,
-             "type of pattern does not match declared type");
-      if (!unify(p->topt->v,synth_typ(esyn)))
-	terr(d->loc,
-	     xprintf("pattern type %s does not match definition type %s",
-		     typ2string(p->topt->v),typ2string(synth_typ(esyn))));
-      if(check_let_pat_exhaustive(s0->loc,p))
-	*exhaust = true; // side effect
-      return decl_synth(te,x,true,s);
-    case Namespace_d(n,tds):
-      terr(d->loc,"namespace is allowed at top level only");
-      return skip_synth(te);
-    case Using_d(q,tds):
-      // FIX: we should allow "using" in limited scope
-      terr(d->loc,"using is allowed at top level only");
-      return skip_synth(te);
     }
 
   case Label_s(x,s):

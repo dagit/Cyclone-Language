@@ -77,19 +77,14 @@ Opt_t<`b> opt_map<`a,`b>(`b f(`a), Opt_t<`a> o) {
   return &Opt(f(o->v));
 }
 
-bool true_f<`a>(`a x) {  return true;  }
+bool true_f<`a>(`a x)  {  return true;  }
 bool false_f<`a>(`a x) {  return false; }
 
-int intcmp(int a, int b) { return a - b; }
+int intcmp(int a, int b)   { return a - b; }
 int charcmp(char a,char b) { return (int)a - (int)b; }
 
-`a fst<`a,`b>($(`a,`b) @pair) {
-  return(pair[0]);
-}
-
-`b snd<`a,`b>($(`a,`b) @pair) {
-  return(pair[1]);
-}
+`a fst<`a,`b>($(`a,`b) @pair) { return(pair[0]); }
+`b snd<`a,`b>($(`a,`b) @pair) { return(pair[1]); }
 
 `c third<`a,`b,`c>($(`a,`b,`c) @triple) {
   return(triple[2]);
@@ -172,7 +167,7 @@ string string_of_int_width(int n, int minWidth) {
   for (; i>=0; --i)
     ans[i] = '0';
 
-  /* this line should be here (Luke 11-10-99) */
+  // this line should be here (Luke 11-10-99)
   if (negative) ans[0] = '-';
   return ans;
 }

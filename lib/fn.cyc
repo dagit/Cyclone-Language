@@ -36,8 +36,7 @@ fn<`arg,`res> fp2fn<`arg,`res>(`res f(`arg)) {
 }
 
 static `c fn_compose<`a,`b,`c>($(fn<`b,`c>, fn<`a,`b>)@ f_and_g,`a arg) {
-  let f = f_and_g[0];
-  let g = f_and_g[1];
+  let &$(f,g) = f_and_g;
   return apply(f,apply(g,arg));
 }
 

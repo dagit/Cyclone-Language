@@ -158,16 +158,16 @@ static bool ok_field_type(segment loc, tenv te, typ t) {
 
 static void var_redecl_okay(genv ge, segment loc, var name, typ t, scope sc) {
   switch (Dict::lookup_opt(ge->ordinaries,name)) {
-  case &Opt{.v=GlobalRes(_,vi)}:
+  case &Opt(VarRes(Global_b(vd))):
     // at most one non-extern
-    if(sc != Extern && vi->sc != Extern) 
+    if(sc != Extern && vd->sc != Extern) 
       terr(loc,xprintf("redeclaration of %s",name));
     // all must be at the same type
-    if (!unify(vi->t,t))
+    if (!unify(vd->type,t))
       // FIX: should the test be unification?
       // FIX: we should also check the tqual
       terr(loc,xprintf("redeclaration of %s at a different type: %s != %s",
-		       name, typ2string(t), typ2string(vi->t)));
+		       name, typ2string(t), typ2string(vd->type)));
     break;
   default: break;
   }
@@ -212,9 +212,7 @@ static void tcVardecl(tenv te, genv ge, segment loc, vardecl vd) {
       terr(loc,"initializer is not a constant expression");
   }
   // add to environment
-  ge->ordinaries = Dict::insert(ge->ordinaries, v,
-				GlobalRes(&$(te->ns,v),
-					  &Var_info(sc, vd->tq, t)));
+  ge->ordinaries = Dict::insert(ge->ordinaries, v, VarRes(Global_b(vd)));
 }
 
 static void tcFndecl(tenv te, genv ge, segment loc, fndecl fd) {
@@ -234,9 +232,7 @@ static void tcFndecl(tenv te, genv ge, segment loc, fndecl fd) {
   // check for redeclaration
   var_redecl_okay(ge, loc, v, t, sc);
   // due to recursion, add function to environment before checking body
-  ge->ordinaries = Dict::insert(ge->ordinaries, v,
-				GlobalRes(&$(te->ns,v),
-					  &Var_info(sc, empty_tqual(), t)));
+  ge->ordinaries = Dict::insert(ge->ordinaries, v, VarRes(Funname_b(fd)));
   // DAN: Here is where I'm assuming the te can be imperatively screwed with
   //      while we're dealing with top-level stuff (though it's not too hard
   //      to undo that assumption)
@@ -248,10 +244,8 @@ static void tcFndecl(tenv te, genv ge, segment loc, fndecl fd) {
 			   .return_typ = fd->ret_type,
 			   .type_vars  = fd->tvs // FIX: check unique
                           }));
-  for (let args = fd->args; args != null; args = args->tl) {
-    let &$(v2,tq,t2) = args->hd;
-    te = add_local_var(loc,te,v2,tq,t2,true); // add_local_var is functional!
-  }
+  for (let args = fd->args; args != null; args = args->tl) 
+    te = add_param_var(loc,te,args->hd); // add_param_var is functional!
   // check the body, then get rid of local environment
   let ssyn = tcStmt(te,fd->body);
   te->le = null;

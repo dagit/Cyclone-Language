@@ -698,10 +698,10 @@ static env add_varmap(env e, qvar x, exp y) {
   return &Env{ .break_lab = e->break_lab,
                .continue_lab = e->continue_lab,
                .varmap = Dict::insert(e->varmap, x, y),
-               .to_pop_break = e->to_pop_break,
+               .to_pop_break    = e->to_pop_break,
                .to_pop_continue = e->to_pop_continue,
-               .to_pop_return = e->to_pop_return,
-               .toplevel = e->toplevel};
+               .to_pop_return   = e->to_pop_return,
+               .toplevel        = e->toplevel};
 }
 
 // env for loop body: break and continue labels are set to null,
@@ -963,7 +963,7 @@ static void exp_to_c(env nv, exp e) {
     default:  break; // skip
     }
     break;
-  case Var_e(qv,vd): 
+  case Var_e(qv,b): 
     // FIX!
     // must look variables up in the nv->varmap
     try {
@@ -1338,7 +1338,7 @@ static void exp_to_c(env nv, exp e) {
       e->r = stmt_exp(declare_stmt(x,ptr_t,&Opt(e0),s,DL),DL)->r;
     }
     break;
-  case Comprehension_e(x,e1,e2): 
+  case Comprehension_e(vd,e1,e2): 
     // Drop the "tagged_array_t" struct stuff when type is a fixed-size array
     // ({ unsigned int max = e1;
     //    unsigned int x ;
@@ -1349,7 +1349,7 @@ static void exp_to_c(env nv, exp e) {
     //    b->contents = a;
     //    for (x = 0; x < max; x++) a[x] = e2;
     //    b; })
-    qvar x1 = &$(null,x);
+    qvar x1 = vd->name;
     bool is_tagged_array = false;
     switch (compress(old_t)) {
     case ArrayType(et,tq,ak):
@@ -1855,9 +1855,9 @@ static stmt xlate_switch(typ t,exp r,exp path,env nv,
   var end_label = fresh_label();
   // for each case, generate a test label and an entry label
   list<$(var,var,switch_clause)@> lscs = List::map(gen_label,scs); 
-  let test_stmts = null;
-  list<env> nvs = null;
-  list<$(qvar,typ)@> vars = null;
+  let                test_stmts = null;
+  list<env>          nvs        = null;
+  list<$(qvar,typ)@> vars       = null;
   // generate the tests for each case, branching to the case's 
   // label on success and to the next test on false.
   for (let lscs2 = lscs; lscs2 != null; lscs2 = lscs2->tl) {
@@ -1872,7 +1872,7 @@ static stmt xlate_switch(typ t,exp r,exp path,env nv,
     } else {
       exp e = sc->where_clause->v;
       var intermed_lab = fresh_label();
-      let res = xlate_pat(nv, t, r, path, sc->pattern, intermed_lab, fail_lab, vars);
+      let res = xlate_pat(nv,t,r,path,sc->pattern,intermed_lab,fail_lab,vars);
       exp_to_c(res[0], e); // Translate where clause with pattern vars in scope
       nvs = &cons(res[0],nvs);
       vars = res[1];
@@ -1899,13 +1899,13 @@ static stmt xlate_switch(typ t,exp r,exp path,env nv,
 			       label_stmt(end_label, skip_stmt(DL),DL),DL),DL);
   // add in all of the variable declarations with a wide enough scope
   for (; vars != null; vars = vars->tl) {
-    $(qvar,typ)@ x = vars->hd;
-    res = declare_stmt(x[0], x[1], null, res, DL);
+    let &$(qv,t) = vars->hd;
+    res = declare_stmt(qv, t, null, res, DL);
   }
   return res;
 }
 
-extern stmt letdecl_to_c(env nv, pat p, Opt_t<typ> topt, exp e, 
+extern stmt letdecl_to_c(env nv, pat p, Opt_t<typ> topt, exp e,
 			 bool exhaust, stmt s);
 extern $(env,list<decl>) decls_to_c(env nv, list<decl> ds);
 
@@ -1913,7 +1913,7 @@ extern $(env,list<decl>) decls_to_c(env nv, list<decl> ds);
 ///////////////////////////////////////////////////////////////
 //              Translation of Statements                    //
 ///////////////////////////////////////////////////////////////
-// This is surprisingly straightforward..->a good sign.
+// This is surprisingly straightforward... a good sign.
 static void stmt_to_c(env nv, stmt s) {
   // written to be self-tail recursive
   while (true) {
@@ -2000,11 +2000,11 @@ static void stmt_to_c(env nv, stmt s) {
       qvar r = temp_var();
       exp_to_c(nv,e);
       let new_s = xlate_switch(e->topt->v,var_exp(r,DL),
-			     address_exp(var_exp(r,DL),DL),nv,scs);
+			       address_exp(var_exp(r,DL),DL),nv,scs);
       s->r = declare_stmt(r,typ_to_c(e->topt->v),&Opt(e),
-				new_s,DL)->r;
+			  new_s,DL)->r;
       return;
-    case Fallthru_s: 
+    case Fallthru_s(_): 
       // FIX:  see xlate_switch above though...
       s->r = Skip_s; unimp("fallthru");
       return;
@@ -2238,7 +2238,7 @@ static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
 				     .q_restrict = false},
                         .type = t,
                         .initializer = eopt,
-                        .shadow_depth = -1};
+                        .shadow = 0};
       res = &cons(new_decl(Var_d(vd),DL),res);
     } else {
       // Declare an integer constant for the tag and a struct for the field
@@ -2249,7 +2249,7 @@ static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
 			.tq = &Tqual{.q_const = true, .q_volatile = false,
 				     .q_restrict = false},
                         .type = sint_t, .initializer = eopt,
-                        .shadow_depth = -1};
+                        .shadow = -1};
       res = &cons(new_decl(Var_d(vd),DL),res);
       // compute the fields for the struct, adding in a tag field
       if (!seen_defn_before) {
@@ -2306,7 +2306,8 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
     let td = &Typedefdecl{.name = n, .tvs = null, .defn = t};
     res = &cons(new_decl(Typedef_d(td),DL),res);
   } else {
-    if (xenums_so_far == null) xenums_so_far = &Opt(Dict::empty(String::strcmp));
+    if (xenums_so_far == null) 
+      xenums_so_far = &Opt(Dict::empty(String::strcmp));
     for (let fs = xd->fields; fs != null; fs = fs->tl) {
       enumfield f = fs->hd;
       if (f->tag != null) unimp("xenum:  can't deal with explicit tags");
@@ -2321,7 +2322,7 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
                             .name = collapse_qvar_tag(f->name,"_tag"),
                             .tq = empty_tqual(), .type = tag_typ,
                             .initializer = initopt,
-                            .shadow_depth = -1};
+                            .shadow = 0};
       res = &cons(new_decl(Var_d(tag_decl),DL),res);
 
       bool seen_before;
@@ -2350,9 +2351,10 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
         fields = &cons(&$((string)"tag",empty_tqual(),
                          nullableptr_t(uchar_t,empty_tqual())),
         List::rev(fields));
-        let strct_decl = &Structdecl{.sc = Public,
-                                     .name = &Opt(collapse_qvar_tag(f->name,"_struct")),
-                                     .tvs = null, .fields = &Opt(fields)};
+        let strct_decl = 
+	  &Structdecl{.sc = Public,
+		      .name = &Opt(collapse_qvar_tag(f->name,"_struct")),
+		      .tvs = null, .fields = &Opt(fields)};
         res = &cons(new_decl(Struct_d(strct_decl),DL),res);
       }
     }
@@ -2487,12 +2489,10 @@ list<decl> toc(list<decl> ds) {
   for (let ts = tagged_array_types; ts != null; ts = ts->tl) {
     let &$(x,t) = ts->hd;
     let f1 = &$((string)"sz", empty_tqual(), uint_t);
-    let f2 = &$((string)"contents", empty_tqual(),
-		nullableptr_t(t,empty_tqual()));
+    let f2 = &$((string)"contents",empty_tqual(),nullableptr_t(t,empty_tqual()));
     let fs = &cons(f1,&cons(f2,null));
-    let sd = &Structdecl{.sc = Public, .name = &Opt(&$(null,x)),
-                         .tvs = null,
-                         .fields = (Opt_t<list<$(string,tqual,typ)@>>)&Opt((list<$(string,tqual,typ)@>)fs)};
+    let sd = &Structdecl{.sc = Public, .name = &Opt(&$(null,x)), .tvs = null,
+                         .fields = &Opt((list<$(string,tqual,typ)@>)fs)};
     ds = &cons(new_decl(Struct_d(sd),DL),ds);
   }
   // add the tuple types in
