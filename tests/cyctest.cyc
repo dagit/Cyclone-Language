@@ -106,6 +106,10 @@ int my_add(int i, int j) {
   return i+j;
 }
 
+int add2(int i) {
+  return i+2;
+}
+
 void return_from_try_test() {
   try
     return;
@@ -236,11 +240,15 @@ void array_test() {
   int z2[?] = Array::copy(z1);
   Array::imp_rev(z2);
   int z3[?] = Array::rev_copy(Array::rev_copy(z1));
+  // z2 is sorted, z1 and z3 are backwards
   okfail(0==array_cmp(int_cmp,z1,z3));
   Array::qsort(int_cmp,z1,0,10);
   okfail(0==array_cmp(int_cmp,z1,z2));
   Array::msort(int_cmp,z3,0,10);
   okfail(0==array_cmp(int_cmp,z3,z2));
+  int z4[?] = Array::map(add2,Array::extract(z2,2,&Core::Opt(4)));
+  Array::imp_map(add2,z4);
+  okfail(0==array_cmp(int_cmp,z4,Array::extract(z2,6,null)));
   test_end();
 }
 

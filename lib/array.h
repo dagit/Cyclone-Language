@@ -35,6 +35,11 @@ extern `b map<`a,`b>(`b f(`a),`a x[?]) [?];
 // Apply a function to each element in an array, returning a new array. 
 // This uses an additional argument to simulate function closures.
 extern `b map_c<`a,`b,`c>(`b f(`c,`a),`c env,`a x[?]) [?];
+//
+// Apply a function to each element in an array, writing the results
+// back into the array.
+extern void imp_map<`a>(`a f(`a),`a x[?]);
+extern void imp_map_c<`a,`b>(`a f(`b,`a),`b env,`a x[?]);
 
 // thrown when two arrays don't have the same size 
 extern xenum exn {Array_mismatch};
@@ -114,6 +119,13 @@ extern $(`a [?],`b[?]) split<`a,`b>($(`a,`b) x[?]);
 extern bool memq<`a>(`a l[?], `a x);
 
 extern bool mem<`a>(int compare(`a,`a), `a l[?], `a x);
+
+
+// Creates a new (smaller) array containing the specified slice of the
+// target array.  The last parameter is an int option of the number of 
+// elements to take, or null for "take until the end of the array".
+extern `a extract<`a>(`a x[?],int start,Core::Opt_t<int> n_opt) [?];
+
 
 
 }

@@ -3,6 +3,7 @@
 
 #include "list.h"
 using List;
+using Core;
 
 namespace Array;
 
@@ -140,7 +141,16 @@ void msort<`a>(int less_eq(`a,`a),`a arr[?],int base_ofs, int len) {
   `a to[?] = new {for i < len : arr[i+base_ofs]};
   `a swap[?];
    
-  int stepsize, start, lstart, lend, rstart, rend, dest;
+  int stepsize; // Non-recursive mergesort repeatedly walks over
+                // the array, each time in bigger steps.
+  int start;    // For each "stepsize", we "start" at different 
+                // offsets and merge two segments of that length.
+  int lstart, lend, rstart, rend;
+                // These are start, end of left (l) and right(r)
+                // segments being merged.
+  int dest;     // This is the offset currently being filled in
+                // the "to" array.  (Smaller element from the
+                // left and right halves is written to to[dest].)
 
   for (stepsize = 1; stepsize < len; stepsize = stepsize * 2) {
     swap = from;
@@ -204,15 +214,22 @@ list<`a> to_list<`a>(`a x[?]) {
   int sx = sizeof(x);
   return new {for i < sx : f(x[i])};
 }
-
-
-
-
 // Apply a function to each element in an array, returning a new array. 
 // This uses an additional argument to simulate function closures.
 `b map_c<`a,`b,`c>(`b f(`c,`a),`c env,`a x[?]) [?] {
   int sx = sizeof(x);
   return new {for i < sx : f(env,x[i])};
+}
+
+// Apply a function to each element in an array, writing the results
+// back into the array.
+void imp_map<`a>(`a f(`a),`a x[?]) {
+  int sx = sizeof(x);
+  for (int i = 0; i<sx; i++) x[i]=f(x[i]);
+}
+void imp_map_c<`a,`b>(`a f(`b,`a),`b env,`a x[?]) {
+  int sx = sizeof(x);
+  for (int i = 0; i<sx; i++) x[i]=f(env,x[i]);
 }
 
 // thrown when two arrays don't have the same size 
@@ -410,3 +427,15 @@ bool mem<`a>(int compare(`a,`a), `a l[?], `a x) {
   return false;
 }
 
+// Creates a new (smaller) array containing the specified slice of the
+// target array.  The last parameter is an int option of the number of 
+// elements to take, or null for "take until the end of the array".
+`a extract<`a>(`a x[?],int start,Core::Opt_t<int> n_opt) [?] {
+  int sx = sizeof(x);
+  int n = (n_opt == null ? sx - start : n_opt->v);
+
+  if (start < 0 || n <= 0 || start + (n_opt == null ? 0 : n) > sx)
+    throw Core::InvalidArg("Array::extract");
+
+  return new {for i < n : x[start+i]};
+}
