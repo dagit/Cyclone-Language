@@ -128,14 +128,13 @@ first because we have already explained their use informally.
   
 \item \textbf{As patterns}
   \begin{itemize}
-  \item Syntax: \texttt{p as x} where \texttt{p} is a pattern and \texttt{x}
-    is an identifier.
+  \item Syntax: \texttt{x as p} where \texttt{x}
+    is an identifier and \texttt{p} is a pattern.
   \item Types for match: all types
   \item Expressions matched: all expressions
-  \item Bindings introduced: the identifier x is bound to the expression
-    being matched, and the expression is further matched against the
-    pattern \texttt{p}.  Thus, a variable pattern is simply shorthand
-    for ``\texttt{_ as x}''.
+  \item Bindings introduced: if the expression matches the pattern \texttt{p},
+  then its value is bound to \texttt{x}.  Thus, a variable pattern is 
+    simply shorthand for ``\texttt{x as _}''.
   \end{itemize}
 
 \item \textbf{Reference patterns}

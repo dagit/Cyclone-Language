@@ -626,7 +626,8 @@ static initlevel_t initlevel_rec(struct InitlevelEnv<`r,`e> @ env,
   if(acc == NoneIL) return NoneIL;
   switch(r) {
   case &NamedLocation(_,r): return initlevel_rec(env,r,acc);
-  case &Aggregate(UnionRInfo{.is_union = true, .fieldnum = f }, d): // union case
+  case &Aggregate(UnionRInfo{.is_union = iu, .fieldnum = f }, d) && iu: 
+    // union case
     // if one of the members is AllIL then we're okay; if we know the
     // field, then it better be the known field that's initialized
     let sz = numelts(d);
@@ -642,7 +643,7 @@ static initlevel_t initlevel_rec(struct InitlevelEnv<`r,`e> @ env,
     else if (initlevel_rec(env,d[f],AllIL) == AllIL)
       this_ans = AllIL;
     break;
-  case &Aggregate(UnionRInfo{.is_union = false, ...},d): // struct case -- they all have to be init'd
+  case &Aggregate(_,d): // struct case -- they all have to be init'd
     let sz = numelts(d);
     this_ans = AllIL;
     for (int i = 0; i < sz; i++)
@@ -1186,7 +1187,9 @@ static bool absRval_lessthan_approx(`a::B ignore, absRval_t<`r> r1, absRval_t<`r
   case $(&AddressOf(p1), &AddressOf(p2)): return place_cmp(p1,p2)==0;
   case $(&AddressOf(_),_):
   case $(_,&AddressOf(_)): return false;
-  case $(&Aggregate(is_union1,d1), &Aggregate(is_union2,d2)):
+  case $(&Aggregate(UnionRInfo{is_union1,fld1},d1), 
+         &Aggregate(UnionRInfo{is_union2,fld2},d2)):
+    if (is_union1 && fld1 != fld2) return false;
     if (d1 == d2) return true;
     for (int i = 0; i < numelts(d1); i++)
       if (!absRval_lessthan_approx(0,d1[i],d2[i])) return false;

@@ -2,6 +2,204 @@ Cyclone Release Notes:
 
 This file explains some of the changes that occurred in between releases.
 ----------------------------------------------------------------------
+Changes going from Version 0.5 dated 14 April 2003, to Version 0.6,
+September 2003.
+
+* Updated documentation for unique pointers, reference counted
+  pointers, and dynamic regions.  See also the paper
+  "Safe and Flexible Memory Management in Cyclone", 
+  Univ. of Maryland Technical Report CS-TR-4514 (available on
+  the Cyclone web page.)
+
+* Reworked how we do constraint checking in the flow analysis.
+  We now track relations ==, !=, <, <=, >, and >= for constants,
+  non-escaping local variables, numelts(x) where x is a non-escaping
+  local variable, and type-level integers.  We use a variant of
+  Pratt's algorithm to check the satisfiability of the constraints.
+  This makes bounds-check elimination a lot better than it was before.
+
+* Added support for type-safe, untagged unions.  As a simple
+  example, one can write:
+
+    union Foo<`i::I> {
+      int *x  @requires valueof(`i) >= 3;
+      int y;  @requires valueof(`i) < 3;
+    };
+
+    int foo_to_int(tag_t<`i> tag, union Foo<`i> f) {
+      if (tag >= 3) return *f.x;
+      else return f.y;
+    }
+
+    struct TaggedFoo {
+      <`i::I>
+      tag_t<`i> tag;
+      union Foo<`i> foo;
+    }
+
+  In the example above, the @requires clauses are predicates that
+  must be proven to be true before the given member can be accessed.
+  For instance, Foo.x can only be accessed when valueof(`i) >= 3.
+  The @requires clauses can only mention conjunctions of relations
+  that the flow analysis can deal with (see above) and the relations
+  must be mutually exclusive (this is checked by the type-checker.)
+
+  In the example above, a value of type tag_t<`i> is passed to
+  foo_to_int along with a union Foo<`i>.  The explicit test
+  that the tag >= 3 is enough for the flow analysis to determine
+  that valueof(`i) >= 3, hence in the then-clause, we are able
+  to access the x component of the Foo object.  Dually, in the
+  else-clause, we know valueof(`i) < 3 so we can access the 
+  y component.  In general, you'll need to pass around a tag_t<`i>
+  somewhere and test it according to the @requires clauses to
+  access a component.  So, the tag isn't really eliminated, but
+  rather made explicit.
+
+  Note that you can always package up a tag and union using
+  an existential struct (as in struct TaggedFoo above).  
+
+* Added attribute __noconsume(i)__ to specify that the ith argument
+  of a function, which must be a unique pointer, is not consumed by
+  executing the function.  So, the caller retains access to the 
+  unique pointer after the call.
+
+* Some changes to buildlib and the compiler to better support 
+  cross-compilation.
+
+* Simpler design for dynamic regions.  See include/core.h and the
+  documentation for details.  Short story -- dynamic regions are
+  represented by a key which is either a unique or reference-
+  counted pointer.  To access the region, you have to open the
+  key as in "{region h = open(k); ...}".  This consumes the key
+  throughout the scope of the open, but you get the key back
+  after the open.  You can free the key explicitly (outside of
+  the open).  If you want to share the dynamic region, then you
+  put the key into a shared data structure (e.g., a global).
+  To get it out, you'll have to swap (with NULL).  
+
+* We now compile the genfiles with -O (except for the parser which
+  takes too long to compile.)  You can build the system with
+  make OPTFLAG=-O3 to turn the optimization up (or -g) to turn
+  it down.  
+
+* When you compile with -nogc on Linux and OSX, you get the Lea allocator
+  (which tends to work better.)
+  
+* New warning -Woverride warns if a new local variable declaration
+  or pattern variable hides a variable.  
+
+* A set of regression tests was added for the type-checker
+  to check for type errors that should occur.
+  See tests/fail<n>.cyc and the corresponding tests/fail<n>.out
+
+* Much work done on the allocation profiler.  
+
+* Flow analysis now understands pattern matching, which allows
+  us to match effectively with unique pointers and to better
+  track NULL/not-NULL through pattern matching.  
+
+* Added some useful functions to Core for exceptions:  
+    // returns the exception name as a string
+    const char *get_exn_name(datatype exn@)
+    // returns the file name of where the last exception was thrown
+    const char *get_exn_filename();
+    // returns the line number of where the last exception was thrown
+    int get_exn_lineno();
+    // re-throws an exception without resetting the file/line number
+    // information.
+    void rethrow(datatype exn@);
+
+  Typical use is something like this:
+
+     try { ... } catch { 
+     case e: 
+       fprintf(stderr,"exception %s from file %s, line %s was thrown\n",
+               get_exn_name(e), get_exn_filename(), get_exn_lineno());
+       rethrow(e);
+     }
+
+* Region order constraints are now checked at instantiation instead
+  of at the function call.  This allowed us to modify the Fn library
+  so that the types are simpler and more general (e.g., curry now
+  works properly.)
+
+* Updates to libc.cys:  got rid of definitions of __uint16_t__, 
+  and _fd_set_hack and related types that were wrapped in #ifdef's 
+  for Cygwin, FreeBSD, and MacOSX since they finally got this right.
+
+* Nested aggregates can now deal with the last element of an
+  aggregate being abstract.  
+
+* Generalized offsetof(t,fs) so that any number of projections
+  can be used (e.g., offsetof(struct Foo,b.x.y.z))
+
+* The Xarray library now uses unique pointers so that when it
+  resizes, it can throw away the old version of the array.  
+  Clients should call reuse() to reclaim the array (or else
+  let the collector reclaim it.)
+
+* Better support for structs that are terminated with an array of
+  indefinite size.  In particular, we now support something like:
+
+  struct Ptr {
+    <`i::I>  // `i is an abstract, integer-level type variable
+    tag_t<`i> size;       // size is an integer with value `i
+    double elts[valueof(`i)]; // elts is an array with `i elements
+  }
+
+  double sum(struct Ptr @p) {
+    double res = 0.0;
+    let &Ptr{.size = s, .elts = es} = p;
+    for (unsigned i = 0; i < s; i++)
+      res += es[i];
+    return res;
+  }
+
+* Changed the way pattern matching is compiled so that we
+  don't introduce so many temporary variables and avoid copying
+  structs so much.
+
+* The alias construct is now part of pattern matching.  For
+  instance, one can write:
+
+  void foo($(int@`U, int) arg) {
+    { let $(alias<`r> int*`r x, y) = arg; ... }
+    ufree(arg[0]);
+    ...
+  }
+
+  If at the end of the scope for the pattern a unique pointer
+  that has been aliased is still defined, then you get it back.
+
+* Bug fixes and small enhancements:
+  * fix for ++x where x is a zero-terminated pointer.
+  * fix for const char foo[3] = "foo" at top-level (inserted cast).
+  * fix for macros that check for zero in zero-terminated pointers..
+  * alias construct is now type-checked properly.
+  * minor fix in subtyping machinery
+  * fix in code generator for polymorphic struct initializers at top-level.
+  * fix in code generator where we were trying to enforce array
+    bounds within sizeof(-) expressions.
+  * got rid of more GCC warnings by putting in more casts.
+  * no longer allow an array comprehension of larger size to
+    be used to initialize an array, so as to avoid an overrun.
+  * fix in memcmp
+  * fix in pretty-printer/dumper allows us to build on FreeBSD.
+  * fix for effective const qualifiers in lvalues.
+  * fix in pattern matching for enums (treated as integers now)
+  * fix in line number information for error messages
+  * cleanup of array promotion code.
+  * flow analysis can now report errors for many functions instead
+    of just one.
+  * clean up for code generator on comprehensions
+  * better null-check elimination for unique pointers.
+  * now check fall-off for functions in flow analysis instead of type-checker
+  * fix in code generator for null-checks
+  * allow any type expression to be parsed in a capability
+  * Some better support for signals and mmap.
+  * Allow semi-colon after a top-level function definition.
+  * Allow labels on declarations.  
+----------------------------------------------------------------------
 Changes going from Version 0.4 dated 1 January 2003, to Version 0.5:
 
 * Configuration is based on autoconf so should work a bit better.
