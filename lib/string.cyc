@@ -13,7 +13,7 @@ using List;
 using Stdio; // for size_t
 
 ///////////////////////// LENGTH
-size_t strlen(string s) {
+size_t strlen(string_t s) {
   size_t i;
   for (i = 0; i<s.size; i++) {
     if (s[i] == '\000')
@@ -24,7 +24,7 @@ size_t strlen(string s) {
 
 // Internal length after offset function, parameterized by what
 // to throw if the offset is out of range.
-static size_t int_strleno(string s, int ofs, string error) {
+static size_t int_strleno(string_t s, int ofs, string_t error) {
   if (ofs > s.size || ofs < 0) throw new InvalidArg(error);
   int i;
   for (i = ofs; i<s.size; i++) {
@@ -43,8 +43,8 @@ static int nocase_cmp(char c1, char c2) {
   return case_cmp((char)Ctype::toupper(c1),(char)Ctype::toupper(c2));
 }
 
-static int cmp(string s1, int ofs1, size_t len1,
-               string s2, int ofs2, size_t len2,
+static int cmp(string_t s1, int ofs1, size_t len1,
+               string_t s2, int ofs2, size_t len2,
                int f(char, char))
 {
   size_t min_length = (len1 < len2) ? len1 : len2;
@@ -59,7 +59,7 @@ static int cmp(string s1, int ofs1, size_t len1,
 
 // Compare two strings lexicographically.
 // Return <0, 0, or >0 depending on whether s1<s2, s1==s2, or s1>s2.
-int strcmp(string s1, string s2) {
+int strcmp(string_t s1, string_t s2) {
   if (s1 == s2)
     return 0;
   size_t len1 = int_strleno(s1,0,"String::strcmp");
@@ -67,12 +67,12 @@ int strcmp(string s1, string s2) {
   return cmp(s1,0,len1,s2,0,len2,case_cmp);
 }
 
-int strptrcmp(stringptr s1, stringptr s2) {
+int strptrcmp(stringptr_t s1, stringptr_t s2) {
   return strcmp(*s1, *s2);
 }
 
-static int ncmp(string s1, int ofs1, size_t len1,
-                string s2, int ofs2, size_t len2,
+static int ncmp(string_t s1, int ofs1, size_t len1,
+                string_t s2, int ofs2, size_t len2,
                 size_t n, int f(char, char))
 {
   if (n <= 0) return 0;
@@ -90,14 +90,14 @@ static int ncmp(string s1, int ofs1, size_t len1,
 
 // Like strcmp but compare no more than n characters.
 // If n<0 return 0 (equal).
-int strncmp(string s1, string s2, size_t n) {
+int strncmp(string_t s1, string_t s2, size_t n) {
   size_t len1 = int_strleno(s1,0,"String::strncmp");
   size_t len2 = int_strleno(s2,0,"String::strncmp");
   return ncmp(s1,0,len1,s2,0,len2,n,case_cmp);
 }
 
 // Like strncmp, but case insensitive.  GCC has it but not C.
-int strncasecmp(string s1, string s2, size_t n) {
+int strncasecmp(string_t s1, string_t s2, size_t n) {
   size_t len1 = int_strleno(s1,0,"String::strncasecmp");
   size_t len2 = int_strleno(s2,0,"String::strncasecmp");
   return ncmp(s1,0,len1,s2,0,len2,n,nocase_cmp);
@@ -106,7 +106,7 @@ int strncasecmp(string s1, string s2, size_t n) {
 
 // Like strcmp but don't consider zeros (null characters) as marking
 // the end of strings.
-int zstrcmp(string a, string b) {
+int zstrcmp(string_t a, string_t b) {
   if(a == b)
     return 0;
   size_t as = a.size;
@@ -121,7 +121,7 @@ int zstrcmp(string a, string b) {
   return ((int)as)-((int)bs);
 }
 // Like zstrcmp but consider at most n characters
-int zstrncmp(string s1,string s2,size_t n) {
+int zstrncmp(string_t s1,string_t s2,size_t n) {
   if (n <= 0) return 0;
 
   size_t s1size = s1.size;
@@ -143,7 +143,7 @@ int zstrncmp(string s1,string s2,size_t n) {
     return(1);
 }
 // like zstrcmp but operates on pointers -- useful for hashtables
-int zstrptrcmp(stringptr a, stringptr b) {
+int zstrptrcmp(stringptr_t a, stringptr_t b) {
   return(zstrcmp(*a,*b));
 }
 
@@ -152,7 +152,7 @@ int zstrptrcmp(stringptr a, stringptr b) {
 
 // Internal string concatenation function, parametized by what
 // to throw on bounds error
-static string int_strcato(string dest,string src,int srcOfs,string error) {
+static mstring_t int_strcato(mstring_t dest,string_t src,int srcOfs,string_t error) {
   int i;
   size_t dsize, slen, dlen;
 
@@ -174,15 +174,15 @@ static string int_strcato(string dest,string src,int srcOfs,string error) {
 
 // Destructive concatenation: the first argument is modified,
 // and returned
-string strcat(string dest,string src) {
+mstring_t strcat(mstring_t dest,string_t src) {
   return int_strcato(dest,src,0,"String::strcat");
 }
 
 // Allocate a new string and fill it with the concatenation of a and b
-string strconcat(string a, string b) {
+mstring_t strconcat(string_t a, string_t b) {
   let alen = strlen(a);
   let blen = strlen(b);
-  string ans = new_string(alen+blen);
+  mstring_t ans = new_string(alen+blen);
   int i, j;
   for (i=0; i < alen; ++i) ans[i]   = a[i];
   for (j=0; j < blen; ++j) ans[i+j] = b[j];
@@ -190,7 +190,7 @@ string strconcat(string a, string b) {
 }
 
 // Allocate a new string and fill it with the concatenation of strs
-string strconcat_l(glist_t<stringptr,`r> strs) {
+mstring_t strconcat_l(glist_t<stringptr_t,`r> strs) {
   size_t len;                           // temp
   size_t total_len  = 0;                // sum of lengths of the strings
   list_t<size_t> lens = 
@@ -204,10 +204,10 @@ string strconcat_l(glist_t<stringptr,`r> strs) {
     end = end->tl;
   } 
   lens = lens->tl;                      // remove junk/temporary 0
-  string ans = new_string(total_len);
+  mstring_t ans = new_string(total_len);
   size_t i = 0;
   while (strs != null) {
-    string next    = *(strs->hd);
+    let next    = *(strs->hd);
     len            = lens->hd;
     strncpy(ans,i,next,0,len);
     i += len;
@@ -219,10 +219,10 @@ string strconcat_l(glist_t<stringptr,`r> strs) {
 
 // Allocate a new string and fill it with the concatenation of strs,
 // using separator between each element
-string str_sepstr(glist_t<stringptr,`r> strs, string separator) {
-  if (strs == null)    return "";
+mstring_t str_sepstr(glist_t<stringptr_t,`r> strs, string_t separator) {
+  if (strs == null)    return new_string(0);
   if (strs->tl == null) return strdup(*(strs->hd));
-  glist_t<stringptr,`r> p = strs;
+  glist_t<stringptr_t,`r> p = strs;
   list_t<size_t> lens = new List((size_t)0,null);// see comments in strconcat_l
   list_t<size_t> end = lens;
   size_t len        = 0;   // initialized to avoid warning
@@ -238,10 +238,10 @@ string str_sepstr(glist_t<stringptr,`r> strs, string separator) {
   lens = lens->tl;
   size_t seplen = strlen(separator);
   total_len += (list_len - 1)*seplen;
-  string ans = new_string(total_len);
+  mstring_t ans = new_string(total_len);
   size_t i = 0;
   while (strs->tl != null) {
-    string next    = *(strs->hd);
+    let next    = *(strs->hd);
     len            = lens->hd;
     strncpy(ans,i,next,0,len);
     i += len;
@@ -258,7 +258,7 @@ string str_sepstr(glist_t<stringptr,`r> strs, string separator) {
 // Destructively copy at most n characters from src into dest, starting
 // at the given offsets
 // (C version does not take offsets)
-string strncpy(string dest, int destOfs, string src, int srcOfs, size_t n) {
+mstring_t strncpy(mstring_t dest, int destOfs, string_t src, int srcOfs, size_t n) {
   // Range checking
   let destSz = dest.size;
   let srcSz = src.size;
@@ -291,7 +291,7 @@ string strncpy(string dest, int destOfs, string src, int srcOfs, size_t n) {
 //       dest[destOfs+i] = src[srcOfs+i];
 //   else {
 //     // we could do better, but this is correct
-//     string buffer = new_string(n);
+//     mstring_t buffer = new_string(n);
 //     for (int i=0; i<n; i++)
 //       buffer[i] = src[srcOfs+i];
 //     for (int i=0; i<n; i++)
@@ -300,7 +300,7 @@ string strncpy(string dest, int destOfs, string src, int srcOfs, size_t n) {
 }
 
 // Strncpy that does not pay attention to zero chars
-string zstrncpy(string dest, int destOfs, string src, int srcOfs, size_t n) {
+mstring_t zstrncpy(mstring_t dest, int destOfs, string_t src, int srcOfs, size_t n) {
   // Range checking
   let destSz = dest.size;
   let srcSz  = src.size;
@@ -317,7 +317,7 @@ string zstrncpy(string dest, int destOfs, string src, int srcOfs, size_t n) {
   return dest;
 }
 // Non-allocating string copy: first arg is returned
-string strcpy(string dest,string src) {
+mstring_t strcpy(mstring_t dest,string_t src) {
   size_t len = strlen(src);
   strncpy(dest,0,src,0,len);
   if (len != dest.size)
@@ -328,9 +328,9 @@ string strcpy(string dest,string src) {
 // Allocating functions
 
 // Not an ISO function, but available in gcc
-string strdup(string src) {
+mstring_t strdup(string_t src) {
   size_t len;
-  string temp;
+  mstring_t temp;
 
   len = strlen(src);
   temp = new_string(len);
@@ -338,8 +338,8 @@ string strdup(string src) {
   return temp;
 }
 
-string expand(string s, size_t sz) {
-  string temp;
+mstring_t expand(string_t s, size_t sz) {
+  mstring_t temp;
   size_t slen;
 
   slen = strlen(s);
@@ -354,7 +354,7 @@ string expand(string s, size_t sz) {
   return temp;
 }
 
-string realloc_str(string str, size_t sz)
+mstring_t realloc_str(mstring_t str, size_t sz)
 {
   size_t maxsizeP = str.size;
 
@@ -376,10 +376,10 @@ string realloc_str(string str, size_t sz)
 // Return a substring of a string, by allocation.
 // FIX: This adds an extra null character at the end of the string.
 // I'd like to remove it but it causes a bug in the lexer on bootstrapping.
-string substring(string s, int start, size_t amt) {
+mstring_t substring(string_t s, int start, size_t amt) {
   if (start < 0 || amt < 0 || start + ((int)amt) - 1 > (int)(s.size))
     throw new InvalidArg("String::substring");
-  string ans = new_string(amt+1);
+  mstring_t ans = new_string(amt+1);
   for(size_t i=0; i<amt; ++i)
     ans[i] = s[start+i];
   ans[amt] = '\000';
@@ -388,16 +388,16 @@ string substring(string s, int start, size_t amt) {
 
 // replace last with second at end of first
 // raise InvalidArg if second is not end of first.
-string replace_suffix (string src, string curr_suffix, string new_suffix) {
+mstring_t replace_suffix (string_t src, string_t curr_suffix, string_t new_suffix) {
   size_t m = src.size;
   size_t n = curr_suffix.size;
-  string err = "String::replace_suffix";
+  string_t err = "String::replace_suffix";
   if (m < n) 
     throw new InvalidArg(err);
   for (size_t i = 1; i <= n; ++i)
     if (src[m-i] != curr_suffix[n-i])
       throw new InvalidArg(err);
-  string ans = new_string(m-n+new_suffix.size);
+  mstring_t ans = new_string(m-n+new_suffix.size);
   strncpy(ans,0,src,0,m-n);
   strncpy(ans,m-n,new_suffix,0,new_suffix.size);
   return ans;
@@ -407,7 +407,7 @@ string replace_suffix (string src, string curr_suffix, string new_suffix) {
 
 // Search for any character of accept in s.
 // Return a ? pointer to the first such character, or null if none.
-string strpbrk(string s, string accept) {
+string_t strpbrk(string_t s, string_t accept) {
   int len = int_strleno(s,0,"String::strpbrk");
   char c = '\000';
 
@@ -421,7 +421,7 @@ string strpbrk(string s, string accept) {
 
 // Return a pointer to the first occurrence of c in s, 
 // or null if none.
-string strchr(string s, char c) {
+string_t strchr(string_t s, char c) {
   int len = int_strleno(s,0,"String::strchr");
   char c2 = '\000';
 
@@ -434,7 +434,7 @@ string strchr(string s, char c) {
 
 // Return a pointer to the last occurrence of c in s,
 // or null if none.
-string strrchr(string s, char c) {
+string_t strrchr(string_t s, char c) {
   int len = int_strleno(s,0,"String::strrchr");
   int i = len - 1;
   s += i;
@@ -449,7 +449,7 @@ string strrchr(string s, char c) {
 // Search s for an occurrence of a character not in accept.
 // Return the offset to the first such character, or the length
 // of s if none.
-size_t strspn(string s, string accept) {
+size_t strspn(string_t s, string_t accept) {
   size_t len = int_strleno(s,0,"String::strspn");
 
   for (size_t i=0; i<len; i++) {
@@ -465,15 +465,15 @@ size_t strspn(string s, string accept) {
 }
 
 ////////////////////////// CONVERSIONS
-list_t<int> explode(string s) {
+list_t<int> explode(string_t s) {
   list_t<int> result = null;
   for (int i = strlen(s) - 1; i >= 0; i--)
     result = new List((int)s[i],result);
   return result;
 }
 
-string implode(glist_t<int,`r> chars) {
-  string s = new_string(List::length(chars));
+mstring_t implode(glist_t<int,`r> chars) {
+  mstring_t s = new_string(List::length(chars));
   size_t i = 0;
   while (chars != null) {
     s[i++] = (char)chars->hd;
@@ -484,7 +484,7 @@ string implode(glist_t<int,`r> chars) {
 
 
 // Fix:  should check for overflow
-int to_int(string s, int *`r offset) {
+int to_int(string_t s, int *`r offset) {
   int ans = 0;
   int sn = 1;
   bool digit_seen = false;
@@ -515,7 +515,7 @@ int to_int(string s, int *`r offset) {
 // FIX:  this does not deal with overflow properly
 // FIX:  would use the built in version of strtod but it appears to be
 // broken...
-double to_double(string s, int *`r offset) {
+double to_double(string_t s, int *`r offset) {
   double ans = 0.0;
   int sn = 1;
   bool digit_seen = false;

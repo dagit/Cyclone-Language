@@ -11,7 +11,7 @@
 namespace Output {
 using Stdio;
 
-extern void output_lexdef(string sourcename, 
+extern void output_lexdef(string_t sourcename, 
 			  FILE @ infile, 
 			  FILE @ outfile,
 			  Syntax::location_t    header,

@@ -180,13 +180,13 @@ int	_EXFUN(_system_r,(struct _reent *, const char *));
 _VOID	_EXFUN(__eprintf,(const char *, const char *, unsigned int, const char *));
 */
 }
-extern double atof(string);
+extern double atof(string_t);
 /*
 extern float atoff(string);
 */
-extern int atoi(string);
-extern long atol(string);
-extern string getenv(string);
+extern int atoi(string_t);
+extern long atol(string_t);
+extern mstring_t getenv(string_t);
 /*
 extern string _getenv_r(struct _reent @,string);
 */

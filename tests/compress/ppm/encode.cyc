@@ -45,7 +45,7 @@ FILE @fp;
 
 int main(argc,argv)
 int argc;
-string? argv;
+string_t? argv;
 {
     argv++;
     argv++;

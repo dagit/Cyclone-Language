@@ -28,22 +28,22 @@ extern void decllist2file(list_t<decl_t> tdl, FILE @f);
 extern doc_t decl2doc(decl_t d);
 
 
-extern string typ2string(type_t); // doesn't rewrite temp tvars
-extern string kind2string(kind_t);
-extern string ckind2string(conref_t<kind_t>);
-extern string exp2string(exp_t);
-extern string stmt2string(stmt_t);
-extern string qvar2string(qvar_t);
-extern string decllist2string(list_t<decl_t> tdl);
-extern string prim2string(primop_t p);
-extern string pat2string(pat_t p);
-extern string scope2string(scope_t sc);
+extern string_t typ2string(type_t); // doesn't rewrite temp tvars
+extern string_t kind2string(kind_t);
+extern string_t ckind2string(conref_t<kind_t>);
+extern string_t exp2string(exp_t);
+extern string_t stmt2string(stmt_t);
+extern string_t qvar2string(qvar_t);
+extern string_t decllist2string(list_t<decl_t> tdl);
+extern string_t prim2string(primop_t p);
+extern string_t pat2string(pat_t p);
+extern string_t scope2string(scope_t sc);
 
   // These are only exposed so Absyndump can use them:
   extern int exp_prec(exp_t);
-  extern string char_escape(char);
-  extern string string_escape(string);
-  extern string prim2str(primop_t p);
+  extern string_t char_escape(char);
+  extern string_t string_escape(string_t);
+  extern string_t prim2str(primop_t p);
   extern bool is_declaration(stmt_t s);
   extern $(Core::opt_t<var_t>,tqual_t,type_t)@ 
                   arg_mk_opt($(var_t,tqual_t,type_t)@ arg);

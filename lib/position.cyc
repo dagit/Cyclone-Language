@@ -12,7 +12,7 @@ using String;
 xtunion exn {Exit};
 
 /////////// Location tracking///////////
-static string source = ""; // initialized by overall control
+static string_t source = ""; // initialized by overall control
 struct Segment { int start; int end; };
 
 seg_t segment_of_abs(int start, int end) { return new{Segment(start,end)}; }
@@ -22,12 +22,12 @@ seg_t segment_join(seg_t s1, seg_t s2) {
   return new{Segment(s1->start,s2->end)}; 
 }
 
-string string_of_loc(int loc) {
+mstring_t string_of_loc(int loc) {
   Lineno::pos_t pos = Lineno::pos_of_abs(source,loc);
   return xprintf("%s (%d:%d)",pos->logical_file,pos->line_no,pos->col);
 }
 
-static string string_of_pos_pr(Lineno::pos_t pos_s, Lineno::pos_t pos_e) {
+static mstring_t string_of_pos_pr(Lineno::pos_t pos_s, Lineno::pos_t pos_e) {
   if (strcmp(pos_s->logical_file,pos_e->logical_file)==0)
     return xprintf("%s(%d:%d-%d:%d)", pos_s->logical_file,
 		   pos_s->line_no,pos_s->col,
@@ -38,7 +38,7 @@ static string string_of_pos_pr(Lineno::pos_t pos_s, Lineno::pos_t pos_e) {
 		   pos_e->logical_file,pos_e->line_no,pos_e->col);
 }
 
-string string_of_segment(seg_t s) {
+mstring_t string_of_segment(seg_t s) {
   if(s == null)
     return xprintf("%s(unknown)",source);
   Lineno::pos_t pos_s = Lineno::pos_of_abs(source,s->start);
@@ -47,10 +47,10 @@ string string_of_segment(seg_t s) {
 }
 
 static Lineno::pos_t new_pos() {
-  return new {Lineno::Pos("","",0,0)};
+  return new {Lineno::Pos("",new_string(0),0,0)};
 }
 
-list_t<stringptr> strings_of_segments(glist_t<seg_t,`r> segs) {
+list_t<mstringptr_t> strings_of_segments(glist_t<seg_t,`r> segs) {
   list_t<$(int,Lineno::pos_t)@> places = null;
   for(let segs2 = segs; segs2 != null; segs2 = segs2->tl) {
     if(segs2->hd == null)
@@ -60,7 +60,7 @@ list_t<stringptr> strings_of_segments(glist_t<seg_t,`r> segs) {
                                places));
   }
   Lineno::poss_of_abss(source, places); // mutates places
-  list_t<stringptr> ans = null;
+  list_t<mstringptr_t> ans = null;
   places = List::imp_rev(places);
   for(; segs != null; segs = segs->tl) 
     if(segs->hd == null)
@@ -78,18 +78,18 @@ list_t<stringptr> strings_of_segments(glist_t<seg_t,`r> segs) {
 
 tunion Error_kind { Lex, Parse, Elab };
 struct Error {
-  string       source;
+  string_t       source;
   seg_t        seg;
   error_kind_t kind;
-  string       desc;
+  string_t       desc;
 };
-error_t mk_err_lex(seg_t l, string desc) {
+error_t mk_err_lex(seg_t l, string_t desc) {
   return new Error(source, l, Lex, desc);
 }
-error_t mk_err_parse(seg_t l, string desc) {
+error_t mk_err_parse(seg_t l, string_t desc) {
   return new Error(source, l, Parse, desc);
 }
-error_t mk_err_elab(seg_t l, string desc) {
+error_t mk_err_elab(seg_t l, string_t desc) {
   return new Error(source, l, Elab, desc);
 }
 
@@ -100,13 +100,13 @@ error_t mk_err_elab(seg_t l, string desc) {
 
 xtunion exn {Nocontext};
 
-static string trunc(int n, string s) {
+static mstring_t trunc(int n, mstring_t s) {
   int len = strlen(s);
   if (len < n) 
     return s;
   int len_one = (n-3)/2;
   int len_two = n-3-len_one;
-  string ans = new_string(n+1);
+  mstring_t ans = new_string(n+1);
   strncpy(ans, 0,         s,     0,           len_one);
   strncpy(ans, len_one,   "...", 0,           3);
   strncpy(ans, len_one+3, s,     len-len_two, len_two);
@@ -117,7 +117,7 @@ static int line_length = 76;
 
 // Produce a one line string that shows the peice of the source file containing
 // the error; return also the column numbers the error starts and finishes at.
-static $(string,int,int)@ get_context(seg_t seg) {
+static $(mstring_t,int,int)@ get_context(seg_t seg) {
   if(seg == null)
     throw Nocontext;
   Lineno::pos_t pos_s, pos_e;
@@ -134,9 +134,9 @@ static $(string,int,int)@ get_context(seg_t seg) {
     // Case 1: error is all on one line, 
     // give 1/3 of line to before, error, and after
     int n = line_length / 3;
-    string sec_one   = trunc(n, substring(sline, 0,  sc            ));
-    string sec_two   = trunc(n, substring(sline, sc, ec-sc         ));
-    string sec_three = trunc(n, substring(sline, sc, strlen(sline)-ec));
+    mstring_t sec_one   = trunc(n, substring(sline, 0,  sc            ));
+    mstring_t sec_two   = trunc(n, substring(sline, sc, ec-sc         ));
+    mstring_t sec_three = trunc(n, substring(sline, sc, strlen(sline)-ec));
     return new $(xprintf("%s%s%s",sec_one,sec_two,sec_three),
                  (int)strlen(sec_one),
                  (int)(strlen(sec_one)+strlen(sec_two)));
@@ -145,10 +145,10 @@ static $(string,int,int)@ get_context(seg_t seg) {
     // Case 2: error on multiple lines,
     // give 1/4 to start, start line rror, end line error, and end
     int n = (line_length-3)/4;
-    string sec_one   = trunc(n, substring(sline, 0,  sc            ));
-    string sec_two   = trunc(n, substring(sline, sc, strlen(sline)-sc));
-    string sec_three = trunc(n, substring(eline, 0,  ec            ));
-    string sec_four  = trunc(n, substring(eline, ec, strlen(eline)-ec));
+    mstring_t sec_one   = trunc(n, substring(sline, 0,  sc            ));
+    mstring_t sec_two   = trunc(n, substring(sline, sc, strlen(sline)-sc));
+    mstring_t sec_three = trunc(n, substring(eline, 0,  ec            ));
+    mstring_t sec_four  = trunc(n, substring(eline, ec, strlen(eline)-ec));
     return new $(xprintf("%s%s.\\.%s%s",sec_one,sec_two,sec_three,sec_four),
                  (int)strlen(sec_one),
                  (int)(strlen(sec_one)+strlen(sec_two)+3+strlen(sec_three)));
@@ -175,8 +175,8 @@ void post_error(error_t e) {
   fprintf(stderr, "%s: %s\n", string_of_segment(e->seg), e->desc);
   if (print_context) {
     try {
-      $(string,int,int)@ x = get_context(e->seg);
-      string marker_str = new {for i < (*x)[2]+1 : '\000'};
+      $(mstring_t,int,int)@ x = get_context(e->seg);
+      mstring_t marker_str = new {for i < (*x)[2]+1 : '\000'};
       int i = -1;
       while (++i < (*x)[1]) marker_str[i] = ' ';
       while (++i < (*x)[2]) marker_str[i] = '^';
@@ -189,7 +189,7 @@ void post_error(error_t e) {
 }
 
 //////////// Overall Control ///////////
-void reset_position(string s)    { source = s; error_b = false; }
-void set_position_file(string s) { source = s; error_b = false; }
-string get_position_file() { return source; }
+void reset_position(string_t s)    { source = s; error_b = false; }
+void set_position_file(string_t s) { source = s; error_b = false; }
+string_t get_position_file() { return source; }
 

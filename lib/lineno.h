@@ -6,14 +6,14 @@
 namespace Lineno {
 
 extern struct Pos {
-  string logical_file;
-  string line;
+  string_t logical_file;
+  mstring_t line;
   int    line_no;
   int    col;
 };
 typedef struct Pos @pos_t;
-extern pos_t  pos_of_abs(string,int);
-extern void poss_of_abss(string filename, List::list_t<$(int,pos_t)@> places);
+extern pos_t  pos_of_abs(string_t,int);
+extern void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@> places);
 
 }
 #endif

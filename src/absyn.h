@@ -49,9 +49,9 @@ namespace Absyn {
   using List;
   using Position;
 
-  typedef stringptr field_name_t;
-  typedef stringptr var_t;
-  typedef stringptr tvarname_t;
+  typedef stringptr_t field_name_t;
+  typedef stringptr_t var_t;
+  typedef stringptr_t tvarname_t;
   extern tunion Nmspace;
   typedef tunion Nmspace nmspace_t;
   typedef $(nmspace_t,var_t) @qvar_t, *qvar_opt_t;
@@ -313,7 +313,7 @@ namespace Absyn {
     Const_att;
     Aligned_att(int);
     Packed_att;
-    Section_att(string);
+    Section_att(string_t);
     Nocommon_att;
     Shared_att;
     Unused_att;
@@ -341,8 +341,8 @@ namespace Absyn {
     Short_c(sign_t,short);
     Int_c(sign_t,int);
     LongLong_c(sign_t,long long);
-    Float_c(string);
-    String_c(string); 
+    Float_c(string_t);
+    String_c(string_t); 
     Null_c;
   };
 
@@ -452,7 +452,7 @@ namespace Absyn {
     Null_p;
     Int_p(sign_t,int);
     Char_p(char);
-    Float_p(string);
+    Float_p(string_t);
     Tuple_p(list_t<pat_t>);
     Pointer_p(pat_t);
     Reference_p(vardecl_t); // only name field is right until tcpat is called
@@ -627,6 +627,7 @@ namespace Absyn {
   extern int tvar_cmp(tvar_t, tvar_t); // WARNING: ignores the kinds
 
   ///////////////////////// Qualifiers ////////////////////////////
+  extern tqual_t const_tqual();
   extern tqual_t combine_tqual(tqual_t x,tqual_t y);
   extern tqual_t empty_tqual();
   
@@ -655,6 +656,7 @@ namespace Absyn {
   extern type_t exn_typ;
   // string (char ?)
   extern type_t string_typ(type_t rgn);
+  extern type_t const_string_typ(type_t rgn);
   // FILE -- KLUDGE -- first call determines all future ones!
   extern type_t file_typ_nocyc();
   extern type_t file_typ();
@@ -688,8 +690,8 @@ namespace Absyn {
   extern exp_t signed_int_exp(int, seg_t);
   extern exp_t uint_exp(unsigned int, seg_t);
   extern exp_t char_exp(char c, seg_t);
-  extern exp_t float_exp(string f, seg_t);
-  extern exp_t string_exp(string s, seg_t);
+  extern exp_t float_exp(string_t f, seg_t);
+  extern exp_t string_exp(string_t s, seg_t);
   extern exp_t var_exp(qvar_t, seg_t);
   extern exp_t varb_exp(qvar_t, binding_t, seg_t);
   extern exp_t unknownid_exp(qvar_t, seg_t);
@@ -796,7 +798,7 @@ namespace Absyn {
   extern struct Structfield *lookup_struct_field(structdecl_t,var_t);
   extern struct Structfield *lookup_union_field(uniondecl_t,var_t);
   extern $(tqual_t,type_t) *lookup_tuple_field(list_t<$(tqual_t,type_t)@>,int);
-  extern string attribute2string(attribute_t);
+  extern string_t attribute2string(attribute_t);
   // returns true when a is an attribute for function types
   extern bool fntype_att(attribute_t a);
 }

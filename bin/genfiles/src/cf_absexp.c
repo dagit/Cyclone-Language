@@ -650,60 +650,62 @@ _temp240)->f1; goto _LL263; _LL263: _temp262=(( struct Cyc_CfAbsexp_MallocOp_str
 _temp240)->f2; goto _LL251;} else{ goto _LL252;} _LL252: if(( unsigned int)
 _temp240 > 1u?*(( int*) _temp240) == Cyc_CfAbsexp_DerefOp: 0){ _LL267: _temp266=(
 void*)(( struct Cyc_CfAbsexp_DerefOp_struct*) _temp240)->f1; goto _LL253;} else{
-goto _LL241;} _LL243: return({ unsigned char* _temp268="Unknown"; struct
-_tagged_string _temp269; _temp269.curr= _temp268; _temp269.base= _temp268;
-_temp269.last_plus_one= _temp268 + 8; _temp269;}); _LL245: return({ struct
-_tagged_string _temp270= Cyc_CfAbsexp_absop2string( _temp254); xprintf("& %.*s",
-_temp270.last_plus_one - _temp270.curr, _temp270.curr);}); _LL247: return*(*
-_temp256->name).f2; _LL249: { struct _tagged_string fs;{ void* _temp271=
-_temp258; struct _tagged_string* _temp277; int _temp279; _LL273: if(*(( int*)
-_temp271) == Cyc_CfFlowInfo_StructF){ _LL278: _temp277=(( struct Cyc_CfFlowInfo_StructF_struct*)
+goto _LL241;} _LL243: return({ unsigned char* _temp268=( unsigned char*)"Unknown";
+struct _tagged_string _temp269; _temp269.curr= _temp268; _temp269.base= _temp268;
+_temp269.last_plus_one= _temp268 + 8; _temp269;}); _LL245: return( struct
+_tagged_string)({ struct _tagged_string _temp270= Cyc_CfAbsexp_absop2string(
+_temp254); xprintf("& %.*s", _temp270.last_plus_one - _temp270.curr, _temp270.curr);});
+_LL247: return*(* _temp256->name).f2; _LL249: { struct _tagged_string fs;{ void*
+_temp271= _temp258; struct _tagged_string* _temp277; int _temp279; _LL273: if(*((
+int*) _temp271) == Cyc_CfFlowInfo_StructF){ _LL278: _temp277=(( struct Cyc_CfFlowInfo_StructF_struct*)
 _temp271)->f1; goto _LL274;} else{ goto _LL275;} _LL275: if(*(( int*) _temp271)
 == Cyc_CfFlowInfo_TupleF){ _LL280: _temp279=(( struct Cyc_CfFlowInfo_TupleF_struct*)
 _temp271)->f1; goto _LL276;} else{ goto _LL272;} _LL274: fs=* _temp277; goto
-_LL272; _LL276: fs= xprintf("%d", _temp279); goto _LL272; _LL272:;} return({
-struct _tagged_string _temp281= Cyc_CfAbsexp_absop2string( _temp260); struct
-_tagged_string _temp282= fs; xprintf("%.*s.%.*s", _temp281.last_plus_one -
-_temp281.curr, _temp281.curr, _temp282.last_plus_one - _temp282.curr, _temp282.curr);});}
-_LL251: return xprintf("<mpt%d>", _temp262); _LL253: return({ struct
-_tagged_string _temp283= Cyc_CfAbsexp_absop2string( _temp266); xprintf("(*%.*s)",
-_temp283.last_plus_one - _temp283.curr, _temp283.curr);}); _LL241:;} struct
-_tagged_string Cyc_CfAbsexp_absexp2string( void* ae, int depth){ struct
-_tagged_string ans= Cyc_Core_new_string( depth);{ int i= 0; for( 0; i <({ struct
-_tagged_string _temp284= ans;( unsigned int)( _temp284.last_plus_one - _temp284.curr);});
-++ i){*(( unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
-_check_unknown_subscript)( ans, sizeof( unsigned char), i)=' ';}}{ void*
-_temp285= ae; void* _temp303; int _temp305; void* _temp307; struct Cyc_Absyn_Exp*
-_temp309; void* _temp311; void* _temp313; struct Cyc_List_List* _temp315; void*
-_temp317; struct Cyc_Absyn_Stmt* _temp319; _LL287: if( _temp285 ==( void*) Cyc_CfAbsexp_SkipAE){
-goto _LL288;} else{ goto _LL289;} _LL289: if(( unsigned int) _temp285 > 2u?*((
-int*) _temp285) == Cyc_CfAbsexp_UseAE: 0){ _LL304: _temp303=( void*)(( struct
-Cyc_CfAbsexp_UseAE_struct*) _temp285)->f1; goto _LL290;} else{ goto _LL291;}
-_LL291: if(( unsigned int) _temp285 > 2u?*(( int*) _temp285) == Cyc_CfAbsexp_MallocAE:
-0){ _LL308: _temp307=( void*)(( struct Cyc_CfAbsexp_MallocAE_struct*) _temp285)->f1;
-if(*(( int*) _temp307) == Cyc_CfFlowInfo_MallocPt){ _LL310: _temp309=(( struct
-Cyc_CfFlowInfo_MallocPt_struct*) _temp307)->f1; goto _LL306;} else{ goto _LL293;}
-_LL306: _temp305=(( struct Cyc_CfAbsexp_MallocAE_struct*) _temp285)->f2; goto
-_LL292;} else{ goto _LL293;} _LL293: if(( unsigned int) _temp285 > 2u?*(( int*)
-_temp285) == Cyc_CfAbsexp_AssignAE: 0){ _LL314: _temp313=( void*)(( struct Cyc_CfAbsexp_AssignAE_struct*)
-_temp285)->f1; goto _LL312; _LL312: _temp311=( void*)(( struct Cyc_CfAbsexp_AssignAE_struct*)
-_temp285)->f2; goto _LL294;} else{ goto _LL295;} _LL295: if(( unsigned int)
-_temp285 > 2u?*(( int*) _temp285) == Cyc_CfAbsexp_GroupAE: 0){ _LL318: _temp317=(
-void*)(( struct Cyc_CfAbsexp_GroupAE_struct*) _temp285)->f1; goto _LL316; _LL316:
-_temp315=(( struct Cyc_CfAbsexp_GroupAE_struct*) _temp285)->f2; goto _LL296;}
-else{ goto _LL297;} _LL297: if(( unsigned int) _temp285 > 2u?*(( int*) _temp285)
-== Cyc_CfAbsexp_StmtAE: 0){ _LL320: _temp319=(( struct Cyc_CfAbsexp_StmtAE_struct*)
-_temp285)->f1; goto _LL298;} else{ goto _LL299;} _LL299: if( _temp285 ==( void*)
-Cyc_CfAbsexp_BottomAE){ goto _LL300;} else{ goto _LL301;} _LL301: goto _LL302;
-_LL288: ans=({ struct _tagged_string _temp321= ans; xprintf("%.*sskip", _temp321.last_plus_one
-- _temp321.curr, _temp321.curr);}); goto _LL286; _LL290: ans=({ struct
-_tagged_string _temp322= ans; struct _tagged_string _temp323= Cyc_CfAbsexp_absop2string(
-_temp303); xprintf("%.*suse %.*s", _temp322.last_plus_one - _temp322.curr,
-_temp322.curr, _temp323.last_plus_one - _temp323.curr, _temp323.curr);}); goto
-_LL286; _LL292: ans=({ struct _tagged_string _temp324= ans; int _temp325=
-_temp305; xprintf("%.*smalloc %i", _temp324.last_plus_one - _temp324.curr,
-_temp324.curr, _temp325);}); goto _LL286; _LL294: ans=({ struct _tagged_string
-_temp326= ans; struct _tagged_string _temp327= Cyc_CfAbsexp_absop2string(
+_LL272; _LL276: fs=( struct _tagged_string) xprintf("%d", _temp279); goto _LL272;
+_LL272:;} return( struct _tagged_string)({ struct _tagged_string _temp281= Cyc_CfAbsexp_absop2string(
+_temp260); struct _tagged_string _temp282= fs; xprintf("%.*s.%.*s", _temp281.last_plus_one
+- _temp281.curr, _temp281.curr, _temp282.last_plus_one - _temp282.curr, _temp282.curr);});}
+_LL251: return( struct _tagged_string) xprintf("<mpt%d>", _temp262); _LL253:
+return( struct _tagged_string)({ struct _tagged_string _temp283= Cyc_CfAbsexp_absop2string(
+_temp266); xprintf("(*%.*s)", _temp283.last_plus_one - _temp283.curr, _temp283.curr);});
+_LL241:;} struct _tagged_string Cyc_CfAbsexp_absexp2string( void* ae, int depth){
+struct _tagged_string ans= Cyc_Core_new_string( depth);{ int i= 0; for( 0; i <({
+struct _tagged_string _temp284= ans;( unsigned int)( _temp284.last_plus_one -
+_temp284.curr);}); ++ i){*(( unsigned char*(*)( struct _tagged_string,
+unsigned int, unsigned int)) _check_unknown_subscript)( ans, sizeof(
+unsigned char), i)=' ';}}{ void* _temp285= ae; void* _temp303; int _temp305;
+void* _temp307; struct Cyc_Absyn_Exp* _temp309; void* _temp311; void* _temp313;
+struct Cyc_List_List* _temp315; void* _temp317; struct Cyc_Absyn_Stmt* _temp319;
+_LL287: if( _temp285 ==( void*) Cyc_CfAbsexp_SkipAE){ goto _LL288;} else{ goto
+_LL289;} _LL289: if(( unsigned int) _temp285 > 2u?*(( int*) _temp285) == Cyc_CfAbsexp_UseAE:
+0){ _LL304: _temp303=( void*)(( struct Cyc_CfAbsexp_UseAE_struct*) _temp285)->f1;
+goto _LL290;} else{ goto _LL291;} _LL291: if(( unsigned int) _temp285 > 2u?*((
+int*) _temp285) == Cyc_CfAbsexp_MallocAE: 0){ _LL308: _temp307=( void*)(( struct
+Cyc_CfAbsexp_MallocAE_struct*) _temp285)->f1; if(*(( int*) _temp307) == Cyc_CfFlowInfo_MallocPt){
+_LL310: _temp309=(( struct Cyc_CfFlowInfo_MallocPt_struct*) _temp307)->f1; goto
+_LL306;} else{ goto _LL293;} _LL306: _temp305=(( struct Cyc_CfAbsexp_MallocAE_struct*)
+_temp285)->f2; goto _LL292;} else{ goto _LL293;} _LL293: if(( unsigned int)
+_temp285 > 2u?*(( int*) _temp285) == Cyc_CfAbsexp_AssignAE: 0){ _LL314: _temp313=(
+void*)(( struct Cyc_CfAbsexp_AssignAE_struct*) _temp285)->f1; goto _LL312;
+_LL312: _temp311=( void*)(( struct Cyc_CfAbsexp_AssignAE_struct*) _temp285)->f2;
+goto _LL294;} else{ goto _LL295;} _LL295: if(( unsigned int) _temp285 > 2u?*((
+int*) _temp285) == Cyc_CfAbsexp_GroupAE: 0){ _LL318: _temp317=( void*)(( struct
+Cyc_CfAbsexp_GroupAE_struct*) _temp285)->f1; goto _LL316; _LL316: _temp315=((
+struct Cyc_CfAbsexp_GroupAE_struct*) _temp285)->f2; goto _LL296;} else{ goto
+_LL297;} _LL297: if(( unsigned int) _temp285 > 2u?*(( int*) _temp285) == Cyc_CfAbsexp_StmtAE:
+0){ _LL320: _temp319=(( struct Cyc_CfAbsexp_StmtAE_struct*) _temp285)->f1; goto
+_LL298;} else{ goto _LL299;} _LL299: if( _temp285 ==( void*) Cyc_CfAbsexp_BottomAE){
+goto _LL300;} else{ goto _LL301;} _LL301: goto _LL302; _LL288: ans=({ struct
+_tagged_string _temp321=( struct _tagged_string) ans; xprintf("%.*sskip",
+_temp321.last_plus_one - _temp321.curr, _temp321.curr);}); goto _LL286; _LL290:
+ans=({ struct _tagged_string _temp322=( struct _tagged_string) ans; struct
+_tagged_string _temp323= Cyc_CfAbsexp_absop2string( _temp303); xprintf("%.*suse %.*s",
+_temp322.last_plus_one - _temp322.curr, _temp322.curr, _temp323.last_plus_one -
+_temp323.curr, _temp323.curr);}); goto _LL286; _LL292: ans=({ struct
+_tagged_string _temp324=( struct _tagged_string) ans; int _temp325= _temp305;
+xprintf("%.*smalloc %i", _temp324.last_plus_one - _temp324.curr, _temp324.curr,
+_temp325);}); goto _LL286; _LL294: ans=({ struct _tagged_string _temp326=(
+struct _tagged_string) ans; struct _tagged_string _temp327= Cyc_CfAbsexp_absop2string(
 _temp313); struct _tagged_string _temp328= Cyc_CfAbsexp_absop2string( _temp311);
 xprintf("%.*sassign %.*s %.*s", _temp326.last_plus_one - _temp326.curr, _temp326.curr,
 _temp327.last_plus_one - _temp327.curr, _temp327.curr, _temp328.last_plus_one -
@@ -711,33 +713,36 @@ _temp328.curr, _temp328.curr);}); goto _LL286; _LL296:{ void* _temp329= _temp317
 _LL331: if( _temp329 ==( void*) Cyc_CfAbsexp_OrderedG){ goto _LL332;} else{ goto
 _LL333;} _LL333: if( _temp329 ==( void*) Cyc_CfAbsexp_UnorderedG){ goto _LL334;}
 else{ goto _LL335;} _LL335: if( _temp329 ==( void*) Cyc_CfAbsexp_OneofG){ goto
-_LL336;} else{ goto _LL330;} _LL332: ans=({ struct _tagged_string _temp337= ans;
-xprintf("%.*sordered", _temp337.last_plus_one - _temp337.curr, _temp337.curr);});
-goto _LL330; _LL334: ans=({ struct _tagged_string _temp338= ans; xprintf("%.*sunordered",
+_LL336;} else{ goto _LL330;} _LL332: ans=({ struct _tagged_string _temp337=(
+struct _tagged_string) ans; xprintf("%.*sordered", _temp337.last_plus_one -
+_temp337.curr, _temp337.curr);}); goto _LL330; _LL334: ans=({ struct
+_tagged_string _temp338=( struct _tagged_string) ans; xprintf("%.*sunordered",
 _temp338.last_plus_one - _temp338.curr, _temp338.curr);}); goto _LL330; _LL336:
-ans=({ struct _tagged_string _temp339= ans; xprintf("%.*soneof", _temp339.last_plus_one
-- _temp339.curr, _temp339.curr);}); goto _LL330; _LL330:;} for( 0; _temp315 != 0;
-_temp315=(( struct Cyc_List_List*) _check_null( _temp315))->tl){ ans=({ struct
-_tagged_string _temp340= ans; struct _tagged_string _temp341= Cyc_CfAbsexp_absexp2string((
-void*)(( struct Cyc_List_List*) _check_null( _temp315))->hd, depth + 1); xprintf("%.*s\n%.*s",
-_temp340.last_plus_one - _temp340.curr, _temp340.curr, _temp341.last_plus_one -
-_temp341.curr, _temp341.curr);});} goto _LL286; _LL298: ans=({ struct
-_tagged_string _temp342= ans; xprintf("%.*s<<stmt>>", _temp342.last_plus_one -
-_temp342.curr, _temp342.curr);}); goto _LL286; _LL300: ans=({ struct
-_tagged_string _temp343= ans; xprintf("%.*sbottom", _temp343.last_plus_one -
+ans=({ struct _tagged_string _temp339=( struct _tagged_string) ans; xprintf("%.*soneof",
+_temp339.last_plus_one - _temp339.curr, _temp339.curr);}); goto _LL330; _LL330:;}
+for( 0; _temp315 != 0; _temp315=(( struct Cyc_List_List*) _check_null( _temp315))->tl){
+ans=({ struct _tagged_string _temp340=( struct _tagged_string) ans; struct
+_tagged_string _temp341= Cyc_CfAbsexp_absexp2string(( void*)(( struct Cyc_List_List*)
+_check_null( _temp315))->hd, depth + 1); xprintf("%.*s\n%.*s", _temp340.last_plus_one
+- _temp340.curr, _temp340.curr, _temp341.last_plus_one - _temp341.curr, _temp341.curr);});}
+goto _LL286; _LL298: ans=({ struct _tagged_string _temp342=( struct
+_tagged_string) ans; xprintf("%.*s<<stmt>>", _temp342.last_plus_one - _temp342.curr,
+_temp342.curr);}); goto _LL286; _LL300: ans=({ struct _tagged_string _temp343=(
+struct _tagged_string) ans; xprintf("%.*sbottom", _temp343.last_plus_one -
 _temp343.curr, _temp343.curr);}); goto _LL286; _LL302:( void) _throw(( void*)
-Cyc_CfAbsexp_BadAbsexp); _LL286:;} return ans;} static void Cyc_CfAbsexp_check_absop(
-void* ao){ void* _temp344= ao; void* _temp358; void* _temp360; void* _temp362;
-void* _temp364; struct Cyc_Absyn_Vardecl* _temp366; int _temp368; struct Cyc_Absyn_Exp*
-_temp370; _LL346: if( _temp344 ==( void*) Cyc_CfAbsexp_UnknownOp){ goto _LL347;}
-else{ goto _LL348;} _LL348: if(( unsigned int) _temp344 > 1u?*(( int*) _temp344)
-== Cyc_CfAbsexp_AddressOp: 0){ _LL359: _temp358=( void*)(( struct Cyc_CfAbsexp_AddressOp_struct*)
-_temp344)->f1; goto _LL349;} else{ goto _LL350;} _LL350: if(( unsigned int)
-_temp344 > 1u?*(( int*) _temp344) == Cyc_CfAbsexp_DerefOp: 0){ _LL361: _temp360=(
-void*)(( struct Cyc_CfAbsexp_DerefOp_struct*) _temp344)->f1; goto _LL351;} else{
-goto _LL352;} _LL352: if(( unsigned int) _temp344 > 1u?*(( int*) _temp344) ==
-Cyc_CfAbsexp_MemberOp: 0){ _LL365: _temp364=( void*)(( struct Cyc_CfAbsexp_MemberOp_struct*)
-_temp344)->f1; goto _LL363; _LL363: _temp362=( void*)(( struct Cyc_CfAbsexp_MemberOp_struct*)
+Cyc_CfAbsexp_BadAbsexp); _LL286:;} return( struct _tagged_string) ans;} static
+void Cyc_CfAbsexp_check_absop( void* ao){ void* _temp344= ao; void* _temp358;
+void* _temp360; void* _temp362; void* _temp364; struct Cyc_Absyn_Vardecl*
+_temp366; int _temp368; struct Cyc_Absyn_Exp* _temp370; _LL346: if( _temp344 ==(
+void*) Cyc_CfAbsexp_UnknownOp){ goto _LL347;} else{ goto _LL348;} _LL348: if((
+unsigned int) _temp344 > 1u?*(( int*) _temp344) == Cyc_CfAbsexp_AddressOp: 0){
+_LL359: _temp358=( void*)(( struct Cyc_CfAbsexp_AddressOp_struct*) _temp344)->f1;
+goto _LL349;} else{ goto _LL350;} _LL350: if(( unsigned int) _temp344 > 1u?*((
+int*) _temp344) == Cyc_CfAbsexp_DerefOp: 0){ _LL361: _temp360=( void*)(( struct
+Cyc_CfAbsexp_DerefOp_struct*) _temp344)->f1; goto _LL351;} else{ goto _LL352;}
+_LL352: if(( unsigned int) _temp344 > 1u?*(( int*) _temp344) == Cyc_CfAbsexp_MemberOp:
+0){ _LL365: _temp364=( void*)(( struct Cyc_CfAbsexp_MemberOp_struct*) _temp344)->f1;
+goto _LL363; _LL363: _temp362=( void*)(( struct Cyc_CfAbsexp_MemberOp_struct*)
 _temp344)->f2; goto _LL353;} else{ goto _LL354;} _LL354: if(( unsigned int)
 _temp344 > 1u?*(( int*) _temp344) == Cyc_CfAbsexp_LocalOp: 0){ _LL367: _temp366=((
 struct Cyc_CfAbsexp_LocalOp_struct*) _temp344)->f1; goto _LL355;} else{ goto
@@ -977,8 +982,8 @@ d2)) Cyc_Dict_iter2_c)( Cyc_CfAbsexp_assign_escape, escaping_states, _temp641,
 _temp637); return; _LL606:( void) _throw(( void*)({ struct Cyc_Core_Impossible_struct*
 _temp645=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp645[ 0]=({ struct Cyc_Core_Impossible_struct _temp646; _temp646.tag= Cyc_Core_Impossible;
-_temp646.f1=({ unsigned char* _temp647="bad pinfos in assign_escape"; struct
-_tagged_string _temp648; _temp648.curr= _temp647; _temp648.base= _temp647;
+_temp646.f1=({ unsigned char* _temp647=( unsigned char*)"bad pinfos in assign_escape";
+struct _tagged_string _temp648; _temp648.curr= _temp647; _temp648.base= _temp647;
 _temp648.last_plus_one= _temp647 + 28; _temp648;}); _temp646;}); _temp645;}));
 _LL596:;} int Cyc_CfAbsexp_is_ok_malloc_assign( void* lval, struct Cyc_List_List*
 ok_mallocs){ void* _temp649= lval; int _temp657; struct Cyc_Absyn_Exp* _temp659;
@@ -1042,8 +1047,8 @@ struct Cyc_List_List)); _temp722->hd=( void*) _temp701; _temp722->tl= _temp667;
 _temp722;}); goto _LL670; _LL682:( void) _throw(( void*)({ struct Cyc_Core_Impossible_struct*
 _temp723=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp723[ 0]=({ struct Cyc_Core_Impossible_struct _temp724; _temp724.tag= Cyc_Core_Impossible;
-_temp724.f1=({ unsigned char* _temp725="local variable in MallocAE"; struct
-_tagged_string _temp726; _temp726.curr= _temp725; _temp726.base= _temp725;
+_temp724.f1=({ unsigned char* _temp725=( unsigned char*)"local variable in MallocAE";
+struct _tagged_string _temp726; _temp726.curr= _temp725; _temp726.base= _temp725;
 _temp726.last_plus_one= _temp725 + 27; _temp726;}); _temp724;}); _temp723;}));
 _LL684: goto _LL670; _LL686: for( 0; _temp709 != 0; _temp709=(( struct Cyc_List_List*)
 _check_null( _temp709))->tl){ struct Cyc_List_List* _temp729; struct Cyc_List_List*
@@ -1145,8 +1150,9 @@ _temp845= 0; goto _LL846; _LL846: Cyc_CfAbsexp_assign_escape(& _temp845,
 _temp804, _temp806); for( 0; _temp845 != 0; _temp845=(( struct Cyc_List_List*)
 _check_null( _temp845))->tl){ void* _temp847=( void*)(( struct Cyc_List_List*)
 _check_null( _temp845))->hd; goto _LL848; _LL848: if( ! Cyc_CfFlowInfo_isAllInit(
-pinfo_dict, _temp847)){ Cyc_Tcutil_terr( loc,({ unsigned char* _temp849="uninitialized value assigned to ambiguous place";
-struct _tagged_string _temp850; _temp850.curr= _temp849; _temp850.base= _temp849;
+pinfo_dict, _temp847)){ Cyc_Tcutil_terr( loc,({ unsigned char* _temp849=(
+unsigned char*)"uninitialized value assigned to ambiguous place"; struct
+_tagged_string _temp850; _temp850.curr= _temp849; _temp850.base= _temp849;
 _temp850.last_plus_one= _temp849 + 48; _temp850;})); return( void*) Cyc_CfFlowInfo_BottomFL;}
 pinfo_dict= Cyc_CfFlowInfo_escape_pointsto( _temp847, pinfo_dict);} pinfo_dict=
 Cyc_CfFlowInfo_insert_place( pinfo_dict, _temp802, _temp806);{ struct Cyc_CfFlowInfo_InitsFL_struct*
@@ -1157,8 +1163,8 @@ _temp852.f1= pinfo_dict; _temp852;}); _temp851;}); goto _LL854; _LL854: Cyc_NewC
 env,( void*) _temp853); return( void*) _temp853;}} _LL810:;}}} _LL793:;}
 _temp772= _temp768; goto _LL753; _LL753: { void* _temp855= Cyc_CfAbsexp_eval_absop_r(
 pinfo_dict, _temp772); goto _LL856; _LL856: if( ! Cyc_CfFlowInfo_isAllInit(
-pinfo_dict, _temp855)){ Cyc_Tcutil_terr( loc,({ struct _tagged_string _temp857=
-Cyc_CfAbsexp_absop2string( _temp772); xprintf("%.*s must be fully initialized to be used here",
+pinfo_dict, _temp855)){ Cyc_Tcutil_terr( loc,( struct _tagged_string)({ struct
+_tagged_string _temp857= Cyc_CfAbsexp_absop2string( _temp772); xprintf("%.*s must be fully initialized to be used here",
 _temp857.last_plus_one - _temp857.curr, _temp857.curr);})); return( void*) Cyc_CfFlowInfo_BottomFL;}{
 struct Cyc_Dict_Dict* _temp858= Cyc_CfFlowInfo_escape_pointsto( _temp855,
 pinfo_dict); goto _LL859; _LL859: if( _temp858 == pinfo_dict){ return in_flow;}{

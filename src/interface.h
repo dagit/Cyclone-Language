@@ -39,7 +39,7 @@ namespace Interface {
   // special case : typedefs may not be included, compatibility is enough 
   // if info == null, no error message is printed
   // else we use (*info)[k] as a name for ik
-  extern bool is_subinterface(i_t i1, i_t i2, $(string, string) * `r info);
+  extern bool is_subinterface(i_t i1, i_t i2, $(string_t, string_t) * `r info);
 
   // try to merge 2 interfaces
   // _ if they're incompatible, return null (and if info != null, print some error messages)
@@ -48,11 +48,11 @@ namespace Interface {
   // special case : a same typedef can appear in both e1 and e2
   // if info == null, no error message is printed
   // else we use (*info)[k] as a name for ik
-  extern struct I * merge(i_t i1, i_t i2, $(string, string) * `r info);
+  extern struct I * merge(i_t i1, i_t i2, $(string_t, string_t) * `r info);
 
   // try to merge a list of interfaces
   // use linfo (if long enough) for the error messages
-  extern struct I * merge_list(list_t<i_t> li, list_t<string @> linfo);
+  extern struct I * merge_list(list_t<i_t> li, list_t<string_t @> linfo);
 
   // pretty print to a text file 
   extern void print(i_t, FILE @);

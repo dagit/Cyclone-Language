@@ -68,7 +68,7 @@ using Absynpp;
 
 xtunion exn {Env_error};
 
-`a env_err(string msg) {
+`a env_err(string_t msg) {
   fprintf(stderr,"Error: %s\n",msg);
   fflush(stderr);
   throw Env_error;
@@ -761,7 +761,8 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   // FIX:  the user may need to get their hands on the region name
   // but if it's gensym'd, they can't.  
   tvar_t rgn0 = 
-    new Tvar(new xprintf("`%s",*(*fd->name)[1]),new_tvar_id(),
+    new Tvar(new ((string_t)xprintf("`%s",*(*fd->name)[1])),
+             new_tvar_id(),
              new_conref(RgnKind));
   let tvs = new List(rgn0,fd->tvs);
   Tcutil::check_unique_tvars(loc,tvs);

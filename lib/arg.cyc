@@ -18,30 +18,31 @@ using Core;
 using Stdio;
 using List;
 
-xtunion exn {Error, Bad(string)};
+xtunion exn {Error, Bad(string_t)};
 
 tunion Spec<`e::E> {
   Unit_spec(void (@f)(;`e)),        // Call f with unit argument
-  Flag_spec(void (@f)(string;`e)),  // Call f with flag argument
-  FlagString_spec(void (@f)(string,string;`e)),
+  Flag_spec(void (@f)(string_t;`e)),  // Call f with flag argument
+  FlagString_spec(void (@f)(string_t,string_t;`e)),
                                     // Call f with flag & string arguments
   Set_spec(bool@),                  // Set the reference to true
   Clear_spec(bool@),                // Set the reference to false
-  String_spec(void (@f)(string;`e)),// Call f with a string argument
+  String_spec(void (@f)(string_t;`e)),// Call f with a string argument
   Int_spec(void (@f)(int;`e)),      // Call f with an int argument
-  Rest_spec(void (@f)(string;`e))   // Stop interpreting keywords and call the
+  Rest_spec(void (@f)(string_t;`e))   // Stop interpreting keywords and call the
                                     // function with each remaining argument
 };
 
 static tunion error {
-  Unknown(string),
-  Missing(string),
-  Message(string),
-  Wrong(string,string,string)  // option, actual, expected
+  Unknown(string_t),
+  Missing(string_t),
+  Message(string_t),
+    // option, actual, expected
+  Wrong(string_t,string_t,string_t)  
 };
 
-static gspec_t<`e> lookup (glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> l, 
-                           string x) {
+static gspec_t<`e> lookup (glist_t<$(string_t,gspec_t<`e>,string_t)@`r1,`r2> l, 
+                           string_t x) {
   while (l != null) {
     let flag = (*l->hd)[0];
     let len = String::strlen(flag);
@@ -56,8 +57,8 @@ static gspec_t<`e> lookup (glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> l,
   throw Not_found;
 }
 
-void usage(glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist, 
-           string errmsg) {
+void usage(glist_t<$(string_t,gspec_t<`e>,string_t)@`r1,`r2> speclist, 
+           string_t errmsg) {
   fprintf(stderr, "%s\n", errmsg);
   while (speclist != null) {
     fprintf(stderr, " %s %s\n", (*speclist->hd)[0], (*speclist->hd)[2]);
@@ -66,12 +67,12 @@ void usage(glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist,
 }
 
 int current = 0;
-static string ?args = null;
+static string_t ?args = null;
 
 static void stop(int prog_pos, tunion error e,
-		 glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist, 
-                 string errmsg) {
-  string progname = prog_pos < args.size ? args[prog_pos] : "(?)";
+		 glist_t<$(string_t,gspec_t<`e>,string_t)@`r1,`r2> speclist, 
+                 string_t errmsg) {
+  string_t progname = prog_pos < args.size ? args[prog_pos] : "(?)";
   switch (e) {
   case &Unknown(s):
      if (String::strcmp(s,"-help")!=0)
@@ -92,17 +93,17 @@ static void stop(int prog_pos, tunion error e,
   current = args.size; // skip everything else
 }
 
-void parse(glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist, 
-           void anonfun(string),
-	   string errmsg,
-	   string ? orig_args) {
+void parse(glist_t<$(string_t,gspec_t<`e>,string_t)@`r1,`r2> speclist, 
+           void anonfun(string_t),
+	   string_t errmsg,
+	   string_t ? orig_args) {
   args = orig_args;
 
   int initpos = current;
   int l       = args.size;
   ++current;
   while (current < l) {
-    string s = args[current];
+    string_t s = args[current];
     if (s.size >= 1 && s[0] == '-') {
       gspec_t<`e> action;
       try action = lookup(speclist, s);
@@ -130,7 +131,7 @@ void parse(glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist,
 	    stop(initpos, new Missing(s), speclist, errmsg);
 	  break;
 	case &Int_spec(f):
-	  string arg = args[current+1];
+	  string_t arg = args[current+1];
 	  int n;
 	  try n = int_of_string(arg);
 	  catch {

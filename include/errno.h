@@ -5,7 +5,7 @@
 #ifndef _SYS_ERRNO_H_
 #define _SYS_ERRNO_H_
 namespace Errno {
-extern char ?sys_err(int);
+extern const char ?sys_err(int);
 extern "C" {
 
   //#include <sys/reent.h>

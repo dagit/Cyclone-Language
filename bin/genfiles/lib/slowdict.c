@@ -130,12 +130,12 @@ else{ goto _LL46;} _LL48: return( void*)( _temp51->v)->data; _LL50:( void)
 _throw(( void*)({ struct Cyc_Core_Impossible_struct* _temp53=( struct Cyc_Core_Impossible_struct*)
 GC_malloc( sizeof( struct Cyc_Core_Impossible_struct)); _temp53[ 0]=({ struct
 Cyc_Core_Impossible_struct _temp54; _temp54.tag= Cyc_Core_Impossible; _temp54.f1=({
-unsigned char* _temp55="Dict::lookup"; struct _tagged_string _temp56; _temp56.curr=
-_temp55; _temp56.base= _temp55; _temp56.last_plus_one= _temp55 + 13; _temp56;});
-_temp54;}); _temp53;})); _LL46:;}( void) _throw(( void*) Cyc_SlowDict_Absent);}
-struct Cyc_Core_Opt* Cyc_SlowDict_lookup_opt( struct Cyc_SlowDict_Dict* d, void*
-key){ if((( int(*)( int(* f)( void*, void*), void*, void*)) Cyc_Splay_splay)( d->reln,
-key,( void*) d->tree)){ void* _temp57=( void*) d->tree; struct Cyc_Splay_noderef*
+unsigned char* _temp55=( unsigned char*)"Dict::lookup"; struct _tagged_string
+_temp56; _temp56.curr= _temp55; _temp56.base= _temp55; _temp56.last_plus_one=
+_temp55 + 13; _temp56;}); _temp54;}); _temp53;})); _LL46:;}( void) _throw(( void*)
+Cyc_SlowDict_Absent);} struct Cyc_Core_Opt* Cyc_SlowDict_lookup_opt( struct Cyc_SlowDict_Dict*
+d, void* key){ if((( int(*)( int(* f)( void*, void*), void*, void*)) Cyc_Splay_splay)(
+d->reln, key,( void*) d->tree)){ void* _temp57=( void*) d->tree; struct Cyc_Splay_noderef*
 _temp63; _LL59: if(( unsigned int) _temp57 > 1u?*(( int*) _temp57) == Cyc_Splay_Node:
 0){ _LL64: _temp63=(( struct Cyc_Splay_Node_struct*) _temp57)->f1; goto _LL60;}
 else{ goto _LL61;} _LL61: if( _temp57 ==( void*) Cyc_Splay_Leaf){ goto _LL62;}
@@ -144,8 +144,8 @@ GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp65->v=( void*)(( void*)( _temp63-
 _temp65;}); _LL62:( void) _throw(( void*)({ struct Cyc_Core_Impossible_struct*
 _temp66=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp66[ 0]=({ struct Cyc_Core_Impossible_struct _temp67; _temp67.tag= Cyc_Core_Impossible;
-_temp67.f1=({ unsigned char* _temp68="Dict::lookup"; struct _tagged_string
-_temp69; _temp69.curr= _temp68; _temp69.base= _temp68; _temp69.last_plus_one=
+_temp67.f1=({ unsigned char* _temp68=( unsigned char*)"Dict::lookup"; struct
+_tagged_string _temp69; _temp69.curr= _temp68; _temp69.base= _temp68; _temp69.last_plus_one=
 _temp68 + 13; _temp69;}); _temp67;}); _temp66;})); _LL58:;} return 0;} static
 int Cyc_SlowDict_get_largest( void* x, void* y){ return 1;} struct Cyc_SlowDict_Dict*
 Cyc_SlowDict_delete( struct Cyc_SlowDict_Dict* d, void* key){ if((( int(*)( int(*
@@ -157,8 +157,8 @@ _temp76=(( struct Cyc_Splay_Node_struct*) _temp70)->f1; goto _LL75;} else{ goto
 _LL71;} _LL73:( void) _throw(( void*)({ struct Cyc_Core_Impossible_struct*
 _temp78=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp78[ 0]=({ struct Cyc_Core_Impossible_struct _temp79; _temp79.tag= Cyc_Core_Impossible;
-_temp79.f1=({ unsigned char* _temp80="Dict::lookup"; struct _tagged_string
-_temp81; _temp81.curr= _temp80; _temp81.base= _temp80; _temp81.last_plus_one=
+_temp79.f1=({ unsigned char* _temp80=( unsigned char*)"Dict::lookup"; struct
+_tagged_string _temp81; _temp81.curr= _temp80; _temp81.base= _temp80; _temp81.last_plus_one=
 _temp80 + 13; _temp81;}); _temp79;}); _temp78;})); _LL75: { struct Cyc_Splay_node*
 n= _temp76->v; void* _temp82=( void*) n->left; struct Cyc_Splay_noderef* _temp88;
 _LL84: if( _temp82 ==( void*) Cyc_Splay_Leaf){ goto _LL85;} else{ goto _LL86;}

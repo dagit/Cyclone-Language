@@ -37,7 +37,7 @@ int f5() {
   return z;
 }
 
-int main(int argc, string ?argv) {
+int main(int argc, string_t ?argv) {
   f5();
   return 0;
 }

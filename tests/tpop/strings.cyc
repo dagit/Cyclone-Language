@@ -11,12 +11,12 @@ using Stdio;
 using Core;
 using Ctype;
 
-void strings(string, FILE @);
+void strings(string_t, FILE @);
 
 #define MINLEN 6
 
 /* strings main: find printable strings in files */
-int main(int argc, string ? argv)
+int main(int argc, string_t ? argv)
 {
   int i;
   FILE *fin;
@@ -36,7 +36,7 @@ int main(int argc, string ? argv)
 }
 
 /* strings: extract printable strings from stream */
-void strings(string name, FILE @fin)
+void strings(string_t name, FILE @fin)
 {
   int c = EOF, i;
   char@{BUFSIZ} buf = new {for i < BUFSIZ : 0};
@@ -52,7 +52,7 @@ void strings(string name, FILE @fin)
     }
     if (i >= MINLEN)  /* print if long enough */
       {
-	string sub = String::substring(buf,0,i);
+	string_t sub = String::substring(buf,0,i);
 	printf("%s:%s\n", name, sub);
       }
   } while (c != EOF);

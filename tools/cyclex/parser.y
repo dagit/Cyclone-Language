@@ -19,7 +19,7 @@ using Syntax;
 
 namespace Lexer {
   extern int lexmain(Lexing::Lexbuf<`a>);
-  extern xtunion exn { extern Lexical_error(string,int,int) };
+  extern xtunion exn { extern Lexical_error(string_t,int,int) };
   extern int line_num;
   extern int line_start_pos;
 }
@@ -28,13 +28,13 @@ namespace Parser {
 
 opt_t<Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>>> lbuf = null;
 
-xtunion exn {Parser_error(string)};
-typedef struct Hashtable::Table<stringptr,regular_expression_t,{},{}> htbl;
+xtunion exn {Parser_error(string_t)};
+typedef struct Hashtable::Table<stringptr_t,regular_expression_t,{},{}> htbl;
   // must be initialized!
 htbl * named_regexps = null;
 lexer_definition_t parse_result = null;
 
-regular_expression_t regexp_for_string(string s) {
+regular_expression_t regexp_for_string(string_t s) {
   int len = String::strlen(s);
   if(len == 0)
     return Epsilon;
@@ -93,7 +93,7 @@ using Parser;
   Acase_tok(acase_t);
   Regexp_tok(regular_expression_t);
   Char_tok(char);
-  String_tok(string);
+  String_tok(string_t);
   Charclass_tok(list_t<int>);
 }
 
@@ -124,7 +124,8 @@ header:
 
 named_regexps:
   named_regexps TLET TIDENT TEQUAL regexp 
-    { Hashtable::insert((Parser::htbl @)named_regexps, new {$3}, $5); 
+    { Hashtable::insert((Parser::htbl @)named_regexps, 
+                        new {(string_t)$3}, $5); 
       $$=^$(0); }
 | /* empty */ { $$=^$(0); }
 
@@ -159,7 +160,7 @@ regexp:
 | regexp regexp %prec CONCAT { $$=^$(new Sequence($1,$2)); }
 | TLPAREN regexp TRPAREN { $$=^$($2); }
 | TIDENT { try $$=^$(Hashtable::lookup((Parser::htbl @)named_regexps,
-				       new {$1}));
+				       new {(string_t)$1}));
 	   catch { 
 	     case Not_found:
 	     yyerror(xprintf("Reference to unbound regexp name `%s'", $1));

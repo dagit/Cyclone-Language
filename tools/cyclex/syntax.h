@@ -30,7 +30,7 @@ SYNTAX_EXTERN_DEFINITION tunion Regular_expression {
 typedef tunion Regular_expression regular_expression_t;
 
 typedef $(regular_expression_t,location_t) @ acase_t;
-typedef $(string,list_t<acase_t>) @ entrypoint_t;
+typedef $(string_t,list_t<acase_t>) @ entrypoint_t;
 
 SYNTAX_EXTERN_DEFINITION struct Lexer_definition {
   location_t         header;

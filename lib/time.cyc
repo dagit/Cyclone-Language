@@ -15,15 +15,15 @@ Cstring timezone(void);
 }
 
 namespace Time {
-  string asctime(const struct tm *_tblock) {
+  mstring_t asctime(const struct tm *_tblock) {
     return Cstring_to_string(Ctime::asctime(_tblock));
   }
 
-  string ctime(const time_t *_time) {
+  mstring_t ctime(const time_t *_time) {
     return Cstring_to_string(Ctime::ctime(_time));
   }
 
-  size_t strftime(string _s, size_t _maxsize, string _fmt,
+  size_t strftime(string_t _s, size_t _maxsize, string_t _fmt,
                   const struct tm *_t) {
     size_t m = (_s.size < _maxsize) ? _s.size : _maxsize;
     return Ctime::strftime(underlying_Cstring(_s),m,
@@ -31,17 +31,17 @@ namespace Time {
   }
 
   // FIX: should check that s is long enough
-  string asctime_r(const struct tm *t, string s) {
+  mstring_t asctime_r(const struct tm *t, mstring_t s) {
     if (s.size < 50) 
       throw new InvalidArg("Time::asctime_r: string too small (< 50)");
     return Cstring_to_string(Ctime::asctime_r(t,underlying_Cstring(s)));
   }
-  string ctime_r(const time_t *t, string s) {
+  mstring_t ctime_r(const time_t *t, mstring_t s) {
     if (s.size < 50) 
       throw new InvalidArg("Time::ctime_r: string too small (< 50)");
     return Cstring_to_string(Ctime::ctime_r(t,underlying_Cstring(s)));
   }
-  string timezone() {
+  mstring_t timezone() {
     return Cstring_to_string(Ctime::timezone());
   }
 }

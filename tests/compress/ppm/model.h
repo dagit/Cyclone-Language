@@ -20,7 +20,7 @@
        return the decoded symbol
 
 */
-void init_arguments(int argc, string? argv, int argp);
+void init_arguments(int argc, string_t? argv, int argp);
 void init_symbols();
 int find_context();
 int eof_symbol();

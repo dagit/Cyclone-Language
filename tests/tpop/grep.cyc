@@ -10,13 +10,13 @@ using Stdio;
 using Core;
 using String;
 
-int grep(string, FILE@, string);
-int match(string, string);
-int matchhere(string, string);
-int matchstar(int, string, string);
+int grep(string_t, FILE@, string_t);
+int match(string_t, string_t);
+int matchhere(string_t, string_t);
+int matchstar(int, string_t, string_t);
 
 /* grep main: search for regexp in files */
-int main(int argc, string? argv)
+int main(int argc, string_t? argv)
 {
   int i, nmatch;
   FILE *f;
@@ -42,10 +42,10 @@ int main(int argc, string? argv)
 }
 
 /* grep: search for regexp in file */
-int grep(string regexp, FILE @f, string name)
+int grep(string_t regexp, FILE @f, string_t name)
 {
   int n, nmatch;
-  string buf = expand("",BUFSIZ);
+  mstring_t buf = expand("",BUFSIZ);
 
   nmatch = 0;
   while (fgets(buf, BUFSIZ, f) != null) {
@@ -64,7 +64,7 @@ int grep(string regexp, FILE @f, string name)
 }
 
 /* matchhere: search for regexp at beginning of text */
-int matchhere(string regexp, string text)
+int matchhere(string_t regexp, string_t text)
 {
   if (strlen(regexp) == 0)
     return 1;
@@ -78,7 +78,7 @@ int matchhere(string regexp, string text)
 }
 
 /* match: search for regexp anywhere in text */
-int match(string regexp, string text)
+int match(string_t regexp, string_t text)
 {
   if (regexp[0] == '^')
     return matchhere(regexp+1, text);
@@ -90,7 +90,7 @@ int match(string regexp, string text)
 }
 
 /* matchstar: search for c*regexp at beginning of text */
-int matchstar(int c, string regexp, string text)
+int matchstar(int c, string_t regexp, string_t text)
 {
   do {	/* a * matches zero or more instances */
     if (matchhere(regexp, text))

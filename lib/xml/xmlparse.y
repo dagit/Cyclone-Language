@@ -15,7 +15,7 @@ using Lexing;
 namespace XmlParse {
 Core::opt_t<Lexbuf<Function_lexbuf_state<Stdio::FILE@>>> lbuf = null;
 static list_t<content_t> parse_result = null;
-void error(string msg) {
+void error(string_t msg) {
   throw new Core::Failure(msg);
 }
 
@@ -59,14 +59,14 @@ using XmlParse;
 
 // Union of types of productions
 %union{
-  String_tok(string);
-  Pi_tok($(Xml::name,string)@);
+  String_tok(string_t);
+  Pi_tok($(Xml::name,string_t)@);
   Element_tok(Xml::element_t);
   Content_tok(List::list_t<Xml::content_t>);
   Attribute_tok(Xml::attribute_t);
   Attributes_tok(List::list_t<Xml::attribute_t>);
-  STag_tok($(string,List::list_t<Xml::attribute_t>)@);
-  EmptyElemTag_tok($(string,List::list_t<Xml::attribute_t>)@);
+  STag_tok($(string_t,List::list_t<Xml::attribute_t>)@);
+  EmptyElemTag_tok($(string_t,List::list_t<Xml::attribute_t>)@);
 }
 
 // Tags for productions
@@ -146,7 +146,7 @@ slashcls:
 
 %%
 
-void yyerror(string s) { return; } 
+void yyerror(string_t s) { return; } 
 
 namespace XmlParse{
   list_t<content_t> parse_file(Stdio::FILE @f) {

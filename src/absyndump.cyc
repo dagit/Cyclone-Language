@@ -31,7 +31,7 @@ void dumpstructfields(list_t<structfield_t> fields);
 // really want to change this to char[] (need a control character for format
 // prims and the ability to cast to untagged (from Tagged requires Toc hlep,
 // from Fixed requires trivial Toc help)
-typedef string dump_string_t;
+typedef string_t dump_string_t;
 
 // set by dumpdecllist2file (this module is not re-entrant)
 FILE @@ dump_file = &stdout; 
@@ -66,7 +66,7 @@ void dump_char(int c) { // no space
 }
 
 // this needs to take a boxed type b/c it's used to instantiate `a
-void dump_str(stringptr s) {
+void dump_str(stringptr_t s) {
   dump(*s);
 }
 
@@ -436,7 +436,7 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Var_e(x,_):     dumpqvar(x); break;
 
   case &Primop_e(p,es):
-    string pstr = Absynpp::prim2str(p);
+    let pstr = Absynpp::prim2str(p);
     if(!is_format_prim(p)) {
       switch (List::length(es)) {
       case 1:

@@ -17,11 +17,12 @@ struct _tagged_string, struct Cyc_Stdio___sFILE*); extern unsigned char Cyc_Stdi
 19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
 unsigned char* tag; struct _tagged_string f1; } ; void* Cyc_Assert_AssertFail(
 struct _tagged_string mesg){ Cyc_Stdio_fputs( mesg, Cyc_Stdio_stderr); Cyc_Stdio_fputs(({
-unsigned char* _temp0=" -- assertion failed\n"; struct _tagged_string _temp1;
-_temp1.curr= _temp0; _temp1.base= _temp0; _temp1.last_plus_one= _temp0 + 22;
-_temp1;}), Cyc_Stdio_stderr); exit( - 1);( void) _throw(( void*)({ struct Cyc_Core_Unreachable_struct*
-_temp2=( struct Cyc_Core_Unreachable_struct*) GC_malloc( sizeof( struct Cyc_Core_Unreachable_struct));
-_temp2[ 0]=({ struct Cyc_Core_Unreachable_struct _temp3; _temp3.tag= Cyc_Core_Unreachable;
-_temp3.f1=({ unsigned char* _temp4="assert"; struct _tagged_string _temp5;
+unsigned char* _temp0=( unsigned char*)" -- assertion failed\n"; struct
+_tagged_string _temp1; _temp1.curr= _temp0; _temp1.base= _temp0; _temp1.last_plus_one=
+_temp0 + 22; _temp1;}), Cyc_Stdio_stderr); exit( - 1);( void) _throw(( void*)({
+struct Cyc_Core_Unreachable_struct* _temp2=( struct Cyc_Core_Unreachable_struct*)
+GC_malloc( sizeof( struct Cyc_Core_Unreachable_struct)); _temp2[ 0]=({ struct
+Cyc_Core_Unreachable_struct _temp3; _temp3.tag= Cyc_Core_Unreachable; _temp3.f1=({
+unsigned char* _temp4=( unsigned char*)"assert"; struct _tagged_string _temp5;
 _temp5.curr= _temp4; _temp5.base= _temp4; _temp5.last_plus_one= _temp4 + 7;
 _temp5;}); _temp3;}); _temp2;}));}

@@ -27,7 +27,7 @@ static struct Opt<kind_t> rk = {RgnKind};
 // specifier as a char, and the index of the character following the conversion
 // specifier.
 opt_t<$(list_t<int>, list_t<int>, list_t<int>, list_t<int>, char, int)@>
-parse_conversionspecification(string s, int i) {
+parse_conversionspecification(string_t s, int i) {
   //  fprintf(cyc_stderr, "String: %s\n" "Position: %d\n",s,i);
   let len = String::strlen(s);
   if (i<0 || i>=len) return null;
@@ -155,7 +155,7 @@ parse_conversionspecification(string s, int i) {
   return new Opt(new $(flags,width,precision,lenmod,c,i+1));
 }
 
-list_t<type_t> get_format_typs(tenv_t te,string s,seg_t loc) {
+list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
   // FIX: on error we return null.  This will probably lead to
   // cascading errors (e.g., too many arguments to printf).
   let len = String::strlen(s);
@@ -307,7 +307,7 @@ list_t<type_t> get_format_typs(tenv_t te,string s,seg_t loc) {
 //         terr(loc,"length modifiers not allowed with %%s");
 //         return null;
 //       }
-      typs = new List(string_typ(new_evar(&rk,new Opt(lookup_type_vars(te)))),typs);
+      typs = new List(const_string_typ(new_evar(&rk,new Opt(lookup_type_vars(te)))),typs);
       break;
     case 'p':
       // We don't support pointer printing
@@ -379,7 +379,7 @@ list_t<type_t> get_format_typs(tenv_t te,string s,seg_t loc) {
 // the conversion specifier (a char),
 // and the index of the character following the conversion specifier.
 opt_t<$(bool, list_t<int>, list_t<int>, char, int)@>
-parse_inputformat(string s, int i) {
+parse_inputformat(string_t s, int i) {
   let len = String::strlen(s);
   if (i<0 || i>=len) return null;
 
@@ -457,7 +457,7 @@ parse_inputformat(string s, int i) {
   }
   return new Opt(new $(suppress,width,lenmod,c,i+1));
 }
-list_t<type_t> get_scanf_typs(tenv_t te,string s,seg_t loc) {
+list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
   // FIX: on error we return null.  This will probably lead to
   // cascading errors (e.g., too many arguments to scanf).
   let len = String::strlen(s);

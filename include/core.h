@@ -17,12 +17,12 @@
 
 // The rest is defined in Cyclone, in core.cyc
 namespace Core {
-extern string get_env(string);
-extern string ?std_args();
+extern mstring_t get_env(string_t);
+extern mstring_t ?std_args();
 struct Opt<`a> { `a v; };
 typedef struct Opt<`a> *opt_t<`a>;
 extern opt_t<`b> opt_map(`b f(`a), opt_t<`a> x);
-extern string new_string(int);
+extern mstring_t new_string(int);
 extern bool true_f(`a);
 extern bool false_f(`a);
 extern `a fst($(`a,`b)@`r);
@@ -32,23 +32,23 @@ extern `a identity(`a);
 extern int intcmp(int,int);
 extern int charcmp(char,char);
 extern int ptrcmp(`a::A @ `r, `a::A @ `r); 
-extern xtunion exn { extern InvalidArg(string) };
-extern xtunion exn { extern Failure(string) };
-extern xtunion exn { extern Impossible(string) };
+extern xtunion exn { extern InvalidArg(string_t) };
+extern xtunion exn { extern Failure(string_t) };
+extern xtunion exn { extern Impossible(string_t) };
 extern xtunion exn { extern Not_found };
-extern xtunion exn { extern Unreachable(string) };
+extern xtunion exn { extern Unreachable(string_t) };
 extern bool is_space(char);
-extern int    int_of_string(string);
-extern string string_of_int(int);
-extern string string_of_uint(unsigned int);
-extern string string_of_char(char);
+extern int    int_of_string(string_t);
+extern mstring_t string_of_int(int);
+extern mstring_t string_of_uint(unsigned int);
+extern mstring_t string_of_char(char);
 extern region_t<`H> heap_region;
 // copies the string, making sure there's a zero at the end
-extern "C" Cstring string_to_Cstring(string);
+extern "C" Cstring string_to_Cstring(string_t);
 // extracts the underlying char[] from the char[?] -- returns null
 // when the string is empty
-extern "C" Cstring underlying_Cstring(string);
-extern "C" string Cstring_to_string(Cstring);
+extern "C" Cstring underlying_Cstring(string_t);
+extern "C" mstring_t Cstring_to_string(Cstring);
 extern "C" int system(Cstring);
 }
 

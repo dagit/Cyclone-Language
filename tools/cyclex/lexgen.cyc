@@ -29,8 +29,8 @@ static tunion Regexp {
 typedef tunion Regexp regexp_t;
 
 static struct Lexer_entry {
-  string                   name;
-  regexp_t                 regexp;
+  string_t                   name;
+  regexp_t                   regexp;
   list_t<$(int,location_t)@> actions;
 };
 typedef struct Lexer_entry @ lexer_entry_t;

@@ -30,13 +30,13 @@ using Lexing;
 using String;
 
 struct Pos {
-  string logical_file;
-  string line;
+  string_t logical_file;
+  mstring_t line;
   int    line_no;
   int    col;
 };
 
-static opt_t<$(string,int)@> parse_linedef(string line) {
+static opt_t<$(mstring_t,int)@> parse_linedef(mstring_t line) {
   try {
     int i = 0;
     while (i < line.size && (line[i] < '0' || line[i] > '9')) ++i;
@@ -48,7 +48,7 @@ static opt_t<$(string,int)@> parse_linedef(string line) {
     int k = ++j;
     while (k < line.size && line[k] != '"') ++k;
     if (j == line.size || k == line.size) return null; // if there's no name
-    string fname = substring(line,j,k-j);
+    mstring_t fname = substring(line,j,k-j);
 
     return new Opt(new $(fname,number));
   } catch {
@@ -62,15 +62,15 @@ int place_cmp($(int,pos_t)@ place1, $(int,pos_t)@ place2) {
 }
 
 // mutates its second argument's elements
-void poss_of_abss(string filename, List::list_t<$(int,pos_t)@> places) {
+void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@> places) {
   places = List::merge_sort(place_cmp, places);
   FILE @f = file_open(filename, "r");
   try {
     Lexbuf<Function_lexbuf_state<FILE@>> lbuf = from_file(f);
-    string source_file = filename;
+    string_t source_file = filename;
     int    line        = 1;
 
-    string this_line;
+    mstring_t this_line;
     int eol, next;
     while(places != null) {
       while (true) {
@@ -84,7 +84,7 @@ void poss_of_abss(string filename, List::list_t<$(int,pos_t)@> places) {
 	case END:     throw new Failure("Lineno: Invalid file position");
 	case NEWLINE: ++line; break;
 	case LINEDEF: 
-	  opt_t<$(string,int)@> fno = parse_linedef(this_line);
+	  opt_t<$(mstring_t,int)@> fno = parse_linedef(this_line);
 	  if (fno == null) {
 	    ++line;
 	    fprintf(stderr, "Unknown directive: %s\n", this_line);
@@ -111,8 +111,8 @@ void poss_of_abss(string filename, List::list_t<$(int,pos_t)@> places) {
   return;
 }
 
-pos_t pos_of_abs(string filename, int abs) {
-  pos_t ans = new Pos("","",0,0);
+pos_t pos_of_abs(string_t filename, int abs) {
+  pos_t ans = new Pos("",new_string(0),0,0);
   poss_of_abss(filename, new List::List(new $(abs,ans),null));
   return ans;
 }

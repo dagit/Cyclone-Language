@@ -74,25 +74,25 @@ typedef long fpos_t;
 //
 // Functions defined in ANSI C standard.
 //
-extern int	remove(string);
-extern int	rename(string, string);
+extern int	remove(string_t);
+extern int	rename(string_t, string_t);
 extern FILE *	tmpfile();
 // extern string	tmpnam(string);
 extern int	fclose(FILE @);
 extern int	fflush(FILE *);
-extern FILE *	freopen(string, string, FILE @);
+extern FILE *	freopen(string_t, string_t, FILE @);
 //extern void	setbuf(FILE *, string);
 //extern int	setvbuf(FILE *, string, int, size_t);
 extern int	fgetc(FILE @);
-extern string   fgets(string, int n, FILE @);
+extern mstring_t fgets(mstring_t, int n, FILE @);
 extern int	fputc(int, FILE @);
-extern int	fputs(string, FILE @);
+extern int	fputs(string_t, FILE @);
 extern int	getc(FILE @);
 //extern int	getchar();
 // extern string     gets(string); // unsafe!
 extern int	putc(int, FILE @);
   //extern int	putchar(int);
-extern int	puts(string);
+extern int	puts(string_t);
 extern int	ungetc(int, FILE @);
   //extern size_t	fread(string,unsigned int _offset,size_t _size,size_t _n,FILE *);
   //extern size_t	fwrite(string,unsigned int _offset,size_t _size,size_t _n,FILE *);
@@ -104,20 +104,20 @@ extern void	rewind(FILE @);
 extern void	clearerr(FILE @);
 extern int	feof(FILE @);
 extern int	ferror(FILE @);
-extern void     perror(string);
-extern FILE *	fopen(string _name , string _type);
+extern void     perror(string_t);
+extern FILE *	fopen(string_t _name , string_t _type);
 
 //
 // Routines in POSIX 1003.1.
 //
 
-extern FILE *	fdopen(int, string);
+extern FILE *	fdopen(int, string_t);
 extern int	fileno(FILE @);
 extern int	getw(FILE @);
   //extern int	pclose(FILE @);
   //extern FILE *   popen(string, string);
 extern int	putw(int, FILE @);
-extern void     setbuffer(FILE @, string, int);
+extern void     setbuffer(FILE @, mstring_t, int);
 extern int	setlinebuf(FILE @);
 
 #define	getchar()	getc(stdin)
@@ -130,18 +130,18 @@ extern int	setlinebuf(FILE @);
 // Routines added for Cyclone
 //
 extern xtunion exn {
-  extern FileOpenError(string);
+  extern FileOpenError(string_t);
   extern FileCloseError;
 };
 
-extern FILE @file_open(string fname, string mode);
+extern FILE @file_open(string_t fname, string_t mode);
 extern void file_close(FILE @);
-extern void file_delete(string);
-extern void file_length(string);
+extern void file_delete(string_t);
+extern void file_length(string_t);
 // these two provided in cyc_runtime.c
-extern int file_string_read(FILE @fd, string dest, int dest_offset, 
+extern int file_string_read(FILE @fd, mstring_t dest, int dest_offset, 
 			    int max_count);
-extern int file_string_write(FILE @fd, string src, int src_offset, 
+extern int file_string_write(FILE @fd, string_t src, int src_offset, 
 			     int max_count);
 }
 #endif

@@ -6,7 +6,7 @@
 namespace Output;
 using Stdio;
 
-static string copy_buffer = ""; // initialized in output_lexdef
+static mstring_t copy_buffer = null; // initialized in output_lexdef
 
 /*void copy_chars(FILE @ ic, FILE @ oc, int start, int stop) {
   int n = stop - start;
@@ -24,7 +24,7 @@ void copy_chars(FILE @ ic, FILE @oc, int start, int stop) {
   }
 }
 
-void copy_chunk(string sourcename, FILE @ ic, FILE @ oc, Syntax::location_t loc){
+void copy_chunk(string_t sourcename, FILE @ ic, FILE @ oc, Syntax::location_t loc){
   if(loc->start_pos < loc->end_pos) {
     fprintf(oc, "#line %d \"%s\"\n", loc->start_line, sourcename);
     for(int i=1; i <= loc->start_col; ++i)
@@ -51,7 +51,7 @@ void output_tables(FILE @oc, Compact::lex_tables_t tbl) {
   fprintf(oc, ";\n");
 }
 
-void output_entry(string sourcename, FILE @ ic, FILE @ oc, 
+void output_entry(string_t sourcename, FILE @ ic, FILE @ oc, 
 		  Lexgen::automata_entry_t e) {
   fprintf(oc, "int %s_rec(Lexbuf<`a> lexbuf, int lexstate) {\n", e->name);
   // save new state, then switch on it , so default case can use it.
@@ -74,7 +74,7 @@ void output_entry(string sourcename, FILE @ ic, FILE @ oc,
 
 xtunion exn { Table_overflow };
 
-void output_lexdef(string sourcename, 
+void output_lexdef(string_t sourcename, 
 		   FILE @ ic, 
 		   FILE @ oc,
 		   Syntax::location_t    header,

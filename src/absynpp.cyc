@@ -98,7 +98,7 @@ static void curr_namespace_drop() {
 
 // ------------
 
-string char_escape(char c) {
+string_t char_escape(char c) {
   switch (c) {
   case '\a': return("\\a");
   case '\b': return("\\b");
@@ -127,7 +127,7 @@ string char_escape(char c) {
   }
 }
 
-static bool special(string s){
+static bool special(string_t s){
   int sz = s.size-1;
   for (int i = 0; i<sz; i++) {
     char c = s[i];
@@ -137,7 +137,7 @@ static bool special(string s){
   return false;
 }
 
-string string_escape(string s) {
+string_t string_escape(string_t s) {
   if (!special(s)) return s;
 
   int n = s.size - 1;
@@ -162,7 +162,7 @@ string string_escape(string s) {
       break;
     }
   // build the escaped string
-  string t = new_string(len);
+  mstring_t t = new_string(len);
   int j = 0;
   for (int i=0; i<=n; i++)
     switch (s[i]) {
@@ -188,15 +188,15 @@ string string_escape(string s) {
   return t;
 }
 
-static string restrict_string = "restrict";
-static string volatile_string = "volatile";
-static string const_string = "const";
-static stringptr restrict_sp = &restrict_string;
-static stringptr volatile_sp = &volatile_string;
-static stringptr const_sp = &const_string;
+static string_t restrict_string = "restrict";
+static string_t volatile_string = "volatile";
+static string_t const_str = "const";
+static stringptr_t restrict_sp = &restrict_string;
+static stringptr_t volatile_sp = &volatile_string;
+static stringptr_t const_sp = &const_str;
 
 doc_t tqual2doc(tqual_t tq) {
-  list_t<stringptr> l = null;
+  list_t<stringptr_t> l = null;
 
   if (tq.q_restrict) l = new List(restrict_sp,l);
   if (tq.q_volatile) l = new List(volatile_sp,l);
@@ -204,7 +204,7 @@ doc_t tqual2doc(tqual_t tq) {
   return egroup(""," "," ",List::map(textptr,l));
 }
 
-string kind2string(kind_t k) {
+string_t kind2string(kind_t k) {
   switch (k) {
   case AnyKind:        return "A";
   case MemKind:        return "M";
@@ -214,7 +214,7 @@ string kind2string(kind_t k) {
   }
 }
 
-string ckind2string(conref_t<kind_t> c) {
+string_t ckind2string(conref_t<kind_t> c) {
   switch (compress_conref(c)->v) {
   case &Eq_constr(k): return kind2string(k);
   default: return "?";
@@ -466,8 +466,8 @@ doc_t ntyp2doc(type_t t) {
     }
     break;
   case &IntType(sn,sz):
-    string sns;
-    string ts;
+    string_t sns;
+    string_t ts;
     switch (sn) {
     case Signed:   sns = "";          break;
     case Unsigned: sns = "unsigned "; break;
@@ -965,7 +965,7 @@ doc_t primapp2doc(int inprec, primop_t p,list_t<exp_t> es) {
   }
 }
 
-string prim2str(primop_t p) {
+string_t prim2str(primop_t p) {
   switch (p) {
   case Plus: return "+";
   case Times: return "*";
@@ -1641,23 +1641,23 @@ void decllist2file(list_t<decl_t> tdl, FILE @f) {
   }
 }
 
-string decllist2string(list_t<decl_t> tdl) {
+string_t decllist2string(list_t<decl_t> tdl) {
   return string_of_doc(seql("",List::map(decl2doc,tdl)),PP_WIDTH);
 }
-string exp2string(exp_t e)     {return string_of_doc(exp2doc(e),  PP_WIDTH);}
-string stmt2string(stmt_t s)   {return string_of_doc(stmt2doc(s), PP_WIDTH);}
-string typ2string(type_t t)    {
+string_t exp2string(exp_t e)     {return string_of_doc(exp2doc(e),  PP_WIDTH);}
+string_t stmt2string(stmt_t s)   {return string_of_doc(stmt2doc(s), PP_WIDTH);}
+string_t typ2string(type_t t)    {
   dont_rewrite_temp_tvars = true; // so that error messages remain 'nice'
   let s = string_of_doc(typ2doc(t),  PP_WIDTH);
   dont_rewrite_temp_tvars = false;
   return s;
 }
-string qvar2string(qvar_t v)   {return string_of_doc(qvar2doc(v), PP_WIDTH);}
-string prim2string(primop_t p) {return string_of_doc(prim2doc(p), PP_WIDTH);}
-string pat2string(pat_t p)     {return string_of_doc(pat2doc(p),  PP_WIDTH);}
+string_t qvar2string(qvar_t v)   {return string_of_doc(qvar2doc(v), PP_WIDTH);}
+string_t prim2string(primop_t p) {return string_of_doc(prim2doc(p), PP_WIDTH);}
+string_t pat2string(pat_t p)     {return string_of_doc(pat2doc(p),  PP_WIDTH);}
 
 // used for error messages
-string scope2string(scope_t sc) {
+string_t scope2string(scope_t sc) {
   switch (sc) {
   case Static:   return "static";
   case Public:   return "public";

@@ -26,17 +26,17 @@ xtunion exn {TypeErr};
 
 extern void unify_it(type_t t1, type_t t2);
 
-void terr(seg_t loc, string s) {
+void terr(seg_t loc, string_t s) {
   Position::post_error(Position::mk_err_elab(loc,s));
 }
 
-`a impos(string msg) {
+`a impos(string_t msg) {
   fprintf(stderr,"Error: %s\n",msg);
   fflush(stderr);
   throw TypeErr;
 }
 
-static string tvar2string(tvar_t tv) {
+static string_t tvar2string(tvar_t tv) {
   return *tv->name;
 }
 
@@ -47,20 +47,19 @@ void print_tvars(list_t<tvar_t> tvs) {
 }
 
 static list_t<seg_t>     warning_segs = null;
-static list_t<stringptr> warning_msgs = null;
+static list_t<stringptr_t> warning_msgs = null;
 
 // we batch warnings because we have to parse the file to determine
 // line and column information.
-void warn(seg_t sg, string msg) {
+void warn(seg_t sg, string_t msg) {
   warning_segs = new List(sg, warning_segs);
-  // FIX:  cast to stringptr is necessary here...
-  warning_msgs = new List((stringptr)(new {msg}),warning_msgs);
+  warning_msgs = new List(new {msg},warning_msgs);
 }
 void flush_warnings() {
   if(warning_segs == null)
     return;
   fprintf(stderr,"***Warnings***\n");
-  list_t<stringptr> seg_strs = strings_of_segments(warning_segs);
+  let seg_strs = strings_of_segments(warning_segs);
   warning_segs = null;
   warning_msgs = List::imp_rev(warning_msgs);
   while(warning_msgs != null) {
@@ -1386,7 +1385,7 @@ int *new_tvar_id() {
 static int tvar_counter = 0;
 tvar_t new_tvar(kind_t k) {
   int i = tvar_counter++;
-  string s = xprintf("#%d",i);
+  string_t s = xprintf("#%d",i);
   return new Tvar(new{s},null,new_conref(k));
 }
 
@@ -1399,7 +1398,7 @@ void rewrite_temp_tvar(tvar_t t) { // change t->name from "#xxx" to "`txxx"
   if (! is_temp_tvar(t)) return;
   let s = String::strconcat("`", *(t -> name));
   s[1] = 't';
-  t -> name = new{s};
+  t -> name = new{(string_t)s};
 }
 
 static $(opt_t<var_t>,tqual_t,type_t)@ 
@@ -2343,7 +2342,7 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
       if (*btvs == null)
         *btvs = free_tvars;
       else if (free_tvars != null) {
-        string s = *free_tvars->hd->name;
+        let s = *free_tvars->hd->name;
         if (s[0] == '?')
           // Try to give the user a clue as to what happened...
           terr(loc,xprintf("You failed to abstract over the generated type variables. \nRemove the bound type variables or else make the effects of the type explicit\nand then abstract the free type variables properly."));
@@ -2384,18 +2383,19 @@ void check_type(seg_t loc, tenv_t te, list_t<tvar_t> bound_tvars,
 // be a better choice.
 static void check_unique_unsorted(int (@cmp)(`a,`a), glist_t<`a,`r> vs,
 				  seg_t loc, 
-				  string a2string(`a), string msg) {
+				  string_t a2string(`a), string_t msg) {
   for(; vs != null; vs = vs->tl)
     for(_ vs2 = vs->tl; vs2 != null; vs2 = vs2->tl)
       if(cmp(vs->hd, vs2->hd)== 0)
 	terr(loc, xprintf("%s: %s",msg,a2string(vs->hd)));
 }
 
-static string strptr2string(string @s) {
+static string_t strptr2string(string_t @s) {
   return *s;
 }
 
-void check_unique_vars(glist_t<var_t,`r> vs, seg_t loc, string msg) {
+void check_unique_vars(glist_t<var_t,`r> vs, seg_t loc, string_t msg)
+{
   check_unique_unsorted(String::zstrptrcmp,vs,loc,strptr2string,msg);
 }
 

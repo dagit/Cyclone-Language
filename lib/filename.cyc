@@ -12,13 +12,13 @@ using List;
 // Anyway, why is this useful?  getcwd() would be better.
 //string current_dir_name = ".";
 
-string concat(string s1, string s2) {
+mstring_t concat(string_t s1, string_t s2) {
   return String::strconcat_l(new List(new s1,
-                                      new List(new DIR_SEPARATOR_STR,
+                                      new List(new ((string_t)DIR_SEPARATOR_STR),
                                                new List(new s2,null))));
 }
 
-string chop_extension(string filename) {
+mstring_t chop_extension(string_t filename) {
   int i = filename.size - 1;
   while (i >= 0 && filename[i] != '.')
     --i;
@@ -29,23 +29,23 @@ string chop_extension(string filename) {
 
 // FIX: I've always thought the type of this was wrong.
 // It should return an option.  Root dirs have no dirname.
-string dirname(string filename) {
+mstring_t dirname(string_t filename) {
   int i = filename.size - 1;
   while (i >= 0 && filename[i] != DIR_SEPARATOR)
     --i;
-  if (i < 0) return "";
+  if (i < 0) return new_string(0);;
   return String::substring(filename, 0, i);
 }
 
 // FIX: similarly, this should return an option.
-string basename(string filename) {
+mstring_t basename(string_t filename) {
   int i = filename.size - 1;
   while (i >= 0 && filename[i] != DIR_SEPARATOR)
     --i;
   return String::substring(filename, i+1, filename.size-(i+1));
 }
 
-bool check_suffix(string filename, string suffix) {
+bool check_suffix(string_t filename, string_t suffix) {
   int i = filename.size-1;
   int j = suffix.size-1;
   while (i >= 0 && j >= 0)
@@ -54,10 +54,10 @@ bool check_suffix(string filename, string suffix) {
   else return true;
 }
 
-string gnuify(string filename) {
+mstring_t gnuify(string_t filename) {
   bool has_drive_name = filename.size>1 && filename[1]==':';
   int i,j;
-  string ans;
+  mstring_t ans;
   int ans_sz;
   if (has_drive_name) {
     ans_sz = filename.size+1;

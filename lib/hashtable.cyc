@@ -65,7 +65,7 @@ void remove(table_t<`a,`b,`e1,`e2> t, `a key) {
     }
 }
 
-int hash_string(string s) {
+int hash_string(string_t s) {
   // could be made faster by explicit loop unrolling
   int ans   = 0;
   int sz    = s.size;
@@ -79,7 +79,7 @@ int hash_string(string s) {
   return ans;
 }
 
-int hash_stringptr(stringptr s) {
+int hash_stringptr(stringptr_t s) {
   return hash_string(*s);
 }
 

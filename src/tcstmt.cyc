@@ -179,7 +179,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // Note that we set new_block to false because we're explicitly creating
     // a new named block here.
     tcStmt(Tcenv::new_named_block(s0->loc,add_label(te,l,s),
-                                  new Tvar(new xprintf("`%s",*l),new_tvar_id(),
+                                  new Tvar(new ((string_t)xprintf("`%s",*l)),new_tvar_id(),
                                            new_conref(RgnKind))),s,false); 
     return;
 
@@ -261,7 +261,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     return;
 
   case &Decl_s(d,s):
-    string unimp_msg_part;
+    string_t unimp_msg_part;
 
     if(new_block)
       te = Tcenv::new_block(s0->loc,te);

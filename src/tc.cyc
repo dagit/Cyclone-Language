@@ -26,8 +26,8 @@ using Stdio;
 namespace Tc;
 
 // used for the error messages of tcdecl
-static string tc_msg_c = "";
-static string * tc_msg = &tc_msg_c;
+static string_t tc_msg_c = "";
+static string_t * tc_msg = &tc_msg_c;
 
 // Transfer any function type attributes from the given list to the
 // function type.  
@@ -288,8 +288,10 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   ge->typedefs = Dict::insert(ge->typedefs,v,td);
 }
 
-static void tcStructFields(tenv_t te, genv_t ge, seg_t loc, string obj,
-			   list_t<structfield_t> fields, list_t<tvar_t> tvs) {
+static void tcStructFields(tenv_t te, genv_t ge, seg_t loc, 
+                           string_t obj,
+			   list_t<structfield_t> fields, 
+                           list_t<tvar_t> tvs) {
   // check fields, rejecting ill-formed types, bad fields, and duplicates
   // (unless the field name is empty)
   region uprev_rgn {
@@ -342,7 +344,7 @@ static void tcStructFields(tenv_t te, genv_t ge, seg_t loc, string obj,
   }
 }
 
-static void tcStructOrUniondecl(tenv_t te, genv_t ge, string obj, seg_t loc, structdecl_t sd) {
+static void tcStructOrUniondecl(tenv_t te, genv_t ge, string_t obj, seg_t loc, structdecl_t sd) {
   let v = (*sd->name->v)[1];
 #ifdef DEBUG
   fprintf(stderr,"type-checking %sdecl %s",obj,*v);
@@ -400,7 +402,7 @@ static void tcStructOrUniondecl(tenv_t te, genv_t ge, string obj, seg_t loc, str
 
 static void tcStructdecl(tenv_t te, genv_t ge, seg_t loc, structdecl_t sd) {
   let v = (*sd->name->v)[1];
-  string obj = "struct";
+  let obj = "struct";
 
   tcStructOrUniondecl(te, ge, obj, loc, sd);
 
@@ -452,7 +454,7 @@ static void tcStructdecl(tenv_t te, genv_t ge, seg_t loc, structdecl_t sd) {
 
 static void tcUniondecl(tenv_t te, genv_t ge, seg_t loc, uniondecl_t ud) {
   let v = (*ud->name->v)[1];
-  string obj = "union";
+  let obj = "union";
 
   tcStructOrUniondecl(te, ge, obj, loc, (structdecl_t) ud);
 
@@ -496,8 +498,10 @@ static void tcUniondecl(tenv_t te, genv_t ge, seg_t loc, uniondecl_t ud) {
   }
 }
 
-static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge, seg_t loc,
-					    string obj, bool is_xtunion,
+static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge, 
+                                            seg_t loc,
+					    string_t obj, 
+                                            bool is_xtunion,
 					    qvar_t name,
 					    list_t<tunionfield_t> fields,
 					    list_t<tvar_t> tvs,
@@ -586,7 +590,7 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge, seg_t loc,
 
 static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
   var_t v = (*tud->name)[1];
-  string obj;
+  string_t obj;
   if (tud->is_xtunion) {
     obj = "xtunion";
   } else {
@@ -861,8 +865,8 @@ static void tc_decls(tenv_t te, list_t<decl_t> ds0, bool in_externC, bool check_
   }
 }
 
-static string cyc_string = "Cyc";
-static stringptr cyc_ns = &cyc_string;
+static string_t cyc_string = "Cyc";
+static stringptr_t cyc_ns = &cyc_string;
 
 void tc(tenv_t te, bool add_cyc_namespace, bool check_var_init, list_t<decl_t> ds) {
   if (add_cyc_namespace)

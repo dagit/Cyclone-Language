@@ -98,6 +98,7 @@ r){ struct _tagged_string s= Cyc_Core_new_string(( int) Cyc_Rope_length( r));
 Cyc_Rope_flatten_it( s, 0, r);( void*)( r->v=( void*)(( void*)({ struct Cyc_Rope_String_rope_struct*
 _temp45=( struct Cyc_Rope_String_rope_struct*) GC_malloc( sizeof( struct Cyc_Rope_String_rope_struct));
 _temp45[ 0]=({ struct Cyc_Rope_String_rope_struct _temp46; _temp46.tag= Cyc_Rope_String_rope;
-_temp46.f1= s; _temp46;}); _temp45;}))); return s;} int Cyc_Rope_cmp( struct Cyc_Rope_Rope_node*
-r1, struct Cyc_Rope_Rope_node* r2){ return Cyc_String_strcmp( Cyc_Rope_to_string(
-r1), Cyc_Rope_to_string( r2));}
+_temp46.f1=( struct _tagged_string) s; _temp46;}); _temp45;}))); return s;} int
+Cyc_Rope_cmp( struct Cyc_Rope_Rope_node* r1, struct Cyc_Rope_Rope_node* r2){
+return Cyc_String_strcmp(( struct _tagged_string) Cyc_Rope_to_string( r1),(
+struct _tagged_string) Cyc_Rope_to_string( r2));}

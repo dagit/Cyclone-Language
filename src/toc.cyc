@@ -73,12 +73,12 @@ tqual_t mt_tq = Tqual(false,false,false);
 // errors and reporting
 xtunion exn {Toc_Unimplemented};
 xtunion exn {Toc_Impossible};
-static `a unimp(string s) {
+static `a unimp(string_t s) {
   fprintf(stderr,"%s\n",s);
   fflush(stderr);
   throw Toc_Unimplemented;
 }
-static `a toc_impos(string s) {
+static `a toc_impos(string_t s) {
   fprintf(stderr,"%s\n",s);
   fflush(stderr);
   throw Toc_Impossible;
@@ -87,8 +87,8 @@ xtunion exn {Match_error};
 
 // some pre-allocated boxed strings -- use foo_sp for char ?* w/ contents "foo"
 #define MAKE_STRING(str)\
-  static string    str##_string = #str; \
-  static stringptr str##_sp     = &str##_string
+  static string_t    str##_string = #str; \
+  static stringptr_t str##_sp     = &str##_string
 
 MAKE_STRING(curr);
 MAKE_STRING(last_plus_one);
@@ -110,8 +110,8 @@ MAKE_STRING(_new_region);
 // (top-level namespace)
 // FIX: Next step is to make the exp_t, not just the qvar_t
 #define MAKE_QVAR(str)\
-  static string                  str##_string = #str;\
-  static $(nmspace_t, stringptr) str##_pr     = $((nmspace_t)&abs_ns_value,\
+  static string_t                  str##_string = #str;\
+  static $(nmspace_t, stringptr_t) str##_pr     = $((nmspace_t)&abs_ns_value,\
 						  &str##_string);\
   static qvar_t                  str##_qv     = &str##_pr
 
@@ -165,14 +165,15 @@ static bool is_nullable(type_t t) {
   }
 }
 
-static qvar_t collapse_qvar_tag(qvar_t x,string tag) {
-  return new $((*x)[0], new {String::strconcat(*((*x)[1]),tag)});
+static qvar_t collapse_qvar_tag(qvar_t x,string_t tag) {
+  return new $((*x)[0], 
+               new {(string_t)String::strconcat(*((*x)[1]),tag)});
 }
 
 static void add_tuple_decl(var_t x, list_t<type_t> ts) {
   let fs = null;
   for (int i=1; ts != null; ts = ts->tl, i++)
-    fs = new List(new Structfield(new {xprintf("f%d",i)},mt_tq,ts->hd,null,null),fs);
+    fs = new List(new Structfield(new {(string_t)xprintf("f%d",i)},mt_tq,ts->hd,null,null),fs);
   fs = List::imp_rev(fs);
   let sd = new Structdecl{.sc = Public, .name = new Opt(new $(abs_ns,x)),
                        .tvs = null, .fields = new Opt(fs), .attributes = null};
@@ -180,7 +181,7 @@ static void add_tuple_decl(var_t x, list_t<type_t> ts) {
 }
 
 static void add_tagged_ptr_decl(var_t x, type_t t) {
-  type_t tptr = star_typ(t,HeapRgn,empty_tqual());
+  type_t tptr = star_typ(t,HeapRgn,mt_tq);
   let f1 = new Structfield(curr_sp,mt_tq,tptr,null,null);
   let f2 = new Structfield(base_sp,mt_tq,tptr,null,null);
   let f3 = new Structfield(last_plus_one_sp,mt_tq,tptr,null,null);
@@ -212,7 +213,7 @@ static var_t add_tuple_type(glist_t<$(tqual_t,type_t)@,`r> tqs0) {
       continue;
     return x;
   }
-  stringptr x = new {xprintf("_tuple%d",tuple_type_counter++)};
+  stringptr_t x = new {(string_t)xprintf("_tuple%d",tuple_type_counter++)};
   list_t<type_t> ts = List::map(snd_tqt,tqs0);
   add_tuple_decl(x,ts);
   tuple_types = new List(new $(x,ts),tuple_types);
@@ -231,6 +232,9 @@ static type_t tagged_string_type() {
   return tagged_string_type_v;
 }
 static type_t add_tagged_ptr_type(type_t t,tqual_t tq) {
+  // NOTE: we ignore the tq because C doesn't let us cast from a
+  // non-const version of a ? type to a const version.  So we
+  // translate them all to non-const.
   // Handle char[?] specially, its C implementation is in cyc_include.h
   switch (t) {
   case &IntType(Unsigned,B1): return tagged_string_type();
@@ -241,7 +245,7 @@ static type_t add_tagged_ptr_type(type_t t,tqual_t tq) {
     if (!unify(t,t2)) continue;
     return strct(x);
   }
-  stringptr x = new {xprintf("_tagged_ptr%d",tagged_ptr_counter++)};
+  _ x = new {(string_t)xprintf("_tagged_ptr%d",tagged_ptr_counter++)};
   add_tagged_ptr_decl(x,t);
   tagged_ptr_types = new List(new $(x,t),tagged_ptr_types);
   return strct(x);
@@ -251,14 +255,14 @@ static type_t add_tagged_ptr_type(type_t t,tqual_t tq) {
 // FIX: need to guarantee these can't conflict
 static int temp_var_counter = 0;
 qvar_t temp_var() {
-  return new $(Loc_n,new {xprintf("_temp%d",temp_var_counter++)});
+  return new $(Loc_n,new {(string_t)xprintf("_temp%d",temp_var_counter++)});
 }
 
 // generate a fresh label
 // FIX: need to guarantee these can't conflict
 static int fresh_label_counter = 0;
 static var_t fresh_label() {
-  return new {xprintf("_LL%d",temp_var_counter++)};
+  return new {(string_t)xprintf("_LL%d",temp_var_counter++)};
 }
 
 ///////////////////////////////////////////////////////////////
@@ -516,15 +520,14 @@ static exp_t rmalloc_exp(exp_t rgn, exp_t s) {
 }
 
 // cache strings used for field names f0,f1,f2,...
-static string f0 = "f0";
-static stringptr field_names_v[1] = {&f0};
-static stringptr ?field_names = field_names_v;
-static stringptr fieldname(int i) {
-  return new xprintf("f%d",i);
+static string_t f0 = "f0";
+static stringptr_t field_names_v[1] = {&f0};
+static stringptr_t ?field_names = field_names_v;
+static stringptr_t fieldname(int i) {
   unsigned int fsz = field_names.size;
   if (i >= fsz) {
     field_names = 
-      new {for j < i+1 : (j < fsz) ? field_names[j] : new (xprintf("f%d",j))};
+      new {for j < i+1 : (j < fsz) ? field_names[j] : new ((string_t)xprintf("f%d",j))};
   }
   return field_names[i];
 }
@@ -542,9 +545,6 @@ static tunion Conv {
 };
 typedef tunion Conv conv;
 
-// Calculate the conversions needed to map t1 to t2 -- the conversions
-// should be applied in reverse order.
-//
 // FIX:  should deal with conversions to/from arithmetic types and
 // bools and enums.  Should also make sure this is synchronized with
 // the type checker -- the right way to do this is to compute the
@@ -570,7 +570,7 @@ static conv conversion(type_t t1, type_t t2) {
   }
 }
 
-static string _sfile_to_file_string = "sfile_to_file";
+static string_t _sfile_to_file_string = "sfile_to_file";
 static $(nmspace_t,var_t) _sfile_to_file_var =
   $((nmspace_t)&abs_ns_value,&_sfile_to_file_string);
 
@@ -610,11 +610,12 @@ static exp_t tag_ptr_conv(bool toplevel, type_t t, exp_t sz, exp_t e) {
   int szvalue = Evexp::eval_const_uint_exp(sz);
   type_t strt_typ;
   type_t elt_typ;
+  tqual_t elt_tqual;
   switch (compress(t)) {
-  case &PointerType(PtrInfo{elt,_,_,_,_}):
-    // FIX:  what about tqual ??
+  case &PointerType(PtrInfo{elt,_,_,tq,_}):
     elt_typ  = elt;
-    strt_typ = add_tagged_ptr_type(elt,mt_tq);
+    elt_tqual = tq;
+    strt_typ = add_tagged_ptr_type(elt,tq);
     break;
   default:
     return toc_impos("tag_ptr_conv: not a pointer");
@@ -640,7 +641,10 @@ static exp_t tag_ptr_conv(bool toplevel, type_t t, exp_t sz, exp_t e) {
       result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
       xexp = var_exp(x,DL);
     } else {
-      xexp = e;
+      if (elt_tqual.q_const)
+        xexp = cast_exp(cstar_typ(elt_typ,mt_tq),e,DL);
+      else 
+        xexp = e;
     }
     exp_t xplussz = add_exp(xexp,sz,DL);
     exp_t urm_exp = 
@@ -665,6 +669,9 @@ static exp_t tag_ptr_conv(bool toplevel, type_t t, exp_t sz, exp_t e) {
     s = seq_stmt(assign_stmt(structmember_exp(var_exp(b,DL),curr_sp,
 					      DL),var_exp(a,DL),DL),s,DL);
     s = declare_stmt(b,strt_typ,null,s,DL);
+    type_t atyp = cstar_typ(elt_typ,mt_tq);
+    // avoid a warning about casting from a const to non-const pointer
+    if (elt_tqual.q_const) e = cast_exp(atyp,e,DL);
     s = declare_stmt(a,cstar_typ(elt_typ,mt_tq),e,s,DL);
     return stmt_exp(s,DL);
   }
@@ -834,7 +841,7 @@ static exp_t printf_to_c(primop_t p, opt_t<exp_t> aopt,
   if (args == null)
     return toc_impos("expecting a literal format string");
 
-  string fmt_str;
+  string_t fmt_str;
   // get out the literal format string
   switch (args->hd->r) {
   case &Const_e(&String_c(s)): fmt_str = s; break;
@@ -1639,7 +1646,8 @@ static void exp_to_c(env_t nv, exp_t e) {
           type_t field_typ = typ_to_c((*tqts->hd)[1]);
           if (is_void_star(field_typ))
             arg = cast_exp(field_typ,arg,null);
-          let a1 = assign_stmt(structmember_exp(xexp,new "f1",DL),arg,DL);
+          let a1 = assign_stmt(structmember_exp(xexp,fieldname(1),DL),
+                               arg,DL);
           s = seq_stmt(a1,s,DL);
           let a2 = assign_stmt(structmember_exp(xexp,tag_sp,DL),
                                var_exp(qv,DL),DL);
@@ -1755,6 +1763,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       let e0 = cast_exp(ptr_typ,e1,DL);
       e->r = stmt_exp(declare_stmt(x,ptr_typ,e0,s,DL),DL)->r;
       break;
+      /*
     case &Const_e(&String_c(s)):
       // Cyc_new_string(s) or Cyc_rnew_string(r,s)
       if (rgnopt == null) 
@@ -1769,6 +1778,7 @@ static void exp_to_c(env_t nv, exp_t e) {
                                    null),DL)->r;
       }
       break;
+      */
     case &Comprehension_e(vd,e1,e2):
       // Drop the "tagged_ptr_t" struct stuff when type is a fixed-size array
       // ({ unsigned int max = e1;
@@ -2445,7 +2455,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
       let t2  = p2->topt->v;
       let t2c = typ_to_c(t2);
       let lab = fresh_label();
-      let arrow_exp = structarrow_exp(rcast, new {xprintf("f%d",cnt)}, DL);
+      let arrow_exp = structarrow_exp(rcast, fieldname(cnt), DL);
       if(is_void_star(typ_to_c(tuf_typ)))
 	arrow_exp = cast_exp(t2c, arrow_exp, DL);
       decls = rnew(rgn) List(rnew (rgn) $(v,t2c),decls);
@@ -3246,7 +3256,7 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
   let n = xd->name;
   for (let fs = xd->fields->v; fs != null; fs = fs->tl) {
     tunionfield_t f  = fs->hd;
-    stringptr     fn = (*f->name)[1];
+    stringptr_t fn = (*f->name)[1];
     let       sz_exp  = uint_exp((*fn).size+4,DL);
     let       tag_typ = new ArrayType(uchar_t,mt_tq,sz_exp);
     // FIX: making bad alignment and pointer-size assumptions!
@@ -3264,7 +3274,7 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
 	list_t<structfield_t> fields = null;
 	int i = 1;
 	for (let tqts = f->typs; tqts != null; tqts = tqts->tl,i++) {
-	  let field_n = (stringptr)(new {xprintf("f%d",i)});
+	  let field_n = new ((string_t)xprintf("f%d",i));
 	  let newf    = new Structfield(field_n,(*tqts->hd)[0],
 					typ_to_c_array((*tqts->hd)[1]),null,null);
 	  fields = new List(newf,fields);

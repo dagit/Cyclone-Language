@@ -15,24 +15,25 @@ using Stdio; // for size_t
 //(*  Copyright 1999 Institut National de Recherche en Informatique et   *)
 //(*  en Automatique.  Distributed only by permission.                   *)
 //(*                                                                     *)
+
 //(***********************************************************************)
 
 //(* Extensible buffers *)
 
 abstract struct t
-{ string buffer;
+{ mstring_t buffer;
   uint position;
   uint length;
-  string initial_buffer;
+  mstring_t initial_buffer;
 };
 
 T create (uint n) {
   if (n < 1) n=1;
-  string s = new_string(n);
+  mstring_t s = new_string(n);
   return new t(s, 0, n, s);
 }
 
-string contents(T b) {
+mstring_t contents(T b) {
   return (String::substring( b->buffer, 0, b->position));
 }
 
@@ -55,7 +56,7 @@ void reset (T b) {
 static void resize(T b, uint more) {
   size_t len = b->length;
   size_t new_len = len;
-  string new_buffer;
+  mstring_t new_buffer;
   while (b->position + more > new_len) {
     new_len = 2 * new_len;
   }
@@ -77,7 +78,7 @@ void add_char(T b, char c) {
 
 // Note: like String::substring, this does not check for
 // null terminators within the specified substring
-void add_substring(T b, string s, int offset, int len) {
+void add_substring(T b, string_t s, int offset, int len) {
   if (offset < 0 || len < 0 || offset + len > s.size)
     throw new InvalidArg("Buffer::add_substring");
   int new_position = b->position + len;
@@ -88,7 +89,7 @@ void add_substring(T b, string s, int offset, int len) {
 }
 
 // This DOES check for null terminators
-void add_string (T b, string s) {
+void add_string (T b, string_t s) {
   int len = String::strlen(s);
   int new_position = b->position + len;
   if (new_position > b->length) resize(b, len);

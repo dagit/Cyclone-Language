@@ -4,7 +4,7 @@
 using Core;
 using Stdio;
 
-int main(int argc, string ? args) {
+int main(int argc, string_t ? args) {
   // The first string is the name of the program.
   if (argc <= 1) 
     throw new Failure("missing name!");

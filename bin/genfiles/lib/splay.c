@@ -40,17 +40,17 @@ void*)(( void*) _temp10->left); _temp18->right=( void*)(( void*) _temp16);
 _temp18;}); goto _LL3;}} _LL7:( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
 _temp19=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
 _temp19[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp20; _temp20.tag= Cyc_Core_InvalidArg;
-_temp20.f1=({ unsigned char* _temp21="Splay::rotate_left"; struct _tagged_string
-_temp22; _temp22.curr= _temp21; _temp22.base= _temp21; _temp22.last_plus_one=
-_temp21 + 19; _temp22;}); _temp20;}); _temp19;})); _LL3:;}} static void Cyc_Splay_rotate_right(
-struct Cyc_Splay_noderef* nr){ struct Cyc_Splay_node* _temp23= nr->v; goto _LL24;
-_LL24: { void* _temp25=( void*) _temp23->right; struct Cyc_Splay_noderef*
-_temp31; _LL27: if(( unsigned int) _temp25 > 1u?*(( int*) _temp25) == Cyc_Splay_Node:
-0){ _LL32: _temp31=(( struct Cyc_Splay_Node_struct*) _temp25)->f1; goto _LL28;}
-else{ goto _LL29;} _LL29: goto _LL30; _LL28: { struct Cyc_Splay_node* _temp33=
-_temp31->v; goto _LL34; _LL34: { struct Cyc_Splay_Node_struct* _temp39=({ struct
-Cyc_Splay_Node_struct* _temp35=( struct Cyc_Splay_Node_struct*) GC_malloc(
-sizeof( struct Cyc_Splay_Node_struct)); _temp35[ 0]=({ struct Cyc_Splay_Node_struct
+_temp20.f1=({ unsigned char* _temp21=( unsigned char*)"Splay::rotate_left";
+struct _tagged_string _temp22; _temp22.curr= _temp21; _temp22.base= _temp21;
+_temp22.last_plus_one= _temp21 + 19; _temp22;}); _temp20;}); _temp19;})); _LL3:;}}
+static void Cyc_Splay_rotate_right( struct Cyc_Splay_noderef* nr){ struct Cyc_Splay_node*
+_temp23= nr->v; goto _LL24; _LL24: { void* _temp25=( void*) _temp23->right;
+struct Cyc_Splay_noderef* _temp31; _LL27: if(( unsigned int) _temp25 > 1u?*((
+int*) _temp25) == Cyc_Splay_Node: 0){ _LL32: _temp31=(( struct Cyc_Splay_Node_struct*)
+_temp25)->f1; goto _LL28;} else{ goto _LL29;} _LL29: goto _LL30; _LL28: { struct
+Cyc_Splay_node* _temp33= _temp31->v; goto _LL34; _LL34: { struct Cyc_Splay_Node_struct*
+_temp39=({ struct Cyc_Splay_Node_struct* _temp35=( struct Cyc_Splay_Node_struct*)
+GC_malloc( sizeof( struct Cyc_Splay_Node_struct)); _temp35[ 0]=({ struct Cyc_Splay_Node_struct
 _temp36; _temp36.tag= Cyc_Splay_Node; _temp36.f1=({ struct Cyc_Splay_noderef*
 _temp37=( struct Cyc_Splay_noderef*) GC_malloc( sizeof( struct Cyc_Splay_noderef));
 _temp37->v=({ struct Cyc_Splay_node* _temp38=( struct Cyc_Splay_node*) GC_malloc(
@@ -65,12 +65,12 @@ void*) _temp33->right); _temp41;}); goto _LL26;}} _LL30:( void) _throw(( void*)(
 struct Cyc_Core_InvalidArg_struct* _temp42=( struct Cyc_Core_InvalidArg_struct*)
 GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp42[ 0]=({ struct
 Cyc_Core_InvalidArg_struct _temp43; _temp43.tag= Cyc_Core_InvalidArg; _temp43.f1=({
-unsigned char* _temp44="Splay::rotate_right"; struct _tagged_string _temp45;
-_temp45.curr= _temp44; _temp45.base= _temp44; _temp45.last_plus_one= _temp44 +
-20; _temp45;}); _temp43;}); _temp42;})); _LL26:;}} struct _tuple0{ void* f1;
-struct Cyc_Splay_noderef* f2; } ; static void Cyc_Splay_lift( struct Cyc_List_List*
-dnl){ while( dnl != 0) { if((( struct Cyc_List_List*) _check_null( dnl))->tl ==
-0){{ struct _tuple0* _temp46=( struct _tuple0*)(( struct Cyc_List_List*)
+unsigned char* _temp44=( unsigned char*)"Splay::rotate_right"; struct
+_tagged_string _temp45; _temp45.curr= _temp44; _temp45.base= _temp44; _temp45.last_plus_one=
+_temp44 + 20; _temp45;}); _temp43;}); _temp42;})); _LL26:;}} struct _tuple0{
+void* f1; struct Cyc_Splay_noderef* f2; } ; static void Cyc_Splay_lift( struct
+Cyc_List_List* dnl){ while( dnl != 0) { if((( struct Cyc_List_List*) _check_null(
+dnl))->tl == 0){{ struct _tuple0* _temp46=( struct _tuple0*)(( struct Cyc_List_List*)
 _check_null( dnl))->hd; struct _tuple0 _temp52; struct Cyc_Splay_noderef*
 _temp53; void* _temp55; struct _tuple0 _temp57; struct Cyc_Splay_noderef*
 _temp58; void* _temp60; _LL48: _temp52=* _temp46; _LL56: _temp55= _temp52.f1;

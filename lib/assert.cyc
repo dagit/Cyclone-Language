@@ -4,7 +4,7 @@
 
 namespace Assert {
   using Stdio;
-  `a AssertFail(string mesg) {
+  `a AssertFail(string_t mesg) {
     fputs(mesg, stderr);
     fputs(" -- assertion failed\n", stderr);
     exit(-1);

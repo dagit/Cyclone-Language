@@ -22,7 +22,7 @@ namespace Tcdecl {
 
   // if msg0 == null, don't print any error message and throw exception Incompatible
   // otherwise call terr(loc, msg) where msg is *msg0 + " " + msg1
-  extern void merr(seg_t loc, string * `r msg0, string msg1);
+  extern void merr(seg_t loc, string_t * `r msg0, string_t msg1);
 
   // all these functions work the same way :
   // _ they check compatibility between d0 (previous top-level declaration)
@@ -35,34 +35,51 @@ namespace Tcdecl {
   // _ we assume the declarations have already been type-checked
 
   // t and v describe the type and the name of the object involved
-  extern $(scope_t, bool) merge_scope(scope_t s0, scope_t s1,  string t, string v,
-				      seg_t loc, string * `r msg);
+  extern $(scope_t, bool) merge_scope(scope_t s0, scope_t s1,  
+                                      string_t t, string_t v,
+				      seg_t loc, string_t * `r msg);
 
-  extern struct Structdecl  * merge_structdecl (structdecl_t d0,  structdecl_t d1,
-						seg_t loc, string * `r msg);
-  extern struct Uniondecl   * merge_uniondecl  (uniondecl_t d0,   uniondecl_t d1,
-						seg_t loc, string * `r msg);
-  extern struct Tuniondecl  * merge_tuniondecl (tuniondecl_t d0,  tuniondecl_t d1,
-						seg_t loc, string * `r msg);
-  extern struct Enumdecl    * merge_enumdecl   (enumdecl_t d0,    enumdecl_t d1, 
-						seg_t loc, string * `r msg);
-  extern struct Vardecl     * merge_vardecl    (vardecl_t d0,     vardecl_t d1, 
-						seg_t loc, string * `r msg);
-  extern struct Typedefdecl * merge_typedefdecl(typedefdecl_t d0, typedefdecl_t d1,
-						seg_t loc, string * `r msg);
+  extern struct Structdecl  * merge_structdecl (structdecl_t d0,  
+                                                structdecl_t d1,
+						seg_t loc, 
+                                                string_t * `r msg);
 
-  extern binding_t            merge_binding    (binding_t d0,     binding_t d1,
-						seg_t loc, string * `r msg);
+  extern struct Uniondecl   * merge_uniondecl  (uniondecl_t d0,   
+                                                uniondecl_t d1,
+						seg_t loc, 
+                                                string_t * `r msg);
+  extern struct Tuniondecl  * merge_tuniondecl (tuniondecl_t d0,  
+                                                tuniondecl_t d1,
+						seg_t loc, 
+                                                string_t * `r msg);
+  extern struct Enumdecl    * merge_enumdecl   (enumdecl_t d0,   
+                                                enumdecl_t d1, 
+						seg_t loc, 
+                                                string_t * `r msg);
+  extern struct Vardecl     * merge_vardecl    (vardecl_t d0,
+                                                vardecl_t d1, 
+						seg_t loc, 
+                                                string_t * `r msg);
+  extern struct Typedefdecl * merge_typedefdecl(typedefdecl_t d0, 
+                                                typedefdecl_t d1,
+						seg_t loc, 
+                                                string_t * `r msg);
+
+  extern binding_t            merge_binding    (binding_t d0,
+                                                binding_t d1,
+						seg_t loc, 
+                                                string_t * `r msg);
   
-  extern struct Xtunionfielddecl * merge_xtunionfielddecl (xtunionfielddecl_t d0,
-							   xtunionfielddecl_t d1, 
-							   seg_t loc, string * `r msg);
+  extern struct Xtunionfielddecl * 
+  merge_xtunionfielddecl (xtunionfielddecl_t d0,
+                          xtunionfielddecl_t d1, 
+                          seg_t loc, string_t * `r msg);
 
   // sort the list of fields, trying to merge the duplicate
   // *res is set to false if something's wrong
   extern List::list_t<tunionfield_t> sort_xtunion_fields(List::list_t<tunionfield_t> f,
 							 bool @ `r1 res,
-							 var_t v, seg_t loc, string * `r2 msg);
+							 var_t v, seg_t loc, string_t * `r2 msg);
 }
 
 #endif /* _TCDECL_H_ */

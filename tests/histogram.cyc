@@ -19,7 +19,7 @@ using Hashtable;
 
 char buf[80];
 
-void print_results(stringptr pos, $(int,int) @totals) {
+void print_results(stringptr_t pos, $(int,int) @totals) {
   let &$(byte_count, call_count) = totals;
   printf("%d\t%s\n",byte_count,*pos);
 }
@@ -55,19 +55,19 @@ void snarfline(FILE @f) {
   ungetc(c,f);
 }
 
-int main(int argc, string ?argv) {
+int main(int argc, string_t ?argv) {
   FILE @f;
   if (argc < 2) {
     f = stdin;
   } else {
     f = (FILE @)fopen(argv[1],"r");
   }
-  table_t<stringptr,$(int,int)@,{},{}> table =
+  table_t<stringptr_t,$(int,int)@,{},{}> table =
       create(101, strptrcmp, hash_stringptr);
 
   // get the program point
   while (gettoken(f)) {
-    string @s = new String::strdup(buf);
+    string_t @s = new ((string_t)String::strdup(buf));
     // get the allocation amount
     if (!gettoken(f)) {
       fprintf(stderr,"missing allocation amount for %s\n",*s); return -1;

@@ -180,12 +180,12 @@ int _EXFUN(clock_getenable_attr, (clockid_t clock_id, int *attr));
 #endif /* _POSIX_CPUTIME or _POSIX_THREAD_CPUTIME */
 
 }
-extern string asctime(const struct tm *_tblock);
-extern string ctime(const time_t *_time);
-extern size_t strftime(string _s, size_t _maxsize, string _fmt, 
+extern mstring_t asctime(const struct tm *_tblock);
+extern mstring_t ctime(const time_t *_time);
+extern size_t strftime(string_t _s, size_t _maxsize, string_t _fmt, 
                        const struct tm *_t);
-extern string asctime_r(const struct tm *, string);
-extern string ctime_r(const time_t *, string);
-extern string timezone(void);
+extern mstring_t asctime_r(const struct tm *, mstring_t);
+extern mstring_t ctime_r(const time_t *, mstring_t);
+extern mstring_t timezone(void);
 }
 #endif /* _TIME_H_ */

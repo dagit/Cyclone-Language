@@ -78,7 +78,7 @@ _check_null( prev))->tl=(( struct Cyc_List_List*) _check_null( l))->tl; return;}
 int Cyc_Hashtable_hash_string( struct _tagged_string s){ int ans= 0; int sz=(
 int)({ struct _tagged_string _temp10= s;( unsigned int)( _temp10.last_plus_one -
 _temp10.curr);}); int shift= 0;{ int i= 0; for( 0; i < sz; ++ i){ ans= ans ^*((
-unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
+const unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
 _check_unknown_subscript)( s, sizeof( unsigned char), i) << shift; shift += 8;
 if( shift == 32){ shift= 0;}}} return ans;} int Cyc_Hashtable_hash_stringptr(
 struct _tagged_string* s){ return Cyc_Hashtable_hash_string(* s);} void Cyc_Hashtable_insert_bucket(

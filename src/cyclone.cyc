@@ -46,36 +46,36 @@ static bool save_temps_r = false;
 static bool save_c_r   = false;
 static bool add_cyc_namespace_r = true;
 
-static string *output_file = null;
-static void set_output_file(string s) {
+static string_t *output_file = null;
+static void set_output_file(string_t s) {
   output_file = new s;
 }
 
-static list_t<stringptr> cppargs = null;
-static void add_cpparg(string s) {
+static list_t<stringptr_t> cppargs = null;
+static void add_cpparg(string_t s) {
   cppargs = new List(new s,cppargs);
 }
 
-static bool is_cyclone_sourcefile(string s) {
+static bool is_cyclone_sourcefile(string_t s) {
   let len = strlen(s);
   if (len <= 4) return false;
   else return (strcmp(s+(len-4),".cyc") == 0);
 }
 
-static list_t<stringptr> cyclone_exec_prefix_path = null;
-static void add_cyclone_exec_prefix_path(string s) {
+static list_t<stringptr_t> cyclone_exec_prefix_path = null;
+static void add_cyclone_exec_prefix_path(string_t s) {
   let len = strlen(s);
   if (len <= 2) return;
-  let dir = substring(s,2,len-2);
+  let dir = (string_t)substring(s,2,len-2);
   cyclone_exec_prefix_path = new List(new dir,cyclone_exec_prefix_path);
 }
 
 // Arguments to pass to the C compiler
-static list_t<stringptr> ccargs = null;
-static void add_ccarg(string s) {
+static list_t<stringptr_t> ccargs = null;
+static void add_ccarg(string_t s) {
   ccargs = new List(new s,ccargs);
 }
-static void add_ccarg2(string flag,string arg) {
+static void add_ccarg2(string_t flag,string_t arg) {
   ccargs = new List(new arg, new List(new flag,ccargs));
 }
 
@@ -84,8 +84,8 @@ static void add_ccarg2(string flag,string arg) {
 // cyclib.a, then we get a "multiple definitions of main" error, via
 // libmain.c.  So, we separate out the library args from the ccargs
 // so that we can force cyclib.a to appear first.
-static list_t<stringptr> libargs = null;
-static void add_libarg(string s) {
+static list_t<stringptr_t> libargs = null;
+static void add_libarg(string_t s) {
   libargs = new List(new s,libargs);
 }
 
@@ -105,9 +105,9 @@ static void set_stop_after_objectfile() {
 }
 
 // Cyclone files given on the command line
-static list_t<stringptr> cyclone_files = null;
+static list_t<stringptr_t> cyclone_files = null;
 // Like add_ccarg but intercepts .cyc files for special handling
-static void add_other(string s) {
+static void add_other(string_t s) {
   if (is_cyclone_sourcefile(s)) {
     // For processing by Cyclone
     cyclone_files = new List(new s,cyclone_files);
@@ -120,14 +120,14 @@ static void add_other(string s) {
   else add_ccarg(s);
 }
 
-static void remove_file(string s) {
+static void remove_file(string_t s) {
   if (save_temps_r) return;
   else Stdio::remove(s);
 }
 
 bool compile_failure = false; // for exit code (helps Makefile)
 
-FILE * try_file_open(string filename, string mode, string msg_part) {
+FILE * try_file_open(string_t filename, string_t mode, string_t msg_part) {
   try return file_open(filename,mode);
   catch {
   default:
@@ -139,11 +139,11 @@ FILE * try_file_open(string filename, string mode, string msg_part) {
 }
 
 list_t<Absyn::decl_t>
-  do_stage(string stage_name,
+  do_stage(string_t stage_name,
            list_t<Absyn::decl_t> f(`a, list_t<Absyn::decl_t>),
            `a env, list_t<Absyn::decl_t> tds) {
-  string exn_string     = "";
-  string explain_string = "";
+  string_t exn_string     = "";
+  string_t explain_string = "";
   bool other_exn = false;
   xtunion exn ex = new Core::Impossible(""); // definite assignment doesn't track data
   let ans = null;
@@ -243,7 +243,7 @@ list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t> tds) {
 
 // We must remember what .c files are produced so that we can remove them
 // after we're done.
-static list_t<stringptr> cfiles = null;
+static list_t<stringptr_t> cfiles = null;
 static void remove_cfiles() {
   if (!save_c_r)
     for (; cfiles != null; cfiles = cfiles->tl)
@@ -251,7 +251,7 @@ static void remove_cfiles() {
 }
 
 /* Take as input a string, return the list of substrings separated by colons */
-static list_t<stringptr> split_by_char(string s, char c) {
+static list_t<stringptr_t> split_by_char(string_t s, char c) {
   if (s == null) return null;
   let result = null;
   let len = strlen(s);
@@ -263,7 +263,7 @@ static list_t<stringptr> split_by_char(string s, char c) {
       break;
     }
     else {
-      result = new List(new substring(s,0,end-s),result);
+      result = new List(new ((string_t)substring(s,0,end-s)),result);
       len -= (end-s);
       s = end+1;
     }
@@ -272,30 +272,30 @@ static list_t<stringptr> split_by_char(string s, char c) {
 }
 
 /* FIX: once stat is ported we can use that instead */
-bool file_exists(string file) {
+bool file_exists(string_t file) {
   FILE *f = null;
   try f = file_open(file,"r"); catch {default: break;}
   if (f == null) return false;
   else { fclose((FILE @)f); return true; }
 }
 
-string *find(list_t<stringptr> dirs, string file) {
+string_t *find(list_t<stringptr_t> dirs, string_t file) {
   if (file == null) return null;
   for (; dirs != null; dirs = dirs->tl) {
     let dir = *dirs->hd;
     if (dir == null || strlen(dir)==0) continue;
-    let s = Filename::concat(dir,file);
+    string_t s = Filename::concat(dir,file);
     if (file_exists(s)) return new s;
   }
   return null;
 }
 
-void process_file(string filename) {
+void process_file(string_t filename) {
 
-  string basename      = Filename::chop_extension(filename);
-  string preprocfile   = strconcat(basename, ".cyp");
-  string interfacefile = strconcat(basename, ".cyci");
-  string cfile         = strconcat(basename, ".c");
+  let basename      = Filename::chop_extension(filename);
+  let preprocfile   = strconcat(basename, ".cyp");
+  let interfacefile = strconcat(basename, ".cyci");
+  let cfile         = strconcat(basename, ".c");
 
   if (v_r) fprintf(stderr,"Compiling %s\n", filename);
 
@@ -308,16 +308,16 @@ void process_file(string filename) {
   // Run the preprocessor, by building and running a command-line
   // Pass -I and -D things onto preprocessor
   // FIX: let user change how/which preprocessor is invoked
-  let cppargs_string = String::str_sepstr(new List(new "",
+  let cppargs_string = String::str_sepstr(new List(new (string_t)"",
                                                    rev(cppargs))," ");
-  string stdinc_string = " -Ic:/cyclone/include";
+  string_t stdinc_string = " -Ic:/cyclone/include";
   let cyclone_include_path = Stdlib::getenv("CYCLONE_INCLUDE_PATH");
   if (cyclone_include_path != null) {
     let x = split_by_char(cyclone_include_path,':');
-    let s = String::str_sepstr(new List(new "",x)," -I");
+    let s = String::str_sepstr(new List(new (string_t)"",x)," -I");
     stdinc_string = xprintf("%s%s",s,stdinc_string);
   }
-  let ofile_string;
+  string_t ofile_string;
   if (stop_after_cpp_r) {
     if (output_file != null)
       ofile_string = xprintf(" -o %s", *output_file);
@@ -424,17 +424,17 @@ void process_file(string filename) {
     case x:
       compile_failure = true;
       file_close((FILE @)out_file);
-      cfiles = new List(new cfile,cfiles);
+      cfiles = new List(new ((string_t)cfile),cfiles);
       throw x;
     }
     file_close((FILE @)out_file);
-    cfiles = new List(new cfile,cfiles);
+    cfiles = new List(new ((string_t)cfile),cfiles);
   }
 }
 
-int main(int argc, string ? argv) {
+int main(int argc, string_t ? argv) {
 
-  list_t<$(string,spec_t,string)@> options =
+  list_t<$(string_t,spec_t,string_t)@> options =
     list(new $("-v",new Set_spec(&v_r),
                  "    Print compilation stages verbosely"),
          new $("-o",new String_spec(set_output_file),
@@ -524,11 +524,11 @@ int main(int argc, string ? argv) {
 
   // Run the C compiler
   // First, find the files cyclib.a, gc.a, cyc_include.h
-  let cyclone_exec_prefix = Stdlib::getenv("CYCLONE_EXEC_PREFIX");
+  string_t cyclone_exec_prefix = Stdlib::getenv("CYCLONE_EXEC_PREFIX");
   if (cyclone_exec_prefix != null)
     cyclone_exec_prefix_path = new List(new cyclone_exec_prefix,
                                         cyclone_exec_prefix_path);
-  cyclone_exec_prefix_path = new List(new "c:/cyclone/bin/cyc-lib",
+  cyclone_exec_prefix_path = new List(new ((string_t)"c:/cyclone/bin/cyc-lib"),
                                         cyclone_exec_prefix_path);
   cyclone_exec_prefix_path = List::imp_rev(cyclone_exec_prefix_path);
   let cyc_include = find(cyclone_exec_prefix_path,"include/cyc_include.h");
@@ -540,10 +540,10 @@ int main(int argc, string ? argv) {
   }
 
   let ccargs_string = String::str_sepstr(rev(ccargs), " ");
-  let libargs_string = String::str_sepstr(new List(new "",rev(libargs)), " ");
+  let libargs_string = String::str_sepstr(new List(new ((string_t)""),rev(libargs)), " ");
   let stdlib_string;
   if (stop_after_objectfile_r)
-    stdlib_string = (string)"";
+    stdlib_string = (string_t)"";
   else {
     let cyclib = find(cyclone_exec_prefix_path,"cyclib.a");
     let gc = find(cyclone_exec_prefix_path,"gc.a");
@@ -562,9 +562,9 @@ int main(int argc, string ? argv) {
     stdlib_string = xprintf(" %s %s",*cyclib,*gc);
   }
   let cccmd =
-    xprintf("gcc -fwritable-strings -include %s%s %s%s%s",
+    xprintf("gcc -include %s%s %s%s%s",
             *cyc_include,
-            (output_file==null?(string)"":xprintf(" -o %s",*output_file)),
+            (output_file==null?((string_t)""):xprintf(" -o %s",*output_file)),
             ccargs_string,
             stdlib_string,
             libargs_string);

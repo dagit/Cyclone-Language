@@ -5,14 +5,14 @@ namespace Rope;
 using Core;
 
 static tunion R {
-  String_rope(string),
+  String_rope(string_t),
   Array_rope(rope_t?)
 };
 abstract struct Rope_node {
   tunion R v;
 };
 
-rope_t from_string(string s) {
+rope_t from_string(string_t s) {
   return new Rope_node{new String_rope(s)};
 }
 rope_t concat(rope_t r1,rope_t r2) {
@@ -37,7 +37,7 @@ uint length(rope_t r) {
   }
 }
 
-static uint flatten_it(string s, uint i, rope_t r) {
+static uint flatten_it(mstring_t s, uint i, rope_t r) {
   switch (r->v) {
   case &String_rope(ss):
     let len = String::strlen(ss);
@@ -51,8 +51,8 @@ static uint flatten_it(string s, uint i, rope_t r) {
   }
 }
 
-string to_string(rope_t r) {
-  string s = new_string(length(r));
+mstring_t to_string(rope_t r) {
+  mstring_t s = new_string(length(r));
   flatten_it(s,0,r);
   // memoize the flattening
   r->v = new String_rope(s);

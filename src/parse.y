@@ -122,7 +122,7 @@ static list_t<decl_t> parse_result = null;
   // Could be static variables in the attribute production, but we don't
   // compile static variables correctly
 tunion Attribute.Aligned_att att_aligned = Aligned_att(-1);
-$(string,tunion Attribute) att_map[] = {
+$(string_t,tunion Attribute) att_map[] = {
   $("stdcall", Stdcall_att),
   $("cdecl", Cdecl_att),
   $("fastcall", Fastcall_att),
@@ -142,21 +142,21 @@ $(string,tunion Attribute) att_map[] = {
 };
 
 // Error functions
-static void err(string msg, seg_t sg) {
+static void err(string_t msg, seg_t sg) {
   post_error(mk_err_parse(sg,msg));
 }
-static `a abort(string msg,seg_t sg) {
+static `a abort(string_t msg,seg_t sg) {
   err(msg,sg);
   throw Exit;
 }
-static void warn(string msg,seg_t sg) {
+static void warn(string_t msg,seg_t sg) {
   fprintf(stderr,"%s: Warning: %s\n",string_of_segment(sg),msg);
   return;
 }
-static `a unimp(string msg,seg_t sg) {
+static `a unimp(string_t msg,seg_t sg) {
   return abort(xprintf("%s unimplemented",msg),sg);
 }
-static void unimp2(string msg,seg_t sg) {
+static void unimp2(string_t msg,seg_t sg) {
   fprintf(stderr,"%s: Warning: Cyclone does not yet support %s\n",
 	  string_of_segment(sg),msg);
   return;
@@ -234,8 +234,8 @@ static $(tqual_t,type_t)@
   return new $((*t)[1],(*t)[2]);
 }
 
-static void only_vardecl(list_t<stringptr> params,decl_t x) {
-  string decl_kind;
+static void only_vardecl(list_t<stringptr_t> params,decl_t x) {
+  string_t decl_kind;
   switch (x->r) {
   case &Var_d(vd):
     if (vd->initializer != null)
@@ -278,7 +278,7 @@ static void only_vardecl(list_t<stringptr> params,decl_t x) {
 // For old-style function definitions,
 // get a parameter type from a list of declarations
 static $(opt_t<var_t>,tqual_t,type_t)@
-  get_param_type($(list_t<decl_t>,seg_t)@ env, stringptr x) {
+  get_param_type($(list_t<decl_t>,seg_t)@ env, stringptr_t x) {
   let &$(tdl,loc) = env;
   if (tdl==null)
     return(abort(xprintf("missing type for parameter %s",*x),loc));
@@ -311,7 +311,7 @@ static bool is_typeparam(type_modifier_t tm) {
 
 // convert an identifier to a type -- if it's the special identifier
 // `H then return HeapRgn, otherwise, return a type variable.
-static type_t id2type(string s, conref_t<kind_t> k) {
+static type_t id2type(string_t s, conref_t<kind_t> k) {
   if (zstrcmp(s,"`H") == 0)
     return HeapRgn;
   else
@@ -435,11 +435,19 @@ static $(var_t,tqual_t,type_t)@
   fnargspec_to_arg(seg_t loc,$(opt_t<var_t>,tqual_t,type_t)@ t) {
   if ((*t)[0] == null) {
     err("missing argument variable in function prototype",loc);
-    return new $(new{(string)"?"},(*t)[1],(*t)[2]);
+    return new $(new{(string_t)"?"},(*t)[1],(*t)[2]);
   } else
     return new $((*t)[0]->v,(*t)[1],(*t)[2]);
 }
 
+static string_t msg1 = 
+  "at most one type may appear within a type specifier";
+static string_t msg2 =
+  "const or volatile may appear only once within a type specifier";
+static string_t msg3 = 
+  "type specifier includes more than one declaration";
+static string_t msg4 = 
+  "sign specifier may appear only once within a type specifier";
 // Given a type-specifier list, determines the type and any declared
 // structs, unions, or [x]tunions.  Most of this is just collapsing
 // combinations of [un]signed, short, long, int, char, etc.  We're
@@ -447,15 +455,9 @@ static $(var_t,tqual_t,type_t)@
 // instance, one can write "unsigned const int" instead of "const
 // unsigned int" and so forth.  I don't think anyone will care...
 // (famous last words.)
-static string msg1 = "at most one type may appear within a type specifier";
-static string msg2 =
-  "const or volatile may appear only once within a type specifier";
-static string msg3 = "type specifier includes more than one declaration";
-static string msg4 =
-  "sign specifier may appear only once within a type specifier";
-
 static $(type_t,opt_t<decl_t>)
   collapse_type_specifiers(list_t<type_specifier_t> ts, seg_t loc) {
+
 
   opt_t<decl_t> declopt = null;    // any hidden declarations
 
@@ -844,7 +846,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
 }
 
 // Convert an identifier to a kind
-static kind_t id_to_kind(string s, seg_t loc) {
+static kind_t id_to_kind(string_t s, seg_t loc) {
   if (strlen(s) != 1) {
     err(xprintf("bad kind: %s",s), loc);
     return BoxKind;
@@ -923,8 +925,8 @@ using Parse;
   Char_tok(char);
   Pointer_Sort_tok(tunion Pointer_Sort);
   Short_tok(short);
-  String_tok(string);
-  Stringopt_tok(opt_t<stringptr>);
+  String_tok(string_t);
+  Stringopt_tok(opt_t<stringptr_t>);
   Type_tok(type_t);
   TypeList_tok(list_t<type_t>);
   Exp_tok(exp_t);
@@ -1519,7 +1521,7 @@ struct_declarator:
     {
       // HACK: give the field an empty name -- see elsewhere in the
       // compiler where we use this invariant
-      $$=^$(new $((new Declarator(new $((nmspace_t)(new Rel_n(null)),new ""),
+      $$=^$(new $((new Declarator(new $((nmspace_t)(new Rel_n(null)),new ((string_t)"")),
                                   null)),
                   new Opt($2)));
     }
@@ -1999,7 +2001,8 @@ statement:
 | REGION IDENTIFIER statement
   { if (zstrcmp($2,"H") == 0)
       err("bad occurrence of heap region `H",LOC(@3,@3));
-    tvar_t tv = new Tvar(new xprintf("`%s",$2),null,new_conref(RgnKind));
+    tvar_t tv = new Tvar(new {(string_t)xprintf("`%s",$2)},null,
+                         new_conref(RgnKind));
     type_t t = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $((nmspace_t)Loc_n, new $2),
                                                new RgnHandleType(t),null),$3),

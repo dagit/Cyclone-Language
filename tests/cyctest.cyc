@@ -32,12 +32,12 @@ using Ref;
 using Fn;
 using Array;
 
-#define allocstr(s) ((stringptr) (new s))
+#define allocstr(s) ((stringptr_t) (new (string_t)s))
 
-void test_begin(string t) {
+void test_begin(string_t t) {
   int x = 12-t.size;
   if (x<0) x=0;
-  string padding = new { for i < x : ' ' };
+  mstring_t padding = new { for i < x : ' ' };
   printf("%s%s: ",padding,t);
 }
 void test_end() {
@@ -57,7 +57,7 @@ void okfailn(int n,bool b) {
 void okfail(bool b) {
   if (b) ok(); else fail();
 }
-void eqstrings(string s1,string s2) {
+void eqstrings(string_t s1,string_t s2) {
   okfail(0 == String::strcmp(s1,s2));
 }
 
@@ -85,7 +85,7 @@ int array_cmp(int cmp(`a,`a),`a ?x,`a ?y) {
 }
   
 
-void pr_string(string s) {
+void pr_string(string_t s) {
   printf("%s; ",s);
 }
 
@@ -200,7 +200,7 @@ void list_test() {
 
   // FIX:  casts are required for typechecking.  Should string constants
   // have type char? or char[sz] ??
-  let slist = new List(new "hello",new List(new "world",null));
+  let slist = new List(allocstr("hello"),new List(allocstr("world"),null));
   let rlist = List::rev(slist);
   okfail(0==test_list_cmp(String::strptrcmp,slist,List::rev(rlist)));
 
@@ -366,8 +366,8 @@ void set_test() {
   okfail(Set::member(Set::union_two(x,x3),11));
   okfail(!Set::is_empty(x));
 
-  set_t<stringptr> s = Set::empty(String::strptrcmp);
-  s = Set::insert(s,new "hello");
+  set_t<stringptr_t> s = Set::empty(String::strptrcmp);
+  s = Set::insert(s,allocstr("hello"));
   s = Set::insert(s,allocstr("world"));
   s = Set::insert(s,allocstr("sphinx"));
   s = Set::insert(s,allocstr("quartz"));
@@ -408,7 +408,7 @@ void hashtable_test() {
   okfail(Hashtable::lookup(x,-4)==445);
   okfail(Hashtable::lookup(x,300)==2828);
 
-  table_t<stringptr,stringptr,{},{}> x2 = 
+  table_t<stringptr_t,stringptr_t,{},{}> x2 = 
     Hashtable::create(17,String::strptrcmp,hash_stringptr);
   Hashtable::insert(x2,allocstr("foo"),allocstr("bar"));
   Hashtable::insert(x2,allocstr("baz"),allocstr("rogue"));
@@ -471,36 +471,36 @@ void string_test() {
   default: fail(); break;
   }
 
-  let s1 = "hello";
+  let s1 = String::strdup("hello");
   okfail(String::strlen(s1)==5);
-  okfail(String::strlen((string)s1+2)==3);
+  okfail(String::strlen((string_t)s1+2)==3);
   s1[3]='\000'; // Note, this writes over a string constant.
   okfail(String::strlen(s1)==3);
-  okfail(String::strlen((string)s1+2)==1);
-  okfail(String::strlen((string)s1+3)==0);
-  okfail(String::strlen((string)s1+4)==1);
-  let s2 = new { for i < 20 : '\000' };
+  okfail(String::strlen((mstring_t)s1+2)==1);
+  okfail(String::strlen((mstring_t)s1+3)==0);
+  okfail(String::strlen((mstring_t)s1+4)==1);
+  mstring_t s2 = new { for i < 20 : '\000' };
   okfail(String::strlen(s2)==0);
   String::strcat(s2,s1);
   okfail(String::strcmp(s2,s1)==0);
   okfail(String::strcmp(s2,"hel")==0);
   String::strcat(s2,s1);
-  okfail(String::strcmp((string)s2+2,(string)"helhel"+2)==0);
-  okfail(String::strcmp((string)s2+2,(string)"xxlhel"+2)==0);
-  String::strcat(s2,(string)s1+4);
+  okfail(String::strcmp(s2+2,"helhel"+2)==0);
+  okfail(String::strcmp(s2+2,"xxlhel"+2)==0);
+  String::strcat(s2,(mstring_t)s1+4);
   okfail(String::strcmp(s2,"helhelo")==0);
   String::strcpy(s2,"foobar");
   okfail(String::strcmp(s2,"foobar")==0);
   String::strncpy(s2,1,"foobar",2,3);
   okfail(String::strcmp(s2,"fobaar")==0);
-  okfail(String::strcmp(s2,(string)"xxxfobaar"+3)==0);
-  okfail(String::strcmp(String::strchr((string)s2+1,'a'),"aar")==0);
-  okfail(String::strchr((string)s2+2,'z')==null);
-  okfail(String::strcmp(String::strrchr((string)s2+1,'a'),"ar")==0);
-  okfail(String::strrchr((string)s2+2,'o')==null);
-  okfail(String::strncmp((string)s2+1,(string)"xxxobaax"+3,4)==0);
-  okfail(String::strncmp((string)s2+1,(string)"xxxobaax"+3,5)!=0);
-  okfail(String::strncasecmp((string)s2+1,(string)"xxxObAax"+3,4)==0);
+  okfail(String::strcmp(s2,"xxxfobaar"+3)==0);
+  okfail(String::strcmp(String::strchr((mstring_t)s2+1,'a'),"aar")==0);
+  okfail(String::strchr((mstring_t)s2+2,'z')==null);
+  okfail(String::strcmp(String::strrchr((mstring_t)s2+1,'a'),"ar")==0);
+  okfail(String::strrchr((mstring_t)s2+2,'o')==null);
+  okfail(String::strncmp((mstring_t)s2+1,"xxxobaax"+3,4)==0);
+  okfail(String::strncmp((mstring_t)s2+1,"xxxobaax"+3,5)!=0);
+  okfail(String::strncasecmp((mstring_t)s2+1,"xxxObAax"+3,4)==0);
   let s3 = String::strdup(s2);
   okfail(String::strcmp(s3,s2)==0);
 
@@ -508,7 +508,7 @@ void string_test() {
 }
 
 // THIS DOESN'T WORK!!
-string bad_strrchr(string s, char c) {
+string_t bad_strrchr(string_t s, char c) {
   int len = String::strlen(s);
 
   for (int i = len-1; i>=0; i--) {
@@ -520,9 +520,9 @@ string bad_strrchr(string s, char c) {
 void bad_test() {
   test_begin("KNOWN TO BE BAD");
   let s2 = "fobaar";
-  printf("\nDa  IN string is %s\n",(string)s2+1);
-  printf("Da OUT string is %s\n",bad_strrchr((string)s2+1,'a'));
-  okfail(String::strcmp(bad_strrchr((string)s2+1,'a'),"ar")==0);
+  printf("\nDa  IN string is %s\n",s2+1);
+  printf("Da OUT string is %s\n",bad_strrchr(s2+1,'a'));
+  okfail(String::strcmp(bad_strrchr(s2+1,'a'),"ar")==0);
   test_end();
 }
 
@@ -543,7 +543,7 @@ void buffer_test() {
 
 void queue_test() {
   test_begin("Queue");
-  Queue::queue_t<stringptr> q = Queue::create();
+  Queue::queue_t<stringptr_t> q = Queue::create();
   okfail(Queue::is_empty(q));
   Queue::add(q,allocstr("a"));
   okfail(!Queue::is_empty(q));
@@ -672,7 +672,7 @@ void ref_test() {
   okfail(Ref::get(x)==2);
   okfail(Ref::get(x)!=4);
 
-  ref_t<stringptr> y = new_ref(allocstr("hello")); // FIX: cast required!
+  ref_t<stringptr_t> y = new_ref(allocstr("hello")); // FIX: cast required!
   okfail(0==String::strcmp(*(Ref::get(y)),"hello"));
   okfail(0!=String::strcmp(*(Ref::get(y)),"world"));
   Ref::set(y,allocstr("world"));
@@ -688,7 +688,7 @@ void filename_test() {
   // current_dir_name  -- because can't have string global, bad initializer
 
   test_begin("Filename");
-  string cwd = ".";
+  let cwd = ".";
   okfail(0==String::strcmp(Filename::concat(cwd,"foo"),
                            "./foo"));
   okfail(0==String::strcmp(Filename::chop_extension("foo.bar"),
@@ -755,9 +755,9 @@ void fn_test() {
 //////////////////////////// Pretty-printer test
 using PP {
 tunion term {
-  Var(string),
+  Var(string_t),
   App(tunion term,tunion term),
-  Lam(string,tunion term)
+  Lam(string_t,tunion term)
 };
 bool is_lam(tunion term t) {
   switch (t) {
@@ -823,26 +823,27 @@ static int i_foo_foo = 0;
 void i_foo(int i) {
   i_foo_foo = i;
 }
-void r_foo(string s) {
+void r_foo(string_t s) {
   printf("Got %s\n",s);
 }
-void a_foo(string s) {
+void a_foo(string_t s) {
   printf("Anon %s\n",s);
 }
-void arg_test(string ? args) {
+typedef $(string_t,spec_t,string_t) @arg_t;
+void arg_test(string_t ? args) {
   // NOTE, TO TEST IT GIVE IT SOME ARGS!
   test_begin("Arg");
 
   if (args.size<=0) fail();
   else if (args.size==1) ok();
   else {
-    let u = new $((string)"-u",(spec_t)(new Unit_spec(u_foo)),(string)"unit");
+    arg_t u = new $("-u",(spec_t)(new Unit_spec(u_foo)),"unit");
     let s_foo = new false;
-    let s = new $((string)"-s",(spec_t)(new Set_spec(s_foo)),(string)"set");
+    arg_t s = new $("-s",(spec_t)(new Set_spec(s_foo)),"set");
     let c_foo = new true;
-    let c = new $((string)"-c",(spec_t)(new Clear_spec(c_foo)),(string)"clear");
-    let i = new $((string)"-i",(spec_t)(new Int_spec(i_foo)),(string)"int");
-    let r = new $((string)"-r",(spec_t)(new Rest_spec(r_foo)),(string)"rest");
+    arg_t c = new $("-c",(spec_t)(new Clear_spec(c_foo)),"clear");
+    arg_t i = new $("-i",(spec_t)(new Int_spec(i_foo)),"int");
+    arg_t r = new $("-r",(spec_t)(new Rest_spec(r_foo)),"rest");
     parse(new List(u,new List(s,new List(c,new List(i,new List(r,null))))),
           a_foo,
           "Usage:",
@@ -852,8 +853,8 @@ void arg_test(string ? args) {
            "c_foo=%s, "
            "i_foo=%d\n",
            u_foo_foo,
-           (*s_foo)?(string)"true":(string)"false",
-           (*c_foo)?(string)"true":(string)"false",
+           (*s_foo)?(string_t)"true":(string_t)"false",
+           (*c_foo)?(string_t)"true":(string_t)"false",
            i_foo_foo);
   }
 
@@ -1014,7 +1015,7 @@ void letv_test() {
     test_end();
 }
 
-int main(int argc, string ? args) {
+int main(int argc, string_t ? args) {
   printf("*************** CYCLONE TEST SUITE ***************\n\n");
 
   printf("EXCEPTIONS:\n");

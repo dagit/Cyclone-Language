@@ -8,20 +8,20 @@
 ////////////////////////////////////////////////////////////////////////////
 
 namespace String {
-extern string strconcat(string,string);
+extern mstring_t strconcat(string_t,string_t);
 }
 
 // The rest is all Cyclone
 namespace Core;
 
-xtunion exn { InvalidArg(string) };
+xtunion exn { InvalidArg(string_t) };
 xtunion exn { SysError(int) };
 
 /////////////////////////////Generally Useful Things//////////////
-xtunion exn { Failure(string) };
-xtunion exn { Impossible(string) };
+xtunion exn { Failure(string_t) };
+xtunion exn { Impossible(string_t) };
 xtunion exn { Not_found };
-xtunion exn { Unreachable(string) };
+xtunion exn { Unreachable(string_t) };
 
 opt_t<`b> opt_map(`b f(`a), opt_t<`a> o) {
   if (o==null)
@@ -29,7 +29,7 @@ opt_t<`b> opt_map(`b f(`a), opt_t<`a> o) {
   return new Opt(f(o->v));
 }
 
-string new_string(int i) {
+mstring_t new_string(int i) {
   return (new {for j < i : '\000'});
 }
 
@@ -71,7 +71,7 @@ static int int_of_char(char c) {
   else throw new InvalidArg("string to integer conversion");
 }
 
-int int_of_string(string s)
+int int_of_string(string_t s)
 {
   int n, i, base;
   int sign = 1;
@@ -107,7 +107,7 @@ int int_of_string(string s)
   return sign*n;
 }
 
-string string_of_int_width(int n, int minWidth) {
+mstring_t string_of_int_width(int n, int minWidth) {
   int i, len = 0;
   bool negative = false;
   if (n < 0) {
@@ -118,7 +118,7 @@ string string_of_int_width(int n, int minWidth) {
   int m = n;
   do ++len; while ((m /= 10) > 0);
   len = len > minWidth ? len : minWidth;
-  string ans = new_string(len+1);
+  mstring_t ans = new_string(len+1);
   for(i=len-1; n > 0; --i) { 
     ans[i] = (char)('0' + (n % 10));
     n /= 10;
@@ -131,15 +131,15 @@ string string_of_int_width(int n, int minWidth) {
   return ans;
 }
 
-string string_of_int(int n) {
+mstring_t string_of_int(int n) {
   return string_of_int_width(n,0);
 }
 
-string string_of_uint(unsigned int n) {
+mstring_t string_of_uint(unsigned int n) {
   int len = 0;
   unsigned int m = n;
   do ++len; while ((m /= 10) > 0);
-  string ans = new_string(len+1);
+  mstring_t ans = new_string(len+1);
   for(int i=len-1; i>=0; --i) {
     ans[i] = (char)('0' + n % 10);
     n /= 10;
@@ -147,8 +147,8 @@ string string_of_uint(unsigned int n) {
   return ans;
 }
 
-string string_of_char(char c) {
-  string ans = new_string(2);
+mstring_t string_of_char(char c) {
+  mstring_t ans = new_string(2);
   ans[0] = c;
   return ans;
 }

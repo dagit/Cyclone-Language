@@ -17,7 +17,7 @@ using Tcutil;
 
 namespace Evexp;
 
-void exp_err(seg_t loc, string msg) {
+void exp_err(seg_t loc, string_t msg) {
   Position::post_error(Position::mk_err_elab(loc, xprintf("Exp_err: %s",msg)));
 }
 

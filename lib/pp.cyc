@@ -63,8 +63,8 @@ struct Ppstate {
 struct Out {
   int newcc;           // new current column
   int newcl;           // new current line
-  alist_t<stringptr> ppout; // pretty-printed output
-  alist_t<$(int,int,int,string)@> links;   // hyperlinks
+  alist_t<stringptr_t> ppout; // pretty-printed output
+  alist_t<$(int,int,int,string_t)@> links;   // hyperlinks
 };
 
 struct Doc {
@@ -73,7 +73,7 @@ struct Doc {
   fn<ppstate_t,out_t,{}> f; // thunk for doing a step of pretty printing
 };
 
-static void dump_out(FILE @f, alist_t<stringptr> al) {
+static void dump_out(FILE @f, alist_t<stringptr_t> al) {
   let xarr = Xarray::create(16,al);
   Xarray::add(xarr,al);
   int last = 0;
@@ -100,22 +100,23 @@ void file_of_doc(doc_t d,int w,FILE @f) {
 }
 
 // Convert a doc_t to a string.  Takes a doc_t and a width as arguments.
-string string_of_doc(doc_t d, int w) {
+string_t string_of_doc(doc_t d, int w) {
   out_t o = apply(d->f,new Ppstate(0,0,1,w,w));
   return String::str_sepstr(list_of_alist(o->ppout),"");
 }
 
 // Convert a doc_t to a string and hyperlinks.
 // Takes a doc_t and a width as arguments.
-$(string,list_t<$(int,int,int,string)@>) @string_and_links(doc_t d, int w) {
+$(string_t,list_t<$(int,int,int,string_t)@>) @string_and_links(doc_t d, int w) {
   out_t o = apply(d->f,new Ppstate(0,0,1,w,w));
-  return new $(String::str_sepstr(list_of_alist(o->ppout),""),
+  return new $((string_t)
+               String::str_sepstr(list_of_alist(o->ppout),""),
                list_of_alist(o->links));
 }
 
-static opt_t<table_t<int,stringptr,{},{}>> bhashtbl = null;
+static opt_t<table_t<int,stringptr_t,{},{}>> bhashtbl = null;
 
-string nlblanks(int i) {  // a newline followed by i blanks
+string_t nlblanks(int i) {  // a newline followed by i blanks
   if (bhashtbl == null)
     bhashtbl = new Opt(Hashtable::create(61,intcmp,identity));
   if (i<0) throw new Failure("nlblanks");
@@ -126,30 +127,30 @@ string nlblanks(int i) {  // a newline followed by i blanks
     let num_tabs   = i / 8;
     let num_spaces = i % 8;
     let total = 1 + num_tabs + num_spaces;
-    string nlb = new_string(total);
+    mstring_t nlb = new_string(total);
     nlb[0] = '\n';
     for (int j = 0; j < num_tabs; j++)
       nlb[j+1] = '\t';
     for (int j = 0; j < num_spaces; j++)
       nlb[j+1+num_tabs] = ' ';
-    Hashtable::insert(bhashtbl->v,i,new {nlb});
+    Hashtable::insert(bhashtbl->v,i,new {(string_t)nlb});
     return nlb;
   }
 }
 
 // hash the strings...
-static opt_t<table_t<stringptr,doc_t,{},{}>> str_hashtbl = null;
+static opt_t<table_t<stringptr_t,doc_t,{},{}>> str_hashtbl = null;
 
 int infinity = 9999999;
 
-static out_t text_doc_f($(int,string) @clo,ppstate_t st) {
+static out_t text_doc_f($(int,string_t) @clo,ppstate_t st) {
   let &$(slen,s) = clo;
   return new Out(st->cc+slen,
                  st->cl,
                  new Single(new {s}),
                  Empty);
 }
-static doc_t text_doc(string s) {
+static doc_t text_doc(string_t s) {
   int slen = String::strlen(s);
   return
     new Doc(slen,
@@ -158,8 +159,8 @@ static doc_t text_doc(string s) {
             (text_doc_f,
              new $(slen,s)));
 }
-doc_t text(string s) {
-  table_t<stringptr,doc_t,{},{}> t;
+doc_t text(string_t s) {
+  table_t<stringptr_t,doc_t,{},{}> t;
   if (str_hashtbl == null) {
     t = Hashtable::create(101,zstrptrcmp,hash_stringptr);
     str_hashtbl = new Opt(t);
@@ -175,7 +176,7 @@ doc_t text(string s) {
     return d;
   }
 }
-doc_t textptr(stringptr s) { return text(*s); }
+doc_t textptr(stringptr_t s) { return text(*s); }
 
 opt_t<doc_t> nil_doc_opt   = null;
 opt_t<doc_t> blank_doc_opt = null;
@@ -196,14 +197,14 @@ doc_t blank_doc() {
   return blank_doc_opt->v;
 }
 
-static out_t hyperlink_f($(int,string,string) @clo, ppstate_t st) {
+static out_t hyperlink_f($(int,string_t,string_t) @clo, ppstate_t st) {
   let &$(slen,shrt,full) = clo;
   return new Out(st->cc+slen,
               st->cl,
               new Single(new {shrt}),
               new Single(new $(st->cl,st->cc,slen,full)));
 }
-doc_t hyperlink(string shrt, string full) {
+doc_t hyperlink(string_t shrt, string_t full) {
   int slen = String::strlen(shrt);
   return new Doc(slen,
                  infinity,
@@ -289,8 +290,8 @@ static out_t long_cats_f(list_t<doc_t> ds0, ppstate_t st) {
   }
   int newcc = os->hd->newcc;
   int newcl = os->hd->newcl;
-  alist_t<stringptr> s = Empty;
-  alist_t<$(int,int,int,string)@> links = Empty;
+  alist_t<stringptr_t> s = Empty;
+  alist_t<$(int,int,int,string_t)@> links = Empty;
   for(; os != null; os = os->tl) {
     s = append(os->hd->ppout,s);
     links = append(os->hd->links,links);
@@ -336,8 +337,8 @@ static out_t cats_arr_f(doc_t ?@docs_ptr, ppstate_t st) {
   }
   int newcc = os->hd->newcc;
   int newcl = os->hd->newcl;
-  alist_t<stringptr> s = Empty;
-  alist_t<$(int,int,int,string)@> links = Empty;
+  alist_t<stringptr_t> s = Empty;
+  alist_t<$(int,int,int,string_t)@> links = Empty;
   for(; os != null; os = os->tl) {
     s = append(os->hd->ppout,s);
     links = append(os->hd->links,links);
@@ -393,17 +394,17 @@ doc_t tab(doc_t d) {
 
 
 /* Sequences */
-static doc_t ppseq_f(doc_t pp(`a), string sep, list_t<`a> l) {
+static doc_t ppseq_f(doc_t pp(`a), string_t sep, list_t<`a> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return pp(l->hd);
   else return cat(pp(l->hd), text(sep), oline_doc(), ppseq_f(pp, sep,l->tl));
                   
 }
-doc_t ppseq(doc_t pp(`a), string sep, list_t<`a> l0) {
+doc_t ppseq(doc_t pp(`a), string_t sep, list_t<`a> l0) {
   return tab(ppseq_f(pp,sep,l0));
 }
 
-doc_t seq_f(string sep, list_t<doc_t> l) {
+doc_t seq_f(string_t sep, list_t<doc_t> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return l->hd;
   else {
@@ -423,45 +424,45 @@ doc_t seq_f(string sep, list_t<doc_t> l) {
     //                                       new List(f(sep,l->tl),null)))));
   }
 }
-doc_t seq(string sep, list_t<doc_t> l0) {
+doc_t seq(string_t sep, list_t<doc_t> l0) {
   return tab(seq_f(sep,l0));
 }
 
 // Sequences broken by lines 
-doc_t ppseql_f(doc_t pp(`a), string sep, list_t<`a> l) {
+doc_t ppseql_f(doc_t pp(`a), string_t sep, list_t<`a> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return pp(l->hd);
   else return cat(pp(l->hd), text(sep), line_doc(), ppseql_f(pp,sep,l->tl));
 }
-doc_t ppseql(doc_t pp(`a), string sep, list_t<`a> l0) {
+doc_t ppseql(doc_t pp(`a), string_t sep, list_t<`a> l0) {
   return tab(ppseql_f(pp,sep,l0));
 }
 
-static doc_t seql_f(string sep, list_t<doc_t> l) {
+static doc_t seql_f(string_t sep, list_t<doc_t> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return l->hd;
   else return cat(l->hd, text(sep), line_doc(), seql_f(sep,l->tl));
 }
-doc_t seql(string sep, list_t<doc_t> l0) {
+doc_t seql(string_t sep, list_t<doc_t> l0) {
   return tab(seql_f(sep,l0));
 }
 
 
-doc_t group(string start, string stop, string sep, list_t<doc_t> ss) {
+doc_t group(string_t start, string_t stop, string_t sep, list_t<doc_t> ss) {
   return cat(text(start),
              seq(sep,ss),
              text(stop));
 }
 
 // Like group but return the empty doc if the list is empty
-doc_t egroup(string start, string stop, string sep, list_t<doc_t> ss) {
+doc_t egroup(string_t start, string_t stop, string_t sep, list_t<doc_t> ss) {
   if (ss==null) return nil_doc();
   else return cat(text(start),
                   seq(sep,ss),
                   text(stop));
 }
 
-doc_t groupl(string start, string stop, string sep, list_t<doc_t> ss) {
+doc_t groupl(string_t start, string_t stop, string_t sep, list_t<doc_t> ss) {
   return cat(text(start),
              seql(sep,ss),
              text(stop));

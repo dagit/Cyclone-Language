@@ -21,7 +21,7 @@ namespace Tcdecl;
 
 xtunion exn {Incompatible};
 
-void merr(seg_t loc, string * `r msg1, string msg2) {
+void merr(seg_t loc, string_t * `r msg1, string_t msg2) {
   if (msg1 == null) {
     throw Incompatible;
   } else {
@@ -31,12 +31,12 @@ void merr(seg_t loc, string * `r msg1, string msg2) {
 
 /* ----- functions for merging ----- */
 
-static void merge_scope_err(scope_t s0, scope_t s1, string t, string v, seg_t loc, string * `r msg) {
+static void merge_scope_err(scope_t s0, scope_t s1, string_t t, string_t v, seg_t loc, string_t * `r msg) {
   merr(loc, msg, xprintf("%s %s is %s whereas expected scope is %s",
 		    t, v, scope2string(s1), scope2string(s0)));
 }
 
-$(scope_t, bool) merge_scope(scope_t s0, scope_t s1, string t, string v, seg_t loc, string * `r msg) {
+$(scope_t, bool) merge_scope(scope_t s0, scope_t s1, string_t t, string_t v, seg_t loc, string_t * `r msg) {
   switch ($(s0,s1)) {
     // ExternC is only compatible with ExternC
   case $(ExternC, ExternC): break;
@@ -68,7 +68,7 @@ static unsigned int get_uint_const_value(exp_t e) {
 }
 
 static inline bool check_tvs(list_t<tvar_t> tvs0, list_t<tvar_t> tvs1,
-			     string t, string v, seg_t loc, string * `r msg) {
+			     string_t t, string_t v, seg_t loc, string_t * `r msg) {
   // reject if different number of type variables or different kinds
   if(List::length(tvs0) != List::length(tvs1)) {
     merr(loc, msg, xprintf("%s %s has a different number of type parameters", t, v));
@@ -93,7 +93,7 @@ static inline bool check_tvs(list_t<tvar_t> tvs0, list_t<tvar_t> tvs1,
 }
 
 static inline bool check_atts(attributes_t atts0, attributes_t atts1,
-			      string t, string v, seg_t loc, string * `r msg) {
+			      string_t t, string_t v, seg_t loc, string_t * `r msg) {
   if (!same_atts(atts0, atts1)) {
     merr(loc, msg, xprintf("%s %s has different attributes", t, v));
     return false;
@@ -113,7 +113,7 @@ static inline list_t<$(tvar_t,type_t)@> build_tvs_map(list_t<tvar_t> tvs0, list_
 }
 
 static struct Structdecl * merge_struct_or_union_decl(structdecl_t d0, structdecl_t d1,
-						      string t, seg_t loc, string * `r msg) {
+						      string_t t, seg_t loc, string_t * `r msg) {
   let v = Absynpp::qvar2string(d0->name->v); // build the complete name
   let res = true;
   // when an incompatibility is found, either we set res to false and continue,
@@ -206,16 +206,16 @@ static struct Structdecl * merge_struct_or_union_decl(structdecl_t d0, structdec
   }
 }
 
-struct Structdecl * merge_structdecl(structdecl_t d0, structdecl_t d1, seg_t loc, string * `r msg) {
+struct Structdecl * merge_structdecl(structdecl_t d0, structdecl_t d1, seg_t loc, string_t * `r msg) {
   return merge_struct_or_union_decl(d0, d1, "struct", loc, msg);
 }
 
-struct Uniondecl * merge_uniondecl(uniondecl_t d0, uniondecl_t d1, seg_t loc, string * `r msg) {
+struct Uniondecl * merge_uniondecl(uniondecl_t d0, uniondecl_t d1, seg_t loc, string_t * `r msg) {
   return (struct Uniondecl *) merge_struct_or_union_decl((structdecl_t) d0, (structdecl_t) d1,
 							 "union", loc, msg);
 }
 
-static inline string is_x2string(bool is_x) {
+static inline string_t is_x2string(bool is_x) {
   if (is_x) {
     return "xtunion";
   } else {
@@ -227,7 +227,7 @@ static inline string is_x2string(bool is_x) {
 // otherwise return f0 or (if necessary) a copy of f0 with the right scope.
 static struct Tunionfield * merge_tunionfield(tunionfield_t f0, tunionfield_t f1,
 					      list_t<$(tvar_t,type_t)@> inst,
-					      string t, string v, string * `r msg) {
+					      string_t t, string_t v, string_t * `r msg) {
   seg_t loc = f1->loc;
 
   // check name
@@ -289,7 +289,7 @@ static struct Tunionfield * merge_tunionfield(tunionfield_t f0, tunionfield_t f1
   } else return f0;
 }
 
-static bool substitute_tunionfield_f1(string @ name, tvar_t x) {
+static bool substitute_tunionfield_f1(string_t @ name, tvar_t x) {
   return (strptrcmp(x->name, name) == 0);
 }
 
@@ -311,10 +311,10 @@ static tunionfield_t substitute_tunionfield(list_t<tvar_t> d0tvs, list_t<tvar_t>
     if(List::exists_c(substitute_tunionfield_f1, tv->name, d0tvs) ||
        List::exists_c(substitute_tunionfield_f1, tv->name, d1tvs)) {
       int i = 0;
-      string base = *(tv->name);
-      string @ new_name;
+      string_t base = *(tv->name);
+      string_t @ new_name;
       do {
-	new_name = new strconcat(base, string_of_int(i));
+	new_name = new ((string_t)strconcat(base, string_of_int(i)));
 	i++;
       } while(List::exists_c(substitute_tunionfield_f1, new_name, d0tvs) ||
 	      List::exists_c(substitute_tunionfield_f1, tv->name, d1tvs));
@@ -345,8 +345,8 @@ merge_xtunion_fields(list_t<tunionfield_t> f0s,
 		     list_t<tvar_t> tvs0,
 		     list_t<tvar_t> tvs1,
 		     bool @ `r1 res, bool @ `r2 incl,
-		     string t, string v,
-		     seg_t loc, string * `r msg) {
+		     string_t t, string_t v,
+		     seg_t loc, string_t * `r msg) {
   // what follows is variant of 'merge'
   // where we test inclusion at the same time
   // and where we call merge_tunionfield when 2 fields have the same name
@@ -402,8 +402,8 @@ sub_xtunion_fields(list_t<tunionfield_t> f0s,
 		   list_t<tunionfield_t> f1s,
 		   list_t<$(tvar_t,type_t)@> inst,
 		   bool @ `r1 res,
-		   string t, string v,
-		   seg_t loc, string * `r2 msg) {
+		   string_t t, string_t v,
+		   seg_t loc, string_t * `r2 msg) {
   list_t<tunionfield_t> @ f2sp = new null; // futur fields
   let next = f2sp;
   int cmp = -1; // memoize comparison
@@ -457,7 +457,7 @@ split(list_t<`a> f) {
 // check for the consistency of duplicate fields
 list_t<tunionfield_t> sort_xtunion_fields(list_t<tunionfield_t> f,
 					  bool @ `r1 res,
-					  var_t v, seg_t loc, string * `r2 msg) {
+					  var_t v, seg_t loc, string_t * `r2 msg) {
   let $(f1, f2) = split(f);
   if (f1 != null && f1->tl != null) f1 = sort_xtunion_fields(f1, res, v, loc, msg);
   if (f2 != null && f2->tl != null) f2 = sort_xtunion_fields(f2, res, v, loc, msg);
@@ -466,9 +466,9 @@ list_t<tunionfield_t> sort_xtunion_fields(list_t<tunionfield_t> f,
 			      "xtunion", *v, loc, msg);
 }
 
-struct Tuniondecl * merge_tuniondecl(tuniondecl_t d0, tuniondecl_t d1, seg_t loc, string * `r msg) {
+struct Tuniondecl * merge_tuniondecl(tuniondecl_t d0, tuniondecl_t d1, seg_t loc, string_t * `r msg) {
   let v = Absynpp::qvar2string(d0->name);// build the complete name
-  string t = "[x]tunion";
+  string_t t = "[x]tunion";
   let res = true;
   // when an incompatibility is found, either we set res to false and continue,
   // or we return null immediately
@@ -555,7 +555,7 @@ struct Tuniondecl * merge_tuniondecl(tuniondecl_t d0, tuniondecl_t d1, seg_t loc
   }
 }
 
-struct Enumdecl * merge_enumdecl (enumdecl_t d0, enumdecl_t d1, seg_t loc, string * `r msg) {
+struct Enumdecl * merge_enumdecl (enumdecl_t d0, enumdecl_t d1, seg_t loc, string_t * `r msg) {
   let v = Absynpp::qvar2string(d0->name); // build the complete name
   let res = true;
 
@@ -606,7 +606,7 @@ struct Enumdecl * merge_enumdecl (enumdecl_t d0, enumdecl_t d1, seg_t loc, strin
 static inline $(scope_t, bool)
 check_var_or_fn_decl(scope_t sc0, type_t t0, tqual_t tq0, attributes_t atts0,
 		     scope_t sc1, type_t t1, tqual_t tq1, attributes_t atts1,
-		     string t, string v, seg_t loc, string * `r msg) {
+		     string_t t, string_t v, seg_t loc, string_t * `r msg) {
   let res = true;
 
   // check scope
@@ -635,7 +635,7 @@ check_var_or_fn_decl(scope_t sc0, type_t t0, tqual_t tq0, attributes_t atts0,
   return $(new_scope, res);
 }
 
-struct Vardecl * merge_vardecl(vardecl_t d0, vardecl_t d1, seg_t loc, string * `r msg) {
+struct Vardecl * merge_vardecl(vardecl_t d0, vardecl_t d1, seg_t loc, string_t * `r msg) {
   let v = Absynpp::qvar2string(d0->name); // build the complete name
 
   // check scopes, types, tquals and attributes
@@ -653,7 +653,7 @@ struct Vardecl * merge_vardecl(vardecl_t d0, vardecl_t d1, seg_t loc, string * `
   }
 }
 
-struct Typedefdecl * merge_typedefdecl(typedefdecl_t d0, typedefdecl_t d1, seg_t loc, string * `r msg) {
+struct Typedefdecl * merge_typedefdecl(typedefdecl_t d0, typedefdecl_t d1, seg_t loc, string_t * `r msg) {
   let v = Absynpp::qvar2string(d0->name); // build the complete name
   
   // check type variables
@@ -673,7 +673,7 @@ struct Typedefdecl * merge_typedefdecl(typedefdecl_t d0, typedefdecl_t d1, seg_t
   return d0;
 }
 
-binding_t merge_binding(binding_t b0, binding_t b1, seg_t loc, string * `r msg) {
+binding_t merge_binding(binding_t b0, binding_t b1, seg_t loc, string_t * `r msg) {
   switch ($(b0, b1)) {
   case $(Unresolved_b,   Unresolved_b)  : return Unresolved_b;
   case $(&Global_b(d0),  &Global_b(d1)) :
@@ -703,7 +703,7 @@ binding_t merge_binding(binding_t b0, binding_t b1, seg_t loc, string * `r msg) 
 
 struct Xtunionfielddecl * merge_xtunionfielddecl (xtunionfielddecl_t d0,
 						  xtunionfielddecl_t d1, 
-						  seg_t loc, string * `r msg) {
+						  seg_t loc, string_t * `r msg) {
   let &Xtunionfielddecl(b0,f0) = d0;
   let &Xtunionfielddecl(b1,f1) = d1;
   let v = qvar2string(f0->name);  

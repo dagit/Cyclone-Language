@@ -37,35 +37,36 @@ unsigned int n){ if( n < 1){ n= 1;}{ struct _tagged_string s= Cyc_Core_new_strin
 int) n); return({ struct Cyc_Buffer_t* _temp0=( struct Cyc_Buffer_t*) GC_malloc(
 sizeof( struct Cyc_Buffer_t)); _temp0->buffer= s; _temp0->position= 0; _temp0->length=
 n; _temp0->initial_buffer= s; _temp0;});}} struct _tagged_string Cyc_Buffer_contents(
-struct Cyc_Buffer_t* b){ return Cyc_String_substring( b->buffer, 0, b->position);}
-unsigned int Cyc_Buffer_length( struct Cyc_Buffer_t* b){ return b->position;}
-void Cyc_Buffer_clear( struct Cyc_Buffer_t* b){ b->position= 0; return;} void
-Cyc_Buffer_reset( struct Cyc_Buffer_t* b){ b->position= 0; b->buffer= b->initial_buffer;
-b->length=({ struct _tagged_string _temp1= b->buffer;( unsigned int)( _temp1.last_plus_one
-- _temp1.curr);}); return;} static void Cyc_Buffer_resize( struct Cyc_Buffer_t*
-b, unsigned int more){ unsigned int len= b->length; unsigned int new_len= len;
-struct _tagged_string new_buffer; while( b->position + more > new_len) { new_len=
-2 * new_len;} new_buffer= Cyc_Core_new_string(( int) new_len); Cyc_String_strncpy(
-new_buffer, 0, b->buffer, 0, b->position); b->buffer= new_buffer; b->length=
-new_len; return;} void Cyc_Buffer_add_char( struct Cyc_Buffer_t* b,
-unsigned char c){ int pos=( int) b->position; if( pos >= b->length){ Cyc_Buffer_resize(
-b, 1);}*(( unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
-_check_unknown_subscript)( b->buffer, sizeof( unsigned char), pos)= c; b->position=(
-unsigned int)( pos + 1); return;} void Cyc_Buffer_add_substring( struct Cyc_Buffer_t*
-b, struct _tagged_string s, int offset, int len){ if(( offset < 0? 1: len < 0)?
-1: offset + len >({ struct _tagged_string _temp2= s;( unsigned int)( _temp2.last_plus_one
-- _temp2.curr);})){( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
-_temp3=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp3[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp4; _temp4.tag= Cyc_Core_InvalidArg;
-_temp4.f1=({ unsigned char* _temp5="Buffer::add_substring"; struct
-_tagged_string _temp6; _temp6.curr= _temp5; _temp6.base= _temp5; _temp6.last_plus_one=
-_temp5 + 22; _temp6;}); _temp4;}); _temp3;}));}{ int new_position=( int)( b->position
-+ len); if( new_position > b->length){ Cyc_Buffer_resize( b,( unsigned int) len);}
-Cyc_String_zstrncpy( b->buffer,( int) b->position, s, offset,( unsigned int) len);
-b->position=( unsigned int) new_position; return;}} void Cyc_Buffer_add_string(
-struct Cyc_Buffer_t* b, struct _tagged_string s){ int len=( int) Cyc_String_strlen(
-s); int new_position=( int)( b->position + len); if( new_position > b->length){
-Cyc_Buffer_resize( b,( unsigned int) len);} Cyc_String_strncpy( b->buffer,( int)
-b->position, s, 0,( unsigned int) len); b->position=( unsigned int) new_position;
-return;} void Cyc_Buffer_add_buffer( struct Cyc_Buffer_t* b, struct Cyc_Buffer_t*
-bs){ Cyc_Buffer_add_substring( b, bs->buffer, 0,( int) bs->position); return;}
+struct Cyc_Buffer_t* b){ return Cyc_String_substring(( struct _tagged_string) b->buffer,
+0, b->position);} unsigned int Cyc_Buffer_length( struct Cyc_Buffer_t* b){
+return b->position;} void Cyc_Buffer_clear( struct Cyc_Buffer_t* b){ b->position=
+0; return;} void Cyc_Buffer_reset( struct Cyc_Buffer_t* b){ b->position= 0; b->buffer=
+b->initial_buffer; b->length=({ struct _tagged_string _temp1= b->buffer;(
+unsigned int)( _temp1.last_plus_one - _temp1.curr);}); return;} static void Cyc_Buffer_resize(
+struct Cyc_Buffer_t* b, unsigned int more){ unsigned int len= b->length;
+unsigned int new_len= len; struct _tagged_string new_buffer; while( b->position
++ more > new_len) { new_len= 2 * new_len;} new_buffer= Cyc_Core_new_string(( int)
+new_len); Cyc_String_strncpy( new_buffer, 0,( struct _tagged_string) b->buffer,
+0, b->position); b->buffer= new_buffer; b->length= new_len; return;} void Cyc_Buffer_add_char(
+struct Cyc_Buffer_t* b, unsigned char c){ int pos=( int) b->position; if( pos >=
+b->length){ Cyc_Buffer_resize( b, 1);}*(( unsigned char*(*)( struct
+_tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)( b->buffer,
+sizeof( unsigned char), pos)= c; b->position=( unsigned int)( pos + 1); return;}
+void Cyc_Buffer_add_substring( struct Cyc_Buffer_t* b, struct _tagged_string s,
+int offset, int len){ if(( offset < 0? 1: len < 0)? 1: offset + len >({ struct
+_tagged_string _temp2= s;( unsigned int)( _temp2.last_plus_one - _temp2.curr);})){(
+void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp3=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp3[ 0]=({ struct Cyc_Core_InvalidArg_struct
+_temp4; _temp4.tag= Cyc_Core_InvalidArg; _temp4.f1=({ unsigned char* _temp5=(
+unsigned char*)"Buffer::add_substring"; struct _tagged_string _temp6; _temp6.curr=
+_temp5; _temp6.base= _temp5; _temp6.last_plus_one= _temp5 + 22; _temp6;});
+_temp4;}); _temp3;}));}{ int new_position=( int)( b->position + len); if(
+new_position > b->length){ Cyc_Buffer_resize( b,( unsigned int) len);} Cyc_String_zstrncpy(
+b->buffer,( int) b->position, s, offset,( unsigned int) len); b->position=(
+unsigned int) new_position; return;}} void Cyc_Buffer_add_string( struct Cyc_Buffer_t*
+b, struct _tagged_string s){ int len=( int) Cyc_String_strlen( s); int
+new_position=( int)( b->position + len); if( new_position > b->length){ Cyc_Buffer_resize(
+b,( unsigned int) len);} Cyc_String_strncpy( b->buffer,( int) b->position, s, 0,(
+unsigned int) len); b->position=( unsigned int) new_position; return;} void Cyc_Buffer_add_buffer(
+struct Cyc_Buffer_t* b, struct Cyc_Buffer_t* bs){ Cyc_Buffer_add_substring( b,(
+struct _tagged_string) bs->buffer, 0,( int) bs->position); return;}

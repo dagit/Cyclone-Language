@@ -28,7 +28,7 @@ using Stdio;
 
 namespace Tcexp;
 
-static type_t expr_err(tenv_t te,seg_t loc,string msg) {
+static type_t expr_err(tenv_t te,seg_t loc,string_t msg) {
   terr(loc,msg);
   return wildtyp(new Opt(lookup_type_vars(te)));
 }
@@ -151,7 +151,7 @@ static void tcExpList(tenv_t te, list_t<exp_t> es) {
 }
 
 // Type check the if expressions, the loop guards, and the where clauses
-void tcTest(tenv_t te, exp_t e, string msg_part) {
+void tcTest(tenv_t te, exp_t e, string_t msg_part) {
   check_contains_assign(e);
   tcExp(te,&sint_t,e);
   if (!coerce_to_bool(te,e))
@@ -200,14 +200,15 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t *`r topt, cnst_t c, exp_t e) 
     let r    = new Const_e(new Int_c(Unsigned,len));
     exp_t elen = new_exp(r,loc);
     elen->topt = new Opt(uint_t);
-    // The default is to treat a string as if it's statically heap allocated
-    // and return a pointer to that string.  However, if the string is used
-    // as an initializer, then we should return an array type.
-    t = atb_typ(uchar_t, HeapRgn, empty_tqual(), new Upper_b(elen));
+    // The default is to treat a string as if it's statically heap 
+    // allocated and return a pointer to that string.  However, if the 
+    // string is used as an initializer, then we should return an array 
+    // type.
+    t = atb_typ(uchar_t, HeapRgn, const_tqual(), new Upper_b(elen));
     if (topt != null) {
       switch (compress(*topt)) {
       case &ArrayType(telt,tq,e2):
-        return new ArrayType(uchar_t, tq, elen);
+        return new ArrayType(uchar_t, const_tqual(), elen);
       case &PointerType(PtrInfo(telt,trgn,nullable,tq,b)):
         if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
           e->topt = new Opt(t);
@@ -216,7 +217,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t *`r topt, cnst_t c, exp_t e) 
         } else {
           // maybe it's going in a different region
           t = atb_typ(uchar_t,new_evar(&rk,new Opt(lookup_type_vars(te))), 
-                      empty_tqual(), 
+                      const_tqual(), 
                       new Upper_b(elen));
           if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
             e->topt = new Opt(t);
@@ -261,7 +262,7 @@ static type_t tcVar(tenv_t te, seg_t loc, qvar_t q, binding_t b) {
 }
 
 static void check_format_args(tenv_t te, exp_t fmt, list_t<exp_t> args,
-			      list_t<type_t> type_getter(tenv_t,string,seg_t)) {
+			      list_t<type_t> type_getter(tenv_t,string_t,seg_t)) {
   // check the format string and get the types it requires
   list_t<type_t> desc_types;
   switch (fmt->r) {
@@ -509,6 +510,7 @@ static type_t tcPrimop(tenv_t te, seg_t loc, type_t *`r topt,
     if (es == null)
       return expr_err(te,loc,"missing format string in xprintf");
     check_format_args(te, es->hd, es->tl, Formatstr::get_format_typs);
+    // don't make the result const -- let it be modifiable
     t = string_typ(new_evar(&rk,new Opt(lookup_type_vars(te))));
     break;
   case Scanf:
@@ -1182,7 +1184,7 @@ static type_t tcTuple(tenv_t te, seg_t loc, type_t *`r topt, list_t<exp_t> es) {
 
 // Compound literals, e.g., (struct foo){3,"abc"}
 static type_t tcCompoundLit(tenv_t te, seg_t loc, type_t *`r topt,
-                             $(opt_t<stringptr>,tqual_t,type_t)@ t,
+                             $(opt_t<stringptr_t>,tqual_t,type_t)@ t,
                              list_t<$(list_t<designator_t>,exp_t)@> des) {
   return expr_err(te,loc,"tcCompoundLit");
 }
@@ -1420,7 +1422,7 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t *`r topt,
            xprintf("tunion constructor %s expects argument of type %s "
                    "but this argument has type %s",
                    qvar2string(tuf->name),typ2string(t),
-                   (e->topt == null) ? (string)"?" : typ2string(e->topt->v)));
+                   (e->topt == null) ? (string_t)"?" : typ2string(e->topt->v)));
   }
   if (es != null)
     return expr_err(te,es->hd->loc,

@@ -15,7 +15,7 @@ using Syntax {
 namespace Parser {
 extern lexer_definition_t parse_file(FILE @f);
 extern opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf;
-extern xtunion exn {extern Parser_error(string)};
+extern xtunion exn {extern Parser_error(string_t)};
 }
 #include "parser_tab.h"
 }}}}}

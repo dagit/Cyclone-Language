@@ -7,7 +7,7 @@ int c = (int)' ';
 
 xtunion exn {ParseError};
 
-void yyerror(string s) {
+void yyerror(string_t s) {
   printf("error: %s\n",s);
   throw ParseError;
 }

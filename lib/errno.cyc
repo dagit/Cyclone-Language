@@ -6,7 +6,7 @@ using Core;
 namespace Errno {
   extern "C" __IMPORT Cstring _sys_errlist[__CYCLONE_SYS_NUM_ERR];
 
-  char ?sys_err(int i) {
+  const char ?sys_err(int i) {
     if (i < 0 || i > Errno::_sys_nerr)
       throw new InvalidArg("sys_err: integer argument out of range");
     return Cstring_to_string(Errno::_sys_errlist[i]);

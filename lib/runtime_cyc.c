@@ -158,7 +158,7 @@ struct _tagged_string Cstring_to_string(Cstring s) {
   return str;
 }
 
-Cstring string_to_Cstring(string s) {
+Cstring string_to_Cstring(struct _tagged_string s) {
   int i;
   char *contents = s.curr;
   size_t sz = s.last_plus_one - s.curr;
@@ -180,7 +180,7 @@ Cstring string_to_Cstring(string s) {
 }
 
 // FIX:  this isn't really needed since you can cast char[?] to char[]
-Cstring underlying_Cstring(string s) {
+Cstring underlying_Cstring(struct _tagged_string s) {
   char *str=s.curr;
 
   if (s.curr == NULL) return NULL;
@@ -213,7 +213,8 @@ static void check_fd(FILE *fd) {
     exit(255);
   }
 }
-int Cyc_Stdio_file_string_read(struct Cyc_Stdio___sFILE *sf, string dest,
+int Cyc_Stdio_file_string_read(struct Cyc_Stdio___sFILE *sf, 
+                               struct _tagged_string dest,
                                int dest_offset, int max_count) {
   unsigned char *new_curr = dest.curr + dest_offset;
   size_t sz = dest.last_plus_one - new_curr;
@@ -226,7 +227,8 @@ int Cyc_Stdio_file_string_read(struct Cyc_Stdio___sFILE *sf, string dest,
   }
   return fread(new_curr, 1, max_count, fd);
 }
-int Cyc_Stdio_file_string_write(struct Cyc_Stdio___sFILE *sf, string src,
+int Cyc_Stdio_file_string_write(struct Cyc_Stdio___sFILE *sf, 
+                                struct _tagged_string src,
                                 int src_offset, int max_count) {
   size_t sz = src.last_plus_one - src.curr;
   unsigned char *new_curr = src.curr + src_offset;

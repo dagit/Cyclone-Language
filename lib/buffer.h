@@ -37,7 +37,7 @@ extern T create(uint n);
 //         limit, however.  In doubt, take [n = 16] for instance.
 //         If [n] is not between 1 and [Sys.max_string_length], it will
 //         be clipped to that interval. *)
-extern string contents(T);
+extern mstring_t contents(T);
 //     (* Return a copy of the current contents of the buffer.
 //        The buffer itself is unchanged. *)
 extern size_t length(T);
@@ -53,10 +53,10 @@ extern void reset(T);
 extern void add_char(T,char);
 //     (* [add_char b c] appends the character [c] at the end of
 //        the buffer [b]. *)
-extern void add_substring(T,string,int offset,int len);
+extern void add_substring(T,string_t,int offset,int len);
 //     (* [add_substring b s ofs len] takes [len] characters from offset
 //        [ofs] in string [s] and appends them at the end of the buffer [b]. *)
-extern void add_string(T,string);
+extern void add_string(T,string_t);
 //     (* [add_string b s] appends the string [s] at the end of
 //        the buffer [b]. *)
 extern void add_buffer(T buf_dest, T buf_source);

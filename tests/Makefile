@@ -29,6 +29,7 @@ all: $(CYCC) $(LIB) \
 	./$(OUT_PREFIX)test_regions
 	./$(OUT_PREFIX)cyctest
 	./$(OUT_PREFIX)foo < foo_input
+	./$(OUT_PREFIX)histogram histogram.txt
 
 $(OUT_PREFIX)hello$(EXE): $(OUT_PREFIX)hello.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)

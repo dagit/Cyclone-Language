@@ -16,11 +16,11 @@ using Set;
 using Tcenv;
 
 extern xtunion exn {extern TypeErr};
-extern `a impos(string);
-extern void terr(seg_t, string);
-extern void warn(seg_t, string);
+extern `a impos(string_t);
+extern void terr(seg_t, string_t);
+extern void warn(seg_t, string_t);
 extern void flush_warnings();
-extern void err_noloc(string);
+extern void err_noloc(string_t);
 
 // set by by Tcenv::tc_init, just to cut down on allocation and calls
 // to Set::empty.
@@ -111,7 +111,7 @@ extern void check_fndecl_valid_type(seg_t,tenv_t,fndecl_t);
 // the side effect of constraining the kinds of the bound type variables.
 extern void check_type(seg_t, tenv_t, list_t<tvar_t> bound_tvars, kind_t k,type_t);
 
-extern void check_unique_vars(glist_t<var_t,`r> vs, seg_t loc, string err_msg);
+extern void check_unique_vars(glist_t<var_t,`r> vs, seg_t loc, string_t err_msg);
 extern void check_unique_tvars(seg_t,list_t<tvar_t>);
 
 // Check that bounds are not zero -- constrain to 1 if necessary

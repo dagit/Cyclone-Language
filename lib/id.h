@@ -21,28 +21,28 @@ extern struct id;
 typedef struct id @Id;
 
 // make an id that is equal to other id's with the same string and int
-extern Id id_make(string,int);
+extern Id id_make(string_t,int);
 
 // make an id with input string, but not equal to any other id
-extern Id id_new(string);
+extern Id id_new(string_t);
 
 // Generate a new unique id from an existing one.
 extern Id id_renew(Id);
 
 // make an id with input string, equal to other ids with this string and int -1
-extern Id id_of_string(string);
+extern Id id_of_string(string_t);
 
 // same as id_new
-extern Id id_unique(string);
+extern Id id_unique(string_t);
 
 // return string and int portions concatenated with a '$' in-between
-extern string id_to_string(Id);
+extern mstring_t id_to_string(Id);
 
 // print an identifier to FILE
 extern void id_prn(FILE @,Id);
 
 // return string portion of an id
-extern string id_to_source(Id);
+extern mstring_t id_to_source(Id);
 
 // defines a total ordering on ids, return 0 if equal, -1 if first arg is first,
 //                                                     +1 if second arg is first

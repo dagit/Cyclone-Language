@@ -18,8 +18,8 @@ using XmlParse;
 using Lexing;
   
 namespace XmlScan {
-string token_string = "";
-string token_pi = "";
+string_t token_string = null;
+string_t token_pi = null;
 // Forward declarations of lexing functions 
 extern int data(Lexbuf<`a>);
 extern int comment(Lexbuf<`a>);
@@ -49,7 +49,9 @@ int yylex() {
   case REFERENCE:
     yylval = new String_tok(XmlScan::token_string); break;
   case PI:
-    yylval = new Pi_tok(new $(XmlScan::token_pi,XmlScan::token_string)); break;
+    yylval = new Pi_tok(new $((string_t)XmlScan::token_pi,
+                              (string_t)XmlScan::token_string)); 
+    break;
   default: break;
   }
   return ans;
@@ -59,9 +61,9 @@ namespace XmlScan;
 
 void init() { setContext(Normal); }
 
-static string get(Lexbuf<`a> b) { return lexeme(b); }
+static string_t get(Lexbuf<`a> b) { return lexeme(b); }
 
-static list_t<stringptr> buffer = null;
+static list_t<stringptr_t> buffer = null;
 
 static void gobble(Lexbuf<`a> b) {
   buffer = new List(new {get(b)},buffer);
@@ -69,13 +71,13 @@ static void gobble(Lexbuf<`a> b) {
 
 static void purge() { buffer = null; }
 
-static string regurgitate() { return String::strconcat_l(List::rev(buffer)); }
+static string_t regurgitate() { return String::strconcat_l(List::rev(buffer)); }
 
-static string pi_cell = "";
-static void pi_set(string s) { pi_cell = s; }
-static string pi_get() { return pi_cell; }
+static string_t pi_cell = null;
+static void pi_set(string_t s) { pi_cell = s; }
+static string_t pi_get() { return pi_cell; }
 
-static string after(int n,string s) {
+static string_t after(int n,string_t s) {
   try
     return String::substring(s,n,String::strlen(s)-n);
   catch {
@@ -85,7 +87,7 @@ static string after(int n,string s) {
   }
 }
 
-void warning(string msg) {
+void warning(string_t msg) {
   fprintf(Stdio::stderr,"%s",msg);
 }
 

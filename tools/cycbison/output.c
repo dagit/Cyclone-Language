@@ -183,7 +183,7 @@ static int high;
 
 
 #define	GUARDSTR "\n#include \"%s\"\nextern int yyerror;\n
-extern int yycost;\nextern string yymsg;\nextern YYSTYPE yyval;\n\n
+extern int yycost;\nextern mstring_t yymsg;\nextern YYSTYPE yyval;\n\n
 yyguard(int n, YYSTYPE yyvsp, YYLTYPE yylsp)\n
 {\n  yyerror = 0;\nyycost = 0;\n  yymsg = 0;\nswitch (n)\n    {"
 
@@ -460,7 +460,7 @@ output_rule_data()
   /* Output the table of symbol names.  */
 
   fprintf(ftable,
-          "static string yytname[] = {   \"%s\"",
+          "static string_t yytname[] = {   \"%s\"",
           tags[0]);
 
   j = strlen (tags[0]) + 44;

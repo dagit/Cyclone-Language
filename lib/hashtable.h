@@ -19,8 +19,8 @@ extern void resize(table_t<`a,`b,`e1,`e2> t);
 // destructive list update since this data structure is not functional
 extern void remove(table_t<`a,`b,`e1,`e2> t, `a key);
 
-extern int hash_string(string s);
-extern int hash_stringptr(stringptr s);
+extern int hash_string(string_t s);
+extern int hash_stringptr(stringptr_t s);
 extern void iter(void f(`a,`b), table_t<`a,`b,`e1,`e2> t);
 
 // debugging

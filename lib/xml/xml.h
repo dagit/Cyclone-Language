@@ -17,21 +17,21 @@ namespace Xml {
 using Core;
 using List;
 
-typedef string chardata;
-typedef string reference;
-typedef string comment;
-typedef string name;
+typedef string_t chardata;
+typedef string_t reference;
+typedef string_t comment;
+typedef string_t name;
 
 EXTERN_DEFINITION
 tunion attvalue {
-  Attvalue1(string), // should be delimited by single quotes
-  Attvalue2(string)  // should be delimited by double quotes
+  Attvalue1(string_t), // should be delimited by single quotes
+  Attvalue2(string_t)  // should be delimited by double quotes
 };
 typedef tunion attvalue attvalue_t;
 
 typedef $(name,attvalue_t)@ attribute_t;
 
-typedef $(name,string)@ pi_t;
+typedef $(name,string_t)@ pi_t;
 
 extern tunion content;
 typedef tunion content content_t;

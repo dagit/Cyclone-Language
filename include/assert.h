@@ -7,7 +7,7 @@
 #else
 #include "core.h"
 namespace Assert{
-extern `a AssertFail(string msg);
+extern `a AssertFail(string_t msg);
 }
 #define _STR(X) _VAL(X)
 #define _VAL(X) #X

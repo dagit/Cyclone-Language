@@ -22,7 +22,7 @@ typedef tunion Absexpgroup absexpgroup_t;
 typedef tunion Absop       absop_t;
 
 extern void check_absexp(absexp_t);
-extern string absexp2string(absexp_t ae, int depth);
+extern string_t absexp2string(absexp_t ae, int depth);
 
 // new invariant: for any function, MallocAE(e) should occur at most once
 // for any e.

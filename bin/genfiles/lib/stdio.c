@@ -84,16 +84,16 @@ _temp1=( struct Cyc_Stdio___sFILE*) GC_malloc( sizeof( struct Cyc_Stdio___sFILE)
 _temp1->file= cf; _temp1;}): 0;} int Cyc_Stdio_fgetc( struct Cyc_Stdio___sFILE*
 f){ return fgetc(( struct Cyc_Cstdio___sFILE*) _check_null( f->file));} struct
 _tagged_string Cyc_Stdio_fgets( struct _tagged_string s, int n, struct Cyc_Stdio___sFILE*
-f){ unsigned char* result; unsigned char* buffer= underlying_Cstring( s);
-unsigned int len=({ struct _tagged_string _temp3= s;( unsigned int)( _temp3.last_plus_one
-- _temp3.curr);}); n=( int)( len < n? len:( unsigned int) n); result= fgets(
-buffer, n,( struct Cyc_Cstdio___sFILE*) _check_null( f->file)); if( result == 0){
-return({ struct _tagged_string _temp2={ 0, 0, 0}; _temp2;});} else{ return s;}}
-int Cyc_Stdio_fputc( int i, struct Cyc_Stdio___sFILE* f){ return fputc( i,(
-struct Cyc_Cstdio___sFILE*) _check_null( f->file));} int Cyc_Stdio_fputs( struct
-_tagged_string s, struct Cyc_Stdio___sFILE* f){ return fputs( string_to_Cstring(
-s),( struct Cyc_Cstdio___sFILE*) _check_null( f->file));} int Cyc_Stdio_getc(
-struct Cyc_Stdio___sFILE* f){ return getc(( struct Cyc_Cstdio___sFILE*)
+f){ unsigned char* result; unsigned char* buffer= underlying_Cstring(( struct
+_tagged_string) s); unsigned int len=({ struct _tagged_string _temp3= s;(
+unsigned int)( _temp3.last_plus_one - _temp3.curr);}); n=( int)( len < n? len:(
+unsigned int) n); result= fgets( buffer, n,( struct Cyc_Cstdio___sFILE*)
+_check_null( f->file)); if( result == 0){ return({ struct _tagged_string _temp2={
+0, 0, 0}; _temp2;});} else{ return s;}} int Cyc_Stdio_fputc( int i, struct Cyc_Stdio___sFILE*
+f){ return fputc( i,( struct Cyc_Cstdio___sFILE*) _check_null( f->file));} int
+Cyc_Stdio_fputs( struct _tagged_string s, struct Cyc_Stdio___sFILE* f){ return
+fputs( string_to_Cstring( s),( struct Cyc_Cstdio___sFILE*) _check_null( f->file));}
+int Cyc_Stdio_getc( struct Cyc_Stdio___sFILE* f){ return getc(( struct Cyc_Cstdio___sFILE*)
 _check_null( f->file));} int Cyc_Stdio_putc( int i, struct Cyc_Stdio___sFILE* f){
 return putc( i,( struct Cyc_Cstdio___sFILE*) _check_null( f->file));} int Cyc_Stdio_puts(
 struct _tagged_string s){ return puts( string_to_Cstring( s));} int Cyc_Stdio_ungetc(

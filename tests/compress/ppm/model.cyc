@@ -85,7 +85,7 @@ static int trieFree; /* next unused trie record */
 
 void init_arguments(argc,argv,argp)
 int argc;
-string? argv;
+string_t? argv;
 int argp;
 {
 #ifdef SSCANF_SUPPORTED

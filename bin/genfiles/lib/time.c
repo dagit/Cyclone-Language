@@ -49,16 +49,18 @@ struct Cyc_Time_tm* t, struct _tagged_string s){ if(({ struct _tagged_string
 _temp2= s;( unsigned int)( _temp2.last_plus_one - _temp2.curr);}) < 50){( void)
 _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp3=( struct Cyc_Core_InvalidArg_struct*)
 GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp3[ 0]=({ struct Cyc_Core_InvalidArg_struct
-_temp4; _temp4.tag= Cyc_Core_InvalidArg; _temp4.f1=({ unsigned char* _temp5="Time::asctime_r: string too small (< 50)";
-struct _tagged_string _temp6; _temp6.curr= _temp5; _temp6.base= _temp5; _temp6.last_plus_one=
-_temp5 + 41; _temp6;}); _temp4;}); _temp3;}));} return Cstring_to_string(
-asctime_r( t, underlying_Cstring( s)));} struct _tagged_string Cyc_Time_ctime_r(
+_temp4; _temp4.tag= Cyc_Core_InvalidArg; _temp4.f1=({ unsigned char* _temp5=(
+unsigned char*)"Time::asctime_r: string too small (< 50)"; struct _tagged_string
+_temp6; _temp6.curr= _temp5; _temp6.base= _temp5; _temp6.last_plus_one= _temp5 +
+41; _temp6;}); _temp4;}); _temp3;}));} return Cstring_to_string( asctime_r( t,
+underlying_Cstring(( struct _tagged_string) s)));} struct _tagged_string Cyc_Time_ctime_r(
 const int* t, struct _tagged_string s){ if(({ struct _tagged_string _temp7= s;(
 unsigned int)( _temp7.last_plus_one - _temp7.curr);}) < 50){( void) _throw((
 void*)({ struct Cyc_Core_InvalidArg_struct* _temp8=( struct Cyc_Core_InvalidArg_struct*)
 GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp8[ 0]=({ struct Cyc_Core_InvalidArg_struct
-_temp9; _temp9.tag= Cyc_Core_InvalidArg; _temp9.f1=({ unsigned char* _temp10="Time::ctime_r: string too small (< 50)";
-struct _tagged_string _temp11; _temp11.curr= _temp10; _temp11.base= _temp10;
-_temp11.last_plus_one= _temp10 + 39; _temp11;}); _temp9;}); _temp8;}));} return
-Cstring_to_string( ctime_r( t, underlying_Cstring( s)));} struct _tagged_string
-Cyc_Time_timezone(){ return Cstring_to_string( timezone());}
+_temp9; _temp9.tag= Cyc_Core_InvalidArg; _temp9.f1=({ unsigned char* _temp10=(
+unsigned char*)"Time::ctime_r: string too small (< 50)"; struct _tagged_string
+_temp11; _temp11.curr= _temp10; _temp11.base= _temp10; _temp11.last_plus_one=
+_temp10 + 39; _temp11;}); _temp9;}); _temp8;}));} return Cstring_to_string(
+ctime_r( t, underlying_Cstring(( struct _tagged_string) s)));} struct
+_tagged_string Cyc_Time_timezone(){ return Cstring_to_string( timezone());}

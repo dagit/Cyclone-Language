@@ -11,10 +11,11 @@
 
 typedef char *{0} Cstring;
 // a boxed and tagged string: struct {unsigned int sz; Cstring *contents;}@
-typedef char ? string;
-typedef string string_t;
+typedef const char ? string_t;
+typedef char ? mstring_t;
 
-typedef string @stringptr;
+typedef string_t @stringptr_t;
+typedef mstring_t @mstringptr_t;
 
 #ifndef bool
 typedef int bool;

@@ -8,13 +8,13 @@
 
 using Core;
 
-void doit(string file) {
+void doit(string_t file) {
   let fd = Stdio::file_open(file,"r");
   XmlDump::dumpContents(Stdio::stdout,XmlParse::parse_file(fd));
   Stdio::fclose(fd);
 }
 
-int main(int argc, string ? argv) {
+int main(int argc, string_t ? argv) {
   argv++; // skip the name of the executable
   for (int n = argv.size; n > 0; n--,argv++)
     doit(*argv);

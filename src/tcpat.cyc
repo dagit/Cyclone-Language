@@ -442,7 +442,7 @@ void check_pat_regions(tenv_t te, pat_t p) {
 // Constant patterns (e.g., 1, true, 3[0]4) have 0 arity.  The span
 // for bool is 2, for char is 256, and for integers, floats, and
 // Xtunions is infinite (i.e., null).
-static tunion Name_value { Name_v(string); Int_v(int); };
+static tunion Name_value { Name_v(string_t); Int_v(int); };
 typedef tunion Name_value name_value_t;
 static struct Con_s {
   name_value_t name;
@@ -488,7 +488,7 @@ static con_t null_ptr_con = &null_ptr_con0;
 static con_t ptr_con      = &ptr_con0;
 
 static con_t int_con(int i)       { return new Con_s(new Int_v(i), 0, null); }
-static con_t float_con(string f)  { return new Con_s(new Name_v(f), 0, null); }
+static con_t float_con(string_t f)  { return new Con_s(new Name_v(f), 0, null); }
 static con_t char_con(char c) { 
   return new Con_s(new Int_v((int)c), 0,new Opt(256));
 }
@@ -500,7 +500,7 @@ static con_t tuple_con(int i)     {
 static simple_pat_t null_pat()           {return new Con(null_con,     null); }
 static simple_pat_t int_pat(int i)       {return new Con(int_con(i),   null); }
 static simple_pat_t char_pat(char c)     {return new Con(char_con(c),  null); }
-static simple_pat_t float_pat(string f)  {return new Con(float_con(f), null); }
+static simple_pat_t float_pat(string_t f)  {return new Con(float_con(f), null); }
 static simple_pat_t null_ptr_pat(simple_pat_t p) {
   return new Con(null_ptr_con,new List(p,null));
 }
@@ -511,7 +511,7 @@ static simple_pat_t tuple_pat(list_t<simple_pat_t> ss) {
   return new Con(tuple_con(List::length(ss)),ss);
 }
 static 
-simple_pat_t con_pat(string con_name,opt_t<int> span,list_t<simple_pat_t> ps) {
+simple_pat_t con_pat(string_t con_name,opt_t<int> span,list_t<simple_pat_t> ps) {
   con_t c = new Con_s(new Name_v(con_name), List::length(ps), span);
   return new Con(c,ps);
 }

@@ -224,13 +224,13 @@ bool isUnknownOp(absop_t ao) {
 }
 
 ///////////////////////// Printing and Debugging //////////////////////////////
-string absop2string(absop_t ao) {
+string_t absop2string(absop_t ao) {
   switch(ao) {
   case UnknownOp:      return "Unknown";
   case &AddressOp(ao2): return xprintf("& %s",absop2string(ao2));
   case &LocalOp(vd):    return *(*vd->name)[1];
   case &MemberOp(ao2,f):
-    string fs;
+    string_t fs;
     switch(f) {
     case &StructF(field): fs = *field; break;
     case &TupleF(i):      fs = xprintf("%d",i); break;
@@ -240,8 +240,8 @@ string absop2string(absop_t ao) {
   case &DerefOp(ao2):  return xprintf("(*%s)", absop2string(ao2));
   }
 }
-string absexp2string(absexp_t ae, int depth) {
-  string ans = Core::new_string(depth);
+string_t absexp2string(absexp_t ae, int depth) {
+  mstring_t ans = Core::new_string(depth);
   for(int i=0; i < ans.size; ++i)
     ans[i] = ' ';
   switch(ae) {

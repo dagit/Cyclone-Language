@@ -34,7 +34,7 @@ using Parser;
 int line_num       = 1;
 int line_start_pos = 0;
 
-void yyerror(string s) {
+void yyerror(string_t s) {
   fprintf(stderr, "%s, line:%d", s, line_num);
   fflush(stderr);
   throw new Parser_error(s);
@@ -42,9 +42,9 @@ void yyerror(string s) {
 
 namespace Lexer {
 
-xtunion exn { Lexical_error(string,int,int); };
+xtunion exn { Lexical_error(string_t,int,int); };
 
-static string                  token_string = (string)"";
+static string_t          token_string = "";
 static int                     token_char   = (int)'D';
 static struct Syntax::Location dummy_loc    = {0,0,0,0};
 static Syntax::location_t      token_action = &dummy_loc;
@@ -52,7 +52,8 @@ static Syntax::location_t      token_action = &dummy_loc;
 static int brace_depth   = 0;
 static int comment_depth = 0;
 
-static string string_buff  = (string)"01234567012345670123456701234567";
+static char string_buff_v[38];
+static mstring_t string_buff  = (mstring_t)string_buff_v;
 static int    string_index = 0;
 
   //typedef int lexfun_t <`a>(Lexing::Lexbuf<`a>;{});
@@ -60,20 +61,20 @@ static int    string_index = 0;
 #define SHRINK_THRESHOLD 16384
 void reset_string_buffer() {
   if(string_buff.size > SHRINK_THRESHOLD)
-    string_buff = (string)"01234567012345670123456701234567";
+    string_buff = (mstring_t)string_buff_v;
   string_index = 0;
 }
 
 void store_string_char(char c) {
   if(string_index >= string_buff.size) {
-    string new_buff = new_string(string_buff.size*2);
+    mstring_t new_buff = new_string(string_buff.size*2);
     String::strncpy(string_buff, 0, new_buff, 0, string_buff.size);
     string_buff = new_buff;
   }
   string_buff[string_index++] = c;
 }
 
-string get_stored_string() {
+mstring_t get_stored_string() {
   return String::substring(string_buff,0,string_index);
 }
 
@@ -142,7 +143,7 @@ rule lexmain = parse
          handle_lexical_error(comment,lexbuf); 
          return lexmain(lexbuf); }
 | ['A'-'Z' 'a'-'z'] ['A'-'Z' 'a'-'z' '\'' '_' '0'-'9'] *
-  { string s = lexeme(lexbuf);
+  { mstring_t s = lexeme(lexbuf);
     if     (String::strcmp(s,"rule")  == 0) return TRULE;
     else if(String::strcmp(s,"parse") == 0) return TPARSE;
     else if(String::strcmp(s,"and")   == 0) return TAND;

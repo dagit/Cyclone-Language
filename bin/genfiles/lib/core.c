@@ -52,45 +52,46 @@ else{ if('a' <= c? c <='f': 0){ return( 10 + c) -'a';} else{ if('A' <= c? c <='F
 0){ return( 10 + c) -'A';} else{( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
 _temp13=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
 _temp13[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp14; _temp14.tag= Cyc_Core_InvalidArg;
-_temp14.f1=({ unsigned char* _temp15="string to integer conversion"; struct
-_tagged_string _temp16; _temp16.curr= _temp15; _temp16.base= _temp15; _temp16.last_plus_one=
-_temp15 + 29; _temp16;}); _temp14;}); _temp13;}));}}}} int Cyc_Core_int_of_string(
-struct _tagged_string s){ int n; int i; int base; int sign= 1; for( i= 0; i <({
-struct _tagged_string _temp17= s;( unsigned int)( _temp17.last_plus_one -
-_temp17.curr);})? Cyc_Core_is_space(*(( unsigned char*(*)( struct _tagged_string,
+_temp14.f1=({ unsigned char* _temp15=( unsigned char*)"string to integer conversion";
+struct _tagged_string _temp16; _temp16.curr= _temp15; _temp16.base= _temp15;
+_temp16.last_plus_one= _temp15 + 29; _temp16;}); _temp14;}); _temp13;}));}}}}
+int Cyc_Core_int_of_string( struct _tagged_string s){ int n; int i; int base;
+int sign= 1; for( i= 0; i <({ struct _tagged_string _temp17= s;( unsigned int)(
+_temp17.last_plus_one - _temp17.curr);})? Cyc_Core_is_space(*(( const
+unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
+_check_unknown_subscript)( s, sizeof( unsigned char), i)): 0; ++ i){;} while( i
+<({ struct _tagged_string _temp18= s;( unsigned int)( _temp18.last_plus_one -
+_temp18.curr);})?*(( const unsigned char*(*)( struct _tagged_string,
 unsigned int, unsigned int)) _check_unknown_subscript)( s, sizeof( unsigned char),
-i)): 0; ++ i){;} while( i <({ struct _tagged_string _temp18= s;( unsigned int)(
-_temp18.last_plus_one - _temp18.curr);})?*(( unsigned char*(*)( struct
-_tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)( s,
-sizeof( unsigned char), i) =='-'? 1:*(( unsigned char*(*)( struct _tagged_string,
-unsigned int, unsigned int)) _check_unknown_subscript)( s, sizeof( unsigned char),
-i) =='+': 0) { if(*(( unsigned char*(*)( struct _tagged_string, unsigned int,
+i) =='-'? 1:*(( const unsigned char*(*)( struct _tagged_string, unsigned int,
+unsigned int)) _check_unknown_subscript)( s, sizeof( unsigned char), i) =='+': 0) {
+if(*(( const unsigned char*(*)( struct _tagged_string, unsigned int,
 unsigned int)) _check_unknown_subscript)( s, sizeof( unsigned char), i) =='-'){
 sign= - sign;} i ++;} if( i ==({ struct _tagged_string _temp19= s;( unsigned int)(
 _temp19.last_plus_one - _temp19.curr);})){( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
 _temp20=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
 _temp20[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp21; _temp21.tag= Cyc_Core_InvalidArg;
-_temp21.f1=({ unsigned char* _temp22="string to integer conversion"; struct
-_tagged_string _temp23; _temp23.curr= _temp22; _temp23.base= _temp22; _temp23.last_plus_one=
-_temp22 + 29; _temp23;}); _temp21;}); _temp20;}));} if( i + 1 ==({ struct
-_tagged_string _temp24= s;( unsigned int)( _temp24.last_plus_one - _temp24.curr);})?
-1:*(( unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
-_check_unknown_subscript)( s, sizeof( unsigned char), i) !='0'){ base= 10;}
-else{ switch(*(( unsigned char*(*)( struct _tagged_string, unsigned int,
-unsigned int)) _check_unknown_subscript)( s, sizeof( unsigned char), ++ i)){
-case 'x': _LL25: base= 16; ++ i; break; case 'o': _LL26: base= 8; ++ i; break;
-case 'b': _LL27: base= 2; ++ i; break; default: _LL28: base= 10; break;}} for( n=
-0; i <({ struct _tagged_string _temp30= s;( unsigned int)( _temp30.last_plus_one
-- _temp30.curr);})?*(( unsigned char*(*)( struct _tagged_string, unsigned int,
-unsigned int)) _check_unknown_subscript)( s, sizeof( unsigned char), i) !='\000':
-0; ++ i){ int digit= Cyc_Core_int_of_char(*(( unsigned char*(*)( struct
+_temp21.f1=({ unsigned char* _temp22=( unsigned char*)"string to integer conversion";
+struct _tagged_string _temp23; _temp23.curr= _temp22; _temp23.base= _temp22;
+_temp23.last_plus_one= _temp22 + 29; _temp23;}); _temp21;}); _temp20;}));} if( i
++ 1 ==({ struct _tagged_string _temp24= s;( unsigned int)( _temp24.last_plus_one
+- _temp24.curr);})? 1:*(( const unsigned char*(*)( struct _tagged_string,
+unsigned int, unsigned int)) _check_unknown_subscript)( s, sizeof( unsigned char),
+i) !='0'){ base= 10;} else{ switch(*(( const unsigned char*(*)( struct
 _tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)( s,
-sizeof( unsigned char), i)); if( digit >= base){( void) _throw(( void*)({ struct
-Cyc_Core_InvalidArg_struct* _temp31=( struct Cyc_Core_InvalidArg_struct*)
+sizeof( unsigned char), ++ i)){ case 'x': _LL25: base= 16; ++ i; break; case 'o':
+_LL26: base= 8; ++ i; break; case 'b': _LL27: base= 2; ++ i; break; default:
+_LL28: base= 10; break;}} for( n= 0; i <({ struct _tagged_string _temp30= s;(
+unsigned int)( _temp30.last_plus_one - _temp30.curr);})?*(( const unsigned char*(*)(
+struct _tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)( s,
+sizeof( unsigned char), i) !='\000': 0; ++ i){ int digit= Cyc_Core_int_of_char(*((
+const unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
+_check_unknown_subscript)( s, sizeof( unsigned char), i)); if( digit >= base){(
+void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp31=( struct Cyc_Core_InvalidArg_struct*)
 GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp31[ 0]=({ struct
 Cyc_Core_InvalidArg_struct _temp32; _temp32.tag= Cyc_Core_InvalidArg; _temp32.f1=({
-unsigned char* _temp33="string to integer conversion"; struct _tagged_string
-_temp34; _temp34.curr= _temp33; _temp34.base= _temp33; _temp34.last_plus_one=
+unsigned char* _temp33=( unsigned char*)"string to integer conversion"; struct
+_tagged_string _temp34; _temp34.curr= _temp33; _temp34.base= _temp33; _temp34.last_plus_one=
 _temp33 + 29; _temp34;}); _temp32;}); _temp31;}));} n= n * base + digit;} return
 sign * n;} struct _tagged_string Cyc_Core_string_of_int_width( int n, int
 minWidth){ int i; int len= 0; int negative= 0; if( n < 0){ negative= 1; ++ len;

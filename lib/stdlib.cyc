@@ -30,7 +30,7 @@ namespace Cstdlib {
 
 using Core;
 namespace Stdlib {
-  double atof(string _nptr) {
+  double atof(string_t _nptr) {
     return Cstdlib::atof(s2c(_nptr));
   }
 #ifndef __STRICT_ANSI__
@@ -40,13 +40,13 @@ namespace Stdlib {
   }
 */
 #endif __STRICT_ANSI__
-  int atoi(string _nptr) {
+  int atoi(string_t _nptr) {
     return Cstdlib::atoi(s2c(_nptr));
   }
-  long atol(string _nptr) {
+  long atol(string_t _nptr) {
     return Cstdlib::atol(s2c(_nptr));
   }
-  string getenv(string name) {
+  mstring_t getenv(string_t name) {
     return Cstring_to_string(Cstdlib::getenv(s2c(name)));
   }
   /*
@@ -60,7 +60,7 @@ namespace Stdlib {
     return Cstring_to_string(Cstdlib::_findenv_r(r,s2c(n),i));
   }
   */
-  int putenv(string s) {
+  int putenv(string_t s) {
     return Cstdlib::putenv(s2c(s));
   }
   /*
@@ -68,7 +68,7 @@ namespace Stdlib {
     return Cstdlib::_putenv_r(r,s2c(s));
   }
    */
-  int setenv(string s, string v, int overwrite) {
+  int setenv(string_t s, string_t v, int overwrite) {
     return Cstdlib::setenv(s2c(s),s2c(v),overwrite);
   }
   /*
@@ -77,7 +77,7 @@ namespace Stdlib {
   }
   */
 #ifdef __CYGWIN__
-  void unsetenv(string s) {
+  void unsetenv(string_t s) {
     Cstdlib::unsetenv(s2c(s));
   }
   /*

@@ -4,12 +4,12 @@
 
 namespace Filename {
   //extern string current_dir_name;
-extern string concat(string, string);
-extern string chop_extension(string);
-extern string dirname(string);
-extern string basename(string);
-extern bool check_suffix(string, string);
-extern string gnuify(string);
+extern mstring_t concat(string_t, string_t);
+extern mstring_t chop_extension(string_t);
+extern mstring_t dirname(string_t);
+extern mstring_t basename(string_t);
+extern bool check_suffix(string_t, string_t);
+extern mstring_t gnuify(string_t);
 }
 
 #endif

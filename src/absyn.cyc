@@ -14,7 +14,7 @@ namespace Absyn;
 // return a negative, zero, or positive int according to whether the
 // first string list is less than, equal to, or greater than the
 // second 
-static int zstrlist_cmp(list_t<stringptr> ss1,list_t<stringptr> ss2) {
+static int zstrlist_cmp(list_t<stringptr_t> ss1,list_t<stringptr_t> ss2) {
   return list_cmp(zstrptrcmp,ss1,ss2);
 }
 int varlist_cmp(list_t<var_t> vs1, list_t<var_t> vs2) {
@@ -67,6 +67,9 @@ tqual_t combine_tqual(tqual_t x,tqual_t y) {
 
 // FIX: fit in an int (with bitfields) rather than doing allocation
 tqual_t empty_tqual() { return Tqual(false,false,false); }
+tqual_t const_tqual() { return Tqual{.q_const = true,
+                                        .q_volatile = false,
+                                        .q_restrict = false}; }
 
 bool is_format_prim(primop_t p) {
   switch (p) {
@@ -140,7 +143,7 @@ type_t slong_t  = &slong_tt;
 type_t float_t  = FloatType;
 type_t double_t = DoubleType;
 // exceptions
-static string exn_string = "exn";
+static string_t exn_string = "exn";
 static tunion Nmspace.Abs_n abs_null = Abs_n(null);
 static $(nmspace_t,var_t) exn_name_v = $((nmspace_t)&abs_null,&exn_string);
 qvar_t exn_name   = &exn_name_v;
@@ -154,11 +157,27 @@ type_t exn_typ = &exn_typ_tt;
 // string
 static opt_t<type_t> string_t_opt = null;
 type_t string_typ(type_t rgn) {
-  if (string_t_opt == null) {
-    type_t t = starb_typ(uchar_t,rgn,empty_tqual(),Unknown_b);
-    string_t_opt = new Opt(t);
+  if (rgn != HeapRgn)
+    return starb_typ(uchar_t,rgn,empty_tqual(),Unknown_b);
+  else {
+    if (string_t_opt == null) {
+      type_t t = starb_typ(uchar_t,HeapRgn,empty_tqual(),Unknown_b);
+      string_t_opt = new Opt(t);
+    }
+    return string_t_opt->v;
   }
-  return string_t_opt->v;
+}
+static opt_t<type_t> const_string_t_opt = null;
+type_t const_string_typ(type_t rgn) {
+  if (rgn != HeapRgn)
+    return starb_typ(uchar_t,rgn,const_tqual(),Unknown_b);
+  else {
+    if (const_string_t_opt == null) {
+      type_t t = starb_typ(uchar_t,HeapRgn,const_tqual(),Unknown_b);
+      const_string_t_opt = new Opt(t);
+    }
+    return const_string_t_opt->v;
+  }
 }
 // pointers
 
@@ -202,12 +221,12 @@ static opt_t<type_t> file_t_opt = null;
 // Maybe someday we'll allow FILE objects to live somewhere other than
 // in the heap (by making the runtime interface more flexible).  
 // If so, we'll need a rgn_t argument.
-static string sf_str = "__sFILE";
-static stringptr sf = &sf_str;
-static string cyc_str = "Cyc";
-static stringptr cyc = &cyc_str;
-static string st_str = "Stdio";
-static stringptr st = &st_str;
+static string_t sf_str = "__sFILE";
+static stringptr_t sf = &sf_str;
+static string_t cyc_str = "Cyc";
+static stringptr_t cyc = &cyc_str;
+static string_t st_str = "Stdio";
+static stringptr_t st = &st_str;
 
 //KLUDGE -- FIRST CALL DETERMINES EVERYTHING!
 static void file_typ_ns(list_t<var_t> ns) {
@@ -281,8 +300,8 @@ exp_t false_exp(seg_t loc) { return bool_exp(false, loc); }
 exp_t char_exp(char c, seg_t loc) {
   return const_exp(new Char_c(Unsigned,c),loc);
 }
-exp_t float_exp(string f, seg_t loc) { return const_exp(new Float_c(f),loc);  }
-exp_t string_exp(string s, seg_t loc){ return const_exp(new String_c(s),loc); }
+exp_t float_exp(string_t f, seg_t loc) { return const_exp(new Float_c(f),loc);  }
+exp_t string_exp(string_t s, seg_t loc){ return const_exp(new String_c(s),loc); }
 
 // This should only be used after type checking.
 // Right now it's only used in Toc and is the only source of Unresolved_b.
@@ -384,9 +403,10 @@ exp_t tuple_exp(list_t<exp_t> es, seg_t loc) {
 }
 exp_t stmt_exp(stmt_t s,seg_t loc) { return new_exp(new StmtExp_e(s), loc); }
 
-static string ne_str = "Null_Exception";
+static string_t ne_str = "Null_Exception";
 static tunion Nmspace.Abs_n top_ns = Abs_n(null);
-static $(nmspace_t,stringptr) ne = $((tunion Nmspace)&top_ns,&ne_str);
+static $(nmspace_t,stringptr_t) ne = 
+  $((tunion Nmspace)&top_ns,&ne_str);
 
 exp_t null_pointer_exn_exp(seg_t loc) { 
   return var_exp(&ne, loc); 
@@ -603,7 +623,7 @@ $(tqual_t,type_t) * lookup_tuple_field(list_t<$(tqual_t,type_t)@> ts, int i) {
   return ts->hd;
 }
 
-string attribute2string(attribute_t a) {
+string_t attribute2string(attribute_t a) {
   switch (a) {
   case &Regparm_att(i): return xprintf("regparm(%d)",i);
   case Stdcall_att: return "stdcall";
