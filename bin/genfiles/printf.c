@@ -1011,9 +1011,9 @@ char),0)),((_tmp11F=(char)(exp + '0'),((_get_dyneither_size(_tmp11D,sizeof(char)
 == 1  && (_tmp11E == '\000'  && _tmp11F != '\000')?_throw_arraybounds(): 1,*((char*)
 _tmp11D.curr)=_tmp11F)))))));};}return p;};}static struct _dyneither_ptr Cyc_sround(
 double fract,int*exp,struct _dyneither_ptr start,struct _dyneither_ptr end,char ch,int*
-signp){double tmp=(double)0.0;if(fract != 0.0)modf(fract * 10,& tmp);else{tmp=(
-double)(ch - '0');}if(tmp > 4)for(0;1;_dyneither_ptr_inplace_plus(& end,sizeof(char),
--1)){if(*((char*)_check_dyneither_subscript(end,sizeof(char),0))== '.')
+signp){double tmp=0.0;if(fract != 0.0)modf(fract * 10,& tmp);else{tmp=(double)(ch - '0');}
+if(tmp > 4)for(0;1;_dyneither_ptr_inplace_plus(& end,sizeof(char),-1)){if(*((char*)
+_check_dyneither_subscript(end,sizeof(char),0))== '.')
 _dyneither_ptr_inplace_plus(& end,sizeof(char),-1);{char _tmp122;char _tmp121;
 struct _dyneither_ptr _tmp120;if(((_tmp120=end,((_tmp121=*((char*)
 _check_dyneither_subscript(_tmp120,sizeof(char),0)),((_tmp122=_tmp121 + '\001',((
@@ -1040,13 +1040,13 @@ _check_dyneither_subscript(end,sizeof(char),0))!= '0')break;if((char*)end.curr =
 char*)start.curr)*signp=0;}}return start;}int Cyc___cvt_double(double number,int
 prec,int flags,int*signp,int fmtch,struct _dyneither_ptr startp,struct _dyneither_ptr
 endp){struct _dyneither_ptr p;struct _dyneither_ptr t;register double fract;int dotrim=
-0;int expcnt;int gformat=0;double integer=(double)0.0;double tmp=(double)0.0;expcnt=
-0;if(number < 0){number=- number;*signp=(int)'-';}else{*signp=0;}fract=modf(number,&
-integer);t=_dyneither_ptr_inplace_plus(& startp,sizeof(char),1);for(p=
-_dyneither_ptr_plus(endp,sizeof(char),- 1);(char*)p.curr >= (char*)startp.curr  && 
-integer != 0.0;++ expcnt){tmp=modf(integer / 10,& integer);{char _tmp12E;char _tmp12D;
-struct _dyneither_ptr _tmp12C;(_tmp12C=_dyneither_ptr_inplace_plus_post(& p,sizeof(
-char),-1),((_tmp12D=*((char*)_check_dyneither_subscript(_tmp12C,sizeof(char),0)),((
+0;int expcnt;int gformat=0;double integer=0.0;double tmp=0.0;expcnt=0;if(number < 0){
+number=- number;*signp=(int)'-';}else{*signp=0;}fract=modf(number,& integer);t=
+_dyneither_ptr_inplace_plus(& startp,sizeof(char),1);for(p=_dyneither_ptr_plus(
+endp,sizeof(char),- 1);(char*)p.curr >= (char*)startp.curr  && integer != 0.0;++
+expcnt){tmp=modf(integer / 10,& integer);{char _tmp12E;char _tmp12D;struct
+_dyneither_ptr _tmp12C;(_tmp12C=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),
+-1),((_tmp12D=*((char*)_check_dyneither_subscript(_tmp12C,sizeof(char),0)),((
 _tmp12E=(char)((int)((tmp + .01)* 10)+ '0'),((_get_dyneither_size(_tmp12C,sizeof(
 char))== 1  && (_tmp12D == '\000'  && _tmp12E != '\000')?_throw_arraybounds(): 1,*((
 char*)_tmp12C.curr)=_tmp12E)))))));};}switch(fmtch){case 'f': _LL63: goto _LL64;case

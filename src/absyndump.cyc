@@ -498,12 +498,13 @@ void dumpntyp(type_t t) {
     case Vc_c:  dump("unsigned __int64");return;
     case Gcc_c: dump("unsigned long long"); return;
     }
-  case &FloatType:  dump("float");  return;
-  case &DoubleType(b): 
-    if (b) 
-      dump("long double"); 
-    else 
+  case &FloatType(i): 
+    if (i==0) 
+      dump("float"); 
+    else if (i==1) 
       dump("double");
+    else 
+      dump("long double"); 
     return;
   case &TupleType(ts): dump_char('$'); dumpargs(ts); return;
   case &AggrType(AggrInfo(info,ts)):
@@ -611,7 +612,7 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Const_e({.Int_c = $(Unsigned,i)}): dump(aprintf("%u",(unsigned)i)); break;
   case &Const_e({.LongLong_c = $(sg,i)}):
     dump("<<FIX LONG LONG CONSTANT>>"); break; // FIX
-  case &Const_e({.Float_c = x}): dump(x); break;
+  case &Const_e({.Float_c = $(x,_)}): dump(x); break;
   case &Const_e({.Null_c = _}): dump("NULL"); break;
   case &Const_e({.String_c = s}):
     dump_char('"'); dump_nospace(Absynpp::string_escape(s)); dump_char('"');
@@ -968,7 +969,7 @@ void dumppat(pat_t p) {
   case &Int_p(Unsigned,i): dump(aprintf("%u",i)); break;
   case &Char_p(ch):
     dump("'"); dump_nospace(Absynpp::char_escape(ch)); dump_nospace("'"); break;
-  case &Float_p(x): dump(x); break;
+  case &Float_p(x,_): dump(x); break;
   case &Var_p(vd,&Pat{.r = &Wild_p,...}): dumpqvar(vd->name); break;
   case &Var_p(vd,p2): dumpqvar(vd->name); dump(" as "); dumppat(p2); break;
   case &Tuple_p(ts,dots):     

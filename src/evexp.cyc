@@ -44,7 +44,7 @@ static cnst_t promote_const(cnst_t cn) {
   switch (cn) {
   case {.Char_c = $(sn,c)}:  return Int_c(sn,(int)c);
   /* FIX: what about wide characters Wchar_c */
-  case {.Short_c = $(sn,s)}: return Int_c(sn,(int)s); 
+  case {.Short_c = $(sn,s)}: return Int_c(sn,(int)s);
   default:             return cn;
   }
 }
@@ -106,7 +106,7 @@ static $(cnst_t,bool) eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
   }
   switch (p) {
   case Div:
-  case Mod: 
+  case Mod:
     if (i2 == 0) {
       terr(e2->loc,"division by zero in constant expression");
       return $(cn1,true);
@@ -208,14 +208,14 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
     }
     terr(e->loc,"bad static expression (too many args to primop)");
     return $(Int_c(Signed,0), true);
-  case &Valueof_e(t): 
+  case &Valueof_e(t):
     // special case to reduce valueof(valueof_t<e>) to e
     switch (compress(t)) {
     case &ValueofType(e2): return eval_const_exp(e2);
     default: break;
     }
     fallthru;
-  case &Sizeoftyp_e(_): 
+  case &Sizeoftyp_e(_):
   case &Sizeofexp_e(_):
   case &Offsetof_e(_,_): ans = $(Int_c(Signed,0), false); break;
   case &Cast_e(t,e2,_,_):
@@ -226,14 +226,14 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
       /* FIX: what about wide characters Wchar_c */
       case $(&IntType(sn,sz),{.Char_c = $(sn2,x)}):  fallthru(sn,sz,sn2,x);
       case $(&IntType(sn,sz),{.Short_c = $(sn2,x)}): fallthru(sn,sz,sn2,x);
-      case $(&IntType(sn,sz),{.Int_c = $(sn2,x)}): 
+      case $(&IntType(sn,sz),{.Int_c = $(sn2,x)}):
 	if(sn != sn2)
-	  ans[0] = Int_c(sn,x); 
+	  ans[0] = Int_c(sn,x);
 	break;
       /* FIX: what about wide characters Wchar_c */
       case $(&TagType(it),{.Char_c = $(sn2,x)}):  fallthru(it,sn2,x);
       case $(&TagType(it),{.Short_c = $(sn2,x)}): fallthru(it,sn2,x);
-      case $(&TagType(it),{.Int_c = $(sn2,x)}): 
+      case $(&TagType(it),{.Int_c = $(sn2,x)}):
 	if(x < 0)
 	  terr(e->loc,"cannot cast negative number to a tag type");
 	unify(it, new ValueofType(const_exp(ans[0],NULL)));
@@ -244,7 +244,7 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
     break;
   case &AnonEnum_e(_,_,ef): fallthru(ef);
   case &Enum_e(_,_,ef): ans = eval_const_exp((exp_t)ef->tag); break;
-  default: 
+  default:
     terr(e->loc,"bad static expression %s", exp2string(e));
     return $(Int_c(Signed,0), true);
   }
@@ -255,10 +255,10 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
 
 bool c_can_eval(exp_t e) {
   switch (e->r) {
-  case &AnonEnum_e(...): 
+  case &AnonEnum_e(...):
   case &Enum_e(...):
-  case &Sizeoftyp_e(_): 
-  case &Sizeofexp_e(_): 
+  case &Sizeoftyp_e(_):
+  case &Sizeofexp_e(_):
   case &Offsetof_e(_,_):
   case &Const_e(_): return true;
   case &Conditional_e(e1,e2,e3):
@@ -311,7 +311,7 @@ int const_exp_cmp(exp_t e1, exp_t e2) {
     if (c1 != 0) return c1;
     fallthru(e11,e12,e21,e22);
   case $(&And_e(e11,e12),&And_e(e21,e22)): fallthru(e11,e12,e21,e22);
-  case $(&Or_e(e11,e12),&Or_e(e21,e22)): 
+  case $(&Or_e(e11,e12),&Or_e(e21,e22)):
     let c1 = const_exp_cmp(e11,e21);
     if(c1 != 0) return c1;
     return const_exp_cmp(e12,e22);
@@ -325,15 +325,15 @@ int const_exp_cmp(exp_t e1, exp_t e2) {
     }
     return 0; // list lengths must be the same -- it's the same primop
   case $(&Sizeoftyp_e(t1), &Sizeoftyp_e(t2)):  return typecmp(t1,t2);
-  case $(&Sizeoftyp_e(t1), &Sizeofexp_e(e2a)): 
+  case $(&Sizeoftyp_e(t1), &Sizeofexp_e(e2a)):
     if(e2a->topt == NULL)
       terr(e2->loc, "cannot handle sizeof(exp) here -- use sizeof(type)");
     return typecmp(t1,e2a->topt->v);
-  case $(&Sizeofexp_e(e1a), &Sizeoftyp_e(t2)): 
+  case $(&Sizeofexp_e(e1a), &Sizeoftyp_e(t2)):
     if(e1a->topt == NULL)
       terr(e1->loc, "cannot handle sizeof(exp) here -- use sizeof(type)");
     return typecmp(e1a->topt->v,t2);
-  case $(&Sizeofexp_e(e1a), &Sizeofexp_e(e2a)): 
+  case $(&Sizeofexp_e(e1a), &Sizeofexp_e(e2a)):
     if(e1a->topt == NULL)
       terr(e1->loc, "cannot handle sizeof(exp) here -- use sizeof(type)");
     if(e2a->topt == NULL)
@@ -396,11 +396,10 @@ bool okay_szofarg(type_t t) {
   case &PointerType(_): return true;
 
   case &TagType(_):
-  case &IntType(_,_): 
-  case &FloatType:    
-  case &DoubleType(_): return true;
+  case &IntType(_,_):
+  case &FloatType(_): return true;
   case &ArrayType(ArrayInfo{t2,_,e,_,_}): //assume e constant checked elsewhere
-    return (e != NULL); 
+    return (e != NULL);
   case &FnType(_): return false;
   case &RgnHandleType(_): return true;
   case &DynRgnType(_,_): return true;
@@ -412,10 +411,10 @@ bool okay_szofarg(type_t t) {
     }
     if(ad->impl == NULL)
       return false;
-    { 
+    {
       region temp;
       let inst = List::rzip(temp,temp,ad->tvs,ts);
-      for (let fs = ad->impl->fields; fs != NULL; fs = fs->tl) 
+      for (let fs = ad->impl->fields; fs != NULL; fs = fs->tl)
         if (!okay_szofarg(rsubstitute(temp,inst,fs->hd->type))) return false;
       return true;
     }
@@ -428,14 +427,14 @@ bool okay_szofarg(type_t t) {
   case &EnumType(_,_):
   case &AnonEnumType(_): return true;
   case &TypeDeclType(...):
-  case &HeapRgn: 
-  case &RefCntRgn: 
-  case &UniqueRgn: 
+  case &HeapRgn:
+  case &RefCntRgn:
+  case &UniqueRgn:
   case &JoinEff(_):
   case &AccessEff(_):
   case &ValueofType(_):
   case &RgnsEff(_):   return false;
-  case &TypedefType(_,_,td,_): 
+  case &TypedefType(_,_,td,_):
     // Is this right, considering abstract typedefs??
     if (td == NULL || td->kind == NULL)
       impos(aprintf("szof typedeftype %s",typ2string(t)));

@@ -398,8 +398,7 @@ namespace Absyn {
     DatatypeFieldType(datatype_field_info_t); // datatype Foo.Bar
     PointerType(ptr_info_t); // t*, t?, t@, etc.  BoxKind when not Unknown_b
     IntType(sign_t,size_of_t); // char, short, int.  MemKind unless B4
-    FloatType;  // MemKind
-    DoubleType(bool); // MemKind.  when bool is true, long double
+    FloatType(int);  // MemKind.  0=>float, 1=>double, _=>long double
     ArrayType(array_info_t);// MemKind
     FnType(fn_info_t); // MemKind
     // We treat anonymous structs, unions, and enums slightly differently
@@ -431,7 +430,6 @@ namespace Absyn {
   extern_datacon(Type,UniqueRgn);
   extern_datacon(Type,RefCntRgn);
   extern_datacon(Type,VoidType);
-  extern_datacon(Type,FloatType);
 
   // used when parsing/pretty-printing function definitions.
   EXTERN_ABSYN datatype Funcparams {
@@ -515,7 +513,7 @@ namespace Absyn {
     $(sign_t,short) Short_c;
     $(sign_t,int) Int_c;
     $(sign_t,long long) LongLong_c;
-    string_t Float_c;  // where's doubles?
+    $(string_t,int) Float_c; // 0=>float, 1=>double, _=>long double
     string_t String_c;
     string_t Wstring_c;
   };
@@ -526,7 +524,7 @@ namespace Absyn {
   extern cnst_t Short_c(sign_t,short);
   extern cnst_t Int_c(sign_t,int);
   extern cnst_t LongLong_c(sign_t,long long);
-  extern cnst_t Float_c(string_t<`H>);
+  extern cnst_t Float_c(string_t<`H>,int);
   extern cnst_t String_c(string_t<`H>);
   extern cnst_t Wstring_c(string_t<`H>);
 
@@ -710,7 +708,7 @@ namespace Absyn {
     Null_p; // NULL
     Int_p(sign_t,int); // 3
     Char_p(char);      // 'a'
-    Float_p(string_t); // 3.1415
+    Float_p(string_t,int); // 3.1415; int 0=>float, 1=>double, _=>long double
     Enum_p(enumdecl_t,enumfield_t);
     AnonEnum_p(type_t,enumfield_t);
     UnknownId_p(qvar_t); // resolved by tcpat
@@ -943,8 +941,8 @@ namespace Absyn {
   extern type_t char_typ, uchar_typ, ushort_typ, uint_typ, ulong_typ, ulonglong_typ;
   // signed types
   extern type_t schar_typ, sshort_typ, sint_typ, slong_typ, slonglong_typ;
-  // float, double, wchar_t
-  extern type_t float_typ, double_typ(bool), wchar_typ();
+  // float, double, long double, wchar_t
+  extern type_t float_typ(int), wchar_typ();
   // empty effect
   extern type_t empty_effect;
   // exception name and type
@@ -1009,7 +1007,7 @@ namespace Absyn {
   extern exp_t uint_exp(unsigned int, seg_t);
   extern exp_t char_exp(char c, seg_t);
   extern exp_t wchar_exp(string_t<`H> s, seg_t);
-  extern exp_t float_exp(string_t<`H> f, seg_t);
+  extern exp_t float_exp(string_t<`H> f, int i, seg_t);
   extern exp_t string_exp(string_t<`H> s, seg_t);
   extern exp_t wstring_exp(string_t<`H> s, seg_t);
   extern exp_t var_exp(qvar_t, seg_t);

@@ -58,7 +58,7 @@ BUG FIXES and UNSOUNDNESSES:
 
 * not inserting defaults for types in xdatatype variant types?
 
-* long long, short, float, and double constants (including 12s, 3l, etc.)
+* long long and short constants (12s, 3l, etc.)
 
 * wide characters and strings
 
@@ -188,7 +188,7 @@ THINGS NEEDED TO SIMPLIFY PORTING:
 * we should start on the porting tool -- use region inference to
   figure out the "right" interface for code.
 
-* better constant expressions (no doubles? no longs?)
+* better constant expressions (no longs?)
 
 * compound literals, more designators for arrays literals, better 
   designators for structs

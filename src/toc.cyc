@@ -129,7 +129,7 @@ static int fresh_label_counter = 0;
 // errors and reporting
 datatype exn {Toc_Unimplemented};
 datatype exn {Toc_Impossible};
-static `a unimp(string_t fmt, ... inject parg_t<`r2> ap) 
+static `a unimp(string_t fmt, ... inject parg_t<`r2> ap)
   __attribute__((format(printf,1,2), noreturn))
 {
   vfprintf(stderr,fmt,ap);
@@ -137,7 +137,7 @@ static `a unimp(string_t fmt, ... inject parg_t<`r2> ap)
   fflush(stderr);
   throw new Toc_Unimplemented;
 }
-static `a toc_impos(string_t fmt, ... inject parg_t<`r2> ap) 
+static `a toc_impos(string_t fmt, ... inject parg_t<`r2> ap)
   __attribute__((format(printf,1,2), noreturn))
 {
   vfprintf(stderr,fmt,ap);
@@ -183,7 +183,7 @@ MAKE_VAR(_push_handler);
 MAKE_VAR(_pop_handler);
 MAKE_VAR(_exn_thrown);
 MAKE_VAR(_npop_handler);
-MAKE_VAR(_check_null); 
+MAKE_VAR(_check_null);
 MAKE_VAR(_check_known_subscript_null);
 MAKE_VAR(_check_known_subscript_notnull);
 MAKE_VAR(_check_dyneither_subscript);
@@ -252,7 +252,7 @@ MAKE_VAR(_throw_match);
 
 static datatype Type.AggrType dyneither_ptr_typ_v =
     AggrType(AggrInfo(AggrInfoU{.UnknownAggr = $(StructA,&_dyneither_ptr_pr,NULL)},NULL));
-                                             
+
 static datatype Type @ dyneither_ptr_typ = &dyneither_ptr_typ_v;
 
 static tqual_t mt_tq = Tqual(false,false,false,false,NULL);
@@ -317,45 +317,45 @@ static datatype Raw_exp.Const_e zero_exp = Const_e(Cnst{.Int_c= $(Signed,0)});
  * cyc_include.h by casing on the type of the arguments
  */
 struct functionSet {
-  exp_t fchar; exp_t fshort; 
+  exp_t fchar; exp_t fshort;
   exp_t fint; exp_t ffloat;
-  exp_t fdouble; exp_t flongdouble; 
+  exp_t fdouble; exp_t flongdouble;
   exp_t fvoidstar;
 };
 
 struct functionSet _zero_arr_plus_functionSet = functionSet {
-  .fchar = &_zero_arr_plus_char_ev, 
-  .fshort = &_zero_arr_plus_short_ev, 
-  .fint = &_zero_arr_plus_int_ev, 
-  .ffloat = &_zero_arr_plus_float_ev, 
-  .fdouble = &_zero_arr_plus_double_ev, 
-  .flongdouble = &_zero_arr_plus_longdouble_ev, 
+  .fchar = &_zero_arr_plus_char_ev,
+  .fshort = &_zero_arr_plus_short_ev,
+  .fint = &_zero_arr_plus_int_ev,
+  .ffloat = &_zero_arr_plus_float_ev,
+  .fdouble = &_zero_arr_plus_double_ev,
+  .flongdouble = &_zero_arr_plus_longdouble_ev,
   .fvoidstar = &_zero_arr_plus_voidstar_ev
 };
 struct functionSet _get_zero_arr_size_functionSet = {
-  .fchar = &_get_zero_arr_size_char_ev, 
+  .fchar = &_get_zero_arr_size_char_ev,
   .fshort = &_get_zero_arr_size_short_ev,
-  .fint = &_get_zero_arr_size_int_ev, 
+  .fint = &_get_zero_arr_size_int_ev,
   .ffloat = &_get_zero_arr_size_float_ev,
-  .fdouble = &_get_zero_arr_size_double_ev, 
+  .fdouble = &_get_zero_arr_size_double_ev,
   .flongdouble = &_get_zero_arr_size_longdouble_ev,
   .fvoidstar = &_get_zero_arr_size_voidstar_ev
 };
 struct functionSet _zero_arr_inplace_plus_functionSet = {
-  .fchar = &_zero_arr_inplace_plus_char_ev, 
+  .fchar = &_zero_arr_inplace_plus_char_ev,
   .fshort = &_zero_arr_inplace_plus_short_ev,
-  .fint = &_zero_arr_inplace_plus_int_ev, 
+  .fint = &_zero_arr_inplace_plus_int_ev,
   .ffloat = &_zero_arr_inplace_plus_float_ev,
-  .fdouble = &_zero_arr_inplace_plus_double_ev, 
+  .fdouble = &_zero_arr_inplace_plus_double_ev,
   .flongdouble = &_zero_arr_inplace_plus_longdouble_ev,
   .fvoidstar = &_zero_arr_inplace_plus_voidstar_ev
 };
 struct functionSet _zero_arr_inplace_plus_post_functionSet = {
-  .fchar = &_zero_arr_inplace_plus_post_char_ev, 
+  .fchar = &_zero_arr_inplace_plus_post_char_ev,
   .fshort = &_zero_arr_inplace_plus_post_short_ev,
-  .fint = &_zero_arr_inplace_plus_post_int_ev, 
+  .fint = &_zero_arr_inplace_plus_post_int_ev,
   .ffloat = &_zero_arr_inplace_plus_post_float_ev,
-  .fdouble = &_zero_arr_inplace_plus_post_double_ev, 
+  .fdouble = &_zero_arr_inplace_plus_post_double_ev,
   .flongdouble = &_zero_arr_inplace_plus_post_longdouble_ev,
   .fvoidstar = &_zero_arr_inplace_plus_post_voidstar_ev
 };
@@ -372,14 +372,14 @@ static exp_t getFunctionType(struct functionSet @fS, type_t t) {
     default: throw new Impossible("impossible IntType (not char, short or int)");
     }
     break;
-  case &FloatType: 
+  case &FloatType(0):
     function = fS->ffloat;
     break;
-  case &DoubleType(longBool): 
-    switch(longBool){
-    case true: function = fS->flongdouble; break;
-    default:   function = fS->fdouble;
-    }
+  case &FloatType(1):
+    function = fS->fdouble;
+    break;
+  case &FloatType(_):
+    function = fS->flongdouble;
     break;
   case &PointerType(_):
     function = fS->fvoidstar;
@@ -428,7 +428,7 @@ static bool is_zero(exp_t e) {
   case &Aggregate_e(_,_,dles,_):  fallthru(dles);
   case &CompoundLit_e(_,dles): fallthru(dles);
   case &UnresolvedMem_e(_,dles):
-    for (; dles != NULL; dles = dles->tl) 
+    for (; dles != NULL; dles = dles->tl)
       if (!is_zero((*dles->hd)[1])) return false;
     return true;
   default: return false;
@@ -438,7 +438,7 @@ static bool is_zero(exp_t e) {
 // return true if t is a nullable pointer type i.e., *
 static bool is_nullable(type_t t) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_,_))): 
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_,_))):
     return conref_def(false,n);
   default: toc_impos("is_nullable");
   }
@@ -465,7 +465,7 @@ static qvar_t collapse_qvar_tag(qvar_t x,string_t<`H> tag) {
 static type_t typ_to_c(type_t t); // forward declarations
 
 // used to generate struct definitions for tuple types
-// we share the struct definitions where possible.  
+// we share the struct definitions where possible.
 static type_t add_tuple_type(list_t<$(tqual_t,type_t)@,`r> tqs0) {
   let TocState{.dyn = dyn, .tuple_types = tuple_types, ...} = *toc_state;
   region d = open(dyn); {
@@ -488,11 +488,11 @@ static type_t add_tuple_type(list_t<$(tqual_t,type_t)@,`r> tqs0) {
     for (int i=1; ts2 != NULL; ts2 = ts2->tl, i++)
       fs = new List(new Aggrfield(fieldname(i),mt_tq,ts2->hd,NULL,NULL),fs);
     fs = List::imp_rev(fs);
-    let sd = new Aggrdecl{.kind=StructA, .sc = Public, 
-                          .name = new $(Rel_n(NULL),xname), .tvs = NULL, 
-                          .impl = new AggrdeclImpl{.exist_vars = NULL, 
+    let sd = new Aggrdecl{.kind=StructA, .sc = Public,
+                          .name = new $(Rel_n(NULL),xname), .tvs = NULL,
+                          .impl = new AggrdeclImpl{.exist_vars = NULL,
                                                    .rgn_po = NULL,
-                                                   .fields = fs, 
+                                                   .fields = fs,
                                                    .tagged=false},
                           .attributes = NULL};
     result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
@@ -513,7 +513,7 @@ static type_t add_struct_type(qvar_t struct_name,
     // look for the same instantiation of abstract-struct-type already declared
     for (let tts = *abs_struct_types; tts != NULL; tts = tts->tl) {
       let &$(x,ts2,t) = tts->hd;
-      if (qvar_cmp(x,struct_name) == 0 && 
+      if (qvar_cmp(x,struct_name) == 0 &&
           List::length(type_args) == List::length(ts2)) {
         bool okay = true;
         for (let ts = type_args; ts != NULL; ts=ts->tl, ts2=ts2->tl)
@@ -523,7 +523,7 @@ static type_t add_struct_type(qvar_t struct_name,
       }
     }
     // haven't seen this one before, add a declaration
-    // we're calling it a "tuple" so we don't have to worry about name 
+    // we're calling it a "tuple" so we don't have to worry about name
     // clashes.
     stringptr_t xname = new (string_t)aprintf("_tuple%d",tuple_type_counter++);
     type_t x = strct(xname);
@@ -545,19 +545,19 @@ static type_t add_struct_type(qvar_t struct_name,
                                   f->width,f->attributes},fs);
     }
     fs = List::imp_rev(fs);
-    let sd = new Aggrdecl{.kind=StructA, .sc = Public, 
-                          .name = new $(Rel_n(NULL),xname), .tvs = NULL, 
-                          .impl = new AggrdeclImpl{.exist_vars = NULL, 
+    let sd = new Aggrdecl{.kind=StructA, .sc = Public,
+                          .name = new $(Rel_n(NULL),xname), .tvs = NULL,
+                          .impl = new AggrdeclImpl{.exist_vars = NULL,
                                                    .rgn_po = NULL,
-                                                   .fields = fs, 
+                                                   .fields = fs,
                                                    .tagged=false},
                           .attributes = NULL};
     result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
     return x;
   }
 }
-                              
-                              
+
+
 
 // generate a temporary variable
 // FIX: need to guarantee these can't conflict
@@ -592,16 +592,16 @@ static exp_t datatype_tag(datatypedecl_t td, qvar_t name) {
     ++ans;
     fs = fs->tl;
   }
-  return uint_exp(ans,DL);    
+  return uint_exp(ans,DL);
 }
 
 ///////////////////////////////////////////////////////////////
 //         Convert a Cyclone type to a C type                //
 ///////////////////////////////////////////////////////////////
-static void enumdecl_to_c(enumdecl_t ed); 
+static void enumdecl_to_c(enumdecl_t ed);
 static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_result_decls);
 static void datatypedecl_to_c(datatypedecl_t tud);
-static $(opt_t<var_t,`r>,tqual_t,type_t)@ 
+static $(opt_t<var_t,`r>,tqual_t,type_t)@
 arg_to_c($(opt_t<var_t,`r>,tqual_t,type_t)@ a) {
   let $(x,y,z) = *a;
   return new $(x,y,typ_to_c(z));
@@ -636,8 +636,8 @@ static type_t typ_to_c_array(type_t t) {
 
 static aggrfield_t aggrfield_to_c(aggrfield_t f) {
   // JGM: I'm making the qualifiers non-const here to allow initialization
-  return new Aggrfield{.name=f->name, 
-                          .tq=mt_tq, // .tq=f->tq, 
+  return new Aggrfield{.name=f->name,
+                          .tq=mt_tq, // .tq=f->tq,
                           .type = typ_to_c(f->type),
                        .width=f->width, .attributes=f->attributes};
 }
@@ -670,14 +670,14 @@ static type_t dyn_rgn_typ() {
 }
 static bool is_boxed_tvar(type_t t) {
   switch (compress(t)) {
-  case &VarType(tv): 
+  case &VarType(tv):
     return kind_leq(typ_kind(t),&tbk);
   default: return false;
   }
 }
 static bool is_abs_tvar(type_t t) {
   switch (compress(t)) {
-  case &VarType(tv): 
+  case &VarType(tv):
     return kind_leq(&ak,typ_kind(t));
   default: return false;
   }
@@ -688,7 +688,7 @@ static type_t typ_to_c(type_t t) {
   switch (t) {
   case &VoidType: return t;
   case &Evar(_,NULL,_,_): return sint_typ; // pick something widely useful
-  case &Evar(_,&Opt{.v=t2},_,_): return typ_to_c(t2); 
+  case &Evar(_,&Opt{.v=t2},_,_): return typ_to_c(t2);
   case &VarType(tv):
     if (tvar_kind(tv,&bk)->kind == AnyKind) {
 //       fprintf(stderr,"Mapping type var %s to void; has AnyKind\n",
@@ -709,21 +709,20 @@ static type_t typ_to_c(type_t t) {
     case &DynEither_b: return dyneither_ptr_typ;
     default: return star_typ(t2,&HeapRgn_val,tq,false_conref);
     }
-  case &IntType(_,_): 
-  case &FloatType:     
-  case &DoubleType(_): return t;
-  case &ArrayType(ArrayInfo{t2,tq,e,_,ztl}): 
+  case &IntType(_,_):
+  case &FloatType(_): return t;
+  case &ArrayType(ArrayInfo{t2,tq,e,_,ztl}):
     return array_typ(typ_to_c_array(t2),tq,e,false_conref,ztl);
   case &FnType(FnInfo{_,_,tq2,t2,args,c_vararg,cyc_vararg,_,atts}):
     // just drop the type arguments & effect and translate the nested types
-    // also, drop any format descriptors 
+    // also, drop any format descriptors
     // FIX:  problem with higher-order functions?  Again C's rules are strange.
     // FIX:  dropping noreturn and const attributes b/c C is complaining.
     let new_atts = NULL;
     for (; atts != NULL; atts = atts->tl)
       switch (atts->hd) {
-      case &Noreturn_att: 
-      case &Const_att: 
+      case &Noreturn_att:
+      case &Const_att:
       case &Format_att(_,_,_): continue;
       case &Noliveunique_att(_): continue; // correct: a Cyclone addition
       case &Initializes_att(_): continue; // correct: a Cyclone addition
@@ -745,7 +744,7 @@ static type_t typ_to_c(type_t t) {
     return add_tuple_type(tqs);
   // FIX: we may have to actually declare these things and use them
   // consistently to make GCC happy.
-  case &AnonAggrType(k,fs): 
+  case &AnonAggrType(k,fs):
     return new AnonAggrType(k,List::map(aggrfield_to_c,fs));
   case &AggrType(AggrInfo(info,ts)):
     // We may be in C code, in which case the implementation may not be set
@@ -774,8 +773,8 @@ static type_t typ_to_c(type_t t) {
   case &EnumType(tdn,_): return t;
   case &AnonEnumType(fs): enumfields_to_c(fs); return t;
   case &TypedefType(tdn,ts,td,topt):
-    if (topt == NULL || noexpand_r) 
-      if (ts != NULL) 
+    if (topt == NULL || noexpand_r)
+      if (ts != NULL)
         return new TypedefType(tdn,NULL,td,NULL);
       else return t;
     // just drop the type arguments and translate the nested types
@@ -796,12 +795,12 @@ static type_t typ_to_c(type_t t) {
   case &ValueofType(_):
     toc_impos("Toc::typ_to_c: type translation passed a valueof_t");
   case &TypeDeclType(&{.r = &Aggr_td(ad),...},_):
-    aggrdecl_to_c(ad,true); 
+    aggrdecl_to_c(ad,true);
     if (ad->kind==UnionA)
       return aggrdecl_type(ad->name,unionq_typ);
     else return aggrdecl_type(ad->name,strctq);
   case &TypeDeclType(&{.r = &Enum_td(ed),...},_):
-    enumdecl_to_c(ed); 
+    enumdecl_to_c(ed);
     return t;
   case &TypeDeclType(&{.r = &Datatype_td(dd),...},t):
     datatypedecl_to_c(dd);
@@ -811,7 +810,7 @@ static type_t typ_to_c(type_t t) {
 
 static exp_t array_to_ptr_cast(type_t t,exp_t e,seg_t l) {
   switch (t) {
-  case &ArrayType(ArrayInfo{t2,tq,_,_,_}): 
+  case &ArrayType(ArrayInfo{t2,tq,_,_,_}):
     return cast_it(star_typ(t2,&HeapRgn_val,tq,false_conref),e);
   default: return cast_it(t,e);
   }
@@ -823,12 +822,11 @@ static bool atomic_typ(type_t t) {
   switch (compress(t)) {
   case &VoidType:       return true;
   case &VarType(_):    return false;
-  case &IntType(_,_):  
-  case &EnumType(_,_): 
-  case &AnonEnumType(_): 
-  case &FloatType:      
-  case &DoubleType(_): 
-  case &FnType(_):     
+  case &IntType(_,_):
+  case &EnumType(_,_):
+  case &AnonEnumType(_):
+  case &FloatType(_):
+  case &FnType(_):
   case &TagType(_): return true;
   case &ArrayType(ArrayInfo{t,_,_,_,_}): return atomic_typ(t);
     // FIX: really should compute in terms of the instantiation
@@ -859,8 +857,8 @@ static bool atomic_typ(type_t t) {
     return true;
     // FIX: can do better if all variants are fieldless (but then they could
     //      have used an enum)
-  case &DatatypeType(_):    
-  case &PointerType(_):   
+  case &DatatypeType(_):
+  case &PointerType(_):
   case &DynRgnType(_,_):
   case &RgnHandleType(_): return false;
   default: toc_impos("atomic_typ:  bad type %s",typ2string(t));
@@ -892,14 +890,14 @@ static bool is_poly_field(type_t t, field_name_t f) {
     fallthru(ad->impl->fields);
   case &AnonAggrType(_,fs):
     let field = lookup_field(fs,f);
-    if (field == NULL) 
+    if (field == NULL)
       toc_impos("is_poly_field: bad field %s",*f);
     return is_void_star_or_boxed_tvar(field->type);
   default: toc_impos("is_poly_field: bad type %s",typ2string(t));
   }
 }
 
-// returns true when e is projection of a field in a struct that has a 
+// returns true when e is projection of a field in a struct that has a
 // variable type before instantiation.  For instance, the field hd has
 // type `a before instantiation in struct cons.
 static bool is_poly_project(exp_t e) {
@@ -936,7 +934,7 @@ static exp_t rmalloc_exp(exp_t rgn, exp_t s) {
 static exp_t calloc_exp(type_t elt_type, exp_t s, exp_t n) {
   if (atomic_typ(elt_type))
     return fncall_exp(_cyccalloc_atomic_e, list(s,n), DL);
-  else 
+  else
     return fncall_exp(_cyccalloc_e, list(s,n), DL);
 }
 // rcalloc something
@@ -956,7 +954,7 @@ static stmt_t throw_match_stmt() {
 
 // t*{sz} -> t? at top-level
 static exp_t make_toplevel_dyn_arr(type_t t, exp_t sz, exp_t e) {
-  // Note e must be either (a) a string or else (b) a [possibly cast] 
+  // Note e must be either (a) a string or else (b) a [possibly cast]
   // identifier that is an array.
   // For case a, we generate
   //   t x[sz] = e;
@@ -1020,7 +1018,7 @@ static struct Env<`r::R> {
   struct FallthruInfo<`r2> *`r2 fallthru_info;
   Dict::dict_t<qvar_t,exp_t,`r> varmap;
   bool toplevel;
-  bool @`r2 in_lhs;  
+  bool @`r2 in_lhs;
   region_t<`r> rgn;
 };
 typedef struct Env<`r> @`r env_t<`r>;
@@ -1072,7 +1070,7 @@ static void set_lhs(env_t<`r> e, bool b) {
 // The type allows y to be a general exp, but in practice it is always a var_exp
 static env_t<`r> add_varmap(region_t<`r> r, env_t<`r2> e, qvar_t x, exp_t y : {`r2} > `r) {
   switch ((*x)[0]) {
-  case {.Rel_n = _}: 
+  case {.Rel_n = _}:
     toc_impos("Toc::add_varmap on Rel_n: %s\n", qvar2string(x));
   default: break;
   }
@@ -1100,14 +1098,14 @@ non_last_switchclause_env(region_t<`r> r,
   fallthru_vars = List::imp_rev(fallthru_vars);
   let &Env{b,c,f,v,t,lhs,_} = e;
   let &Env{_,_,_,next_case_varmap,_,_,_} = next_case_env;
-  struct FallthruInfo<`r>*`r fi = 
+  struct FallthruInfo<`r>*`r fi =
     rnew(r) FallthruInfo{fallthru_l,fallthru_vars,
                            Dict::rshare(r,next_case_varmap)};
   return rnew(r) Env{rnew(r) break_l, c, fi, Dict::rshare(r,v),t,lhs,r};
 }
 
-static env_t<`r> 
-last_switchclause_env(region_t<`r> r, env_t<`r2> e, var_t break_l : 
+static env_t<`r>
+last_switchclause_env(region_t<`r> r, env_t<`r2> e, var_t break_l :
                       {`r2} > `r) {
   let &Env{b,c,f,v,t,lhs,_} = e;
   return rnew(r) Env{rnew(r) break_l, c, NULL, Dict::rshare(r,v), t, lhs, r};
@@ -1116,7 +1114,7 @@ last_switchclause_env(region_t<`r> r, env_t<`r2> e, var_t break_l :
 // must have no pattern vars and type is int, char, or datatype of a type
 // with no value constructors. (If it weren't for allowing fallthru
 // anywhere, we wouldn't need the next_l.)
-static env_t<`r> 
+static env_t<`r>
 switch_as_switch_env(region_t<`r> r, env_t<`r2> e, var_t next_l :
                      {`r2} > `r) {
   let &Env{b,c,f,v,t,lhs,_} = e;
@@ -1141,8 +1139,8 @@ static bool need_null_check(exp_t e) { // e must be pre-translation!
   switch(e->annot) {
   case &CfFlowInfo::UnknownZ(_): return is_nullable(e->topt->v);
   case &CfFlowInfo::NotZero(_):  return false;
-  case &CfFlowInfo::IsZero: 
-    Tcutil::terr(e->loc,"dereference of NULL pointer"); 
+  case &CfFlowInfo::IsZero:
+    Tcutil::terr(e->loc,"dereference of NULL pointer");
     return false;
   case &EmptyAnnot:
     // warning is unfounded under sizeof as in memcpy
@@ -1156,8 +1154,8 @@ static CfFlowInfo::relns_t get_relns(exp_t e) { // e must be pre-translation!
   switch (e->annot) {
   case &CfFlowInfo::UnknownZ(r): return r;
   case &CfFlowInfo::NotZero(r):  return r;
-  case &CfFlowInfo::IsZero: 
-    Tcutil::terr(e->loc,"dereference of NULL pointer"); 
+  case &CfFlowInfo::IsZero:
+    Tcutil::terr(e->loc,"dereference of NULL pointer");
     return NULL;
   case &EmptyAnnot: return NULL;
   default: toc_impos("get_relns");
@@ -1183,14 +1181,14 @@ static bool check_const_array(unsigned i, type_t t) {
 }
 
 // see if y is <= numelts(v)
-static bool check_leq_size_var(CfFlowInfo::relns_t relns, vardecl_t v, 
+static bool check_leq_size_var(CfFlowInfo::relns_t relns, vardecl_t v,
                                vardecl_t y) {
   for (; relns != NULL; relns = relns->tl) {
     let r = relns->hd;
     if (r->vd != y) continue;
     switch (r->rop) {
     case {.LessNumelts = z} : fallthru(z);
-    case {.LessEqNumelts = z}: if (z == v) return true; else break; 
+    case {.LessEqNumelts = z}: if (z == v) return true; else break;
     default: continue;
     }
   }
@@ -1210,9 +1208,9 @@ static bool check_leq_size(CfFlowInfo::relns_t relns, vardecl_t v, exp_t e,
     if (check_leq_size_var(relns,v,y)) return true;
     break;
   case &Const_e({.Int_c = $(None,i)}): fallthru(i);
-  case &Const_e({.Int_c = $(Signed,i)}): 
+  case &Const_e({.Int_c = $(Signed,i)}):
     return ((i >= 0) && check_const_array(i,vtype));
-  case &Const_e({.Int_c = $(Unsigned,i)}): 
+  case &Const_e({.Int_c = $(Unsigned,i)}):
     return check_const_array(i,vtype);
   case &Primop_e(Numelts,&List(e2,_)):
     // see if e2 is v
@@ -1233,12 +1231,12 @@ static bool check_leq_size(CfFlowInfo::relns_t relns, vardecl_t v, exp_t e,
 // return true if we can prove from relns that i < numelts(a)
 //  FIX: doesn't deal with the case where i is a constant and a's size
 //  can be found.
-static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t relns, 
+static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t relns,
                          exp_t a, exp_t i) {
 #ifdef BCE_DEBUG
   fprintf(stderr,"bounds check on %s:%s and %s\n",exp2string(a),
           typ2string(a_typ),exp2string(i));
-  fprintf(stderr,"relns: ["); CfFlowInfo::print_relns(relns); 
+  fprintf(stderr,"relns: ["); CfFlowInfo::print_relns(relns);
   fprintf(stderr,"]\n");
 #endif
   // if a has type T*{x} or T[x], then we can pretend like it's
@@ -1251,15 +1249,15 @@ static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t relns,
   case &Var_e(_,&Global_b(x1)): fallthru(x1);
   case &Var_e(_,&Param_b(x1)):
     if (x1->escapes) fallthru;
-    x = x1; 
-    break; 
+    x = x1;
+    break;
   default:
     // we're going to fake up a vardecl here
     static string_t bogus_string = "*bogus*";
-    static $(nmspace_t,var_t) bogus_qvar = 
+    static $(nmspace_t,var_t) bogus_qvar =
       $(Nmspace{.Loc_n = 0},&bogus_string);
-    static struct Vardecl bogus_vardecl = 
-    {.sc = Public, .name = &bogus_qvar, 
+    static struct Vardecl bogus_vardecl =
+    {.sc = Public, .name = &bogus_qvar,
      .tq = Tqual{false,false,false,false,NULL},
      .type = &VoidType_val, .initializer = NULL, .rgn = NULL,
      .attributes = NULL, .escapes = false};
@@ -1268,14 +1266,14 @@ static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t relns,
     x->type = a_typ;
   }
   let xtype = a_typ;
-  
+
   inner_loop:
     switch (i->r) {
     case &Cast_e(t,e2,_,_): i = e2; goto inner_loop;
     case &Const_e({.Int_c = $(None,i)}): fallthru(i);
-    case &Const_e({.Int_c = $(Signed,i)}): 
+    case &Const_e({.Int_c = $(Signed,i)}):
       return ((i >= 0) && check_const_array(i+1,xtype));
-    case &Const_e({.Int_c = $(Unsigned,i)}): 
+    case &Const_e({.Int_c = $(Unsigned,i)}):
       return check_const_array(i+1,xtype);
     case &Primop_e(Mod,&List(e1,&List(e2,_))):
       // we have x[e1 % e2]
@@ -1295,7 +1293,7 @@ static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t relns,
             // y < numelts(x)
           case {.LessNumelts = z}: if (x == z) return true; else break;
           case {.LessVar = $(z,zt)}:
-            // y < z -- 
+            // y < z --
             // first try to find out z : tag_t<t> and x has type t*{e} and
             // then prove t <= e.  Here's where we need z's original type.
             // Unfortunately, z->type is the translated type at this point.
@@ -1317,7 +1315,7 @@ static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t relns,
                 fprintf(stderr,"checking to see if %s <= %s\n",
                         exp2string(tve), exp2string(tage));
 #endif
-                if (Evexp::lte_const_exp(tve, tage)) 
+                if (Evexp::lte_const_exp(tve, tage))
                   return true;
                 break;
               default: break;
@@ -1325,21 +1323,21 @@ static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t relns,
               break;
             default: break;
             }
-            // then try to find z == numelts(x) or z <= numelts(x) 
+            // then try to find z == numelts(x) or z <= numelts(x)
             for (let rs = relns; rs != NULL; rs = rs->tl) {
               let r = rs->hd;
-              if (r->vd == z) 
+              if (r->vd == z)
                 switch (r->rop) {
                 case {.LessEqNumelts = w}: fallthru(w);
                 case {.LessNumelts = w}:
-                  if (x == w) return true; 
+                  if (x == w) return true;
 		  break;
-                case {.EqualConst = c}: 
+                case {.EqualConst = c}:
                   return check_const_array(c,xtype);
                 case {.LessEqConst = c} && c > 0:
                   return check_const_array(c,xtype);
                 case {.LessVar = $(w,_)}:
-                  if (check_leq_size_var(relns, x, w)) return true; 
+                  if (check_leq_size_var(relns, x, w)) return true;
 		  break;
                 default: break;
                 }
@@ -1398,8 +1396,8 @@ static exp_t make_struct(env_t nv, qvar_t x, type_t struct_typ, stmt_t s,
   return stmt_exp(declare_stmt(x,t,eo,s,DL),DL);
 }
 
-static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd, 
-                                 exp_t e1, exp_t e2, bool zero_term, stmt_t s, 
+static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
+                                 exp_t e1, exp_t e2, bool zero_term, stmt_t s,
                                  bool e1_already_translated);
 
 static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
@@ -1407,7 +1405,7 @@ static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
                                stmt_t s);
 
 // code to initialize an array
-static stmt_t init_array(env_t nv, exp_t lhs, 
+static stmt_t init_array(env_t nv, exp_t lhs,
                          list_t<$(list_t<designator_t>,exp_t)@> dles0,
                          stmt_t s) {
   int count = List::length(dles0)-1;
@@ -1453,7 +1451,7 @@ static stmt_t init_array(env_t nv, exp_t lhs,
 
 // code to initialize a comprehension
 // WARNING: Changing the translation here will break Tovc.
-static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd, 
+static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
                                  exp_t e1, exp_t e2, bool zero_term,
                                  stmt_t s, bool e1_already_translated) {
   let x1 = vd->name;
@@ -1512,7 +1510,7 @@ static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
     let &$(ds,e) = es->hd;
     if(ds == NULL)
       toc_impos("empty designator list");
-    if(ds->tl != NULL) 
+    if(ds->tl != NULL)
       toc_impos("too many designators in anonymous struct");
     switch (ds->hd) {
     case &FieldName(f):
@@ -1542,14 +1540,14 @@ static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
 
 // Would be nice to share more code with init_struct
 // but the designators get in the way.
-static exp_t init_tuple(env_t nv, bool pointer, 
+static exp_t init_tuple(env_t nv, bool pointer,
                         exp_opt_t rgnopt, list_t<exp_t> es) {
   // $(e1,...,en)  -> ({ t x;   x.f1 = e1; ... x.fn = en; x})
   // &$(e1,...,en) -> ({ t * x=malloc(sizeof(t); x->f1 = e1; ... x->fn = en; x})
   TOC_RGN(nv,r) {
     let tqs = List::rmap(r,tup_to_c,es);
     let n   = add_tuple_type(tqs);
-    
+
     let x    = temp_var();
     let xexp = var_exp(x,DL);
     let s    = exp_stmt(xexp,DL);
@@ -1592,8 +1590,8 @@ static int get_member_offset(aggrdecl_t ad, field_name_t f) {
 }
 
 static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
-                         bool pointer, exp_opt_t rgnopt, 
-                         list_t<$(list_t<designator_t>,exp_t)@> dles, 
+                         bool pointer, exp_opt_t rgnopt,
+                         list_t<$(list_t<designator_t>,exp_t)@> dles,
                          typedef_name_t tdn) {
   let x    = temp_var();
   let xexp = var_exp(x,DL);
@@ -1601,11 +1599,11 @@ static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
 
   let lval_f = pointer ? aggrarrow_exp : aggrmember_exp;
   let aggr_typ = typ_to_c(struct_type); //aggrdecl_type(tdn,strctq);
-  
+
   bool is_atomic = true;
   aggrdecl_t ad;
   switch(compress(struct_type)) {
-  case &AggrType(AggrInfo(info,_)): 
+  case &AggrType(AggrInfo(info,_)):
     ad = get_known_aggrdecl(info);
     break;
   default: toc_impos("init_struct: bad struct type");
@@ -1696,7 +1694,7 @@ static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t> fs,
 // We find the underlying lvalue, call it el.
 // We replace el in e1 with f(el,env)
 // We assume that variables in f(el,env) will not be captured by any
-static void lvalue_assign(exp_t e1, list_t<field_name_t> fs, 
+static void lvalue_assign(exp_t e1, list_t<field_name_t> fs,
 			  exp_t f(exp_t,`a), `a f_env){
   switch (e1->r) {
   case &StmtExp_e(s): lvalue_assign_stmt(s,fs,f,f_env); break;
@@ -1719,7 +1717,7 @@ static void lvalue_assign(exp_t e1, list_t<field_name_t> fs,
     break;
   }
 }
-static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t> fs, 
+static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t> fs,
 			       exp_t f(exp_t,`a), `a f_env) {
   switch (s->r) {
   case &Exp_s(e1):    lvalue_assign(e1,fs,f,f_env);      break;
@@ -1743,7 +1741,7 @@ static exp_t push_address_exp(exp_t e) {
   case &Deref_e(e1):
     return e1;
   case &StmtExp_e(s):
-    // we only have this case because of assignments to 
+    // we only have this case because of assignments to
     // tagged union members -- see tagged_union_assignop
     push_address_stmt(s);
     return e;
@@ -1758,7 +1756,7 @@ static void push_address_stmt(stmt_t s) {
   case &Seq_s(_,s2): fallthru(s2);
   case &Decl_s(_,s2): push_address_stmt(s2); break;
   case &Exp_s(*e): *e = push_address_exp(*e); break;
-  default: 
+  default:
     toc_impos("can't take & of stmt %s",stmt2string(s));
   }
 }
@@ -1804,35 +1802,36 @@ static exp_t generate_zero(type_t t) {
   case &EnumType(_,_)  : fallthru;
   case &AnonEnumType(_): fallthru(Unsigned);
   case &IntType(sn,Int_sz) : fallthru(sn);
-  case &IntType(sn,Long_sz) : 
+  case &IntType(sn,Long_sz) :
     res = const_exp(Int_c(sn,0),DL); break;
-  case &IntType(sn,LongLong_sz) : 
+  case &IntType(sn,LongLong_sz) :
     res = const_exp(LongLong_c(sn,0),DL); break;
-  case &FloatType   : fallthru;
-  case &DoubleType(_)  : res = const_exp(Float_c("0.0"),DL); break;
-  default: 
+  case &FloatType(0): res = const_exp(Float_c("0.0F",0),DL); break;
+  case &FloatType(1): res = const_exp(Float_c("0.0",1),DL); break;
+  case &FloatType(i): res = const_exp(Float_c("0.0L",i),DL); break;
+  default:
     toc_impos("found non-zero type %s in generate_zero",typ2string(t));
   }
   res->topt = new Opt(t);
   return res;
 }
 
-// We're translating e which is of the form e_1 op= e_2 where e_1 
+// We're translating e which is of the form e_1 op= e_2 where e_1
 // involves a zero-terminated pointer and is of the form *ea or
 // ea[eb].  We need to prevent overwriting the last zero in the array.  unary & applied to non-lvalue
-static void zero_ptr_assign_to_c(env_t nv, exp_t e, 
+static void zero_ptr_assign_to_c(env_t nv, exp_t e,
                                  exp_t e1, opt_t<primop_t> popt, exp_t e2,
-                                 type_t ptr_type, 
+                                 type_t ptr_type,
                                  bool is_dyneither,
                                  type_t elt_type) {
   // To simplify the translation, we always use a fat pointer and generate:
-  //  ({ fat_ptr_type x = ((fat_ptr_type)ea) + eb; 
+  //  ({ fat_ptr_type x = ((fat_ptr_type)ea) + eb;
   //     elt_type y = *x; // check here that x is not null and in bounds
   //     elt_type z = y op e2;
   //     if (numelts(x) == 1 && y == zero && z != zero) _throw_arraybounds();
   //     *x.curr = z; })
   // Note that this is generated and *then* translated to ensure the
-  // proper constraints.  
+  // proper constraints.
   type_t fat_ptr_type = dyneither_typ(elt_type, &HeapRgn_val, mt_tq, true_conref);
   let c_elt_type = typ_to_c(elt_type);
   let c_fat_ptr_type = typ_to_c(fat_ptr_type);
@@ -1842,13 +1841,13 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
   switch (e1->r) {
   case &Deref_e(ea):
     if (!is_dyneither) {
-      ea = cast_exp(fat_ptr_type,ea,false,Other_coercion,DL); 
+      ea = cast_exp(fat_ptr_type,ea,false,Other_coercion,DL);
       ea->topt = new Opt(fat_ptr_type);
     }
     exp_to_c(nv,ea); xinit = ea; break;
   case &Subscript_e(ea,eb):
     if (!is_dyneither) {
-      ea = cast_exp(fat_ptr_type,ea,false,Other_coercion,DL); 
+      ea = cast_exp(fat_ptr_type,ea,false,Other_coercion,DL);
       ea->topt = new Opt(fat_ptr_type);
     }
     exp_to_c(nv,ea); exp_to_c(nv,eb);
@@ -1884,7 +1883,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     let z_bnd = new Local_b(z_vd);
     nv = add_varmap(rgn2, nv, z, var_exp(z,DL));  // add z to the varmap
     // build y == zero and translate -- here, we need to know what
-    // the element type is to generate the right zero.  
+    // the element type is to generate the right zero.
     let y2_exp = varb_exp(y,y_bnd,DL); y2_exp->topt = deref_x->topt;
     let zero1_exp = generate_zero(elt_type);
     let comp1_exp = prim2_exp(Eq,y2_exp,zero1_exp,DL);
@@ -1919,7 +1918,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
   }
 }
 
-// we have a read of e1.f or e1->f where e1 does any needed null checks, 
+// we have a read of e1.f or e1->f where e1 does any needed null checks,
 // but we now have to do a tag-check.  We translate this to:
 //  ({ temp = e1;
 //     if (temp->f.tag != f_tag) throw_match();
@@ -1928,7 +1927,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
 // unless we are in a left-hand-side context, in which case we translate to
 //  ({ temp = &e1->f; // okay because e1 must be a lhs
 //     if (temp->tag != f_tag) throw_match();
-//     &temp->val; 
+//     &temp->val;
 //  })
 static raw_exp_t check_tagged_union(exp_t e1,type_t e1_c_type,
                                     type_t aggrtype,field_name_t f,
@@ -1953,7 +1952,7 @@ static raw_exp_t check_tagged_union(exp_t e1,type_t e1_c_type,
     let e1_p_type = cstar_typ(e1_c_type,mt_tq);
     let e1_f = address_exp(aggrproj(e1,f,DL),DL);
     let s = declare_stmt(temp,e1_p_type,e1_f,seq_stmt(ifs,sres,DL),DL);
-    return stmt_exp_r(s);    
+    return stmt_exp_r(s);
   } else {
     let temp_f_tag = aggrmember_exp(aggrproj(temp_exp,f,DL),tag_sp,DL);
     let test_exp = neq_exp(temp_f_tag,f_tag,DL);
@@ -1966,17 +1965,17 @@ static raw_exp_t check_tagged_union(exp_t e1,type_t e1_c_type,
 }
 
 // return true if e is e1.f or e1->f where e1 is a (pointer to a)
-// tagged union.  While we're at it, calculate the tag for the 
+// tagged union.  While we're at it, calculate the tag for the
 // corresponding member f_tag.
-static bool is_tagged_union_project(exp_t e, int @f_tag, 
+static bool is_tagged_union_project(exp_t e, int @f_tag,
                                     type_t @ tagged_member_type,
                                     bool clear_read) {
   switch (e->r) {
   case &Cast_e(_,e1,_,_): toc_impos("cast on lhs!");
   case &AggrMember_e(e1,f,_,*is_read):
     switch (compress(e1->topt->v)) {
-    case &AggrType(AggrInfo(info,...)): 
-      let ad = get_known_aggrdecl(info); 
+    case &AggrType(AggrInfo(info,...)):
+      let ad = get_known_aggrdecl(info);
       *f_tag = get_member_offset(ad,f);
       // FIX: we need to get unique names for these damned structs...
       string_t str = aprintf("_union_%s_%s",*((*ad->name)[1]),*f);
@@ -1989,8 +1988,8 @@ static bool is_tagged_union_project(exp_t e, int @f_tag,
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{.elt_typ = et,...}):
       switch (compress(et)) {
-      case &AggrType(AggrInfo(info,...)): 
-        let ad = get_known_aggrdecl(info); 
+      case &AggrType(AggrInfo(info,...)):
+        let ad = get_known_aggrdecl(info);
         *f_tag = get_member_offset(ad,f);
         // FIX: we need to get unique names for these damned structs...
         string_t str = aprintf("_union_%s_%s",*((*ad->name)[1]),*f);
@@ -2032,7 +2031,7 @@ void add_tagged_union_check_for_swap(exp_t e, int tag, type_t mem_type) {
 // or e1->f.  In particular, when we have e1->f = e2, we rewrite to:
 // ({ temp = &e1->f;
 //    temp->tag = f_tag;
-//    temp->val = e2; }) 
+//    temp->val = e2; })
 // and if we have e1->f op= e2 we rewrite to:
 // ({ temp = &e1->f;
 //    if (temp->tag != f_tag) throw_match();
@@ -2048,7 +2047,7 @@ static raw_exp_t tagged_union_assignop(exp_t e1, type_t e1_cyc_type,
   exp_t f_tag = signed_int_exp(tag_num,DL);
   stmt_t s3 = exp_stmt(assignop_exp(temp_val,popt,e2,DL),DL);
   stmt_t s2;
-  if (popt == NULL) 
+  if (popt == NULL)
     s2 = exp_stmt(assign_exp(temp_tag,f_tag,DL),DL);
   else {
     let test_exp = neq_exp(temp_tag,f_tag,DL);
@@ -2069,7 +2068,7 @@ static void exp_to_c(env_t nv, exp_t e) {
   type_t old_typ = e->topt->v;
   switch (r) {
   case &Const_e({.Null_c = _}):
-    // NULL translate to 0 unless a tagged array, then {0,0,0}, via runtime 
+    // NULL translate to 0 unless a tagged array, then {0,0,0}, via runtime
     // call unless at top-level
     // note: we don't need the element type b/c the length is 0 (so we lie)
     // note: should share all these uint_exp(0,DL) things
@@ -2077,14 +2076,14 @@ static void exp_to_c(env_t nv, exp_t e) {
     if(is_tagged_pointer_typ(old_typ)) {
       if(is_toplevel(nv))
 	e->r = make_toplevel_dyn_arr(old_typ, zero, zero)->r;
-      else 
+      else
 	e->r = fncall_exp_r(_tag_dyneither_e, list(zero,zero,zero));
     } else {
       e->r = (raw_exp_t)(&zero_exp);
     }
     break;
   case &Const_e(_): break;
-  case &Var_e(qv,b): 
+  case &Var_e(qv,b):
     try e->r = lookup_varmap(nv,qv)->r;
     catch { case &Dict::Absent:
        toc_impos("Can't find %s in exp_to_c, Var\n", qvar2string(qv));
@@ -2100,7 +2099,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     case Numelts:
       exp_t arg = es->hd;
       switch (compress(arg->topt->v)) {
-      case &ArrayType(ArrayInfo{_,_,e2,_,_}): 
+      case &ArrayType(ArrayInfo{_,_,e2,_,_}):
         // FIX: copy the expression e2 here.
         if (!Evexp::c_can_eval((exp_t)e2))
           terr(e->loc,"can't calculate numelts");
@@ -2109,13 +2108,13 @@ static void exp_to_c(env_t nv, exp_t e) {
 	switch(conref_def(bounds_one,bound)) {
         case &DynEither_b: // retrieve (last_plus_one - curr) via runtime call
 	  e->r = fncall_exp_r(_get_dyneither_size_e,
-                              list(es->hd, 
+                              list(es->hd,
                                    sizeoftyp_exp(typ_to_c(elt_typ),DL)));
           break;
-	case &Upper_b(e2): 
+	case &Upper_b(e2):
           // when zero-terminated, we have to call "strlen"
           if (conref_def(false,zt)) {
-            exp_t function_e = 
+            exp_t function_e =
 	      getFunctionRemovePointer(&_get_zero_arr_size_functionSet,
 				       es->hd);
             e->r = fncall_exp_r(function_e,list(es->hd,e2));
@@ -2130,9 +2129,9 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  break;
 	}
 	break;
-      default: 
+      default:
 	toc_impos("size primop applied to non-array %s (%s)",
-                  typ2string(arg->topt->v),typ2string(arg->topt->v)); 
+                  typ2string(arg->topt->v),typ2string(arg->topt->v));
       }
       break;
     case Plus:
@@ -2181,12 +2180,12 @@ static void exp_to_c(env_t nv, exp_t e) {
 	}
       }
       break;
-    case Eq: 
-    case Neq: 
-    case Gt: 
-    case Gte: 
-    case Lt: 
-    case Lte: 
+    case Eq:
+    case Neq:
+    case Gt:
+    case Gte:
+    case Lt:
+    case Lte:
       // need to extract .curr field of tagged arrays for comparisons
       exp_t e1 = es->hd;
       exp_t e2 = es->tl->hd;
@@ -2207,10 +2206,10 @@ static void exp_to_c(env_t nv, exp_t e) {
     // *ea or ea[eb] and ea is a zero-terminated pointer, for
     // then we need to know that the inc/dec doesn't destroy the
     // trailing 0.  See the special code in the AssignOp_e case.
-    // To combat this, I'm simply disallowing it.  
-    // 
+    // To combat this, I'm simply disallowing it.
+    //
     // Similarly, we need to worry about the case where e2 is a
-    // tagged union projection.  
+    // tagged union projection.
     type_t ptr_type = &VoidType_val;
     type_t elt_type = &VoidType_val;
     bool is_dyneither = false;
@@ -2243,15 +2242,15 @@ static void exp_to_c(env_t nv, exp_t e) {
     set_lhs(nv,true);
     exp_to_c(nv,e2);
     set_lhs(nv,false);
-    // only t ? or zero-terminated types are translated funny, 
+    // only t ? or zero-terminated types are translated funny,
     // note that e2 is an lvalue!
     type_t elt_typ = &VoidType_val;
     if(is_tagged_pointer_typ_elt(old_typ,&elt_typ)) {
       _ fn_e;
       int change = 1;
-      fn_e = (incr==PostInc || incr==PostDec) ? 
+      fn_e = (incr==PostInc || incr==PostDec) ?
         _dyneither_ptr_inplace_plus_post_e : _dyneither_ptr_inplace_plus_e;
-      if (incr == PreDec || incr == PostDec) 
+      if (incr == PreDec || incr == PostDec)
         change = -1;
       e->r = fncall_exp_r(fn_e, list(push_address_exp(e2),
                                      sizeoftyp_exp(typ_to_c(elt_typ),DL),
@@ -2260,7 +2259,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       // e.g, x++ becomes _zero_arr_inplace_plus_post(x,1)
       //let fn_e = (incr == PostInc) ? _zero_arr_inplace_plus_post_e :
       //  _zero_arr_inplace_plus_e;
-      let fnSet = (incr==PostInc) ? &_zero_arr_inplace_plus_functionSet 
+      let fnSet = (incr==PostInc) ? &_zero_arr_inplace_plus_functionSet
 	                          : &_zero_arr_inplace_plus_post_functionSet;
       exp_t fn_e = getFunctionRemovePointer(fnSet, e2);
       e->r = fncall_exp_r(fn_e, list(push_address_exp(e2),
@@ -2272,21 +2271,21 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &AssignOp_e(e1,popt,e2):
     // FIX: not sure all these special-cases work right *together*...
-    // 
+    //
     // We need to know whether or not the expression is of the form
     // *ea op= e2 or ea[eb] op= e2 where ea is a zero-terminated pointer.
     // The reason is that we need to ensure not only that the pointer
-    // is in bounds, but also, if it's pointing to the last element 
+    // is in bounds, but also, if it's pointing to the last element
     // (i.e., the zero) then the value written in should continue to
     // be zero.  So, for instance, if we have *ea = e2, then either ea
     // can't point to the last element or e2 must be 0.  If we have
     // *ea op= e2 then we need to know that either ea can't point to
     // the last element or (0 op= e2) is 0.
-    // 
-    // Similarly, when e1 is a tagged union member, then we need to 
+    //
+    // Similarly, when e1 is a tagged union member, then we need to
     // update its tag as well as the value.  This is problematic when
     // we have something like e.x += 1 which is both a read and a write
-    // of the member.  
+    // of the member.
     // See if e1 is a projection on a tagged union member.
     type_t  e1_old_typ = e1->topt->v;
     type_t  e2_old_typ = e2->topt->v;
@@ -2294,7 +2293,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     type_t tagged_member_struct_type = &VoidType_val; // bogus unless e1_tagged_proj
     if (is_tagged_union_project(e1,&f_tag,&tagged_member_struct_type,true)) {
       set_lhs(nv,true);
-      exp_to_c(nv,e1); 
+      exp_to_c(nv,e1);
       set_lhs(nv,false);
       exp_to_c(nv,e2);
       e->r = tagged_union_assignop(e1,e1_old_typ,popt,e2,e2_old_typ,f_tag,
@@ -2305,15 +2304,15 @@ static void exp_to_c(env_t nv, exp_t e) {
     type_t elt_type = &VoidType_val;
     bool is_dyneither = false;
     if (is_zero_ptr_deref(e1,&ptr_type,&is_dyneither,&elt_type)) {
-      zero_ptr_assign_to_c(nv, e, e1, popt, e2, ptr_type, 
+      zero_ptr_assign_to_c(nv, e, e1, popt, e2, ptr_type,
                            is_dyneither, elt_type);
       return;
-    } 
+    }
     // See if e1 is a polymorphic field (i.e., is an instantiated type
     // variable) -- if so, coerce e2 to void*.
     bool e1_poly    = is_poly_project(e1);
     set_lhs(nv,true);
-    exp_to_c(nv,e1); 
+    exp_to_c(nv,e1);
     set_lhs(nv,false);
     exp_to_c(nv,e2);
     // special case for pointer arithmetic of t ? or zero-terminated types
@@ -2324,7 +2323,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         _ change;
         switch(popt->v) {
         case Plus:  change = e2; break;
-        case Minus: 
+        case Minus:
           change = prim1_exp(Minus,e2,DL); break;
         default:    toc_impos("bad t ? pointer arithmetic");
         }
@@ -2338,7 +2337,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         // We're doing x += e where x is a zero-terminated pointer.
         // Make sure we don't run off the end.
         switch (popt->v) {
-        case Plus: 
+        case Plus:
           done = true;
           e->r = fncall_exp_r(getFunctionRemovePointer(&_zero_arr_inplace_plus_functionSet,e1),list(e1,e2));
           break;
@@ -2348,7 +2347,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     }
     if(!done) {
       // this cast is necessary to avoid gcc warnings
-      if (e1_poly) 
+      if (e1_poly)
         e2->r = cast_it_r(void_star_typ(), new_exp(e2->r,DL));
       // The typechecker guarantees that e1 starts out as an lvalue, but
       // the translation might have to insert casts, NULL checks,
@@ -2409,15 +2408,15 @@ static void exp_to_c(env_t nv, exp_t e) {
 	new_args = new List(es->hd, new_args);
       }
       new_args = new List(fncall_exp(_tag_dyneither_e,
-				     list(argvexp, 
-					  sizeoftyp_exp(cva_type,DL), 
+				     list(argvexp,
+					  sizeoftyp_exp(cva_type,DL),
 					  num_varargs_exp), DL),
 			  new_args);
       new_args = imp_rev(new_args);
       // make the function call
       exp_to_c(nv,e1);
       stmt_t s = exp_stmt(fncall_exp(e1,new_args,DL),DL);
-     
+
       // make the declarations and prepend them
       if(vai->inject) {
 	datatypedecl_t tud;
@@ -2426,7 +2425,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	default: toc_impos("toc: unknown datatype in vararg with inject");
 	}
 	qvar_t ? vs = rnew(r) {for i < num_varargs : temp_var()};
-	
+
         if (num_varargs != 0) {
           // declare argv = {&v1,&v2,...,&vnum_varargs}
           let array_args = NULL;
@@ -2449,7 +2448,7 @@ static void exp_to_c(env_t nv, exp_t e) {
             // DAN: We don't use an initializer b/c we're afraid of the GCC bug,
             //   but I doubt it would happen and it causes a lot of gunk. :-(
             // struct qv_tag temp x;
-            // x.tag = i; 
+            // x.tag = i;
             // x.f1  = arg;
             s = seq_stmt(assign_stmt(aggrmember_exp(varexp,fieldname(1),DL),
                                      arg,DL),
@@ -2460,8 +2459,8 @@ static void exp_to_c(env_t nv, exp_t e) {
             s = declare_stmt(var,strctq(collapse_qvar_tag(qv,"_struct")), NULL,
                              s,DL);
           }
-        } 
-        // if there are no var args, then set argv to the empty fat pointer 
+        }
+        // if there are no var args, then set argv to the empty fat pointer
         // instead of an array of 0 elements to keep ansi c compilers happy
         else {
           let array_args = list(make_dle(uint_exp(0,DL)),make_dle(uint_exp(0,DL)),
@@ -2471,7 +2470,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         }
       } else {
 	// we'd like: argv = { e1, ..., en} where ei is the ith vararg, but
-	// alas I hit the GCC BUG when I did that (in one place in the 
+	// alas I hit the GCC BUG when I did that (in one place in the
 	// pretty printer -- everything else went through fine).  So we do:
 	// t argv[n];
 	// argv[0] = e1; ... argv[n-1] = en;
@@ -2494,10 +2493,10 @@ static void exp_to_c(env_t nv, exp_t e) {
 			 s,DL);
 	*/
       }
-      
+
       e->r = stmt_exp_r(s);
     }
-    break; 
+    break;
   case &Throw_e(e1):
     // throw e -> (t)(throw(e)), the latter being a function call to throw
     exp_to_c(nv,e1);
@@ -2518,9 +2517,9 @@ static void exp_to_c(env_t nv, exp_t e) {
       let k = typ_kind(ts->hd)->kind;
       if(k != EffKind && k != RgnKind) {
 	switch(compress(ts->hd)) {
-	case &VarType(_):    
+	case &VarType(_):
 	case &DatatypeType(_): continue;
-	default: 
+	default:
 	  e->r = array_to_ptr_cast(typ_to_c(e->topt->v),e1,DL)->r;
 	  break;
 	}
@@ -2544,7 +2543,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       let zt2 = conref_def(false,p2.ptr_atts.zero_term);
       switch($(b1,b2)) {
       case $(&Upper_b(b1), &Upper_b(b2)):
-        if ((!Evexp::c_can_eval(b1) || !Evexp::c_can_eval(b2)) && 
+        if ((!Evexp::c_can_eval(b1) || !Evexp::c_can_eval(b2)) &&
             !Evexp::same_const_exp(b1,b2))
           terr(e->loc,"can't validate cast due to potential size differences");
 	if(n1 && !n2) {
@@ -2553,11 +2552,11 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  // cast from t* to t@ -- run-time check: (t*)_check_null(e)
 	  // flow analysis may not set annotation correctly here!
           // sanity checking:
-          if (coercion != NonNull_to_Null) 
+          if (coercion != NonNull_to_Null)
             impos("null-check conversion mis-classified: %s",exp2string(e));
           bool do_null_check = need_null_check(e1);
           if (do_null_check) {
-            if (!user_inserted) 
+            if (!user_inserted)
               Tcutil::warn(e->loc,"inserted null check due to implicit "
                            "cast from * to @ type");
             e->r = cast_it_r(*t,fncall_exp(_check_null_e,
@@ -2620,7 +2619,7 @@ static void exp_to_c(env_t nv, exp_t e) {
           } else {
             // build the t ? struct
             e->r = fncall_exp_r(tag_e,
-                                list(e1, 
+                                list(e1,
                                      sizeoftyp_exp(typ_to_c(p2.elt_typ),DL),
                                      e2));
           }
@@ -2631,11 +2630,11 @@ static void exp_to_c(env_t nv, exp_t e) {
           terr(e->loc,"cannot perform coercion since numelts cannot be determined statically.");
 	if(is_toplevel(nv))
 	  unimp("can't coerce t? to t* or t@ at the top-level");
-        // When we have t?ZEROTERM and are casting to 
+        // When we have t?ZEROTERM and are casting to
         // t*{e2} or t@{e2} *without* the ZEROTERM, then we
-        // can't allow e2 to be the actual size of the array -- 
+        // can't allow e2 to be the actual size of the array --
         // it needs to be one less to ensure that you can't
-        // overwrite the trailing 0.  We achieve this by 
+        // overwrite the trailing 0.  We achieve this by
         // incrementing e2 by one.  That is if x has type t?Z,
         // and we're casting it to t@{2}, then we'd better check
         // that the size is at least 2+1=3.
@@ -2643,7 +2642,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         if (zt1 && !zt2) {
           new_e2 = add_exp(e2,uint_exp(1,NULL),NULL);
         }
-	// cast from t ? to t* or t@ -- run-time check: 
+	// cast from t ? to t* or t@ -- run-time check:
 	// for t*: (t *)_untag_arr(e1, sizeof(t), new_e2)
 	// for t@: (t *)_check_null(_untag_arr(e1, sizeof(t), new_e2))
         let untag_e = _untag_dyneither_ptr_e;
@@ -2651,7 +2650,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 				 list(e1,
                                       sizeoftyp_exp(typ_to_c(p1.elt_typ),DL),
 				      new_e2), DL);
-	if(n2) 
+	if(n2)
 	  ptr_exp->r = fncall_exp_r(_check_null_e,
                                     new List(copy_exp(ptr_exp), NULL));
 	e->r = cast_it_r(*t, ptr_exp);
@@ -2667,7 +2666,7 @@ DynCast:
           e->r = fncall_exp_r(td_e,
                               list(e1,sizeoftyp_exp(typ_to_c(p1.elt_typ),DL),
                                    uint_exp(1,DL)));
-        } 
+        }
 	break;
       }
       break;
@@ -2770,13 +2769,13 @@ DynCast:
       exp_to_c(nv,e1);
       let malloc_size_exp = var_exp(max,DL);
       // add one to max for zero-terminated arrays
-      if (zero_term) 
+      if (zero_term)
         malloc_size_exp = add_exp(malloc_size_exp,uint_exp(1,DL),DL);
-      stmt_t s = init_comprehension(nv, var_exp(a,DL), vd, var_exp(max,DL), 
+      stmt_t s = init_comprehension(nv, var_exp(a,DL), vd, var_exp(max,DL),
                                     e2, zero_term, skip_stmt_dl(), true);
       // FIX:  casts needed on exp_opts
       TOC_RGN(nv,r) {
-        list_t<$(qvar_t,type_t,exp_opt_t)@/*`r,`r*/> decls = 
+        list_t<$(qvar_t,type_t,exp_opt_t)@/*`r,`r*/> decls =
           rnew(r) List(rnew(r) $(max,uint_typ,(exp_opt_t)e1),NULL);
         exp_t ai;
         if (rgnopt == NULL || no_regions)
@@ -2798,9 +2797,9 @@ DynCast:
           let b = temp_var();
           let t = typ_to_c(old_typ);
           let tag = _tag_dyneither_e;
-          let binit = 
+          let binit =
 	    fncall_exp(tag,
-		       list(var_exp(a,DL), sizeoftyp_exp(elt_typ, DL), 
+		       list(var_exp(a,DL), sizeoftyp_exp(elt_typ, DL),
                             malloc_size_exp), DL);
           decls = rnew(r) List(rnew(r) $(b,t,(exp_opt_t)binit),decls);
           s = seq_stmt(s,exp_stmt(var_exp(b,DL),DL),DL);
@@ -2833,7 +2832,7 @@ DynCast:
       let xexp = var_exp(x,DL);
       exp_t mexp = sizeofexp_exp(deref_exp(xexp,DL),DL);
       exp_t inner_mexp = mexp;
-      if (rgnopt == NULL || no_regions) 
+      if (rgnopt == NULL || no_regions)
         mexp = malloc_exp(old_elt_typ,mexp);
       else {
         exp_t r = (exp_t)rgnopt;
@@ -2841,7 +2840,7 @@ DynCast:
         mexp = rmalloc_exp(r,mexp);
       }
       //      mexp = cast_it(cstar_typ(elt_typ,mt_tq));
-      // For tagged arrays, I have gotten burned by the GCC BUG 
+      // For tagged arrays, I have gotten burned by the GCC BUG
       // (they're structs), so we special-case it right here
       // I HAVE NO IDEA IF I'M CATCHING ENOUGH CASES.
       bool done = false;
@@ -2883,9 +2882,9 @@ DynCast:
     break;
   case &Sizeofexp_e(e1): exp_to_c(nv,e1); break;
   case &Sizeoftyp_e(t):  e->r = new Sizeoftyp_e(typ_to_c_array(t));  break;
-  case &Offsetof_e(t,&StructField(n)): 
+  case &Offsetof_e(t,&StructField(n)):
     e->r = new Offsetof_e(typ_to_c_array(t),new StructField(n)); break;
-  case &Offsetof_e(t,&TupleIndex(n)): 
+  case &Offsetof_e(t,&TupleIndex(n)):
     switch(compress(t)) {
     case &AggrType(AggrInfo(info,_)):
       let ad = get_known_aggrdecl(info);
@@ -2929,7 +2928,7 @@ DynCast:
         // Note that a null check is sufficient for zero-terminated arrays
         // too, because we guarantee that there's something to read here,
         // even if it's just a 0.  Note that writes are handled specially
-        // by the AssignOp_e case.  
+        // by the AssignOp_e case.
         if (!conref_def(false,zt)) {
           let $(i,b) = Evexp::eval_const_uint_exp(nelts);
           // FIX:  should really do like below for the -> case
@@ -3009,8 +3008,8 @@ DynCast:
                                    list(new_exp(e1->r,DL),
                                         sizeoftyp_exp(ta1,DL),
                                         uint_exp(0,DL)),DL));
-                                        
-                                   
+
+
       break;
     }
     if (is_tagged && is_read) {
@@ -3046,7 +3045,7 @@ DynCast:
       switch (conref_def(bounds_one,b)) {
       default:
 	in_bnds = check_bounds(e1_typ,relns,e1,e2);
-	if(warn_bounds_checks && !in_bnds) 
+	if(warn_bounds_checks && !in_bnds)
 	  Tcutil::warn(e->loc,"bounds check necessary for %s", exp2string(e));
 #ifdef BCE_DEBUG
       fprintf(stderr,"check bounds returned %s\n", in_bnds ? "true " : "false");
@@ -3176,7 +3175,7 @@ DynCast:
       aggrdecl_t sd2 = (aggrdecl_t)sd;
 
       TOC_RGN(nv,rgn) {
-      let fields = Tcutil::resolve_aggregate_designators(rgn, e->loc, dles, 
+      let fields = Tcutil::resolve_aggregate_designators(rgn, e->loc, dles,
                                                          sd2->kind,
                                                          sd2->impl->fields);
       if (sd->impl->tagged) {
@@ -3185,7 +3184,7 @@ DynCast:
         let fieldtyp = field->type;
         exp_to_c(nv,fieldexp);
         if (is_void_star_or_boxed_tvar(fieldtyp))
-          fieldexp->r = 
+          fieldexp->r =
             cast_it_r(void_star_typ(),new_exp(fieldexp->r,DL));
         // for tagged unions, must insert tag here
         int i = get_member_offset(sd,field->name);
@@ -3206,7 +3205,7 @@ DynCast:
               let fieldtyp = field->type;
               exp_to_c(nv,fieldexp);
               if (is_void_star_or_boxed_tvar(fieldtyp))
-                fieldexp->r = 
+                fieldexp->r =
                   cast_it_r(void_star_typ(),new_exp(fieldexp->r,DL));
               newdles = new List(new $(NULL,fieldexp), newdles);
               break;
@@ -3238,7 +3237,7 @@ DynCast:
       e->r = unresolvedmem_exp_r(NULL,dles);
     }
     break;
-  
+
   case &Datatype_e(es,tud,tuf):
     type_t datatype_ctype;
     exp_t tag_exp;
@@ -3246,7 +3245,7 @@ DynCast:
     let xexp = var_exp(x,DL);
     exp_t member_exp;
     datatype_ctype = strctq(collapse_qvar_tag(tuf->name,"_struct"));
-    tag_exp = (tud->is_extensible) ? var_exp(tuf->name,DL) : 
+    tag_exp = (tud->is_extensible) ? var_exp(tuf->name,DL) :
       datatype_tag(tud,tuf->name);
     member_exp = xexp;
     let tqts = tuf->typs;
@@ -3290,11 +3289,11 @@ DynCast:
   case &Enum_e(_,_,_):
   case &AnonEnum_e(_,_,_): break;
 
-  case &Malloc_e(MallocInfo{is_calloc,rgnopt,topt,num_elts,is_fat}): 
+  case &Malloc_e(MallocInfo{is_calloc,rgnopt,topt,num_elts,is_fat}):
     type_t t_c = typ_to_c(*topt);
     exp_to_c(nv,num_elts);
     // FIX: we shouldn't be able to calloc a zero-terminated array of
-    // size less than 1.  
+    // size less than 1.
     if (is_fat) {
       let x = temp_var();
       let p = temp_var();
@@ -3308,7 +3307,7 @@ DynCast:
         } else {
           pexp = calloc_exp(*topt,sizeoftyp_exp(t_c,DL), var_exp(x,DL));
         }
-        rexp = fncall_exp(_tag_dyneither_e, 
+        rexp = fncall_exp(_tag_dyneither_e,
                           list(var_exp(p,DL),sizeoftyp_exp(t_c,DL),
                                var_exp(x,DL)), DL);
       } else {
@@ -3316,7 +3315,7 @@ DynCast:
           exp_t rgn = (exp_t)rgnopt;
           exp_to_c(nv,rgn);
           pexp = rmalloc_exp(rgn, var_exp(x,DL));
-        } else { 
+        } else {
           pexp = malloc_exp(*topt, var_exp(x,DL));
         }
         rexp = fncall_exp(_tag_dyneither_e, list(var_exp(p,DL),uint_exp(1,DL),
@@ -3412,7 +3411,7 @@ DynCast:
     }
     break;
   case &StmtExp_e(s): stmt_to_c(nv,s);  break;
-  case &UnresolvedMem_e(_,_): toc_impos("UnresolvedMem"); 
+  case &UnresolvedMem_e(_,_): toc_impos("UnresolvedMem");
   case &CompoundLit_e(_,_):   unimp("compoundlit");
   case &Valueof_e(_): toc_impos("valueof(-)");
   case &Asm_e(...): toc_impos("__asm__");
@@ -3454,13 +3453,13 @@ static stmt_t if_neq_stmt(exp_t e1,exp_t e2,stmt_t fail_stmt) {
 }
 
 static $(env_t<`rgn>,list_t<$(qvar_t,type_t)@`rgn,`rgn>,stmt_t)
-xlate_pat(env_t<`rgn> nv, 
+xlate_pat(env_t<`rgn> nv,
           region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
-	  stmt_t fail_stmt, 
+	  stmt_t fail_stmt,
           list_t<$(qvar_t,type_t)@`rgn,`rgn> decls) {
   stmt_t s; // the test statement
   switch (p->r) {
-  case &Var_p(&Vardecl(_,x,_,_,_,_,_,_),p2): 
+  case &Var_p(&Vardecl(_,x,_,_,_,_,_,_),p2):
     // in essence, x = r; but achieved through the varmap
     return xlate_pat(add_varmap(rgn,nv,x,r),
                      rgn, t, r, path, p2, fail_stmt, decls);
@@ -3481,16 +3480,16 @@ xlate_pat(env_t<`rgn> nv,
     let result = xlate_pat(nv,rgn,t,r,path,p2,fail_stmt,decls);
     result[2] = seq_stmt(s,result[2],DL);
     return result;
-  case &Null_p:   s=if_neq_stmt(r,signed_int_exp(0,DL),fail_stmt); break;
-  case &Int_p(sn,i): s=if_neq_stmt(r,int_exp(sn,i,DL),    fail_stmt); break;
-  case &Char_p(c):   s=if_neq_stmt(r,char_exp(c,DL),      fail_stmt); break;
-  case &Float_p(f):  s=if_neq_stmt(r,float_exp(f,DL),     fail_stmt); break;
+  case &Null_p:       s=if_neq_stmt(r,signed_int_exp(0,DL),fail_stmt); break;
+  case &Int_p(sn,i):  s=if_neq_stmt(r,int_exp(sn,i,DL),    fail_stmt); break;
+  case &Char_p(c):    s=if_neq_stmt(r,char_exp(c,DL),      fail_stmt); break;
+  case &Float_p(f,i): s=if_neq_stmt(r,float_exp(f,i,DL),   fail_stmt); break;
 
-  case &Enum_p(ed,ef): 
-    s = if_neq_stmt(r,new_exp(new Enum_e(ef->name,ed,ef),NULL),fail_stmt); 
+  case &Enum_p(ed,ef):
+    s = if_neq_stmt(r,new_exp(new Enum_e(ef->name,ed,ef),NULL),fail_stmt);
     break;
   case &AnonEnum_p(t2,ef):
-    s = if_neq_stmt(r,new_exp(new AnonEnum_e(ef->name,t2,ef),NULL),fail_stmt); 
+    s = if_neq_stmt(r,new_exp(new AnonEnum_e(ef->name,t2,ef),NULL),fail_stmt);
     break;
 
   case &Pointer_p(&Pat{&Datatype_p(tud,tuf,ps,_),_,_}):
@@ -3528,7 +3527,7 @@ xlate_pat(env_t<`rgn> nv,
       s = seq_stmt(s, seq_stmt(s1,s3,DL), DL);
     }
     exp_t temp_tag = aggrarrow_exp(var_exp(temp,DL), tag_sp, DL);
-    exp_t tag_exp = 
+    exp_t tag_exp =
       tud->is_extensible ? var_exp(tuf->name,DL) : datatype_tag(tud,tuf->name);
     exp_t test_exp = neq_exp(temp_tag, tag_exp, DL);
     s = ifthenelse_stmt(test_exp,fail_stmt,s,DL);
@@ -3695,7 +3694,7 @@ static $(var_t,var_t,switch_clause_t)@`r gen_label(region_t<`r> r,
   return rnew(r) $(fresh_label(),fresh_label(),sc);
 }
 
-static void xlate_switch(env_t nv, stmt_t whole_s, 
+static void xlate_switch(env_t nv, stmt_t whole_s,
 			 exp_t e, list_t<switch_clause_t> scs) {
   exp_to_c(nv,e);
   let t = e->topt->v;
@@ -3704,7 +3703,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
   // FIX: cannot have Float_p in any cases.
   bool leave_as_switch;
   switch (compress(t)) {
-  case &IntType(_,_):  
+  case &IntType(_,_):
   case &EnumType(_,_): leave_as_switch = true;  break;
   default:             leave_as_switch = false; break;
   }
@@ -3734,7 +3733,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
   // for each case, generate a test label and an entry label
   TOC_RGN(nv,rgn) {
     let nv = share_env(rgn,nv);
-    list_t<$(var_t,var_t,switch_clause_t)@/*`rgn,`rgn*/> lscs = 
+    list_t<$(var_t,var_t,switch_clause_t)@/*`rgn,`rgn*/> lscs =
       List::rmap_c(rgn,gen_label,rgn,scs);
     list_t<stmt_t/*,`rgn*/>                test_stmts = NULL;
     list_t<env_t/*,`rgn*/>                 nvs        = NULL;
@@ -3774,7 +3773,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
         if(lscs->tl != NULL) {
           let &$(_,fallthru_lab,next_sc) = lscs->tl->hd;
           stmt_to_c(non_last_switchclause_env(rgn2, env, end_l, fallthru_lab,
-                                              next_sc->pat_vars->v, 
+                                              next_sc->pat_vars->v,
                                               nvs->tl->hd),
                     s);
         } else
@@ -3834,7 +3833,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 	exp_to_c(nv,(exp_t)eopt);
       }
       // reset handler **after** evaluating expression
-      if (s->try_depth > 0) 
+      if (s->try_depth > 0)
 	if (topt != NULL) {
 	  let x = temp_var();
 	  let retn_stmt = return_stmt(var_exp(x,DL),DL);
@@ -3869,7 +3868,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       if (c != NULL)
 	s->r = goto_stmt_r(*c,NULL);
       fallthru(dest);
-    case &Goto_s(_,dest): 
+    case &Goto_s(_,dest):
       // reset handler (note: earlier checks prevent jump into handler)
       do_npop_before(s->try_depth - dest->try_depth, s);
       return;
@@ -3886,7 +3885,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
     case &Fallthru_s(es,dest_clause):
       let &Env{.fallthru_info = fi,...} = nv;
       if(fi == NULL)
-	toc_impos("fallthru in unexpected place"); 
+	toc_impos("fallthru in unexpected place");
       let FallthruInfo{l,vs,other_vmap} = *fi;
       stmt_t s2 = goto_stmt(l, DL);
       // reset handler (after the es evaluation)
@@ -3902,7 +3901,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       return;
     case &Decl_s(d,s1):
       // we have to treat Let_d and Var_d where we bind a comprehension
-      // (not at the top-level) specially because these have to return 
+      // (not at the top-level) specially because these have to return
       // "statements".  See letdecl_to_c and decls_to_c below.
       switch (d->r) {
       case &Var_d(vd):
@@ -3923,13 +3922,13 @@ static void stmt_to_c(env_t nv, stmt_t s) {
           vd->initializer = e;
           d->r = new Var_d(vd);
           TOC_RGN(nv, temp) {
-            let nv2 = 
+            let nv2 =
               add_varmap(temp,nv,old_name,
                          varb_exp(new_name,new Local_b(vd),DL));
             local_decl_to_c(nv2, nv, vd, s1);
           }
           break;
-        default: 
+        default:
 	  // we treat let declarations specially because they may need
 	  // statements in addition to declarations, so we splice them in
 	  // as a statement.  Other declarations only produce declarations.
@@ -3975,7 +3974,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         // { struct _RegionHandle rh = _new_region();
         //   struct _RegionHandle *x = &rh;
         //   _push_region(x);
-        //   body; 
+        //   body;
         //   _pop_region(x);
         // }
         // When open_exp_opt is not NULL:
@@ -3996,11 +3995,11 @@ static void stmt_to_c(env_t nv, stmt_t s) {
           stmt_to_c(add_varmap(temp,nv,x_var,x_exp),body);
         }
         if (no_regions) {
-          s->r = declare_stmt(x_var, rh_struct_ptr_typ, 
+          s->r = declare_stmt(x_var, rh_struct_ptr_typ,
                               uint_exp(0,DL), body, DL)->r;
         } else if (open_exp_opt == NULL) {
-          s->r = 
-            declare_stmt(rh_var,rh_struct_typ, 
+          s->r =
+            declare_stmt(rh_var,rh_struct_typ,
                          fncall_exp(_new_region_e,
                                     new List(string_exp(qvar2string(x_var),DL),
                                              NULL),DL),
@@ -4011,28 +4010,28 @@ static void stmt_to_c(env_t nv, stmt_t s) {
                      DL),DL),DL),DL)->r;
         } else {
           exp_to_c(nv, (exp_t)open_exp_opt);
-          s->r = 
-            declare_stmt(rh_var, strct(_DynRegionFrame_sp), NULL, 
+          s->r =
+            declare_stmt(rh_var, strct(_DynRegionFrame_sp), NULL,
 	    declare_stmt(x_var, rh_struct_ptr_typ,
                          fncall_exp(_open_dynregion_e,
                                     list(address_exp(rh_exp,DL),
                                          (exp_t)open_exp_opt),
                                     DL),
             seq_stmt(body,
-                     exp_stmt(fncall_exp(_pop_dynregion_e,  
+                     exp_stmt(fncall_exp(_pop_dynregion_e,
                                          list(x_exp), DL),DL),
                      DL),DL),DL)->r;
         }
         return;
       case &Alias_d(e,tv,vd):
-        // Handle this like a variable declaration 
+        // Handle this like a variable declaration
         qvar_t old_name = vd->name;
         qvar_t new_name = temp_var();
         vd->name = new_name;
         vd->initializer = e;
         s->r = new Decl_s(new Decl(new Var_d(vd),DL),s1);
         TOC_RGN(nv, temp) {
-          let nv2 = 
+          let nv2 =
             add_varmap(temp,nv,old_name,
                        varb_exp(new_name,new Local_b(vd),DL));
           local_decl_to_c(nv2, nv, vd, s1);
@@ -4056,7 +4055,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       //       control flow.
       // struct handler_cons h;
       // _push_handler(&h);
-      // int was_thrown = 0; 
+      // int was_thrown = 0;
       // if (setjmp(h.handler)) was_thrown = 1;
       // if (!was_thrown) {
       //   body
@@ -4083,7 +4082,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         // translate the body
         stmt_to_c(nv,body);
         let tryandpop_stmt = seq_stmt(body,
-                                      exp_stmt(fncall_exp(_pop_handler_e, 
+                                      exp_stmt(fncall_exp(_pop_handler_e,
                                                           NULL,
                                                           DL), DL),DL);
         // add a default case which re-throws the exception
@@ -4110,7 +4109,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
                      new List(aggrmember_exp(h_exp,handler_sp,DL), NULL),
                      DL);
         let pushhandler_call = // _pushhandler(h);
-          exp_stmt(fncall_exp(_push_handler_e, 
+          exp_stmt(fncall_exp(_push_handler_e,
                               new List(address_exp(h_exp,DL), NULL),
                               DL),DL);
         let zero_exp = int_exp(Signed,0,DL);
@@ -4158,7 +4157,7 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
       (*args->hd)[2] = typ_to_c((*args->hd)[2]);
       nv = add_varmap(frgn,nv,x,var_exp(x,DL));
     }
-    // for C code, we need to go through and convert all of the types 
+    // for C code, we need to go through and convert all of the types
     // from Cyclone types to C, but otherwise leave the code alone.
     if (cinclude) {
       stmttypes_to_c(f->body);
@@ -4189,7 +4188,7 @@ static scope_t scope_to_c(scope_t s) {
   }
 }
 
-// struct & union declarations -- straightforward except when we have 
+// struct & union declarations -- straightforward except when we have
 // a tagged union.  When we have:
 //   @tagged union Foo { T1 m1; ... Tn mn; };
 // this is translated to:
@@ -4208,7 +4207,7 @@ static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_decls) {
       $(aggrdecl_t,type_t)@ v;
       if (ad->kind == StructA)
         v = rnew(d) $(ad,strctq(n));
-      else 
+      else
         v = rnew(d) $(ad,unionq_typ(n));
       *aggrs_so_far = Dict::insert(*aggrs_so_far,n,v);
     } else {
@@ -4302,7 +4301,7 @@ static void datatypedecl_to_c(datatypedecl_t tud) {
       return;
     *datatypes_so_far = Set::rinsert(d,*datatypes_so_far, n);
   }
-  
+
   for (let fields = tud->fields->v; fields != NULL; fields = fields->tl) {
     datatypefield_t f = fields->hd;
     // compute the fields for the struct, adding in a tag field
@@ -4316,10 +4315,10 @@ static void datatypedecl_to_c(datatypedecl_t tud) {
     }
     fs = new List(new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL),
                   List::imp_rev(fs));
-    let ad = 
+    let ad =
       new Aggrdecl{.kind = StructA, .sc = Public,
                    .name = collapse_qvar_tag(f->name,"_struct"),
-                   .tvs = NULL, 
+                   .tvs = NULL,
                    .impl = new AggrdeclImpl(NULL,NULL,fs,false),
                    .attributes = NULL};
     result_decls = new List(new_decl(new Aggr_d(ad),DL),result_decls);
@@ -4364,7 +4363,7 @@ static void xdatatypedecl_to_c(datatypedecl_t xd) {
         let tag_decl = new_vardecl(f->name, tag_typ, initopt);
         tag_decl->sc = f->sc;
         result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
-        *xdatatypes_so_far = 
+        *xdatatypes_so_far =
           Dict::insert(*xdatatypes_so_far, f->name, f->sc != Extern);
         list_t<aggrfield_t> fields = NULL;
         int i = 1;
@@ -4380,7 +4379,7 @@ static void xdatatypedecl_to_c(datatypedecl_t xd) {
         let strct_decl =
           new Aggrdecl{.kind = StructA, .sc = Public,
                        .name = collapse_qvar_tag(f->name,"_struct"),
-                       .tvs  = NULL, 
+                       .tvs  = NULL,
                        .impl = new AggrdeclImpl(NULL,NULL,fields,false),
                        .attributes = NULL};
         result_decls = new List(new_decl(new Aggr_d(strct_decl),DL),
@@ -4413,7 +4412,7 @@ static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s) {
   type_t old_typ = vd->type;
   vd->type = typ_to_c_array(old_typ);
   // Fat pointers can't be declared with "register" scope
-  if (vd->sc == Register && is_tagged_pointer_typ(old_typ)) 
+  if (vd->sc == Register && is_tagged_pointer_typ(old_typ))
     vd->sc = Public;
   stmt_to_c(body_nv,s);
   if(vd->initializer != NULL) {
@@ -4433,7 +4432,7 @@ static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s) {
           let nv2 = set_toplevel(temp,init_nv);
           exp_to_c(nv2, init);
         }
-      } else 
+      } else
         exp_to_c(init_nv, init);
       break;
     }
@@ -4468,7 +4467,7 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, type_t t, exp_t e, stmt_t s) {
     let fail = throw_match_stmt();
     let nv = share_env(prgn,nv);
     let $(nv,vars,test_stmt) =
-      xlate_pat(nv, prgn, t, var_exp(x,DL), var_exp(x,DL), p, 
+      xlate_pat(nv, prgn, t, var_exp(x,DL), var_exp(x,DL), p,
 		throw_match_stmt(),NULL);
     stmt_to_c(nv,s);
     s = declare_stmt(x,typ_to_c(t),e,seq_stmt(test_stmt,s,DL),DL);
@@ -4481,7 +4480,7 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, type_t t, exp_t e, stmt_t s) {
 }
 
 // These next few functions clean up the types in C code, getting
-// rid of stuff inserted by the parser (e.g., region evars). 
+// rid of stuff inserted by the parser (e.g., region evars).
 
 static void exptypes_to_c(exp_t e) {
   switch (e->r) {
@@ -4500,13 +4499,13 @@ static void exptypes_to_c(exp_t e) {
   case &Subscript_e(e1,e2):  fallthru(e1,e2);
   case &Swap_e(e1,e2):       fallthru(e1,e2);
   case &AssignOp_e(e1,_,e2): exptypes_to_c(e1); exptypes_to_c(e2); break;
-  case &Conditional_e(e1,e2,e3): 
+  case &Conditional_e(e1,e2,e3):
     exptypes_to_c(e1); exptypes_to_c(e2); exptypes_to_c(e3); break;
   case &FnCall_e(e,es,_):    fallthru(e,es);
   case &UnknownCall_e(e,es):
     exptypes_to_c(e); List::iter(exptypes_to_c,es); break;
   case &Cast_e(*t,e,_,_): *t = typ_to_c(*t); exptypes_to_c(e); break;
-  case &CompoundLit_e(&$(_,_,*t),dles): 
+  case &CompoundLit_e(&$(_,_,*t),dles):
     *t = typ_to_c(*t);
     fallthru(dles);
   case &UnresolvedMem_e(_,dles): fallthru(dles);
@@ -4539,7 +4538,7 @@ static void exptypes_to_c(exp_t e) {
   case &Instantiate_e(_,_): fallthru;
   case &New_e(_,_):         fallthru;
   case &Valueof_e(_):       fallthru;
-  case &Tagcheck_e(...):    
+  case &Tagcheck_e(...):
     Tcutil::terr(e->loc,"Cyclone expression within C code");
     break;
   }
@@ -4547,7 +4546,7 @@ static void exptypes_to_c(exp_t e) {
 
 static void decltypes_to_c(decl_t d) {
   switch (d->r) {
-  case &Var_d(vd): 
+  case &Var_d(vd):
     vd->type = typ_to_c(vd->type);
     if (vd->initializer != NULL) exptypes_to_c((exp_t)vd->initializer);
     break;
@@ -4558,8 +4557,8 @@ static void decltypes_to_c(decl_t d) {
     }
     break;
   case &Aggr_d(ad): aggrdecl_to_c(ad,true); break;
-  case &Enum_d(ed): 
-    if (ed->fields != NULL) 
+  case &Enum_d(ed):
+    if (ed->fields != NULL)
       for (let fs = ed->fields->v; fs != NULL; fs = fs->tl) {
         let f = fs->hd;
         if (f->tag != NULL) exptypes_to_c((exp_t)f->tag);
@@ -4572,13 +4571,13 @@ static void decltypes_to_c(decl_t d) {
   case &Namespace_d(_,_):
   case &Using_d(_,_):
   case &ExternC_d(_):
-  case &ExternCinclude_d(_,_): 
+  case &ExternCinclude_d(_,_):
   case &Region_d(...):
   case &Alias_d(...):
     Tcutil::terr(d->loc,"Cyclone declaration within C code");
     break;
   case &Porton_d:
-  case &Portoff_d: 
+  case &Portoff_d:
     break;
   }
 }
@@ -4590,18 +4589,18 @@ static void stmttypes_to_c(stmt_t s) {
   case &Return_s(eopt): if (eopt != NULL) exptypes_to_c((exp_t)eopt); break;
   case &IfThenElse_s(e,s1,s2):
     exptypes_to_c(e); stmttypes_to_c(s1); stmttypes_to_c(s2); break;
-  case &While_s($(e,_),s): 
+  case &While_s($(e,_),s):
     exptypes_to_c(e); stmttypes_to_c(s); break;
   case &For_s(e1,$(e2,_),$(e3,_),s):
-    exptypes_to_c(e1); exptypes_to_c(e2); exptypes_to_c(e3); 
+    exptypes_to_c(e1); exptypes_to_c(e2); exptypes_to_c(e3);
     stmttypes_to_c(s); break;
-  case &Switch_s(e,scs): 
-    exptypes_to_c(e); 
+  case &Switch_s(e,scs):
+    exptypes_to_c(e);
     for (; scs != NULL; scs=scs->tl) stmttypes_to_c(scs->hd->body);
     break;
   case &Decl_s(d,s): decltypes_to_c(d); stmttypes_to_c(s); break;
   case &Do_s(s,$(e,_)): stmttypes_to_c(s); exptypes_to_c(e); break;
-  case &Skip_s: 
+  case &Skip_s:
   case &Break_s(_):
   case &Continue_s(_):
   case &Goto_s(_,_): break;
@@ -4626,12 +4625,12 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
     case &Var_d(vd):
       let c_name = vd->name;
       // strip any namespace from an extern C declaration
-      if (vd->sc == ExternC) 
+      if (vd->sc == ExternC)
 	c_name = new $(Rel_n(NULL),(*c_name)[1]);
       if (vd->initializer != NULL) {
         if (cinclude)
           exptypes_to_c((exp_t)vd->initializer);
-        else 
+        else
           exp_to_c(nv, (exp_t)vd->initializer);
       }
       nv = add_varmap(r,nv,vd->name,varb_exp(c_name,new Global_b(vd),DL));
@@ -4652,7 +4651,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
       fndecl_to_c(nv, fd, cinclude);
       result_decls = new List(d,result_decls);
       break;
-    case &Let_d(_,_,_): 
+    case &Let_d(_,_,_):
     case &Letv_d(_):
       toc_impos("letdecl at toplevel");
     case &Region_d(...):
@@ -4675,7 +4674,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
     case &Typedef_d(td):
       td->name = td->name;
       td->tvs  = NULL;
-      if (td->defn != NULL) 
+      if (td->defn != NULL)
         td->defn = new Opt(typ_to_c_array(td->defn->v));
       else {
         switch (td->kind->v->kind) {
@@ -4701,7 +4700,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
 static void init() {
   let NewRegion{dyn} = new_dynregion();
   region d = open(dyn); {
-    toc_state = 
+    toc_state =
       new TocState{ .dyn = dyn,
                     .tuple_types = rnew(d) NULL,
                     .aggrs_so_far = rnew(d) Dict::rempty(d,qvar_cmp),
@@ -4725,7 +4724,7 @@ static void init() {
     &_pop_handler_str,
     &_exn_thrown_str,
     &_npop_handler_str,
-    &_check_null_str, 
+    &_check_null_str,
     &_check_known_subscript_null_str,
     &_check_known_subscript_notnull_str,
     &_check_dyneither_subscript_str,

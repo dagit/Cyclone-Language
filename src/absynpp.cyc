@@ -58,7 +58,7 @@ extern doc_t de2doc($(list_t<designator_t>,exp_t)@ de);
 extern doc_t tqtd2doc(tqual_t tq, type_t t, opt_t<doc_t> dopt);
 extern doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,
                          bool c_varargs,vararg_info_t *cyc_varargs,
-                         opt_t<type_t> effopt, 
+                         opt_t<type_t> effopt,
                          list_t<$(type_t,type_t)@> rgn_po);
 extern doc_t datatypefields2doc(list_t<datatypefield_t> fields);
 extern doc_t enumfields2doc(list_t<enumfield_t> fs);
@@ -309,14 +309,14 @@ string_t string_escape(string_t<`H> s) {
   int len = 0;
   for (int i=0; i<=n; i++)
     switch (s[i]) {
-    case '\a': 
-    case '\b': 
-    case '\f': 
-    case '\n': 
-    case '\r': 
-    case '\t': 
-    case '\v': 
-    case '\\': 
+    case '\a':
+    case '\b':
+    case '\f':
+    case '\n':
+    case '\r':
+    case '\t':
+    case '\v':
+    case '\\':
     case '\"': len += 2; break;
     case c:
       if (c>=' ' && c<='~') len++;
@@ -369,7 +369,7 @@ doc_t tqual2doc(tqual_t tq) {
 string_t kind2string(kind_t ka) {
   let &Kind(k,a) = ka;
   switch (k) {
-  case AnyKind: 
+  case AnyKind:
     switch (a) {
     case Aliasable: return "A";
     case Unique: return "UA";
@@ -387,7 +387,7 @@ string_t kind2string(kind_t ka) {
     case Unique: return "UB";
     case Top: return "TB";
     }
-  case RgnKind: 
+  case RgnKind:
     switch (a) {
     case Aliasable: return "R";
     case Unique: return "UR";
@@ -427,7 +427,7 @@ doc_t tps2doc(list_t<type_t> ts) {
 
 doc_t ktvar2doc(tvar_t tv) {
   switch (compress_kb(tv->kind)) {
-  case &Unknown_kb(_): 
+  case &Unknown_kb(_):
   case &Eq_kb(&Kind(BoxKind,Aliasable)): return textptr(tv->name);
   case &Less_kb(_,k):   fallthru(k);
   case &Eq_kb(k):       return cat(textptr(tv->name), text("::"), kind2doc(k));
@@ -458,8 +458,8 @@ doc_t args2doc(list_t<$(tqual_t,type_t)@> ts) {
 
 doc_t noncallatt2doc(attribute_t att) {
   switch(att) {
-  case &Stdcall_att:  
-  case &Cdecl_att:    
+  case &Stdcall_att:
+  case &Cdecl_att:
   case &Fastcall_att: return nil_doc();
   default: return text(attribute2string(att));
   }
@@ -480,14 +480,14 @@ doc_t noncallconv2doc(attributes_t atts) { // for MS only
   bool hasatt = false;
    for(_ atts2 = atts; atts2 != NULL; atts2 = atts2->tl)
     switch(atts2->hd) {
-    case &Stdcall_att:  
-    case &Cdecl_att:    
+    case &Stdcall_att:
+    case &Cdecl_att:
     case &Fastcall_att: break;
     default: hasatt = true; break;
     }
   if(!hasatt)
     return nil_doc();
-  return cat(text(" __declspec("), 
+  return cat(text(" __declspec("),
 	     group("",""," ",List::map(noncallatt2doc,atts)),
 	     text(")"));
 }
@@ -509,11 +509,11 @@ bool next_is_pointer(list_t<type_modifier_t> tms) {
   if (tms==NULL) return false;
   switch (tms->hd) {
   case &Pointer_mod(_,_): return true;
-  case &Attributes_mod(_,_): 
+  case &Attributes_mod(_,_):
     switch(c_compiler){
     case Gcc_c: return false;
     default:   return next_is_pointer(tms->tl);
-    } 
+    }
   default: return false;
   }
 }
@@ -524,7 +524,7 @@ extern doc_t ntyp2doc(type_t t);
 static struct Doc *cache_question = NULL;
 static doc_t question() {
   if (!cache_question) {
-    if (PP::tex_output) 
+    if (PP::tex_output)
       cache_question = text_width("{?}",1); // protect against following ` in TeX
     else cache_question = text("?");
   }
@@ -533,7 +533,7 @@ static doc_t question() {
 static struct Doc *cache_lb = NULL;
 static doc_t lb() {
   if (!cache_lb) {
-    if (PP::tex_output) 
+    if (PP::tex_output)
       cache_lb = text_width("{\\lb}",1);
     else cache_lb = text("{");
   }
@@ -542,7 +542,7 @@ static doc_t lb() {
 static struct Doc *cache_rb = NULL;
 static doc_t rb() {
   if (!cache_rb) {
-    if (PP::tex_output) 
+    if (PP::tex_output)
       cache_rb = text_width("{\\rb}",1);
     else cache_rb = text("}");
   }
@@ -551,7 +551,7 @@ static doc_t rb() {
 static struct Doc *cache_dollar = NULL;
 static doc_t dollar() {
   if (!cache_dollar) {
-    if (PP::tex_output) 
+    if (PP::tex_output)
       cache_dollar = text_width("\\$",1);
     else cache_dollar = text("$");
   }
@@ -593,11 +593,11 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
   switch (tms->hd) {
   case &Carray_mod(zeroterm,_):
     if (next_is_pointer(tms->tl)) rest = p_rest;
-    return cat(rest,conref_def(false,zeroterm) ? 
+    return cat(rest,conref_def(false,zeroterm) ?
                text("[]@zeroterm") : text("[]"));
   case &ConstArray_mod(e,zeroterm,_):
     if (next_is_pointer(tms->tl)) rest = p_rest;
-    return cat(rest, text("["), exp2doc(e), 
+    return cat(rest, text("["), exp2doc(e),
                conref_def(false,zeroterm) ? text("]@zeroterm") : text("]"));
   case &Function_mod(args):
     if (next_is_pointer(tms->tl)) rest = p_rest;
@@ -609,7 +609,7 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
     }
   case &Attributes_mod(_, atts):
     switch(c_compiler){
-    case Gcc_c: 
+    case Gcc_c:
       if (next_is_pointer(tms->tl)) rest = p_rest;
       return cat(rest, atts2doc(atts));
     case Vc_c:
@@ -637,7 +637,7 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
       break;
     }
     if (print_zeroterm) {
-      if (!is_char_ptr && conref_def(false,zt)) 
+      if (!is_char_ptr && conref_def(false,zt))
 	ptr = cat(ptr,text("@zeroterm "));
       else if (is_char_ptr && !conref_def(false,zt))
 	ptr = cat(ptr,text("@nozeroterm "));
@@ -742,12 +742,12 @@ doc_t ntyp2doc(type_t t) {
     break;
   case &DatatypeType(DatatypeInfo(tu_info,ts)):
     switch(tu_info) {
-    case {.UnknownDatatype = UnknownDatatypeInfo(n,is_x)}: 
+    case {.UnknownDatatype = UnknownDatatypeInfo(n,is_x)}:
       fallthru(n,is_x);
     case {.KnownDatatype = &&Datatypedecl(_,n,_,_,is_x)}:
       let kw = text("datatype ");
       let ext = is_x ? text("@extensible ") : nil_doc();
-      s = cat(ext,kw,qvar2doc(n),tps2doc(ts)); 
+      s = cat(ext,kw,qvar2doc(n),tps2doc(ts));
       break;
     }
     break;
@@ -782,7 +782,7 @@ doc_t ntyp2doc(type_t t) {
     case Short_sz: ts = "short"; break;
     case Int_sz: ts = "int";   break;
     case Long_sz: ts = "long";   break;
-    case LongLong_sz: 
+    case LongLong_sz:
       switch(c_compiler) {
       case Gcc_c: ts = "long long"; break;
       case Vc_c:  ts = "__int64";   break;
@@ -791,12 +791,13 @@ doc_t ntyp2doc(type_t t) {
     }
     s = text(aprintf("%s%s",sns,ts));
     break;
-  case &FloatType:  s = text("float");  break;
-  case &DoubleType(b): 
-    if (b) 
-      s = text("long double"); 
-    else 
+  case &FloatType(i):
+    if (i==0)
+      s = text("float");
+    else if (i==1)
       s = text("double");
+    else
+      s = text("long double");
     break;
   case &TupleType(ts):
     s = cat(dollar(),args2doc(ts));
@@ -873,7 +874,7 @@ doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,bool c_varargs,
                   list_t<$(type_t,type_t)@> rgn_po) {
   let arg_docs = List::map(funarg2doc,args);
   doc_t eff_doc;
-  if (c_varargs) 
+  if (c_varargs)
     arg_docs = List::append(arg_docs,new List(text("..."),NULL));
   else if (cyc_varargs != NULL) {
     let varargs_doc = cat(text("..."),
@@ -883,9 +884,9 @@ doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,bool c_varargs,
     arg_docs = List::append(arg_docs,new List(varargs_doc,NULL));
   }
   let arg_doc = group("","",",",arg_docs);
-  if (effopt != NULL && print_all_effects) 
+  if (effopt != NULL && print_all_effects)
     arg_doc = cat(arg_doc,text(";"),eff2doc(effopt->v));
-  if (rgn_po != NULL) 
+  if (rgn_po != NULL)
     arg_doc = cat(arg_doc,text(":"),rgnpo2doc(rgn_po));
   return cat(text("("),arg_doc,text(")"));
 }
@@ -909,7 +910,7 @@ string_t qvar2string(qvar_t q) {
     break;
   case {.C_n = x}:
     match = use_curr_namespace && list_prefix(strptrcmp, x, curr_namespace);
-    // No namespace prefixes in the C namespace. 
+    // No namespace prefixes in the C namespace.
     break;
   case {.Abs_n = x}:
     match = use_curr_namespace && list_prefix(strptrcmp, x, curr_namespace);
@@ -989,23 +990,23 @@ doc_t typ2doc(type_t t) {
 // BIGGER WARNING: Absyndump::dumpexp_prec has to use the same constants!!!
 int exp_prec(exp_t e) {
   switch (e->r) {
-  case &Const_e(...):    
-  case &Var_e(...):    
+  case &Const_e(...):
+  case &Var_e(...):
   case &UnknownId_e(...): return 10000;
   case &Primop_e(p,_):
     switch (p) {
     case Plus:           return 100;
     case Times:          return 110;
     case Minus:          return 100;
-    case Div:            
+    case Div:
     case Mod:            return 110;
-    case Eq:             
+    case Eq:
     case Neq:            return  70;
-    case Gt:             
-    case Lt:             
-    case Gte:            
+    case Gt:
+    case Lt:
+    case Gte:
     case Lte:            return  80;
-    case Not:            
+    case Not:
     case Bitnot:         return 130;
     case Bitand:         return  60;
     case Bitor:          return  40;
@@ -1021,35 +1022,35 @@ int exp_prec(exp_t e) {
   case &And_e(...):             return  35; // FIX: right precedence for &&
   case &Or_e(...):              return  30; // FIX: right precedence for ||
   case &SeqExp_e(...):          return  10;
-  case &UnknownCall_e(...):     
+  case &UnknownCall_e(...):
   case &FnCall_e(...):        return 140;
   case &Throw_e(...):             return 130;
   case &NoInstantiate_e(e2):    return exp_prec(e2);
   case &Instantiate_e(e2,_):    return exp_prec(e2);
   case &Cast_e(...):        return 120;
   case &New_e(...):             return 15; // ???
-  case &Address_e(_):           
-  case &Sizeoftyp_e(_):         
-  case &Sizeofexp_e(_):         
+  case &Address_e(_):
+  case &Sizeoftyp_e(_):
+  case &Sizeofexp_e(_):
   case &Valueof_e(_):
   case &Asm_e(...):
   case &Tagcheck_e(...):
-  case &Offsetof_e(...):        
+  case &Offsetof_e(...):
   case &Deref_e(...):             return 130;
-  case &AggrMember_e(...):    
-  case &AggrArrow_e(...):     
+  case &AggrMember_e(...):
+  case &AggrArrow_e(...):
   case &Subscript_e(...):       return 140;
   case &Tuple_e(...):             return 150;
-  case &CompoundLit_e(...):     
-  case &Array_e(...):             
-  case &Comprehension_e(...): 
-  case &Aggregate_e(...):      
-  case &AnonStruct_e(...):      
-  case &Datatype_e(...):    
-  case &Enum_e(...):          
-  case &AnonEnum_e(...):      
-  case &Malloc_e(_):            
-  case &Swap_e(...):            
+  case &CompoundLit_e(...):
+  case &Array_e(...):
+  case &Comprehension_e(...):
+  case &Aggregate_e(...):
+  case &AnonStruct_e(...):
+  case &Datatype_e(...):
+  case &Enum_e(...):
+  case &AnonEnum_e(...):
+  case &Malloc_e(_):
+  case &Swap_e(...):
   case &UnresolvedMem_e(...):   return 140; // ???
   case &StmtExp_e(...):           return 10000;
   }
@@ -1142,16 +1143,16 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &Asm_e(vol,body):
     if (vol)
       s = cat(text("__asm__"),text(" volatile ("),text(body),text(")"));
-    else 
+    else
       s = cat(text("__asm__("),text(body),text(")"));
     break;
-  case &Tagcheck_e(e,f): 
-    s = cat(text("tagcheck("), exp2doc(e), text("."), textptr(f), text(")")); 
+  case &Tagcheck_e(e,f):
+    s = cat(text("tagcheck("), exp2doc(e), text("."), textptr(f), text(")"));
     break;
-  case &Offsetof_e(t,&StructField(n)): 
+  case &Offsetof_e(t,&StructField(n)):
     s = cat(text("offsetof("), typ2doc(t), text(","), textptr(n), text(")"));
     break;
-  case &Offsetof_e(t,&TupleIndex(n)): 
+  case &Offsetof_e(t,&TupleIndex(n)):
     s = cat(text("offsetof("), typ2doc(t), text(","), text(aprintf("%d",n)), text(")"));
     break;
   case &Deref_e(e1):
@@ -1224,7 +1225,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
       exp_t st = sizeoftyp_exp(*topt,NULL);
       if (rgnopt == NULL)
         s = cat(text("calloc("),exp2doc(e),text(","),exp2doc(st),text(")"));
-      else 
+      else
         s = cat(text("rcalloc("),exp2doc((exp_t)rgnopt),text(","),
                 exp2doc(e),text(","),exp2doc(st),text(")"));
     } else {
@@ -1232,9 +1233,9 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
       // see comments in absyn.h
       if (topt == NULL)
         new_e = e;
-      else 
+      else
         new_e = times_exp(sizeoftyp_exp(*topt,NULL),e,NULL);
-    
+
       if (rgnopt == NULL)
         s = cat(text("malloc("),exp2doc(new_e),text(")"));
       else
@@ -1288,9 +1289,9 @@ doc_t cnst2doc(cnst_t c) {
   case {.Int_c = $(None,i)}:     fallthru(i);
   case {.Int_c = $(Signed,i)}:   return text(aprintf("%d",i));
   case {.Int_c = $(Unsigned,i)}: return text(aprintf("%u",(unsigned)i));
-  case {.LongLong_c = $(sg,i)}:  
+  case {.LongLong_c = $(sg,i)}:
     return text("<<FIX LONG LONG CONSTANT>>"); // FIX
-  case {.Float_c = x}:  return text(x);
+  case {.Float_c = $(x,_)}:  return text(x);
   case {.Null_c = _}:      return text("NULL");
   case {.String_c = s}:
     return cat(text("\""), text(string_escape(s)), text("\""));
@@ -1318,7 +1319,7 @@ doc_t primapp2doc(int inprec, primop_t p,list_t<exp_t> es) {
                                 string_of_doc(ps,72)));
     else
       return cat(ds->hd,text(" "),ps,text(" "),ds->tl->hd);
-  } 
+  }
 }
 
 string_t prim2str(primop_t p) {
@@ -1372,7 +1373,7 @@ doc_t stmt2doc(stmt_t st, bool stmtexp) {
                 rb(),
                 line_doc(),
                 is_declaration(s2)? // for gcc compatibility
-                (stmtexp ? 
+                (stmtexp ?
                  cat(text("("),lb(), blank_doc(),
                      nest(2,stmt2doc(s2,stmtexp)),
                      rb(),text(");"),
@@ -1475,7 +1476,7 @@ doc_t stmt2doc(stmt_t st, bool stmtexp) {
     break;
   case &Label_s(x,s1):
     if (decls_first && is_declaration(s1)) {
-      if (stmtexp) 
+      if (stmtexp)
         s = cat(textptr(x),
                 text(": ("),
                 lb(),
@@ -1483,7 +1484,7 @@ doc_t stmt2doc(stmt_t st, bool stmtexp) {
                 nest(2,stmt2doc(s1,true)),
                 line_doc(),
                 rb(),text(");"));
-      else 
+      else
         s = cat(textptr(x),
                 text(": "),
                 lb(),
@@ -1537,8 +1538,8 @@ doc_t pat2doc(pat_t p) {
     else s = text(aprintf("%u",i));
     break;
   case &Char_p(ch): s = text(aprintf("'%s'",char_escape(ch))); break;
-  case &Float_p(x): s = text(x); break;
-  case &Var_p(vd,&Pat{.r = &Wild_p,...}):  
+  case &Float_p(x,_): s = text(x); break;
+  case &Var_p(vd,&Pat{.r = &Wild_p,...}):
     s = qvar2doc(vd->name); break;
   case &Var_p(vd,p2):
 
@@ -1547,7 +1548,7 @@ doc_t pat2doc(pat_t p) {
     s = cat(qvar2doc(vd->name), text("<"), textptr(get_name(tv)), text(">"));
     break;
   case &Tuple_p(ts,dots):
-    s = cat(dollar(), text("("), ppseq(pat2doc,",",ts), 
+    s = cat(dollar(), text("("), ppseq(pat2doc,",",ts),
             dots ? text(", ...)") : text(")"));
     break;
   case &Pointer_p(p2):
@@ -1646,9 +1647,9 @@ doc_t vardecl2doc(vardecl_t vd) {
   doc_t beforenamedoc;
   switch(c_compiler){
   case Gcc_c: beforenamedoc = attsdoc; break;
-  case Vc_c:  
+  case Vc_c:
     switch(compress(type)) {
-    case &FnType(FnInfo(_,_,_,_,_,_,_,_,atts2)): 
+    case &FnType(FnInfo(_,_,_,_,_,_,_,_,atts2)):
       beforenamedoc = callconv2doc(atts2);
       break;
     default: beforenamedoc = nil_doc(); break;
@@ -1690,7 +1691,7 @@ doc_t aggrdecl2doc(aggrdecl_t ad) {
                ktvars2doc(ad->tvs),
                blank_doc(),lb(),
                ktvars2doc(ad->impl->exist_vars),
-               (ad->impl->rgn_po==NULL ? nil_doc() : 
+               (ad->impl->rgn_po==NULL ? nil_doc() :
                 cat(text(":"),rgnpo2doc(ad->impl->rgn_po))),
                nest(2, cat(line_doc(),aggrfields2doc(ad->impl->fields))),
                line_doc(),
@@ -1770,14 +1771,14 @@ doc_t decl2doc(decl_t d) {
 			  line_doc(),
 			  rb());
     s = cat(inlinedoc,scopedoc,tqtddoc,bodydoc);
-    
+
     switch(c_compiler){
     case Vc_c:  s = cat(attsdoc,s); break;
     default: break;
     }
 
     break;
-    
+
   case &Aggr_d(ad):
     s = cat(aggrdecl2doc(ad),text(";"));
     break;
@@ -1791,7 +1792,7 @@ doc_t decl2doc(decl_t d) {
             text(">" ),
             qvar2doc(vd->name),
             (resetable ? text(" @resetable") : nil_doc()),
-            ((open_exp_opt != NULL) ? 
+            ((open_exp_opt != NULL) ?
              cat(text(" = open("), exp2doc((exp_t)open_exp_opt), text(")")) :
              nil_doc()),text(";"));
     break;
@@ -1819,7 +1820,7 @@ doc_t decl2doc(decl_t d) {
     type_t t;
     if (td->defn != NULL)
       t = td->defn->v;
-    else 
+    else
       t = new_evar(td->kind,NULL);
     s = cat(text("typedef "),
             tqtd2doc(td->tq,
@@ -1864,7 +1865,7 @@ doc_t decl2doc(decl_t d) {
               rb(),
               text(" */"));
     break;
-  case &ExternC_d(tdl): 
+  case &ExternC_d(tdl):
     if (print_externC_stmts)
       s = cat(text("extern \"C\" "),
               lb(),
@@ -1883,14 +1884,14 @@ doc_t decl2doc(decl_t d) {
               rb(),
               text(" */"));
     break;
-  case &ExternCinclude_d(tdl,exs): 
+  case &ExternCinclude_d(tdl,exs):
     if (print_externC_stmts) {
-      doc_t exs_doc; 
+      doc_t exs_doc;
       if (exs != NULL)
         exs_doc = cat(rb(),text(" export "),lb(),
                       line_doc(),ppseql(export2doc,",",exs),
                       line_doc(),rb());
-      else 
+      else
         exs_doc = rb();
       s = cat(text("extern \"C include\" "),
               lb(),
@@ -1957,9 +1958,9 @@ bool is_anon_aggrtype(type_t t) {
   }
 }
 
-// bubble the attribute modifier past a running series of 
+// bubble the attribute modifier past a running series of
 // Pointer_mod Function_mod's
-static list_t<type_modifier_t<`r>,`r> 
+static list_t<type_modifier_t<`r>,`r>
 bubble_attributes(region_t<`r> r,type_modifier_t<`r> atts,
                   list_t<type_modifier_t<`r>,`r> tms) {
   if (tms != NULL && tms->tl != NULL) {
@@ -1973,7 +1974,7 @@ bubble_attributes(region_t<`r> r,type_modifier_t<`r> atts,
 
 
 // Conversion between alternate forms of types
-$(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r, 
+$(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
                                                         tqual_t tq,type_t t) {
   switch (t) {
   case &ArrayType(ArrayInfo{t2,tq2,e,zeroterm,ztl}):
@@ -1995,7 +1996,7 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
                         rgn_po,fn_atts}):
     if (! print_all_tvars) {
       // don't print default effects
-      // WARNING: this is our criterion to detect default effect, 
+      // WARNING: this is our criterion to detect default effect,
       // so it'd better be right
       if (effopt == NULL || exists_temp_tvar_in_effect(effopt->v)) {
 	effopt = NULL;	//drop the existing effect
@@ -2014,7 +2015,7 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
     list_t<type_modifier_t<`r>,`r> tms = tml3;
     // mess with attributes and arguments:
     // * for gcc: we put all attributes after the args
-    // * for VC: 
+    // * for VC:
     //   o we drop non-calling conventions on the floor (in fact,
     //     decl printing puts them at the declaration beginning)
     //   o for calling conventions, we put them before the args and rely
@@ -2022,26 +2023,26 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
     //     (I doubt this is right in all cases.)
 
     switch(c_compiler){
-    case Gcc_c: 
+    case Gcc_c:
       if (fn_atts != NULL){
         // if the return type is a function pointer, then we have to
         // move the attributes past that function modifier and so forth
         tms = bubble_attributes(r,rnew(r) Attributes_mod(NULL,fn_atts),tms);
       }
-      tms = rnew(r) List(rnew(r) 
+      tms = rnew(r) List(rnew(r)
                          Function_mod(rnew(r) WithTypes(args,c_varargs,
                                                         cyc_varargs,effopt,
                                                         rgn_po)),tms);
       break;
     case Vc_c:
-      tms = rnew(r) List(rnew(r) 
+      tms = rnew(r) List(rnew(r)
                          Function_mod(rnew(r) WithTypes(args,c_varargs,
                                                         cyc_varargs,effopt,
                                                       rgn_po)),tms);
       for(; fn_atts != NULL; fn_atts = fn_atts->tl)
 	switch(fn_atts->hd) {
-	case &Stdcall_att: 
-	case &Cdecl_att:   
+	case &Stdcall_att:
+	case &Cdecl_att:
 	case &Fastcall_att:
 	  tms = rnew(r) List(rnew(r) Attributes_mod(NULL,new List(fn_atts->hd,NULL)),tms);
 	  goto AfterAtts;
@@ -2098,8 +2099,8 @@ doc_t tqtd2doc(tqual_t tq, type_t typ, opt_t<doc_t> dopt) {
     tms = List::imp_rev(tms);
     if (tms==NULL && dopt==NULL)
       return cat(tqual2doc(tq),ntyp2doc(t));
-    else 
-      return 
+    else
+      return
         cat(tqual2doc(tq),
             ntyp2doc(t),
             text(" "),

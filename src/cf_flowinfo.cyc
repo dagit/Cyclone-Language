@@ -60,7 +60,7 @@ int root_cmp(root_t r1, root_t r2);
 flow_env_t<`r> new_flow_env(region_t<`r> r) {
   static datatype Raw_exp.Const_e dummy_rawexp = Const_e(Cnst{.Null_c = 0});
   static struct Exp dummy_exp = Exp(NULL,&dummy_rawexp,NULL,&EmptyAnnot_val);
-  return rnew(r) 
+  return rnew(r)
     FlowEnv { .r = r,
               .zero = rnew(r) Zero,
               .notzeroall = rnew (r) NotZeroAll,
@@ -94,13 +94,13 @@ bool update_place_set(dict_set_t<`a,`r> *set, `a place, Position::seg_t loc) {
 string_t place_err_string(place_t place) {
   let Place{root,fields} = *place;
   switch (root) {
-  case &VarRoot(vd): 
+  case &VarRoot(vd):
     if (fields == NULL)
       return Absynpp::qvar2string(vd->name);
     else
       return aprintf("reachable from %s", Absynpp::qvar2string(vd->name));
   default: Tcutil::impos("error locations not for VarRoots");
-  }  
+  }
 }
 
 // checks for conflicts when merging consumed sets
@@ -113,7 +113,7 @@ static Position::seg_t combine_consume_f(`b env,
 
 // updates the given set if not NULL.  Returns true if the place
 // is already in the set.
-place_set_t<`r> union_place_set(place_set_t<`r> s1, place_set_t<`r> s2, 
+place_set_t<`r> union_place_set(place_set_t<`r> s1, place_set_t<`r> s2,
                                 bool disjoint) {
 //    DEBUG_PRINT("**union_place_set:\n");
 //    DEBUG_PRINT("  s1= ");
@@ -131,7 +131,7 @@ place_set_t<`r> union_place_set(place_set_t<`r> s1, place_set_t<`r> s2,
 bool place_set_subset(dict_set_t<`a,`r> s1, dict_set_t<`a,`r> s2) {
   if ((int)s1.t == (int)s2.t) return true;
   try {
-    region temp; { 
+    region temp; {
       Iter::iter_t<_,`temp> iter = Dict::make_iter(temp,s1);
       let elem = *Dict::rchoose(temp,s1);
       while(Iter::next(iter,&elem)) {
@@ -174,7 +174,7 @@ int get_field_index(type_t t, field_name_t f) {
     fallthru(fs);
   case &AnonAggrType(_,fs):
     return get_field_index_fs(fs, f);
-  default: 
+  default:
     throw new Core::Impossible(aprintf("get_field_index failed: %s",
                                        Absynpp::typ2string(t)));
   }
@@ -243,7 +243,7 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
                                       type_t t, absRval_t<`r> leafval);
 
 aggrdict_t<`r> aggrfields_to_aggrdict(flow_env_t<`r> fenv,
-                                      list_t<struct Aggrfield@> fs, 
+                                      list_t<struct Aggrfield@> fs,
 				      bool no_init_bits_only,
                                       absRval_t<`r> leafval) {
   // we treat bitfields as if always initialized -- those are fields with
@@ -252,14 +252,14 @@ aggrdict_t<`r> aggrfields_to_aggrdict(flow_env_t<`r> fenv,
   aggrdict_t<`r> d = rnew(fenv->r) { for i < sz: fenv->unknown_all };
   for(int i = 0; i < sz; i++, fs = fs->tl) {
     let &Aggrfield(n,_,t2,_,_) = fs->hd;
-    if(numelts(*n) != 1) 
+    if(numelts(*n) != 1)
       d[i] = i_typ_to_absrval(fenv, false, no_init_bits_only, t2,leafval);
   }
   return d;
 }
 
 // do a substitution on an aggregate field
-static struct Aggrfield@`t 
+static struct Aggrfield@`t
   substitute_field($(region_t<`t>,
                      list_t<$(tvar_t,type_t)@`t,`t>)@ env,
                    struct Aggrfield@ f) {
@@ -300,7 +300,7 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
     // we use *bogus* for all of the field names since they're looked up
     // by index, not name.  Avoids creating the field names...
     aggrdict_t d = rnew(fenv->r) { for i < sz : fenv->unknown_all };
-    for (int i = 0; i < sz; i++) { 
+    for (int i = 0; i < sz; i++) {
       d[i] = i_typ_to_absrval(fenv,false,no_init_bits_only,(*tqts->hd)[1],leafval);
       tqts = tqts->tl;
     }
@@ -311,7 +311,7 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
       break;
     let fields = ad->impl->fields;
     if (targs == NULL) fallthru(ad->kind,fields);
-    return rnew(fenv->r) 
+    return rnew(fenv->r)
       Aggregate(UnionRInfo(ad->kind==UnionA,-1),substitute_aggrfields_to_aggrdict(fenv,ad->tvs,targs,fields,ad->kind==UnionA,leafval));
   case &AnonAggrType(k,fs):
     DEBUG_PRINT("typ_to_absrval: type=%s, leaf_val=",
@@ -319,7 +319,7 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
     DEBUG_PRINT_F(print_absrval,leafval);
     return rnew(fenv->r) Aggregate(UnionRInfo(k==UnionA,-1),aggrfields_to_aggrdict(fenv,fs,k==UnionA,leafval));
   case &ArrayType(ArrayInfo{et,_,_,zeroterm,_}) && conref_def(false,zeroterm):
-    // special case for zero-terminated arrays of bits-only things -- 
+    // special case for zero-terminated arrays of bits-only things --
     // here, we initialize them at translation by putting a 0 in at the end.
     return (allow_zeroterm && !no_init_bits_only && Tcutil::bits_only(et)) ? fenv->unknown_all : leafval;
   case &TagType(t): return leafval;
@@ -332,7 +332,7 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
     break;
   default: break;
   }
-  
+
   return (!no_init_bits_only && Tcutil::bits_only(t)) ? fenv->unknown_all : leafval;
 }
 
@@ -361,7 +361,7 @@ bool is_unique_consumed(exp_t e, int env_iteration, absRval_t<`r> r, bool @needs
       return is_unique_consumed(e,env_iteration,d[field_no],needs_unconsume);
   default: return false;
   }
-}  
+}
 
 absRval_t<`r> make_unique_unconsumed(flow_env_t<`r> fenv, absRval_t<`r> r) {
   switch (r) {
@@ -380,11 +380,11 @@ absRval_t<`r> make_unique_unconsumed(flow_env_t<`r> fenv, absRval_t<`r> r) {
       return rnew(fenv->r) Aggregate(uinfo,d2);
     else return r;
   default: return r;
-  }  
+  }
 }
 
 absRval_t<`r> make_unique_consumed(flow_env_t<`r> fenv, type_t t, exp_t consumer, int iteration, absRval_t<`r> r) {
-  if (Tcutil::is_noalias_pointer(t)) 
+  if (Tcutil::is_noalias_pointer(t))
     return rnew(fenv->r) Consumed(consumer,iteration,r);
   switch $(Tcutil::compress(t),r) {
   case $(&TupleType(tqts),&Aggregate(b,d)):
@@ -412,7 +412,7 @@ absRval_t<`r> make_unique_consumed(flow_env_t<`r> fenv, type_t t, exp_t consumer
   }
 }
 
-static bool 
+static bool
 prefix_of_member(place_t<`r2,`r3> place,
                  Dict::dict_t<place_t<`r2,`r3>,Position::seg_t,`r4> set) {
   region r; {
@@ -454,8 +454,8 @@ static void add_places(escpile_t<`r,`r> pile, absRval_t<`r> r) {
   switch(r) {
   case &Consumed(_,_,r): add_places(pile,r); return;
   case &AddressOf(p): add_place(pile, p); return;
-  case &Aggregate(b,d): 
-    for (int i = 0; i < numelts(d); i++) 
+  case &Aggregate(b,d):
+    for (int i = 0; i < numelts(d); i++)
       add_places(pile, d[i]);
     return;
   default: return;
@@ -468,8 +468,8 @@ static void add_places(escpile_t<`r,`r> pile, absRval_t<`r> r) {
 static absRval_t<`r> insert_place_inner(region_t<`r> r, absRval_t<`r> new_val,
                                         absRval_t<`r> old_val) {
   switch(old_val) {
-  case &Aggregate(UnionRInfo(is_union,_),d): 
-    aggrdict_t d2 = rnew(r) { for i < numelts(d) : 
+  case &Aggregate(UnionRInfo(is_union,_),d):
+    aggrdict_t d2 = rnew(r) { for i < numelts(d) :
                               insert_place_inner(r,new_val,d[i]) };
     // we eliminate the distinction as to which field was last
     // written since we're changing the values of things
@@ -482,7 +482,7 @@ static absRval_t<`r> insert_place_inner(region_t<`r> r, absRval_t<`r> new_val,
 
 // functionally update the entry in dictionary [d] at index [n] with
 // [rval]; return the same dictionary if [rval] is the same as the old value.
-static aggrdict_t<`r> aggr_dict_insert(region_t<`r> r, aggrdict_t<`r> d, 
+static aggrdict_t<`r> aggr_dict_insert(region_t<`r> r, aggrdict_t<`r> d,
                                        int n, absRval_t<`r> rval) {
   let old_rval = d[n];
   if (old_rval == rval) return d;
@@ -495,12 +495,12 @@ static aggrdict_t<`r> aggr_dict_insert(region_t<`r> r, aggrdict_t<`r> d,
 // processing an aggregate, it will recursively iterate over the
 // fields [fs], functionally updating entries in the aggregate
 // dictionary [d] as it unwinds, avoiding changes if pointer equality
-// is maintained.  
+// is maintained.
 static absRval_t<`r> insert_place_outer(region_t<`r> r,
                                         list_t<int> fs,
-                                        absRval_t<`r> old_val, 
+                                        absRval_t<`r> old_val,
                                         absRval_t<`r> new_val) {
-  if(fs==NULL) 
+  if(fs==NULL)
     return insert_place_inner(r,new_val,old_val);
   switch($(fs,old_val)) {
   case $(&List(hd,tl),&Aggregate(UnionRInfo(is_union,_),d)):
@@ -516,7 +516,7 @@ static absRval_t<`r> insert_place_outer(region_t<`r> r,
 // Note: we should only be escaping leaves now -- never Aggregate!
 // Note: There's a quadratic behavior here that won't be a problem in practice.
 static flowdict_t<`r> escape_these(flow_env_t<`r> fenv,
-                                   escpile_t<`r,`r> pile, 
+                                   escpile_t<`r,`r> pile,
                                    place_set_t<`r> * all_changed,
                                    flowdict_t<`r> d) {
   while(pile->places != NULL) {
@@ -524,7 +524,7 @@ static flowdict_t<`r> escape_these(flow_env_t<`r> fenv,
     pile->places = pile->places->tl;
     update_place_set(all_changed,place,NULL);
     absRval_t oldval, newval;
-    try oldval = lookup_place(d,place); 
+    try oldval = lookup_place(d,place);
     catch { case &Dict::Absent: continue; }
     switch(initlevel(fenv,d,oldval)) {
     case AllIL:  newval = fenv->esc_all;  break;
@@ -562,7 +562,7 @@ static initlevel_t initlevel_approx(absRval_t r) {
   default: throw new Core::Impossible("initlevel_approx");
   }
 }
-static initlevel_t initlevel_rec(struct InitlevelEnv<`r,`e> @ env, 
+static initlevel_t initlevel_rec(struct InitlevelEnv<`r,`e> @ env,
 				 absRval_t<`r> r, initlevel_t acc) {
   initlevel_t this_ans;
   if(acc == NoneIL) return NoneIL;
@@ -586,10 +586,10 @@ static initlevel_t initlevel_rec(struct InitlevelEnv<`r,`e> @ env,
   case &Aggregate(UnionRInfo{.is_union = false, ...},d): // struct case -- they all have to be init'd
     let sz = numelts(d);
     this_ans = AllIL;
-    for (int i = 0; i < sz; i++) 
+    for (int i = 0; i < sz; i++)
       this_ans = initlevel_rec(env,d[i],this_ans);
     break;
-  case &AddressOf(p): 
+  case &AddressOf(p):
     if(List::mem(place_cmp, env->seen, p))
       this_ans = AllIL;
     else {
@@ -618,10 +618,10 @@ absRval_t<`r> lookup_place(flowdict_t<`r> d, place_t<`r,`r> place) {
   let ans = Dict::lookup(d,root);
   for(; fields != NULL; fields = fields->tl)
     switch($(ans,fields->hd)) {
-    case $(&Aggregate(is_union,d2), fname): 
+    case $(&Aggregate(is_union,d2), fname):
       ans = d2[fname];
       break;
-    default: 
+    default:
       DEBUG_PRINT("found bad lookup place ");
       DEBUG_PRINT_F(print_absrval,ans);
       DEBUG_PRINT("\n");
@@ -634,12 +634,12 @@ static bool is_rval_unescaped(absRval_t rval) {
   switch(rval) {
   case &Esc(_):       return false;
   case &Consumed(_,_,r): return is_rval_unescaped(rval);
-  case &Aggregate(UnionRInfo(is_union,field_no),d): 
+  case &Aggregate(UnionRInfo(is_union,field_no),d):
     if (is_union && field_no != -1)
       return !is_rval_unescaped(d[field_no]);
     else {
       unsigned sz = numelts(d);
-      for (int i = 0; i < sz; i++) 
+      for (int i = 0; i < sz; i++)
 	if (!is_rval_unescaped(d[i])) return false;
       return true;
     }
@@ -662,15 +662,15 @@ flowdict_t<`r> escape_deref(flow_env_t<`r> fenv, flowdict_t<`r> d, place_set_t<`
 static struct AssignEnv<`r::R,`r2::R,`r3::R> {
   flow_env_t<`r2>   fenv;
   escpile_t<`r2,`r2,`r,`r> pile;
-  
+
   flowdict_t<`r2>   d;
   Position::seg_t  loc;
 
   place_t<`r,`r> root_place;
   place_set_t<`r> *`r3 all_changed;
 };
-static absRval_t<`r2> assign_place_inner(struct AssignEnv<`r,`r2> @ env, 
-                                         absRval_t<`r2> oldval, 
+static absRval_t<`r2> assign_place_inner(struct AssignEnv<`r,`r2> @ env,
+                                         absRval_t<`r2> oldval,
                                          absRval_t<`r2> newval) {
   // assignments to escaped places must be fully-init because other aliases
   // might assume fully-init.  Always causes place to be added for same reason.
@@ -682,7 +682,7 @@ static absRval_t<`r2> assign_place_inner(struct AssignEnv<`r,`r2> @ env,
 		   "an escaped location");
     return env->fenv->esc_all;
   case $(&Aggregate(is_union1,d1), &Aggregate(is_union2,d2)):
-    aggrdict_t new_d = 
+    aggrdict_t new_d =
       rnew(env->fenv->r) {for i < numelts(d1) : assign_place_inner(env,d1[i],d2[i]) };
     // try to preserve sharing by returning one of the original arrays
     // if there was no change
@@ -723,10 +723,10 @@ static bool nprefix(int @n, `a unused) {
   if (*n > 0) { *n = *n - 1; return true; }
   else return false;
 }
-static absRval_t<`r2> assign_place_outer(struct AssignEnv<`r,`r2> @ env, 
+static absRval_t<`r2> assign_place_outer(struct AssignEnv<`r,`r2> @ env,
                                          list_t<int> fs,
 					 int fs_prefix,
-                                         absRval_t<`r2> oldval, 
+                                         absRval_t<`r2> oldval,
                                          absRval_t<`r2> newval) {
   if(fs == NULL) return assign_place_inner(env,oldval,newval);
   switch($(fs,oldval)) {
@@ -769,8 +769,8 @@ static absRval_t<`r2> assign_place_outer(struct AssignEnv<`r,`r2> @ env,
 }
 flowdict_t<`r> assign_place(flow_env_t<`r> fenv,
                             Position::seg_t loc, flowdict_t<`r> d,
-                            place_set_t<`r> * all_changed, 
-                            place_t<`r,`r> place, 
+                            place_set_t<`r> * all_changed,
+                            place_t<`r,`r> place,
                             absRval_t<`r> r) {
   update_place_set(all_changed,place,NULL);
   ANAL_RGN(fenv, rgn) {
@@ -820,7 +820,7 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
   switch($(r1,r2)) { // only break when the answer should be Unknown or Esc!
 
   case $(&Consumed(e1,i1,r1),&Consumed(e2,i2,r2)):
-    if (e1 == e2 && i1 == i2) 
+    if (e1 == e2 && i1 == i2)
       return rnew(rgn) Consumed(e1,i1,join_absRval(env,a,r1,r2));
     switch (r1) {
     case &AddressOf(p): add_place(env->pile,p); break;
@@ -831,9 +831,9 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
     default: break;
     }
     break;
-  case $(&Consumed(e1,i1,r1),_): 
+  case $(&Consumed(e1,i1,r1),_):
     return rnew(rgn) Consumed(e1,i1,join_absRval(env,a,r1,r2));
-  case $(_,&Consumed(e2,i2,r2)): 
+  case $(_,&Consumed(e2,i2,r2)):
     return rnew(rgn) Consumed(e2,i2,join_absRval(env,a,r1,r2));
 
   case $(&AddressOf(p1), &AddressOf(p2)):
@@ -843,11 +843,11 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
     break;
 
   case $(&AddressOf(p), &NotZeroThis): fallthru(p);
-  case $(&NotZeroThis, &AddressOf(p)): 
+  case $(&NotZeroThis, &AddressOf(p)):
     add_place(env->pile,p);
     return env->fenv->notzerothis;
 
-  case $(&AddressOf(p), &NotZeroAll): 
+  case $(&AddressOf(p), &NotZeroAll):
     add_place(env->pile,p);
     switch (initlevel(env->fenv,env->d1,r1)) {
     case AllIL: return env->fenv->notzeroall;
@@ -859,7 +859,7 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
     case AllIL: return env->fenv->notzeroall;
     default: return env->fenv->notzerothis;
     }
-    
+
   case $(&AddressOf(p), _): add_place(env->pile,p); break;
   case $(_, &AddressOf(p)): add_place(env->pile,p); break;
 
@@ -868,7 +868,7 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
   case $(&NotZeroThis, &NotZeroAll): return env->fenv->notzerothis;
 
   case $(&Aggregate(UnionRInfo(is_union1,field_no1),d1), &Aggregate(UnionRInfo(is_union2,field_no2),d2)):
-    aggrdict_t new_d = 
+    aggrdict_t new_d =
       rnew(rgn) {for i < numelts(d1) : join_absRval(env,0,d1[i],d2[i]) };
 
     // try to preserve sharing by returning one of the original arrays
@@ -894,7 +894,7 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
       }
     }
     return rnew(rgn) Aggregate(UnionRInfo(is_union1,field_no1 == field_no2 ? field_no1 : -1),new_d);
-    
+
   default: break;
   }
   initlevel_t il1 = initlevel(env->fenv,env->d1,r1);
@@ -941,7 +941,7 @@ static bool same_relop(reln_op_t r1,reln_op_t r2) {
 }
 static relns_t<`r> join_relns(region_t<`r> r, relns_t<`r> r1s, relns_t<`r> r2s){
   if (r1s == r2s) return r1s;
-  //  fprintf(stderr,"join on ["); print_relns(r1s); 
+  //  fprintf(stderr,"join on ["); print_relns(r1s);
   //  fprintf(stderr,"] and ["); print_relns(r2s); fprintf(stderr,"]\n");
   list_t<reln_t> res = NULL;
   bool diff = false;
@@ -984,7 +984,7 @@ flow_t<`r> join_flow(flow_env_t<`r> fenv,
   }
 }
 
-$(flow_t<`r>,absRval_t<`r>) 
+$(flow_t<`r>,absRval_t<`r>)
 join_flow_and_rval(flow_env_t<`r> fenv,
                    place_set_t<`r>* all_changed,
                    $(flow_t<`r>,absRval_t<`r>) pr1,
@@ -997,7 +997,7 @@ join_flow_and_rval(flow_env_t<`r> fenv,
   switch($(f1,f2,outflow)) {
   case $({.BottomFL = _},_,_): return $(outflow,r2);
   case $(_,{.BottomFL = _},_): return $(outflow,r1);
-  case $({.ReachableFL = $(d1,_)},{.ReachableFL = $(d2,_)}, 
+  case $({.ReachableFL = $(d1,_)},{.ReachableFL = $(d2,_)},
 	 {.ReachableFL = $(outd,relns)}):
     if(absRval_lessthan_approx(0,r1,r2)) return $(outflow,r2);
     if(absRval_lessthan_approx(0,r2,r1)) return $(outflow,r1);
@@ -1015,7 +1015,7 @@ static absRval_t<`r> after_absRval_d(afterenv_t<`r,`r2>,int,absRval_t<`r>,absRva
 static absRval_t<`r> after_absRval(afterenv_t<`r,`r2> env, absRval_t<`r> r1, absRval_t<`r> r2) {
   bool changed1 = env->changed == One || Dict::member(env->chg1,env->curr_place);
   bool changed2 = env->changed == Two || Dict::member(env->chg2,env->curr_place);
-  if(changed1 && changed2) 
+  if(changed1 && changed2)
     return join_absRval(&env->joinenv, 0, r1, r2);
   // checking for "is a contained object changed in the other pinfo" is
   // quadratic because we'll do it "all the way down", but in practice
@@ -1038,10 +1038,10 @@ static absRval_t<`r> after_absRval(afterenv_t<`r,`r2> env, absRval_t<`r> r1, abs
   case $(_,&Consumed(...)): return join_absRval(&env->joinenv, 0, r1, r2);
   case $(&Aggregate(UnionRInfo(is_union1,field_no1),d1),
 	 &Aggregate(UnionRInfo(is_union2,field_no2),d2)):
-    aggrdict_t new_d = 
-      rnew(env->joinenv.fenv->r) 
+    aggrdict_t new_d =
+      rnew(env->joinenv.fenv->r)
         {for i < numelts(d1) : after_absRval_d(env,i,d1[i],d2[i]) };
-                                                         
+
     // try to preserve sharing by returning one of the original arrays
     // if there was no change; moreover, we will preserve the fieldnum
     // information for the unchanged side if this is a union
@@ -1063,7 +1063,7 @@ static absRval_t<`r> after_absRval(afterenv_t<`r,`r2> env, absRval_t<`r> r1, abs
     // field information here
     return rnew(env->joinenv.fenv->r) Aggregate(UnionRInfo(is_union1,field_no1 == field_no2 ? field_no1 : -1),new_d);
 
-  default: 
+  default:
     DEBUG_PRINT("after_absRval, rvalues are ");
     DEBUG_PRINT_F(print_absrval,r1);
     DEBUG_PRINT(" and ");
@@ -1072,11 +1072,11 @@ static absRval_t<`r> after_absRval(afterenv_t<`r,`r2> env, absRval_t<`r> r1, abs
     throw new Core::Impossible("after_absRval -- non-aggregates!");
   }
 }
-static absRval_t<`r> 
-after_absRval_d(afterenv_t<`r,`r2> env, int key, 
+static absRval_t<`r>
+after_absRval_d(afterenv_t<`r,`r2> env, int key,
                 absRval_t<`r> r1, absRval_t<`r> r2) {
   if(r1 == r2) return r1;
-  let old_last_field = env->last_field_cell; 
+  let old_last_field = env->last_field_cell;
   let old_changed    = env->changed;
   *env->last_field_cell = rnew(env->joinenv.fenv->r) List(key,NULL);
 //     `r2                 `r1  `r        `r
@@ -1098,13 +1098,13 @@ static absRval_t<`r> after_root(afterenv_t<`r,`r2> env, root_t<`r> root,
 }
 // FIX: region-allocate chg1 and chg2
 flow_t<`r> after_flow(flow_env_t<`r> fenv,
-                      place_set_t<`r>* all_changed, 
+                      place_set_t<`r>* all_changed,
                       flow_t<`r> f1, flow_t<`r> f2,
                       place_set_t<`r> chg1, place_set_t<`r> chg2) {
 
   //if(f1 == f2) return f1;
   switch($(f1,f2)) {
-  case $({.BottomFL = _},_): 
+  case $({.BottomFL = _},_):
   case $(_,{.BottomFL = _}): return BottomFL();
   case $({.ReachableFL = $(d1,r1)},{.ReachableFL = $(d2,r2)}):
     if(d1.t == d2.t && r1 == r2) return f1;
@@ -1112,8 +1112,8 @@ flow_t<`r> after_flow(flow_env_t<`r> fenv,
     // cut-off in presence of changes)
     ANAL_RGN(fenv, rgn) {
       let curr_place = fenv->dummy_place;
-      let env  = AfterEnv(JoinEnv(fenv, rnew(rgn) EscPile(rgn,NULL), d1, d2), 
-			  chg1, chg2, 
+      let env  = AfterEnv(JoinEnv(fenv, rnew(rgn) EscPile(rgn,NULL), d1, d2),
+			  chg1, chg2,
 			  curr_place, &curr_place->fields,
 			  Neither);
       let new_d = Dict::union_two_c(after_root,&env,d1,d2);
@@ -1134,12 +1134,12 @@ static bool absRval_lessthan_approx(`a::B ignore, absRval_t<`r> r1, absRval_t<`r
   case $(_,&AddressOf(_)): return false;
   case $(&Aggregate(is_union1,d1), &Aggregate(is_union2,d2)):
     if (d1 == d2) return true;
-    for (int i = 0; i < numelts(d1); i++) 
+    for (int i = 0; i < numelts(d1); i++)
       if (!absRval_lessthan_approx(0,d1[i],d2[i])) return false;
     return true;
   case $(&NotZeroAll, &NotZeroThis): return true;
   case $(_, &NotZeroThis): return false;
-  case $(_, &Zero): 
+  case $(_, &Zero):
   case $(_, &NotZeroAll): return false;
   case $(&Esc(_),&Esc(_)): break;
   case $(&Esc(_),_): return false;
@@ -1156,7 +1156,7 @@ static bool absRval_lessthan_approx(`a::B ignore, absRval_t<`r> r1, absRval_t<`r
 
 static bool relns_approx(relns_t<`r> r2s, relns_t<`r> r1s) {
   if (r1s == r2s) return true;
-  //fprintf(stderr,"approx on ["); print_relns(r1s); 
+  //fprintf(stderr,"approx on ["); print_relns(r1s);
   //fprintf(stderr,"] and ["); print_relns(r2s); fprintf(stderr,"]");
   for (; r1s != NULL; r1s = r1s->tl) {
     let r1 = r1s->hd;
@@ -1169,7 +1169,7 @@ static bool relns_approx(relns_t<`r> r2s, relns_t<`r> r1s) {
       }
     }
     if (!found)
-      return false; 
+      return false;
   }
   return true;
 }
@@ -1261,10 +1261,10 @@ relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, vardecl_t v, exp_t 
   // even if v isn't an integral type, it might be an array in which case
   // we need to kill it.
   r = reln_kill_var(rgn, r, v);
-  // if e is malloc(n*sizeof(t)) or a calloc(n,sizeof(t)) 
+  // if e is malloc(n*sizeof(t)) or a calloc(n,sizeof(t))
   // then we can add n <= numelts(v).  Note that we can't easily
   // do this for comprehensions (i.e., rnew(e1) {for i < n : e2})
-  // because e1 or e2 could modify n.  
+  // because e1 or e2 could modify n.
   switch (e->r) {
   case &Malloc_e(MallocInfo{_,_,_,e2,true}):
     malloc_loop:
@@ -1273,7 +1273,7 @@ relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, vardecl_t v, exp_t 
     case &Var_e(_,&Pat_b(n)): fallthru(n);
     case &Var_e(_,&Local_b(n)): fallthru(n);
     case &Var_e(_,&Param_b(n)): fallthru(n);
-    case &Var_e(_,&Global_b(n)): 
+    case &Var_e(_,&Global_b(n)):
       if (n->escapes) return r;
       return rnew(rgn) List(rnew(rgn) Reln{n,LessEqNumelts(v)},r);
     default: return r;
@@ -1283,15 +1283,15 @@ relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, vardecl_t v, exp_t 
   // otherwise ignore any situations where we have a non-integral type
   switch (Tcutil::compress(v->type)) {
   case &IntType(_,_): break;
-  default: 
+  default:
     return r;
   }
   // ignore if e isn't numelts(y) or a constant
-  
+
  loop:
   switch (e->r) {
   case &Cast_e(_,e1,_,_): e = e1; goto loop;
-  case &Const_e({.Int_c = $(_,i)}): 
+  case &Const_e({.Int_c = $(_,i)}):
     return rnew(rgn) List(rnew(rgn) Reln(v,EqualConst(i)),r);
   case &Primop_e(Mod, &List(_,&List(e2,_))):
     // FIX: is this safe?  what if e modifies v2?
@@ -1369,7 +1369,7 @@ void print_initlevel(initlevel_t il) {
 
 void print_root(root_t root) {
   switch (root) {
-  case &VarRoot(vd): 
+  case &VarRoot(vd):
     fprintf(stderr,"Root(%s)",Absynpp::qvar2string(vd->name)); break;
   case &MallocPt(e,t):
     fprintf(stderr,"MallocPt(%s,%s)",
@@ -1432,9 +1432,9 @@ void print_absrval(absRval_t rval) {
     fprintf(stderr,")"); break;
   case &Esc(il): fprintf(stderr,"Esc("); print_initlevel(il);
     fprintf(stderr,")"); break;
-  case &AddressOf(p): fprintf(stderr,"AddrOf("); print_place(p); 
+  case &AddressOf(p): fprintf(stderr,"AddrOf("); print_place(p);
     fprintf(stderr,")"); break;
-  case &Aggregate(UnionRInfo(is_union,f),d): 
+  case &Aggregate(UnionRInfo(is_union,f),d):
     if (is_union) {
       fprintf(stderr,"AggrUnion{");
       if (f != -1)
@@ -1479,21 +1479,20 @@ void print_flow(flow_t f) {
 // returns true when t contains the region rgn with a few exceptions:
 //  * doesn't count rgn in function types
 //  * doesn't count rgn in region_t types (i.e., handles)
-// We don't care about functions -- they're only callable if their 
+// We don't care about functions -- they're only callable if their
 // effects are covered by the capability and in the absence of closures,
 // can't have any dangling pointers into rgn.  Region handles aren't
 // "killed" when we reset a region and in fact we need them to ensure
-// that we can allocate stuff in the region.  
+// that we can allocate stuff in the region.
 bool contains_region(killrgn_t rgn, type_t t) {
   switch (Tcutil::compress(t)) {
   case &TypeDeclType(...): // really an error -- should be compressed out
   case &VoidType: // these cases can't contain rgn
-  case &IntType(_,_):    
-  case &FloatType:        
-  case &DoubleType(_):   
-  case &EnumType(_,_):   
-  case &AnonEnumType(_): 
-  case &TagType(_):      
+  case &IntType(_,_):
+  case &FloatType(_):
+  case &EnumType(_,_):
+  case &AnonEnumType(_):
+  case &TagType(_):
   case &HeapRgn:
   case &Evar(_,_,_,_): return false; // because of compress above
   case &UniqueRgn:
@@ -1506,25 +1505,25 @@ bool contains_region(killrgn_t rgn, type_t t) {
     case &RefCntRgn_k: return true;
     default: return false;
     }
-  case &VarType(tv): 
+  case &VarType(tv):
     switch (rgn) {
     case &RefCntRgn_k:
     case &UniqueRgn_k: return false;
     case &Region_k(rgn): return tvar_cmp(tv,rgn) == 0;
     }
-    // for parameterized types, we just look to see if rgn shows up 
+    // for parameterized types, we just look to see if rgn shows up
     // in the parameters -- this is overly aggressive since the regions
     // might not actually get used or may only get used in a handle or
     // in a function.  But it beats substituting and descending.
     //
     // Note also that we don't descend into the definitions of datatypes,
     // structs, typedefs, etc. because they must be closed w.r.t. all regions
-    // except the heap.  
+    // except the heap.
   case &DatatypeType(DatatypeInfo{_,targs}): fallthru(targs);
   case &TypedefType(_,targs,_,_):    fallthru(targs);
   case &AggrType(AggrInfo{_,targs}): fallthru(targs);
   case &DatatypeFieldType(DatatypeFieldInfo{_,targs}): fallthru(targs);
-  case &JoinEff(targs): 
+  case &JoinEff(targs):
     return List::exists_c(contains_region,rgn,targs);
   case &PointerType(PtrInfo{t2,_,PtrAtts(r,_,_,_,_)}):
     return contains_region(rgn,r) || contains_region(rgn,t2);
@@ -1534,13 +1533,13 @@ bool contains_region(killrgn_t rgn, type_t t) {
       if (contains_region(rgn,(*tqs->hd)[1])) return true;
     return false;
   case &AnonAggrType(_,fds):
-    for (; fds != NULL; fds = fds->tl) 
+    for (; fds != NULL; fds = fds->tl)
       if (contains_region(rgn,fds->hd->type)) return true;
     return false;
   case &ArrayType(ArrayInfo{t2,_,_,_,_}): fallthru(t2);
   case &AccessEff(t2):     fallthru(t2);
   case &RgnsEff(t2):       return contains_region(rgn,t2);
-  case &DynRgnType(t1,t2): 
+  case &DynRgnType(t1,t2):
     return contains_region(rgn,t1) || contains_region(rgn,t2);
   // careful: we don't want to kill any region handles to the region in
   // question.
@@ -1553,14 +1552,14 @@ bool contains_region(killrgn_t rgn, type_t t) {
 static void kill_root($(flow_env_t<`r>, flowdict_t<`r>,killrgn_t)@ env, root_t<`r> root, absRval_t<`r> rval) {
   let &$(fenv,*fd,rgn) = env;
   switch (root) {
-  case &VarRoot(vd): 
+  case &VarRoot(vd):
     // if the variable's type contains the region
     if (contains_region(rgn,vd->type))
       // set it to uninitialized in the new dictionary
       rval = typ_to_absrval(fenv, vd->type, false,fenv->unknown_none);
     *fd = Dict::insert(*fd,root,rval);
     break;
-  case &MallocPt(_,t): 
+  case &MallocPt(_,t):
     // if the result of the malloc's type does not contain the region
     if (!contains_region(rgn,t))
       // insert the mapping into the new dictionary
@@ -1573,22 +1572,22 @@ static void kill_root($(flow_env_t<`r>, flowdict_t<`r>,killrgn_t)@ env, root_t<`
 }
 
 // "kill" all roots in the flowdict that have rgn in their type
-static flowdict_t<`r> 
+static flowdict_t<`r>
 kill_flowdict_region(flow_env_t<`r> fenv, flowdict_t<`r> fd, type_t rgn) {
   switch (Tcutil::compress(rgn)) {
-  case &VarType(tv): 
+  case &VarType(tv):
     datatype KillRgn.Region_k v = Region_k(tv);
     datatype KillRgn @v2 = &v;
     $(flow_env_t,flowdict_t,killrgn_t) env = $(fenv,fenv->mt_flowdict,v2);
     Dict::iter_c(kill_root,&env,fd);
     return env[1];
-    
-  case &UniqueRgn: 
+
+  case &UniqueRgn:
     $(flow_env_t,flowdict_t,killrgn_t) env = $(fenv,fenv->mt_flowdict,&UniqueRgn_k_val);
     Dict::iter_c(kill_root,&env,fd);
     return env[1];
 
-  case &RefCntRgn: 
+  case &RefCntRgn:
     $(flow_env_t,flowdict_t,killrgn_t) env = $(fenv,fenv->mt_flowdict,&RefCntRgn_k_val);
     Dict::iter_c(kill_root,&env,fd);
     return env[1];
@@ -1603,12 +1602,12 @@ static relns_t<`r> kill_relns_region(relns_t<`r> relns, type_t rgn) {
   return NULL;
 }
 
-// the region rgn has been reset -- produce an outflow where the 
+// the region rgn has been reset -- produce an outflow where the
 // roots involving rgn are now uninitialized.
 flow_t<`r> kill_flow_region(flow_env_t<`r> fenv, flow_t<`r> f, type_t rgn) {
   switch (f) {
   case {.BottomFL = _}: return f;
-  case {.ReachableFL = $(fd,r)}: 
+  case {.ReachableFL = $(fd,r)}:
     let fd2 = kill_flowdict_region(fenv,fd,rgn);
     let r2 = kill_relns_region(r,rgn);
     // FIX: deal with killing consumed values?

@@ -264,9 +264,9 @@ list_t<type_t,`r> get_format_typs(region_t<`r> r, tenv_t te,string_t s,seg_t loc
         //  return NULL;
         //}
         switch (lenmod) {
-        case NULL:       typs = rnew(r) List(double_typ(false),typs); break;
+        case NULL:       typs = rnew(r) List(float_typ(1),typs); break;
         case &List(x,NULL) && x =='l': 
-          typs = rnew(r) List(double_typ(true),typs); break;
+          typs = rnew(r) List(float_typ(2),typs); break;
         default:
           terr(loc,"length modifier '%s' is not allowed with %%%c",
                implode(lenmod), c);
@@ -527,9 +527,9 @@ list_t<type_t,`r> get_scanf_typs(region_t<`r> r,tenv_t te,string_t s,seg_t loc) 
     case 'A':
       let tvs = new Opt(lookup_type_vars(te));
       switch (lenmod) {
-      case NULL: t = float_typ; break;
+      case NULL: t = float_typ(0); break;
         // Note, %f means float in scanf, double in printf!!
-      case &List(x,NULL) && x=='l': t = double_typ(false); break;
+      case &List(x,NULL) && x=='l': t = float_typ(1); break;
       default: // We don't support L
         terr(loc,"length modifier '%s' is not allowed with %%%c",
               implode(lenmod), c);

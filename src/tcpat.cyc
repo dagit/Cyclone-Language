@@ -264,7 +264,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
   case &Int_p(None,_):
   case &Int_p(Signed,_):   t = num_type(topt, sint_typ);  break;
   case &Char_p(_):         t = num_type(topt, char_typ);  break;
-  case &Float_p(_):        t = num_type(topt, float_typ); break;
+  case &Float_p(_,i):      t = num_type(topt, float_typ(i)); break;
   case &Enum_p(ed,_):      t = num_type(topt, new EnumType(ed->name,ed)); break;
   case &AnonEnum_p(tenum,_): t = num_type(topt, tenum); break;
   case &Null_p:
@@ -744,10 +744,10 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
   switch (p->r) {
   case &Wild_p:          
   case &TagInt_p(_,_):  s = rnew(r) Any; break;
-  case &Null_p:          s = null_pat(r,p); break;
+  case &Null_p:         s = null_pat(r,p); break;
   case &Int_p(sn,i):    s = int_pat(r,i,p); break;
   case &Char_p(c):      s = char_pat(r,c,p); break;
-  case &Float_p(f):     s = float_pat(r,f,p); break;
+  case &Float_p(f,_):   s = float_pat(r,f,p); break;
   case &Var_p(_,p2):    s = compile_pat(r,p2); break;
   case &Reference_p(_,p2): s = compile_pat(r,p2); break;
   case &Pointer_p(pp):
@@ -1228,7 +1228,7 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
     case &Null_p: return "NULL";
     case &Int_p(_,i): return aprintf("%d",i);
     case &Char_p(c): return aprintf("%d",c);
-    case &Float_p(f): return f;
+    case &Float_p(f,i): return f;
     case &Enum_p(_,ef): fallthru(ef);
     case &AnonEnum_p(_,ef): return qvar2string(ef->name);
     case &Exp_p(e): return exp2string(e);

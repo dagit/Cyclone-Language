@@ -632,7 +632,7 @@ static type_t
           t = int_typ(sgn2,sz);
         break;
         // hack -- if we've seen "long" then sz will be B8
-      case &DoubleType(_): t = double_typ(true); break;
+      case &FloatType(_): t = float_typ(2); break;
       default: err("size qualifier on non-integral type",last_loc); break;
       }
   }
@@ -951,7 +951,7 @@ static exp_t pat2exp(pat_t p) {
   case &Null_p: return null_exp(p->loc);
   case &Int_p(s,i): return int_exp(s,i,p->loc);
   case &Char_p(c): return char_exp(c,p->loc);
-  case &Float_p(s): return float_exp(s,p->loc);
+  case &Float_p(s,i): return float_exp(s,i,p->loc);
   case &UnknownCall_p(x,ps,false): 
     exp_t e1 = new_exp(new UnknownId_e(x),p->loc);
     list_t<exp_t> es = List::map(pat2exp,ps);
@@ -1502,8 +1502,8 @@ type_specifier_notypedef:
 | SHORT     { $$=^$(new Short_spec(LOC(@1,@1))); }
 | INT       { $$=^$(type_spec(sint_typ,LOC(@1,@1))); }
 | LONG      { $$=^$(new Long_spec(LOC(@1,@1))); }
-| FLOAT     { $$=^$(type_spec(float_typ,LOC(@1,@1))); }
-| DOUBLE    { $$=^$(type_spec(double_typ(false),LOC(@1,@1))); }
+| FLOAT     { $$=^$(type_spec(float_typ(0),LOC(@1,@1))); }
+| DOUBLE    { $$=^$(type_spec(float_typ(1),LOC(@1,@1))); }
 | SIGNED    { $$=^$(new Signed_spec(LOC(@1,@1))); }
 | UNSIGNED  { $$=^$(new Unsigned_spec(LOC(@1,@1))); }
 | enum_specifier { $$=$!1; }
@@ -2598,8 +2598,8 @@ pattern:
       $$=^$(new_pat(new Int_p(s,i),e->loc)); break;
     case &Const_e({.Int_c = $(s,i)}):
       $$=^$(new_pat(new Int_p(s,i),e->loc)); break;
-    case &Const_e({.Float_c = s}):
-      $$=^$(new_pat(new Float_p(s),e->loc)); break;
+    case &Const_e({.Float_c = $(s,i)}):
+      $$=^$(new_pat(new Float_p(s,i),e->loc)); break;
     case &Const_e({.Null_c = _}):
       $$=^$(new_pat(&Null_p_val,e->loc)); break;
     case &Const_e({.String_c = _}): 
@@ -2968,7 +2968,16 @@ constant:
   INTEGER_CONSTANT   { $$=^$(int_exp($1[0],$1[1],LOC(@1,@1))); }
 | CHARACTER_CONSTANT { $$=^$(char_exp($1,              LOC(@1,@1))); }
 | WCHARACTER_CONSTANT{ $$=^$(wchar_exp($1,             LOC(@1,@1))); }
-| FLOATING_CONSTANT  { $$=^$(float_exp($1,             LOC(@1,@1))); }
+| FLOATING_CONSTANT  {
+     int l = strlen($1);
+     int i = 1; // indicates double
+     if (l>0) {
+       char c = $1[l-1];
+       if (c=='f' || c=='F') i = 0;      // float
+       else if (c=='l' || c=='L') i = 2; // long double
+     }
+     $$=^$(float_exp($1, i, LOC(@1,@1)));
+   }
 /* Cyc: NULL */
 | NULL_kw            { $$=^$(null_exp(LOC(@1,@1)));}
 ;

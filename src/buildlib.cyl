@@ -926,8 +926,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     switch (t) {
     case &VoidType:
     case &IntType(_,_):
-    case &FloatType:
-    case &DoubleType(_):
+    case &FloatType(_):
       return;
 
     case &PointerType(x):

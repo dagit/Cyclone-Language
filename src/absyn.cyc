@@ -221,7 +221,6 @@ datacon(Type,HeapRgn);
 datacon(Type,UniqueRgn);
 datacon(Type,RefCntRgn);
 datacon(Type,VoidType);
-datacon(Type,FloatType);
 
 // unsigned types
 static datatype Type.IntType char_tt      = IntType(None,Char_sz);
@@ -285,13 +284,16 @@ type_t int_typ(sign_t sn, size_of_t sz) {
     }
   }
 }
-// float, double, wchar_t
-type_t float_typ  = &FloatType_val;
-type_t double_typ(bool b) {
-  static datatype Type.DoubleType dt = DoubleType(true);
-  static datatype Type.DoubleType df = DoubleType(false);
-  return b ? &dt : &df;
+// float, double, long double
+type_t float_typ(int i) {
+  static datatype Type.FloatType fl = FloatType(0);
+  static datatype Type.FloatType db = FloatType(1);
+  static datatype Type.FloatType ldb = FloatType(2);
+  if (i==0) return &fl;
+  if (i==1) return &db;
+  return &ldb;
 }
+// wide characters
 // from install_path.c
 extern "C" {
   extern int Wchar_t_unsigned;
@@ -534,7 +536,7 @@ cnst_t Wchar_c(string_t<`H> s)  {return Cnst{.Wchar_c = s};}
 cnst_t Short_c(sign_t sn,short s) {return Cnst{.Short_c = $(sn,s)};}
 cnst_t Int_c(sign_t sn,int i) {return Cnst{.Int_c = $(sn,i)};}
 cnst_t LongLong_c(sign_t sn,long long l) {return Cnst{.LongLong_c = $(sn,l)};}
-cnst_t Float_c(string_t<`H> s) {return Cnst{.Float_c = s};}
+cnst_t Float_c(string_t<`H> s,int i) {return Cnst{.Float_c = $(s,i)};}
 cnst_t String_c(string_t<`H> s) {return Cnst{.String_c = s};}
 cnst_t Wstring_c(string_t<`H> s) {return Cnst{.Wstring_c = s};}
 
@@ -562,7 +564,7 @@ exp_t char_exp(char c, seg_t loc) {
 exp_t wchar_exp(string_t<`H> s, seg_t loc) {
   return const_exp(Wchar_c(s),loc);
 }
-exp_t float_exp(string_t<`H> f, seg_t loc) { return const_exp(Float_c(f),loc);  }
+exp_t float_exp(string_t<`H> f, int i, seg_t loc) { return const_exp(Float_c(f,i),loc);  }
 exp_t string_exp(string_t<`H> s, seg_t loc){ return const_exp(String_c(s),loc); }
 exp_t wstring_exp(string_t<`H> s, seg_t loc){ return const_exp(Wstring_c(s),loc); }
 

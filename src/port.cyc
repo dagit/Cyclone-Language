@@ -54,7 +54,7 @@
  *
  * The inference is also very naive with respect to constraint representation
  * and solving.  Right now, I just have a very ad-hoc set of rules for
- * trying to simplify the constraints eagerly. 
+ * trying to simplify the constraints eagerly.
 */
 
 #include <core.h>
@@ -117,10 +117,10 @@ typedef struct Cvar {
   list_t<ctype_t> lowers; // lower bounds
 } @cvar_t;
 // Used in aggregates
-typedef struct Cfield { 
-  ctype_t qual; 
+typedef struct Cfield {
+  ctype_t qual;
   field_name_t f;
-  ctype_t type; 
+  ctype_t type;
 }@ cfield_t;
 typedef list_t<cfield_t> cfields_t;
 // We have the following "sub-typing" relations on ctypes:
@@ -148,7 +148,7 @@ datatype Ctype {
   KnownAggr_ct($(struct Aggrdecl @, cfields_t)@);
   // used for an aggregate that we've not yet figured out -- if eq is
   // not NULL, points to the equivalence class
-  UnknownAggr_ct(cfields_t, ctype_t* eq); 
+  UnknownAggr_ct(cfields_t, ctype_t* eq);
   Fn_ct(ctype_t return_type, list_t<ctype_t> arg_types);
   Var_ct(cvar_t);
 };
@@ -180,18 +180,18 @@ static string_t ctype2string(bool deep, ctype_t t) {
   case &Zterm_ct: return "ZT";
   case &Nozterm_ct: return "NZT";
   case &RgnVar_ct(n): return aprintf("%s",*n);
-  case &Ptr_ct(elt,qual,k,rgn,zt): 
+  case &Ptr_ct(elt,qual,k,rgn,zt):
     return aprintf("ptr(%s,%s,%s,%s,%s)",ctype2string(deep,elt),
                    ctype2string(deep,qual),ctype2string(deep,k),
                    ctype2string(deep,rgn),ctype2string(deep,zt));
-  case &Array_ct(elt,qual,zt): 
+  case &Array_ct(elt,qual,zt):
     return aprintf("array(%s,%s,%s)",ctype2string(deep,elt),
                    ctype2string(deep,qual),ctype2string(deep,zt));
   case &KnownAggr_ct(&$(ad, cfs)):
     string_t s = (ad->kind == StructA) ? "struct" : "union";
     if (!deep)
       return aprintf("%s %s",s,qvar2string(ad->name));
-    else 
+    else
       return aprintf("%s %s {%s}",s,qvar2string(ad->name),
                      cfields2string(false,cfs));
   case &UnknownAggr_ct(cfs, &eq): return ctype2string(deep,eq);
@@ -222,7 +222,7 @@ list_t<stringptr_t> sep(string_t<`H> s, list_t<stringptr_t<`H,`H>,`H> xs) {
   return xs;
 }
 static stringptr_t cfield2stringptr(bool deep, cfield_t f) {
-  string_t s = 
+  string_t s =
     aprintf("%s %s: %s",ctype2string(deep,f->qual),*f->f,ctype2string(deep,f->type));
   return new s;
 }
@@ -281,7 +281,7 @@ static bool unifies(ctype_t t1, ctype_t t2);
 
 static ctype_t compress_ct(ctype_t t) {
   switch (t) {
-  case &Var_ct(&Cvar{_,*eqp,us,ls}): 
+  case &Var_ct(&Cvar{_,*eqp,us,ls}):
     let eq = *eqp;
     if (eq) {
       // the variable is constrained to be equal to something else --
@@ -292,17 +292,17 @@ static ctype_t compress_ct(ctype_t t) {
     }
     // try to set it equal to a bound -- we can do this when t <= L
     // and L is a lower bound for a given category, or when U <= t
-    // and U is an upper bound for a given category.  
+    // and U is an upper bound for a given category.
     for (; ls != NULL; ls = ls->tl) {
       switch (ls->hd) {
-      case &Const_ct: 
+      case &Const_ct:
       case &Nozterm_ct:
       case &Void_ct:
       case &KnownAggr_ct(_):
       case &Fn_ct(_,_):
         *eqp = new ls->hd;
         return ls->hd;
-      default: 
+      default:
         break;
       }
     }
@@ -324,7 +324,7 @@ static ctype_t compress_ct(ctype_t t) {
     // Unknown aggregates compress similarly to variables
     if (eq) return compress_ct(*eq);
     else return t;
-  default: 
+  default:
     // no real compression to do
     return t;
   }
@@ -348,10 +348,10 @@ static ctype_t inst(Dict::dict_t<tvarname_t,ctype_t> @instenv, ctype_t t) {
   case &Var_ct(_):
   case &Heap_ct: return t;
   case &RgnVar_ct(n):
-    if (!Dict::member(*instenv,n)) 
+    if (!Dict::member(*instenv,n))
       *instenv = Dict::insert(*instenv,n,var());
     return Dict::lookup(*instenv,n);
-  case &Ptr_ct(t1,t2,t3,t4,zt): 
+  case &Ptr_ct(t1,t2,t3,t4,zt):
     let $(nt1,nt4) = $(inst(instenv,t1),inst(instenv,t4));
     if (nt1 == t1 && nt4 == t4) return t;
     return new Ptr_ct(nt1,t2,t3,nt4,zt);
@@ -392,7 +392,7 @@ void generalize(bool is_rgn, ctype_t t) {
   t = compress_ct(t);
   switch (t) {
   case &Var_ct(cv):
-    // Filter out self 
+    // Filter out self
     cv->uppers = filter_self(t,cv->uppers);
     cv->lowers = filter_self(t,cv->lowers);
     if (is_rgn) {
@@ -425,7 +425,7 @@ void generalize(bool is_rgn, ctype_t t) {
   case &Nozterm_ct:
   case &Zterm_ct:
   case &Heap_ct: return;
-  case &Ptr_ct(t1,t2,t3,t4,t5): 
+  case &Ptr_ct(t1,t2,t3,t4,t5):
     // NB: no need to descend into other sub-terms since we're
     // looking for region variables.
     generalize(false,t1); generalize(true,t4); break;
@@ -442,19 +442,19 @@ static bool occurs(ctype_t v, ctype_t t) {
   t = compress_ct(t);
   if (t == v) return true;
   switch (t) {
-  case &Ptr_ct(t1,t2,t3,t4,t5): 
+  case &Ptr_ct(t1,t2,t3,t4,t5):
     return occurs(v,t1) || occurs(v,t2) || occurs(v,t3) || occurs(v,t4) ||
       occurs(v,t5);
-  case &Array_ct(t1,t2,t3): 
+  case &Array_ct(t1,t2,t3):
     return occurs(v,t1) || occurs(v,t2) || occurs(v,t3);
   case &Fn_ct(t,ts):
     if (occurs(v,t)) return true;
-    for (; ts; ts = ts->tl) 
+    for (; ts; ts = ts->tl)
       if (occurs(v,ts->hd)) return true;
     return false;
   case &KnownAggr_ct(&$(_,fs)): return false;
   case &UnknownAggr_ct(fs,_):
-    for (; fs; fs = fs->tl) 
+    for (; fs; fs = fs->tl)
       if (occurs(v,fs->hd->qual) || occurs(v,fs->hd->type)) return true;
     return false;
   default: return false;
@@ -477,7 +477,7 @@ static void unify_ct(ctype_t t1, ctype_t t2) {
   t2 = compress_ct(t2);
   if (t1 == t2) return;
   switch ($(t1,t2)) {
-  case $(&Var_ct(v1),_): 
+  case $(&Var_ct(v1),_):
     if (!occurs(t1,t2)) {
       // we want to set v1 to t2.  Make sure that t2 is leq
       // any uper bound of v1 and geq any lower bound.
@@ -490,7 +490,7 @@ static void unify_ct(ctype_t t1, ctype_t t2) {
     } else throw &Unify_ct_val;
   case $(_, &Var_ct(v1)): unify_ct(t2,t1); return;
   case $(&Ptr_ct(e1,q1,k1,r1,zt1), &Ptr_ct(e2,q2,k2,r2,zt2)):
-    unify_ct(e1,e2); unify_ct(q1,q2); unify_ct(k1,k2); unify_ct(r1,r2); 
+    unify_ct(e1,e2); unify_ct(q1,q2); unify_ct(k1,k2); unify_ct(r1,r2);
     unify_ct(zt1,zt2);
     return;
   case $(&RgnVar_ct(&n1), &RgnVar_ct(&n2)):
@@ -500,7 +500,7 @@ static void unify_ct(ctype_t t1, ctype_t t2) {
     unify_ct(e1,e2); unify_ct(q1,q2); unify_ct(zt1,zt2); return;
   case $(&Fn_ct(t1,ts1), &Fn_ct(t2,ts2)):
     unify_ct(t1,t2); unify_cts(ts1,ts2); return;
-  case $(&KnownAggr_ct(p1), &KnownAggr_ct(p2)): 
+  case $(&KnownAggr_ct(p1), &KnownAggr_ct(p2)):
     if (p1 == p2) return; else throw &Unify_ct_val;
   case $(&UnknownAggr_ct(fs1,*eq1), &UnknownAggr_ct(fs2,*eq2)):
     let t = unknown_aggr_ct(merge_fields(fs1,fs2,true));
@@ -522,13 +522,13 @@ static void unify_cts(list_t<ctype_t> t1, list_t<ctype_t> t2) {
   for (; t1 != NULL && t2 != NULL; t1 = t1->tl, t2 = t2->tl) {
     unify_ct(t1->hd,t2->hd);
   }
-  if (t1 != NULL || t2 != NULL) 
+  if (t1 != NULL || t2 != NULL)
     throw &Unify_ct_val;
 }
 // Merges two sets of fields so that they are point-wise constrained.
 // If allow_subset is false, then fs2 must be a subset of the fields in fs1
 // Used for merging the types of fields in a aggregates during unification.
-static cfields_t merge_fields(cfields_t fs1, cfields_t fs2, 
+static cfields_t merge_fields(cfields_t fs1, cfields_t fs2,
                               bool allow_f1_subset_f2) {
   cfields_t common = NULL;
   for (let xs2 = fs2; xs2; xs2 = xs2->tl) {
@@ -545,9 +545,9 @@ static cfields_t merge_fields(cfields_t fs1, cfields_t fs2,
       }
     }
     if (!found) {
-      if (allow_f1_subset_f2) 
+      if (allow_f1_subset_f2)
         common = new List(f2,common);
-      else throw &Unify_ct_val; 
+      else throw &Unify_ct_val;
     }
   }
   for (let xs1 = fs1; xs1; xs1 = xs1->tl) {
@@ -572,7 +572,7 @@ static bool unifies(ctype_t t1, ctype_t t2) {
 
     unify_ct(t1,t2);
   } catch {
-  case &Unify_ct: 
+  case &Unify_ct:
 #ifdef PORT_DEBUG
     fprintf(stderr,"Unify failure: %s != %s\n",ctype2string(true,t1),
             ctype2string(true,t2));
@@ -585,7 +585,7 @@ static bool unifies(ctype_t t1, ctype_t t2) {
 // Subtyping of C types
 
 // Insert t into the upper bounds of v.  May end up unifying v with t.
-static list_t<ctype_t> insert_upper(ctype_t v, ctype_t t, 
+static list_t<ctype_t> insert_upper(ctype_t v, ctype_t t,
                                     list_t<ctype_t,`H> @uppers) {
   t = compress_ct(t);
   switch (t) {
@@ -603,11 +603,11 @@ static list_t<ctype_t> insert_upper(ctype_t v, ctype_t t,
     // must null out v's upper bounds to avoid a potential loop between
     // unification and leq.
     *uppers = NULL;
-    unifies(v,t); 
+    unifies(v,t);
     return *uppers;
     // If t is an upper bound for a given category, then we might as well
     // forget the constraint.
-  case &Void_ct: 
+  case &Void_ct:
   case &Const_ct:
   case &Nozterm_ct:
     return *uppers;
@@ -622,9 +622,9 @@ static list_t<ctype_t> insert_upper(ctype_t v, ctype_t t,
       // if t is a sub-type of an upper bound, we're done.
       // Note that we've already filtered out a lot of t's that
       // might be subtypes above.
-    case $(&Arith_ct,&Ptr_ct(_,_,_,_,_)): 
-    case $(&Arith_ct,&Zero_ct): 
-    case $(&Arith_ct,&Array_ct(_,_,_)): 
+    case $(&Arith_ct,&Ptr_ct(_,_,_,_,_)):
+    case $(&Arith_ct,&Zero_ct):
+    case $(&Arith_ct,&Array_ct(_,_,_)):
       return *uppers;
     case $(&Ptr_ct(ta,qa,ka,ra,za), &Ptr_ct(tb,qb,kb,rb,zb)):
       // we have v <= ptr(ta,qa,ka,ra,za), ptr(tb,qb,kb,rb,zb)
@@ -647,11 +647,11 @@ static list_t<ctype_t> insert_upper(ctype_t v, ctype_t t,
 
 // Same as insert_upper but we're inserting t into the list of
 // lower bounds for v.
-static list_t<ctype_t> insert_lower(ctype_t v, ctype_t t, 
+static list_t<ctype_t> insert_lower(ctype_t v, ctype_t t,
                                     list_t<ctype_t,`H> @lowers) {
   t = compress_ct(t);
   switch (t) {
-  case &Const_ct: 
+  case &Const_ct:
   case &Zterm_ct:
   case &Thin_ct:
   case &Fat_ct:
@@ -666,7 +666,7 @@ static list_t<ctype_t> insert_lower(ctype_t v, ctype_t t,
   case &Notconst_ct:
   case &Nozterm_ct:
     return *lowers;
-  default: 
+  default:
     break;
   }
   for (let ls = *lowers; ls; ls = ls->tl) {
@@ -700,14 +700,14 @@ static list_t<ctype_t> insert_lower(ctype_t v, ctype_t t,
 
 
 // Return true if t1 <= t2.  Really, this might fail and still return
-// true, since insert_upper and insert_lower don't check for an 
+// true, since insert_upper and insert_lower don't check for an
 // inconsistency.  That's okay here since we don't have to be sound...
 static bool leq(ctype_t t1, ctype_t t2) {
 #ifdef PORT_DEBUG
     fprintf(stderr,"leq %s and %s\n",ctype2string(true,t1),
             ctype2string(true,t2));
 #endif
-  
+
   if (t1 == t2) return true;
   t1 = compress_ct(t1);
   t2 = compress_ct(t2);
@@ -729,15 +729,15 @@ static bool leq(ctype_t t1, ctype_t t2) {
   case $(&Ptr_ct(_,_,_,_,_),&Void_ct): return true;
   case $(&Array_ct(_,_,_),&Arith_ct): return true;
   case $(&Array_ct(_,_,_),&Void_ct): return true;
-  case $(&Ptr_ct(t1,q1,k1,r1,z1), &Ptr_ct(t2,q2,k2,r2,z2)): 
+  case $(&Ptr_ct(t1,q1,k1,r1,z1), &Ptr_ct(t2,q2,k2,r2,z2)):
     return leq(t1,t2) && leq(q1,q2) && unifies(k1,k2) && leq(r1,r2) &&
       leq(z1,z2);
   case $(&Array_ct(t1,q1,z1),&Array_ct(t2,q2,z2)):
     return leq(t1,t2) && leq(q1,q2) && leq(z1,z2);
   case $(&Array_ct(t1,q1,z1),&Ptr_ct(t2,q2,k2,_,z2)):
-    return leq(t1,t2) && leq(q1,q2) && unifies(&Fat_ct_val,k2) && 
+    return leq(t1,t2) && leq(q1,q2) && unifies(&Fat_ct_val,k2) &&
       leq(z1,z2);
-  case $(&Var_ct(v1),&Var_ct(v2)): 
+  case $(&Var_ct(v1),&Var_ct(v2)):
     v1->uppers = filter_self(t1,v1->uppers);
     v2->lowers = filter_self(t2,v2->lowers);
     v1->uppers = insert_upper(t1,t2,&v1->uppers);
@@ -751,7 +751,7 @@ static bool leq(ctype_t t1, ctype_t t2) {
     v2->lowers = filter_self(t2,v2->lowers);
     v2->lowers = insert_lower(t2,t1,&v2->lowers);
     return true;
-  default: return unifies(t1,t2); 
+  default: return unifies(t1,t2);
   }
 }
 
@@ -803,32 +803,32 @@ static cenv_t empty_cenv() {
                                .edits = NULL,
                                .porting = false,
                                .return_type = void_ct() };
-  return new Cenv {.gcenv = g, 
+  return new Cenv {.gcenv = g,
                    .cpos = Toplevel_pos,
                    .var_dict = Dict::empty(qvar_cmp) };
 }
 
-// Environment Lookup 
+// Environment Lookup
 // These functions are coded so they don't fail but return some
-// bogus answer when we can't find something.  
-static bool in_fn_arg(cenv_t env) { 
+// bogus answer when we can't find something.
+static bool in_fn_arg(cenv_t env) {
   return env->cpos == FnArg_pos;
 }
-static bool in_fn_res(cenv_t env) { 
+static bool in_fn_res(cenv_t env) {
   return env->cpos == FnRes_pos;
 }
-static bool in_toplevel(cenv_t env) { 
+static bool in_toplevel(cenv_t env) {
   return env->cpos == Toplevel_pos;
 }
-static ctype_t lookup_return_type(cenv_t env) { 
-  return env->gcenv->return_type; 
+static ctype_t lookup_return_type(cenv_t env) {
+  return env->gcenv->return_type;
 }
 static type_t lookup_typedef(cenv_t env, typedef_name_t n) {
   try {
     let $(t,_) = *Dict::lookup(env->gcenv->typedef_dict,n);
     return t;
   } catch {
-  case &Dict::Absent: 
+  case &Dict::Absent:
 #ifdef PORT_DEBUG
     fprintf(stderr,"can't find typedef %s\n",qvar2string(n));
 #endif
@@ -842,7 +842,7 @@ static ctype_t lookup_typedef_ctype(cenv_t env, typedef_name_t n) {
     let $(_,ct) = *Dict::lookup(env->gcenv->typedef_dict,n);
     return ct;
   } catch {
-  case &Dict::Absent: 
+  case &Dict::Absent:
 #ifdef PORT_DEBUG
     fprintf(stderr,"can't find typedef %s\n",qvar2string(n));
 #endif
@@ -855,7 +855,7 @@ static ctype_t lookup_typedef_ctype(cenv_t env, typedef_name_t n) {
 static $(struct Aggrdecl @,cfields_t)@ lookup_struct_decl(cenv_t env,
                                                           typedef_name_t n){
   let popt = Dict::lookup_opt(env->gcenv->struct_dict,n);
-  if (popt) 
+  if (popt)
     return *popt;
   else {
     let ad = new Aggrdecl{.kind = StructA, .sc = Public, .name = n,
@@ -871,7 +871,7 @@ static $(struct Aggrdecl @,cfields_t)@ lookup_struct_decl(cenv_t env,
 static $(struct Aggrdecl @,cfields_t)@ lookup_union_decl(cenv_t env,
                                                         typedef_name_t n) {
   let popt = Dict::lookup_opt(env->gcenv->union_dict,n);
-  if (popt) 
+  if (popt)
     return *popt;
   else {
     let ad = new Aggrdecl{.kind = UnionA, .sc = Public, .name = n,
@@ -888,7 +888,7 @@ static $(ctype_t, ctype_t) lookup_var(cenv_t env, qvar_t x) {
     let $(_,p) = *Dict::lookup(env->var_dict,x);
     return *p;
   } catch {
-  case &Dict::Absent: 
+  case &Dict::Absent:
 #ifdef PORT_DEBUG
     fprintf(stderr,"can't find variable %s\n",qvar2string(x));
 #endif
@@ -949,7 +949,7 @@ static void add_return_type(cenv_t env, ctype_t t) {
 }
 // Add a variable to the environment, giving it's original parsed type,
 // and its qualifier and ctype.
-static cenv_t add_var(cenv_t env, qvar_t x, type_t t, ctype_t qual, 
+static cenv_t add_var(cenv_t env, qvar_t x, type_t t, ctype_t qual,
                       ctype_t ctype) {
   return new Cenv{env->gcenv,
                   Dict::insert(env->var_dict,x,new $(t,new $(qual,ctype))),
@@ -964,21 +964,21 @@ static void add_typedef(cenv_t env, typedef_name_t n, type_t t, ctype_t ct) {
 // Register a ctype that is serving as a qualifier which might
 // later change.  In particular, after constraint generation and
 // simplification, if new_qual != orig_qual, we emit an edit.
-static void register_const_cvar(cenv_t env, ctype_t new_qual, 
+static void register_const_cvar(cenv_t env, ctype_t new_qual,
                                 ctype_t orig_qual, seg_t loc) {
   env->gcenv->qualifier_edits = new List(new $(new_qual,orig_qual,loc),
                                          env->gcenv->qualifier_edits);
 }
 // Register a ctype that is serving as a pointer kind (* or ?)
-// In particular, after constraint generation and simplification, 
+// In particular, after constraint generation and simplification,
 // if new_ptr != orig_ptr, we emit an edit.
-static void register_ptr_cvars(cenv_t env, ctype_t new_ptr, 
+static void register_ptr_cvars(cenv_t env, ctype_t new_ptr,
                                ctype_t orig_ptr, seg_t loc) {
   env->gcenv->pointer_edits = new List(new $(new_ptr,orig_ptr,loc),
                                        env->gcenv->pointer_edits);
 }
 
-static void register_zeroterm_cvars(cenv_t env, ctype_t new_zt, 
+static void register_zeroterm_cvars(cenv_t env, ctype_t new_zt,
                                     ctype_t orig_zt, seg_t loc) {
   env->gcenv->zeroterm_edits = new List(new $(new_zt,orig_zt,loc),
                                         env->gcenv->zeroterm_edits);
@@ -987,9 +987,9 @@ static void register_zeroterm_cvars(cenv_t env, ctype_t new_zt,
 // Create a "good" type for main:  int main(int, char??) which will
 // end up constraining the C code.
 static type_t main_type() {
-  $(opt_t<var_t>,tqual_t,type_t)@ arg1 = 
+  $(opt_t<var_t>,tqual_t,type_t)@ arg1 =
     new $(NULL,empty_tqual(NULL),sint_typ);
-  $(opt_t<var_t>,tqual_t,type_t)@ arg2 = 
+  $(opt_t<var_t>,tqual_t,type_t)@ arg2 =
     new $(NULL,empty_tqual(NULL),
           dyneither_typ(string_typ(wildtyp(NULL)),wildtyp(NULL),
                                 empty_tqual(NULL), empty_conref()));
@@ -999,7 +999,7 @@ static type_t main_type() {
                               .args = list(arg1,arg2), .c_varargs = false,
                               .cyc_varargs = NULL, .rgn_po = NULL,
                               .attributes = NULL});
-                              
+
 }
 
 static ctype_t type_to_ctype(cenv_t env, type_t t);
@@ -1032,20 +1032,20 @@ static void region_counts(Dict::dict_t<tvarname_t,int@> @cts, ctype_t t) {
   case &Nozterm_ct:
   case &Heap_ct: return;
   case &RgnVar_ct(n):
-    if (!Dict::member(*cts,n)) 
+    if (!Dict::member(*cts,n))
       *cts = Dict::insert(*cts,n,new 0);
     let p = Dict::lookup(*cts,n);
     *p = *p + 1;
     return;
-  case &Ptr_ct(t1,t2,t3,t4,zt): 
-    region_counts(cts,t1); 
+  case &Ptr_ct(t1,t2,t3,t4,zt):
+    region_counts(cts,t1);
     region_counts(cts,t4);
     return;
   case &Array_ct(t1,t2,zt):
-    region_counts(cts,t1); 
+    region_counts(cts,t1);
     return;
   case &Fn_ct(t1,ts):
-    region_counts(cts,t1); 
+    region_counts(cts,t1);
     for (; ts; ts = ts->tl) region_counts(cts,ts->hd);
     return;
   }
@@ -1053,10 +1053,10 @@ static void region_counts(Dict::dict_t<tvarname_t,int@> @cts, ctype_t t) {
 
 // Match the original type against the ctype, looking for pointer regions.
 // If the original type has an evar, where the ctype has a region var
-// that is used multiple times, then record the mismatch as an edit.  
-// Or, if the original type has an evar where the ctype is the heap region, 
+// that is used multiple times, then record the mismatch as an edit.
+// Or, if the original type has an evar where the ctype is the heap region,
 // and we're in a function argument position, then record the mismatch.
-static void register_rgns(cenv_t env, Dict::dict_t<tvarname_t,int@> counts, 
+static void register_rgns(cenv_t env, Dict::dict_t<tvarname_t,int@> counts,
                           bool fn_res, type_t t, ctype_t c) {
   c = compress_ct(c);
   switch ($(t, c)) {
@@ -1066,13 +1066,13 @@ static void register_rgns(cenv_t env, Dict::dict_t<tvarname_t,int@> counts,
     rc = compress_ct(rc);
     switch ($(rt,rc)) {
     case $(&Evar(_,_,_,_), &Heap_ct) && !fn_res:
-      env->gcenv->edits = 
+      env->gcenv->edits =
         new List(new Edit{loc,"`H ",""}, env->gcenv->edits);
       break;
     case $(&Evar(_,_,_,_), &RgnVar_ct(n)):
       let i = *Dict::lookup(counts,n);
       if (i > 1)
-        env->gcenv->edits = 
+        env->gcenv->edits =
           new List(new Edit{loc,aprintf("%s ",*n),""}, env->gcenv->edits);
       break;
     default: break;
@@ -1110,10 +1110,10 @@ static bool is_char(cenv_t env, type_t t) {
   }
 }
 
-// Convert a type to a ctype -- many shortcuts here 
+// Convert a type to a ctype -- many shortcuts here
 static ctype_t type_to_ctype(cenv_t env, type_t t) {
   switch (t) {
-  case &TypedefType(n,_,_,_): 
+  case &TypedefType(n,_,_,_):
     (*n)[0] = Loc_n;
     return lookup_typedef_ctype(env,n);
   case &VoidType: return void_ct();
@@ -1123,12 +1123,12 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
     let zt_loc = loc ? loc->zt_loc : NULL;
     // What we do here is insert soft constraints that correspond to
     // what the user wrote down -- these soft constraints might change
-    // in which case we have to change the user's annotations.  
+    // in which case we have to change the user's annotations.
     let cet = type_to_ctype(env,et);
     ctype_t new_rgn;
     // Translate the region
     switch (r) {
-    case &HeapRgn: 
+    case &HeapRgn:
       new_rgn = heap_ct(); break;
     case &VarType(&Tvar{name,_,_}):
       new_rgn = rgnvar_ct(name); break;
@@ -1138,12 +1138,12 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
       if (in_fn_arg(env))
         new_rgn = rgnvar_ct(new_region_var());
       // fn results and type definitions use the heap as the default rgn
-      else if (in_fn_res(env) || in_toplevel(env)) 
-        new_rgn = heap_ct(); 
+      else if (in_fn_res(env) || in_toplevel(env))
+        new_rgn = heap_ct();
       else new_rgn = var();
       break;
-    default: 
-      new_rgn = heap_ct(); break; 
+    default:
+      new_rgn = heap_ct(); break;
     }
     let orig_fat = (conref_val(b) == &DynEither_b_val);
     bool orig_zt;
@@ -1152,27 +1152,27 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
     default: orig_zt = conref_val(zt); break;
     }
     if (env->gcenv->porting) {
-      let cqv = var(); 
+      let cqv = var();
       // Register the constraint variable that is used for the qualifier
       // along with the original qualifier constraint.  If a mismatch shows
       // up later, then we'll emit an edit to get the qualifier right.
       register_const_cvar(env,cqv,tq.print_const ? const_ct() : notconst_ct(),
-                          tq.loc); 
+                          tq.loc);
       // Trust the user if they make a pointer const
       if (tq.print_const) unify_ct(cqv,const_ct());
 #ifdef PORT_DEBUG
-      if (tq.loc == NULL) 
+      if (tq.loc == NULL)
         fprintf(stderr,"hmmm...qualifier has bad loc for type %s\n",
                 typ2string(t));
 #endif
       let cbv = var();
-      // Register cbv and cnv as the variables that control what kind of 
-      // pointer this should be, using the location of the pointer. 
+      // Register cbv and cnv as the variables that control what kind of
+      // pointer this should be, using the location of the pointer.
       register_ptr_cvars(env, cbv, orig_fat ? fat_ct() : thin_ct(), ptr_loc);
       // Trust the user if they make a pointer fat
       if (orig_fat) unify_ct(cbv,fat_ct());
       let czv = var();
-      // Register the zeroterm constraint variable and the original 
+      // Register the zeroterm constraint variable and the original
       // zeroterm constraint.
       register_zeroterm_cvars(env, czv, orig_zt ? zterm_ct() : nozterm_ct(), zt_loc);
       // Trust the user if they explicitly wrote ZEROTERM or NOZEROTERM
@@ -1184,7 +1184,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
         break;
       }
       // Note that the type returned has unconstrained variables for
-      // the qualifier, bounds, rgn, and zeroterm unless the user 
+      // the qualifier, bounds, rgn, and zeroterm unless the user
       // explicitly wrote something down.
       return ptr_ct(cet,cqv,cbv,new_rgn,czv);
     } else {
@@ -1195,8 +1195,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
                     orig_zt ? zterm_ct() : nozterm_ct());
     }
   case &IntType(_,_):
-  case &FloatType:
-  case &DoubleType(_): return arith_ct();
+  case &FloatType(_): return arith_ct();
   case &ArrayType(ArrayInfo{et,tq,_,zt,ztloc}):
     // Similar to the pointer case.
     let cet = type_to_ctype(env,et);
@@ -1206,9 +1205,9 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
     default: orig_zt = conref_val(zt); break;
     }
     if (env->gcenv->porting) {
-      let cqv = var(); 
+      let cqv = var();
       register_const_cvar(env,cqv,tq.print_const ? const_ct() : notconst_ct(),
-                          tq.loc); 
+                          tq.loc);
 #ifdef PORT_DEBUG
       if (tq.loc == NULL)
         fprintf(stderr,"uhm, array type %s qualifier missing location...\n",
@@ -1240,27 +1239,27 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
     return fn_ct(crt,List::imp_rev(cargs));
   case &AggrType(AggrInfo{ai,_}):
     switch (ai) {
-    case {.UnknownAggr = $(StructA,n,_)}: 
+    case {.UnknownAggr = $(StructA,n,_)}:
       (*n)[0] = Loc_n;
       let p = lookup_struct_decl(env,n);
       return known_aggr_ct(p);
-    case {.UnknownAggr = $(UnionA,n,_)}: 
+    case {.UnknownAggr = $(UnionA,n,_)}:
       (*n)[0] = Loc_n;
       let p = lookup_union_decl(env,n);
       return known_aggr_ct(p);
-    case {.KnownAggr = adp}: 
+    case {.KnownAggr = adp}:
       let ad = *adp;
       switch (ad->kind) {
-      case StructA: 
+      case StructA:
         let p = lookup_struct_decl(env,ad->name);
         return known_aggr_ct(p);
-      case UnionA:  
+      case UnionA:
         let p = lookup_union_decl(env,ad->name);
         return known_aggr_ct(p);
       }
     }
   case &EnumType(_,_): return arith_ct();
-  case &AnonEnumType(fs): 
+  case &AnonEnumType(fs):
     // add in an enum declaration
     for (; fs; fs = fs->tl) {
       (*fs->hd->name)[0] = Loc_n;
@@ -1316,7 +1315,7 @@ static ctype_t gen_primop(cenv_t env, primop_t p, list_t<ctype_t> args) {
         return arith_ct();
       }
     }
-  case Times: case Div: case Mod: case Eq: case Neq: case Lt: case Gt: 
+  case Times: case Div: case Mod: case Eq: case Neq: case Lt: case Gt:
   case Lte: case Gte: case Bitand: case Bitor: case Bitxor: case Bitlshift:
   case Bitlrshift: case Bitarshift:
     leq(arg1,arith_ct());
@@ -1334,10 +1333,10 @@ static ctype_t gen_primop(cenv_t env, primop_t p, list_t<ctype_t> args) {
 static $(ctype_t qual,ctype_t type) gen_lhs(cenv_t env, exp_t e) {
   switch (e->r) {
   case &Var_e(x,_):       fallthru(x);
-  case &UnknownId_e(x): 
+  case &UnknownId_e(x):
     (*x)[0] = Loc_n;
     return lookup_var(env,x);
-  case &Subscript_e(e1,e2): 
+  case &Subscript_e(e1,e2):
     let v = var();
     let q = var();
     let t1 = gen_exp(env, e1);
@@ -1371,19 +1370,19 @@ static $(ctype_t qual,ctype_t type) gen_lhs(cenv_t env, exp_t e) {
 // generate constraints for a RHS expression and return the constraint type
 static ctype_t gen_exp(cenv_t env, exp_t e) {
   switch (e->r) {
-  case &Const_e({.Char_c = $(_,_)}): 
-  case &Const_e({.Wchar_c = _}): 
+  case &Const_e({.Char_c = $(_,_)}):
+  case &Const_e({.Wchar_c = _}):
   case &Const_e({.Short_c = $(_,_)}):
   case &Const_e({.LongLong_c = $(_,_)}):
-  case &Sizeoftyp_e(_): 
+  case &Sizeoftyp_e(_):
   case &Sizeofexp_e(_):
   case &Offsetof_e(_,_):
-  case &Enum_e(_,_,_): 
+  case &Enum_e(_,_,_):
   case &AnonEnum_e(_,_,_):
   case &Const_e({.Float_c = _}):  return arith_ct();
   case &Const_e({.Int_c = $(_,0)}): return zero_ct();
   case &Const_e({.Int_c = $(_,_)}): return arith_ct();
-  case &Const_e({.String_c = _}): 
+  case &Const_e({.String_c = _}):
     return ptr_ct(arith_ct(),const_ct(),fat_ct(),heap_ct(),zterm_ct());
   case &Const_e({.Wstring_c = _}):
     return ptr_ct(arith_ct(),const_ct(),fat_ct(),heap_ct(),zterm_ct());
@@ -1420,7 +1419,7 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
       leq(t2,t1);
       return t1;
     }
-  case &Increment_e(e1,inc): 
+  case &Increment_e(e1,inc):
     let $(q,t) = gen_lhs(env,e1);
     unifies(q,notconst_ct());
     // could have a fatptr or an arith
@@ -1518,20 +1517,20 @@ static void gen_stmt(cenv_t env, stmt_t s) {
     return;
   case &IfThenElse_s(e,s1,s2):
     leq(gen_exp(env,e),arith_ct());
-    gen_stmt(env,s1); 
+    gen_stmt(env,s1);
     gen_stmt(env,s2);
     return;
-  case &While_s($(e,_),s): 
+  case &While_s($(e,_),s):
     leq(gen_exp(env,e),arith_ct());
-    gen_stmt(env,s); 
+    gen_stmt(env,s);
     return;
   case &Break_s(_):
   case &Continue_s(_):
   case &Goto_s(_,_): return;
   case &For_s(e1,$(e2,_),$(e3,_),s):
-    gen_exp(env,e1); 
+    gen_exp(env,e1);
     leq(gen_exp(env,e2),arith_ct());
-    gen_exp(env,e3); 
+    gen_exp(env,e3);
     gen_stmt(env,s);
     return;
   case &Switch_s(e,scs):
@@ -1544,9 +1543,9 @@ static void gen_stmt(cenv_t env, stmt_t s) {
   case &Fallthru_s(_,_): impos("fallthru");
   case &Decl_s(d,s): env = gen_localdecl(env,d); gen_stmt(env,s); return;
   case &Label_s(_,s): gen_stmt(env,s); return;
-  case &Do_s(s,$(e,_)): 
-    gen_stmt(env,s); 
-    leq(gen_exp(env,e),arith_ct()); 
+  case &Do_s(s,$(e,_)):
+    gen_stmt(env,s);
+    leq(gen_exp(env,e),arith_ct());
     return;
   case &TryCatch_s(_,_): impos("try/catch");
   case &ResetRegion_s(_): impos("reset region");
@@ -1561,7 +1560,7 @@ static ctype_t gen_initializer(cenv_t env, type_t t, exp_t e) {
   case &CompoundLit_e(_,dles):
   LOOP:
     switch (t) {
-    case &TypedefType(n,_,_,_): 
+    case &TypedefType(n,_,_,_):
       (*n)[0] = Loc_n;
       t = lookup_typedef(env,n); goto LOOP;
     case &ArrayType(ArrayInfo{et,_,_,zt,ztl}):
@@ -1597,7 +1596,7 @@ static ctype_t gen_initializer(cenv_t env, type_t t, exp_t e) {
   case &Const_e({.Wstring_c = _}):
   LOOP2:
     switch (t) {
-    case &TypedefType(n,_,_,_): 
+    case &TypedefType(n,_,_,_):
       (*n)[0] = Loc_n;
       t = lookup_typedef(env,n); goto LOOP2;
     case &ArrayType(_): return array_ct(arith_ct(), const_ct(), zterm_ct());
@@ -1607,14 +1606,14 @@ static ctype_t gen_initializer(cenv_t env, type_t t, exp_t e) {
   }
 }
 
-// generate constraints for a local declaration 
+// generate constraints for a local declaration
 static cenv_t gen_localdecl(cenv_t env, decl_t d) {
   switch (d->r) {
   case &Var_d(vd):
     let t = var();
     ctype_t q;
     if (env->gcenv->porting) {
-      q = var(); 
+      q = var();
       register_const_cvar(env,q,
                           vd->tq.print_const ? const_ct() : notconst_ct(),
                           vd->tq.loc);
@@ -1654,19 +1653,19 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
   case &Portoff_d:
     env->gcenv->porting = false;
     return env;
-  case &Var_d(vd): 
+  case &Var_d(vd):
     (*vd->name)[0] = Loc_n;
 #ifdef PORT_DEBUG
     fprintf(stderr,"processing var decl %s\n",qvar2string(vd->name));
 #endif
     if (declared_var(env,vd->name)) {
       let $(q,t) = lookup_var(env,vd->name);
-      ctype_t q2; 
+      ctype_t q2;
       if (env->gcenv->porting && !isfn(env,vd->name)) {
-        q2 = var(); 
+        q2 = var();
         register_const_cvar(env,q2,
                             vd->tq.print_const ? const_ct():notconst_ct(),
-                            vd->tq.loc); 
+                            vd->tq.loc);
 #ifdef PORT_DEBUG
         if (vd->tq.loc == NULL)
           fprintf(stderr,"uhm, top variable %s qual missing location...\n",
@@ -1691,14 +1690,14 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
 #endif
     (*fd->name)[0] = Loc_n;
     $(type_t, $(ctype_t,ctype_t)@) *predeclared = NULL;
-    
+
     if (declared_var(env,fd->name)) {
       predeclared = lookup_full_var(env,fd->name);
-    } 
+    }
     let rettype = fd->ret_type;
     let args = fd->args;
     let targs = map(make_targ,args);
-    let fntype = 
+    let fntype =
       new FnType(FnInfo{NULL,NULL,empty_tqual(NULL),rettype,targs,false,NULL,NULL,NULL});
     // Note:  we do not set the cpos to FnRes_pos here because we want
     // to get constraint variables for the regions
@@ -1715,7 +1714,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
       if (env->gcenv->porting) {
         tqv = var();
         register_const_cvar(env,tqv,tq.print_const?const_ct():notconst_ct(),
-                            tq.loc); 
+                            tq.loc);
 #ifdef PORT_DEBUG
         if (tq.loc == NULL)
           fprintf(stderr,"uhm, fn %s, param %s qualifier missing location.\n",
@@ -1744,7 +1743,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
 #ifdef PORT_DEBUG
     fprintf(stderr,"after body, fntype is %s\n",ctype2string(true,ctype));
 #endif
-    // we need to generalize the regions according to how they were used.  
+    // we need to generalize the regions according to how they were used.
     generalize(false,ctype);
 #ifdef PORT_DEBUG
     fprintf(stderr,"after gen, fntype is %s\n",ctype2string(true,ctype));
@@ -1767,10 +1766,10 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
       // FIX: there might be more than one pre-declaration for a function.
       let $(orig_type,&$(q2,t2)) = *predeclared;
       unifies(q2,const_ct());
-      unifies(t2,instantiate(ctype)); 
+      unifies(t2,instantiate(ctype));
       // Register the regions of the predeclared type
       register_rgns(env, counts, true, orig_type, ctype);
-    } 
+    }
     return env;
   case &Typedef_d(td):
 #ifdef PORT_DEBUG
@@ -1792,11 +1791,11 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     $(struct Aggrdecl @,cfields_t) @previous;
     cfields_t curr = NULL;
     switch (ad->kind) {
-    case StructA: 
-      previous = lookup_struct_decl(env,name); 
+    case StructA:
+      previous = lookup_struct_decl(env,name);
       break;
-    case UnionA:  
-      previous = lookup_union_decl(env,name); 
+    case UnionA:
+      previous = lookup_union_decl(env,name);
       break;
     }
     if (ad->impl) {
@@ -1808,7 +1807,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
           qv = var();
           register_const_cvar(env,qv,
                               f->tq.print_const?const_ct():notconst_ct(),
-                              f->tq.loc); 
+                              f->tq.loc);
 #ifdef PORT_DEBUG
           if (f->tq.loc == NULL)
             fprintf(stderr,"uhm, struct %s, field %s qualifier missing"
@@ -1838,15 +1837,15 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
 #endif
     (*ed->name)[0] = Loc_n;
     // just insert the enum's identifiers as constant arithmetic values
-    if (ed->fields) 
+    if (ed->fields)
       for(let fs = ed->fields->v; fs; fs = fs->tl) {
         (*fs->hd->name)[0] = Loc_n;
         env = add_var(env, fs->hd->name, new EnumType(ed->name,ed),
                       const_ct(), arith_ct());
       }
     return env;
-  default: 
-    if (env->gcenv->porting) 
+  default:
+    if (env->gcenv->porting)
       fprintf(stderr,"Warning: Cyclone declaration found in code to be ported -- skipping.");
     return env;
   }
@@ -1887,7 +1886,7 @@ static edits_t gen_edits(list_t<decl_t> ds) {
     let $(new_ctype, orig_ctype, loc) = *ptrs->hd;
     if (!unifies(new_ctype,orig_ctype) && loc) {
       switch (compress_ct(orig_ctype)) {
-      case &Thin_ct: 
+      case &Thin_ct:
         edits = new List{new Edit{loc,"?","*"}, edits};
         break;
       case &Fat_ct:
@@ -1897,7 +1896,7 @@ static edits_t gen_edits(list_t<decl_t> ds) {
       }
     }
   }
-  // insert any edits for the consts 
+  // insert any edits for the consts
   for (; consts; consts = consts->tl) {
     let $(new_qual, old_qual, loc) = *consts->hd;
     if (!unifies(new_qual,old_qual) && loc) {
