@@ -99,7 +99,7 @@ int get_field_index(type_t t, field_name_t f) {
   case &AppType(&AggrCon(info),_):
     let fs = get_known_aggrdecl(info)->impl->fields;
     fallthru(fs);
-  case &AnonAggrType(_,fs):
+  case &AnonAggrType(_,_,fs):
     return get_field_index_fs(fs, f);
   default:
     Warn::impos("get_field_index failed: %s", Absynpp::typ2string(t));
@@ -233,8 +233,7 @@ static absRval_t i_typ_to_absrval(flow_env_t fenv,
   case &AppType(&DatatypeFieldCon({.KnownDatatypefield=$(_,tuf)}),_):
     if(tuf->typs == NULL)
       return leafval;
-    fallthru(tuf->typs);
-  case &TupleType(tqts):
+    let tqts = tuf->typs;
     unsigned   sz = List::length(tqts);
     aggrdict_t d  = new { for i < sz : fenv->unknown_all };
     for (int i = 0; i < sz; i++) {
@@ -254,7 +253,7 @@ static absRval_t i_typ_to_absrval(flow_env_t fenv,
 							   fields,
 							   ad->kind==UnionA,
 							   leafval));
-  case &AnonAggrType(k,fs):
+  case &AnonAggrType(k,_,fs):
     DEBUG_PRINT("typ_to_absrval: type=%s, leaf_val=",
 		Absynpp::typ2string(t));
     DEBUG_PRINT_F(print_absrval,leafval);
@@ -346,19 +345,11 @@ absRval_t make_unique_consumed(flow_env_t fenv, aqualbnds_t aqb, type_t t, exp_t
     if (r3 != r2) 
       return new NamedLocation(s,r3);
     return r;
-  case $(&TupleType(tqts),&Aggregate(b,d)):
-    let sz = numelts(d);
-    aggrdict_t d2 = new { for i < sz : fenv->unknown_all };
-    for (int i = 0; i < sz; i++) {
-      d2[i] = make_unique_consumed(fenv,aqb,(*tqts->hd)[1],consumer,iteration,d[i],local_alias);
-      tqts = tqts->tl;
-    }
-    return new Aggregate(b,d2);
   case $(&AppType(&AggrCon(info),_),&Aggregate(b,d)):
     let ad = get_known_aggrdecl(info);
     if (ad->impl == NULL) return r;
     fallthru(ad->kind,ad->impl->fields,b,d);
-  case $(&AnonAggrType(k,fs),&Aggregate(b,d)):
+  case $(&AnonAggrType(k,_,fs),&Aggregate(b,d)):
     aggrdict_t d2 = new { for i < numelts(d) : d[i] };
     unsigned sz = List::length(fs);
     for (int i = 0; i < sz; i++, fs = fs->tl) {

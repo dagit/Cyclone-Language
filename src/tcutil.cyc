@@ -273,12 +273,7 @@ bool is_bits_only_type(type_t t) {
     // can't allow a zero-terminated array to be treated as bits only
     // for initialization purposes
     return (!type2bool(false,zero_term)) && is_bits_only_type(t);
-  case &TupleType(tqs):
-    for (; tqs != NULL; tqs = tqs->tl)
-      if (!is_bits_only_type((*tqs->hd)[1])) 
-	return false;
-    return true;
-  case &AnonAggrType(_,fs):
+  case &AnonAggrType(_,_,fs):
     for (; fs != NULL; fs = fs->tl)
       if (!is_bits_only_type(fs->hd->type)) 
 	return false;
@@ -361,8 +356,7 @@ type_t copy_type(type_t t) {
     return new FnType(FnInfo{tvs2,effopt2,rt_tq,rt2,args2,c_varargs2,
                                cyc_varargs2,rgn_po2,qb2,atts2,req2,req_rlns2,
                                ens2,ens_rlns2,ret_val2,argvds2});
-  case &TupleType(tqts):    return new TupleType(map(copy_tqt,tqts));
-  case &AnonAggrType(k,fs): return new AnonAggrType(k,map(copy_field,fs));
+  case &AnonAggrType(k,b,fs): return new AnonAggrType(k,b,map(copy_field,fs));
   case &ValueofType(e):     return new ValueofType(e); // FIX: should copy e
   case &TypeofType(e):      return new TypeofType(e);  // FIX: should copy e
   case &TypedefType(tdn,ts,td,_):
@@ -437,7 +431,6 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
   case &Offsetof_e(t,ofs): new_e = offsetof_exp(copy_type(t),ofs,e->loc); break;
   case &Deref_e(e1):       new_e = deref_exp(DC(pt,e1),e->loc);           break;
   case &Extension_e(e1):   new_e = extension_exp(DC(pt,e1),e->loc);       break;
-  case &Tuple_e(es):       new_e = tuple_exp(map_c(DC,pt,es),e->loc);     break;
   case &AggrMember_e(e1,n,f1,f2):
     new_e = new_exp(new AggrMember_e(DC(pt,e1),n,f1,f2),e->loc); break;
   case &AggrArrow_e(e1,n,f1,f2):
@@ -457,8 +450,12 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
     new_e = new_exp(new Aggregate_e(n,map(copy_type,ts),map_c(copy_eds,pt,eds),agr),
 		   e->loc);
     break;
-  case &AnonStruct_e(t,eds):
-    new_e = new_exp(new AnonStruct_e(copy_type(t),map_c(copy_eds,pt,eds)),e->loc);
+  case &AnonStruct_e(topt,b,eds):
+    type_opt_t new_topt = NULL;
+    if (topt != NULL) {
+      new_topt = copy_type((type_t)topt);
+    }
+    new_e = new_exp(new AnonStruct_e(new_topt,b,map_c(copy_eds,pt,eds)),e->loc);
     break;
   case &CompoundLit_e(&$(vopt,tq,t),eds):
     new_e = new_exp(new CompoundLit_e(new $(vopt,tq,copy_type(t)),
@@ -590,7 +587,7 @@ kind_t type_kind(type_t t) {
       return &Kinds::mk;
     }
   case &FnType(_):         return &Kinds::ak;
-  case &AnonAggrType(_,_): return &Kinds::mk;
+  case &AnonAggrType(_,_,_): return &Kinds::mk;
   case &PointerType(pinfo):
     switch (compress(pinfo.ptr_atts.bounds)) {
     case &AppType(&ThinCon,_):
@@ -608,7 +605,6 @@ kind_t type_kind(type_t t) {
   case &ArrayType(ArrayInfo{_,_,num_elts,_,_}):
     if (num_elts == NULL || is_const_exp(num_elts)) return &Kinds::mk;
     return &Kinds::ak;
-  case &TupleType(_): return &Kinds::mk;
   case &TypedefType(_,_,td,_):
     if (td == NULL || td->kind == NULL)
       Warn::impos2("type_kind: typedef found: ",t);
@@ -661,7 +657,7 @@ static type_t rgns_of(type_t t) {
     return normalize_effect(join_eff(list(access_eff(r),rgns_of(et))));
   case &ArrayType(ArrayInfo{et,...}):
     return normalize_effect(rgns_of(et));
-  case &AnonAggrType(_,fs):
+  case &AnonAggrType(_,_,fs):
     return normalize_effect(join_eff(map(rgns_of_field,fs)));
   case &FnType(FnInfo{tvs,eff,rt_tq,rt,args,_,cyc_varargs,rpo,...}):
     // NOTE:  we define RgnsEff(t) in this case to be the regions in the
@@ -673,11 +669,6 @@ static type_t rgns_of(type_t t) {
     // and then compute the regions of that.
     let e = substitute(map(region_free_subst,tvs),(type_t)eff);
     return normalize_effect(e);
-  case &TupleType(tqts):
-    let ts = NULL;
-    for (; tqts != NULL; tqts = tqts->tl)
-      ts = new List((*tqts->hd)[1],ts);
-    fallthru(ts);
   case &TypedefType(_,ts,_,_): // Note: just for abstract typedefs
     return normalize_effect(join_eff(map(rgns_of,ts)));
   case &TypeDeclType(...): Warn::impos2("typedecl in rgns_of");
@@ -1042,13 +1033,12 @@ static int type_case_number(type_t t) {
   case &PointerType(_):       return 3;
   case &ArrayType(_):         return 4;
   case &FnType(_):            return 5;
-  case &TupleType(_):         return 6;
-  case &AnonAggrType(_,_):    return 7;
-  case &TypedefType(...):     return 8;
-  case &ValueofType(_):       return 9;
-  case &TypeDeclType(...):    return 10;
-  case &TypeofType(_):        return 11;
-  case &AppType(c,_):         return 12 + tycon2int(c);
+  case &AnonAggrType(...):    return 6;
+  case &TypedefType(...):     return 7;
+  case &ValueofType(_):       return 8;
+  case &TypeDeclType(...):    return 9;
+  case &TypeofType(_):        return 10;
+  case &AppType(c,_):         return 11 + tycon2int(c);
   }
 }
 static int star_cmp(int (@cmp)(`a@`r,`a@`r),`a*`r a1, `a*`r a2) {
@@ -1245,10 +1235,7 @@ int typecmp(type_t t1, type_t t2) {
     // should never have gotten here...
     Warn::impos2("typecmp: function type comparison should never get here!");
 
-  case $(&TupleType(ts2), &TupleType(ts1)):
-    return list_cmp(tqual_type_cmp,ts1,ts2);
-
-  case $(&AnonAggrType(k2,fs2), &AnonAggrType(k1,fs1)):
+  case $(&AnonAggrType(k2,_,fs2), &AnonAggrType(k1,_,fs1)):
     if(k1 != k2) 
       return (k1==StructA) ? -1 : 1;
     return list_cmp(aggrfield_cmp,fs1,fs2);
@@ -1676,6 +1663,7 @@ $(decl_t,exp_t,bool) insert_alias(exp_t e, type_t e_type) {
       Warn::err2(e->loc, "Automatic alias coercion of restricted pointers not supported");
       success = false;
     }
+    break;
   default: break;
   }
   e->topt = NULL;
@@ -1800,18 +1788,6 @@ flatten_type(region_t<`r> r, bool flatten, type_t t1) {
     t1 = compress(t1);
     switch (t1) {
     case &AppType(&VoidCon,_): return NULL;
-    case &TupleType(tqs):
-      let env = $(r,flatten);
-      // we can flatten only the first component recursively
-      switch (tqs) {
-      case NULL: return NULL;
-      case &List{hd,tl}:
-        let hd2 = rcopy_tqt(&env,hd);
-        env[1] = false;
-        let tl2 = rmap_c(r,rcopy_tqt,&env,tqs);
-        let temp = rnew(r) List{hd2,tl2};
-        return rflatten(r,rnew (r) List{hd2,tl2});
-      }
     case &AppType(&AggrCon({.KnownAggr = &ad}),ts):
       // FIX: too strict with existentials and constraints??
       if(ad->kind==UnionA || ad->impl==NULL
@@ -1828,7 +1804,7 @@ flatten_type(region_t<`r> r, bool flatten, type_t t1) {
         let tts = rnew(r) List{hd2,tl2};
         return List::rflatten(r,tts);
       }
-    case &AnonAggrType(StructA,fs):
+    case &AnonAggrType(StructA,_,fs):
       $(list_t<_,`r>,region_t<`r>,bool) env = $(NULL,r,flatten);
       switch (fs) {
       case NULL: return NULL;
@@ -2492,20 +2468,9 @@ type_t rsubstitute(region_t<`r> rgn,
     return new FnType(FnInfo{vs,eff2,rtq,rsubstitute(rgn,inst,rtyp),args2,
 			       c_varargs,cyc_varargs2,rgn_po2,qb2,atts,
 			       req2,req_relns2,ens2,ens_relns2,ret_value,argvds});
-  case &TupleType(tqts):
-    list_t<type_t,`r> ts2 = NULL;
-    bool change = false;
-    for (let ts1 = tqts; ts1 != NULL; ts1 = ts1->tl) {
-      let t1 = (*ts1->hd)[1];
-      let t2 = rsubstitute(rgn,inst,t1);
-      if (t1 != t2)
-        change = true;
-      ts2 = rnew(rgn) List(t2,ts2);
-    }
-    return (!change) ? t : new TupleType(List::map2(map2_tq,tqts,imp_rev(ts2)));
-  case &AnonAggrType(k,fs):
+  case &AnonAggrType(k,b,fs):
     let new_fs = subst_aggrfields(rgn,inst,fs);
-    return (fs==new_fs) ? t : new AnonAggrType(k,new_fs);
+    return (fs==new_fs) ? t : new AnonAggrType(k,b,new_fs);
   case &Evar(_,r,_,_):
     return (r==NULL) ? t : rsubstitute(rgn,inst,(type_t)r);
     /*   case &AppType(&AqualVarCon, ts): *///no need to special case this anymore
@@ -2835,11 +2800,6 @@ bool is_noalias_pointer_or_aggr(aqualbnds_t aqb, type_t t) {
   if (is_noalias_pointer(aqb, t,false)) 
     return true;
   switch (t) {
-  case &TupleType(qts):
-    for(; qts != NULL; qts = qts->tl)
-      if (is_noalias_pointer_or_aggr(aqb,(*qts->hd)[1])) 
-	return true;
-    return false;
   case &AppType(&AggrCon({.KnownAggr = adp}),ts):
     if ((*adp)->impl == NULL) 
       return false;
@@ -2848,7 +2808,7 @@ bool is_noalias_pointer_or_aggr(aqualbnds_t aqb, type_t t) {
       if (is_noalias_pointer_or_aggr(aqb, substitute(inst,x->hd->type))) 
 	return true;
     return false;
-  case &AnonAggrType(_,x):
+  case &AnonAggrType(_,_,x):
     for(; x != NULL; x = x->tl)
       if (is_noalias_pointer_or_aggr(aqb, x->hd->type)) 
 	return true;
@@ -2882,11 +2842,7 @@ bool is_noalias_path(aqualbnds_t aqb, exp_t e) {
   case &Deref_e(e1):
     return is_noalias_pointer(aqb, (type_t)e1->topt,true) && is_noalias_path(aqb, e1);
   case &AggrMember_e(e1,f,...): return is_noalias_path(aqb, e1);
-  case &Subscript_e(e1,e2):
-    switch (compress((type_t)e1->topt)) {
-    case &TupleType(...): return is_noalias_path(aqb, e1);
-    default: return false;
-    }
+  case &Subscript_e(e1,e2): return false;
   case &Conditional_e(_,e1,e2):
     return is_noalias_path(aqb, e1) && is_noalias_path(aqb, e2);
   case &SeqExp_e(_,e2): fallthru(e2);
@@ -2949,7 +2905,7 @@ $(bool,type_t) addressof_props(exp_t e) {
     // we have an unboxed thing, so we inherit e2's region
     // must check that f isn't a bitfield.
     switch (compress((type_t)e1->topt)) {
-    case &AnonAggrType(_,fs):
+    case &AnonAggrType(_,_,fs):
       let finfo = lookup_field(fs,f);
       if(finfo != NULL && finfo->width == NULL) {
         let $(c,t) = addressof_props(e1);
@@ -2974,7 +2930,7 @@ $(bool,type_t) addressof_props(exp_t e) {
     case &PointerType(PtrInfo(t1,_,PtrAtts(r,...))):
       struct Aggrfield * finfo;
       switch (compress(t1)) {
-      case &AnonAggrType(_,fs):
+      case &AnonAggrType(_,_,fs):
 	finfo = lookup_field(fs,f); break;
       case &AppType(&AggrCon({.KnownAggr = &ad}),_):
 	finfo = lookup_decl_field(ad,f); break;
@@ -2997,15 +2953,6 @@ $(bool,type_t) addressof_props(exp_t e) {
     // or not because [] is overloaded for all array kinds, and tuples
     type_t t = compress((type_t)e1->topt);
     switch (t) {
-    case &TupleType(ts):
-      // We need an lvalue in this unboxed case whereas "C w/ tuples" wouldn't.
-      let $(i,known) = Evexp::eval_const_uint_exp(e2);
-      if(!known)
-	return bogus_ans;
-      let finfo = lookup_tuple_field(ts,i);
-      if(finfo != NULL)
-	return $((*finfo)[0].real_const, addressof_props(e1)[1]);
-      return bogus_ans;
     case &PointerType(PtrInfo(_,tq,PtrAtts(r,...))):
       return $(tq.real_const,r);
     case &ArrayType(ArrayInfo{_,tq,...}):
@@ -3087,14 +3034,13 @@ static bool cnst_exp(bool var_okay, exp_t e) {
   case &Comprehension_e(_,e1,e2,_): return rec(false,e1) && rec(false,e2);
   case &ComprehensionNoinit_e(e,_,_): return rec(false,e);
   case &Array_e(des):        fallthru(des);
-  case &AnonStruct_e(_,des): fallthru(des);
+  case &AnonStruct_e(_,_,des): fallthru(des);
   case &Aggregate_e(_,_,des,_):
     for (; des != NULL; des = des->tl)
       if (!cnst_exp(false,(*des->hd)[1]))
         return false;
     return true;
   case &Primop_e(_,es): fallthru(es);
-  case &Tuple_e(es):    fallthru(es);
   case &Datatype_e(es,_,_):
     for (; es != NULL; es = es->tl)
       if (!cnst_exp(false,es->hd))
@@ -3146,12 +3092,7 @@ bool zeroable_type(type_t t) {
   case &PointerType(PtrInfo(_,_,PtrAtts(_,n,...))): 
     return force_type2bool(true,n);
   case &ArrayType(ArrayInfo{t,...}): return zeroable_type(t);
-  case &TupleType(tqs):
-    for (; tqs != NULL; tqs = tqs->tl)
-      if (!zeroable_type((*tqs->hd)[1])) 
-	return false;
-    return true;
-  case &AnonAggrType(_,fs): return fields_zeroable(NULL,NULL,fs); //never tagged
+  case &AnonAggrType(_,_,fs): return fields_zeroable(NULL,NULL,fs); //never tagged
   default: return false;
   }
 }

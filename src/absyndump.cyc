@@ -402,6 +402,10 @@ static void dump_aqual_val(alias_qual_val_t aqv) {
   }
 }
 
+static $(tqual_t,type_t)@ aggrfield2arg(aggrfield_t f) {
+  return new $(f->tq,f->type);
+}
+
 // Print a normalized typ to a doc
 static void dumpntyp(type_t t) {
   switch (t) {
@@ -416,9 +420,14 @@ static void dumpntyp(type_t t) {
     if (k == NULL) dump("K"); else dumpkind(k->v); 
     dump(aprintf("%d",i)); return;
   case &Evar(k,t,i,_): dumpntyp((type_t)t); return; // shouldn't happen!
-  case &TupleType(ts): dump_char('$'); dumpargs(ts); return;
-  case &AnonAggrType(k,fs):
-    dumpaggr_kind(k); dump_char('{'); dumpaggrfields(fs); dump_char('}');return;
+  case &AnonAggrType(k,is_tuple,fs):
+    if (is_tuple) {
+      dump_char('$');
+      dumpargs(map(aggrfield2arg,fs));
+    } else {
+      dumpaggr_kind(k); dump_char('{'); dumpaggrfields(fs); dump_char('}');
+    }
+    return;
   case &TypeDeclType(&{.r=&Aggr_td(d),...},_):     dump_aggrdecl(d);     return;
   case &TypeDeclType(&{.r=&Enum_td(d),...},_):     dump_enumdecl(d);     return;
   case &TypeDeclType(&{.r=&Datatype_td(d),...},_): dump_datatypedecl(d); return;
@@ -573,7 +582,6 @@ static void dumpde($(list_t<designator_t>,exp_t)@ de) {
 static void dumpoffset_field(offsetof_field_t f) {
   switch(f) {
   case &StructField(n): dump_nospace(*n);      return;
-  case &TupleIndex(n):  dump(aprintf("%d",n)); return;
   }
 }
 
@@ -784,8 +792,6 @@ static void dumpexp_prec(int inprec, exp_t e) {
   case &Subscript_e(e1,e2):
     dumpexp_prec(myprec,e1); dump_char('['); dumpexp(e2); dump_char(']'); break;
 
-  case &Tuple_e(es): dump("$("); dumpexps_prec(20,es); dump_char(')'); break;
-
   case &CompoundLit_e(vat,des):
     dump_char('(');
     dumptyp((*vat)[2]); // OK to ignore qualifiers??
@@ -813,7 +819,13 @@ static void dumpexp_prec(int inprec, exp_t e) {
     group(dumpde,des,"","}",",");
     break;
 
-  case &AnonStruct_e(_,des): group(dumpde,des,"{","}",","); break;
+  case &AnonStruct_e(_,is_tuple,des): 
+    if (is_tuple) {
+      dump("$("); dumpexps_prec(20,map(snd,des)); dump_char(')');
+    } else {
+      group(dumpde,des,"{","}",","); 
+    }
+    break;
   case &Enum_e(_,ef):        fallthru(ef);
   case &AnonEnum_e(_,ef):    dumpqvar(ef->name); break;
 
@@ -1026,20 +1038,27 @@ static void dumppat(pat_t p) {
     dump("alias"); dump("<"); dumptvar(tv); dump(">" );
     dumpvardecl(vd,p->loc,false);
     break;
-  case &Tuple_p(ts,dots): group(dumppat,ts,"$(",pat_term(dots),","); break;
   case &Pointer_p(p2):    dump("&"); dumppat(p2); break;
   case &TagInt_p(tv,vd): 
     dumpqvar(vd->name); dump_char('<'); dumptvar(tv); dump_char('>'); break;
   case &UnknownId_p(q):  dumpqvar(q); break;
   case &UnknownCall_p(q,ps,dots): 
     dumpqvar(q); group(dumppat,ps,"(",pat_term(dots),","); break;
-  case &Aggr_p(&info,exists,dps,dots): 
-    dumpqvar(aggr_kinded_name(info)[1]);
-    fallthru(exists,dps,dots);
-  case &Aggr_p(NULL,exists,dps,dots):
-    dump_char('{');
-    egroup(dumptvar,exists,"<",">",",");
-    group(dumpdp,dps,"",pat_term(dots),",");
+  case &Aggr_p(topt,is_tuple,exists,dps,dots):
+    if (is_tuple) {
+      group(dumppat,map(snd,dps),"$(",pat_term(dots),",");
+    } else {
+      if (topt != NULL) {
+        switch (compress((type_t)topt)) {
+        case &AppType(&AggrCon(info),_):
+          dumpqvar(aggr_kinded_name(info)[1]); break;
+        default: break;
+        }
+      }
+      dump_char('{');
+      egroup(dumptvar,exists,"<",">",",");
+      group(dumpdp,dps,"",pat_term(dots),",");
+    }
     break;
   case &Datatype_p(_,tuf,ps,dots):
     dumpqvar(tuf->name); 

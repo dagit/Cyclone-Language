@@ -582,6 +582,7 @@ static bool ensure_no_throw_exp(exp_t e) {
       switch(fname->topt) {
       case &PointerType(PtrInfo(&FnType(fi), ...)):
 	fname_ok = List::mem(Atts::attribute_cmp,fi.attributes,&Atts::No_throw_att_val);
+        break;
       default:
 	Warn::impos2("Expected function pointer type");
       }

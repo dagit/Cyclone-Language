@@ -421,7 +421,9 @@ static bool resolve_visit_f1(env_t env, exp_t e) {
     return true;
   case &Malloc_e(MallocInfo(_,_,_,to,...)): 
     if(to!=NULL) fallthru(*to); else return true;
-  case &AnonStruct_e(t,_): fallthru(t); // can't exist until after type-checker
+  case &AnonStruct_e(topt,_,_): 
+    if (topt == NULL) return true;
+    fallthru((type_t)topt); 
   case &AnonEnum_e(t,_): fallthru(t);
   case &CompoundLit_e(&$(_,_,t),_): fallthru(t);
   case &Valueof_e(t): fallthru(t);
@@ -645,7 +647,7 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
     // (set *to here instead of in i_check_valid_type)
 
     // recursive descent from here down
-  case &AnonAggrType(_,fs): 
+  case &AnonAggrType(_,_,fs): 
     resolve_aggrfields(loc,env,fs);
     return;
   case &AppType(&AnonEnumCon(fs),_): 
@@ -675,10 +677,6 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
     resolve_type(loc,env,bds);
     return;
 
-  case &TupleType(tqts):
-    for(; tqts!=NULL; tqts=tqts->tl)
-      resolve_type(loc,env,(*tqts->hd)[1]);
-    return;
   case &ArrayType(ArrayInfo(t1,_,eo,_,_)):
     resolve_type(loc,env,t1);
     if(eo!=NULL) resolve_exp(env,(exp_t)eo);
@@ -736,7 +734,8 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
       let new_ps = NULL;
       for(; ps != NULL; ps = ps->tl)
 	new_ps = new List(new $(NULL,ps->hd), new_ps);
-      p->r = new Aggr_p(new KnownAggr(new ad),NULL,imp_rev(new_ps),dots);
+      type_t atype = aggr_type(KnownAggr(new ad),NULL);
+      p->r = new Aggr_p(atype,false,NULL,imp_rev(new_ps),dots);
       return;
     case &DatatypeRes(tud,tuf):
       p->r = new Datatype_p(tud,tuf,ps,dots); return;
@@ -745,17 +744,6 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
       err2(loc,"enum tag used with arguments in pattern"); return;
     } catch { case &BindingError: break; }
     err2(loc, qv, " is not a constructor in pattern"); return;
-
-  case &Aggr_p(&{.UnknownAggr= $(_,n,_)} , exist_ts, dps, dots):
-    for(let dps2=dps; dps2 != NULL; dps2 = dps2->tl)
-      resolve_pat(env,(*dps2->hd)[1]);
-    try {
-      let ad = resolve_lookup(loc,env->ns,n,lookup_aggrdecl);
-      p->r = new Aggr_p(new KnownAggr(new ad), exist_ts, dps, dots);
-    } catch { case &BindingError: 
-       err2(loc, "non-aggregate name has designator patterns"); return;
-    }
-    return;
 
   case &Wild_p: return;
 
@@ -768,11 +756,6 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
     resolve_and_add_vardecl(loc,env,vd); break;
 
   case &Pointer_p(p2): resolve_pat(env,p2); return;
-  case &Tuple_p(ps,_):
-    for(; ps != NULL; ps = ps->tl)
-      resolve_pat(env,ps->hd);
-    break;
-
   case &Exp_p(e): resolve_exp(env,e); return;
 
   case &Null_p:
@@ -780,10 +763,28 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
   case &Char_p(...):
   case &Float_p(...): return;
 
-  case &Aggr_p(NULL,_,dps,_): 
-    // have to resolve during type-checking with topt because we have no qvar
-    fallthru(dps);
-  case &Aggr_p(&{.KnownAggr = _},_,dps,_):
+  case &Aggr_p(topt,_,_,dps,_):
+    if (topt != NULL) {
+      let t = (type_t)topt;
+      switch (compress(t)) {
+      case &AppType(&AggrCon(*info),_):
+        switch (*info) {
+        case {.UnknownAggr = $(ak,n,_)}:
+          try {
+            let ad = resolve_lookup(loc,env->ns,n,lookup_aggrdecl);
+            *info = KnownAggr(new ad);
+          } catch {
+          case &BindingError: 
+            err2(p->loc, n, " is an undefined aggregate");
+            break;
+          }
+          break;
+        case {.KnownAggr = _}: break;
+        }
+        break;
+      default: resolve_type(p->loc, env, (type_t)topt); break;
+      }
+    }
     for(; dps != NULL; dps = dps->tl)
       resolve_pat(env,(*dps->hd)[1]);
     return;

@@ -616,11 +616,11 @@ list_t<$(`a,`b)@`RC> zip(list_t<`a> x0, list_t<`b> y0) {
   if (x != NULL || y != NULL) throw &List_mismatch_val;
   return(result);
 }
-list_t<$(`a,`b)@`RC> zip3(list_t<`a> x0, list_t<`b> y0, list_t<`b> z0) {
+list_t<$(`a,`b,`b)@`RC> zip3(list_t<`a> x0, list_t<`b> y0, list_t<`b> z0) {
   if (x0 == NULL && y0 == NULL && z0 == NULL) return NULL;
   if (x0 == NULL || y0 == NULL || z0 == NULL) throw &List_mismatch_val;
 
-  List_t<$(`a,`b)@`RC> result, prev, tmp;
+  List_t<$(`a,`b,`b)@`RC> result, prev, tmp;
 
   result = rcnew List(rcnew $(x0->hd,y0->hd,z0->hd),NULL);
   prev = alias_refptr(result);

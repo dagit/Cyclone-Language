@@ -97,7 +97,6 @@ static `a unexpected_form(exp_t e) __attribute__((noreturn)) {
   case &Pragma_e(...): bad_form = "Pragma_e"; break;
   case &Throw_e(...): bad_form = "Throw_e"; break;
   case &New_e(...): bad_form = "New_e"; break;
-  case &Tuple_e(...): bad_form = "Tuple_e"; break;
   case &CompoundLit_e(...): bad_form = "CompoundLit_e"; break;
   case &Array_e(...): bad_form = "Array_e"; break;
   case &Comprehension_e(...): bad_form = "Comprehension_e"; break;

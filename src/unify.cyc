@@ -187,11 +187,7 @@ void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
       occurs(evar,r,env,r2);
     }
     break;
-  case &TupleType(args):
-    for(; args != NULL; args = args->tl)
-      occurs(evar,r,env,(*args->hd)[1]);
-    break;
-  case &AnonAggrType(_,fs):
+  case &AnonAggrType(_,_,fs):
     // FIX: shouldn't we check for occurrence within the requires clauses?
     for (; fs != NULL; fs = fs->tl)
       occurs(evar,r,env,fs->hd->type);
@@ -549,19 +545,7 @@ static void unify_it(type_t t1, type_t t2) {
       fail_because("@ensures clauses not equivalent");
     return;
 
-  case $(&TupleType(ts2), &TupleType(ts1)):
-    for (; ts1 != NULL && ts2 != NULL; ts1 = ts1->tl, ts2 = ts2->tl) {
-      let $(tqa,ta) = *ts1->hd;
-      let $(tqb,tb) = *ts2->hd;
-      unify_it(ta,tb);
-      unify_tqual(tqa,ta,tqb,tb);
-    }
-    if (ts1 == NULL && ts2 == NULL) 
-      return;
-    ts_failure = $(t1,t2);
-    fail_because("tuple types have different numbers of components");
-
-  case $(&AnonAggrType(k2,fs2), &AnonAggrType(k1,fs1)):
+  case $(&AnonAggrType(k2,tup2,fs2), &AnonAggrType(k1,tup1,fs1)):
     if(k1 != k2)
       fail_because("struct and union type"); 
     for (; fs1 != NULL && fs2 != NULL; fs1 = fs1->tl, fs2 = fs2->tl) {

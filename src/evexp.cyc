@@ -425,7 +425,6 @@ static unsigned int exp_case_number(exp_t e) {
   case &AggrMember_e(...):   return 21;
   case &AggrArrow_e(...):    return 22;
   case &Subscript_e(...):    return 23;
-  case &Tuple_e(...):        return 24;
   case &CompoundLit_e(...):  return 25;
   case &Array_e(...):        return 26;
   case &Comprehension_e(...):return 27;
@@ -524,14 +523,8 @@ int exp_cmp(exp_t e1, exp_t e2) {
     if (l2 < l1) return 1;
     for (;f1 != NULL && f2 != NULL; f1=f1->tl, f2=f2->tl)
       switch($(f1->hd,f2->hd)) {
-      case $(&StructField(_),&TupleIndex(_)): return -1;
-      case $(&TupleIndex(_),&StructField(_)): return 1;
       case $(&StructField(fn1),&StructField(fn2)): 
 	int c = strptrcmp(fn1,fn2);
-	if (c != 0) return c;
-	break;
-      case $(&TupleIndex(i1),&TupleIndex(i2)): 
-	int c = i1-i2;
 	if (c != 0) return c;
 	break;
       }
@@ -557,8 +550,11 @@ int exp_cmp(exp_t e1, exp_t e2) {
     c1 = Tcutil::typecmp(t1,t2);
     if (c1 != 0) return c1;
     return exp_cmp(e1,e2);
-  case $(&AnonStruct_e(t1,des1),&AnonStruct_e(t2,des2)):
-    let c1 = Tcutil::typecmp(t1,t2); 
+  case $(&AnonStruct_e(t1,_,des1),&AnonStruct_e(t2,_,des2)):
+    int c1 = 0;
+    if (t1 != NULL && t2 != NULL) c1 = Tcutil::typecmp((type_t)t1,(type_t)t2);
+    else if (t1 == NULL) c1 = -1;
+    else if (t2 == NULL) c1 = 1;
     if (c1 != 0) return c1;
     fallthru(des1,des2);
   case $(&Array_e(des1),&Array_e(des2)):
@@ -569,8 +565,6 @@ int exp_cmp(exp_t e1, exp_t e2) {
     c1 = list_cmp(Tcutil::typecmp, ts1, ts2);
     if (c1 != 0) return c1;
     return list_cmp(designator_exp_cmp,des1,des1);
-  case $(&Tuple_e(es1),&Tuple_e(es2)):
-    return list_cmp(exp_cmp,es1,es2);
   case $(&Datatype_e(es1,dd1,df1),&Datatype_e(es2,dd2,df2)):
     let c1 = (int)dd1 - (int)dd2;
     if (c1 != 0) return c1;
@@ -657,19 +651,13 @@ bool okay_szofarg(type_t t) {
   case &Evar(&Opt{&Kind(BoxKind,_)},...): return true; // Possible?
   case &Evar(...): return false;
 
-  case &TupleType(tqs):
-    for (; tqs != NULL; tqs = tqs->tl)
-      if(!okay_szofarg((*tqs->hd)[1]))
-	return false;
-    return true;
-
     // okay? (used to require constrained bound)
   case &PointerType(_): return true;
 
   case &ArrayType(ArrayInfo{t2,_,e,_,_}): //assume e constant checked elsewhere
     return (e != NULL);
   case &FnType(_): return false;
-  case &AnonAggrType(_,fs):
+  case &AnonAggrType(_,_,fs):
     for(; fs != NULL; fs = fs->tl)
       if(!okay_szofarg(fs->hd->type))
 	return false;

@@ -61,7 +61,8 @@ struct _DynRegionFrame { //not used
 /* Reaps */
 struct _ReapPage
 #ifdef CYC_REGION_PROFILE
-{ unsigned total_bytes;
+{ unsigned direct_flag;
+  unsigned total_bytes;
   unsigned free_bytes;
   void *bget_page;
   struct _ReapPage *next;
@@ -77,8 +78,8 @@ struct _ReapHandle {
 #endif 
   struct _pool *released_ptrs;
   struct bget_region_key *bkey;
-  unsigned int id;
 #ifdef CYC_REGION_PROFILE
+  unsigned int id;
   const char         *name;
 #endif
 };
@@ -368,7 +369,8 @@ static inline void*_fast_region_malloc(struct _RegionHandle*r, _AliasQualHandle_
 //   return _region_malloc(r,aq,orig_s); 
 // }
 
-//migration to reaps
+//migration to reaps -- Remove this block to revert to regions 
+//... but the rufree etc. will not work
 #ifndef RUNTIME_CYC
 #define _new_region(n) _new_reap(n)
 #define _free_region(r) _free_reap(r)
@@ -445,11 +447,11 @@ if(a > b)return 1;
 return -1;}
 # 59
 int Cyc_Core_ptrcmp(void*a,void*b){
-return Cyc_Core_nptrcmp(a,b);}struct _tuple0{void*f1;void*f2;};
+return Cyc_Core_nptrcmp(a,b);}struct _tuple0{void*f0;void*f1;};
 # 63
-void*Cyc_Core_fst(struct _tuple0*pair){return(*pair).f1;}
-void*Cyc_Core_snd(struct _tuple0*pair){return(*pair).f2;}struct _tuple1{void*f1;void*f2;void*f3;};
-void*Cyc_Core_third(struct _tuple1*triple){return(*triple).f3;}
+void*Cyc_Core_fst(struct _tuple0*pair){return(*pair).f0;}
+void*Cyc_Core_snd(struct _tuple0*pair){return(*pair).f1;}struct _tuple1{void*f0;void*f1;void*f2;};
+void*Cyc_Core_third(struct _tuple1*triple){return(*triple).f2;}
 # 67
 void*Cyc_Core_identity(void*x){return x;}
 # 69

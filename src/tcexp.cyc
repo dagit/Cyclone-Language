@@ -86,10 +86,24 @@ void resolve_unresolved_mem(seg_t loc, type_t * topt, exp_t e,
 			    list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> des){
   // NOTE: must always set e->r or caller will loop!
   if (topt == NULL) {
-    // guess it is an array
+    // look to see if there are field designators that look like an aggregate
+    // and if so, guess that it's an anonymous struct, else guess that 
+    // it's an array.
+    if (des != NULL) {
+      let $(dls,_) = *des->hd;
+      if (dls != NULL) {
+        switch (dls->hd) {
+        case &FieldName(n): 
+          e->r = new AnonStruct_e(NULL,false,des);
+          return;
+        default: break;
+        }
+      }
+    }
     e->r = new Array_e(des);
     return;
   }
+
   type_t t = *topt;
   switch (compress(t)) {
   case &AppType(&AggrCon(info),_):
@@ -99,7 +113,7 @@ void resolve_unresolved_mem(seg_t loc, type_t * topt, exp_t e,
     }
     break;
   case &ArrayType(ArrayInfo{at,aq,...}): e->r = new Array_e(des); break;
-  case &AnonAggrType(_,_):  e->r = new AnonStruct_e(t,des); break;
+  case &AnonAggrType(_,it,_):  e->r = new AnonStruct_e(t,it,des); break;
   default:                  e->r = new Array_e(des);        break;//do something
   }
 }
@@ -587,7 +601,7 @@ static bool check_writable_aggr(seg_t loc, type_t t) {
       return false;
     } 
     fallthru(ad->impl->fields);
-  case &AnonAggrType(_,fs):
+  case &AnonAggrType(_,_,fs):
     for (; fs != NULL; fs = fs->tl) {
       let f = fs->hd;
       if (f->tq.real_const) {
@@ -614,16 +628,6 @@ static bool check_writable_aggr(seg_t loc, type_t t) {
       return false;
     }
     return check_writable_aggr(loc,elt_type);
-  case &TupleType(fs):
-    for (; fs != NULL; fs = fs->tl) {
-      let &$(tq,t) = fs->hd;
-      if (tq.real_const) {
-        Warn::err2(loc, "attempt to overwrite a tuple field with a const member");
-        return false;
-      }
-      if (!check_writable_aggr(loc,t)) return false;
-    }
-    return true;
   default: return true;
   }
 }
@@ -644,17 +648,6 @@ static void check_writable(tenv_t te, exp_t e) {
     switch (compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo{_,tq,_}): fallthru(tq);
     case &ArrayType(ArrayInfo{_,tq,_,_,_}): if (!tq.real_const) return; break;
-    case &TupleType(ts):
-      let $(i,known) = Evexp::eval_const_uint_exp(e2);
-      if(!known) {
-	Warn::err2(e->loc,"tuple projection cannot use sizeof or offsetof");
-	return;
-      }
-      try {
-        let &$(tq,_) = List::nth(ts,i);
-        if (!tq.real_const) return;
-      } catch { case &Nth: return; }
-      break;
     default: break;
     }
     break;
@@ -664,7 +657,7 @@ static void check_writable(tenv_t te, exp_t e) {
       struct Aggrfield *sf = (adp == NULL) ? NULL : lookup_decl_field(*adp, f);
       if (sf == NULL || !sf->tq.real_const) return;
       break;
-    case &AnonAggrType(_,fs):
+    case &AnonAggrType(_,_,fs):
       struct Aggrfield *sf = lookup_field(fs, f);
       if (sf == NULL || !sf->tq.real_const) return;
       break;
@@ -681,7 +674,7 @@ static void check_writable(tenv_t te, exp_t e) {
             (adp == NULL) ? NULL : lookup_decl_field(*adp, f);
           if (sf == NULL || !sf->tq.real_const) return;
           break;
-        case &AnonAggrType(_,fs):
+        case &AnonAggrType(_,_,fs):
           struct Aggrfield *sf = lookup_field(fs, f);
           if (sf == NULL || !sf->tq.real_const) return;
           break;
@@ -1204,18 +1197,13 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0, type_t * topt, exp_t e){
     Warn::err2(e->loc,"cannot take the address of an alias-free path");
 
   // first, dispense with the
-  // case where we have &e[i] and e is an array/pointer (i.e., not a tuple).
+  // case where we have &e[i] and e is an array/pointer 
   switch (e->r) {
   case &Subscript_e(e1,e2):
-    switch (compress((type_t)e1->topt)) {
-    case &TupleType(_): break; // leave & for tuple types alone.
-    default:
-      // We have &e[i] -- rewrite the whole expression as (e+i).
-      // This ensures that we get the right size for an array or ? pointer.
-      e0->r = add_exp(e1,e2,0)->r;
-      return tcPlus(te,e1,e2);
-    }
-    break;
+    // We have &e[i] -- rewrite the whole expression as (e+i).
+    // This ensures that we get the right size for an array or ? pointer.
+    e0->r = add_exp(e1,e2,0)->r;
+    return tcPlus(te,e1,e2);
   default: break;
   }
 
@@ -1286,7 +1274,7 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
 	if((*adp)->impl == NULL) 
 	  break;
 	fallthru((*adp)->impl->fields);
-      case &AnonAggrType(_,fields):
+      case &AnonAggrType(_,_,fields):
 	type_opt_t t2 = find_c(structfield_type,n,fields);
 	if (!t2)
 	  Warn::err2(loc,"no field of struct/union has name %s",*n);
@@ -1304,50 +1292,10 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
 	  for (list_t x = fs; x != l; x=x->tl)
 	    switch (x->hd) {
 	    case &StructField(n): s = aprintf("%s.%s",s,*n); break;
-	    case &TupleIndex(n):  s = aprintf("%s.%d",s, n); break;
 	    }
 	  Warn::err2(loc,s," == ",t," is not a struct/union type");
 	}
       }
-      break;
-    case &TupleIndex(n):
-      bool bad_type = true;
-      switch(compress(t)) {
-      case &AppType(&AggrCon({.KnownAggr = adp}),_):
-	if((*adp)->impl == NULL)
-	  break;
-	fallthru((*adp)->impl->fields);
-      case &AnonAggrType(_,fields):
-	if(List::length(fields) <= n)
-	  Warn::err2(loc,"struct/union has too few components: ",
-		     List::length(fields)," <= ",n);
-	else
-	  t = List::nth(fields,n)->type;
-	bad_type = false;
-	break;
-      case &TupleType(l):
-	if(List::length(l) <= n)
-	  Warn::err2(loc,"tuple has too few components: ",length(l)," <= ",n);
-	else
-	  t = (*List::nth(l,n))[1];
-	bad_type = false;
-	break;
-      case &AppType(&DatatypeFieldCon({.KnownDatatypefield=$(_,tuf)}),_):
-	if(List::length(tuf->typs) < n)
-	  Warn::err2(loc,"datatype field has too few components: ",
-	       List::length(tuf->typs)," < ", n);
-	else {
-	  if (n != 0)
-	    t = (*List::nth(tuf->typs,n-1))[1];
-	  else if (l->tl != NULL)
-	    Warn::err2(loc,"datatype field index 0 refers to the tag; cannot be indexed through");
-	}
-	bad_type = false;
-	break;
-      default: break;
-      }
-      if(bad_type)
-	Warn::err2(loc,t," is not a known type");
       break;
     }
   }
@@ -1423,10 +1371,10 @@ static type_t tcAggrMember2(tenv_t te, seg_t loc, type_t * topt,
         return expr_err(te,loc,topt,"must use pattern-matching to access field ",*f,"\n\tdue to existential type variables.");
     }
     return t2;
-  case &AnonAggrType(k,fs):
+  case &AnonAggrType(k,_,fs):
     let finfo = lookup_field(fs,f);
     if (finfo == NULL)
-      return expr_err(te,loc,topt,"type has no ",*f," member");
+      return expr_err(te,loc,topt,"type ",aggr_type," has no ",*f," member");
     // if this is a non-tagged union and we are reading a pointer,
     // then either we need to be writing to this spot
     if (k == UnionA && !is_bits_only_type(finfo->type) && !in_notreadctxt(te) &&
@@ -1456,9 +1404,10 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
   return tcAggrMember2(te,loc,topt,t2,f,is_tagged,is_read);
 }
 
-// e1[e2] FIX: look at topt
+// e1[e2] FIX: look at topt.
+// if e1 is a tuple then rewrite this to e1.fi where i == e2
 static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
-			  exp_t e1, exp_t e2) {
+			  exp_t orig, exp_t e1, exp_t e2) {
   let te = clear_lhs(clear_notreadctxt(te_orig));
   tcExp(clear_abstract_val_ok(te),NULL,e1);
   tcExp(clear_abstract_val_ok(te),NULL,e2);
@@ -1512,48 +1461,21 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
     if (!Kinds::kind_leq(type_kind(t),&Kinds::mk) && !abstract_val_ok(te))
       Warn::err2(e1->loc,"can't subscript an abstract pointer");
     return t;
-  case &TupleType(ts): 
+  case &AnonAggrType(StructA,is_tuple,fields) && is_tuple:
     let $(i,known) = Evexp::eval_const_uint_exp(e2);
     if(!known)
       return expr_err(te,loc,NULL,
 		      "tuple projection cannot use sizeof or offsetof");
-    try return (*List::nth(ts,i))[1];
-    catch { case &Nth:
+    let &FieldName(n) = tuple_field_designator(i);
+    orig->r = new AggrMember_e(e1,n,false,!in_notreadctxt(te));
+    let finfo = lookup_field(fields,n);
+    if (finfo == NULL) {
       return expr_err(te,loc,NULL,"index is ",i," but tuple has only ",
-		      List::length(ts), " fields");
+		      List::length(fields), " fields");
     }
+    return finfo->type;
   default: return expr_err(te,loc,topt,"subscript applied to ",t1);
   }
-}
-
-// $(es)
-static type_t tcTuple(tenv_t te, seg_t loc, type_t * topt, list_t<exp_t> es) {
-  bool done = false;
-  list_t<$(tqual_t,type_t)@> fields = NULL;
-  if(topt != NULL)
-    switch (compress(*topt)) {
-    case &TupleType(ts):
-      // topt should never cause failure, just guides coercions.
-      if(length(ts) != length(es))
-	break;
-      for(; es != NULL; es = es->tl, ts = ts->tl) {
-	bool bogus = false;
-	let topt2 = (*ts->hd)[1];
-	tcExpInitializer(clear_abstract_val_ok(te),&topt2,es->hd);
-	// try to coerce the argument to the result type
-	coerce_arg(curr_rgnpo(te),curr_aquals_bounds(te),es->hd,(*ts->hd)[1],&bogus);
-	fields = new List(new $((*ts->hd)[0], (type_t)es->hd->topt), fields);
-      }
-      done = true;
-      break;
-    default: break;
-    }
-  if(!done)
-    for(; es != NULL; es = es->tl) {
-      tcExpInitializer(clear_abstract_val_ok(te),NULL,es->hd);
-      fields = new List(new $(empty_tqual(0), (type_t)es->hd->topt), fields);
-    }
-  return new TupleType(imp_rev(fields));
 }
 
 // Compound literals, e.g., (struct foo){3,"abc"}
@@ -1745,7 +1667,7 @@ static bool ensure_typqual_nothrow(type_t t) {
 static bool ensure_nothrow_initializer(exp_t e) {
   switch(e->r) {
   case &Cast_e(_, e1, _, _): return ensure_nothrow_initializer(e1);
-  default: return ensure_typqual_nothrow(e->topt);
+  default: return ensure_typqual_nothrow((type_t)e->topt);
   }
 }
 
@@ -1871,11 +1793,51 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
   return res_typ;
 }
 
-// JGM: question -- how do you build an anonymous struct?
-static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
-                           list_t<$(list_t<designator_t>,exp_t)@> args) {
-  switch (compress(ts)) {
-  case &AnonAggrType(k,fs):
+static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t *topt, exp_t orig,
+                           type_opt_t *ts,
+                           bool is_tuple,
+                           list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> args) {
+  type_t struct_type;
+  if (*ts != NULL) struct_type = (type_t)*ts;
+  else if (topt != NULL) struct_type = *topt;
+  else struct_type = new_evar(&Kinds::mko,lookup_opt_type_vars(te));
+  
+  switch (compress(struct_type)) {
+  case &AppType(&AggrCon(ainfo),ts):
+    // we guessed wrong in resolving things -- this is actually a Aggregate_e
+    typedef_name_t name;
+    struct Aggrdecl *adopt = NULL;
+    switch (ainfo) {
+    case {.UnknownAggr = $(_,n,_)}: name = n; break;
+    case {.KnownAggr = &ad}: name = ad->name; adopt = ad; break;
+    }
+    orig->r = new Aggregate_e(name,ts,args,adopt);
+    tcExpNoInst(te, topt, orig);
+    break;
+  case &Evar(...):
+    // this *should* be a tuple so the designators should all be there.
+    // build the type using the designators and evars
+    list_t<aggrfield_t> fs = NULL;
+    let tvs = lookup_opt_type_vars(te);
+    int i = 0;
+    for (let a = args; a != NULL; a = a->tl, ++i) {
+      let $(ds,_) = *a->hd;
+      if (ds == NULL) Warn::impos("tcAnonStruct -- missing designators!");
+      var_t n;
+      switch (ds->hd) {
+      case &FieldName(name): n = name; break;
+      default: Warn::impos("tcAnonStruct -- designator is array!");
+      }
+      aggrfield_t f = new Aggrfield(n,empty_tqual(0),
+                                    new_evar(&Kinds::mko,tvs),
+                                    NULL, NULL, NULL);
+      fs = new List{f,fs};
+    }
+    fs = List::imp_rev(fs);
+    Unify::unify(struct_type,new AnonAggrType(StructA,is_tuple,fs));
+    *ts = struct_type;
+    fallthru(StructA,fs);    
+  case &AnonAggrType(k,_,fs):
     if(k==UnionA)
       Warn::err2(loc,"expecting struct but found union");
     list_t<$(aggrfield_t,exp_t)@> fields =
@@ -1890,9 +1852,9 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
 			field_exp->topt);
     }
     break;
-  default: Warn::impos2("tcAnonStruct: wrong type");
+  default: Warn::impos2("tcAnonStruct: wrong type ",struct_type," for exp ",orig);
   }
-  return ts;
+  return struct_type;
 }
 
 // f(es)   where f is a datatype and is tuf->name
@@ -2420,7 +2382,7 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
 // poly-type, we instantiate the quantifiers.
 static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
   tcExpNoInst(te,topt,e);
-  type_t cached_type = e->topt;
+  type_t cached_type = (type_t)e->topt;
   type_t t = e->topt = compress(pointer_expand((type_t)e->topt,false));
     // see if the user has asked not to implicitly instantiate any quantifiers
   switch (e->r) {
@@ -2564,8 +2526,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcAggrMember(te,loc,topt,e1,f,is_tagged,is_read); break;
   case &AggrArrow_e(e1,f,*is_tagged,*is_read):
     t = tcAggrArrow(te,loc,topt,e1,f,is_tagged,is_read); break;
-  case &Subscript_e(e1,e2):    t = tcSubscript(te,loc,topt,e1,e2); break;
-  case &Tuple_e(es):           t = tcTuple(te,loc,topt,es); break;
+  case &Subscript_e(e1,e2):    t = tcSubscript(te,loc,topt,e,e1,e2); break;
   case &CompoundLit_e(t1,des): t = tcCompoundLit(te,loc,e,topt,t1,des); break;
   case &Array_e(des):
     // tcArray expects us to pass in an optional element type, not
@@ -2591,7 +2552,8 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcComprehensionNoinit(te,loc,topt,e1,t1,iszeroterm); break;
   case &Aggregate_e(*tn,*ts,args,*sd_opt):
     t = tcAggregate(te,loc,topt,tn,ts,args,sd_opt); break;
-  case &AnonStruct_e(ts,args):  t = tcAnonStruct(te,loc,ts,args); break;
+  case &AnonStruct_e(*ts,is_tuple,args):  
+    t = tcAnonStruct(te,loc,topt,e,ts,is_tuple,args); break;
   case &Datatype_e(es,tud,tuf): t = tcDatatype(te,loc,topt,e,es,tud,tuf); break;
   case &Enum_e(ed,ef):          t = enum_type(ed->name,ed); break;
   case &AnonEnum_e(t2,ef):      t = t2; break;

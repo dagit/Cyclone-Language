@@ -734,8 +734,13 @@ doc_t eff2doc(type_t t) {
   return group("","","+",List::imp_append(effects,new List(doc1,NULL)));
 }
 
+
 doc_t aggr_kind2doc(aggr_kind_t k) {
   return (k==StructA) ? text("struct ") : text("union ");
+}
+
+static $(tqual_t,type_t)@ aggrfield2arg(aggrfield_t f) {
+  return new $(f->tq,f->type);
 }
 
 // Convert a normalized typ to a doc
@@ -810,13 +815,15 @@ doc_t ntyp2doc(type_t t) {
     case 1:  return text("double");     
     default: return text("long double");
     }
-  case &TupleType(ts): return cat(dollar(),args2doc(ts));
   case &AppType(&ComplexCon,ts): return cat(text("_Complex "),ntyp2doc(ts->hd));
   case &AppType(&AggrCon(info),ts):
     let $(k,n) = aggr_kinded_name(info);
     return cat(aggr_kind2doc(k), qvar2doc(n), tps2doc(ts));
-  case &AnonAggrType(k,fs):
-    return cat(aggr_kind2doc(k), lb(), nest(2, aggrfields2doc(fs)), rb());
+  case &AnonAggrType(k,is_tuple,fs):
+    if (is_tuple) 
+      return cat(dollar(), args2doc(map(aggrfield2arg,fs)));
+    else 
+      return cat(aggr_kind2doc(k), lb(), nest(2, aggrfields2doc(fs)), rb());
   case &AppType(&AnonEnumCon(fs),_):
     return cat(text("enum "),lb(),nest(2, enumfields2doc(fs)), rb());
   case &AppType(&EnumCon(n,_),_): return cat(text("enum "),qvar2doc(n));
@@ -993,7 +1000,6 @@ doc_t typ2doc(type_t t) {
 static doc_t offsetof_field_to_doc(offsetof_field_t f) {
   switch(f) {
   case &StructField(n): return textptr(n);
-  case &TupleIndex(n):  return text(aprintf("%d",n));
   }
 }
 
@@ -1057,7 +1063,6 @@ int exp_prec(exp_t e) {
   case &AggrMember_e(...):
   case &AggrArrow_e(...):
   case &Subscript_e(...):     return 140;
-  case &Tuple_e(...):         return 150;
   case &CompoundLit_e(...):
   case &Array_e(...):
   case &Comprehension_e(...):
@@ -1201,8 +1206,6 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     s = cat(exp2doc_prec(myprec,e1), text("->"), textptr(n)); break;
   case &Subscript_e(e1,e2):
     s = cat(exp2doc_prec(myprec,e1), text("["), exp2doc(e2), text("]")); break;
-  case &Tuple_e(es):
-    s = cat(dollar(), text("("), exps2doc_prec(20,es), text(")")); break;
   case &CompoundLit_e(vat,des): // OK to ignore qualifiers??
     s = cat(text("("), typ2doc((*vat)[2]), text(")"),
             group_braces(",",List::map(de2doc,des)));
@@ -1227,7 +1230,12 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
             group_braces(",",
 		  (ts != NULL ? new List(tps2doc(ts), des_doc) : des_doc)));
     break;
-  case &AnonStruct_e(_,des): s = group_braces(",",List::map(de2doc,des)); break;
+  case &AnonStruct_e(_,is_tuple,des): 
+    if (is_tuple)
+      s = cat(dollar(), text("("), exps2doc_prec(20,map(snd,des)), text(")"));
+    else 
+      s = group_braces(",",List::map(de2doc,des)); 
+    break;
   case &Datatype_e(es,_,tuf):
     // special case: a nullary datatype constant is printed "foo" not "foo()"
     s = cat(qvar2doc(tuf->name),egroup("(",")",",",List::map(exp2doc,es)));
@@ -1524,9 +1532,6 @@ doc_t pat2doc(pat_t p) {
     return cat(text("alias"),text(" <"),tvar2doc(tv),text("> "),vardecl2doc(vd));
   case &TagInt_p(tv,vd):
     return cat(qvar2doc(vd->name), text("<"), tvar2doc(tv), text(">"));
-  case &Tuple_p(ts,dots):
-    return cat(dollar(), text("("), ppseq(pat2doc,",",ts),
-	       dots ? text(", ...)") : text(")"));
   case &Pointer_p(p2): return cat(text("&"),pat2doc(p2));
   case &Reference_p(vd,&Pat{.r = &Wild_p,...}):
     return cat(text("*"),qvar2doc(vd->name));
@@ -1536,17 +1541,26 @@ doc_t pat2doc(pat_t p) {
   case &UnknownCall_p(q,ps,dots):
     string_t term = dots ? ", ...)" : ")";
     return cat(qvar2doc(q), group("(",term,",",List::map(pat2doc,ps)));
-  case &Aggr_p(&info,exists,dps,dots):
-    string_t term = dots ? ", ...}" : "}";
-    let $(_,n) = aggr_kinded_name(info);
-    return cat(qvar2doc(n), lb(),
-	       egroup("[","]",",",List::map(tvar2doc,exists)),
-	       group("",term,",",List::map(dp2doc,dps)));
-  case &Aggr_p(NULL,exists,dps,dots):
-    string_t term = dots ? ", ...}" : "}";
-    return cat(lb(),
-	       egroup("[","]",",",List::map(tvar2doc,exists)),
-	       group("",term,",",List::map(dp2doc,dps)));
+  case &Aggr_p(topt,is_tuple,exists,dps,dots):
+    if (is_tuple) {
+      return cat(dollar(), text("("), ppseq(pat2doc,",",map(snd,dps)),
+                 dots ? text(", ...)") : text(")"));
+    } else {
+      string_t term = dots ? ", ...}" : "}";
+      if (topt != NULL) {
+        switch (compress((type_t)topt)) {
+        case &AppType(&AggrCon(info),...):
+          let $(_,n) = aggr_kinded_name(info);
+          return cat(qvar2doc(n), lb(),
+                     egroup("[","]",",",List::map(tvar2doc,exists)),
+                     group("",term,",",List::map(dp2doc,dps)));
+        default: break;
+        }
+      }
+      return cat(lb(),
+                 egroup("[","]",",",List::map(tvar2doc,exists)),
+                 group("",term,",",List::map(dp2doc,dps)));
+    }
   case &Enum_p(_,ef): fallthru(ef);
   case &AnonEnum_p(_,ef): return qvar2doc(ef->name);
   case &Datatype_p(_,tuf,NULL,_): return qvar2doc(tuf->name);
@@ -1858,7 +1872,7 @@ bool exists_temp_tvar_in_effect(type_t t) {
 // function parameters where gcc does not like them.
 bool is_anon_aggrtype(type_t t) {
   switch (t) {
-  case &AnonAggrType(_,_): 
+  case &AnonAggrType(_,_,_): 
   case &AppType(&AnonEnumCon(_),_): return true;
   case &TypedefType(_,_,td,x) && x != NULL:
     // This won't loop if the types come from a .cyc file,

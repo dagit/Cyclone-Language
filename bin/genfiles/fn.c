@@ -61,7 +61,8 @@ struct _DynRegionFrame { //not used
 /* Reaps */
 struct _ReapPage
 #ifdef CYC_REGION_PROFILE
-{ unsigned total_bytes;
+{ unsigned direct_flag;
+  unsigned total_bytes;
   unsigned free_bytes;
   void *bget_page;
   struct _ReapPage *next;
@@ -77,8 +78,8 @@ struct _ReapHandle {
 #endif 
   struct _pool *released_ptrs;
   struct bget_region_key *bkey;
-  unsigned int id;
 #ifdef CYC_REGION_PROFILE
+  unsigned int id;
   const char         *name;
 #endif
 };
@@ -368,7 +369,8 @@ static inline void*_fast_region_malloc(struct _RegionHandle*r, _AliasQualHandle_
 //   return _region_malloc(r,aq,orig_s); 
 // }
 
-//migration to reaps
+//migration to reaps -- Remove this block to revert to regions 
+//... but the rufree etc. will not work
 #ifndef RUNTIME_CYC
 #define _new_region(n) _new_reap(n)
 #define _free_region(r) _free_reap(r)
@@ -427,29 +429,29 @@ return({(struct Cyc_Fn_Function*(*)(void*(*)(void*(*)(void*),void*),void*(*)(voi
 # 47
 void*Cyc_Fn_apply(struct Cyc_Fn_Function*f,void*x){
 void*_Tmp0;void*_Tmp1;_Tmp1=f->f;_Tmp0=(void*)f->env;{void*(*code)(void*,void*)=_Tmp1;void*env=_Tmp0;
-return code(env,x);}}struct _tuple0{struct Cyc_Fn_Function*f1;struct Cyc_Fn_Function*f2;};
+return code(env,x);}}struct _tuple0{struct Cyc_Fn_Function*f0;struct Cyc_Fn_Function*f1;};
 # 52
 static void*Cyc_Fn_fn_compose(struct _tuple0*f_and_g,void*arg){
-void*_Tmp0;void*_Tmp1;_Tmp1=f_and_g->f1;_Tmp0=f_and_g->f2;{struct Cyc_Fn_Function*f=_Tmp1;struct Cyc_Fn_Function*g=_Tmp0;
+void*_Tmp0;void*_Tmp1;_Tmp1=f_and_g->f0;_Tmp0=f_and_g->f1;{struct Cyc_Fn_Function*f=_Tmp1;struct Cyc_Fn_Function*g=_Tmp0;
 return({struct Cyc_Fn_Function*_Tmp2=f;Cyc_Fn_apply(_Tmp2,Cyc_Fn_apply(g,arg));});}}
 # 58
 struct Cyc_Fn_Function*Cyc_Fn_compose(struct Cyc_Fn_Function*g,struct Cyc_Fn_Function*f){
 # 60
-return({(struct Cyc_Fn_Function*(*)(void*(*)(struct _tuple0*,void*),struct _tuple0*))Cyc_Fn_make_fn;})(Cyc_Fn_fn_compose,({struct _tuple0*_Tmp0=_cycalloc(sizeof(struct _tuple0));_Tmp0->f1=f,_Tmp0->f2=g;_Tmp0;}));}struct _tuple1{struct Cyc_Fn_Function*f1;void*f2;};struct _tuple2{void*f1;void*f2;};
+return({(struct Cyc_Fn_Function*(*)(void*(*)(struct _tuple0*,void*),struct _tuple0*))Cyc_Fn_make_fn;})(Cyc_Fn_fn_compose,({struct _tuple0*_Tmp0=_cycalloc(sizeof(struct _tuple0));_Tmp0->f0=f,_Tmp0->f1=g;_Tmp0;}));}struct _tuple1{struct Cyc_Fn_Function*f0;void*f1;};struct _tuple2{void*f0;void*f1;};
 # 65
 static void*Cyc_Fn_inner(struct _tuple1*env,void*second){
-return({struct Cyc_Fn_Function*_Tmp0=(*env).f1;({(void*(*)(struct Cyc_Fn_Function*,struct _tuple2*))Cyc_Fn_apply;})(_Tmp0,({struct _tuple2*_Tmp1=_cycalloc(sizeof(struct _tuple2));_Tmp1->f1=(*env).f2,_Tmp1->f2=second;_Tmp1;}));});}
+return({struct Cyc_Fn_Function*_Tmp0=(*env).f0;({(void*(*)(struct Cyc_Fn_Function*,struct _tuple2*))Cyc_Fn_apply;})(_Tmp0,({struct _tuple2*_Tmp1=_cycalloc(sizeof(struct _tuple2));_Tmp1->f0=(*env).f1,_Tmp1->f1=second;_Tmp1;}));});}
 # 68
 static struct Cyc_Fn_Function*Cyc_Fn_outer(struct Cyc_Fn_Function*f,void*first){
 # 70
-return({(struct Cyc_Fn_Function*(*)(void*(*)(struct _tuple1*,void*),struct _tuple1*))Cyc_Fn_make_fn;})(Cyc_Fn_inner,({struct _tuple1*_Tmp0=_cycalloc(sizeof(struct _tuple1));_Tmp0->f1=f,_Tmp0->f2=first;_Tmp0;}));}
+return({(struct Cyc_Fn_Function*(*)(void*(*)(struct _tuple1*,void*),struct _tuple1*))Cyc_Fn_make_fn;})(Cyc_Fn_inner,({struct _tuple1*_Tmp0=_cycalloc(sizeof(struct _tuple1));_Tmp0->f0=f,_Tmp0->f1=first;_Tmp0;}));}
 # 74
 struct Cyc_Fn_Function*Cyc_Fn_curry(struct Cyc_Fn_Function*f){
 # 76
 return({(struct Cyc_Fn_Function*(*)(struct Cyc_Fn_Function*(*)(struct Cyc_Fn_Function*,void*),struct Cyc_Fn_Function*))Cyc_Fn_make_fn;})(Cyc_Fn_outer,f);}
 # 79
 static void*Cyc_Fn_lambda(struct Cyc_Fn_Function*f,struct _tuple2*arg){
-return({struct Cyc_Fn_Function*_Tmp0=({(struct Cyc_Fn_Function*(*)(struct Cyc_Fn_Function*,void*))Cyc_Fn_apply;})(f,(*arg).f1);Cyc_Fn_apply(_Tmp0,(*arg).f2);});}
+return({struct Cyc_Fn_Function*_Tmp0=({(struct Cyc_Fn_Function*(*)(struct Cyc_Fn_Function*,void*))Cyc_Fn_apply;})(f,(*arg).f0);Cyc_Fn_apply(_Tmp0,(*arg).f1);});}
 # 84
 struct Cyc_Fn_Function*Cyc_Fn_uncurry(struct Cyc_Fn_Function*f){
 # 86

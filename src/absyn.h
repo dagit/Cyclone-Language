@@ -389,8 +389,8 @@ namespace Absyn {
     // We treat anonymous structs, unions, and enums slightly differently
     // than C.  In particular, we treat structurally equivalent types as
     // equal.  C requires a name for each type and uses by-name equivalence.
-    TupleType(list_t<$(tqual_t,type_t)@>); // MemKind
-    AnonAggrType(aggr_kind_t,list_t<aggrfield_t>); // MemKind
+    //TupleType(list_t<$(tqual_t,type_t)@>); // MemKind
+    AnonAggrType(aggr_kind_t,bool tuple,list_t<aggrfield_t>); // MemKind
     // An abbreviation -- the type_t* contains the definition iff any
     TypedefType(typedef_name_t,types_t,struct Typedefdecl *,type_opt_t);
     ValueofType(exp_t);      // IntKind -- exp must be a type-level expression
@@ -496,7 +496,7 @@ namespace Absyn {
   // information for offsetof
   EXTERN_ABSYN datatype OffsetofField {
     StructField(field_name_t);
-    TupleIndex(unsigned int);
+    //TupleIndex(unsigned int);
   };
 
   // Casts are labelled with whether or not they involve a coercion
@@ -575,7 +575,7 @@ namespace Absyn {
     AggrMember_e(exp_t,field_name_t,bool is_tagged, bool is_read);  // e.x
     AggrArrow_e(exp_t,field_name_t,bool is_tagged, bool is_read);   // e->x
     Subscript_e(exp_t,exp_t); // e1[e2]
-    Tuple_e(list_t<exp_t>);   // $(e1,...,en)
+    //Tuple_e(list_t<exp_t>);   // $(e1,...,en)
     CompoundLit_e($(var_opt_t,tqual_t,type_t)@,
                   list_t<$(list_t<designator_t>,exp_t)@>); 
     Array_e(list_t<$(list_t<designator_t>,exp_t)@>); // {.0=e1,...,.n=en}
@@ -589,7 +589,7 @@ namespace Absyn {
                 list_t<$(list_t<designator_t>,exp_t)@>, 
                 struct Aggrdecl *);
     // {.x1=e1,....,.xn=en}
-    AnonStruct_e(type_t, list_t<$(list_t<designator_t>,exp_t)@>);
+    AnonStruct_e(type_opt_t, bool tuple, list_t<$(list_t<designator_t>,exp_t)@>);
     // Foo(e1,...,en)
     Datatype_e(list_t<exp_t>,datatypedecl_t,datatypefield_t);
     Enum_e(enumdecl_t,enumfield_t);
@@ -663,9 +663,10 @@ namespace Absyn {
     AliasVar_p(tvar_t, vardecl_t);  // alias <`r> T x
     Reference_p(vardecl_t,pat_t);// *x as p (*x when p is Wild_p)
     TagInt_p(tvar_t,vardecl_t);// i<`i> (unpack an int)
-    Tuple_p(list_t<pat_t>, bool dot_dot_dot); // $(p1,...,pn)
+    //Tuple_p(list_t<pat_t>, bool dot_dot_dot); // $(p1,...,pn)
     Pointer_p(pat_t); // &p
-    Aggr_p(aggr_info_t *,list_t<tvar_t>,list_t<$(list_t<designator_t>,pat_t)@>,
+    Aggr_p(type_opt_t,bool tuple,list_t<tvar_t>,
+           list_t<$(list_t<designator_t>,pat_t)@>,
            bool dot_dot_dot);
     Datatype_p(datatypedecl_t, datatypefield_t, list_t<pat_t>, bool dot_dot_dot);
     Null_p; // NULL
@@ -931,8 +932,11 @@ namespace Absyn {
     enum_type(typedef_name_t, struct Enumdecl *`H),
     anon_enum_type(list_t<enumfield_t,`H>),
     builtin_type(string_t<`H>, kind_t),
+    tuple_type(list_t<$(tqual_t,type_t)@`H,`H> tqts),
     typedef_type(typedef_name_t,list_t<type_t,`H>,struct Typedefdecl*`H ,type_opt_t);
 
+  // usefule for avoiding allocation/creation of a tuple field name
+  datatype Designator.FieldName @ tuple_field_designator(int i);
   // exception name and type
   extern qvar_t exn_name;
   datatypedecl_t exn_tud();

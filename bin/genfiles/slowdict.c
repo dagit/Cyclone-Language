@@ -61,7 +61,8 @@ struct _DynRegionFrame { //not used
 /* Reaps */
 struct _ReapPage
 #ifdef CYC_REGION_PROFILE
-{ unsigned total_bytes;
+{ unsigned direct_flag;
+  unsigned total_bytes;
   unsigned free_bytes;
   void *bget_page;
   struct _ReapPage *next;
@@ -77,8 +78,8 @@ struct _ReapHandle {
 #endif 
   struct _pool *released_ptrs;
   struct bget_region_key *bkey;
-  unsigned int id;
 #ifdef CYC_REGION_PROFILE
+  unsigned int id;
   const char         *name;
 #endif
 };
@@ -368,7 +369,8 @@ static inline void*_fast_region_malloc(struct _RegionHandle*r, _AliasQualHandle_
 //   return _region_malloc(r,aq,orig_s); 
 // }
 
-//migration to reaps
+//migration to reaps -- Remove this block to revert to regions 
+//... but the rufree etc. will not work
 #ifndef RUNTIME_CYC
 #define _new_region(n) _new_reap(n)
 #define _free_region(r) _free_reap(r)
@@ -474,12 +476,12 @@ struct Cyc_SlowDict_Dict*Cyc_SlowDict_insert_new(struct Cyc_SlowDict_Dict*d,void
 # 100
 if(Cyc_Splay_splay(d->reln,key,d->tree))
 _throw(& Cyc_SlowDict_Present_val);
-return Cyc_SlowDict_insert(d,key,data);}struct _tuple0{void*f1;void*f2;};
+return Cyc_SlowDict_insert(d,key,data);}struct _tuple0{void*f0;void*f1;};
 # 105
 struct Cyc_SlowDict_Dict*Cyc_SlowDict_inserts(struct Cyc_SlowDict_Dict*d,struct Cyc_List_List*kds){
 # 107
 for(1;kds!=0;kds=kds->tl){
-d=Cyc_SlowDict_insert(d,(*((struct _tuple0*)kds->hd)).f1,(*((struct _tuple0*)kds->hd)).f2);}
+d=Cyc_SlowDict_insert(d,(*((struct _tuple0*)kds->hd)).f0,(*((struct _tuple0*)kds->hd)).f1);}
 return d;}
 # 112
 struct Cyc_SlowDict_Dict*Cyc_SlowDict_singleton(int(*comp)(void*,void*),void*key,void*data){
@@ -637,10 +639,10 @@ return({struct Cyc_SlowDict_Dict*_Tmp0=_cycalloc(sizeof(struct Cyc_SlowDict_Dict
 struct _tuple0*Cyc_SlowDict_choose(struct Cyc_SlowDict_Dict*d){
 void*_Tmp0=d->tree;void*_Tmp1;if(*((int*)_Tmp0)==0)
 _throw(& Cyc_SlowDict_Absent_val);else{_Tmp1=((struct Cyc_Splay_Node_Splay_tree_struct*)_Tmp0)->f1;{struct Cyc_Splay_noderef*nr=_Tmp1;
-return({struct _tuple0*_Tmp2=_cycalloc(sizeof(struct _tuple0));_Tmp2->f1=nr->v->key,_Tmp2->f2=nr->v->data;_Tmp2;});}};}
+return({struct _tuple0*_Tmp2=_cycalloc(sizeof(struct _tuple0));_Tmp2->f0=nr->v->key,_Tmp2->f1=nr->v->data;_Tmp2;});}};}
 # 292
 struct Cyc_List_List*Cyc_SlowDict_to_list_f(void*k,void*v,struct Cyc_List_List*accum){
-return({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple0*_Tmp1=({struct _tuple0*_Tmp2=_cycalloc(sizeof(struct _tuple0));_Tmp2->f1=k,_Tmp2->f2=v;_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=accum;_Tmp0;});}
+return({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple0*_Tmp1=({struct _tuple0*_Tmp2=_cycalloc(sizeof(struct _tuple0));_Tmp2->f0=k,_Tmp2->f1=v;_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=accum;_Tmp0;});}
 # 296
 struct Cyc_List_List*Cyc_SlowDict_to_list(struct Cyc_SlowDict_Dict*d){
 return({(struct Cyc_List_List*(*)(struct Cyc_List_List*(*)(void*,void*,struct Cyc_List_List*),struct Cyc_SlowDict_Dict*,struct Cyc_List_List*))Cyc_SlowDict_fold;})(Cyc_SlowDict_to_list_f,d,0);}

@@ -1522,13 +1522,12 @@ static ctype_t gen_exp(bool takeaddress,cenv_t env, exp_t e) {
   case &Pragma_e(_): impos("Pragma_e");
   case &Swap_e(e1,e2): impos("Swap_e");
   case &New_e(...): impos("New_e");
-  case &Tuple_e(_): impos("Tuple_e");
   case &CompoundLit_e(_,_): impos("CompoundLit_e");
   case &Array_e(_): impos("Array_e");
   case &Comprehension_e(_,_,_,_): impos("Comprehension_e");
   case &ComprehensionNoinit_e(...): impos("ComprehensionNoinit_e");
   case &Aggregate_e(_,_,_,_): impos("Aggregate_e");
-  case &AnonStruct_e(_,_): impos("AnonStruct_e");
+  case &AnonStruct_e(...): impos("AnonStruct_e");
   case &Datatype_e(_,_,_): impos("Datatype_e");
   case &UnresolvedMem_e(_,_): impos("UnresolvedMem_e");
   case &StmtExp_e(s): impos("StmtExp_e");

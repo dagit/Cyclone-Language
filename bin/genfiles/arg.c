@@ -61,7 +61,8 @@ struct _DynRegionFrame { //not used
 /* Reaps */
 struct _ReapPage
 #ifdef CYC_REGION_PROFILE
-{ unsigned total_bytes;
+{ unsigned direct_flag;
+  unsigned total_bytes;
   unsigned free_bytes;
   void *bget_page;
   struct _ReapPage *next;
@@ -77,8 +78,8 @@ struct _ReapHandle {
 #endif 
   struct _pool *released_ptrs;
   struct bget_region_key *bkey;
-  unsigned int id;
 #ifdef CYC_REGION_PROFILE
+  unsigned int id;
   const char         *name;
 #endif
 };
@@ -368,7 +369,8 @@ static inline void*_fast_region_malloc(struct _RegionHandle*r, _AliasQualHandle_
 //   return _region_malloc(r,aq,orig_s); 
 // }
 
-//migration to reaps
+//migration to reaps -- Remove this block to revert to regions 
+//... but the rufree etc. will not work
 #ifndef RUNTIME_CYC
 #define _new_region(n) _new_reap(n)
 #define _free_region(r) _free_reap(r)
@@ -440,18 +442,18 @@ extern void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*,struct _fat_ptr,int,in
 # 92 "buffer.h"
 extern void Cyc_Buffer_add_string(struct Cyc_Buffer_t*,struct _fat_ptr);
 # 29 "assert.h"
-extern void*Cyc___assert_fail(struct _fat_ptr,struct _fat_ptr,unsigned);char Cyc_Arg_Bad[4U]="Bad";char Cyc_Arg_Error[6U]="Error";struct Cyc_Arg_Unknown_Arg_error_struct{int tag;struct _fat_ptr f1;};struct Cyc_Arg_Missing_Arg_error_struct{int tag;struct _fat_ptr f1;};struct Cyc_Arg_Message_Arg_error_struct{int tag;struct _fat_ptr f1;};struct Cyc_Arg_Wrong_Arg_error_struct{int tag;struct _fat_ptr f1;struct _fat_ptr f2;struct _fat_ptr f3;};struct _tuple0{struct _fat_ptr f1;int f2;struct _fat_ptr f3;void*f4;struct _fat_ptr f5;};
+extern void*Cyc___assert_fail(struct _fat_ptr,struct _fat_ptr,unsigned);char Cyc_Arg_Bad[4U]="Bad";char Cyc_Arg_Error[6U]="Error";struct Cyc_Arg_Unknown_Arg_error_struct{int tag;struct _fat_ptr f1;};struct Cyc_Arg_Missing_Arg_error_struct{int tag;struct _fat_ptr f1;};struct Cyc_Arg_Message_Arg_error_struct{int tag;struct _fat_ptr f1;};struct Cyc_Arg_Wrong_Arg_error_struct{int tag;struct _fat_ptr f1;struct _fat_ptr f2;struct _fat_ptr f3;};struct _tuple0{struct _fat_ptr f0;int f1;struct _fat_ptr f2;void*f3;struct _fat_ptr f4;};
 # 68 "arg.cyc"
 static void*Cyc_Arg_lookup(struct Cyc_List_List*l,struct _fat_ptr x){
 while(l!=0){
-struct _fat_ptr flag=(*((struct _tuple0*)l->hd)).f1;
+struct _fat_ptr flag=(*((struct _tuple0*)l->hd)).f0;
 unsigned long len=Cyc_strlen(flag);
-if(len > 0U &&(*((struct _tuple0*)l->hd)).f2){
-if(Cyc_strncmp(x,(*((struct _tuple0*)l->hd)).f1,len)==0)
-return(*((struct _tuple0*)l->hd)).f4;}else{
+if(len > 0U &&(*((struct _tuple0*)l->hd)).f1){
+if(Cyc_strncmp(x,(*((struct _tuple0*)l->hd)).f0,len)==0)
+return(*((struct _tuple0*)l->hd)).f3;}else{
 # 76
-if(Cyc_strcmp(x,(*((struct _tuple0*)l->hd)).f1)==0)
-return(*((struct _tuple0*)l->hd)).f4;}
+if(Cyc_strcmp(x,(*((struct _tuple0*)l->hd)).f0)==0)
+return(*((struct _tuple0*)l->hd)).f3;}
 l=l->tl;}
 # 80
 _throw((void*)({struct Cyc_Core_Not_found_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Not_found_exn_struct));_Tmp0->tag=Cyc_Core_Not_found;_Tmp0;}));}
@@ -521,9 +523,9 @@ void Cyc_Arg_usage(struct Cyc_List_List*speclist,struct _fat_ptr errmsg){
 struct Cyc_Buffer_t*b=Cyc_Buffer_create(1024U);
 while(speclist!=0){
 ({struct Cyc_Buffer_t*_Tmp0=b;struct _fat_ptr _Tmp1=(struct _fat_ptr)
-Cyc_strconcat((struct _fat_ptr)(*((struct _tuple0*)speclist->hd)).f1,(struct _fat_ptr)(*((struct _tuple0*)speclist->hd)).f3);
+Cyc_strconcat((struct _fat_ptr)(*((struct _tuple0*)speclist->hd)).f0,(struct _fat_ptr)(*((struct _tuple0*)speclist->hd)).f2);
 # 169
-Cyc_Arg_Justify_justify_b(_Tmp0,12,72,_Tmp1,(*((struct _tuple0*)speclist->hd)).f5);});
+Cyc_Arg_Justify_justify_b(_Tmp0,12,72,_Tmp1,(*((struct _tuple0*)speclist->hd)).f4);});
 # 172
 speclist=speclist->tl;}
 # 174

@@ -71,7 +71,6 @@ typedef datatype PatTest@ pat_test_t;
 extern datatype Access {
   Dummy;  // used to deal with the dummy tuple we create for handling where clauses
   Deref;
-  TupleField(unsigned);
   DatatypeField(datatypedecl_t, datatypefield_t, unsigned);
   AggrField(bool tagged, stringptr_t);
 };

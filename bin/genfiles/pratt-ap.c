@@ -61,7 +61,8 @@ struct _DynRegionFrame { //not used
 /* Reaps */
 struct _ReapPage
 #ifdef CYC_REGION_PROFILE
-{ unsigned total_bytes;
+{ unsigned direct_flag;
+  unsigned total_bytes;
   unsigned free_bytes;
   void *bget_page;
   struct _ReapPage *next;
@@ -77,8 +78,8 @@ struct _ReapHandle {
 #endif 
   struct _pool *released_ptrs;
   struct bget_region_key *bkey;
-  unsigned int id;
 #ifdef CYC_REGION_PROFILE
+  unsigned int id;
   const char         *name;
 #endif
 };
@@ -368,7 +369,8 @@ static inline void*_fast_region_malloc(struct _RegionHandle*r, _AliasQualHandle_
 //   return _region_malloc(r,aq,orig_s); 
 // }
 
-//migration to reaps
+//migration to reaps -- Remove this block to revert to regions 
+//... but the rufree etc. will not work
 #ifndef RUNTIME_CYC
 #define _new_region(n) _new_reap(n)
 #define _free_region(r) _free_reap(r)
@@ -414,7 +416,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif
  struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 178 "list.h"
-extern struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*);struct _union_Nmspace_Rel_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_Abs_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_C_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_Loc_n{int tag;int val;};union Cyc_Absyn_Nmspace{struct _union_Nmspace_Rel_n Rel_n;struct _union_Nmspace_Abs_n Abs_n;struct _union_Nmspace_C_n C_n;struct _union_Nmspace_Loc_n Loc_n;};struct _tuple0{union Cyc_Absyn_Nmspace f1;struct _fat_ptr*f2;};
+extern struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*);struct _union_Nmspace_Rel_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_Abs_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_C_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_Loc_n{int tag;int val;};union Cyc_Absyn_Nmspace{struct _union_Nmspace_Rel_n Rel_n;struct _union_Nmspace_Abs_n Abs_n;struct _union_Nmspace_C_n C_n;struct _union_Nmspace_Loc_n Loc_n;};struct _tuple0{union Cyc_Absyn_Nmspace f0;struct _fat_ptr*f1;};
 # 135 "absyn.h"
 enum Cyc_Absyn_Scope{Cyc_Absyn_Static =0U,Cyc_Absyn_Abstract =1U,Cyc_Absyn_Public =2U,Cyc_Absyn_Extern =3U,Cyc_Absyn_ExternC =4U,Cyc_Absyn_Register =5U};struct Cyc_Absyn_Tqual{int print_const: 1;int q_volatile: 1;int q_restrict: 1;int real_const: 1;unsigned loc;};struct Cyc_Absyn_Exp{void*topt;void*r;unsigned loc;void*annot;};struct Cyc_Absyn_Vardecl{enum Cyc_Absyn_Scope sc;struct _tuple0*name;unsigned varloc;struct Cyc_Absyn_Tqual tq;void*type;struct Cyc_Absyn_Exp*initializer;void*rgn;struct Cyc_List_List*attributes;int escapes;int is_proto;};
 # 29 "unify.h"
@@ -450,30 +452,30 @@ union Cyc_Pratt_Node Cyc_Pratt_NNumelts(struct Cyc_Absyn_Vardecl*vd){return({uni
 union Cyc_Pratt_Node Cyc_Pratt_NType(void*t){return({union Cyc_Pratt_Node _Tmp0;_Tmp0.NType.tag=4U,_Tmp0.NType.val=t;_Tmp0;});}
 union Cyc_Pratt_Node Cyc_Pratt_NParam(unsigned i){return({union Cyc_Pratt_Node _Tmp0;_Tmp0.NParam.tag=5U,_Tmp0.NParam.val=i;_Tmp0;});}
 union Cyc_Pratt_Node Cyc_Pratt_NParamNumelts(unsigned i){return({union Cyc_Pratt_Node _Tmp0;_Tmp0.NParamNumelts.tag=6U,_Tmp0.NParamNumelts.val=i;_Tmp0;});}
-union Cyc_Pratt_Node Cyc_Pratt_NReturn (void){return({union Cyc_Pratt_Node _Tmp0;_Tmp0.NReturn.tag=7U,_Tmp0.NReturn.val=0;_Tmp0;});}struct _tuple12{union Cyc_Pratt_Node f1;union Cyc_Pratt_Node f2;};
+union Cyc_Pratt_Node Cyc_Pratt_NReturn (void){return({union Cyc_Pratt_Node _Tmp0;_Tmp0.NReturn.tag=7U,_Tmp0.NReturn.val=0;_Tmp0;});}struct _tuple12{union Cyc_Pratt_Node f0;union Cyc_Pratt_Node f1;};
 # 93
 static int Cyc_Pratt_cmp_node(union Cyc_Pratt_Node n1,union Cyc_Pratt_Node n2){
-struct _tuple12 _Tmp0=({struct _tuple12 _Tmp1;_Tmp1.f1=n1,_Tmp1.f2=n2;_Tmp1;});unsigned _Tmp1;unsigned _Tmp2;void*_Tmp3;void*_Tmp4;if(_Tmp0.f1.NZero.tag==1){if(_Tmp0.f2.NZero.tag==1)
+struct _tuple12 _Tmp0=({struct _tuple12 _Tmp1;_Tmp1.f0=n1,_Tmp1.f1=n2;_Tmp1;});unsigned _Tmp1;unsigned _Tmp2;void*_Tmp3;void*_Tmp4;if(_Tmp0.f0.NZero.tag==1){if(_Tmp0.f1.NZero.tag==1)
 return 0;else{
-return -1;}}else{if(_Tmp0.f2.NZero.tag==1)
-return 1;else{if(_Tmp0.f1.NReturn.tag==7){if(_Tmp0.f2.NReturn.tag==7)
+return -1;}}else{if(_Tmp0.f1.NZero.tag==1)
+return 1;else{if(_Tmp0.f0.NReturn.tag==7){if(_Tmp0.f1.NReturn.tag==7)
 return 0;else{
-return -1;}}else{if(_Tmp0.f2.NReturn.tag==7)
-return 1;else{if(_Tmp0.f1.NVar.tag==2){if(_Tmp0.f2.NVar.tag==2){_Tmp4=_Tmp0.f1.NVar.val;_Tmp3=_Tmp0.f2.NVar.val;{struct Cyc_Absyn_Vardecl*x=_Tmp4;struct Cyc_Absyn_Vardecl*y=_Tmp3;
+return -1;}}else{if(_Tmp0.f1.NReturn.tag==7)
+return 1;else{if(_Tmp0.f0.NVar.tag==2){if(_Tmp0.f1.NVar.tag==2){_Tmp4=_Tmp0.f0.NVar.val;_Tmp3=_Tmp0.f1.NVar.val;{struct Cyc_Absyn_Vardecl*x=_Tmp4;struct Cyc_Absyn_Vardecl*y=_Tmp3;
 return(int)x - (int)y;}}else{
-return -1;}}else{if(_Tmp0.f2.NVar.tag==2)
-return 1;else{if(_Tmp0.f1.NNumelts.tag==3){if(_Tmp0.f2.NNumelts.tag==3){_Tmp4=_Tmp0.f1.NNumelts.val;_Tmp3=_Tmp0.f2.NNumelts.val;{struct Cyc_Absyn_Vardecl*x=_Tmp4;struct Cyc_Absyn_Vardecl*y=_Tmp3;
-return(int)x - (int)y;}}else{_Tmp4=_Tmp0.f1.NNumelts.val;{struct Cyc_Absyn_Vardecl*x=_Tmp4;
-return -1;}}}else{if(_Tmp0.f2.NNumelts.tag==3){_Tmp4=_Tmp0.f2.NNumelts.val;{struct Cyc_Absyn_Vardecl*y=_Tmp4;
-return 1;}}else{if(_Tmp0.f1.NType.tag==4){if(_Tmp0.f2.NType.tag==4){_Tmp4=_Tmp0.f1.NType.val;_Tmp3=_Tmp0.f2.NType.val;{void*x=_Tmp4;void*y=_Tmp3;
+return -1;}}else{if(_Tmp0.f1.NVar.tag==2)
+return 1;else{if(_Tmp0.f0.NNumelts.tag==3){if(_Tmp0.f1.NNumelts.tag==3){_Tmp4=_Tmp0.f0.NNumelts.val;_Tmp3=_Tmp0.f1.NNumelts.val;{struct Cyc_Absyn_Vardecl*x=_Tmp4;struct Cyc_Absyn_Vardecl*y=_Tmp3;
+return(int)x - (int)y;}}else{_Tmp4=_Tmp0.f0.NNumelts.val;{struct Cyc_Absyn_Vardecl*x=_Tmp4;
+return -1;}}}else{if(_Tmp0.f1.NNumelts.tag==3){_Tmp4=_Tmp0.f1.NNumelts.val;{struct Cyc_Absyn_Vardecl*y=_Tmp4;
+return 1;}}else{if(_Tmp0.f0.NType.tag==4){if(_Tmp0.f1.NType.tag==4){_Tmp4=_Tmp0.f0.NType.val;_Tmp3=_Tmp0.f1.NType.val;{void*x=_Tmp4;void*y=_Tmp3;
 # 108
 if(Cyc_Unify_unify(x,y))return 0;
 return Cyc_Tcutil_typecmp(x,y);}}else{
-return -1;}}else{if(_Tmp0.f2.NType.tag==4)
-return 1;else{if(_Tmp0.f1.NParam.tag==5){if(_Tmp0.f2.NParam.tag==5){_Tmp2=_Tmp0.f1.NParam.val;_Tmp1=_Tmp0.f2.NParam.val;{unsigned i=_Tmp2;unsigned j=_Tmp1;
-return(int)i - (int)j;}}else{_Tmp2=_Tmp0.f1.NParam.val;{unsigned i=_Tmp2;
-return -1;}}}else{if(_Tmp0.f2.NParam.tag==5){_Tmp2=_Tmp0.f2.NParam.val;{unsigned j=_Tmp2;
-return 1;}}else{_Tmp2=_Tmp0.f1.NParamNumelts.val;_Tmp1=_Tmp0.f2.NParamNumelts.val;{unsigned i=_Tmp2;unsigned j=_Tmp1;
+return -1;}}else{if(_Tmp0.f1.NType.tag==4)
+return 1;else{if(_Tmp0.f0.NParam.tag==5){if(_Tmp0.f1.NParam.tag==5){_Tmp2=_Tmp0.f0.NParam.val;_Tmp1=_Tmp0.f1.NParam.val;{unsigned i=_Tmp2;unsigned j=_Tmp1;
+return(int)i - (int)j;}}else{_Tmp2=_Tmp0.f0.NParam.val;{unsigned i=_Tmp2;
+return -1;}}}else{if(_Tmp0.f1.NParam.tag==5){_Tmp2=_Tmp0.f1.NParam.val;{unsigned j=_Tmp2;
+return 1;}}else{_Tmp2=_Tmp0.f0.NParamNumelts.val;_Tmp1=_Tmp0.f1.NParamNumelts.val;{unsigned i=_Tmp2;unsigned j=_Tmp1;
 return(int)i - (int)j;}}}}}}}}}}}}};}
 # 119
 struct _fat_ptr Cyc_Pratt_node2string(union Cyc_Pratt_Node n){

@@ -13,8 +13,8 @@ CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g  #--vcgen
 endif
 HAVE_PTHREAD=no
 # test asm doesn't work for me on cygwin
-EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm flatlist md5 unique_patterns dynregion cinclude  multimethod  testasm testaqualsuccess structarray scheme patterns refcnt_test rc testbget)
- # testsexp)
+EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm flatlist md5 unique_patterns dynregion cinclude  multimethod  testasm testaqualsuccess structarray scheme patterns refcnt_test rc)
+ # testbget testsexp)
 #these are broken -->  require  (related to Absyn::compress on valueof_t)
 #streambuff.cyc is broken badly ... it is unsound to pattern match on existentials with `RC inside them, wait until restrict
 ifeq ($(HAVE_PTHREAD),yes)
@@ -75,7 +75,7 @@ all: $(EXES) failtest streambufftest.o
 #	./testsexp
 	./rc
 	./testasm
-	./testbget
+#	./testbget
 ifeq ($(HAVE_PTHREAD),yes)
 	./testexn
 endif

@@ -26,6 +26,7 @@
 #include <string.h>
 #include <hashtable.h>
 #include "evexp.h"
+#include <xarray.h>
 using Core;
 using List;
 namespace Absyn;
@@ -691,8 +692,35 @@ exp_t aggrarrow_exp(exp_t e, field_name_t n, seg_t loc) {
 exp_t subscript_exp(exp_t e1, exp_t e2, seg_t loc) {
   return new_exp(new Subscript_e(e1,e2), loc); 
 }
+datatype Designator.FieldName @ tuple_field_designator(int i) {
+  static struct Xarray::Xarray<datatype Designator.FieldName @> *x = NULL;
+  if (x == NULL) x = Xarray::create_empty();
+  while (i >= Xarray::length((Xarray::xarray_t)x)) {
+    string_t s = aprintf("f%d",i);
+    var_t n = new s;
+    Xarray::add_ind((Xarray::xarray_t)x, new FieldName(n));
+  }
+  return Xarray::get((Xarray::xarray_t)x, i);
+}
 exp_t tuple_exp(list_t<exp_t,`H> es, seg_t loc) {
-  return new_exp(new Tuple_e(es), loc); 
+  list_t<$(list_t<designator_t>,exp_t)@> dles = NULL;
+  for (unsigned i = 0; es != NULL; es = es->tl, ++i) {
+    let dle = new $(new List{(designator_t)tuple_field_designator(i),NULL},
+                    es->hd);
+    dles = new List{dle,dles};
+  }
+  dles = List::imp_rev(dles);
+  return new_exp(new AnonStruct_e(NULL,true,dles),loc);
+}
+type_t tuple_type(list_t<$(tqual_t,type_t)@`H,`H> tqts) {
+  list_t<aggrfield_t> fs = NULL;
+  for (int i = 0; tqts != NULL; tqts=tqts->tl, ++i) {
+    let &$(tq,t) = tqts->hd;
+    let &FieldName(n) = tuple_field_designator(i);
+    let af = new Aggrfield{n,tq,t,NULL,NULL,NULL};
+    fs = new List{af,fs};
+  }
+  return new AnonAggrType(StructA,true,List::imp_rev(fs));
 }
 exp_t stmt_exp(stmt_t s,seg_t loc) { 
   return new_exp(new StmtExp_e(s), loc); 
@@ -1018,7 +1046,7 @@ aggrdecl_t get_known_aggrdecl(union AggrInfo info) {
 }
 bool is_nontagged_nonrequire_union_type(type_t t) {
   switch(compress(t)) {
-  case &AnonAggrType(UnionA,fs):     
+  case &AnonAggrType(UnionA,_,fs):     
     return fs == NULL || fs->hd->requires_clause == NULL;
   case &AppType(&AggrCon(info),_):
     switch (info) {
@@ -1036,7 +1064,7 @@ bool is_nontagged_nonrequire_union_type(type_t t) {
 }
 bool is_require_union_type(type_t t) {
   switch(compress(t)) {
-  case &AnonAggrType(UnionA,fs):
+  case &AnonAggrType(UnionA,_,fs):
     return fs != NULL && fs->hd->requires_clause != NULL;
   case &AppType(&AggrCon(info),_):
     switch (info) {
@@ -1134,12 +1162,11 @@ void visit_exp(bool (@f1)(`a,exp_t), bool (@f2)(`a,stmt_t), `a env, exp_t e) {
   case &CompoundLit_e(_, ldt):   fallthru(ldt);
   case &UnresolvedMem_e(_, ldt): fallthru(ldt);
   case &Aggregate_e(_,_,ldt,_):  fallthru(ldt);
-  case &AnonStruct_e(_, ldt):
+  case &AnonStruct_e(_, _, ldt):
     for(; ldt != NULL; ldt = ldt->tl)
       visit_exp(f1,f2,env,(*ldt->hd)[1]);
     break;
 
-  case &Tuple_e(lexp):    fallthru(lexp);
   case &Primop_e(_,lexp): fallthru(lexp);
   case &Datatype_e(lexp,_,_):
     for(; lexp!=NULL; lexp=lexp->tl)

@@ -80,7 +80,7 @@ unsigned onum_elts(ofsptr_t<`a,`r> p) {
   // must use pattern matching to destructure existential, locally
   // binding the type variable `j to the size of the array.
   let &OfsPtr{.ofs = x, .ptr={<`j> .size = s, .elts = e}} = p; 
-  let ptr = Core::mkfat(e,sizeof(`a),s);
+  `a ?ptr = Core::mkfat(e,sizeof(`a),s);
   // note that e has type `a @{valueof(`j)}
   ptr += (x+offset);
   return *ptr;

@@ -314,7 +314,7 @@ static void check_union_requires(seg_t loc, type_t t, field_name_t f, flow_t inf
         }
       }
       break;
-    case &AnonAggrType(_,fs):
+    case &AnonAggrType(_,_,fs):
       let field = lookup_field(fs,f);
       let req = field->requires_clause;
       if (req != NULL) {
@@ -353,16 +353,19 @@ static void check_nounique(analenv_t env, seg_t loc, type_t t, absRval_t r) {
   case $(_,&Zero): return;
   case $(_,&Consumed(...)): return;
   case $(_,&NamedLocation(_,r)): check_nounique(env,loc,t,r); return;
-  case $(&AppType(&DatatypeFieldCon({.KnownDatatypefield=$(_,tuf)}),_),&Aggregate(_,ad)):
+  case $(&AppType(&DatatypeFieldCon({.KnownDatatypefield=$(tud,tuf)}),targs),&Aggregate(_,ad)):
     if(tuf->typs == NULL)
       return;
-    fallthru(tuf->typs,ad);
-  case $(&TupleType(tqts),&Aggregate(_,ad)):
-    unsigned sz = List::length(tqts);
-    for (int i = 0; i < sz; i++, tqts = tqts->tl) {
-      check_nounique(env,loc,(*tqts->hd)[1],ad[i]);
+    region temp;
+    let inst = List::rzip(temp,temp,tud->tvs,targs);
+    let fs = tuf->typs;
+    for (int i = 0; i < numelts(ad); i++, fs = fs->tl) {
+      let &$(_,t) = fs->hd;
+      if (inst != NULL) t = Tcutil::rsubstitute(temp,inst,t);
+      check_nounique(env,loc,t,ad[i]);
     }
     return;
+
   case $(&AppType(&AggrCon(info),targs),&Aggregate(_,d)):
     // fix -- not right for unions?
     let ad = get_known_aggrdecl(info);
@@ -376,7 +379,7 @@ static void check_nounique(analenv_t env, seg_t loc, type_t t, absRval_t r) {
       check_nounique(env,loc,t,d[i]);
     }
     return;
-  case $(&AnonAggrType(k,fs),&Aggregate(_,d)):
+  case $(&AnonAggrType(k,_,fs),&Aggregate(_,d)):
     // fix -- not right for unions?
     for (int i = 0; i < numelts(d); i++, fs = fs->tl)
       check_nounique(env,loc,fs->hd->type,d[i]);
@@ -860,13 +863,10 @@ static bool is_local_var_rooted_path(Absyn::exp_t e, bool cast_ok) {
   case &AggrArrow_e(e,...):
     return is_local_var_rooted_path(e,cast_ok);
   case &Subscript_e(e,...):
-    switch (compress((type_t)e->topt)) {
-    case &TupleType(...): return is_local_var_rooted_path(e,cast_ok);
-    default: return false;
-    }
-    case &Cast_e(_,e,...):
-      if (cast_ok) return is_local_var_rooted_path(e,cast_ok);
-      else return false;
+    return false;
+  case &Cast_e(_,e,...):
+    if (cast_ok) return is_local_var_rooted_path(e,cast_ok);
+    else return false;
   default: return false;
   }
 }
@@ -1538,47 +1538,32 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
       break;
     default: break;
     }
-    switch(compress((type_t)e1->topt)) {
-    case &TupleType(tqts):
-      let $(r,_) = unname_rval(rvals->hd);
-      switch(r) {
-      case &Aggregate(_,rdict):
-	unsigned int i = Evexp::eval_const_uint_exp(e2)[0];
-	return $(f2,rdict[i]);
-      default: Warn::impos("anal_Rexp: Subscript");
-      }
-    case &PointerType(...):
-      let $(f3,r) = anal_derefR(env,inflow,f,e1,rvals->hd,e2);
-      switch (f3) {
-      case {.BottomFL = _}: return $(f3,r);
-      default: return $(f2,r);
-      }
-    default: Warn::impos("anal_Rexp: Subscript -- bad type");
+    let $(f3,r) = anal_derefR(env,inflow,f,e1,rvals->hd,e2);
+    switch (f3) {
+    case {.BottomFL = _}: return $(f3,r);
+    default: return $(f2,r);
     }
 
  case &Datatype_e(es,tud,_): // NULL case handled above
-   fallthru(es);
- case &Tuple_e(es):
-      let $(f,rvals) = anal_Rexps(env,inflow,es,true,true);
-      aggrdict_t aggrdict =
-        new {for i < List::length(es) :
-	     ({ let temp = rvals->hd;
-	     rvals = rvals->tl;
-	     temp; })};
+   let $(f,rvals) = anal_Rexps(env,inflow,es,true,true);
+   aggrdict_t aggrdict =
+     new {for i < List::length(es) :
+          ({ let temp = rvals->hd;
+          rvals = rvals->tl;
+          temp; })};
+   return $(f, new Aggregate(UnionRInfo(false,-1),aggrdict));
 
-      return $(f, new Aggregate(UnionRInfo(false,-1),aggrdict));
-
- case &AnonStruct_e(_,des):
+ case &AnonStruct_e(_,_,des):
    list_t<Absyn::aggrfield_t> fs;
    switch (compress((type_t)e->topt)) {
-   case &AnonAggrType(_,f): fs = f; break;
+   case &AnonAggrType(_,_,f): fs = f; break;
    default: Warn::impos("anal_Rexp:anon struct has bad type");
    }
    fallthru(des,StructA,fs);
  case &Aggregate_e(_,_,des,&Aggrdecl{.kind = kind, .impl = &AggrdeclImpl{.fields=fs,...},...}):
    type_t exp_type = (type_t)e->topt;
    let $(f,rvals) = anal_Rexps(env,inflow,map(Core::snd,des),true,true);
-   aggrdict_t aggrdict =
+   aggrdict_t aggrdict = 
      aggrfields_to_aggrdict(fenv,fs,kind==UnionA,fenv->unknown_all);
 
    int field_no = -1;
@@ -1920,32 +1905,23 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
     DEBUG_PRINT("DONE Analyzing rexp for lexp deref |%s|\n",exp2string(e1));
     return anal_derefL(env,inflow,e1,f,r,passthrough_consumes,false,path);
   case &Subscript_e(e1,e2):
-    // assumes that tuple-projection implies e2 is pure and is evaluable
-    switch(compress((type_t)e1->topt)) {
-    case &TupleType(_):
-      let fld = Evexp::eval_const_uint_exp(e2)[0];
-      return anal_Lexp_rec(env,inflow,expand_unique,passthrough_consumes,e1,
-			   new List(new Dot(fld),path));
-    case &PointerType(...):
-      let $(f,rvals) = anal_Rexps(env,inflow,list(e1,e2),false,true);
-      let f2 = f;
-      switch(f) {
-      case {.ReachableFL = $(d2,relns)}:
-	if(initlevel(fenv,d2,rvals->tl->hd)==NoneIL)
-	  aerr(e2->loc, "expression may not be initialized");
-	let new_relns = add_subscript_reln(relns,e1,e2);
-	if (relns != new_relns)
-	  f2 = ReachableFL(d2,new_relns);
-	break;
-      default: break;
-      }
-      // FIX: expand unique place when the subscript bound is one?
-      let $(f3,r) = anal_derefL(env,inflow,e1,f,rvals->hd,passthrough_consumes,false,path);
-      switch (f3) {
-      case {.BottomFL = _}: return $(f3,r);
-      default: return $(f2,r);
-      }
-    default: Warn::impos("anal_Lexp: Subscript -- bad type");
+    let $(f,rvals) = anal_Rexps(env,inflow,list(e1,e2),false,true);
+    let f2 = f;
+    switch(f) {
+    case {.ReachableFL = $(d2,relns)}:
+      if(initlevel(fenv,d2,rvals->tl->hd)==NoneIL)
+        aerr(e2->loc, "expression may not be initialized");
+      let new_relns = add_subscript_reln(relns,e1,e2);
+      if (relns != new_relns)
+        f2 = ReachableFL(d2,new_relns);
+      break;
+    default: break;
+    }
+    // FIX: expand unique place when the subscript bound is one?
+    let $(f3,r) = anal_derefL(env,inflow,e1,f,rvals->hd,passthrough_consumes,false,path);
+    switch (f3) {
+    case {.BottomFL = _}: return $(f3,r);
+    default: return $(f2,r);
     }
     // KLUDGE: unions (see comment at top of file)
   case &AggrMember_e(e1,fld,...):

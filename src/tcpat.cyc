@@ -46,45 +46,67 @@ namespace Tcpat;
 static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
   switch(p->r) {
 
-  case &Aggr_p(NULL, exist_ts, dps, dots): 
-    // DJG: this case remains because binding does not have topt
-    //      I think it's primarily used for tagged unions (not datatypes)
-    if (topt == NULL) 
-      Warn::err2(p->loc, "cannot determine pattern type");
-    else 
-      switch (compress(*topt)) {
-      case &AppType(&AggrCon(ainfo),_):
-	p->r = new Aggr_p(new ainfo, exist_ts, dps, dots);
+  case &Aggr_p(NULL, is_tuple, exist_ts, dps, dots): 
+    if (topt == NULL) {
+      if (is_tuple && !dots) {
+        list_t<aggrfield_t> fields = NULL;
+        unsigned int n = List::length(dps);
+        for (int i = 0; i < n; ++i) {
+          let &FieldName(n) = tuple_field_designator(i);
+          let f = new Aggrfield{n,empty_tqual(0),new_evar(&Kinds::mko,lookup_opt_type_vars(te)),NULL,NULL,NULL};
+          fields = new List{f,fields};
+        }
+        fields = List::imp_rev(fields);
+        type_t t = new AnonAggrType(StructA,is_tuple,fields);
+        p->r = new Aggr_p(t, is_tuple, exist_ts, dps, dots);
+      } else 
+        Warn::err2(p->loc, "cannot determine pattern type");
+    } else {
+      let type = compress(*topt);
+      switch (type) {
+      case &AppType(&AggrCon(_),_):
+	p->r = new Aggr_p(type, is_tuple, exist_ts, dps, dots);
 	resolve_pat(te, topt, p); 
 	break;
+      case &AnonAggrType(...):
+        p->r = new Aggr_p(type, is_tuple, exist_ts, dps, dots);
+        resolve_pat(te, topt, p);
+        break;
       default:
 	Warn::err2(p->loc,"pattern expects aggregate type instead of ",*topt);
 	break;
       }
+    }
     return;
     
-  case &Aggr_p(&{.KnownAggr= adp}, *exist_ts, dps, dots):
-    let ad = *adp;
-    if(ad->impl==NULL) {
-      Warn::err2(p->loc, "can't destructure an abstract",ad);
-      p->r = &Wild_p_val;
+  case &Aggr_p(topt, is_tuple, *exist_ts, dps, dots):
+    switch (compress((type_t)topt)) {
+    case &AppType(&AggrCon(AggrInfo{.KnownAggr = adp}),_):
+      let ad = *adp;
+      if(ad->impl==NULL) {
+        Warn::err2(p->loc, "can't destructure an abstract",ad);
+        p->r = &Wild_p_val;
+        return;
+      }
+      int more_exists = length(ad->impl->exist_vars) - length(*exist_ts);
+      if(more_exists < 0) {
+        Warn::err2(p->loc, "too many existential type variables in pattern");
+        let ts = exist_ts;
+        for (int n = length(ad->impl->exist_vars); n != 0; n--)
+          ts = &(*ts)->tl;
+        *ts = NULL;
+      } else if (more_exists > 0) {
+        // add missing type variables for user here
+        let new_ts = NULL;
+        for (; more_exists != 0; more_exists--) 
+          new_ts = new List(new_tvar(new Unknown_kb(NULL)),new_ts);
+        *exist_ts = List::imp_append(*exist_ts,new_ts);
+      }
       return;
+    case &AnonAggrType(...):
+      return;
+    default: Warn::impos2("resolve_pat unknown aggrtype ", (type_t)topt);
     }
-    int more_exists = length(ad->impl->exist_vars) - length(*exist_ts);
-    if(more_exists < 0) {
-      Warn::err2(p->loc, "too many existential type variables in pattern");
-      let ts = exist_ts;
-      for (int n = length(ad->impl->exist_vars); n != 0; n--)
-	ts = &(*ts)->tl;
-      *ts = NULL;
-    } else if (more_exists > 0) {
-      // add missing type variables for user here
-      let new_ts = NULL;
-      for (; more_exists != 0; more_exists--) 
-	new_ts = new List(new_tvar(new Unknown_kb(NULL)),new_ts);
-      *exist_ts = List::imp_append(*exist_ts,new_ts);
-    }
-    return;
   case &Exp_p(e):
     Tcexp::tcExp(te,NULL,e);
     if (!is_const_exp(e)) {
@@ -103,7 +125,6 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
 
   case &UnknownId_p(...):   Warn::impos2("resolve_pat UnknownId_p");
   case &UnknownCall_p(...): Warn::impos2("resolve_pat UnknownCall_p");
-  case &Aggr_p(...):        Warn::impos2("resolve_pat unknownAggr");
 
   default: return;
   }
@@ -353,119 +374,89 @@ DONT_PROMOTE:
     if (new_access_exp) new_access_exp->topt = p2->topt;
     break;
 
-  case &Tuple_p(*ps_p,dots):
-    let ps = *ps_p;
-    list_t<$(tqual_t,type_t)@> pat_ts  = NULL;
-    list_t<$(tqual_t,type_t)@> topt_ts = NULL;
-    if(topt != NULL)
-      switch(compress(*topt)) {
-      case &TupleType(tqts): 
-        topt_ts = tqts; 
-	if(dots) {
-	  *ps_p = remove_dots(ps,length(ps),length(tqts),wild_pat,p->loc,
-			      "tuple");
-	  ps = *ps_p;
-	}
-        break;
-      default: break;
-      }
-    else if (dots)
-      Warn::err2(p->loc,"cannot determine missing fields for ... in tuple pattern");
-    for(int i = 0; ps != NULL; ps=ps->tl, i++) {
-      let inner_topt = NULL;
-      if(topt_ts != NULL) {
-	inner_topt = &(*topt_ts->hd)[1];
-	topt_ts    = topt_ts->tl;
-      }
-      exp_opt_t new_access_exp = NULL;
-      if (access_exp)
-	new_access_exp=subscript_exp(access_exp,
-				     const_exp(Cnst{.Int_c=$(Unsigned,i)},
-					       DL),DL);
-      res = combine_results(res,tcPatRec(te,ps->hd,inner_topt,
-					 rgn_pat,allow_ref_pat,
-					 new_access_exp));
-      if (new_access_exp) new_access_exp->topt = ps->hd->topt;
-      pat_ts = new List(new $(empty_tqual(0),(type_t)ps->hd->topt),pat_ts);
-    }
-    t = new TupleType(List::imp_rev(pat_ts));
-    break;
-
-  case &Aggr_p(&{.KnownAggr = &ad},exist_ts,*dps_p,dots):
+  case &Aggr_p(atype,is_tuple,exist_ts,*dps_p,dots):
     let dps = *dps_p;
-    if(ad->impl==NULL) {
-      Warn::err2(p->loc,"can't destructure abstract ",ad);
-      t = wildtyp(lookup_opt_type_vars(te));
+    if (atype == NULL) {
+      // error has already been issued
+      t = wildtyp(lookup_opt_type_vars(te)); 
       break;
     }
-    // don't allow reference patterns for existentials or tagged unions --
-    // see Dan's ESOP paper
-    if (ad->kind == UnionA && ad->impl->tagged)
-      allow_ref_pat = false;
-    if (exist_ts != NULL) {
-      // we can allow a reference as long as the whole structure is abstract;
-      // this is because there's no way to alter the structure and thus
-      // violate the assumption of the open existential
-      if (topt == NULL || type_kind(*topt) != &Kinds::ak)
-        allow_ref_pat = false;
-    }
-    { region rgn;
-      // constrain type variables to have at least the kind they were abstracted over
-      let var_tvs = NULL;
-      list_t<$(type_t,type_t)@> outlives_constraints = NULL;
-      let u = ad->impl->exist_vars;
-      for (_ t = exist_ts ; t != NULL; t = t->tl) {
-	tvar_t tv = t->hd;
-	tvar_t uv = u->hd;
-	u = u->tl;
-	let kb1 = Kinds::compress_kb(tv->kind);
-	let kb2 = Kinds::compress_kb(uv->kind);
-	kind_t k2;
-	switch(kb2) {
-	case &Less_kb(_,k): fallthru(k);
-	case &Eq_kb(k): k2 = k; break;
-	default: Warn::impos2("unconstrained existential tyvar in aggregate");
-	}
-	switch (kb1) {
-	  // ensure that kind of quantified var <:: kind of pattern var
-	case &Eq_kb(k1): 
-	  if(!Kinds::kind_leq(k2,k1)) 
-	    Warn::err2(p->loc,"type variable ",tv," has kind ",kb1,
-		       " but must have at least kind ",k2);
-	  break;
-	case &Less_kb(*f,k): fallthru(f);
-	case &Unknown_kb(*f): *f = new Opt(kb2); break;
-	}
-	type_t vartype = new VarType(tv);
-	var_tvs = rnew(rgn) List(vartype,var_tvs);
-	// if unpacking a region var, must add it to the po
-	// FIX: allow adding existentials of TR kind?
-	if(k2->kind == RgnKind) {
-/* 	  if (k2->aliasqual != Aliasable) */
-/* 	    Warn::impos2("opened existential had unique or top region kind"); */
-	  outlives_constraints =
-	    new List(new $(empty_effect,vartype),outlives_constraints);
-	}
+    t = (type_t)atype;
+    switch (compress(t)) {
+    case &AppType(&AggrCon(ainfo as {.KnownAggr = &ad}),_):
+      if(ad->impl==NULL) {
+        Warn::err2(p->loc,"can't destructure abstract ",ad);
+        t = wildtyp(lookup_opt_type_vars(te));
+        break;
       }
+      // don't allow reference patterns for existentials or tagged unions --
+      // see Dan's ESOP paper
+      if (ad->kind == UnionA && ad->impl->tagged)
+        allow_ref_pat = false;
+      if (exist_ts != NULL) {
+        // we can allow a reference as long as the whole structure is abstract;
+        // this is because there's no way to alter the structure and thus
+        // violate the assumption of the open existential
+        if (topt == NULL || type_kind(*topt) != &Kinds::ak)
+          allow_ref_pat = false;
+      }
+      { region rgn;
+      // constrain type variables to have at least the kind they were abstracted over
+        let var_tvs = NULL;
+        list_t<$(type_t,type_t)@> outlives_constraints = NULL;
+        let u = ad->impl->exist_vars;
+        for (_ t = exist_ts ; t != NULL; t = t->tl) {
+          tvar_t tv = t->hd;
+          tvar_t uv = u->hd;
+          u = u->tl;
+          let kb1 = Kinds::compress_kb(tv->kind);
+          let kb2 = Kinds::compress_kb(uv->kind);
+          kind_t k2;
+          switch(kb2) {
+          case &Less_kb(_,k): fallthru(k);
+          case &Eq_kb(k): k2 = k; break;
+          default: Warn::impos2("unconstrained existential tyvar in aggregate");
+          }
+          switch (kb1) {
+            // ensure that kind of quantified var <:: kind of pattern var
+          case &Eq_kb(k1): 
+            if(!Kinds::kind_leq(k2,k1)) 
+              Warn::err2(p->loc,"type variable ",tv," has kind ",kb1,
+                         " but must have at least kind ",k2);
+            break;
+          case &Less_kb(*f,k): fallthru(f);
+          case &Unknown_kb(*f): *f = new Opt(kb2); break;
+          }
+          type_t vartype = new VarType(tv);
+          var_tvs = rnew(rgn) List(vartype,var_tvs);
+          // if unpacking a region var, must add it to the po
+          // FIX: allow adding existentials of TR kind?
+          if(k2->kind == RgnKind) {
+            /* 	  if (k2->aliasqual != Aliasable) */
+            /* 	    Warn::impos2("opened existential had unique or top region kind"); */
+            outlives_constraints =
+              new List(new $(empty_effect,vartype),outlives_constraints);
+          }
+        }
+        
+        var_tvs = imp_rev(var_tvs);
 
-      var_tvs = imp_rev(var_tvs);
-
-      tenv_t te2 = add_type_vars(p->loc,te,exist_ts);
+        tenv_t te2 = add_type_vars(p->loc,te,exist_ts);
       
-      let env = $(lookup_type_vars(te2),rgn);
-      let all_inst   = List::rmap_c(rgn,r_make_inst_var,&env,ad->tvs);
-      let exist_inst = List::rzip(rgn,rgn,ad->impl->exist_vars,var_tvs);
-      let all_typs   = List::map(snd,all_inst);
-      let exist_typs = List::map(snd,exist_inst);
-      let inst       = List::rappend(rgn,all_inst,exist_inst);
+        let env = $(lookup_type_vars(te2),rgn);
+        let all_inst   = List::rmap_c(rgn,r_make_inst_var,&env,ad->tvs);
+        let exist_inst = List::rzip(rgn,rgn,ad->impl->exist_vars,var_tvs);
+        let all_typs   = List::map(snd,all_inst);
+        let exist_typs = List::map(snd,exist_inst);
+        let inst       = List::rappend(rgn,all_inst,exist_inst);
       
-      if(exist_ts != NULL || ad->impl->rgn_po != NULL) { //how does qual_bnd get handled here?
-	if(res.tvars_and_bounds_opt==NULL)
-	  res.tvars_and_bounds_opt = new $(NULL,NULL);
-	(*res.tvars_and_bounds_opt)[0] = 
-	  append((*res.tvars_and_bounds_opt)[0],map(add_false,exist_ts));
-	(*res.tvars_and_bounds_opt)[1] = 
-	  append((*res.tvars_and_bounds_opt)[1],outlives_constraints);
+        if(exist_ts != NULL || ad->impl->rgn_po != NULL) { //how does qual_bnd get handled here?
+          if(res.tvars_and_bounds_opt==NULL)
+            res.tvars_and_bounds_opt = new $(NULL,NULL);
+          (*res.tvars_and_bounds_opt)[0] = 
+            append((*res.tvars_and_bounds_opt)[0],map(add_false,exist_ts));
+          (*res.tvars_and_bounds_opt)[1] = 
+            append((*res.tvars_and_bounds_opt)[1],outlives_constraints);
           let rpo_inst = NULL;
           for(let rpo=ad->impl->rgn_po; rpo != NULL; rpo = rpo->tl)
             rpo_inst = new List(new $(rsubstitute(rgn,inst,(*rpo->hd)[0]),
@@ -482,37 +473,73 @@ DONT_PROMOTE:
 	  }
           aqb_inst = imp_rev(aqb_inst);
 	  res.aquals_bounds = aqb_inst;
-      }
+        }
 
-      //*tsp = all_typs;
-      t = aggr_type(KnownAggr(new ad),all_typs);
-      if (dots && ad->kind == UnionA) 
-	Warn::warn(p->loc,"`...' pattern not allowed in union pattern");
+        //*tsp = all_typs;
+        t = aggr_type(KnownAggr(new ad),all_typs);
+        if (dots && ad->kind == UnionA) 
+          Warn::warn(p->loc,"`...' pattern not allowed in union pattern");
+        else if (dots) {
+          *dps_p = remove_dots(dps,length(dps),length(ad->impl->fields),
+                               wild_dlp,p->loc,"struct");
+          dps = *dps_p;
+        }
+        list_t<$(aggrfield_t,pat_t)@`rgn,`rgn> fields =
+          resolve_aggregate_designators(rgn,p->loc,dps,ad->kind,ad->impl->fields);
+        for(; fields != NULL; fields = fields->tl) {
+          let &$(field,pat)     = fields->hd;
+          let inst_fieldtyp     = rsubstitute(rgn,inst,field->type);
+          //inst_fieldtyp = pat_promote_array(te,inst_fieldtyp,rgn_pat);
+          exp_opt_t new_access_exp = NULL;
+          if (access_exp)
+            new_access_exp = aggrmember_exp(access_exp,field->name,DL);
+          res = combine_results(res,tcPatRec(te2,pat,&inst_fieldtyp,rgn_pat,
+                                             allow_ref_pat,new_access_exp));
+          // must unify here or the type we gave pat won't ever get checked
+          // against the exp we're matching against.  Even if we succeed now,
+          // we could be constraining so as to catch an error later.
+          if (!Unify::unify((type_t)pat->topt,inst_fieldtyp))
+            Warn::err2(p->loc,"field ",*field->name," of ",ad,
+                       " pattern expects type ",inst_fieldtyp," != ",
+                       (type_t)pat->topt);
+          if (new_access_exp) new_access_exp->topt = pat->topt;
+        }
+      }
+      break;
+    case &AnonAggrType(ak,is_tuple,afs):
+      // FIX: lots of code duplicated from above.
+      if (exist_ts != NULL) 
+        Warn::err2(p->loc,"bad existentially-bound type variables");
+      if (dots && ak == UnionA)
+        Warn::warn(p->loc,"`...' patterns not allowed in union pattern");
       else if (dots) {
-	*dps_p = remove_dots(dps,length(dps),length(ad->impl->fields),
-			   wild_dlp,p->loc,"struct");
-	dps = *dps_p;
+        *dps_p = remove_dots(dps,length(dps),length(afs),wild_dlp,p->loc,
+                             is_tuple ? "tuple" : "struct");
+        dps = *dps_p;
       }
-      list_t<$(aggrfield_t,pat_t)@`rgn,`rgn> fields =
-	resolve_aggregate_designators(rgn,p->loc,dps,ad->kind,ad->impl->fields);
-      for(; fields != NULL; fields = fields->tl) {
-	let &$(field,pat)     = fields->hd;
-	let inst_fieldtyp     = rsubstitute(rgn,inst,field->type);
-	//inst_fieldtyp = pat_promote_array(te,inst_fieldtyp,rgn_pat);
-	exp_opt_t new_access_exp = NULL;
-	if (access_exp)
-	  new_access_exp = aggrmember_exp(access_exp,field->name,DL);
-	res = combine_results(res,tcPatRec(te2,pat,&inst_fieldtyp,rgn_pat,
-					   allow_ref_pat,new_access_exp));
-	// must unify here or the type we gave pat won't ever get checked
-	// against the exp we're matching against.  Even if we succeed now,
-	// we could be constraining so as to catch an error later.
-	if (!Unify::unify((type_t)pat->topt,inst_fieldtyp))
-	  Warn::err2(p->loc,"field ",*field->name," of ",ad,
-		     " pattern expects type ",inst_fieldtyp," != ",
-		     (type_t)pat->topt);
-	if (new_access_exp) new_access_exp->topt = pat->topt;
+      { region rgn;
+        list_t<$(aggrfield_t,pat_t)@`rgn,`rgn> fields =
+          resolve_aggregate_designators(rgn,p->loc,dps,ak,afs);
+        for(; fields != NULL; fields = fields->tl) {
+          let &$(field,pat)     = fields->hd;
+          let fieldtyp = field->type;
+          exp_opt_t new_access_exp = NULL;
+          if (access_exp)
+            new_access_exp = aggrmember_exp(access_exp,field->name,DL);
+          res = combine_results(res,tcPatRec(te,pat,&fieldtyp,rgn_pat,
+                                             allow_ref_pat,new_access_exp));
+          // must unify here or the type we gave pat won't ever get checked
+          // against the exp we're matching against.  Even if we succeed now,
+          // we could be constraining so as to catch an error later.
+          if (!Unify::unify((type_t)pat->topt,fieldtyp))
+            Warn::err2(p->loc,"field ",*field->name,
+                       " pattern expects type ",fieldtyp," != ",
+                       (type_t)pat->topt);
+          if (new_access_exp) new_access_exp->topt = pat->topt;
+        }
       }
+      break;
+    default: Warn::impos2("bad type in tcpat");
     }
     break;
 
@@ -553,8 +580,6 @@ DONT_PROMOTE:
       Warn::err2(p->loc,"too few arguments for datatype constructor ",tuf->name);
     break;
 
-  case &Aggr_p(NULL,...):
-  case &Aggr_p(&{.UnknownAggr = _},...):
   case &UnknownId_p(_):         
   case &Exp_p(_):
   case &UnknownCall_p(...): t = wildtyp(lookup_opt_type_vars(te)); break;
@@ -669,14 +694,14 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
       return;
     default: Warn::impos2("check_pat_regions: bad pointer type");
     }
-  case &Aggr_p(ai,exist_ts,dps,_): 
+  case &Aggr_p(ai,is_tuple,exist_ts,dps,_): 
     for (; dps != NULL; dps = dps->tl)
       check_pat_regions_rec(te,(*dps->hd)[1],did_noalias_deref,patvars);
     return;
   // FIX: ultimately should allow unique pointers in datatype patterns
-  case &Datatype_p(_,_,ps,_): did_noalias_deref = false; fallthru(ps);
-  case &Tuple_p(ps,_):
-    for(; ps != NULL; ps = ps->tl)
+  case &Datatype_p(_,_,ps,_): 
+    did_noalias_deref = false; 
+    for (; ps != NULL; ps = ps->tl)
       check_pat_regions_rec(te,ps->hd,did_noalias_deref,patvars);
     return;
   case &Reference_p(vd,p2): 
@@ -810,7 +835,6 @@ datatype PatTest.NeqNull NeqNull_val = NeqNull;
 datatype Access {
   Dummy;
   Deref;
-  TupleField(unsigned);
   DatatypeField(datatypedecl_t, datatypefield_t, unsigned);
   AggrField(bool tagged, stringptr_t);
 };
@@ -908,13 +932,17 @@ static pat_test_t get_pat_test(union PatOrWhere pw) {
       if (ddecl->is_extensible) 
         return new EqExtensibleDatatype(ddecl, df);
       return new EqDatatypeTag(datatype_tag_number(ddecl, df->name), ddecl, df);
-    case &Aggr_p(&info,_,dlps,_):
-      let ad = get_known_aggrdecl(info);
-      if (!ad->impl->tagged) 
-	Warn::impos2("non-tagged aggregate in pattern test");
-      switch ((*dlps->hd)[0]->hd) {
-      case &FieldName(f): return new EqTaggedUnion(f,get_member_offset(ad,f));
-      default: Warn::impos2("no field name in tagged union pattern");
+    case &Aggr_p(atype,_,_,dlps,_) && atype != NULL:
+      switch (compress((type_t)atype)) {
+      case &AppType(&AggrCon(info),_):
+        let ad = get_known_aggrdecl(info);
+        if (!ad->impl->tagged) 
+          Warn::impos2("non-tagged aggregate in pattern test");
+        switch ((*dlps->hd)[0]->hd) {
+        case &FieldName(f): return new EqTaggedUnion(f,get_member_offset(ad,f));
+        default: Warn::impos2("no field name in tagged union pattern");
+        }
+      default: Warn::impos2("non-tagged aggregate in pattern test");
       }
     default: Warn::impos2("non-test pattern in pattern test");
     }
@@ -1010,14 +1038,28 @@ static simple_pat_t compile_pat(pat_t p) {
     s = con_pat(*((*tuf->name)[1]),span, List::map(compile_pat,ps),p);
     break;
     
-  case &Tuple_p(ps,_): s = tuple_pat(List::map(compile_pat,ps),pw(p)); break;
-    
-  case &Aggr_p(&{.KnownAggr = &ad},_,dlps,_):
+  case &Aggr_p(atype,_,_,dlps,_):
+    list_t<aggrfield_t> fields;
+    aggr_kind_t aggr_kind;
+    bool is_tagged = false;
+    switch (compress((type_t)atype)) {
+    case &AppType(&AggrCon(ainfo),_):
+      let ad = get_known_aggrdecl(ainfo);
+      aggr_kind = ad->kind;
+      fields = ad->impl->fields;
+      is_tagged = ad->impl->tagged;
+      break;
+    case &AnonAggrType(ak,_,fs):
+      aggr_kind = ak;
+      fields = fs;
+      break;
+    default: Warn::impos2("bad type on aggr pattern");
+    }
     // FIX: doesn't look like multiple designators are right
     // we do different things for structs and unions:
-    if (ad->kind == StructA) {
+    if (aggr_kind == StructA) {
       list_t<simple_pat_t> ps = NULL;
-      for (_ fields = ad->impl->fields; fields != NULL; fields = fields->tl) {
+      for (; fields != NULL; fields = fields->tl) {
         // leave out bit fields without a name
         bool found = (strcmp(*fields->hd->name,"") == 0);
         for(_ dlps0 = dlps; !found && dlps0 != NULL; dlps0 = dlps0->tl) {
@@ -1037,10 +1079,10 @@ static simple_pat_t compile_pat(pat_t p) {
       }
       s = tuple_pat(List::imp_rev(ps),pw(p));
     } else {
-      // ad->kind == UnionA-- want to treat this like a datatype
-      if (!ad->impl->tagged) 
+      // UnionA-- want to treat this like a datatype
+      if (!is_tagged) 
         Warn::err2(p->loc,"patterns on untagged unions not yet supported.");
-      int * span = new List::length(ad->impl->fields);
+      int * span = new List::length(fields);
       switch (dlps) {
       case &List{.hd=&$(&List{.hd=&FieldName(f),.tl=NULL},p2),.tl=NULL}:
         s = con_pat(*f,span,new List{compile_pat(p2),NULL},p);
@@ -1060,7 +1102,6 @@ static simple_pat_t compile_pat(pat_t p) {
 
   case &UnknownId_p(_):     
   case &UnknownCall_p(...): 
-  case &Aggr_p(...):      
   case &Exp_p(_): s = new Any;
   }
   return s;
@@ -1092,7 +1133,6 @@ static bool same_access(access_t a1, access_t a2) {
   switch $(a1,a2) {
   case $(&Dummy,&Dummy): return true;
   case $(&Deref,&Deref): return true;
-  case $(&TupleField(i1),&TupleField(i2)): return i1 == i2;
   case $(&DatatypeField(_,df1,i1),&DatatypeField(_,df2,i2)): 
     return (df1 == df2) && (i1 == i2);
   case $(&AggrField(b1,f1), &AggrField(b2,f2)):
@@ -1147,7 +1187,6 @@ static void print_access(access_t a) {
   switch (a) {
   case &Dummy: fprintf(stderr,"DUMMY"); break;
   case &Deref: fprintf(stderr,"*"); break;
-  case &TupleField(i): fprintf(stderr,"[%d]",i); break;
   case &DatatypeField(_,f,i):
     fprintf(stderr,"%s[%d]",qvar2string(f->name),i); break;
   case &AggrField(tagged, f):
@@ -1354,21 +1393,32 @@ static access_t get_access(union PatOrWhere pw, int i) {
       if (i != 0) 
         Warn::impos("get_access on pointer pattern with offset %d\n",i);
       return &Deref_val;
-    case &Tuple_p(...): return new TupleField(i);
     case &Datatype_p(tud,tuf,...): return new DatatypeField(tud,tuf,i);
-    case &Aggr_p(&info,_,dlps,_):
-      let ad = get_known_aggrdecl(info);
-      if (ad->impl->tagged)
+    case &Aggr_p(atype,_,_,dlps,_):
+      list_t<aggrfield_t> fields;
+      bool is_tagged = false;
+      switch (compress((type_t)atype)) {
+      case &AppType(&AggrCon(ainfo),_):
+        let ad = get_known_aggrdecl(ainfo);
+        is_tagged = ad->impl->tagged;
+        fields = ad->impl->fields;
+        break;
+      case &AnonAggrType(_,_,fs):
+        fields = fs;
+        break;
+      default: Warn::impos("bad type in aggr pattern");
+      }
+      if (is_tagged) {
         switch ((*dlps->hd)[0]) {
         case &List{&FieldName(f),NULL}:
-          return new AggrField(ad->impl->tagged,f);
+          return new AggrField(is_tagged,f);
         default: 
 	  Warn::impos("get_access on bad aggr pattern: %s",pat2string(p));
         }
-      let fields = ad->impl->fields;
+      }
       let orig_i = i;
       for (; i != 0; i--) fields = fields->tl;
-      return new AggrField(ad->impl->tagged,fields->hd->name);
+      return new AggrField(is_tagged,fields->hd->name);
     default: Warn::impos("get_access on bad pattern: %s",pat2string(p));
     }
   }
@@ -1479,17 +1529,24 @@ static string_t desc2string(term_desc_t d) {
     case &Reference_p(vd,_): return aprintf("*%s",qvar2string(vd->name));
     case &TagInt_p(tv,vd):   return aprintf("%s<`%s>",qvar2string(vd->name),
 					    *tv->name);
-    case &Tuple_p(_,_): return aprintf("$(%s)",descs2string(ds));
     case &Pointer_p(_): return aprintf("&%s",descs2string(ds));
-    case &Aggr_p(&{.KnownAggr = &ad},_,dlps,_): 
-      if (ad->kind == UnionA)
-        switch (dlps) {
-        case &List{&$(&List{&FieldName(f),_},_),_}:
-          return aprintf("%s{.%s = %s}",qvar2string(ad->name),*f,
-                         descs2string(ds));
-        default: break;
-        }
-      return aprintf("%s{%s}",qvar2string(ad->name),descs2string(ds));
+    case &Aggr_p(atype,_,_,dlps,_): 
+      switch (compress((type_t)atype)) {
+      case &AppType(&AggrCon(ainfo),_):
+        let ad = get_known_aggrdecl(ainfo);
+        if (ad->kind == UnionA)
+          switch (dlps) {
+          case &List{&$(&List{&FieldName(f),_},_),_}:
+            return aprintf("%s{.%s = %s}",qvar2string(ad->name),*f,
+                           descs2string(ds));
+          default: break;
+          }
+        return aprintf("%s{%s}",qvar2string(ad->name),descs2string(ds));
+      case &AnonAggrType(_,is_tuple,_):
+        if (is_tuple) return aprintf("$(%s)",descs2string(ds));
+        else return aprintf("{%s}",descs2string(ds));
+      default: Warn::impos2("bad type in aggr_p");
+      }
     case &Datatype_p(_, tuf, _, _): 
       if (ds == NULL)
         return aprintf("%s",qvar2string(tuf->name));
@@ -1539,7 +1596,9 @@ static string_t desc2string(term_desc_t d) {
 	  return (List::length(args) == 0) ? n : aprintf("%s(...)",n);
       }
       throw &Desc2string_val;
-    case &AppType(&AggrCon({.KnownAggr = &ad}),_) && ad->kind == UnionA:
+    case &AppType(&AggrCon(ainfo),_):
+      let ad = get_known_aggrdecl(ainfo);
+      if (ad->kind != UnionA) throw &Desc2string_val;
       let fields = ad->impl->fields;
       int span = List::length(fields);
       let &$(_,&union_name) = ad->name;

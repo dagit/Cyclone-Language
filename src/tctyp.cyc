@@ -1167,16 +1167,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
       env.free_qualvars = new_env.free_qualvars;
     break;
 
-  case &TupleType(tq_ts):
-    for (; tq_ts != NULL; tq_ts = tq_ts->tl) {
-      let p = tq_ts->hd;
-      env = i_check_type(env,&Kinds::mk,(*p)[1],true,false);
-      (*p)[0].real_const =
-        extract_const_from_typedef(loc,(*p)[0].print_const,(*p)[1]);
-    }
-    break;
-
-  case &AnonAggrType(k,fs):
+  case &AnonAggrType(k,is_tuple,fs):
     // FIX: this code is mostly duplicated in Tc::tcAggrdecl
     list_t<field_name_t> prev_fields = NULL;
     for (; fs != NULL; fs = fs->tl) {

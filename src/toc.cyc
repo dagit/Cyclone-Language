@@ -376,8 +376,8 @@ static bool is_zero(exp_t e) {
   switch (e->r) {
   case &Const_e({.Null_c = _}):  return true;
   case &Cast_e(_,e1,_,_):        return is_zero(e1);
-  case &Tuple_e(es):             return List::forall(is_zero,es);
   case &Array_e(dles):           fallthru(dles);
+  case &AnonStruct_e(_,_,dles):  fallthru(dles);
   case &Aggregate_e(_,_,dles,_): fallthru(dles);
   case &CompoundLit_e(_,dles):   fallthru(dles);
   case &UnresolvedMem_e(_,dles):
@@ -741,14 +741,7 @@ type_t typ_to_c(type_t t) {
     }
     return new FnType(FnInfo{NULL,NULL,tq2,typ_to_c(t2),new_args,
                                c_vararg,NULL,NULL,NULL,new_atts,NULL,NULL,NULL,NULL,NULL,NULL});
-  case &TupleType(tqs):
-    // $(t1,...,tn) maps to struct tuple_type_n where we define
-    // struct tuple_type_n { t1 f1; ...; tn fn; };
-    let tqs2 = NULL;
-    for(; tqs != NULL; tqs=tqs->tl)
-      tqs2 = new List(new $((*tqs->hd)[0],typ_to_c((*tqs->hd)[1])),tqs2);
-    return add_tuple_type(imp_rev(tqs2));
-  case &AnonAggrType(k,fs):
+  case &AnonAggrType(k,_,fs):
     // similar to tuple translation (introduce sharing to appease C)
     // but we have full aggrfields to deal with
     let fs2 = NULL;
@@ -868,13 +861,9 @@ static bool atomic_type(type_t t) {
     }
   case &FnType(_): return true;
   case &ArrayType(ArrayInfo{t,...}): return atomic_type(t);
-  case &AnonAggrType(_,fs):
+  case &AnonAggrType(_,_,fs):
     for (; fs != NULL; fs = fs->tl)
       if (!atomic_type(fs->hd->type)) return false;
-    return true;
-  case &TupleType(tqs):
-    for (; tqs != NULL; tqs = tqs->tl)
-      if (!atomic_type((*tqs->hd)[1])) return false;
     return true;
   case &PointerType(_): return false;
   default: toc_impos("atomic_typ:  bad type ",t);
@@ -889,7 +878,7 @@ static bool is_poly_field(type_t t, field_name_t f) {
     if (ad->impl == NULL)
       toc_impos("is_poly_field: type missing fields");
     fallthru(ad->impl->fields);
-  case &AnonAggrType(_,fs):
+  case &AnonAggrType(_,_,fs):
     let field = lookup_field(fs,f);
     if (field == NULL)
       toc_impos("is_poly_field: bad field ",*f);
@@ -2274,40 +2263,6 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Sizeofexp_e(e1):  exp_to_c(nv,e1); break;
   case &Sizeoftype_e(t):  e->r = new Sizeoftype_e(typ_to_c(t));  break;
   case &Offsetof_e(t,fs):
-    let t2 = t;
-    let l = fs;
-    for (; l != NULL; l=l->tl) {
-      switch (l->hd) {
-      case &StructField(n): break;
-      case &TupleIndex(n):
-	switch(compress(t2)) {
-	case &AppType(&AggrCon(info),_):
-	  let ad = get_known_aggrdecl(info);
-	  if(ad->impl==NULL)
-	    toc_impos("struct fields must be known");
-	  fallthru(ad->impl->fields);
-	case &AnonAggrType(_,fields):
-	  let nth_field = List::nth(fields,n);
-	  l->hd = new StructField(nth_field->name);
-	  t2 = nth_field->type;
-	  break;
-	case &TupleType(ts):
-	  l->hd = new StructField(fieldname(n+1));
-	  t2 = (*List::nth(ts,n))[1];
-	  break;
-	case &AppType(&DatatypeFieldCon({.KnownDatatypefield=$(_,tuf)}),_):
-	  if(n == 0)
-	    l->hd = new StructField(tag_sp);
-	  else {
-	    t2 = (*List::nth(tuf->typs,n-1))[1];
-	    l->hd = new StructField(fieldname(n));
-	  }
-	  break;
-	default: toc_impos("impossible type for offsetof tuple index");
-	}
-	break;
-      }
-    }
     e->r = new Offsetof_e(typ_to_c(t),fs);
     break;
   case &AggrMember_e(e1,f,is_tagged,is_read):
@@ -2340,52 +2295,10 @@ static void exp_to_c(env_t nv, exp_t e) {
     ptr_use_to_c(nv,e1,e->annot,NULL);
     break;
   case &Subscript_e(e1,e2):
-    switch (compress((type_t)e1->topt)) {
-    case &TupleType(ts): // e1.fi  where i = e2+1
-      exp_to_c(nv, e1); // DJG: I think this is a lhs if e is
-      let old_lhs = in_lhs(nv);
-      set_lhs(nv,false);
-      exp_to_c(nv, e2);
-      let $(i,known) = Evexp::eval_const_uint_exp(e2);
-      if(!known)
-	toc_impos("unknown tuple subscript in translation to C");
-      e->r = aggrmember_exp_r(e1,fieldname(i+1));
-      break;
-    default:
-      did_inserted_checks = true;
-      bool index_used = ptr_use_to_c(nv,e1,e->annot,e2);
-      if(index_used)
-	e->r = deref_exp_r(e1);
-      break;
-    }
-    break;
-  case &Tuple_e(es):
-    if(!is_toplevel(nv)) {
-      // convert to a struct and rely on RemoveAggrs
-      let strct_typ = add_tuple_type(List::map(tup_to_c,es));
-      switch(strct_typ) {
-      case &AppType(&AggrCon(aggrinfo),NULL):
-	list_t<$(list_t<designator_t>,exp_t)@> dles = NULL;
-	aggrdecl_t sd = get_known_aggrdecl(aggrinfo);
-	for(int i=1; es != NULL; es = es->tl, ++i) {
-	  exp_to_c(nv,es->hd);
-	  dles = new List(make_field(fieldname(i),es->hd), dles);
-	}
-	e->r    = new Aggregate_e(sd->name,NULL,imp_rev(dles),sd);
-	e->topt = strct_typ;
-	break;
-      default: toc_impos("tuple type not an aggregate");
-      }
-    } else {
-      // At top-level use an initializer
-      // $(e1,...,en) -> {e1,...,en}
-      list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> dles = NULL;
-      for (; es != NULL; es = es->tl) {
-	exp_to_c(nv,es->hd);
-	dles = new List(new $(NULL,es->hd),dles);
-      }
-      e->r = unresolvedmem_exp_r(NULL,imp_rev(dles));
-    }
+    did_inserted_checks = true;
+    bool index_used = ptr_use_to_c(nv,e1,e->annot,e2);
+    if(index_used)
+      e->r = deref_exp_r(e1);
     break;
   case &Array_e(dles0):
     // We now leave this to RemoveAggrs, which converts this to assignments
@@ -2433,7 +2346,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_to_c(nv,e1);
     break;
 
-  case &AnonStruct_e(st,dles): // note: no support for struck hacks
+  case &AnonStruct_e(st,_,dles): // note: no support for struck hacks
     for(let dles2=dles; dles2!=NULL; dles2=dles2->tl)
       exp_to_c(nv,(*dles2->hd)[1]);
     let strct_typ = typ_to_c((type_t)e->topt);
@@ -2832,8 +2745,7 @@ static exp_t compile_path(path_t ps, exp_t v) {
         }
       v = deref_exp(v,DL);
       break;
-    case &DatatypeField(_,_,i): fallthru(i);
-    case &TupleField(i): v = member_exp(v,fieldname(i+1),DL); break;
+    case &DatatypeField(_,_,i): v = member_exp(v,fieldname(i+1),DL); break;
     case &AggrField(tagged, f):
       v = member_exp(v,f,DL);
       if (tagged)  // tagged unions require getting the .val member
@@ -3126,8 +3038,7 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
     }
     return s;
 
-  case &Datatype_p(_,_,ps,_): fallthru(ps);
-  case &Tuple_p(ps,_):
+  case &Datatype_p(_,_,ps,_): 
     stmt_opt_t s = NULL;
     for(int cnt = 1; ps != NULL; ps = ps->tl, ++cnt) {
       let p2  = ps->hd;
@@ -3138,10 +3049,23 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
       s = seq_stmt_opt(s, extract_pattern_vars(rgn,nv,newdecls,prevdecls,member_exp(path,f,DL),p2));
     }
     return s;
-  case &Aggr_p(NULL,...): toc_impos("unresolved aggregate pattern!");
-  case &Aggr_p(&info,_,dlps,_):
-    //similar to translation of tuple pattern, but must account for designators.
-    let ad = get_known_aggrdecl(info);
+
+  case &Aggr_p(topt,_,_,dlps,_):
+    if (topt == NULL) toc_impos("unresolved aggregate pattern!");
+    type_t atype = (type_t)topt;
+    list_t<aggrfield_t> fields;
+    bool is_tagged = false;
+    switch (compress(atype)) {
+    case &AppType(&AggrCon(info),_):
+      let ad = get_known_aggrdecl(info);
+      fields = ad->impl->fields;
+      is_tagged = ad->impl->tagged;
+      break;
+    case &AnonAggrType(ak,is_tuple,fs):
+      fields = fs;
+      break;
+    default: toc_impos("bad type in aggr pattern");
+    }
     stmt_opt_t s = NULL;
     for (; dlps != NULL; dlps = dlps->tl) {
       let tup = dlps->hd;
@@ -3153,8 +3077,8 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
       let t2c = typ_to_c_array(t2);
       let memexp = member_exp(path,f,DL);
       // tagged unions require an extra .val
-      if (ad->impl->tagged) memexp = member_exp(memexp,val_sp,DL);
-      let ftype = lookup_field(ad->impl->fields,f)->type;
+      if (is_tagged) memexp = member_exp(memexp,val_sp,DL);
+      let ftype = lookup_field(fields,f)->type;
       if (is_void_star_or_boxed_tvar(ftype))
         memexp = cast_it(t2c, memexp);
       else if (!is_array_type(ftype)
@@ -3217,11 +3141,10 @@ static void subst_pattern_vars(patdecls_t env, exp_t e) {
     subst_pattern_vars(env,e2); 
     break;
   case &FnCall_e(e,es,_,_): subst_pattern_vars(env,e); fallthru(es);
-  case &Primop_e(_,es): fallthru(es);
-  case &Tuple_e(es): List::iter_c(subst_pattern_vars,env,es); break;
+  case &Primop_e(_,es): List::iter_c(subst_pattern_vars,env,es); break;
   case &UnresolvedMem_e(_,dles): fallthru(dles);
   case &Aggregate_e(_,_,dles,_): fallthru(dles);
-  case &AnonStruct_e(_,dles)   : fallthru(dles);
+  case &AnonStruct_e(_,_,dles) : fallthru(dles);
   case &Array_e(dles)          : fallthru(dles);
   case &CompoundLit_e(_,dles)  :
     for (; dles != NULL; dles = dles->tl)

@@ -61,7 +61,8 @@ struct _DynRegionFrame { //not used
 /* Reaps */
 struct _ReapPage
 #ifdef CYC_REGION_PROFILE
-{ unsigned total_bytes;
+{ unsigned direct_flag;
+  unsigned total_bytes;
   unsigned free_bytes;
   void *bget_page;
   struct _ReapPage *next;
@@ -77,8 +78,8 @@ struct _ReapHandle {
 #endif 
   struct _pool *released_ptrs;
   struct bget_region_key *bkey;
-  unsigned int id;
 #ifdef CYC_REGION_PROFILE
+  unsigned int id;
   const char         *name;
 #endif
 };
@@ -368,7 +369,8 @@ static inline void*_fast_region_malloc(struct _RegionHandle*r, _AliasQualHandle_
 //   return _region_malloc(r,aq,orig_s); 
 // }
 
-//migration to reaps
+//migration to reaps -- Remove this block to revert to regions 
+//... but the rufree etc. will not work
 #ifndef RUNTIME_CYC
 #define _new_region(n) _new_reap(n)
 #define _free_region(r) _free_reap(r)
@@ -475,7 +477,7 @@ void Cyc_Specsfile_add_cyclone_exec_path(struct _fat_ptr s){
 unsigned long len=Cyc_strlen(s);
 if(len <= 2U)return;{
 struct _fat_ptr dir=Cyc_substring(s,2,len - 2U);
-Cyc_Specsfile_cyclone_exec_path=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=dir;_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=Cyc_Specsfile_cyclone_exec_path;_Tmp0;});}}struct _tuple0{struct _fat_ptr*f1;struct _fat_ptr*f2;};
+Cyc_Specsfile_cyclone_exec_path=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=dir;_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=Cyc_Specsfile_cyclone_exec_path;_Tmp0;});}}struct _tuple0{struct _fat_ptr*f0;struct _fat_ptr*f1;};
 # 57
 struct Cyc_List_List*Cyc_Specsfile_read_specs(struct _fat_ptr file){
 struct Cyc_List_List*result=0;
@@ -531,8 +533,8 @@ break;}
 # 114
 if(c==42){
 # 116
-result=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple0*_Tmp1=({struct _tuple0*_Tmp2=_cycalloc(sizeof(struct _tuple0));({struct _fat_ptr*_Tmp3=({struct _fat_ptr*_Tmp4=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp5=(struct _fat_ptr)Cyc_strdup(_tag_fat(strname,sizeof(char),256U));*_Tmp4=_Tmp5;});_Tmp4;});_Tmp2->f1=_Tmp3;}),({
-struct _fat_ptr*_Tmp3=({struct _fat_ptr*_Tmp4=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp5=(struct _fat_ptr)Cyc_strdup(_tag_fat("",sizeof(char),1U));*_Tmp4=_Tmp5;});_Tmp4;});_Tmp2->f2=_Tmp3;});_Tmp2;});
+result=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple0*_Tmp1=({struct _tuple0*_Tmp2=_cycalloc(sizeof(struct _tuple0));({struct _fat_ptr*_Tmp3=({struct _fat_ptr*_Tmp4=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp5=(struct _fat_ptr)Cyc_strdup(_tag_fat(strname,sizeof(char),256U));*_Tmp4=_Tmp5;});_Tmp4;});_Tmp2->f0=_Tmp3;}),({
+struct _fat_ptr*_Tmp3=({struct _fat_ptr*_Tmp4=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp5=(struct _fat_ptr)Cyc_strdup(_tag_fat("",sizeof(char),1U));*_Tmp4=_Tmp5;});_Tmp4;});_Tmp2->f1=_Tmp3;});_Tmp2;});
 # 116
 _Tmp0->hd=_Tmp1;}),_Tmp0->tl=result;_Tmp0;});
 # 118
@@ -552,8 +554,8 @@ _tag_fat(strname,sizeof(char),256U);_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp
 Cyc_fflush(Cyc_stderr);
 goto CLEANUP_AND_RETURN;}}
 # 137
-result=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple0*_Tmp1=({struct _tuple0*_Tmp2=_cycalloc(sizeof(struct _tuple0));({struct _fat_ptr*_Tmp3=({struct _fat_ptr*_Tmp4=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp5=(struct _fat_ptr)Cyc_strdup(_tag_fat(strname,sizeof(char),256U));*_Tmp4=_Tmp5;});_Tmp4;});_Tmp2->f1=_Tmp3;}),({
-struct _fat_ptr*_Tmp3=({struct _fat_ptr*_Tmp4=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp5=(struct _fat_ptr)Cyc_strdup(_tag_fat(strvalue,sizeof(char),4096U));*_Tmp4=_Tmp5;});_Tmp4;});_Tmp2->f2=_Tmp3;});_Tmp2;});
+result=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple0*_Tmp1=({struct _tuple0*_Tmp2=_cycalloc(sizeof(struct _tuple0));({struct _fat_ptr*_Tmp3=({struct _fat_ptr*_Tmp4=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp5=(struct _fat_ptr)Cyc_strdup(_tag_fat(strname,sizeof(char),256U));*_Tmp4=_Tmp5;});_Tmp4;});_Tmp2->f0=_Tmp3;}),({
+struct _fat_ptr*_Tmp3=({struct _fat_ptr*_Tmp4=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp5=(struct _fat_ptr)Cyc_strdup(_tag_fat(strvalue,sizeof(char),4096U));*_Tmp4=_Tmp5;});_Tmp4;});_Tmp2->f1=_Tmp3;});_Tmp2;});
 # 137
 _Tmp0->hd=_Tmp1;}),_Tmp0->tl=result;_Tmp0;});
 # 139

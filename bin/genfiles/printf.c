@@ -61,7 +61,8 @@ struct _DynRegionFrame { //not used
 /* Reaps */
 struct _ReapPage
 #ifdef CYC_REGION_PROFILE
-{ unsigned total_bytes;
+{ unsigned direct_flag;
+  unsigned total_bytes;
   unsigned free_bytes;
   void *bget_page;
   struct _ReapPage *next;
@@ -77,8 +78,8 @@ struct _ReapHandle {
 #endif 
   struct _pool *released_ptrs;
   struct bget_region_key *bkey;
-  unsigned int id;
 #ifdef CYC_REGION_PROFILE
+  unsigned int id;
   const char         *name;
 #endif
 };
@@ -368,7 +369,8 @@ static inline void*_fast_region_malloc(struct _RegionHandle*r, _AliasQualHandle_
 //   return _region_malloc(r,aq,orig_s); 
 // }
 
-//migration to reaps
+//migration to reaps -- Remove this block to revert to regions 
+//... but the rufree etc. will not work
 #ifndef RUNTIME_CYC
 #define _new_region(n) _new_reap(n)
 #define _free_region(r) _free_reap(r)
@@ -1077,10 +1079,10 @@ int Cyc_printf(struct _fat_ptr fmt,struct _fat_ptr ap){
 # 985
 int ans;
 ans=Cyc_vprintf(fmt,ap);
-return ans;}struct _tuple0{struct _fat_ptr*f1;unsigned long*f2;};
+return ans;}struct _tuple0{struct _fat_ptr*f0;unsigned long*f1;};
 # 990
 static int Cyc_putc_string(int c,struct _tuple0*sptr_n){
-void*_Tmp0;void*_Tmp1;_Tmp1=sptr_n->f1;_Tmp0=sptr_n->f2;{struct _fat_ptr*sptr=_Tmp1;unsigned long*nptr=_Tmp0;
+void*_Tmp0;void*_Tmp1;_Tmp1=sptr_n->f0;_Tmp0=sptr_n->f1;{struct _fat_ptr*sptr=_Tmp1;unsigned long*nptr=_Tmp0;
 struct _fat_ptr s=*sptr;
 unsigned long n=*nptr;
 if(n==0U)return -1;
@@ -1094,7 +1096,7 @@ int Cyc_vsnprintf(struct _fat_ptr s,unsigned long n,struct _fat_ptr fmt,struct _
 int ans;
 struct _fat_ptr sptr=s;
 unsigned long nptr=n;
-struct _tuple0 sptr_n=({struct _tuple0 _Tmp0;_Tmp0.f1=& sptr,_Tmp0.f2=& nptr;_Tmp0;});
+struct _tuple0 sptr_n=({struct _tuple0 _Tmp0;_Tmp0.f0=& sptr,_Tmp0.f1=& nptr;_Tmp0;});
 ans=({(int(*)(int(*)(int,struct _tuple0*),struct _tuple0*,struct _fat_ptr,struct _fat_ptr))Cyc__IO_vfprintf;})(Cyc_putc_string,& sptr_n,fmt,ap);
 if(0 <= ans)
 *((char*)_check_fat_subscript(s,sizeof(char),ans))='\000';

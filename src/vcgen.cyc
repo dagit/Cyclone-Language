@@ -1270,48 +1270,43 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Subscript_e(e1,e2): 
     let $(t1,a1) = vcgen_rexp_always(env,e1,ain);
     let $(t2,a2) = vcgen_rexp(env,e2,a1);
-    switch (Absyn::compress((type_t)e1->topt)) {
-    case &Absyn::TupleType(_): break;
-    default:
-      term_t term_numelts, term_typebound;
-      // we don't know t2, can't really infer anything about the bound
-      if (t2 == NULL) { 
-        update_try_assn(env, a2);
-        break;
-      }
-      let eopt = Tcutil::get_type_bound((type_t)e1->topt);
-      if (eopt == NULL) {
-        // fat pointer -- express bounds in terms of numelts(t1)
-        term_numelts = unop(Absyn::Numelts, t1, Absyn::uint_type);
-      } else {
-        // thin pointer -- express bounds directly from type
-        exp_t e = (exp_t)eopt;
-        term_numelts = vcgen_rexp_always(env, e, a2)[0];
-      }
-      let bnds_check = ult(t2, term_numelts);
-      // note that although this is a neq, the prover will not blow
-      // up because it need only consider 0 < t1.
-      let null_check = neq(zero(),t1);
-      // if we have an exception, then we know either the bounds check
-      // failed or the null check failed.
-      update_try_assn(env,and(a2,or(not(bnds_check),not(null_check))));
-      // associate these checks with the expression for insert_checks
-      let exp_checks = new ExpChecks{.ctxt=a2,.bounds_check=bnds_check,
-                                     .null_check=null_check};
-      insert_exp_checks(env->assn_info, e1, exp_checks);
-      // afterwards, we know both the bounds check and null check succeeded.
-      a2 = and(and(a2,bnds_check),null_check);;
+    term_t term_numelts, term_typebound;
+    // we don't know t2, can't really infer anything about the bound
+    if (t2 == NULL) { 
+      update_try_assn(env, a2);
+      return $(NULL,a2);
     }
+    let eopt = Tcutil::get_type_bound((type_t)e1->topt);
+    if (eopt == NULL) {
+      // fat pointer -- express bounds in terms of numelts(t1)
+      term_numelts = unop(Absyn::Numelts, t1, Absyn::uint_type);
+    } else {
+      // thin pointer -- express bounds directly from type
+      exp_t e = (exp_t)eopt;
+      term_numelts = vcgen_rexp_always(env, e, a2)[0];
+    }
+    let bnds_check = ult(t2, term_numelts);
+    // note that although this is a neq, the prover will not blow
+    // up because it need only consider 0 < t1.
+    let null_check = neq(zero(),t1);
+    // if we have an exception, then we know either the bounds check
+    // failed or the null check failed.
+    update_try_assn(env,and(a2,or(not(bnds_check),not(null_check))));
+    // associate these checks with the expression for insert_checks
+    let exp_checks = new ExpChecks{.ctxt=a2,.bounds_check=bnds_check,
+                                   .null_check=null_check};
+    insert_exp_checks(env->assn_info, e1, exp_checks);
+    // afterwards, we know both the bounds check and null check succeeded.
+    a2 = and(and(a2,bnds_check),null_check);;
     return $(NULL,a2);
 
-  case &Absyn::Datatype_e(es,...): fallthru(es);
-  case &Absyn::Tuple_e(es): return $(NULL,vcgen_rexps_nosave(env,es,ain));
+  case &Absyn::Datatype_e(es,...): return $(NULL,vcgen_rexps_nosave(env,es,ain));
 
   case &Absyn::CompoundLit_e(_,dles):   fallthru(dles);
   case &Absyn::Array_e(dles):           fallthru(dles);
   case &Absyn::Aggregate_e(_,_,dles,_): fallthru(dles);
   case &Absyn::UnresolvedMem_e(_,dles): fallthru(dles);
-  case &Absyn::AnonStruct_e(_,dles):
+  case &Absyn::AnonStruct_e(_,_,dles):
     for (; dles != NULL; dles = dles->tl) {
       let &$(_,e) = dles->hd;
       ain = (vcgen_rexp(env,e,ain))[1];

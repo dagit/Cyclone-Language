@@ -298,7 +298,6 @@ static void do_exp(env_t nv, exp_t e) {
   case &Pragma_e(...): e->annot = &NoCheck_val; break;
 
   case &Datatype_e(es,...): fallthru(es);
-  case &Tuple_e(es): fallthru(es);
   case &Primop_e(_,es): // even Numelts and pointer-arith have nothing here
     e->annot = &NoCheck_val;
     for(; es!=NULL; es=es->tl)
@@ -407,7 +406,6 @@ static void do_exp(env_t nv, exp_t e) {
   case &Deref_e(e1): fallthru(e1,shared_zero_exp());
   case &Subscript_e(e1,e2): 
     switch(compress((type_t)e1->topt)) {
-    case &TupleType(_): e->annot = &NoCheck_val; break; // type-checker checks
     case &PointerType(PtrInfo(ta,tq,PtrAtts(rgn,n,b,zt,_,_,_))):
       bool bds_ck;
       //bds_ck  = need_bounds_check(nv,get_relns(e1),e1,e2);
@@ -519,7 +517,7 @@ static void do_exp(env_t nv, exp_t e) {
     break;
   case &Array_e(dles):           fallthru(dles);
   case &Aggregate_e(_,_,dles,_): fallthru(dles);
-  case &AnonStruct_e(_,dles):
+  case &AnonStruct_e(_,_,dles):
     e->annot = &NoCheck_val;
     for(; dles!=NULL; dles=dles->tl)
       do_exp(nv,(*dles->hd)[1]);

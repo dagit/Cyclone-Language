@@ -256,9 +256,6 @@ static bool check_public_type(genv_t ae, seen_t seen, string_t obj, qvar_t name,
     }
     return b;
 
-  case &TupleType(lt):
-    return check_public_type_list(ae, seen, obj, name, get_type1, lt);
-
   case &AppType(&AggrCon(info),targs):
     let ad = get_known_aggrdecl(info);
     if (ad->sc == Static) {

@@ -1514,7 +1514,7 @@ type_specifier_notypedef:
 | '_' COLON_COLON kind 
   { $$=^$(type_spec(new_evar(Kinds::kind_to_opt($3),NULL),LOC(@1,@3))); }
 | '$' '(' parameter_list ')'
-    { $$=^$(type_spec(new TupleType(map_c(get_tqual_typ,SLOC(@3),imp_rev($3))),
+    { $$=^$(type_spec(tuple_type(map_c(get_tqual_typ,SLOC(@3),imp_rev($3))),
                       LOC(@1,@4))); }
 | REGION_T '<' any_type_name right_angle
     { $$=^$(type_spec(rgn_handle_type($3),LOC(@1,@4))); }
@@ -1572,7 +1572,7 @@ enum_declaration_list:
 /* parsing of struct and union specifiers. */
 struct_or_union_specifier:
   struct_or_union '{' struct_declaration_list '}'
-  { $$=^$(type_spec(new AnonAggrType($1,$3),LOC(@1,@4))); }
+  { $$=^$(type_spec(new AnonAggrType($1,false,$3),LOC(@1,@4))); }
 /* Cyc:  TAGGED_QUAL, type_params_opt are added */
 | maybe_tagged_struct_union struct_union_name type_params_opt '{' 
     type_params_opt optional_rgnpo_qualbnd struct_declaration_list '}'
@@ -2577,9 +2577,9 @@ pattern:
 				 type_name_to_type($5,SLOC(@5)),NULL);
       $$ = ^$(new_pat(new AliasVar_p(tv,vd),location));
       }
-| '$' '(' tuple_pattern_list ')'
-    { let $(ps, dots) = *($3);
-      $$=^$(new_pat(new Tuple_p(ps,dots),LOC(@1,@4)));
+| '$' '(' field_pattern_list ')'
+    { let $(fps, dots) = *($3);
+      $$=^$(new_pat(new Aggr_p(NULL,true,NULL,fps,dots),LOC(@1,@4)));
     }
 | qual_opt_identifier '(' tuple_pattern_list ')'
     { let $(ps, dots) = *($3);
@@ -2588,13 +2588,14 @@ pattern:
 | qual_opt_identifier '{' type_params_opt field_pattern_list '}'
    {  let $(fps, dots) = *($4); 
       let exist_ts = List::map_c(typ2tvar,SLOC(@3),$3);
-      $$=^$(new_pat(new Aggr_p(new UnknownAggr(StructA,$1,NULL),
-			       exist_ts,fps,dots),LOC(@1,@5)));
+      let ai = UnknownAggr(StructA,$1,NULL);
+      let typ = new AppType(new AggrCon(ai),NULL);
+      $$=^$(new_pat(new Aggr_p(typ,false,exist_ts,fps,dots),LOC(@1,@5)));
    }
 | '{' type_params_opt field_pattern_list '}'
    {  let $(fps, dots) = *($3); 
       let exist_ts = List::map_c(typ2tvar,SLOC(@2),$2);
-      $$=^$(new_pat(new Aggr_p(NULL,exist_ts,fps,dots),LOC(@1,@4)));
+      $$=^$(new_pat(new Aggr_p(NULL,false,exist_ts,fps,dots),LOC(@1,@4)));
    }
 | AND_OP pattern /* to allow &&p */
     { $$=^$(new_pat(new Pointer_p(new_pat(new Pointer_p($2),LOC(@1,@2))),LOC(@1,@2))); }
@@ -2928,12 +2929,16 @@ field_expression:
     { $$=^$(new List(new StructField(new $1),NULL)); }
 /* not checking sign here...*/
 | INTEGER_CONSTANT
-    { $$ = ^$(new List(new TupleIndex(cnst2uint(SLOC(@1),$1)),NULL)); }
+   { let i = cnst2uint(SLOC(@1),$1);
+     let &FieldName(f) = tuple_field_designator(i);
+     $$ = ^$(new List(new StructField(f),NULL)); }
 | field_expression '.' field_name
     { $$ = ^$(new List(new StructField(new $3),$1)); }
 /* not checking sign here...*/
 | field_expression '.' INTEGER_CONSTANT
-    { $$ = ^$(new List(new TupleIndex(cnst2uint(SLOC(@3),$3)),$1)); }
+    { let i = cnst2uint(SLOC(@3),$3);
+      let &FieldName(f) = tuple_field_designator(i);
+      $$ = ^$(new List(new StructField(f),$1)); }
 ;
 
 primary_expression:

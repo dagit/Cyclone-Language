@@ -50,7 +50,6 @@ static string_t get_type_kind(type_t t) {
   case &PointerType(...): return "Pointertype";  // t*, t?, t@, etc.  BoxKind when not Unknown_b
   case &ArrayType(...): return "ArrayType"; // MemKind
   case &FnType(...): return "FnType";  // MemKind
-  case &TupleType(...): return "TupleType";  // MemKind
   case &AnonAggrType(...): return "AnonAggrType";  // MemKind
   case &TypedefType(...): return "Typedeftype"; 
   case &ValueofType(...): return "Valueoftype";       // IntKind -- exp must be a type-level expression
@@ -150,18 +149,16 @@ static type_t expand_c_type(seg_t loc, tenv_t te, type_t ctyp) {
     //    fprintf(stderr, "Got array type %s\n", Absynpp::typ2string(ctyp));
     ainfo->elt_type = expand_c_type(loc, te, Toc::typ_to_c(ainfo->elt_type));
     return ctyp;
-  case &TupleType(tlst):     
-    Tctyp::check_valid_toplevel_type(loc, te, ctyp);
-    //    fprintf(stderr, "Got tuple type %s\n", Absynpp::typ2string(ctyp));
-    while(tlst) {
-      let &$(tq, *elt_type) = tlst->hd;
-      *elt_type = expand_c_type(loc, te, Toc::typ_to_c(*elt_type));
-      tlst = tlst->tl;
-    }
-    //    fprintf(stderr, "Got tuple type %s\n", Absynpp::typ2string(ctyp));
-    return ctyp;
-  case &AnonAggrType(knd, flst):     
+  case &AnonAggrType(knd, is_tuple, flst):     
     //    fprintf(stderr, "Got anonaggr type %s\n", Absynpp::typ2string(ctyp));
+    if (is_tuple) {
+      Tctyp::check_valid_toplevel_type(loc,te,ctyp);
+      for (; flst != NULL; flst = flst->tl) {
+        let elt_type = &flst->hd->type;
+        *elt_type = expand_c_type(loc, te, Toc::typ_to_c(*elt_type));
+        flst = flst->tl;
+      }
+    }
     return ctyp;
   case &TypeDeclType(td, tptr):      
     //    fprintf(stderr, "Got typedecl type %s\n", Absynpp::typ2string(ctyp));
@@ -780,8 +777,6 @@ static void deconstruct_type(type_t t) {
       argit=argit->tl;
     }
     break;
-  case &TupleType(...):
-    fprintf(stderr, "Got TupleType\n"); break;
   case &AnonAggrType(...):
     fprintf(stderr, "Got AnonAggrType\n"); break;
   case &TypedefType(n,ts,d,topt):
@@ -820,7 +815,7 @@ static $(list_t<tvar_t>, list_t<tvar_t>)* add_tvars_to_type(tenv_t te,
     if(changed)
       return  new $(fi->tvars, old_tvars);
     break;
-  case &AnonAggrType(...):
+  case &AnonAggrType(knd, is_tuple, flst):
     break;
   case &TypedefType(n,ts,d,topt):
     /*  fprintf(stderr, "Got TypedefType\n"); 
@@ -1042,13 +1037,6 @@ static void i_clear_vartype_ids(type_t t) {
       let &$(_,_,at) = argit->hd;
       i_clear_vartype_ids(at);
       argit = argit->tl;
-    }
-    break;
-  case &TupleType(ts):
-    while(ts) {
-      let &$(_,et) = ts->hd;
-      i_clear_vartype_ids(et);
-      ts = ts->tl;
     }
     break;
   case &TypedefType(_,ts,_,to):

@@ -61,7 +61,8 @@ struct _DynRegionFrame { //not used
 /* Reaps */
 struct _ReapPage
 #ifdef CYC_REGION_PROFILE
-{ unsigned total_bytes;
+{ unsigned direct_flag;
+  unsigned total_bytes;
   unsigned free_bytes;
   void *bget_page;
   struct _ReapPage *next;
@@ -77,8 +78,8 @@ struct _ReapHandle {
 #endif 
   struct _pool *released_ptrs;
   struct bget_region_key *bkey;
-  unsigned int id;
 #ifdef CYC_REGION_PROFILE
+  unsigned int id;
   const char         *name;
 #endif
 };
@@ -368,7 +369,8 @@ static inline void*_fast_region_malloc(struct _RegionHandle*r, _AliasQualHandle_
 //   return _region_malloc(r,aq,orig_s); 
 // }
 
-//migration to reaps
+//migration to reaps -- Remove this block to revert to regions 
+//... but the rufree etc. will not work
 #ifndef RUNTIME_CYC
 #define _new_region(n) _new_reap(n)
 #define _free_region(r) _free_reap(r)
@@ -421,24 +423,24 @@ extern int isdigit(int);
 extern unsigned long Cyc_strlen(struct _fat_ptr);
 # 136 "string.h"
 extern struct _fat_ptr Cyc_implode(struct Cyc_List_List*);struct Cyc_Absyn_Tqual{int print_const: 1;int q_volatile: 1;int q_restrict: 1;int real_const: 1;unsigned loc;};
-# 877 "absyn.h"
+# 878 "absyn.h"
 struct Cyc_Absyn_Tqual Cyc_Absyn_const_tqual(unsigned);
 struct Cyc_Absyn_Tqual Cyc_Absyn_empty_tqual(unsigned);
-# 897
+# 898
 void*Cyc_Absyn_new_evar(struct Cyc_Core_Opt*,struct Cyc_Core_Opt*);
-# 902
+# 903
 extern void*Cyc_Absyn_char_type;extern void*Cyc_Absyn_uchar_type;extern void*Cyc_Absyn_ushort_type;extern void*Cyc_Absyn_uint_type;extern void*Cyc_Absyn_ulong_type;
-# 904
+# 905
 extern void*Cyc_Absyn_schar_type;extern void*Cyc_Absyn_sshort_type;extern void*Cyc_Absyn_sint_type;extern void*Cyc_Absyn_slong_type;
-# 906
+# 907
 extern void*Cyc_Absyn_float_type;extern void*Cyc_Absyn_double_type;extern void*Cyc_Absyn_long_double_type;
-# 913
+# 914
 extern void*Cyc_Absyn_al_qual_type;
-# 917
+# 918
 extern void*Cyc_Absyn_true_type;extern void*Cyc_Absyn_false_type;
-# 961
-void*Cyc_Absyn_at_type(void*,void*,void*,struct Cyc_Absyn_Tqual,void*,void*);
 # 965
+void*Cyc_Absyn_at_type(void*,void*,void*,struct Cyc_Absyn_Tqual,void*,void*);
+# 969
 void*Cyc_Absyn_fatptr_type(void*,void*,void*,struct Cyc_Absyn_Tqual,void*,void*);
 # 33 "warn.h"
 void Cyc_Warn_verr(unsigned,struct _fat_ptr,struct _fat_ptr);
@@ -452,7 +454,7 @@ struct Cyc_List_List*Cyc_Tcenv_lookup_type_vars(struct Cyc_Tcenv_Tenv*);
 static void*Cyc_Formatstr_err_null(unsigned loc,struct _fat_ptr fmt,struct _fat_ptr ap){
 # 33
 Cyc_Warn_verr(loc,fmt,ap);
-return 0;}struct _tuple11{struct Cyc_List_List*f1;struct Cyc_List_List*f2;struct Cyc_List_List*f3;struct Cyc_List_List*f4;char f5;int f6;};
+return 0;}struct _tuple11{struct Cyc_List_List*f0;struct Cyc_List_List*f1;struct Cyc_List_List*f2;struct Cyc_List_List*f3;char f4;int f5;};
 # 43
 struct Cyc_Core_Opt*Cyc_Formatstr_parse_conversionspecification(struct _RegionHandle*r,struct _fat_ptr s,int i){
 # 47
@@ -558,7 +560,7 @@ switch((int)c){case 100:
  goto _LL1C;default:
  return 0;}_LL1C:;
 # 166 "formatstr.cyc"
-return({struct Cyc_Core_Opt*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Core_Opt));({struct _tuple11*_Tmp1=({struct _tuple11*_Tmp2=_region_malloc(r,0U,sizeof(struct _tuple11));_Tmp2->f1=flags,_Tmp2->f2=width,_Tmp2->f3=precision,_Tmp2->f4=lenmod,_Tmp2->f5=c,_Tmp2->f6=i + 1;_Tmp2;});_Tmp0->v=_Tmp1;});_Tmp0;});}}}}}
+return({struct Cyc_Core_Opt*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Core_Opt));({struct _tuple11*_Tmp1=({struct _tuple11*_Tmp2=_region_malloc(r,0U,sizeof(struct _tuple11));_Tmp2->f0=flags,_Tmp2->f1=width,_Tmp2->f2=precision,_Tmp2->f3=lenmod,_Tmp2->f4=c,_Tmp2->f5=i + 1;_Tmp2;});_Tmp0->v=_Tmp1;});_Tmp0;});}}}}}
 # 169
 struct Cyc_List_List*Cyc_Formatstr_get_format_types(struct Cyc_Tcenv_Tenv*te,struct _fat_ptr s,int isCproto,unsigned loc){
 # 172
@@ -571,7 +573,7 @@ if((int)*((const char*)_check_fat_subscript(s,sizeof(char),i))!=37)continue;{
 struct Cyc_Core_Opt*cs=Cyc_Formatstr_parse_conversionspecification(temp,s,i + 1);
 if(cs==0){
 struct Cyc_List_List*_Tmp1=({(struct Cyc_List_List*(*)(unsigned,struct _fat_ptr,struct _fat_ptr ap))Cyc_Formatstr_err_null;})(loc,_tag_fat("bad format string",sizeof(char),18U),_tag_fat(0U,sizeof(void*),0));_npop_handler(0);return _Tmp1;}{
-struct _tuple11*_Tmp1=(struct _tuple11*)cs->v;int _Tmp2;char _Tmp3;void*_Tmp4;void*_Tmp5;void*_Tmp6;void*_Tmp7;_Tmp7=_Tmp1->f1;_Tmp6=_Tmp1->f2;_Tmp5=_Tmp1->f3;_Tmp4=_Tmp1->f4;_Tmp3=_Tmp1->f5;_Tmp2=_Tmp1->f6;{struct Cyc_List_List*flags=_Tmp7;struct Cyc_List_List*width=_Tmp6;struct Cyc_List_List*precision=_Tmp5;struct Cyc_List_List*lenmod=_Tmp4;char c=_Tmp3;int j=_Tmp2;
+struct _tuple11*_Tmp1=(struct _tuple11*)cs->v;int _Tmp2;char _Tmp3;void*_Tmp4;void*_Tmp5;void*_Tmp6;void*_Tmp7;_Tmp7=_Tmp1->f0;_Tmp6=_Tmp1->f1;_Tmp5=_Tmp1->f2;_Tmp4=_Tmp1->f3;_Tmp3=_Tmp1->f4;_Tmp2=_Tmp1->f5;{struct Cyc_List_List*flags=_Tmp7;struct Cyc_List_List*width=_Tmp6;struct Cyc_List_List*precision=_Tmp5;struct Cyc_List_List*lenmod=_Tmp4;char c=_Tmp3;int j=_Tmp2;
 i=j - 1;
 {int _Tmp8;if(lenmod!=0){if(((struct Cyc_List_List*)lenmod)->tl==0){_Tmp8=(int)lenmod->hd;if(
 ((int)_Tmp8==106 ||(int)_Tmp8==122)||(int)_Tmp8==116){int x=_Tmp8;
@@ -765,7 +767,7 @@ struct Cyc_List_List*_Tmp8=0;_npop_handler(0);return _Tmp8;}}_LL12:;}}}}}{
 # 346
 struct Cyc_List_List*_Tmp1=Cyc_List_imp_rev(typs);_npop_handler(0);return _Tmp1;}
 # 176
-;_pop_region();}struct _tuple12{int f1;struct Cyc_List_List*f2;struct Cyc_List_List*f3;char f4;int f5;};
+;_pop_region();}struct _tuple12{int f0;struct Cyc_List_List*f1;struct Cyc_List_List*f2;char f3;int f4;};
 # 357 "formatstr.cyc"
 struct Cyc_Core_Opt*Cyc_Formatstr_parse_inputformat(struct _RegionHandle*r,struct _fat_ptr s,int i){
 # 359
@@ -840,7 +842,7 @@ switch((int)c){case 100:
  goto _LLF;default:
  return 0;}_LLF:;
 # 434
-return({struct Cyc_Core_Opt*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Core_Opt));({struct _tuple12*_Tmp1=({struct _tuple12*_Tmp2=_region_malloc(r,0U,sizeof(struct _tuple12));_Tmp2->f1=suppress,_Tmp2->f2=width,_Tmp2->f3=lenmod,_Tmp2->f4=c,_Tmp2->f5=i + 1;_Tmp2;});_Tmp0->v=_Tmp1;});_Tmp0;});}}}}
+return({struct Cyc_Core_Opt*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Core_Opt));({struct _tuple12*_Tmp1=({struct _tuple12*_Tmp2=_region_malloc(r,0U,sizeof(struct _tuple12));_Tmp2->f0=suppress,_Tmp2->f1=width,_Tmp2->f2=lenmod,_Tmp2->f3=c,_Tmp2->f4=i + 1;_Tmp2;});_Tmp0->v=_Tmp1;});_Tmp0;});}}}}
 # 436
 struct Cyc_List_List*Cyc_Formatstr_get_scanf_types(struct Cyc_Tcenv_Tenv*te,struct _fat_ptr s,int isCproto,unsigned loc){
 # 439
@@ -853,7 +855,7 @@ if((int)*((const char*)_check_fat_subscript(s,sizeof(char),i))!=37)continue;{
 struct Cyc_Core_Opt*x=Cyc_Formatstr_parse_inputformat(temp,s,i + 1);
 if(x==0){
 struct Cyc_List_List*_Tmp1=({(struct Cyc_List_List*(*)(unsigned,struct _fat_ptr,struct _fat_ptr ap))Cyc_Formatstr_err_null;})(loc,_tag_fat("bad format string",sizeof(char),18U),_tag_fat(0U,sizeof(void*),0));_npop_handler(0);return _Tmp1;}{
-struct _tuple12*_Tmp1=(struct _tuple12*)x->v;int _Tmp2;char _Tmp3;void*_Tmp4;void*_Tmp5;int _Tmp6;_Tmp6=_Tmp1->f1;_Tmp5=_Tmp1->f2;_Tmp4=_Tmp1->f3;_Tmp3=_Tmp1->f4;_Tmp2=_Tmp1->f5;{int suppress=_Tmp6;struct Cyc_List_List*width=_Tmp5;struct Cyc_List_List*lenmod=_Tmp4;char c=_Tmp3;int j=_Tmp2;
+struct _tuple12*_Tmp1=(struct _tuple12*)x->v;int _Tmp2;char _Tmp3;void*_Tmp4;void*_Tmp5;int _Tmp6;_Tmp6=_Tmp1->f0;_Tmp5=_Tmp1->f1;_Tmp4=_Tmp1->f2;_Tmp3=_Tmp1->f3;_Tmp2=_Tmp1->f4;{int suppress=_Tmp6;struct Cyc_List_List*width=_Tmp5;struct Cyc_List_List*lenmod=_Tmp4;char c=_Tmp3;int j=_Tmp2;
 i=j - 1;
 {int _Tmp7;if(lenmod!=0){if(((struct Cyc_List_List*)lenmod)->tl==0){_Tmp7=(int)lenmod->hd;if(
 ((int)_Tmp7==106 ||(int)_Tmp7==122)||(int)_Tmp7==116){int x=_Tmp7;

@@ -173,12 +173,7 @@ static void rgnsubtype(Position::seg_t loc, struct rgnsubenv env, type_t type) {
     return;
     // Assume that function types are always OK to refer to `C.
   case &FnType(...): return;
-  case &TupleType(tqts):
-    for (let ts1 = tqts; ts1 != NULL; ts1 = ts1->tl) {
-      rgnsubtype(loc,env,(*ts1->hd)[1]);
-    }
-    return;
-  case &AnonAggrType(_,fs):
+  case &AnonAggrType(_,_,fs):
     for (;fs != NULL; fs = fs->tl) {
       rgnsubtype(loc,env,fs->hd->type);
       rgnsubexpopt(env,fs->hd->requires_clause);
@@ -237,14 +232,10 @@ static void rgnsubexp(struct rgnsubenv env, exp_t e) {
 
   case &Datatype_e(es,dtd,dtfd): fallthru(es);
     // FIX: deal with datatype defs?
-  case &Primop_e(_,es):          fallthru(es);
-  case &Tuple_e(es):
-    while (es != NULL) {
+  case &Primop_e(_,es):          
+    for (; es != NULL; es = es->tl)
       rgnsubexp(env,es->hd);
-      es = es->tl;
-    }
     break;
-
   case &ComprehensionNoinit_e(e1,*t,_): fallthru(t,e1);
   case &Cast_e(*t,e1,...):
     rgnsubtype(e->loc,env,*t);
@@ -318,10 +309,12 @@ static void rgnsubexp(struct rgnsubenv env, exp_t e) {
     rgnsubds(env,ds);
     break;    
     
-  case &AnonStruct_e(*t,ds):
-    rgnsubtype(e->loc,env,*t);
-    if (!env.toplevel)
-      *t = Tcutil::substitute_nofun(env.inst,*t);
+  case &AnonStruct_e(*t,_,ds):
+    if (*t != NULL) {
+      rgnsubtype(e->loc,env,(type_t)*t);
+      if (!env.toplevel)
+        *t = Tcutil::substitute_nofun(env.inst,(type_t)*t);
+    }
     rgnsubds(env,ds);
     break;
 
@@ -390,7 +383,7 @@ static void rgnsubpat(struct rgnsubenv env, pat_t p) {
 
   case &Pointer_p(p1): rgnsubpat(env,p1); return;
 
-  case &Aggr_p(_,tvs,ds,_):
+  case &Aggr_p(_,_,tvs,ds,_):
     for (;tvs != NULL; tvs=tvs->tl)
       check_tvar(p->loc,tvs->hd);
     for (;ds != NULL; ds = ds->tl)
@@ -399,7 +392,6 @@ static void rgnsubpat(struct rgnsubenv env, pat_t p) {
     
     //FIX: deal with datatype fields?
   case &Datatype_p(_,_,ps,_): fallthru(ps);
-  case &Tuple_p(ps,_):        fallthru(ps);
   case &UnknownCall_p(_,ps,_):
     for (;ps != NULL; ps=ps->tl)
       rgnsubpat(env,ps->hd);
