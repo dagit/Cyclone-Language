@@ -9,7 +9,7 @@
       (cons '("\\.cyc"      . c++-mode)
       (cons '("\\.cys"      . c++-mode)
       (cons '("\\.y"        . c++-mode)
-      auto-mode-alist))))))
+      auto-mode-alist)))))))
 (font-lock-add-keywords 'c++-mode ; reserved words not in C++ and not types
     (list 
       "\\\<xtunion\\\>" 
