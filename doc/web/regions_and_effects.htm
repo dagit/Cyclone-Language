@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=windows-1252" x-undefined>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <title>Regions and Effects</title>
 <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
 <meta name="ProgId" content="FrontPage.Editor.Document">
@@ -10,10 +10,190 @@
 
 <body><!--msnavigation--><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="1%">
 
-<nobr><a href="index.htm">Home</a></nobr><br><nobr><a href="quick_questions.htm">Quick&nbsp;Questions</a></nobr><br><nobr><a href="quick_answers.htm">Quick&nbsp;Answers</a></nobr><br><nobr><a href="known_bugs.htm">Known&nbsp;Bugs</a></nobr><br><nobr><a href="pointers.htm">Pointers</a></nobr><br><nobr><a href="discriminated_unions.htm">Discriminated&nbsp;Unions</a></nobr><br><nobr><a href="pattern_matching.htm">Pattern&nbsp;Matching</a></nobr><br><nobr><a href="type_inference.htm">Type&nbsp;Inference</a></nobr><br><nobr><a href="polymorphism.htm">Polymorphism</a></nobr><br><nobr>Regions&nbsp;and&nbsp;Effects</nobr><br><nobr><a href="definite_assignment.htm">Definite&nbsp;Assignment</a></nobr><br><nobr><a href="namespaces.htm">Namespaces</a></nobr><br><nobr><a href="interfacing_with_c.htm">Interfacing&nbsp;with&nbsp;C</a></nobr>
+<nobr><a href="index.htm">Home</a></nobr><br><nobr><a href="quick_questions.htm">Quick&nbsp;Questions</a></nobr><br><nobr><a href="quick_answers.htm">Quick&nbsp;Answers</a></nobr><br><nobr><a href="known_bugs.htm">Known&nbsp;Bugs</a></nobr><br><nobr><a href="pointers.htm">Pointers</a></nobr><br><nobr><a href="discriminated_unions.htm">Discriminated&nbsp;Unions</a></nobr><br><nobr><a href="pattern_matching.htm">Pattern&nbsp;Matching</a></nobr><br><nobr><a href="type_inference.htm">Type&nbsp;Inference</a></nobr><br><nobr><a href="polymorphism.htm">Polymorphism</a></nobr><br><nobr>Memory&nbsp;Management</nobr><br><nobr><a href="definite_assignment.htm">Definite&nbsp;Assignment</a></nobr><br><nobr><a href="namespaces.htm">Namespaces</a></nobr><br><nobr><a href="interfacing_with_c.htm">Interfacing&nbsp;with&nbsp;C</a></nobr>
 
 </td><td valign="top" width="24"></td><!--msnavigation--><td valign="top">
-
-<!--msnavigation--></td></tr><!--msnavigation--></table></body>
+<h1 align="center">Memory Management Via Regions</h1>
+<p align="left">Contents: <a href="#intro">Introduction</a>, <a href="#alloc">Allocation</a>,
+<a href="#common">Common Uses</a>, <a href="#types">Types</a></p>
+<p><b><a name="intro"></a>Introduction</b></p>
+<p>Cyclone prevents memory-management errors, such as following dangling
+pointers, without requiring that all pointers point into the heap, which is
+garbage-collected.&nbsp; Here we explain Cyclone's memory-management scheme and
+related type annotations.&nbsp; The system is based on an explicit &quot;region
+and effect&quot; system; you should not need to have seen regions and effects
+before to understand our explanation.</p>
+<p>A <i>region </i>contains a collection of objects and every object is
+contained in exactly one region.&nbsp; When a region is deallocated, all the
+objects in the region are deallocated.&nbsp; In this sense, regions are like
+&quot;arenas&quot; (also called &quot;zones&quot;), a fairly common
+memory-management idiom.&nbsp; Cyclone has three flavors of regions:</p>
+<ul>
+  <li><b>The heap</b> is a special region.&nbsp; There is only one heap.&nbsp;
+    The heap is never deallocated.&nbsp; New objects can be added to the heap at
+    any time.&nbsp; Its contents are garbage-collected.</li>
+  <li>Local declarations give rise to objects allocated into <b>stack regions</b>.&nbsp;
+    When a block of declarations is executed, a new stack region is allocated
+    with enough space for the declarations.&nbsp; No more objects can be
+    allocated into a stack region.&nbsp; The region is deallocated when the
+    block containing the declarations finishes executing.&nbsp; Similarly, when
+    a function is called, its actual parameters are placed in the same stack
+    region as the objects for the declarations at the beginning of the
+    function's body. <i>This behavior is exactly like in C; we are just calling
+    this stack space a region!</i> </li>
+  <li>The construct &quot;<font face="Courier New">region r s</font>&quot;
+    creates a <b>growable region</b>, where r is an identifier and s is a
+    statement.&nbsp; (Typically s is a compound statement, so it looks like <font face="Courier New">region
+    r { ... }</font>.)&nbsp; A <i>handle</i> for the growable region is bound to
+    r.&nbsp; Both r and the region's lifetime is the execution of s.&nbsp;
+    Inside of s, we can add objects to the region, as explained below.</li>
+</ul>
+<p>A non-heap object lives until its region is deallocated.&nbsp; There is no
+way to free an object earlier.&nbsp; Heap objects may be garbage-collected once
+they are unreachable (cannot be reached by traversing pointers) from the
+program's variables.&nbsp; Objects in live non-heap regions always appear
+reachable to the garbage collector (and so everything reachable from them
+appears reachable as well).</p>
+<p>Cyclone allows dangling pointers; it prohibits <i>following</i> dangling
+pointers.&nbsp; This restriction is part of the type system: It is a
+compile-time error if a dangling pointer (a pointer into a deallocated region)
+might be followed.&nbsp; There are no run-time checks of the form, &quot;is this
+pointing into a live region?&quot;&nbsp; As explained below, each pointer type
+has a region and objects of the type may only point into that region.&nbsp; The
+type &quot;t *&quot; is for pointers into the heap; see below for how to declare
+pointers into other regions.</p>
+<p><b><a name="alloc"></a>Allocation</b></p>
+<p>There are three constructs for allocating a new object in the heap:</p>
+<ul>
+  <li><font face="Courier New"><b>new e</b></font>, where new is a keyword an e
+    is an expression, allocates space for an object of e's type and initializes
+    the object with e.&nbsp; It is roughly equivalent to &quot;t temp =
+    malloc(sizeof(t)); *temp = e;&quot;.&nbsp; For example, new 17 creates a
+    pointer to an object containing 17 and, given &quot;struct Pair{int x; int
+    y;};&quot;, new Pair(7,9) and new Pair{.y = 9, .x = 7} both return pointers
+    to pairs with the fields initialized in the obvious manner.&nbsp; (As in all
+    of Cyclone, struct designators must be preceded by the name of the struct.)</li>
+  <li><b>new {...}</b>, where new is a keyword and {...} is an array initializer,
+    allocates space for an array of the appropriate size and initializes the
+    array's elements according to the initializer.&nbsp; 
+    <p>For example, new {3,4,5} allocates space for three ints and returns a
+    pointer to the space.&nbsp; More interestingly, </p>
+    <p><font face="Courier New">new {for i &lt; e1 : e2 }</font></p>
+    <p>evaluates e1 (which must have type unsigned int) and allocates space for
+    an array of that many objects of e2's type.&nbsp; e2 may mention i.&nbsp; e2
+    is first evaluated with i==0 and the result is put at index 0 of the array,
+    then e2 is evaluated with i==1 and the result is put at index 1 of the
+    array, and so on.&nbsp; </p>
+    <p><b>Note: Currently, this construct is the only way to create an object
+    whose size depends on run-time information.</b></p>
+    <p>For example, this function returns an array containing the first n
+    positive even numbers:</p>
+    <p style="line-height: 0"><font face="Courier New">int ? n_evens(int n) {</font></p>
+    <p style="line-height: 0"><font face="Courier New">&nbsp; return new {for
+    next &lt; n :&nbsp; 2*(next+1)};</font></p>
+    <p style="line-height: 0"><font face="Courier New">}</font></p>
+    <p>e1 is evaluated exactly once.&nbsp;&nbsp; e2 is evaluated e1 times.&nbsp;
+    Note that e1 may be 0.&nbsp; <b>Warning: e1 is implictly converted to an
+    unsigned int</b>, so negative values may crash Cyclone!&nbsp; After all new
+    {for i &lt; -1 :&nbsp; 0}, after conversion, asks for an object of roughly 4
+    billion 0s, exhausting the 32-bit address space.</li>
+  <li><font face="Courier New"><b>malloc(sizeof(t))</b></font> where malloc and
+    sizeof are keywords and t is a type.&nbsp; Notice that malloc in Cyclone is
+    much more restricted than in C (where it is a library function consuming an
+    int and returning a char *).&nbsp; In Cyclone, the argument currently must
+    have the form sizeof(t), i.e. you cannot say 8, even if 8 is the size of
+    some type t.&nbsp; That is why malloc cannot be used to create an array
+    whose length depends on run-time information.&nbsp; On the plus side, the
+    type of malloc(sizeof(t)) is t @ (which is a subtype of t*), so there is no
+    need to cast the result of malloc.&nbsp; </li>
+</ul>
+<p>For a growable region, there are three constructs analogous for those that
+implicitly use the heap: <b>rnew(r) e, rnew(r) {...}, and rmalloc(r,sizeof(t))</b>
+all allocate into the region for which r is a handle, where rnew and rmalloc are
+keywords.&nbsp; Note that core.h in the Cyclone library has a global variable
+heap_region which contains a handle for the heap region.&nbsp; As such, you can
+view new e as syntactic sugar for rnew(heap_region,e), and similarly for the
+other constructs.</p>
+<p>The only way to allocate an object into a stack region is via a local
+declaration.&nbsp; Cyclone does not currently support salloc.</p>
+<p><b><a name="common"></a>Common Uses</b></p>
+<p>Although the type system associated with regions is complicated, there are a
+small number of common uses that are easy, even before you understand how they
+fit into the general framework.&nbsp; We present these cases separately for two
+reaons.&nbsp; First, it makes it easier to write and port code without investing
+undue intellectual effort.&nbsp; Second, the full explanation may be easier to
+understand if you have already used the common idioms.</p>
+<ul>
+  <li>Remember that a pointer always points into the same region and this region
+    is indicated by the pointer's type. t * refers to pointers in the heap, so
+    you cannot do the following:
+    <p style="line-height: 0"><font face="Courier New">int x = 7;</font></p>
+    <p style="line-height: 0"><font face="Courier New">int * y = &amp;x;</font></p>
+    <p><b>Here is how to make stack pointers:</b></p>
+    <p style="line-height: 0"><font face="Courier New"><b>int x = 7;</b></font></p>
+    <p style="line-height: 0"><font face="Courier New"><b>int *_ y = &amp;x;</b></font></p>
+    <p><b>The _ (underscore) tells the type-checker to infer the region
+    information for y.</b>&nbsp; In this case, it is the&nbsp; block in which x
+    is declared, i.e. it corresponds to a stack region.&nbsp; You could add _ to
+    all your local pointer types, but it is unnecessary when the pointer points
+    into the heap.</p>
+    <p>Because pointers have only one region attached, the following will not
+    type-check and there is no type that can make it type-check:</p>
+    <p style="line-height: 0"><font face="Courier New">int x = 7;</font></p>
+    <p style="line-height: 0"><font face="Courier New">int *_ y = &amp;x;</font></p>
+    <p style="line-height: 0"><font face="Courier New">y = new 42; // y is not a
+    heap pointer</font></p>
+    <p style="line-height: 0">&nbsp;</li>
+  <li>If a function parameter has type t*, then you cannot&nbsp; pass a pointer
+    into the stack or a growable region for that parameter.&nbsp; (To do so
+    would make it easy for the function to create dangling pointers that could
+    later be followed.)&nbsp; But many functions can take, for example, stack
+    pointers, because they only read through the pointers or pass them to other
+    functions that can take stack pointers.</li>
+</ul>
+<blockquote>
+  <p><b>Here is how to make functions that can accept stack pointers:&nbsp; For
+  each parameter that can safely be a stack pointer, put `r after the * (or @)
+  where `r is an identifier starting with a back-quote that is different from
+  all the other backquote-starting identifiers in the function's type.</b>&nbsp;
+  For example:</p>
+  <p><font face="Courier New">void f(int *`r1 x1, int *`r2 x2, int * x3);</font></p>
+  <p>allows the first two arguments to point into any region at all while the
+  third argument must point into the heap.&nbsp; Note that if we replace `r2
+  with `r1, then x1 and x2 can still point into any region, but they must point
+  into the <i>same</i> region.</p>
+</blockquote>
+<ul>
+  <li><b>You can pass a region handle to a function</b> (so the function can
+    allocate into a caller-provided region).&nbsp; The type of a handle is <font face="Courier New">region_t&lt;`r&gt;</font>
+    where `r is the region information associated with pointers into the
+    region.&nbsp; For example, this code allocates a pair of ints into r:
+    <p><font face="Courier New">$(int,int)*`r f(region_t&lt;`r&gt; r, int x, int
+    y) { </font></p>
+    <p>&nbsp;&nbsp; <font face="Courier New"> </font><font face="Courier New">return
+    rnew(r) $(7,9); </font></p>
+    <p><font face="Courier New">}</font></p>
+    <p>Notice that we used the same `r for the handle and the return type.&nbsp;
+    We could have also passed the object back through a pointer parameter like
+    this:</p>
+    <p style="line-height: 0"><font face="Courier New">void
+    f2(region_t&lt;`r&gt; r, int x, int y, $(int,int)*`r *`r2 p){ </font></p>
+    <p style="line-height: 0"><font face="Courier New">&nbsp; *p = rnew(r)
+    $(7,9); </font></p>
+    <p style="line-height: 0"><font face="Courier New">}</font></p>
+    <p>Notice that we have been careful to indicate that the region where *p
+    lives (corresponding to `r2) may be different from the region for which r is
+    the handle (corresponding to `r).&nbsp; Here is an example use of f2:</p>
+    <p style="line-height: 0">&nbsp; <font face="Courier New">region r { </font></p>
+    <p style="line-height: 0"><font face="Courier New">&nbsp; $(int,int) *_ x =
+    null; </font></p>
+    <p style="line-height: 0"><font face="Courier New">&nbsp; f2(r,3,4,&amp;x);</font></p>
+    <p style="line-height: 0"><font face="Courier New">&nbsp;}</font></p>
+    <p>&nbsp;</li>
+  <li>typedef, struct, tunion, and xtunion declarations can all be parameterized
+    by regions.</li>
+</ul>
+<p><b><a name="types"></a>Types</b></p>
+&nbsp;<!--msnavigation--></td></tr><!--msnavigation--></table></body>
 
 </html>

@@ -11,7 +11,7 @@
 
 <body><!--msnavigation--><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="1%">
 
-<nobr><a href="index.htm">Home</a></nobr><br><nobr><a href="quick_questions.htm">Quick&nbsp;Questions</a></nobr><br><nobr>Quick&nbsp;Answers</nobr><br><nobr><a href="known_bugs.htm">Known&nbsp;Bugs</a></nobr><br><nobr><a href="pointers.htm">Pointers</a></nobr><br><nobr><a href="discriminated_unions.htm">Discriminated&nbsp;Unions</a></nobr><br><nobr><a href="pattern_matching.htm">Pattern&nbsp;Matching</a></nobr><br><nobr><a href="type_inference.htm">Type&nbsp;Inference</a></nobr><br><nobr><a href="polymorphism.htm">Polymorphism</a></nobr><br><nobr><a href="regions_and_effects.htm">Regions&nbsp;and&nbsp;Effects</a></nobr><br><nobr><a href="definite_assignment.htm">Definite&nbsp;Assignment</a></nobr><br><nobr><a href="namespaces.htm">Namespaces</a></nobr><br><nobr><a href="interfacing_with_c.htm">Interfacing&nbsp;with&nbsp;C</a></nobr>
+<nobr><a href="index.htm">Home</a></nobr><br><nobr><a href="quick_questions.htm">Quick&nbsp;Questions</a></nobr><br><nobr>Quick&nbsp;Answers</nobr><br><nobr><a href="known_bugs.htm">Known&nbsp;Bugs</a></nobr><br><nobr><a href="pointers.htm">Pointers</a></nobr><br><nobr><a href="discriminated_unions.htm">Discriminated&nbsp;Unions</a></nobr><br><nobr><a href="pattern_matching.htm">Pattern&nbsp;Matching</a></nobr><br><nobr><a href="type_inference.htm">Type&nbsp;Inference</a></nobr><br><nobr><a href="polymorphism.htm">Polymorphism</a></nobr><br><nobr><a href="regions_and_effects.htm">Memory&nbsp;Management</a></nobr><br><nobr><a href="definite_assignment.htm">Definite&nbsp;Assignment</a></nobr><br><nobr><a href="namespaces.htm">Namespaces</a></nobr><br><nobr><a href="interfacing_with_c.htm">Interfacing&nbsp;with&nbsp;C</a></nobr>
 
 </td><td valign="top" width="24"></td><!--msnavigation--><td valign="top">
 <h1 align="center">Quick Answers About Cyclone</h1>
@@ -296,6 +296,24 @@ to reclaim heap objects or use <a href="regions_and_effects.htm">regions</a>
 (similar to &quot;arenas&quot; or &quot;zones&quot;) for managing collections of
 objects.</p>
 <p>For porting code, you may want to define &quot;void free(`a a) {}&quot;.</p>
+<p><b><a name="mem_gc"></a>Is there a garbage collector?</b></p>
+<p>Yes, Cyclone code must be linked against the Boehm-Demers-Weiser conservative
+collector, which is bin/gc.a in the Cyclone distribution.&nbsp; Even if you do
+no heap allocation, the command-line arguments are copied into the heap before
+your code executes.&nbsp; If you link against additional C code, that code must
+obey the usual rules for conservative garbage collection: no wildcard pointers
+and no calling malloc behind the collector's back.&nbsp; Instead, you should
+call GC_malloc.&nbsp; See the collector's documentation for more
+information.&nbsp;&nbsp;</p>
+<p>Note that if you allocate all objects on the stack, garbage collection will
+never occur.&nbsp; If you allocate all objects on the stack or in regions, it is
+very unlikely collection will occur and nothing will actually get collected.</p>
+<p><b><a name="mem_salloc"></a>Can I use salloc? realloc?</b></p>
+<p>No, neither of these functions are currently provided and it is not possible
+to write them in Cyclone.&nbsp; Both features are really only useful for
+allocating an amount of space that depends on run-time values (such as for some
+arrays).&nbsp; Because Cyclone currently requires that such space be initialized
+when it is allocated, we cannot safely provide salloc or realloc.&nbsp;&nbsp;</p>
 <p><b><a name="tools_pp"></a>Can I get a readable version of the output?</b></p>
 <p>Yes, with caveats.&nbsp; Pass Cyclone the flag -pp and the C output will be
 pretty-printed.&nbsp; (The default is to &quot;ugly print&quot; because
