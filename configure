@@ -59,6 +59,27 @@ function get_cc {
   fi
 }
 
+# when setting up a new architecture, figures out the default
+#   set up genfiles to use
+#
+function get_def_genfiles {
+  mkdir ${CYCDIR}/bin/genfiles/${ARCH}
+  case "${OS}" in
+    cygwin*)
+      DEF_ARCH=i686-unknown-cygwin1.3.2;;
+    *bsd*)
+      DEF_ARCH=i386-unknown-openbsd2.8;;
+    *)
+      DEF_ARCH=i686-unknown-linux
+  esac
+  echo "Using the genfiles from ${DEF_ARCH}" 
+  cp -r ${CYCDIR}/bin/genfiles/${DEF_ARCH}/* ${CYCDIR}/bin/genfiles/${ARCH}
+  CVS_files=`find ${CYCDIR}/bin/genfiles/${ARCH} -name CVS`
+  if [ -n "$CVS_files" ]; then
+    \rm -rf $CVS_files
+  fi
+}
+
 ###########################################################################
 #  incdir="$CYCDIR/include"
 #  libdir="$CYCDIR/bin/cyc-lib"
@@ -155,20 +176,7 @@ if [ ! -f "arch/${ARCH}" ]; then
     if [ -d "${CYCDIR}/bin/genfiles/${ARCH}" ]; then
       echo "Warning: genfiles directory for ${ARCH} exists"
     else
-      # this code is replicated below; change both places
-      mkdir ${CYCDIR}/bin/genfiles/${ARCH}
-      case "${ARCH}" in
-      *cygwin*)
-        DEF_ARCH=i686-unknown-cygwin1.3.2;;
-      *)
-        DEF_ARCH=i686-unknown-linux
-      esac
-      echo "Using the genfiles from ${DEF_ARCH}" 
-      cp -r ${CYCDIR}/bin/genfiles/${DEF_ARCH}/* ${CYCDIR}/bin/genfiles/${ARCH}
-      CVS_files=`find ${CYCDIR}/bin/genfiles/${ARCH} -name CVS`
-      if [ -n "$CVS_files" ]; then
-        \rm -rf $CVS_files
-      fi
+      get_def_genfiles;
     fi
   else
     echo "aborting."
@@ -181,20 +189,7 @@ else
     cd ../bin/genfiles; ./extract_patch ${PATCH_ARCH} ${ARCH}; cd -
     if [ ! -d "${CYCDIR}/bin/genfiles/${ARCH}" ]; then
       echo "Warning: genfiles directory for ${ARCH} not present"
-      # XXX replicates the code above
-      mkdir ${CYCDIR}/bin/genfiles/${ARCH}
-      case "${ARCH}" in
-      *cygwin*)
-        DEF_ARCH=i686-unknown-cygwin1.3.2;;
-      *)
-        DEF_ARCH=i686-unknown-linux
-      esac
-      echo "Using the genfiles from ${DEF_ARCH}" 
-      cp -r ${CYCDIR}/bin/genfiles/${DEF_ARCH}/* ${CYCDIR}/bin/genfiles/${ARCH}
-      CVS_files=`find ${CYCDIR}/bin/genfiles/${ARCH} -name CVS`
-      if [ -n "$CVS_files" ]; then
-        \rm -rf $CVS_files
-      fi
+      get_def_genfiles;
     fi
   else
     echo "Error---missing configuration files for ${ARCH}; rerun configure"

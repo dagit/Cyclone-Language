@@ -188,6 +188,7 @@ endif
 #   communicate between update_all_archs and update for this to
 #   work properly.
 update_all_archs: 
+	$(MAKE) -c bin/genfiles clean
 	@if [ "$(PATCH_ARCH)" != "$(ARCH)" ]; then\
 	  if [ ! -d "$(PATCH_ARCH)" ]; then mkdir $(PATCH_ARCH); fi;\
           $(MAKE) -C lib TARGET=$(PATCH_ARCH) $(PATCH_ARCH);\

@@ -117,7 +117,7 @@ $(TARGET): $(addprefix $(TARGETDIR), $(C_LIBS)) $(RUNTIME).c precore_c.h nogc.c
 	cp nogc.c $(TARGETDIR)nogc.c
 
 $(TARGETDIR)%.c: %.cyc $(CYCC) $(CYCINC_H)
-	$(CYCC) -D_PLATFORM_INCLUDES_="\"arch/$(TARGET).h\"" -I$(CYC_INC_PATH) -stopafter-toc $(TOVC_FLAG) -save-c -use-cpp '$(CONFIGDIR)/cyccpp $(CONFIGDIR)/arch/$(ARCH) $(CONFIGDIR)/arch/$(TARGET)' -o $@ $<
+	$(CYCC) -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) $(CPP_FLAG) -D_PLATFORM_INCLUDES_="\"arch/$(TARGET).h\"" -I$(CYC_INC_PATH) -stopafter-toc $(TOVC_FLAG) -save-c -use-cpp '$(CONFIGDIR)/cyccpp $(CONFIGDIR)/arch/$(ARCH) $(CONFIGDIR)/arch/$(TARGET)' -o $@ $<
 endif
 
 # delete generated files with a particular prefix

@@ -79,9 +79,10 @@ extern "C" {
   extern Cstring Cdef_inc_path;
   extern Cstring Cdef_lib_path;
   extern Cstring Carch;
+  extern Cstring Ccomp;
 }
 
-static string_t cpp = "gcc -x c -E -U__GNUC__ -nostdinc";
+static string_t cpp = "";
 static void set_cpp(string_t<`H> s) {
   cpp = s;
 }
@@ -94,7 +95,8 @@ static void add_cpparg(string_t<`H> s) {
 // Prints the version # and exits
 static void print_version() {
   printf("The Cyclone compiler, version %s\n", version);
-  printf("Compiled for architecture: %s\n", Cstring_to_string(Carch));
+  printf("Compiled for architecture: %s / %s\n", 
+	 Cstring_to_string(Carch), Cstring_to_string(Ccomp));
   printf("Standard library directory: %s\n",Cstring_to_string(Cdef_lib_path));
   printf("Standard include directory: %s\n", Cstring_to_string(Cdef_inc_path));
   exit(0);
@@ -413,6 +415,18 @@ static bool file_exists(string_t file) {
   else { fclose((FILE @)f); return true; }
 }
 
+/* Prints out a list of string pointers */
+static string_t sprint_list(list_t<stringptr_t>dirs) {
+  string_t tmp = "";
+  for (; dirs != NULL; dirs = dirs->tl) {
+    let dir = *dirs->hd;
+    if (dir == NULL || strlen(dir)==0) continue;
+    dir = strconcat(dir,":");
+    tmp = strconcat(dir,tmp);
+  }
+  return tmp;
+}
+
 /* Looks for the file in the list of directories.  The order
    of the list matters---it returns the first file it finds. */
 static string_t *find(list_t<stringptr_t> dirs, string_t file) {
@@ -429,7 +443,8 @@ static string_t *find(list_t<stringptr_t> dirs, string_t file) {
 static string_t do_find(list_t<stringptr_t> dirs, string_t file) {
   let f = find(dirs, file);
   if (f == NULL) {
-    fprintf(stderr,"Error: can't find internal compiler file %s", file);
+    fprintf(stderr,"Error: can't find internal compiler file %s in path %s\n", 
+	    file, sprint_list(dirs));
     compile_failure = true;
     remove_cfiles();
     exit(1);
@@ -704,6 +719,11 @@ static bool is_cfile(string_t @ n) {
 
 int main(int argc, string_t<`H> ?`H argv) {
 
+  // set default preprocessor before overwriting with argument processing
+  string_t comp = Cstring_to_string(Ccomp);
+  set_cpp(strconcat(comp," -x c -E -U__GNUC__ -nostdinc"));
+
+  // now parse the arguments
   Arg::speclist_t<`H,`H> options =
     list(new $("-v",false,"",
                new Set_spec(&v_r),
@@ -961,7 +981,8 @@ int main(int argc, string_t<`H> ?`H argv) {
   }
 
   let cccmd =
-    aprintf("gcc %s %s%s%s",
+    aprintf("%s %s %s%s%s",
+	    comp,
             (output_file==NULL?((string_t)""):aprintf(" -o %s",sh_escape_string(*output_file))),
             ccargs_string,
             stdlib_string,

@@ -65,7 +65,8 @@ cycdoc.cyc: cycdoc.cyl
 install_path.c:
 	@(echo "char *Carch = \"$(ARCH)\";"; \
 	  echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
-	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";") > $@
+	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
+	  echo "char *Ccomp = \"$(CC)\";") > $@
 
 cyclone.$(O): version.h
 version.h: ../.version
@@ -111,7 +112,7 @@ TARGETDIR := ../$(TARGET)/
 $(TARGET): $(addprefix $(TARGETDIR), $(C_SRCS))
 
 $(TARGETDIR)%.c: %.cyc $(CYCC) $(CYCINC_H)
-	$(CYCC) -D_PLATFORM_INCLUDES_="\"arch/$(TARGET).h\"" -I$(CYC_INC_PATH) -stopafter-toc $(TOVC_FLAG) -save-c -use-cpp '$(CONFIGDIR)/cyccpp $(CONFIGDIR)/arch/$(ARCH) $(CONFIGDIR)/arch/$(TARGET)' -o $@ $<
+	$(CYCC) -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) $(CPP_FLAG) -D_PLATFORM_INCLUDES_="\"arch/$(TARGET).h\"" -I$(CYC_INC_PATH) -stopafter-toc $(TOVC_FLAG) -save-c -use-cpp '$(CONFIGDIR)/cyccpp $(CONFIGDIR)/arch/$(ARCH) $(CONFIGDIR)/arch/$(TARGET)' -o $@ $<
 
 endif
 

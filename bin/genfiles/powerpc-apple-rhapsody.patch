@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapsody/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Mon Sep 10 11:30:36 2001
---- powerpc-apple-rhapsody/lib/execinfo.c	Wed Sep 12 12:49:42 2001
+*** i686-unknown-linux/lib/execinfo.c	Mon Sep 10 12:33:26 2001
+--- powerpc-apple-rhapsody/lib/execinfo.c	Thu Sep 13 11:07:38 2001
 ***************
 *** 230,324 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
@@ -129,7 +129,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/install_path.c.rej powerpc-apple-rhapsody/src/install_path.c.rej
 *** i686-unknown-linux/src/install_path.c.rej	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/src/install_path.c.rej	Wed Sep 12 12:49:42 2001
+--- powerpc-apple-rhapsody/src/install_path.c.rej	Thu Sep 13 11:07:38 2001
 ***************
 *** 0 ****
 --- 1,6 ----
