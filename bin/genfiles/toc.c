@@ -3481,15 +3481,17 @@ _LL282;case Cyc_Absyn_Lte: _LL282: {struct Cyc_Absyn_Exp*e1=(struct Cyc_Absyn_Ex
 struct Cyc_List_List*)_check_null(_tmp490))->hd;struct Cyc_Absyn_Exp*e2=(struct Cyc_Absyn_Exp*)((
 struct Cyc_List_List*)_check_null(_tmp490->tl))->hd;void*t1=(void*)((struct Cyc_List_List*)
 _check_null(_tmp519))->hd;void*t2=(void*)((struct Cyc_List_List*)_check_null(
-_tmp519->tl))->hd;if(Cyc_Tcutil_is_tagged_pointer_typ(t1))e1->r=Cyc_Toc_aggrmember_exp_r(
-Cyc_Absyn_new_exp(e1->r,0),Cyc_Toc_curr_sp);if(Cyc_Tcutil_is_tagged_pointer_typ(
-t2))e2->r=Cyc_Toc_aggrmember_exp_r(Cyc_Absyn_new_exp(e2->r,0),Cyc_Toc_curr_sp);
-break;}default: _LL283: break;}goto _LL208;}_LL213: {struct Cyc_Absyn_Increment_e_struct*
-_tmp491=(struct Cyc_Absyn_Increment_e_struct*)_tmp484;if(_tmp491->tag != 5)goto
-_LL215;else{_tmp492=_tmp491->f1;_tmp493=_tmp491->f2;}}_LL214: {void*e2_cyc_typ=(
-void*)((struct Cyc_Core_Opt*)_check_null(_tmp492->topt))->v;void*ptr_type=(void*)&
-Cyc_Absyn_VoidType_val;void*elt_type=(void*)& Cyc_Absyn_VoidType_val;int
-is_dyneither=0;const char*_tmpBC1;struct _dyneither_ptr incr_str=(_tmpBC1="increment",
+_tmp519->tl))->hd;void*elt_typ=(void*)& Cyc_Absyn_VoidType_val;if(Cyc_Tcutil_is_tagged_pointer_typ_elt(
+t1,& elt_typ))e1->r=Cyc_Toc_cast_it_r(Cyc_Absyn_cstar_typ(Cyc_Toc_typ_to_c(
+elt_typ),Cyc_Toc_mt_tq),Cyc_Absyn_aggrmember_exp(Cyc_Absyn_new_exp(e1->r,0),Cyc_Toc_curr_sp,
+0));if(Cyc_Tcutil_is_tagged_pointer_typ(t2))e2->r=Cyc_Toc_cast_it_r(Cyc_Absyn_cstar_typ(
+Cyc_Toc_typ_to_c(elt_typ),Cyc_Toc_mt_tq),Cyc_Absyn_aggrmember_exp(Cyc_Absyn_new_exp(
+e2->r,0),Cyc_Toc_curr_sp,0));break;}default: _LL283: break;}goto _LL208;}_LL213: {
+struct Cyc_Absyn_Increment_e_struct*_tmp491=(struct Cyc_Absyn_Increment_e_struct*)
+_tmp484;if(_tmp491->tag != 5)goto _LL215;else{_tmp492=_tmp491->f1;_tmp493=_tmp491->f2;}}
+_LL214: {void*e2_cyc_typ=(void*)((struct Cyc_Core_Opt*)_check_null(_tmp492->topt))->v;
+void*ptr_type=(void*)& Cyc_Absyn_VoidType_val;void*elt_type=(void*)& Cyc_Absyn_VoidType_val;
+int is_dyneither=0;const char*_tmpBC1;struct _dyneither_ptr incr_str=(_tmpBC1="increment",
 _tag_dyneither(_tmpBC1,sizeof(char),10));if(_tmp493 == Cyc_Absyn_PreDec  || 
 _tmp493 == Cyc_Absyn_PostDec){const char*_tmpBC2;incr_str=((_tmpBC2="decrement",
 _tag_dyneither(_tmpBC2,sizeof(char),10)));}if(Cyc_Tcutil_is_zero_ptr_deref(

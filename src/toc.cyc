@@ -1998,10 +1998,11 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_t e2 = es->tl->hd;
       type_t t1 = old_typs->hd;
       type_t t2 = old_typs->tl->hd;
-      if (is_tagged_pointer_typ(t1))
-	e1->r = aggrmember_exp_r(new_exp(e1->r,DL),curr_sp);
+      type_t elt_typ = &VoidType_val; // bogus until next call
+      if (is_tagged_pointer_typ_elt(t1,&elt_typ))
+	e1->r = cast_it_r(cstar_typ(typ_to_c(elt_typ),mt_tq),aggrmember_exp(new_exp(e1->r,DL),curr_sp,DL));
       if (is_tagged_pointer_typ(t2))
-	e2->r = aggrmember_exp_r(new_exp(e2->r,DL),curr_sp);
+	e2->r = cast_it_r(cstar_typ(typ_to_c(elt_typ),mt_tq),aggrmember_exp(new_exp(e2->r,DL),curr_sp,DL));
       break;
     default: break; //skip
     }

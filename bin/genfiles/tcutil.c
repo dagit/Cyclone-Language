@@ -1230,9 +1230,9 @@ _tmpE81;(_tmpE81=0,Cyc_fprintf(Cyc_stderr,((_tmpE82="\n\t",_tag_dyneither(
 _tmpE82,sizeof(char),3))),_tag_dyneither(_tmpE81,sizeof(void*),0)));}pos=8;}{
 const char*_tmpE85;void*_tmpE84;(_tmpE84=0,Cyc_fprintf(Cyc_stderr,((_tmpE85="are not compatible. ",
 _tag_dyneither(_tmpE85,sizeof(char),21))),_tag_dyneither(_tmpE84,sizeof(void*),0)));}
-pos +=17;if(Cyc_Tcutil_failure_reason.curr != (_tag_dyneither(0,0,0)).curr){if(pos
-+ Cyc_strlen((struct _dyneither_ptr)Cyc_Tcutil_failure_reason)>= 80){const char*
-_tmpE88;void*_tmpE87;(_tmpE87=0,Cyc_fprintf(Cyc_stderr,((_tmpE88="\n\t",
+pos +=17;if((char*)Cyc_Tcutil_failure_reason.curr != (char*)(_tag_dyneither(0,0,0)).curr){
+if(pos + Cyc_strlen((struct _dyneither_ptr)Cyc_Tcutil_failure_reason)>= 80){const
+char*_tmpE88;void*_tmpE87;(_tmpE87=0,Cyc_fprintf(Cyc_stderr,((_tmpE88="\n\t",
 _tag_dyneither(_tmpE88,sizeof(char),3))),_tag_dyneither(_tmpE87,sizeof(void*),0)));}{
 const char*_tmpE8C;void*_tmpE8B[1];struct Cyc_String_pa_struct _tmpE8A;(_tmpE8A.tag=
 0,((_tmpE8A.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Tcutil_failure_reason),((
