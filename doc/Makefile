@@ -8,6 +8,11 @@ letter: main-letter.pdf
 
 a4: main-a4.pdf
 
+online-manual: main-screen.html
+	$(RM) -r online-manual
+	mkdir online-manual
+	(cd online-manual; hacha ../main-screen.html)
+
 main-screen.html:
 	hevea main-screen
 	hevea main-screen
@@ -35,5 +40,6 @@ clean:
 	$(RM) *.aux *.dvi *.hind *.haux *.idx *.ilg *.ind *.ing *.log
 	$(RM) *.pdf *.toc *.out
 	$(RM) main-screen.html
+	$(RM) -r online-manual
 
 .PHONY: main-screen.html main-screen.pdf main-letter.pdf main-a4.pdf
