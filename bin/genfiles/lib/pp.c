@@ -145,13 +145,13 @@ Cyc_Core_Opt)); _temp39->v=( void*)(( struct Cyc_Hashtable_Table*(*)( int sz,
 int(* cmp)( int, int), int(* hash)( int))) Cyc_Hashtable_create)( 61, Cyc_Core_intcmp,(
 int(*)( int)) Cyc_Core_identity); _temp39;});} if( i < 0){( void) _throw(({
 struct Cyc_Core_Failure_struct* _temp40=( struct Cyc_Core_Failure_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Failure_struct));* _temp40=( struct Cyc_Core_Failure_struct){.tag=
-Cyc_Core_Failure_tag,.f1=( struct _tagged_string)({ char* _temp41=( char*)"nlblanks";
-struct _tagged_string _temp42; _temp42.curr= _temp41; _temp42.base= _temp41;
-_temp42.last_plus_one= _temp41 + 9; _temp42;})};( struct _xenum_struct*) _temp40;}));}{
-struct _handler_cons _temp43; _push_handler(& _temp43);{ struct _xenum_struct*
-_temp44=( struct _xenum_struct*) setjmp( _temp43.handler); if( ! _temp44){{
-struct _tagged_string _temp45=*(( struct _tagged_string*(*)( struct Cyc_Hashtable_Table*
+GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp40->tag= Cyc_Core_Failure_tag;
+_temp40->f1=( struct _tagged_string)({ char* _temp41=( char*)"nlblanks"; struct
+_tagged_string _temp42; _temp42.curr= _temp41; _temp42.base= _temp41; _temp42.last_plus_one=
+_temp41 + 9; _temp42;});( struct _xenum_struct*) _temp40;}));}{ struct
+_handler_cons _temp43; _push_handler(& _temp43);{ struct _xenum_struct* _temp44=(
+struct _xenum_struct*) setjmp( _temp43.handler); if( ! _temp44){{ struct
+_tagged_string _temp45=*(( struct _tagged_string*(*)( struct Cyc_Hashtable_Table*
 t, int key)) Cyc_Hashtable_lookup)(( struct Cyc_Hashtable_Table*) Cyc_PP_bhashtbl->v,
 i); _npop_handler( 0u); return _temp45;}; _pop_handler();} else{ struct
 _xenum_struct* _temp47= _temp44; _LL49: if( _temp47->tag == Cyc_Core_Not_found_tag){
@@ -360,10 +360,10 @@ void*) links; _temp147;});}} struct Cyc_PP_Doc* Cyc_PP_concats_arr( struct
 _tagged_ptr0 docs){ int sz=( int)({ struct _tagged_ptr0 _temp148= docs;(
 unsigned int)( _temp148.last_plus_one - _temp148.curr);}); if( sz == 0){( void)
 _throw(({ struct Cyc_Core_Failure_struct* _temp149=( struct Cyc_Core_Failure_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Failure_struct));* _temp149=( struct Cyc_Core_Failure_struct){.tag=
-Cyc_Core_Failure_tag,.f1=( struct _tagged_string)({ char* _temp150=( char*)"concats_arr -- size zero array";
+GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp149->tag= Cyc_Core_Failure_tag;
+_temp149->f1=( struct _tagged_string)({ char* _temp150=( char*)"concats_arr -- size zero array";
 struct _tagged_string _temp151; _temp151.curr= _temp150; _temp151.base= _temp150;
-_temp151.last_plus_one= _temp150 + 31; _temp151;})};( struct _xenum_struct*)
+_temp151.last_plus_one= _temp150 + 31; _temp151;});( struct _xenum_struct*)
 _temp149;}));}{ struct Cyc_PP_Doc* d=({ struct _tagged_ptr0 _temp152= docs;
 struct Cyc_PP_Doc** _temp154= _temp152.curr + 0; if( _temp154 < _temp152.base? 1:
 _temp154 >= _temp152.last_plus_one){ _throw( Null_Exception);}* _temp154;}); int

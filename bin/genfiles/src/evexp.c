@@ -874,9 +874,8 @@ _temp597;});} if( use_b3){ return({ struct Cyc_Absyn_Int_c_struct* _temp598=(
 struct Cyc_Absyn_Int_c_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Int_c_struct));
 _temp598->tag= Cyc_Absyn_Int_c_tag; _temp598->f1=( void*) Cyc_Absyn_Signed;
 _temp598->f2= b3? 1: 0;( void*) _temp598;});}( void) _throw(({ struct Cyc_Core_Unreachable_struct*
-_temp599=( struct Cyc_Core_Unreachable_struct*) GC_malloc( sizeof( struct Cyc_Core_Unreachable_struct));*
-_temp599=( struct Cyc_Core_Unreachable_struct){.tag= Cyc_Core_Unreachable_tag,.f1=(
-struct _tagged_string)({ char* _temp600=( char*)"Evexp::eval_const_binop";
-struct _tagged_string _temp601; _temp601.curr= _temp600; _temp601.base= _temp600;
-_temp601.last_plus_one= _temp600 + 24; _temp601;})};( struct _xenum_struct*)
-_temp599;}));}}
+_temp599=( struct Cyc_Core_Unreachable_struct*) GC_malloc( sizeof( struct Cyc_Core_Unreachable_struct));
+_temp599->tag= Cyc_Core_Unreachable_tag; _temp599->f1=( struct _tagged_string)({
+char* _temp600=( char*)"Evexp::eval_const_binop"; struct _tagged_string _temp601;
+_temp601.curr= _temp600; _temp601.base= _temp600; _temp601.last_plus_one=
+_temp600 + 24; _temp601;});( struct _xenum_struct*) _temp599;}));}}

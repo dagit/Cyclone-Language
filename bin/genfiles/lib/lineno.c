@@ -105,13 +105,13 @@ _LL12: return 2; case 1: _LL13: return 1; case 2: _LL14: return 3; default:
 _LL15:( lexbuf->refill_buff)( lexbuf); return(( int(*)( struct Cyc_Lexing_lexbuf*
 lexbuf, int lexstate)) Cyc_Lineno_token_rec)( lexbuf, lexstate);}( void) _throw(({
 struct Cyc_Lexing_Error_struct* _temp17=( struct Cyc_Lexing_Error_struct*)
-GC_malloc( sizeof( struct Cyc_Lexing_Error_struct));* _temp17=( struct Cyc_Lexing_Error_struct){.tag=
-Cyc_Lexing_Error_tag,.f1=( struct _tagged_string)({ char* _temp18=( char*)"some action didn't return!";
+GC_malloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp17->tag= Cyc_Lexing_Error_tag;
+_temp17->f1=( struct _tagged_string)({ char* _temp18=( char*)"some action didn't return!";
 struct _tagged_string _temp19; _temp19.curr= _temp18; _temp19.base= _temp18;
-_temp19.last_plus_one= _temp18 + 27; _temp19;})};( struct _xenum_struct*)
-_temp17;}));} int Cyc_Lineno_token( struct Cyc_Lexing_lexbuf* lexbuf){ return((
-int(*)( struct Cyc_Lexing_lexbuf* lexbuf, int lexstate)) Cyc_Lineno_token_rec)(
-lexbuf, 0);} struct Cyc_Lineno_Pos; static struct Cyc_Core_Opt* Cyc_Lineno_parse_linedef(
+_temp19.last_plus_one= _temp18 + 27; _temp19;});( struct _xenum_struct*) _temp17;}));}
+int Cyc_Lineno_token( struct Cyc_Lexing_lexbuf* lexbuf){ return(( int(*)( struct
+Cyc_Lexing_lexbuf* lexbuf, int lexstate)) Cyc_Lineno_token_rec)( lexbuf, 0);}
+struct Cyc_Lineno_Pos; static struct Cyc_Core_Opt* Cyc_Lineno_parse_linedef(
 struct _tagged_string line){ struct _handler_cons _temp20; _push_handler(&
 _temp20);{ struct _xenum_struct* _temp21=( struct _xenum_struct*) setjmp(
 _temp20.handler); if( ! _temp21){{ int i= 0; while(( unsigned int) i <({ struct
@@ -169,23 +169,22 @@ struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme_end)( lbuf); this_line=(( struct
 _tagged_string(*)( struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme)( lbuf); if(
 eol >=(*(( struct _tuple1*) places->hd)).f1){ break;} switch( next){ case 3:
 _LL63:( void) _throw(({ struct Cyc_Core_Failure_struct* _temp65=( struct Cyc_Core_Failure_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Failure_struct));* _temp65=( struct Cyc_Core_Failure_struct){.tag=
-Cyc_Core_Failure_tag,.f1=( struct _tagged_string)({ char* _temp66=( char*)"Lineno: Invalid file position";
+GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp65->tag= Cyc_Core_Failure_tag;
+_temp65->f1=( struct _tagged_string)({ char* _temp66=( char*)"Lineno: Invalid file position";
 struct _tagged_string _temp67; _temp67.curr= _temp66; _temp67.base= _temp66;
-_temp67.last_plus_one= _temp66 + 30; _temp67;})};( struct _xenum_struct*)
-_temp65;})); case 1: _LL64: ++ line; break; case 2: _LL68: { struct Cyc_Core_Opt*
-fno= Cyc_Lineno_parse_linedef( this_line); if( fno == 0){ ++ line;({ struct
-_tagged_string _temp70= this_line; fprintf( Cyc_Stdio_stderr,"Unknown directive: %.*s\n",
-_temp70.last_plus_one - _temp70.curr, _temp70.curr);});} else{ source_file=(*((
-struct _tuple0*) fno->v)).f1; line=(*(( struct _tuple0*) fno->v)).f2;} break;}
-default: _LL69:( void) _throw(({ struct Cyc_Core_Failure_struct* _temp72=(
-struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));*
-_temp72=( struct Cyc_Core_Failure_struct){.tag= Cyc_Core_Failure_tag,.f1=(
-struct _tagged_string)({ char* _temp73=( char*)"Lineno: Impossible"; struct
-_tagged_string _temp74; _temp74.curr= _temp73; _temp74.base= _temp73; _temp74.last_plus_one=
-_temp73 + 19; _temp74;})};( struct _xenum_struct*) _temp72;}));}} while( places
-!= 0? eol >=(*(( struct _tuple1*) places->hd)).f1: 0) { struct Cyc_Lineno_Pos* p=(*((
-struct _tuple1*) places->hd)).f2; p->logical_file= source_file; p->line=
+_temp67.last_plus_one= _temp66 + 30; _temp67;});( struct _xenum_struct*) _temp65;}));
+case 1: _LL64: ++ line; break; case 2: _LL68: { struct Cyc_Core_Opt* fno= Cyc_Lineno_parse_linedef(
+this_line); if( fno == 0){ ++ line;({ struct _tagged_string _temp70= this_line;
+fprintf( Cyc_Stdio_stderr,"Unknown directive: %.*s\n", _temp70.last_plus_one -
+_temp70.curr, _temp70.curr);});} else{ source_file=(*(( struct _tuple0*) fno->v)).f1;
+line=(*(( struct _tuple0*) fno->v)).f2;} break;} default: _LL69:( void) _throw(({
+struct Cyc_Core_Failure_struct* _temp72=( struct Cyc_Core_Failure_struct*)
+GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp72->tag= Cyc_Core_Failure_tag;
+_temp72->f1=( struct _tagged_string)({ char* _temp73=( char*)"Lineno: Impossible";
+struct _tagged_string _temp74; _temp74.curr= _temp73; _temp74.base= _temp73;
+_temp74.last_plus_one= _temp73 + 19; _temp74;});( struct _xenum_struct*) _temp72;}));}}
+while( places != 0? eol >=(*(( struct _tuple1*) places->hd)).f1: 0) { struct Cyc_Lineno_Pos*
+p=(*(( struct _tuple1*) places->hd)).f2; p->logical_file= source_file; p->line=
 this_line; p->line_no= line; p->col=( int)( Cyc_String_strlen( this_line) -(
 unsigned int)( eol -(*(( struct _tuple1*) places->hd)).f1)); places= places->tl;}
 ++ line;}}; _pop_handler();} else{ struct _xenum_struct* _temp76= _temp62; _LL78:

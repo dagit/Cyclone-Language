@@ -853,11 +853,11 @@ _temp370.nullable; goto _LL375; _LL375: _temp374=( struct Cyc_Absyn_Tqual*)
 _temp370.tq; goto _LL373; _LL373: _temp372=( struct Cyc_Absyn_Conref*) _temp370.bounds;
 goto _LL367;} else{ goto _LL368;} _LL368: goto _LL369; _LL367: Cyc_Tcenv_check_rgn_accessible(
 te, p->loc, _temp378); return; _LL369:( void) _throw(({ struct Cyc_Core_Impossible_struct*
-_temp382=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));*
-_temp382=( struct Cyc_Core_Impossible_struct){.tag= Cyc_Core_Impossible_tag,.f1=(
-struct _tagged_string)({ char* _temp383=( char*)"check_pat_regions: bad pointer type";
-struct _tagged_string _temp384; _temp384.curr= _temp383; _temp384.base= _temp383;
-_temp384.last_plus_one= _temp383 + 36; _temp384;})};( struct _xenum_struct*)
+_temp382=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
+_temp382->tag= Cyc_Core_Impossible_tag; _temp382->f1=( struct _tagged_string)({
+char* _temp383=( char*)"check_pat_regions: bad pointer type"; struct
+_tagged_string _temp384; _temp384.curr= _temp383; _temp384.base= _temp383;
+_temp384.last_plus_one= _temp383 + 36; _temp384;});( struct _xenum_struct*)
 _temp382;})); _LL365:;} _LL321: _temp344=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Pat*(*
 f)( struct _tuple6*), struct Cyc_List_List* x)) Cyc_List_map)(( struct Cyc_Absyn_Pat*(*)(
 struct _tuple6*)) Cyc_Core_snd, _temp332); goto _LL323; _LL323: _temp354=

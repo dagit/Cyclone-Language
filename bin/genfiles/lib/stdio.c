@@ -109,12 +109,11 @@ char Cyc_Stdio_FileOpenError_tag[ 14u]="FileOpenError"; char Cyc_Stdio_FileClose
 15u]="FileCloseError"; struct Cyc_Stdio___sFILE* Cyc_Stdio_file_open( struct
 _tagged_string fname, struct _tagged_string mode){ struct Cyc_Stdio___sFILE* f=
 Cyc_Stdio_fopen( fname, mode); if( f == 0){( void) _throw(({ struct Cyc_Stdio_FileOpenError_struct*
-_temp1=( struct Cyc_Stdio_FileOpenError_struct*) GC_malloc( sizeof( struct Cyc_Stdio_FileOpenError_struct));*
-_temp1=( struct Cyc_Stdio_FileOpenError_struct){.tag= Cyc_Stdio_FileOpenError_tag,.f1=
-fname};( struct _xenum_struct*) _temp1;}));} return( struct Cyc_Stdio___sFILE*)({
-struct Cyc_Stdio___sFILE* _temp2= f; if( _temp2 == 0){ _throw( Null_Exception);}
-_temp2;});} void Cyc_Stdio_file_close( struct Cyc_Stdio___sFILE* f){ if( Cyc_Stdio_fclose((
-struct Cyc_Stdio___sFILE*) f) != 0){( void) _throw(({ struct Cyc_Stdio_FileCloseError_struct*
-_temp3=( struct Cyc_Stdio_FileCloseError_struct*) GC_malloc_atomic( sizeof(
-struct Cyc_Stdio_FileCloseError_struct));* _temp3=( struct Cyc_Stdio_FileCloseError_struct){.tag=
-Cyc_Stdio_FileCloseError_tag};( struct _xenum_struct*) _temp3;}));}}
+_temp1=( struct Cyc_Stdio_FileOpenError_struct*) GC_malloc( sizeof( struct Cyc_Stdio_FileOpenError_struct));
+_temp1->tag= Cyc_Stdio_FileOpenError_tag; _temp1->f1= fname;( struct
+_xenum_struct*) _temp1;}));} return( struct Cyc_Stdio___sFILE*)({ struct Cyc_Stdio___sFILE*
+_temp2= f; if( _temp2 == 0){ _throw( Null_Exception);} _temp2;});} void Cyc_Stdio_file_close(
+struct Cyc_Stdio___sFILE* f){ if( Cyc_Stdio_fclose(( struct Cyc_Stdio___sFILE*)
+f) != 0){( void) _throw(({ struct Cyc_Stdio_FileCloseError_struct* _temp3=(
+struct Cyc_Stdio_FileCloseError_struct*) GC_malloc_atomic( sizeof( struct Cyc_Stdio_FileCloseError_struct));
+_temp3->tag= Cyc_Stdio_FileCloseError_tag;( struct _xenum_struct*) _temp3;}));}}

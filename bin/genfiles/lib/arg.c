@@ -56,24 +56,23 @@ _tagged_string f2; struct _tagged_string f3; } ; static void* Cyc_Arg_lookup(
 struct Cyc_List_List* l, struct _tagged_string x){ while( l != 0) { if( Cyc_String_strcmp(
 x,(*(( struct _tuple0*) l->hd)).f1) == 0){ return(*(( struct _tuple0*) l->hd)).f2;}
 l= l->tl;}( void) _throw(({ struct Cyc_Core_Not_found_struct* _temp0=( struct
-Cyc_Core_Not_found_struct*) GC_malloc_atomic( sizeof( struct Cyc_Core_Not_found_struct));*
-_temp0=( struct Cyc_Core_Not_found_struct){.tag= Cyc_Core_Not_found_tag};(
-struct _xenum_struct*) _temp0;}));} void Cyc_Arg_usage( struct Cyc_List_List*
-speclist, struct _tagged_string errmsg){({ struct _tagged_string _temp1= errmsg;
-fprintf( Cyc_Stdio_stderr,"%.*s\n", _temp1.last_plus_one - _temp1.curr, _temp1.curr);});
-while( speclist != 0) {({ struct _tagged_string _temp2=(*(( struct _tuple0*)
-speclist->hd)).f1; struct _tagged_string _temp3=(*(( struct _tuple0*) speclist->hd)).f3;
-fprintf( Cyc_Stdio_stderr," %.*s %.*s\n", _temp2.last_plus_one - _temp2.curr,
-_temp2.curr, _temp3.last_plus_one - _temp3.curr, _temp3.curr);}); speclist=
-speclist->tl;}} int Cyc_Arg_current= 0; static struct _tagged_ptr0 Cyc_Arg_args={
-0, 0, 0}; static void Cyc_Arg_stop( int prog_pos, void* e, struct Cyc_List_List*
-speclist, struct _tagged_string errmsg){ struct _tagged_string progname=(
-unsigned int) prog_pos <({ struct _tagged_ptr0 _temp4= Cyc_Arg_args;(
-unsigned int)( _temp4.last_plus_one - _temp4.curr);})?({ struct _tagged_ptr0
-_temp5= Cyc_Arg_args; struct _tagged_string* _temp7= _temp5.curr + prog_pos; if(
-_temp7 < _temp5.base? 1: _temp7 >= _temp5.last_plus_one){ _throw( Null_Exception);}*
-_temp7;}):( struct _tagged_string)({ char* _temp8=( char*)"(?)"; struct
-_tagged_string _temp9; _temp9.curr= _temp8; _temp9.base= _temp8; _temp9.last_plus_one=
+Cyc_Core_Not_found_struct*) GC_malloc_atomic( sizeof( struct Cyc_Core_Not_found_struct));
+_temp0->tag= Cyc_Core_Not_found_tag;( struct _xenum_struct*) _temp0;}));} void
+Cyc_Arg_usage( struct Cyc_List_List* speclist, struct _tagged_string errmsg){({
+struct _tagged_string _temp1= errmsg; fprintf( Cyc_Stdio_stderr,"%.*s\n", _temp1.last_plus_one
+- _temp1.curr, _temp1.curr);}); while( speclist != 0) {({ struct _tagged_string
+_temp2=(*(( struct _tuple0*) speclist->hd)).f1; struct _tagged_string _temp3=(*((
+struct _tuple0*) speclist->hd)).f3; fprintf( Cyc_Stdio_stderr," %.*s %.*s\n",
+_temp2.last_plus_one - _temp2.curr, _temp2.curr, _temp3.last_plus_one - _temp3.curr,
+_temp3.curr);}); speclist= speclist->tl;}} int Cyc_Arg_current= 0; static struct
+_tagged_ptr0 Cyc_Arg_args={ 0, 0, 0}; static void Cyc_Arg_stop( int prog_pos,
+void* e, struct Cyc_List_List* speclist, struct _tagged_string errmsg){ struct
+_tagged_string progname=( unsigned int) prog_pos <({ struct _tagged_ptr0 _temp4=
+Cyc_Arg_args;( unsigned int)( _temp4.last_plus_one - _temp4.curr);})?({ struct
+_tagged_ptr0 _temp5= Cyc_Arg_args; struct _tagged_string* _temp7= _temp5.curr +
+prog_pos; if( _temp7 < _temp5.base? 1: _temp7 >= _temp5.last_plus_one){ _throw(
+Null_Exception);}* _temp7;}):( struct _tagged_string)({ char* _temp8=( char*)"(?)";
+struct _tagged_string _temp9; _temp9.curr= _temp8; _temp9.base= _temp8; _temp9.last_plus_one=
 _temp8 + 4; _temp9;});{ void* _temp10= e; struct _tagged_string _temp20; struct
 _tagged_string _temp22; struct _tagged_string _temp24; struct _tagged_string
 _temp26; struct _tagged_string _temp28; struct _tagged_string _temp30; _LL12:
@@ -106,11 +105,10 @@ _temp41.last_plus_one - _temp41.curr, _temp41.curr);}); goto _LL11; _LL19:({
 struct _tagged_string _temp42= progname; struct _tagged_string _temp43= _temp30;
 fprintf( Cyc_Stdio_stderr,"%.*s: %.*s.\n", _temp42.last_plus_one - _temp42.curr,
 _temp42.curr, _temp43.last_plus_one - _temp43.curr, _temp43.curr);}); goto _LL11;
-_LL11:;} Cyc_Arg_usage( speclist, errmsg);( void) _throw(({ struct Cyc_Arg_Error_struct*
-_temp44=( struct Cyc_Arg_Error_struct*) GC_malloc_atomic( sizeof( struct Cyc_Arg_Error_struct));*
-_temp44=( struct Cyc_Arg_Error_struct){.tag= Cyc_Arg_Error_tag};( struct
-_xenum_struct*) _temp44;}));} void Cyc_Arg_parse( struct Cyc_List_List* speclist,
-void(* anonfun)( struct _tagged_string), struct _tagged_string errmsg){ Cyc_Arg_args=
+_LL11:;} Cyc_Arg_usage( speclist, errmsg); Cyc_Arg_current=( int)({ struct
+_tagged_ptr0 _temp44= Cyc_Arg_args;( unsigned int)( _temp44.last_plus_one -
+_temp44.curr);});} void Cyc_Arg_parse( struct Cyc_List_List* speclist, void(*
+anonfun)( struct _tagged_string), struct _tagged_string errmsg){ Cyc_Arg_args=
 Cyc_Core_std_args();{ int initpos= Cyc_Arg_current; int l=( int)({ struct
 _tagged_ptr0 _temp45= Cyc_Arg_args;( unsigned int)( _temp45.last_plus_one -
 _temp45.curr);}); ++ Cyc_Arg_current; while( Cyc_Arg_current < l) { struct

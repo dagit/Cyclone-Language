@@ -963,29 +963,28 @@ _LL404; _LL404: return Cyc_Tcexp_tcArithBinop( te, e1, e2, Cyc_Tcutil_integral_p
 _LL406: goto _LL408; _LL408: goto _LL410; _LL410: goto _LL412; _LL412: goto
 _LL414; _LL414: goto _LL416; _LL416: return Cyc_Tcexp_tcAnyBinop( te, loc, e1,
 e2); _LL418:( void) _throw(({ struct Cyc_Core_Failure_struct* _temp419=( struct
-Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));*
-_temp419=( struct Cyc_Core_Failure_struct){.tag= Cyc_Core_Failure_tag,.f1=(
-struct _tagged_string)({ char* _temp420=( char*)"bad binary primop"; struct
-_tagged_string _temp421; _temp421.curr= _temp420; _temp421.base= _temp420;
-_temp421.last_plus_one= _temp420 + 18; _temp421;})};( struct _xenum_struct*)
-_temp419;})); _LL382:;} static void* Cyc_Tcexp_tcPrimop( struct Cyc_Tcenv_Tenv*
-te, struct Cyc_Position_Segment* loc, void** topt, void* p, struct Cyc_List_List*
-es){ if( p == Cyc_Absyn_Minus?(( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(
-es) == 1: 0){ return Cyc_Tcexp_tcExp( te, topt,( struct Cyc_Absyn_Exp*) es->hd);}
-Cyc_Tcexp_tcExpList( te, es);{ void* t;{ void* _temp422= p; _LL424: if( _temp422
-== Cyc_Absyn_Printf){ goto _LL425;} else{ goto _LL426;} _LL426: if( _temp422 ==
-Cyc_Absyn_Fprintf){ goto _LL427;} else{ goto _LL428;} _LL428: if( _temp422 ==
-Cyc_Absyn_Xprintf){ goto _LL429;} else{ goto _LL430;} _LL430: if( _temp422 ==
-Cyc_Absyn_Scanf){ goto _LL431;} else{ goto _LL432;} _LL432: if( _temp422 == Cyc_Absyn_Fscanf){
-goto _LL433;} else{ goto _LL434;} _LL434: if( _temp422 == Cyc_Absyn_Sscanf){
-goto _LL435;} else{ goto _LL436;} _LL436: goto _LL437; _LL425: if( es == 0){
-return Cyc_Tcexp_expr_err( te, loc,( struct _tagged_string)({ char* _temp438=(
-char*)"missing format string in printf"; struct _tagged_string _temp439;
-_temp439.curr= _temp438; _temp439.base= _temp438; _temp439.last_plus_one=
-_temp438 + 32; _temp439;}));} Cyc_Tcexp_check_format_args( te,( struct Cyc_Absyn_Exp*)
-es->hd, es->tl, Cyc_Formatstr_get_format_typs); t= Cyc_Absyn_VoidType; goto
-_LL423; _LL427: if( es == 0? 1: es->tl == 0){ return Cyc_Tcexp_expr_err( te, loc,(
-struct _tagged_string)({ char* _temp440=( char*)"too few arguments to fprintf";
+Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
+_temp419->tag= Cyc_Core_Failure_tag; _temp419->f1=( struct _tagged_string)({
+char* _temp420=( char*)"bad binary primop"; struct _tagged_string _temp421;
+_temp421.curr= _temp420; _temp421.base= _temp420; _temp421.last_plus_one=
+_temp420 + 18; _temp421;});( struct _xenum_struct*) _temp419;})); _LL382:;}
+static void* Cyc_Tcexp_tcPrimop( struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment*
+loc, void** topt, void* p, struct Cyc_List_List* es){ if( p == Cyc_Absyn_Minus?((
+int(*)( struct Cyc_List_List* x)) Cyc_List_length)( es) == 1: 0){ return Cyc_Tcexp_tcExp(
+te, topt,( struct Cyc_Absyn_Exp*) es->hd);} Cyc_Tcexp_tcExpList( te, es);{ void*
+t;{ void* _temp422= p; _LL424: if( _temp422 == Cyc_Absyn_Printf){ goto _LL425;}
+else{ goto _LL426;} _LL426: if( _temp422 == Cyc_Absyn_Fprintf){ goto _LL427;}
+else{ goto _LL428;} _LL428: if( _temp422 == Cyc_Absyn_Xprintf){ goto _LL429;}
+else{ goto _LL430;} _LL430: if( _temp422 == Cyc_Absyn_Scanf){ goto _LL431;}
+else{ goto _LL432;} _LL432: if( _temp422 == Cyc_Absyn_Fscanf){ goto _LL433;}
+else{ goto _LL434;} _LL434: if( _temp422 == Cyc_Absyn_Sscanf){ goto _LL435;}
+else{ goto _LL436;} _LL436: goto _LL437; _LL425: if( es == 0){ return Cyc_Tcexp_expr_err(
+te, loc,( struct _tagged_string)({ char* _temp438=( char*)"missing format string in printf";
+struct _tagged_string _temp439; _temp439.curr= _temp438; _temp439.base= _temp438;
+_temp439.last_plus_one= _temp438 + 32; _temp439;}));} Cyc_Tcexp_check_format_args(
+te,( struct Cyc_Absyn_Exp*) es->hd, es->tl, Cyc_Formatstr_get_format_typs); t=
+Cyc_Absyn_VoidType; goto _LL423; _LL427: if( es == 0? 1: es->tl == 0){ return
+Cyc_Tcexp_expr_err( te, loc,( struct _tagged_string)({ char* _temp440=( char*)"too few arguments to fprintf";
 struct _tagged_string _temp441; _temp441.curr= _temp440; _temp441.base= _temp440;
 _temp441.last_plus_one= _temp440 + 29; _temp441;}));} if( ! Cyc_Tcutil_unify((
 void*)((( struct Cyc_Absyn_Exp*) es->hd)->topt)->v, Cyc_Absyn_file_typ())){ Cyc_Tcutil_terr(((

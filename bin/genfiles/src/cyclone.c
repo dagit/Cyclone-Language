@@ -557,16 +557,16 @@ _temp18;}); struct _tagged_string explain_string=( struct _tagged_string)({ char
 _temp19=( char*)""; struct _tagged_string _temp20; _temp20.curr= _temp19;
 _temp20.base= _temp19; _temp20.last_plus_one= _temp19 + 1; _temp20;}); int
 other_exn= 0; struct _xenum_struct* ex=({ struct Cyc_Core_Impossible_struct*
-_temp21=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));*
-_temp21=( struct Cyc_Core_Impossible_struct){.tag= Cyc_Core_Impossible_tag,.f1=(
-struct _tagged_string)({ char* _temp22=( char*)""; struct _tagged_string _temp23;
-_temp23.curr= _temp22; _temp23.base= _temp22; _temp23.last_plus_one= _temp22 + 1;
-_temp23;})};( struct _xenum_struct*) _temp21;}); struct Cyc_List_List* ans= 0;{
-struct _handler_cons _temp24; _push_handler(& _temp24);{ struct _xenum_struct*
-_temp25=( struct _xenum_struct*) setjmp( _temp24.handler); if( ! _temp25){ ans=
-f( env, tds);; _pop_handler();} else{ struct _xenum_struct* _temp27= _temp25;
-struct _tagged_string _temp37; _LL29: if((*(( struct _xenum_struct*) _temp27)).tag
-== Cyc_Core_Impossible_tag){ _LL38: _temp37=(( struct Cyc_Core_Impossible_struct*)
+_temp21=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
+_temp21->tag= Cyc_Core_Impossible_tag; _temp21->f1=( struct _tagged_string)({
+char* _temp22=( char*)""; struct _tagged_string _temp23; _temp23.curr= _temp22;
+_temp23.base= _temp22; _temp23.last_plus_one= _temp22 + 1; _temp23;});( struct
+_xenum_struct*) _temp21;}); struct Cyc_List_List* ans= 0;{ struct _handler_cons
+_temp24; _push_handler(& _temp24);{ struct _xenum_struct* _temp25=( struct
+_xenum_struct*) setjmp( _temp24.handler); if( ! _temp25){ ans= f( env, tds);;
+_pop_handler();} else{ struct _xenum_struct* _temp27= _temp25; struct
+_tagged_string _temp37; _LL29: if((*(( struct _xenum_struct*) _temp27)).tag ==
+Cyc_Core_Impossible_tag){ _LL38: _temp37=(( struct Cyc_Core_Impossible_struct*)
 _temp27)->f1; goto _LL30;} else{ goto _LL31;} _LL31: if( _temp27->tag == Cyc_Dict_Absent_tag){
 goto _LL32;} else{ goto _LL33;} _LL33: goto _LL34; _LL35: goto _LL36; _LL30:
 exn_string=( struct _tagged_string)({ char* _temp39=( char*)"Exception Core::Impossible";

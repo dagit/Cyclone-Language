@@ -69,80 +69,80 @@ void*), struct _tagged_ptr0 arr, int base_ofs, int len){ void* temp; int sp_ofs;
 int i; int j; int limit_ofs; if(( base_ofs < 0? 1:( unsigned int)( base_ofs +
 len) >({ struct _tagged_ptr0 _temp0= arr;( unsigned int)( _temp0.last_plus_one -
 _temp0.curr);}))? 1: len < 0){( void) _throw(({ struct Cyc_Core_InvalidArg_struct*
-_temp1=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));*
-_temp1=( struct Cyc_Core_InvalidArg_struct){.tag= Cyc_Core_InvalidArg_tag,.f1=(
-struct _tagged_string)({ char* _temp2=( char*)"Array::qsort"; struct
-_tagged_string _temp3; _temp3.curr= _temp2; _temp3.base= _temp2; _temp3.last_plus_one=
-_temp2 + 13; _temp3;})};( struct _xenum_struct*) _temp1;}));} limit_ofs=
-base_ofs + len; sp_ofs= 0; for( 0; 1; 0){ if( limit_ofs - base_ofs > 3){ temp=({
-struct _tagged_ptr0 _temp4= arr; void** _temp6= _temp4.curr +(( limit_ofs -
-base_ofs) / 2 + base_ofs); if( _temp6 < _temp4.base? 1: _temp6 >= _temp4.last_plus_one){
-_throw( Null_Exception);}* _temp6;});({ struct _tagged_ptr0 _temp7= arr; void**
-_temp9= _temp7.curr +(( limit_ofs - base_ofs) / 2 + base_ofs); if( _temp9 <
-_temp7.base? 1: _temp9 >= _temp7.last_plus_one){ _throw( Null_Exception);}*
-_temp9=({ struct _tagged_ptr0 _temp10= arr; void** _temp12= _temp10.curr +
-base_ofs; if( _temp12 < _temp10.base? 1: _temp12 >= _temp10.last_plus_one){
-_throw( Null_Exception);}* _temp12;});});({ struct _tagged_ptr0 _temp13= arr;
-void** _temp15= _temp13.curr + base_ofs; if( _temp15 < _temp13.base? 1: _temp15
->= _temp13.last_plus_one){ _throw( Null_Exception);}* _temp15= temp;}); i=
-base_ofs + 1; j= limit_ofs - 1; if( less_eq(({ struct _tagged_ptr0 _temp16= arr;
-void** _temp18= _temp16.curr + i; if( _temp18 < _temp16.base? 1: _temp18 >=
-_temp16.last_plus_one){ _throw( Null_Exception);}* _temp18;}),({ struct
-_tagged_ptr0 _temp19= arr; void** _temp21= _temp19.curr + j; if( _temp21 <
-_temp19.base? 1: _temp21 >= _temp19.last_plus_one){ _throw( Null_Exception);}*
-_temp21;})) > 0){ temp=({ struct _tagged_ptr0 _temp22= arr; void** _temp24=
-_temp22.curr + i; if( _temp24 < _temp22.base? 1: _temp24 >= _temp22.last_plus_one){
-_throw( Null_Exception);}* _temp24;});({ struct _tagged_ptr0 _temp25= arr; void**
-_temp27= _temp25.curr + i; if( _temp27 < _temp25.base? 1: _temp27 >= _temp25.last_plus_one){
-_throw( Null_Exception);}* _temp27=({ struct _tagged_ptr0 _temp28= arr; void**
-_temp30= _temp28.curr + j; if( _temp30 < _temp28.base? 1: _temp30 >= _temp28.last_plus_one){
-_throw( Null_Exception);}* _temp30;});});({ struct _tagged_ptr0 _temp31= arr;
-void** _temp33= _temp31.curr + j; if( _temp33 < _temp31.base? 1: _temp33 >=
-_temp31.last_plus_one){ _throw( Null_Exception);}* _temp33= temp;});} if(
-less_eq(({ struct _tagged_ptr0 _temp34= arr; void** _temp36= _temp34.curr +
-base_ofs; if( _temp36 < _temp34.base? 1: _temp36 >= _temp34.last_plus_one){
-_throw( Null_Exception);}* _temp36;}),({ struct _tagged_ptr0 _temp37= arr; void**
-_temp39= _temp37.curr + j; if( _temp39 < _temp37.base? 1: _temp39 >= _temp37.last_plus_one){
-_throw( Null_Exception);}* _temp39;})) > 0){ temp=({ struct _tagged_ptr0 _temp40=
-arr; void** _temp42= _temp40.curr + base_ofs; if( _temp42 < _temp40.base? 1:
-_temp42 >= _temp40.last_plus_one){ _throw( Null_Exception);}* _temp42;});({
-struct _tagged_ptr0 _temp43= arr; void** _temp45= _temp43.curr + base_ofs; if(
-_temp45 < _temp43.base? 1: _temp45 >= _temp43.last_plus_one){ _throw(
-Null_Exception);}* _temp45=({ struct _tagged_ptr0 _temp46= arr; void** _temp48=
-_temp46.curr + j; if( _temp48 < _temp46.base? 1: _temp48 >= _temp46.last_plus_one){
-_throw( Null_Exception);}* _temp48;});});({ struct _tagged_ptr0 _temp49= arr;
-void** _temp51= _temp49.curr + j; if( _temp51 < _temp49.base? 1: _temp51 >=
-_temp49.last_plus_one){ _throw( Null_Exception);}* _temp51= temp;});} if(
-less_eq(({ struct _tagged_ptr0 _temp52= arr; void** _temp54= _temp52.curr + i;
-if( _temp54 < _temp52.base? 1: _temp54 >= _temp52.last_plus_one){ _throw(
-Null_Exception);}* _temp54;}),({ struct _tagged_ptr0 _temp55= arr; void**
-_temp57= _temp55.curr + base_ofs; if( _temp57 < _temp55.base? 1: _temp57 >=
-_temp55.last_plus_one){ _throw( Null_Exception);}* _temp57;})) > 0){ temp=({
-struct _tagged_ptr0 _temp58= arr; void** _temp60= _temp58.curr + i; if( _temp60
-< _temp58.base? 1: _temp60 >= _temp58.last_plus_one){ _throw( Null_Exception);}*
-_temp60;});({ struct _tagged_ptr0 _temp61= arr; void** _temp63= _temp61.curr + i;
-if( _temp63 < _temp61.base? 1: _temp63 >= _temp61.last_plus_one){ _throw(
-Null_Exception);}* _temp63=({ struct _tagged_ptr0 _temp64= arr; void** _temp66=
-_temp64.curr + base_ofs; if( _temp66 < _temp64.base? 1: _temp66 >= _temp64.last_plus_one){
-_throw( Null_Exception);}* _temp66;});});({ struct _tagged_ptr0 _temp67= arr;
-void** _temp69= _temp67.curr + base_ofs; if( _temp69 < _temp67.base? 1: _temp69
->= _temp67.last_plus_one){ _throw( Null_Exception);}* _temp69= temp;});} for( 0;
-1; 0){ do { i ++;} while ( less_eq(({ struct _tagged_ptr0 _temp70= arr; void**
-_temp72= _temp70.curr + i; if( _temp72 < _temp70.base? 1: _temp72 >= _temp70.last_plus_one){
-_throw( Null_Exception);}* _temp72;}),({ struct _tagged_ptr0 _temp73= arr; void**
-_temp75= _temp73.curr + base_ofs; if( _temp75 < _temp73.base? 1: _temp75 >=
-_temp73.last_plus_one){ _throw( Null_Exception);}* _temp75;})) < 0); do { j --;} while (
-less_eq(({ struct _tagged_ptr0 _temp76= arr; void** _temp78= _temp76.curr + j;
-if( _temp78 < _temp76.base? 1: _temp78 >= _temp76.last_plus_one){ _throw(
-Null_Exception);}* _temp78;}),({ struct _tagged_ptr0 _temp79= arr; void**
-_temp81= _temp79.curr + base_ofs; if( _temp81 < _temp79.base? 1: _temp81 >=
-_temp79.last_plus_one){ _throw( Null_Exception);}* _temp81;})) > 0); if( i > j){
-break;} temp=({ struct _tagged_ptr0 _temp82= arr; void** _temp84= _temp82.curr +
-i; if( _temp84 < _temp82.base? 1: _temp84 >= _temp82.last_plus_one){ _throw(
-Null_Exception);}* _temp84;});({ struct _tagged_ptr0 _temp85= arr; void**
-_temp87= _temp85.curr + i; if( _temp87 < _temp85.base? 1: _temp87 >= _temp85.last_plus_one){
-_throw( Null_Exception);}* _temp87=({ struct _tagged_ptr0 _temp88= arr; void**
-_temp90= _temp88.curr + j; if( _temp90 < _temp88.base? 1: _temp90 >= _temp88.last_plus_one){
+_temp1=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
+_temp1->tag= Cyc_Core_InvalidArg_tag; _temp1->f1=( struct _tagged_string)({ char*
+_temp2=( char*)"Array::qsort"; struct _tagged_string _temp3; _temp3.curr= _temp2;
+_temp3.base= _temp2; _temp3.last_plus_one= _temp2 + 13; _temp3;});( struct
+_xenum_struct*) _temp1;}));} limit_ofs= base_ofs + len; sp_ofs= 0; for( 0; 1; 0){
+if( limit_ofs - base_ofs > 3){ temp=({ struct _tagged_ptr0 _temp4= arr; void**
+_temp6= _temp4.curr +(( limit_ofs - base_ofs) / 2 + base_ofs); if( _temp6 <
+_temp4.base? 1: _temp6 >= _temp4.last_plus_one){ _throw( Null_Exception);}*
+_temp6;});({ struct _tagged_ptr0 _temp7= arr; void** _temp9= _temp7.curr +((
+limit_ofs - base_ofs) / 2 + base_ofs); if( _temp9 < _temp7.base? 1: _temp9 >=
+_temp7.last_plus_one){ _throw( Null_Exception);}* _temp9=({ struct _tagged_ptr0
+_temp10= arr; void** _temp12= _temp10.curr + base_ofs; if( _temp12 < _temp10.base?
+1: _temp12 >= _temp10.last_plus_one){ _throw( Null_Exception);}* _temp12;});});({
+struct _tagged_ptr0 _temp13= arr; void** _temp15= _temp13.curr + base_ofs; if(
+_temp15 < _temp13.base? 1: _temp15 >= _temp13.last_plus_one){ _throw(
+Null_Exception);}* _temp15= temp;}); i= base_ofs + 1; j= limit_ofs - 1; if(
+less_eq(({ struct _tagged_ptr0 _temp16= arr; void** _temp18= _temp16.curr + i;
+if( _temp18 < _temp16.base? 1: _temp18 >= _temp16.last_plus_one){ _throw(
+Null_Exception);}* _temp18;}),({ struct _tagged_ptr0 _temp19= arr; void**
+_temp21= _temp19.curr + j; if( _temp21 < _temp19.base? 1: _temp21 >= _temp19.last_plus_one){
+_throw( Null_Exception);}* _temp21;})) > 0){ temp=({ struct _tagged_ptr0 _temp22=
+arr; void** _temp24= _temp22.curr + i; if( _temp24 < _temp22.base? 1: _temp24 >=
+_temp22.last_plus_one){ _throw( Null_Exception);}* _temp24;});({ struct
+_tagged_ptr0 _temp25= arr; void** _temp27= _temp25.curr + i; if( _temp27 <
+_temp25.base? 1: _temp27 >= _temp25.last_plus_one){ _throw( Null_Exception);}*
+_temp27=({ struct _tagged_ptr0 _temp28= arr; void** _temp30= _temp28.curr + j;
+if( _temp30 < _temp28.base? 1: _temp30 >= _temp28.last_plus_one){ _throw(
+Null_Exception);}* _temp30;});});({ struct _tagged_ptr0 _temp31= arr; void**
+_temp33= _temp31.curr + j; if( _temp33 < _temp31.base? 1: _temp33 >= _temp31.last_plus_one){
+_throw( Null_Exception);}* _temp33= temp;});} if( less_eq(({ struct _tagged_ptr0
+_temp34= arr; void** _temp36= _temp34.curr + base_ofs; if( _temp36 < _temp34.base?
+1: _temp36 >= _temp34.last_plus_one){ _throw( Null_Exception);}* _temp36;}),({
+struct _tagged_ptr0 _temp37= arr; void** _temp39= _temp37.curr + j; if( _temp39
+< _temp37.base? 1: _temp39 >= _temp37.last_plus_one){ _throw( Null_Exception);}*
+_temp39;})) > 0){ temp=({ struct _tagged_ptr0 _temp40= arr; void** _temp42=
+_temp40.curr + base_ofs; if( _temp42 < _temp40.base? 1: _temp42 >= _temp40.last_plus_one){
+_throw( Null_Exception);}* _temp42;});({ struct _tagged_ptr0 _temp43= arr; void**
+_temp45= _temp43.curr + base_ofs; if( _temp45 < _temp43.base? 1: _temp45 >=
+_temp43.last_plus_one){ _throw( Null_Exception);}* _temp45=({ struct
+_tagged_ptr0 _temp46= arr; void** _temp48= _temp46.curr + j; if( _temp48 <
+_temp46.base? 1: _temp48 >= _temp46.last_plus_one){ _throw( Null_Exception);}*
+_temp48;});});({ struct _tagged_ptr0 _temp49= arr; void** _temp51= _temp49.curr
++ j; if( _temp51 < _temp49.base? 1: _temp51 >= _temp49.last_plus_one){ _throw(
+Null_Exception);}* _temp51= temp;});} if( less_eq(({ struct _tagged_ptr0 _temp52=
+arr; void** _temp54= _temp52.curr + i; if( _temp54 < _temp52.base? 1: _temp54 >=
+_temp52.last_plus_one){ _throw( Null_Exception);}* _temp54;}),({ struct
+_tagged_ptr0 _temp55= arr; void** _temp57= _temp55.curr + base_ofs; if( _temp57
+< _temp55.base? 1: _temp57 >= _temp55.last_plus_one){ _throw( Null_Exception);}*
+_temp57;})) > 0){ temp=({ struct _tagged_ptr0 _temp58= arr; void** _temp60=
+_temp58.curr + i; if( _temp60 < _temp58.base? 1: _temp60 >= _temp58.last_plus_one){
+_throw( Null_Exception);}* _temp60;});({ struct _tagged_ptr0 _temp61= arr; void**
+_temp63= _temp61.curr + i; if( _temp63 < _temp61.base? 1: _temp63 >= _temp61.last_plus_one){
+_throw( Null_Exception);}* _temp63=({ struct _tagged_ptr0 _temp64= arr; void**
+_temp66= _temp64.curr + base_ofs; if( _temp66 < _temp64.base? 1: _temp66 >=
+_temp64.last_plus_one){ _throw( Null_Exception);}* _temp66;});});({ struct
+_tagged_ptr0 _temp67= arr; void** _temp69= _temp67.curr + base_ofs; if( _temp69
+< _temp67.base? 1: _temp69 >= _temp67.last_plus_one){ _throw( Null_Exception);}*
+_temp69= temp;});} for( 0; 1; 0){ do { i ++;} while ( less_eq(({ struct
+_tagged_ptr0 _temp70= arr; void** _temp72= _temp70.curr + i; if( _temp72 <
+_temp70.base? 1: _temp72 >= _temp70.last_plus_one){ _throw( Null_Exception);}*
+_temp72;}),({ struct _tagged_ptr0 _temp73= arr; void** _temp75= _temp73.curr +
+base_ofs; if( _temp75 < _temp73.base? 1: _temp75 >= _temp73.last_plus_one){
+_throw( Null_Exception);}* _temp75;})) < 0); do { j --;} while ( less_eq(({
+struct _tagged_ptr0 _temp76= arr; void** _temp78= _temp76.curr + j; if( _temp78
+< _temp76.base? 1: _temp78 >= _temp76.last_plus_one){ _throw( Null_Exception);}*
+_temp78;}),({ struct _tagged_ptr0 _temp79= arr; void** _temp81= _temp79.curr +
+base_ofs; if( _temp81 < _temp79.base? 1: _temp81 >= _temp79.last_plus_one){
+_throw( Null_Exception);}* _temp81;})) > 0); if( i > j){ break;} temp=({ struct
+_tagged_ptr0 _temp82= arr; void** _temp84= _temp82.curr + i; if( _temp84 <
+_temp82.base? 1: _temp84 >= _temp82.last_plus_one){ _throw( Null_Exception);}*
+_temp84;});({ struct _tagged_ptr0 _temp85= arr; void** _temp87= _temp85.curr + i;
+if( _temp87 < _temp85.base? 1: _temp87 >= _temp85.last_plus_one){ _throw(
+Null_Exception);}* _temp87=({ struct _tagged_ptr0 _temp88= arr; void** _temp90=
+_temp88.curr + j; if( _temp90 < _temp88.base? 1: _temp90 >= _temp88.last_plus_one){
 _throw( Null_Exception);}* _temp90;});});({ struct _tagged_ptr0 _temp91= arr;
 void** _temp93= _temp91.curr + j; if( _temp93 < _temp91.base? 1: _temp93 >=
 _temp91.last_plus_one){ _throw( Null_Exception);}* _temp93= temp;});;} temp=({
@@ -189,10 +189,10 @@ void*, void*), struct _tagged_ptr0 arr, int base_ofs, int len){ if(( base_ofs <
 0? 1:( unsigned int)( base_ofs + len) >({ struct _tagged_ptr0 _temp136= arr;(
 unsigned int)( _temp136.last_plus_one - _temp136.curr);}))? 1: len < 0){( void)
 _throw(({ struct Cyc_Core_InvalidArg_struct* _temp137=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));* _temp137=( struct Cyc_Core_InvalidArg_struct){.tag=
-Cyc_Core_InvalidArg_tag,.f1=( struct _tagged_string)({ char* _temp138=( char*)"Array::msort";
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp137->tag= Cyc_Core_InvalidArg_tag;
+_temp137->f1=( struct _tagged_string)({ char* _temp138=( char*)"Array::msort";
 struct _tagged_string _temp139; _temp139.curr= _temp138; _temp139.base= _temp138;
-_temp139.last_plus_one= _temp138 + 13; _temp139;})};( struct _xenum_struct*)
+_temp139.last_plus_one= _temp138 + 13; _temp139;});( struct _xenum_struct*)
 _temp137;}));}{ int limit_ofs= base_ofs + len; struct _tagged_ptr0 from=({
 unsigned int _temp143=( unsigned int) len; void** _temp144=( void**) GC_malloc(
 sizeof( void*) * _temp143); unsigned int i; struct _tagged_ptr0 _temp145={
@@ -292,44 +292,43 @@ _temp223= x;( unsigned int)( _temp223.last_plus_one - _temp223.curr);}); if((
 unsigned int) sx !=({ struct _tagged_ptr0 _temp224= y;( unsigned int)( _temp224.last_plus_one
 - _temp224.curr);})){( void) _throw(({ struct Cyc_Array_Array_mismatch_struct*
 _temp225=( struct Cyc_Array_Array_mismatch_struct*) GC_malloc_atomic( sizeof(
-struct Cyc_Array_Array_mismatch_struct));* _temp225=( struct Cyc_Array_Array_mismatch_struct){.tag=
-Cyc_Array_Array_mismatch_tag};( struct _xenum_struct*) _temp225;}));} return({
-unsigned int _temp232=( unsigned int) sx; void** _temp233=( void**) GC_malloc(
-sizeof( void*) * _temp232); unsigned int i; struct _tagged_ptr0 _temp234={
-_temp233, _temp233, _temp233 + _temp232}; for( i= 0; i < _temp232; i ++){
-_temp233[ i]= f(({ struct _tagged_ptr0 _temp226= x; void** _temp228= _temp226.curr
-+( int) i; if( _temp228 < _temp226.base? 1: _temp228 >= _temp226.last_plus_one){
-_throw( Null_Exception);}* _temp228;}),({ struct _tagged_ptr0 _temp229= y; void**
-_temp231= _temp229.curr +( int) i; if( _temp231 < _temp229.base? 1: _temp231 >=
-_temp229.last_plus_one){ _throw( Null_Exception);}* _temp231;}));} _temp234;});}
-void Cyc_Array_app( void*(* f)( void*), struct _tagged_ptr0 x){ int sx=( int)({
-struct _tagged_ptr0 _temp235= x;( unsigned int)( _temp235.last_plus_one -
-_temp235.curr);}); int i= 0; for( 0; i < sx; i ++){ f(({ struct _tagged_ptr0
-_temp236= x; void** _temp238= _temp236.curr + i; if( _temp238 < _temp236.base? 1:
-_temp238 >= _temp236.last_plus_one){ _throw( Null_Exception);}* _temp238;}));}}
-void Cyc_Array_app_c( void*(* f)( void*, void*), void* env, struct _tagged_ptr0
-x){ int sx=( int)({ struct _tagged_ptr0 _temp239= x;( unsigned int)( _temp239.last_plus_one
-- _temp239.curr);}); int i= 0; for( 0; i < sx; i ++){ f( env,({ struct
-_tagged_ptr0 _temp240= x; void** _temp242= _temp240.curr + i; if( _temp242 <
-_temp240.base? 1: _temp242 >= _temp240.last_plus_one){ _throw( Null_Exception);}*
-_temp242;}));}} void Cyc_Array_iter( void(* f)( void*), struct _tagged_ptr0 x){
-int sx=( int)({ struct _tagged_ptr0 _temp243= x;( unsigned int)( _temp243.last_plus_one
-- _temp243.curr);}); int i= 0; for( 0; i < sx; i ++){ f(({ struct _tagged_ptr0
-_temp244= x; void** _temp246= _temp244.curr + i; if( _temp246 < _temp244.base? 1:
-_temp246 >= _temp244.last_plus_one){ _throw( Null_Exception);}* _temp246;}));}}
-void Cyc_Array_iter_c( void(* f)( void*, void*), void* env, struct _tagged_ptr0
-x){ int sx=( int)({ struct _tagged_ptr0 _temp247= x;( unsigned int)( _temp247.last_plus_one
-- _temp247.curr);}); int i= 0; for( 0; i < sx; i ++){ f( env,({ struct
-_tagged_ptr0 _temp248= x; void** _temp250= _temp248.curr + i; if( _temp250 <
-_temp248.base? 1: _temp250 >= _temp248.last_plus_one){ _throw( Null_Exception);}*
-_temp250;}));}} void Cyc_Array_app2( void*(* f)( void*, void*), struct
-_tagged_ptr0 x, struct _tagged_ptr0 y){ int sx=( int)({ struct _tagged_ptr0
-_temp251= x;( unsigned int)( _temp251.last_plus_one - _temp251.curr);}); if((
-unsigned int) sx !=({ struct _tagged_ptr0 _temp252= y;( unsigned int)( _temp252.last_plus_one
-- _temp252.curr);})){( void) _throw(({ struct Cyc_Array_Array_mismatch_struct*
-_temp253=( struct Cyc_Array_Array_mismatch_struct*) GC_malloc_atomic( sizeof(
-struct Cyc_Array_Array_mismatch_struct));* _temp253=( struct Cyc_Array_Array_mismatch_struct){.tag=
-Cyc_Array_Array_mismatch_tag};( struct _xenum_struct*) _temp253;}));}{ int i= 0;
+struct Cyc_Array_Array_mismatch_struct)); _temp225->tag= Cyc_Array_Array_mismatch_tag;(
+struct _xenum_struct*) _temp225;}));} return({ unsigned int _temp232=(
+unsigned int) sx; void** _temp233=( void**) GC_malloc( sizeof( void*) * _temp232);
+unsigned int i; struct _tagged_ptr0 _temp234={ _temp233, _temp233, _temp233 +
+_temp232}; for( i= 0; i < _temp232; i ++){ _temp233[ i]= f(({ struct
+_tagged_ptr0 _temp226= x; void** _temp228= _temp226.curr +( int) i; if( _temp228
+< _temp226.base? 1: _temp228 >= _temp226.last_plus_one){ _throw( Null_Exception);}*
+_temp228;}),({ struct _tagged_ptr0 _temp229= y; void** _temp231= _temp229.curr +(
+int) i; if( _temp231 < _temp229.base? 1: _temp231 >= _temp229.last_plus_one){
+_throw( Null_Exception);}* _temp231;}));} _temp234;});} void Cyc_Array_app( void*(*
+f)( void*), struct _tagged_ptr0 x){ int sx=( int)({ struct _tagged_ptr0 _temp235=
+x;( unsigned int)( _temp235.last_plus_one - _temp235.curr);}); int i= 0; for( 0;
+i < sx; i ++){ f(({ struct _tagged_ptr0 _temp236= x; void** _temp238= _temp236.curr
++ i; if( _temp238 < _temp236.base? 1: _temp238 >= _temp236.last_plus_one){
+_throw( Null_Exception);}* _temp238;}));}} void Cyc_Array_app_c( void*(* f)(
+void*, void*), void* env, struct _tagged_ptr0 x){ int sx=( int)({ struct
+_tagged_ptr0 _temp239= x;( unsigned int)( _temp239.last_plus_one - _temp239.curr);});
+int i= 0; for( 0; i < sx; i ++){ f( env,({ struct _tagged_ptr0 _temp240= x; void**
+_temp242= _temp240.curr + i; if( _temp242 < _temp240.base? 1: _temp242 >=
+_temp240.last_plus_one){ _throw( Null_Exception);}* _temp242;}));}} void Cyc_Array_iter(
+void(* f)( void*), struct _tagged_ptr0 x){ int sx=( int)({ struct _tagged_ptr0
+_temp243= x;( unsigned int)( _temp243.last_plus_one - _temp243.curr);}); int i=
+0; for( 0; i < sx; i ++){ f(({ struct _tagged_ptr0 _temp244= x; void** _temp246=
+_temp244.curr + i; if( _temp246 < _temp244.base? 1: _temp246 >= _temp244.last_plus_one){
+_throw( Null_Exception);}* _temp246;}));}} void Cyc_Array_iter_c( void(* f)(
+void*, void*), void* env, struct _tagged_ptr0 x){ int sx=( int)({ struct
+_tagged_ptr0 _temp247= x;( unsigned int)( _temp247.last_plus_one - _temp247.curr);});
+int i= 0; for( 0; i < sx; i ++){ f( env,({ struct _tagged_ptr0 _temp248= x; void**
+_temp250= _temp248.curr + i; if( _temp250 < _temp248.base? 1: _temp250 >=
+_temp248.last_plus_one){ _throw( Null_Exception);}* _temp250;}));}} void Cyc_Array_app2(
+void*(* f)( void*, void*), struct _tagged_ptr0 x, struct _tagged_ptr0 y){ int sx=(
+int)({ struct _tagged_ptr0 _temp251= x;( unsigned int)( _temp251.last_plus_one -
+_temp251.curr);}); if(( unsigned int) sx !=({ struct _tagged_ptr0 _temp252= y;(
+unsigned int)( _temp252.last_plus_one - _temp252.curr);})){( void) _throw(({
+struct Cyc_Array_Array_mismatch_struct* _temp253=( struct Cyc_Array_Array_mismatch_struct*)
+GC_malloc_atomic( sizeof( struct Cyc_Array_Array_mismatch_struct)); _temp253->tag=
+Cyc_Array_Array_mismatch_tag;( struct _xenum_struct*) _temp253;}));}{ int i= 0;
 for( 0; i < sx; i ++){ f(({ struct _tagged_ptr0 _temp254= x; void** _temp256=
 _temp254.curr + i; if( _temp256 < _temp254.base? 1: _temp256 >= _temp254.last_plus_one){
 _throw( Null_Exception);}* _temp256;}),({ struct _tagged_ptr0 _temp257= y; void**
@@ -340,21 +339,20 @@ _tagged_ptr0 y){ int sx=( int)({ struct _tagged_ptr0 _temp260= x;( unsigned int)
 _temp260.last_plus_one - _temp260.curr);}); if(( unsigned int) sx !=({ struct
 _tagged_ptr0 _temp261= y;( unsigned int)( _temp261.last_plus_one - _temp261.curr);})){(
 void) _throw(({ struct Cyc_Array_Array_mismatch_struct* _temp262=( struct Cyc_Array_Array_mismatch_struct*)
-GC_malloc_atomic( sizeof( struct Cyc_Array_Array_mismatch_struct));* _temp262=(
-struct Cyc_Array_Array_mismatch_struct){.tag= Cyc_Array_Array_mismatch_tag};(
-struct _xenum_struct*) _temp262;}));}{ int i= 0; for( 0; i < sx; i ++){ f( env,({
-struct _tagged_ptr0 _temp263= x; void** _temp265= _temp263.curr + i; if(
-_temp265 < _temp263.base? 1: _temp265 >= _temp263.last_plus_one){ _throw(
-Null_Exception);}* _temp265;}),({ struct _tagged_ptr0 _temp266= y; void**
-_temp268= _temp266.curr + i; if( _temp268 < _temp266.base? 1: _temp268 >=
-_temp266.last_plus_one){ _throw( Null_Exception);}* _temp268;}));}}} void Cyc_Array_iter2(
-void(* f)( void*, void*), struct _tagged_ptr0 x, struct _tagged_ptr0 y){ int sx=(
-int)({ struct _tagged_ptr0 _temp269= x;( unsigned int)( _temp269.last_plus_one -
-_temp269.curr);}); if(( unsigned int) sx !=({ struct _tagged_ptr0 _temp270= y;(
-unsigned int)( _temp270.last_plus_one - _temp270.curr);})){( void) _throw(({
-struct Cyc_Array_Array_mismatch_struct* _temp271=( struct Cyc_Array_Array_mismatch_struct*)
-GC_malloc_atomic( sizeof( struct Cyc_Array_Array_mismatch_struct));* _temp271=(
-struct Cyc_Array_Array_mismatch_struct){.tag= Cyc_Array_Array_mismatch_tag};(
+GC_malloc_atomic( sizeof( struct Cyc_Array_Array_mismatch_struct)); _temp262->tag=
+Cyc_Array_Array_mismatch_tag;( struct _xenum_struct*) _temp262;}));}{ int i= 0;
+for( 0; i < sx; i ++){ f( env,({ struct _tagged_ptr0 _temp263= x; void**
+_temp265= _temp263.curr + i; if( _temp265 < _temp263.base? 1: _temp265 >=
+_temp263.last_plus_one){ _throw( Null_Exception);}* _temp265;}),({ struct
+_tagged_ptr0 _temp266= y; void** _temp268= _temp266.curr + i; if( _temp268 <
+_temp266.base? 1: _temp268 >= _temp266.last_plus_one){ _throw( Null_Exception);}*
+_temp268;}));}}} void Cyc_Array_iter2( void(* f)( void*, void*), struct
+_tagged_ptr0 x, struct _tagged_ptr0 y){ int sx=( int)({ struct _tagged_ptr0
+_temp269= x;( unsigned int)( _temp269.last_plus_one - _temp269.curr);}); if((
+unsigned int) sx !=({ struct _tagged_ptr0 _temp270= y;( unsigned int)( _temp270.last_plus_one
+- _temp270.curr);})){( void) _throw(({ struct Cyc_Array_Array_mismatch_struct*
+_temp271=( struct Cyc_Array_Array_mismatch_struct*) GC_malloc_atomic( sizeof(
+struct Cyc_Array_Array_mismatch_struct)); _temp271->tag= Cyc_Array_Array_mismatch_tag;(
 struct _xenum_struct*) _temp271;}));}{ int i= 0; for( 0; i < sx; i ++){ f(({
 struct _tagged_ptr0 _temp272= x; void** _temp274= _temp272.curr + i; if(
 _temp274 < _temp272.base? 1: _temp274 >= _temp272.last_plus_one){ _throw(
@@ -366,23 +364,22 @@ _tagged_ptr0 y){ int sx=( int)({ struct _tagged_ptr0 _temp278= x;( unsigned int)
 _temp278.last_plus_one - _temp278.curr);}); if(( unsigned int) sx !=({ struct
 _tagged_ptr0 _temp279= y;( unsigned int)( _temp279.last_plus_one - _temp279.curr);})){(
 void) _throw(({ struct Cyc_Array_Array_mismatch_struct* _temp280=( struct Cyc_Array_Array_mismatch_struct*)
-GC_malloc_atomic( sizeof( struct Cyc_Array_Array_mismatch_struct));* _temp280=(
-struct Cyc_Array_Array_mismatch_struct){.tag= Cyc_Array_Array_mismatch_tag};(
-struct _xenum_struct*) _temp280;}));}{ int i= 0; for( 0; i < sx; i ++){ f( env,({
-struct _tagged_ptr0 _temp281= x; void** _temp283= _temp281.curr + i; if(
-_temp283 < _temp281.base? 1: _temp283 >= _temp281.last_plus_one){ _throw(
-Null_Exception);}* _temp283;}),({ struct _tagged_ptr0 _temp284= y; void**
-_temp286= _temp284.curr + i; if( _temp286 < _temp284.base? 1: _temp286 >=
-_temp284.last_plus_one){ _throw( Null_Exception);}* _temp286;}));}}} void* Cyc_Array_fold_left(
-void*(* f)( void*, void*), void* accum, struct _tagged_ptr0 x){ int sx=( int)({
-struct _tagged_ptr0 _temp287= x;( unsigned int)( _temp287.last_plus_one -
-_temp287.curr);});{ int i= 0; for( 0; i < sx; i ++){ accum= f( accum,({ struct
-_tagged_ptr0 _temp288= x; void** _temp290= _temp288.curr + i; if( _temp290 <
-_temp288.base? 1: _temp290 >= _temp288.last_plus_one){ _throw( Null_Exception);}*
-_temp290;}));}} return accum;} void* Cyc_Array_fold_left_c( void*(* f)( void*,
-void*, void*), void* env, void* accum, struct _tagged_ptr0 x){ int sx=( int)({
-struct _tagged_ptr0 _temp291= x;( unsigned int)( _temp291.last_plus_one -
-_temp291.curr);});{ int i= 0; for( 0; i < sx; i ++){ accum= f( env, accum,({
+GC_malloc_atomic( sizeof( struct Cyc_Array_Array_mismatch_struct)); _temp280->tag=
+Cyc_Array_Array_mismatch_tag;( struct _xenum_struct*) _temp280;}));}{ int i= 0;
+for( 0; i < sx; i ++){ f( env,({ struct _tagged_ptr0 _temp281= x; void**
+_temp283= _temp281.curr + i; if( _temp283 < _temp281.base? 1: _temp283 >=
+_temp281.last_plus_one){ _throw( Null_Exception);}* _temp283;}),({ struct
+_tagged_ptr0 _temp284= y; void** _temp286= _temp284.curr + i; if( _temp286 <
+_temp284.base? 1: _temp286 >= _temp284.last_plus_one){ _throw( Null_Exception);}*
+_temp286;}));}}} void* Cyc_Array_fold_left( void*(* f)( void*, void*), void*
+accum, struct _tagged_ptr0 x){ int sx=( int)({ struct _tagged_ptr0 _temp287= x;(
+unsigned int)( _temp287.last_plus_one - _temp287.curr);});{ int i= 0; for( 0; i
+< sx; i ++){ accum= f( accum,({ struct _tagged_ptr0 _temp288= x; void** _temp290=
+_temp288.curr + i; if( _temp290 < _temp288.base? 1: _temp290 >= _temp288.last_plus_one){
+_throw( Null_Exception);}* _temp290;}));}} return accum;} void* Cyc_Array_fold_left_c(
+void*(* f)( void*, void*, void*), void* env, void* accum, struct _tagged_ptr0 x){
+int sx=( int)({ struct _tagged_ptr0 _temp291= x;( unsigned int)( _temp291.last_plus_one
+- _temp291.curr);});{ int i= 0; for( 0; i < sx; i ++){ accum= f( env, accum,({
 struct _tagged_ptr0 _temp292= x; void** _temp294= _temp292.curr + i; if(
 _temp294 < _temp292.base? 1: _temp294 >= _temp292.last_plus_one){ _throw(
 Null_Exception);}* _temp294;}));}} return accum;} void* Cyc_Array_fold_right(
@@ -445,17 +442,16 @@ _tagged_ptr0 y){ int sx=( int)({ struct _tagged_ptr0 _temp339= x;( unsigned int)
 _temp339.last_plus_one - _temp339.curr);}); if(( unsigned int) sx !=({ struct
 _tagged_ptr0 _temp340= y;( unsigned int)( _temp340.last_plus_one - _temp340.curr);})){(
 void) _throw(({ struct Cyc_Array_Array_mismatch_struct* _temp341=( struct Cyc_Array_Array_mismatch_struct*)
-GC_malloc_atomic( sizeof( struct Cyc_Array_Array_mismatch_struct));* _temp341=(
-struct Cyc_Array_Array_mismatch_struct){.tag= Cyc_Array_Array_mismatch_tag};(
-struct _xenum_struct*) _temp341;}));} return({ unsigned int _temp349=(
-unsigned int) sx; struct _tuple0* _temp350=( struct _tuple0*) GC_malloc( sizeof(
-struct _tuple0) * _temp349); unsigned int i; struct _tagged_ptr1 _temp351={
-_temp350, _temp350, _temp350 + _temp349}; for( i= 0; i < _temp349; i ++){
-_temp350[ i]=({ struct _tuple0 _temp342; _temp342.f1=({ struct _tagged_ptr0
-_temp346= x; void** _temp348= _temp346.curr +( int) i; if( _temp348 < _temp346.base?
-1: _temp348 >= _temp346.last_plus_one){ _throw( Null_Exception);}* _temp348;});
-_temp342.f2=({ struct _tagged_ptr0 _temp343= y; void** _temp345= _temp343.curr +(
-int) i; if( _temp345 < _temp343.base? 1: _temp345 >= _temp343.last_plus_one){
+GC_malloc_atomic( sizeof( struct Cyc_Array_Array_mismatch_struct)); _temp341->tag=
+Cyc_Array_Array_mismatch_tag;( struct _xenum_struct*) _temp341;}));} return({
+unsigned int _temp349=( unsigned int) sx; struct _tuple0* _temp350=( struct
+_tuple0*) GC_malloc( sizeof( struct _tuple0) * _temp349); unsigned int i; struct
+_tagged_ptr1 _temp351={ _temp350, _temp350, _temp350 + _temp349}; for( i= 0; i <
+_temp349; i ++){ _temp350[ i]=({ struct _tuple0 _temp342; _temp342.f1=({ struct
+_tagged_ptr0 _temp346= x; void** _temp348= _temp346.curr +( int) i; if( _temp348
+< _temp346.base? 1: _temp348 >= _temp346.last_plus_one){ _throw( Null_Exception);}*
+_temp348;}); _temp342.f2=({ struct _tagged_ptr0 _temp343= y; void** _temp345=
+_temp343.curr +( int) i; if( _temp345 < _temp343.base? 1: _temp345 >= _temp343.last_plus_one){
 _throw( Null_Exception);}* _temp345;}); _temp342;});} _temp351;});} struct
 _tuple1 Cyc_Array_split( struct _tagged_ptr1 x){ int sx=( int)({ struct
 _tagged_ptr1 _temp352= x;( unsigned int)( _temp352.last_plus_one - _temp352.curr);});
@@ -487,15 +483,14 @@ struct _tagged_ptr0 x, int start, int* n_opt){ int sx=( int)({ struct
 _tagged_ptr0 _temp374= x;( unsigned int)( _temp374.last_plus_one - _temp374.curr);});
 int n= n_opt == 0? sx - start:* n_opt; if(( start < 0? 1: n <= 0)? 1: start +(
 n_opt == 0? 0: n) > sx){( void) _throw(({ struct Cyc_Core_InvalidArg_struct*
-_temp375=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));*
-_temp375=( struct Cyc_Core_InvalidArg_struct){.tag= Cyc_Core_InvalidArg_tag,.f1=(
-struct _tagged_string)({ char* _temp376=( char*)"Array::extract"; struct
-_tagged_string _temp377; _temp377.curr= _temp376; _temp377.base= _temp376;
-_temp377.last_plus_one= _temp376 + 15; _temp377;})};( struct _xenum_struct*)
-_temp375;}));} return({ unsigned int _temp381=( unsigned int) n; void** _temp382=(
-void**) GC_malloc( sizeof( void*) * _temp381); unsigned int i; struct
-_tagged_ptr0 _temp383={ _temp382, _temp382, _temp382 + _temp381}; for( i= 0; i <
-_temp381; i ++){ _temp382[ i]=({ struct _tagged_ptr0 _temp378= x; void**
-_temp380= _temp378.curr +( int)(( unsigned int) start + i); if( _temp380 <
-_temp378.base? 1: _temp380 >= _temp378.last_plus_one){ _throw( Null_Exception);}*
-_temp380;});} _temp383;});}
+_temp375=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
+_temp375->tag= Cyc_Core_InvalidArg_tag; _temp375->f1=( struct _tagged_string)({
+char* _temp376=( char*)"Array::extract"; struct _tagged_string _temp377;
+_temp377.curr= _temp376; _temp377.base= _temp376; _temp377.last_plus_one=
+_temp376 + 15; _temp377;});( struct _xenum_struct*) _temp375;}));} return({
+unsigned int _temp381=( unsigned int) n; void** _temp382=( void**) GC_malloc(
+sizeof( void*) * _temp381); unsigned int i; struct _tagged_ptr0 _temp383={
+_temp382, _temp382, _temp382 + _temp381}; for( i= 0; i < _temp381; i ++){
+_temp382[ i]=({ struct _tagged_ptr0 _temp378= x; void** _temp380= _temp378.curr
++( int)(( unsigned int) start + i); if( _temp380 < _temp378.base? 1: _temp380 >=
+_temp378.last_plus_one){ _throw( Null_Exception);}* _temp380;});} _temp383;});}

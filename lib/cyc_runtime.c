@@ -27,7 +27,7 @@ struct _tagged_string xprintf(char *fmt, ...) {
   struct _tagged_string result;
 
   va_start(argp,fmt);
-  len1 = vsnprintf(my_buff,0,fmt,argp); // how much space do we need
+  len1 = vsnprintf(my_buff,1,fmt,argp); // how much space do we need
   va_end(argp);
 
   // Presumably the Cyclone typechecker rules this out, but check anyway

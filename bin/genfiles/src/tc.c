@@ -776,14 +776,13 @@ struct _enum_struct*) _temp338)->tag == Cyc_Absyn_Abs_n_tag: 0){ _LL349:
 _temp348=( struct Cyc_List_List*)(( struct Cyc_Absyn_Abs_n_struct*) _temp338)->f1;
 goto _LL343;} else{ goto _LL344;} _LL344: goto _LL345; _LL341: goto _LL339;
 _LL343:( void) _throw(({ struct Cyc_Core_Impossible_struct* _temp350=( struct
-Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));*
-_temp350=( struct Cyc_Core_Impossible_struct){.tag= Cyc_Core_Impossible_tag,.f1=(
-struct _tagged_string)({ char* _temp351=( char*)"tc: Abs_n in tcFndecl"; struct
-_tagged_string _temp352; _temp352.curr= _temp351; _temp352.base= _temp351;
-_temp352.last_plus_one= _temp351 + 22; _temp352;})};( struct _xenum_struct*)
-_temp350;})); _LL345: Cyc_Tcutil_terr( loc,( struct _tagged_string)({ char*
-_temp353=( char*)"qualified declarations are not implemented"; struct
-_tagged_string _temp354; _temp354.curr= _temp353; _temp354.base= _temp353;
+Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
+_temp350->tag= Cyc_Core_Impossible_tag; _temp350->f1=( struct _tagged_string)({
+char* _temp351=( char*)"tc: Abs_n in tcFndecl"; struct _tagged_string _temp352;
+_temp352.curr= _temp351; _temp352.base= _temp351; _temp352.last_plus_one=
+_temp351 + 22; _temp352;});( struct _xenum_struct*) _temp350;})); _LL345: Cyc_Tcutil_terr(
+loc,( struct _tagged_string)({ char* _temp353=( char*)"qualified declarations are not implemented";
+struct _tagged_string _temp354; _temp354.curr= _temp353; _temp354.base= _temp353;
 _temp354.last_plus_one= _temp353 + 43; _temp354;})); return; _LL339:;}(* fd->name).f1=({
 struct Cyc_Absyn_Abs_n_struct* _temp355=( struct Cyc_Absyn_Abs_n_struct*)
 GC_malloc( sizeof( struct Cyc_Absyn_Abs_n_struct)); _temp355->tag= Cyc_Absyn_Abs_n_tag;
@@ -1225,25 +1224,24 @@ _LL670: if(( unsigned int) _temp662 > 1u?(( struct _enum_struct*) _temp662)->tag
 == Cyc_Absyn_Abs_n_tag: 0){ _LL677: _temp676=( struct Cyc_List_List*)(( struct
 Cyc_Absyn_Abs_n_struct*) _temp662)->f1; goto _LL671;} else{ goto _LL663;} _LL665:(
 void) _throw(({ struct Cyc_Core_Impossible_struct* _temp678=( struct Cyc_Core_Impossible_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));* _temp678=( struct Cyc_Core_Impossible_struct){.tag=
-Cyc_Core_Impossible_tag,.f1=( struct _tagged_string)({ char* _temp679=( char*)"tcXenumdecl: Loc_n";
+GC_malloc( sizeof( struct Cyc_Core_Impossible_struct)); _temp678->tag= Cyc_Core_Impossible_tag;
+_temp678->f1=( struct _tagged_string)({ char* _temp679=( char*)"tcXenumdecl: Loc_n";
 struct _tagged_string _temp680; _temp680.curr= _temp679; _temp680.base= _temp679;
-_temp680.last_plus_one= _temp679 + 19; _temp680;})};( struct _xenum_struct*)
+_temp680.last_plus_one= _temp679 + 19; _temp680;});( struct _xenum_struct*)
 _temp678;})); _LL667:(* xd->name).f1=({ struct Cyc_Absyn_Abs_n_struct* _temp681=(
 struct Cyc_Absyn_Abs_n_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Abs_n_struct));
 _temp681->tag= Cyc_Absyn_Abs_n_tag; _temp681->f1= te->ns;( void*) _temp681;});
 goto _LL663; _LL669:( void) _throw(({ struct Cyc_Core_Impossible_struct*
-_temp682=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));*
-_temp682=( struct Cyc_Core_Impossible_struct){.tag= Cyc_Core_Impossible_tag,.f1=(
-struct _tagged_string)({ char* _temp683=( char*)"tcXenumdecl: Rel_n non-null";
-struct _tagged_string _temp684; _temp684.curr= _temp683; _temp684.base= _temp683;
-_temp684.last_plus_one= _temp683 + 28; _temp684;})};( struct _xenum_struct*)
-_temp682;})); _LL671:( void) _throw(({ struct Cyc_Core_Impossible_struct*
-_temp685=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));*
-_temp685=( struct Cyc_Core_Impossible_struct){.tag= Cyc_Core_Impossible_tag,.f1=(
-struct _tagged_string)({ char* _temp686=( char*)"tcXenumdecl: Abs_n"; struct
-_tagged_string _temp687; _temp687.curr= _temp686; _temp687.base= _temp686;
-_temp687.last_plus_one= _temp686 + 19; _temp687;})};( struct _xenum_struct*)
+_temp682=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
+_temp682->tag= Cyc_Core_Impossible_tag; _temp682->f1=( struct _tagged_string)({
+char* _temp683=( char*)"tcXenumdecl: Rel_n non-null"; struct _tagged_string
+_temp684; _temp684.curr= _temp683; _temp684.base= _temp683; _temp684.last_plus_one=
+_temp683 + 28; _temp684;});( struct _xenum_struct*) _temp682;})); _LL671:( void)
+_throw(({ struct Cyc_Core_Impossible_struct* _temp685=( struct Cyc_Core_Impossible_struct*)
+GC_malloc( sizeof( struct Cyc_Core_Impossible_struct)); _temp685->tag= Cyc_Core_Impossible_tag;
+_temp685->f1=( struct _tagged_string)({ char* _temp686=( char*)"tcXenumdecl: Abs_n";
+struct _tagged_string _temp687; _temp687.curr= _temp686; _temp687.base= _temp686;
+_temp687.last_plus_one= _temp686 + 19; _temp687;});( struct _xenum_struct*)
 _temp685;})); _LL663:;} if( xd2o == 0){ struct Cyc_Absyn_Xenumdecl** x=( struct
 Cyc_Absyn_Xenumdecl**)({ struct _tuple10* _temp688=( struct _tuple10*) GC_malloc(
 sizeof( struct _tuple10)); _temp688->f1=({ struct Cyc_Absyn_Xenumdecl* _temp689=(
@@ -1285,10 +1283,10 @@ _LL702: Cyc_Tcutil_terr( loc,( struct _tagged_string)({ char* _temp712=( char*)"
 struct _tagged_string _temp713; _temp713.curr= _temp712; _temp713.base= _temp712;
 _temp713.last_plus_one= _temp712 + 40; _temp713;})); goto _LL696; _LL704:( void)
 _throw(({ struct Cyc_Core_Impossible_struct* _temp714=( struct Cyc_Core_Impossible_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));* _temp714=( struct Cyc_Core_Impossible_struct){.tag=
-Cyc_Core_Impossible_tag,.f1=( struct _tagged_string)({ char* _temp715=( char*)"tcXenumdecl: Loc_n";
+GC_malloc( sizeof( struct Cyc_Core_Impossible_struct)); _temp714->tag= Cyc_Core_Impossible_tag;
+_temp714->f1=( struct _tagged_string)({ char* _temp715=( char*)"tcXenumdecl: Loc_n";
 struct _tagged_string _temp716; _temp716.curr= _temp715; _temp716.base= _temp715;
-_temp716.last_plus_one= _temp715 + 19; _temp716;})};( struct _xenum_struct*)
+_temp716.last_plus_one= _temp715 + 19; _temp716;});( struct _xenum_struct*)
 _temp714;})); goto _LL696; _LL696:;}{ struct Cyc_List_List* tvs= f->tvs; for( 0;
 tvs != 0; tvs= tvs->tl){ struct Cyc_Absyn_Tvar* tv=( struct Cyc_Absyn_Tvar*) tvs->hd;
 struct Cyc_Absyn_Conref* c=(( struct Cyc_Absyn_Conref*(*)( struct Cyc_Absyn_Conref*
@@ -1327,10 +1325,10 @@ _LL738: if(( unsigned int) _temp732 > 1u?(( struct _enum_struct*) _temp732)->tag
 Cyc_Absyn_Rel_n_struct*) _temp732)->f1; goto _LL739;} else{ goto _LL733;} _LL735:
 ns_f= _temp740; goto _LL733; _LL737: goto _LL739; _LL739:( void) _throw(({
 struct Cyc_Core_Impossible_struct* _temp744=( struct Cyc_Core_Impossible_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));* _temp744=( struct Cyc_Core_Impossible_struct){.tag=
-Cyc_Core_Impossible_tag,.f1=( struct _tagged_string)({ char* _temp745=( char*)"tcXenumdecl: Rel_n or Loc_n";
+GC_malloc( sizeof( struct Cyc_Core_Impossible_struct)); _temp744->tag= Cyc_Core_Impossible_tag;
+_temp744->f1=( struct _tagged_string)({ char* _temp745=( char*)"tcXenumdecl: Rel_n or Loc_n";
 struct _tagged_string _temp746; _temp746.curr= _temp745; _temp746.base= _temp745;
-_temp746.last_plus_one= _temp745 + 28; _temp746;})};( struct _xenum_struct*)
+_temp746.last_plus_one= _temp745 + 28; _temp746;});( struct _xenum_struct*)
 _temp744;})); goto _LL733; _LL733:;}{ struct _handler_cons _temp747;
 _push_handler(& _temp747);{ struct _xenum_struct* _temp748=( struct
 _xenum_struct*) setjmp( _temp747.handler); if( ! _temp748){ ge_f=(( struct Cyc_Tcenv_Genv*(*)(

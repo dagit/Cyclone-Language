@@ -1926,10 +1926,10 @@ _temp1395.last_plus_one= _temp1394 + 2; _temp1395;}))); _LL1334:;} struct Cyc_PP
 Cyc_Absynpp_primapp2doc( int inprec, void* p, struct Cyc_List_List* es){ struct
 Cyc_PP_Doc* ps= Cyc_Absynpp_prim2doc( p); if( p == Cyc_Absyn_Size){ if( es == 0?
 1: es->tl != 0){( void) _throw(({ struct Cyc_Core_Failure_struct* _temp1396=(
-struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));*
-_temp1396=( struct Cyc_Core_Failure_struct){.tag= Cyc_Core_Failure_tag,.f1=({
-struct _tagged_string _temp1397= Cyc_PP_string_of_doc( ps, 72); xprintf("Absynpp::primapp2doc Size: %.*s with bad args",
-_temp1397.last_plus_one - _temp1397.curr, _temp1397.curr);})};( struct
+struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
+_temp1396->tag= Cyc_Core_Failure_tag; _temp1396->f1=({ struct _tagged_string
+_temp1397= Cyc_PP_string_of_doc( ps, 72); xprintf("Absynpp::primapp2doc Size: %.*s with bad args",
+_temp1397.last_plus_one - _temp1397.curr, _temp1397.curr);});( struct
 _xenum_struct*) _temp1396;}));}{ struct Cyc_PP_Doc* d= Cyc_Absynpp_exp2doc_prec(
 inprec,( struct Cyc_Absyn_Exp*) es->hd); return Cyc_Absynpp_cat2( d, Cyc_PP_text((
 struct _tagged_string)({ char* _temp1398=( char*)".size"; struct _tagged_string
@@ -1938,19 +1938,19 @@ _temp1398 + 6; _temp1399;})));}} else{ if( ! Cyc_Absyn_is_format_prim( p)){
 struct Cyc_List_List* ds=(( struct Cyc_List_List*(*)( struct Cyc_PP_Doc*(* f)(
 int, struct Cyc_Absyn_Exp*), int env, struct Cyc_List_List* x)) Cyc_List_map_c)(
 Cyc_Absynpp_exp2doc_prec, inprec, es); if( ds == 0){( void) _throw(({ struct Cyc_Core_Failure_struct*
-_temp1400=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));*
-_temp1400=( struct Cyc_Core_Failure_struct){.tag= Cyc_Core_Failure_tag,.f1=({
-struct _tagged_string _temp1401= Cyc_PP_string_of_doc( ps, 72); xprintf("Absynpp::primapp2doc: %.*s with no args",
-_temp1401.last_plus_one - _temp1401.curr, _temp1401.curr);})};( struct
+_temp1400=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
+_temp1400->tag= Cyc_Core_Failure_tag; _temp1400->f1=({ struct _tagged_string
+_temp1401= Cyc_PP_string_of_doc( ps, 72); xprintf("Absynpp::primapp2doc: %.*s with no args",
+_temp1401.last_plus_one - _temp1401.curr, _temp1401.curr);});( struct
 _xenum_struct*) _temp1400;}));} else{ if( ds->tl == 0){ return Cyc_Absynpp_cat3(
 ps, Cyc_PP_text(( struct _tagged_string)({ char* _temp1402=( char*)" "; struct
 _tagged_string _temp1403; _temp1403.curr= _temp1402; _temp1403.base= _temp1402;
 _temp1403.last_plus_one= _temp1402 + 2; _temp1403;})),( struct Cyc_PP_Doc*) ds->hd);}
 else{ if(( ds->tl)->tl != 0){( void) _throw(({ struct Cyc_Core_Failure_struct*
-_temp1404=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));*
-_temp1404=( struct Cyc_Core_Failure_struct){.tag= Cyc_Core_Failure_tag,.f1=({
-struct _tagged_string _temp1405= Cyc_PP_string_of_doc( ps, 72); xprintf("Absynpp::primapp2doc: %.*s with more than 2 args",
-_temp1405.last_plus_one - _temp1405.curr, _temp1405.curr);})};( struct
+_temp1404=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
+_temp1404->tag= Cyc_Core_Failure_tag; _temp1404->f1=({ struct _tagged_string
+_temp1405= Cyc_PP_string_of_doc( ps, 72); xprintf("Absynpp::primapp2doc: %.*s with more than 2 args",
+_temp1405.last_plus_one - _temp1405.curr, _temp1405.curr);});( struct
 _xenum_struct*) _temp1404;}));} else{ return Cyc_Absynpp_cat5(( struct Cyc_PP_Doc*)
 ds->hd, Cyc_PP_text(( struct _tagged_string)({ char* _temp1406=( char*)" ";
 struct _tagged_string _temp1407; _temp1407.curr= _temp1406; _temp1407.base=

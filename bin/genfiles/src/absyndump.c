@@ -1117,10 +1117,10 @@ break; case 2: _LL679: Cyc_Absyndump_dumpexp_prec( myprec,( struct Cyc_Absyn_Exp
 _temp538->hd); Cyc_Absyndump_dump( pstr); Cyc_Absyndump_dumpexp_prec( myprec,(
 struct Cyc_Absyn_Exp*)( _temp538->tl)->hd); break; default: _LL682:( void)
 _throw(({ struct Cyc_Core_Failure_struct* _temp684=( struct Cyc_Core_Failure_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Failure_struct));* _temp684=( struct Cyc_Core_Failure_struct){.tag=
-Cyc_Core_Failure_tag,.f1=( struct _tagged_string)({ char* _temp685=( char*)"Absyndump -- Bad number of arguments to primop";
+GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp684->tag= Cyc_Core_Failure_tag;
+_temp684->f1=( struct _tagged_string)({ char* _temp685=( char*)"Absyndump -- Bad number of arguments to primop";
 struct _tagged_string _temp686; _temp686.curr= _temp685; _temp686.base= _temp685;
-_temp686.last_plus_one= _temp685 + 47; _temp686;})};( struct _xenum_struct*)
+_temp686.last_plus_one= _temp685 + 47; _temp686;});( struct _xenum_struct*)
 _temp684;}));}} else{ Cyc_Absyndump_dump( pstr); Cyc_Absyndump_dump_nospace((
 struct _tagged_string)({ char* _temp687=( char*)"("; struct _tagged_string
 _temp688; _temp688.curr= _temp687; _temp688.base= _temp687; _temp688.last_plus_one=
@@ -1942,10 +1942,10 @@ return; _LL1254: Cyc_Absyndump_dump_char(( int)'?'); Cyc_Absyndump_dump_str(
 _temp1305->name);(( void(*)( struct Cyc_List_List* tms, void(* f)( void*), void*
 a)) Cyc_Absyndump_dumptms)( tms->tl, f, a); return; _LL1256:( void) _throw(({
 struct Cyc_Core_Impossible_struct* _temp1315=( struct Cyc_Core_Impossible_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));* _temp1315=( struct Cyc_Core_Impossible_struct){.tag=
-Cyc_Core_Impossible_tag,.f1=( struct _tagged_string)({ char* _temp1316=( char*)"dumptms: bad Pointer_mod";
+GC_malloc( sizeof( struct Cyc_Core_Impossible_struct)); _temp1315->tag= Cyc_Core_Impossible_tag;
+_temp1315->f1=( struct _tagged_string)({ char* _temp1316=( char*)"dumptms: bad Pointer_mod";
 struct _tagged_string _temp1317; _temp1317.curr= _temp1316; _temp1317.base=
-_temp1316; _temp1317.last_plus_one= _temp1316 + 25; _temp1317;})};( struct
+_temp1316; _temp1317.last_plus_one= _temp1316 + 25; _temp1317;});( struct
 _xenum_struct*) _temp1315;})); _LL1258: { int next_is_pointer= 0; if( tms->tl !=
 0){ void* _temp1318=( void*)( tms->tl)->hd; struct Cyc_Absyn_Tqual* _temp1324;
 void* _temp1326; void* _temp1328; _LL1320: if(( unsigned int) _temp1318 > 1u?((
@@ -2018,21 +2018,20 @@ _temp1385.last_plus_one= _temp1384 + 2; _temp1385;})); goto _LL1331; _LL1341:
 if( _temp1362){ Cyc_Absyndump_dumpkindedtvars( _temp1366);} else{ Cyc_Absyndump_dumptvars(
 _temp1366);} goto _LL1331; _LL1343: Cyc_Absyndump_dumpatts( _temp1368); goto
 _LL1331; _LL1345:( void) _throw(({ struct Cyc_Core_Impossible_struct* _temp1386=(
-struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));*
-_temp1386=( struct Cyc_Core_Impossible_struct){.tag= Cyc_Core_Impossible_tag,.f1=(
-struct _tagged_string)({ char* _temp1387=( char*)"dumptms"; struct
-_tagged_string _temp1388; _temp1388.curr= _temp1387; _temp1388.base= _temp1387;
-_temp1388.last_plus_one= _temp1387 + 8; _temp1388;})};( struct _xenum_struct*)
-_temp1386;})); _LL1331:;} return;} _LL1242:;}} static struct Cyc_Absyn_Tqual Cyc_Absyndump_empty_tq_v=(
-struct Cyc_Absyn_Tqual){.q_const= 0,.q_volatile= 0,.q_restrict= 0}; static
-struct Cyc_Absyn_Tqual* Cyc_Absyndump_empty_tq=& Cyc_Absyndump_empty_tq_v; void
-Cyc_Absyndump_dumptqtd( struct Cyc_Absyn_Tqual* tq, void* t, void(* f)( void*),
-void* a){ if( tq == 0){ tq=( struct Cyc_Absyn_Tqual*) Cyc_Absyndump_empty_tq;}{
-struct Cyc_List_List* _temp1392; void* _temp1394; struct Cyc_Absyn_Tqual*
-_temp1396; struct _tuple4 _temp1390= Cyc_Absynpp_to_tms(( struct Cyc_Absyn_Tqual*)({
-struct Cyc_Absyn_Tqual* _temp1389= tq; if( _temp1389 == 0){ _throw(
-Null_Exception);} _temp1389;}), t); _LL1397: _temp1396= _temp1390.f1; goto
-_LL1395; _LL1395: _temp1394= _temp1390.f2; goto _LL1393; _LL1393: _temp1392=
+struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
+_temp1386->tag= Cyc_Core_Impossible_tag; _temp1386->f1=( struct _tagged_string)({
+char* _temp1387=( char*)"dumptms"; struct _tagged_string _temp1388; _temp1388.curr=
+_temp1387; _temp1388.base= _temp1387; _temp1388.last_plus_one= _temp1387 + 8;
+_temp1388;});( struct _xenum_struct*) _temp1386;})); _LL1331:;} return;} _LL1242:;}}
+static struct Cyc_Absyn_Tqual Cyc_Absyndump_empty_tq_v=( struct Cyc_Absyn_Tqual){.q_const=
+0,.q_volatile= 0,.q_restrict= 0}; static struct Cyc_Absyn_Tqual* Cyc_Absyndump_empty_tq=&
+Cyc_Absyndump_empty_tq_v; void Cyc_Absyndump_dumptqtd( struct Cyc_Absyn_Tqual*
+tq, void* t, void(* f)( void*), void* a){ if( tq == 0){ tq=( struct Cyc_Absyn_Tqual*)
+Cyc_Absyndump_empty_tq;}{ struct Cyc_List_List* _temp1392; void* _temp1394;
+struct Cyc_Absyn_Tqual* _temp1396; struct _tuple4 _temp1390= Cyc_Absynpp_to_tms((
+struct Cyc_Absyn_Tqual*)({ struct Cyc_Absyn_Tqual* _temp1389= tq; if( _temp1389
+== 0){ _throw( Null_Exception);} _temp1389;}), t); _LL1397: _temp1396= _temp1390.f1;
+goto _LL1395; _LL1395: _temp1394= _temp1390.f2; goto _LL1393; _LL1393: _temp1392=
 _temp1390.f3; goto _LL1391; _LL1391: Cyc_Absyndump_dumptq( _temp1396); Cyc_Absyndump_dumpntyp(
 _temp1394);(( void(*)( struct Cyc_List_List* tms, void(* f)( void*), void* a))
 Cyc_Absyndump_dumptms)((( struct Cyc_List_List*(*)( struct Cyc_List_List* x))

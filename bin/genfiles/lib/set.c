@@ -179,5 +179,5 @@ struct Cyc_Set_Set* s2){ return(( int(*)( struct Cyc_Set_Set* s1, struct Cyc_Set
 s2)) Cyc_Set_compare)( s1, s2) == 0;} char Cyc_Set_Absent_tag[ 7u]="Absent";
 void* Cyc_Set_choose( struct Cyc_Set_Set* s){ if( s->nodes == 0){( void) _throw(({
 struct Cyc_Set_Absent_struct* _temp22=( struct Cyc_Set_Absent_struct*)
-GC_malloc_atomic( sizeof( struct Cyc_Set_Absent_struct));* _temp22=( struct Cyc_Set_Absent_struct){.tag=
-Cyc_Set_Absent_tag};( struct _xenum_struct*) _temp22;}));} return( void*)( s->nodes)->hd;}
+GC_malloc_atomic( sizeof( struct Cyc_Set_Absent_struct)); _temp22->tag= Cyc_Set_Absent_tag;(
+struct _xenum_struct*) _temp22;}));} return( void*)( s->nodes)->hd;}

@@ -699,8 +699,7 @@ static typ tcAddress(tenv te, seg_t loc, typ *`r topt, exp e) {
   if (topt != null) {
     switch (compress(*topt)) {
     case PointerType(PtrInfo{elttype,_,_,tq,_}):
-      // FIX:  this allocation is needed because *elttype doesn't compile
-      // correctly.
+      //FIX: this allocation is needed because *elttype is compiled incorrectly!
       topt2 = new {elttype};
       tq2 = tq;
       break;

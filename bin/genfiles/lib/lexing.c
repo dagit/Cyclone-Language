@@ -129,9 +129,9 @@ _temp29;});} else{ state=({ struct _tagged_ptr0 _temp30= tbl->lex_default; int*
 _temp32= _temp30.curr + state; if( _temp32 < _temp30.base? 1: _temp32 >= _temp30.last_plus_one){
 _throw( Null_Exception);}* _temp32;});} if( state < 0){ lbuf->lex_curr_pos= lbuf->lex_last_pos;
 if( lbuf->lex_last_action == - 1){( void) _throw(({ struct Cyc_Lexing_Error_struct*
-_temp33=( struct Cyc_Lexing_Error_struct*) GC_malloc( sizeof( struct Cyc_Lexing_Error_struct));*
-_temp33=( struct Cyc_Lexing_Error_struct){.tag= Cyc_Lexing_Error_tag,.f1=(
-struct _tagged_string)({ char* _temp34=( char*)"empty token"; struct
-_tagged_string _temp35; _temp35.curr= _temp34; _temp35.base= _temp34; _temp35.last_plus_one=
-_temp34 + 12; _temp35;})};( struct _xenum_struct*) _temp33;}));} else{ return
-lbuf->lex_last_action;}} else{ if( c == 256){ lbuf->lex_eof_reached= 0;}}}}
+_temp33=( struct Cyc_Lexing_Error_struct*) GC_malloc( sizeof( struct Cyc_Lexing_Error_struct));
+_temp33->tag= Cyc_Lexing_Error_tag; _temp33->f1=( struct _tagged_string)({ char*
+_temp34=( char*)"empty token"; struct _tagged_string _temp35; _temp35.curr=
+_temp34; _temp35.base= _temp34; _temp35.last_plus_one= _temp34 + 12; _temp35;});(
+struct _xenum_struct*) _temp33;}));} else{ return lbuf->lex_last_action;}} else{
+if( c == 256){ lbuf->lex_eof_reached= 0;}}}}

@@ -83,7 +83,7 @@ static void stop(int prog_pos, enum error e,
      break;
   }
   usage(speclist, errmsg);
-  throw Error; // should exit here
+  current = args.size; // skip everything else
 }
 
 void parse(glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist, 
