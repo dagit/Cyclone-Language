@@ -23,24 +23,24 @@ case "$OS" in
   ;;
 esac
 
-# get the root directory of the source tree
+# get the root directory of the source tree and set up WHICH.
 # Note: under Cygwin, pwd can return a path name containing a colon.
 #  Such path names don't work in make's VPATH, so we convert them
 #  to path names without colons using the cygpath command.
+# We use 'command -v' for WHICH because it seems to work on Mac OS X, 
+* solaris, linux, and IRIX.  Other options are 'type -p' and 'which'.
 case "$OS" in
   cygwin*)
     PWD=`pwd`
     CYCDIR=`cygpath -u "$PWD"`
+    WHICH='which'
   ;;
   *)
     CYCDIR=`pwd`
+    WHICH='command -v'
   ;;
 esac
 
-########## find a suitable version of 'which'
-# The following seems to work on Mac OS X, solaris, linux, IRIX
-#   Other options are 'type -p' and 'which'
-WHICH='command -v'
 
 ########## find a suitable version of diff
 DIFF="diff"
@@ -210,7 +210,9 @@ if [ ! -f "${CYCDIR}/bin/genfiles/${ARCH}.cycspecs" ]; then
   fi
 else
   echo "Supported architecture ${ARCH}"
-  cd ../bin/genfiles; ./extract_patch ${PATCH_ARCH} ${ARCH}; cd -
+  cd ../bin/genfiles; 
+  ./extract_patch ${PATCH_ARCH} ${ARCH}
+  cd ../../config
   if [ ! -d "${CYCDIR}/bin/genfiles/${ARCH}" ]; then
     echo "Warning: genfiles directory for ${ARCH} not present"
     get_def_genfiles;

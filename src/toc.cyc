@@ -1108,18 +1108,39 @@ static bool check_leq_size(CfFlowInfo::relns_t relns, vardecl_t v, exp_t e) {
 // return true if we can prove from relns that i < numelts(a)
 //  FIX: doesn't deal with the case where i is a constant and a's size
 //  can be found.
-static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
+static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t relns, 
+                         exp_t a, exp_t i) {
 #ifdef BCE_DEBUG
   fprintf(stderr,"bounds check on %s and %s\n",exp2string(a),exp2string(i));
   fprintf(stderr,"relns: ["); CfFlowInfo::print_relns(relns); 
   fprintf(stderr,"]\n");
 #endif
+  // if a has type T*{x} or T[x], then we can pretend like it's
+  // a variable to get the rest of this code to work out.
+  vardecl_t x;
+
   switch (a->r) {
-  case &Var_e(_,&Pat_b(x)):    fallthru(x);
-  case &Var_e(_,&Local_b(x)):  fallthru(x);
-  case &Var_e(_,&Global_b(x)): fallthru(x);
-  case &Var_e(_,&Param_b(x)):
-    if (x->escapes) return false; // no point in looking for escaping vars
+  case &Var_e(_,&Pat_b(x1)):    fallthru(x1);
+  case &Var_e(_,&Local_b(x1)):  fallthru(x1);
+  case &Var_e(_,&Global_b(x1)): fallthru(x1);
+  case &Var_e(_,&Param_b(x1)):
+    if (x1->escapes) fallthru;
+    x = x1; 
+    break; 
+  default:
+    // we're going to fake up a vardecl here
+    static string_t bogus_string = "*bogus*";
+    static $(nmspace_t,var_t) bogus_qvar = 
+      $(Nmspace{.Loc_n = 0},&bogus_string);
+    static struct Vardecl bogus_vardecl = 
+    {.sc = Public, .name = &bogus_qvar, 
+     .tq = Tqual{false,false,false,false,NULL},
+     .type = &VoidType_val, .initializer = NULL, .rgn = NULL,
+     .attributes = NULL, .escapes = false};
+
+    x = &bogus_vardecl;
+    x->type = a_typ;
+  }
 
   inner_loop:
     switch (i->r) {
@@ -1205,10 +1226,7 @@ static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
       break;
     default: break;
     }
-    break;
-  default: break;
-  }
-  return false;
+    return false;
 }
 
 static type_t get_c_typ(exp_t e) {
@@ -2852,7 +2870,7 @@ DynCast:
       bool in_bnds = false;
       switch (conref_def(bounds_one,b)) {
       default:
-	in_bnds = check_bounds(relns,e1,e2);
+	in_bnds = check_bounds(e1_typ,relns,e1,e2);
 	if(warn_bounds_checks && !in_bnds) 
 	  Tcutil::warn(e->loc,"bounds check necessary for %s", exp2string(e));
 #ifdef BCE_DEBUG
