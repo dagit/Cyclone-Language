@@ -33,6 +33,11 @@ static void die(const char ?`r desc, ...`r2 inject parg_t<`r4> ap)
   exit(1);
 }
 
+static bool was_space = false;
+static context_t space_ctxt = Context(0,0,0,0,0,0,DONT_KNOW, DONT_KNOW);
+bool eq_space_context(context_t t1, context_t t2){
+  return (t1.size==t2.size)||(t1.U==t2.U)||(t1.U?(t1.color==t2.color):true);
+}
 /* keep going until you hit a tag or EOF 
  * and then return the text you've got so far.
    XXX should be able to region-ify this */
@@ -55,18 +60,28 @@ static doc_t get_text(context_t ctxt, buf_t b, FILE @f) {
     case 0x0A:
     case 0x09:
       // white space treated specially
-      Buffer::add_char(b,(char)c);
       if (!in_tt) {
-	while (true) {
-	  c = GETC(f);
-	  if (c == 0x20 || c == 0x0D || c == 0x0A || c == 0x09) continue;
-	  break;
-	}
-	UNGETC(c,f);
+        //only add in space if previous char is not same context space
+        if (!was_space||!eq_space_context(ctxt,space_ctxt)){
+          Buffer::add_char(b,(char)c);
+        }
+        while (true) {
+          c = GETC(f);
+          if (c == 0x20 || c == 0x0D || c == 0x0A || c == 0x09) continue;
+          break;
+        }
+        UNGETC(c,f);
+        was_space = true;
+        space_ctxt = ctxt;
+      }
+      else{
+          Buffer::add_char(b,(char)c);
+          was_space = false;
       }
       break;
     default:
       Buffer::add_char(b,(char)c);
+      was_space = false;
       break;
     }
   }
