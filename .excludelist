@@ -4,10 +4,6 @@ CVS
 TAGS
 NOTES
 cyclone/.inst
-cyclone/include/sys/select.h
-cyclone/include/sys/cselect.h
-cyclone/lib/sys/select.h
-cyclone/lib/sys/cselect.h
 cyclone/tools/cyclex/qdist
 cyclone/tools/cycocamllex
 cyclone/tools/cycbison

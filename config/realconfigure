@@ -101,7 +101,7 @@ function get_def_genfiles {
       DEF_ARCH=i686-unknown-linux
   esac
   echo "Using the genfiles from ${DEF_ARCH}" 
-  bin/genfiles/extract_patch ${PATCH_ARCH} ${DEF_ARCH}
+  ${CYCDIR}/bin/genfiles/extract_patch ${PATCH_ARCH} ${DEF_ARCH}
   cp -r ${CYCDIR}/bin/genfiles/${DEF_ARCH}/* ${CYCDIR}/bin/genfiles/${ARCH}
   CVS_files=`find ${CYCDIR}/bin/genfiles/${ARCH} -name CVS`
   if [ -n "$CVS_files" ]; then
