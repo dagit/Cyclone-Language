@@ -113,7 +113,6 @@ static tunionfield_t getField(tuniondecl_t td, qvar_t fieldname) {
 	return l->hd;
   }
   Tcutil::impos("Could not find field in tuniondecl");
-  throw Tcutil::TypeErr; // redundant, as impos will do this
 }
 
 // defines the Tcgenrep namespace as an absyn value
@@ -1164,7 +1163,6 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       break;
   case &TunionType(_):
     Tcutil::impos("gen(): tunion must be resolved by now");
-    break;
   case &TunionFieldType(tfieldinfo): // tunion_field_info_t
     // should be similar to tuple
     if(tfieldinfo.targs != NULL)
@@ -1178,7 +1176,6 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       break;
     default:
       Tcutil::impos("gen(): tunionfield must be known at this point");
-      break;
     }
     break;
 
@@ -1334,7 +1331,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     //      Tcutil::impos("gen() expression not yet supported");
     //      throw Tcutil::TypeErr; // redundant, as impos will do this
   case &SizeofType(_):
-    Tcutil::impos("gen() for sizeof_t<-> not yet supported"); break;
+    Tcutil::impos("gen() for sizeof_t<-> not yet supported");
   }
   //printf("Done %s\n",typ2string(type));
   return new $(dict,lookup(dict,type));

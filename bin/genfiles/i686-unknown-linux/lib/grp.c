@@ -38,8 +38,8 @@ struct _RuntimeStack {
 //// Regions
 struct _RegionPage {
 #ifdef CYC_REGION_PROFILE
-  unsigned int total_bytes;
-  unsigned int free_bytes;
+  unsigned total_bytes;
+  unsigned free_bytes;
 #endif
   struct _RegionPage *next;
   char data[0];
@@ -56,9 +56,9 @@ struct _RegionHandle {
 };
 
 extern struct _RegionHandle _new_region(const char *);
-extern void * _region_malloc(struct _RegionHandle *, unsigned);
-extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
-extern void   _free_region(struct _RegionHandle *);
+extern void* _region_malloc(struct _RegionHandle *, unsigned);
+extern void* _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
+extern void  _free_region(struct _RegionHandle *);
 
 //// Exceptions 
 struct _handler_cons {
@@ -75,7 +75,7 @@ extern void _pop_region();
 extern int _throw_null();
 extern int _throw_arraybounds();
 extern int _throw_badalloc();
-extern int _throw(void * e);
+extern int _throw(void* e);
 #endif
 
 extern struct _xtunion_struct *_exn_thrown;
@@ -95,7 +95,7 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 #define _check_null(ptr) (ptr)
 #else
 #define _check_null(ptr) \
-  ({ void *_check_null_temp = (void*)(ptr); \
+  ({ void*_check_null_temp = (void*)(ptr); \
      if (!_check_null_temp) _throw_null(); \
      _check_null_temp; })
 #endif
@@ -105,7 +105,7 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   ((char *)ptr) + (elt_sz)*(index); })
 #else
 #define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
-  void *_cks_ptr = (void*)(ptr); \
+  void*_cks_ptr = (void*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
   unsigned _cks_index = (index); \
@@ -145,13 +145,13 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 
 #define _tag_arr(tcurr,elt_sz,num_elts) ({ \
   struct _tagged_arr _tag_arr_ans; \
-  _tag_arr_ans.base = _tag_arr_ans.curr = (void *)(tcurr); \
+  _tag_arr_ans.base = _tag_arr_ans.curr = (void*)(tcurr); \
   _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts); \
   _tag_arr_ans; })
 
 #define _init_tag_arr(arr_ptr,arr,elt_sz,num_elts) ({ \
   struct _tagged_arr *_itarr_ptr = (arr_ptr); \
-  void * _itarr = (arr); \
+  void* _itarr = (arr); \
   _itarr_ptr->base = _itarr_ptr->curr = _itarr; \
   _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts); \
   _itarr_ptr; })
@@ -192,49 +192,49 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   _ans; })
 
 //// Allocation
-extern void * GC_malloc(int);
-extern void * GC_malloc_atomic(int);
-extern void * GC_calloc(unsigned int,unsigned int);
-extern void * GC_calloc_atomic(unsigned int,unsigned int);
+extern void* GC_malloc(int);
+extern void* GC_malloc_atomic(int);
+extern void* GC_calloc(unsigned,unsigned);
+extern void* GC_calloc_atomic(unsigned,unsigned);
 
-static inline void * _cycalloc(int n) {
+static inline void* _cycalloc(int n) {
   void * ans = (void *)GC_malloc(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cycalloc_atomic(int n) {
+static inline void* _cycalloc_atomic(int n) {
   void * ans = (void *)GC_malloc_atomic(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cyccalloc(unsigned int n, unsigned int s) {
-  void * ans = (void *)GC_calloc(n,s);
+static inline void* _cyccalloc(unsigned n, unsigned s) {
+  void* ans = (void*)GC_calloc(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cyccalloc_atomic(unsigned int n, unsigned int s) {
-  void * ans = (void *)GC_calloc_atomic(n,s);
+static inline void* _cyccalloc_atomic(unsigned n, unsigned s) {
+  void* ans = (void*)GC_calloc_atomic(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
 #define MAX_MALLOC_SIZE (1 << 28)
-static inline unsigned int _check_times(unsigned int x, unsigned int y) {
+static inline unsigned int _check_times(unsigned x, unsigned y) {
   unsigned long long whole_ans = 
     ((unsigned long long)x)*((unsigned long long)y);
-  unsigned int word_ans = (unsigned int)whole_ans;
+  unsigned word_ans = (unsigned)whole_ans;
   if(word_ans < whole_ans || word_ans > MAX_MALLOC_SIZE)
     _throw_badalloc();
   return word_ans;
 }
 
 #if defined(CYC_REGION_PROFILE) 
-extern void * _profile_GC_malloc(int,char *file,int lineno);
-extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
-extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
+extern void* _profile_GC_malloc(int,char *file,int lineno);
+extern void* _profile_GC_malloc_atomic(int,char *file,int lineno);
+extern void* _profile_region_malloc(struct _RegionHandle *, unsigned,
                                      char *file,int lineno);
 extern struct _RegionHandle _profile_new_region(const char *rgn_name,
 						char *file,int lineno);
@@ -256,22 +256,21 @@ unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Impossib
 15];struct Cyc_Core_Impossible_struct{unsigned char*tag;struct _tagged_arr f1;};
 extern unsigned char Cyc_Core_Not_found[14];extern unsigned char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{unsigned char*tag;struct _tagged_arr f1;};
-extern unsigned char*string_to_Cstring(struct _tagged_arr);extern struct _tagged_arr
-Cstring_to_string(unsigned char*);extern struct _tagged_arr ntCsl_to_ntsl(
-unsigned char**);struct Cyc_Std_group{struct _tagged_arr gr_name;struct _tagged_arr
-gr_passwd;unsigned int gr_gid;struct _tagged_arr gr_mem;};extern struct Cyc_Std_group*
-Cyc_Std_getgrnam(struct _tagged_arr name);extern struct Cyc_Std_group*Cyc_Std_getgrgid(
-unsigned int uid);extern int Cyc_Std_initgroups(struct _tagged_arr user,unsigned int
-group);extern int Cyc_Std_setgroups(struct _tagged_arr groups);struct Cyc_Cgrp_Cgroup{
-unsigned char*gr_name;unsigned char*gr_passwd;unsigned int gr_gid;unsigned char**
-gr_mem;};extern struct Cyc_Cgrp_Cgroup*getgrnam(unsigned char*name);extern struct
-Cyc_Cgrp_Cgroup*getgrgid(unsigned int gid);extern int initgroups(unsigned char*user,
-unsigned int group);extern int setgroups(unsigned int n,const unsigned int*groups);
-struct Cyc_Std_group*Cyc_Std_getgrnam(struct _tagged_arr name){struct Cyc_Cgrp_Cgroup*
-src=getgrnam(string_to_Cstring(name));return(unsigned int)src?({struct Cyc_Std_group*
-_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->gr_name=(struct _tagged_arr)
-Cstring_to_string(src->gr_name);_tmp0->gr_passwd=(struct _tagged_arr)
-Cstring_to_string(src->gr_passwd);_tmp0->gr_gid=src->gr_gid;_tmp0->gr_mem=
+unsigned char*string_to_Cstring(struct _tagged_arr);struct _tagged_arr
+Cstring_to_string(unsigned char*);struct _tagged_arr ntCsl_to_ntsl(unsigned char**);
+struct Cyc_Std_group{struct _tagged_arr gr_name;struct _tagged_arr gr_passwd;
+unsigned int gr_gid;struct _tagged_arr gr_mem;};struct Cyc_Std_group*Cyc_Std_getgrnam(
+struct _tagged_arr name);struct Cyc_Std_group*Cyc_Std_getgrgid(unsigned int uid);int
+Cyc_Std_initgroups(struct _tagged_arr user,unsigned int group);int Cyc_Std_setgroups(
+struct _tagged_arr groups);struct Cyc_Cgrp_Cgroup{unsigned char*gr_name;
+unsigned char*gr_passwd;unsigned int gr_gid;unsigned char**gr_mem;};struct Cyc_Cgrp_Cgroup*
+getgrnam(unsigned char*name);struct Cyc_Cgrp_Cgroup*getgrgid(unsigned int gid);int
+initgroups(unsigned char*user,unsigned int group);int setgroups(unsigned int n,
+const unsigned int*groups);struct Cyc_Std_group*Cyc_Std_getgrnam(struct _tagged_arr
+name){struct Cyc_Cgrp_Cgroup*src=getgrnam(string_to_Cstring(name));return(
+unsigned int)src?({struct Cyc_Std_group*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->gr_name=(
+struct _tagged_arr)Cstring_to_string(src->gr_name);_tmp0->gr_passwd=(struct
+_tagged_arr)Cstring_to_string(src->gr_passwd);_tmp0->gr_gid=src->gr_gid;_tmp0->gr_mem=
 ntCsl_to_ntsl(src->gr_mem);_tmp0;}): 0;}struct Cyc_Std_group*Cyc_Std_getgrgid(
 unsigned int gid){struct Cyc_Cgrp_Cgroup*src=getgrgid(gid);return(unsigned int)src?({
 struct Cyc_Std_group*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->gr_name=(struct

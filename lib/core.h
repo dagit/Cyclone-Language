@@ -112,6 +112,8 @@ extern int charcmp(char,char);
   /** [charcmp] is a comparison function on [char]. */
 extern int ptrcmp(`a::A @ `r, `a::A @ `r);
   /** [ptrcmp] is a comparison function on pointers. */
+extern int nptrcmp(`a::A * `r, `a::A * `r);
+  /** [nptrcmp] is a comparison function on nullable pointers. */
 extern xtunion exn { extern Invalid_argument(string_t) };
   /** [Invalid_argument] is an exception thrown by library functions
       when one of their arguments is inappropriate.  */

@@ -38,8 +38,8 @@ struct _RuntimeStack {
 //// Regions
 struct _RegionPage {
 #ifdef CYC_REGION_PROFILE
-  unsigned int total_bytes;
-  unsigned int free_bytes;
+  unsigned total_bytes;
+  unsigned free_bytes;
 #endif
   struct _RegionPage *next;
   char data[0];
@@ -56,9 +56,9 @@ struct _RegionHandle {
 };
 
 extern struct _RegionHandle _new_region(const char *);
-extern void * _region_malloc(struct _RegionHandle *, unsigned);
-extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
-extern void   _free_region(struct _RegionHandle *);
+extern void* _region_malloc(struct _RegionHandle *, unsigned);
+extern void* _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
+extern void  _free_region(struct _RegionHandle *);
 
 //// Exceptions 
 struct _handler_cons {
@@ -75,7 +75,7 @@ extern void _pop_region();
 extern int _throw_null();
 extern int _throw_arraybounds();
 extern int _throw_badalloc();
-extern int _throw(void * e);
+extern int _throw(void* e);
 #endif
 
 extern struct _xtunion_struct *_exn_thrown;
@@ -95,7 +95,7 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 #define _check_null(ptr) (ptr)
 #else
 #define _check_null(ptr) \
-  ({ void *_check_null_temp = (void*)(ptr); \
+  ({ void*_check_null_temp = (void*)(ptr); \
      if (!_check_null_temp) _throw_null(); \
      _check_null_temp; })
 #endif
@@ -105,7 +105,7 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   ((char *)ptr) + (elt_sz)*(index); })
 #else
 #define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
-  void *_cks_ptr = (void*)(ptr); \
+  void*_cks_ptr = (void*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
   unsigned _cks_index = (index); \
@@ -145,13 +145,13 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 
 #define _tag_arr(tcurr,elt_sz,num_elts) ({ \
   struct _tagged_arr _tag_arr_ans; \
-  _tag_arr_ans.base = _tag_arr_ans.curr = (void *)(tcurr); \
+  _tag_arr_ans.base = _tag_arr_ans.curr = (void*)(tcurr); \
   _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts); \
   _tag_arr_ans; })
 
 #define _init_tag_arr(arr_ptr,arr,elt_sz,num_elts) ({ \
   struct _tagged_arr *_itarr_ptr = (arr_ptr); \
-  void * _itarr = (arr); \
+  void* _itarr = (arr); \
   _itarr_ptr->base = _itarr_ptr->curr = _itarr; \
   _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts); \
   _itarr_ptr; })
@@ -192,49 +192,49 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   _ans; })
 
 //// Allocation
-extern void * GC_malloc(int);
-extern void * GC_malloc_atomic(int);
-extern void * GC_calloc(unsigned int,unsigned int);
-extern void * GC_calloc_atomic(unsigned int,unsigned int);
+extern void* GC_malloc(int);
+extern void* GC_malloc_atomic(int);
+extern void* GC_calloc(unsigned,unsigned);
+extern void* GC_calloc_atomic(unsigned,unsigned);
 
-static inline void * _cycalloc(int n) {
+static inline void* _cycalloc(int n) {
   void * ans = (void *)GC_malloc(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cycalloc_atomic(int n) {
+static inline void* _cycalloc_atomic(int n) {
   void * ans = (void *)GC_malloc_atomic(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cyccalloc(unsigned int n, unsigned int s) {
-  void * ans = (void *)GC_calloc(n,s);
+static inline void* _cyccalloc(unsigned n, unsigned s) {
+  void* ans = (void*)GC_calloc(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cyccalloc_atomic(unsigned int n, unsigned int s) {
-  void * ans = (void *)GC_calloc_atomic(n,s);
+static inline void* _cyccalloc_atomic(unsigned n, unsigned s) {
+  void* ans = (void*)GC_calloc_atomic(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
 #define MAX_MALLOC_SIZE (1 << 28)
-static inline unsigned int _check_times(unsigned int x, unsigned int y) {
+static inline unsigned int _check_times(unsigned x, unsigned y) {
   unsigned long long whole_ans = 
     ((unsigned long long)x)*((unsigned long long)y);
-  unsigned int word_ans = (unsigned int)whole_ans;
+  unsigned word_ans = (unsigned)whole_ans;
   if(word_ans < whole_ans || word_ans > MAX_MALLOC_SIZE)
     _throw_badalloc();
   return word_ans;
 }
 
 #if defined(CYC_REGION_PROFILE) 
-extern void * _profile_GC_malloc(int,char *file,int lineno);
-extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
-extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
+extern void* _profile_GC_malloc(int,char *file,int lineno);
+extern void* _profile_GC_malloc_atomic(int,char *file,int lineno);
+extern void* _profile_region_malloc(struct _RegionHandle *, unsigned,
                                      char *file,int lineno);
 extern struct _RegionHandle _profile_new_region(const char *rgn_name,
 						char *file,int lineno);
@@ -249,25 +249,24 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Core_Opt{void*v;};extern struct _tagged_arr Cyc_Core_new_string(
-unsigned int);extern unsigned char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+ struct Cyc_Core_Opt{void*v;};struct _tagged_arr Cyc_Core_new_string(unsigned int);
+extern unsigned char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
 unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Failure[12];
 struct Cyc_Core_Failure_struct{unsigned char*tag;struct _tagged_arr f1;};extern
 unsigned char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Not_found[14];
 extern unsigned char Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{
 unsigned char*tag;struct _tagged_arr f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*
-tl;};extern int Cyc_List_length(struct Cyc_List_List*x);extern unsigned char Cyc_List_List_mismatch[
-18];extern unsigned char Cyc_List_Nth[8];struct Cyc_Rope_Rope_node;extern struct Cyc_Rope_Rope_node*
-Cyc_Rope_from_string(struct _tagged_arr);extern struct _tagged_arr Cyc_Rope_to_string(
-struct Cyc_Rope_Rope_node*);extern struct Cyc_Rope_Rope_node*Cyc_Rope_concat(struct
-Cyc_Rope_Rope_node*,struct Cyc_Rope_Rope_node*);extern struct Cyc_Rope_Rope_node*
-Cyc_Rope_concata(struct _tagged_arr);extern struct Cyc_Rope_Rope_node*Cyc_Rope_concatl(
-struct Cyc_List_List*);extern unsigned int Cyc_Rope_length(struct Cyc_Rope_Rope_node*);
-extern int Cyc_Rope_cmp(struct Cyc_Rope_Rope_node*,struct Cyc_Rope_Rope_node*);
-extern unsigned int Cyc_Std_strlen(struct _tagged_arr s);extern int Cyc_Std_strcmp(
-struct _tagged_arr s1,struct _tagged_arr s2);extern struct _tagged_arr Cyc_Std_strncpy(
-struct _tagged_arr,struct _tagged_arr,unsigned int);struct Cyc_Rope_String_rope_struct{
+tl;};int Cyc_List_length(struct Cyc_List_List*x);extern unsigned char Cyc_List_List_mismatch[
+18];extern unsigned char Cyc_List_Nth[8];struct Cyc_Rope_Rope_node;struct Cyc_Rope_Rope_node*
+Cyc_Rope_from_string(struct _tagged_arr);struct _tagged_arr Cyc_Rope_to_string(
+struct Cyc_Rope_Rope_node*);struct Cyc_Rope_Rope_node*Cyc_Rope_concat(struct Cyc_Rope_Rope_node*,
+struct Cyc_Rope_Rope_node*);struct Cyc_Rope_Rope_node*Cyc_Rope_concata(struct
+_tagged_arr);struct Cyc_Rope_Rope_node*Cyc_Rope_concatl(struct Cyc_List_List*);
+unsigned int Cyc_Rope_length(struct Cyc_Rope_Rope_node*);int Cyc_Rope_cmp(struct Cyc_Rope_Rope_node*,
+struct Cyc_Rope_Rope_node*);unsigned int Cyc_Std_strlen(struct _tagged_arr s);int Cyc_Std_strcmp(
+struct _tagged_arr s1,struct _tagged_arr s2);struct _tagged_arr Cyc_Std_strncpy(struct
+_tagged_arr,struct _tagged_arr,unsigned int);struct Cyc_Rope_String_rope_struct{
 int tag;struct _tagged_arr f1;};struct Cyc_Rope_Array_rope_struct{int tag;struct
 _tagged_arr f1;};struct Cyc_Rope_Rope_node{void*v;};struct Cyc_Rope_Rope_node*Cyc_Rope_from_string(
 struct _tagged_arr s){return({struct Cyc_Rope_Rope_node*_tmp0=_cycalloc(sizeof(*
@@ -293,28 +292,28 @@ _cycalloc(_check_times(sizeof(struct Cyc_Rope_Rope_node*),_tmpD));struct
 _tagged_arr _tmp10=_tag_arr(_tmpE,sizeof(struct Cyc_Rope_Rope_node*),(unsigned int)((
 int(*)(struct Cyc_List_List*x))Cyc_List_length)(l));{unsigned int _tmpF=_tmpD;
 unsigned int i;for(i=0;i < _tmpF;i ++){_tmpE[i]=({struct Cyc_Rope_Rope_node*r=(
-struct Cyc_Rope_Rope_node*)((struct Cyc_List_List*)_check_null(l))->hd;l=l->tl;r;});}};
+struct Cyc_Rope_Rope_node*)((struct Cyc_List_List*)_check_null(l))->hd;l=l->tl;r;});}}
 _tmp10;});_tmpC;});_tmpB;}));_tmpA;});}unsigned int Cyc_Rope_length(struct Cyc_Rope_Rope_node*
 r){void*_tmp11=(void*)r->v;struct _tagged_arr _tmp12;struct _tagged_arr _tmp13;_LL1:
-if(*((int*)_tmp11)== 0){_LL5: _tmp12=((struct Cyc_Rope_String_rope_struct*)_tmp11)->f1;
-goto _LL2;}else{goto _LL3;}_LL3: if(*((int*)_tmp11)== 1){_LL6: _tmp13=((struct Cyc_Rope_Array_rope_struct*)
-_tmp11)->f1;goto _LL4;}else{goto _LL0;}_LL2: return(unsigned int)Cyc_Std_strlen(
-_tmp12);_LL4: {unsigned int total=0;unsigned int sz=_get_arr_size(_tmp13,sizeof(
-struct Cyc_Rope_Rope_node*));{unsigned int i=0;for(0;i < sz;i ++){total +=Cyc_Rope_length(((
-struct Cyc_Rope_Rope_node**)_tmp13.curr)[(int)i]);}}return total;}_LL0:;}static
-unsigned int Cyc_Rope_flatten_it(struct _tagged_arr s,unsigned int i,struct Cyc_Rope_Rope_node*
-r){void*_tmp14=(void*)r->v;struct _tagged_arr _tmp15;struct _tagged_arr _tmp16;_LL8:
-if(*((int*)_tmp14)== 0){_LLC: _tmp15=((struct Cyc_Rope_String_rope_struct*)_tmp14)->f1;
-goto _LL9;}else{goto _LLA;}_LLA: if(*((int*)_tmp14)== 1){_LLD: _tmp16=((struct Cyc_Rope_Array_rope_struct*)
-_tmp14)->f1;goto _LLB;}else{goto _LL7;}_LL9: {unsigned int _tmp17=Cyc_Std_strlen(
-_tmp15);Cyc_Std_strncpy(_tagged_arr_plus(s,sizeof(unsigned char),(int)i),_tmp15,
-_tmp17);return i + _tmp17;}_LLB: {unsigned int _tmp18=_get_arr_size(_tmp16,sizeof(
-struct Cyc_Rope_Rope_node*));{int j=0;for(0;j < _tmp18;j ++){i=Cyc_Rope_flatten_it(s,
-i,((struct Cyc_Rope_Rope_node**)_tmp16.curr)[j]);}}return i;}_LL7:;}struct
-_tagged_arr Cyc_Rope_to_string(struct Cyc_Rope_Rope_node*r){struct _tagged_arr s=Cyc_Core_new_string(
-Cyc_Rope_length(r));Cyc_Rope_flatten_it(s,0,r);(void*)(r->v=(void*)((void*)({
-struct Cyc_Rope_String_rope_struct*_tmp19=_cycalloc(sizeof(*_tmp19));_tmp19[0]=({
-struct Cyc_Rope_String_rope_struct _tmp1A;_tmp1A.tag=0;_tmp1A.f1=(struct
-_tagged_arr)s;_tmp1A;});_tmp19;})));return s;}int Cyc_Rope_cmp(struct Cyc_Rope_Rope_node*
-r1,struct Cyc_Rope_Rope_node*r2){return Cyc_Std_strcmp((struct _tagged_arr)Cyc_Rope_to_string(
-r1),(struct _tagged_arr)Cyc_Rope_to_string(r2));}
+if(*((int*)_tmp11)!= 0)goto _LL3;_tmp12=((struct Cyc_Rope_String_rope_struct*)
+_tmp11)->f1;_LL2: return(unsigned int)Cyc_Std_strlen(_tmp12);_LL3: if(*((int*)
+_tmp11)!= 1)goto _LL0;_tmp13=((struct Cyc_Rope_Array_rope_struct*)_tmp11)->f1;_LL4: {
+unsigned int total=0;unsigned int sz=_get_arr_size(_tmp13,sizeof(struct Cyc_Rope_Rope_node*));{
+unsigned int i=0;for(0;i < sz;i ++){total +=Cyc_Rope_length(((struct Cyc_Rope_Rope_node**)
+_tmp13.curr)[(int)i]);}}return total;}_LL0:;}static unsigned int Cyc_Rope_flatten_it(
+struct _tagged_arr s,unsigned int i,struct Cyc_Rope_Rope_node*r){void*_tmp14=(void*)
+r->v;struct _tagged_arr _tmp15;struct _tagged_arr _tmp16;_LL6: if(*((int*)_tmp14)!= 0)
+goto _LL8;_tmp15=((struct Cyc_Rope_String_rope_struct*)_tmp14)->f1;_LL7: {
+unsigned int _tmp17=Cyc_Std_strlen(_tmp15);Cyc_Std_strncpy(_tagged_arr_plus(s,
+sizeof(unsigned char),(int)i),_tmp15,_tmp17);return i + _tmp17;}_LL8: if(*((int*)
+_tmp14)!= 1)goto _LL5;_tmp16=((struct Cyc_Rope_Array_rope_struct*)_tmp14)->f1;_LL9: {
+unsigned int _tmp18=_get_arr_size(_tmp16,sizeof(struct Cyc_Rope_Rope_node*));{int j=
+0;for(0;j < _tmp18;j ++){i=Cyc_Rope_flatten_it(s,i,((struct Cyc_Rope_Rope_node**)
+_tmp16.curr)[j]);}}return i;}_LL5:;}struct _tagged_arr Cyc_Rope_to_string(struct Cyc_Rope_Rope_node*
+r){struct _tagged_arr s=Cyc_Core_new_string(Cyc_Rope_length(r));Cyc_Rope_flatten_it(
+s,0,r);(void*)(r->v=(void*)((void*)({struct Cyc_Rope_String_rope_struct*_tmp19=
+_cycalloc(sizeof(*_tmp19));_tmp19[0]=({struct Cyc_Rope_String_rope_struct _tmp1A;
+_tmp1A.tag=0;_tmp1A.f1=(struct _tagged_arr)s;_tmp1A;});_tmp19;})));return s;}int
+Cyc_Rope_cmp(struct Cyc_Rope_Rope_node*r1,struct Cyc_Rope_Rope_node*r2){return Cyc_Std_strcmp((
+struct _tagged_arr)Cyc_Rope_to_string(r1),(struct _tagged_arr)Cyc_Rope_to_string(
+r2));}

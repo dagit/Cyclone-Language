@@ -38,8 +38,8 @@ struct _RuntimeStack {
 //// Regions
 struct _RegionPage {
 #ifdef CYC_REGION_PROFILE
-  unsigned int total_bytes;
-  unsigned int free_bytes;
+  unsigned total_bytes;
+  unsigned free_bytes;
 #endif
   struct _RegionPage *next;
   char data[0];
@@ -56,9 +56,9 @@ struct _RegionHandle {
 };
 
 extern struct _RegionHandle _new_region(const char *);
-extern void * _region_malloc(struct _RegionHandle *, unsigned);
-extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
-extern void   _free_region(struct _RegionHandle *);
+extern void* _region_malloc(struct _RegionHandle *, unsigned);
+extern void* _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
+extern void  _free_region(struct _RegionHandle *);
 
 //// Exceptions 
 struct _handler_cons {
@@ -75,7 +75,7 @@ extern void _pop_region();
 extern int _throw_null();
 extern int _throw_arraybounds();
 extern int _throw_badalloc();
-extern int _throw(void * e);
+extern int _throw(void* e);
 #endif
 
 extern struct _xtunion_struct *_exn_thrown;
@@ -95,7 +95,7 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 #define _check_null(ptr) (ptr)
 #else
 #define _check_null(ptr) \
-  ({ void *_check_null_temp = (void*)(ptr); \
+  ({ void*_check_null_temp = (void*)(ptr); \
      if (!_check_null_temp) _throw_null(); \
      _check_null_temp; })
 #endif
@@ -105,7 +105,7 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   ((char *)ptr) + (elt_sz)*(index); })
 #else
 #define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
-  void *_cks_ptr = (void*)(ptr); \
+  void*_cks_ptr = (void*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
   unsigned _cks_index = (index); \
@@ -145,13 +145,13 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 
 #define _tag_arr(tcurr,elt_sz,num_elts) ({ \
   struct _tagged_arr _tag_arr_ans; \
-  _tag_arr_ans.base = _tag_arr_ans.curr = (void *)(tcurr); \
+  _tag_arr_ans.base = _tag_arr_ans.curr = (void*)(tcurr); \
   _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts); \
   _tag_arr_ans; })
 
 #define _init_tag_arr(arr_ptr,arr,elt_sz,num_elts) ({ \
   struct _tagged_arr *_itarr_ptr = (arr_ptr); \
-  void * _itarr = (arr); \
+  void* _itarr = (arr); \
   _itarr_ptr->base = _itarr_ptr->curr = _itarr; \
   _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts); \
   _itarr_ptr; })
@@ -192,49 +192,49 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   _ans; })
 
 //// Allocation
-extern void * GC_malloc(int);
-extern void * GC_malloc_atomic(int);
-extern void * GC_calloc(unsigned int,unsigned int);
-extern void * GC_calloc_atomic(unsigned int,unsigned int);
+extern void* GC_malloc(int);
+extern void* GC_malloc_atomic(int);
+extern void* GC_calloc(unsigned,unsigned);
+extern void* GC_calloc_atomic(unsigned,unsigned);
 
-static inline void * _cycalloc(int n) {
+static inline void* _cycalloc(int n) {
   void * ans = (void *)GC_malloc(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cycalloc_atomic(int n) {
+static inline void* _cycalloc_atomic(int n) {
   void * ans = (void *)GC_malloc_atomic(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cyccalloc(unsigned int n, unsigned int s) {
-  void * ans = (void *)GC_calloc(n,s);
+static inline void* _cyccalloc(unsigned n, unsigned s) {
+  void* ans = (void*)GC_calloc(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cyccalloc_atomic(unsigned int n, unsigned int s) {
-  void * ans = (void *)GC_calloc_atomic(n,s);
+static inline void* _cyccalloc_atomic(unsigned n, unsigned s) {
+  void* ans = (void*)GC_calloc_atomic(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
 #define MAX_MALLOC_SIZE (1 << 28)
-static inline unsigned int _check_times(unsigned int x, unsigned int y) {
+static inline unsigned int _check_times(unsigned x, unsigned y) {
   unsigned long long whole_ans = 
     ((unsigned long long)x)*((unsigned long long)y);
-  unsigned int word_ans = (unsigned int)whole_ans;
+  unsigned word_ans = (unsigned)whole_ans;
   if(word_ans < whole_ans || word_ans > MAX_MALLOC_SIZE)
     _throw_badalloc();
   return word_ans;
 }
 
 #if defined(CYC_REGION_PROFILE) 
-extern void * _profile_GC_malloc(int,char *file,int lineno);
-extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
-extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
+extern void* _profile_GC_malloc(int,char *file,int lineno);
+extern void* _profile_GC_malloc_atomic(int,char *file,int lineno);
+extern void* _profile_region_malloc(struct _RegionHandle *, unsigned,
                                      char *file,int lineno);
 extern struct _RegionHandle _profile_new_region(const char *rgn_name,
 						char *file,int lineno);
@@ -249,8 +249,8 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Std__types_fd_set{int fds_bits[2];};struct Cyc_Core_Opt{void*v;};extern
-struct _tagged_arr Cyc_Core_new_string(unsigned int);extern unsigned char Cyc_Core_Invalid_argument[
+ struct Cyc_Std__types_fd_set{int fds_bits[2];};struct Cyc_Core_Opt{void*v;};struct
+_tagged_arr Cyc_Core_new_string(unsigned int);extern unsigned char Cyc_Core_Invalid_argument[
 21];struct Cyc_Core_Invalid_argument_struct{unsigned char*tag;struct _tagged_arr f1;
 };extern unsigned char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
 unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Impossible[
@@ -259,44 +259,43 @@ extern unsigned char Cyc_Core_Not_found[14];extern unsigned char Cyc_Core_Unreac
 16];struct Cyc_Core_Unreachable_struct{unsigned char*tag;struct _tagged_arr f1;};
 struct Cyc_Cstdio___abstractFILE;struct Cyc_Std___cycFILE;extern unsigned char Cyc_Std_FileCloseError[
 19];extern unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
-unsigned char*tag;struct _tagged_arr f1;};extern int Cyc_Std_file_string_read(struct
-Cyc_Std___cycFILE*fd,struct _tagged_arr dest,int dest_offset,int max_count);struct
-Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
-int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct
-Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int
-tag;unsigned int*f1;};struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct
-Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
-int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
-Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
-int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};extern
-unsigned char Cyc_Lexing_Error[10];struct Cyc_Lexing_Error_struct{unsigned char*
-tag;struct _tagged_arr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);
-void*refill_state;struct _tagged_arr lex_buffer;int lex_buffer_len;int lex_abs_pos;
-int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;int
-lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{int(*read_fun)(struct
-_tagged_arr,int,void*);void*read_fun_state;};struct Cyc_Lexing_lex_tables{struct
-_tagged_arr lex_base;struct _tagged_arr lex_backtrk;struct _tagged_arr lex_default;
-struct _tagged_arr lex_trans;struct _tagged_arr lex_check;};extern struct Cyc_Lexing_lexbuf*
-Cyc_Lexing_from_function(int(*read_fun)(struct _tagged_arr,int,void*),void*);
-extern struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc_Std___cycFILE*);
-extern struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(struct _tagged_arr);extern
-struct _tagged_arr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*);extern unsigned char
-Cyc_Lexing_lexeme_char(struct Cyc_Lexing_lexbuf*,int);extern int Cyc_Lexing_lexeme_start(
-struct Cyc_Lexing_lexbuf*);extern int Cyc_Lexing_lexeme_end(struct Cyc_Lexing_lexbuf*);
+unsigned char*tag;struct _tagged_arr f1;};int Cyc_Std_file_string_read(struct Cyc_Std___cycFILE*
+fd,struct _tagged_arr dest,int dest_offset,int max_count);struct Cyc_Std_String_pa_struct{
+int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;}
+;struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{
+int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};struct
+Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{
+int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
+Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
+int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
+};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};extern unsigned char Cyc_Lexing_Error[
+10];struct Cyc_Lexing_Error_struct{unsigned char*tag;struct _tagged_arr f1;};struct
+Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;
+struct _tagged_arr lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;
+int lex_curr_pos;int lex_last_pos;int lex_last_action;int lex_eof_reached;};struct
+Cyc_Lexing_function_lexbuf_state{int(*read_fun)(struct _tagged_arr,int,void*);
+void*read_fun_state;};struct Cyc_Lexing_lex_tables{struct _tagged_arr lex_base;
+struct _tagged_arr lex_backtrk;struct _tagged_arr lex_default;struct _tagged_arr
+lex_trans;struct _tagged_arr lex_check;};struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(
+int(*read_fun)(struct _tagged_arr,int,void*),void*);struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(
+struct Cyc_Std___cycFILE*);struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(struct
+_tagged_arr);struct _tagged_arr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*);
+unsigned char Cyc_Lexing_lexeme_char(struct Cyc_Lexing_lexbuf*,int);int Cyc_Lexing_lexeme_start(
+struct Cyc_Lexing_lexbuf*);int Cyc_Lexing_lexeme_end(struct Cyc_Lexing_lexbuf*);
 struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern unsigned char Cyc_List_List_mismatch[
-18];extern unsigned char Cyc_List_Nth[8];extern struct _tagged_arr Cyc_Std_zstrncpy(
-struct _tagged_arr,struct _tagged_arr,unsigned int);extern struct _tagged_arr Cyc_Std_strdup(
+18];extern unsigned char Cyc_List_Nth[8];struct _tagged_arr Cyc_Std_zstrncpy(struct
+_tagged_arr,struct _tagged_arr,unsigned int);struct _tagged_arr Cyc_Std_strdup(
 struct _tagged_arr src);unsigned char Cyc_Lexing_Error[10]="\000\000\000\000Error";
 struct Cyc_Lexing_lexbuf;struct Cyc_Lexing_function_lexbuf_state;struct Cyc_Lexing_lex_tables;
 static unsigned char Cyc_Lexing_aux_buffer_v[1]={'\000'};static struct _tagged_arr
 Cyc_Lexing_aux_buffer={(void*)((unsigned char*)Cyc_Lexing_aux_buffer_v),(void*)((
 unsigned char*)Cyc_Lexing_aux_buffer_v),(void*)((unsigned char*)Cyc_Lexing_aux_buffer_v
 + 1)};void Cyc_Lexing_lex_refill(struct Cyc_Lexing_lexbuf*lexbuf){if(_get_arr_size(
-Cyc_Lexing_aux_buffer,sizeof(unsigned char))== 1){Cyc_Lexing_aux_buffer=Cyc_Core_new_string(
-4096);}{int read=(((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun)(
+Cyc_Lexing_aux_buffer,sizeof(unsigned char))== 1)Cyc_Lexing_aux_buffer=Cyc_Core_new_string(
+4096);{int read=(((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun)(
 Cyc_Lexing_aux_buffer,(int)_get_arr_size(Cyc_Lexing_aux_buffer,sizeof(
 unsigned char)),(void*)((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun_state);
-int n=read > 0? read:((lexbuf->lex_eof_reached=1,0));if(lexbuf->lex_start_pos < n){
+int n=read > 0?read:((lexbuf->lex_eof_reached=1,0));if(lexbuf->lex_start_pos < n){
 int oldlen=lexbuf->lex_buffer_len;int newlen=oldlen * 2;struct _tagged_arr newbuf=Cyc_Core_new_string((
 unsigned int)(newlen + 1));Cyc_Std_zstrncpy(_tagged_arr_plus(newbuf,sizeof(
 unsigned char),oldlen),(struct _tagged_arr)lexbuf->lex_buffer,(unsigned int)

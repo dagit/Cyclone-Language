@@ -379,24 +379,21 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
 
 /* ------ extracting an interface from a global environment ------ */
 
-// FIX: Make this hack go away (it won't be that bad)
+// FIX: Make this hack go away
 #define EXTRACT_DECL(OBJ)\
 static void extract_##OBJ##decl($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env,\
 				var_t x, OBJ##decl_t@ dp) {\
   let &$(imp, exp, check_complete_defs, ae, seen, _) = env;\
   let d = *dp;\
-\
   switch(d->sc) {\
   case Static:\
-    if (check_complete_defs && d->fields == NULL) {\
+    if (check_complete_defs && d->fields == NULL)\
       fields_err("static", #OBJ, d->name);\
-    }\
     break;\
   case Abstract:\
     if (d->fields == NULL) {\
-      if (check_complete_defs) {\
+      if (check_complete_defs)\
 	fields_err("abstract", #OBJ, d->name);\
-      }\
     } else {\
       d = new *d;\
       d->fields = NULL;\
@@ -410,15 +407,13 @@ static void extract_##OBJ##decl($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env,\
       d = new *d;\
       d->sc = Abstract;\
     }\
-    if (check_public_##OBJ##decl(ae, seen, d)) {\
+    if (check_public_##OBJ##decl(ae, seen, d))\
       exp->OBJ##decls = Dict::insert(exp->OBJ##decls, x, d);\
-    }\
     break;\
-  case ExternC: fallthru;\
+  case ExternC: \
   case Extern:\
-    if (check_public_##OBJ##decl(ae, seen, d)) {\
+    if (check_public_##OBJ##decl(ae, seen, d)) \
       imp->OBJ##decls = Dict::insert(imp->OBJ##decls, x, d);\
-    }\
     break;\
   }\
 }

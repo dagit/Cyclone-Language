@@ -107,6 +107,8 @@ bool need_space_before() {
   case ';':
   case ',':
   case '=':
+  case '?':
+  case '!':
   case ' ':
   case '\n':
   case '*': return false;
@@ -530,13 +532,9 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Const_e(&Char_c(sg,ch)):
     dump_char('\''); dump_nospace(Absynpp::char_escape(ch)); dump_char('\''); 
     break;
-  case &Const_e(&Short_c(sg,s)):
-    dump(aprintf("%d",s));
-    break;
-  case &Const_e(&Int_c(Signed,i)):
-    dump(aprintf("%d",i)); break;
-  case &Const_e(&Int_c(Unsigned,i)):
-    dump(aprintf("%u",(unsigned)i)); break;
+  case &Const_e(&Short_c(sg,s)):     dump(aprintf("%d",s)); break;
+  case &Const_e(&Int_c(Signed,i)):   dump(aprintf("%d",i)); break;
+  case &Const_e(&Int_c(Unsigned,i)): dump(aprintf("%u",(unsigned)i)); break;
   case &Const_e(&LongLong_c(sg,i)):
     dump("<<FIX LONG LONG CONSTANT>>"); break; // FIX
   case &Const_e(&Float_c(x)): dump(x); break;
@@ -674,9 +672,12 @@ void dumpexp_prec(int inprec, exp_t e) {
     dump_char(':'); dumpexp(e2); dump_char('}');
     break;
 
-  case &Struct_e(n,des,_):
+  case &Struct_e(n,ts,des,_):
     dumpqvar(n);
-    group(dumpde,des,"{","}",",");
+    dump_char('{');
+    if(ts != NULL)
+      dumptps(ts);
+    group(dumpde,des,"","}",",");
     break;
 
   case &AnonStruct_e(_,des):
@@ -782,9 +783,14 @@ void dumpstmt(stmt_t s) {
   case &Return_s(NULL): dumploc(s->loc); dump("return;"); break;
   case &Return_s(e): dumploc(s->loc); dump("return"); dumpexp((exp_t)e); dump_semi(); break;
   case &IfThenElse_s(e,s1,s2):
-    dumploc(s->loc); dump("if("); dumpexp(e); dump_nospace("){");
-    dumpstmt(s1);
-    dump_char('}');
+    dumploc(s->loc); dump("if("); dumpexp(e); 
+    switch(s1->r) {
+    case &Seq_s(_,_):
+    case &Decl_s(_,_): 
+    case &IfThenElse_s(_,_,_):
+    case &Label_s(_,_): dump_nospace("){"); dumpstmt(s1); dump_char('}'); break;
+    default: dump_char(')'); dumpstmt(s1);
+    }
     switch (s2->r) {
     case Skip_s: break;
     default: dump("else{"); dumpstmt(s2); dump_char('}'); break;
@@ -795,9 +801,9 @@ void dumpstmt(stmt_t s) {
     dumpstmt(s1);
     dump_char('}');
     break;
-  case &Break_s(_):         dumploc(s->loc); dump("break;");        break;
-  case &Continue_s(_):      dumploc(s->loc); dump("continue;");     break;
-  case &Goto_s(x,_):        dumploc(s->loc); dump("goto"); dump_str(x); dump_semi(); break;
+  case &Break_s(_):    dumploc(s->loc); dump("break;");    break;
+  case &Continue_s(_): dumploc(s->loc); dump("continue;"); break;
+  case &Goto_s(x,_):   dumploc(s->loc); dump("goto"); dump_str(x); dump_semi(); break;
 
   case &For_s(e1,$(e2,_),$(e3,_),s1):
     dumploc(s->loc); dump("for("); dumpexp(e1);dump_semi(); dumpexp(e2);dump_semi(); dumpexp(e3);
@@ -829,18 +835,18 @@ void dumpstmt(stmt_t s) {
     break;
 
   case &Do_s(s1,$(e,_)):
-    dumploc(s->loc); dump("do {"); dumpstmt(s1); 
-    dump_nospace("} while ("); dumpexp(e); dump_nospace(");");
+    dumploc(s->loc); dump("do{"); dumpstmt(s1); 
+    dump_nospace("}while("); dumpexp(e); dump_nospace(");");
     break;
 
   case &SwitchC_s(e,ss): 
-    dumploc(s->loc); dump("switch \"C\" ("); dumpexp(e); dump_nospace("){");
+    dumploc(s->loc); dump("switch \"C\"("); dumpexp(e); dump_nospace("){");
     for(; ss != NULL; ss = ss->tl) {
       let &SwitchC_clause(e,s,_) = ss->hd;
       if(e == NULL)
-	dump("default: ");
+	dump("default:");
       else {
-	dump("case "); dumpexp((exp_t)e); dump_char(':');
+	dump("case"); dumpexp((exp_t)e); dump_char(':');
       }
       dumpstmt(s);
     }
@@ -853,7 +859,7 @@ void dumpstmt(stmt_t s) {
 
   case &TryCatch_s(s1,ss):
     dumploc(s->loc); dump("try"); dumpstmt(s1); 
-    dump("catch {");
+    dump("catch{");
     dumpswitchclauses(ss); dump_char('}');
     break;
 
@@ -992,7 +998,14 @@ void dumpvardecl(vardecl_t vd,Position::seg_t loc) {
     let pr = $(call_conv,name);
     dumptms(List::imp_rev(tms), dump_callconv_qvar, &pr);
   } else {
-    dumpscope(sc);
+    // hack to avoid writing so many useless externs:
+    if(sc == Extern && qvar_to_Cids)
+      switch(Tcutil::compress(type)) {
+      case &FnType(_): break;
+      default: dumpscope(sc);
+      }
+    else
+      dumpscope(sc);
     dumptqtd(tq, type, dumpqvar, name);
     dumpatts(atts);
   }
@@ -1006,6 +1019,9 @@ void dumpvardecl(vardecl_t vd,Position::seg_t loc) {
 
 void dumpdecl(decl_t d) {
   switch(d->r) {
+  case &Var_d(vd):
+    dumpvardecl(vd,d->loc);
+    break;
   case &Fn_d(fd):
     dumploc(d->loc);
     //    fprintf(stderr,"%s",*(*fd->name)[1]); fflush(stdout);
@@ -1043,9 +1059,6 @@ void dumpdecl(decl_t d) {
       dumpatts(ad->attributes);
       dump(";");
     }
-    break;
-  case &Var_d(vd):
-    dumpvardecl(vd,d->loc);
     break;
   case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion)):
     dumpscope(sc);

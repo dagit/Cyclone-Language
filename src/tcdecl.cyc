@@ -107,8 +107,7 @@ static inline bool check_tvs(list_t<tvar_t> tvs0, list_t<tvar_t> tvs1,
     let c0 = force_kb(x0->hd->kind);
     let c1 = force_kb(x1->hd->kind);
     if (c0 == c1) continue;
-    merr(loc, msg, 
-         "%s %s has a different kind (%s) for type parameter %s (%s)",
+    merr(loc, msg, "%s %s has a different kind (%s) for type parameter %s (%s)",
          t, v, kind2string(c0), *x0->hd->name, kind2string(c1));
     return false;
   }
@@ -356,7 +355,7 @@ merge_xtunion_fields(list_t<tunionfield_t,`H> f0s, list_t<tunionfield_t,`H> f1s,
   return *f2sp;
 }
 
-// FIX : a non recursive version ?
+// FIX : a non recursive version ?  At least regionify this
 static $(list_t<`a>, list_t<`a>) split(list_t<`a,`H> f) {
   if (f == NULL) return $(NULL, NULL);
   if (f->tl == NULL) return $(f, NULL);
@@ -513,7 +512,7 @@ struct Enumdecl * merge_enumdecl(enumdecl_t d0, enumdecl_t d1,
   }
 }
 
-static inline $(scope_t, bool)
+static $(scope_t, bool)
 check_var_or_fn_decl(scope_t sc0, type_t t0, tqual_t tq0, attributes_t atts0,
 		     scope_t sc1, type_t t1, tqual_t tq1, attributes_t atts1,
 		     string_t t, string_t v, seg_t loc, string_t * msg) {
@@ -596,13 +595,13 @@ struct Typedefdecl * merge_typedefdecl(typedefdecl_t d0, typedefdecl_t d1,
 
 binding_t merge_binding(binding_t b0, binding_t b1, seg_t loc, string_t * msg) {
   switch ($(b0, b1)) {
-  case $(Unresolved_b,   Unresolved_b)  : return Unresolved_b;
-  case $(&Global_b(d0),  &Global_b(d1)) :
+  case $(Unresolved_b,   Unresolved_b): return Unresolved_b;
+  case $(&Global_b(d0),  &Global_b(d1)):
     let d2 = merge_vardecl(d0, d1, loc, msg);
     if (d2 == NULL) return Unresolved_b;
-    if (d0 == d2) return b0;
-    else if (d1 == d2) return b1;
-    else return new Global_b((vardecl_t) d2);
+    if (d2 == d0) return b0;
+    if (d2 == d1) return b1;
+    return new Global_b((vardecl_t) d2);
   case $(&Global_b(d0),  &Funname_b(d1)):
     let $(_,res) = check_var_or_fn_decl(d0->sc,d0->type,d0->tq,d0->attributes,
 					d1->sc,d1->cached_typ->v,empty_tqual(), 
@@ -644,10 +643,7 @@ struct Xtunionfielddecl * merge_xtunionfielddecl (xtunionfielddecl_t d0,
 
   // try to merge the 2 fields
   let f2 = merge_tunionfield(f0, f1, inst1, "xtunionfield", v, msg);
-
   if (f2 == NULL) return NULL;
-  if (f2 == f0)
-    return d0;
-  else
-    return new Xtunionfielddecl(b0, (tunionfield_t) f2);
+  if (f2 == f0)   return d0;
+  return new Xtunionfielddecl(b0, (tunionfield_t) f2);
 }

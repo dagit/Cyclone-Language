@@ -595,7 +595,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     return $(f, new Aggregate(aggrdict));
 
   case &AnonStruct_e(_,des): fallthru(des);
-  case &Struct_e(_,des,_): // FIX: avoid more allocation
+  case &Struct_e(_,_,des,_): // FIX: avoid more allocation
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,map(Core::snd,des));
     aggrdict_t aggrdict = Dict::empty(zstrptrcmp);
     for(int i=0; rvals != NULL; rvals = rvals->tl, des = des->tl, ++i)

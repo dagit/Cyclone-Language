@@ -946,7 +946,7 @@ using Parse;
 %type <list_t<$(opt_t<var_t>,tqual_t,type_t)@>> parameter_list
 %type <$(list_t<$(opt_t<var_t>,tqual_t,type_t)@>, bool,vararg_info_t *,opt_t<type_t>, list_t<$(type_t,type_t)@>)@> parameter_type_list
 %type <list_t<type_t>> type_name_list type_params_opt effect_set region_set
-%type <list_t<type_t>> atomic_effect exist_vars_opt
+%type <list_t<type_t>> atomic_effect
 %type <list_t<designator_t>> designation designator_list
 %type <designator_t> designator
 %type <kind_t> kind
@@ -1292,7 +1292,7 @@ struct_or_union_specifier:
   struct_or_union '{' struct_declaration_list '}'
   { $$=^$(type_spec(new AnonAggrType($1,$3),LOC(@1,@4))); }
 /* Cyc:  type_params_opt are added */
-| struct_or_union struct_union_name type_params_opt '{' exist_vars_opt struct_declaration_list '}'
+| struct_or_union struct_union_name type_params_opt '{' type_params_opt struct_declaration_list '}'
     { let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
       let exist_ts = List::map_c(typ2tvar,LOC(@5,@5),$5);
       $$=^$(new Decl_spec(aggr_decl($1, Public, $2, ts, new Opt(exist_ts), 
@@ -1304,10 +1304,6 @@ struct_or_union_specifier:
 		      LOC(@1,@3)));
     }
 ;
-
-exist_vars_opt: 
-/* empty */ { $$=^$(NULL); }
-|  '<' type_name_list '>' { $$=^$(List::imp_rev($2)); }
 
 type_params_opt:
   /* empty */
@@ -2049,7 +2045,7 @@ pattern:
     {$$=^$(new_pat(new Tuple_p(List::imp_rev($3)),LOC(@1,@4)));}
 | qual_opt_identifier '(' tuple_pattern_list ')'
   { $$=^$(new_pat(new UnknownCall_p($1,List::imp_rev($3)),LOC(@1,@4))); }
-| qual_opt_identifier '{' exist_vars_opt field_pattern_list '}'
+| qual_opt_identifier '{' type_params_opt field_pattern_list '}'
    { let exist_ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
       $$=^$(new_pat(new Aggr_p(AggrInfo(new UnknownAggr(StructA,$1),NULL),
 			       exist_ts, List::imp_rev($4)),
@@ -2313,8 +2309,8 @@ primary_expression:
 | '$' '(' argument_expression_list ')'
     { $$=^$(tuple_exp($3,LOC(@1,@4))); }
 /* Cyc: structure expressions */
-| qual_opt_identifier '{' initializer_list '}'
-    { $$=^$(new_exp(new Struct_e($1,List::imp_rev($3),NULL),LOC(@1,@4))); }
+| qual_opt_identifier '{' type_params_opt initializer_list '}'
+    { $$=^$(new_exp(new Struct_e($1,$3,List::imp_rev($4),NULL),LOC(@1,@5))); }
 /* Cyc: compound statement expressions, as in gcc */
 | '(' '{' block_item_list '}' ')'
     { $$=^$(stmt_exp($3,LOC(@1,@5))); }

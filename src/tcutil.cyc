@@ -40,7 +40,7 @@ using Tcenv;
 
 namespace Tcutil;
 
-xtunion exn {TypeErr, Unify};
+xtunion exn {Unify};
 
 extern void unify_it(type_t t1, type_t t2);
 
@@ -93,9 +93,9 @@ void terr(seg_t loc, string_t fmt, ... inject parg_t ap)
   __attribute__((format(printf,1,2), noreturn))
 {
   string_t msg = vrprintf(heap_region,fmt,ap);
-  fprintf(stderr,"Error: %s\n",msg);
+  fprintf(stderr,"Compiler Error (Tcutil::impos): %s\n",msg);
   fflush(stderr);
-  throw TypeErr;
+  throw new Impossible(msg);
 }
 
 static string_t tvar2string(tvar_t tv) {
@@ -197,8 +197,7 @@ static $(tqual_t,type_t)@ copy_tqt($(tqual_t,type_t) @arg) {
   return new $(x,copy_type(t));
 }
 static aggrfield_t copy_field(aggrfield_t f) {
-  return new Aggrfield{f->name,f->tq,copy_type(f->type),f->width,
-                           f->attributes};
+  return new Aggrfield{f->name,f->tq,copy_type(f->type),f->width,f->attributes};
 }
 static $(type_t,type_t)@ copy_rgncmp($(type_t,type_t)@ x) {
   let &$(r1,r2) = x;
@@ -393,10 +392,8 @@ static void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
     occurs(evar,r,env,rt);
     for(; args != NULL; args = args->tl)
       occurs(evar,r,env,(*args->hd)[2]);
-    if (cyc_varargs != NULL) {
-      let VarargInfo(_,_,t,_) = *cyc_varargs;
-      occurs(evar,r,env,t); 
-    }
+    if (cyc_varargs != NULL)
+      occurs(evar,r,env,cyc_varargs->type);
     for (; rgn_po != NULL; rgn_po = rgn_po->tl) {
       let &$(r1,r2) = rgn_po->hd;
       occurs(evar,r,env,r1);
@@ -1633,11 +1630,11 @@ bool will_lose_precision(type_t t1, type_t t2) {
 
 // coerce the list e so that each element has type t -- used in arrays and
 // conditionals 
-bool coerce_list(tenv_t te, type_t t, list_t<exp_t,`r> es) {
+bool coerce_list(tenv_t te, type_t t, list_t<exp_t> es) {
   // find the biggest arithmetic type (if any) for the list and determine
   // if all of the elements are boxed.
   opt_t<type_t> max_arith_type = NULL;
-  for (list_t<exp_t,`r> el = es; el != NULL; el = el->tl) {
+  for (list_t<exp_t> el = es; el != NULL; el = el->tl) {
     type_t t1 = compress(el->hd->topt->v);
     if (is_arithmetic_type(t1)) 
       if (max_arith_type == NULL || will_lose_precision(t1,max_arith_type->v))
@@ -1648,7 +1645,7 @@ bool coerce_list(tenv_t te, type_t t, list_t<exp_t,`r> es) {
     if (!unify(t,max_arith_type->v))
       return false;
   // now coerce each expression to the type t as if by assignment
-  for (list_t<exp_t,`r> el = es; el != NULL; el = el->tl)
+  for (list_t<exp_t> el = es; el != NULL; el = el->tl)
     if (!coerce_assign(te,el->hd,t)) {
       terr(el->hd->loc,"type mismatch: expecting %s but found %s",
            typ2string(t),typ2string(el->hd->topt->v));
@@ -1658,13 +1655,13 @@ bool coerce_list(tenv_t te, type_t t, list_t<exp_t,`r> es) {
 }
 
 // coerce e to have type "bool" (int) -- used in conditionals 
+// Note: explicit cast is needed only for fat pointers, I think.
 bool coerce_to_bool(tenv_t te, exp_t e) {
-  if (!coerce_sint_typ(te,e)) {
+  if (!coerce_sint_typ(te,e))
     switch (compress(e->topt->v)) {
     case &PointerType(_): unchecked_cast(te,e,uint_t); break;
     default: return false;
     }
-  }
   return true;
 }
 
@@ -2103,11 +2100,11 @@ void unchecked_cast(tenv_t te, exp_t e, type_t t) {
 
 bool is_integral(exp_t e) {
   switch (compress(e->topt->v)) {
+  case &IntType(_,_): 
   case &EnumType(_,_):
   case &AnonEnumType(_):
-  case &IntType(_,_): return true;
-  case &Evar(_,_,_,_): return unify(e->topt->v,sint_t);
   case &SizeofType(_): return true;
+  case &Evar(_,_,_,_): return unify(e->topt->v,sint_t);
   default: return false;
   }
 }
@@ -2118,7 +2115,7 @@ bool is_numeric(exp_t e) {
   switch (compress(e->topt->v)) {
   case FloatType:  
   case &DoubleType(_): return true;
-  default:         return false;
+  default: return false;
   }
 }
 
@@ -3439,7 +3436,7 @@ bool is_tagged_pointer_typ_elt(type_t t, type_t@ elt_typ_dest) {
       *elt_typ_dest = elt_typ; 
       return true;
     case No_constr: 
-      b->v = new Eq_constr((bounds_t)Unknown_b); 
+      b->v = new Eq_constr(Unknown_b); 
       *elt_typ_dest = elt_typ; 
       return true;
     default: return false;
@@ -3473,8 +3470,8 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
   case &Var_e(q,x):
     // where oh where does my variable live?
     switch(x) {
-    case Unresolved_b: return bogus_ans;
-    case &Funname_b(_): return $(false, HeapRgn); 
+    case Unresolved_b: 
+    case &Funname_b(_): return bogus_ans;
     case &Global_b(vd): 
       switch (compress(e->topt->v)) {
 	// arrays cannot be modified
@@ -3511,22 +3508,20 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
     }
   case &AggrArrow_e(e1,f): 
     // we have a boxed thing, so the region is in the pointer-type.
-    // must check that f isn't a bitfield.
+    // must check that f isn't a bitfield. DAN: why?
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{t1,r,_,_,_}): 
+      struct Aggrfield * finfo;
       switch (compress(t1)) {
-      case &AnonAggrType(_,fs):
-        let finfo = lookup_field(fs,f);
-	if(finfo != NULL && finfo->width != NULL)
-	  return $(finfo->tq.q_const, r);
-	return bogus_ans;
+      case &AnonAggrType(_,fs): 
+	finfo = lookup_field(fs,f); break;
       case &AggrType(AggrInfo(&KnownAggr(&ad),_)):
-	let finfo = lookup_decl_field(ad,f);
-	if(finfo != NULL && finfo->width != NULL)
-	  return $(finfo->tq.q_const, addressof_props(te,e1)[1]);
-	return bogus_ans;
+	finfo = lookup_decl_field(ad,f); break;
       default: return bogus_ans;
       }
+      if(finfo != NULL && finfo->width != NULL)
+	return $(finfo->tq.q_const, r);
+      return bogus_ans;
     default: return bogus_ans;
     }
   case &Deref_e(e1):
@@ -3540,25 +3535,22 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
   case &Subscript_e(e1,e2):
     // here we need to figure out whether we've got a boxed thing
     // or not because [] is overloaded for all array kinds, and tuples
-    // FIX: eventually a tagged array's elements may live in a region, for now, 
-    // they always in the heap
     type_t t = compress(e1->topt->v);
     switch (t) {
-    case &ArrayType(_,tq,_): 
-      // Actually, this should be impossible since we've surely
-      // promoted e1 to a pointer.
-      // NOTE: Unlike C, we cannot allow any e1 -- it must be an lvalue.
-      // (C doesn't need to know the region and we do!)
-      return $(tq.q_const, addressof_props(te,e1)[1]);
     case &TupleType(ts):
       // We need an lvalue in this unboxed case whereas "C w/ tuples" wouldn't.
       let finfo = lookup_tuple_field(ts,Evexp::eval_const_uint_exp(e2));
       if(finfo != NULL)
 	return $((*finfo)[0].q_const, addressof_props(te,e1)[1]);
       return bogus_ans;
-
     case &PointerType(PtrInfo{t2,r,_,tq,b}): 
       return $(tq.q_const,r);
+    case &ArrayType(_,tq,_): 
+      // Actually, this should be impossible since we've surely
+      // promoted e1 to a pointer.
+      // NOTE: Unlike C, we cannot allow any e1 -- it must be an lvalue.
+      // (C doesn't need to know the region and we do!)
+      return $(tq.q_const, addressof_props(te,e1)[1]);
     default: return bogus_ans;
     }
   default: 
@@ -3584,9 +3576,8 @@ type_t array_to_ptr(tenv_t te, type_t e_typ, exp_t e) {
   }
 }
 
-// give an error when we can statically tell that the array bounds
-// aren't large enough -- if the bounds are unconstrained, set them
-// to i+1.
+// give an error when we can statically tell that the array bounds arent'
+// large enough -- if the bounds are unconstrained, set them to i+1.
 void check_bound(seg_t loc, unsigned int i, conref_t<bounds_t> b) {
   b = compress_conref(b);
   switch (b->v) {
@@ -3696,7 +3687,7 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
     return cnst_exp(te,false,e1) && cnst_exp(te,false,e2);
   case &Array_e(des): fallthru(des);
   case &AnonStruct_e(_,des): fallthru(des);
-  case &Struct_e(_,des,_):
+  case &Struct_e(_,_,des,_):
     for (; des != NULL; des = des->tl)
       if (!cnst_exp(te,false,(*des->hd)[1]))
         return false;
@@ -3736,6 +3727,7 @@ bool supports_default(type_t t) {
       }
     default: return false;
     }
+
   case &ArrayType(t,_,_): return supports_default(t);
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl)
@@ -3746,13 +3738,10 @@ bool supports_default(type_t t) {
     if(ad->fields==NULL) return false;
     if(ad->exist_vars->v != NULL) return false; // FIX?
     return fields_support_default(ad->tvs, ts, ad->fields->v);
-  case &AnonAggrType(_,fs):
-    return fields_support_default(NULL,NULL,fs);
+  case &AnonAggrType(_,fs): return fields_support_default(NULL,NULL,fs);
 
   case &AnonEnumType(_):
-  case &EnumType(_,_): 
-    // FIX: may not include 0!
-    return true;
+  case &EnumType(_,_): return true; // FIX: may not include 0!
 
   default: return false;
   }
@@ -3774,12 +3763,11 @@ bool is_noreturn(type_t t) {
   switch (compress(t)) {
   case &PointerType(PtrInfo{elt,_,_,_,_}): return is_noreturn(elt);
   case &FnType(FnInfo{_,_,_,_,_,_,_,atts}):
-    for (; atts != NULL; atts = atts->tl) {
+    for (; atts != NULL; atts = atts->tl)
       switch (atts->hd) {
       case Noreturn_att: return true;
       default: continue;
       }
-    }
     break;
   default: break;
   }

@@ -38,8 +38,8 @@ struct _RuntimeStack {
 //// Regions
 struct _RegionPage {
 #ifdef CYC_REGION_PROFILE
-  unsigned int total_bytes;
-  unsigned int free_bytes;
+  unsigned total_bytes;
+  unsigned free_bytes;
 #endif
   struct _RegionPage *next;
   char data[0];
@@ -56,9 +56,9 @@ struct _RegionHandle {
 };
 
 extern struct _RegionHandle _new_region(const char *);
-extern void * _region_malloc(struct _RegionHandle *, unsigned);
-extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
-extern void   _free_region(struct _RegionHandle *);
+extern void* _region_malloc(struct _RegionHandle *, unsigned);
+extern void* _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
+extern void  _free_region(struct _RegionHandle *);
 
 //// Exceptions 
 struct _handler_cons {
@@ -75,7 +75,7 @@ extern void _pop_region();
 extern int _throw_null();
 extern int _throw_arraybounds();
 extern int _throw_badalloc();
-extern int _throw(void * e);
+extern int _throw(void* e);
 #endif
 
 extern struct _xtunion_struct *_exn_thrown;
@@ -95,7 +95,7 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 #define _check_null(ptr) (ptr)
 #else
 #define _check_null(ptr) \
-  ({ void *_check_null_temp = (void*)(ptr); \
+  ({ void*_check_null_temp = (void*)(ptr); \
      if (!_check_null_temp) _throw_null(); \
      _check_null_temp; })
 #endif
@@ -105,7 +105,7 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   ((char *)ptr) + (elt_sz)*(index); })
 #else
 #define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
-  void *_cks_ptr = (void*)(ptr); \
+  void*_cks_ptr = (void*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
   unsigned _cks_index = (index); \
@@ -145,13 +145,13 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 
 #define _tag_arr(tcurr,elt_sz,num_elts) ({ \
   struct _tagged_arr _tag_arr_ans; \
-  _tag_arr_ans.base = _tag_arr_ans.curr = (void *)(tcurr); \
+  _tag_arr_ans.base = _tag_arr_ans.curr = (void*)(tcurr); \
   _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts); \
   _tag_arr_ans; })
 
 #define _init_tag_arr(arr_ptr,arr,elt_sz,num_elts) ({ \
   struct _tagged_arr *_itarr_ptr = (arr_ptr); \
-  void * _itarr = (arr); \
+  void* _itarr = (arr); \
   _itarr_ptr->base = _itarr_ptr->curr = _itarr; \
   _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts); \
   _itarr_ptr; })
@@ -192,49 +192,49 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   _ans; })
 
 //// Allocation
-extern void * GC_malloc(int);
-extern void * GC_malloc_atomic(int);
-extern void * GC_calloc(unsigned int,unsigned int);
-extern void * GC_calloc_atomic(unsigned int,unsigned int);
+extern void* GC_malloc(int);
+extern void* GC_malloc_atomic(int);
+extern void* GC_calloc(unsigned,unsigned);
+extern void* GC_calloc_atomic(unsigned,unsigned);
 
-static inline void * _cycalloc(int n) {
+static inline void* _cycalloc(int n) {
   void * ans = (void *)GC_malloc(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cycalloc_atomic(int n) {
+static inline void* _cycalloc_atomic(int n) {
   void * ans = (void *)GC_malloc_atomic(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cyccalloc(unsigned int n, unsigned int s) {
-  void * ans = (void *)GC_calloc(n,s);
+static inline void* _cyccalloc(unsigned n, unsigned s) {
+  void* ans = (void*)GC_calloc(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cyccalloc_atomic(unsigned int n, unsigned int s) {
-  void * ans = (void *)GC_calloc_atomic(n,s);
+static inline void* _cyccalloc_atomic(unsigned n, unsigned s) {
+  void* ans = (void*)GC_calloc_atomic(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
 #define MAX_MALLOC_SIZE (1 << 28)
-static inline unsigned int _check_times(unsigned int x, unsigned int y) {
+static inline unsigned int _check_times(unsigned x, unsigned y) {
   unsigned long long whole_ans = 
     ((unsigned long long)x)*((unsigned long long)y);
-  unsigned int word_ans = (unsigned int)whole_ans;
+  unsigned word_ans = (unsigned)whole_ans;
   if(word_ans < whole_ans || word_ans > MAX_MALLOC_SIZE)
     _throw_badalloc();
   return word_ans;
 }
 
 #if defined(CYC_REGION_PROFILE) 
-extern void * _profile_GC_malloc(int,char *file,int lineno);
-extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
-extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
+extern void* _profile_GC_malloc(int,char *file,int lineno);
+extern void* _profile_GC_malloc_atomic(int,char *file,int lineno);
+extern void* _profile_region_malloc(struct _RegionHandle *, unsigned,
                                      char *file,int lineno);
 extern struct _RegionHandle _profile_new_region(const char *rgn_name,
 						char *file,int lineno);
@@ -249,58 +249,56 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Core_Opt{void*v;};extern struct _tagged_arr Cyc_Core_new_string(
-unsigned int);extern unsigned char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+ struct Cyc_Core_Opt{void*v;};struct _tagged_arr Cyc_Core_new_string(unsigned int);
+extern unsigned char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
 unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Failure[12];
 struct Cyc_Core_Failure_struct{unsigned char*tag;struct _tagged_arr f1;};extern
 unsigned char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Not_found[14];
 extern unsigned char Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{
-unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Buffer_t;extern struct Cyc_Buffer_t*
-Cyc_Buffer_create(unsigned int n);extern struct _tagged_arr Cyc_Buffer_contents(
-struct Cyc_Buffer_t*);extern unsigned int Cyc_Buffer_length(struct Cyc_Buffer_t*);
-extern void Cyc_Buffer_clear(struct Cyc_Buffer_t*);extern void Cyc_Buffer_reset(
-struct Cyc_Buffer_t*);extern void Cyc_Buffer_add_char(struct Cyc_Buffer_t*,
-unsigned char);extern void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*,struct
-_tagged_arr,int offset,int len);extern void Cyc_Buffer_add_string(struct Cyc_Buffer_t*,
-struct _tagged_arr);extern void Cyc_Buffer_add_buffer(struct Cyc_Buffer_t*buf_dest,
-struct Cyc_Buffer_t*buf_source);struct Cyc_List_List{void*hd;struct Cyc_List_List*
-tl;};extern unsigned char Cyc_List_List_mismatch[18];extern unsigned char Cyc_List_Nth[
-8];extern unsigned int Cyc_Std_strlen(struct _tagged_arr s);extern struct _tagged_arr
-Cyc_Std_strncpy(struct _tagged_arr,struct _tagged_arr,unsigned int);extern struct
-_tagged_arr Cyc_Std_zstrncpy(struct _tagged_arr,struct _tagged_arr,unsigned int);
-extern struct _tagged_arr Cyc_Std_substring(struct _tagged_arr,int ofs,unsigned int n);
-struct Cyc_Buffer_t{struct _tagged_arr buffer;unsigned int position;unsigned int
-length;struct _tagged_arr initial_buffer;};struct Cyc_Buffer_t*Cyc_Buffer_create(
-unsigned int n){if(n < 1){n=1;}{struct _tagged_arr s=Cyc_Core_new_string(n);return({
-struct Cyc_Buffer_t*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->buffer=s;_tmp0->position=
-0;_tmp0->length=n;_tmp0->initial_buffer=s;_tmp0;});}}struct _tagged_arr Cyc_Buffer_contents(
-struct Cyc_Buffer_t*b){return Cyc_Std_substring((struct _tagged_arr)b->buffer,0,b->position);}
-unsigned int Cyc_Buffer_length(struct Cyc_Buffer_t*b){return(unsigned int)b->position;}
-void Cyc_Buffer_clear(struct Cyc_Buffer_t*b){b->position=0;return;}void Cyc_Buffer_reset(
-struct Cyc_Buffer_t*b){b->position=0;b->buffer=b->initial_buffer;b->length=
-_get_arr_size(b->buffer,sizeof(unsigned char));return;}static void Cyc_Buffer_resize(
-struct Cyc_Buffer_t*b,unsigned int more){unsigned int len=b->length;unsigned int
-new_len=len;struct _tagged_arr new_buffer;while(b->position + more > new_len){
-new_len=2 * new_len;}new_buffer=Cyc_Core_new_string(new_len);Cyc_Std_strncpy(
-new_buffer,(struct _tagged_arr)b->buffer,b->position);b->buffer=new_buffer;b->length=
-new_len;return;}void Cyc_Buffer_add_char(struct Cyc_Buffer_t*b,unsigned char c){int
-pos=(int)b->position;if(pos >= b->length){Cyc_Buffer_resize(b,1);}*((
-unsigned char*)_check_unknown_subscript(b->buffer,sizeof(unsigned char),pos))=c;
-b->position=(unsigned int)(pos + 1);return;}void Cyc_Buffer_add_substring(struct
-Cyc_Buffer_t*b,struct _tagged_arr s,int offset,int len){if((offset < 0? 1: len < 0)? 1:
-offset + len > _get_arr_size(s,sizeof(unsigned char))){(int)_throw((void*)({struct
-Cyc_Core_Invalid_argument_struct*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1[0]=({
-struct Cyc_Core_Invalid_argument_struct _tmp2;_tmp2.tag=Cyc_Core_Invalid_argument;
-_tmp2.f1=_tag_arr("Buffer::add_substring",sizeof(unsigned char),22);_tmp2;});
-_tmp1;}));}{int new_position=(int)(b->position + len);if(new_position > b->length){
-Cyc_Buffer_resize(b,(unsigned int)len);}Cyc_Std_zstrncpy(_tagged_arr_plus(b->buffer,
-sizeof(unsigned char),(int)b->position),_tagged_arr_plus(s,sizeof(unsigned char),
-offset),(unsigned int)len);b->position=(unsigned int)new_position;return;}}void
-Cyc_Buffer_add_string(struct Cyc_Buffer_t*b,struct _tagged_arr s){int len=(int)Cyc_Std_strlen(
-s);int new_position=(int)(b->position + len);if(new_position > b->length){Cyc_Buffer_resize(
-b,(unsigned int)len);}Cyc_Std_strncpy(_tagged_arr_plus(b->buffer,sizeof(
-unsigned char),(int)b->position),s,(unsigned int)len);b->position=(unsigned int)
-new_position;return;}void Cyc_Buffer_add_buffer(struct Cyc_Buffer_t*b,struct Cyc_Buffer_t*
-bs){Cyc_Buffer_add_substring(b,(struct _tagged_arr)bs->buffer,0,(int)bs->position);
-return;}
+unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Buffer_t;struct Cyc_Buffer_t*
+Cyc_Buffer_create(unsigned int n);struct _tagged_arr Cyc_Buffer_contents(struct Cyc_Buffer_t*);
+unsigned int Cyc_Buffer_length(struct Cyc_Buffer_t*);void Cyc_Buffer_clear(struct
+Cyc_Buffer_t*);void Cyc_Buffer_reset(struct Cyc_Buffer_t*);void Cyc_Buffer_add_char(
+struct Cyc_Buffer_t*,unsigned char);void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*,
+struct _tagged_arr,int offset,int len);void Cyc_Buffer_add_string(struct Cyc_Buffer_t*,
+struct _tagged_arr);void Cyc_Buffer_add_buffer(struct Cyc_Buffer_t*buf_dest,struct
+Cyc_Buffer_t*buf_source);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
+extern unsigned char Cyc_List_List_mismatch[18];extern unsigned char Cyc_List_Nth[8];
+unsigned int Cyc_Std_strlen(struct _tagged_arr s);struct _tagged_arr Cyc_Std_strncpy(
+struct _tagged_arr,struct _tagged_arr,unsigned int);struct _tagged_arr Cyc_Std_zstrncpy(
+struct _tagged_arr,struct _tagged_arr,unsigned int);struct _tagged_arr Cyc_Std_substring(
+struct _tagged_arr,int ofs,unsigned int n);struct Cyc_Buffer_t{struct _tagged_arr
+buffer;unsigned int position;unsigned int length;struct _tagged_arr initial_buffer;}
+;struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned int n){if(n < 1)n=1;{struct
+_tagged_arr s=Cyc_Core_new_string(n);return({struct Cyc_Buffer_t*_tmp0=_cycalloc(
+sizeof(*_tmp0));_tmp0->buffer=s;_tmp0->position=0;_tmp0->length=n;_tmp0->initial_buffer=
+s;_tmp0;});}}struct _tagged_arr Cyc_Buffer_contents(struct Cyc_Buffer_t*b){return
+Cyc_Std_substring((struct _tagged_arr)b->buffer,0,b->position);}unsigned int Cyc_Buffer_length(
+struct Cyc_Buffer_t*b){return(unsigned int)b->position;}void Cyc_Buffer_clear(
+struct Cyc_Buffer_t*b){b->position=0;return;}void Cyc_Buffer_reset(struct Cyc_Buffer_t*
+b){b->position=0;b->buffer=b->initial_buffer;b->length=_get_arr_size(b->buffer,
+sizeof(unsigned char));return;}static void Cyc_Buffer_resize(struct Cyc_Buffer_t*b,
+unsigned int more){unsigned int len=b->length;unsigned int new_len=len;struct
+_tagged_arr new_buffer;while(b->position + more > new_len){new_len=2 * new_len;}
+new_buffer=Cyc_Core_new_string(new_len);Cyc_Std_strncpy(new_buffer,(struct
+_tagged_arr)b->buffer,b->position);b->buffer=new_buffer;b->length=new_len;
+return;}void Cyc_Buffer_add_char(struct Cyc_Buffer_t*b,unsigned char c){int pos=(int)
+b->position;if(pos >= b->length)Cyc_Buffer_resize(b,1);*((unsigned char*)
+_check_unknown_subscript(b->buffer,sizeof(unsigned char),pos))=c;b->position=(
+unsigned int)(pos + 1);return;}void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*b,
+struct _tagged_arr s,int offset,int len){if((offset < 0?1: len < 0)?1: offset + len > 
+_get_arr_size(s,sizeof(unsigned char)))(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1[0]=({struct Cyc_Core_Invalid_argument_struct
+_tmp2;_tmp2.tag=Cyc_Core_Invalid_argument;_tmp2.f1=_tag_arr("Buffer::add_substring",
+sizeof(unsigned char),22);_tmp2;});_tmp1;}));{int new_position=(int)(b->position + 
+len);if(new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);Cyc_Std_zstrncpy(
+_tagged_arr_plus(b->buffer,sizeof(unsigned char),(int)b->position),
+_tagged_arr_plus(s,sizeof(unsigned char),offset),(unsigned int)len);b->position=(
+unsigned int)new_position;return;}}void Cyc_Buffer_add_string(struct Cyc_Buffer_t*
+b,struct _tagged_arr s){int len=(int)Cyc_Std_strlen(s);int new_position=(int)(b->position
++ len);if(new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);Cyc_Std_strncpy(
+_tagged_arr_plus(b->buffer,sizeof(unsigned char),(int)b->position),s,(
+unsigned int)len);b->position=(unsigned int)new_position;return;}void Cyc_Buffer_add_buffer(
+struct Cyc_Buffer_t*b,struct Cyc_Buffer_t*bs){Cyc_Buffer_add_substring(b,(struct
+_tagged_arr)bs->buffer,0,(int)bs->position);return;}

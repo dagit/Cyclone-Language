@@ -939,7 +939,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Comprehension_e(_,_,_):
       fprintf(stderr,"Error: unexpected Comprehension_e\n");
       exit(1); return;
-    case &Struct_e(_,_,_):
+    case &Struct_e(_,_,_,_):
       fprintf(stderr,"Error: unexpected Struct_e\n");
       exit(1); return;
     case &AnonStruct_e(_,_):

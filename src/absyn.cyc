@@ -37,6 +37,7 @@ static int zstrlist_cmp(list_t<stringptr_t> ss1, list_t<stringptr_t> ss2) {
   return list_cmp(zstrptrcmp,ss1,ss2);
 }
 int varlist_cmp(list_t<var_t> vs1, list_t<var_t> vs2) {
+  if((int)vs1==(int)vs2) return 0;
   return zstrlist_cmp(vs1,vs2);
 }
 int qvar_cmp(qvar_t q1, qvar_t q2) {
@@ -225,7 +226,6 @@ type_t exn_typ = &exn_typ_tt;
 // tunion PrintArg and tunion ScanfArg qvars
 static string_t printarg_str = "PrintArg";
 static string_t scanfarg_str = "ScanfArg";
-static string_t cyc_str = "Cyc";
 static string_t std_str = "Std";
 static struct List<var_t,`H> std_list = {&std_str, NULL};
 static tunion Nmspace.Abs_n std_namespace = Abs_n(&std_list);
@@ -358,13 +358,11 @@ exp_t New_exp(exp_opt_t rgn_handle, exp_t e, seg_t loc) {
   return new_exp(new New_e(rgn_handle,e), loc);
 }
 exp_t copy_exp(exp_t e) {
-  return new Exp{.topt=e->topt, .r=e->r, .loc=e->loc, .annot=EmptyAnnot};
+  return new *e;
 }
 exp_t const_exp(cnst_t c, seg_t loc) { return new_exp(new Const_e(c), loc); }
 exp_t null_exp(seg_t loc) { return new_exp(new Const_e(Null_c), loc); }
-exp_t int_exp(sign_t s,int i,seg_t seg) { 
-  return const_exp(new Int_c(s,i),seg);
-}
+exp_t int_exp(sign_t s,int i,seg_t seg) {return const_exp(new Int_c(s,i),seg);}
 exp_t signed_int_exp(int i,    seg_t loc) {return int_exp(Signed,i,loc);}
 exp_t uint_exp(unsigned int i, seg_t loc) {return int_exp(Unsigned,i,loc);}
 exp_t bool_exp(bool b, seg_t loc) { return signed_int_exp(b ? 1 : 0, loc); }
@@ -524,9 +522,10 @@ stmt_t switch_stmt(exp_t e, list_t<switch_clause_t,`H> scs, seg_t loc) {
   return new_stmt(new Switch_s(e,scs), loc);
 }
 stmt_t seq_stmt(stmt_t s1, stmt_t s2, seg_t loc) { 
-  switch (s1->r) {
-  case Skip_s: return s2;
-  default:     return new_stmt(new Seq_s(s1,s2), loc); 
+  switch ($(s1->r,s2->r)) {
+  case $(Skip_s,_): return s2;
+  case $(_,Skip_s): return s1;
+  default: return new_stmt(new Seq_s(s1,s2), loc); 
   }
 }
 stmt_t fallthru_stmt(list_t<exp_t,`H> el, seg_t loc) { 
@@ -720,10 +719,8 @@ string_t attribute2string(attribute_t a) {
   case Constructor_att: return "constructor";
   case Destructor_att: return "destructor";
   case No_check_memory_usage_att: return "no_check_memory_usage";
-  case &Format_att(Printf_ft,n,m): 
-    return aprintf("format(printf,%u,%u)",n,m);
-  case &Format_att(Scanf_ft,n,m):
-    return aprintf("format(scanf,%u,%u)",n,m);
+  case &Format_att(Printf_ft,n,m): return aprintf("format(printf,%u,%u)",n,m);
+  case &Format_att(Scanf_ft,n,m):  return aprintf("format(scanf,%u,%u)", n,m);
   }
 }
 
@@ -747,11 +744,10 @@ static stringptr_t field_names_v[1] = {&f0};
 static stringptr_t ?field_names = field_names_v;
 stringptr_t fieldname(int i) {
   unsigned int fsz = field_names.size;
-  if (i >= fsz) {
+  if (i >= fsz)
     field_names = 
       new {for j < i+1 : 
 	   (j < fsz) ? field_names[j] : new (string_t)aprintf("f%d",j)};
-  }
   return field_names[i];
 }
 
@@ -779,12 +775,8 @@ bool is_union_type(type_t t) {
     Marshal::print_type(decls_rep,&decls);
     printf("\n");
   }
-
   
 }
 
-
 using Typerep;
 typestruct_t decls_rep = __gen(list_t<Absyn::decl_t>);
-
-  

@@ -478,8 +478,9 @@ namespace Absyn {
     Array_e(list_t<$(list_t<designator_t>,exp_t)@>); // {.0=e1,...,.n=en}
     // {for i < e1 : e2}
     Comprehension_e(vardecl_t,exp_t,exp_t); // much of vardecl is known
-    // Foo{.x1=e1,...,.xn=en}
+    // Foo{.x1=e1,...,.xn=en} (with optional witness types)
     Struct_e(typedef_name_t,
+	     list_t<type_t>, // witness types, maybe fewer before type-checking
 	     list_t<$(list_t<designator_t>,exp_t)@>, 
 	     struct Aggrdecl *);
     // {.x1=e1,....,.xn=en}
@@ -578,7 +579,7 @@ namespace Absyn {
   EXTERN_ABSYN struct Switch_clause {
     pat_t                    pattern;  // pattern
     opt_t<list_t<vardecl_t>> pat_vars; // set by type-checker, used downstream
-    exp_opt_t                where_clause; // case p & e: -- the e part
+    exp_opt_t                where_clause; // case p && e: -- the e part
     stmt_t                   body;     // corresponding statement
     seg_t                    loc;      // location in source code
   };
@@ -702,7 +703,7 @@ namespace Absyn {
           opt_t<list_t<vardecl_t>>, // set by type-checker, used downstream
           opt_t<type_t>,
           exp_t,
-          bool); // true => exhaustive
+          bool); // true => exhaustive (no longer used)
     Letv_d(list_t<vardecl_t>); // multi-let
     Aggr_d(aggrdecl_t);    // [struct|union] Foo { ... }
     Tunion_d(tuniondecl_t);    // [x]tunion Bar { ... }

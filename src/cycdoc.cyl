@@ -656,7 +656,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     dump_char(':'); dumpexp(e2); dump_char('}');
     break;
 
-  case &Struct_e(n,des,_):
+  case &Struct_e(n,_,des,_): // FIX: drops witness types
     dumpqvar(n);
     group(dumpde,des,"{","}",",");
     break;

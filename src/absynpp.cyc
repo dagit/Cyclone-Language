@@ -857,7 +857,7 @@ int exp_prec(exp_t e) {
   case &CompoundLit_e(_,_):     
   case &Array_e(_):             
   case &Comprehension_e(_,_,_): 
-  case &Struct_e(_,_,_):      
+  case &Struct_e(_,_,_,_):      
   case &AnonStruct_e(_,_):      
   case &Tunion_e(_,_,_):    
   case &Enum_e(_,_,_):          
@@ -1006,9 +1006,11 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
             exp2doc(e2),
             text("}"));
     break;
-  case &Struct_e(n,des,_):
+  case &Struct_e(n,ts,des,_):
+    let des_doc = List::map(de2doc,des);
     s = cat(qvar2doc(n),
-            group("{","}",",",List::map(de2doc,des)));
+            group("{","}",",",
+		  (ts != NULL ? new List(tps2doc(ts), des_doc) : des_doc)));
     break;
   case &AnonStruct_e(_,des):
     s = group("{","}",",",List::map(de2doc,des));
@@ -1734,8 +1736,8 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
     if(to_VC)
       for(; fn_atts != NULL; fn_atts = fn_atts->tl)
 	switch(fn_atts->hd) {
-	case Stdcall_att:  fallthru;
-	case Cdecl_att:    fallthru;
+	case Stdcall_att: 
+	case Cdecl_att:   
 	case Fastcall_att:
 	  tms = new List(new Attributes_mod(NULL,new List(fn_atts->hd,NULL)),
 			 tms);

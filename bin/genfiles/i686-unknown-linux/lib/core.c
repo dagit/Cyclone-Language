@@ -38,8 +38,8 @@ struct _RuntimeStack {
 //// Regions
 struct _RegionPage {
 #ifdef CYC_REGION_PROFILE
-  unsigned int total_bytes;
-  unsigned int free_bytes;
+  unsigned total_bytes;
+  unsigned free_bytes;
 #endif
   struct _RegionPage *next;
   char data[0];
@@ -56,9 +56,9 @@ struct _RegionHandle {
 };
 
 extern struct _RegionHandle _new_region(const char *);
-extern void * _region_malloc(struct _RegionHandle *, unsigned);
-extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
-extern void   _free_region(struct _RegionHandle *);
+extern void* _region_malloc(struct _RegionHandle *, unsigned);
+extern void* _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
+extern void  _free_region(struct _RegionHandle *);
 
 //// Exceptions 
 struct _handler_cons {
@@ -75,7 +75,7 @@ extern void _pop_region();
 extern int _throw_null();
 extern int _throw_arraybounds();
 extern int _throw_badalloc();
-extern int _throw(void * e);
+extern int _throw(void* e);
 #endif
 
 extern struct _xtunion_struct *_exn_thrown;
@@ -95,7 +95,7 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 #define _check_null(ptr) (ptr)
 #else
 #define _check_null(ptr) \
-  ({ void *_check_null_temp = (void*)(ptr); \
+  ({ void*_check_null_temp = (void*)(ptr); \
      if (!_check_null_temp) _throw_null(); \
      _check_null_temp; })
 #endif
@@ -105,7 +105,7 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   ((char *)ptr) + (elt_sz)*(index); })
 #else
 #define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
-  void *_cks_ptr = (void*)(ptr); \
+  void*_cks_ptr = (void*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
   unsigned _cks_index = (index); \
@@ -145,13 +145,13 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 
 #define _tag_arr(tcurr,elt_sz,num_elts) ({ \
   struct _tagged_arr _tag_arr_ans; \
-  _tag_arr_ans.base = _tag_arr_ans.curr = (void *)(tcurr); \
+  _tag_arr_ans.base = _tag_arr_ans.curr = (void*)(tcurr); \
   _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts); \
   _tag_arr_ans; })
 
 #define _init_tag_arr(arr_ptr,arr,elt_sz,num_elts) ({ \
   struct _tagged_arr *_itarr_ptr = (arr_ptr); \
-  void * _itarr = (arr); \
+  void* _itarr = (arr); \
   _itarr_ptr->base = _itarr_ptr->curr = _itarr; \
   _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts); \
   _itarr_ptr; })
@@ -192,49 +192,49 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   _ans; })
 
 //// Allocation
-extern void * GC_malloc(int);
-extern void * GC_malloc_atomic(int);
-extern void * GC_calloc(unsigned int,unsigned int);
-extern void * GC_calloc_atomic(unsigned int,unsigned int);
+extern void* GC_malloc(int);
+extern void* GC_malloc_atomic(int);
+extern void* GC_calloc(unsigned,unsigned);
+extern void* GC_calloc_atomic(unsigned,unsigned);
 
-static inline void * _cycalloc(int n) {
+static inline void* _cycalloc(int n) {
   void * ans = (void *)GC_malloc(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cycalloc_atomic(int n) {
+static inline void* _cycalloc_atomic(int n) {
   void * ans = (void *)GC_malloc_atomic(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cyccalloc(unsigned int n, unsigned int s) {
-  void * ans = (void *)GC_calloc(n,s);
+static inline void* _cyccalloc(unsigned n, unsigned s) {
+  void* ans = (void*)GC_calloc(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cyccalloc_atomic(unsigned int n, unsigned int s) {
-  void * ans = (void *)GC_calloc_atomic(n,s);
+static inline void* _cyccalloc_atomic(unsigned n, unsigned s) {
+  void* ans = (void*)GC_calloc_atomic(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
 #define MAX_MALLOC_SIZE (1 << 28)
-static inline unsigned int _check_times(unsigned int x, unsigned int y) {
+static inline unsigned int _check_times(unsigned x, unsigned y) {
   unsigned long long whole_ans = 
     ((unsigned long long)x)*((unsigned long long)y);
-  unsigned int word_ans = (unsigned int)whole_ans;
+  unsigned word_ans = (unsigned)whole_ans;
   if(word_ans < whole_ans || word_ans > MAX_MALLOC_SIZE)
     _throw_badalloc();
   return word_ans;
 }
 
 #if defined(CYC_REGION_PROFILE) 
-extern void * _profile_GC_malloc(int,char *file,int lineno);
-extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
-extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
+extern void* _profile_GC_malloc(int,char *file,int lineno);
+extern void* _profile_GC_malloc_atomic(int,char *file,int lineno);
+extern void* _profile_region_malloc(struct _RegionHandle *, unsigned,
                                      char *file,int lineno);
 extern struct _RegionHandle _profile_new_region(const char *rgn_name,
 						char *file,int lineno);
@@ -249,15 +249,14 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Core_Opt{void*v;};extern struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(
-void*),struct Cyc_Core_Opt*x);extern struct _tagged_arr Cyc_Core_new_string(
-unsigned int);extern struct _tagged_arr Cyc_Core_rnew_string(struct _RegionHandle*,
-unsigned int);extern int Cyc_Core_true_f(void*);extern int Cyc_Core_false_f(void*);
-struct _tuple0{void*f1;void*f2;};extern void*Cyc_Core_fst(struct _tuple0*);extern
-void*Cyc_Core_snd(struct _tuple0*);struct _tuple1{void*f1;void*f2;void*f3;};extern
-void*Cyc_Core_third(struct _tuple1*);extern void*Cyc_Core_identity(void*);extern
-int Cyc_Core_intcmp(int,int);extern int Cyc_Core_charcmp(unsigned char,
-unsigned char);extern int Cyc_Core_ptrcmp(void*,void*);extern unsigned char Cyc_Core_Invalid_argument[
+ struct Cyc_Core_Opt{void*v;};struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),
+struct Cyc_Core_Opt*x);struct _tagged_arr Cyc_Core_new_string(unsigned int);struct
+_tagged_arr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned int);int Cyc_Core_true_f(
+void*);int Cyc_Core_false_f(void*);struct _tuple0{void*f1;void*f2;};void*Cyc_Core_fst(
+struct _tuple0*);void*Cyc_Core_snd(struct _tuple0*);struct _tuple1{void*f1;void*f2;
+void*f3;};void*Cyc_Core_third(struct _tuple1*);void*Cyc_Core_identity(void*);int
+Cyc_Core_intcmp(int,int);int Cyc_Core_charcmp(unsigned char,unsigned char);int Cyc_Core_ptrcmp(
+void*,void*);int Cyc_Core_nptrcmp(void*,void*);extern unsigned char Cyc_Core_Invalid_argument[
 21];struct Cyc_Core_Invalid_argument_struct{unsigned char*tag;struct _tagged_arr f1;
 };extern unsigned char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
 unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Impossible[
@@ -270,7 +269,7 @@ unsigned char*tag;int f1;};unsigned char Cyc_Core_Failure[12]="\000\000\000\000F
 unsigned char Cyc_Core_Impossible[15]="\000\000\000\000Impossible";unsigned char
 Cyc_Core_Not_found[14]="\000\000\000\000Not_found";unsigned char Cyc_Core_Unreachable[
 16]="\000\000\000\000Unreachable";struct Cyc_Core_Opt;struct Cyc_Core_Opt*Cyc_Core_opt_map(
-void*(*f)(void*),struct Cyc_Core_Opt*o){if(o == 0){return 0;}return({struct Cyc_Core_Opt*
+void*(*f)(void*),struct Cyc_Core_Opt*o){if(o == 0)return 0;return({struct Cyc_Core_Opt*
 _tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->v=(void*)f((void*)o->v);_tmp0;});}struct
 _tagged_arr Cyc_Core_new_string(unsigned int i){return({unsigned int _tmp1=i;
 unsigned char*_tmp2=_cyccalloc_atomic(sizeof(unsigned char),_tmp1);_tag_arr(
@@ -279,8 +278,9 @@ struct _RegionHandle*r,unsigned int i){return({unsigned int _tmp3=i;unsigned cha
 _tmp4=_region_calloc(r,sizeof(unsigned char),_tmp3);_tag_arr(_tmp4,sizeof(
 unsigned char),_tmp3);});}int Cyc_Core_true_f(void*x){return 1;}int Cyc_Core_false_f(
 void*x){return 0;}int Cyc_Core_intcmp(int a,int b){return a - b;}int Cyc_Core_charcmp(
-unsigned char a,unsigned char b){return(int)a - (int)b;}int Cyc_Core_ptrcmp(void*a,
-void*b){if(a == b){return 0;}if(a > b){return 1;}return - 1;}void*Cyc_Core_fst(struct
+unsigned char a,unsigned char b){return(int)a - (int)b;}int Cyc_Core_nptrcmp(void*a,
+void*b){if(a == b)return 0;if(a > b)return 1;return - 1;}int Cyc_Core_ptrcmp(void*a,
+void*b){if(a == b)return 0;if(a > b)return 1;return - 1;}void*Cyc_Core_fst(struct
 _tuple0*pair){return(*pair).f1;}void*Cyc_Core_snd(struct _tuple0*pair){return(*
 pair).f2;}void*Cyc_Core_third(struct _tuple1*triple){return(*triple).f3;}void*Cyc_Core_identity(
 void*x){return x;}

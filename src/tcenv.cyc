@@ -221,7 +221,7 @@ static void check_repeat(tenv_t te, seg_t loc, `a lookup(genv_t,var_t),
 			 var_t v, 
 			 list_t<var_t,`H> cns,
 			 list_t<list_t<var_t,`H>,`H> nss) {
-  for(; nss != NULL; nss = nss->tl) {
+  for(; nss != NULL; nss = nss->tl)
     if (!same_namespace(cns,nss->hd)) {
       genv_t ge2 = Dict::lookup(te->ae,nss->hd);
       try {
@@ -229,7 +229,6 @@ static void check_repeat(tenv_t te, seg_t loc, `a lookup(genv_t,var_t),
 	Tcutil::terr(loc,"%s is ambiguous",*v);
       } catch { case Dict::Absent: break; }
     }
-  }
   return;
 }
 
@@ -549,19 +548,13 @@ static rgn_po_t add_region_po(rgn_po_t po, tvar_t tv) {
 //////////////////// Function Environment Manipulation //////////////////////
 
 static fenv_t copy_fenv_old_ctrl(fenv_t f) {
-  return new Fenv(f->shared, f->type_vars, f->region_order,
-                  f->locals, f->encloser, f->ctrl_env,
-                  f->capability, f->curr_rgn);
+  return new *f;
 }
 static fenv_t copy_fenv_new_ctrl(fenv_t f) {
   // WARNING: fallthru_clause shared with old
-  ctrl_env_t c = f->ctrl_env;
-  return new Fenv(f->shared, f->type_vars, f->region_order, 
-                  f->locals, f->encloser,
-                  new CtrlEnv(c->continue_stmt, c->break_stmt, 
-                              c->fallthru_clause,
-                              c->next_stmt, c->try_depth),
-                  f->capability, f->curr_rgn);
+  let ans = new *f;
+  ans->ctrl_env = new *f->ctrl_env;
+  return ans;
 }
 
 type_t return_typ(tenv_t te) {
@@ -592,10 +585,8 @@ tenv_t add_local_var(seg_t loc, tenv_t te, vardecl_t vd) {
   switch ((*vd->name)[0]) {
   case Loc_n: break;
   default:
-    // This is a fail-safe.
-    // Maybe we should just clobber with Loc_n?
+    // This is a fail-safe. Maybe we should just clobber with Loc_n?
     throw new Impossible("add_local_var: called with Rel_n");
-    break;
   }
   fe->locals = Dict::insert(fe->locals,v,new Local_b(vd));
   return put_fenv(te,fe);
@@ -614,8 +605,8 @@ resolved_t lookup_ordinary(tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Loc_n:
-    if (te->le == NULL) { throw Dict::Absent; }
-    else fallthru;
+    if (te->le == NULL) throw Dict::Absent;
+    fallthru;
   case &Rel_n(NULL) && te->le != NULL:
     let fe = get_fenv(te);
     // NB a local overrides any global, without an ambiguity warning
@@ -623,8 +614,7 @@ resolved_t lookup_ordinary(tenv_t te,seg_t loc,qvar_t q) {
     catch {case Dict::Absent: return lookup_ordinary_global(te,loc,q);}
   default:
     try return lookup_ordinary_global(te,loc,q);    
-    catch {
-    case Dict::Absent: 
+    catch {case Dict::Absent: 
       // Print out the error message elsewhere.
       // terr(loc,"unbound identifier: %s", Absynpp::qvar2string(q));
       return new VarRes(Unresolved_b);

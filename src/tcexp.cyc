@@ -104,10 +104,9 @@ static void resolve_unknown_fn(tenv_t te,exp_t e,exp_t e1,list_t<exp_t,`H> es) {
                qvar2string(tuf->name));
         e->r = new Tunion_e(es,tud,tuf); 
 	return;
-	return;
       case &AggrRes(ad):
 	let des = List::map(make_struct_arg,es);
-	e->r = new Struct_e(ad->name,des,ad);
+	e->r = new Struct_e(ad->name,NULL,des,ad);
 	return;
       case &AnonEnumRes(_,_):
       case &EnumRes(_,_):
@@ -140,7 +139,7 @@ void resolve_unresolved_mem(tenv_t te, seg_t loc, type_t * topt, exp_t e,
   case &AggrType(AggrInfo(info,_)):
     switch(info) {
     case &UnknownAggr(_,_): impos("struct type not properly set");
-    case &KnownAggr(&ad):   e->r = new Struct_e(ad->name,des,ad);
+    case &KnownAggr(&ad):   e->r = new Struct_e(ad->name,NULL,des,ad);
     }
     break;
   case &ArrayType(at,aq,_): e->r = new Array_e(des);        break;
@@ -216,9 +215,8 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
     }
     break;
   case &String_c(s):
-    int len  = s.size; // includes the trailing 0 character
-    let r    = new Const_e(new Int_c(Unsigned,len));
-    exp_t elen = new_exp(r,loc);
+    int len = s.size; // includes the trailing 0 character
+    exp_t elen = const_exp(new Int_c(Unsigned, len), loc);
     elen->topt = new Opt(uint_t);
     // The default is to treat a string as if it's statically heap 
     // allocated and return a pointer to that string.  However, if the 
@@ -226,9 +224,9 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
     t = atb_typ(uchar_t, HeapRgn, const_tqual(), new Upper_b(elen));
     if (topt != NULL) {
       switch (compress(*topt)) {
-      case &ArrayType(telt,tq,e2):
+      case &ArrayType(_,tq,_):
         return new ArrayType(uchar_t, tq, elen);
-      case &PointerType(PtrInfo(telt,trgn,nullable,tq,b)):
+      case &PointerType(_):
         if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
           e->topt = new Opt(t);
           unchecked_cast(te, e, *topt);
@@ -266,17 +264,11 @@ static type_t tcVar(tenv_t te, seg_t loc, qvar_t q, binding_t b) {
   switch(b) {
   case Unresolved_b:
     return expr_err(te,loc,"undeclared identifier: %s",qvar2string(q));
-  case &Global_b(vd):
-    q[0] = vd->name[0];
-    return vd->type;
-  case &Funname_b(fd):
-    q[0] = fd->name[0];
-    return fndecl2typ(fd);
-  case &Pat_b(vd):   fallthru(vd);
-  case &Local_b(vd): fallthru(vd);
-  case &Param_b(vd):
-    (*q)[0] = Loc_n;
-    return vd->type;
+  case &Global_b(vd):  *q = *vd->name; return vd->type;
+  case &Funname_b(fd): *q = *fd->name; return fndecl2typ(fd);
+  case &Pat_b(vd):     fallthru(vd);
+  case &Local_b(vd):   fallthru(vd);
+  case &Param_b(vd):   (*q)[0] = Loc_n; return vd->type;
   }
 }
 
@@ -289,9 +281,7 @@ static void check_format_args(tenv_t te, exp_t fmt,
   case &Const_e(&String_c(s)): fallthru(s);
   case &Cast_e(_,&Exp(_,&Const_e(&String_c(s)),_,_)):
     desc_types = type_getter(te,s,fmt->loc); break;
-  default: 
-    // don't have a string literal argument, so we can't check the args
-    return;
+  default: return; // without a string literal argument, we can't check the args
   }
   if (opt_args != NULL) {
     let args = opt_args->v;
@@ -334,10 +324,9 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
   case Size:
     switch (t) {
     case &ArrayType(_,_,_): 
-    case &PointerType(PtrInfo(_,_,_,_,_)): break;
+    case &PointerType(_): break;
     default:
       terr(loc,"size requires pointer or array type, not %s",typ2string(t));
-      break;
     }
     return uint_t;
   default: impos("Non-unary primop");
@@ -425,19 +414,19 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
     return sint_t;
   // okay if same types and boxed
   else if (unify(t1,t2) && 
-           unify(t1,new_evar(&bk,new Opt(lookup_type_vars(te))))) {
+           unify(t1,new_evar(&bk,new Opt(lookup_type_vars(te)))))
     return sint_t;
   // okay if t1 can be silently cast to t2 or vice versa 
-  } else if (silent_castable(te,loc,t2,t1)) {
+  else if (silent_castable(te,loc,t2,t1)) {
     unchecked_cast(te,e2,t1);
     return sint_t;
   } else if (silent_castable(te,loc,t1,t2)) {
     unchecked_cast(te,e1,t2);
     return sint_t;
-  } else if (zero_to_null(te,t2,e1) || zero_to_null(te,t1,e2)) {
+  } else if (zero_to_null(te,t2,e1) || zero_to_null(te,t1,e2))
     return sint_t;
   // support comparisons on pointers
-  } else {
+  else {
     switch ($(compress(t1), compress(t2))) {
     case $(&PointerType(PtrInfo{t1a,_,_,_,_}),
 	   &PointerType(PtrInfo{t2a,_,_,_,_})):
@@ -507,7 +496,6 @@ static type_t tcPrimop(tenv_t te, seg_t loc, type_t * topt,
 // check that e is not a const expression -- assumes e is already
 // an lvalue and is type-checked
 static void check_writable(tenv_t te, exp_t e) {
-  
   switch (e->r) {
   case &Var_e(_,&Param_b(vd)): fallthru(vd);
   case &Var_e(_,&Local_b(vd)): fallthru(vd);
@@ -601,9 +589,9 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t * topt,
   tcExp(te,topt,e2);
   tcExp(te,topt,e3);
   type_t t = new_evar(&mk,new Opt(lookup_type_vars(te)));
-  let l1 = new List(e3,NULL);
-  let l2 = new List(e2,l1);
-  if (!coerce_list(te,t,l2)) {
+  let l1 = List(e3,NULL);
+  let l2 = List(e2,&l1);
+  if (!coerce_list(te,t,&l2)) {
     terr(loc,"conditional clause types do not match: %s != %s",
          typ2string(e2->topt->v),typ2string(e3->topt->v));
     explain_failure();
@@ -937,10 +925,9 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
   tcExpNoInst(te,topt2,e);
 
   // first, dispense with the malloc-and-initialize cases or the
-  // case where we have &e[i] and e is an array/pointer (i.e., not
-  // a tuple.
+  // case where we have &e[i] and e is an array/pointer (i.e., not a tuple).
   switch (e->r) {
-  case &Struct_e(_,_,_): 
+  case &Struct_e(_,_,_,_): 
   case &Tuple_e(_):
     // Note: We're heap region b/c this is translated to an actual malloc
     warn(loc,"& used to allocate");
@@ -960,9 +947,8 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
     case &TupleType(_): break; // leave & for tuple types alone.
     default: 
       // we have &e[i] -- rewrite the whole expression as (e+i)
-      // This ensures that we get the right size for an array or ?
-      // pointer.
-      e0->r = new Primop_e(Plus, new List(e1, new List(e2, NULL)));
+      // This ensures that we get the right size for an array or ? pointer.
+      e0->r = add_exp(e1,e2,NULL)->r; 
       return tcPlus(te,e1,e2);
     }
     break;
@@ -985,13 +971,12 @@ static type_t tcSizeof(tenv_t te, seg_t loc, type_t * topt, type_t t) {
   if(!Evexp::okay_szofarg(t))
     terr(loc, "sizeof applied to type %s, which has unknown size here",
          typ2string(t));
-  if (topt != NULL) {
+  if (topt != NULL)
     switch (compress(*topt)) {
-    // only return sizeof_t<t> when requested from context
+      // only return sizeof_t<t> when requested from context
     case &SizeofType(_): return new SizeofType(t);
     default: break;
     }
-  }
   return uint_t; 
 }
 
@@ -1303,7 +1288,7 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
   let topt2 = NULL;
   let tqopt = NULL;
 
-  if (topt != NULL) {
+  if (topt != NULL)
     switch (compress(*topt)) {
     case &PointerType(x):
       pinfo = x;
@@ -1317,17 +1302,16 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
     default:
       break;
     }
-   }
-   // type-check the body in the new environment
-   type_t t = tcExp(te,topt2,body);
-   if (te->le == NULL) {
-     // the bound and the body must both be constant expressions at top-level
-     if (!is_const_exp(te,bound))
-       terr(bound->loc,"bound is not constant");
-     if (!is_const_exp(te,body))
-       terr(bound->loc,"body is not constant");
-   }
-   return new ArrayType(t,(tqopt == NULL) ? empty_tqual() : *tqopt, bound);
+  // type-check the body in the new environment
+  type_t t = tcExp(te,topt2,body);
+  if (te->le == NULL) {
+    // the bound and the body must both be constant expressions at top-level
+    if (!is_const_exp(te,bound))
+      terr(bound->loc,"bound is not constant");
+    if (!is_const_exp(te,body))
+      terr(bound->loc,"body is not constant");
+  }
+  return new ArrayType(t,(tqopt == NULL) ? empty_tqual() : *tqopt, bound);
 }
 
  //////////////////// Struct (f{e1,...,en}) ///////////////////
@@ -1341,17 +1325,15 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
  // then this is the same as Foo{.a=1,.b=2,.c=3,.d=4,.e=5};
  // Later, we should support array designators and so forth.
 static type_t tcStruct(tenv_t te, seg_t loc, type_t * topt,
-                       typedef_name_t @tn,
+                       typedef_name_t @tn, list_t<type_t,`H> @ ts,
                        list_t<$(list_t<designator_t>,exp_t)@> args,
                        struct Aggrdecl *`H @`H ad_opt) {
   aggrdecl_t ad;
   if (*ad_opt != NULL)
     ad = (aggrdecl_t)(*ad_opt);
   else {
-    try
-      ad = *lookup_aggrdecl(te,loc,*tn);
-    catch { 
-    case Dict::Absent:
+    try ad = *lookup_aggrdecl(te,loc,*tn);
+    catch { case Dict::Absent:
       terr(loc, "unbound struct name %s",qvar2string(*tn));
       return topt != NULL ? *topt : VoidType;
     }
@@ -1372,8 +1354,22 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t * topt,
   let all_typs   = List::map(snd,all_inst);
   let exist_typs = List::map(snd,exist_inst);
   let inst       = List::rappend(rgn,all_inst,exist_inst);
-  let typs    = List::map(snd,inst);
   let res_typ = new AggrType(AggrInfo(new KnownAggr(new ad),all_typs));
+  // integrate any witnesses the programmer wrote explicitly
+  let user_ex_ts = *ts;
+  let ex_ts = exist_typs;
+  while(user_ex_ts != NULL && ex_ts != NULL) {
+    // FIX: allow region kinds and effect kinds?
+    check_type(loc,te,lookup_type_vars(te),AnyKind,true,user_ex_ts->hd);
+    unify(user_ex_ts->hd,ex_ts->hd);
+    user_ex_ts = user_ex_ts->tl;
+    ex_ts      = ex_ts->tl;
+  }
+  if(user_ex_ts != NULL)
+    terr(loc, "too many explicit witness types"); // TEST ME!
+    
+  *ts = exist_typs;
+
   // this will instantiate the struct if we have type information in topt
   // unfortunately, I think it allows topt to cause failure
   if (topt != NULL) unify(res_typ,*topt);
@@ -1962,8 +1958,8 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcFill(te,loc,topt,e1); break;
   case &Comprehension_e(vd,e1,e2):
     t = tcComprehension(te,loc,topt,vd,e1,e2); break;
-  case &Struct_e(*tn,args,*sd_opt):
-    t = tcStruct(te,loc,topt,tn,args,sd_opt); break;
+  case &Struct_e(*tn,*ts,args,*sd_opt):
+    t = tcStruct(te,loc,topt,tn,ts,args,sd_opt); break;
   case &AnonStruct_e(ts,args):
     t = tcAnonStruct(te,loc,ts,args); break;
   case &Tunion_e(es,tud,tuf):

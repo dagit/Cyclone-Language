@@ -38,8 +38,8 @@ struct _RuntimeStack {
 //// Regions
 struct _RegionPage {
 #ifdef CYC_REGION_PROFILE
-  unsigned int total_bytes;
-  unsigned int free_bytes;
+  unsigned total_bytes;
+  unsigned free_bytes;
 #endif
   struct _RegionPage *next;
   char data[0];
@@ -56,9 +56,9 @@ struct _RegionHandle {
 };
 
 extern struct _RegionHandle _new_region(const char *);
-extern void * _region_malloc(struct _RegionHandle *, unsigned);
-extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
-extern void   _free_region(struct _RegionHandle *);
+extern void* _region_malloc(struct _RegionHandle *, unsigned);
+extern void* _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
+extern void  _free_region(struct _RegionHandle *);
 
 //// Exceptions 
 struct _handler_cons {
@@ -75,7 +75,7 @@ extern void _pop_region();
 extern int _throw_null();
 extern int _throw_arraybounds();
 extern int _throw_badalloc();
-extern int _throw(void * e);
+extern int _throw(void* e);
 #endif
 
 extern struct _xtunion_struct *_exn_thrown;
@@ -95,7 +95,7 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 #define _check_null(ptr) (ptr)
 #else
 #define _check_null(ptr) \
-  ({ void *_check_null_temp = (void*)(ptr); \
+  ({ void*_check_null_temp = (void*)(ptr); \
      if (!_check_null_temp) _throw_null(); \
      _check_null_temp; })
 #endif
@@ -105,7 +105,7 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   ((char *)ptr) + (elt_sz)*(index); })
 #else
 #define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
-  void *_cks_ptr = (void*)(ptr); \
+  void*_cks_ptr = (void*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
   unsigned _cks_index = (index); \
@@ -145,13 +145,13 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 
 #define _tag_arr(tcurr,elt_sz,num_elts) ({ \
   struct _tagged_arr _tag_arr_ans; \
-  _tag_arr_ans.base = _tag_arr_ans.curr = (void *)(tcurr); \
+  _tag_arr_ans.base = _tag_arr_ans.curr = (void*)(tcurr); \
   _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts); \
   _tag_arr_ans; })
 
 #define _init_tag_arr(arr_ptr,arr,elt_sz,num_elts) ({ \
   struct _tagged_arr *_itarr_ptr = (arr_ptr); \
-  void * _itarr = (arr); \
+  void* _itarr = (arr); \
   _itarr_ptr->base = _itarr_ptr->curr = _itarr; \
   _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts); \
   _itarr_ptr; })
@@ -192,49 +192,49 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   _ans; })
 
 //// Allocation
-extern void * GC_malloc(int);
-extern void * GC_malloc_atomic(int);
-extern void * GC_calloc(unsigned int,unsigned int);
-extern void * GC_calloc_atomic(unsigned int,unsigned int);
+extern void* GC_malloc(int);
+extern void* GC_malloc_atomic(int);
+extern void* GC_calloc(unsigned,unsigned);
+extern void* GC_calloc_atomic(unsigned,unsigned);
 
-static inline void * _cycalloc(int n) {
+static inline void* _cycalloc(int n) {
   void * ans = (void *)GC_malloc(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cycalloc_atomic(int n) {
+static inline void* _cycalloc_atomic(int n) {
   void * ans = (void *)GC_malloc_atomic(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cyccalloc(unsigned int n, unsigned int s) {
-  void * ans = (void *)GC_calloc(n,s);
+static inline void* _cyccalloc(unsigned n, unsigned s) {
+  void* ans = (void*)GC_calloc(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cyccalloc_atomic(unsigned int n, unsigned int s) {
-  void * ans = (void *)GC_calloc_atomic(n,s);
+static inline void* _cyccalloc_atomic(unsigned n, unsigned s) {
+  void* ans = (void*)GC_calloc_atomic(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
 #define MAX_MALLOC_SIZE (1 << 28)
-static inline unsigned int _check_times(unsigned int x, unsigned int y) {
+static inline unsigned int _check_times(unsigned x, unsigned y) {
   unsigned long long whole_ans = 
     ((unsigned long long)x)*((unsigned long long)y);
-  unsigned int word_ans = (unsigned int)whole_ans;
+  unsigned word_ans = (unsigned)whole_ans;
   if(word_ans < whole_ans || word_ans > MAX_MALLOC_SIZE)
     _throw_badalloc();
   return word_ans;
 }
 
 #if defined(CYC_REGION_PROFILE) 
-extern void * _profile_GC_malloc(int,char *file,int lineno);
-extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
-extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
+extern void* _profile_GC_malloc(int,char *file,int lineno);
+extern void* _profile_GC_malloc_atomic(int,char *file,int lineno);
+extern void* _profile_region_malloc(struct _RegionHandle *, unsigned,
                                      char *file,int lineno);
 extern struct _RegionHandle _profile_new_region(const char *rgn_name,
 						char *file,int lineno);
@@ -249,62 +249,62 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Core_Opt{void*v;};extern struct _tagged_arr Cyc_Core_new_string(
-unsigned int);extern unsigned char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+ struct Cyc_Core_Opt{void*v;};struct _tagged_arr Cyc_Core_new_string(unsigned int);
+extern unsigned char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
 unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Failure[12];
 struct Cyc_Core_Failure_struct{unsigned char*tag;struct _tagged_arr f1;};extern
 unsigned char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Not_found[14];
 extern unsigned char Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{
-unsigned char*tag;struct _tagged_arr f1;};extern struct _tagged_arr Cyc_Filename_concat(
-struct _tagged_arr,struct _tagged_arr);extern struct _tagged_arr Cyc_Filename_chop_extension(
-struct _tagged_arr);extern struct _tagged_arr Cyc_Filename_dirname(struct _tagged_arr);
-extern struct _tagged_arr Cyc_Filename_basename(struct _tagged_arr);extern int Cyc_Filename_check_suffix(
-struct _tagged_arr,struct _tagged_arr);extern struct _tagged_arr Cyc_Filename_gnuify(
-struct _tagged_arr);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern
+unsigned char*tag;struct _tagged_arr f1;};struct _tagged_arr Cyc_Filename_concat(
+struct _tagged_arr,struct _tagged_arr);struct _tagged_arr Cyc_Filename_chop_extension(
+struct _tagged_arr);struct _tagged_arr Cyc_Filename_dirname(struct _tagged_arr);
+struct _tagged_arr Cyc_Filename_basename(struct _tagged_arr);int Cyc_Filename_check_suffix(
+struct _tagged_arr,struct _tagged_arr);struct _tagged_arr Cyc_Filename_gnuify(struct
+_tagged_arr);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern
 unsigned char Cyc_List_List_mismatch[18];extern unsigned char Cyc_List_Nth[8];
-extern struct _tagged_arr Cyc_Std_strconcat(struct _tagged_arr,struct _tagged_arr);
-extern struct _tagged_arr Cyc_Std_substring(struct _tagged_arr,int ofs,unsigned int n);
-struct _tagged_arr Cyc_Filename_concat(struct _tagged_arr s1,struct _tagged_arr s2){
-return Cyc_Std_strconcat(s1,(struct _tagged_arr)Cyc_Std_strconcat(_tag_arr("/",
-sizeof(unsigned char),2),s2));}struct _tagged_arr Cyc_Filename_chop_extension(
-struct _tagged_arr filename){int i=(int)(_get_arr_size(filename,sizeof(
-unsigned char))- 1);while(i >= 0?((const unsigned char*)filename.curr)[i]!= '.': 0){
--- i;}if(i < 0){(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp0=
-_cycalloc(sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Invalid_argument_struct _tmp1;
-_tmp1.tag=Cyc_Core_Invalid_argument;_tmp1.f1=_tag_arr("chop_extension",sizeof(
-unsigned char),15);_tmp1;});_tmp0;}));}return Cyc_Std_substring(filename,0,(
-unsigned int)i);}struct _tagged_arr Cyc_Filename_dirname(struct _tagged_arr filename){
-int i=(int)(_get_arr_size(filename,sizeof(unsigned char))- 1);while(i >= 0?((const
-unsigned char*)filename.curr)[i]!= '/': 0){-- i;}if(i < 0){return Cyc_Core_new_string(
-0);}return Cyc_Std_substring(filename,0,(unsigned int)i);}struct _tagged_arr Cyc_Filename_basename(
+struct _tagged_arr Cyc_Std_strconcat(struct _tagged_arr,struct _tagged_arr);struct
+_tagged_arr Cyc_Std_substring(struct _tagged_arr,int ofs,unsigned int n);struct
+_tagged_arr Cyc_Filename_concat(struct _tagged_arr s1,struct _tagged_arr s2){return
+Cyc_Std_strconcat(s1,(struct _tagged_arr)Cyc_Std_strconcat(_tag_arr("/",sizeof(
+unsigned char),2),s2));}struct _tagged_arr Cyc_Filename_chop_extension(struct
+_tagged_arr filename){int i=(int)(_get_arr_size(filename,sizeof(unsigned char))- 1);
+while(i >= 0?((const unsigned char*)filename.curr)[i]!= '.': 0){-- i;}if(i < 0)(int)
+_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp0=_cycalloc(sizeof(*
+_tmp0));_tmp0[0]=({struct Cyc_Core_Invalid_argument_struct _tmp1;_tmp1.tag=Cyc_Core_Invalid_argument;
+_tmp1.f1=_tag_arr("chop_extension",sizeof(unsigned char),15);_tmp1;});_tmp0;}));
+return Cyc_Std_substring(filename,0,(unsigned int)i);}struct _tagged_arr Cyc_Filename_dirname(
 struct _tagged_arr filename){int i=(int)(_get_arr_size(filename,sizeof(
 unsigned char))- 1);while(i >= 0?((const unsigned char*)filename.curr)[i]!= '/': 0){
--- i;}return Cyc_Std_substring(filename,i + 1,_get_arr_size(filename,sizeof(
-unsigned char))- (i + 1));}int Cyc_Filename_check_suffix(struct _tagged_arr filename,
-struct _tagged_arr suffix){int i=(int)(_get_arr_size(filename,sizeof(unsigned char))
-- 1);int j=(int)(_get_arr_size(suffix,sizeof(unsigned char))- 1);while(i >= 0? j >= 
-0: 0){if(*((const unsigned char*)_check_unknown_subscript(filename,sizeof(
-unsigned char),i --))!= *((const unsigned char*)_check_unknown_subscript(suffix,
-sizeof(unsigned char),j --))){return 0;}}if(j >= 0){return 0;}else{return 1;}}struct
-_tagged_arr Cyc_Filename_gnuify(struct _tagged_arr filename){int has_drive_name=
-_get_arr_size(filename,sizeof(unsigned char))> 1?*((const unsigned char*)
-_check_unknown_subscript(filename,sizeof(unsigned char),1))== ':': 0;int i;int j;
-struct _tagged_arr ans;int ans_sz;if(has_drive_name){ans_sz=(int)(_get_arr_size(
-filename,sizeof(unsigned char))+ 1);ans=({unsigned int _tmp2=(unsigned int)ans_sz;
-unsigned char*_tmp3=(unsigned char*)_cycalloc_atomic(_check_times(sizeof(
-unsigned char),_tmp2));struct _tagged_arr _tmp5=_tag_arr(_tmp3,sizeof(
-unsigned char),(unsigned int)ans_sz);{unsigned int _tmp4=_tmp2;unsigned int k;for(
-k=0;k < _tmp4;k ++){_tmp3[k]='\000';}};_tmp5;});*((unsigned char*)
-_check_unknown_subscript(ans,sizeof(unsigned char),0))=(*((unsigned char*)
-_check_unknown_subscript(ans,sizeof(unsigned char),1))='/');*((unsigned char*)
-_check_unknown_subscript(ans,sizeof(unsigned char),2))=*((const unsigned char*)
-_check_unknown_subscript(filename,sizeof(unsigned char),0));i=3;j=2;}else{ans_sz=(
-int)_get_arr_size(filename,sizeof(unsigned char));ans=({unsigned int _tmp6=(
-unsigned int)ans_sz;unsigned char*_tmp7=(unsigned char*)_cycalloc_atomic(
-_check_times(sizeof(unsigned char),_tmp6));struct _tagged_arr _tmp9=_tag_arr(_tmp7,
-sizeof(unsigned char),(unsigned int)ans_sz);{unsigned int _tmp8=_tmp6;
-unsigned int k;for(k=0;k < _tmp8;k ++){_tmp7[k]='\000';}};_tmp9;});i=0;j=0;}while(i
-< ans_sz){unsigned char c=*((const unsigned char*)_check_unknown_subscript(
-filename,sizeof(unsigned char),j ++));*((unsigned char*)_check_unknown_subscript(
-ans,sizeof(unsigned char),i ++))=c == '\\'?'/': c;}return ans;}
+-- i;}if(i < 0)return Cyc_Core_new_string(0);return Cyc_Std_substring(filename,0,(
+unsigned int)i);}struct _tagged_arr Cyc_Filename_basename(struct _tagged_arr
+filename){int i=(int)(_get_arr_size(filename,sizeof(unsigned char))- 1);while(i >= 
+0?((const unsigned char*)filename.curr)[i]!= '/': 0){-- i;}return Cyc_Std_substring(
+filename,i + 1,_get_arr_size(filename,sizeof(unsigned char))- (i + 1));}int Cyc_Filename_check_suffix(
+struct _tagged_arr filename,struct _tagged_arr suffix){int i=(int)(_get_arr_size(
+filename,sizeof(unsigned char))- 1);int j=(int)(_get_arr_size(suffix,sizeof(
+unsigned char))- 1);while(i >= 0?j >= 0: 0){if(*((const unsigned char*)
+_check_unknown_subscript(filename,sizeof(unsigned char),i --))!= *((const
+unsigned char*)_check_unknown_subscript(suffix,sizeof(unsigned char),j --)))
+return 0;}if(j >= 0)return 0;else{return 1;}}struct _tagged_arr Cyc_Filename_gnuify(
+struct _tagged_arr filename){int has_drive_name=_get_arr_size(filename,sizeof(
+unsigned char))> 1?*((const unsigned char*)_check_unknown_subscript(filename,
+sizeof(unsigned char),1))== ':': 0;int i;int j;struct _tagged_arr ans;int ans_sz;if(
+has_drive_name){ans_sz=(int)(_get_arr_size(filename,sizeof(unsigned char))+ 1);
+ans=({unsigned int _tmp2=(unsigned int)ans_sz;unsigned char*_tmp3=(unsigned char*)
+_cycalloc_atomic(_check_times(sizeof(unsigned char),_tmp2));struct _tagged_arr
+_tmp5=_tag_arr(_tmp3,sizeof(unsigned char),(unsigned int)ans_sz);{unsigned int
+_tmp4=_tmp2;unsigned int k;for(k=0;k < _tmp4;k ++){_tmp3[k]='\000';}}_tmp5;});*((
+unsigned char*)_check_unknown_subscript(ans,sizeof(unsigned char),0))=(*((
+unsigned char*)_check_unknown_subscript(ans,sizeof(unsigned char),1))='/');*((
+unsigned char*)_check_unknown_subscript(ans,sizeof(unsigned char),2))=*((const
+unsigned char*)_check_unknown_subscript(filename,sizeof(unsigned char),0));i=3;j=
+2;}else{ans_sz=(int)_get_arr_size(filename,sizeof(unsigned char));ans=({
+unsigned int _tmp6=(unsigned int)ans_sz;unsigned char*_tmp7=(unsigned char*)
+_cycalloc_atomic(_check_times(sizeof(unsigned char),_tmp6));struct _tagged_arr
+_tmp9=_tag_arr(_tmp7,sizeof(unsigned char),(unsigned int)ans_sz);{unsigned int
+_tmp8=_tmp6;unsigned int k;for(k=0;k < _tmp8;k ++){_tmp7[k]='\000';}}_tmp9;});i=0;j=
+0;}while(i < ans_sz){unsigned char c=*((const unsigned char*)
+_check_unknown_subscript(filename,sizeof(unsigned char),j ++));*((unsigned char*)
+_check_unknown_subscript(ans,sizeof(unsigned char),i ++))=c == '\\'?'/': c;}return
+ans;}

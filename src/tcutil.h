@@ -35,7 +35,6 @@ using Absyn;
 using Position;
 using Tcenv;
 
-extern xtunion exn {extern TypeErr};
 extern `a impos(string_t fmt, ... inject parg_t<`r2> ap)
    __attribute__((format(printf,1,2), noreturn)) ;
 extern void terr(seg_t, string_t fmt, ... inject parg_t<`r2> ap)
@@ -43,10 +42,9 @@ extern void terr(seg_t, string_t fmt, ... inject parg_t<`r2> ap)
 extern void warn(seg_t, string_t fmt, ... inject parg_t<`r2> ap)
    __attribute__((format(printf,2,3))) ;
 extern void flush_warnings();
-extern void err_noloc(string_t);
+  // bextern void err_noloc(string_t);
 
-// set by by Tcenv::tc_init, just to cut down on allocation and calls
-// to Set::empty.
+// set by by Tcenv::tc_init, just to reduce allocation and calls to Set::empty.
 extern Core::opt_t<Set::set_t<var_t>> empty_var_set;
 
 // returns a deep copy of a type -- note that the evars will
@@ -66,7 +64,7 @@ extern void unchecked_cast(tenv_t, exp_t, type_t);
 extern bool coerce_arg(tenv_t, exp_t, type_t); 
 extern bool coerce_assign(tenv_t, exp_t, type_t);
 extern bool coerce_to_bool(tenv_t, exp_t);
-extern bool coerce_list(tenv_t, type_t, list_t<exp_t,`r>);
+extern bool coerce_list(tenv_t, type_t, list_t<exp_t>);
 extern bool coerce_uint_typ(tenv_t, exp_t);
 extern bool coerce_sint_typ(tenv_t, exp_t);
 extern bool coerce_use(tenv_t, exp_t, type_t);
@@ -109,19 +107,17 @@ extern type_t rsubstitute(region_t<`r>,list_t<$(tvar_t,type_t)@`r,`r>,type_t);
 // to constrain evars...
 extern bool subset_effect(bool set_to_empty, type_t e1, type_t e2);
 
-// true when rgn is in effect -- won't side-effect any evars when
+// returns true when rgn is in effect -- won't side-effect any evars when
 // constrain is false.
 extern bool region_in_effect(bool constrain, type_t r, type_t e);
 
 extern type_t fndecl2typ(fndecl_t);
 
 // generate an appropriate evar for a type variable -- used in
-// instantiation.  The list of tvars is used to constrain the
-// evar.
+// instantiation.  The list of tvars is used to constrain the evar.
 extern $(tvar_t,type_t)@   make_inst_var(list_t<tvar_t,`H>,tvar_t);
 extern $(tvar_t,type_t)@`r r_make_inst_var($(list_t<tvar_t,`H>,region_t<`r>)@,
 					   tvar_t);
-                  
 
 // checks that a width given on a struct or union member is consistent
 // with the type definition for the member.

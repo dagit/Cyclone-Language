@@ -46,7 +46,7 @@ ifdef MS
 #FIX: Ignore fewer flags.
 	cl /Fe$@ $(CYC_LIB_PATH)/snprintf.obj $^ $(CYCDIR)/bin/cyc-lib/gc.lib
 else
-	$(CYCC) -v -B. -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) $(CYCFLAGS) -v -B. -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
 endif
 
 # Why do these want two -B arguments -- because the first one makes sure
