@@ -32,6 +32,7 @@ endif
 
 # needed for booting
 CYCLONE_BOOT_LIBS:=ap\
+        apq\
         arg\
         assert\
         buffer\
@@ -66,6 +67,7 @@ CYCLONE_LIBS:=array\
 	tmp
 
 CYCLONE_H:=ap.h\
+        apq.h\
 	arg.h\
 	array.h\
 	assert.h\

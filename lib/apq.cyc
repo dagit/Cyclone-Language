@@ -1,0 +1,100 @@
+#include "apq.h"
+#define T APQ_T
+
+struct T {
+  AP_T n;
+  AP_T d;
+};
+
+datatype exn {
+  Invalid_argument(const char ?);
+};
+
+T reduce(T q) {
+  if (AP_cmp(q->d, AP_zero) < 0) {
+    q->d = AP_neg(q->d);
+    q->n = AP_neg(q->n);
+  }
+  AP_T gcd = AP_gcd(AP_abs(q->n), q->d);
+  if (AP_cmp(gcd, AP_one) == 0)
+    return q;
+  T newq = malloc(sizeof(struct T));
+  newq->n = AP_div(q->n, gcd);
+  newq->d = AP_div(q->d, gcd);
+  return newq;
+}
+
+T APQ_fromint(int i) {
+  T q = malloc(sizeof(struct T));
+  q->n = AP_fromint(i);
+  q->d = AP_one;
+  return q;
+}
+
+T APQ_fromAP(AP_T n, AP_T d) {
+  if (AP_cmp(d, AP_zero) == 0) throw new Invalid_argument("APQ_fromAP: divide by zero");
+  T q = malloc(sizeof(struct T));
+  q->n = n;
+  q->d = d;
+  return reduce(q);
+}
+
+T APQ_fromstr(const char ? str, int base) {
+  T q = malloc(sizeof(struct T));
+  let s = str;
+  while (*s && *s != '/') s++;
+  q->n = AP_fromstr(str, base);
+  if (*s) {
+    let d = AP_fromstr(s + 1, base);
+    if (AP_cmp(d, AP_zero))
+      q->d = d;
+    else throw new Invalid_argument("APQ_fromstr: malformed string");
+  }
+  else
+    q->d = AP_one;
+  return reduce(q);
+}
+
+char ? APQ_tostr(T q, int base) {
+  if (AP_cmp(q->d, AP_one) == 0)
+    return AP_tostr(q->n, base);
+  return aprintf("%s/%s", AP_tostr(q->n, base), AP_tostr(q->d, base));
+}
+
+T APQ_neg(T q) {
+  return APQ_fromAP(AP_neg(q->n), q->d);
+}
+
+T APQ_abs(T q) {
+  return APQ_fromAP(AP_abs(q->n), q->d);
+}
+
+T APQ_add(T p, T q) {
+  let d = AP_lcm(p->d, q->d);
+  let px = AP_div(d, p->d);
+  let qx = AP_div(d, q->d);
+  return APQ_fromAP(AP_add(AP_mul(p->n, px), AP_mul(q->n, qx)), d);
+}
+
+T APQ_sub(T p, T q) {
+  let d = AP_lcm(p->d, q->d);
+  let px = AP_div(d, p->d);
+  let qx = AP_div(d, q->d);
+  return APQ_fromAP(AP_sub(AP_mul(p->n, px), AP_mul(q->n, qx)), d);
+}
+
+T APQ_mul(T p, T q) {
+  return APQ_fromAP(AP_mul(p->n, q->n), AP_mul(p->d, q->d));
+}
+
+T APQ_div(T p, T q) {
+  if (AP_cmp(q->n, AP_zero) == 0) throw new Invalid_argument("APQ_div: divide by zero");
+  return APQ_fromAP(AP_mul(p->n, q->d), AP_mul(p->d, q->n));
+}
+
+int APQ_cmp(T p, T q) {
+  let d = AP_lcm(p->d, q->d);
+  let px = AP_div(d, p->d);
+  let qx = AP_div(d, q->d);
+  return AP_cmp(AP_mul(p->n, px), AP_mul(q->n, qx));
+}
