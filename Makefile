@@ -478,7 +478,7 @@ nocheck: \
   $(BL)/cyc-lib/$(target)/runtime_cyc_nocheck.a
 
 ifndef NO_XML_LIB
-cyclone: $(BL)/cyc-lib/$(target)/libxml.a
+xml:     $(BL)/cyc-lib/$(target)/libxml.a
 aprof:   $(BL)/cyc-lib/$(target)/libxml_a.a
 gprof:   $(BL)/cyc-lib/$(target)/libxml_pg.a
 nocheck: $(BL)/cyc-lib/$(target)/libxml_nocheck.a
