@@ -50,7 +50,7 @@ clean:
 	$(RM) $(GCCEXEFILES)
 
 gcc-%$(EXE): %.gcc
-	gcc $(CFLAGS) -o $@ -x c $^
+	gcc $(CFLAGS) -o $@ -x c $^ -lm
 
 %$(EXE): %.cyc
-	$(CYCC) $(CYCFLAGS) -o $@ $^
+	$(CYCC) $(CYCFLAGS) -o $@ $^ -lm
