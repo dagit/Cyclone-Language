@@ -129,7 +129,7 @@ region yyregion; {
   int yyssp_offset;
   /*  the state stack     */
   short @{YYMAXDEPTH} yyss = 
-	(short @{YYMAXDEPTH})(rnew(yyregion) {for i < YYMAXDEPTH : (short)0});
+	(short @{YYMAXDEPTH}) (rcalloc(yyregion, YYMAXDEPTH, sizeof(short)));
   /*  the semantic value stack */
   int yyvsp_offset;
   union YYSTYPE @{YYMAXDEPTH} yyvs = 
