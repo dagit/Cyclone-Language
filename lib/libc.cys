@@ -664,11 +664,11 @@ cycstub {
     }
   }
 
-  int creat(string_t s, mode_t m) {
+  int creat(const char ? s, mode_t m) {
     return Cfcntl::creat(string_to_Cstring(s),m);
   }
 
-  int open(string_t s, int i, ... mode_t ms) {
+  int open(const char ? s, int i, ... mode_t ms) {
     /* Note: if open is called with more than 3 arguments, the
        additional args are simply ignored. */
     if (ms.size >= 1)
@@ -2031,6 +2031,9 @@ epilogue {
   #define _SIG_HOLD_def_
   #undef SIG_HOLD
   #endif
+}
+epilogue kill {
+  extern "C" int kill(pid_t, int);
 }
 epilogue sigaddset {
   #ifndef __CYGWIN__
@@ -4705,7 +4708,7 @@ epilogue nanosleep {
 }
 epilogue strftime {
   // Omitted because of the struct tm problem
-  //  extern size_t strftime(string_t, size_t, string_t, const struct tm @);
+  //  extern size_t strftime(const char ?, size_t, const char ?, const struct tm @);
 }
 cycstub strftime {
   // Omitted because of the struct tm problem
@@ -5150,20 +5153,26 @@ epilogue execle {
   // extern int execle(const char *, const char *, ...);
 }
 epilogue execlp {
-  //  extern int execlp(const char ?, const char ?, ... const char ?);
+  extern int execlp(const char ?, const char ?, ... const char ?);
+}
+cycstub execvp {
+  namespace Cunistd {
+    // needed by execlp, so out of order
+    extern "C" int execvp(Cstring file, Cstring *argv);
+  }
 }
 cycstub execlp {
-  //  int execlp(const char ? path, const char ? arg0, ... const char ? argv) {
-  //    if (argv[argv.size - 1] != NULL)
-  //      throw new Failure("execl: arg list must be NULL-terminated");
-  //
-  //    // We allocate 1+argv.size because we need to prepend arg0
-  //    Cstring ?newargs = new {for i < 1 + argv.size : NULL};
-  //    newargs[0] = string_to_Cstring(arg0);
-  //    for (int i = 0; i < argv.size; i++)
-  //      newargs[i+1] = string_to_Cstring(argv[i]);
-  //    return Cunistd::execvp(string_to_Cstring(path), (Cstring*) newargs);
-  //  }
+  int execlp(const char ?path, const char ?arg0, ... const char ?argv) {
+    if (argv[argv.size - 1] != NULL)
+      throw new Failure("execl: arg list must be NULL-terminated");
+
+    // We allocate 1+argv.size because we need to prepend arg0
+    Cstring ?newargs = new {for i < 1 + argv.size : NULL};
+    newargs[0] = string_to_Cstring(arg0);
+    for (int i = 0; i < argv.size; i++)
+      newargs[i+1] = string_to_Cstring(argv[i]);
+    return Cunistd::execvp(string_to_Cstring(path), (Cstring*) newargs);
+  }
 }
 epilogue execv {
   // Not supported yet
@@ -5202,11 +5211,6 @@ cycstub execve {
 epilogue execvp {
   // Not supported yet
   // extern int execvp(const char *, char *const []);
-}
-cycstub execvp {
-  //  namespace Cunistd {
-  //    extern "C" int execvp(Cstring file, Cstring *argv);
-  //  }
 }
 epilogue _exit {
   extern "C" void _exit(int);
@@ -5502,7 +5506,7 @@ cycstub write {
   }
   static xtunion exn.Failure __write_failure =
     Failure("write: called with count > buf.size");
-  ssize_t write(int fd, string_t buf, size_t count) {
+  ssize_t write(int fd, const char ? buf, size_t count) {
     if (count > buf.size) throw &__write_failure;
     return Cunistd::write(fd, underlying_Cstring(buf), count);
   }
