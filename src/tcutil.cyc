@@ -1726,7 +1726,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	case $(&AbsUpper_b(t1), &AbsUpper_b(t2)):
 	  if(!unify(t1,t2))
 	    switch ($(compress(t1),compress(t2))) {
-	    case $(&TypeInt(n1), &TypeInt(n2)): if(n1 > n2) okay = false; break;
+	    case $(&TypeInt(n1), &TypeInt(n2)): if(n1 < n2) okay = false; break;
 	    default: okay = false; break;
 	    }
 	  break;
@@ -1734,7 +1734,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	  let $(i,known) = Evexp::eval_const_uint_exp(e1);
 	  if(!known) { okay = false; break; }
 	  switch (compress(t2)) {
-	  case &TypeInt(n2): if(i > n2) okay = false; break;
+	  case &TypeInt(n2): if(i < n2) okay = false; break;
 	  default: okay = false; break;
 	  }
 	  break;

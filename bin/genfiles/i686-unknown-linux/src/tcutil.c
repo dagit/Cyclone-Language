@@ -2611,7 +2611,7 @@ _tmp4D8);_tmp4E1;});void*_tmp4E3;int _tmp4E4;void*_tmp4E5;int _tmp4E6;_LL350:
 _tmp4E3=_tmp4E2.f1;if(_tmp4E3 <= (void*)3?1:*((int*)_tmp4E3)!= 18)goto _LL352;
 _tmp4E4=((struct Cyc_Absyn_TypeInt_struct*)_tmp4E3)->f1;_tmp4E5=_tmp4E2.f2;if(
 _tmp4E5 <= (void*)3?1:*((int*)_tmp4E5)!= 18)goto _LL352;_tmp4E6=((struct Cyc_Absyn_TypeInt_struct*)
-_tmp4E5)->f1;_LL351: if(_tmp4E4 > _tmp4E6)okay=0;goto _LL34F;_LL352:;_LL353: okay=0;
+_tmp4E5)->f1;_LL351: if(_tmp4E4 < _tmp4E6)okay=0;goto _LL34F;_LL352:;_LL353: okay=0;
 goto _LL34F;_LL34F:;}goto _LL33E;_LL349: _tmp4D9=_tmp4C9.f1;if(_tmp4D9 <= (void*)1?1:*((
 int*)_tmp4D9)!= 0)goto _LL34B;_tmp4DA=((struct Cyc_Absyn_Upper_b_struct*)_tmp4D9)->f1;
 _tmp4DB=_tmp4C9.f2;if(_tmp4DB <= (void*)1?1:*((int*)_tmp4DB)!= 1)goto _LL34B;
@@ -2620,7 +2620,7 @@ unsigned int _tmp4E8;int _tmp4E9;struct _tuple7 _tmp4E7=Cyc_Evexp_eval_const_uin
 _tmp4DA);_tmp4E8=_tmp4E7.f1;_tmp4E9=_tmp4E7.f2;if(!_tmp4E9){okay=0;goto _LL33E;}{
 void*_tmp4EA=Cyc_Tcutil_compress(_tmp4DC);int _tmp4EB;_LL355: if(_tmp4EA <= (void*)
 3?1:*((int*)_tmp4EA)!= 18)goto _LL357;_tmp4EB=((struct Cyc_Absyn_TypeInt_struct*)
-_tmp4EA)->f1;_LL356: if(_tmp4E8 > _tmp4EB)okay=0;goto _LL354;_LL357:;_LL358: okay=0;
+_tmp4EA)->f1;_LL356: if(_tmp4E8 < _tmp4EB)okay=0;goto _LL354;_LL357:;_LL358: okay=0;
 goto _LL354;_LL354:;}goto _LL33E;}_LL34B: _tmp4DD=_tmp4C9.f1;if(_tmp4DD <= (void*)1?
 1:*((int*)_tmp4DD)!= 1)goto _LL34D;_LL34C: goto _LL34E;_LL34D: _tmp4DE=_tmp4C9.f2;
 if(_tmp4DE <= (void*)1?1:*((int*)_tmp4DE)!= 1)goto _LL33E;_LL34E: okay=0;goto _LL33E;
