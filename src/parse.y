@@ -232,7 +232,7 @@ static void only_vardecl(list_t<stringptr> params,decl x) {
   case Let_d(_,_,_,_,_): decl_kind = "let declaration";        break;
   case Fn_d(_):          decl_kind = "function declaration";   break;
   case Struct_d(_):      decl_kind = "struct declaration";     break;
-  case Union_d:          decl_kind = "union declaration";      break;
+  case Union_d(_):       decl_kind = "union declaration";      break;
   case Enum_d(_):        decl_kind = "enum declaration";       break;
   case Typedef_d(_):     decl_kind = "typedef";                break;
   case Xenum_d(_):       decl_kind = "xenum declaration";      break;
@@ -501,9 +501,10 @@ static $(typ,opt_t<decl>)
           t = XenumType(xed->name,null);
           if (xed->fields != null) declopt = &Opt(d);
 	  break;
-        case Union_d:
-          // FIX: TEMPORARY SO WE CAN TEST THE PARSER
-          t = UnionType;
+        case Union_d(ud):
+          let args = List::map(tvar2typ,ud->tvs);
+          t = UnionType(ud->name->v,args,null);
+          if (ud->fields!=null) declopt = &Opt(d);
 	  break;
         default:
 	  abort("bad declaration within type specifier",d->loc);
@@ -723,6 +724,7 @@ static list_t<decl> make_declarations(decl_spec_t ds,
       decl d = declopt->v;
       switch (d->r) {
       case Struct_d(sd): sd->sc = s; sd->attributes = atts; break;
+      case Union_d(ud): ud->sc = s; ud->attributes = atts; break;
       case Enum_d(ed)  : 
         ed->sc = s; 
         if (atts != null) err("bad attributes on enum",loc); break;
@@ -748,10 +750,11 @@ static list_t<decl> make_declarations(decl_spec_t ds,
         let ed = &Xenumdecl{.sc=s, .name=n, .fields=null};
         if (atts != null) err("bad attributes on xenum",loc);
         return &List(&Decl(Xenum_d(ed),loc),null);
-      case UnionType:
-        // FIX: TEMPORARY SO WE CAN TEST THE PARSER 
+      case UnionType(n,ts,_):
+        let ts2 = List::map_c(typ2tvar,loc,ts);
+        let ud = &Uniondecl{s,&Opt((typedef_name_t)n),ts2,null,null};
         if (atts != null) err("bad attributes on union",loc);
-        return &List(&Decl(Union_d,loc),null);
+        return &List(&Decl(Union_d(ud),loc),null);
       default: err("missing declarator",loc); return null;
       }
     }
@@ -774,8 +777,10 @@ static list_t<decl> make_declarations(decl_spec_t ds,
           break;
         case Enum_d(ed)  : ed->sc = s; break;
         case Xenum_d(ed) : ed->sc = s; break;
+        case Union_d(ud) : ud->sc = s; break;
         default:
-          err("declaration within typedef is not a struct,enum, or xenum",loc);
+          err("declaration within typedef is not a struct, union, enum, "
+              "or xenum",loc);
 	  break;
         }
         decls = &List(d,decls);
@@ -1294,8 +1299,7 @@ struct_or_union_specifier:
         d = struct_decl(Public,null,null,&Opt($3),null,LOC(@1,@4));
 	break;
       case Union_su:
-        unimp2("unions",LOC(@1,@4));
-        d = new_decl(Union_d,LOC(@1,@4));
+        d = union_decl(Public,null,null,&Opt($3),null,LOC(@1,@4));
 	break;
       }
       $$=^$(Decl_spec(d));
@@ -1311,8 +1315,7 @@ struct_or_union_specifier:
         d = struct_decl(Public,&Opt($2),ts,&Opt($5),null,LOC(@1,@6));
 	break;
       case Union_su:
-        unimp2("unions",LOC(@1,@6));
-        d = new_decl(Union_d,LOC(@1,@6));
+        d = union_decl(Public,&Opt($2),ts,&Opt($5),null,LOC(@1,@6));
 	break;
       }
       $$=^$(Decl_spec(d));
@@ -1327,8 +1330,7 @@ struct_or_union_specifier:
         d = struct_decl(Public,&Opt($2),ts,&Opt($5),null,LOC(@1,@6));
 	break;
       case Union_su:
-        unimp2("unions",LOC(@1,@6));
-        d = new_decl(Union_d,LOC(@1,@6));
+        d = union_decl(Public,&Opt($2),ts,&Opt($5),null,LOC(@1,@6));
 	break;
       }
       $$=^$(Decl_spec(d));
@@ -1340,8 +1342,7 @@ struct_or_union_specifier:
 	$$=^$(type_spec(StructType($2,$3,null),LOC(@1,@3)));
 	break;
       case Union_su:
-        unimp2("unions",LOC(@1,@3));
-        $$=^$(Decl_spec(new_decl(Union_d,LOC(@1,@3))));
+	$$=^$(type_spec(UnionType($2,$3,null),LOC(@1,@3)));
 	break;
       }
     }
@@ -1352,8 +1353,7 @@ struct_or_union_specifier:
         $$=^$(type_spec(StructType($2,$3,null),LOC(@1,@3)));
 	break;
       case Union_su:
-        unimp2("unions",LOC(@1,@3));
-        $$=^$(Decl_spec(new_decl(Union_d,LOC(@1,@3))));
+        $$=^$(type_spec(UnionType($2,$3,null),LOC(@1,@3)));
 	break;
       }
     }

@@ -198,15 +198,21 @@ typ void_star_typ() {
   return void_star_t_opt->v;
 }
 
-// structs
+// structs and unions
 // WARNING: currently only Toc calls these, so we don't need to set
 //          the structdecl field.  Beware using them anywhere else!
 // (Probably we should require setting the third field even in Toc.)
 typ strct(var name) {
   return StructType(new {$(Abs_n(null),name)},null,null);
 }
+typ union_typ(var name) {
+  return UnionType(new {$(Abs_n(null),name)},null,null);
+}
 typ strctq(qvar name) {
   return StructType(name,null,null);
+}
+typ unionq_typ(qvar name) {
+  return UnionType(name,null,null);
 }
 
 ///////////////////////// Expressions //////////////////////////////
@@ -428,6 +434,12 @@ decl struct_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
   return new_decl(Struct_d(&Structdecl {.sc=s,.name=n,.tvs=ts,.fields=fs,
                                         .attributes = atts}),loc);
 }
+decl union_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
+                opt_t<list_t<structfield_t>> fs, attributes_t atts,
+                seg_t loc) {
+  return new_decl(Union_d(&Uniondecl {.sc=s,.name=n,.tvs=ts,.fields=fs,
+                                         .attributes = atts}),loc);
+}
 decl enum_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
 	       opt_t<list_t<enumfield>> fs,seg_t loc) {
   return new_decl(Enum_d(&Enumdecl{.sc=s, .name=n, .tvs=ts, .fields=fs}),loc);
@@ -503,15 +515,22 @@ bool is_lvalue(exp e) {
   }
 }
 
-struct Structfield * lookup_struct_field(structdecl sd, var v) {
-  if (sd->fields == null) 
+struct Structfield * lookup_field(opt_t<list_t<structfield_t>> fields, var v) {
+  if (fields == null) 
     return null;
-  for(_ fs = sd->fields->v; fs != null; fs = fs->tl) {
+  for(_ fs = fields->v; fs != null; fs = fs->tl) {
     let f = fs->hd;
     if (String::zstrptrcmp(f->name,v) == 0)
       return f;
   }
   return null;
+}
+
+struct Structfield * lookup_struct_field(structdecl sd, var v) {
+  return lookup_field(sd->fields,v);
+}
+struct Structfield * lookup_union_field(uniondecl_t ud, var v) {
+  return lookup_field(ud->fields,v);
 }
 
 $(tqual,typ) * lookup_tuple_field(list_t<$(tqual,typ)@> ts, int i) {

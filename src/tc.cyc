@@ -539,6 +539,177 @@ static void tcStructdecl(tenv te, genv_t ge, seg_t loc, structdecl sd) {
   *sdp = sd;
 }
 
+// FIX: this code is almost exactly the same as tcStructdecl
+static void tcUniondecl(tenv te, genv_t ge, seg_t loc, uniondecl_t ud) {
+  // reject anonymous top-level
+  if (ud->name == null) {
+    terr(loc,"anonymous unions are not allowed at top level");
+    return;
+  }
+  var v = (*ud->name->v)[1];
+#ifdef DEBUG
+  fprintf(stderr,"type-checking uniondecl %s",*v);
+  fflush(stderr);
+#endif
+  // only allow packed and aligned attributes
+  for (_ atts = ud->attributes; atts != null; atts = atts->tl) {
+    switch (atts->hd) {
+    case Packed_att: continue;
+    case Aligned_att(_): continue;
+    default: terr(loc,xprintf("bad attribute %s in union %s definition",
+                              attribute2string(atts->hd), *v));
+    break;
+    }
+  }
+  // disallow MemKinds and set unconstrained kinds to BoxKind
+  for(_ tvs2 = ud->tvs; tvs2 != null; tvs2 = tvs2->tl) {
+    let c = compress_conref(tvs2->hd->kind);
+    switch (c->v) {
+    case No_constr:
+      c->v = Eq_constr(BoxKind); continue;
+    case Eq_constr(MemKind):
+      terr(loc,xprintf("union %s attempts to abstract type "
+                       "variable %s of kind M",*v,
+                       *tvs2->hd->name)); continue;
+    default: continue;
+    }
+  }
+  list_t<tvar> tvs = ud->tvs;
+  // reject explicitly qualified name
+  switch ((*ud->name->v)[0]) {
+  case Rel_n(null): break;
+  case Abs_n(null): break; // allowed for top-level constants
+  default:
+    terr(loc,"qualified declarations are not implemented"); // FIX
+    return;
+  }
+  // expand to qualified name
+  (*ud->name->v)[0] = Abs_n(te->ns);
+  // reject ill-formed type
+  check_unique_tvars(loc,tvs);
+
+  // redeclarations have to be handled differently
+  switch (Dict::lookup_opt(ge->uniondecls,v)) {
+  case null:
+    // add the declaration to the environment, then go check the fields
+    ge->uniondecls = Dict::insert(ge->uniondecls, v, (uniondecl_t@)(&$(ud)));
+    if(ud->fields == null) {
+      return;
+    }
+    break;
+
+  case &Opt(udp): // a redeclaration
+    let ud2  = *udp;
+    let tvs2 = ud2->tvs;
+    // reject if different number of type variables or different kinds
+    if(List::length(tvs) != List::length(tvs2))
+      terr(loc,xprintf("redeclaration of union %s "
+		       "has a different number of type parameters", *v));
+    let x1 = tvs;
+    let x2 = tvs2;
+    for (; x1 != null; x1 = x1->tl, x2=x2->tl) {
+      let c1 = compress_conref(x1->hd->kind);
+      let c2 = compress_conref(x2->hd->kind);
+      // if the kind of the type variable is unconstrained, then set it to
+      // the kind of in the previous declaration.
+      if (c1->v == No_constr && c1 != c2)
+        c1->v = Forward_constr(c2);
+      // check that the kinds are the same
+      if (conref_val(c1) != conref_val(c2))
+        terr(loc,xprintf("redeclaration of union %s has a different kind "
+                         "(%s) for type parameter %s (%s)", *v, 
+                         ckind2string(c1), *x1->hd->name, ckind2string(c2)));
+    }
+    // reject if scopes are inconsistent
+    ud->sc = scope_redecl_okay(ud->sc, ud->fields, ud2->sc, ud2->fields,
+			       loc, "union", v);
+    // now things really depend on which declarations have fields
+    switch ($(ud->fields, ud2->fields)) {
+    case $(null,null): return;
+    case $(_,   null): *udp = ud; break; // go check the fields below
+    case $(null,_):    ud->fields = ud2->fields; ud->tvs = tvs; return;
+    case $(_,   _):
+      // both declare fields, so they must agree (with renaming w.r.t. tyvars)
+      list_t<$(tvar,typ)@> inst = null;
+      for(let tvs0 = tvs; tvs0 != null; tvs0 = tvs0->tl, tvs2 = tvs2->tl)
+	inst = &List(&$(tvs2->hd,VarType(tvs0->hd)), inst);
+      // check that attributes are the same
+      if (!same_atts(ud->attributes, ud2->attributes)) 
+        terr(loc,xprintf("redeclaration of union %s has different attributes",
+                         *v));
+      // check each field under the map
+      let f1s = ud->fields->v;
+      let f2s = ud2->fields->v;
+      for(; f1s != null && f2s != null; f1s = f1s->tl, f2s = f2s->tl) {
+	let &Structfield(fn1,tq1,t1,atts1) = f1s->hd;
+	let &Structfield(fn2,tq2,t2,atts2) = f2s->hd;
+	// names, qualifiers, types, and attributes all must agree
+	if (String::zstrptrcmp(fn1,fn2) != 0)
+	  terr(loc, xprintf("redeclaration of union %s: field name mismatch "
+			    "%s != %s", *v, *fn1, *fn2));
+        if (!same_atts(atts1,atts2))
+	  terr(loc, xprintf("redeclaration of union %s: attribute mismatch on"
+			    " field %s", *v, *fn1));
+	if (!equal_tqual(tq1,tq2))
+	  terr(loc, xprintf("redeclaration of union %s: qualifier mismatch on"
+			    " field %s", *v, *fn1));
+	// important side-effects on t1
+	check_type(loc, te, tvs, MemKind, t1);
+	typ subst_t2 = substitute(inst,t2);
+	if(!unify(t1,subst_t2)) // FIX: unify definitely seems wrong here
+	  terr(loc,xprintf("redeclaration of union %s: type mismatch on field"
+			   " %s: %s != %s", *v, *fn1,
+			   typ2string(t1), typ2string(subst_t2)));
+      }
+      // check for field-number mismatch
+      if (f2s != null)
+	terr(loc,xprintf("redeclaration of union %s is missing field %s",
+			 *v, *(f2s->hd->name)));
+      if (f1s != null)
+	terr(loc,xprintf("redeclaration of union %s has extra field %s",
+			 *v, *(f1s->hd->name)));
+      return;
+    }
+    break;
+  }
+  // This is the first declaration with fields, so check the fields
+  // may not be the first declaration, so must not overwrite the dict
+  // entry!
+  // for the sake of recursive fields, make name abstract in body
+  let udp = Dict::lookup(ge->uniondecls, v);
+  *udp = &Uniondecl(ud->sc, ud->name, tvs, null, null);
+  // check fields, rejecting ill-formed types, bad fields, and duplicates
+  list_t<field_name> prev_fields = null;
+  list_t<typ> prev_types = null;
+  for (let fs = ud->fields->v; fs != null; fs = fs->tl) {
+    let &Structfield(fn,tq,t,atts) = fs->hd;
+    if (List::mem(String::zstrptrcmp,prev_fields,fn))
+	terr(loc,xprintf("duplicate field %s in union",*fn));
+    prev_fields = &List(fn,prev_fields);
+    check_type(loc,te,tvs,MemKind,t);
+    // check that the type t only consists of "bits" -- later we may
+    // want to allow a more permissive form of unions.
+    if (!bits_only(t))
+      terr(loc,xprintf("%s has a type that is possibly incompatible with "
+                       "other members of union %s",*fn,*v));
+    // check that we have only packed or aligned attributes
+    for (; atts != null; atts = atts->tl) {
+      switch (atts->hd) {
+      case Packed_att: continue;
+      case Aligned_att(_): continue;
+      default: terr(loc,xprintf("bad attribute %s in union %s, member %s",
+                                attribute2string(atts->hd), *v, *fn));
+      break;
+                                
+      }
+    }
+    // FIX: check for consistent tquals?
+  }
+  // undo our clobbering with the abstract version
+  *udp = ud;
+}
+
+
 static void tcEnumdecl(tenv te, genv_t ge, seg_t loc, enumdecl ed) {
   // reject anonymous top-level
   if (ed->name == null) {
@@ -845,9 +1016,6 @@ static void tc_decls(tenv te, list_t<decl> ds0, bool in_externC) {
     case Let_d(_,_,_,_,_): // FIX
       terr(loc,"top level let-declarations are not implemented");
       break;
-    case Union_d: // FIX
-      terr(loc,"union is not implemented");
-      break;
     case Var_d(vd):
       if (in_externC && okay_externC(d->loc,vd->sc))
 	vd->sc = ExternC;
@@ -865,6 +1033,11 @@ static void tc_decls(tenv te, list_t<decl> ds0, bool in_externC) {
       if (in_externC && okay_externC(d->loc,sd->sc))
 	sd->sc = ExternC;
       tcStructdecl(te,ge,loc,sd);
+      break;
+    case Union_d(ud):
+      if (in_externC && okay_externC(d->loc,ud->sc))
+        ud->sc = ExternC;
+      tcUniondecl(te,ge,loc,ud);
       break;
     case Enum_d(ed):
       if (in_externC && okay_externC(d->loc,ed->sc))

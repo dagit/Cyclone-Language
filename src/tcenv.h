@@ -33,6 +33,7 @@ typedef enum Resolved resolved_t;
 extern struct Genv {
   set_t<var>               namespaces;
   dict_t<var,structdecl@>  structdecls;
+  dict_t<var,uniondecl_t@> uniondecls;
   dict_t<var,enumdecl@>    enumdecls;
   dict_t<var,xenumdecl@>   xenumdecls;
   dict_t<var,typedefdecl>  typedefs; // indirection unneeded b/c no redeclaration
@@ -79,6 +80,7 @@ extern tenv_t enter_ns(tenv_t, var);
 extern list_t<var>         resolve_namespace(tenv_t,seg_t,var,list_t<var>);
 extern resolved_t        lookup_ordinary(tenv_t,seg_t,qvar);
 extern structdecl@       lookup_structdecl(tenv_t,seg_t,qvar);
+extern uniondecl_t@      lookup_uniondecl(tenv_t,seg_t,qvar);
 extern enumdecl@         lookup_enumdecl(tenv_t,seg_t,qvar);
 extern opt_t<xenumdecl@> lookup_xenumdecl(tenv_t,seg_t,qvar);
 extern typedefdecl       lookup_typedefdecl(tenv_t,seg_t,qvar);

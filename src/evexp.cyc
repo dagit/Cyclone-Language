@@ -161,9 +161,21 @@ unsigned int szof(typ t, seg_t loc) {
     for(let fs = sd->fields->v; fs != null; fs = fs->tl)
       s += szof(fs->hd->type,loc);
     return s;
+  case UnionType(_,ts,udp):
+    // FIX:  need to deal with padding and alignment
+    if (udp == null)
+      return Tcutil::impos("szof on unchecked UnionType");
+    let ud = *udp;
+    if (ud->fields == null)
+      terr(loc,"cannot apply sizeof to abstract union type");
+    unsigned int s = 0;
+    for (let fs = ud->fields->v; fs != null; fs =fs->tl) {
+      unsigned int i = szof(fs->hd->type,loc);
+      s = (s > i) ? s : i;
+    }
+    return s;
   case HeapRgn: terr(loc, "cannot apply sizoef to a region"); return 0u;
   case TypedefType(_,_,_): return Tcutil::impos("szof typedeftype");
-  case UnionType:          return Tcutil::impos("szof uniontype");
   case JoinEff(_): fallthru;
   case AccessEff(_): terr(loc, "cannot apply sizoef to an effect"); return 0u;
   }

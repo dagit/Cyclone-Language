@@ -21,8 +21,6 @@
    must be resolved on a per-structure/per-union basis (e.g., two
    structs can have members with the same names) so their bindings
    don't belong in our environments.
-
-   Also, we don't currently implement union.
 */
 
 /* During type checking we keep two parallel environments.  One is
@@ -91,6 +89,7 @@ struct Tenv {
 struct Genv {
   set_t<var>                    namespaces;
   Dict::dict_t<var,structdecl@> structdecls;
+  Dict::dict_t<var,uniondecl_t@> uniondecls;
   Dict::dict_t<var,enumdecl@>   enumdecls;
   Dict::dict_t<var,xenumdecl@>  xenumdecls;
   Dict::dict_t<var,typedefdecl> typedefs; // no indirection b/c no redeclaration
@@ -296,6 +295,24 @@ structdecl @ lookup_structdecl(tenv te,seg_t loc,qvar q) {
     return Dict::lookup(ge->structdecls,v);
   }
 }
+
+static uniondecl_t @ lookup_uniondecl_f(genv_t ge,var v) {
+  return Dict::lookup(ge->uniondecls,v);
+}
+uniondecl_t @ lookup_uniondecl(tenv te,seg_t loc,qvar q) {
+  let &$(nsl,v) = q;
+  switch (nsl) {
+  case Loc_n: fallthru;
+  case Rel_n(null):
+    return scoped_lookup(te, loc, lookup_uniondecl_f, v);
+  case Abs_n(y):
+    let ge = Dict::lookup(te->ae,y);
+    return Dict::lookup(ge->uniondecls,v);
+  case Rel_n(&List(x,y)):
+    let ge = lookup_namespace(te,loc,x,y);
+    return Dict::lookup(ge->uniondecls,v);
+  }
+}
 //structdecl @ lookup_structdecl_abs(tenv te, seg_t loc,qvar q) {
 //  return Dict::lookup(Dict::lookup(te->ae,(*q)[0])->structdecls, (*q)[1]);
 //}
@@ -381,6 +398,7 @@ typedefdecl lookup_typedefdecl(tenv te, seg_t loc, qvar q) {
 genv_t empty_genv() {
   return &Genv{.namespaces  = empty_var_set->v,
                .structdecls = Dict::empty(String::zstrptrcmp),
+               .uniondecls  = Dict::empty(String::zstrptrcmp),
                .enumdecls   = Dict::empty(String::zstrptrcmp),
                .xenumdecls  = Dict::empty(String::zstrptrcmp),
                .typedefs    = Dict::empty(String::zstrptrcmp),

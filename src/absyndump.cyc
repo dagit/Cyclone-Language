@@ -275,8 +275,10 @@ void dumpntyp(typ t) {
   case StructType(null,ts,_):   dump("struct"); dumptps(ts); return;
   case StructType(n,  ts,_):
     dump("struct"); dumpqvar((qvar)n); dumptps(ts); return;
+  case UnionType(null,ts,_):   dump("union"); dumptps(ts); return;
+  case UnionType(n,  ts,_):
+    dump("union"); dumpqvar((qvar)n); dumptps(ts); return;
   case TypedefType(n,ts,topt):  dumpqvar(n), dumptps(ts); return;
-  case UnionType: dump("union {/* unimplemented */}"); return;
   case RgnHandleType(rgn):
     dumprgn(rgn); return;
   case HeapRgn: return; 
@@ -702,6 +704,21 @@ void dumpdecl(decl d) {
       dump(";");
     }
     break;
+  case Union_d(ud):
+    dumpscope(ud->sc);
+    dump("union");
+    if(ud->name != null) dumpqvar(ud->name->v);
+    dumptvars(ud->tvs);
+    if(ud->fields == null)
+      dump_semi();
+    else {
+      dump_char('{');
+      dumpstructfields(ud->fields->v);
+      dump("}");
+      dumpatts(ud->attributes);
+      dump(";");
+    }
+    break;
   case Var_d(&Vardecl(sc,name,tq,type,initializer,shadow_depth,_,atts)):
     // FIX: use shadow_depth information
     dumpscope(sc);
@@ -713,7 +730,6 @@ void dumpdecl(decl d) {
     }
     dump_semi();
     break;
-  case Union_d: dump("**UnionDecl**"); break;
   case Enum_d(ed):
     dumpscope(ed->sc);
     dump("enum");

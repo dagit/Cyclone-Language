@@ -322,7 +322,11 @@ static typ typ_to_c(typ t) {
     tqs = List::map(typ_to_c_f,tqs);
     let n = add_tuple_type(tqs);
     return strct(n);
-  case StructType(tdnopt,ts,_):
+  case UnionType(tdnopt,_,_): 
+    if (tdnopt == null) unimp("anonymous union");
+    // just drop the type arguments and translate the nested types
+    return unionq_typ((typedef_name_t)tdnopt);
+  case StructType(tdnopt,_,_):
     if (tdnopt == null) unimp("anonymous struct");
     // just drop the type arguments and translate the nested types
     return strctq((typedef_name_t)tdnopt);
@@ -335,8 +339,6 @@ static typ typ_to_c(typ t) {
     return void_star_typ();
   case HeapRgn:
     return toc_impos("Toc::typ_to_c: type translation passed the heap region");
-  case UnionType:
-    return toc_impos("uniontype");
   case AccessEff(_):
     return toc_impos("Toc::typ_to_c: type translation passed the access eff");
   case JoinEff(_):
@@ -383,7 +385,9 @@ static bool atomic_typ(typ t) {
   case StructType(_,_,_): return false;
   case EnumType(_,_,_):   return false;
   case XenumType(_,_):    return false;
-  case UnionType: return false;
+    // FIX: could make this true now since we only allow bits in unions,
+    // but it would be an evil bug to track down if we had to deal with this.
+  case UnionType(_,_,_):  return false; 
   case PointerType(_): return false;
   case RgnHandleType(_): return false;
   default:
@@ -403,7 +407,7 @@ static bool is_void_star(typ t) {
   }
 }
 
-// returns true when field f of the struct t has type void*.
+// returns true when field f of the struct/union t has type void*.
 static bool is_poly_field(typ t, field_name f) {
   switch (compress(t)) {
   case StructType(tdn,_,&sd):
@@ -424,6 +428,26 @@ static bool is_poly_field(typ t, field_name f) {
     if(tdn == null)
       toc_impos("StructType name not properly set");
     toc_impos(xprintf("is_poly_field:  struct %s missing structdecl",
+		      qvar2string((qvar)tdn)));
+    return false;
+  case UnionType(tdn,_,&ud):
+    if (tdn == null)
+      toc_impos("UnionType name not properly set");
+    if (ud->fields == null)
+      toc_impos(xprintf("is_poly_field:  union %s missing fields",
+			qvar2string((qvar)tdn)));
+    let fields = ud->fields->v;
+    for (; fields != null; fields = fields->tl) {
+      if (String::zstrptrcmp(f,fields->hd->name) == 0)
+	return is_void_star(fields->hd->type);
+    }
+    toc_impos(xprintf("is_poly_field:  union %s has no %s field",
+		      qvar2string((qvar)tdn),*f));
+    return false;
+  case UnionType(tdn,_,null):
+    if(tdn == null)
+      toc_impos("UnionType name not properly set");
+    toc_impos(xprintf("is_poly_field:  union %s missing structdecl",
 		      qvar2string((qvar)tdn)));
     return false;
   default:
@@ -1618,8 +1642,8 @@ static void exp_to_c(env nv, exp e) {
     exp eb = lt_exp(var_exp(x1,DL),var_exp(max,DL),DL);
     exp ec = post_inc_exp(var_exp(x1,DL),DL);
     stmt s = for_stmt(ea,eb,ec,
-		      assign_stmt(subscript_exp(var_exp(a,DL),
-						var_exp(x1,DL),DL),e2,DL),DL);
+                      assign_stmt(subscript_exp(var_exp(a,DL),
+                                                var_exp(x1,DL),DL),e2,DL),DL);
     // FIX:  casts needed on exp_opts
     list_t<$(qvar,typ,exp_opt)@> decls =
       &List(&$(max,uint_t,(exp_opt)e1),null);
@@ -1633,13 +1657,13 @@ static void exp_to_c(env nv, exp e) {
       let b = temp_var();
       let t = typ_to_c(old_typ);
       let binit = 
-	unresolvedmem_exp(null,
-			  &List{&$(null,var_exp(a,DL)),
-				&List{&$(null,var_exp(a,DL)),
-				      &List{&$(null,add_exp(var_exp(a,DL),
-							    var_exp(max,DL),
-							    DL)),
-					    null}}},DL);
+        unresolvedmem_exp(null,
+                          &List{&$(null,var_exp(a,DL)),
+                                &List{&$(null,var_exp(a,DL)),
+                                      &List{&$(null,add_exp(var_exp(a,DL),
+                                                            var_exp(max,DL),
+                                                            DL)),
+                                            null}}},DL);
       decls = &List(&$(b,t,(exp_opt)binit),decls);
       s = seq_stmt(s,exp_stmt(var_exp(b,DL),DL),DL);
     } else // not a tagged array -- just return a
@@ -2492,6 +2516,41 @@ static void structdecl_to_c(structdecl s) {
     }
 }
 
+// union declarations -- straightforward
+opt_t<Dict::dict_t<var,uniondecl_t>> unions_so_far = null;
+static void uniondecl_to_c(uniondecl_t u) {
+  let n = u->name->v;
+  if (unions_so_far == null) unions_so_far =
+                               &Opt(Dict::empty(String::zstrptrcmp));
+  bool seen_defn_before;
+  let dopt = Dict::lookup_opt(unions_so_far->v, (*n)[1]);
+  if (dopt == null) {
+    seen_defn_before = false;
+    unions_so_far->v = Dict::insert(unions_so_far->v,(*n)[1],u);
+  } else {
+    if (dopt->v->fields == null) {
+      unions_so_far->v = Dict::insert(unions_so_far->v,(*n)[1],u);
+      seen_defn_before = false;
+    } else
+      seen_defn_before = true;
+  }
+
+  u->sc =
+    // C does not like extern or static on union declarations -- this avoids
+    // a gcc warning
+    (u->sc == Extern || u->sc == Static || u->sc == ExternC) ? 
+    Public : scope_to_c(u->sc);
+  u->tvs  = null;
+  u->name = &Opt(n);
+  if (u->fields != null)
+    if (seen_defn_before)
+      u->fields = null;
+    else {
+      for (let fields = u->fields->v; fields != null; fields = fields->tl)
+        fields->hd->type = typ_to_c_array(fields->hd->type);
+    }
+}
+
 // enum declarations -- tricky
 // for "enum foo {Bar,Blah,Baz(t1,t2,t3),Baf(t4,t5)}" we generate
 //   typedef void *foo;
@@ -2778,7 +2837,10 @@ static $(env,list_t<decl>) decls_to_c(env nv, list_t<decl> ds, bool top) {
       structdecl_to_c(sd);
       res = &List(d,res);
       break;
-    case Union_d: toc_impos("uniondecl"); break;
+    case Union_d(ud):
+      uniondecl_to_c(ud);
+      res = &List(d,res);
+      break;
     case Enum_d(ed):
       res = enumdecl_to_c(ed,res);
       break;

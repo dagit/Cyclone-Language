@@ -138,5 +138,9 @@ extern tvar new_tvar(kind_t k);
 
 // are the lists of attributes the same?  doesn't require the same order
 extern bool same_atts(attributes_t, attributes_t);
+
+// returns true iff t contains only "bits" and no pointers or enums. 
+// This is used to restrict the members of unions to ensure safety.
+extern bool bits_only(typ t);
 }
 #endif

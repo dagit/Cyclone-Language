@@ -309,7 +309,7 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
     case Using_d(q,tds):     unimp_msg_part = "using";     break; //FIX: allow
     case Fn_d(_):            unimp_msg_part = "function";  break;
     case Struct_d(_):        unimp_msg_part = "struct";    break;
-    case Union_d:            unimp_msg_part = "union";     break;
+    case Union_d(_):         unimp_msg_part = "union";     break;
     case Enum_d(_):          unimp_msg_part = "enum";      break;
     case Xenum_d(_):         unimp_msg_part = "xenum";     break;
     case Typedef_d(_):       unimp_msg_part = "typedef";   break;

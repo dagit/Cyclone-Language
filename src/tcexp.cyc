@@ -782,6 +782,16 @@ static typ tcStructMember(tenv te, seg_t loc, typ *`r topt,
     let inst = List::zip(sd->tvs,ts);
     let t2   = substitute(inst,finfo->type);
     return t2;
+  case UnionType(tdnopt,ts,&ud):
+    if (tdnopt == null)
+      return expr_err(te,loc,"unresolved struct type (COMPILER ERROR)");
+    let finfo = lookup_union_field(ud,f);
+    if (finfo == null)
+      return expr_err(te,loc,xprintf("union %s has no %s field",
+				     qvar2string((qvar)tdnopt), *f));
+    let inst = List::zip(ud->tvs,ts);
+    let t2   = substitute(inst,finfo->type);
+    return t2;
   case ArrayType(_,_,_) && (String::zstrcmp(*f,"size") == 0):
     outer_e->r = Primop_e(Size,&List(e,null));
     return uint_t;
@@ -790,10 +800,11 @@ static typ tcStructMember(tenv te, seg_t loc, typ *`r topt,
     return uint_t;
   default:
     if (String::zstrcmp(*f,"size") == 0)
-      return expr_err(te,loc,xprintf("expecting struct or array, found %s",
+      return expr_err(te,loc,xprintf("expecting struct, union or array, "
+                                     "found %s",
 				     typ2string(t)));
     else
-       return expr_err(te,loc,xprintf("expecting struct, found %s",
+       return expr_err(te,loc,xprintf("expecting struct or union, found %s",
 				      typ2string(t)));
   }
 }
@@ -813,6 +824,15 @@ static typ tcStructArrow(tenv te, seg_t loc, typ *`r topt, exp e, field_name f)
 	return expr_err(te,loc,xprintf("struct %s has no %s field",
 				       qvar2string((qvar)tdnopt),*f));
       let inst = List::zip(sd->tvs,ts);
+      let t3   = substitute(inst,finfo->type);
+      check_rgn_accessible(te,loc,rt);
+      return t3;
+    case UnionType(tdnopt,ts,&ud):
+      let finfo = lookup_union_field(ud,f);
+      if (finfo == null)
+	return expr_err(te,loc,xprintf("union %s has no %s field",
+				       qvar2string((qvar)tdnopt),*f));
+      let inst = List::zip(ud->tvs,ts);
       let t3   = substitute(inst,finfo->type);
       check_rgn_accessible(te,loc,rt);
       return t3;
@@ -1264,6 +1284,9 @@ static bool cnst_exp(tenv te, bool var_okay, exp e) {
       if (!cnst_exp(te,false,es->hd))
         return false;
     return true;
+    // eventually -- should support comprehensions for initializers
+  //case Comprehension_e(vd,e1,e2):
+  //return (cnst_exp(te,false,e1) && cnst_exp(te,false,e2));
   default:
     return false;
   }

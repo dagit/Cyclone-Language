@@ -134,9 +134,11 @@ kind_t typ_kind(typ t) {
 
   case EnumType(_,_,_):      return BoxKind;
   case XenumType(_,_):       return BoxKind; 
-    // for structs without definitions, we must be conservative
+    // for structs or unions without definitions, we must be conservative
   case StructType(_,_,null): return AnyKind;
+  case UnionType(_,_,null) : return AnyKind;
   case StructType(_,_,_):    return MemKind;
+  case UnionType(_,_,_):     return MemKind;
 
   case PointerType(pinfo):
     switch (compress_conref(pinfo.bounds)->v) {
@@ -152,7 +154,6 @@ kind_t typ_kind(typ t) {
   case TupleType(tqts):  return MemKind;
   case TypedefType(_,_,topt): 
     return impos(xprintf("typ_kind: typedef found: %s", typ2string(t)));
-  case UnionType:        return impos("union type");
   case AccessEff(_):     return EffKind;
   case JoinEff(_):       return EffKind;
   }
@@ -195,6 +196,7 @@ static void occurs(typ evar, typ t) {
   case RgnHandleType(rt): occurs(evar,rt); break;
   case TypedefType(_,ts,topt): fallthru(ts);
   case EnumType(_,ts,_):       fallthru(ts);
+  case UnionType(_,ts,_):      fallthru(ts);
   case StructType(_,ts,_):     occurslist(evar,ts); break;
   case AccessEff(t0): occurs(evar,t0); break;
   case JoinEff(ts): occurslist(evar,ts); break;
@@ -581,6 +583,15 @@ void unify_it(typ t1, typ t2) {
     if ((nopt1 != null && nopt2 != null
 	 && qvar_cmp((qvar)nopt1,(qvar)nopt2) == 0) 
 	|| (nopt1 == null && nopt2 == null)) {
+      unify_list(ts1,ts2);
+      return;
+    }
+    break;
+
+  case $(UnionType(nopt2,ts2,udp2), UnionType(nopt1,ts1,udp1)):
+    if ((nopt1 != null && nopt2 != null
+         && qvar_cmp((qvar)nopt1,(qvar)nopt2) == 0)
+        || nopt1 == null && nopt2 == null) {
       unify_list(ts1,ts2);
       return;
     }
@@ -1015,6 +1026,20 @@ bool castable(tenv te, seg_t loc, typ t1, typ t2) {
   t2 = compress(t2);
   if(unify(t1,t2))
     return true;
+  // we can cast t1 to a union type if t1 matches one of the fields
+  // in the union -- note that I'm only allowing equal types here.
+  switch (t2) {
+  case UnionType(_,ts,udp):
+    if (udp == null) break;
+    let ud = *udp;
+    if (ud->fields == null) break;
+    let inst = List::zip(ud->tvs,ts);
+    for (_ fs = ud->fields->v; fs != null; fs = fs->tl) {
+      if (unify(t1,substitute(inst,fs->hd->type))) return true;
+    }
+    break;
+  default: break;
+  }
   switch (t1) {
   case EnumType(name_opt,ts,ed):
     // can cast an enum to an int -- extracts the tag
@@ -1333,6 +1358,9 @@ typ substitute(list_t<$(tvar,typ)@> inst, typ t) {
   case StructType(no,ts,sd):   
     let new_ts = substs(inst,ts);
     return new_ts == ts ? t : StructType(no,new_ts,sd);
+  case UnionType(no,ts,ud):
+    let new_ts = substs(inst, ts);
+    return new_ts == ts ? t : UnionType(no,new_ts,ud);
   case EnumType(no,ts,ed):     
     let new_ts = substs(inst,ts);
     return new_ts == ts ? t : EnumType(no,new_ts,ed);
@@ -1385,7 +1413,6 @@ typ substitute(list_t<$(tvar,typ)@> inst, typ t) {
   case FloatType:       return t;
   case DoubleType:      return t;
   case HeapRgn:         return t;
-  case UnionType:       return t;
   case AccessEff(r): 
     let new_r = substitute(inst,r);
     return new_r == r ? t : AccessEff(new_r);
@@ -1664,6 +1691,35 @@ list_t<tvar> check_valid_type(seg_t loc, tenv te, list_t<tvar> free_vars,
       free_vars = check_valid_type(loc,te,free_vars,k1,t1);
     }
     break;
+  case UnionType(tdnopt,targs,*udp):
+    if (tdnopt == null) {
+      terr(loc,"missing union name");
+      return free_vars;
+    }
+    if(*udp == null) {
+      try *udp = lookup_uniondecl(te,loc,(qvar)tdnopt);
+      catch { case Dict::Absent:
+	terr(loc,xprintf("unbound type union %s",qvar2string((qvar)tdnopt)));
+        return free_vars;
+      }
+    }
+    uniondecl_t ud = **udp;
+    // Make relative name absolute (or replace absolute name with itself)
+    if (ud->name != null) // sanity check
+      *tdnopt = ud->name->v[0];
+    list_t<tvar> tvs = ud->tvs;
+    int lvs   = List::length(tvs);
+    int largs = List::length(targs);
+    if (lvs != largs) 
+      terr(loc,xprintf("union %s expects %d type arguments but was given %d",
+		       qvar2string((qvar)tdnopt),lvs,largs));
+    // check that each of the type arguments is well-formed
+    for (; targs != null; targs = targs->tl, tvs = tvs->tl) {
+      typ t1 = targs->hd;
+      kind_t k1 = conref_val(tvs->hd->kind);
+      free_vars = check_valid_type(loc,te,free_vars,k1,t1);
+    }
+    break;
   case TypedefType(tdn,targs,*toptp):
     // NB: since we called compress *toptp == null
     typedefdecl td;
@@ -1689,9 +1745,6 @@ list_t<tvar> check_valid_type(seg_t loc, tenv te, list_t<tvar> free_vars,
     }
     typ new_typ = substitute(inst,td->defn);
     *toptp = &Opt(new_typ);
-    break;
-  case UnionType:
-    terr(loc,"union type unsupported");
     break;
   case HeapRgn:
     break;
@@ -1939,6 +1992,11 @@ $(bool,typ) addressof_props(tenv te, exp e) {
       let finfo = lookup_struct_field(sd,f);
       if(finfo != null)
 	return $(finfo->tq->q_const, addressof_props(te,e1)[1]);
+      return bogus_ans;
+    case UnionType(_,_,&ud):
+      let finfo = lookup_union_field(ud,f);
+      if (finfo != null)
+        return $(finfo->tq->q_const, addressof_props(te,e1)[1]);
       fallthru;
     default: return bogus_ans;
     }
@@ -1951,7 +2009,12 @@ $(bool,typ) addressof_props(tenv te, exp e) {
 	let finfo = lookup_struct_field(sd,f);
 	if(finfo != null)
 	  return $(finfo->tq->q_const, r);
-	fallthru;
+	return bogus_ans;
+      case UnionType(_,_,&ud):
+	let finfo = lookup_union_field(ud,f);
+	if(finfo != null)
+	  return $(finfo->tq->q_const, r);
+	return bogus_ans;
       default: return bogus_ans;
       }
     default: return bogus_ans;
@@ -2032,5 +2095,46 @@ void check_bound(seg_t loc, unsigned int i, conref<bounds_t> b) {
 
 void check_nonzero_bound(seg_t loc, conref<bounds_t> b) {
   check_bound(loc, 0, b);
+}
+
+bool bits_only(typ t) {
+  switch (compress(t)) {
+  case VoidType: return true;
+  case EnumType(_,ts,edp):
+    // we allow enums that don't carry values
+    if (edp == null) return false;
+    let ed = *edp;
+    if (ed->fields == null) return false;
+    for (_ fs = ed->fields->v; fs != null; fs = fs->tl) {
+      _ f = fs->hd;
+      if (f->tvs != null || f->typs != null) return false;
+    }
+    return true;
+  case IntType(_,_): return true;
+  case FloatType: return true;
+  case DoubleType: return true;
+  case ArrayType(t,_,_): return bits_only(t);
+  case TupleType(tqs):
+    for (; tqs != null; tqs = tqs->tl) 
+      if (!bits_only((*tqs->hd)[1])) return false;
+    return true;
+  case StructType(_,ts,sdp):
+    if (sdp == null) return false;
+    let sd = *sdp;
+    if (sd->fields == null) return false;
+    let inst = List::zip(sd->tvs,ts);
+    for (_ fs = sd->fields->v; fs != null; fs = fs->tl)
+      if (!bits_only(substitute(inst,fs->hd->type))) return false;
+    return true;
+  case UnionType(_,ts,udp):
+    if (udp == null) return false;
+    let ud = *udp;
+    if (ud->fields == null) return false;
+    let inst = List::zip(ud->tvs,ts);
+    for (_ fs = ud->fields->v; fs != null; fs = fs->tl)
+      if (!bits_only(substitute(inst,fs->hd->type))) return false;
+    return true;
+  default: return false;
+  }
 }
 

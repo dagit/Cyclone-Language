@@ -422,6 +422,14 @@ doc_t ntyp2doc(typ t) {
                (n==null) ? nil_doc() : qvar2doc((qvar)n),
                tps2doc(ts));
     break;
+  case UnionType(n,ts,_):
+    if (n == null)
+      s = cat2(text("union "),tps2doc(ts));
+    else
+      s = cat3(text("union "),
+               (n==null) ? nil_doc() : qvar2doc((qvar)n),
+               tps2doc(ts));
+    break;
   case TypedefType(n,ts,topt):
     // NB: we could print out the expanded typedef by following the topt
     // pointer (when non-null).
@@ -432,9 +440,6 @@ doc_t ntyp2doc(typ t) {
     break;
   case RgnHandleType(t):
     s = rgn2doc(t);
-    break;
-  case UnionType:
-    s = text("union {unimplemented}");
     break;
   case HeapRgn:
     s = rgn2doc(t); 
@@ -1278,6 +1283,27 @@ doc_t decl2doc(decl d) {
                 text(";"));
     }
     break;
+  case Union_d(ud):
+    if (ud->fields==null)
+      s = cat5(scope2doc(ud->sc),
+               text("union "),
+               (ud->name==null)?text(""):qvar2doc(ud->name->v),
+               tvars2doc(ud->tvs),
+               text(";"));
+    else {
+      s = cat10(scope2doc(ud->sc),
+                text("union "),
+                (ud->name==null)?text(""):qvar2doc(ud->name->v),
+                tvars2doc(ud->tvs),
+                text(" {"),
+                nest(2,(ud->fields==null)?text(""):
+                     cat2(line_doc(),structfields2doc(ud->fields->v))),
+                line_doc(),
+                text("}"),
+                atts2doc(ud->attributes),
+                text(";"));
+    }
+    break;
   case Var_d(&Vardecl(sc,name,tq,type,initializer,shadow_depth,_,atts)):
     doc_t sn = qvar2doc(name);
     if(shadow_depth > 0)
@@ -1289,9 +1315,6 @@ doc_t decl2doc(decl d) {
 	       ? text("")
 	       : cat2(text(" = "),exp2doc((exp)initializer)),
              text(";"));
-    break;
-  case Union_d:
-    s = text("**UnionDecl**");
     break;
   case Enum_d(ed):
     if (ed->fields==null)

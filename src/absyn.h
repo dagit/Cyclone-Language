@@ -86,6 +86,7 @@ namespace Absyn {
   extern struct Switch_clause;
   extern struct Fndecl;
   extern struct Structdecl;
+  extern struct Uniondecl;
   extern struct Enumfield;
   extern struct Enumdecl;
   extern struct Xenumdecl;
@@ -126,6 +127,7 @@ namespace Absyn {
   typedef struct Switch_clause @switch_clause;
   typedef struct Fndecl @fndecl;
   typedef struct Structdecl @structdecl;
+  typedef struct Uniondecl @uniondecl_t;
   typedef struct Enumfield @enumfield;
   typedef struct Enumdecl @enumdecl;
   typedef struct Xenumdecl @xenumdecl;
@@ -222,7 +224,7 @@ namespace Absyn {
     FnType(fn_info_t);                                     // MemKind
     TupleType(list_t<$(tqual,typ)@>); // MemKind
     StructType(typedef_name_opt_t,list_t<typ>,structdecl *); // MemKind
-    UnionType;            // MemKind -- currently unsupported
+    UnionType(typedef_name_opt_t,list_t<typ>,uniondecl_t *);  // MemKind 
     RgnHandleType(typ);   // BoxKind -- mem?  
     // An abbreviation -- the opt_t<typ> contains the definition if any
     TypedefType(typedef_name_t,list_t<typ>,opt_t<typ>);
@@ -324,8 +326,8 @@ namespace Absyn {
     Sizeoftyp_e(typ);
     Sizeofexp_e(exp);
     Deref_e(exp);
-    StructMember_e(exp,field_name);
-    StructArrow_e(exp,field_name);
+    StructMember_e(exp,field_name); // also union member
+    StructArrow_e(exp,field_name);  // also union arrow
     Subscript_e(exp,exp);
     Tuple_e(list_t<exp>);
     CompoundLit_e($(opt_t<var>,tqual,typ)@,list_t<$(list_t<designator>,exp)@>);
@@ -476,6 +478,14 @@ namespace Absyn {
     attributes_t                 attributes;
   };
 
+  EXTERN_DEFINITION struct Uniondecl {
+    scope                        sc;
+    opt_t<typedef_name_t>        name;
+    list_t<tvar>                 tvs;
+    opt_t<list_t<structfield_t>> fields;
+    attributes_t                 attributes;
+  };
+
   EXTERN_DEFINITION struct Enumfield {
     qvar                  name;
     exp_opt               tag;
@@ -512,7 +522,7 @@ namespace Absyn {
           exp,
           bool); // true => exhaustive
     Struct_d(structdecl);
-    Union_d;
+    Union_d(uniondecl_t);
     Enum_d(enumdecl);
     Xenum_d(xenumdecl);
     Typedef_d(typedefdecl);
@@ -576,7 +586,9 @@ namespace Absyn {
   extern typ void_star_typ();
   // structs
   extern typ strct(var  name);
+  extern typ union_typ(var name);
   extern typ strctq(qvar name);
+  extern typ unionq_typ(qvar name);
 
   /////////////////////////////// Expressions ////////////////////////
   extern exp new_exp(raw_exp_t, seg_t);
@@ -673,6 +685,9 @@ namespace Absyn {
   extern decl struct_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
 			  opt_t<list_t<structfield_t>> fs, attributes_t atts,
 			  seg_t loc);
+  extern decl union_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
+			  opt_t<list_t<structfield_t>> fs, attributes_t atts,
+			  seg_t loc);
   extern decl enum_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
 			opt_t<list_t<enumfield>> fs,seg_t loc);
   extern decl xenum_decl(scope s,typedef_name_t n,list_t<enumfield> fs,
@@ -688,7 +703,9 @@ namespace Absyn {
   // extern typ pointer_abbrev(typ);
   extern bool is_lvalue(exp);
 
+  extern struct Structfield * lookup_field(opt_t<list_t<structfield_t>>,var);
   extern struct Structfield * lookup_struct_field(structdecl,var);
+  extern struct Structfield * lookup_union_field(uniondecl_t,var);
   extern $(tqual,typ) * lookup_tuple_field(list_t<$(tqual,typ)@>,int);
   extern string attribute2string(attribute_t);
 }

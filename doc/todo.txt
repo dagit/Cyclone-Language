@@ -51,6 +51,8 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
   (e.g., -tc -toc -up should be default.)  Also, should support
   passing flags through to GCC and the pre-processor.
 
+* wide characters and strings
+
 THINGS NEEDED TO SIMPLIFY PORTING:
 ----------------------------------
 * need to add support for explicit malloc and initialization.
