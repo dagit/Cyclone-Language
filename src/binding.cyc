@@ -430,11 +430,6 @@ static bool resolve_visit_f1(env_t env, exp_t e) {
     resolve_type(e->loc,env,t);
     return true;
 
-  case &Asm_e(v,t,o,i,c): 
-    resolve_asm_iolist(env, o);
-    resolve_asm_iolist(env, i);
-    return false;
-
   default: return true;
   }
 }
@@ -463,10 +458,6 @@ void resolve_stmt(env_t env, stmt_t s) {
 void resolve_exp(env_t env, exp_t e) { 
   visit_exp(resolve_visit_f1,resolve_visit_f2,env,e); 
 }
-void resolve_asm_iolist(env_t env, list_t<$(string_t, exp_t)@> l) {
-  for(; l != NULL; l = l->tl) 
-    resolve_exp(env, (*l->hd)[1]);
-}
 
 void resolve_scs(env_t env, list_t<switch_clause_t> scs) {
   let old_locals = *env->local_vars;
@@ -474,7 +465,7 @@ void resolve_scs(env_t env, list_t<switch_clause_t> scs) {
     let &Switch_clause(pattern,_,where_clause,body,_) = scs->hd;
     resolve_pat(env,pattern);
     if(where_clause != NULL)
-      resolve_exp(env,(exp_t)where_clause);
+      resolve_exp(env,where_clause);
     resolve_stmt(env,body);
     *env->local_vars = old_locals;
   }

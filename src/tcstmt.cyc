@@ -204,8 +204,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 		   "but pattern variable has type ",ts->hd);
         Unify::explain_failure();
       }
-      // JGM: no test case
-      check_consume(es->hd->loc,ts->hd,es->hd);
+      check_consume(es->hd->loc,ts->hd,es->hd); // JGM: no test case
     }
     if (es != NULL)
       Warn::err2(s0->loc, "too many arguments in explicit fallthru");
@@ -484,7 +483,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       Tctyp::check_type(s0->loc,te,lookup_type_vars(te2),&Kinds::bk,true,false,*t);
       if (!Unify::unify(*t,rgn_handle_type(rgn_typ)))
 	Warn::impos("region stmt: type of region handle is wrong!");
-      //        tcStmt(add_local_var(decl_rgn,s->loc,te2,vd),s,false);
       tcStmt(te2,s,false);
       return;
 
@@ -538,50 +536,36 @@ static bool check_catchall_handler(stmt_t b){
   switch(b->r) {
   case &TryCatch_s(_, case_list, _):
     bool found_wild = false;
-    while(case_list) {
+    for(; case_list; case_list=case_list->tl) {
       let clause = case_list->hd;
       switch(clause->pattern->r) {
-      case &Wild_p:
-	found_wild = true;
- 	break;
-     default:
-	break;
+      case &Wild_p: found_wild = true; break;
+      default: break;
       }
       if(!ensure_no_throw_stmt(clause->body))
 	return false;
-      case_list = case_list->tl;
     }
     return found_wild;
-  default:
-    return false;
+  default: return false;
   }
 }
-
 static bool ensure_no_throw_exp(exp_t e) {
   switch(e->r) {
-  case &Const_e(_):
-    return true;
+  case &Const_e(_): return true;
 
-  case &Primop_e(_, es):
-    return List::forall(ensure_no_throw_exp, es);
-  case &And_e(e1, e2): fallthru (e1, e2);
-  case &Or_e(e1, e2): fallthru (e1, e2);
+  case &Primop_e(_, es): return List::forall(ensure_no_throw_exp, es);
+  case &And_e(e1, e2):  fallthru (e1, e2);
+  case &Or_e(e1, e2):   fallthru (e1, e2);
   case &Swap_e(e1, e2): fallthru (e1, e2);
-  case &SeqExp_e(e1, e2):
-    return ensure_no_throw_exp(e1) && ensure_no_throw_exp(e2);
+  case &SeqExp_e(e1, e2): return ensure_no_throw_exp(e1) && ensure_no_throw_exp(e2);
   case &FnCall_e(fname, args, vargs, res):
     if(!res) //should be impossible at this point
       return false;
     bool fname_ok = false;
     switch(fname->r) { 
-    case &Instantiate_e(e1, ts):
-      fname_ok = ensure_no_throw_exp(e1);
-      break;
-    case &Var_e(b):
-      fname_ok = ensure_no_throw_exp(fname);
-      break;
-    default: //fname must be a Var_e or Inst_e
-      break;
+    case &Instantiate_e(e1, ts): fname_ok = ensure_no_throw_exp(e1);    break;
+    case &Var_e(b):              fname_ok = ensure_no_throw_exp(fname); break;
+    default: break; //fname must be a Var_e or Inst_e
     }
     return fname_ok && List::forall(ensure_no_throw_exp, args);
   case &Var_e(b):
@@ -611,24 +595,18 @@ static bool ensure_no_throw_exp(exp_t e) {
     case &Local_b(_): return true;
     default: return false;  //only funname supported
     }
-  case &Address_e(e1):
-    return ensure_no_throw_exp(e1);
+  case &Address_e(e1): return ensure_no_throw_exp(e1);
   case &Aggregate_e(_, _, exps, _):
-    return List::forall(ensure_no_throw_exp,
-			List::map(snd,
-				  exps));
+    return List::forall(ensure_no_throw_exp, List::map(snd, exps));
   case &Cast_e(ct,e1,b,c): //no user cast
     return !b && ensure_no_throw_exp(e1);
   case &Deref_e(e1): fallthru(e1);
   case &AggrArrow_e(e1, ...):
     switch(e1->topt) {
-    case &PointerType(*pi):
-      return !pi->ptr_atts.nullable;
-    default:
-      return false; //impos
+    case &PointerType(*pi): return !pi->ptr_atts.nullable;
+    default: return false; //impos
     }
-  default: //exp may throw
-    return false;
+  default: return false; //exp may throw
   }
 }
 

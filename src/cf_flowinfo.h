@@ -39,7 +39,7 @@
 namespace CfFlowInfo {
 
 bool anal_error;
-void aerr(Position::seg_t loc, string_t fmt, ... inject parg_t ap)
+void aerr(Position::seg_t, string_t, ... inject parg_t)
   __attribute__((format(printf,2,3)));
 
 // Do not ever mutate any data structures built from these -- they share a lot!
@@ -163,26 +163,26 @@ extern int root_cmp(root_t, root_t);
 extern int place_cmp(place_t, place_t);
 
 extern aggrdict_t aggrfields_to_aggrdict(flow_env_t, List::list_t<struct Absyn::Aggrfield@>, bool no_init_bits_only, absRval_t);
-extern absRval_t typ_to_absrval(flow_env_t, Absyn::type_t t, bool no_init_bits_only, absRval_t leafval);
-extern absRval_t make_unique_consumed(flow_env_t fenv, Absyn::type_t t, Absyn::exp_t consumer, int iteration, absRval_t, bool);
-extern bool is_unique_consumed(Absyn::exp_t e, int env_iteration, absRval_t r, bool @needs_unconsume);
-extern absRval_t make_unique_unconsumed(flow_env_t fenv, absRval_t r);
-extern $(absRval_t,List::list_t<Absyn::vardecl_t>) unname_rval(absRval_t rv);
+extern absRval_t typ_to_absrval(flow_env_t, Absyn::type_t, bool no_init_bits_only, absRval_t leafval);
+extern absRval_t make_unique_consumed(flow_env_t, Absyn::type_t, Absyn::exp_t consumer, int iteration, absRval_t, bool);
+extern bool is_unique_consumed(Absyn::exp_t, int env_iteration, absRval_t, bool @needs_unconsume);
+extern absRval_t make_unique_unconsumed(flow_env_t, absRval_t);
+extern $(absRval_t,List::list_t<Absyn::vardecl_t>) unname_rval(absRval_t);
 
-extern initlevel_t initlevel(flow_env_t,flowdict_t d, absRval_t r);
-extern absRval_t lookup_place(flowdict_t d, place_t place);
-extern bool is_unescaped(flowdict_t d, place_t place);
-extern bool is_init_pointer(absRval_t r);
-extern bool flow_lessthan_approx(flow_t f1, flow_t f2);
+extern initlevel_t initlevel(flow_env_t,flowdict_t, absRval_t);
+extern absRval_t lookup_place(flowdict_t, place_t);
+extern bool is_unescaped(flowdict_t, place_t);
+extern bool is_init_pointer(absRval_t);
+extern bool flow_lessthan_approx(flow_t, flow_t);
 
-extern void print_absrval(absRval_t rval);
-extern void print_initlevel(initlevel_t il);
-extern void print_root(root_t root);
-extern void print_path(path_t p);
-extern void print_place(place_t p);
-extern void print_list(List::list_t<`a> p, void (@pr)(`a));
-extern void print_flowdict(flowdict_t d);
-extern void print_flow(flow_t f);
+extern void print_absrval(absRval_t);
+extern void print_initlevel(initlevel_t);
+extern void print_root(root_t);
+extern void print_path(path_t);
+extern void print_place(place_t);
+extern void print_list(List::list_t<`a>, void (@)(`a));
+extern void print_flowdict(flowdict_t);
+extern void print_flow(flow_t);
 
 // debugging
 //#define DEBUG_FLOW
@@ -198,17 +198,14 @@ extern bool debug_msgs;
 
 // all of the following throw EscNotInit as appropriate
 // the field list in the thrown place_t might be empty even if it shouldn't be
-extern flowdict_t escape_deref(flow_env_t fenv, flowdict_t d, absRval_t r);
-extern flowdict_t assign_place(flow_env_t fenv,
-			       Position::seg_t loc, flowdict_t d,
-			       place_t place,
-			       absRval_t r);
+extern flowdict_t escape_deref(flow_env_t, flowdict_t, absRval_t);
+extern flowdict_t assign_place(flow_env_t, Position::seg_t, flowdict_t,
+			       place_t, absRval_t);
 extern flow_t join_tryflow(flow_env_t,flow_t,flow_t); 
 extern flow_t join_flow(flow_env_t,flow_t,flow_t); 
 extern $(flow_t,absRval_t) join_flow_and_rval(flow_env_t,
-					      $(flow_t,absRval_t) pr1,
-					      $(flow_t,absRval_t) pr2);
-                             
-extern string_t place_err_string(place_t place);
+					      $(flow_t,absRval_t),
+					      $(flow_t,absRval_t));
+extern string_t place_err_string(place_t);
 }
 #endif

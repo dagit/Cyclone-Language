@@ -156,11 +156,9 @@ int place_cmp(place_t p1, place_t p2) {
 //    instantiated types or not allow partial initialization of such fields.)
 // Note: We could memoize answers here.
 
-// forward declaration
-static absRval_t i_typ_to_absrval(flow_env_t fenv,
-				  bool allow_zeroterm,
-				  bool no_init_bits_only,
-				  type_t t, absRval_t leafval);
+static absRval_t i_typ_to_absrval(flow_env_t,
+				  bool allow_zeroterm, bool no_init_bits_only,
+				  type_t, absRval_t leafval);
 
 aggrdict_t aggrfields_to_aggrdict(flow_env_t fenv,
 				  list_t<struct Aggrfield@> fs,
@@ -226,10 +224,8 @@ static aggrdict_t substitute_aggrfields_to_aggrdict(flow_env_t fenv,
 }
 
 static absRval_t i_typ_to_absrval(flow_env_t fenv,
-				  bool allow_zeroterm,
-				  bool no_init_bits_only,
+				  bool allow_zeroterm, bool no_init_bits_only,
 				  type_t t, absRval_t leafval) {
-
   // we treat bits-only unions as always initialized
   if (is_nontagged_nonrequire_union_type(t)) return fenv->unknown_all;
 
@@ -301,10 +297,9 @@ bool is_unique_consumed(exp_t e, int env_iteration, absRval_t r, bool @needs_unc
   case &Aggregate(UnionRInfo(is_union,field_no),d):
     if (!is_union || field_no == -1) {
       let sz = numelts(d);
-      for (int i=0; i<sz; i++) {
+      for (int i=0; i<sz; i++)
 	if (is_unique_consumed(e,env_iteration,d[i],needs_unconsume))
 	  return true;
-      }
       return false;
     }
     else
@@ -337,7 +332,7 @@ absRval_t make_unique_unconsumed(flow_env_t fenv, absRval_t r) {
     let r3 = make_unique_unconsumed(fenv,r2);
     if (r3 != r2)
       return new NamedLocation(n,r3);
-    else return r;
+    return r;
   default: return r;
   }
 }
@@ -348,8 +343,9 @@ absRval_t make_unique_consumed(flow_env_t fenv, type_t t, exp_t consumer, int it
   switch $(compress(t),r) {
   case $(_,&NamedLocation(s,r2)):
     let r3 = make_unique_consumed(fenv,t,consumer,iteration,r2,local_alias);
-    if (r3 != r2) return new NamedLocation(s,r3);
-    else return r;
+    if (r3 != r2) 
+      return new NamedLocation(s,r3);
+    return r;
   case $(&TupleType(tqts),&Aggregate(b,d)):
     let sz = numelts(d);
     aggrdict_t d2 = new { for i < sz : fenv->unknown_all };
@@ -412,9 +408,9 @@ static void add_place(escpile_t pile, place_t place) {
 }
 static void add_places(escpile_t pile, absRval_t r) {
   switch(r) {
-  case &Consumed(_,_,r,_): add_places(pile,r); return;
+  case &Consumed(_,_,r,_):  fallthru(r);
   case &NamedLocation(_,r): add_places(pile,r); return;
-  case &AddressOf(p): add_place(pile, p); return;
+  case &AddressOf(p):       add_place(pile, p); return;
   case &Aggregate(b,d):
     for (int i = 0; i < numelts(d); i++)
       add_places(pile, d[i]);
@@ -466,15 +462,15 @@ static absRval_t insert_place_outer(path_t path,
     let new_child = insert_place_outer(tl,d[i],new_val);
     let new_d = aggr_dict_insert(d, i,new_child);
     if (new_d == d) return old_val;
-    else return new Aggregate(UnionRInfo(is_union,-1),new_d);
+    return new Aggregate(UnionRInfo(is_union,-1),new_d);
   case $(&List(&Star,tl),&UniquePtr(rval)):
     let new_rval = insert_place_outer(tl,rval,new_val);
     if (new_rval == rval) return old_val;
-    else return new UniquePtr(new_rval);
+    return new UniquePtr(new_rval);
   case $(_,&NamedLocation(n,rval)):
     let new_rval = insert_place_outer(path,rval,new_val);
     if (new_rval == rval) return old_val;
-    else return new NamedLocation(n,new_rval);
+    return new NamedLocation(n,new_rval);
   default: Warn::impos("bad insert place");
   }
 }
@@ -533,14 +529,12 @@ static initlevel_t initlevel_rec(struct InitlevelEnv @ env,
     let sz = numelts(d);
     this_ans = NoneIL;
     if (f == -1) {
-      for (int i = 0; i < sz; i++) {
+      for (int i = 0; i < sz; i++)
 	if (initlevel_rec(env,d[i],AllIL) == AllIL) {
 	  this_ans = AllIL;
 	  break;
 	}
-      }
-    }
-    else if (initlevel_rec(env,d[f],AllIL) == AllIL)
+    } else if (initlevel_rec(env,d[f],AllIL) == AllIL)
       this_ans = AllIL;
     break;
   case &Aggregate(_,d): // struct case -- they all have to be init'd
@@ -578,12 +572,8 @@ absRval_t lookup_place(flowdict_t d, place_t place) {
     // FIX: any case when I don't want to go under the Consumed ?
     case $(&Consumed(_,_,rval,_), _):
       ans = rval; goto retry;
-    case $(&Aggregate(is_union,d2), &Dot(fname)):
-      ans = d2[fname];
-      break;
-    case $(&UniquePtr(rval),&Star):
-      ans = rval;
-      break;
+    case $(&Aggregate(is_union,d2), &Dot(fname)): ans = d2[fname]; break;
+    case $(&UniquePtr(rval),&Star): ans = rval; break;
     default:
       DEBUG_PRINT("found bad lookup place ");
       DEBUG_PRINT_F(print_absrval,ans);
@@ -785,21 +775,15 @@ static bool absRval_lessthan_approx(`a ignore, absRval_t r1, absRval_t r2);
 
 static bool contains_local_consumed(absRval_t r) {
   switch(r) {
-  case &Consumed(_,_,_,l):
-    return l;
-  case &UniquePtr(r1):
-    return contains_local_consumed(r1);
-  case &NamedLocation(_, ac):
-    return contains_local_consumed(ac);
-  case &Aggregate(...):
-    return false;
-  default:
-    return false;
+  case &Consumed(_,_,_,l):    return l;
+  case &UniquePtr(r1):        return contains_local_consumed(r1);
+  case &NamedLocation(_, ac): return contains_local_consumed(ac);
+  case &Aggregate(...):       return false;
+  default:                    return false;
   }
 }
 
-
-static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2);//forward decl
+static absRval_t join_absRval(joinenv_t,`a,absRval_t,absRval_t); // forward decl
 
 //The case aggregate values is the only special one since we need to examine
 //the fields of the aggregate and join them individually.
@@ -810,8 +794,7 @@ static absRval_t join_absRval_tryflow(joinenv_t env,`a a,absRval_t r1,absRval_t 
   switch($(contains_local_consumed(r1),contains_local_consumed(r2))) {
   case $(true, false): return r2;
   case $(false, true): return r1;
-  default:
-    return join_absRval(env, a, r1, r2);
+  default:             return join_absRval(env, a, r1, r2);
   }
 }
 
@@ -829,8 +812,7 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
   case $(&NamedLocation(n1,r1),&NamedLocation(n2,r2)):
     if (n1 == n2) // names flow from an original spot, so physical eq ok
       return new NamedLocation(n1,join_absRval(env,a,r1,r2));
-    else
-      return join_absRval(env,a,r1,r2);
+    return join_absRval(env,a,r1,r2);
   case $(&NamedLocation(n1,r1),_): return join_absRval(env,a,r1,r2);
   case $(_,&NamedLocation(n2,r2)): return join_absRval(env,a,r1,r2);
 
@@ -861,13 +843,13 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
     add_place(env->pile,p);
     switch (initlevel(env->fenv,env->d1,r1)) {
     case AllIL: return env->fenv->notzeroall;
-    default: return env->fenv->unknown_none;
+    default:    return env->fenv->unknown_none;
     }
   case $(&NotZeroAll, &AddressOf(p)):
     add_place(env->pile,p);
     switch (initlevel(env->fenv,env->d2,r2)) {
     case AllIL: return env->fenv->notzeroall;
-    default: return env->fenv->unknown_none;
+    default:    return env->fenv->unknown_none;
     }
 
   case $(&UniquePtr(r1), &UniquePtr(r2)):
@@ -876,12 +858,12 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
   case $(&UniquePtr(r1), &NotZeroAll):
     switch (initlevel(env->fenv,env->d1,r1)) {
     case AllIL: return env->fenv->notzeroall;
-    default: return env->fenv->unknown_none;
+    default:    return env->fenv->unknown_none;
     }
   case $(&NotZeroAll, &UniquePtr(r2)):
     switch (initlevel(env->fenv,env->d2,r2)) {
     case AllIL: return env->fenv->notzeroall;
-    default: return env->fenv->unknown_none;
+    default:    return env->fenv->unknown_none;
     }
 
   case $(&AddressOf(p), _): add_place(env->pile,p); break;
@@ -924,13 +906,15 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
   case $(&Esc(_),_):
   case $(_,&Esc(_)):
     switch($(il1,il2)) {
-    case $(_,NoneIL): case $(NoneIL,_): return env->fenv->esc_none;
-    default: return env->fenv->esc_all;
+    case $(_,NoneIL): 
+    case $(NoneIL,_): return env->fenv->esc_none;
+    default:          return env->fenv->esc_all;
     }
   default:
     switch($(il1,il2)) {
-    case $(_,NoneIL): case $(NoneIL,_): return env->fenv->unknown_none;
-    default: return env->fenv->unknown_all;
+    case $(_,NoneIL): 
+    case $(NoneIL,_): return env->fenv->unknown_none;
+    default:          return env->fenv->unknown_all;
     }
   }
 }
@@ -965,7 +949,7 @@ flow_t join_flow(flow_env_t fenv, flow_t f1, flow_t f2){
   case $({.ReachableFL = $(d1,r1)}, {.ReachableFL = $(d2,r2)}):
     // A lot of computation to avoid allocation, but profiling suggests
     // that's the right thing to do.
-    if(d1.t == d2.t && r1 == r2) return f1;
+    if(d1.t == d2.t && r1 == r2)    return f1;
     if(flow_lessthan_approx(f1,f2)) return f2;
     if(flow_lessthan_approx(f2,f1)) return f1;
     let env     = JoinEnv(fenv, new EscPile(NULL),d1,d2,false);
@@ -1059,22 +1043,17 @@ bool flow_lessthan_approx(flow_t f1, flow_t f2) {
 
 $(absRval_t,list_t<vardecl_t>) unname_rval(absRval_t rv) {
   list_t names = NULL;
-  bool done = false;
-  while (!done) {
+  while (true)
     switch (rv) {
-    case &NamedLocation(vd,rv2):
-      names = new List(vd,names); rv = rv2; break;
-    default:
-      done = true; break;
+    case &NamedLocation(vd,rv2): names = new List(vd,names); rv = rv2; break;
+    default: return $(rv,names);
     }
-  }
-  return $(rv,names);
 }
 
 void print_initlevel(initlevel_t il) {
   switch (il) {
   case NoneIL: fprintf(stderr,"uninitialized");   break;
-  default:  fprintf(stderr,"all-initialized"); break;
+  default:     fprintf(stderr,"all-initialized"); break;
   }
 }
 
@@ -1091,7 +1070,7 @@ void print_root(root_t root) {
 }
 
 void print_path(path_t p) {
-  for (path_t x = p; x != NULL; x=x->tl) {
+  for (path_t x = p; x != NULL; x=x->tl)
     switch (x->hd) {
     case &Dot(i):
       fprintf(stderr,".%d",i);
@@ -1108,7 +1087,6 @@ void print_path(path_t p) {
       }
       fprintf(stderr,"*");
     }
-  }
   fprintf(stderr," ");
 }
 

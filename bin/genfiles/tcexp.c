@@ -476,7 +476,7 @@ void*Cyc_Warn_impos2(struct _fat_ptr);
 void*Cyc_Warn_impos_loc2(unsigned,struct _fat_ptr);
 # 43 "flags.h"
 extern int Cyc_Flags_tc_aggressive_warn;
-# 63 "absynpp.h"
+# 62 "absynpp.h"
 struct _fat_ptr Cyc_Absynpp_typ2string(void*);
 # 27 "unify.h"
 void Cyc_Unify_explain_failure (void);

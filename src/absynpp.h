@@ -27,7 +27,6 @@ namespace Absynpp {
 using Absyn;
 using List;
 using PP;
-string_t get_type_kind(type_t t);
 
 extern struct Params {
   bool expand_typedefs;

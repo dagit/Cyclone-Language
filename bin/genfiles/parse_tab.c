@@ -601,7 +601,7 @@ int Cyc_Atts_fntype_att(void*);
 struct _fat_ptr Cyc_CurRgn_curr_rgn_name;
 # 31
 void*Cyc_CurRgn_curr_rgn_type (void);
-# 68 "absynpp.h"
+# 67 "absynpp.h"
 struct _fat_ptr Cyc_Absynpp_cnst2string(union Cyc_Absyn_Cnst);
 struct _fat_ptr Cyc_Absynpp_exp2string(struct Cyc_Absyn_Exp*);
 struct _fat_ptr Cyc_Absynpp_stmt2string(struct Cyc_Absyn_Stmt*);

@@ -41,6 +41,23 @@ namespace Cifc;
 static int glob_tvar_id=0;
 bool opt_inst_tvar = false;
 
+static string_t get_type_kind(type_t t) {
+  switch(t) {
+  case &AppType(...): return "AppType"; 
+  case &Evar(...):  return "Evar";  
+  case &VarType(...): return "Vartype";  // type variables, kind induced by tvar
+  case &PointerType(...): return "Pointertype";  // t*, t?, t@, etc.  BoxKind when not Unknown_b
+  case &ArrayType(...): return "ArrayType"; // MemKind
+  case &FnType(...): return "FnType";  // MemKind
+  case &TupleType(...): return "TupleType";  // MemKind
+  case &AnonAggrType(...): return "AnonAggrType";  // MemKind
+  case &TypedefType(...): return "Typedeftype"; 
+  case &ValueofType(...): return "Valueoftype";       // IntKind -- exp must be a type-level expression
+  case &TypeDeclType(...): return "Typedecltype";  
+  case &TypeofType(...): return "Typeoftype"; 
+  }
+}
+
 static bool is_concrete(decl_t d) {
   switch(d->r) {
   case &Fn_d(...):
@@ -511,7 +528,7 @@ static bool find_and_remove(list_t<type_t,`r> @lst, kindbound_t kind) {
       }
       break;
     default:
-      impos("expects a VarType list only -- got %s(%s)", Absynpp::typ2string(t), Absynpp::get_type_kind(t));
+      impos("expects a VarType list only -- got %s(%s)", Absynpp::typ2string(t), get_type_kind(t));
     }
     prev = cur;
     cur = cur->tl;
@@ -539,11 +556,8 @@ static list_t<tvar_t> extract_tvars(types_t ts) {
   while(ts) {
     let t = ts->hd;
     switch(t) {
-    case &VarType(tv):
-      res = new List(tv, res);
-      break;
-    default: 
-      throw &Contains_nontvar_val;
+    case &VarType(tv): res = new List(tv, res); break;
+    default: throw &Contains_nontvar_val;
     }
     ts = ts->tl;
   }

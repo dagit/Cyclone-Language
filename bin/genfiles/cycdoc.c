@@ -403,13 +403,13 @@ struct Cyc_List_List*Cyc_Parse_parse_file(struct Cyc___cycFILE*);
 extern int Cyc_PP_tex_output;struct Cyc_PP_Doc;
 # 53
 extern struct _fat_ptr Cyc_PP_string_of_doc(struct Cyc_PP_Doc*,int);struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
-# 52 "absynpp.h"
+# 51 "absynpp.h"
 extern int Cyc_Absynpp_print_for_cycdoc;
-# 54
+# 53
 void Cyc_Absynpp_set_params(struct Cyc_Absynpp_Params*);
-# 56
+# 55
 extern struct Cyc_Absynpp_Params Cyc_Absynpp_tc_params_r;
-# 60
+# 59
 struct Cyc_PP_Doc*Cyc_Absynpp_decl2doc(struct Cyc_Absyn_Decl*);
 # 29 "cycdoc.cyl"
 extern void Cyc_Lex_lex_init(int);struct Cyc_MatchDecl_Comment_struct{int tag;struct _fat_ptr f1;};struct Cyc_Standalone_Comment_struct{int tag;struct _fat_ptr f1;};struct _tuple12{int f1;void*f2;};
