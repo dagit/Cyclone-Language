@@ -1490,9 +1490,9 @@ bool silent_castable(RgnOrder::rgn_po_opt_t po,seg_t loc,type_t t1,type_t t2) {
        && (!force_type2bool(true,pinfo_a.ptr_atts.zero_term)
 	   || !pinfo_b.elt_tq.real_const))
       return false;
-    // can only move from released to not released, or stay the same
-    if(!unify(pinfo_a.ptr_atts.released, pinfo_b.ptr_atts.released)
-       && !force_type2bool(true,pinfo_a.ptr_atts.released))
+    // can only move from autoreleased to not autoreleased, or stay the same
+    if(!unify(pinfo_a.ptr_atts.autoreleased, pinfo_b.ptr_atts.autoreleased)
+       && !force_type2bool(true,pinfo_a.ptr_atts.autoreleased))
       return false;
     // element types have to be equal or t1's element type must be a
     // pointer-sub-type of t2's element type (e.g., t1 = datatype D.C
@@ -1828,7 +1828,7 @@ bool subtype(RgnOrder::rgn_po_opt_t po, list_t<$(type_t,type_t)@`H,`H> assume,
     if (unify(zt_a,zt_b)
         && !type2bool(false,zt_a) && type2bool(false,zt_b))
       return false;
-    // if t1 is not released, then t2 must not be released
+    // if t1 is not autoreleased, then t2 must not be autoreleased
     if (unify(rel_a,rel_b)
         && !type2bool(false,rel_a) && type2bool(false,rel_b))
       return false;
@@ -2004,7 +2004,7 @@ coercion_t castable(RgnOrder::rgn_po_opt_t po, seg_t loc, type_t t1, type_t t2){
         ((deep_castable && ptrsubtype(po,assump,t_a,t_b)) ||
          unify(t_a,t_b) || isomorphic(t_a,t_b) || unify(t_b,void_type));
       bool zeroterm_ok = unify(zt_a,zt_b) || !type2bool(false,zt_b);
-      bool released_ok = unify(rel_a,rel_b) || !type2bool(false,rel_b);
+      bool autoreleased_ok = unify(rel_a,rel_b) || !type2bool(false,rel_b);
       // FIX: we need to take any qualifiers into account on typedefs
       let bitcase = ptrsub ? false : (is_bits_only_type(t_a) && is_char_type(t_b)
                                       && !force_type2bool(false,zt_b)
@@ -2023,7 +2023,7 @@ coercion_t castable(RgnOrder::rgn_po_opt_t po, seg_t loc, type_t t1, type_t t2){
       if (t1_nullable && !t2_nullable)
         coercion = Null_to_NonNull;
 
-      if (bounds_ok && zeroterm_ok && released_ok && (ptrsub || bitcase) &&
+      if (bounds_ok && zeroterm_ok && autoreleased_ok && (ptrsub || bitcase) &&
           (unify(rt_a,rt_b) || RgnOrder::rgn_outlives_rgn(po,rt_a,rt_b)))
         return coercion;
       else return Unknown_coercion;

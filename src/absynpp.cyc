@@ -690,7 +690,7 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
       else if (is_char_ptr && !type2bool(false,zt))
 	ztd = text("@nozeroterm");
       if (type2bool(false,rel))
-	reld = text("@released");
+	reld = text("@autoreleased");
     }
     switch(compress(rgn)) {
     case &AppType(&HeapCon,_): break;

@@ -164,7 +164,7 @@ void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
     occurs(evar,r,env,pinfo.ptr_atts.nullable);
     occurs(evar,r,env,pinfo.ptr_atts.bounds);
     occurs(evar,r,env,pinfo.ptr_atts.zero_term);
-    occurs(evar,r,env,pinfo.ptr_atts.released);
+    occurs(evar,r,env,pinfo.ptr_atts.autoreleased);
     break;
     // FIX: shouldn't we check for occurrence within the bound?
   case &ArrayType(ArrayInfo{t2,_,_,zt,_}): 
@@ -368,7 +368,7 @@ static void unify_it(type_t t1, type_t t2) {
     }
     if (!unify(rel1,rel2)) {
       ts_failure = $(t1,t2);
-      fail_because("(not both auto-released)");
+      fail_because("(not both autoreleased)");
     }
     unify_tqual(tqual1a,t1a,tqual2a,t2a);
     if (!unify(b1,b2)) {

@@ -587,7 +587,7 @@ static bool try_alias_coerce(tenv_t tenv, type_t old_type, type_t new_type,
                                                pnew.ptr_atts.bounds, 
                                                pnew.ptr_atts.zero_term, 
                                                pold.ptr_atts.ptrloc,
-				               pnew.ptr_atts.released}});
+				               pnew.ptr_atts.autoreleased}});
     return (subtype(curr_rgnpo(tenv), assump, ptry, new_type) && 
             coerce_assign(curr_rgnpo(tenv), initializer, ptry));
   default: return false;

@@ -1290,7 +1290,7 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
     }
     if(!qvar_to_Cids && !is_char_ptr && type2bool(false,zt)) dump("@zeroterm");
     if(!qvar_to_Cids && is_char_ptr && !type2bool(false,zt)) dump("@nozeroterm");
-    if(!qvar_to_Cids && type2bool(false,rel)) dump("@released");
+    if(!qvar_to_Cids && type2bool(false,rel)) dump("@autoreleased");
     switch(compress(rgn)) {
     case &AppType(&HeapCon,_):   if (!qvar_to_Cids) dump("`H"); break;
     case &AppType(&UniqueCon,_): dump("`U");  break;

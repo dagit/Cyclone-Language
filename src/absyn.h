@@ -224,7 +224,7 @@ namespace Absyn {
     ptrbound_t bounds;    // legal bounds for pointer indexing
     booltype_t zero_term; // true => zero terminated array
     ptrloc_t   ptrloc;    // location info -- only present when porting C code
-    booltype_t released;  // true => an autoreleased, reference-counted pointer
+    booltype_t autoreleased;  // true => an autoreleased, reference-counted pointer
   };
 
   // information about a pointer type

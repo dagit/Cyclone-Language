@@ -63,7 +63,7 @@ int ptrcmp(`a::TA @ `r a, `a @ `r b) {
 
 `a identity(`a x) { return x; }
 
-`a::TA ? @released `C autorelease(`a::TA ?`RC ptr)  __attribute__((noliveunique(1))) {
+`a::TA ? @autoreleased `C autorelease(`a::TA ?`RC ptr)  __attribute__((noliveunique(1))) {
   return Core::autorelease_handle(Core::current_handle(),ptr);
 }
 

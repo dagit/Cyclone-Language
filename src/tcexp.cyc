@@ -2276,7 +2276,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     pi.ptr_atts.rgn = rgn;
     pi.ptr_atts.bounds = bounds_one();
     pi.ptr_atts.zero_term = false_type;
-    pi.ptr_atts.released = false_type;
+    pi.ptr_atts.autoreleased = false_type;
     type_t res_typ = pointer_type(pi);
     if (topt != NULL && !Unify::unify(*topt,res_typ) &&
 	silent_castable(curr_rgnpo(te),loc,res_typ,*topt)) {

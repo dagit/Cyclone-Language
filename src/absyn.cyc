@@ -365,19 +365,19 @@ type_t fatptr_type(type_t t, type_t r, tqual_t tq, booltype_t zt, booltype_t rel
   return pointer_type(PtrInfo{t, tq, PtrAtts{.rgn = r, .nullable = true_type, 
 					     .bounds = fat_bound_type,
 					     .zero_term = zt, .ptrloc=NULL,
-					     .released = rel}});
+					     .autoreleased = rel}});
 }
 type_t starb_type(type_t t, type_t r, tqual_t tq, ptrbound_t b, booltype_t zt, booltype_t rel) {
   return pointer_type(PtrInfo{t, tq, PtrAtts{.rgn = r, .nullable = true_type, 
 					     .bounds = b, 
 					     .zero_term = zt, .ptrloc=NULL,
-					     .released = rel }});
+					     .autoreleased = rel }});
 }
 type_t atb_type(type_t t, type_t r, tqual_t tq, ptrbound_t b, booltype_t zt, booltype_t rel) {
   return pointer_type(PtrInfo{t, tq, PtrAtts{.rgn = r, .nullable = false_type, 
 					     .bounds = b, 
 					     .zero_term = zt, .ptrloc=NULL,
-					     .released = rel }});
+					     .autoreleased = rel }});
 }
 type_t star_type(type_t t, type_t r, tqual_t tq, booltype_t zeroterm, booltype_t rel) { 
   return starb_type(t,r,tq,bounds_one(),zeroterm,rel);

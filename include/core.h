@@ -198,16 +198,16 @@ extern region_t<`RC> refcnt_region;
       meaning that those pointers will have to get GC'ed if [p] ends
       up being freed. */
 
- `a::TA ? @released `r autorelease_handle(region_t<`r> h, `a::TA ?`RC ptr)  __attribute__((noliveunique(2)));
+ `a::TA ? @autoreleased `r autorelease_handle(region_t<`r> h, `a::TA ?`RC ptr)  __attribute__((noliveunique(2)));
   /** [autorelease(h,p)] attaches the given reference-counted pointer
       to the region h; the count on [p] will be decremted when the
       region is freed.  An alias into the pool is returned, and [p] is
       consumed. */
 
- `a::TA ? @released `C autorelease(`a::TA ?`RC ptr)  __attribute__((noliveunique(1)));
+ `a::TA ? @autoreleased `C autorelease(`a::TA ?`RC ptr)  __attribute__((noliveunique(1)));
   /** [autorelease(p)] is the same as [autorelease_handle(current_handle(),p)]. */
 
- `a ?`RC inc_refptr(`a::TA ? @released `r ptr);
+ `a ?`RC inc_refptr(`a::TA ? @autoreleased `r ptr);
   /** [inc_refptr(p)] increments the reference count of the given
       autoreleased pointer, returning a reference-counted pointer to
       that storage.  This pointer will outlive the current autorelease

@@ -193,12 +193,12 @@ static $(booltype_t nullable,ptrbound_t bound,
                          pointer_quals_t pqs) {
   // for now, the last qualifier wins and overrides previous ones
   booltype_t zeroterm = Tcutil::any_bool(NULL);
-  booltype_t released = Tcutil::any_bool(NULL);
+  booltype_t autoreleased = Tcutil::any_bool(NULL);
   for (; pqs != NULL; pqs = pqs->tl)
     switch (pqs->hd) {
     case &Zeroterm_ptrqual:     zeroterm = true_type;            break;
     case &Nozeroterm_ptrqual:   zeroterm = false_type;           break;
-    case &Autoreleased_ptrqual: released = true_type;            break;
+    case &Autoreleased_ptrqual: autoreleased = true_type;        break;
     case &Nullable_ptrqual:     nullable = true_type;            break;
     case &Notnull_ptrqual:      nullable = false_type;           break;
     case &Fat_ptrqual:             bound = fat_bound_type;       break;
@@ -206,7 +206,7 @@ static $(booltype_t nullable,ptrbound_t bound,
     case &Numelts_ptrqual(e):      bound = thin_bounds_exp(e);   break;
     case &Region_ptrqual(t):         rgn = t;                    break;
     }
-  return $(nullable,bound,zeroterm,rgn,released);
+  return $(nullable,bound,zeroterm,rgn,autoreleased);
 }
 
 ////////////////// Functions for creating abstract syntax //////////////////
@@ -1802,8 +1802,8 @@ one_pointer:
     let $(ploc,nullable,bound) = *$1;
     if (Flags::porting_c_code)
       ptrloc = new PtrLoc{.ptr_loc=ploc,.rgn_loc=SLOC(@3),.zt_loc=SLOC(@2)};
-    let $(nullable,bound,zeroterm,rgn_opt,released) = collapse_pointer_quals(ploc,nullable,bound,$3,$2);
-    ans = rnew(yyr) List(rnew(yyr) Pointer_mod(PtrAtts(rgn_opt,nullable,bound,zeroterm,ptrloc,released),$5), ans);
+    let $(nullable,bound,zeroterm,rgn_opt,autoreleased) = collapse_pointer_quals(ploc,nullable,bound,$3,$2);
+    ans = rnew(yyr) List(rnew(yyr) Pointer_mod(PtrAtts(rgn_opt,nullable,bound,zeroterm,ptrloc,autoreleased),$5), ans);
     $$ = ^$(ans);
   }
 
