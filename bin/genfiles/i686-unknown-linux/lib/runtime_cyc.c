@@ -183,8 +183,23 @@ struct _tagged_arr wrap_Cstring_as_string(Cstring s, size_t len) {
   if (s == NULL) {
     str.base = str.curr = str.last_plus_one = NULL;
   } else {
+    int slen = strlen(s)+1;
     if (len == -1)
-      len = strlen(s)+1;
+      len = slen;
+    else if (len > slen)
+      _throw_arraybounds(); /* FIX: pick better exception */
+    str.base = str.curr = s;
+    str.last_plus_one = str.base + len;
+  }
+  return str;
+}
+
+// trusted---the length field is not verified to be correct
+struct _tagged_arr wrap_Cbuffer_as_buffer(Cstring s, size_t len) {
+  struct _tagged_arr str;
+  if (s == NULL) {
+    str.base = str.curr = str.last_plus_one = NULL;
+  } else {
     str.base = str.curr = s;
     str.last_plus_one = str.base + len;
   }

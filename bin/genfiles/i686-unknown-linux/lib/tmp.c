@@ -307,10 +307,9 @@ extern void _profile_free_region(struct _RegionHandle *,
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct
-_tagged_arr wrap_Cstring_as_string(char*,unsigned int);typedef struct{int __count;
-union{unsigned int __wch;char __wchb[4];}__value;}Cyc_Std___mbstate_t;typedef
-struct{int __pos;Cyc_Std___mbstate_t __state;}Cyc_Std__G_fpos_t;typedef Cyc_Std__G_fpos_t
+16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};typedef
+struct{int __count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc_Std___mbstate_t;
+typedef struct{int __pos;Cyc_Std___mbstate_t __state;}Cyc_Std__G_fpos_t;typedef Cyc_Std__G_fpos_t
 Cyc_Std_fpos_t;struct Cyc_Std___cycFILE;struct Cyc_Std_Cstdio___abstractFILE;
 struct Cyc_Std___cycFILE*Cyc_Std_fromCfile(struct Cyc_Std_Cstdio___abstractFILE*cf);
 struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
@@ -330,5 +329,7 @@ extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];struct _tagge
 Cyc_Std_strcpy(struct _tagged_arr dest,struct _tagged_arr src);struct Cyc_Std_Cstdio___abstractFILE*
 tmpfile();char*tmpnam(char*);struct Cyc_Std___cycFILE*Cyc_Std_tmpfile(){struct Cyc_Std_Cstdio___abstractFILE*
 cf=tmpfile();return Cyc_Std_fromCfile(cf);}struct _tagged_arr Cyc_Std_tmpnam(struct
-_tagged_arr s){struct _tagged_arr name=wrap_Cstring_as_string(tmpnam(0),- 1);return(
-unsigned int)s.curr?Cyc_Std_strcpy(s,(struct _tagged_arr)name): name;}
+_tagged_arr s){char*name=tmpnam(0);return(unsigned int)s.curr?Cyc_Std_strcpy(s,(
+struct _tagged_arr)({char*_tmp0=name;_tag_arr(_tmp0,sizeof(char),
+_get_zero_arr_size(_tmp0,1));})):({char*_tmp1=name;_tag_arr(_tmp1,sizeof(char),
+_get_zero_arr_size(_tmp1,1));});}

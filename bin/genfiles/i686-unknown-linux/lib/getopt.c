@@ -324,26 +324,25 @@ int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;doubl
 int tag;struct _tagged_arr f1;};extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[
 18];struct Cyc_Std_FileOpenError_struct{char*tag;struct _tagged_arr f1;};typedef
 struct{int quot;int rem;}Cyc_Std_div_t;typedef struct{int quot;int rem;}Cyc_Std_ldiv_t;
-struct _tagged_arr Cyc_Std_getenv(struct _tagged_arr);enum Cyc_Std___anonymous_enum_366__{
-Cyc_Std__PC_LINK_MAX  = 0,Cyc_Std__PC_MAX_CANON  = 1,Cyc_Std__PC_MAX_INPUT  = 2,Cyc_Std__PC_NAME_MAX
- = 3,Cyc_Std__PC_PATH_MAX  = 4,Cyc_Std__PC_PIPE_BUF  = 5,Cyc_Std__PC_CHOWN_RESTRICTED
+char*getenv(const char*);enum Cyc_Std___anonymous_enum_366__{Cyc_Std__PC_LINK_MAX
+ = 0,Cyc_Std__PC_MAX_CANON  = 1,Cyc_Std__PC_MAX_INPUT  = 2,Cyc_Std__PC_NAME_MAX  = 
+3,Cyc_Std__PC_PATH_MAX  = 4,Cyc_Std__PC_PIPE_BUF  = 5,Cyc_Std__PC_CHOWN_RESTRICTED
  = 6,Cyc_Std__PC_NO_TRUNC  = 7,Cyc_Std__PC_VDISABLE  = 8,Cyc_Std__PC_SYNC_IO  = 9,
 Cyc_Std__PC_ASYNC_IO  = 10,Cyc_Std__PC_PRIO_IO  = 11,Cyc_Std__PC_SOCK_MAXBUF  = 12,
 Cyc_Std__PC_FILESIZEBITS  = 13,Cyc_Std__PC_REC_INCR_XFER_SIZE  = 14,Cyc_Std__PC_REC_MAX_XFER_SIZE
  = 15,Cyc_Std__PC_REC_MIN_XFER_SIZE  = 16,Cyc_Std__PC_REC_XFER_ALIGN  = 17,Cyc_Std__PC_ALLOC_SIZE_MIN
  = 18,Cyc_Std__PC_SYMLINK_MAX  = 19};enum Cyc_Std___anonymous_enum_368__{Cyc_Std__CS_PATH
- = 0,Cyc_Std__CS_V6_WIDTH_RESTRICTED_ENVS  = 1};int Cyc_Std_chroot(struct
-_tagged_arr);struct _tagged_arr Cyc_Std_getpass(struct _tagged_arr);struct Cyc_List_List{
-void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];extern char
-Cyc_List_Nth[8];unsigned int Cyc_Std_strlen(struct _tagged_arr s);int Cyc_Std_strcmp(
-struct _tagged_arr s1,struct _tagged_arr s2);int Cyc_Std_strncmp(struct _tagged_arr s1,
-struct _tagged_arr s2,unsigned int len);struct _tagged_arr Cyc_Std_strchr(struct
-_tagged_arr s,char c);extern struct _tagged_arr Cyc_Std_optarg;extern int Cyc_Std_optind;
-extern int Cyc_Std_opterr;extern int Cyc_Std_optopt;struct Cyc_Std_option{struct
-_tagged_arr name;int has_arg;int*flag;int val;};int Cyc_Std_getopt(int __argc,struct
-_tagged_arr __argv,struct _tagged_arr __shortopts);int Cyc_Std__getopt_internal(int
-__argc,struct _tagged_arr __argv,struct _tagged_arr __shortopts,struct _tagged_arr
-__longopts,int*__longind,int __long_only);struct _tagged_arr Cyc_Std_optarg;int Cyc_Std_optind=
+ = 0,Cyc_Std__CS_V6_WIDTH_RESTRICTED_ENVS  = 1};struct Cyc_List_List{void*hd;
+struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[
+8];unsigned int Cyc_Std_strlen(struct _tagged_arr s);int Cyc_Std_strcmp(struct
+_tagged_arr s1,struct _tagged_arr s2);int Cyc_Std_strncmp(struct _tagged_arr s1,struct
+_tagged_arr s2,unsigned int len);struct _tagged_arr Cyc_Std_strchr(struct _tagged_arr
+s,char c);extern struct _tagged_arr Cyc_Std_optarg;extern int Cyc_Std_optind;extern int
+Cyc_Std_opterr;extern int Cyc_Std_optopt;struct Cyc_Std_option{struct _tagged_arr
+name;int has_arg;int*flag;int val;};int Cyc_Std_getopt(int __argc,struct _tagged_arr
+__argv,struct _tagged_arr __shortopts);int Cyc_Std__getopt_internal(int __argc,
+struct _tagged_arr __argv,struct _tagged_arr __shortopts,struct _tagged_arr __longopts,
+int*__longind,int __long_only);struct _tagged_arr Cyc_Std_optarg;int Cyc_Std_optind=
 1;int Cyc_Std___getopt_initialized;static struct _tagged_arr Cyc_Std_nextchar;int Cyc_Std_opterr=
 1;int Cyc_Std_optopt=(int)'?';enum Cyc_Std_ordering_tag{Cyc_Std_REQUIRE_ORDER  = 0,
 Cyc_Std_PERMUTE  = 1,Cyc_Std_RETURN_IN_ORDER  = 2};static enum Cyc_Std_ordering_tag
@@ -371,10 +370,10 @@ _tagged_arr),middle + i))=tem;}bottom +=len;}}Cyc_Std_first_nonopt +=Cyc_Std_opt
 - Cyc_Std_last_nonopt;Cyc_Std_last_nonopt=Cyc_Std_optind;}static struct
 _tagged_arr Cyc_Std__getopt_initialize(int argc,struct _tagged_arr argv,struct
 _tagged_arr optstring){Cyc_Std_first_nonopt=(Cyc_Std_last_nonopt=Cyc_Std_optind);
-Cyc_Std_nextchar=_tag_arr(0,0,0);Cyc_Std_posixly_correct=Cyc_Std_getenv(({const
-char*_tmp0="POSIXLY_CORRECT";_tag_arr(_tmp0,sizeof(char),_get_zero_arr_size(
-_tmp0,16));}));if(*((const char*)_check_unknown_subscript(optstring,sizeof(char),
-0))== '-'){Cyc_Std_ordering=Cyc_Std_RETURN_IN_ORDER;_tagged_arr_inplace_plus(&
+Cyc_Std_nextchar=_tag_arr(0,0,0);Cyc_Std_posixly_correct=({char*_tmp0=getenv((
+const char*)"POSIXLY_CORRECT");_tag_arr(_tmp0,sizeof(char),_get_zero_arr_size(
+_tmp0,1));});if(*((const char*)_check_unknown_subscript(optstring,sizeof(char),0))
+== '-'){Cyc_Std_ordering=Cyc_Std_RETURN_IN_ORDER;_tagged_arr_inplace_plus(&
 optstring,sizeof(char),1);}else{if(*((const char*)_check_unknown_subscript(
 optstring,sizeof(char),0))== '+'){Cyc_Std_ordering=Cyc_Std_REQUIRE_ORDER;
 _tagged_arr_inplace_plus(& optstring,sizeof(char),1);}else{if(Cyc_Std_posixly_correct.curr

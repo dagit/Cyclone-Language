@@ -1,16 +1,17 @@
 #!/bin/awk -f
 	   { name=$1;
-	     median=$3;
+	     median=$4;
 	     idx = match(name,"-");
 	     noprint=0;
-	     if (idx == 0)
-	       type="cyc/";
+	     if (idx == 0) {
+	       noprint=1;
+	     }
 	     else {
 	       prefix=substr(name,1,idx);
 	       if (prefix ~ "gcc")
 	         type="c/";
 	       else
-	         noprint=1;
+	         type="cyc/";
 	       name=substr(name,idx+1);
 	     }
 	     if (!noprint) printf("%s %s %s\n",name,type,median); }

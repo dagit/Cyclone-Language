@@ -317,8 +317,8 @@ int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned in
 int tag;short*f1;};struct Cyc_Std_Buffer_pa_struct{int tag;struct _tagged_arr f1;};
 struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};struct _tagged_arr Cyc_Std_aprintf(
 struct _tagged_arr,struct _tagged_arr);int Cyc_Std_fclose(struct Cyc_Std___cycFILE*);
-struct Cyc_Std___cycFILE*Cyc_Std_fdopen(int,struct _tagged_arr);int Cyc_Std_fflush(
-struct Cyc_Std___cycFILE*);int Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,struct
+struct Cyc_Std___cycFILE*Cyc_Std_fdopen(int,const char*);int Cyc_Std_fflush(struct
+Cyc_Std___cycFILE*);int Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,struct
 _tagged_arr,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;
 };struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
 int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
@@ -344,48 +344,42 @@ Cyc_Std__PC_PRIO_IO  = 11,Cyc_Std__PC_SOCK_MAXBUF  = 12,Cyc_Std__PC_FILESIZEBITS
  = 13,Cyc_Std__PC_REC_INCR_XFER_SIZE  = 14,Cyc_Std__PC_REC_MAX_XFER_SIZE  = 15,Cyc_Std__PC_REC_MIN_XFER_SIZE
  = 16,Cyc_Std__PC_REC_XFER_ALIGN  = 17,Cyc_Std__PC_ALLOC_SIZE_MIN  = 18,Cyc_Std__PC_SYMLINK_MAX
  = 19};enum Cyc_Std___anonymous_enum_368__{Cyc_Std__CS_PATH  = 0,Cyc_Std__CS_V6_WIDTH_RESTRICTED_ENVS
- = 1};int Cyc_Std_chroot(struct _tagged_arr);int close(int);int dup2(int,int);int Cyc_Std_execlp(
-struct _tagged_arr,struct _tagged_arr,struct _tagged_arr);int fork();struct
-_tagged_arr Cyc_Std_getpass(struct _tagged_arr);int getpid();int pipe(int*);int
-backtrace(int*,int);int Cyc_Execinfo_backtrace(struct _tagged_arr array,int size){
-if(size > _get_arr_size(array,sizeof(int)))(int)_throw((void*)({struct Cyc_Core_Failure_struct*
-_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Failure_struct _tmp1;
-_tmp1.tag=Cyc_Core_Failure;_tmp1.f1=({const char*_tmp2="backtrace: size > array.size";
+ = 1};int close(int);int dup2(int,int);int Cyc_Std_execlp(const char*,const char*,
+struct _tagged_arr);int fork();int getpid();int pipe(int*);int backtrace(int*,int);
+int Cyc_Execinfo_backtrace(struct _tagged_arr array,int size){if(size > _get_arr_size(
+array,sizeof(int)))(int)_throw((void*)({struct Cyc_Core_Failure_struct*_tmp0=
+_cycalloc(sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Failure_struct _tmp1;_tmp1.tag=
+Cyc_Core_Failure;_tmp1.f1=({const char*_tmp2="backtrace: size > array.size";
 _tag_arr(_tmp2,sizeof(char),_get_zero_arr_size(_tmp2,29));});_tmp1;});_tmp0;}));
 return backtrace((int*)_check_null(_untag_arr(array,sizeof(int),1)),size);}int Cyc_Execinfo_bt(){
-int bt[20];{unsigned int _tmp16=20;unsigned int i;for(i=0;i < _tmp16;i ++){bt[i]=0;}}{
+int bt[20];{unsigned int _tmp10=20;unsigned int i;for(i=0;i < _tmp10;i ++){bt[i]=0;}}{
 int tochild[2]={0,0};int fromchild[2]={0,0};int pid;int self_pid;if(pipe(tochild)?1:
 pipe(fromchild))return 1;self_pid=getpid();if((pid=fork())== 0){if(dup2(tochild[0],
-0)== - 1?1: dup2(fromchild[1],1)== - 1)return 1;({struct _tagged_arr _tmp3[4];_tmp3[3]=(
-struct _tagged_arr)_tag_arr(0,0,0);_tmp3[2]=(struct _tagged_arr)({struct Cyc_Std_Int_pa_struct
-_tmpA;_tmpA.tag=1;_tmpA.f1=(int)((unsigned int)self_pid);{void*_tmp8[1]={& _tmpA};
-Cyc_Std_aprintf(({const char*_tmp9="/proc/%d/exe";_tag_arr(_tmp9,sizeof(char),
-_get_zero_arr_size(_tmp9,13));}),_tag_arr(_tmp8,sizeof(void*),1));}});_tmp3[1]=({
-const char*_tmp7="-e";_tag_arr(_tmp7,sizeof(char),_get_zero_arr_size(_tmp7,3));});
-_tmp3[0]=({const char*_tmp6="--functions";_tag_arr(_tmp6,sizeof(char),
-_get_zero_arr_size(_tmp6,12));});Cyc_Std_execlp(({const char*_tmp4="addr2line";
-_tag_arr(_tmp4,sizeof(char),_get_zero_arr_size(_tmp4,10));}),({const char*_tmp5="addr2line";
-_tag_arr(_tmp5,sizeof(char),_get_zero_arr_size(_tmp5,10));}),_tag_arr(_tmp3,
-sizeof(struct _tagged_arr),4));});return 1;}else{if(pid < 0){close(tochild[0]);
-close(tochild[1]);close(fromchild[0]);close(fromchild[1]);return 1;}}{struct Cyc_Std___cycFILE*
-w=({struct Cyc_Std___cycFILE*f=Cyc_Std_fdopen(tochild[1],({const char*_tmp15="w";
-_tag_arr(_tmp15,sizeof(char),_get_zero_arr_size(_tmp15,2));}));if(!((
+0)== - 1?1: dup2(fromchild[1],1)== - 1)return 1;({const char*_tmp3[4];_tmp3[3]=(const
+char*)0;_tmp3[2]=(const char*)_check_null(_untag_arr(({struct Cyc_Std_Int_pa_struct
+_tmp6;_tmp6.tag=1;_tmp6.f1=(int)((unsigned int)self_pid);{void*_tmp4[1]={& _tmp6};
+Cyc_Std_aprintf(({const char*_tmp5="/proc/%d/exe";_tag_arr(_tmp5,sizeof(char),
+_get_zero_arr_size(_tmp5,13));}),_tag_arr(_tmp4,sizeof(void*),1));}}),sizeof(
+char),1));_tmp3[1]=(const char*)"-e";_tmp3[0]=(const char*)"--functions";Cyc_Std_execlp((
+const char*)"addr2line",(const char*)"addr2line",_tag_arr(_tmp3,sizeof(const char*),
+4));});return 1;}else{if(pid < 0){close(tochild[0]);close(tochild[1]);close(
+fromchild[0]);close(fromchild[1]);return 1;}}{struct Cyc_Std___cycFILE*w=({struct
+Cyc_Std___cycFILE*f=Cyc_Std_fdopen(tochild[1],(const char*)"w");if(!((
 unsigned int)f))return 1;(struct Cyc_Std___cycFILE*)_check_null(f);});struct Cyc_Std___cycFILE*
-r=({struct Cyc_Std___cycFILE*f=Cyc_Std_fdopen(fromchild[0],({const char*_tmp14="r";
-_tag_arr(_tmp14,sizeof(char),_get_zero_arr_size(_tmp14,2));}));if(!((
+r=({struct Cyc_Std___cycFILE*f=Cyc_Std_fdopen(fromchild[0],(const char*)"r");if(!((
 unsigned int)f)){Cyc_Std_fclose(w);return 1;}(struct Cyc_Std___cycFILE*)
 _check_null(f);});int n=Cyc_Execinfo_backtrace(_tag_arr(bt,sizeof(int),20),(int)
-20);{int c=0;for(0;c < n;c ++){({struct Cyc_Std_Int_pa_struct _tmpD;_tmpD.tag=1;_tmpD.f1=(
-unsigned int)bt[_check_known_subscript_notnull(20,c)];{void*_tmpB[1]={& _tmpD};
-Cyc_Std_fprintf(w,({const char*_tmpC="%#x\n";_tag_arr(_tmpC,sizeof(char),
-_get_zero_arr_size(_tmpC,5));}),_tag_arr(_tmpB,sizeof(void*),1));}});}}Cyc_Std_fflush((
-struct Cyc_Std___cycFILE*)w);({void*_tmpE[0]={};Cyc_Std_printf(({const char*_tmpF="Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n";
-_tag_arr(_tmpF,sizeof(char),_get_zero_arr_size(_tmpF,94));}),_tag_arr(_tmpE,
-sizeof(void*),0));});{int c=0;for(0;c < n;c ++){int d;int pos=0;({void*_tmp10[0]={};
-Cyc_Std_printf(({const char*_tmp11="  ";_tag_arr(_tmp11,sizeof(char),
-_get_zero_arr_size(_tmp11,3));}),_tag_arr(_tmp10,sizeof(void*),0));});while((d=
-Cyc_Std_getc(r))!= '\n'){(putchar(d),pos ++);}while(pos ++ < 16){putchar((int)' ');}({
-void*_tmp12[0]={};Cyc_Std_printf(({const char*_tmp13="  ";_tag_arr(_tmp13,sizeof(
-char),_get_zero_arr_size(_tmp13,3));}),_tag_arr(_tmp12,sizeof(void*),0));});
-while((d=Cyc_Std_getc(r))!= '\n'){putchar(d);}putchar((int)'\n');}}Cyc_Std_fclose(
-r);Cyc_Std_fclose(w);kill(pid,15);waitpid(pid,0,0);return 0;}}}
+20);{int c=0;for(0;c < n;c ++){({struct Cyc_Std_Int_pa_struct _tmp9;_tmp9.tag=1;_tmp9.f1=(
+unsigned int)bt[_check_known_subscript_notnull(20,c)];{void*_tmp7[1]={& _tmp9};
+Cyc_Std_fprintf(w,({const char*_tmp8="%#x\n";_tag_arr(_tmp8,sizeof(char),
+_get_zero_arr_size(_tmp8,5));}),_tag_arr(_tmp7,sizeof(void*),1));}});}}Cyc_Std_fflush((
+struct Cyc_Std___cycFILE*)w);({void*_tmpA[0]={};Cyc_Std_printf(({const char*_tmpB="Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n";
+_tag_arr(_tmpB,sizeof(char),_get_zero_arr_size(_tmpB,94));}),_tag_arr(_tmpA,
+sizeof(void*),0));});{int c=0;for(0;c < n;c ++){int d;int pos=0;({void*_tmpC[0]={};
+Cyc_Std_printf(({const char*_tmpD="  ";_tag_arr(_tmpD,sizeof(char),
+_get_zero_arr_size(_tmpD,3));}),_tag_arr(_tmpC,sizeof(void*),0));});while((d=Cyc_Std_getc(
+r))!= '\n'){(putchar(d),pos ++);}while(pos ++ < 16){putchar((int)' ');}({void*_tmpE[
+0]={};Cyc_Std_printf(({const char*_tmpF="  ";_tag_arr(_tmpF,sizeof(char),
+_get_zero_arr_size(_tmpF,3));}),_tag_arr(_tmpE,sizeof(void*),0));});while((d=Cyc_Std_getc(
+r))!= '\n'){putchar(d);}putchar((int)'\n');}}Cyc_Std_fclose(r);Cyc_Std_fclose(w);
+kill(pid,15);waitpid(pid,0,0);return 0;}}}

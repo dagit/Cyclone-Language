@@ -4967,27 +4967,27 @@ epilogue execle {
   // extern int execle(const char *, const char *, ...);
 }
 epilogue execlp {
-  // FIX: need to convert to using null-terminated strings
-//    extern int execlp(const char ?, const char ?, ... const char ?);
+  extern int execlp(const char @, const char @`r, ... const char *`r);
 }
 cycstub execvp {
   namespace Cunistd {
     // needed by execlp, so out of order
-    extern "C" int execvp(char @ file, char @ *argv);
+    extern "C" int execvp(const char @ file, const char **argv);
   }
 }
 cycstub execlp {
-//    int execlp(const char @ path, const char ?arg0, ... const char ?argv) {
-//      if (argv[argv.size - 1] != NULL)
-//        throw new Failure("execl: arg list must be NULL-terminated");
-
-//      // We allocate 1+argv.size because we need to prepend arg0
-//      char * ?newargs = new {for i < 1 + argv.size : NULL};
-//      newargs[0] = string_to_char *(arg0);
-//      for (int i = 0; i < argv.size; i++)
-//        newargs[i+1] = string_to_char *(argv[i]);
-//      return Cunistd::execvp(path, (char **) newargs);
-//    }
+  static xtunion exn.Failure __execlp_failure =
+    Failure("execlp arg list not NULL-terminated");
+  int execlp(const char @ path, const char @`r arg0, ... const char *`r argv) {
+    if (argv[argv.size - 1] != NULL) throw &__execlp_failure;
+    // We allocate 1+argv.size because we need to prepend arg0
+    // FIX: can region-allocate ...
+    const char *`r ?newargs = new {for i < argv.size : (const char *`r)NULL};
+    newargs[0] = arg0;
+    for (int i = 0; i < argv.size; i++)
+      newargs[i+1] = argv[i];
+    return Cunistd::execvp(path, (const char **) newargs);
+  }
 }
 epilogue execv {
   // Not supported yet

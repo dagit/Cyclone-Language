@@ -309,12 +309,11 @@ char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};int isspace(
 int);int isupper(int);typedef struct{int quot;int rem;}Cyc_Std_div_t;typedef struct{
-int quot;int rem;}Cyc_Std_ldiv_t;double Cyc_Std_atof(struct _tagged_arr);int Cyc_Std_strtol(
-struct _tagged_arr,struct _tagged_arr*,int);unsigned int Cyc_Std_strtoul(struct
-_tagged_arr,struct _tagged_arr*,int);typedef struct{int __count;union{unsigned int
-__wch;char __wchb[4];}__value;}Cyc_Std___mbstate_t;typedef struct{int __pos;Cyc_Std___mbstate_t
-__state;}Cyc_Std__G_fpos_t;typedef Cyc_Std__G_fpos_t Cyc_Std_fpos_t;struct Cyc_Std___cycFILE;
-extern struct Cyc_Std___cycFILE*Cyc_Std_stdin;struct Cyc_Std_Cstdio___abstractFILE;
+int quot;int rem;}Cyc_Std_ldiv_t;double atof(const char*);int strtol(char*,char**,int);
+unsigned int strtoul(char*,char**,int);typedef struct{int __count;union{
+unsigned int __wch;char __wchb[4];}__value;}Cyc_Std___mbstate_t;typedef struct{int
+__pos;Cyc_Std___mbstate_t __state;}Cyc_Std__G_fpos_t;typedef Cyc_Std__G_fpos_t Cyc_Std_fpos_t;
+struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*Cyc_Std_stdin;struct Cyc_Std_Cstdio___abstractFILE;
 struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
 int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct
 Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_Buffer_pa_struct{int
@@ -377,8 +376,8 @@ _LL1D:;}int Cyc_Std__IO_vfscanf(int(*_IO_getc)(void*),int(*_IO_ungetc)(int,void*
 int(*_IO_peekc)(void*),void*fp,struct _tagged_arr fmt0,struct _tagged_arr ap,int*
 errp){struct _tagged_arr fmt=fmt0;int c;long long width;struct _tagged_arr p=_tag_arr(
 0,0,0);int n;int flags=0;struct _tagged_arr p0=_tag_arr(0,0,0);int nassigned;int nread;
-int base=0;int use_strtoul=0;char ccltab[256];char buf[351];{unsigned int _tmp4B=350;
-unsigned int i;for(i=0;i < _tmp4B;i ++){buf[i]='0';}buf[_tmp4B]=(char)0;}{int
+int base=0;int use_strtoul=0;char ccltab[256];char buf[351];{unsigned int _tmp48=350;
+unsigned int i;for(i=0;i < _tmp48;i ++){buf[i]='0';}buf[_tmp48]=(char)0;}{int
 seen_eof=0;static short basefix[17]={10,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
 nassigned=0;nread=0;for(0;1;0){c=(int)*((const char*)_check_unknown_subscript(
 _tagged_arr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0));if(c == 0)
@@ -489,21 +488,19 @@ _tagged_arr_inplace_plus(& p,sizeof(char),-1);_IO_ungetc(c,fp);}if((flags & 8)==
 unsigned int res;({struct _tagged_arr _tmp38=p;char _tmp39=*((char*)
 _check_unknown_subscript(_tmp38,sizeof(char),0));char _tmp3A='\000';if(
 _get_arr_size(_tmp38,sizeof(char))== 1?_tmp39 == '\000'?_tmp3A != '\000': 0: 0)
-_throw_arraybounds();*((char*)_tmp38.curr)=_tmp3A;});if(use_strtoul)res=Cyc_Std_strtoul(({
-char*_tmp3B=buf;_tag_arr(_tmp3B,sizeof(char),_get_zero_arr_size(_tmp3B,351));}),
-0,base);else{res=(unsigned int)Cyc_Std_strtol(({char*_tmp3C=buf;_tag_arr(_tmp3C,
-sizeof(char),_get_zero_arr_size(_tmp3C,351));}),0,base);}if(flags & 16)*((int*)
-Cyc_Std_va_arg_int_ptr(*((void**)_check_unknown_subscript(ap,sizeof(void*),0))))=(
-int)res;else{if(flags & 4)*((short*)Cyc_Std_va_arg_short_ptr(*((void**)
+_throw_arraybounds();*((char*)_tmp38.curr)=_tmp3A;});if(use_strtoul)res=strtoul((
+char*)buf,0,base);else{res=(unsigned int)strtol((char*)buf,0,base);}if(flags & 16)*((
+int*)Cyc_Std_va_arg_int_ptr(*((void**)_check_unknown_subscript(ap,sizeof(void*),
+0))))=(int)res;else{if(flags & 4)*((short*)Cyc_Std_va_arg_short_ptr(*((void**)
 _check_unknown_subscript(ap,sizeof(void*),0))))=(short)res;else{if(flags & 1)*((
 int*)Cyc_Std_va_arg_int_ptr(*((void**)_check_unknown_subscript(ap,sizeof(void*),
 0))))=(int)res;else{*((int*)Cyc_Std_va_arg_int_ptr(*((void**)
 _check_unknown_subscript(ap,sizeof(void*),0))))=(int)res;}}}
 _tagged_arr_inplace_plus_post(& ap,sizeof(void*),1);nassigned ++;}nread +=(p.curr - ({
-char*_tmp3D=buf;_tag_arr(_tmp3D,sizeof(char),_get_zero_arr_size(_tmp3D,351));}).curr)
+char*_tmp3B=buf;_tag_arr(_tmp3B,sizeof(char),_get_zero_arr_size(_tmp3B,351));}).curr)
 / sizeof(char);break;case 4: _LL4C: if(width == 0?1: width > sizeof(buf)- 1)width=(
-long long)(sizeof(buf)- 1);flags |=((64 | 128)| 256)| 512;for(p=({char*_tmp3E=buf;
-_tag_arr(_tmp3E,sizeof(char),_get_zero_arr_size(_tmp3E,351));});width != 0;width
+long long)(sizeof(buf)- 1);flags |=((64 | 128)| 256)| 512;for(p=({char*_tmp3C=buf;
+_tag_arr(_tmp3C,sizeof(char),_get_zero_arr_size(_tmp3C,351));});width != 0;width
 --){c=_IO_peekc(fp);switch(c){case '0': _LL6A: goto _LL6B;case '1': _LL6B: goto _LL6C;
 case '2': _LL6C: goto _LL6D;case '3': _LL6D: goto _LL6E;case '4': _LL6E: goto _LL6F;case '5':
 _LL6F: goto _LL70;case '6': _LL70: goto _LL71;case '7': _LL71: goto _LL72;case '8': _LL72:
@@ -511,32 +508,31 @@ goto _LL73;case '9': _LL73: flags &=~(64 | 128);goto fok;case '+': _LL74: goto _
 _LL75: if(flags & 64){flags &=~ 64;goto fok;}break;case '.': _LL76: if(flags & 256){flags
 &=~(64 | 256);goto fok;}break;case 'e': _LL77: goto _LL78;case 'E': _LL78: if((flags & (
 128 | 512))== 512){flags=(flags & ~(512 | 256)| 64)| 128;goto fok;}break;default:
-_LL79: break;}break;fok:({struct _tagged_arr _tmp3F=_tagged_arr_inplace_plus_post(&
-p,sizeof(char),1);char _tmp40=*((char*)_check_unknown_subscript(_tmp3F,sizeof(
-char),0));char _tmp41=(char)c;if(_get_arr_size(_tmp3F,sizeof(char))== 1?_tmp40 == '\000'?
-_tmp41 != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp3F.curr)=_tmp41;});
+_LL79: break;}break;fok:({struct _tagged_arr _tmp3D=_tagged_arr_inplace_plus_post(&
+p,sizeof(char),1);char _tmp3E=*((char*)_check_unknown_subscript(_tmp3D,sizeof(
+char),0));char _tmp3F=(char)c;if(_get_arr_size(_tmp3D,sizeof(char))== 1?_tmp3E == '\000'?
+_tmp3F != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp3D.curr)=_tmp3F;});
 _IO_getc(fp);if(_IO_peekc(fp)== - 1){seen_eof ++;break;}}if(flags & 128){if(flags & 
-512){while(p.curr > ({char*_tmp42=buf;_tag_arr(_tmp42,sizeof(char),
-_get_zero_arr_size(_tmp42,351));}).curr){_tagged_arr_inplace_plus(& p,sizeof(char),
+512){while(p.curr > ({char*_tmp40=buf;_tag_arr(_tmp40,sizeof(char),
+_get_zero_arr_size(_tmp40,351));}).curr){_tagged_arr_inplace_plus(& p,sizeof(char),
 -1);_IO_ungetc((int)*((char*)_check_unknown_subscript(p,sizeof(char),0)),fp);}
 goto match_failure;}_tagged_arr_inplace_plus(& p,sizeof(char),-1);c=(int)*((char*)
 _check_unknown_subscript(p,sizeof(char),0));if(c != 'e'?c != 'E': 0){_IO_ungetc(c,
 fp);_tagged_arr_inplace_plus(& p,sizeof(char),-1);c=(int)*((char*)
 _check_unknown_subscript(p,sizeof(char),0));}_IO_ungetc(c,fp);}if((flags & 8)== 0){
-double res;({struct _tagged_arr _tmp43=p;char _tmp44=*((char*)
-_check_unknown_subscript(_tmp43,sizeof(char),0));char _tmp45='\000';if(
-_get_arr_size(_tmp43,sizeof(char))== 1?_tmp44 == '\000'?_tmp45 != '\000': 0: 0)
-_throw_arraybounds();*((char*)_tmp43.curr)=_tmp45;});res=Cyc_Std_atof(({char*
-_tmp46=buf;_tag_arr(_tmp46,sizeof(char),_get_zero_arr_size(_tmp46,351));}));if(
-flags & 1)*((double*)Cyc_Std_va_arg_double_ptr(*((void**)_check_unknown_subscript(
-ap,sizeof(void*),0))))=res;else{*((float*)Cyc_Std_va_arg_float_ptr(*((void**)
-_check_unknown_subscript(ap,sizeof(void*),0))))=(float)res;}
+double res;({struct _tagged_arr _tmp41=p;char _tmp42=*((char*)
+_check_unknown_subscript(_tmp41,sizeof(char),0));char _tmp43='\000';if(
+_get_arr_size(_tmp41,sizeof(char))== 1?_tmp42 == '\000'?_tmp43 != '\000': 0: 0)
+_throw_arraybounds();*((char*)_tmp41.curr)=_tmp43;});res=atof((const char*)buf);
+if(flags & 1)*((double*)Cyc_Std_va_arg_double_ptr(*((void**)
+_check_unknown_subscript(ap,sizeof(void*),0))))=res;else{*((float*)Cyc_Std_va_arg_float_ptr(*((
+void**)_check_unknown_subscript(ap,sizeof(void*),0))))=(float)res;}
 _tagged_arr_inplace_plus_post(& ap,sizeof(void*),1);nassigned ++;}nread +=(p.curr - ({
-char*_tmp47=buf;_tag_arr(_tmp47,sizeof(char),_get_zero_arr_size(_tmp47,351));}).curr)
+char*_tmp44=buf;_tag_arr(_tmp44,sizeof(char),_get_zero_arr_size(_tmp44,351));}).curr)
 / sizeof(char);break;default: _LL69:(int)_throw((void*)({struct Cyc_Core_Impossible_struct*
-_tmp48=_cycalloc(sizeof(*_tmp48));_tmp48[0]=({struct Cyc_Core_Impossible_struct
-_tmp49;_tmp49.tag=Cyc_Core_Impossible;_tmp49.f1=({const char*_tmp4A="scanf3";
-_tag_arr(_tmp4A,sizeof(char),_get_zero_arr_size(_tmp4A,7));});_tmp49;});_tmp48;}));}}
+_tmp45=_cycalloc(sizeof(*_tmp45));_tmp45[0]=({struct Cyc_Core_Impossible_struct
+_tmp46;_tmp46.tag=Cyc_Core_Impossible;_tmp46.f1=({const char*_tmp47="scanf3";
+_tag_arr(_tmp47,sizeof(char),_get_zero_arr_size(_tmp47,7));});_tmp46;});_tmp45;}));}}
 eof_failure: seen_eof ++;input_failure: if(nassigned == 0)nassigned=- 1;
 control_failure: match_failure: if((unsigned int)errp)*((int*)errp)|=2;done: if((
 unsigned int)errp?seen_eof: 0)*((int*)errp)|=1;return nassigned;}}static struct

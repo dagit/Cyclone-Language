@@ -1,6 +1,6 @@
 #!/bin/awk -f
 	   { name=$1;
-	     median=$3;
+	     median=$4;
 	     idx = match(name,"-");
 	     noprint=0;
 	     if (idx == 0) {
