@@ -134,6 +134,7 @@ CYCLONE_H:=arg.h\
 	stdlib.h\
 	string.h\
 	strings.h\
+	sys/cioctl.h\
 	sys/cmman.h\
 	sys/cresource.h\
 	sys/cselect.h\
@@ -142,6 +143,7 @@ CYCLONE_H:=arg.h\
 	sys/ctime.h\
 	sys/ctypes.h\
 	sys/cwait.h\
+	sys/ioctl.h\
 	sys/mman.h\
 	sys/resource.h\
 	sys/select.h\
