@@ -38,6 +38,10 @@
 #include "new_control_flow.h"
 #include "interface.h"
 
+/* hard-coded for now; will make configurable soon */
+#define CYCLONE_INCLUDE_PATH "c:/cyclone/include"
+#define CYCLONE_LIB_PATH "c:/cyclone/bin/cyc-lib"
+
 namespace Lex {
   extern void lex_init();
 }
@@ -73,6 +77,11 @@ static void set_output_file(string_t<`H> s) {
   output_file = new s;
 }
 
+static string_t cpp = "gcc -x c -E -U__GNUC__ -nostdinc";
+static void set_cpp(string_t<`H> s) {
+  cpp = s;
+}
+
 static list_t<stringptr_t> cppargs = NULL;
 static void add_cpparg(string_t<`H> s) {
   cppargs = new List(new s,cppargs);
@@ -84,12 +93,12 @@ static bool is_cyclone_sourcefile(string_t s) {
   else return (strcmp(s+(len-4),".cyc") == 0);
 }
 
-static list_t<stringptr_t> cyclone_exec_prefix_path = NULL;
-static void add_cyclone_exec_prefix_path(string_t s) {
+static list_t<stringptr_t> cyclone_lib_path = NULL;
+static void add_cyclone_lib_path(string_t s) {
   let len = strlen(s);
   if (len <= 2) return;
   let dir = (string_t)substring(s,2,len-2);
-  cyclone_exec_prefix_path = new List(new dir,cyclone_exec_prefix_path);
+  cyclone_lib_path = new List(new dir,cyclone_lib_path);
 }
 
 // Arguments to pass to the C compiler
@@ -339,6 +348,8 @@ static bool file_exists(string_t file) {
   else { fclose((FILE @)f); return true; }
 }
 
+/* Looks for the file in the list of directories.  The order
+   of the list matters---it returns the first file it finds. */
 static string_t *find(list_t<stringptr_t> dirs, string_t file) {
   if (file == NULL) return NULL;
   for (; dirs != NULL; dirs = dirs->tl) {
@@ -442,7 +453,18 @@ static void process_file(string_t<`H> filename) {
     String::str_sepstr(new List(new (string_t)"",
                                 List::map(sh_escape_stringptr,rev(cppargs))),
                        " ");
-  string_t stdinc_string = " -Ic:/cyclone/include";
+  // About the cyclone include path---this path is specified with the
+  // following order (where the earlier in the order, the first place we look
+  // for the file):
+  // 1) command line arguments (with -I)
+  // 2) environment var (with CYCLONE_INCLUDE_PATH)
+  // 3) hardwired in the build (by #defining CYCLONE_INCLUDE_PATH) 
+  string_t stdinc_string =
+#if defined(CYCLONE_INCLUDE_PATH)
+  " -I" CYCLONE_INCLUDE_PATH;
+#else
+  "";
+#endif
   let cyclone_include_path = Stdlib::getenv("CYCLONE_INCLUDE_PATH");
   if (cyclone_include_path != NULL) {
     let x = split_by_char(cyclone_include_path,':');
@@ -479,8 +501,8 @@ static void process_file(string_t<`H> filename) {
     }
   else fixup_string = "";
 
-  let cmd = aprintf("gcc -x c -E -U__GNUC__ -nostdinc%s%s %s%s%s",
-                    cppargs_string, stdinc_string,
+  let cmd = aprintf("%s%s%s %s%s%s",
+	            cpp, cppargs_string, stdinc_string,
                     sh_escape_string(filename),
                     fixup_string, ofile_string);
 
@@ -628,7 +650,7 @@ int main(int argc, string_t<`H> ?`H argv) {
                new Flag_spec(add_cpparg),
                "Pass definition to preprocessor"),
          new $("-B",true,"<file>",
-               new Flag_spec(add_cyclone_exec_prefix_path),
+               new Flag_spec(add_cyclone_lib_path),
                "Add to the list of directories to search for compiler files"),
          new $("-I",true,"<dir>",
                new Flag_spec(add_cpparg),
@@ -706,9 +728,15 @@ int main(int argc, string_t<`H> ?`H argv) {
          new $("-save-temps",false,"",
                new Unit_spec(set_save_temps),
                "Don't delete temporary files"),
+         new $("-use-cpp",false,"<path>",
+               new String_spec(set_cpp),
+               "Indicate which preprocessor to use"),
          new $("-save-c",false,"",
                new Set_spec(&save_c_r),
                "Don't delete temporary C files"),
+         new $("-tc",false,"",
+               new Set_spec(&tc_r),
+               "Stop after type checking"),
          new $("-nocyc",false,"",
                new Unit_spec(set_nocyc),
                "Don't add implicit namespace Cyc"),
@@ -747,14 +775,21 @@ int main(int argc, string_t<`H> ?`H argv) {
 
   // Run the C compiler
   // First, find the files libcyc.a, gc.a, cyc_include.h
+
+  // The Cyclone lib-path is specified with the following order (where
+  // the earlier in the order, the first place we look for the file):
+  // 1) command line arguments (with -B)
+  // 2) environment var (with CYCLONE_EXEC_PREFIX)
+  // 3) hardwired in the build (by #defining CYCLONE_LIB_PATH) 
   string_t cyclone_exec_prefix = Stdlib::getenv("CYCLONE_EXEC_PREFIX");
   if (cyclone_exec_prefix != NULL)
-    cyclone_exec_prefix_path = new List(new cyclone_exec_prefix,
-                                        cyclone_exec_prefix_path);
-  cyclone_exec_prefix_path = new List(new ((string_t)"c:/cyclone/bin/cyc-lib"),
-                                        cyclone_exec_prefix_path);
-  cyclone_exec_prefix_path = List::imp_rev(cyclone_exec_prefix_path);
-  let cyc_include = do_find(cyclone_exec_prefix_path,"include/cyc_include.h");
+    cyclone_lib_path = new List(new cyclone_exec_prefix, cyclone_lib_path);
+#if defined(CYCLONE_LIB_PATH)
+  cyclone_lib_path = new List(new ((string_t)CYCLONE_LIB_PATH),
+                              cyclone_lib_path);
+#endif
+  cyclone_lib_path = List::imp_rev(cyclone_lib_path);
+  let cyc_include = do_find(cyclone_lib_path,"include/cyc_include.h");
 
   ccargs = rev(ccargs);
   let ccargs_string = String::str_sepstr(List::map(sh_escape_stringptr,ccargs), " ");
@@ -776,11 +811,12 @@ int main(int argc, string_t<`H> ?`H argv) {
 
     string_t libcyc_filename = pa_r ? "libcyc_a.a" : "libcyc.a";
     string_t nogc_filename = pa_r ? "nogc_a.a" : "nogc.a";
+    string_t gc_filename = "gc.a";
 
-    let libcyc = do_find(cyclone_exec_prefix_path,libcyc_filename);
+    let libcyc = do_find(cyclone_lib_path,libcyc_filename);
     let gc = (nogc_r ?
-              do_find(cyclone_exec_prefix_path,nogc_filename):
-              do_find(cyclone_exec_prefix_path,"gc.a"));
+              do_find(cyclone_lib_path,nogc_filename):
+              do_find(cyclone_lib_path,gc_filename));
 
     stdlib = list(new libcyc /*, new gc*/);
     stdlib_string = aprintf(" %s %s", libcyc, gc);
