@@ -557,7 +557,7 @@ flow_info_t eval_absexp(analenv_t env, seg_t loc,
       out_flow = join_flow(out_flow, eval_absexp(env,loc,ael->hd,in_flow));
     return out_flow;
   case &GroupAE(UnorderedG,ael): 
-    _ out_flow = in_flow; 
+    let out_flow = in_flow; 
     // local iteration until we reach a fixpoint
     // notice how we are extremely conservative.  Basically, the aes may
     // happen any number of times in any order.
@@ -568,7 +568,6 @@ flow_info_t eval_absexp(analenv_t env, seg_t loc,
     // distinct exp, but this should be true!!
     do {
       in_flow  = out_flow;
-      out_flow = in_flow;
       for(_ ael2 = ael; ael2 != null; ael2 = ael2->tl)
 	out_flow = join_flow(out_flow, eval_absexp(env,loc,ael2->hd, out_flow));
     } while(!flow_lessthan_approx(out_flow,in_flow));

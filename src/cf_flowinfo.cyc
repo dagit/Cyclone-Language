@@ -386,6 +386,12 @@ flow_info_t join_flow(flow_info_t f1, flow_info_t f2) {
   case $(_,BottomFL): return f1;
   case $(&InitsFL(d1),&InitsFL(d2)):
     if(d1 == d2) return f1;
+    // we're doing a lot of work to avoid allocation here, but profiling
+    // suggests that's the right thing to do!
+    if(flow_lessthan_approx(f1,f2))
+      return f2;
+    if(flow_lessthan_approx(f2,f1))
+      return f1;
     let places  = *empty_place_set_ptr;
     let joinenv = JoinEnv(d1,d2,&places);
     let outdict = Dict::intersect_c(join_pathinfo,&joinenv,d1,d2);

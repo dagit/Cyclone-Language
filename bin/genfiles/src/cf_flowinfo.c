@@ -944,16 +944,18 @@ _temp609)->f1; goto _LL606;} else{ goto _LL590;} _LL606: _temp605= _temp589.f2;
 if(( unsigned int) _temp605 > 1u?*(( int*) _temp605) == Cyc_CfFlowInfo_InitsFL:
 0){ _LL608: _temp607=(( struct Cyc_CfFlowInfo_InitsFL_struct*) _temp605)->f1;
 goto _LL596;} else{ goto _LL590;} _LL592: return f2; _LL594: return f1; _LL596:
-if( _temp611 == _temp607){ return f1;}{ struct Cyc_Set_Set* _temp613=*(( struct
-Cyc_Set_Set**) _check_null( Cyc_CfFlowInfo_empty_place_set_ptr)); struct Cyc_CfFlowInfo_JoinEnv
-_temp614=({ struct Cyc_CfFlowInfo_JoinEnv _temp618; _temp618.d1= _temp611;
-_temp618.d2= _temp607; _temp618.places=& _temp613; _temp618;}); struct Cyc_Dict_Dict*
-_temp615=(( struct Cyc_Dict_Dict*(*)( void*(* f)( struct Cyc_CfFlowInfo_JoinEnv*,
-void*, void*), struct Cyc_CfFlowInfo_JoinEnv* env, struct Cyc_Dict_Dict* d1,
-struct Cyc_Dict_Dict* d2)) Cyc_Dict_intersect_c)( Cyc_CfFlowInfo_join_pathinfo,&
-_temp614, _temp611, _temp607); return( void*)({ struct Cyc_CfFlowInfo_InitsFL_struct*
-_temp616=( struct Cyc_CfFlowInfo_InitsFL_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_InitsFL_struct));
-_temp616[ 0]=({ struct Cyc_CfFlowInfo_InitsFL_struct _temp617; _temp617.tag= Cyc_CfFlowInfo_InitsFL;
+if( _temp611 == _temp607){ return f1;} if( Cyc_CfFlowInfo_flow_lessthan_approx(
+f1, f2)){ return f2;} if( Cyc_CfFlowInfo_flow_lessthan_approx( f2, f1)){ return
+f1;}{ struct Cyc_Set_Set* _temp613=*(( struct Cyc_Set_Set**) _check_null( Cyc_CfFlowInfo_empty_place_set_ptr));
+struct Cyc_CfFlowInfo_JoinEnv _temp614=({ struct Cyc_CfFlowInfo_JoinEnv _temp618;
+_temp618.d1= _temp611; _temp618.d2= _temp607; _temp618.places=& _temp613;
+_temp618;}); struct Cyc_Dict_Dict* _temp615=(( struct Cyc_Dict_Dict*(*)( void*(*
+f)( struct Cyc_CfFlowInfo_JoinEnv*, void*, void*), struct Cyc_CfFlowInfo_JoinEnv*
+env, struct Cyc_Dict_Dict* d1, struct Cyc_Dict_Dict* d2)) Cyc_Dict_intersect_c)(
+Cyc_CfFlowInfo_join_pathinfo,& _temp614, _temp611, _temp607); return( void*)({
+struct Cyc_CfFlowInfo_InitsFL_struct* _temp616=( struct Cyc_CfFlowInfo_InitsFL_struct*)
+GC_malloc( sizeof( struct Cyc_CfFlowInfo_InitsFL_struct)); _temp616[ 0]=({
+struct Cyc_CfFlowInfo_InitsFL_struct _temp617; _temp617.tag= Cyc_CfFlowInfo_InitsFL;
 _temp617.f1= Cyc_CfFlowInfo_escape_these( _temp613, _temp615); _temp617;});
 _temp616;});} _LL590:;}} int Cyc_CfFlowInfo_initstate_lessthan_approx( void*
 state1, void* state2){ struct _tuple3 _temp620=({ struct _tuple3 _temp619;

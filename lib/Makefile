@@ -33,6 +33,7 @@ endif
 LC_FLAG =
 
 CYC_FLAGS := -I. -B. -save-c $(LC_FLAG) $(CYC_MPROF_FLAG) $(TOC_FLAG)
+#CYC_FLAGS := -I. -B. -pg -save-c $(LC_FLAG) $(CYC_MPROF_FLAG) $(TOC_FLAG)
 
 all: $(OUT_PREFIX)$(CYCLIB) nogc.a xml/libxml.a
 
@@ -80,6 +81,7 @@ ifdef MS
 	cl /I$(CYCDIR) /Dinline=__inline /c /w /nologo /Fo$@ $(RUNTIME).c
 else
 	$(CC) -c -o $@ -include include/cyc_include.h $(CPPFLAGS) $(CFLAGS) $(RUNTIME).c
+#	$(CC) -pg -c -o $@ -include include/cyc_include.h $(CPPFLAGS) $(CFLAGS) $(RUNTIME).c
 endif
 
 # delete generated files with a particular prefix
