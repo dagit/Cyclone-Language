@@ -448,10 +448,10 @@ static enum Cyc_Toseqc_SideEffect Cyc_Toseqc_fun_effect(struct _tuple1*qv){
 struct _tuple1*_tmp13=qv;void*_tmp14;if(((((struct _tuple1*)_tmp13)->f1).Loc_n).tag == 4){_tmp14=_tmp13->f2;{struct _fat_ptr*fn=_tmp14;
 # 72
 {int i=0;for(0;(unsigned)i < 8U;++ i){
-if(!Cyc_strcmp((struct _fat_ptr)Cyc_Toseqc_pure_funs[i],(struct _fat_ptr)*fn))
+if(!Cyc_strcmp((struct _fat_ptr)*((struct _fat_ptr*)_check_known_subscript_notnull(Cyc_Toseqc_pure_funs,8U,sizeof(struct _fat_ptr),i)),(struct _fat_ptr)*fn))
 return Cyc_Toseqc_NoEffect;}}
 {int i=0;for(0;(unsigned)i < 6U;++ i){
-if(!Cyc_strcmp((struct _fat_ptr)Cyc_Toseqc_exn_effect_funs[i],(struct _fat_ptr)*fn))
+if(!Cyc_strcmp((struct _fat_ptr)*((struct _fat_ptr*)_check_known_subscript_notnull(Cyc_Toseqc_exn_effect_funs,6U,sizeof(struct _fat_ptr),i)),(struct _fat_ptr)*fn))
 return Cyc_Toseqc_ExnEffect;}}
 return Cyc_Toseqc_AnyEffect;}}else{
 return Cyc_Toseqc_AnyEffect;};}

@@ -451,7 +451,7 @@ struct _fat_ptr Cyc_Absynpp_typ2string(void*);struct Cyc_RgnOrder_RgnPO{struct C
 # 67 "rgnorder.cyc"
 static int Cyc_RgnOrder_valid_constraint(void*eff,void*rgn){
 struct Cyc_Absyn_Kind*_tmp0=Cyc_Tcutil_type_kind(rgn);struct Cyc_Absyn_Kind*_stmttmp0=_tmp0;struct Cyc_Absyn_Kind*_tmp1=_stmttmp0;enum Cyc_Absyn_AliasQual _tmp3;enum Cyc_Absyn_KindQual _tmp2;_tmp2=_tmp1->kind;_tmp3=_tmp1->aliasqual;{enum Cyc_Absyn_KindQual k=_tmp2;enum Cyc_Absyn_AliasQual a=_tmp3;
-if((int)k != (int)3U)
+if((int)k != 3)
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmp5=({struct Cyc_Warn_String_Warn_Warg_struct _tmpB3;_tmpB3.tag=0,({struct _fat_ptr _tmpBF=({const char*_tmp9="bad region type |";_tag_fat(_tmp9,sizeof(char),18U);});_tmpB3.f1=_tmpBF;});_tmpB3;});struct Cyc_Warn_Typ_Warn_Warg_struct _tmp6=({struct Cyc_Warn_Typ_Warn_Warg_struct _tmpB2;_tmpB2.tag=2,_tmpB2.f1=(void*)rgn;_tmpB2;});struct Cyc_Warn_String_Warn_Warg_struct _tmp7=({struct Cyc_Warn_String_Warn_Warg_struct _tmpB1;_tmpB1.tag=0,({struct _fat_ptr _tmpC0=({const char*_tmp8="| passed to add_outlives_constraint";_tag_fat(_tmp8,sizeof(char),36U);});_tmpB1.f1=_tmpC0;});_tmpB1;});void*_tmp4[3];_tmp4[0]=& _tmp5,_tmp4[1]=& _tmp6,_tmp4[2]=& _tmp7;((int(*)(struct _fat_ptr))Cyc_Warn_impos2)(_tag_fat(_tmp4,sizeof(void*),3));});{
 void*_tmpA=Cyc_Absyn_compress(eff);void*_stmttmp1=_tmpA;void*_tmpB=_stmttmp1;void*_tmpC;switch(*((int*)_tmpB)){case 0: switch(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmpB)->f1)){case 9: _tmpC=((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmpB)->f2;{struct Cyc_List_List*es=_tmpC;
 # 73
@@ -463,7 +463,7 @@ struct Cyc_Absyn_Kind*_tmpD=Cyc_Tcutil_type_kind(t);struct Cyc_Absyn_Kind*_stmtt
 return(int)a == (int)0U ||(int)ta == (int)a;}}}else{goto _LLE;}case 8: if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmpB)->f2 != 0){_tmpC=(void*)(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmpB)->f2)->hd;{void*r=_tmpC;
 # 85
 struct Cyc_Absyn_Kind*_tmp11=Cyc_Tcutil_type_kind(r);struct Cyc_Absyn_Kind*_stmttmp3=_tmp11;struct Cyc_Absyn_Kind*_tmp12=_stmttmp3;enum Cyc_Absyn_AliasQual _tmp14;enum Cyc_Absyn_KindQual _tmp13;_tmp13=_tmp12->kind;_tmp14=_tmp12->aliasqual;{enum Cyc_Absyn_KindQual rk=_tmp13;enum Cyc_Absyn_AliasQual ra=_tmp14;
-return(int)k == (int)3U &&((int)a == (int)0U ||(int)ra == (int)a);}}}else{goto _LLE;}default: goto _LLE;}case 1:
+return(int)k == 3 &&((int)a == (int)0U ||(int)ra == (int)a);}}}else{goto _LLE;}default: goto _LLE;}case 1:
 # 77
  goto _LL9;case 2: _LL9:
  return 1;default: _LLE:

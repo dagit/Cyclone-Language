@@ -76,7 +76,7 @@ static bool nocyc_setjmp_r = false;
 static bool generate_interface_r = false;
 static bool toseqc_r = true;
 static bool pthread_r = false;
-static bool vcgen_r  = false;
+static bool vcgen_r  = true;
 
 // Arguments to pass to the C compiler
 static list_t<stringptr_t> ccargs = NULL;
@@ -471,12 +471,6 @@ list_t<Absyn::decl_t> do_cfcheck(JumpAnalysis::jump_anal_res_t tables,
   return tds;
 }
 
-// bool do_vcgen(JumpAnalysis::jump_anal_res_t tables,
-//               list_t<Absyn::decl_t,`H> tds) {
-//   Vcgen::vcgen_topdecls(tables,tds);
-//   return true;
-// }
-
 bool do_insert_checks(JumpAnalysis::jump_anal_res_t tables, list_t<Absyn::decl_t,`H> tds) {
   InsertChecks::insert_checks(tds,tables, vcgen_r);
   return true;
@@ -829,10 +823,6 @@ static void process_file(string_t<`H> filename) {
   if(!compile_failure && Flags::stop_after_pass >= Flags::FlowAnalysis)
     tds = do_stage("control-flow checking",tds,do_cfcheck,(_@)jump_tables,tds);
 
-  // Verification-condition generation (optional for now -- vcgen_r)
-  //   if (!compile_failure && vcgen_r && Flags::stop_after_pass >= Flags::VCGen)
-  //     do_stage("verification condition generation",tds,do_vcgen,(_@)jump_tables,true);
-  
   // check-insertion
   if(!compile_failure && Flags::stop_after_pass >= Flags::CheckInsertion)
     do_stage("check insertion", tds, do_insert_checks, (_@)jump_tables, true);
@@ -1190,9 +1180,9 @@ using Arg {
   make_option(opt75,"-pg",false,"",
               Unit_spec,set_pg,
               "Compile for profiling with gprof");
-  make_option(opt76,"--vcgen",false, "",
-              Set_spec,&vcgen_r,
-              "compute verification-conditions");
+  make_option(opt76,"--novcgen",false, "",
+              Clear_spec,&vcgen_r,
+              "do not compute verification-conditions");
   make_option(opt77,"--cifc-inst-tvar",false, "",
               Unit_spec,Cifc::set_inst_tvar,
               "instantiate type variables instead of introducing new ones");

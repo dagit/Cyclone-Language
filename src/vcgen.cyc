@@ -93,6 +93,7 @@
 #include <dict.h>
 #include <string.h> 
 #include <cycboot.h> 
+#include <set.h>
 
 
 //#define VCGEN_DEBUG
@@ -105,61 +106,53 @@ using PrattProver;
 ////// Forward Declaration for Environments /////
 struct Env;
 typedef struct Env @env_t;
-// returns true if a2 is provable from a1 (i.e., a1 |- a2)
-// tries simple_prove first and then tries the constraint solver
-static bool implies_noreduce(assn_t a1, assn_t a2) {
-  return simple_prove(a1,a2) || constraint_prove(a1,a2);
-}
 
-// same as above but as a side effect, reduces the caller's
-// assertions.
-static bool implies(assn_t @a1, assn_t @a2) {
+// returns true if a2 is provable from a1 (i.e., a1 |- a2)
+// only tries simple_prove.
+static bool simple_implies(assn_t @a1, assn_t @a2) {
   *a1 = reduce(*a1);
   *a2 = reduce(*a2);
-  return implies_noreduce(*a1,*a2);
+  return simple_prove(*a1,*a2);
+}
+
+// same as simple_implies but also tries the constraint prover.
+static bool implies(assn_t @a1, assn_t @a2) {
+  return simple_implies(a1,a2) || constraint_prove(*a1,*a2);
 }
 
 ////////// Widening for Assertions ////////////////////
+// Given A, we factor out all of the common conjuncts.
+// We use this at loops to ensure we eventually get a loop
+// invariant.  We also use this at statement-level join
+// points, because otherwise we blow up into a large number
+// of paths.
+typedef struct Set::Set<`a,`H>*`H set_opt_t<`a>;
 
-// We want to find an assertion a' such that ctxt => a' and a => a'.
-// (so or(ctxt,a) => a'.)  In addition, we want a' to have size less
-// than or equal to a.  
-static assn_t weaken_it(assn_t ctxt, assn_t a) {
-  if (simple_prove(ctxt,a)) return a;
-  assn_t res;
+// s is a set of primitive assertions that we consider to be
+// a conjunction -- we are computing an approximation of and(sopt,a).  
+// When sopt is NULL, it represents false.  
+static set_opt_t<assn_t> widen_it(set_opt_t<assn_t> s, assn_t a) {
+  if (s == NULL) return NULL;
   switch (a) {
-  case &And(a1,a2):
-    let b1 = weaken_it(ctxt,a1);            // IH: ctxt=>b1 & a1=>b1
-    let b2 = weaken_it(ctxt,a2);            // IH: ctxt=>b2 & a2=>b2
-    //if (implies_noreduce(b1,b2)) return b1;
-    //if (implies_noreduce(b2,b1)) return b2;
-    res = and(b1,b2);                   // ctxt => b1&b2  a1&a2=> b1&b2
-    break;
-  case &Or(a1,a2):
-    let b1 = weaken_it(a2,a1);           // a1=>b1 & a2=>b1
-    let b2 = weaken_it(a1,a2);           // a2=>b2 & a1=>b2
-    res = weaken_it(ctxt,and(b1,b2));  // ctxt=>c  b1&b2=>c  a1|a2=>b1&b2
-    break;
-  case &True: 
-  case &False: 
-  case &Prim(...): 
-    res = &true_assn;
-    break;
-  default: return weaken_it(ctxt, reduce(a));
+  case &Prim(t1,Eq,t2): 
+    return Set::insert((Set::set_t<assn_t>)s,a); 
+  case &Prim(t1,p,t2): return Set::insert((Set::set_t<assn_t>)s,a); 
+  case &And(a1,a2): return widen_it(widen_it(s,a1),a2);
+  case &Or(a1,a2):  
+    let s1 = widen_it(s,a1);
+    let s2 = widen_it(s,a2);
+    if (s1 == NULL || s2 == NULL) return NULL;
+    return Set::intersect((Set::set_t<assn_t>)s1,(Set::set_t<assn_t>)s2);
+  case &True: return s;
+  case &False: return NULL;
+  default: return widen_it(s,reduce(a));
   }
-  return res;
 }
 
-
-// We are given assertions A1 and A2 and would like to find
-// the strongest assertion A such that A1 implies A and
-// A2 implies A.  However, we would like to also ensure that
-// A is "smaller" than A2.  The widen operation ensures that
-// either we get back A2 or else the assertion is smaller
-// (or as a technical hitch, we flip once from false to true.)
-static assn_t weaken_assn(assn_t ctxt, assn_t a) {
-  if (implies(&ctxt,&a)) return a;
-  return weaken_it(ctxt,a);
+static assn_t widen(assn_t a) {
+  let sopt = widen_it(Set::empty(assncmp),a);
+  if (sopt == NULL) return &false_assn;
+  return Set::fold(and,(Set::set_t<assn_t>)sopt,&true_assn);
 }
 
 ////////// Updating an Assertion //////////////////
@@ -199,13 +192,14 @@ struct SharedEnv {
   Hashtable::table_t<stmt_t,assn_t@> assn_table;
   // a mapping for successors in the control-flow graph (from jump_analysis)
   Hashtable::table_t<stmt_t,stmt_opt_t> succ_table;
-  // the assertion accumulated for the current exception handler
-  assn_t try_assn;
+  // the assertion accumulated for the current exception handler if any
+  assn_t* try_assn;
   // when not-null is used to record the resulting value of an expr-stmt.
   term_opt_t* exp_stmt;
-  // used to record the result terms and assertions for a function
+  // used to record the result terms and assertions for a function.  Only
+  // needed when the function has an ensures clause.
   term_opt_t  res_term;
-  assn_t      res_assn;
+  assn_t*     res_assn;
 };
 
 typedef Dict::dict_t<vardecl_t,int> state_counter_t;
@@ -229,15 +223,15 @@ struct Env {
 static int hash_ptr(`a s) { return (int)s; }
 
 static env_t 
-initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info) {
+initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info, assn_t *`H res_assn) {
   let succ_table = Hashtable::lookup(tables->succ_tables,fd);
   let assn_table = Hashtable::create(57, Core::ptrcmp, hash_ptr);
   let senv =  new SharedEnv{.assn_table = assn_table,
                             .succ_table = succ_table,
-                            .try_assn = &false_assn,
+                            .try_assn = NULL,
                             .exp_stmt = NULL,
                             .res_term = NULL,
-                            .res_assn = &false_assn};
+                            .res_assn = res_assn};
   let d = Dict::empty(Core::ptrcmp);
   return new Env { .shared = senv, .state_counter = d, .assn_info = assn_info};
 }
@@ -264,7 +258,7 @@ static term_t fresh_nonescvar(env_t env, vardecl_t vd) {
   int res = 0;
   Dict::lookup_bool(env->state_counter,vd,&res);
   env->state_counter = Dict::insert(env->state_counter,vd,res+1);
-  return new LogicVar(vd,res);
+  return new LogicVar(vd,res,vd->type);
 }
 
 // each statement may have an assertion associated with it from
@@ -273,7 +267,7 @@ static assn_t pre_stmt_update(env_t env, stmt_t s, assn_t ain) {
   let popt = Hashtable::lookup_opt(env->shared->assn_table,s);
   if (popt != NULL) {
     assn_t @p = *popt;
-    let new_precondition = merge_assn(ain,*p);
+    let new_precondition = or(ain,*p);
     *p = new_precondition;
     return new_precondition;
   } else 
@@ -296,7 +290,7 @@ static assn_t loop_assn(env_t env, stmt_t s, assn_t ain) {
   assn_t @* aprevopt = Hashtable::lookup_opt(env->shared->assn_table,s);
   if (aprevopt != NULL) {
     let aprev = *aprevopt;
-    ain = weaken_assn(ain,*aprev);
+    ain = widen(or(ain,*aprev));
     *aprev = ain;
   } else {
     Hashtable::insert(env->shared->assn_table,s,new ain);
@@ -305,12 +299,12 @@ static assn_t loop_assn(env_t env, stmt_t s, assn_t ain) {
 }
 
 // similar to pre_stmt_update but makes sure to put the
-// result on the statement.
+// result on the statement.  
 static assn_t forward_assn(env_t env, stmt_t s, assn_t ain) {
   assn_t@* aprevopt = Hashtable::lookup_opt(env->shared->assn_table,s);
   if (aprevopt != NULL) {
     let aprev = *aprevopt;
-    ain = merge_assn(ain,*aprev);
+    ain = widen(or(ain,*aprev));
     *aprev = ain;
   } else {
     Hashtable::insert(env->shared->assn_table,s,new ain);
@@ -319,21 +313,23 @@ static assn_t forward_assn(env_t env, stmt_t s, assn_t ain) {
 }
 
 // update the assertion associated with the current 
-// exception handler.
+// exception handler.  
 static void update_try_assn(env_t env, assn_t a) {
-  env->shared->try_assn = merge_assn(env->shared->try_assn,a);
+  if (env->shared->try_assn == NULL) return;
+  *env->shared->try_assn = widen(or(*env->shared->try_assn,a));
 }
 
 // update the return information for a function
-static void update_return(env_t env, term_opt_t t, assn_t a) {
+static void update_return(env_t env, term_opt_t t, assn_t a, type_opt_t topt) {
   let shared = env->shared;
+  if (shared->res_assn == NULL) return;
   if (shared->res_term != NULL || t != NULL) {
-    let v = fresh_var();
+    let v = fresh_var(topt);
     shared->res_term = v;
-    shared->res_assn = 
-      merge_assn(and(a,eq(v,t)),and(shared->res_assn,eq(v,shared->res_term)));
+    *shared->res_assn = 
+      or(and(a,eq(v,t)),and(*shared->res_assn,eq(v,shared->res_term)));
   } else {
-    shared->res_assn = merge_assn(a,shared->res_assn);
+    *shared->res_assn = or(a,*shared->res_assn);
   }
 }
 
@@ -507,11 +503,11 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     s = s2;
     goto LOOP;
   case &Absyn::Return_s(NULL): 
-    update_return(env,NULL,ain);
+    update_return(env,NULL,ain,NULL);
     return &false_assn;
   case &Absyn::Return_s(e as &_): 
     let $(t,aout) = vcgen_rexp(env,(exp_t)e,ain);
-    update_return(env,t,aout);
+    update_return(env,t,aout,e->topt);
     return &false_assn;
   case &Absyn::IfThenElse_s(e1,s1,s2):
     let $(at,af) = vcgen_test(env,e1,ain);
@@ -519,7 +515,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     at = vcgen_stmt(env,s1,at);
     af = vcgen_stmt(env2,s2,af);
     merge_env(env,env2);
-    return merge_assn(at,af);
+    return widen(or(at,af));
   case &Absyn::While_s($(e,dummy),s):
     // we're doing local iteration here -- we join with the
     // assertion on the dummy and widen each time around the loop since
@@ -530,7 +526,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
       ain = loop_assn(env,dummy,ain);
       let $(at,af) = vcgen_test(env,e,ain);
       ain = vcgen_stmt(env,s,at);
-      if (implies(&ain,get_assn(env,dummy))) return af;
+      if (simple_implies(&ain,get_assn(env,dummy))) return af;
     } 
   case &Absyn::Continue_s: fallthru;
     // continue is a backwards jump in a loop, but we take
@@ -544,7 +540,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     // that statement.  
     let dest = Hashtable::lookup(env->shared->succ_table,s);
     if (dest == NULL) 
-      update_return(env,NULL,ain);
+      update_return(env,NULL,ain,NULL);
     else 
       forward_assn(env, (stmt_t)dest, ain);
     return &false_assn;
@@ -559,15 +555,15 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
       // must do pre-statement check because continue goes here
       ain = pre_stmt_update(env,dummy3,ain);
       ain = vcgen_rexp(env,e3,ain)[1];
-      if (implies(&ain,get_assn(env,dummy2))) return af;
+      if (simple_implies(&ain,get_assn(env,dummy2))) return af;
     }
   case &Absyn::Do_s(s,$(e,dummy)):
     // similar to while loop
     while (true) {
       ain = vcgen_stmt(env,s,ain);
       let $(at,af) = vcgen_test(env,e,ain);
-      ain = weaken_assn(*get_assn(env,dummy),ain);
-      if (implies(&ain,get_assn(env,dummy))) return af;
+      ain = widen(or(*get_assn(env,dummy),ain));
+      if (simple_implies(&ain,get_assn(env,dummy))) return af;
       loop_assn(env,dummy,ain);
     }
   case &Absyn::Switch_s(e,scs,_):
@@ -609,16 +605,16 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     // save old try/catch-handler assertion
     let old_try_assn = env->shared->try_assn;
     // install new try/catch-handler assertion
-    env->shared->try_assn = &false_assn;
+    env->shared->try_assn = new ((assn_t)&false_assn);
     // run vcgen on the body -- this will update the env->shared->try_assn 
     // with assertions of any state that might throw an exn.
     ain = vcgen_stmt(env,s,ain);
     // restore the old handler's assertion.
-    let new_try_assn = env->shared->try_assn;
+    let new_try_assn = *env->shared->try_assn;
     env->shared->try_assn = old_try_assn;
     // analyze the catch handlers and merge with the body to get
     // the final output.
-    return merge_assn(ain,vcgen_switch(env,scs,new_try_assn));
+    return or(ain,vcgen_switch(env,scs,new_try_assn));
   }
 }
 
@@ -633,15 +629,16 @@ static assn_t vcgen_switch(env_t env, list_t<switch_clause_t> scs, assn_t ain) {
     for (let pvs = sc->pat_vars->v; pvs != NULL; pvs = pvs->tl) {
       let &$(vdopt,eopt) = pvs->hd;
       if (vdopt != NULL) {
-        if (eopt != NULL)
-          a = do_assign(env,a,new Var(*vdopt),vcgen_rexp(env,(exp_t)eopt,a)[0]);
-        else 
-          a = do_assign(env,a,new Var(*vdopt),fresh_var());
+        // FIX: the expression associated with the vardecls isn't right.
+        //if (eopt != NULL)
+        //  a = do_assign(env,a,new Var(*vdopt),vcgen_rexp(env,(exp_t)eopt,a)[0]);
+        //else 
+          a = do_assign(env,a,new Var(*vdopt),fresh_var((*vdopt)->type));
       }
     }
     if (sc->where_clause != NULL) 
       a = vcgen_test(env, (exp_t)sc->where_clause, a)[0];
-    res = merge_assn(res,vcgen_stmt(env,sc->body,a));
+    res = or(res,vcgen_stmt(env,sc->body,a));
   }
   return res;
 }
@@ -650,7 +647,7 @@ static assn_t add_vardecl(env_t env, vardecl_t vd, assn_t a) {
   // stupid C semantics means I have to put in a dummy value for vd first,
   // then run the initializer.  
   let tv = new Var(vd);
-  a = do_assign(env,a,tv,fresh_var());
+  a = do_assign(env,a,tv,fresh_var(vd->type));
   if (vd->initializer != NULL) {
     let $(t,a1) = vcgen_rexp(env,(exp_t)vd->initializer,a);
     a = do_assign(env,a1,tv,t);
@@ -666,12 +663,16 @@ static assn_t vcgen_local_decl(env_t env, decl_t d, assn_t a) {
     for (let vds = vds->v; vds != NULL; vds = vds->tl) {
       let $(vdopt,eopt) = *vds->hd;
       if (vdopt != NULL) {
+        // FIX: the expressions associated with the patterns are not right.
+        a = add_vardecl(env,*vdopt,a);
+        /*
         if (eopt == NULL) a = add_vardecl(env,*vdopt,a);
         else {
           let $(t,a1) = vcgen_rexp(env,e,a);
           let tv = new Var(*vdopt);
           a = do_assign(env,a1,tv,t);
         }
+        */
       }
     }
     return a;
@@ -715,15 +716,15 @@ static $(assn_t,assn_t) vcgen_test(env_t env, exp_t e, assn_t ain) {
     let $(a1t,a1f) = vcgen_test(env,e1,ain);
     let $(a2t,a2f) = vcgen_test(env,e2,a1t);
     let $(a3t,a3f) = vcgen_test(env,e3,a1f);
-    return $(merge_assn(a2t,a3t),merge_assn(a2f,a3f));
+    return $(or(a2t,a3t),or(a2f,a3f));
   case &Absyn::And_e(e1,e2):
     let $(a1t,a1f) = vcgen_test(env,e1,ain);
     let $(a2t,a2f) = vcgen_test(env,e2,a1t);
-    return $(a2t, merge_assn(a1f,a2f));
+    return $(a2t, or(a1f,a2f));
   case &Absyn::Or_e(e1,e2):
     let $(a1t,a1f) = vcgen_test(env,e1,ain);
     let $(a2t,a2f) = vcgen_test(env,e2,a1f);
-    return $(merge_assn(a1t,a2t),a2f);
+    return $(or(a1t,a2t),a2f);
   case &Absyn::SeqExp_e(e1,e2):
     let $(_,ain) = vcgen_rexp(env,e1,ain);
     return vcgen_test(env,e2,ain);
@@ -801,7 +802,7 @@ static $(list_t<term_t>*,assn_t) vcgen_rexps(env_t env, list_t<exp_t> es, assn_t
 
 static $(term_t,assn_t) vcgen_rexp_always(env_t env, exp_t e, assn_t ain) {
   let $(topt,a) = vcgen_rexp(env,e,ain);
-  return $(topt == NULL ? fresh_var() : (term_t)topt, a);
+  return $(topt == NULL ? fresh_var(e->topt) : (term_t)topt, a);
 }
 
 static $(list_t<term_t>,assn_t) vcgen_rexps_always(env_t env, list_t<exp_t> es, assn_t ain) {
@@ -937,26 +938,26 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     let $(t1,at) = vcgen_rexp(env,e2,at);
     let $(t2,af) = vcgen_rexp(env,e3,af);
     if (t1 != NULL && t2 != NULL) {
-      let v = fresh_var();
+      let v = fresh_var(e->topt);
       at = and(at,eq(v,t1));
       af = and(af,eq(v,t2));
-      return $(v,merge_assn(at,af));
+      return $(v,widen(or(at,af)));
     } else
-      return $(NULL,merge_assn(at,af));
+      return $(NULL,or(at,af));
   case &Absyn::And_e(e1,e2):
     let $(at,af) = vcgen_test(env,e1,ain);
     let $(t,at) = vcgen_rexp(env,e2,at);
-    let v = fresh_var();
+    let v = fresh_var(e->topt);
     at = and(at,eq(v,t));
     af = and(af,eq(v,zero()));
-    return $(v,merge_assn(at,af));
+    return $(v,widen(or(at,af)));
   case &Absyn::Or_e(e1,e2):
     let $(at,af) = vcgen_test(env,e1,ain);
     let $(t,af) = vcgen_rexp(env,e2,af);
-    let v = fresh_var();
+    let v = fresh_var(e->topt);
     at = and(at,eq(v,one()));
     af = and(af,eq(v,t));
-    return $(v,merge_assn(at,af));
+    return $(v,widen(or(at,af)));
   case &Absyn::SeqExp_e(e1,e2):
     let $(_,a) = vcgen_rexp(env,e1,ain);
     return vcgen_rexp(env,e2,a);
@@ -978,7 +979,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     // add in the @ensures clause for the result
     let $(at,_) = vcgen_test(env,ensures,a2);
     if (ret_value != NULL) {
-      let v = fresh_var();
+      let v = fresh_var(((vardecl_t)ret_value)->type);
       // FIX: substitute ts for formal parameters
       at = subst((vardecl_t)ret_value,v,at);
       return $(v,at);
@@ -1008,6 +1009,12 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       fprintf(stderr, "type(e) = %s\n", Absynpp::typ2string(e->topt));
 #endif
       switch $(Absyn::compress(tp),Absyn::compress((type_t)e->topt)) {
+        // these two cases allow us to drop a cast of a tag_t to int/long
+        // or unsigned int/unsigned long.
+      case $(&Absyn::AppType(&Absyn::IntCon(_,Absyn::Int_sz),_),&Absyn::AppType(&Absyn::TagCon,_)):
+        return $(t,a);
+      case $(&Absyn::AppType(&Absyn::IntCon(_,Absyn::Long_sz),_),&Absyn::AppType(&Absyn::TagCon,_)):
+        return $(t,a);
       case $(&Absyn::AppType(&Absyn::IntCon(u1,s1),_),&Absyn::AppType(&Absyn::IntCon(u2,s2),_)):
 #ifdef VCGEN_DEBUG
 	fprintf(stderr, "cast: (tp) e where (tp) could be removed if %d == %d\n",
@@ -1053,7 +1060,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Deref_e(e): fallthru(e);
   case &Absyn::AggrArrow_e(e,...): fallthru(e, shared_zero_exp());
   case &Absyn::Subscript_e(e1,e2): 
-    let $(t1,a1) = vcgen_rexp(env,e1,ain);
+    let $(t1,a1) = vcgen_rexp_always(env,e1,ain);
     let $(t2,a2) = vcgen_rexp(env,e2,a1);
     switch (Absyn::compress((type_t)e1->topt)) {
     case &Absyn::TupleType(_): break;
@@ -1063,12 +1070,11 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       update_try_assn(env, a2);
       term_t term_numelts, term_typebound;
       
-      // we don't know t1, can't really infer anything about the bound
-      if (t1 == NULL) break;
       // we don't know t2, can't really infer anything about the bound
       if (t2 == NULL) break;
-      
       term_numelts = primop(Absyn::Numelts, list(t1));
+      /* we figure this out in the constraint solver now in order to
+         keep the size of the assertion small.
       exp_opt_t bound = Tcutil::get_type_bound((type_t)e1->topt);
       if (bound != NULL){
 	if (Tcutil::is_const_exp(bound)){
@@ -1076,6 +1082,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
 	  a2 = and(a2, eq(term_numelts, term_typebound));
 	}
       }
+      */
       let inbound_assn = ult(t2, term_numelts);
       insert_assn_info(env->assn_info, e1, new $(a2, inbound_assn));
       a2 = and(a2,inbound_assn);
@@ -1098,8 +1105,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
 
   case &Absyn::Comprehension_e(vd,e1,e2,_): 
     // similar to a while-loop except we evaluate e1 only once.
-    let $(t1,a) = vcgen_rexp(env,e1,ain);
-    let t1 = (t1 == NULL) ? fresh_var() : (term_t)t1;
+    let $(t1,a) = vcgen_rexp_always(env,e1,ain);
     let v = new Var(vd);
     // start off with index 0
     a = do_assign(env,a,v,zero());
@@ -1108,8 +1114,8 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       let af = and(a,ugte(v,t1));
       let $(_,abody) = vcgen_rexp(env,e2,at);  // run body and add one
       abody = do_assign(env,abody,v,primop(Absyn::Plus,list(v,one())));
-      if (implies(&abody,&a)) { a = af; break; }
-      a = weaken_assn(abody,a);  // widen and possibly iterate
+      if (simple_implies(&abody,&a)) { a = af; break; }
+      a = widen(or(abody,a));  // widen and possibly iterate
     }
     return $(NULL,a);
   case &Absyn::ComprehensionNoinit_e(e,_,_):
@@ -1155,21 +1161,22 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
 
 // FIX? take into account top-level (const) variable intializers?
 void vcgen_fundecl(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info){
-  let env = initial_env(tables,fd, assn_info);
   assn_t a = &true_assn;
   // put in the requires clause as an assumption.
   let $(args,reqopt,ensopt,ret_value) = get_requires_and_ensures_info(&fd->i);
+  assn_t *result_assn = (ensopt == NULL) ? NULL : new ((assn_t)&false_assn);
+  let env = initial_env(tables,fd,assn_info,result_assn);
   if (reqopt != NULL) {
     // hope the vards in here point to the vardecls in the fn...
     a = vcgen_test(env,(exp_t)reqopt,a)[0];
   }
   vcgen_stmt(env,fd->body,a);
-  // check the requires clause
+  // check the ensures clause
   if (ensopt != NULL) {
     exp_t ens = (exp_t)ensopt;
     let $(at,_) = vcgen_test(env,ens,&true_assn);
     let senv = env->shared;
-    let res_assn_opt = senv->res_assn;
+    let res_assn_opt = *senv->res_assn;
     assn_t res_assn = &false_assn;
     if (res_assn_opt != NULL) res_assn = ((assn_t)res_assn_opt);
     string_t str = "NULL";

@@ -469,7 +469,7 @@ if((int)env.ctxt == (int)Cyc_RemoveAggrs_AggrField && Cyc_Tcutil_is_array_type((
 struct Cyc_List_List*dles=0;
 unsigned _tmp11=_get_fat_size(s,sizeof(char));unsigned n=_tmp11;
 {unsigned i=0U;for(0;i < n;++ i){
-struct Cyc_Absyn_Exp*_tmp12=Cyc_Absyn_char_exp(((const char*)s.curr)[(int)i],0U);struct Cyc_Absyn_Exp*c=_tmp12;
+struct Cyc_Absyn_Exp*_tmp12=Cyc_Absyn_char_exp(*((const char*)_check_fat_subscript(s,sizeof(char),(int)i)),0U);struct Cyc_Absyn_Exp*c=_tmp12;
 c->topt=Cyc_Absyn_char_type;
 dles=({struct Cyc_List_List*_tmp14=_cycalloc(sizeof(*_tmp14));({struct _tuple11*_tmp62=({struct _tuple11*_tmp13=_cycalloc(sizeof(*_tmp13));_tmp13->f1=0,_tmp13->f2=c;_tmp13;});_tmp14->hd=_tmp62;}),_tmp14->tl=dles;_tmp14;});}}
 # 109

@@ -459,7 +459,7 @@ union Cyc_Absyn_Cnst _tmp8=Cyc_Evexp_promote_const(cn);union Cyc_Absyn_Cnst _stm
 return({struct _tuple11 _tmpF9;_tmpF9.f1=(unsigned)i,_tmpF9.f2=1;_tmpF9;});}case 6: _tmpA=((_tmp9.LongLong_c).val).f2;{long long x=_tmpA;
 # 52
 unsigned long long y=(unsigned long long)x >> (unsigned long long)32;
-if(y != (unsigned long long)-1 && y != (unsigned long long)0)
+if(y != 4294967295U && y != 0U)
 return({struct _tuple11 _tmpFA;_tmpFA.f1=0U,_tmpFA.f2=0;_tmpFA;});
 return({struct _tuple11 _tmpFB;_tmpFB.f1=(unsigned)x,_tmpFB.f2=1;_tmpFB;});}case 7:
  return({struct _tuple11 _tmpFC;_tmpFC.f1=0U,_tmpFC.f2=0;_tmpFC;});case 1:
@@ -743,7 +743,7 @@ return 1;else{
 unsigned long long i1=Cyc_Evexp_integral_const_to_long_long(c1);
 unsigned long long i2=Cyc_Evexp_integral_const_to_long_long(c2);
 long long diff=(long long)(i1 - i2);
-return diff == (long long)0?0:(diff < (long long)0?- 1: 1);}}}}}}}}}};}struct _tuple18{void*f1;void*f2;};
+return diff == (long long)0?0:(diff < (long long)0?-1: 1);}}}}}}}}}};}struct _tuple18{void*f1;void*f2;};
 # 351
 static int Cyc_Evexp_designator_cmp(void*d1,void*d2){
 struct _tuple18 _tmp7B=({struct _tuple18 _tmp128;_tmp128.f1=d1,_tmp128.f2=d2;_tmp128;});struct _tuple18 _stmttmp13=_tmp7B;struct _tuple18 _tmp7C=_stmttmp13;void*_tmp7E;void*_tmp7D;if(*((int*)_tmp7C.f1)== 0){if(*((int*)_tmp7C.f2)== 0){_tmp7D=((struct Cyc_Absyn_ArrayElement_Absyn_Designator_struct*)_tmp7C.f1)->f1;_tmp7E=((struct Cyc_Absyn_ArrayElement_Absyn_Designator_struct*)_tmp7C.f2)->f1;{struct Cyc_Absyn_Exp*e1=_tmp7D;struct Cyc_Absyn_Exp*e2=_tmp7E;

@@ -1328,7 +1328,7 @@ if(!Cyc_Binding_at_toplevel(env)){
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmp1DB=({struct Cyc_Warn_String_Warn_Warg_struct _tmp264;_tmp264.tag=0,({struct _fat_ptr _tmp31B=({const char*_tmp1DC="nested type definitions are not yet supported";_tag_fat(_tmp1DC,sizeof(char),46U);});_tmp264.f1=_tmp31B;});_tmp264;});void*_tmp1DA[1];_tmp1DA[0]=& _tmp1DB;({unsigned _tmp31C=loc;Cyc_Warn_err2(_tmp31C,_tag_fat(_tmp1DA,sizeof(void*),1));});});
 goto _LL0;}
 # 1023
-Cyc_Binding_absolutize_decl(loc,env,td->name,td->extern_c?Cyc_Absyn_ExternC: Cyc_Absyn_Public);{
+Cyc_Binding_absolutize_decl(loc,env,td->name,td->extern_c?4U: 2U);{
 struct _tuple0*_tmp1DD=td->name;struct _tuple0*_stmttmp1C=_tmp1DD;struct _tuple0*_tmp1DE=_stmttmp1C;void*_tmp1E0;union Cyc_Absyn_Nmspace _tmp1DF;_tmp1DF=_tmp1DE->f1;_tmp1E0=_tmp1DE->f2;{union Cyc_Absyn_Nmspace decl_ns=_tmp1DF;struct _fat_ptr*decl_name=_tmp1E0;
 # 1026
 struct Cyc_Binding_ResolveNSEnv*_tmp1E1=((struct Cyc_Binding_ResolveNSEnv*(*)(struct Cyc_Binding_NSCtxt*,union Cyc_Absyn_Nmspace))Cyc_Binding_get_ns_data)(env->ns,decl_ns);struct Cyc_Binding_ResolveNSEnv*decl_ns_data=_tmp1E1;

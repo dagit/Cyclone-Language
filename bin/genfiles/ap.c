@@ -454,7 +454,7 @@ if(n < 0)
 Cyc_XP_fromint(((struct Cyc_AP_T*)_check_null(z))->size,z->digits,(unsigned long)(- n));else{
 # 49
 Cyc_XP_fromint(((struct Cyc_AP_T*)_check_null(z))->size,z->digits,(unsigned long)n);}}
-z->sign=n < 0?- 1: 1;
+z->sign=n < 0?-1: 1;
 return Cyc_normalize(z,z->size);}
 # 53
 static struct Cyc_AP_T*Cyc_normalize(struct Cyc_AP_T*z,int n){
@@ -533,7 +533,7 @@ z=Cyc_mk(x->ndigits + y->ndigits);
 Cyc_XP_mul(((struct Cyc_AP_T*)_check_null(z))->digits,x->ndigits,x->digits,y->ndigits,y->digits);
 # 120
 Cyc_normalize(z,z->size);
-z->sign=(z->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0 ||(x->sign ^ y->sign)== 0)?1: - 1;
+z->sign=(z->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0 ||(x->sign ^ y->sign)== 0)?1: -1;
 # 123
 return z;}
 # 125
@@ -584,7 +584,7 @@ struct _fat_ptr tmp=({unsigned _tmp1B=(unsigned)((x->ndigits + y->ndigits)+ 2)* 
 # 172
 Cyc_normalize(q,q->size);
 Cyc_normalize(r,r->size);
-q->sign=(q->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(q->digits,sizeof(unsigned char),0))== 0 ||(x->sign ^ y->sign)== 0)?1: - 1;
+q->sign=(q->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(q->digits,sizeof(unsigned char),0))== 0 ||(x->sign ^ y->sign)== 0)?1: -1;
 # 176
 return q;}
 # 178
@@ -751,9 +751,9 @@ char sign='\000';
 int carry;
 (unsigned)p.curr?0:({struct _fat_ptr _tmpA3=({const char*_tmp39="p";_tag_fat(_tmp39,sizeof(char),2U);});((int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail)(_tmpA3,({const char*_tmp3A="ap.cyc";_tag_fat(_tmp3A,sizeof(char),7U);}),344U);});
 base >= 2 && base <= 36?0:({struct _fat_ptr _tmpA4=({const char*_tmp3B="base >= 2 && base <= 36";_tag_fat(_tmp3B,sizeof(char),24U);});((int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail)(_tmpA4,({const char*_tmp3C="ap.cyc";_tag_fat(_tmp3C,sizeof(char),7U);}),345U);});
-while((int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))&& isspace((int)*((const char*)_check_fat_subscript(p,sizeof(char),0U)))){
+while((int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))&& isspace((int)*((const char*)p.curr))){
 _fat_ptr_inplace_plus(& p,sizeof(char),1);}
-if((int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))== (int)'-' ||(int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))== (int)'+')
+if((int)*((const char*)p.curr)== (int)'-' ||(int)*((const char*)p.curr)== (int)'+')
 sign=*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& p,sizeof(char),1),sizeof(char),0U));
 {
 const char*start;
@@ -761,9 +761,9 @@ int k;int n=0;
 for(1;(int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))== (int)'0' &&(int)*((const char*)_check_fat_subscript(p,sizeof(char),1))== (int)'0';_fat_ptr_inplace_plus(& p,sizeof(char),1)){
 ;}
 start=(const char*)_untag_fat_ptr(p,sizeof(char),1U);
-for(1;(((int)'0' <= (int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))&&(int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))<= (int)'9')&&(int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))< (int)'0' + base ||
-((int)'a' <= (int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))&&(int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))<= (int)'z')&&(int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))< ((int)'a' + base)- 10)||
-((int)'A' <= (int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))&&(int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))<= (int)'Z')&&(int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))< ((int)'A' + base)- 10;_fat_ptr_inplace_plus(& p,sizeof(char),1)){
+for(1;(((int)'0' <= (int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))&&(int)*((const char*)p.curr)<= (int)'9')&&(int)*((const char*)p.curr)< (int)'0' + base ||
+((int)'a' <= (int)*((const char*)p.curr)&&(int)*((const char*)p.curr)<= (int)'z')&&(int)*((const char*)p.curr)< ((int)'a' + base)- 10)||
+((int)'A' <= (int)*((const char*)p.curr)&&(int)*((const char*)p.curr)<= (int)'Z')&&(int)*((const char*)p.curr)< ((int)'A' + base)- 10;_fat_ptr_inplace_plus(& p,sizeof(char),1)){
 ++ n;}
 for(k=1;1 << k < base;++ k){
 ;}
@@ -774,7 +774,7 @@ carry=({int _tmpA7=((struct Cyc_AP_T*)_check_null(z))->size;struct _fat_ptr _tmp
 # 367
 carry == 0?0:({struct _fat_ptr _tmpA8=({const char*_tmp3E="carry == 0";_tag_fat(_tmp3E,sizeof(char),11U);});((int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail)(_tmpA8,({const char*_tmp3F="ap.cyc";_tag_fat(_tmp3F,sizeof(char),7U);}),367U);});
 Cyc_normalize(z,z->size);
-z->sign=(z->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0 ||(int)sign != (int)'-')?1: - 1;
+z->sign=(z->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0 ||(int)sign != (int)'-')?1: -1;
 return z;}
 # 372
 char*Cyc_AP_tostr(struct Cyc_AP_T*x,int base){

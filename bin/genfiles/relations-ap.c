@@ -884,7 +884,7 @@ goto _LL0;}}else{_tmp82=_tmp81->rop1;_tmp83=_tmp81->relation;_tmp84=_tmp81->rop2
 # 516
 union Cyc_Pratt_Node _tmp8D=Cyc_Relations_rop2node(rop1);union Cyc_Pratt_Node n1=_tmp8D;
 union Cyc_Pratt_Node _tmp8E=Cyc_Relations_rop2node(rop2);union Cyc_Pratt_Node n2=_tmp8E;
-int i=(int)reln == (int)3U?- 1: 0;
+int i=(int)reln == (int)3U?-1: 0;
 # 521
 G=({struct Cyc_Pratt_Graph*_tmp11A=G;union Cyc_Pratt_Node _tmp119=n1;union Cyc_Pratt_Node _tmp118=n2;Cyc_Pratt_add_edge(_tmp11A,_tmp119,_tmp118,Cyc_AP_fromint(i));});
 # 523

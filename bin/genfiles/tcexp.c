@@ -1272,7 +1272,7 @@ void*t=(void*)_check_null(e->topt);
 if(!Cyc_Tcutil_is_numeric(e)){
 void*telt=Cyc_Absyn_void_type;
 if(Cyc_Tcutil_is_fat_pointer_type_elt(t,& telt)||
- Cyc_Tcutil_is_zero_pointer_type_elt(t,& telt)&&((int)i == (int)0U ||(int)i == (int)1U)){
+ Cyc_Tcutil_is_zero_pointer_type_elt(t,& telt)&&((int)i == 0 ||(int)i == 1)){
 if(!Cyc_Kinds_kind_leq(Cyc_Tcutil_type_kind(telt),& Cyc_Kinds_tmk))
 ({void*_tmp143=0U;({unsigned _tmp69F=e->loc;struct _fat_ptr _tmp69E=({const char*_tmp144="can't perform arithmetic on abstract pointer type";_tag_fat(_tmp144,sizeof(char),50U);});Cyc_Tcutil_terr(_tmp69F,_tmp69E,_tag_fat(_tmp143,sizeof(void*),0));});});
 if(Cyc_Tcutil_is_noalias_pointer(t,0))

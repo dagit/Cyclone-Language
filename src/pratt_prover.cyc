@@ -143,6 +143,70 @@ static graph_t *graph_append(graph_t *`H g1, graph_t *`H g2) {
 }
 
 static bool add_edge(graph_t @, bool, term_t, term_t, int, assn_t_nullable);
+static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2);
+
+type_opt_t get_term_type(term_t t) {
+  switch (t) {
+  case &Const(e): return e->topt;
+  case &Var(vd): return vd->type;
+  case &LogicVar(_,_,topt): return topt;
+  case &Primop(...): // fix -- could get info out here
+    return NULL;
+  case &Cast(type,_): return type;
+  }
+}
+
+static void add_node(graph_t @g, term_t n);
+
+static void add_eq(graph_t @g, term_t t1, term_t t2) {
+  add_node(g,t2);
+  //fprintf(stderr,"adding %s = %s to graph\n",term2string(t1),term2string(t2));
+  add_constraint(g, t1, ULte, t2);
+  add_constraint(g, t1, SLte, t2);
+  add_constraint(g, t2, ULte, t1);
+  add_constraint(g, t2, SLte, t1);
+}
+
+// check n to see if its type reveals its numelts is known and if so,
+// add the information to the graph.  similarly, check if n's type
+// is tag_t<valueof(e)> and if so, add n == e.
+static void add_type_info(graph_t @g, term_t n) {
+  let topt = get_term_type(n);
+  if (topt != NULL) {
+    type_t t = (type_t)topt;
+    let eopt = Tcutil::get_type_bound(t);
+    if (eopt != NULL) {
+      term_t t1 = primop(Absyn::Numelts, list(n));
+      // sigh -- must get rid of a cast to int/long
+      exp_t e = (exp_t)eopt;
+    loop:
+      switch (e->r) {
+      case &Absyn::Cast_e(tp2,e2,...):
+        switch (Absyn::compress(tp2)) {
+        case &Absyn::AppType(&Absyn::IntCon(_,s),_):
+          if (s == Absyn::Int_sz || s == Absyn::Long_sz) {
+            e = e2; goto loop;
+          }
+          break;
+        default: break;
+        }
+        break;
+      default: break;
+      }
+      term_t t2 = cnst((exp_t)e);
+      add_eq(g,t1,t2);
+    }
+    switch (Absyn::compress(t)) {
+    case &Absyn::AppType(&Absyn::TagCon,&List{v,_}):
+      switch (Absyn::compress(v)) {
+      case &Absyn::ValueofType(e): add_eq(g,n,cnst(e)); break;
+      case v2: add_eq(g,n,cnst(Absyn::valueof_exp(v2,0))); break;
+      }
+      break;
+    default: break;
+    }
+  }
+}
 
 // add a row to a single graph if not already present
 static void add_node(graph_t @g, term_t n) {
@@ -150,12 +214,16 @@ static void add_node(graph_t @g, term_t n) {
     if (cmp_term(ns->source,n) == 0) return;
   }
   g->rows = new Row{g->rows,n,NULL};
+  // if n is numelts(x) then add n <s MAXINT and n <u MAXINT
   switch (n){
-  case &Primop(Absyn::Numelts, _):
+  case &Primop(Absyn::Numelts, &List(x,_)):
     add_edge(g, false, n, zero(), MAXINT-1, NULL);
     add_edge(g, true, n, zero(), MAXINT-1, NULL);
+    // if x has type T*{e}, then add numelts(n) == e.
+    add_type_info(g,x);
     break;
   default:
+    add_type_info(g,n);
     break;
   }
 }
@@ -489,8 +557,8 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
   case &True: break;         // gs and true == gs
   case &False: gs = NULL; break; // gs and false == false
   case &And(a1,a2): 
-    gs = cgraph(gs,a2);  // gs and (a1 and a2) == (gs and a2) and a1
-    a = a1;
+    gs = cgraph(gs,a1);  // gs and (a1 and a2) == (gs and a1) and a2
+    a = a2;
     goto LOOP;
   case &Or(a1,a2):
     unsigned int n = num_graphs(gs);
@@ -682,7 +750,7 @@ assn_t row2assn(row_t r){
 }
 
 assn_t merge_assn(assn_t a1, assn_t a2){
-    //turn a1 or a2 to DNF normal form, represented by a set of graphs
+  //turn a1 or a2 to DNF normal form, represented by a set of graphs
   let g = cgraph(true_graph(), or(a1,a2));
   if (g == NULL) return &false_assn;
   if (num_graphs(g) > max_parallel_assn){

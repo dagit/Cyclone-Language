@@ -534,7 +534,7 @@ unsigned sz=Cyc_strlen((struct _fat_ptr)s);
 # 127
 if(Cyc_Absyndump_need_space_before())
 Cyc_fputc((int)' ',*Cyc_Absyndump_dump_file);
-if(sz >= (unsigned)1){
+if(sz >= 1U){
 Cyc_Absyndump_prev_char=*((const char*)_check_fat_subscript(s,sizeof(char),(int)(sz - (unsigned)1)));
 Cyc_file_string_write(*Cyc_Absyndump_dump_file,s,0,(int)sz);}}
 # 135

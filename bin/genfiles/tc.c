@@ -625,7 +625,7 @@ if(Cyc_Tcutil_is_function_type(t)){
 atts=Cyc_Atts_transfer_fn_type_atts(t,atts);
 Cyc_Atts_fnTypeAttsOK(loc,t);}
 # 104
-if((int)sc == (int)3U ||(int)sc == (int)4U){
+if((int)sc == 3 ||(int)sc == 4){
 if(initializer != 0 && !in_cinclude)
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmp14=({struct Cyc_Warn_String_Warn_Warg_struct _tmp1B9;_tmp1B9.tag=0,({struct _fat_ptr _tmp238=({const char*_tmp15="extern declaration should not have initializer";_tag_fat(_tmp15,sizeof(char),47U);});_tmp1B9.f1=_tmp238;});_tmp1B9;});void*_tmp13[1];_tmp13[0]=& _tmp14;({unsigned _tmp239=loc;Cyc_Warn_err2(_tmp239,_tag_fat(_tmp13,sizeof(void*),1));});});}else{
 if(!Cyc_Tcutil_is_function_type(t)){
@@ -888,8 +888,8 @@ prev_fields=({struct Cyc_List_List*_tmpBF=_region_malloc(uprev_rgn,sizeof(*_tmpB
 # 355
 struct Cyc_Absyn_Kind*field_kind=& Cyc_Kinds_tmk;
 # 359
-if((int)str_or_union == (int)1U ||
- fs->tl == 0 &&(int)str_or_union == (int)0U)
+if((int)str_or_union == 1 ||
+ fs->tl == 0 &&(int)str_or_union == 0)
 field_kind=& Cyc_Kinds_tak;
 Cyc_Tctyp_check_type(loc,te,tvs,field_kind,0,0,t);
 # 364

@@ -433,7 +433,7 @@ c=(int)*((char*)_check_fat_subscript(lbuf->lex_buffer,sizeof(char),lbuf->lex_cur
 if(c == -1)c=256;}
 # 68
 if(*((const int*)_check_known_subscript_notnull(Cyc_Lineno_lex_check,273U,sizeof(int),base + c))== state)
-state=*((const int*)_check_known_subscript_notnull(Cyc_Lineno_lex_trans,273U,sizeof(int),base + c));else{
+state=Cyc_Lineno_lex_trans[base + c];else{
 # 71
 state=Cyc_Lineno_lex_default[state];}
 if(state < 0){
@@ -503,10 +503,10 @@ eol=((int(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_lexeme_end)(lbuf);
 # 105
 this_line=((struct _fat_ptr(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_lexeme)(lbuf);
 # 107
-if((int)next == (int)2U || eol > (*((struct _tuple1*)places->hd)).f1)
+if((int)next == 2 || eol > (*((struct _tuple1*)places->hd)).f1)
 break;
 # 110
-if((int)next == (int)0U)++ line;else{
+if((int)next == 0)++ line;else{
 # 112
 struct _tuple0*fno=Cyc_Lineno_parse_linedef(this_line);
 if(fno == 0)

@@ -69,6 +69,13 @@ typedef absyn_annot_t annot_t;
 unsigned total_bounds_checks      = 0;     // just statistics
 unsigned bounds_checks_eliminated = 0;     // just statistics
 
+#ifdef PERFORMANCE_DEBUG
+unsigned simple_eliminated_check = 0;
+unsigned relations_eliminated_check = 0;
+unsigned both_eliminated_check = 0;
+unsigned vcgen_eliminated_check = 0;
+#endif
+
 static exp_t shared_zero_exp() {
   static exp_opt_t ans = NULL;
   if(!ans) 
@@ -139,6 +146,33 @@ static relns_t get_relns(exp_t e) {
   }
 }
 
+// just gets the common case that i is a constant and a's size is constant
+static bool simple_need_bounds_check(env_t nv, exp_t a, exp_t i) {
+  if(nv.in_sizeof)
+    return false;
+  if(nv.at_toplevel) // may change if allow fat-to-thin at toplevel
+    impos_loc(a->loc,"InsertChecks: memory read at top-level");
+#ifdef BCE_DEBUG
+  fprintf(stderr,"bounds check on %s:%s and %s\n",exp2string(a),
+          typ2string((type_t)a->topt),exp2string(i));
+#endif
+  // if a's type is T*{e}, T@{e}, or T[e] then e may be a good rop_bd
+  exp_opt_t bound_opt = Tcutil::get_type_bound((type_t)a->topt);
+  // no luck -- it's a fat pointer.
+  if (bound_opt == NULL) return true;
+  let bound = (exp_t)bound_opt;
+  // if the bound or index aren't constant, we lose.
+  if (!Tcutil::is_const_exp(bound) || !Tcutil::is_const_exp(i)) return true;
+  let $(b,b_known) = Evexp::eval_const_uint_exp(bound);
+  let $(i,i_known) = Evexp::eval_const_uint_exp(i);
+  // if we can't evaluate them at compile-time, or i >= b, we lose.
+  if (!b_known || !i_known || i >= b) return true;
+  // hooray -- we can eliminate the check
+  ++bounds_checks_eliminated;
+  return false;
+}
+
+// NOT CURRENTLY USED -- around for comparison's sake.
 // return false if we can prove from relns that i < numelts(a)
 //  FIX: doesn't deal with the case where i is a constant and a's size
 //  can be found.
@@ -147,7 +181,6 @@ static bool need_bounds_check(env_t nv, relns_t<`H> relns, exp_t a, exp_t i) {
     return false;
   if(nv.at_toplevel) // may change if allow fat-to-thin at toplevel
     impos_loc(a->loc,"InsertChecks: memory read at top-level");
-  ++total_bounds_checks;
 #ifdef BCE_DEBUG
   fprintf(stderr,"bounds check on %s:%s and %s\n",exp2string(a),
           typ2string((type_t)a->topt),exp2string(i));
@@ -213,8 +246,6 @@ static bool need_bounds_check(env_t nv, relns_t<`H> relns, exp_t a, exp_t i) {
 #ifdef BCE_DEBUG
   fprintf(stderr," -- answer is %s\n",ans ? "true" : "false");
 #endif
-  if(!ans)
-    ++bounds_checks_eliminated;
   if(Flags::warn_bounds_checks && ans)
     warn(a->loc,"inserted bounds check (location is pointer expression)");
   return ans;
@@ -232,14 +263,6 @@ static bool need_bounds_check_vcgen(env_t nv, exp_t a){
   let $(ctxt, assn) = Vcgen::exp2ctxt_assn(nv.assn_info, a);
   return !PrattProver::constraint_prove(ctxt, assn);
 }
-
-#ifdef PERFORMANCE_DEBUG
-//wangyl for debugging purpose, we need to compare performance of 
-//two different bound checkign elimination algorithms
-static int same_result = 0;
-static int vcgen_eliminate = 0;
-static int reln_eliminate = 0;
-#endif
 
 static void do_exp(env_t nv, exp_t e) {
 
@@ -361,20 +384,33 @@ static void do_exp(env_t nv, exp_t e) {
     switch(compress((type_t)e1->topt)) {
     case &TupleType(_): e->annot = &NoCheck_val; break; // type-checker checks
     case &PointerType(PtrInfo(ta,tq,PtrAtts(rgn,n,b,zt,_,_))):
-      bool bds_ck  = need_bounds_check(nv,get_relns(e1),e1,e2);
-      bool bds_ck_vcgen;
-      if (nv.vcgen_r){
-	bds_ck_vcgen = need_bounds_check_vcgen(nv, e1);
+      bool bds_ck;
+      ++total_bounds_checks;
+      //bds_ck  = need_bounds_check(nv,get_relns(e1),e1,e2);
+      // try to eliminate the bounds check by just looking for constants.
+      bds_ck  = simple_need_bounds_check(nv,e1,e2);
 #ifdef PERFORMANCE_DEBUG
-	if (bds_ck_vcgen != bds_ck){
-	  if (bds_ck_vcgen) reln_eliminate ++;
-	  else vcgen_eliminate ++;
-	}
-	else {
-	  same_result ++;
-	}
+      if (!bds_ck) ++simple_eliminated_check;
+#endif
+      if (bds_ck && nv.vcgen_r) {
+        // try to eliminate the check using the vcgen.
+        bds_ck = need_bounds_check_vcgen(nv, e1);
+        if (!bds_ck) 
+          ++bounds_checks_eliminated;
+#ifdef PERFORMANCE_DEBUG
+        let old_bds_ck = need_bounds_check(nv,get_relns(e1),e1,e2);
+        if (old_bds_ck != bds_ck) {
+          if (bds_ck)
+            ++relations_eliminated_check;
+          else 
+            ++vcgen_eliminated_check;
+        } else {
+          if (!bds_ck && !old_bds_ck) ++both_eliminated_check;
+        }
 #endif
       }
+      if (bds_ck && Flags::warn_bounds_checks)
+        warn(e1->loc,"inserted bounds check (location is pointer expression)");
       exp_opt_t bd = Tcutil::get_bounds_exp(bounds_one(),b);
       bool fat_ptr = (bd == NULL);
       bool null_ck;
@@ -468,9 +504,44 @@ static void do_decl(env_t nv, decl_t d) {
   case &Fn_d(fd): 
     let nv = fn_body_env(nv);
     nv.assn_info = Vcgen::new_assn_info();
-    if (nv.vcgen_r)
+    if (nv.vcgen_r) {
+#ifdef PERFORMANCE_DEBUG
+      relations_eliminated_check = 0;
+      vcgen_eliminated_check = 0;
+      struct timeval start, end;
+      gettimeofday(&start,NULL);
+#endif
       Vcgen::vcgen_fundecl(nv.tables, fd, nv.assn_info);
+#ifdef PERFORMANCE_DEBUG
+      gettimeofday(&end,NULL);
+      end.tv_sec -= start.tv_sec;
+      end.tv_usec -= start.tv_usec;
+      if (end.tv_usec < 0) {
+        end.tv_usec += 1000000;
+        --end.tv_sec;
+      }
+      fprintf(stderr,"vcgen for %s:  %d.%06d secs\n",
+              Absynpp::qvar2string(fd->name),end.tv_sec,end.tv_usec);
+      fflush(stderr);
+#endif
+    }
+#ifdef PERFORMANCE_DEBUG
+    struct timeval start, end;
+    gettimeofday(&start,NULL);
+#endif
     do_stmt(nv,fd->body); 
+#ifdef PERFORMANCE_DEBUG
+    gettimeofday(&end,NULL);
+    end.tv_sec -= start.tv_sec;
+    end.tv_usec -= start.tv_usec;
+    if (end.tv_usec < 0) {
+      end.tv_usec += 1000000;
+      --end.tv_sec;
+    }
+    fprintf(stderr,"insert checks for %s:  %d.%06d secs\n",
+            Absynpp::qvar2string(fd->name),end.tv_sec,end.tv_usec);
+    fflush(stderr);
+#endif
     break;//forgets if in sizeof
   case &Let_d(_,_,e,_): do_exp(nv,e); break;    
   case &Letv_d(_): break;
@@ -530,18 +601,27 @@ static void do_stmt(env_t nv, stmt_t s) {
 
 void insert_checks(List::list_t<decl_t,`H> tds,
 		   JumpAnalysis::jump_anal_res_t tables, bool do_vcgen) {
+#ifdef PERFORMANCE_DEBUG
+  relations_eliminated_check = 0;
+  vcgen_eliminated_check = 0;
+  simple_eliminated_check = 0;
+  both_eliminated_check = 0;
+#endif
   let nv = toplevel_env(tables, do_vcgen);
   for(; tds != NULL; tds = tds->tl)
     do_decl(nv,tds->hd);
 #ifdef PERFORMANCE_DEBUG
-  //wangyl performance comparison
-  if(do_vcgen){
-    printf( "************insert_checks*************\n");
-    printf( "vcgen and reln agree for %d times\n", same_result);
-    printf( "vcgen elminate %d that reln couldn't\n", vcgen_eliminate);
-    printf( "reln eliminate %d that vcgen couldn't\n", reln_eliminate);
-    printf( "reln eliminated %d out of %d total\n", bounds_checks_eliminated, total_bounds_checks);
-    printf( "**************************************\n");
-  }
+  fprintf(stderr,"****INSERT CHECKS***********************************\n");
+  fprintf(stderr,"%d checks were eliminated by simple\n",
+          simple_eliminated_check);
+  fprintf(stderr,"%d checks were eliminated by both relns and vcgen\n",
+          both_eliminated_check);
+  fprintf(stderr,"%d checks were eliminated by relns but not vcgen\n",
+          relations_eliminated_check);
+  fprintf(stderr,"%d checks were eliminated by vcgen but not relns\n",
+          vcgen_eliminated_check);
+  fprintf(stderr,"%d out of a total of %d checks were eliminated\n",
+          bounds_checks_eliminated, total_bounds_checks);
+  fprintf(stderr,"****************************************************\n");
 #endif
 }

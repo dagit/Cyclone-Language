@@ -53,7 +53,7 @@ namespace AssnDef{
   datatype Term {
     Const(exp_t); // a Cyclone "constant" expression (e.g., 3, sizeof(e), etc.)
     Var(vardecl_t);
-    LogicVar(vardecl_opt_t,int);
+    LogicVar(vardecl_opt_t,int,type_opt_t);
     Primop(Absyn::primop_t,list_t<term_t>);
     Cast(Absyn::type_t, term_t);
   };
@@ -69,7 +69,7 @@ namespace AssnDef{
   //  bool is_commutative(Absyn::primop_t p);
   term_t primop(Absyn::primop_t p, list_t<term_t,`H> ts);
   term_t cast(Absyn::type_t tp, term_t tm);
-  term_t fresh_var();
+  term_t fresh_var(type_opt_t);
 
   int cmp_term(term_t t1, term_t t2);
 
@@ -88,7 +88,7 @@ namespace AssnDef{
     Kill(assn_t); // replace all escaping variables with fresh logic variables
   };
 
-  
+  int assncmp(datatype Assn@a1, datatype Assn@a2);  
 
   string_t assn2string(assn_t a);
 

@@ -1156,7 +1156,8 @@ int typecmp(type_t t1, type_t t2) {
     if (c != 0) return c;
     return list_cmp(typecmp,ts1,ts2);
   case $(&Evar(...),&Evar(...)):
-    Warn::impos2("typecmp: can only compare closed types");
+    return ((int)t1) - ((int)t2);
+    //Warn::impos2("typecmp: can only compare closed types");
 
   case $(&VarType(tv2),&VarType(tv1)):
     // identities should be resolved

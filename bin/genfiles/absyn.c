@@ -912,8 +912,8 @@ return Cyc_Absyn_int_exp(Cyc_Absyn_Signed,i,loc);}
 struct Cyc_Absyn_Exp*Cyc_Absyn_uint_exp(unsigned i,unsigned loc){
 static struct Cyc_Absyn_Const_e_Absyn_Raw_exp_struct uzero={0,{.Int_c={5,{Cyc_Absyn_Unsigned,0}}}};
 static struct Cyc_Absyn_Const_e_Absyn_Raw_exp_struct uone={0,{.Int_c={5,{Cyc_Absyn_Unsigned,1}}}};
-if(i == (unsigned)0)return Cyc_Absyn_new_exp((void*)& uzero,loc);
-if(i == (unsigned)1)return Cyc_Absyn_new_exp((void*)& uone,loc);
+if(i == 0U)return Cyc_Absyn_new_exp((void*)& uzero,loc);
+if(i == 1U)return Cyc_Absyn_new_exp((void*)& uone,loc);
 return Cyc_Absyn_int_exp(Cyc_Absyn_Unsigned,(int)i,loc);}
 # 497
 struct Cyc_Absyn_Exp*Cyc_Absyn_bool_exp(int b,unsigned loc){return Cyc_Absyn_signed_int_exp(b?1: 0,loc);}

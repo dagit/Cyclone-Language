@@ -515,7 +515,7 @@ c=(int)*((char*)_check_fat_subscript(lbuf->lex_buffer,sizeof(char),lbuf->lex_cur
 if(c == -1)c=256;}
 # 81
 if(*((const int*)_check_known_subscript_notnull(Cyc_lex_check,266U,sizeof(int),base + c))== state)
-state=*((const int*)_check_known_subscript_notnull(Cyc_lex_trans,266U,sizeof(int),base + c));else{
+state=Cyc_lex_trans[base + c];else{
 # 84
 state=Cyc_lex_default[state];}
 if(state < 0){
@@ -567,19 +567,19 @@ int depth=0;
 int len=(int)Cyc_strlen((struct _fat_ptr)s);
 int i=0;for(0;i < len;++ i){
 char c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
-if((int)c != (int)'['){Cyc_fputc((int)c,outf);continue;}
+if((int)c != 91){Cyc_fputc((int)c,outf);continue;}
 Cyc_fputs("\\texttt{",outf);
 ++ i;
 ++ depth;
 for(1;i < len;++ i){
 char c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
-if((int)c == (int)']'){
+if((int)c == 93){
 -- depth;
 if(depth == 0){
 Cyc_fputc((int)'}',outf);
 break;}}else{
 # 117
-if((int)c == (int)'[')++ depth;}
+if((int)c == 91)++ depth;}
 Cyc_fputc((int)c,outf);}}}
 # 124
 static int Cyc_width=50;
@@ -649,7 +649,7 @@ int _tmp23=0;int i=_tmp23;
 int _tmp24=0;int j=_tmp24;
 for(1;(unsigned long)i < len;++ i){
 char _tmp25=*((const char*)_check_fat_subscript(s,sizeof(char),i));char c=_tmp25;
-if((int)c == (int)'\'' || Cyc_is_other_special(c))
+if((int)c == 39 || Cyc_is_other_special(c))
 ({struct _fat_ptr _tmp26=_fat_ptr_plus(s2,sizeof(char),j ++);char _tmp27=*((char*)_check_fat_subscript(_tmp26,sizeof(char),0U));char _tmp28='\\';if(_get_fat_size(_tmp26,sizeof(char))== 1U &&(_tmp27 == 0 && _tmp28 != 0))_throw_arraybounds();*((char*)_tmp26.curr)=_tmp28;});
 ({struct _fat_ptr _tmp29=_fat_ptr_plus(s2,sizeof(char),j ++);char _tmp2A=*((char*)_check_fat_subscript(_tmp29,sizeof(char),0U));char _tmp2B=c;if(_get_fat_size(_tmp29,sizeof(char))== 1U &&(_tmp2A == 0 && _tmp2B != 0))_throw_arraybounds();*((char*)_tmp29.curr)=_tmp2B;});}
 # 209

@@ -639,7 +639,7 @@ char _tmp3=c;switch((int)_tmp3){case 7:
  return({const char*_tmpC="\"";_tag_fat(_tmpC,sizeof(char),2U);});case 39:
  return({const char*_tmpD="\\'";_tag_fat(_tmpD,sizeof(char),3U);});default:
 # 274
- if((int)c >= (int)' ' &&(int)c <= (int)'~'){
+ if((int)c >= 32 &&(int)c <= 126){
 struct _fat_ptr _tmpE=Cyc_Core_new_string(2U);struct _fat_ptr t=_tmpE;
 ({struct _fat_ptr _tmpF=_fat_ptr_plus(t,sizeof(char),0);char _tmp10=*((char*)_check_fat_subscript(_tmpF,sizeof(char),0U));char _tmp11=c;if(_get_fat_size(_tmpF,sizeof(char))== 1U &&(_tmp10 == 0 && _tmp11 != 0))_throw_arraybounds();*((char*)_tmpF.curr)=_tmp11;});
 return(struct _fat_ptr)t;}else{
@@ -656,7 +656,7 @@ static int Cyc_Absynpp_special(struct _fat_ptr s){
 int sz=(int)(_get_fat_size(s,sizeof(char))- (unsigned)1);
 {int i=0;for(0;i < sz;++ i){
 char c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
-if((((int)c <= (int)' ' ||(int)c >= (int)'~')||(int)c == (int)'"')||(int)c == (int)'\\')
+if((((int)c <= 32 ||(int)c >= 126)||(int)c == 34)||(int)c == 92)
 return 1;}}
 # 297
 return 0;}
@@ -681,7 +681,7 @@ char _tmp1F=*((const char*)_check_fat_subscript(s,sizeof(char),i));char _stmttmp
  goto _LL12;case 34: _LL12:
  len +=2;goto _LL0;default: _tmp21=_tmp20;{char c=_tmp21;
 # 320
-if((int)c >= (int)' ' &&(int)c <= (int)'~')++ len;else{
+if((int)c >= 32 &&(int)c <= 126)++ len;else{
 len +=4;}
 goto _LL0;}}_LL0:;}}{
 # 325
@@ -699,7 +699,7 @@ char _tmp22=*((const char*)_check_fat_subscript(s,sizeof(char),i));char _stmttmp
 ({struct _fat_ptr _tmp4F=_fat_ptr_plus(t,sizeof(char),j ++);char _tmp50=*((char*)_check_fat_subscript(_tmp4F,sizeof(char),0U));char _tmp51='\\';if(_get_fat_size(_tmp4F,sizeof(char))== 1U &&(_tmp50 == 0 && _tmp51 != 0))_throw_arraybounds();*((char*)_tmp4F.curr)=_tmp51;});({struct _fat_ptr _tmp52=_fat_ptr_plus(t,sizeof(char),j ++);char _tmp53=*((char*)_check_fat_subscript(_tmp52,sizeof(char),0U));char _tmp54='\\';if(_get_fat_size(_tmp52,sizeof(char))== 1U &&(_tmp53 == 0 && _tmp54 != 0))_throw_arraybounds();*((char*)_tmp52.curr)=_tmp54;});goto _LL15;case 34:
 ({struct _fat_ptr _tmp55=_fat_ptr_plus(t,sizeof(char),j ++);char _tmp56=*((char*)_check_fat_subscript(_tmp55,sizeof(char),0U));char _tmp57='\\';if(_get_fat_size(_tmp55,sizeof(char))== 1U &&(_tmp56 == 0 && _tmp57 != 0))_throw_arraybounds();*((char*)_tmp55.curr)=_tmp57;});({struct _fat_ptr _tmp58=_fat_ptr_plus(t,sizeof(char),j ++);char _tmp59=*((char*)_check_fat_subscript(_tmp58,sizeof(char),0U));char _tmp5A='"';if(_get_fat_size(_tmp58,sizeof(char))== 1U &&(_tmp59 == 0 && _tmp5A != 0))_throw_arraybounds();*((char*)_tmp58.curr)=_tmp5A;});goto _LL15;default: _tmp24=_tmp23;{char c=_tmp24;
 # 339
-if((int)c >= (int)' ' &&(int)c <= (int)'~')({struct _fat_ptr _tmp5B=_fat_ptr_plus(t,sizeof(char),j ++);char _tmp5C=*((char*)_check_fat_subscript(_tmp5B,sizeof(char),0U));char _tmp5D=c;if(_get_fat_size(_tmp5B,sizeof(char))== 1U &&(_tmp5C == 0 && _tmp5D != 0))_throw_arraybounds();*((char*)_tmp5B.curr)=_tmp5D;});else{
+if((int)c >= 32 &&(int)c <= 126)({struct _fat_ptr _tmp5B=_fat_ptr_plus(t,sizeof(char),j ++);char _tmp5C=*((char*)_check_fat_subscript(_tmp5B,sizeof(char),0U));char _tmp5D=c;if(_get_fat_size(_tmp5B,sizeof(char))== 1U &&(_tmp5C == 0 && _tmp5D != 0))_throw_arraybounds();*((char*)_tmp5B.curr)=_tmp5D;});else{
 # 341
 unsigned char uc=(unsigned char)c;
 # 344

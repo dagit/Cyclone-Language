@@ -1105,8 +1105,8 @@ if(changed)
 some_change=1;}
 # 840
 tv_ovrs=changed_decls;}}while(
-some_change && ++ niter < (unsigned)10);
-if(niter >= (unsigned)10){
+some_change && ++ niter < 10U);
+if(niter >= 10U){
 ({struct Cyc_String_pa_PrintArg_struct _tmp12F=({struct Cyc_String_pa_PrintArg_struct _tmp17B;_tmp17B.tag=0,({
 struct _fat_ptr _tmp209=(struct _fat_ptr)((struct _fat_ptr)Cyc_Absynpp_decllist2string(changed_decls));_tmp17B.f1=_tmp209;});_tmp17B;});void*_tmp12D[1];_tmp12D[0]=& _tmp12F;({struct Cyc___cycFILE*_tmp20B=Cyc_stderr;struct _fat_ptr _tmp20A=({const char*_tmp12E="Suspected mutually recursive structs involving the following decls \n %s";_tag_fat(_tmp12E,sizeof(char),72U);});Cyc_fprintf(_tmp20B,_tmp20A,_tag_fat(_tmp12D,sizeof(void*),1));});});
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmp131=({struct Cyc_Warn_String_Warn_Warg_struct _tmp17C;_tmp17C.tag=0,({struct _fat_ptr _tmp20C=({const char*_tmp132="Suspected mutually recursive structs -- abandoning cifc";_tag_fat(_tmp132,sizeof(char),56U);});_tmp17C.f1=_tmp20C;});_tmp17C;});void*_tmp130[1];_tmp130[0]=& _tmp131;({unsigned _tmp20D=loc;Cyc_Warn_err2(_tmp20D,_tag_fat(_tmp130,sizeof(void*),1));});});}

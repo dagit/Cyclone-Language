@@ -431,7 +431,7 @@ void*_tmp18=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp4=
 return d;}case 3: _tmp1A=((struct Cyc_LongDouble_pa_PrintArg_struct*)_tmp19)->f1;{long double ld=_tmp1A;
 return(double)ld;}default:
 # 138
-(int)_throw(((void*(*)(struct _fat_ptr))Cyc_badarg)((struct _fat_ptr)({struct Cyc_String_pa_PrintArg_struct _tmp1E=({struct Cyc_String_pa_PrintArg_struct _tmpC1;_tmpC1.tag=0,({struct _fat_ptr _tmpC5=(struct _fat_ptr)((struct _fat_ptr)Cyc_parg2string(*((void**)_check_fat_subscript(ap,sizeof(void*),0U))));_tmpC1.f1=_tmpC5;});_tmpC1;});void*_tmp1C[1];_tmp1C[0]=& _tmp1E;({struct _fat_ptr _tmpC6=({const char*_tmp1D="printf expected double but found %s";_tag_fat(_tmp1D,sizeof(char),36U);});Cyc_aprintf(_tmpC6,_tag_fat(_tmp1C,sizeof(void*),1));});})));};}
+(int)_throw(((void*(*)(struct _fat_ptr))Cyc_badarg)((struct _fat_ptr)({struct Cyc_String_pa_PrintArg_struct _tmp1E=({struct Cyc_String_pa_PrintArg_struct _tmpC1;_tmpC1.tag=0,({struct _fat_ptr _tmpC5=(struct _fat_ptr)((struct _fat_ptr)Cyc_parg2string(*((void**)ap.curr)));_tmpC1.f1=_tmpC5;});_tmpC1;});void*_tmp1C[1];_tmp1C[0]=& _tmp1E;({struct _fat_ptr _tmpC6=({const char*_tmp1D="printf expected double but found %s";_tag_fat(_tmp1D,sizeof(char),36U);});Cyc_aprintf(_tmpC6,_tag_fat(_tmp1C,sizeof(void*),1));});})));};}
 # 144
 static short*Cyc_va_arg_short_ptr(struct _fat_ptr ap){
 void*_tmp1F=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp5=_tmp1F;void*_tmp20=_stmttmp5;void*_tmp21;if(*((int*)_tmp20)== 4){_tmp21=((struct Cyc_ShortPtr_pa_PrintArg_struct*)_tmp20)->f1;{short*p=_tmp21;
@@ -546,7 +546,7 @@ for(1;1;1){
 # 351
 fmark=fmt;{
 unsigned fmt_sz=_get_fat_size(fmt,sizeof(char));
-for(n=0;((unsigned)n < fmt_sz &&(ch=(int)((const char*)fmt.curr)[n])!= (int)'\000')&& ch != (int)'%';++ n){
+for(n=0;((unsigned)n < fmt_sz &&(ch=(int)((const char*)fmt.curr)[n])!= 0)&& ch != 37;++ n){
 ;}
 fmt=_fat_ptr_plus(fmt,sizeof(char),n);
 # 357
@@ -554,7 +554,7 @@ if((n=(fmt.curr - fmark.curr)/ sizeof(char))!= 0){
 do{if(({int _tmpC7=Cyc__IO_sputn(ioputc,ioputc_env,(struct _fat_ptr)fmark,n);_tmpC7 != n;}))goto error;}while(0);
 ret +=n;}
 # 361
-if(ch == (int)'\000')
+if(ch == 0)
 goto done;
 _fat_ptr_inplace_plus(& fmt,sizeof(char),1);
 # 365
@@ -589,13 +589,13 @@ goto rflag;case 43:
  sign='+';
 goto rflag;case 46:
 # 407
- if((ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U)))== (int)'*'){
+ if((ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U)))== 42){
 n=Cyc_va_arg_int(ap);_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 prec=n < 0?- 1: n;
 goto rflag;}
 # 412
 n=0;
-while((unsigned)(ch - (int)'0')<= (unsigned)9){
+while((unsigned)(ch - 48)<= 9U){
 n=10 * n + (ch - (int)'0');
 ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));}
 # 417
@@ -610,7 +610,7 @@ goto rflag;case 49:
  n=0;
 do{
 n=10 * n + (ch - (int)'0');
-ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));}while((unsigned)(ch - (int)'0')<= (unsigned)9);
+ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));}while((unsigned)(ch - 48)<= 9U);
 # 435
 width=n;
 goto reswitch;case 76:
@@ -645,7 +645,7 @@ goto number;case 101:
  _double=Cyc_va_arg_double(ap);_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 # 470
 if(prec > 39){
-if(ch != (int)'g' && ch != (int)'G' || flags & 8)
+if(ch != 103 && ch != 71 || flags & 8)
 fpprec=prec - 39;
 prec=39;}else{
 if(prec == -1)
@@ -658,7 +658,7 @@ size=({double _tmpCC=_double;int _tmpCB=prec;int _tmpCA=flags;int _tmpC9=ch;stru
 _fat_ptr_plus(({char*_tmp34=buf;_tag_fat(_tmp34,sizeof(char),349U);}),sizeof(char),(int)(sizeof(buf)- (unsigned)1)));});
 if(softsign)
 sign='-';
-if((int)*((char*)_check_fat_subscript(cp,sizeof(char),0U))== (int)'\000')
+if((int)*((char*)cp.curr)== (int)'\000')
 _fat_ptr_inplace_plus(& cp,sizeof(char),1);
 goto _LL0;case 110:
 # 493
@@ -681,7 +681,7 @@ goto nosign;case 112:
  _ulong=(unsigned long)Cyc_va_arg_long(ap);_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 base=2U;
 flags |=64;
-ch=(int)'x';
+ch=120;
 goto nosign;case 115:  {
 # 523
 struct _fat_ptr b=Cyc_va_arg_string(ap);_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
@@ -709,7 +709,7 @@ goto nosign;case 88:
  _ulong=flags & 1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(ap)): Cyc_va_arg_uint(ap));_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 base=2U;
 # 548
-if(flags & 8 && _ulong != (unsigned long)0)
+if(flags & 8 && _ulong != 0U)
 flags |=64;
 # 552
 nosign: sign='\000';
@@ -718,7 +718,7 @@ number: if((dprec=prec)>= 0)
 flags &=~ 32;
 # 566
 cp=_fat_ptr_plus(({char*_tmp35=buf;_tag_fat(_tmp35,sizeof(char),349U);}),sizeof(char),(308 + 39)+ 1);
-if(_ulong != (unsigned long)0 || prec != 0){
+if(_ulong != 0U || prec != 0){
 struct _fat_ptr xdigs;
 # 574
 enum Cyc_BASE _tmp36=base;switch((int)_tmp36){case Cyc_OCT:
@@ -731,19 +731,19 @@ if(flags & 8 &&(int)*((char*)_check_fat_subscript(cp,sizeof(char),0U))!= (int)'0
 ({struct _fat_ptr _tmp3A=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp3B=*((char*)_check_fat_subscript(_tmp3A,sizeof(char),0U));char _tmp3C='0';if(_get_fat_size(_tmp3A,sizeof(char))== 1U &&(_tmp3B == 0 && _tmp3C != 0))_throw_arraybounds();*((char*)_tmp3A.curr)=_tmp3C;});
 goto _LL4F;case Cyc_DEC:
 # 587
- while(_ulong >= (unsigned long)10){
+ while(_ulong >= 10U){
 ({struct _fat_ptr _tmp3D=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp3E=*((char*)_check_fat_subscript(_tmp3D,sizeof(char),0U));char _tmp3F=(char)(_ulong % (unsigned long)10 + (unsigned long)'0');if(_get_fat_size(_tmp3D,sizeof(char))== 1U &&(_tmp3E == 0 && _tmp3F != 0))_throw_arraybounds();*((char*)_tmp3D.curr)=_tmp3F;});
 _ulong /=10U;}
 # 591
 ({struct _fat_ptr _tmp40=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp41=*((char*)_check_fat_subscript(_tmp40,sizeof(char),0U));char _tmp42=(char)(_ulong + (unsigned long)'0');if(_get_fat_size(_tmp40,sizeof(char))== 1U &&(_tmp41 == 0 && _tmp42 != 0))_throw_arraybounds();*((char*)_tmp40.curr)=_tmp42;});
 goto _LL4F;case Cyc_HEX:
 # 595
- if(ch == (int)'X')
+ if(ch == 88)
 xdigs=({const char*_tmp43="0123456789ABCDEF";_tag_fat(_tmp43,sizeof(char),17U);});else{
 # 598
 xdigs=({const char*_tmp44="0123456789abcdef";_tag_fat(_tmp44,sizeof(char),17U);});}
 do{
-({struct _fat_ptr _tmp45=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp46=*((char*)_check_fat_subscript(_tmp45,sizeof(char),0U));char _tmp47=*((const char*)_check_fat_subscript(xdigs,sizeof(char),(int)(_ulong & (unsigned long)15)));if(_get_fat_size(_tmp45,sizeof(char))== 1U &&(_tmp46 == 0 && _tmp47 != 0))_throw_arraybounds();*((char*)_tmp45.curr)=_tmp47;});
+({struct _fat_ptr _tmp45=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp46=*((char*)_check_fat_subscript(_tmp45,sizeof(char),0U));char _tmp47=*((const char*)_check_fat_subscript(xdigs,sizeof(char),(int)(_ulong & 15U)));if(_get_fat_size(_tmp45,sizeof(char))== 1U &&(_tmp46 == 0 && _tmp47 != 0))_throw_arraybounds();*((char*)_tmp45.curr)=_tmp47;});
 _ulong >>=4U;}while((int)_ulong);
 # 603
 goto _LL4F;default:
@@ -755,7 +755,7 @@ size=({unsigned char*_tmpD1=(_fat_ptr_plus(({char*_tmp49=buf;_tag_fat(_tmp49,siz
 skipsize:
  goto _LL0;default:
 # 613
- if(ch == (int)'\000')
+ if(ch == 0)
 goto done;
 # 616
 cp=({char*_tmp4A=buf;_tag_fat(_tmp4A,sizeof(char),349U);});

@@ -33,7 +33,7 @@ using Hashtable;
 datatype Term {
   Const(exp_t); // a Cyclone "constant" expression (e.g., 3, sizeof(e), etc.)
   Var(vardecl_t);
-  LogicVar(vardecl_opt_t,int);
+  LogicVar(vardecl_opt_t,int,type_opt_t);
   Primop(Absyn::primop_t,list_t<term_t>);
   Cast(Absyn::type_t, term_t);
 };
@@ -42,8 +42,8 @@ string_t term2string(term_t t) {
   switch (t) {
   case &Const(e): return Absynpp::exp2string(e);
   case &Var(vd): return Absynpp::qvar2string(vd->name);
-  case &LogicVar(NULL,i): return aprintf("_X%d",i);
-  case &LogicVar(vd,i): return aprintf("_%s%d",Absynpp::qvar2string(vd->name),i);
+  case &LogicVar(NULL,i,_): return aprintf("_X%d",i);
+  case &LogicVar(vd,i,_): return aprintf("_%s%d",Absynpp::qvar2string(vd->name),i);
   case &Primop(p,&List{t1,&List{t2,NULL}}): 
     return aprintf("(%s%s%s)",term2string(t1),
                    Absynpp::prim2string(p),term2string(t2));
@@ -98,9 +98,9 @@ term_t primop(Absyn::primop_t p, list_t<term_t,`H> ts) {
 term_t cast(Absyn::type_t tp, term_t tm) {
   return new Cast(tp,tm);
 }
-term_t fresh_var() {
+term_t fresh_var(type_opt_t t) {
   static int counter = 0;
-  return new LogicVar(NULL,counter++);
+  return new LogicVar(NULL,counter++,t);
 }
 
 int cmp_term(term_t t1, term_t t2) {
@@ -111,11 +111,11 @@ int cmp_term(term_t t1, term_t t2) {
   case $(&Var(vd1),&Var(vd2)): return (int)vd1 - (int)vd2;
   case $(&Var(_),_): return -1;
   case $(_,&Var(_)): return 1;
-  case $(&LogicVar(vd1,i),&LogicVar(vd2,j)): 
+  case $(&LogicVar(vd1,i,_),&LogicVar(vd2,j,_)): 
     if (vd1 == vd2) return (i - j);
     return (int)vd1 - (int)vd2;
-  case $(&LogicVar(_,_),_): return -1;
-  case $(_,&LogicVar(_,_)): return 1;
+  case $(&LogicVar(...),_): return -1;
+  case $(_,&LogicVar(...)): return 1;
   case $(&Cast(tp1,tm1),&Cast(tp2,tm2)):
     int c = Tcutil::typecmp(tp1,tp2);
     if (c != 0) return c;
@@ -265,7 +265,7 @@ static int assnhash(datatype Assn @a) {
 
 // compare two assertions for structural equality -- does not assume
 // the components have been hash-consed, but probably could.
-static int assncmp(datatype Assn @a1, datatype Assn @a2) {
+int assncmp(datatype Assn @a1, datatype Assn @a2) {
  LOOP:
   if (a1 == a2) return 0;
   switch $(a1,a2) {
@@ -533,7 +533,7 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
       }
       // if not, then assign it a fresh variable and record it in the
       // esc_subst.
-      let t = fresh_var();
+      let t = fresh_var(vd->type);
       *esc_subst = new List{new $(vd,t),*esc_subst};
       //wangyl: is it neseccary to generate another fresh_var
       //when t is already newly generated?

@@ -702,7 +702,7 @@ static void*Cyc_Toc_unimp(struct _fat_ptr str){
 # 71
 static void*Cyc_Toc_toc_impos(struct _fat_ptr ap){
 void*toc=(void*)({struct Cyc_Warn_String_Warn_Warg_struct*_tmp5=_cycalloc(sizeof(*_tmp5));_tmp5->tag=0,({struct _fat_ptr _tmp6EB=({const char*_tmp4="Toc: ";_tag_fat(_tmp4,sizeof(char),6U);});_tmp5->f1=_tmp6EB;});_tmp5;});
-struct _fat_ptr args=({unsigned _tmp3=_get_fat_size(ap,sizeof(void*))+ (unsigned)1;void**_tmp2=_cycalloc(_check_times(_tmp3,sizeof(void*)));({{unsigned _tmp674=_get_fat_size(ap,sizeof(void*))+ (unsigned)1;unsigned i;for(i=0;i < _tmp674;++ i){i == (unsigned)0?_tmp2[i]=toc:(_tmp2[i]=*((void**)_check_fat_subscript(ap,sizeof(void*),(int)(i - (unsigned)1))));}}0;});_tag_fat(_tmp2,sizeof(void*),_tmp3);});
+struct _fat_ptr args=({unsigned _tmp3=_get_fat_size(ap,sizeof(void*))+ (unsigned)1;void**_tmp2=_cycalloc(_check_times(_tmp3,sizeof(void*)));({{unsigned _tmp674=_get_fat_size(ap,sizeof(void*))+ (unsigned)1;unsigned i;for(i=0;i < _tmp674;++ i){i == 0U?_tmp2[i]=toc:(_tmp2[i]=*((void**)_check_fat_subscript(ap,sizeof(void*),(int)(i - (unsigned)1))));}}0;});_tag_fat(_tmp2,sizeof(void*),_tmp3);});
 Cyc_Warn_vimpos2(args);}
 # 77
 struct _fat_ptr Cyc_Toc_globals={(void*)0,(void*)0,(void*)(0 + 0)};
@@ -1970,7 +1970,7 @@ void*ignore_typ=Cyc_Absyn_void_type;
 int ignore_bool=0;
 int ignore_int=0;
 struct _fat_ptr incr_str=({const char*_tmp2FD="increment";_tag_fat(_tmp2FD,sizeof(char),10U);});
-if((int)incr == (int)2U ||(int)incr == (int)3U)incr_str=({const char*_tmp2E1="decrement";_tag_fat(_tmp2E1,sizeof(char),10U);});
+if((int)incr == 2 ||(int)incr == 3)incr_str=({const char*_tmp2E1="decrement";_tag_fat(_tmp2E1,sizeof(char),10U);});
 if(Cyc_Tcutil_is_zero_ptr_deref(e2,& ignore_typ,& ignore_bool,& ignore_typ))
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmp2E3=({struct Cyc_Warn_String_Warn_Warg_struct _tmp6B8;_tmp6B8.tag=0,({struct _fat_ptr _tmp7EE=({const char*_tmp2E9="in-place ";_tag_fat(_tmp2E9,sizeof(char),10U);});_tmp6B8.f1=_tmp7EE;});_tmp6B8;});struct Cyc_Warn_String_Warn_Warg_struct _tmp2E4=({struct Cyc_Warn_String_Warn_Warg_struct _tmp6B7;_tmp6B7.tag=0,_tmp6B7.f1=incr_str;_tmp6B7;});struct Cyc_Warn_String_Warn_Warg_struct _tmp2E5=({struct Cyc_Warn_String_Warn_Warg_struct _tmp6B6;_tmp6B6.tag=0,({struct _fat_ptr _tmp7EF=({const char*_tmp2E8=" is not supported when ";_tag_fat(_tmp2E8,sizeof(char),24U);});_tmp6B6.f1=_tmp7EF;});_tmp6B6;});struct Cyc_Warn_String_Warn_Warg_struct _tmp2E6=({struct Cyc_Warn_String_Warn_Warg_struct _tmp6B5;_tmp6B5.tag=0,({
 struct _fat_ptr _tmp7F0=({const char*_tmp2E7="dereferencing a zero-terminated pointer";_tag_fat(_tmp2E7,sizeof(char),40U);});_tmp6B5.f1=_tmp7F0;});_tmp6B5;});void*_tmp2E2[4];_tmp2E2[0]=& _tmp2E3,_tmp2E2[1]=& _tmp2E4,_tmp2E2[2]=& _tmp2E5,_tmp2E2[3]=& _tmp2E6;({unsigned _tmp7F1=e->loc;((int(*)(unsigned,struct _fat_ptr))Cyc_Warn_impos_loc2)(_tmp7F1,_tag_fat(_tmp2E2,sizeof(void*),4));});});
@@ -1995,9 +1995,9 @@ Cyc_Toc_set_lhs(nv,0);{
 void*elt_typ=Cyc_Absyn_void_type;
 if(Cyc_Tcutil_is_fat_pointer_type_elt(old_typ,& elt_typ)){
 int change=1;
-struct Cyc_Absyn_Exp*_tmp2F3=((int)incr == (int)1U ||(int)incr == (int)3U)?Cyc_Toc__fat_ptr_inplace_plus_post_e: Cyc_Toc__fat_ptr_inplace_plus_e;struct Cyc_Absyn_Exp*fn_e=_tmp2F3;
+struct Cyc_Absyn_Exp*_tmp2F3=((int)incr == 1 ||(int)incr == 3)?Cyc_Toc__fat_ptr_inplace_plus_post_e: Cyc_Toc__fat_ptr_inplace_plus_e;struct Cyc_Absyn_Exp*fn_e=_tmp2F3;
 # 1794
-if((int)incr == (int)2U ||(int)incr == (int)3U)
+if((int)incr == 2 ||(int)incr == 3)
 change=-1;
 ({void*_tmp7FB=({struct Cyc_Absyn_Exp*_tmp2F4[3];({struct Cyc_Absyn_Exp*_tmp7F9=Cyc_Toc_push_address_exp(e2);_tmp2F4[0]=_tmp7F9;}),({
 struct Cyc_Absyn_Exp*_tmp7F8=Cyc_Absyn_sizeoftype_exp(Cyc_Toc_typ_to_c(elt_typ),0U);_tmp2F4[1]=_tmp7F8;}),({
@@ -2235,7 +2235,7 @@ Cyc_Toc_exp_to_c(nv,e1);
 # 2056 "toc.cyc"
 for(1;ts != 0;ts=ts->tl){
 enum Cyc_Absyn_KindQual _tmp32B=(Cyc_Tcutil_type_kind((void*)ts->hd))->kind;enum Cyc_Absyn_KindQual k=_tmp32B;
-if((int)k != (int)4U &&(int)k != (int)3U){
+if((int)k != 4 &&(int)k != 3){
 {void*_tmp32C=Cyc_Absyn_compress((void*)ts->hd);void*_stmttmp34=_tmp32C;void*_tmp32D=_stmttmp34;switch(*((int*)_tmp32D)){case 2:
  goto _LLA3;case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmp32D)->f1)== 18){_LLA3:
  continue;}else{goto _LLA4;}default: _LLA4:

@@ -410,7 +410,7 @@ if(j >= 0)return 0;else{
 return 1;}}
 # 75
 struct _fat_ptr Cyc_Filename_gnuify(struct _fat_ptr filename){
-int has_drive_name=_get_fat_size(filename,sizeof(char))> (unsigned)1 &&(int)((const char*)filename.curr)[1]== (int)':';
+int has_drive_name=_get_fat_size(filename,sizeof(char))> 1U &&(int)((const char*)filename.curr)[1]== (int)':';
 int i;int j;
 struct _fat_ptr ans;
 int ans_sz;

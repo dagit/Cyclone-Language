@@ -872,7 +872,7 @@ int _tmp9F=is_local;int allow_evars=_tmp9F;
 Cyc_Tctyp_check_type(s0->loc,te,bound_vars,& Cyc_Kinds_tmk,allow_evars,1,t);
 ({int _tmp197=Cyc_Tcutil_extract_const_from_typedef(s0->loc,(vd->tq).print_const,t);(vd->tq).real_const=_tmp197;});
 # 390
-if((int)sc == (int)3U ||(int)sc == (int)4U)
+if((int)sc == 3 ||(int)sc == 4)
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmpA1=({struct Cyc_Warn_String_Warn_Warg_struct _tmp135;_tmp135.tag=0,({struct _fat_ptr _tmp198=({const char*_tmpA2="extern declarations are not yet supported within functions";_tag_fat(_tmpA2,sizeof(char),59U);});_tmp135.f1=_tmp198;});_tmp135;});void*_tmpA0[1];_tmpA0[0]=& _tmpA1;({unsigned _tmp199=d->loc;Cyc_Warn_err2(_tmp199,_tag_fat(_tmpA0,sizeof(void*),1));});});
 if(initializer != 0){
 Cyc_Tcexp_tcExpInitializer(te,& t,initializer);

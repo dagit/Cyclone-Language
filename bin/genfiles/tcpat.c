@@ -1497,7 +1497,7 @@ return(void*)({struct Cyc_Tcpat_Neg_Tcpat_Term_desc_struct*_tmp242=_cycalloc(siz
 static enum Cyc_Tcpat_Answer Cyc_Tcpat_static_match(struct Cyc_Tcpat_Con_s*c,void*td){
 void*_tmp246=td;void*_tmp247;if(*((int*)_tmp246)== 0){_tmp247=((struct Cyc_Tcpat_Pos_Tcpat_Term_desc_struct*)_tmp246)->f1;{struct Cyc_Tcpat_Con_s*c2=_tmp247;
 # 1212
-return Cyc_Tcpat_compare_con(c,c2)== 0?Cyc_Tcpat_Yes: Cyc_Tcpat_No;}}else{_tmp247=((struct Cyc_Tcpat_Neg_Tcpat_Term_desc_struct*)_tmp246)->f1;{struct Cyc_Set_Set*cs=_tmp247;
+return Cyc_Tcpat_compare_con(c,c2)== 0?0U: 1U;}}else{_tmp247=((struct Cyc_Tcpat_Neg_Tcpat_Term_desc_struct*)_tmp246)->f1;{struct Cyc_Set_Set*cs=_tmp247;
 # 1215
 if(((int(*)(struct Cyc_Set_Set*,struct Cyc_Tcpat_Con_s*))Cyc_Set_member)(cs,c))return Cyc_Tcpat_No;
 # 1218
