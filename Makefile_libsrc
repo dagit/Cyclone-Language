@@ -23,6 +23,7 @@ CYCBISON:=$(CYCDIR)/bin/cycbison$(EXE)
 INC_PATH:=. include $(CYCDIR)/lib $(CYCDIR)/src $(CYCDIR)/include
 LIB_PATH:=$(CYCDIR)/lib
 LIBR:=$(CYCLIB)
+export CYCC CYCLEX CYCBISON INC_PATH LIB_PATH LIBR
 
 # Note, the -B arguments ensure that we use the correct cyc_include.h.
 #   If cyc_include.h is being changed, the new version should be in
