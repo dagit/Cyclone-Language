@@ -8,6 +8,7 @@
 #include "timer.h"
 #include "buffer.h"
 #include "parser.h"
+#include "flat.h"
 using Core;
 using Stdio;
 using Buffer;
@@ -58,10 +59,14 @@ void dump(buf_t b, doc_t d) {
   case &Seq(ds): for (; ds != null; ds=ds->tl) dump(b,ds->hd); break;
   case &Text(i): Buffer::write_buf(stdout,b,i); break;
   case &Tagged(tag,d):
-    fwrite(start_tags[tag],1,strlen(start_tags[tag]),stdout); 
-    dump(b,d); 
-    fwrite(end_tags[tag],1,strlen(end_tags[tag]),stdout);
-    break;
+    try {
+      fwrite(start_tags[tag],1,strlen(start_tags[tag]),stdout); 
+      dump(b,d); 
+      fwrite(end_tags[tag],1,strlen(end_tags[tag]),stdout);
+    } catch {
+    default: fprintf(stderr,"bad tag %d\n",tag); exit(1); break;
+    }
+      break;
   }
 }
 
@@ -82,8 +87,8 @@ int doc_size(buf_t b,doc_t d) {
   return sum;
 }
 
-int num_texts(doc_t d) {
-  int sum = 0;
+unsigned int num_texts(doc_t d) {
+  unsigned int sum = 0;
   switch (d) {
   case &Seq(ds):
     for (; ds != null; ds=ds->tl)
@@ -96,6 +101,7 @@ int num_texts(doc_t d) {
   }
   return sum;
 }
+
 
 struct Context {
   bool B :1;
@@ -192,29 +198,46 @@ doc_t down_opt(context_t ctxt, doc_t d) {
   }
 }
 
+// Queues for fast append
+struct Q {
+  List::list_t<doc_t> first;
+  List::list_t<doc_t> last;
+};
+
+struct Q qappend(struct Q q1, struct Q q2) {
+  if (q1.last == null) return q2;
+  else if (q2.last == null) return q1;
+  else {
+    q1.last->tl = q2.first;
+    q1.last = q2.last;
+    return q1;
+  }
+}
+
 /* removes all of the Seq's from a document, returning it as a list of 
    non-Seq-containing docs */
-List::list_t<doc_t> flatten(doc_t d) {
+struct Q flattenit(doc_t d) {
   switch (d) {
   case &Seq(ds):
+    struct Q q = {null,null};
     List::list_t<doc_t> ds1, ds_tot = null;
-    while (ds != null) {
-      ds1 = flatten(ds->hd);
-      ds_tot = List::imp_append(ds_tot,ds1);
-      ds = ds->tl;
-    }
-    return ds_tot;
-  case &Text(i): return new List::List(d,null);
+    for (; ds != null; ds = ds->tl) 
+      q = qappend(q,flattenit(ds->hd));
+    return q;
+  case &Text(i): 
+    let x = new List::List(d,null);
+    return Q{x,x};
   case &Tagged(tag,d):
-    List::list_t<doc_t> ds_hd, ds;
-    ds_hd = ds = flatten(d);
-    while (ds != null) {
-      ds->hd = new Tagged(tag,ds->hd);
-      ds = ds->tl;
-    }
-    return ds_hd;
+    struct Q q = flattenit(d);
+    for (_ x = q.first; x != null; x = x->tl) 
+      x->hd = new Tagged(tag,x->hd);
+    return q;
   }
 }  
+
+List::list_t<doc_t> flatten(doc_t d) {
+  return flattenit(d).first;
+}
 
 extern void validate_docs(buf_t,doc_t,doc_t);
 
@@ -241,11 +264,18 @@ int main(int argc, char ??argv) {
     fprintf(stderr, "TagElim::synth_t has gotten too big!!!");
   buf_t b = init_buf();
   fprintf(stderr,"getting docs..."); fflush(stderr);
-  doc_t orig = get_docs(init_context,b,f);
-  fprintf(stderr,"%d\ncopying docs...",check_time()); fflush(stderr);
-  doc_t d = copy_doc(orig);
-//    List::list_t<doc_t> fds = flatten(d);
-//    d = new Seq(fds);
+  // doc_t orig = get_docs(init_context,b,f);
+  // fprintf(stderr,"%d\ncopying docs...",check_time()); fflush(stderr);
+  // doc_t d = copy_doc(orig);
+  doc_t d = get_docs(init_context,b,f);
+
+  /* JGM: uncomment to try the bottom up approach
+  fprintf(stderr,"%d\nflatten into array...", check_time());
+  d = Flat::flatten_array(d);
+  */
+  // List::list_t<doc_t> fds = flatten(d);
+  // d = new Seq(fds);
+  
   is_change = true;
   while(is_change && check_time() > 2) {
     is_change = false;

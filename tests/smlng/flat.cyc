@@ -1,0 +1,286 @@
+#include <list.h>
+#include <stdio.h>
+#include "core.h"
+#include "smlng.h"
+using Core;
+using List;
+using Stdio;
+namespace Flat;
+
+struct FlatContext {
+  unsigned int B  : 1; 
+  unsigned int EM : 1; 
+  unsigned int I  : 1;
+  unsigned int S  : 1;
+  unsigned int TT : 1;
+  unsigned int U  : 2; 
+  char size;  // 10 == don't care
+  char color; // 0 == don't care
+};
+typedef struct FlatContext ctxt_t;
+ctxt_t init_flat_context = {false,false,false,false,false,0,DONT_KNOW,DONT_KNOW};
+
+unsigned int num_texts(doc_t d) {
+  switch (d) {
+  case &Text(s): return 1;
+  case &Seq(ds):
+    unsigned int s = 0;
+    for (; ds != null; ds=ds->tl)
+      s += num_texts(ds->hd); 
+    return s;
+  case &Tagged(tag,d):
+    return num_texts(d);
+  }
+}
+
+static ctxt_t new_ctxt(ctxt_t ctxt, tag_t tag) {
+  switch (tag) {
+  case B_tag:
+    ctxt.B = true; 
+    break;
+  case EM_tag:
+    ctxt.EM = !ctxt.EM; 
+    break;
+  case I_tag:
+    ctxt.I = true;
+    break;
+  case PL_tag:
+    // PL clears the U, B, EM, I, S, and TT attributes
+    ctxt.U = 0; ctxt.B = false; ctxt.EM = false; ctxt.I = false;
+    ctxt.S = false; ctxt.TT = false;
+    break;
+  case S_tag:
+    ctxt.S = true;
+    ctxt.EM = false; 
+    break;
+  case TT_tag:
+    ctxt.TT = true;
+    break;
+  case U_tag:
+    ctxt.U++;
+    break;
+  case Zero:
+  case One:
+  case Two:
+  case Three:
+  case Four:
+  case Five:
+  case Six:
+  case Seven:
+  case Eight:
+  case Nine:
+    char sz = (char)tag;
+    ctxt.size = sz;
+    break;
+  case r_tag:
+  case g_tag:
+  case b_tag:
+  case c_tag:
+  case m_tag:
+  case y_tag:
+  case k_tag:
+  case w_tag:
+    char color = (char)tag;
+    ctxt.color = color;
+    break;
+  default: throw new Impossible("flat");
+  }
+  return ctxt;
+}
+
+static void flat_arr(ctxt_t ctxt, doc_t d, $(ctxt_t,doc_t) ?a, 
+                     unsigned int @`r pos) {
+  switch (d) {
+  case &Text(i): 
+    a[*pos] = $(ctxt,d);
+    *pos = *pos + 1;
+    break;
+  case &Seq(ds):
+    for (; ds != null; ds = ds->tl)
+      flat_arr(ctxt,ds->hd,a,pos);
+    break;
+  case &Tagged(t,d):
+    flat_arr(new_ctxt(ctxt,t),d,a,pos);
+    break;
+  }
+}
+
+static void print_context(ctxt_t c) {
+  fprintf(stderr,"B=%d, EM=%d, I=%d, S=%d, TT=%d, U=%d, size=%d, color=%d",
+          c.B, c.EM, c.I, c.S, c.TT, c.U, c.size, c.color);
+}  
+
+static inline bool same_ctxt(ctxt_t c1, ctxt_t c2) {
+  return c1.B == c2.B && c1.EM == c2.EM && c1.I == c2.I && c1.S == c2.S &&
+    c1.TT == c2.TT && c1.U == c2.U && c1.size == c2.size && 
+    c1.color == c2.color;
+}
+
+static unsigned int merge_same($(ctxt_t,doc_t)? a) {
+  unsigned int sz = a.size;
+  unsigned int cur_target = 0;
+  for (_ i = 0; i < sz; i++) {
+    let $(c,d) = a[i];
+    for (_ j = i+1; j < sz; j++) {
+      let $(c2,d2) = a[j];
+      if (same_ctxt(c,c2)) {
+        d = new Seq(new List(d,new List(d2,null)));
+        i++;
+      } else {
+        i = j-1;
+        break;
+      }
+    }
+    a[cur_target] = $(c,d);
+    cur_target++;
+  }
+  return cur_target;
+}
+
+static inline int ctxt_diff(ctxt_t c1, ctxt_t c2) {
+  int d = 0;
+  if (c1.B != c2.B) d++;
+  if (c1.EM != c2.EM) d++;
+  if (c1.I != c2.I) d++;
+  if (c1.S != c2.S) d++;
+  if (c1.TT != c2.TT) d++;
+  if (c1.U != c2.U) d++;
+  if (c1.size != c2.size) d++;
+  if (c1.color != c2.color) d++;
+  return d;
+}  
+
+static $(ctxt_t,doc_t) merge_doc(ctxt_t c1,doc_t d1,ctxt_t c2,doc_t d2) {
+  ctxt_t c3 = c1;
+  if (c1.B != c2.B) {
+    if (c1.B)
+      d1 = new Tagged(B_tag,d1);
+    else 
+      d2 = new Tagged(B_tag,d2);
+    c3.B = false;
+  }
+  if (c1.EM != c2.EM) {
+    if (c1.EM)
+      d1 = new Tagged(EM_tag,d1);
+    else
+      d2 = new Tagged(EM_tag,d2);
+    c3.EM = false;
+  }
+  if (c1.I != c2.I) {
+    if (c1.I)
+      d1 = new Tagged(I_tag,d1);
+    else
+      d2 = new Tagged(I_tag,d2);
+    c3.I = false;
+  }
+  if (c1.S != c2.S) {
+    if (c1.S)
+      d1 = new Tagged(S_tag,d1);
+    else
+      d2 = new Tagged(S_tag,d2);
+    c3.S = false;
+  }
+  if (c1.TT != c2.TT) {
+    if (c1.TT)
+      d1 = new Tagged(TT_tag,d1);
+    else
+      d2 = new Tagged(TT_tag,d2);
+    c3.TT = false;
+  }
+  while (c1.U != c2.U) {
+    if (c1.U > c2.U) {
+      c3.U = c2.U;
+      d1 = new Tagged(U_tag,d1);
+      c1.U--;
+    } else {
+      c3.U = c1.U;
+      d2 = new Tagged(U_tag,d2);
+      c2.U--;
+    }
+  }
+  if (c1.size != c2.size) {
+    if (c1.size == DONT_KNOW) {
+      d2 = new Tagged(c2.size,d2);
+      c3.size = DONT_KNOW;
+    } else {
+      // NOTE, could pick either one
+      d1 = new Tagged(c1.size,d1);
+      c3.size = c2.size;
+    } 
+  }
+  if (c1.color != c2.color) {
+    if (c1.color == DONT_KNOW) {
+      d2 = new Tagged((char)(c2.color),d2);
+      c3.color = DONT_KNOW;
+    } else {
+      // NOTE, could pick either one
+      d1 = new Tagged((char)(c1.color),d1);
+      c3.color = c2.color;
+    } 
+  }
+  return $(c3,new Seq(new List(d1,new List(d2,null))));
+}
+
+
+static doc_t finish_doc(ctxt_t c1,doc_t d1) {
+  if (c1.B) 
+    d1 = new Tagged(B_tag,d1);
+  if (c1.EM) 
+    d1 = new Tagged(EM_tag,d1);
+  if (c1.I)
+    d1 = new Tagged(I_tag,d1);
+  if (c1.S)
+    d1 = new Tagged(S_tag,d1);
+  if (c1.TT)
+    d1 = new Tagged(TT_tag,d1);
+  while (c1.U != 0) 
+    d1 = new Tagged(U_tag,d1);
+  if (c1.size != DONT_KNOW) 
+    d1 = new Tagged(c1.size,d1);
+  if (c1.color != DONT_KNOW) 
+    d1 = new Tagged((char)(c1.color),d1);
+  return d1;
+}
+
+
+static unsigned int merge_mostly_same($(ctxt_t,doc_t)? a, unsigned int sz,
+                                      int curr_delta) {
+  unsigned int cur_target = 0;
+  for (_ i = 0; i < sz; i++) {
+    let $(c,d) = a[i];
+    for (_ j = i+1; j < sz; j++) {
+      let $(c2,d2) = a[j];
+      let delta = ctxt_diff(c,c2);
+      if (delta < curr_delta) {
+        let $(c3,d3) = merge_doc(c,d,c2,d2);
+        d = d3;
+        c = c3;
+        i++;
+      } else {
+        i = j-1;
+        break;
+      }
+    }
+    a[cur_target] = $(c,d);
+    cur_target++;
+  }
+  return cur_target;
+}
+
+
+doc_t flatten_array(doc_t d) {
+  unsigned int n = num_texts(d);
+  unsigned int c = 0;
+  $(ctxt_t, doc_t) p = $(init_flat_context,d);
+  $(ctxt_t, doc_t) ? a = new {for i < n : p};
+  flat_arr(init_flat_context,d,a,&c);
+  c = merge_same(a);
+  for (_ k = 0; k < 8; k++) {
+    c = merge_mostly_same(a,c,k);
+    if (c == 1) break;
+  }
+  let $(ctxt,d) = a[0];
+  let ans = finish_doc(ctxt,d);
+  return ans;
+}
+  
