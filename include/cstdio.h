@@ -70,7 +70,7 @@ extern int remove (const char ?);
 extern int rename (const char ?, const char ?);
 
 /* Create a temporary file and open it read/write.  */
-//extern FILE *tmpfile ();
+extern FILE *tmpfile ();
 /* Generate a temporary filename.  */
 //extern char ?`H tmpnam (char ?`H);
 

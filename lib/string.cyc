@@ -452,7 +452,19 @@ mstring_t replace_suffix (string_t src, string_t curr_suffix, string_t new_suffi
 
 // Search for any character of accept in s.
 // Return a ? pointer to the first such character, or NULL if none.
-mstring_t<`r> strpbrk(mstring_t<`r> s, string_t accept) {
+string_t<`r> strpbrk(string_t<`r> s, string_t accept) {
+  int len = int_strleno(s,"Std::strpbrk");
+  char c = '\000';
+
+  for (; len>0 && (c=*s)!=0; len--,s++) {
+    for (int j=0; j<accept.size; j++)
+      if (c == accept[j])
+	return s;
+  }
+  return NULL;
+}
+
+mstring_t<`r> mstrpbrk(mstring_t<`r> s, string_t accept) {
   int len = int_strleno(s,"Std::strpbrk");
   char c = '\000';
 
@@ -490,7 +502,7 @@ string_t<`r> strchr(string_t<`r> s, char c) {
 
 // Return a pointer to the last occurrence of c in s,
 // or NULL if none.
-mstring_t<`r> strrchr(mstring_t<`r> s, char c) {
+string_t<`r> strrchr(string_t<`r> s, char c) {
   int len = int_strleno(s,"Std::strrchr");
   int i = len - 1;
   s += i;
@@ -512,6 +524,20 @@ string_t<`r> strstr(string_t<`r> haystack, string_t needle) {
   for (string_t<`r> start = haystack;
        (start = strchr(start, *needle)) != NULL;
        start = strchr(start+1, *needle))
+    if (strncmp(start, needle, len) == 0)
+      return start;
+
+  return NULL;
+}
+
+mstring_t<`r> mstrstr(mstring_t<`r> haystack, string_t needle) {
+  if (!haystack || !needle) throw new Invalid_argument("Std::strstr");
+  if (*needle == '\0') return haystack;
+
+  int len = int_strleno(needle, "Std::strstr");
+  for (mstring_t<`r> start = haystack;
+       (start = mstrchr(start, *needle)) != NULL;
+       start = mstrchr(start+1, *needle))
     if (strncmp(start, needle, len) == 0)
       return start;
 

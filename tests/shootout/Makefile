@@ -8,7 +8,7 @@ CYCC = $(CYCDIR)/bin/$(CYCCOMP)
 # Not implemented at all: lists methcall objinst prodcons regexmatch
 #  spellcheck strcat wordfreq
 BENCHMARKS = ackermann ary3 except fibo hash hash2 heapsort\
- hello matrix nestedloop random reversefile sieve sumcol wc
+ hello matrix moments nestedloop random reversefile sieve sumcol wc
 
 EXEFILES = $(addsuffix $(EXE), $(BENCHMARKS))
 GCCEXEFILES = $(addprefix gcc-, $(EXEFILES))

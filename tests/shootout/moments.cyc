@@ -12,14 +12,14 @@
 #define MAXLINELEN 128
 
 int
-compare_doubles (const double @a, const double @b) {
+compare_doubles (/* const */ double @a, /* const */ double @b) {
     return (int) (*a - *b);
 }
 
 
 int
 main() {
-    char line[MAXLINELEN];
+    char line[MAXLINELEN] = { for i < MAXLINELEN : '\0' };
     int i, n = 0, mid = 0;
     double sum = 0.0;
     double mean = 0.0;
@@ -57,8 +57,7 @@ main() {
 	kurtosis = (kurtosis/(n * variance * variance)) - 3.0;
     }
 
-    //ANNOYING: qsort won't work here because of size of doubles
-    qsort(compare_doubles, nums, n);
+    Array::qsort(compare_doubles, nums, n);
     mid = (n/2);
     median = n % 2 ? nums[mid] : (nums[mid] + nums[mid-1])/2;
 

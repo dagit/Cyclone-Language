@@ -55,9 +55,9 @@ void add(stringptr_t<`H,`H> pos, $(int,int) @totals) {
   results[index++] = new $(pos,(*totals)[0],(*totals)[1]);
 }
 
-int cmp($(stringptr_t,int,int) @x,$(stringptr_t,int,int) @y) {
-  let left =  (*x)[1];
-  let right = (*y)[1];
+int cmp($(stringptr_t,int,int) @@x,$(stringptr_t,int,int) @@y) {
+  let left =  (**x)[1];
+  let right = (**y)[1];
   if (left>right) return -1;
   if (left<right) return 1;
   return 0;

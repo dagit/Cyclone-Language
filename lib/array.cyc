@@ -52,7 +52,7 @@ namespace Array;
 /******************************************************************/
 
 #define  SWAP(a, b)  { temp = arr[a]; arr[a] = arr[b]; arr[b] = temp; }
-#define  COMP(a, b)  (less_eq(arr[a], arr[b]))
+#define  COMP(a, b)  (less_eq(&(arr[a]), &(arr[b])))
 #define  T           3    /* subfiles of T or fewer elements will */
                           /* be sorted by a simple insertion sort */
                           /* Note!  T must be at least 3          */
@@ -64,7 +64,8 @@ namespace Array;
 static int sp[40] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-void qsort(int less_eq(`a,`a),`a ?arr, int len)
+void qsort<`a,`r::R>(cmpfn_t<`a,`r,`r> less_eq, `a ?`r arr, int len)
+//  void qsort(cmpfn_t less_eq,`a ?`r arr, int len)
 {
   int base_ofs = 0;  // FIX: this used to be an arg; need to get rid of it completely, but it's assigned to
 
@@ -139,12 +140,12 @@ void qsort(int less_eq(`a,`a),`a ?arr, int len)
 
 // Mergesort (stable)
 
-#define LESSEQ(a,b) (less_eq(from[a],from[b]))
+#define LESSEQ(a,b) (less_eq(&from[a],&from[b]))
 #define MIN(a,b) (a < b ? a : b)
 #define PUT(a) to[dest++] = from[a++]
 
 
-void msort(int less_eq(`a,`a), `a ?`H arr, int len) {
+void msort(cmpfn_t<`a,`H,`H> less_eq, `a ?`H arr, int len) {
 
   if (len > arr.size || len < 0)
     throw new Core::Invalid_argument("Array::msort");

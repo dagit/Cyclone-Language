@@ -100,7 +100,7 @@ getAttributes(list_t<attribute_t> atrs,list_t<name @> names)
     names = names->tl;
     atrs = atrs->tl;
   }
-  return res;
+  return imp_rev(res);
 }
 
 /* [getAttribute(atr,nm)] returns the value associated with attribute
