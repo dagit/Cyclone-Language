@@ -3,17 +3,16 @@
 # environment for the desired architecture, after unsetting the one for
 # the existing one, before calling the real cpp.
 #
-# usage: cyccpp this_arch_defines target_arch_defines
+# The first argument is the name of the compiling architecture.
+# The second argument is the name of the target architecture.
+# Both must be have been installed by ../configure.
 #
-# Each argument is a preprocessor file with a series of #define definitions
-# in it.  The desired architecture's file is used as is, while the 
-# source architecture file is converted so that each #define becomes
-# a #undef.
+# Note: We are assuming (as is ../configure) that no architecture ends in .undef
 
 CPP="gcc -x c -E -U__GNUC__ -nostdinc"
 
 if [ $# -lt 3 ]; then
-  echo usage: $0 this_arch_defines target_arch_defines
+  echo usage: $0 this_architecture target_architecture
   exit 1
 else
 
@@ -22,10 +21,8 @@ TARGET=$2
 shift
 shift
 
-# turn the source arch file into undefs
-UNDEF_STR=`awk '{ printf("-U%s ",$2); }' < $SOURCE`
+ARCHDIR=$CYCDIR/config/arch
 
-# call CPP
-$CPP $UNDEF_STR -include $TARGET $*
+echo $CPP -include $SOURCE.undef -include $TARGET $* > stderr
+$CPP -include $SOURCE.undef -include $TARGET $*
 fi
-

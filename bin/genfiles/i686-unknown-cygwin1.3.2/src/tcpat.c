@@ -765,8 +765,9 @@ sizeof( unsigned char), 49u), _tag_arr( _temp310, sizeof( void*), 3u));}}}});}}}
 _pop_region( rgn);} goto _LL138; _LL164: if((( int(*)( struct Cyc_List_List* x))
 Cyc_List_length)( _temp198) != (( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(
 _temp200->tvs)){({ void* _temp315[ 0u]={}; Cyc_Tcutil_terr( p->loc, _tag_arr("wrong number of existential type variables in pattern",
-sizeof( unsigned char), 54u), _tag_arr( _temp315, sizeof( void*), 0u));});}{
-struct _RegionHandle _temp316= _new_region(); struct _RegionHandle* rgn=&
+sizeof( unsigned char), 54u), _tag_arr( _temp315, sizeof( void*), 0u));});} if(((
+int(*)( struct Cyc_List_List* x)) Cyc_List_length)( _temp198) !=  0){ region_opt=
+0;}{ struct _RegionHandle _temp316= _new_region(); struct _RegionHandle* rgn=&
 _temp316; _push_region( rgn);{ struct Cyc_List_List* _temp317= 0;{ struct Cyc_List_List*
 t= _temp198; for( 0; t !=  0; t=(( struct Cyc_List_List*) _check_null( t))->tl){
 struct Cyc_Absyn_Tvar* tv=( struct Cyc_Absyn_Tvar*)(( struct Cyc_List_List*)

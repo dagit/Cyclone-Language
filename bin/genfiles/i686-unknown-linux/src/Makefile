@@ -11,9 +11,9 @@ PROG=cyclone$(EXE)
 
 all: $(PROG)
 
-$(PROG): $(O_SRCS) install_path.o
+$(PROG): $(O_SRCS) install_path.o $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
 	$(MAKE) -C ../lib
-	$(CC) -O -o $@ $^ $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a $(LDFLAGS)
+	$(CC) -O -o $@ $^ $(LDFLAGS)
 	$(RM) install_path.c install_path.o
 
 install_path.c:

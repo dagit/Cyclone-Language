@@ -27,7 +27,6 @@ ifndef MS
   endif
 endif
 
-
 CYCLONE_LIBS:=arg\
 	inet\
         array\
@@ -191,5 +190,4 @@ O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS))
 O_LIBS:=$(addsuffix .$(O), $(CYCLONE_LIBS))
 C_RUNTIME:=$(addsuffix .c, $(RUNTIME))
 
-CYC_FLAGS:=-D_PLATFORM_INCLUDES_="\"arch/$(ARCH).h\""
 LDFLAGS:=-lm

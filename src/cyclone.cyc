@@ -810,16 +810,18 @@ int main(int argc, string_t<`H> ?`H argv) {
     stdlib_string = (string_t)"";
   } else {
 
+    // FIX: -pg should get different versions of the libraries?
+    //      What about -g?
     string_t libcyc_filename = pa_r ? "libcyc_a.a" : "libcyc.a";
     string_t nogc_filename = pa_r ? "nogc_a.a" : "nogc.a";
-    string_t gc_filename = "gc.a";
+    string_t gc_filename = "gc.a"; 
 
     let libcyc = do_find(cyclone_lib_path,libcyc_filename);
     let gc = (nogc_r ?
               do_find(cyclone_lib_path,nogc_filename):
               do_find(cyclone_lib_path,gc_filename));
 
-    stdlib = list(new libcyc /*, new gc*/);
+    stdlib = list(new libcyc);
     stdlib_string = aprintf(" %s %s", libcyc, gc);
   }
 

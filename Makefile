@@ -1,6 +1,6 @@
 
 # The following instructions assume you have not added any files to
-# src or lib.  If you have, you MUST MODIFY Makefile.inc in the
+# src or lib.  If you have, you must update Makefile.inc.in in the
 # obvious manner.
 
 # To update to a new version of the compiler, here's the boostrap sequence
@@ -10,6 +10,8 @@
 #   4. make cyclone
 # It is strongly advised that you precede step 3 with the boostrap-checking
 # facilities provided by CYCC and OUT_PREFIX.
+# To update for other architectures, do make update_all_archs after you have
+# reached a fixpoint.
 
 # To use a new version of the compiler without nuking the C files used to
 # bootstrap:
@@ -21,10 +23,6 @@ include Makefile.inc
 
 ifndef ARCH
 $(error "Must have ARCH variable defined to properly compile")
-else
-ifndef TARGET
-TARGET := $(ARCH)
-endif
 endif
 
 CYC_BIN_PATH := $(CYCDIR)/bin
@@ -46,7 +44,6 @@ tools:
 	$(MAKE) install -C tools/bison
 	$(MAKE) install -C tools/cyclex
 	$(MAKE) install -C tools/aprof
-#	$(MAKE) install -C tools/cycocamllex
 .PHONY: tools
 
 $(CYC_LIB_PATH)/gc.a:
@@ -54,8 +51,7 @@ $(CYC_LIB_PATH)/gc.a:
 	ln gc/gc.a $@
 
 # After building all of the source, install it in the user-defined 
-# directories.  Also, keep a record of what was copied for later
-# uninstall.
+# directories.  Also, keep a record of what was copied for later uninstall.
 install: build inc_install lib_install bin_install
 uninstall: inc_uninstall lib_uninstall bin_uninstall
 
@@ -95,20 +91,19 @@ lib_uninstall:
 	@(echo "no lib directory specified"; exit 1)
 endif
 
-# These targets build off the Cyclone source files, 
-# but do not replace anything in bin
+# These build off the Cyclone source files, but do not replace anything in bin
+# They are affected by CYCC and OUT_PREFIX.
 cyclone_src: lib_src
-	$(MAKE) -C src CYCC=$(CYCC) TARGET=$(TARGET) OUT_PREFIX=$(OUT_PREFIX)
-
+	$(MAKE) -C src
 lib_src:
-	$(MAKE) -C lib CYCC=$(CYCC) TARGET=$(TARGET) OUT_PREFIX=$(OUT_PREFIX)
+	$(MAKE) -C lib
 
 # to make just the source files (no linking or .o), for cross-compile
+# These are affected by CYCC and OUT_PREFIX
 cyclone_srconly: lib_srconly
-	$(MAKE) -C src src CYCC=$(CYCC) TARGET=$(TARGET) OUT_PREFIX=$(OUT_PREFIX)
-
+	$(MAKE) -C src src
 lib_srconly:
-	$(MAKE) -C lib src CYCC=$(CYCC) TARGET=$(TARGET) OUT_PREFIX=$(OUT_PREFIX)
+	$(MAKE) -C lib src
 
 # Allocation profiler and its special version of the Cyclone library
 aprof:
@@ -118,69 +113,85 @@ aprof:
 # This target compares the C files in bin/genfiles to those in src
 # Lack of difference means running the update would have no real effect.
 diff: cyclone_src
-	for i in $(C_SRCS); do (diff bin/genfiles/$(TARGET)/src/$$i src/$$i) done
-	for i in $(C_LIBS); do (diff bin/genfiles/$(TARGET)/lib/$$i lib/$$i) done
+	for i in $(C_SRCS); do (diff bin/genfiles/$(ARCH)/src/$$i src/$$i) done
+	for i in $(C_LIBS); do (diff bin/genfiles/$(ARCH)/lib/$$i lib/$$i) done
 	for i in $(CYCLONE_H); do (diff include/$$i lib/$$i) done
-	diff bin/genfiles/$(TARGET)/lib/$(C_RUNTIME) lib/$(C_RUNTIME)
-	diff bin/genfiles/$(TARGET)/lib/precore_c.h lib/precore_c.h
+	diff bin/genfiles/$(ARCH)/lib/$(C_RUNTIME) lib/$(C_RUNTIME)
+	diff bin/genfiles/$(ARCH)/lib/precore_c.h lib/precore_c.h
 	diff bin/cyc-lib/include/cyc_include.h lib/include/cyc_include.h
-	diff bin/genfiles/$(TARGET)/lib/nogc.c lib/nogc.c
+	diff bin/genfiles/$(ARCH)/lib/nogc.c lib/nogc.c
 
 # This target compares the C files in bin/genfiles to those in src
 # Lack of difference means running the update would have no real effect.
 cmp: 
-	@for i in $(C_SRCS); do (cmp -s bin/genfiles/$(TARGET)/src/$$i src/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX src/$$i CHANGED) done
-	@for i in $(C_LIBS); do (cmp -s bin/genfiles/$(TARGET)/lib/$$i lib/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$$i CHANGED) done
+	@for i in $(C_SRCS); do (cmp -s bin/genfiles/$(ARCH)/src/$$i src/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX src/$$i CHANGED) done
+	@for i in $(C_LIBS); do (cmp -s bin/genfiles/$(ARCH)/lib/$$i lib/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$$i CHANGED) done
 	@for i in $(CYCLONE_H); do (cmp -s include/$$i lib/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$$i CHANGED) done
-	@cmp -s bin/genfiles/$(TARGET)/lib/$(C_RUNTIME) lib/$(C_RUNTIME) || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$(C_RUNTIME) CHANGED
-	@cmp -s bin/genfiles/$(TARGET)/lib/precore_c.h lib/precore_c.h || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/precore_c.h CHANGED
+	@cmp -s bin/genfiles/$(ARCH)/lib/$(C_RUNTIME) lib/$(C_RUNTIME) || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$(C_RUNTIME) CHANGED
+	@cmp -s bin/genfiles/$(ARCH)/lib/precore_c.h lib/precore_c.h || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/precore_c.h CHANGED
 	@cmp -s bin/cyc-lib/include/cyc_include.h lib/include/cyc_include.h || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX cyc-lib/include/cyc_include.h CHANGED
-	@cmp -s bin/genfiles/$(TARGET)/lib/nogc.c lib/nogc.c || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/nogc.c CHANGED
+	@cmp -s bin/genfiles/$(ARCH)/lib/nogc.c lib/nogc.c || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/nogc.c CHANGED
 
 # This target updates what is in bin/genfiles and include.
-# It would be "dangerous"
-# to invoke this target with "make -k" if we did not have version control.
-# I intend to put a "warning" waiting for user response in (and remind
-# to add files to Makefile.inc).
-# TJIM: modified to update only changed files.  This speeds up cvs commit
-# over a slow link.
-# MWH: Added a check to make sure that the .c files match the target we are
-# installing into
-update: cyclone_src
-	@if [ ! -f "src/.target" -o "`cat src/.target`" != "$(TARGET)" ]; then echo "Attempting to update $(TARGET) with files built for `cat src/.target`"; exit 1; fi
-	@for i in $(C_SRCS); do (cmp -s src/$$i bin/genfiles/$(TARGET)/src/$$i || (echo UPDATING src/$$i; cp src/$$i bin/genfiles/$(TARGET)/src/$$i)) done
-	@if [ ! -f "lib/.target" -o "`cat lib/.target`" != "$(TARGET)" ]; then echo "Attempting to update $(TARGET) with files built for `cat lib/.target`"; exit 1; fi
-	@for i in $(C_LIBS); do (cmp -s lib/$$i bin/genfiles/$(TARGET)/lib/$$i || (echo UPDATING lib/$$i; cp lib/$$i bin/genfiles/$(TARGET)/lib/$$i)) done
+# It would be "dangerous" to invoke this target if we did not have 
+# version control.  Only updates changed files (makes cvs faster).
+ifeq ($(TARGET),$(ARCH))
+SRCDIR:=src
+LIBDIR:=lib
+ARCHDIR:=bin/genfiles/$(ARCH)
+else
+SRCDIR:=$(TARGET)
+LIBDIR:=$(TARGET)
+ARCHDIR:=bin/genfiles/$(TARGET)
+endif
+update: 
+	@for i in $(C_SRCS); do (cmp -s $(SRCDIR)/$$i $(ARCHDIR)/src/$$i || (echo UPDATING $(SRCDIR)/$$i; cp $(SRCDIR)/$$i $(ARCHDIR)/src/$$i)) done
+	@for i in $(C_LIBS); do (cmp -s $(LIBDIR)/$$i $(ARCHDIR)/lib/$$i || (echo UPDATING $(LIBDIR)/$$i; cp $(LIBDIR)/$$i $(ARCHDIR)/lib/$$i)) done
+	@cmp -s $(LIBDIR)/nogc.c $(ARCHDIR)/lib/nogc.c || (echo UPDATING $(LIBDIR)/nogc.c; cp $(LIBDIR)/nogc.c $(ARCHDIR)/lib/nogc.c)
+	@cmp -s $(LIBDIR)/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME) || (echo UPDATING $(LIBDIR)/$(C_RUNTIME); cp $(LIBDIR)/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME))
+	@cmp -s $(LIBDIR)/precore_c.h $(ARCHDIR)/lib/precore_c.h || (echo UPDATING $(LIBDIR)/precore_c.h; cp $(LIBDIR)/precore_c.h $(ARCHDIR)/lib/precore_c.h)
+ifeq ($(TARGET),$(ARCH))
 	@for i in $(CYCLONE_H); do (cmp -s lib/$$i include/$$i || (echo UPDATING lib/$$i; cp lib/$$i include/$$i)) done
 	@(cd lib; for i in arch/*.h; do (cmp -s $$i ../include/$$i || (echo UPDATING lib/$$i; cp $$i ../include/$$i)) done)
-	@cmp -s lib/$(C_RUNTIME) bin/genfiles/$(TARGET)/lib/$(C_RUNTIME) || (echo UPDATING lib/$(C_RUNTIME); cp lib/$(C_RUNTIME) bin/genfiles/$(TARGET)/lib/$(C_RUNTIME))
-	@cmp -s lib/precore_c.h bin/genfiles/$(TARGET)/lib/precore_c.h || (echo UPDATING lib/precore_c.h; cp lib/precore_c.h bin/genfiles/$(TARGET)/lib/precore_c.h)
 	@cmp -s lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h || (echo UPDATING cyc-lib/include/cyc_include.h; cp lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h)
-	@cmp -s lib/nogc.c bin/genfiles/$(TARGET)/lib/nogc.c || (echo UPDATING lib/nogc.c; cp lib/nogc.c bin/genfiles/$(TARGET)/lib/nogc.c)
+endif
 
-# This will destroy any existing compiled files in lib and src
+# This will compile (C files) and update for all supported architectures
 #   and then compile and install for all supported architectures
-update_all_archs:
-	@for arch in $(ALL_ARCHS); do $(MAKE) clean_src update TARGET=$$arch; done
+update_all_archs: 
+	@for arch in $(ALL_ARCHS); do\
+	  if [ "$$arch" != "$(ARCH)" ]; then\
+	    if [ ! -d "$$arch" ]; then mkdir $$arch; fi;\
+            $(MAKE) -C lib TARGET=$$arch $$arch;\
+	    $(MAKE) -C src TARGET=$$arch $$arch;\
+	    $(MAKE) update TARGET=$$arch;\
+	  fi;\
+	done
 
+# affected by CYCC and OUT_PREFIX
 test:
-	$(MAKE) -C tests CYCC=$(CYCC) OUT_PREFIX=$(OUT_PREFIX)
+	$(MAKE) -C tests
 
 clean_src:
 	$(MAKE) clean -C src
 	$(MAKE) clean -C lib
 
+# OUT_PREFIX affects these targets
 clean_src_prefix:
-	$(MAKE) clean_prefix -C src OUT_PREFIX=$(OUT_PREFIX)
-	$(MAKE) clean_prefix -C lib OUT_PREFIX=$(OUT_PREFIX)
+	$(MAKE) clean_prefix -C src 
+	$(MAKE) clean_prefix -C lib 
 
+# Clean-up: using OUT_PREFIX for other targets is a wasteful kludge.
 clean_nogc:
 	$(MAKE) clean -C tools/bison
 	$(MAKE) clean -C tools/cyclex
 	$(MAKE) clean -C tools/aprof
-#	$(MAKE) clean -C tools/cycocamllex
 	$(MAKE) clean -C src
 	$(MAKE) clean -C lib
+	@for arch in $(ALL_ARCHS); do\
+	    $(MAKE) clean_prefix -C src OUT_PREFIX=../$$arch/src/;\
+	    $(MAKE) clean_prefix -C lib OUT_PREFIX=../$$arch/lib/;\
+	done
 	$(RM) bin/cyc-lib/libcyc.a bin/cyc-lib/libcyc_a.a
 	$(MAKE) clean -C bin/genfiles
 	$(MAKE) clean -C tests

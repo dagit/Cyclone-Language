@@ -30,8 +30,8 @@ $(BINDIR)/$(PROG): $(PROG)
 
 all: $(PROG)
 
-$(PROG): $(O_SRCS)
-	$(CYCC) -B$(BINDIR)/cyc-lib $(LC_FLAG) -g -o $@ $^ $(LDFLAGS)
+$(PROG): $(O_SRCS) $(BINDIR)/cyc-lib/$(CYCLIB)
+	$(CYCC) -B$(BINDIR)/cyc-lib $(LC_FLAG) -g -o $@ $(O_SRCS) $(LDFLAGS)
 
 boot:
 	-rm -f lexer.cyc

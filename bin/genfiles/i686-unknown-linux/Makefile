@@ -6,28 +6,26 @@ CYC_BIN_PATH=$(CYCDIR)/bin
 .PHONY: install compile
 
 install: install_lib install_comp
-install_a: compile_a copy_a
-install_lib: compile_lib copy_lib
-install_comp: compile_comp copy_comp
+install_a: comp_a $(CYC_LIB_PATH)/libcyc_a.a
+install_lib: comp_lib $(CYC_LIB_PATH)/$(CYCLIB) 
+install_comp: comp_src $(CYC_BIN_PATH)/cyclone$(EXE)
 
-compile_lib:
+comp_lib:
 	$(MAKE) -C lib
-
-copy_lib:
-	cp lib/$(CYCLIB) $(CYC_LIB_PATH)
-	cp lib/nogc.a $(CYC_LIB_PATH)
-	
-compile_comp:
+comp_src:
 	$(MAKE) -C src
-
-copy_comp:
-	cp src/cyclone$(EXE) $(CYC_BIN_PATH)
-	
-compile_a:
+comp_a:
 	$(MAKE) -C lib libcyc_a.a nogc_a.a
 
-copy_a: 
-	cp lib/libcyc_a.a $(CYC_LIB_PATH)
+$(CYC_LIB_PATH)/$(CYCLIB): lib/$(CYCLIB)
+	cp $< $@
+	cp lib/nogc.a $(CYC_LIB_PATH)
+
+$(CYC_BIN_PATH)/cyclone$(EXE): src/cyclone$(EXE)
+	cp $< $@
+
+$(CYC_LIB_PATH)/libcyc_a.a: lib/libcyc_a.a
+	cp $< $@
 	cp lib/nogc_a.a $(CYC_LIB_PATH)
 
 uninstall: clean
@@ -36,16 +34,6 @@ uninstall: clean
 	$(RM) $(CYC_BIN_PATH)/cyclone$(EXE)
 	$(RM) $(CYC_LIB_PATH)/cyclib_a.a
 	$(RM) $(CYC_LIB_PATH)/nogc_a.a
-
-#$(CYC_LIB_PATH)/$(CYCLIB): lib/$(CYCLIB)
-#	cp lib/$(CYCLIB) $(CYC_LIB_PATH)
-#
-#$(CYC_BIN_PATH)/cyclone$(EXE): src/cyclone$(EXE)
-#	cp src/cyclone$(EXE) $(CYC_BIN_PATH)
-#
-#$(CYC_LIB_PATH)/nogc.a: lib/nogc.a
-#	cp lib/nogc.a $(CYC_LIB_PATH)
-#
 
 clean:
 	$(MAKE) clean -C src

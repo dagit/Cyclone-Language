@@ -287,6 +287,13 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
   case &Tunion_p(tud,tuf,tvs,ps): 
     if(length(tvs) != length(tuf->tvs))
       terr(p->loc,"wrong number of existential type variables in pattern");
+    // this avoids a subtle violation of type-safety.  It's only necessary
+    // when we're matching against a TunionFieldType, but I find it cleaner
+    // to always ban reference patterns directly under existentials.
+    // (FIX The error message isn't accurate though.)
+    if(length(tvs) != 0)
+      region_opt = NULL;
+
     region rgn {
 
       // constrain the type variables to have box kind
@@ -305,7 +312,6 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
 	  break;
 	case &Forward_constr(_):throw impos("forward after compress in conref");
 	}
-	// bummer the type is still going in the heap
 	var_tvs = rnew(rgn) List((type_t)(new VarType(tv)),var_tvs);
       }
       var_tvs = imp_rev(var_tvs);

@@ -56,8 +56,8 @@ $(BINDIR)/$(PROG): $(PROG)
 
 all: $(PROG)
 
-$(PROG): $(O_SRCS)
-	$(CYCC) -B$(BINDIR)/cyc-lib $(LC_FLAG) -o $@ $^ $(LDFLAGS)
+$(PROG): $(O_SRCS) $(BINDIR)/cyc-lib/$(CYCLIB)
+	$(CYCC) -B$(BINDIR)/cyc-lib $(LC_FLAG) -o $@ $(O_SRCS) $(LDFLAGS)
 
 
 # This file is different to pass the parser file names to the compiler.

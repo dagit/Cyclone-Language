@@ -20,7 +20,7 @@
       "\\\<splice\\\>"
       "\\\<cut\\\>"
       "\\\<fill\\\>"
-      '("\\\<null\\\>" (0 'font-lock-constant-face t t)))
+      '("\\\<NULL\\\>" (0 'font-lock-constant-face t t)))
     t)
 
 (setq c++-font-lock-extra-types 

@@ -1,13 +1,5 @@
 include ../../Makefile.inc
 
-ifndef ARCH
-$(error "Must have ARCH variable defined to properly compile")
-else
-ifndef TARGET
-TARGET := $(ARCH)
-endif
-endif
-
 # use the installed compiler ..
 CYC_BIN_PATH=$(CYCDIR)/bin
 
@@ -19,10 +11,7 @@ CYCC=$(CYC_BIN_PATH)/$(CYCCOMP)
 CYCBISON=$(CYC_BIN_PATH)/cycbison$(EXE)
 CYCLEX=$(CYC_BIN_PATH)/cyclex$(EXE)
 
-# for cross-compiling
-CPP_FLAG := -use-cpp '$(CYCDIR)/config/cyccpp $(CYCDIR)/config/arch/$(ARCH) $(CYCDIR)/config/arch/$(TARGET)'
-
-CYC_FLAGS+=-I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) $(CPP_FLAG)
+CYC_FLAGS+=-I$(CYC_INC_PATH) -B$(CYC_LIB_PATH)
 
 SRCS=xml xmlparse_tab xmlscan xmldump
 
