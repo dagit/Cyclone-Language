@@ -72,7 +72,7 @@ extern int rename (const char ?, const char ?);
 /* Create a temporary file and open it read/write.  */
 extern FILE *tmpfile ();
 /* Generate a temporary filename.  */
-//extern char ?`H tmpnam (char ?`H);
+extern char ?`H tmpnam (char ?`H);
 
 /* Close STREAM.  */
 extern int fclose (FILE @);
@@ -171,6 +171,10 @@ extern int putw (int __w, FILE @__stream);
 extern void setbuffer (FILE @__stream, char ?__buf, size_t __size);
 /* Make STREAM line-buffered.  */
 extern void setlinebuf (FILE @__stream);
+
+/* Opens and closes a pipe */
+extern FILE* popen(const char ?command, const char ?type);
+extern int pclose(FILE@ stream);
 
 // 
 // Routines added for Cyclone

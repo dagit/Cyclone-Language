@@ -16,26 +16,19 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
-#ifndef _SYS_IOCTL_H
-#define _SYS_IOCTL_H
+#include <core.h>
+#include <ccrypt.h>
+using Core;
 
-namespace Std {
-
-//  extern tunion IoctlArg<`r::R> {
-//    /* The remaining cases are for the argument following the type-varying
-//       argument; they could be eliminated if we had per-arg injection. */
-//    /* NOTE: ORDER MATTERS! on these inject things */
-//    IO_nonblock(int @`r); // FIONBIO
-//  };
-//  typedef tunion `r IoctlArg<`r> IO<`r>;
-//  extern "C" int ioctl(int fd, int cmd, ... inject IO);
-
-#ifdef __CYGWIN__
-#define FIONBIO 0x8004667e /* To be compatible with termiost version */
-#endif
-
-extern "C" int ioctl(int fd, int cmd, int @arg);
-
+namespace Ccrypt {
+  extern "C" {
+    Cstring crypt(const Cstring key, const Cstring salt);
+  }
+#define s2c(x) (string_to_Cstring(x))
 }
 
-#endif
+namespace Std;
+
+char ?crypt(const char ?key, const char ?salt) {
+  return Ccrypt::crypt(s2c(key), s2c(salt));
+}

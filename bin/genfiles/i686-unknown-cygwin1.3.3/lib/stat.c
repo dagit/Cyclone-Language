@@ -233,7 +233,7 @@ ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_tm{ int tm_sec; int tm_min; int
 tm_hour; int tm_mday; int tm_mon; int tm_year; int tm_wday; int tm_yday; int
 tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*
 gmtime( const int* timep); extern struct Cyc_Std_tm* localtime( const int* timep);
-extern int timezone; extern int daylight; struct Cyc_Std_stat_t{ short st_dev;
+extern int _timezone; extern int daylight; struct Cyc_Std_stat_t{ short st_dev;
 unsigned int st_ino; int st_mode; unsigned short st_nlink; unsigned short st_uid;
 unsigned short st_gid; short st_rdev; int st_size; int st_atime; int st_spare1;
 int st_mtime; int st_spare2; int st_ctime; int st_spare3; int st_blksize; int

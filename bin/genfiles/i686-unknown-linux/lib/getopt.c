@@ -247,7 +247,9 @@ int tag; unsigned int* f1; } ; static const int Cyc_Std_StringPtr_sa= 4; struct
 Cyc_Std_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static const
 int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double*
 f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
-int tag; float* f1; } ; extern int system( unsigned char*); struct Cyc_Std__Div{
+int tag; float* f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
+} ; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[
+8u]; extern unsigned char Cyc_Array_Array_mismatch[ 19u]; struct Cyc_Std__Div{
 int quot; int rem; } ; struct Cyc_Std__Ldiv{ int quot; int rem; } ; extern int
 abs( int __x); extern int atexit( void(* __func)()); extern struct Cyc_Std__Div
 div( int __numer, int __denom); extern struct Cyc_Std__Ldiv ldiv( int __numer,
@@ -286,9 +288,8 @@ struct _tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr
 int Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd,
 struct _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct
 _tagged_arr pathname); int Cyc_Std_gethostname( struct _tagged_arr, unsigned int);
-int Cyc_Std_chroot( struct _tagged_arr); struct Cyc_List_List{ void* hd; struct
-Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern
-unsigned char Cyc_List_Nth[ 8u]; extern unsigned int Cyc_Std_strlen( struct
+int Cyc_Std_chroot( struct _tagged_arr); struct _tagged_arr Cyc_Std_getpass(
+struct _tagged_arr prompt); extern unsigned int Cyc_Std_strlen( struct
 _tagged_arr s); extern int Cyc_Std_strcmp( struct _tagged_arr s1, struct
 _tagged_arr s2); extern int Cyc_Std_strncmp( struct _tagged_arr s1, struct
 _tagged_arr s2, unsigned int len); extern struct _tagged_arr Cyc_Std_strchr(

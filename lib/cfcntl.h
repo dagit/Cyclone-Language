@@ -35,6 +35,9 @@
 #define O_TRUNC     01000
 #define O_APPEND    02000
 #define O_NONBLOCK  04000
+#ifdef __CYGWIN__
+#define O_NDELAY    O_NONBLOCK
+#endif
 #define O_SYNC     010000
 
 #define F_DUPFD 0

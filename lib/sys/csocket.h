@@ -80,8 +80,15 @@ typedef unsigned short sa_family_t;
 
   extern struct sockaddr_in;
 
+/* For porting purposes */
+struct sockaddr {
+  unsigned short sa_family;
+  char           sa_data[14];
+};
+
 extern tunion SockAddr<`r::R> {
   SA_sockaddr_in(struct sockaddr_in @`r);
+  SA_sockaddr(struct sockaddr @`r);
   /* We will add other cases as necessary, e.g., SockAddr_In6 */
 
   /* The remaining cases are for the argument following the type-varying
@@ -91,12 +98,6 @@ extern tunion SockAddr<`r::R> {
   SA_socklen(socklen_t); // bind, connect, sendto
 };
 typedef tunion `r SockAddr<`r> SA<`r>;
-
-/* For porting purposes */
-struct sockaddr {
-  unsigned short sa_family;
-  char           sa_data[14];
-};
 
 extern "C" int socket(int domain, int type, int protocol);
 extern "C" int socketpair(int domain, int type, int protocol, int @{2} fds);

@@ -18,6 +18,7 @@
 
 #include <core.h>
 #include <stdlib.h>
+#include <array.h>
 
 namespace Cstdlib {
   extern "C" {
@@ -29,6 +30,7 @@ namespace Cstdlib {
     double strtod(Cstring, Cstring *`r);
     long strtol(Cstring, Cstring *`r, int);
     unsigned long strtoul(Cstring, Cstring *`r, int);
+    int system(Cstring);
 #define s2c(x) (string_to_Cstring(x))
   }
 }
@@ -112,4 +114,13 @@ namespace Std {
     return r;
   }
 
+  void qsort<`a,`r::R>(`a ?`r tab, size_t nmemb, size_t szmemb, 
+		       Array::cmpfn_t<`a,`r,`r> compfn) {
+    Array::qsort(compfn, tab, nmemb);
+  }
+
+  int system(string_t cmd) {
+    return Cstdlib::system(s2c(cmd));
+  
+}
 }

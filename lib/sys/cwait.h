@@ -2,6 +2,7 @@
 #define _SYS_WAIT_H
 
 #include <sys/ctypes.h>
+#include <sys/resource.h>
 
 #define WNOHANG 1
 #define WUNTRACED 2
@@ -15,6 +16,7 @@
 namespace Std {
   extern "C" pid_t wait(int *`r status);
   extern "C" pid_t waitpid(pid_t pid, int *`r status, int options);
+  extern "C" pid_t wait3(int @status, int options, struct rusage *rusage);
 }
 
 #endif

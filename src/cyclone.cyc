@@ -591,7 +591,7 @@ static void process_file(string_t<`H> filename) {
                     fixup_string, ofile_string);
 
   if (v_r) fprintf(stderr,"%s\n",cmd);
-  if (system(string_to_Cstring(cmd)) != 0) {
+  if (system(cmd) != 0) {
     compile_failure = true;
     fprintf(stderr,"\nError: preprocessing\n");
     return;
@@ -1008,7 +1008,7 @@ int main(int argc, string_t<`H> ?`H argv) {
 	    stdlib_string,
             libargs_string);
   if (v_r) fprintf(stderr,"%s\n",cccmd);
-  if (system(string_to_Cstring(cccmd)) != 0) {
+  if (system(cccmd) != 0) {
     fprintf(stderr,"Error: C compiler failed\n");
     compile_failure = true;
     remove_cfiles();

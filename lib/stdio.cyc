@@ -31,7 +31,7 @@ typedef struct Cstdio::__sFILE __sFILE;
 int remove(Cstring);
 int rename(Cstring, Cstring);
 __sFILE *tmpfile();
-//Cstring	tmpnam(Cstring);
+Cstring	tmpnam(Cstring);
 int fclose(__sFILE @`r);
 int fflush(__sFILE *`r);
 __sFILE *fopen (Cstring __filename, Cstring __modes);
@@ -64,6 +64,8 @@ int feof(__sFILE @__stream);
 int ferror(__sFILE @__stream);
 void perror(Cstring __s);
 int fileno(__sFILE @__stream);
+__sFILE *popen(Cstring, Cstring);
+int pclose(__sFILE @__stream);
   //__sFILE *  popen(Cstring, Cstring);
   //int	pclose(__sFILE @);
 #define s2c(x) (string_to_Cstring(x))
@@ -88,12 +90,10 @@ FILE *tmpfile() {
   return cf ? new __sFILE(cf) : NULL;
 }
 
-/*
 char ?`H tmpnam(char ?`H s) {
   char ?name = Cstring_to_string(Cstdio::tmpnam(NULL));
   return s ? strcpy(s, name) : name;
 }
-*/
 
 int fclose(FILE @`r f) {
   int r = Cstdio::fclose((Cstdio::__sFILE @) f->file);
@@ -222,12 +222,12 @@ int fileno(FILE @`r f) { return Cstdio::fileno((Cstdio::__sFILE @) f->file); }
 
 int getw(FILE @`r f) { return Cstdio::getw((Cstdio::__sFILE @) f->file); }
 
-//int pclose(FILE @f) { return Cstdio::pclose((Cstdio::__sFILE @) f->file); }
+int pclose(FILE @`r f) { return Cstdio::pclose((Cstdio::__sFILE @) f->file); }
 
-//FILE *popen(string s, string m) {
-//  Cstdio::__sFILE *cf = Cstdio::popen(s2c(s),s2c(m));
-//  return cf ? new __sFILE(cf) : NULL;
-//}
+FILE *popen(const char ? s, const char ? m) {
+  Cstdio::__sFILE *cf = Cstdio::popen(s2c(s),s2c(m));
+  return (cf ? new __sFILE(cf) : NULL);
+}
 
 int putw(int i, FILE @`r f) {
   return Cstdio::putw(i,(Cstdio::__sFILE @) f->file);

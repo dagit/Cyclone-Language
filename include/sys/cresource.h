@@ -23,6 +23,8 @@
 #ifndef _SYS_RESOURCE_H
 #define _SYS_RESOURCE_H
 
+#include <sys/ctime.h> // for timeval
+
 namespace Std {
 
 #define RLIMIT_CPU 0
@@ -42,8 +44,31 @@ namespace Std {
     rlim_t rlim_max;
   };
 
-  extern "C" int getrlimit(int resource, struct rlimit @`r rlim);
-  extern "C" int setrlimit(int resource, const struct rlimit @`r rlim);
+  struct rusage {
+    struct timeval ru_utime;	/* user time used */
+    struct timeval ru_stime;	/* system time used */
+    long ru_maxrss;
+    long ru_ixrss;               /* XXX: 0 */
+    long ru_idrss;               /* XXX: sum of rm_asrss */
+    long ru_isrss;               /* XXX: 0 */
+    long ru_minflt;              /* any page faults not requiring I/O */
+    long ru_majflt;              /* any page faults requiring I/O */
+    long ru_nswap;               /* swaps */
+    long ru_inblock;             /* block input operations */
+    long ru_oublock;             /* block output operations */
+    long ru_msgsnd;              /* messages sent */
+    long ru_msgrcv;              /* messages received */
+    long ru_nsignals;            /* signals received */
+    long ru_nvcsw;               /* voluntary context switches */
+    long ru_nivcsw;              /* involuntary " */
+  #define ru_last         ru_nivcsw
+  };
+
+  extern "C" int getrlimit(int resource, struct rlimit @ rlim);
+  extern "C" int setrlimit(int resource, const struct rlimit @ rlim);
+
+  extern "C" int getrusage (int who, struct rusage @ rusage);
+
 }
 
 #endif

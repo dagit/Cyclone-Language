@@ -248,7 +248,9 @@ int tag; unsigned int* f1; } ; static const int Cyc_Std_StringPtr_sa= 4; struct
 Cyc_Std_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static const
 int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double*
 f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
-int tag; float* f1; } ; extern int system( unsigned char*); struct Cyc_Std__Div{
+int tag; float* f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
+} ; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[
+8u]; extern unsigned char Cyc_Array_Array_mismatch[ 19u]; struct Cyc_Std__Div{
 int quot; int rem; } ; struct Cyc_Std__Ldiv{ int quot; int rem; } ; extern int
 abs( int __x); extern int atexit( void(* __func)()); extern struct Cyc_Std__Div
 div( int __numer, int __denom); extern struct Cyc_Std__Ldiv ldiv( int __numer,
@@ -276,36 +278,36 @@ int seteuid( unsigned short euid); extern unsigned short getgid(); extern int
 setgid( unsigned short gid); extern unsigned short getegid(); extern int setegid(
 unsigned short egid); extern int nice( int); extern int pause(); extern int pipe(
 int* filedes); extern int lseek( int filedes, int offset, int whence); extern
-unsigned int sleep( unsigned int); int Cyc_Std_access( struct _tagged_arr, int);
-int Cyc_Std_chdir( struct _tagged_arr); int Cyc_Std_chown( struct _tagged_arr,
-unsigned short, unsigned short); struct _tagged_arr Cyc_Std_getcwd( struct
-_tagged_arr buf, unsigned int size); int Cyc_Std_execl( struct _tagged_arr path,
-struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execlp( struct
-_tagged_arr file, struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execve(
-struct _tagged_arr filename, struct _tagged_arr argv, struct _tagged_arr envp);
-int Cyc_Std_link( struct _tagged_arr, struct _tagged_arr); int Cyc_Std_read( int
-fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_rmdir( struct
-_tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr); int
-Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd, struct
-_tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct _tagged_arr
-pathname); int Cyc_Std_gethostname( struct _tagged_arr, unsigned int); int Cyc_Std_chroot(
-struct _tagged_arr); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; }
-; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[
-8u]; extern unsigned int Cyc_Std_strlen( struct _tagged_arr s); extern int Cyc_Std_strcmp(
-struct _tagged_arr s1, struct _tagged_arr s2); extern int Cyc_Std_strncmp(
-struct _tagged_arr s1, struct _tagged_arr s2, unsigned int len); extern struct
-_tagged_arr Cyc_Std_strchr( struct _tagged_arr s, unsigned char c); struct
-_tagged_arr Cyc_Std_optarg; int Cyc_Std_optind= 1; int Cyc_Std___getopt_initialized;
-static struct _tagged_arr Cyc_Std_nextchar; int Cyc_Std_opterr= 1; int Cyc_Std_optopt=(
-int)'?'; enum  Cyc_Std_ordering_tag{ Cyc_Std_REQUIRE_ORDER  =  0u, Cyc_Std_PERMUTE
- =  1u, Cyc_Std_RETURN_IN_ORDER  =  2u}; static enum  Cyc_Std_ordering_tag Cyc_Std_ordering;
-static struct _tagged_arr Cyc_Std_posixly_correct; static int Cyc_Std_first_nonopt;
-static int Cyc_Std_last_nonopt; static int Cyc_Std_nonoption_flags_max_len;
-static int Cyc_Std_nonoption_flags_len; static int Cyc_Std_original_argc; static
-int Cyc_Std_original_argv; static void  __attribute__(( unused ))  Cyc_Std_store_args_and_env(
-int argc, struct _tagged_arr argv){ Cyc_Std_original_argc= argc; Cyc_Std_original_argv=(
-int) argv.curr;} static void Cyc_Std_exchange( struct _tagged_arr argv){ int
-bottom= Cyc_Std_first_nonopt; int middle= Cyc_Std_last_nonopt; int top= Cyc_Std_optind;
+unsigned int sleep( unsigned int); extern int isatty( int); int Cyc_Std_access(
+struct _tagged_arr, int); int Cyc_Std_chdir( struct _tagged_arr); int Cyc_Std_chown(
+struct _tagged_arr, unsigned short, unsigned short); struct _tagged_arr Cyc_Std_getcwd(
+struct _tagged_arr buf, unsigned int size); int Cyc_Std_execl( struct
+_tagged_arr path, struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execlp(
+struct _tagged_arr file, struct _tagged_arr arg0, struct _tagged_arr argv); int
+Cyc_Std_execve( struct _tagged_arr filename, struct _tagged_arr argv, struct
+_tagged_arr envp); int Cyc_Std_link( struct _tagged_arr, struct _tagged_arr);
+int Cyc_Std_read( int fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_rmdir(
+struct _tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr);
+int Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd,
+struct _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct
+_tagged_arr pathname); int Cyc_Std_gethostname( struct _tagged_arr, unsigned int);
+int Cyc_Std_chroot( struct _tagged_arr); struct _tagged_arr Cyc_Std_getpass(
+struct _tagged_arr prompt); extern unsigned int Cyc_Std_strlen( struct
+_tagged_arr s); extern int Cyc_Std_strcmp( struct _tagged_arr s1, struct
+_tagged_arr s2); extern int Cyc_Std_strncmp( struct _tagged_arr s1, struct
+_tagged_arr s2, unsigned int len); extern struct _tagged_arr Cyc_Std_strchr(
+struct _tagged_arr s, unsigned char c); struct _tagged_arr Cyc_Std_optarg; int
+Cyc_Std_optind= 1; int Cyc_Std___getopt_initialized; static struct _tagged_arr
+Cyc_Std_nextchar; int Cyc_Std_opterr= 1; int Cyc_Std_optopt=( int)'?'; enum  Cyc_Std_ordering_tag{
+Cyc_Std_REQUIRE_ORDER  =  0u, Cyc_Std_PERMUTE  =  1u, Cyc_Std_RETURN_IN_ORDER
+ =  2u}; static enum  Cyc_Std_ordering_tag Cyc_Std_ordering; static struct
+_tagged_arr Cyc_Std_posixly_correct; static int Cyc_Std_first_nonopt; static int
+Cyc_Std_last_nonopt; static int Cyc_Std_nonoption_flags_max_len; static int Cyc_Std_nonoption_flags_len;
+static int Cyc_Std_original_argc; static int Cyc_Std_original_argv; static void
+ __attribute__(( unused ))  Cyc_Std_store_args_and_env( int argc, struct
+_tagged_arr argv){ Cyc_Std_original_argc= argc; Cyc_Std_original_argv=( int)
+argv.curr;} static void Cyc_Std_exchange( struct _tagged_arr argv){ int bottom=
+Cyc_Std_first_nonopt; int middle= Cyc_Std_last_nonopt; int top= Cyc_Std_optind;
 struct _tagged_arr tem; while( top >  middle? middle >  bottom: 0) { if( top - 
 middle >  middle -  bottom){ int len= middle -  bottom; int i; for( i= 0; i < 
 len; i ++){ tem=*(( struct _tagged_arr*) _check_unknown_subscript( argv, sizeof(

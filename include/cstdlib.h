@@ -29,11 +29,10 @@
 /* Get size_t from <stddef.h> */
 #include <cstddef.h>
 #include <core.h>
+#include <array.h>
 
 namespace Std {
 extern "C" {
-
-extern int system(Cstring);
 
 /* Returned by `div'.  */
 typedef struct _Div
@@ -123,6 +122,11 @@ extern double strtod(const char ?`r n, const char ?`r *`r2 end);
 extern long strtol(const char ?`r n, const char ?`r *`r2 end, int base);
 /* Convert a string to an unsigned long integer.  */
 extern unsigned long strtoul(const char ?`r n,const char ?`r *`r2 end, int base);
+/* Here for compatibility reasons.  Will call Array::qsort */
+extern void qsort<`a,`r::R>(`a ?`r tab, size_t nmemb, size_t szmemb, Array::cmpfn_t<`a,`r,`r>);
+
+extern int system(string_t);
+
 
 }
 #endif

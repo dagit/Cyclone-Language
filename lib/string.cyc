@@ -512,6 +512,18 @@ string_t<`r> strrchr(string_t<`r> s, char c) {
   return NULL;
 }
 
+mstring_t<`r> mstrrchr(mstring_t<`r> s, char c) {
+  int len = int_strleno(s,"Std::mstrrchr");
+  int i = len - 1;
+  s += i;
+
+  for (; i>=0; i--, s--) {
+    if (*s == c)
+      return s;
+  }
+  return NULL;
+}
+
 // Return a pointer to the beginning of the substring needle within
 // haystack, or NULL if the substring is not found.
 string_t<`r> strstr(string_t<`r> haystack, string_t needle) {
@@ -559,6 +571,25 @@ size_t strspn(string_t s, string_t accept) {
       
   return len;
 }
+
+// Search s for an occurrence of a character in accept.
+// Return the offset to the first such character, or the length
+// of s if none.
+size_t strcspn(string_t s, string_t accept) {
+  size_t len = int_strleno(s,"Std::strspn");
+
+  for (size_t i=0; i<len; i++) {
+    int j;
+    for (j=0; j<accept.size; j++)
+      if (s[i] != accept[j])
+	break; /* inner loop */
+    if (j == accept.size) /* didn't find it */
+      return i;
+  }
+      
+  return len;
+}
+
 
 ////////////////////////// CONVERSIONS
 list_t<int,`r> rexplode(region_t<`r> r,string_t s) {

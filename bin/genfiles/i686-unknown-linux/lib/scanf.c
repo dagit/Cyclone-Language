@@ -234,18 +234,20 @@ int); extern int isdigit( int); extern int isgraph( int); extern int islower(
 int); extern int isprint( int); extern int ispunct( int); extern int isspace(
 int); extern int isupper( int); extern int isxdigit( int); extern int toascii(
 int); extern int tolower( int); extern int toupper( int); extern int _tolower(
-int); extern int _toupper( int); extern int system( unsigned char*); struct Cyc_Std__Div{
-int quot; int rem; } ; struct Cyc_Std__Ldiv{ int quot; int rem; } ; extern int
-abs( int __x); extern int atexit( void(* __func)()); extern struct Cyc_Std__Div
-div( int __numer, int __denom); extern struct Cyc_Std__Ldiv ldiv( int __numer,
-int __denom); extern int random(); extern void srandom( unsigned int __seed);
-extern int rand(); extern void srand( unsigned int __seed); extern int rand_r(
-unsigned int* __seed); extern int grantpt( int __fd); extern int unlockpt( int
-__fd); extern double Cyc_Std_atof( struct _tagged_arr); extern int Cyc_Std_strtol(
-struct _tagged_arr n, struct _tagged_arr* end, int base); extern unsigned int
-Cyc_Std_strtoul( struct _tagged_arr n, struct _tagged_arr* end, int base);
-struct Cyc_Std___sFILE; extern struct Cyc_Std___sFILE* Cyc_Std_stdin; extern int
-Cyc_Std_fgetc( struct Cyc_Std___sFILE* __stream); extern int Cyc_Std_getc(
+int); extern int _toupper( int); struct Cyc_List_List{ void* hd; struct Cyc_List_List*
+tl; } ; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
+Cyc_List_Nth[ 8u]; extern unsigned char Cyc_Array_Array_mismatch[ 19u]; struct
+Cyc_Std__Div{ int quot; int rem; } ; struct Cyc_Std__Ldiv{ int quot; int rem; }
+; extern int abs( int __x); extern int atexit( void(* __func)()); extern struct
+Cyc_Std__Div div( int __numer, int __denom); extern struct Cyc_Std__Ldiv ldiv(
+int __numer, int __denom); extern int random(); extern void srandom(
+unsigned int __seed); extern int rand(); extern void srand( unsigned int __seed);
+extern int rand_r( unsigned int* __seed); extern int grantpt( int __fd); extern
+int unlockpt( int __fd); extern double Cyc_Std_atof( struct _tagged_arr); extern
+int Cyc_Std_strtol( struct _tagged_arr n, struct _tagged_arr* end, int base);
+extern unsigned int Cyc_Std_strtoul( struct _tagged_arr n, struct _tagged_arr*
+end, int base); struct Cyc_Std___sFILE; extern struct Cyc_Std___sFILE* Cyc_Std_stdin;
+extern int Cyc_Std_fgetc( struct Cyc_Std___sFILE* __stream); extern int Cyc_Std_getc(
 struct Cyc_Std___sFILE* __stream); extern int Cyc_Std_ungetc( int __c, struct
 Cyc_Std___sFILE* __stream); extern unsigned char Cyc_Std_FileCloseError[ 19u];
 extern unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{

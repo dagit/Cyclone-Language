@@ -276,6 +276,7 @@ _tagged_arr, struct _tagged_arr); extern struct _tagged_arr Cyc_Std_rreplace_suf
 struct _RegionHandle* r, struct _tagged_arr src, struct _tagged_arr curr_suffix,
 struct _tagged_arr new_suffix); extern struct _tagged_arr Cyc_Std_strchr( struct
 _tagged_arr s, unsigned char c); extern struct _tagged_arr Cyc_Std_mstrchr(
+struct _tagged_arr s, unsigned char c); extern struct _tagged_arr Cyc_Std_mstrrchr(
 struct _tagged_arr s, unsigned char c); extern struct _tagged_arr Cyc_Std_strrchr(
 struct _tagged_arr s, unsigned char c); extern struct _tagged_arr Cyc_Std_mstrstr(
 struct _tagged_arr haystack, struct _tagged_arr needle); extern struct
@@ -283,6 +284,7 @@ _tagged_arr Cyc_Std_strstr( struct _tagged_arr haystack, struct _tagged_arr
 needle); extern struct _tagged_arr Cyc_Std_strpbrk( struct _tagged_arr s, struct
 _tagged_arr accept); extern struct _tagged_arr Cyc_Std_mstrpbrk( struct
 _tagged_arr s, struct _tagged_arr accept); extern unsigned int Cyc_Std_strspn(
+struct _tagged_arr s, struct _tagged_arr accept); extern unsigned int Cyc_Std_strcspn(
 struct _tagged_arr s, struct _tagged_arr accept); extern struct Cyc_List_List*
 Cyc_Std_explode( struct _tagged_arr s); extern struct Cyc_List_List* Cyc_Std_rexplode(
 struct _RegionHandle*, struct _tagged_arr s); extern struct _tagged_arr Cyc_Std_implode(
@@ -531,11 +533,18 @@ sizeof( unsigned char), i); for( 0; i >=  0;( i --,
 _tagged_arr_inplace_plus_post(& s, sizeof( unsigned char), -1))){ if(*(( const
 unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), 0u)) ==  c){
 return s;}} return( struct _tagged_arr) _tag_arr( 0u, 0u, 0u);} struct
-_tagged_arr Cyc_Std_strstr( struct _tagged_arr haystack, struct _tagged_arr
-needle){ if( !(( unsigned int) haystack.curr)? 1: !(( unsigned int) needle.curr)){(
-int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp29=( struct
-Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
-_temp29[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp30; _temp30.tag= Cyc_Core_Invalid_argument;
+_tagged_arr Cyc_Std_mstrrchr( struct _tagged_arr s, unsigned char c){ int len=(
+int) Cyc_Std_int_strleno(( struct _tagged_arr) s, _tag_arr("Std::mstrrchr",
+sizeof( unsigned char), 14u)); int i= len -  1; _tagged_arr_inplace_plus(& s,
+sizeof( unsigned char), i); for( 0; i >=  0;( i --,
+_tagged_arr_inplace_plus_post(& s, sizeof( unsigned char), -1))){ if(*((
+unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), 0u)) ==  c){
+return s;}} return _tag_arr( 0u, 0u, 0u);} struct _tagged_arr Cyc_Std_strstr(
+struct _tagged_arr haystack, struct _tagged_arr needle){ if( !(( unsigned int)
+haystack.curr)? 1: !(( unsigned int) needle.curr)){( int) _throw(( void*)({
+struct Cyc_Core_Invalid_argument_struct* _temp29=( struct Cyc_Core_Invalid_argument_struct*)
+_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp29[ 0]=({
+struct Cyc_Core_Invalid_argument_struct _temp30; _temp30.tag= Cyc_Core_Invalid_argument;
 _temp30.f1= _tag_arr("Std::strstr", sizeof( unsigned char), 12u); _temp30;});
 _temp29;}));} if(*(( const unsigned char*) _check_unknown_subscript( needle,
 sizeof( unsigned char), 0u)) == '\000'){ return haystack;}{ int len=( int) Cyc_Std_int_strleno(
@@ -569,18 +578,25 @@ j; for( j= 0; j <  _get_arr_size( accept, sizeof( unsigned char)); j ++){ if(*((
 const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char),( int)
 i)) == *(( const unsigned char*) _check_unknown_subscript( accept, sizeof(
 unsigned char), j))){ break;}} if( j ==  _get_arr_size( accept, sizeof(
-unsigned char))){ return i;}}} return len;} struct Cyc_List_List* Cyc_Std_rexplode(
-struct _RegionHandle* r, struct _tagged_arr s){ struct Cyc_List_List* result= 0;{
-int i=( int)( Cyc_Std_strlen( s) -  1); for( 0; i >=  0; i --){ result=({ struct
-Cyc_List_List* _temp33=( struct Cyc_List_List*) _region_malloc( r, sizeof(
-struct Cyc_List_List)); _temp33->hd=( void*)(( int)*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), i))); _temp33->tl= result;
-_temp33;});}} return result;} struct Cyc_List_List* Cyc_Std_explode( struct
-_tagged_arr s){ return Cyc_Std_rexplode( Cyc_Core_heap_region, s);} struct
-_tagged_arr Cyc_Std_implode( struct Cyc_List_List* chars){ struct _tagged_arr s=
-Cyc_Core_new_string((( int(*)( struct Cyc_List_List* x)) Cyc_List_length)( chars));
-unsigned int i= 0; while( chars !=  0) {*(( unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char),( int) i ++))=(
+unsigned char))){ return i;}}} return len;} unsigned int Cyc_Std_strcspn( struct
+_tagged_arr s, struct _tagged_arr accept){ unsigned int len= Cyc_Std_int_strleno(
+s, _tag_arr("Std::strspn", sizeof( unsigned char), 12u));{ unsigned int i= 0;
+for( 0; i <  len; i ++){ int j; for( j= 0; j <  _get_arr_size( accept, sizeof(
+unsigned char)); j ++){ if(*(( const unsigned char*) _check_unknown_subscript( s,
+sizeof( unsigned char),( int) i)) != *(( const unsigned char*)
+_check_unknown_subscript( accept, sizeof( unsigned char), j))){ break;}} if( j
+==  _get_arr_size( accept, sizeof( unsigned char))){ return i;}}} return len;}
+struct Cyc_List_List* Cyc_Std_rexplode( struct _RegionHandle* r, struct
+_tagged_arr s){ struct Cyc_List_List* result= 0;{ int i=( int)( Cyc_Std_strlen(
+s) -  1); for( 0; i >=  0; i --){ result=({ struct Cyc_List_List* _temp33=(
+struct Cyc_List_List*) _region_malloc( r, sizeof( struct Cyc_List_List));
+_temp33->hd=( void*)(( int)*(( const unsigned char*) _check_unknown_subscript( s,
+sizeof( unsigned char), i))); _temp33->tl= result; _temp33;});}} return result;}
+struct Cyc_List_List* Cyc_Std_explode( struct _tagged_arr s){ return Cyc_Std_rexplode(
+Cyc_Core_heap_region, s);} struct _tagged_arr Cyc_Std_implode( struct Cyc_List_List*
+chars){ struct _tagged_arr s= Cyc_Core_new_string((( int(*)( struct Cyc_List_List*
+x)) Cyc_List_length)( chars)); unsigned int i= 0; while( chars !=  0) {*((
+unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char),( int) i ++))=(
 unsigned char)(( int) chars->hd); chars= chars->tl;} return s;} int Cyc_Std_strcasecmp(
 struct _tagged_arr s1, struct _tagged_arr s2){ if( s1.curr ==  s2.curr){ return
 0;}{ unsigned int len1= Cyc_Std_int_strleno( s1, _tag_arr("Std::strcasecmp",

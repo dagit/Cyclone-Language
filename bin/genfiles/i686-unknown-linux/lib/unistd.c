@@ -255,11 +255,12 @@ struct _tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr
 int Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd,
 struct _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct
 _tagged_arr pathname); int Cyc_Std_gethostname( struct _tagged_arr, unsigned int);
-int Cyc_Std_chroot( struct _tagged_arr); extern int access( unsigned char*, int);
-extern int chdir( unsigned char*); extern int chown( unsigned char*,
-unsigned int, unsigned int); extern unsigned char* getcwd( unsigned char* buf,
-unsigned int size); extern int execv( unsigned char* path, unsigned char** argv);
-extern int execvp( unsigned char* file, unsigned char** argv); extern int execve(
+int Cyc_Std_chroot( struct _tagged_arr); struct _tagged_arr Cyc_Std_getpass(
+struct _tagged_arr prompt); extern int access( unsigned char*, int); extern int
+chdir( unsigned char*); extern int chown( unsigned char*, unsigned int,
+unsigned int); extern unsigned char* getcwd( unsigned char* buf, unsigned int
+size); extern int execv( unsigned char* path, unsigned char** argv); extern int
+execvp( unsigned char* file, unsigned char** argv); extern int execve(
 unsigned char* path, unsigned char** argv, unsigned char** envp); extern int
 link( unsigned char* path1, unsigned char* path2); extern int read( int fd,
 unsigned char* buf, unsigned int count); extern int rmdir( unsigned char*);
@@ -267,14 +268,15 @@ extern int symlink( unsigned char* path1, unsigned char* path2); extern int
 truncate( unsigned char*, int); extern int write( int fd, unsigned char* buf,
 unsigned int count); extern int unlink( unsigned char* pathname); extern int
 gethostname( unsigned char*, unsigned int); extern int chroot( unsigned char*);
-int Cyc_Std_access( struct _tagged_arr path, int mode){ return access(
-string_to_Cstring( path), mode);} int Cyc_Std_chdir( struct _tagged_arr path){
-return chdir( string_to_Cstring( path));} int Cyc_Std_chown( struct _tagged_arr
-path, unsigned int owner, unsigned int group){ return chown( string_to_Cstring(
-path), owner, group);} struct _tagged_arr Cyc_Std_getcwd( struct _tagged_arr buf,
-unsigned int size){ if( !(( unsigned int) buf.curr)? 1: _get_arr_size( buf,
-sizeof( unsigned char)) <  size){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
-_temp0=( struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
+extern unsigned char* getpass( unsigned char*); int Cyc_Std_access( struct
+_tagged_arr path, int mode){ return access( string_to_Cstring( path), mode);}
+int Cyc_Std_chdir( struct _tagged_arr path){ return chdir( string_to_Cstring(
+path));} int Cyc_Std_chown( struct _tagged_arr path, unsigned int owner,
+unsigned int group){ return chown( string_to_Cstring( path), owner, group);}
+struct _tagged_arr Cyc_Std_getcwd( struct _tagged_arr buf, unsigned int size){
+if( !(( unsigned int) buf.curr)? 1: _get_arr_size( buf, sizeof( unsigned char))
+<  size){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp0=(
+struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
 _temp0[ 0]=({ struct Cyc_Core_Failure_struct _temp1; _temp1.tag= Cyc_Core_Failure;
 _temp1.f1= _tag_arr("getcwd: invalid buf argument", sizeof( unsigned char), 29u);
 _temp1;}); _temp0;}));}{ unsigned char* response= getcwd(( unsigned char*)
@@ -322,14 +324,14 @@ _tagged_arr*) _check_unknown_subscript( argv, sizeof( struct _tagged_arr), i)));
 return execvp( string_to_Cstring( path),( unsigned char**) _check_null(
 _untag_arr( newargs, sizeof( unsigned char*), 1u)));}} int Cyc_Std_execve(
 struct _tagged_arr filename, struct _tagged_arr argv, struct _tagged_arr envp){
-if((*(( const struct _tagged_arr*) _check_unknown_subscript( argv, sizeof(
-struct _tagged_arr),( int)( _get_arr_size( argv, sizeof( struct _tagged_arr)) - 
-1)))).curr != (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){( int) _throw((
-void*)({ struct Cyc_Core_Failure_struct* _temp14=( struct Cyc_Core_Failure_struct*)
-_cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp14[ 0]=({ struct Cyc_Core_Failure_struct
-_temp15; _temp15.tag= Cyc_Core_Failure; _temp15.f1= _tag_arr("execve: arg list must be NULL-terminated",
-sizeof( unsigned char), 41u); _temp15;}); _temp14;}));}{ struct _tagged_arr
-newargs=({ unsigned int _temp20= _get_arr_size( argv, sizeof( struct _tagged_arr));
+if((*(( struct _tagged_arr*) _check_unknown_subscript( argv, sizeof( struct
+_tagged_arr),( int)( _get_arr_size( argv, sizeof( struct _tagged_arr)) -  1)))).curr
+!= ( _tag_arr( 0u, 0u, 0u)).curr){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
+_temp14=( struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
+_temp14[ 0]=({ struct Cyc_Core_Failure_struct _temp15; _temp15.tag= Cyc_Core_Failure;
+_temp15.f1= _tag_arr("execve: arg list must be NULL-terminated", sizeof(
+unsigned char), 41u); _temp15;}); _temp14;}));}{ struct _tagged_arr newargs=({
+unsigned int _temp20= _get_arr_size( argv, sizeof( struct _tagged_arr));
 unsigned char** _temp21=( unsigned char**) _cycalloc( _check_times( sizeof(
 unsigned char*), _temp20)); struct _tagged_arr _temp23= _tag_arr( _temp21,
 sizeof( unsigned char*), _get_arr_size( argv, sizeof( struct _tagged_arr)));{
@@ -337,16 +339,17 @@ unsigned int _temp22= _temp20; unsigned int i; for( i= 0; i <  _temp22; i ++){
 _temp21[ i]= 0;}}; _temp23;});{ int i= 0; for( 0; i <  _get_arr_size( argv,
 sizeof( struct _tagged_arr)); i ++){*(( unsigned char**)
 _check_unknown_subscript( newargs, sizeof( unsigned char*), i))=
-string_to_Cstring(*(( const struct _tagged_arr*) _check_unknown_subscript( argv,
-sizeof( struct _tagged_arr), i)));}}{ struct _tagged_arr newenvp=({ unsigned int
-_temp16= _get_arr_size( envp, sizeof( struct _tagged_arr)); unsigned char**
-_temp17=( unsigned char**) _cycalloc( _check_times( sizeof( unsigned char*),
-_temp16)); struct _tagged_arr _temp19= _tag_arr( _temp17, sizeof( unsigned char*),
-_get_arr_size( envp, sizeof( struct _tagged_arr)));{ unsigned int _temp18=
-_temp16; unsigned int i; for( i= 0; i <  _temp18; i ++){ _temp17[ i]= 0;}};
-_temp19;});{ int i= 0; for( 0; i <  _get_arr_size( envp, sizeof( struct
-_tagged_arr)); i ++){*(( unsigned char**) _check_unknown_subscript( newenvp,
-sizeof( unsigned char*), i))= string_to_Cstring(*(( const struct _tagged_arr*)
+string_to_Cstring(( struct _tagged_arr)*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), i)));}}{ struct
+_tagged_arr newenvp=({ unsigned int _temp16= _get_arr_size( envp, sizeof( struct
+_tagged_arr)); unsigned char** _temp17=( unsigned char**) _cycalloc(
+_check_times( sizeof( unsigned char*), _temp16)); struct _tagged_arr _temp19=
+_tag_arr( _temp17, sizeof( unsigned char*), _get_arr_size( envp, sizeof( struct
+_tagged_arr)));{ unsigned int _temp18= _temp16; unsigned int i; for( i= 0; i < 
+_temp18; i ++){ _temp17[ i]= 0;}}; _temp19;});{ int i= 0; for( 0; i < 
+_get_arr_size( envp, sizeof( struct _tagged_arr)); i ++){*(( unsigned char**)
+_check_unknown_subscript( newenvp, sizeof( unsigned char*), i))=
+string_to_Cstring(( struct _tagged_arr)*(( struct _tagged_arr*)
 _check_unknown_subscript( envp, sizeof( struct _tagged_arr), i)));}} return
 execve( string_to_Cstring( filename),( unsigned char**) _check_null( _untag_arr(
 newargs, sizeof( unsigned char*), 1u)),( unsigned char**) _check_null(
@@ -380,3 +383,5 @@ _temp29.f1= _tag_arr("gethostname: called with count > buf.size", sizeof(
 unsigned char), 42u); _temp29;}); _temp28;}));} return gethostname(
 underlying_Cstring(( struct _tagged_arr) buf), count);} int Cyc_Std_chroot(
 struct _tagged_arr pathname){ return chroot( string_to_Cstring( pathname));}
+struct _tagged_arr Cyc_Std_getpass( struct _tagged_arr prompt){ return
+Cstring_to_string( getpass( string_to_Cstring( prompt)));}

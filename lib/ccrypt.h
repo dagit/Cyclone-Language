@@ -1,5 +1,5 @@
 /* This file is part of the Cyclone Library.
-   Copyright (C) 2001 Greg Morrisett
+   Copyright (C) 2001 Greg Morrisett, AT&T
 
    This library is free software; you can redistribute it and/or it
    under the terms of the GNU Lesser General Public License as
@@ -16,26 +16,11 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
-#ifndef _SYS_IOCTL_H
-#define _SYS_IOCTL_H
+#ifndef _CRYPT_H_
+#define _CRYPT_H_
 
 namespace Std {
-
-//  extern tunion IoctlArg<`r::R> {
-//    /* The remaining cases are for the argument following the type-varying
-//       argument; they could be eliminated if we had per-arg injection. */
-//    /* NOTE: ORDER MATTERS! on these inject things */
-//    IO_nonblock(int @`r); // FIONBIO
-//  };
-//  typedef tunion `r IoctlArg<`r> IO<`r>;
-//  extern "C" int ioctl(int fd, int cmd, ... inject IO);
-
-#ifdef __CYGWIN__
-#define FIONBIO 0x8004667e /* To be compatible with termiost version */
-#endif
-
-extern "C" int ioctl(int fd, int cmd, int @arg);
-
+  extern char ?crypt(const char ?key, const char ?salt);
 }
 
 #endif

@@ -38,6 +38,7 @@ namespace Cunistd {
     int unlink(Cstring pathname);
     int gethostname(Cstring,size_t);
     int chroot(Cstring);
+    Cstring getpass(const Cstring);
   }
 }
 
@@ -88,7 +89,7 @@ int execlp(string_t path, string_t arg0, ... string_t argv) {
   return Cunistd::execvp(string_to_Cstring(path), (Cstring*) newargs);
 }
 
-int execve(string_t filename, string_t const ?argv, string_t const ?envp) {
+int execve(string_t filename, mstring_t ?argv, mstring_t ?envp) {
   if (argv[argv.size - 1] != NULL)
     throw new Failure("execve: arg list must be NULL-terminated");
 
@@ -144,4 +145,8 @@ int gethostname(mstring_t buf, size_t count) {
 
 int chroot(string_t pathname) {
   return Cunistd::chroot(string_to_Cstring(pathname));
+}
+
+char ?getpass(const char? prompt) {
+  return Cstring_to_string(Cunistd::getpass(string_to_Cstring(prompt)));
 }

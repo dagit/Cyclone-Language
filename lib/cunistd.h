@@ -68,9 +68,7 @@ namespace Std {
     int pipe(int @{2}`r filedes);
     off_t lseek(int filedes, off_t offset, int whence);
     unsigned sleep(unsigned);
-#if defined(__linux__)
     int isatty(int);
-#endif  
 }
 
   int access(string_t,int);
@@ -81,7 +79,8 @@ namespace Std {
   int execlp(string_t file, string_t arg0, ... string_t argv);
   //int execv(string_t path, string_t const ?argv);
   //int execp(string_t file, string_t const ?argv);
-  int execve(string_t filename, string_t const ?argv, string_t const ?envp);
+  //int execve(string_t filename, string_t const ?argv, string_t const ?envp);
+  int execve(string_t filename, mstring_t ?argv, mstring_t ?envp);
   int link(string_t,string_t);
   ssize_t read(int fd, mstring_t buf, size_t count);
   int rmdir(string_t);
@@ -91,6 +90,7 @@ namespace Std {
   int unlink(string_t pathname);
   int gethostname(mstring_t, size_t);
   int chroot(string_t);
+  char ?getpass(const char?prompt);
 }
 
 #endif

@@ -233,7 +233,7 @@ ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_tm{ int tm_sec; int tm_min; int
 tm_hour; int tm_mday; int tm_mon; int tm_year; int tm_wday; int tm_yday; int
 tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*
 gmtime( const int* timep); extern struct Cyc_Std_tm* localtime( const int* timep);
-extern int timezone; extern int daylight; struct Cyc_utimbuf{ int actime; int
+extern int _timezone; extern int daylight; struct Cyc_utimbuf{ int actime; int
 modtime; } ; extern int Cyc_utime( struct _tagged_arr file, struct Cyc_utimbuf*
 file_times); extern int utime( unsigned char* filename, struct Cyc_utimbuf* buf);
 int Cyc_utime( struct _tagged_arr filename, struct Cyc_utimbuf* buf){ return

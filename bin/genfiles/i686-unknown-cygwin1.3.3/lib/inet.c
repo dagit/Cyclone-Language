@@ -234,28 +234,32 @@ ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{ int tv_sec; int tv_usec
 gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone* __z); extern
 int select( int n, struct Cyc_Std__types_fd_set* readfds, struct Cyc_Std__types_fd_set*
 writefds, struct Cyc_Std__types_fd_set* exceptfds, struct Cyc_Std_timeval*
-timeout); struct Cyc_Std_sockaddr_in; static const int Cyc_Std_SA_sockaddr_in= 0;
-struct Cyc_Std_SA_sockaddr_in_struct{ int tag; struct Cyc_Std_sockaddr_in* f1; }
-; static const int Cyc_Std_SA_socklenptr= 1; struct Cyc_Std_SA_socklenptr_struct{
-int tag; unsigned int* f1; } ; static const int Cyc_Std_SA_socklen= 2; struct
-Cyc_Std_SA_socklen_struct{ int tag; unsigned int f1; } ; struct Cyc_Std_sockaddr{
-unsigned short sa_family; unsigned char sa_data[ 14u]; } ; extern int socket(
-int domain, int type, int protocol); extern int socketpair( int domain, int type,
-int protocol, int* fds); extern int listen( int fd, int n); extern int shutdown(
-int fd, int how); static const int Cyc_Std_SO_int= 0; struct Cyc_Std_SO_int_struct{
-int tag; int* f1; } ; static const int Cyc_Std_SO_timeval= 1; struct Cyc_Std_SO_timeval_struct{
-int tag; struct Cyc_Std_timeval* f1; } ; static const int Cyc_Std_SO_socklenptr=
-2; struct Cyc_Std_SO_socklenptr_struct{ int tag; unsigned int* f1; } ; static
-const int Cyc_Std_SO_socklen= 3; struct Cyc_Std_SO_socklen_struct{ int tag;
+timeout); struct Cyc_Std_sockaddr_in; struct Cyc_Std_sockaddr{ unsigned short
+sa_family; unsigned char sa_data[ 14u]; } ; static const int Cyc_Std_SA_sockaddr_in=
+0; struct Cyc_Std_SA_sockaddr_in_struct{ int tag; struct Cyc_Std_sockaddr_in* f1;
+} ; static const int Cyc_Std_SA_sockaddr= 1; struct Cyc_Std_SA_sockaddr_struct{
+int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
+2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
+const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
+unsigned int f1; } ; extern int socket( int domain, int type, int protocol);
+extern int socketpair( int domain, int type, int protocol, int* fds); extern int
+listen( int fd, int n); extern int shutdown( int fd, int how); static const int
+Cyc_Std_SO_int= 0; struct Cyc_Std_SO_int_struct{ int tag; int* f1; } ; static
+const int Cyc_Std_SO_timeval= 1; struct Cyc_Std_SO_timeval_struct{ int tag;
+struct Cyc_Std_timeval* f1; } ; static const int Cyc_Std_SO_socklenptr= 2;
+struct Cyc_Std_SO_socklenptr_struct{ int tag; unsigned int* f1; } ; static const
+int Cyc_Std_SO_socklen= 3; struct Cyc_Std_SO_socklen_struct{ int tag;
 unsigned int f1; } ; struct Cyc_Std_in_addr{ unsigned int s_addr; } ; struct Cyc_Std_sockaddr_in{
 unsigned short sin_family; unsigned short sin_port; struct Cyc_Std_in_addr
 sin_addr; unsigned char sin_zero[ 8u]; } ; extern unsigned int htonl(
 unsigned int); extern unsigned short htons( unsigned short); extern unsigned int
 ntohl( unsigned int); extern unsigned short ntohs( unsigned short); extern int
 Cyc_Std_inet_aton( struct _tagged_arr cp, struct Cyc_Std_in_addr* inp); extern
-struct _tagged_arr Cyc_Std_inet_ntoa( struct Cyc_Std_in_addr); extern int
-inet_aton( unsigned char* cp, struct Cyc_Std_in_addr* inp); extern unsigned char*
-inet_ntoa( struct Cyc_Std_in_addr); int Cyc_Std_inet_aton( struct _tagged_arr cp,
-struct Cyc_Std_in_addr* inp){ return inet_aton( string_to_Cstring( cp), inp);}
-struct _tagged_arr Cyc_Std_inet_ntoa( struct Cyc_Std_in_addr x){ return
-Cstring_to_string( inet_ntoa( x));}
+struct _tagged_arr Cyc_Std_inet_ntoa( struct Cyc_Std_in_addr); extern
+unsigned int Cyc_Std_inet_addr( struct _tagged_arr addr); extern int inet_aton(
+unsigned char* cp, struct Cyc_Std_in_addr* inp); extern unsigned char* inet_ntoa(
+struct Cyc_Std_in_addr); extern unsigned int inet_addr( unsigned char*); int Cyc_Std_inet_aton(
+struct _tagged_arr cp, struct Cyc_Std_in_addr* inp){ return inet_aton(
+string_to_Cstring( cp), inp);} struct _tagged_arr Cyc_Std_inet_ntoa( struct Cyc_Std_in_addr
+x){ return Cstring_to_string( inet_ntoa( x));} unsigned int Cyc_Std_inet_addr(
+struct _tagged_arr addr){ return inet_addr( string_to_Cstring( addr));}

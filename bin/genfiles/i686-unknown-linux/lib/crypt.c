@@ -228,29 +228,9 @@ unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
-int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
-tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
-__z); struct Cyc_Std_sockaddr_in; struct Cyc_Std_sockaddr{ unsigned short
-sa_family; unsigned char sa_data[ 14u]; } ; static const int Cyc_Std_SA_sockaddr_in=
-0; struct Cyc_Std_SA_sockaddr_in_struct{ int tag; struct Cyc_Std_sockaddr_in* f1;
-} ; static const int Cyc_Std_SA_sockaddr= 1; struct Cyc_Std_SA_sockaddr_struct{
-int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
-2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
-const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
-unsigned int f1; } ; extern int socket( int domain, int type, int protocol);
-extern int socketpair( int domain, int type, int protocol, int* fds); extern int
-listen( int fd, int n); extern int shutdown( int fd, int how); static const int
-Cyc_Std_SO_int= 0; struct Cyc_Std_SO_int_struct{ int tag; int* f1; } ; static
-const int Cyc_Std_SO_timeval= 1; struct Cyc_Std_SO_timeval_struct{ int tag;
-struct Cyc_Std_timeval* f1; } ; static const int Cyc_Std_SO_socklenptr= 2;
-struct Cyc_Std_SO_socklenptr_struct{ int tag; unsigned int* f1; } ; static const
-int Cyc_Std_SO_socklen= 3; struct Cyc_Std_SO_socklen_struct{ int tag;
-unsigned int f1; } ; struct Cyc_Std_in_addr{ unsigned int s_addr; } ; struct Cyc_Std_sockaddr_in{
-unsigned short sin_family; unsigned short sin_port; struct Cyc_Std_in_addr
-sin_addr; unsigned char sin_zero[ 8u]; } ; extern unsigned int htonl(
-unsigned int); extern unsigned short htons( unsigned short); extern unsigned int
-ntohl( unsigned int); extern unsigned short ntohs( unsigned short);
-unsigned char Cyc_Std_sockaddr_in[ 16u]="\000\000\000\000sockaddr_in"; struct
-Cyc_Std_sockaddr_in_struct{ unsigned char* tag; struct Cyc_Std_sockaddr_in f1; }
-;
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern struct
+_tagged_arr Cyc_Std_crypt( struct _tagged_arr key, struct _tagged_arr salt);
+extern unsigned char* crypt( unsigned char* key, unsigned char* salt); struct
+_tagged_arr Cyc_Std_crypt( struct _tagged_arr key, struct _tagged_arr salt){
+return _tag_arr( crypt( string_to_Cstring( key), string_to_Cstring( salt)),
+sizeof( unsigned char), 0u);}

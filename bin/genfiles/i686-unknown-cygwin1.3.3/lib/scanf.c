@@ -235,10 +235,12 @@ int); extern int isgraph( int); extern int islower( int); extern int isprint(
 int); extern int ispunct( int); extern int isspace( int); extern int isupper(
 int); extern int isxdigit( int); extern int toascii( int); extern int tolower(
 int); extern int toupper( int); extern int _tolower( int); extern int _toupper(
-int); extern int system( unsigned char*); struct Cyc_Std__Div{ int quot; int rem;
-} ; struct Cyc_Std__Ldiv{ int quot; int rem; } ; extern int abs( int __x);
-extern int atexit( void(* __func)()); extern struct Cyc_Std__Div div( int
-__numer, int __denom); extern struct Cyc_Std__Ldiv ldiv( int __numer, int
+int); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
+unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[ 8u];
+extern unsigned char Cyc_Array_Array_mismatch[ 19u]; struct Cyc_Std__Div{ int
+quot; int rem; } ; struct Cyc_Std__Ldiv{ int quot; int rem; } ; extern int abs(
+int __x); extern int atexit( void(* __func)()); extern struct Cyc_Std__Div div(
+int __numer, int __denom); extern struct Cyc_Std__Ldiv ldiv( int __numer, int
 __denom); extern int random(); extern void srandom( unsigned int __seed); extern
 int rand(); extern void srand( unsigned int __seed); extern int rand_r(
 unsigned int* __seed); extern int grantpt( int __fd); extern int unlockpt( int

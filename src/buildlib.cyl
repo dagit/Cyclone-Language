@@ -1118,7 +1118,7 @@ and block_comment = parse
     /* Get the macros out of the file */
     let cmd = aprintf("echo '#include <%s>' | gcc -E -dM -o %s -",
                       filename,preprocfile);
-    if (system(string_to_Cstring(cmd)) != 0) {
+    if (system(cmd) != 0) {
       /* The header probably doesn't exist on this system;
          create a default header. */
       maybe = fopen(filename,"w");
@@ -1175,7 +1175,7 @@ and block_comment = parse
     /* Get the type declarations out of the file */
     cmd = aprintf("echo '#include <%s>' | gcc -E -o %s -",
                   filename,preprocfile);
-    if (system(string_to_Cstring(cmd)) != 0) {
+    if (system(cmd) != 0) {
       fclose(log_file);
       return 1;
     }
@@ -1409,7 +1409,7 @@ and block_comment = parse
     /* Print reachable macros */
     cmd = aprintf("echo '#include <%s>' | gcc -E -dM -o %s -",
                   filename,preprocfile);
-    if (system(string_to_Cstring(cmd)) != 0) {
+    if (system(cmd) != 0) {
       fclose(log_file);
       return 1;
     }

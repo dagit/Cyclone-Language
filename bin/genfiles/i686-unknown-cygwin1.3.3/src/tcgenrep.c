@@ -293,7 +293,7 @@ unsigned int Cyc_Typerep_size_type( void* rep); struct Cyc_Std_tm{ int tm_sec;
 int tm_min; int tm_hour; int tm_mday; int tm_mon; int tm_year; int tm_wday; int
 tm_yday; int tm_isdst; } ; extern void tzset(); extern int time( int* t); extern
 struct Cyc_Std_tm* gmtime( const int* timep); extern struct Cyc_Std_tm*
-localtime( const int* timep); extern int timezone; extern int daylight; static
+localtime( const int* timep); extern int _timezone; extern int daylight; static
 const int Cyc_Absyn_Loc_n= 0; static const int Cyc_Absyn_Rel_n= 0; struct Cyc_Absyn_Rel_n_struct{
 int tag; struct Cyc_List_List* f1; } ; static const int Cyc_Absyn_Abs_n= 1;
 struct Cyc_Absyn_Abs_n_struct{ int tag; struct Cyc_List_List* f1; } ; struct

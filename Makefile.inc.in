@@ -32,6 +32,7 @@ CYCLONE_LIBS:=arg\
         bitvec\
         buffer\
         core\
+	crypt\
         dict\
 	dirent\
 	execinfo\
@@ -79,6 +80,7 @@ CYCLONE_H:=arg.h\
 	bitvec.h\
 	buffer.h\
 	cassert.h\
+	ccrypt.h\
 	cctype.h\
 	cdirent.h\
 	cerrno.h\
@@ -89,6 +91,7 @@ CYCLONE_H:=arg.h\
 	cnetdb.h\
 	core.h\
 	cpwd.h\
+	crypt.h\
 	csignal.h\
 	cstddef.h\
 	cstdio.h\

@@ -51,7 +51,11 @@ namespace Std {
   extern mstring_t asctime_r(const struct tm @`r, mstring_t);
   extern mstring_t ctime_r(const time_t @`r, mstring_t);
 
+#ifdef __CYGWIN__
+  extern "C" long int _timezone;
+#else
   extern "C" long timezone;
+#endif
   extern "C" int daylight;
 }
 

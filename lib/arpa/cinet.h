@@ -24,6 +24,7 @@
 namespace Std {
   extern int inet_aton(string_t cp, struct in_addr @`r inp);
   extern char ?inet_ntoa(struct in_addr);
+  extern unsigned long inet_addr(string_t addr);
 }
 
 #endif

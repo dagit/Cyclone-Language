@@ -239,7 +239,7 @@ extern unsigned int Cyc_Std_strftime( struct _tagged_arr s, unsigned int maxsize
 struct _tagged_arr fmt, const struct Cyc_Std_tm* t); extern struct _tagged_arr
 Cyc_Std_asctime_r( const struct Cyc_Std_tm*, struct _tagged_arr); extern struct
 _tagged_arr Cyc_Std_ctime_r( const int*, struct _tagged_arr); extern int
-timezone; extern int daylight; struct Cyc_Std_timeval{ int tv_sec; int tv_usec;
+_timezone; extern int daylight; struct Cyc_Std_timeval{ int tv_sec; int tv_usec;
 } ; struct Cyc_Std_timezone{ int tz_minuteswest; int tz_dsttime; } ; extern int
 gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone* __z); extern
 int select( int n, struct Cyc_Std__types_fd_set* readfds, struct Cyc_Std__types_fd_set*

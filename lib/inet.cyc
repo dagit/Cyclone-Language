@@ -25,6 +25,7 @@ namespace Cinet {
   extern "C" {
     int inet_aton(const Cstring cp, struct Std::in_addr @`r inp);
     Cstring inet_ntoa(struct Std::in_addr);
+    unsigned long inet_addr(const Cstring);
   }
 #define s2c(x) (string_to_Cstring(x))
 }
@@ -37,4 +38,8 @@ int inet_aton(string_t cp, struct in_addr @`r inp) {
 
 char ?inet_ntoa(struct in_addr x) {
   return Cstring_to_string(Cinet::inet_ntoa(x));
+}
+
+unsigned long inet_addr(string_t addr) {
+  return Cinet::inet_addr(s2c(addr));
 }
