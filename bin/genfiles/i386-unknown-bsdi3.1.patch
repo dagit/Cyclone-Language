@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Sat Nov  3 15:16:00 2001
---- i386-unknown-bsdi3.1/lib/execinfo.c	Sat Nov  3 14:29:42 2001
+*** i686-unknown-linux/lib/execinfo.c	Fri Nov  2 10:57:16 2001
+--- i386-unknown-bsdi3.1/lib/execinfo.c	Sun Nov  4 14:46:03 2001
 ***************
 *** 230,259 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
@@ -148,8 +148,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1
 ! unsigned char), 42u); _temp1;}); _temp0;})); return 0;} int Cyc_Execinfo_bt(){
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-bsdi3.1/lib/stat.c
-*** i686-unknown-linux/lib/stat.c	Sat Nov  3 15:16:02 2001
---- i386-unknown-bsdi3.1/lib/stat.c	Sat Nov  3 14:29:42 2001
+*** i686-unknown-linux/lib/stat.c	Thu Nov  1 13:13:00 2001
+--- i386-unknown-bsdi3.1/lib/stat.c	Sun Nov  4 14:46:03 2001
 ***************
 *** 233,244 ****
   tm_wday; int tm_yday; int tm_isdst; } ; extern void tzset(); extern int time(

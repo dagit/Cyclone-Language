@@ -257,28 +257,38 @@ ntohl( unsigned int); extern unsigned short ntohs( unsigned short); struct Cyc_S
 struct _tagged_arr s_name; struct _tagged_arr s_aliases; unsigned short s_port;
 struct _tagged_arr s_proto; } ; struct Cyc_Std_hostent{ struct _tagged_arr
 h_name; struct _tagged_arr h_aliases; int h_addrtype; int h_length; struct
-_tagged_arr h_addr_list; } ; extern struct Cyc_Std_servent* Cyc_Std_getservbyname(
-struct _tagged_arr name, struct _tagged_arr proto); extern struct Cyc_Std_hostent*
-Cyc_Std_gethostbyname( struct _tagged_arr name); extern void Cyc_Std_herror(
-struct _tagged_arr); struct Cyc_Cnetdb_Cservent{ unsigned char* s_name;
-unsigned char** s_aliases; unsigned short s_port; unsigned char* s_proto; } ;
-struct Cyc_Cnetdb_Chostent{ unsigned char* h_name; unsigned char** h_aliases;
-short h_addrtype; short h_length; struct Cyc_Std_in_addr** h_addr_list; } ;
-extern struct Cyc_Cnetdb_Cservent* getservbyname( unsigned char* name,
-unsigned char* proto); extern struct Cyc_Cnetdb_Chostent* gethostbyname(
-unsigned char* name); extern void herror( unsigned char*); extern struct
-_tagged_arr pntlp_toCyc( struct Cyc_Std_in_addr**); struct Cyc_Std_servent* Cyc_Std_getservbyname(
-struct _tagged_arr name, struct _tagged_arr proto){ struct Cyc_Cnetdb_Cservent*
-src= getservbyname( string_to_Cstring( name), string_to_Cstring( proto)); return(
-unsigned int) src?({ struct Cyc_Std_servent* _temp0=( struct Cyc_Std_servent*)
-_cycalloc( sizeof( struct Cyc_Std_servent)); _temp0->s_name= Cstring_to_string(
-src->s_name); _temp0->s_aliases= ntCsl_to_ntsl( src->s_aliases); _temp0->s_port=
-src->s_port; _temp0->s_proto= Cstring_to_string( src->s_proto); _temp0;}): 0;}
-struct Cyc_Std_hostent* Cyc_Std_gethostbyname( struct _tagged_arr name){ struct
-Cyc_Cnetdb_Chostent* src= gethostbyname( string_to_Cstring( name)); return(
-unsigned int) src?({ struct Cyc_Std_hostent* _temp1=( struct Cyc_Std_hostent*)
-_cycalloc( sizeof( struct Cyc_Std_hostent)); _temp1->h_name= Cstring_to_string(
-src->h_name); _temp1->h_aliases= ntCsl_to_ntsl( src->h_aliases); _temp1->h_addrtype=(
-int) src->h_addrtype; _temp1->h_length=( int) src->h_length; _temp1->h_addr_list=
-pntlp_toCyc( src->h_addr_list); _temp1;}): 0;} void Cyc_Std_herror( struct
-_tagged_arr s){ herror( string_to_Cstring( s));}
+_tagged_arr h_addr_list; } ; struct Cyc_Std_protoent{ struct _tagged_arr p_name;
+struct _tagged_arr p_aliases; int p_proto; } ; extern struct Cyc_Std_servent*
+Cyc_Std_getservbyname( struct _tagged_arr name, struct _tagged_arr proto);
+extern struct Cyc_Std_hostent* Cyc_Std_gethostbyname( struct _tagged_arr name);
+extern struct Cyc_Std_protoent* Cyc_Std_getprotobyname( struct _tagged_arr name);
+extern void Cyc_Std_herror( struct _tagged_arr); struct Cyc_Cnetdb_Cservent{
+unsigned char* s_name; unsigned char** s_aliases; unsigned short s_port;
+unsigned char* s_proto; } ; struct Cyc_Cnetdb_Chostent{ unsigned char* h_name;
+unsigned char** h_aliases; short h_addrtype; short h_length; struct Cyc_Std_in_addr**
+h_addr_list; } ; struct Cyc_Cnetdb_Cprotoent{ unsigned char* p_name;
+unsigned char** p_aliases; int p_proto; } ; extern struct Cyc_Cnetdb_Cservent*
+getservbyname( unsigned char* name, unsigned char* proto); extern struct Cyc_Cnetdb_Chostent*
+gethostbyname( unsigned char* name); extern struct Cyc_Cnetdb_Cprotoent*
+getprotobyname( unsigned char* name); extern void herror( unsigned char*);
+extern struct _tagged_arr pntlp_toCyc( struct Cyc_Std_in_addr**); struct Cyc_Std_servent*
+Cyc_Std_getservbyname( struct _tagged_arr name, struct _tagged_arr proto){
+struct Cyc_Cnetdb_Cservent* src= getservbyname( string_to_Cstring( name),
+string_to_Cstring( proto)); return( unsigned int) src?({ struct Cyc_Std_servent*
+_temp0=( struct Cyc_Std_servent*) _cycalloc( sizeof( struct Cyc_Std_servent));
+_temp0->s_name= Cstring_to_string( src->s_name); _temp0->s_aliases=
+ntCsl_to_ntsl( src->s_aliases); _temp0->s_port= src->s_port; _temp0->s_proto=
+Cstring_to_string( src->s_proto); _temp0;}): 0;} struct Cyc_Std_hostent* Cyc_Std_gethostbyname(
+struct _tagged_arr name){ struct Cyc_Cnetdb_Chostent* src= gethostbyname(
+string_to_Cstring( name)); return( unsigned int) src?({ struct Cyc_Std_hostent*
+_temp1=( struct Cyc_Std_hostent*) _cycalloc( sizeof( struct Cyc_Std_hostent));
+_temp1->h_name= Cstring_to_string( src->h_name); _temp1->h_aliases=
+ntCsl_to_ntsl( src->h_aliases); _temp1->h_addrtype=( int) src->h_addrtype;
+_temp1->h_length=( int) src->h_length; _temp1->h_addr_list= pntlp_toCyc( src->h_addr_list);
+_temp1;}): 0;} struct Cyc_Std_protoent* Cyc_Std_getprotobyname( struct
+_tagged_arr name){ struct Cyc_Cnetdb_Cprotoent* src= getprotobyname(
+string_to_Cstring( name)); return( unsigned int) src?({ struct Cyc_Std_protoent*
+_temp2=( struct Cyc_Std_protoent*) _cycalloc( sizeof( struct Cyc_Std_protoent));
+_temp2->p_name= Cstring_to_string( src->p_name); _temp2->p_aliases=
+ntCsl_to_ntsl( src->p_aliases); _temp2->p_proto= src->p_proto; _temp2;}): 0;}
+void Cyc_Std_herror( struct _tagged_arr s){ herror( string_to_Cstring( s));}

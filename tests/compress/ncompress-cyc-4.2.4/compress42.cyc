@@ -463,13 +463,13 @@ union bytes
 };
 #if BYTEORDER == 4321 && NOALLIGN == 1
 #define	output(b,o,c,n)	{						\
-  *(long ?)((b)+((o)>>3)) |= ((long)(c))<<((o)&0x7);                    \
+  *(long @)((b)+((o)>>3)) |= ((long)(c))<<((o)&0x7);                    \
   (o) += (n);								\
 }
 #else
 #ifdef BYTEORDER
 #define	output(b,o,c,n)	{	                                        \
-  REG1 char_type	?p = ((b) +((o)>>3));				\
+  REG1 char_type	@{3}p = ((b) +((o)>>3));				\
   union bytes i;							\
   i.word = ((long)(c))<<((o)&0x7);				        \
   p[0] |= i.bytes.b1;							\
@@ -479,7 +479,7 @@ union bytes
 }
 #else
 #define	output(b,o,c,n)	{	                                        \
-  REG1 char_type     ?p = ((b) + ((o)>>3));				\
+  REG1 char_type     @{3}p = ((b) + ((o)>>3));				\
   REG2 long		 i = ((long)(c))<<((o)&0x7);	\
   p[0] |= (char_type)(i);						\
   p[1] |= (char_type)(i>>8);						\
@@ -490,12 +490,12 @@ union bytes
 #endif
 #if BYTEORDER == 4321 && NOALLIGN == 1
 #define	input(b,o,c,n,m){\
-  (c) = (*(long ?)((b)+((o)>>3))>>((o)&0x7))&(m);	\
+  (c) = (*(long @)((b)+((o)>>3))>>((o)&0x7))&(m);	\
   (o) += (n);\
 }
 #else
 #define	input(b,o,c,n,m){	\
-  REG1 char_type 		?p = ((b)+((o)>>3));			\
+  REG1 char_type 		@{3}p = ((b)+((o)>>3));			\
   (c) = ((((long)(p[0]))|((long)(p[1])<<8)|		\
            ((long)(p[2])<<16))>>((o)&0x7))&(m);	\
   (o) += (n);\
@@ -565,6 +565,7 @@ unsigned short *codetab[5] =
 #	define	codetabof(i)		(codetab[(i) >> 14][(i) & 0x3fff])
 #	define	tab_prefixof(i)		codetabof(i)
 #	define	tab_suffixof(i)		((char_type *)htab[(i)>>15])[(i) & 0x7fff]
+// this is wrong now
 #	define	de_stack			((char_type *)((htab2)+8191))
 void
 clear_htab ()
@@ -594,7 +595,9 @@ unsigned short codetab[HSIZE];
 #	define	codetabof(i)			codetab[i]
 #	define	tab_prefixof(i)			codetabof(i)
 #	define	tab_suffixof(i)			htab.chars[i]
-#	define	de_stack			((htab.chars+(HSIZE-1)))
+#       define  stackof(i)                      htab.chars[i]
+//#	define	de_stack			((htab.chars+(HSIZE-1)))
+#	define	de_stack			(HSIZE-1)
 #	define	clear_htab()			memset(htab.chars, -1, sizeof(htab.counts))
 #	define	clear_tab_prefixof()	memset(codetab, 0, 256);
 #endif /* MAXSEG_64K */
@@ -1633,7 +1636,8 @@ decompress (fdin, fdout)
   int fdin;
 int fdout;
 {
-  REG2 char_type ? stackp;
+  //REG2 char_type ? stackp;
+  REG2 int stackp;
   REG3 code_int code;
   REG4 int finchar;
   REG5 code_int oldcode;
@@ -1787,24 +1791,24 @@ int fdout;
 		  abort_compress (0);
 		}
 
-	      *--stackp = (char_type) finchar;
+	      stackof(--stackp) = (char_type) finchar;
 	      code = oldcode;
 	    }
 
 	  while ((cmp_code_int) code >= (cmp_code_int) 256)
 	    {			/* Generate output characters in reverse order */
-	      *--stackp = tab_suffixof (code);
+	      stackof(--stackp) = tab_suffixof (code);
 	      code = tab_prefixof (code);
 	    }
 
-	  *--stackp = (char_type) (finchar = tab_suffixof (code));
+	  stackof(--stackp) = (char_type) (finchar = tab_suffixof (code));
 
 	  /* And put them out in forward order */
 
 	  {
 	    REG1 int i;
 
-	    if (outpos + (i = ((_?) de_stack - stackp)) >= OBUFSIZ)
+	    if (outpos + (i = (de_stack - stackp)) >= OBUFSIZ)
 	      {
 		do
 		  {
@@ -1814,7 +1818,7 @@ int fdout;
 		    if (i > 0)
 		      {
 			//zstrncpy (outbuf + outpos, stackp, i);
-			memcpy (outbuf + outpos, stackp, i);
+			memcpy (outbuf + outpos, &stackof(stackp), i);
 			outpos += i;
 		      }
 
@@ -1827,12 +1831,12 @@ int fdout;
 		      }
 		    stackp += i;
 		  }
-		while ((i = ((_?) de_stack - stackp)) > 0);
+		while ((i = (de_stack - stackp)) > 0);
 	      }
 	    else
 	      {
 		//zstrncpy (outbuf + outpos, stackp, i);
-		memcpy (outbuf + outpos, stackp, i);
+		memcpy (outbuf + outpos, &stackof(stackp), i);
 		outpos += i;
 	      }
 	  }

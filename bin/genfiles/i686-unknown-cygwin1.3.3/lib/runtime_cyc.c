@@ -212,7 +212,7 @@ struct _tagged_arr ntCsl_to_ntsl(Cstring *ntCsl) {
   struct _tagged_arr result;
   Cstring *ptr;
 
-  for (ptr = ntCsl; *ptr; numstrs++); // not safe!
+  for (ptr = ntCsl; *ptr;  ptr++,numstrs++); // not safe!
   result.base = (char *)GC_malloc_atomic(numstrs+1);
   if (result.base == NULL) 
     _throw_badalloc();

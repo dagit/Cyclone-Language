@@ -38,9 +38,18 @@ namespace Std {
     struct in_addr *?h_addr_list;
 #define h_addr h_addr_list[0]
   };
+  
+  struct protoent
+  {
+    mstring_t p_name;			/* Official protocol name.  */
+    mstring_t? p_aliases;		/* Alias list.  */
+    int p_proto;			/* Protocol number.  */
+  };
+  
 
   extern struct servent *getservbyname(string_t name, string_t proto);
   extern struct hostent *gethostbyname(string_t name);
+  extern struct protoent * getprotobyname(string_t name);
   extern void herror(const char ?`r);
 }
 
