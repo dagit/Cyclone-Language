@@ -86,11 +86,19 @@ bool print_externC_stmts = false;
 static list_t<var_t> curr_namespace = null;
 
 static void curr_namespace_add(var_t v) {
-  curr_namespace = new List(v, curr_namespace);
+  curr_namespace = imp_append(curr_namespace, new List(v, null));
+}
+
+static void suppr_last(list_t<`a> @ `r l) {// could be in List
+  if ((*l) -> tl == null) {
+    *l = null;
+  } else {
+    suppr_last(&((*l) -> tl));
+  }  
 }
 
 static void curr_namespace_drop() {
-  curr_namespace = curr_namespace -> tl;
+  suppr_last(&curr_namespace);
 }
 
 // ------------
@@ -569,8 +577,8 @@ doc_t qvar2doc(qvar_t q) {
     if (list_prefix(String::strptrcmp, prefix, curr_namespace))
       return var2doc((*q)[1]);
     else
-      return cat2(egroup("","::","::",List::map(var2doc,prefix)),
-		var2doc((*q)[1]));
+      return text(String::str_sepstr(List::append(prefix,
+						  new List((*q)[1],null)),"::"));
   }
 }
 
@@ -801,7 +809,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     s = group("{","}",",",List::map(de2doc,des));
     break;
   case &Comprehension_e(vd,e1,e2):
-    s = cat7(text("new {for "),
+    s = cat7(text("{for "),
              text(*((*vd->name)[1])),
              text(" < "),
              exp2doc(e1),

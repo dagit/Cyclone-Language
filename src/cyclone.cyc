@@ -18,6 +18,7 @@
 #include "tc.h"
 #include "toc.h"
 #include "new_control_flow.h"
+#include "interface.h"
 
 namespace Lex {
 extern void lex_init();
@@ -33,6 +34,7 @@ static bool up_r       = false;
 static bool noexpand_r = false;
 static bool noshake_r  = false;
 static bool tc_r       = false;
+static bool ic_r       = false;
 static bool toc_r      = false;
 static bool v_r        = false;
 static bool q_r        = false;
@@ -42,6 +44,7 @@ bool @ up       = &up_r;
 bool @ noexpand = &noexpand_r;
 bool @ noshake  = &noshake_r;
 bool @ tc       = &tc_r;
+bool @ ic       = &ic_r;
 bool @ toc      = &toc_r;
 bool @ v        = &v_r;
 bool @ q        = &q_r;
@@ -121,24 +124,40 @@ list_t<Absyn::decl_t>
   fflush(stderr);
   return ans;
 }
+
 list_t<Absyn::decl_t> do_parse(FILE @ f, list_t<Absyn::decl_t> ignore) {
   Lex::lex_init(); // must forget typedefs, may as well flush symbols too
   return Parse::parse_file(f);
 }
+
 list_t<Absyn::decl_t> do_typecheck(Tcenv::tenv_t te,list_t<Absyn::decl_t> tds){
   Absynpp::expand_typedefs = ! *noexpand;
-  Tc::tc(te,add_cyc_namespace_r && toc_r,tds); //don't add namespaces if we don't translate to C
+  add_cyc_namespace_r = add_cyc_namespace_r && toc_r; //don't add namespaces if we don't translate to C
+  Tc::tc(te,add_cyc_namespace_r, tds);
   if(!*noshake)
     tds = Tc::treeshake(te,tds);
   return tds;
 }
+
 list_t<Absyn::decl_t> do_cfcheck(bool ignore, list_t<Absyn::decl_t> tds) {
   NewControlFlow::cf_check(tds);
   return tds;
 }
+
+list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE @) @ params, list_t<Absyn::decl_t> tds) {
+  let te = (*params)[0];
+  let f = (*params)[1];
+
+  let i = Interface::extract(te -> ae);
+  Interface::print(i, f);
+
+  return tds;
+}
+
 list_t<Absyn::decl_t> do_translate(bool ignore, list_t<Absyn::decl_t> tds) {
   return Toc::toc(tds);
 }
+
 list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t> tds) {
   Absynpp::expand_typedefs = ! *noexpand;
   Absynpp::decls_first = Absynpp::qvar_to_Cids = *toc;
@@ -162,6 +181,7 @@ void compile_file(string filename) {
 
   string basename    = Filename::chop_extension(filename);
   string preprocfile = strconcat(basename, ".i");
+  string interfacefile = strconcat(basename, ".cyci");
 
   if (!*q||*v) fprintf(stderr,"Compiling file: %s", basename);
   if (*v) fprintf(stderr,"\n");
@@ -192,6 +212,7 @@ void compile_file(string filename) {
   // Actually process the file
   FILE * in_file  = try_file_open(preprocfile,"r","file");
   FILE * out_file = stdout; // possibly changed below
+
   if(compile_failure)
     return;
   list_t<Absyn::decl_t> tds = null;
@@ -200,12 +221,20 @@ void compile_file(string filename) {
 		   preprocfile);
     file_close((FILE@)in_file); // won't happen if exception is thrown
   }
+  let te = Tcenv::tc_init();
   if(!compile_failure && tds != null && *tc)
-    tds = do_stage("type checking", do_typecheck, Tcenv::tc_init(), tds,
+    tds = do_stage("type checking", do_typecheck, te, tds,
 		   preprocfile);
   if(!compile_failure && *tc)
     tds = do_stage("control-flow checking", do_cfcheck, true, tds,
 		   preprocfile);
+  if(!compile_failure && *ic) {
+    FILE * inter_file = try_file_open(interfacefile, "w", "interface file");
+    // Position::reset_position(interfacefile);
+    tds = do_stage("interface checking", do_interface, new $(te, (FILE @) inter_file), tds,
+		   preprocfile);
+    if (inter_file != null) file_close((FILE @) inter_file);
+  }
   if(!compile_failure && *toc)
     tds = do_stage("translation to C", do_translate, true, tds,
 		   preprocfile);
@@ -216,6 +245,7 @@ void compile_file(string filename) {
 		   preprocfile);
   if (out_file != null && out_file != stdout) 
     file_close((FILE @)out_file); // won't happen if exception is thrown
+
   fprintf(stderr,"\n"); 
   if(!compile_failure)
     Tcutil::flush_warnings();
@@ -224,7 +254,7 @@ void compile_file(string filename) {
 }
 
 int main(int argc, string ? argv) {
-  $(string,spec_t,string) specs[14] = 
+  $(string,spec_t,string) specs[15] = 
     {$("-nocyc",new Clear_spec(add_cyc_namespace),
        "does not add implicit namespace Cyc"),
      $("-q",new Set_spec(q),
@@ -239,6 +269,8 @@ int main(int argc, string ? argv) {
        "translate to C"),
      $("-tc",new Set_spec(tc), 
        "type check"),
+     $("-ic",new Set_spec(ic), 
+       "interface check"),
      $("-noremoveunused",new Set_spec(noshake),
        "don't remove externed variables that aren't used"),
      $("-noexpandtypedefs",new Set_spec(noexpand),
@@ -267,7 +299,8 @@ int main(int argc, string ? argv) {
   let l12 = List(&specs[11],&l11);
   let l13 = List(&specs[12],&l12);
   let l14 = List(&specs[13],&l13);
-  let options = &l14;
+  let l15 = List(&specs[14],&l14);
+  let options = &l15;
 		 
   Arg::parse(options, compile_file, "Options:", argv);
 

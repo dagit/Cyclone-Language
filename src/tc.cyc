@@ -136,16 +136,11 @@ static bool var_redecl_okay(genv_t ge, seg_t loc, var_t name, type_t t,
     if (!same_atts(atts, vd->attributes))
       terr(loc,xprintf("redeclaration of %s with different attributes",*name));
     break;
+  case &VarRes(&Funname_b(fd)): terr(loc,xprintf("redefinition of function %s", *name)); break;
+    // FIX : print the location of the previous definition (as gcc)
   default: break;
   }
   return true;
-}
-
-static bool is_function_type(type_t t) {
-  switch (compress(t)) {
-  case &FnType(_): return true;
-  default: return false;
-  }
 }
 
 // Transfer any function type attributes from the given list to the
@@ -1253,7 +1248,20 @@ void tc(tenv_t te, bool add_cyc_namespace, list_t<decl_t> ds) {
 // for tree-shaking (so we don't include the world)
 // Note: We must shake after all type-checking or we'll be too eager.
 // Note: All names should now be absolute.
-static bool vardecl_needed(tenv_t te, decl_t d) {
+
+// We recompute the global environment and delete what's not needed anymore
+// all would be far easier if Dict has a delete function :-)
+
+// for each namespace, we have the environment and a list of what has to be removed in it
+typedef Dict::dict_t<list_t<var_t>, $(genv_t, Set::set_t<var_t>) @> treeshake_env_t;
+
+static bool vardecl_needed(treeshake_env_t env, decl_t d);
+
+static list_t<decl_t> treeshake_f(treeshake_env_t env, list_t<decl_t> ds) {
+  return List::filter_c(vardecl_needed, env, ds);
+}
+
+static bool vardecl_needed(treeshake_env_t env, decl_t d) {
   switch(d->r) {
   case &Var_d(vd):
     // get rid of externs that are never referenced
@@ -1266,16 +1274,41 @@ static bool vardecl_needed(tenv_t te, decl_t d) {
     case &Rel_n(y): ns = y; break;
     case &Abs_n(y): ns = y; break;
     }
-    let ge = Dict::lookup(te->ae,ns);
-    return (*Dict::lookup(ge->ordinaries,name))[1];
+    let nsenv = Dict::lookup(env,ns);
+    let ge = (*nsenv)[0];
+    let needed = (*Dict::lookup(ge->ordinaries,name))[1];
+    if (! needed) {
+      (*nsenv)[1] = Set::insert((*nsenv)[1], name); // we'll remove it later from ge->ordinaries
+    }
+    return needed;
   case &Using_d(_,*ds2p): fallthru(ds2p);
   case &Namespace_d(_,*ds2p):
-    *ds2p = treeshake(te,*ds2p);
+    *ds2p = treeshake_f(env,*ds2p);
     return true;
   default: return true;
   }
 }
 
+// Mathieu : all this would be really nicer if we had local functions...
+static bool treeshake_remove_f(Set::set_t<var_t> set, var_t x, _ y) {
+  return !Set::member(set, x);
+}
+
+static void treeshake_remove(list_t<var_t> ns, $(genv_t, Set::set_t<var_t>) @ nsenv) {
+  let ge = (*nsenv)[0];
+  let set = (*nsenv)[1];
+  ge->ordinaries = Dict::filter_c(treeshake_remove_f, set, ge->ordinaries);
+}
+			     			     
+static $(genv_t, Set::set_t<var_t>)@ treeshake_make_env_f(genv_t ge) {
+  return new $(ge, Set::empty(String::strptrcmp));
+}
+
 list_t<decl_t> treeshake(tenv_t te, list_t<decl_t> ds) {
-  return List::filter_c(vardecl_needed,te,ds);
+  let env = Dict::map(treeshake_make_env_f, te->ae);
+  let ds1 = treeshake_f(env, ds);
+  
+  Dict::iter(treeshake_remove, env); // update the global environment
+
+  return ds1;
 }

@@ -4,7 +4,8 @@
 #include "list.h"
 
 // The entire interface is the same as SlowDict, except there is no
-// delete or delete_present.
+// delete_present.
+// Mathieu : now a few more functions
 
 // TODO:  add region support
 
@@ -70,6 +71,10 @@ extern void iter(void f(`a,`b),hdict_t<`a,`b,`e> d);
 extern void iter_c(void f(`c,`a,`b),`c env,hdict_t<`a,`b,`e> d);
 
 // raises Absent if an element of d1 is not in d2
+extern void iter2(void (@f)(`b,`b),
+		  hdict_t<`a,`b,`e> d1, 
+		  hdict_t<`a,`b,`e> d2);
+
 extern void iter2_c(void (@f)(`c,`b,`b), `c env,
 		    hdict_t<`a,`b,`e> d1, 
 		    hdict_t<`a,`b,`e> d2);
@@ -104,5 +109,11 @@ extern $(`a,`b)@ choose(hdict_t<`a,`b,`e> d);
 // Return an association list containing all the elements
 extern list_t<$(`a,`b)@> to_list(hdict_t<`a,`b,`e> d);
 
-  }}
+// pretty inefficient...
+extern hdict_t<`a,`b,`e> filter_c(bool f(`c,`a,`b), `c env, hdict_t<`a,`b,`e> d);
+extern hdict_t<`a,`b,`e> filter(bool f(`a,`b), hdict_t<`a,`b,`e> d);
+extern hdict_t<`a,`b,`e> difference(hdict_t<`a,`b,`e> d1, hdict_t<`a,`b,`e> d2); // returns d1 - d2
+extern hdict_t<`a,`b,`e> delete(hdict_t<`a,`b,`e>, `a);
+
+}}
 #endif

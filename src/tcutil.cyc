@@ -1247,6 +1247,13 @@ bool is_numeric(exp_t e) {
   }
 }
 
+bool is_function_type(type_t t) {
+  switch (compress(t)) {
+  case &FnType(_): return true;
+  default: return false;
+  }
+}
+
 type_t max_arithmetic_type(type_t t1, type_t t2) {
   switch ($(t1,t2)) {
   case $(DoubleType,_): fallthru;

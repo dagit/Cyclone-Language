@@ -46,6 +46,8 @@ extern bool castable(tenv_t,seg_t,type_t,type_t);
 
 extern bool is_integral(exp_t);
 extern bool is_numeric(exp_t);
+extern bool is_function_type(type_t t);
+
 extern type_t max_arithmetic_type(type_t, type_t);
 
 extern bool unify(type_t, type_t);

@@ -47,7 +47,8 @@ CYCLONE_SRCS:=absyn\
          cf_flowinfo\
          cf_absexp\
          new_control_flow\
-         cyclone
+         interface\
+	 cyclone
 
 # Makefiles assume this is only one file, but they could be changed.
 RUNTIME:=runtime_cyc

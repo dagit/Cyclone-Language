@@ -1,4 +1,3 @@
-
 #include "core.h"
 #include "list.h"
 #include "dict.h"
@@ -45,6 +44,7 @@ bool member(hdict_t<`a,`b,`e> d, `a key) {
   }
   return false;
 }
+
 `b lookup(hdict_t<`a,`b,`e> d, `a key) {
   let rel = d->rel;
   let t   = d->t;
@@ -56,6 +56,7 @@ bool member(hdict_t<`a,`b,`e> d, `a key) {
   }
   throw new Absent;
 }
+
 Core::opt_t<`b> lookup_opt(hdict_t<`a,`b,`e> d, `a key) {
   let rel = d->rel;
   let t   = d->t;
@@ -67,6 +68,7 @@ Core::opt_t<`b> lookup_opt(hdict_t<`a,`b,`e> d, `a key) {
   }
   return null;
 }
+
 bool lookup_bool(hdict_t<`a,`b,`d> d, `a key, `b @`r ans_place) {
   let rel = d->rel;
   let t   = d->t;
@@ -92,6 +94,7 @@ balance($(tunion Color, tree<`a,`b>, tree<`a,`b>, $(`a,`b)) quad) {
   case $(a,b,c,d): return new T(a,b,c,d);
   }
 }
+
 static tree<`a,`b>
 ins(int rel(`a,`a), $(`a,`b) key_val, tree<`a,`b> t) {
   switch (t) {
@@ -125,11 +128,12 @@ hdict_t<`a,`b,`e> inserts(hdict_t<`a,`b,`e> d,List::glist_t<$(`a,`b)@`r1,`r2> kd
 
 static `c fold_tree(`c f(`a,`b,`c), struct T<`a,`b> @ t, `c accum) {
   let &T(_,left,right,$(key,val)) = t;
-  accum = f(key, val, accum);
   if(left  != null) accum = fold_tree(f,(struct T<`a,`b>@)left,accum);
+  accum = f(key, val, accum);
   if(right != null) accum = fold_tree(f,(struct T<`a,`b>@)right,accum);
   return accum;
 }
+
 `c fold(`c f(`a,`b,`c),hdict_t<`a,`b,`e> d,`c accum) {
   if(d->t == null)
     return accum;
@@ -139,11 +143,12 @@ static `c fold_tree(`c f(`a,`b,`c), struct T<`a,`b> @ t, `c accum) {
 static `c fold_tree_c(`c f(`d,`a,`b,`c),   `d env,
                       struct T<`a,`b> @ t, `c accum) {
   let &T(_,left,right,$(key,val)) = t;
-  accum = f(env, key, val, accum);
   if(left  != null) accum = fold_tree_c(f,env,(struct T<`a,`b>@)left,accum);
+  accum = f(env, key, val, accum);
   if(right != null) accum = fold_tree_c(f,env,(struct T<`a,`b>@)right,accum);
   return accum;
 }
+
 `c fold_c(`c f(`d,`a,`b,`c),`d env,hdict_t<`a,`b,`e> d,`c accum) {
   if(d->t == null)
     return accum;
@@ -152,10 +157,11 @@ static `c fold_tree_c(`c f(`d,`a,`b,`c),   `d env,
 
 static void app_tree(`c f(`a,`b), struct T<`a,`b> @ t) {
   let &T(_,left,right,$(key,val)) = t;
-  f(key, val);
   if(left  != null) app_tree(f,(struct T<`a,`b>@)left);
+  f(key, val);
   if(right != null) app_tree(f,(struct T<`a,`b>@)right);
 }
+
 void app(`c f(`a,`b),hdict_t<`a,`b,`e> d) {
   if(d->t != null)
     app_tree(f,(struct T<`a,`b>@)(d->t));
@@ -163,10 +169,11 @@ void app(`c f(`a,`b),hdict_t<`a,`b,`e> d) {
 
 static void app_tree_c(`c f(`d,`a,`b), `d env, struct T<`a,`b>@ t){
   let &T(_,left,right,$(key,val)) = t;
-  f(env, key, val);
   if(left  != null) app_tree_c(f,env,(struct T<`a,`b>@)left);
+  f(env, key, val);
   if(right != null) app_tree_c(f,env,(struct T<`a,`b>@)right);
 }
+
 void app_c(`c f(`d,`a,`b),`d env, hdict_t<`a,`b,`e> d) {
   if(d->t != null)
     app_tree_c(f,env,(struct T<`a,`b>@)(d->t));
@@ -174,10 +181,11 @@ void app_c(`c f(`d,`a,`b),`d env, hdict_t<`a,`b,`e> d) {
 
 static void iter_tree(void f(`a,`b), struct T<`a,`b> @ t) {
   let &T(_,left,right,$(key,val)) = t;
-  f(key, val);
   if(left  != null) iter_tree(f,(struct T<`a,`b>@)left);
+  f(key, val);
   if(right != null) iter_tree(f,(struct T<`a,`b>@)right);
 }
+
 void iter(void f(`a,`b),hdict_t<`a,`b,`e> d) {
   if(d->t != null)
     iter_tree(f,(struct T<`a,`b>@)(d->t));
@@ -185,38 +193,47 @@ void iter(void f(`a,`b),hdict_t<`a,`b,`e> d) {
 
 static void iter_tree_c(void f(`c,`a,`b), `c env, struct T<`a,`b>@ t){
   let &T(_,left,right,$(key,val)) = t;
-  f(env, key, val);
   if(left  != null) iter_tree_c(f,env,(struct T<`a,`b>@)left);
+  f(env, key, val);
   if(right != null) iter_tree_c(f,env,(struct T<`a,`b>@)right);
 }
+
 void iter_c(void f(`c,`a,`b),`c env, hdict_t<`a,`b,`e> d) {
   if(d->t != null)
     iter_tree_c(f,env,(struct T<`a,`b>@)(d->t));
 }
 
-// No need to be a struct once the compiler is fixed.
-static struct Iter2Env<`a,`b,`c,`e1::E,`e2::E> {
-  void (@f)(`c,`b,`b;`e1);
-  `c inner_env;
-  hdict_t<`a,`b,`e2> d2;
-};
-typedef struct Iter2Env<`a,`b,`c,`e1,`e2> iter2_env_t<`a,`b,`c,`e1,`e2>;
-static void iter2_c_f(iter2_env_t<`a,`b,`c,`e1,`e2> @`r env, `a a, `b b1) {
-  let &Iter2Env(f,inner_env,d2) = env;
+static void iter2_f($(void (@f)(`b, `b), hdict_t<`a,`b,`e>) @ `r env, `a a, `b b1) {
+  let &$(f, d2) = env;
+  f(b1, Dict::lookup(d2, a)); // may throw Absent
+}
+
+void iter2(void (@f)(`b, `b),
+	   hdict_t<`a,`b,`e> d1,
+	   hdict_t<`a,`b,`e> d2) {
+  let env = $(f, d2);
+  iter_c(iter2_f, &env, d1);
+}
+
+static void iter2_c_f($(void (@f)(`c, `b, `b), hdict_t<`a,`b,`e>, `c) @ `r env, `a a, `b b1) {
+  let &$(f, d2, inner_env) = env;
   f(inner_env, b1, Dict::lookup(d2, a)); // may throw Absent
 }
+
 void iter2_c(void (@f)(`c,`b,`b), `c inner_env, 
 	     hdict_t<`a,`b,`e> d1,
 	     hdict_t<`a,`b,`e> d2) {
-  let env = Iter2Env(f,inner_env,d2);
+  let env = $(f, d2, inner_env);
   iter_c(iter2_c_f, &env, d1);
 }
+
 static tree<`a,`c> map_tree(`c f(`b), struct T<`a,`b>@ t) {
   let &T(c,left,right,$(key,val)) = t;
   let new_left  = left  == null ? null : map_tree(f,(struct T<`a,`b>@)left);
+  let new_val   = f(val);
   let new_right = right == null ? null : map_tree(f,(struct T<`a,`b>@)right);
-  return new T(c,new_left,new_right,$(key,f(val)));
-} 
+  return new T(c,new_left,new_right,$(key,new_val));
+}
 
 hdict_t<`a,`c,`e> map(`c f(`b),hdict_t<`a,`b,`e> d) {
   if(d->t == null)
@@ -224,12 +241,12 @@ hdict_t<`a,`c,`e> map(`c f(`b),hdict_t<`a,`b,`e> d) {
   return new Dict(d->rel,map_tree(f,(struct T<`a,`b>@)(d->t)));
 }
 
-// Note: walk is post-order
 static tree<`a,`c> map_tree_c(`c f(`d,`b), `d env, struct T<`a,`b>@ t) {
   let &T(c,left,right,$(key,val)) = t;
-  let new_left = left ==null ? null : map_tree_c(f,env,(struct T<`a,`b>@)left);
-  let new_right= right==null ? null : map_tree_c(f,env,(struct T<`a,`b>@)right);
-  return new T(c,new_left,new_right,$(key,f(env,val)));
+  let new_left  = left  == null ? null : map_tree_c(f,env,(struct T<`a,`b>@)left);
+  let new_val   = f(env,val);
+  let new_right = right == null ? null : map_tree_c(f,env,(struct T<`a,`b>@)right);
+  return new T(c,new_left,new_right,$(key,new_val));
 } 
 
 hdict_t<`a,`c,`e> map_c(`c f(`d,`b),`d env,hdict_t<`a,`b,`e> d) {
@@ -247,8 +264,8 @@ $(`a,`b)@ choose(hdict_t<`a,`b,`e> d) {
 static bool forall_tree_c(bool f(`c,`a,`b),`c env,struct T<`a,`b>@ t){
   let &T(_,left,right,$(key,val)) = t;
   return 
-    f(env,key,val) 
-    && (left  == null || forall_tree_c(f,env,(struct T<`a,`b>@)left))
+       (left  == null || forall_tree_c(f,env,(struct T<`a,`b>@)left))
+    && f(env,key,val) 
     && (right == null || forall_tree_c(f,env,(struct T<`a,`b>@)right));
 }
 
@@ -258,25 +275,18 @@ bool forall_c(bool f(`c,`a,`b), `c env, hdict_t<`a,`b,`e> d) {
   return forall_tree_c(f, env, (struct T<`a,`b>@)d->t);
 }
 
-// see comment elswhere in this file about how the compiler gets confused
-// by a tuple for the env and coredumps.
-static struct ForallIntEnv<`a,`b,`e1::E,`e2::E> {
-  bool (@f)(`a,`b,`b;`e1);
-  hdict_t<`a,`b,`e2> d1;
-};
-typedef struct ForallIntEnv<`a,`b,`e1,`e2> forall_int_env_t<`a,`b,`e1,`e2>;
-
-static bool forall_intersect_f(forall_int_env_t<`a,`b,`c,`d> @`r env,`a a,`b b){
-  let &ForallIntEnv(f,d2) = env;
+static bool forall_intersect_f($(bool (@)(`a,`b,`b), hdict_t<`a,`b,`d>) @`r env,`a a,`b b){
+  let &$(f,d2) = env;
   if(Dict::member(d2,a))
     return f(a,b,Dict::lookup(d2,a));
   return true;
 }
+
 // Note: would be faster to iterate over the smaller dict.
-bool forall_intersect(bool (@f)(`a,`b,`b), 
+bool forall_intersect(bool (@f)(`a,`b,`b),
 		      hdict_t<`a,`b,`d> d1,
 		      hdict_t<`a,`b,`d> d2) {
-  let env = ForallIntEnv(f,d2);
+  let env = $(f,d2);
   return forall_c(forall_intersect_f, &env, d1);
 }
 
@@ -288,62 +298,32 @@ static hdict_t<`a,`b,`e> union_f(`b f(`b,`b), `a a, `b b, hdict_t<`a,`b,`e> d1)
   else
     return Dict::insert(d1, a, b);
 }
+
 hdict_t<`a,`b,`e> union_two(`b f(`b,`b), hdict_t<`a,`b,`e> d1, 
                             hdict_t<`a,`b,`e> d2) {
-  if(d1 == d2)
-    return d1;
+  if (d1 == d2) return d1;
   return Dict::fold_c(union_f, f, d2, d1);
 }
 
-// FIX:  the following causes the compiler to core dump -- the culprit
-// seems to be the tuple, so I've recoded using a struct:
-/*
-static void 
-intersect_f($(`b f(`b,`b;{}), hdict_t<`a,`b,`e>, hdict_t<`a,`b,`e>) @ trip, 
-            `a a, `b b) {
-  let &$(f,d1,d3_ptr) = trip;
-  if(Dict::member(d1,a))
-    *d3_ptr = Dict::insert(*d3_ptr, a, f(Dict::lookup(d1, a), b));
-  return;
-}
-*/
-
-struct IntArg<`a,`b,`e1::E,`e2::E> {
-  `b (@f)(`b,`b;`e1);
-  hdict_t<`a,`b,`e2> d1;
-  hdict_t<`a,`b,`e2> d2;
-};
-
-typedef struct IntArg<`a,`b,`e1,`e2> intarg_t<`a,`b,`e1,`e2>;
-
-static void 
-intersect_f(intarg_t<`a,`b,`e1,`e2> @ `r trip, `a a, `b b) {
-  let &IntArg{f, d1, *d2} = trip;
+static void intersect_f($(`b (@)(`b,`b), hdict_t<`a,`b,`e>,
+			  hdict_t<`a,`b,`e>) @ `r trip, `a a, `b b) {
+  let &$(f, d1, *d2) = trip;
   if (Dict::member(d1,a))
     *d2 = Dict::insert(*d2,a,f(Dict::lookup(d1,a),b));
 }
+
 // Note: would be faster to iterate over the smaller dict.
 hdict_t<`a,`b,`e> intersect(`b (@f)(`b,`b), hdict_t<`a,`b,`e> d1, 
                             hdict_t<`a,`b,`e> d2) {
-  if(d1 == d2)
-    return d1;
-  let env = IntArg{f, d1, Dict::empty(d1->rel)};
+  if (d1 == d2) return d1;
+  let env = $(f, d1, Dict::empty(d1->rel));
   Dict::iter_c(intersect_f, &env, d2);
-  return env.d2;
+  return env[2];
 }
 
-struct IntArgC<`a,`b,`c,`e1::E,`e2::E> {
-  `b (@f)(`c,`b,`b;`e1);
-  `c env;
-  hdict_t<`a,`b,`e2> d1;
-  hdict_t<`a,`b,`e2> d2;
-};
-
-typedef struct IntArgC<`a,`b,`c,`e1,`e2> intargc_t<`a,`b,`c,`e1,`e2>;
-
-static void 
-intersectc_f(intargc_t<`a,`b,`c,`e1,`e2> @ `r quad, `a a, `b b) {
-  let &IntArgC{f, env, d1, *d2} = quad;
+static void intersect_c_f($(`b (@)(`c,`b,`b), `c, hdict_t<`a,`b,`e> d1,
+			    hdict_t<`a,`b,`e> d2) @ `r quad, `a a, `b b) {
+  let &$(f, env, d1, *d2) = quad;
   if (Dict::member(d1,a))
     *d2 = Dict::insert(*d2,a,f(env,Dict::lookup(d1,a),b));
 }
@@ -351,19 +331,56 @@ intersectc_f(intargc_t<`a,`b,`c,`e1,`e2> @ `r quad, `a a, `b b) {
 hdict_t<`a,`b,`e> intersect_c(`b (@f)(`c,`b,`b), `c env,
 			      hdict_t<`a,`b,`e> d1, 
 			      hdict_t<`a,`b,`e> d2) {
-  if(d1 == d2)
-    return d1;
-  // NB: env is stack allocated!
-  let env2 = IntArgC{f, env, d1, Dict::empty(d1->rel)};
-  Dict::iter_c(intersectc_f, &env2, d2);
-  return env2.d2;
+  if (d1 == d2) return d1;
+  // NB: env2 is stack allocated!
+  let env2 = $(f, env, d1, Dict::empty(d1->rel));
+  Dict::iter_c(intersect_c_f, &env2, d2);
+  return env2[3];
 }
 
 static List::list_t<$(`a,`b)@> 
   to_list_f(`a k, `b v, List::list_t<$(`a,`b)@> accum){
   return new List::List(new $(k,v),accum);
 }
+
 List::list_t<$(`a,`b)@> to_list(hdict_t<`a,`b,`e> d) {
   return fold(to_list_f, d, null);
 }
 
+static hdict_t<`a,`b,`e> filter_f(bool f(`a,`b), `a x, `b y, hdict_t<`a,`b,`e> acc) {
+  return (f(x, y) ? insert(acc, x, y) : acc);
+}
+
+hdict_t<`a,`b,`e> filter(bool f(`a, `b), hdict_t<`a,`b,`e> d) {
+  return fold_c(filter_f, f, d, empty(d -> rel));
+}
+
+static hdict_t<`a,`b,`e> filter_c_f($(bool (@) (`c, `a, `b), `c) @ `r env,
+				    `a x, `b y, hdict_t<`a,`b,`e> acc) {
+  let &$(f, f_env) = env;
+  return (f(f_env, x, y)) ? insert(acc, x, y) : acc;
+}
+
+hdict_t<`a,`b,`e> filter_c(bool f (`c, `a, `b), `c f_env, hdict_t<`a,`b,`e> d) {
+  let env = $(f, f_env);
+  return fold_c(filter_c_f, &env, d, empty(d -> rel));
+}
+
+static bool difference_f(hdict_t<`a,`b,`e> d, `a x, `b y) {
+  return !member(d, x);
+}
+
+hdict_t<`a,`b,`e> difference(hdict_t<`a,`b,`e> d1, hdict_t<`a,`b,`e> d2) {
+  return filter_c(difference_f, d2, d1);
+}
+
+static bool delete_f($(int (@)(`a,`a;`e), `a) @ `r env, `a x, `b y) {
+  let &$(rel, x0) = env;
+  return (rel(x0, x) == 0);
+}
+
+hdict_t<`a,`b,`e> delete(hdict_t<`a,`b,`e> d, `a x) {
+  if (lookup_opt(d,x) == null) return d;
+  let env = $(d -> rel, x);
+  return filter_c(delete_f, &env, d);
+}

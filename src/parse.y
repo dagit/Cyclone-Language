@@ -1000,7 +1000,7 @@ using Parse;
 %type <FnDecl_tok> function_definition function_definition2
 %type <DeclList_tok> declaration declaration_list
 %type <DeclList_tok> prog
-%type <DeclList_tok> translation_unit translation_unit_opt external_declaration
+%type <DeclList_tok> translation_unit external_declaration
 %type <DeclSpec_tok> declaration_specifiers
 %type <InitDecl_tok> init_declarator
 %type <InitDeclList_tok> init_declarator_list init_declarator_list0
@@ -1045,9 +1045,7 @@ prog:
     }
 
 translation_unit:
-  external_declaration
-    { $$=$!1; }
-| external_declaration translation_unit
+  external_declaration translation_unit
     { $$=^$(List::imp_append($1,$2)); }
 /* Cyc: added using and namespace */
 /* NB: using_action calls Lex::enter_using */
@@ -1055,7 +1053,7 @@ translation_unit:
     { $$=^$(new List(new Decl(new Using_d($1,$3),LOC(@1,@3)),null));
       Lex::leave_using();
     }
-| using_action '{' translation_unit unusing_action translation_unit_opt
+| using_action '{' translation_unit unusing_action translation_unit
     { $$=^$(new List(new Decl(new Using_d($1,$3),LOC(@1,@4)),$5));
     }
 /* NB: namespace_action calls Lex::enter_namespace */
@@ -1063,19 +1061,16 @@ translation_unit:
     { $$=^$(new List(new Decl(new Namespace_d(new {$1},$3),LOC(@1,@3)),null));
       Lex::leave_namespace();
     }
-| namespace_action '{' translation_unit unnamespace_action translation_unit_opt
+| namespace_action '{' translation_unit unnamespace_action translation_unit
     { $$=^$(new List(new Decl(new Namespace_d(new {$1},$3),LOC(@1,@4)),$5));
     }
-| EXTERN STRING '{' translation_unit '}' translation_unit_opt
+| EXTERN STRING '{' translation_unit '}' translation_unit
     { if (String::strcmp($2,"C") != 0)
         err("only extern \"C\" { ... } is allowed",LOC(@1,@2));
       $$=^$(new List(new Decl(new ExternC_d($4),LOC(@1,@5)),$6));
     }
+| /* empty */ { $$=^$(null); }
 ;
-
-translation_unit_opt:
-    /* empty */    { $$=^$(null); }
-| translation_unit { $$=$!1; }
 
 external_declaration:
   function_definition 
