@@ -1914,6 +1914,11 @@ hstub {
   #define _in_addr_t_def_
   typedef unsigned int in_addr_t;
   #endif
+  /* Not defined in OS X */
+  #ifndef _sa_family_t_def_
+  #define _sa_family_t_def_
+  typedef unsigned char sa_family_t;
+  #endif
 }
 // Not sure why these were here -- they aren't according to POSIX
 // hstub htonl {
@@ -3660,6 +3665,9 @@ sys/sem.h:
 ;
 
 sys/select.h:
+cpp {
+  #include <sys/types.h> // For fd_set on OS X
+}
 include {
 time_t
 suseconds_t
@@ -3822,6 +3830,11 @@ hstub {
   /* Cygwin #defines socklen_t */
   typedef int socklen_t;
   #endif
+  #endif
+  /* Not defined in OS X */
+  #ifndef _sa_family_t_def_
+  #define _sa_family_t_def_
+  typedef unsigned char sa_family_t;
   #endif
 }
 hstub {
@@ -4391,6 +4404,13 @@ sys/un.h:
 include {
 sockaddr_un
 sa_family_t
+}
+hstub {
+  /* Not defined in OS X */
+  #ifndef _sa_family_t_def_
+  #define _sa_family_t_def_
+  typedef unsigned char sa_family_t;
+  #endif
 }
 ;
 

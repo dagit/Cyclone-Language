@@ -82,6 +82,8 @@ clean:
 	$(RM) $(addsuffix .[oc], genrep_test genrep_read genrep_write hello bytes cyctest foo histogram finger test_getopt typeref typerep_test test_regions)\
 	$(RM) foo_tab.* unsafe_cast.o
 	$(RM) hello cyctest foo histogram merge_sort finger test_getopt
+	$(RM) test_regions genrep_write genrep_read genrep_test rep
+	$(RM) typerep_test
 	$(RM) *~ *.exe *.output *.stackdump
 #	$(MAKE) clean -C benchmarks
 #	$(MAKE) clean -C compress/cacm
