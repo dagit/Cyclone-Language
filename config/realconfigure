@@ -35,7 +35,7 @@ fi
 # Decide on a built-in command to find commands.  In ksh this is
 #  command -v and in bash it is type -p.  The 'which' command is
 #  giving me trouble on solaris so I resort to this.
-if [ $BASH = "" ]; then # ksh
+if [[ $BASH = "" ]]; then # ksh
   WHICH='command -v'
 else
   WHICH='type -p'
