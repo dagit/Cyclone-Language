@@ -700,6 +700,38 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
 	  && (*args2->hd)[2] == void_type) {
 	args2 = NULL;
       }
+      // eliminate C99 dependencies e.g., int f(int n, int a[n]) by
+      // adding in a requires clause e.g., 
+      // int f(int n, int a@) @requires(n <= numelts(a))
+      list_t<exp_t> new_requires = NULL;
+      for (let a = args2; a != NULL; a = a->tl) {
+        let &$(vopt,tq,*t) = a->hd;
+        switch (*t) {
+        case &ArrayType(ArrayInfo{et,tq,neltsopt,zt,ztloc}):
+          if (neltsopt != NULL && vopt != NULL) {
+            qvar_t v = new $(Nmspace{.Loc_n = 0},(var_t)vopt);
+            exp_t nelts = copy_exp((exp_t)neltsopt);
+            exp_t e2 = primop_exp(Numelts,list(var_exp(v,DL)),DL);
+            exp_t new_req = lte_exp(nelts, e2, DL);
+            new_requires = new List{new_req,new_requires};
+          }
+          break;
+        default: break;
+        }
+      }
+      if (new_requires != NULL) {
+        exp_t r;
+        if (req != NULL) 
+          r = req; 
+        else {
+          r = new_requires->hd;
+          new_requires = new_requires->tl;
+        }
+        for (; new_requires != NULL; new_requires = new_requires->tl)
+          r = and_exp(r,new_requires->hd,DL);
+        req = r;
+      }
+
       // pull out any tag_t variables and their associated tag_t types
       let tags = get_arg_tags(args2);
       // convert result type from array to pointer result

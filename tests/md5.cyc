@@ -32,7 +32,7 @@
 #include "md5.h"
 
 /* forward declaration */
-static void Transform (UINT4 buf[4], UINT4 in[16]);
+static void Transform (UINT4 @{4}buf, UINT4 @{16}in);
 
 /* F, G and H are basic MD5 functions: selection, majority, parity */
 #define F(x, y, z) (((x) & (y)) | ((~x) & (z)))
@@ -162,7 +162,7 @@ void MD5Final (MD5_CTX *mdContext)
 
 /* Basic MD5 step. Transform buf based on in.
  */
-static void Transform (UINT4 buf[4], UINT4 in[16])
+static void Transform (UINT4 @{4}buf, UINT4@{16} in)
 {
   UINT4 a = buf[0], b = buf[1], c = buf[2], d = buf[3];
 

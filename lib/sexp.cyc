@@ -1,0 +1,856 @@
+/* This file is part of the Cyclone Library.
+   Copyright (C) 2004 Greg Morrisett
+
+   This library is free software; you can redistribute it and/or it
+   under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; see the file COPYING.LIB.  If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place, Suite
+   330, Boston, MA 02111-1307 USA. */
+
+/* This file defines an extensible form of data suitable for serializing
+   to and from files.  Values are represented as objects that know how
+   to print and parse themselves from strings.  New kinds of objects can
+   be defined by defining a new class (with suitable methods) and registering
+   that class.  Built-in classes include support for all of the integral
+   types, floats, doubles, and tuples of values.  These are all hash-consed
+   when created to ensure maximal sharing among the objects.
+
+   This also demonstrates the use of many advanced features in Cyclone,
+   including how to do class-based OO programming.
+*/
+#include <sexp.h>
+#include <xarray.h>
+#include <string.h>
+#include <list.h>
+#include <cycboot.h>
+using List;
+
+namespace Sexp;
+
+/* type abbreviations useful for defining macros */
+typedef unsigned char uchar_t;
+typedef signed char schar_t;
+typedef unsigned short ushort_t;
+typedef signed short sshort_t;
+typedef unsigned int uint_t;
+typedef signed int sint_t;
+typedef unsigned long long ulonglong_t;
+typedef signed long long slonglong_t;
+typedef float float_t;
+typedef double double_t;
+typedef const char ?`H str_t;
+typedef const char ?`H symbol_t;
+typedef Object_t ?`H tuple_t;
+
+/* coerce an Obj_t<`a> to an Object */
+Object_t up(Obj_t<`a>@`H self : regions(`a) > `H) {
+  return Object{<`a> .self = self};
+}
+
+/* try to downcast an Object to a particular class */
+Obj_t<`b>* down(Class_t<`b>@`H B, Object_t x) {
+  let Object{<`x> self} = x;
+  B->cast_value = NULL;
+  self->vtable->cast_value = self;
+  return B->cast_value;
+}
+
+/* invoke hash method */
+int hash(Object_t self) {
+  let Object{<`x> self} = self;
+  return self->vtable->hash(self);
+}
+
+/* invoke comparison method */
+int cmp(Object_t x, Object_t y) {
+  let Object{<`x> xself} = x;
+  let Object{<`y> yself} = y;
+  if ((void *)xself == (void *)yself) return 0;
+  /* different classes -- return diff */
+  int diff = (int)xself->vtable - (int)yself->vtable;
+  if (diff != 0) return diff;
+  /* same class -downcast y to x's class and invoke cmp method */
+  let yasx = down(xself->vtable,y);
+  return xself->vtable->cmp(xself,(_@)yasx);
+}
+
+/* invoke visit method */
+`a visit(Object_t x, Visitor_t<`a,`env,`r>@`r v, `env env) {
+  let Object{<`x> xself} = x;
+  return xself->vtable->accept(xself, v, env);
+}
+
+/* print an object using printer p */
+void print(struct Printer<`p> @p, Object_t x) {
+  let Object{<`x> xself} = x;
+  p->print(p->env,aprintf("%c(",xself->vtable->tag));
+  xself->vtable->print(xself,p);
+  p->print(p->env,")" );
+}
+
+
+/* used in tofile below */
+static void printfile(FILE @`f f, const char ?`H s) {
+  fprintf(f,"%s",s);
+}
+
+/* print an object to a file */
+void tofile(FILE @`f f, Object_t x) {
+  let p = Printer{.env = f, .print = printfile};
+  print(&p, x);
+}
+
+/* print an object to a new file named by filename */
+void tofilename(const char @filename, Object_t x) {
+  FILE *fopt = fopen(filename,"w");
+  if (fopt == NULL) fprintf(stderr,"unable to open file %s\n",filename);
+  tofile((FILE @)fopt, x);
+  fclose((FILE @)fopt);
+}
+
+/* used in tostring below */
+void printstring(Xarray::xarray_t<const char @`H,`H> strings, const char ?`H s)
+{
+  Xarray::add(strings,(const char @)s);
+}
+
+// used in tostring below
+static void addlength(int @c, const char @s) {
+  for (; *s != 0; ++s) *c = *c+1;
+}
+// used in tostring below
+static void addstring(char ?@p, const char @s) {
+  for (; *s != 0; ++s) {
+    **p = *s;
+    *p = *p + 1;
+  }
+}
+
+/* convert an object to a string */
+const char ?tostring(Object_t v) {
+  Xarray::xarray_t<const char @`H,`H> x = Xarray::create_empty();
+  struct Printer<Xarray::xarray_t<const char @`H,`H>> p = 
+    Printer{.env = x, .print = printstring};
+  print(&p,v);
+  int len = 1;
+  Xarray::iter_c(addlength, &len, x);
+  char ?res = calloc(len,sizeof(char));
+  char ?p = res;
+  Xarray::iter_c(addstring, &p, x);
+  return res;
+}
+
+/* used to build a collection of classes */
+typedef struct Cls {
+  <`a> : regions(`a) > `H
+  Class_t<`a> @vtable;
+} @class_t;
+
+/* defined below -- a list of all registered classes */
+extern list_t<class_t> classes;
+
+/* register a new class -- should check that the tag is unique */
+void register_class(struct Class<`a>@`H c : regions(`a) > `H) {
+  classes = new List(new Cls{c},classes);
+}
+
+
+// get a char
+static int pgetc(struct Parser<`a> @p) {
+  int res = p->getc(p->env);
+  return res;
+}
+
+// put back a char
+static void pungetc(struct Parser<`a> @p, int ch) {
+  p->ungetc(ch,p->env);
+}
+
+// signal an error
+static void perror(struct Parser<`a> @p,int ch,const char ?s) 
+  __attribute__((noreturn)) {
+  p->error(p->env,ch,s);
+}
+
+// true when ch is a space, tab, or newline
+static bool whitespace(int ch) {
+  return (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r');
+}
+
+// skip over whitespace and consume the expected_ch
+static void expectws(struct Parser<`a>@p, int expected_ch) {
+  int ch = pgetc(p);
+  while (whitespace(ch)) ch = pgetc(p);
+  if (ch != expected_ch) perror(p,ch,aprintf("expected '%c'",expected_ch));
+}
+
+// consume the expected char
+static void expect(struct Parser<`a>@p, int expected_ch) {
+  int ch = pgetc(p);
+  if (ch != expected_ch) perror(p,ch,aprintf("expected '%c'",expected_ch));
+}
+
+// main parser: sucks in exactly one object and fails otherwise.
+// reads in one character and compares it against the registered classes'
+// tags to determine which parser to invoke.
+Object_t parse(struct Parser<`p>@ p) {
+  int ch = pgetc(p);
+  while (whitespace(ch)) ch = pgetc(p);
+  for (let cs = classes; cs != NULL; cs = cs->tl) {
+    let &Cls{<`c> .vtable = v} = cs->hd;
+    if (ch == v->tag) {
+      expectws(p,'(');
+      let obj = v->parse(p);
+      expectws(p,')');
+      return up(obj);
+    }
+  }
+  p->error(p->env,ch,"unexpected tag");
+}
+
+
+// used in file2object below
+static void file_error<`r1,`r2>(FILE @`r1 f, int ch, 
+                                const char ?`r2 msg) __attribute__((noreturn))
+{
+  fprintf(stderr,"found '%c'.  %s\n",ch,msg);
+  fclose(f);
+  throw new Core::Failure("Sexp::file2object error");
+}
+
+// parse an sexp from a FILE
+Object_t fromfile(FILE @`r f) {
+  struct Parser<FILE @> p = {.env = f, .getc = getc, .ungetc = ungetc,
+                                .error = file_error@<`r><>};
+  try {
+    let s = parse(&p);
+    fclose(f);
+    return s;
+  } catch {
+  case e: Core::rethrow(e);
+  }
+}
+
+// open filename and parse an sexp from it, then close the file
+Object_t fromfilename(const char @filename) {
+  FILE * fopt = fopen(filename,"r");
+  if (fopt == NULL) throw new Core::Failure("file not found");
+  let res = fromfile((FILE @)fopt);
+  fclose((FILE @)fopt);
+  return res;
+}
+
+// environment for parsing strings.
+struct StringEnv<`r> { 
+  const char ?`r str;  // string source
+  uint_t length; // it's strlen
+  uint_t offset; // current offset
+};
+
+// get a char from the string
+static int string_getc(struct StringEnv<`r>@env) {
+  if (env->offset >= env->length) return EOF;
+  int ch = env->str[env->offset];
+  env->offset++;
+  return ch;
+}
+
+// put back a char from the string
+static int string_ungetc(int ch, struct StringEnv<`r>@env) {
+  if (ch == EOF) return -1;
+  env->offset--;
+  return 0;
+}
+
+// error for the string
+static void string_error<`r1,`r2,`r>(struct StringEnv<`r1>@`r2 env,
+                                     int ch, const char ?`r msg)
+  __attribute__((noreturn)) {
+  fprintf(stderr,"found '%c', %s\n",ch,msg);
+  throw new Core::Failure("Sexp::string2object error");
+}
+
+// parse an object from a string
+Object_t fromstring(const char ?`r str) {
+  struct StringEnv<`r> env = {.str = str, .length = strlen(str), .offset = 0};
+  struct Parser<struct StringEnv<`r>@> p = 
+  {.env = &env, .getc = string_getc, .ungetc = string_ungetc,
+      .error = string_error@<`r,`fromstring><>};
+  return parse(&p);
+}
+
+
+// most of the hash functions just return the object's value
+#define genhash(n) \
+  static int hash_##n(Obj_t<n##_t>@ self) { return (int)self->v; }
+genhash(ulonglong);
+genhash(slonglong);
+genhash(uint);
+genhash(sint);
+genhash(ushort);
+genhash(sshort);
+genhash(uchar);
+genhash(schar);
+#undef genhash
+
+// most of the comparison functions just return an integral difference
+#define gencmp(n) \
+  static int cmp_##n(Obj_t<n##_t> @x,Obj_t<n##_t> @y) { \
+    return x->v - y->v; \
+  }
+gencmp(uint)
+gencmp(sint)
+gencmp(ushort)
+gencmp(sshort)
+gencmp(uchar)
+gencmp(schar)
+#undef gencmp
+
+// all of the accept methods are the same -- we check for the right
+// visitor method and if present, invoke it.  Otherwise, we invoke the
+// default.  We really should check for null in the default case.
+#define genaccept(n) \
+  static `b accept_##n<`b,`env,`r>(Obj_t<n##_t>@`H self, \
+                                   Visitor_t<`b,`env,`r>@`r visitor,\
+                                   `env env) { \
+    let f = visitor->visit_##n; \
+    if (f == NULL) return visitor->visit_default(env, up(self), visitor); \
+    else return f(env, self, visitor); \
+  }
+
+genaccept(uchar)
+genaccept(schar)
+genaccept(ushort)
+genaccept(sshort)
+genaccept(uint)
+genaccept(sint)
+genaccept(ulonglong)
+genaccept(slonglong)
+genaccept(float)
+genaccept(double)
+genaccept(str)
+genaccept(symbol)
+genaccept(tuple)
+#undef genaccept
+
+
+// convert a hex digit to an integral value
+static uint_t hex2value(struct Parser<`a>@p, int ch) {
+  if (ch >= '0' && ch <= '9')
+    return (ch - '0');
+  if (ch >= 'A' && ch <= 'F')
+    return (10 + (ch - 'A'));
+  if (ch >= 'a' && ch <= 'f')
+    return (10 + (ch - 'a'));
+  perror(p,ch,"expecting hex digit");
+}
+
+// used for printing out hex rep of values
+static uint_t nibble(unsigned i, unsigned x) {
+  for (; i > 0; i--)
+    x = x >> 4;
+  return (x & 0xf);
+}
+
+// parse long long's -- read in 16 hex digits
+static ulonglong_t parse_longlong(struct Parser<`a>@ p) {
+  ulonglong_t res = 0;
+  for (unsigned i = 0; i < 16; i++) {
+    int ch = pgetc(p);
+    ulonglong_t v = hex2value(p,ch);
+    res = (res << 4) | v;
+  }
+  return res;
+}
+
+// print a long long -- uses 16 hex digits 
+static void print_ulonglong(Obj_t<ulonglong_t>@`H self, 
+                            struct Printer<`p>@`r p) {
+  let x = self->v;
+  p->print(p->env,aprintf("%08x%08x",(uint_t)(x >> 32),(uint_t)x));
+}
+// parses a long long -- expects 16 hex digits
+static Obj_t<ulonglong_t>@ parse_ulonglong(struct Parser<`a>@ p) {
+  return mk_ulonglong(parse_longlong(p));
+}
+// specialize long long parsing and printing to signed/unsigned
+static void print_slonglong(Obj_t<slonglong_t>@`H self, 
+                            struct Printer<`p>@`r p) {
+  let x = self->v;
+  p->print(p->env,aprintf("%08x%08x",(uint_t)(x >> 32),(uint_t)x));
+}
+static Obj_t<slonglong_t>@ parse_slonglong(struct Parser<`a>@ p) {
+  return mk_slonglong(parse_longlong(p));
+}
+// compare two unsigned long longs
+static int cmp_ulonglong(Obj_t<ulonglong_t> @x,
+                         Obj_t<ulonglong_t> @y) {
+  if (x->v > y->v) return 1;
+  else if (x->v < y->v) return -1;
+  else return 0;
+}
+// compare two signed long longs
+static int cmp_slonglong(Obj_t<slonglong_t> @x,
+                         Obj_t<slonglong_t> @y) {
+  if (x->v > y->v) return 1;
+  else if (x->v < y->v) return -1;
+  else return 0;
+}
+
+// parse int's -- read in 8 hex digits 
+static uint_t parse_int(struct Parser<`a>@ p) {
+  uint_t res = 0;
+  for (unsigned i = 0; i < 8; i++) {
+    int ch = pgetc(p);
+    uint_t v = hex2value(p,ch);
+    res = (res << 4) | v;
+  }
+  return res;
+}
+// print unsigned int -- write out 8 hex digits
+static void print_uint(Obj_t<uint_t>@`H self, struct Printer<`p>@`r p) {
+  let x = self->v;
+  p->print(p->env,aprintf("%08x",x));
+}
+// parse unsigned int -- expects 8 hex digits
+static Obj_t<uint_t>@ parse_uint(struct Parser<`a>@ p) {
+  return mk_uint(parse_int(p));
+}
+// print signed int -- write out 8 hex digits
+static void print_sint(Obj_t<sint_t>@`H self, struct Printer<`p>@`r p) {
+  let x = self->v;
+  p->print(p->env,aprintf("%08x",x));
+}
+// parse unsigned int -- expects 8 hex digits
+static Obj_t<sint_t>@ parse_sint(struct Parser<`a>@ p) {
+  return mk_sint(parse_int(p));
+}
+
+// parse short's -- read in 4 hex digits 
+static ushort_t parse_short(struct Parser<`a>@ p) {
+  unsigned res = 0;
+  for (unsigned i = 0; i < 4; i++) {
+    int ch = pgetc(p);
+    unsigned v = hex2value(p,ch);
+    res = (res << 4) | v;
+  }
+  return (ushort_t)res;
+}
+
+// print a ushort -- write out 4 hex digits
+static void print_ushort(Obj_t<ushort_t>@`H self, struct Printer<`p>@`r p) {
+  let x = self->v;
+  p->print(p->env,aprintf("%x%x%x%x",
+                          nibble(3,x),nibble(2,x),nibble(1,x),nibble(0,x)));
+}
+// parse a ushort -- read in 4 hex digits
+static Obj_t<ushort_t>@ parse_ushort(struct Parser<`a>@ p) {
+  return mk_ushort(parse_short(p));
+}
+// print a signed short -- write out 4 hex digits
+static void print_sshort(Obj_t<sshort_t>@`H self, struct Printer<`p>@`r p) {
+  let x = self->v;
+  p->print(p->env,aprintf("%x%x%x%x",
+                          nibble(3,x),nibble(2,x),nibble(1,x),nibble(0,x)));
+}
+// parse a signed short -- read in 4 hex digits
+static Obj_t<sshort_t>@ parse_sshort(struct Parser<`a>@ p) {
+  return mk_sshort(parse_short(p));
+}
+
+// parse char -- read in 2 hex digits 
+static uchar_t parse_char(struct Parser<`a>@ p) {
+  unsigned res = 0;
+  for (unsigned i = 0; i < 2; i++) {
+    int ch = pgetc(p);
+    unsigned v = hex2value(p,ch);
+    res = (res << 4) | v;
+  }
+  return (uchar_t)res;
+}
+// print uchar -- write out 2 hex digits 
+static void print_uchar(Obj_t<uchar_t>@`H self, struct Printer<`p>@`r p) {
+  let x = self->v;
+  p->print(p->env,aprintf("%x%x",nibble(1,x),nibble(0,x)));
+}
+// parse uchar -- read in 2 hex digits 
+static Obj_t<uchar_t>@ parse_uchar(struct Parser<`a>@ p) {
+  return mk_uchar(parse_char(p));
+}
+// print schar -- write out 2 hex digits 
+static void print_schar(Obj_t<schar_t>@`H self, struct Printer<`p>@`r p) {
+  let x = self->v;
+  p->print(p->env,aprintf("%x%x",nibble(1,x),nibble(0,x)));
+}
+// parse schar -- read in 2 hex digits 
+static Obj_t<schar_t>@ parse_schar(struct Parser<`a>@ p) {
+  return mk_schar(parse_char(p));
+}
+
+// these routines data structures and routines are used to convert
+// floats and doubles to integral values for printing and parsing.
+union IntFloat { uint_t i; float f; };
+static float int2float(uint_t i) {
+  union IntFloat u = {.i = i}; return u.f;
+}
+static uint_t float2int(float f) {
+  union IntFloat u = {.f = f}; return u.i;
+}
+union DoubleLongLong { ulonglong_t x; double_t d; };
+static double longlong2double(ulonglong_t x) {
+  union DoubleLongLong u = {.x = x}; return u.d;
+};
+static ulonglong_t double2longlong(double d) {
+  union DoubleLongLong u = {.d = d}; return u.x;
+}
+
+// float hash -- convert to integer
+static int hash_float(Obj_t<float>@ self) { return float2int(self->v); }
+// print float -- convert to integer and then print as 8 hex digits
+static void print_float(Obj_t<float>@`H self, struct Printer<`p>@`r p) {
+  let x = self->v;
+  p->print(p->env,aprintf("%08x",float2int(x)));
+}
+// parse a float by reading in a 8 hex digits as an integer and then convert.
+static Obj_t<float> @parse_float(struct Parser<`a>@ p) {
+  return mk_float(int2float(parse_int(p)));
+}
+// compare two floats
+static int cmp_float(Obj_t<float> @x,Obj_t<float> @y) {
+  float diff = x->v - y->v;
+  if (diff < 0.0) return -1;
+  else if (diff > 0.0) return 1;
+  else return 0;
+}
+
+// double hash -- convert to long long and then take low bits
+static int hash_double(Obj_t<double>@ self) {
+  return (uint_t)double2longlong(self->v);
+}
+// print double -- convert to long long and then dump 16 hex digits
+static void print_double(Obj_t<double>@`H self, struct Printer<`p>@`r p) {
+  let d = self->v;
+  let x = double2longlong(d);
+  p->print(p->env,aprintf("%08x%08x",(uint_t)(x >> 32),(uint_t)x));
+}
+// parse a double by reading in an 16 hex digits and then use a union
+// to convert it to a double.
+static Obj_t<double>@ parse_double(struct Parser<`a>@ p) {
+  return mk_double(longlong2double(parse_longlong(p)));
+}
+// compare two doubles
+static int cmp_double(Obj_t<double> @x,Obj_t<double> @y) {
+  double diff = x->v - y->v;
+  if (diff < 0.0) return -1;
+  else if (diff > 0.0) return 1;
+  else return 0;
+}
+
+// hash a string
+static int hash_str(Obj_t<str_t>@ self) {
+  return Hashtable::hash_string(self->v);
+}
+// hash a sybmol -- same as above but eases macros
+static int hash_symbol(Obj_t<symbol_t>@ self) {
+  return Hashtable::hash_string(self->v);
+}
+// print symbol -- just dump out the contents
+static void print_symbol(Obj_t<symbol_t>@`H self, 
+                         struct Printer<`p>@`r p) {
+  p->print(p->env,self->v);
+}
+  
+
+// parse a symbol -- we skip white space at the front and at the end,
+// The symbol can contain any character except whitespace or ')'.
+static Obj_t<symbol_t>@ parse_symbol(struct Parser<`a>@ p) {
+  List::list_t<int> chars = NULL;
+  int ch = pgetc(p);
+  while (whitespace(ch)) ch = pgetc(p);
+  while (true) {
+    if (ch == EOF) perror(p,ch,"unexpected end of file");
+    if (whitespace(ch) || ch == ')') {
+      pungetc(p,ch);
+      break;
+    }
+    chars = new List::List{ch,chars};
+    ch = pgetc(p);
+  }
+  chars = List::imp_rev(chars);
+  char ?buf = calloc(List::length(chars)+1,sizeof(char));
+  for (unsigned i = 0; chars != NULL; chars = chars->tl, ++i)
+    buf[i] = (char)chars->hd;
+  return mk_symbol(buf);
+}
+
+// used in printing strings to escape key characters
+static const char ?escape(const char ?`H s) {
+  unsigned n = strlen(s);
+  int escapes = 0;
+  for (unsigned i = 0; i < n; i++) {
+    if (s[i] == '"' || s[i] == '\\') escapes++;
+  }
+  if (escapes == 0) return s;
+  char ?news = new {for i < n+escapes+1 : '\0'};
+  uint_t pos = 0;
+  for (unsigned i = 0; i < n; i++) {
+    char ch = s[i];
+    if (s[i] == '"' || s[i] == '\\') {
+      news[pos] = '\\';
+      pos++;
+    }
+    news[pos] = ch;
+    pos++;
+  }
+  return news;
+}
+
+// print string
+static void print_str(Obj_t<str_t>@`H self, struct Printer<`p>@`r p) {
+  p->print(p->env,"\"");
+  p->print(p->env,escape(self->v));
+  p->print(p->env,"\"");
+}
+
+// compare strings
+static int cmp_str(Obj_t<str_t> @x,Obj_t<str_t> @y) {
+  return strcmp(x->v,y->v);
+}
+// compare symbols
+static int cmp_symbol(Obj_t<symbol_t> @x,Obj_t<symbol_t> @y) {
+  return strcmp(x->v,y->v);
+}
+
+// parse strings.
+// similar to symbols except that any character is allowed except '"'
+// or '\' unless escaped.
+static Obj_t<str_t> @parse_str(struct Parser<`a>@ p) {
+  expectws(p,'"');
+  List::list_t<int> chars = NULL;
+  while (true) {
+    int ch = pgetc(p);
+    if (ch == EOF) perror(p,ch,"unexpected end of file");
+    if (ch == '"') break;
+    if (ch == '\\') {
+      ch = pgetc(p);
+      if (ch != '"' && ch != '\\') perror(p,ch,"expected '\"' or '\\'");
+    }
+    chars = new List::List{ch,chars};
+  }
+  chars = List::imp_rev(chars);
+  char ?buf = calloc(List::length(chars)+1,sizeof(char));
+  for (unsigned i = 0; chars != NULL; chars = chars->tl, ++i)
+    buf[i] = (char)chars->hd;
+  return mk_str(buf);
+}
+
+// print tuples
+static void print_tuple(Obj_t<Object_t?`H>@`H self,
+                         struct Printer<`p>@`r p) {
+  let vs = self->v;
+  let n = numelts(vs);
+  for (unsigned i = 0; i < n; i++)
+    print(p,vs[i]);
+}
+
+// hash tuples -- we just use the physical address of the components
+// to compute the hash.  It would be better to call the hash method on
+// the components and then cache the result in the object itself.
+static int hash_tuple(Obj_t<Object_t ?`H>@ x) {
+  unsigned res = 0;
+  let vs = x->v;
+  let n = numelts(vs);
+  for (unsigned i = 0; i < n; ++i) {
+    let Object{v} = vs[i];
+    res = (res << 8) | ((unsigned int)v & 0xff);
+  }
+  return res;
+}
+
+// compare two tuples
+static int cmp_tuple(Obj_t<Object_t ?`H> @x,Obj_t<Object_t ?`H> @y) {
+  if (x == y) return 0;
+  let xs = x->v;
+  let ys = y->v;
+  let nx = numelts(xs);
+  let ny = numelts(ys);
+  if (nx < ny) return -1;
+  if (nx > ny) return 1;
+  for (unsigned i = 0; i < nx; i++) {
+    int c = cmp(xs[i],ys[i]);
+    if (c != 0) return c;
+  }
+  return 0;
+}
+
+// used in parse_tuple below
+static Object_t next_list(list_t<Object_t@`H,`H> @xs) {
+  let h = (*xs)->hd;
+  *xs = (*xs)->tl;
+  return *h;
+}
+
+// parse in a tuple of objects
+static Obj_t<Object_t ?> @parse_tuple(struct Parser<`a>@ p) {
+  List::list_t<Object_t @> xs = NULL;
+ Next:    
+    int ch = pgetc(p);
+    while (whitespace(ch)) ch = pgetc(p);
+    if (ch == ')') {
+      pungetc(p,ch);
+      xs = List::imp_rev(xs);
+      let len = List::length(xs);
+      let vs = new {for i < len : next_list(&xs)};
+      return mk_tuple(vs);
+    }
+    for (let cs = classes; cs != NULL; cs = cs->tl) {
+      let &Cls{<`c> .vtable = v} = cs->hd;
+      if (ch == v->tag) {
+        expectws(p,'(');
+        let obj = v->parse(p);
+        expectws(p,')');
+        xs = new List(new up(obj),xs);
+        goto Next;
+      }
+    }
+    p->error(p->env,ch,"unexpected tag");
+}
+
+// generate the built-in classes
+#define genclass(n,c,nm) \
+  struct Class<n##_t> n##_class = { \
+  .cast_value = NULL, \
+     .hash_table = NULL, \
+     .tag = c, \
+     .name = nm, \
+     .print = print_##n<>, \
+     .parse = parse_##n<>, \
+     .cmp = cmp_##n<>, \
+     .hash = hash_##n<>, \
+     .accept = accept_##n<> \
+};
+
+genclass(uchar,'C',"unsigned char")
+genclass(schar,'c',"signed char")
+genclass(ushort,'S',"unsigned short")
+genclass(sshort,'s',"signed short")
+genclass(uint,'I',"unsigned int")
+genclass(sint,'i',"signed int")
+genclass(ulonglong,'L',"unsigned long long")
+genclass(slonglong,'l',"signed long long")
+genclass(float,'f',"float")
+genclass(double,'d',"double")
+genclass(str,'r',"string")
+genclass(symbol,'y',"symbol")
+genclass(tuple,'t',"tuple")
+#undef genclass
+
+// used in the mk_<foo> constructors below -- each class has a hashtable.
+// when we create an object, we check to see if it's already in the hashtable.
+// if so, then we return the hashed object and otherwise enter it into the
+// hashtable.  The table is lazily initialized so we have to take care of
+// that as well.
+static Obj_t<`a>@* hashcons(Obj_t<`a>@ x) {
+  let c = x->vtable;
+  struct Hashtable::Table *topt = c->hash_table;
+  Hashtable::table_t t;
+  if (topt == NULL) {
+    t = Hashtable::create(101,c->cmp,c->hash);
+    c->hash_table = t;
+  } else {
+    t = (Hashtable::table_t)topt;
+  }
+  return Hashtable::lookup_other_opt(t,x,c->cmp,c->hash);
+}
+
+// define the constructors for the built-in classes, as well as an
+// encapsulated class for use in the registered classes list below.
+#define mk(n) \
+  Obj_t<n##_t> @mk_##n(n##_t v) { \
+    let obj = Obj{.vtable = &n##_class, .v = v}; \
+    let objopt = hashcons(&obj); \
+    if (objopt != NULL) return *objopt; \
+    let objp = new obj; \
+    Hashtable::insert((Hashtable::table_t)obj.vtable->hash_table,objp,objp); \
+    return objp; \
+  } \
+  Object_t obj_##n(n##_t v) { return up(mk_##n(v)); }\
+  struct Cls n##_class_w = Cls{&n##_class}; 
+
+mk(uchar)
+mk(schar)
+mk(ushort)
+mk(sshort)
+mk(uint)
+mk(sint)
+mk(ulonglong)
+mk(slonglong)
+mk(float)
+mk(double)
+mk(str)
+mk(symbol)
+mk(tuple)
+#undef mk
+
+// useful abbreviation for creating a tuple object using varargs
+Object_t tuple(...Object_t objs) {
+  return obj_tuple(new {for i < numelts(objs) : objs[i]});
+}
+
+
+// create the list of registered classes for use in parsing.
+static struct List<struct Cls@`H,`H> c0 = List{ &uchar_class_w, NULL};
+static struct List<struct Cls@`H,`H> c1 = List{ &schar_class_w, &c0};
+static struct List<struct Cls@`H,`H> c2 = List{ &ushort_class_w, &c1};
+static struct List<struct Cls@`H,`H> c3 = List{ &sshort_class_w, &c2};
+static struct List<struct Cls@`H,`H> c4 = List{ &uint_class_w, &c3};
+static struct List<struct Cls@`H,`H> c5 = List{ &sint_class_w, &c4};
+static struct List<struct Cls@`H,`H> c6 = List{ &ulonglong_class_w, &c5};
+static struct List<struct Cls@`H,`H> c7 = List{ &slonglong_class_w, &c6};
+static struct List<struct Cls@`H,`H> c8 = List{ &float_class_w, &c7};
+static struct List<struct Cls@`H,`H> c9 = List{ &double_class_w, &c8};
+static struct List<struct Cls@`H,`H> c10 = List{ &symbol_class_w, &c9};
+static struct List<struct Cls@`H,`H> c11 = List{ &str_class_w, &c10};
+static struct List<struct Cls@`H,`H> c12 = List{ &tuple_class_w, &c11};
+
+list_t<class_t> classes = &c12;
+
+// empty visitor -- everything is null
+Visitor_t<`b,`a,`r> empty_visitor() {
+  return Visitor{
+       .visit_uchar = NULL,
+       .visit_schar = NULL,
+       .visit_ushort = NULL,
+       .visit_sshort = NULL,
+       .visit_uint = NULL,
+       .visit_sint = NULL,
+       .visit_ulonglong = NULL,
+       .visit_slonglong = NULL,
+       .visit_float = NULL,
+       .visit_double = NULL,
+       .visit_symbol = NULL,
+       .visit_str = NULL,
+       .visit_tuple = NULL,
+       .visit_default = NULL};
+}
+// default visitor -- same as above but has a default method.
+Visitor_t<`b,`a,`r> default_visitor(`b (@`H def)(`a,Object_t,visitor_t<`b,`a,`r>)) {
+  let v = empty_visitor();
+  v.visit_default = def;
+  return v;
+}
+
+
+
+
+
+
