@@ -40,7 +40,7 @@ diff:
 	diff lexer.cyc genfiles/lexer.cyc
 
 # careful -- this overwrites the cyclone file needed to bootstrap!
-update: all genfiles/lexer.cyc
+update: $(PROG) genfiles/lexer.cyc
 
 parser_tab.cyc: parser.y $(CYCBISON)
 	$(CYCBISON) -v -d $< -o $@
@@ -48,7 +48,7 @@ parser_tab.h: parser.y $(CYCBISON)
 	$(CYCBISON) -v -d $< -o parser_tab.cyc
 
 ifdef BOOTSTRAP
-lexer.cyc: lexer.cyl $(PROG)
+lexer.cyc: lexer.cyl
 	./$(PROG) $< $@
 
 genfiles/lexer.cyc: lexer.cyc
