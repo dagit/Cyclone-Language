@@ -43,6 +43,11 @@ BUG FIXES and UNSOUNDNESSES:
   compiler that lets one treat them both as MemKind so that one can
   easily write 64 bit code.
 
+* We need to support attribute mode.  This is used in GCC to specify
+  data representations, e.g., 64 bit integers.  Currently we are deleting
+  these when we build the standard library, see buildlib.cyl, so we
+  aren't getting the correct data representations!!!
+
 * There are too many conflicts in the parser (18 shift-reduce, 4 reduce-
   reduce.)  Someone should really clean this up.
 

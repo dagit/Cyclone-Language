@@ -410,17 +410,28 @@ and slurp = parse /* returns 1 if more to do, 0 if all done */
   log("Warning: use of region sidestepped\n");
   return 1; }
 | "__extension__" /* Used in cygwin in sys/reent.h */
-{ return 1; }
+{ log("Warning: use of __extension__ deleted\n");
+  return 1; }
 | "__attribute__ ((__mode__ (__HI__)))" /* Used in linux in _G_config.h */
-{ return 1; }
+/* These mode hacks WILL cause bugs; best solution is to
+   support mode directly in Cyclone */
+{ log("Warning: use of mode HI deleted\n");
+  return 1; }
 | "__attribute__ ((__mode__ (__SI__)))" /* Used in linux in _G_config.h */
-{ return 1; }
+{ log("Warning: use of mode SI deleted\n");
+  return 1; }
 | "__attribute__ ((__mode__ (__QI__)))" /* Used in linux in sys/types.h */
-{ return 1; }
+{ log("Warning: use of mode QI deleted\n");
+  return 1; }
 | "__attribute__ ((__mode__ (__DI__)))" /* Used in linux in sys/types.h */
-{ return 1; }
+{ log("Warning: use of mode DI deleted\n");
+  return 1; }
+| "__attribute__((__mode__(__DI__)))" /* Used in freebsd in a number of places */
+{ log("Warning: use of mode DI deleted\n");
+  return 1; }
 | "__attribute__ ((__mode__ (__word__)))" /* Used in linux in sys/types.h */
-{ return 1; }
+{ log("Warning: use of mode word deleted\n");
+  return 1; }
 | "__inline__" /* Used in cygwin in stdio.h */
 { fputs("inline",(FILE @)slurp_out); return 1; }
 | "__inline" /* Used in OS X */
