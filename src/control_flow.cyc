@@ -526,6 +526,11 @@ static flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
     for(_ vds2 = vds; vds2 != null; vds2 = vds2->tl)
       s_env = remove_unassigned(env,vds2->hd);
     return cf_check_stmt(s_env,s);
+  case Decl_s(&Decl(Letv_d(vl),_),s):
+    for (; vl != null; vl = vl->tl) {
+      env = add_unassigned(env,vl->hd);
+    }
+    return cf_check_stmt(add_unassigned(env,vd), s);
   // all the work necessary for non-local control flow is done by the jumpers
   case Label_s(_,s):
     return cf_check_stmt(env,s);

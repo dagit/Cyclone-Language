@@ -310,6 +310,29 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       pattern_synth(s0->loc, te, new_tvs, x, s, null, false);
       return;
 
+    case &Letv_d(vds):
+      let curr_bl = Tcenv::curr_rgn(te);
+      let te2 = te;
+      for (; vds != null; vds = vds->tl) {
+        let vd = vds->hd;
+        let &Vardecl(_,&$(nsl,_),_,t,_,*rgn_ptr,_) = vd;
+        *rgn_ptr = new Opt(curr_bl); // side effect
+        switch (nsl) {
+        case Loc_n: break;
+        case &Rel_n(null):
+          (*vd->name)[0] = Loc_n;
+          break;
+        case &Abs_n(y): throw impos("tcstmt: Abs_n declaration");
+        default:
+          terr(d->loc, "cannot declare a qualified local variable");
+          break;
+        }
+        check_type(s0->loc,te2,lookup_type_vars(te2),MemKind,t);
+        te2 = add_local_var(s->loc,te2,vd);
+      }
+      tcStmt(set_encloser(te2,s0),s,false);
+      return;
+
     case &Namespace_d(n,tds): unimp_msg_part = "namespace"; break;
     case &Using_d(q,tds):     unimp_msg_part = "using";     break; //FIX: allow
     case &Fn_d(_):            unimp_msg_part = "function";  break;

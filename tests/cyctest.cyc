@@ -1017,6 +1017,17 @@ using Errno {
   }
 }
 
+void letv_test() {
+    test_begin("Letv");
+    let x,y;
+    y = 0;
+    if (y != 0) x = 3;
+    else x = 4;
+    okfail(x == 4);
+    okfail(y == 0);
+    test_end();
+}
+
 int main(int argc, string ? args) {
   printf("*************** CYCLONE TEST SUITE ***************\n\n");
 
@@ -1059,6 +1070,7 @@ int main(int argc, string ? args) {
   arg_test(args);
   printf_test();
   att_test();
+  letv_test();
   // scanf_test(); // commented out because sscanf is insecure
 
   if (no_errors) {

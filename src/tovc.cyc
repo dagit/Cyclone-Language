@@ -508,6 +508,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
       fallthru;
     case &Var_d(_):         fallthru;
     case &Let_d(_,_,_,_,_): fallthru;
+    case &Letv_d(_):        fallthru;
     case &Struct_d(_):      fallthru;
     case &Union_d(_):       fallthru;
     case &Tunion_d(_):      fallthru;

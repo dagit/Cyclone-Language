@@ -772,6 +772,9 @@ static void tc_decls(tenv_t te, list_t<decl_t> ds0, bool in_externC, bool check_
     case &Let_d(_,_,_,_,_): // FIX
       terr(loc,"top level let-declarations are not implemented");
       break;
+    case &Letv_d(_): // FIX
+      terr(loc,"top level let-declarations are not implemented");
+      break;
     case &Var_d(vd):
       if (in_externC && okay_externC(d->loc,vd->sc))
 	vd->sc = ExternC;

@@ -839,6 +839,11 @@ void cf_prepass(absenv_t env, stmt_t s) {
     cf_set_absexps(s, new List(ae, null));
     cf_prepass(env,s1);
     return;
+  case &Decl_s(&Decl(&Letv_d(vds),_),s1):
+    for(; vds != null; vds = vds->tl)
+      add_var_root(env,vds->hd);
+    cf_prepass(env,s1);
+    return;
   case &Decl_s(_,_): fallthru;
   case &Cut_s(_):    fallthru;
   case &Splice_s(_): throw new Impossible("cf_prepass: bad stmt form");
@@ -1067,6 +1072,10 @@ flow_info_t cf_analyze_stmt(analenv_t env, stmt_t s, flow_info_t in_flow) {
     body_inflow = eval_absexp(env, e->loc, aes->hd, body_inflow);
     // THIS PART GOES AWAY WHEN WE INTERPRET PATTERNS
     body_inflow = add_init_vars_flow(env, body_inflow, vds);
+    return cf_analyze_stmt(env, s, body_inflow);
+
+  case &Decl_s(&Decl(&Letv_d(vds),_),s):
+    let body_inflow = add_vardecls_flow(env, in_flow, vds);
     return cf_analyze_stmt(env, s, body_inflow);
 
   case &Label_s(_,s): return cf_analyze_stmt(env,s,in_flow);

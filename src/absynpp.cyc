@@ -1372,6 +1372,14 @@ doc_t enumfields2doc(list_t<enumfield_t> fs) {
   return ppseql(enumfield2doc,",",fs);
 }
 
+static doc_t id2doc(vardecl_t v) {
+  return qvar2doc(v->name);
+}
+
+static doc_t ids2doc(list_t<vardecl_t> vds) {
+  return ppseq(id2doc,",",vds);
+}
+
 doc_t decl2doc(decl_t d) {
   doc_t s;
   switch (d->r) {
@@ -1462,6 +1470,11 @@ doc_t decl2doc(decl_t d) {
              pat2doc(p),
              text(" = "),
              exp2doc(e),
+             text(";"));
+    break;
+  case &Letv_d(vds):
+    s = cat3(text("let "),
+             ids2doc(vds),
              text(";"));
     break;
   case &Enum_d(&Enumdecl{sc,n,fields}):

@@ -461,6 +461,9 @@ decl_t new_decl(raw_decl_t r, seg_t loc) { return new Decl{.r=r, .loc=loc}; }
 decl_t let_decl(pat_t p, opt_t<type_t> t_opt, exp_t e, seg_t loc) {
   return new_decl(new Let_d(p,null,t_opt,e,false),loc);
 }
+decl_t letv_decl(list_t<vardecl_t> vds, seg_t loc) {
+  return new_decl(new Letv_d(vds),loc);
+}
 vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init) {
   return new Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
                         .type=t, .initializer=init, .rgn=null, 

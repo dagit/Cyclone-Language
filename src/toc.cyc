@@ -2636,6 +2636,29 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 	// as a statement.  Other declarations only produce declarations.
 	s->r = letdecl_to_c(nv, p, topt, e, exhaust, s1)->r;
         break;
+      case &Letv_d(vds):
+        //let nv2 = nv;
+        //for (; vds != null; vds = vds->tl) {
+        //  let vd = vds->hd;
+        //  let c_name = vd->name;
+        //  vd->type = typ_to_c_array(vd->type);
+        //  nv2 = add_varmap(nv2,c_name,varb_exp(c_name,new Local_b(vd),DL));
+        //}
+        //stmt_to_c(nv2,s1);
+
+        // Transform Letv_d into a sequence of Var_d, and call stmt_to_c on
+        // the result.
+        let rvds = List::rev(vds);
+        if (rvds == null)
+          impos("empty Letv_d");
+        d->r = new Var_d(rvds->hd);
+        rvds = rvds->tl;
+        for (; rvds != null; rvds = rvds->tl) {
+          let d2 = new_decl(new Var_d(rvds->hd),DL);
+          s->r = decl_stmt(d2,new_stmt(s->r,DL),DL)->r;
+        }
+        stmt_to_c(nv,s);
+        break;
       case &Var_d(vd):
         let c_name = vd->name;
         vd->type = typ_to_c_array(vd->type);
@@ -2647,7 +2670,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
           case &Comprehension_e(vd2,e1,e2):
             vd->initializer = null;
             s1->r = init_comprehension(nv, var_exp(c_name, DL), vd2, e1, e2,
-				      new_stmt(s1->r,DL), false)->r;
+                                       new_stmt(s1->r,DL), false)->r;
             break;
           default:
             exp_to_c(nv, init);
@@ -3134,6 +3157,10 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
       result_decls = new List(d,result_decls);
       break;
     case &Let_d(_,_,_,_,_):
+      // this is handled in stmt_to_c
+      toc_impos("letdecl");
+      break;
+    case &Letv_d(_):
       // this is handled in stmt_to_c
       toc_impos("letdecl");
       break;

@@ -747,6 +747,13 @@ static void dump_fn_qvar(fndecl_t fd) {
   dumpqvar(fd->name);
 }
 
+static void dumpids(list_t<vardecl_t> vds) {
+  for (; vds != null; vds = vds->tl) {
+    dumpqvar(vds->hd->name);
+    if (vds->tl != null) dump_char(',');
+  }
+}
+
 void dumpdecl(decl_t d) {
   switch(d->r) {
   case &Fn_d(fd):
@@ -843,6 +850,11 @@ void dumpdecl(decl_t d) {
     dumppat(p);
     dump_char('=');
     dumpexp(e);
+    dump_semi();
+    break;
+  case &Letv_d(vds):
+    dump("let ");
+    dumpids(vds);
     dump_semi();
     break;
   case &Typedef_d(td):

@@ -554,6 +554,7 @@ namespace Absyn {
           opt_t<type_t>,
           exp_t,
           bool); // true => exhaustive
+    Letv_d(list_t<vardecl_t>);
     Struct_d(structdecl_t);
     Union_d(uniondecl_t);
     Tunion_d(tuniondecl_t);
@@ -717,6 +718,7 @@ namespace Absyn {
   ////////////////////////// Declarations ///////////////////////////
   extern decl_t new_decl(raw_decl_t r, seg_t loc);
   extern decl_t let_decl(pat_t p, opt_t<type_t> t_opt, exp_t e, seg_t loc);
+  extern decl_t letv_decl(list_t<vardecl_t>, seg_t loc);
   extern vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init);
   extern vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init);
   extern decl_t struct_decl(scope_t s,opt_t<typedef_name_t> n,
