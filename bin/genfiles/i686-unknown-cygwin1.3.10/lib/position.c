@@ -516,10 +516,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_curr = _cus_arr.curr;
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -537,10 +536,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_curr = _cus_arr.curr; \
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1183,7 +1181,7 @@ _LL7: goto _LL5;_LL8:;_LL9:(void)_throw(_tmp68);_LL5:;}}}}if(Cyc_Position_num_er
 == Cyc_Position_max_errors)({void*_tmp69=0;Cyc_fprintf(Cyc_stderr,({const char*
 _tmp6A="Too many error messages!\n";_tag_dynforward(_tmp6A,sizeof(char),
 _get_zero_arr_size_char(_tmp6A,26));}),_tag_dynforward(_tmp69,sizeof(void*),0));});
-Cyc_fflush((struct Cyc___cycFILE*)Cyc_stderr);++ Cyc_Position_num_errors;}void Cyc_Position_reset_position(
+Cyc_fflush((struct Cyc___cycFILE*)Cyc_stderr);Cyc_Position_num_errors ++;}void Cyc_Position_reset_position(
 struct _dynforward_ptr s){Cyc_Position_source=s;Cyc_Position_error_b=0;}void Cyc_Position_set_position_file(
 struct _dynforward_ptr s){Cyc_Position_source=s;Cyc_Position_error_b=0;}struct
 _dynforward_ptr Cyc_Position_get_position_file(){return Cyc_Position_source;}

@@ -516,10 +516,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_curr = _cus_arr.curr;
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -537,10 +536,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_curr = _cus_arr.curr; \
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1199,7 +1197,7 @@ int f6;};struct Cyc_Core_Opt*Cyc_Formatstr_parse_conversionspecification(struct
 _RegionHandle*r,struct _dynforward_ptr s,int i);struct Cyc_Core_Opt*Cyc_Formatstr_parse_conversionspecification(
 struct _RegionHandle*r,struct _dynforward_ptr s,int i){unsigned long _tmp0=Cyc_strlen((
 struct _dynforward_ptr)s);if(i < 0  || i >= _tmp0)return 0;{struct Cyc_List_List*_tmp1=
-0;char c=' ';for(0;i < _tmp0;++ i){c=*((const char*)_check_dynforward_subscript(s,
+0;char c=' ';for(0;i < _tmp0;i ++){c=*((const char*)_check_dynforward_subscript(s,
 sizeof(char),i));switch(c){case '+': _LL0: goto _LL1;case '-': _LL1: goto _LL2;case ' ':
 _LL2: goto _LL3;case '#': _LL3: goto _LL4;case '0': _LL4:{struct Cyc_List_List*_tmp137;
 _tmp1=((_tmp137=_region_malloc(r,sizeof(*_tmp137)),((_tmp137->hd=(void*)((int)c),((
@@ -1208,7 +1206,7 @@ _tmp0)return 0;_tmp1=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List
 _tmp1);{struct Cyc_List_List*_tmp3=0;c=*((const char*)_check_dynforward_subscript(
 s,sizeof(char),i));if(c == '*'){{struct Cyc_List_List*_tmp138;_tmp3=((_tmp138=
 _region_malloc(r,sizeof(*_tmp138)),((_tmp138->hd=(void*)((int)c),((_tmp138->tl=
-_tmp3,_tmp138))))));}++ i;}else{for(0;i < _tmp0;++ i){c=*((const char*)
+_tmp3,_tmp138))))));}i ++;}else{for(0;i < _tmp0;i ++){c=*((const char*)
 _check_dynforward_subscript(s,sizeof(char),i));if(isdigit((int)c)){struct Cyc_List_List*
 _tmp139;_tmp3=((_tmp139=_region_malloc(r,sizeof(*_tmp139)),((_tmp139->hd=(void*)((
 int)c),((_tmp139->tl=_tmp3,_tmp139))))));}else{break;}}}if(i >= _tmp0)return 0;
@@ -1216,10 +1214,10 @@ _tmp3=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(_tmp3
 struct Cyc_List_List*_tmp6=0;c=*((const char*)_check_dynforward_subscript(s,
 sizeof(char),i));if(c == '.'){{struct Cyc_List_List*_tmp13A;_tmp6=((_tmp13A=
 _region_malloc(r,sizeof(*_tmp13A)),((_tmp13A->hd=(void*)((int)c),((_tmp13A->tl=
-_tmp6,_tmp13A))))));}++ i;if(i >= _tmp0)return 0;c=*((const char*)
+_tmp6,_tmp13A))))));}i ++;if(i >= _tmp0)return 0;c=*((const char*)
 _check_dynforward_subscript(s,sizeof(char),i));if(c == '*'){{struct Cyc_List_List*
 _tmp13B;_tmp6=((_tmp13B=_region_malloc(r,sizeof(*_tmp13B)),((_tmp13B->hd=(void*)((
-int)c),((_tmp13B->tl=_tmp6,_tmp13B))))));}++ i;}else{for(0;i < _tmp0;++ i){c=*((
+int)c),((_tmp13B->tl=_tmp6,_tmp13B))))));}i ++;}else{for(0;i < _tmp0;i ++){c=*((
 const char*)_check_dynforward_subscript(s,sizeof(char),i));if(isdigit((int)c)){
 struct Cyc_List_List*_tmp13C;_tmp6=((_tmp13C=_region_malloc(r,sizeof(*_tmp13C)),((
 _tmp13C->hd=(void*)((int)c),((_tmp13C->tl=_tmp6,_tmp13C))))));}else{break;}}}}
@@ -1227,18 +1225,18 @@ if(i >= _tmp0)return 0;_tmp6=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))
 _tmp6);{struct Cyc_List_List*_tmpA=0;c=*((const char*)_check_dynforward_subscript(
 s,sizeof(char),i));switch(c){case 'h': _LL7:{struct Cyc_List_List*_tmp13D;_tmpA=((
 _tmp13D=_region_malloc(r,sizeof(*_tmp13D)),((_tmp13D->hd=(void*)((int)c),((
-_tmp13D->tl=_tmpA,_tmp13D))))));}++ i;if(i >= _tmp0)return 0;c=*((const char*)
+_tmp13D->tl=_tmpA,_tmp13D))))));}i ++;if(i >= _tmp0)return 0;c=*((const char*)
 _check_dynforward_subscript(s,sizeof(char),i));if(c == 'h'){{struct Cyc_List_List*
 _tmp13E;_tmpA=((_tmp13E=_region_malloc(r,sizeof(*_tmp13E)),((_tmp13E->hd=(void*)((
-int)c),((_tmp13E->tl=_tmpA,_tmp13E))))));}++ i;}break;case 'l': _LL8:{struct Cyc_List_List*
+int)c),((_tmp13E->tl=_tmpA,_tmp13E))))));}i ++;}break;case 'l': _LL8:{struct Cyc_List_List*
 _tmp13F;_tmpA=((_tmp13F=_region_malloc(r,sizeof(*_tmp13F)),((_tmp13F->hd=(void*)((
-int)c),((_tmp13F->tl=_tmpA,_tmp13F))))));}++ i;if(i >= _tmp0)return 0;c=*((const
+int)c),((_tmp13F->tl=_tmpA,_tmp13F))))));}i ++;if(i >= _tmp0)return 0;c=*((const
 char*)_check_dynforward_subscript(s,sizeof(char),i));if(c == 'l'){{struct Cyc_List_List*
 _tmp140;_tmpA=((_tmp140=_region_malloc(r,sizeof(*_tmp140)),((_tmp140->hd=(void*)((
-int)c),((_tmp140->tl=_tmpA,_tmp140))))));}++ i;}break;case 'j': _LL9: goto _LLA;case 'z':
+int)c),((_tmp140->tl=_tmpA,_tmp140))))));}i ++;}break;case 'j': _LL9: goto _LLA;case 'z':
 _LLA: goto _LLB;case 't': _LLB: goto _LLC;case 'L': _LLC:{struct Cyc_List_List*_tmp141;
 _tmpA=((_tmp141=_region_malloc(r,sizeof(*_tmp141)),((_tmp141->hd=(void*)((int)c),((
-_tmp141->tl=_tmpA,_tmp141))))));}++ i;break;default: _LLD: break;}if(i >= _tmp0)
+_tmp141->tl=_tmpA,_tmp141))))));}i ++;break;default: _LLD: break;}if(i >= _tmp0)
 return 0;_tmpA=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(
 _tmpA);c=*((const char*)_check_dynforward_subscript(s,sizeof(char),i));switch(c){
 case 'd': _LLF: goto _LL10;case 'i': _LL10: goto _LL11;case 'o': _LL11: goto _LL12;case 'u':
@@ -1257,7 +1255,7 @@ loc);struct Cyc_List_List*Cyc_Formatstr_get_format_typs(struct _RegionHandle*r,
 struct Cyc_Tcenv_Tenv*te,struct _dynforward_ptr s,struct Cyc_Position_Segment*loc){
 unsigned long _tmp12=Cyc_strlen((struct _dynforward_ptr)s);struct Cyc_List_List*
 _tmp13=0;int i;struct _RegionHandle _tmp14=_new_region("temp");struct _RegionHandle*
-temp=& _tmp14;_push_region(temp);for(i=0;i < _tmp12;++ i){if(*((const char*)
+temp=& _tmp14;_push_region(temp);for(i=0;i < _tmp12;i ++){if(*((const char*)
 _check_dynforward_subscript(s,sizeof(char),i))!= '%')continue;{struct Cyc_Core_Opt*
 _tmp15=Cyc_Formatstr_parse_conversionspecification(temp,s,i + 1);if(_tmp15 == 0){{
 const char*_tmp147;void*_tmp146;(_tmp146=0,Cyc_Tcutil_terr(loc,((_tmp147="bad format string",
@@ -1466,8 +1464,8 @@ i);struct Cyc_Core_Opt*Cyc_Formatstr_parse_inputformat(struct _RegionHandle*r,
 struct _dynforward_ptr s,int i){unsigned long _tmpB3=Cyc_strlen((struct
 _dynforward_ptr)s);if(i < 0  || i >= _tmpB3)return 0;{int _tmpB4=0;char _tmpB5=*((
 const char*)_check_dynforward_subscript(s,sizeof(char),i));if(_tmpB5 == '*'){
-_tmpB4=1;++ i;if(i >= _tmpB3)return 0;}{struct Cyc_List_List*_tmpB6=0;for(0;i < 
-_tmpB3;++ i){_tmpB5=*((const char*)_check_dynforward_subscript(s,sizeof(char),i));
+_tmpB4=1;i ++;if(i >= _tmpB3)return 0;}{struct Cyc_List_List*_tmpB6=0;for(0;i < 
+_tmpB3;i ++){_tmpB5=*((const char*)_check_dynforward_subscript(s,sizeof(char),i));
 if(isdigit((int)_tmpB5)){struct Cyc_List_List*_tmp19D;_tmpB6=((_tmp19D=
 _region_malloc(r,sizeof(*_tmp19D)),((_tmp19D->hd=(void*)((int)_tmpB5),((_tmp19D->tl=
 _tmpB6,_tmp19D))))));}else{break;}}if(i >= _tmpB3)return 0;_tmpB6=((struct Cyc_List_List*(*)(
@@ -1475,19 +1473,19 @@ struct Cyc_List_List*x))Cyc_List_imp_rev)(_tmpB6);{struct Cyc_List_List*_tmpB8=0
 _tmpB5=*((const char*)_check_dynforward_subscript(s,sizeof(char),i));switch(
 _tmpB5){case 'h': _LL70:{struct Cyc_List_List*_tmp19E;_tmpB8=((_tmp19E=
 _region_malloc(r,sizeof(*_tmp19E)),((_tmp19E->hd=(void*)((int)_tmpB5),((_tmp19E->tl=
-_tmpB8,_tmp19E))))));}++ i;if(i >= _tmpB3)return 0;_tmpB5=*((const char*)
+_tmpB8,_tmp19E))))));}i ++;if(i >= _tmpB3)return 0;_tmpB5=*((const char*)
 _check_dynforward_subscript(s,sizeof(char),i));if(_tmpB5 == 'h'){{struct Cyc_List_List*
 _tmp19F;_tmpB8=((_tmp19F=_region_malloc(r,sizeof(*_tmp19F)),((_tmp19F->hd=(void*)((
-int)_tmpB5),((_tmp19F->tl=_tmpB8,_tmp19F))))));}++ i;}break;case 'l': _LL71:{struct
+int)_tmpB5),((_tmp19F->tl=_tmpB8,_tmp19F))))));}i ++;}break;case 'l': _LL71:{struct
 Cyc_List_List*_tmp1A0;_tmpB8=((_tmp1A0=_region_malloc(r,sizeof(*_tmp1A0)),((
-_tmp1A0->hd=(void*)((int)_tmpB5),((_tmp1A0->tl=_tmpB8,_tmp1A0))))));}++ i;if(i >= 
+_tmp1A0->hd=(void*)((int)_tmpB5),((_tmp1A0->tl=_tmpB8,_tmp1A0))))));}i ++;if(i >= 
 _tmpB3)return 0;_tmpB5=*((const char*)_check_dynforward_subscript(s,sizeof(char),i));
 if(_tmpB5 == 'l'){{struct Cyc_List_List*_tmp1A1;_tmpB8=((_tmp1A1=_region_malloc(r,
 sizeof(*_tmp1A1)),((_tmp1A1->hd=(void*)((int)_tmpB5),((_tmp1A1->tl=_tmpB8,
-_tmp1A1))))));}++ i;}break;case 'j': _LL72: goto _LL73;case 'z': _LL73: goto _LL74;case 't':
+_tmp1A1))))));}i ++;}break;case 'j': _LL72: goto _LL73;case 'z': _LL73: goto _LL74;case 't':
 _LL74: goto _LL75;case 'L': _LL75:{struct Cyc_List_List*_tmp1A2;_tmpB8=((_tmp1A2=
 _region_malloc(r,sizeof(*_tmp1A2)),((_tmp1A2->hd=(void*)((int)_tmpB5),((_tmp1A2->tl=
-_tmpB8,_tmp1A2))))));}++ i;break;default: _LL76: break;}if(i >= _tmpB3)return 0;
+_tmpB8,_tmp1A2))))));}i ++;break;default: _LL76: break;}if(i >= _tmpB3)return 0;
 _tmpB8=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(_tmpB8);
 _tmpB5=*((const char*)_check_dynforward_subscript(s,sizeof(char),i));switch(
 _tmpB5){case 'd': _LL78: goto _LL79;case 'i': _LL79: goto _LL7A;case 'o': _LL7A: goto _LL7B;
@@ -1506,7 +1504,7 @@ Cyc_Formatstr_get_scanf_typs(struct _RegionHandle*r,struct Cyc_Tcenv_Tenv*te,
 struct _dynforward_ptr s,struct Cyc_Position_Segment*loc){unsigned long _tmpC0=Cyc_strlen((
 struct _dynforward_ptr)s);struct Cyc_List_List*_tmpC1=0;int i;{struct _RegionHandle
 _tmpC2=_new_region("temp");struct _RegionHandle*temp=& _tmpC2;_push_region(temp);
-for(i=0;i < _tmpC0;++ i){if(*((const char*)_check_dynforward_subscript(s,sizeof(
+for(i=0;i < _tmpC0;i ++){if(*((const char*)_check_dynforward_subscript(s,sizeof(
 char),i))!= '%')continue;{struct Cyc_Core_Opt*_tmpC3=Cyc_Formatstr_parse_inputformat(
 temp,s,i + 1);if(_tmpC3 == 0){{const char*_tmp1A8;void*_tmp1A7;(_tmp1A7=0,Cyc_Tcutil_terr(
 loc,((_tmp1A8="bad format string",_tag_dynforward(_tmp1A8,sizeof(char),

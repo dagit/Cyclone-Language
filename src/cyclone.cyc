@@ -84,6 +84,7 @@ static bool print_full_evars_r = false;
 static bool print_all_tvars_r = false;
 static bool print_all_kinds_r = false;
 static bool print_all_effects_r = false;
+static bool nocyc_setjmp_r = false;
 
 // Arguments to pass to the C compiler
 static list_t<stringptr_t> ccargs = NULL;
@@ -639,7 +640,8 @@ list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
     fprintf(out_file,"#define _INLINE_FUNCTIONS\n");
 
   // Copy cyc_setjmp.h and cyc_include.h to out_file.
-  if (copy_internal_file(cyc_setjmp,out_file)) return tds;
+  if (!nocyc_setjmp_r)
+    if (copy_internal_file(cyc_setjmp,out_file)) return tds;
   if (copy_internal_file(cyc_include,out_file)) return tds;
   
   if (pp_r) {
@@ -1261,6 +1263,9 @@ int main(int argc, string_t<`H> ?`H argv) {
          rnew(r)$("-printalleffects",false,"",
                rnew(r)Set_spec(&print_all_effects_r),
                "Print effects for functions (type debugging)"),
+         rnew(r)$("-nocyc_setjmp",false,"",
+               rnew(r)Set_spec(&nocyc_setjmp_r),
+               "Do not use compiler special file cyc_setjmp.h"),
          rnew(r)$("-CI",false," <file>",
                rnew(r)String_spec(set_cyc_include),
                "Set cyc_include.h to be <file>"),
@@ -1354,10 +1359,10 @@ int main(int argc, string_t<`H> ?`H argv) {
   // the .c output.
   /* The absolute file name is kept in a global variable */
   /* don't bother if we won't translate to C or if set explicitly */
-  if (!stop_after_cpp_r && strlen(cyc_include) == 0) {
+  if (!stop_after_cpp_r && !nocyc_setjmp_r)
     cyc_setjmp = do_find(cyclone_arch_path,"cyc_setjmp.h");
+  if (!stop_after_cpp_r && strlen(cyc_include) == 0)
     cyc_include = do_find(cyclone_exec_path,"cyc_include.h");
-  }
 
   /* Process each .cyc file */
   for (let l = rev(cyclone_files); l != NULL; l = l->tl) {

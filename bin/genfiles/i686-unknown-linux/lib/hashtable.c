@@ -532,10 +532,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_curr = _cus_arr.curr;
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -553,10 +552,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_curr = _cus_arr.curr; \
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1042,25 +1040,25 @@ _dynforward_ptr ndata=({unsigned int _tmp17=(unsigned int)nsize;struct Cyc_List_
 _tmp18=(struct Cyc_List_List**)_region_malloc(t->r,_check_times(sizeof(struct Cyc_List_List*),
 _tmp17));struct _dynforward_ptr _tmp1A=_tag_dynforward(_tmp18,sizeof(struct Cyc_List_List*),
 _tmp17);{unsigned int _tmp19=_tmp17;unsigned int i;for(i=0;i < _tmp19;i ++){_tmp18[i]=
-mt;}}_tmp1A;});{int i=0;for(0;i < osize;++ i){Cyc_Hashtable_insert_bucket(t->r,
+mt;}}_tmp1A;});{int i=0;for(0;i < osize;i ++){Cyc_Hashtable_insert_bucket(t->r,
 ndata,t->hash,*((struct Cyc_List_List**)_check_dynforward_subscript(odata,sizeof(
 struct Cyc_List_List*),i)));}}t->tab=ndata;t->max_len=2 * t->max_len;}void Cyc_Hashtable_iter(
 void(*f)(void*,void*),struct Cyc_Hashtable_Table*t){struct _dynforward_ptr odata=t->tab;
 int osize=(int)_get_dynforward_size(odata,sizeof(struct Cyc_List_List*));int i=0;
-for(0;i < osize;++ i){struct Cyc_List_List*iter=*((struct Cyc_List_List**)
+for(0;i < osize;i ++){struct Cyc_List_List*iter=*((struct Cyc_List_List**)
 _check_dynforward_subscript(odata,sizeof(struct Cyc_List_List*),i));for(0;iter != 
 0;iter=iter->tl){f((((struct _tuple0*)iter->hd)[_check_known_subscript_notnull(1,
 0)]).f1,(((struct _tuple0*)iter->hd)[_check_known_subscript_notnull(1,0)]).f2);}}}
 void Cyc_Hashtable_iter_c(void(*f)(void*,void*,void*),struct Cyc_Hashtable_Table*t,
 void*env){struct _dynforward_ptr odata=t->tab;int osize=(int)_get_dynforward_size(
-odata,sizeof(struct Cyc_List_List*));int i=0;for(0;i < osize;++ i){struct Cyc_List_List*
+odata,sizeof(struct Cyc_List_List*));int i=0;for(0;i < osize;i ++){struct Cyc_List_List*
 iter=*((struct Cyc_List_List**)_check_dynforward_subscript(odata,sizeof(struct Cyc_List_List*),
 i));for(0;iter != 0;iter=iter->tl){f((((struct _tuple0*)iter->hd)[
 _check_known_subscript_notnull(1,0)]).f1,(((struct _tuple0*)iter->hd)[
 _check_known_subscript_notnull(1,0)]).f2,env);}}}void Cyc_Hashtable_print_table_map(
 struct Cyc_Hashtable_Table*t,void(*prn_key)(void*),void(*prn_val)(void*)){struct
 _dynforward_ptr odata=t->tab;int osize=(int)_get_dynforward_size(odata,sizeof(
-struct Cyc_List_List*));int i=0;for(0;i < osize;++ i){({struct Cyc_Int_pa_struct
+struct Cyc_List_List*));int i=0;for(0;i < osize;i ++){({struct Cyc_Int_pa_struct
 _tmp1D;_tmp1D.tag=1;_tmp1D.f1=(unsigned long)i;{void*_tmp1B[1]={& _tmp1D};Cyc_printf(({
 const char*_tmp1C="%d: ";_tag_dynforward(_tmp1C,sizeof(char),
 _get_zero_arr_size_char(_tmp1C,5));}),_tag_dynforward(_tmp1B,sizeof(void*),1));}});{

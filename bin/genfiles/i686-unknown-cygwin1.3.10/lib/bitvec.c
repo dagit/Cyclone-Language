@@ -516,10 +516,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_curr = _cus_arr.curr;
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -537,10 +536,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_curr = _cus_arr.curr; \
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1049,8 +1047,8 @@ assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({co
 char*_tmp16="words < bvec.size";_tag_dynforward(_tmp16,sizeof(char),
 _get_zero_arr_size_char(_tmp16,18));}),({const char*_tmp17="bitvec.cyc";
 _tag_dynforward(_tmp17,sizeof(char),_get_zero_arr_size_char(_tmp17,11));}),149);{
-int i=0;for(0;i < words;++ i){if(*((int*)_check_dynforward_subscript(bvec,sizeof(
-int),i))!= -1)return 0;}}{int i=words * 32;for(0;i < sz;++ i){if(!Cyc_Bitvec_get(bvec,
+int i=0;for(0;i < words;i ++){if(*((int*)_check_dynforward_subscript(bvec,sizeof(
+int),i))!= -1)return 0;}}{int i=words * 32;for(0;i < sz;i ++){if(!Cyc_Bitvec_get(bvec,
 i))return 0;}}return 1;}void Cyc_Bitvec_print_bvec(struct _dynforward_ptr bvec){{int i=
 0;for(0;i < 32 * _get_dynforward_size(bvec,sizeof(int));++ i){({struct Cyc_Int_pa_struct
 _tmp1A;_tmp1A.tag=1;_tmp1A.f1=(unsigned long)(Cyc_Bitvec_get(bvec,i)?1: 0);{void*

@@ -516,10 +516,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_curr = _cus_arr.curr;
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -537,10 +536,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_curr = _cus_arr.curr; \
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1026,13 +1024,13 @@ _get_zero_arr_size_char(_tmp48,3)))),_tmp49)))),_tmp47)))));}return x->tl;}struc
 Cyc_List_List*Cyc_List_rlist(struct _RegionHandle*r,struct _dynforward_ptr argv);
 struct Cyc_List_List*Cyc_List_rlist(struct _RegionHandle*r,struct _dynforward_ptr
 argv){struct Cyc_List_List*result=0;{int i=(int)(_get_dynforward_size(argv,sizeof(
-void*))- 1);for(0;i >= 0;-- i){struct Cyc_List_List*_tmp4A;result=((_tmp4A=
+void*))- 1);for(0;i >= 0;i --){struct Cyc_List_List*_tmp4A;result=((_tmp4A=
 _region_malloc(r,sizeof(*_tmp4A)),((_tmp4A->hd=(void*)*((void**)
 _check_dynforward_subscript(argv,sizeof(void*),i)),((_tmp4A->tl=result,_tmp4A))))));}}
 return result;}struct Cyc_List_List*Cyc_List_list(struct _dynforward_ptr argv);
 struct Cyc_List_List*Cyc_List_list(struct _dynforward_ptr argv){struct Cyc_List_List*
-result=0;{int i=(int)(_get_dynforward_size(argv,sizeof(void*))- 1);for(0;i >= 0;--
-i){struct Cyc_List_List*_tmp4B;result=((_tmp4B=_cycalloc(sizeof(*_tmp4B)),((
+result=0;{int i=(int)(_get_dynforward_size(argv,sizeof(void*))- 1);for(0;i >= 0;i
+--){struct Cyc_List_List*_tmp4B;result=((_tmp4B=_cycalloc(sizeof(*_tmp4B)),((
 _tmp4B->hd=(void*)*((void**)_check_dynforward_subscript(argv,sizeof(void*),i)),((
 _tmp4B->tl=result,_tmp4B))))));}}return result;}struct Cyc_List_List*Cyc_List_rcopy(
 struct _RegionHandle*r2,struct Cyc_List_List*x);struct Cyc_List_List*Cyc_List_rcopy(

@@ -516,10 +516,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_curr = _cus_arr.curr;
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -537,10 +536,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_curr = _cus_arr.curr; \
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1356,9 +1354,9 @@ _tmp50="too many existentially bound type variables in pattern";_tag_dynforward(
 _tmp50,sizeof(char),_get_zero_arr_size_char(_tmp50,55));}),_tag_dynforward(
 _tmp4F,sizeof(void*),0));});{struct Cyc_List_List**_tmp51=_tmpB;{int n=((int(*)(
 struct Cyc_List_List*x))Cyc_List_length)(((struct Cyc_Absyn_AggrdeclImpl*)
-_check_null(_tmp4A->impl))->exist_vars);for(0;n != 0;-- n){_tmp51=&((struct Cyc_List_List*)
+_check_null(_tmp4A->impl))->exist_vars);for(0;n != 0;n --){_tmp51=&((struct Cyc_List_List*)
 _check_null(*_tmp51))->tl;}}*_tmp51=0;}}else{if(more_exists > 0){struct Cyc_List_List*
-_tmp52=0;for(0;more_exists != 0;-- more_exists){_tmp52=({struct Cyc_List_List*
+_tmp52=0;for(0;more_exists != 0;more_exists --){_tmp52=({struct Cyc_List_List*
 _tmp53=_cycalloc(sizeof(*_tmp53));_tmp53->hd=Cyc_Tcutil_new_tvar((void*)({struct
 Cyc_Absyn_Unknown_kb_struct*_tmp54=_cycalloc(sizeof(*_tmp54));_tmp54[0]=({struct
 Cyc_Absyn_Unknown_kb_struct _tmp55;_tmp55.tag=1;_tmp55.f1=0;_tmp55;});_tmp54;}));
@@ -1541,7 +1539,7 @@ _LL75: if(_tmpC2 <= (void*)4)goto _LL77;if(*((int*)_tmpC2)!= 9)goto _LL77;_tmpC3
 struct Cyc_Absyn_TupleType_struct*)_tmpC2)->f1;_LL76: topt_ts=_tmpC3;if(_tmp83){
 int _tmpC4=((int(*)(struct Cyc_List_List*x))Cyc_List_length)(_tmpC1);int _tmpC5=((
 int(*)(struct Cyc_List_List*x))Cyc_List_length)(_tmpC3);if(_tmpC4 < _tmpC5){struct
-Cyc_List_List*wild_ps=0;{int i=0;for(0;i < _tmpC5 - _tmpC4;++ i){wild_ps=({struct Cyc_List_List*
+Cyc_List_List*wild_ps=0;{int i=0;for(0;i < _tmpC5 - _tmpC4;i ++){wild_ps=({struct Cyc_List_List*
 _tmpC6=_cycalloc(sizeof(*_tmpC6));_tmpC6->hd=Cyc_Tcpat_wild_pat(p->loc);_tmpC6->tl=
 wild_ps;_tmpC6;});}}*_tmp82=((struct Cyc_List_List*(*)(struct Cyc_List_List*x,
 struct Cyc_List_List*y))Cyc_List_imp_append)(_tmpC1,wild_ps);_tmpC1=*_tmp82;}
@@ -1660,7 +1658,7 @@ _tmp102));_tmp102[0]=_tmp87;_tmp102;});_tmp101;});_tmp100.targs=*_tmp89;_tmp100;
 _tmpFF;});_tmpFE;});if(_tmp8D){int _tmp103=((int(*)(struct Cyc_List_List*x))Cyc_List_length)(
 _tmpD0);int _tmp104=((int(*)(struct Cyc_List_List*x))Cyc_List_length)(((struct Cyc_Absyn_AggrdeclImpl*)
 _check_null(_tmp87->impl))->fields);if(_tmp103 < _tmp104){struct Cyc_List_List*
-wild_dps=0;{int i=0;for(0;i < _tmp104 - _tmp103;++ i){wild_dps=({struct Cyc_List_List*
+wild_dps=0;{int i=0;for(0;i < _tmp104 - _tmp103;i ++){wild_dps=({struct Cyc_List_List*
 _tmp105=_cycalloc(sizeof(*_tmp105));_tmp105->hd=({struct _tuple8*_tmp106=
 _cycalloc(sizeof(*_tmp106));_tmp106->f1=0;_tmp106->f2=Cyc_Tcpat_wild_pat(p->loc);
 _tmp106;});_tmp105->tl=wild_dps;_tmp105;});}}*_tmp8C=((struct Cyc_List_List*(*)(
@@ -1733,7 +1731,7 @@ _tmp12C->tl,_tmp127=_tmp127->tl)){Cyc_Tcutil_unify((void*)_tmp12C->hd,(void*)
 _tmp127->hd);}goto _LL87;}_LL8C:;_LL8D: goto _LL87;_LL87:;}if(_tmp92){int _tmp12D=((
 int(*)(struct Cyc_List_List*x))Cyc_List_length)(_tmp114);int _tmp12E=((int(*)(
 struct Cyc_List_List*x))Cyc_List_length)(tqts);if(_tmp12D < _tmp12E){struct Cyc_List_List*
-wild_ps=0;{int i=0;for(0;i < _tmp12E - _tmp12D;++ i){wild_ps=({struct Cyc_List_List*
+wild_ps=0;{int i=0;for(0;i < _tmp12E - _tmp12D;i ++){wild_ps=({struct Cyc_List_List*
 _tmp12F=_cycalloc(sizeof(*_tmp12F));_tmp12F->hd=Cyc_Tcpat_wild_pat(p->loc);
 _tmp12F->tl=wild_ps;_tmp12F;});}}*_tmp91=((struct Cyc_List_List*(*)(struct Cyc_List_List*
 x,struct Cyc_List_List*y))Cyc_List_imp_append)(_tmp114,wild_ps);_tmp114=*_tmp91;}
@@ -2370,7 +2368,7 @@ struct Cyc_Absyn_PtrAtts _tmp2A6;struct Cyc_Absyn_TunionInfo _tmp2A7;union Cyc_A
 _tmp2A8;struct Cyc_Absyn_Tuniondecl**_tmp2A9;struct Cyc_Absyn_Tuniondecl*_tmp2AA;
 _LL16B: if(_tmp2A3 <= (void*)4)goto _LL173;if(*((int*)_tmp2A3)!= 5)goto _LL16D;
 _tmp2A4=(void*)((struct Cyc_Absyn_IntType_struct*)_tmp2A3)->f2;if((int)_tmp2A4 != 
-0)goto _LL16D;_LL16C:{int i=0;for(0;i < 256;++ i){struct Cyc_Tcpat_Con_s*_tmp2AB=Cyc_Tcpat_char_con(
+0)goto _LL16D;_LL16C:{int i=0;for(0;i < 256;i ++){struct Cyc_Tcpat_Con_s*_tmp2AB=Cyc_Tcpat_char_con(
 r,(char)i,(struct Cyc_Absyn_Pat*)_tmp2A2);if(!((int(*)(struct Cyc_Set_Set*s,struct
 Cyc_Tcpat_Con_s*elt))Cyc_Set_member)(_tmp269,_tmp2AB))return(struct
 _dynforward_ptr)({struct Cyc_Int_pa_struct _tmp2AE;_tmp2AE.tag=1;_tmp2AE.f1=(
@@ -2378,7 +2376,7 @@ unsigned long)i;{void*_tmp2AC[1]={& _tmp2AE};Cyc_aprintf(({const char*_tmp2AD="%
 _tag_dynforward(_tmp2AD,sizeof(char),_get_zero_arr_size_char(_tmp2AD,3));}),
 _tag_dynforward(_tmp2AC,sizeof(void*),1));}});}}(int)_throw((void*)Cyc_Tcpat_Desc2string);
 _LL16D: if(*((int*)_tmp2A3)!= 5)goto _LL16F;_LL16E:{unsigned int i=0;for(0;i < 0 - 1;
-++ i){struct Cyc_Tcpat_Con_s*_tmp2AF=Cyc_Tcpat_int_con(r,(int)i,_tmp2A2);if(!((int(*)(
+i ++){struct Cyc_Tcpat_Con_s*_tmp2AF=Cyc_Tcpat_int_con(r,(int)i,_tmp2A2);if(!((int(*)(
 struct Cyc_Set_Set*s,struct Cyc_Tcpat_Con_s*elt))Cyc_Set_member)(_tmp269,_tmp2AF))
 return(struct _dynforward_ptr)({struct Cyc_Int_pa_struct _tmp2B2;_tmp2B2.tag=1;
 _tmp2B2.f1=(unsigned long)((int)i);{void*_tmp2B0[1]={& _tmp2B2};Cyc_aprintf(({

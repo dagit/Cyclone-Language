@@ -146,7 +146,7 @@ core.h: $(CYCDIR)/include/core.h
 	cp $< $@
 
 precore_c.h: core.h $(CYCC) cyc_include.h cycspecs
-	$(CYCC) $(CYCFLAGS) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ -x cyc $<
+	$(CYCC) $(CYCFLAGS) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -nocyc_setjmp -o $@ -x cyc $<
 
 %.cyc: %.cyl $(CYCLEX)
 	$(CYCLEX) $< $@

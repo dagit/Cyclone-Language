@@ -516,10 +516,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_curr = _cus_arr.curr;
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -537,10 +536,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_curr = _cus_arr.curr; \
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1362,7 +1360,7 @@ _tag_dynforward(_tmp4,sizeof(char),_get_zero_arr_size_char(_tmp4,3));}),
 _tag_dynforward(_tmp3,sizeof(void*),0));});pos=8;}else{({void*_tmp5=0;Cyc_fprintf(
 Cyc_stderr,({const char*_tmp6=" ";_tag_dynforward(_tmp6,sizeof(char),
 _get_zero_arr_size_char(_tmp6,2));}),_tag_dynforward(_tmp5,sizeof(void*),0));});
-++ pos;}({void*_tmp7=0;Cyc_fprintf(Cyc_stderr,({const char*_tmp8="and ";
+pos ++;}({void*_tmp7=0;Cyc_fprintf(Cyc_stderr,({const char*_tmp8="and ";
 _tag_dynforward(_tmp8,sizeof(char),_get_zero_arr_size_char(_tmp8,5));}),
 _tag_dynforward(_tmp7,sizeof(void*),0));});pos +=4;if(pos + _get_dynforward_size(
 s2,sizeof(char))>= 80){({void*_tmp9=0;Cyc_fprintf(Cyc_stderr,({const char*_tmpA="\n\t";

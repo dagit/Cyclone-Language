@@ -516,10 +516,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_curr = _cus_arr.curr;
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -537,10 +536,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_curr = _cus_arr.curr; \
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -989,12 +987,12 @@ _get_zero_arr_size_char(_tmp3,14));}),({const char*_tmp4="arg.cyc";
 _tag_dynforward(_tmp4,sizeof(char),_get_zero_arr_size_char(_tmp4,8));}),94);if(
 howmuch > _tmp2){Cyc_Buffer_add_string(b,s);return(struct _dynforward_ptr)
 _tag_dynforward(0,0,0);}{int i;for(i=howmuch - 1;i >= 0  && !isspace((int)*((const
-char*)_check_dynforward_subscript(s,sizeof(char),i)));-- i){;}if(i < 0)for(i=
+char*)_check_dynforward_subscript(s,sizeof(char),i)));i --){;}if(i < 0)for(i=
 howmuch?howmuch - 1: 0;(i < _tmp2  && (int)((const char*)s.curr)[i]) && !isspace((int)*((
-const char*)_check_dynforward_subscript(s,sizeof(char),i)));++ i){;}Cyc_Buffer_add_substring(
+const char*)_check_dynforward_subscript(s,sizeof(char),i)));i ++){;}Cyc_Buffer_add_substring(
 b,s,0,i);{struct _dynforward_ptr whatsleft=(struct _dynforward_ptr)_tag_dynforward(
 0,0,0);for(0;(i < _tmp2  && (int)((const char*)s.curr)[i]) && isspace((int)*((const
-char*)_check_dynforward_subscript(s,sizeof(char),i)));++ i){;}if(i < _tmp2  && (int)((
+char*)_check_dynforward_subscript(s,sizeof(char),i)));i ++){;}if(i < _tmp2  && (int)((
 const char*)s.curr)[i])whatsleft=_dynforward_ptr_plus(s,sizeof(char),i);return
 whatsleft;}}}}void Cyc_Arg_Justify_justify_b(struct Cyc_Buffer_t*b,int indent,int
 margin,struct _dynforward_ptr item,struct _dynforward_ptr desc){if(item.curr != ((
@@ -1005,7 +1003,7 @@ unsigned int _tmp11=(unsigned int)(indent + 2);char*_tmp12=(char*)_cycalloc_atom
 _check_times(sizeof(char),_tmp11 + 1));struct _dynforward_ptr _tmp14=
 _tag_dynforward(_tmp12,sizeof(char),_tmp11 + 1);{unsigned int _tmp13=_tmp11;
 unsigned int i;for(i=0;i < _tmp13;i ++){_tmp12[i]='\000';}_tmp12[_tmp13]=(char)0;}
-_tmp14;});{unsigned int i=0;for(0;i < indent + 1;++ i){({struct _dynforward_ptr _tmp5=
+_tmp14;});{unsigned int i=0;for(0;i < indent + 1;i ++){({struct _dynforward_ptr _tmp5=
 _dynforward_ptr_plus(indentstr,sizeof(char),(int)i);char _tmp6=*((char*)
 _check_dynforward_subscript(_tmp5,sizeof(char),0));char _tmp7=i == 0?'\n':' ';if(
 _get_dynforward_size(_tmp5,sizeof(char))== 1  && (_tmp6 == '\000'  && _tmp7 != '\000'))
@@ -1016,7 +1014,7 @@ _dynforward_ptr temp=({unsigned int _tmpC=(indent - _tmp8)+ 1;char*_tmpD=(char*)
 _cycalloc_atomic(_check_times(sizeof(char),_tmpC + 1));struct _dynforward_ptr _tmpF=
 _tag_dynforward(_tmpD,sizeof(char),_tmpC + 1);{unsigned int _tmpE=_tmpC;
 unsigned int i;for(i=0;i < _tmpE;i ++){_tmpD[i]='\000';}_tmpD[_tmpE]=(char)0;}_tmpF;});{
-unsigned int i=0;for(0;i < indent - _tmp8;++ i){({struct _dynforward_ptr _tmp9=
+unsigned int i=0;for(0;i < indent - _tmp8;i ++){({struct _dynforward_ptr _tmp9=
 _dynforward_ptr_plus(temp,sizeof(char),(int)i);char _tmpA=*((char*)
 _check_dynforward_subscript(_tmp9,sizeof(char),0));char _tmpB=' ';if(
 _get_dynforward_size(_tmp9,sizeof(char))== 1  && (_tmpA == '\000'  && _tmpB != '\000'))

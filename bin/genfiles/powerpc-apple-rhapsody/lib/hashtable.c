@@ -516,10 +516,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_curr = _cus_arr.curr;
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -537,10 +536,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_curr = _cus_arr.curr; \
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1040,20 +1038,20 @@ _tmp39;unsigned int _tmp38;struct _dynforward_ptr ndata=(_tmp38=(unsigned int)ns
 _tmp39=(struct Cyc_List_List**)_region_malloc(t->r,_check_times(sizeof(struct Cyc_List_List*),
 _tmp38)),((_tmp3A=_tag_dynforward(_tmp39,sizeof(struct Cyc_List_List*),_tmp38),((((
 _tmp3B=_tmp38,_tmp3D(& _tmp3C,& _tmp3B,& _tmp39,& mt))),_tmp3A)))))));{int i=0;for(0;
-i < osize;++ i){Cyc_Hashtable_insert_bucket(t->r,ndata,t->hash,*((struct Cyc_List_List**)
+i < osize;i ++){Cyc_Hashtable_insert_bucket(t->r,ndata,t->hash,*((struct Cyc_List_List**)
 _check_dynforward_subscript(odata,sizeof(struct Cyc_List_List*),i)));}}t->tab=
 ndata;t->max_len=2 * t->max_len;}void Cyc_Hashtable_iter(void(*f)(void*,void*),
 struct Cyc_Hashtable_Table*t);void Cyc_Hashtable_iter(void(*f)(void*,void*),struct
 Cyc_Hashtable_Table*t){struct _dynforward_ptr odata=t->tab;int osize=(int)
-_get_dynforward_size(odata,sizeof(struct Cyc_List_List*));int i=0;for(0;i < osize;
-++ i){struct Cyc_List_List*iter=*((struct Cyc_List_List**)
+_get_dynforward_size(odata,sizeof(struct Cyc_List_List*));int i=0;for(0;i < osize;i
+++){struct Cyc_List_List*iter=*((struct Cyc_List_List**)
 _check_dynforward_subscript(odata,sizeof(struct Cyc_List_List*),i));for(0;iter != 
 0;iter=iter->tl){f((((struct _tuple0*)iter->hd)[_check_known_subscript_notnull(1,
 0)]).f1,(((struct _tuple0*)iter->hd)[_check_known_subscript_notnull(1,0)]).f2);}}}
 void Cyc_Hashtable_iter_c(void(*f)(void*,void*,void*),struct Cyc_Hashtable_Table*t,
 void*env);void Cyc_Hashtable_iter_c(void(*f)(void*,void*,void*),struct Cyc_Hashtable_Table*
 t,void*env){struct _dynforward_ptr odata=t->tab;int osize=(int)_get_dynforward_size(
-odata,sizeof(struct Cyc_List_List*));int i=0;for(0;i < osize;++ i){struct Cyc_List_List*
+odata,sizeof(struct Cyc_List_List*));int i=0;for(0;i < osize;i ++){struct Cyc_List_List*
 iter=*((struct Cyc_List_List**)_check_dynforward_subscript(odata,sizeof(struct Cyc_List_List*),
 i));for(0;iter != 0;iter=iter->tl){f((((struct _tuple0*)iter->hd)[
 _check_known_subscript_notnull(1,0)]).f1,(((struct _tuple0*)iter->hd)[
@@ -1061,7 +1059,7 @@ _check_known_subscript_notnull(1,0)]).f2,env);}}}void Cyc_Hashtable_print_table_
 struct Cyc_Hashtable_Table*t,void(*prn_key)(void*),void(*prn_val)(void*));void Cyc_Hashtable_print_table_map(
 struct Cyc_Hashtable_Table*t,void(*prn_key)(void*),void(*prn_val)(void*)){struct
 _dynforward_ptr odata=t->tab;int osize=(int)_get_dynforward_size(odata,sizeof(
-struct Cyc_List_List*));int i=0;for(0;i < osize;++ i){{const char*_tmp41;void*_tmp40[
+struct Cyc_List_List*));int i=0;for(0;i < osize;i ++){{const char*_tmp41;void*_tmp40[
 1];struct Cyc_Int_pa_struct _tmp3F;(_tmp3F.tag=1,((_tmp3F.f1=(unsigned long)i,((
 _tmp40[0]=& _tmp3F,Cyc_printf(((_tmp41="%d: ",_tag_dynforward(_tmp41,sizeof(char),
 _get_zero_arr_size_char(_tmp41,5)))),_tag_dynforward(_tmp40,sizeof(void*),1)))))));}{

@@ -516,10 +516,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_curr = _cus_arr.curr;
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -537,10 +536,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_curr = _cus_arr.curr; \
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1069,9 +1067,9 @@ bvec,sizeof(int))?0:((int(*)(struct _dynforward_ptr assertion,struct
 _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(((_tmp3A="words < bvec.size",
 _tag_dynforward(_tmp3A,sizeof(char),_get_zero_arr_size_char(_tmp3A,18)))),((
 _tmp3B="bitvec.cyc",_tag_dynforward(_tmp3B,sizeof(char),_get_zero_arr_size_char(
-_tmp3B,11)))),149);}{int i=0;for(0;i < words;++ i){if(*((int*)
+_tmp3B,11)))),149);}{int i=0;for(0;i < words;i ++){if(*((int*)
 _check_dynforward_subscript(bvec,sizeof(int),i))!= -1)return 0;}}{int i=words * 32;
-for(0;i < sz;++ i){if(!Cyc_Bitvec_get(bvec,i))return 0;}}return 1;}void Cyc_Bitvec_print_bvec(
+for(0;i < sz;i ++){if(!Cyc_Bitvec_get(bvec,i))return 0;}}return 1;}void Cyc_Bitvec_print_bvec(
 struct _dynforward_ptr bvec);void Cyc_Bitvec_print_bvec(struct _dynforward_ptr bvec){{
 int i=0;for(0;i < 32 * _get_dynforward_size(bvec,sizeof(int));++ i){const char*_tmp3F;
 void*_tmp3E[1];struct Cyc_Int_pa_struct _tmp3D;(_tmp3D.tag=1,((_tmp3D.f1=(

@@ -516,10 +516,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_curr = _cus_arr.curr;
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -537,10 +536,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_curr = _cus_arr.curr; \
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1333,21 +1331,21 @@ char),0));char _tmp1C=(char)('0' + (c & 7));if(_get_dynforward_size(_tmp1A,sizeo
 char))== 1  && (_tmp1B == '\000'  && _tmp1C != '\000'))_throw_arraybounds();*((char*)
 _tmp1A.curr)=_tmp1C;});return(struct _dynforward_ptr)_tmp10;}}}static int Cyc_Absynpp_special(
 struct _dynforward_ptr s){int sz=(int)(_get_dynforward_size(s,sizeof(char))- 1);{
-int i=0;for(0;i < sz;++ i){char c=*((const char*)_check_dynforward_subscript(s,
+int i=0;for(0;i < sz;i ++){char c=*((const char*)_check_dynforward_subscript(s,
 sizeof(char),i));if(((c <= ' '  || c >= '~') || c == '"') || c == '\\')return 1;}}
 return 0;}struct _dynforward_ptr Cyc_Absynpp_string_escape(struct _dynforward_ptr s){
 if(!Cyc_Absynpp_special(s))return s;{int n=(int)(_get_dynforward_size(s,sizeof(
 char))- 1);if(n > 0  && *((const char*)_check_dynforward_subscript(s,sizeof(char),n))
-== '\000')-- n;{int len=0;{int i=0;for(0;i <= n;++ i){char _tmp1D=*((const char*)
+== '\000')n --;{int len=0;{int i=0;for(0;i <= n;i ++){char _tmp1D=*((const char*)
 _check_dynforward_subscript(s,sizeof(char),i));_LLD: if(_tmp1D != '\a')goto _LLF;
 _LLE: goto _LL10;_LLF: if(_tmp1D != '\b')goto _LL11;_LL10: goto _LL12;_LL11: if(_tmp1D != '\f')
 goto _LL13;_LL12: goto _LL14;_LL13: if(_tmp1D != '\n')goto _LL15;_LL14: goto _LL16;_LL15:
 if(_tmp1D != '\r')goto _LL17;_LL16: goto _LL18;_LL17: if(_tmp1D != '\t')goto _LL19;
 _LL18: goto _LL1A;_LL19: if(_tmp1D != '\v')goto _LL1B;_LL1A: goto _LL1C;_LL1B: if(_tmp1D
 != '\\')goto _LL1D;_LL1C: goto _LL1E;_LL1D: if(_tmp1D != '"')goto _LL1F;_LL1E: len +=2;
-goto _LLC;_LL1F:;_LL20: if(_tmp1D >= ' '  && _tmp1D <= '~')++ len;else{len +=4;}goto
+goto _LLC;_LL1F:;_LL20: if(_tmp1D >= ' '  && _tmp1D <= '~')len ++;else{len +=4;}goto
 _LLC;_LLC:;}}{struct _dynforward_ptr t=Cyc_Core_new_string((unsigned int)(len + 1));
-int j=0;{int i=0;for(0;i <= n;++ i){char _tmp1E=*((const char*)
+int j=0;{int i=0;for(0;i <= n;i ++){char _tmp1E=*((const char*)
 _check_dynforward_subscript(s,sizeof(char),i));_LL22: if(_tmp1E != '\a')goto _LL24;
 _LL23:({struct _dynforward_ptr _tmp1F=_dynforward_ptr_plus(t,sizeof(char),j ++);
 char _tmp20=*((char*)_check_dynforward_subscript(_tmp1F,sizeof(char),0));char

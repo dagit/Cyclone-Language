@@ -516,10 +516,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_curr = _cus_arr.curr;
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -537,10 +536,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_curr = _cus_arr.curr; \
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -3346,7 +3344,7 @@ yyn < 0){if(yyn == - 32768)goto yyerrlab;yyn=- yyn;goto yyreduce;}else{if(yyn ==
 yyerrlab;}if(yyn == 1006){int _tmp381=0;_npop_handler(0);return _tmp381;}if(Cyc_yychar
 != 0)Cyc_yychar=- 2;yyvs[_check_known_subscript_notnull(10000,++ yyvsp_offset)]=
 Cyc_yylval;yyls[_check_known_subscript_notnull(10000,++ yylsp_offset)]=Cyc_yylloc;
-if(yyerrstatus != 0)-- yyerrstatus;yystate=yyn;goto yynewstate;yydefault: yyn=(int)
+if(yyerrstatus != 0)yyerrstatus --;yystate=yyn;goto yynewstate;yydefault: yyn=(int)
 Cyc_yydefact[_check_known_subscript_notnull(1007,yystate)];if(yyn == 0)goto
 yyerrlab;yyreduce: yylen=(int)Cyc_yyr2[_check_known_subscript_notnull(501,yyn)];
 if(yylen > 0)yyval=yyvs[_check_known_subscript_notnull(10000,(yyvsp_offset + 1)- 
@@ -6853,7 +6851,7 @@ yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 498:
 _LL403: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case
 499: _LL404: break;case 500: _LL405: yylex_buf->lex_curr_pos -=1;break;default: _LL406:
 break;}yyvsp_offset -=yylen;yyssp_offset -=yylen;yylsp_offset -=yylen;yyvs[
-_check_known_subscript_notnull(10000,++ yyvsp_offset)]=yyval;++ yylsp_offset;if(
+_check_known_subscript_notnull(10000,++ yyvsp_offset)]=yyval;yylsp_offset ++;if(
 yylen == 0){(yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line=
 Cyc_yylloc.first_line;(yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_column=
 Cyc_yylloc.first_column;(yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).last_line=(
@@ -6874,7 +6872,7 @@ _check_known_subscript_notnull(142,yyn - 133)];}goto yynewstate;yyerrlab: if(
 yyerrstatus == 0){++ Cyc_yynerrs;yyn=(int)Cyc_yypact[
 _check_known_subscript_notnull(1007,yystate)];if(yyn > - 32768  && yyn < 6421){int
 sze=0;struct _dynforward_ptr msg;int x;int count;count=0;for(x=yyn < 0?- yyn: 0;x < 275 / 
-sizeof(char*);++ x){if(Cyc_yycheck[_check_known_subscript_notnull(6422,x + yyn)]== 
+sizeof(char*);x ++){if(Cyc_yycheck[_check_known_subscript_notnull(6422,x + yyn)]== 
 x)(sze +=Cyc_strlen((struct _dynforward_ptr)Cyc_yytname[
 _check_known_subscript_notnull(275,x)])+ 15,count ++);}{unsigned int _tmp1359;
 unsigned int _tmp1358;struct _dynforward_ptr _tmp1357;char*_tmp1356;unsigned int
@@ -6884,7 +6882,7 @@ _tmp1356,sizeof(char),_tmp1355 + 1),((((_tmp1358=_tmp1355,((_tmp135A(& _tmp1359,
 _tmp1358,& _tmp1356),_tmp1356[_tmp1358]=(char)0)))),_tmp1357))))))));}{const char*
 _tmp135B;Cyc_strcpy(msg,((_tmp135B="parse error",_tag_dynforward(_tmp135B,
 sizeof(char),_get_zero_arr_size_char(_tmp135B,12)))));}if(count < 5){count=0;for(
-x=yyn < 0?- yyn: 0;x < 275 / sizeof(char*);++ x){if(Cyc_yycheck[
+x=yyn < 0?- yyn: 0;x < 275 / sizeof(char*);x ++){if(Cyc_yycheck[
 _check_known_subscript_notnull(6422,x + yyn)]== x){{const char*_tmp135D;const char*
 _tmp135C;Cyc_strcat(msg,(struct _dynforward_ptr)(count == 0?(struct _dynforward_ptr)((
 _tmp135D=", expecting `",_tag_dynforward(_tmp135D,sizeof(char),
@@ -6892,14 +6890,14 @@ _get_zero_arr_size_char(_tmp135D,14)))):(struct _dynforward_ptr)((_tmp135C=" or 
 _tag_dynforward(_tmp135C,sizeof(char),_get_zero_arr_size_char(_tmp135C,6))))));}
 Cyc_strcat(msg,(struct _dynforward_ptr)Cyc_yytname[_check_known_subscript_notnull(
 275,x)]);{const char*_tmp135E;Cyc_strcat(msg,((_tmp135E="'",_tag_dynforward(
-_tmp135E,sizeof(char),_get_zero_arr_size_char(_tmp135E,2)))));}++ count;}}}Cyc_yyerror((
+_tmp135E,sizeof(char),_get_zero_arr_size_char(_tmp135E,2)))));}count ++;}}}Cyc_yyerror((
 struct _dynforward_ptr)msg);}else{const char*_tmp135F;Cyc_yyerror(((_tmp135F="parse error",
 _tag_dynforward(_tmp135F,sizeof(char),_get_zero_arr_size_char(_tmp135F,12)))));}}
 goto yyerrlab1;yyerrlab1: if(yyerrstatus == 3){if(Cyc_yychar == 0){int _tmp8C4=1;
 _npop_handler(0);return _tmp8C4;}Cyc_yychar=- 2;}yyerrstatus=3;goto yyerrhandle;
 yyerrdefault: yyerrpop: if(yyssp_offset == 0){int _tmp8C5=1;_npop_handler(0);return
-_tmp8C5;}-- yyvsp_offset;yystate=(int)yyss[_check_known_subscript_notnull(10000,
--- yyssp_offset)];-- yylsp_offset;yyerrhandle: yyn=(int)Cyc_yypact[
+_tmp8C5;}yyvsp_offset --;yystate=(int)yyss[_check_known_subscript_notnull(10000,
+-- yyssp_offset)];yylsp_offset --;yyerrhandle: yyn=(int)Cyc_yypact[
 _check_known_subscript_notnull(1007,yystate)];if(yyn == - 32768)goto yyerrdefault;
 yyn +=1;if((yyn < 0  || yyn > 6421) || Cyc_yycheck[_check_known_subscript_notnull(
 6422,yyn)]!= 1)goto yyerrdefault;yyn=(int)Cyc_yytable[

@@ -22,8 +22,8 @@
 #include <stdio.h>
 #include <string.h> // for memcpy
 #include <stdarg.h>
-// #include <errno.h>
 #include <signal.h>
+#include <setjmp.h>
 
 // The C include file precore_c.h is produced (semi) automatically
 // from the Cyclone include file core.h.  Note, it now includes

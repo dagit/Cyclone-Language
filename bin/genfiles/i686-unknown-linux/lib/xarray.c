@@ -532,10 +532,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_curr = _cus_arr.curr;
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -553,10 +552,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_curr = _cus_arr.curr; \
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1108,6 +1106,6 @@ xarr,int i){if(i < 0  || i > xarr->num_elmts - 1)(int)_throw((void*)({struct Cyc
 _tmp36=_cycalloc(sizeof(*_tmp36));_tmp36[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmp37;_tmp37.tag=Cyc_Core_Invalid_argument;_tmp37.f1=({const char*_tmp38="xarray index out of bounds";
 _tag_dynforward(_tmp38,sizeof(char),_get_zero_arr_size_char(_tmp38,27));});
-_tmp37;});_tmp36;}));{int j=i;for(0;j < xarr->num_elmts - 2;++ j){*((void**)
+_tmp37;});_tmp36;}));{int j=i;for(0;j < xarr->num_elmts - 2;j ++){*((void**)
 _check_dynforward_subscript(xarr->elmts,sizeof(void*),j))=*((void**)
-_check_dynforward_subscript(xarr->elmts,sizeof(void*),j + 1));}}-- xarr->num_elmts;}
+_check_dynforward_subscript(xarr->elmts,sizeof(void*),j + 1));}}xarr->num_elmts --;}

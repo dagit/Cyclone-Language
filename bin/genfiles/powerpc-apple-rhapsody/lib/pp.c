@@ -516,10 +516,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_curr = _cus_arr.curr;
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -537,10 +536,9 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_curr = _cus_arr.curr; \
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1059,12 +1057,12 @@ _dynforward_ptr _tmpB7;(_tmpB7=_dynforward_ptr_plus(nlb,sizeof(char),0),((_tmpB8
 char*)_check_dynforward_subscript(_tmpB7,sizeof(char),0)),((_tmpB9='\n',((
 _get_dynforward_size(_tmpB7,sizeof(char))== 1  && (_tmpB8 == '\000'  && _tmpB9 != '\000')?
 _throw_arraybounds(): 1,*((char*)_tmpB7.curr)=_tmpB9)))))));}{int j=0;for(0;j < 
-_tmp1F;++ j){char _tmpBC;char _tmpBB;struct _dynforward_ptr _tmpBA;(_tmpBA=
+_tmp1F;j ++){char _tmpBC;char _tmpBB;struct _dynforward_ptr _tmpBA;(_tmpBA=
 _dynforward_ptr_plus(nlb,sizeof(char),j + 1),((_tmpBB=*((char*)
 _check_dynforward_subscript(_tmpBA,sizeof(char),0)),((_tmpBC='\t',((
 _get_dynforward_size(_tmpBA,sizeof(char))== 1  && (_tmpBB == '\000'  && _tmpBC != '\000')?
 _throw_arraybounds(): 1,*((char*)_tmpBA.curr)=_tmpBC)))))));}}{int j=0;for(0;j < 
-_tmp20;++ j){char _tmpBF;char _tmpBE;struct _dynforward_ptr _tmpBD;(_tmpBD=
+_tmp20;j ++){char _tmpBF;char _tmpBE;struct _dynforward_ptr _tmpBD;(_tmpBD=
 _dynforward_ptr_plus(nlb,sizeof(char),(j + 1)+ _tmp1F),((_tmpBE=*((char*)
 _check_dynforward_subscript(_tmpBD,sizeof(char),0)),((_tmpBF=' ',((
 _get_dynforward_size(_tmpBD,sizeof(char))== 1  && (_tmpBE == '\000'  && _tmpBF != '\000')?
@@ -1087,7 +1085,7 @@ char _tmpC9;char _tmpC8;struct _dynforward_ptr _tmpC7;(_tmpC7=_dynforward_ptr_pl
 nlb,sizeof(char),2),((_tmpC8=*((char*)_check_dynforward_subscript(_tmpC7,sizeof(
 char),0)),((_tmpC9='\n',((_get_dynforward_size(_tmpC7,sizeof(char))== 1  && (
 _tmpC8 == '\000'  && _tmpC9 != '\000')?_throw_arraybounds(): 1,*((char*)_tmpC7.curr)=
-_tmpC9)))))));}{int j=3;for(0;j < _tmp2C;++ j){char _tmpCC;char _tmpCB;struct
+_tmpC9)))))));}{int j=3;for(0;j < _tmp2C;j ++){char _tmpCC;char _tmpCB;struct
 _dynforward_ptr _tmpCA;(_tmpCA=_dynforward_ptr_plus(nlb,sizeof(char),j),((_tmpCB=*((
 char*)_check_dynforward_subscript(_tmpCA,sizeof(char),0)),((_tmpCC='~',((
 _get_dynforward_size(_tmpCA,sizeof(char))== 1  && (_tmpCB == '\000'  && _tmpCC != '\000')?
@@ -1250,7 +1248,7 @@ struct Cyc_PP_Ppstate*),struct _tuple5*x))Cyc_Fn_make_fn)(Cyc_PP_concat_f,((
 _tmp116=_cycalloc(sizeof(*_tmp116)),((_tmp116->f1=d1,((_tmp116->f2=d2,_tmp116))))))),
 _tmp115)))))));}struct Cyc_PP_Doc*Cyc_PP_cat(struct _dynforward_ptr l);struct Cyc_PP_Doc*
 Cyc_PP_cat(struct _dynforward_ptr l){struct Cyc_PP_Doc*_tmp80=Cyc_PP_nil_doc();{int
-i=(int)(_get_dynforward_size(l,sizeof(struct Cyc_PP_Doc*))- 1);for(0;i >= 0;-- i){
+i=(int)(_get_dynforward_size(l,sizeof(struct Cyc_PP_Doc*))- 1);for(0;i >= 0;i --){
 _tmp80=Cyc_PP_concat(*((struct Cyc_PP_Doc**)_check_dynforward_subscript(l,sizeof(
 struct Cyc_PP_Doc*),i)),_tmp80);}}return _tmp80;}static struct Cyc_PP_Out*Cyc_PP_long_cats_f(
 struct Cyc_List_List*ds0,struct Cyc_PP_Ppstate*st);static struct Cyc_PP_Out*Cyc_PP_long_cats_f(
