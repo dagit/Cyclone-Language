@@ -959,7 +959,17 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     default: throw new Core::Impossible("anal_Rexp: Subscript -- bad type");
     }
 
-  case &Tunion_e(es,_,_): fallthru(es); // NULL case handled above
+  case &Tunion_e(es,tud,_): // NULL case handled above
+    if (tud->is_flat) {
+      // FIX: for now, I'm just requiring everything to be initialized here
+      // because otherwise, I'm getting join errors.
+      let $(f,rvals) = anal_unordered_Rexps(env,inflow,es,false);
+      f = consume_unique_rvals(e->loc,f); // consume init exprs
+      for (; es; es = es->tl, rvals = rvals->tl)
+        f = use_Rval(env,es->hd->loc,f,rvals->hd);
+      return $(f,unknown_all);
+    }
+    fallthru(es); 
   case &Tuple_e(es):
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,es,false);
     f = consume_unique_rvals(e->loc,f); // consume init exprs

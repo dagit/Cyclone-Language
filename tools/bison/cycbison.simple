@@ -76,7 +76,7 @@ extern int yylex();
 
 
 static int	yychar = '\000';       /*  the lookahead symbol		*/
-xtunion YYSTYPE yylval = YYINITIALSVAL;/* semantic value of lookahead symbol */
+tunion YYSTYPE yylval = YYINITIALSVAL;/* semantic value of lookahead symbol */
 
 static int yynerrs = 0;		/*  number of parse errors so far       */
 
@@ -122,8 +122,8 @@ int yyparse(YYPARSE_PARAM_ARG)
 	(short @{YYMAXDEPTH})(new {for i < YYMAXDEPTH : (short)0});
   /*  the semantic value stack */
   int yyvsp_offset;
-  xtunion YYSTYPE @{YYMAXDEPTH} yyvs = 
-	(xtunion YYSTYPE @{YYMAXDEPTH})(new {for i < YYMAXDEPTH : yylval}); 
+  tunion YYSTYPE @{YYMAXDEPTH} yyvs = 
+	(tunion YYSTYPE @{YYMAXDEPTH})(new {for i < YYMAXDEPTH : yylval}); 
 
 #ifdef YYLSP_NEEDED
   /*  the location stack */
@@ -139,14 +139,14 @@ int yyparse(YYPARSE_PARAM_ARG)
 
 #ifdef YYPURE
   int yychar;
-  xtunion YYSTYPE yylval;
+  tunion YYSTYPE yylval;
   int yynerrs;
 #ifdef YYLSP_NEEDED
   YYLTYPE yylloc;
 #endif
 #endif
 
-  xtunion YYSTYPE yyval = yylval;/* the variable used to return		*/
+  tunion YYSTYPE yyval = yylval;/* the variable used to return		*/
 				/*  semantic values from the action	*/
 				/*  routines				*/
 
@@ -191,7 +191,7 @@ yynewstate:
     if (yystacksize > YYMAXDEPTH)
       yystacksize = YYMAXDEPTH;
     short ?yyss1 = new {for i < yystacksize : 0};
-    xtunion YYSTYPE ?yyvs1 = new {for i < yystacksize : yylval};
+    tunion YYSTYPE ?yyvs1 = new {for i < yystacksize : yylval};
 #ifdef YYLSP_NEEDED
     YYLTYPE ?yyls1 = new {for i < yystacksize : yynewloc()};
 #endif

@@ -727,7 +727,7 @@ static void add_to_list(char ?`H str, char ?`H constructor){
   struct strlist *`H l2;
   for(; l1 != NULL; l1 = l1->tl)
     if (strcmp(l1->str,str)==0){
-      warns("you refered to the type %s before you define it\n",str);
+      warns("you refered to the type %s before you defined it\n",str);
       l1->nth = constructor;
       l1->seen = false;
       return;
@@ -781,7 +781,7 @@ parse_type_decl ()
     // modify bison so that we get rid of the union definition and gensym
     // tokens appropriately.
     //fprintf((FILE @)fattrs, "\n_ yyget_%s(xtunion YYSTYPE yy1) {switch(yy1) {case &%s(yy2): return yy2; default: throw &yyfail_%s;}}\n", name, name, name);
-    fprintf((FILE @)fattrs, "\n%s yyget_%s(xtunion YYSTYPE yy1) {\n  _ yyzzz; \n  switch(yy1) {\n    case &%s(yyzzzz): \n      yyzzz = yyzzzz;\n      break;\n    default: throw &yyfail_%s;\n  }; \n  return yyzzz;\n}",name,deconstructor,deconstructor,deconstructor);
+    fprintf((FILE @)fattrs, "\n%s yyget_%s(tunion YYSTYPE yy1) {\n  _ yyzzz; \n  switch(yy1) {\n    case %s(yyzzzz): \n      yyzzz = yyzzzz;\n      break;\n    default: throw &yyfail_%s;\n  }; \n  return yyzzz;\n}",name,deconstructor,deconstructor,deconstructor);
   }
 
   for (;;)
@@ -930,11 +930,13 @@ parse_union_decl()
   else
     fprintf((FILE @)fattrs, "\n");
 
-  fprintf((FILE @)fattrs, "\nxtunion YYSTYPE;\nxtunion YYSTYPE "); 
-  if (fdefines)
-    fprintf((FILE @)fdefines, 
-	"\nextern int yyparse();\nextern xtunion YYSTYPE; "
-	    "\nextern xtunion YYSTYPE ");
+  //JGM: we want to avoid printing out the union as-is, because we want
+  //to add constructors later on.
+  //fprintf((FILE @)fattrs, "\n__flat__ tunion YYSTYPE;\n__flat__ tunion YYSTYPE "); 
+  //if (fdefines)
+  //fprintf((FILE @)fdefines, 
+  //"\nextern int yyparse();\nextern __flat__ tunion YYSTYPE; "
+  //    "\nextern __flat__ tunion YYSTYPE ");
 
   count = 0;
   in_comment = 0;
@@ -945,13 +947,13 @@ parse_union_decl()
 
   while (c != EOF)
     {
-      putc(c, (FILE @)fattrs);
+      //putc(c, (FILE @)fattrs);
       if (fdefines){
 	if (new_field && (c>='a' && c<='z' || c>='A' && c<='Z')) {
-	  fprintf((FILE @)fdefines, "extern ");
+	  //fprintf((FILE @)fdefines, "extern ");
 	  new_field=0;
 	}
-	putc(c, (FILE @)fdefines);
+	//putc(c, (FILE @)fdefines);
       }
 
       switch (c)
@@ -971,17 +973,17 @@ parse_union_decl()
 	    ungetc(c, (FILE @)finput);
 	  else
 	    {
-	      putc(c, (FILE @)fattrs);
-	      if (fdefines)
-		putc(c, (FILE @)fdefines);
+	      //putc(c, (FILE @)fattrs);
+	      //if (fdefines)
+		//putc(c, (FILE @)fdefines);
 	      cplus_comment = (c == '/');
 	      in_comment = 1;
 	      c = getc((FILE @)finput);
 	      while (in_comment)
 		{
-		  putc(c, (FILE @)fattrs);
-		  if (fdefines)
-		    putc(c, (FILE @)fdefines);
+		  //putc(c, (FILE @)fattrs);
+		  //if (fdefines)
+                  //putc(c, (FILE @)fdefines);
 
 		  if (c == '\n')
 		    {
@@ -1000,9 +1002,9 @@ parse_union_decl()
 		      c = getc((FILE @)finput);
 		      if (c == '/')
 			{
-			  putc('/', (FILE @)fattrs);
-			  if (fdefines)
-			    putc('/', (FILE @)fdefines);
+			  //putc('/', (FILE @)fattrs);
+			  //if (fdefines)
+                          //putc('/', (FILE @)fdefines);
 			  in_comment = 0;
 			}
 		    }
@@ -1023,9 +1025,9 @@ parse_union_decl()
 	  count--;
 	  if (count <= 0)
 	    {
-	      fprintf((FILE @)fattrs, "; \n");
-	      if (fdefines)
-		fprintf((FILE @)fdefines, "; \n");
+	      //fprintf((FILE @)fattrs, "; \n");
+	      //if (fdefines)
+	      //fprintf((FILE @)fdefines, "; \n");
 	      /* JF don't choke on trailing semi */
 	      c=skip_white_space();
 	      if(c!=';') ungetc(c,(FILE @)finput);
@@ -1053,9 +1055,9 @@ parse_union_decl()
 	  c = getc((FILE @)finput);
 	  while (isalnum(c) || c == '_' || c == '.')
 	    {
-	      putc(c, (FILE @)fattrs);
-	      if (fdefines)
-		putc(c, (FILE @)fdefines);
+	      //putc(c, (FILE @)fattrs);
+	      //if (fdefines)
+              //putc(c, (FILE @)fdefines);
 
 	      if (p == token_buffer + maxtoken)
 		p = grow_token_buffer(p);
@@ -1081,9 +1083,9 @@ parse_union_decl()
 
 	  while (c != ')'||level>0)
 	    {
-	      putc(c, (FILE @)fattrs);
-	      if (fdefines)
-		putc(c, (FILE @)fdefines);
+	      //putc(c, (FILE @)fattrs);
+	      //if (fdefines)
+              //putc(c, (FILE @)fdefines);
 
 	      if (c == EOF)
 		fatal("unterminated type name at end of file");
@@ -1113,9 +1115,9 @@ parse_union_decl()
 	      c = getc((FILE @)finput);
 	    }
 	  
-	  putc(c, (FILE @)fattrs);
-	  if (fdefines)
-	    putc(c, (FILE @)fdefines);
+	  //putc(c, (FILE @)fattrs);
+	  //if (fdefines)
+          //putc(c, (FILE @)fdefines);
 
 	  *p = 0;
 	  type_name = strdup(token_buffer);
@@ -1134,7 +1136,21 @@ parse_union_decl()
 
 }
 
-
+struct strlist * reverse(struct strlist *`H x) {
+  if (x == NULL) return NULL;
+  else { 
+    struct strlist *first = x;
+    struct strlist *second = x->tl;
+    x->tl = NULL;
+    while (second != NULL) {
+      struct strlist *temp = second->tl;
+      second->tl = first;
+      first = second;
+      second = temp;
+    }
+    return first;
+  }
+}
 
 /* copy the union declaration into fattrs (and fdefines),
    where it is made into the
@@ -1142,8 +1158,9 @@ parse_union_decl()
 void
 print_union_decl()
 {
+  seen_destructors = reverse(seen_destructors);
   struct strlist *`H l1 = seen_destructors;
-  fprintf((FILE @)fattrs0,"\nxtunion YYSTYPE;\nxtunion YYSTYPE ");
+  fprintf((FILE @)fattrs0,"\n__flat__ tunion YYSTYPE;\n__flat__ tunion YYSTYPE ");
   fprintf((FILE @)fattrs0,"\n{");
   for(; l1 != NULL; l1 = l1->tl){
     fprintf((FILE @)fattrs0,"\n  %s(%s),",
@@ -1153,14 +1170,14 @@ print_union_decl()
   fprintf((FILE @)fattrs0,"\n};\n");
   if (fdefines){
     fprintf((FILE @)fdefines,"\nextern int yyparse();");
-    fprintf((FILE @)fdefines,"\nextern xtunion YYSTYPE ");
+    fprintf((FILE @)fdefines,"\nextern __flat__ tunion YYSTYPE ");
     fprintf((FILE @)fdefines,"\n{");
     l1 = seen_destructors;
     for(; l1 != NULL; l1 = l1->tl){
-      fprintf((FILE @)fdefines,"\n  extern %s(%s),",
+      fprintf((FILE @)fdefines,"\n  %s(%s),",
               l1->nth, l1->str);
     }
-    fprintf((FILE @)fdefines,"\n  extern YYINITIALSVAL");
+    fprintf((FILE @)fdefines,"\n  YYINITIALSVAL");
     fprintf((FILE @)fdefines,"\n};\n");
   }
 
@@ -1608,7 +1625,7 @@ copy_action(symbol_list *rule, int stack_offset)
 
 	      break;
 	      /* JGM: we use ^$ to abbreviate <typename> where
-	       * <typename> is the xtunion field name that's associated with
+	       * <typename> is the tunion field name that's associated with
 	       * the rule via the type declaration.  
 	       */
 	    case '^':
@@ -1617,7 +1634,7 @@ copy_action(symbol_list *rule, int stack_offset)
 		c = getc((FILE @)finput);
 		type_name = get_type_name(0,rule);
 		if (type_name)
-		  fprintf((FILE @)faction,"new %s",type2nth(type_name));
+		  fprintf((FILE @)faction,"%s",type2nth(type_name));
 		else
 		  fatal("rule has no type for ^$");
 		continue;
@@ -2309,7 +2326,7 @@ packsymbols()
 	  if (spec_name_prefix)
 	    fprintf((FILE @)fdefines, "\nextern YYSTYPE %slval;\n", spec_name_prefix);
 	  else
-	    fprintf((FILE @)fdefines, "\nextern xtunion YYSTYPE yylval;\n");
+	    fprintf((FILE @)fdefines, "\nextern tunion YYSTYPE yylval;\n");
 	}
 
       if (semantic_parser)

@@ -870,61 +870,14 @@ using Parse;
 %token TYPE_VAR TYPEDEF_NAME QUAL_IDENTIFIER QUAL_TYPEDEF_NAME TYPE_INTEGER
 // Cyc: added __attribute__ keyword
 %token ATTRIBUTE
-// the union type for all productions
+// specify tagged union constructors for types of semantic values that 
+// the lexer must produce.  The other constructors are generated implicitly.
 %union {
-  Okay_tok;
-  Bool_tok(bool);
   Int_tok($(sign_t,int)@);
   Char_tok(char);
-  Pointer_Sort_tok(tunion Pointer_Sort);
-  Short_tok(short);
   String_tok(string_t);
   Stringopt_tok(opt_t<stringptr_t>);
-  Type_tok(type_t);
-  TypeList_tok(list_t<type_t>);
-  Exp_tok(exp_t);
-  ExpList_tok(list_t<exp_t>);
-  Primop_tok(primop_t);
-  Primopopt_tok(opt_t<primop_t>);
   QualId_tok(qvar_t);
-  Stmt_tok(stmt_t);
-  SwitchClauseList_tok(list_t<switch_clause_t>);
-  Pattern_tok(pat_t);
-  PatternList_tok(list_t<pat_t>);
-  FnDecl_tok(fndecl_t);
-  DeclList_tok(list_t<decl_t>);
-  DeclSpec_tok(decl_spec_t);
-  InitDecl_tok($(declarator_t,exp_opt_t)@);
-  InitDeclList_tok(list_t<$(declarator_t,exp_opt_t)@>);
-  StorageClass_tok(storage_class_t);
-  TypeSpecifier_tok(type_specifier_t);
-  QualSpecList_tok($(tqual_t,list_t<type_specifier_t>,attributes_t)@);
-  TypeQual_tok(tqual_t);
-  AggrFieldDeclList_tok(list_t<aggrfield_t>);
-  AggrFieldDeclListList_tok(list_t<list_t<aggrfield_t>>);
-  Declarator_tok(declarator_t);
-  AbstractDeclarator_tok(abstractdeclarator_t);
-  TunionField_tok(tunionfield_t);
-  TunionFieldList_tok(list_t<tunionfield_t>);
-  ParamDecl_tok($(opt_t<var_t>,tqual_t,type_t)@);
-  ParamDeclList_tok(list_t<$(opt_t<var_t>,tqual_t,type_t)@>);
-  ParamDeclListBool_tok($(list_t<$(opt_t<var_t>,tqual_t,type_t)@>,bool,vararg_info_t *,opt_t<type_t>,list_t<$(type_t,type_t)@>)@);
-  StructOrUnion_tok(aggr_kind_t);
-  IdList_tok(list_t<var_t>);
-  Designator_tok(designator_t);
-  DesignatorList_tok(list_t<designator_t>);
-  TypeModifierList_tok(list_t<type_modifier_t>);
-  InitializerList_tok(list_t<$(list_t<designator_t>,exp_t)@>);
-  FieldPattern_tok($(list_t<designator_t>,pat_t)@);
-  FieldPatternList_tok(list_t<$(list_t<designator_t>,pat_t)@>);
-  Kind_tok(kind_t);
-  Attribute_tok(attribute_t);
-  AttributeList_tok(list_t<attribute_t>);
-  Enumfield_tok(enumfield_t);
-  EnumfieldList_tok(list_t<enumfield_t>);
-  Scope_tok(scope_t);
-  TypeOpt_tok(opt_t<type_t>);
-  Rgnorder_tok(list_t<$(type_t,type_t)@>);
 }
 /* types for productions */
 %type <$(sign_t,int)@> INTEGER_CONSTANT TYPE_INTEGER
@@ -2797,15 +2750,12 @@ right_angle:
 | RIGHT_OP { lbuf->v->lex_curr_pos -= 1; }
 %%
 
-void yyprint(int i, xtunion YYSTYPE v) {
+void yyprint(int i, tunion YYSTYPE v) {
   switch (v) {
-  case &Int_tok(&$(_,i2)): fprintf(stderr,"%d",i2);      break;
-  case &Char_tok(c):       fprintf(stderr,"%c",c);       break;
-  case &Short_tok(s):      fprintf(stderr,"%ds",(int)s); break;
-  case &String_tok(s):          fprintf(stderr,"\"%s\"",s);  break;
-  case &Stringopt_tok(NULL):    fprintf(stderr,"NULL");      break;
-  case &Stringopt_tok(&Opt(s)): fprintf(stderr,"\"%s\"",*s); break;
-  case &QualId_tok(&$(p,v2)):
+  case Int_tok(&$(_,i2)): fprintf(stderr,"%d",i2);      break;
+  case Char_tok(c):       fprintf(stderr,"%c",c);       break;
+  case String_tok(s):          fprintf(stderr,"\"%s\"",s);  break;
+  case QualId_tok(&$(p,v2)):
     let prefix = NULL;
     switch (p) {
     case &Rel_n(x): prefix = x; break;
