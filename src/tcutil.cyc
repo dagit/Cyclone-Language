@@ -4227,12 +4227,15 @@ bool is_noalias_pointer_or_aggr(type_t t) {
 static bool is_noalias_field(type_t t, field_name_t f) {
   switch (compress(t)) {
   case &AggrType(AggrInfo(KnownAggr(&ad),ts)):
-    let finfo = lookup_decl_field(ad,f);
+    fallthru ((ad->impl == NULL) ? NULL : ad->impl->fields);
+  case &AnonAggrType(_,x):
+    let finfo = lookup_field(x,f);
     switch (finfo) {
     case NULL: Tcutil::impos("is_noalias_field: missing field");
     case &Aggrfield(_,_,t,_,_):
       return is_noalias_pointer_or_aggr(t);
     }
+    return false;
   default:
     Tcutil::impos("is_noalias_field: invalid type |%s|",
 		  Absynpp::typ2string(t));
