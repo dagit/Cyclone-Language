@@ -176,6 +176,10 @@ namespace Aprof {
 }
 
 // Colors etc. to use on the graph
+extern double WIDTH;
+extern double HEIGHT;
+extern unsigned int XMAXRES;
+extern bool landscape;
 extern const char ??colors;
 extern const char ?curve_stroke;
 extern const char ?gc_fill;

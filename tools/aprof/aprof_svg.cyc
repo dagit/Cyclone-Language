@@ -39,8 +39,8 @@ using Fn;
 
 /* Dimensions of the graph on the printed page, in points (pt).
    The title, legend, etc., appear outside these dimensions. */
-#define WIDTH 300.0
-#define HEIGHT 300.0
+double WIDTH = 300.0;
+double HEIGHT = 300.0;
 
 /* Resolution of the graph: number of divisions in the x dimension.
    Increasing resolution will result in a more accurate graph.
@@ -49,8 +49,8 @@ using Fn;
    about 40,000 for Adobe Illustrator, for example.  Also,
    limiting the resolution controls the size of the SVG
    output and the internal data structures of aprof. */
-#define XMAXRES 1000
-static unsigned int xres = XMAXRES;
+unsigned int XMAXRES = 1000;
+static unsigned int xres = 0;
 double scale = 1.0;
 static void compute_resolution() {
   if (max_time<XMAXRES) xres = max_time+1; else xres = XMAXRES;
@@ -87,13 +87,13 @@ struct ProcEnv {
 };
 
 /* Nicely format f as a number of bytes */
-static char ?print_bytes(double f) {
+static char ?print_units(double f,const char ?suffix) {
   $(double,const char ?) powers[] =
-    { $(1099511627776.0,"TB"),
-      $(1073741824.0,"GB"),
-      $(1048576.0,"MB"),
-      $(1024.0,"KB") };
-  const char ?units = "B";
+    { $(1099511627776.0,"T"),
+      $(1073741824.0,"G"),
+      $(1048576.0,"M"),
+      $(1024.0,"K") };
+  const char ?units = "";
 
   for (let i = 0; i < numelts(powers); i++) {
     if (f > powers[i][0]) {
@@ -104,11 +104,14 @@ static char ?print_bytes(double f) {
   }
   /* Print >= 3 digits of precision */
   if (f < 10.0)
-    return aprintf("%.2f %s",f,units);
+    return aprintf("%.2f %s%s",f,units,suffix);
   else if (f < 100.0)
-    return aprintf("%.1f %s",f,units);
+    return aprintf("%.1f %s%s",f,units,suffix);
   else
-    return aprintf("%.0f %s",f,units);
+    return aprintf("%.0f %s%s",f,units,suffix);
+}
+static char ?print_bytes(double f) {
+  return print_units(f,"B");
 }
 
 /////////////////////////////// EVENT PROCESSING
@@ -489,9 +492,10 @@ static void output_legend(list_t<$(const char ?,const char ?)@> items) {
   }
 }
 
+bool landscape = false;
 const char ?curve_stroke = "black";
 const char ?gc_fill = "black";
-const char ?gc_opacity = "0.3";
+const char ?gc_opacity = "0.5";
 
 static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t ?? yv) {
 
@@ -501,13 +505,14 @@ static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t 
          -HEIGHT / max_y);  // negative y scale so coords are flipped
 
   /* the fills */
+  printf("<!-- curves -->\n");
   // bottom curve first...
   printf("<path d='M");
   for (int x=0; x < xres; x++) {
     printf("%d,%d ",x,yv[0][x]);
   }
   printf("%d,0 0,0 ",xres-1); // bottom border is x axis
-  printf("' stroke='%s' fill='%s' opacity='0.7'/>\n",curve_stroke,color(0));
+  printf("' stroke='%s' stroke-width='0.1' fill='%s' opacity='0.7'/>\n",curve_stroke,color(0));
 
   // ... then the other curves, going up
   for (int i=1; i < num_curves; i++) {
@@ -521,10 +526,11 @@ static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t 
       printf("%d,%d ",x,yv[i-1][x]);
     }
     printf("0,%d ",yv[i][0]);
-    printf("' stroke='%s' fill='%s' opacity='0.7'/>\n",curve_stroke,color(i));
+    printf("' stroke='%s' stroke-width='0.1' fill='%s' opacity='0.7'/>\n",curve_stroke,color(i));
   }
 
   /* the garbage collections */
+  printf("<!-- garbage collections -->\n");
   gc_scale();
   for (let l = gc_list; l != NULL; l = l->tl) {
     let &$(x1,x2) = l->hd;
@@ -725,6 +731,8 @@ int generate_svg(string_t<`H> file) {
   printf("<svg xmlns='http://www.w3.org/2000/svg'\n"
          "     xmlns:xlink='http://www.w3.org/1999/xlink'>\n");
 
+  if (landscape) printf("<g transform='rotate(-90)'>\n");
+
   /* print the curves and garbage collections */
   output_curves(xres,num_curves,max_y,zz);
 
@@ -746,9 +754,23 @@ int generate_svg(string_t<`H> file) {
   output_legend(namecolors);
   printf("</g>\n");
 
-  /* print the title of the graph */
+  printf("<!-- x and y axes -->\n");
+  printf("<path d='M-5,0 0,0 0,%f %f,%f %f,%f' fill='none'"
+         " stroke='black' stroke-width='0.2'/>\n",
+         HEIGHT, WIDTH, HEIGHT, WIDTH, HEIGHT+5);
+  printf("<text x='-10' y='3' text-anchor='end'>%s</text>\n",
+         print_bytes(max_y));
+  const char ?CE = " clocks";
+  if (use_events) CE = " events";
   printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",
-         WIDTH/2,HEIGHT+20,title);
+         WIDTH, HEIGHT+18, print_units(max_time,CE));
+
+  /* print the title of the graph */
+  printf("<!-- graph title -->\n");
+  printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",
+         WIDTH/2,HEIGHT+50,title);
+
+  if (landscape) printf("</g>\n");
   printf("</svg>\n");
 
   return 0;
@@ -860,29 +882,25 @@ static bool proc_event2(aprof_event_t event) {
   switch (event) {
   case &AllocE(AllocEvent(time,_,rname,count,*rstats,addr)):
     mark_gc_over();
-    if (!strcmp(rname,"unique")) {
+    if (!strcmp(rname,"unique") || !strcmp(rname,"refcnt")) {
       if (count>0) {
         // remember count for addr in case gc reclaims addr
         Hashtable::insert((_@)allocations_table,
-                          addr,new $("unique",time,
+                          addr,new $(rname,time,
                                      (unsigned int)count));
       }
       else {
-        // gc did not reclaim, this is ufree, forget addr/count
-
+        // gc did not reclaim, this is (u)free, forget addr/count
         try {
           let &$(_,start_time,_) =
             Hashtable::lookup((_@)allocations_table, addr);
           Hashtable::remove((_@)allocations_table, addr);
-          add_rect("unique",start_time,addr,time,-count); // count<0
+          add_rect(rname,start_time,addr,time,-count); // count<0
         }
         catch {
         case &Not_found: break;
         }
       }
-    }
-    else if (!strcmp(rname,"refcnt")) {
-      // TODO
     }
     else if (!strcmp(rname,"heap")) {
       Hashtable::insert((_@)allocations_table, addr,
@@ -1123,7 +1141,7 @@ int generate_svg2(string_t<`H> file) {
   }
 
   printf("<!-- garbage collections -->\n");
-  printf("<g opacity='0.3'>\n");
+  printf("<g opacity='%s'>\n",gc_opacity);
   for (let l = gc_list; l != NULL; l = l->tl) {
     let &$(x1,x2) = l->hd;
     printf("<rect x='%u' y='%u' width='%u' height='%u'/>\n",
@@ -1146,7 +1164,7 @@ int generate_svg2(string_t<`H> file) {
   printf("</g>\n");
 
   /* print the title of the graph */
-  let title = "Memory usage, lifetime x amount allocated";
+  let title = "Memory usage, time x address";
   printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",
          WIDTH/2,HEIGHT+20,title);
   printf("</svg>\n");
@@ -1190,13 +1208,13 @@ static void finish_lifetimes(unsigned int addr, clock_t start_time) {
 static bool proc_event3(aprof_event_t event) {
   switch (event) {
   case &AllocE(AllocEvent(time,_,rname,count,*rstats,addr)):
-    if (!strcmp(rname,"unique")) {
+    if (!strcmp(rname,"unique") || !strcmp(rname,"refcnt")) {
       if (count>0) {
         // remember time for addr in case gc reclaims addr
         Hashtable::insert((_@)starttimes_table,addr,time);
       }
       else {
-        // gc did not reclaim, this is ufree
+        // gc did not reclaim, this is (u)free
         try {
           let start_time = Hashtable::lookup((_@)starttimes_table, addr);
           Hashtable::remove((_@)starttimes_table, addr);
@@ -1211,9 +1229,6 @@ static bool proc_event3(aprof_event_t event) {
           break;
         }
       }
-    }
-    else if (!strcmp(rname,"refcnt")) {
-      // TODO
     }
     else if (!strcmp(rname,"heap")) {
       Hashtable::insert((_@)starttimes_table, addr, time);
@@ -1304,6 +1319,7 @@ static void record_lifetime(unsigned int lifetime,unsigned int lcount) {
   cumulative_lcount += lcount;
   lifetimes = new List(new $(lifetime,lcount),lifetimes);
 }
+
 int generate_svg3(string_t<`H> file) {
 
   init_globals3();
@@ -1356,21 +1372,22 @@ int generate_svg3(string_t<`H> file) {
   printf("<g transform='translate(0,%d) scale(%.12f,-%.12f)'>\n",
          (int)HEIGHT,
          xscale, yscale);
-  printf("<g opacity='0.4'>\n"); // svg says can't move y and width here :-(
   for (let i = 0; i<max_lifetime+1; i++) {
     // TJIM: don't print cumulative graph for now, swamps the other histo
     // TJIM: actually should print it as a percentage curve
     //    printf("<rect fill='green' x='%d' y='0' width='1' height='%d' />\n",
     //           i,cumulative_arr[i]);
-    printf("<rect x='%d' y='0' width='1' height='%d'/>\n",
-           i,lifetimes_arr[i]);
+    if (lifetimes_arr[i]) // to prevent lots of zero-height bars
+      printf("<rect fill='red' x='%d' y='0' width='1' height='%d'/>\n",
+             i,lifetimes_arr[i]);
   }
-  printf("</g>\n");
   printf("</g>\n");
 
   printf("<!-- x and y axes -->\n");
-  printf("<path d='M-5,0 0,0 0,%f %f,%f %f,%f' fill='none'"
-         " stroke='black'/>\n",
+  printf("<path d='M-5,0 0,0' fill='none'"
+         " stroke='black' stroke-width='0.1'/>\n"
+         "<path d='M 0,%f %f,%f %f,%f' fill='none'"
+         " stroke='black' stroke-width='0.1'/>\n",
          HEIGHT, WIDTH, HEIGHT, WIDTH, HEIGHT+5);
   printf("<text x='-10' y='3' text-anchor='end'>%d objects</text>\n",
          max_lcount);

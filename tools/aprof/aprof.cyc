@@ -44,8 +44,19 @@ static void usage(string_t<`H> argv0) __attribute__((noreturn)) {
           "  -q     quiet output\n"
           "  -cd X  use X as a clock divisor\n"
           "  -ev    use allocation events instead of clocks\n"
+          "  -landscape\n"
+          "         print the -svg graph in landscape mode\n"
           "  -omit [reserved|refcnt|other|heap|unique]\n"
           "         omit a region from the -svg graph\n"
+          "  -width <n>\n"
+          "         use <n> as the width of the graph on the page, in points.\n"
+          "         Default is 300.  Does not include graph legends.\n"
+          "  -height <n>\n"
+          "         use <n> as the height of the graph on the page, in points.\n"
+          "         Default is 300.  Does not include graph legends.\n"
+          "  -xmaxres <n>\n"
+          "         use <n> as maximum number of points to plot on the x axis.\n"
+          "         Default is 1000.  Larger xmaxres gives a more accurate but bigger graph.\n"
           "  -color <c>\n"
           "         use <c> as a color in -svg instead of the defaults\n"
           "         Examples: black, rgb(148,208,84)\n"
@@ -58,7 +69,7 @@ static void usage(string_t<`H> argv0) __attribute__((noreturn)) {
           "         Examples: black (default), rgb(148,208,84)\n"
           "  -gc_opacity <o>\n"
           "         use <o> as the opacity of the gc bars in -svg\n"
-          "         Default is 0.3\n"
+          "         Default is 0.5\n"
           "  -d X   show dynamic regions that are >= X (a fraction) of the total heap (def=%g)\n",
           argv0,
           dyn_threshhold);
@@ -132,8 +143,20 @@ int main(int argc, string_t<`H> ?`H argv) {
     else if ( strcmp( argv[argn], "-cd" ) == 0 && argn+1 < argc ) {
       clockdivisor_override = atoi(argv[++argn]);
     }
+    else if ( strcmp( argv[argn], "-width" ) == 0 && argn+1 < argc ) {
+      WIDTH = atof(argv[++argn]);
+    }
+    else if ( strcmp( argv[argn], "-height" ) == 0 && argn+1 < argc ) {
+      HEIGHT = atof(argv[++argn]);
+    }
+    else if ( strcmp( argv[argn], "-xmaxres" ) == 0 && argn+1 < argc ) {
+      XMAXRES = atoi(argv[++argn]);
+    }
     else if ( strcmp( argv[argn], "-ev" ) == 0 ) {
       use_events = true;
+    }
+    else if ( strcmp( argv[argn], "-landscape" ) == 0 ) {
+      landscape = true;
     }
     else
       usage(argv[0]);
