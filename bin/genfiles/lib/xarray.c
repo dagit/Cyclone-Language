@@ -1,37 +1,40 @@
 #include "cyc_include.h"
 
  typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
-unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char;
-typedef unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef
-unsigned int Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int
-Cyc_uint; typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
-int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
-it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
-char* Cyc_caddr_t; typedef unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t;
-typedef unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
-typedef short Cyc_int16_t; typedef unsigned short Cyc_u_int16_t; typedef int Cyc_int32_t;
-typedef unsigned int Cyc_u_int32_t; typedef long long Cyc_int64_t; typedef
-unsigned long long Cyc_u_int64_t; typedef int Cyc_register_t; typedef short Cyc_dev_t;
-typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
-Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
-typedef char* Cyc_addr_t; typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t;
-typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ;
-typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
-typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
-typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void
-exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
-struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg[ 15u];
-struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; } ;
-extern char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{ char* tag;
-struct _tagged_string f1; } ; extern char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Not_found[ 14u];
-extern char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{ char*
-tag; struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
-_tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
-struct _tagged_string Cstring_to_string( char*); extern int system( char*);
-struct _tagged_ptr0{ void** curr; void** base; void** last_plus_one; } ; struct
-Cyc_Xarray_Xarray{ struct _tagged_ptr0 elmts; int num_elmts; } ; typedef struct
-Cyc_Xarray_Xarray* Cyc_Xarray_xarray_t; extern int Cyc_Xarray_length( struct Cyc_Xarray_Xarray*);
+unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef
+unsigned char Cyc_u_char; typedef unsigned short Cyc_u_short; typedef
+unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef unsigned short
+Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int Cyc_clock_t;
+typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct
+Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec it_value; }
+; typedef int Cyc_daddr_t; typedef unsigned char* Cyc_caddr_t; typedef
+unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
+unsigned int Cyc_vm_size_t; typedef unsigned char Cyc_int8_t; typedef
+unsigned char Cyc_u_int8_t; typedef short Cyc_int16_t; typedef unsigned short
+Cyc_u_int16_t; typedef int Cyc_int32_t; typedef unsigned int Cyc_u_int32_t;
+typedef long long Cyc_int64_t; typedef unsigned long long Cyc_u_int64_t; typedef
+int Cyc_register_t; typedef short Cyc_dev_t; typedef int Cyc_off_t; typedef
+unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int Cyc_pid_t;
+typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned char* Cyc_addr_t;
+typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask;
+struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
+Cyc__types_fd_set; typedef unsigned char* Cyc_Cstring; typedef struct
+_tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
+struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void exit(
+int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef struct Cyc_Core_Opt*
+Cyc_Core_opt_t; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Failure[
+12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_string
+f1; } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Not_found[
+14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
+unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
+string_to_Cstring( struct _tagged_string); extern unsigned char*
+underlying_Cstring( struct _tagged_string); extern struct _tagged_string
+Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
+_tagged_ptr0{ void** curr; void** base; void** last_plus_one; } ; struct Cyc_Xarray_Xarray{
+struct _tagged_ptr0 elmts; int num_elmts; } ; typedef struct Cyc_Xarray_Xarray*
+Cyc_Xarray_xarray_t; extern int Cyc_Xarray_length( struct Cyc_Xarray_Xarray*);
 extern void* Cyc_Xarray_get( struct Cyc_Xarray_Xarray*, int); extern void Cyc_Xarray_set(
 struct Cyc_Xarray_Xarray*, int, void*); extern struct Cyc_Xarray_Xarray* Cyc_Xarray_create(
 int, void*); extern struct Cyc_Xarray_Xarray* Cyc_Xarray_create_empty(); extern
@@ -53,41 +56,42 @@ void* Cyc_Xarray_get( struct Cyc_Xarray_Xarray* xarr, int i){ if( i < 0? 1: i >=
 xarr->num_elmts){( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
 _temp0=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
 _temp0[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp1; _temp1.tag= Cyc_Core_InvalidArg;
-_temp1.f1=({ char* _temp2="Xarray::get: bad index"; struct _tagged_string _temp3;
-_temp3.curr= _temp2; _temp3.base= _temp2; _temp3.last_plus_one= _temp2 + 23;
-_temp3;}); _temp1;}); _temp0;}));} return*(( void**(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( xarr->elmts, sizeof(
-void*), i);} void Cyc_Xarray_set( struct Cyc_Xarray_Xarray* xarr, int i, void* a){
-if( i < 0? 1: i >= xarr->num_elmts){( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
-_temp4=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp4[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp5; _temp5.tag= Cyc_Core_InvalidArg;
-_temp5.f1=({ char* _temp6="Xarray::set: bad index"; struct _tagged_string _temp7;
-_temp7.curr= _temp6; _temp7.base= _temp6; _temp7.last_plus_one= _temp6 + 23;
-_temp7;}); _temp5;}); _temp4;}));}*(( void**(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( xarr->elmts, sizeof(
-void*), i)= a;} struct Cyc_Xarray_Xarray* Cyc_Xarray_create_empty(){ struct
-_tagged_ptr0 x=({ void** _temp10=({ void** _temp9=( void**) GC_malloc( sizeof(
-void*) * 0); _temp9;}); struct _tagged_ptr0 _temp11; _temp11.curr= _temp10;
-_temp11.base= _temp10; _temp11.last_plus_one= _temp10 + 0; _temp11;}); return({
-struct Cyc_Xarray_Xarray* _temp8=( struct Cyc_Xarray_Xarray*) GC_malloc( sizeof(
-struct Cyc_Xarray_Xarray)); _temp8->elmts= x; _temp8->num_elmts= 0; _temp8;});}
-struct Cyc_Xarray_Xarray* Cyc_Xarray_create( int len, void* a){ if( len < 0){(
-void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp12=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp12[ 0]=({ struct
-Cyc_Core_InvalidArg_struct _temp13; _temp13.tag= Cyc_Core_InvalidArg; _temp13.f1=({
-char* _temp14="xarrays must have a non-negative size buffer"; struct
-_tagged_string _temp15; _temp15.curr= _temp14; _temp15.base= _temp14; _temp15.last_plus_one=
-_temp14 + 45; _temp15;}); _temp13;}); _temp12;}));} return({ struct Cyc_Xarray_Xarray*
-_temp16=( struct Cyc_Xarray_Xarray*) GC_malloc( sizeof( struct Cyc_Xarray_Xarray));
-_temp16->elmts=({ unsigned int _temp17=( unsigned int) len; void** _temp18=(
-void**) GC_malloc( sizeof( void*) * _temp17); struct _tagged_ptr0 _temp20={
-_temp18, _temp18, _temp18 + _temp17};{ unsigned int _temp19= _temp17;
-unsigned int i; for( i= 0; i < _temp19; i ++){ _temp18[ i]= a;}}; _temp20;});
-_temp16->num_elmts= 0; _temp16;});} struct Cyc_Xarray_Xarray* Cyc_Xarray_singleton(
-int len, void* a){ if( len < 1){( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
-_temp21=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp21[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp22; _temp22.tag= Cyc_Core_InvalidArg;
-_temp22.f1=({ char* _temp23="singleton xarray must have size >=1"; struct
+_temp1.f1=({ unsigned char* _temp2="Xarray::get: bad index"; struct
+_tagged_string _temp3; _temp3.curr= _temp2; _temp3.base= _temp2; _temp3.last_plus_one=
+_temp2 + 23; _temp3;}); _temp1;}); _temp0;}));} return*(( void**(*)( struct
+_tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( xarr->elmts,
+sizeof( void*), i);} void Cyc_Xarray_set( struct Cyc_Xarray_Xarray* xarr, int i,
+void* a){ if( i < 0? 1: i >= xarr->num_elmts){( void) _throw(( void*)({ struct
+Cyc_Core_InvalidArg_struct* _temp4=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp4[ 0]=({ struct Cyc_Core_InvalidArg_struct
+_temp5; _temp5.tag= Cyc_Core_InvalidArg; _temp5.f1=({ unsigned char* _temp6="Xarray::set: bad index";
+struct _tagged_string _temp7; _temp7.curr= _temp6; _temp7.base= _temp6; _temp7.last_plus_one=
+_temp6 + 23; _temp7;}); _temp5;}); _temp4;}));}*(( void**(*)( struct
+_tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( xarr->elmts,
+sizeof( void*), i)= a;} struct Cyc_Xarray_Xarray* Cyc_Xarray_create_empty(){
+struct _tagged_ptr0 x=({ void** _temp10=({ void** _temp9=( void**) GC_malloc(
+sizeof( void*) * 0); _temp9;}); struct _tagged_ptr0 _temp11; _temp11.curr=
+_temp10; _temp11.base= _temp10; _temp11.last_plus_one= _temp10 + 0; _temp11;});
+return({ struct Cyc_Xarray_Xarray* _temp8=( struct Cyc_Xarray_Xarray*) GC_malloc(
+sizeof( struct Cyc_Xarray_Xarray)); _temp8->elmts= x; _temp8->num_elmts= 0;
+_temp8;});} struct Cyc_Xarray_Xarray* Cyc_Xarray_create( int len, void* a){ if(
+len < 0){( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp12=(
+struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
+_temp12[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp13; _temp13.tag= Cyc_Core_InvalidArg;
+_temp13.f1=({ unsigned char* _temp14="xarrays must have a non-negative size buffer";
+struct _tagged_string _temp15; _temp15.curr= _temp14; _temp15.base= _temp14;
+_temp15.last_plus_one= _temp14 + 45; _temp15;}); _temp13;}); _temp12;}));}
+return({ struct Cyc_Xarray_Xarray* _temp16=( struct Cyc_Xarray_Xarray*)
+GC_malloc( sizeof( struct Cyc_Xarray_Xarray)); _temp16->elmts=({ unsigned int
+_temp17=( unsigned int) len; void** _temp18=( void**) GC_malloc( sizeof( void*)
+* _temp17); struct _tagged_ptr0 _temp20={ _temp18, _temp18, _temp18 + _temp17};{
+unsigned int _temp19= _temp17; unsigned int i; for( i= 0; i < _temp19; i ++){
+_temp18[ i]= a;}}; _temp20;}); _temp16->num_elmts= 0; _temp16;});} struct Cyc_Xarray_Xarray*
+Cyc_Xarray_singleton( int len, void* a){ if( len < 1){( void) _throw(( void*)({
+struct Cyc_Core_InvalidArg_struct* _temp21=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp21[ 0]=({ struct
+Cyc_Core_InvalidArg_struct _temp22; _temp22.tag= Cyc_Core_InvalidArg; _temp22.f1=({
+unsigned char* _temp23="singleton xarray must have size >=1"; struct
 _tagged_string _temp24; _temp24.curr= _temp23; _temp24.base= _temp23; _temp24.last_plus_one=
 _temp23 + 36; _temp24;}); _temp22;}); _temp21;}));}{ struct Cyc_Xarray_Xarray* x=((
 struct Cyc_Xarray_Xarray*(*)( int len, void* a)) Cyc_Xarray_create)( len, a); x->num_elmts=

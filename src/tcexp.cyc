@@ -173,7 +173,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t *`r topt, cnst_t c, exp_t e) 
         // truncate without warning.
         // The typical case is in an array initializer, e.g.,
         // short x[1] = { 255 };
-      switch (*topt) {
+      switch (compress(*topt)) {
       case &IntType(sn,B1):
         t = (sn == (sign_t)Unsigned) ? uchar_t : schar_t;
         e->r = new Const_e(new Char_c(sn,(char)(i))); // i gets truncated here

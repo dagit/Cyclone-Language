@@ -1,40 +1,43 @@
 #include "cyc_include.h"
 
  typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
-unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char;
-typedef unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef
-unsigned int Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int
-Cyc_uint; typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
-int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
-it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
-char* Cyc_caddr_t; typedef unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t;
-typedef unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
-typedef short Cyc_int16_t; typedef unsigned short Cyc_u_int16_t; typedef int Cyc_int32_t;
-typedef unsigned int Cyc_u_int32_t; typedef long long Cyc_int64_t; typedef
-unsigned long long Cyc_u_int64_t; typedef int Cyc_register_t; typedef short Cyc_dev_t;
-typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
-Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
-typedef char* Cyc_addr_t; typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t;
-typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ;
-typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
-typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
-typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void
-exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
-struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg[ 15u];
-struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; } ;
-extern char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{ char* tag;
-struct _tagged_string f1; } ; extern char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Not_found[ 14u];
-extern char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{ char*
-tag; struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
-_tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
-struct _tagged_string Cstring_to_string( char*); extern int system( char*);
-struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List*
+unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef
+unsigned char Cyc_u_char; typedef unsigned short Cyc_u_short; typedef
+unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef unsigned short
+Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int Cyc_clock_t;
+typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct
+Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec it_value; }
+; typedef int Cyc_daddr_t; typedef unsigned char* Cyc_caddr_t; typedef
+unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
+unsigned int Cyc_vm_size_t; typedef unsigned char Cyc_int8_t; typedef
+unsigned char Cyc_u_int8_t; typedef short Cyc_int16_t; typedef unsigned short
+Cyc_u_int16_t; typedef int Cyc_int32_t; typedef unsigned int Cyc_u_int32_t;
+typedef long long Cyc_int64_t; typedef unsigned long long Cyc_u_int64_t; typedef
+int Cyc_register_t; typedef short Cyc_dev_t; typedef int Cyc_off_t; typedef
+unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int Cyc_pid_t;
+typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned char* Cyc_addr_t;
+typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask;
+struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
+Cyc__types_fd_set; typedef unsigned char* Cyc_Cstring; typedef struct
+_tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
+struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void exit(
+int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef struct Cyc_Core_Opt*
+Cyc_Core_opt_t; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Failure[
+12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_string
+f1; } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Not_found[
+14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
+unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
+string_to_Cstring( struct _tagged_string); extern unsigned char*
+underlying_Cstring( struct _tagged_string); extern struct _tagged_string
+Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
+Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List*
 Cyc_List_glist_t; typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct
 Cyc_List_List* Cyc_List_List_t; extern int Cyc_List_length( struct Cyc_List_List*
-x); extern char Cyc_List_List_empty[ 15u]; extern char Cyc_List_List_mismatch[
-18u]; extern char Cyc_List_Nth[ 8u]; extern void* Cyc_List_assoc_cmp( int(*
-compare)( void*, void*), struct Cyc_List_List* l, void* x); struct Cyc_Hashtable_Table;
+x); extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern void* Cyc_List_assoc_cmp(
+int(* compare)( void*, void*), struct Cyc_List_List* l, void* x); struct Cyc_Hashtable_Table;
 typedef struct Cyc_Hashtable_Table* Cyc_Hashtable_table_t; extern struct Cyc_Hashtable_Table*
 Cyc_Hashtable_create( int sz, int(* cmp)( void*, void*), int(* hash)( void*));
 extern void Cyc_Hashtable_insert( struct Cyc_Hashtable_Table* t, void* key, void*
@@ -46,63 +49,63 @@ struct _tagged_string* s); extern void Cyc_Hashtable_iter( void(* f)( void*,
 void*), struct Cyc_Hashtable_Table* t); extern void Cyc_Hashtable_print_table_map(
 struct Cyc_Hashtable_Table* t, void(* prn_key)( void*), void(* prn_val)( void*));
 struct Cyc_Stdio___sFILE; typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE;
-typedef int Cyc_Stdio_fpos_t; extern char Cyc_Stdio_FileCloseError[ 19u]; extern
-char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{ char*
-tag; struct _tagged_string f1; } ; struct _tagged_ptr0{ struct Cyc_List_List**
-curr; struct Cyc_List_List** base; struct Cyc_List_List** last_plus_one; } ;
-struct Cyc_Hashtable_Table{ int(* cmp)( void*, void*); int(* hash)( void*); int
-max_len; struct _tagged_ptr0 tab; } ; struct Cyc_Hashtable_Table* Cyc_Hashtable_create(
-int sz, int(* cmp)( void*, void*), int(* hash)( void*)){ struct Cyc_List_List*
-mt= 0; return({ struct Cyc_Hashtable_Table* _temp0=( struct Cyc_Hashtable_Table*)
-GC_malloc( sizeof( struct Cyc_Hashtable_Table)); _temp0->cmp= cmp; _temp0->hash=
-hash; _temp0->max_len= 3; _temp0->tab=({ unsigned int _temp1=( unsigned int) sz;
-struct Cyc_List_List** _temp2=( struct Cyc_List_List**) GC_malloc( sizeof(
-struct Cyc_List_List*) * _temp1); struct _tagged_ptr0 _temp4={ _temp2, _temp2,
-_temp2 + _temp1};{ unsigned int _temp3= _temp1; unsigned int i; for( i= 0; i <
-_temp3; i ++){ _temp2[ i]= mt;}}; _temp4;}); _temp0;});} struct _tuple0{ void*
-f1; void* f2; } ; void Cyc_Hashtable_insert( struct Cyc_Hashtable_Table* t, void*
-key, void* val){ struct _tagged_ptr0 tab= t->tab; int bucket=( int)((* t->hash)(
-key) %({ struct _tagged_ptr0 _temp7= tab;( unsigned int)( _temp7.last_plus_one -
-_temp7.curr);}));*(( struct Cyc_List_List**(*)( struct _tagged_ptr0,
+typedef int Cyc_Stdio_fpos_t; extern unsigned char Cyc_Stdio_FileCloseError[ 19u];
+extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
+unsigned char* tag; struct _tagged_string f1; } ; struct _tagged_ptr0{ struct
+Cyc_List_List** curr; struct Cyc_List_List** base; struct Cyc_List_List**
+last_plus_one; } ; struct Cyc_Hashtable_Table{ int(* cmp)( void*, void*); int(*
+hash)( void*); int max_len; struct _tagged_ptr0 tab; } ; struct Cyc_Hashtable_Table*
+Cyc_Hashtable_create( int sz, int(* cmp)( void*, void*), int(* hash)( void*)){
+struct Cyc_List_List* mt= 0; return({ struct Cyc_Hashtable_Table* _temp0=(
+struct Cyc_Hashtable_Table*) GC_malloc( sizeof( struct Cyc_Hashtable_Table));
+_temp0->cmp= cmp; _temp0->hash= hash; _temp0->max_len= 3; _temp0->tab=({
+unsigned int _temp1=( unsigned int) sz; struct Cyc_List_List** _temp2=( struct
+Cyc_List_List**) GC_malloc( sizeof( struct Cyc_List_List*) * _temp1); struct
+_tagged_ptr0 _temp4={ _temp2, _temp2, _temp2 + _temp1};{ unsigned int _temp3=
+_temp1; unsigned int i; for( i= 0; i < _temp3; i ++){ _temp2[ i]= mt;}}; _temp4;});
+_temp0;});} struct _tuple0{ void* f1; void* f2; } ; void Cyc_Hashtable_insert(
+struct Cyc_Hashtable_Table* t, void* key, void* val){ struct _tagged_ptr0 tab= t->tab;
+int bucket=( int)((* t->hash)( key) %({ struct _tagged_ptr0 _temp7= tab;(
+unsigned int)( _temp7.last_plus_one - _temp7.curr);}));*(( struct Cyc_List_List**(*)(
+struct _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( tab,
+sizeof( struct Cyc_List_List*), bucket)=({ struct Cyc_List_List* _temp5=( struct
+Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp5->hd=( void*)({
+struct _tuple0* _temp6=( struct _tuple0*) GC_malloc( sizeof( struct _tuple0));
+_temp6->f1= key; _temp6->f2= val; _temp6;}); _temp5->tl=*(( struct Cyc_List_List**(*)(
+struct _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( tab,
+sizeof( struct Cyc_List_List*), bucket); _temp5;}); if((( int(*)( struct Cyc_List_List*
+x)) Cyc_List_length)(*(( struct Cyc_List_List**(*)( struct _tagged_ptr0,
 unsigned int, unsigned int)) _check_unknown_subscript)( tab, sizeof( struct Cyc_List_List*),
-bucket)=({ struct Cyc_List_List* _temp5=( struct Cyc_List_List*) GC_malloc(
-sizeof( struct Cyc_List_List)); _temp5->hd=( void*)({ struct _tuple0* _temp6=(
-struct _tuple0*) GC_malloc( sizeof( struct _tuple0)); _temp6->f1= key; _temp6->f2=
-val; _temp6;}); _temp5->tl=*(( struct Cyc_List_List**(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( tab, sizeof( struct Cyc_List_List*),
-bucket); _temp5;}); if((( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(*((
+bucket)) > t->max_len){(( void(*)( struct Cyc_Hashtable_Table* t)) Cyc_Hashtable_resize)(
+t);}} void* Cyc_Hashtable_lookup( struct Cyc_Hashtable_Table* t, void* key){
+struct _tagged_ptr0 tab= t->tab; struct Cyc_List_List* l=*(( struct Cyc_List_List**(*)(
+struct _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( tab,
+sizeof( struct Cyc_List_List*),( int)((* t->hash)( key) %({ struct _tagged_ptr0
+_temp8= tab;( unsigned int)( _temp8.last_plus_one - _temp8.curr);}))); return((
+void*(*)( int(* compare)( void*, void*), struct Cyc_List_List* l, void* x)) Cyc_List_assoc_cmp)(
+t->cmp, l, key);} void Cyc_Hashtable_remove( struct Cyc_Hashtable_Table* t, void*
+key){ struct _tagged_ptr0 tab= t->tab; int(* cmp)( void*, void*)= t->cmp; int
+bucket=( int)((* t->hash)( key) %({ struct _tagged_ptr0 _temp9= tab;(
+unsigned int)( _temp9.last_plus_one - _temp9.curr);})); struct Cyc_List_List* l=*((
 struct Cyc_List_List**(*)( struct _tagged_ptr0, unsigned int, unsigned int))
-_check_unknown_subscript)( tab, sizeof( struct Cyc_List_List*), bucket)) > t->max_len){((
-void(*)( struct Cyc_Hashtable_Table* t)) Cyc_Hashtable_resize)( t);}} void* Cyc_Hashtable_lookup(
-struct Cyc_Hashtable_Table* t, void* key){ struct _tagged_ptr0 tab= t->tab;
-struct Cyc_List_List* l=*(( struct Cyc_List_List**(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( tab, sizeof( struct Cyc_List_List*),(
-int)((* t->hash)( key) %({ struct _tagged_ptr0 _temp8= tab;( unsigned int)(
-_temp8.last_plus_one - _temp8.curr);}))); return(( void*(*)( int(* compare)(
-void*, void*), struct Cyc_List_List* l, void* x)) Cyc_List_assoc_cmp)( t->cmp, l,
-key);} void Cyc_Hashtable_remove( struct Cyc_Hashtable_Table* t, void* key){
-struct _tagged_ptr0 tab= t->tab; int(* cmp)( void*, void*)= t->cmp; int bucket=(
-int)((* t->hash)( key) %({ struct _tagged_ptr0 _temp9= tab;( unsigned int)(
-_temp9.last_plus_one - _temp9.curr);})); struct Cyc_List_List* l=*(( struct Cyc_List_List**(*)(
-struct _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( tab,
-sizeof( struct Cyc_List_List*), bucket); if( l == 0){ return;} if((* cmp)( key,(((
-struct _tuple0*)(( struct Cyc_List_List*) _check_null( l))->hd)[
-_check_known_subscript_notnull( 1u, 0)]).f1) == 0){*(( struct Cyc_List_List**(*)(
-struct _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( tab,
-sizeof( struct Cyc_List_List*), bucket)=(( struct Cyc_List_List*) _check_null( l))->tl;
-return;}{ struct Cyc_List_List* prev= l; l=(( struct Cyc_List_List*) _check_null(
-l))->tl; for( 0;(( struct Cyc_List_List*) _check_null( l))->tl != 0;( prev= l, l=((
-struct Cyc_List_List*) _check_null( l))->tl)){ if((* cmp)( key,((( struct
-_tuple0*)(( struct Cyc_List_List*) _check_null( l))->hd)[
+_check_unknown_subscript)( tab, sizeof( struct Cyc_List_List*), bucket); if( l
+== 0){ return;} if((* cmp)( key,((( struct _tuple0*)(( struct Cyc_List_List*)
+_check_null( l))->hd)[ _check_known_subscript_notnull( 1u, 0)]).f1) == 0){*((
+struct Cyc_List_List**(*)( struct _tagged_ptr0, unsigned int, unsigned int))
+_check_unknown_subscript)( tab, sizeof( struct Cyc_List_List*), bucket)=((
+struct Cyc_List_List*) _check_null( l))->tl; return;}{ struct Cyc_List_List*
+prev= l; l=(( struct Cyc_List_List*) _check_null( l))->tl; for( 0;(( struct Cyc_List_List*)
+_check_null( l))->tl != 0;( prev= l, l=(( struct Cyc_List_List*) _check_null( l))->tl)){
+if((* cmp)( key,((( struct _tuple0*)(( struct Cyc_List_List*) _check_null( l))->hd)[
 _check_known_subscript_notnull( 1u, 0)]).f1) == 0){(( struct Cyc_List_List*)
 _check_null( prev))->tl=(( struct Cyc_List_List*) _check_null( l))->tl; return;}}}}
 int Cyc_Hashtable_hash_string( struct _tagged_string s){ int ans= 0; int sz=(
 int)({ struct _tagged_string _temp10= s;( unsigned int)( _temp10.last_plus_one -
 _temp10.curr);}); int shift= 0;{ int i= 0; for( 0; i < sz; ++ i){ ans= ans ^*((
-char*(*)( struct _tagged_string, unsigned int, unsigned int))
-_check_unknown_subscript)( s, sizeof( char), i) << shift; shift += 8; if( shift
-== 32){ shift= 0;}}} return ans;} int Cyc_Hashtable_hash_stringptr( struct
-_tagged_string* s){ return Cyc_Hashtable_hash_string(* s);} void Cyc_Hashtable_insert_bucket(
+unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
+_check_unknown_subscript)( s, sizeof( unsigned char), i) << shift; shift += 8;
+if( shift == 32){ shift= 0;}}} return ans;} int Cyc_Hashtable_hash_stringptr(
+struct _tagged_string* s){ return Cyc_Hashtable_hash_string(* s);} void Cyc_Hashtable_insert_bucket(
 struct _tagged_ptr0 tab, int(* hash)( void*), struct Cyc_List_List* elems){ if(
 elems == 0){ return;}(( void(*)( struct _tagged_ptr0 tab, int(* hash)( void*),
 struct Cyc_List_List* elems)) Cyc_Hashtable_insert_bucket)( tab, hash,(( struct

@@ -96,7 +96,11 @@ static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
     for(; env.all_locals != null; env.all_locals = env.all_locals->tl) {
       let vd = env.all_locals->hd;
       if(String::zstrptrcmp(v,(*vd->name)[1])==0) {
-	e->r = deref_exp(var_exp(vd->name,DL),DL)->r;
+	// don't deref if it's a stack-allocated array 
+	switch(vd->type) {
+	case &ArrayType(_,_,_): break;
+	default: e->r = deref_exp(var_exp(vd->name,DL),DL)->r; break;
+	}
 	*env.freevars = Set::rinsert(env.rgn,*env.freevars,vd);
 	return;
       }
@@ -226,10 +230,21 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
   glist_t<vardecl_t,`r> free_vars = Set::elements(freevars);
   for(; free_vars != null; free_vars = free_vars->tl) {
     vardecl_t vd = free_vars->hd;
-    params = new List(new $((*vd->name)[1], vd->tq, 
-			    cstar_typ(vd->type,empty_tqual())),
-		      params);
-    args = new List(address_exp(var_exp(vd->name,DL),DL), args);
+    // don't box if it's a stack-allocated array
+    switch(vd->type) {
+    case &ArrayType(elt_typ,_,_): 
+      params = new List(new $((*vd->name)[1], vd->tq, 
+			      cstar_typ(elt_typ,empty_tqual())),
+			params);
+      args = new List(var_exp(vd->name,DL), args); 
+      break;
+    default: 
+      params = new List(new $((*vd->name)[1], vd->tq, 
+			      cstar_typ(vd->type,empty_tqual())),
+			params);
+      args = new List(address_exp(var_exp(vd->name,DL),DL), args);
+      break;
+    }
   }
   qvar_t funname = Toc::temp_var();
   *env.gen_ds=new List(new_decl(new Fn_d(new Fndecl(Static,true,funname,

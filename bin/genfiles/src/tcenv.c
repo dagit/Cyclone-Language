@@ -1,82 +1,85 @@
 #include "cyc_include.h"
 
  typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
-unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char;
-typedef unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef
-unsigned int Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int
-Cyc_uint; typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
-int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
-it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
-char* Cyc_caddr_t; typedef unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t;
-typedef unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
-typedef short Cyc_int16_t; typedef unsigned short Cyc_u_int16_t; typedef int Cyc_int32_t;
-typedef unsigned int Cyc_u_int32_t; typedef long long Cyc_int64_t; typedef
-unsigned long long Cyc_u_int64_t; typedef int Cyc_register_t; typedef short Cyc_dev_t;
-typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
-Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
-typedef char* Cyc_addr_t; typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t;
-typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ;
-typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
-typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
-typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void
-exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
-struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg[ 15u];
-struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; } ;
-extern char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{ char* tag;
-struct _tagged_string f1; } ; extern char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Not_found[ 14u];
-extern char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{ char*
-tag; struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
-_tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
-struct _tagged_string Cstring_to_string( char*); extern int system( char*);
-struct Cyc_Stdio___sFILE; typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE;
-extern struct Cyc_Stdio___sFILE* Cyc_Stdio_stderr; typedef int Cyc_Stdio_fpos_t;
-extern int Cyc_Stdio_fflush( struct Cyc_Stdio___sFILE*); extern char Cyc_Stdio_FileCloseError[
-19u]; extern char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
-char* tag; struct _tagged_string f1; } ; struct Cyc_List_List{ void* hd; struct
-Cyc_List_List* tl; } ; typedef struct Cyc_List_List* Cyc_List_glist_t; typedef
-struct Cyc_List_List* Cyc_List_list_t; typedef struct Cyc_List_List* Cyc_List_List_t;
-extern char Cyc_List_List_empty[ 15u]; extern char Cyc_List_List_mismatch[ 18u];
-extern struct Cyc_List_List* Cyc_List_rev( struct Cyc_List_List* x); extern
-struct Cyc_List_List* Cyc_List_imp_rev( struct Cyc_List_List* x); extern struct
-Cyc_List_List* Cyc_List_append( struct Cyc_List_List* x, struct Cyc_List_List* y);
-extern char Cyc_List_Nth[ 8u]; struct Cyc_Dict_Dict; typedef struct Cyc_Dict_Dict*
-Cyc_Dict_gdict_t; typedef struct Cyc_Dict_Dict* Cyc_Dict_hdict_t; typedef struct
-Cyc_Dict_Dict* Cyc_Dict_dict_t; extern char Cyc_Dict_Present[ 12u]; extern char
-Cyc_Dict_Absent[ 11u]; extern struct Cyc_Dict_Dict* Cyc_Dict_empty( int(* comp)(
-void*, void*)); extern int Cyc_Dict_member( struct Cyc_Dict_Dict* d, void* key);
-extern struct Cyc_Dict_Dict* Cyc_Dict_insert( struct Cyc_Dict_Dict* d, void* key,
-void* data); extern void* Cyc_Dict_lookup( struct Cyc_Dict_Dict* d, void* key);
-extern struct Cyc_Core_Opt* Cyc_Dict_lookup_opt( struct Cyc_Dict_Dict* d, void*
-key); struct Cyc_Set_Set; typedef struct Cyc_Set_Set* Cyc_Set_gset_t; typedef
-struct Cyc_Set_Set* Cyc_Set_hset_t; typedef struct Cyc_Set_Set* Cyc_Set_set_t;
-extern struct Cyc_Set_Set* Cyc_Set_empty( int(* comp)( void*, void*)); extern
-int Cyc_Set_member( struct Cyc_Set_Set* s, void* elt); extern char Cyc_Set_Absent[
-11u]; struct Cyc_SlowDict_Dict; typedef struct Cyc_SlowDict_Dict* Cyc_SlowDict_hdict_t;
-typedef struct Cyc_SlowDict_Dict* Cyc_SlowDict_dict_t; extern char Cyc_SlowDict_Present[
-12u]; extern char Cyc_SlowDict_Absent[ 11u]; extern struct Cyc_SlowDict_Dict*
-Cyc_SlowDict_empty( int(* comp)( void*, void*)); extern int Cyc_SlowDict_is_empty(
-struct Cyc_SlowDict_Dict* d); extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_insert(
-struct Cyc_SlowDict_Dict* d, void* key, void* data); extern struct Cyc_Core_Opt*
-Cyc_SlowDict_lookup_opt( struct Cyc_SlowDict_Dict* d, void* key); extern struct
-Cyc_SlowDict_Dict* Cyc_SlowDict_delete( struct Cyc_SlowDict_Dict* d, void* key);
-struct Cyc_Lineno_Pos{ struct _tagged_string logical_file; struct _tagged_string
-line; int line_no; int col; } ; typedef struct Cyc_Lineno_Pos* Cyc_Lineno_pos_t;
-extern char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment; typedef struct
-Cyc_Position_Segment* Cyc_Position_seg_t; static const int Cyc_Position_Lex= 0;
-static const int Cyc_Position_Parse= 1; static const int Cyc_Position_Elab= 2;
-typedef void* Cyc_Position_error_kind_t; struct Cyc_Position_Error{ struct
-_tagged_string source; struct Cyc_Position_Segment* seg; void* kind; struct
-_tagged_string desc; } ; typedef struct Cyc_Position_Error* Cyc_Position_error_t;
-extern char Cyc_Position_Nocontext[ 14u]; extern int Cyc_String_zstrptrcmp(
-struct _tagged_string*, struct _tagged_string*); struct Cyc_PP_Ppstate; typedef
-struct Cyc_PP_Ppstate* Cyc_PP_ppstate_t; struct Cyc_PP_Out; typedef struct Cyc_PP_Out*
-Cyc_PP_out_t; struct Cyc_PP_Doc; typedef struct Cyc_PP_Doc* Cyc_PP_doc_t;
-typedef struct _tagged_string* Cyc_Absyn_field_name_t; typedef struct
-_tagged_string* Cyc_Absyn_var_t; typedef struct _tagged_string* Cyc_Absyn_tvarname_t;
-typedef void* Cyc_Absyn_nmspace_t; struct _tuple0{ void* f1; struct
-_tagged_string* f2; } ; typedef struct _tuple0* Cyc_Absyn_qvar_t; typedef struct
-_tuple0* Cyc_Absyn_qvar_opt_t; typedef struct _tuple0* Cyc_Absyn_typedef_name_t;
+unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef
+unsigned char Cyc_u_char; typedef unsigned short Cyc_u_short; typedef
+unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef unsigned short
+Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int Cyc_clock_t;
+typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct
+Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec it_value; }
+; typedef int Cyc_daddr_t; typedef unsigned char* Cyc_caddr_t; typedef
+unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
+unsigned int Cyc_vm_size_t; typedef unsigned char Cyc_int8_t; typedef
+unsigned char Cyc_u_int8_t; typedef short Cyc_int16_t; typedef unsigned short
+Cyc_u_int16_t; typedef int Cyc_int32_t; typedef unsigned int Cyc_u_int32_t;
+typedef long long Cyc_int64_t; typedef unsigned long long Cyc_u_int64_t; typedef
+int Cyc_register_t; typedef short Cyc_dev_t; typedef int Cyc_off_t; typedef
+unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int Cyc_pid_t;
+typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned char* Cyc_addr_t;
+typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask;
+struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
+Cyc__types_fd_set; typedef unsigned char* Cyc_Cstring; typedef struct
+_tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
+struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void exit(
+int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef struct Cyc_Core_Opt*
+Cyc_Core_opt_t; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Failure[
+12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_string
+f1; } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Not_found[
+14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
+unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
+string_to_Cstring( struct _tagged_string); extern unsigned char*
+underlying_Cstring( struct _tagged_string); extern struct _tagged_string
+Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
+Cyc_Stdio___sFILE; typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE; extern
+struct Cyc_Stdio___sFILE* Cyc_Stdio_stderr; typedef int Cyc_Stdio_fpos_t; extern
+int Cyc_Stdio_fflush( struct Cyc_Stdio___sFILE*); extern unsigned char Cyc_Stdio_FileCloseError[
+19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
+unsigned char* tag; struct _tagged_string f1; } ; struct Cyc_List_List{ void* hd;
+struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List* Cyc_List_glist_t;
+typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct Cyc_List_List* Cyc_List_List_t;
+extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
+18u]; extern struct Cyc_List_List* Cyc_List_rev( struct Cyc_List_List* x);
+extern struct Cyc_List_List* Cyc_List_imp_rev( struct Cyc_List_List* x); extern
+struct Cyc_List_List* Cyc_List_append( struct Cyc_List_List* x, struct Cyc_List_List*
+y); extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Dict_Dict; typedef struct
+Cyc_Dict_Dict* Cyc_Dict_gdict_t; typedef struct Cyc_Dict_Dict* Cyc_Dict_hdict_t;
+typedef struct Cyc_Dict_Dict* Cyc_Dict_dict_t; extern unsigned char Cyc_Dict_Present[
+12u]; extern unsigned char Cyc_Dict_Absent[ 11u]; extern struct Cyc_Dict_Dict*
+Cyc_Dict_empty( int(* comp)( void*, void*)); extern int Cyc_Dict_member( struct
+Cyc_Dict_Dict* d, void* key); extern struct Cyc_Dict_Dict* Cyc_Dict_insert(
+struct Cyc_Dict_Dict* d, void* key, void* data); extern void* Cyc_Dict_lookup(
+struct Cyc_Dict_Dict* d, void* key); extern struct Cyc_Core_Opt* Cyc_Dict_lookup_opt(
+struct Cyc_Dict_Dict* d, void* key); struct Cyc_Set_Set; typedef struct Cyc_Set_Set*
+Cyc_Set_gset_t; typedef struct Cyc_Set_Set* Cyc_Set_hset_t; typedef struct Cyc_Set_Set*
+Cyc_Set_set_t; extern struct Cyc_Set_Set* Cyc_Set_empty( int(* comp)( void*,
+void*)); extern int Cyc_Set_member( struct Cyc_Set_Set* s, void* elt); extern
+unsigned char Cyc_Set_Absent[ 11u]; struct Cyc_SlowDict_Dict; typedef struct Cyc_SlowDict_Dict*
+Cyc_SlowDict_hdict_t; typedef struct Cyc_SlowDict_Dict* Cyc_SlowDict_dict_t;
+extern unsigned char Cyc_SlowDict_Present[ 12u]; extern unsigned char Cyc_SlowDict_Absent[
+11u]; extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_empty( int(* comp)( void*,
+void*)); extern int Cyc_SlowDict_is_empty( struct Cyc_SlowDict_Dict* d); extern
+struct Cyc_SlowDict_Dict* Cyc_SlowDict_insert( struct Cyc_SlowDict_Dict* d, void*
+key, void* data); extern struct Cyc_Core_Opt* Cyc_SlowDict_lookup_opt( struct
+Cyc_SlowDict_Dict* d, void* key); extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_delete(
+struct Cyc_SlowDict_Dict* d, void* key); struct Cyc_Lineno_Pos{ struct
+_tagged_string logical_file; struct _tagged_string line; int line_no; int col; }
+; typedef struct Cyc_Lineno_Pos* Cyc_Lineno_pos_t; extern unsigned char Cyc_Position_Exit[
+9u]; struct Cyc_Position_Segment; typedef struct Cyc_Position_Segment* Cyc_Position_seg_t;
+static const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1;
+static const int Cyc_Position_Elab= 2; typedef void* Cyc_Position_error_kind_t;
+struct Cyc_Position_Error{ struct _tagged_string source; struct Cyc_Position_Segment*
+seg; void* kind; struct _tagged_string desc; } ; typedef struct Cyc_Position_Error*
+Cyc_Position_error_t; extern unsigned char Cyc_Position_Nocontext[ 14u]; extern
+int Cyc_String_zstrptrcmp( struct _tagged_string*, struct _tagged_string*);
+struct Cyc_PP_Ppstate; typedef struct Cyc_PP_Ppstate* Cyc_PP_ppstate_t; struct
+Cyc_PP_Out; typedef struct Cyc_PP_Out* Cyc_PP_out_t; struct Cyc_PP_Doc; typedef
+struct Cyc_PP_Doc* Cyc_PP_doc_t; typedef struct _tagged_string* Cyc_Absyn_field_name_t;
+typedef struct _tagged_string* Cyc_Absyn_var_t; typedef struct _tagged_string*
+Cyc_Absyn_tvarname_t; typedef void* Cyc_Absyn_nmspace_t; struct _tuple0{ void*
+f1; struct _tagged_string* f2; } ; typedef struct _tuple0* Cyc_Absyn_qvar_t;
+typedef struct _tuple0* Cyc_Absyn_qvar_opt_t; typedef struct _tuple0* Cyc_Absyn_typedef_name_t;
 typedef struct _tuple0* Cyc_Absyn_typedef_name_opt_t; struct Cyc_Absyn_Tvar;
 struct Cyc_Absyn_Tqual; struct Cyc_Absyn_Conref; struct Cyc_Absyn_PtrInfo;
 struct Cyc_Absyn_VarargInfo; struct Cyc_Absyn_FnInfo; struct Cyc_Absyn_TunionInfo;
@@ -207,7 +210,7 @@ struct Cyc_List_List* f1; struct Cyc_Position_Segment* f2; int f3; } ; static
 const int Cyc_Absyn_Attributes_mod= 4; struct Cyc_Absyn_Attributes_mod_struct{
 int tag; struct Cyc_Position_Segment* f1; struct Cyc_List_List* f2; } ; static
 const int Cyc_Absyn_Char_c= 0; struct Cyc_Absyn_Char_c_struct{ int tag; void* f1;
-char f2; } ; static const int Cyc_Absyn_Short_c= 1; struct Cyc_Absyn_Short_c_struct{
+unsigned char f2; } ; static const int Cyc_Absyn_Short_c= 1; struct Cyc_Absyn_Short_c_struct{
 int tag; void* f1; short f2; } ; static const int Cyc_Absyn_Int_c= 2; struct Cyc_Absyn_Int_c_struct{
 int tag; void* f1; int f2; } ; static const int Cyc_Absyn_LongLong_c= 3; struct
 Cyc_Absyn_LongLong_c_struct{ int tag; void* f1; long long f2; } ; static const
@@ -326,7 +329,7 @@ non_local_preds; int try_depth; void* annot; } ; static const int Cyc_Absyn_Wild
 struct Cyc_Absyn_Vardecl* f1; } ; static const int Cyc_Absyn_Null_p= 1; static
 const int Cyc_Absyn_Int_p= 1; struct Cyc_Absyn_Int_p_struct{ int tag; void* f1;
 int f2; } ; static const int Cyc_Absyn_Char_p= 2; struct Cyc_Absyn_Char_p_struct{
-int tag; char f1; } ; static const int Cyc_Absyn_Float_p= 3; struct Cyc_Absyn_Float_p_struct{
+int tag; unsigned char f1; } ; static const int Cyc_Absyn_Float_p= 3; struct Cyc_Absyn_Float_p_struct{
 int tag; struct _tagged_string f1; } ; static const int Cyc_Absyn_Tuple_p= 4;
 struct Cyc_Absyn_Tuple_p_struct{ int tag; struct Cyc_List_List* f1; } ; static
 const int Cyc_Absyn_Pointer_p= 5; struct Cyc_Absyn_Pointer_p_struct{ int tag;
@@ -397,8 +400,8 @@ struct Cyc_Absyn_Decl{ void* r; struct Cyc_Position_Segment* loc; } ; static
 const int Cyc_Absyn_ArrayElement= 0; struct Cyc_Absyn_ArrayElement_struct{ int
 tag; struct Cyc_Absyn_Exp* f1; } ; static const int Cyc_Absyn_FieldName= 1;
 struct Cyc_Absyn_FieldName_struct{ int tag; struct _tagged_string* f1; } ;
-extern char Cyc_Absyn_EmptyAnnot[ 15u]; extern int Cyc_Absyn_varlist_cmp( struct
-Cyc_List_List*, struct Cyc_List_List*); extern struct Cyc_Absyn_Tqual Cyc_Absyn_empty_tqual();
+extern unsigned char Cyc_Absyn_EmptyAnnot[ 15u]; extern int Cyc_Absyn_varlist_cmp(
+struct Cyc_List_List*, struct Cyc_List_List*); extern struct Cyc_Absyn_Tqual Cyc_Absyn_empty_tqual();
 extern struct Cyc_Absyn_Conref* Cyc_Absyn_new_conref( void* x); extern struct
 _tuple0* Cyc_Absyn_exn_name; extern struct Cyc_Absyn_Tuniondecl* Cyc_Absyn_exn_xed;
 extern void* Cyc_Absyn_tagged_typ( void* t, void* rgn, struct Cyc_Absyn_Tqual tq);
@@ -474,29 +477,29 @@ struct Cyc_Tcenv_Tenv*); extern struct Cyc_Tcenv_Tenv* Cyc_Tcenv_add_region(
 struct Cyc_Tcenv_Tenv* te, void* r); extern void Cyc_Tcenv_check_rgn_accessible(
 struct Cyc_Tcenv_Tenv*, struct Cyc_Position_Segment*, void* rgn); extern void
 Cyc_Tcenv_check_effect_accessible( struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment*
-loc, void* eff); extern char Cyc_Tcutil_TypeErr[ 12u]; extern void Cyc_Tcutil_terr(
+loc, void* eff); extern unsigned char Cyc_Tcutil_TypeErr[ 12u]; extern void Cyc_Tcutil_terr(
 struct Cyc_Position_Segment*, struct _tagged_string); extern struct Cyc_Core_Opt*
 Cyc_Tcutil_empty_var_set; extern int Cyc_Tcutil_subset_effect( int set_to_empty,
 void* e1, void* e2); extern int Cyc_Tcutil_region_in_effect( int constrain, void*
 r, void* e); extern void Cyc_Tcutil_check_unique_tvars( struct Cyc_Position_Segment*,
 struct Cyc_List_List*); extern struct Cyc_Absyn_Tvar* Cyc_Tcutil_new_tvar( void*
-k); char Cyc_Tcenv_Env_error[ 14u]="\000\000\000\000Env_error"; void* Cyc_Tcenv_env_err(
-struct _tagged_string msg){({ struct _tagged_string _temp0= msg; fprintf( Cyc_Stdio_stderr,"Error: %.*s\n",
-_temp0.last_plus_one - _temp0.curr, _temp0.curr);}); Cyc_Stdio_fflush(( struct
-Cyc_Stdio___sFILE*) Cyc_Stdio_stderr);( void) _throw(( void*) Cyc_Tcenv_Env_error);}
-struct Cyc_Tcenv_Tenv; struct Cyc_Tcenv_Genv; struct Cyc_Tcenv_CtrlEnv{ void*
-continue_stmt; void* break_stmt; struct _tuple3* fallthru_clause; void*
-next_stmt; int try_depth; } ; typedef struct Cyc_Tcenv_CtrlEnv* Cyc_Tcenv_ctrl_env_t;
-struct Cyc_Tcenv_SharedFenv{ void* return_typ; struct Cyc_Dict_Dict* seen_labels;
-struct Cyc_SlowDict_Dict* needed_labels; } ; struct Cyc_Tcenv_Fenv{ struct Cyc_Tcenv_SharedFenv*
-shared; struct Cyc_List_List* type_vars; struct Cyc_Dict_Dict* locals; struct
-Cyc_Absyn_Stmt* encloser; struct Cyc_Tcenv_CtrlEnv* ctrl_env; void* capability;
-void* curr_rgn; } ; struct Cyc_Tcenv_Tenv* Cyc_Tcenv_tc_init(){ Cyc_Tcutil_empty_var_set=({
-struct Cyc_Core_Opt* _temp1=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp1->v=( void*)(( struct Cyc_Set_Set*(*)( int(* comp)( struct
-_tagged_string*, struct _tagged_string*))) Cyc_Set_empty)( Cyc_String_zstrptrcmp);
-_temp1;});{ struct Cyc_Tcenv_Genv* _temp2= Cyc_Tcenv_empty_genv(); goto _LL3;
-_LL3: { struct Cyc_List_List* _temp4= 0; goto _LL5; _LL5: _temp2->tuniondecls=((
+k); unsigned char Cyc_Tcenv_Env_error[ 14u]="\000\000\000\000Env_error"; void*
+Cyc_Tcenv_env_err( struct _tagged_string msg){({ struct _tagged_string _temp0=
+msg; fprintf( Cyc_Stdio_stderr,"Error: %.*s\n", _temp0.last_plus_one - _temp0.curr,
+_temp0.curr);}); Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*) Cyc_Stdio_stderr);(
+void) _throw(( void*) Cyc_Tcenv_Env_error);} struct Cyc_Tcenv_Tenv; struct Cyc_Tcenv_Genv;
+struct Cyc_Tcenv_CtrlEnv{ void* continue_stmt; void* break_stmt; struct _tuple3*
+fallthru_clause; void* next_stmt; int try_depth; } ; typedef struct Cyc_Tcenv_CtrlEnv*
+Cyc_Tcenv_ctrl_env_t; struct Cyc_Tcenv_SharedFenv{ void* return_typ; struct Cyc_Dict_Dict*
+seen_labels; struct Cyc_SlowDict_Dict* needed_labels; } ; struct Cyc_Tcenv_Fenv{
+struct Cyc_Tcenv_SharedFenv* shared; struct Cyc_List_List* type_vars; struct Cyc_Dict_Dict*
+locals; struct Cyc_Absyn_Stmt* encloser; struct Cyc_Tcenv_CtrlEnv* ctrl_env;
+void* capability; void* curr_rgn; } ; struct Cyc_Tcenv_Tenv* Cyc_Tcenv_tc_init(){
+Cyc_Tcutil_empty_var_set=({ struct Cyc_Core_Opt* _temp1=( struct Cyc_Core_Opt*)
+GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1->v=( void*)(( struct Cyc_Set_Set*(*)(
+int(* comp)( struct _tagged_string*, struct _tagged_string*))) Cyc_Set_empty)(
+Cyc_String_zstrptrcmp); _temp1;});{ struct Cyc_Tcenv_Genv* _temp2= Cyc_Tcenv_empty_genv();
+goto _LL3; _LL3: { struct Cyc_List_List* _temp4= 0; goto _LL5; _LL5: _temp2->tuniondecls=((
 struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict* d, struct _tagged_string* key,
 struct Cyc_Absyn_Tuniondecl** data)) Cyc_Dict_insert)( _temp2->tuniondecls,(*
 Cyc_Absyn_exn_name).f2,& Cyc_Absyn_exn_xed);{ struct Cyc_Dict_Dict* _temp6=((
@@ -511,7 +514,7 @@ loc, struct _tagged_string* n, struct Cyc_List_List* ns){ return(( struct Cyc_Tc
 struct Cyc_Dict_Dict* d, struct Cyc_List_List* key)) Cyc_Dict_lookup)( te->ae,
 Cyc_Tcenv_resolve_namespace( te, loc, n, ns));} static struct Cyc_List_List* Cyc_Tcenv_outer_namespace(
 struct Cyc_List_List* ns){ if( ns == 0){ return(( struct Cyc_List_List*(*)(
-struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ char* _temp9="Tcenv::outer_namespace";
+struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ unsigned char* _temp9="Tcenv::outer_namespace";
 struct _tagged_string _temp10; _temp10.curr= _temp9; _temp10.base= _temp9;
 _temp10.last_plus_one= _temp9 + 23; _temp10;}));} return(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x)) Cyc_List_rev)((( struct Cyc_List_List*) _check_null(((
@@ -742,26 +745,26 @@ _temp216;}); _npop_handler( 0u); return _temp217;}; _pop_handler();} else{ void*
 _temp214=( void*) _exn_thrown; void* _temp219= _temp214; _LL221: if( _temp219 ==
 Cyc_Dict_Absent){ goto _LL222;} else{ goto _LL223;} _LL223: goto _LL224; _LL222:
 return 0; _LL224:( void) _throw( _temp219); _LL220:;}}} _LL197: Cyc_Tcutil_terr(
-loc,({ char* _temp225="lookup_xtuniondecl: impossible"; struct _tagged_string
-_temp226; _temp226.curr= _temp225; _temp226.base= _temp225; _temp226.last_plus_one=
-_temp225 + 31; _temp226;})); return 0; _LL199: { struct Cyc_Tcenv_Genv* ge;{
-struct _handler_cons _temp227; _push_handler(& _temp227);{ int _temp229= 0; if(
-setjmp( _temp227.handler)){ _temp229= 1;} if( ! _temp229){ ge= Cyc_Tcenv_lookup_namespace(
-te, loc, _temp209, _temp207);; _pop_handler();} else{ void* _temp228=( void*)
-_exn_thrown; void* _temp231= _temp228; _LL233: if( _temp231 == Cyc_Dict_Absent){
-goto _LL234;} else{ goto _LL235;} _LL235: goto _LL236; _LL234: Cyc_Tcutil_terr(
-loc,({ char* _temp237="bad qualified name for xtunion"; struct _tagged_string
-_temp238; _temp238.curr= _temp237; _temp238.base= _temp237; _temp238.last_plus_one=
-_temp237 + 31; _temp238;}));( void) _throw(( void*) Cyc_Dict_Absent); _LL236:(
-void) _throw( _temp231); _LL232:;}}} return({ struct Cyc_Core_Opt* _temp239=(
-struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp239->v=(
-void*)(( struct Cyc_Absyn_Tuniondecl**(*)( struct Cyc_Dict_Dict* d, struct
-_tagged_string* key)) Cyc_Dict_lookup)( ge->tuniondecls, _temp188); _temp239;});}
-_LL201: { struct Cyc_Tcenv_Genv* ge=(( struct Cyc_Tcenv_Genv*(*)( struct Cyc_Dict_Dict*
-d, struct Cyc_List_List* key)) Cyc_Dict_lookup)( te->ae, _temp211); return({
-struct Cyc_Core_Opt* _temp240=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp240->v=( void*)(( struct Cyc_Absyn_Tuniondecl**(*)( struct
-Cyc_Dict_Dict* d, struct _tagged_string* key)) Cyc_Dict_lookup)( ge->tuniondecls,
+loc,({ unsigned char* _temp225="lookup_xtuniondecl: impossible"; struct
+_tagged_string _temp226; _temp226.curr= _temp225; _temp226.base= _temp225;
+_temp226.last_plus_one= _temp225 + 31; _temp226;})); return 0; _LL199: { struct
+Cyc_Tcenv_Genv* ge;{ struct _handler_cons _temp227; _push_handler(& _temp227);{
+int _temp229= 0; if( setjmp( _temp227.handler)){ _temp229= 1;} if( ! _temp229){
+ge= Cyc_Tcenv_lookup_namespace( te, loc, _temp209, _temp207);; _pop_handler();}
+else{ void* _temp228=( void*) _exn_thrown; void* _temp231= _temp228; _LL233: if(
+_temp231 == Cyc_Dict_Absent){ goto _LL234;} else{ goto _LL235;} _LL235: goto
+_LL236; _LL234: Cyc_Tcutil_terr( loc,({ unsigned char* _temp237="bad qualified name for xtunion";
+struct _tagged_string _temp238; _temp238.curr= _temp237; _temp238.base= _temp237;
+_temp238.last_plus_one= _temp237 + 31; _temp238;}));( void) _throw(( void*) Cyc_Dict_Absent);
+_LL236:( void) _throw( _temp231); _LL232:;}}} return({ struct Cyc_Core_Opt*
+_temp239=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
+_temp239->v=( void*)(( struct Cyc_Absyn_Tuniondecl**(*)( struct Cyc_Dict_Dict* d,
+struct _tagged_string* key)) Cyc_Dict_lookup)( ge->tuniondecls, _temp188);
+_temp239;});} _LL201: { struct Cyc_Tcenv_Genv* ge=(( struct Cyc_Tcenv_Genv*(*)(
+struct Cyc_Dict_Dict* d, struct Cyc_List_List* key)) Cyc_Dict_lookup)( te->ae,
+_temp211); return({ struct Cyc_Core_Opt* _temp240=( struct Cyc_Core_Opt*)
+GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp240->v=( void*)(( struct Cyc_Absyn_Tuniondecl**(*)(
+struct Cyc_Dict_Dict* d, struct _tagged_string* key)) Cyc_Dict_lookup)( ge->tuniondecls,
 _temp188); _temp240;});} _LL193:;}} static struct Cyc_Absyn_Enumdecl** Cyc_Tcenv_lookup_enumdecl_f(
 struct Cyc_Tcenv_Genv* ge, struct _tagged_string* v){ return(( struct Cyc_Absyn_Enumdecl**(*)(
 struct Cyc_Dict_Dict* d, struct _tagged_string* key)) Cyc_Dict_lookup)( ge->enumdecls,
@@ -927,15 +930,15 @@ c->fallthru_clause; _temp376->next_stmt=( void*)(( void*) c->next_stmt);
 _temp376->try_depth= c->try_depth; _temp376;}); _temp375->capability=( void*)((
 void*) f->capability); _temp375->curr_rgn=( void*)(( void*) f->curr_rgn);
 _temp375;});} void* Cyc_Tcenv_return_typ( struct Cyc_Tcenv_Tenv* te){ if( te->le
-== 0){(( void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ char*
-_temp377="Tcenv: unexpected return_typ"; struct _tagged_string _temp378;
-_temp378.curr= _temp377; _temp378.base= _temp377; _temp378.last_plus_one=
+== 0){(( void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({
+unsigned char* _temp377="Tcenv: unexpected return_typ"; struct _tagged_string
+_temp378; _temp378.curr= _temp377; _temp378.base= _temp377; _temp378.last_plus_one=
 _temp377 + 29; _temp378;}));} return( void*)(( Cyc_Tcenv_get_fenv( te))->shared)->return_typ;}
 struct Cyc_List_List* Cyc_Tcenv_lookup_type_vars( struct Cyc_Tcenv_Tenv* te){
 if( te->le == 0){ return 0;} return( Cyc_Tcenv_get_fenv( te))->type_vars;}
 struct Cyc_Tcenv_Tenv* Cyc_Tcenv_add_type_vars( struct Cyc_Position_Segment* loc,
 struct Cyc_Tcenv_Tenv* te, struct Cyc_List_List* tvs){ if( te->le == 0){(( void(*)(
-struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ char* _temp379="Tcenv: unexpected add_type_vars";
+struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ unsigned char* _temp379="Tcenv: unexpected add_type_vars";
 struct _tagged_string _temp380; _temp380.curr= _temp379; _temp380.base= _temp379;
 _temp380.last_plus_one= _temp379 + 32; _temp380;}));}{ struct Cyc_Tcenv_Fenv*
 _temp381= Cyc_Tcenv_copy_fenv_old_ctrl( Cyc_Tcenv_get_fenv( te)); goto _LL382;
@@ -945,7 +948,7 @@ _LL384; _LL384: Cyc_Tcutil_check_unique_tvars( loc, _temp383); _temp381->type_va
 _temp383; return Cyc_Tcenv_put_fenv( te, _temp381);}}} struct Cyc_Tcenv_Tenv*
 Cyc_Tcenv_add_local_var( struct Cyc_Position_Segment* loc, struct Cyc_Tcenv_Tenv*
 te, struct Cyc_Absyn_Vardecl* vd){ if( te->le == 0){(( void(*)( struct
-_tagged_string msg)) Cyc_Tcenv_env_err)(({ char* _temp385="Tcenv: unexpected add_local_var";
+_tagged_string msg)) Cyc_Tcenv_env_err)(({ unsigned char* _temp385="Tcenv: unexpected add_local_var";
 struct _tagged_string _temp386; _temp386.curr= _temp385; _temp386.base= _temp385;
 _temp386.last_plus_one= _temp385 + 32; _temp386;}));}{ struct Cyc_Tcenv_Fenv*
 _temp387= Cyc_Tcenv_copy_fenv_old_ctrl( Cyc_Tcenv_get_fenv( te)); goto _LL388;
@@ -955,8 +958,8 @@ goto _LL394;} else{ goto _LL395;} _LL395: goto _LL396; _LL394: goto _LL392;
 _LL396:( void) _throw(( void*)({ struct Cyc_Core_Impossible_struct* _temp397=(
 struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp397[ 0]=({ struct Cyc_Core_Impossible_struct _temp398; _temp398.tag= Cyc_Core_Impossible;
-_temp398.f1=({ char* _temp399="add_local_var: called with Rel_n"; struct
-_tagged_string _temp400; _temp400.curr= _temp399; _temp400.base= _temp399;
+_temp398.f1=({ unsigned char* _temp399="add_local_var: called with Rel_n";
+struct _tagged_string _temp400; _temp400.curr= _temp399; _temp400.base= _temp399;
 _temp400.last_plus_one= _temp399 + 33; _temp400;}); _temp398;}); _temp397;}));
 goto _LL392; _LL392:;} _temp387->locals=(( struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict*
 d, struct _tagged_string* key, void* data)) Cyc_Dict_insert)( _temp387->locals,
@@ -966,7 +969,7 @@ _temp402; _temp402.tag= Cyc_Absyn_Local_b; _temp402.f1= vd; _temp402;});
 _temp401;})); return Cyc_Tcenv_put_fenv( te, _temp387);}}} struct Cyc_Tcenv_Tenv*
 Cyc_Tcenv_add_pat_var( struct Cyc_Position_Segment* loc, struct Cyc_Tcenv_Tenv*
 te, struct Cyc_Absyn_Vardecl* vd){ if( te->le == 0){(( void(*)( struct
-_tagged_string msg)) Cyc_Tcenv_env_err)(({ char* _temp403="Tcenv: unexpected add_pat_var";
+_tagged_string msg)) Cyc_Tcenv_env_err)(({ unsigned char* _temp403="Tcenv: unexpected add_pat_var";
 struct _tagged_string _temp404; _temp404.curr= _temp403; _temp404.base= _temp403;
 _temp404.last_plus_one= _temp403 + 30; _temp404;}));}{ struct Cyc_Tcenv_Fenv*
 _temp405= Cyc_Tcenv_copy_fenv_old_ctrl( Cyc_Tcenv_get_fenv( te)); goto _LL406;
@@ -1013,31 +1016,32 @@ _temp457.f1=( void*)(( void*) Cyc_Absyn_Unresolved_b); _temp457;}); _temp456;});
 _LL454:( void) _throw( _temp449); _LL450:;}}} _LL419:;}} void Cyc_Tcenv_process_continue(
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Stmt* s, struct Cyc_Absyn_Stmt**
 sopt){ if( te->le == 0){(( void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({
-char* _temp458="Tcenv: unexpected process_continue"; struct _tagged_string
-_temp459; _temp459.curr= _temp458; _temp459.base= _temp458; _temp459.last_plus_one=
-_temp458 + 35; _temp459;}));}{ void* _temp460=( void*)(( Cyc_Tcenv_get_fenv( te))->ctrl_env)->continue_stmt;
-struct Cyc_Absyn_Stmt* _temp470; _LL462: if(( unsigned int) _temp460 > 3u?*((
-int*) _temp460) == Cyc_Tcenv_Stmt_j: 0){ _LL471: _temp470=(( struct Cyc_Tcenv_Stmt_j_struct*)
-_temp460)->f1; goto _LL463;} else{ goto _LL464;} _LL464: if( _temp460 ==( void*)
-Cyc_Tcenv_NotLoop_j){ goto _LL465;} else{ goto _LL466;} _LL466: if( _temp460 ==(
-void*) Cyc_Tcenv_CaseEnd_j){ goto _LL467;} else{ goto _LL468;} _LL468: if(
-_temp460 ==( void*) Cyc_Tcenv_FnEnd_j){ goto _LL469;} else{ goto _LL461;} _LL463:
-_temp470->non_local_preds=({ struct Cyc_List_List* _temp472=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp472->hd=( void*) s; _temp472->tl=
-_temp470->non_local_preds; _temp472;});* sopt=( struct Cyc_Absyn_Stmt*) _temp470;
-return; _LL465: Cyc_Tcutil_terr( s->loc,({ char* _temp473="continue not in a loop";
-struct _tagged_string _temp474; _temp474.curr= _temp473; _temp474.base= _temp473;
-_temp474.last_plus_one= _temp473 + 23; _temp474;})); return; _LL467:(( void(*)(
-struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ char* _temp475="Tcenv: continue dest is CaseEnd";
+unsigned char* _temp458="Tcenv: unexpected process_continue"; struct
+_tagged_string _temp459; _temp459.curr= _temp458; _temp459.base= _temp458;
+_temp459.last_plus_one= _temp458 + 35; _temp459;}));}{ void* _temp460=( void*)((
+Cyc_Tcenv_get_fenv( te))->ctrl_env)->continue_stmt; struct Cyc_Absyn_Stmt*
+_temp470; _LL462: if(( unsigned int) _temp460 > 3u?*(( int*) _temp460) == Cyc_Tcenv_Stmt_j:
+0){ _LL471: _temp470=(( struct Cyc_Tcenv_Stmt_j_struct*) _temp460)->f1; goto
+_LL463;} else{ goto _LL464;} _LL464: if( _temp460 ==( void*) Cyc_Tcenv_NotLoop_j){
+goto _LL465;} else{ goto _LL466;} _LL466: if( _temp460 ==( void*) Cyc_Tcenv_CaseEnd_j){
+goto _LL467;} else{ goto _LL468;} _LL468: if( _temp460 ==( void*) Cyc_Tcenv_FnEnd_j){
+goto _LL469;} else{ goto _LL461;} _LL463: _temp470->non_local_preds=({ struct
+Cyc_List_List* _temp472=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp472->hd=( void*) s; _temp472->tl= _temp470->non_local_preds; _temp472;});*
+sopt=( struct Cyc_Absyn_Stmt*) _temp470; return; _LL465: Cyc_Tcutil_terr( s->loc,({
+unsigned char* _temp473="continue not in a loop"; struct _tagged_string _temp474;
+_temp474.curr= _temp473; _temp474.base= _temp473; _temp474.last_plus_one=
+_temp473 + 23; _temp474;})); return; _LL467:(( void(*)( struct _tagged_string
+msg)) Cyc_Tcenv_env_err)(({ unsigned char* _temp475="Tcenv: continue dest is CaseEnd";
 struct _tagged_string _temp476; _temp476.curr= _temp475; _temp476.base= _temp475;
 _temp476.last_plus_one= _temp475 + 32; _temp476;})); return; _LL469:(( void(*)(
-struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ char* _temp477="Tcenv: continue dest is CaseEnd";
+struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ unsigned char* _temp477="Tcenv: continue dest is CaseEnd";
 struct _tagged_string _temp478; _temp478.curr= _temp477; _temp478.base= _temp477;
 _temp478.last_plus_one= _temp477 + 32; _temp478;})); return; _LL461:;}} void Cyc_Tcenv_process_break(
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Stmt* s, struct Cyc_Absyn_Stmt**
 sopt){ if( te->le == 0){(( void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({
-char* _temp479="Tcenv: unexpected process_break"; struct _tagged_string _temp480;
-_temp480.curr= _temp479; _temp480.base= _temp479; _temp480.last_plus_one=
+unsigned char* _temp479="Tcenv: unexpected process_break"; struct _tagged_string
+_temp480; _temp480.curr= _temp479; _temp480.base= _temp479; _temp480.last_plus_one=
 _temp479 + 32; _temp480;}));}{ struct Cyc_Tcenv_Fenv* fe= Cyc_Tcenv_get_fenv( te);
 void* _temp481=( void*)( fe->ctrl_env)->break_stmt; struct Cyc_Absyn_Stmt*
 _temp491; _LL483: if(( unsigned int) _temp481 > 3u?*(( int*) _temp481) == Cyc_Tcenv_Stmt_j:
@@ -1049,18 +1053,19 @@ goto _LL490;} else{ goto _LL482;} _LL484: _temp491->non_local_preds=({ struct
 Cyc_List_List* _temp493=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
 _temp493->hd=( void*) s; _temp493->tl= _temp491->non_local_preds; _temp493;});*
 sopt=( struct Cyc_Absyn_Stmt*) _temp491; return; _LL486: Cyc_Tcutil_terr( s->loc,({
-char* _temp494="break not in a loop or switch"; struct _tagged_string _temp495;
-_temp495.curr= _temp494; _temp495.base= _temp494; _temp495.last_plus_one=
+unsigned char* _temp494="break not in a loop or switch"; struct _tagged_string
+_temp495; _temp495.curr= _temp494; _temp495.base= _temp494; _temp495.last_plus_one=
 _temp494 + 30; _temp495;})); return; _LL488: if(( void*)( fe->shared)->return_typ
-!=( void*) Cyc_Absyn_VoidType){ Cyc_Tcutil_terr( s->loc,({ char* _temp496="break causes function not to return a value";
-struct _tagged_string _temp497; _temp497.curr= _temp496; _temp497.base= _temp496;
-_temp497.last_plus_one= _temp496 + 44; _temp497;}));} return; _LL490: Cyc_Tcutil_terr(
-s->loc,({ char* _temp498="break causes outer switch clause to implicitly fallthru";
+!=( void*) Cyc_Absyn_VoidType){ Cyc_Tcutil_terr( s->loc,({ unsigned char*
+_temp496="break causes function not to return a value"; struct _tagged_string
+_temp497; _temp497.curr= _temp496; _temp497.base= _temp496; _temp497.last_plus_one=
+_temp496 + 44; _temp497;}));} return; _LL490: Cyc_Tcutil_terr( s->loc,({
+unsigned char* _temp498="break causes outer switch clause to implicitly fallthru";
 struct _tagged_string _temp499; _temp499.curr= _temp498; _temp499.base= _temp498;
 _temp499.last_plus_one= _temp498 + 56; _temp499;})); return; _LL482:;}} void Cyc_Tcenv_process_goto(
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Stmt* s, struct _tagged_string* l,
 struct Cyc_Absyn_Stmt** sopt){ if( te->le == 0){(( void(*)( struct
-_tagged_string msg)) Cyc_Tcenv_env_err)(({ char* _temp500="Tcenv: unexpected process_goto";
+_tagged_string msg)) Cyc_Tcenv_env_err)(({ unsigned char* _temp500="Tcenv: unexpected process_goto";
 struct _tagged_string _temp501; _temp501.curr= _temp500; _temp501.base= _temp500;
 _temp501.last_plus_one= _temp500 + 31; _temp501;}));}{ struct Cyc_Tcenv_Fenv* fe=
 Cyc_Tcenv_get_fenv( te); struct Cyc_Core_Opt* _temp502=(( struct Cyc_Core_Opt*(*)(
@@ -1083,23 +1088,23 @@ _check_null( _temp502))->v)->non_local_preds; _temp510;});* sopt=( struct Cyc_Ab
 struct Cyc_Absyn_Stmt*)(( struct Cyc_Core_Opt*) _check_null( _temp502))->v);}}}
 struct _tuple3* Cyc_Tcenv_process_fallthru( struct Cyc_Tcenv_Tenv* te, struct
 Cyc_Absyn_Stmt* s, struct Cyc_Absyn_Switch_clause*** clauseopt){ if( te->le == 0){((
-void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ char* _temp511="Tcenv: unexpected process_fallthru";
-struct _tagged_string _temp512; _temp512.curr= _temp511; _temp512.base= _temp511;
-_temp512.last_plus_one= _temp511 + 35; _temp512;}));}{ struct Cyc_Tcenv_Fenv*
-_temp513= Cyc_Tcenv_get_fenv( te); goto _LL514; _LL514: { struct _tuple3*
-_temp515=( _temp513->ctrl_env)->fallthru_clause; goto _LL516; _LL516: if(
-_temp515 != 0){(((*(( struct _tuple3*) _check_null( _temp515))).f1)->body)->non_local_preds=({
-struct Cyc_List_List* _temp517=( struct Cyc_List_List*) GC_malloc( sizeof(
-struct Cyc_List_List)); _temp517->hd=( void*) s; _temp517->tl=(((*(( struct
-_tuple3*) _check_null( _temp515))).f1)->body)->non_local_preds; _temp517;});*
-clauseopt=({ struct Cyc_Absyn_Switch_clause** _temp518=( struct Cyc_Absyn_Switch_clause**)
-GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause*) * 1); _temp518[ 0]=(*((
-struct _tuple3*) _check_null( _temp515))).f1; _temp518;});} return _temp515;}}}
-struct Cyc_Tcenv_Tenv* Cyc_Tcenv_set_fallthru( struct Cyc_Tcenv_Tenv* te, struct
-Cyc_List_List* new_tvs, struct Cyc_List_List* vds, struct Cyc_Absyn_Switch_clause*
+void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ unsigned char*
+_temp511="Tcenv: unexpected process_fallthru"; struct _tagged_string _temp512;
+_temp512.curr= _temp511; _temp512.base= _temp511; _temp512.last_plus_one=
+_temp511 + 35; _temp512;}));}{ struct Cyc_Tcenv_Fenv* _temp513= Cyc_Tcenv_get_fenv(
+te); goto _LL514; _LL514: { struct _tuple3* _temp515=( _temp513->ctrl_env)->fallthru_clause;
+goto _LL516; _LL516: if( _temp515 != 0){(((*(( struct _tuple3*) _check_null(
+_temp515))).f1)->body)->non_local_preds=({ struct Cyc_List_List* _temp517=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp517->hd=(
+void*) s; _temp517->tl=(((*(( struct _tuple3*) _check_null( _temp515))).f1)->body)->non_local_preds;
+_temp517;});* clauseopt=({ struct Cyc_Absyn_Switch_clause** _temp518=( struct
+Cyc_Absyn_Switch_clause**) GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause*) *
+1); _temp518[ 0]=(*(( struct _tuple3*) _check_null( _temp515))).f1; _temp518;});}
+return _temp515;}}} struct Cyc_Tcenv_Tenv* Cyc_Tcenv_set_fallthru( struct Cyc_Tcenv_Tenv*
+te, struct Cyc_List_List* new_tvs, struct Cyc_List_List* vds, struct Cyc_Absyn_Switch_clause*
 clause){ if( te->le == 0){(( void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({
-char* _temp519="Tcenv: unexpected set_fallthru"; struct _tagged_string _temp520;
-_temp520.curr= _temp519; _temp520.base= _temp519; _temp520.last_plus_one=
+unsigned char* _temp519="Tcenv: unexpected set_fallthru"; struct _tagged_string
+_temp520; _temp520.curr= _temp519; _temp520.base= _temp519; _temp520.last_plus_one=
 _temp519 + 31; _temp520;}));}{ struct Cyc_List_List* _temp521= 0; goto _LL522;
 _LL522: for( 0; vds != 0; vds=(( struct Cyc_List_List*) _check_null( vds))->tl){
 _temp521=({ struct Cyc_List_List* _temp523=( struct Cyc_List_List*) GC_malloc(
@@ -1112,17 +1117,18 @@ _temp524=( struct _tuple3*) GC_malloc( sizeof( struct _tuple3)); _temp524->f1=
 clause; _temp524->f2= new_tvs; _temp524->f3= _temp521; _temp524;}); return Cyc_Tcenv_put_fenv(
 te, fe);}}} struct Cyc_Tcenv_Tenv* Cyc_Tcenv_clear_fallthru( struct Cyc_Tcenv_Tenv*
 te){ if( te->le == 0){(( void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({
-char* _temp525="Tcenv: unexpected clear_fallthru"; struct _tagged_string
-_temp526; _temp526.curr= _temp525; _temp526.base= _temp525; _temp526.last_plus_one=
-_temp525 + 33; _temp526;}));}{ struct Cyc_Tcenv_Fenv* fe= Cyc_Tcenv_copy_fenv_new_ctrl(
-Cyc_Tcenv_get_fenv( te));( fe->ctrl_env)->fallthru_clause= 0; return Cyc_Tcenv_put_fenv(
-te, fe);}} struct Cyc_Tcenv_Tenv* Cyc_Tcenv_set_in_loop( struct Cyc_Tcenv_Tenv*
-te, struct Cyc_Absyn_Stmt* continue_dest){ if( te->le == 0){(( void(*)( struct
-_tagged_string msg)) Cyc_Tcenv_env_err)(({ char* _temp527="Tcenv: unexpected set_in_loop";
-struct _tagged_string _temp528; _temp528.curr= _temp527; _temp528.base= _temp527;
-_temp528.last_plus_one= _temp527 + 30; _temp528;}));}{ struct Cyc_Tcenv_Fenv* fe=
-Cyc_Tcenv_copy_fenv_new_ctrl( Cyc_Tcenv_get_fenv( te));( void*)(( fe->ctrl_env)->continue_stmt=(
-void*)(( void*)({ struct Cyc_Tcenv_Stmt_j_struct* _temp529=( struct Cyc_Tcenv_Stmt_j_struct*)
+unsigned char* _temp525="Tcenv: unexpected clear_fallthru"; struct
+_tagged_string _temp526; _temp526.curr= _temp525; _temp526.base= _temp525;
+_temp526.last_plus_one= _temp525 + 33; _temp526;}));}{ struct Cyc_Tcenv_Fenv* fe=
+Cyc_Tcenv_copy_fenv_new_ctrl( Cyc_Tcenv_get_fenv( te));( fe->ctrl_env)->fallthru_clause=
+0; return Cyc_Tcenv_put_fenv( te, fe);}} struct Cyc_Tcenv_Tenv* Cyc_Tcenv_set_in_loop(
+struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Stmt* continue_dest){ if( te->le ==
+0){(( void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ unsigned char*
+_temp527="Tcenv: unexpected set_in_loop"; struct _tagged_string _temp528;
+_temp528.curr= _temp527; _temp528.base= _temp527; _temp528.last_plus_one=
+_temp527 + 30; _temp528;}));}{ struct Cyc_Tcenv_Fenv* fe= Cyc_Tcenv_copy_fenv_new_ctrl(
+Cyc_Tcenv_get_fenv( te));( void*)(( fe->ctrl_env)->continue_stmt=( void*)(( void*)({
+struct Cyc_Tcenv_Stmt_j_struct* _temp529=( struct Cyc_Tcenv_Stmt_j_struct*)
 GC_malloc( sizeof( struct Cyc_Tcenv_Stmt_j_struct)); _temp529[ 0]=({ struct Cyc_Tcenv_Stmt_j_struct
 _temp530; _temp530.tag= Cyc_Tcenv_Stmt_j; _temp530.f1= continue_dest; _temp530;});
 _temp529;})));( void*)(( fe->ctrl_env)->break_stmt=( void*)(( void*)( fe->ctrl_env)->next_stmt));(
@@ -1132,52 +1138,52 @@ _temp531[ 0]=({ struct Cyc_Tcenv_Stmt_j_struct _temp532; _temp532.tag= Cyc_Tcenv
 _temp532.f1= continue_dest; _temp532;}); _temp531;}))); return Cyc_Tcenv_put_fenv(
 te, fe);}} struct Cyc_Tcenv_Tenv* Cyc_Tcenv_enter_try( struct Cyc_Tcenv_Tenv* te){
 if( te->le == 0){(( void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({
-char* _temp533="Tcenv: unexpected enter_try"; struct _tagged_string _temp534;
-_temp534.curr= _temp533; _temp534.base= _temp533; _temp534.last_plus_one=
+unsigned char* _temp533="Tcenv: unexpected enter_try"; struct _tagged_string
+_temp534; _temp534.curr= _temp533; _temp534.base= _temp533; _temp534.last_plus_one=
 _temp533 + 28; _temp534;}));}{ struct Cyc_Tcenv_Fenv* fe= Cyc_Tcenv_copy_fenv_new_ctrl(
 Cyc_Tcenv_get_fenv( te)); ++( fe->ctrl_env)->try_depth; return Cyc_Tcenv_put_fenv(
 te, fe);}} int Cyc_Tcenv_get_try_depth( struct Cyc_Tcenv_Tenv* te){ if( te->le
-== 0){(( void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ char*
-_temp535="Tcenv: unexpected get_try_depth"; struct _tagged_string _temp536;
-_temp536.curr= _temp535; _temp536.base= _temp535; _temp536.last_plus_one=
+== 0){(( void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({
+unsigned char* _temp535="Tcenv: unexpected get_try_depth"; struct _tagged_string
+_temp536; _temp536.curr= _temp535; _temp536.base= _temp535; _temp536.last_plus_one=
 _temp535 + 32; _temp536;}));} return(( Cyc_Tcenv_get_fenv( te))->ctrl_env)->try_depth;}
 struct Cyc_Tcenv_Tenv* Cyc_Tcenv_set_in_switch( struct Cyc_Tcenv_Tenv* te){ if(
-te->le == 0){(( void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ char*
-_temp537="Tcenv: unexpected set_in_switch"; struct _tagged_string _temp538;
-_temp538.curr= _temp537; _temp538.base= _temp537; _temp538.last_plus_one=
+te->le == 0){(( void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({
+unsigned char* _temp537="Tcenv: unexpected set_in_switch"; struct _tagged_string
+_temp538; _temp538.curr= _temp537; _temp538.base= _temp537; _temp538.last_plus_one=
 _temp537 + 32; _temp538;}));}{ struct Cyc_Tcenv_Fenv* fe= Cyc_Tcenv_copy_fenv_new_ctrl(
 Cyc_Tcenv_get_fenv( te));( void*)(( fe->ctrl_env)->break_stmt=( void*)(( void*)(
 fe->ctrl_env)->next_stmt));( void*)(( fe->ctrl_env)->next_stmt=( void*)(( void*)
 Cyc_Tcenv_CaseEnd_j)); return Cyc_Tcenv_put_fenv( te, fe);}} struct Cyc_Tcenv_Tenv*
 Cyc_Tcenv_set_next( struct Cyc_Tcenv_Tenv* te, void* j){ if( te->le == 0){((
-void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ char* _temp539="Tcenv: unexpected set_next";
-struct _tagged_string _temp540; _temp540.curr= _temp539; _temp540.base= _temp539;
-_temp540.last_plus_one= _temp539 + 27; _temp540;}));}{ struct Cyc_Tcenv_Fenv* fe=
-Cyc_Tcenv_copy_fenv_new_ctrl( Cyc_Tcenv_get_fenv( te));( void*)(( fe->ctrl_env)->next_stmt=(
-void*) j); return Cyc_Tcenv_put_fenv( te, fe);}} struct Cyc_Tcenv_Tenv* Cyc_Tcenv_add_label(
-struct Cyc_Tcenv_Tenv* te, struct _tagged_string* v, struct Cyc_Absyn_Stmt* s){
-if( te->le == 0){(( void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({
-char* _temp541="Tcenv: unexpected add_label"; struct _tagged_string _temp542;
-_temp542.curr= _temp541; _temp542.base= _temp541; _temp542.last_plus_one=
-_temp541 + 28; _temp542;}));}{ struct Cyc_Tcenv_Fenv* _temp543= Cyc_Tcenv_get_fenv(
-te); goto _LL544; _LL544: { struct Cyc_SlowDict_Dict* _temp545=( _temp543->shared)->needed_labels;
-goto _LL546; _LL546: { struct Cyc_Core_Opt* _temp547=(( struct Cyc_Core_Opt*(*)(
-struct Cyc_SlowDict_Dict* d, struct _tagged_string* key)) Cyc_SlowDict_lookup_opt)(
-_temp545, v); goto _LL548; _LL548: if( _temp547 != 0){( _temp543->shared)->needed_labels=((
-struct Cyc_SlowDict_Dict*(*)( struct Cyc_SlowDict_Dict* d, struct _tagged_string*
-key)) Cyc_SlowDict_delete)( _temp545, v);{ struct Cyc_List_List* _temp549=(
-struct Cyc_List_List*)(( struct Cyc_Core_Opt*) _check_null( _temp547))->v; goto
-_LL550; _LL550: s->non_local_preds= _temp549; for( 0; _temp549 != 0; _temp549=((
-struct Cyc_List_List*) _check_null( _temp549))->tl){ void* _temp551=( void*)((
-struct Cyc_Absyn_Stmt*)(( struct Cyc_List_List*) _check_null( _temp549))->hd)->r;
-struct Cyc_Absyn_Stmt* _temp557; struct Cyc_Absyn_Stmt** _temp559; struct
-_tagged_string* _temp560; _LL553: if(( unsigned int) _temp551 > 1u?*(( int*)
-_temp551) == Cyc_Absyn_Goto_s: 0){ _LL561: _temp560=(( struct Cyc_Absyn_Goto_s_struct*)
+void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ unsigned char*
+_temp539="Tcenv: unexpected set_next"; struct _tagged_string _temp540; _temp540.curr=
+_temp539; _temp540.base= _temp539; _temp540.last_plus_one= _temp539 + 27;
+_temp540;}));}{ struct Cyc_Tcenv_Fenv* fe= Cyc_Tcenv_copy_fenv_new_ctrl( Cyc_Tcenv_get_fenv(
+te));( void*)(( fe->ctrl_env)->next_stmt=( void*) j); return Cyc_Tcenv_put_fenv(
+te, fe);}} struct Cyc_Tcenv_Tenv* Cyc_Tcenv_add_label( struct Cyc_Tcenv_Tenv* te,
+struct _tagged_string* v, struct Cyc_Absyn_Stmt* s){ if( te->le == 0){(( void(*)(
+struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ unsigned char* _temp541="Tcenv: unexpected add_label";
+struct _tagged_string _temp542; _temp542.curr= _temp541; _temp542.base= _temp541;
+_temp542.last_plus_one= _temp541 + 28; _temp542;}));}{ struct Cyc_Tcenv_Fenv*
+_temp543= Cyc_Tcenv_get_fenv( te); goto _LL544; _LL544: { struct Cyc_SlowDict_Dict*
+_temp545=( _temp543->shared)->needed_labels; goto _LL546; _LL546: { struct Cyc_Core_Opt*
+_temp547=(( struct Cyc_Core_Opt*(*)( struct Cyc_SlowDict_Dict* d, struct
+_tagged_string* key)) Cyc_SlowDict_lookup_opt)( _temp545, v); goto _LL548;
+_LL548: if( _temp547 != 0){( _temp543->shared)->needed_labels=(( struct Cyc_SlowDict_Dict*(*)(
+struct Cyc_SlowDict_Dict* d, struct _tagged_string* key)) Cyc_SlowDict_delete)(
+_temp545, v);{ struct Cyc_List_List* _temp549=( struct Cyc_List_List*)(( struct
+Cyc_Core_Opt*) _check_null( _temp547))->v; goto _LL550; _LL550: s->non_local_preds=
+_temp549; for( 0; _temp549 != 0; _temp549=(( struct Cyc_List_List*) _check_null(
+_temp549))->tl){ void* _temp551=( void*)(( struct Cyc_Absyn_Stmt*)(( struct Cyc_List_List*)
+_check_null( _temp549))->hd)->r; struct Cyc_Absyn_Stmt* _temp557; struct Cyc_Absyn_Stmt**
+_temp559; struct _tagged_string* _temp560; _LL553: if(( unsigned int) _temp551 >
+1u?*(( int*) _temp551) == Cyc_Absyn_Goto_s: 0){ _LL561: _temp560=(( struct Cyc_Absyn_Goto_s_struct*)
 _temp551)->f1; goto _LL558; _LL558: _temp557=(( struct Cyc_Absyn_Goto_s_struct*)
 _temp551)->f2; _temp559=&(( struct Cyc_Absyn_Goto_s_struct*) _temp551)->f2; goto
 _LL554;} else{ goto _LL555;} _LL555: goto _LL556; _LL554:* _temp559=( struct Cyc_Absyn_Stmt*)
 s; goto _LL552; _LL556:(( void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({
-char* _temp562="Tcenv: add_label backpatching of non-goto"; struct
+unsigned char* _temp562="Tcenv: add_label backpatching of non-goto"; struct
 _tagged_string _temp563; _temp563.curr= _temp562; _temp563.base= _temp562;
 _temp563.last_plus_one= _temp562 + 42; _temp563;})); goto _LL552; _LL552:;}}}
 if((( int(*)( struct Cyc_Dict_Dict* d, struct _tagged_string* key)) Cyc_Dict_member)((
@@ -1190,18 +1196,18 @@ return te;}}}} int Cyc_Tcenv_all_labels_resolved( struct Cyc_Tcenv_Tenv* te){
 return(( int(*)( struct Cyc_SlowDict_Dict* d)) Cyc_SlowDict_is_empty)((( Cyc_Tcenv_get_fenv(
 te))->shared)->needed_labels);} struct Cyc_Absyn_Stmt* Cyc_Tcenv_get_encloser(
 struct Cyc_Tcenv_Tenv* te){ if( te->le == 0){(( void(*)( struct _tagged_string
-msg)) Cyc_Tcenv_env_err)(({ char* _temp565="Tcenv: unexpected get_encloser";
+msg)) Cyc_Tcenv_env_err)(({ unsigned char* _temp565="Tcenv: unexpected get_encloser";
 struct _tagged_string _temp566; _temp566.curr= _temp565; _temp566.base= _temp565;
 _temp566.last_plus_one= _temp565 + 31; _temp566;}));} return( Cyc_Tcenv_get_fenv(
 te))->encloser;} struct Cyc_Tcenv_Tenv* Cyc_Tcenv_set_encloser( struct Cyc_Tcenv_Tenv*
 te, struct Cyc_Absyn_Stmt* s){ if( te->le == 0){(( void(*)( struct
-_tagged_string msg)) Cyc_Tcenv_env_err)(({ char* _temp567="Tcenv: unexpected set_encloser";
+_tagged_string msg)) Cyc_Tcenv_env_err)(({ unsigned char* _temp567="Tcenv: unexpected set_encloser";
 struct _tagged_string _temp568; _temp568.curr= _temp567; _temp568.base= _temp567;
 _temp568.last_plus_one= _temp567 + 31; _temp568;}));}{ struct Cyc_Tcenv_Fenv* fe=
 Cyc_Tcenv_copy_fenv_old_ctrl( Cyc_Tcenv_get_fenv( te)); fe->encloser= s; return
 Cyc_Tcenv_put_fenv( te, fe);}} struct Cyc_Tcenv_Tenv* Cyc_Tcenv_add_region(
 struct Cyc_Tcenv_Tenv* te, void* r){ if( te->le == 0){(( void(*)( struct
-_tagged_string msg)) Cyc_Tcenv_env_err)(({ char* _temp569="Tcenv::add_region: unexpected add_region";
+_tagged_string msg)) Cyc_Tcenv_env_err)(({ unsigned char* _temp569="Tcenv::add_region: unexpected add_region";
 struct _tagged_string _temp570; _temp570.curr= _temp569; _temp570.base= _temp569;
 _temp570.last_plus_one= _temp569 + 41; _temp570;}));}{ struct Cyc_Tcenv_Fenv* fe=
 Cyc_Tcenv_copy_fenv_old_ctrl( Cyc_Tcenv_get_fenv( te));( void*)( fe->capability=(
@@ -1218,17 +1224,17 @@ _temp574->hd=( void*)(( void*) fe->capability); _temp574->tl= 0; _temp574;});
 _temp573;}); _temp572;}); _temp571;}))); return Cyc_Tcenv_put_fenv( te, fe);}}
 struct Cyc_Tcenv_Tenv* Cyc_Tcenv_new_named_block( struct Cyc_Position_Segment*
 loc, struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Tvar* block_rgn){ if( te->le ==
-0){(( void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ char* _temp577="Tcenv: unexpected new_block";
-struct _tagged_string _temp578; _temp578.curr= _temp577; _temp578.base= _temp577;
-_temp578.last_plus_one= _temp577 + 28; _temp578;}));}{ struct Cyc_Tcenv_Fenv* fe=
-Cyc_Tcenv_copy_fenv_old_ctrl( Cyc_Tcenv_get_fenv( te)); void* block_typ=( void*)({
-struct Cyc_Absyn_VarType_struct* _temp586=( struct Cyc_Absyn_VarType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_VarType_struct)); _temp586[ 0]=({ struct Cyc_Absyn_VarType_struct
-_temp587; _temp587.tag= Cyc_Absyn_VarType; _temp587.f1= block_rgn; _temp587;});
-_temp586;}); fe->type_vars=({ struct Cyc_List_List* _temp579=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp579->hd=( void*) block_rgn;
-_temp579->tl= fe->type_vars; _temp579;}); Cyc_Tcutil_check_unique_tvars( loc, fe->type_vars);(
-void*)( fe->capability=( void*)(( void*)({ struct Cyc_Absyn_JoinEff_struct*
+0){(( void(*)( struct _tagged_string msg)) Cyc_Tcenv_env_err)(({ unsigned char*
+_temp577="Tcenv: unexpected new_block"; struct _tagged_string _temp578; _temp578.curr=
+_temp577; _temp578.base= _temp577; _temp578.last_plus_one= _temp577 + 28;
+_temp578;}));}{ struct Cyc_Tcenv_Fenv* fe= Cyc_Tcenv_copy_fenv_old_ctrl( Cyc_Tcenv_get_fenv(
+te)); void* block_typ=( void*)({ struct Cyc_Absyn_VarType_struct* _temp586=(
+struct Cyc_Absyn_VarType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_VarType_struct));
+_temp586[ 0]=({ struct Cyc_Absyn_VarType_struct _temp587; _temp587.tag= Cyc_Absyn_VarType;
+_temp587.f1= block_rgn; _temp587;}); _temp586;}); fe->type_vars=({ struct Cyc_List_List*
+_temp579=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp579->hd=( void*) block_rgn; _temp579->tl= fe->type_vars; _temp579;}); Cyc_Tcutil_check_unique_tvars(
+loc, fe->type_vars);( void*)( fe->capability=( void*)(( void*)({ struct Cyc_Absyn_JoinEff_struct*
 _temp580=( struct Cyc_Absyn_JoinEff_struct*) GC_malloc( sizeof( struct Cyc_Absyn_JoinEff_struct));
 _temp580[ 0]=({ struct Cyc_Absyn_JoinEff_struct _temp581; _temp581.tag= Cyc_Absyn_JoinEff;
 _temp581.f1=({ struct Cyc_List_List* _temp582=( struct Cyc_List_List*) GC_malloc(
@@ -1329,7 +1335,7 @@ locals,( struct _tagged_string*)(( struct Cyc_Core_Opt*) _check_null( _temp624))
 void*)({ struct Cyc_Absyn_Param_b_struct* _temp637=( struct Cyc_Absyn_Param_b_struct*)
 GC_malloc( sizeof( struct Cyc_Absyn_Param_b_struct)); _temp637[ 0]=({ struct Cyc_Absyn_Param_b_struct
 _temp638; _temp638.tag= Cyc_Absyn_Param_b; _temp638.f1= _temp634; _temp638;});
-_temp637;}));}} else{ Cyc_Tcutil_terr( loc,({ char* _temp639="missing name for varargs";
+_temp637;}));}} else{ Cyc_Tcutil_terr( loc,({ unsigned char* _temp639="missing name for varargs";
 struct _tagged_string _temp640; _temp640.curr= _temp639; _temp640.base= _temp639;
 _temp640.last_plus_one= _temp639 + 25; _temp640;}));}} fd->param_vardecls=({
 struct Cyc_Core_Opt* _temp641=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct

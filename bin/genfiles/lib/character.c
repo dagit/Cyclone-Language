@@ -31,19 +31,17 @@ unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_string); extern unsigned char*
 underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); extern int system( unsigned char*); extern
-void* Cyc_Assert_AssertFail( struct _tagged_string msg); struct Cyc_Stdio___sFILE;
-typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE; extern struct Cyc_Stdio___sFILE*
-Cyc_Stdio_stderr; typedef int Cyc_Stdio_fpos_t; extern int Cyc_Stdio_fputs(
-struct _tagged_string, struct Cyc_Stdio___sFILE*); extern unsigned char Cyc_Stdio_FileCloseError[
-19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
-unsigned char* tag; struct _tagged_string f1; } ; void* Cyc_Assert_AssertFail(
-struct _tagged_string mesg){ Cyc_Stdio_fputs( mesg, Cyc_Stdio_stderr); Cyc_Stdio_fputs(({
-unsigned char* _temp0=" -- assertion failed\n"; struct _tagged_string _temp1;
-_temp1.curr= _temp0; _temp1.base= _temp0; _temp1.last_plus_one= _temp0 + 22;
-_temp1;}), Cyc_Stdio_stderr); exit( - 1);( void) _throw(( void*)({ struct Cyc_Core_Unreachable_struct*
-_temp2=( struct Cyc_Core_Unreachable_struct*) GC_malloc( sizeof( struct Cyc_Core_Unreachable_struct));
-_temp2[ 0]=({ struct Cyc_Core_Unreachable_struct _temp3; _temp3.tag= Cyc_Core_Unreachable;
-_temp3.f1=({ unsigned char* _temp4="assert"; struct _tagged_string _temp5;
-_temp5.curr= _temp4; _temp5.base= _temp4; _temp5.last_plus_one= _temp4 + 7;
-_temp5;}); _temp3;}); _temp2;}));}
+Cstring_to_string( unsigned char*); extern int system( unsigned char*); int Cyc_Character_isupper(
+unsigned char c){ return c >='A'? c <='Z': 0;} int Cyc_Character_islower(
+unsigned char c){ return c >='a'? c <='z': 0;} int Cyc_Character_isalpha(
+unsigned char c){ return Cyc_Character_islower( c)? 1: Cyc_Character_isupper( c);}
+int Cyc_Character_isdigit( unsigned char c){ return c >='0'? c <='9': 0;} int
+Cyc_Character_isprint( unsigned char c){ return c ==' '? 1:( c >='!'? c <='~': 0);}
+int Cyc_Character_isgraph( unsigned char c){ return c >='!'? c <='~': 0;}
+unsigned char Cyc_Character_toupper( unsigned char c){ if( Cyc_Character_islower(
+c)){ c +='A' -'a';} return c;} int Cyc_Character_isxdigit( unsigned char c){ if(
+Cyc_Character_isdigit( c)){ return 1;} else{ unsigned char d= Cyc_Character_toupper(
+c); return d >='A'? d <='F': 0;}} int Cyc_Character_isspace( unsigned char c){
+return(((( c ==' '? 1: c =='\t')? 1: c =='\n')? 1: c =='\r')? 1: c =='\f')? 1: c
+=='\v';} unsigned char Cyc_Character_tolower( unsigned char c){ if( Cyc_Character_isupper(
+c)){ c +='a' -'A';} return c;}

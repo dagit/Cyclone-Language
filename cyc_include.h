@@ -6,7 +6,11 @@
 #define _CYC_INCLUDE_H_
 
 //// Strings
-struct _tagged_string { char *curr; char *base; char *last_plus_one; };
+struct _tagged_string { 
+  unsigned char *curr; 
+  unsigned char *base; 
+  unsigned char *last_plus_one; 
+};
 extern struct _tagged_string xprintf(char *fmt, ...);
 
 //// Discriminated Unions
@@ -75,7 +79,7 @@ static inline char * _check_unknown_subscript(struct _tagged_string arr,
   // caller casts first argument and result
   // multiplication looks inefficient, but C compiler has to insert it otherwise
   // by inlining, it should be able to avoid actual multiplication
-  char * ans = arr.curr + elt_sz*index;
+  unsigned char * ans = arr.curr + elt_sz*index;
   if(!arr.base || ans < arr.base || ans >= arr.last_plus_one)
     _throw(Null_Exception);
   return ans;

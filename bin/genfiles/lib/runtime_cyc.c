@@ -186,7 +186,7 @@ static void check_fd(FILE *fd) {
 }
 int Cyc_Stdio_file_string_read(FILE *fd, string dest, int dest_offset, 
 			       int max_count) {
-  char *new_curr = dest.curr + dest_offset;
+  unsigned char *new_curr = dest.curr + dest_offset;
   size_t sz = dest.last_plus_one - new_curr;
   if (new_curr < dest.base || new_curr >= dest.last_plus_one)
     throw(Null_Exception);
@@ -200,7 +200,7 @@ int Cyc_Stdio_file_string_read(FILE *fd, string dest, int dest_offset,
 int Cyc_Stdio_file_string_write(FILE *fd, string src, int src_offset, 
 				int max_count) {
   size_t sz = src.last_plus_one - src.curr;
-  char *new_curr = src.curr + src_offset;
+  unsigned char *new_curr = src.curr + src_offset;
   if (new_curr < src.base || new_curr >= src.last_plus_one)
     throw(Null_Exception);
   check_fd(fd);

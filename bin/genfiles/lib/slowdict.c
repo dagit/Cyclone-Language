@@ -1,48 +1,52 @@
 #include "cyc_include.h"
 
  typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
-unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char;
-typedef unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef
-unsigned int Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int
-Cyc_uint; typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
-int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
-it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
-char* Cyc_caddr_t; typedef unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t;
-typedef unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
-typedef short Cyc_int16_t; typedef unsigned short Cyc_u_int16_t; typedef int Cyc_int32_t;
-typedef unsigned int Cyc_u_int32_t; typedef long long Cyc_int64_t; typedef
-unsigned long long Cyc_u_int64_t; typedef int Cyc_register_t; typedef short Cyc_dev_t;
-typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
-Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
-typedef char* Cyc_addr_t; typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t;
-typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ;
-typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
-typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
-typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void
-exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
-struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg[ 15u];
-struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; } ;
-extern char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{ char* tag;
-struct _tagged_string f1; } ; extern char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Not_found[ 14u];
-extern char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{ char*
-tag; struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
-_tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
-struct _tagged_string Cstring_to_string( char*); extern int system( char*);
-struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List*
+unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef
+unsigned char Cyc_u_char; typedef unsigned short Cyc_u_short; typedef
+unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef unsigned short
+Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int Cyc_clock_t;
+typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct
+Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec it_value; }
+; typedef int Cyc_daddr_t; typedef unsigned char* Cyc_caddr_t; typedef
+unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
+unsigned int Cyc_vm_size_t; typedef unsigned char Cyc_int8_t; typedef
+unsigned char Cyc_u_int8_t; typedef short Cyc_int16_t; typedef unsigned short
+Cyc_u_int16_t; typedef int Cyc_int32_t; typedef unsigned int Cyc_u_int32_t;
+typedef long long Cyc_int64_t; typedef unsigned long long Cyc_u_int64_t; typedef
+int Cyc_register_t; typedef short Cyc_dev_t; typedef int Cyc_off_t; typedef
+unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int Cyc_pid_t;
+typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned char* Cyc_addr_t;
+typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask;
+struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
+Cyc__types_fd_set; typedef unsigned char* Cyc_Cstring; typedef struct
+_tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
+struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void exit(
+int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef struct Cyc_Core_Opt*
+Cyc_Core_opt_t; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Failure[
+12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_string
+f1; } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Not_found[
+14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
+unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
+string_to_Cstring( struct _tagged_string); extern unsigned char*
+underlying_Cstring( struct _tagged_string); extern struct _tagged_string
+Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
+Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List*
 Cyc_List_glist_t; typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct
-Cyc_List_List* Cyc_List_List_t; extern char Cyc_List_List_empty[ 15u]; extern
-char Cyc_List_List_mismatch[ 18u]; extern char Cyc_List_Nth[ 8u]; struct Cyc_Splay_node;
-struct Cyc_Splay_noderef{ struct Cyc_Splay_node* v; } ; static const int Cyc_Splay_Leaf=
-0; static const int Cyc_Splay_Node= 0; struct Cyc_Splay_Node_struct{ int tag;
-struct Cyc_Splay_noderef* f1; } ; struct Cyc_Splay_node{ void* key; void* data;
-void* left; void* right; } ; extern int Cyc_Splay_splay( int(* f)( void*, void*),
-void*, void*); struct Cyc_SlowDict_Dict; typedef struct Cyc_SlowDict_Dict* Cyc_SlowDict_hdict_t;
-typedef struct Cyc_SlowDict_Dict* Cyc_SlowDict_dict_t; extern char Cyc_SlowDict_Present[
-12u]; extern char Cyc_SlowDict_Absent[ 11u]; extern struct Cyc_SlowDict_Dict*
-Cyc_SlowDict_empty( int(* comp)( void*, void*)); extern int Cyc_SlowDict_is_empty(
-struct Cyc_SlowDict_Dict* d); extern int Cyc_SlowDict_member( struct Cyc_SlowDict_Dict*
-d, void* key); extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_insert( struct Cyc_SlowDict_Dict*
+Cyc_List_List* Cyc_List_List_t; extern unsigned char Cyc_List_List_empty[ 15u];
+extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[
+8u]; struct Cyc_Splay_node; struct Cyc_Splay_noderef{ struct Cyc_Splay_node* v;
+} ; static const int Cyc_Splay_Leaf= 0; static const int Cyc_Splay_Node= 0;
+struct Cyc_Splay_Node_struct{ int tag; struct Cyc_Splay_noderef* f1; } ; struct
+Cyc_Splay_node{ void* key; void* data; void* left; void* right; } ; extern int
+Cyc_Splay_splay( int(* f)( void*, void*), void*, void*); struct Cyc_SlowDict_Dict;
+typedef struct Cyc_SlowDict_Dict* Cyc_SlowDict_hdict_t; typedef struct Cyc_SlowDict_Dict*
+Cyc_SlowDict_dict_t; extern unsigned char Cyc_SlowDict_Present[ 12u]; extern
+unsigned char Cyc_SlowDict_Absent[ 11u]; extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_empty(
+int(* comp)( void*, void*)); extern int Cyc_SlowDict_is_empty( struct Cyc_SlowDict_Dict*
+d); extern int Cyc_SlowDict_member( struct Cyc_SlowDict_Dict* d, void* key);
+extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_insert( struct Cyc_SlowDict_Dict*
 d, void* key, void* data); extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_insert_new(
 struct Cyc_SlowDict_Dict* d, void* key, void* data); extern struct Cyc_SlowDict_Dict*
 Cyc_SlowDict_inserts( struct Cyc_SlowDict_Dict* d, struct Cyc_List_List* kds);
@@ -64,8 +68,8 @@ void*(* f)( void*), struct Cyc_SlowDict_Dict* d); extern struct Cyc_SlowDict_Dic
 Cyc_SlowDict_map_c( void*(* f)( void*, void*), void* env, struct Cyc_SlowDict_Dict*
 d); struct _tuple0{ void* f1; void* f2; } ; extern struct _tuple0* Cyc_SlowDict_choose(
 struct Cyc_SlowDict_Dict* d); extern struct Cyc_List_List* Cyc_SlowDict_to_list(
-struct Cyc_SlowDict_Dict* d); char Cyc_SlowDict_Absent[ 11u]="\000\000\000\000Absent";
-char Cyc_SlowDict_Present[ 12u]="\000\000\000\000Present"; struct Cyc_SlowDict_Dict{
+struct Cyc_SlowDict_Dict* d); unsigned char Cyc_SlowDict_Absent[ 11u]="\000\000\000\000Absent";
+unsigned char Cyc_SlowDict_Present[ 12u]="\000\000\000\000Present"; struct Cyc_SlowDict_Dict{
 int(* reln)( void*, void*); void* tree; } ; struct Cyc_SlowDict_Dict* Cyc_SlowDict_empty(
 int(* comp)( void*, void*)){ void* t=( void*) Cyc_Splay_Leaf; return({ struct
 Cyc_SlowDict_Dict* _temp0=( struct Cyc_SlowDict_Dict*) GC_malloc( sizeof( struct
@@ -150,7 +154,7 @@ else{ goto _LL46;} _LL48: return( void*)( _temp51->v)->data; _LL50:( void)
 _throw(( void*)({ struct Cyc_Core_Impossible_struct* _temp53=( struct Cyc_Core_Impossible_struct*)
 GC_malloc( sizeof( struct Cyc_Core_Impossible_struct)); _temp53[ 0]=({ struct
 Cyc_Core_Impossible_struct _temp54; _temp54.tag= Cyc_Core_Impossible; _temp54.f1=({
-char* _temp55="Dict::lookup"; struct _tagged_string _temp56; _temp56.curr=
+unsigned char* _temp55="Dict::lookup"; struct _tagged_string _temp56; _temp56.curr=
 _temp55; _temp56.base= _temp55; _temp56.last_plus_one= _temp55 + 13; _temp56;});
 _temp54;}); _temp53;})); _LL46:;}( void) _throw(( void*) Cyc_SlowDict_Absent);}
 struct Cyc_Core_Opt* Cyc_SlowDict_lookup_opt( struct Cyc_SlowDict_Dict* d, void*
@@ -164,39 +168,40 @@ GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp65->v=( void*)(( void*)( _temp63-
 _temp65;}); _LL62:( void) _throw(( void*)({ struct Cyc_Core_Impossible_struct*
 _temp66=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp66[ 0]=({ struct Cyc_Core_Impossible_struct _temp67; _temp67.tag= Cyc_Core_Impossible;
-_temp67.f1=({ char* _temp68="Dict::lookup"; struct _tagged_string _temp69;
-_temp69.curr= _temp68; _temp69.base= _temp68; _temp69.last_plus_one= _temp68 +
-13; _temp69;}); _temp67;}); _temp66;})); _LL58:;} return 0;} static int Cyc_SlowDict_get_largest(
-void* x, void* y){ return 1;} struct Cyc_SlowDict_Dict* Cyc_SlowDict_delete(
-struct Cyc_SlowDict_Dict* d, void* key){ if((( int(*)( int(* f)( void*, void*),
-void*, void*)) Cyc_Splay_splay)( d->reln, key,( void*) d->tree)){ void* _temp70=(
-void*) d->tree; struct Cyc_Splay_noderef* _temp76; _LL72: if( _temp70 ==( void*)
-Cyc_Splay_Leaf){ goto _LL73;} else{ goto _LL74;} _LL74: if(( unsigned int)
-_temp70 > 1u?*(( int*) _temp70) == Cyc_Splay_Node: 0){ _LL77: _temp76=(( struct
-Cyc_Splay_Node_struct*) _temp70)->f1; goto _LL75;} else{ goto _LL71;} _LL73:(
-void) _throw(( void*)({ struct Cyc_Core_Impossible_struct* _temp78=( struct Cyc_Core_Impossible_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Impossible_struct)); _temp78[ 0]=({ struct
-Cyc_Core_Impossible_struct _temp79; _temp79.tag= Cyc_Core_Impossible; _temp79.f1=({
-char* _temp80="Dict::lookup"; struct _tagged_string _temp81; _temp81.curr=
-_temp80; _temp81.base= _temp80; _temp81.last_plus_one= _temp80 + 13; _temp81;});
-_temp79;}); _temp78;})); _LL75: { struct Cyc_Splay_node* n= _temp76->v; void*
-_temp82=( void*) n->left; struct Cyc_Splay_noderef* _temp88; _LL84: if( _temp82
-==( void*) Cyc_Splay_Leaf){ goto _LL85;} else{ goto _LL86;} _LL86: if((
-unsigned int) _temp82 > 1u?*(( int*) _temp82) == Cyc_Splay_Node: 0){ _LL89:
-_temp88=(( struct Cyc_Splay_Node_struct*) _temp82)->f1; goto _LL87;} else{ goto
-_LL83;} _LL85: return({ struct Cyc_SlowDict_Dict* _temp90=( struct Cyc_SlowDict_Dict*)
-GC_malloc( sizeof( struct Cyc_SlowDict_Dict)); _temp90->reln= d->reln; _temp90->tree=(
-void*)(( void*) n->right); _temp90;}); _LL87: { void* _temp91=( void*) n->right;
-struct Cyc_Splay_noderef* _temp97; _LL93: if( _temp91 ==( void*) Cyc_Splay_Leaf){
-goto _LL94;} else{ goto _LL95;} _LL95: if(( unsigned int) _temp91 > 1u?*(( int*)
-_temp91) == Cyc_Splay_Node: 0){ _LL98: _temp97=(( struct Cyc_Splay_Node_struct*)
-_temp91)->f1; goto _LL96;} else{ goto _LL92;} _LL94: return({ struct Cyc_SlowDict_Dict*
-_temp99=( struct Cyc_SlowDict_Dict*) GC_malloc( sizeof( struct Cyc_SlowDict_Dict));
-_temp99->reln= d->reln; _temp99->tree=( void*)(( void*) n->left); _temp99;});
-_LL96:(( int(*)( int(* f)( void*, void*), void*, void*)) Cyc_Splay_splay)(( int(*)(
-void* x, void* y)) Cyc_SlowDict_get_largest, key,( void*) n->left);{ struct Cyc_Splay_node*
-newtop= _temp88->v; return({ struct Cyc_SlowDict_Dict* _temp100=( struct Cyc_SlowDict_Dict*)
-GC_malloc( sizeof( struct Cyc_SlowDict_Dict)); _temp100->reln= d->reln; _temp100->tree=(
+_temp67.f1=({ unsigned char* _temp68="Dict::lookup"; struct _tagged_string
+_temp69; _temp69.curr= _temp68; _temp69.base= _temp68; _temp69.last_plus_one=
+_temp68 + 13; _temp69;}); _temp67;}); _temp66;})); _LL58:;} return 0;} static
+int Cyc_SlowDict_get_largest( void* x, void* y){ return 1;} struct Cyc_SlowDict_Dict*
+Cyc_SlowDict_delete( struct Cyc_SlowDict_Dict* d, void* key){ if((( int(*)( int(*
+f)( void*, void*), void*, void*)) Cyc_Splay_splay)( d->reln, key,( void*) d->tree)){
+void* _temp70=( void*) d->tree; struct Cyc_Splay_noderef* _temp76; _LL72: if(
+_temp70 ==( void*) Cyc_Splay_Leaf){ goto _LL73;} else{ goto _LL74;} _LL74: if((
+unsigned int) _temp70 > 1u?*(( int*) _temp70) == Cyc_Splay_Node: 0){ _LL77:
+_temp76=(( struct Cyc_Splay_Node_struct*) _temp70)->f1; goto _LL75;} else{ goto
+_LL71;} _LL73:( void) _throw(( void*)({ struct Cyc_Core_Impossible_struct*
+_temp78=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
+_temp78[ 0]=({ struct Cyc_Core_Impossible_struct _temp79; _temp79.tag= Cyc_Core_Impossible;
+_temp79.f1=({ unsigned char* _temp80="Dict::lookup"; struct _tagged_string
+_temp81; _temp81.curr= _temp80; _temp81.base= _temp80; _temp81.last_plus_one=
+_temp80 + 13; _temp81;}); _temp79;}); _temp78;})); _LL75: { struct Cyc_Splay_node*
+n= _temp76->v; void* _temp82=( void*) n->left; struct Cyc_Splay_noderef* _temp88;
+_LL84: if( _temp82 ==( void*) Cyc_Splay_Leaf){ goto _LL85;} else{ goto _LL86;}
+_LL86: if(( unsigned int) _temp82 > 1u?*(( int*) _temp82) == Cyc_Splay_Node: 0){
+_LL89: _temp88=(( struct Cyc_Splay_Node_struct*) _temp82)->f1; goto _LL87;}
+else{ goto _LL83;} _LL85: return({ struct Cyc_SlowDict_Dict* _temp90=( struct
+Cyc_SlowDict_Dict*) GC_malloc( sizeof( struct Cyc_SlowDict_Dict)); _temp90->reln=
+d->reln; _temp90->tree=( void*)(( void*) n->right); _temp90;}); _LL87: { void*
+_temp91=( void*) n->right; struct Cyc_Splay_noderef* _temp97; _LL93: if( _temp91
+==( void*) Cyc_Splay_Leaf){ goto _LL94;} else{ goto _LL95;} _LL95: if((
+unsigned int) _temp91 > 1u?*(( int*) _temp91) == Cyc_Splay_Node: 0){ _LL98:
+_temp97=(( struct Cyc_Splay_Node_struct*) _temp91)->f1; goto _LL96;} else{ goto
+_LL92;} _LL94: return({ struct Cyc_SlowDict_Dict* _temp99=( struct Cyc_SlowDict_Dict*)
+GC_malloc( sizeof( struct Cyc_SlowDict_Dict)); _temp99->reln= d->reln; _temp99->tree=(
+void*)(( void*) n->left); _temp99;}); _LL96:(( int(*)( int(* f)( void*, void*),
+void*, void*)) Cyc_Splay_splay)(( int(*)( void* x, void* y)) Cyc_SlowDict_get_largest,
+key,( void*) n->left);{ struct Cyc_Splay_node* newtop= _temp88->v; return({
+struct Cyc_SlowDict_Dict* _temp100=( struct Cyc_SlowDict_Dict*) GC_malloc(
+sizeof( struct Cyc_SlowDict_Dict)); _temp100->reln= d->reln; _temp100->tree=(
 void*)(( void*)({ struct Cyc_Splay_Node_struct* _temp101=( struct Cyc_Splay_Node_struct*)
 GC_malloc( sizeof( struct Cyc_Splay_Node_struct)); _temp101[ 0]=({ struct Cyc_Splay_Node_struct
 _temp102; _temp102.tag= Cyc_Splay_Node; _temp102.f1=({ struct Cyc_Splay_noderef*

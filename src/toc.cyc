@@ -516,9 +516,11 @@ static exp_t rmalloc_exp(exp_t rgn, exp_t s) {
 }
 
 // cache strings used for field names f0,f1,f2,...
-static stringptr field_names_v[0] = {};
+static string f0 = "f0";
+static stringptr field_names_v[1] = {&f0};
 static stringptr ?field_names = field_names_v;
 static stringptr fieldname(int i) {
+  return new xprintf("f%d",i);
   unsigned int fsz = field_names.size;
   if (i >= fsz) {
     field_names = 
@@ -1576,7 +1578,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       type_t arr_type = typ_to_c(new ArrayType(va_type,mt_tq,num_varargs_exp));
       let f = temp_var();
       let argv = temp_var();
-      let argvexp = var_exp(argv,null);
+      let argvexp = var_exp(argv,DL);
       let a = temp_var();
       let num_args = List::length(es);
       let num_normargs = num_args - num_varargs;

@@ -114,7 +114,7 @@ string char_escape(char c) {
       let t = new_string(4);
       int j = 0;
       t[j++] = '\\';
-      t[j++] = (char)('0'+((c>>6)&7));
+      t[j++] = (char)('0'+(((unsigned char)c>>6)&7));
       t[j++] = (char)('0'+((c>>3)&7));
       t[j++] = (char)('0'+(c&7));
       return t;
@@ -254,12 +254,50 @@ doc_t args2doc(list_t<$(tqual_t,type_t)@> ts) {
   return(group("(",")",",",List::map(arg2doc,ts)));
 }
 
-doc_t att2doc(attribute_t a) {
+doc_t noncallatt2doc(attribute_t att) {
+  switch(att) {
+  case Stdcall_att:  return nil_doc();
+  case Cdecl_att:    return nil_doc();
+  case Fastcall_att: return nil_doc();
+  default: return text(attribute2string(att));
+  }
+}
+
+doc_t callconv2doc(attributes_t atts) { // for MS only
+  for(; atts != null; atts = atts->tl)
+    switch(atts->hd) {
+    case Stdcall_att:  return text("_stdcall");
+    case Cdecl_att:    return text("_cdecl");
+    case Fastcall_att: return text("_fastcall");
+    default: break;
+    }
+  return nil_doc();
+}
+
+doc_t noncallconv2doc(attributes_t atts) { // for MS only
+  bool hasatt = false;
+   for(_ atts2 = atts; atts2 != null; atts2 = atts2->tl)
+    switch(atts->hd) {
+    case Stdcall_att:  break;
+    case Cdecl_att:    break;
+    case Fastcall_att: break;
+    default: hasatt = true; break;
+    }
+  if(!hasatt)
+    return nil_doc();
+  return cat(text("__declspec("), 
+	     group("",""," ",List::map(noncallatt2doc,atts)),
+	     text(")"));
+}
+
+doc_t att2doc(attribute_t a) { // for gcc only
   return text(attribute2string(a));
 }
 
 doc_t atts2doc(list_t<attribute_t> atts) {
   if (atts == null) return nil_doc();
+  if(Absynpp::to_VC)
+    return noncallconv2doc(atts);
   return(cat(text(" __attribute__"),
              group("((","))",",",List::map(att2doc,atts))));
 }
@@ -432,12 +470,12 @@ doc_t ntyp2doc(type_t t) {
     case B1:
       switch (sn) {
       case Signed:   sns = "signed "; break;
-      case Unsigned: sns = "";        break;
+      case Unsigned: break;
       }
       ts = "char";
       break;
-    case B2: ts = "short";     break;
-    case B4: ts = "int";       break;
+    case B2: ts = "short"; break;
+    case B4: ts = "int";   break;
     case B8: ts = (to_VC ? "__int64" : "long long"); break;
     }
     s = text(xprintf("%s%s",sns,ts));
@@ -1251,15 +1289,29 @@ doc_t decl2doc(decl_t d) {
                                  fd->ret_type,
                                  List::map(arg_mk_opt,fd->args),
                                  fd->c_varargs, fd->cyc_varargs,null});
-    s = cat(text(fd->is_inline? (to_VC ? "__inline " : "inline ") : ""),
-            scope2doc(fd->sc),
-            tqtd2doc(Tqual(false,false,false),t,
-                     new Opt(cat(atts2doc(fd->attributes),typedef_name2doc(fd->name)))),
-            text(" {"),
-            nest(2,cat(line_doc(),stmt2doc(fd->body))),
-            line_doc(),
-            text("}"));
+    doc_t attsdoc   = atts2doc(fd->attributes);
+    doc_t inlinedoc;
+    if(fd->is_inline)
+      if(to_VC)
+	inlinedoc = text("__inline ");
+      else
+	inlinedoc = text("inline ");
+    else
+      inlinedoc = nil_doc();
+    doc_t scopedoc  = scope2doc(fd->sc);
+    doc_t beforenamedoc = to_VC ? callconv2doc(fd->attributes) : attsdoc;
+    doc_t namedoc   = typedef_name2doc(fd->name);
+    doc_t tqtddoc   = tqtd2doc(Tqual(false,false,false), t,
+			       new Opt(cat(beforenamedoc,namedoc)));
+    doc_t bodydoc   = cat(text(" {"),
+			  nest(2,cat(line_doc(),stmt2doc(fd->body))),
+			  line_doc(),
+			  text("}"));
+    s = cat(inlinedoc,scopedoc,tqtddoc,bodydoc);
+    if(to_VC)
+      s = cat(attsdoc,s);
     break;
+    
   case &Struct_d(sd):
     if (sd->fields==null)
       s = cat(scope2doc(sd->sc),
@@ -1302,9 +1354,10 @@ doc_t decl2doc(decl_t d) {
     break;
   case &Var_d(&Vardecl(sc,name,tq,type,initializer,_,atts)):
     doc_t sn = typedef_name2doc(name);
-    s = cat(scope2doc(sc),
+    s = cat((to_VC ? atts2doc(atts) : nil_doc()),
+	    scope2doc(sc),
             tqtd2doc(tq,type,new Opt(sn)),
-            atts2doc(atts),
+	    (!to_VC ? atts2doc(atts) : nil_doc()),
             (initializer == null)
             ? text("")
             : cat(text(" = "),exp2doc((exp_t)initializer)),
