@@ -529,8 +529,12 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
 void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
   void *result;
   // allocate in the heap
-  if (r == NULL)
+  if (r == NULL) {
+#ifdef CYC_REGION_PROFILE
+    heap_total_bytes += s;
+#endif
     return GC_malloc(s);
+  }
   // round s up to the nearest MIN_ALIGNMENT value
   s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
   if (s > (r->last_plus_one - r->offset))
