@@ -121,12 +121,13 @@ static void add_ccarg(string_t<`H> s) {
   ccargs = new List(new s,ccargs);
 }
 
-static list_t<stringptr_t> cyclone_lib_path = NULL;
-static void add_cyclone_lib_path(string_t s) {
+static list_t<stringptr_t> cyclone_exec_path = NULL;
+static void add_cyclone_exec_path(string_t s) {
   let len = strlen(s);
   if (len <= 2) return;
   let dir = (string_t)substring(s,2,len-2);
-  cyclone_lib_path = new List(new dir,cyclone_lib_path);
+  cyclone_exec_path = new List(new dir,cyclone_exec_path);
+  add_ccarg(strconcat("-L",dir));
 }
 
 // Ideally we would simply pass library args as ccargs, preserving
@@ -794,13 +795,13 @@ int main(int argc, string_t<`H> ?`H argv) {
                new Flag_spec(add_cpparg),
                "Pass definition to preprocessor"),
          new $("-B",true,"<file>",
-               new Flag_spec(add_cyclone_lib_path),
+               new Flag_spec(add_cyclone_exec_path),
                "Add to the list of directories to search for compiler files"),
          new $("-I",true,"<dir>",
                new Flag_spec(add_cpparg),
                "Add to the list of directories to search for include files"),
          new $("-L",true,"<dir>",
-               new Flag_spec(add_cyclone_lib_path),
+               new Flag_spec(add_ccarg),
                "Add to the list of directories for -l"),
          new $("-l",true,"<file>",
                new Flag_spec(add_libarg),
@@ -936,29 +937,24 @@ int main(int argc, string_t<`H> ?`H argv) {
   }
   
   // Find the file cyc_include.h, needed to produce the .c output.
-  // The Cyclone lib-path is specified with the following order (where
+  // The Cyclone exec-path is specified with the following order (where
   // the earlier in the order, the first place we look for the file):
   // 1) command line arguments (with -B)
   // 2) environment var (with CYCLONE_EXEC_PREFIX)
   // 3) hardwired in the build (by setting lib_path)
   string_t cyclone_exec_prefix = getenv("CYCLONE_EXEC_PREFIX");
   if (cyclone_exec_prefix != NULL)
-    cyclone_lib_path = new List(new cyclone_exec_prefix, cyclone_lib_path);
+    cyclone_exec_path = new List(new cyclone_exec_prefix, cyclone_exec_path);
+  // FIX: we should not share def_lib_path but rather have a def_exec_path
   string_t def_lib_path = Cstring_to_string(Cdef_lib_path);
   if (strlen(def_lib_path) > 0)
-    cyclone_lib_path = new List(new def_lib_path, cyclone_lib_path);
-  /* Look for other cyclone libraries during linking */
-  list_t<stringptr_t> pp = cyclone_lib_path;
-  while(pp != NULL) {
-    add_ccarg(strconcat("-L",*pp->hd));
-    pp = pp->tl;
-  }
-    //if (cyclone_lib_path != NULL)
-    //add_ccarg(strconcat("-L",*cyclone_lib_path->hd));
-  cyclone_lib_path = List::imp_rev(cyclone_lib_path);
-  /* The absolute file name is kept in a global variable */
-  cyc_include = do_find(cyclone_lib_path,"include/cyc_include.h");
+    cyclone_exec_path = new List(new def_lib_path, cyclone_exec_path);
+  cyclone_exec_path = List::imp_rev(cyclone_exec_path);
 
+  /* The absolute file name is kept in a global variable */
+  cyc_include = do_find(cyclone_exec_path,"include/cyc_include.h");
+
+  /* Process each .cyc file */
   for (let l = rev(cyclone_files); l != NULL; l = l->tl) {
     process_file(*(l->hd));
     if (compile_failure) return 1;
@@ -968,10 +964,12 @@ int main(int argc, string_t<`H> ?`H argv) {
 
   // If there are no files for the C compiler to process don't bother
   // to run it.
+  // FIX: this is no longer a good check, as we add_ccargs -L stuff;
+  //  we should keep a separate list of c_files
   if (ccargs == NULL) return 0;
 
   // Run the C compiler
-  // First, find the files libcyc.a, gc.a
+  add_ccarg(strconcat("-L",def_lib_path));
 
   ccargs = rev(ccargs);
   let ccargs_string = str_sepstr(List::map(sh_escape_stringptr,ccargs), " ");
@@ -993,28 +991,29 @@ int main(int argc, string_t<`H> ?`H argv) {
 
     // FIX: -pg should get different versions of the libraries?
     //      What about -g?
-    string_t libcyc_filename;
+    string_t libcyc_flag;
     string_t nogc_filename;
     string_t gc_filename; 
     if(pa_r) {
-      libcyc_filename = "libcyc_a.a";
+      libcyc_flag = "-lcyc_a";
       nogc_filename = "nogc_a.a";
     } else if(nocheck_r) {
-      libcyc_filename = "libcyc_nocheck.a";
+      libcyc_flag = "-lcyc_nocheck";
       nogc_filename = "nogc_nocheck.a";
     } else {
-      libcyc_filename = "libcyc.a";
+      libcyc_flag = "-lcyc";
       nogc_filename = "nogc.a";
     }
     gc_filename = "gc.a";
  
-    let libcyc = do_find(cyclone_lib_path,libcyc_filename);
     let gc = (nogc_r ?
-              do_find(cyclone_lib_path,nogc_filename):
-              do_find(cyclone_lib_path,gc_filename));
+              do_find(cyclone_exec_path,nogc_filename):
+              do_find(cyclone_exec_path,gc_filename));
 
-    stdlib = list(new libcyc);
-    stdlib_string = aprintf(" %s %s", libcyc, gc);
+    // FIX: temporarily removed from interface check below
+    //stdlib = list(new libcyc_flag);
+    stdlib = NULL;
+    stdlib_string = aprintf(" %s %s", libcyc_flag, gc);
   }
 
   if (ic_r) try {
