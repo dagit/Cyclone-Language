@@ -3,8 +3,7 @@
 The Cyclone compiler has the following command-line options:
 \begin{description}
 \item[-help] Print a short description of the command-line options.
-\item[-v] Print information about the stages of the compiler and the
-  commands it invokes to the standard error.
+\item[-v] Print compilation stages verbosely.
 \item[--version] Print version number and exit.
 \item[-o \textit{file}] Set the output file name to \textit{file}.
 \item[-D\textit{name}]
@@ -37,8 +36,6 @@ The Cyclone compiler has the following command-line options:
   Compile for profiling with the \texttt{gprof} tool.
 \item[-pa]
   Compile for profiling with the \texttt{aprof} tool.
-\item[-S]
-  Stop after producing assembly code.
 \item[-M]
   Produce dependencies for inclusion in a makefile.
 \item[-MG]
@@ -49,6 +46,8 @@ The Cyclone compiler has the following command-line options:
   the \texttt{-M} flag.
 \item[-E]
   Stop after preprocessing.
+\item[-S]
+  Stop after producing assembly code.
 \item[-nogc]
   Don't link in the garbage collector.
 \end{description}
@@ -62,11 +61,11 @@ to its developers:
   Compile for debugging.  This is currently only useful for compiler
   developers, as the debugging information reflects the C code that
   the Cyclone code is compiled to, and not the Cyclone code itself.
-\item[-parseonly]
+\item[-stopafter-parse]
   Stop after parsing.
-\item[-tc]
+\item[-stopafter-tc]
   Stop after type checking.
-\item[-toc]
+\item[-stopafter-toc]
   Stop after translation to C\@.
 \item[-ic]
   Activate the link-checker.
@@ -80,6 +79,8 @@ to its developers:
   Don't delete temporary files.
 \item[-save-c]
   Don't delete temporary C files.
+\item[-use-cpp\textit{path}]
+  Indicate which preprocessor to use.
 \item[-nocyc]
   Don't add the implicit namespace Cyc to variable names in the C output.
 \item[-noremoveunused]
