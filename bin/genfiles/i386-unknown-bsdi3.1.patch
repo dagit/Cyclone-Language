@@ -1,8 +1,8 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Tue Nov  6 14:54:12 2001
---- i386-unknown-bsdi3.1/lib/execinfo.c	Tue Nov  6 16:14:22 2001
+*** i686-unknown-linux/lib/execinfo.c	Wed Nov  7 10:35:16 2001
+--- i386-unknown-bsdi3.1/lib/execinfo.c	Wed Nov  7 10:36:10 2001
 ***************
-*** 232,350 ****
+*** 242,360 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); int Cyc_Execinfo_backtrace(
   struct _tagged_arr, int); int Cyc_Execinfo_bt(); struct Cyc_Std___sFILE; extern
@@ -122,7 +122,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1
 ! Cyc_Std_putc( d, Cyc_Std_stdout);} Cyc_Std_putc(( int)'\n', Cyc_Std_stdout);}}
 ! Cyc_Std_fclose( r); Cyc_Std_fclose( w); kill( pid, 15); waitpid( pid, 0, 0);
 ! return 0;}}}
---- 232,270 ----
+--- 242,280 ----
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); int Cyc_Execinfo_backtrace(
   struct _tagged_arr, int); int Cyc_Execinfo_bt(); struct Cyc_Std___sFILE; extern
@@ -163,10 +163,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1
 ! unsigned char), 42u); _temp1;}); _temp0;})); return 0;} int Cyc_Execinfo_bt(){
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-bsdi3.1/lib/getopt.c
-*** i686-unknown-linux/lib/getopt.c	Tue Nov  6 14:54:12 2001
---- i386-unknown-bsdi3.1/lib/getopt.c	Tue Nov  6 16:14:22 2001
+*** i686-unknown-linux/lib/getopt.c	Wed Nov  7 10:35:16 2001
+--- i386-unknown-bsdi3.1/lib/getopt.c	Wed Nov  7 10:36:10 2001
 ***************
-*** 261,271 ****
+*** 271,281 ****
   __fd); extern struct _tagged_arr Cyc_Std_getenv( struct _tagged_arr); struct Cyc_Std_timeval{
   int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
   tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
@@ -178,7 +178,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-bsdi3.1/l
   struct _tagged_arr name; int has_arg; int* flag; int val; } ; extern int Cyc_Std_getopt(
   int __argc, struct _tagged_arr __argv, struct _tagged_arr __shortopts); extern
   int Cyc_Std__getopt_internal( int __argc, struct _tagged_arr __argv, struct
---- 261,268 ----
+--- 271,278 ----
   __fd); extern struct _tagged_arr Cyc_Std_getenv( struct _tagged_arr); struct Cyc_Std_timeval{
   int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
   tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
@@ -188,10 +188,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-bsdi3.1/l
   int __argc, struct _tagged_arr __argv, struct _tagged_arr __shortopts); extern
   int Cyc_Std__getopt_internal( int __argc, struct _tagged_arr __argv, struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c i386-unknown-bsdi3.1/lib/in.c
-*** i686-unknown-linux/lib/in.c	Tue Nov  6 14:54:12 2001
---- i386-unknown-bsdi3.1/lib/in.c	Tue Nov  6 16:14:22 2001
+*** i686-unknown-linux/lib/in.c	Wed Nov  7 10:35:18 2001
+--- i386-unknown-bsdi3.1/lib/in.c	Wed Nov  7 10:36:12 2001
 ***************
-*** 233,243 ****
+*** 243,253 ****
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
   int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
   tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
@@ -203,7 +203,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c i386-unknown-bsdi3.1/lib/i
   0; struct Cyc_Std_SA_sockaddr_in_struct{ int tag; struct Cyc_Std_sockaddr_in* f1;
   } ; static const int Cyc_Std_SA_sockaddr= 1; struct Cyc_Std_SA_sockaddr_struct{
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
---- 233,240 ----
+--- 243,250 ----
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
   int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
   tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
@@ -213,10 +213,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c i386-unknown-bsdi3.1/lib/i
   } ; static const int Cyc_Std_SA_sockaddr= 1; struct Cyc_Std_SA_sockaddr_struct{
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c i386-unknown-bsdi3.1/lib/inet.c
-*** i686-unknown-linux/lib/inet.c	Tue Nov  6 14:54:12 2001
---- i386-unknown-bsdi3.1/lib/inet.c	Tue Nov  6 16:14:22 2001
+*** i686-unknown-linux/lib/inet.c	Wed Nov  7 10:35:16 2001
+--- i386-unknown-bsdi3.1/lib/inet.c	Wed Nov  7 10:36:08 2001
 ***************
-*** 233,243 ****
+*** 243,253 ****
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
   int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
   tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
@@ -228,7 +228,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c i386-unknown-bsdi3.1/lib
   0; struct Cyc_Std_SA_sockaddr_in_struct{ int tag; struct Cyc_Std_sockaddr_in* f1;
   } ; static const int Cyc_Std_SA_sockaddr= 1; struct Cyc_Std_SA_sockaddr_struct{
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
---- 233,240 ----
+--- 243,250 ----
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
   int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
   tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
@@ -238,10 +238,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c i386-unknown-bsdi3.1/lib
   } ; static const int Cyc_Std_SA_sockaddr= 1; struct Cyc_Std_SA_sockaddr_struct{
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c i386-unknown-bsdi3.1/lib/netdb.c
-*** i686-unknown-linux/lib/netdb.c	Tue Nov  6 14:54:12 2001
---- i386-unknown-bsdi3.1/lib/netdb.c	Tue Nov  6 16:14:22 2001
+*** i686-unknown-linux/lib/netdb.c	Wed Nov  7 10:35:18 2001
+--- i386-unknown-bsdi3.1/lib/netdb.c	Wed Nov  7 10:36:12 2001
 ***************
-*** 233,243 ****
+*** 243,253 ****
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
   int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
   tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
@@ -253,7 +253,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c i386-unknown-bsdi3.1/li
   0; struct Cyc_Std_SA_sockaddr_in_struct{ int tag; struct Cyc_Std_sockaddr_in* f1;
   } ; static const int Cyc_Std_SA_sockaddr= 1; struct Cyc_Std_SA_sockaddr_struct{
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
---- 233,240 ----
+--- 243,250 ----
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
   int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
   tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
@@ -263,10 +263,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c i386-unknown-bsdi3.1/li
   } ; static const int Cyc_Std_SA_sockaddr= 1; struct Cyc_Std_SA_sockaddr_struct{
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c i386-unknown-bsdi3.1/lib/socket.c
-*** i686-unknown-linux/lib/socket.c	Tue Nov  6 14:54:12 2001
---- i386-unknown-bsdi3.1/lib/socket.c	Tue Nov  6 16:14:22 2001
+*** i686-unknown-linux/lib/socket.c	Wed Nov  7 10:35:20 2001
+--- i386-unknown-bsdi3.1/lib/socket.c	Wed Nov  7 10:36:14 2001
 ***************
-*** 233,243 ****
+*** 243,253 ****
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
   int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
   tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
@@ -278,7 +278,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c i386-unknown-bsdi3.1/l
   0; struct Cyc_Std_SA_sockaddr_in_struct{ int tag; struct Cyc_Std_sockaddr_in* f1;
   } ; static const int Cyc_Std_SA_sockaddr= 1; struct Cyc_Std_SA_sockaddr_struct{
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
---- 233,240 ----
+--- 243,250 ----
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
   int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
   tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
@@ -288,10 +288,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c i386-unknown-bsdi3.1/l
   } ; static const int Cyc_Std_SA_sockaddr= 1; struct Cyc_Std_SA_sockaddr_struct{
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-bsdi3.1/lib/stat.c
-*** i686-unknown-linux/lib/stat.c	Tue Nov  6 13:26:54 2001
---- i386-unknown-bsdi3.1/lib/stat.c	Tue Nov  6 16:14:23 2001
+*** i686-unknown-linux/lib/stat.c	Wed Nov  7 10:35:20 2001
+--- i386-unknown-bsdi3.1/lib/stat.c	Wed Nov  7 10:36:12 2001
 ***************
-*** 235,246 ****
+*** 245,256 ****
   tm_wday; int tm_yday; int tm_isdst; } ; extern void tzset(); extern int time(
   int* t); extern struct Cyc_Std_tm* gmtime( const int* timep); extern struct Cyc_Std_tm*
   localtime( const int* timep); extern int timezone; extern int daylight; struct
@@ -304,7 +304,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-bsdi3.1/lib
   struct _tagged_arr filename, struct Cyc_Std_stat_t* buf); extern int fstat( int
   fd, struct Cyc_Std_stat_t* buf); extern int Cyc_Std_lstat( struct _tagged_arr
   filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
---- 235,244 ----
+--- 245,254 ----
   tm_wday; int tm_yday; int tm_isdst; } ; extern void tzset(); extern int time(
   int* t); extern struct Cyc_Std_tm* gmtime( const int* timep); extern struct Cyc_Std_tm*
   localtime( const int* timep); extern int timezone; extern int daylight; struct
@@ -316,10 +316,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-bsdi3.1/lib
   fd, struct Cyc_Std_stat_t* buf); extern int Cyc_Std_lstat( struct _tagged_arr
   filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c i386-unknown-bsdi3.1/lib/time.c
-*** i686-unknown-linux/lib/time.c	Tue Nov  6 14:54:12 2001
---- i386-unknown-bsdi3.1/lib/time.c	Tue Nov  6 16:14:23 2001
+*** i686-unknown-linux/lib/time.c	Wed Nov  7 10:35:20 2001
+--- i386-unknown-bsdi3.1/lib/time.c	Wed Nov  7 10:36:14 2001
 ***************
-*** 243,261 ****
+*** 253,271 ****
   struct _tagged_arr); extern int timezone; extern int daylight; struct Cyc_Std_timeval{
   int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
   tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
@@ -339,7 +339,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c i386-unknown-bsdi3.1/lib
   wrap_Cstring_as_string( asctime( timeptr), - 1);} struct _tagged_arr Cyc_Std_ctime(
   const int* timep){ return wrap_Cstring_as_string( ctime( timep), - 1);}
   unsigned int Cyc_Std_strftime( struct _tagged_arr s, unsigned int maxsize,
---- 243,258 ----
+--- 253,268 ----
   struct _tagged_arr); extern int timezone; extern int daylight; struct Cyc_Std_timeval{
   int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
   tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
@@ -357,10 +357,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c i386-unknown-bsdi3.1/lib
   const int* timep){ return wrap_Cstring_as_string( ctime( timep), - 1);}
   unsigned int Cyc_Std_strftime( struct _tagged_arr s, unsigned int maxsize,
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c i386-unknown-bsdi3.1/lib/unistd.c
-*** i686-unknown-linux/lib/unistd.c	Tue Nov  6 14:54:12 2001
---- i386-unknown-bsdi3.1/lib/unistd.c	Tue Nov  6 16:14:23 2001
+*** i686-unknown-linux/lib/unistd.c	Wed Nov  7 10:35:20 2001
+--- i386-unknown-bsdi3.1/lib/unistd.c	Wed Nov  7 10:36:14 2001
 ***************
-*** 233,275 ****
+*** 243,285 ****
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
   int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
   tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
@@ -404,7 +404,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c i386-unknown-bsdi3.1/l
   unsigned char* buf, unsigned int count); extern int rmdir( unsigned char*);
   extern int symlink( unsigned char* path1, unsigned char* path2); extern int
   truncate( unsigned char*, int); extern int write( int fd, unsigned char* buf,
---- 233,271 ----
+--- 243,281 ----
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
   int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
   tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
@@ -445,10 +445,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c i386-unknown-bsdi3.1/l
   extern int symlink( unsigned char* path1, unsigned char* path2); extern int
   truncate( unsigned char*, int); extern int write( int fd, unsigned char* buf,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c i386-unknown-bsdi3.1/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Tue Nov  6 14:54:12 2001
---- i386-unknown-bsdi3.1/src/buildlib.c	Tue Nov  6 16:14:23 2001
+*** i686-unknown-linux/src/buildlib.c	Wed Nov  7 10:35:16 2001
+--- i386-unknown-bsdi3.1/src/buildlib.c	Wed Nov  7 10:36:08 2001
 ***************
-*** 321,353 ****
+*** 331,363 ****
   tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*
   gmtime( const int* timep); extern struct Cyc_Std_tm* localtime( const int* timep);
   extern int timezone; extern int daylight; struct Cyc_Std_stat_t{
@@ -482,7 +482,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c i386-unknown-bsdi3.1
   unsigned int gid); extern unsigned int getegid(); extern int setegid(
   unsigned int egid); extern int nice( int); extern int pause(); extern int pipe(
   int* filedes); extern int lseek( int filedes, int offset, int whence); extern
---- 321,348 ----
+--- 331,358 ----
   tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*
   gmtime( const int* timep); extern struct Cyc_Std_tm* localtime( const int* timep);
   extern int timezone; extern int daylight; struct Cyc_Std_stat_t{
@@ -513,7 +513,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c i386-unknown-bsdi3.1
   int* filedes); extern int lseek( int filedes, int offset, int whence); extern
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c.orig i386-unknown-bsdi3.1/src/buildlib.c.orig
 *** i686-unknown-linux/src/buildlib.c.orig	Wed Dec 31 19:00:00 1969
---- i386-unknown-bsdi3.1/src/buildlib.c.orig	Tue Nov  6 16:14:23 2001
+--- i386-unknown-bsdi3.1/src/buildlib.c.orig	Wed Nov  7 10:36:06 2001
 ***************
 *** 0 ****
 --- 1,2805 ----

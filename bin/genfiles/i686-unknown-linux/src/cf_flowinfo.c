@@ -43,11 +43,11 @@ struct _RuntimeStack {
 
 //// Regions
 struct _RegionPage {
-  struct _RegionPage *next;
 #ifdef CYC_REGION_PROFILE
   unsigned int total_bytes;
   unsigned int free_bytes;
 #endif
+  struct _RegionPage *next;
   char data[0];
 };
 
@@ -56,9 +56,13 @@ struct _RegionHandle {
   struct _RegionPage *curr;
   char               *offset;
   char               *last_plus_one;
+#ifdef CYC_REGION_PROFILE
+  const char         *name;
+#endif
 };
 
-extern struct _RegionHandle _new_region();
+extern struct _RegionHandle _new_region(const char *);
+//  extern struct _RegionHandle _new_region();
 extern void * _region_malloc(struct _RegionHandle *, unsigned int);
 extern void   _free_region(struct _RegionHandle *);
 
@@ -211,7 +215,13 @@ extern void * _profile_GC_malloc(int,char *file,int lineno);
 extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
 extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
                                      char *file,int lineno);
+extern struct _RegionHandle _profile_new_region(const char *rgn_name,
+						char *file,int lineno);
+extern void _profile_free_region(struct _RegionHandle *,
+				 char *file,int lineno);
 #  if !defined(RUNTIME_CYC)
+#define _new_region(n) _profile_new_region(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
+#define _free_region(r) _profile_free_region(r,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
 #define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
 #  endif
 #define _cycalloc(n) _profile_GC_malloc(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
@@ -925,9 +935,9 @@ d, struct Cyc_CfFlowInfo_Place* place){ return(( int(*)( int a, int b, void*
 rval)) Cyc_CfFlowInfo_is_rval_unescaped)( 0, 0, Cyc_CfFlowInfo_lookup_place( d,
 place));} struct Cyc_Dict_Dict* Cyc_CfFlowInfo_escape_deref( struct Cyc_Dict_Dict*
 d, struct Cyc_Set_Set** all_changed, void* r){ struct _RegionHandle _temp235=
-_new_region(); struct _RegionHandle* rgn=& _temp235; _push_region( rgn);{ struct
-Cyc_CfFlowInfo_EscPile* pile=({ struct Cyc_CfFlowInfo_EscPile* _temp237=( struct
-Cyc_CfFlowInfo_EscPile*) _region_malloc( rgn, sizeof( struct Cyc_CfFlowInfo_EscPile));
+_new_region("rgn"); struct _RegionHandle* rgn=& _temp235; _push_region( rgn);{
+struct Cyc_CfFlowInfo_EscPile* pile=({ struct Cyc_CfFlowInfo_EscPile* _temp237=(
+struct Cyc_CfFlowInfo_EscPile*) _region_malloc( rgn, sizeof( struct Cyc_CfFlowInfo_EscPile));
 _temp237->rgn= rgn; _temp237->places= 0; _temp237;});(( void(*)( struct Cyc_CfFlowInfo_EscPile*
 pile, int a, void* r)) Cyc_CfFlowInfo_add_places)( pile, 0, r);{ struct Cyc_Dict_Dict*
 _temp236= Cyc_CfFlowInfo_escape_these( pile, all_changed, d); _npop_handler( 0u);
@@ -1004,7 +1014,7 @@ _LL285:;}} struct Cyc_Dict_Dict* Cyc_CfFlowInfo_assign_place( struct Cyc_Positio
 loc, struct Cyc_Dict_Dict* d, struct Cyc_Set_Set** all_changed, struct Cyc_CfFlowInfo_Place*
 place, void* r){ if( all_changed !=  0){* all_changed=(( struct Cyc_Set_Set*(*)(
 struct Cyc_Set_Set* s, struct Cyc_CfFlowInfo_Place* elt)) Cyc_Set_insert)(*
-all_changed, place);}{ struct _RegionHandle _temp306= _new_region(); struct
+all_changed, place);}{ struct _RegionHandle _temp306= _new_region("rgn"); struct
 _RegionHandle* rgn=& _temp306; _push_region( rgn);{ struct Cyc_CfFlowInfo_Place
 _temp309; struct Cyc_List_List* _temp310; void* _temp312; struct Cyc_CfFlowInfo_Place*
 _temp307= place; _temp309=* _temp307; _LL313: _temp312=( void*) _temp309.root;
@@ -1113,9 +1123,9 @@ if(( unsigned int) _temp437 >  1u?*(( int*) _temp437) ==  Cyc_CfFlowInfo_Reachab
 goto _LL432;} else{ goto _LL426;} _LL428: return f2; _LL430: return f1; _LL432:
 if( _temp443 ==  _temp439){ return f1;} if( Cyc_CfFlowInfo_flow_lessthan_approx(
 f1, f2)){ return f2;} if( Cyc_CfFlowInfo_flow_lessthan_approx( f2, f1)){ return
-f1;}{ struct _RegionHandle _temp445= _new_region(); struct _RegionHandle* rgn=&
-_temp445; _push_region( rgn);{ struct Cyc_CfFlowInfo_JoinEnv _temp446=({ struct
-Cyc_CfFlowInfo_JoinEnv _temp451; _temp451.pile=({ struct Cyc_CfFlowInfo_EscPile*
+f1;}{ struct _RegionHandle _temp445= _new_region("rgn"); struct _RegionHandle*
+rgn=& _temp445; _push_region( rgn);{ struct Cyc_CfFlowInfo_JoinEnv _temp446=({
+struct Cyc_CfFlowInfo_JoinEnv _temp451; _temp451.pile=({ struct Cyc_CfFlowInfo_EscPile*
 _temp452=( struct Cyc_CfFlowInfo_EscPile*) _region_malloc( rgn, sizeof( struct
 Cyc_CfFlowInfo_EscPile)); _temp452->rgn= rgn; _temp452->places= 0; _temp452;});
 _temp451.d1= _temp443; _temp451.d2= _temp439; _temp451;}); struct Cyc_Dict_Dict*
@@ -1193,7 +1203,7 @@ if(( unsigned int) _temp491 >  1u?*(( int*) _temp491) ==  Cyc_CfFlowInfo_Reachab
 0){ _LL494: _temp493=(( struct Cyc_CfFlowInfo_ReachableFL_struct*) _temp491)->f1;
 goto _LL486;} else{ goto _LL480;} _LL482: goto _LL484; _LL484: return( void*)
 Cyc_CfFlowInfo_BottomFL; _LL486: if( _temp497 ==  _temp493){ return f1;}{ struct
-_RegionHandle _temp499= _new_region(); struct _RegionHandle* rgn=& _temp499;
+_RegionHandle _temp499= _new_region("rgn"); struct _RegionHandle* rgn=& _temp499;
 _push_region( rgn);{ struct Cyc_CfFlowInfo_Place* _temp500=({ struct Cyc_CfFlowInfo_Place*
 _temp509=( struct Cyc_CfFlowInfo_Place*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_Place));
 _temp509->root=( void*)(( void*)& dummy_root); _temp509->fields= 0; _temp509;});

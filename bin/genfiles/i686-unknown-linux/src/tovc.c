@@ -43,11 +43,11 @@ struct _RuntimeStack {
 
 //// Regions
 struct _RegionPage {
-  struct _RegionPage *next;
 #ifdef CYC_REGION_PROFILE
   unsigned int total_bytes;
   unsigned int free_bytes;
 #endif
+  struct _RegionPage *next;
   char data[0];
 };
 
@@ -56,9 +56,13 @@ struct _RegionHandle {
   struct _RegionPage *curr;
   char               *offset;
   char               *last_plus_one;
+#ifdef CYC_REGION_PROFILE
+  const char         *name;
+#endif
 };
 
-extern struct _RegionHandle _new_region();
+extern struct _RegionHandle _new_region(const char *);
+//  extern struct _RegionHandle _new_region();
 extern void * _region_malloc(struct _RegionHandle *, unsigned int);
 extern void   _free_region(struct _RegionHandle *);
 
@@ -211,7 +215,13 @@ extern void * _profile_GC_malloc(int,char *file,int lineno);
 extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
 extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
                                      char *file,int lineno);
+extern struct _RegionHandle _profile_new_region(const char *rgn_name,
+						char *file,int lineno);
+extern void _profile_free_region(struct _RegionHandle *,
+				 char *file,int lineno);
 #  if !defined(RUNTIME_CYC)
+#define _new_region(n) _profile_new_region(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
+#define _free_region(r) _profile_free_region(r,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
 #define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
 #  endif
 #define _cycalloc(n) _profile_GC_malloc(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
@@ -1181,7 +1191,7 @@ _LL607;} else{ goto _LL608;} _LL608: if(*(( int*) _temp586) ==  Cyc_Absyn_Using_
 _LL617: _temp616=(( struct Cyc_Absyn_Using_d_struct*) _temp586)->f2; goto _LL609;}
 else{ goto _LL610;} _LL610: if(*(( int*) _temp586) ==  Cyc_Absyn_ExternC_d){
 _LL619: _temp618=(( struct Cyc_Absyn_ExternC_d_struct*) _temp586)->f1; goto
-_LL611;} else{ goto _LL587;} _LL589:{ struct _RegionHandle _temp620= _new_region();
+_LL611;} else{ goto _LL587;} _LL589:{ struct _RegionHandle _temp620= _new_region("rgn");
 struct _RegionHandle* rgn=& _temp620; _push_region( rgn);{ struct Cyc_List_List**
 _temp621=({ struct Cyc_List_List** _temp623=( struct Cyc_List_List**)
 _region_malloc( rgn, sizeof( struct Cyc_List_List*)); _temp623[ 0]= 0; _temp623;});

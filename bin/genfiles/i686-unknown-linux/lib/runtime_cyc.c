@@ -101,7 +101,12 @@ void _npop_handler(int n) {
     } 
     if (_current_handler->tag == 1) {
       //fprintf(stderr,"popping region %x\n",(unsigned int)_current_handler);
+#ifdef CYC_REGION_PROFILE
+      _profile_free_region((struct _RegionHandle *)_current_handler,
+			   "bogus",0);
+#else
       _free_region((struct _RegionHandle *)_current_handler);
+#endif
       //} else {
       //fprintf(stderr,"popping handler %x\n",(unsigned int)_current_handler);
     }
@@ -487,7 +492,8 @@ static int heap_total_atomic_bytes = 0;
 struct _RegionHandle *Cyc_Core_heap_region = NULL;
 
 // defined below so profiling macros work
-struct _RegionHandle _new_region();
+struct _RegionHandle _new_region(const char *);
+//  struct _RegionHandle _new_region();
 static void grow_region(struct _RegionHandle *r, unsigned int s);
 
 // minimum page size for a region
@@ -506,18 +512,6 @@ bool Cyc_set_default_region_page_size(size_t s) {
 }
 
 #define MIN_ALIGNMENT (sizeof(double))
-
-extern void _free_region(struct _RegionHandle *r) {
-  struct _RegionPage *p = r->curr;
-  while (p != NULL) {
-    struct _RegionPage *n = p->next;
-    GC_free(p);
-    p = n;
-  }
-  r->curr = 0;
-  r->offset = 0;
-  r->last_plus_one = 0;
-}
 
 // argc is redundant
 struct _tagged_argv { 
@@ -606,8 +600,10 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
     next_size = s + default_region_page_size;
 
   p = GC_malloc(sizeof(struct _RegionPage) + next_size);
-  if (!p)
+  if (!p) {
     fprintf(stderr,"grow_region failure");
+    _throw_badalloc;
+  }
   p->next = r->curr;
 #ifdef CYC_REGION_PROFILE
   p->total_bytes = sizeof(struct _RegionPage) + next_size;
@@ -646,7 +642,9 @@ void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
 
 
 // allocate a new page and return a region handle for a new region.
-struct _RegionHandle _new_region() {
+struct _RegionHandle _new_region(const char *rgn_name) {
+//  struct _RegionHandle _new_region() {
+//    char *rgn_name = "foo";
   struct _RegionHandle r;
   struct _RegionPage *p;
 
@@ -658,6 +656,7 @@ struct _RegionHandle _new_region() {
 #ifdef CYC_REGION_PROFILE
   p->total_bytes = sizeof(struct _RegionPage) + default_region_page_size;
   p->free_bytes = default_region_page_size;
+  r.name = rgn_name;
 #endif
   r.s.tag = 1;
   r.s.next = NULL;
@@ -667,14 +666,89 @@ struct _RegionHandle _new_region() {
   return r;
 }
 
+extern void _free_region(struct _RegionHandle *r) {
+  struct _RegionPage *p = r->curr;
+  while (p != NULL) {
+    struct _RegionPage *n = p->next;
+    GC_free(p);
+    p = n;
+  }
+  r->curr = 0;
+  r->offset = 0;
+  r->last_plus_one = 0;
+}
+
 #ifdef CYC_REGION_PROFILE
+
+static int region_get_heap_size(struct _RegionHandle *r) {
+  if (r != NULL) {
+    struct _RegionPage *p = r->curr;
+    int sz = 0;
+    while (p != NULL) {
+      sz += p->total_bytes;
+      p = p->next;
+    }  
+    return sz;
+  }
+  else
+    return GC_get_heap_size();
+}
+
+/* Two choices: print the "effective" free bytes, which are just
+   the ones in the current page, or print the non-allocated bytes,
+   which are the free bytes in all the pages.  Doing the former. */
+static int region_get_free_bytes(struct _RegionHandle *r) {
+  if (r != NULL) {
+    struct _RegionPage *p = r->curr;
+    if (p != NULL)
+      return p->free_bytes;
+    else 
+      return 0;
+  }
+  else
+    return GC_get_free_bytes();
+}
+
+static int region_get_total_bytes(struct _RegionHandle *r) {
+  if (r != NULL) {
+    struct _RegionPage *p = r->curr;
+    int sz = 0;
+    while (p != NULL) {
+      sz = sz + (p->total_bytes - p->free_bytes);
+      p = p->next;
+    }  
+    return sz;
+  }
+  else
+    return GC_get_total_bytes();
+}
+
+struct _RegionHandle _profile_new_region(const char *rgn_name, 
+					 char *file, int lineno) {
+  if (alloc_log != NULL) {
+    fputs(file,alloc_log);
+    fprintf(alloc_log,":%d\t%s\tcreate\n",lineno,rgn_name);
+  }
+  return _new_region(rgn_name);
+}
+
+void _profile_free_region(struct _RegionHandle *r, char *file, int lineno) {
+  if (alloc_log != NULL) {
+    fputs(file,alloc_log);
+    fprintf(alloc_log,":%d\t%s\tfree\n",lineno, r != NULL ? r->name : "heap");
+  }
+  _free_region(r);
+}
 
 void * _profile_region_malloc(struct _RegionHandle *r, unsigned int s,
                               char *file, int lineno) {
   if (alloc_log != NULL) {
     fputs(file,alloc_log);
-    fprintf(alloc_log,":%d\t%d\t%d\t%d\t%d\n",lineno,s,GC_get_heap_size(),
-            GC_get_free_bytes(),GC_get_total_bytes());
+    fprintf(alloc_log,":%d\t%s\t%d\t%d\t%d\t%d\n",lineno,
+	    r != NULL ? r->name : "heap",s,
+	    region_get_heap_size(r), 
+	    region_get_free_bytes(r),
+	    region_get_total_bytes(r));
   }
   return _region_malloc(r,s);
 }
@@ -684,8 +758,8 @@ void * _profile_GC_malloc(int n, char *file, int lineno) {
   heap_total_bytes += n;
   if (alloc_log != NULL) {
     fputs(file,alloc_log);
-    fprintf(alloc_log,":%d\t%d\t%d\t%d\t%d\n",lineno,n,GC_get_heap_size(),
-            GC_get_free_bytes(),GC_get_total_bytes());
+    fprintf(alloc_log,":%d\theap\t%d\t%d\t%d\t%d\n",lineno,n,
+	    GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes());
   }
   result =  GC_malloc(n);
   if(!result)
@@ -699,8 +773,8 @@ void * _profile_GC_malloc_atomic(int n, char *file, int lineno) {
   heap_total_atomic_bytes +=n;
   if (alloc_log != NULL) {
     fputs(file,alloc_log);
-    fprintf(alloc_log,":%d\t%d\t%d\t%d\t%d\n",lineno,n,GC_get_heap_size(),
-            GC_get_free_bytes(),GC_get_total_bytes());
+    fprintf(alloc_log,":%d\theap\t%d\t%d\t%d\t%d\n",lineno,n,
+	    GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes());
   }
   result =  GC_malloc_atomic(n);
   if(!result)
