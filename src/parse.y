@@ -29,14 +29,12 @@ extern void yyprint(int i, xenum YYSTYPE v);
 #include "position.h"
 #include "absyn.h"
 #include "pp.h"
-#include "fn.h"
 using Core;
 using Stdio;
 using Lexing;
 using List;
 using Absyn;
 using Position;
-using Fn;
 using String;
 
 /* Typedef processing must be split between the parser and lexer.
@@ -2194,7 +2192,8 @@ primary_expression:
 | qual_opt_identifier LEFT_RIGHT
     { $$=^$(noinstantiate_exp(new_exp(UnknownId_e($1),LOC(@1,@1)),LOC(@1,@2)));}
 | qual_opt_identifier '@' '<' type_name_list '>'
-    { $$=^$(instantiate_exp(new_exp(UnknownId_e($1),LOC(@1,@1)),&Opt(List::imp_rev($4)),LOC(@1,@5))); }
+    { $$=^$(instantiate_exp(new_exp(UnknownId_e($1),LOC(@1,@1)),
+			    List::imp_rev($4),LOC(@1,@5))); }
 /* Cyc: tuple expressions */
 | '$' '(' argument_expression_list ')'
     { $$=^$(tuple_exp($3,LOC(@1,@4))); }

@@ -538,7 +538,9 @@ static typ tcConditional(tenv te, seg_t loc, typ *`r topt,
   tcExp(te,topt,e2);
   tcExp(te,topt,e3);
   typ t = wildtyp();
-  if (!coerce_list(te,t,&List(e2,&List(e3,null))))
+  let l1 = List(e3,null);
+  let l2 = List(e2,&l1);
+  if (!coerce_list(te,t,&l2))
     terr(loc,xprintf("conditional clause types do not match: %s != %s",
 			    typ2string(e2->topt->v),typ2string(e3->topt->v)));
   return t;
@@ -645,30 +647,22 @@ static typ tcThrow(tenv te, seg_t loc, typ *`r topt, exp e) {
 
 // explicit instantiation
 static typ tcInstantiate(tenv te, seg_t loc, typ *`r topt,
-                         exp e, opt_t<list_t<typ>> @opt_ref) {
+                         exp e, list_t<typ> ts) {
   tcExpNoInst(te,null,e);
   // turn any functions into function pointers
   e->topt->v = pointer_expand(compress(e->topt->v));
-  opt_t<list_t<typ>> topts = *opt_ref;
-  typ              t1    = compress(e->topt->v);
+  typ         t1 = compress(e->topt->v);
   switch (t1) {
   case PointerType(PtrInfo{t0,rt,x,tq,b}):
     switch (compress(t0)) {
     case FnType(FnInfo{tvars,eff,rtyp,args,varargs}):
-      list_t<$(tvar,typ)@> instantiation;
-      if (topts == null) {
-        instantiation = List::map(make_inst_var,tvars);
-        *opt_ref = &Opt(List::split(instantiation)[1]); // side-effect
-      } else {
-        _ ts = topts->v;
-        instantiation = null;
-        if (List::length(ts) != List::length(tvars))
-          return expr_err(te,loc,"type instantiation mismatch");
-        for (; ts != null; ts = ts->tl, tvars = tvars->tl) {
-          kind_t k = (*tvars->hd)[1];
-          check_valid_kinded_type(loc,te,lookup_type_vars(te),k,ts->hd);
-          instantiation = &List(&$(tvars->hd,ts->hd),instantiation);
-        }
+      list_t<$(tvar,typ)@> instantiation = null;
+      if (List::length(ts) != List::length(tvars))
+	return expr_err(te,loc,"type instantiation mismatch");
+      for (; ts != null; ts = ts->tl, tvars = tvars->tl) {
+	kind_t k = (*tvars->hd)[1];
+	check_valid_kinded_type(loc,te,lookup_type_vars(te),k,ts->hd);
+	instantiation = &List(&$(tvars->hd,ts->hd),instantiation);
       }
       typ new_fn_typ = 
         substitute(instantiation,FnType(FnInfo{null,eff,rtyp,args,varargs}));
@@ -1304,8 +1298,8 @@ static typ tcExpNoPromote(tenv te, typ *`r topt, exp e) {
                                 FnType(FnInfo{null,eff,rtyp,args,varargs}));
 	  typ new_typ = PointerType(PtrInfo{ftyp,rt,x,tq,b});
 	  exp inner   = copy_exp(e);
-	  e->r    = Instantiate_e(inner,&Opt(ts));
-	  e->topt = &Opt(new_typ);
+	  e->r        = Instantiate_e(inner,ts);
+	  e->topt     = &Opt(new_typ);
 	}
 	break;
       default: break;
@@ -1375,8 +1369,8 @@ static void tcExpNoInst(tenv te, typ *`r topt, exp e) {
   case Throw_e(e1):
     t = tcThrow(te,loc,topt,e1);
     break;
-  case Instantiate_e(e2,*o):
-    t = tcInstantiate(te,loc,topt,e2,o);
+  case Instantiate_e(e2,ts):
+    t = tcInstantiate(te,loc,topt,e2,ts);
     break;
   case Cast_e(t1,e1):
     t = tcCast(te,loc,topt,t1,e1);

@@ -263,20 +263,20 @@ int main() {
 		   "pretty print"),
 		 $("-o",String_spec(set_out_file_name),
 		 "output file name")};
-  _ l1  = List(&specs[0], null);
-  _ l2  = List(&specs[1], &l1);
-  _ l3  = List(&specs[2], &l2);
-  _ l4  = List(&specs[3], &l3);
-  _ l5  = List(&specs[4], &l4);
-  _ l6  = List(&specs[5], &l5);
-  _ l7  = List(&specs[6], &l6);
-  _ l8  = List(&specs[7], &l7);
-  _ l9  = List(&specs[8], &l8);
-  _ l10 = List(&specs[9], &l9);
-  _ l11 = List(&specs[10],&l10);
-  _ l12 = List(&specs[11],&l11);
-  _ l13 = List(&specs[12],&l12);
-  _ options = &l13;
+  let l1  = List(&specs[0], null);
+  let l2  = List(&specs[1], &l1);
+  let l3  = List(&specs[2], &l2);
+  let l4  = List(&specs[3], &l3);
+  let l5  = List(&specs[4], &l4);
+  let l6  = List(&specs[5], &l5);
+  let l7  = List(&specs[6], &l6);
+  let l8  = List(&specs[7], &l7);
+  let l9  = List(&specs[8], &l8);
+  let l10 = List(&specs[9], &l9);
+  let l11 = List(&specs[10],&l10);
+  let l12 = List(&specs[11],&l11);
+  let l13 = List(&specs[12],&l12);
+  let options = &l13;
 		 
   Arg::parse(options, compile_file, "Options:");
 

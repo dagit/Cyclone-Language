@@ -32,10 +32,9 @@ static void pattern_synth(seg_t loc, tenv te, list_t<tvar> tvs,
 			  list_t<vardecl> vs, stmt s, exp_opt where_opt,
 			  bool new_block) {
   tenv te2 = add_type_vars(loc,te,tvs);
-  if(new_block && vs != null)
+  if(new_block)
     te2 = Tcenv::new_block(te2);
-  let block = Tcenv::curr_block(te2);
-  let ropt = &Opt(block);
+  let ropt = &Opt(Tcenv::curr_rgn(te2));
   for(let vs2 = vs; vs2 != null; vs2 = vs2->tl) {
     te2 = add_pat_var(loc, te2, vs2->hd);
     vs2->hd->region = ropt;
@@ -46,7 +45,7 @@ static void pattern_synth(seg_t loc, tenv te, list_t<tvar> tvs,
 
   if(vs != null)
     te2 = set_encloser(te2,s); // for substatements inside of s
-  tcStmt(te2,s,true); // pattern vars are in a different region from body ??
+  tcStmt(te2,s,false); // pattern vars are in a different region from body ??
   // The encloser of s is not s, so reset it properly.
   if(vs != null)
     ControlFlow::set_encloser(s,get_encloser(te));
@@ -232,16 +231,15 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
 
     switch (d->r) {
     case Var_d(vd):
-      let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_,*block_ptr) = vd;
-      let curr_bl = Tcenv::curr_block(te);
-      *block_ptr = &Opt(curr_bl); // side effect
+      let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_,*rgn_ptr) = vd;
+      let curr_bl = Tcenv::curr_rgn(te);
+      *rgn_ptr = &Opt(curr_bl); // side effect
       switch (nsl) {
       case Loc_n: break;
       case Rel_n(null):
         (*vd->name)[0] = Loc_n;
         break;
-      case Abs_n(y):
-        throw impos("tcstmt: Abs_n declaration");
+      case Abs_n(y): throw impos("tcstmt: Abs_n declaration");
       default:
         terr(d->loc, "cannot declare a qualified local variable");
         break;
@@ -277,8 +275,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
 
     case Let_d(p,*vds,*topt_ref,e,*exhaust):
       let topt = *topt_ref;
-      // FIX:  should we use tcExpInitializer?
-      tcExp(te,null,e);
+      tcExpInitializer(te,null,e);
       *topt_ref = e->topt; // side effect
       let &$(new_tvs,x) = tcPat(te,p,null);//FIX: can pass region if e an lvalue
       *vds = &Opt(x);

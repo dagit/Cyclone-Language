@@ -189,7 +189,7 @@ static var add_tuple_type(list_t<$(tqual,typ)@> tqs0) {
 
 // used to generate struct definitions for tagged pointer types (e.g., t?)
 // we share the struct definitions where possible.
-// FIX: should use an efficient map data structure.
+// FIX should use an efficient map data structure.
 static list_t<$(var,typ)@> tagged_ptr_types = null;
 static int tagged_ptr_counter = 0;
 static var add_tagged_ptr_type(typ t,tqual tq) {
@@ -306,7 +306,7 @@ static typ typ_to_c(typ t) {
     // just drop the type arguments & effect and translate the nested types
     // FIX:  problem with higher-order functions?  Again C's rules are strange.
     return FnType(FnInfo{null,null,typ_to_c(t2),
-                           List::map(arg_to_c,args),vararg});
+                         List::map(arg_to_c,args),vararg});
   case TupleType(tqs):
     // $(t1,...,tn) maps to struct tuple_type_n where we define
     // struct tuple_type_n { t1 f1; ...; tn fn; };
@@ -343,14 +343,14 @@ static typ typ_to_c(typ t) {
 static exp array_to_ptr(typ t,exp e,seg_t l) {
   switch (t) {
   case ArrayType(t2,tq,_): return cast_exp(star_typ(t2,HeapRgn,tq),e,l);
-  default:                  return e;
+  default:                 return e;
   }
 }
 // The same, but the cast is forced.
 static exp array_to_ptr_cast(typ t,exp e,seg_t l) {
   switch (t) {
   case ArrayType(t2,tq,_): return cast_exp(star_typ(t2,HeapRgn,tq),e,l);
-  default:                    return cast_exp(t,e,l);
+  default:                 return cast_exp(t,e,l);
   }
 }
 
@@ -368,10 +368,9 @@ static bool atomic_typ(typ t) {
     for (; tqs != null; tqs = tqs->tl)
       if (!atomic_typ((*tqs->hd)[1])) return false;
     return true;
-  // FIX -- really need the struct and enum definitions
-    // have them now, really need to compute in terms of the instantiation
+    // FIX: really should compute in terms of the instantiation
     // to be as aggressive as possible.
-    // note even without this we'll allocation Position::seg_t with atomic.
+    // note even without this we'll allocate Position::seg_t with atomic.
   case StructType(_,_,_): return false;
   case EnumType(_,_,_):   return false;
   case XenumType(_,_):    return false;
@@ -802,7 +801,8 @@ static env switch_as_switch_env(env e, var next_l) {
 //      int t3 = y;
 //      printf("%d%.*s%d\n",t1,t2->sz,t2->contents,t3);
 //   })
-static exp printf_to_c(primop p,opt_t<exp> aopt,list_t<exp> args,list_t<typ> typs) {
+static exp printf_to_c(primop p, opt_t<exp> aopt,
+		       list_t<exp> args, list_t<typ> typs) {
   // All errors are Impossible because they should have been caught by
   // the typechecker
   if (args == null)
@@ -1334,10 +1334,18 @@ static void exp_to_c(env nv, exp e) {
     e->r = array_to_ptr_cast(typ_to_c(old_typ),newthrow_exp(e1),DL)->r;
     break;
   case NoInstantiate_e(e1): exp_to_c(nv,e1); break;
-  case Instantiate_e(e1,opt_type):
+  case Instantiate_e(e1,ts):
     exp_to_c(nv,e1);
     typ t_inst = typ_to_c(e->topt->v);
-    e->r = array_to_ptr_cast(t_inst,e1,DL)->r;
+    // only cast when the instantiation has type variables,
+    // you can cast other times, but you'll spit out much more C code.
+    for(; ts != null; ts = ts->tl) {
+      kind_t k = typ_kind(ts->hd);
+      if(k != EffKind && k != RgnKind) {
+	e->r = array_to_ptr_cast(t_inst,e1,DL)->r;
+	break;
+      }
+    }
     break;
   case Cast_e(*t,*e1):
     typ old_t2  = (*e1)->topt->v;
@@ -1362,8 +1370,6 @@ static void exp_to_c(env nv, exp e) {
       e->r = init_tuple(nv, true, es)->r;
       break;
     default: // it's actually an address-of.
-      // FIX: translation of e1 cannot induce a bounds-check or other
-      //      stmt_exp (i.e. it must remain an lvalue!)
       exp_to_c(nv,e1);
       if(!is_lvalue(e1)) {
 	lvalue_assign(e1,null,address_lvalue,true);
@@ -1708,7 +1714,8 @@ static void exp_to_c(env nv, exp e) {
 	  fields = fields->tl;
 	}
 	exp tag_exp = uint_exp(tag_count,DL);
-	list_t<$(list_t<designator>,exp)@> dles = List::map_c(add_designator,nv,es);
+	list_t<$(list_t<designator>,exp)@> dles = 
+	  List::map_c(add_designator,nv,es);
 	dles = &List(&$(null,tag_exp),dles);
 	exp init_exp = unresolvedmem_exp(null,dles,DL);
 	let vd = static_vardecl(x,strct_typ,init_exp);
@@ -1782,7 +1789,8 @@ static void exp_to_c(env nv, exp e) {
     if (nv->toplevel) {
       // struct qv_tag x = {->tag = i, ->f1 = e1, ... , ->fn = en};
       // (t)(&x);
-      list_t<$(list_t<designator>,exp)@> dles = List::map_c(add_designator,nv,es);
+      list_t<$(list_t<designator>,exp)@> dles = 
+	List::map_c(add_designator,nv,es);
       dles = &List(&$(null,tag_exp),dles);
       exp init_exp = unresolvedmem_exp(null,dles,DL);
       let vd = static_vardecl(x,strct_typ,init_exp);

@@ -70,7 +70,7 @@ opt_t<set_t<var>> empty_var_set = null;
 // compress out any evars or typedefs
 typ compress(typ t) {
   switch (t) {
-  case Evar(_,null,      _): 
+  case Evar(_,null,_): 
     return t;
   case Evar(_,*t2opt_ref,_): // TRICKY
     typ t2 = compress((*t2opt_ref)->v);
@@ -93,7 +93,7 @@ static bool kind_leq(kind_t k1, kind_t k2) {
 }
 
 // return the "least" kind of a type
-static kind_t typ_kind(typ t) {
+kind_t typ_kind(typ t) {
   switch (compress(t)) {
     // FIX: this isn't the least kind -- what if it gets constrained from
     // UnresolvedKind to something or from MemKind to BoxKind?
@@ -371,7 +371,6 @@ static bool evar_in_effect(typ evar, typ e) {
   }
 }
 
-
 // Returns true when e1 is a sub-effect of e2 -- this isn't very
 // efficient and can constrain both effect and region evars in
 // unpredictable ways (though it tries hard not to).  
@@ -393,10 +392,9 @@ bool subset_effect(bool set_to_empty, typ e1, typ e2) {
   }
   switch (compress(e1)) {
   case JoinEff(es): 
-    for (; es != null; es = es->tl) {
-      if (subset_effect(set_to_empty,es->hd,e2)) continue;
-      return false;
-    }
+    for (; es != null; es = es->tl)
+      if (!subset_effect(set_to_empty,es->hd,e2))
+	return false;
     return true;
   case AccessEff(r): 
     // Try checking if the region is in the effect without performing
@@ -521,7 +519,7 @@ void unify_it(typ t1, typ t2) {
     if(k2 == k1 && String::zstrptrcmp(x2,x1) == 0) return;
     break;
 
-  case $(StructType(nopt2,ts2,sd2), StructType(nopt1,ts1,sd1)): 
+  case $(StructType(nopt2,ts2,sd2),StructType(nopt1,ts1,sd1)): 
     // FIX: equivalent and more efficient to pointer-compare sds
     if ((nopt1 != null && nopt2 != null
 	 && qvar_cmp((qvar)nopt1,(qvar)nopt2) == 0) 
@@ -531,7 +529,7 @@ void unify_it(typ t1, typ t2) {
     }
     break;
 
-  case $(EnumType(nopt2,ts2,edp2), EnumType(nopt1,ts1,edp1)):
+  case $(EnumType(nopt2,ts2,edp2),EnumType(nopt1,ts1,edp1)):
     if (*edp2 == *edp1) {
       unify_list(ts1,ts2);
       return;
@@ -564,8 +562,8 @@ void unify_it(typ t1, typ t2) {
     if ((sn1 == sn2) && (sz1 == sz2)) return;
     break;
 
-  case $(FloatType,    FloatType):    return;
-  case $(DoubleType,   DoubleType):   return;
+  case $(FloatType,  FloatType):  return;
+  case $(DoubleType, DoubleType): return;
 
   case $(ArrayType(t2a,tq2a,e1), ArrayType(t1a,tq1a,e2)):
     unify_it(t1a,t2a);
@@ -641,9 +639,9 @@ bool will_lose_precision(typ t1, typ t2) {
   t1 = compress(t1);
   t2 = compress(t2);
   switch ($(t1,t2)) {
-  case $(DoubleType,   FloatType):       return true;
-  case $(DoubleType,   IntType(_,_)):    return true;
-  case $(FloatType,    IntType(_,_)):    return true;
+  case $(DoubleType,    FloatType):      return true;
+  case $(DoubleType,    IntType(_,_)):   return true;
+  case $(FloatType,     IntType(_,_)):   return true;
   case $(IntType(_,B8), IntType(_,B8)):  return false;
   case $(IntType(_,B8), _):              return true; // see prev case
   case $(IntType(_,B4), FloatType):      return true;
@@ -656,11 +654,11 @@ bool will_lose_precision(typ t1, typ t2) {
 
 // coerce the list e so that each element has type t -- used in arrays and
 // conditionals 
-bool coerce_list(tenv te, typ t, list_t<exp> es) {
+bool coerce_list(tenv te, typ t, glist_t<exp,`r> es) {
   // find the biggest arithmetic type (if any) for the list and determine
   // if all of the elements are boxed.
   opt_t<typ> max_arith_type = null;
-  for (list_t<exp> el = es; el != null; el = el->tl) {
+  for (glist_t<exp,`r> el = es; el != null; el = el->tl) {
     typ t1 = compress(el->hd->topt->v);
     if (is_arithmetic_type(t1)) 
       if (max_arith_type == null || will_lose_precision(t1,max_arith_type->v))
@@ -671,7 +669,7 @@ bool coerce_list(tenv te, typ t, list_t<exp> es) {
     if (!unify(t,max_arith_type->v))
       return false;
   // now coerce each expression to the type t as if by assignment
-  for (list_t<exp> el = es; el != null; el = el->tl)
+  for (glist_t<exp,`r> el = es; el != null; el = el->tl)
     if (!coerce_assign(te,el->hd,t)) {
       terr(el->hd->loc,xprintf("type mismatch: expecting %s but found %s",
 			       typ2string(t),typ2string(el->hd->topt->v)));
@@ -1594,8 +1592,7 @@ static list_t<tvar> i_check_valid_type(seg_t loc, tenv te,
     // evaluating it during unification
     Evexp::eval_const_uint_exp(e); // check that e is of constant size
     break;
-  case FnType(*fninfo):
-    let &FnInfo{*btvs,*eff,tr,args,vararg} = fninfo;
+  case FnType(FnInfo{*btvs,*eff,tr,args,vararg}):
     // FIX:  make sure that `H is not a bound variable...
     check_unique_tvars(loc,*btvs);
     list_t<tvar> new_free_vars = null;
@@ -1738,8 +1735,7 @@ void check_valid_toplevel_type(seg_t loc, tenv te, typ t) {
   }
   if (free_tvars != null) {
     switch (compress(t)) {
-    case FnType(*fninfo):
-      let &FnInfo{*btvs,eff,tr,args,vararg} = fninfo;
+    case FnType(FnInfo{*btvs,eff,tr,args,vararg}):
       if (*btvs == null)
         *btvs = free_tvars;
       else if (free_tvars != null) {

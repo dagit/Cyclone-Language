@@ -1319,21 +1319,21 @@ doc_t scope2doc(scope sc) {
 }
 
 // Conversion between alternate forms of types
-$(tqual,typ,list_t<type_modifier>)@ to_tms(tqual tq,typ t) {
+$(tqual,typ,list_t<type_modifier>) to_tms(tqual tq,typ t) {
   switch (t) {
   case ArrayType(t2,tq2,e):
     // Throw away tq, can't qualify an array
-    let &$(tq3,t3,tml3) = to_tms(tq2,t2);
+    let $(tq3,t3,tml3) = to_tms(tq2,t2);
     type_modifier tm;
     if (Evexp::eval_const_uint_exp(e) == 0)
       tm = Carray_mod;
     else
       tm = ConstArray_mod(e);
-    return &$(tq3, t3, (list_t<type_modifier>)&List(tm,tml3));
+    return $(tq3, t3, (list_t<type_modifier>)&List(tm,tml3));
 
   case PointerType(PtrInfo{.elt_typ = t2, .rgn_typ = rgntyp,
 			   .nullable = nullable, .tq = tq2, .bounds = b}):
-    let &$(tq3,t3,tml3) = to_tms(tq2,t2);
+    let $(tq3,t3,tml3) = to_tms(tq2,t2);
     enum Pointer_Sort ps;
     switch ($(compress_conref(nullable)->v,compress_conref(b)->v)) {
     case $(Eq_constr(true), Eq_constr(Upper_b(e))):
@@ -1348,43 +1348,43 @@ $(tqual,typ,list_t<type_modifier>)@ to_tms(tqual tq,typ t) {
       // ps = impos("bad pointer type in Absynpp::to_tms"); break;
     }
     type_modifier tm = Pointer_mod(ps,rgntyp,tq);
-    return &$(tq3, t3, (list_t<type_modifier>)&List(tm,tml3));
+    return $(tq3, t3, (list_t<type_modifier>)&List(tm,tml3));
 
     // FIX: deal with effect?
   case FnType(FnInfo{typvars,effopt,t2,args,varargs}):
     // discard tq because you can't qualify a function
-    let &$(tq3,t3,tml3) = to_tms(empty_tqual(),t2);
+    let $(tq3,t3,tml3) = to_tms(empty_tqual(),t2);
     list_t<type_modifier> tms = 
       &List(Function_mod(WithTypes(args,varargs,effopt)),tml3);
     if (typvars != null)
       tms = &List(TypeParams_mod(typvars,null,true),tms);
-    return &$(tq3,t3,tms);
+    return $(tq3,t3,tms);
 
   case Evar(k,topt,i):
     if (topt == null)
-      return &$(tq,t,null);
+      return $(tq,t,null);
     else
       return to_tms(tq,topt->v);
 
   case TypedefType(n,ts,topt):
     if (topt == null || !expand_typedefs)
-      return &$(tq,t,null);
+      return $(tq,t,null);
     else
       return to_tms(tq,topt->v);
 
-  default: return &$(tq,t,null);
+  default: return $(tq,t,null);
   }
 }
 
 doc_t tqtd2doc(tqual tq, typ t, opt_t<doc_t> dopt) {
-  $(tqual,typ,list_t<type_modifier>)@ x = to_tms(tq,t);
-  list_t<type_modifier> tms = List::rev((*x)[2]);
+  let $(tq,t,tms) = to_tms(tq,t);
+  tms = List::imp_rev(tms);
   if (tms==null && dopt==null)
-    return cat2(tqual2doc((*x)[0]),ntyp2doc((*x)[1]));
+    return cat2(tqual2doc(tq),ntyp2doc(t));
   else
     return
-      cat4(tqual2doc((*x)[0]),
-           ntyp2doc((*x)[1]),
+      cat4(tqual2doc(tq),
+           ntyp2doc(t),
            text(" "),
            dtms2doc((dopt==null)?nil_doc():dopt->v,tms));
 }

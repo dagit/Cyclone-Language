@@ -36,7 +36,7 @@ extern string pat2string(pat p);
   extern string prim2str(primop p);
   extern bool is_declaration(stmt s);
   extern $(Core::opt_t<var>,tqual,typ)@ arg_mk_opt($(var,tqual,typ)@ arg);
-  extern $(tqual,typ,list_t<type_modifier>)@ to_tms(tqual tq,typ t);
+  extern $(tqual,typ,list_t<type_modifier>) to_tms(tqual tq,typ t);
 
 }
 #endif

@@ -115,7 +115,7 @@ extern tenv_t add_label(tenv_t, var, stmt);
 extern bool all_labels_resolved(tenv_t);
 
 extern tenv_t new_block(tenv_t);
-extern typ curr_block(tenv_t);
+extern typ curr_rgn(tenv_t);
 // Check that the region is in the current capability
 extern void check_rgn_accessible(tenv_t,seg_t,typ rgn);
 // Check that an effect is a sub-effect of the current capability

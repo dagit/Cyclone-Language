@@ -171,10 +171,10 @@ namespace Absyn {
 
   EXTERN_DEFINITION struct FnInfo {
     list_t<tvar>                     tvars;
-    opt_t<typ>                     effect; // null => default effect
-    typ                            ret_typ;
+    opt_t<typ>                       effect; // null => default effect
+    typ                              ret_typ;
     list_t<$(opt_t<var>,tqual,typ)@> args;
-    bool                           varargs;
+    bool                             varargs;
   };
 
   // Note: The last fields of EnumType, XenumType, StructType and TypedefType
@@ -203,13 +203,13 @@ namespace Absyn {
     FnType(fn_info_t);                                     // MemKind
     TupleType(list_t<$(tqual,typ)@>); // MemKind
     StructType(typedef_name_opt_t,list_t<typ>,structdecl *); // MemKind
-    UnionType;                    // MemKind -- currently unsupported
-    RgnHandleType(typ);                             // BoxKind -- mem?  
+    UnionType;            // MemKind -- currently unsupported
+    RgnHandleType(typ);   // BoxKind -- mem?  
     // An abbreviation -- the opt_t<typ> contains the definition if any
     TypedefType(typedef_name_t,list_t<typ>,opt_t<typ>);
-    HeapRgn;                                              // RgnKind
-    AccessEff(typ);                            // RgnKind -> EffKind
-    JoinEff(list_t<typ>);                   // EffKind list -> EffKind
+    HeapRgn;              // RgnKind
+    AccessEff(typ);       // RgnKind -> EffKind
+    JoinEff(list_t<typ>); // EffKind list -> EffKind
   };
 
   EXTERN_DEFINITION enum Funcparams {
@@ -264,7 +264,7 @@ namespace Absyn {
     FnCall_e(exp,list_t<exp>);
     Throw_e(exp);
     NoInstantiate_e(exp);
-    Instantiate_e(exp,opt_t<list_t<typ>>);
+    Instantiate_e(exp,list_t<typ>);
     Cast_e(typ,exp);
     Address_e(exp);
     Sizeof_e(typ);
@@ -320,7 +320,7 @@ namespace Absyn {
   EXTERN_DEFINITION struct Stmt {
     raw_stmt_t   r;
     seg_t        loc;
-    list_t<stmt>   non_local_preds; // set by type-checking
+    list_t<stmt> non_local_preds; // set by type-checking
     stmt_annot_t annot;
   };
 
@@ -359,7 +359,7 @@ namespace Absyn {
 
   // only local and pat cases need to worry about shadowing
   EXTERN_DEFINITION enum Binding {
-    Unresolved_b; // Only used by Toc.  I'd like to get rid of it completely.
+    Unresolved_b; 
     Global_b(vardecl);
     Funname_b(fndecl); // good distinction between functions and function ptrs
     Param_b($(var,tqual,typ)@);
@@ -381,7 +381,7 @@ namespace Absyn {
     scope                   sc;
     bool                    is_inline;
     qvar                    name;
-    list_t<tvar>              tvs; 
+    list_t<tvar>            tvs; 
     opt_t<typ>              effect; // null => default effect
     typ                     ret_type;
     list_t<$(var,tqual,typ)@> args;
@@ -422,7 +422,7 @@ namespace Absyn {
 
   EXTERN_DEFINITION struct Typedefdecl {
     typedef_name_t name;
-    list_t<tvar>     tvs;
+    list_t<tvar>   tvs;
     typ            defn;
   };
 
@@ -543,7 +543,7 @@ namespace Absyn {
   extern exp fncall_exp(exp, list_t<exp>, seg_t);
   extern exp throw_exp(exp, seg_t);
   extern exp noinstantiate_exp(exp, seg_t);
-  extern exp instantiate_exp(exp, opt_t<list_t<typ>>, seg_t);
+  extern exp instantiate_exp(exp, list_t<typ>, seg_t);
   extern exp cast_exp(typ, exp, seg_t);
   extern exp address_exp(exp, seg_t);
   extern exp sizeof_exp(typ t, seg_t);

@@ -137,7 +137,6 @@ static struct SharedFenv {
   typ                            return_typ;
   Dict::dict_t<var,stmt>           seen_labels;
   SlowDict::dict_t<var,list_t<stmt>> needed_labels;  // FIX: check empty when done!
-  int                            curr_block_num; // for "gensymming" blocks
   typ                            parameter_rgn;  // region of parameters
 };
 
@@ -665,7 +664,6 @@ tenv set_encloser(tenv te, stmt s) {
 tenv new_block(tenv te) {
   if (te->le == null) env_err("Tcenv: unexpected new_block");
   fenv_t fe = copy_fenv_old_ctrl(get_fenv(te));
-  int block_num = ++fe->shared->curr_block_num;
   tvar block_rgn = new_tvar(RgnKind);
   typ block_typ = VarType(block_rgn);
   // NOTE:  no need to check uniqueness since the variable is gensymed
@@ -682,8 +680,8 @@ typ parameter_rgn(tenv te) {
   return get_fenv(te)->shared->parameter_rgn;
 }
 
-typ curr_block(tenv te) {
-  if (te->le == null) return HeapRgn; // KLUDGE:  top-level is -1
+typ curr_rgn(tenv te) {
+  if (te->le == null) return HeapRgn; 
   return get_fenv(te)->curr_rgn;
 }
 
@@ -729,8 +727,7 @@ fenv_t new_fenv(fndecl fd) {
                   &SharedFenv{.return_typ = fd->ret_type,
 			      .seen_labels = Dict::empty(String::zstrptrcmp),
 			      .needed_labels = 
-                                SlowDict::empty(String::zstrptrcmp),
-                              .curr_block_num = 0,
+			        SlowDict::empty(String::zstrptrcmp),
                               .parameter_rgn = param_rgn
                              }, 
  	       .type_vars   = &List(rgn0,fd->tvs), // assumed unique

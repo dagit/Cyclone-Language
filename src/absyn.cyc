@@ -277,7 +277,7 @@ exp fncall_exp(exp e, list_t<exp> es, seg_t loc) {
 exp noinstantiate_exp(exp e, seg_t loc) {
   return new_exp(NoInstantiate_e(e), loc);
 }
-exp instantiate_exp(exp e, opt_t<list_t<typ>> ts, seg_t loc) {
+exp instantiate_exp(exp e, list_t<typ> ts, seg_t loc) {
   return new_exp(Instantiate_e(e,ts), loc);
 }
 exp cast_exp(typ t, exp e, seg_t loc) { 
