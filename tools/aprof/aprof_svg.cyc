@@ -583,9 +583,15 @@ static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t 
            " fill='%s' stroke='none' opacity='%s'/>\n",
            x1,x2-x1,max_y,gc_fill,gc_opacity);
     if (gc_caps)
-      printf("<polygon points='%d,%d %d,%d %f,%f'"
+      printf("<polygon points='%f,%f %f,%f %f,%f'"
              " fill='black' stroke='none'/>\n",
-             x1,max_y,x2,max_y,((x2-x1)/2.0+x1),1.01*max_y);
+             ((x2-x1)/2.0)+x1-(xres*0.01), 1.01*max_y,
+             ((x2-x1)/2.0)+x1+(xres*0.01), 1.01*max_y,
+             ((x2-x1)/2.0)+x1, max_y);
+    //             x1,max_y,x2,max_y,((x2-x1)/2.0+x1),1.01*max_y);
+//      printf("<polygon points='%d,%d %d,%d %f,%f'"
+//             " fill='black' stroke='none'/>\n",
+//             x1,max_y,x2,max_y,((x2-x1)/2.0+x1),1.01*max_y);
   }
 
   printf("<!-- marks -->\n");
