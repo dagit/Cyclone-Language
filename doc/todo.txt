@@ -53,12 +53,6 @@ BUG FIXES and UNSOUNDNESSES:
 
 * can't cast char?? to const char? const ? (or whatever it is.)
 
-<<<<<<< todo.txt
-* int foo[] = { 0,0,0 } works but int foo[] = { for i < 3 : 0 }
-  doesn't
-
-=======
->>>>>>> 1.49
 * add F-bounded polymorphism or at least make it possible to abstract
   qualifiers.  The string library isn't polymorphic enough because in
   many places, we want to pass in a mutable string and get out the
