@@ -352,13 +352,13 @@ void process_file(string filename) {
   catch {
   case x:
     file_close((FILE@)in_file);
-    Tcutil::flush_warnings();
+    //    Tcutil::flush_warnings();
     remove_file(preprocfile); // Can't remove this before warnings are flushed!
     throw x;
   }
   file_close((FILE@)in_file);
   if (compile_failure) {
-    Tcutil::flush_warnings();
+    //    Tcutil::flush_warnings();
     remove_file(preprocfile); // Can't remove this before warnings are flushed!
     return;
   } 
@@ -369,12 +369,13 @@ void process_file(string filename) {
   // Type checking and control-flow checking
   tds = do_stage("type checking", do_typecheck, te, tds);
   if (compile_failure) {
-    Tcutil::flush_warnings();
+    //    Tcutil::flush_warnings();
     remove_file(preprocfile); // Can't remove this before warnings are flushed!
     return;
   } 
   tds = do_stage("control-flow checking", do_cfcheck, true, tds);
-  Tcutil::flush_warnings();
+  if(!compile_failure)
+    Tcutil::flush_warnings();
   remove_file(preprocfile); // Can't remove this before warnings are flushed!
   if (compile_failure) return;
   // Once the type-checking has been done, there's no need for

@@ -951,10 +951,12 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	// want to allow it to make porting easier -- I'm afraid
 	// that writing t *x = y, where y is an array will go through
 	// too easily...
-	//case $(&Eq_constr(&Upper_b(e1)),&Eq_constr(&Upper_b(e2))):
-	//okay = okay && (Evexp::eval_const_uint_exp(e1) >= 
-	//		Evexp::eval_const_uint_exp(e2)); 
-	//break;
+	// DAN: okay, so make it a warning...
+      case $(&Eq_constr(&Upper_b(e1)),&Eq_constr(&Upper_b(e2))):
+	okay = okay && (Evexp::eval_const_uint_exp(e1) >= 
+			Evexp::eval_const_uint_exp(e2)); 
+	warn(loc, "implicit cast to shorter array");
+	break;
       case $(&Eq_constr(Unknown_b),&Eq_constr(Unknown_b)):
 	// Can cast ? to ? regardless of nullable
 	okay = true; break;
@@ -2661,7 +2663,7 @@ bool bits_only(type_t t) {
   case &IntType(_,_): return true;
   case FloatType: return true;
   case DoubleType: return true;
-  case &EnumType(_,_): return true;
+  case &EnumType(_,_): return false; //could be true but for pattern exhaustion!
   case &ArrayType(t,_,_): return bits_only(t);
   case &TupleType(tqs):
     for (; tqs != null; tqs = tqs->tl) 

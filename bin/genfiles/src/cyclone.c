@@ -836,24 +836,23 @@ _temp168; _temp168.curr= _temp167; _temp168.base= _temp167; _temp168.last_plus_o
 _temp167 + 8; _temp168;}), Cyc_do_parse,( struct Cyc_Stdio___sFILE*) _check_null(
 in_file), tds);; _pop_handler();} else{ void* _temp165=( void*) _exn_thrown;
 void* _temp170= _temp165; _LL172: goto _LL173; _LL174: goto _LL175; _LL173: Cyc_Stdio_file_close((
-struct Cyc_Stdio___sFILE*) _check_null( in_file)); Cyc_Tcutil_flush_warnings();
-Cyc_remove_file( preprocfile);( void) _throw( _temp170); _LL175:( void) _throw(
-_temp170); _LL171:;}}} Cyc_Stdio_file_close(( struct Cyc_Stdio___sFILE*)
-_check_null( in_file)); if( Cyc_compile_failure){ Cyc_Tcutil_flush_warnings();
-Cyc_remove_file( preprocfile); return;}{ struct Cyc_Tcenv_Tenv* _temp176= Cyc_Tcenv_tc_init();
+struct Cyc_Stdio___sFILE*) _check_null( in_file)); Cyc_remove_file( preprocfile);(
+void) _throw( _temp170); _LL175:( void) _throw( _temp170); _LL171:;}}} Cyc_Stdio_file_close((
+struct Cyc_Stdio___sFILE*) _check_null( in_file)); if( Cyc_compile_failure){ Cyc_remove_file(
+preprocfile); return;}{ struct Cyc_Tcenv_Tenv* _temp176= Cyc_Tcenv_tc_init();
 goto _LL177; _LL177: if( Cyc_parseonly_r){ goto PRINTC;} tds=(( struct Cyc_List_List*(*)(
 struct _tagged_string stage_name, struct Cyc_List_List*(* f)( struct Cyc_Tcenv_Tenv*,
 struct Cyc_List_List*), struct Cyc_Tcenv_Tenv* env, struct Cyc_List_List* tds))
 Cyc_do_stage)(({ unsigned char* _temp178="type checking"; struct _tagged_string
 _temp179; _temp179.curr= _temp178; _temp179.base= _temp178; _temp179.last_plus_one=
 _temp178 + 14; _temp179;}), Cyc_do_typecheck, _temp176, tds); if( Cyc_compile_failure){
-Cyc_Tcutil_flush_warnings(); Cyc_remove_file( preprocfile); return;} tds=((
-struct Cyc_List_List*(*)( struct _tagged_string stage_name, struct Cyc_List_List*(*
-f)( int, struct Cyc_List_List*), int env, struct Cyc_List_List* tds)) Cyc_do_stage)(({
-unsigned char* _temp180="control-flow checking"; struct _tagged_string _temp181;
-_temp181.curr= _temp180; _temp181.base= _temp180; _temp181.last_plus_one=
-_temp180 + 22; _temp181;}), Cyc_do_cfcheck, 1, tds); Cyc_Tcutil_flush_warnings();
-Cyc_remove_file( preprocfile); if( Cyc_compile_failure){ return;} Cyc_Absynpp_print_using_stmts=(
+Cyc_remove_file( preprocfile); return;} tds=(( struct Cyc_List_List*(*)( struct
+_tagged_string stage_name, struct Cyc_List_List*(* f)( int, struct Cyc_List_List*),
+int env, struct Cyc_List_List* tds)) Cyc_do_stage)(({ unsigned char* _temp180="control-flow checking";
+struct _tagged_string _temp181; _temp181.curr= _temp180; _temp181.base= _temp180;
+_temp181.last_plus_one= _temp180 + 22; _temp181;}), Cyc_do_cfcheck, 1, tds); if(
+! Cyc_compile_failure){ Cyc_Tcutil_flush_warnings();} Cyc_remove_file(
+preprocfile); if( Cyc_compile_failure){ return;} Cyc_Absynpp_print_using_stmts=(
 Cyc_Absynpp_print_externC_stmts= 0); if( Cyc_ic_r){ struct Cyc_Stdio___sFILE*
 inter_file; inter_file= Cyc_try_file_open( interfacefile,({ unsigned char*
 _temp182="w"; struct _tagged_string _temp183; _temp183.curr= _temp182; _temp183.base=

@@ -232,7 +232,6 @@ cnst_t eval_const_unprimop(primop_t p,exp_t e) {
 cnst_t eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
   let cn1 = promote_const(eval_const_exp(e1));
   let cn2 = promote_const(eval_const_exp(e2));
-  // FIX: See above, do non-integer possibilities here!
   sign_t s1, s2;
   int    i1, i2;
   switch (cn1) {
@@ -244,13 +243,7 @@ cnst_t eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
   default: exp_err(e2->loc, "bad constant expression"); return cn1;
   }
   switch (p) {
-  case Div: 
-    if (i2 == 0) {
-      exp_err(e2->loc,"division by zero in constant expression");
-      return cn1;
-    }
-    break;
-    // FIX: when implemented, delete above and just have fallthru;
+  case Div: fallthru;
   case Mod: 
     if (i2 == 0) {
       exp_err(e2->loc,"division by zero in constant expression");

@@ -4,13 +4,14 @@ BUG FIXES and UNSOUNDNESSES:
 ----------------------------
 * FIX all of the FIX things.
 
+* Provide offsetof as a primitive, as in C.
+
 * We rely on C to catch incomplete types, such as 
   struct X {
     struct X x;
   };
 
-* Prevent using label H (induces region name `H).  Centralize the
-  check that tyvars aren't `H.
+* Centralize the check that tyvars aren't `H.
 
 * void f() {
    void g();
