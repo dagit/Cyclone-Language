@@ -36,7 +36,7 @@ buf_t @expand_buf(buf_t @b) {
   return new Buf{buf,b->idx};
 }
 
-void input_buf_char(buf_t @@b, char c) {
+void input_buf_char(buf_t @@`r b, char c) {
   if ((*b)->idx == (*b)->buf.size)
     *b = expand_buf(*b);
   (*b)->buf[(*b)->idx] = c;
@@ -45,8 +45,8 @@ void input_buf_char(buf_t @@b, char c) {
 
 /* parser */
 
-xtunion exn { Parse_error; End_of_file };
-#define die(s) throw Parse_error
+xtunion exn { Parse_error(const char ?); End_of_file };
+#define die(s) throw new Parse_error((const char ?)s);
 
 char nextchar(FILE @f) {
   int c = fgetc(f);
@@ -65,76 +65,102 @@ $(tag_t,int) gettag(FILE @f) {
   tag_t t;
   int end_tag = 0;
 
-  /* look for / */
-  c1 = nextchar(f);
-  if (c1 == '/')
-    end_tag = 1;
-  else
-    ungetc(c1,f);
+  printf ("in get_tag\n");
 
-  /* figure out which tag */
-  c1 = nextchar(f);
-  switch (c1) {
-  case '0': t = Zero; break;
-  case '1': t = One; break;
-  case '2': t = Two; break;
-  case '3': t = Three; break;
-  case '4': t = Four; break;
-  case '5': t = Five; break;
-  case '6': t = Six; break;
-  case '7': t = Seven; break;
-  case '8': t = Eight; break;
-  case '9': t = Nine; break;
-  case 'B': t = B_tag; break;
-  case 'I': t = I_tag; break;
-  case 'S': t = S_tag; break;
-  case 'U': t = U_tag; break;
-  case 'r': t = r_tag; break;
-  case 'g': t = g_tag; break;
-  case 'b': t = b_tag; break;
-  case 'c': t = c_tag; break;
-  case 'm': t = m_tag; break;
-  case 'y': t = y_tag; break;
-  case 'k': t = k_tag; break;
-  case 'w': t = w_tag; break;
-  case 'E': 
-    if (nextchar(f) != 'M')
-      die("invalid 2-char tag");
-    t = EM_tag;
-    break;
-  case 'P':
-    if (nextchar(f) != 'L')
-      die("invalid 2-char tag");
-    t = PL_tag;
-    break;
-  case 'T':
-    if (nextchar(f) != 'T')
-      die("invalid 2-char tag");
-    t = TT_tag;
-    break;
-  default:
-    die("invalid 2-char tag");
-  }
+  try {
+    /* look for / */
+    c1 = nextchar(f);
+    if (c1 == '/') 
+      end_tag = 1;
+    else
+      ungetc(c1,f);
+    
+    /* figure out which tag */
+    c1 = nextchar(f);
+    switch (c1) {
+    case '0': t = Zero; break;
+    case '1': t = One; break;
+    case '2': t = Two; break;
+    case '3': t = Three; break;
+    case '4': t = Four; break;
+    case '5': t = Five; break;
+    case '6': t = Six; break;
+    case '7': t = Seven; break;
+    case '8': t = Eight; break;
+    case '9': t = Nine; break;
+    case 'B': t = B_tag; break;
+    case 'I': t = I_tag; break;
+    case 'S': t = S_tag; break;
+    case 'U': t = U_tag; break;
+    case 'r': t = r_tag; break;
+    case 'g': t = g_tag; break;
+    case 'b': t = b_tag; break;
+    case 'c': t = c_tag; break;
+    case 'm': t = m_tag; break;
+    case 'y': t = y_tag; break;
+    case 'k': t = k_tag; break;
+    case 'w': t = w_tag; break;
+    case 'E': 
+      if (nextchar(f) != 'M') {
+	printf ("c1=%c\n",c1);
+	die("invalid 2-char tag");
+      }
+      t = EM_tag;
+      break;
+    case 'P':
+      if (nextchar(f) != 'L') {
+	printf ("c1=%c\n",c1);
+	die("invalid 2-char tag");
+      }
+      t = PL_tag;
+      break;
+    case 'T':
+      if (nextchar(f) != 'T') {
+	printf ("c1=%c\n",c1);
+	die("invalid 2-char tag");
+      }
+      t = TT_tag;
+      break;
+    default:
+      printf ("c1=%c\n",c1);
+      die("invalid tag");
+    }
   
-  /* kill trailing '>' */
-  if (nextchar(f) != '>') die("no trailing > on tag");
-  return $(t,end_tag);
+    /* kill trailing '>' */
+    if (nextchar(f) != '>') die("no trailing > on tag");
+    return $(t,end_tag);
+  }
+  catch {
+  case End_of_file:
+    die("premature end of file");
+  }
 }
 
 /* keep going until you hit a tag and then return the text you've got so far.
    XXX should be able to region-ify this */
 doc_t get_text(FILE @f) {
+
+  printf ("in get_text\n");
+
   char c;
   buf_t @b = alloc_buf();
   while (1) {
-    c = nextchar(f);
-    switch (c) {
-    case '<': /* tag */
-      ungetc(c,f);
+    try {
+      c = nextchar(f);
+      switch (c) {
+      case '<': /* tag */
+	ungetc(c,f);
+	input_buf_char(&b,'\0');
+	return new Text(b->buf);
+      default:
+	input_buf_char(&b,c);
+	break;
+      }
+    }
+    catch {
+    case End_of_file:
       input_buf_char(&b,'\0');
       return new Text(b->buf);
-    default:
-      input_buf_char(&b,c);
     }
   }
 }
@@ -143,7 +169,12 @@ extern doc_t get_doc(FILE @);
 
 /* assumes the opening tag has already been read */
 doc_t get_tag_doc(FILE @f, tag_t t) {
+
+  printf ("in get_tag_doc\n");
+
   doc_t d = get_doc(f);
+  if (nextchar(f) != '<')
+    die("failed to read '<'");
   let $(t2,e) = gettag(f);
   if (e) /* ending tag */
     return new Tagged(t,d);
@@ -155,17 +186,37 @@ doc_t get_tag_doc(FILE @f, tag_t t) {
 
 doc_t get_doc(FILE @f) {
   char c;
+  doc_t d;
 
-  c = nextchar(f);
-  switch (c) {
-  case '<': /* tag */
-    let $(t,e) = gettag(f);
-    if (!e) {
-      return get_tag_doc(f,t);
+  printf ("in get doc\n");
+
+  try {
+    c = nextchar(f);
+    switch (c) {
+    case '<': /* tag */
+      let $(t,e) = gettag(f);
+      if (!e) {
+	return get_tag_doc(f,t);
+      }
+      else
+	die("found illegal end tag");
+    default: 
+      ungetc(c,f);
+      return get_text(f);
+//        doc_t d2;
+//        d = get_text(f);
+//        try {
+//  	d2 = get_doc(f);
+//        }
+//        catch {
+//        case End_of_file:
+//  	return d;
+//        }
+//        return new Seq(new {d,d2});
     }
-    else
-      die("found illegal end tag");
-  default: 
-    return get_text(f);
+  }
+  catch {
+  case End_of_file:
+    die("end of file I should do something with");
   }
 }    
