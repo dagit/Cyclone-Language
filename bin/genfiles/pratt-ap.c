@@ -323,18 +323,28 @@ static struct
 }
 
 /* Allocation */
-
 extern void* GC_malloc(int);
 extern void* GC_malloc_atomic(int);
 extern void* GC_calloc(unsigned,unsigned);
 extern void* GC_calloc_atomic(unsigned,unsigned);
-
+/* bound the allocation size to be less than MAX_ALLOC_SIZE,
+   which is defined in runtime_memory.c
+*/
+extern void* _bounded_GC_malloc(int,const char *file,int lineno);
+extern void* _bounded_GC_malloc_atomic(int,const char *file,int lineno);
+extern void* _bounded_GC_calloc(unsigned n, unsigned s,
+                                const char *file,int lineno);
+extern void* _bounded_GC_calloc_atomic(unsigned n, unsigned s,
+                                       const char *file,
+                                       int lineno);
 /* FIX?  Not sure if we want to pass filename and lineno in here... */
 #ifndef CYC_REGION_PROFILE
-#define _cycalloc(n)            (GC_malloc(n)          ? : _throw_badalloc())
-#define _cycalloc_atomic(n)     (GC_malloc_atomic(n)   ? : _throw_badalloc())
-#define _cyccalloc(n,s)         (GC_calloc(n,s)        ? : _throw_badalloc())
-#define _cyccalloc_atomic(n,s)  (GC_calloc_atomic(n,s) ? : _throw_badalloc())
+#define _cycalloc(n) _bounded_GC_malloc(n,__FILE__,__LINE__)
+#define _cycalloc_atomic(n) _bounded_GC_malloc_atomic(n,__FILE__,__LINE__)
+#define _cyccalloc(n,s) _bounded_GC_calloc(n,s,__FILE__,__LINE__)
+#define _cyccalloc_atomic(n,s) _bounded_GC_calloc_atomic(n,s,__FILE__,__LINE__)
+
+
 #endif
 
 #define MAX_MALLOC_SIZE (1 << 28)
@@ -466,11 +476,11 @@ int Cyc_RgnOrder_eff_outlives_eff(struct Cyc_RgnOrder_RgnPO*,void*eff1,void*eff2
 void Cyc_RgnOrder_print_region_po(struct Cyc_RgnOrder_RgnPO*po);extern char Cyc_Tcenv_Env_error[10U];struct Cyc_Tcenv_Env_error_exn_struct{char*tag;};struct Cyc_Tcenv_Genv{struct Cyc_Dict_Dict aggrdecls;struct Cyc_Dict_Dict datatypedecls;struct Cyc_Dict_Dict enumdecls;struct Cyc_Dict_Dict typedefs;struct Cyc_Dict_Dict ordinaries;};struct Cyc_Tcenv_Fenv;struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Tcenv_Genv*ae;struct Cyc_Tcenv_Fenv*le;int allow_valueof: 1;int in_extern_c_include: 1;};
 # 84 "tcenv.h"
 enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0U,Cyc_Tcenv_InNew  = 1U,Cyc_Tcenv_InNewAggr  = 2U};
-# 196 "tcutil.h"
+# 197 "tcutil.h"
 int Cyc_Tcutil_unify(void*,void*);
-# 198
+# 199
 int Cyc_Tcutil_typecmp(void*,void*);struct _union_RelnOp_RConst{int tag;unsigned int val;};struct _union_RelnOp_RVar{int tag;struct Cyc_Absyn_Vardecl*val;};struct _union_RelnOp_RNumelts{int tag;struct Cyc_Absyn_Vardecl*val;};struct _union_RelnOp_RType{int tag;void*val;};struct _union_RelnOp_RParam{int tag;unsigned int val;};struct _union_RelnOp_RParamNumelts{int tag;unsigned int val;};struct _union_RelnOp_RReturn{int tag;unsigned int val;};union Cyc_Relations_RelnOp{struct _union_RelnOp_RConst RConst;struct _union_RelnOp_RVar RVar;struct _union_RelnOp_RNumelts RNumelts;struct _union_RelnOp_RType RType;struct _union_RelnOp_RParam RParam;struct _union_RelnOp_RParamNumelts RParamNumelts;struct _union_RelnOp_RReturn RReturn;};
-# 49 "relations.h"
+# 49 "relations-ap.h"
 enum Cyc_Relations_Relation{Cyc_Relations_Req  = 0U,Cyc_Relations_Rneq  = 1U,Cyc_Relations_Rlte  = 2U,Cyc_Relations_Rlt  = 3U};struct Cyc_Relations_Reln{union Cyc_Relations_RelnOp rop1;enum Cyc_Relations_Relation relation;union Cyc_Relations_RelnOp rop2;};
 # 41 "cf_flowinfo.h"
 int Cyc_CfFlowInfo_anal_error;

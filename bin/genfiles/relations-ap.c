@@ -323,18 +323,28 @@ static struct
 }
 
 /* Allocation */
-
 extern void* GC_malloc(int);
 extern void* GC_malloc_atomic(int);
 extern void* GC_calloc(unsigned,unsigned);
 extern void* GC_calloc_atomic(unsigned,unsigned);
-
+/* bound the allocation size to be less than MAX_ALLOC_SIZE,
+   which is defined in runtime_memory.c
+*/
+extern void* _bounded_GC_malloc(int,const char *file,int lineno);
+extern void* _bounded_GC_malloc_atomic(int,const char *file,int lineno);
+extern void* _bounded_GC_calloc(unsigned n, unsigned s,
+                                const char *file,int lineno);
+extern void* _bounded_GC_calloc_atomic(unsigned n, unsigned s,
+                                       const char *file,
+                                       int lineno);
 /* FIX?  Not sure if we want to pass filename and lineno in here... */
 #ifndef CYC_REGION_PROFILE
-#define _cycalloc(n)            (GC_malloc(n)          ? : _throw_badalloc())
-#define _cycalloc_atomic(n)     (GC_malloc_atomic(n)   ? : _throw_badalloc())
-#define _cyccalloc(n,s)         (GC_calloc(n,s)        ? : _throw_badalloc())
-#define _cyccalloc_atomic(n,s)  (GC_calloc_atomic(n,s) ? : _throw_badalloc())
+#define _cycalloc(n) _bounded_GC_malloc(n,__FILE__,__LINE__)
+#define _cycalloc_atomic(n) _bounded_GC_malloc_atomic(n,__FILE__,__LINE__)
+#define _cyccalloc(n,s) _bounded_GC_calloc(n,s,__FILE__,__LINE__)
+#define _cyccalloc_atomic(n,s) _bounded_GC_calloc_atomic(n,s,__FILE__,__LINE__)
+
+
 #endif
 
 #define MAX_MALLOC_SIZE (1 << 28)
@@ -521,17 +531,17 @@ void Cyc_Tcutil_terr(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_pt
 void Cyc_Tcutil_warn(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
 # 45
 int Cyc_Tcutil_is_integral_type(void*);
-# 76
+# 77
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*def,void*b);
-# 89
+# 90
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*def,void*b);
-# 114
+# 115
 void*Cyc_Tcutil_compress(void*t);
-# 196
+# 197
 int Cyc_Tcutil_unify(void*,void*);
-# 344 "tcutil.h"
+# 345 "tcutil.h"
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*e);
-# 373
+# 374
 struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*b);
 # 8 "ap.h"
 extern struct Cyc_AP_T*Cyc_AP_one;
