@@ -7,9 +7,6 @@
 #include "absyn.h"
 #include "tcutil.h"
 
-//debugging
-#include "absynpp.h"
-
 #define CF_FLOWINFO_CYC
 #include "cf_flowinfo.h"
 
@@ -74,8 +71,6 @@ int place_cmp(place_t p1, place_t p2) {
 //   (If we ever have memory kinds, then we either need to figure out field's
 //    instantiated types or not allow partial initialization of such fields.)
 // Note: We could memoize answers here, but it doesn't seem important.
-// Note: may revisit the decision to separate tuple and struct dicts, but
-//       probably can write iterators that are polymorphic over the key type.
 path_info_t typ_to_unesc_none_pinfo(typ t) {
   switch(Tcutil::compress(t)) {
   case TupleType(tqts):
@@ -119,11 +114,11 @@ path_info_t insert_place_rec(path_info_t insert_path,
     return pinfo;
   switch($(insert_path,fields)) {
   case $(TuplePI(d), &List(TupleF(i), tl)): 
-    return TuplePI(Dict::insert(d, i, 
-				insert_place_rec(Dict::lookup(d,i),tl,pinfo)));
+    let next_path = Dict::lookup(d,i);
+    return TuplePI(Dict::insert(d, i, insert_place_rec(next_path,tl,pinfo)));
   case $(StructPI(d),&List(StructF(n),tl)):
-    return StructPI(Dict::insert(d, n, 
-				 insert_place_rec(Dict::lookup(d,n),tl,pinfo)));
+    let next_path = Dict::lookup(d,n);
+    return StructPI(Dict::insert(d, n, insert_place_rec(next_path,tl,pinfo)));
   default: 
     throw Core::Impossible("bad insert_place");
   }
@@ -134,12 +129,7 @@ pinfo_dict_t<local_root_t> insert_place(pinfo_dict_t<local_root_t> d,
   return Dict::insert(d, r, insert_place_rec(Dict::lookup(d,r), fields, pinfo));
 }
 
-//bool isEscaped
-
 // Note: must detect cycles in the MustPointTo graph or we won't terminate.
-// This is the "first pass" that decides if everything reachable is initialized.
-// We use the result to decide whether to "escape downstream" or just make
-// the root "ThisInit".
 bool isAllInit_pinfo($(pinfo_dict_t<local_root_t>,list_t<place_t>)@`r env,
 		     path_info_t path);
 bool isAllInit_is ($(pinfo_dict_t<local_root_t>,list_t<place_t>)@`r env,
@@ -173,22 +163,23 @@ bool isAllInit(pinfo_dict_t<local_root_t> pinfo_dict, path_info_t pinfo) {
   return isAllInit_pinfo(&isInitEnv, pinfo);
 }
 
-// escape_pointsto should only be called when everything reachable is fully
-// initialized -- it's escaping.
-// Note: The map_c calls do a lot of unnecessary allocation!!
-path_info_t pinfo_getplaces_esc(Set::set_t<place_t> @`r places_ptr,
+// Note: The map_c calls do a lot of unnecessary allocation.
+path_info_t pinfo_getplaces_esc($(pinfo_dict_t<local_root_t>,
+				  Set::set_t<place_t>@`r1) @`r2 env,
 				path_info_t pinfo) {
+  let &$(rootd,places_ptr) = env;
   switch(pinfo) {
   case LeafPI(MustPointTo(place)): 
     *places_ptr = Set::insert(*places_ptr, place); 
-    fallthru;
-  case LeafPI(UnknownIS(_,AllIL)): 
-    return mkLeafPI(Esc,AllIL);
+    if(isAllInit(rootd,lookup_place(rootd,place)))
+      return mkLeafPI(Esc,AllIL);
+    return mkLeafPI(Esc,ThisIL);
+  case LeafPI(UnknownIS(_,il)): 
+    return mkLeafPI(Esc,il);
   case TuplePI(d):  
-    return TuplePI(Dict::map_c(pinfo_getplaces_esc, places_ptr, d));
+    return TuplePI(Dict::map_c(pinfo_getplaces_esc, env, d));
   case StructPI(d): 
-    return StructPI(Dict::map_c(pinfo_getplaces_esc, places_ptr, d));
-  default: throw Core::Impossible("bad arg to escape");
+    return StructPI(Dict::map_c(pinfo_getplaces_esc, env, d));
   }
 }
 void pinfo_getplaces(Set::set_t<place_t> @`r places_ptr, `a a, 
@@ -207,9 +198,27 @@ void pinfo_getplaces(Set::set_t<place_t> @`r places_ptr, `a a,
     return;
   }
 }
+
+// note: this terminates because we thread the dictionary.
+// note: we need to catch not in the dict b/c of how join_flow uses this code.
+pinfo_dict_t<local_root_t> escape_these(Set::set_t<place_t> places, 
+					pinfo_dict_t<local_root_t> d) {
+  while(!Set::is_empty(places)) {
+    let place = Set::choose(places);
+    places = Set::delete(places,place);
+    path_info_t place_old_pinfo;
+    try place_old_pinfo = lookup_place(d,place);
+    catch { case Dict::Absent: continue; }
+    let places_env = $(d,&places);
+    let place_new_pinfo = pinfo_getplaces_esc(&places_env, place_old_pinfo);
+    if(place_old_pinfo != place_new_pinfo) 
+      d = insert_place(d, place, place_new_pinfo);
+  }
+  return d;
+}
+
 static Set::set_t<place_t> * empty_place_set_ptr = null; 
 // only things pointed to escape
-// note: this terminates because we thread the dictionary.
 pinfo_dict_t<local_root_t> escape_pointsto(path_info_t pinfo,
 					   pinfo_dict_t<local_root_t> d) {
   if(empty_place_set_ptr == null)
@@ -218,16 +227,7 @@ pinfo_dict_t<local_root_t> escape_pointsto(path_info_t pinfo,
   let places = *empty_place_set_ptr;
   pinfo_getplaces(&places, 0, pinfo);
 
-  while(!Set::is_empty(places)) {
-    let place = Set::choose(places);
-    places = Set::delete(places,place);
-    let place_old_pinfo = lookup_place(d,place);
-    let place_new_pinfo = pinfo_getplaces_esc(&places, place_old_pinfo);
-    if(place_old_pinfo != place_new_pinfo) 
-      d = insert_place(d, place, place_new_pinfo);
-  }
-
-  return d;
+  return escape_these(places,d);
 }
 
 // To do: try to avoid allocation here
@@ -240,13 +240,13 @@ path_info_t assign_unknown_dict(init_level_t level, path_info_t pinfo) {
   }
 }
 //////////////////////////// Joins  and Lessthan ///////////////////////////////
-// Notice how we work very hard to avoid allocation.
 
-static struct JoinEnv {
+struct JoinEnv<`r::R> {
   pinfo_dict_t<local_root_t> d1;
   pinfo_dict_t<local_root_t> d2;
+  Set::set_t<place_t>@`r places;
 };
-typedef struct JoinEnv @`r join_env_t<`r::R>;
+typedef struct JoinEnv<`r1> @`r2 join_env_t<`r1,`r2>;
 
 // WARNING: If this changes, make sure initstate_lessthan_approx still works.
 escaped_t join_escape(escaped_t esc1, escaped_t esc2) {
@@ -266,7 +266,13 @@ init_level_t join_initlevel(init_level_t il1, init_level_t il2) {
   default:          return AllIL;
   }
 }
-path_info_t join_initstate(join_env_t<`r> env,
+
+// note: There is another reasonable policy for losing an alias to AllInit:
+//   still make the result ThisInit and **don't** lose the aliases downstream.
+//   I imagine the default should be AllInit and los downstream with a pragma
+//   in the source to get the other behavior (if anyone actually cares).
+//   Note that the two policies are incomparable.
+path_info_t join_initstate(join_env_t<`r1,`r2> env,
 			   init_state_t state1, 
 			   init_state_t state2) {
   switch($(state1,state2)) {
@@ -274,32 +280,23 @@ path_info_t join_initstate(join_env_t<`r> env,
     return mkLeafPI(join_escape(esc1,esc2), join_initlevel(il1,il2));
 
   case $(UnknownIS(esc1,il1),MustPointTo(place2)):
-    // note: this is the funny situation where  a user may want another policy:
-    //  it is incomparable to keep the downstream aliases and make the 
-    //  resulting initlevel NOT AllIL.
     // note: esc1 is irrelevant in the sense that place2 and downstream
     //       escapes b/c we no longer know all the pointers to it.
     let isInitEnv = $(env->d2,null);
     if(il1==AllIL && isAllInit_pinfo(&isInitEnv,lookup_place(env->d2,place2))) {
-      env->d2 = escape_pointsto(lookup_place(env->d2,place2), env->d2);
+      *(env->places) = Set::insert(*(env->places), place2);
       return mkLeafPI(esc1,il1);
     }
-    // act as though we have il2==ThisIL b/c the result won't be AllIL
-    // but state says, "I point somewhere".
     return mkLeafPI(esc1, join_initlevel(il1, ThisIL));
+
   case $(MustPointTo(place1),UnknownIS(esc2,il2)):
-    // note: this is the funny situation where  a user may want another policy:
-    //  it is incomparable to keep the downstream aliases and make the 
-    //  resulting initlevel NOT AllIL.
-    // note: esc1 is irrelevant in the sense that place2 and downstream
+    // note: esc2 is irrelevant in the sense that place2 and downstream
     //       escapes b/c we no longer know all the pointers to it.
     let isInitEnv = $(env->d1,null);
     if(il2==AllIL && isAllInit_pinfo(&isInitEnv,lookup_place(env->d1,place1))) {
-      env->d1 = escape_pointsto(lookup_place(env->d1,place1), env->d1);
+      *(env->places) = Set::insert(*(env->places), place1);
       return mkLeafPI(esc2,il2);
     }
-    // act as though we have il1==ThisIL b/c the result won't be AllIL
-    // but state says, "I point somewhere".
     return mkLeafPI(esc2, join_initlevel(ThisIL, il2));
 
   case $(MustPointTo(place1),MustPointTo(place2)):
@@ -308,14 +305,17 @@ path_info_t join_initstate(join_env_t<`r> env,
     let isInitEnv2 = $(env->d2,null);
     if(isAllInit_pinfo(&isInitEnv1, lookup_place(env->d1,place1))
        && isAllInit_pinfo(&isInitEnv2, lookup_place(env->d2,place2))) {
-      env->d1 = escape_pointsto(lookup_place(env->d1,place1), env->d1);
-      env->d2 = escape_pointsto(lookup_place(env->d2,place2), env->d2);
+      *(env->places) = Set::insert(*(env->places), place1);
+      *(env->places) = Set::insert(*(env->places), place2);
       return mkLeafPI(Unesc,AllIL);
     }
     return mkLeafPI(Unesc,ThisIL);
   }
 }
-path_info_t join_pathinfo(join_env_t<`r> env,
+
+// we could try to do more to avoid allocation, but we do is easy
+// and gets most of the possible sharing, I think.
+path_info_t join_pathinfo(join_env_t<`r1,`r2> env,
 			  path_info_t pinfo1, path_info_t pinfo2) {
   if(pinfo1 == pinfo2) return pinfo1;
   switch($(pinfo1,pinfo2)) {
@@ -324,32 +324,29 @@ path_info_t join_pathinfo(join_env_t<`r> env,
     return join_initstate(env,is1,is2);
   case $(TuplePI(d1),TuplePI(d2)):
     if (d1 == d2) return pinfo1;
-    let dict_ans = Dict::intersect_c(join_pathinfo,env,d1,d2);
-    if(d1 == dict_ans) return pinfo1;
-    if(d2 == dict_ans) return pinfo2;
-    return TuplePI(dict_ans);
+    return TuplePI(Dict::intersect_c(join_pathinfo,env,d1,d2));
   case $(StructPI(d1),StructPI(d2)):
     if (d1 == d2) return pinfo1;
-    let dict_ans = Dict::intersect_c(join_pathinfo,env,d1,d2);
-    if(d1 == dict_ans) return pinfo1;
-    if(d2 == dict_ans) return pinfo2;
-    return StructPI(dict_ans);
+    return StructPI(Dict::intersect_c(join_pathinfo,env,d1,d2));
   default: throw Core::Impossible("join_pathinfo");
   }
 }
-
 flow_info_t join_flow(flow_info_t f1, flow_info_t f2) { 
+  if(empty_place_set_ptr == null)
+    empty_place_set_ptr = new{Set::empty(place_cmp)};
+
   if(f1 == f2) return f1;
   switch($(f1,f2)) {
   case $(BottomFL,_): return f2;
   case $(_,BottomFL): return f1;
   case $(InitsFL(d1),InitsFL(d2)):
     if(d1 == d2) return f1;
-    let joinenv = JoinEnv(d1,d2);
-    return InitsFL(Dict::intersect_c(join_pathinfo,&joinenv,d1,d2));
+    let places  = *empty_place_set_ptr;
+    let joinenv = JoinEnv(d1,d2,&places);
+    let outdict = Dict::intersect_c(join_pathinfo,&joinenv,d1,d2);
+    return InitsFL(escape_these(places,outdict));
   }
 }
-
 
 // WARNING: This is where we cheat ("approx") for performance (see below).
 bool initstate_lessthan_approx(init_state_t state1, init_state_t state2) {

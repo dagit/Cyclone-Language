@@ -185,7 +185,7 @@ static list_t<var> outer_namespace(list_t<var> ns) {
 // FIX: We should eagerly detect repeats by having one big dict
 // that we recompute on namespace and using boundaries
 static void check_repeat(tenv_t te, seg_t loc, `a lookup(genv_t,var),
-			     var v, list_t<list_t<var>> nss) {
+			 var v, list_t<list_t<var>> nss) {
   for(; nss != null; nss = nss->tl) {
     genv_t ge2 = Dict::lookup(te->ae,nss->hd);
     try {
@@ -228,7 +228,7 @@ static resolved_t lookup_ordinary_global_f(genv_t ge,var v) {
   (*ans)[1] = true;
   return (*ans)[0];
 }
-static resolved_t lookup_ordinary_global(tenv te,seg_t loc,qvar q) {
+static resolved_t lookup_ordinary_global(tenv_t te,seg_t loc,qvar q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Loc_n: fallthru;
@@ -243,8 +243,8 @@ static resolved_t lookup_ordinary_global(tenv te,seg_t loc,qvar q) {
 }
 
 // Return the absolute name of relative namespace &List(n,ns)
-list_t<var> resolve_namespace(tenv te, seg_t loc,
-                            var n, list_t<var> ns) {
+list_t<var> resolve_namespace(tenv_t te, seg_t loc,
+			      var n, list_t<var> ns) {
   let cns = te->ns; // current namespace
   let possible_results = null;
   while (true) {

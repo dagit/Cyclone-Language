@@ -300,7 +300,7 @@ void check_absexp(absexp_t ae) {
 // An Unknown means an assignment must be totally init (for alias reasons!)
 // And for AddressOf, the result is AllIL if totally init, ThisIL otherwise.
 
-// To do: AVOID ALL THIS ALLOCATION! (reverse the field list in place???)
+// To do: avoid doing so much allocation.
 // FIX: Cannot descend through uninitialized -- it's an error that must
 //      be reported!
 path_info_t eval_absop_r(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao);
@@ -327,7 +327,6 @@ init_state_t eval_absop_l(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
   case AddressOp(_): throw BadAbsexp;
   }
 }
-// MORE ALLOCATION TO AVOID HERE!
 path_info_t eval_absop_r(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
   switch(ao) {
   case LocalOp(vd):   return Dict::lookup(pinfo_dict, VarRoot(vd));
@@ -343,11 +342,12 @@ path_info_t eval_absop_r(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
   case DerefOp(ao2):
     let inner_pinfo = eval_absop_r(pinfo_dict,ao2);
     switch(inner_pinfo) {
-    case LeafPI(UnknownIS(_,_)):     return inner_pinfo;
-    case LeafPI(MustPointTo(place)): return lookup_place(pinfo_dict, place);
+    case LeafPI(UnknownIS(esc,ThisIL)): return mkLeafPI(esc,NoneIL);//esc right?
+    case LeafPI(UnknownIS(_,_)):        return inner_pinfo;
+    case LeafPI(MustPointTo(place)):    return lookup_place(pinfo_dict, place);
     default: throw BadAbsexp;
     }
-  case UnknownOp:      return mkLeafPI(Esc,AllIL); // correct variants??
+  case UnknownOp:      return mkLeafPI(Esc,AllIL);
   case AddressOp(ao2): return LeafPI(eval_absop_l(pinfo_dict,ao2));
   }
 }
@@ -545,4 +545,3 @@ flow_info_t eval_absexp(analenv_t env, seg_t loc,
     return out_flow;
   }
 }
-

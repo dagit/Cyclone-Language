@@ -45,8 +45,8 @@ void print_tvars(list_t<tvar> tvs) {
   fprintf(stderr,"\n"); fflush(stderr);
 }
 
-static list_t<seg_t> warning_segs = null;
-static list_t<stringptr>  warning_msgs = null;
+static list_t<seg_t>     warning_segs = null;
+static list_t<stringptr> warning_msgs = null;
 
 // we batch warnings because we have to parse the file to determine
 // line and column information.

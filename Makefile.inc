@@ -39,7 +39,6 @@ CYCLONE_SRCS:=absyn\
 	 formatstr\
          evexp\
          tc\
-	 control_flow\
          toc\
          cf_flowinfo\
          cf_absexp\

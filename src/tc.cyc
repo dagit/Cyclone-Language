@@ -791,7 +791,7 @@ static void tc_decls(tenv te, list_t<decl> ds0, bool in_externC) {
       var       first;
       list_t<var> rest;
       switch (nsl) {
-      case Loc_n: fallthru;
+      case Loc_n:       fallthru;
       case Rel_n(null): fallthru;
       case Abs_n(null):
         first = v; rest = null; break;

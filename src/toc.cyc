@@ -56,6 +56,12 @@ namespace Toc;
 
 // used for creation of all abstract syntax nodes here
 #define DL null
+// don't use these if you're going to mutate the result! 
+// (We're avoiding useless mallocs)
+enum Nmspace abs_ns = Abs_n(null);
+struct Tqual mt_tq_v = Tqual(false,false,false);
+tqual mt_tq = &mt_tq_v;
+
 // set to true to force null checking in generated code -- default to
 // false for now to simplify the output and make it more readable.
 bool check_for_null = false;
@@ -141,21 +147,21 @@ static list_t<decl> added_decls = null;
 static void add_tuple_decl(var x, list_t<typ> ts) {
   let fs = null;
   for (int i=1; ts != null; ts = ts->tl, i++)
-    fs = &List(&$(new {xprintf("f%d",i)},empty_tqual(),ts->hd),fs);
+    fs = &List(&$(new {xprintf("f%d",i)},mt_tq,ts->hd),fs);
   fs = List::imp_rev(fs);
-  let sd = &Structdecl{.sc = Public, .name = &Opt(&$(Abs_n(null),x)),
+  let sd = &Structdecl{.sc = Public, .name = &Opt(&$(abs_ns,x)),
                        .tvs = null, .fields = &Opt(fs)};
   added_decls = &List(new_decl(Struct_d(sd),DL),added_decls);
 }
 
 static void add_tagged_ptr_decl(var x, typ t) {
-  typ tptr = star_typ(t,HeapRgn,empty_tqual());
-  let f1 = &$(curr_sp,empty_tqual(),tptr);
-  let f2 = &$(base_sp,empty_tqual(),tptr);
-  let f3 = &$(last_plus_one_sp,empty_tqual(),tptr);
+  typ tptr = star_typ(t,HeapRgn,mt_tq);
+  let f1 = &$(curr_sp,mt_tq,tptr);
+  let f2 = &$(base_sp,mt_tq,tptr);
+  let f3 = &$(last_plus_one_sp,mt_tq,tptr);
   let fs = &List(f1,&List(f2,&List(f3,null)));
   let sd = &Structdecl{.sc = Public,
-                       .name = &Opt(&$(Abs_n(null),x)),
+                       .name = &Opt(&$(abs_ns,x)),
                        .tvs = null,
                        .fields = &Opt((list_t<$(stringptr,tqual,typ)@>)fs)};
   added_decls = &List(new_decl(Struct_d(sd),DL),added_decls);
@@ -213,7 +219,7 @@ static var add_tagged_ptr_type(typ t,tqual tq) {
 // FIX: need to guarantee these can't conflict
 static int temp_var_counter = 0;
 static qvar temp_var() {
-  return &$(Abs_n(null),new {xprintf("_temp%d",temp_var_counter++)});
+  return &$(abs_ns,new {xprintf("_temp%d",temp_var_counter++)});
 }
 
 // generate a fresh label
@@ -286,7 +292,7 @@ static typ typ_to_c(typ t) {
     // get rid of the repetition
     return TypedefType(tdn,null,
 		       &Opt(star_typ(strct(_xenum_struct_sp),HeapRgn,
-				     empty_tqual())));
+				     mt_tq)));
   case PointerType(PtrInfo{t2,_,_,tq,bnds}):
     // t2? maps to struct tagged_ptr_t2, where we define
     // struct tagged_ptr_t2 { t2 *curr; t2 *base; t2 *last_plus_one; }
@@ -451,7 +457,8 @@ static exp malloc_ptr(exp s) {
 
 // no pointers possible malloc
 static string gc_malloc_atomic_string = "GC_malloc_atomic";
-static $(enum Nmspace,var) gc_malloc_atomic_var = $(Abs_n(null),&gc_malloc_atomic_string);
+static $(enum Nmspace,var) gc_malloc_atomic_var = 
+                       $(Abs_n(null),&gc_malloc_atomic_string);
 
 static exp malloc_atomic(exp s) {
   return fncall_exp(var_exp(&gc_malloc_atomic_var,DL),&List(s,null),DL);
@@ -541,7 +548,7 @@ static exp tag_ptr_conv(bool toplevel, typ t, exp sz, exp e) {
   case PointerType(PtrInfo{elt,_,_,_,_}):
     // FIX:  what about tqual ??
     elt_typ = elt;
-    let n = add_tagged_ptr_type(elt,empty_tqual());
+    let n = add_tagged_ptr_type(elt,mt_tq);
     strt_typ = strct(n);
     break;
   default:
@@ -553,7 +560,7 @@ static exp tag_ptr_conv(bool toplevel, typ t, exp sz, exp e) {
     // t *x = e;
     // (struct tagged_ptr) {x,x,x+sz};
     qvar x = temp_var();
-    typ vd_typ = ArrayType(elt_typ,empty_tqual(),sz);
+    typ vd_typ = ArrayType(elt_typ,mt_tq,sz);
     vardecl vd = static_vardecl(x,vd_typ,e);
     temp_topdecls = &List(new_decl(Var_d(vd),DL),temp_topdecls);
     exp xexp = var_exp(x,DL);
@@ -581,7 +588,7 @@ static exp tag_ptr_conv(bool toplevel, typ t, exp sz, exp e) {
     s = seq_stmt(assign_stmt(structmember_exp(var_exp(b,DL),curr_sp,
 					      DL),var_exp(a,DL),DL),s,DL);
     s = declare_stmt(b,strt_typ,null,s,DL);
-    s = declare_stmt(a,cstar_typ(elt_typ,empty_tqual()),
+    s = declare_stmt(a,cstar_typ(elt_typ,mt_tq),
 		     cast_exp(t,e,DL),s,DL);
     return stmt_exp(s,DL);
   }
@@ -933,7 +940,7 @@ static typ get_cyc_typ(exp e) {
   return e->topt->v;
 }
 static $(tqual, typ)@ tup_to_c(exp e) {
-  return &$(empty_tqual(), typ_to_c(e->topt->v));
+  return &$(mt_tq, typ_to_c(e->topt->v));
 }
 static void exp_to_c(env nv, exp e); // forward declaration
 static $(list_t<designator>,exp)@ add_designator(env nv, exp e) {
@@ -946,7 +953,7 @@ static exp make_struct(qvar x, typ struct_typ, stmt s,
   exp_opt eo;
   typ        t;
   if(pointer) {
-    t  = cstar_typ(struct_typ, empty_tqual());
+    t  = cstar_typ(struct_typ, mt_tq);
     let se = sizeof_exp(struct_typ,DL);
     eo = cast_exp(t, is_atomic ? malloc_atomic(se) : malloc_ptr(se), DL);
   } else {
@@ -1132,7 +1139,7 @@ static void exp_to_c(env nv, exp e) {
 	  e->r = um->r;
 	} else {
 	  // null -> ({ struct tagged_ptr x = {0,0,0}; x })
-	  let t = strct(add_tagged_ptr_type(typ_to_c(elt),empty_tqual()));
+	  let t = strct(add_tagged_ptr_type(typ_to_c(elt),mt_tq));
 	  let x = temp_var();
 	  let xexp = var_exp(x,DL);
 	  let s = declare_stmt(x,t,um,exp_stmt(xexp,DL),DL);
@@ -1152,7 +1159,7 @@ static void exp_to_c(env nv, exp e) {
     break;
   case Const_e(String_c(heap_allocate,s)) && heap_allocate:
     // Cyc_new_string(s)
-    e->r = fncall_exp(var_exp(&$(Abs_n(null),Cyc_new_string_sp),DL),
+    e->r = fncall_exp(var_exp(&$(abs_ns,Cyc_new_string_sp),DL),
 		      &List(new_exp(Const_e(String_c(false,s)),DL),null),
 		      DL)->r;
     break;
@@ -1582,7 +1589,7 @@ static void exp_to_c(env nv, exp e) {
         break;
       }
       typ elt_typ=typ_to_c(old_elt_typ);
-      let ptr_typ = cstar_typ(elt_typ,empty_tqual());
+      let ptr_typ = cstar_typ(elt_typ,mt_tq);
       let e2 = times_exp(sizeof_exp(elt_typ,DL),
                          signed_int_exp(List::length(dles0),DL),DL);
       let e1 = malloc_exp(old_elt_typ,e2);
@@ -1613,7 +1620,7 @@ static void exp_to_c(env nv, exp e) {
     }
     typ old_elt_typ = e2->topt->v;
     typ elt_typ = typ_to_c(old_elt_typ);
-    typ ptr_typ = cstar_typ(elt_typ,empty_tqual());
+    typ ptr_typ = cstar_typ(elt_typ,mt_tq);
     exp_to_c(nv,e1);
     env nv2 = add_varmap(nv,x1,varb_exp(x1,Local_b(vd),DL));
     exp_to_c(nv2,e2);
@@ -1702,7 +1709,7 @@ static void exp_to_c(env nv, exp e) {
       let x = temp_var();
       let xexp = var_exp(x,DL);
       let strct_typ = strctq(collapse_qvar_tag(qv,"_struct"));
-      let pstrct_typ = cstar_typ(strct_typ,empty_tqual());
+      let pstrct_typ = cstar_typ(strct_typ,mt_tq);
       // we have to do this differently for the toplevel
       if (nv->toplevel) {
 	// struct qv_tag x = {->tag = i, ->f1 = e1, ... ,->fn = en};
@@ -1761,7 +1768,7 @@ static void exp_to_c(env nv, exp e) {
 //       let x = temp_var();
 //       let xexp = var_exp(x,DL);
 //       let strct_t = strct(collapse_qvar_tag(qv,"_struct")[1]);
-//       let pstrct_t = cstar_typ(strct_t,empty_tqual());
+//       let pstrct_t = cstar_typ(strct_t,mt_tq);
 //       let e2 = sizeof_exp(strct_t,DL);
 //       let e1 = cast_exp(pstrct_t,malloc_exp(e2),DL);
 //       let dles = null;
@@ -1786,7 +1793,7 @@ static void exp_to_c(env nv, exp e) {
     let x = temp_var();
     let xexp = var_exp(x,DL);
     let strct_typ = strctq(collapse_qvar_tag(qv,"_struct"));
-    let pstrct_typ = cstar_typ(strct_typ,empty_tqual());
+    let pstrct_typ = cstar_typ(strct_typ,mt_tq);
     exp tag_exp = var_exp(collapse_qvar_tag(qv,"_tag"),DL);
     if (nv->toplevel) {
       // struct qv_tag x = {->tag = i, ->f1 = e1, ... , ->fn = en};
@@ -1882,7 +1889,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
   case Reference_p(vd):
     // v = path; goto succ_lab
     let v = temp_var();
-    decls = &List(&$(v,cstar_typ(typ_to_c(t),empty_tqual())),decls);
+    decls = &List(&$(v,cstar_typ(typ_to_c(t),mt_tq)),decls);
     nv    = add_varmap(nv,vd->name,var_exp(v,DL));
     s     = seq_stmt(assign_stmt(var_exp(v,DL),address_exp(path,DL),DL),
 		     goto_stmt(succ_lab,DL),DL);
@@ -1908,7 +1915,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
     list_t<stmt> ss = null;
     int cnt = List::length(ps);
     qvar efstrct = collapse_qvar_tag(ef->name,"_struct");
-    exp rcast   = cast_exp(cstar_typ(strctq(efstrct),empty_tqual()),r,DL);
+    exp rcast   = cast_exp(cstar_typ(strctq(efstrct),mt_tq),r,DL);
     for(let rps = List::rev(ps); rps != null; rps = rps->tl, cnt--) {
       let p2  = rps->hd;
       let v   = temp_var();
@@ -1944,7 +1951,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
 	}
       }
       exp max_tag_exp = uint_exp(max_tag,DL);
-      exp e3 = cast_exp(cstar_typ(strct(_enum_struct_sp),empty_tqual()),
+      exp e3 = cast_exp(cstar_typ(strct(_enum_struct_sp),mt_tq),
 			r,DL);
       exp e1 = structarrow_exp(e3,tag_sp,DL);
       exp e5 = gt_exp(cast_exp(uint_t,r,DL), max_tag_exp, DL);
@@ -1964,7 +1971,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
     list_t<stmt> ss = null;
     int cnt = List::length(ps);
     qvar xfstrct = collapse_qvar_tag(xf->name,"_struct");
-    exp rcast = cast_exp(cstar_typ(strctq(xfstrct),empty_tqual()),r,DL);
+    exp rcast = cast_exp(cstar_typ(strctq(xfstrct),mt_tq),r,DL);
     for(let rps = List::rev(ps); rps != null; rps = rps->tl, cnt--) {
       let p2  = rps->hd;
       let v   = temp_var();
@@ -1991,7 +1998,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
 			  succ_lab,
 			  fail_lab);
     } else {
-      exp e3 = cast_exp(cstar_typ(strct(_xenum_struct_sp),empty_tqual()),
+      exp e3 = cast_exp(cstar_typ(strct(_xenum_struct_sp),mt_tq),
 			r,DL);
       exp e2 = deref_exp(e3,DL);
       exp e1 = structmember_exp(e2,tag_sp,DL);
@@ -2261,7 +2268,7 @@ static void stmt_to_c(env nv, stmt s) {
       // reset handler
       // FIX:  share code between break, continue, return, fallthru
       if (nv->to_pop_return != 0) {
-	let call_exp = fncall_exp(var_exp(&$(Abs_n(null),_npop_handler_sp),DL),
+	let call_exp = fncall_exp(var_exp(&$(abs_ns,_npop_handler_sp),DL),
                                   &List(uint_exp(nv->to_pop_return-1,DL),null),
                                   DL);
 	let call_stmt = exp_stmt(call_exp,DL);
@@ -2291,7 +2298,7 @@ static void stmt_to_c(env nv, stmt s) {
       // reset handler
       // FIX:  share code between break, continue, return, fallthru
       if (nv->to_pop_break != 0) {
-	let call_exp = fncall_exp(var_exp(&$(Abs_n(null),_npop_handler_sp),DL),
+	let call_exp = fncall_exp(var_exp(&$(abs_ns,_npop_handler_sp),DL),
                                   &List(uint_exp(nv->to_pop_break-1,DL),null),
                                   DL);
 	let call_stmt = exp_stmt(call_exp,DL);
@@ -2304,7 +2311,7 @@ static void stmt_to_c(env nv, stmt s) {
       // reset handler
       // FIX:  share code between break, continue, return, fallthru
       if (nv->to_pop_continue != 0) {
-	let call_exp = fncall_exp(var_exp(&$(Abs_n(null),_npop_handler_sp),DL),
+	let call_exp = fncall_exp(var_exp(&$(abs_ns,_npop_handler_sp),DL),
                                   &List(uint_exp(nv->to_pop_continue-1,DL),null),
                                   DL);
 	let call_stmt = exp_stmt(call_exp,DL);
@@ -2338,7 +2345,7 @@ static void stmt_to_c(env nv, stmt s) {
       // reset handler
       // FIX:  share code between break, continue, return, fallthru
       if (nv->to_pop_fallthru != 0) {
-	let call_exp = fncall_exp(var_exp(&$(Abs_n(null),_npop_handler_sp),DL),
+	let call_exp = fncall_exp(var_exp(&$(abs_ns,_npop_handler_sp),DL),
                                   &List(uint_exp(nv->to_pop_fallthru-1,DL),null),
                                   DL);
 	let call_stmt = exp_stmt(call_exp,DL);
@@ -2401,9 +2408,9 @@ static void stmt_to_c(env nv, stmt s) {
       exp  e_exp = var_exp(e_var,DL);
       typ  h_typ = strct(_handler_cons_sp);
       typ  e_typ = typ_to_c(exn_typ);
-      exp  pushhandler_exp = var_exp(&$(Abs_n(null), _push_handler_sp),DL);
-      exp  setjmp_exp      = var_exp(&$(Abs_n(null), setjmp_sp),       DL);
-      exp  pophandler_exp  = var_exp(&$(Abs_n(null), _pop_handler_sp), DL);
+      exp  pushhandler_exp = var_exp(&$(abs_ns, _push_handler_sp),DL);
+      exp  setjmp_exp      = var_exp(&$(abs_ns, setjmp_sp),       DL);
+      exp  pophandler_exp  = var_exp(&$(abs_ns, _pop_handler_sp), DL);
       // e_exp needs a typ because it'll go through exp_to_c;
       // as well, it must be in varmap
       e_exp->topt = &Opt(e_typ);
@@ -2609,7 +2616,7 @@ static list_t<decl> enumdecl_to_c(enumdecl ed, list_t<decl> res) {
           fs = &List(&$(fname,(*ts->hd)[0],typ_to_c_array((*ts->hd)[1])),fs);
         }
         fs = List::imp_rev(fs);
-        fs = &List(&$(tag_sp,empty_tqual(),sint_t),fs);
+        fs = &List(&$(tag_sp,mt_tq,sint_t),fs);
         let sd = &Structdecl{.sc = Public,
                              .name = &Opt(collapse_qvar_tag(f->name,"_struct")),
                              .tvs = null, 
@@ -2652,7 +2659,7 @@ static list_t<decl> xenumdecl_to_c(xenumdecl xd, list_t<decl> res) {
   let n = xd->name;
 
   if (xd->fields == null) {
-    let t  = cstar_typ(strct(_xenum_struct_sp),empty_tqual());
+    let t  = cstar_typ(strct(_xenum_struct_sp),mt_tq);
     let td = &Typedefdecl{.name = n, .tvs = null, .defn = t};
     res = &List(new_decl(Typedef_d(td),DL),res);
   } else {
@@ -2663,7 +2670,7 @@ static list_t<decl> xenumdecl_to_c(xenumdecl xd, list_t<decl> res) {
       if (f->tag != null) unimp("xenum:  can't deal with explicit tags");
       stringptr fn      = (*f->name)[1];
       let       sz_exp  = uint_exp((*fn).size,DL);
-      let       tag_typ = ArrayType(uchar_t,empty_tqual(),sz_exp);
+      let       tag_typ = ArrayType(uchar_t,mt_tq,sz_exp);
       exp_opt initopt = null;
       if (xd->sc != Extern)
 	initopt = string_exp(false,*fn,DL);
@@ -2696,8 +2703,8 @@ static list_t<decl> xenumdecl_to_c(xenumdecl xd, list_t<decl> res) {
           let newf = &$(field_n,(*ts->hd)[0],typ_to_c_array((*ts->hd)[1]));
           fields = &List(newf,fields);
         }
-        fields = &List(&$(tag_sp,empty_tqual(),
-			  cstar_typ(uchar_t,empty_tqual())),
+        fields = &List(&$(tag_sp,mt_tq,
+			  cstar_typ(uchar_t,mt_tq)),
         List::rev(fields));
         let strct_decl =
 	  &Structdecl{.sc     = Public,
@@ -2732,7 +2739,7 @@ static stmt letdecl_to_c(env nv, pat p, opt_t<typ> topt, exp e,
   if(exhaust)
     s = declare_stmt(x,typ_to_c(t),e,seq_stmt(test_stmt,succ_stmt,DL),DL);
   else {
-    let e3 = newthrow_exp(var_exp(&$(Abs_n(null),Match_Exception_sp),DL));
+    let e3 = newthrow_exp(var_exp(&$(abs_ns,Match_Exception_sp),DL));
     let fail_stmt = label_stmt(fail_lab,exp_stmt(e3,DL),DL);
     s = declare_stmt(x,typ_to_c(t),e,
 		     seq_stmt(test_stmt,
@@ -2762,7 +2769,7 @@ static $(env,list_t<decl>) decls_to_c(env nv, list_t<decl> ds, bool top) {
       let c_name = vd->name;
       // strip any namespace from an extern C declaration
       if (vd->sc == ExternC) 
-	c_name = &$(Abs_n(null),(*c_name)[1]);
+	c_name = &$(abs_ns,(*c_name)[1]);
       if (vd->initializer != null)
 	exp_to_c(nv, (exp)vd->initializer);
       if (nv->toplevel) {
@@ -2782,7 +2789,7 @@ static $(env,list_t<decl>) decls_to_c(env nv, list_t<decl> ds, bool top) {
       // extern C declarations are not placed in a namespace
       let c_name = fd->name;
       if (fd->sc == ExternC)
-	c_name = &$(Abs_n(null),(*c_name)[1]);
+	c_name = &$(abs_ns,(*c_name)[1]);
       nv = add_varmap(nv,fd->name,var_exp(c_name,DL));
       fd->name = c_name;
       fndecl_to_c(nv, fd);

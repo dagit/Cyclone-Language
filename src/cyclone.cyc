@@ -16,7 +16,6 @@
 #include "tcutil.h"
 #include "tcenv.h"
 #include "tc.h"
-#include "control_flow.h"
 #include "toc.h"
 #include "new_control_flow.h"
 
@@ -136,7 +135,6 @@ list_t<Absyn::decl> do_typecheck(Tcenv::tenv te, list_t<Absyn::decl> tds) {
   return tds;
 }
 list_t<Absyn::decl> do_cfcheck(bool ignore, list_t<Absyn::decl> tds) {
-  //  ControlFlow::cf_check(tds);
   NewControlFlow::cf_check(tds);
   return tds;
 }
@@ -167,10 +165,8 @@ void compile_file(string filename) {
 
   // Run the preprocessor, by building and running a command-line
   // Pass -I and -D things onto pre-processor
-  string inc_string = 
-    String::str_sepstr(&List(new{""},rev(includes))," -I");
-  string def_string = 
-    String::str_sepstr(&List(new{""},rev(defines)), " -D");
+  string inc_string = String::str_sepstr(&List(new{""},rev(includes))," -I");
+  string def_string = String::str_sepstr(&List(new{""},rev(defines)), " -D");
   // check that the input file exists
   FILE * f0 = try_file_open(filename, "r", "input file");
   if(compile_failure)

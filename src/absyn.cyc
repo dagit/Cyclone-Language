@@ -28,10 +28,7 @@ int qvar_cmp(qvar q1, qvar q2) {
   let n2 = (*q2)[0];
   switch ($(n1,n2)) {
   case $(Loc_n,    Loc_n):     break;
-  case $(Rel_n(x1),Rel_n(x2)): //fallthru(x1,x2);
-    int i = zstrlist_cmp(x1,x2);
-    if (i != 0) return i;
-    break;
+  case $(Rel_n(x1),Rel_n(x2)): fallthru(x1,x2);
   case $(Abs_n(x1),Abs_n(x2)):
     int i = zstrlist_cmp(x1,x2);
     if (i != 0) return i;

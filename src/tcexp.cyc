@@ -15,9 +15,9 @@
 #include "tcutil.h"
 #include "evexp.h"
 #include "tcstmt.h"
-#include "control_flow.h"
 #include "formatstr.h"
 #include "tcexp.h"
+#include "new_control_flow.h"
 using Core;
 using List;
 using Position;
@@ -1155,7 +1155,7 @@ static typ tcXenum(tenv te, seg_t loc, typ *`r topt,
 static typ tcStmtExp(tenv te, seg_t loc, typ *`r topt, stmt s) {
   Tcstmt::tcStmt(set_encloser(te,s),s,true);
   // The encloser of s is not s, so reset it properly.
-  ControlFlow::set_encloser(s,get_encloser(te));
+  NewControlFlow::set_encloser(s,get_encloser(te));
   // The type is the type of the expression that ends the statment.
   while(true)
     switch (s->r) {

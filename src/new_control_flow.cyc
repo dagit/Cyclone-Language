@@ -37,9 +37,6 @@
 #include "cf_absexp.h"
 #include "new_control_flow.h"
 
-// Going away soon (but for now type-checker decorates with its annotation)
-#include "control_flow.h"
-
 // for debugging
 #include "absynpp.h"
 #include "stdio.h"
@@ -75,7 +72,6 @@ typedef typ     typ_t;
 // * else list is null
 struct CFStmtAnnot {
   stmt_t           encloser; // for checking goto-scope -- no other use
-  list_t<stmt_t>   non_local_preds; // field in stmt going away
   int              visited;  // for detecting need to iterate
   flow_info_t      flow;     // flow to merge in when we check again
   list_t<absexp_t> absexps;  // meaning explained above
@@ -83,25 +79,19 @@ struct CFStmtAnnot {
 typedef struct CFStmtAnnot cf_stmt_annot_t;
 xenum StmtAnnot { CFAnnot(cf_stmt_annot_t); };
 
+// to be used by the type-checking pass to get things set up for us
+// must be called on EVERY stmt in the abstract syntax (even the dummy ones)
+void set_encloser(stmt enclosee, stmt encloser) {
+  enclosee->annot = CFAnnot(CFStmtAnnot(encloser, 0, BottomFL, null));
+}
+
 static cf_stmt_annot_t @ get_stmt_annot(stmt_t s) {
   switch(s->annot) {
   case CFAnnot(*x): return x;
   default: throw Impossible("ControlFlow -- wrong stmt annotation");
   }
 }
-// FIX: When we stop using old ControlFlow, the stmt_annot will already be
-//      our module's StmtAnnot, not the old StmtAnnot, so this changes.
-//      In particular, it will take the encloser as an argument.
-// FIX: At that time, we'll also most non_local_preds into the annot b/c
-//      we're the only module that uses it.
-void cf_decorate_stmt(stmt_t s) {
-  stmt_t encloser = ControlFlow::get_encloser(s);
-  s->annot = CFAnnot(CFStmtAnnot(encloser, 
-				 s->non_local_preds,
-				 0,
-				 BottomFL,
-				 null));
-}
+
 void cf_set_absexps(stmt_t s, list_t<absexp_t> ael) {
   get_stmt_annot(s)->absexps = ael;
 }
@@ -734,12 +724,9 @@ list_t<absexp_t> cf_prepass_scs(absenv_t env, list_t<switch_clause> scs) {
   return imp_rev(ans);
 }
 
-// Note: When type-checker annotates with our annotation, 
-//       the cf_decorate_stmt(s) call should be unnecessary.
 void cf_prepass(absenv_t env, stmt_t s) {
   assert(env.lhsides == null);
   assert(env.access_path == null);
-  cf_decorate_stmt(s); 
 
   switch(s->r) {
   case Skip_s: 
@@ -766,7 +753,6 @@ void cf_prepass(absenv_t env, stmt_t s) {
     return;
   case Do_s(s1,$(e,cont)): fallthru(e,cont,s1); // order irrelevant in this pass
   case While_s($(e,cont),s1):
-    cf_decorate_stmt(cont);
     let $(when_true,when_false) = abstract_guard(env,e);
     cf_set_absexps(s,new{List(when_true,new{List(when_false,null)})});
     cf_prepass(env,s1);
@@ -776,24 +762,19 @@ void cf_prepass(absenv_t env, stmt_t s) {
   case Goto_s(_,null): throw Impossible("cf_prepass: goto w/o destination");
   case Goto_s(_,dest): 
     // check we don't jump into scope -- this is totally orthogonal to 
-    // the rest of control-flow checking.
-    // FIX: Uncomment this after we have our stmt_annot.  Otherwise,
-    //      we don't know which annotation the dest will have (may or may
-    //      not have been processed yet!)
-    /*    let my_encloser   = get_stmt_annot(s)->encloser;
+    // the rest of control-flow checking, so we get it out of the way
+    let my_encloser   = get_stmt_annot(s)->encloser;
     let dest_encloser = get_stmt_annot((stmt)dest)->encloser;
     while(dest_encloser != my_encloser) {
       let next_encloser = get_stmt_annot(my_encloser)->encloser;
       if(next_encloser == my_encloser) { // function body is own encloser
-	terr(s->loc, "goto enters local scope or exception handler");
+	Tcutil::terr(s->loc, "goto enters local scope or exception handler");
 	break;
       }
       my_encloser = next_encloser;
-      } */
+    } 
     return;
   case For_s(e1,$(e2,guard),$(e3,cont),s1):
-    cf_decorate_stmt(guard);
-    cf_decorate_stmt(cont);
     let ae1 = abstract_exp_top(env,e1);
     let $(when_true,when_false) = abstract_guard(env,e2);
     let ae3 = abstract_exp_top(env,e3);
@@ -1079,11 +1060,15 @@ void cf_postpass(stmt_t s) {
     cf_postpass(s1);
     cf_postpass(s2);
     return;
-  case Label_s(_,s1):   fallthru(s1);
-  case While_s(_,s1):   fallthru(s1);
-  case For_s(_,_,_,s1): fallthru(s1);
-  case Decl_s(_,s1):    fallthru(s1);
-  case Do_s(s1,_):
+  case For_s(_,$(_,s2),$(_,s3),s1): 
+    cf_postpass(s3); 
+    fallthru(s1,s2);
+  case While_s($(_,s2),s1): fallthru(s1,s2);
+  case Do_s(s1,$(_,s2)): 
+    cf_postpass(s2);
+    fallthru(s1);
+  case Label_s(_,s1): fallthru(s1);
+  case Decl_s(_,s1):    
     cf_postpass(s1);
     return;
   case TryCatch_s(s1,scs):
@@ -1098,6 +1083,7 @@ void cf_postpass(stmt_t s) {
   }
 }
 
+//////////////////////////// Top-level ////////////////////////////////
 void cf_check_fun(fndecl fd) {
   //  fprintf(Stdio::stderr, "%s", *(*fd->name)[1]);
   absenv_t absenv = AbsEnv(new{SharedAbsEnv(Dict::empty(local_root_cmp), null)},

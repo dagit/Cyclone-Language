@@ -13,6 +13,9 @@ namespace NewControlFlow {
 using List;
 using CfFlowInfo;
 
+// to be used by the type-checking pass to get things set up for us
+extern void set_encloser(Absyn::stmt enclosee, Absyn::stmt encloser);
+
 extern struct AnalEnv {
   pinfo_dict_t<local_root_t> roots; // the "uninit leaves" versions
   bool        in_try;  // an optimization for the common case

@@ -9,7 +9,7 @@
 #include "tcenv.h"
 #include "tcexp.h"
 #include "tcpat.h"
-#include "control_flow.h"
+#include "new_control_flow.h"
 #include "tcstmt.h"
 #include "evexp.h"
 #include "stdio.h"
@@ -48,7 +48,7 @@ static void pattern_synth(seg_t loc, tenv te, list_t<tvar> tvs,
   tcStmt(te2,s,false); // pattern vars are in a different region from body ??
   // The encloser of s is not s, so reset it properly.
   if(vs != null)
-    ControlFlow::set_encloser(s,get_encloser(te));
+    NewControlFlow::set_encloser(s,get_encloser(te));
 }
 
 // new_block is a kludge because we he abstract syntax doesn't group the
@@ -61,7 +61,7 @@ static void pattern_synth(seg_t loc, tenv te, list_t<tvar> tvs,
 //       anywhere because they end regions.
 void tcStmt(tenv te, stmt s0, bool new_block) {
 
-  ControlFlow::set_encloser(s0, get_encloser(te));
+  NewControlFlow::set_encloser(s0, get_encloser(te));
 
   switch (s0->r) {
 
@@ -77,7 +77,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     while (true)
       switch (s2->r) {
       case Seq_s(s3,s4):
-	ControlFlow::set_encloser(s2, get_encloser(te));
+	NewControlFlow::set_encloser(s2, get_encloser(te));
 	te2 = set_next(te,Stmt_j(s4));
 	tcStmt(te2,s3,true);
 	s2  = s4;
@@ -117,14 +117,14 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     return;
 
   case While_s($(e,cont_s),s):
-    ControlFlow::set_encloser(cont_s, get_encloser(te));
+    NewControlFlow::set_encloser(cont_s, get_encloser(te));
     tcTest(te,e,"while loop");
     tcStmt(set_in_loop(te,cont_s),s,true);
     return;
 
   case For_s(e1,$(e2,guard_s),$(e3,cont_s),s):
-    ControlFlow::set_encloser(guard_s, get_encloser(te));
-    ControlFlow::set_encloser(cont_s,  get_encloser(te));
+    NewControlFlow::set_encloser(guard_s, get_encloser(te));
+    NewControlFlow::set_encloser(cont_s,  get_encloser(te));
     tcExp(te,null,e1);
     tcTest(te,e2,"for loop");
     te = set_in_loop(te,cont_s);
@@ -133,7 +133,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     return;
 
   case Do_s(s,$(e,cont_s)):
-    ControlFlow::set_encloser(cont_s, get_encloser(te));
+    NewControlFlow::set_encloser(cont_s, get_encloser(te));
     tcStmt(set_in_loop(te,cont_s),s,true);
     tcTest(te,e,"do loop");
     return;
@@ -166,7 +166,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
       terr(s0->loc, "too few arguments to explicit fallthru");
     return;
 
-  // Note: ControlFlow requires we add the label with s, not s0 !!
+  // Note: NewControlFlow requires we add the label with s, not s0 !!
   //       (That way, we can use switch_clause bodies and stmtExp stmt's
   //       as enclosers and get the right behavior!!!)
     // FIX: should use l for the region name.
