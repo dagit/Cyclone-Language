@@ -22,11 +22,14 @@ CYC_FLAGS= $(LC_FLAG) -I../../lib -B../../lib -g -pp -save-c
 LIB=../../bin/cyc-lib/$(OUT_PREFIX)$(CYCLIB)
 
 all: $(CYCC) $(LIB) \
-  smlng$(EXE)
+  smlng$(EXE) generate$(EXE)
 
 smlng$(EXE): smlng.o tag_elim.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 #	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
+
+generate$(EXE): generate.o
+	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
 $(OUT_PREFIX)%.o : %.cyc $(CYCC)
