@@ -270,6 +270,10 @@ namespace Absyn {
     Relations::relns_t                       ensures_relns;
     // the variable used in the @ensures clause for the return value
     vardecl_opt_t                            return_value;
+    // the variable declarations used in the @requires and @ensures clauses --
+    // we only have vardecls corresponding to those arguments that are actually
+    // named.
+    list_t<vardecl_t>                        arg_vardecls;
   };
 
   // information for datatypes

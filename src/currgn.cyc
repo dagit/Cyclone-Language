@@ -79,7 +79,7 @@ static $(var_opt_t,tqual_t,type_t)@ argtype($(var_opt_t,tqual_t,type_t)@`H arg) 
     switch (compress(t1)) {
     case &FnType(FnInfo{*tvars,eff,res_tq,res_typ,args_info,c_vararg,
 			  cyc_vararg,rgn_po,atts,req,req_relns,ens,ens_relns,
-			  ret_var}):
+			  ret_var,argvds}):
       // change the type of functions to be parameterized by `C, so
       // that `C is not substituted for
       let tvars2 = *tvars;
@@ -96,7 +96,7 @@ type_t instantiate(type_t fntype, type_t currgn) {
   switch (fntype) {
   case &FnType(FnInfo{tvars,eff,res_tq,res_typ,*args_info,c_vararg,
 			cyc_vararg,rgn_po,atts,req,req_relns,ens,ens_relns,
-			ret_var}):
+			ret_var,argvds}):
     // Need to make sure we don't instantiate for any functions
     // appearing in the arguments of the function; simulates our
     // assumption that they will be higher order

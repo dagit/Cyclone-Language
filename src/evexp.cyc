@@ -266,6 +266,8 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
   return ans;
 }
 
+// FIX: static stuff like numelts(x) where x is a variable should go
+// through, &x, etc.
 bool c_can_eval(exp_t e) {
   switch (e->r) {
   case &AnonEnum_e(...):
@@ -278,6 +280,13 @@ bool c_can_eval(exp_t e) {
     return c_can_eval(e1) && c_can_eval(e2) && c_can_eval(e3);
   case &And_e(e1,e2): fallthru(e1,e2);
   case &Or_e(e1,e2):  return c_can_eval(e1) && c_can_eval(e2);
+  case &Primop_e(Numelts,&List{e1,_}):
+    let topt = e1->topt;
+    if (topt != NULL) {
+      let eopt = Tcutil::get_type_bound((type_t)topt);
+      if (eopt != NULL) return c_can_eval((exp_t)eopt);
+    }
+    return false;
   case &Primop_e(p,es):
     for (; es != NULL; es = es->tl)
       if (!c_can_eval(es->hd)) 

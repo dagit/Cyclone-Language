@@ -809,6 +809,7 @@ type_t function_type(list_t<tvar_t,`H> tvs, type_opt_t eff_type,
                               .requires_relns = NULL,
                               .ensures_clause = ens,
                               .ensures_relns = NULL,
+                              .arg_vardecls = NULL,
                               .return_value = NULL});
 }
 // MWH: use RgnKind here rather than TopRgnKind for fresh evars;

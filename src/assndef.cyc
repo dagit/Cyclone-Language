@@ -40,24 +40,27 @@ datatype Term {
 };
 
 string_t term2string(term_t t) {
+  string_t res;
   switch (t) {
-  case &Uint(i): return aprintf("%d", i);
-  case &Const(e): return Absynpp::exp2string(e);
-  case &Var(vd): return Absynpp::qvar2string(vd->name);
-  case &LogicVar(NULL,i,_): return aprintf("_X%d",i);
-  case &LogicVar(vd,i,_): return aprintf("_%s%d",Absynpp::qvar2string(vd->name),i);
+  case &Uint(i): res = aprintf("0x%x", i); break;
+  case &Const(e): res = Absynpp::exp2string(e); break;
+  case &Var(vd): res = Absynpp::qvar2string(vd->name); break;
+  case &LogicVar(NULL,i,_): res = aprintf("_X%d",i); break;
+  case &LogicVar(vd,i,_): 
+    res = aprintf("_%s%d",Absynpp::qvar2string(vd->name),i); break;
   case &Primop(p,&List{t1,&List{t2,NULL}},_): 
-    return aprintf("(%s%s%s)",term2string(t1),
-                   Absynpp::prim2string(p),term2string(t2));
-  case &Primop(p,&List{t,_},_):
-    return aprintf("%s(%s)",Absynpp::prim2string(p),term2string(t));
+    res = aprintf("(%s%s%s)",term2string(t1),Absynpp::prim2string(p),
+                  term2string(t2));
+    break;
+  case &Primop(p,&List{t1,_},_):
+    res = aprintf("%s(%s)",Absynpp::prim2string(p),term2string(t1)); break;
   case &Cast(tp,tm):
-    return aprintf("(%s)%s",Absynpp::typ2string(tp),term2string(tm));
+    res = aprintf("(%s)%s",Absynpp::typ2string(tp),term2string(tm)); break;
   default: Warn::impos("term2string primop args");
   }
+  return res;
 }
 
-term_t cnst(Absyn::exp_t e) { return new Const(e); }
 term_t zero() {
   static datatype Term.Uint z = Uint(0);
   return &z;
@@ -66,7 +69,16 @@ term_t one() {
   static datatype Term.Uint x = Uint(1);
   return &x;
 }
-  
+term_t cnst(Absyn::exp_t e) { 
+  let $(c, known) = Evexp::eval_const_uint_exp(e);
+  if (known) {
+    if (c == 0) return zero();
+    if (c == 1) return one();
+    return new Uint(c);
+  }
+  return new Const(e); 
+}
+
 term_t var(vardecl_t vd) { return new Var(vd); }
 
 inline static bool is_commutative(Absyn::primop_t p) {
@@ -398,11 +410,8 @@ assn_t and(assn_t a1, assn_t a2) {
   case $(&False,_): return a1;
   case $(_,&False): return a2;
   default: 
-    // Sort the two operands so that we're more likely to share.
-    // Note that we could do more than this and, for instance,
-    // right-associate and's but this doesn't seem to be a win.
-    if ((int)a1 > (int)a2)
-      a1 :=: a2;
+    // NB: used to sort the operands based on physical address, but
+    // to keep things more deterministic, I'm not sorting now.
     let a = And(a1,a2);
     return hash_cons(&a);
   }
@@ -417,12 +426,10 @@ assn_t or(assn_t a1, assn_t a2) {
   case $(&False,_): return a2;
   case $(_,&False): return a1;
   default: 
-    // sort the operands and hash-cons.
-    if ((int)a1 > (int)a2)
-      a1 :=: a2;
+    // NB: used to sort the operands based on physical address, but
+    // to keep things more deterministic, I'm not sorting now.
     let a = Or(a1,a2);
-    let res =hash_cons(&a);
-    return res;
+    return hash_cons(&a);
   }
 }
 
@@ -465,7 +472,7 @@ prim_assn(eq,Eq)
   // compute negation of assertion -- unfortunately requires
   // reducing the assertion (i.e., getting rid of Subst and Kill
   // nodes.)
-  assn_t not(assn_t a) {
+assn_t not(assn_t a) {
   switch (a) {
   case &True: return &false_assn;
   case &False: return &true_assn;
@@ -540,9 +547,6 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
       // esc_subst.
       let t = fresh_var(vd->type);
       *esc_subst = new List{new $(vd,t),*esc_subst};
-      //wangyl: is it neseccary to generate another fresh_var
-      //when t is already newly generated?
-      //      return fresh_var();
       return t;
     } else if (!vd->escapes) {
       // it's a non-escaping variable -- look it up in non_esc_subst.

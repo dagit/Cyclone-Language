@@ -375,8 +375,8 @@ static exp_t stmt_to_fun(toexpenv_t env, stmt_t s, type_t rettype) {
     new List(new_decl(new Fn_d(new Fndecl(Static,false,funname,s,
 					  FnInfo(NULL,NULL,empty_tqual(0),
 						 rettype,params,false,NULL,
-						 NULL,NULL,
-						 NULL,NULL,NULL,NULL,NULL),
+						 NULL,NULL,NULL,NULL,
+                                                 NULL,NULL,NULL,NULL),
 					  NULL,NULL,NULL,Static)),DL),
 	     *env.gen_ds);
   return fncall_exp(var_exp(funname,DL), args, DL);

@@ -85,9 +85,9 @@ static exp_t shared_zero_exp() {
 static struct Env {
   JumpAnalysis::jump_anal_res_t tables;
   Vcgen::assn_info_t assn_info;
-  bool in_sizeof   : 1;
-  bool at_toplevel : 1;
-  bool vcgen_r     : 1;
+  bool in_sizeof   :1;
+  bool at_toplevel :1;
+  bool vcgen_r     :1;
 };
 
 typedef struct Env env_t; // not a pointer
@@ -352,7 +352,7 @@ static void do_exp(env_t nv, exp_t e) {
 	break;
       case $(&_,NULL): // cast to fat -- must know size; null is fine
 	// FIX: shouldn't the type-checker catch this? Does it?
-	if(!Evexp::c_can_eval((exp_t)b1))
+	if(!Evexp::c_can_eval((exp_t)b1)) 
 	  err(e->loc,"cannot perform coercion: numelts is statically unknown");
 	e->annot = &NoCheck_val;
 	break;

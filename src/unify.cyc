@@ -419,8 +419,8 @@ static void unify_it(type_t t1, type_t t2) {
       fail_because("(different array sizes)");
     return;
 
-  case $(&FnType(FnInfo{tvs2,eff2,rt_tq2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,atts2,req2,req_relns2,ens2,ens_relns2,return_value2}),
-         &FnType(FnInfo{tvs1,eff1,rt_tq1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,atts1,req1,req_relns1,ens1,ens_relns1,return_value1})):
+  case $(&FnType(FnInfo{tvs2,eff2,rt_tq2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,atts2,req2,req_relns2,ens2,ens_relns2,argvds2,return_value2}),
+         &FnType(FnInfo{tvs1,eff1,rt_tq1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,atts1,req1,req_relns1,ens1,ens_relns1,argvds1,return_value1})):
     { region rgn; 
     list_t<$(tvar_t,type_t)@`rgn,`rgn> inst = NULL;
     while (tvs1 != NULL) {
@@ -444,12 +444,12 @@ static void unify_it(type_t t1, type_t t2) {
     if (inst != NULL) {
       unify_it(new FnType(FnInfo{NULL,eff1,rt_tq1,rt1,args1,c_vararg1,
 				   cyc_vararg1,rpo1,atts1,req1,req_relns1,ens1,
-                                   ens_relns1,return_value1}),
+                                   ens_relns1,argvds1,return_value1}),
 	       Tcutil::rsubstitute(rgn, inst,
 				   new FnType(FnInfo{NULL,eff2,rt_tq2,rt2,args2,
 						       c_vararg2,cyc_vararg2,rpo2,
 						       atts2,req2,req_relns2,
-						       ens2,ens_relns2,return_value2})));
+						       ens2,ens_relns2,argvds2,return_value2})));
       return;
     }
     }
@@ -494,6 +494,9 @@ static void unify_it(type_t t1, type_t t2) {
       fail_because("(function types have different attributes)");
     if (!Tcutil::same_rgn_po(rpo2,rpo1))
       fail_because("(function types have different region lifetime orderings)");
+    // FIX: need to use pratt prover or something like it here -- also,
+    // we'll need to substitute for the return_value and argvds to get
+    // this right...
     if (!check_logical_equivalence(req_relns1,req_relns2))
       fail_because("(@requires clauses not equivalent)");
     if (!check_logical_equivalence(ens_relns1,ens_relns2))

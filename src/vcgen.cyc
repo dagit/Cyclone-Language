@@ -400,11 +400,10 @@ static void insert_assn_info(assn_info_t assn_info, Absyn::exp_t e, $(AssnDef::a
   return;
 }
 
-static exp_t shared_zero_exp() {
-  static exp_opt_t ans = NULL;
-  if(!ans) 
-    ans = Absyn::uint_exp(0,0);
-  return (exp_t)ans;
+static exp_t zero_exp() {
+  exp_t ans = Absyn::uint_exp(0,0);
+  ans->topt = Absyn::uint_type;
+  return ans;
 }
 
 // forward declarations for the analysis functions.
@@ -961,11 +960,11 @@ static $(term_opt_t,assn_t) vcgen_lexp(env_t env, exp_t e, assn_t ain) {
 
 // extract the arguments, requires, and ensures clause for a function from
 // its type.
-static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, exp_opt_t req, exp_opt_t ens, vardecl_opt_t ret_value) get_requires_and_ensures_info(Absyn::fn_info_t @fi) {
-  return $(fi->args,fi->requires_clause,fi->ensures_clause,fi->return_value);
+static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_t> argvds, exp_opt_t req, exp_opt_t ens, vardecl_opt_t ret_value) get_requires_and_ensures_info(Absyn::fn_info_t @fi) {
+  return $(fi->args,fi->arg_vardecls,fi->requires_clause,fi->ensures_clause,fi->return_value);
 }
 
-static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, exp_opt_t req, exp_opt_t ens, vardecl_opt_t ret_value) get_requires_and_ensures(type_opt_t topt) {
+static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_t> argvds, exp_opt_t req, exp_opt_t ens, vardecl_opt_t ret_value) get_requires_and_ensures(type_opt_t topt) {
   if (topt != NULL) {
     type_t t = Tcutil::pointer_elt_type((type_t)topt);
     switch (t) {
@@ -973,28 +972,19 @@ static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, exp_opt_t req, exp_opt_t ens
     default: break;
     }
   } 
-  return $(NULL,NULL,NULL,NULL);
+  return $(NULL,NULL,NULL,NULL,NULL);
 }
 
 static void check_requires(env_t env, list_t<term_t> inputs,
-                           list_t<$(var_opt_t,tqual_t,type_t)@> args,
+                           list_t<vardecl_t> argvds,
                            assn_t a, exp_opt_t reqopt) {
   if (reqopt != NULL) {
     exp_t req = (exp_t)reqopt;
     // pretend like we're assigning the actual values to the parameter
     // values
-    for (; args != NULL && inputs != NULL; args = args->tl, inputs = inputs->tl) {
-      let &$(vopt,tq,t) = args->hd;
-      if (vopt != NULL) {
-        // have to fake up a vardecl
-        Absyn::qvar_t qv = new $(Absyn::Loc_n,(Absyn::var_t)vopt);
-        let vd = new Absyn::Vardecl {.sc = Absyn::Public,
-                                     .name = qv,.varloc = 0,.tq = tq,
-                                     .type = t,.initializer = NULL,
-                                     .rgn = NULL,.attributes = NULL,
-                                     .escapes = false, .is_proto=false};
-          a = and(a,eq(new Var(vd),inputs->hd));
-        }
+    for (; argvds != NULL && inputs != NULL; argvds = argvds->tl, inputs = inputs->tl) {
+      let vd = argvds->hd;
+      a = and(a,eq(new Var(vd),inputs->hd));
     }
     // FIX? varargs.
     let $(at,_) = vcgen_test(env,(exp_t)reqopt,&true_assn);
@@ -1133,8 +1123,8 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     let $(ts,a) = vcgen_rexps_always(env,es,ain);
     let $(_,a2) = vcgen_rexp(env,e,a);
     // check @requires clause on function
-    let $(args,reqopt,ensopt,ret_value) = get_requires_and_ensures(e->topt);
-    check_requires(env,ts,args,a2,reqopt);
+    let $(args,argvds,reqopt,ensopt,ret_value) = get_requires_and_ensures(e->topt);
+    check_requires(env,ts,argvds,a2,reqopt);
     // kill every variable that points into memory -- could refine
     // this to only those reachable from globals or the parameters.
     a2 = kill(a2);
@@ -1146,6 +1136,16 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     exp_t ensures = (exp_t)ensopt;
     // add in the @ensures clause for the result
     let $(at,_) = vcgen_test(env,ensures,a2);
+    // substitute ts for function formals in resulting assertion
+    for (; args != NULL && ts != NULL; args=args->tl, ts=ts->tl) {
+      let &$(vdopt,_,_) = args->hd;
+      if (vdopt != NULL) {
+        let vd = argvds->hd;
+        argvds = argvds->tl;
+        at = subst(vd,ts->hd,at);
+      }
+    }
+    // substitute v for the return_value
     if (ret_value != NULL) {
       let v = fresh_var(((vardecl_t)ret_value)->type);
       // FIX: substitute ts for formal parameters
@@ -1221,31 +1221,18 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     return $(NULL,vcgen_rexp(env,e,ain)[1]);
 
   case &Absyn::Deref_e(e): fallthru(e);
-  case &Absyn::AggrArrow_e(e,...): fallthru(e, shared_zero_exp());
+  case &Absyn::AggrArrow_e(e,...): fallthru(e, zero_exp());
   case &Absyn::Subscript_e(e1,e2): 
     let $(t1,a1) = vcgen_rexp_always(env,e1,ain);
     let $(t2,a2) = vcgen_rexp(env,e2,a1);
     switch (Absyn::compress((type_t)e1->topt)) {
     case &Absyn::TupleType(_): break;
     default:
-      // wangyl: try_assn should be updated by a2.
-      //      update_try_assn(env, ain);
       update_try_assn(env, a2);
       term_t term_numelts, term_typebound;
-      
       // we don't know t2, can't really infer anything about the bound
       if (t2 == NULL) break;
       term_numelts = primop(Absyn::Numelts, list(t1), Absyn::uint_type);
-      /* we figure this out in the constraint solver now in order to
-         keep the size of the assertion small.
-      exp_opt_t bound = Tcutil::get_type_bound((type_t)e1->topt);
-      if (bound != NULL){
-	if (Tcutil::is_const_exp(bound)){
-	  term_typebound = cnst(bound);
-	  a2 = and(a2, eq(term_numelts, term_typebound));
-	}
-      }
-      */
       let inbound_assn = ult(t2, term_numelts);
       insert_assn_info(env->assn_info, e1, new $(a2, inbound_assn));
       a2 = and(a2,inbound_assn);
@@ -1311,7 +1298,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Assert_e(e1):
     let $(at,_) = vcgen_test(env,e1,&true_assn);
     if (!implies(&ain,&at)) 
-      Warn::err(e->loc, "cannot prove @assert(%s) \n\nfrom %s",
+      Warn::err(e->loc, "cannot prove @assert(%s) \nfrom %s",
                 assn2string(at), assn2string(reduce(ain)));
     return $(one(),and(ain,at));
   }
@@ -1322,7 +1309,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
 void vcgen_fundecl(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info){
   assn_t a = &true_assn;
   // put in the requires clause as an assumption.
-  let $(args,reqopt,ensopt,ret_value) = get_requires_and_ensures_info(&fd->i);
+  let $(args,arvds,reqopt,ensopt,ret_value) = get_requires_and_ensures_info(&fd->i);
   assn_t *result_assn = (ensopt == NULL) ? NULL : new ((assn_t)&false_assn);
   term_opt_t res_term = (ret_value == NULL) ? NULL : (new Var((vardecl_t)ret_value));
   let env = initial_env(tables,fd,assn_info,result_assn,res_term);

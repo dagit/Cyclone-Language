@@ -69,7 +69,9 @@ static void print_graphs(graph_t* gs) {
     fprintf(stderr,"\t{");
     for (let ns = gs->rows; ns != NULL; ns = ns->next) {
       let t1 = ns->source;
-      for (let ds = ns->distance; ds != NULL; ds = ds->next) {
+      let ds = ns->distance;
+      if (ds == NULL) continue;
+      for (; ds != NULL; ds = ds->next) {
         let t2 = ds->target;
         if (ds->dinfo == Both_valid) {
           fprintf(stderr,"%s - %s U<= %d, %s - %s S<= %d",term2string(t1),
@@ -210,17 +212,17 @@ static int add_node(graph_t @g, term_t n) {
     if (cmp_term(ns->source,n) == 0) return true;
   }
   g->rows = new Row{g->rows,n,NULL};
-  // if n is numelts(x) then add n <s MAXINT and n <u MAXINT
   switch (n){
   case &Primop(Absyn::Numelts, &List(x,_),_):
+    // if n is numelts(x) then add n <s MAXINT and n <u MAXINT and 0 <=u n
     return add_edge(g, false, n, zero(), MAXINT-1, NULL) &&
       add_edge(g, true, n, zero(), MAXINT-1, NULL) &&
+      add_edge(g, false, zero(), n, 0, NULL) &&
       // if x has type T*{e}, then add numelts(n) == e.
       add_type_info(g,x);
-  default:
+  default:   
     return add_type_info(g,n);
   }
-  return true;
 }
 
 static row_t lookup_row(graph_t @g, term_t i) {
@@ -259,23 +261,44 @@ static dist_t* lookup_distance(row_t i, bool is_signed, term_t j) {
 // Inserts the edge as appropriate.  Must look through the Distance
 // list to see if there's already an entry for i and j and update
 // it instead of adding a new Distance node.
-static void insert_distance(row_t i, bool is_signed, term_t j, int dist,assn_opt_t origin) {
-  if (cmp_term(i->source,j) == 0) return; // same term always at distance 0
+static bool insert_distance(row_t i, bool is_signed, term_t j, int dist,assn_opt_t origin) {
+  if (cmp_term(i->source,j) == 0) {
+    // same term should always be at distance 0
+    if (dist != 0) { 
+      fprintf(stderr,"WARNING: distance %s--0-->%s is changing to %d!\n",
+              term2string(i->source),term2string(j),dist);
+      return false;
+    }
+    return true;
+  }
   let ds = lookup_col(i,j);
   if (ds != NULL) {
     if (is_signed) { 
+      if ((ds->dinfo & Signed_valid) && ds->signed_dist.length < dist) {
+        fprintf(stderr,"WARNING: signed distance %s--%d-->%s is growing to %d!\n",
+                term2string(i->source),ds->signed_dist.length,
+                term2string(j),dist);
+        return false;
+      }
       ds->dinfo |= Signed_valid;
       ds->signed_dist.length = dist;
       ds->signed_dist.prim = origin;
     } else {
+      if ((ds->dinfo & Unsigned_valid) && ds->unsigned_dist.length < dist) {
+        fprintf(stderr,"WARNING: unsigned distance %s--%d-->%s is growing to %d!\n",
+                      term2string(i->source),ds->unsigned_dist.length,
+                      term2string(j),dist);
+        return false;
+      }
       ds->dinfo |= Unsigned_valid;
       ds->unsigned_dist.length = dist;
       ds->unsigned_dist.prim = origin;
     }
-    return;
+    return true;
   }
   dist_t d = Dist{.length = dist, .prim = origin};
   i->distance = new Distance{i->distance,j,is_signed ? Signed_valid : Unsigned_valid,d,d};
+  return true;
 }
 
 
@@ -335,7 +358,6 @@ is_unsigned_overflow(unsigned c1, operator_t op,unsigned c2){
 // add an edge to a graph and close it off to find shortest paths.
 // returns true if the resulting graph remains consistent and false
 // otherwise.
-// FIX: MUST WORRY ABOUT OVERFLOW ISSUES
 // wangyl: here we are using signed integer to represent weight of
 // the edges in the graph, we need to check if any overflow happens
 // while computing shoterst path of all pairs and looking for negative
@@ -472,46 +494,29 @@ static $(term_t, int) break_term(graph_t @g, bool is_signed,term_t t){
   unsigned cu = 0u;
   term_t res = t;
   Absyn::primop_t p;
-  switch (t){
-  case &Primop(Absyn::Plus, ts,_):
+  switch (t) {
+  case &Primop(Absyn::Plus, &List{t1,&List{t2,NULL}}, _):
     p = Absyn::Plus;
-    if (ts == NULL){
-      Tcutil::impos("no argument for primop");
-    }else if (ts->tl == NULL){
-      // t = + t' = t' + 0;
-      return $(ts->hd, 0);
-    }else if (ts->tl->tl == NULL){
-      let $(c1, okay1) = eval_term(ts->hd);
-      let $(c2, okay2) = eval_term(ts->tl->hd);
-      if (okay1) {// t = c1 + t'
-	res = ts->tl->hd;
-	c = (int)c1;
-	cu = (unsigned)c1;
-      }else if (okay2){//t = t' + c2
-	res = ts->hd;
-	c = (int)c2;
-	cu = (unsigned)c2;
-      }else return $(t,0);
-    }else
-      //other cases t = t1+t2+t2 ..., ignore
-      return $(t, 0);
+    let $(c1, okay1) = eval_term(t1);
+    let $(c2, okay2) = eval_term(t2);
+    if (okay1) {// t = c1 + t'
+      res = t2;
+      c = (int)c1;
+      cu = (unsigned)c1;
+    } else if (okay2) {//t = t' + c2
+      res = t1;
+      c = (int)c2;
+      cu = (unsigned)c2;
+    } else return $(t,0);
     break;
-  case &Primop(Absyn::Minus, ts, _):
+  case &Primop(Absyn::Minus, &List{t1,&List{t2,NULL}}, _):
     p = Absyn::Minus;
-    if (ts == NULL){
-      Tcutil::impos("no argument for primop");
-    }else if (ts->tl == NULL){
-      //t = -t', can't do much here
-      return $(t, 0);
-    }else if (ts->tl->tl == NULL){
-      let $(c2, okay2) = eval_term(ts->tl->hd);
-      if (okay2){ // t = t' - c2
-	res = ts->hd;
-	c = -((int)c2); // t = t' + (-c2)
-	cu = c2;
-      }
-      else return $(t, 0);
-    }else return $(t, 0);
+    let $(c2, okay2) = eval_term(t2);
+    if (okay2){ // t = t' - c2
+      res = t1;
+      c = -((int)c2); // t = t' + (-c2)
+      cu = c2;
+    } else return $(t, 0);
     break;
   default:
     return $(t, 0);
@@ -562,8 +567,6 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
   let $(c1,okay1) = eval_term(t1);
   let $(c2,okay2) = eval_term(t2);
   let origin = AssnDef::prim(t1, p, t2);
-  // FIX: NOT SURE IF ANY OF THIS IS RIGHT -- MUST WORRY ABOUT
-  // OVERFLOW ISSUES!
   if (okay1 && okay2) {
     // we have c1 p c2 -- reduce to true or false immediately.
     switch (p) {

@@ -6,7 +6,7 @@
 
 namespace PrattProver{
   bool constraint_prove(AssnDef::assn_t ctxt, AssnDef::assn_t a);
-  AssnDef::assn_t merge_assn(AssnDef::assn_t a1, AssnDef::assn_t a2);
+  //AssnDef::assn_t merge_assn(AssnDef::assn_t a1, AssnDef::assn_t a2);
 }
 
 #endif

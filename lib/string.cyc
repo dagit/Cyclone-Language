@@ -38,7 +38,7 @@ size_t strlen(buffer_t s) /*@ensures(return_value <= numelts(s))*/
 {
   size_t i;
   unsigned int sz = numelts(s);
-  for (i = 0; /*@assert(i <= numelts(s)) && */i < sz; ++i) 
+  for (i = 0; /*@assert__(i <= numelts(s)) && */ i < sz; ++i) 
     if (s[i] == '\000')
       return i;
   return i;

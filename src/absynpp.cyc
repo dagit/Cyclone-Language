@@ -2055,7 +2055,7 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
     return $(tq3, t3, tml3);
 
   case &FnType(FnInfo{typvars,effopt,t2qual,t2,args,c_varargs,cyc_varargs,
-                        rgn_po,fn_atts,req,_,ens,_,_}):
+                        rgn_po,fn_atts,req,_,ens,_,_,_}):
     if (! print_all_tvars) {
       // don't print default effects
       // WARNING: this is our criterion to detect default effect,
