@@ -27,5 +27,6 @@ fail2.cyc:141: attempt to dereference a consumed alias-free pointer
 fail2.cyc:145: aliased pattern expression not an l-value: rnew(Core::unique_region) 1
 fail2.cyc:150: cannot track alias-free pointers through multiple assignments
 fail2.cyc:155: expression attempts to copy a consumed alias-free value
+fail2.cyc:163: expression attempts to copy a consumed alias-free value
 
 COMPILATION FAILED!

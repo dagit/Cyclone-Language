@@ -151,6 +151,11 @@ static void add_cpparg(string_t<`H> s) {
   cppargs = new List(new s,cppargs);
 }
 
+static void add_cpp_and_ccarg(string_t<`H> s) {
+  add_cpparg(s);
+  add_ccarg(s);
+}
+
 static void add_iprefix(string_t<`H> s) {
   add_cpparg(aprintf("-iprefix %s",s));
 }
@@ -246,8 +251,7 @@ static void set_stop_after_objectfile() {
 }
 
 static void set_nocppprecomp() {
-  add_cpparg("-no-cpp-precomp");
-  add_ccarg("-no-cpp-precomp");
+  add_cpp_and_ccarg("-no-cpp-precomp");
 }
 
 static void clear_lineno() {
@@ -1187,7 +1191,10 @@ int main(int argc, string_t<`H> ?`H argv) {
                "Even more optimization"),
          rnew(r)$("-fomit-frame-pointer",false,"",
                rnew(r)Flag_spec(add_ccarg),
-               "Omit frame pointer"),
+               "Omit frame pointer (gcc option)"),
+         rnew(r)$("-fno-builtin",false,"",
+               rnew(r)Flag_spec(add_cpp_and_ccarg),
+               "Suppress builtin code sequence expansions (gcc option)"),
          rnew(r)$("-g",false,"",
                rnew(r)Flag_spec(add_ccarg),
                "Compile for debugging"),

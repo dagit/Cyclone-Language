@@ -39,15 +39,13 @@ int length(list_t<`a::TB> x) {
   return i;
 }
 
-// return the first element in a list, if any, throw Failure otherwise. 
+// return the first element in a list
 `a hd(List_t<`a> x) {
-  if (x == NULL) throw new Failure("hd");
   return x->hd;
 }
 
-// return the tail of a list, if any, throw Failure otherwise. 
+// return the tail of a list
 list_t<`a,`r> tl(List_t<`a::TB,`r> x) {
-  if (x == NULL) throw new Failure("tl");
   return x->tl;
 }
 

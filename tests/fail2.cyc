@@ -154,3 +154,11 @@ void a27(int *`U x) {
   // attempts to copy a consumed value
   Core::ufree(x);
 }
+typedef _::UR uregion;
+typedef int @ @region(uregion) uptr;
+extern void uptrfree(uptr);
+void a28(uptr x) {
+  let y = x;
+  // attempts to copy a consumed value
+  uptrfree(x);
+}

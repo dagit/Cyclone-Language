@@ -5232,9 +5232,15 @@ bool is_tagged_pointer_typ(type_t t) {
 // warning: not just a predicate; side-effects VarTypes to be of non-unique
 //   flavor if they are not yet set
 bool is_noalias_region(type_t r, bool must_be_unique) {
+//   printf("is_noalias_region: %s/%s\n",typ2string(compress(r)),
+// 	 must_be_unique ? "yes" : "no");
   switch (compress(r)) {
   case &RefCntRgn: return !must_be_unique;
   case &UniqueRgn: return true;
+  case &TypedefType(_,_,&Typedefdecl{.kind=&Core::Opt{.v=&Kind(k,a)},...},NULL): 
+    return ((k == RgnKind) && (a == Unique || (a == Top && !must_be_unique)));
+//     fallthru(k,a);
+//   case &Evar(&Core::Opt{.v=&Kind(k,a)},NULL,_,_):
   case &VarType(tv):
     let &Kind(k,a) = tvar_kind(tv,&rk);
     if ((k == RgnKind) && (a == Unique || (a == Top && !must_be_unique))) {

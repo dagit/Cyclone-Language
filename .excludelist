@@ -42,6 +42,7 @@
 /lib/netinet$
 /lib/sys$
 /makedist$
+/mwhtests$
 /src/parse.output
 /tests/benchmarks$
 /tests/boa-0\.94\.8\.3$
