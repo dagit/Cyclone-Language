@@ -3052,10 +3052,12 @@ static void enumdecl_to_c(env_t nv,enumdecl_t ed) {
     // a gcc warning
     (ed->sc == Extern || ed->sc == Static || 
      ed->sc == ExternC) ? Public : scope_to_c(ed->sc);
-  for (let fs = ed->fields; fs != null; fs = fs->tl) {
-    if (fs->hd->tag != null) {
-      unsigned int i = Evexp::eval_const_uint_exp((exp_t)fs->hd->tag);
-      fs->hd->tag = uint_exp(i,null);
+  if (ed->fields != null) {
+    for (let fs = ed->fields->v; fs != null; fs = fs->tl) {
+      if (fs->hd->tag != null) {
+	unsigned int i = Evexp::eval_const_uint_exp((exp_t)fs->hd->tag);
+	fs->hd->tag = uint_exp(i,null);
+      }
     }
   }
 }

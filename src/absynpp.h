@@ -36,6 +36,7 @@ extern string qvar2string(qvar_t);
 extern string decllist2string(list_t<decl_t> tdl);
 extern string prim2string(primop_t p);
 extern string pat2string(pat_t p);
+extern string scope2string(scope_t sc);
 
   // These are only exposed so Absyndump can use them:
   extern int exp_prec(exp_t);

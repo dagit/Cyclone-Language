@@ -1,28 +1,23 @@
 #include "cyc_include.h"
 
- typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
-unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char;
-typedef unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef
-unsigned int Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int
-Cyc_uint; typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
-int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
-it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
-char* Cyc_caddr_t; typedef unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t;
-typedef unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
-typedef short Cyc_int16_t; typedef unsigned short Cyc_u_int16_t; typedef int Cyc_int32_t;
-typedef unsigned int Cyc_u_int32_t; typedef long long Cyc_int64_t; typedef
-unsigned long long Cyc_u_int64_t; typedef int Cyc_register_t; typedef short Cyc_dev_t;
-typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
-Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
-typedef char* Cyc_addr_t; typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t;
-typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ;
-typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
-typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
-typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
-exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
-struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg[ 15u];
-struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; } ;
-extern char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{ char* tag;
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef int Cyc_wchar_t;
+typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char; typedef unsigned short
+Cyc_u_short; typedef unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long;
+typedef unsigned short Cyc_ushort; typedef unsigned int Cyc_uint; typedef
+unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{ int
+tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec it_interval;
+struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef char* Cyc_caddr_t;
+typedef unsigned short Cyc_ino_t; typedef short Cyc_dev_t; typedef int Cyc_off_t;
+typedef unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int
+Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned int
+Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask; struct
+Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set Cyc__types_fd_set;
+typedef char* Cyc_Cstring; typedef struct _tagged_string Cyc_string; typedef
+struct _tagged_string Cyc_string_t; typedef struct _tagged_string* Cyc_stringptr;
+typedef int Cyc_bool; extern void* exit( int); extern void* abort(); struct Cyc_Core_Opt{
+void* v; } ; typedef struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg[
+15u]; struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; }
+; extern char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{ char* tag;
 struct _tagged_string f1; } ; extern char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
 char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Not_found[ 14u];
 extern char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{ char*
@@ -31,16 +26,16 @@ _tagged_string); extern char* string_to_Cstring( struct _tagged_string); extern
 char* underlying_Cstring( struct _tagged_string); extern struct _tagged_string
 Cstring_to_string( char*); extern int system( char*); struct Cyc_Stdio___sFILE;
 typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE; extern struct Cyc_Stdio___sFILE*
-Cyc_Stdio_stderr; typedef int Cyc_Stdio_fpos_t; extern char Cyc_Stdio_FileOpenError[
-18u]; struct Cyc_Stdio_FileOpenError_struct{ char* tag; struct _tagged_string f1;
-} ; extern char Cyc_Stdio_FileCloseError[ 19u]; struct Cyc_List_List{ void* hd;
-struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List* Cyc_List_glist_t;
-typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct Cyc_List_List* Cyc_List_List_t;
+Cyc_Stdio_stderr; typedef int Cyc_Stdio_fpos_t; extern char Cyc_Stdio_FileCloseError[
+19u]; extern char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
+char* tag; struct _tagged_string f1; } ; struct Cyc_List_List{ void* hd; struct
+Cyc_List_List* tl; } ; typedef struct Cyc_List_List* Cyc_List_glist_t; typedef
+struct Cyc_List_List* Cyc_List_list_t; typedef struct Cyc_List_List* Cyc_List_List_t;
 extern char Cyc_List_List_empty[ 15u]; extern char Cyc_List_List_mismatch[ 18u];
 extern char Cyc_List_Nth[ 8u]; extern int Cyc_String_strcmp( struct
-_tagged_string s1, struct _tagged_string s2); extern char Cyc_Arg_Error[ 10u];
-extern char Cyc_Arg_Bad[ 8u]; struct Cyc_Arg_Bad_struct{ char* tag; struct
-_tagged_string f1; } ; static const int Cyc_Arg_Unit_spec= 0; struct Cyc_Arg_Unit_spec_struct{
+_tagged_string s1, struct _tagged_string s2); extern char Cyc_Arg_Bad[ 8u];
+struct Cyc_Arg_Bad_struct{ char* tag; struct _tagged_string f1; } ; extern char
+Cyc_Arg_Error[ 10u]; static const int Cyc_Arg_Unit_spec= 0; struct Cyc_Arg_Unit_spec_struct{
 int tag; void(* f1)(); } ; static const int Cyc_Arg_Set_spec= 1; struct Cyc_Arg_Set_spec_struct{
 int tag; int* f1; } ; static const int Cyc_Arg_Clear_spec= 2; struct Cyc_Arg_Clear_spec_struct{
 int tag; int* f1; } ; static const int Cyc_Arg_String_spec= 3; struct Cyc_Arg_String_spec_struct{
@@ -52,8 +47,8 @@ extern void Cyc_Arg_usage( struct Cyc_List_List*, struct _tagged_string); extern
 int Cyc_Arg_current; struct _tagged_ptr0{ struct _tagged_string* curr; struct
 _tagged_string* base; struct _tagged_string* last_plus_one; } ; extern void Cyc_Arg_parse(
 struct Cyc_List_List* specs, void(* anonfun)( struct _tagged_string), struct
-_tagged_string errmsg, struct _tagged_ptr0 args); char Cyc_Arg_Error[ 10u]; char
-Cyc_Arg_Bad[ 8u]; static const int Cyc_Arg_Unknown= 0; struct Cyc_Arg_Unknown_struct{
+_tagged_string errmsg, struct _tagged_ptr0 args); char Cyc_Arg_Bad[ 8u]; char
+Cyc_Arg_Error[ 10u]; static const int Cyc_Arg_Unknown= 0; struct Cyc_Arg_Unknown_struct{
 int tag; struct _tagged_string f1; } ; static const int Cyc_Arg_Missing= 1;
 struct Cyc_Arg_Missing_struct{ int tag; struct _tagged_string f1; } ; static
 const int Cyc_Arg_Message= 2; struct Cyc_Arg_Message_struct{ int tag; struct

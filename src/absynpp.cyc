@@ -1397,8 +1397,7 @@ doc_t decl2doc(decl_t d) {
                 (sd->name==null)?text(""):typedef_name2doc(sd->name->v),
                 ktvars2doc(sd->tvs),
                 text(" {"),
-                nest(2,(sd->fields==null)?text(""):
-                     cat2(line_doc(),structfields2doc(sd->fields->v))),
+                nest(2, cat2(line_doc(),structfields2doc(sd->fields->v))),
                 line_doc(),
                 text("}"),
                 atts2doc(sd->attributes),
@@ -1418,8 +1417,7 @@ doc_t decl2doc(decl_t d) {
                 (ud->name==null)?text(""):qvar2doc(ud->name->v),
                 tvars2doc(ud->tvs),
                 text(" {"),
-                nest(2,(ud->fields==null)?text(""):
-                     cat2(line_doc(),structfields2doc(ud->fields->v))),
+                nest(2, cat2(line_doc(),structfields2doc(ud->fields->v))),
                 line_doc(),
                 text("}"),
                 atts2doc(ud->attributes),
@@ -1439,18 +1437,17 @@ doc_t decl2doc(decl_t d) {
   case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion)):
     if (fields==null)
       s = cat5(scope2doc(sc),
-               (is_xtunion ? text("xtunion") : text("tunion ")),
+               (is_xtunion ? text("xtunion ") : text("tunion ")),
                typedef_name2doc(name),
                ktvars2doc(tvs),
                text(";"));
     else
       s = cat8(scope2doc(sc),
-               (is_xtunion ? text("xtunion") : text("tunion ")),
+               (is_xtunion ? text("xtunion ") : text("tunion ")),
                typedef_name2doc(name),
                ktvars2doc(tvs),
                text(" {"),
-               nest(2,(fields==null)?text(""):
-                    cat2(line_doc(),tunionfields2doc(fields->v))),
+               nest(2, cat2(line_doc(),tunionfields2doc(fields->v))),
                line_doc(),
                text("};"));
     break;
@@ -1461,14 +1458,20 @@ doc_t decl2doc(decl_t d) {
              exp2doc(e),
              text(";"));
     break;
-  case &Enum_d(&Enumdecl{sc,n,fs}):
-    s = cat7(scope2doc(sc),
-             text("enum "),
-             qvar2doc(n),
-             text(" {"),
-             nest(2,cat2(line_doc(),enumfields2doc(fs))),
-             line_doc(),
-             text("};"));
+  case &Enum_d(&Enumdecl{sc,n,fields}):
+    if (fields == null)
+      s = cat4(scope2doc(sc),
+	       text("enum "),
+	       typedef_name2doc(n),
+	       text(";"));
+    else
+      s = cat7(scope2doc(sc),
+	       text("enum "),
+	       qvar2doc(n),
+	       text(" {"),
+	       nest(2, cat2(line_doc(),enumfields2doc(fields->v))),
+	       line_doc(),
+	       text("};"));
     break;
   case &Typedef_d(td):
     s = cat3(text("typedef "),
@@ -1690,4 +1693,14 @@ string qvar2string(qvar_t v)   {return string_of_doc(qvar2doc(v), PP_WIDTH);}
 string prim2string(primop_t p) {return string_of_doc(prim2doc(p), PP_WIDTH);}
 string pat2string(pat_t p)     {return string_of_doc(pat2doc(p),  PP_WIDTH);}
 
+// used for error messages
+string scope2string(scope_t sc) {
+  switch (sc) {
+  case Static:   return "static";
+  case Public:   return "public";
+  case Extern:   return "extern";
+  case ExternC:  return "extern \"C\"";
+  case Abstract: return "abstract";
+  }
+}
 

@@ -799,13 +799,17 @@ void dumpdecl(decl_t d) {
       dump_nospace("};");
     }
     break;
-  case &Enum_d(&Enumdecl{sc,nm,fs}):
+  case &Enum_d(&Enumdecl{sc,nm,fields}):
     dumpscope(sc);
     dump("enum ");
     dumpqvar(nm);
-    dump_char('{');
-    dumpenumfields(fs);
-    dump_nospace("};");
+    if (fields == null)
+      dump_semi();
+    else {
+      dump_char('{');
+      dumpenumfields(fields->v);
+      dump_nospace("};");
+    }
     return;
   case &Let_d(p,_,_,e,_):
     dump("let");

@@ -1646,7 +1646,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
       tuniondecl_t tud;
       try tud = *lookup_tuniondecl(te,loc,n);// FIX: lookup_xtuniondecl needed?
       catch { case Dict::Absent:
-        terr(loc,xprintf("unbound type tunion %s",qvar2string(n)));
+        terr(loc,xprintf("unbound type [x]tunion %s",qvar2string(n)));
         return free_vars;
       }
       if(tud->is_xtunion != is_x)
@@ -1679,23 +1679,26 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
     case &UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
       tuniondecl_t  tud;
       tunionfield_t tuf;
-      try tud = *lookup_tuniondecl(te,loc,tname);//FIX lookup_xtuniondecl needed?
+      try *lookup_tuniondecl(te,loc,tname);//FIX lookup_xtuniondecl needed?
       catch { case Dict::Absent:
         terr(loc,xprintf("unbound type tunion %s",qvar2string(tname)));
-        return free_vars;
+      return free_vars;
       }
-      if(tud->is_xtunion != is_x)
-	terr(loc,xprintf("[x]tunion is different from type declaration %s",
-			 qvar2string(tname)));
       try 
 	switch(lookup_ordinary(te,loc,fname)) {
 	case &TunionRes(tud2,tuf2):
 	  tuf = tuf2;
-	  if(tud2 != tud) {
+	  /* Mathieu: this check is not valid any more
+	  if(tud2 != tud) != 0) {
 	    terr(loc,xprintf("unbound field %s in type tunion %s",
                              qvar2string(fname), qvar2string(tname)));
             return free_vars;
           }
+	  */
+	  tud = tud2;
+	  if(tud->is_xtunion != is_x)
+	    terr(loc,xprintf("[x]tunion is different from type declaration %s",
+			     qvar2string(tname)));
 	  break;
 	default: terr(loc,xprintf("unbound field %s in type tunion %s",
 				  qvar2string(fname), qvar2string(tname)));

@@ -601,7 +601,7 @@ static simple_pat_t compile_pat(pat_t p) {
   case &Enum_p(ed,ef):
     // FIX: two different enum constructors can have the same value so we
     // might not get a duplicate warning when we should.
-    int span = List::length(ed->fields);
+    int span = List::length(ed->fields->v);
     s = con_pat(*((*ef->name)[1]), new Opt(span), null);
     break;
   case &UnknownId_p(_):         s = impos("compile_pat: unknownid");     break;

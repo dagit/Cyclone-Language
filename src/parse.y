@@ -1328,7 +1328,7 @@ type_qualifier:
 /* parsing of enum specifiers */
 enum_specifier:
   ENUM qual_opt_identifier '{' enum_declaration_list '}'
-  { $$=^$(new Decl_spec(new Decl{new Enum_d(new Enumdecl(Public,$2,$4)), 
+  { $$=^$(new Decl_spec(new Decl{new Enum_d(new Enumdecl(Public,$2,new Opt($4))), 
                                  LOC(@1,@5)})); }
 | ENUM qual_opt_identifier
   { $$=^$(type_spec(new EnumType($2,null),LOC(@1,@2))); }

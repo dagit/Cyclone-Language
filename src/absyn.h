@@ -536,7 +536,7 @@ namespace Absyn {
   EXTERN_ABSYN struct Enumdecl {
     scope_t             sc;
     typedef_name_t      name;
-    list_t<enumfield_t> fields;
+    opt_t<list_t<enumfield_t>> fields;
   };
 
   EXTERN_ABSYN struct Typedefdecl {
