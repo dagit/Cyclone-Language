@@ -300,13 +300,10 @@ $(addprefix bin/lib/cyc-lib/, $(addsuffix /cycspecs, $(ALL_ARCHS))): \
 # matter what.
 $(addprefix bin/lib/cyc-lib/$(ARCH)/include/, cstubs.c cycstubs.cyc) \
 bin/lib/cyc-lib/$(ARCH)/cyc_setjmp.h: \
-  $(CYCDIR)/bin/genfiles/$(ARCH).headers.tgz \
   $(CYC_INCLUDE_H) \
   bin/cyc-lib/libc.cys
-	gunzip -c $< | tar xf - -C bin/lib/cyc-lib/$(ARCH)/include
-	bin/buildlib -d bin/lib/cyc-lib/$(ARCH)/include -finish -setjmp > bin/lib/cyc-lib/$(ARCH)/cyc_setjmp.h
-	bin/buildlib -d bin/lib/cyc-lib/$(ARCH)/include -finish bin/cyc-lib/libc.cys
-	find bin/lib/cyc-lib/$(ARCH)/include -name '*.i[BC]' -exec rm \{\} \;
+	bin/buildlib -d bin/lib/cyc-lib/$(ARCH)/include -setjmp > bin/lib/cyc-lib/$(ARCH)/cyc_setjmp.h
+	bin/buildlib -d bin/lib/cyc-lib/$(ARCH)/include bin/cyc-lib/libc.cys
 
 bin/lib/cyc-lib/$(ARCH)/include/precore_c.h: $(CYC_INCLUDE_H)
 bin/lib/cyc-lib/$(ARCH)/include/precore_c.h: \
@@ -324,12 +321,6 @@ bin/lib/cyc-lib/$(ARCH)/include/cycstubs.$(O): \
   bin/lib/cyc-lib/$(ARCH)/include/cycstubs.cyc \
   bin/cyclone$(EXE)
 	bin/cyclone$(EXE) -save-c -Iinclude -Bbin/lib/cyc-lib -c -o $@ $<
-
-# Note, we can only build the headers on the current arch
-$(CYCDIR)/bin/genfiles/$(ARCH).headers.tgz:
-	$(CYCDIR)/bin/buildlib $(CYCDIR)/bin/cyc-lib/libc.cys -gather
-	tar cf - -C BUILDLIB.OUT . | gzip -c > $@
-	$(RM) -r BUILDLIB.OUT
 
 bin/lib/cyc-lib/$(ARCH)/gc.a: gc/gc.a $(CYC_INCLUDE_H)
 	cp -p $< $@

@@ -1,8 +1,0 @@
-*cyclone:
- -elim-statement-expressions
-
-*predefines:
-
-
-*cpp:
- -nostdinc -D__USER_LABEL_PREFIX__ -D__SIZE_TYPE__=unsigned\ int -D__PTRDIFF_TYPE__=int -D__HAVE_BUILTIN_SETJMP__=1 -D__i386=1 -D__GNUC_PATCHLEVEL__=0 -D__ELF__=1 -D__WCHAR_TYPE__=long\ int -D__GNUC_MINOR__=96 -D__WINT_TYPE__=unsigned\ int -D__tune_i386__=1 -D__unix=1 -Dunix=1 -D__REGISTER_PREFIX__ -D__linux=1 -D__GNUC__=2 -Di386=1 -D__linux__=1 -D__VERSION__="2.96\ 20000731\ (Red\ Hat\ Linux\ 7.1\ 2.96-81)" -D__i386__=1 -Dlinux=1 -D__unix__=1
