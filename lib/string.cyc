@@ -339,13 +339,16 @@ mstring_t<`r> strcpy(mstring_t<`r> dest, buffer_t src) {
 // Allocating functions
 
 // Not an ISO function, but available in gcc
-mstring_t<`r> rstrdup(region_t<`r> r, buffer_t src) {
+mstring_t<`r> rstrdup(region_t<`r::TR> r, buffer_t src) {
   size_t len;
   mstring_t<`r> temp;
 
   len = strlen(src);
   temp = rnew_string(r,len+1);
-  strncpy((char ? @nozeroterm)temp,src,len);
+  { let temp2 = (char ? @nozeroterm`r)temp;
+    let alias <`x>char ? @nozeroterm`x dst = temp2;
+    strncpy(dst,src,len);
+  }
   return temp;
 }
 

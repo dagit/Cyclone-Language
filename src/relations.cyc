@@ -75,6 +75,35 @@ relns_t<`r> add_relation(region_t<`r> rgn, reln_op_t rop1, relation_t relation,
   return rnew(rgn) List(rnew(rgn) Reln(rop1,relation,rop2),relns);
 }
 
+relns_t<`r> duplicate_relation(region_t<`r> rgn,
+			       Absyn::exp_t e_old, Absyn::exp_t e_new,
+			       relns_t<`r> relns) {
+  Relations::reln_op_t rop_old = Relations::RConst(0); // dummy value
+  Relations::reln_op_t rop_new = Relations::RConst(0); // dummy value
+  if (!exp2relnop(e_old,&rop_old)) return relns;
+  if (!exp2relnop(e_new,&rop_new)) {
+    Tcutil::warn(e_new->loc,"Could not construct relation");
+    return relns;
+  }
+  for (let rs = relns; rs != NULL; rs = rs->tl) {
+    let r = rs->hd;
+    let rop1 = r->rop1;
+    let rop2 = r->rop2;
+    bool addIt = false;
+    if (same_relop(rop1,rop_old)) {
+      addIt = true;
+      rop1 = rop_new;
+    }
+    if (same_relop(rop2,rop_old)) {
+      addIt = true;
+      rop2 = rop_new;
+    }
+    if (addIt)
+      relns = rnew(rgn) List(rnew (rgn) Reln(rop1,r->relation,rop2),relns);
+  }
+  return relns;
+}
+
 bool relns_approx(relns_t<`r> r2s, relns_t<`r> r1s) {
   if (r1s == r2s) return true;
   //fprintf(stderr,"approx on ["); print_relns(stderr,r1s);

@@ -1005,23 +1005,81 @@ void sig_test() {
 }
 
 @tagged union foo { int w; int z; };
-void escape_it(union foo @f) { }
+@tagged union bar { union foo @f; int x; };
+void escape_it(`a x) { }
 void tagged_union_test() {
   test_begin("Tagged unions");
   union foo fx = {.z = 1 };
   union foo @ f = new fx;
   f->z = 1;
+
   if (tagcheck(f->w)) {
     printf("woo hoo %d\n",f->w); // not reached
   }
   escape_it(f);
-  okfail (tagcheck(f->w) == false);
-  okfail (f->z == 1);
+  okfail (tagcheck(f->w) == false); // failed tagcheck
+  okfail (f->z == 1); // correct lookup
+  try {
+    int z = f->w;
+    fail();
+  } catch {
+  default: 
+    ok(); break;
+  }
+
+  // make sure swap works
   fx.z = 2;
   int z = 0;
-  z :=: fx.z;
+  fx.z :=: z;
   okfail (fx.z == 0);
   okfail (z == 2);
+  escape_it(f);
+
+  // make sure that we don't partially swap something on a match failure
+  try {
+    f->w :=: z;
+    fail();
+  } catch {
+  default:
+    okfail (f->z == 1);
+    okfail (z == 2);
+    break;
+  }
+
+  // swap through multiple levels of union
+  union bar @ b = new bar{.f = f};
+  okfail (b->f->z == 1);
+  z :=: b->f->z;
+  okfail (b->f->z == 2);
+  okfail (z == 1);
+  test_end();
+}
+
+void swap_test() {
+  test_begin("Swap expression");
+  // ints
+  int i1 = 1;
+  int i2 = 2;
+  i1 :=: i2;
+  okfail (i1 == 2);
+  okfail (i2 == 1);
+  // thin pointers
+  int *x = new 1;
+  int *y = new 2;
+  x :=: y;
+  okfail (*x == 2);
+  okfail (*y == 1);
+  // fat pointers
+  int ?w = new 1;
+  int ?z = new 2;
+  w :=: z;
+  okfail (*w == 2);
+  okfail (*z == 1);
+  // struct pointers
+  struct f { int *x; } *pf = new f(new 1);
+  pf->x :=: x;
+  okfail (*x == 1);
+  okfail (*pf->x == 2);  
   test_end();
 }
 
@@ -1070,6 +1128,7 @@ int main(int argc, string_t<`H> ?`H args) {
     sig_test();
     scanf_test(); // commented out because sscanf is insecure
     tagged_union_test();
+    swap_test();
   } catch {
   case &Array_bounds:
     fflush(stdout);

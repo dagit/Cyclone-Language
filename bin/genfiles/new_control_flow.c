@@ -1116,23 +1116,23 @@ int Cyc_Relations_exp2relnop(struct Cyc_Absyn_Exp*e,union Cyc_Relations_RelnOp*p
 struct Cyc_List_List*Cyc_Relations_exp2relns(struct _RegionHandle*r,struct Cyc_Absyn_Exp*e);
 # 88
 struct Cyc_List_List*Cyc_Relations_add_relation(struct _RegionHandle*rgn,union Cyc_Relations_RelnOp rop1,enum Cyc_Relations_Relation r,union Cyc_Relations_RelnOp rop2,struct Cyc_List_List*relns);
-# 93
-struct Cyc_List_List*Cyc_Relations_reln_assign_var(struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_Absyn_Vardecl*,struct Cyc_Absyn_Exp*);
-# 96
-struct Cyc_List_List*Cyc_Relations_reln_assign_exp(struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*);
 # 101
+struct Cyc_List_List*Cyc_Relations_reln_assign_var(struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_Absyn_Vardecl*,struct Cyc_Absyn_Exp*);
+# 104
+struct Cyc_List_List*Cyc_Relations_reln_assign_exp(struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*);
+# 109
 struct Cyc_List_List*Cyc_Relations_reln_kill_exp(struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_Absyn_Exp*);
-# 103
-struct Cyc_List_List*Cyc_Relations_copy_relns(struct _RegionHandle*,struct Cyc_List_List*);
-# 105
-int Cyc_Relations_same_relns(struct Cyc_List_List*,struct Cyc_List_List*);
 # 111
+struct Cyc_List_List*Cyc_Relations_copy_relns(struct _RegionHandle*,struct Cyc_List_List*);
+# 113
+int Cyc_Relations_same_relns(struct Cyc_List_List*,struct Cyc_List_List*);
+# 119
 void Cyc_Relations_print_relns(struct Cyc___cycFILE*,struct Cyc_List_List*);
-# 114
+# 122
 struct _dyneither_ptr Cyc_Relations_rop2string(union Cyc_Relations_RelnOp r);
 struct _dyneither_ptr Cyc_Relations_relation2string(enum Cyc_Relations_Relation r);
 struct _dyneither_ptr Cyc_Relations_relns2string(struct Cyc_List_List*r);
-# 122
+# 130
 int Cyc_Relations_consistent_relations(struct Cyc_List_List*rlns);
 # 43 "cf_flowinfo.h"
 int Cyc_CfFlowInfo_anal_error;

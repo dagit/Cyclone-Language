@@ -354,15 +354,15 @@ type_t copy_type(type_t t) {
 //   if (r != NULL) r1 = new Opt(r->v);
 //   return new Vardecl(s,n,q,copy_type(t),eopt1,r1,atts,esc);
 // }
-static designator_t copy_designator(bool pt, designator_t d) {
+static designator_t copy_designator(bool preserve_types, designator_t d) {
   switch (d) {
-  case &ArrayElement(e): return new ArrayElement(DC(pt,e));
+  case &ArrayElement(e): return new ArrayElement(DC(preserve_types,e));
   case &FieldName(v): return d;
   }
 }
 static $(list_t<designator_t>,exp_t)@
-copy_eds(bool pt,$(list_t<designator_t>,exp_t)@ e) {
-  return new $(map_c(copy_designator,pt,e[0][0]),DC(pt,e[0][1]));
+copy_eds(bool preserve_types,$(list_t<designator_t>,exp_t)@ e) {
+  return new $(map_c(copy_designator,preserve_types,e[0][0]),DC(preserve_types,e[0][1]));
 }
 // does a deep copy, but not of vardecls, bindings
 exp_t deep_copy_exp(bool preserve_types, exp_t e) {
@@ -474,8 +474,11 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
     break;
   case &Asm_e(v,s): new_e = asm_exp(v,s,e->loc); break;
   }
-  // types are shared
-  if (preserve_types) new_e->topt = e->topt;
+  // types/annotations are shared
+  if (preserve_types) {
+    new_e->topt = e->topt;
+    new_e->annot = e->annot;
+  }
   return new_e;
 }
 

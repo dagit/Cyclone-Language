@@ -2350,29 +2350,6 @@ static bool is_tagged_union_project(exp_t e, int @f_tag,
   }
 }
 
-// special case for when we're swapping a tagged union member.
-// We have on input e.f or e->f and we want to swap the val
-// field, so ultimately, we want to return &e.f.val or &e->f.val
-// but we also need to check that e.f.tag or e->f.tag is the
-// right one.  So, we mute e into:
-// ({ temp = &e.f // or &e->f
-//    if (temp->tag != f_tag) throw_match();
-//    &temp->val; })
-void add_tagged_union_check_for_swap(exp_t e, int tag, type_t mem_type) {
-  let temp = temp_var();
-  exp_t temp_exp = var_exp(temp,DL);
-  exp_t temp_val = aggrarrow_exp(temp_exp,val_sp,DL);
-  exp_t temp_tag = aggrarrow_exp(temp_exp,tag_sp,DL);
-  exp_t f_tag = signed_int_exp(tag,DL);
-  stmt_t s3 = exp_stmt(address_exp(temp_val,DL),DL);
-  let test_exp = neq_exp(temp_tag,f_tag,DL);
-  stmt_t s2 = ifthenelse_stmt(test_exp,throw_match_stmt(),skip_stmt_dl(),DL);
-  stmt_t s1 = declare_stmt(temp,cstar_typ(mem_type,mt_tq),
-                           push_address_exp(copy_exp(e)),
-                           seq_stmt(s2,s3,DL),DL);
-  e->r = stmt_exp_r(s1);
-}
-
 // special case for assignment to a tagged union member (either e1.f
 // or e1->f.  In particular, when we have e1->f = e2, we rewrite to:
 // ({ temp = &e1->f;
@@ -3785,53 +3762,36 @@ DynCast:
     break;
 
   case &Swap_e(e1,e2):
-    // for pointer values, do
-    //   swap(e1,e2) --> _swap_kw(&e1,&e2)
-    // where _swap_kw is _swap_word for word-sized values, and something
-    // different for the two kinds of fat pointers.  Assumes that we are
-    // not swapping zero-terminated array elements so that we can avoid
-    // adding dynamic checks.
+    // e1 :=: e2 becomes ({ typeof(e1) tmp = e1; typeof(e2) tmp2 = e2;
+    //                      e1 = tmp2; e2 = tmp; })
+    // This assumes that e1 and e2 are effect-free lvalues.  We implement
+    // this by replacing e with a Cyclone expression implementing the swap,
+    // and then reuse the existing code generator to get everything to work out,
+    // e.g. to handle tagged unions.
     type_t e1_old_typ = (type_t)e1->topt;
     type_t e2_old_typ = (type_t)e2->topt;
     if (!is_boxed(e1_old_typ) && !is_pointer_type(e1_old_typ))
       toc_impos("Swap_e: is_pointer_or_boxed: not a pointer or boxed type");
 
-    // figure out which swap primitive to use
-    exp_t swap_fn;
-    if (is_dyneither_ptr(e1_old_typ))
-      swap_fn = _swap_dyneither_e;
-    else
-      swap_fn = _swap_word_e;
+    // create the Cyclone expression for the swap.  Need to deep copy the
+    // expressions since the translation to C is by side-effect, and the rhs
+    // and lhs of tagged unions are translated differently.
+    let loc = e->loc;
+    let v1 = temp_var();
+    let v1e = var_exp(v1,loc); v1e->topt = e1_old_typ;
+    let v2 = temp_var();
+    let v2e = var_exp(v2,loc); v2e->topt = e2_old_typ;
 
-    // figure out if these are tagged-union projections -- if so, then
-    // we need to do some fix-up work after translating.
-    int f1_tag = 0;
-    type_t tagged_mem_type1 = &VoidType_val;
-    bool e1_tmem = is_tagged_union_project(e1,&f1_tag,&tagged_mem_type1,true);
-    int f2_tag = 0;
-    type_t tagged_mem_type2 = &VoidType_val;
-    bool e2_tmem = is_tagged_union_project(e2,&f2_tag,&tagged_mem_type2,true);
+    let s1e = assign_exp(deep_copy_exp(true,e1),v2e,loc); s1e->topt = e1_old_typ;
+    let s1 = exp_stmt(s1e,loc); // e1 = v2
+    let s2e = assign_exp(deep_copy_exp(true,e2),v1e,loc); s2e->topt = e2_old_typ;
+    let s2 = exp_stmt(s2e,loc); // e2 = v1
 
-    set_lhs(nv,true);
-    exp_to_c(nv,e1);
-    exp_to_c(nv,e2);
-    set_lhs(nv,false);
-
-    // special case when e1 or e2 is a tagged union member (e.g., e.f or e->f)
-    if (e1_tmem) {
-      add_tagged_union_check_for_swap(e1,f1_tag,tagged_mem_type1);
-    } else {
-      // we may have to push the address operation in to get a valid lhs
-      e1 = push_address_exp(e1);
-    }
-    if (e2_tmem) {
-      add_tagged_union_check_for_swap(e2,f2_tag,tagged_mem_type2);
-    } else {
-      // we may have to push the address operation in to get a valid lhs
-      e2 = push_address_exp(e2);
-    }
-    e->r = fncall_exp_r(swap_fn,list(e1,e2));
-
+    let s = declare_stmt(v1,e1_old_typ,e1, // typeof(e1) v1 = e1
+			 declare_stmt(v2,e2_old_typ,e2, // typeof(e2) v2 = e2
+				      seq_stmt(s1,s2,loc),loc),loc); // above asgns
+    stmt_to_c(nv,s);
+    e->r = stmt_exp_r(s);
     break;
   case &Tagcheck_e(e1,f):
     // e1.f.tag == f_tag

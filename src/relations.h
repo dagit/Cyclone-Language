@@ -89,6 +89,14 @@ extern relns_t<`r> add_relation(region_t<`r> rgn,
                                 reln_op_t rop1, relation_t r,
                                 reln_op_t rop2, relns_t<`r> relns);
 
+// Duplicate all relations in [relns] that mention an rop for [e_old],
+// replacing its rop in the duplicated version with the rop for
+// [e_new].  Used when deep-copying an expression after the flow
+// analysis (i.e. during code generation)
+extern relns_t<`r> duplicate_relation(region_t<`r> rgn,
+				      Absyn::exp_t e_old, Absyn::exp_t e_new,
+				      relns_t<`r> relns);
+
 // Update relations with x being overwritten by e
 extern relns_t<`r> reln_assign_var(region_t<`r>, relns_t<`r>, 
                                    Absyn::vardecl_t, Absyn::exp_t);

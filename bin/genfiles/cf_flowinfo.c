@@ -1089,11 +1089,11 @@ typedef union Cyc_Relations_RelnOp Cyc_Relations_reln_op_t;
 # 51
 enum Cyc_Relations_Relation{Cyc_Relations_Req  = 0,Cyc_Relations_Rneq  = 1,Cyc_Relations_Rlte  = 2,Cyc_Relations_Rlt  = 3};
 typedef enum Cyc_Relations_Relation Cyc_Relations_relation_t;struct Cyc_Relations_Reln{union Cyc_Relations_RelnOp rop1;enum Cyc_Relations_Relation relation;union Cyc_Relations_RelnOp rop2;};
-# 107
+# 115
 int Cyc_Relations_relns_approx(struct Cyc_List_List*r2s,struct Cyc_List_List*r1s);
-# 109
+# 117
 struct Cyc_List_List*Cyc_Relations_join_relns(struct _RegionHandle*r,struct Cyc_List_List*,struct Cyc_List_List*);
-# 111
+# 119
 void Cyc_Relations_print_relns(struct Cyc___cycFILE*,struct Cyc_List_List*);
 # 43 "cf_flowinfo.h"
 int Cyc_CfFlowInfo_anal_error;

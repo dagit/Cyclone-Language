@@ -2345,12 +2345,8 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
 // swap(e1,e2)
 static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
 		     exp_t e1, exp_t e2) {
-  // JGM: I'm entering a "notreadctxt" for both of the expressions,
-  // because the translation to C has to treat these specially, in
-  // a way that's similar to doing an AssignOp with some primop
-  // (e.g., foo.x += 3).
   TEMP_RGN(te, r) {
-    let te2 = enter_lhs(r,enter_notreadctxt(r,te));
+    let te2 = enter_lhs(r,te);
     tcExpNoPromote(te2,NULL,e1);
     let t1 = (type_t)e1->topt;
     tcExpNoPromote(te2,&t1,e2);
