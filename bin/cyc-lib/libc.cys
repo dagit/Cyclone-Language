@@ -336,6 +336,16 @@ MAGIC
 }
 ;
 
+crypt.h:
+hstub encrypt {
+  // FIX: should this be null-terminated or not?
+  extern "C" void encrypt(char @{64}, int);
+}
+hstub crypt {
+  extern "C" char * crypt(const char @ key, const char @ salt);
+}
+;
+
 ctype.h:
 hstub {
   extern "C" int isalnum(int);
@@ -5231,7 +5241,7 @@ hstub confstr {
   // extern size_t confstr(int, char *, size_t);
 }
 hstub crypt {
-  extern "C" char @ crypt(const char @ key, const char @ salt);
+  extern "C" char * crypt(const char @ key, const char @ salt);
 }
 hstub ctermid {
   // Not supported yet
