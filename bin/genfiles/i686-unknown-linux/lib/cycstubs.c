@@ -384,14 +384,16 @@ Cyc_Std_IPPROTO_IPV6  = 41,Cyc_Std_IPPROTO_ROUTING  = 43,Cyc_Std_IPPROTO_FRAGMEN
 Cyc_Std_IPPROTO_DSTOPTS  = 60,Cyc_Std_IPPROTO_MTP  = 92,Cyc_Std_IPPROTO_ENCAP  = 98,
 Cyc_Std_IPPROTO_PIM  = 103,Cyc_Std_IPPROTO_COMP  = 108,Cyc_Std_IPPROTO_RAW  = 255,
 Cyc_Std_IPPROTO_MAX  = 256};struct Cyc_Std_in6_addr{union{unsigned char u6_addr8[16];
-unsigned short u6_addr16[8];unsigned int u6_addr32[4];}in6_u;};struct Cyc_Std_sockaddr_in{
+unsigned short u6_addr16[8];unsigned int u6_addr32[4];}in6_u;};struct Cyc_Std_sockaddr{
+unsigned short sa_family;char sa_data[14];};struct Cyc_Std_sockaddr_in{
 unsigned short sin_family;unsigned short sin_port;struct Cyc_Std_in_addr sin_addr;
-unsigned char sin_zero[8];};struct Cyc_Std_sockaddr_in6{unsigned short sin6_family;
-unsigned short sin6_port;unsigned int sin6_flowinfo;struct Cyc_Std_in6_addr
-sin6_addr;unsigned int sin6_scope_id;};struct Cyc_Std_ipv6_mreq{struct Cyc_Std_in6_addr
-ipv6mr_multiaddr;unsigned int ipv6mr_interface;};struct Cyc_Std_pollfd{int fd;short
-events;short revents;};int Cyc_Std_poll(struct _tagged_arr,unsigned int,int);int
-poll(struct Cyc_Std_pollfd*,unsigned int b,int c);static char _tmpF[22]="poll called with NULL";
+unsigned char sin_zero[((sizeof(struct Cyc_Std_sockaddr)- sizeof(unsigned short))- 
+sizeof(unsigned short))- sizeof(struct Cyc_Std_in_addr)];};struct Cyc_Std_sockaddr_in6{
+unsigned short sin6_family;unsigned short sin6_port;unsigned int sin6_flowinfo;
+struct Cyc_Std_in6_addr sin6_addr;unsigned int sin6_scope_id;};struct Cyc_Std_ipv6_mreq{
+struct Cyc_Std_in6_addr ipv6mr_multiaddr;unsigned int ipv6mr_interface;};struct Cyc_Std_pollfd{
+int fd;short events;short revents;};int Cyc_Std_poll(struct _tagged_arr,unsigned int,
+int);int poll(struct Cyc_Std_pollfd*,unsigned int b,int c);static char _tmpF[22]="poll called with NULL";
 static struct Cyc_Core_Failure_struct Cyc_Std___poll_failure_1={Cyc_Core_Failure,{
 _tmpF,_tmpF,_tmpF + 22}};static char _tmp11[39]="poll called with out-of-bounds pointer";
 static struct Cyc_Core_Failure_struct Cyc_Std___poll_failure_2={Cyc_Core_Failure,{
@@ -404,27 +406,27 @@ void*_tmp16=_tmp13;_LL6: if(_tmp16 != Cyc_Array_bounds)goto _LL8;_LL7:(int)_thro
 void*)& Cyc_Std___poll_failure_2);_LL8:;_LL9:(void)_throw(_tmp16);_LL5:;}}}{int
 len=(int)_get_arr_size(a,sizeof(struct Cyc_Std_pollfd));return poll((struct Cyc_Std_pollfd*)
 _untag_arr(a,sizeof(struct Cyc_Std_pollfd),0),b < (unsigned int)len?b:(
-unsigned int)len,c);}}typedef struct{unsigned int __val[32];}Cyc_Std___sigset_t;
-typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;enum Cyc_Std___anonymous_enum_181__{
-Cyc_Std_SIGEV_SIGNAL  = 0,Cyc_Std_SIGEV_NONE  = 1,Cyc_Std_SIGEV_THREAD  = 2};struct
-Cyc_Std___SIG_BUILTIN_struct{int tag;void*f1;};struct Cyc_Std___SIG_HANDLER_struct{
-int tag;void(*f1)(int);};void*Cyc_Std_signal(int,struct _tagged_arr);void*Cyc_Std_Csignal_make_SIG_DFL(){
-return(void*)({struct Cyc_Std___SIG_BUILTIN_struct*_tmp17=_cycalloc(sizeof(*
-_tmp17));_tmp17[0]=({struct Cyc_Std___SIG_BUILTIN_struct _tmp18;_tmp18.tag=0;
-_tmp18.f1=(void*)((void*)0);_tmp18;});_tmp17;});}void*Cyc_Std_Csignal_make_SIG_ERR(){
-return(void*)({struct Cyc_Std___SIG_BUILTIN_struct*_tmp19=_cycalloc(sizeof(*
-_tmp19));_tmp19[0]=({struct Cyc_Std___SIG_BUILTIN_struct _tmp1A;_tmp1A.tag=0;
-_tmp1A.f1=(void*)((void*)1);_tmp1A;});_tmp19;});}void*Cyc_Std_Csignal_make_SIG_IGN(){
-return(void*)({struct Cyc_Std___SIG_BUILTIN_struct*_tmp1B=_cycalloc(sizeof(*
-_tmp1B));_tmp1B[0]=({struct Cyc_Std___SIG_BUILTIN_struct _tmp1C;_tmp1C.tag=0;
-_tmp1C.f1=(void*)((void*)1);_tmp1C;});_tmp1B;});}void*Cyc_Std_Csignal_make_SIG_HANDLER(
-void(*f)(int)){return(void*)({struct Cyc_Std___SIG_HANDLER_struct*_tmp1D=
-_cycalloc(sizeof(*_tmp1D));_tmp1D[0]=({struct Cyc_Std___SIG_HANDLER_struct _tmp1E;
-_tmp1E.tag=1;_tmp1E.f1=f;_tmp1E;});_tmp1D;});}void*signal_SIG_DFL(int);void*
-signal_SIG_ERR(int);void*signal_SIG_IGN(int);void*signal(int,void(*)(int));
-static char _tmp20[49]="signal called with the wrong number of arguments";static
-struct Cyc_Core_Failure_struct Cyc_Std___signal_failure={Cyc_Core_Failure,{_tmp20,
-_tmp20,_tmp20 + 49}};void*Cyc_Std_signal(int a,struct _tagged_arr b){if(
+unsigned int)len,c);}}typedef struct{unsigned int __val[1024 / (8 * sizeof(
+unsigned int))];}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;
+enum Cyc_Std___anonymous_enum_181__{Cyc_Std_SIGEV_SIGNAL  = 0,Cyc_Std_SIGEV_NONE
+ = 1,Cyc_Std_SIGEV_THREAD  = 2};struct Cyc_Std___SIG_BUILTIN_struct{int tag;void*f1;
+};struct Cyc_Std___SIG_HANDLER_struct{int tag;void(*f1)(int);};void*Cyc_Std_signal(
+int,struct _tagged_arr);void*Cyc_Std_Csignal_make_SIG_DFL(){return(void*)({struct
+Cyc_Std___SIG_BUILTIN_struct*_tmp17=_cycalloc(sizeof(*_tmp17));_tmp17[0]=({
+struct Cyc_Std___SIG_BUILTIN_struct _tmp18;_tmp18.tag=0;_tmp18.f1=(void*)((void*)0);
+_tmp18;});_tmp17;});}void*Cyc_Std_Csignal_make_SIG_ERR(){return(void*)({struct
+Cyc_Std___SIG_BUILTIN_struct*_tmp19=_cycalloc(sizeof(*_tmp19));_tmp19[0]=({
+struct Cyc_Std___SIG_BUILTIN_struct _tmp1A;_tmp1A.tag=0;_tmp1A.f1=(void*)((void*)1);
+_tmp1A;});_tmp19;});}void*Cyc_Std_Csignal_make_SIG_IGN(){return(void*)({struct
+Cyc_Std___SIG_BUILTIN_struct*_tmp1B=_cycalloc(sizeof(*_tmp1B));_tmp1B[0]=({
+struct Cyc_Std___SIG_BUILTIN_struct _tmp1C;_tmp1C.tag=0;_tmp1C.f1=(void*)((void*)1);
+_tmp1C;});_tmp1B;});}void*Cyc_Std_Csignal_make_SIG_HANDLER(void(*f)(int)){return(
+void*)({struct Cyc_Std___SIG_HANDLER_struct*_tmp1D=_cycalloc(sizeof(*_tmp1D));
+_tmp1D[0]=({struct Cyc_Std___SIG_HANDLER_struct _tmp1E;_tmp1E.tag=1;_tmp1E.f1=f;
+_tmp1E;});_tmp1D;});}void*signal_SIG_DFL(int);void*signal_SIG_ERR(int);void*
+signal_SIG_IGN(int);void*signal(int,void(*)(int));static char _tmp20[49]="signal called with the wrong number of arguments";
+static struct Cyc_Core_Failure_struct Cyc_Std___signal_failure={Cyc_Core_Failure,{
+_tmp20,_tmp20,_tmp20 + 49}};void*Cyc_Std_signal(int a,struct _tagged_arr b){if(
 _get_arr_size(b,sizeof(void*))!= 1)(int)_throw((void*)& Cyc_Std___signal_failure);{
 void*_tmp21=*((void**)_check_unknown_subscript(b,sizeof(void*),0));void*_tmp22;
 void*_tmp23;void*_tmp24;void(*_tmp25)(int);_LLB: if(*((int*)_tmp21)!= 0)goto _LLD;
@@ -663,30 +665,30 @@ int ru_maxrss;int ru_ixrss;int ru_idrss;int ru_isrss;int ru_minflt;int ru_majflt
 ru_nswap;int ru_inblock;int ru_oublock;int ru_msgsnd;int ru_msgrcv;int ru_nsignals;
 int ru_nvcsw;int ru_nivcsw;};enum Cyc_Std___priority_which{Cyc_Std_PRIO_PROCESS  = 
 0,Cyc_Std_PRIO_PGRP  = 1,Cyc_Std_PRIO_USER  = 2};struct Cyc_Std_timespec{int tv_sec;
-int tv_nsec;};typedef struct{int __fds_bits[32];}Cyc_Std_fd_set;int select(int,Cyc_Std_fd_set*,
-Cyc_Std_fd_set*,Cyc_Std_fd_set*,struct Cyc_Std_timeval*);void Cyc_Std_FD_CLR(int,
-Cyc_Std_fd_set*);int Cyc_Std_FD_ISSET(int,Cyc_Std_fd_set*);void Cyc_Std_FD_SET(int,
-Cyc_Std_fd_set*);void Cyc_Std_FD_ZERO(Cyc_Std_fd_set*);void __stub_FD_CLR(int,Cyc_Std_fd_set*);
-int __stub_FD_ISSET(int,Cyc_Std_fd_set*);void __stub_FD_SET(int,Cyc_Std_fd_set*);
-void __stub_FD_ZERO(Cyc_Std_fd_set*);void Cyc_Std_FD_CLR(int a,Cyc_Std_fd_set*b){
-return __stub_FD_CLR(a,b);}int Cyc_Std_FD_ISSET(int a,Cyc_Std_fd_set*b){return
-__stub_FD_ISSET(a,b);}void Cyc_Std_FD_SET(int a,Cyc_Std_fd_set*b){return
-__stub_FD_SET(a,b);}void Cyc_Std_FD_ZERO(Cyc_Std_fd_set*a){return __stub_FD_ZERO(a);}
-enum Cyc_Std___socket_type{Cyc_Std_SOCK_STREAM  = 1,Cyc_Std_SOCK_DGRAM  = 2,Cyc_Std_SOCK_RAW
- = 3,Cyc_Std_SOCK_RDM  = 4,Cyc_Std_SOCK_SEQPACKET  = 5,Cyc_Std_SOCK_PACKET  = 10};
-enum Cyc_Std___anonymous_enum_266__{Cyc_Std_MSG_OOB  = 1,Cyc_Std_MSG_PEEK  = 2,Cyc_Std_MSG_DONTROUTE
- = 4,Cyc_Std_MSG_CTRUNC  = 8,Cyc_Std_MSG_PROXY  = 16,Cyc_Std_MSG_TRUNC  = 32,Cyc_Std_MSG_DONTWAIT
- = 64,Cyc_Std_MSG_EOR  = 128,Cyc_Std_MSG_WAITALL  = 256,Cyc_Std_MSG_FIN  = 512,Cyc_Std_MSG_SYN
- = 1024,Cyc_Std_MSG_CONFIRM  = 2048,Cyc_Std_MSG_RST  = 4096,Cyc_Std_MSG_ERRQUEUE
- = 8192,Cyc_Std_MSG_NOSIGNAL  = 16384};struct Cyc_Std_cmsghdr{unsigned int cmsg_len;
-int cmsg_level;int cmsg_type;unsigned char __cmsg_data[0];};enum Cyc_Std___anonymous_enum_267__{
-Cyc_Std_SCM_RIGHTS  = 1,Cyc_Std_SCM_CREDENTIALS  = 2,Cyc_Std___SCM_CONNECT  = 3};
-struct Cyc_Std_linger{int l_onoff;int l_linger;};enum Cyc_Std___anonymous_enum_268__{
-Cyc_Std_SHUT_RD  = 0,Cyc_Std_SHUT_WR  = 1,Cyc_Std_SHUT_RDWR  = 2};struct Cyc_Std_SA_sockaddr_in_struct{
-int tag;struct Cyc_Std_sockaddr_in*f1;};struct Cyc_Std_SA_socklenptr_struct{int tag;
-unsigned int*f1;};struct Cyc_Std_SA_socklen_struct{int tag;unsigned int f1;};struct
-Cyc_Std_SO_int_struct{int tag;int*f1;};struct Cyc_Std_SO_timeval_struct{int tag;
-struct Cyc_Std_timeval*f1;};struct Cyc_Std_SO_socklenptr_struct{int tag;
+int tv_nsec;};typedef struct{int __fds_bits[1024 / (8 * sizeof(int))];}Cyc_Std_fd_set;
+int select(int,Cyc_Std_fd_set*,Cyc_Std_fd_set*,Cyc_Std_fd_set*,struct Cyc_Std_timeval*);
+void Cyc_Std_FD_CLR(int,Cyc_Std_fd_set*);int Cyc_Std_FD_ISSET(int,Cyc_Std_fd_set*);
+void Cyc_Std_FD_SET(int,Cyc_Std_fd_set*);void Cyc_Std_FD_ZERO(Cyc_Std_fd_set*);
+void __stub_FD_CLR(int,Cyc_Std_fd_set*);int __stub_FD_ISSET(int,Cyc_Std_fd_set*);
+void __stub_FD_SET(int,Cyc_Std_fd_set*);void __stub_FD_ZERO(Cyc_Std_fd_set*);void
+Cyc_Std_FD_CLR(int a,Cyc_Std_fd_set*b){return __stub_FD_CLR(a,b);}int Cyc_Std_FD_ISSET(
+int a,Cyc_Std_fd_set*b){return __stub_FD_ISSET(a,b);}void Cyc_Std_FD_SET(int a,Cyc_Std_fd_set*
+b){return __stub_FD_SET(a,b);}void Cyc_Std_FD_ZERO(Cyc_Std_fd_set*a){return
+__stub_FD_ZERO(a);}enum Cyc_Std___socket_type{Cyc_Std_SOCK_STREAM  = 1,Cyc_Std_SOCK_DGRAM
+ = 2,Cyc_Std_SOCK_RAW  = 3,Cyc_Std_SOCK_RDM  = 4,Cyc_Std_SOCK_SEQPACKET  = 5,Cyc_Std_SOCK_PACKET
+ = 10};enum Cyc_Std___anonymous_enum_266__{Cyc_Std_MSG_OOB  = 1,Cyc_Std_MSG_PEEK
+ = 2,Cyc_Std_MSG_DONTROUTE  = 4,Cyc_Std_MSG_CTRUNC  = 8,Cyc_Std_MSG_PROXY  = 16,Cyc_Std_MSG_TRUNC
+ = 32,Cyc_Std_MSG_DONTWAIT  = 64,Cyc_Std_MSG_EOR  = 128,Cyc_Std_MSG_WAITALL  = 256,
+Cyc_Std_MSG_FIN  = 512,Cyc_Std_MSG_SYN  = 1024,Cyc_Std_MSG_CONFIRM  = 2048,Cyc_Std_MSG_RST
+ = 4096,Cyc_Std_MSG_ERRQUEUE  = 8192,Cyc_Std_MSG_NOSIGNAL  = 16384};struct Cyc_Std_cmsghdr{
+unsigned int cmsg_len;int cmsg_level;int cmsg_type;unsigned char __cmsg_data[0];};
+enum Cyc_Std___anonymous_enum_267__{Cyc_Std_SCM_RIGHTS  = 1,Cyc_Std_SCM_CREDENTIALS
+ = 2,Cyc_Std___SCM_CONNECT  = 3};struct Cyc_Std_linger{int l_onoff;int l_linger;};
+enum Cyc_Std___anonymous_enum_268__{Cyc_Std_SHUT_RD  = 0,Cyc_Std_SHUT_WR  = 1,Cyc_Std_SHUT_RDWR
+ = 2};struct Cyc_Std_SA_sockaddr_in_struct{int tag;struct Cyc_Std_sockaddr_in*f1;};
+struct Cyc_Std_SA_socklenptr_struct{int tag;unsigned int*f1;};struct Cyc_Std_SA_socklen_struct{
+int tag;unsigned int f1;};struct Cyc_Std_SO_int_struct{int tag;int*f1;};struct Cyc_Std_SO_timeval_struct{
+int tag;struct Cyc_Std_timeval*f1;};struct Cyc_Std_SO_socklenptr_struct{int tag;
 unsigned int*f1;};struct Cyc_Std_SO_socklen_struct{int tag;unsigned int f1;};int Cyc_Std_accept(
 int fd,struct _tagged_arr);int Cyc_Std_bind(int fd,struct _tagged_arr);int Cyc_Std_connect(
 int fd,struct _tagged_arr);int Cyc_Std_getpeername(int fd,struct _tagged_arr);int Cyc_Std_getsockname(

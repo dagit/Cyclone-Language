@@ -1,3 +1,22 @@
+/* Buildlib -- converts C header files to Cyclone.
+   Copyright (C) 2001, 2002 Greg Morrisett, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
 {
 /* Notes
 
@@ -26,14 +45,6 @@
    Cyclone file.)  Maybe we can use buildlib to extract just the
    definitions we need from setjmp.h -- we need a flag in the parser
    that disables Cyclone keywords, so that we can parse more C code.
-
-   Some C headers use sizeof(type) in constant expressions, which we
-   don't currently allow in Cyclone.  The current hack is to
-   precalculate the sizes using gcc, and do a textual replace of the
-   sizeof expression with the actual size.  (The reason we don't allow
-   it in Cyclone right now is that our compiler is not capable of
-   calculating it at compile time, since it relies on gcc to lay out
-   memory.)
 
    Cyclone does not currently handle long double complex, which is
    needed in <complex.h>.
@@ -101,20 +112,6 @@ int log(const char ?fmt, ... inject parg_t<`r2> ap)
   fflush((FILE@)log_file);
   return x;
 }
-
-/* These will be filled in using gcc later */
-/* HARDCODED TEMPORARILY */
-int sizeof_unsignedlongint = 4;
-int sizeof_unsignedshortint = 2;
-int sizeof_shortint = 2;
-int sizeof_int = 4;
-int sizeof_short = 2;
-int sizeof_fdmask = 4;
-int sizeof___fdmask = 4;
-int sizeof_uint32 = 4;
-int sizeof_sockaddr = 16;
-int sizeof_inport = 2;
-int sizeof_inaddr = 4;
 
 static string_t *current_source = NULL;
 static list_t<stringptr_t> current_args = NULL;
@@ -375,53 +372,6 @@ and slurp = parse /* returns 1 if more to do, 0 if all done */
   while (slurp_string(lexbuf)) /* skip */;
   return 1;
 }
-/* Currently Cyclone doesn't allow sizeofs as constant expressions.
-   So we calculate the sizes in a previous phase and insert them
-   here on a case-by-case basis. */
-| "sizeof" ws* "(" ws* "fd_mask" ws* ")"
-{ fprintf((FILE @)slurp_out," %d ",sizeof_fdmask);
-  log("Warning: sizeof(fd_mask) inlined\n");
-  return 1; }
-| "sizeof" ws* "(" ws* "__fd_mask" ws* ")"
-{ fprintf((FILE @)slurp_out," %d ",sizeof___fdmask);
-  log("Warning: sizeof(__fd_mask) inlined\n");
-  return 1; }
-| "sizeof" ws* "(" ws* "__uint32_t" ws* ")"
-{ fprintf((FILE @)slurp_out," %d ",sizeof_uint32);
-  log("Warning: sizeof(__uint32_t) inlined\n");
-  return 1; }
-| "sizeof" ws* "(" ws* "in_port_t" ws* ")"
-{ fprintf((FILE @)slurp_out," %d ",sizeof_inport);
-  log("Warning: sizeof(__in_port_t) inlined\n");
-  return 1; }
-| "sizeof" ws* "(" ws* "int" ws* ")"
-{ fprintf((FILE @)slurp_out," %d ",sizeof_int);
-  log("Warning: sizeof(int) inlined\n");
-  return 1; }
-| "sizeof" ws* "(" ws* "short" ws* ")"
-{ fprintf((FILE @)slurp_out," %d ",sizeof_short);
-  log("Warning: sizeof(__short) inlined\n");
-  return 1; }
-| "sizeof" ws* "(" ws* "unsigned" ws+ "long" ws+ "int" ws* ")"
-{ fprintf((FILE @)slurp_out," %d ",sizeof_unsignedlongint);
-  log("Warning: sizeof(unsigned long int) inlined\n");
-  return 1; }
-| "sizeof" ws* "(" ws* "unsigned" ws+ "short" ws+ "int" ws* ")"
-{ fprintf((FILE @)slurp_out," %d ",sizeof_unsignedshortint);
-  log("Warning: sizeof(unsigned short int) inlined\n");
-  return 1; }
-| "sizeof" ws* "(" ws* "short" ws+ "int" ws* ")"
-{ fprintf((FILE @)slurp_out," %d ",sizeof_shortint);
-  log("Warning: sizeof(short int) inlined\n");
-  return 1; }
-| "sizeof" ws* "(" ws* "struct" ws+ "sockaddr" ws* ")"
-{ fprintf((FILE @)slurp_out," %d ",sizeof_sockaddr);
-  log("Warning: sizeof(struct sockaddr) inlined\n");
-  return 1; }
-| "sizeof" ws* "(" ws* "struct" ws+ "in_addr" ws* ")"
-{ fprintf((FILE @)slurp_out," %d ",sizeof_inaddr);
-  log("Warning: sizeof(struct inaddr) inlined\n");
-  return 1; }
 | "*" ws* "malloc" ws* "("
 /* malloc is a Cyclone keyword so our parser can't handle a malloc
    declaration. */
@@ -1699,62 +1649,6 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     return 0;
   }
 
-  int getsize(const char ?dir, const char ?includes, const char ?type) {
-    /* FIX: should get rid of dir argument and use std. temp file stuff */
-    let getsizefilename = Filename::concat(dir,"getsize.c");
-    let getsizeexec = Filename::concat(dir,"getsize");
-    let getsizeout = Filename::concat(dir,"getsize.out");
-    let getsizefile = fopen(getsizefilename,"w");
-    if (!getsizefile) {
-      fprintf(stderr,"Error: could not create %s\n",getsizefilename);
-      log("Warning: could not find the size of %s\n",type);
-      return -1;
-    }
-    /* We jump through some hoops here because the system function does not
-       return the value returned by main (it does something more
-       complicated and not very portable). */
-    fprintf((FILE@)getsizefile,
-            "%s\n"
-            "#include <stdio.h>\n"
-            "int main() {\n"
-            "  FILE *f = fopen(\"%s\",\"w\");\n"
-            "  fprintf(f,\"%%d\\n\",sizeof(%s));\n"
-            "  fclose(f);\n"
-            "  return (int)sizeof(%s);\n"
-            "}\n",
-            includes,
-            getsizeout,
-            type,
-            type);
-    fclose((FILE@)getsizefile);
-    let GCC = Cstring_to_string(Ccomp);
-    let gcccmd = aprintf("%s -o %s -x c %s",
-                         GCC,
-                         getsizeexec,
-                         getsizefilename);
-    if (system(gcccmd)) {
-      fprintf(stderr,
-              "Warning: could not find the size of %s; continuing anyway\n",
-              type);
-      log("Warning: could not find the size of %s\n",type);
-      return -1;
-    }
-    let z = system(getsizeexec);
-    //    log("size of %s returned by system is %d\n",type,z);
-    let f = fopen(getsizeout,"r");
-    int w = -1;
-    if (fscanf((FILE@)f,"%d",&w) != 1) {
-      log("Warning: could not find the size of %s\n",type);
-      return -1;
-    }
-    log("size of %s read from file %s is %d\n",type,getsizeout,w);
-    fclose((FILE@)f);
-    remove(getsizeout);
-    remove(getsizefilename);
-    remove(getsizeexec);
-    return w;
-  }
-
   /* Helper functions for command line argument processing */
   static string_t output_dir = "BUILDLIB.OUT";
   static void set_output_dir(string_t<`H> s) {
@@ -1861,22 +1755,6 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       fprintf((FILE@)cycstubs_file,
               "#include <core.h>\n"
               "using Core;\n\n");
-
-      /* Find the sizes of various types, for use in constant expressions */
-      // DISABLED FOR NOW
-//      sizeof_unsignedlongint = getsize(output_dir,"","unsigned long int");
-//      sizeof_unsignedshortint = getsize(output_dir,"","unsigned short int");
-//      sizeof_shortint = getsize(output_dir,"","short int");
-//      sizeof_int = getsize(output_dir,"","int");
-//      sizeof_short = getsize(output_dir,"","short");
-//      /* sys/types is needed on OS X b/c it defines needed typedef u_int */
-//      sizeof_fdmask = getsize(output_dir,"#include <sys/types.h>\n#include <sys/select.h>","fd_mask");
-//      sizeof___fdmask = getsize(output_dir,"#include <sys/types.h>\n#include <sys/select.h>","__fd_mask");
-//      sizeof_uint32 = getsize(output_dir,"#include <sys/types.h>","__uint32_t");
-//      /* sys/types is needed on OS X b/c it defines needed typedef u_char */
-//      sizeof_sockaddr = getsize(output_dir,"#include <sys/types.h>\n#include <sys/socket.h>","struct sockaddr");
-//      sizeof_inport = getsize(output_dir,"#include <sys/types.h>\n#include <netinet/in.h>","in_port_t");
-//      sizeof_inaddr = getsize(output_dir,"#include <sys/types.h>\n#include <netinet/in.h>","struct in_addr");
     }
             
     /* Main loop -- process each spec file */

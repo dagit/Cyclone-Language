@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c powerpc-apple-rhapsody/lib/arg.c
-*** i686-unknown-linux/lib/arg.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/lib/arg.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/arg.c	Tue Feb 12 01:23:08 2002
+--- powerpc-apple-rhapsody/lib/arg.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 250,262 ****
   #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
@@ -30,7 +30,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c powerpc-apple-rhapsody/li
   int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c.rej powerpc-apple-rhapsody/lib/arg.c.rej
 *** i686-unknown-linux/lib/arg.c.rej	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/lib/arg.c.rej	Thu Feb 14 11:46:52 2002
+--- powerpc-apple-rhapsody/lib/arg.c.rej	Thu Feb 14 12:18:49 2002
 ***************
 *** 0 ****
 --- 1,52 ----
@@ -87,8 +87,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c.rej powerpc-apple-rhapsod
 +   Cyc_List_Nth[8];unsigned int Cyc_Std_strlen(struct _tagged_arr s);int Cyc_Std_strcmp(
 +   struct _tagged_arr s1,struct _tagged_arr s2);int Cyc_Std_strncmp(struct _tagged_arr s1,
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/assert.c powerpc-apple-rhapsody/lib/assert.c
-*** i686-unknown-linux/lib/assert.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/lib/assert.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/assert.c	Tue Feb 12 01:23:08 2002
+--- powerpc-apple-rhapsody/lib/assert.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 256,269 ****
   };extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{char*tag;
@@ -120,7 +120,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/assert.c powerpc-apple-rhapsody
   struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/assert.c.rej powerpc-apple-rhapsody/lib/assert.c.rej
 *** i686-unknown-linux/lib/assert.c.rej	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/lib/assert.c.rej	Thu Feb 14 11:46:52 2002
+--- powerpc-apple-rhapsody/lib/assert.c.rej	Thu Feb 14 12:18:49 2002
 ***************
 *** 0 ****
 --- 1,51 ----
@@ -176,8 +176,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/assert.c.rej powerpc-apple-rhap
 + ! sizeof(void*),3));}}}});Cyc_Std_fflush((struct Cyc_Std___cycFILE*)Cyc_Std_stderr);
 + ! exit(- 1);}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/bitvec.c powerpc-apple-rhapsody/lib/bitvec.c
-*** i686-unknown-linux/lib/bitvec.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/lib/bitvec.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/bitvec.c	Tue Feb 12 01:23:08 2002
+--- powerpc-apple-rhapsody/lib/bitvec.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 257,276 ****
   16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct Cyc_List_List{
@@ -220,7 +220,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/bitvec.c powerpc-apple-rhapsody
   void*f2;};struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*r,struct Cyc_Dict_Dict*
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/bitvec.c.rej powerpc-apple-rhapsody/lib/bitvec.c.rej
 *** i686-unknown-linux/lib/bitvec.c.rej	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/lib/bitvec.c.rej	Thu Feb 14 11:46:52 2002
+--- powerpc-apple-rhapsody/lib/bitvec.c.rej	Thu Feb 14 12:18:49 2002
 ***************
 *** 0 ****
 --- 1,70 ----
@@ -295,8 +295,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/bitvec.c.rej powerpc-apple-rhap
 +   struct _tagged_arr src1,struct _tagged_arr src2);void*Cyc_Std___assert_fail(struct
 +   _tagged_arr assertion,struct _tagged_arr file,unsigned int line);int Cyc_Bitvec_get(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapsody/lib/cycstubs.c
-*** i686-unknown-linux/lib/cycstubs.c	Thu Feb 14 11:45:54 2002
---- powerpc-apple-rhapsody/lib/cycstubs.c	Thu Feb 14 11:46:56 2002
+*** i686-unknown-linux/lib/cycstubs.c	Thu Feb 14 11:57:03 2002
+--- powerpc-apple-rhapsody/lib/cycstubs.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 266,273 ****
   struct _tagged_arr cp,struct Cyc_Std_in_addr*inp){return inet_aton(string_to_Cstring(
@@ -431,7 +431,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   struct _tagged_arr name,struct _tagged_arr proto){struct Cyc_Std_Cnetdb_Cservent*src=
   getservbyname(string_to_Cstring(name),string_to_Cstring(proto));return(
 ***************
-*** 374,475 ****
+*** 374,477 ****
   _tmpD=_cycalloc(sizeof(*_tmpD));_tmpD->p_name=Cstring_to_string(src->p_name);
   _tmpD->p_aliases=ntCsl_to_ntsl(src->p_aliases);_tmpD->p_proto=src->p_proto;_tmpD;}):
   0;}void herror(char*);void Cyc_Std_herror(struct _tagged_arr s){herror(
@@ -445,14 +445,16 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
 ! Cyc_Std_IPPROTO_DSTOPTS  = 60,Cyc_Std_IPPROTO_MTP  = 92,Cyc_Std_IPPROTO_ENCAP  = 98,
 ! Cyc_Std_IPPROTO_PIM  = 103,Cyc_Std_IPPROTO_COMP  = 108,Cyc_Std_IPPROTO_RAW  = 255,
 ! Cyc_Std_IPPROTO_MAX  = 256};struct Cyc_Std_in6_addr{union{unsigned char u6_addr8[16];
-! unsigned short u6_addr16[8];unsigned int u6_addr32[4];}in6_u;};struct Cyc_Std_sockaddr_in{
+! unsigned short u6_addr16[8];unsigned int u6_addr32[4];}in6_u;};struct Cyc_Std_sockaddr{
+! unsigned short sa_family;char sa_data[14];};struct Cyc_Std_sockaddr_in{
 ! unsigned short sin_family;unsigned short sin_port;struct Cyc_Std_in_addr sin_addr;
-! unsigned char sin_zero[8];};struct Cyc_Std_sockaddr_in6{unsigned short sin6_family;
-! unsigned short sin6_port;unsigned int sin6_flowinfo;struct Cyc_Std_in6_addr
-! sin6_addr;unsigned int sin6_scope_id;};struct Cyc_Std_ipv6_mreq{struct Cyc_Std_in6_addr
-! ipv6mr_multiaddr;unsigned int ipv6mr_interface;};struct Cyc_Std_pollfd{int fd;short
-! events;short revents;};int Cyc_Std_poll(struct _tagged_arr,unsigned int,int);int
-! poll(struct Cyc_Std_pollfd*,unsigned int b,int c);static char _tmpF[22]="poll called with NULL";
+! unsigned char sin_zero[((sizeof(struct Cyc_Std_sockaddr)- sizeof(unsigned short))- 
+! sizeof(unsigned short))- sizeof(struct Cyc_Std_in_addr)];};struct Cyc_Std_sockaddr_in6{
+! unsigned short sin6_family;unsigned short sin6_port;unsigned int sin6_flowinfo;
+! struct Cyc_Std_in6_addr sin6_addr;unsigned int sin6_scope_id;};struct Cyc_Std_ipv6_mreq{
+! struct Cyc_Std_in6_addr ipv6mr_multiaddr;unsigned int ipv6mr_interface;};struct Cyc_Std_pollfd{
+! int fd;short events;short revents;};int Cyc_Std_poll(struct _tagged_arr,unsigned int,
+! int);int poll(struct Cyc_Std_pollfd*,unsigned int b,int c);static char _tmpF[22]="poll called with NULL";
 ! static struct Cyc_Core_Failure_struct Cyc_Std___poll_failure_1={Cyc_Core_Failure,{
 ! _tmpF,_tmpF,_tmpF + 22}};static char _tmp11[39]="poll called with out-of-bounds pointer";
 ! static struct Cyc_Core_Failure_struct Cyc_Std___poll_failure_2={Cyc_Core_Failure,{
@@ -465,27 +467,27 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
 ! void*)& Cyc_Std___poll_failure_2);_LL8:;_LL9:(void)_throw(_tmp16);_LL5:;}}}{int
 ! len=(int)_get_arr_size(a,sizeof(struct Cyc_Std_pollfd));return poll((struct Cyc_Std_pollfd*)
 ! _untag_arr(a,sizeof(struct Cyc_Std_pollfd),0),b < (unsigned int)len?b:(
-! unsigned int)len,c);}}typedef struct{unsigned int __val[32];}Cyc_Std___sigset_t;
-! typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;enum Cyc_Std___anonymous_enum_181__{
-! Cyc_Std_SIGEV_SIGNAL  = 0,Cyc_Std_SIGEV_NONE  = 1,Cyc_Std_SIGEV_THREAD  = 2};struct
-! Cyc_Std___SIG_BUILTIN_struct{int tag;void*f1;};struct Cyc_Std___SIG_HANDLER_struct{
-! int tag;void(*f1)(int);};void*Cyc_Std_signal(int,struct _tagged_arr);void*Cyc_Std_Csignal_make_SIG_DFL(){
-! return(void*)({struct Cyc_Std___SIG_BUILTIN_struct*_tmp17=_cycalloc(sizeof(*
-! _tmp17));_tmp17[0]=({struct Cyc_Std___SIG_BUILTIN_struct _tmp18;_tmp18.tag=0;
-! _tmp18.f1=(void*)((void*)0);_tmp18;});_tmp17;});}void*Cyc_Std_Csignal_make_SIG_ERR(){
-! return(void*)({struct Cyc_Std___SIG_BUILTIN_struct*_tmp19=_cycalloc(sizeof(*
-! _tmp19));_tmp19[0]=({struct Cyc_Std___SIG_BUILTIN_struct _tmp1A;_tmp1A.tag=0;
-! _tmp1A.f1=(void*)((void*)1);_tmp1A;});_tmp19;});}void*Cyc_Std_Csignal_make_SIG_IGN(){
-! return(void*)({struct Cyc_Std___SIG_BUILTIN_struct*_tmp1B=_cycalloc(sizeof(*
-! _tmp1B));_tmp1B[0]=({struct Cyc_Std___SIG_BUILTIN_struct _tmp1C;_tmp1C.tag=0;
-! _tmp1C.f1=(void*)((void*)1);_tmp1C;});_tmp1B;});}void*Cyc_Std_Csignal_make_SIG_HANDLER(
-! void(*f)(int)){return(void*)({struct Cyc_Std___SIG_HANDLER_struct*_tmp1D=
-! _cycalloc(sizeof(*_tmp1D));_tmp1D[0]=({struct Cyc_Std___SIG_HANDLER_struct _tmp1E;
-! _tmp1E.tag=1;_tmp1E.f1=f;_tmp1E;});_tmp1D;});}void*signal_SIG_DFL(int);void*
-  signal_SIG_ERR(int);void*signal_SIG_IGN(int);void*signal(int,void(*)(int));
-! static char _tmp20[49]="signal called with the wrong number of arguments";static
-! struct Cyc_Core_Failure_struct Cyc_Std___signal_failure={Cyc_Core_Failure,{_tmp20,
-! _tmp20,_tmp20 + 49}};void*Cyc_Std_signal(int a,struct _tagged_arr b){if(
+! unsigned int)len,c);}}typedef struct{unsigned int __val[1024 / (8 * sizeof(
+! unsigned int))];}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;
+! enum Cyc_Std___anonymous_enum_181__{Cyc_Std_SIGEV_SIGNAL  = 0,Cyc_Std_SIGEV_NONE
+!  = 1,Cyc_Std_SIGEV_THREAD  = 2};struct Cyc_Std___SIG_BUILTIN_struct{int tag;void*f1;
+  };struct Cyc_Std___SIG_HANDLER_struct{int tag;void(*f1)(int);};void*Cyc_Std_signal(
+  int,struct _tagged_arr);void*Cyc_Std_Csignal_make_SIG_DFL(){return(void*)({struct
+! Cyc_Std___SIG_BUILTIN_struct*_tmp17=_cycalloc(sizeof(*_tmp17));_tmp17[0]=({
+! struct Cyc_Std___SIG_BUILTIN_struct _tmp18;_tmp18.tag=0;_tmp18.f1=(void*)((void*)0);
+! _tmp18;});_tmp17;});}void*Cyc_Std_Csignal_make_SIG_ERR(){return(void*)({struct
+! Cyc_Std___SIG_BUILTIN_struct*_tmp19=_cycalloc(sizeof(*_tmp19));_tmp19[0]=({
+! struct Cyc_Std___SIG_BUILTIN_struct _tmp1A;_tmp1A.tag=0;_tmp1A.f1=(void*)((void*)1);
+! _tmp1A;});_tmp19;});}void*Cyc_Std_Csignal_make_SIG_IGN(){return(void*)({struct
+! Cyc_Std___SIG_BUILTIN_struct*_tmp1B=_cycalloc(sizeof(*_tmp1B));_tmp1B[0]=({
+! struct Cyc_Std___SIG_BUILTIN_struct _tmp1C;_tmp1C.tag=0;_tmp1C.f1=(void*)((void*)1);
+! _tmp1C;});_tmp1B;});}void*Cyc_Std_Csignal_make_SIG_HANDLER(void(*f)(int)){return(
+! void*)({struct Cyc_Std___SIG_HANDLER_struct*_tmp1D=_cycalloc(sizeof(*_tmp1D));
+! _tmp1D[0]=({struct Cyc_Std___SIG_HANDLER_struct _tmp1E;_tmp1E.tag=1;_tmp1E.f1=f;
+! _tmp1E;});_tmp1D;});}void*signal_SIG_DFL(int);void*signal_SIG_ERR(int);void*
+! signal_SIG_IGN(int);void*signal(int,void(*)(int));static char _tmp20[49]="signal called with the wrong number of arguments";
+! static struct Cyc_Core_Failure_struct Cyc_Std___signal_failure={Cyc_Core_Failure,{
+! _tmp20,_tmp20,_tmp20 + 49}};void*Cyc_Std_signal(int a,struct _tagged_arr b){if(
   _get_arr_size(b,sizeof(void*))!= 1)(int)_throw((void*)& Cyc_Std___signal_failure);{
 ! void*_tmp21=*((void**)_check_unknown_subscript(b,sizeof(void*),0));void*_tmp22;
 ! void*_tmp23;void*_tmp24;void(*_tmp25)(int);_LLB: if(*((int*)_tmp21)!= 0)goto _LLD;
@@ -546,8 +548,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
 ! unsigned int sin6_flowinfo;struct Cyc_Std_in6_addr sin6_addr;unsigned int
 ! sin6_scope_id;};struct Cyc_Std_ipv6_mreq{struct Cyc_Std_in6_addr ipv6mr_multiaddr;
 ! unsigned int ipv6mr_interface;};struct Cyc_Std___SIG_BUILTIN_struct{int tag;void*f1;
-! };struct Cyc_Std___SIG_HANDLER_struct{int tag;void(*f1)(int);};void*Cyc_Std_signal(
-! int,struct _tagged_arr);void*Cyc_Std_Csignal_make_SIG_DFL(){return(void*)({struct
+  };struct Cyc_Std___SIG_HANDLER_struct{int tag;void(*f1)(int);};void*Cyc_Std_signal(
+  int,struct _tagged_arr);void*Cyc_Std_Csignal_make_SIG_DFL(){return(void*)({struct
 ! Cyc_Std___SIG_BUILTIN_struct*_tmpE=_cycalloc(sizeof(*_tmpE));_tmpE[0]=({struct
 ! Cyc_Std___SIG_BUILTIN_struct _tmpF;_tmpF.tag=0;_tmpF.f1=(void*)((void*)0);_tmpF;});
 ! _tmpE;});}void*Cyc_Std_Csignal_make_SIG_ERR(){return(void*)({struct Cyc_Std___SIG_BUILTIN_struct*
@@ -559,7 +561,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
 ! void(*f)(int)){return(void*)({struct Cyc_Std___SIG_HANDLER_struct*_tmp14=
 ! _cycalloc(sizeof(*_tmp14));_tmp14[0]=({struct Cyc_Std___SIG_HANDLER_struct _tmp15;
 ! _tmp15.tag=1;_tmp15.f1=f;_tmp15;});_tmp14;});}void*signal_SIG_DFL(int);void*
-  signal_SIG_ERR(int);void*signal_SIG_IGN(int);void*signal(int,void(*)(int));
+! signal_SIG_ERR(int);void*signal_SIG_IGN(int);void*signal(int,void(*)(int));
 ! static char _tmp17[49]="signal called with the wrong number of arguments";static
 ! struct Cyc_Core_Failure_struct Cyc_Std___signal_failure={Cyc_Core_Failure,{_tmp17,
 ! _tmp17,_tmp17 + 49}};void*Cyc_Std_signal(int a,struct _tagged_arr b){if(
@@ -608,7 +610,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   int,struct Cyc_Std___cycFILE*);int Cyc_Std_getw(struct Cyc_Std___cycFILE*);int Cyc_Std_putw(
   int,struct Cyc_Std___cycFILE*);extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[
 ***************
-*** 478,587 ****
+*** 480,589 ****
   struct Cyc_Std___cycFILE*);struct Cyc_Std_Cstdio___abstractFILE;struct Cyc_Std___cycFILE{
   struct Cyc_Std_Cstdio___abstractFILE*file;};struct Cyc_Std___cycFILE*Cyc_Std_fromCfile(
   struct Cyc_Std_Cstdio___abstractFILE*cf){return(unsigned int)cf?({struct Cyc_Std___cycFILE*
@@ -827,7 +829,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   _get_arr_size(buf,sizeof(char))< size)(int)_throw((void*)& Cyc_Std___setvbuf_failure);
   return setvbuf(f->file,underlying_Cstring((struct _tagged_arr)buf),type,size);}int
 ***************
-*** 592,635 ****
+*** 594,637 ****
   f){return putw(x,f->file);}char Cyc_Std_FileCloseError[19]="\000\000\000\000FileCloseError";
   char Cyc_Std_FileOpenError[18]="\000\000\000\000FileOpenError";struct Cyc_Std___cycFILE*
   Cyc_Std_file_open(struct _tagged_arr fname,struct _tagged_arr mode){struct Cyc_Std___cycFILE*
@@ -916,7 +918,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   int found_zero=0;{int i=(int)(_get_arr_size(s,sizeof(char))- 1);for(0;i >= 0;i --){
   if(*((const char*)_check_unknown_subscript(s,sizeof(char),i))== '\000'){
 ***************
-*** 648,694 ****
+*** 650,696 ****
   == 0?0: c;unsigned int r=strtoul(c,(char**)& e,base);if(endptr != 0){int m=(int)((
   unsigned int)e - (unsigned int)c);*endptr=_tagged_arr_plus(n,sizeof(char),m);}
   return r;}}int system(char*);int Cyc_Std_system(struct _tagged_arr x){return system(
@@ -935,30 +937,30 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
 ! ru_nswap;int ru_inblock;int ru_oublock;int ru_msgsnd;int ru_msgrcv;int ru_nsignals;
 ! int ru_nvcsw;int ru_nivcsw;};enum Cyc_Std___priority_which{Cyc_Std_PRIO_PROCESS  = 
 ! 0,Cyc_Std_PRIO_PGRP  = 1,Cyc_Std_PRIO_USER  = 2};struct Cyc_Std_timespec{int tv_sec;
-! int tv_nsec;};typedef struct{int __fds_bits[32];}Cyc_Std_fd_set;int select(int,Cyc_Std_fd_set*,
-! Cyc_Std_fd_set*,Cyc_Std_fd_set*,struct Cyc_Std_timeval*);void Cyc_Std_FD_CLR(int,
-! Cyc_Std_fd_set*);int Cyc_Std_FD_ISSET(int,Cyc_Std_fd_set*);void Cyc_Std_FD_SET(int,
-! Cyc_Std_fd_set*);void Cyc_Std_FD_ZERO(Cyc_Std_fd_set*);void __stub_FD_CLR(int,Cyc_Std_fd_set*);
-! int __stub_FD_ISSET(int,Cyc_Std_fd_set*);void __stub_FD_SET(int,Cyc_Std_fd_set*);
-! void __stub_FD_ZERO(Cyc_Std_fd_set*);void Cyc_Std_FD_CLR(int a,Cyc_Std_fd_set*b){
-! return __stub_FD_CLR(a,b);}int Cyc_Std_FD_ISSET(int a,Cyc_Std_fd_set*b){return
-! __stub_FD_ISSET(a,b);}void Cyc_Std_FD_SET(int a,Cyc_Std_fd_set*b){return
-! __stub_FD_SET(a,b);}void Cyc_Std_FD_ZERO(Cyc_Std_fd_set*a){return __stub_FD_ZERO(a);}
-! enum Cyc_Std___socket_type{Cyc_Std_SOCK_STREAM  = 1,Cyc_Std_SOCK_DGRAM  = 2,Cyc_Std_SOCK_RAW
-!  = 3,Cyc_Std_SOCK_RDM  = 4,Cyc_Std_SOCK_SEQPACKET  = 5,Cyc_Std_SOCK_PACKET  = 10};
-! enum Cyc_Std___anonymous_enum_266__{Cyc_Std_MSG_OOB  = 1,Cyc_Std_MSG_PEEK  = 2,Cyc_Std_MSG_DONTROUTE
-!  = 4,Cyc_Std_MSG_CTRUNC  = 8,Cyc_Std_MSG_PROXY  = 16,Cyc_Std_MSG_TRUNC  = 32,Cyc_Std_MSG_DONTWAIT
-!  = 64,Cyc_Std_MSG_EOR  = 128,Cyc_Std_MSG_WAITALL  = 256,Cyc_Std_MSG_FIN  = 512,Cyc_Std_MSG_SYN
-!  = 1024,Cyc_Std_MSG_CONFIRM  = 2048,Cyc_Std_MSG_RST  = 4096,Cyc_Std_MSG_ERRQUEUE
-!  = 8192,Cyc_Std_MSG_NOSIGNAL  = 16384};struct Cyc_Std_cmsghdr{unsigned int cmsg_len;
-! int cmsg_level;int cmsg_type;unsigned char __cmsg_data[0];};enum Cyc_Std___anonymous_enum_267__{
-! Cyc_Std_SCM_RIGHTS  = 1,Cyc_Std_SCM_CREDENTIALS  = 2,Cyc_Std___SCM_CONNECT  = 3};
-! struct Cyc_Std_linger{int l_onoff;int l_linger;};enum Cyc_Std___anonymous_enum_268__{
-! Cyc_Std_SHUT_RD  = 0,Cyc_Std_SHUT_WR  = 1,Cyc_Std_SHUT_RDWR  = 2};struct Cyc_Std_SA_sockaddr_in_struct{
-! int tag;struct Cyc_Std_sockaddr_in*f1;};struct Cyc_Std_SA_socklenptr_struct{int tag;
-! unsigned int*f1;};struct Cyc_Std_SA_socklen_struct{int tag;unsigned int f1;};struct
-! Cyc_Std_SO_int_struct{int tag;int*f1;};struct Cyc_Std_SO_timeval_struct{int tag;
-! struct Cyc_Std_timeval*f1;};struct Cyc_Std_SO_socklenptr_struct{int tag;
+! int tv_nsec;};typedef struct{int __fds_bits[1024 / (8 * sizeof(int))];}Cyc_Std_fd_set;
+! int select(int,Cyc_Std_fd_set*,Cyc_Std_fd_set*,Cyc_Std_fd_set*,struct Cyc_Std_timeval*);
+! void Cyc_Std_FD_CLR(int,Cyc_Std_fd_set*);int Cyc_Std_FD_ISSET(int,Cyc_Std_fd_set*);
+! void Cyc_Std_FD_SET(int,Cyc_Std_fd_set*);void Cyc_Std_FD_ZERO(Cyc_Std_fd_set*);
+! void __stub_FD_CLR(int,Cyc_Std_fd_set*);int __stub_FD_ISSET(int,Cyc_Std_fd_set*);
+! void __stub_FD_SET(int,Cyc_Std_fd_set*);void __stub_FD_ZERO(Cyc_Std_fd_set*);void
+! Cyc_Std_FD_CLR(int a,Cyc_Std_fd_set*b){return __stub_FD_CLR(a,b);}int Cyc_Std_FD_ISSET(
+! int a,Cyc_Std_fd_set*b){return __stub_FD_ISSET(a,b);}void Cyc_Std_FD_SET(int a,Cyc_Std_fd_set*
+! b){return __stub_FD_SET(a,b);}void Cyc_Std_FD_ZERO(Cyc_Std_fd_set*a){return
+! __stub_FD_ZERO(a);}enum Cyc_Std___socket_type{Cyc_Std_SOCK_STREAM  = 1,Cyc_Std_SOCK_DGRAM
+!  = 2,Cyc_Std_SOCK_RAW  = 3,Cyc_Std_SOCK_RDM  = 4,Cyc_Std_SOCK_SEQPACKET  = 5,Cyc_Std_SOCK_PACKET
+!  = 10};enum Cyc_Std___anonymous_enum_266__{Cyc_Std_MSG_OOB  = 1,Cyc_Std_MSG_PEEK
+!  = 2,Cyc_Std_MSG_DONTROUTE  = 4,Cyc_Std_MSG_CTRUNC  = 8,Cyc_Std_MSG_PROXY  = 16,Cyc_Std_MSG_TRUNC
+!  = 32,Cyc_Std_MSG_DONTWAIT  = 64,Cyc_Std_MSG_EOR  = 128,Cyc_Std_MSG_WAITALL  = 256,
+! Cyc_Std_MSG_FIN  = 512,Cyc_Std_MSG_SYN  = 1024,Cyc_Std_MSG_CONFIRM  = 2048,Cyc_Std_MSG_RST
+!  = 4096,Cyc_Std_MSG_ERRQUEUE  = 8192,Cyc_Std_MSG_NOSIGNAL  = 16384};struct Cyc_Std_cmsghdr{
+! unsigned int cmsg_len;int cmsg_level;int cmsg_type;unsigned char __cmsg_data[0];};
+! enum Cyc_Std___anonymous_enum_267__{Cyc_Std_SCM_RIGHTS  = 1,Cyc_Std_SCM_CREDENTIALS
+!  = 2,Cyc_Std___SCM_CONNECT  = 3};struct Cyc_Std_linger{int l_onoff;int l_linger;};
+! enum Cyc_Std___anonymous_enum_268__{Cyc_Std_SHUT_RD  = 0,Cyc_Std_SHUT_WR  = 1,Cyc_Std_SHUT_RDWR
+!  = 2};struct Cyc_Std_SA_sockaddr_in_struct{int tag;struct Cyc_Std_sockaddr_in*f1;};
+! struct Cyc_Std_SA_socklenptr_struct{int tag;unsigned int*f1;};struct Cyc_Std_SA_socklen_struct{
+! int tag;unsigned int f1;};struct Cyc_Std_SO_int_struct{int tag;int*f1;};struct Cyc_Std_SO_timeval_struct{
+! int tag;struct Cyc_Std_timeval*f1;};struct Cyc_Std_SO_socklenptr_struct{int tag;
 ! unsigned int*f1;};struct Cyc_Std_SO_socklen_struct{int tag;unsigned int f1;};int Cyc_Std_accept(
 ! int fd,struct _tagged_arr);int Cyc_Std_bind(int fd,struct _tagged_arr);int Cyc_Std_connect(
   int fd,struct _tagged_arr);int Cyc_Std_getpeername(int fd,struct _tagged_arr);int Cyc_Std_getsockname(
@@ -979,17 +981,17 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
 ! ru_stime;int ru_maxrss;int ru_ixrss;int ru_idrss;int ru_isrss;int ru_minflt;int
 ! ru_majflt;int ru_nswap;int ru_inblock;int ru_oublock;int ru_msgsnd;int ru_msgrcv;int
 ! ru_nsignals;int ru_nvcsw;int ru_nivcsw;};struct Cyc_Std_rlimit{long long rlim_cur;
-! long long rlim_max;};struct Cyc_Std_fd_set{int fds_bits[32];};struct Cyc_Std_timespec{
-! int tv_sec;int tv_nsec;};void Cyc_Std_FD_CLR(int,struct Cyc_Std_fd_set*);int Cyc_Std_FD_ISSET(
-! int,struct Cyc_Std_fd_set*);void Cyc_Std_FD_SET(int,struct Cyc_Std_fd_set*);void Cyc_Std_FD_ZERO(
-! struct Cyc_Std_fd_set*);void __stub_FD_CLR(int,struct Cyc_Std_fd_set*);int
-! __stub_FD_ISSET(int,struct Cyc_Std_fd_set*);void __stub_FD_SET(int,struct Cyc_Std_fd_set*);
-! void __stub_FD_ZERO(struct Cyc_Std_fd_set*);void Cyc_Std_FD_CLR(int a,struct Cyc_Std_fd_set*
-! b){return __stub_FD_CLR(a,b);}int Cyc_Std_FD_ISSET(int a,struct Cyc_Std_fd_set*b){
-! return __stub_FD_ISSET(a,b);}void Cyc_Std_FD_SET(int a,struct Cyc_Std_fd_set*b){
-! return __stub_FD_SET(a,b);}void Cyc_Std_FD_ZERO(struct Cyc_Std_fd_set*a){return
-! __stub_FD_ZERO(a);}struct Cyc_Std_cmsghdr;struct Cyc_Std_linger{int l_onoff;int
-! l_linger;};struct Cyc_Std_SA_sockaddr_in_struct{int tag;struct Cyc_Std_sockaddr_in*
+! long long rlim_max;};struct Cyc_Std_fd_set{int fds_bits[(1024 + (sizeof(int)* 8 - 1))
+! / (sizeof(int)* 8)];};struct Cyc_Std_timespec{int tv_sec;int tv_nsec;};void Cyc_Std_FD_CLR(
+! int,struct Cyc_Std_fd_set*);int Cyc_Std_FD_ISSET(int,struct Cyc_Std_fd_set*);void
+! Cyc_Std_FD_SET(int,struct Cyc_Std_fd_set*);void Cyc_Std_FD_ZERO(struct Cyc_Std_fd_set*);
+! void __stub_FD_CLR(int,struct Cyc_Std_fd_set*);int __stub_FD_ISSET(int,struct Cyc_Std_fd_set*);
+! void __stub_FD_SET(int,struct Cyc_Std_fd_set*);void __stub_FD_ZERO(struct Cyc_Std_fd_set*);
+! void Cyc_Std_FD_CLR(int a,struct Cyc_Std_fd_set*b){return __stub_FD_CLR(a,b);}int Cyc_Std_FD_ISSET(
+! int a,struct Cyc_Std_fd_set*b){return __stub_FD_ISSET(a,b);}void Cyc_Std_FD_SET(int a,
+! struct Cyc_Std_fd_set*b){return __stub_FD_SET(a,b);}void Cyc_Std_FD_ZERO(struct Cyc_Std_fd_set*
+! a){return __stub_FD_ZERO(a);}struct Cyc_Std_cmsghdr;struct Cyc_Std_linger{int
+! l_onoff;int l_linger;};struct Cyc_Std_SA_sockaddr_in_struct{int tag;struct Cyc_Std_sockaddr_in*
 ! f1;};struct Cyc_Std_SA_socklenptr_struct{int tag;int*f1;};struct Cyc_Std_SA_socklen_struct{
 ! int tag;int f1;};struct Cyc_Std_SO_int_struct{int tag;int*f1;};struct Cyc_Std_SO_timeval_struct{
 ! int tag;struct Cyc_Std_timeval*f1;};struct Cyc_Std_SO_socklenptr_struct{int tag;int*
@@ -999,7 +1001,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   int fd,struct _tagged_arr);int Cyc_Std_getsockopt(int fd,int level,int optname,struct
   _tagged_arr);int Cyc_Std_recv(int fd,struct _tagged_arr buf,unsigned int n,int flags);
 ***************
-*** 697,892 ****
+*** 699,894 ****
   int Cyc_Std_sendto(int fd,struct _tagged_arr buf,unsigned int n,int flags,struct
   _tagged_arr);int Cyc_Std_setsockopt(int fd,int level,int optname,struct _tagged_arr);
   char Cyc_Std_SocketError[16]="\000\000\000\000SocketError";int accept_in(int,const
@@ -1375,7 +1377,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   owner,unsigned int group){return chown(string_to_Cstring(path),owner,group);}int
   chroot(char*);int Cyc_Std_chroot(struct _tagged_arr pathname){return chroot(
 ***************
-*** 894,944 ****
+*** 896,946 ****
   struct _tagged_arr path,struct _tagged_arr arg0,struct _tagged_arr argv){if((*((struct
   _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),(int)(
   _get_arr_size(argv,sizeof(struct _tagged_arr))- 1)))).curr != ((struct _tagged_arr)
@@ -1480,7 +1482,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   Cyc_Std___gethostname_failure);return gethostname(underlying_Cstring((struct
   _tagged_arr)buf),count);}char*getpass(char*);struct _tagged_arr Cyc_Std_getpass(
 ***************
-*** 946,970 ****
+*** 948,972 ****
   prompt)),- 1);}int link(char*path1,char*path2);int Cyc_Std_link(struct _tagged_arr
   path1,struct _tagged_arr path2){return link(string_to_Cstring(path1),
   string_to_Cstring(path2));}int read(int fd,char*buf,unsigned int count);static char
@@ -1533,8 +1535,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   b){if(!((unsigned int)a.curr))(int)_throw((void*)& Cyc_Std___utime_failure);
   return Cyc_Std_utime(_tag_arr(string_to_Cstring(a),sizeof(char),0),b);}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/dict.c powerpc-apple-rhapsody/lib/dict.c
-*** i686-unknown-linux/lib/dict.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/lib/dict.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/dict.c	Tue Feb 12 01:23:08 2002
+--- powerpc-apple-rhapsody/lib/dict.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 258,272 ****
   struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_List_List{void*hd;struct Cyc_List_List*
@@ -1566,10 +1568,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/dict.c powerpc-apple-rhapsody/l
   Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
   int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapsody/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Tue Feb 12 20:20:02 2002
---- powerpc-apple-rhapsody/lib/execinfo.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/execinfo.c	Thu Feb 14 11:57:03 2002
+--- powerpc-apple-rhapsody/lib/execinfo.c	Thu Feb 14 12:18:49 2002
 ***************
-*** 255,328 ****
+*** 255,329 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
   16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};int Cyc_Execinfo_backtrace(
@@ -1595,31 +1597,32 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! struct Cyc_Std_timeval ru_utime;struct Cyc_Std_timeval ru_stime;int ru_maxrss;int
 ! ru_ixrss;int ru_idrss;int ru_isrss;int ru_minflt;int ru_majflt;int ru_nswap;int
 ! ru_inblock;int ru_oublock;int ru_msgsnd;int ru_msgrcv;int ru_nsignals;int ru_nvcsw;
-! int ru_nivcsw;};int waitpid(int,int*,int);typedef struct{unsigned int __val[32];}Cyc_Std___sigset_t;
-! typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;enum Cyc_Std___anonymous_enum_181__{
-! Cyc_Std_SIGEV_SIGNAL  = 0,Cyc_Std_SIGEV_NONE  = 1,Cyc_Std_SIGEV_THREAD  = 2};int
-! kill(int,int);struct Cyc_Std___SIG_BUILTIN_struct{int tag;void*f1;};struct Cyc_Std___SIG_HANDLER_struct{
-! int tag;void(*f1)(int);};enum Cyc_Std___anonymous_enum_362__{Cyc_Std__PC_LINK_MAX
-!  = 0,Cyc_Std__PC_MAX_CANON  = 1,Cyc_Std__PC_MAX_INPUT  = 2,Cyc_Std__PC_NAME_MAX  = 
-! 3,Cyc_Std__PC_PATH_MAX  = 4,Cyc_Std__PC_PIPE_BUF  = 5,Cyc_Std__PC_CHOWN_RESTRICTED
-!  = 6,Cyc_Std__PC_NO_TRUNC  = 7,Cyc_Std__PC_VDISABLE  = 8,Cyc_Std__PC_SYNC_IO  = 9,
-! Cyc_Std__PC_ASYNC_IO  = 10,Cyc_Std__PC_PRIO_IO  = 11,Cyc_Std__PC_SOCK_MAXBUF  = 12,
-! Cyc_Std__PC_FILESIZEBITS  = 13,Cyc_Std__PC_REC_INCR_XFER_SIZE  = 14,Cyc_Std__PC_REC_MAX_XFER_SIZE
-!  = 15,Cyc_Std__PC_REC_MIN_XFER_SIZE  = 16,Cyc_Std__PC_REC_XFER_ALIGN  = 17};enum 
-! Cyc_Std___anonymous_enum_364__{Cyc_Std__CS_PATH  = 0};int Cyc_Std_chroot(struct
-! _tagged_arr);int close(int);int dup2(int,int);int Cyc_Std_execlp(struct _tagged_arr,
-! struct _tagged_arr,struct _tagged_arr);int fork();struct _tagged_arr Cyc_Std_getpass(
-! struct _tagged_arr);int getpid();int pipe(int*);int backtrace(int*,int);int Cyc_Execinfo_backtrace(
-! struct _tagged_arr array,int size){if(size > _get_arr_size(array,sizeof(int)))(int)
-! _throw((void*)({struct Cyc_Core_Failure_struct*_tmp0=_cycalloc(sizeof(*_tmp0));
-! _tmp0[0]=({struct Cyc_Core_Failure_struct _tmp1;_tmp1.tag=Cyc_Core_Failure;_tmp1.f1=
-! _tag_arr("backtrace: size > array.size",sizeof(char),29);_tmp1;});_tmp0;}));
-! return backtrace((int*)_check_null(_untag_arr(array,sizeof(int),1)),size);}int Cyc_Execinfo_bt(){
-! int bt[20];{unsigned int _tmpA=20;unsigned int i;for(i=0;i < _tmpA;i ++){bt[i]=0;}}{
-! int tochild[2]={0,0};int fromchild[2]={0,0};int pid;int self_pid;if(pipe(tochild)?1:
-! pipe(fromchild))return 1;self_pid=getpid();if((pid=fork())== 0){if(dup2(tochild[0],
-! 0)== - 1?1: dup2(fromchild[1],1)== - 1)return 1;({struct _tagged_arr _tmp2[4];_tmp2[3]=(
-! struct _tagged_arr)_tag_arr(0,0,0);_tmp2[2]=(struct _tagged_arr)({struct Cyc_Std_Int_pa_struct
+! int ru_nivcsw;};int waitpid(int,int*,int);typedef struct{unsigned int __val[1024 / (8
+! * sizeof(unsigned int))];}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;
+! enum Cyc_Std___anonymous_enum_181__{Cyc_Std_SIGEV_SIGNAL  = 0,Cyc_Std_SIGEV_NONE
+!  = 1,Cyc_Std_SIGEV_THREAD  = 2};int kill(int,int);struct Cyc_Std___SIG_BUILTIN_struct{
+! int tag;void*f1;};struct Cyc_Std___SIG_HANDLER_struct{int tag;void(*f1)(int);};
+! enum Cyc_Std___anonymous_enum_362__{Cyc_Std__PC_LINK_MAX  = 0,Cyc_Std__PC_MAX_CANON
+!  = 1,Cyc_Std__PC_MAX_INPUT  = 2,Cyc_Std__PC_NAME_MAX  = 3,Cyc_Std__PC_PATH_MAX  = 4,
+! Cyc_Std__PC_PIPE_BUF  = 5,Cyc_Std__PC_CHOWN_RESTRICTED  = 6,Cyc_Std__PC_NO_TRUNC
+!  = 7,Cyc_Std__PC_VDISABLE  = 8,Cyc_Std__PC_SYNC_IO  = 9,Cyc_Std__PC_ASYNC_IO  = 10,
+! Cyc_Std__PC_PRIO_IO  = 11,Cyc_Std__PC_SOCK_MAXBUF  = 12,Cyc_Std__PC_FILESIZEBITS
+!  = 13,Cyc_Std__PC_REC_INCR_XFER_SIZE  = 14,Cyc_Std__PC_REC_MAX_XFER_SIZE  = 15,Cyc_Std__PC_REC_MIN_XFER_SIZE
+!  = 16,Cyc_Std__PC_REC_XFER_ALIGN  = 17};enum Cyc_Std___anonymous_enum_364__{Cyc_Std__CS_PATH
+!  = 0};int Cyc_Std_chroot(struct _tagged_arr);int close(int);int dup2(int,int);int Cyc_Std_execlp(
+! struct _tagged_arr,struct _tagged_arr,struct _tagged_arr);int fork();struct
+! _tagged_arr Cyc_Std_getpass(struct _tagged_arr);int getpid();int pipe(int*);int
+! backtrace(int*,int);int Cyc_Execinfo_backtrace(struct _tagged_arr array,int size){
+! if(size > _get_arr_size(array,sizeof(int)))(int)_throw((void*)({struct Cyc_Core_Failure_struct*
+! _tmp0=_cycalloc(sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Failure_struct _tmp1;
+! _tmp1.tag=Cyc_Core_Failure;_tmp1.f1=_tag_arr("backtrace: size > array.size",
+! sizeof(char),29);_tmp1;});_tmp0;}));return backtrace((int*)_check_null(_untag_arr(
+! array,sizeof(int),1)),size);}int Cyc_Execinfo_bt(){int bt[20];{unsigned int _tmpA=
+! 20;unsigned int i;for(i=0;i < _tmpA;i ++){bt[i]=0;}}{int tochild[2]={0,0};int
+! fromchild[2]={0,0};int pid;int self_pid;if(pipe(tochild)?1: pipe(fromchild))return 1;
+! self_pid=getpid();if((pid=fork())== 0){if(dup2(tochild[0],0)== - 1?1: dup2(
+! fromchild[1],1)== - 1)return 1;({struct _tagged_arr _tmp2[4];_tmp2[3]=(struct
+! _tagged_arr)_tag_arr(0,0,0);_tmp2[2]=(struct _tagged_arr)({struct Cyc_Std_Int_pa_struct
 ! _tmp4;_tmp4.tag=1;_tmp4.f1=(int)((unsigned int)self_pid);{void*_tmp3[1]={& _tmp4};
 ! Cyc_Std_aprintf(_tag_arr("/proc/%d/exe",sizeof(char),13),_tag_arr(_tmp3,sizeof(
 ! void*),1));}});_tmp2[1]=_tag_arr("-e",sizeof(char),3);_tmp2[0]=_tag_arr("--functions",
@@ -1665,8 +1668,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! Cyc_Core_Failure_struct _tmp1;_tmp1.tag=Cyc_Core_Failure;_tmp1.f1=_tag_arr("backtrace: unsupported except under Linux",
 ! sizeof(char),42);_tmp1;});_tmp0;}));return 0;}int Cyc_Execinfo_bt(){return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody/lib/getopt.c
-*** i686-unknown-linux/lib/getopt.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/lib/getopt.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/getopt.c	Tue Feb 12 01:23:08 2002
+--- powerpc-apple-rhapsody/lib/getopt.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 254,267 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
@@ -1721,8 +1724,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody
   char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];unsigned int Cyc_Std_strlen(
   struct _tagged_arr s);int Cyc_Std_strcmp(struct _tagged_arr s1,struct _tagged_arr s2);
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/hashtable.c powerpc-apple-rhapsody/lib/hashtable.c
-*** i686-unknown-linux/lib/hashtable.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/lib/hashtable.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/hashtable.c	Tue Feb 12 01:23:08 2002
+--- powerpc-apple-rhapsody/lib/hashtable.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 266,285 ****
   struct _tagged_arr*p);void Cyc_Hashtable_iter(void(*f)(void*,void*),struct Cyc_Hashtable_Table*
@@ -1764,8 +1767,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/hashtable.c powerpc-apple-rhaps
   int max_len;struct _tagged_arr tab;};struct Cyc_Hashtable_Table*Cyc_Hashtable_create(
   int sz,int(*cmp)(void*,void*),int(*hash)(void*)){struct Cyc_List_List*mt=0;return({
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lexing.c powerpc-apple-rhapsody/lib/lexing.c
-*** i686-unknown-linux/lib/lexing.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/lib/lexing.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/lexing.c	Tue Feb 12 01:23:08 2002
+--- powerpc-apple-rhapsody/lib/lexing.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 255,269 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
@@ -1797,8 +1800,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lexing.c powerpc-apple-rhapsody
   Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
   int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};extern char
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lineno.c powerpc-apple-rhapsody/lib/lineno.c
-*** i686-unknown-linux/lib/lineno.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/lib/lineno.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/lineno.c	Tue Feb 12 01:23:08 2002
+--- powerpc-apple-rhapsody/lib/lineno.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 255,269 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
@@ -1830,8 +1833,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lineno.c powerpc-apple-rhapsody
   Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
   int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};int Cyc_Std_sscanf(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c powerpc-apple-rhapsody/lib/marshal.c
-*** i686-unknown-linux/lib/marshal.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/lib/marshal.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/marshal.c	Tue Feb 12 01:23:08 2002
+--- powerpc-apple-rhapsody/lib/marshal.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 279,293 ****
   struct _tagged_arr Cyc_Typerep_get_tagname(unsigned int tag,struct _tagged_arr l);
@@ -1863,8 +1866,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c powerpc-apple-rhapsod
   int,struct Cyc_Std___cycFILE*);unsigned int Cyc_Std_fread(struct _tagged_arr,
   unsigned int,unsigned int,struct Cyc_Std___cycFILE*);struct Cyc_Std_ShortPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/mman.c powerpc-apple-rhapsody/lib/mman.c
-*** i686-unknown-linux/lib/mman.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/lib/mman.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/mman.c	Tue Feb 12 01:23:08 2002
+--- powerpc-apple-rhapsody/lib/mman.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 257,264 ****
   16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};char*
@@ -1885,8 +1888,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/mman.c powerpc-apple-rhapsody/l
   struct _tagged_arr start,unsigned int length){return munmap(underlying_Cstring((
   struct _tagged_arr)start),length);}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/position.c powerpc-apple-rhapsody/lib/position.c
-*** i686-unknown-linux/lib/position.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/lib/position.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/position.c	Tue Feb 12 01:23:08 2002
+--- powerpc-apple-rhapsody/lib/position.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 257,272 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
@@ -1920,8 +1923,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/position.c powerpc-apple-rhapso
   int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};
   struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/pp.c powerpc-apple-rhapsody/lib/pp.c
-*** i686-unknown-linux/lib/pp.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/lib/pp.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/pp.c	Tue Feb 12 01:23:08 2002
+--- powerpc-apple-rhapsody/lib/pp.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 256,269 ****
   char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
@@ -1951,8 +1954,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/pp.c powerpc-apple-rhapsody/lib
   };struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
   int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/printf.c powerpc-apple-rhapsody/lib/printf.c
-*** i686-unknown-linux/lib/printf.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/lib/printf.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/printf.c	Tue Feb 12 01:23:08 2002
+--- powerpc-apple-rhapsody/lib/printf.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 255,284 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -2014,8 +2017,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/printf.c powerpc-apple-rhapsody
   tag;struct _tagged_arr f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
   extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];unsigned int Cyc_Std_strlen(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/scanf.c powerpc-apple-rhapsody/lib/scanf.c
-*** i686-unknown-linux/lib/scanf.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/lib/scanf.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/scanf.c	Tue Feb 12 01:23:08 2002
+--- powerpc-apple-rhapsody/lib/scanf.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 258,301 ****
   int);int isupper(int);typedef struct{int quot;int rem;}Cyc_Std_div_t;typedef struct{
@@ -2107,8 +2110,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/scanf.c powerpc-apple-rhapsody/
   void*a){void*_tmpE=a;double*_tmpF;_LL14: if(*((int*)_tmpE)!= 5)goto _LL16;_tmpF=((
   struct Cyc_Std_DoublePtr_sa_struct*)_tmpE)->f1;_LL15: return _tmpF;_LL16:;_LL17:(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/tmp.c powerpc-apple-rhapsody/lib/tmp.c
-*** i686-unknown-linux/lib/tmp.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/lib/tmp.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/tmp.c	Tue Feb 12 01:23:08 2002
+--- powerpc-apple-rhapsody/lib/tmp.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 255,279 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -2161,8 +2164,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/tmp.c powerpc-apple-rhapsody/li
   _tagged_arr s){struct _tagged_arr name=wrap_Cstring_as_string(tmpnam(0),- 1);return(
   unsigned int)s.curr?Cyc_Std_strcpy(s,(struct _tagged_arr)name): name;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/typerep.c powerpc-apple-rhapsody/lib/typerep.c
-*** i686-unknown-linux/lib/typerep.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/lib/typerep.c	Thu Feb 14 11:46:52 2002
+*** i686-unknown-linux/lib/typerep.c	Tue Feb 12 01:23:08 2002
+--- powerpc-apple-rhapsody/lib/typerep.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 273,287 ****
   struct _tagged_arr Cyc_Typerep_get_tagname(unsigned int tag,struct _tagged_arr l);
@@ -2194,8 +2197,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/typerep.c powerpc-apple-rhapsod
   Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
   int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};int Cyc_Std_printf(
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyn.c powerpc-apple-rhapsody/src/absyn.c
-*** i686-unknown-linux/src/absyn.c	Tue Feb 12 10:08:24 2002
---- powerpc-apple-rhapsody/src/absyn.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/absyn.c	Tue Feb 12 01:23:07 2002
+--- powerpc-apple-rhapsody/src/absyn.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 609,623 ****
   _tagged_arr*f1;int f2;struct _tagged_arr f3;};struct Cyc_Typerep_Enum_struct{int tag;
@@ -2227,8 +2230,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyn.c powerpc-apple-rhapsody/
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
   int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyndump.c powerpc-apple-rhapsody/src/absyndump.c
-*** i686-unknown-linux/src/absyndump.c	Wed Feb 13 15:03:24 2002
---- powerpc-apple-rhapsody/src/absyndump.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/absyndump.c	Thu Feb 14 11:38:12 2002
+--- powerpc-apple-rhapsody/src/absyndump.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 254,268 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
@@ -2261,8 +2264,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyndump.c powerpc-apple-rhaps
   int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};
   struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/absynpp.c powerpc-apple-rhapsody/src/absynpp.c
-*** i686-unknown-linux/src/absynpp.c	Wed Feb 13 15:03:24 2002
---- powerpc-apple-rhapsody/src/absynpp.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/absynpp.c	Thu Feb 14 11:38:12 2002
+--- powerpc-apple-rhapsody/src/absynpp.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 255,269 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
@@ -2294,8 +2297,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/absynpp.c powerpc-apple-rhapsod
   int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapsody/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Thu Feb 14 11:45:52 2002
---- powerpc-apple-rhapsody/src/buildlib.c	Thu Feb 14 11:46:56 2002
+*** i686-unknown-linux/src/buildlib.c	Thu Feb 14 12:14:22 2002
+--- powerpc-apple-rhapsody/src/buildlib.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 257,270 ****
   struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
@@ -2326,7 +2329,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   _tagged_arr,struct _tagged_arr);int Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,
   struct _tagged_arr,struct _tagged_arr);int Cyc_Std_fputc(int,struct Cyc_Std___cycFILE*);
 ***************
-*** 583,894 ****
+*** 582,616 ****
   Cyc_YYINITIALSVAL[18];struct Cyc_Yyltype{int timestamp;int first_line;int
   first_column;int last_line;int last_column;};typedef struct{int quot;int rem;}Cyc_Std_div_t;
   typedef struct{int quot;int rem;}Cyc_Std_ldiv_t;int Cyc_Std_system(struct _tagged_arr);
@@ -2356,290 +2359,13 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
 ! sizeof(char),34),_tag_arr(_tmp0,sizeof(void*),0));});exit(1);}{int _tmp1=Cyc_Std_vfprintf((
 ! struct Cyc_Std___cycFILE*)_check_null(Cyc_log_file),fmt,ap);Cyc_Std_fflush((
 ! struct Cyc_Std___cycFILE*)((struct Cyc_Std___cycFILE*)_check_null(Cyc_log_file)));
-! return _tmp1;}}int Cyc_sizeof_unsignedlongint=4;int Cyc_sizeof_unsignedshortint=2;
-! int Cyc_sizeof_shortint=2;int Cyc_sizeof_int=4;int Cyc_sizeof_short=2;int Cyc_sizeof_fdmask=
-! 4;int Cyc_sizeof___fdmask=4;int Cyc_sizeof_uint32=4;int Cyc_sizeof_sockaddr=16;int
-! Cyc_sizeof_inport=2;int Cyc_sizeof_inaddr=4;static struct _tagged_arr*Cyc_current_source=
-! 0;static struct Cyc_List_List*Cyc_current_args=0;static struct Cyc_Set_Set**Cyc_current_targets=
-! 0;static void Cyc_add_target(struct _tagged_arr*sptr){Cyc_current_targets=({struct
-! Cyc_Set_Set**_tmp2=_cycalloc(sizeof(*_tmp2));_tmp2[0]=((struct Cyc_Set_Set*(*)(
-! struct Cyc_Set_Set*s,struct _tagged_arr*elt))Cyc_Set_insert)(*((struct Cyc_Set_Set**)
-! _check_null(Cyc_current_targets)),sptr);_tmp2;});}struct _tuple9{struct
-! _tagged_arr*f1;struct Cyc_Set_Set*f2;};struct _tuple9*Cyc_line(struct Cyc_Lexing_lexbuf*);
-! int Cyc_macroname(struct Cyc_Lexing_lexbuf*);int Cyc_args(struct Cyc_Lexing_lexbuf*);
-! int Cyc_token(struct Cyc_Lexing_lexbuf*);int Cyc_string(struct Cyc_Lexing_lexbuf*);
-! struct Cyc_Std___cycFILE*Cyc_slurp_out=0;int Cyc_slurp(struct Cyc_Lexing_lexbuf*);
-! int Cyc_slurp_string(struct Cyc_Lexing_lexbuf*);int Cyc_asm(struct Cyc_Lexing_lexbuf*);
-! int Cyc_asm_string(struct Cyc_Lexing_lexbuf*);int Cyc_asm_comment(struct Cyc_Lexing_lexbuf*);
-! struct _tuple10{struct _tagged_arr f1;struct _tagged_arr*f2;};struct _tuple10*Cyc_suck_line(
-! struct Cyc_Lexing_lexbuf*);int Cyc_suck_macroname(struct Cyc_Lexing_lexbuf*);int Cyc_suck_restofline(
-! struct Cyc_Lexing_lexbuf*);struct _tagged_arr Cyc_current_line=(struct _tagged_arr){(
-! void*)0,(void*)0,(void*)(0 + 0)};struct _tuple11{struct _tagged_arr f1;struct
-! _tagged_arr f2;};struct _tuple12{struct _tagged_arr f1;struct Cyc_List_List*f2;struct
-! Cyc_List_List*f3;struct Cyc_List_List*f4;struct Cyc_List_List*f5;struct Cyc_List_List*
-! f6;struct Cyc_List_List*f7;};struct _tuple12*Cyc_spec(struct Cyc_Lexing_lexbuf*);
-! int Cyc_commands(struct Cyc_Lexing_lexbuf*);int Cyc_snarfsymbols(struct Cyc_Lexing_lexbuf*);
-! int Cyc_block(struct Cyc_Lexing_lexbuf*);int Cyc_block_string(struct Cyc_Lexing_lexbuf*);
-! int Cyc_block_comment(struct Cyc_Lexing_lexbuf*);struct _tagged_arr Cyc_current_header=(
-! struct _tagged_arr){(void*)0,(void*)0,(void*)(0 + 0)};struct Cyc_List_List*Cyc_snarfed_symbols=
-! 0;struct Cyc_List_List*Cyc_current_symbols=0;struct Cyc_List_List*Cyc_current_cstubs=
-! 0;struct Cyc_List_List*Cyc_current_cycstubs=0;struct Cyc_List_List*Cyc_current_prologue=
-! 0;struct Cyc_List_List*Cyc_current_epilogue=0;struct Cyc_List_List*Cyc_current_omit_symbols=
-! 0;struct Cyc_List_List*Cyc_current_cpp=0;struct Cyc_Buffer_t*Cyc_specbuf=0;int Cyc_braces_to_match=
-! 0;int Cyc_parens_to_match=0;int Cyc_numdef=0;const int Cyc_lex_base[517]=(const int[
-! 517]){0,0,75,192,305,310,311,166,312,91,27,384,28,523,637,715,283,325,92,- 3,0,- 1,
-! - 2,- 8,- 3,1,- 2,323,- 4,2,166,- 5,605,797,312,- 6,- 7,- 4,16,- 3,29,11,835,- 3,910,13,- 16,
-! 223,12,- 2,216,23,26,28,24,28,58,56,65,52,70,370,1024,1139,386,93,83,90,112,96,
-! 106,115,124,115,126,113,375,414,152,180,209,227,228,377,525,227,226,229,238,226,
-! 248,498,1253,1368,654,- 8,238,235,254,239,239,239,259,508,1482,1597,- 11,684,- 12,
-! 241,270,510,1711,1826,- 9,720,- 10,746,- 13,432,515,550,1903,1980,2057,2138,434,465,
-! 667,2213,269,269,279,277,279,290,0,13,4,2294,5,660,2302,2367,822,49,467,6,2328,7,
-! 990,2390,2428,998,- 32,1051,1056,297,288,272,297,289,299,722,1169,315,311,302,310,
-! 303,300,311,316,311,327,329,669,1167,319,327,365,396,396,709,1279,403,398,1259,
-! 405,413,829,1284,412,410,1370,416,415,414,442,427,846,1394,434,434,447,441,452,
-! 450,451,438,1484,458,457,456,458,448,1599,450,449,1713,2490,473,468,1828,571,473,
-! 2352,475,473,498,520,500,2492,522,510,552,536,545,2500,566,565,576,575,573,10,14,
-! 596,576,2502,600,589,603,602,613,2507,1182,611,617,626,619,630,642,629,629,632,
-! 645,652,637,- 30,649,653,650,660,678,679,- 25,659,675,696,693,704,700,731,749,762,
-! - 19,748,745,752,784,785,- 27,776,774,810,822,818,834,813,871,874,862,867,858,858,
-! - 29,892,886,889,899,908,918,920,953,960,962,1,4,6,963,964,953,952,967,967,975,
-! 976,2,52,987,989,2292,20,21,1012,1013,976,1001,1016,1022,1023,1079,1110,1112,- 24,
-! 1059,1061,1116,1117,1118,- 21,1066,1067,1122,1123,1125,- 22,1072,1073,1128,1131,
-! 1132,- 20,1079,1080,1140,1142,1143,- 23,1090,1091,1604,- 31,1399,1100,1101,1099,
-! 1099,1098,1119,1121,- 18,1124,1125,1124,1166,1718,- 14,1159,1162,1162,1177,1833,
-! 2441,1180,1181,1182,1187,1187,1200,2536,- 15,1204,1205,1203,1216,2542,- 17,- 7,- 8,8,
-! 1381,2508,9,1452,2564,2587,1469,1609,- 49,1623,- 2,1256,- 4,1283,1344,2110,1284,
-! 1345,1451,1684,1285,2621,2664,1289,1325,1288,1331,2734,1334,1335,- 36,- 42,- 37,
-! 2809,- 28,1336,- 40,1337,- 45,- 39,- 48,2884,2913,2535,1343,1353,1799,2923,2953,2702,
-! 2894,2986,3017,3055,1345,1356,3125,3163,1425,1435,1456,1468,1461,1548,- 6,- 34,
-! 1353,3095,- 47,- 46,- 33,1362,3203,1371,1375,2725,1388,1476,1487,1488,1489,1490,
-! 1501,1506,1535,3276,3360,3233,1536,- 41,- 38,- 35,- 26,1737,3442,4,3525,1570,15,1515,
-! 1515,1518,1516,1513,1524,1594};const int Cyc_lex_backtrk[517]=(const int[517]){- 1,-
-! 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,2,- 1,- 1,- 1,- 1,2,- 1,8,- 1,3,
-! 5,- 1,- 1,6,5,- 1,- 1,- 1,6,- 1,5,1,0,- 1,0,1,- 1,14,15,- 1,15,15,15,15,15,- 1,- 1,- 1,- 1,- 1,
-! - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- - 1,- 1,- 1,- 1,- 1,13,14,2,4,4,- 1,0,0,0,2,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,2,2,8,3,5,- 1,6,5,6,
-- 5,2,8,3,5,- 1,6,5,- 1,31,31,31,31,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,25,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- - 1,- 1,- 1,- 1,- 1,- 1,27,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-! - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,6,1,9,2,4,- 1,5,4,- 1,- 1,
-! 2,- 1,48,- 1,48,48,48,48,48,48,48,48,5,7,48,48,48,48,0,48,48,- 1,- 1,- 1,0,- 1,43,- 1,
-! 42,- 1,- 1,- 1,9,7,- 1,7,7,- 1,8,9,- 1,- 1,9,5,6,5,5,- 1,4,4,4,6,6,5,5,- 1,- 1,- 1,9,- 1,- 1,
-! - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,2,- 1,- 1,2,1,
-! 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1};const int Cyc_lex_default[517]=(const int[517]){- 1,- 1,- 1,
-! 419,408,154,23,36,23,19,- 1,- 1,12,31,46,31,36,23,19,0,- 1,0,0,0,0,- 1,0,- 1,0,- 1,- 1,
-! 0,- 1,- 1,- 1,0,0,0,- 1,0,40,- 1,- 1,0,- 1,- 1,0,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,-
-  1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,- 1,0,- 1,- 1,- 1,- 1,- 1,0,
-- - 1,0,- 1,0,119,- 1,- 1,- 1,- 1,- 1,126,126,126,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- - 1,- 1,- 1,- 1,- 1,146,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-! - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,- 1,0,-
-! 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-! - 1,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-! - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,
-! - 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,
-! 0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,0,0,0,- 1,- 1,- 1,- 1,- 1,-
-! 1,- 1,- 1,- 1,0,- 1,0,- 1,0,- 1,- 1,482,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,0,0,
-! - 1,0,- 1,0,- 1,0,0,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,-
-! 1,- 1,- 1,0,0,- 1,- 1,0,0,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,
-! 0,0,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1};const int Cyc_lex_trans[3782]=(const
-! int[3782]){0,0,0,0,0,0,0,0,0,0,22,19,28,509,19,28,19,28,95,19,45,45,45,45,45,22,
-! 45,0,0,0,0,0,21,317,328,510,21,22,- 1,- 1,22,- 1,- 1,45,318,45,319,22,507,507,507,
-! 507,507,507,507,507,507,507,31,119,22,245,130,40,246,507,507,507,507,507,507,507,
-! 507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,31,
-! 329,363,357,507,146,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,
-! 507,507,507,507,507,507,507,507,507,507,507,505,505,505,505,505,505,505,505,505,
-! 505,137,20,85,78,65,55,56,505,505,505,505,505,505,505,505,505,505,505,505,505,
-! 505,505,505,505,505,505,505,505,505,505,505,505,505,57,58,59,60,505,61,505,505,
-! 505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,
-! 505,505,505,505,66,67,37,420,421,420,420,421,39,22,68,69,70,71,72,145,34,34,34,
-! 34,34,34,34,34,73,74,420,422,423,75,76,424,425,426,120,120,427,428,120,429,430,
-! 431,432,433,433,433,433,433,433,433,433,433,434,79,435,436,437,120,19,438,438,
-! 438,438,438,438,438,438,438,438,438,438,438,438,438,438,438,438,438,438,438,438,
-! 438,438,438,438,19,- 1,- 1,439,438,80,438,438,438,438,438,438,438,438,438,438,438,
-! 438,438,438,438,438,438,438,438,438,438,438,438,438,438,438,409,440,37,410,155,
-! 155,24,24,155,147,138,81,82,96,83,38,97,86,28,87,24,29,98,25,411,88,89,155,90,22,
-! 26,26,21,21,91,117,109,156,99,100,101,102,103,110,26,35,35,35,35,35,35,35,35,111,
-! 131,132,30,30,30,30,30,30,30,30,62,62,133,134,62,77,77,84,84,77,135,84,136,255,
-! 159,160,64,64,412,161,64,162,163,62,148,139,157,39,77,22,84,239,233,224,170,195,
-! 171,172,27,64,173,31,174,21,77,77,158,196,77,175,176,188,180,129,129,129,129,129,
-! 129,129,129,129,129,- 1,32,- 1,- 1,77,- 1,22,129,129,129,129,129,129,129,129,129,129,
-! 129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,- 1,181,- 1,- 1,129,
-! - 1,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,
-! 129,129,129,129,129,129,129,92,92,35,182,92,183,186,187,189,190,104,104,112,112,
-! 104,193,112,120,120,194,217,120,197,92,198,121,121,84,84,121,28,84,21,104,199,
-! 112,200,211,204,205,120,206,207,208,209,210,212,213,121,214,84,215,128,128,114,
-! 216,128,218,219,21,21,21,122,123,122,122,122,122,122,122,122,122,122,122,21,128,
-! 222,223,227,228,229,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,
-! 122,122,122,122,122,122,122,122,122,122,122,230,231,232,234,122,235,122,122,122,
-  122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,
-! 122,122,122,47,47,19,236,47,237,238,33,33,33,33,33,33,33,33,33,33,94,94,249,225,
-! 94,240,47,33,33,33,33,33,33,128,128,177,177,128,242,177,241,48,243,94,226,- 1,244,
-! - 1,247,248,107,107,250,49,107,251,128,252,177,33,33,33,33,33,33,144,144,144,144,
-! 144,144,144,144,107,253,184,184,254,- 1,184,- 1,41,41,306,307,41,115,115,163,163,
-! 115,292,163,50,286,51,276,269,184,52,262,263,264,265,41,53,54,266,267,115,268,
-! 163,117,117,270,271,117,272,273,164,42,42,42,42,42,42,42,42,42,42,274,275,277,
-! 278,95,117,28,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,
-! 42,42,42,42,279,108,280,281,42,282,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,
-! 42,42,42,42,42,42,42,42,42,42,42,191,191,43,283,191,116,284,33,33,33,33,33,33,33,
-! 33,33,33,201,201,285,287,201,288,191,33,33,33,33,33,33,289,118,35,35,35,35,35,35,
-! 35,35,201,290,291,293,294,44,44,44,44,44,44,44,44,44,44,21,33,33,33,33,33,33,44,
-! 44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,295,
-! 296,297,298,44,299,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,
-! 44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,300,301,302,28,303,304,305,44,44,
-! 44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,369,308,
-! 309,310,44,311,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,
-! 44,44,44,44,62,62,312,313,62,153,153,153,153,153,153,153,153,35,35,35,35,35,35,
-! 35,35,314,315,62,316,320,321,393,393,322,323,393,373,373,324,325,373,326,327,63,
-! 63,63,63,63,63,63,63,63,63,330,393,331,351,345,337,373,63,63,63,63,63,63,63,63,
-! 63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,338,339,340,341,63,342,63,
-! 63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,31,64,
-! 64,394,343,64,344,346,374,347,348,349,350,395,352,353,354,355,375,356,358,359,
-! 360,376,64,361,362,364,365,177,177,164,164,177,366,164,367,368,370,371,63,63,63,
-! 63,63,63,63,63,63,63,388,382,177,377,164,378,379,63,63,63,63,63,63,63,63,63,63,
-! 63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,380,381,383,384,63,385,63,63,63,
-! 63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,92,92,165,
-! 386,92,389,187,187,390,166,187,391,167,178,392,402,396,256,257,258,179,259,168,
-! 92,169,260,184,184,397,187,184,191,191,398,261,191,399,400,116,93,93,93,93,93,93,
-! 93,93,93,93,184,403,404,405,406,191,503,93,93,93,93,93,93,93,93,93,93,93,93,93,
-! 93,93,93,93,93,93,93,93,93,93,93,93,93,502,481,476,451,93,275,93,93,93,93,93,93,
-! 93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,36,94,94,194,194,94,
-! 500,194,185,448,291,449,305,192,418,418,445,446,418,443,441,447,450,479,94,344,
-! 194,201,201,501,372,201,373,373,362,114,373,418,285,21,93,93,93,93,93,93,93,93,
-! 93,93,201,350,95,95,35,373,35,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,
-! 93,93,93,93,93,93,93,93,93,442,95,95,35,93,35,93,93,93,93,93,93,93,93,93,93,93,
-! 93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,104,104,210,210,104,268,210,374,202,
-! 417,417,417,417,417,417,417,417,375,203,31,31,154,480,104,381,210,31,31,31,31,31,
-! 31,31,31,108,106,108,118,387,105,105,105,105,105,105,105,105,105,105,401,36,31,
-! 31,36,46,475,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,
-! 105,105,105,105,105,105,105,105,105,36,407,356,36,105,475,105,105,105,105,105,
-  105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,
-! 105,106,107,107,216,216,107,21,216,371,371,511,512,371,418,418,513,514,418,515,
-! 475,516,21,0,0,107,0,216,504,0,504,504,371,0,0,0,118,418,0,21,372,105,105,105,
-! 105,105,105,105,105,105,105,504,475,0,0,0,0,0,105,105,105,105,105,105,105,105,
-! 105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,0,0,0,0,
-! 105,0,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,
-! 105,105,105,105,105,105,105,105,112,112,220,220,112,0,220,386,386,0,477,386,478,
-! 478,478,478,478,478,478,478,478,478,0,112,0,220,504,0,504,504,386,0,0,0,95,0,0,0,
-! 387,113,113,113,113,113,113,113,113,113,113,504,0,0,0,0,0,0,113,113,113,113,113,
-  113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,
-  113,0,0,0,0,113,0,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,
-! 113,113,113,113,113,113,113,113,113,113,113,114,115,115,223,223,115,0,223,392,
-! 392,0,0,392,458,458,458,458,458,458,458,458,458,458,0,115,0,223,0,0,0,0,392,0,0,
-! 0,106,0,0,0,46,113,113,113,113,113,113,113,113,113,113,0,0,0,0,0,0,0,113,113,113,
-! 113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,
-! 113,113,113,0,0,0,0,113,0,113,113,113,113,113,113,113,113,113,113,113,113,113,
-! 113,113,113,113,113,113,113,113,113,113,113,113,113,124,124,124,124,124,124,124,
-! 124,124,124,124,124,22,0,0,0,0,0,0,124,124,124,124,124,124,124,124,124,124,124,
-! 124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,0,0,0,0,124,0,124,
-  124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,
-! 124,124,124,124,124,124,125,124,124,124,124,124,124,124,124,124,124,22,0,0,0,0,0,
-! 0,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,
-! 124,124,124,124,124,124,124,0,0,0,0,124,0,124,124,124,124,124,124,124,124,124,
-  124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,
-! 124,124,124,124,124,124,124,124,124,22,0,0,0,0,- 1,0,124,124,124,124,124,124,124,
-! 124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,- 1,-
-! 1,0,- 1,124,0,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,
-! 124,124,124,124,124,124,124,124,124,0,0,0,0,125,125,125,125,125,125,125,125,125,
-! 125,125,125,127,0,0,0,0,0,483,125,125,125,125,125,125,125,125,125,125,125,125,
-! 125,125,125,125,125,125,125,125,125,125,125,125,125,125,0,0,0,0,125,0,125,125,
-  125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,
-! 125,125,125,125,129,129,129,129,129,129,129,129,129,129,0,0,0,0,0,0,0,129,129,
-  129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,
-! 129,129,129,129,28,0,0,140,129,0,129,129,129,129,129,129,129,129,129,129,129,129,
-! 129,129,129,129,129,129,129,129,129,129,129,129,129,129,0,0,28,0,0,149,141,141,
-! 141,141,141,141,141,141,143,143,143,143,143,143,143,143,143,143,332,226,226,0,
-! 333,226,- 1,143,143,143,143,143,143,334,0,335,150,150,150,150,150,150,150,150,226,
-! 0,0,0,0,0,0,31,0,36,- 1,0,0,0,0,143,143,143,143,143,143,0,0,0,0,0,0,336,0,0,142,
-! 143,143,143,143,143,143,143,143,143,143,31,0,0,0,0,0,0,143,143,143,143,143,143,
-! 152,152,152,152,152,152,152,152,152,152,151,0,393,393,0,0,393,152,152,152,152,
-! 152,152,0,0,0,143,143,143,143,143,143,0,0,0,393,0,0,152,152,152,152,152,152,152,
-! 152,152,152,0,152,152,152,152,152,152,152,152,152,152,152,152,220,220,232,232,
-! 220,0,232,0,0,0,238,238,248,248,238,0,248,254,254,19,0,254,413,220,0,232,152,152,
-! 152,152,152,152,95,238,35,248,0,0,0,0,254,394,19,0,31,0,400,400,0,28,400,395,406,
-! 406,0,0,406,414,414,414,414,414,414,414,414,0,0,0,0,400,0,0,0,0,0,406,0,401,0,
-! 457,0,457,0,407,458,458,458,458,458,458,458,458,458,458,0,0,221,0,0,0,0,0,0,0,0,
-! 0,28,0,0,0,0,0,0,416,416,416,416,416,416,416,416,416,416,0,0,0,0,0,0,415,416,416,
-! 416,416,416,416,416,416,416,416,416,416,416,416,416,416,0,0,0,0,0,0,0,416,416,
-! 416,416,416,416,0,0,0,416,416,416,416,416,416,452,0,463,463,463,463,463,463,463,
-! 463,464,464,0,0,0,0,0,416,416,416,416,416,416,454,0,0,0,0,0,0,465,0,0,0,0,0,0,0,
-! 0,466,0,0,467,452,0,453,453,453,453,453,453,453,453,453,453,454,0,0,0,0,0,0,465,
-! 0,0,0,454,0,0,0,0,466,0,455,467,0,0,0,461,0,461,0,456,462,462,462,462,462,462,
-! 462,462,462,462,0,0,0,0,356,454,0,0,0,0,0,0,455,498,498,498,498,498,498,498,498,
-! 456,444,444,444,444,444,444,444,444,444,444,0,0,0,0,0,0,0,444,444,444,444,444,
-  444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,
-! 444,0,0,0,0,444,0,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,
-  444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,
-! 444,0,0,0,0,0,0,0,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,
-! 444,444,444,444,444,444,444,444,444,444,444,0,0,0,0,444,0,444,444,444,444,444,
-  444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,
-! 444,459,459,459,459,459,459,459,459,459,459,462,462,462,462,462,462,462,462,462,
-! 462,0,460,116,0,0,0,0,452,116,453,453,453,453,453,453,453,453,453,453,458,458,
-! 458,458,458,458,458,458,458,458,0,454,0,0,460,116,0,0,455,0,0,116,114,0,0,0,0,
-! 456,114,0,459,459,459,459,459,459,459,459,459,459,0,0,0,454,0,0,0,0,0,0,455,460,
-! 116,0,114,0,0,0,116,456,114,0,0,462,462,462,462,462,462,462,462,462,462,0,0,0,0,
-! 0,0,0,0,0,0,460,116,116,0,0,0,0,116,116,452,0,463,463,463,463,463,463,463,463,
-! 464,464,0,0,0,0,0,0,0,0,0,0,0,454,0,116,0,0,0,0,473,116,0,0,0,0,0,0,452,474,464,
-! 464,464,464,464,464,464,464,464,464,0,0,0,0,0,454,0,0,0,0,0,454,473,0,0,0,0,0,
-! 471,0,0,474,0,0,0,0,0,472,0,0,478,478,478,478,478,478,478,478,478,478,0,0,0,454,
-! 0,0,0,0,0,0,471,460,116,0,0,0,0,0,116,472,468,468,468,468,468,468,468,468,468,
-! 468,0,0,0,0,0,0,0,468,468,468,468,468,468,460,116,0,0,0,0,0,116,0,0,0,0,0,0,0,
-! 468,468,468,468,468,468,468,468,468,468,0,468,468,468,468,468,468,468,468,468,
-! 468,468,468,0,0,0,484,0,469,0,0,485,0,0,0,0,0,470,0,0,486,486,486,486,486,486,
-! 486,486,0,468,468,468,468,468,468,487,0,0,0,0,469,356,0,0,0,0,0,0,0,470,499,499,
-! 499,499,499,499,499,499,0,0,0,0,0,0,488,0,0,0,0,489,490,0,0,0,491,0,0,0,0,0,0,0,
-! 492,0,0,0,493,0,494,0,495,0,496,497,497,497,497,497,497,497,497,497,497,0,0,0,0,
-! 0,0,0,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,
-! 497,497,497,497,497,497,497,497,0,0,0,0,0,0,497,497,497,497,497,497,497,497,497,
-! 497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,368,0,0,0,0,
-! 0,0,0,0,497,497,497,497,497,497,497,497,497,497,0,0,0,0,0,0,0,497,497,497,497,
-  497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,
-! 497,497,0,0,0,0,0,0,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,
-! 497,497,497,497,497,497,497,497,497,497,497,22,0,0,506,0,0,0,505,505,505,505,505,
-! 505,505,505,505,505,0,0,0,0,0,0,0,505,505,505,505,505,505,505,505,505,505,505,
-! 505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,0,0,0,0,505,0,505,
-  505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,
-! 505,505,505,505,505,508,0,0,0,0,0,0,0,507,507,507,507,507,507,507,507,507,507,0,
-! 0,0,0,0,0,0,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,
-! 507,507,507,507,507,507,507,507,507,0,0,0,0,507,0,507,507,507,507,507,507,507,
-! 507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,0,0,
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-! 0,0,0,0,0,0,0,0,0,0,0,0};const int Cyc_lex_check[3782]=(const int[3782]){- 1,- 1,- 1,-
-! 1,- 1,- 1,- 1,- 1,- 1,- 1,0,25,29,0,138,140,147,149,410,413,41,41,45,45,41,509,45,- 1,-
-! 1,- 1,- 1,- 1,136,316,327,0,506,10,12,40,10,12,40,41,317,45,318,20,1,1,1,1,1,1,1,1,
-! 1,1,38,48,137,244,10,38,245,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-! 145,328,332,333,1,145,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,
-! 2,2,2,2,2,2,2,9,18,51,52,53,54,55,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-! 2,2,2,56,57,58,59,2,60,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,65,66,
-! 7,3,3,3,3,3,7,7,67,68,69,70,71,7,30,30,30,30,30,30,30,30,72,73,3,3,3,74,75,3,3,3,
-! 47,47,3,3,47,3,3,3,3,3,3,3,3,3,3,3,3,3,3,78,3,3,3,47,0,3,3,3,3,3,3,3,3,3,3,3,3,3,
-! 3,3,3,3,3,3,3,3,3,3,3,3,3,10,12,40,3,3,79,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
-! 3,3,3,3,3,3,3,4,3,16,4,5,5,6,8,5,6,8,80,81,50,82,16,50,85,27,86,17,27,50,17,4,87,
-! 88,5,89,5,6,8,9,18,90,96,97,5,98,99,100,101,102,109,17,34,34,34,34,34,34,34,34,
-! 110,130,131,27,27,27,27,27,27,27,27,61,61,132,133,61,76,76,83,83,76,134,83,135,
-! 157,158,159,64,64,4,160,64,161,162,61,6,8,5,16,76,16,83,165,166,167,169,168,170,
-! 171,17,64,172,27,173,7,77,77,5,168,77,174,175,178,179,11,11,11,11,11,11,11,11,11,
-! 11,119,27,126,119,77,126,3,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,
-! 11,11,11,11,11,11,11,11,127,180,146,127,11,146,11,11,11,11,11,11,11,11,11,11,11,
-! 11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,91,91,64,181,91,182,185,186,188,189,
-! 103,103,111,111,103,192,111,120,120,193,195,120,196,91,197,13,13,84,84,13,77,84,
-! 16,103,198,111,199,202,203,204,120,205,206,207,208,209,211,212,13,213,84,214,121,
-  121,4,215,121,217,218,5,6,8,13,13,13,13,13,13,13,13,13,13,13,13,17,121,221,222,
-  225,227,228,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,
-  13,13,13,229,230,231,233,13,234,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,
---- 581,886 ----
+! return _tmp1;}}static struct _tagged_arr*Cyc_current_source=0;static struct Cyc_List_List*
+! Cyc_current_args=0;static struct Cyc_Set_Set**Cyc_current_targets=0;static void Cyc_add_target(
+! struct _tagged_arr*sptr){Cyc_current_targets=({struct Cyc_Set_Set**_tmp2=_cycalloc(
+  sizeof(*_tmp2));_tmp2[0]=((struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*s,struct
+  _tagged_arr*elt))Cyc_Set_insert)(*((struct Cyc_Set_Set**)_check_null(Cyc_current_targets)),
+  sptr);_tmp2;});}struct _tuple9{struct _tagged_arr*f1;struct Cyc_Set_Set*f2;};struct
+--- 580,608 ----
   Cyc_YYINITIALSVAL[18];struct Cyc_Yyltype{int timestamp;int first_line;int
   first_column;int last_line;int last_column;};typedef struct{int quot;int rem;}Cyc_Std_div_t;
   typedef struct{int quot;int rem;}Cyc_Std_ldiv_t;int Cyc_Std_system(struct _tagged_arr);
@@ -2662,312 +2388,35 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
 ! _tag_arr("Internal error: log file is NULL\n",sizeof(char),34),_tag_arr(_tmp0,
 ! sizeof(void*),0));});exit(1);}{int _tmp1=Cyc_Std_vfprintf((struct Cyc_Std___cycFILE*)
 ! _check_null(Cyc_log_file),fmt,ap);Cyc_Std_fflush((struct Cyc_Std___cycFILE*)((
-! struct Cyc_Std___cycFILE*)_check_null(Cyc_log_file)));return _tmp1;}}int Cyc_sizeof_unsignedlongint=
-! 4;int Cyc_sizeof_unsignedshortint=2;int Cyc_sizeof_shortint=2;int Cyc_sizeof_int=4;
-! int Cyc_sizeof_short=2;int Cyc_sizeof_fdmask=4;int Cyc_sizeof___fdmask=4;int Cyc_sizeof_uint32=
-! 4;int Cyc_sizeof_sockaddr=16;int Cyc_sizeof_inport=2;int Cyc_sizeof_inaddr=4;static
-! struct _tagged_arr*Cyc_current_source=0;static struct Cyc_List_List*Cyc_current_args=
-! 0;static struct Cyc_Set_Set**Cyc_current_targets=0;static void Cyc_add_target(struct
+! struct Cyc_Std___cycFILE*)_check_null(Cyc_log_file)));return _tmp1;}}static struct
+! _tagged_arr*Cyc_current_source=0;static struct Cyc_List_List*Cyc_current_args=0;
+! static struct Cyc_Set_Set**Cyc_current_targets=0;static void Cyc_add_target(struct
 ! _tagged_arr*sptr){Cyc_current_targets=({struct Cyc_Set_Set**_tmp2=_cycalloc(
-! sizeof(*_tmp2));_tmp2[0]=((struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*s,struct
-! _tagged_arr*elt))Cyc_Set_insert)(*((struct Cyc_Set_Set**)_check_null(Cyc_current_targets)),
-! sptr);_tmp2;});}struct _tuple9{struct _tagged_arr*f1;struct Cyc_Set_Set*f2;};struct
-! _tuple9*Cyc_line(struct Cyc_Lexing_lexbuf*);int Cyc_macroname(struct Cyc_Lexing_lexbuf*);
-! int Cyc_args(struct Cyc_Lexing_lexbuf*);int Cyc_token(struct Cyc_Lexing_lexbuf*);int
-! Cyc_string(struct Cyc_Lexing_lexbuf*);struct Cyc_Std___cycFILE*Cyc_slurp_out=0;int
-! Cyc_slurp(struct Cyc_Lexing_lexbuf*);int Cyc_slurp_string(struct Cyc_Lexing_lexbuf*);
-! int Cyc_asm(struct Cyc_Lexing_lexbuf*);int Cyc_asm_string(struct Cyc_Lexing_lexbuf*);
-! int Cyc_asm_comment(struct Cyc_Lexing_lexbuf*);struct _tuple10{struct _tagged_arr f1;
-! struct _tagged_arr*f2;};struct _tuple10*Cyc_suck_line(struct Cyc_Lexing_lexbuf*);
-! int Cyc_suck_macroname(struct Cyc_Lexing_lexbuf*);int Cyc_suck_restofline(struct Cyc_Lexing_lexbuf*);
-! struct _tagged_arr Cyc_current_line=(struct _tagged_arr){(void*)0,(void*)0,(void*)(
-! 0 + 0)};struct _tuple11{struct _tagged_arr f1;struct _tagged_arr f2;};struct _tuple12{
-! struct _tagged_arr f1;struct Cyc_List_List*f2;struct Cyc_List_List*f3;struct Cyc_List_List*
-! f4;struct Cyc_List_List*f5;struct Cyc_List_List*f6;struct Cyc_List_List*f7;};struct
-! _tuple12*Cyc_spec(struct Cyc_Lexing_lexbuf*);int Cyc_commands(struct Cyc_Lexing_lexbuf*);
-! int Cyc_snarfsymbols(struct Cyc_Lexing_lexbuf*);int Cyc_block(struct Cyc_Lexing_lexbuf*);
-! int Cyc_block_string(struct Cyc_Lexing_lexbuf*);int Cyc_block_comment(struct Cyc_Lexing_lexbuf*);
-! struct _tagged_arr Cyc_current_header=(struct _tagged_arr){(void*)0,(void*)0,(void*)(
-! 0 + 0)};struct Cyc_List_List*Cyc_snarfed_symbols=0;struct Cyc_List_List*Cyc_current_symbols=
-! 0;struct Cyc_List_List*Cyc_current_cstubs=0;struct Cyc_List_List*Cyc_current_cycstubs=
-! 0;struct Cyc_List_List*Cyc_current_prologue=0;struct Cyc_List_List*Cyc_current_epilogue=
-! 0;struct Cyc_List_List*Cyc_current_omit_symbols=0;struct Cyc_List_List*Cyc_current_cpp=
-! 0;struct Cyc_Buffer_t*Cyc_specbuf=0;int Cyc_braces_to_match=0;int Cyc_parens_to_match=
-! 0;int Cyc_numdef=0;const int Cyc_lex_base[517]=(const int[517]){0,0,75,192,305,310,
-! 311,166,312,91,27,384,28,523,637,715,283,325,92,- 3,0,- 1,- 2,- 8,- 3,1,- 2,323,- 4,2,
-! 166,- 5,605,797,312,- 6,- 7,- 4,16,- 3,29,11,835,- 3,910,13,- 16,223,12,- 2,216,23,26,28,
-! 24,28,58,56,65,52,70,370,1024,1139,386,93,83,90,112,96,106,115,124,115,126,113,
-! 375,414,152,180,209,227,228,377,525,227,226,229,238,226,248,498,1253,1368,654,- 8,
-! 238,235,254,239,239,239,259,508,1482,1597,- 11,684,- 12,241,270,510,1711,1826,- 9,
-! 720,- 10,746,- 13,432,515,550,1903,1980,2057,2138,434,465,667,2213,269,269,279,277,
-! 279,290,0,13,4,2294,5,660,2302,2367,822,49,467,6,2328,7,990,2390,2428,998,- 32,
-! 1051,1056,297,288,272,297,289,299,722,1169,315,311,302,310,303,300,311,316,311,
-! 327,329,669,1167,319,327,365,396,396,709,1279,403,398,1259,405,413,829,1284,412,
-! 410,1370,416,415,414,442,427,846,1394,434,434,447,441,452,450,451,438,1484,458,
-! 457,456,458,448,1599,450,449,1713,2490,473,468,1828,571,473,2352,475,473,498,520,
-! 500,2492,522,510,552,536,545,2500,566,565,576,575,573,10,14,596,576,2502,600,589,
-! 603,602,613,2507,1182,611,617,626,619,630,642,629,629,632,645,652,637,- 30,649,
-! 653,650,660,678,679,- 25,659,675,696,693,704,700,731,749,762,- 19,748,745,752,784,
-! 785,- 27,776,774,810,822,818,834,813,871,874,862,867,858,858,- 29,892,886,889,899,
-! 908,918,920,953,960,962,1,4,6,963,964,953,952,967,967,975,976,2,52,987,989,2292,
-! 20,21,1012,1013,976,1001,1016,1022,1023,1079,1110,1112,- 24,1059,1061,1116,1117,
-! 1118,- 21,1066,1067,1122,1123,1125,- 22,1072,1073,1128,1131,1132,- 20,1079,1080,
-! 1140,1142,1143,- 23,1090,1091,1604,- 31,1399,1100,1101,1099,1099,1098,1119,1121,-
-! 18,1124,1125,1124,1166,1718,- 14,1159,1162,1162,1177,1833,2441,1180,1181,1182,
-! 1187,1187,1200,2536,- 15,1204,1205,1203,1216,2542,- 17,- 7,- 8,8,1381,2508,9,1452,
-! 2564,2587,1469,1609,- 49,1623,- 2,1256,- 4,1283,1344,2110,1284,1345,1451,1684,1285,
-! 2621,2664,1289,1325,1288,1331,2734,1334,1335,- 36,- 42,- 37,2809,- 28,1336,- 40,1337,
-! - 45,- 39,- 48,2884,2913,2535,1343,1353,1799,2923,2953,2702,2894,2986,3017,3055,
-! 1345,1356,3125,3163,1425,1435,1456,1468,1461,1548,- 6,- 34,1353,3095,- 47,- 46,- 33,
-! 1362,3203,1371,1375,2725,1388,1476,1487,1488,1489,1490,1501,1506,1535,3276,3360,
-! 3233,1536,- 41,- 38,- 35,- 26,1737,3442,4,3525,1570,15,1515,1515,1518,1516,1513,1524,
-! 1594};const int Cyc_lex_backtrk[517]=(const int[517]){- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-! - 1,- 1,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,2,- 1,- 1,- 1,- 1,2,- 1,8,- 1,3,5,- 1,- 1,6,5,- 1,- 1,- 1,6,- 1,
-! 5,1,0,- 1,0,1,- 1,14,15,- 1,15,15,15,15,15,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,-
-! 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-! - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,13,14,2,
-! 4,4,- 1,0,0,0,2,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,2,2,8,3,5,- 1,6,5,6,5,2,8,3,5,- 1,6,5,- 1,31,
-! 31,31,31,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-+ - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,25,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,27,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-! - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,6,1,9,2,4,- 1,5,4,- 1,- 1,2,- 1,48,- 1,48,48,48,48,
-! 48,48,48,48,5,7,48,48,48,48,0,48,48,- 1,- 1,- 1,0,- 1,43,- 1,42,- 1,- 1,- 1,9,7,- 1,7,7,-
-! 1,8,9,- 1,- 1,9,5,6,5,5,- 1,4,4,4,6,6,5,5,- 1,- 1,- 1,9,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-! - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,2,- 1,- 1,2,1,1,- 1,- 1,- 1,- 1,- 1,- 1,- 1};
-! const int Cyc_lex_default[517]=(const int[517]){- 1,- 1,- 1,419,408,154,23,36,23,19,- 1,
-! - 1,12,31,46,31,36,23,19,0,- 1,0,0,0,0,- 1,0,- 1,0,- 1,- 1,0,- 1,- 1,- 1,0,0,0,- 1,0,40,- 1,
-! - 1,0,- 1,- 1,0,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-! - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,- 1,
-! - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,- 1,0,- 1,- 1,- 1,- 1,- 1,0,- 1,0,- 1,0,119,- 1,- 1,- 1,- 1,- 1,
-! 126,126,126,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,146,- 1,- 1,- 1,-
-! 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,-
-  1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-  - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-! - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,
-! - 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,-
-! 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-! - 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,
-! 0,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-! - 1,- 1,- 1,- 1,- 1,0,- 1,- 1,- 1,- 1,- 1,0,0,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,- 1,0,- 1,0,- 1,
-! - 1,482,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,0,0,- 1,0,- 1,0,- 1,0,0,0,- 1,- 1,
-! - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,0,- 1,- 1,0,0,0,-
-! 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,0,0,0,0,- 1,- 1,- 1,- 1,- 1,- 1,-
-! 1,- 1,- 1,- 1,- 1,- 1,- 1};const int Cyc_lex_trans[3782]=(const int[3782]){0,0,0,0,0,0,0,
-! 0,0,0,22,19,28,509,19,28,19,28,95,19,45,45,45,45,45,22,45,0,0,0,0,0,21,317,328,
-! 510,21,22,- 1,- 1,22,- 1,- 1,45,318,45,319,22,507,507,507,507,507,507,507,507,507,
-! 507,31,119,22,245,130,40,246,507,507,507,507,507,507,507,507,507,507,507,507,507,
-! 507,507,507,507,507,507,507,507,507,507,507,507,507,31,329,363,357,507,146,507,
-! 507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,
-! 507,507,507,507,507,505,505,505,505,505,505,505,505,505,505,137,20,85,78,65,55,
-! 56,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,
-! 505,505,505,505,505,505,505,57,58,59,60,505,61,505,505,505,505,505,505,505,505,
-! 505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,66,67,37,
-! 420,421,420,420,421,39,22,68,69,70,71,72,145,34,34,34,34,34,34,34,34,73,74,420,
-! 422,423,75,76,424,425,426,120,120,427,428,120,429,430,431,432,433,433,433,433,
-! 433,433,433,433,433,434,79,435,436,437,120,19,438,438,438,438,438,438,438,438,
-! 438,438,438,438,438,438,438,438,438,438,438,438,438,438,438,438,438,438,19,- 1,- 1,
-! 439,438,80,438,438,438,438,438,438,438,438,438,438,438,438,438,438,438,438,438,
-! 438,438,438,438,438,438,438,438,438,409,440,37,410,155,155,24,24,155,147,138,81,
-! 82,96,83,38,97,86,28,87,24,29,98,25,411,88,89,155,90,22,26,26,21,21,91,117,109,
-! 156,99,100,101,102,103,110,26,35,35,35,35,35,35,35,35,111,131,132,30,30,30,30,30,
-! 30,30,30,62,62,133,134,62,77,77,84,84,77,135,84,136,255,159,160,64,64,412,161,64,
-! 162,163,62,148,139,157,39,77,22,84,239,233,224,170,195,171,172,27,64,173,31,174,
-! 21,77,77,158,196,77,175,176,188,180,129,129,129,129,129,129,129,129,129,129,- 1,
-! 32,- 1,- 1,77,- 1,22,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,
-! 129,129,129,129,129,129,129,129,129,129,129,- 1,181,- 1,- 1,129,- 1,129,129,129,129,
-! 129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,
-! 129,129,92,92,35,182,92,183,186,187,189,190,104,104,112,112,104,193,112,120,120,
-! 194,217,120,197,92,198,121,121,84,84,121,28,84,21,104,199,112,200,211,204,205,
-! 120,206,207,208,209,210,212,213,121,214,84,215,128,128,114,216,128,218,219,21,21,
-! 21,122,123,122,122,122,122,122,122,122,122,122,122,21,128,222,223,227,228,229,
-  122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,
-! 122,122,122,122,122,122,230,231,232,234,122,235,122,122,122,122,122,122,122,122,
-! 122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,47,47,19,
-! 236,47,237,238,33,33,33,33,33,33,33,33,33,33,94,94,249,225,94,240,47,33,33,33,33,
-! 33,33,128,128,177,177,128,242,177,241,48,243,94,226,- 1,244,- 1,247,248,107,107,
-! 250,49,107,251,128,252,177,33,33,33,33,33,33,144,144,144,144,144,144,144,144,107,
-! 253,184,184,254,- 1,184,- 1,41,41,306,307,41,115,115,163,163,115,292,163,50,286,51,
-! 276,269,184,52,262,263,264,265,41,53,54,266,267,115,268,163,117,117,270,271,117,
-! 272,273,164,42,42,42,42,42,42,42,42,42,42,274,275,277,278,95,117,28,42,42,42,42,
-! 42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,279,108,280,
-! 281,42,282,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,42,
-! 42,42,42,191,191,43,283,191,116,284,33,33,33,33,33,33,33,33,33,33,201,201,285,
-! 287,201,288,191,33,33,33,33,33,33,289,118,35,35,35,35,35,35,35,35,201,290,291,
-! 293,294,44,44,44,44,44,44,44,44,44,44,21,33,33,33,33,33,33,44,44,44,44,44,44,44,
-! 44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,295,296,297,298,44,299,
-! 44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,
-! 44,44,44,44,44,44,44,44,44,300,301,302,28,303,304,305,44,44,44,44,44,44,44,44,44,
-! 44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,369,308,309,310,44,311,44,44,
-! 44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,44,62,62,
-! 312,313,62,153,153,153,153,153,153,153,153,35,35,35,35,35,35,35,35,314,315,62,
-! 316,320,321,393,393,322,323,393,373,373,324,325,373,326,327,63,63,63,63,63,63,63,
-! 63,63,63,330,393,331,351,345,337,373,63,63,63,63,63,63,63,63,63,63,63,63,63,63,
-! 63,63,63,63,63,63,63,63,63,63,63,63,338,339,340,341,63,342,63,63,63,63,63,63,63,
-! 63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,31,64,64,394,343,64,344,
-! 346,374,347,348,349,350,395,352,353,354,355,375,356,358,359,360,376,64,361,362,
-! 364,365,177,177,164,164,177,366,164,367,368,370,371,63,63,63,63,63,63,63,63,63,
-! 63,388,382,177,377,164,378,379,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,
-! 63,63,63,63,63,63,63,63,63,63,380,381,383,384,63,385,63,63,63,63,63,63,63,63,63,
-! 63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,92,92,165,386,92,389,187,187,
-! 390,166,187,391,167,178,392,402,396,256,257,258,179,259,168,92,169,260,184,184,
-! 397,187,184,191,191,398,261,191,399,400,116,93,93,93,93,93,93,93,93,93,93,184,
-! 403,404,405,406,191,503,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,
-! 93,93,93,93,93,93,93,502,481,476,451,93,275,93,93,93,93,93,93,93,93,93,93,93,93,
-! 93,93,93,93,93,93,93,93,93,93,93,93,93,93,36,94,94,194,194,94,500,194,185,448,
-! 291,449,305,192,418,418,445,446,418,443,441,447,450,479,94,344,194,201,201,501,
-! 372,201,373,373,362,114,373,418,285,21,93,93,93,93,93,93,93,93,93,93,201,350,95,
-! 95,35,373,35,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,
-! 93,93,93,93,442,95,95,35,93,35,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,93,
-! 93,93,93,93,93,93,93,93,93,93,104,104,210,210,104,268,210,374,202,417,417,417,
-! 417,417,417,417,417,375,203,31,31,154,480,104,381,210,31,31,31,31,31,31,31,31,
-! 108,106,108,118,387,105,105,105,105,105,105,105,105,105,105,401,36,31,31,36,46,
-! 475,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,
-! 105,105,105,105,105,105,105,36,407,356,36,105,475,105,105,105,105,105,105,105,
-! 105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,106,
-! 107,107,216,216,107,21,216,371,371,511,512,371,418,418,513,514,418,515,475,516,
-! 21,0,0,107,0,216,504,0,504,504,371,0,0,0,118,418,0,21,372,105,105,105,105,105,
-! 105,105,105,105,105,504,475,0,0,0,0,0,105,105,105,105,105,105,105,105,105,105,
-! 105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,0,0,0,0,105,0,
-  105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,105,
-! 105,105,105,105,105,105,112,112,220,220,112,0,220,386,386,0,477,386,478,478,478,
-! 478,478,478,478,478,478,478,0,112,0,220,504,0,504,504,386,0,0,0,95,0,0,0,387,113,
-! 113,113,113,113,113,113,113,113,113,504,0,0,0,0,0,0,113,113,113,113,113,113,113,
-! 113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,0,0,
-! 0,0,113,0,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,
-! 113,113,113,113,113,113,113,113,113,114,115,115,223,223,115,0,223,392,392,0,0,
-! 392,458,458,458,458,458,458,458,458,458,458,0,115,0,223,0,0,0,0,392,0,0,0,106,0,
-! 0,0,46,113,113,113,113,113,113,113,113,113,113,0,0,0,0,0,0,0,113,113,113,113,113,
-  113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,
-  113,0,0,0,0,113,0,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,
-! 113,113,113,113,113,113,113,113,113,113,113,124,124,124,124,124,124,124,124,124,
-! 124,124,124,22,0,0,0,0,0,0,124,124,124,124,124,124,124,124,124,124,124,124,124,
-! 124,124,124,124,124,124,124,124,124,124,124,124,124,0,0,0,0,124,0,124,124,124,
-  124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,
-! 124,124,124,124,125,124,124,124,124,124,124,124,124,124,124,22,0,0,0,0,0,0,124,
-  124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,
-! 124,124,124,124,124,0,0,0,0,124,0,124,124,124,124,124,124,124,124,124,124,124,
-! 124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,
-! 124,124,124,124,124,124,124,22,0,0,0,0,- 1,0,124,124,124,124,124,124,124,124,124,
-! 124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,- 1,- 1,0,- 1,
-! 124,0,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,
-! 124,124,124,124,124,124,124,124,0,0,0,0,125,125,125,125,125,125,125,125,125,125,
-! 125,125,127,0,0,0,0,0,483,125,125,125,125,125,125,125,125,125,125,125,125,125,
-! 125,125,125,125,125,125,125,125,125,125,125,125,125,0,0,0,0,125,0,125,125,125,
-  125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,125,
-! 125,125,125,129,129,129,129,129,129,129,129,129,129,0,0,0,0,0,0,0,129,129,129,
-  129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,
-! 129,129,129,28,0,0,140,129,0,129,129,129,129,129,129,129,129,129,129,129,129,129,
-! 129,129,129,129,129,129,129,129,129,129,129,129,129,0,0,28,0,0,149,141,141,141,
-! 141,141,141,141,141,143,143,143,143,143,143,143,143,143,143,332,226,226,0,333,
-! 226,- 1,143,143,143,143,143,143,334,0,335,150,150,150,150,150,150,150,150,226,0,0,
-! 0,0,0,0,31,0,36,- 1,0,0,0,0,143,143,143,143,143,143,0,0,0,0,0,0,336,0,0,142,143,
-! 143,143,143,143,143,143,143,143,143,31,0,0,0,0,0,0,143,143,143,143,143,143,152,
-! 152,152,152,152,152,152,152,152,152,151,0,393,393,0,0,393,152,152,152,152,152,
-! 152,0,0,0,143,143,143,143,143,143,0,0,0,393,0,0,152,152,152,152,152,152,152,152,
-! 152,152,0,152,152,152,152,152,152,152,152,152,152,152,152,220,220,232,232,220,0,
-! 232,0,0,0,238,238,248,248,238,0,248,254,254,19,0,254,413,220,0,232,152,152,152,
-! 152,152,152,95,238,35,248,0,0,0,0,254,394,19,0,31,0,400,400,0,28,400,395,406,406,
-! 0,0,406,414,414,414,414,414,414,414,414,0,0,0,0,400,0,0,0,0,0,406,0,401,0,457,0,
-! 457,0,407,458,458,458,458,458,458,458,458,458,458,0,0,221,0,0,0,0,0,0,0,0,0,28,0,
-! 0,0,0,0,0,416,416,416,416,416,416,416,416,416,416,0,0,0,0,0,0,415,416,416,416,
-! 416,416,416,416,416,416,416,416,416,416,416,416,416,0,0,0,0,0,0,0,416,416,416,
-! 416,416,416,0,0,0,416,416,416,416,416,416,452,0,463,463,463,463,463,463,463,463,
-! 464,464,0,0,0,0,0,416,416,416,416,416,416,454,0,0,0,0,0,0,465,0,0,0,0,0,0,0,0,
-! 466,0,0,467,452,0,453,453,453,453,453,453,453,453,453,453,454,0,0,0,0,0,0,465,0,
-! 0,0,454,0,0,0,0,466,0,455,467,0,0,0,461,0,461,0,456,462,462,462,462,462,462,462,
-! 462,462,462,0,0,0,0,356,454,0,0,0,0,0,0,455,498,498,498,498,498,498,498,498,456,
-! 444,444,444,444,444,444,444,444,444,444,0,0,0,0,0,0,0,444,444,444,444,444,444,
-  444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,
-! 0,0,0,0,444,0,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,
-  444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,
-! 0,0,0,0,0,0,0,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,
-! 444,444,444,444,444,444,444,444,444,444,0,0,0,0,444,0,444,444,444,444,444,444,
-  444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,444,
-! 459,459,459,459,459,459,459,459,459,459,462,462,462,462,462,462,462,462,462,462,
-! 0,460,116,0,0,0,0,452,116,453,453,453,453,453,453,453,453,453,453,458,458,458,
-! 458,458,458,458,458,458,458,0,454,0,0,460,116,0,0,455,0,0,116,114,0,0,0,0,456,
-! 114,0,459,459,459,459,459,459,459,459,459,459,0,0,0,454,0,0,0,0,0,0,455,460,116,
-! 0,114,0,0,0,116,456,114,0,0,462,462,462,462,462,462,462,462,462,462,0,0,0,0,0,0,
-! 0,0,0,0,460,116,116,0,0,0,0,116,116,452,0,463,463,463,463,463,463,463,463,464,
-! 464,0,0,0,0,0,0,0,0,0,0,0,454,0,116,0,0,0,0,473,116,0,0,0,0,0,0,452,474,464,464,
-! 464,464,464,464,464,464,464,464,0,0,0,0,0,454,0,0,0,0,0,454,473,0,0,0,0,0,471,0,
-! 0,474,0,0,0,0,0,472,0,0,478,478,478,478,478,478,478,478,478,478,0,0,0,454,0,0,0,
-! 0,0,0,471,460,116,0,0,0,0,0,116,472,468,468,468,468,468,468,468,468,468,468,0,0,
-! 0,0,0,0,0,468,468,468,468,468,468,460,116,0,0,0,0,0,116,0,0,0,0,0,0,0,468,468,
-! 468,468,468,468,468,468,468,468,0,468,468,468,468,468,468,468,468,468,468,468,
-! 468,0,0,0,484,0,469,0,0,485,0,0,0,0,0,470,0,0,486,486,486,486,486,486,486,486,0,
-! 468,468,468,468,468,468,487,0,0,0,0,469,356,0,0,0,0,0,0,0,470,499,499,499,499,
-! 499,499,499,499,0,0,0,0,0,0,488,0,0,0,0,489,490,0,0,0,491,0,0,0,0,0,0,0,492,0,0,
-! 0,493,0,494,0,495,0,496,497,497,497,497,497,497,497,497,497,497,0,0,0,0,0,0,0,
-! 497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,
-! 497,497,497,497,497,497,0,0,0,0,0,0,497,497,497,497,497,497,497,497,497,497,497,
-! 497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,368,0,0,0,0,0,0,0,0,
-! 497,497,497,497,497,497,497,497,497,497,0,0,0,0,0,0,0,497,497,497,497,497,497,
-  497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,
-! 0,0,0,0,0,0,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,497,
-! 497,497,497,497,497,497,497,497,497,22,0,0,506,0,0,0,505,505,505,505,505,505,505,
-! 505,505,505,0,0,0,0,0,0,0,505,505,505,505,505,505,505,505,505,505,505,505,505,
-! 505,505,505,505,505,505,505,505,505,505,505,505,505,0,0,0,0,505,0,505,505,505,
-  505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,505,
-! 505,505,505,508,0,0,0,0,0,0,0,507,507,507,507,507,507,507,507,507,507,0,0,0,0,0,
-! 0,0,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,
-! 507,507,507,507,507,507,507,0,0,0,0,507,0,507,507,507,507,507,507,507,507,507,
-! 507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,507,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-! 0,0,0,0,0,0,0,0};const int Cyc_lex_check[3782]=(const int[3782]){- 1,- 1,- 1,- 1,- 1,- 1,
-! - 1,- 1,- 1,- 1,0,25,29,0,138,140,147,149,410,413,41,41,45,45,41,509,45,- 1,- 1,- 1,- 1,
-! - 1,136,316,327,0,506,10,12,40,10,12,40,41,317,45,318,20,1,1,1,1,1,1,1,1,1,1,38,
-! 48,137,244,10,38,245,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,145,328,
-! 332,333,1,145,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,
-! 2,2,2,9,18,51,52,53,54,55,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,56,
-! 57,58,59,2,60,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,65,66,7,3,3,3,
-! 3,3,7,7,67,68,69,70,71,7,30,30,30,30,30,30,30,30,72,73,3,3,3,74,75,3,3,3,47,47,3,
-! 3,47,3,3,3,3,3,3,3,3,3,3,3,3,3,3,78,3,3,3,47,0,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
-! 3,3,3,3,3,3,3,3,3,10,12,40,3,3,79,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
-! 3,3,3,4,3,16,4,5,5,6,8,5,6,8,80,81,50,82,16,50,85,27,86,17,27,50,17,4,87,88,5,89,
-! 5,6,8,9,18,90,96,97,5,98,99,100,101,102,109,17,34,34,34,34,34,34,34,34,110,130,
-! 131,27,27,27,27,27,27,27,27,61,61,132,133,61,76,76,83,83,76,134,83,135,157,158,
-! 159,64,64,4,160,64,161,162,61,6,8,5,16,76,16,83,165,166,167,169,168,170,171,17,
-! 64,172,27,173,7,77,77,5,168,77,174,175,178,179,11,11,11,11,11,11,11,11,11,11,119,
-! 27,126,119,77,126,3,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,
-! 11,11,11,11,11,11,127,180,146,127,11,146,11,11,11,11,11,11,11,11,11,11,11,11,11,
-! 11,11,11,11,11,11,11,11,11,11,11,11,11,91,91,64,181,91,182,185,186,188,189,103,
-! 103,111,111,103,192,111,120,120,193,195,120,196,91,197,13,13,84,84,13,77,84,16,
-! 103,198,111,199,202,203,204,120,205,206,207,208,209,211,212,13,213,84,214,121,
-  121,4,215,121,217,218,5,6,8,13,13,13,13,13,13,13,13,13,13,13,13,17,121,221,222,
-  225,227,228,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,
-  13,13,13,229,230,231,233,13,234,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,
+  sizeof(*_tmp2));_tmp2[0]=((struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*s,struct
+  _tagged_arr*elt))Cyc_Set_insert)(*((struct Cyc_Set_Set**)_check_null(Cyc_current_targets)),
+  sptr);_tmp2;});}struct _tuple9{struct _tagged_arr*f1;struct Cyc_Set_Set*f2;};struct
 ***************
-*** 1810,1817 ****
-  _tmp134.f1=(struct _tagged_arr)d;{struct Cyc_Std_String_pa_struct _tmp133;_tmp133.tag=
-  0;_tmp133.f1=(struct _tagged_arr)d;{void*_tmp132[2]={& _tmp133,& _tmp134};Cyc_prscript(
+*** 1724,1731 ****
+  _tmp113.f1=(struct _tagged_arr)d;{struct Cyc_Std_String_pa_struct _tmp112;_tmp112.tag=
+  0;_tmp112.f1=(struct _tagged_arr)d;{void*_tmp111[2]={& _tmp112,& _tmp113};Cyc_prscript(
   _tag_arr("if ! test -e %s; then mkdir %s; fi\n",sizeof(char),36),_tag_arr(
-! _tmp132,sizeof(void*),2));}}});else{int _tmp135=({unsigned int _tmp138[0];Cyc_Std_open(
-! d,0,_tag_arr(_tmp138,sizeof(unsigned int),0));});if(_tmp135 == - 1){if(Cyc_Std_mkdir(
-  d,448)== - 1){({struct Cyc_Std_String_pa_struct _tmp137;_tmp137.tag=0;_tmp137.f1=(
-  struct _tagged_arr)d;{void*_tmp136[1]={& _tmp137};Cyc_Std_fprintf(Cyc_Std_stderr,
+! _tmp111,sizeof(void*),2));}}});else{int _tmp114=({unsigned int _tmp117[0];Cyc_Std_open(
+! d,0,_tag_arr(_tmp117,sizeof(unsigned int),0));});if(_tmp114 == - 1){if(Cyc_Std_mkdir(
+  d,448)== - 1){({struct Cyc_Std_String_pa_struct _tmp116;_tmp116.tag=0;_tmp116.f1=(
+  struct _tagged_arr)d;{void*_tmp115[1]={& _tmp116};Cyc_Std_fprintf(Cyc_Std_stderr,
   _tag_arr("Error: could not create directory %s\n",sizeof(char),38),_tag_arr(
---- 1802,1809 ----
-  _tmp134.f1=(struct _tagged_arr)d;{struct Cyc_Std_String_pa_struct _tmp133;_tmp133.tag=
-  0;_tmp133.f1=(struct _tagged_arr)d;{void*_tmp132[2]={& _tmp133,& _tmp134};Cyc_prscript(
+--- 1716,1723 ----
+  _tmp113.f1=(struct _tagged_arr)d;{struct Cyc_Std_String_pa_struct _tmp112;_tmp112.tag=
+  0;_tmp112.f1=(struct _tagged_arr)d;{void*_tmp111[2]={& _tmp112,& _tmp113};Cyc_prscript(
   _tag_arr("if ! test -e %s; then mkdir %s; fi\n",sizeof(char),36),_tag_arr(
-! _tmp132,sizeof(void*),2));}}});else{int _tmp135=({unsigned short _tmp138[0];Cyc_Std_open(
-! d,0,_tag_arr(_tmp138,sizeof(unsigned short),0));});if(_tmp135 == - 1){if(Cyc_Std_mkdir(
-  d,448)== - 1){({struct Cyc_Std_String_pa_struct _tmp137;_tmp137.tag=0;_tmp137.f1=(
-  struct _tagged_arr)d;{void*_tmp136[1]={& _tmp137};Cyc_Std_fprintf(Cyc_Std_stderr,
+! _tmp111,sizeof(void*),2));}}});else{int _tmp114=({unsigned short _tmp117[0];Cyc_Std_open(
+! d,0,_tag_arr(_tmp117,sizeof(unsigned short),0));});if(_tmp114 == - 1){if(Cyc_Std_mkdir(
+  d,448)== - 1){({struct Cyc_Std_String_pa_struct _tmp116;_tmp116.tag=0;_tmp116.f1=(
+  struct _tagged_arr)d;{void*_tmp115[1]={& _tmp116};Cyc_Std_fprintf(Cyc_Std_stderr,
   _tag_arr("Error: could not create directory %s\n",sizeof(char),38),_tag_arr(
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/cf_flowinfo.c powerpc-apple-rhapsody/src/cf_flowinfo.c
-*** i686-unknown-linux/src/cf_flowinfo.c	Wed Feb 13 16:25:56 2002
---- powerpc-apple-rhapsody/src/cf_flowinfo.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/cf_flowinfo.c	Thu Feb 14 11:38:12 2002
+--- powerpc-apple-rhapsody/src/cf_flowinfo.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 265,279 ****
   void*);struct Cyc_Set_Set;struct Cyc_Set_Set*Cyc_Set_empty(int(*cmp)(void*,void*));
@@ -3000,8 +2449,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cf_flowinfo.c powerpc-apple-rha
   int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/cycdoc.c powerpc-apple-rhapsody/src/cycdoc.c
-*** i686-unknown-linux/src/cycdoc.c	Wed Feb 13 15:03:26 2002
---- powerpc-apple-rhapsody/src/cycdoc.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/cycdoc.c	Thu Feb 14 11:38:12 2002
+--- powerpc-apple-rhapsody/src/cycdoc.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 256,271 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
@@ -3035,8 +2484,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cycdoc.c powerpc-apple-rhapsody
   _tagged_arr,struct _tagged_arr);int Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,
   struct _tagged_arr,struct _tagged_arr);int Cyc_Std_fputc(int,struct Cyc_Std___cycFILE*);
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsody/src/cyclone.c
-*** i686-unknown-linux/src/cyclone.c	Wed Feb 13 17:05:26 2002
---- powerpc-apple-rhapsody/src/cyclone.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/cyclone.c	Thu Feb 14 11:38:12 2002
+--- powerpc-apple-rhapsody/src/cyclone.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 271,287 ****
   int tag;void(*f1)(struct _tagged_arr);};struct Cyc_Arg_Int_spec_struct{int tag;void(*
@@ -3072,8 +2521,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   struct _tagged_arr,struct _tagged_arr);unsigned int Cyc_Std_fread(struct _tagged_arr,
   unsigned int,unsigned int,struct Cyc_Std___cycFILE*);struct Cyc_Std_ShortPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/evexp.c powerpc-apple-rhapsody/src/evexp.c
-*** i686-unknown-linux/src/evexp.c	Wed Feb 13 16:25:56 2002
---- powerpc-apple-rhapsody/src/evexp.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/evexp.c	Thu Feb 14 11:38:12 2002
+--- powerpc-apple-rhapsody/src/evexp.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 259,273 ****
   Cyc_List_Nth[8];struct Cyc_Lineno_Pos{struct _tagged_arr logical_file;struct
@@ -3105,8 +2554,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/evexp.c powerpc-apple-rhapsody/
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
   int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhapsody/src/formatstr.c
-*** i686-unknown-linux/src/formatstr.c	Tue Feb 12 10:08:28 2002
---- powerpc-apple-rhapsody/src/formatstr.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/formatstr.c	Tue Feb 12 01:23:07 2002
+--- powerpc-apple-rhapsody/src/formatstr.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 261,275 ****
   struct Cyc_List_List*c);struct Cyc_Lineno_Pos{struct _tagged_arr logical_file;struct
@@ -3139,7 +2588,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhaps
   int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};extern char
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/install_path.c powerpc-apple-rhapsody/src/install_path.c
 *** i686-unknown-linux/src/install_path.c	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/src/install_path.c	Thu Feb 14 11:46:54 2002
+--- powerpc-apple-rhapsody/src/install_path.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 0 ****
 --- 1,5 ----
@@ -3149,8 +2598,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/install_path.c powerpc-apple-rh
 + char *Ccomp = "gcc";
 + char *Cversion = "0.2";
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/interface.c powerpc-apple-rhapsody/src/interface.c
-*** i686-unknown-linux/src/interface.c	Tue Feb 12 10:08:28 2002
---- powerpc-apple-rhapsody/src/interface.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/interface.c	Tue Feb 12 01:23:07 2002
+--- powerpc-apple-rhapsody/src/interface.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 255,269 ****
   char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
@@ -3182,8 +2631,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/interface.c powerpc-apple-rhaps
   int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/lex.c powerpc-apple-rhapsody/src/lex.c
-*** i686-unknown-linux/src/lex.c	Tue Feb 12 10:08:28 2002
---- powerpc-apple-rhapsody/src/lex.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/lex.c	Tue Feb 12 01:23:07 2002
+--- powerpc-apple-rhapsody/src/lex.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 255,269 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
@@ -3215,8 +2664,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/lex.c powerpc-apple-rhapsody/sr
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
   int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/new_control_flow.c powerpc-apple-rhapsody/src/new_control_flow.c
-*** i686-unknown-linux/src/new_control_flow.c	Wed Feb 13 16:25:56 2002
---- powerpc-apple-rhapsody/src/new_control_flow.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/new_control_flow.c	Thu Feb 14 11:38:12 2002
+--- powerpc-apple-rhapsody/src/new_control_flow.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 264,277 ****
   int(*next)(void*env,void*dest);};int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);
@@ -3247,8 +2696,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/new_control_flow.c powerpc-appl
   Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
   int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};extern char
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/parse_tab.c powerpc-apple-rhapsody/src/parse_tab.c
-*** i686-unknown-linux/src/parse_tab.c	Tue Feb 12 10:08:28 2002
---- powerpc-apple-rhapsody/src/parse_tab.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/parse_tab.c	Tue Feb 12 01:23:07 2002
+--- powerpc-apple-rhapsody/src/parse_tab.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 255,277 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -3297,8 +2746,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/parse_tab.c powerpc-apple-rhaps
   Cyc_Lexing_lexbuf*);void*refill_state;struct _tagged_arr lex_buffer;int
   lex_buffer_len;int lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/rgnorder.c powerpc-apple-rhapsody/src/rgnorder.c
-*** i686-unknown-linux/src/rgnorder.c	Tue Feb 12 10:08:30 2002
---- powerpc-apple-rhapsody/src/rgnorder.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/rgnorder.c	Tue Feb 12 01:23:07 2002
+--- powerpc-apple-rhapsody/src/rgnorder.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 250,268 ****
   #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
@@ -3339,8 +2788,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/rgnorder.c powerpc-apple-rhapso
   char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
   _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tc.c powerpc-apple-rhapsody/src/tc.c
-*** i686-unknown-linux/src/tc.c	Thu Feb 14 11:45:52 2002
---- powerpc-apple-rhapsody/src/tc.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/tc.c	Thu Feb 14 11:38:12 2002
+--- powerpc-apple-rhapsody/src/tc.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 451,470 ****
   void*rgn);void*Cyc_Absyn_const_string_typ(void*rgn);void*Cyc_Absyn_tagged_typ(
@@ -3382,8 +2831,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tc.c powerpc-apple-rhapsody/src
   add_cyc_prefix: 1;int to_VC: 1;int decls_first: 1;int rewrite_temp_tvars: 1;int
   print_all_tvars: 1;int print_all_kinds: 1;int print_using_stmts: 1;int
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcdecl.c powerpc-apple-rhapsody/src/tcdecl.c
-*** i686-unknown-linux/src/tcdecl.c	Tue Feb 12 10:08:30 2002
---- powerpc-apple-rhapsody/src/tcdecl.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/tcdecl.c	Tue Feb 12 01:23:07 2002
+--- powerpc-apple-rhapsody/src/tcdecl.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 250,263 ****
   #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
@@ -3414,8 +2863,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcdecl.c powerpc-apple-rhapsody
   int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcenv.c powerpc-apple-rhapsody/src/tcenv.c
-*** i686-unknown-linux/src/tcenv.c	Tue Feb 12 10:08:30 2002
---- powerpc-apple-rhapsody/src/tcenv.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/tcenv.c	Tue Feb 12 01:23:07 2002
+--- powerpc-apple-rhapsody/src/tcenv.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 254,268 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
@@ -3448,8 +2897,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcenv.c powerpc-apple-rhapsody/
   int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};
   struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcexp.c powerpc-apple-rhapsody/src/tcexp.c
-*** i686-unknown-linux/src/tcexp.c	Wed Feb 13 15:03:26 2002
---- powerpc-apple-rhapsody/src/tcexp.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/tcexp.c	Thu Feb 14 11:38:12 2002
+--- powerpc-apple-rhapsody/src/tcexp.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 471,484 ****
   struct _tagged_arr*);struct Cyc_Absyn_Aggrfield*Cyc_Absyn_lookup_decl_field(struct
@@ -3480,8 +2929,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcexp.c powerpc-apple-rhapsody/
   Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
   int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcgenrep.c powerpc-apple-rhapsody/src/tcgenrep.c
-*** i686-unknown-linux/src/tcgenrep.c	Wed Feb 13 15:03:26 2002
---- powerpc-apple-rhapsody/src/tcgenrep.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/tcgenrep.c	Thu Feb 14 11:38:12 2002
+--- powerpc-apple-rhapsody/src/tcgenrep.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 272,285 ****
   struct Cyc_List_List*x);struct Cyc_List_List*Cyc_List_tabulate(int n,void*(*f)(int));
@@ -3530,8 +2979,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcgenrep.c powerpc-apple-rhapso
   f1;};struct _tuple6{void*f1;struct _tagged_arr*f2;};struct Cyc_Absyn_Conref;struct
   Cyc_Absyn_Tqual{int q_const: 1;int q_volatile: 1;int q_restrict: 1;};struct Cyc_Absyn_Conref{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcpat.c powerpc-apple-rhapsody/src/tcpat.c
-*** i686-unknown-linux/src/tcpat.c	Tue Feb 12 10:08:30 2002
---- powerpc-apple-rhapsody/src/tcpat.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/tcpat.c	Tue Feb 12 01:23:07 2002
+--- powerpc-apple-rhapsody/src/tcpat.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 270,288 ****
   x,struct Cyc_List_List*y);struct Cyc_List_List*Cyc_List_rtabulate_c(struct
@@ -3572,8 +3021,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcpat.c powerpc-apple-rhapsody/
   r,struct Cyc_Dict_Dict*d);struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*,
   struct Cyc_Dict_Dict*d);struct Cyc_Set_Set;struct Cyc_Set_Set*Cyc_Set_rempty(struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcstmt.c powerpc-apple-rhapsody/src/tcstmt.c
-*** i686-unknown-linux/src/tcstmt.c	Wed Feb 13 15:03:24 2002
---- powerpc-apple-rhapsody/src/tcstmt.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/tcstmt.c	Thu Feb 14 11:38:12 2002
+--- powerpc-apple-rhapsody/src/tcstmt.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 447,460 ****
   struct Cyc_Absyn_Stmt*Cyc_Absyn_skip_stmt(struct Cyc_Position_Segment*loc);struct
@@ -3604,8 +3053,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcstmt.c powerpc-apple-rhapsody
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
   int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcutil.c powerpc-apple-rhapsody/src/tcutil.c
-*** i686-unknown-linux/src/tcutil.c	Thu Feb 14 11:45:52 2002
---- powerpc-apple-rhapsody/src/tcutil.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/tcutil.c	Thu Feb 14 11:38:12 2002
+--- powerpc-apple-rhapsody/src/tcutil.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 256,301 ****
   _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -3700,8 +3149,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcutil.c powerpc-apple-rhapsody
   struct Cyc_List_List*);struct Cyc_Position_Error{struct _tagged_arr source;struct Cyc_Position_Segment*
   seg;void*kind;struct _tagged_arr desc;};struct Cyc_Position_Error*Cyc_Position_mk_err_elab(
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/toc.c powerpc-apple-rhapsody/src/toc.c
-*** i686-unknown-linux/src/toc.c	Wed Feb 13 15:44:32 2002
---- powerpc-apple-rhapsody/src/toc.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/toc.c	Thu Feb 14 11:38:13 2002
+--- powerpc-apple-rhapsody/src/toc.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 255,302 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -3800,8 +3249,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/toc.c powerpc-apple-rhapsody/sr
   struct Cyc_Position_Segment*);struct Cyc_Position_Error{struct _tagged_arr source;
   struct Cyc_Position_Segment*seg;void*kind;struct _tagged_arr desc;};extern char Cyc_Position_Nocontext[
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tovc.c powerpc-apple-rhapsody/src/tovc.c
-*** i686-unknown-linux/src/tovc.c	Tue Feb 12 10:08:32 2002
---- powerpc-apple-rhapsody/src/tovc.c	Thu Feb 14 11:46:54 2002
+*** i686-unknown-linux/src/tovc.c	Tue Feb 12 01:23:07 2002
+--- powerpc-apple-rhapsody/src/tovc.c	Thu Feb 14 12:18:49 2002
 ***************
 *** 262,276 ****
   Cyc_List_List*x);struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*x);

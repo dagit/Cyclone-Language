@@ -352,7 +352,8 @@ Cyc_Std_IPPROTO_ICMP  = 1,Cyc_Std_IPPROTO_IGMP  = 2,Cyc_Std_IPPROTO_IPIP  = 4,Cy
  = 6,Cyc_Std_IPPROTO_EGP  = 8,Cyc_Std_IPPROTO_PUP  = 12,Cyc_Std_IPPROTO_UDP  = 17,
 Cyc_Std_IPPROTO_IDP  = 22,Cyc_Std_IPPROTO_RAW  = 255,Cyc_Std_IPPROTO_MAX  = 256};
 struct Cyc_Std_sockaddr_in{short sin_family;unsigned short sin_port;struct Cyc_Std_in_addr
-sin_addr;unsigned char __pad[8];};struct Cyc_Std_in6_addr{unsigned char s6_addr[16];
+sin_addr;unsigned char __pad[((16 - sizeof(short))- sizeof(unsigned short))- 
+sizeof(struct Cyc_Std_in_addr)];};struct Cyc_Std_in6_addr{unsigned char s6_addr[16];
 };struct Cyc_Std_sockaddr_in6{unsigned short sin6_family;unsigned short sin6_port;
 unsigned int sin6_flowinfo;struct Cyc_Std_in6_addr sin6_addr;};struct Cyc_Std_pollfd{
 int fd;short events;short revents;};int Cyc_Std_poll(struct _tagged_arr,unsigned int,
@@ -586,12 +587,13 @@ unsigned int rlim_cur;unsigned int rlim_max;};struct Cyc_Std_rusage{struct Cyc_S
 ru_utime;struct Cyc_Std_timeval ru_stime;int ru_maxrss;int ru_ixrss;int ru_idrss;int
 ru_isrss;int ru_minflt;int ru_majflt;int ru_nswap;int ru_inblock;int ru_oublock;int
 ru_msgsnd;int ru_msgrcv;int ru_nsignals;int ru_nvcsw;int ru_nivcsw;};struct Cyc_Std_timespec{
-int tv_sec;int tv_nsec;};struct Cyc_Std__types_fd_set{int fds_bits[2];};int select(
-int,struct Cyc_Std__types_fd_set*,struct Cyc_Std__types_fd_set*,struct Cyc_Std__types_fd_set*,
-struct Cyc_Std_timeval*);void Cyc_Std_FD_CLR(int,struct Cyc_Std__types_fd_set*);int
-Cyc_Std_FD_ISSET(int,struct Cyc_Std__types_fd_set*);void Cyc_Std_FD_SET(int,struct
-Cyc_Std__types_fd_set*);void Cyc_Std_FD_ZERO(struct Cyc_Std__types_fd_set*);void
-__stub_FD_CLR(int,struct Cyc_Std__types_fd_set*);int __stub_FD_ISSET(int,struct Cyc_Std__types_fd_set*);
+int tv_sec;int tv_nsec;};struct Cyc_Std__types_fd_set{int fds_bits[(64 + (sizeof(int)
+* 8 - 1))/ (sizeof(int)* 8)];};int select(int,struct Cyc_Std__types_fd_set*,struct
+Cyc_Std__types_fd_set*,struct Cyc_Std__types_fd_set*,struct Cyc_Std_timeval*);void
+Cyc_Std_FD_CLR(int,struct Cyc_Std__types_fd_set*);int Cyc_Std_FD_ISSET(int,struct
+Cyc_Std__types_fd_set*);void Cyc_Std_FD_SET(int,struct Cyc_Std__types_fd_set*);
+void Cyc_Std_FD_ZERO(struct Cyc_Std__types_fd_set*);void __stub_FD_CLR(int,struct
+Cyc_Std__types_fd_set*);int __stub_FD_ISSET(int,struct Cyc_Std__types_fd_set*);
 void __stub_FD_SET(int,struct Cyc_Std__types_fd_set*);void __stub_FD_ZERO(struct Cyc_Std__types_fd_set*);
 void Cyc_Std_FD_CLR(int a,struct Cyc_Std__types_fd_set*b){return __stub_FD_CLR(a,b);}
 int Cyc_Std_FD_ISSET(int a,struct Cyc_Std__types_fd_set*b){return __stub_FD_ISSET(a,
