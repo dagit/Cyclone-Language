@@ -91,109 +91,106 @@ extern struct _xtunion_struct ADD_PREFIX(Bad_alloc_struct);
 extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 
 //// Built-in Run-time Checks and company
-static inline 
-void * _check_null(void * ptr) {
-#ifndef NO_CYC_NULL_CHECKS
-  if(!ptr)
-    _throw_null();
+#ifdef NO_CYC_NULL_CHECKS
+#define _check_null(ptr) (ptr)
+#else
+#define _check_null(ptr) \
+  ({ void *_check_null_temp = (void*)(ptr); \
+     if (!_check_null_temp) _throw_null(); \
+     _check_null_temp; })
 #endif
-  return ptr;
-}
-static inline 
-char * _check_known_subscript_null(void * ptr, unsigned bound, 
-				   unsigned elt_sz, unsigned index) {
-#ifndef NO_CYC_NULL_CHECKS
-  if(!ptr)
-    _throw_null();
-#endif
-#ifndef NO_CYC_BOUNDS_CHECKS
-  if(index >= bound)
-    _throw_arraybounds();
-#endif
-  return ((char *)ptr) + elt_sz*index;
-}
-static inline 
-unsigned _check_known_subscript_notnull(unsigned bound, unsigned index) {
-#ifndef NO_CYC_BOUNDS_CHECKS
-  if(index >= bound)
-    _throw_arraybounds();
-#endif
-  return index;
-}
-static inline 
-char * _check_unknown_subscript(struct _tagged_arr arr,
-				unsigned elt_sz, unsigned index) {
-  // caller casts first argument and result
-  // multiplication looks inefficient, but C compiler has to insert it otherwise
-  // by inlining, it should be able to avoid actual multiplication
-  unsigned char * ans = arr.curr + elt_sz * index;
-  // might be faster not to distinguish these two cases. definitely would be
-  // smaller.
-#ifndef NO_CYC_NULL_CHECKS
-  if(!arr.base) 
-    _throw_null();
-#endif
-#ifndef NO_CYC_BOUNDS_CHECKS
-  if(ans < arr.base || ans >= arr.last_plus_one)
-    _throw_arraybounds();
-#endif
-  return ans;
-}
-static inline 
-struct _tagged_arr _tag_arr(const void * curr, 
-			    unsigned elt_sz, unsigned num_elts) {
-  // beware the gcc bug, can happen with *temp = _tag_arr(...) in weird places!
-  struct _tagged_arr ans;
-  ans.base = (void *)curr;
-  ans.curr = (void *)curr;
-  ans.last_plus_one = ((char *)curr) + elt_sz * num_elts;
-  return ans;
-}
-static inline
-struct _tagged_arr * _init_tag_arr(struct _tagged_arr * arr_ptr, void * arr, 
-				   unsigned elt_sz, unsigned num_elts) {
-  // we use this to (hopefully) avoid the gcc bug
-  arr_ptr->base = arr_ptr->curr = arr;
-  arr_ptr->last_plus_one = ((char *)arr) + elt_sz * num_elts;
-  return arr_ptr;
-}
 
-static inline
-char * _untag_arr(struct _tagged_arr arr, unsigned elt_sz, unsigned num_elts) {
-  // Note: if arr is "null" base and curr should both be null, so this
-  //       is correct (caller checks for null if untagging to @ type)
-  // base may not be null if you use t ? pointer subtraction to get 0 -- oh well
-#ifndef NO_CYC_BOUNDS_CHECKS
-  if(arr.curr < arr.base || arr.curr + elt_sz * num_elts > arr.last_plus_one)
-    _throw_arraybounds();
+#ifdef NO_CYC_BOUNDS_CHECKS
+#define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
+  ((char *)ptr) + (elt_sz)*(index); })
+#else
+#define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
+  void *_cks_ptr = (void*)(ptr); \
+  unsigned _cks_bound = (bound); \
+  unsigned _cks_elt_sz = (elt_sz); \
+  unsigned _cks_index = (index); \
+  if (!_cks_ptr) _throw_null(); \
+  if (!_cks_index >= _cks_bound) _throw_arraybounds(); \
+  ((char *)cks_ptr) + cks_elt_sz*cks_index; })
 #endif
-  return arr.curr;
-}
-static inline 
-unsigned _get_arr_size(struct _tagged_arr arr, unsigned elt_sz) {
-  return (arr.curr<arr.base || arr.curr>=arr.last_plus_one) ? 0 : ((arr.last_plus_one - arr.curr) / elt_sz);
-}
-static inline
-struct _tagged_arr _tagged_arr_plus(struct _tagged_arr arr, unsigned elt_sz,
-				    int change) {
-  struct _tagged_arr ans = arr;
-  ans.curr += ((int)elt_sz)*change;
-  return ans;
-}
-static inline
-struct _tagged_arr _tagged_arr_inplace_plus(struct _tagged_arr * arr_ptr,
-					    unsigned elt_sz, int change) {
-  arr_ptr->curr += ((int)elt_sz)*change;
-  return *arr_ptr;
-}
-static inline
-struct _tagged_arr _tagged_arr_inplace_plus_post(struct _tagged_arr * arr_ptr,
-						 unsigned elt_sz, int change) {
-  struct _tagged_arr ans = *arr_ptr;
-  arr_ptr->curr += ((int)elt_sz)*change;
-  return ans;
-}
-				  
+
+#ifdef NO_CYC_BOUNDS_CHECKS
+#define _check_known_subscript_notnull(bound,index) (index)
+#else
+#define _check_known_subscript_notnull(bound,index) ({ \
+  unsigned _cksnn_bound = (bound); \
+  unsigned _cksnn_index = (index); \
+  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
+  _cksnn_index; })
+#endif
+
+#ifdef NO_CYC_BOUNDS_CHECKS
+#define _check_unknown_subscript(arr,elt_sz,index) ({ \
+  struct _tagged_arr _cus_arr = (arr); \
+  unsigned _cus_elt_sz = (elt_sz); \
+  unsigned _cus_index = (index); \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  _cus_ans; })
+#else
+#define _check_unknown_subscript(arr,elt_sz,index) ({ \
+  struct _tagged_arr _cus_arr = (arr); \
+  unsigned _cus_elt_sz = (elt_sz); \
+  unsigned _cus_index = (index); \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  if (!_cus_arr.base) _throw_null(); \
+  if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
+    _throw_arraybounds(); \
+  _cus_ans; })
+#endif
+
+#define _tag_arr(tcurr,elt_sz,num_elts) ({ \
+  struct _tagged_arr _tag_arr_ans; \
+  _tag_arr_ans.base = _tag_arr_ans.curr = (void *)(tcurr); \
+  _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts); \
+  _tag_arr_ans; })
+
+#define _init_tag_arr(arr_ptr,arr,elt_sz,num_elts) ({ \
+  struct _tagged_arr *_itarr_ptr = (arr_ptr); \
+  void * _itarr = (arr); \
+  _itarr_ptr->base = _itarr_ptr->curr = _itarr; \
+  _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts); \
+  _itarr_ptr; })
+
+#ifdef NO_CYC_BOUNDS_CHECKS
+#define _untag_arr(arr,elt_sz,num_elts) ((arr).curr)
+#else
+#define _untag_arr(arr,elt_sz,num_elts) ({ \
+  struct _tagged_arr _arr = (arr); \
+  unsigned char *_curr = _arr.curr; \
+  if (_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one)\
+    _throw_arraybounds(); \
+  _curr; })
+#endif
+
+#define _get_arr_size(arr,elt_sz) \
+  ({struct _tagged_arr _get_arr_size_temp = (arr); \
+    unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr; \
+    unsigned char *_get_arr_size_last=_get_arr_size_temp.last_plus_one; \
+    (_get_arr_size_curr < _get_arr_size_temp.base || \
+     _get_arr_size_curr >= _get_arr_size_last) ? 0 : \
+    ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));})
+
+#define _tagged_arr_plus(arr,elt_sz,change) ({ \
+  struct _tagged_arr _ans = (arr); \
+  _ans.curr += ((int)(elt_sz))*(change); \
+  _ans; })
+
+#define _tagged_arr_inplace_plus(arr_ptr,elt_sz,change) ({ \
+  struct _tagged_arr * _arr_ptr = (arr_ptr); \
+  _arr_ptr->curr += ((int)(elt_sz))*(change); \
+  *_arr_ptr; })
+
+#define _tagged_arr_inplace_plus_post(arr_ptr,elt_sz,change) ({ \
+  struct _tagged_arr * _arr_ptr = (arr_ptr); \
+  struct _tagged_arr _ans = *_arr_ptr; \
+  _arr_ptr->curr += ((int)(elt_sz))*(change); \
+  _ans; })
+
 //// Allocation
 extern void * GC_malloc(int);
 extern void * GC_malloc_atomic(int);
@@ -271,17 +268,16 @@ void*_tmp1=(void*)_tmp0->left;struct Cyc_Splay_noderef*_tmp2;_LL1: if((
 unsigned int)_tmp1 > 1?*((int*)_tmp1)== 0: 0){_LL5: _tmp2=((struct Cyc_Splay_Node_struct*)
 _tmp1)->f1;goto _LL2;}else{goto _LL3;}_LL3: goto _LL4;_LL2: {struct Cyc_Splay_node*
 _tmp3=_tmp2->v;struct Cyc_Splay_Node_struct*_tmp4=({struct Cyc_Splay_Node_struct*
-_tmp6=_region_malloc(r,sizeof(struct Cyc_Splay_Node_struct));_tmp6[0]=({struct Cyc_Splay_Node_struct
+_tmp6=_region_malloc(r,sizeof(*_tmp6));_tmp6[0]=({struct Cyc_Splay_Node_struct
 _tmp7;_tmp7.tag=0;_tmp7.f1=({struct Cyc_Splay_noderef*_tmp8=_region_malloc(r,
-sizeof(struct Cyc_Splay_noderef));_tmp8->v=({struct Cyc_Splay_node*_tmp9=
-_region_malloc(r,sizeof(struct Cyc_Splay_node));_tmp9->key=(void*)((void*)_tmp0->key);
-_tmp9->data=(void*)((void*)_tmp0->data);_tmp9->left=(void*)((void*)_tmp3->right);
-_tmp9->right=(void*)((void*)_tmp0->right);_tmp9;});_tmp8;});_tmp7;});_tmp6;});nr->v=({
-struct Cyc_Splay_node*_tmp5=_region_malloc(r,sizeof(struct Cyc_Splay_node));_tmp5->key=(
-void*)((void*)_tmp3->key);_tmp5->data=(void*)((void*)_tmp3->data);_tmp5->left=(
-void*)((void*)_tmp3->left);_tmp5->right=(void*)((void*)_tmp4);_tmp5;});goto _LL0;}
-_LL4:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmpA=_cycalloc(
-sizeof(struct Cyc_Core_Invalid_argument_struct));_tmpA[0]=({struct Cyc_Core_Invalid_argument_struct
+sizeof(*_tmp8));_tmp8->v=({struct Cyc_Splay_node*_tmp9=_region_malloc(r,sizeof(*
+_tmp9));_tmp9->key=(void*)((void*)_tmp0->key);_tmp9->data=(void*)((void*)_tmp0->data);
+_tmp9->left=(void*)((void*)_tmp3->right);_tmp9->right=(void*)((void*)_tmp0->right);
+_tmp9;});_tmp8;});_tmp7;});_tmp6;});nr->v=({struct Cyc_Splay_node*_tmp5=
+_region_malloc(r,sizeof(*_tmp5));_tmp5->key=(void*)((void*)_tmp3->key);_tmp5->data=(
+void*)((void*)_tmp3->data);_tmp5->left=(void*)((void*)_tmp3->left);_tmp5->right=(
+void*)((void*)_tmp4);_tmp5;});goto _LL0;}_LL4:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+_tmpA=_cycalloc(sizeof(*_tmpA));_tmpA[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmpB;_tmpB.tag=Cyc_Core_Invalid_argument;_tmpB.f1=_tag_arr("Splay::rotate_left",
 sizeof(unsigned char),19);_tmpB;});_tmpA;}));_LL0:;}static void Cyc_Splay_rotate_right(
 struct _RegionHandle*r,struct Cyc_Splay_noderef*nr){struct Cyc_Splay_node*_tmpC=nr->v;
@@ -289,18 +285,17 @@ void*_tmpD=(void*)_tmpC->right;struct Cyc_Splay_noderef*_tmpE;_LL7: if((
 unsigned int)_tmpD > 1?*((int*)_tmpD)== 0: 0){_LLB: _tmpE=((struct Cyc_Splay_Node_struct*)
 _tmpD)->f1;goto _LL8;}else{goto _LL9;}_LL9: goto _LLA;_LL8: {struct Cyc_Splay_node*
 _tmpF=_tmpE->v;struct Cyc_Splay_Node_struct*_tmp10=({struct Cyc_Splay_Node_struct*
-_tmp12=_region_malloc(r,sizeof(struct Cyc_Splay_Node_struct));_tmp12[0]=({struct
-Cyc_Splay_Node_struct _tmp13;_tmp13.tag=0;_tmp13.f1=({struct Cyc_Splay_noderef*
-_tmp14=_region_malloc(r,sizeof(struct Cyc_Splay_noderef));_tmp14->v=({struct Cyc_Splay_node*
-_tmp15=_region_malloc(r,sizeof(struct Cyc_Splay_node));_tmp15->key=(void*)((void*)
-_tmpC->key);_tmp15->data=(void*)((void*)_tmpC->data);_tmp15->left=(void*)((void*)
-_tmpC->left);_tmp15->right=(void*)((void*)_tmpF->left);_tmp15;});_tmp14;});
-_tmp13;});_tmp12;});nr->v=({struct Cyc_Splay_node*_tmp11=_region_malloc(r,sizeof(
-struct Cyc_Splay_node));_tmp11->key=(void*)((void*)_tmpF->key);_tmp11->data=(void*)((
-void*)_tmpF->data);_tmp11->left=(void*)((void*)_tmp10);_tmp11->right=(void*)((
-void*)_tmpF->right);_tmp11;});goto _LL6;}_LLA:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
-_tmp16=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_struct));_tmp16[0]=({
-struct Cyc_Core_Invalid_argument_struct _tmp17;_tmp17.tag=Cyc_Core_Invalid_argument;
+_tmp12=_region_malloc(r,sizeof(*_tmp12));_tmp12[0]=({struct Cyc_Splay_Node_struct
+_tmp13;_tmp13.tag=0;_tmp13.f1=({struct Cyc_Splay_noderef*_tmp14=_region_malloc(r,
+sizeof(*_tmp14));_tmp14->v=({struct Cyc_Splay_node*_tmp15=_region_malloc(r,
+sizeof(*_tmp15));_tmp15->key=(void*)((void*)_tmpC->key);_tmp15->data=(void*)((
+void*)_tmpC->data);_tmp15->left=(void*)((void*)_tmpC->left);_tmp15->right=(void*)((
+void*)_tmpF->left);_tmp15;});_tmp14;});_tmp13;});_tmp12;});nr->v=({struct Cyc_Splay_node*
+_tmp11=_region_malloc(r,sizeof(*_tmp11));_tmp11->key=(void*)((void*)_tmpF->key);
+_tmp11->data=(void*)((void*)_tmpF->data);_tmp11->left=(void*)((void*)_tmp10);
+_tmp11->right=(void*)((void*)_tmpF->right);_tmp11;});goto _LL6;}_LLA:(int)_throw((
+void*)({struct Cyc_Core_Invalid_argument_struct*_tmp16=_cycalloc(sizeof(*_tmp16));
+_tmp16[0]=({struct Cyc_Core_Invalid_argument_struct _tmp17;_tmp17.tag=Cyc_Core_Invalid_argument;
 _tmp17.f1=_tag_arr("Splay::rotate_right",sizeof(unsigned char),20);_tmp17;});
 _tmp16;}));_LL6:;}struct _tuple0{void*f1;struct Cyc_Splay_noderef*f2;};static void
 Cyc_Splay_lift(struct _RegionHandle*r,struct Cyc_List_List*dnl){while(dnl != 0){if(
@@ -335,14 +330,13 @@ goto _LL2C;}else{goto _LL2D;}_LL2D: if((int)_tmp2B == 0){goto _LL2E;}else{goto _
 _LL2C: {struct Cyc_Splay_node*_tmp2D=_tmp2C->v;int _tmp2E=reln(reln_first_arg,(
 void*)_tmp2D->key);if(_tmp2E == 0){Cyc_Splay_lift(r,path);{int _tmp2F=1;
 _npop_handler(0);return _tmp2F;}}else{if(_tmp2E < 0){path=({struct Cyc_List_List*
-_tmp30=_region_malloc(temp,sizeof(struct Cyc_List_List));_tmp30->hd=({struct
-_tuple0*_tmp31=_region_malloc(temp,sizeof(struct _tuple0));_tmp31->f1=(void*)0;
-_tmp31->f2=_tmp2C;_tmp31;});_tmp30->tl=path;_tmp30;});tree=(void*)_tmp2D->left;}
-else{path=({struct Cyc_List_List*_tmp32=_region_malloc(temp,sizeof(struct Cyc_List_List));
-_tmp32->hd=({struct _tuple0*_tmp33=_region_malloc(temp,sizeof(struct _tuple0));
-_tmp33->f1=(void*)1;_tmp33->f2=_tmp2C;_tmp33;});_tmp32->tl=path;_tmp32;});tree=(
-void*)_tmp2D->right;}}goto _LL2A;}_LL2E: if(path != 0){Cyc_Splay_lift(r,((struct Cyc_List_List*)
-_check_null(path))->tl);}{int _tmp34=0;_npop_handler(0);return _tmp34;}_LL2A:;}};
-_pop_region(temp);}int Cyc_Splay_splay(int(*reln)(void*,void*),void*
-reln_first_arg,void*tree){return Cyc_Splay_rsplay(Cyc_Core_heap_region,reln,
-reln_first_arg,tree);}
+_tmp30=_region_malloc(temp,sizeof(*_tmp30));_tmp30->hd=({struct _tuple0*_tmp31=
+_region_malloc(temp,sizeof(*_tmp31));_tmp31->f1=(void*)0;_tmp31->f2=_tmp2C;
+_tmp31;});_tmp30->tl=path;_tmp30;});tree=(void*)_tmp2D->left;}else{path=({struct
+Cyc_List_List*_tmp32=_region_malloc(temp,sizeof(*_tmp32));_tmp32->hd=({struct
+_tuple0*_tmp33=_region_malloc(temp,sizeof(*_tmp33));_tmp33->f1=(void*)1;_tmp33->f2=
+_tmp2C;_tmp33;});_tmp32->tl=path;_tmp32;});tree=(void*)_tmp2D->right;}}goto _LL2A;}
+_LL2E: if(path != 0){Cyc_Splay_lift(r,((struct Cyc_List_List*)_check_null(path))->tl);}{
+int _tmp34=0;_npop_handler(0);return _tmp34;}_LL2A:;}};_pop_region(temp);}int Cyc_Splay_splay(
+int(*reln)(void*,void*),void*reln_first_arg,void*tree){return Cyc_Splay_rsplay(
+Cyc_Core_heap_region,reln,reln_first_arg,tree);}

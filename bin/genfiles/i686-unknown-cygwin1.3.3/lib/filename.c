@@ -272,9 +272,9 @@ sizeof(unsigned char),2),s2));}struct _tagged_arr Cyc_Filename_chop_extension(
 struct _tagged_arr filename){int i=(int)(_get_arr_size(filename,sizeof(
 unsigned char))- 1);while(i >= 0?((const unsigned char*)filename.curr)[i]!= '.': 0){
 -- i;}if(i < 0){(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp0=
-_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_struct));_tmp0[0]=({struct Cyc_Core_Invalid_argument_struct
-_tmp1;_tmp1.tag=Cyc_Core_Invalid_argument;_tmp1.f1=_tag_arr("chop_extension",
-sizeof(unsigned char),15);_tmp1;});_tmp0;}));}return Cyc_Std_substring(filename,0,(
+_cycalloc(sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Invalid_argument_struct _tmp1;
+_tmp1.tag=Cyc_Core_Invalid_argument;_tmp1.f1=_tag_arr("chop_extension",sizeof(
+unsigned char),15);_tmp1;});_tmp0;}));}return Cyc_Std_substring(filename,0,(
 unsigned int)i);}struct _tagged_arr Cyc_Filename_dirname(struct _tagged_arr filename){
 int i=(int)(_get_arr_size(filename,sizeof(unsigned char))- 1);while(i >= 0?((const
 unsigned char*)filename.curr)[i]!= '/': 0){-- i;}if(i < 0){return Cyc_Core_new_string(

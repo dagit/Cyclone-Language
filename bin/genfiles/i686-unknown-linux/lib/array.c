@@ -91,109 +91,106 @@ extern struct _xtunion_struct ADD_PREFIX(Bad_alloc_struct);
 extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 
 //// Built-in Run-time Checks and company
-static inline 
-void * _check_null(void * ptr) {
-#ifndef NO_CYC_NULL_CHECKS
-  if(!ptr)
-    _throw_null();
+#ifdef NO_CYC_NULL_CHECKS
+#define _check_null(ptr) (ptr)
+#else
+#define _check_null(ptr) \
+  ({ void *_check_null_temp = (void*)(ptr); \
+     if (!_check_null_temp) _throw_null(); \
+     _check_null_temp; })
 #endif
-  return ptr;
-}
-static inline 
-char * _check_known_subscript_null(void * ptr, unsigned bound, 
-				   unsigned elt_sz, unsigned index) {
-#ifndef NO_CYC_NULL_CHECKS
-  if(!ptr)
-    _throw_null();
-#endif
-#ifndef NO_CYC_BOUNDS_CHECKS
-  if(index >= bound)
-    _throw_arraybounds();
-#endif
-  return ((char *)ptr) + elt_sz*index;
-}
-static inline 
-unsigned _check_known_subscript_notnull(unsigned bound, unsigned index) {
-#ifndef NO_CYC_BOUNDS_CHECKS
-  if(index >= bound)
-    _throw_arraybounds();
-#endif
-  return index;
-}
-static inline 
-char * _check_unknown_subscript(struct _tagged_arr arr,
-				unsigned elt_sz, unsigned index) {
-  // caller casts first argument and result
-  // multiplication looks inefficient, but C compiler has to insert it otherwise
-  // by inlining, it should be able to avoid actual multiplication
-  unsigned char * ans = arr.curr + elt_sz * index;
-  // might be faster not to distinguish these two cases. definitely would be
-  // smaller.
-#ifndef NO_CYC_NULL_CHECKS
-  if(!arr.base) 
-    _throw_null();
-#endif
-#ifndef NO_CYC_BOUNDS_CHECKS
-  if(ans < arr.base || ans >= arr.last_plus_one)
-    _throw_arraybounds();
-#endif
-  return ans;
-}
-static inline 
-struct _tagged_arr _tag_arr(const void * curr, 
-			    unsigned elt_sz, unsigned num_elts) {
-  // beware the gcc bug, can happen with *temp = _tag_arr(...) in weird places!
-  struct _tagged_arr ans;
-  ans.base = (void *)curr;
-  ans.curr = (void *)curr;
-  ans.last_plus_one = ((char *)curr) + elt_sz * num_elts;
-  return ans;
-}
-static inline
-struct _tagged_arr * _init_tag_arr(struct _tagged_arr * arr_ptr, void * arr, 
-				   unsigned elt_sz, unsigned num_elts) {
-  // we use this to (hopefully) avoid the gcc bug
-  arr_ptr->base = arr_ptr->curr = arr;
-  arr_ptr->last_plus_one = ((char *)arr) + elt_sz * num_elts;
-  return arr_ptr;
-}
 
-static inline
-char * _untag_arr(struct _tagged_arr arr, unsigned elt_sz, unsigned num_elts) {
-  // Note: if arr is "null" base and curr should both be null, so this
-  //       is correct (caller checks for null if untagging to @ type)
-  // base may not be null if you use t ? pointer subtraction to get 0 -- oh well
-#ifndef NO_CYC_BOUNDS_CHECKS
-  if(arr.curr < arr.base || arr.curr + elt_sz * num_elts > arr.last_plus_one)
-    _throw_arraybounds();
+#ifdef NO_CYC_BOUNDS_CHECKS
+#define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
+  ((char *)ptr) + (elt_sz)*(index); })
+#else
+#define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
+  void *_cks_ptr = (void*)(ptr); \
+  unsigned _cks_bound = (bound); \
+  unsigned _cks_elt_sz = (elt_sz); \
+  unsigned _cks_index = (index); \
+  if (!_cks_ptr) _throw_null(); \
+  if (!_cks_index >= _cks_bound) _throw_arraybounds(); \
+  ((char *)cks_ptr) + cks_elt_sz*cks_index; })
 #endif
-  return arr.curr;
-}
-static inline 
-unsigned _get_arr_size(struct _tagged_arr arr, unsigned elt_sz) {
-  return (arr.curr<arr.base || arr.curr>=arr.last_plus_one) ? 0 : ((arr.last_plus_one - arr.curr) / elt_sz);
-}
-static inline
-struct _tagged_arr _tagged_arr_plus(struct _tagged_arr arr, unsigned elt_sz,
-				    int change) {
-  struct _tagged_arr ans = arr;
-  ans.curr += ((int)elt_sz)*change;
-  return ans;
-}
-static inline
-struct _tagged_arr _tagged_arr_inplace_plus(struct _tagged_arr * arr_ptr,
-					    unsigned elt_sz, int change) {
-  arr_ptr->curr += ((int)elt_sz)*change;
-  return *arr_ptr;
-}
-static inline
-struct _tagged_arr _tagged_arr_inplace_plus_post(struct _tagged_arr * arr_ptr,
-						 unsigned elt_sz, int change) {
-  struct _tagged_arr ans = *arr_ptr;
-  arr_ptr->curr += ((int)elt_sz)*change;
-  return ans;
-}
-				  
+
+#ifdef NO_CYC_BOUNDS_CHECKS
+#define _check_known_subscript_notnull(bound,index) (index)
+#else
+#define _check_known_subscript_notnull(bound,index) ({ \
+  unsigned _cksnn_bound = (bound); \
+  unsigned _cksnn_index = (index); \
+  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
+  _cksnn_index; })
+#endif
+
+#ifdef NO_CYC_BOUNDS_CHECKS
+#define _check_unknown_subscript(arr,elt_sz,index) ({ \
+  struct _tagged_arr _cus_arr = (arr); \
+  unsigned _cus_elt_sz = (elt_sz); \
+  unsigned _cus_index = (index); \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  _cus_ans; })
+#else
+#define _check_unknown_subscript(arr,elt_sz,index) ({ \
+  struct _tagged_arr _cus_arr = (arr); \
+  unsigned _cus_elt_sz = (elt_sz); \
+  unsigned _cus_index = (index); \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  if (!_cus_arr.base) _throw_null(); \
+  if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
+    _throw_arraybounds(); \
+  _cus_ans; })
+#endif
+
+#define _tag_arr(tcurr,elt_sz,num_elts) ({ \
+  struct _tagged_arr _tag_arr_ans; \
+  _tag_arr_ans.base = _tag_arr_ans.curr = (void *)(tcurr); \
+  _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts); \
+  _tag_arr_ans; })
+
+#define _init_tag_arr(arr_ptr,arr,elt_sz,num_elts) ({ \
+  struct _tagged_arr *_itarr_ptr = (arr_ptr); \
+  void * _itarr = (arr); \
+  _itarr_ptr->base = _itarr_ptr->curr = _itarr; \
+  _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts); \
+  _itarr_ptr; })
+
+#ifdef NO_CYC_BOUNDS_CHECKS
+#define _untag_arr(arr,elt_sz,num_elts) ((arr).curr)
+#else
+#define _untag_arr(arr,elt_sz,num_elts) ({ \
+  struct _tagged_arr _arr = (arr); \
+  unsigned char *_curr = _arr.curr; \
+  if (_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one)\
+    _throw_arraybounds(); \
+  _curr; })
+#endif
+
+#define _get_arr_size(arr,elt_sz) \
+  ({struct _tagged_arr _get_arr_size_temp = (arr); \
+    unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr; \
+    unsigned char *_get_arr_size_last=_get_arr_size_temp.last_plus_one; \
+    (_get_arr_size_curr < _get_arr_size_temp.base || \
+     _get_arr_size_curr >= _get_arr_size_last) ? 0 : \
+    ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));})
+
+#define _tagged_arr_plus(arr,elt_sz,change) ({ \
+  struct _tagged_arr _ans = (arr); \
+  _ans.curr += ((int)(elt_sz))*(change); \
+  _ans; })
+
+#define _tagged_arr_inplace_plus(arr_ptr,elt_sz,change) ({ \
+  struct _tagged_arr * _arr_ptr = (arr_ptr); \
+  _arr_ptr->curr += ((int)(elt_sz))*(change); \
+  *_arr_ptr; })
+
+#define _tagged_arr_inplace_plus_post(arr_ptr,elt_sz,change) ({ \
+  struct _tagged_arr * _arr_ptr = (arr_ptr); \
+  struct _tagged_arr _ans = *_arr_ptr; \
+  _arr_ptr->curr += ((int)(elt_sz))*(change); \
+  _ans; })
+
 //// Allocation
 extern void * GC_malloc(int);
 extern void * GC_malloc_atomic(int);
@@ -299,58 +296,57 @@ _tagged_arr Cyc_Array_extract(struct _tagged_arr x,int start,int*len_opt);void C
 int(*less_eq)(void**,void**),struct _tagged_arr arr,int len){int base_ofs=0;void*
 temp;int sp[40];int sp_ofs;int i;int j;int limit_ofs;if((base_ofs < 0? 1: base_ofs + len > 
 _get_arr_size(arr,sizeof(void*)))? 1: len < 0){(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
-_tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_struct));_tmp0[0]=({
-struct Cyc_Core_Invalid_argument_struct _tmp1;_tmp1.tag=Cyc_Core_Invalid_argument;
-_tmp1.f1=_tag_arr("Array::qsort",sizeof(unsigned char),13);_tmp1;});_tmp0;}));}
-limit_ofs=base_ofs + len;sp_ofs=0;for(0;1;0){if(limit_ofs - base_ofs > 3){temp=*((
-void**)_check_unknown_subscript(arr,sizeof(void*),(limit_ofs - base_ofs)/ 2 + 
-base_ofs));*((void**)_check_unknown_subscript(arr,sizeof(void*),(limit_ofs - 
-base_ofs)/ 2 + base_ofs))=((void**)arr.curr)[base_ofs];((void**)arr.curr)[
-base_ofs]=temp;i=base_ofs + 1;j=limit_ofs - 1;if(less_eq((void**)_untag_arr(
-_tagged_arr_plus(arr,sizeof(void*),i),sizeof(void*),1),(void**)_untag_arr(
-_tagged_arr_plus(arr,sizeof(void*),j),sizeof(void*),1))> 0){temp=((void**)arr.curr)[
-i];((void**)arr.curr)[i]=((void**)arr.curr)[j];((void**)arr.curr)[j]=temp;}if(
-less_eq((void**)_untag_arr(_tagged_arr_plus(arr,sizeof(void*),base_ofs),sizeof(
-void*),1),(void**)_untag_arr(_tagged_arr_plus(arr,sizeof(void*),j),sizeof(void*),
-1))> 0){temp=((void**)arr.curr)[base_ofs];((void**)arr.curr)[base_ofs]=((void**)
+_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Invalid_argument_struct
+_tmp1;_tmp1.tag=Cyc_Core_Invalid_argument;_tmp1.f1=_tag_arr("Array::qsort",
+sizeof(unsigned char),13);_tmp1;});_tmp0;}));}limit_ofs=base_ofs + len;sp_ofs=0;
+for(0;1;0){if(limit_ofs - base_ofs > 3){temp=*((void**)_check_unknown_subscript(
+arr,sizeof(void*),(limit_ofs - base_ofs)/ 2 + base_ofs));*((void**)
+_check_unknown_subscript(arr,sizeof(void*),(limit_ofs - base_ofs)/ 2 + base_ofs))=((
+void**)arr.curr)[base_ofs];((void**)arr.curr)[base_ofs]=temp;i=base_ofs + 1;j=
+limit_ofs - 1;if(less_eq((void**)_untag_arr(_tagged_arr_plus(arr,sizeof(void*),i),
+sizeof(void*),1),(void**)_untag_arr(_tagged_arr_plus(arr,sizeof(void*),j),
+sizeof(void*),1))> 0){temp=((void**)arr.curr)[i];((void**)arr.curr)[i]=((void**)
 arr.curr)[j];((void**)arr.curr)[j]=temp;}if(less_eq((void**)_untag_arr(
-_tagged_arr_plus(arr,sizeof(void*),i),sizeof(void*),1),(void**)_untag_arr(
-_tagged_arr_plus(arr,sizeof(void*),base_ofs),sizeof(void*),1))> 0){temp=((void**)
-arr.curr)[i];((void**)arr.curr)[i]=((void**)arr.curr)[base_ofs];((void**)arr.curr)[
-base_ofs]=temp;}for(0;1;0){do {i ++;} while (less_eq((void**)_untag_arr(
-_tagged_arr_plus(arr,sizeof(void*),i),sizeof(void*),1),(void**)_untag_arr(
-_tagged_arr_plus(arr,sizeof(void*),base_ofs),sizeof(void*),1))< 0);do {j --;} while (
-less_eq((void**)_untag_arr(_tagged_arr_plus(arr,sizeof(void*),j),sizeof(void*),1),(
+_tagged_arr_plus(arr,sizeof(void*),base_ofs),sizeof(void*),1),(void**)_untag_arr(
+_tagged_arr_plus(arr,sizeof(void*),j),sizeof(void*),1))> 0){temp=((void**)arr.curr)[
+base_ofs];((void**)arr.curr)[base_ofs]=((void**)arr.curr)[j];((void**)arr.curr)[
+j]=temp;}if(less_eq((void**)_untag_arr(_tagged_arr_plus(arr,sizeof(void*),i),
+sizeof(void*),1),(void**)_untag_arr(_tagged_arr_plus(arr,sizeof(void*),base_ofs),
+sizeof(void*),1))> 0){temp=((void**)arr.curr)[i];((void**)arr.curr)[i]=((void**)
+arr.curr)[base_ofs];((void**)arr.curr)[base_ofs]=temp;}for(0;1;0){do {i ++;} while (
+less_eq((void**)_untag_arr(_tagged_arr_plus(arr,sizeof(void*),i),sizeof(void*),1),(
 void**)_untag_arr(_tagged_arr_plus(arr,sizeof(void*),base_ofs),sizeof(void*),1))
-> 0);if(i > j){break;}temp=((void**)arr.curr)[i];((void**)arr.curr)[i]=((void**)
-arr.curr)[j];((void**)arr.curr)[j]=temp;;}temp=((void**)arr.curr)[base_ofs];((
-void**)arr.curr)[base_ofs]=((void**)arr.curr)[j];((void**)arr.curr)[j]=temp;if(j
-- base_ofs > limit_ofs - i){sp[sp_ofs]=base_ofs;sp[_check_known_subscript_notnull(
-40,sp_ofs + 1)]=j;base_ofs=i;}else{sp[sp_ofs]=i;sp[_check_known_subscript_notnull(
-40,sp_ofs + 1)]=limit_ofs;limit_ofs=j;}sp_ofs +=2;}else{for((j=base_ofs,i=j + 1);i < 
-limit_ofs;(j=i,i ++)){for(0;less_eq((void**)_untag_arr(_tagged_arr_plus(arr,
-sizeof(void*),j),sizeof(void*),1),(void**)_untag_arr(_tagged_arr_plus(
-_tagged_arr_plus(arr,sizeof(void*),j),sizeof(void*),1),sizeof(void*),1))> 0;j --){
-temp=((void**)arr.curr)[j];((void**)arr.curr)[j]=*((void**)
-_check_unknown_subscript(arr,sizeof(void*),j + 1));*((void**)
+< 0);do {j --;} while (less_eq((void**)_untag_arr(_tagged_arr_plus(arr,sizeof(
+void*),j),sizeof(void*),1),(void**)_untag_arr(_tagged_arr_plus(arr,sizeof(void*),
+base_ofs),sizeof(void*),1))> 0);if(i > j){break;}temp=((void**)arr.curr)[i];((
+void**)arr.curr)[i]=((void**)arr.curr)[j];((void**)arr.curr)[j]=temp;;}temp=((
+void**)arr.curr)[base_ofs];((void**)arr.curr)[base_ofs]=((void**)arr.curr)[j];((
+void**)arr.curr)[j]=temp;if(j - base_ofs > limit_ofs - i){sp[sp_ofs]=base_ofs;sp[
+_check_known_subscript_notnull(40,sp_ofs + 1)]=j;base_ofs=i;}else{sp[sp_ofs]=i;sp[
+_check_known_subscript_notnull(40,sp_ofs + 1)]=limit_ofs;limit_ofs=j;}sp_ofs +=2;}
+else{for((j=base_ofs,i=j + 1);i < limit_ofs;(j=i,i ++)){for(0;less_eq((void**)
+_untag_arr(_tagged_arr_plus(arr,sizeof(void*),j),sizeof(void*),1),(void**)
+_untag_arr(_tagged_arr_plus(_tagged_arr_plus(arr,sizeof(void*),j),sizeof(void*),
+1),sizeof(void*),1))> 0;j --){temp=((void**)arr.curr)[j];((void**)arr.curr)[j]=*((
+void**)_check_unknown_subscript(arr,sizeof(void*),j + 1));*((void**)
 _check_unknown_subscript(arr,sizeof(void*),j + 1))=temp;if(j == base_ofs){break;}}}
 if(sp_ofs != 0){sp_ofs -=2;base_ofs=sp[sp_ofs];limit_ofs=sp[
 _check_known_subscript_notnull(40,sp_ofs + 1)];}else{break;}}}}void Cyc_Array_msort(
 int(*less_eq)(void**,void**),struct _tagged_arr arr,int len){if(len > _get_arr_size(
 arr,sizeof(void*))? 1: len < 0){(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
-_tmp2=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_struct));_tmp2[0]=({
-struct Cyc_Core_Invalid_argument_struct _tmp3;_tmp3.tag=Cyc_Core_Invalid_argument;
-_tmp3.f1=_tag_arr("Array::msort",sizeof(unsigned char),13);_tmp3;});_tmp2;}));}{
-struct _tagged_arr from=({unsigned int _tmp4=(unsigned int)len;void**_tmp5=(void**)
-_cycalloc(_check_times(sizeof(void*),_tmp4));struct _tagged_arr _tmp7=_tag_arr(
-_tmp5,sizeof(void*),(unsigned int)len);{unsigned int _tmp6=_tmp4;unsigned int i;
-for(i=0;i < _tmp6;i ++){_tmp5[i]=*((void**)_check_unknown_subscript(arr,sizeof(
-void*),0));}};_tmp7;});struct _tagged_arr to=arr;struct _tagged_arr swap;int swapped=
-0;int stepsize;int start;int lstart;int lend;int rstart;int rend;int dest;for(stepsize=
-1;stepsize < len;stepsize=stepsize * 2){swap=from;from=to;to=swap;dest=0;for(start=
-0;start < len;start=start + stepsize * 2){lstart=start;rstart=start + stepsize < len?
-start + stepsize: len;lend=rstart;rend=start + stepsize * 2 < len? start + stepsize * 2:
-len;while(lstart < lend? rstart < rend: 0){if(less_eq((void**)_untag_arr(
+_tmp2=_cycalloc(sizeof(*_tmp2));_tmp2[0]=({struct Cyc_Core_Invalid_argument_struct
+_tmp3;_tmp3.tag=Cyc_Core_Invalid_argument;_tmp3.f1=_tag_arr("Array::msort",
+sizeof(unsigned char),13);_tmp3;});_tmp2;}));}{struct _tagged_arr from=({
+unsigned int _tmp4=(unsigned int)len;void**_tmp5=(void**)_cycalloc(_check_times(
+sizeof(void*),_tmp4));struct _tagged_arr _tmp7=_tag_arr(_tmp5,sizeof(void*),(
+unsigned int)len);{unsigned int _tmp6=_tmp4;unsigned int i;for(i=0;i < _tmp6;i ++){
+_tmp5[i]=*((void**)_check_unknown_subscript(arr,sizeof(void*),0));}};_tmp7;});
+struct _tagged_arr to=arr;struct _tagged_arr swap;int swapped=0;int stepsize;int start;
+int lstart;int lend;int rstart;int rend;int dest;for(stepsize=1;stepsize < len;
+stepsize=stepsize * 2){swap=from;from=to;to=swap;dest=0;for(start=0;start < len;
+start=start + stepsize * 2){lstart=start;rstart=start + stepsize < len? start + 
+stepsize: len;lend=rstart;rend=start + stepsize * 2 < len? start + stepsize * 2: len;
+while(lstart < lend? rstart < rend: 0){if(less_eq((void**)_untag_arr(
 _tagged_arr_plus(from,sizeof(void*),lstart),sizeof(void*),1),(void**)_untag_arr(
 _tagged_arr_plus(from,sizeof(void*),rstart),sizeof(void*),1))<= 0){*((void**)
 _check_unknown_subscript(to,sizeof(void*),dest ++))=*((void**)
@@ -468,7 +464,7 @@ sizeof(void*));{int i=0;for(0;i < s;i ++){if(0 == compare(((void**)l.curr)[i],x)
 return 1;}}}return 0;}struct _tagged_arr Cyc_Array_extract(struct _tagged_arr x,int
 start,int*n_opt){int sx=(int)_get_arr_size(x,sizeof(void*));int n=n_opt == 0? sx - 
 start:*n_opt;if((start < 0? 1: n <= 0)? 1: start + (n_opt == 0? 0: n)> sx){(int)_throw((
-void*)({struct Cyc_Core_Invalid_argument_struct*_tmp2A=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_struct));
+void*)({struct Cyc_Core_Invalid_argument_struct*_tmp2A=_cycalloc(sizeof(*_tmp2A));
 _tmp2A[0]=({struct Cyc_Core_Invalid_argument_struct _tmp2B;_tmp2B.tag=Cyc_Core_Invalid_argument;
 _tmp2B.f1=_tag_arr("Array::extract",sizeof(unsigned char),15);_tmp2B;});_tmp2A;}));}
 return({unsigned int _tmp2C=(unsigned int)n;void**_tmp2D=(void**)_cycalloc(

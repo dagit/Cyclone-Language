@@ -11,6 +11,9 @@ CONFIGURATION BUGS:
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
+* C code from void f() { let x = NULL; } doesn't compile b/c we
+underconstrain the constant NULL and the unused type of x differently.
+
 * There are at least two problems with the new treatment of [r]malloc and
   [r]calloc.  First, we need to check that the things we are allocating
   aren't too large (just as we do with array comprehensions.)  This avoids

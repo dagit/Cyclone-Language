@@ -41,10 +41,9 @@ static struct Opt<kind_t> rk = {RgnKind};
 // Parse a conversion specification starting at index i in string s.
 // s[i] should be the first character after the leading '%'.
 // If there is an error, return NULL.
-// Otherwise, return the flags, width, precision, length modifier,
-// from s, as lists of ints (boxed chars).  Also return the conversion 
-// specifier as a char, and the index of the character following the conversion
-// specifier.
+// Otherwise, return the flags, width, precision, and length modifier from s,
+// as lists of ints (boxed chars).  Also return the conversion specifier as a 
+// char, and the index of the character following the conversion specifier.
 opt_t<$(list_t<int>, list_t<int>, list_t<int>, list_t<int>, char, int)@>
 parse_conversionspecification(string_t s, int i) {
   //  fprintf(cyc_stderr, "String: %s\n" "Position: %d\n",s,i);
@@ -57,17 +56,17 @@ parse_conversionspecification(string_t s, int i) {
   for (; i<len; i++) {
     c = s[i];
     switch (c) {
-    case '+': fallthru;
-    case '-': fallthru;
-    case ' ': fallthru;
-    case '#': fallthru;
+    case '+': 
+    case '-': 
+    case ' ': 
+    case '#': 
     case '0': flags = new List((int)c,flags); continue;
     default: break;
     }
     break;
   }
   if (i>=len) return NULL;
-  flags = List::imp_rev(flags);
+  flags = imp_rev(flags);
 
   // Parse width: ('*' | ['0'-'9']+)?
   let width = NULL;
@@ -83,7 +82,7 @@ parse_conversionspecification(string_t s, int i) {
     }
   }
   if (i>=len) return NULL;
-  width = List::imp_rev(width);
+  width = imp_rev(width);
 
   // Parse precision: ('.' ('*' | ['0'-'9']+)? )?
   let precision = NULL;
@@ -96,16 +95,15 @@ parse_conversionspecification(string_t s, int i) {
     if (c == '*') {
       precision = new List((int)c,precision);
       i++;
-    } else {
+    } else
       for (; i<len; i++) {
         c = s[i];
         if (isdigit(c)) precision = new List((int)c,precision);
         else break;
       }
-    }
   }
   if (i>=len) return NULL;
-  precision = List::imp_rev(precision);
+  precision = imp_rev(precision);
 
   // Parse length modifier:
   //  (['h' 'l' 'j' 'z' 't' 'L'] | 'h' 'h' | 'l' 'l')
@@ -126,9 +124,9 @@ parse_conversionspecification(string_t s, int i) {
     c = s[i];
     if (c == 'l') { lenmod = new List((int)c,lenmod); i++; }
     break;
-  case 'j': fallthru; 
-  case 'z': fallthru; 
-  case 't': fallthru; 
+  case 'j': 
+  case 'z': 
+  case 't': 
   case 'L':
     lenmod = new List((int)c,lenmod);
     i++;
@@ -136,29 +134,29 @@ parse_conversionspecification(string_t s, int i) {
   default: break;
   }
   if (i>=len) return NULL;
-  lenmod = List::imp_rev(lenmod); // unnecessary
+  lenmod = imp_rev(lenmod); // unnecessary
 
   // Parse conversion specifier
   c = s[i]; // not redundant
   switch (c) {
-  case 'd': break;
-  case 'i': break;
-  case 'o': break;
-  case 'u': break;
-  case 'x': break;
-  case 'X': break;
-  case 'f': break;
-  case 'F': break;
-  case 'e': break;
-  case 'E': break;
-  case 'g': break;
-  case 'G': break;
-  case 'a': break;
-  case 'A': break;
-  case 'c': break;
-  case 's': break;
-  case 'p': break;
-  case 'n': break;
+  case 'd': 
+  case 'i': 
+  case 'o': 
+  case 'u': 
+  case 'x': 
+  case 'X': 
+  case 'f': 
+  case 'F': 
+  case 'e': 
+  case 'E': 
+  case 'g': 
+  case 'G': 
+  case 'a': 
+  case 'A': 
+  case 'c': 
+  case 's': 
+  case 'p': 
+  case 'n': 
   case '%': break;
   default: return NULL;
   }
@@ -198,8 +196,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
     default: break;
     }
     switch (width) {
-    case &List(x,NULL) && x=='*':
-      typs = new List(sint_t,typs); break;
+    case &List(x,NULL) && x=='*': typs = new List(sint_t,typs); break;
     default: break;
     }
     switch (precision) {
@@ -209,7 +206,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
     }
     type_t t;
     switch (c) {
-    case 'd': fallthru;
+    case 'd':
     case 'i':
       for (_ f = flags; f != NULL; f = f->tl)
         if (f->hd == '#') {
@@ -217,15 +214,13 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
           return NULL;
         }
       switch (lenmod) {
-      case NULL:                     t = sint_t; break;
-      case &List(x,NULL) && x=='l':  t = slong_t; break;
-      case &List(x,NULL) && x=='h':  t = sshort_t; break;
-      case &List(x,&List(y,NULL))
-        && (x=='h' && y=='h'):       t = schar_t; break;
-      // We don't support ll
-      default:
+      case NULL:                    t = sint_t; break;
+      case &List(x,NULL) && x=='l': t = slong_t; break;
+      case &List(x,NULL) && x=='h': t = sshort_t; break;
+      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = schar_t; break;
+      default: // We don't support ll
         terr(loc,"length modifier '%s' is not allowed with %%%c",
-             implode(lenmod), c);
+	     implode(lenmod), c);
         return NULL;
       }
       typs = new List(t,typs);
@@ -237,15 +232,14 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
           return NULL;
         }
       fallthru;
-    case 'o': fallthru;
-    case 'x': fallthru;
+    case 'o': 
+    case 'x': 
     case 'X':
       switch (lenmod) {
-      case NULL:                     t = uint_t; break;
-      case &List(x,NULL) && x=='l':  t = ulong_t; break;
-      case &List(x,NULL) && x=='h':  t = ushort_t; break;
-      case &List(x,&List(y,NULL))
-        && (x=='h' && y=='h'):       t = uchar_t; break;
+      case NULL:                    t = uint_t; break;
+      case &List(x,NULL) && x=='l': t = ulong_t; break;
+      case &List(x,NULL) && x=='h': t = ushort_t; break;
+      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = uchar_t; break;
       // We don't support ll
       default:
         terr(loc,"length modifier '%s' is not allowed with %%%c",
@@ -254,13 +248,13 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
       }
       typs = new List(t,typs);
       break;
-    case 'f': fallthru;
-    case 'F': fallthru;
-    case 'e': fallthru;
-    case 'E': fallthru;
-    case 'g': fallthru;
-    case 'G': fallthru;
-    case 'a': fallthru;
+    case 'f': 
+    case 'F': 
+    case 'e': 
+    case 'E': 
+    case 'g': 
+    case 'G': 
+    case 'a': 
     case 'A':
       // We don't allow any length modifiers for floating point numbers;
       // in particular, we don't allow L (long double)
@@ -268,7 +262,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
         terr(loc,"length modifiers are not allowed with %%%c",c);
         return NULL;
       }
-      typs = new List(double_t(false),typs);
+      typs = new List(double_typ(false),typs);
       break;
     case 'c':
       for (_ f = flags; f != NULL; f = f->tl)
@@ -279,8 +273,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
       // We don't allow any length modifiers for characters;
       // in particular, we don't allow l (wint_t)
       if (lenmod != NULL) {
-        terr(loc,"length modifier '%s' not allowed with %%c",
-             implode(lenmod));
+        terr(loc,"length modifier '%s' not allowed with %%c", implode(lenmod));
         return NULL;
       }
       if (precision != NULL) {
@@ -320,43 +313,35 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
              implode(precision));
         return NULL;
       }
-      let tenv_tvs = new Opt(lookup_type_vars(te));
+      let tvs = new Opt(lookup_type_vars(te));
       switch (lenmod) {
-      case NULL:
-        t = at_typ(sint_t,new_evar(&rk,tenv_tvs),empty_tqual()); break;
-      case &List(x,NULL) && x=='l':
-        t = at_typ(ulong_t,new_evar(&rk,tenv_tvs),empty_tqual()); break;
-      case &List(x,NULL) && x=='h':
-        t = at_typ(sshort_t,new_evar(&rk,tenv_tvs),empty_tqual()); break;
-      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'):
-          t = at_typ(schar_t,new_evar(&rk,tenv_tvs),empty_tqual()); break;
-      // We don't support ll
-      default:
-        terr(loc,"length modifier '%s' not allowed with %%n",
-             implode(lenmod));
+      case NULL: t = sint_t; break;
+      case &List(x,NULL) && x=='l': t = ulong_t; break; // DAN: slong_t???
+      case &List(x,NULL) && x=='h': t = sshort_t; break;
+      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = schar_t; break;
+      default: // We don't support ll
+        terr(loc,"length modifier '%s' is not allowed with %%%c",
+	     implode(lenmod), c);
         return NULL;
       }
+      t = at_typ(t,new_evar(&rk,tvs),empty_tqual());
       typs = new List(t,typs);
       break;
     case '%':
       if (flags != NULL) {
-        terr(loc,"flags '%s' not allowed with %%%%",
-             implode(flags));
+        terr(loc,"flags '%s' not allowed with %%%%", implode(flags));
         return NULL;
       }
       if (width != NULL) {
-        terr(loc,"width '%s' not allowed with %%%%",
-             implode(width));
+        terr(loc,"width '%s' not allowed with %%%%", implode(width));
         return NULL;
       }
       if (precision != NULL) {
-        terr(loc,"precision '%s' not allowed with %%%%",
-             implode(precision));
+        terr(loc,"precision '%s' not allowed with %%%%", implode(precision));
         return NULL;
       }
       if (lenmod != NULL) {
-        terr(loc,"length modifier '%s' not allowed with %%%%",
-             implode(lenmod));
+        terr(loc,"length modifier '%s' not allowed with %%%%", implode(lenmod));
         return NULL;
       }
       break;
@@ -364,7 +349,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
       return NULL; // impossible
     }
   }
-  return List::imp_rev(typs);
+  return imp_rev(typs);
 }
 
 // Parse a scanf conversion specification starting at index i in string s.
@@ -394,7 +379,7 @@ parse_inputformat(string_t s, int i) {
     else break;
   }
   if (i>=len) return NULL;
-  width = List::imp_rev(width);
+  width = imp_rev(width);
 
   // Parse length modifier:
   //  ('h' | 'l' | 'j' | 'z' | 't' | 'L' | 'h' 'h' | 'l' 'l')
@@ -415,9 +400,9 @@ parse_inputformat(string_t s, int i) {
     c = s[i];
     if (c == 'l') { lenmod = new List((int)c,lenmod); i++; }
     break;
-  case 'j': fallthru; 
-  case 'z': fallthru; 
-  case 't': fallthru; 
+  case 'j': 
+  case 'z': 
+  case 't': 
   case 'L':
     lenmod = new List((int)c,lenmod);
     i++;
@@ -425,29 +410,29 @@ parse_inputformat(string_t s, int i) {
   default: break;
   }
   if (i>=len) return NULL;
-  lenmod = List::imp_rev(lenmod); // unnecessary
+  lenmod = imp_rev(lenmod); // unnecessary
 
   // Parse conversion specifier
   c = s[i]; // not redundant
   switch (c) {
-  case 'd': break;
-  case 'i': break;
-  case 'o': break;
-  case 'u': break;
-  case 'x': break;
-  case 'X': break;
-  case 'f': break;
-  case 'F': break;
-  case 'e': break;
-  case 'E': break;
-  case 'g': break;
-  case 'G': break;
-  case 'a': break;
-  case 'A': break;
-  case 'c': break;
-  case 's': break;
-  case 'p': break;
-  case 'n': break;
+  case 'd': 
+  case 'i': 
+  case 'o': 
+  case 'u': 
+  case 'x': 
+  case 'X': 
+  case 'f': 
+  case 'F': 
+  case 'e': 
+  case 'E': 
+  case 'g': 
+  case 'G': 
+  case 'a': 
+  case 'A': 
+  case 'c': 
+  case 's': 
+  case 'p': 
+  case 'n': 
   case '%': break;
   default: return NULL;
   }
@@ -478,71 +463,59 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
     if (suppress) continue;
     type_t t;
     switch (c) {
-    case 'd': fallthru;
+    case 'd': 
     case 'i':
       let tvs = new Opt(lookup_type_vars(te));
       switch (lenmod) {
-      case NULL:
-        t = at_typ(sint_t,new_evar(&rk,tvs),empty_tqual()); break;
-      case &List(x,NULL) && x=='l':
-        t = at_typ(slong_t,new_evar(&rk,tvs),empty_tqual()); break;
-      case &List(x,NULL) && x=='h':
-        t = at_typ(sshort_t,new_evar(&rk,tvs),empty_tqual()); break;
-      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'):
-        t = at_typ(schar_t,new_evar(&rk,tvs),empty_tqual()); break;
-      // We don't support ll
-      default:
+      case NULL: t = sint_t; break;
+      case &List(x,NULL) && x=='l': t = slong_t; break;
+      case &List(x,NULL) && x=='h': t = sshort_t; break;
+      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = schar_t; break;
+      default: // We don't support ll
         terr(loc,"length modifier '%s' is not allowed with %%%c",
               implode(lenmod), c);
         return NULL;
       }
+      t = at_typ(t,new_evar(&rk,tvs),empty_tqual());
       typs = new List(t,typs);
       break;
     case 'u':
-      fallthru;
-    case 'o': fallthru;
-    case 'x': fallthru;
+    case 'o': 
+    case 'x': 
     case 'X':
       let tvs = new Opt(lookup_type_vars(te));
       switch (lenmod) {
-      case NULL:
-        t = at_typ(uint_t,new_evar(&rk,tvs),empty_tqual()); break;
-      case &List(x,NULL) && x=='l':
-        t = at_typ(ulong_t,new_evar(&rk,tvs),empty_tqual()); break;
-      case &List(x,NULL) && x=='h':
-        t = at_typ(ushort_t,new_evar(&rk,tvs),empty_tqual()); break;
-      case &List(x,&List(y,NULL))
-        && (x=='h' && y=='h'):
-          t = at_typ(uchar_t,new_evar(&rk,tvs),empty_tqual()); break;
-      // We don't support ll
-      default:
+      case NULL: t = uint_t; break;
+      case &List(x,NULL) && x=='l': t = ulong_t; break;
+      case &List(x,NULL) && x=='h': t = ushort_t; break;
+      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = uchar_t; break;
+      default: // We don't support ll
         terr(loc,"length modifier '%s' is not allowed with %%%c",
-              implode(lenmod), c);
+	     implode(lenmod), c);
         return NULL;
       }
+      t = at_typ(t,new_evar(&rk,tvs),empty_tqual());
       typs = new List(t,typs);
       break;
-    case 'f': fallthru;
-    case 'F': fallthru;
-    case 'e': fallthru;
-    case 'E': fallthru;
-    case 'g': fallthru;
-    case 'G': fallthru;
-    case 'a': fallthru;
+    case 'f': 
+    case 'F': 
+    case 'e': 
+    case 'E': 
+    case 'g': 
+    case 'G': 
+    case 'a': 
     case 'A':
       let tvs = new Opt(lookup_type_vars(te));
       switch (lenmod) {
-      case NULL:
+      case NULL: t = float_typ; break;
         // Note, %f means float in scanf, double in printf!!
-        t = at_typ(float_t,new_evar(&rk,tvs),empty_tqual()); break;
-      case &List(x,NULL) && x=='l':
-        t = at_typ(double_t(false),new_evar(&rk,tvs),empty_tqual()); break;
-      // We don't support L
-      default:
+      case &List(x,NULL) && x=='l': t = double_typ(false); break;
+      default: // We don't support L
         terr(loc,"length modifier '%s' is not allowed with %%%c",
               implode(lenmod), c);
         return NULL;
       }
+      t = at_typ(t,new_evar(&rk,tvs),empty_tqual());
       typs = new List(t,typs);
       break;
       //JGM: need to fix and synch up with lib/scanf.cyc
@@ -552,28 +525,22 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
       typs = new List(string_typ(new_evar(&rk,tvs)),typs);
       break;
     case '[':
-      terr(loc,"%%[ is not supported");
-      return NULL;
     case 'p':
-      terr(loc,"%%p is not supported");
+      terr(loc,"%%%c is not supported",c);
       return NULL;
     case 'n':
       let tvs = new Opt(lookup_type_vars(te));
       switch (lenmod) {
-      case NULL:
-        t = at_typ(sint_t,new_evar(&rk,tvs),empty_tqual()); break;
-      case &List(x,NULL) && x=='l':
-        t = at_typ(ulong_t,new_evar(&rk,tvs),empty_tqual()); break;
-      case &List(x,NULL) && x=='h':
-        t = at_typ(sshort_t,new_evar(&rk,tvs),empty_tqual()); break;
-      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'):
-	t = at_typ(schar_t,new_evar(&rk,tvs),empty_tqual()); break;
-      // We don't support ll
-      default:
-        terr(loc,"length modifier '%s' not allowed with %%n",
-              implode(lenmod));
+      case NULL: t = sint_t; break;
+      case &List(x,NULL) && x=='l': t = ulong_t; break; // DAN: slong_t???
+      case &List(x,NULL) && x=='h': t = sshort_t; break;
+      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = schar_t; break;
+      default: // We don't support ll
+        terr(loc,"length modifier '%s' is not allowed with %%%c",
+	     implode(lenmod), c);
         return NULL;
       }
+      t = at_typ(t,new_evar(&rk,tvs),empty_tqual());
       typs = new List(t,typs);
       break;
     case '%':
@@ -582,13 +549,11 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
         return NULL;
       }
       if (width != NULL) {
-        terr(loc,"width '%s' not allowed with %%%%",
-              implode(width));
+        terr(loc,"width '%s' not allowed with %%%%", implode(width));
         return NULL;
       }
       if (lenmod != NULL) {
-        terr(loc,"length modifier '%s' not allowed with %%%%",
-             implode(lenmod));
+        terr(loc,"length modifier '%s' not allowed with %%%%", implode(lenmod));
         return NULL;
       }
       break;
@@ -596,5 +561,5 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
       return NULL; // impossible
     }
   }
-  return (List::imp_rev(typs));
+  return imp_rev(typs);
 }

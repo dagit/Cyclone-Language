@@ -271,8 +271,8 @@ struct Cyc_Core_SysError_struct{unsigned char*tag;int f1;};unsigned char Cyc_Cor
 unsigned char Cyc_Core_Not_found[14]="\000\000\000\000Not_found";unsigned char Cyc_Core_Unreachable[
 16]="\000\000\000\000Unreachable";struct Cyc_Core_Opt;struct Cyc_Core_Opt*Cyc_Core_opt_map(
 void*(*f)(void*),struct Cyc_Core_Opt*o){if(o == 0){return 0;}return({struct Cyc_Core_Opt*
-_tmp0=_cycalloc(sizeof(struct Cyc_Core_Opt));_tmp0->v=(void*)f((void*)o->v);_tmp0;});}
-struct _tagged_arr Cyc_Core_new_string(unsigned int i){return({unsigned int _tmp1=i;
+_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->v=(void*)f((void*)o->v);_tmp0;});}struct
+_tagged_arr Cyc_Core_new_string(unsigned int i){return({unsigned int _tmp1=i;
 unsigned char*_tmp2=_cyccalloc_atomic(sizeof(unsigned char),_tmp1);_tag_arr(
 _tmp2,sizeof(unsigned char),_tmp1);});}struct _tagged_arr Cyc_Core_rnew_string(
 struct _RegionHandle*r,unsigned int i){return({unsigned int _tmp3=i;unsigned char*

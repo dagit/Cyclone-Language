@@ -312,23 +312,22 @@ lexbuf->lex_abs_pos=lexbuf->lex_abs_pos + n;lexbuf->lex_curr_pos=lexbuf->lex_cur
 - n;lexbuf->lex_start_pos=lexbuf->lex_start_pos - n;lexbuf->lex_last_pos=lexbuf->lex_last_pos
 - n;}}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(int(*read_fun)(struct
 _tagged_arr,int,void*),void*read_fun_state){return({struct Cyc_Lexing_lexbuf*
-_tmp0=_cycalloc(sizeof(struct Cyc_Lexing_lexbuf));_tmp0->refill_buff=Cyc_Lexing_lex_refill;
-_tmp0->refill_state=({struct Cyc_Lexing_function_lexbuf_state*_tmp1=_cycalloc(
-sizeof(struct Cyc_Lexing_function_lexbuf_state));_tmp1->read_fun=read_fun;_tmp1->read_fun_state=(
-void*)read_fun_state;_tmp1;});_tmp0->lex_buffer=Cyc_Core_new_string(8192);_tmp0->lex_buffer_len=
-8192;_tmp0->lex_abs_pos=- 8192;_tmp0->lex_start_pos=8192;_tmp0->lex_curr_pos=8192;
-_tmp0->lex_last_pos=8192;_tmp0->lex_last_action=0;_tmp0->lex_eof_reached=0;_tmp0;});}
-int Cyc_Lexing_read_from_file(struct _tagged_arr aux,int n,struct Cyc_Std___sFILE*f){
-return Cyc_Std_file_string_read(f,aux,0,n);}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(
-struct Cyc_Std___sFILE*f){return((struct Cyc_Lexing_lexbuf*(*)(int(*read_fun)(
-struct _tagged_arr,int,struct Cyc_Std___sFILE*),struct Cyc_Std___sFILE*
-read_fun_state))Cyc_Lexing_from_function)(Cyc_Lexing_read_from_file,f);}static
-void Cyc_Lexing_set_eof(struct Cyc_Lexing_lexbuf*lbuf){lbuf->lex_eof_reached=1;}
-struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(struct _tagged_arr s){return({
-struct Cyc_Lexing_lexbuf*_tmp2=_cycalloc(sizeof(struct Cyc_Lexing_lexbuf));_tmp2->refill_buff=
-Cyc_Lexing_set_eof;_tmp2->refill_state=(void*)0;_tmp2->lex_buffer=Cyc_Std_strdup((
-struct _tagged_arr)s);_tmp2->lex_buffer_len=(int)_get_arr_size(s,sizeof(
-unsigned char));_tmp2->lex_abs_pos=0;_tmp2->lex_start_pos=0;_tmp2->lex_curr_pos=
+_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->refill_buff=Cyc_Lexing_lex_refill;_tmp0->refill_state=({
+struct Cyc_Lexing_function_lexbuf_state*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->read_fun=
+read_fun;_tmp1->read_fun_state=(void*)read_fun_state;_tmp1;});_tmp0->lex_buffer=
+Cyc_Core_new_string(8192);_tmp0->lex_buffer_len=8192;_tmp0->lex_abs_pos=- 8192;
+_tmp0->lex_start_pos=8192;_tmp0->lex_curr_pos=8192;_tmp0->lex_last_pos=8192;
+_tmp0->lex_last_action=0;_tmp0->lex_eof_reached=0;_tmp0;});}int Cyc_Lexing_read_from_file(
+struct _tagged_arr aux,int n,struct Cyc_Std___sFILE*f){return Cyc_Std_file_string_read(
+f,aux,0,n);}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc_Std___sFILE*f){
+return((struct Cyc_Lexing_lexbuf*(*)(int(*read_fun)(struct _tagged_arr,int,struct
+Cyc_Std___sFILE*),struct Cyc_Std___sFILE*read_fun_state))Cyc_Lexing_from_function)(
+Cyc_Lexing_read_from_file,f);}static void Cyc_Lexing_set_eof(struct Cyc_Lexing_lexbuf*
+lbuf){lbuf->lex_eof_reached=1;}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(
+struct _tagged_arr s){return({struct Cyc_Lexing_lexbuf*_tmp2=_cycalloc(sizeof(*
+_tmp2));_tmp2->refill_buff=Cyc_Lexing_set_eof;_tmp2->refill_state=(void*)0;_tmp2->lex_buffer=
+Cyc_Std_strdup((struct _tagged_arr)s);_tmp2->lex_buffer_len=(int)_get_arr_size(s,
+sizeof(unsigned char));_tmp2->lex_abs_pos=0;_tmp2->lex_start_pos=0;_tmp2->lex_curr_pos=
 0;_tmp2->lex_last_pos=0;_tmp2->lex_last_action=0;_tmp2->lex_eof_reached=1;_tmp2;});}
 struct _tagged_arr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*lbuf){int len=lbuf->lex_curr_pos
 - lbuf->lex_start_pos;struct _tagged_arr s=Cyc_Core_new_string((unsigned int)(len + 

@@ -626,7 +626,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     dump("sizeof("); dumptyp(t); dump_char(')'); break;
 
   case &Sizeofexp_e(e1):
-    dump("sizeof("); dumpexp_prec(myprec,e1); dump_char(')'); break;
+    dump("sizeof("); dumpexp(e1); dump_char(')'); break;
 
   case &Offsetof_e(t,&StructField(n)):
     dump("offsetof("); dumptyp(t); dump_char(','); dump_nospace(*n);

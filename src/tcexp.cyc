@@ -194,7 +194,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t *`r topt, cnst_t c, exp_t e){
     t = (sn == (sign_t)Unsigned) ? ushort_t : sshort_t; break;
   case &LongLong_c(sn,_): 
     t = (sn == (sign_t)Unsigned) ? ulonglong_t  : slonglong_t;  break;
-  case &Float_c(_) : t = float_t; break;
+  case &Float_c(_) : t = float_typ; break;
   case &Int_c(sn,i):
     if (topt == NULL)
       t = (sn == (sign_t)Unsigned) ? uint_t : sint_t;

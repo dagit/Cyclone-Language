@@ -221,10 +221,10 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
 static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
   var_t   v  = (*fd->name)[1];
 #ifdef DEBUG
-  fprintf(stderr,"type-checking fndecl %s",*v);
-  fflush(stderr);
+  fprintf(stderr,"type-checking fndecl %s",*v); fflush(stderr);
 #endif
-  scope_t sc = fd->sc;
+  if(fd->sc == ExternC)
+    terr(loc,"extern \"C\" functions cannot be implemented in Cyclone");
 
   // reject explicitly qualified name
   switch ((*fd->name)[0]) {

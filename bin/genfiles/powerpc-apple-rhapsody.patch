@@ -1,8 +1,8 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapsody/lib/cycstubs.c
-*** i686-unknown-linux/lib/cycstubs.c	Thu Dec 13 17:38:57 2001
---- powerpc-apple-rhapsody/lib/cycstubs.c	Thu Dec 13 18:33:37 2001
+*** i686-unknown-linux/lib/cycstubs.c	Sun Dec 16 17:15:14 2001
+--- powerpc-apple-rhapsody/lib/cycstubs.c	Sun Dec 16 17:18:08 2001
 ***************
-*** 292,304 ****
+*** 288,300 ****
   _check_unknown_subscript(ms,sizeof(unsigned int),0)));}else{return
   open_without_mode(string_to_Cstring(s),i);}}struct Cyc_Std_timeval{int tv_sec;int
   tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;int tz_dsttime;};struct Cyc_Std_itimerval{
@@ -16,7 +16,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   unsigned int*f1;};struct Cyc_Std_SA_socklen_struct{int tag;unsigned int f1;};extern
   int Cyc_Std_accept(int fd,struct _tagged_arr);extern int Cyc_Std_bind(int fd,struct
   _tagged_arr);extern int Cyc_Std_connect(int fd,struct _tagged_arr);extern int Cyc_Std_getpeername(
---- 292,301 ----
+--- 288,297 ----
   _check_unknown_subscript(ms,sizeof(unsigned int),0)));}else{return
   open_without_mode(string_to_Cstring(s),i);}}struct Cyc_Std_timeval{int tv_sec;int
   tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;int tz_dsttime;};struct Cyc_Std_itimerval{
@@ -28,39 +28,47 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   int Cyc_Std_accept(int fd,struct _tagged_arr);extern int Cyc_Std_bind(int fd,struct
   _tagged_arr);extern int Cyc_Std_connect(int fd,struct _tagged_arr);extern int Cyc_Std_getpeername(
 ***************
-*** 368,381 ****
-  struct _tagged_arr fmt,const struct Cyc_Std_tm*t);extern struct _tagged_arr Cyc_Std_asctime_r(
-  const struct Cyc_Std_tm*,struct _tagged_arr);extern struct _tagged_arr Cyc_Std_ctime_r(
-  const int*,struct _tagged_arr);extern int timezone;struct Cyc_Std_stat_t{
-! unsigned long long st_dev;unsigned short __pad1;unsigned int st_ino;unsigned int
-! st_mode;unsigned int st_nlink;unsigned int st_uid;unsigned int st_gid;
-! unsigned long long st_rdev;unsigned short __pad2;int st_size;int st_blksize;int
-! st_blocks;int st_atime;unsigned int __unused1;int st_mtime;unsigned int __unused2;
-! int st_ctime;unsigned int __unused3;unsigned int __unused4;unsigned int __unused5;};
-! extern int Cyc_Std_stat(struct _tagged_arr filename,struct Cyc_Std_stat_t*buf);extern
-! int Cyc_Std_lstat(struct _tagged_arr filename,struct Cyc_Std_stat_t*buf);extern int
-! Cyc_Std_mkdir(struct _tagged_arr pathname,unsigned int mode);extern int Cyc_Std_chmod(
-  struct _tagged_arr path,unsigned int mode);extern int stat(unsigned char*filename,
-  struct Cyc_Std_stat_t*buf);extern int lstat(unsigned char*filename,struct Cyc_Std_stat_t*
-  buf);extern int mkdir(unsigned char*pathname,unsigned int mode);extern int chmod(
---- 365,376 ----
-  struct _tagged_arr fmt,const struct Cyc_Std_tm*t);extern struct _tagged_arr Cyc_Std_asctime_r(
-  const struct Cyc_Std_tm*,struct _tagged_arr);extern struct _tagged_arr Cyc_Std_ctime_r(
-  const int*,struct _tagged_arr);extern int timezone;struct Cyc_Std_stat_t{
-! unsigned long long st_dev;unsigned int st_ino;unsigned int st_mode;unsigned int
-! st_nlink;unsigned int st_uid;unsigned int st_gid;unsigned long long st_rdev;int
-! st_size;unsigned int st_blksize;unsigned int st_blocks;int st_atime;int st_mtime;int
-! st_ctime;};extern int Cyc_Std_stat(struct _tagged_arr filename,struct Cyc_Std_stat_t*
-! buf);extern int Cyc_Std_lstat(struct _tagged_arr filename,struct Cyc_Std_stat_t*buf);
-! extern int Cyc_Std_mkdir(struct _tagged_arr pathname,unsigned int mode);extern int Cyc_Std_chmod(
-  struct _tagged_arr path,unsigned int mode);extern int stat(unsigned char*filename,
-  struct Cyc_Std_stat_t*buf);extern int lstat(unsigned char*filename,struct Cyc_Std_stat_t*
-  buf);extern int mkdir(unsigned char*pathname,unsigned int mode);extern int chmod(
+*** 364,381 ****
+  const struct Cyc_Std_tm*t);extern struct _tagged_arr Cyc_Std_asctime_r(const struct Cyc_Std_tm*,
+  struct _tagged_arr);extern struct _tagged_arr Cyc_Std_ctime_r(const int*,struct
+  _tagged_arr);extern int timezone;struct Cyc_Std_stat_t{unsigned long long st_dev;
+! unsigned short __pad1;unsigned int st_ino;unsigned int st_mode;unsigned int st_nlink;
+! unsigned int st_uid;unsigned int st_gid;unsigned long long st_rdev;unsigned short
+! __pad2;int st_size;int st_blksize;int st_blocks;int st_atime;unsigned int __unused1;
+! int st_mtime;unsigned int __unused2;int st_ctime;unsigned int __unused3;unsigned int
+! __unused4;unsigned int __unused5;};extern int Cyc_Std_stat(struct _tagged_arr
+! filename,struct Cyc_Std_stat_t*buf);extern int Cyc_Std_lstat(struct _tagged_arr
+! filename,struct Cyc_Std_stat_t*buf);extern int Cyc_Std_mkdir(struct _tagged_arr
+! pathname,unsigned int mode);extern int Cyc_Std_chmod(struct _tagged_arr path,
+! unsigned int mode);extern int stat(unsigned char*filename,struct Cyc_Std_stat_t*buf);
+! extern int lstat(unsigned char*filename,struct Cyc_Std_stat_t*buf);extern int mkdir(
+! unsigned char*pathname,unsigned int mode);extern int chmod(unsigned char*pathname,
+! unsigned int mode);int Cyc_Std_stat(struct _tagged_arr filename,struct Cyc_Std_stat_t*
+  buf){return stat(string_to_Cstring(filename),buf);}int Cyc_Std_lstat(struct
+  _tagged_arr filename,struct Cyc_Std_stat_t*buf){return lstat(string_to_Cstring(
+  filename),buf);}int Cyc_Std_mkdir(struct _tagged_arr pathname,unsigned int mode){
+--- 361,376 ----
+  const struct Cyc_Std_tm*t);extern struct _tagged_arr Cyc_Std_asctime_r(const struct Cyc_Std_tm*,
+  struct _tagged_arr);extern struct _tagged_arr Cyc_Std_ctime_r(const int*,struct
+  _tagged_arr);extern int timezone;struct Cyc_Std_stat_t{unsigned long long st_dev;
+! unsigned int st_ino;unsigned int st_mode;unsigned int st_nlink;unsigned int st_uid;
+! unsigned int st_gid;unsigned long long st_rdev;int st_size;unsigned int st_blksize;
+! unsigned int st_blocks;int st_atime;int st_mtime;int st_ctime;};extern int Cyc_Std_stat(
+! struct _tagged_arr filename,struct Cyc_Std_stat_t*buf);extern int Cyc_Std_lstat(
+! struct _tagged_arr filename,struct Cyc_Std_stat_t*buf);extern int Cyc_Std_mkdir(
+! struct _tagged_arr pathname,unsigned int mode);extern int Cyc_Std_chmod(struct
+! _tagged_arr path,unsigned int mode);extern int stat(unsigned char*filename,struct Cyc_Std_stat_t*
+! buf);extern int lstat(unsigned char*filename,struct Cyc_Std_stat_t*buf);extern int
+! mkdir(unsigned char*pathname,unsigned int mode);extern int chmod(unsigned char*
+! pathname,unsigned int mode);int Cyc_Std_stat(struct _tagged_arr filename,struct Cyc_Std_stat_t*
+  buf){return stat(string_to_Cstring(filename),buf);}int Cyc_Std_lstat(struct
+  _tagged_arr filename,struct Cyc_Std_stat_t*buf){return lstat(string_to_Cstring(
+  filename),buf);}int Cyc_Std_mkdir(struct _tagged_arr pathname,unsigned int mode){
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapsody/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Thu Dec 13 17:38:57 2001
---- powerpc-apple-rhapsody/lib/execinfo.c	Thu Dec 13 18:33:37 2001
+*** i686-unknown-linux/lib/execinfo.c	Sun Dec 16 17:15:14 2001
+--- powerpc-apple-rhapsody/lib/execinfo.c	Sun Dec 16 17:18:08 2001
 ***************
-*** 260,340 ****
+*** 257,337 ****
   extern unsigned char Cyc_Core_Not_found[14];extern unsigned char Cyc_Core_Unreachable[
   16];struct Cyc_Core_Unreachable_struct{unsigned char*tag;struct _tagged_arr f1;};
   int Cyc_Execinfo_backtrace(struct _tagged_arr,int);int Cyc_Execinfo_bt();struct Cyc_Cstdio___sFILE;
@@ -108,25 +116,25 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! Cyc_Std_chroot(struct _tagged_arr);struct _tagged_arr Cyc_Std_getpass(struct
 ! _tagged_arr prompt);extern int backtrace(int*,int);int Cyc_Execinfo_backtrace(struct
 ! _tagged_arr array,int size){if(size > _get_arr_size(array,sizeof(int))){(int)_throw((
-! void*)({struct Cyc_Core_Failure_struct*_tmp0=_cycalloc(sizeof(struct Cyc_Core_Failure_struct));
-! _tmp0[0]=({struct Cyc_Core_Failure_struct _tmp1;_tmp1.tag=Cyc_Core_Failure;_tmp1.f1=
-! _tag_arr("backtrace: size > array.size",sizeof(unsigned char),29);_tmp1;});_tmp0;}));}
-! return backtrace((int*)_check_null(_untag_arr(array,sizeof(int),1)),size);}int Cyc_Execinfo_bt(){
-! int bt[20];{unsigned int _tmpA=20;unsigned int i;for(i=0;i < _tmpA;i ++){bt[i]=0;}}{
-! int tochild[2]={0,0};int fromchild[2]={0,0};int pid;int self_pid;if(pipe(tochild)? 1:
-! pipe(fromchild)){return 1;}self_pid=getpid();if((pid=fork())== 0){if(dup2(tochild[
-! 0],0)== - 1? 1: dup2(fromchild[1],1)== - 1){return 1;}({struct _tagged_arr _tmp2[4];
-! _tmp2[3]=(struct _tagged_arr)_tag_arr(0,0,0);_tmp2[2]=(struct _tagged_arr)({struct
-! Cyc_Std_Int_pa_struct _tmp4;_tmp4.tag=1;_tmp4.f1=(int)((unsigned int)self_pid);{
-! void*_tmp3[1]={& _tmp4};Cyc_Std_aprintf(_tag_arr("/proc/%d/exe",sizeof(
-! unsigned char),13),_tag_arr(_tmp3,sizeof(void*),1));}});_tmp2[1]=_tag_arr("-e",
-! sizeof(unsigned char),3);_tmp2[0]=_tag_arr("--functions",sizeof(unsigned char),
-! 12);Cyc_Std_execlp(_tag_arr("addr2line",sizeof(unsigned char),10),_tag_arr("addr2line",
-! sizeof(unsigned char),10),_tag_arr(_tmp2,sizeof(struct _tagged_arr),4));});return
-! 1;}else{if(pid < 0){close(tochild[0]);close(tochild[1]);close(fromchild[0]);close(
-! fromchild[1]);return 1;}}{struct Cyc_Std___sFILE*w=({struct Cyc_Std___sFILE*f=Cyc_Std_fdopen(
-! tochild[1],_tag_arr("w",sizeof(unsigned char),2));if(!((unsigned int)f)){return 1;}(
-! struct Cyc_Std___sFILE*)_check_null(f);});struct Cyc_Std___sFILE*r=({struct Cyc_Std___sFILE*
+! void*)({struct Cyc_Core_Failure_struct*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0[0]=({
+! struct Cyc_Core_Failure_struct _tmp1;_tmp1.tag=Cyc_Core_Failure;_tmp1.f1=_tag_arr("backtrace: size > array.size",
+! sizeof(unsigned char),29);_tmp1;});_tmp0;}));}return backtrace((int*)_check_null(
+! _untag_arr(array,sizeof(int),1)),size);}int Cyc_Execinfo_bt(){int bt[20];{
+! unsigned int _tmpA=20;unsigned int i;for(i=0;i < _tmpA;i ++){bt[i]=0;}}{int tochild[2]={
+! 0,0};int fromchild[2]={0,0};int pid;int self_pid;if(pipe(tochild)? 1: pipe(fromchild)){
+! return 1;}self_pid=getpid();if((pid=fork())== 0){if(dup2(tochild[0],0)== - 1? 1:
+! dup2(fromchild[1],1)== - 1){return 1;}({struct _tagged_arr _tmp2[4];_tmp2[3]=(struct
+! _tagged_arr)_tag_arr(0,0,0);_tmp2[2]=(struct _tagged_arr)({struct Cyc_Std_Int_pa_struct
+! _tmp4;_tmp4.tag=1;_tmp4.f1=(int)((unsigned int)self_pid);{void*_tmp3[1]={& _tmp4};
+! Cyc_Std_aprintf(_tag_arr("/proc/%d/exe",sizeof(unsigned char),13),_tag_arr(_tmp3,
+! sizeof(void*),1));}});_tmp2[1]=_tag_arr("-e",sizeof(unsigned char),3);_tmp2[0]=
+! _tag_arr("--functions",sizeof(unsigned char),12);Cyc_Std_execlp(_tag_arr("addr2line",
+! sizeof(unsigned char),10),_tag_arr("addr2line",sizeof(unsigned char),10),
+! _tag_arr(_tmp2,sizeof(struct _tagged_arr),4));});return 1;}else{if(pid < 0){close(
+! tochild[0]);close(tochild[1]);close(fromchild[0]);close(fromchild[1]);return 1;}}{
+! struct Cyc_Std___sFILE*w=({struct Cyc_Std___sFILE*f=Cyc_Std_fdopen(tochild[1],
+! _tag_arr("w",sizeof(unsigned char),2));if(!((unsigned int)f)){return 1;}(struct
+! Cyc_Std___sFILE*)_check_null(f);});struct Cyc_Std___sFILE*r=({struct Cyc_Std___sFILE*
 ! f=Cyc_Std_fdopen(fromchild[0],_tag_arr("r",sizeof(unsigned char),2));if(!((
 ! unsigned int)f)){Cyc_Std_fclose(w);return 1;}(struct Cyc_Std___sFILE*)_check_null(
 ! f);});int n=Cyc_Execinfo_backtrace(_tag_arr(bt,sizeof(int),20),(int)20);{int c=0;
@@ -142,7 +150,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! unsigned char),3),_tag_arr(_tmp9,sizeof(void*),0));});while((d=Cyc_Std_getc(r))
 ! != '\n'){Cyc_Std_putc(d,Cyc_Std_stdout);}Cyc_Std_putc((int)'\n',Cyc_Std_stdout);}}
 ! Cyc_Std_fclose(r);Cyc_Std_fclose(w);kill(pid,15);waitpid(pid,0,0);return 0;}}}
---- 260,285 ----
+--- 257,281 ----
   extern unsigned char Cyc_Core_Not_found[14];extern unsigned char Cyc_Core_Unreachable[
   16];struct Cyc_Core_Unreachable_struct{unsigned char*tag;struct _tagged_arr f1;};
   int Cyc_Execinfo_backtrace(struct _tagged_arr,int);int Cyc_Execinfo_bt();struct Cyc_Cstdio___sFILE;
@@ -165,15 +173,14 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! ru_msgsnd;int ru_msgrcv;int ru_nsignals;int ru_nvcsw;int ru_nivcsw;};void(*Cyc_Std_signal(
 ! int sig,void(*func)(int)))(int);int Cyc_Execinfo_backtrace(struct _tagged_arr array,
 ! int size){(int)_throw((void*)({struct Cyc_Core_Failure_struct*_tmp0=_cycalloc(
-! sizeof(struct Cyc_Core_Failure_struct));_tmp0[0]=({struct Cyc_Core_Failure_struct
-! _tmp1;_tmp1.tag=Cyc_Core_Failure;_tmp1.f1=_tag_arr("backtrace: unsupported except under Linux",
-! sizeof(unsigned char),42);_tmp1;});_tmp0;}));return 0;}int Cyc_Execinfo_bt(){
-! return 1;}
+! sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Failure_struct _tmp1;_tmp1.tag=Cyc_Core_Failure;
+! _tmp1.f1=_tag_arr("backtrace: unsupported except under Linux",sizeof(
+! unsigned char),42);_tmp1;});_tmp0;}));return 0;}int Cyc_Execinfo_bt(){return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody/lib/getopt.c
-*** i686-unknown-linux/lib/getopt.c	Thu Dec 13 17:38:57 2001
---- powerpc-apple-rhapsody/lib/getopt.c	Thu Dec 13 18:33:37 2001
+*** i686-unknown-linux/lib/getopt.c	Sun Dec 16 17:15:14 2001
+--- powerpc-apple-rhapsody/lib/getopt.c	Sun Dec 16 17:18:08 2001
 ***************
-*** 277,288 ****
+*** 274,285 ****
   extern struct _tagged_arr Cyc_Std_getenv(struct _tagged_arr);struct Cyc_Std_timeval{
   int tv_sec;int tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;int tz_dsttime;};
   struct Cyc_Std_itimerval{struct Cyc_Std_timeval it_interval;struct Cyc_Std_timeval
@@ -186,7 +193,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody
   int __argc,struct _tagged_arr __argv,struct _tagged_arr __shortopts,struct _tagged_arr
   __longopts,int*__longind,int __long_only);int Cyc_Std_access(struct _tagged_arr,int);
   int Cyc_Std_chdir(struct _tagged_arr);int Cyc_Std_chown(struct _tagged_arr,
---- 277,286 ----
+--- 274,283 ----
   extern struct _tagged_arr Cyc_Std_getenv(struct _tagged_arr);struct Cyc_Std_timeval{
   int tv_sec;int tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;int tz_dsttime;};
   struct Cyc_Std_itimerval{struct Cyc_Std_timeval it_interval;struct Cyc_Std_timeval
@@ -198,10 +205,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody
   __longopts,int*__longind,int __long_only);int Cyc_Std_access(struct _tagged_arr,int);
   int Cyc_Std_chdir(struct _tagged_arr);int Cyc_Std_chown(struct _tagged_arr,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapsody/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Thu Dec 13 17:39:00 2001
---- powerpc-apple-rhapsody/src/buildlib.c	Thu Dec 13 18:33:38 2001
+*** i686-unknown-linux/src/buildlib.c	Sun Dec 16 17:15:12 2001
+--- powerpc-apple-rhapsody/src/buildlib.c	Sun Dec 16 17:18:06 2001
 ***************
-*** 328,354 ****
+*** 325,351 ****
   extern void Cyc_Buffer_add_char(struct Cyc_Buffer_t*,unsigned char);extern void Cyc_Buffer_add_string(
   struct Cyc_Buffer_t*,struct _tagged_arr);struct Cyc_Std_tm{int tm_sec;int tm_min;int
   tm_hour;int tm_mday;int tm_mon;int tm_year;int tm_wday;int tm_yday;int tm_isdst;};
@@ -229,7 +236,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   struct _tagged_arr,struct _tagged_arr);int Cyc_Std_read(int fd,struct _tagged_arr buf,
   unsigned int count);int Cyc_Std_rmdir(struct _tagged_arr);int Cyc_Std_symlink(struct
   _tagged_arr,struct _tagged_arr);int Cyc_Std_truncate(struct _tagged_arr,int);int Cyc_Std_write(
---- 328,350 ----
+--- 325,347 ----
   extern void Cyc_Buffer_add_char(struct Cyc_Buffer_t*,unsigned char);extern void Cyc_Buffer_add_string(
   struct Cyc_Buffer_t*,struct _tagged_arr);struct Cyc_Std_tm{int tm_sec;int tm_min;int
   tm_hour;int tm_mday;int tm_mon;int tm_year;int tm_wday;int tm_yday;int tm_isdst;};

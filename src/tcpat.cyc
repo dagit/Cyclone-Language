@@ -172,7 +172,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
   case &Int_p(Unsigned,_): t = num_type(topt, uint_t);  break;
   case &Int_p(Signed,_):   t = num_type(topt, sint_t);  break;
   case &Char_p(_):         t = num_type(topt, uchar_t); break;
-  case &Float_p(_):        t = num_type(topt, float_t); break;
+  case &Float_p(_):        t = num_type(topt, float_typ); break;
   case &Enum_p(ed,ef):     
     t = num_type(topt, new EnumType(ed->name,ed)); break;
   case &AnonEnum_p(tenum,ef):  

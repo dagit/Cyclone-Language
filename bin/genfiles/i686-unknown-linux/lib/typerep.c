@@ -91,109 +91,106 @@ extern struct _xtunion_struct ADD_PREFIX(Bad_alloc_struct);
 extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 
 //// Built-in Run-time Checks and company
-static inline 
-void * _check_null(void * ptr) {
-#ifndef NO_CYC_NULL_CHECKS
-  if(!ptr)
-    _throw_null();
+#ifdef NO_CYC_NULL_CHECKS
+#define _check_null(ptr) (ptr)
+#else
+#define _check_null(ptr) \
+  ({ void *_check_null_temp = (void*)(ptr); \
+     if (!_check_null_temp) _throw_null(); \
+     _check_null_temp; })
 #endif
-  return ptr;
-}
-static inline 
-char * _check_known_subscript_null(void * ptr, unsigned bound, 
-				   unsigned elt_sz, unsigned index) {
-#ifndef NO_CYC_NULL_CHECKS
-  if(!ptr)
-    _throw_null();
-#endif
-#ifndef NO_CYC_BOUNDS_CHECKS
-  if(index >= bound)
-    _throw_arraybounds();
-#endif
-  return ((char *)ptr) + elt_sz*index;
-}
-static inline 
-unsigned _check_known_subscript_notnull(unsigned bound, unsigned index) {
-#ifndef NO_CYC_BOUNDS_CHECKS
-  if(index >= bound)
-    _throw_arraybounds();
-#endif
-  return index;
-}
-static inline 
-char * _check_unknown_subscript(struct _tagged_arr arr,
-				unsigned elt_sz, unsigned index) {
-  // caller casts first argument and result
-  // multiplication looks inefficient, but C compiler has to insert it otherwise
-  // by inlining, it should be able to avoid actual multiplication
-  unsigned char * ans = arr.curr + elt_sz * index;
-  // might be faster not to distinguish these two cases. definitely would be
-  // smaller.
-#ifndef NO_CYC_NULL_CHECKS
-  if(!arr.base) 
-    _throw_null();
-#endif
-#ifndef NO_CYC_BOUNDS_CHECKS
-  if(ans < arr.base || ans >= arr.last_plus_one)
-    _throw_arraybounds();
-#endif
-  return ans;
-}
-static inline 
-struct _tagged_arr _tag_arr(const void * curr, 
-			    unsigned elt_sz, unsigned num_elts) {
-  // beware the gcc bug, can happen with *temp = _tag_arr(...) in weird places!
-  struct _tagged_arr ans;
-  ans.base = (void *)curr;
-  ans.curr = (void *)curr;
-  ans.last_plus_one = ((char *)curr) + elt_sz * num_elts;
-  return ans;
-}
-static inline
-struct _tagged_arr * _init_tag_arr(struct _tagged_arr * arr_ptr, void * arr, 
-				   unsigned elt_sz, unsigned num_elts) {
-  // we use this to (hopefully) avoid the gcc bug
-  arr_ptr->base = arr_ptr->curr = arr;
-  arr_ptr->last_plus_one = ((char *)arr) + elt_sz * num_elts;
-  return arr_ptr;
-}
 
-static inline
-char * _untag_arr(struct _tagged_arr arr, unsigned elt_sz, unsigned num_elts) {
-  // Note: if arr is "null" base and curr should both be null, so this
-  //       is correct (caller checks for null if untagging to @ type)
-  // base may not be null if you use t ? pointer subtraction to get 0 -- oh well
-#ifndef NO_CYC_BOUNDS_CHECKS
-  if(arr.curr < arr.base || arr.curr + elt_sz * num_elts > arr.last_plus_one)
-    _throw_arraybounds();
+#ifdef NO_CYC_BOUNDS_CHECKS
+#define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
+  ((char *)ptr) + (elt_sz)*(index); })
+#else
+#define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
+  void *_cks_ptr = (void*)(ptr); \
+  unsigned _cks_bound = (bound); \
+  unsigned _cks_elt_sz = (elt_sz); \
+  unsigned _cks_index = (index); \
+  if (!_cks_ptr) _throw_null(); \
+  if (!_cks_index >= _cks_bound) _throw_arraybounds(); \
+  ((char *)cks_ptr) + cks_elt_sz*cks_index; })
 #endif
-  return arr.curr;
-}
-static inline 
-unsigned _get_arr_size(struct _tagged_arr arr, unsigned elt_sz) {
-  return (arr.curr<arr.base || arr.curr>=arr.last_plus_one) ? 0 : ((arr.last_plus_one - arr.curr) / elt_sz);
-}
-static inline
-struct _tagged_arr _tagged_arr_plus(struct _tagged_arr arr, unsigned elt_sz,
-				    int change) {
-  struct _tagged_arr ans = arr;
-  ans.curr += ((int)elt_sz)*change;
-  return ans;
-}
-static inline
-struct _tagged_arr _tagged_arr_inplace_plus(struct _tagged_arr * arr_ptr,
-					    unsigned elt_sz, int change) {
-  arr_ptr->curr += ((int)elt_sz)*change;
-  return *arr_ptr;
-}
-static inline
-struct _tagged_arr _tagged_arr_inplace_plus_post(struct _tagged_arr * arr_ptr,
-						 unsigned elt_sz, int change) {
-  struct _tagged_arr ans = *arr_ptr;
-  arr_ptr->curr += ((int)elt_sz)*change;
-  return ans;
-}
-				  
+
+#ifdef NO_CYC_BOUNDS_CHECKS
+#define _check_known_subscript_notnull(bound,index) (index)
+#else
+#define _check_known_subscript_notnull(bound,index) ({ \
+  unsigned _cksnn_bound = (bound); \
+  unsigned _cksnn_index = (index); \
+  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
+  _cksnn_index; })
+#endif
+
+#ifdef NO_CYC_BOUNDS_CHECKS
+#define _check_unknown_subscript(arr,elt_sz,index) ({ \
+  struct _tagged_arr _cus_arr = (arr); \
+  unsigned _cus_elt_sz = (elt_sz); \
+  unsigned _cus_index = (index); \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  _cus_ans; })
+#else
+#define _check_unknown_subscript(arr,elt_sz,index) ({ \
+  struct _tagged_arr _cus_arr = (arr); \
+  unsigned _cus_elt_sz = (elt_sz); \
+  unsigned _cus_index = (index); \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  if (!_cus_arr.base) _throw_null(); \
+  if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
+    _throw_arraybounds(); \
+  _cus_ans; })
+#endif
+
+#define _tag_arr(tcurr,elt_sz,num_elts) ({ \
+  struct _tagged_arr _tag_arr_ans; \
+  _tag_arr_ans.base = _tag_arr_ans.curr = (void *)(tcurr); \
+  _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts); \
+  _tag_arr_ans; })
+
+#define _init_tag_arr(arr_ptr,arr,elt_sz,num_elts) ({ \
+  struct _tagged_arr *_itarr_ptr = (arr_ptr); \
+  void * _itarr = (arr); \
+  _itarr_ptr->base = _itarr_ptr->curr = _itarr; \
+  _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts); \
+  _itarr_ptr; })
+
+#ifdef NO_CYC_BOUNDS_CHECKS
+#define _untag_arr(arr,elt_sz,num_elts) ((arr).curr)
+#else
+#define _untag_arr(arr,elt_sz,num_elts) ({ \
+  struct _tagged_arr _arr = (arr); \
+  unsigned char *_curr = _arr.curr; \
+  if (_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one)\
+    _throw_arraybounds(); \
+  _curr; })
+#endif
+
+#define _get_arr_size(arr,elt_sz) \
+  ({struct _tagged_arr _get_arr_size_temp = (arr); \
+    unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr; \
+    unsigned char *_get_arr_size_last=_get_arr_size_temp.last_plus_one; \
+    (_get_arr_size_curr < _get_arr_size_temp.base || \
+     _get_arr_size_curr >= _get_arr_size_last) ? 0 : \
+    ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));})
+
+#define _tagged_arr_plus(arr,elt_sz,change) ({ \
+  struct _tagged_arr _ans = (arr); \
+  _ans.curr += ((int)(elt_sz))*(change); \
+  _ans; })
+
+#define _tagged_arr_inplace_plus(arr_ptr,elt_sz,change) ({ \
+  struct _tagged_arr * _arr_ptr = (arr_ptr); \
+  _arr_ptr->curr += ((int)(elt_sz))*(change); \
+  *_arr_ptr; })
+
+#define _tagged_arr_inplace_plus_post(arr_ptr,elt_sz,change) ({ \
+  struct _tagged_arr * _arr_ptr = (arr_ptr); \
+  struct _tagged_arr _ans = *_arr_ptr; \
+  _arr_ptr->curr += ((int)(elt_sz))*(change); \
+  _ans; })
+
 //// Allocation
 extern void * GC_malloc(int);
 extern void * GC_malloc_atomic(int);
@@ -301,109 +298,107 @@ _tmp1,sizeof(struct _tuple1*))- 1;struct _tuple1**_tmp8=(struct _tuple1**)_cycal
 _check_times(sizeof(struct _tuple1*),_tmp7));struct _tagged_arr _tmpB=_tag_arr(
 _tmp8,sizeof(struct _tuple1*),_get_arr_size(_tmp1,sizeof(struct _tuple1*))- 1);{
 unsigned int _tmp9=_tmp7;unsigned int i;for(i=0;i < _tmp9;i ++){_tmp8[i]=({struct
-_tuple1*_tmpA=_cycalloc(sizeof(struct _tuple1));_tmpA->f1=(*(*((struct _tuple1**)
+_tuple1*_tmpA=_cycalloc(sizeof(*_tmpA));_tmpA->f1=(*(*((struct _tuple1**)
 _check_unknown_subscript(_tmp1,sizeof(struct _tuple1*),(int)(i + 1))))).f1 - pos1;
 _tmpA->f2=(*(*((struct _tuple1**)_check_unknown_subscript(_tmp1,sizeof(struct
 _tuple1*),(int)(i + 1))))).f2;_tmpA;});}};_tmpB;});return({struct _tuple4 _tmp4;
 _tmp4.f1=pos1;_tmp4.f2=(void*)({struct Cyc_Typerep_Tuple_struct*_tmp5=_cycalloc(
-sizeof(struct Cyc_Typerep_Tuple_struct));_tmp5[0]=({struct Cyc_Typerep_Tuple_struct
-_tmp6;_tmp6.tag=4;_tmp6.f1=_tmp2 - pos1;_tmp6.f2=_tmp3;_tmp6;});_tmp5;});_tmp4;});}
-_LL4:(int)_throw((void*)({struct Cyc_Core_Failure_struct*_tmpC=_cycalloc(sizeof(
-struct Cyc_Core_Failure_struct));_tmpC[0]=({struct Cyc_Core_Failure_struct _tmpD;
-_tmpD.tag=Cyc_Core_Failure;_tmpD.f1=_tag_arr("tuple_tl: expected tuple of size >= 2",
+sizeof(*_tmp5));_tmp5[0]=({struct Cyc_Typerep_Tuple_struct _tmp6;_tmp6.tag=4;_tmp6.f1=
+_tmp2 - pos1;_tmp6.f2=_tmp3;_tmp6;});_tmp5;});_tmp4;});}_LL4:(int)_throw((void*)({
+struct Cyc_Core_Failure_struct*_tmpC=_cycalloc(sizeof(*_tmpC));_tmpC[0]=({struct
+Cyc_Core_Failure_struct _tmpD;_tmpD.tag=Cyc_Core_Failure;_tmpD.f1=_tag_arr("tuple_tl: expected tuple of size >= 2",
 sizeof(unsigned char),38);_tmpD;});_tmpC;}));_LL0:;}struct _tuple4 Cyc_Typerep_get_unionbranch(
 unsigned int tag,struct _tagged_arr l){{int i=0;for(0;i < _get_arr_size(l,sizeof(
 struct _tuple0*));i ++){void*_tmpF;unsigned int _tmp10;struct _tuple0 _tmpE=*((struct
 _tuple0**)l.curr)[i];_LL9: _tmp10=_tmpE.f1;goto _LL8;_LL8: _tmpF=_tmpE.f3;goto _LL7;
 _LL7: if(_tmp10 == tag){return Cyc_Typerep_tuple_tl(_tmpF);}}}(int)_throw((void*)({
-struct Cyc_Core_Failure_struct*_tmp11=_cycalloc(sizeof(struct Cyc_Core_Failure_struct));
-_tmp11[0]=({struct Cyc_Core_Failure_struct _tmp12;_tmp12.tag=Cyc_Core_Failure;
-_tmp12.f1=_tag_arr("Could not find tag in TUnion",sizeof(unsigned char),29);
-_tmp12;});_tmp11;}));}struct _tagged_arr Cyc_Typerep_get_tagname(unsigned int tag,
-struct _tagged_arr l){{int i=0;for(0;i < _get_arr_size(l,sizeof(struct _tuple2*));i ++){
+struct Cyc_Core_Failure_struct*_tmp11=_cycalloc(sizeof(*_tmp11));_tmp11[0]=({
+struct Cyc_Core_Failure_struct _tmp12;_tmp12.tag=Cyc_Core_Failure;_tmp12.f1=
+_tag_arr("Could not find tag in TUnion",sizeof(unsigned char),29);_tmp12;});
+_tmp11;}));}struct _tagged_arr Cyc_Typerep_get_tagname(unsigned int tag,struct
+_tagged_arr l){{int i=0;for(0;i < _get_arr_size(l,sizeof(struct _tuple2*));i ++){
 struct _tagged_arr _tmp14;unsigned int _tmp15;struct _tuple2 _tmp13=*((struct _tuple2**)
 l.curr)[i];_LLC: _tmp15=_tmp13.f1;goto _LLB;_LLB: _tmp14=_tmp13.f2;goto _LLA;_LLA:
 if(_tmp15 == tag){return _tmp14;}}}(int)_throw((void*)({struct Cyc_Core_Failure_struct*
-_tmp16=_cycalloc(sizeof(struct Cyc_Core_Failure_struct));_tmp16[0]=({struct Cyc_Core_Failure_struct
+_tmp16=_cycalloc(sizeof(*_tmp16));_tmp16[0]=({struct Cyc_Core_Failure_struct
 _tmp17;_tmp17.tag=Cyc_Core_Failure;_tmp17.f1=_tag_arr("Could not find name in TUnion",
 sizeof(unsigned char),30);_tmp17;});_tmp16;}));}struct _tagged_arr Cyc_Typerep_get_tagname2(
 unsigned int tag,struct _tagged_arr l){{int i=0;for(0;i < _get_arr_size(l,sizeof(
 struct _tuple0*));i ++){struct _tagged_arr _tmp19;unsigned int _tmp1A;struct _tuple0
 _tmp18=*((struct _tuple0**)l.curr)[i];_LLF: _tmp1A=_tmp18.f1;goto _LLE;_LLE: _tmp19=
 _tmp18.f2;goto _LLD;_LLD: if(_tmp1A == tag){return _tmp19;}}}(int)_throw((void*)({
-struct Cyc_Core_Failure_struct*_tmp1B=_cycalloc(sizeof(struct Cyc_Core_Failure_struct));
-_tmp1B[0]=({struct Cyc_Core_Failure_struct _tmp1C;_tmp1C.tag=Cyc_Core_Failure;
-_tmp1C.f1=_tag_arr("Could not find name in TUnion",sizeof(unsigned char),30);
-_tmp1C;});_tmp1B;}));}struct _tuple4 Cyc_Typerep_get_xtunionbranch(struct
-_tagged_arr tag,struct _tagged_arr l){{int i=0;for(0;i < _get_arr_size(l,sizeof(
-struct _tuple3*));i ++){void*_tmp1E;struct _tagged_arr _tmp1F;struct _tuple3 _tmp1D=*((
-struct _tuple3**)l.curr)[i];_LL12: _tmp1F=_tmp1D.f1;goto _LL11;_LL11: _tmp1E=_tmp1D.f2;
-goto _LL10;_LL10: if(Cyc_Std_strcmp(_tmp1F,tag)== 0){return Cyc_Typerep_tuple_tl(
-_tmp1E);}}}(int)_throw((void*)({struct Cyc_Core_Failure_struct*_tmp20=_cycalloc(
-sizeof(struct Cyc_Core_Failure_struct));_tmp20[0]=({struct Cyc_Core_Failure_struct
-_tmp21;_tmp21.tag=Cyc_Core_Failure;_tmp21.f1=_tag_arr("Could not find tag in XTUnion",
-sizeof(unsigned char),30);_tmp21;});_tmp20;}));}unsigned int Cyc_Typerep_size_type(
-void*rep){void*_tmp22=rep;unsigned int _tmp23;int _tmp24;unsigned int _tmp25;
-unsigned int _tmp26;struct _tagged_arr _tmp27;_LL14: if((unsigned int)_tmp22 > 2?*((
-int*)_tmp22)== 0: 0){_LL29: _tmp24=((struct Cyc_Typerep_Int_struct*)_tmp22)->f1;
-goto _LL28;_LL28: _tmp23=((struct Cyc_Typerep_Int_struct*)_tmp22)->f2;goto _LL15;}
-else{goto _LL16;}_LL16: if((int)_tmp22 == 0){goto _LL17;}else{goto _LL18;}_LL18: if((
-int)_tmp22 == 1){goto _LL19;}else{goto _LL1A;}_LL1A: if((unsigned int)_tmp22 > 2?*((
-int*)_tmp22)== 1: 0){goto _LL1B;}else{goto _LL1C;}_LL1C: if((unsigned int)_tmp22 > 2?*((
-int*)_tmp22)== 2: 0){goto _LL1D;}else{goto _LL1E;}_LL1E: if((unsigned int)_tmp22 > 2?*((
-int*)_tmp22)== 3: 0){_LL2A: _tmp25=((struct Cyc_Typerep_Struct_struct*)_tmp22)->f2;
-goto _LL1F;}else{goto _LL20;}_LL20: if((unsigned int)_tmp22 > 2?*((int*)_tmp22)== 4:
-0){_LL2B: _tmp26=((struct Cyc_Typerep_Tuple_struct*)_tmp22)->f1;goto _LL21;}else{
-goto _LL22;}_LL22: if((unsigned int)_tmp22 > 2?*((int*)_tmp22)== 5: 0){goto _LL23;}
-else{goto _LL24;}_LL24: if((unsigned int)_tmp22 > 2?*((int*)_tmp22)== 6: 0){goto
-_LL25;}else{goto _LL26;}_LL26: if((unsigned int)_tmp22 > 2?*((int*)_tmp22)== 7: 0){
-_LL2C: _tmp27=((struct Cyc_Typerep_Union_struct*)_tmp22)->f2;goto _LL27;}else{goto
-_LL13;}_LL15: return _tmp23 >> 3;_LL17: return sizeof(float);_LL19: return sizeof(
-double);_LL1B: return sizeof(void*);_LL1D: return sizeof(struct _tagged_arr);_LL1F:
-return _tmp25;_LL21: return _tmp26;_LL23: return sizeof(void*);_LL25: return sizeof(
-void*);_LL27: {int max=0;{int i=0;for(0;i < _get_arr_size(_tmp27,sizeof(struct
-_tuple3*));i ++){struct _tuple3 _tmp29;void*_tmp2A;struct _tagged_arr _tmp2B;struct
-_tuple3*_tmp28=((struct _tuple3**)_tmp27.curr)[i];_tmp29=*_tmp28;_LL2F: _tmp2B=
-_tmp29.f1;goto _LL2E;_LL2E: _tmp2A=_tmp29.f2;goto _LL2D;_LL2D: {unsigned int _tmp2C=
-Cyc_Typerep_size_type(_tmp2A);max=(int)(max < _tmp2C? _tmp2C:(unsigned int)max);}}}
-return(unsigned int)max;}_LL13:;}struct _tagged_arr Cyc_Typerep_anon_or_name(
-struct _tagged_arr*name){return name == 0? _tag_arr("(anon)",sizeof(unsigned char),7):*
-name;}void Cyc_Typerep_print_typestruct(void*rep){void*_tmp2D=rep;unsigned int
-_tmp2E;int _tmp2F;void*_tmp30;unsigned int _tmp31;void*_tmp32;struct _tagged_arr
-_tmp33;unsigned int _tmp34;struct _tagged_arr*_tmp35;struct _tagged_arr _tmp36;
-unsigned int _tmp37;struct _tagged_arr _tmp38;struct _tagged_arr _tmp39;struct
-_tagged_arr _tmp3A;struct _tagged_arr _tmp3B;struct _tagged_arr _tmp3C;struct
-_tagged_arr _tmp3D;struct _tagged_arr*_tmp3E;_LL31: if((unsigned int)_tmp2D > 2?*((
-int*)_tmp2D)== 0: 0){_LL46: _tmp2F=((struct Cyc_Typerep_Int_struct*)_tmp2D)->f1;
-goto _LL45;_LL45: _tmp2E=((struct Cyc_Typerep_Int_struct*)_tmp2D)->f2;goto _LL32;}
-else{goto _LL33;}_LL33: if((int)_tmp2D == 0){goto _LL34;}else{goto _LL35;}_LL35: if((
-int)_tmp2D == 1){goto _LL36;}else{goto _LL37;}_LL37: if((unsigned int)_tmp2D > 2?*((
-int*)_tmp2D)== 1: 0){_LL48: _tmp31=((struct Cyc_Typerep_ThinPtr_struct*)_tmp2D)->f1;
-goto _LL47;_LL47: _tmp30=(void*)((struct Cyc_Typerep_ThinPtr_struct*)_tmp2D)->f2;
-goto _LL38;}else{goto _LL39;}_LL39: if((unsigned int)_tmp2D > 2?*((int*)_tmp2D)== 2:
-0){_LL49: _tmp32=(void*)((struct Cyc_Typerep_FatPtr_struct*)_tmp2D)->f1;goto _LL3A;}
-else{goto _LL3B;}_LL3B: if((unsigned int)_tmp2D > 2?*((int*)_tmp2D)== 3: 0){_LL4C:
-_tmp35=((struct Cyc_Typerep_Struct_struct*)_tmp2D)->f1;goto _LL4B;_LL4B: _tmp34=((
-struct Cyc_Typerep_Struct_struct*)_tmp2D)->f2;goto _LL4A;_LL4A: _tmp33=((struct Cyc_Typerep_Struct_struct*)
-_tmp2D)->f3;goto _LL3C;}else{goto _LL3D;}_LL3D: if((unsigned int)_tmp2D > 2?*((int*)
-_tmp2D)== 4: 0){_LL4E: _tmp37=((struct Cyc_Typerep_Tuple_struct*)_tmp2D)->f1;goto
-_LL4D;_LL4D: _tmp36=((struct Cyc_Typerep_Tuple_struct*)_tmp2D)->f2;goto _LL3E;}
-else{goto _LL3F;}_LL3F: if((unsigned int)_tmp2D > 2?*((int*)_tmp2D)== 5: 0){_LL51:
-_tmp3A=((struct Cyc_Typerep_TUnion_struct*)_tmp2D)->f1;goto _LL50;_LL50: _tmp39=((
-struct Cyc_Typerep_TUnion_struct*)_tmp2D)->f2;goto _LL4F;_LL4F: _tmp38=((struct Cyc_Typerep_TUnion_struct*)
-_tmp2D)->f3;goto _LL40;}else{goto _LL41;}_LL41: if((unsigned int)_tmp2D > 2?*((int*)
-_tmp2D)== 6: 0){_LL53: _tmp3C=((struct Cyc_Typerep_XTUnion_struct*)_tmp2D)->f1;goto
-_LL52;_LL52: _tmp3B=((struct Cyc_Typerep_XTUnion_struct*)_tmp2D)->f2;goto _LL42;}
-else{goto _LL43;}_LL43: if((unsigned int)_tmp2D > 2?*((int*)_tmp2D)== 7: 0){_LL55:
-_tmp3E=((struct Cyc_Typerep_Union_struct*)_tmp2D)->f1;goto _LL54;_LL54: _tmp3D=((
-struct Cyc_Typerep_Union_struct*)_tmp2D)->f2;goto _LL44;}else{goto _LL30;}_LL32:({
-struct Cyc_Std_Int_pa_struct _tmp41;_tmp41.tag=1;_tmp41.f1=(int)_tmp2E;{struct Cyc_Std_String_pa_struct
-_tmp40;_tmp40.tag=0;_tmp40.f1=(struct _tagged_arr)(_tmp2F? _tag_arr("signed",
-sizeof(unsigned char),7): _tag_arr("unsigned",sizeof(unsigned char),9));{void*
-_tmp3F[2]={& _tmp40,& _tmp41};Cyc_Std_printf(_tag_arr("Int(%s,%d)",sizeof(
-unsigned char),11),_tag_arr(_tmp3F,sizeof(void*),2));}}});goto _LL30;_LL34:({void*
-_tmp42[0]={};Cyc_Std_printf(_tag_arr("Float",sizeof(unsigned char),6),_tag_arr(
-_tmp42,sizeof(void*),0));});goto _LL30;_LL36:({void*_tmp43[0]={};Cyc_Std_printf(
+struct Cyc_Core_Failure_struct*_tmp1B=_cycalloc(sizeof(*_tmp1B));_tmp1B[0]=({
+struct Cyc_Core_Failure_struct _tmp1C;_tmp1C.tag=Cyc_Core_Failure;_tmp1C.f1=
+_tag_arr("Could not find name in TUnion",sizeof(unsigned char),30);_tmp1C;});
+_tmp1B;}));}struct _tuple4 Cyc_Typerep_get_xtunionbranch(struct _tagged_arr tag,
+struct _tagged_arr l){{int i=0;for(0;i < _get_arr_size(l,sizeof(struct _tuple3*));i ++){
+void*_tmp1E;struct _tagged_arr _tmp1F;struct _tuple3 _tmp1D=*((struct _tuple3**)l.curr)[
+i];_LL12: _tmp1F=_tmp1D.f1;goto _LL11;_LL11: _tmp1E=_tmp1D.f2;goto _LL10;_LL10: if(
+Cyc_Std_strcmp(_tmp1F,tag)== 0){return Cyc_Typerep_tuple_tl(_tmp1E);}}}(int)
+_throw((void*)({struct Cyc_Core_Failure_struct*_tmp20=_cycalloc(sizeof(*_tmp20));
+_tmp20[0]=({struct Cyc_Core_Failure_struct _tmp21;_tmp21.tag=Cyc_Core_Failure;
+_tmp21.f1=_tag_arr("Could not find tag in XTUnion",sizeof(unsigned char),30);
+_tmp21;});_tmp20;}));}unsigned int Cyc_Typerep_size_type(void*rep){void*_tmp22=
+rep;unsigned int _tmp23;int _tmp24;unsigned int _tmp25;unsigned int _tmp26;struct
+_tagged_arr _tmp27;_LL14: if((unsigned int)_tmp22 > 2?*((int*)_tmp22)== 0: 0){_LL29:
+_tmp24=((struct Cyc_Typerep_Int_struct*)_tmp22)->f1;goto _LL28;_LL28: _tmp23=((
+struct Cyc_Typerep_Int_struct*)_tmp22)->f2;goto _LL15;}else{goto _LL16;}_LL16: if((
+int)_tmp22 == 0){goto _LL17;}else{goto _LL18;}_LL18: if((int)_tmp22 == 1){goto _LL19;}
+else{goto _LL1A;}_LL1A: if((unsigned int)_tmp22 > 2?*((int*)_tmp22)== 1: 0){goto
+_LL1B;}else{goto _LL1C;}_LL1C: if((unsigned int)_tmp22 > 2?*((int*)_tmp22)== 2: 0){
+goto _LL1D;}else{goto _LL1E;}_LL1E: if((unsigned int)_tmp22 > 2?*((int*)_tmp22)== 3:
+0){_LL2A: _tmp25=((struct Cyc_Typerep_Struct_struct*)_tmp22)->f2;goto _LL1F;}else{
+goto _LL20;}_LL20: if((unsigned int)_tmp22 > 2?*((int*)_tmp22)== 4: 0){_LL2B: _tmp26=((
+struct Cyc_Typerep_Tuple_struct*)_tmp22)->f1;goto _LL21;}else{goto _LL22;}_LL22: if((
+unsigned int)_tmp22 > 2?*((int*)_tmp22)== 5: 0){goto _LL23;}else{goto _LL24;}_LL24:
+if((unsigned int)_tmp22 > 2?*((int*)_tmp22)== 6: 0){goto _LL25;}else{goto _LL26;}
+_LL26: if((unsigned int)_tmp22 > 2?*((int*)_tmp22)== 7: 0){_LL2C: _tmp27=((struct Cyc_Typerep_Union_struct*)
+_tmp22)->f2;goto _LL27;}else{goto _LL13;}_LL15: return _tmp23 >> 3;_LL17: return
+sizeof(float);_LL19: return sizeof(double);_LL1B: return sizeof(void*);_LL1D: return
+sizeof(struct _tagged_arr);_LL1F: return _tmp25;_LL21: return _tmp26;_LL23: return
+sizeof(void*);_LL25: return sizeof(void*);_LL27: {int max=0;{int i=0;for(0;i < 
+_get_arr_size(_tmp27,sizeof(struct _tuple3*));i ++){struct _tuple3 _tmp29;void*
+_tmp2A;struct _tagged_arr _tmp2B;struct _tuple3*_tmp28=((struct _tuple3**)_tmp27.curr)[
+i];_tmp29=*_tmp28;_LL2F: _tmp2B=_tmp29.f1;goto _LL2E;_LL2E: _tmp2A=_tmp29.f2;goto
+_LL2D;_LL2D: {unsigned int _tmp2C=Cyc_Typerep_size_type(_tmp2A);max=(int)(max < 
+_tmp2C? _tmp2C:(unsigned int)max);}}}return(unsigned int)max;}_LL13:;}struct
+_tagged_arr Cyc_Typerep_anon_or_name(struct _tagged_arr*name){return name == 0?
+_tag_arr("(anon)",sizeof(unsigned char),7):*name;}void Cyc_Typerep_print_typestruct(
+void*rep){void*_tmp2D=rep;unsigned int _tmp2E;int _tmp2F;void*_tmp30;unsigned int
+_tmp31;void*_tmp32;struct _tagged_arr _tmp33;unsigned int _tmp34;struct _tagged_arr*
+_tmp35;struct _tagged_arr _tmp36;unsigned int _tmp37;struct _tagged_arr _tmp38;struct
+_tagged_arr _tmp39;struct _tagged_arr _tmp3A;struct _tagged_arr _tmp3B;struct
+_tagged_arr _tmp3C;struct _tagged_arr _tmp3D;struct _tagged_arr*_tmp3E;_LL31: if((
+unsigned int)_tmp2D > 2?*((int*)_tmp2D)== 0: 0){_LL46: _tmp2F=((struct Cyc_Typerep_Int_struct*)
+_tmp2D)->f1;goto _LL45;_LL45: _tmp2E=((struct Cyc_Typerep_Int_struct*)_tmp2D)->f2;
+goto _LL32;}else{goto _LL33;}_LL33: if((int)_tmp2D == 0){goto _LL34;}else{goto _LL35;}
+_LL35: if((int)_tmp2D == 1){goto _LL36;}else{goto _LL37;}_LL37: if((unsigned int)
+_tmp2D > 2?*((int*)_tmp2D)== 1: 0){_LL48: _tmp31=((struct Cyc_Typerep_ThinPtr_struct*)
+_tmp2D)->f1;goto _LL47;_LL47: _tmp30=(void*)((struct Cyc_Typerep_ThinPtr_struct*)
+_tmp2D)->f2;goto _LL38;}else{goto _LL39;}_LL39: if((unsigned int)_tmp2D > 2?*((int*)
+_tmp2D)== 2: 0){_LL49: _tmp32=(void*)((struct Cyc_Typerep_FatPtr_struct*)_tmp2D)->f1;
+goto _LL3A;}else{goto _LL3B;}_LL3B: if((unsigned int)_tmp2D > 2?*((int*)_tmp2D)== 3:
+0){_LL4C: _tmp35=((struct Cyc_Typerep_Struct_struct*)_tmp2D)->f1;goto _LL4B;_LL4B:
+_tmp34=((struct Cyc_Typerep_Struct_struct*)_tmp2D)->f2;goto _LL4A;_LL4A: _tmp33=((
+struct Cyc_Typerep_Struct_struct*)_tmp2D)->f3;goto _LL3C;}else{goto _LL3D;}_LL3D:
+if((unsigned int)_tmp2D > 2?*((int*)_tmp2D)== 4: 0){_LL4E: _tmp37=((struct Cyc_Typerep_Tuple_struct*)
+_tmp2D)->f1;goto _LL4D;_LL4D: _tmp36=((struct Cyc_Typerep_Tuple_struct*)_tmp2D)->f2;
+goto _LL3E;}else{goto _LL3F;}_LL3F: if((unsigned int)_tmp2D > 2?*((int*)_tmp2D)== 5:
+0){_LL51: _tmp3A=((struct Cyc_Typerep_TUnion_struct*)_tmp2D)->f1;goto _LL50;_LL50:
+_tmp39=((struct Cyc_Typerep_TUnion_struct*)_tmp2D)->f2;goto _LL4F;_LL4F: _tmp38=((
+struct Cyc_Typerep_TUnion_struct*)_tmp2D)->f3;goto _LL40;}else{goto _LL41;}_LL41:
+if((unsigned int)_tmp2D > 2?*((int*)_tmp2D)== 6: 0){_LL53: _tmp3C=((struct Cyc_Typerep_XTUnion_struct*)
+_tmp2D)->f1;goto _LL52;_LL52: _tmp3B=((struct Cyc_Typerep_XTUnion_struct*)_tmp2D)->f2;
+goto _LL42;}else{goto _LL43;}_LL43: if((unsigned int)_tmp2D > 2?*((int*)_tmp2D)== 7:
+0){_LL55: _tmp3E=((struct Cyc_Typerep_Union_struct*)_tmp2D)->f1;goto _LL54;_LL54:
+_tmp3D=((struct Cyc_Typerep_Union_struct*)_tmp2D)->f2;goto _LL44;}else{goto _LL30;}
+_LL32:({struct Cyc_Std_Int_pa_struct _tmp41;_tmp41.tag=1;_tmp41.f1=(int)_tmp2E;{
+struct Cyc_Std_String_pa_struct _tmp40;_tmp40.tag=0;_tmp40.f1=(struct _tagged_arr)(
+_tmp2F? _tag_arr("signed",sizeof(unsigned char),7): _tag_arr("unsigned",sizeof(
+unsigned char),9));{void*_tmp3F[2]={& _tmp40,& _tmp41};Cyc_Std_printf(_tag_arr("Int(%s,%d)",
+sizeof(unsigned char),11),_tag_arr(_tmp3F,sizeof(void*),2));}}});goto _LL30;_LL34:({
+void*_tmp42[0]={};Cyc_Std_printf(_tag_arr("Float",sizeof(unsigned char),6),
+_tag_arr(_tmp42,sizeof(void*),0));});goto _LL30;_LL36:({void*_tmp43[0]={};Cyc_Std_printf(
 _tag_arr("Double",sizeof(unsigned char),7),_tag_arr(_tmp43,sizeof(void*),0));});
 goto _LL30;_LL38:({struct Cyc_Std_Int_pa_struct _tmp45;_tmp45.tag=1;_tmp45.f1=(int)
 _tmp31;{void*_tmp44[1]={& _tmp45};Cyc_Std_printf(_tag_arr("ThinPtr(%d,",sizeof(

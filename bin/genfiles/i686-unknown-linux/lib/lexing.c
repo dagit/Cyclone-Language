@@ -91,109 +91,106 @@ extern struct _xtunion_struct ADD_PREFIX(Bad_alloc_struct);
 extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 
 //// Built-in Run-time Checks and company
-static inline 
-void * _check_null(void * ptr) {
-#ifndef NO_CYC_NULL_CHECKS
-  if(!ptr)
-    _throw_null();
+#ifdef NO_CYC_NULL_CHECKS
+#define _check_null(ptr) (ptr)
+#else
+#define _check_null(ptr) \
+  ({ void *_check_null_temp = (void*)(ptr); \
+     if (!_check_null_temp) _throw_null(); \
+     _check_null_temp; })
 #endif
-  return ptr;
-}
-static inline 
-char * _check_known_subscript_null(void * ptr, unsigned bound, 
-				   unsigned elt_sz, unsigned index) {
-#ifndef NO_CYC_NULL_CHECKS
-  if(!ptr)
-    _throw_null();
-#endif
-#ifndef NO_CYC_BOUNDS_CHECKS
-  if(index >= bound)
-    _throw_arraybounds();
-#endif
-  return ((char *)ptr) + elt_sz*index;
-}
-static inline 
-unsigned _check_known_subscript_notnull(unsigned bound, unsigned index) {
-#ifndef NO_CYC_BOUNDS_CHECKS
-  if(index >= bound)
-    _throw_arraybounds();
-#endif
-  return index;
-}
-static inline 
-char * _check_unknown_subscript(struct _tagged_arr arr,
-				unsigned elt_sz, unsigned index) {
-  // caller casts first argument and result
-  // multiplication looks inefficient, but C compiler has to insert it otherwise
-  // by inlining, it should be able to avoid actual multiplication
-  unsigned char * ans = arr.curr + elt_sz * index;
-  // might be faster not to distinguish these two cases. definitely would be
-  // smaller.
-#ifndef NO_CYC_NULL_CHECKS
-  if(!arr.base) 
-    _throw_null();
-#endif
-#ifndef NO_CYC_BOUNDS_CHECKS
-  if(ans < arr.base || ans >= arr.last_plus_one)
-    _throw_arraybounds();
-#endif
-  return ans;
-}
-static inline 
-struct _tagged_arr _tag_arr(const void * curr, 
-			    unsigned elt_sz, unsigned num_elts) {
-  // beware the gcc bug, can happen with *temp = _tag_arr(...) in weird places!
-  struct _tagged_arr ans;
-  ans.base = (void *)curr;
-  ans.curr = (void *)curr;
-  ans.last_plus_one = ((char *)curr) + elt_sz * num_elts;
-  return ans;
-}
-static inline
-struct _tagged_arr * _init_tag_arr(struct _tagged_arr * arr_ptr, void * arr, 
-				   unsigned elt_sz, unsigned num_elts) {
-  // we use this to (hopefully) avoid the gcc bug
-  arr_ptr->base = arr_ptr->curr = arr;
-  arr_ptr->last_plus_one = ((char *)arr) + elt_sz * num_elts;
-  return arr_ptr;
-}
 
-static inline
-char * _untag_arr(struct _tagged_arr arr, unsigned elt_sz, unsigned num_elts) {
-  // Note: if arr is "null" base and curr should both be null, so this
-  //       is correct (caller checks for null if untagging to @ type)
-  // base may not be null if you use t ? pointer subtraction to get 0 -- oh well
-#ifndef NO_CYC_BOUNDS_CHECKS
-  if(arr.curr < arr.base || arr.curr + elt_sz * num_elts > arr.last_plus_one)
-    _throw_arraybounds();
+#ifdef NO_CYC_BOUNDS_CHECKS
+#define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
+  ((char *)ptr) + (elt_sz)*(index); })
+#else
+#define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
+  void *_cks_ptr = (void*)(ptr); \
+  unsigned _cks_bound = (bound); \
+  unsigned _cks_elt_sz = (elt_sz); \
+  unsigned _cks_index = (index); \
+  if (!_cks_ptr) _throw_null(); \
+  if (!_cks_index >= _cks_bound) _throw_arraybounds(); \
+  ((char *)cks_ptr) + cks_elt_sz*cks_index; })
 #endif
-  return arr.curr;
-}
-static inline 
-unsigned _get_arr_size(struct _tagged_arr arr, unsigned elt_sz) {
-  return (arr.curr<arr.base || arr.curr>=arr.last_plus_one) ? 0 : ((arr.last_plus_one - arr.curr) / elt_sz);
-}
-static inline
-struct _tagged_arr _tagged_arr_plus(struct _tagged_arr arr, unsigned elt_sz,
-				    int change) {
-  struct _tagged_arr ans = arr;
-  ans.curr += ((int)elt_sz)*change;
-  return ans;
-}
-static inline
-struct _tagged_arr _tagged_arr_inplace_plus(struct _tagged_arr * arr_ptr,
-					    unsigned elt_sz, int change) {
-  arr_ptr->curr += ((int)elt_sz)*change;
-  return *arr_ptr;
-}
-static inline
-struct _tagged_arr _tagged_arr_inplace_plus_post(struct _tagged_arr * arr_ptr,
-						 unsigned elt_sz, int change) {
-  struct _tagged_arr ans = *arr_ptr;
-  arr_ptr->curr += ((int)elt_sz)*change;
-  return ans;
-}
-				  
+
+#ifdef NO_CYC_BOUNDS_CHECKS
+#define _check_known_subscript_notnull(bound,index) (index)
+#else
+#define _check_known_subscript_notnull(bound,index) ({ \
+  unsigned _cksnn_bound = (bound); \
+  unsigned _cksnn_index = (index); \
+  if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
+  _cksnn_index; })
+#endif
+
+#ifdef NO_CYC_BOUNDS_CHECKS
+#define _check_unknown_subscript(arr,elt_sz,index) ({ \
+  struct _tagged_arr _cus_arr = (arr); \
+  unsigned _cus_elt_sz = (elt_sz); \
+  unsigned _cus_index = (index); \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  _cus_ans; })
+#else
+#define _check_unknown_subscript(arr,elt_sz,index) ({ \
+  struct _tagged_arr _cus_arr = (arr); \
+  unsigned _cus_elt_sz = (elt_sz); \
+  unsigned _cus_index = (index); \
+  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  if (!_cus_arr.base) _throw_null(); \
+  if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
+    _throw_arraybounds(); \
+  _cus_ans; })
+#endif
+
+#define _tag_arr(tcurr,elt_sz,num_elts) ({ \
+  struct _tagged_arr _tag_arr_ans; \
+  _tag_arr_ans.base = _tag_arr_ans.curr = (void *)(tcurr); \
+  _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts); \
+  _tag_arr_ans; })
+
+#define _init_tag_arr(arr_ptr,arr,elt_sz,num_elts) ({ \
+  struct _tagged_arr *_itarr_ptr = (arr_ptr); \
+  void * _itarr = (arr); \
+  _itarr_ptr->base = _itarr_ptr->curr = _itarr; \
+  _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts); \
+  _itarr_ptr; })
+
+#ifdef NO_CYC_BOUNDS_CHECKS
+#define _untag_arr(arr,elt_sz,num_elts) ((arr).curr)
+#else
+#define _untag_arr(arr,elt_sz,num_elts) ({ \
+  struct _tagged_arr _arr = (arr); \
+  unsigned char *_curr = _arr.curr; \
+  if (_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one)\
+    _throw_arraybounds(); \
+  _curr; })
+#endif
+
+#define _get_arr_size(arr,elt_sz) \
+  ({struct _tagged_arr _get_arr_size_temp = (arr); \
+    unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr; \
+    unsigned char *_get_arr_size_last=_get_arr_size_temp.last_plus_one; \
+    (_get_arr_size_curr < _get_arr_size_temp.base || \
+     _get_arr_size_curr >= _get_arr_size_last) ? 0 : \
+    ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));})
+
+#define _tagged_arr_plus(arr,elt_sz,change) ({ \
+  struct _tagged_arr _ans = (arr); \
+  _ans.curr += ((int)(elt_sz))*(change); \
+  _ans; })
+
+#define _tagged_arr_inplace_plus(arr_ptr,elt_sz,change) ({ \
+  struct _tagged_arr * _arr_ptr = (arr_ptr); \
+  _arr_ptr->curr += ((int)(elt_sz))*(change); \
+  *_arr_ptr; })
+
+#define _tagged_arr_inplace_plus_post(arr_ptr,elt_sz,change) ({ \
+  struct _tagged_arr * _arr_ptr = (arr_ptr); \
+  struct _tagged_arr _ans = *_arr_ptr; \
+  _arr_ptr->curr += ((int)(elt_sz))*(change); \
+  _ans; })
+
 //// Allocation
 extern void * GC_malloc(int);
 extern void * GC_malloc_atomic(int);
@@ -314,23 +311,22 @@ lexbuf->lex_abs_pos=lexbuf->lex_abs_pos + n;lexbuf->lex_curr_pos=lexbuf->lex_cur
 - n;lexbuf->lex_start_pos=lexbuf->lex_start_pos - n;lexbuf->lex_last_pos=lexbuf->lex_last_pos
 - n;}}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(int(*read_fun)(struct
 _tagged_arr,int,void*),void*read_fun_state){return({struct Cyc_Lexing_lexbuf*
-_tmp0=_cycalloc(sizeof(struct Cyc_Lexing_lexbuf));_tmp0->refill_buff=Cyc_Lexing_lex_refill;
-_tmp0->refill_state=({struct Cyc_Lexing_function_lexbuf_state*_tmp1=_cycalloc(
-sizeof(struct Cyc_Lexing_function_lexbuf_state));_tmp1->read_fun=read_fun;_tmp1->read_fun_state=(
-void*)read_fun_state;_tmp1;});_tmp0->lex_buffer=Cyc_Core_new_string(8192);_tmp0->lex_buffer_len=
-8192;_tmp0->lex_abs_pos=- 8192;_tmp0->lex_start_pos=8192;_tmp0->lex_curr_pos=8192;
-_tmp0->lex_last_pos=8192;_tmp0->lex_last_action=0;_tmp0->lex_eof_reached=0;_tmp0;});}
-int Cyc_Lexing_read_from_file(struct _tagged_arr aux,int n,struct Cyc_Std___sFILE*f){
-return Cyc_Std_file_string_read(f,aux,0,n);}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(
-struct Cyc_Std___sFILE*f){return((struct Cyc_Lexing_lexbuf*(*)(int(*read_fun)(
-struct _tagged_arr,int,struct Cyc_Std___sFILE*),struct Cyc_Std___sFILE*
-read_fun_state))Cyc_Lexing_from_function)(Cyc_Lexing_read_from_file,f);}static
-void Cyc_Lexing_set_eof(struct Cyc_Lexing_lexbuf*lbuf){lbuf->lex_eof_reached=1;}
-struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(struct _tagged_arr s){return({
-struct Cyc_Lexing_lexbuf*_tmp2=_cycalloc(sizeof(struct Cyc_Lexing_lexbuf));_tmp2->refill_buff=
-Cyc_Lexing_set_eof;_tmp2->refill_state=(void*)0;_tmp2->lex_buffer=Cyc_Std_strdup((
-struct _tagged_arr)s);_tmp2->lex_buffer_len=(int)_get_arr_size(s,sizeof(
-unsigned char));_tmp2->lex_abs_pos=0;_tmp2->lex_start_pos=0;_tmp2->lex_curr_pos=
+_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->refill_buff=Cyc_Lexing_lex_refill;_tmp0->refill_state=({
+struct Cyc_Lexing_function_lexbuf_state*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->read_fun=
+read_fun;_tmp1->read_fun_state=(void*)read_fun_state;_tmp1;});_tmp0->lex_buffer=
+Cyc_Core_new_string(8192);_tmp0->lex_buffer_len=8192;_tmp0->lex_abs_pos=- 8192;
+_tmp0->lex_start_pos=8192;_tmp0->lex_curr_pos=8192;_tmp0->lex_last_pos=8192;
+_tmp0->lex_last_action=0;_tmp0->lex_eof_reached=0;_tmp0;});}int Cyc_Lexing_read_from_file(
+struct _tagged_arr aux,int n,struct Cyc_Std___sFILE*f){return Cyc_Std_file_string_read(
+f,aux,0,n);}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc_Std___sFILE*f){
+return((struct Cyc_Lexing_lexbuf*(*)(int(*read_fun)(struct _tagged_arr,int,struct
+Cyc_Std___sFILE*),struct Cyc_Std___sFILE*read_fun_state))Cyc_Lexing_from_function)(
+Cyc_Lexing_read_from_file,f);}static void Cyc_Lexing_set_eof(struct Cyc_Lexing_lexbuf*
+lbuf){lbuf->lex_eof_reached=1;}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(
+struct _tagged_arr s){return({struct Cyc_Lexing_lexbuf*_tmp2=_cycalloc(sizeof(*
+_tmp2));_tmp2->refill_buff=Cyc_Lexing_set_eof;_tmp2->refill_state=(void*)0;_tmp2->lex_buffer=
+Cyc_Std_strdup((struct _tagged_arr)s);_tmp2->lex_buffer_len=(int)_get_arr_size(s,
+sizeof(unsigned char));_tmp2->lex_abs_pos=0;_tmp2->lex_start_pos=0;_tmp2->lex_curr_pos=
 0;_tmp2->lex_last_pos=0;_tmp2->lex_last_action=0;_tmp2->lex_eof_reached=1;_tmp2;});}
 struct _tagged_arr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*lbuf){int len=lbuf->lex_curr_pos
 - lbuf->lex_start_pos;struct _tagged_arr s=Cyc_Core_new_string((unsigned int)(len + 

@@ -492,15 +492,13 @@ static short process_id(Lexbuf<`a> lbuf) {
     return (short)kw_nums[symbol_num-1]; 
 
   let s = get_symbol(symbol_num);
+  token_string = *s;
 
   // maybe it's a typedef
-  if (is_typedef(NULL,s)) {
-    token_qvar = new $(rel_ns_null, s);
-    return QUAL_TYPEDEF_NAME;
-  }
+  if (is_typedef(NULL,s))
+    return TYPEDEF_NAME;
 
   // alas, it's an identifier
-  token_string = *s;
   return IDENTIFIER;
 }
 
@@ -529,14 +527,13 @@ static short process_qual_id(Lexbuf<`a> lbuf) {
   token_qvar = new $(new Rel_n(vs),v);
   if (is_typedef(vs,v))
     return QUAL_TYPEDEF_NAME;
-  else 
-    return QUAL_IDENTIFIER;
+  return QUAL_IDENTIFIER;
 }
 
 // Forward declarations of lexing functions 
-extern int token(Lexbuf<`a>);
-extern int strng(Lexbuf<`a>);
-extern int comment(Lexbuf<`a>);
+int token(Lexbuf<`a>);
+int strng(Lexbuf<`a>);
+int comment(Lexbuf<`a>);
 } // namespace Lex
 
 // for parser -- must not be prefixed
@@ -546,6 +543,7 @@ int yylex() {
  yylloc.last_line  = lexeme_end(lbuf->v);
  switch (ans) {
  case IDENTIFIER        : yylval = new String_tok(Lex::token_string); break;
+ case TYPEDEF_NAME      : yylval = new String_tok(Lex::token_string); break;
  case QUAL_IDENTIFIER   : yylval = new QualId_tok(Lex::token_qvar);   break;
  case QUAL_TYPEDEF_NAME : yylval = new QualId_tok(Lex::token_qvar);   break;
  case TYPE_VAR          : yylval = new String_tok(Lex::token_string); break;

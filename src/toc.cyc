@@ -874,7 +874,7 @@ static exp_t make_struct(env_t nv, qvar_t x, type_t struct_typ, stmt_t s,
   type_t    t;
   if (pointer) {
     t  = cstar_typ(struct_typ, mt_tq);
-    let se = sizeoftyp_exp(struct_typ,DL);
+    let se = sizeofexp_exp(deref_exp(var_exp(x,DL),DL),DL);
     if (rgnopt == NULL)
       //eo = cast_exp(t, is_atomic ? malloc_atomic(se) : malloc_ptr(se), DL);
       eo = is_atomic ? malloc_atomic(se) : malloc_ptr(se);
@@ -1729,7 +1729,10 @@ static void exp_to_c(env_t nv, exp_t e) {
       type_t old_elt_typ = e1->topt->v;
       type_t elt_typ = typ_to_c(old_elt_typ);
       // build up the malloc expression: (t *)(malloc(sizeof(t)))
-      exp_t mexp = sizeoftyp_exp(elt_typ,DL);
+      let x = temp_var();
+      let xexp = var_exp(x,DL);
+      exp_t mexp = sizeofexp_exp(deref_exp(xexp,DL),DL);
+      exp_t inner_mexp = mexp;
       if (rgnopt == NULL) 
         mexp = malloc_exp(old_elt_typ,mexp);
       else {
@@ -1749,9 +1752,11 @@ static void exp_to_c(env_t nv, exp_t e) {
 	       &PointerType(PtrInfo(_,_,_,_,be))):
 	  switch($(conref_def(bounds_one,bc),conref_def(bounds_one,be))) {
 	  case $(Unknown_b,&Upper_b(arr_sz)):
+	    inner_mexp->r = sizeoftyp_exp(elt_typ,DL)->r;
 	    done = true;
 	    e->r = fncall_exp(_init_tag_arr_e,
-			      list(mexp,e2,sizeoftyp_exp(arr_typ,DL),arr_sz),
+			      list(mexp,
+				   e2,sizeoftyp_exp(arr_typ,DL),arr_sz),
 			      DL)->r;
 	    break;
 	  default: break;
@@ -1763,11 +1768,10 @@ static void exp_to_c(env_t nv, exp_t e) {
       default: break;
       }
       if(!done) {
-	let x = temp_var();
-	let s = exp_stmt(var_exp(x,DL),DL);
+	let s = exp_stmt(xexp,DL);
 	let e_index = signed_int_exp(0,DL);
 	exp_to_c(nv,e1);
-	s = seq_stmt(assign_stmt(subscript_exp(var_exp(x,DL),e_index,DL),
+	s = seq_stmt(assign_stmt(subscript_exp(xexp,e_index,DL),
 				 e1,DL),s,DL);
 	let ptr_typ = cstar_typ(elt_typ,mt_tq);
 	e->r = stmt_exp(declare_stmt(x,ptr_typ,mexp,s,DL),DL)->r;

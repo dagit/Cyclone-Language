@@ -278,7 +278,7 @@ ru_ixrss;int ru_idrss;int ru_isrss;int ru_minflt;int ru_majflt;int ru_nswap;int
 ru_inblock;int ru_oublock;int ru_msgsnd;int ru_msgrcv;int ru_nsignals;int ru_nvcsw;
 int ru_nivcsw;};void(*Cyc_Std_signal(int sig,void(*func)(int)))(int);int Cyc_Execinfo_backtrace(
 struct _tagged_arr array,int size){(int)_throw((void*)({struct Cyc_Core_Failure_struct*
-_tmp0=_cycalloc(sizeof(struct Cyc_Core_Failure_struct));_tmp0[0]=({struct Cyc_Core_Failure_struct
-_tmp1;_tmp1.tag=Cyc_Core_Failure;_tmp1.f1=_tag_arr("backtrace: unsupported except under Linux",
+_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Failure_struct _tmp1;
+_tmp1.tag=Cyc_Core_Failure;_tmp1.f1=_tag_arr("backtrace: unsupported except under Linux",
 sizeof(unsigned char),42);_tmp1;});_tmp0;}));return 0;}int Cyc_Execinfo_bt(){
 return 1;}

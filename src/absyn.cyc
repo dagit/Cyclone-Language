@@ -193,8 +193,8 @@ type_t sint_t   = &sint_tt;
 type_t slong_t  = &slong_tt;
 type_t slonglong_t = &slonglong_tt;
 // float, double
-type_t float_t  = FloatType;
-type_t double_t(bool b) {
+type_t float_typ  = FloatType;
+type_t double_typ(bool b) {
   return new DoubleType(b);
 }
 // exceptions
@@ -697,7 +697,7 @@ struct Structfield * lookup_union_field(uniondecl_t ud, var_t v) {
   return (ud->fields == NULL) ? NULL : lookup_field(ud->fields->v,v);
 }
 
-$(tqual_t,type_t) * lookup_tuple_field(list_t<$(tqual_t,type_t)@`H,`H> ts, 
+$(tqual_t,type_t) * lookup_tuple_field(list_t<$(tqual_t,type_t)@`H> ts, 
                                        int i) {
   for(; i != 0; --i) {
     if(ts == NULL)

@@ -548,15 +548,14 @@ namespace Absyn {
   // raw patterns
   EXTERN_ABSYN tunion Raw_pat {
     Wild_p; // _ 
-    Var_p(vardecl_t); // x.  only name field is right until tcPat is called
+    Var_p(vardecl_t); // x. only name field is right until tcPat is called
     Null_p; // NULL
     Int_p(sign_t,int); // 3
     Char_p(char);      // 'a'
     Float_p(string_t); // 3.1415
     Tuple_p(list_t<pat_t>); // $(p1,...,pn)
     Pointer_p(pat_t); // &p
-    // *p. only name field is right until tcpat is called
-    Reference_p(vardecl_t); 
+    Reference_p(vardecl_t);// *p. only name field is right until tcPat is called
     Struct_p(structdecl_t,opt_t<list_t<type_t>>,list_t<tvar_t>,
 	     list_t<$(list_t<designator_t>,pat_t)@>);
     Tunion_p(tuniondecl_t, tunionfield_t, list_t<tvar_t>, list_t<pat_t>);
@@ -775,7 +774,7 @@ namespace Absyn {
   // signed types
   extern type_t schar_t, sshort_t, sint_t, slong_t, slonglong_t;
   // float, double
-  extern type_t float_t, double_t(bool);
+  extern type_t float_typ, double_typ(bool);
   // empty effect
   extern type_t empty_effect;
   // exception name and type
@@ -948,7 +947,7 @@ namespace Absyn {
   // find a union field by name from a union declaration
   extern struct Structfield *lookup_union_field(uniondecl_t,var_t);
   // find a tuple field form a list of qualifiers and types
-  extern $(tqual_t,type_t) *lookup_tuple_field(list_t<$(tqual_t,type_t)@`H,`H>,int);
+  extern $(tqual_t,type_t)*lookup_tuple_field(list_t<$(tqual_t,type_t)@`H>,int);
   // turn an attribute into a string
   extern string_t attribute2string(attribute_t);
   // returns true when a is an attribute for function types

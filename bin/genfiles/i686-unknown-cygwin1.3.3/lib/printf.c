@@ -294,16 +294,16 @@ _tag_arr("int",sizeof(unsigned char),4);_LL6: return _tag_arr("double",sizeof(
 unsigned char),7);_LL8: return _tag_arr("short *",sizeof(unsigned char),8);_LLA:
 return _tag_arr("unsigned long *",sizeof(unsigned char),16);_LL0:;}static void*Cyc_Std_badarg(
 struct _tagged_arr s){return(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
-_tmp1=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_struct));_tmp1[0]=({
-struct Cyc_Core_Invalid_argument_struct _tmp2;_tmp2.tag=Cyc_Core_Invalid_argument;
-_tmp2.f1=s;_tmp2;});_tmp1;}));}static int Cyc_Std_va_arg_int(struct _tagged_arr ap){
-void*_tmp3=*((void**)_check_unknown_subscript(ap,sizeof(void*),0));unsigned int
-_tmp4;_LLC: if(*((int*)_tmp3)== 1){_LL10: _tmp4=((struct Cyc_Std_Int_pa_struct*)
-_tmp3)->f1;goto _LLD;}else{goto _LLE;}_LLE: goto _LLF;_LLD: return(int)_tmp4;_LLF:
-return((int(*)(struct _tagged_arr s))Cyc_Std_badarg)(_tag_arr("printf expected int",
-sizeof(unsigned char),20));_LLB:;}static int Cyc_Std_va_arg_long(struct _tagged_arr
-ap){void*_tmp5=*((void**)_check_unknown_subscript(ap,sizeof(void*),0));
-unsigned int _tmp6;_LL12: if(*((int*)_tmp5)== 1){_LL16: _tmp6=((struct Cyc_Std_Int_pa_struct*)
+_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1[0]=({struct Cyc_Core_Invalid_argument_struct
+_tmp2;_tmp2.tag=Cyc_Core_Invalid_argument;_tmp2.f1=s;_tmp2;});_tmp1;}));}static
+int Cyc_Std_va_arg_int(struct _tagged_arr ap){void*_tmp3=*((void**)
+_check_unknown_subscript(ap,sizeof(void*),0));unsigned int _tmp4;_LLC: if(*((int*)
+_tmp3)== 1){_LL10: _tmp4=((struct Cyc_Std_Int_pa_struct*)_tmp3)->f1;goto _LLD;}
+else{goto _LLE;}_LLE: goto _LLF;_LLD: return(int)_tmp4;_LLF: return((int(*)(struct
+_tagged_arr s))Cyc_Std_badarg)(_tag_arr("printf expected int",sizeof(
+unsigned char),20));_LLB:;}static int Cyc_Std_va_arg_long(struct _tagged_arr ap){
+void*_tmp5=*((void**)_check_unknown_subscript(ap,sizeof(void*),0));unsigned int
+_tmp6;_LL12: if(*((int*)_tmp5)== 1){_LL16: _tmp6=((struct Cyc_Std_Int_pa_struct*)
 _tmp5)->f1;goto _LL13;}else{goto _LL14;}_LL14: goto _LL15;_LL13: return(int)_tmp6;
 _LL15: return((int(*)(struct _tagged_arr s))Cyc_Std_badarg)(_tag_arr("printf expected int",
 sizeof(unsigned char),20));_LL11:;}static unsigned int Cyc_Std_va_arg_ulong(struct
@@ -587,36 +587,36 @@ _tagged_arr_inplace_plus(& t,sizeof(unsigned char),-1),sizeof(unsigned char),0))
 == '0': 0){;}if(*((unsigned char*)_check_unknown_subscript(t,sizeof(unsigned char),
 0))!= '.'){_tagged_arr_inplace_plus(& t,sizeof(unsigned char),1);}}}break;
 default: _LL6D:(int)_throw((void*)({struct Cyc_Core_Impossible_struct*_tmp15=
-_cycalloc(sizeof(struct Cyc_Core_Impossible_struct));_tmp15[0]=({struct Cyc_Core_Impossible_struct
-_tmp16;_tmp16.tag=Cyc_Core_Impossible;_tmp16.f1=_tag_arr("Std::__cvt_double",
-sizeof(unsigned char),18);_tmp16;});_tmp15;}));}return(t.curr - startp.curr)/ 
-sizeof(unsigned char);}int Cyc_Std_vfprintf(struct Cyc_Std___sFILE*f,struct
-_tagged_arr fmt,struct _tagged_arr ap){int ans;ans=((int(*)(int(*ioputc)(int,struct
-Cyc_Std___sFILE*),struct Cyc_Std___sFILE*ioputc_env,struct _tagged_arr fmt0,struct
-_tagged_arr ap))Cyc_Std__IO_vfprintf)(Cyc_Std_putc,f,fmt,ap);return ans;}int Cyc_Std_fprintf(
-struct Cyc_Std___sFILE*f,struct _tagged_arr fmt,struct _tagged_arr ap){return Cyc_Std_vfprintf(
-f,fmt,ap);}int Cyc_Std_vprintf(struct _tagged_arr fmt,struct _tagged_arr ap){int ans;
-ans=((int(*)(int(*ioputc)(int,struct Cyc_Std___sFILE*),struct Cyc_Std___sFILE*
-ioputc_env,struct _tagged_arr fmt0,struct _tagged_arr ap))Cyc_Std__IO_vfprintf)(Cyc_Std_putc,
-Cyc_Std_stdout,fmt,ap);return ans;}int Cyc_Std_printf(struct _tagged_arr fmt,struct
-_tagged_arr ap){int ans;ans=Cyc_Std_vprintf(fmt,ap);return ans;}struct _tuple0{
-struct _tagged_arr*f1;unsigned int*f2;};static int Cyc_Std_putc_string(int c,struct
-_tuple0*sptr_n){struct _tuple0 _tmp18;unsigned int*_tmp19;struct _tagged_arr*_tmp1A;
-struct _tuple0*_tmp17=sptr_n;_tmp18=*_tmp17;_LL71: _tmp1A=_tmp18.f1;goto _LL70;
-_LL70: _tmp19=_tmp18.f2;goto _LL6F;_LL6F: {struct _tagged_arr s=*_tmp1A;unsigned int
-n=*_tmp19;if(_get_arr_size(s,sizeof(unsigned char))== 0? 1: n == 0){return - 1;}*((
-unsigned char*)_check_unknown_subscript(s,sizeof(unsigned char),0))=(
-unsigned char)c;*_tmp1A=_tagged_arr_plus(s,sizeof(unsigned char),1);*_tmp19=n - 1;
-return 1;}}int Cyc_Std_vsnprintf(struct _tagged_arr s,unsigned int n,struct
-_tagged_arr fmt,struct _tagged_arr ap){int ans;struct _tagged_arr _tmp1B=s;
-unsigned int _tmp1C=n;struct _tuple0 _tmp1D=({struct _tuple0 _tmp1E;_tmp1E.f1=& _tmp1B;
-_tmp1E.f2=& _tmp1C;_tmp1E;});ans=((int(*)(int(*ioputc)(int,struct _tuple0*),struct
-_tuple0*ioputc_env,struct _tagged_arr fmt0,struct _tagged_arr ap))Cyc_Std__IO_vfprintf)(
-Cyc_Std_putc_string,& _tmp1D,fmt,ap);if(0 <= ans){((unsigned char*)s.curr)[ans]='\000';}
-return ans;}int Cyc_Std_snprintf(struct _tagged_arr s,unsigned int n,struct
-_tagged_arr fmt,struct _tagged_arr ap){return Cyc_Std_vsnprintf(s,n,fmt,ap);}int Cyc_Std_vsprintf(
-struct _tagged_arr s,struct _tagged_arr fmt,struct _tagged_arr ap){return Cyc_Std_vsnprintf(
-s,_get_arr_size(s,sizeof(unsigned char)),fmt,ap);}int Cyc_Std_sprintf(struct
+_cycalloc(sizeof(*_tmp15));_tmp15[0]=({struct Cyc_Core_Impossible_struct _tmp16;
+_tmp16.tag=Cyc_Core_Impossible;_tmp16.f1=_tag_arr("Std::__cvt_double",sizeof(
+unsigned char),18);_tmp16;});_tmp15;}));}return(t.curr - startp.curr)/ sizeof(
+unsigned char);}int Cyc_Std_vfprintf(struct Cyc_Std___sFILE*f,struct _tagged_arr fmt,
+struct _tagged_arr ap){int ans;ans=((int(*)(int(*ioputc)(int,struct Cyc_Std___sFILE*),
+struct Cyc_Std___sFILE*ioputc_env,struct _tagged_arr fmt0,struct _tagged_arr ap))Cyc_Std__IO_vfprintf)(
+Cyc_Std_putc,f,fmt,ap);return ans;}int Cyc_Std_fprintf(struct Cyc_Std___sFILE*f,
+struct _tagged_arr fmt,struct _tagged_arr ap){return Cyc_Std_vfprintf(f,fmt,ap);}int
+Cyc_Std_vprintf(struct _tagged_arr fmt,struct _tagged_arr ap){int ans;ans=((int(*)(
+int(*ioputc)(int,struct Cyc_Std___sFILE*),struct Cyc_Std___sFILE*ioputc_env,struct
+_tagged_arr fmt0,struct _tagged_arr ap))Cyc_Std__IO_vfprintf)(Cyc_Std_putc,Cyc_Std_stdout,
+fmt,ap);return ans;}int Cyc_Std_printf(struct _tagged_arr fmt,struct _tagged_arr ap){
+int ans;ans=Cyc_Std_vprintf(fmt,ap);return ans;}struct _tuple0{struct _tagged_arr*f1;
+unsigned int*f2;};static int Cyc_Std_putc_string(int c,struct _tuple0*sptr_n){struct
+_tuple0 _tmp18;unsigned int*_tmp19;struct _tagged_arr*_tmp1A;struct _tuple0*_tmp17=
+sptr_n;_tmp18=*_tmp17;_LL71: _tmp1A=_tmp18.f1;goto _LL70;_LL70: _tmp19=_tmp18.f2;
+goto _LL6F;_LL6F: {struct _tagged_arr s=*_tmp1A;unsigned int n=*_tmp19;if(
+_get_arr_size(s,sizeof(unsigned char))== 0? 1: n == 0){return - 1;}*((unsigned char*)
+_check_unknown_subscript(s,sizeof(unsigned char),0))=(unsigned char)c;*_tmp1A=
+_tagged_arr_plus(s,sizeof(unsigned char),1);*_tmp19=n - 1;return 1;}}int Cyc_Std_vsnprintf(
+struct _tagged_arr s,unsigned int n,struct _tagged_arr fmt,struct _tagged_arr ap){int
+ans;struct _tagged_arr _tmp1B=s;unsigned int _tmp1C=n;struct _tuple0 _tmp1D=({struct
+_tuple0 _tmp1E;_tmp1E.f1=& _tmp1B;_tmp1E.f2=& _tmp1C;_tmp1E;});ans=((int(*)(int(*
+ioputc)(int,struct _tuple0*),struct _tuple0*ioputc_env,struct _tagged_arr fmt0,
+struct _tagged_arr ap))Cyc_Std__IO_vfprintf)(Cyc_Std_putc_string,& _tmp1D,fmt,ap);
+if(0 <= ans){((unsigned char*)s.curr)[ans]='\000';}return ans;}int Cyc_Std_snprintf(
+struct _tagged_arr s,unsigned int n,struct _tagged_arr fmt,struct _tagged_arr ap){
+return Cyc_Std_vsnprintf(s,n,fmt,ap);}int Cyc_Std_vsprintf(struct _tagged_arr s,
+struct _tagged_arr fmt,struct _tagged_arr ap){return Cyc_Std_vsnprintf(s,
+_get_arr_size(s,sizeof(unsigned char)),fmt,ap);}int Cyc_Std_sprintf(struct
 _tagged_arr s,struct _tagged_arr fmt,struct _tagged_arr ap){return Cyc_Std_vsnprintf(s,
 _get_arr_size(s,sizeof(unsigned char)),fmt,ap);}static int Cyc_Std_putc_void(int c,
 int dummy){return 1;}struct _tagged_arr Cyc_Std_vrprintf(struct _RegionHandle*r1,
