@@ -717,10 +717,10 @@ sizeof(char),(int)(m - i)))!= *((const char*)_check_unknown_subscript(curr_suffi
 sizeof(char),(int)(n - i))))(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
 _tmp45=_cycalloc(sizeof(*_tmp45));_tmp45[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmp46;_tmp46.tag=Cyc_Core_Invalid_argument;_tmp46.f1=err;_tmp46;});_tmp45;}));}}{
-struct _tagged_arr ans=Cyc_Core_rnew_string(r,(m - n)+ _get_arr_size(new_suffix,
-sizeof(char)));Cyc_strncpy(_tagged_ptr_decrease_size(ans,sizeof(char),1),src,m - 
-n);Cyc_strncpy(_tagged_ptr_decrease_size(_tagged_arr_plus(_tagged_arr_plus(ans,
-sizeof(char),(int)m),sizeof(char),-(int)n),sizeof(char),1),new_suffix,
+struct _tagged_arr ans=Cyc_Core_rnew_string(r,((m - n)+ _get_arr_size(new_suffix,
+sizeof(char)))+ 1);Cyc_strncpy(_tagged_ptr_decrease_size(ans,sizeof(char),1),src,
+m - n);Cyc_strncpy(_tagged_ptr_decrease_size(_tagged_arr_plus(_tagged_arr_plus(
+ans,sizeof(char),(int)m),sizeof(char),-(int)n),sizeof(char),1),new_suffix,
 _get_arr_size(new_suffix,sizeof(char)));return ans;}}struct _tagged_arr Cyc_replace_suffix(
 struct _tagged_arr src,struct _tagged_arr curr_suffix,struct _tagged_arr new_suffix){
 return Cyc_rreplace_suffix(Cyc_Core_heap_region,src,curr_suffix,new_suffix);}
