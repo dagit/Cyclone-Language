@@ -45,20 +45,20 @@ static struct Trie {
 // These must be (re-)initialized in lex_init.
 static int    num_kws  = 0;
 static int ?  kw_nums  = null;
-static struct Xarray::xarray<stringptr> * symbols  = null;
+static struct Xarray::Xarray<stringptr> * symbols  = null;
 static trie_t ids_trie      = null;//int field is symbol index, -1 for not there
 static trie_t typedefs_trie = null;//int field true iff path is a typedef
 
 static int comment_depth = 0;
 
 // These needn't be set by lex_init -- they're set while finding a token.
-static $(sign,int)      token_int_pair = $(Signed,0);
+static $(sign_t,int)    token_int_pair = $(Signed,0);
 static string           bogus_string   = "*bogus*";
 static $(enum Nmspace,var) token_id_pair  = $(Abs_n(null),&bogus_string);
 
 static char             token_char     = '\000';
 static string           token_string   = "";
-static $(sign,int)@     token_int      = &token_int_pair;
+static $(sign_t,int)@   token_int      = &token_int_pair;
 static qvar             token_qvar     = &token_id_pair;
 
 static int runaway_start = 0;
@@ -72,7 +72,7 @@ static void runaway_err(string msg,Lexbuf<`a> lb) {
   post_error(mk_err_lex (s,msg));
 }
 
-/************************** RESERVED WORDS **************************/
+// ************************** RESERVED WORDS **************************
 
 static $(string,short) rw_array[] = {
   $("abstract", ABSTRACT),
@@ -151,7 +151,7 @@ static int str_index(string buff, int offset, int len) {
       }
       let newstr = new_string(len+1);
       String::zstrncpy(newstr,0,buff,offset,len);
-      int ans = Xarray::add_ind((Xarray::Xarray<stringptr>)symbols, 
+      int ans = Xarray::add_ind((Xarray::xarray_t<stringptr>)symbols, 
 				new {newstr});
       t->shared_str = ans;
       return ans;
@@ -166,7 +166,7 @@ static int str_index(string buff, int offset, int len) {
   if(t->shared_str == -1) {
     let newstr = new_string(len+1);
     String::zstrncpy(newstr,0,buff,offset,len);
-    int ans = Xarray::add_ind((Xarray::Xarray<stringptr>)symbols, 
+    int ans = Xarray::add_ind((Xarray::xarray_t<stringptr>)symbols, 
 			      new {newstr});
     t->shared_str = ans;
     return ans;
@@ -207,15 +207,15 @@ static void insert_typedef(stringptr sptr) {
 }
 
 static stringptr get_symbol(int symbol_num) {
-  return Xarray::get((Xarray::Xarray<stringptr>)symbols, symbol_num);
+  return Xarray::get((Xarray::xarray_t<stringptr>)symbols, symbol_num);
 }
 
-/************************ INTEGER CONSTANTS ************************/
+// ************************ INTEGER CONSTANTS ************************
 
-/* String to integer conversions.  Core::int_of_string does not handle
-   all of the cases we want: it does not handle a trailing 'u', 'U',
-   'l', or 'L'; and in particular, it does not treat '0'['0'-'7'] as
-   an octal number.  */
+  // String to integer conversions.  Core::int_of_string does not handle
+  // all of the cases we want: it does not handle a trailing 'u', 'U',
+  // 'l', or 'L'; and in particular, it does not treat '0'['0'-'7'] as
+  // an octal number.  
 
   // copied from Core
 static int int_of_char(char c) {
@@ -225,11 +225,10 @@ static int int_of_char(char c) {
   else throw InvalidArg("string to integer conversion");
 }
 
-/* 
- * FIX: We should really have 8-bytes to store a long literal!!!
- *      That is, we and the previous version totally ignore the L!!!
- */
-$(sign, int)@ intconst(Lexbuf<`a> lbuf, int start, int base) {
+ 
+// FIX: We should really have 8-bytes to store a long literal!!!
+//      That is, we and the previous version totally ignore the L!!!
+$(sign_t, int)@ intconst(Lexbuf<`a> lbuf, int start, int base) {
   unsigned int n    = 0;
   int          end  = lbuf->lex_curr_pos;
   string       buff = lbuf->lex_buffer;
@@ -239,16 +238,16 @@ $(sign, int)@ intconst(Lexbuf<`a> lbuf, int start, int base) {
     switch (c) {
         // incorrect to return as soon as we see 'u' 'U' if l isn't ignored
     case 'u': fallthru;
-    case 'U': return &$(Unsigned,(signed int)n); 
+    case 'U': return new {$(Unsigned,(signed int)n)}; 
     case 'l': break;
     case 'L': break;
     default: n = n*base + (unsigned int)int_of_char(c); break;
     }
   }
-  return &$(Signed, (signed int)n);
+  return new{$(Signed, (signed int)n)};
 }
 
-/*********************** CHARACTER CONSTANTS ***********************/
+// *********************** CHARACTER CONSTANTS ***********************
 
 static char char_for_octal_code(Lexbuf<`a> lb, int start, int howmany) {
   int c = 0;
@@ -257,7 +256,6 @@ static char char_for_octal_code(Lexbuf<`a> lb, int start, int howmany) {
   return (char)c;
 }
 
-// FIX: shouldn't build a lexeme, but pretty rare
 static char char_for_hex_code(string s, int start) {
   int c = 0; 
   int len = String::strlen(s);
@@ -274,7 +272,7 @@ static char char_for_hex_code(string s, int start) {
   return (char)c;
 }
 
-/************************* STRING CONSTANTS *************************/
+// ************************* STRING CONSTANTS *************************
 
 string string_buffer = "xxxxxxxxxx";
 int    string_pos    = 0;
@@ -295,7 +293,7 @@ string get_stored_string () {
   return str;
 } 
 
-/******************* NAMESPACE, USING, AND TYPEDEF  *******************/
+// ******************* NAMESPACE, USING, AND TYPEDEF  *******************
 
 static struct Ldecls {
   // records typedefs and namespaces declared in a scope
@@ -477,7 +475,7 @@ static short process_id(Lexbuf<`a> lbuf) {
 
   // maybe it's a keyword
   if(symbol_num < num_kws)
-    return (short)kw_nums[symbol_num]; // cast should be unnecessary
+    return (short)kw_nums[symbol_num]; 
 
   stringptr s = get_symbol(symbol_num);
 
@@ -619,7 +617,7 @@ rule token = parse
 | "::" { return COLON_COLON; }
 /* comments */
 | "#"[^ '\n' '\r']*(newline)      { return  token(lexbuf); }
-| [' ' '\t' '\v' '\f' '\n' '\r']+     { return  token(lexbuf); }
+| [' ' '\t' '\v' '\f' '\n' '\r']+ { return  token(lexbuf); }
 | "//"[^'\n' '\r']* newline       { return  token(lexbuf); }
 | "/*"  { comment_depth = 1; 
 	  runaway_start = lexeme_start(lexbuf); 

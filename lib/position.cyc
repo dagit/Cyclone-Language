@@ -15,11 +15,11 @@ xenum exn {Exit};
 static string source = ""; // initialized by overall control
 struct Segment { int start; int end; };
 
-seg_t segment_of_abs(int start, int end) { return &Segment(start,end); }
+seg_t segment_of_abs(int start, int end) { return new{Segment(start,end)}; }
 seg_t segment_join(seg_t s1, seg_t s2) { 
   if(s1 == null) return s2;
   if(s2 == null) return s1;
-  return &Segment(s1->start,s2->end); 
+  return new{Segment(s1->start,s2->end)}; 
 }
 
 string string_of_loc(int loc) {
@@ -47,7 +47,7 @@ string string_of_segment(seg_t s) {
 }
 
 static Lineno::pos_t new_pos() {
-  return &Lineno::Pos("","",0,0);
+  return new {Lineno::Pos("","",0,0)};
 }
 
 list_t<stringptr> strings_of_segments(glist_t<seg_t,`r> segs) {
@@ -64,11 +64,9 @@ list_t<stringptr> strings_of_segments(glist_t<seg_t,`r> segs) {
   places = List::imp_rev(places);
   for(; segs != null; segs = segs->tl) 
     if(segs->hd == null)
-      // FIX:  the cast to stringptr is needed for some reason...
-      ans = &List((stringptr) new {xprintf("%s(unknown)", source)}, ans);
+      ans = &List(new {xprintf("%s(unknown)", source)}, ans);
     else {
-      ans = &List((stringptr) new {string_of_pos_pr((*places->hd)[1], 
-						    (*places->tl->hd)[1])}, 
+      ans = &List(new {string_of_pos_pr((*places->hd)[1],(*places->tl->hd)[1])},
 		  ans);
       places = places->tl->tl;
     }
@@ -129,10 +127,8 @@ static $(string,int,int)@ get_context(seg_t seg) {
   default: throw Nocontext;
   }
   
-  string sline = pos_s->line;     string eline = pos_e->line;
-  int    sl    = pos_s->line_no;  int    el    = pos_e->line_no;
-  int    sc    = pos_s->col;      int    ec    = pos_e->col;
-  
+  let &Lineno::Pos(_,sline,sl,sc) = pos_s;
+  let &Lineno::Pos(_,eline,el,ec) = pos_e;
   if (sl == el) {
     // Case 1: error is all on one line, 
     // give 1/3 of line to before, error, and after
@@ -140,7 +136,8 @@ static $(string,int,int)@ get_context(seg_t seg) {
     string sec_one   = trunc(n, substring(sline, 0,  sc            ));
     string sec_two   = trunc(n, substring(sline, sc, ec-sc         ));
     string sec_three = trunc(n, substring(sline, sc, strlen(sline)-ec));
-    return &$(xprintf("%s%s%s",sec_one,sec_two,sec_three),(int)strlen(sec_one),
+    return &$(xprintf("%s%s%s",sec_one,sec_two,sec_three),
+	      (int)strlen(sec_one),
 	      (int)(strlen(sec_one)+strlen(sec_two)));
   }
   else {

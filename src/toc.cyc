@@ -1286,10 +1286,11 @@ static void exp_to_c(env nv, exp e) {
     // FIX:  tagged array types
     // See if e1 is a polymorphic field (i.e., is an instantiated type
     // variable) -- if so, coerce e2 to void*.
-    bool e1_poly = is_poly_project(e1);
-    typ e1_old_typ = e1->topt->v;
-    typ e2_old_typ = e2->topt->v;
-    exp_to_c(nv,e1); exp_to_c(nv,e2);
+    bool e1_poly    = is_poly_project(e1);
+    typ  e1_old_typ = e1->topt->v;
+    typ  e2_old_typ = e2->topt->v;
+    exp_to_c(nv,e1); 
+    exp_to_c(nv,e2);
     if (popt != null && (popt->v == Plus || popt->v == Minus)) {
       // We could have e1+=e2 where e1 is a tagged array or
       // we could have e1-=e2 where e1 is a tagged array and e2 is either
@@ -1431,7 +1432,8 @@ static void exp_to_c(env nv, exp e) {
     break;
   case StructMember_e(e1,f):
     exp_to_c(nv, e1);
-    e->r = array_to_ptr_cast(typ_to_c(e->topt->v),new_exp(e->r,DL),DL)->r;
+    if(is_poly_project(e))
+      e->r = array_to_ptr_cast(typ_to_c(e->topt->v),new_exp(e->r,DL),DL)->r;
     break;
   case StructArrow_e(e1,f):
     exp_to_c(nv, e1);
@@ -1445,7 +1447,7 @@ static void exp_to_c(env nv, exp e) {
       stmt s2 = exp_stmt(structarrow_exp(var_exp(x,DL),f,DL),DL);
       stmt s3 = seq_stmt(s1,s2,DL);
       e->r = stmt_exp(declare_stmt(x,tx,e1,s3,DL),DL)->r;
-    } else {
+    } else if(is_poly_project(e)) {
       e->r = array_to_ptr_cast(typ_to_c(e->topt->v),new_exp(e->r,DL),DL)->r;
     }
     break;
@@ -2806,16 +2808,8 @@ static $(env,list_t<decl>) decls_to_c(env nv, list_t<decl> ds, bool top) {
       td->defn = typ_to_c_array(td->defn);
       res = &List(d,res);
       break;
-    case Namespace_d(v,ds2):
-      let p = decls_to_c(nv,ds2,top);
-      nv = p[0];
-      res = List::imp_append(List::imp_rev(p[1]),res);
-      break;
-    case Using_d(q,ds2):
-      let p = decls_to_c(nv,ds2,top);
-      nv = p[0];
-      res = List::imp_append(List::imp_rev(p[1]),res);
-      break;
+    case Namespace_d(_,ds2): fallthru(ds2);
+    case Using_d(_,ds2):     fallthru(ds2);
     case ExternC_d(ds2):
       let p = decls_to_c(nv,ds2,top);
       nv = p[0];

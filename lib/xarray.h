@@ -11,57 +11,58 @@ namespace Xarray {
 
 using Core;
 
-struct xarray<`a::B> {
+struct Xarray<`a::B> {
   `a ?elmts;
   int num_elmts;
 };
-typedef struct xarray<`a> @Xarray<`a>;
+typedef struct Xarray<`a> @xarray_t<`a>;
 
-extern int length(Xarray<`a>);
+extern int length(xarray_t<`a>);
 
-extern `a get(Xarray<`a>, int);
+extern `a get(xarray_t<`a>, int);
 
-extern void set(Xarray<`a>, int, `a);
+extern void set(xarray_t<`a>, int, `a);
 
-extern Xarray<`a> create(int, `a);
+extern xarray_t<`a> create(int, `a);
 
-extern Xarray<`a> create_empty();
+extern xarray_t<`a> create_empty();
 
-extern Xarray<`a> singleton(int, `a);
+extern xarray_t<`a> singleton(int, `a);
 
-extern void add(Xarray<`a>, `a);
+extern void add(xarray_t<`a>, `a);
 
-extern int add_ind(Xarray<`a>, `a);
+extern int add_ind(xarray_t<`a>, `a);
 
-extern `a ?to_array(Xarray<`a>);
+extern `a ?to_array(xarray_t<`a>);
 
-extern Xarray<`a> from_array(`a ?arr);
+extern xarray_t<`a> from_array(`a ?arr);
 
-extern Xarray<`a> append(Xarray<`a>, Xarray<`a>); // functional
+extern xarray_t<`a> append(xarray_t<`a>, xarray_t<`a>); // functional
 
-extern void imp_append(Xarray<`a>, Xarray<`a>); // imperative
+extern void imp_append(xarray_t<`a>, xarray_t<`a>); // imperative
 
-extern void app(`b f(`a), Xarray<`a>);
+extern void app(`b f(`a), xarray_t<`a>);
 
-extern void app_c(`b f(`c,`a), `c, Xarray<`a>);
+extern void app_c(`b f(`c,`a), `c, xarray_t<`a>);
 
-extern void iter(void f(`a), Xarray<`a>);
+extern void iter(void f(`a), xarray_t<`a>);
 
-extern void iter_c(void f(`b,`a), `b, Xarray<`a>);
+extern void iter_c(void f(`b,`a), `b, xarray_t<`a>);
 
-extern Xarray<`b> map(`b f(`a), Xarray<`a>);
+extern xarray_t<`b> map(`b f(`a), xarray_t<`a>);
 
-extern Xarray<`b> map_c(`b f(`c,`a), `c, Xarray<`a>);
+extern xarray_t<`b> map_c(`b f(`c,`a), `c, xarray_t<`a>);
 
-extern void reuse(Xarray<`a> xarr);
+extern void reuse(xarray_t<`a> xarr);
 
 // Delete the last num elements.
-extern void delete(Xarray<`a> xarr, int num);
+extern void delete(xarray_t<`a> xarr, int num);
 
 // Remove the element at position i.
 // Slide all higher elements down one position.
-extern void remove(Xarray<`a> xarr, int i); 
+extern void remove(xarray_t<`a> xarr, int i); 
 
 }
 
 #endif
+

@@ -420,7 +420,7 @@ static $(typ,opt_t<decl>) collapse_type_specifiers(list_t<type_specifier_t> ts,
   bool      seen_size = false;
   typ       t         = VoidType;
   size_of_t sz        = B4;
-  sign      sgn       = Signed;
+  sign_t    sgn       = Signed;
 
   seg_t last_loc = loc;
 
@@ -805,7 +805,7 @@ using Parse;
 /* the union type for all productions -- for now a placeholder */
 %union {
   Okay_tok;
-  Int_tok($(sign,int)@);
+  Int_tok($(sign_t,int)@);
   Char_tok(char);
   Pointer_Sort_tok(enum Pointer_Sort);
   Short_tok(short);

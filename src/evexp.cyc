@@ -205,8 +205,8 @@ cnst_t eval_const_binprimop(primop p,exp e1,exp e2) {
   let cn1 = promote_const(eval_const_exp(e1));
   let cn2 = promote_const(eval_const_exp(e2));
   // FIX: See above, do non-integer possibilities here!
-  sign s1, s2;
-  int i1, i2;
+  sign_t s1, s2;
+  int    i1, i2;
   switch (cn1) {
   case Int_c(x,y): s1 = x; i1 = y; break;
   default: exp_err(e1->loc, "bad constant expression"); return cn1;

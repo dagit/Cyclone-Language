@@ -200,7 +200,7 @@ exp copy_exp(exp e) {
 }
 exp const_exp(cnst_t c, seg_t loc) { return new_exp(Const_e(c), loc); }
 exp null_exp(seg_t loc) { return new_exp(Const_e(Null_c), loc); }
-exp int_exp(sign s,int i,seg_t seg) { 
+exp int_exp(sign_t s,int i,seg_t seg) { 
   return const_exp(Int_c(s,i),seg);
 }
 exp signed_int_exp(int i,    seg_t loc) {return int_exp(Signed,i,loc);}

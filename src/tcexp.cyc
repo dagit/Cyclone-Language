@@ -1046,7 +1046,13 @@ static typ tcStruct(tenv_t te, seg_t loc, typ *`r topt,
   if (*sd_opt != null)
     sd = (structdecl)(*sd_opt);
   else {
-    sd = *lookup_structdecl(te,loc,*tn);
+    try
+      sd = *lookup_structdecl(te,loc,*tn);
+    catch { 
+    case Dict::Absent:
+      terr(loc, xprintf("unbound struct name %s",qvar2string(*tn)));
+      return topt != null ? *topt : VoidType;
+    }
     *sd_opt = sd;
     if (sd->name != null)
       *tn = sd->name->v;

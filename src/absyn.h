@@ -100,7 +100,7 @@ namespace Absyn {
   typedef enum Size_of size_of_t;
   typedef enum Kind kind_t;
   typedef $(tvarname_t,kind_t)@ tvar; // resolved kind via in-place mutation
-  typedef enum Sign sign;
+  typedef enum Sign sign_t;
   typedef struct Conref<`a> @conref<`a>;
   typedef enum Constraint<`a> constraint_t<`a>;
   typedef enum Bounds bounds_t;
@@ -196,7 +196,7 @@ namespace Absyn {
     EnumType(typedef_name_opt_t,list_t<typ>,enumdecl *);     // BoxKind
     XenumType(typedef_name_t,xenumdecl *);                 // BoxKind
     PointerType(ptr_info_t);            // BoxKind when not Unknown_b
-    IntType(sign,size_of_t);                     // MemKind unless B4
+    IntType(sign_t,size_of_t);                     // MemKind unless B4
     FloatType;                                             // MemKind
     DoubleType;                                            // MemKind
     ArrayType(typ/* element typ*/,tqual,exp /* size */);   // MemKind
@@ -234,10 +234,10 @@ namespace Absyn {
   };
 
   EXTERN_DEFINITION enum Cnst {
-    Char_c(sign,char);
-    Short_c(sign,short);
-    Int_c(sign,int);
-    LongLong_c(sign,long long);
+    Char_c(sign_t,char);
+    Short_c(sign_t,short);
+    Int_c(sign_t,int);
+    LongLong_c(sign_t,long long);
     Float_c(string);
     String_c(bool,string); // bool is true when heap allocate
     Null_c;
@@ -328,7 +328,7 @@ namespace Absyn {
     Wild_p;
     Var_p(vardecl); // only name field is right until tcPat is called
     Null_p;
-    Int_p(sign,int);
+    Int_p(sign_t,int);
     Char_p(char);
     Float_p(string);
     Tuple_p(list_t<pat>);
@@ -507,7 +507,7 @@ namespace Absyn {
   extern exp bool_exp(bool, seg_t);
   extern exp true_exp(seg_t);
   extern exp false_exp(seg_t);
-  extern exp int_exp(sign,int,seg_t);
+  extern exp int_exp(sign_t,int,seg_t);
   extern exp signed_int_exp(int, seg_t);
   extern exp uint_exp(unsigned int, seg_t);
   extern exp char_exp(char c, seg_t);

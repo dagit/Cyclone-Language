@@ -862,8 +862,7 @@ bool coerceable(typ t) {
 // FIX:  we should recursively flatten tuple and struct types here,
 // but doing so is tricky because we have to get the padding and
 // alignment right.  This seems to be particularly weird on the
-// x86 -- I need to find precise documentation on it before we 
-// do this.
+// x86 -- I need to find precise documentation on it before we do this.
 static $(tqual,typ)@ flatten_typ_f(list_t<$(tvar,typ)@> inst,
                                    $(field_name,tqual,typ)@ x) {
   return &$((*x)[1],substitute(inst,(*x)[2]));
@@ -874,6 +873,7 @@ static list_t<$(tqual,typ)@> flatten_typ(tenv te,typ t1) {
   case VoidType:       return null;
   case TupleType(tqs): return tqs; // FIX: recursively flatten here
   case StructType(tdnopt,ts,sdp):
+    if (sdp == null || tdnopt == null) return &List(&$(empty_tqual(),t1),null);
     let sd   = *sdp;
     let n    = *tdnopt;
     let inst = List::zip(sd->tvs,ts);
