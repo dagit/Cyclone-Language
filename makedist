@@ -97,3 +97,12 @@ fi
 #
 cd cyclone
 echo $version > .version
+
+# tag CVS, if desired
+#
+echo "Tag the current CVS as version $version? (y/n)"
+echo "  (only currently committed files will be tagged)"
+read resp
+if [ "$resp" = "y" ]; then
+  cvs tag `echo v${version} | sed -e 's/\./-/g'`
+fi
