@@ -568,36 +568,23 @@ static fndecl_t make_function(region_t<`yy> yy,
     Warn::warn(loc,"bad type params, ignoring");
   // fn_type had better be a FnType
   switch (fn_type) {
-    case &FnType(FnInfo{tvs,eff,ret_tqual,ret_type,args,c_varargs,cyc_varargs,
-                          rgn_po,attributes,requires_clause,requires_relns,
-                          ensures_clause,ensures_relns}):
-      let rev_newargs = NULL;
-      for(let args2 = args; args2 != NULL; args2 = args2->tl) {
-	let &$(vopt,tq,t) = args2->hd;
-	if(vopt == NULL) {
-	  Warn::err(loc,"missing argument variable in function prototype");
-	  rev_newargs = new List(new $(new "?",tq,t), rev_newargs);
-	} else
-	  rev_newargs = new List(new $((var_t)vopt,tq,t), rev_newargs);
+  case &FnType(i):
+    //tvs,eff,ret_tqual,ret_type,args,c_varargs,cyc_varargs,
+    //rgn_po,attributes,requires_clause,requires_relns,
+    // ensures_clause,ensures_relns}):
+    //      let rev_newargs = NULL;
+    for(let args2 = i.args; args2 != NULL; args2 = args2->tl)
+      if((*args2->hd)[0] == NULL) {
+	Warn::err(loc,"missing argument variable in function prototype");
+	(*args2->hd)[0] = new "?";
       }
-      // We don't fill in the cached type here because we may need
-      // to figure out the bound type variables and the effect.
-      return new Fndecl {.sc=sc,.name=d.id,.tvs=tvs,
-                            .is_inline=is_inline,.effect=eff,
-                            .ret_tqual=ret_tqual,
-                            .ret_type=ret_type,.args=imp_rev(rev_newargs),
-                            .c_varargs=c_varargs,
-                            .cyc_varargs=cyc_varargs,
-                            .rgn_po = rgn_po,
-                            .body=body,.cached_type=NULL,
-                            .param_vardecls=NULL,
-                            .fn_vardecl = NULL,
-                            .attributes = append(attributes,out_atts),
-                            .requires_clause = requires_clause,
-                            .requires_relns = NULL,
-                            .ensures_clause = ensures_clause,
-                            .ensures_relns = NULL};
-    default: parse_abort(loc,"declarator is not a function prototype");
+    // We don't fill in the cached type here because we may need
+    // to figure out the bound type variables and the effect.
+    i.attributes=append(i.attributes,out_atts);
+    return new Fndecl {.sc=sc,.is_inline=is_inline,.name=d.id,.body=body,
+		       .i=i,
+		       .cached_type=NULL,.param_vardecls=NULL,.fn_vardecl=NULL};
+  default: parse_abort(loc,"declarator is not a function prototype");
   }
 }
 

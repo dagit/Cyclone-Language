@@ -53,6 +53,19 @@ static void simplify_unused_result_exp(exp_t e) {
   }
 }
 
+// returns true if [e] is "essentially" a variable
+static bool is_var_exp(exp_t e) {
+  while (1) {
+    switch (e->r) {
+    case &Var_e(...): return true;
+    case &NoInstantiate_e(e2): fallthru(e2);
+    case &Instantiate_e(e2,_): e = e2; continue;
+//     case &Cast_e(_,e2,_,_): e = e2; continue;
+    default: return false;
+    }
+  }
+}
+
 // used to check that a where-clause has no effect -- we want
 // to rule out in particular assignments to variables and function calls,
 // but allow exceptions to be thrown and global variables and the like
@@ -597,9 +610,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           terr(d->loc,"bad storage class for inner function");
         check_fndecl_valid_type(d->loc,te,fd);
         type_t t = fndecl2type(fd);
-        fd->attributes = transfer_fn_type_atts(t,fd->attributes);
+        fd->i.attributes = transfer_fn_type_atts(t,fd->i.attributes);
         // check packed and aligned don't show up
-        for (_ atts = fd->attributes; atts; atts = atts->tl)
+        for (_ atts = fd->i.attributes; atts; atts = atts->tl)
           switch (atts->hd) {
           case &Packed_att: case &Aligned_att(_):
             terr(d->loc,"bad attribute %s for function",

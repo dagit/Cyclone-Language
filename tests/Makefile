@@ -64,13 +64,13 @@ all: $(EXES) failtest
 
 # tests things that should be type errors
 failtest:
-	($(CYCC) -c --manyerrors fail1.cyc 2> fail1.tmp) || true
+	($(CYCC) $(CYCFLAGS) -c --manyerrors fail1.cyc 2> fail1.tmp) || true
 	diff -w fail1.tmp fail1.out || true
-	($(CYCC) -c --manyerrors fail2.cyc 2> fail2.tmp) || true
+	($(CYCC) $(CYCFLAGS) -c --manyerrors fail2.cyc 2> fail2.tmp) || true
 	diff -w fail2.tmp fail2.out || true
-	($(CYCC) -c --manyerrors fail3.cyc 2> fail3.tmp) || true
+	($(CYCC) $(CYCFLAGS) -c --manyerrors fail3.cyc 2> fail3.tmp) || true
 	diff -w fail3.tmp fail3.out || true
-	($(CYCC) -c --manyerrors fail4.cyc 2> fail4.tmp) || true
+	($(CYCC) $(CYCFLAGS) -c --manyerrors fail4.cyc 2> fail4.tmp) || true
 	diff -w fail4.tmp fail4.out || true
 
 hello$(EXE): hello.o

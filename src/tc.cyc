@@ -194,7 +194,7 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
       }
 
     if(initializer == NULL || in_cinclude) {
-      if (check_var_init && !in_cinclude && !supports_default(t))
+      if (check_var_init && !in_cinclude && !zeroable_type(t))
         terr(loc,"initializer required for variable %s of type %s",
              qvar2string(vd->name), typ2string(t));
     } else {
@@ -293,10 +293,10 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
   // check for redeclaration
   type_t t = fndecl2type(fd);
   // move any function type attributes into the function's type
-  fd->attributes = transfer_fn_type_atts(t,fd->attributes);
+  fd->i.attributes = transfer_fn_type_atts(t,fd->i.attributes);
   fnTypeAttsOK(te, t, loc);
   // check that packed and aligned don't show up in the attributes
-  for (_ atts = fd->attributes; atts != NULL; atts = atts->tl)
+  for (_ atts = fd->i.attributes; atts != NULL; atts = atts->tl)
     switch (atts->hd) {
     case &Packed_att:
     case &Aligned_att(_): 
@@ -351,18 +351,18 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
   // look for main and check that it has a good type
   if (is_main(q)) {
     // result type should be int
-    switch (compress(fd->ret_type)) {
+    switch (compress(fd->i.ret_type)) {
     case &AppType(&VoidCon,_): warn(loc,"main declared with return type void"); break;
     case &AppType(&IntCon(_,Int_sz),_): break;
     case &AppType(&IntCon(_,Long_sz),_): break;
     default: 
       terr(loc,"main declared with return type %s instead of int or void",
-	   typ2string(fd->ret_type)); 
+	   typ2string(fd->i.ret_type)); 
       break;
     }
-    if (fd->c_varargs || fd->cyc_varargs != NULL)
+    if (fd->i.c_varargs || fd->i.cyc_varargs != NULL)
       terr(loc,"main declared with varargs");
-    let args = fd->args;
+    let args = fd->i.args;
     if (args != NULL) {
       let &$(_,_,t1) = args->hd;
       switch (compress(t1)) {
@@ -379,7 +379,7 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
         args = args->tl;
         if (args != NULL)
           terr(loc,"main declared with too many arguments");
-        opt_t<list_t<tvar_t>> tvs = new Opt(fd->tvs);
+        opt_t<list_t<tvar_t>> tvs = new Opt(fd->i.tvars);
         if (!unify(t2,fatptr_type(string_type(new_evar(new Opt(&rk),tvs)),
                                      new_evar(new Opt(&rk),tvs),
                                      empty_tqual(0),any_bool(&te))) &&

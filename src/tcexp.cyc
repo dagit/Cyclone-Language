@@ -2125,8 +2125,7 @@ static type_t mallocRgn(type_t rgn) {
 }
 
 static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
-                       type_t *@t, exp_t @e, bool @is_calloc,
-                       bool @is_fat) {
+                       type_t *@t, exp_t @e, bool @is_calloc, bool @is_fat) {
   // by default, we allocate heap pointers unless the topt tells us
   //   to do otherwise (see below)
   type_t rgn = heap_rgn_type;

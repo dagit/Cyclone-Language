@@ -2975,7 +2975,7 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
   // Enter the requires relations -- have to substitute the vardecls
   // for the parameters in the relns
   let vardecls = fd->param_vardecls->v;
-  for (let reqs = fd->requires_relns; reqs != NULL; reqs = reqs->tl) {
+  for (let reqs = fd->i.requires_relns; reqs != NULL; reqs = reqs->tl) {
     let req = reqs->hd;
     relns = add_relation(Core::heap_region, translate_rop(vardecls,req->rop1),
                          req->relation, translate_rop(vardecls,req->rop2),
@@ -3027,9 +3027,9 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
     new AnalEnv(tables,
 		Hashtable::lookup(tables->succ_tables,fd),
 		Hashtable::lookup(tables->pat_pop_tables,fd),
-		fenv,true,0,false,inflow,noreturn,fd->ret_type,
+		fenv,true,0,false,inflow,noreturn,fd->i.ret_type,
 		NULL,param_roots,noconsume_roots,
-		flow_table,fd->ensures_relns);
+		flow_table,fd->i.ensures_relns);
   flow_t    outflow  = inflow;
   while(env->iterate_again && !anal_error) {
     ++(env->iteration_num);
@@ -3048,9 +3048,9 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
     // this is the case when the function "falls off the end"
     if (noreturn)
       aerr(loc, "`noreturn' function might (implicitly) return");
-    else if (!Tcutil::is_void_type(fd->ret_type)) {
-      if (Tcutil::is_any_float_type(fd->ret_type) ||
-          Tcutil::is_any_int_type(fd->ret_type))
+    else if (!Tcutil::is_void_type(fd->i.ret_type)) {
+      if (Tcutil::is_any_float_type(fd->i.ret_type) ||
+          Tcutil::is_any_int_type(fd->i.ret_type))
         Warn::warn(loc, "function may not return a value"); 
       else
         aerr(loc, "function may not return a value"); break;

@@ -23,6 +23,7 @@
 
 #include <dict.h>
 #include "rgnorder.h"
+#include "warn.h"
 #include "tcutil.h"
 #include "absynpp.h"
 using List;
@@ -65,8 +66,8 @@ struct RgnPO {
 static bool valid_constraint(type_t eff, type_t rgn) {
   let &Kind(k,a) = type_kind(rgn);
   if (k != RgnKind)
-    impos("bad region type |%s| passed to add_outlives_constraint",
-	  Absynpp::typ2string(rgn));
+    Warn::impos("bad region type |%s| passed to add_outlives_constraint",
+		Absynpp::typ2string(rgn));
   switch (compress(eff)) {
   case &AppType(&JoinCon,es):
     for (; es != NULL; es = es->tl) 
@@ -86,8 +87,8 @@ static bool valid_constraint(type_t eff, type_t rgn) {
     let &Kind(rk,ra) = type_kind(r);
     return (k == RgnKind) && ((a == Aliasable) || (ra == a));
   default:
-    impos("bad effect |%s| passed to add_outlives_constraint",
-	  Absynpp::typ2string(eff));
+    Warn::impos("bad effect |%s| passed to add_outlives_constraint",
+		Absynpp::typ2string(eff));
   }
 }
 
@@ -124,15 +125,15 @@ rgn_po_t add_outlives_constraint(rgn_po_t po, type_t eff, type_t rgn,
     ans->these_outlive_unique=join_eff(list(eff,po->these_outlive_unique));
     return ans;
   case &AppType(&RefCntCon,_):
-    impos("RgnOrder::add_outlives_constraint can't outlive RC for now");
-  default: impos("RgnOrder::add_outlives_constraint passed a bad region");
+    Warn::impos("RgnOrder::add_outlives_constraint can't outlive RC for now");
+  default: Warn::impos("RgnOrder::add_outlives_constraint passed a bad region");
   }
 }
 
 rgn_po_t add_youngest(rgn_po_t po, tvar_t rgn, bool opened) {
   // sanity check
   if(!opened && Dict::member(po->d,rgn))
-    impos("RgnOrder::add_youngest: repeated region");
+    Warn::impos("RgnOrder::add_youngest: repeated region");
   let ans = new *po;
   if (opened) {
     ans->d = Dict::insert(po->d, rgn, empty_effect);
@@ -147,7 +148,7 @@ rgn_po_t add_youngest(rgn_po_t po, tvar_t rgn, bool opened) {
 }
 rgn_po_t add_unordered(rgn_po_t po, tvar_t rgn) {
   if(Dict::member(po->d,rgn))
-    impos("RgnOrder::add_unordered: repeated region");
+    Warn::impos("RgnOrder::add_unordered: repeated region");
   let ans = new *po;
   ans->d = Dict::insert(ans->d, rgn, empty_effect);
   return ans;
@@ -264,7 +265,7 @@ initial_env(region_t<`r> listrgn, rgn_po_t po, type_t rgn) {
     }
   }
   else
-    impos("RgnOrder: rgn not of correct kind");
+    Warn::impos("RgnOrder: rgn not of correct kind");
 
   switch(r) {
   case &VarType(tv): 
@@ -360,7 +361,7 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
 	  if(contains_rgnseff(tv,next_eff))
 	    return true;
 	  add_to_search(&env,next_eff);
-	} else impos("RgnOrder: type variable not in dict");
+	} else Warn::impos("RgnOrder: type variable not in dict");
       }
       return false;
     default: return false;

@@ -263,7 +263,7 @@ type_t gen_float_type(unsigned i) {
   case 0: return float_type;
   case 1: return double_type;
   case 2: return long_double_type;
-  default: Tcutil::impos("gen_float_type(%d)",i);
+  default: Warn::impos("gen_float_type(%d)",i);
   }
 }
 // regions
@@ -1097,7 +1097,7 @@ $(aggr_kind_t,qvar_t) aggr_kinded_name(union AggrInfo info) {
 }
 aggrdecl_t get_known_aggrdecl(union AggrInfo info) {
   switch(info) {
-  case {.UnknownAggr = _ }: Tcutil::impos("unchecked aggrdecl");
+  case {.UnknownAggr = _ }: Warn::impos("unchecked aggrdecl");
   case {.KnownAggr = &ad}: return ad;
   }
 }

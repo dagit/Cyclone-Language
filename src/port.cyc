@@ -1669,7 +1669,7 @@ static cenv_t gen_localdecl(cenv_t env, decl_t d, bool fromglobal) {
   }
 }
 
-static $(var_opt_t,tqual_t,type_t)@ make_targ($(var_t,tqual_t,type_t)@ arg){
+static $(var_opt_t,tqual_t,type_t)@ make_targ($(var_opt_t,tqual_t,type_t)@ arg){
   let $(x,q,t) = *arg;
   return new $(NULL,q,t);
 }
@@ -1726,8 +1726,8 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     if (declared_var(env,fd->name)) {
       predeclared = lookup_full_var(env,fd->name);
     }
-    let rettype = fd->ret_type;
-    let args = fd->args;
+    let rettype = fd->i.ret_type;
+    let args = fd->i.args;
     let targs = map(make_targ,args);
     let fntype =
       new FnType(FnInfo{NULL,NULL,empty_tqual(0),rettype,targs,false,NULL,NULL,NULL,NULL,NULL,NULL,NULL});
@@ -1735,7 +1735,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     // to get constraint variables for the regions
     let fn_env = set_cpos(env,FnBody_pos);
     let c_rettype = type_to_ctype(fn_env, rettype);
-    list_t<$(var_t,type_t,ctype_t,ctype_t)@> c_args = NULL;
+    list_t<$(var_opt_t,type_t,ctype_t,ctype_t)@> c_args = NULL;
     list_t<ctype_t> c_arg_types = NULL;
     for (let xs = args; xs; xs = xs->tl) {
       let $(x,tq,t) = *xs->hd;

@@ -3645,15 +3645,15 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 // function declaration translation -- straightforward
 static void stmttypes_to_c(stmt_t s);
 static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
-  f->tvs      = NULL;
-  f->effect   = NULL;
-  f->rgn_po   = NULL;
-  f->requires_clause = NULL;
-  f->ensures_clause  = NULL;
-  f->ret_type = typ_to_c(f->ret_type);
+  f->i.tvars  = NULL;
+  f->i.effect = NULL;
+  f->i.rgn_po = NULL;
+  f->i.requires_clause = NULL;
+  f->i.ensures_clause  = NULL;
+  f->i.ret_type = typ_to_c(f->i.ret_type);
   region frgn; {
     let nv = share_env(frgn,nv);
-    for (let args=f->args; args != NULL; args = args->tl) {
+    for (let args=f->i.args; args != NULL; args = args->tl) {
       let x = new $((nmspace_t)Loc_n,(*args->hd)[0]);
       (*args->hd)[2] = typ_to_c((*args->hd)[2]);
     }
@@ -3664,12 +3664,12 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
       return;
     }
     fn_pop_table = new Hashtable::lookup(*gpop_tables,f);
-    if (f->cyc_varargs && f->cyc_varargs->name != NULL) {
-      let VarargInfo{n,tq,t,i} = *f->cyc_varargs;
+    if (f->i.cyc_varargs && f->i.cyc_varargs->name != NULL) {
+      let VarargInfo{n,tq,t,i} = *f->i.cyc_varargs;
       let t2 = typ_to_c(fatptr_type(t,heap_rgn_type,tq,false_type));// region irrelevant
       let x2 = new $((nmspace_t)Loc_n,(var_t)n);
-      f->args = List::append(f->args,new List(new $((var_t)n,tq,t2),NULL));
-      f->cyc_varargs = NULL;
+      f->i.args = List::append(f->i.args,new List(new $((var_t)n,tq,t2),NULL));
+      f->i.cyc_varargs = NULL;
     }
     // Tovc would like to use param_vardecls:
     for(let arg_vds = f->param_vardecls->v; arg_vds!=NULL; arg_vds=arg_vds->tl) {
@@ -4120,8 +4120,8 @@ static void decltypes_to_c(decl_t d) {
     if (vd->initializer != NULL) exptypes_to_c((exp_t)vd->initializer);
     break;
   case &Fn_d(fd):
-    fd->ret_type = typ_to_c(fd->ret_type);
-    for (let args=fd->args; args != NULL; args = args->tl) {
+    fd->i.ret_type = typ_to_c(fd->i.ret_type);
+    for (let args=fd->i.args; args != NULL; args = args->tl) {
       (*args->hd)[2] = typ_to_c((*args->hd)[2]);
     }
     break;

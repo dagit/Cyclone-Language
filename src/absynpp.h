@@ -81,8 +81,6 @@ extern string_t tvar2string(tvar_t);
   extern string_t string_escape(string_t<`H>);
   extern string_t prim2str(primop_t p);
   extern bool is_declaration(stmt_t s);
-  extern $(var_opt_t,tqual_t,type_t)@
-                  arg_mk_opt($(var_t,tqual_t,type_t)@ arg);
   extern $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r>,tqual_t tq,type_t t);
 }
 #endif

@@ -507,15 +507,15 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   tvar_t rgn0 =
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
              new_tvar_id(), &rgn_kb);
-  let tvs = new List(rgn0,fd->tvs);
+  let tvs = new List(rgn0,fd->i.tvars);
   Tcutil::check_unique_tvars(loc,tvs);
 //   fprintf(stderr,"checking fn %s\n",qvar2string(fd->name));
-  let rgn_po = initial_fn_po(fd->tvs,fd->rgn_po, (type_t)fd->effect,rgn0,loc);
+  let rgn_po = initial_fn_po(fd->i.tvars,fd->i.rgn_po, (type_t)fd->i.effect,rgn0,loc);
   type_t param_rgn = new VarType(rgn0);
   for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) 
     vds->hd->rgn = param_rgn;
-  if (fd->cyc_varargs != NULL) {
-    let VarargInfo(n,tq,t,i) = *fd->cyc_varargs;
+  if (fd->i.cyc_varargs != NULL) {
+    let VarargInfo(n,tq,t,i) = *fd->i.cyc_varargs;
     // name-resolution did not set param_rgn for the cyc_varargs array
     for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) {
       let vd = vds->hd;
@@ -526,12 +526,12 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
     }
   }
   return new
-    Fenv{.shared = new_shared_fenv(fd->ret_type),
+    Fenv{.shared = new_shared_fenv(fd->i.ret_type),
          .type_vars   = tvs,
          .region_order = rgn_po,
          .ctrl_env    = NULL,
          .capability  = join_eff(new List(access_eff(param_rgn),
-                                             new List((type_t)fd->effect,NULL))),
+                                             new List((type_t)fd->i.effect,NULL))),
          .curr_rgn    = param_rgn,
 	 .flags       = FenvFlags{NoneNew,false,false,false,false}
        };
@@ -543,7 +543,7 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
   tvar_t rgn0 =
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
              new_tvar_id(), &rgn_kb);
-  for (let tvars = fd->tvs; tvars != NULL; tvars = tvars->tl) {
+  for (let tvars = fd->i.tvars; tvars != NULL; tvars = tvars->tl) {
     let &Kind(k,a) = tvar_kind(tvars->hd,&bk);
     if (k == RgnKind)
       if (a == Aliasable)
@@ -552,15 +552,15 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
 	impos("non-intuitionistic tvar in nested_fenv");
   }
   rgn_po = add_youngest(rgn_po, rgn0, false);
-  for(let po2 = fd->rgn_po; po2 != NULL; po2=po2->tl)
+  for(let po2 = fd->i.rgn_po; po2 != NULL; po2=po2->tl)
     rgn_po = add_outlives_constraint(rgn_po,(*po2->hd)[0],(*po2->hd)[1],loc);
-  let tvs = new List(rgn0,append(fd->tvs,type_vars));
+  let tvs = new List(rgn0,append(fd->i.tvars,type_vars));
   check_unique_tvars(loc,tvs);
   type_t param_rgn = new VarType(rgn0);
   for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl)
     vds->hd->rgn = param_rgn;
-  if (fd->cyc_varargs != NULL) {
-    let VarargInfo(n,tq,t,i) = *fd->cyc_varargs;
+  if (fd->i.cyc_varargs != NULL) {
+    let VarargInfo(n,tq,t,i) = *fd->i.cyc_varargs;
     // name-resolution did not set param_rgn for the cyc_varargs array
     for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) {
       let vd = vds->hd;
@@ -571,12 +571,12 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
     }
   }
   return new
-    Fenv{.shared = new_shared_fenv(fd->ret_type),
+    Fenv{.shared = new_shared_fenv(fd->i.ret_type),
          .type_vars   = tvs,
          .region_order = rgn_po,
          .ctrl_env    = NULL,
          .capability  = join_eff(new List(access_eff(param_rgn),
-                                             new List((type_t)fd->effect,NULL))),
+					  new List((type_t)fd->i.effect,NULL))),
          .curr_rgn    = param_rgn,
 	 .flags       = FenvFlags{NoneNew,false,false,false,false}
        };

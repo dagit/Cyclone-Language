@@ -928,11 +928,6 @@ doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,bool c_varargs,
   return res;
 }
 
-$(var_opt_t,tqual_t,type_t)@ arg_mk_opt($(var_t,tqual_t,type_t)@ arg) {
-  let &$(v,tq,t) = arg;
-  return new $((var_opt_t)v,tq,t);
-}
-
 doc_t var2doc(var_t v) { return text(*v); }
 
 string_t qvar2string(qvar_t q) {
@@ -1812,17 +1807,10 @@ doc_t decl2doc(decl_t d) {
   doc_t s;
   switch (d->r) {
   case &Fn_d(fd):
-    type_t t = new FnType(FnInfo{fd->tvs,
-                                 fd->effect,
-                                 fd->ret_tqual,
-                                 fd->ret_type,
-                                 List::map(arg_mk_opt,fd->args),
-                                 fd->c_varargs, fd->cyc_varargs,
-                                 fd->rgn_po,
-                                 NULL,
-                                 fd->requires_clause, fd->requires_relns,
-                                 fd->ensures_clause, fd->ensures_relns});
-    doc_t attsdoc   = atts2doc(fd->attributes);
+    fn_info_t type_info = fd->i;
+    type_info.attributes = NULL;
+    type_t t = new FnType(type_info);
+    doc_t attsdoc   = atts2doc(fd->i.attributes);
     doc_t inlinedoc;
     if(fd->is_inline)
       switch(c_compiler) {
@@ -1835,7 +1823,7 @@ doc_t decl2doc(decl_t d) {
     doc_t beforenamedoc;
     switch(c_compiler){
     case Gcc_c: beforenamedoc = attsdoc; break;
-    case Vc_c:  beforenamedoc = callconv2doc(fd->attributes); break;
+    case Vc_c:  beforenamedoc = callconv2doc(fd->i.attributes); break;
     }
     doc_t namedoc   = typedef_name2doc(fd->name);
     doc_t tqtddoc   = tqtd2doc(empty_tqual(0), t,

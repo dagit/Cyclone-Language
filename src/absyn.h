@@ -759,29 +759,16 @@ namespace Absyn {
 
   // Function declarations.
   EXTERN_ABSYN struct Fndecl {
-    scope_t                    sc;         // static, extern, etc.
-    bool                       is_inline;  // inline flag
-    qvar_t                     name;       // function name
-    list_t<tvar_t>             tvs;        // bound type variables
-    type_opt_t                 effect;     // null => default effect
-    tqual_t                    ret_tqual;  // return type qualifier
-    type_t                     ret_type;   // return type
-    list_t<$(var_t,tqual_t,type_t)@> args; // arguments & their quals and types
-    bool                       c_varargs;   // C vararg?
-    vararg_info_t*             cyc_varargs; // non-null if Cyclone vararg
-    list_t<$(type_t,type_t)@>  rgn_po; // partial order on region params
-    stmt_t                     body;   // body of function
-    type_opt_t                 cached_type; // cached type of the function
+    scope_t    sc;         // static, extern, etc.
+    bool       is_inline;  // inline flag
+    qvar_t     name;       // function name
+    stmt_t     body;   // body of function
+    fn_info_t  i;
+    // type differs from i in that it may have fewer attributes and it
+    // may have a different const-ness on the return qualifier
+    type_opt_t cached_type; // cached type of the function
     opt_t<list_t<vardecl_t>>   param_vardecls;// so we can use pointer equality
     struct Vardecl            *fn_vardecl; // used only for inner functions
-    // any attributes except aligned or packed
-    attributes_t               attributes; 
-    // pre-condition to call function
-    exp_opt_t                  requires_clause;
-    Relations::relns_t         requires_relns;
-    // post-condition on return from function
-    exp_opt_t                  ensures_clause;
-    Relations::relns_t         ensures_relns;
   };
 
   EXTERN_ABSYN struct Aggrfield {

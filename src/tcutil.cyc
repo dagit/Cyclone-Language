@@ -40,33 +40,29 @@ namespace Tcutil;
 
 // these next few functions are obvious and have no side effects
 bool is_void_type(type_t t) {
-  switch (Tcutil::compress(t)) {
+  switch (compress(t)) {
   case &AppType(&VoidCon,_): return true;
   default: return false;
   }
 }
-
 bool is_array_type(type_t t) {
   switch(compress(t)) {
   case &ArrayType(_): return true;
   default: return false;
   }
 }
-
 bool is_heap_rgn_type(type_t t) {
   switch (compress(t)) {
   case &AppType(&HeapCon,_): return true;
   default: return false;
   }
 }
-
 bool is_pointer_type(type_t t) {
   switch (compress(t)) {
   case &PointerType(_): return true;
   default: return false;
   }
 }
-
 // true for any char [signed | unsigned | none]
 bool is_char_type(type_t t) {
   switch (compress(t)) {
@@ -74,7 +70,6 @@ bool is_char_type(type_t t) {
   default: return false;
   }
 }
-
 // true for [signed | unsigned | none] [char | short | int | long | long long]
 bool is_any_int_type(type_t t) {
   switch (compress(t)) {
@@ -82,7 +77,6 @@ bool is_any_int_type(type_t t) {
   default: return false;
   }
 }
-
 // true for [float | double | long double]
 bool is_any_float_type(type_t t) {
   switch (compress(t)) {
@@ -90,7 +84,6 @@ bool is_any_float_type(type_t t) {
   default: return false;
   }
 }
-
 // is_any_int_type or tag_t<...> or enum
 bool is_integral_type(type_t t) {
   switch (compress(t)) {
@@ -105,7 +98,6 @@ bool is_integral_type(type_t t) {
   default: return false;
   }
 }
-
 bool is_signed_type(type_t t) {
   switch (compress(t)) {
   case &AppType(&IntCon(Signed,_),_): return true;
@@ -113,22 +105,18 @@ bool is_signed_type(type_t t) {
   default: return false;
   }
 }
-
 bool is_arithmetic_type(type_t t) {
   return is_integral_type(t) || is_any_float_type(t);
 }
-
 bool is_strict_arithmetic_type(type_t t) {
   return is_any_int_type(t) || is_any_float_type(t);
 }
-
 bool is_function_type(type_t t) {
   switch (compress(t)) {
   case &FnType(_): return true;
   default: return false;
   }
 }
-
 // return true if t has boxed kind.
 bool is_boxed(type_t t) {
   return type_kind(t)->kind == BoxKind;
@@ -381,17 +369,12 @@ void explain_failure() {
 
 void terr(seg_t loc, string_t fmt, ... inject parg_t ap)
   __attribute__((format(printf,2,3))) {
-  Position::post_error(Position::mk_err(loc,vrprintf(heap_region,fmt,ap)));
+  Warn::verr(loc,fmt,ap);
 }
 `a impos(string_t fmt, ... inject parg_t ap)
   __attribute__((format(printf,1,2), noreturn))
 {
-  string_t msg = vrprintf(heap_region,fmt,ap);
-  if (!Position::error_p()) {
-    fprintf(stderr,"Compiler Error (Tcutil::impos): %s\n",msg);
-    fflush(stderr);
-  }
-  throw new Impossible(msg);
+  Warn::vimpos(fmt,ap);
 }
 void warn(seg_t sg, string_t fmt, ... inject parg_t ap)
   __attribute__((format(printf,2,3))) {
@@ -2413,6 +2396,22 @@ bool rgn_of_pointer(type_t t, type_t @rgn) {
   }
 }
 
+// returns true if "0" is a value in the type.  Used for checking
+// the well-formedness of zero-terminated array and pointer types.
+// Currently, only integral types and thin pointers support this.
+static bool admits_zero(type_t t) {
+  switch (compress(t)) {
+  case &AppType(&IntCon(_,_),_):
+  case &AppType(&FloatCon(_),_): return true;
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bounds,_,_))):
+      // for now, we're not allowing fat pointers to be in zero-terminated
+      // arrays.  They cause way too many problems in the translation and
+      // are of dubious use (I hope.)
+    return (!unify(fat_bound_type,bounds) && force_type2bool(false,nullable));
+  default: return false;
+  }
+}
+
 /* FIX: this is duplicated in toc; but the functions are slightly different */
 bool is_zero(exp_t e) {
   switch (e->r) {
@@ -2543,15 +2542,6 @@ bool zero_to_null(tenv_t te, type_t t2, exp_t e1) {
   return false;
 }
 
-string_t coercion2string(coercion_t c) {
-  switch (c) {
-  case Unknown_coercion: return "unknown";
-  case No_coercion: return "no coercion";
-  case Null_to_NonNull: return "null check";
-  case Other_coercion: return "other coercion";
-  }
-}
-
 bool warn_alias_coerce = false;
 
 // returns a pair by doing the following
@@ -2647,7 +2637,6 @@ bool coerce_arg(tenv_t te, exp_t e, type_t t2, bool @alias_coercion) {
     } else if (zero_to_null(te,t2,e)) {
       return true;
     } else if ((c = castable(te,e->loc,t1,t2)) != Unknown_coercion) {
-      //fprintf(stderr,"found them to be castable: %s\n",coercion2string(c));
       // if C supports the conversion, then we don't need the cast.
       if (c != No_coercion) unchecked_cast(te,e,t2,c);
       if (c != Null_to_NonNull)
@@ -3173,11 +3162,6 @@ void rewrite_temp_tvar(tvar_t t) { // change t->name from "#xxx" to "`xxx"
 }
 
 // Given a function declaration, return its type as a function type:
-static $(var_opt_t,tqual_t,type_t)@
-  fndecl2type_f($(var_t,tqual_t,type_t)@ x) {
-  return new $((var_opt_t)((*x)[0]), (*x)[1], (*x)[2]);
-}
-
 type_t fndecl2type(fndecl_t fd) {
   if (fd->cached_type == NULL) {
     // We don't cache this type as we want to expand out the effect
@@ -3186,17 +3170,12 @@ type_t fndecl2type(fndecl_t fd) {
     // First, separate the function type attributes from the rest
     // of the attributes and update the function declaration appropriately.
     let fn_type_atts = NULL;
-    for (_ atts = fd->attributes; atts != NULL; atts = atts->tl)
+    for (_ atts = fd->i.attributes; atts != NULL; atts = atts->tl)
       if (fntype_att(atts->hd))
         fn_type_atts = new List(atts->hd,fn_type_atts);
-    return new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_tqual, fd->ret_type,
-                               List::map(fndecl2type_f, fd->args),
-                               fd->c_varargs, fd->cyc_varargs,
-                               fd->rgn_po, fn_type_atts,
-                               fd->requires_clause, 
-                               fd->requires_relns,
-                               fd->ensures_clause, 
-                               fd->ensures_relns});
+    let type_info = fd->i;
+    type_info.attributes = fn_type_atts;
+    return new FnType(type_info);
   }
   return (type_t)fd->cached_type;
 }
@@ -3258,7 +3237,7 @@ static relns_t extract_relns(list_t<$(var_opt_t,tqual_t,type_t)@> args,
 }
 
 // Substitution stuff
-static `a fst_fdarg($(`a,tqual_t,`c)@`r t) { return (*t)[0]; }
+static var_t fst_fdarg($(var_opt_t,tqual_t,`c)@ t) { return (var_t)(*t)[0]; }
 type_t snd_tqt($(tqual_t,type_t)@`r t) { return (*t)[1]; }
 static $(tqual_t,type_t)@ map2_tq($(tqual_t,type_t)@`H pr, type_t t) {
   let &$(tq,t2) = pr;
@@ -3375,8 +3354,9 @@ static exp_opt_t rsubs_exp_opt(region_t<`r> r,
   else return rsubsexp(r,inst,e);
 }
 
-aggrfield_t subst_aggrfield(region_t<`r> r,
-                            list_t<$(tvar_t,type_t)@`r,`r> inst, aggrfield_t f)
+static aggrfield_t subst_aggrfield(region_t<`r> r,
+				   list_t<$(tvar_t,type_t)@`r,`r> inst, 
+				   aggrfield_t f)
 {
   let t = f->type;
   let req = f->requires_clause;
@@ -3388,9 +3368,9 @@ aggrfield_t subst_aggrfield(region_t<`r> r,
                             .requires_clause = new_req};
 }
 
-list_t<aggrfield_t> subst_aggrfields(region_t<`r> r,
-                                     list_t<$(tvar_t,type_t)@`r,`r> inst, 
-                                     list_t<aggrfield_t,`H> fs) {
+static list_t<aggrfield_t> subst_aggrfields(region_t<`r> r,
+					    list_t<$(tvar_t,type_t)@`r,`r> inst,
+					    list_t<aggrfield_t,`H> fs) {
   if (fs == NULL) return NULL;
   let f = fs->hd;
   let t = fs->tl;
@@ -4909,25 +4889,15 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
   // this fills in the missing bound type variables and effects
   check_valid_toplevel_type(loc,te,t);
   switch (compress(t)) {
-  case &FnType(FnInfo{tvs,effect,rtq,rt,args,_,_,_,_,req,req_relns,ens,ens_relns}):
-    fd->tvs = tvs;
-    fd->effect = effect;
-    for (let fdargs = fd->args; fdargs != NULL; fdargs = fdargs->tl,
-           args = args->tl) {
-      (*fdargs->hd)[1] = (*args->hd)[1]; // to pick up resolved qualifiers
-      (*fdargs->hd)[2] = (*args->hd)[2]; // to pick up resolved types
-    }
-    fd->ret_tqual = rtq;
-    fd->ret_type = rt;
-    fd->ret_tqual.real_const = extract_const_from_typedef(loc,fd->ret_tqual.print_const,rt);
-    fd->requires_clause = req;
-    fd->requires_relns = req_relns;
-    fd->ensures_clause = ens;
-    fd->ensures_relns = ens_relns;
+  case &FnType(i):
+    fd->i = i;
+    fd->i.ret_tqual.real_const = 
+      extract_const_from_typedef(loc,i.ret_tqual.print_const,i.ret_type);
     break;
   default: impos("check_fndecl_valid_type: not a FnType");
   }
-  check_unique_vars(map(fst_fdarg,fd->args), loc,
+  region r;
+  check_unique_vars(map(fst_fdarg,fd->i.args), loc,
 		    "function declaration has repeated parameter");
   // cache the type on the declaration so we don't have to recompute it
   fd->cached_type = t;
@@ -4980,7 +4950,7 @@ static string_t<`r> strptr2string(string_t<`r> @s) {
   return *s;
 }
 
-void check_unique_vars(list_t<var_t,`r> vs, seg_t loc, string_t msg) {
+void check_unique_vars(list_t<var_t> vs, seg_t loc, string_t msg) {
   check_unique_unsorted(strptrcmp,vs,loc,strptr2string,msg);
 }
 
@@ -5394,19 +5364,6 @@ void check_nonzero_bound(seg_t loc, ptrbound_t b) {
   check_bound(loc, 0, b, false);
 }
 
-// returns true if [e] is "essentially" a variable
-bool is_var_exp(exp_t e) {
-  while (1) {
-    switch (e->r) {
-    case &Var_e(...): return true;
-    case &NoInstantiate_e(e2): fallthru(e2);
-    case &Instantiate_e(e2,_): e = e2; continue;
-//     case &Cast_e(_,e2,_,_): e = e2; continue;
-    default: return false;
-    }
-  }
-}
-
 // FIX: there are other expressions we could allow, such as
 // &(x->y) or &(x[0]) that we do not support here...
 // RENAME
@@ -5490,34 +5447,60 @@ bool is_const_exp(exp_t e) {
   return cnst_exp(false,e);
 }
 
-static bool fields_support_default(list_t<tvar_t> tvs, list_t<type_t> ts,
-                                   list_t<aggrfield_t> fs);
-bool supports_default(type_t t) {
+static bool fields_zeroable(list_t<tvar_t> tvs, list_t<type_t> ts,
+			    list_t<aggrfield_t> fs);
+bool zeroable_type(type_t t) {
   switch (compress(t)) {
   case &AppType(c,ts):
     switch (c) {
     case &VoidCon:
     case &IntCon(_,_):
     case &FloatCon(_): return true;
-    case &AnonEnumCon(_):
-    case &EnumCon(_,_): return true; // FIX: may not include 0!
+      // Not all enums have a 0!
+    case &EnumCon(_,edo): 
+      if(edo==NULL || edo->fields==NULL)
+	return false;
+      fallthru(edo->fields->v);
+    case &AnonEnumCon(fs):
+      for(let fs2 = fs; fs2 != NULL; fs2 = fs2->tl) {
+	if(fs2->hd->tag == NULL) // DJG: Impossible?
+	  return fs2 == fs; // first field would actually be a 0
+	let $(i,known)= Evexp::eval_const_uint_exp((exp_t)fs2->hd->tag);
+	if(known && i==0)
+	  return true;
+      }
+      return false;
+	
     case &AggrCon(info):
+      // FIX: must reject tagged unions
       let ad = get_known_aggrdecl(info);
       if(ad->impl == NULL) return false;
       if(ad->impl->exist_vars != NULL) return false; // FIX?
-      return fields_support_default(ad->tvs, ts, ad->impl->fields);
+      return fields_zeroable(ad->tvs, ts, ad->impl->fields);
     default: return false;
     }
   case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bounds,_,_))):
     return (unify(bounds,fat_bound_type) || force_type2bool(true,nullable));
-  case &ArrayType(ArrayInfo{t,_,_,_,_}): return supports_default(t);
+  case &ArrayType(ArrayInfo{t,_,_,_,_}): return zeroable_type(t);
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl)
-      if (!supports_default((*tqs->hd)[1])) return false;
+      if (!zeroable_type((*tqs->hd)[1])) return false;
     return true;
-  case &AnonAggrType(_,fs): return fields_support_default(NULL,NULL,fs);
+  case &AnonAggrType(_,fs): return fields_zeroable(NULL,NULL,fs);
   default: return false;
   }
+}
+static bool fields_zeroable(list_t<tvar_t> tvs, list_t<type_t> ts,
+			    list_t<aggrfield_t> fs) {
+  region rgn; 
+  let inst = List::rzip(rgn,rgn,tvs,ts);
+  for (; fs != NULL; fs = fs->tl) {
+    type_t t = fs->hd->type;
+    if (zeroable_type(t)) continue;
+    t = rsubstitute(rgn,inst,fs->hd->type);
+    if (!zeroable_type(t)) return false;
+  }
+  return true;
 }
 
 // issue a warning if the type is a typedef with non-empty qualifiers
@@ -5537,34 +5520,6 @@ void check_no_qual(seg_t loc, type_t t) {
   }
 }
 
-static bool fields_support_default(list_t<tvar_t> tvs, list_t<type_t> ts,
-                                   list_t<aggrfield_t> fs) {
-  region rgn; 
-  let inst = List::rzip(rgn,rgn,tvs,ts);
-  for (; fs != NULL; fs = fs->tl) {
-    type_t t = fs->hd->type;
-    if (supports_default(t)) return true;
-    t = rsubstitute(rgn,inst,fs->hd->type);
-    if (!supports_default(t)) return false;
-  }
-  return true;
-}
-
-// returns true if "0" is a value in the type.  Used for checking
-// the well-formedness of zero-terminated array and pointer types.
-// Currently, only integral types and thin pointers support this.
-bool admits_zero(type_t t) {
-  switch (compress(t)) {
-  case &AppType(&IntCon(_,_),_):
-  case &AppType(&FloatCon(_),_): return true;
-  case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bounds,_,_))):
-      // for now, we're not allowing fat pointers to be in zero-terminated
-      // arrays.  They cause way too many problems in the translation and
-      // are of dubious use (I hope.)
-    return (!unify(fat_bound_type,bounds) && force_type2bool(false,nullable));
-  default: return false;
-  }
-}
 
 // Transfer any function type attributes from the given list to the
 // function type.
@@ -5645,62 +5600,6 @@ type_t promote_array(type_t t, type_t rgn, bool convert_tag) {
     }
     return atb_type(et,rgn,tq,b,zt);
   default: return t;
-  }
-}
-
-// does the type admit zero?
-bool zeroable_type(type_t t) {
-  switch (compress(t)) {
-  case &AppType(c,ts):
-    switch (c) {
-    case &VoidCon:
-    case &IntCon(...):
-    case &FloatCon(...): return true;
-    case &EnumCon(...): // FIX: explicit tags?
-    case &TagCon: return true; // FIX: true iff 0? Is sizeof right?
-    case &AnonEnumCon(...): return true; // FIX: explicit tags?
-    case &RgnHandleCon: 
-    case &DatatypeCon(...):
-    case &DatatypeFieldCon(...): 
-    case &BuiltinCon(...): return false;
-    case &HeapCon:
-    case &UniqueCon:
-    case &RefCntCon:
-    case &AccessCon:
-    case &JoinCon:
-    case &TrueCon:
-    case &FalseCon:
-    case &ThinCon:
-    case &FatCon:
-    case &RgnsCon: impos("bad type `%s' in zeroable type",typ2string(t));
-    case &AggrCon(info):
-      let ad = get_known_aggrdecl(info);
-      if(ad->impl == NULL || ad->impl->exist_vars != NULL)
-        return false;
-      region r; 
-      let inst = List::rzip(r,r,ad->tvs,ts);
-      for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl)
-        if (!zeroable_type(rsubstitute(r,inst,fs->hd->type))) return false;
-      return true;
-    }
-  case &Evar(...):
-  case &VarType(...): return false;
-  case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_,_))):
-    return (type2bool(true,n));
-  case &ArrayType(ArrayInfo{t,...}): return zeroable_type(t);
-  case &FnType(_): return false;
-  case &TupleType(tqs):
-    for (; tqs; tqs = tqs->tl)
-      if (!zeroable_type((*tqs->hd)[1])) return false;
-    return true;
-  case &AnonAggrType(_,fs):
-    for (; fs != NULL; fs = fs->tl)
-      if (!zeroable_type(fs->hd->type)) return false;
-    return true;
-  case &TypedefType(...):
-  case &TypeDeclType(...):
-  case &TypeofType(...):
-  case &ValueofType(...):return false;
   }
 }
 

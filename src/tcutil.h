@@ -28,13 +28,12 @@ using Absyn;
 using Tcenv;
 
 ///////////////////  Warnings and Error messages ///////////////////////
-extern `a impos(string_t fmt, ... inject parg_t<`r2> ap)
+extern `a impos(string_t, ... inject parg_t)
    __attribute__((format(printf,1,2), noreturn)) ;
-extern void terr(seg_t, string_t fmt, ... inject parg_t<`r2> ap)
+extern void terr(seg_t, string_t, ... inject parg_t)
    __attribute__((format(printf,2,3))) ;
-extern void warn(seg_t, string_t fmt, ... inject parg_t<`r2> ap)
-   __attribute__((format(printf,2,3))) ;
-extern void flush_warnings();
+extern void warn(seg_t, string_t, ... inject parg_t)
+  __attribute__((format(printf,2,3))) ;
 
 ////////////////  Predicates and Destructors for Types /////////////////
 // Pure predicates
@@ -79,9 +78,9 @@ extern exp_opt_t get_bounds_exp(ptrbound_t def, ptrbound_t b);
 // If the bounds are unconstrained, then sets them to @thin@numelts(1).
 extern exp_opt_t get_type_bound(type_t t);
 // like is_tagged_pointer_type, but puts element type in elt_dest when true.
-extern bool is_tagged_pointer_type_elt(type_t t, type_t@`r elt_dest);
+extern bool is_tagged_pointer_type_elt(type_t t, type_t@ elt_dest);
 // like above but checks to see if the pointer is zero-terminated
-extern bool is_zero_pointer_type_elt(type_t t, type_t@`r elt_type_dest);
+extern bool is_zero_pointer_type_elt(type_t t, type_t@ elt_type_dest);
 // like above but also works for arrays and returns dynamic pointer stats
 extern bool is_zero_ptr_type(type_t t, type_t @ptr_type, 
 			     bool @is_dyneither, type_t @elt_type);
@@ -89,12 +88,10 @@ extern bool is_zero_ptr_type(type_t t, type_t @ptr_type,
 // it's unconstrained, constrain it to def and return that.
 extern exp_opt_t get_bounds_exp(ptrbound_t def, ptrbound_t b);
 
-
 //////////////////////// UTILITIES for Expressions ///////////////
 extern bool is_integral(exp_t); 
 extern bool is_numeric(exp_t);
 extern bool is_zero(exp_t e);
-
 
 // returns a deep copy of a type -- note that the evars will
 // still share and if the identity is set on type variables,
@@ -205,14 +202,7 @@ extern type_t rsubstitute(region_t<`r>,list_t<$(tvar_t,type_t)@`r,`r>,type_t);
 extern list_t<$(type_t,type_t)@> rsubst_rgnpo(region_t<`r>,
 					      list_t<$(tvar_t,type_t)@`r,`r>,
 					      list_t<$(type_t,type_t)@`H,`H>);
-// substitute through an aggregate field
-extern aggrfield_t subst_aggrfield(region_t<`r> r,
-                                   list_t<$(tvar_t,type_t)@`r,`r>, 
-                                   aggrfield_t);
-// substitute through a list of aggregate fields
-extern list_t<aggrfield_t> subst_aggrfields(region_t<`r> r,
-                                            list_t<$(tvar_t,type_t)@`r,`r>, 
-                                            list_t<aggrfield_t,`H> fs);
+
 // substitute through an expression
 extern exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r>, exp_t);
 
@@ -318,11 +308,6 @@ extern bool is_noalias_pointer_or_aggr(type_t t);
 // or not &e is const and what region e is in.
 extern $(bool,type_t) addressof_props(tenv_t te, exp_t e);
 
-// Given a function's effect (or capability) split it into a
-// list of effect type variables, and a list of region type
-// variables respectively.
-extern $(list_t<tvar_t>,list_t<tvar_t>) split_effect(Core::opt_t<type_t> effect);
-
 // Given an effect, express/mutate it to have only regions(`a), `r, and joins.
 extern type_t normalize_effect(type_t e);
 
@@ -344,19 +329,8 @@ extern bool same_atts(attributes_t, attributes_t);
 // returns true iff e is an expression that can be evaluated at compile time
 extern bool is_const_exp(exp_t e);
 
-// returns true if [e] is "essentially" a variable
-extern bool is_var_exp(exp_t e);
-
 // like Core::snd, but first argument is a tqual_t (not a BoxKind)
-extern type_t snd_tqt($(tqual_t,type_t)@`r);
-
-// does the type support "0" as a default value? -- used for toplevel
-// variables where we don't have an initializer
-extern bool supports_default(type_t);
-
-// does the type support "0" as a value?  -- used for testing whether or
-// not we can have a zero-terminated array.
-extern bool admits_zero(type_t t);
+extern type_t snd_tqt($(tqual_t,type_t)@);
 
 // If t is a typedef, returns true if the typedef is const, and warns
 // if the flag declared_const is true.  Otherwise returns declared_const.

@@ -25,6 +25,7 @@
 #include "absynpp.h"
 #include "evexp.h"
 #include "tcutil.h"
+#include "warn.h"
 #include "cyclone.h"
 
 namespace Lex {
@@ -1143,7 +1144,7 @@ void dumptypedefname(typedefdecl_t td) {
 }
 
 static void dump_atts_qvar(fndecl_t fd) {
-  dumpatts(fd->attributes);
+  dumpatts(fd->i.attributes);
   dumpqvar(fd->name);
 }
 static void dump_callconv_qvar($(attribute_t,qvar_t)@`r pr) {
@@ -1157,7 +1158,7 @@ static void dump_callconv_qvar($(attribute_t,qvar_t)@`r pr) {
   dumpqvar((*pr)[1]);
 }
 static void dump_callconv_fdqvar(fndecl_t fd) {
-  dump_callconv(fd->attributes);
+  dump_callconv(fd->i.attributes);
   dumpqvar(fd->name);
 }
 
@@ -1290,7 +1291,7 @@ void dumpdecl(decl_t d) {
   case &Fn_d(fd):
     //    fprintf(stderr,"%s",*(*fd->name)[1]); fflush(stdout);
     switch(c_compiler) {
-    case Vc_c: dumpatts(fd->attributes); break;
+    case Vc_c: dumpatts(fd->i.attributes); break;
     case Gcc_c: break;
     }
     if(fd->is_inline) 
@@ -1299,13 +1300,9 @@ void dumpdecl(decl_t d) {
       case Gc_c: dump("inline");   break;
       }
     dumpscope(fd->sc);
-    type_t t = new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_tqual,
-                                 fd->ret_type,
-                                 List::map(Absynpp::arg_mk_opt,fd->args), 
-                                 fd->c_varargs, fd->cyc_varargs,
-                                 fd->rgn_po, NULL, fd->requires_clause,
-                                 fd->requires_relns,
-                                 fd->ensures_clause,fd->ensures_relns});
+    fn_info_t type_info = fd->i;
+    type_info.attributes = NULL;
+    type_t t = new FnType(type_info);
     switch(c_compiler){
     case Gcc_c:
       dumptqtd(empty_tqual(0), t, dump_atts_qvar,fd);
@@ -1451,7 +1448,7 @@ void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms, void f(`a), `a a) {
     case &VarType(tv): dumptvar(tv); break;
     case &Evar(_,NULL,_,_): dumpntyp(Tcutil::compress(rgn)); break;
     case &TypedefType(...): dump("@region("); dumptyp(rgn); dump(")"); break;
-    default: Tcutil::impos("dumptms: bad rgn type in Pointer_mod");
+    default: Warn::impos("dumptms: bad rgn type in Pointer_mod");
     }
     dumptq(tq2); // rare
     dumptms(false,tms->tl,f,a);
@@ -1485,7 +1482,7 @@ void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms, void f(`a), `a a) {
     case &TypeParams_mod(ts,loc,print_kinds): 
       if (print_kinds) dumpkindedtvars(ts); else dumptvars(ts); break;
     case &Attributes_mod(_,atts): dumpatts(atts); break;
-    case &Pointer_mod(_,_): Tcutil::impos("dumptms");
+    case &Pointer_mod(_,_): Warn::impos("dumptms");
     }
     return;
   }
@@ -1524,13 +1521,9 @@ static void dump_decl_interface(decl_t d) {
   case &Fn_d(fd):
     if (fd->sc == Static) return;
     dumpscope(fd->sc);
-    type_t t = new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_tqual,
-                                 fd->ret_type, 
-                                 List::map(Absynpp::arg_mk_opt,fd->args),
-                                 fd->c_varargs, fd->cyc_varargs, 
-                                 fd->rgn_po, NULL, fd->requires_clause,
-                                 fd->requires_relns,
-                                 fd->ensures_clause, fd->ensures_relns});
+    fn_info_t type_info = fd->i;
+    type_info.attributes = NULL;
+    type_t t = new FnType(type_info);
     dumptqtd(empty_tqual(0), t, dump_atts_qvar, fd);
     dump(";\n");
     break;
@@ -1591,7 +1584,7 @@ static void dump_decl_interface(decl_t d) {
     }
     */
     break;
-  default: Tcutil::impos("bad top-level declaration");
+  default: Warn::impos("bad top-level declaration");
   }
 }
 

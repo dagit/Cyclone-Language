@@ -1283,16 +1283,15 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Fn_d(x):
       let &$(_,v) = x->name;
       current_source = v;
-      scan_type(x->ret_type,dep);
-      for (let a = x->args; a != NULL; a = a->tl) {
+      scan_type(x->i.ret_type,dep);
+      for (let a = x->i.args; a != NULL; a = a->tl) {
         let &$(_,_,t1) = a->hd;
         scan_type(t1,dep);
       }
-      if (x->cyc_varargs != NULL)
-        scan_type(x->cyc_varargs->type,dep);
-      if (x->is_inline) {
+      if (x->i.cyc_varargs != NULL)
+        scan_type(x->i.cyc_varargs->type,dep);
+      if (x->is_inline)
         fprintf(stderr,"Warning: ignoring inline function\n");
-      }
       break;
     case &Aggr_d(x):
       let &$(_,v) = x->name;
