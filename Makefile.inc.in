@@ -1,30 +1,25 @@
-# -*- Makefile -*-
+# @configure_input@
+VERSION=@PACKAGE_VERSION@
+ARCH=@build@
+CYCDIR=@abs_srcdir@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+INC_INSTALL=@includedir@/cyclone
+BIN_INSTALL=@bindir@
+LIB_INSTALL=@libdir@/cyclone
+@SET_MAKE@
+RANLIB=@RANLIB@
+CC=@CC@
+EXE=@EXEEXT@
+O=@OBJEXT@
+LDFLAGS=@LDFLAGS@
 
-VERSION = 0.4
-
-# Assume with Windows
-
-O := o
-A := a
-EXE := .exe
-
+SHELL=/bin/sh
+A=a
 # What we do when using VC++
 ifdef MS
-  O := obj
-  A := lib
-endif
-
-# If there's no sign of a Cygwin environment, it's unix
-ifndef MS
-  ifndef CYGWIN
-    ifneq ($(OS),Windows_NT)
-      ifneq ($(OSTYPE),cygwin)
-        O := o
-        A := a
-        EXE :=
-      endif
-    endif
-  endif
+  O=obj
+  A=lib
 endif
 
 # needed for booting

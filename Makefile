@@ -36,7 +36,7 @@ cyclone: \
 	bin/lib/cyc-lib/$(ARCH)/gc.a \
 	bin/lib/$(CYCBOOTLIB) \
 	$(addprefix bin/, cyclone$(EXE) cycdoc$(EXE) buildlib$(EXE)) \
-	$(addprefix bin/lib/cyc-lib/, $(addsuffix /cycspecs, $(ALL_ARCHS))) \
+	bin/lib/cyc-lib/$(ARCH)/cycspecs \
 	$(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc.a $(RUNTIME).$(O)) \
 	bin/lib/cyc-lib/$(ARCH)/cyc_setjmp.h \
 	bin/lib/$(CYCLIB)
@@ -143,8 +143,7 @@ bin/lib/$(CYCBOOTLIB): \
 	  $(addprefix bin/genfiles/, $(O_BOOT_LIBS)) \
 	  bin/genfiles/boot_cstubs.$(O) \
 	  bin/genfiles/boot_cycstubs.$(O)
-	@echo Trying ranlib, if not found, probably ok to ignore error messages
-	-ranlib $@
+	$(RANLIB) $@
 
 bin/lib/libcycboot_a.a: \
   $(addprefix bin/genfiles/, $(A_BOOT_LIBS)) \
@@ -155,8 +154,7 @@ bin/lib/libcycboot_a.a: \
 	  $(addprefix bin/genfiles/, $(A_BOOT_LIBS)) \
 	  bin/genfiles/boot_cstubs_a.$(O) \
 	  bin/genfiles/boot_cycstubs_a.$(O)
-	@echo Trying ranlib, if not found, probably ok to ignore error messages
-	-ranlib $@
+	$(RANLIB) $@
 
 %.$(O): %.cyc bin/cyclone$(EXE)
 	bin/cyclone$(EXE) -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $<
@@ -200,8 +198,7 @@ bin/lib/$(CYCLIB): \
 	  $(addprefix bin/genfiles/, $(O_BOOT_LIBS)) \
 	  bin/lib/cyc-lib/$(ARCH)/include/cstubs.$(O) \
 	  bin/lib/cyc-lib/$(ARCH)/include/cycstubs.$(O)
-	@echo Trying ranlib, if not found, probably ok to ignore error messages
-	-ranlib $@
+	$(RANLIB) $@
 
 bin/lib/libcyc_a.a: \
   $(addprefix bin/genfiles/, $(A_BOOT_LIBS)) \
@@ -214,8 +211,7 @@ bin/lib/libcyc_a.a: \
 	  $(addprefix lib/, $(A_LIBS)) \
 	  bin/lib/cyc-lib/$(ARCH)/include/cstubs_a.$(O) \
 	  bin/lib/cyc-lib/$(ARCH)/include/cycstubs_a.$(O)
-	@echo Trying ranlib, if not found, probably ok to ignore error messages
-	-ranlib $@
+	$(RANLIB) $@
 
 bin/lib/libcyc_pg.a: \
   $(addprefix bin/genfiles/, $(PG_BOOT_LIBS)) \
@@ -228,8 +224,7 @@ bin/lib/libcyc_pg.a: \
 	  $(addprefix lib/, $(PG_LIBS)) \
 	  bin/lib/cyc-lib/$(ARCH)/include/cstubs_pg.$(O) \
 	  bin/lib/cyc-lib/$(ARCH)/include/cycstubs_pg.$(O)
-	@echo Trying ranlib, if not found, probably ok to ignore error messages
-	-ranlib $@
+	$(RANLIB) $@
 
 bin/lib/libcyc_nocheck.a: \
   $(addprefix bin/genfiles/, $(NOCHECK_BOOT_LIBS)) \
@@ -242,32 +237,28 @@ bin/lib/libcyc_nocheck.a: \
 	  $(addprefix lib/, $(NOCHECK_LIBS)) \
 	  bin/lib/cyc-lib/$(ARCH)/include/cstubs_nocheck.$(O) \
 	  bin/lib/cyc-lib/$(ARCH)/include/cycstubs_nocheck.$(O)
-	@echo Trying ranlib, if not found, probably ok to ignore error messages
-	-ranlib $@
+	$(RANLIB) $@
 
 bin/lib/cyc-lib/$(ARCH)/nogc.a: $(CYC_INCLUDE_H)
 bin/lib/cyc-lib/$(ARCH)/nogc.a: \
   bin/genfiles/nogc.$(O)
 	-$(RM) $@
 	ar rc $@ $<
-	@echo Trying ranlib, if not found, probably ok to ignore error messages
-	-ranlib $@
+	$(RANLIB) $@
 
 bin/lib/cyc-lib/$(ARCH)/nogc_a.a: $(CYC_INCLUDE_H)
 bin/lib/cyc-lib/$(ARCH)/nogc_a.a: \
   bin/genfiles/nogc_a.$(O)
 	-$(RM) $@
 	ar rc $@ $<
-	@echo Trying ranlib, if not found, probably ok to ignore error messages
-	-ranlib $@
+	$(RANLIB) $@
 
 bin/lib/cyc-lib/$(ARCH)/nogc_pg.a: $(CYC_INCLUDE_H)
 bin/lib/cyc-lib/$(ARCH)/nogc_pg.a: \
   bin/genfiles/nogc_pg.$(O)
 	-$(RM) $@
 	ar rc $@ $<
-	@echo Trying ranlib, if not found, probably ok to ignore error messages
-	-ranlib $@
+	$(RANLIB) $@
 
 bin/lib/cyc-lib/$(ARCH)/$(RUNTIME).$(O): $(CYC_INCLUDE_H)
 bin/lib/cyc-lib/$(ARCH)/$(RUNTIME).$(O): \
@@ -289,16 +280,12 @@ bin/lib/cyc-lib/$(ARCH)/$(RUNTIME)_pg.$(O): \
 bin/lib/cyc-lib/cyc_include.h: $(CYCDIR)/bin/cyc-lib/cyc_include.h
 	-mkdir bin/lib
 	-mkdir bin/lib/cyc-lib
-	-for i in $(ALL_ARCHS);\
-	  do mkdir bin/lib/cyc-lib/$$i;\
-	  done
+	-mkdir bin/lib/cyc-lib/$(ARCH)
 	-mkdir bin/lib/cyc-lib/$(ARCH)/include
 	cp $< $@
 
-$(addprefix bin/lib/cyc-lib/, $(addsuffix /cycspecs, $(ALL_ARCHS))): \
-  bin/lib/cyc-lib/%/cycspecs: bin/genfiles/%.cycspecs \
-  $(CYC_INCLUDE_H)
-	cp $< $@
+bin/lib/cyc-lib/$(ARCH)/cycspecs: $(CYC_INCLUDE_H)
+	${CYCDIR}/config/buildspecs > $@
 
 # The buildlib process creates many files; exactly what files depends
 # on the architecture.  So, we give just three targets: cstubs.c,

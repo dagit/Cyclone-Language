@@ -138,8 +138,7 @@ ifdef LC_FLAG
 	$(CYCC) -o $@ $(LC_FLAG) $^
 else
 	ar rc $@ $^
-	@echo Trying ranlib, if not found, probably ok to ignore error messages
-	-ranlib $@
+	$(RANLIB) $@
 endif
 endif
 
@@ -152,15 +151,13 @@ ifdef LC_FLAG
 	$(CYCC) -o $@ $(LC_FLAG) $^
 else
 	ar rc $@ $^
-	@echo Trying ranlib, if not found, probably ok to ignore error messages
-	-ranlib $@
+	$(RANLIB) $@
 endif
 endif
 
 nogc.a: nogc.o
 	ar rc $@ $^
-	@echo Trying ranlib, if not found, probably ok to ignore error messages
-	-ranlib $@
+	$(RANLIB) $@
 
 cyc_include.h: $(CYCDIR)/bin/lib/cyc-lib/cyc_include.h
 	cp $< $@
