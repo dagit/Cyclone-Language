@@ -150,8 +150,8 @@ static int fast_tvar_cmp(tvar_t tv1, tvar_t tv2) {
 type_t compress(type_t t) {
   switch (t) {
   case &Evar(_,NULL,_,_): 
-  case &TypedefType(_,_,NULL): return t;
-  case &TypedefType(_,_,*topt_ref): fallthru(topt_ref);
+  case &TypedefType(_,_,_,NULL): return t;
+  case &TypedefType(_,_,_,*topt_ref): fallthru(topt_ref);
   case &Evar(_,*t2opt_ref,_,_): // TRICKY
     type_t t2 = compress((*t2opt_ref)->v);
     // only modify if something changed to avoid allocation
@@ -255,7 +255,8 @@ type_t copy_type(type_t t) {
   case &AnonEnumType(fs): return new AnonEnumType(List::map(copy_enumfield,fs));
   case &SizeofType(t): return new SizeofType(copy_type(t));
   case &RgnHandleType(t): return new RgnHandleType(copy_type(t));
-  case &TypedefType(tdn,ts,_): return new TypedefType(tdn,copy_types(ts),NULL);
+  case &TypedefType(tdn,ts,td,_): 
+    return new TypedefType(tdn,copy_types(ts),td,NULL);
   case HeapRgn: return t;
   case &AccessEff(t): return new AccessEff(copy_type(t));
   case &JoinEff(ts): return new JoinEff(copy_types(ts));
@@ -331,8 +332,10 @@ kind_t typ_kind(type_t t) {
   // Arrays are always of memkind
   case &ArrayType(_,_,_): 
   case &TupleType(_): return MemKind;
-  case &TypedefType(_,_,topt):
-    impos("typ_kind: typedef found: %s", typ2string(t));
+  case &TypedefType(_,_,td,_):
+    if (td == NULL || td->kind == NULL)
+      impos("typ_kind: typedef found: %s", typ2string(t));
+    return td->kind->v;
   case &AccessEff(_):     
   case &JoinEff(_):       
   case &RgnsEff(_): return EffKind;
@@ -406,7 +409,7 @@ static void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
     break;
   case &TunionType(TunionInfo{_,ts,rg}):
     occurs(evar,r,env,rg); occurslist(evar,r,env,ts); break;
-  case &TypedefType(_,ts,topt): fallthru(ts);
+  case &TypedefType(_,ts,_,topt): fallthru(ts);
   case &TunionFieldType(TunionFieldInfo{_,ts}): fallthru(ts);
   case &AggrType(AggrInfo(_,ts)): occurslist(evar,r,env,ts); break;
   case &AnonAggrType(_,fs):
@@ -584,7 +587,8 @@ static type_t rgns_of(type_t t) {
   case &AccessEff(_):
   case &JoinEff(_): return t;
   case &RgnsEff(t2): return rgns_of(t2);
-  case &TypedefType(_,_,_): impos("typedef in compressed type");
+  case &TypedefType(_,ts,_,_): 
+    return normalize_effect(new JoinEff(map(rgns_of,ts)));
   }
 }
 
@@ -1465,7 +1469,7 @@ static int type_case_number(type_t t) {
   case &EnumType(_,_): return 16;
   case &AnonEnumType(_): return 17;
   case &RgnHandleType(_): return 18;
-  case &TypedefType(_,_,_): return 19;
+  case &TypedefType(_,_,_,_): return 19;
   case HeapRgn: return 20;
   case &AccessEff(_): return 21;
   case &JoinEff(_): return 22;
@@ -2285,9 +2289,9 @@ type_t rsubstitute(region_t<`r> rgn,
     let new_ts = substs(rgn,inst,ts);
     return (new_ts == ts) ? t : 
       new TunionFieldType(TunionFieldInfo{info,new_ts});
-  case &TypedefType(n,ts,topt): 
+  case &TypedefType(n,ts,td,topt): 
     let new_ts = substs(rgn,inst,ts);
-    return new_ts == ts ? t : new TypedefType(n,new_ts,topt);
+    return new_ts == ts ? t : new TypedefType(n,new_ts,td,topt);
   case &ArrayType(t1,tq,e):     
     let new_t1 = rsubstitute(rgn,inst,t1);
     return new_t1 == t1 ? t : new ArrayType(new_t1,tq,e);
@@ -3103,7 +3107,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     }
     break;
 	
-  case &TypedefType(tdn,*targs_ref,*toptp):
+  case &TypedefType(tdn,*targs_ref,*tdopt,*toptp):
     list_t<type_t> targs = *targs_ref;
     // NB: since we called compress *toptp == NULL
     typedefdecl_t td;
@@ -3112,6 +3116,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       terr(loc,"unbound typedef name %s",qvar2string(tdn));
       return cvtenv;
     }
+    *tdopt = td;
     // Make relative name absolute (or replace absolute name with itself)
     tdn[0] = td->name[0];
     list_t<tvar_t> tvs = td->tvs;
@@ -3138,8 +3143,10 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       // add the hidden type arguments back in so error messages are decent
       *targs_ref = List::imp_append(targs,List::imp_rev(hidden_ts));
     }
-    type_t new_typ = substitute(inst,td->defn);
-    *toptp = new Opt(new_typ);
+    if (td->defn != NULL) {
+      type_t new_typ = substitute(inst,td->defn->v);
+      *toptp = new Opt(new_typ);
+    }
     break;
   case HeapRgn:
     break;

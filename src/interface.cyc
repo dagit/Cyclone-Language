@@ -250,7 +250,9 @@ static bool check_public_enumdecl(aenv_t ae, seen_t seen, enumdecl_t d) {
 }
 
 static bool check_public_typedefdecl(aenv_t ae, seen_t seen, typedefdecl_t d) {
-  return check_public_type(ae, seen, NULL /*"typedef"*/, d->name, d->defn);
+  if (d->defn != NULL)
+    return check_public_type(ae, seen, NULL/*"typedef"*/, d->name, d->defn->v);
+  else return true;
   // don't print an error message for typedefs (we'll just not export the decl)
 }
 
@@ -269,7 +271,7 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
   switch (compress(t)) {
   case &PointerType(PtrInfo(t,_,_,_,_)): fallthru(t);
   case &ArrayType(t,_,_): fallthru(t);
-  case &TypedefType(_,_, &Opt(t)):
+  case &TypedefType(_,_,_, &Opt(t)):
     return check_public_type(ae, seen, obj, name, t);
 
   case &FnType(FnInfo(_,_,ret,args,_,cyc_varargs,_,_)):

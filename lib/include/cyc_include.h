@@ -56,9 +56,10 @@ struct _RegionHandle {
 };
 
 extern struct _RegionHandle _new_region(const char *);
-extern void* _region_malloc(struct _RegionHandle *, unsigned);
-extern void* _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
-extern void  _free_region(struct _RegionHandle *);
+extern void * _region_malloc(struct _RegionHandle *, unsigned);
+extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
+extern void   _free_region(struct _RegionHandle *);
+extern void   _reset_region(struct _RegionHandle *);
 
 //// Exceptions 
 struct _handler_cons {

@@ -583,13 +583,14 @@ struct Typedefdecl * merge_typedefdecl(typedefdecl_t d0, typedefdecl_t d1,
   let inst = build_tvs_map(d0->tvs, d1->tvs);
 
   // check types
-  type_t subst_defn1 = substitute(inst, d1->defn);
-  if(! check_type(d0->defn, subst_defn1)) {
-    merr(loc,msg,"typedef %s does not refer to the same type: %s != %s",
-	 v, typ2string(subst_defn1), typ2string(d0->defn));
-    return NULL;
+  if (d0->defn != NULL && d1->defn != NULL) {
+    type_t subst_defn1 = substitute(inst, d1->defn->v);
+    if(! check_type(d0->defn->v, subst_defn1)) {
+      merr(loc,msg,"typedef %s does not refer to the same type: %s != %s",
+           v, typ2string(subst_defn1), typ2string(d0->defn->v));
+      return NULL;
+    }
   }
-  
   return d0;
 }
 

@@ -158,6 +158,7 @@ static struct SharedFenv {
 // Encodes partial order for region lifetimes
 static struct RgnPO {
   tvar_t tvar;
+  bool resetable;
   list_t<struct RgnPO @> ancestors;
 };
 typedef list_t<struct RgnPO @> rgn_po_t;
@@ -510,7 +511,8 @@ static rgn_po_t initial_region_po(seg_t loc, list_t<tvar_t> tvs,
   for (; tvs != NULL; tvs = tvs->tl) {
     tvar_t tv = tvs->hd;
     if (tvar_kind(tv) == RgnKind) {
-      result = new List(new RgnPO{.tvar=tv, .ancestors=NULL},result);
+      result = new List(new RgnPO{.tvar=tv, .resetable=false,
+                                  .ancestors=NULL},result);
     }
   }
   for (; po != NULL; po = po->tl) {
@@ -539,10 +541,28 @@ static rgn_po_t initial_region_po(seg_t loc, list_t<tvar_t> tvs,
   return result;
 }
 
-// add a new region variable to the given partial order.  All previously
-// declared regions are ancestors.
-static rgn_po_t add_region_po(rgn_po_t po, tvar_t tv) {
-  return new List(new RgnPO{.tvar = tv, .ancestors = po}, po);
+// given a po list, return those tvars that aren't resetable
+static rgn_po_t non_resetable_ancestors(rgn_po_t po) {
+  // first check to see if any are resetable
+  for (_ p = po; p != NULL; p = p->tl)
+    if (p->hd->resetable) { 
+      // we found a resetable one -- going to have to build a new list
+      rgn_po_t res = NULL;
+      for (p = po; p != NULL; p = p->tl) {
+        if (p->hd->resetable) continue;
+        res = new List(p->hd,res);
+      }
+      return (List::imp_rev(res));
+    }
+  // none were resetable -- return the po
+  return po;
+}
+
+// add a new region variable to the given partial order.  only allow
+// as ancestors those regions that are not resetable.
+static rgn_po_t add_region_po(rgn_po_t po, tvar_t tv, bool resetable) {
+  return new List(new RgnPO{.tvar = tv, .resetable = resetable,
+                               .ancestors = non_resetable_ancestors(po)}, po);
 }
 
 //////////////////// Function Environment Manipulation //////////////////////
@@ -780,7 +800,7 @@ tenv_t set_encloser(tenv_t te, stmt_t s) {
   return put_fenv(te,fe);
 }
 
-tenv_t add_region(tenv_t te, type_t r) {
+tenv_t add_region(tenv_t te, type_t r, bool resetable) {
   if (te->le == NULL) env_err("Tcenv::add_region: unexpected add_region");
   fenv_t fe = copy_fenv_old_ctrl(get_fenv(te));
   tvar_t tv;
@@ -788,7 +808,7 @@ tenv_t add_region(tenv_t te, type_t r) {
   case &VarType(x): tv = x; break;
   default: tv = env_err("bad add region"); break;
   }
-  fe->region_order = add_region_po(fe->region_order, tv);
+  fe->region_order = add_region_po(fe->region_order, tv, resetable);
   fe->capability = new JoinEff(new List(new AccessEff(r),
                                         new List(fe->capability,NULL)));
   return put_fenv(te,fe);
@@ -800,7 +820,7 @@ tenv_t new_named_block(seg_t loc, tenv_t te, tvar_t block_rgn) {
   type_t block_typ = new VarType(block_rgn);
   fe->type_vars = new List(block_rgn, fe->type_vars);
   Tcutil::check_unique_tvars(loc,fe->type_vars);
-  fe->region_order = add_region_po(fe->region_order, block_rgn);
+  fe->region_order = add_region_po(fe->region_order, block_rgn, false);
   fe->capability = new JoinEff(new List(new AccessEff(block_typ), 
                                         new List(fe->capability,NULL)));
   fe->curr_rgn = block_typ;
@@ -828,7 +848,20 @@ void check_rgn_accessible(tenv_t te, seg_t loc, type_t rgn) {
         region_in_effect(true, rgn, capability)) return;
   }
   terr(loc, "Expression accesses unavailable region %s", typ2string(rgn));
-                    
+}
+
+// Check to see if a region is accessible and resetable
+void check_rgn_resetable(tenv_t te, seg_t loc, type_t rgn) {
+  check_rgn_accessible(te,loc,rgn);
+  switch (compress(rgn)) {
+  case &VarType(r):
+    let rpo = find_region_in_po(get_fenv(te)->region_order,r);
+    if (!rpo->resetable) 
+      terr(loc, "Region %s is not resetable", typ2string(rgn));
+    return;
+  default:
+    impos("check_rgn_resetable");
+  }
 }
 
 // check that region rt_a outlives region rt_b using the partial order in
@@ -884,7 +917,8 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
              new Eq_kb(RgnKind));
   let tvs = new List(rgn0,fd->tvs);
   Tcutil::check_unique_tvars(loc,tvs);
-  let rgn_po = add_region_po(initial_region_po(loc,fd->tvs,fd->rgn_po),rgn0);
+  let rgn_po = add_region_po(initial_region_po(loc,fd->tvs,fd->rgn_po),rgn0,
+                             false);
   type_t param_rgn = new VarType(rgn0);
   let vds = NULL;
   for(let args = fd->args; args != NULL; args = args->tl) {

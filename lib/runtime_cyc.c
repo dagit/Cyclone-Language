@@ -421,6 +421,7 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
   r->last_plus_one = r->offset + next_size;
 }
 
+
 // allocate s bytes within region r
 void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
   void *result;
@@ -499,6 +500,7 @@ struct _RegionHandle _new_region(const char *rgn_name) {
   return r;
 }
 
+// free all the resources associated with a region (except the handle)
 void _free_region(struct _RegionHandle *r) {
   struct _RegionPage *p = r->curr;
   while (p != NULL) {
@@ -510,6 +512,17 @@ void _free_region(struct _RegionHandle *r) {
   r->offset = 0;
   r->last_plus_one = 0;
 }
+
+// reset the region by freeing its pages and then reallocating a fresh page.
+void _reset_region(struct _RegionHandle *r) {
+  _free_region(r);
+#ifdef CYC_REGION_PROFILE  
+  *r = _new_region(r->name);
+#else
+  *r = _new_region(NULL);
+#endif
+}
+
 
 #ifdef CYC_REGION_PROFILE
 

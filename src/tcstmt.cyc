@@ -449,7 +449,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     }
     throw impos("tcStmt: nested %s declarations unimplemented",unimp_msg_part);
 
-  case &Region_s(tv,vd,s):
+  case &Region_s(tv,vd,resetable,s):
     // Same KLUDGE as with TryCatch_s -- we need a next statement that is
     // not outside of the handler.
     s->r = new_stmt(new Seq_s(new_stmt(s->r,s->loc), skip_stmt(s->loc)),
@@ -462,12 +462,21 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     *rgn_ptr = new Opt(curr_bl); // side effect
     te = add_type_vars(s0->loc,te,new List(tv,NULL));
     check_type(s0->loc,te,lookup_type_vars(te),BoxKind,true,t);
-    te = add_region(te, rgn_typ);
+    te = add_region(te, rgn_typ, resetable);
     if (!unify(t,new RgnHandleType(rgn_typ)))
       impos("region stmt: type of region handle is wrong!");
     tcStmt(set_encloser(add_local_var(s->loc,enter_try(te),vd),s0),s,false);
     return;
-
+  case &ResetRegion_s(e):
+    // check that e is a region_t<`r> 
+    type_t rgn_type = new_evar(new Opt(RgnKind),
+                               new Opt(lookup_type_vars(te)));
+    type_t etype = new RgnHandleType(rgn_type);
+    if (!unify(tcExp(te,&etype,e),etype))
+      terr(e->loc, "expecting region_t but found %s", typ2string(e->topt->v));
+    // check that `r is resetable
+    check_rgn_resetable(te,s0->loc,rgn_type);
+    return;
   case &Cut_s(s):    throw impos("tcStmt: cut is not implemented");    // FIX
   case &Splice_s(s): throw impos("tcStmt: splice is not implemented"); // FIX
   }

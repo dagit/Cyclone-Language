@@ -121,7 +121,13 @@ bool okay_szofarg(type_t t) {
   case &JoinEff(_):
   case &AccessEff(_):
   case &RgnsEff(_):   return false;
-  case &TypedefType(_,_,_): impos(aprintf("szof typedeftype %s",typ2string(t)));
+  case &TypedefType(_,_,td,_): 
+    if (td == NULL || td->kind == NULL)
+      impos(aprintf("szof typedeftype %s",typ2string(t)));
+    else switch(td->kind->v) {
+    case BoxKind: return true;
+    default: return false;
+    }
   }
 }
 

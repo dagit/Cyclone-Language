@@ -43,7 +43,8 @@ namespace CfFlowInfo {
 // Do not ever mutate any data structures built from these -- they share a lot!
 EXTERN_CFFLOW tunion Root {
   VarRoot(Absyn::vardecl_t);
-  MallocPt(Absyn::exp_t); // misnamed when do other analyses??
+  // the type below is the type of the result of the malloc
+  MallocPt(Absyn::exp_t,Absyn::type_t); // misnamed when do other analyses??
 };
 typedef tunion Root root_t;
 
@@ -140,5 +141,7 @@ extern flowdict_t assign_place(Position::seg_t loc, flowdict_t d,
 			       absRval_t r);
 extern flow_t join_flow(place_set_t*,flow_t,flow_t); 
 extern flow_t after_flow(place_set_t*,flow_t,flow_t,place_set_t,place_set_t);
+  // reset anything that points into rgn to be uninitialized
+extern flow_t kill_flow_region(flow_t f, Absyn::type_t rgn);
 }
 #endif

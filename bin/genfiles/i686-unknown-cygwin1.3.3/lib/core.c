@@ -56,9 +56,10 @@ struct _RegionHandle {
 };
 
 extern struct _RegionHandle _new_region(const char *);
-extern void* _region_malloc(struct _RegionHandle *, unsigned);
-extern void* _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
-extern void  _free_region(struct _RegionHandle *);
+extern void * _region_malloc(struct _RegionHandle *, unsigned);
+extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
+extern void   _free_region(struct _RegionHandle *);
+extern void   _reset_region(struct _RegionHandle *);
 
 //// Exceptions 
 struct _handler_cons {
@@ -256,31 +257,27 @@ struct _RegionHandle*,unsigned int);int Cyc_Core_true_f(void*);int Cyc_Core_fals
 void*);struct _tuple0{void*f1;void*f2;};void*Cyc_Core_fst(struct _tuple0*);void*
 Cyc_Core_snd(struct _tuple0*);struct _tuple1{void*f1;void*f2;void*f3;};void*Cyc_Core_third(
 struct _tuple1*);void*Cyc_Core_identity(void*);int Cyc_Core_intcmp(int,int);int Cyc_Core_charcmp(
-unsigned char,unsigned char);int Cyc_Core_ptrcmp(void*,void*);int Cyc_Core_nptrcmp(
-void*,void*);extern unsigned char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Failure[12];
-struct Cyc_Core_Failure_struct{unsigned char*tag;struct _tagged_arr f1;};extern
-unsigned char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Not_found[14];
-extern unsigned char Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{
-unsigned char*tag;struct _tagged_arr f1;};unsigned char Cyc_Core_Invalid_argument[
-21]="\000\000\000\000Invalid_argument";unsigned char Cyc_Core_SysError[13]="\000\000\000\000SysError";
-struct Cyc_Core_SysError_struct{unsigned char*tag;int f1;};unsigned char Cyc_Core_Failure[
-12]="\000\000\000\000Failure";unsigned char Cyc_Core_Impossible[15]="\000\000\000\000Impossible";
-unsigned char Cyc_Core_Not_found[14]="\000\000\000\000Not_found";unsigned char Cyc_Core_Unreachable[
-16]="\000\000\000\000Unreachable";struct Cyc_Core_Opt;struct Cyc_Core_Opt*Cyc_Core_opt_map(
-void*(*f)(void*),struct Cyc_Core_Opt*o){if(o == 0)return 0;return({struct Cyc_Core_Opt*
-_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->v=(void*)f((void*)o->v);_tmp0;});}struct
-_tagged_arr Cyc_Core_new_string(unsigned int i){return({unsigned int _tmp1=i;
-unsigned char*_tmp2=_cyccalloc_atomic(sizeof(unsigned char),_tmp1);_tag_arr(
-_tmp2,sizeof(unsigned char),_tmp1);});}struct _tagged_arr Cyc_Core_rnew_string(
-struct _RegionHandle*r,unsigned int i){return({unsigned int _tmp3=i;unsigned char*
-_tmp4=_region_calloc(r,sizeof(unsigned char),_tmp3);_tag_arr(_tmp4,sizeof(
-unsigned char),_tmp3);});}int Cyc_Core_true_f(void*x){return 1;}int Cyc_Core_false_f(
-void*x){return 0;}int Cyc_Core_intcmp(int a,int b){return a - b;}int Cyc_Core_charcmp(
-unsigned char a,unsigned char b){return(int)a - (int)b;}int Cyc_Core_nptrcmp(void*a,
-void*b){if(a == b)return 0;if(a > b)return 1;return - 1;}int Cyc_Core_ptrcmp(void*a,
-void*b){if(a == b)return 0;if(a > b)return 1;return - 1;}void*Cyc_Core_fst(struct
-_tuple0*pair){return(*pair).f1;}void*Cyc_Core_snd(struct _tuple0*pair){return(*
-pair).f2;}void*Cyc_Core_third(struct _tuple1*triple){return(*triple).f3;}void*Cyc_Core_identity(
-void*x){return x;}
+char,char);int Cyc_Core_ptrcmp(void*,void*);int Cyc_Core_nptrcmp(void*,void*);
+extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
+char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
+16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};char Cyc_Core_Invalid_argument[
+21]="\000\000\000\000Invalid_argument";char Cyc_Core_SysError[13]="\000\000\000\000SysError";
+struct Cyc_Core_SysError_struct{char*tag;int f1;};char Cyc_Core_Failure[12]="\000\000\000\000Failure";
+char Cyc_Core_Impossible[15]="\000\000\000\000Impossible";char Cyc_Core_Not_found[
+14]="\000\000\000\000Not_found";char Cyc_Core_Unreachable[16]="\000\000\000\000Unreachable";
+struct Cyc_Core_Opt;struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct
+Cyc_Core_Opt*o){if(o == 0)return 0;return({struct Cyc_Core_Opt*_tmp0=_cycalloc(
+sizeof(*_tmp0));_tmp0->v=(void*)f((void*)o->v);_tmp0;});}struct _tagged_arr Cyc_Core_new_string(
+unsigned int i){return({unsigned int _tmp1=i;char*_tmp2=_cyccalloc_atomic(sizeof(
+char),_tmp1);_tag_arr(_tmp2,sizeof(char),_tmp1);});}struct _tagged_arr Cyc_Core_rnew_string(
+struct _RegionHandle*r,unsigned int i){return({unsigned int _tmp3=i;char*_tmp4=
+_region_calloc(r,sizeof(char),_tmp3);_tag_arr(_tmp4,sizeof(char),_tmp3);});}int
+Cyc_Core_true_f(void*x){return 1;}int Cyc_Core_false_f(void*x){return 0;}int Cyc_Core_intcmp(
+int a,int b){return a - b;}int Cyc_Core_charcmp(char a,char b){return(int)a - (int)b;}
+int Cyc_Core_nptrcmp(void*a,void*b){if(a == b)return 0;if(a > b)return 1;return - 1;}
+int Cyc_Core_ptrcmp(void*a,void*b){if(a == b)return 0;if(a > b)return 1;return - 1;}
+void*Cyc_Core_fst(struct _tuple0*pair){return(*pair).f1;}void*Cyc_Core_snd(struct
+_tuple0*pair){return(*pair).f2;}void*Cyc_Core_third(struct _tuple1*triple){return(*
+triple).f3;}void*Cyc_Core_identity(void*x){return x;}

@@ -634,7 +634,7 @@ doc_t ntyp2doc(type_t t) {
     case B1:
       switch (sn) {
       case Signed:   sns = "signed "; break;
-      case Unsigned: break;
+      case Unsigned: sns = ""; break;
       }
       ts = "char";
       break;
@@ -671,7 +671,7 @@ doc_t ntyp2doc(type_t t) {
   case &SizeofType(t):
     s = cat(text("sizeof_t<"),typ2doc(t),text(">"));
     break;
-  case &TypedefType(n,ts,topt):
+  case &TypedefType(n,ts,kopt,topt):
     // NB: we could print out the expanded typedef by following the topt
     // pointer (when non-NULL).
     // TJ: NO, the way to do that is to expand typedefs in to_tms -- see
@@ -1331,8 +1331,10 @@ doc_t stmt2doc(stmt_t st) {
             line_doc(),
             text("}"));
     break;
-  case &Region_s(tv,vd,s1):
-    s = cat(text("region<"),
+  case &Region_s(tv,vd,resetable,s1):
+    s = cat(text("region"),
+            resetable ? text("") : text("[resetable]"),
+            text("<"),
             textptr(get_name(tv)),
             text(">" ),
             qvar2doc(vd->name),
@@ -1341,6 +1343,9 @@ doc_t stmt2doc(stmt_t st) {
             nest(2,stmt2doc(s1)),
             line_doc(),
             text("}"));
+    break;
+  case &ResetRegion_s(e):
+    s = cat(text("reset_region("),exp2doc(e),text(");"));
     break;
   }
   return s;
@@ -1579,9 +1584,14 @@ doc_t decl2doc(decl_t d) {
               text("};"));
     break;
   case &Typedef_d(td):
+    type_t t;
+    if (td->defn != NULL)
+      t = td->defn->v;
+    else 
+      t = new_evar(td->kind,NULL);
     s = cat(text("typedef "),
             tqtd2doc(Tqual(false,false,false),
-                   td->defn,
+                     t,
 		   new Opt(cat(typedef_name2doc(td->name),tvars2doc(td->tvs)))),
             text(";"));
 
@@ -1659,7 +1669,7 @@ bool exists_temp_tvar_in_effect(type_t t) {
 bool is_anon_aggrtype(type_t t) {
   switch (t) {
   case &AnonAggrType(_,_): return true;
-  case &TypedefType(_,_,&Opt(x)):
+  case &TypedefType(_,_,_,&Opt(x)):
     /* This won't loop if the types come from a .cyc file,
        because typedefs in Cyclone (or C) can't be recursive */
     return is_anon_aggrtype(x);
@@ -1755,7 +1765,7 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
     else
       return to_tms(tq,topt->v);
 
-  case &TypedefType(n,ts,topt):
+  case &TypedefType(n,ts,_,topt):
     if (topt == NULL || !expand_typedefs || is_anon_aggrtype(topt->v))
       return $(tq,t,NULL);
     else

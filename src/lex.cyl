@@ -134,6 +134,7 @@ static $(string_t,short) rw_array[] = {
   $("region", REGION),
   $("regions", REGIONS),
   $("register", REGISTER),
+  $("reset_region", RESET_REGION),
   $("restrict", RESTRICT),
   $("return", RETURN),
   $("rmalloc", RMALLOC),
@@ -568,7 +569,7 @@ rule token = parse
 | ['_']['A'-'Z''a'-'z''0'-'9''_']+
 { return process_id(lexbuf); }
 /* Qualified identifiers and type names (e.g., Foo::bar) */
-| (['A'-'Z''a'-'z''_']['A'-'Z''a'-'z''0'-'9''_']*':'':')+
+| (['A'-'Z''a'-'z']['A'-'Z''a'-'z''0'-'9''_']*':'':')+
   ['A'-'Z''a'-'z''_']['A'-'Z''a'-'z''0'-'9''_']*
       { return process_qual_id(lexbuf); }
 /* Type variables */

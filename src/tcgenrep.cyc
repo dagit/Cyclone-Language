@@ -1073,9 +1073,9 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     let types = List::map(get_second,fields);
     dict = buildRepTuple(te,dict,loc,varname,Static,type,types);
     break;
-  case &TypedefType(name,params,def):
+  case &TypedefType(name,params,td,def):
     if(def == NULL) 
-      Tcutil::impos("gen(): typedef definition must be present by now");
+      Tcutil::impos("gen(): can't gen for abstract typedef");
     // lookup rep for definition
     // throws away current "info"
     let &$(dict2,info2) = lookupRep(te,dict,loc,def->v);

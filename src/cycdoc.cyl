@@ -427,7 +427,7 @@ void dumpntyp(type_t t) {
   case &AnonAggrType(k,fs):
     dump_alpha(k==UnionA ? "union" : "struct");
     dump_lb(); dumpaggrfields(fs); dump_rb(); return;
-  case &TypedefType(n,ts,topt):  dumpqvar(n), dumptps(ts); return;
+  case &TypedefType(n,ts,_,topt):  dumpqvar(n), dumptps(ts); return;
   case &RgnHandleType(rgn): dumprgn(rgn); return;
   case HeapRgn: 
   case &AccessEff(_):
@@ -963,7 +963,12 @@ void dumpdecl(decl_t d, string_t comment) {
   case &Typedef_d(td):
     dump_begin();
     dump_alpha("typedef");
-    dumptqtd(Tqual(false,false,false),td->defn,dump_boldtypedefname,td);
+    type_t t;
+    if (td->defn != NULL)
+      t = td->defn->v;
+    else 
+      t = new_evar(td->kind,NULL);
+    dumptqtd(Tqual(false,false,false),t,dump_boldtypedefname,td);
     dump_symbol(";\n");
     dump_middle();
     dump_comment(comment);

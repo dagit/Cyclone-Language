@@ -619,7 +619,19 @@ static decl_t v_typ_to_typedef(seg_t loc, $(qvar_t,tqual_t,type_t,list_t<tvar_t,
   if (atts != NULL)
     err(aprintf("bad attribute %s within typedef", attribute2string(atts->hd)),
 	loc);
-  return new_decl(new Typedef_d(new Typedefdecl{.name=x, .tvs=tvs, .defn=typ}),
+  // if the "type" is an evar, then the typedef is abstract
+  opt_t<kind_t> kind;
+  opt_t<type_t> type;
+  switch (typ) {
+  case &Evar(kopt,_,_,_): 
+    type = NULL;
+    if (kopt == NULL) kind = new Opt(BoxKind);
+    else kind = kopt;
+    break;
+  default: kind = NULL; type = new Opt(typ); break;
+  }
+  return new_decl(new Typedef_d(new Typedefdecl{.name=x, .tvs=tvs, .kind=kind,
+                                                .defn=type}),
 		  loc);
 }
 
@@ -814,7 +826,7 @@ using Parse;
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION FORARRAY
 %token FILL CODEGEN CUT SPLICE
 %token MALLOC RMALLOC CALLOC RCALLOC
-%token REGION_T SIZEOF_T REGION RNEW REGIONS
+%token REGION_T SIZEOF_T REGION RNEW REGIONS RESET_REGION
 %token GEN
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
@@ -1225,6 +1237,8 @@ attribute:
 type_specifier:
   VOID      { $$=^$(type_spec(VoidType,LOC(@1,@1))); }
 | '_'       { $$=^$(type_spec(new_evar(NULL,NULL),LOC(@1,@1))); }
+| '_' COLON_COLON kind 
+  { $$=^$(type_spec(new_evar(new Opt($3),NULL),LOC(@1,@3))); }
 | CHAR      { $$=^$(type_spec(uchar_t,LOC(@1,@1))); }
 | SHORT     { $$=^$(new Short_spec(LOC(@1,@1))); }
 | INT       { $$=^$(type_spec(sint_t,LOC(@1,@1))); }
@@ -1240,7 +1254,7 @@ type_specifier:
 /* Cyc: added type variables and optional type parameters to typedef'd names */
 | type_var { $$=^$(type_spec($1, LOC(@1,@1))); }
 | qual_opt_typedef type_params_opt
-    { $$=^$(type_spec(new TypedefType($1,$2,NULL),LOC(@1,@2))); }
+    { $$=^$(type_spec(new TypedefType($1,$2,NULL,NULL),LOC(@1,@2))); }
 /* Cyc: everything below here is an addition */
 | '$' '(' parameter_list ')'
     { $$=^$(type_spec(new TupleType(List::map_c(get_tqual_typ,
@@ -1835,7 +1849,8 @@ statement:
     tvar_t tv = new Tvar(new $3,NULL,new Eq_kb(RgnKind));
     type_t t  = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $5),
-                                               new RgnHandleType(t),NULL),$6),
+                                               new RgnHandleType(t),NULL),
+                                false,$6),
                    LOC(@1,@6)));
   }
 | REGION IDENTIFIER statement
@@ -1845,9 +1860,38 @@ statement:
 			 new Eq_kb(RgnKind));
     type_t t = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $2),
-                                               new RgnHandleType(t),NULL),$3),
+                                               new RgnHandleType(t),NULL),
+                                false,$3),
                    LOC(@1,@3)));
   }
+| REGION '[' IDENTIFIER ']' '<' TYPE_VAR '>' IDENTIFIER statement
+  { if (zstrcmp($3,"resetable") != 0)
+      err("expecting [resetable]",LOC(@3,@3));
+    if (zstrcmp($6,"`H") == 0)
+      err("bad occurrence of heap region `H",LOC(@6,@6));
+    tvar_t tv = new Tvar(new $6,NULL,new Eq_kb(RgnKind));
+    type_t t  = new VarType(tv);
+    $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $8),
+                                               new RgnHandleType(t),NULL),
+                                true,$9),
+                   LOC(@1,@9)));
+  }
+| REGION '[' IDENTIFIER ']' IDENTIFIER statement
+  { if (zstrcmp($3,"resetable") != 0)
+      err("expecting `resetable'",LOC(@3,@3));
+    if (zstrcmp($5,"H") == 0)
+      err("bad occurrence of heap region `H",LOC(@5,@5));
+    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$5), NULL,
+			 new Eq_kb(RgnKind));
+    type_t t = new VarType(tv);
+    $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $5),
+                                               new RgnHandleType(t),NULL),
+                                true,$6),
+                   LOC(@1,@6)));
+  }
+/* Cyc: reset_region(e) statement */
+| RESET_REGION '(' expression ')' ';'
+  { $$=^$(new_stmt(new ResetRegion_s($3),LOC(@1,@5))); }
 /* Cyc: cut and splice */
 | CUT statement         { $$=^$(new_stmt(new Cut_s($2),LOC(@1,@2))); }
 | SPLICE statement      { $$=^$(new_stmt(new Splice_s($2),LOC(@1,@2))); }

@@ -60,8 +60,8 @@ int root_cmp(root_t r1, root_t r2) {
   if(((int)r1) == ((int)r2))
     return 0;
   int p1, p2;
-  switch(r1) {case &VarRoot(x): p1=(int)x; break; case &MallocPt(x): p1=(int)x;}
-  switch(r2) {case &VarRoot(x): p2=(int)x; break; case &MallocPt(x): p2=(int)x;}
+  switch(r1) {case &VarRoot(x): p1=(int)x; break; case &MallocPt(x,_): p1=(int)x;}
+  switch(r2) {case &VarRoot(x): p2=(int)x; break; case &MallocPt(x,_): p2=(int)x;}
   return p1 - p2;
 }
 int place_cmp(place_t p1, place_t p2) {
@@ -78,7 +78,7 @@ static mstringptr_t place2string(place_t p) {
   list_t<mstringptr_t> sl = NULL;
   switch(p->root) {
   case &VarRoot(vd): sl = new List(new aprintf("%s",*(*vd->name)[1]),sl); break;
-  case &MallocPt(e): sl = new List(new aprintf("mpt%d",(int)e),sl);
+  case &MallocPt(e,_): sl = new List(new aprintf("mpt%d",(int)e),sl);
   }
   for(_ fields = p->fields; fields != NULL; fields = fields->tl)
     sl = new List(new aprintf("%s", *fields->hd), sl);
@@ -268,7 +268,9 @@ absRval_t lookup_place(flowdict_t d, place_t place) {
   let ans = Dict::lookup(d,root);
   for(; fields != NULL; fields = fields->tl)
     switch($(ans,fields->hd)) {
-    case $(&Aggregate(d2), fname): ans = Dict::lookup(d2,fname); break;
+    case $(&Aggregate(d2), fname): 
+      ans = Dict::lookup(d2,fname); 
+      break;
     default: throw new Core::Impossible("bad lookup_place");
     }
   return ans;
@@ -526,7 +528,7 @@ flow_t after_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
 		  place_set_t chg1, place_set_t chg2) {
   static tunion Raw_exp.Const_e dummy_rawexp = Const_e(Null_c);
   static struct Exp dummy_exp = Exp(NULL,&dummy_rawexp,NULL,EmptyAnnot);
-  static tunion Root.MallocPt dummy_root = MallocPt(&dummy_exp);
+  static tunion Root.MallocPt dummy_root = MallocPt(&dummy_exp,VoidType);
 
   if(f1 == f2) return f1;
   switch($(f1,f2)) {
@@ -767,5 +769,111 @@ void print_relns(relns_t r) {
   for (; r != NULL; r = r->tl) {
     print_reln(r->hd);
     if (r->tl != NULL) fprintf(stderr,",");
+  }
+}
+
+// returns true when t contains the region rgn with a few exceptions:
+//  * doesn't count rgn in function types
+//  * doesn't count rgn in region_t types (i.e., handles)
+// We don't care about functions -- they're only callable if their 
+// effects are covered by the capability and in the absence of closures,
+// can't have any dangling pointers into rgn.  Region handles aren't
+// "killed" when we reset a region and in fact we need them to ensure
+// that we can allocate stuff in the region.  
+static bool contains_region(tvar_t rgn, type_t t) {
+  switch (Tcutil::compress(t)) {
+  case VoidType:         fallthru; // these cases can't contain rgn
+  case &IntType(_,_):    fallthru;
+  case FloatType:        fallthru;
+  case &DoubleType(_):   fallthru;
+  case &EnumType(_,_):   fallthru;
+  case &AnonEnumType(_): fallthru;
+  case &SizeofType(_):   fallthru;
+  case HeapRgn:          fallthru;
+  case &Evar(_,_,_,_):   return false; // because of compress above
+  case &VarType(tv): return tvar_cmp(tv,rgn) == 0;
+    // for parameterized types, we just look to see if rgn shows up 
+    // in the parameters -- this is overly aggressive since the regions
+    // might not actually get used or may only get used in a handle or
+    // in a function.  But it beats substituting and descending.
+    //
+    // Note also that we don't descend into the definitions of [x]tunions,
+    // structs, typedefs, etc. because they must be closed w.r.t. all regions
+    // except the heap.  
+  case &TunionType(TunionInfo{_,targs,r}): 
+    if (contains_region(rgn,r)) return true;
+    fallthru(targs);
+  case &TypedefType(_,targs,_,_):    fallthru(targs);
+  case &AggrType(AggrInfo{_,targs}): fallthru(targs);
+  case &TunionFieldType(TunionFieldInfo{_,targs}): fallthru(targs);
+  case &JoinEff(targs): 
+    return List::exists_c(contains_region,rgn,targs);
+  case &PointerType(PtrInfo{t2,r,_,_,_}):
+    return contains_region(rgn,r) || contains_region(rgn,t2);
+  case &FnType(_): return false;
+  case &TupleType(tqs):
+    for (; tqs != NULL; tqs = tqs->tl)
+      if (contains_region(rgn,(*tqs->hd)[1])) return true;
+    return false;
+  case &AnonAggrType(_,fds):
+    for (; fds != NULL; fds = fds->tl) 
+      if (contains_region(rgn,fds->hd->type)) return true;
+    return false;
+  case &ArrayType(t2,_,_): fallthru(t2);
+  case &AccessEff(t2):     fallthru(t2);
+  case &RgnsEff(t2):       return contains_region(rgn,t2);
+  // careful: we don't want to kill any region handles to the region in
+  // question.
+  case &RgnHandleType(t2): return false;
+  }
+}
+
+// used by kill_flowdict_region below
+static void kill_root($(flowdict_t,tvar_t)@ env, root_t root, absRval_t rval) {
+  let &$(*fd,rgn) = env;
+  switch (root) {
+  case &VarRoot(vd): 
+    // if the variable's type contains the region
+    if (contains_region(rgn,vd->type))
+      // set it to uninitialized in the new dictionary
+      rval = typ_to_absrval(vd->type, unknown_none);
+    *fd = Dict::insert(*fd,root,rval);
+    break;
+  case &MallocPt(_,t): 
+    // if the result of the malloc's type does not contain the region
+    if (!contains_region(rgn,t))
+      // insert the mapping into the new dictionary
+      *fd = Dict::insert(*fd,root,rval);
+    break;
+  }
+}
+
+// "kill" all roots in the flowdict that have rgn in their type
+static flowdict_t kill_flowdict_region(flowdict_t fd, type_t rgn) {
+  tvar_t rgn_tvar;
+  switch (Tcutil::compress(rgn)) {
+  case &VarType(tv): rgn_tvar = tv; break;
+  default: throw new Core::Impossible("kill_flowdict_region"); break;
+  }
+  $(flowdict_t,tvar_t) env = $(Dict::empty(root_cmp),rgn_tvar);
+  Dict::iter_c(kill_root,&env,fd);
+  return env[0];
+}
+
+// "kill" all relations in the flow analysis that involve the given region
+static relns_t kill_relns_region(relns_t relns, type_t rgn) {
+  // FIX: too conservative
+  return NULL;
+}
+
+// the region rgn has been reset -- produce an outflow where the 
+// roots involving rgn are now uninitialized.
+flow_t kill_flow_region(flow_t f, type_t rgn) {
+  switch (f) {
+  case BottomFL: return f;
+  case &ReachableFL(fd,r): 
+    let fd2 = kill_flowdict_region(fd,rgn);
+    let r2 = kill_relns_region(r,rgn);
+    return new ReachableFL(fd2,r2);
   }
 }

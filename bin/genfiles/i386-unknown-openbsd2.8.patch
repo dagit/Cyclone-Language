@@ -1,8 +1,8 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c i386-unknown-openbsd2.8/lib/cycstubs.c
-*** i686-unknown-linux/lib/cycstubs.c	Mon Dec 31 15:21:34 2001
---- i386-unknown-openbsd2.8/lib/cycstubs.c	Sat Jan  5 18:28:47 2002
+*** i686-unknown-linux/lib/cycstubs.c	Sun Jan  6 17:14:04 2002
+--- i386-unknown-openbsd2.8/lib/cycstubs.c	Sun Jan  6 17:15:50 2002
 ***************
-*** 287,299 ****
+*** 284,294 ****
   _check_unknown_subscript(ms,sizeof(unsigned int),0)));else{return
   open_without_mode(string_to_Cstring(s),i);}}struct Cyc_Std_timeval{int tv_sec;int
   tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;int tz_dsttime;};struct Cyc_Std_itimerval{
@@ -10,110 +10,86 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c i386-unknown-openbsd
 ! unsigned int __val[64];}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;
 ! struct Cyc_Std_timespec{int tv_sec;int tv_nsec;};struct Cyc_Std_timeval;struct Cyc_Std___fd_set{
 ! int __fds_bits[32];};struct Cyc_Std_sockaddr_in;struct Cyc_Std_sockaddr{
-! unsigned short sa_family;unsigned char sa_data[14];};struct Cyc_Std_SA_sockaddr_in_struct{
-! int tag;struct Cyc_Std_sockaddr_in*f1;};struct Cyc_Std_SA_sockaddr_struct{int tag;
-! struct Cyc_Std_sockaddr*f1;};struct Cyc_Std_SA_socklenptr_struct{int tag;
+! unsigned short sa_family;char sa_data[14];};struct Cyc_Std_SA_sockaddr_in_struct{
+  int tag;struct Cyc_Std_sockaddr_in*f1;};struct Cyc_Std_SA_sockaddr_struct{int tag;
+  struct Cyc_Std_sockaddr*f1;};struct Cyc_Std_SA_socklenptr_struct{int tag;
   unsigned int*f1;};struct Cyc_Std_SA_socklen_struct{int tag;unsigned int f1;};int Cyc_Std_accept(
-  int fd,struct _tagged_arr);int Cyc_Std_bind(int fd,struct _tagged_arr);int Cyc_Std_connect(
-  int fd,struct _tagged_arr);int Cyc_Std_getpeername(int fd,struct _tagged_arr);int Cyc_Std_getsockname(
---- 287,296 ----
+--- 284,291 ----
   _check_unknown_subscript(ms,sizeof(unsigned int),0)));else{return
   open_without_mode(string_to_Cstring(s),i);}}struct Cyc_Std_timeval{int tv_sec;int
   tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;int tz_dsttime;};struct Cyc_Std_itimerval{
 ! struct Cyc_Std_timeval it_interval;struct Cyc_Std_timeval it_value;};struct Cyc_Std_sockaddr_in;
-! struct Cyc_Std_sockaddr{unsigned short sa_family;unsigned char sa_data[14];};struct
-! Cyc_Std_SA_sockaddr_in_struct{int tag;struct Cyc_Std_sockaddr_in*f1;};struct Cyc_Std_SA_sockaddr_struct{
-! int tag;struct Cyc_Std_sockaddr*f1;};struct Cyc_Std_SA_socklenptr_struct{int tag;
+! struct Cyc_Std_sockaddr{unsigned short sa_family;char sa_data[14];};struct Cyc_Std_SA_sockaddr_in_struct{
+  int tag;struct Cyc_Std_sockaddr_in*f1;};struct Cyc_Std_SA_sockaddr_struct{int tag;
+  struct Cyc_Std_sockaddr*f1;};struct Cyc_Std_SA_socklenptr_struct{int tag;
   unsigned int*f1;};struct Cyc_Std_SA_socklen_struct{int tag;unsigned int f1;};int Cyc_Std_accept(
-  int fd,struct _tagged_arr);int Cyc_Std_bind(int fd,struct _tagged_arr);int Cyc_Std_connect(
-  int fd,struct _tagged_arr);int Cyc_Std_getpeername(int fd,struct _tagged_arr);int Cyc_Std_getsockname(
 ***************
-*** 360,385 ****
-  struct _tagged_arr s,unsigned int maxsize,struct _tagged_arr fmt,const struct Cyc_Std_tm*
-  t);struct _tagged_arr Cyc_Std_asctime_r(const struct Cyc_Std_tm*,struct _tagged_arr);
-  struct _tagged_arr Cyc_Std_ctime_r(const int*,struct _tagged_arr);extern int timezone;
-! struct Cyc_Std_stat_t{unsigned long long st_dev;unsigned short __pad1;unsigned int
-! st_ino;unsigned int st_mode;unsigned int st_nlink;unsigned int st_uid;unsigned int
-! st_gid;unsigned long long st_rdev;unsigned short __pad2;int st_size;int st_blksize;
-! int st_blocks;int st_atime;unsigned int __unused1;int st_mtime;unsigned int __unused2;
-! int st_ctime;unsigned int __unused3;unsigned int __unused4;unsigned int __unused5;};
-! int Cyc_Std_stat(struct _tagged_arr filename,struct Cyc_Std_stat_t*buf);int Cyc_Std_lstat(
-! struct _tagged_arr filename,struct Cyc_Std_stat_t*buf);int Cyc_Std_mkdir(struct
-! _tagged_arr pathname,unsigned int mode);int Cyc_Std_chmod(struct _tagged_arr path,
-! unsigned int mode);int stat(unsigned char*filename,struct Cyc_Std_stat_t*buf);int
-! lstat(unsigned char*filename,struct Cyc_Std_stat_t*buf);int mkdir(unsigned char*
-! pathname,unsigned int mode);int chmod(unsigned char*pathname,unsigned int mode);int
-! Cyc_Std_stat(struct _tagged_arr filename,struct Cyc_Std_stat_t*buf){return stat(
-! string_to_Cstring(filename),buf);}int Cyc_Std_lstat(struct _tagged_arr filename,
-! struct Cyc_Std_stat_t*buf){return lstat(string_to_Cstring(filename),buf);}int Cyc_Std_mkdir(
-! struct _tagged_arr pathname,unsigned int mode){return mkdir(string_to_Cstring(
-! pathname),mode);}int Cyc_Std_chmod(struct _tagged_arr pathname,unsigned int mode){
-! return chmod(string_to_Cstring(pathname),mode);}struct Cyc_Cstdio___abstractFILE;
-! struct Cyc_Std___cycFILE;struct Cyc_Std___cycFILE*Cyc_Std_fromCfile(struct Cyc_Cstdio___abstractFILE*
-! cf);int Cyc_Std_remove(struct _tagged_arr);int Cyc_Std_rename(struct _tagged_arr,
-! struct _tagged_arr);int Cyc_Std_fclose(struct Cyc_Std___cycFILE*);int Cyc_Std_fflush(
-  struct Cyc_Std___cycFILE*);struct Cyc_Std___cycFILE*Cyc_Std_fopen(struct
-  _tagged_arr __filename,struct _tagged_arr __modes);struct Cyc_Std___cycFILE*Cyc_Std_freopen(
-  struct _tagged_arr,struct _tagged_arr,struct Cyc_Std___cycFILE*);void Cyc_Std_setbuf(
---- 357,381 ----
-  struct _tagged_arr s,unsigned int maxsize,struct _tagged_arr fmt,const struct Cyc_Std_tm*
-  t);struct _tagged_arr Cyc_Std_asctime_r(const struct Cyc_Std_tm*,struct _tagged_arr);
-  struct _tagged_arr Cyc_Std_ctime_r(const int*,struct _tagged_arr);extern int timezone;
-! struct Cyc_Std_stat_t{unsigned long long st_dev;unsigned int st_ino;unsigned int
-! st_mode;unsigned int st_nlink;unsigned int st_uid;unsigned int st_gid;
-! unsigned long long st_rdev;int st_size;unsigned int st_blksize;unsigned int
-! st_blocks;int st_atime;int st_mtime;int st_ctime;};int Cyc_Std_stat(struct
+*** 355,371 ****
+  _tagged_arr fmt,const struct Cyc_Std_tm*t);struct _tagged_arr Cyc_Std_asctime_r(const
+  struct Cyc_Std_tm*,struct _tagged_arr);struct _tagged_arr Cyc_Std_ctime_r(const int*,
+  struct _tagged_arr);extern int timezone;struct Cyc_Std_stat_t{unsigned long long
+! st_dev;unsigned short __pad1;unsigned int st_ino;unsigned int st_mode;unsigned int
+! st_nlink;unsigned int st_uid;unsigned int st_gid;unsigned long long st_rdev;
+! unsigned short __pad2;int st_size;int st_blksize;int st_blocks;int st_atime;
+! unsigned int __unused1;int st_mtime;unsigned int __unused2;int st_ctime;unsigned int
+! __unused3;unsigned int __unused4;unsigned int __unused5;};int Cyc_Std_stat(struct
 ! _tagged_arr filename,struct Cyc_Std_stat_t*buf);int Cyc_Std_lstat(struct _tagged_arr
 ! filename,struct Cyc_Std_stat_t*buf);int Cyc_Std_mkdir(struct _tagged_arr pathname,
 ! unsigned int mode);int Cyc_Std_chmod(struct _tagged_arr path,unsigned int mode);int
-! stat(unsigned char*filename,struct Cyc_Std_stat_t*buf);int lstat(unsigned char*
-! filename,struct Cyc_Std_stat_t*buf);int mkdir(unsigned char*pathname,unsigned int
-! mode);int chmod(unsigned char*pathname,unsigned int mode);int Cyc_Std_stat(struct
-! _tagged_arr filename,struct Cyc_Std_stat_t*buf){return stat(string_to_Cstring(
-! filename),buf);}int Cyc_Std_lstat(struct _tagged_arr filename,struct Cyc_Std_stat_t*
-! buf){return lstat(string_to_Cstring(filename),buf);}int Cyc_Std_mkdir(struct
-! _tagged_arr pathname,unsigned int mode){return mkdir(string_to_Cstring(pathname),
-! mode);}int Cyc_Std_chmod(struct _tagged_arr pathname,unsigned int mode){return chmod(
-! string_to_Cstring(pathname),mode);}struct Cyc_Cstdio___abstractFILE;struct Cyc_Std___cycFILE;
-! struct Cyc_Std___cycFILE*Cyc_Std_fromCfile(struct Cyc_Cstdio___abstractFILE*cf);
-! int Cyc_Std_remove(struct _tagged_arr);int Cyc_Std_rename(struct _tagged_arr,struct
-! _tagged_arr);int Cyc_Std_fclose(struct Cyc_Std___cycFILE*);int Cyc_Std_fflush(
-  struct Cyc_Std___cycFILE*);struct Cyc_Std___cycFILE*Cyc_Std_fopen(struct
-  _tagged_arr __filename,struct _tagged_arr __modes);struct Cyc_Std___cycFILE*Cyc_Std_freopen(
-  struct _tagged_arr,struct _tagged_arr,struct Cyc_Std___cycFILE*);void Cyc_Std_setbuf(
+! stat(char*filename,struct Cyc_Std_stat_t*buf);int lstat(char*filename,struct Cyc_Std_stat_t*
+! buf);int mkdir(char*pathname,unsigned int mode);int chmod(char*pathname,
+! unsigned int mode);int Cyc_Std_stat(struct _tagged_arr filename,struct Cyc_Std_stat_t*
+  buf){return stat(string_to_Cstring(filename),buf);}int Cyc_Std_lstat(struct
+  _tagged_arr filename,struct Cyc_Std_stat_t*buf){return lstat(string_to_Cstring(
+  filename),buf);}int Cyc_Std_mkdir(struct _tagged_arr pathname,unsigned int mode){
+--- 352,366 ----
+  _tagged_arr fmt,const struct Cyc_Std_tm*t);struct _tagged_arr Cyc_Std_asctime_r(const
+  struct Cyc_Std_tm*,struct _tagged_arr);struct _tagged_arr Cyc_Std_ctime_r(const int*,
+  struct _tagged_arr);extern int timezone;struct Cyc_Std_stat_t{unsigned long long
+! st_dev;unsigned int st_ino;unsigned int st_mode;unsigned int st_nlink;unsigned int
+! st_uid;unsigned int st_gid;unsigned long long st_rdev;int st_size;unsigned int
+! st_blksize;unsigned int st_blocks;int st_atime;int st_mtime;int st_ctime;};int Cyc_Std_stat(
+! struct _tagged_arr filename,struct Cyc_Std_stat_t*buf);int Cyc_Std_lstat(struct
+! _tagged_arr filename,struct Cyc_Std_stat_t*buf);int Cyc_Std_mkdir(struct _tagged_arr
+! pathname,unsigned int mode);int Cyc_Std_chmod(struct _tagged_arr path,unsigned int
+! mode);int stat(char*filename,struct Cyc_Std_stat_t*buf);int lstat(char*filename,
+! struct Cyc_Std_stat_t*buf);int mkdir(char*pathname,unsigned int mode);int chmod(char*
+! pathname,unsigned int mode);int Cyc_Std_stat(struct _tagged_arr filename,struct Cyc_Std_stat_t*
+  buf){return stat(string_to_Cstring(filename),buf);}int Cyc_Std_lstat(struct
+  _tagged_arr filename,struct Cyc_Std_stat_t*buf){return lstat(string_to_Cstring(
+  filename),buf);}int Cyc_Std_mkdir(struct _tagged_arr pathname,unsigned int mode){
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-openbsd2.8/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Mon Dec 31 15:21:35 2001
---- i386-unknown-openbsd2.8/lib/execinfo.c	Sat Jan  5 18:28:47 2002
+*** i686-unknown-linux/lib/execinfo.c	Sun Jan  6 17:14:06 2002
+--- i386-unknown-openbsd2.8/lib/execinfo.c	Sun Jan  6 17:15:50 2002
 ***************
-*** 257,336 ****
-  extern unsigned char Cyc_Core_Not_found[14];extern unsigned char Cyc_Core_Unreachable[
-  16];struct Cyc_Core_Unreachable_struct{unsigned char*tag;struct _tagged_arr f1;};
-  int Cyc_Execinfo_backtrace(struct _tagged_arr,int);int Cyc_Execinfo_bt();struct Cyc_Cstdio___abstractFILE;
+*** 256,333 ****
+  char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
+  16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};int Cyc_Execinfo_backtrace(
+  struct _tagged_arr,int);int Cyc_Execinfo_bt();struct Cyc_Cstdio___abstractFILE;
 ! struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*Cyc_Std_stdout;int Cyc_Std_fclose(
 ! struct Cyc_Std___cycFILE*);int Cyc_Std_fflush(struct Cyc_Std___cycFILE*);int Cyc_Std_getc(
 ! struct Cyc_Std___cycFILE*__stream);int Cyc_Std_putc(int __c,struct Cyc_Std___cycFILE*
 ! __stream);struct Cyc_Std___cycFILE*Cyc_Std_fdopen(int __fd,struct _tagged_arr
-! __modes);extern unsigned char Cyc_Std_FileCloseError[19];extern unsigned char Cyc_Std_FileOpenError[
-! 18];struct Cyc_Std_FileOpenError_struct{unsigned char*tag;struct _tagged_arr f1;};
-! struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
-! int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct
-! Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int
-! tag;unsigned int*f1;};int Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,struct
-! _tagged_arr fmt,struct _tagged_arr);int Cyc_Std_printf(struct _tagged_arr fmt,struct
-! _tagged_arr);struct _tagged_arr Cyc_Std_aprintf(struct _tagged_arr fmt,struct
-! _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{
-! int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
-! Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
-! int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
-! };struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_Std_timeval{int
-! tv_sec;int tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;int tz_dsttime;};
-! struct Cyc_Std_itimerval{struct Cyc_Std_timeval it_interval;struct Cyc_Std_timeval
+! __modes);extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[18];
+! struct Cyc_Std_FileOpenError_struct{char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{
+  int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;}
+  ;struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{
+! int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};int Cyc_Std_fprintf(
+! struct Cyc_Std___cycFILE*,struct _tagged_arr fmt,struct _tagged_arr);int Cyc_Std_printf(
+! struct _tagged_arr fmt,struct _tagged_arr);struct _tagged_arr Cyc_Std_aprintf(struct
+! _tagged_arr fmt,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{int tag;short*
+! f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
+! int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
+! Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
+! int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_Std_timeval{
+! int tv_sec;int tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;int tz_dsttime;};
+  struct Cyc_Std_itimerval{struct Cyc_Std_timeval it_interval;struct Cyc_Std_timeval
 ! it_value;};typedef struct{unsigned int __val[64];}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t
 ! Cyc_Std_sigset_t;struct Cyc_Std_timespec{int tv_sec;int tv_nsec;};struct Cyc_Std_timeval;
 ! struct Cyc_Std___fd_set{int __fds_bits[32];};struct Cyc_Std_rlimit{unsigned int
-  rlim_cur;unsigned int rlim_max;};struct Cyc_Std_rusage{struct Cyc_Std_timeval
-  ru_utime;struct Cyc_Std_timeval ru_stime;int ru_maxrss;int ru_ixrss;int ru_idrss;int
-  ru_isrss;int ru_minflt;int ru_majflt;int ru_nswap;int ru_inblock;int ru_oublock;int
+! rlim_cur;unsigned int rlim_max;};struct Cyc_Std_rusage{struct Cyc_Std_timeval
+! ru_utime;struct Cyc_Std_timeval ru_stime;int ru_maxrss;int ru_ixrss;int ru_idrss;int
+! ru_isrss;int ru_minflt;int ru_majflt;int ru_nswap;int ru_inblock;int ru_oublock;int
 ! ru_msgsnd;int ru_msgrcv;int ru_nsignals;int ru_nvcsw;int ru_nivcsw;};int waitpid(int
 ! pid,int*status,int options);void(*Cyc_Std_signal(int sig,void(*func)(int)))(int);
 ! int kill(int,int);struct Cyc_Std_option{struct _tagged_arr name;int has_arg;int*flag;
@@ -134,147 +110,105 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-openbsd
 ! _tagged_arr array,int size){if(size > _get_arr_size(array,sizeof(int)))(int)_throw((
 ! void*)({struct Cyc_Core_Failure_struct*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0[0]=({
 ! struct Cyc_Core_Failure_struct _tmp1;_tmp1.tag=Cyc_Core_Failure;_tmp1.f1=_tag_arr("backtrace: size > array.size",
-! sizeof(unsigned char),29);_tmp1;});_tmp0;}));return backtrace((int*)_check_null(
-! _untag_arr(array,sizeof(int),1)),size);}int Cyc_Execinfo_bt(){int bt[20];{
-! unsigned int _tmpA=20;unsigned int i;for(i=0;i < _tmpA;i ++){bt[i]=0;}}{int tochild[2]={
-! 0,0};int fromchild[2]={0,0};int pid;int self_pid;if(pipe(tochild)?1: pipe(fromchild))
-! return 1;self_pid=getpid();if((pid=fork())== 0){if(dup2(tochild[0],0)== - 1?1: dup2(
+! sizeof(char),29);_tmp1;});_tmp0;}));return backtrace((int*)_check_null(_untag_arr(
+! array,sizeof(int),1)),size);}int Cyc_Execinfo_bt(){int bt[20];{unsigned int _tmpA=
+! 20;unsigned int i;for(i=0;i < _tmpA;i ++){bt[i]=0;}}{int tochild[2]={0,0};int
+! fromchild[2]={0,0};int pid;int self_pid;if(pipe(tochild)?1: pipe(fromchild))return 1;
+! self_pid=getpid();if((pid=fork())== 0){if(dup2(tochild[0],0)== - 1?1: dup2(
 ! fromchild[1],1)== - 1)return 1;({struct _tagged_arr _tmp2[4];_tmp2[3]=(struct
 ! _tagged_arr)_tag_arr(0,0,0);_tmp2[2]=(struct _tagged_arr)({struct Cyc_Std_Int_pa_struct
 ! _tmp4;_tmp4.tag=1;_tmp4.f1=(int)((unsigned int)self_pid);{void*_tmp3[1]={& _tmp4};
-! Cyc_Std_aprintf(_tag_arr("/proc/%d/exe",sizeof(unsigned char),13),_tag_arr(_tmp3,
-! sizeof(void*),1));}});_tmp2[1]=_tag_arr("-e",sizeof(unsigned char),3);_tmp2[0]=
-! _tag_arr("--functions",sizeof(unsigned char),12);Cyc_Std_execlp(_tag_arr("addr2line",
-! sizeof(unsigned char),10),_tag_arr("addr2line",sizeof(unsigned char),10),
-! _tag_arr(_tmp2,sizeof(struct _tagged_arr),4));});return 1;}else{if(pid < 0){close(
-! tochild[0]);close(tochild[1]);close(fromchild[0]);close(fromchild[1]);return 1;}}{
-! struct Cyc_Std___cycFILE*w=({struct Cyc_Std___cycFILE*f=Cyc_Std_fdopen(tochild[1],
-! _tag_arr("w",sizeof(unsigned char),2));if(!((unsigned int)f))return 1;(struct Cyc_Std___cycFILE*)
-! _check_null(f);});struct Cyc_Std___cycFILE*r=({struct Cyc_Std___cycFILE*f=Cyc_Std_fdopen(
-! fromchild[0],_tag_arr("r",sizeof(unsigned char),2));if(!((unsigned int)f)){Cyc_Std_fclose(
-! w);return 1;}(struct Cyc_Std___cycFILE*)_check_null(f);});int n=Cyc_Execinfo_backtrace(
-! _tag_arr(bt,sizeof(int),20),(int)20);{int c=0;for(0;c < n;c ++){({struct Cyc_Std_Int_pa_struct
-! _tmp6;_tmp6.tag=1;_tmp6.f1=(unsigned int)bt[c];{void*_tmp5[1]={& _tmp6};Cyc_Std_fprintf(
-! w,_tag_arr("%#x\n",sizeof(unsigned char),5),_tag_arr(_tmp5,sizeof(void*),1));}});}}
-! Cyc_Std_fflush((struct Cyc_Std___cycFILE*)w);({void*_tmp7[0]={};Cyc_Std_printf(
-! _tag_arr("Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n",
-! sizeof(unsigned char),94),_tag_arr(_tmp7,sizeof(void*),0));});{int c=0;for(0;c < n;
-! c ++){int d;int pos=0;({void*_tmp8[0]={};Cyc_Std_printf(_tag_arr("  ",sizeof(
-! unsigned char),3),_tag_arr(_tmp8,sizeof(void*),0));});while((d=Cyc_Std_getc(r))
-! != '\n'){(Cyc_Std_putc(d,Cyc_Std_stdout),pos ++);}while(pos ++ < 16){Cyc_Std_putc((
-! int)' ',Cyc_Std_stdout);}({void*_tmp9[0]={};Cyc_Std_printf(_tag_arr("  ",sizeof(
-! unsigned char),3),_tag_arr(_tmp9,sizeof(void*),0));});while((d=Cyc_Std_getc(r))
-! != '\n'){Cyc_Std_putc(d,Cyc_Std_stdout);}Cyc_Std_putc((int)'\n',Cyc_Std_stdout);}}
-! Cyc_Std_fclose(r);Cyc_Std_fclose(w);kill(pid,15);waitpid(pid,0,0);return 0;}}}
---- 257,281 ----
-  extern unsigned char Cyc_Core_Not_found[14];extern unsigned char Cyc_Core_Unreachable[
-  16];struct Cyc_Core_Unreachable_struct{unsigned char*tag;struct _tagged_arr f1;};
-  int Cyc_Execinfo_backtrace(struct _tagged_arr,int);int Cyc_Execinfo_bt();struct Cyc_Cstdio___abstractFILE;
-! struct Cyc_Std___cycFILE;extern unsigned char Cyc_Std_FileCloseError[19];extern
-! unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
-! unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;
-! struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct
-! Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int
-! tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};struct Cyc_Std_ShortPtr_sa_struct{
-! int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};
-! struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{
-! int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{int tag;struct
-! _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{
-! int tag;float*f1;};struct Cyc_Std_timeval{int tv_sec;int tv_usec;};struct Cyc_Std_timezone{
-! int tz_minuteswest;int tz_dsttime;};struct Cyc_Std_itimerval{struct Cyc_Std_timeval
-! it_interval;struct Cyc_Std_timeval it_value;};struct Cyc_Std_rlimit{unsigned int
-  rlim_cur;unsigned int rlim_max;};struct Cyc_Std_rusage{struct Cyc_Std_timeval
-  ru_utime;struct Cyc_Std_timeval ru_stime;int ru_maxrss;int ru_ixrss;int ru_idrss;int
-  ru_isrss;int ru_minflt;int ru_majflt;int ru_nswap;int ru_inblock;int ru_oublock;int
-! ru_msgsnd;int ru_msgrcv;int ru_nsignals;int ru_nvcsw;int ru_nivcsw;};void(*Cyc_Std_signal(
-! int sig,void(*func)(int)))(int);int Cyc_Execinfo_backtrace(struct _tagged_arr array,
-! int size){(int)_throw((void*)({struct Cyc_Core_Failure_struct*_tmp0=_cycalloc(
-! sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Failure_struct _tmp1;_tmp1.tag=Cyc_Core_Failure;
-! _tmp1.f1=_tag_arr("backtrace: unsupported except under Linux",sizeof(
-! unsigned char),42);_tmp1;});_tmp0;}));return 0;}int Cyc_Execinfo_bt(){return 1;}
-diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-openbsd2.8/lib/getopt.c
-*** i686-unknown-linux/lib/getopt.c	Mon Dec 31 15:21:35 2001
---- i386-unknown-openbsd2.8/lib/getopt.c	Sat Jan  5 18:28:47 2002
-***************
-*** 274,307 ****
-  struct _tagged_arr Cyc_Std_getenv(struct _tagged_arr);struct Cyc_Std_timeval{int
-  tv_sec;int tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;int tz_dsttime;};
+! Cyc_Std_aprintf(_tag_arr("/proc/%d/exe",sizeof(char),13),_tag_arr(_tmp3,sizeof(
+! void*),1));}});_tmp2[1]=_tag_arr("-e",sizeof(char),3);_tmp2[0]=_tag_arr("--functions",
+! sizeof(char),12);Cyc_Std_execlp(_tag_arr("addr2line",sizeof(char),10),_tag_arr("addr2line",
+! sizeof(char),10),_tag_arr(_tmp2,sizeof(struct _tagged_arr),4));});return 1;}else{
+! if(pid < 0){close(tochild[0]);close(tochild[1]);close(fromchild[0]);close(
+! fromchild[1]);return 1;}}{struct Cyc_Std___cycFILE*w=({struct Cyc_Std___cycFILE*f=
+! Cyc_Std_fdopen(tochild[1],_tag_arr("w",sizeof(char),2));if(!((unsigned int)f))
+! return 1;(struct Cyc_Std___cycFILE*)_check_null(f);});struct Cyc_Std___cycFILE*r=({
+! struct Cyc_Std___cycFILE*f=Cyc_Std_fdopen(fromchild[0],_tag_arr("r",sizeof(char),
+! 2));if(!((unsigned int)f)){Cyc_Std_fclose(w);return 1;}(struct Cyc_Std___cycFILE*)
+! _check_null(f);});int n=Cyc_Execinfo_backtrace(_tag_arr(bt,sizeof(int),20),(int)
+! 20);{int c=0;for(0;c < n;c ++){({struct Cyc_Std_Int_pa_struct _tmp6;_tmp6.tag=1;_tmp6.f1=(
+! unsigned int)bt[c];{void*_tmp5[1]={& _tmp6};Cyc_Std_fprintf(w,_tag_arr("%#x\n",
+! sizeof(char),5),_tag_arr(_tmp5,sizeof(void*),1));}});}}Cyc_Std_fflush((struct Cyc_Std___cycFILE*)
+! w);({void*_tmp7[0]={};Cyc_Std_printf(_tag_arr("Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n",
+! sizeof(char),94),_tag_arr(_tmp7,sizeof(void*),0));});{int c=0;for(0;c < n;c ++){int
+! d;int pos=0;({void*_tmp8[0]={};Cyc_Std_printf(_tag_arr("  ",sizeof(char),3),
+! _tag_arr(_tmp8,sizeof(void*),0));});while((d=Cyc_Std_getc(r))!= '\n'){(Cyc_Std_putc(
+! d,Cyc_Std_stdout),pos ++);}while(pos ++ < 16){Cyc_Std_putc((int)' ',Cyc_Std_stdout);}({
+! void*_tmp9[0]={};Cyc_Std_printf(_tag_arr("  ",sizeof(char),3),_tag_arr(_tmp9,
+! sizeof(void*),0));});while((d=Cyc_Std_getc(r))!= '\n'){Cyc_Std_putc(d,Cyc_Std_stdout);}
+! Cyc_Std_putc((int)'\n',Cyc_Std_stdout);}}Cyc_Std_fclose(r);Cyc_Std_fclose(w);
+! kill(pid,15);waitpid(pid,0,0);return 0;}}}
+--- 256,279 ----
+  char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
+  16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};int Cyc_Execinfo_backtrace(
+  struct _tagged_arr,int);int Cyc_Execinfo_bt();struct Cyc_Cstdio___abstractFILE;
+! struct Cyc_Std___cycFILE;extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[
+! 18];struct Cyc_Std_FileOpenError_struct{char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{
+  int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;}
+  ;struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{
+! int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};struct
+! Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{
+! int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
+! Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
+! int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
+! };struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_Std_timeval{int
+! tv_sec;int tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;int tz_dsttime;};
   struct Cyc_Std_itimerval{struct Cyc_Std_timeval it_interval;struct Cyc_Std_timeval
-! it_value;};typedef struct{unsigned int __val[64];}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t
-! Cyc_Std_sigset_t;struct Cyc_Std_timespec{int tv_sec;int tv_nsec;};struct Cyc_Std_timeval;
-! struct Cyc_Std___fd_set{int __fds_bits[32];};extern struct _tagged_arr Cyc_Std_optarg;
+! it_value;};struct Cyc_Std_rlimit{unsigned int rlim_cur;unsigned int rlim_max;};
+! struct Cyc_Std_rusage{struct Cyc_Std_timeval ru_utime;struct Cyc_Std_timeval ru_stime;
+! int ru_maxrss;int ru_ixrss;int ru_idrss;int ru_isrss;int ru_minflt;int ru_majflt;int
+! ru_nswap;int ru_inblock;int ru_oublock;int ru_msgsnd;int ru_msgrcv;int ru_nsignals;
+! int ru_nvcsw;int ru_nivcsw;};void(*Cyc_Std_signal(int sig,void(*func)(int)))(int);
+! int Cyc_Execinfo_backtrace(struct _tagged_arr array,int size){(int)_throw((void*)({
+! struct Cyc_Core_Failure_struct*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0[0]=({struct
+! Cyc_Core_Failure_struct _tmp1;_tmp1.tag=Cyc_Core_Failure;_tmp1.f1=_tag_arr("backtrace: unsupported except under Linux",
+! sizeof(char),42);_tmp1;});_tmp0;}));return 0;}int Cyc_Execinfo_bt(){return 1;}
+diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-openbsd2.8/lib/getopt.c
+*** i686-unknown-linux/lib/getopt.c	Sun Jan  6 17:14:06 2002
+--- i386-unknown-openbsd2.8/lib/getopt.c	Sun Jan  6 17:15:50 2002
+***************
+*** 271,284 ****
+  quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};struct _tagged_arr Cyc_Std_getenv(
+  struct _tagged_arr);struct Cyc_Std_timeval{int tv_sec;int tv_usec;};struct Cyc_Std_timezone{
+  int tz_minuteswest;int tz_dsttime;};struct Cyc_Std_itimerval{struct Cyc_Std_timeval
+! it_interval;struct Cyc_Std_timeval it_value;};typedef struct{unsigned int __val[64];}
+! Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;struct Cyc_Std_timespec{
+! int tv_sec;int tv_nsec;};struct Cyc_Std_timeval;struct Cyc_Std___fd_set{int
+! __fds_bits[32];};extern struct _tagged_arr Cyc_Std_optarg;extern int Cyc_Std_optind;
+! extern int Cyc_Std_opterr;extern int Cyc_Std_optopt;struct Cyc_Std_option{struct
+! _tagged_arr name;int has_arg;int*flag;int val;};int Cyc_Std_getopt(int __argc,struct
+! _tagged_arr __argv,struct _tagged_arr __shortopts);int Cyc_Std__getopt_internal(int
+! __argc,struct _tagged_arr __argv,struct _tagged_arr __shortopts,struct _tagged_arr
+  __longopts,int*__longind,int __long_only);int Cyc_Std_access(struct _tagged_arr,int);
+  int Cyc_Std_chdir(struct _tagged_arr);int Cyc_Std_chown(struct _tagged_arr,
+  unsigned int,unsigned int);struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,
+--- 271,281 ----
+  quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};struct _tagged_arr Cyc_Std_getenv(
+  struct _tagged_arr);struct Cyc_Std_timeval{int tv_sec;int tv_usec;};struct Cyc_Std_timezone{
+  int tz_minuteswest;int tz_dsttime;};struct Cyc_Std_itimerval{struct Cyc_Std_timeval
+! it_interval;struct Cyc_Std_timeval it_value;};extern struct _tagged_arr Cyc_Std_optarg;
 ! extern int Cyc_Std_optind;extern int Cyc_Std_opterr;extern int Cyc_Std_optopt;struct
 ! Cyc_Std_option{struct _tagged_arr name;int has_arg;int*flag;int val;};int Cyc_Std_getopt(
 ! int __argc,struct _tagged_arr __argv,struct _tagged_arr __shortopts);int Cyc_Std__getopt_internal(
 ! int __argc,struct _tagged_arr __argv,struct _tagged_arr __shortopts,struct _tagged_arr
-! __longopts,int*__longind,int __long_only);int Cyc_Std_access(struct _tagged_arr,int);
-! int Cyc_Std_chdir(struct _tagged_arr);int Cyc_Std_chown(struct _tagged_arr,
-! unsigned int,unsigned int);struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,
-! unsigned int size);int Cyc_Std_execl(struct _tagged_arr path,struct _tagged_arr arg0,
-! struct _tagged_arr argv);int Cyc_Std_execlp(struct _tagged_arr file,struct _tagged_arr
-! arg0,struct _tagged_arr argv);int Cyc_Std_execve(struct _tagged_arr filename,struct
-! _tagged_arr argv,struct _tagged_arr envp);int Cyc_Std_link(struct _tagged_arr,struct
-! _tagged_arr);int Cyc_Std_read(int fd,struct _tagged_arr buf,unsigned int count);int
-! Cyc_Std_rmdir(struct _tagged_arr);int Cyc_Std_symlink(struct _tagged_arr,struct
-! _tagged_arr);int Cyc_Std_truncate(struct _tagged_arr,int);int Cyc_Std_write(int fd,
-! struct _tagged_arr buf,unsigned int count);int Cyc_Std_unlink(struct _tagged_arr
-! pathname);int Cyc_Std_gethostname(struct _tagged_arr,unsigned int);int Cyc_Std_chroot(
-! struct _tagged_arr);struct _tagged_arr Cyc_Std_getpass(struct _tagged_arr prompt);
-! unsigned int Cyc_Std_strlen(struct _tagged_arr s);int Cyc_Std_strcmp(struct
-! _tagged_arr s1,struct _tagged_arr s2);int Cyc_Std_strncmp(struct _tagged_arr s1,struct
-! _tagged_arr s2,unsigned int len);struct _tagged_arr Cyc_Std_strchr(struct _tagged_arr
-! s,unsigned char c);struct _tagged_arr Cyc_Std_optarg;int Cyc_Std_optind=1;int Cyc_Std___getopt_initialized;
-! static struct _tagged_arr Cyc_Std_nextchar;int Cyc_Std_opterr=1;int Cyc_Std_optopt=(
-! int)'?';enum Cyc_Std_ordering_tag{Cyc_Std_REQUIRE_ORDER  = 0,Cyc_Std_PERMUTE  = 1,
-! Cyc_Std_RETURN_IN_ORDER  = 2};static enum Cyc_Std_ordering_tag Cyc_Std_ordering;
-! static struct _tagged_arr Cyc_Std_posixly_correct;static int Cyc_Std_first_nonopt;
-  static int Cyc_Std_last_nonopt;static int Cyc_Std_nonoption_flags_max_len;static int
-  Cyc_Std_nonoption_flags_len;static int Cyc_Std_original_argc;static int Cyc_Std_original_argv;
-  static void  __attribute__((unused )) Cyc_Std_store_args_and_env(int argc,struct
---- 274,304 ----
-  struct _tagged_arr Cyc_Std_getenv(struct _tagged_arr);struct Cyc_Std_timeval{int
-  tv_sec;int tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;int tz_dsttime;};
-  struct Cyc_Std_itimerval{struct Cyc_Std_timeval it_interval;struct Cyc_Std_timeval
-! it_value;};extern struct _tagged_arr Cyc_Std_optarg;extern int Cyc_Std_optind;extern
-! int Cyc_Std_opterr;extern int Cyc_Std_optopt;struct Cyc_Std_option{struct _tagged_arr
-! name;int has_arg;int*flag;int val;};int Cyc_Std_getopt(int __argc,struct _tagged_arr
-! __argv,struct _tagged_arr __shortopts);int Cyc_Std__getopt_internal(int __argc,
-! struct _tagged_arr __argv,struct _tagged_arr __shortopts,struct _tagged_arr __longopts,
-! int*__longind,int __long_only);int Cyc_Std_access(struct _tagged_arr,int);int Cyc_Std_chdir(
-! struct _tagged_arr);int Cyc_Std_chown(struct _tagged_arr,unsigned int,unsigned int);
-! struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,unsigned int size);int Cyc_Std_execl(
-! struct _tagged_arr path,struct _tagged_arr arg0,struct _tagged_arr argv);int Cyc_Std_execlp(
-! struct _tagged_arr file,struct _tagged_arr arg0,struct _tagged_arr argv);int Cyc_Std_execve(
-! struct _tagged_arr filename,struct _tagged_arr argv,struct _tagged_arr envp);int Cyc_Std_link(
-! struct _tagged_arr,struct _tagged_arr);int Cyc_Std_read(int fd,struct _tagged_arr buf,
-! unsigned int count);int Cyc_Std_rmdir(struct _tagged_arr);int Cyc_Std_symlink(struct
-! _tagged_arr,struct _tagged_arr);int Cyc_Std_truncate(struct _tagged_arr,int);int Cyc_Std_write(
-! int fd,struct _tagged_arr buf,unsigned int count);int Cyc_Std_unlink(struct
-! _tagged_arr pathname);int Cyc_Std_gethostname(struct _tagged_arr,unsigned int);int
-! Cyc_Std_chroot(struct _tagged_arr);struct _tagged_arr Cyc_Std_getpass(struct
-! _tagged_arr prompt);unsigned int Cyc_Std_strlen(struct _tagged_arr s);int Cyc_Std_strcmp(
-! struct _tagged_arr s1,struct _tagged_arr s2);int Cyc_Std_strncmp(struct _tagged_arr s1,
-! struct _tagged_arr s2,unsigned int len);struct _tagged_arr Cyc_Std_strchr(struct
-! _tagged_arr s,unsigned char c);struct _tagged_arr Cyc_Std_optarg;int Cyc_Std_optind=1;
-! int Cyc_Std___getopt_initialized;static struct _tagged_arr Cyc_Std_nextchar;int Cyc_Std_opterr=
-! 1;int Cyc_Std_optopt=(int)'?';enum Cyc_Std_ordering_tag{Cyc_Std_REQUIRE_ORDER  = 0,
-! Cyc_Std_PERMUTE  = 1,Cyc_Std_RETURN_IN_ORDER  = 2};static enum Cyc_Std_ordering_tag
-! Cyc_Std_ordering;static struct _tagged_arr Cyc_Std_posixly_correct;static int Cyc_Std_first_nonopt;
-  static int Cyc_Std_last_nonopt;static int Cyc_Std_nonoption_flags_max_len;static int
-  Cyc_Std_nonoption_flags_len;static int Cyc_Std_original_argc;static int Cyc_Std_original_argv;
-  static void  __attribute__((unused )) Cyc_Std_store_args_and_env(int argc,struct
+  __longopts,int*__longind,int __long_only);int Cyc_Std_access(struct _tagged_arr,int);
+  int Cyc_Std_chdir(struct _tagged_arr);int Cyc_Std_chown(struct _tagged_arr,
+  unsigned int,unsigned int);struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c i386-unknown-openbsd2.8/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Sat Jan  5 18:26:37 2002
---- i386-unknown-openbsd2.8/src/buildlib.c	Sat Jan  5 18:28:48 2002
+*** i686-unknown-linux/src/buildlib.c	Sun Jan  6 17:14:04 2002
+--- i386-unknown-openbsd2.8/src/buildlib.c	Sun Jan  6 17:15:48 2002
 ***************
-*** 598,618 ****
-  int quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};int Cyc_Std_system(struct
-  _tagged_arr);struct Cyc_Std_tm{int tm_sec;int tm_min;int tm_hour;int tm_mday;int
-  tm_mon;int tm_year;int tm_wday;int tm_yday;int tm_isdst;};extern int timezone;struct
-! Cyc_Std_stat_t{unsigned long long st_dev;unsigned short __pad1;unsigned int st_ino;
-! unsigned int st_mode;unsigned int st_nlink;unsigned int st_uid;unsigned int st_gid;
-! unsigned long long st_rdev;unsigned short __pad2;int st_size;int st_blksize;int
-! st_blocks;int st_atime;unsigned int __unused1;int st_mtime;unsigned int __unused2;
+*** 581,606 ****
+  struct Cyc_Std__Div{int quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};int Cyc_Std_system(
+  struct _tagged_arr);struct Cyc_Std_tm{int tm_sec;int tm_min;int tm_hour;int tm_mday;
+  int tm_mon;int tm_year;int tm_wday;int tm_yday;int tm_isdst;};extern int timezone;
+! struct Cyc_Std_stat_t{unsigned long long st_dev;unsigned short __pad1;unsigned int
+! st_ino;unsigned int st_mode;unsigned int st_nlink;unsigned int st_uid;unsigned int
+! st_gid;unsigned long long st_rdev;unsigned short __pad2;int st_size;int st_blksize;
+! int st_blocks;int st_atime;unsigned int __unused1;int st_mtime;unsigned int __unused2;
 ! int st_ctime;unsigned int __unused3;unsigned int __unused4;unsigned int __unused5;};
 ! int Cyc_Std_mkdir(struct _tagged_arr pathname,unsigned int mode);struct Cyc_Std_flock{
 ! short l_type;int l_start;short l_whence;int l_len;int l_pid;};struct Cyc_Std_Flock_struct{
@@ -286,24 +220,35 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c i386-unknown-openbsd
 ! struct Cyc_Std_timespec{int tv_sec;int tv_nsec;};struct Cyc_Std_timeval;struct Cyc_Std___fd_set{
 ! int __fds_bits[32];};struct Cyc_Std_option{struct _tagged_arr name;int has_arg;int*
 ! flag;int val;};int close(int);int Cyc_Std_access(struct _tagged_arr,int);int Cyc_Std_chdir(
-  struct _tagged_arr);int Cyc_Std_chown(struct _tagged_arr,unsigned int,unsigned int);
-  struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,unsigned int size);int Cyc_Std_execl(
-  struct _tagged_arr path,struct _tagged_arr arg0,struct _tagged_arr argv);int Cyc_Std_execlp(
---- 598,614 ----
-  int quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};int Cyc_Std_system(struct
-  _tagged_arr);struct Cyc_Std_tm{int tm_sec;int tm_min;int tm_hour;int tm_mday;int
-  tm_mon;int tm_year;int tm_wday;int tm_yday;int tm_isdst;};extern int timezone;struct
-! Cyc_Std_stat_t{unsigned long long st_dev;unsigned int st_ino;unsigned int st_mode;
-! unsigned int st_nlink;unsigned int st_uid;unsigned int st_gid;unsigned long long
-! st_rdev;int st_size;unsigned int st_blksize;unsigned int st_blocks;int st_atime;int
-! st_mtime;int st_ctime;};int Cyc_Std_mkdir(struct _tagged_arr pathname,unsigned int
-! mode);struct Cyc_Std_flock{short l_type;int l_start;short l_whence;int l_len;int l_pid;
-! };struct Cyc_Std_Flock_struct{int tag;struct Cyc_Std_flock*f1;};struct Cyc_Std_Long_struct{
-! int tag;int f1;};int Cyc_Std_open(struct _tagged_arr,int,struct _tagged_arr);struct
-! Cyc_Std_timeval{int tv_sec;int tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;
-! int tz_dsttime;};struct Cyc_Std_itimerval{struct Cyc_Std_timeval it_interval;struct
-! Cyc_Std_timeval it_value;};struct Cyc_Std_option{struct _tagged_arr name;int has_arg;
-! int*flag;int val;};int close(int);int Cyc_Std_access(struct _tagged_arr,int);int Cyc_Std_chdir(
-  struct _tagged_arr);int Cyc_Std_chown(struct _tagged_arr,unsigned int,unsigned int);
-  struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,unsigned int size);int Cyc_Std_execl(
-  struct _tagged_arr path,struct _tagged_arr arg0,struct _tagged_arr argv);int Cyc_Std_execlp(
+! struct _tagged_arr);int Cyc_Std_chown(struct _tagged_arr,unsigned int,unsigned int);
+! struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,unsigned int size);int Cyc_Std_execl(
+! struct _tagged_arr path,struct _tagged_arr arg0,struct _tagged_arr argv);int Cyc_Std_execlp(
+! struct _tagged_arr file,struct _tagged_arr arg0,struct _tagged_arr argv);int Cyc_Std_execve(
+! struct _tagged_arr filename,struct _tagged_arr argv,struct _tagged_arr envp);int Cyc_Std_link(
+  struct _tagged_arr,struct _tagged_arr);int Cyc_Std_read(int fd,struct _tagged_arr buf,
+  unsigned int count);int Cyc_Std_rmdir(struct _tagged_arr);int Cyc_Std_symlink(struct
+  _tagged_arr,struct _tagged_arr);int Cyc_Std_truncate(struct _tagged_arr,int);int Cyc_Std_write(
+--- 581,603 ----
+  struct Cyc_Std__Div{int quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};int Cyc_Std_system(
+  struct _tagged_arr);struct Cyc_Std_tm{int tm_sec;int tm_min;int tm_hour;int tm_mday;
+  int tm_mon;int tm_year;int tm_wday;int tm_yday;int tm_isdst;};extern int timezone;
+! struct Cyc_Std_stat_t{unsigned long long st_dev;unsigned int st_ino;unsigned int
+! st_mode;unsigned int st_nlink;unsigned int st_uid;unsigned int st_gid;
+! unsigned long long st_rdev;int st_size;unsigned int st_blksize;unsigned int
+! st_blocks;int st_atime;int st_mtime;int st_ctime;};int Cyc_Std_mkdir(struct
+! _tagged_arr pathname,unsigned int mode);struct Cyc_Std_flock{short l_type;int l_start;
+! short l_whence;int l_len;int l_pid;};struct Cyc_Std_Flock_struct{int tag;struct Cyc_Std_flock*
+! f1;};struct Cyc_Std_Long_struct{int tag;int f1;};int Cyc_Std_open(struct _tagged_arr,
+! int,struct _tagged_arr);struct Cyc_Std_timeval{int tv_sec;int tv_usec;};struct Cyc_Std_timezone{
+! int tz_minuteswest;int tz_dsttime;};struct Cyc_Std_itimerval{struct Cyc_Std_timeval
+! it_interval;struct Cyc_Std_timeval it_value;};struct Cyc_Std_option{struct
+! _tagged_arr name;int has_arg;int*flag;int val;};int close(int);int Cyc_Std_access(
+! struct _tagged_arr,int);int Cyc_Std_chdir(struct _tagged_arr);int Cyc_Std_chown(
+! struct _tagged_arr,unsigned int,unsigned int);struct _tagged_arr Cyc_Std_getcwd(
+! struct _tagged_arr buf,unsigned int size);int Cyc_Std_execl(struct _tagged_arr path,
+! struct _tagged_arr arg0,struct _tagged_arr argv);int Cyc_Std_execlp(struct _tagged_arr
+! file,struct _tagged_arr arg0,struct _tagged_arr argv);int Cyc_Std_execve(struct
+! _tagged_arr filename,struct _tagged_arr argv,struct _tagged_arr envp);int Cyc_Std_link(
+  struct _tagged_arr,struct _tagged_arr);int Cyc_Std_read(int fd,struct _tagged_arr buf,
+  unsigned int count);int Cyc_Std_rmdir(struct _tagged_arr);int Cyc_Std_symlink(struct
+  _tagged_arr,struct _tagged_arr);int Cyc_Std_truncate(struct _tagged_arr,int);int Cyc_Std_write(

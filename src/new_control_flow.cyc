@@ -381,7 +381,8 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     //       okay b/c assign_place_inner does the right thing
   case &Var_e(_,&Param_b(vd)): fallthru(vd);
   case &Var_e(_,&Local_b(vd)): fallthru(vd);
-  case &Var_e(_,&Pat_b(vd)): return $(inflow, Dict::lookup(d, new VarRoot(vd)));
+  case &Var_e(_,&Pat_b(vd)): 
+    return $(inflow, Dict::lookup(d, new VarRoot(vd)));
 
     // Note: none of the primops cause things to escape or do a dereference!
     //       and they all return initialized ints of unknown value.
@@ -469,7 +470,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
       return $(outflow,typ_to_absrval(e->topt->v,unknown_all));
 
   case &Malloc_e(MallocInfo{iscalloc,eopt,topt,exp,isfat}):
-    root_t    root      = new MallocPt(exp);
+    root_t    root      = new MallocPt(exp,e->topt->v);
     place_t   place     = new Place(root,NULL);
     absRval_t rval      = new AddressOf(place);
     absRval_t place_val = 
@@ -490,8 +491,8 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
       return $(new ReachableFL(Dict::insert(d2,root,place_val),relns), rval);
     }
 
-  case &New_e(eopt,e):
-    root_t    root      = new MallocPt(e);
+  case &New_e(eopt,e2):
+    root_t    root      = new MallocPt(e2,e->topt->v);
     place_t   place     = new Place(root,NULL);
     absRval_t rval      = new AddressOf(place);
     if(env->all_changed != NULL)
@@ -499,11 +500,11 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     flow_t    outflow;
     absRval_t place_val;
     if(eopt!=NULL) {
-      let $(f,rvals) = anal_unordered_Rexps(env,inflow,list((exp_t)eopt,e));
+      let $(f,rvals) = anal_unordered_Rexps(env,inflow,list((exp_t)eopt,e2));
       outflow   = f;
       place_val = rvals->tl->hd;
     } else {
-      let $(f,r) = anal_Rexp(env,inflow,e);
+      let $(f,r) = anal_Rexp(env,inflow,e2);
       outflow   = f;
       place_val = r;
     }
@@ -1155,10 +1156,19 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s) {
 
   case &Label_s(_,s): return anal_stmt(env,inflow,s);
 
-  case &Region_s(tv,vd,s):
+  case &Region_s(tv,vd,resetable,s):
     let vds = List(vd,NULL);
     inflow = add_vars(inflow,&vds,unknown_all);
     return anal_stmt(env,inflow,s);
+
+  case &ResetRegion_s(e):
+    let $(f,r) = anal_Rexp(env,inflow,e);
+    let outflow = use_Rval(env,e->loc,f,r);
+    switch (Tcutil::compress(e->topt->v)) {
+    case &RgnHandleType(r): 
+      return kill_flow_region(f,r);
+    default: throw new Core::Impossible("anal_stmt -- reset_region");
+    }
 
   default: throw new Core::Impossible("anal_stmt -- bad stmt syntax"
                                       " or unimplemented stmt form");
@@ -1217,9 +1227,9 @@ static void postpass(stmt_t s) {
   case &Do_s(s1,$(_,s2)):      fallthru(s1,s2);
   case &IfThenElse_s(_,s1,s2): postpass(s1); fallthru(s2);
 
-  case &Region_s(_,_,s1): fallthru(s1);
-  case &Label_s(_,s1):    fallthru(s1);
-  case &Decl_s(_,s1):     postpass(s1); return;
+  case &Region_s(_,_,_,s1): fallthru(s1);
+  case &Label_s(_,s1):      fallthru(s1);
+  case &Decl_s(_,s1):       postpass(s1); return;
 
   case &TryCatch_s(s1,scs): postpass(s1); fallthru(scs);
   case &Switch_s(_,scs):

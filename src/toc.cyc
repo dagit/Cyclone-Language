@@ -153,6 +153,7 @@ MAKE_VAR(_check_times);
 MAKE_VAR(_new_region);
 MAKE_VAR(_push_region);
 MAKE_VAR(_pop_region);
+MAKE_VAR(_reset_region);
 
 #undef MAKE_STRING
 #undef MAKE_VAR
@@ -394,10 +395,11 @@ static type_t typ_to_c(type_t t) {
     return strctq(ad->name);
   case &EnumType(tdn,_): return t;
   case &AnonEnumType(fs): enumfields_to_c(fs); return t;
-  case &TypedefType(tdn,ts,topt):
-    if (topt == NULL) toc_impos("Toc::typ_to_c: unresolved TypedefType");
+  case &TypedefType(tdn,ts,td,topt):
+    if (topt == NULL) 
+      return new TypedefType(tdn,NULL,td,NULL);
     // just drop the type arguments and translate the nested types
-    return new TypedefType(tdn,NULL, new Opt(typ_to_c_array(topt->v)));
+    else return new TypedefType(tdn,NULL,td,new Opt(typ_to_c_array(topt->v)));
   case &SizeofType(_): 
     return uint_t;
   case &RgnHandleType(t):
@@ -2725,7 +2727,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
                                      cast_exp(e_typ,_exn_thrown_e,DL),
                         handler_stmt,DL),DL),DL),DL),DL),DL)->r;
       return;
-    case &Region_s(tv, vd, body):
+    case &Region_s(tv, vd, resetable, body):
       // NOTE:  _npop_handler has to deal with regions as well as exceptions
       // { struct _RegionHandle rh = _new_region();
       //   struct _RegionHandle *x = &rh;
@@ -2752,6 +2754,10 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         seq_stmt(body,
 		 exp_stmt(fncall_exp(_pop_region_e,  list(x_exp), DL),DL),
 		 DL),DL),DL),DL)->r;
+      return;
+    case &ResetRegion_s(e):
+      exp_to_c(nv,e);
+      s->r = exp_stmt(fncall_exp(_reset_region_e,new List(e,NULL),DL),DL)->r;
       return;
     case &SwitchC_s(_,_): toc_impos("switchC_s");
     case &Cut_s(_):       unimp("cut");
@@ -3083,7 +3089,14 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
     case &Typedef_d(td):
       td->name = td->name;
       td->tvs  = NULL;
-      td->defn = typ_to_c_array(td->defn);
+      if (td->defn != NULL) 
+        td->defn = new Opt(typ_to_c_array(td->defn->v));
+      else {
+        switch (td->kind->v) {
+        case BoxKind: td->defn = new Opt(void_star_typ()); break;
+        default: td->defn = new Opt(VoidType); break;
+        }
+      }
       result_decls = new List(d,result_decls);
       break;
     case &Namespace_d(_,ds2): fallthru(ds2);

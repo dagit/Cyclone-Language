@@ -207,6 +207,15 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
   }
 }
 
+static bool is_main(qvar_t n) {
+  let &$(nms,v) = n;
+  switch (nms) {
+  case &Abs_n(NULL):
+    return (zstrcmp(*v,"main") == 0);
+  default: return false;
+  }
+}
+
 static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
   var_t   v  = (*fd->name)[1];
 #ifdef DEBUG
@@ -281,6 +290,54 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
   // check for undefined labels FIX: get better error message
   if(!all_labels_resolved(te))
     terr(loc,"function has goto statements to undefined labels");
+  // look for main and check that it has a good type
+  if (is_main(fd->name)) {
+    // result type should be int
+    switch (compress(fd->ret_type)) {
+    case &IntType(_,B4): break;
+    default: 
+      terr(loc,"main declared with return type %s instead of int",
+           typ2string(fd->ret_type)); break;
+    }
+    if (fd->c_varargs || fd->cyc_varargs != NULL)
+      terr(loc,"main declared with varargs");
+    let args = fd->args;
+    if (args != NULL) {
+      let &$(_,_,t1) = args->hd;
+      switch (compress(t1)) {
+      case &IntType(_,B4): break;
+      default:
+        terr(loc,"main declared with first argument of type %s instead of int",
+             typ2string(t1));
+        break;
+      }
+      args = args->tl;
+      if (args != NULL) {
+        let &$(_,_,t2) = args->hd;
+        args = args->tl;
+        if (args != NULL)
+          terr(loc,"main declared with too many arguments");
+        opt_t<list_t<tvar_t>> tvs = new Opt(fd->tvs);
+        if (!unify(t2,tagged_typ(string_typ(new_evar(new Opt(RgnKind),tvs)),
+                                 new_evar(new Opt(RgnKind),tvs),
+                                 empty_tqual())) &&
+            !unify(t2,tagged_typ(const_string_typ(new_evar(new Opt(RgnKind),
+                                                           tvs)),
+                                 new_evar(new Opt(RgnKind),tvs),
+                                 empty_tqual())) &&
+            !unify(t2,tagged_typ(string_typ(new_evar(new Opt(RgnKind),tvs)),
+                                 new_evar(new Opt(RgnKind),tvs),
+                                 const_tqual())) &&
+            !unify(t2,tagged_typ(const_string_typ(new_evar(new Opt(RgnKind),
+                                                           tvs)),
+                                 new_evar(new Opt(RgnKind),tvs),
+                                 const_tqual()))) {
+          terr(loc,"second argument of main has type %s instead of char??",
+               typ2string(t2));
+        }
+      }
+    }
+  }
 
   te->le = NULL;
 }
@@ -309,7 +366,20 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   // reject ill-formed type
   check_unique_tvars(loc,td->tvs);
   add_tvar_identities(td->tvs);
-  check_type(loc,te,td->tvs,AnyKind,false,td->defn);
+  if (td->defn != NULL)
+    check_type(loc,te,td->tvs,AnyKind,false,td->defn->v);
+  else {
+    // run through and constrain the kinds of unconstrained tvs to boxkind
+    for (_ tvs = td->tvs; tvs != NULL; tvs = tvs->tl) {
+      switch (compress_kb(tvs->hd->kind)) {
+      case &Unknown_kb(*f): 
+        *f = new Opt(new Eq_kb(BoxKind)); break;
+      case &Less_kb(*f,k):
+        *f = new Opt(new Eq_kb(k)); break;
+      default: continue;
+      }
+    }
+  }
   // add to environment
   ge->typedefs = Dict::insert(ge->typedefs,v,td);
 }

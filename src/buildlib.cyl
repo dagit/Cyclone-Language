@@ -1002,7 +1002,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       fallthru(v);
     case &EnumType(&$(_,v),_):
       fallthru(v);
-    case &TypedefType(&$(_,v),_,_):
+    case &TypedefType(&$(_,v),_,_,_):
       add_target(v);
       return;
 
@@ -1099,7 +1099,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Typedef_d(x):
       let &$(_,v) = x->name;
       current_source = v;
-      scan_type(x->defn);
+      if (x->defn)
+        scan_type(x->defn->v);
       break;
 
     case &Let_d(_,_,_,_,_):

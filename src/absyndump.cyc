@@ -430,7 +430,7 @@ void dumpntyp(type_t t) {
     break;
   case &IntType(Signed,   B4): dump("int"); return;
   case &IntType(Signed,   B1): dump("signed char"); return;
-  case &IntType(Unsigned, B1): dump("unsigned char"); return;
+  case &IntType(Unsigned, B1): dump("char"); return;
   case &IntType(Signed,   B2): dump("short"); return;
   case &IntType(Unsigned, B2): dump("unsigned short"); return;
   case &IntType(Unsigned, B4): dump("unsigned int"); return;
@@ -454,7 +454,7 @@ void dumpntyp(type_t t) {
     dumpaggr_kind(k); dump_char('{'); dumpaggrfields(fs); dump_char('}');return;
   case &EnumType(n,_):    dump("enum "); dumpqvar(n); return;
   case &AnonEnumType(fs): dump("enum {"); dumpenumfields(fs); dump("}"); return;
-  case &TypedefType(n,ts,topt):  dumpqvar(n), dumptps(ts); return;
+  case &TypedefType(n,ts,_,topt):  dumpqvar(n), dumptps(ts); return;
   case &SizeofType(t): dump("sizeof_t<"); dumpntyp(t); dump(">"); return;
   case &RgnHandleType(rgn): dumprgn(rgn); return;
   case HeapRgn: 
@@ -863,9 +863,14 @@ void dumpstmt(stmt_t s) {
     dumpswitchclauses(ss); dump_char('}');
     break;
 
-  case &Region_s(tv,vd,ss):
-    dumploc(s->loc); dump("region<"); dumptvar(tv); dump("> "); dumpqvar(vd->name);
+  case &Region_s(tv,vd,resetable,ss):
+    dumploc(s->loc); dump("region"); 
+    if (resetable) dump("[resetable]");
+    dump("<"); dumptvar(tv); dump("> "); dumpqvar(vd->name);
     dump("{"); dumpstmt(ss); dump("}");
+    break;
+  case &ResetRegion_s(e):
+    dumploc(s->loc); dump("reset_region("); dumpexp(e); dump(");");
     break;
 
   case &Cut_s(s1):    dump("cut");    dumpstmt(s1); break;
@@ -1098,9 +1103,14 @@ void dumpdecl(decl_t d) {
     dump_semi();
     break;
   case &Typedef_d(td):
-    if (!expand_typedefs || Absynpp::is_anon_aggrtype(td->defn)) {
+    if (!expand_typedefs || (td->defn != NULL) && (Absynpp::is_anon_aggrtype(td->defn->v))) {
       dump("typedef");
-      dumptqtd(Tqual(false,false,false),td->defn,dumptypedefname,td);
+      type_t t;
+      if (td->defn == NULL) 
+        t = new_evar(td->kind,NULL);
+      else 
+        t = td->defn->v;
+      dumptqtd(Tqual(false,false,false),t,dumptypedefname,td);
       dump_semi();
     }
     break;

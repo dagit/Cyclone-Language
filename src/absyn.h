@@ -325,7 +325,7 @@ namespace Absyn {
     // equivalence only.
     RgnHandleType(type_t);   // a handle for allocating in a region.  BoxKind
     // An abbreviation -- the opt_t<typ> contains the definition if any
-    TypedefType(typedef_name_t,list_t<type_t>,opt_t<type_t>);
+    TypedefType(typedef_name_t,list_t<type_t>,struct Typedefdecl *,opt_t<type_t>);
     HeapRgn;                 // The heap region.  RgnKind 
     AccessEff(type_t);       // Uses region r.  RgnKind -> EffKind
     JoinEff(list_t<type_t>); // e1+e2.  EffKind list -> EffKind
@@ -537,8 +537,10 @@ namespace Absyn {
     Label_s(var_t,stmt_t); // L:s
     Do_s(stmt_t,$(exp_t,stmt_t));
     TryCatch_s(stmt_t,list_t<switch_clause_t>);
-    Region_s(tvar_t, vardecl_t, stmt_t); // region<`r> h {s}
+    Region_s(tvar_t, vardecl_t, bool, stmt_t); // region<`r> h {s}
+    // the bool above is true when the region is resetable
     ForArray_s(forarray_info_t);
+    ResetRegion_s(exp_t); // reset_region(e)
   };
   // statements with auxiliary info
   EXTERN_ABSYN struct Stmt {
@@ -692,7 +694,8 @@ namespace Absyn {
   EXTERN_ABSYN struct Typedefdecl {
     typedef_name_t name;
     list_t<tvar_t> tvs;
-    type_t         defn;
+    opt_t<kind_t>  kind;
+    opt_t<type_t>  defn;
   };
 
   // raw declarations

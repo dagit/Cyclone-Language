@@ -1506,9 +1506,9 @@ static bool zeroable_type(type_t t) {
       if (!zeroable_type(fs->hd->type)) return false;
     return true;
   case &AnonEnumType(_): return true; // FIX: explicit tags?
+  case &TypedefType(_,_,_,_): return false;
   case &RgnHandleType(_): return false;
 
-  case &TypedefType(_,_,_):
   case HeapRgn:
   case &AccessEff(_):
   case &JoinEff(_):
