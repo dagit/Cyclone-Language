@@ -2,6 +2,106 @@ Cyclone Release Notes:
 
 This file explains some of the changes that occurred in between releases.
 ----------------------------------------------------------------------
+Changes going from Version 0.6 dated September 2003, to Version 0.7,
+February 2004.
+
+* Forced Cyclone's evalation order to be right-to-left for assignments, but
+  otherwise left-to-right.  Before it was basically undefined (matching C).
+  This allows the flow analysis to be a bit more precise, and eliminate a
+  few more dynamic checks.
+
+* Added support for building cross-compilers.  Do:
+
+  ./configure --target=<whatever>
+  make
+  make install
+	
+  Then you can invoke the cyclone cross compiler as
+	
+  cyclone -b <whatever> foo.cyc
+
+* Updated buildlib to permit some customization of included types.  In
+  particular, users can provide suggested types that are
+  "representation-compatible" with their C versions, but add useful
+  qualifiers, like @zeroterm, or @nonnull.  Removed cyclone versions of
+  grp.h and pwd.h, in favor of libc.cys specifications.
+
+* Enhancements to the runtime allocator:
+  * Rewrote the allocation routines to be a little faster, especially for
+    the case where you're allocating in a region.
+  * Added support for rmalloc_inline(r,e).  This calls a version of rmalloc
+    that should be inlined and work relatively fast for non-heap, non-rc,
+    non-unique allocation.
+  * In addition, when compiling the output of the compiler, you can pass the
+    flag -DCYC_NOALIGN and this will cause us to skip the padding that is
+    usually added for alignment.  This flag should only be used on
+    architectures where alignment isn't necessary.
+
+* Changed how the e1 :=: e2 (atomic swap of e1 and e2) is compiled.  Now
+  assumes a single-threaded implementation, and takes place in the code
+  generator, rather than the runtime, for better efficiency and to avoid a
+  GCC bug.
+
+* Updated runtime system so that drop_refptr, refptr_count, and ufree take
+  thin pointers rather than fat ones.  The alias_refptr routine still takes
+  a fat pointer so that curr/base/bounds information is preserved in the
+  alias.
+
+* Changed argument processing in the compiler so that by default, arguments
+  not known to Cyclone are passed to gcc.  Call compiler with
+  -known-gcc-flags-only to treat unknown arguments as errors.
+
+* Reorganized how compiler warnings are emitted so that -Woverride, -Wall
+  and default warnings are more sensible.
+
+* Updated Cyclone testing suite to be a bit more complete and principled.
+
+* Added the GCC extension typeof(e) and __typeof__(e) as types.  This is
+  supposed to type-check the expression e, and then return its type.
+
+* Changed some library functions to work better with unique and
+  reference-counted pointers.  
+
+* Removed reset-region functionality, which is now subsumed by dynamic
+  regions. 
+
+* Changes to the structure of the implementation 
+  * Broken things into more passes: binding resolution pass that deals with
+    namespaces broken out of the typechecker and now resides in binding.cyc.
+    This infrastructure is shared by the lexer.  Checking that jumps,
+    breaks, etc. never enter scopes, have proper targets, etc. now done in
+    jump_analysis.cyc; this used to be in the flow analysis.  Finally, code
+    generation for ensuring proper evaluation order is done as a separate
+    pass following normal code generation.  As a consequence of these
+    changes, type-checking environments were signficantly simplified.
+  * Factored runtime system, formerly in the file lib/runtime_cyc.c, into a
+    number of files, all linked into the library runtime_cyc.a.  The goal is
+    to permit easier customization of runtime system elements for different
+    platforms.  Separate files are for region and exception lifetime
+    management (runtime_stack.c), memory management (runtime_memory.c),
+    exception handling (runtime_exception.c), and main (runtime_cyc.c).
+  * Changed the way pattern matching is compiled.  A decision tree is
+    generated in tcpat.cyc, which is then used in toc.cyc to emit switches,
+    if-then-elses, and gotos as necessary.
+  * "Un-regionified" many parts of the compiler.  These datastructures live
+    essentially for the duration of compilation, so region-allocating them
+    was pointless and just added clutter.
+  * We now "embrace" the use of gcc-specific statement expressions during
+    code generation.
+
+* Bug fixes and small enhancements
+  * improved error messages for the parser by associating canned messages
+    with particular parser states.
+  * improved support for extern "C include" to be more C friendly (notably
+    for Linux kernel headers).
+  * fixed the rewriting portion of the porting tool write annotations in the
+    correct spots, accounting for weirdness in cpp.
+  * regions of unique kind (UR) other than `U are now tracked properly.
+  * fixed flow analysis to eliminate a few more null checks.
+  * Bison line numbering was a bit off, affected line numbers reported on
+    errors in files generated by bison. 
+
+----------------------------------------------------------------------
 Changes going from Version 0.5 dated 14 April 2003, to Version 0.6,
 September 2003.
 
@@ -79,11 +179,11 @@ September 2003.
 
 * We now compile the genfiles with -O (except for the parser which
   takes too long to compile.)  You can build the system with
-  make OPTFLAG=-O3 to turn the optimization up (or -g) to turn
-  it down.  
+  make OPTFLAG=-O3 to turn the optimization up (or -g to turn
+  it down).
 
 * When you compile with -nogc on Linux and OSX, you get the Lea allocator
-  (which tends to work better.)
+  (which tends to work better).
   
 * New warning -Woverride warns if a new local variable declaration
   or pattern variable hides a variable.  

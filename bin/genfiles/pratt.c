@@ -1121,10 +1121,10 @@ return({struct Cyc_Pratt_Graph*_tmp31=_cycalloc(sizeof(*_tmp31));_tmp31->nodes=_
 static int*Cyc_Pratt_lookup_distance(struct Cyc_Pratt_Graph*G,union Cyc_Pratt_Node x,union Cyc_Pratt_Node y){
 static int zero_ptr;
 # 172
-if(({Cyc_Pratt_cmp_node(x,y)== 0;}))return& zero_ptr;
+if(Cyc_Pratt_cmp_node(x,y)== 0)return& zero_ptr;
 {struct Cyc_List_List*_tmp34=G->edges;for(0;_tmp34 != 0;_tmp34=_tmp34->tl){
 struct Cyc_Pratt_Edge*_tmp35=(struct Cyc_Pratt_Edge*)_tmp34->hd;
-if(({Cyc_Pratt_cmp_node(_tmp35->x,x)== 0;}) && ({Cyc_Pratt_cmp_node(_tmp35->y,y)== 0;}))
+if(Cyc_Pratt_cmp_node(_tmp35->x,x)== 0  && Cyc_Pratt_cmp_node(_tmp35->y,y)== 0)
 return& _tmp35->value;}}
 # 178
 return 0;}
@@ -1151,7 +1151,7 @@ if(_tmp44->tl != 0)({void*_tmp42=0;({struct Cyc___cycFILE*_tmp64=Cyc_stderr;stru
 static void Cyc_Pratt_add_node(struct Cyc_Pratt_Graph*G,union Cyc_Pratt_Node x){
 {struct Cyc_List_List*_tmp46=G->nodes;for(0;_tmp46 != 0;_tmp46=_tmp46->tl){
 union Cyc_Pratt_Node y=*((union Cyc_Pratt_Node*)_tmp46->hd);
-if(({Cyc_Pratt_cmp_node(x,y)== 0;}))return;}}
+if(Cyc_Pratt_cmp_node(x,y)== 0)return;}}
 # 214
 ({struct Cyc_List_List*_tmp66=({struct Cyc_List_List*_tmp47=_cycalloc(sizeof(*_tmp47));({union Cyc_Pratt_Node*_tmp65=({union Cyc_Pratt_Node*_tmp48=_cycalloc(sizeof(*_tmp48));_tmp48[0]=x;_tmp48;});_tmp47->hd=_tmp65;});_tmp47->tl=G->nodes;_tmp47;});G->nodes=_tmp66;});}
 # 220

@@ -210,6 +210,15 @@ static enum SideEffect stmt_effect(stmt_t s) {
   }
 }
 
+/* Runtime system functions introduced in toc.cyc are unresolved bindings;
+   these are constants, and so do not need to be sequenced. */
+static bool is_toc_var(exp_t e) {
+  switch (e->r) {
+  case &Var_e(&Unresolved_b(v)): return true;
+  default: return false;
+  }
+}
+
 static void stmt_to_seqc(stmt_t s);
 static void exp_to_seqc(exp_t s);
 
@@ -228,36 +237,33 @@ static void exp_to_seqc(exp_t s);
    If the optimization results in no locals being declared, we don't
    return any statement.
 */
-static void exps_to_seqc(exp_t e, list_t<exp_t> es, bool is_assign) {
+static stmt_opt_t exps_to_seqc(exp_t e, list_t<exp_t> es) {
   // Convert each of the expressions
   List::iter(exp_to_seqc,es);
 
   // See if we need to fix the order of the current expressions
-  if (List::length(es) <= 1 || exps_effect(es) != AnyEffect) return;
+  if (List::length(es) <= 1 || exps_effect(es) != AnyEffect) return NULL;
 
   // Create local declarations for each expression.  Note that we
   // don't have to do this for the last expression in the list.
   stmt_t stmt = exp_stmt(copy_exp(e),e->loc);
+  stmt_opt_t laststmt = stmt;
   bool did_skip = false;
-  bool did_convert_lval = false;
+  bool did_convert = false;
   for (_ x = List::rev(es); x != NULL; x=x->tl) {
     let e1 = x->hd;
     // Don't bother translating any constant expressions.  Note that if
     // this is an assignment, the lhs will never be constant.
-    if (Tcutil::is_const_exp(e1)) continue;
+    if (Tcutil::is_const_exp(e1) || is_toc_var(e1)) continue;
 
     // Since we reversed the list, we skip the first non-constant expression,
     // since this will be the last to be evaluated in the generated code.
     // If this is an assignment, it should be an lvalue 
     if (!did_skip) {
       did_skip = true;
-//       if (is_assign && !is_lvalue(e1)) {
-	// FIX: Should take the address of it here, and then
-	// dereference the other argument.  I'm lazy ...
-// 	Warn::impos("Toseqc: assigning to non-lvalues not implemented");
-//       }
       continue;
     }
+    did_convert = true;
 
     // Variable expression
     let v = Toc::temp_var();
@@ -278,8 +284,13 @@ static void exps_to_seqc(exp_t e, list_t<exp_t> es, bool is_assign) {
     e1->r = ve->r;
   }
 
-  // Turn the original expression into a statement expression
-  e->r = stmt_exp(stmt,e->loc)->r;
+  // Turn the original expression into a statement expression if we converted
+  if (did_convert) {
+    e->r = stmt_exp(stmt,e->loc)->r;
+    return laststmt;
+  }
+  else return NULL;
+  
 //   printf("final expression: |%s|\n",Absynpp::exp2string(e));
 //   fflush(stdout);    
 }
@@ -290,17 +301,15 @@ static void exp_to_seqc(exp_t e) {
   case &Const_e(_): return;
   case &Var_e(_): return;
 
-  case &FnCall_e(e1,es,...):
-    // optimization: function designators cannot be side-effected
-    exp_to_seqc(e1); fallthru(es);
+  case &FnCall_e(e1,es,...):  fallthru(new List(e1,es));
   case &Primop_e(_, es):
-    exps_to_seqc(e,es,false);
+    exps_to_seqc(e,es);
     return;
 
   case &Subscript_e(e1,e2):   fallthru(e1,e2);
   case &AssignOp_e(e1, _, e2):
     // we do assignment statements right to left
-    exps_to_seqc(e,list(e2,e1),true);
+    exps_to_seqc(e,list(e2,e1));
     return;
 
   case &Conditional_e(e1,e2,e3):
@@ -329,7 +338,7 @@ static void exp_to_seqc(exp_t e) {
 
   case &UnresolvedMem_e(_,dles):
     let $(_,es) = List::split(dles);
-    exps_to_seqc(e,es,false);
+    exps_to_seqc(e,es);
     return;
 
   case &StmtExp_e(s):
@@ -416,8 +425,51 @@ static void stmt_to_seqc(stmt_t s) {
     case &Decl_s(d,s2):
       switch (d->r) {
       case &Var_d(vd):
-	if (vd->initializer != NULL)
-	  exp_to_seqc((exp_t)vd->initializer);
+	if (vd->initializer != NULL) {
+	  switch (vd->initializer->r) {
+	    // need to handle struct, array initialization specially so that
+	    //   let v = { e1, e2 }
+	    // gets translated to be
+	    //   let x1 = e1 in
+	    //   let x2 = e2 in
+	    //   let v = { x1, x2 }
+	    // rather than
+	    //   let v = ({ let x1 = e1 in
+	    //              let x2 = e2 in
+	    //              {e1,e2} })
+	    // this form causes gcc to barf.
+	    case &UnresolvedMem_e(_,dles):
+	      let $(_,es) = List::split(dles);
+	      let laststmt = exps_to_seqc((exp_t)vd->initializer,es); 
+	      // If nothing needed to be translated, then we're done
+	      if (laststmt == NULL) break;
+	      // Otherwise, vd->initializer is now of the form
+	      // ({ let x1 = e1 ...
+	      //    let xn = en in
+	      //    initexp[x1/e1...xn/en] })
+	      // and the laststmt is the initexp[...] as an Exp_Stmt
+	      switch (laststmt->r) {
+	      case &Exp_s(initexp):
+		switch (vd->initializer->r) {
+		case &StmtExp_e(s3):
+		  vd->initializer = initexp;
+		  laststmt->r = s->r;
+		  s->r = s3->r;
+		  break;
+		default:
+		  throw new Impossible(aprintf("exps_to_seqc updated to non-stmt-exp |%s|", Absynpp::exp2string((exp_t)vd->initializer)));
+		}
+		break;
+	      default:
+		throw new Impossible(aprintf("exps_to_seqc returned non-exp-stmt |%s|", Absynpp::stmt2string(laststmt)));
+	      }
+	      break;
+	  default:
+	    // not an array, struct, etc., so do the standard thing
+	    exp_to_seqc((exp_t)vd->initializer); 
+	    break;
+	  }
+	}
 	s = s2;
 	continue;
       default: break;

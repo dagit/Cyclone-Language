@@ -949,7 +949,7 @@ return Cyc_Xarray_rsingleton(Cyc_Core_heap_region,len,a);}
 void Cyc_Xarray_add(struct Cyc_Xarray_Xarray*xarr,void*a){
 if(xarr->num_elmts == _get_dyneither_size(xarr->elmts,sizeof(void*))){
 if(xarr->num_elmts == 0)
-({struct _dyneither_ptr _tmp47=({_tag_dyneither(({unsigned int _tmp12=(unsigned int)10;void**_tmp13=(void**)({struct _RegionHandle*_tmp46=Cyc_Core_unique_region;_region_malloc(_tmp46,_check_times(sizeof(void*),_tmp12));});{unsigned int _tmp14=_tmp12;unsigned int i;for(i=0;i < _tmp14;i ++){_tmp13[i]=(void*)a;}}_tmp13;}),sizeof(void*),(unsigned int)10);});xarr->elmts=_tmp47;});else{
+({struct _dyneither_ptr _tmp47=_tag_dyneither(({unsigned int _tmp12=(unsigned int)10;void**_tmp13=(void**)({struct _RegionHandle*_tmp46=Cyc_Core_unique_region;_region_malloc(_tmp46,_check_times(sizeof(void*),_tmp12));});{unsigned int _tmp14=_tmp12;unsigned int i;for(i=0;i < _tmp14;i ++){_tmp13[i]=(void*)a;}}_tmp13;}),sizeof(void*),(unsigned int)10);xarr->elmts=_tmp47;});else{
 # 74
 struct _dyneither_ptr newarr=({unsigned int _tmp17=(unsigned int)(xarr->num_elmts * 2);void**_tmp18=(void**)({struct _RegionHandle*_tmp48=Cyc_Core_unique_region;_region_malloc(_tmp48,_check_times(sizeof(void*),_tmp17));});struct _dyneither_ptr _tmp1A=_tag_dyneither(_tmp18,sizeof(void*),_tmp17);{unsigned int _tmp19=_tmp17;unsigned int i;for(i=0;i < _tmp19;i ++){_tmp18[i]=(void*)*((void**)_check_dyneither_subscript(xarr->elmts,sizeof(void*),0));}}_tmp1A;});
 {int i=1;for(0;i < xarr->num_elmts;++ i){
@@ -965,7 +965,7 @@ return xarr->num_elmts - 1;}
 # 89
 struct _dyneither_ptr Cyc_Xarray_rto_array(struct _RegionHandle*r,struct Cyc_Xarray_Xarray*xarr){
 if(xarr->num_elmts == 0)
-return({_tag_dyneither(({void**_tmp1B=_region_malloc(r,sizeof(void*)* 0);_tmp1B;}),sizeof(void*),0);});{
+return _tag_dyneither(({void**_tmp1B=_region_malloc(r,sizeof(void*)* 0);_tmp1B;}),sizeof(void*),0);{
 struct _dyneither_ptr ans=({unsigned int _tmp1C=(unsigned int)xarr->num_elmts;void**_tmp1D=(void**)({struct _RegionHandle*_tmp4A=r;_region_malloc(_tmp4A,_check_times(sizeof(void*),_tmp1C));});struct _dyneither_ptr _tmp1F=_tag_dyneither(_tmp1D,sizeof(void*),_tmp1C);{unsigned int _tmp1E=_tmp1C;unsigned int i;for(i=0;i < _tmp1E;i ++){_tmp1D[i]=(void*)*((void**)_check_dyneither_subscript(xarr->elmts,sizeof(void*),(int)i));}}_tmp1F;});
 return ans;};}
 # 96

@@ -1419,7 +1419,7 @@ return Cyc_Tcutil_typecmp(_tmp117,_tmp116);}else{goto _LL125;}default: _LL125: _
 ({void*_tmpF2=0;({struct _dyneither_ptr _tmp190=({const char*_tmpF3="Evexp::const_exp_cmp, unexpected case";_tag_dyneither(_tmpF3,sizeof(char),38);});((int(*)(struct _dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Tcutil_impos)(_tmp190,_tag_dyneither(_tmpF2,sizeof(void*),0));});});}_LL10E:;};};};}
 # 416
 int Cyc_Evexp_same_const_exp(struct Cyc_Absyn_Exp*e1,struct Cyc_Absyn_Exp*e2){
-return({Cyc_Evexp_const_exp_cmp(e1,e2)== 0;});}
+return Cyc_Evexp_const_exp_cmp(e1,e2)== 0;}
 # 419
 int Cyc_Evexp_lte_const_exp(struct Cyc_Absyn_Exp*e1,struct Cyc_Absyn_Exp*e2){
 struct _tuple10 _tmp11D=Cyc_Evexp_eval_const_uint_exp(e1);struct _tuple10 _tmp11E=_tmp11D;unsigned int _tmp124;int _tmp123;_LL131: _tmp124=_tmp11E.f1;_tmp123=_tmp11E.f2;_LL132:;{

@@ -958,7 +958,7 @@ int j=i;
 while((j < _get_dyneither_size(line,sizeof(char)) && ((char*)line.curr)[j]>= '0') && ((char*)line.curr)[j]<= '9'){++ j;}
 if(i == _get_dyneither_size(line,sizeof(char))){struct Cyc_Core_Opt*_tmpA=0;_npop_handler(0);return _tmpA;}{
 int number=0;
-if(({({struct Cyc_IntPtr_sa_ScanfArg_struct _tmpD;_tmpD.tag=2;_tmpD.f1=& number;({void*_tmpB[1]={& _tmpD};({struct _dyneither_ptr _tmp28=(struct _dyneither_ptr)Cyc_substring((struct _dyneither_ptr)line,i,(unsigned long)(j - i));struct _dyneither_ptr _tmp27=({const char*_tmpC="%d";_tag_dyneither(_tmpC,sizeof(char),3);});Cyc_sscanf(_tmp28,_tmp27,_tag_dyneither(_tmpB,sizeof(void*),1));});});})!= 1;})){
+if(({struct Cyc_IntPtr_sa_ScanfArg_struct _tmpD;_tmpD.tag=2;_tmpD.f1=& number;({void*_tmpB[1]={& _tmpD};({struct _dyneither_ptr _tmp28=(struct _dyneither_ptr)Cyc_substring((struct _dyneither_ptr)line,i,(unsigned long)(j - i));struct _dyneither_ptr _tmp27=({const char*_tmpC="%d";_tag_dyneither(_tmpC,sizeof(char),3);});Cyc_sscanf(_tmp28,_tmp27,_tag_dyneither(_tmpB,sizeof(void*),1));});});})!= 1){
 struct Cyc_Core_Opt*_tmpE=0;_npop_handler(0);return _tmpE;}
 while(j < _get_dyneither_size(line,sizeof(char)) && ((char*)line.curr)[j]!= '"'){++ j;}{
 int k=++ j;

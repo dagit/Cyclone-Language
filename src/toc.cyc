@@ -2955,7 +2955,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  e->r = make_toplevel_dyn_arr(old_t2,e2,e1)->r;
 	} else {
           let tag_e = _tag_dyneither_e;
-	  // cast from t*{n} or t@{n} to t? or t?+-
+	  // cast from t*{n} or t@{n} to t? or t?
           if (zt1) {
             // if p1 is zero-terminated then calculate the size dynamically:
             //   ({ t *x = e1;

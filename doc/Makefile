@@ -37,7 +37,7 @@ letter: main-letter.pdf
 
 a4: main-a4.pdf
 
-tarball: online-manual letter
+tarball: letter online-manual
 	tar cvf cyclone-$(VERSION)-docs.tar online-manual main-letter.pdf
 	gzip cyclone-$(VERSION)-docs.tar
 

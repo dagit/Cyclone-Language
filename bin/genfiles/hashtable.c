@@ -914,7 +914,7 @@ struct Cyc_List_List*_tmp6=({int _tmp2E=(int)({int _tmp2D=(t->hash)(key);_tmp2D 
 int(*_tmp7)(void*,void*)=t->cmp;
 for(0;_tmp6 != 0;_tmp6=_tmp6->tl){
 struct _tuple0*_tmp8=(struct _tuple0*)_tmp6->hd;struct _tuple0*_tmp9=_tmp8;void*_tmpB;void**_tmpA;_LL1: _tmpB=_tmp9->f1;_tmpA=(void**)& _tmp9->f2;_LL2:;
-if(({_tmp7(key,_tmpB)== 0;}))return _tmpA;}
+if(_tmp7(key,_tmpB)== 0)return _tmpA;}
 # 71
 return 0;}
 # 74
@@ -924,7 +924,7 @@ struct Cyc_List_List*_tmpD=({int _tmp30=(int)({int _tmp2F=(t->hash)(key);_tmp2F 
 int(*_tmpE)(void*,void*)=t->cmp;
 for(0;_tmpD != 0;_tmpD=_tmpD->tl){
 struct _tuple0 _tmpF=*((struct _tuple0*)_tmpD->hd);struct _tuple0 _tmp10=_tmpF;void*_tmp12;void*_tmp11;_LL4: _tmp12=_tmp10.f1;_tmp11=_tmp10.f2;_LL5:;
-if(({_tmpE(key,_tmp12)== 0;})){
+if(_tmpE(key,_tmp12)== 0){
 *data=_tmp11;
 return 1;}}
 # 85
@@ -937,13 +937,13 @@ int(*_tmp14)(void*,void*)=t->cmp;
 int bucket=(int)({int _tmp31=(t->hash)(key);_tmp31 % _get_dyneither_size(_tmp13,sizeof(struct Cyc_List_List*));});
 struct Cyc_List_List*_tmp15=*((struct Cyc_List_List**)_check_dyneither_subscript(_tmp13,sizeof(struct Cyc_List_List*),bucket));
 if(_tmp15 == 0)return;
-if(({_tmp14(key,(((struct _tuple0*)_tmp15->hd)[0]).f1)== 0;})){
+if(_tmp14(key,(((struct _tuple0*)_tmp15->hd)[0]).f1)== 0){
 ((struct Cyc_List_List**)_tmp13.curr)[bucket]=_tmp15->tl;
 return;}{
 # 100
 struct Cyc_List_List*_tmp16=_tmp15->tl;for(0;_tmp15->tl != 0;(_tmp15=_tmp15->tl,_tmp16=_tmp16->tl)){
 # 102
-if(({_tmp14(key,(((struct _tuple0*)((struct Cyc_List_List*)_check_null(_tmp16))->hd)[0]).f1)== 0;})){
+if(_tmp14(key,(((struct _tuple0*)((struct Cyc_List_List*)_check_null(_tmp16))->hd)[0]).f1)== 0){
 _tmp15->tl=_tmp16->tl;
 return;}}};}
 # 108

@@ -132,7 +132,7 @@ streambufftest$(EXE): streambufftest.o streambuff.o
 clean:
 	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions unique_test zeroterm structarray flatlist md5 require streambufftest streambuff refcnt_test)
 	$(RM) foo_tab.* unsafe_cast.o pcredemo.o pcredemo.c pcredemo md5driver.o
-	$(RM) $(EXES) fail1.tmp
+	$(RM) $(EXES) fail1.tmp fail2.tmp fail3.tmp fail4.tmp
 	$(RM) *~ *.exe *.output *.stackdump
 #	$(MAKE) clean -C benchmarks
 #	$(MAKE) clean -C compress/cacm

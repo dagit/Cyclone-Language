@@ -1214,16 +1214,16 @@ return accum;}
 # 288
 void*Cyc_List_fold_right(void*(*f)(void*,void*),struct Cyc_List_List*x,void*accum){
 if(x == 0)return accum;else{
-return({void*_tmp4D=x->hd;f(_tmp4D,Cyc_List_fold_right(f,x->tl,accum));});}}
+return({void*(*_tmp4E)(void*,void*)=f;void*_tmp4D=x->hd;_tmp4E(_tmp4D,Cyc_List_fold_right(f,x->tl,accum));});}}
 # 292
 void*Cyc_List_fold_right_c(void*(*f)(void*,void*,void*),void*env,struct Cyc_List_List*x,void*accum){
 if(x == 0)return accum;else{
-return({void*_tmp4F=env;void*_tmp4E=x->hd;f(_tmp4F,_tmp4E,Cyc_List_fold_right_c(f,env,x->tl,accum));});}}
+return({void*(*_tmp51)(void*,void*,void*)=f;void*_tmp50=env;void*_tmp4F=x->hd;_tmp51(_tmp50,_tmp4F,Cyc_List_fold_right_c(f,env,x->tl,accum));});}}
 # 299
 struct Cyc_List_List*Cyc_List_rrevappend(struct _RegionHandle*r2,struct Cyc_List_List*x,struct Cyc_List_List*y){
 # 301
 while(x != 0){
-({struct Cyc_List_List*_tmp50=({struct Cyc_List_List*_tmpD=_region_malloc(r2,sizeof(*_tmpD));_tmpD->hd=x->hd;_tmpD->tl=y;_tmpD;});y=_tmp50;});
+({struct Cyc_List_List*_tmp52=({struct Cyc_List_List*_tmpD=_region_malloc(r2,sizeof(*_tmpD));_tmpD->hd=x->hd;_tmpD->tl=y;_tmpD;});y=_tmp52;});
 x=x->tl;}
 # 305
 return y;}
@@ -1259,7 +1259,7 @@ struct Cyc_List_List*result;struct Cyc_List_List*prev;
 # 345
 if(x == 0)return y;
 if(y == 0)return Cyc_List_rcopy(r2,x);
-({struct Cyc_List_List*_tmp51=({struct Cyc_List_List*_tmpE=_region_malloc(r2,sizeof(*_tmpE));_tmpE->hd=x->hd;_tmpE->tl=0;_tmpE;});result=_tmp51;});
+({struct Cyc_List_List*_tmp53=({struct Cyc_List_List*_tmpE=_region_malloc(r2,sizeof(*_tmpE));_tmpE->hd=x->hd;_tmpE->tl=0;_tmpE;});result=_tmp53;});
 prev=result;
 for(x=x->tl;x != 0;x=x->tl){
 struct Cyc_List_List*temp=({struct Cyc_List_List*_tmpF=_region_malloc(r2,sizeof(*_tmpF));_tmpF->hd=x->hd;_tmpF->tl=0;_tmpF;});
@@ -1294,7 +1294,7 @@ struct Cyc_List_List*c;struct Cyc_List_List*d;
 if(a == 0)return b;
 if(b == 0)return a;
 # 396
-if(({less_eq(a->hd,b->hd)<= 0;})){
+if(less_eq(a->hd,b->hd)<= 0){
 c=a;
 a=a->tl;}else{
 # 400
@@ -1305,7 +1305,7 @@ d=c;
 # 405
 while(a != 0  && b != 0){
 # 407
-if(({less_eq(a->hd,b->hd)<= 0;})){
+if(less_eq(a->hd,b->hd)<= 0){
 c->tl=a;
 c=a;
 a=a->tl;}else{
@@ -1339,14 +1339,14 @@ x=x->tl;}}
 # 445
 aptr->tl=0;
 bptr->tl=0;
-return({int(*_tmp53)(void*,void*)=less_eq;struct Cyc_List_List*_tmp52=
+return({int(*_tmp55)(void*,void*)=less_eq;struct Cyc_List_List*_tmp54=
 Cyc_List_rimp_merge_sort(less_eq,a);
 # 447
-Cyc_List_imp_merge(_tmp53,_tmp52,
+Cyc_List_imp_merge(_tmp55,_tmp54,
 Cyc_List_rimp_merge_sort(less_eq,b));});};};}
 # 455
 struct Cyc_List_List*Cyc_List_rmerge_sort(struct _RegionHandle*r2,int(*less_eq)(void*,void*),struct Cyc_List_List*x){
-return({int(*_tmp54)(void*,void*)=less_eq;Cyc_List_rimp_merge_sort(_tmp54,Cyc_List_rcopy(r2,x));});}
+return({int(*_tmp56)(void*,void*)=less_eq;Cyc_List_rimp_merge_sort(_tmp56,Cyc_List_rcopy(r2,x));});}
 # 460
 struct Cyc_List_List*Cyc_List_rmerge(struct _RegionHandle*r3,int(*less_eq)(void*,void*),struct Cyc_List_List*a,struct Cyc_List_List*b){
 # 464
@@ -1355,11 +1355,11 @@ struct Cyc_List_List*c;struct Cyc_List_List*d;
 if(a == 0)return Cyc_List_rcopy(r3,b);
 if(b == 0)return Cyc_List_rcopy(r3,a);
 # 474
-if(({less_eq(a->hd,b->hd)<= 0;})){
-({struct Cyc_List_List*_tmp55=({struct Cyc_List_List*_tmp10=_region_malloc(r3,sizeof(*_tmp10));_tmp10->hd=a->hd;_tmp10->tl=0;_tmp10;});c=_tmp55;});
+if(less_eq(a->hd,b->hd)<= 0){
+({struct Cyc_List_List*_tmp57=({struct Cyc_List_List*_tmp10=_region_malloc(r3,sizeof(*_tmp10));_tmp10->hd=a->hd;_tmp10->tl=0;_tmp10;});c=_tmp57;});
 a=a->tl;}else{
 # 478
-({struct Cyc_List_List*_tmp56=({struct Cyc_List_List*_tmp11=_region_malloc(r3,sizeof(*_tmp11));_tmp11->hd=b->hd;_tmp11->tl=0;_tmp11;});c=_tmp56;});
+({struct Cyc_List_List*_tmp58=({struct Cyc_List_List*_tmp11=_region_malloc(r3,sizeof(*_tmp11));_tmp11->hd=b->hd;_tmp11->tl=0;_tmp11;});c=_tmp58;});
 b=b->tl;}
 # 481
 d=c;
@@ -1367,21 +1367,21 @@ d=c;
 while(a != 0  && b != 0){
 # 485
 struct Cyc_List_List*temp;
-if(({less_eq(a->hd,b->hd)<= 0;})){
-({struct Cyc_List_List*_tmp57=({struct Cyc_List_List*_tmp12=_region_malloc(r3,sizeof(*_tmp12));_tmp12->hd=a->hd;_tmp12->tl=0;_tmp12;});temp=_tmp57;});
+if(less_eq(a->hd,b->hd)<= 0){
+({struct Cyc_List_List*_tmp59=({struct Cyc_List_List*_tmp12=_region_malloc(r3,sizeof(*_tmp12));_tmp12->hd=a->hd;_tmp12->tl=0;_tmp12;});temp=_tmp59;});
 c->tl=temp;
 c=temp;
 a=a->tl;}else{
 # 492
-({struct Cyc_List_List*_tmp58=({struct Cyc_List_List*_tmp13=_region_malloc(r3,sizeof(*_tmp13));_tmp13->hd=b->hd;_tmp13->tl=0;_tmp13;});temp=_tmp58;});
+({struct Cyc_List_List*_tmp5A=({struct Cyc_List_List*_tmp13=_region_malloc(r3,sizeof(*_tmp13));_tmp13->hd=b->hd;_tmp13->tl=0;_tmp13;});temp=_tmp5A;});
 c->tl=temp;
 c=temp;
 b=b->tl;}}
 # 499
 if(a == 0)
-({struct Cyc_List_List*_tmp59=Cyc_List_rcopy(r3,b);c->tl=_tmp59;});else{
+({struct Cyc_List_List*_tmp5B=Cyc_List_rcopy(r3,b);c->tl=_tmp5B;});else{
 # 502
-({struct Cyc_List_List*_tmp5A=Cyc_List_rcopy(r3,a);c->tl=_tmp5A;});}
+({struct Cyc_List_List*_tmp5C=Cyc_List_rcopy(r3,a);c->tl=_tmp5C;});}
 return d;}
 # 506
 struct Cyc_List_List*Cyc_List_merge_sort(int(*less_eq)(void*,void*),struct Cyc_List_List*x){
@@ -1429,7 +1429,7 @@ return x != 0;}
 void*Cyc_List_find_c(void*(*pred)(void*,void*),void*env,struct Cyc_List_List*x){
 void*v=0;
 for(0;x != 0;x=x->tl){
-({void*_tmp5B=pred(env,x->hd);v=_tmp5B;});
+({void*_tmp5D=pred(env,x->hd);v=_tmp5D;});
 if((unsigned int)v)break;}
 # 571
 return v;}struct _tuple2{void*f1;void*f2;};
@@ -1441,14 +1441,14 @@ struct Cyc_List_List*result;struct Cyc_List_List*prev;struct Cyc_List_List*temp;
 if(x == 0  && y == 0)return 0;
 if(x == 0  || y == 0)(int)_throw((void*)& Cyc_List_List_mismatch_val);
 # 583
-({struct Cyc_List_List*_tmp5D=({struct Cyc_List_List*_tmp15=_region_malloc(r3,sizeof(*_tmp15));({struct _tuple2*_tmp5C=({struct _tuple2*_tmp16=_region_malloc(r4,sizeof(*_tmp16));_tmp16->f1=x->hd;_tmp16->f2=y->hd;_tmp16;});_tmp15->hd=_tmp5C;});_tmp15->tl=0;_tmp15;});result=_tmp5D;});
+({struct Cyc_List_List*_tmp5F=({struct Cyc_List_List*_tmp15=_region_malloc(r3,sizeof(*_tmp15));({struct _tuple2*_tmp5E=({struct _tuple2*_tmp16=_region_malloc(r4,sizeof(*_tmp16));_tmp16->f1=x->hd;_tmp16->f2=y->hd;_tmp16;});_tmp15->hd=_tmp5E;});_tmp15->tl=0;_tmp15;});result=_tmp5F;});
 prev=result;
 # 586
 x=x->tl;
 y=y->tl;
 # 589
 while(x != 0  && y != 0){
-({struct Cyc_List_List*_tmp5F=({struct Cyc_List_List*_tmp17=_region_malloc(r3,sizeof(*_tmp17));({struct _tuple2*_tmp5E=({struct _tuple2*_tmp18=_region_malloc(r4,sizeof(*_tmp18));_tmp18->f1=x->hd;_tmp18->f2=y->hd;_tmp18;});_tmp17->hd=_tmp5E;});_tmp17->tl=0;_tmp17;});temp=_tmp5F;});
+({struct Cyc_List_List*_tmp61=({struct Cyc_List_List*_tmp17=_region_malloc(r3,sizeof(*_tmp17));({struct _tuple2*_tmp60=({struct _tuple2*_tmp18=_region_malloc(r4,sizeof(*_tmp18));_tmp18->f1=x->hd;_tmp18->f2=y->hd;_tmp18;});_tmp17->hd=_tmp60;});_tmp17->tl=0;_tmp17;});temp=_tmp61;});
 prev->tl=temp;
 prev=temp;
 x=x->tl;
@@ -1467,7 +1467,7 @@ struct Cyc_List_List*result;struct Cyc_List_List*prev;struct Cyc_List_List*temp;
 if((x == 0  && y == 0) && z == 0)return 0;
 if((x == 0  || y == 0) || z == 0)(int)_throw((void*)& Cyc_List_List_mismatch_val);
 # 611
-({struct Cyc_List_List*_tmp61=({struct Cyc_List_List*_tmp19=_region_malloc(r3,sizeof(*_tmp19));({struct _tuple3*_tmp60=({struct _tuple3*_tmp1A=_region_malloc(r4,sizeof(*_tmp1A));_tmp1A->f1=x->hd;_tmp1A->f2=y->hd;_tmp1A->f3=z->hd;_tmp1A;});_tmp19->hd=_tmp60;});_tmp19->tl=0;_tmp19;});result=_tmp61;});
+({struct Cyc_List_List*_tmp63=({struct Cyc_List_List*_tmp19=_region_malloc(r3,sizeof(*_tmp19));({struct _tuple3*_tmp62=({struct _tuple3*_tmp1A=_region_malloc(r4,sizeof(*_tmp1A));_tmp1A->f1=x->hd;_tmp1A->f2=y->hd;_tmp1A->f3=z->hd;_tmp1A;});_tmp19->hd=_tmp62;});_tmp19->tl=0;_tmp19;});result=_tmp63;});
 prev=result;
 # 614
 x=x->tl;
@@ -1475,7 +1475,7 @@ y=y->tl;
 z=z->tl;
 # 618
 while((x != 0  && y != 0) && z != 0){
-({struct Cyc_List_List*_tmp63=({struct Cyc_List_List*_tmp1B=_region_malloc(r3,sizeof(*_tmp1B));({struct _tuple3*_tmp62=({struct _tuple3*_tmp1C=_region_malloc(r4,sizeof(*_tmp1C));_tmp1C->f1=x->hd;_tmp1C->f2=y->hd;_tmp1C->f3=z->hd;_tmp1C;});_tmp1B->hd=_tmp62;});_tmp1B->tl=0;_tmp1B;});temp=_tmp63;});
+({struct Cyc_List_List*_tmp65=({struct Cyc_List_List*_tmp1B=_region_malloc(r3,sizeof(*_tmp1B));({struct _tuple3*_tmp64=({struct _tuple3*_tmp1C=_region_malloc(r4,sizeof(*_tmp1C));_tmp1C->f1=x->hd;_tmp1C->f2=y->hd;_tmp1C->f3=z->hd;_tmp1C;});_tmp1B->hd=_tmp64;});_tmp1B->tl=0;_tmp1B;});temp=_tmp65;});
 prev->tl=temp;
 prev=temp;
 x=x->tl;
@@ -1495,12 +1495,12 @@ struct Cyc_List_List*result2;struct Cyc_List_List*prev2;struct Cyc_List_List*tem
 # 641
 if(x == 0)return({struct _tuple0 _tmp1D;_tmp1D.f1=0;_tmp1D.f2=0;_tmp1D;});
 # 643
-({struct Cyc_List_List*_tmp65=({struct Cyc_List_List*_tmp64=({struct Cyc_List_List*_tmp1E=_region_malloc(r3,sizeof(*_tmp1E));_tmp1E->hd=(((struct _tuple2*)x->hd)[0]).f1;_tmp1E->tl=0;_tmp1E;});result1=_tmp64;});prev1=_tmp65;});
-({struct Cyc_List_List*_tmp67=({struct Cyc_List_List*_tmp66=({struct Cyc_List_List*_tmp1F=_region_malloc(r4,sizeof(*_tmp1F));_tmp1F->hd=(((struct _tuple2*)x->hd)[0]).f2;_tmp1F->tl=0;_tmp1F;});result2=_tmp66;});prev2=_tmp67;});
+({struct Cyc_List_List*_tmp67=({struct Cyc_List_List*_tmp66=({struct Cyc_List_List*_tmp1E=_region_malloc(r3,sizeof(*_tmp1E));_tmp1E->hd=(((struct _tuple2*)x->hd)[0]).f1;_tmp1E->tl=0;_tmp1E;});result1=_tmp66;});prev1=_tmp67;});
+({struct Cyc_List_List*_tmp69=({struct Cyc_List_List*_tmp68=({struct Cyc_List_List*_tmp1F=_region_malloc(r4,sizeof(*_tmp1F));_tmp1F->hd=(((struct _tuple2*)x->hd)[0]).f2;_tmp1F->tl=0;_tmp1F;});result2=_tmp68;});prev2=_tmp69;});
 # 646
 for(x=x->tl;x != 0;x=x->tl){
-({struct Cyc_List_List*_tmp68=({struct Cyc_List_List*_tmp20=_region_malloc(r3,sizeof(*_tmp20));_tmp20->hd=(((struct _tuple2*)x->hd)[0]).f1;_tmp20->tl=0;_tmp20;});temp1=_tmp68;});
-({struct Cyc_List_List*_tmp69=({struct Cyc_List_List*_tmp21=_region_malloc(r4,sizeof(*_tmp21));_tmp21->hd=(((struct _tuple2*)x->hd)[0]).f2;_tmp21->tl=0;_tmp21;});temp2=_tmp69;});
+({struct Cyc_List_List*_tmp6A=({struct Cyc_List_List*_tmp20=_region_malloc(r3,sizeof(*_tmp20));_tmp20->hd=(((struct _tuple2*)x->hd)[0]).f1;_tmp20->tl=0;_tmp20;});temp1=_tmp6A;});
+({struct Cyc_List_List*_tmp6B=({struct Cyc_List_List*_tmp21=_region_malloc(r4,sizeof(*_tmp21));_tmp21->hd=(((struct _tuple2*)x->hd)[0]).f2;_tmp21->tl=0;_tmp21;});temp2=_tmp6B;});
 prev1->tl=temp1;
 prev2->tl=temp2;
 prev1=temp1;
@@ -1519,14 +1519,14 @@ struct Cyc_List_List*result3;struct Cyc_List_List*prev3;struct Cyc_List_List*tem
 # 670
 if(x == 0)return({struct _tuple1 _tmp23;_tmp23.f1=0;_tmp23.f2=0;_tmp23.f3=0;_tmp23;});
 # 672
-({struct Cyc_List_List*_tmp6B=({struct Cyc_List_List*_tmp6A=({struct Cyc_List_List*_tmp24=_region_malloc(r3,sizeof(*_tmp24));_tmp24->hd=(((struct _tuple3*)x->hd)[0]).f1;_tmp24->tl=0;_tmp24;});result1=_tmp6A;});prev1=_tmp6B;});
-({struct Cyc_List_List*_tmp6D=({struct Cyc_List_List*_tmp6C=({struct Cyc_List_List*_tmp25=_region_malloc(r4,sizeof(*_tmp25));_tmp25->hd=(((struct _tuple3*)x->hd)[0]).f2;_tmp25->tl=0;_tmp25;});result2=_tmp6C;});prev2=_tmp6D;});
-({struct Cyc_List_List*_tmp6F=({struct Cyc_List_List*_tmp6E=({struct Cyc_List_List*_tmp26=_region_malloc(r5,sizeof(*_tmp26));_tmp26->hd=(((struct _tuple3*)x->hd)[0]).f3;_tmp26->tl=0;_tmp26;});result3=_tmp6E;});prev3=_tmp6F;});
+({struct Cyc_List_List*_tmp6D=({struct Cyc_List_List*_tmp6C=({struct Cyc_List_List*_tmp24=_region_malloc(r3,sizeof(*_tmp24));_tmp24->hd=(((struct _tuple3*)x->hd)[0]).f1;_tmp24->tl=0;_tmp24;});result1=_tmp6C;});prev1=_tmp6D;});
+({struct Cyc_List_List*_tmp6F=({struct Cyc_List_List*_tmp6E=({struct Cyc_List_List*_tmp25=_region_malloc(r4,sizeof(*_tmp25));_tmp25->hd=(((struct _tuple3*)x->hd)[0]).f2;_tmp25->tl=0;_tmp25;});result2=_tmp6E;});prev2=_tmp6F;});
+({struct Cyc_List_List*_tmp71=({struct Cyc_List_List*_tmp70=({struct Cyc_List_List*_tmp26=_region_malloc(r5,sizeof(*_tmp26));_tmp26->hd=(((struct _tuple3*)x->hd)[0]).f3;_tmp26->tl=0;_tmp26;});result3=_tmp70;});prev3=_tmp71;});
 # 676
 for(x=x->tl;x != 0;x=x->tl){
-({struct Cyc_List_List*_tmp70=({struct Cyc_List_List*_tmp27=_region_malloc(r3,sizeof(*_tmp27));_tmp27->hd=(((struct _tuple3*)x->hd)[0]).f1;_tmp27->tl=0;_tmp27;});temp1=_tmp70;});
-({struct Cyc_List_List*_tmp71=({struct Cyc_List_List*_tmp28=_region_malloc(r4,sizeof(*_tmp28));_tmp28->hd=(((struct _tuple3*)x->hd)[0]).f2;_tmp28->tl=0;_tmp28;});temp2=_tmp71;});
-({struct Cyc_List_List*_tmp72=({struct Cyc_List_List*_tmp29=_region_malloc(r5,sizeof(*_tmp29));_tmp29->hd=(((struct _tuple3*)x->hd)[0]).f3;_tmp29->tl=0;_tmp29;});temp3=_tmp72;});
+({struct Cyc_List_List*_tmp72=({struct Cyc_List_List*_tmp27=_region_malloc(r3,sizeof(*_tmp27));_tmp27->hd=(((struct _tuple3*)x->hd)[0]).f1;_tmp27->tl=0;_tmp27;});temp1=_tmp72;});
+({struct Cyc_List_List*_tmp73=({struct Cyc_List_List*_tmp28=_region_malloc(r4,sizeof(*_tmp28));_tmp28->hd=(((struct _tuple3*)x->hd)[0]).f2;_tmp28->tl=0;_tmp28;});temp2=_tmp73;});
+({struct Cyc_List_List*_tmp74=({struct Cyc_List_List*_tmp29=_region_malloc(r5,sizeof(*_tmp29));_tmp29->hd=(((struct _tuple3*)x->hd)[0]).f3;_tmp29->tl=0;_tmp29;});temp3=_tmp74;});
 prev1->tl=temp1;
 prev2->tl=temp2;
 prev3->tl=temp3;
@@ -1548,7 +1548,7 @@ return 0;}
 # 705
 int Cyc_List_mem(int(*cmp)(void*,void*),struct Cyc_List_List*l,void*x){
 while(l != 0){
-if(({cmp(l->hd,x)== 0;}))return 1;
+if(cmp(l->hd,x)== 0)return 1;
 l=l->tl;}
 # 710
 return 0;}
@@ -1562,7 +1562,7 @@ l=l->tl;}
 # 727
 void*Cyc_List_assoc_cmp(int(*cmp)(void*,void*),struct Cyc_List_List*l,void*x){
 while(l != 0){
-if(({cmp((*((struct _tuple2*)l->hd)).f1,x)== 0;}))return(*((struct _tuple2*)l->hd)).f2;
+if(cmp((*((struct _tuple2*)l->hd)).f1,x)== 0)return(*((struct _tuple2*)l->hd)).f2;
 l=l->tl;}
 # 732
 (int)_throw((void*)& Cyc_Core_Not_found_val);}
@@ -1571,7 +1571,7 @@ struct Cyc_List_List*Cyc_List_delete_cmp(int(*cmp)(void*,void*),struct Cyc_List_
 struct Cyc_List_List*prev=0;
 struct Cyc_List_List*_tmp2B=l;
 while(_tmp2B != 0){
-if(({cmp(_tmp2B->hd,x)== 0;})){
+if(cmp(_tmp2B->hd,x)== 0){
 if(prev == 0)
 return((struct Cyc_List_List*)_check_null(l))->tl;else{
 # 747
@@ -1598,7 +1598,7 @@ return 0;}
 # 780
 int Cyc_List_mem_assoc_cmp(int(*cmp)(void*,void*),struct Cyc_List_List*l,void*x){
 while(l != 0){
-if(({cmp((((struct _tuple2*)l->hd)[0]).f1,x)== 0;}))return 1;
+if(cmp((((struct _tuple2*)l->hd)[0]).f1,x)== 0)return 1;
 l=l->tl;}
 # 785
 return 0;}
@@ -1607,7 +1607,7 @@ struct Cyc_Core_Opt*Cyc_List_check_unique(int(*cmp)(void*,void*),struct Cyc_List
 while(x != 0){
 struct Cyc_List_List*_tmp2C=x->tl;
 if(_tmp2C != 0){
-if(({cmp(x->hd,_tmp2C->hd)== 0;}))return({struct Cyc_Core_Opt*_tmp2D=_cycalloc(sizeof(*_tmp2D));_tmp2D->v=x->hd;_tmp2D;});}
+if(cmp(x->hd,_tmp2C->hd)== 0)return({struct Cyc_Core_Opt*_tmp2D=_cycalloc(sizeof(*_tmp2D));_tmp2D->v=x->hd;_tmp2D;});}
 x=_tmp2C;}
 # 798
 return 0;}
@@ -1616,8 +1616,8 @@ struct _dyneither_ptr Cyc_List_rto_array(struct _RegionHandle*r2,struct Cyc_List
 int s;
 struct _dyneither_ptr arr;
 # 806
-({int _tmp73=Cyc_List_length(x);s=_tmp73;});
-({struct _dyneither_ptr _tmp76=({unsigned int _tmp2E=(unsigned int)s;void**_tmp2F=(void**)({struct _RegionHandle*_tmp74=r2;_region_malloc(_tmp74,_check_times(sizeof(void*),_tmp2E));});struct _dyneither_ptr _tmp32=_tag_dyneither(_tmp2F,sizeof(void*),_tmp2E);{unsigned int _tmp30=_tmp2E;unsigned int i;for(i=0;i < _tmp30;i ++){({typeof((void*)({void*_tmp31=((struct Cyc_List_List*)_check_null(x))->hd;x=x->tl;_tmp31;}))_tmp75=(void*)({void*_tmp31=((struct Cyc_List_List*)_check_null(x))->hd;x=x->tl;_tmp31;});_tmp2F[i]=_tmp75;});}}_tmp32;});arr=_tmp76;});
+({int _tmp75=Cyc_List_length(x);s=_tmp75;});
+({struct _dyneither_ptr _tmp78=({unsigned int _tmp2E=(unsigned int)s;void**_tmp2F=(void**)({struct _RegionHandle*_tmp76=r2;_region_malloc(_tmp76,_check_times(sizeof(void*),_tmp2E));});struct _dyneither_ptr _tmp32=_tag_dyneither(_tmp2F,sizeof(void*),_tmp2E);{unsigned int _tmp30=_tmp2E;unsigned int i;for(i=0;i < _tmp30;i ++){({typeof((void*)({void*_tmp31=((struct Cyc_List_List*)_check_null(x))->hd;x=x->tl;_tmp31;}))_tmp77=(void*)({void*_tmp31=((struct Cyc_List_List*)_check_null(x))->hd;x=x->tl;_tmp31;});_tmp2F[i]=_tmp77;});}}_tmp32;});arr=_tmp78;});
 # 810
 return arr;}
 # 813
@@ -1627,7 +1627,7 @@ return Cyc_List_rto_array(Cyc_Core_heap_region,x);}
 struct Cyc_List_List*Cyc_List_rfrom_array(struct _RegionHandle*r2,struct _dyneither_ptr arr){
 struct Cyc_List_List*ans=0;
 {int i=(int)(_get_dyneither_size(arr,sizeof(void*))- 1);for(0;i >= 0;-- i){
-({struct Cyc_List_List*_tmp77=({struct Cyc_List_List*_tmp33=_region_malloc(r2,sizeof(*_tmp33));_tmp33->hd=*((void**)_check_dyneither_subscript(arr,sizeof(void*),i));_tmp33->tl=ans;_tmp33;});ans=_tmp77;});}}
+({struct Cyc_List_List*_tmp79=({struct Cyc_List_List*_tmp33=_region_malloc(r2,sizeof(*_tmp33));_tmp33->hd=*((void**)_check_dyneither_subscript(arr,sizeof(void*),i));_tmp33->tl=ans;_tmp33;});ans=_tmp79;});}}
 return ans;}
 # 825
 struct Cyc_List_List*Cyc_List_from_array(struct _dyneither_ptr arr){
@@ -1636,7 +1636,7 @@ return Cyc_List_rfrom_array(Cyc_Core_heap_region,arr);}
 struct Cyc_List_List*Cyc_List_rtabulate(struct _RegionHandle*r,int n,void*(*f)(int)){
 struct Cyc_List_List*res=0;
 {int i=0;for(0;i < n;++ i){
-({struct Cyc_List_List*_tmp79=({struct Cyc_List_List*_tmp34=_region_malloc(r,sizeof(*_tmp34));({void*_tmp78=f(i);_tmp34->hd=_tmp78;});_tmp34->tl=res;_tmp34;});res=_tmp79;});}}
+({struct Cyc_List_List*_tmp7B=({struct Cyc_List_List*_tmp34=_region_malloc(r,sizeof(*_tmp34));({void*_tmp7A=f(i);_tmp34->hd=_tmp7A;});_tmp34->tl=res;_tmp34;});res=_tmp7B;});}}
 # 834
 return Cyc_List_imp_rev(res);}
 # 837
@@ -1646,7 +1646,7 @@ return Cyc_List_rtabulate(Cyc_Core_heap_region,n,f);}
 struct Cyc_List_List*Cyc_List_rtabulate_c(struct _RegionHandle*r,int n,void*(*f)(void*,int),void*env){
 struct Cyc_List_List*res=0;
 {int i=0;for(0;i < n;++ i){
-({struct Cyc_List_List*_tmp7B=({struct Cyc_List_List*_tmp35=_region_malloc(r,sizeof(*_tmp35));({void*_tmp7A=f(env,i);_tmp35->hd=_tmp7A;});_tmp35->tl=res;_tmp35;});res=_tmp7B;});}}
+({struct Cyc_List_List*_tmp7D=({struct Cyc_List_List*_tmp35=_region_malloc(r,sizeof(*_tmp35));({void*_tmp7C=f(env,i);_tmp35->hd=_tmp7C;});_tmp35->tl=res;_tmp35;});res=_tmp7D;});}}
 # 846
 return Cyc_List_imp_rev(res);}
 # 849
@@ -1688,7 +1688,7 @@ struct Cyc_List_List*end=result;
 struct Cyc_List_List*temp;
 for(0;l != 0;l=l->tl){
 if(f(env,l->hd)){
-({struct Cyc_List_List*_tmp7C=({struct Cyc_List_List*_tmp38=_region_malloc(r,sizeof(*_tmp38));_tmp38->hd=l->hd;_tmp38->tl=0;_tmp38;});temp=_tmp7C;});
+({struct Cyc_List_List*_tmp7E=({struct Cyc_List_List*_tmp38=_region_malloc(r,sizeof(*_tmp38));_tmp38->hd=l->hd;_tmp38->tl=0;_tmp38;});temp=_tmp7E;});
 end->tl=temp;
 end=temp;}}
 # 897
@@ -1706,7 +1706,7 @@ struct Cyc_List_List*end=result;
 struct Cyc_List_List*temp;
 for(0;l != 0;l=l->tl){
 if(f(l->hd)){
-({struct Cyc_List_List*_tmp7D=({struct Cyc_List_List*_tmp3A=_region_malloc(r,sizeof(*_tmp3A));_tmp3A->hd=l->hd;_tmp3A->tl=0;_tmp3A;});temp=_tmp7D;});
+({struct Cyc_List_List*_tmp7F=({struct Cyc_List_List*_tmp3A=_region_malloc(r,sizeof(*_tmp3A));_tmp3A->hd=l->hd;_tmp3A->tl=0;_tmp3A;});temp=_tmp7F;});
 end->tl=temp;
 end=temp;}}
 # 918

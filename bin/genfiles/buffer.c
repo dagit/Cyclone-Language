@@ -927,7 +927,7 @@ if((offset < 0  || len < 0) || offset + len > _get_dyneither_size(s,sizeof(char)
 (int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp4=_cycalloc(sizeof(*_tmp4));({struct Cyc_Core_Invalid_argument_exn_struct _tmpB=({struct Cyc_Core_Invalid_argument_exn_struct _tmp5;_tmp5.tag=Cyc_Core_Invalid_argument;({struct _dyneither_ptr _tmpA=({const char*_tmp6="Buffer::add_substring";_tag_dyneither(_tmp6,sizeof(char),22);});_tmp5.f1=_tmpA;});_tmp5;});_tmp4[0]=_tmpB;});_tmp4;}));{
 int new_position=(int)(b->position + len);
 if(new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);
-({struct _dyneither_ptr _tmpD=({_dyneither_ptr_decrease_size(_dyneither_ptr_plus(b->buffer,sizeof(char),(int)b->position),sizeof(char),1);});struct _dyneither_ptr _tmpC=(struct _dyneither_ptr)_dyneither_ptr_plus(s,sizeof(char),offset);Cyc_zstrncpy(_tmpD,_tmpC,(unsigned long)len);});
+({struct _dyneither_ptr _tmpD=_dyneither_ptr_decrease_size(_dyneither_ptr_plus(b->buffer,sizeof(char),(int)b->position),sizeof(char),1);struct _dyneither_ptr _tmpC=(struct _dyneither_ptr)_dyneither_ptr_plus(s,sizeof(char),offset);Cyc_zstrncpy(_tmpD,_tmpC,(unsigned long)len);});
 b->position=(unsigned int)new_position;
 return;};}
 # 111

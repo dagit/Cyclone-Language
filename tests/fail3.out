@@ -1,7 +1,6 @@
 
 fail3.cyc:4: dereference of possibly uninitialized pointer
 fail3.cyc:15: expression may not be fully initialized
-fail3.cyc:21: dereference of possibly uninitialized pointer
 fail3.cyc:23: expression may not be initialized
 fail3.cyc:30: dereference of possibly uninitialized pointer
 fail3.cyc:37: dereference of possibly uninitialized pointer

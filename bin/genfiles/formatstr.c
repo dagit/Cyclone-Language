@@ -1259,9 +1259,9 @@ if(_tmp90 != 0){
 ({void*_tmp62=0;({unsigned int _tmp135=loc;struct _dyneither_ptr _tmp134=({const char*_tmp63="length modifiers not allowed with %%s";_tag_dyneither(_tmp63,sizeof(char),38);});Cyc_Tcutil_terr(_tmp135,_tmp134,_tag_dyneither(_tmp62,sizeof(void*),0));});});{
 struct Cyc_List_List*_tmp64=0;_npop_handler(0);return _tmp64;};}{
 # 305
-void*ptr=({void*_tmp139=Cyc_Absyn_char_typ;void*_tmp138=({
+void*ptr=({void*_tmp139=Cyc_Absyn_char_typ;void*_tmp138=
 Cyc_Absyn_new_evar(& Cyc_Tcutil_rko,({struct Cyc_Core_Opt*_tmp66=_cycalloc(sizeof(*_tmp66));({struct Cyc_List_List*_tmp136=
-Cyc_Tcenv_lookup_type_vars(te);_tmp66->v=_tmp136;});_tmp66;}));});
+Cyc_Tcenv_lookup_type_vars(te);_tmp66->v=_tmp136;});_tmp66;}));
 # 305
 struct Cyc_Absyn_Tqual _tmp137=
 # 308

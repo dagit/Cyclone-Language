@@ -17,7 +17,7 @@ void a2() {
 void a3() {
   int *p1, *p2;
   p1 = new 0;
-  // dereference of possibly uninitialized pointer
+
   (*p1) 
     // expression may not be initialized
     + (int)(p1=p2);

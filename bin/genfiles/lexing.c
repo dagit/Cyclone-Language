@@ -909,7 +909,7 @@ _dyneither_ptr_plus(lexbuf->lex_buffer,sizeof(char),n);
 # 100
 Cyc_zstrncpy(_tmpB,_tmpA,(unsigned long)(lexbuf->lex_buffer_len - n));});
 # 103
-({struct _dyneither_ptr _tmpD=({_dyneither_ptr_decrease_size(_dyneither_ptr_plus(lexbuf->lex_buffer,sizeof(char),lexbuf->lex_buffer_len - n),sizeof(char),1);});struct _dyneither_ptr _tmpC=(struct _dyneither_ptr)Cyc_Lexing_aux_buffer;Cyc_zstrncpy(_tmpD,_tmpC,(unsigned long)n);});
+({struct _dyneither_ptr _tmpD=_dyneither_ptr_decrease_size(_dyneither_ptr_plus(lexbuf->lex_buffer,sizeof(char),lexbuf->lex_buffer_len - n),sizeof(char),1);struct _dyneither_ptr _tmpC=(struct _dyneither_ptr)Cyc_Lexing_aux_buffer;Cyc_zstrncpy(_tmpD,_tmpC,(unsigned long)n);});
 # 105
 lexbuf->lex_abs_pos=lexbuf->lex_abs_pos + n;
 lexbuf->lex_curr_pos=lexbuf->lex_curr_pos - n;

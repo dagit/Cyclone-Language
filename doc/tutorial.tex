@@ -952,9 +952,11 @@ because memory management is a difficult and tricky business.
 We have attempted to make stack allocation and region polymorphic
 functions simple to use without sacrificing programmer control
 over the lifetimes of objects and without having to resort to
-garbage collection.  
-
-For more information about regions, see
+garbage collection.  As more advanced features, we also provide
+even finer control over object lifetimes, but at the expense of
+more work from the programmer, using the \emph{unique region} and
+\emph{reference-counted} regions.  For more information on these,
+and regions in general, see
 \hyperref[{sec:regions}]{Section~\ref{sec:regions}}.
 
 \subsection{Tagged Unions and Datatypes}
@@ -1758,6 +1760,36 @@ Though Cyclone adds many new features to C, there are also a number
 of restrictions that it must enforce to ensure code does not crash.
 Here is a list of the major restrictions:
 \begin{itemize}
+\item Cyclone enforces the evaluation order of subexpressions in contexts
+  in which C\@ is agnostic.  For example, consider the following expression
+\begin{verbatim}
+  f(x=0,x=1);
+\end{verbatim}
+  In C\@, the resulting value of \texttt{x} could either be $1$ or $0$,
+  depending on the compiler; the language makes no restriction on
+  the order that argument expressions should be evaluated.  This allows
+  the compiler more freedom in generating optimized code.  However, it
+  often makes programs harder to reason about, and they can break in
+  subtle ways when ported to different platforms.  It also can foil forms
+  of static analysis aimed at improving performance, such array-bounds-
+  or null-check elimination.
+
+  For Cyclone, we implement the following policy:
+\begin{itemize}
+\item Cyclone follows C\@ for all those places it has a requirement, e.g., for
+  comma-separated expression lists.
+\item Cyclone enforces the evaluation order to be right-to-left for assignment
+  expressions.  For example:
+\begin{verbatim}
+  e1 = e2 = e3;
+\end{verbatim}
+  In this expression, Cyclone evaluates first \texttt{e3}, then \texttt{e2},
+  then \texttt{e1}.
+\item In all contexts, Cyclone's evaluation order is left-to-right, e.g.,
+  for arguments passed to a function, and subexpressions in an arithmetic
+  expression.
+\end{itemize}
+
 \item Cyclone does not permit some of the casts that are allowed in C because
   incorrect casts can lead to crashes, and it is not always possible
   for us to determine what is safe.  In general, you should be
@@ -1823,15 +1855,15 @@ Here is a list of the major restrictions:
   cases for a switch statement (with no intervening statement) do
   not require an explicit \texttt{fallthru}.
 
-\item In the near future, Cyclone will place some restrictions on
-  linking for safety reasons. In particular, if you import a variable
-  or function with one type, then it must be exported by another file
-  with that type. In addition, access to C code will be restricted
-  based on a notion of security roles.
+%\item In the near future, Cyclone will place some restrictions on
+%  linking for safety reasons. In particular, if you import a variable
+%  or function with one type, then it must be exported by another file
+%  with that type. In addition, access to C code will be restricted
+%  based on a notion of security roles.
 
 \item Cyclone has some new keywords (beyond those of C99 and GCC)
   that can no longer be used as identifiers.  The list includes:
-  \texttt{abstract}, \texttt{alias}, \texttt{calloc}, \texttt{datatype},
+  \texttt{abstract}, \texttt{calloc}, \texttt{datatype},
   \texttt{dynregion_t}, \texttt{export}, \texttt{fallthru}, 
   \texttt{__gen}, \texttt{let}, \texttt{malloc}, \texttt{namespace},
   \texttt{numelts}, \texttt{__cyclone_port_on__}, 
