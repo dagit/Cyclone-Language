@@ -6,13 +6,13 @@ aio.h:
 
 arpa/inet.h:
 cpp {
- // OS X does not include struct in_addr in arpa/inet.h, but here instead
- #include <sys/types.h> // needed by in_addr, defines u_int32_t
- #include <netinet/in.h>
- #ifdef __APPLE__
- // for uint32_t and uint16_t on OS X
- #include <stdint.h>
- #endif
+  // OS X does not include struct in_addr in arpa/inet.h, but here instead
+  #include <sys/types.h> // needed by in_addr, defines u_int32_t
+  #include <netinet/in.h>
+  #ifdef __APPLE__
+  // for uint32_t and uint16_t on OS X
+  #include <stdint.h>
+  #endif
 }
 include {
 in_port_t
@@ -29,14 +29,6 @@ hstub {
   #ifndef _in_addr_t_def_
   #define _in_addr_t_def_
   typedef unsigned long in_addr_t;
-  #endif
-  #ifndef _uint16_t_def_
-  #define _uint16_t_def_
-  typedef unsigned short uint16_t;
-  #endif
-  #ifndef _uint32_t_def_
-  #define _uint32_t_def_
-  typedef unsigned long uint32_t;
   #endif
 }
 hstub {
@@ -69,17 +61,12 @@ cycstub {
   }
 }
 cstub {
-  #ifdef __APPLE__
   #include <sys/types.h>
+  #if defined(__APPLE__) 
   #include <netinet/in.h>
   #include <stdint.h>
   #endif
   #include <arpa/inet.h>
-#if defined(__CYGWIN32__) || defined(__CYGWIN__)
-  /* These types are not defined under Cygwin for some reason */
-  typedef unsigned short uint16_t;
-  typedef unsigned long uint32_t;
-#endif
   uint32_t __stub_htonl(uint32_t x) {
     return htonl(x);
   }

@@ -1,0 +1,155 @@
+/* This file is part of the Cyclone Library.
+   Copyright (C) 2000, 2001 Greg Morrisett, AT&T
+
+   This library is free software; you can redistribute it and/or it
+   under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; see the file COPYING.LIB.  If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place, Suite
+   330, Boston, MA 02111-1307 USA. */
+
+
+#include <core.h>
+
+namespace Flatlist {
+using Core;
+
+  // List nodes that hold `a values and live in region `r.
+  // Unlike the List library, these nodes can hold values of
+  // arbitrary type (e.g., doubles, char?, etc.)
+  struct Node<`a::A,`r::R> {
+    struct Node<`a,`r> *`r next;
+    `a value;
+  };
+
+  // an abbreviation for pointers to flattened nodes.
+  typedef struct Node<`a,`r> *`r flist_t<`a,`r>;
+
+  // calculate the length of a flat list.
+  int length(flist_t x) {
+    int i = 0;
+    for (; x != NULL; x = x->next, ++i);
+    return i;
+  }
+
+  // imperatively reverse a flattened list.
+  flist_t<`a,`r> imp_rev(flist_t<`a,`r> x) {
+    if (x == NULL) return x;
+    else {
+      flist_t<`a,`r> first  = x;
+      flist_t<`a,`r> second = x->next;
+      x->next = NULL;
+      while (second != NULL) {
+        flist_t<`a,`r> temp = second->next;
+        second->next = first;
+        first = second;
+        second = temp;
+      } 
+      return first;
+    }
+  }
+
+  // iterate across a flat list and apply f to each node.
+  void iter(void f(struct Node<`a,`r>@`r), flist_t<`a,`r> x) {
+    for (; x != NULL; x = x->next) 
+      f(x);
+  }
+
+  // same as above, but the f is given an environment.
+  void iter_c(void f(`env,struct Node<`a,`r>@`r), `env env, flist_t<`a,`r> x) {
+    for (; x != NULL; x = x->next) 
+      f(env,x);
+  }
+
+  // map one flat list of `a values to another flat list of `b values.
+  // The result is allocated in region `r.  The function f is supposed
+  // to initialize the newly allocated `b node, given the corresponding
+  // `a node, hence the initializes(2) attribute.  The sizeof the `b
+  // nodes must be passed in so that we can allocate them.
+  flist_t<`b,`r> rmap(region_t<`r> r,
+                      void f(struct Node<`a,`r1>@`r1,struct Node<`b,`r>@`r) 
+                      __attribute__((initializes(2))),
+                      sizeof_t<struct Node<`b,`r>> size,
+                      flist_t<`a,`r1> x) {
+    if (x == NULL) return NULL;
+    struct Node<`b,`r>@`r res = rmalloc(r,size); // note use of size here
+    f(x,res); // f initializes res 
+    res->next = rmap(r,f,size,x->next);
+    return res;
+  }
+
+  // Same as above, but allocate the result in the heap region.
+  flist_t<`b> map(void f(struct Node<`a,`r1>@`r1,struct Node<`b,`H>@`H) 
+                  __attribute__((initializes(2))),
+                  sizeof_t<struct Node<`b,`H>> size,
+                  flist_t<`a,`r1> x) {
+    return rmap(heap_region,f,size,x);
+  }
+
+  // You might wonder why we don't have f just take in pointers to the
+  // value components of the nodes instead of the whole nodes as in:
+  // void f(`a@`r1, `b@`r2) __attribute__((initializes(2))) so that
+  // the tail field could be filled in by rmap.  However, we can't take
+  // the address of the last member of a struct that is of abstract type
+  // because the compiler doesn't know what the alignment of this 
+  // member is.  In general, it will depend upon what `a is.  Note that
+  // we might be able to do this if we had an offsetof_t value...
+  
+}
+
+// The following code shows the flatlist code in action.
+#include <stdio.h>
+using Core;
+
+// Print out the value which is a string.
+void print_string(struct Flatlist::Node<string_t> @ x) {
+  printf("%s ",x->value);
+}
+// Print out the value which is an integer.
+void print_int(struct Flatlist::Node<int> @ x) {
+  printf("%d ",x->value);
+}
+
+// Used to map an integer node to a string node.
+void tostring(struct Flatlist::Node<int,`r1>@`r1 x, 
+              struct Flatlist::Node<string_t<`H>,`r2>@`r2 y) 
+  __attribute__((initializes(2)))
+{
+  y->next = NULL;
+  y->value = aprintf("%d",x->value);
+}
+
+int main() {
+  struct Flatlist::Node<string_t>* x;
+  struct Flatlist::Node<int>* y = NULL;
+  // create a list of 10 integers in reverse order
+  for (int i = 0; i < 10; i++) 
+    y = new Flatlist::Node{y, i};
+  // print them out -- should yield 9,8,7,6,5,4,3,2,1,0
+  Flatlist::iter(print_int,y); printf("\n");
+  // reverse them
+  y = Flatlist::imp_rev(y);
+  // print them out -- should yield 0,1,2,3,4,5,6,7,8,9
+  Flatlist::iter(print_int,y); printf("\n");
+  // map tostring across the list of integers to yield a list of strings
+  x = Flatlist::map(tostring,sizeof(struct Flatlist::Node<string_t<`H>,`H>),y);
+  // print out the strings -- should yield 0,1,2,3,4,5,6,7,8,9
+  Flatlist::iter(print_string,x); printf("\n");
+  // reverse the list of strings
+  x = Flatlist::imp_rev(x);
+  // print them out again -- should yield 9,8,7,6,5,4,3,2,1,0
+  Flatlist::iter(print_string,x); printf("\n");
+  return 0;
+}
+
+
+
+
