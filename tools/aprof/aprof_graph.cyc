@@ -63,7 +63,10 @@ using Fn;
 
 // dynamic regions must consume this much of the total memory at
 //   some point to be shown in the graph
-#define DYN_THRESHHOLD  0.01
+namespace Aprof {
+  double dyn_threshhold = 0.01;
+  bool all_dynregions = false;
+}
 
 // Data that is maintained/updated at each profiled event
 struct ProcEnv {
@@ -82,6 +85,7 @@ struct ProcEnv {
   list_t<$(unsigned int,unsigned int)@> heap_live;
   list_t<$(unsigned int,unsigned int)@> unique_live;
   list_t<$(unsigned int,unsigned int)@> refcnt_live;
+  list_t<$(unsigned int,unsigned int)@> total_dyn_live;
   list_t<$(stringptr_t,list_t<$(unsigned int,unsigned int) @>@) @> dyn_live;
 };
 
@@ -103,8 +107,7 @@ static void output_point($(unsigned int ?, unsigned int) @env,
   }
   else {
     if (*last_cnt <= x) {
-      if (verbose)
-	fprintf(stderr,"last_cnt = %d, x=%d, amt=%d\n",*last_cnt,x,amt);
+//       fprintf(stderr,"last_cnt = %d, x=%d, amt=%d\n",*last_cnt,x,amt);
       return;
     }
     int last_output_cnt = *last_cnt;
@@ -189,7 +192,7 @@ output_dynregion_line($(int,unsigned int ?,
   let &$(*num,heap_size,mempts) = env;
   let &$(name,pts) = line;
   if (length(*pts) <= 2) return; // region was empty
-  if (!yeah_man(*pts,mempts,DYN_THRESHHOLD)) return;
+  if (!yeah_man(*pts,mempts,dyn_threshhold)) return;
 //   fprintf(stderr,"Outputting dynregion %s,%x\n",*name,pts);
   output_line(*name,*num,heap_size,false,*pts);
   *num = (*num + 1);
@@ -311,11 +314,19 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
 	let &$(*tot_size,*free_size) =
 	  assoc_cmp(strptrcmp,env->dyn_regions,rnameptr);
 	*free_size = *free_size - count;
-	// update the points list
+	int live_size = *tot_size - *free_size;
+	int old_live_size = 0;
+	// update the total points list
+	if (env->total_dyn_live != NULL) {
+	  old_live_size = (*env->total_dyn_live->hd)[1];
+	}
+	env->total_dyn_live = add_point(env->cnt,count + old_live_size,
+					env->total_dyn_live);
+	// update the individual points list
 	let l = assoc_cmp(strptrcmp,env->dyn_live,rnameptr);
 // 	fprintf(stderr,"adding point at time %d for region %s l=%x\n",
 // 		env->cnt,rname,(unsigned int)l);
-	*l = add_point(env->cnt,*tot_size - *free_size,*l);
+	*l = add_point(env->cnt,live_size,*l);
       } catch {
       case &Not_found:
 	fprintf(stderr,
@@ -332,9 +343,20 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
 
     let rnameptr = new rname;
     try {
+      // update total points list
+      let &$(tot_size,free_size) =
+	assoc_cmp(strptrcmp,env->dyn_regions,rnameptr);
+      int live_size = tot_size - free_size;
+      int old_live_size = 0;
+      if (env->total_dyn_live != NULL) {
+	old_live_size = (*env->total_dyn_live->hd)[1];
+      }
+      env->total_dyn_live = add_point(env->cnt,old_live_size - live_size,
+				      env->total_dyn_live);
+      // remove region from running counters
       env->dyn_regions = delete_cmp(cmp,env->dyn_regions,
 				    new $(rnameptr,new $(0,0)));
-      // update the points list
+      // update the individual points list
       let l = assoc_cmp(strptrcmp,env->dyn_live,rnameptr);
 //       fprintf(stderr,"adding point at time %d for region %s l=%x\n",
 // 	      env->cnt,rname,(unsigned int)l);
@@ -366,8 +388,15 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
       let old_tot = *tot_size;
       let old_free = *free_size;
       *tot_size = *tot_size + count;
-      *free_size = (count - (old_tot-old_free));
+      *free_size = count;
       env->total_dynregion_size += count;
+      // update total live points
+      int old_live_size = 0;
+      if (env->total_dyn_live != NULL) {
+	old_live_size = (*env->total_dyn_live->hd)[1];
+      }
+      env->total_dyn_live = add_point(env->cnt,old_live_size+old_free,
+				      env->total_dyn_live);
       // update point
       let l = assoc_cmp(strptrcmp,env->dyn_live,rnameptr);
 //       fprintf(stderr,"adding point at time %d for region %s l=%x\n",
@@ -394,7 +423,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
 
 namespace Aprof;
 
-int generate_graph(string_t<`H> file, bool no_dynamic) {
+int generate_graph(string_t<`H> file) {
   struct ProcEnv @`H env =
     new ProcEnv{.cnt = 0,
 		.total_heap_size = 0,
@@ -408,12 +437,14 @@ int generate_graph(string_t<`H> file, bool no_dynamic) {
 		.heap_live = NULL,
 		.unique_live = NULL,
 		.refcnt_live = NULL,
+		.total_dyn_live = NULL,
 		.dyn_live = NULL };
 
   // process the file
   fn_t clos = make_fn(proc_event,env);
   int ret = proc_file(file,clos);
   if (ret != 0) return ret;
+
   env->mem_total =
     new List(new $(env->cnt-1,env->total_heap_size),env->mem_total);
 
@@ -424,23 +455,35 @@ int generate_graph(string_t<`H> file, bool no_dynamic) {
   unsigned int ?heap_size = calloc(env->cnt+1,sizeof(unsigned int));
 
   // header
-  printf("newgraph\n  xaxis min 1 max %d label : allocation time\n",
+  printf("newgraph\n  xaxis min 1 max %d label : allocation event #\n",
 	 env->cnt+1);
-  printf("  yaxis min 1 max %d label : bytes\n\n",
+  printf("  yaxis min 1 max %d label : bytes allocated/freed\n\n",
 	 env->total_heap_size + (int)(env->total_heap_size * 0.05));
 
   // gc
   output_line(aprintf("GC (%d total)",length(env->gc_points)),
 	      -1,heap_size,true,env->gc_points);
+  // total
+  output_line("total reserved",3,heap_size,true,env->mem_total);
   // unique
   output_line("unique",0,heap_size,false,env->unique_live);
   // heap
   output_line("heap",1,heap_size,false,env->heap_live);
   // dynamic/growable regions
-  let dynenv = new $(2,heap_size,env->mem_total);
-  if (!no_dynamic) iter_c(output_dynregion_line,dynenv,env->dyn_live);
-  // total
-  output_line("total reserved",(*dynenv)[0] % 7,heap_size,true,env->mem_total);
-
+  if (!all_dynregions) {
+    // tie of the end of the points if the regions weren't cleared
+    if (env->total_dyn_live != NULL) {
+      let &$(cnt,livesize) = env->total_dyn_live->hd;
+      if (livesize > heap_size[cnt] * dyn_threshhold)
+	env->total_dyn_live = 
+	  new List(new $(env->cnt-1,livesize),env->total_dyn_live);
+    }
+    if (yeah_man(env->total_dyn_live,env->mem_total,dyn_threshhold))
+      output_line("regions",2,heap_size,false,env->total_dyn_live);
+  }
+  else {
+    let dynenv = new $(2,heap_size,env->mem_total);
+    iter_c(output_dynregion_line,dynenv,env->dyn_live);
+  }
   return 0;
 }

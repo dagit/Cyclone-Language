@@ -121,16 +121,19 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
 #define UPDATE_FREQ_PERCENT 2
   int seg = filesz / (100/UPDATE_FREQ_PERCENT);
   int ticks = 0;
-  for (int i = 0; i<(100/UPDATE_FREQ_PERCENT); i++)
-    fprintf(stderr,"=");
-  fprintf(stderr,"\n");
+  if (verbose) {
+    for (int i = 0; i<(100/UPDATE_FREQ_PERCENT); i++)
+      fprintf(stderr,"=");
+    fprintf(stderr,"\n");
+  }
 
   // process the input file one line at a time
   while (gettoken(f)) {
     if (strcmp(buf,"----") == 0) break;
     int cur_loc = ftell(f);
     if ((cur_loc - (ticks*seg)) >= seg) {
-      fprintf(stderr,".");
+      if (verbose)
+	fprintf(stderr,".");
       ticks++;
     }
 
@@ -257,6 +260,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
     snarfline(f);
   }
 
-  fprintf(stderr,"\n");
+  if (verbose)
+    fprintf(stderr,"\n");
   return 0;
 }

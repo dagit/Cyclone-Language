@@ -87,12 +87,16 @@ namespace Aprof {
   // Controls debug printing level to stderr
   extern bool verbose;
 
+  // Controls threshhold for printing dynamic regions in graph
+  extern double dyn_threshhold;
+
+  // Whether to aggregate or print individual dynamic regions for graph
+  extern bool all_dynregions;
+
   // Uses proc_file above to generate a graph of the system's memory
   // usage.  The output graph is printed to stdout as a jgraph graph
   // (see http://www.cs.utk.edu/~plank/plank/jgraph/jgraph.html).
-  // If [no_dynamic] is set to true, only prints heap, unique, and
-  // refcnt region results.
-  extern int generate_graph(string_t<`H> file, bool no_dynamic);
+  extern int generate_graph(string_t<`H> file);
 
   // Uses proc_file above to generate a tabular summary of per-region
   // allocation information.

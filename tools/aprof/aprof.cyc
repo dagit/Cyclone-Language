@@ -19,22 +19,22 @@
 
 #include <core.h>
 #include <string.h>
+#include <stdlib.h>
 #include "aprof_event.h"
 
 namespace Aprof {
-  bool verbose = false;
+  bool verbose = true;
 }
 
 using Aprof;
 
 static void usage(string_t<`H> argv0) __attribute__((noreturn)) {
-  fprintf(stderr,"usage: %s [-g] [-d] [-v] [profile]\n  by default, generates an allocation summary for file amon.out\n  -g   generate graph of dynamic memory usage over time\n  -v   verbose (debugging) output\n  -h   show only heap/unique/refcnt regions (graph output only)\n",argv0);
+  fprintf(stderr,"usage: %s [-g] [-q] [-d X] [-h] [profile]\n  by default, generates an allocation summary for file amon.out\n  -g   generate graph of dynamic memory usage over time\n  -q   quiet output\n  -d X show dynamic regions that are >= X (a fraction) of the total heap (def=%g)\n",argv0,dyn_threshhold);
   exit(1);
 }
 
 int main(int argc, string_t<`H> ?`H argv) {
   bool do_graph = false;
-  bool no_dynamic = false;
   string_t<`H> file;
 
   int argn = 1;
@@ -44,11 +44,14 @@ int main(int argc, string_t<`H> ?`H argv) {
     else if ( strcmp( argv[argn], "-g" ) == 0 ) {
       do_graph = true;
     }
-    else if ( strcmp( argv[argn], "-h" ) == 0 ) {
-      no_dynamic = true;
+    else if ( strcmp( argv[argn], "-q" ) == 0 ) {
+      verbose = false;
     }
-    else if ( strcmp( argv[argn], "-v" ) == 0 ) {
-      verbose = true;
+    else if ( strcmp( argv[argn], "-d" ) == 0 && argn+1 < argc ) {
+      dyn_threshhold = strtod(strdup(argv[++argn]),NULL);
+    }
+    else if ( strcmp( argv[argn], "-a" ) == 0 ) {
+      all_dynregions = true;
     }
     else
       usage(argv[0]);
@@ -64,7 +67,7 @@ int main(int argc, string_t<`H> ?`H argv) {
 
   int ret;
   if (do_graph)
-    ret = generate_graph(file,no_dynamic);
+    ret = generate_graph(file);
   else
     ret = generate_summary(file);
   return ret;
