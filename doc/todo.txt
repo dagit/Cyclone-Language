@@ -2,14 +2,10 @@ Todo list:
 
 CONFIGURATION BUGS:
 ------------------
-* when building on an architecture that uses a .patch file, need to
-  not remove the bin/genfiles directory after it's been extracted
-  and built.  This currently screws up make install.
-
 * add a --prefix path to the configure script (this is a gnu convention)
 
-* someone suggests that make all and make check should be added,
-  following gnu conventions
+* someone suggests that make check should be added, following gnu
+  conventions
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
@@ -201,9 +197,6 @@ THINGS NEEDED TO SIMPLIFY PORTING:
 
 * better evaluation in evexp.pop
 
-* remove cyc_include.h's dependency on setjmp.h, since that really
-  pollutes the namespace
-
 THINGS NEEDED TO MAKE REGIONS MORE REAL:
 ----------------------------------------
 * finish getting unique pointers into shape.
@@ -213,8 +206,8 @@ THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 * better type error messages:  it would be good to drop region information
   when it's not germaine to the error (e.g., regions).
 
-* nested functions (closures -- with RTCG approach to get calling convention
-  right.)
+* escaping nested functions (closures -- with RTCG approach to get
+  calling convention right.)
 
 * regular expressions
 
@@ -230,13 +223,11 @@ THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 * ought to be able to treat the arguments to a datatype constructor as a tuple
   in a pattern...
 
-* should support "..." in struct patterns?
-
 * qualifiers for arguments to [x]datatype constructors?  on tuples?
 
 * Support qualified identifier declarations (instead of just uses).
 
-* as patterns.  views and abstract patterns.  
+* views and abstract patterns.  
 
 * string append operator (++)?  string patterns?  regexp patterns?
 
