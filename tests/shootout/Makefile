@@ -35,6 +35,7 @@ clean:
 	$(RM) $(NOBOUNDSEXEFILES)
 	$(RM) $(EXEFILES)
 	$(RM) $(GCCEXEFILES)
+	$(RM) $(HIST) $(CATN)
 
 $(HIST): hist.c
 	gcc $(CFLAGS) -o $@ -x c $^
