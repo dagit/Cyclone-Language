@@ -45,7 +45,7 @@ endif
 LC_FLAG =
 
 # for cross-compiling
-CPP_FLAG := -use-cpp '$(CYCDIR)/bin/cyccpp $(CYCDIR)/config/arch/$(ARCH) $(CYCDIR)/config/arch/$(TARGET)'
+CPP_FLAG := -use-cpp '$(CYCDIR)/config/cyccpp $(CYCDIR)/config/arch/$(ARCH) $(CYCDIR)/config/arch/$(TARGET)'
 
 CYC_FLAGS := -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -save-c $(LC_FLAG) $(CYC_APROF_FLAG) $(TOC_FLAG) $(CPP_FLAG)
 #CYC_FLAGS := -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -g -pp -save-c $(LC_FLAG) $(CYC_APROF_FLAG) $(TOC_FLAG)
@@ -80,13 +80,18 @@ xml/libxml.a:
 #	$(MAKE) -C xml CYCC=$(CYCDIR)/$(CYCC)
 
 # For machine-generated we need special targets (the .cyc is prefixed)
-$(OUT_PREFIX)lineno.o : $(OUT_PREFIX)lineno.cyc $(CYCC) $(CYCINC_H)
-	$(CYCC) $(CYC_FLAGS) -c $<
+# $(OUT_PREFIX)lineno.o : $(OUT_PREFIX)lineno.cyc $(CYCC) $(CYCINC_H)
+# 	$(CYCC) $(CYC_FLAGS) -c $<
 $(OUT_PREFIX)lineno.cyc : lineno.cyl $(CYCLEX) 
 	$(CYCLEX) $< $@
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
 $(OUT_PREFIX)%.o : %.cyc $(CYCC) $(CYCINC_H)
+	@if [ -f ".target$(OUT_PREFIX)" ]; then \
+	if [ "`cat .target$(OUT_PREFIX)`" != "$(TARGET)" ]; then \
+	echo "unknown" > .target$(OUT_PREFIX); \
+	fi; \
+	else echo $(TARGET) > .target$(OUT_PREFIX); fi
 	$(CYCC) $(CYC_FLAGS) -o $@ -c $<
 
 $(OUT_PREFIX)%.c: %.cyc $(CYCC) $(CYCINC_H)
@@ -116,7 +121,7 @@ clean:
 	rm -f $(addprefix *, $(C_LIBS) $(O_LIBS) $(RUNTIME).o $(CYCLIB))
 	rm -f $(addprefix *, precore_c.h lineno.cyc)
 	rm -f nogc.o nogc.a
-	rm -f *~ *.output *.stackdump *.d amon.out
+	rm -f *~ *.output *.stackdump *.d amon.out .target*
 	$(MAKE) clean -C xml
 
 # Produce dependencies

@@ -20,7 +20,7 @@ CYCBISON=$(CYC_BIN_PATH)/cycbison$(EXE)
 CYCLEX=$(CYC_BIN_PATH)/cyclex$(EXE)
 
 # for cross-compiling
-CPP_FLAG := -use-cpp '$(CYCDIR)/bin/cyccpp $(CYCDIR)/config/arch/$(ARCH) $(CYCDIR)/config/arch/$(TARGET)'
+CPP_FLAG := -use-cpp '$(CYCDIR)/config/cyccpp $(CYCDIR)/config/arch/$(ARCH) $(CYCDIR)/config/arch/$(TARGET)'
 
 CYC_FLAGS=-I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) $(CPP_FLAG)
 

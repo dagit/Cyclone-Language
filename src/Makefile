@@ -43,7 +43,7 @@ endif
 LC_FLAG =
 
 # for cross-compiling
-CPP_FLAG := -use-cpp '$(CYCDIR)/bin/cyccpp $(CYCDIR)/config/arch/$(ARCH) $(CYCDIR)/config/arch/$(TARGET)'
+CPP_FLAG := -use-cpp '$(CYCDIR)/config/cyccpp $(CYCDIR)/config/arch/$(ARCH) $(CYCDIR)/config/arch/$(TARGET)'
 
 CYC_FLAGS := -I$(CYC_INC_PATH) -I. -B$(CYC_LIB_PATH) -save-c $(LC_FLAG) $(TOC_FLAG) $(APROF_FLAG) $(CPP_FLAG)
 #CYC_FLAGS := -g -I$(CYC_INC_PATH) -I. -B$(CYC_LIB_PATH) -save-c $(LC_FLAG) $(TOC_FLAG) $(APROF_FLAG)
@@ -70,13 +70,13 @@ endif
 src: $(addprefix $(OUT_PREFIX), $(C_SRCS))
 
 # For machine-generated we need special targets (the .cyc is prefixed)
-$(OUT_PREFIX)lex.o : $(OUT_PREFIX)lex.cyc $(CYCC) $(CYCINC_H)
-	$(CYCC) $(CYC_FLAGS) -c $<
+# $(OUT_PREFIX)lex.o : $(OUT_PREFIX)lex.cyc $(CYCC) $(CYCINC_H)
+# 	$(CYCC) $(CYC_FLAGS) -c $<
 $(OUT_PREFIX)lex.cyc : lex.cyl $(CYCLEX)
 	$(CYCLEX) $< $@
 
-$(OUT_PREFIX)parse_tab.o: $(OUT_PREFIX)parse_tab.cyc $(CYCC) $(CYCINC_H)
-	$(CYCC) $(CYC_FLAGS) -c $< 
+# $(OUT_PREFIX)parse_tab.o: $(OUT_PREFIX)parse_tab.cyc $(CYCC) $(CYCINC_H)
+# 	$(CYCC) $(CYC_FLAGS) -c $< 
 $(OUT_PREFIX)parse_tab.cyc: parse.y $(CYCBISON)
 	$(CYCBISON) -d $< -o $@
 #$(OUT_PREFIX)parse_tab.h: parse.y $(CYCBISON)
@@ -86,6 +86,11 @@ parse_tab.h: parse.y $(CYCBISON)
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
 $(OUT_PREFIX)%.o $(OUT_PREFIX)%.c: %.cyc $(CYCC) $(CYCINC_H)
+	@if [ -f ".target$(OUT_PREFIX)" ]; then \
+	if [ "`cat .target$(OUT_PREFIX)`" != "$(TARGET)" ]; then \
+	echo "unknown" > .target$(OUT_PREFIX); \
+	fi; \
+	else echo $(TARGET) > .target$(OUT_PREFIX); fi
 	$(CYCC) $(CYC_FLAGS) -o $@ -c $<
 
 ifdef MS
@@ -102,7 +107,7 @@ clean_prefix:
 clean:
 	rm -f $(addprefix *, $(C_SRCS) $(O_SRCS) $(CYCCOMP))
 	rm -f $(addprefix *, lex.cyc parse_tab.cyc parse_tab.h)
-	rm -f *~ *.output *.stackdump *.d amon.out
+	rm -f *~ *.output *.stackdump *.d amon.out .target*
 
 # Produce dependencies
 # We don't use $(CYCC) here because this would create a circular
@@ -121,4 +126,3 @@ ifneq ($(MAKECMDGOALS),clean_prefix)
 -include $(addprefix $(OUT_PREFIX), $(addsuffix .d, $(CYCLONE_SRCS)))
 endif
 endif
-

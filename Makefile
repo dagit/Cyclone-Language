@@ -103,8 +103,12 @@ cmp:
 # to add files to Makefile.inc).
 # TJIM: modified to update only changed files.  This speeds up cvs commit
 # over a slow link.
+# MWH: Added a check to make sure that the .c files match the target we are
+# installing into
 update: cyclone_src
+	@if [ ! -f "src/.target" -o "`cat src/.target`" != "$(TARGET)" ]; then echo "Attempting to update $(TARGET) with files built for `cat src/.target`"; exit 1; fi
 	@for i in $(C_SRCS); do (cmp -s src/$$i bin/genfiles/$(TARGET)/src/$$i || (echo UPDATING src/$$i; cp src/$$i bin/genfiles/$(TARGET)/src/$$i)) done
+	@if [ ! -f "lib/.target" -o "`cat lib/.target`" != "$(TARGET)" ]; then echo "Attempting to update $(TARGET) with files built for `cat lib/.target`"; exit 1; fi
 	@for i in $(C_LIBS); do (cmp -s lib/$$i bin/genfiles/$(TARGET)/lib/$$i || (echo UPDATING lib/$$i; cp lib/$$i bin/genfiles/$(TARGET)/lib/$$i)) done
 	@for i in $(CYCLONE_H); do (cmp -s lib/$$i include/$$i || (echo UPDATING lib/$$i; cp lib/$$i include/$$i)) done
 	@cmp -s lib/$(C_RUNTIME) bin/genfiles/$(TARGET)/lib/$(C_RUNTIME) || (echo UPDATING lib/$(C_RUNTIME); cp lib/$(C_RUNTIME) bin/genfiles/$(TARGET)/lib/$(C_RUNTIME))
