@@ -549,8 +549,8 @@ dict_t<`a,`b> delete(dict_t<`a,`b,`r1> d, `a x) {
 }
 
 bool iter_f<`a,`b,`r1,`r2,`r3>($(tree<`a,`b,`r1> ?`r2,int) @`r2 stk, 
-			       $(`a,`b)@`r3 dest;
-                               {`r1,`r2,`r3}) {
+			       $(`a,`b)@`r3 dest
+                               ) {
   let &$(stack,*indp) = stk;
   let ind = *indp;
   if(ind==-1)
@@ -566,8 +566,10 @@ bool iter_f<`a,`b,`r1,`r2,`r3>($(tree<`a,`b,`r1> ?`r2,int) @`r2 stk,
   return true;
 }
 
-Iter::iter_t<$(`a,`b),{`r1,`r2}> make_iter(region_t<`r1> rgn,
-					   dict_t<`a,`b,`r2> d) {
+Iter::iter_t<$(`a,`b),`bd> make_iter(region_t<`r1> rgn,
+				     dict_t<`a,`b,`r2> d
+				     : regions($(`a,`b)) > `bd,
+				       {`r1,`r2} > `bd) {
   // we exploit the balancing invariant to bound the array size
   int half_max_size = 1;
   let t = d.t;
@@ -577,8 +579,8 @@ Iter::iter_t<$(`a,`b),{`r1,`r2}> make_iter(region_t<`r1> rgn,
   }
   t = d.t;
   let stack = rnew(rgn) { for i < 2*half_max_size : t};
-  return Iter::Iter(rnew(rgn) $(stack, (t ? 0 : -1)),
-		    iter_f@<`a,`b,`r2,`r1><>);
+  return Iter::Iter{.env = rnew(rgn) $(stack, (t ? 0 : -1)),
+		    .next = iter_f@<`a,`b,`r2,`r1><>};
 }
 
 // we need to do this by hand, since automated marshallers are not

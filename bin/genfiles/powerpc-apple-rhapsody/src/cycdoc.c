@@ -1358,17 +1358,17 @@ _tmpE1)))),((_tmpDF->tl=((struct Cyc_List_List*(*)(struct _dyneither_ptr*(*f)(
 struct _dyneither_ptr*),struct Cyc_List_List*x))Cyc_List_map)(Cyc_sh_escape_stringptr,((
 struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_rev)(Cyc_cycargs)),
 _tmpDF)))))),((_tmpE2=" ",_tag_dyneither(_tmpE2,sizeof(char),2))));const char*
-_tmpEB;void*_tmpEA[4];struct Cyc_String_pa_struct _tmpE9;struct Cyc_String_pa_struct
-_tmpE8;const char*_tmpE7;struct Cyc_String_pa_struct _tmpE6;struct Cyc_String_pa_struct
+_tmpEB;const char*_tmpEA;void*_tmpE9[4];struct Cyc_String_pa_struct _tmpE8;struct
+Cyc_String_pa_struct _tmpE7;struct Cyc_String_pa_struct _tmpE6;struct Cyc_String_pa_struct
 _tmpE5;const char*_tmp50=(const char*)_untag_dyneither_ptr(((_tmpE5.tag=0,((_tmpE5.f1=(
 struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_sh_escape_string(filename)),((
 _tmpE6.tag=0,((_tmpE6.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_sh_escape_string(((
-_tmpE7=_tmp4E,_tag_dyneither(_tmpE7,sizeof(char),_get_zero_arr_size_char(_tmpE7,
-1)))))),((_tmpE8.tag=0,((_tmpE8.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)
-_tmp4F),((_tmpE9.tag=0,((_tmpE9.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)
-Cyc_cyclone_file),((_tmpEA[0]=& _tmpE9,((_tmpEA[1]=& _tmpE8,((_tmpEA[2]=& _tmpE6,((
-_tmpEA[3]=& _tmpE5,Cyc_aprintf(((_tmpEB="%s %s -E -o %s -x cyc %s",_tag_dyneither(
-_tmpEB,sizeof(char),25))),_tag_dyneither(_tmpEA,sizeof(void*),4)))))))))))))))))))))))))),
+_tmpEB=_tmp4E,_tag_dyneither(_tmpEB,sizeof(char),_get_zero_arr_size_char(_tmpEB,
+1)))))),((_tmpE7.tag=0,((_tmpE7.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)
+_tmp4F),((_tmpE8.tag=0,((_tmpE8.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)
+Cyc_cyclone_file),((_tmpE9[0]=& _tmpE8,((_tmpE9[1]=& _tmpE7,((_tmpE9[2]=& _tmpE6,((
+_tmpE9[3]=& _tmpE5,Cyc_aprintf(((_tmpEA="%s %s -E -o %s -x cyc %s",_tag_dyneither(
+_tmpEA,sizeof(char),25))),_tag_dyneither(_tmpE9,sizeof(void*),4)))))))))))))))))))))))))),
 sizeof(char),1);if(system(_tmp50)!= 0){{const char*_tmpEE;void*_tmpED;(_tmpED=0,
 Cyc_fprintf(Cyc_stderr,((_tmpEE="\nError: preprocessing\n",_tag_dyneither(_tmpEE,
 sizeof(char),23))),_tag_dyneither(_tmpED,sizeof(void*),0)));}return;}{const char*
@@ -1438,46 +1438,46 @@ _LL36:;};};}};};};};};};};};}void GC_blacklist_warn_clear();struct _tuple21{stru
 _dyneither_ptr f1;int f2;struct _dyneither_ptr f3;void*f4;struct _dyneither_ptr f5;};
 int Cyc_main(int argc,struct _dyneither_ptr argv);int Cyc_main(int argc,struct
 _dyneither_ptr argv){GC_blacklist_warn_clear();{struct _tuple21*_tmp14F;const char*
-_tmp14E;const char*_tmp14D;struct Cyc_Arg_String_spec_struct _tmp14C;struct Cyc_Arg_String_spec_struct*
-_tmp14B;const char*_tmp14A;struct _tuple21*_tmp149;const char*_tmp148;const char*
-_tmp147;struct Cyc_Arg_Int_spec_struct _tmp146;struct Cyc_Arg_Int_spec_struct*
-_tmp145;const char*_tmp144;struct _tuple21*_tmp143;const char*_tmp142;const char*
-_tmp141;struct Cyc_Arg_Flag_spec_struct _tmp140;struct Cyc_Arg_Flag_spec_struct*
-_tmp13F;const char*_tmp13E;struct _tuple21*_tmp13D;const char*_tmp13C;const char*
-_tmp13B;struct Cyc_Arg_Flag_spec_struct _tmp13A;struct Cyc_Arg_Flag_spec_struct*
-_tmp139;const char*_tmp138;struct _tuple21*_tmp137;const char*_tmp136;const char*
-_tmp135;struct Cyc_Arg_Flag_spec_struct _tmp134;struct Cyc_Arg_Flag_spec_struct*
-_tmp133;const char*_tmp132;struct _tuple21*_tmp131[5];struct Cyc_List_List*options=(
-_tmp131[4]=((_tmp137=_cycalloc(sizeof(*_tmp137)),((_tmp137->f1=((_tmp136="-B",
-_tag_dyneither(_tmp136,sizeof(char),3))),((_tmp137->f2=1,((_tmp137->f3=((_tmp135="<file>",
-_tag_dyneither(_tmp135,sizeof(char),7))),((_tmp137->f4=(void*)((_tmp133=
-_cycalloc(sizeof(*_tmp133)),((_tmp133[0]=((_tmp134.tag=1,((_tmp134.f1=Cyc_add_cycarg,
-_tmp134)))),_tmp133)))),((_tmp137->f5=((_tmp132="Add to the list of directories to search for compiler files",
-_tag_dyneither(_tmp132,sizeof(char),60))),_tmp137)))))))))))),((_tmp131[3]=((
-_tmp13D=_cycalloc(sizeof(*_tmp13D)),((_tmp13D->f1=((_tmp13C="-I",_tag_dyneither(
-_tmp13C,sizeof(char),3))),((_tmp13D->f2=1,((_tmp13D->f3=((_tmp13B="<dir>",
-_tag_dyneither(_tmp13B,sizeof(char),6))),((_tmp13D->f4=(void*)((_tmp139=
-_cycalloc(sizeof(*_tmp139)),((_tmp139[0]=((_tmp13A.tag=1,((_tmp13A.f1=Cyc_add_cycarg,
-_tmp13A)))),_tmp139)))),((_tmp13D->f5=((_tmp138="Add to the list of directories to search for include files",
-_tag_dyneither(_tmp138,sizeof(char),59))),_tmp13D)))))))))))),((_tmp131[2]=((
-_tmp143=_cycalloc(sizeof(*_tmp143)),((_tmp143->f1=((_tmp142="-D",_tag_dyneither(
-_tmp142,sizeof(char),3))),((_tmp143->f2=1,((_tmp143->f3=((_tmp141="<name>[=<value>]",
-_tag_dyneither(_tmp141,sizeof(char),17))),((_tmp143->f4=(void*)((_tmp13F=
-_cycalloc(sizeof(*_tmp13F)),((_tmp13F[0]=((_tmp140.tag=1,((_tmp140.f1=Cyc_add_cycarg,
-_tmp140)))),_tmp13F)))),((_tmp143->f5=((_tmp13E="Pass definition to preprocessor",
-_tag_dyneither(_tmp13E,sizeof(char),32))),_tmp143)))))))))))),((_tmp131[1]=((
-_tmp149=_cycalloc(sizeof(*_tmp149)),((_tmp149->f1=((_tmp148="-w",_tag_dyneither(
-_tmp148,sizeof(char),3))),((_tmp149->f2=0,((_tmp149->f3=((_tmp147=" <width>",
-_tag_dyneither(_tmp147,sizeof(char),9))),((_tmp149->f4=(void*)((_tmp145=
-_cycalloc(sizeof(*_tmp145)),((_tmp145[0]=((_tmp146.tag=6,((_tmp146.f1=Cyc_set_width,
-_tmp146)))),_tmp145)))),((_tmp149->f5=((_tmp144="Use <width> as the max width for printing declarations",
-_tag_dyneither(_tmp144,sizeof(char),55))),_tmp149)))))))))))),((_tmp131[0]=((
-_tmp14F=_cycalloc(sizeof(*_tmp14F)),((_tmp14F->f1=((_tmp14E="-cyclone",
-_tag_dyneither(_tmp14E,sizeof(char),9))),((_tmp14F->f2=0,((_tmp14F->f3=((_tmp14D=" <file>",
-_tag_dyneither(_tmp14D,sizeof(char),8))),((_tmp14F->f4=(void*)((_tmp14B=
-_cycalloc(sizeof(*_tmp14B)),((_tmp14B[0]=((_tmp14C.tag=5,((_tmp14C.f1=Cyc_set_cyclone_file,
-_tmp14C)))),_tmp14B)))),((_tmp14F->f5=((_tmp14A="Use <file> as the cyclone compiler",
-_tag_dyneither(_tmp14A,sizeof(char),35))),_tmp14F)))))))))))),((struct Cyc_List_List*(*)(
+_tmp14E;struct Cyc_Arg_Flag_spec_struct _tmp14D;struct Cyc_Arg_Flag_spec_struct*
+_tmp14C;const char*_tmp14B;const char*_tmp14A;struct _tuple21*_tmp149;const char*
+_tmp148;struct Cyc_Arg_Flag_spec_struct _tmp147;struct Cyc_Arg_Flag_spec_struct*
+_tmp146;const char*_tmp145;const char*_tmp144;struct _tuple21*_tmp143;const char*
+_tmp142;struct Cyc_Arg_Flag_spec_struct _tmp141;struct Cyc_Arg_Flag_spec_struct*
+_tmp140;const char*_tmp13F;const char*_tmp13E;struct _tuple21*_tmp13D;const char*
+_tmp13C;struct Cyc_Arg_Int_spec_struct _tmp13B;struct Cyc_Arg_Int_spec_struct*
+_tmp13A;const char*_tmp139;const char*_tmp138;struct _tuple21*_tmp137;const char*
+_tmp136;struct Cyc_Arg_String_spec_struct _tmp135;struct Cyc_Arg_String_spec_struct*
+_tmp134;const char*_tmp133;const char*_tmp132;struct _tuple21*_tmp131[5];struct Cyc_List_List*
+options=(_tmp131[4]=((_tmp14F=_cycalloc(sizeof(*_tmp14F)),((_tmp14F->f1=((
+_tmp14A="-B",_tag_dyneither(_tmp14A,sizeof(char),3))),((_tmp14F->f2=1,((_tmp14F->f3=((
+_tmp14B="<file>",_tag_dyneither(_tmp14B,sizeof(char),7))),((_tmp14F->f4=(void*)((
+_tmp14C=_cycalloc(sizeof(*_tmp14C)),((_tmp14C[0]=((_tmp14D.tag=1,((_tmp14D.f1=
+Cyc_add_cycarg,_tmp14D)))),_tmp14C)))),((_tmp14F->f5=((_tmp14E="Add to the list of directories to search for compiler files",
+_tag_dyneither(_tmp14E,sizeof(char),60))),_tmp14F)))))))))))),((_tmp131[3]=((
+_tmp149=_cycalloc(sizeof(*_tmp149)),((_tmp149->f1=((_tmp144="-I",_tag_dyneither(
+_tmp144,sizeof(char),3))),((_tmp149->f2=1,((_tmp149->f3=((_tmp145="<dir>",
+_tag_dyneither(_tmp145,sizeof(char),6))),((_tmp149->f4=(void*)((_tmp146=
+_cycalloc(sizeof(*_tmp146)),((_tmp146[0]=((_tmp147.tag=1,((_tmp147.f1=Cyc_add_cycarg,
+_tmp147)))),_tmp146)))),((_tmp149->f5=((_tmp148="Add to the list of directories to search for include files",
+_tag_dyneither(_tmp148,sizeof(char),59))),_tmp149)))))))))))),((_tmp131[2]=((
+_tmp143=_cycalloc(sizeof(*_tmp143)),((_tmp143->f1=((_tmp13E="-D",_tag_dyneither(
+_tmp13E,sizeof(char),3))),((_tmp143->f2=1,((_tmp143->f3=((_tmp13F="<name>[=<value>]",
+_tag_dyneither(_tmp13F,sizeof(char),17))),((_tmp143->f4=(void*)((_tmp140=
+_cycalloc(sizeof(*_tmp140)),((_tmp140[0]=((_tmp141.tag=1,((_tmp141.f1=Cyc_add_cycarg,
+_tmp141)))),_tmp140)))),((_tmp143->f5=((_tmp142="Pass definition to preprocessor",
+_tag_dyneither(_tmp142,sizeof(char),32))),_tmp143)))))))))))),((_tmp131[1]=((
+_tmp13D=_cycalloc(sizeof(*_tmp13D)),((_tmp13D->f1=((_tmp138="-w",_tag_dyneither(
+_tmp138,sizeof(char),3))),((_tmp13D->f2=0,((_tmp13D->f3=((_tmp139=" <width>",
+_tag_dyneither(_tmp139,sizeof(char),9))),((_tmp13D->f4=(void*)((_tmp13A=
+_cycalloc(sizeof(*_tmp13A)),((_tmp13A[0]=((_tmp13B.tag=6,((_tmp13B.f1=Cyc_set_width,
+_tmp13B)))),_tmp13A)))),((_tmp13D->f5=((_tmp13C="Use <width> as the max width for printing declarations",
+_tag_dyneither(_tmp13C,sizeof(char),55))),_tmp13D)))))))))))),((_tmp131[0]=((
+_tmp137=_cycalloc(sizeof(*_tmp137)),((_tmp137->f1=((_tmp132="-cyclone",
+_tag_dyneither(_tmp132,sizeof(char),9))),((_tmp137->f2=0,((_tmp137->f3=((_tmp133=" <file>",
+_tag_dyneither(_tmp133,sizeof(char),8))),((_tmp137->f4=(void*)((_tmp134=
+_cycalloc(sizeof(*_tmp134)),((_tmp134[0]=((_tmp135.tag=5,((_tmp135.f1=Cyc_set_cyclone_file,
+_tmp135)))),_tmp134)))),((_tmp137->f5=((_tmp136="Use <file> as the cyclone compiler",
+_tag_dyneither(_tmp136,sizeof(char),35))),_tmp137)))))))))))),((struct Cyc_List_List*(*)(
 struct _dyneither_ptr))Cyc_List_list)(_tag_dyneither(_tmp131,sizeof(struct
 _tuple21*),5)))))))))));{const char*_tmp150;Cyc_Arg_parse(options,Cyc_add_other,((
 _tmp150="Options:",_tag_dyneither(_tmp150,sizeof(char),9))),argv);}if(Cyc_cycdoc_files

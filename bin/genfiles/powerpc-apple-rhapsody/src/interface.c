@@ -1227,22 +1227,22 @@ v))Cyc_Dict_insert)(_tmp4->xdatatypefielddecls,(*((struct Cyc_Absyn_Datatypefiel
 _tmp6->hd)->name).f2,_tmp8);};}}_tmp3->exports=((struct Cyc_Dict_Dict(*)(struct
 Cyc_Dict_Dict d,struct Cyc_List_List*k,struct Cyc_Interface_Ienv*v))Cyc_Dict_insert)(
 _tmp3->exports,0,_tmp4);{struct Cyc_Interface_Ienv*_tmpB=Cyc_Interface_new_ienv();
-struct _dyneither_ptr*_tmp269;const char*_tmp268;union Cyc_Absyn_Nmspace _tmp267;
+union Cyc_Absyn_Nmspace _tmp269;struct _dyneither_ptr*_tmp268;const char*_tmp267;
 struct _tuple0*_tmp266;struct _tuple0*qmain=(_tmp266=_cycalloc(sizeof(*_tmp266)),((
-_tmp266->f1=(((_tmp267.Abs_n).val=0,(((_tmp267.Abs_n).tag=2,_tmp267)))),((
-_tmp266->f2=((_tmp269=_cycalloc(sizeof(*_tmp269)),((_tmp269[0]=(struct
-_dyneither_ptr)((_tmp268="main",_tag_dyneither(_tmp268,sizeof(char),5))),_tmp269)))),
-_tmp266)))));struct Cyc_List_List*_tmp271;struct _tuple7*_tmp270;struct _tuple7*
+_tmp266->f1=(((_tmp269.Abs_n).val=0,(((_tmp269.Abs_n).tag=2,_tmp269)))),((
+_tmp266->f2=((_tmp268=_cycalloc(sizeof(*_tmp268)),((_tmp268[0]=(struct
+_dyneither_ptr)((_tmp267="main",_tag_dyneither(_tmp267,sizeof(char),5))),_tmp268)))),
+_tmp266)))));struct _tuple7*_tmp271;struct Cyc_List_List*_tmp270;struct _tuple7*
 _tmp26F;struct Cyc_List_List*_tmp26E;struct Cyc_Absyn_Vardecl*_tmpC=Cyc_Absyn_new_vardecl(
 qmain,Cyc_Absyn_function_typ(0,0,Cyc_Absyn_sint_typ,((_tmp26E=_cycalloc(sizeof(*
-_tmp26E)),((_tmp26E->hd=((_tmp26F=_cycalloc(sizeof(*_tmp26F)),((_tmp26F->f1=0,((
-_tmp26F->f2=Cyc_Absyn_empty_tqual(0),((_tmp26F->f3=Cyc_Absyn_uint_typ,_tmp26F)))))))),((
-_tmp26E->tl=((_tmp271=_cycalloc(sizeof(*_tmp271)),((_tmp271->hd=((_tmp270=
-_cycalloc(sizeof(*_tmp270)),((_tmp270->f1=0,((_tmp270->f2=Cyc_Absyn_empty_tqual(
-0),((_tmp270->f3=Cyc_Absyn_dyneither_typ(Cyc_Absyn_dyneither_typ(Cyc_Absyn_char_typ,(
+_tmp26E)),((_tmp26E->hd=((_tmp271=_cycalloc(sizeof(*_tmp271)),((_tmp271->f1=0,((
+_tmp271->f2=Cyc_Absyn_empty_tqual(0),((_tmp271->f3=Cyc_Absyn_uint_typ,_tmp271)))))))),((
+_tmp26E->tl=((_tmp270=_cycalloc(sizeof(*_tmp270)),((_tmp270->hd=((_tmp26F=
+_cycalloc(sizeof(*_tmp26F)),((_tmp26F->f1=0,((_tmp26F->f2=Cyc_Absyn_empty_tqual(
+0),((_tmp26F->f3=Cyc_Absyn_dyneither_typ(Cyc_Absyn_dyneither_typ(Cyc_Absyn_char_typ,(
 void*)& Cyc_Absyn_HeapRgn_val,Cyc_Absyn_empty_tqual(0),Cyc_Absyn_false_conref),(
 void*)& Cyc_Absyn_HeapRgn_val,Cyc_Absyn_empty_tqual(0),Cyc_Absyn_false_conref),
-_tmp270)))))))),((_tmp271->tl=0,_tmp271)))))),_tmp26E)))))),0,0,0,0),0);_tmpC->sc=
+_tmp26F)))))))),((_tmp270->tl=0,_tmp270)))))),_tmp26E)))))),0,0,0,0),0);_tmpC->sc=
 Cyc_Absyn_Extern;_tmpB->vardecls=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,
 struct _dyneither_ptr*k,struct Cyc_Absyn_Vardecl*v))Cyc_Dict_insert)(_tmpB->vardecls,(*
 qmain).f2,_tmpC);_tmp3->imports=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,

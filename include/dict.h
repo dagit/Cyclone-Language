@@ -279,8 +279,10 @@ extern dict_t<`a,`b,`r> rdelete_same(dict_t<`a,`b,`r>, `a);
     dictionary [d].  This can be faster than [delete(d,k)] because it
     avoids a copy when [k] is not a member of [d]. */
 
-extern Iter::iter_t<$(`a,`b),{`r1,`r2}> make_iter(region_t<`r1> rgn, 
-						  dict_t<`a,`b,`r2> d);
+extern Iter::iter_t<$(`a,`b),`bd> make_iter(region_t<`r1> rgn, 
+					    dict_t<`a,`b,`r2> d
+					    : regions($(`a,`b)) > `bd,
+                                              {`r1,`r2} > `bd);
   /** [make_iter(s)] returns an iterator over the set [s]; O(log n) space
       is allocated in [rgn] where n is the number of elements in d*/
 

@@ -164,7 +164,7 @@ bool place_set_subset(dict_set_t<`a,`r> s1, dict_set_t<`a,`r> s2) {
   if ((int)s1.t == (int)s2.t) return true;
   try {
     region temp; { 
-      let iter = Dict::make_iter(temp,s1);
+      Iter::iter_t<_,`temp> iter = Dict::make_iter(temp,s1);
       let elem = *Dict::rchoose(temp,s1);
       while(Iter::next(iter,&elem)) {
 	let place = elem[0];
@@ -366,7 +366,7 @@ prefix_of_member(place_t<`r2,`r3> place,
                  Dict::dict_t<place_t<`r2,`r3>,Position::seg_t,`r4> set) {
   region r; {
     let elem = $(place,NULL);
-    let iter = Dict::make_iter(r,set);
+    Iter::iter_t<_,`r> iter = Dict::make_iter(r,set);
     while(Iter::next(iter,&elem)) {
       let place2 = elem[0];
       let Place{root1,fs1} = *place;
@@ -1369,7 +1369,7 @@ void print_list(List::list_t<`a> x, void (@pr)(`a)) {
 void print_dict_set(dict_set_t<`a> p, void (@pr)(`a)) {
   region r; {
     try {
-      let iter = Dict::make_iter(r,p);
+      Iter::iter_t<_,`r> iter = Dict::make_iter(r,p);
       let elem = *Dict::rchoose(r,p);
       bool first = true;
       fprintf(stderr,"{ ");

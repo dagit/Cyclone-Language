@@ -125,7 +125,9 @@ extern `a choose(set_t<`a> s);
   /** [choose(s)] returns some element of the set [s]; if the set is
       empty, [choose] throws [Absent]. */
 
-extern Iter::iter_t<`a,{`r1,`r2}> make_iter(region_t<`r1> rgn, set_t<`a,`r2> s);
+extern Iter::iter_t<`a,`bd> make_iter(region_t<`r1> rgn, set_t<`a,`r2> s
+				     : regions(`a) > `bd,
+                                       {`r1,`r2} > `bd);
   /** [make_iter(s)] returns an iterator over the set [s]; a constant of space
       is allocated in [rgn] */
 

@@ -19,7 +19,7 @@
 #include <iter.h>
 namespace Iter;
 
-bool next(iter_t<`a::A> iter,`a::A @dest) {
+bool next(iter_t<`a::A> iter,`a @dest) {
   let Iter{<`env> env,f} = iter;
   return f(env,dest);
 }

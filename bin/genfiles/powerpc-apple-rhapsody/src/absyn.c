@@ -1985,9 +1985,9 @@ e1,struct Cyc_Absyn_Exp*e2,struct Cyc_Absyn_Exp*e3,struct Cyc_Absyn_Stmt*s,struc
 Cyc_Position_Segment*loc){struct Cyc_Absyn_For_s_struct _tmp32E;struct _tuple8
 _tmp32D;struct _tuple8 _tmp32C;struct Cyc_Absyn_For_s_struct*_tmp32B;return Cyc_Absyn_new_stmt((
 void*)((_tmp32B=_cycalloc(sizeof(*_tmp32B)),((_tmp32B[0]=((_tmp32E.tag=9,((
-_tmp32E.f1=e1,((_tmp32E.f2=((_tmp32D.f1=e2,((_tmp32D.f2=Cyc_Absyn_skip_stmt(e3->loc),
-_tmp32D)))),((_tmp32E.f3=((_tmp32C.f1=e3,((_tmp32C.f2=Cyc_Absyn_skip_stmt(e3->loc),
-_tmp32C)))),((_tmp32E.f4=s,_tmp32E)))))))))),_tmp32B)))),loc);}struct Cyc_Absyn_Stmt*
+_tmp32E.f1=e1,((_tmp32E.f2=((_tmp32C.f1=e2,((_tmp32C.f2=Cyc_Absyn_skip_stmt(e3->loc),
+_tmp32C)))),((_tmp32E.f3=((_tmp32D.f1=e3,((_tmp32D.f2=Cyc_Absyn_skip_stmt(e3->loc),
+_tmp32D)))),((_tmp32E.f4=s,_tmp32E)))))))))),_tmp32B)))),loc);}struct Cyc_Absyn_Stmt*
 Cyc_Absyn_switch_stmt(struct Cyc_Absyn_Exp*e,struct Cyc_List_List*scs,struct Cyc_Position_Segment*
 loc);struct Cyc_Absyn_Stmt*Cyc_Absyn_switch_stmt(struct Cyc_Absyn_Exp*e,struct Cyc_List_List*
 scs,struct Cyc_Position_Segment*loc){struct Cyc_Absyn_Switch_s_struct _tmp331;

@@ -863,14 +863,14 @@ struct _dyneither_ptr _tmp58;struct _dyneither_ptr _tmp5A;struct _dyneither_ptr 
 struct _dyneither_ptr*_tmp5D;int _tmp5E;struct _dyneither_ptr _tmp5F;struct
 _dyneither_ptr*_tmp61;int _tmp62;struct _dyneither_ptr _tmp63;_LL1F: {struct Cyc_Typerep_Int_struct*
 _tmp3F=(struct Cyc_Typerep_Int_struct*)_tmp3E;if(_tmp3F->tag != 0)goto _LL21;else{
-_tmp40=_tmp3F->f1;_tmp41=_tmp3F->f2;}}_LL20:{const char*_tmp1C0;void*_tmp1BF[2];
-const char*_tmp1BE;const char*_tmp1BD;struct Cyc_String_pa_struct _tmp1BC;struct Cyc_Int_pa_struct
+_tmp40=_tmp3F->f1;_tmp41=_tmp3F->f2;}}_LL20:{const char*_tmp1C0;const char*_tmp1BF;
+const char*_tmp1BE;void*_tmp1BD[2];struct Cyc_String_pa_struct _tmp1BC;struct Cyc_Int_pa_struct
 _tmp1BB;(_tmp1BB.tag=1,((_tmp1BB.f1=(unsigned long)((int)_tmp41),((_tmp1BC.tag=0,((
 _tmp1BC.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)(_tmp40?(struct
-_dyneither_ptr)((_tmp1BD="signed",_tag_dyneither(_tmp1BD,sizeof(char),7))):(
-struct _dyneither_ptr)((_tmp1BE="unsigned",_tag_dyneither(_tmp1BE,sizeof(char),9))))),((
-_tmp1BF[0]=& _tmp1BC,((_tmp1BF[1]=& _tmp1BB,Cyc_printf(((_tmp1C0="Int(%s,%d)",
-_tag_dyneither(_tmp1C0,sizeof(char),11))),_tag_dyneither(_tmp1BF,sizeof(void*),2)))))))))))));}
+_dyneither_ptr)((_tmp1BF="signed",_tag_dyneither(_tmp1BF,sizeof(char),7))):(
+struct _dyneither_ptr)((_tmp1C0="unsigned",_tag_dyneither(_tmp1C0,sizeof(char),9))))),((
+_tmp1BD[0]=& _tmp1BC,((_tmp1BD[1]=& _tmp1BB,Cyc_printf(((_tmp1BE="Int(%s,%d)",
+_tag_dyneither(_tmp1BE,sizeof(char),11))),_tag_dyneither(_tmp1BD,sizeof(void*),2)))))))))))));}
 goto _LL1E;_LL21: {struct Cyc_Typerep_Float_struct*_tmp42=(struct Cyc_Typerep_Float_struct*)
 _tmp3E;if(_tmp42->tag != 1)goto _LL23;}_LL22:{const char*_tmp1C3;void*_tmp1C2;(
 _tmp1C2=0,Cyc_printf(((_tmp1C3="Float",_tag_dyneither(_tmp1C3,sizeof(char),6))),

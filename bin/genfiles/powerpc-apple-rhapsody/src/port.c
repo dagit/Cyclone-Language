@@ -2060,22 +2060,22 @@ _tmp2EB=(struct Cyc_Port_Heap_ct_struct*)_tmp2EA;if(_tmp2EB->tag != 7)goto _LL18
 if(!(!fn_res))goto _LL18A;_LL189:{struct Cyc_Port_Edit*_tmp5ED;const char*_tmp5EC;
 const char*_tmp5EB;struct Cyc_List_List*_tmp5EA;(env->gcenv)->edits=((_tmp5EA=
 _cycalloc(sizeof(*_tmp5EA)),((_tmp5EA->hd=((_tmp5ED=_cycalloc(sizeof(*_tmp5ED)),((
-_tmp5ED->loc=_tmp2E5,((_tmp5ED->old_string=((_tmp5EC="`H ",_tag_dyneither(
-_tmp5EC,sizeof(char),4))),((_tmp5ED->new_string=((_tmp5EB="",_tag_dyneither(
-_tmp5EB,sizeof(char),1))),_tmp5ED)))))))),((_tmp5EA->tl=(env->gcenv)->edits,
+_tmp5ED->loc=_tmp2E5,((_tmp5ED->old_string=((_tmp5EB="`H ",_tag_dyneither(
+_tmp5EB,sizeof(char),4))),((_tmp5ED->new_string=((_tmp5EC="",_tag_dyneither(
+_tmp5EC,sizeof(char),1))),_tmp5ED)))))))),((_tmp5EA->tl=(env->gcenv)->edits,
 _tmp5EA))))));}goto _LL187;_LL18A: _tmp2EC=_tmp2E7.f1;{struct Cyc_Absyn_Evar_struct*
 _tmp2ED=(struct Cyc_Absyn_Evar_struct*)_tmp2EC;if(_tmp2ED->tag != 1)goto _LL18C;};
 _tmp2EE=_tmp2E7.f2;{struct Cyc_Port_RgnVar_ct_struct*_tmp2EF=(struct Cyc_Port_RgnVar_ct_struct*)
 _tmp2EE;if(_tmp2EF->tag != 10)goto _LL18C;else{_tmp2F0=_tmp2EF->f1;}};_LL18B: {int
 _tmp2F5=*((int*(*)(struct Cyc_Dict_Dict d,struct _dyneither_ptr*k))Cyc_Dict_lookup)(
 counts,_tmp2F0);if(_tmp2F5 > 1){struct Cyc_Port_Edit*_tmp5FD;const char*_tmp5FC;
-void*_tmp5FB[1];struct Cyc_String_pa_struct _tmp5FA;const char*_tmp5F9;struct Cyc_List_List*
+const char*_tmp5FB;void*_tmp5FA[1];struct Cyc_String_pa_struct _tmp5F9;struct Cyc_List_List*
 _tmp5F8;(env->gcenv)->edits=((_tmp5F8=_cycalloc(sizeof(*_tmp5F8)),((_tmp5F8->hd=((
 _tmp5FD=_cycalloc(sizeof(*_tmp5FD)),((_tmp5FD->loc=_tmp2E5,((_tmp5FD->old_string=(
-struct _dyneither_ptr)((_tmp5FA.tag=0,((_tmp5FA.f1=(struct _dyneither_ptr)((struct
-_dyneither_ptr)*_tmp2F0),((_tmp5FB[0]=& _tmp5FA,Cyc_aprintf(((_tmp5FC="%s ",
-_tag_dyneither(_tmp5FC,sizeof(char),4))),_tag_dyneither(_tmp5FB,sizeof(void*),1)))))))),((
-_tmp5FD->new_string=((_tmp5F9="",_tag_dyneither(_tmp5F9,sizeof(char),1))),
+struct _dyneither_ptr)((_tmp5F9.tag=0,((_tmp5F9.f1=(struct _dyneither_ptr)((struct
+_dyneither_ptr)*_tmp2F0),((_tmp5FA[0]=& _tmp5F9,Cyc_aprintf(((_tmp5FB="%s ",
+_tag_dyneither(_tmp5FB,sizeof(char),4))),_tag_dyneither(_tmp5FA,sizeof(void*),1)))))))),((
+_tmp5FD->new_string=((_tmp5FC="",_tag_dyneither(_tmp5FC,sizeof(char),1))),
 _tmp5FD)))))))),((_tmp5F8->tl=(env->gcenv)->edits,_tmp5F8))))));}goto _LL187;}
 _LL18C:;_LL18D: goto _LL187;_LL187:;}goto _LL17E;};_LL181: _tmp2D5=_tmp2C9.f1;{
 struct Cyc_Absyn_ArrayType_struct*_tmp2D6=(struct Cyc_Absyn_ArrayType_struct*)
@@ -2822,16 +2822,16 @@ Cyc_Port_Thin_ct_struct*_tmp500=(struct Cyc_Port_Thin_ct_struct*)_tmp4FF;if(
 _tmp500->tag != 2)goto _LL2CA;}_LL2C9:{struct Cyc_Port_Edit*_tmp681;const char*
 _tmp680;const char*_tmp67F;struct Cyc_List_List*_tmp67E;_tmp4EB=((_tmp67E=
 _cycalloc(sizeof(*_tmp67E)),((_tmp67E->hd=((_tmp681=_cycalloc(sizeof(*_tmp681)),((
-_tmp681->loc=_tmp4FE,((_tmp681->old_string=((_tmp680="?",_tag_dyneither(_tmp680,
-sizeof(char),2))),((_tmp681->new_string=((_tmp67F="*",_tag_dyneither(_tmp67F,
+_tmp681->loc=_tmp4FE,((_tmp681->old_string=((_tmp67F="?",_tag_dyneither(_tmp67F,
+sizeof(char),2))),((_tmp681->new_string=((_tmp680="*",_tag_dyneither(_tmp680,
 sizeof(char),2))),_tmp681)))))))),((_tmp67E->tl=_tmp4EB,_tmp67E))))));}goto
 _LL2C7;_LL2CA: {struct Cyc_Port_Fat_ct_struct*_tmp501=(struct Cyc_Port_Fat_ct_struct*)
 _tmp4FF;if(_tmp501->tag != 3)goto _LL2CC;}_LL2CB:{struct Cyc_Port_Edit*_tmp68A;
 const char*_tmp689;const char*_tmp688;struct Cyc_List_List*_tmp687;_tmp4EB=((
 _tmp687=_cycalloc(sizeof(*_tmp687)),((_tmp687->hd=((_tmp68A=_cycalloc(sizeof(*
-_tmp68A)),((_tmp68A->loc=_tmp4FE,((_tmp68A->old_string=((_tmp689="*",
-_tag_dyneither(_tmp689,sizeof(char),2))),((_tmp68A->new_string=((_tmp688="?",
-_tag_dyneither(_tmp688,sizeof(char),2))),_tmp68A)))))))),((_tmp687->tl=_tmp4EB,
+_tmp68A)),((_tmp68A->loc=_tmp4FE,((_tmp68A->old_string=((_tmp688="*",
+_tag_dyneither(_tmp688,sizeof(char),2))),((_tmp68A->new_string=((_tmp689="?",
+_tag_dyneither(_tmp689,sizeof(char),2))),_tmp68A)))))))),((_tmp687->tl=_tmp4EB,
 _tmp687))))));}goto _LL2C7;_LL2CC:;_LL2CD: goto _LL2C7;_LL2C7:;}}for(0;(
 unsigned int)_tmp4E9;_tmp4E9=_tmp4E9->tl){void*_tmp50B;void*_tmp50C;struct Cyc_Position_Segment*
 _tmp50D;struct _tuple13 _tmp50A=*((struct _tuple13*)_tmp4E9->hd);_tmp50B=_tmp50A.f1;
@@ -2841,16 +2841,16 @@ Cyc_Port_Notconst_ct_struct*_tmp50F=(struct Cyc_Port_Notconst_ct_struct*)_tmp50E
 if(_tmp50F->tag != 1)goto _LL2D1;}_LL2D0:{struct Cyc_Port_Edit*_tmp693;const char*
 _tmp692;const char*_tmp691;struct Cyc_List_List*_tmp690;_tmp4EB=((_tmp690=
 _cycalloc(sizeof(*_tmp690)),((_tmp690->hd=((_tmp693=_cycalloc(sizeof(*_tmp693)),((
-_tmp693->loc=_tmp50D,((_tmp693->old_string=((_tmp692="const ",_tag_dyneither(
-_tmp692,sizeof(char),7))),((_tmp693->new_string=((_tmp691="",_tag_dyneither(
-_tmp691,sizeof(char),1))),_tmp693)))))))),((_tmp690->tl=_tmp4EB,_tmp690))))));}
+_tmp693->loc=_tmp50D,((_tmp693->old_string=((_tmp691="const ",_tag_dyneither(
+_tmp691,sizeof(char),7))),((_tmp693->new_string=((_tmp692="",_tag_dyneither(
+_tmp692,sizeof(char),1))),_tmp693)))))))),((_tmp690->tl=_tmp4EB,_tmp690))))));}
 goto _LL2CE;_LL2D1: {struct Cyc_Port_Const_ct_struct*_tmp510=(struct Cyc_Port_Const_ct_struct*)
 _tmp50E;if(_tmp510->tag != 0)goto _LL2D3;}_LL2D2:{struct Cyc_Port_Edit*_tmp69C;
 const char*_tmp69B;const char*_tmp69A;struct Cyc_List_List*_tmp699;_tmp4EB=((
 _tmp699=_cycalloc(sizeof(*_tmp699)),((_tmp699->hd=((_tmp69C=_cycalloc(sizeof(*
-_tmp69C)),((_tmp69C->loc=_tmp50D,((_tmp69C->old_string=((_tmp69B="",
-_tag_dyneither(_tmp69B,sizeof(char),1))),((_tmp69C->new_string=((_tmp69A="const ",
-_tag_dyneither(_tmp69A,sizeof(char),7))),_tmp69C)))))))),((_tmp699->tl=_tmp4EB,
+_tmp69C)),((_tmp69C->loc=_tmp50D,((_tmp69C->old_string=((_tmp69A="",
+_tag_dyneither(_tmp69A,sizeof(char),1))),((_tmp69C->new_string=((_tmp69B="const ",
+_tag_dyneither(_tmp69B,sizeof(char),7))),_tmp69C)))))))),((_tmp699->tl=_tmp4EB,
 _tmp699))))));}goto _LL2CE;_LL2D3:;_LL2D4: goto _LL2CE;_LL2CE:;}}for(0;(
 unsigned int)_tmp4EA;_tmp4EA=_tmp4EA->tl){void*_tmp51A;void*_tmp51B;struct Cyc_Position_Segment*
 _tmp51C;struct _tuple13 _tmp519=*((struct _tuple13*)_tmp4EA->hd);_tmp51A=_tmp519.f1;
@@ -2860,16 +2860,16 @@ Cyc_Port_Zterm_ct_struct*_tmp51E=(struct Cyc_Port_Zterm_ct_struct*)_tmp51D;if(
 _tmp51E->tag != 8)goto _LL2D8;}_LL2D7:{struct Cyc_Port_Edit*_tmp6A5;const char*
 _tmp6A4;const char*_tmp6A3;struct Cyc_List_List*_tmp6A2;_tmp4EB=((_tmp6A2=
 _cycalloc(sizeof(*_tmp6A2)),((_tmp6A2->hd=((_tmp6A5=_cycalloc(sizeof(*_tmp6A5)),((
-_tmp6A5->loc=_tmp51C,((_tmp6A5->old_string=((_tmp6A4="NOZEROTERM ",
-_tag_dyneither(_tmp6A4,sizeof(char),12))),((_tmp6A5->new_string=((_tmp6A3="",
-_tag_dyneither(_tmp6A3,sizeof(char),1))),_tmp6A5)))))))),((_tmp6A2->tl=_tmp4EB,
+_tmp6A5->loc=_tmp51C,((_tmp6A5->old_string=((_tmp6A3="NOZEROTERM ",
+_tag_dyneither(_tmp6A3,sizeof(char),12))),((_tmp6A5->new_string=((_tmp6A4="",
+_tag_dyneither(_tmp6A4,sizeof(char),1))),_tmp6A5)))))))),((_tmp6A2->tl=_tmp4EB,
 _tmp6A2))))));}goto _LL2D5;_LL2D8: {struct Cyc_Port_Nozterm_ct_struct*_tmp51F=(
 struct Cyc_Port_Nozterm_ct_struct*)_tmp51D;if(_tmp51F->tag != 9)goto _LL2DA;}_LL2D9:{
 struct Cyc_Port_Edit*_tmp6AE;const char*_tmp6AD;const char*_tmp6AC;struct Cyc_List_List*
 _tmp6AB;_tmp4EB=((_tmp6AB=_cycalloc(sizeof(*_tmp6AB)),((_tmp6AB->hd=((_tmp6AE=
 _cycalloc(sizeof(*_tmp6AE)),((_tmp6AE->loc=_tmp51C,((_tmp6AE->old_string=((
-_tmp6AD="ZEROTERM ",_tag_dyneither(_tmp6AD,sizeof(char),10))),((_tmp6AE->new_string=((
-_tmp6AC="",_tag_dyneither(_tmp6AC,sizeof(char),1))),_tmp6AE)))))))),((_tmp6AB->tl=
+_tmp6AC="ZEROTERM ",_tag_dyneither(_tmp6AC,sizeof(char),10))),((_tmp6AE->new_string=((
+_tmp6AD="",_tag_dyneither(_tmp6AD,sizeof(char),1))),_tmp6AE)))))))),((_tmp6AB->tl=
 _tmp4EB,_tmp6AB))))));}goto _LL2D5;_LL2DA:;_LL2DB: goto _LL2D5;_LL2D5:;}}_tmp4EB=((
 struct Cyc_List_List*(*)(int(*cmp)(struct Cyc_Port_Edit*,struct Cyc_Port_Edit*),
 struct Cyc_List_List*x))Cyc_List_merge_sort)(Cyc_Port_cmp_edit,_tmp4EB);while((

@@ -200,6 +200,27 @@ rgn_po_t<`r> initial_fn_po(region_t<`r> r,
   return ans;
 }
 
+// FIX: this can probably lead to tyvars not in the dict
+//  bool sub_constraints(region_t<`r> r, list_t<tvar_t> tvs,
+//  		     list_t<$(type_t,type_t)@> po1, 
+//  		     list_t<$(type_t,type_t)@> po2) {
+//    tvar_t dummy = new Tvar(new "",0,new Eq_kb(RgnKind)); // ALLOCATION
+//    Dict::dict_t<_,struct RgnInfo@`r,`r> d = Dict::rempty(r,tvar_cmp);
+//    for(let tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
+//      switch(tvar_kind(tvs2->hd,BoxKind)) {
+//      case RgnKind: 
+//      case UniqueRgnKind: 
+//      case TopRgnKind: 
+//        d = Dict::insert(d,tvs2->hd,rnew (r) RgnInfo(empty_effect,false)); break;
+//        break;
+//      default: break;
+//      }
+//    let ans = rnew(r) RgnPO(d,empty_effect,empty_effect,dummy);
+//    for(; po2 != NULL; po2 = po2->tl)
+//      ans = add_outlives_constraint(r, ans, (*po2->hd)[0], (*po2->hd)[1], NULL);
+//    return satisfies_constraints(ans,po1,&HeapRgn_val,false);
+//  }
+
 // Note: rgn better be in the dict!
 bool is_region_resetable(rgn_po_t po, Absyn::tvar_t r) {
   return Dict::lookup(po->d,r)->resetable;
@@ -313,7 +334,8 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
           //        typ2string(Dict::lookup(po->d,next)->these_outlive));
 
 	  add_to_search(&env,Dict::lookup(po->d,next)->these_outlive);
-	} else impos("RgnOrder: type variable not in dict");
+	} else 
+	  impos(aprintf("RgnOrder: type variable %s not in dict",*tv->name));
       }
       return false;
     default: return false;
@@ -461,7 +483,7 @@ bool eff_outlives_eff(rgn_po_t po, type_t eff1, type_t eff2) {
 // DEBUGGING
 void print_region_po(rgn_po_t po) {
   region r; { 
-    let iter = Dict::make_iter(r,po->d);
+    Iter::iter_t<_,`r> iter = Dict::make_iter(r,po->d);
     let elem = *Dict::rchoose(r,po->d);
     fprintf(stderr,"region po:\n");
     while(Iter::next(iter,&elem)) {

@@ -352,14 +352,16 @@ datatype exn.Absent Absent_val = Absent;
   return(s->nodes->hd);
 }
 
-bool iter_f<`a,`r1,`r2,`r3>(list_t<`a,`r1> @`r2 elts_left, `a @`r3 dest;
-			    {`r1,`r2,`r3}) {
+bool iter_f<`a,`r1,`r2,`r3>(list_t<`a,`r1> @`r2 elts_left, `a @`r3 dest) {
   if(!*elts_left)
     return false;
   *dest = (*elts_left)->hd;
   *elts_left = (*elts_left)->tl;
   return true;
 }
-Iter::iter_t<`a,{`r1,`r2}> make_iter(region_t<`r1> rgn, set_t<`a,`r2> s) {
-  return Iter::Iter(rnew(rgn) s->nodes, iter_f@<`a,`r2,`r1><>);
+Iter::iter_t<`a,`bd> make_iter(region_t<`r1> rgn, set_t<`a,`r2> s
+			      : regions(`a) > `bd,
+                                {`r1,`r2} > `bd) {
+  return Iter::Iter{.env=rnew(rgn) s->nodes, 
+		    .next = iter_f@<`a,`r2,`r1><>};
 }

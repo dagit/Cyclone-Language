@@ -977,16 +977,16 @@ struct _tuple3*clo,struct Cyc_PP_Ppstate*st);static struct Cyc_PP_Out*Cyc_PP_hyp
 struct _tuple3*clo,struct Cyc_PP_Ppstate*st){struct _tuple3 _tmp6E;int _tmp6F;struct
 _dyneither_ptr _tmp70;struct _dyneither_ptr _tmp71;struct _tuple3*_tmp6D=clo;_tmp6E=*
 _tmp6D;_tmp6F=_tmp6E.f1;_tmp70=_tmp6E.f2;_tmp71=_tmp6E.f3;{struct Cyc_PP_Single_struct*
-_tmp10E;struct _tuple4*_tmp10D;struct Cyc_PP_Single_struct _tmp10C;struct Cyc_PP_Single_struct*
-_tmp10B;struct _dyneither_ptr*_tmp10A;struct Cyc_PP_Single_struct _tmp109;struct Cyc_PP_Out*
+_tmp10E;struct _dyneither_ptr*_tmp10D;struct Cyc_PP_Single_struct _tmp10C;struct Cyc_PP_Single_struct*
+_tmp10B;struct _tuple4*_tmp10A;struct Cyc_PP_Single_struct _tmp109;struct Cyc_PP_Out*
 _tmp108;return(_tmp108=_cycalloc(sizeof(*_tmp108)),((_tmp108->newcc=st->cc + 
-_tmp6F,((_tmp108->newcl=st->cl,((_tmp108->ppout=(void*)((_tmp10B=_cycalloc(
-sizeof(*_tmp10B)),((_tmp10B[0]=((_tmp109.tag=1,((_tmp109.f1=(void*)((_tmp10A=
-_cycalloc(sizeof(struct _dyneither_ptr)* 1),((_tmp10A[0]=_tmp70,_tmp10A)))),
-_tmp109)))),_tmp10B)))),((_tmp108->links=(void*)((_tmp10E=_cycalloc(sizeof(*
-_tmp10E)),((_tmp10E[0]=((_tmp10C.tag=1,((_tmp10C.f1=(void*)((_tmp10D=_cycalloc(
-sizeof(*_tmp10D)),((_tmp10D->f1=st->cl,((_tmp10D->f2=st->cc,((_tmp10D->f3=_tmp6F,((
-_tmp10D->f4=_tmp71,_tmp10D)))))))))),_tmp10C)))),_tmp10E)))),_tmp108)))))))));};}
+_tmp6F,((_tmp108->newcl=st->cl,((_tmp108->ppout=(void*)((_tmp10E=_cycalloc(
+sizeof(*_tmp10E)),((_tmp10E[0]=((_tmp10C.tag=1,((_tmp10C.f1=(void*)((_tmp10D=
+_cycalloc(sizeof(struct _dyneither_ptr)* 1),((_tmp10D[0]=_tmp70,_tmp10D)))),
+_tmp10C)))),_tmp10E)))),((_tmp108->links=(void*)((_tmp10B=_cycalloc(sizeof(*
+_tmp10B)),((_tmp10B[0]=((_tmp109.tag=1,((_tmp109.f1=(void*)((_tmp10A=_cycalloc(
+sizeof(*_tmp10A)),((_tmp10A->f1=st->cl,((_tmp10A->f2=st->cc,((_tmp10A->f3=_tmp6F,((
+_tmp10A->f4=_tmp71,_tmp10A)))))))))),_tmp109)))),_tmp10B)))),_tmp108)))))))));};}
 struct Cyc_PP_Doc*Cyc_PP_hyperlink(struct _dyneither_ptr shrt,struct _dyneither_ptr
 full);struct Cyc_PP_Doc*Cyc_PP_hyperlink(struct _dyneither_ptr shrt,struct
 _dyneither_ptr full){int slen=(int)Cyc_strlen((struct _dyneither_ptr)shrt);struct

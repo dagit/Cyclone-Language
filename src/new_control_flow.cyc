@@ -218,7 +218,11 @@ static void remove_vars(flow_env_t<`r> fenv,
   // for all variables in out_unique_places not in c, print a warning
   let $(ConsumeInfo(c,_),_) = save_consume_info(fenv,outflow,false);
   ANAL_RGN(fenv,tmp) {
-    let iter = Dict::make_iter(tmp,*out_unique_places);
+#ifdef COARSE_REGIONS
+    Iter::iter_t<_,`r> iter = Dict::make_iter(tmp,*out_unique_places);
+#else
+    Iter::iter_t<_,`tmp> iter = Dict::make_iter(tmp,*out_unique_places);
+#endif
     let elem = *Dict::rchoose(tmp,*out_unique_places);
     while(Iter::next(iter,&elem)) {
       let p = elem[0];

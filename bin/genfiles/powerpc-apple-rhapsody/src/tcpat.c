@@ -1225,12 +1225,12 @@ _tmp16=_tmpC->f3;_tmp17=_tmpC->f4;}}_LL8:{struct _handler_cons _tmp65;
 _push_handler(& _tmp65);{int _tmp67=0;if(setjmp(_tmp65.handler))_tmp67=1;if(!
 _tmp67){{struct Cyc_Absyn_Aggrdecl**_tmp68=Cyc_Tcenv_lookup_aggrdecl(te,p->loc,
 _tmp12);struct Cyc_Absyn_Aggrdecl*_tmp69=*_tmp68;if(_tmp69->impl == 0){{const char*
-_tmp3D2;void*_tmp3D1[1];const char*_tmp3D0;const char*_tmp3CF;struct Cyc_String_pa_struct
+_tmp3D2;const char*_tmp3D1;const char*_tmp3D0;void*_tmp3CF[1];struct Cyc_String_pa_struct
 _tmp3CE;(_tmp3CE.tag=0,((_tmp3CE.f1=(struct _dyneither_ptr)(_tmp69->kind == Cyc_Absyn_StructA?(
-_tmp3CF="struct",_tag_dyneither(_tmp3CF,sizeof(char),7)):((_tmp3D0="union",
-_tag_dyneither(_tmp3D0,sizeof(char),6)))),((_tmp3D1[0]=& _tmp3CE,Cyc_Tcutil_terr(
-p->loc,((_tmp3D2="can't destructure an abstract %s",_tag_dyneither(_tmp3D2,
-sizeof(char),33))),_tag_dyneither(_tmp3D1,sizeof(void*),1)))))));}p->r=(void*)&
+_tmp3D1="struct",_tag_dyneither(_tmp3D1,sizeof(char),7)):((_tmp3D2="union",
+_tag_dyneither(_tmp3D2,sizeof(char),6)))),((_tmp3CF[0]=& _tmp3CE,Cyc_Tcutil_terr(
+p->loc,((_tmp3D0="can't destructure an abstract %s",_tag_dyneither(_tmp3D0,
+sizeof(char),33))),_tag_dyneither(_tmp3CF,sizeof(void*),1)))))));}p->r=(void*)&
 Cyc_Absyn_Wild_p_val;_npop_handler(0);return;}{int more_exists=((int(*)(struct Cyc_List_List*
 x))Cyc_List_length)(((struct Cyc_Absyn_AggrdeclImpl*)_check_null(_tmp69->impl))->exist_vars)
 - ((int(*)(struct Cyc_List_List*x))Cyc_List_length)(*_tmp15);if(more_exists < 0){{

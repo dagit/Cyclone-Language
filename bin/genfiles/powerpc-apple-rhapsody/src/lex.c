@@ -1372,12 +1372,12 @@ struct Cyc_List_List*)_check_null(x))->hd);if(((int(*)(struct Cyc_Set_Set*s,stru
 _dyneither_ptr*elt))Cyc_Set_member)(ld->namespaces,n))return((struct Cyc_List_List*(*)(
 struct Cyc_List_List*x,struct Cyc_List_List*y))Cyc_List_append)((struct Cyc_List_List*)((
 struct Cyc_List_List*)_check_null(x))->hd,(struct Cyc_List_List*)ns);}}}{const char*
-_tmp134;void*_tmp133[1];const char*_tmp132;struct Cyc_String_pa_struct _tmp131;Cyc_yyerror((
+_tmp134;const char*_tmp133;void*_tmp132[1];struct Cyc_String_pa_struct _tmp131;Cyc_yyerror((
 struct _dyneither_ptr)((_tmp131.tag=0,((_tmp131.f1=(struct _dyneither_ptr)((struct
-_dyneither_ptr)Cyc_str_sepstr((struct Cyc_List_List*)ns,((_tmp132="::",
-_tag_dyneither(_tmp132,sizeof(char),3))))),((_tmp133[0]=& _tmp131,Cyc_aprintf(((
-_tmp134="undeclared namespace %s",_tag_dyneither(_tmp134,sizeof(char),24))),
-_tag_dyneither(_tmp133,sizeof(void*),1)))))))));}return 0;}static void Cyc_Lex_recompute_typedefs();
+_dyneither_ptr)Cyc_str_sepstr((struct Cyc_List_List*)ns,((_tmp134="::",
+_tag_dyneither(_tmp134,sizeof(char),3))))),((_tmp132[0]=& _tmp131,Cyc_aprintf(((
+_tmp133="undeclared namespace %s",_tag_dyneither(_tmp133,sizeof(char),24))),
+_tag_dyneither(_tmp132,sizeof(void*),1)))))))));}return 0;}static void Cyc_Lex_recompute_typedefs();
 static void Cyc_Lex_recompute_typedefs(){struct _DynRegionHandle*_tmp8B;struct Cyc_Lex_Trie*
 _tmp8C;struct Cyc_Lex_DynTrie _tmp8A=*((struct Cyc_Lex_DynTrie*)_check_null(Cyc_Lex_typedefs_trie));
 _tmp8B=_tmp8A.dyn;_tmp8C=_tmp8A.t;Cyc_Core_free_dynregion(_tmp8B);{struct

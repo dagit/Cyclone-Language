@@ -1200,23 +1200,23 @@ void*)& Cyc_Absyn_VoidType_val;int Cyc_Tcutil_tq1_const=0;void*Cyc_Tcutil_t2_fai
 void*)& Cyc_Absyn_VoidType_val;int Cyc_Tcutil_tq2_const=0;struct _dyneither_ptr Cyc_Tcutil_failure_reason=(
 struct _dyneither_ptr){(void*)0,(void*)0,(void*)(0 + 0)};void Cyc_Tcutil_explain_failure();
 void Cyc_Tcutil_explain_failure(){if(Cyc_Position_num_errors >= Cyc_Position_max_errors)
-return;Cyc_fflush((struct Cyc___cycFILE*)Cyc_stderr);{const char*_tmpE64;void*
-_tmpE63[2];const char*_tmpE62;const char*_tmpE61;struct Cyc_String_pa_struct _tmpE60;
+return;Cyc_fflush((struct Cyc___cycFILE*)Cyc_stderr);{const char*_tmpE64;const char*
+_tmpE63;const char*_tmpE62;void*_tmpE61[2];struct Cyc_String_pa_struct _tmpE60;
 struct Cyc_String_pa_struct _tmpE5F;struct _dyneither_ptr s1=(struct _dyneither_ptr)((
 _tmpE5F.tag=0,((_tmpE5F.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Absynpp_typ2string(
 Cyc_Tcutil_t1_failure)),((_tmpE60.tag=0,((_tmpE60.f1=(struct _dyneither_ptr)(Cyc_Tcutil_tq1_const?(
-_tmpE61="const ",_tag_dyneither(_tmpE61,sizeof(char),7)):((_tmpE62="",
-_tag_dyneither(_tmpE62,sizeof(char),1)))),((_tmpE63[0]=& _tmpE60,((_tmpE63[1]=&
-_tmpE5F,Cyc_aprintf(((_tmpE64="%s%s",_tag_dyneither(_tmpE64,sizeof(char),5))),
-_tag_dyneither(_tmpE63,sizeof(void*),2))))))))))))));const char*_tmpE6D;void*
-_tmpE6C[2];const char*_tmpE6B;const char*_tmpE6A;struct Cyc_String_pa_struct _tmpE69;
+_tmpE63="const ",_tag_dyneither(_tmpE63,sizeof(char),7)):((_tmpE64="",
+_tag_dyneither(_tmpE64,sizeof(char),1)))),((_tmpE61[0]=& _tmpE60,((_tmpE61[1]=&
+_tmpE5F,Cyc_aprintf(((_tmpE62="%s%s",_tag_dyneither(_tmpE62,sizeof(char),5))),
+_tag_dyneither(_tmpE61,sizeof(void*),2))))))))))))));const char*_tmpE6D;const char*
+_tmpE6C;const char*_tmpE6B;void*_tmpE6A[2];struct Cyc_String_pa_struct _tmpE69;
 struct Cyc_String_pa_struct _tmpE68;struct _dyneither_ptr s2=(struct _dyneither_ptr)((
 _tmpE68.tag=0,((_tmpE68.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Absynpp_typ2string(
 Cyc_Tcutil_t2_failure)),((_tmpE69.tag=0,((_tmpE69.f1=(struct _dyneither_ptr)(Cyc_Tcutil_tq2_const?(
-_tmpE6A="const ",_tag_dyneither(_tmpE6A,sizeof(char),7)):((_tmpE6B="",
-_tag_dyneither(_tmpE6B,sizeof(char),1)))),((_tmpE6C[0]=& _tmpE69,((_tmpE6C[1]=&
-_tmpE68,Cyc_aprintf(((_tmpE6D="%s%s",_tag_dyneither(_tmpE6D,sizeof(char),5))),
-_tag_dyneither(_tmpE6C,sizeof(void*),2))))))))))))));int pos=2;{const char*_tmpE71;
+_tmpE6C="const ",_tag_dyneither(_tmpE6C,sizeof(char),7)):((_tmpE6D="",
+_tag_dyneither(_tmpE6D,sizeof(char),1)))),((_tmpE6A[0]=& _tmpE69,((_tmpE6A[1]=&
+_tmpE68,Cyc_aprintf(((_tmpE6B="%s%s",_tag_dyneither(_tmpE6B,sizeof(char),5))),
+_tag_dyneither(_tmpE6A,sizeof(void*),2))))))))))))));int pos=2;{const char*_tmpE71;
 void*_tmpE70[1];struct Cyc_String_pa_struct _tmpE6F;(_tmpE6F.tag=0,((_tmpE6F.f1=(
 struct _dyneither_ptr)((struct _dyneither_ptr)s1),((_tmpE70[0]=& _tmpE6F,Cyc_fprintf(
 Cyc_stderr,((_tmpE71="  %s",_tag_dyneither(_tmpE71,sizeof(char),5))),

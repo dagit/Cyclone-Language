@@ -20,13 +20,13 @@
 #define _ITER_H_
 #include <core.h>
 namespace Iter {
-  struct Iter<`a::A,`eff::E> { 
-    <`env>
+  struct Iter<`a::A,`bd::R> { 
+    <`env> : regions(`env) > `bd
     `env env;
     // return false when no more elts.
-    bool (@next)<`r::R>(`env env, `a @`r dest; `eff + {`r}); 
+    bool (@next)<`r>(`env env, `a @`r dest); 
   };
-  typedef struct Iter<`a,`eff> iter_t<`a,`eff>;
-  bool next(iter_t<`a::A>,`a::A @);
+  typedef struct Iter<`a,`bd> iter_t<`a,`bd>;
+  bool next(iter_t<`a::A>,`a @);
 }
 #endif

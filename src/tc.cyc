@@ -1120,7 +1120,7 @@ list_t<decl_t> treeshake(tenv_t<`g,_> te, list_t<decl_t> ds) {
     if(Dict::is_empty(env.nsdict))
       return ds1; // shouldn't be possible
     // update the global environment
-    let iter = Dict::make_iter(Core::heap_region,env.nsdict);
+    Iter::iter_t<_,`rgn> iter = Dict::make_iter(Core::heap_region,env.nsdict);
     let pr = *Dict::rchoose(rgn,env.nsdict);
     while(Iter::next(iter,&pr)) {
       let $(_,&$(ge,set)) = pr;
