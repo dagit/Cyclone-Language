@@ -21,7 +21,7 @@
 #include <list.h>
 #include <set.h>
 #include <dict.h>
-#include <cstring.h>
+#include <string.h>
 #include "absyn.h"
 #include "tcutil.h"
 #include "absynpp.h"
@@ -75,7 +75,7 @@ int place_cmp(place_t p1, place_t p2) {
   int i = root_cmp(p1->root,p2->root);
   if(i != 0)
     return i;
-  return list_cmp(Std::strptrcmp,p1->fields,p2->fields);
+  return list_cmp(strptrcmp,p1->fields,p2->fields);
 }
 
 // for debugging
@@ -110,7 +110,7 @@ absRval_t typ_to_absrval(type_t t, absRval_t leafval) {
 	return leafval;
       fallthru(tuf->typs);
     case &TupleType(tqts):
-      aggrdict_t d = Dict::empty(Std::strptrcmp);
+      aggrdict_t d = Dict::empty(strptrcmp);
       for(int i=0; tqts != NULL; tqts = tqts->tl, ++i)
 	d = Dict::insert(d,fieldname(i),typ_to_absrval((*tqts->hd)[1],leafval));
       return new Aggregate(d);
@@ -121,7 +121,7 @@ absRval_t typ_to_absrval(type_t t, absRval_t leafval) {
 	break;
       fallthru(ad->impl->fields);
     case &AnonAggrType(StructA,fs):
-      aggrdict_t d = Dict::empty(Std::strptrcmp);
+      aggrdict_t d = Dict::empty(strptrcmp);
       for(; fs != NULL; fs = fs->tl) {
 	let &Aggrfield(n,_,t2,_,_) = fs->hd;
 	if((*n).size != 1) //empty name means bit field so no need to include it
@@ -143,7 +143,7 @@ static bool prefix_of_member(region_t<`r> r, place_t<`r2,`r3> place,
     let fs1 = place->fields;
     let fs2 = place2->fields;
     for(; fs1 != NULL && fs2 != NULL; fs1 = fs1->tl, fs2 = fs2->tl)
-      if(Std::strptrcmp(fs1->hd,fs2->hd) != 0)
+      if(strptrcmp(fs1->hd,fs2->hd) != 0)
 	break;
     if(fs1 == NULL)
       return true;

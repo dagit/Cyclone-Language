@@ -33,11 +33,10 @@
 #define _LEXING_H_
 
 #include <core.h>
-#include <cstdio.h>
+#include <stdio.h>
 
 namespace Lexing {
 using Core;
-using Std;
 
 extern xtunion exn { extern Error(string_t) };
 

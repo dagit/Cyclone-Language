@@ -16,5 +16,31 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
-#include <cassert.h>
-using Std;
+/* Originally derived from the GNU C Library, released under LGPL:
+   Copyright (C) 1991,1992,1994-1999,2000,2001 Free Software Foundation, Inc. */
+#ifndef _ASSERT_H_
+#define _ASSERT_H_
+
+#undef assert
+#ifdef NDEBUG
+#define assert(test) (0)
+#else
+#include <core.h>
+extern `a
+__assert_fail (string_t assertion, string_t file, unsigned int line) 
+  __attribute__((noreturn));
+
+#ifndef __FILE2__
+#ifdef __BASE_FILE__
+#define __FILE2__ __BASE_FILE__
+#else
+#define __FILE2__ __FILE__
+#endif
+#endif
+
+#define __STRING(x) #x
+#define assert(expr) ((expr) ? 0 : \
+  (__assert_fail(__STRING(expr), __FILE2__, __LINE__)))
+
+#endif
+#endif

@@ -20,7 +20,7 @@
 #define _PP_H_
 
 #include <core.h>
-#include <cstdio.h>
+#include <stdio.h>
 #include <list.h>
 
 namespace PP {
@@ -35,7 +35,6 @@ namespace PP {
        the heap. */
 
 using Core;
-using Std;
 using List;
 extern int tex_output;
 extern struct Ppstate;

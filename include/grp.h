@@ -1,5 +1,5 @@
 /* This file is part of the Cyclone Library.
-   Copyright (C) 2001 Greg Morrisett, AT&T
+   Copyright (C) 2001 Greg Morrisett
 
    This library is free software; you can redistribute it and/or it
    under the terms of the GNU Lesser General Public License as
@@ -16,5 +16,22 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
-#include <cgrp.h>
-using Std;
+#ifndef _GRP_H
+#define _GRP_H
+
+#include <core.h>
+#include <sys/types.h>
+
+struct group {
+  string_t gr_name;
+  string_t gr_passwd;
+  gid_t gr_gid;
+  mstring_t ?gr_mem;
+};
+
+extern struct group *getgrnam(string_t name);
+extern struct group *getgrgid(uid_t uid);
+extern int initgroups(string_t user, gid_t group);
+extern int setgroups(const gid_t ? groups);
+
+#endif

@@ -26,7 +26,7 @@
 #include <signal.h>
 
 // The C include file precore_c.h is produced (semi) automatically
-// from the Cyclone include file precore.h.  Note, it now includes
+// from the Cyclone include file core.h.  Note, it now includes
 // the contents of cyc_include.h
 
 /* RUNTIME_CYC defined to prevent including parts of precore_c.h 
@@ -377,9 +377,9 @@ void stack_trace() {
 }  
 
 // These are defined in cstubs.c
-extern struct Cyc_Std___cycFILE {
+extern struct Cyc___cycFILE {
   FILE *file;
-} *Cyc_Std_stdin, *Cyc_Std_stdout, *Cyc_Std_stderr;
+} *Cyc_stdin, *Cyc_stdout, *Cyc_stderr;
 
 extern int Cyc_main(int argc, struct _tagged_argv argv);
 
@@ -401,9 +401,9 @@ int main(int argc, char **argv) {
     return 1;
   }
   // set standard file descriptors
-  Cyc_Std_stdin->file = stdin;
-  Cyc_Std_stdout->file = stdout;
-  Cyc_Std_stderr->file = stderr;
+  Cyc_stdin->file = stdin;
+  Cyc_stdout->file = stdout;
+  Cyc_stderr->file = stderr;
   // convert command-line args to Cyclone strings
   {struct _tagged_argv args;
   int i, result;

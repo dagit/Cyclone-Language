@@ -3,8 +3,6 @@
 #include <string.h>
 using Core;
 
-namespace Std;
-
 namespace Cstdio {
 extern "C" {
 struct Cstdio::__abstractFILE *tmpfile();

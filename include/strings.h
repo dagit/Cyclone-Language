@@ -16,5 +16,15 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
-#include <cstrings.h>
-using Std;
+
+#ifndef _STRINGS_H
+#define _STRINGS_H
+
+#include <stddef.h>  // for size_t
+
+#ifndef __CYGWIN__
+extern int strcasecmp(buffer_t, buffer_t);
+extern int strncasecmp(buffer_t s1, buffer_t s2, size_t len);
+#endif
+
+#endif

@@ -24,7 +24,7 @@
 #include "tc.h"
 #include "parse.h"
 #include <pp.h>
-#include <cstring.h>
+#include <string.h>
 #include "tcutil.h"
 #include "tcdecl.h"
 #include <position.h>
@@ -67,12 +67,12 @@ struct I {
 
 static ienv_t new_ienv() {
   return new Ienv {
-    .aggrdecls    = Dict::empty(Std::strptrcmp),
-    .tuniondecls  = Dict::empty(Std::strptrcmp),
-    .enumdecls    = Dict::empty(Std::strptrcmp),
-    .typedefdecls = Dict::empty(Std::strptrcmp),
-    .vardecls     = Dict::empty(Std::strptrcmp),
-    .xtunionfielddecls = Dict::empty(Std::strptrcmp)
+    .aggrdecls    = Dict::empty(strptrcmp),
+    .tuniondecls  = Dict::empty(strptrcmp),
+    .enumdecls    = Dict::empty(strptrcmp),
+    .typedefdecls = Dict::empty(strptrcmp),
+    .vardecls     = Dict::empty(strptrcmp),
+    .xtunionfielddecls = Dict::empty(strptrcmp)
   };
 }
 

@@ -390,7 +390,7 @@ cstub {
   /* OS X needs sys/types.h before dirent.h */
   #include <sys/types.h>
   #include <dirent.h>
-  struct Cyc_Std___cycDIR { // must match defn in cyclone stub
+  struct Cyc___cycDIR { // must match defn in cyclone stub
     DIR *dir;
   };
 }
@@ -618,7 +618,7 @@ cycstub {
   namespace Cfcntl {
     extern "C" int fcntl(int fd, int cmd);
     extern "C" int fcntl_with_arg(int fd, int cmd, long arg);
-    extern "C" int fcntl_with_lock(int fd, int cmd, struct Std::flock *lock);
+    extern "C" int fcntl_with_lock(int fd, int cmd, struct flock *lock);
     extern "C" int open_without_mode(const char *,int);
     extern "C" int open_with_mode(const char *,int,mode_t);
   }
@@ -2112,7 +2112,7 @@ epilogue {
   typedef tunion `r SigArg sigarg_t<`r>;
 }
 cycstub {
-  #include <csignal.h>
+  #include <signal.h>
 }
 epilogue sigset {
   extern sigarg_t sigset(int, sigarg_t);
@@ -2166,42 +2166,42 @@ cycstub sigset {
 }
 cstub {
   #include <signal.h>
-  typedef void *Cyc_Std_sigarg_t;
-  extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_DFL();
-  extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_ERR();
-  extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_IGN();
-  extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_HOLD();
-  extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_HANDLER(void (*)(int));
-  Cyc_Std_sigarg_t sig_wrap(void (*f)(int)) {
+  typedef void *Cyc_sigarg_t;
+  extern Cyc_sigarg_t Cyc_Csignal_make_SIG_DFL();
+  extern Cyc_sigarg_t Cyc_Csignal_make_SIG_ERR();
+  extern Cyc_sigarg_t Cyc_Csignal_make_SIG_IGN();
+  extern Cyc_sigarg_t Cyc_Csignal_make_SIG_HOLD();
+  extern Cyc_sigarg_t Cyc_Csignal_make_SIG_HANDLER(void (*)(int));
+  Cyc_sigarg_t sig_wrap(void (*f)(int)) {
     if (f == SIG_DFL)
-      return Cyc_Std_Csignal_make_SIG_DFL();
+      return Cyc_Csignal_make_SIG_DFL();
     if (f == SIG_ERR)
-      return Cyc_Std_Csignal_make_SIG_ERR();
+      return Cyc_Csignal_make_SIG_ERR();
     if (f == SIG_IGN)
-      return Cyc_Std_Csignal_make_SIG_IGN();
+      return Cyc_Csignal_make_SIG_IGN();
   #ifdef SIG_HOLD
     if (f == SIG_HOLD)
-      return Cyc_Std_Csignal_make_SIG_HOLD();
+      return Cyc_Csignal_make_SIG_HOLD();
   #endif
-      return Cyc_Std_Csignal_make_SIG_HANDLER(f);
+      return Cyc_Csignal_make_SIG_HANDLER(f);
   }
 }
 cstub sigset {
-  Cyc_Std_sigarg_t sigset_SIG_DFL(int a) {
+  Cyc_sigarg_t sigset_SIG_DFL(int a) {
     return sig_wrap(sigset(a,SIG_DFL));
   }
-  Cyc_Std_sigarg_t sigset_SIG_ERR(int a) {
+  Cyc_sigarg_t sigset_SIG_ERR(int a) {
     return sig_wrap(sigset(a,SIG_ERR));
   }
-  Cyc_Std_sigarg_t sigset_SIG_IGN(int a) {
+  Cyc_sigarg_t sigset_SIG_IGN(int a) {
     return sig_wrap(sigset(a,SIG_IGN));
   }
 #ifdef _SIG_HOLD_def_
-  Cyc_Std_sigarg_t sigset_SIG_HOLD(int a) {
+  Cyc_sigarg_t sigset_SIG_HOLD(int a) {
     return sig_wrap(sigset(a,SIG_HOLD));
   }
 #endif
-  Cyc_Std_sigarg_t sigset_SIG_HANDLER(int a, void (*f)(int)) {
+  Cyc_sigarg_t sigset_SIG_HANDLER(int a, void (*f)(int)) {
     return sig_wrap(sigset(a,f));
   }
 }
@@ -2241,18 +2241,18 @@ cycstub signal {
 }
 cstub signal {
   #ifndef __CYGWIN__
-  Cyc_Std_sigarg_t signal_SIG_DFL(int a) {
+  Cyc_sigarg_t signal_SIG_DFL(int a) {
     return sig_wrap(signal(a,SIG_DFL));
   }
-  Cyc_Std_sigarg_t signal_SIG_ERR(int a) {
+  Cyc_sigarg_t signal_SIG_ERR(int a) {
     return sig_wrap(signal(a,SIG_ERR));
   }
   #ifdef _SIG_HOLD_def_
-  Cyc_Std_sigarg_t signal_SIG_HOLD(int a) {
+  Cyc_sigarg_t signal_SIG_HOLD(int a) {
     return sig_wrap(signal(a,SIG_HOLD));
   }
   #endif
-  Cyc_Std_sigarg_t signal_SIG_IGN(int a) {
+  Cyc_sigarg_t signal_SIG_IGN(int a) {
     return sig_wrap(signal(a,SIG_IGN));
   }
   #endif
@@ -2416,13 +2416,13 @@ cycstub {
 }
 cstub {
   #include <stdio.h>
-  // Define struct Std::__cycFILE, and initialize stdin, stdout, stderr
-  struct Cyc_Std___cycFILE { // must match defn in cyclone stub
+  // Define struct __cycFILE, and initialize stdin, stdout, stderr
+  struct Cyc___cycFILE { // must match defn in cyclone stub
     FILE *file;
-  } Cyc_Std_stdin_v, Cyc_Std_stdout_v, Cyc_Std_stderr_v,
-    *Cyc_Std_stdin = &Cyc_Std_stdin_v,
-    *Cyc_Std_stdout = &Cyc_Std_stdout_v,
-    *Cyc_Std_stderr = &Cyc_Std_stderr_v;
+  } Cyc_stdin_v, Cyc_stdout_v, Cyc_stderr_v,
+    *Cyc_stdin = &Cyc_stdin_v,
+    *Cyc_stdout = &Cyc_stdout_v,
+    *Cyc_stderr = &Cyc_stderr_v;
 }
 epilogue {
   // vararg for printf functions.  The functions themselves are defined
@@ -3122,7 +3122,7 @@ epilogue {
                                int max_count);
 }
 cstub {
-  FILE *_sfile_to_file(struct Cyc_Std___cycFILE *sf) {
+  FILE *_sfile_to_file(struct Cyc___cycFILE *sf) {
     if(!sf) {
       fprintf(stderr,"Attempt to access null file descriptor.\n");
       exit(255);
@@ -3131,7 +3131,7 @@ cstub {
       throw(Cyc_Null_Exception); // FIX:  should be more descriptive?
     return sf->file;
   }
-  int Cyc_Std_file_string_read(struct Cyc_Std___cycFILE *sf, 
+  int Cyc_file_string_read(struct Cyc___cycFILE *sf, 
                                  struct _tagged_arr dest,
                                  int dest_offset, int max_count) {
     unsigned char *new_curr = dest.curr + dest_offset;
@@ -3145,7 +3145,7 @@ cstub {
     }
     return fread(new_curr, 1, max_count, fd);
   }
-  int Cyc_Std_file_string_write(struct Cyc_Std___cycFILE *sf, 
+  int Cyc_file_string_write(struct Cyc___cycFILE *sf, 
                                   struct _tagged_arr src,
                                   int src_offset, int max_count) {
     size_t sz = src.last_plus_one - src.curr;
@@ -3408,7 +3408,7 @@ epilogue {
 
 sys/dir.h:
 epilogue {
-  #include <cdirent.h>
+  #include <dirent.h>
 }
 ;
 
@@ -3424,7 +3424,7 @@ W_OK
 R_OK
 }
 prologue {
-  #include <cfcntl.h>
+  #include <fcntl.h>
 }
 ;
 
@@ -3926,7 +3926,7 @@ cycstub recv {
     extern "C" ssize_t recv_wrapped(int, char ?NOZEROTERM, size_t, int);
   }
   // FIX: kill the extra level of indirection?  That is, rename the
-  //   C function to be Cyc_Std__recv and call it directly ...
+  //   C function to be Cyc__recv and call it directly ...
   ssize_t recv(int fd, char ?NOZEROTERM buf, size_t n, int flags) {
     return Csocket::recv_wrapped(fd,buf,n,flags);
   }

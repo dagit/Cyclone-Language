@@ -21,13 +21,12 @@
 #define _ABSYNPP_H_
 
 #include <core.h>
-#include <cstdio.h>
+#include <stdio.h>
 #include <list.h>
 #include <pp.h>
 #include "absyn.h"
 
 namespace Absynpp {
-using Std;
 using Absyn;
 using List;
 using PP;

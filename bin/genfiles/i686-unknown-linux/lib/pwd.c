@@ -309,23 +309,22 @@ char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};char*
 string_to_Cstring(struct _tagged_arr);struct _tagged_arr Cstring_to_string(char*);
-struct Cyc_Std_passwd{struct _tagged_arr pw_name;struct _tagged_arr pw_passwd;
+struct Cyc_passwd{struct _tagged_arr pw_name;struct _tagged_arr pw_passwd;
 unsigned int pw_uid;unsigned int pw_gid;struct _tagged_arr pw_gecos;struct
-_tagged_arr pw_dir;struct _tagged_arr pw_shell;};struct Cyc_Std_passwd*Cyc_Std_getpwnam(
-struct _tagged_arr name);struct Cyc_Std_passwd*Cyc_Std_getpwuid(unsigned int uid);
-struct Cyc_Cpwd_Cpasswd{char*pw_name;char*pw_passwd;unsigned int pw_uid;
-unsigned int pw_gid;char*pw_gecos;char*pw_dir;char*pw_shell;};struct Cyc_Cpwd_Cpasswd*
-getpwnam(char*name);struct Cyc_Cpwd_Cpasswd*getpwuid(unsigned int uid);struct Cyc_Std_passwd*
-Cyc_Std_getpwnam(struct _tagged_arr name){struct Cyc_Cpwd_Cpasswd*src=getpwnam(
-string_to_Cstring(name));struct Cyc_Std_passwd*_tmp0=(unsigned int)src?({struct
-Cyc_Std_passwd*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->pw_name=(struct _tagged_arr)
-Cstring_to_string(src->pw_name);_tmp1->pw_passwd=(struct _tagged_arr)
-Cstring_to_string(src->pw_passwd);_tmp1->pw_uid=src->pw_uid;_tmp1->pw_gid=src->pw_gid;
-_tmp1->pw_gecos=(struct _tagged_arr)Cstring_to_string(src->pw_gecos);_tmp1->pw_dir=(
-struct _tagged_arr)Cstring_to_string(src->pw_dir);_tmp1->pw_shell=(struct
-_tagged_arr)Cstring_to_string(src->pw_shell);_tmp1;}): 0;return _tmp0;}struct Cyc_Std_passwd*
-Cyc_Std_getpwuid(unsigned int uid){struct Cyc_Cpwd_Cpasswd*src=getpwuid(uid);
-struct Cyc_Std_passwd*_tmp2=(unsigned int)src?({struct Cyc_Std_passwd*_tmp3=
+_tagged_arr pw_dir;struct _tagged_arr pw_shell;};struct Cyc_passwd*Cyc_getpwnam(
+struct _tagged_arr name);struct Cyc_passwd*Cyc_getpwuid(unsigned int uid);struct Cyc_Cpwd_Cpasswd{
+char*pw_name;char*pw_passwd;unsigned int pw_uid;unsigned int pw_gid;char*pw_gecos;
+char*pw_dir;char*pw_shell;};struct Cyc_Cpwd_Cpasswd*getpwnam(char*name);struct Cyc_Cpwd_Cpasswd*
+getpwuid(unsigned int uid);struct Cyc_passwd*Cyc_getpwnam(struct _tagged_arr name){
+struct Cyc_Cpwd_Cpasswd*src=getpwnam(string_to_Cstring(name));struct Cyc_passwd*
+_tmp0=(unsigned int)src?({struct Cyc_passwd*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->pw_name=(
+struct _tagged_arr)Cstring_to_string(src->pw_name);_tmp1->pw_passwd=(struct
+_tagged_arr)Cstring_to_string(src->pw_passwd);_tmp1->pw_uid=src->pw_uid;_tmp1->pw_gid=
+src->pw_gid;_tmp1->pw_gecos=(struct _tagged_arr)Cstring_to_string(src->pw_gecos);
+_tmp1->pw_dir=(struct _tagged_arr)Cstring_to_string(src->pw_dir);_tmp1->pw_shell=(
+struct _tagged_arr)Cstring_to_string(src->pw_shell);_tmp1;}): 0;return _tmp0;}
+struct Cyc_passwd*Cyc_getpwuid(unsigned int uid){struct Cyc_Cpwd_Cpasswd*src=
+getpwuid(uid);struct Cyc_passwd*_tmp2=(unsigned int)src?({struct Cyc_passwd*_tmp3=
 _cycalloc(sizeof(*_tmp3));_tmp3->pw_name=(struct _tagged_arr)Cstring_to_string(
 src->pw_name);_tmp3->pw_passwd=(struct _tagged_arr)Cstring_to_string(src->pw_passwd);
 _tmp3->pw_uid=src->pw_uid;_tmp3->pw_gid=src->pw_gid;_tmp3->pw_gecos=(struct

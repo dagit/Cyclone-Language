@@ -303,15 +303,14 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Std_option{struct _tagged_arr name;int has_arg;int*flag;int val;};int Cyc_Std_getopt_long(
+ struct Cyc_option{struct _tagged_arr name;int has_arg;int*flag;int val;};int Cyc_getopt_long(
 int __argc,struct _tagged_arr __argv,struct _tagged_arr __shortopts,struct _tagged_arr
-__longopts,int*__longind);int Cyc_Std_getopt_long_only(int __argc,struct
-_tagged_arr __argv,struct _tagged_arr __shortopts,struct _tagged_arr __longopts,int*
-__longind);int Cyc_Std__getopt_internal(int __argc,struct _tagged_arr __argv,struct
-_tagged_arr __shortopts,struct _tagged_arr __longopts,int*__longind,int __long_only);
-int Cyc_Std_getopt_long(int argc,struct _tagged_arr argv,struct _tagged_arr options,
-struct _tagged_arr long_options,int*opt_index){return Cyc_Std__getopt_internal(argc,
-argv,options,long_options,opt_index,0);}int Cyc_Std_getopt_long_only(int argc,
-struct _tagged_arr argv,struct _tagged_arr options,struct _tagged_arr long_options,int*
-opt_index){return Cyc_Std__getopt_internal(argc,argv,options,long_options,
-opt_index,1);}
+__longopts,int*__longind);int Cyc_getopt_long_only(int __argc,struct _tagged_arr
+__argv,struct _tagged_arr __shortopts,struct _tagged_arr __longopts,int*__longind);
+int Cyc__getopt_internal(int __argc,struct _tagged_arr __argv,struct _tagged_arr
+__shortopts,struct _tagged_arr __longopts,int*__longind,int __long_only);int Cyc_getopt_long(
+int argc,struct _tagged_arr argv,struct _tagged_arr options,struct _tagged_arr
+long_options,int*opt_index){return Cyc__getopt_internal(argc,argv,options,
+long_options,opt_index,0);}int Cyc_getopt_long_only(int argc,struct _tagged_arr argv,
+struct _tagged_arr options,struct _tagged_arr long_options,int*opt_index){return Cyc__getopt_internal(
+argc,argv,options,long_options,opt_index,1);}

@@ -315,27 +315,26 @@ struct _tagged_arr);struct _tagged_arr Cyc_Filename_basename(struct _tagged_arr)
 Cyc_Filename_check_suffix(struct _tagged_arr,struct _tagged_arr);struct _tagged_arr
 Cyc_Filename_gnuify(struct _tagged_arr);struct Cyc_List_List{void*hd;struct Cyc_List_List*
 tl;};extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];struct
-_tagged_arr Cyc_Std_strconcat(struct _tagged_arr,struct _tagged_arr);struct
-_tagged_arr Cyc_Std_substring(struct _tagged_arr,int ofs,unsigned int n);struct
-_tagged_arr Cyc_Filename_concat(struct _tagged_arr s1,struct _tagged_arr s2){return
-Cyc_Std_strconcat((struct _tagged_arr)s1,(struct _tagged_arr)Cyc_Std_strconcat(({
-const char*_tmp0="/";_tag_arr(_tmp0,sizeof(char),_get_zero_arr_size(_tmp0,2));}),(
-struct _tagged_arr)s2));}struct _tagged_arr Cyc_Filename_chop_extension(struct
-_tagged_arr filename){int i=(int)(_get_arr_size(filename,sizeof(char))- 1);while(i
->= 0?*((const char*)_check_unknown_subscript(filename,sizeof(char),i))!= '.': 0){
--- i;}if(i < 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp1=
-_cycalloc(sizeof(*_tmp1));_tmp1[0]=({struct Cyc_Core_Invalid_argument_struct _tmp2;
-_tmp2.tag=Cyc_Core_Invalid_argument;_tmp2.f1=({const char*_tmp3="chop_extension";
+_tagged_arr Cyc_strconcat(struct _tagged_arr,struct _tagged_arr);struct _tagged_arr
+Cyc_substring(struct _tagged_arr,int ofs,unsigned int n);struct _tagged_arr Cyc_Filename_concat(
+struct _tagged_arr s1,struct _tagged_arr s2){return Cyc_strconcat((struct _tagged_arr)
+s1,(struct _tagged_arr)Cyc_strconcat(({const char*_tmp0="/";_tag_arr(_tmp0,sizeof(
+char),_get_zero_arr_size(_tmp0,2));}),(struct _tagged_arr)s2));}struct _tagged_arr
+Cyc_Filename_chop_extension(struct _tagged_arr filename){int i=(int)(_get_arr_size(
+filename,sizeof(char))- 1);while(i >= 0?*((const char*)_check_unknown_subscript(
+filename,sizeof(char),i))!= '.': 0){-- i;}if(i < 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1[0]=({struct Cyc_Core_Invalid_argument_struct
+_tmp2;_tmp2.tag=Cyc_Core_Invalid_argument;_tmp2.f1=({const char*_tmp3="chop_extension";
 _tag_arr(_tmp3,sizeof(char),_get_zero_arr_size(_tmp3,15));});_tmp2;});_tmp1;}));
-return Cyc_Std_substring((struct _tagged_arr)filename,0,(unsigned int)i);}struct
+return Cyc_substring((struct _tagged_arr)filename,0,(unsigned int)i);}struct
 _tagged_arr Cyc_Filename_dirname(struct _tagged_arr filename){int i=(int)(
 _get_arr_size(filename,sizeof(char))- 1);while(i >= 0?*((const char*)
 _check_unknown_subscript(filename,sizeof(char),i))!= '/': 0){-- i;}if(i < 0)return
-Cyc_Core_new_string(0);return Cyc_Std_substring((struct _tagged_arr)filename,0,(
+Cyc_Core_new_string(0);return Cyc_substring((struct _tagged_arr)filename,0,(
 unsigned int)i);}struct _tagged_arr Cyc_Filename_basename(struct _tagged_arr
 filename){int i=(int)(_get_arr_size(filename,sizeof(char))- 1);while(i >= 0?*((
 const char*)_check_unknown_subscript(filename,sizeof(char),i))!= '/': 0){-- i;}
-return Cyc_Std_substring((struct _tagged_arr)filename,i + 1,_get_arr_size(filename,
+return Cyc_substring((struct _tagged_arr)filename,i + 1,_get_arr_size(filename,
 sizeof(char))- (i + 1));}int Cyc_Filename_check_suffix(struct _tagged_arr filename,
 struct _tagged_arr suffix){int i=(int)(_get_arr_size(filename,sizeof(char))- 1);int
 j=(int)(_get_arr_size(suffix,sizeof(char))- 1);while(i >= 0?j >= 0: 0){if(*((const

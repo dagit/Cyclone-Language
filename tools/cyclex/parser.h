@@ -8,7 +8,6 @@
 #include "syntax.h"
 
 using Core {
-using Std {
 using List {
 using Lexing {
 using Syntax {
@@ -18,6 +17,6 @@ extern opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf;
 extern xtunion exn {extern Parser_error(string_t)};
 }
 #include "parser_tab.h"
-}}}}}
+}}}}
 
 #endif

@@ -79,8 +79,6 @@ static char sccsid[] = "%W% (Berkeley) %G%";
 #include <stdio.h>
 using Core;
 
-namespace Std;
-
 typedef long long int _IO_ssize_t;
 
 #define EOF (-1)

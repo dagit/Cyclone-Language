@@ -39,8 +39,6 @@ namespace Cpwd {
 #define c2s(x) (Cstring_to_string(x))
 }
 
-namespace Std;
-
 struct passwd *getpwnam(string_t name) {
   /* FIX should free C malloced structure after copying it */
   struct Cpwd::Cpasswd *src = Cpwd::getpwnam(s2c(name));

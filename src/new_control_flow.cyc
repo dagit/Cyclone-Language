@@ -39,7 +39,7 @@
 #include <list.h>
 #include <set.h>
 #include <dict.h>
-#include <cstring.h>
+#include <string.h>
 #include "absyn.h"
 #include "tcutil.h"
 #include "evexp.h"

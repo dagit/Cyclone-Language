@@ -2,7 +2,7 @@
   /* OS X needs sys/types.h before dirent.h */
   #include <sys/types.h>
   #include <dirent.h>
-  struct Cyc_Std___cycDIR { // must match defn in cyclone stub
+  struct Cyc___cycDIR { // must match defn in cyclone stub
     DIR *dir;
   };
 
@@ -34,53 +34,53 @@
   }
 
   #include <signal.h>
-  typedef void *Cyc_Std_sigarg_t;
-  extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_DFL();
-  extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_ERR();
-  extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_IGN();
-  extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_HOLD();
-  extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_HANDLER(void (*)(int));
-  Cyc_Std_sigarg_t sig_wrap(void (*f)(int)) {
+  typedef void *Cyc_sigarg_t;
+  extern Cyc_sigarg_t Cyc_Csignal_make_SIG_DFL();
+  extern Cyc_sigarg_t Cyc_Csignal_make_SIG_ERR();
+  extern Cyc_sigarg_t Cyc_Csignal_make_SIG_IGN();
+  extern Cyc_sigarg_t Cyc_Csignal_make_SIG_HOLD();
+  extern Cyc_sigarg_t Cyc_Csignal_make_SIG_HANDLER(void (*)(int));
+  Cyc_sigarg_t sig_wrap(void (*f)(int)) {
     if (f == SIG_DFL)
-      return Cyc_Std_Csignal_make_SIG_DFL();
+      return Cyc_Csignal_make_SIG_DFL();
     if (f == SIG_ERR)
-      return Cyc_Std_Csignal_make_SIG_ERR();
+      return Cyc_Csignal_make_SIG_ERR();
     if (f == SIG_IGN)
-      return Cyc_Std_Csignal_make_SIG_IGN();
+      return Cyc_Csignal_make_SIG_IGN();
   #ifdef SIG_HOLD
     if (f == SIG_HOLD)
-      return Cyc_Std_Csignal_make_SIG_HOLD();
+      return Cyc_Csignal_make_SIG_HOLD();
   #endif
-      return Cyc_Std_Csignal_make_SIG_HANDLER(f);
+      return Cyc_Csignal_make_SIG_HANDLER(f);
   }
 
   #ifndef __CYGWIN__
-  Cyc_Std_sigarg_t signal_SIG_DFL(int a) {
+  Cyc_sigarg_t signal_SIG_DFL(int a) {
     return sig_wrap(signal(a,SIG_DFL));
   }
-  Cyc_Std_sigarg_t signal_SIG_ERR(int a) {
+  Cyc_sigarg_t signal_SIG_ERR(int a) {
     return sig_wrap(signal(a,SIG_ERR));
   }
   #ifdef _SIG_HOLD_def_
-  Cyc_Std_sigarg_t signal_SIG_HOLD(int a) {
+  Cyc_sigarg_t signal_SIG_HOLD(int a) {
     return sig_wrap(signal(a,SIG_HOLD));
   }
   #endif
-  Cyc_Std_sigarg_t signal_SIG_IGN(int a) {
+  Cyc_sigarg_t signal_SIG_IGN(int a) {
     return sig_wrap(signal(a,SIG_IGN));
   }
   #endif
 
   #include <stdio.h>
-  // Define struct Std::__cycFILE, and initialize stdin, stdout, stderr
-  struct Cyc_Std___cycFILE { // must match defn in cyclone stub
+  // Define struct __cycFILE, and initialize stdin, stdout, stderr
+  struct Cyc___cycFILE { // must match defn in cyclone stub
     FILE *file;
-  } Cyc_Std_stdin_v, Cyc_Std_stdout_v, Cyc_Std_stderr_v,
-    *Cyc_Std_stdin = &Cyc_Std_stdin_v,
-    *Cyc_Std_stdout = &Cyc_Std_stdout_v,
-    *Cyc_Std_stderr = &Cyc_Std_stderr_v;
+  } Cyc_stdin_v, Cyc_stdout_v, Cyc_stderr_v,
+    *Cyc_stdin = &Cyc_stdin_v,
+    *Cyc_stdout = &Cyc_stdout_v,
+    *Cyc_stderr = &Cyc_stderr_v;
 
-  FILE *_sfile_to_file(struct Cyc_Std___cycFILE *sf) {
+  FILE *_sfile_to_file(struct Cyc___cycFILE *sf) {
     if(!sf) {
       fprintf(stderr,"Attempt to access null file descriptor.\n");
       exit(255);
@@ -89,7 +89,7 @@
       throw(Cyc_Null_Exception); // FIX:  should be more descriptive?
     return sf->file;
   }
-  int Cyc_Std_file_string_read(struct Cyc_Std___cycFILE *sf, 
+  int Cyc_file_string_read(struct Cyc___cycFILE *sf, 
                                  struct _tagged_arr dest,
                                  int dest_offset, int max_count) {
     unsigned char *new_curr = dest.curr + dest_offset;
@@ -103,7 +103,7 @@
     }
     return fread(new_curr, 1, max_count, fd);
   }
-  int Cyc_Std_file_string_write(struct Cyc_Std___cycFILE *sf, 
+  int Cyc_file_string_write(struct Cyc___cycFILE *sf, 
                                   struct _tagged_arr src,
                                   int src_offset, int max_count) {
     size_t sz = src.last_plus_one - src.curr;

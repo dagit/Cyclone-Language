@@ -31,7 +31,6 @@
 #undef memcpy
 #undef memmove
 
-namespace Std {
 using Core;
 using List;
 
@@ -404,7 +403,7 @@ mstring_t realloc_str(mstring_t<`H> str, size_t sz) {
 mstring_t<`r> rsubstring(region_t<`r> r,buffer_t s, 
                          int start, size_t amt) {
   //if (start < 0 || amt < 0 || start + ((int)amt) - 1 > (int)(s.size))
-  //  throw new Invalid_argument("Std::substring");
+  //  throw new Invalid_argument("substring");
   mstring_t ans = rnew_string(r,amt+1);
   s = s+start;
   assert(amt < ans.size && amt <= s.size);
@@ -423,7 +422,7 @@ mstring_t substring(buffer_t s, int start, size_t amt) {
 mstring_t<`r> rreplace_suffix (region_t<`r> r,buffer_t src, buffer_t curr_suffix, buffer_t new_suffix) {
   size_t m = src.size;
   size_t n = curr_suffix.size;
-  string_t err = "Std::replace_suffix";
+  string_t err = "replace_suffix";
   if (m < n) 
     throw new Invalid_argument(err);
   for (size_t i = 1; i <= n; ++i)
@@ -521,7 +520,7 @@ mstring_t<`r> mstrrchr(mstring_t<`r> s, char c) {
 // Return a pointer to the beginning of the substring needle within
 // haystack, or NULL if the substring is not found.
 string_t<`r> strstr(string_t<`r> haystack, string_t needle) {
-  if (!haystack || !needle) throw new Invalid_argument("Std::strstr");
+  if (!haystack || !needle) throw new Invalid_argument("strstr");
   if (*needle == '\0') return haystack;
 
   int len = strlen(needle);
@@ -535,7 +534,7 @@ string_t<`r> strstr(string_t<`r> haystack, string_t needle) {
 }
 
 mstring_t<`r> mstrstr(mstring_t<`r> haystack, string_t needle) {
-  if (!haystack || !needle) throw new Invalid_argument("Std::mstrstr");
+  if (!haystack || !needle) throw new Invalid_argument("mstrstr");
   if (*needle == '\0') return haystack;
 
   int len = strlen(needle);
@@ -722,28 +721,28 @@ char ?NOZEROTERM realloc(char ?NOZEROTERM`H s, size_t n) {
 
 `a::A?`r _memcpy(`a?`r d, const `a? s, size_t n, sizeof_t<`a> sz) {
   if (d == NULL || d.size < n || s == NULL || s.size < n)
-    throw new Invalid_argument("Std::memcpy");
+    throw new Invalid_argument("memcpy");
   Cstr::memcpy((`a *)d, (const `a *)s, n*sz);
   return d;
 }
 
 `a::A?`r _memmove(`a?`r d, const `a? s, size_t n, sizeof_t<`a> sz) {
   if (d == NULL || d.size < n || s == NULL || s.size < n)
-    throw new Invalid_argument("Std::memove");
+    throw new Invalid_argument("memove");
   Cstr::memmove((`a *)d, (const `a *)s, n*sz);
   return d;
 }
 
 int memcmp(const char ?NOZEROTERM s1, const char ?NOZEROTERM s2, size_t n) {
   if (s1 == NULL || s2 == NULL || s1.size >= n || s2.size >= n)
-    throw new Invalid_argument("Std::memcmp");
+    throw new Invalid_argument("memcmp");
   return Cstr::memcmp((const void *)s1, (const void *)s2, n);
 }
 
 const char?NOZEROTERM `r memchr(const char ?NOZEROTERM `r s, char c, size_t n) {
   unsigned int sz = s.size;
   if (s == NULL || n > sz)
-    throw new Invalid_argument("Std::memchr");
+    throw new Invalid_argument("memchr");
   let p = Cstr::memchr((const char *NOZEROTERM)s, c, n);
   if (p == NULL) return NULL;
   let sval = (unsigned int)((const char *NOZEROTERM)s);
@@ -755,7 +754,7 @@ const char?NOZEROTERM `r memchr(const char ?NOZEROTERM `r s, char c, size_t n) {
 char?NOZEROTERM`r mmemchr(char ?NOZEROTERM`r s, char c, size_t n) {
   unsigned int sz = s.size;
   if (s == NULL || n > sz)
-    throw new Invalid_argument("Std::mmemchr");
+    throw new Invalid_argument("mmemchr");
   let p = Cstr::memchr((const char *NOZEROTERM)s, c, n);
   if (p == NULL) return NULL;
   let sval = (unsigned int)((const char *NOZEROTERM)s);
@@ -766,21 +765,19 @@ char?NOZEROTERM`r mmemchr(char ?NOZEROTERM`r s, char c, size_t n) {
 
 char ?NOZEROTERM`r memset(char ?NOZEROTERM`r s, char c, size_t n) {
   if (s == NULL || n > s.size)
-    throw new Invalid_argument("Std::memset");
+    throw new Invalid_argument("memset");
   Cstr::memset((void *)((char *NOZEROTERM)s), c, n);
   return s;
 }
  
 void bzero(char?NOZEROTERM s, size_t n) {
   if(s == NULL || s.size < n)
-    throw new Invalid_argument("Std::bzero");
+    throw new Invalid_argument("bzero");
   Cstr::bzero((_*NOZEROTERM)s,n);
 }
 
 void _bcopy(const `a::A? src, `a?`r dst, size_t n, sizeof_t<`a> sz) {
   if(src == NULL || src.size < n || dst == NULL || dst.size < n)
-    throw new Invalid_argument("Std::bcopy");
+    throw new Invalid_argument("bcopy");
   Cstr::bcopy((const `a*)src,(_*)dst,n*sz);
-}
-
 }

@@ -16,5 +16,9 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
-#include <ccrypt.h>
-using Std;
+#ifndef _CRYPT_H_
+#define _CRYPT_H_
+
+extern char ?crypt(const char ?key, const char ?salt);
+
+#endif

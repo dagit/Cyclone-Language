@@ -20,8 +20,7 @@
    Copyright (C) 1987,88,89,90,91,92,93,94,96,97,98
    Free Software Foundation, Inc. */
 
-#include <cgetopt.h>
-namespace Std {
+#include <getopt.h>
 int
 getopt_long (int argc, char ?`H?argv, const char ?options,
              const struct option ?long_options, int *opt_index)
@@ -39,8 +38,6 @@ getopt_long_only (int argc, char ?`H?argv, const char ?options,
 {
   return _getopt_internal (argc, argv, options, long_options, opt_index, 1);
 }
-
-} /* end namespace Getopt */
 
 
 #ifdef TEST

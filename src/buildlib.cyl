@@ -1231,7 +1231,6 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
        macrosfile = sys/types.iB
        declsfile = sys/types.iC
        filtereddeclsfile = sys/types.iD
-       cfilename = sys/ctypes.h
     */
     let basename = Filename::basename(filename);
     let dirname = Filename::dirname(filename);
@@ -1249,10 +1248,6 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       ((dirname.size == 0)?
       (aprintf("%s.iD", choppedname)):
       (Filename::concat(dirname, aprintf("%s.iD", choppedname))));
-    let cfilename = (const char @)
-      ((dirname.size == 0)?
-      (aprintf("c%s", basename)):
-      (Filename::concat(dirname, aprintf("c%s", basename))));
 
     try {
 
@@ -1427,11 +1422,6 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     maybe = fopen(filename,"w");
     if (!maybe) return 1;
     out_file = (FILE @)maybe;
-    fprintf(out_file,"#include <%s>\nusing Std;\n",cfilename);
-    fclose(out_file);
-    maybe = fopen(cfilename, "w");
-    if (!maybe) return 1;
-    out_file = (FILE @)maybe;
     mstring_t ifdefmacro = aprintf("_%s_",filename);
     for (let j = 0; j < ifdefmacro.size; j++) {
       if (ifdefmacro[j] == '.' || ifdefmacro[j] == '/')
@@ -1505,8 +1495,6 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     Tc::tc(te, true, print_decls);
 
     /* print them */
-    fprintf(out_file,"\nnamespace Std {\n");
-
     for (let $(d,n) = $(print_decls, names); 
 	 d != NULL && n != NULL; d = d->tl, n = n->tl) {
       let decl = d->hd;
@@ -1558,7 +1546,6 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
           log("%s is not supported on this platform\n",symbol);
       }
     }
-    fprintf(out_file,"}\n"); // close namespace Std
     fprintf(out_file,"#endif\n");
     fclose(out_file);
 
@@ -1576,17 +1563,16 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     /* Dump out the cyclone stubs */
     out_file = (FILE @)cycstubs_file;
     /* Always include the header, to make sure it has no errors */
-    fprintf(out_file, "#include <%s>\n\n", cfilename);
+    fprintf(out_file, "#include <%s>\n\n", filename);
     if (cycstubs != NULL) {
       out_file = (FILE @)cycstubs_file;
-      fprintf(out_file, "namespace Std {\n");
       for (let x = cycstubs; x != NULL; x = x->tl) {
         let &$(symbol,text) = x->hd;
         if (text != NULL &&
             (symbol == NULL || Set::member(defined_symbols, new symbol)))
           fputs((const char @)text,out_file);
       }
-      fprintf(out_file, "}\n\n");
+      fprintf(out_file, "\n");
     }
 
     return 0;
@@ -1608,16 +1594,6 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       fprintf(out_file,
               "#error -- %s is not supported on this platform\n",
               filename);
-      fclose(out_file);
-      maybe = fopen(cfilename,"w");
-      if (!maybe) {
-        fprintf(stderr,"Error: could not create file %s\n",cfilename);
-        return 1;
-      }
-      out_file = (FILE@)maybe;
-      fprintf(out_file,
-              "#error -- %s is not supported on this platform\n",
-              cfilename);
       fclose(out_file);
       fprintf(stderr,"Warning: %s will not be supported on this platform\n",
               filename);

@@ -61,21 +61,22 @@ ifdef MS
 #FIX: Ignore fewer flags.
 	cl /Fe$@ $(CYC_LIB_PATH)/snprintf.obj $^ $(CYCDIR)/bin/lib/cyc-lib/gc.lib
 else
-	$(CYCC) $(CYCFLAGS) -v -L. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) $(CYCFLAGS) -v -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
 endif
 
 # The -L. makes sure that we pick up the libcyc.a of the current
-#   directory.  The -B makes sure we pick up the gc.a of the current
-#   $(CYCDIR), and we avoid the libcyc.a and gc.a of any version of
-#   Cyclone currently installed in the usual place.
+# directory.  The -B. makes sure we use the runtime_cyc.o of the
+# current directory, and the second -B makes sure we pick up the gc.a
+# of the current $(CYCDIR), and we avoid the libcyc.a and gc.a of any
+# version of Cyclone currently installed in the usual place.
 # Why don't these use $(CYCFLAGS) -- because that has -save-c which is
 #   irrelevant and the -B flags used there are to find cyc_include.h,
 #   not the .a files.
 cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS))
-	$(CYCC) -v -L. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) -v -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
 
 buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O)
-	$(CYCC) -v -L. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) -v -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
 
 install_path.c: $(CYCDIR)/.version $(CYCDIR)/Makefile.inc
 	 (echo "char *Carch = \"$(ARCH)\";"; \

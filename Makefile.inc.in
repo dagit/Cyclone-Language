@@ -65,15 +65,8 @@ CYCLONE_H:=arg.h\
 	assert.h\
 	bitvec.h\
 	buffer.h\
-	cassert.h\
-	ccrypt.h\
-	cgetopt.h\
-	cgrp.h\
 	core.h\
-	cpwd.h\
 	crypt.h\
-	cstring.h\
-	cstrings.h\
 	dict.h\
 	execinfo.h\
 	filename.h\

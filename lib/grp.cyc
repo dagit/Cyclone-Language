@@ -17,7 +17,7 @@
    330, Boston, MA 02111-1307 USA. */
 
 #include <core.h>
-#include <cgrp.h>
+#include <grp.h>
 using Core;
 
 namespace Cgrp {
@@ -36,8 +36,6 @@ namespace Cgrp {
 #define s2c(x) (string_to_Cstring(x))
 #define c2s(x) (Cstring_to_string(x))
 }
-
-namespace Std;
 
 struct group *getgrnam(string_t name) {
   struct Cgrp::Cgroup *src = Cgrp::getgrnam(s2c(name));
