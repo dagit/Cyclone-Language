@@ -331,14 +331,14 @@ static list_t<stringptr_t> split_by_char(string_t s, char c) {
 }
 
 /* FIX: once stat is ported we can use that instead */
-bool file_exists(string_t file) {
+static bool file_exists(string_t file) {
   FILE *f = null;
   try f = file_open(file,"r"); catch {default: break;}
   if (f == null) return false;
   else { fclose((FILE @)f); return true; }
 }
 
-string_t *find(list_t<stringptr_t> dirs, string_t file) {
+static string_t *find(list_t<stringptr_t> dirs, string_t file) {
   if (file == null) return null;
   for (; dirs != null; dirs = dirs->tl) {
     let dir = *dirs->hd;
@@ -349,7 +349,7 @@ string_t *find(list_t<stringptr_t> dirs, string_t file) {
   return null;
 }
 
-string_t do_find(list_t<stringptr_t> dirs, string_t file) {
+static string_t do_find(list_t<stringptr_t> dirs, string_t file) {
   let f = find(dirs, file);
   if (f == null) {
     fprintf(stderr,"Error: can't find internal compiler file %s", file);
@@ -360,7 +360,65 @@ string_t do_find(list_t<stringptr_t> dirs, string_t file) {
   return *f;
 }
 
-void process_file(string_t filename) {
+/* Is a character special to /bin/sh (except for single quote)? */
+static bool is_other_special(char c) {
+  switch (c) {
+  case '\\': fallthru;
+  case '"': fallthru;
+  case ';': fallthru;
+  case '&': fallthru;
+  case '(': fallthru;
+  case ')': fallthru;
+  case '|': fallthru;
+  case '^': fallthru;
+  case '<': fallthru;
+  case '>': fallthru;
+  case ' ': fallthru;
+  case '\n': fallthru;
+  case '\t': return true;
+  default: return false;
+  }
+}
+
+/* Escape any characters special to /bin/sh */
+static string_t sh_escape_string(string_t s) {
+  let len = strlen(s);
+
+  /* Count the number of single quotes and other special chars in s */
+  let single_quotes = 0;
+  let other_special = 0;
+  for (int i = 0; i < len; i++) {
+    let c = s[i];
+    if (c == '\'') single_quotes++;
+    else if (is_other_special(c)) other_special++;
+  }
+
+  /* No special chars to escape */
+  if (single_quotes == 0 && other_special == 0)
+    return s;
+
+  /* No single quotes, we can just single quote s */
+  if (single_quotes == 0)
+    return strconcat_l(list(new "'",new (string_t)s, new "'"));
+
+  /* We'll quote all special chars by prefixing with a backslash */
+  let len2 = len + single_quotes + other_special;
+  let s2 = new {for i < len2+1 : '\0'}; // add trailing null
+  let i = 0;
+  let j = 0;
+  for (; i < len; i++) {
+    let c = s[i];
+    if (c == '\'' || is_other_special(c))
+      s2[j++] = '\\';
+    s2[j++] = c;
+  }
+  return s2;
+}
+static stringptr_t sh_escape_stringptr(stringptr_t sp) {
+  return new sh_escape_string(*sp);
+}
+
+static void process_file(string_t filename) {
 
   let basename      = Filename::chop_extension(filename);
   let preprocfile   = strconcat(basename, ".cyp");
@@ -379,13 +437,17 @@ void process_file(string_t filename) {
   // Run the preprocessor, by building and running a command-line
   // Pass -I and -D things onto preprocessor
   // FIX: let user change how/which preprocessor is invoked
-  let cppargs_string = String::str_sepstr(new List(new (string_t)"",
-                                                   rev(cppargs))," ");
+  let cppargs_string =
+    String::str_sepstr(new List(new (string_t)"",
+                                List::map(sh_escape_stringptr,rev(cppargs))),
+                       " ");
   string_t stdinc_string = " -Ic:/cyclone/include";
   let cyclone_include_path = Stdlib::getenv("CYCLONE_INCLUDE_PATH");
   if (cyclone_include_path != null) {
     let x = split_by_char(cyclone_include_path,':');
-    let s = String::str_sepstr(new List(new (string_t)"",x)," -I");
+    let s = String::str_sepstr(new List(new (string_t)"",
+                                        List::map(sh_escape_stringptr,x)),
+                               " -I");
     stdinc_string = xprintf("%s%s",s,stdinc_string);
   }
   string_t ofile_string;
@@ -395,7 +457,7 @@ void process_file(string_t filename) {
     else // output to standard out
       ofile_string = "";
   }
-  else ofile_string = xprintf(" > %s", preprocfile);
+  else ofile_string = xprintf(" > %s", sh_escape_string(preprocfile));
 
   string_t fixup_string;
   if (produce_dependencies)
@@ -417,7 +479,8 @@ void process_file(string_t filename) {
   else fixup_string = "";
 
   let cmd = xprintf("gcc -x c -E -U__GNUC__ -nostdinc%s%s %s%s%s",
-                    cppargs_string, stdinc_string, filename,
+                    cppargs_string, stdinc_string,
+                    sh_escape_string(filename),
                     fixup_string, ofile_string);
 
   if (v_r) fprintf(stderr,"%s\n",cmd);
@@ -665,9 +728,10 @@ int main(int argc, string_t ? argv) {
   let cyc_include = do_find(cyclone_exec_prefix_path,"include/cyc_include.h");
 
   ccargs = rev(ccargs);
-  let ccargs_string = String::str_sepstr(ccargs, " ");
+  let ccargs_string = String::str_sepstr(List::map(sh_escape_stringptr,ccargs), " ");
   libargs = rev(libargs);
-  let libargs_string = String::str_sepstr(new List(new ((string_t)""), libargs), " ");
+  let libargs_string = String::str_sepstr(new List(new ((string_t)""),
+                                                   List::map(sh_escape_stringptr,libargs)), " ");
 
   let stdlib;
   let stdlib_string;
@@ -757,7 +821,7 @@ int main(int argc, string_t ? argv) {
   let cccmd =
     xprintf("gcc -include %s%s %s%s%s",
             cyc_include,
-            (output_file==null?((string_t)""):xprintf(" -o %s",*output_file)),
+            (output_file==null?((string_t)""):xprintf(" -o %s",sh_escape_string(*output_file))),
             ccargs_string,
             stdlib_string,
             libargs_string);
