@@ -117,6 +117,7 @@ _check_null(void *ptr) {
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
   ((char *)ptr) + (elt_sz)*(index); })
+#else
 #ifdef _INLINE_FUNCTIONS
 static inline char *
 _check_known_subscript_null(void *ptr, unsigned bound, unsigned elt_sz, unsigned index) {
