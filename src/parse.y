@@ -165,6 +165,14 @@ static void unimp2(string_t msg,seg_t sg) {
 }
 
 // Functions for creating abstract syntax
+
+// a way to gensym an enum name
+static int enum_counter = 0;
+// FIX:  need to guarantee this won't conflict with a use name
+qvar_t gensym_enum() {
+  return new $(new Rel_n(NULL), new (string_t)aprintf("__anonymous_enum_%d__", enum_counter++));
+}
+
 static structfield_t
 make_struct_field(seg_t loc,
                   $($(qvar_t,tqual_t,type_t,list_t<tvar_t,`H>,
@@ -289,6 +297,15 @@ static type_t id2type(string_t<`H> s, conref_t<kind_t> k) {
     return HeapRgn;
   else
     return new VarType(new Tvar(new s,NULL,k));
+}
+
+static tvar_t copy_tvar(tvar_t t) {
+  conref_t<kind_t> k;
+  switch (compress_conref(t->kind)->v) {
+  case &Eq_constr(v): k = new_conref(v); break;
+  default: k = empty_conref(); break;
+  }
+  return new Tvar{.name=t->name, .identity = NULL, .kind = k};
 }
 
 // convert a list of types to a list of typevars -- the parser can't
@@ -515,17 +532,17 @@ static $(type_t,opt_t<decl_t>)
 	seen_type = true;
         switch (d->r) {
         case &Struct_d(sd):
-          let args = List::map(tvar2typ,sd->tvs);
+          let args = List::map(tvar2typ,List::map(copy_tvar,sd->tvs));
           t = new StructType(sd->name->v,args,NULL);
           if (sd->fields!=NULL) declopt = new Opt(d);
 	  break;
         case &Tunion_d(tud):
-          let args = List::map(tvar2typ,tud->tvs);
+          let args = List::map(tvar2typ,List::map(copy_tvar,tud->tvs));
           t = new TunionType(TunionInfo(new KnownTunion(new tud), args, HeapRgn));
 	  if(tud->fields != NULL) declopt = new Opt(d);
 	  break;
         case &Union_d(ud):
-          let args = List::map(tvar2typ,ud->tvs);
+          let args = List::map(tvar2typ,List::map(copy_tvar,ud->tvs));
           t = new UnionType(ud->name->v,args,NULL);
           if (ud->fields!=NULL) declopt = new Opt(d);
 	  break;
@@ -779,6 +796,12 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
         return new List(new Decl(new Union_d(ud),loc),NULL);
       case &EnumType(n,_):
         let ed = new Enumdecl{s,n,NULL};
+        if (atts != NULL) err("bad attributes on enum",loc);
+        return new List(new Decl(new Enum_d(ed),loc),NULL);
+      case &AnonEnumType(fs):
+        // someone's written:  enum {A,B,C}; which is a perfectly good
+        // way to declare symbolic constants A, B, and C.
+        let ed = new Enumdecl{s,gensym_enum(),new Opt(fs)};
         if (atts != NULL) err("bad attributes on enum",loc);
         return new List(new Decl(new Enum_d(ed),loc),NULL);
       default: err("missing declarator",loc); return NULL;

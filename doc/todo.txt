@@ -140,9 +140,9 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
   the issue that our casts may include computation.  We should
   have a way to check to see if a cast doesn't do any computation.
 
-* get rid of null, replace with 0 (requires clever overloading)
+* add memcpy, memset, bzero, realloc, etc. somehow.
 
-* add memcpy and memset somehow.
+* add setjmp and longjmp somehow.
 
 THINGS NEEDED TO SIMPLIFY PORTING:
 ----------------------------------
