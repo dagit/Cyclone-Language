@@ -17,7 +17,7 @@ static struct option long_options[]=
 };
 
 int
-main (int argc, char ??argv)
+main (int argc, char ?`H ?argv)
 {
   int c;
   int digit_optind = 0;

@@ -370,7 +370,7 @@ void set_test() {
   okfail(Set::member(Set::union_two(x,x3),11));
   okfail(!Set::is_empty(x));
 
-  set_t<stringptr_t> s = Set::empty(String::strptrcmp);
+  set_t<stringptr_t<`H,`H>,`H> s = Set::empty(String::strptrcmp);
   s = Set::insert(s,allocstr("hello"));
   s = Set::insert(s,allocstr("world"));
   s = Set::insert(s,allocstr("sphinx"));
@@ -404,7 +404,7 @@ void dict_test() {
 int hash_int(int i) { return i; }
 void hashtable_test() {
   test_begin("Hashtable");
-  table_t<int,int,{},{}> x = Hashtable::create(17,int_cmp,hash_int);
+  table_t<int,int> x = Hashtable::create(17,int_cmp,hash_int);
   Hashtable::insert(x,1,2);
   Hashtable::insert(x,-4,445);
   Hashtable::insert(x,300,2828);
@@ -412,7 +412,7 @@ void hashtable_test() {
   okfail(Hashtable::lookup(x,-4)==445);
   okfail(Hashtable::lookup(x,300)==2828);
 
-  table_t<stringptr_t,stringptr_t,{},{}> x2 = 
+  table_t<stringptr_t<`H,`H>,stringptr_t<`H,`H>> x2 = 
     Hashtable::create(17,String::strptrcmp,hash_stringptr);
   Hashtable::insert(x2,allocstr("foo"),allocstr("bar"));
   Hashtable::insert(x2,allocstr("baz"),allocstr("rogue"));
@@ -512,7 +512,7 @@ void string_test() {
 }
 
 // THIS DOESN'T WORK!!
-string_t bad_strrchr(string_t s, char c) {
+string_t bad_strrchr(string_t<`H> s, char c) {
   int len = String::strlen(s);
 
   for (int i = len-1; i>=0; i--) {
@@ -547,7 +547,7 @@ void buffer_test() {
 
 void queue_test() {
   test_begin("Queue");
-  Queue::queue_t<stringptr_t> q = Queue::create();
+  Queue::queue_t<stringptr_t<`H,`H>> q = Queue::create();
   okfail(Queue::is_empty(q));
   Queue::add(q,allocstr("a"));
   okfail(!Queue::is_empty(q));
@@ -834,7 +834,7 @@ void a_foo(string_t s) {
   printf("Anon %s\n",s);
 }
 typedef $(string_t,bool,string_t,spec_t,string_t) @arg_t;
-void arg_test(string_t ? args) {
+void arg_test(string_t<`H> ?`H args) {
   // NOTE, TO TEST IT GIVE IT SOME ARGS!
   test_begin("Arg");
 
@@ -1017,7 +1017,7 @@ void letv_test() {
     test_end();
 }
 
-int main(int argc, string_t ? args) {
+int main(int argc, string_t<`H> ?`H args) {
   printf("*************** CYCLONE TEST SUITE ***************\n\n");
 
   printf("EXCEPTIONS:\n");

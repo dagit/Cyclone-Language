@@ -1,6 +1,6 @@
 /* BIT OUTPUT ROUTINES. */
 
-#include "stdio.h"
+#include <stdio.h>
 using Stdio;
 
 

@@ -290,7 +290,7 @@ static tag_t get_endtag_nocheck(FILE @f) {
   return get_tag(f);
 }
 list_t<doc_t> get_nest(context_t ctxt, buf_t b, FILE @f) {
-  list_t<doc_t> ds = null;
+  list_t<doc_t,`H> ds = null;
   unsigned int count = 0; /* Invariant: count is length of ds */
 
   /* Maintain a stack with an elt for each level of nesting.

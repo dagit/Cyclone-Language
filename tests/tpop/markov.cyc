@@ -39,17 +39,17 @@ typedef struct _State State;
 typedef struct _Suffix Suffix;
 
 
-State* lookup(string_t*{NPREF} prefix, int create);
-void build(string_t*{NPREF} prefix, FILE@);
+State* lookup(string_t<`H> *{NPREF} prefix, int create);
+void build(string_t<`H>*{NPREF} prefix, FILE@);
 void generate(int nwords);
-void add(string_t*{NPREF} prefix, string_t word);
+void add(string_t<`H>*{NPREF} prefix, string_t<`H> word);
 
 State	??statetab = null;
 
 const char NONWORD[] = "\n";  /* cannot appear as real word */
 
 /* temporary stubs */
-`a ? memmove(`a ? dest, `a ? src, size_t n)
+`a ?`r memmove(`a ?`r dest, `a ? src, size_t n)
 {/* minor assumption: n is a multiple of sizeof('a) == 4  */
   /* Here n is a number of bytes to copy.  
      It's hard to duplicate this behavior exactly. */
@@ -111,7 +111,7 @@ unsigned int hash(string_t*{NPREF} s)
 /* lookup: search for prefix; create if requested. */
 /*  returns pointer if present or created; null if not. */
 /*  creation doesn't strdup so strings mustn't change later. */
-State* lookup(string_t *{NPREF}prefix, int create)
+State* lookup(string_t<`H> *{NPREF} prefix, int create)
 {
   int i, h;
   State *sp;
@@ -132,7 +132,7 @@ State* lookup(string_t *{NPREF}prefix, int create)
 }
 
 /* addsuffix: add to state. suffix must not change later */
-void addsuffix(State *sp, string_t suffix)
+void addsuffix(State *`H sp, string_t<`H> suffix)
 {
   Suffix *suf;
 
@@ -142,7 +142,7 @@ void addsuffix(State *sp, string_t suffix)
 }
 
 /* add: add word to suffix list, update prefix */
-void add(string_t*{NPREF} prefix, string_t suffix)
+void add(string_t<`H>*{NPREF} prefix, string_t<`H> suffix)
 {
   State *sp;
 
@@ -154,7 +154,7 @@ void add(string_t*{NPREF} prefix, string_t suffix)
 }
 
 /* build: read input, build prefix table */
-void build(string_t*{NPREF} prefix, FILE @f)
+void build(string_t<`H> *{NPREF} prefix, FILE @f)
 {
   mstring_t buf = String::expand("",100);
 

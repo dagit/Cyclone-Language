@@ -216,7 +216,7 @@ context_t init_context = {
 
 /*filtering out Mt's in a list of docs
  *used in remove_Mt(doc_t d) */
-static List::list_t<doc_t> filter_Mt(List::list_t<doc_t> ds){
+static List::list_t<doc_t> filter_Mt(List::list_t<doc_t,`H> ds){
   while(ds != null && ds->hd == Mt)
     ds = ds->tl;
   if(ds == null)
@@ -471,7 +471,7 @@ List::list_t<doc_t> flatten(doc_t d) {
 
 extern void validate_docs(buf_t,doc_t,doc_t);
 
-int main(int argc, char ??argv) {
+int main(int argc, char ?`H ?`H argv) {
   string_t tlimit = "182";
   FILE @f = stdin;
 

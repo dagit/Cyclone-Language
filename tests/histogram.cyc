@@ -62,7 +62,7 @@ int main(int argc, string_t ?argv) {
   } else {
     f = (FILE @)fopen(argv[1],"r");
   }
-  table_t<stringptr_t,$(int,int)@,{},{}> table =
+  table_t<stringptr_t<`H,`H>,$(int,int)@> table =
       create(101, strptrcmp, hash_stringptr);
 
   // get the program point

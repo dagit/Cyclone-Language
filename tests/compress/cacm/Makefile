@@ -4,7 +4,7 @@
 CYCDIR := ../../..
 include $(CYCDIR)/Makefile.inc
 
-CYCC := $(CYCDIR)/src/$(CYCCOMP)
+CYCC := $(CYCDIR)/bin/$(CYCCOMP)
 
 # FIX: if -pp is not used, there is an error in ugly-printing that
 # leaves an unterminated comment

@@ -5,18 +5,26 @@ CYCC := ../../bin/$(CYCCOMP)
 PROGS := fib hanoi shuffle nsieve tfftdp
 
 CYCFLAGS := -lm
+
+ifndef CYGWIN
+ifneq ($(OS),Windows_NT)
+ifneq ($(OSTYPE),cygwin)
 CFLAGS   := -lm
+endif
+endif
+endif
 
 CYCFLAGS := $(CYCFLAGS) -O3
 CFLAGS   := $(CFLAGS)   -O3
 
 #########################################################
 
-CPROGS := $(addsuffix -orig, $(PROGS))
+CYCPROGS := $(addsuffix $(EXE), $(PROGS))
+CPROGS := $(addsuffix $(EXE), $(addsuffix -orig, $(PROGS)))
 BENCH  := $(addprefix bench-, $(PROGS))
 RUN    := $(addprefix run-,   $(PROGS))
 
-ALL := $(PROGS) $(CPROGS)
+ALL := $(CYCPROGS) $(CPROGS)
 
 #########################################################
 
@@ -29,10 +37,14 @@ clean:
 
 #########################################################
 
-%-orig: %-orig.c
+%-orig$(EXE): %-orig.c
 	$(CC) $(CFLAGS) -Wall -o $@ $<
 
-%: %.cyc $(CYCC)
+%$(EXE): %.cyc $(CYCC)
+	$(CYCC) $(CYCFLAGS) -o $@ $<
+
+#JGM: for some reason, I needed this...
+fib$(EXE) : fib.cyc $(CYCC)
 	$(CYCC) $(CYCFLAGS) -o $@ $<
 
 #I tried this to get the labels to work automatically...

@@ -566,10 +566,10 @@ $(doc_t,dyn_synth_t) dynamic_regions_rec(doc_t doc, bool shift, int win_size) {
     flatten_top_seq(doc);
     int only_sizes  = 0;
     int only_colors = 0;
-    list_t<doc_t> ds   = *dsp;
-    list_t<doc_t> prev = null;
-    list_t<doc_t> prev_start_sizes  = null; // not prev at beginning 
-    list_t<doc_t> prev_start_colors = null; // not prev at beginning 
+    list_t<doc_t,`H> ds   = *dsp;
+    list_t<doc_t,`H> prev = null;
+    list_t<doc_t,`H> prev_start_sizes  = null; // not prev at beginning 
+    list_t<doc_t,`H> prev_start_colors = null; // not prev at beginning 
     while(ds != null) {
       //      fprintf(stderr,"\nA %d %d ", only_sizes, only_colors);
       let $(newd, inner_synth) = dynamic_regions_rec(ds->hd,shift,win_size);

@@ -3,14 +3,14 @@ include ../../Makefile.inc
 
 # Override this variables to use a bootstrapped compiler (you may want
 # an absolute path)
-CYCC=../../src/$(CYCCOMP)
+CYCC=../../bin/$(CYCCOMP)
 
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX=
 
 CYC_FLAGS=-I../../lib -B../../lib
 
-LIB=../../lib/$(OUT_PREFIX)$(CYCLIB)
+LIB=../../bin/cyc-lib/$(OUT_PREFIX)$(CYCLIB)
 
 all: $(CYCC) $(OUT_PREFIX)freq$(EXE) $(OUT_PREFIX)strings$(EXE) \
   $(OUT_PREFIX)grep$(EXE) $(OUT_PREFIX)markov$(EXE)
@@ -19,6 +19,9 @@ all: $(CYCC) $(OUT_PREFIX)freq$(EXE) $(OUT_PREFIX)strings$(EXE) \
 # Note: we leave in $(LIB) so we get the $(OUT_PREFIX) version of the
 # library
 $(OUT_PREFIX)%$(EXE): $(OUT_PREFIX)%.o $(LIB)
+	$(CYCC) $(CYC_FLAGS) -g -o $@ $^ $(LDFLAGS)
+
+$(OUT_PREFIX)freq$(EXE): $(OUT_PREFIX)freq.o $(LIB)
 	$(CYCC) $(CYC_FLAGS) -g -o $@ $^ $(LDFLAGS)
 
 # This takes care of non-machine-generated versions (the .cyc is already there)

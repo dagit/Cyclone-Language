@@ -7,9 +7,9 @@ CYCDIR := ../../..
 
 include $(CYCDIR)/Makefile.inc
 
-CYCC=$(CYCDIR)/src/$(CYCCOMP)
+CYCC=$(CYCDIR)/bin/$(CYCCOMP)
 
-CYC_FLAGS=-I$(CYCDIR)/lib -B$(CYCDIR)/lib -pp -v
+CYC_FLAGS=-I$(CYCDIR)/lib -B$(CYCDIR)/lib 
 
 encode$(EXE): arithcode.o model.o encode.o
 	$(CYCC) $(CYC_FLAGS) -g -o $@ $^

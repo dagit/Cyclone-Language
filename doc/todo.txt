@@ -4,6 +4,15 @@ BUG FIXES and UNSOUNDNESSES:
 ----------------------------
 * FIX all of the FIX things.
 
+* ugly printer generates comments by accident -- see tests/compress/cacm
+
+* can't cast char?? to const char? const ? (or whatever it is.)
+
+* when you have int x[56] and do int ?z = &x[1], z has size 1 instead
+  of size 55.  
+
+* error messages are confusing now that typedefs have hidden parameters.
+
 * Type-checker must disallow x -= y where x and y are pointers.
 
 * what to do with free evars at the top-level or within type definitions?
