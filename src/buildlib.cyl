@@ -90,6 +90,8 @@ using List;
 using Core;
 using Absyn;
 
+extern "C" Cstring Ccomp; // The string to invoke gcc
+
 FILE *log_file = NULL;
 FILE *cstubs_file = NULL;
 FILE *cycstubs_file = NULL;
@@ -1278,8 +1280,9 @@ and block_comment = parse
     dep_t t = new_deps();
 
     /* Get the macros out of the file */
-    let cmd = aprintf("echo '#include <%s>' | gcc -E -dM -o %s -",
-                      filename,preprocfile);
+    let GCC = Cstring_to_string(Ccomp);
+    let cmd = aprintf("echo '#include <%s>' | %s -E -dM -o %s -",
+                      GCC,filename,preprocfile);
     if (system(cmd) != 0) {
       /* The header probably doesn't exist on this system;
          create a default header. */
@@ -1331,8 +1334,8 @@ and block_comment = parse
     fclose(in_file);
 
     /* Get the type declarations out of the file */
-    cmd = aprintf("echo '#include <%s>' | gcc -E -o %s -",
-                  filename,preprocfile);
+    cmd = aprintf("echo '#include <%s>' | %s -E -o %s -",
+                  GCC,filename,preprocfile);
     if (system(cmd) != 0) {
       return 1;
     }
@@ -1560,8 +1563,8 @@ and block_comment = parse
     }
 
     /* Print reachable macros */
-    cmd = aprintf("echo '#include <%s>' | gcc -E -dM -o %s -",
-                  filename,preprocfile);
+    cmd = aprintf("echo '#include <%s>' | %s -E -dM -o %s -",
+                  GCC,filename,preprocfile);
     if (system(cmd) != 0) {
       return 1;
     }
@@ -1679,7 +1682,9 @@ and block_comment = parse
             type,
             type);
     fclose((FILE@)getsizefile);
-    let gcccmd = aprintf("gcc -o %s %s",
+    let GCC = Cstring_to_string(Ccomp);
+    let gcccmd = aprintf("%s -o %s %s",
+                         GCC,
                          getsizeexec,
                          getsizefilename);
     if (system(gcccmd) != 0) {

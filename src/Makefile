@@ -62,7 +62,7 @@ cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS))
 cycdoc.cyc: cycdoc.cyl
 	$(CYCLEX) $< $@
 
-buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS))
+buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O)
 	$(CYCC) -v -B$(CYC_LIB_PATH) -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
 
 buildlib.cyc: buildlib.cyl

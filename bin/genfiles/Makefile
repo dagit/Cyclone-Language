@@ -75,13 +75,13 @@ $(ARCH)/lib/nogc_a.a: $(ARCH)/lib/a_nogc.o
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
-$(ARCH)/src/cyclone$(EXE): $(addprefix $(ARCH)/src/, $(O_SRCS) install_path.o) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
+$(ARCH)/src/cyclone$(EXE): $(addprefix $(ARCH)/src/, $(O_SRCS) install_path.$(O)) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(ARCH)/src/cycdoc$(EXE): $(addprefix $(ARCH)/src/, $(addsuffix .$(O), $(CYCDOC_SRCS))) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(ARCH)/src/buildlib$(EXE): $(addprefix $(ARCH)/src/, $(addsuffix .$(O), $(BUILDLIB_SRCS))) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
+$(ARCH)/src/buildlib$(EXE): $(addprefix $(ARCH)/src/, $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O)) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(ARCH)/src/install_path.c: ../../Makefile.inc
