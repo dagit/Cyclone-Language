@@ -14,7 +14,7 @@ struct _RuntimeStack {
 };
 
 #ifndef offsetof
-/* should be size_t, but int is fine. */
+/* should be size_t but int is fine */
 #define offsetof(t,n) ((int)(&(((t *)0)->n)))
 #endif
 
@@ -203,7 +203,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
 #define _zero_arr_plus_voidstar(x,s,i) \
   (_zero_arr_plus_voidstar_fn(x,s,i,__FILE__,__LINE__))
 #define _zero_arr_inplace_plus_char(x,i) \
-  _zero_arr_inplace_plus_char_fn((char **)(x),i,__FILE__,__LINE__)
+  _zero_arr_inplace_plus_char_fn((char**)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_short(x,i) \
   _zero_arr_inplace_plus_short_fn((short **)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_int(x,i) \
@@ -246,7 +246,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
   struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
-      _curr != (unsigned char *)0) \
+      _curr != (unsigned char*)0) \
     _throw_arraybounds(); \
   _curr; })
 #endif
@@ -299,7 +299,7 @@ void* GC_calloc_atomic(unsigned,unsigned);
 
 #if(defined(__linux__) && defined(__KERNEL__))
 void *cyc_vmalloc(unsigned);
-void cyc_vfree(void *);
+void cyc_vfree(void*);
 #endif
 // bound the allocation size to be < MAX_ALLOC_SIZE. See macros below for usage.
 #define MAX_MALLOC_SIZE (1 << 28)
@@ -388,12 +388,12 @@ struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(void*)){
 return({(struct Cyc_Fn_Function*(*)(void*(*)(void*(*)(void*),void*),void*(*)(void*)))Cyc_Fn_make_fn;})(Cyc_Fn_fp_apply,f);}
 # 47
 void*Cyc_Fn_apply(struct Cyc_Fn_Function*f,void*x){
-struct Cyc_Fn_Function*_Tmp0=f;void*_Tmp1;void*_Tmp2;_Tmp2=_Tmp0->f;_Tmp1=(void*)_Tmp0->env;{void*(*code)(void*,void*)=_Tmp2;void*env=_Tmp1;
+void*_Tmp0;void*_Tmp1;_Tmp1=f->f;_Tmp0=(void*)f->env;{void*(*code)(void*,void*)=_Tmp1;void*env=_Tmp0;
 return code(env,x);}}struct _tuple0{struct Cyc_Fn_Function*f1;struct Cyc_Fn_Function*f2;};
 # 52
 static void*Cyc_Fn_fn_compose(struct _tuple0*f_and_g,void*arg){
-struct _tuple0*_Tmp0=f_and_g;void*_Tmp1;void*_Tmp2;_Tmp2=_Tmp0->f1;_Tmp1=_Tmp0->f2;{struct Cyc_Fn_Function*f=_Tmp2;struct Cyc_Fn_Function*g=_Tmp1;
-return({struct Cyc_Fn_Function*_Tmp3=f;Cyc_Fn_apply(_Tmp3,Cyc_Fn_apply(g,arg));});}}
+void*_Tmp0;void*_Tmp1;_Tmp1=f_and_g->f1;_Tmp0=f_and_g->f2;{struct Cyc_Fn_Function*f=_Tmp1;struct Cyc_Fn_Function*g=_Tmp0;
+return({struct Cyc_Fn_Function*_Tmp2=f;Cyc_Fn_apply(_Tmp2,Cyc_Fn_apply(g,arg));});}}
 # 58
 struct Cyc_Fn_Function*Cyc_Fn_compose(struct Cyc_Fn_Function*g,struct Cyc_Fn_Function*f){
 # 60
@@ -419,6 +419,6 @@ return({(struct Cyc_Fn_Function*(*)(void*(*)(struct Cyc_Fn_Function*,struct _tup
 # 90
 struct Cyc_List_List*Cyc_Fn_map_fn(struct Cyc_Fn_Function*f,struct Cyc_List_List*x){
 struct Cyc_List_List*res=0;
-for(1;x != 0;x=x->tl){
+for(1;x!=0;x=x->tl){
 res=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({void*_Tmp1=Cyc_Fn_apply(f,x->hd);_Tmp0->hd=_Tmp1;}),_Tmp0->tl=res;_Tmp0;});}
 return Cyc_List_imp_rev(res);}

@@ -14,7 +14,7 @@ struct _RuntimeStack {
 };
 
 #ifndef offsetof
-/* should be size_t, but int is fine. */
+/* should be size_t but int is fine */
 #define offsetof(t,n) ((int)(&(((t *)0)->n)))
 #endif
 
@@ -203,7 +203,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
 #define _zero_arr_plus_voidstar(x,s,i) \
   (_zero_arr_plus_voidstar_fn(x,s,i,__FILE__,__LINE__))
 #define _zero_arr_inplace_plus_char(x,i) \
-  _zero_arr_inplace_plus_char_fn((char **)(x),i,__FILE__,__LINE__)
+  _zero_arr_inplace_plus_char_fn((char**)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_short(x,i) \
   _zero_arr_inplace_plus_short_fn((short **)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_int(x,i) \
@@ -246,7 +246,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
   struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
-      _curr != (unsigned char *)0) \
+      _curr != (unsigned char*)0) \
     _throw_arraybounds(); \
   _curr; })
 #endif
@@ -299,7 +299,7 @@ void* GC_calloc_atomic(unsigned,unsigned);
 
 #if(defined(__linux__) && defined(__KERNEL__))
 void *cyc_vmalloc(unsigned);
-void cyc_vfree(void *);
+void cyc_vfree(void*);
 #endif
 // bound the allocation size to be < MAX_ALLOC_SIZE. See macros below for usage.
 #define MAX_MALLOC_SIZE (1 << 28)
@@ -399,12 +399,12 @@ int Cyc_Position_use_gcc_style_location=1;static char _TmpG0[1U]="";
 static struct _fat_ptr Cyc_Position_source={_TmpG0,_TmpG0,_TmpG0 + 1U};
 # 35
 unsigned Cyc_Position_segment_join(unsigned s1,unsigned s2){
-if(s1 == 0U)return s2;
-if(s2 == 0U)return s1;
+if(s1==0U)return s2;
+if(s2==0U)return s1;
 return s1;}
 # 40
 int Cyc_Position_segment_equals(unsigned s1,unsigned s2){
-return s1 == s2;}
+return s1==s2;}
 # 44
 struct _fat_ptr Cyc_Position_string_of_loc(unsigned loc){
 struct Cyc_Lineno_Pos*pos=Cyc_Lineno_pos_of_abs(Cyc_Position_source,(int)loc);
@@ -426,7 +426,7 @@ return({struct Cyc_Lineno_Pos*_Tmp0=_cycalloc(sizeof(struct Cyc_Lineno_Pos));_Tm
 struct Cyc_List_List*Cyc_Position_strings_of_segments(struct Cyc_List_List*segs){
 # 67
 struct Cyc_List_List*ans=0;
-for(1;segs != 0;segs=segs->tl){
+for(1;segs!=0;segs=segs->tl){
 ans=({struct Cyc_List_List*_Tmp0=_cycalloc(sizeof(struct Cyc_List_List));({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp3=Cyc_Position_string_of_segment((unsigned)segs->hd);*_Tmp2=_Tmp3;});_Tmp2;});_Tmp0->hd=_Tmp1;}),_Tmp0->tl=ans;_Tmp0;});}
 return ans;}struct Cyc_Position_Error{struct _fat_ptr source;unsigned seg;struct _fat_ptr desc;};
 # 93 "position.cyc"
@@ -450,7 +450,7 @@ Cyc_Position_first_error=0;}
 # 113
 if(Cyc_Position_num_errors <= Cyc_Position_max_errors)
 ({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({struct _fat_ptr _Tmp2=Cyc_Position_string_of_segment(e->seg);_Tmp1.f1=_Tmp2;});_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=e->desc;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,({const char*_Tmp3="%s: %s\n";_tag_fat(_Tmp3,sizeof(char),8U);}),_tag_fat(_Tmp2,sizeof(void*),2));});
-if(Cyc_Position_num_errors == Cyc_Position_max_errors)
+if(Cyc_Position_num_errors==Cyc_Position_max_errors)
 Cyc_fprintf(Cyc_stderr,({const char*_Tmp0="Too many error messages!\n";_tag_fat(_Tmp0,sizeof(char),26U);}),_tag_fat(0U,sizeof(void*),0));
 Cyc_fflush(Cyc_stderr);
 ++ Cyc_Position_num_errors;}
@@ -461,6 +461,6 @@ struct _fat_ptr Cyc_Position_get_position_file (void){return Cyc_Position_source
 # 126
 struct _fat_ptr Cyc_Position_get_line_directive(unsigned s){
 struct Cyc_Lineno_Pos*pos_s=Cyc_Lineno_pos_of_abs(Cyc_Position_source,(int)s);
-if(pos_s != 0)
+if(pos_s!=0)
 return({struct Cyc_Int_pa_PrintArg_struct _Tmp0=({struct Cyc_Int_pa_PrintArg_struct _Tmp1;_Tmp1.tag=1,_Tmp1.f1=(unsigned long)pos_s->line_no;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=pos_s->logical_file;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_aprintf(({const char*_Tmp3="\n#line %d \"%s\"\n";_tag_fat(_Tmp3,sizeof(char),16U);}),_tag_fat(_Tmp2,sizeof(void*),2));});
 return _tag_fat(0,0,0);}

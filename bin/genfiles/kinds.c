@@ -14,7 +14,7 @@ struct _RuntimeStack {
 };
 
 #ifndef offsetof
-/* should be size_t, but int is fine. */
+/* should be size_t but int is fine */
 #define offsetof(t,n) ((int)(&(((t *)0)->n)))
 #endif
 
@@ -203,7 +203,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
 #define _zero_arr_plus_voidstar(x,s,i) \
   (_zero_arr_plus_voidstar_fn(x,s,i,__FILE__,__LINE__))
 #define _zero_arr_inplace_plus_char(x,i) \
-  _zero_arr_inplace_plus_char_fn((char **)(x),i,__FILE__,__LINE__)
+  _zero_arr_inplace_plus_char_fn((char**)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_short(x,i) \
   _zero_arr_inplace_plus_short_fn((short **)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_int(x,i) \
@@ -246,7 +246,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
   struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
-      _curr != (unsigned char *)0) \
+      _curr != (unsigned char*)0) \
     _throw_arraybounds(); \
   _curr; })
 #endif
@@ -299,7 +299,7 @@ void* GC_calloc_atomic(unsigned,unsigned);
 
 #if(defined(__linux__) && defined(__KERNEL__))
 void *cyc_vmalloc(unsigned);
-void cyc_vfree(void *);
+void cyc_vfree(void*);
 #endif
 // bound the allocation size to be < MAX_ALLOC_SIZE. See macros below for usage.
 #define MAX_MALLOC_SIZE (1 << 28)
@@ -465,10 +465,10 @@ struct Cyc_Core_Opt Cyc_Kinds_ubko={(void*)& Cyc_Kinds_ubk};
 struct Cyc_Core_Opt Cyc_Kinds_umko={(void*)& Cyc_Kinds_umk};
 # 64
 struct Cyc_Core_Opt*Cyc_Kinds_kind_to_opt(struct Cyc_Absyn_Kind*ka){
-struct Cyc_Absyn_Kind*_Tmp0=ka;enum Cyc_Absyn_AliasQual _Tmp1;enum Cyc_Absyn_KindQual _Tmp2;_Tmp2=_Tmp0->kind;_Tmp1=_Tmp0->aliasqual;{enum Cyc_Absyn_KindQual k=_Tmp2;enum Cyc_Absyn_AliasQual a=_Tmp1;
-{enum Cyc_Absyn_AliasQual _Tmp3=a;switch((int)_Tmp3){case Cyc_Absyn_Aliasable:  {
+enum Cyc_Absyn_AliasQual _Tmp0;enum Cyc_Absyn_KindQual _Tmp1;_Tmp1=ka->kind;_Tmp0=ka->aliasqual;{enum Cyc_Absyn_KindQual k=_Tmp1;enum Cyc_Absyn_AliasQual a=_Tmp0;
+switch((int)a){case Cyc_Absyn_Aliasable:
 # 68
-enum Cyc_Absyn_KindQual _Tmp4=k;switch((int)_Tmp4){case Cyc_Absyn_AnyKind:
+ switch((int)k){case Cyc_Absyn_AnyKind:
  return& Cyc_Kinds_ako;case Cyc_Absyn_MemKind:
  return& Cyc_Kinds_mko;case Cyc_Absyn_BoxKind:
  return& Cyc_Kinds_bko;case Cyc_Absyn_RgnKind:
@@ -476,28 +476,28 @@ enum Cyc_Absyn_KindQual _Tmp4=k;switch((int)_Tmp4){case Cyc_Absyn_AnyKind:
  return& Cyc_Kinds_eko;case Cyc_Absyn_IntKind:
  return& Cyc_Kinds_iko;case Cyc_Absyn_BoolKind:
  return& Cyc_Kinds_bko;case Cyc_Absyn_PtrBndKind:
- goto _LL1E;default: _LL1E: return& Cyc_Kinds_ptrbko;};}case Cyc_Absyn_Unique:
+ goto _LL1E;default: _LL1E: return& Cyc_Kinds_ptrbko;};case Cyc_Absyn_Unique:
 # 79
-{enum Cyc_Absyn_KindQual _Tmp4=k;switch((int)_Tmp4){case Cyc_Absyn_AnyKind:
+ switch((int)k){case Cyc_Absyn_AnyKind:
  return& Cyc_Kinds_uako;case Cyc_Absyn_MemKind:
  return& Cyc_Kinds_umko;case Cyc_Absyn_BoxKind:
  return& Cyc_Kinds_ubko;case Cyc_Absyn_RgnKind:
  return& Cyc_Kinds_urko;default:
- goto _LL1F;}_LL1F:;}
+ goto _LL1F;}_LL1F:;
 # 86
 goto _LL3;case Cyc_Absyn_Top:
 # 88
-{enum Cyc_Absyn_KindQual _Tmp4=k;switch((int)_Tmp4){case Cyc_Absyn_AnyKind:
+ switch((int)k){case Cyc_Absyn_AnyKind:
  return& Cyc_Kinds_tako;case Cyc_Absyn_MemKind:
  return& Cyc_Kinds_tmko;case Cyc_Absyn_BoxKind:
  return& Cyc_Kinds_tbko;case Cyc_Absyn_RgnKind:
  return& Cyc_Kinds_trko;default:
- goto _LL2A;}_LL2A:;}
+ goto _LL2A;}_LL2A:;
 # 95
 goto _LL3;default:
- goto _LL3;}_LL3:;}
+ goto _LL3;}_LL3:;
 # 98
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=({const char*_Tmp5="kind_to_opt: bad kind ";_tag_fat(_Tmp5,sizeof(char),23U);});_Tmp4;});struct Cyc_Warn_Kind_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_Kind_Warn_Warg_struct _Tmp5;_Tmp5.tag=9,_Tmp5.f1=ka;_Tmp5;});void*_Tmp5[2];_Tmp5[0]=& _Tmp3,_Tmp5[1]=& _Tmp4;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_Tmp5,sizeof(void*),2));});}}
+({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=({const char*_Tmp4="kind_to_opt: bad kind ";_tag_fat(_Tmp4,sizeof(char),23U);});_Tmp3;});struct Cyc_Warn_Kind_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_Kind_Warn_Warg_struct _Tmp4;_Tmp4.tag=9,_Tmp4.f1=ka;_Tmp4;});void*_Tmp4[2];_Tmp4[0]=& _Tmp2,_Tmp4[1]=& _Tmp3;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_Tmp4,sizeof(void*),2));});}}
 # 101
 void*Cyc_Kinds_kind_to_bound(struct Cyc_Absyn_Kind*k){
 return(void*)({struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct));_Tmp0->tag=0,_Tmp0->f1=k;_Tmp0;});}
@@ -506,8 +506,8 @@ struct Cyc_Core_Opt*Cyc_Kinds_kind_to_bound_opt(struct Cyc_Absyn_Kind*k){
 return({struct Cyc_Core_Opt*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Opt));({void*_Tmp1=Cyc_Kinds_kind_to_bound(k);_Tmp0->v=_Tmp1;});_Tmp0;});}
 # 109
 struct Cyc_Absyn_Kind*Cyc_Kinds_id_to_kind(struct _fat_ptr s,unsigned loc){
-if(Cyc_strlen(s)== 1U || Cyc_strlen(s)== 2U){
-char _stmttmp0=((const char*)s.curr)[0];char _Tmp0=_stmttmp0;switch((int)_Tmp0){case 65:
+if(Cyc_strlen(s)==1U || Cyc_strlen(s)==2U){
+char _Tmp0=((const char*)s.curr)[0];switch((int)_Tmp0){case 65:
  return& Cyc_Kinds_ak;case 77:
  return& Cyc_Kinds_mk;case 66:
  return& Cyc_Kinds_bk;case 82:
@@ -515,7 +515,7 @@ char _stmttmp0=((const char*)s.curr)[0];char _Tmp0=_stmttmp0;switch((int)_Tmp0){
  return& Cyc_Kinds_ek;case 73:
  return& Cyc_Kinds_ik;case 85:
 # 119
-{char _stmttmp1=((const char*)s.curr)[1];char _Tmp1=_stmttmp1;switch((int)_Tmp1){case 82:
+{char _Tmp1=((const char*)s.curr)[1];switch((int)_Tmp1){case 82:
  return& Cyc_Kinds_urk;case 65:
  return& Cyc_Kinds_uak;case 77:
  return& Cyc_Kinds_umk;case 66:
@@ -524,7 +524,7 @@ char _stmttmp0=((const char*)s.curr)[0];char _Tmp0=_stmttmp0;switch((int)_Tmp0){
 # 126
 goto _LL0;case 84:
 # 128
-{char _stmttmp2=((const char*)s.curr)[1];char _Tmp1=_stmttmp2;switch((int)_Tmp1){case 82:
+{char _Tmp1=((const char*)s.curr)[1];switch((int)_Tmp1){case 82:
  return& Cyc_Kinds_trk;case 65:
  return& Cyc_Kinds_tak;case 77:
  return& Cyc_Kinds_tmk;case 66:
@@ -538,48 +538,48 @@ goto _LL0;default:
 return& Cyc_Kinds_bk;}
 # 142
 struct _fat_ptr Cyc_Kinds_kind2string(struct Cyc_Absyn_Kind*ka){
-struct Cyc_Absyn_Kind*_Tmp0=ka;enum Cyc_Absyn_AliasQual _Tmp1;enum Cyc_Absyn_KindQual _Tmp2;_Tmp2=_Tmp0->kind;_Tmp1=_Tmp0->aliasqual;{enum Cyc_Absyn_KindQual k=_Tmp2;enum Cyc_Absyn_AliasQual a=_Tmp1;
-enum Cyc_Absyn_KindQual _Tmp3=k;switch((int)_Tmp3){case Cyc_Absyn_AnyKind:  {
+enum Cyc_Absyn_AliasQual _Tmp0;enum Cyc_Absyn_KindQual _Tmp1;_Tmp1=ka->kind;_Tmp0=ka->aliasqual;{enum Cyc_Absyn_KindQual k=_Tmp1;enum Cyc_Absyn_AliasQual a=_Tmp0;
+switch((int)k){case Cyc_Absyn_AnyKind:
 # 146
-enum Cyc_Absyn_AliasQual _Tmp4=a;switch((int)_Tmp4){case Cyc_Absyn_Aliasable:
- return({const char*_Tmp5="A";_tag_fat(_Tmp5,sizeof(char),2U);});case Cyc_Absyn_Unique:
- return({const char*_Tmp5="UA";_tag_fat(_Tmp5,sizeof(char),3U);});case Cyc_Absyn_Top:
- goto _LL1E;default: _LL1E: return({const char*_Tmp5="TA";_tag_fat(_Tmp5,sizeof(char),3U);});};}case Cyc_Absyn_MemKind:  {
+ switch((int)a){case Cyc_Absyn_Aliasable:
+ return({const char*_Tmp2="A";_tag_fat(_Tmp2,sizeof(char),2U);});case Cyc_Absyn_Unique:
+ return({const char*_Tmp2="UA";_tag_fat(_Tmp2,sizeof(char),3U);});case Cyc_Absyn_Top:
+ goto _LL1E;default: _LL1E: return({const char*_Tmp2="TA";_tag_fat(_Tmp2,sizeof(char),3U);});};case Cyc_Absyn_MemKind:
 # 152
-enum Cyc_Absyn_AliasQual _Tmp4=a;switch((int)_Tmp4){case Cyc_Absyn_Aliasable:
- return({const char*_Tmp5="M";_tag_fat(_Tmp5,sizeof(char),2U);});case Cyc_Absyn_Unique:
- return({const char*_Tmp5="UM";_tag_fat(_Tmp5,sizeof(char),3U);});case Cyc_Absyn_Top:
- goto _LL27;default: _LL27: return({const char*_Tmp5="TM";_tag_fat(_Tmp5,sizeof(char),3U);});};}case Cyc_Absyn_BoxKind:  {
+ switch((int)a){case Cyc_Absyn_Aliasable:
+ return({const char*_Tmp2="M";_tag_fat(_Tmp2,sizeof(char),2U);});case Cyc_Absyn_Unique:
+ return({const char*_Tmp2="UM";_tag_fat(_Tmp2,sizeof(char),3U);});case Cyc_Absyn_Top:
+ goto _LL27;default: _LL27: return({const char*_Tmp2="TM";_tag_fat(_Tmp2,sizeof(char),3U);});};case Cyc_Absyn_BoxKind:
 # 158
-enum Cyc_Absyn_AliasQual _Tmp4=a;switch((int)_Tmp4){case Cyc_Absyn_Aliasable:
- return({const char*_Tmp5="B";_tag_fat(_Tmp5,sizeof(char),2U);});case Cyc_Absyn_Unique:
- return({const char*_Tmp5="UB";_tag_fat(_Tmp5,sizeof(char),3U);});case Cyc_Absyn_Top:
- goto _LL30;default: _LL30: return({const char*_Tmp5="TB";_tag_fat(_Tmp5,sizeof(char),3U);});};}case Cyc_Absyn_RgnKind:  {
+ switch((int)a){case Cyc_Absyn_Aliasable:
+ return({const char*_Tmp2="B";_tag_fat(_Tmp2,sizeof(char),2U);});case Cyc_Absyn_Unique:
+ return({const char*_Tmp2="UB";_tag_fat(_Tmp2,sizeof(char),3U);});case Cyc_Absyn_Top:
+ goto _LL30;default: _LL30: return({const char*_Tmp2="TB";_tag_fat(_Tmp2,sizeof(char),3U);});};case Cyc_Absyn_RgnKind:
 # 164
-enum Cyc_Absyn_AliasQual _Tmp4=a;switch((int)_Tmp4){case Cyc_Absyn_Aliasable:
- return({const char*_Tmp5="R";_tag_fat(_Tmp5,sizeof(char),2U);});case Cyc_Absyn_Unique:
- return({const char*_Tmp5="UR";_tag_fat(_Tmp5,sizeof(char),3U);});case Cyc_Absyn_Top:
- goto _LL39;default: _LL39: return({const char*_Tmp5="TR";_tag_fat(_Tmp5,sizeof(char),3U);});};}case Cyc_Absyn_EffKind:
+ switch((int)a){case Cyc_Absyn_Aliasable:
+ return({const char*_Tmp2="R";_tag_fat(_Tmp2,sizeof(char),2U);});case Cyc_Absyn_Unique:
+ return({const char*_Tmp2="UR";_tag_fat(_Tmp2,sizeof(char),3U);});case Cyc_Absyn_Top:
+ goto _LL39;default: _LL39: return({const char*_Tmp2="TR";_tag_fat(_Tmp2,sizeof(char),3U);});};case Cyc_Absyn_EffKind:
 # 169
- return({const char*_Tmp4="E";_tag_fat(_Tmp4,sizeof(char),2U);});case Cyc_Absyn_IntKind:
- return({const char*_Tmp4="I";_tag_fat(_Tmp4,sizeof(char),2U);});case Cyc_Absyn_BoolKind:
- return({const char*_Tmp4="BOOL";_tag_fat(_Tmp4,sizeof(char),5U);});case Cyc_Absyn_PtrBndKind:
- goto _LL15;default: _LL15: return({const char*_Tmp4="PTRBND";_tag_fat(_Tmp4,sizeof(char),7U);});};}}
+ return({const char*_Tmp2="E";_tag_fat(_Tmp2,sizeof(char),2U);});case Cyc_Absyn_IntKind:
+ return({const char*_Tmp2="I";_tag_fat(_Tmp2,sizeof(char),2U);});case Cyc_Absyn_BoolKind:
+ return({const char*_Tmp2="BOOL";_tag_fat(_Tmp2,sizeof(char),5U);});case Cyc_Absyn_PtrBndKind:
+ goto _LL15;default: _LL15: return({const char*_Tmp2="PTRBND";_tag_fat(_Tmp2,sizeof(char),7U);});};}}
 # 176
 void*Cyc_Kinds_compress_kb(void*k){
-void*_Tmp0=k;void*_Tmp1;switch(*((int*)_Tmp0)){case 0:
- goto _LL4;case 1: if(((struct Cyc_Absyn_Unknown_kb_Absyn_KindBound_struct*)_Tmp0)->f1 == 0){_LL4:
- goto _LL6;}else{_Tmp1=(void**)&(((struct Cyc_Absyn_Unknown_kb_Absyn_KindBound_struct*)_Tmp0)->f1)->v;{void**k2=_Tmp1;
+void*_Tmp0;switch(*((int*)k)){case 0:
+ goto _LL4;case 1: if(((struct Cyc_Absyn_Unknown_kb_Absyn_KindBound_struct*)k)->f1==0){_LL4:
+ goto _LL6;}else{_Tmp0=(void**)&((struct Cyc_Absyn_Unknown_kb_Absyn_KindBound_struct*)k)->f1->v;{void**k2=_Tmp0;
 # 181
-_Tmp1=k2;goto _LLA;}}default: if(((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_Tmp0)->f1 == 0){_LL6:
+_Tmp0=k2;goto _LLA;}}default: if(((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)k)->f1==0){_LL6:
 # 180
- return k;}else{_Tmp1=(void**)&(((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_Tmp0)->f1)->v;_LLA: {void**k2=(void**)_Tmp1;
+ return k;}else{_Tmp0=(void**)&((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)k)->f1->v;_LLA: {void**k2=(void**)_Tmp0;
 # 183
-({void*_Tmp2=Cyc_Kinds_compress_kb(*k2);*k2=_Tmp2;});
+({void*_Tmp1=Cyc_Kinds_compress_kb(*k2);*k2=_Tmp1;});
 return*k2;}}};}
 # 187
 struct Cyc_Absyn_Kind*Cyc_Kinds_force_kb(void*kb){
-void*_stmttmp3=Cyc_Kinds_compress_kb(kb);void*_Tmp0=_stmttmp3;void*_Tmp1;void*_Tmp2;switch(*((int*)_Tmp0)){case 0: _Tmp2=((struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Kind*k=_Tmp2;
+void*_Tmp0=Cyc_Kinds_compress_kb(kb);void*_Tmp1;void*_Tmp2;switch(*((int*)_Tmp0)){case 0: _Tmp2=((struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Kind*k=_Tmp2;
 return k;}case 1: _Tmp2=(struct Cyc_Core_Opt**)&((struct Cyc_Absyn_Unknown_kb_Absyn_KindBound_struct*)_Tmp0)->f1;{struct Cyc_Core_Opt**f=_Tmp2;
 _Tmp2=f;_Tmp1=& Cyc_Kinds_bk;goto _LL6;}default: _Tmp2=(struct Cyc_Core_Opt**)&((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_Tmp0)->f1;_Tmp1=((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_Tmp0)->f2;_LL6: {struct Cyc_Core_Opt**f=(struct Cyc_Core_Opt**)_Tmp2;struct Cyc_Absyn_Kind*k=_Tmp1;
 # 192
@@ -587,38 +587,38 @@ _Tmp2=f;_Tmp1=& Cyc_Kinds_bk;goto _LL6;}default: _Tmp2=(struct Cyc_Core_Opt**)&(
 return k;}};}
 # 200
 void*Cyc_Kinds_copy_kindbound(void*kb){
-void*_stmttmp4=Cyc_Kinds_compress_kb(kb);void*_Tmp0=_stmttmp4;void*_Tmp1;switch(*((int*)_Tmp0)){case 1:
+void*_Tmp0=Cyc_Kinds_compress_kb(kb);void*_Tmp1;switch(*((int*)_Tmp0)){case 1:
  return(void*)({struct Cyc_Absyn_Unknown_kb_Absyn_KindBound_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Absyn_Unknown_kb_Absyn_KindBound_struct));_Tmp2->tag=1,_Tmp2->f1=0;_Tmp2;});case 2: _Tmp1=((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Kind*k=_Tmp1;
 return(void*)({struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct));_Tmp2->tag=2,_Tmp2->f1=0,_Tmp2->f2=k;_Tmp2;});}default:
  return kb;};}struct _tuple11{enum Cyc_Absyn_KindQual f1;enum Cyc_Absyn_KindQual f2;};struct _tuple12{enum Cyc_Absyn_AliasQual f1;enum Cyc_Absyn_AliasQual f2;};
 # 216 "kinds.cyc"
 int Cyc_Kinds_kind_leq(struct Cyc_Absyn_Kind*ka1,struct Cyc_Absyn_Kind*ka2){
-struct Cyc_Absyn_Kind*_Tmp0=ka1;enum Cyc_Absyn_AliasQual _Tmp1;enum Cyc_Absyn_KindQual _Tmp2;_Tmp2=_Tmp0->kind;_Tmp1=_Tmp0->aliasqual;{enum Cyc_Absyn_KindQual k1=_Tmp2;enum Cyc_Absyn_AliasQual a1=_Tmp1;
-struct Cyc_Absyn_Kind*_Tmp3=ka2;enum Cyc_Absyn_AliasQual _Tmp4;enum Cyc_Absyn_KindQual _Tmp5;_Tmp5=_Tmp3->kind;_Tmp4=_Tmp3->aliasqual;{enum Cyc_Absyn_KindQual k2=_Tmp5;enum Cyc_Absyn_AliasQual a2=_Tmp4;
+enum Cyc_Absyn_AliasQual _Tmp0;enum Cyc_Absyn_KindQual _Tmp1;_Tmp1=ka1->kind;_Tmp0=ka1->aliasqual;{enum Cyc_Absyn_KindQual k1=_Tmp1;enum Cyc_Absyn_AliasQual a1=_Tmp0;
+enum Cyc_Absyn_AliasQual _Tmp2;enum Cyc_Absyn_KindQual _Tmp3;_Tmp3=ka2->kind;_Tmp2=ka2->aliasqual;{enum Cyc_Absyn_KindQual k2=_Tmp3;enum Cyc_Absyn_AliasQual a2=_Tmp2;
 # 220
-if((int)k1 != (int)k2){
-struct _tuple11 _stmttmp5=({struct _tuple11 _Tmp6;_Tmp6.f1=k1,_Tmp6.f2=k2;_Tmp6;});struct _tuple11 _Tmp6=_stmttmp5;switch((int)_Tmp6.f1){case Cyc_Absyn_BoxKind: switch((int)_Tmp6.f2){case Cyc_Absyn_MemKind:
+if((int)k1!=(int)k2){
+struct _tuple11 _Tmp4=({struct _tuple11 _Tmp5;_Tmp5.f1=k1,_Tmp5.f2=k2;_Tmp5;});switch((int)_Tmp4.f1){case Cyc_Absyn_BoxKind: switch((int)_Tmp4.f2){case Cyc_Absyn_MemKind:
  goto _LLA;case Cyc_Absyn_AnyKind: _LLA:
- goto _LLC;default: goto _LLD;}case Cyc_Absyn_MemKind: if(_Tmp6.f2 == Cyc_Absyn_AnyKind){_LLC:
+ goto _LLC;default: goto _LLD;}case Cyc_Absyn_MemKind: if(_Tmp4.f2==Cyc_Absyn_AnyKind){_LLC:
  goto _LL6;}else{goto _LLD;}default: _LLD:
  return 0;}_LL6:;}
 # 228
-if((int)a1 != (int)a2){
-struct _tuple12 _stmttmp6=({struct _tuple12 _Tmp6;_Tmp6.f1=a1,_Tmp6.f2=a2;_Tmp6;});struct _tuple12 _Tmp6=_stmttmp6;switch((int)_Tmp6.f1){case Cyc_Absyn_Aliasable: if(_Tmp6.f2 == Cyc_Absyn_Top)
-goto _LL13;else{goto _LL14;}case Cyc_Absyn_Unique: if(_Tmp6.f2 == Cyc_Absyn_Top){_LL13:
+if((int)a1!=(int)a2){
+struct _tuple12 _Tmp4=({struct _tuple12 _Tmp5;_Tmp5.f1=a1,_Tmp5.f2=a2;_Tmp5;});switch((int)_Tmp4.f1){case Cyc_Absyn_Aliasable: if(_Tmp4.f2==Cyc_Absyn_Top)
+goto _LL13;else{goto _LL14;}case Cyc_Absyn_Unique: if(_Tmp4.f2==Cyc_Absyn_Top){_LL13:
  return 1;}else{goto _LL14;}default: _LL14:
  return 0;};}
 # 234
 return 1;}}}
 # 237
 struct Cyc_Absyn_Kind*Cyc_Kinds_tvar_kind(struct Cyc_Absyn_Tvar*tv,struct Cyc_Absyn_Kind*def){
-void*_stmttmp7=Cyc_Kinds_compress_kb(tv->kind);void*_Tmp0=_stmttmp7;void*_Tmp1;switch(*((int*)_Tmp0)){case 0: _Tmp1=((struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Kind*k=_Tmp1;
+void*_Tmp0=Cyc_Kinds_compress_kb(tv->kind);void*_Tmp1;switch(*((int*)_Tmp0)){case 0: _Tmp1=((struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Kind*k=_Tmp1;
 return k;}case 2: _Tmp1=((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_Tmp0)->f2;{struct Cyc_Absyn_Kind*k=_Tmp1;
 return k;}default:
 ({void*_Tmp2=(void*)({struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*_Tmp3=_cycalloc(sizeof(struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct));_Tmp3->tag=2,_Tmp3->f1=0,_Tmp3->f2=def;_Tmp3;});tv->kind=_Tmp2;});return def;};}struct _tuple13{struct Cyc_Absyn_Tvar*f1;void*f2;};
 # 245
 struct _tuple13 Cyc_Kinds_swap_kind(void*t,void*kb){
-void*_stmttmp8=Cyc_Absyn_compress(t);void*_Tmp0=_stmttmp8;void*_Tmp1;if(*((int*)_Tmp0)== 2){_Tmp1=((struct Cyc_Absyn_VarType_Absyn_Type_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Tvar*tv=_Tmp1;
+void*_Tmp0=Cyc_Absyn_compress(t);void*_Tmp1;if(*((int*)_Tmp0)==2){_Tmp1=((struct Cyc_Absyn_VarType_Absyn_Type_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Tvar*tv=_Tmp1;
 # 248
 void*oldkb=tv->kind;
 tv->kind=kb;
@@ -626,22 +626,22 @@ return({struct _tuple13 _Tmp2;_Tmp2.f1=tv,_Tmp2.f2=oldkb;_Tmp2;});}}else{
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp3;_Tmp3.tag=0,_Tmp3.f1=({const char*_Tmp4="swap_kind: cannot update the kind of ";_tag_fat(_Tmp4,sizeof(char),38U);});_Tmp3;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp4;_Tmp4.tag=2,_Tmp4.f1=(void*)t;_Tmp4;});void*_Tmp4[2];_Tmp4[0]=& _Tmp2,_Tmp4[1]=& _Tmp3;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_Tmp4,sizeof(void*),2));});};}
 # 255
 int Cyc_Kinds_kind_eq(struct Cyc_Absyn_Kind*k1,struct Cyc_Absyn_Kind*k2){
-return k1 == k2 ||(int)k1->kind == (int)k2->kind &&(int)k1->aliasqual == (int)k2->aliasqual;}struct _tuple14{void*f1;void*f2;};
+return k1==k2 ||(int)k1->kind==(int)k2->kind &&(int)k1->aliasqual==(int)k2->aliasqual;}struct _tuple14{void*f1;void*f2;};
 # 262
 int Cyc_Kinds_constrain_kinds(void*c1,void*c2){
 c1=Cyc_Kinds_compress_kb(c1);
 c2=Cyc_Kinds_compress_kb(c2);
-if(c1 == c2)return 1;{
-struct _tuple14 _stmttmp9=({struct _tuple14 _Tmp0;_Tmp0.f1=c1,_Tmp0.f2=c2;_Tmp0;});struct _tuple14 _Tmp0=_stmttmp9;void*_Tmp1;void*_Tmp2;void*_Tmp3;void*_Tmp4;if(*((int*)_Tmp0.f1)== 0)switch(*((int*)_Tmp0.f2)){case 0: _Tmp4=((struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*)_Tmp0.f1)->f1;_Tmp3=((struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*)_Tmp0.f2)->f1;{struct Cyc_Absyn_Kind*k1=_Tmp4;struct Cyc_Absyn_Kind*k2=_Tmp3;
-return k1 == k2;}case 1: goto _LL3;default: _Tmp4=((struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*)_Tmp0.f1)->f1;_Tmp3=(struct Cyc_Core_Opt**)&((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_Tmp0.f2)->f1;_Tmp2=((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_Tmp0.f2)->f2;{struct Cyc_Absyn_Kind*k1=_Tmp4;struct Cyc_Core_Opt**f=_Tmp3;struct Cyc_Absyn_Kind*k2=_Tmp2;
+if(c1==c2)return 1;{
+struct _tuple14 _Tmp0=({struct _tuple14 _Tmp1;_Tmp1.f1=c1,_Tmp1.f2=c2;_Tmp1;});void*_Tmp1;void*_Tmp2;void*_Tmp3;void*_Tmp4;if(*((int*)_Tmp0.f1)==0)switch(*((int*)_Tmp0.f2)){case 0: _Tmp4=((struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*)_Tmp0.f1)->f1;_Tmp3=((struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*)_Tmp0.f2)->f1;{struct Cyc_Absyn_Kind*k1=_Tmp4;struct Cyc_Absyn_Kind*k2=_Tmp3;
+return k1==k2;}case 1: goto _LL3;default: _Tmp4=((struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*)_Tmp0.f1)->f1;_Tmp3=(struct Cyc_Core_Opt**)&((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_Tmp0.f2)->f1;_Tmp2=((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_Tmp0.f2)->f2;{struct Cyc_Absyn_Kind*k1=_Tmp4;struct Cyc_Core_Opt**f=_Tmp3;struct Cyc_Absyn_Kind*k2=_Tmp2;
 # 276
 if(!Cyc_Kinds_kind_leq(k1,k2))
 return 0;
 ({struct Cyc_Core_Opt*_Tmp5=({struct Cyc_Core_Opt*_Tmp6=_cycalloc(sizeof(struct Cyc_Core_Opt));_Tmp6->v=c1;_Tmp6;});*f=_Tmp5;});
-return 1;}}else{if(*((int*)_Tmp0.f2)== 1){_LL3: _Tmp4=(struct Cyc_Core_Opt**)&((struct Cyc_Absyn_Unknown_kb_Absyn_KindBound_struct*)_Tmp0.f2)->f1;{struct Cyc_Core_Opt**f=_Tmp4;
+return 1;}}else{if(*((int*)_Tmp0.f2)==1){_LL3: _Tmp4=(struct Cyc_Core_Opt**)&((struct Cyc_Absyn_Unknown_kb_Absyn_KindBound_struct*)_Tmp0.f2)->f1;{struct Cyc_Core_Opt**f=_Tmp4;
 # 268
-({struct Cyc_Core_Opt*_Tmp5=({struct Cyc_Core_Opt*_Tmp6=_cycalloc(sizeof(struct Cyc_Core_Opt));_Tmp6->v=c1;_Tmp6;});*f=_Tmp5;});return 1;}}else{if(*((int*)_Tmp0.f1)== 1){_Tmp4=(struct Cyc_Core_Opt**)&((struct Cyc_Absyn_Unknown_kb_Absyn_KindBound_struct*)_Tmp0.f1)->f1;{struct Cyc_Core_Opt**f=_Tmp4;
-({struct Cyc_Core_Opt*_Tmp5=({struct Cyc_Core_Opt*_Tmp6=_cycalloc(sizeof(struct Cyc_Core_Opt));_Tmp6->v=c2;_Tmp6;});*f=_Tmp5;});return 1;}}else{if(*((int*)_Tmp0.f2)== 0){_Tmp4=(struct Cyc_Core_Opt**)&((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_Tmp0.f1)->f1;_Tmp3=((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_Tmp0.f1)->f2;_Tmp2=((struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*)_Tmp0.f2)->f1;{struct Cyc_Core_Opt**f=_Tmp4;struct Cyc_Absyn_Kind*k1=_Tmp3;struct Cyc_Absyn_Kind*k2=_Tmp2;
+({struct Cyc_Core_Opt*_Tmp5=({struct Cyc_Core_Opt*_Tmp6=_cycalloc(sizeof(struct Cyc_Core_Opt));_Tmp6->v=c1;_Tmp6;});*f=_Tmp5;});return 1;}}else{if(*((int*)_Tmp0.f1)==1){_Tmp4=(struct Cyc_Core_Opt**)&((struct Cyc_Absyn_Unknown_kb_Absyn_KindBound_struct*)_Tmp0.f1)->f1;{struct Cyc_Core_Opt**f=_Tmp4;
+({struct Cyc_Core_Opt*_Tmp5=({struct Cyc_Core_Opt*_Tmp6=_cycalloc(sizeof(struct Cyc_Core_Opt));_Tmp6->v=c2;_Tmp6;});*f=_Tmp5;});return 1;}}else{if(*((int*)_Tmp0.f2)==0){_Tmp4=(struct Cyc_Core_Opt**)&((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_Tmp0.f1)->f1;_Tmp3=((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_Tmp0.f1)->f2;_Tmp2=((struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*)_Tmp0.f2)->f1;{struct Cyc_Core_Opt**f=_Tmp4;struct Cyc_Absyn_Kind*k1=_Tmp3;struct Cyc_Absyn_Kind*k2=_Tmp2;
 # 271
 if(!Cyc_Kinds_kind_leq(k2,k1))
 return 0;

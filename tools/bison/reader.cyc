@@ -40,16 +40,17 @@ The entry point is reader().  */
 /* DJG: I think the parser generator is still busted if you try to
  * re-define YYLTYPE.  Note that = is used on locs, so they shouldn't
  * be pointers!
+ * DJG: I changed the line and column info to unsigned from int
  */
 #define	LTYPESTR \
 "\n#ifndef YYLTYPE"\
 "\nstruct Yyltype"\
 "\n    {"\
 "\n      int timestamp;"\
-"\n      int first_line;"\
-"\n      int first_column;"\
-"\n      int last_line;"\
-"\n      int last_column;"\
+"\n      unsigned first_line;"\
+"\n      unsigned first_column;"\
+"\n      unsigned last_line;"\
+"\n      unsigned last_column;"\
 "\n   };"\
 "\ntypedef struct Yyltype yyltype;"\
 "\n\n"\

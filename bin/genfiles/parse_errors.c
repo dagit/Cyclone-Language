@@ -14,7 +14,7 @@ struct _RuntimeStack {
 };
 
 #ifndef offsetof
-/* should be size_t, but int is fine. */
+/* should be size_t but int is fine */
 #define offsetof(t,n) ((int)(&(((t *)0)->n)))
 #endif
 
@@ -203,7 +203,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
 #define _zero_arr_plus_voidstar(x,s,i) \
   (_zero_arr_plus_voidstar_fn(x,s,i,__FILE__,__LINE__))
 #define _zero_arr_inplace_plus_char(x,i) \
-  _zero_arr_inplace_plus_char_fn((char **)(x),i,__FILE__,__LINE__)
+  _zero_arr_inplace_plus_char_fn((char**)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_short(x,i) \
   _zero_arr_inplace_plus_short_fn((short **)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_int(x,i) \
@@ -246,7 +246,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
   struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
-      _curr != (unsigned char *)0) \
+      _curr != (unsigned char*)0) \
     _throw_arraybounds(); \
   _curr; })
 #endif
@@ -299,7 +299,7 @@ void* GC_calloc_atomic(unsigned,unsigned);
 
 #if(defined(__linux__) && defined(__KERNEL__))
 void *cyc_vmalloc(unsigned);
-void cyc_vfree(void *);
+void cyc_vfree(void*);
 #endif
 // bound the allocation size to be < MAX_ALLOC_SIZE. See macros below for usage.
 #define MAX_MALLOC_SIZE (1 << 28)
@@ -396,15 +396,15 @@ if(Cyc_Flags_print_parser_state_and_token){
 exit(1);}
 # 27
 {unsigned i=0U;for(0;i < 111U;++ i){
-if((Cyc_ParseErrors_msg_table[(int)i]).state == state &&(Cyc_ParseErrors_msg_table[(int)i]).token == token){
+if(Cyc_ParseErrors_msg_table[(int)i].state==state && Cyc_ParseErrors_msg_table[(int)i].token==token){
 # 30
-s=(Cyc_ParseErrors_msg_table[(int)i]).msg;
+s=Cyc_ParseErrors_msg_table[(int)i].msg;
 break;}else{
-if((Cyc_ParseErrors_msg_table[(int)i]).state == state)
-s=(Cyc_ParseErrors_msg_table[(int)i]).msg;}}}{
+if(Cyc_ParseErrors_msg_table[(int)i].state==state)
+s=Cyc_ParseErrors_msg_table[(int)i].msg;}}}{
 # 35
 struct _fat_ptr ts=Cyc_token2string(token);
-if((char*)ts.curr != (char*)(_tag_fat(0,0,0)).curr)
+if((char*)ts.curr!=(char*)_tag_fat(0,0,0).curr)
 ({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=s;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,({struct _fat_ptr _Tmp3=Cyc_token2string(token);_Tmp2.f1=_Tmp3;});_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_Warn_err((unsigned)Cyc_yylloc.first_line,({const char*_Tmp3="%s (found %s instead)";_tag_fat(_Tmp3,sizeof(char),22U);}),_tag_fat(_Tmp2,sizeof(void*),2));});else{
 # 39
 ({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=s;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_Warn_err((unsigned)Cyc_yylloc.first_line,({const char*_Tmp2="%s ";_tag_fat(_Tmp2,sizeof(char),4U);}),_tag_fat(_Tmp1,sizeof(void*),1));});}}}

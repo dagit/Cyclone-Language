@@ -14,7 +14,7 @@ struct _RuntimeStack {
 };
 
 #ifndef offsetof
-/* should be size_t, but int is fine. */
+/* should be size_t but int is fine */
 #define offsetof(t,n) ((int)(&(((t *)0)->n)))
 #endif
 
@@ -203,7 +203,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
 #define _zero_arr_plus_voidstar(x,s,i) \
   (_zero_arr_plus_voidstar_fn(x,s,i,__FILE__,__LINE__))
 #define _zero_arr_inplace_plus_char(x,i) \
-  _zero_arr_inplace_plus_char_fn((char **)(x),i,__FILE__,__LINE__)
+  _zero_arr_inplace_plus_char_fn((char**)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_short(x,i) \
   _zero_arr_inplace_plus_short_fn((short **)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_int(x,i) \
@@ -246,7 +246,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
   struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
-      _curr != (unsigned char *)0) \
+      _curr != (unsigned char*)0) \
     _throw_arraybounds(); \
   _curr; })
 #endif
@@ -299,7 +299,7 @@ void* GC_calloc_atomic(unsigned,unsigned);
 
 #if(defined(__linux__) && defined(__KERNEL__))
 void *cyc_vmalloc(unsigned);
-void cyc_vfree(void *);
+void cyc_vfree(void*);
 #endif
 // bound the allocation size to be < MAX_ALLOC_SIZE. See macros below for usage.
 #define MAX_MALLOC_SIZE (1 << 28)
@@ -433,32 +433,32 @@ return(- state)- 1;else{
 c=256;}}else{
 # 65
 c=(int)*((char*)_check_fat_subscript(lbuf->lex_buffer,sizeof(char),lbuf->lex_curr_pos ++));
-if(c == -1)c=256;}
+if(c==-1)c=256;}
 # 68
-if(*((const int*)_check_known_subscript_notnull(Cyc_Lineno_lex_check,273U,sizeof(int),base + c))== state)
+if(*((const int*)_check_known_subscript_notnull(Cyc_Lineno_lex_check,273U,sizeof(int),base + c))==state)
 state=*((const int*)_check_known_subscript_notnull(Cyc_Lineno_lex_trans,273U,sizeof(int),base + c));else{
 # 71
 state=*((const int*)_check_known_subscript_notnull(Cyc_Lineno_lex_default,10U,sizeof(int),state));}
 if(state < 0){
 lbuf->lex_curr_pos=lbuf->lex_last_pos;
-if(lbuf->lex_last_action == -1)
+if(lbuf->lex_last_action==-1)
 (void*)_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Lexing_Error_exn_struct));_Tmp0->tag=Cyc_Lexing_Error,_Tmp0->f1=({const char*_Tmp1="empty token";_tag_fat(_Tmp1,sizeof(char),12U);});_Tmp0;}));else{
 # 77
 return lbuf->lex_last_action;}}else{
 # 80
-if(c == 256)lbuf->lex_eof_reached=0;}}}
+if(c==256)lbuf->lex_eof_reached=0;}}}
 # 84
 enum Cyc_Lineno_token_val Cyc_Lineno_token_rec(struct Cyc_Lexing_lexbuf*lexbuf,int lexstate){
 lexstate=Cyc_Lineno_lex_engine(lexstate,lexbuf);
-{int _Tmp0=lexstate;switch((int)_Tmp0){case 0:
+switch((int)lexstate){case 0:
 # 48 "lineno.cyl"
  return 1U;case 1:
 # 49 "lineno.cyl"
  return 0U;case 2:
 # 50 "lineno.cyl"
  return 2U;default:
-((lexbuf->refill_buff))(lexbuf);
-return Cyc_Lineno_token_rec(lexbuf,lexstate);};}
+ lexbuf->refill_buff(lexbuf);
+return Cyc_Lineno_token_rec(lexbuf,lexstate);};
 # 54
 (void*)_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Lexing_Error_exn_struct));_Tmp0->tag=Cyc_Lexing_Error,_Tmp0->f1=({const char*_Tmp1="some action didn't return!";_tag_fat(_Tmp1,sizeof(char),27U);});_Tmp0;}));}
 # 56
@@ -470,18 +470,18 @@ struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.h
 while((unsigned)i < _get_fat_size(line,sizeof(char))&&((int)((char*)line.curr)[i]< 48 ||(int)((char*)line.curr)[i]> 57)){++ i;}{
 int j=i;
 while(((unsigned)j < _get_fat_size(line,sizeof(char))&&(int)((char*)line.curr)[j]>= 48)&&(int)((char*)line.curr)[j]<= 57){++ j;}
-if((unsigned)i == _get_fat_size(line,sizeof(char))){struct _tuple0*_Tmp2=0;_npop_handler(0);return _Tmp2;}{
+if((unsigned)i==_get_fat_size(line,sizeof(char))){struct _tuple0*_Tmp2=0;_npop_handler(0);return _Tmp2;}{
 int number=0;
-if(({struct Cyc_IntPtr_sa_ScanfArg_struct _Tmp2=({struct Cyc_IntPtr_sa_ScanfArg_struct _Tmp3;_Tmp3.tag=2,_Tmp3.f1=& number;_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;({struct _fat_ptr _Tmp4=Cyc_substring(line,i,(unsigned long)(j - i));struct _fat_ptr _Tmp5=({const char*_Tmp6="%d";_tag_fat(_Tmp6,sizeof(char),3U);});Cyc_sscanf(_Tmp4,_Tmp5,_tag_fat(_Tmp3,sizeof(void*),1));});})!= 1){
+if(({struct Cyc_IntPtr_sa_ScanfArg_struct _Tmp2=({struct Cyc_IntPtr_sa_ScanfArg_struct _Tmp3;_Tmp3.tag=2,_Tmp3.f1=& number;_Tmp3;});void*_Tmp3[1];_Tmp3[0]=& _Tmp2;({struct _fat_ptr _Tmp4=Cyc_substring(line,i,(unsigned long)(j - i));struct _fat_ptr _Tmp5=({const char*_Tmp6="%d";_tag_fat(_Tmp6,sizeof(char),3U);});Cyc_sscanf(_Tmp4,_Tmp5,_tag_fat(_Tmp3,sizeof(void*),1));});})!=1){
 struct _tuple0*_Tmp2=0;_npop_handler(0);return _Tmp2;}
-while((unsigned)j < _get_fat_size(line,sizeof(char))&&(int)((char*)line.curr)[j]!= 34){++ j;}{
+while((unsigned)j < _get_fat_size(line,sizeof(char))&&(int)((char*)line.curr)[j]!=34){++ j;}{
 int k=++ j;
-while((unsigned)k < _get_fat_size(line,sizeof(char))&&(int)((char*)line.curr)[k]!= 34){++ k;}
-if((unsigned)j == _get_fat_size(line,sizeof(char))||(unsigned)k == _get_fat_size(line,sizeof(char))){struct _tuple0*_Tmp2=0;_npop_handler(0);return _Tmp2;}{
+while((unsigned)k < _get_fat_size(line,sizeof(char))&&(int)((char*)line.curr)[k]!=34){++ k;}
+if((unsigned)j==_get_fat_size(line,sizeof(char))||(unsigned)k==_get_fat_size(line,sizeof(char))){struct _tuple0*_Tmp2=0;_npop_handler(0);return _Tmp2;}{
 struct _fat_ptr fname=Cyc_substring(line,j,(unsigned long)(k - j));
 struct _tuple0*_Tmp2;_Tmp2=_cycalloc(sizeof(struct _tuple0)),_Tmp2->f1=fname,_Tmp2->f2=number;_npop_handler(0);return _Tmp2;}}}}}
 # 65
-;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3=_Tmp2;
+;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();
 # 79
 return 0;;}}}struct _tuple1{int f1;struct Cyc_Lineno_Pos*f2;};
 # 82
@@ -499,26 +499,26 @@ struct _fat_ptr this_line;
 int eol;
 enum Cyc_Lineno_token_val next;
 # 98
-while(places != 0){
+while(places!=0){
 while(1){
 next=Cyc_Lineno_token(lbuf);
 eol=Cyc_Lexing_lexeme_end(lbuf);
 # 103
 this_line=Cyc_Lexing_lexeme(lbuf);
 # 105
-if((int)next == 2 || eol > (*((struct _tuple1*)places->hd)).f1)
+if((int)next==2 || eol > (*((struct _tuple1*)places->hd)).f1)
 break;
 # 108
-if((int)next == 0)++ line;else{
+if((int)next==0)++ line;else{
 # 110
 struct _tuple0*fno=Cyc_Lineno_parse_linedef(this_line);
-if(fno == 0)
+if(fno==0)
 ++ line;else{
 # 116
 source_file=(*fno).f1;
 line=(*fno).f2;}}}
 # 121
-while(places != 0 &&((int)next == 2 || eol > (*((struct _tuple1*)places->hd)).f1)){
+while(places!=0 &&((int)next==2 || eol > (*((struct _tuple1*)places->hd)).f1)){
 struct Cyc_Lineno_Pos*p=(*((struct _tuple1*)places->hd)).f2;
 ({struct _fat_ptr _Tmp2=Cyc_strdup(source_file);p->logical_file=_Tmp2;});
 p->line=this_line;
@@ -529,7 +529,7 @@ places=places->tl;}
 # 130
 ++ line;}}
 # 91
-;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3=_Tmp2;void*_Tmp4;_Tmp4=_Tmp3;{void*y=_Tmp4;
+;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;_Tmp3=_Tmp2;{void*y=_Tmp3;
 # 132
 Cyc_file_close(f);(void*)_throw(y);};}}}
 Cyc_file_close(f);

@@ -14,7 +14,7 @@ struct _RuntimeStack {
 };
 
 #ifndef offsetof
-/* should be size_t, but int is fine. */
+/* should be size_t but int is fine */
 #define offsetof(t,n) ((int)(&(((t *)0)->n)))
 #endif
 
@@ -203,7 +203,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
 #define _zero_arr_plus_voidstar(x,s,i) \
   (_zero_arr_plus_voidstar_fn(x,s,i,__FILE__,__LINE__))
 #define _zero_arr_inplace_plus_char(x,i) \
-  _zero_arr_inplace_plus_char_fn((char **)(x),i,__FILE__,__LINE__)
+  _zero_arr_inplace_plus_char_fn((char**)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_short(x,i) \
   _zero_arr_inplace_plus_short_fn((short **)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_int(x,i) \
@@ -246,7 +246,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
   struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
-      _curr != (unsigned char *)0) \
+      _curr != (unsigned char*)0) \
     _throw_arraybounds(); \
   _curr; })
 #endif
@@ -299,7 +299,7 @@ void* GC_calloc_atomic(unsigned,unsigned);
 
 #if(defined(__linux__) && defined(__KERNEL__))
 void *cyc_vmalloc(unsigned);
-void cyc_vfree(void *);
+void cyc_vfree(void*);
 #endif
 // bound the allocation size to be < MAX_ALLOC_SIZE. See macros below for usage.
 #define MAX_MALLOC_SIZE (1 << 28)
@@ -438,16 +438,16 @@ void Cyc_Warn_warn(unsigned loc,struct _fat_ptr fmt,struct _fat_ptr ap){
 Cyc_Warn_vwarn(loc,fmt,ap);}
 # 61
 void Cyc_Warn_flush_warnings (void){
-if(Cyc_Warn_warning_segs == 0)
+if(Cyc_Warn_warning_segs==0)
 return;
 Cyc_fprintf(Cyc_stderr,({const char*_Tmp0="***Warnings***\n";_tag_fat(_Tmp0,sizeof(char),16U);}),_tag_fat(0U,sizeof(void*),0));{
 struct Cyc_List_List*seg_strs=Cyc_Position_strings_of_segments(Cyc_Warn_warning_segs);
 Cyc_Warn_warning_segs=0;
 Cyc_Warn_warning_msgs=Cyc_List_imp_rev(Cyc_Warn_warning_msgs);
-while(Cyc_Warn_warning_msgs != 0){
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=*((struct _fat_ptr*)(_check_null(seg_strs))->hd);_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=*((struct _fat_ptr*)(_check_null(Cyc_Warn_warning_msgs))->hd);_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,({const char*_Tmp3="%s: %s\n";_tag_fat(_Tmp3,sizeof(char),8U);}),_tag_fat(_Tmp2,sizeof(void*),2));});
+while(Cyc_Warn_warning_msgs!=0){
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=*((struct _fat_ptr*)_check_null(seg_strs)->hd);_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=*((struct _fat_ptr*)_check_null(Cyc_Warn_warning_msgs)->hd);_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,({const char*_Tmp3="%s: %s\n";_tag_fat(_Tmp3,sizeof(char),8U);}),_tag_fat(_Tmp2,sizeof(void*),2));});
 seg_strs=seg_strs->tl;
-Cyc_Warn_warning_msgs=(_check_null(Cyc_Warn_warning_msgs))->tl;}
+Cyc_Warn_warning_msgs=_check_null(Cyc_Warn_warning_msgs)->tl;}
 # 73
 Cyc_fprintf(Cyc_stderr,({const char*_Tmp0="**************\n";_tag_fat(_Tmp0,sizeof(char),16U);}),_tag_fat(0U,sizeof(void*),0));
 Cyc_fflush(Cyc_stderr);}}
@@ -487,14 +487,14 @@ struct Cyc_List_List*lst=0;
 int curr_line_len=0;
 {int i=0;for(0;(unsigned)i < _get_fat_size(args,sizeof(void*));++ i){
 struct _fat_ptr s;
-{void*_stmttmp0=((void**)args.curr)[i];void*_Tmp0=_stmttmp0;int _Tmp1;void*_Tmp2;struct _fat_ptr _Tmp3;switch(*((int*)_Tmp0)){case 0: _Tmp3=((struct Cyc_Warn_String_Warn_Warg_struct*)_Tmp0)->f1;{struct _fat_ptr s2=_Tmp3;
+{void*_Tmp0=((void**)args.curr)[i];int _Tmp1;void*_Tmp2;struct _fat_ptr _Tmp3;switch(*((int*)_Tmp0)){case 0: _Tmp3=((struct Cyc_Warn_String_Warn_Warg_struct*)_Tmp0)->f1;{struct _fat_ptr s2=_Tmp3;
 s=s2;goto _LL0;}case 4: _Tmp2=((struct Cyc_Warn_Exp_Warn_Warg_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Exp*e=_Tmp2;
 s=Cyc_Absynpp_exp2string(e);goto _LL0;}case 3: _Tmp2=(void*)((struct Cyc_Warn_TypOpt_Warn_Warg_struct*)_Tmp0)->f1;{void*t=_Tmp2;
 if((unsigned)t){_Tmp2=t;goto _LL8;}else{s=({const char*_Tmp4="<?>";_tag_fat(_Tmp4,sizeof(char),4U);});}goto _LL0;}case 2: _Tmp2=(void*)((struct Cyc_Warn_Typ_Warn_Warg_struct*)_Tmp0)->f1;_LL8: {void*t=_Tmp2;
 s=Cyc_Absynpp_typ2string(t);goto _LL0;}case 1: _Tmp2=((struct Cyc_Warn_Qvar_Warn_Warg_struct*)_Tmp0)->f1;{struct _tuple0*qv=_Tmp2;
 s=Cyc_Absynpp_qvar2string(qv);goto _LL0;}case 5: _Tmp2=((struct Cyc_Warn_Stmt_Warn_Warg_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Stmt*s2=_Tmp2;
 s=Cyc_Absynpp_stmt2string(s2);goto _LL0;}case 6: _Tmp2=((struct Cyc_Warn_Aggrdecl_Warn_Warg_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Aggrdecl*ad=_Tmp2;
-s=({struct _fat_ptr _Tmp4=(int)ad->kind == 1?({const char*_Tmp5="union ";_tag_fat(_Tmp5,sizeof(char),7U);}):({const char*_Tmp5="struct ";_tag_fat(_Tmp5,sizeof(char),8U);});Cyc_strconcat(_Tmp4,
+s=({struct _fat_ptr _Tmp4=(int)ad->kind==1?({const char*_Tmp5="union ";_tag_fat(_Tmp5,sizeof(char),7U);}):({const char*_Tmp5="struct ";_tag_fat(_Tmp5,sizeof(char),8U);});Cyc_strconcat(_Tmp4,
 Cyc_Absynpp_qvar2string(ad->name));});
 goto _LL0;}case 7: _Tmp2=((struct Cyc_Warn_Tvar_Warn_Warg_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Tvar*tv=_Tmp2;
 s=*tv->name;goto _LL0;}case 9: _Tmp2=((struct Cyc_Warn_Kind_Warn_Warg_struct*)_Tmp0)->f1;{struct Cyc_Absyn_Kind*k=_Tmp2;

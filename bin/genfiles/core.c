@@ -14,7 +14,7 @@ struct _RuntimeStack {
 };
 
 #ifndef offsetof
-/* should be size_t, but int is fine. */
+/* should be size_t but int is fine */
 #define offsetof(t,n) ((int)(&(((t *)0)->n)))
 #endif
 
@@ -203,7 +203,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
 #define _zero_arr_plus_voidstar(x,s,i) \
   (_zero_arr_plus_voidstar_fn(x,s,i,__FILE__,__LINE__))
 #define _zero_arr_inplace_plus_char(x,i) \
-  _zero_arr_inplace_plus_char_fn((char **)(x),i,__FILE__,__LINE__)
+  _zero_arr_inplace_plus_char_fn((char**)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_short(x,i) \
   _zero_arr_inplace_plus_short_fn((short **)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_int(x,i) \
@@ -246,7 +246,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
   struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
-      _curr != (unsigned char *)0) \
+      _curr != (unsigned char*)0) \
     _throw_arraybounds(); \
   _curr; })
 #endif
@@ -299,7 +299,7 @@ void* GC_calloc_atomic(unsigned,unsigned);
 
 #if(defined(__linux__) && defined(__KERNEL__))
 void *cyc_vmalloc(unsigned);
-void cyc_vfree(void *);
+void cyc_vfree(void*);
 #endif
 // bound the allocation size to be < MAX_ALLOC_SIZE. See macros below for usage.
 #define MAX_MALLOC_SIZE (1 << 28)
@@ -385,7 +385,7 @@ struct _fat_ptr Cyc_Core_autorelease_handle(struct _RegionHandle*,struct _fat_pt
 struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found};char Cyc_Core_Unreachable[12U]="Unreachable";
 # 34
 struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*o){
-return o == 0?0:({struct Cyc_Core_Opt*_Tmp0=_region_malloc(Cyc_Core_unique_region,sizeof(struct Cyc_Core_Opt));({void*_Tmp1=f(o->v);_Tmp0->v=_Tmp1;});_Tmp0;});}
+return o==0?0:({struct Cyc_Core_Opt*_Tmp0=_region_malloc(Cyc_Core_unique_region,sizeof(struct Cyc_Core_Opt));({void*_Tmp1=f(o->v);_Tmp0->v=_Tmp1;});_Tmp0;});}
 # 38
 struct _fat_ptr Cyc_Core_new_string(unsigned i){
 return({unsigned _Tmp0=i;_tag_fat(_cyccalloc_atomic(sizeof(char),_Tmp0),sizeof(char),_Tmp0);});}
@@ -399,7 +399,7 @@ int Cyc_Core_false_f(void*x){return 0;}
 int Cyc_Core_intcmp(int a,int b){return a - b;}
 int Cyc_Core_charcmp(char a,char b){return(int)a - (int)b;}
 int Cyc_Core_nptrcmp(void*a,void*b){
-if(a == b)return 0;
+if(a==b)return 0;
 if(a > b)return 1;
 return -1;}
 # 56
@@ -428,7 +428,7 @@ void*Cyc_Core_arrcast(struct _fat_ptr dyn,unsigned bd,unsigned sz){
 if(bd >> 20 || sz >> 12)
 return 0;{
 unsigned char*ptrbd=dyn.curr + bd * sz;
-if(((ptrbd < dyn.curr || dyn.curr == 0)|| dyn.curr < dyn.base)|| ptrbd > dyn.last_plus_one)
+if(((ptrbd < dyn.curr || dyn.curr==0)|| dyn.curr < dyn.base)|| ptrbd > dyn.last_plus_one)
 # 93
 return 0;
 return dyn.curr;}}

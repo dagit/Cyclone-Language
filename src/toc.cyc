@@ -3386,7 +3386,13 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
   let t = (type_t)e->topt;
   exp_to_c(nv,e);
 
-  let $(v,path) = temp_var_and_exp();
+  // Tcstmt ensures e is a variable right now
+  // let v = temp_var();
+  let v;
+  switch(e->r) {
+  case &Var_e(b): v = binding2qvar(b); break;
+  default: Warn::impos_loc2(e->loc,"pattern expression not a variable: ",e);
+  }
   var_t end_l = fresh_label();
   TOC_RGN(nv,rgn) {
     let nv = share_env(rgn,nv);
@@ -3454,7 +3460,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
       continue;
     }
     // overwrite original switch with new code.
-    whole_s->r = declare_stmt(v,typ_to_c((type_t)e->topt),e,res,DL)->r;
+    whole_s->r = res->r; //declare_stmt(v,typ_to_c((type_t)e->topt),e,res,DL)->r;
     return;
   }
 }
@@ -4033,7 +4039,13 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t dopt,
   let nv = share_env(rgn,nv);
   let t = (type_t)e->topt;
   exp_to_c(nv,e);
-  qvar_t v     = temp_var();
+  // Tcstmt ensures e is a variable right now
+  // let v = temp_var();
+  let v;
+  switch(e->r) {
+  case &Var_e(b): v = binding2qvar(b); break;
+  default: Warn::impos_loc2(e->loc,"pattern expression not a variable: ",e);
+  }
   exp_t  path  = var_exp(v,DL);
   var_t  end_l = fresh_label();
   // we us a bogus fail statement since it has to pass through translation.
@@ -4070,7 +4082,7 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t dopt,
     res = decl_stmt(new_decl(new Var_d(vd), DL), res, DL);
   }
   // finally declare the root variable v and initialize it with e
-  return declare_stmt(v,typ_to_c(t),e,res,DL);
+  return res; // declare_stmt(v,typ_to_c(t),e,res,DL);
 }
 
 // These next few functions clean up the types in C code, getting

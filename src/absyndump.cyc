@@ -123,9 +123,9 @@ static void dump(dump_string_t s) {
     pos = sz;
     fputc('\n',*dump_file);
     } else */
-  if(need_space_before())
-    fputc(' ',*dump_file);
   if(sz >= 1) {
+    if(need_space_before())
+      fputc(' ',*dump_file);
     prev_char = s[sz-1];
     file_string_write(*dump_file, s, 0, sz);
   }
@@ -570,7 +570,8 @@ static void dumpexps_prec(int inprec, list_t<exp_t> es) {
 
 static void dumpexp_prec(int inprec, exp_t e) {
   int myprec = Absynpp::exp_prec(e);
-  if(inprec >= myprec)
+  if(inprec >= myprec && ((inprec != 140) || myprec != 140))
+    //  if(inprec >= myprec)
     dump_nospace("(");
   switch (e->r) {
   case &Const_e({.Char_c = $(sg,ch)}):
@@ -612,8 +613,13 @@ static void dumpexp_prec(int inprec, exp_t e) {
       break;
     case 2:
       dumpexp_prec(myprec,es->hd);
-      dump(pstr);
-      dump_char(' '); // avoids problem with '/' followed by '*'
+      switch(p) {
+      case Eq:
+      case Neq: dump_nospace(pstr); break;
+      default: // avoids problems, eg. "y/*z" and "x--3"
+	dump(pstr);
+	dump_char(' '); 
+      }
       dumpexp_prec(myprec,es->tl->hd);
       break;
     default: Warn::impos("Absyndump -- Bad number of arguments to primop");
@@ -814,7 +820,8 @@ static void dumpexp_prec(int inprec, exp_t e) {
   case &StmtExp_e(s):
     dump_nospace("({"); dumpstmt(s,true,NULL); dump_nospace("})"); break;
   }
-  if(inprec >= myprec)
+  if(inprec >= myprec && ((inprec != 140) || myprec != 140))
+    //  if(inprec >= myprec)
     dump_char(')');
 }
 

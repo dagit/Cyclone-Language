@@ -14,7 +14,7 @@ struct _RuntimeStack {
 };
 
 #ifndef offsetof
-/* should be size_t, but int is fine. */
+/* should be size_t but int is fine */
 #define offsetof(t,n) ((int)(&(((t *)0)->n)))
 #endif
 
@@ -203,7 +203,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
 #define _zero_arr_plus_voidstar(x,s,i) \
   (_zero_arr_plus_voidstar_fn(x,s,i,__FILE__,__LINE__))
 #define _zero_arr_inplace_plus_char(x,i) \
-  _zero_arr_inplace_plus_char_fn((char **)(x),i,__FILE__,__LINE__)
+  _zero_arr_inplace_plus_char_fn((char**)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_short(x,i) \
   _zero_arr_inplace_plus_short_fn((short **)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_int(x,i) \
@@ -246,7 +246,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
   struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
-      _curr != (unsigned char *)0) \
+      _curr != (unsigned char*)0) \
     _throw_arraybounds(); \
   _curr; })
 #endif
@@ -299,7 +299,7 @@ void* GC_calloc_atomic(unsigned,unsigned);
 
 #if(defined(__linux__) && defined(__KERNEL__))
 void *cyc_vmalloc(unsigned);
-void cyc_vfree(void *);
+void cyc_vfree(void*);
 #endif
 // bound the allocation size to be < MAX_ALLOC_SIZE. See macros below for usage.
 #define MAX_MALLOC_SIZE (1 << 28)
@@ -472,7 +472,7 @@ return putw(x,f->file);}char Cyc_FileCloseError[15U]="FileCloseError";char Cyc_F
 # 166
 struct Cyc___cycFILE*Cyc_file_open(struct _fat_ptr fname,struct _fat_ptr mode){
 struct Cyc___cycFILE*f=({const char*_Tmp0=(const char*)_check_null(_untag_fat_ptr(fname,sizeof(char),1U));Cyc_fopen(_Tmp0,(const char*)_check_null(_untag_fat_ptr(mode,sizeof(char),1U)));});
-if(f == 0){
+if(f==0){
 struct _fat_ptr fn=({unsigned _Tmp0=_get_fat_size(fname,sizeof(char))+ 1U;_tag_fat(({char*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(char)));({{unsigned _Tmp2=_get_fat_size(fname,sizeof(char));unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=((const char*)fname.curr)[(int)i];}_Tmp1[_Tmp2]=0;}0;});_Tmp1;}),sizeof(char),_Tmp0);});
 (void*)_throw((void*)({struct Cyc_FileOpenError_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_FileOpenError_exn_struct));_Tmp0->tag=Cyc_FileOpenError,_Tmp0->f1=fn;_Tmp0;}));}
 # 172
@@ -480,7 +480,7 @@ return f;}
 # 175
 struct Cyc_FileCloseError_exn_struct Cyc_FileCloseError_val={Cyc_FileCloseError};
 void Cyc_file_close(struct Cyc___cycFILE*f){
-if(Cyc_fclose(f)!= 0)(void*)_throw((void*)& Cyc_FileCloseError_val);}
+if(Cyc_fclose(f)!=0)(void*)_throw((void*)& Cyc_FileCloseError_val);}
 # 183
 extern char*getcwd(char*,unsigned long);static char _TmpG3[29U]="getcwd: invalid buf argument";
 # 185

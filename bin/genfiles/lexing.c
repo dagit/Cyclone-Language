@@ -14,7 +14,7 @@ struct _RuntimeStack {
 };
 
 #ifndef offsetof
-/* should be size_t, but int is fine. */
+/* should be size_t but int is fine */
 #define offsetof(t,n) ((int)(&(((t *)0)->n)))
 #endif
 
@@ -203,7 +203,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
 #define _zero_arr_plus_voidstar(x,s,i) \
   (_zero_arr_plus_voidstar_fn(x,s,i,__FILE__,__LINE__))
 #define _zero_arr_inplace_plus_char(x,i) \
-  _zero_arr_inplace_plus_char_fn((char **)(x),i,__FILE__,__LINE__)
+  _zero_arr_inplace_plus_char_fn((char**)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_short(x,i) \
   _zero_arr_inplace_plus_short_fn((short **)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_int(x,i) \
@@ -246,7 +246,7 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
   struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
-      _curr != (unsigned char *)0) \
+      _curr != (unsigned char*)0) \
     _throw_arraybounds(); \
   _curr; })
 #endif
@@ -299,7 +299,7 @@ void* GC_calloc_atomic(unsigned,unsigned);
 
 #if(defined(__linux__) && defined(__KERNEL__))
 void *cyc_vmalloc(unsigned);
-void cyc_vfree(void *);
+void cyc_vfree(void*);
 #endif
 // bound the allocation size to be < MAX_ALLOC_SIZE. See macros below for usage.
 #define MAX_MALLOC_SIZE (1 << 28)
@@ -392,9 +392,9 @@ static char Cyc_Lexing_aux_buffer_v[1U]={'\000'};
 static struct _fat_ptr Cyc_Lexing_aux_buffer={(void*)Cyc_Lexing_aux_buffer_v,(void*)Cyc_Lexing_aux_buffer_v,(void*)(Cyc_Lexing_aux_buffer_v + 1U)};
 # 76
 void Cyc_Lexing_lex_refill(struct Cyc_Lexing_lexbuf*lexbuf){
-if(_get_fat_size(Cyc_Lexing_aux_buffer,sizeof(char))== 1U)Cyc_Lexing_aux_buffer=Cyc_Core_new_string(4097U);{
+if(_get_fat_size(Cyc_Lexing_aux_buffer,sizeof(char))==1U)Cyc_Lexing_aux_buffer=Cyc_Core_new_string(4097U);{
 int read=
-((((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun))(Cyc_Lexing_aux_buffer,(int)(
+((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun(Cyc_Lexing_aux_buffer,(int)(
 _get_fat_size(Cyc_Lexing_aux_buffer,sizeof(char))- 1U),((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun_state);
 # 82
 int n=read > 0?read:(lexbuf->lex_eof_reached=1,0);
@@ -448,7 +448,7 @@ struct _fat_ptr Cyc_Lexing_rlexeme(struct _RegionHandle*r,struct Cyc_Lexing_lexb
 int len=lbuf->lex_curr_pos - lbuf->lex_start_pos;
 struct _fat_ptr s=Cyc_Core_rnew_string(r,(unsigned)(len + 1));
 ({struct _fat_ptr _Tmp0=_fat_ptr_decrease_size(s,sizeof(char),1U);struct _fat_ptr _Tmp1=_fat_ptr_plus(lbuf->lex_buffer,sizeof(char),lbuf->lex_start_pos);Cyc_zstrncpy(_Tmp0,_Tmp1,(unsigned long)len);});
-({struct _fat_ptr _Tmp0=_fat_ptr_plus(s,sizeof(char),len);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='\000';if(_get_fat_size(_Tmp0,sizeof(char))== 1U &&(_Tmp1 == 0 && _Tmp2 != 0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+({struct _fat_ptr _Tmp0=_fat_ptr_plus(s,sizeof(char),len);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='\000';if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 return s;}
 # 148
 struct _fat_ptr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*lbuf){
