@@ -273,8 +273,10 @@ static doc_t finish_doc(ctxt_t c1,doc_t d1) {
     d1 = new Tagged(S_tag,d1);
   if (c1.TT)
     d1 = new Tagged(TT_tag,d1);
-  while (c1.U != 0) 
+  while (c1.U != 0) {
     d1 = new Tagged(U_tag,d1);
+    c1.U--;
+  }
   if (c1.size != DONT_KNOW) 
     d1 = new Tagged(c1.size,d1);
   if (c1.color != DONT_KNOW) 
@@ -301,6 +303,10 @@ doc_t flatten_array(doc_t d) {
     fprintf(stderr," %d ",c);
     // stop if we only have one node left
     if (c == 1) break;
+  }
+  if (c != 1) {
+    fprintf(stderr,"flatten_array: count is %d\n",c);
+    throw new Impossible("flatten_array");
   }
   let $(ctxt,d) = a[0];
   // complete the node

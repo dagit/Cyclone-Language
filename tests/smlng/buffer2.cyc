@@ -32,10 +32,6 @@ extern unsigned int size(buf_t b, unsigned int p) {
 extern void add_char(buf_t b, char c) {
   buf[pos] = c;
   pos++;
-  if (pos > MAX_FILESIZE) {
-    fprintf(stderr,"exhausted buffer!\n");
-    exit(1);
-  }
 }
 
 extern char get_char(buf_t b, unsigned int p) {
