@@ -29,10 +29,6 @@
    In the meantime -noexpandtypedefs works.  An example of this is
    fpos_t in stdio.h.
 
-   We handle anonymous enums by giving them a fresh name.  It would be
-   better to extend Cyclone to handle them.  Right now it complains,
-   e.g., test.cyc(3:0-3:12): missing declarator
-
    Cygwin stdio.h has an inline function.  Probably we don't have to
    worry about inline functions because they are used in function
    macros, and we're planning on hand-coding all the functions.
@@ -140,7 +136,6 @@ extern int slurp_string(Lexbuf<`a>);
 extern int asm(Lexbuf<`a>);
 extern int asm_string(Lexbuf<`a>);
 extern int asm_comment(Lexbuf<`a>);
-int enum_hack = 0;
 
 typedef $(string_t,stringptr_t) *suck_line_t;
 extern suck_line_t suck_line(Lexbuf<`a>);
@@ -420,12 +415,6 @@ and slurp = parse
 /* malloc is a Cyclone keyword so our parser can't handle a malloc
    declaration. */
 { fputs("*__IGNORE_FOR_CYCLONE_MALLOC ",(FILE @)slurp_out); return slurp(lexbuf); }
-| "enum" [' ''\n''\r''\t']* '{'
-/* Our parser currently doesn't handle anonymous enums.  This is a
-   temporary hack to get around the problem -- just make up a name. */
-{ fprintf((FILE @)slurp_out,
-          "enum __CYCLONE_ENUM_HACK_%d {", enum_hack++);
-  return slurp(lexbuf); }
 | "__extension__" /* Used in cygwin in sys/reent.h */
 { return slurp(lexbuf); }
 | "__attribute__ ((__mode__ (__HI__)))" /* Used in linux in _G_config.h */
@@ -586,6 +575,8 @@ and spec "spec_t" = parse
                current_cstubs,
                current_cycstubs);
 }
+| "//" [^'\n''\r']*
+{ return spec(lexbuf); }
 | ws+
 { return spec(lexbuf); }
 | eof
@@ -695,6 +686,8 @@ and commands = parse
                         (string_t)Buffer::contents((Buffer::T)specbuf));
   current_cycstubs = new List(x,current_cycstubs);
   return commands(lexbuf); }
+| "//" [^'\n''\r']*
+{ return commands(lexbuf); }
 | ws+
 { return commands(lexbuf); }
 | eof

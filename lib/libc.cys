@@ -1,10 +1,8 @@
-aio.h:
-epilogue {
-  // Realtime
-  // Has a structure containing void *
-  // Not supported yet
-}
-;
+// Realtime
+// Has a structure containing void *
+// Not supported yet
+// aio.h:
+// ;
 
 arpa/inet.h:
 include {
@@ -44,6 +42,216 @@ epilogue inet_addr {
   extern in_addr_t inet_addr(const char ?);
 }
 ;
+
+// Our compiler can't handle this yet.  E.g., it doesn't like
+// types such as 'long double complex'.
+// complex.h:
+// include {
+// complex
+// _Complex_I
+// imaginary
+// _Imaginary_I
+// I
+// }
+// epilogue cabs {
+//   extern "C" double cabs(double complex);
+// }
+// epilogue cabsf {
+//   extern "C" float cabsf(float complex);
+// }
+// epilogue cabsl {
+//   extern "C" long double cabsl(long double complex);
+// }
+// epilogue cacos {
+//   extern "C" double complex cacos(double complex);
+// }
+// epilogue cacosf {
+//   extern "C" float complex cacosf(float complex);
+// }
+// epilogue cacosh {
+//   extern "C" double complex cacosh(double complex);
+// }
+// epilogue cacoshf {
+//   extern "C" float complex cacoshf(float complex);
+// }
+// epilogue cacoshl {
+//   extern "C" long double complex cacoshl(long double complex);
+// }
+// epilogue cacosl {
+//   extern "C" long double complex cacosl(long double complex);
+// }
+// epilogue carg {
+//   extern "C" double carg(double complex);
+// }
+// epilogue cargf {
+//   extern "C" float cargf(float complex);
+// }
+// epilogue cargl {
+//   extern "C" long double cargl(long double complex);
+// }
+// epilogue casin {
+//   extern "C" double complex casin(double complex);
+// }
+// epilogue casinf {
+//   extern "C" float complex casinf(float complex);
+// }
+// epilogue casinh {
+//   extern "C" double complex casinh(double complex);
+// }
+// epilogue casinhf {
+//   extern "C" float complex casinhf(float complex);
+// }
+// epilogue casinhl {
+//   extern "C" long double complex casinhl(long double complex);
+// }
+// epilogue casinl {
+//   extern "C" long double complex casinl(long double complex);
+// }
+// epilogue catan {
+//   extern "C" double complex catan(double complex);
+// }
+// epilogue catanf {
+//   extern "C" float complex catanf(float complex);
+// }
+// epilogue catanh {
+//   extern "C" double complex catanh(double complex);
+// }
+// epilogue catanhf {
+//   extern "C" float complex catanhf(float complex);
+// }
+// epilogue catanhl {
+//   extern "C" long double complex catanhl(long double complex);
+// }
+// epilogue catanl {
+//   extern "C" long double complex catanl(long double complex);
+// }
+// epilogue ccos {
+//   extern "C" double complex ccos(double complex);
+// }
+// epilogue ccosf {
+//   extern "C" float complex ccosf(float complex);
+// }
+// epilogue ccosh {
+//   extern "C" double complex ccosh(double complex);
+// }
+// epilogue ccoshf {
+//   extern "C" float complex ccoshf(float complex);
+// }
+// epilogue ccoshl {
+//   extern "C" long double complex ccoshl(long double complex);
+// }
+// epilogue ccosl {
+//   extern "C" long double complex ccosl(long double complex);
+// }
+// epilogue cexp {
+//   extern "C" double complex cexp(double complex);
+// }
+// epilogue cexpf {
+//   extern "C" float complex cexpf(float complex);
+// }
+// epilogue cexpl {
+//   extern "C" long double complex cexpl(long double complex);
+// }
+// epilogue cimag {
+//   extern "C" double cimag(double complex);
+// }
+// epilogue cimagf {
+//   extern "C" float cimagf(float complex);
+// }
+// epilogue cimagl {
+//   extern "C" long double cimagl(long double complex);
+// }
+// epilogue clog {
+//   extern "C" double complex clog(double complex);
+// }
+// epilogue clogf {
+//   extern "C" float complex clogf(float complex);
+// }
+// epilogue clogl {
+//   extern "C" long double complex clogl(long double complex);
+// }
+// epilogue conj {
+//   extern "C" double complex conj(double complex);
+// }
+// epilogue conjf {
+//   extern "C" float complex conjf(float complex);
+// }
+// epilogue conjl {
+//   extern "C" long double complex conjl(long double complex);
+// }
+// epilogue cpow {
+//   extern "C" double complex cpow(double complex, double complex);
+// }
+// epilogue cpowf {
+//   extern "C" float complex cpowf(float complex, float complex);
+// }
+// epilogue cpowl {
+//   extern "C" long double complex cpowl(long double complex, long double complex);
+// }
+// epilogue cproj {
+//   extern "C" double complex cproj(double complex);
+// }
+// epilogue cprojf {
+//   extern "C" float complex cprojf(float complex);
+// }
+// epilogue cprojl {
+//   extern "C" long double complex cprojl(long double complex);
+// }
+// epilogue creal {
+//   extern "C" double creal(double complex);
+// }
+// epilogue crealf {
+//   extern "C" float crealf(float complex);
+// }
+// epilogue creall {
+//   extern "C" long double creall(long double complex);
+// }
+// epilogue csin {
+//   extern "C" double complex csin(double complex);
+// }
+// epilogue csinf {
+//   extern "C" float complex csinf(float complex);
+// }
+// epilogue csinh {
+//   extern "C" double complex csinh(double complex);
+// }
+// epilogue csinhf {
+//   extern "C" float complex csinhf(float complex);
+// }
+// epilogue csinhl {
+//   extern "C" long double complex csinhl(long double complex);
+// }
+// epilogue csinl {
+//   extern "C" long double complex csinl(long double complex);
+// }
+// epilogue csqrt {
+//   extern "C" double complex csqrt(double complex);
+// }
+// epilogue csqrtf {
+//   extern "C" float complex csqrtf(float complex);
+// }
+// epilogue csqrtl {
+//   extern "C" long double complex csqrtl(long double complex);
+// }
+// epilogue ctan {
+//   extern "C" double complex ctan(double complex);
+// }
+// epilogue ctanf {
+//   extern "C" float complex ctanf(float complex);
+// }
+// epilogue ctanh {
+//   extern "C" double complex ctanh(double complex);
+// }
+// epilogue ctanhf {
+//   extern "C" float complex ctanhf(float complex);
+// }
+// epilogue ctanhl {
+//   extern "C" long double complex ctanhl(long double complex);
+// }
+// epilogue ctanl {
+//   extern "C" long double complex ctanl(long double complex);
+// }
+// ;
 
 cpio.h:
 include {
@@ -125,12 +333,10 @@ epilogue _toupper {
 }
 ;
 
-dlfcn.h:
-epilogue {
-  // Dynamic linking
-  // Not supported yet
-}
-;
+// Dynamic linking
+// Not supported yet
+// dlfcn.h:
+// ;
 
 dirent.h:
 include {
@@ -209,7 +415,7 @@ cycstub rewinddir {
     extern "C" void rewinddir(__cDIR @d);
   }
   void rewinddir(DIR @d) {
-    Cdirent::rewinddir(d->dir);
+    return Cdirent::rewinddir(d->dir);
   }
 }
 epilogue seekdir {
@@ -220,7 +426,7 @@ cycstub seekdir {
     extern "C" void seekdir(__cDIR @d, long);
   }
   void seekdir(DIR @d, long x) {
-    Cdirent::seekdir(d->dir,x);
+    return Cdirent::seekdir(d->dir,x);
   }
 }
 epilogue telldir {
@@ -591,19 +797,95 @@ cycstub {
 }
 ;
 
-glob.h:
-epilogue {
-  // This may need to be written entirely in Cyclone, since it manipulates
-  // arrays of paths
-}
-;
+// This one requires true closures, or an implementation
+// completely in Cyclone.
+// Our parser dies on it in Linux
+// ftw.h:
+// omitvariables { stat }
+// include {
+// FTW
+// FTW_F
+// FTW_D
+// FTW_DNR
+// FTW_DP
+// FTW_NS
+// FTW_SL
+// FTW_SLN
+// FTW_PHYS
+// FTW_MOUNT
+// FTW_DEPTH
+// FTW_CHDIR
+// stat
+// S_IFMT
+// S_IFBLK
+// S_IFCHR
+// S_IFIFO
+// S_IFREG
+// S_IFDIR
+// S_IFLNK
+// S_IFSOCK
+// S_IRWXU
+// S_IRUSR
+// S_IWUSR
+// S_IXUSR
+// S_IRWXG
+// S_IRGRP
+// S_IWGRP
+// S_IXGRP
+// S_IRWXO
+// S_IROTH
+// S_IWOTH
+// S_IXOTH
+// S_ISUID
+// S_ISGID
+// S_ISVTX
+// S_ISBLK
+// S_ISCHR
+// S_ISDIR
+// S_ISFIFO
+// S_ISREG
+// S_ISLNK
+// S_ISSOCK
+// S_TYPEISMQ
+// S_TYPEISSEM
+// S_TYPEISSHM
+// S_TYPEISTMO
+// }
+// epilogue ftw {
+//   extern int ftw(const char ?,
+//                  int (@)(const char ?, const struct stat @, int),
+//                  int);
+// }
+// epilogue nftw {
+//   extern int nftw(const char ?
+//                   int (@)(const char ?, const struct stat @, int, struct FTW @),
+//                   int,
+//                   int);
+// }
+// ;
 
-grp.h:
-epilogue {
-  // This may need to be written entirely in Cyclone, since it manipulates
-  // arrays of paths
-}
-;
+// This may need to be written entirely in Cyclone, since it manipulates
+// arrays of paths
+// glob.h:
+// ;
+
+// This may need to be written entirely in Cyclone, since it manipulates
+// arrays of paths
+// grp.h:
+// ;
+
+// Not supported yet
+// inttypes.h:
+// include {
+// imaxdiv_t
+// }
+// epilogue {
+//   // This isn't quite right.  Posix requires <inttypes.h> to include
+//   // <stdint.h>, but this include is not making the definitions of
+//   // <stdint.h> available in the Std namespace.
+// #include <stdint.h>
+// }
+// ;
 
 iso646.h:
 include {
@@ -621,11 +903,9 @@ xor_eq
 }
 ;
 
-langinfo.h:
-epilogue {
-  // Not supported yet
-}
-;
+// Not supported yet
+// langinfo.h:
+// ;
 
 libgen.h:
 epilogue {
@@ -825,12 +1105,10 @@ NZERO
 }
 ;
 
-locale.h:
-epilogue {
-  // Defines a struct containing char *
-  // Not supported yet
-}
-;
+// Defines a struct containing char *
+// Not supported yet
+// locale.h:
+// ;
 
 math.h:
 include {
@@ -1433,40 +1711,30 @@ epilogue {
 }
 ;
 
-monetary.h:
-epilogue {
-  // Defines a printf-like function, so we need to define it in Cyclone
-  // Not supported yet
-}
-;
+// Defines a printf-like function, so we need to define it in Cyclone
+// Not supported yet
+// monetary.h:
+// ;
 
-mqueue.h:
-epilogue {
-  // Realtime
-  // Not supported yet
-}
-;
+// Realtime
+// Not supported yet
+// mqueue.h:
+// ;
 
-ndbm.h:
-epilogue {
-  // Defines a structure containing a void *
-  // Not supported yet
-}
-;
+// Defines a structure containing a void *
+// Not supported yet
+// ndbm.h:
+// ;
 
-net/if.h:
-epilogue {
-  // Defines a structure containing a char *
-  // Not supported yet
-}
-;
+// Defines a structure containing a char *
+// Not supported yet
+// net/if.h:
+// ;
 
-netdb.h:
-epilogue {
-  // Defines a structure containing a char *
-  // Not supported yet
-}
-;
+// Defines a structure containing a char *
+// Not supported yet
+// netdb.h:
+// ;
 
 netinet/in.h:
 include {
@@ -1542,12 +1810,10 @@ TCP_NODELAY
 }
 ;
 
-nl_types.h:
-epilogue {
-  // Locale stuff
-  // Not supported yet
-}
-;
+// Locale stuff
+// Not supported yet
+// nl_types.h:
+// ;
 
 poll.h:
 include {
@@ -1593,44 +1859,39 @@ cycstub poll {
 }
 ;
 
-pthread.h:
-epilogue { // Threads
-  // Not supported yet
-}
-;
+// Threads
+// Not supported yet
+// pthread.h:
+// ;
 
-pwd.h:
-epilogue {
-  // Defines a structure containing a char *
-  // Not supported yet
-}
-;
+// Defines a structure containing a char *
+// Not supported yet
+// pwd.h:
+// ;
 
-sched.h:
-epilogue {
-  // Real time
-  // Not supported yet
-}
-;
+// Our parser dies on it in Linux
+// Uses strings extensively, probably best to rewrite in Cyclone
+// Not supported yet
+// regexp.h:
+// ;
 
-search.h:
-epilogue {
-  // Defines a structure containing a char *
-  // Not supported yet
-}
-;
+// Real time
+// Not supported yet
+// sched.h:
+// ;
 
-semaphore.h:
-epilogue {
-  // Not supported yet
-}
-;
+// Defines a structure containing a char *
+// Not supported yet
+// search.h:
+// ;
 
-setjmp.h:
-epilogue {
-  // Not supported yet
-}
-;
+// Not supported yet
+// semaphore.h:
+// ;
+
+// Not supported yet
+// setjmp.h:
+// ;
 
 signal.h:
 omitvariables { sigaction }
@@ -1915,26 +2176,20 @@ epilogue {
 }
 ;
 
-spawn.h:
-epilogue {
-  // Realtime
-  // Not supported yet
-}
-;
+// Realtime
+// Not supported yet
+// spawn.h:
+// ;
 
-stdarg.h:
-epilogue {
-  // We have safe ways of handling varargs in Cyclone already
-  // Not supported
-}
-;
+// We have safe ways of handling varargs in Cyclone already
+// Not supported
+// stdarg.h:
+// ;
 
-stdbool.h:
-epilogue {
-  // Maybe this should replace Cyclone's treatment of bool?
-  // Not supported yet
-}
-;
+// Maybe this should replace Cyclone's treatment of bool?
+// Not supported yet
+// stdbool.h:
+// ;
 
 stddef.h:
 include {
@@ -2045,10 +2300,11 @@ epilogue {
   extern FILE @stderr;
 }
 cycstub {
-  // FIX: we should get rid of as many uses of string_to_Cstring as
-  // possible, since it heap-allocates and copies.
   #ifndef s2c
   #define s2c(x) (string_to_Cstring(x))
+  #endif
+  #ifndef static_c2s
+  #define static_c2s(x) (wrap_Cstring_as_string(x,-1))
   #endif
 }
 cycstub {
@@ -2096,7 +2352,7 @@ cycstub clearerr {
     extern "C" void clearerr(__cFILE @);
   }
   void clearerr(FILE @f) {
-    Cstdio::clearerr(f->file);
+    return Cstdio::clearerr(f->file);
   }
 }
 epilogue ctermid {
@@ -2222,7 +2478,7 @@ cycstub flockfile {
     extern "C" void flockfile(__cFILE @);
   }
   void flockfile(FILE @f) {
-    Cstdio::flockfile(f->file);
+    return Cstdio::flockfile(f->file);
   }
 }
 epilogue fopen {
@@ -2391,7 +2647,7 @@ cycstub funlockfile {
     extern "C" void funlockfile(__cFILE @);
   }
   void funlockfile(FILE @f) {
-    Cstdio::funlockfile(f->file);
+    return Cstdio::funlockfile(f->file);
   }
 }
 epilogue fwrite {
@@ -2478,7 +2734,7 @@ cycstub perror {
   }
   void perror(const char ?x) {
     // Note: looks like it's OK to call Cstdio::perror with NULL
-    Cstdio::perror(s2c(x));
+    return Cstdio::perror(s2c(x));
   }
 }
 epilogue popen {
@@ -2572,7 +2828,7 @@ cycstub rewind {
     extern "C" void rewind(__cFILE @);
   }
   void rewind(FILE @f) {
-    Cstdio::rewind(f->file);
+    return Cstdio::rewind(f->file);
   }
 }
 epilogue {
@@ -2592,6 +2848,7 @@ epilogue setbuf {
 cycstub setbuf {
   void setbuf(FILE @f, char ?`H buf) {
     setvbuf(f, buf, buf ? _IOFBF : _IONBF, BUFSIZ);
+    return;
   }
 }
 epilogue setvbuf {
@@ -2672,7 +2929,7 @@ cycstub tmpnam {
     extern "C" Cstring tmpnam(Cstring);
   }
   char ?`H tmpnam(char ?`H s) {
-    char ?name = Cstring_to_string(Cstdio::tmpnam(NULL));
+    char ?name = static_c2s(Cstdio::tmpnam(NULL));
     return s ? strcpy(s, name) : name;
   }
 }
@@ -2797,8 +3054,6 @@ WSTOPSIG
 WTERMSIG
 }
 cycstub {
-  // FIX: we should get rid of as many uses of string_to_Cstring as
-  // possible, since it heap-allocates and copies.
   #ifndef s2c
   #define s2c(x) (string_to_Cstring(x))
   #endif
@@ -2978,12 +3233,12 @@ prologue {
   #include <array.h> // for Array::cmpfn_t in declaration of qsort
 }
 epilogue {
-  extern void qsort<`a,`r::R>(`a ?`r, size_t, size_t, Array::cmpfn_t<`a,`r,`r>);
+  extern void qsort<`a::B,`r::R>(`a ?`r, size_t, size_t, Array::cmpfn_t<`a,`r,`r>);
 }
 cycstub {
   #include <array.h>
-  void qsort<`a,`r::R>(`a ?`r tab, size_t nmemb, size_t szmemb, 
-		       Array::cmpfn_t<`a,`r,`r> compfn) {
+  void qsort<`a::B,`r::R>(`a ?`r tab, size_t nmemb, size_t szmemb, 
+                          Array::cmpfn_t<`a,`r,`r> compfn) {
     Array::qsort(compfn, tab, nmemb);
   }
 }
@@ -3110,6 +3365,14 @@ epilogue unlockpt {
 }
 ;
 
+// We do this all in Cyclone
+// string.h:
+// ;
+
+// We do this all in Cyclone
+// strings.h:
+// ;
+
 stropts.h:
 epilogue {
   // FIX: stropts.h is not yet supported.
@@ -3206,11 +3469,9 @@ epilogue setrlimit {
 }
 ;
 
-sys/sem.h:
-epilogue {
-  // Semaphores -- not supported yet
-}
-;
+// Semaphores -- not supported yet
+// sys/sem.h:
+// ;
 
 sys/select.h:
 include {
@@ -3255,16 +3516,16 @@ cycstub {
     extern "C" void __stub_FD_ZERO(fd_set @);
   }
   void FD_CLR(int a, fd_set @b) {
-    Csysselect::__stub_FD_CLR(a,b);
+    return Csysselect::__stub_FD_CLR(a,b);
   }
   int FD_ISSET(int a, fd_set @b) {
     return Csysselect::__stub_FD_ISSET(a,b);
   }
   void FD_SET(int a, fd_set @b) {
-    Csysselect::__stub_FD_SET(a,b);
+    return Csysselect::__stub_FD_SET(a,b);
   }
   void FD_ZERO(fd_set @a) {
-    Csysselect::__stub_FD_ZERO(a);
+    return Csysselect::__stub_FD_ZERO(a);
   }
 }
 cstub {
@@ -3284,11 +3545,10 @@ cstub {
 }
 ;
 
-sys/shm.h:
-epilogue {
-  // Shared memory stuff -- not supported yet
-}
-;
+// Shared memory stuff
+// Not supported yet
+// sys/shm.h:
+// ;
 
 sys/socket.h:
 include {
@@ -3745,6 +4005,15 @@ epilogue umask {
 }
 ;
 
+// Our parser gets a parse error on this file in Linux
+// sys/statvfs.h:
+// ;
+
+// This works fine but produces plenty of warnings so I don't
+// bother to put it in clib.cys yet.
+// tgmath.h:
+// ;
+
 sys/time.h:
 include {
 timeval
@@ -3852,11 +4121,9 @@ epilogue {
 }
 ;
 
-sys/uio.h:
-epilogue {
-  // Defines a struct containing a void *, not supported.
-}
-;
+// Defines a struct containing a void *, not supported.
+// sys/uio.h:
+// ;
 
 sys/un.h:
 include {
@@ -3957,12 +4224,10 @@ TOEXEC
 }
 ;
 
-termios.h:
-epilogue {
-  // Terminal I/O interface
-  // Not supported yet
-}
-;
+// Terminal I/O interface
+// Not supported yet
+// termios.h:
+// ;
 
 time.h:
 include {
@@ -4137,26 +4402,20 @@ epilogue daylight {
 }
 ;
 
-trace.h:
-epilogue {
-  // Tracing
-  // Not supported yet
-}
-;
+// Tracing
+// Not supported yet
+// trace.h:
+// ;
 
-ucontext.h:
-epilogue {
-  // User context
-  // Defines a pointer-containing struct, not supported yet
-}
-;
+// User context
+// Defines a pointer-containing struct, not supported yet
+// ucontext.h:
+// ;
 
-ulimit.h:
-epilogue {
-  // Defines a vararg function, needs a stub to be written
-  // Not supported yet
-}
-;
+// Defines a vararg function, needs a stub to be written
+// Not supported yet
+// ulimit.h:
+// ;
 
 unistd.h:
 include {
@@ -4911,22 +5170,21 @@ cycstub {
 }
 ;
 
-utmpx.h:
-epilogue {
-  // User accounting database definitions
-  // Not supported yet
-}
-;
+// User accounting database definitions
+// Not supported yet
+// utmpx.h:
+// ;
 
-wctype.h:
-epilogue {
-  // Wide characters are not supported yet in Cyclone
-}
-;
+// This gives a parse error in Cygwin because their wchar.h
+// contains an actual parse error: they don't define size_t
+// wchar.h:
+// ;
 
-wordexp.h:
-epilogue {
-  // Word expansions
-  // Not supported yet
-}
-;
+// Wide characters are not supported yet in Cyclone
+// wctype.h:
+// ;
+
+// Word expansions
+// Not supported yet
+// wordexp.h:
+// ;
