@@ -1,4 +1,9 @@
 
+  #ifdef __APPLE__
+  #include <sys/types.h>
+  #include <netinet/in.h>
+  #include <stdint.h>
+  #endif
   #include <arpa/inet.h>
 #if defined(__CYGWIN32__) || defined(__CYGWIN__)
   /* These types are not defined under Cygwin for some reason */

@@ -7,8 +7,12 @@ aio.h:
 arpa/inet.h:
 cpp {
  // OS X does not include struct in_addr in arpa/inet.h, but here instead
- #include <sys/types.h>
+ #include <sys/types.h> // needed by in_addr, defines u_int32_t
  #include <netinet/in.h>
+ #ifdef __APPLE__
+ // for uint32_t and uint16_t on OS X
+ #include <stdint.h>
+ #endif
 }
 include {
 in_port_t
@@ -65,6 +69,11 @@ cycstub {
   }
 }
 cstub {
+  #ifdef __APPLE__
+  #include <sys/types.h>
+  #include <netinet/in.h>
+  #include <stdint.h>
+  #endif
   #include <arpa/inet.h>
 #if defined(__CYGWIN32__) || defined(__CYGWIN__)
   /* These types are not defined under Cygwin for some reason */
