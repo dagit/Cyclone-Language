@@ -2637,18 +2637,27 @@ resolve_struct_designators(region_t<`r> rgn, seg_t loc,
   return imp_rev(ans);
 }
 
-bool is_tagged_pointer_typ(type_t t) {
+bool is_tagged_pointer_typ_elt(type_t t, type_t@`r elt_typ_dest) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo{_,_,_,_,b}):
+  case &PointerType(PtrInfo{elt_typ,_,_,_,b}):
     let b = compress_conref(b);
     switch (compress_conref(b)->v) {
-    case &Eq_constr(Unknown_b): return true;
+    case &Eq_constr(Unknown_b): 
+      *elt_typ_dest = elt_typ; 
+      return true;
     case No_constr: 
-      b->v = new Eq_constr((bounds_t)Unknown_b); return true;
+      b->v = new Eq_constr((bounds_t)Unknown_b); 
+      *elt_typ_dest = elt_typ; 
+      return true;
     default: return false;
     }
   default: return false;
   }
+}
+
+bool is_tagged_pointer_typ(type_t t) {
+  type_t ignore = VoidType;
+  return is_tagged_pointer_typ_elt(t, &ignore);
 }
 
 // used by address of.  

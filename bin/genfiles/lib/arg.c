@@ -58,45 +58,44 @@ return(*(( struct _tuple0*)(( struct Cyc_List_List*) _check_null( l))->hd)).f2;}
 l=(( struct Cyc_List_List*) _check_null( l))->tl;}}( int) _throw(( void*) Cyc_Core_Not_found);}
 void Cyc_Arg_usage( struct Cyc_List_List* speclist, struct _tagged_arr errmsg){({
 struct _tagged_arr _temp4= errmsg; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s\n",
-_temp4.last_plus_one - _temp4.curr, _temp4.curr);}); while( speclist != 0) {({
-struct _tagged_arr _temp5=(*(( struct _tuple0*)(( struct Cyc_List_List*)
-_check_null( speclist))->hd)).f1; struct _tagged_arr _temp6=(*(( struct _tuple0*)((
-struct Cyc_List_List*) _check_null( speclist))->hd)).f3; fprintf( _sfile_to_file(
-Cyc_Stdio_stderr)," %.*s %.*s\n", _temp5.last_plus_one - _temp5.curr, _temp5.curr,
-_temp6.last_plus_one - _temp6.curr, _temp6.curr);}); speclist=(( struct Cyc_List_List*)
-_check_null( speclist))->tl;}} int Cyc_Arg_current= 0; static struct _tagged_arr
-Cyc_Arg_args={( void*) 0u,( void*) 0u,( void*) 0u + 0u}; static void Cyc_Arg_stop(
-int prog_pos, void* e, struct Cyc_List_List* speclist, struct _tagged_arr errmsg){
-struct _tagged_arr progname= prog_pos < _get_arr_size( Cyc_Arg_args, sizeof(
-struct _tagged_arr))?*(( struct _tagged_arr*) _check_unknown_subscript( Cyc_Arg_args,
-sizeof( struct _tagged_arr), prog_pos)): _tag_arr("(?)", sizeof( unsigned char),
-4u);{ void* _temp7= e; struct _tagged_arr _temp17; struct _tagged_arr _temp19;
-struct _tagged_arr _temp21; struct _tagged_arr _temp23; struct _tagged_arr
-_temp25; struct _tagged_arr _temp27; _LL9: if(*(( int*) _temp7) == Cyc_Arg_Unknown){
-_LL18: _temp17=(( struct Cyc_Arg_Unknown_struct*) _temp7)->f1; goto _LL10;}
-else{ goto _LL11;} _LL11: if(*(( int*) _temp7) == Cyc_Arg_Missing){ _LL20:
-_temp19=(( struct Cyc_Arg_Missing_struct*) _temp7)->f1; goto _LL12;} else{ goto
-_LL13;} _LL13: if(*(( int*) _temp7) == Cyc_Arg_Wrong){ _LL26: _temp25=(( struct
-Cyc_Arg_Wrong_struct*) _temp7)->f1; goto _LL24; _LL24: _temp23=(( struct Cyc_Arg_Wrong_struct*)
-_temp7)->f2; goto _LL22; _LL22: _temp21=(( struct Cyc_Arg_Wrong_struct*) _temp7)->f3;
-goto _LL14;} else{ goto _LL15;} _LL15: if(*(( int*) _temp7) == Cyc_Arg_Message){
-_LL28: _temp27=(( struct Cyc_Arg_Message_struct*) _temp7)->f1; goto _LL16;}
-else{ goto _LL8;} _LL10: if( Cyc_String_strcmp( _temp17, _tag_arr("-help",
-sizeof( unsigned char), 6u)) != 0){({ struct _tagged_arr _temp29= progname;
-struct _tagged_arr _temp30= _temp17; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s: unknown option `%.*s'.\n",
-_temp29.last_plus_one - _temp29.curr, _temp29.curr, _temp30.last_plus_one -
-_temp30.curr, _temp30.curr);});} goto _LL8; _LL12:({ struct _tagged_arr _temp31=
-progname; struct _tagged_arr _temp32= _temp19; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s: option `%.*s' needs an argument.\n",
-_temp31.last_plus_one - _temp31.curr, _temp31.curr, _temp32.last_plus_one -
-_temp32.curr, _temp32.curr);}); goto _LL8; _LL14:({ struct _tagged_arr _temp33=
-progname; struct _tagged_arr _temp34= _temp23; struct _tagged_arr _temp35=
-_temp25; struct _tagged_arr _temp36= _temp21; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s: wrong argument `%.*s'; option `%.*s' expects %.*s.\n",
-_temp33.last_plus_one - _temp33.curr, _temp33.curr, _temp34.last_plus_one -
-_temp34.curr, _temp34.curr, _temp35.last_plus_one - _temp35.curr, _temp35.curr,
-_temp36.last_plus_one - _temp36.curr, _temp36.curr);}); goto _LL8; _LL16:({
-struct _tagged_arr _temp37= progname; struct _tagged_arr _temp38= _temp27;
-fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s: %.*s.\n", _temp37.last_plus_one
-- _temp37.curr, _temp37.curr, _temp38.last_plus_one - _temp38.curr, _temp38.curr);});
+_get_arr_size( _temp4, 1u), _temp4.curr);}); while( speclist != 0) {({ struct
+_tagged_arr _temp5=(*(( struct _tuple0*)(( struct Cyc_List_List*) _check_null(
+speclist))->hd)).f1; struct _tagged_arr _temp6=(*(( struct _tuple0*)(( struct
+Cyc_List_List*) _check_null( speclist))->hd)).f3; fprintf( _sfile_to_file( Cyc_Stdio_stderr)," %.*s %.*s\n",
+_get_arr_size( _temp5, 1u), _temp5.curr, _get_arr_size( _temp6, 1u), _temp6.curr);});
+speclist=(( struct Cyc_List_List*) _check_null( speclist))->tl;}} int Cyc_Arg_current=
+0; static struct _tagged_arr Cyc_Arg_args={( void*) 0u,( void*) 0u,( void*) 0u +
+0u}; static void Cyc_Arg_stop( int prog_pos, void* e, struct Cyc_List_List*
+speclist, struct _tagged_arr errmsg){ struct _tagged_arr progname= prog_pos <
+_get_arr_size( Cyc_Arg_args, sizeof( struct _tagged_arr))?*(( struct _tagged_arr*)
+_check_unknown_subscript( Cyc_Arg_args, sizeof( struct _tagged_arr), prog_pos)):
+_tag_arr("(?)", sizeof( unsigned char), 4u);{ void* _temp7= e; struct
+_tagged_arr _temp17; struct _tagged_arr _temp19; struct _tagged_arr _temp21;
+struct _tagged_arr _temp23; struct _tagged_arr _temp25; struct _tagged_arr
+_temp27; _LL9: if(*(( int*) _temp7) == Cyc_Arg_Unknown){ _LL18: _temp17=((
+struct Cyc_Arg_Unknown_struct*) _temp7)->f1; goto _LL10;} else{ goto _LL11;}
+_LL11: if(*(( int*) _temp7) == Cyc_Arg_Missing){ _LL20: _temp19=(( struct Cyc_Arg_Missing_struct*)
+_temp7)->f1; goto _LL12;} else{ goto _LL13;} _LL13: if(*(( int*) _temp7) == Cyc_Arg_Wrong){
+_LL26: _temp25=(( struct Cyc_Arg_Wrong_struct*) _temp7)->f1; goto _LL24; _LL24:
+_temp23=(( struct Cyc_Arg_Wrong_struct*) _temp7)->f2; goto _LL22; _LL22: _temp21=((
+struct Cyc_Arg_Wrong_struct*) _temp7)->f3; goto _LL14;} else{ goto _LL15;} _LL15:
+if(*(( int*) _temp7) == Cyc_Arg_Message){ _LL28: _temp27=(( struct Cyc_Arg_Message_struct*)
+_temp7)->f1; goto _LL16;} else{ goto _LL8;} _LL10: if( Cyc_String_strcmp(
+_temp17, _tag_arr("-help", sizeof( unsigned char), 6u)) != 0){({ struct
+_tagged_arr _temp29= progname; struct _tagged_arr _temp30= _temp17; fprintf(
+_sfile_to_file( Cyc_Stdio_stderr),"%.*s: unknown option `%.*s'.\n",
+_get_arr_size( _temp29, 1u), _temp29.curr, _get_arr_size( _temp30, 1u), _temp30.curr);});}
+goto _LL8; _LL12:({ struct _tagged_arr _temp31= progname; struct _tagged_arr
+_temp32= _temp19; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s: option `%.*s' needs an argument.\n",
+_get_arr_size( _temp31, 1u), _temp31.curr, _get_arr_size( _temp32, 1u), _temp32.curr);});
+goto _LL8; _LL14:({ struct _tagged_arr _temp33= progname; struct _tagged_arr
+_temp34= _temp23; struct _tagged_arr _temp35= _temp25; struct _tagged_arr
+_temp36= _temp21; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s: wrong argument `%.*s'; option `%.*s' expects %.*s.\n",
+_get_arr_size( _temp33, 1u), _temp33.curr, _get_arr_size( _temp34, 1u), _temp34.curr,
+_get_arr_size( _temp35, 1u), _temp35.curr, _get_arr_size( _temp36, 1u), _temp36.curr);});
+goto _LL8; _LL16:({ struct _tagged_arr _temp37= progname; struct _tagged_arr
+_temp38= _temp27; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s: %.*s.\n",
+_get_arr_size( _temp37, 1u), _temp37.curr, _get_arr_size( _temp38, 1u), _temp38.curr);});
 goto _LL8; _LL8:;} Cyc_Arg_usage( speclist, errmsg); Cyc_Arg_current=( int)
 _get_arr_size( Cyc_Arg_args, sizeof( struct _tagged_arr));} void Cyc_Arg_parse(
 struct Cyc_List_List* speclist, void(* anonfun)( struct _tagged_arr), struct

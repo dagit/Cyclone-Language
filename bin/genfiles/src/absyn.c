@@ -1340,7 +1340,7 @@ unsigned char), 6u); _LL428: if( _temp455 == - 1){ return _tag_arr("aligned",
 sizeof( unsigned char), 8u);} else{ return( struct _tagged_arr) xprintf("aligned(%d)",
 _temp455);} _LL430: return _tag_arr("packed", sizeof( unsigned char), 7u);
 _LL432: return( struct _tagged_arr)({ struct _tagged_arr _temp459= _temp457;
-xprintf("section(\"%.*s\")", _temp459.last_plus_one - _temp459.curr, _temp459.curr);});
+xprintf("section(\"%.*s\")", _get_arr_size( _temp459, 1u), _temp459.curr);});
 _LL434: return _tag_arr("nocommon", sizeof( unsigned char), 9u); _LL436: return
 _tag_arr("shared", sizeof( unsigned char), 7u); _LL438: return _tag_arr("unused",
 sizeof( unsigned char), 7u); _LL440: return _tag_arr("weak", sizeof(

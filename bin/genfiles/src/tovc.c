@@ -501,9 +501,9 @@ void*)({ struct Cyc_Core_Impossible_struct* _temp151=( struct Cyc_Core_Impossibl
 GC_malloc( sizeof( struct Cyc_Core_Impossible_struct)); _temp151[ 0]=({ struct
 Cyc_Core_Impossible_struct _temp152; _temp152.tag= Cyc_Core_Impossible; _temp152.f1=(
 struct _tagged_arr)({ struct _tagged_arr _temp153=* _temp53; xprintf("unbound variable %.*s found in box_free_vars_exp",
-_temp153.last_plus_one - _temp153.curr, _temp153.curr);}); _temp152;}); _temp151;}));
-_LL5: return; _LL7: return; _LL9: Cyc_Tovc_box_free_vars_exp( env, _temp67);
-_temp69= _temp65; goto _LL11; _LL11: for( 0; _temp69 != 0; _temp69=(( struct Cyc_List_List*)
+_get_arr_size( _temp153, 1u), _temp153.curr);}); _temp152;}); _temp151;})); _LL5:
+return; _LL7: return; _LL9: Cyc_Tovc_box_free_vars_exp( env, _temp67); _temp69=
+_temp65; goto _LL11; _LL11: for( 0; _temp69 != 0; _temp69=(( struct Cyc_List_List*)
 _check_null( _temp69))->tl){ Cyc_Tovc_box_free_vars_exp( env,( struct Cyc_Absyn_Exp*)((
 struct Cyc_List_List*) _check_null( _temp69))->hd);} return; _LL13: Cyc_Tovc_box_free_vars_exp(
 env, _temp73); _temp81= _temp77; _temp79= _temp75; goto _LL15; _LL15: _temp85=
@@ -1092,14 +1092,14 @@ struct Cyc_Dict_Dict*(*)( struct _RegionHandle*, int(* comp)( struct _tagged_arr
 struct _tagged_arr*))) Cyc_Dict_rempty)( rgn, Cyc_String_zstrptrcmp); _temp823.encloser=
 _temp783->body; _temp823.gen_ds= _temp821; _temp823;}), _temp783->body);
 _temp753=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x, struct Cyc_List_List*
-y)) Cyc_List_append)(* _temp821, _temp753);}; _pop_region(& _temp819);} goto
-_LL762; _LL762: goto _LL764; _LL764: goto _LL766; _LL766: goto _LL768; _LL768:
-goto _LL770; _LL770: goto _LL772; _LL772: goto _LL774; _LL774: goto _LL776;
-_LL776: _temp753=({ struct Cyc_List_List* _temp824=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp824->hd=( void*) _temp755;
-_temp824->tl= _temp753; _temp824;}); goto _LL758; _LL778: _temp813= _temp809;
-goto _LL780; _LL780: _temp817= _temp813; goto _LL782; _LL782:( int) _throw((
-void*)({ struct Cyc_Core_Impossible_struct* _temp825=( struct Cyc_Core_Impossible_struct*)
+y)) Cyc_List_append)(* _temp821, _temp753);}; _pop_region( rgn);} goto _LL762;
+_LL762: goto _LL764; _LL764: goto _LL766; _LL766: goto _LL768; _LL768: goto
+_LL770; _LL770: goto _LL772; _LL772: goto _LL774; _LL774: goto _LL776; _LL776:
+_temp753=({ struct Cyc_List_List* _temp824=( struct Cyc_List_List*) GC_malloc(
+sizeof( struct Cyc_List_List)); _temp824->hd=( void*) _temp755; _temp824->tl=
+_temp753; _temp824;}); goto _LL758; _LL778: _temp813= _temp809; goto _LL780;
+_LL780: _temp817= _temp813; goto _LL782; _LL782:( int) _throw(( void*)({ struct
+Cyc_Core_Impossible_struct* _temp825=( struct Cyc_Core_Impossible_struct*)
 GC_malloc( sizeof( struct Cyc_Core_Impossible_struct)); _temp825[ 0]=({ struct
 Cyc_Core_Impossible_struct _temp826; _temp826.tag= Cyc_Core_Impossible; _temp826.f1=
 _tag_arr("nested translation unit after translation to C", sizeof( unsigned char),

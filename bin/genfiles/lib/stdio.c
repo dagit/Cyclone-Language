@@ -86,12 +86,12 @@ _tagged_arr Cyc_Stdio_fgets( struct _tagged_arr s, int n, struct Cyc_Stdio___sFI
 f){ unsigned char* result; unsigned char* buffer= underlying_Cstring(( struct
 _tagged_arr) s); unsigned int len= _get_arr_size( s, sizeof( unsigned char)); n=(
 int)( len < n? len:( unsigned int) n); result= fgets( buffer, n,( struct Cyc_Cstdio___sFILE*)
-_check_null( f->file)); if( result == 0){ return _tag_arr( 0u, sizeof(
-unsigned char), 0u);} else{ return s;}} int Cyc_Stdio_fputc( int i, struct Cyc_Stdio___sFILE*
-f){ return fputc( i,( struct Cyc_Cstdio___sFILE*) _check_null( f->file));} int
-Cyc_Stdio_fputs( struct _tagged_arr s, struct Cyc_Stdio___sFILE* f){ return
-fputs( string_to_Cstring( s),( struct Cyc_Cstdio___sFILE*) _check_null( f->file));}
-int Cyc_Stdio_getc( struct Cyc_Stdio___sFILE* f){ return getc(( struct Cyc_Cstdio___sFILE*)
+_check_null( f->file)); if( result == 0){ return _tag_arr( 0u, 0u, 0u);} else{
+return s;}} int Cyc_Stdio_fputc( int i, struct Cyc_Stdio___sFILE* f){ return
+fputc( i,( struct Cyc_Cstdio___sFILE*) _check_null( f->file));} int Cyc_Stdio_fputs(
+struct _tagged_arr s, struct Cyc_Stdio___sFILE* f){ return fputs(
+string_to_Cstring( s),( struct Cyc_Cstdio___sFILE*) _check_null( f->file));} int
+Cyc_Stdio_getc( struct Cyc_Stdio___sFILE* f){ return getc(( struct Cyc_Cstdio___sFILE*)
 _check_null( f->file));} int Cyc_Stdio_putc( int i, struct Cyc_Stdio___sFILE* f){
 return putc( i,( struct Cyc_Cstdio___sFILE*) _check_null( f->file));} int Cyc_Stdio_puts(
 struct _tagged_arr s){ return puts( string_to_Cstring( s));} int Cyc_Stdio_ungetc(

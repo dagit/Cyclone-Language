@@ -29,5 +29,4 @@ GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp0[ 0]=({ struct Cyc_Co
 _temp1; _temp1.tag= Cyc_Core_Failure; _temp1.f1= _tag_arr("getcwd: invalid buf argument",
 sizeof( unsigned char), 29u); _temp1;}); _temp0;}));}{ unsigned char* response=
 getcwd(( unsigned char*) _check_null( _untag_arr( buf, sizeof( unsigned char), 0u)),
-size); return( unsigned int) response? buf: _tag_arr( 0u, sizeof( unsigned char),
-0u);}}
+size); return( unsigned int) response? buf: _tag_arr( 0u, 0u, 0u);}}

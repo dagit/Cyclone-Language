@@ -51,8 +51,8 @@ _tagged_arr*) GC_malloc( sizeof( struct _tagged_arr) * 1); _temp4[ 0]=( struct
 _tagged_arr) Cyc_Core_string_of_int( x->i); _temp4;}); _temp3->tl= 0; _temp3;});
 _temp2;}); _temp1;}));} void Cyc_Id_id_prn( struct Cyc_Stdio___sFILE* f, struct
 Cyc_Id_id* x){({ struct _tagged_arr _temp6=( struct _tagged_arr) Cyc_Id_id_to_string(
-x); fprintf( _sfile_to_file( f),"%.*s", _temp6.last_plus_one - _temp6.curr,
-_temp6.curr);});} struct _tagged_arr Cyc_Id_id_to_source( struct Cyc_Id_id* x){
-return Cyc_String_strdup( x->s);} int Cyc_Id_id_compare( struct Cyc_Id_id* x1,
-struct Cyc_Id_id* x2){ if( x1->i == x2->i){ return Cyc_String_zstrcmp( x1->s, x2->s);}
-else{ if( x1->i < x2->i){ return - 1;} else{ return 1;}}}
+x); fprintf( _sfile_to_file( f),"%.*s", _get_arr_size( _temp6, 1u), _temp6.curr);});}
+struct _tagged_arr Cyc_Id_id_to_source( struct Cyc_Id_id* x){ return Cyc_String_strdup(
+x->s);} int Cyc_Id_id_compare( struct Cyc_Id_id* x1, struct Cyc_Id_id* x2){ if(
+x1->i == x2->i){ return Cyc_String_zstrcmp( x1->s, x2->s);} else{ if( x1->i < x2->i){
+return - 1;} else{ return 1;}}}

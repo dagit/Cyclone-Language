@@ -655,20 +655,20 @@ else{ goto _LL252;} _LL252: if(( unsigned int) _temp240 > 1u?*(( int*) _temp240)
 _temp240)->f1; goto _LL253;} else{ goto _LL241;} _LL243: return _tag_arr("Unknown",
 sizeof( unsigned char), 8u); _LL245: return( struct _tagged_arr)({ struct
 _tagged_arr _temp268= Cyc_CfAbsexp_absop2string( _temp254); xprintf("& %.*s",
-_temp268.last_plus_one - _temp268.curr, _temp268.curr);}); _LL247: return*(*
-_temp256->name).f2; _LL249: { struct _tagged_arr fs;{ void* _temp269= _temp258;
-struct _tagged_arr* _temp275; int _temp277; _LL271: if(*(( int*) _temp269) ==
-Cyc_CfFlowInfo_StructF){ _LL276: _temp275=(( struct Cyc_CfFlowInfo_StructF_struct*)
-_temp269)->f1; goto _LL272;} else{ goto _LL273;} _LL273: if(*(( int*) _temp269)
-== Cyc_CfFlowInfo_TupleF){ _LL278: _temp277=(( struct Cyc_CfFlowInfo_TupleF_struct*)
-_temp269)->f1; goto _LL274;} else{ goto _LL270;} _LL272: fs=* _temp275; goto
-_LL270; _LL274: fs=( struct _tagged_arr) xprintf("%d", _temp277); goto _LL270;
-_LL270:;} return( struct _tagged_arr)({ struct _tagged_arr _temp279= Cyc_CfAbsexp_absop2string(
-_temp260); struct _tagged_arr _temp280= fs; xprintf("%.*s.%.*s", _temp279.last_plus_one
-- _temp279.curr, _temp279.curr, _temp280.last_plus_one - _temp280.curr, _temp280.curr);});}
+_get_arr_size( _temp268, 1u), _temp268.curr);}); _LL247: return*(* _temp256->name).f2;
+_LL249: { struct _tagged_arr fs;{ void* _temp269= _temp258; struct _tagged_arr*
+_temp275; int _temp277; _LL271: if(*(( int*) _temp269) == Cyc_CfFlowInfo_StructF){
+_LL276: _temp275=(( struct Cyc_CfFlowInfo_StructF_struct*) _temp269)->f1; goto
+_LL272;} else{ goto _LL273;} _LL273: if(*(( int*) _temp269) == Cyc_CfFlowInfo_TupleF){
+_LL278: _temp277=(( struct Cyc_CfFlowInfo_TupleF_struct*) _temp269)->f1; goto
+_LL274;} else{ goto _LL270;} _LL272: fs=* _temp275; goto _LL270; _LL274: fs=(
+struct _tagged_arr) xprintf("%d", _temp277); goto _LL270; _LL270:;} return(
+struct _tagged_arr)({ struct _tagged_arr _temp279= Cyc_CfAbsexp_absop2string(
+_temp260); struct _tagged_arr _temp280= fs; xprintf("%.*s.%.*s", _get_arr_size(
+_temp279, 1u), _temp279.curr, _get_arr_size( _temp280, 1u), _temp280.curr);});}
 _LL251: return( struct _tagged_arr) xprintf("<mpt%d>", _temp262); _LL253: return(
 struct _tagged_arr)({ struct _tagged_arr _temp281= Cyc_CfAbsexp_absop2string(
-_temp266); xprintf("(*%.*s)", _temp281.last_plus_one - _temp281.curr, _temp281.curr);});
+_temp266); xprintf("(*%.*s)", _get_arr_size( _temp281, 1u), _temp281.curr);});
 _LL241:;} struct _tagged_arr Cyc_CfAbsexp_absexp2string( void* ae, int depth){
 struct _tagged_arr ans= Cyc_Core_new_string( depth);{ int i= 0; for( 0; i <
 _get_arr_size( ans, sizeof( unsigned char)); ++ i){*(( unsigned char*)
@@ -696,50 +696,49 @@ else{ goto _LL294;} _LL294: if(( unsigned int) _temp282 > 2u?*(( int*) _temp282)
 _temp282)->f1; goto _LL295;} else{ goto _LL296;} _LL296: if( _temp282 ==( void*)
 Cyc_CfAbsexp_BottomAE){ goto _LL297;} else{ goto _LL298;} _LL298: goto _LL299;
 _LL285: ans=({ struct _tagged_arr _temp318=( struct _tagged_arr) ans; xprintf("%.*sskip",
-_temp318.last_plus_one - _temp318.curr, _temp318.curr);}); goto _LL283; _LL287:
-ans=({ struct _tagged_arr _temp319=( struct _tagged_arr) ans; struct _tagged_arr
-_temp320= Cyc_CfAbsexp_absop2string( _temp300); xprintf("%.*suse %.*s", _temp319.last_plus_one
-- _temp319.curr, _temp319.curr, _temp320.last_plus_one - _temp320.curr, _temp320.curr);});
-goto _LL283; _LL289: ans=({ struct _tagged_arr _temp321=( struct _tagged_arr)
-ans; int _temp322= _temp302; xprintf("%.*smalloc %i", _temp321.last_plus_one -
-_temp321.curr, _temp321.curr, _temp322);}); goto _LL283; _LL291: ans=({ struct
-_tagged_arr _temp323=( struct _tagged_arr) ans; struct _tagged_arr _temp324= Cyc_CfAbsexp_absop2string(
-_temp310); struct _tagged_arr _temp325= Cyc_CfAbsexp_absop2string( _temp308);
-xprintf("%.*sassign %.*s %.*s", _temp323.last_plus_one - _temp323.curr, _temp323.curr,
-_temp324.last_plus_one - _temp324.curr, _temp324.curr, _temp325.last_plus_one -
-_temp325.curr, _temp325.curr);}); goto _LL283; _LL293:{ void* _temp326= _temp314;
+_get_arr_size( _temp318, 1u), _temp318.curr);}); goto _LL283; _LL287: ans=({
+struct _tagged_arr _temp319=( struct _tagged_arr) ans; struct _tagged_arr
+_temp320= Cyc_CfAbsexp_absop2string( _temp300); xprintf("%.*suse %.*s",
+_get_arr_size( _temp319, 1u), _temp319.curr, _get_arr_size( _temp320, 1u),
+_temp320.curr);}); goto _LL283; _LL289: ans=({ struct _tagged_arr _temp321=(
+struct _tagged_arr) ans; int _temp322= _temp302; xprintf("%.*smalloc %i",
+_get_arr_size( _temp321, 1u), _temp321.curr, _temp322);}); goto _LL283; _LL291:
+ans=({ struct _tagged_arr _temp323=( struct _tagged_arr) ans; struct _tagged_arr
+_temp324= Cyc_CfAbsexp_absop2string( _temp310); struct _tagged_arr _temp325= Cyc_CfAbsexp_absop2string(
+_temp308); xprintf("%.*sassign %.*s %.*s", _get_arr_size( _temp323, 1u),
+_temp323.curr, _get_arr_size( _temp324, 1u), _temp324.curr, _get_arr_size(
+_temp325, 1u), _temp325.curr);}); goto _LL283; _LL293:{ void* _temp326= _temp314;
 _LL328: if( _temp326 ==( void*) Cyc_CfAbsexp_OrderedG){ goto _LL329;} else{ goto
 _LL330;} _LL330: if( _temp326 ==( void*) Cyc_CfAbsexp_UnorderedG){ goto _LL331;}
 else{ goto _LL332;} _LL332: if( _temp326 ==( void*) Cyc_CfAbsexp_OneofG){ goto
 _LL333;} else{ goto _LL327;} _LL329: ans=({ struct _tagged_arr _temp334=( struct
-_tagged_arr) ans; xprintf("%.*sordered", _temp334.last_plus_one - _temp334.curr,
-_temp334.curr);}); goto _LL327; _LL331: ans=({ struct _tagged_arr _temp335=(
-struct _tagged_arr) ans; xprintf("%.*sunordered", _temp335.last_plus_one -
-_temp335.curr, _temp335.curr);}); goto _LL327; _LL333: ans=({ struct _tagged_arr
-_temp336=( struct _tagged_arr) ans; xprintf("%.*soneof", _temp336.last_plus_one
-- _temp336.curr, _temp336.curr);}); goto _LL327; _LL327:;} for( 0; _temp312 != 0;
-_temp312=(( struct Cyc_List_List*) _check_null( _temp312))->tl){ ans=({ struct
-_tagged_arr _temp337=( struct _tagged_arr) ans; struct _tagged_arr _temp338= Cyc_CfAbsexp_absexp2string((
-void*)(( struct Cyc_List_List*) _check_null( _temp312))->hd, depth + 1); xprintf("%.*s\n%.*s",
-_temp337.last_plus_one - _temp337.curr, _temp337.curr, _temp338.last_plus_one -
-_temp338.curr, _temp338.curr);});} goto _LL283; _LL295: ans=({ struct
-_tagged_arr _temp339=( struct _tagged_arr) ans; xprintf("%.*s<<stmt>>", _temp339.last_plus_one
-- _temp339.curr, _temp339.curr);}); goto _LL283; _LL297: ans=({ struct
-_tagged_arr _temp340=( struct _tagged_arr) ans; xprintf("%.*sbottom", _temp340.last_plus_one
-- _temp340.curr, _temp340.curr);}); goto _LL283; _LL299:( int) _throw(( void*)
-Cyc_CfAbsexp_BadAbsexp); _LL283:;} return( struct _tagged_arr) ans;} static void
-Cyc_CfAbsexp_check_absop( void* ao){ void* _temp341= ao; void* _temp355; void*
-_temp357; void* _temp359; void* _temp361; struct Cyc_Absyn_Vardecl* _temp363;
-int _temp365; struct Cyc_Absyn_Exp* _temp367; _LL343: if( _temp341 ==( void*)
-Cyc_CfAbsexp_UnknownOp){ goto _LL344;} else{ goto _LL345;} _LL345: if((
-unsigned int) _temp341 > 1u?*(( int*) _temp341) == Cyc_CfAbsexp_AddressOp: 0){
-_LL356: _temp355=( void*)(( struct Cyc_CfAbsexp_AddressOp_struct*) _temp341)->f1;
-goto _LL346;} else{ goto _LL347;} _LL347: if(( unsigned int) _temp341 > 1u?*((
-int*) _temp341) == Cyc_CfAbsexp_DerefOp: 0){ _LL358: _temp357=( void*)(( struct
-Cyc_CfAbsexp_DerefOp_struct*) _temp341)->f1; goto _LL348;} else{ goto _LL349;}
-_LL349: if(( unsigned int) _temp341 > 1u?*(( int*) _temp341) == Cyc_CfAbsexp_MemberOp:
-0){ _LL362: _temp361=( void*)(( struct Cyc_CfAbsexp_MemberOp_struct*) _temp341)->f1;
-goto _LL360; _LL360: _temp359=( void*)(( struct Cyc_CfAbsexp_MemberOp_struct*)
+_tagged_arr) ans; xprintf("%.*sordered", _get_arr_size( _temp334, 1u), _temp334.curr);});
+goto _LL327; _LL331: ans=({ struct _tagged_arr _temp335=( struct _tagged_arr)
+ans; xprintf("%.*sunordered", _get_arr_size( _temp335, 1u), _temp335.curr);});
+goto _LL327; _LL333: ans=({ struct _tagged_arr _temp336=( struct _tagged_arr)
+ans; xprintf("%.*soneof", _get_arr_size( _temp336, 1u), _temp336.curr);}); goto
+_LL327; _LL327:;} for( 0; _temp312 != 0; _temp312=(( struct Cyc_List_List*)
+_check_null( _temp312))->tl){ ans=({ struct _tagged_arr _temp337=( struct
+_tagged_arr) ans; struct _tagged_arr _temp338= Cyc_CfAbsexp_absexp2string(( void*)((
+struct Cyc_List_List*) _check_null( _temp312))->hd, depth + 1); xprintf("%.*s\n%.*s",
+_get_arr_size( _temp337, 1u), _temp337.curr, _get_arr_size( _temp338, 1u),
+_temp338.curr);});} goto _LL283; _LL295: ans=({ struct _tagged_arr _temp339=(
+struct _tagged_arr) ans; xprintf("%.*s<<stmt>>", _get_arr_size( _temp339, 1u),
+_temp339.curr);}); goto _LL283; _LL297: ans=({ struct _tagged_arr _temp340=(
+struct _tagged_arr) ans; xprintf("%.*sbottom", _get_arr_size( _temp340, 1u),
+_temp340.curr);}); goto _LL283; _LL299:( int) _throw(( void*) Cyc_CfAbsexp_BadAbsexp);
+_LL283:;} return( struct _tagged_arr) ans;} static void Cyc_CfAbsexp_check_absop(
+void* ao){ void* _temp341= ao; void* _temp355; void* _temp357; void* _temp359;
+void* _temp361; struct Cyc_Absyn_Vardecl* _temp363; int _temp365; struct Cyc_Absyn_Exp*
+_temp367; _LL343: if( _temp341 ==( void*) Cyc_CfAbsexp_UnknownOp){ goto _LL344;}
+else{ goto _LL345;} _LL345: if(( unsigned int) _temp341 > 1u?*(( int*) _temp341)
+== Cyc_CfAbsexp_AddressOp: 0){ _LL356: _temp355=( void*)(( struct Cyc_CfAbsexp_AddressOp_struct*)
+_temp341)->f1; goto _LL346;} else{ goto _LL347;} _LL347: if(( unsigned int)
+_temp341 > 1u?*(( int*) _temp341) == Cyc_CfAbsexp_DerefOp: 0){ _LL358: _temp357=(
+void*)(( struct Cyc_CfAbsexp_DerefOp_struct*) _temp341)->f1; goto _LL348;} else{
+goto _LL349;} _LL349: if(( unsigned int) _temp341 > 1u?*(( int*) _temp341) ==
+Cyc_CfAbsexp_MemberOp: 0){ _LL362: _temp361=( void*)(( struct Cyc_CfAbsexp_MemberOp_struct*)
+_temp341)->f1; goto _LL360; _LL360: _temp359=( void*)(( struct Cyc_CfAbsexp_MemberOp_struct*)
 _temp341)->f2; goto _LL350;} else{ goto _LL351;} _LL351: if(( unsigned int)
 _temp341 > 1u?*(( int*) _temp341) == Cyc_CfAbsexp_LocalOp: 0){ _LL364: _temp363=((
 struct Cyc_CfAbsexp_LocalOp_struct*) _temp341)->f1; goto _LL352;} else{ goto
@@ -1160,10 +1159,10 @@ _temp854; _LL850: if(( unsigned int) _temp848 > 1u?*(( int*) _temp848) == Cyc_Cf
 _LL851;} else{ goto _LL852;} _LL852: goto _LL853; _LL851: if( Cyc_Tcutil_bits_only((
 void*) _temp854->type)){ Cyc_Tcutil_warn( loc,( struct _tagged_arr)({ struct
 _tagged_arr _temp856=*(* _temp854->name).f2; xprintf("pointer-free %.*s may not be fully initialized",
-_temp856.last_plus_one - _temp856.curr, _temp856.curr);})); goto _LL849;} goto
-_LL853; _LL853: Cyc_Tcutil_terr( loc,( struct _tagged_arr)({ struct _tagged_arr
-_temp857= Cyc_CfAbsexp_absop2string( _temp765); xprintf("%.*s must be fully initialized to be used here",
-_temp857.last_plus_one - _temp857.curr, _temp857.curr);})); return( void*) Cyc_CfFlowInfo_BottomFL;
+_get_arr_size( _temp856, 1u), _temp856.curr);})); goto _LL849;} goto _LL853;
+_LL853: Cyc_Tcutil_terr( loc,( struct _tagged_arr)({ struct _tagged_arr _temp857=
+Cyc_CfAbsexp_absop2string( _temp765); xprintf("%.*s must be fully initialized to be used here",
+_get_arr_size( _temp857, 1u), _temp857.curr);})); return( void*) Cyc_CfFlowInfo_BottomFL;
 _LL849:;}{ struct Cyc_Dict_Dict* _temp858= Cyc_CfFlowInfo_escape_pointsto(
 _temp846, pinfo_dict); goto _LL859; _LL859: if( _temp858 == pinfo_dict){ return
 in_flow;}{ struct Cyc_CfFlowInfo_InitsFL_struct* _temp862=({ struct Cyc_CfFlowInfo_InitsFL_struct*
@@ -1216,4 +1215,4 @@ struct Cyc_CfFlowInfo_InitsFL_struct _temp886; _temp886.tag= Cyc_CfFlowInfo_Init
 _temp886.f1= pinfo_dict; _temp886;}); _temp885;}); for( 0; _temp879 != 0;
 _temp879=(( struct Cyc_List_List*) _check_null( _temp879))->tl){ out_flow= Cyc_CfAbsexp_eval_absexp(
 env, loc,( void*)(( struct Cyc_List_List*) _check_null( _temp879))->hd, out_flow);}};
-_pop_region(& _temp874);} return out_flow;}} _LL742:;}}
+_pop_region( spine_rgn);} return out_flow;}} _LL742:;}}

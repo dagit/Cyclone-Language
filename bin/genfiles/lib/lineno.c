@@ -138,8 +138,8 @@ _temp29.f1= _tag_arr("Lineno: Invalid file position", sizeof( unsigned char), 30
 _temp29;}); _temp28;})); case 1: _LL27: ++ line; break; case 2: _LL30: { struct
 Cyc_Core_Opt* fno= Cyc_Lineno_parse_linedef( this_line); if( fno == 0){ ++ line;({
 struct _tagged_arr _temp32=( struct _tagged_arr) this_line; fprintf(
-_sfile_to_file( Cyc_Stdio_stderr),"Unknown directive: %.*s\n", _temp32.last_plus_one
-- _temp32.curr, _temp32.curr);});} else{ source_file=( struct _tagged_arr)(*((
+_sfile_to_file( Cyc_Stdio_stderr),"Unknown directive: %.*s\n", _get_arr_size(
+_temp32, 1u), _temp32.curr);});} else{ source_file=( struct _tagged_arr)(*((
 struct _tuple0*)(( struct Cyc_Core_Opt*) _check_null( fno))->v)).f1; line=(*((
 struct _tuple0*)(( struct Cyc_Core_Opt*) _check_null( fno))->v)).f2;} break;}
 default: _LL31:( int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp34=(

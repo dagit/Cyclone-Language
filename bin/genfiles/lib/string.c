@@ -17,15 +17,21 @@ struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
 unsigned char*); extern int* __errno(); struct Cyc_List_List{ void* hd; struct
 Cyc_List_List* tl; } ; extern int Cyc_List_length( struct Cyc_List_List* x);
 extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern int isalnum( int __c);
-extern int isalpha( int __c); extern int iscntrl( int __c); extern int isdigit(
-int __c); extern int isgraph( int __c); extern int islower( int __c); extern int
-isprint( int __c); extern int ispunct( int __c); extern int isspace( int __c);
-extern int isupper( int __c); extern int isxdigit( int __c); extern int tolower(
-int __c); extern int toupper( int __c); extern int isascii( int __c); extern int
-toascii( int __c); extern int _tolower( int __c); extern int _toupper( int __c);
-struct Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[ 19u];
-extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern int isalnum( int __c)
+ __attribute__(( cdecl )) ; extern int isalpha( int __c)  __attribute__(( cdecl
+)) ; extern int iscntrl( int __c)  __attribute__(( cdecl )) ; extern int isdigit(
+int __c)  __attribute__(( cdecl )) ; extern int isgraph( int __c)
+ __attribute__(( cdecl )) ; extern int islower( int __c)  __attribute__(( cdecl
+)) ; extern int isprint( int __c)  __attribute__(( cdecl )) ; extern int ispunct(
+int __c)  __attribute__(( cdecl )) ; extern int isspace( int __c)
+ __attribute__(( cdecl )) ; extern int isupper( int __c)  __attribute__(( cdecl
+)) ; extern int isxdigit( int __c)  __attribute__(( cdecl )) ; extern int
+tolower( int __c)  __attribute__(( cdecl )) ; extern int toupper( int __c)
+ __attribute__(( cdecl )) ; extern int isascii( int __c)  __attribute__(( cdecl
+)) ; extern int toascii( int __c)  __attribute__(( cdecl )) ; extern int
+_tolower( int __c)  __attribute__(( cdecl )) ; extern int _toupper( int __c)
+ __attribute__(( cdecl )) ; struct Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[
+19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern struct _tagged_arr Cyc_String_strerror(
 int); extern int Cyc_String_strlen( struct _tagged_arr s); extern int Cyc_String_strcmp(
 struct _tagged_arr s1, struct _tagged_arr s2); extern int Cyc_String_strptrcmp(
@@ -217,7 +223,7 @@ struct _tagged_arr*)(( struct Cyc_List_List*) _check_null( strs))->hd); goto
 _LL11; _LL11: len=( int)(( struct Cyc_List_List*) _check_null( lens))->hd; Cyc_String_strncpy(
 ans, i, _temp10, 0, len); i += len; strs=(( struct Cyc_List_List*) _check_null(
 strs))->tl; lens=(( struct Cyc_List_List*) _check_null( lens))->tl;}}};
-_pop_region(& _temp8);} return ans;} struct _tagged_arr Cyc_String_strconcat_l(
+_pop_region( temp);} return ans;} struct _tagged_arr Cyc_String_strconcat_l(
 struct Cyc_List_List* strs){ return Cyc_String_rstrconcat_l( Cyc_Core_heap_region,
 strs);} struct _tagged_arr Cyc_String_rstr_sepstr( struct _RegionHandle* r,
 struct Cyc_List_List* strs, struct _tagged_arr separator){ if( strs == 0){
@@ -247,7 +253,7 @@ _check_null( strs))->tl; lens=(( struct Cyc_List_List*) _check_null( lens))->tl;
 Cyc_String_strncpy( ans, i,*(( struct _tagged_arr*)(( struct Cyc_List_List*)
 _check_null( strs))->hd), 0,( int)(( struct Cyc_List_List*) _check_null( lens))->hd);{
 struct _tagged_arr _temp19= ans; _npop_handler( 0u); return _temp19;}}}};
-_pop_region(& _temp15);}}} struct _tagged_arr Cyc_String_str_sepstr( struct Cyc_List_List*
+_pop_region( temp);}}} struct _tagged_arr Cyc_String_str_sepstr( struct Cyc_List_List*
 strs, struct _tagged_arr separator){ return Cyc_String_rstr_sepstr( Cyc_Core_heap_region,
 strs, separator);} struct _tagged_arr Cyc_String_strncpy( struct _tagged_arr
 dest, int destOfs, struct _tagged_arr src, int srcOfs, int n){ unsigned int
@@ -358,20 +364,19 @@ _check_unknown_subscript( s, sizeof( unsigned char), 0u))) != 0: 0;( len --,
 _tagged_arr_inplace_plus_post(& s, sizeof( unsigned char), 1))){ int j= 0; for(
 0; j < _get_arr_size( accept, sizeof( unsigned char)); j ++){ if( c ==*(( const
 unsigned char*) _check_unknown_subscript( accept, sizeof( unsigned char), j))){
-return s;}}} return _tag_arr( 0u, sizeof( unsigned char), 0u);} struct
-_tagged_arr Cyc_String_strchr( struct _tagged_arr s, unsigned char c){ int len=
-Cyc_String_int_strleno( s, 0, _tag_arr("String::strchr", sizeof( unsigned char),
-15u)); unsigned char c2='\000'; for( 0; len > 0?( c2=*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), 0u))) != 0: 0;( len --,
-_tagged_arr_inplace_plus_post(& s, sizeof( unsigned char), 1))){ if( c2 == c){
-return s;}} return( struct _tagged_arr) _tag_arr( 0u, sizeof( unsigned char), 0u);}
-struct _tagged_arr Cyc_String_strrchr( struct _tagged_arr s, unsigned char c){
-int len= Cyc_String_int_strleno(( struct _tagged_arr) s, 0, _tag_arr("String::strrchr",
-sizeof( unsigned char), 16u)); int i= len - 1; _tagged_arr_inplace_plus(& s,
-sizeof( unsigned char), i); for( 0; i >= 0;( i --, _tagged_arr_inplace_plus_post(&
-s, sizeof( unsigned char), -1))){ if(*(( unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), 0u)) == c){ return s;}}
-return _tag_arr( 0u, sizeof( unsigned char), 0u);} int Cyc_String_strspn( struct
+return s;}}} return _tag_arr( 0u, 0u, 0u);} struct _tagged_arr Cyc_String_strchr(
+struct _tagged_arr s, unsigned char c){ int len= Cyc_String_int_strleno( s, 0,
+_tag_arr("String::strchr", sizeof( unsigned char), 15u)); unsigned char c2='\000';
+for( 0; len > 0?( c2=*(( const unsigned char*) _check_unknown_subscript( s,
+sizeof( unsigned char), 0u))) != 0: 0;( len --, _tagged_arr_inplace_plus_post(&
+s, sizeof( unsigned char), 1))){ if( c2 == c){ return s;}} return( struct
+_tagged_arr) _tag_arr( 0u, 0u, 0u);} struct _tagged_arr Cyc_String_strrchr(
+struct _tagged_arr s, unsigned char c){ int len= Cyc_String_int_strleno(( struct
+_tagged_arr) s, 0, _tag_arr("String::strrchr", sizeof( unsigned char), 16u));
+int i= len - 1; _tagged_arr_inplace_plus(& s, sizeof( unsigned char), i); for( 0;
+i >= 0;( i --, _tagged_arr_inplace_plus_post(& s, sizeof( unsigned char), -1))){
+if(*(( unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), 0u))
+== c){ return s;}} return _tag_arr( 0u, 0u, 0u);} int Cyc_String_strspn( struct
 _tagged_arr s, struct _tagged_arr accept){ int len= Cyc_String_int_strleno( s, 0,
 _tag_arr("String::strspn", sizeof( unsigned char), 15u));{ int i= 0; for( 0; i <
 len; i ++){ int j; for( j= 0; j < _get_arr_size( accept, sizeof( unsigned char));

@@ -94,9 +94,6 @@ static tunion Nmspace rel_ns = &rel_ns_value;
   static stringptr_t str##_sp     = &str##_string
 
 MAKE_STRING(curr);
-MAKE_STRING(last_plus_one);
-MAKE_STRING(base);
-MAKE_STRING(xtunion); // not used as a keyword
 MAKE_STRING(tag);
 MAKE_STRING(_handler_cons);
 MAKE_STRING(handler);
@@ -149,6 +146,20 @@ static tunion Type tagged_arr_typ = &tagged_arr_typ_v;
 
 static tqual_t mt_tq = Tqual(false,false,false);
 
+// cache strings used for field names f0,f1,f2,...
+static string_t f0 = "f0";
+static stringptr_t field_names_v[1] = {&f0};
+static stringptr_t ?field_names = field_names_v;
+static stringptr_t fieldname(int i) {
+  unsigned int fsz = field_names.size;
+  if (i >= fsz) {
+    field_names = 
+      new {for j < i+1 : 
+	   (j < fsz) ? field_names[j] : new (string_t)xprintf("f%d",j)};
+  }
+  return field_names[i];
+}
+
 ///////////////////////////// Various Utilities /////////////////////////////
 
 static bool is_zero(exp_t e) {
@@ -182,40 +193,35 @@ static bool is_nullable(type_t t) {
 
 static qvar_t collapse_qvar_tag(qvar_t x,string_t tag) {
   return new $((*x)[0], 
-               new {(string_t)String::strconcat(*((*x)[1]),tag)});
-}
-
-static void add_tuple_decl(var_t x, list_t<type_t> ts) {
-  let fs = null;
-  for (int i=1; ts != null; ts = ts->tl, i++)
-    fs = new List(new Structfield(new {(string_t)xprintf("f%d",i)},mt_tq,ts->hd,null,null),fs);
-  fs = List::imp_rev(fs);
-  let sd = new Structdecl{.sc = Public, .name = new Opt(new $(rel_ns,x)),
-                       .tvs = null, .fields = new Opt(fs), .attributes = null};
-  result_decls = new List(new_decl(new Struct_d(sd),DL),result_decls);
+               new (string_t)String::strconcat(*((*x)[1]),tag));
 }
 
 // used to generate struct definitions for tuple types
 // we share the struct definitions where possible.  
 // FIX: should use an efficient map data structure.
 static var_t add_tuple_type(glist_t<$(tqual_t,type_t)@,`r> tqs0) {
+  // look for the same tuple-type already declared
   for (let tts = tuple_types; tts != null; tts = tts->tl) {
     let &$(x,ts) = tts->hd;
-    bool okay = true;
-    let  tqs  = tqs0;
+    let tqs = tqs0;
     for (; tqs != null && ts != null; tqs = tqs->tl, ts = ts->tl)
-      if (!unify((*tqs->hd)[1],ts->hd)) {
-	okay = false;
+      if (!unify((*tqs->hd)[1],ts->hd))
 	break;
-      }
-    if (!okay || tqs != null || ts != null)
-      continue;
-    return x;
+    if(tqs == null && ts == null)
+      return x;
   }
+  // haven't seen this one before, add a declaration
   stringptr_t x = new (string_t)xprintf("_tuple%d",tuple_type_counter++);
   list_t<type_t> ts = List::map(snd_tqt,tqs0);
-  add_tuple_decl(x,ts);
-  tuple_types = new List(new $(x,ts),tuple_types);
+  let fs = null;
+  list_t<type_t> ts2 = ts;
+  for (int i=1; ts2 != null; ts2 = ts2->tl, i++)
+    fs = new List(new Structfield(fieldname(i),mt_tq,ts2->hd,null,null),fs);
+  fs = List::imp_rev(fs);
+  let sd = new Structdecl{.sc = Public, .name = new Opt(new $(rel_ns,x)),
+                       .tvs = null, .fields = new Opt(fs), .attributes = null};
+  result_decls = new List(new_decl(new Struct_d(sd),DL),result_decls);
+  tuple_types  = new List(new $(x,ts),tuple_types);
   return x;
 }
 
@@ -270,7 +276,6 @@ static type_t typ_to_c_array(type_t t) {
 }
 
 static structfield_t structfield_to_c(structfield_t f) {
-  // FIX: should the width be translated?  shouldn't it already be a constant?
   return new Structfield{.name=f->name, .tq=f->tq, .type = typ_to_c(f->type),
                             .width=f->width, .attributes=f->attributes};
 }
@@ -278,12 +283,9 @@ static structfield_t structfield_to_c(structfield_t f) {
 static type_t typ_to_c(type_t t) {
   switch (t) {
   case VoidType: return t;
-      // FIX:  Typically this happens with throw, and void seems to be
-      // the right thing to return.  But, I'm not sure.
-  case &Evar(_,null,_,_): return sint_t;
-  case &Evar(_,&Opt{.v=t2},_,_): return typ_to_c(t2);
-    // type variables (`a) are mapped to void*
-  case &VarType(_): return void_star_typ();
+  case &Evar(_,null,_,_): return sint_t; // pick something widely useful
+  case &Evar(_,&Opt{.v=t2},_,_): return typ_to_c(t2); 
+  case &VarType(_): return void_star_typ(); // map `a to void *
   case &TunionType(TunionInfo{&KnownTunion(tud),_,_}): return void_star_typ();
   case &TunionType(_): throw impos("unresolved TunionType");
   case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud,tuf),_}):
@@ -296,8 +298,7 @@ static type_t typ_to_c(type_t t) {
     else return strctq(collapse_qvar_tag(tuf->name,"_struct"));
   case &TunionFieldType(_): throw impos("unresolved TunionFieldType");
   case &PointerType(PtrInfo{t2,_,_,tq,bnds}):
-    // t2? maps to struct tagged_ptr_t2, where we define
-    // struct tagged_ptr_t2 { t2 *curr; t2 *base; t2 *last_plus_one; }
+    // t2? maps to struct tagged_arr.
     // t2* and t2@ map to t2*.  Regions are irrelevant.
     t2 = typ_to_c_array(t2);
     switch (compress_conref(bnds)->v) {
@@ -311,13 +312,11 @@ static type_t typ_to_c(type_t t) {
   case &FnType(FnInfo{_,_,t2,args,c_vararg,cyc_vararg,_,atts}):
     // just drop the type arguments & effect and translate the nested types
     // FIX:  problem with higher-order functions?  Again C's rules are strange.
-    // FIX:  I'm dropping attributes like noreturn and const because C
-    // complains otherwise.
+    // FIX:  dropping noreturn and const attributes b/c C is complaining.
     let new_atts = atts;
     let new_atts = null;
     for (; atts != null; atts = atts->tl) {
       switch (atts->hd) {
-	//      case Cdecl_att   : fallthru; DAN: Is this necessary?
       case Noreturn_att: fallthru;
       case Const_att   : continue;
       default: new_atts = new List(atts->hd,new_atts); break;
@@ -357,7 +356,7 @@ static type_t typ_to_c(type_t t) {
     // just drop the type arguments and translate the nested types
     return new TypedefType(tdn,null, new Opt(typ_to_c_array(topt->v)));
   case &RgnHandleType(t):
-    return cstar_typ(strct(_RegionHandle_sp),mt_tq);
+    return cstar_typ(strct(_RegionHandle_sp),mt_tq); // could be shared
   case HeapRgn: 
     return toc_impos("Toc::typ_to_c: type translation passed the heap region");
   case &AccessEff(_):
@@ -478,20 +477,6 @@ static exp_t rmalloc_exp(exp_t rgn, exp_t s) {
   return fncall_exp(_region_malloc_e, list(rgn,s), DL);
 }
 
-// cache strings used for field names f0,f1,f2,...
-static string_t f0 = "f0";
-static stringptr_t field_names_v[1] = {&f0};
-static stringptr_t ?field_names = field_names_v;
-static stringptr_t fieldname(int i) {
-  unsigned int fsz = field_names.size;
-  if (i >= fsz) {
-    field_names = 
-      new {for j < i+1 : 
-	   (j < fsz) ? field_names[j] : new (string_t)xprintf("f%d",j)};
-  }
-  return field_names[i];
-}
-
 // goes away when printf is in C
 // convert a Cyc_Stdio___sFILE to a FILE (aka Cyc_Cstdio___sFILE)
 static exp_t fdconv(exp_t e) {
@@ -504,18 +489,7 @@ static exp_t newthrow_exp(exp_t e) {
 }
 
 // t*{sz} -> t? at top-level
-// CLEAN THIS UP
 static exp_t make_toplevel_tagged_arr(type_t t, exp_t sz, exp_t e) {
-  type_t elt_typ;
-  tqual_t elt_tqual;
-  switch (compress(t)) {
-  case &PointerType(PtrInfo{elt,_,_,tq,_}):
-    elt_typ  = typ_to_c(elt);
-    elt_tqual = tq;
-    break;
-  default:
-    return toc_impos("make_toplevel_tagged_arr: not a pointer");
-  }
   // Note e must be either (a) a string or else (b) a [possibly cast] 
   // identifier that is an array.
   // For case a, we generate
@@ -530,9 +504,10 @@ static exp_t make_toplevel_tagged_arr(type_t t, exp_t sz, exp_t e) {
   }
   exp_t xexp;
   if (is_string) {
-    qvar_t x = temp_var();
-    type_t vd_typ = new ArrayType(elt_typ,mt_tq,sz);
-    vardecl_t vd = static_vardecl(x,vd_typ,e);
+    qvar_t    x      = temp_var();
+    type_t    vd_typ = new ArrayType(uchar_t,mt_tq,sz);
+    vardecl_t vd     
+      = static_vardecl(x,vd_typ,e);
     result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
     xexp = var_exp(x,DL);
   } else 
@@ -600,7 +575,7 @@ static env_t clear_toplevel(env_t e) {
 static env_t add_varmap(env_t e, qvar_t x, exp_t y) {
   switch ((*x)[0]) {
   case &Rel_n(_):
-    throw new Impossible(xprintf("Toc::add_varmap on Rel_n: %s\n", qvar2string(x)));
+    throw toc_impos(xprintf("Toc::add_varmap on Rel_n: %s\n", qvar2string(x)));
   default: break;
   }
   env_t ans = copy_env(e);
@@ -769,14 +744,13 @@ static exp_t printf_to_c(primop_t p, opt_t<exp_t> aopt,
         rev_fmt = rnew(r) List('.',rev_fmt);
         rev_fmt = rnew(r) List('*',rev_fmt);
         rev_fmt = rnew(r) List('s',rev_fmt);
-        let temp = temp_var();
+        let temp   = temp_var();
+	let temp_e = var_exp(temp,DL);
         rev_temps = rnew(r) List(rnew(r) $(temp,typs->hd,args->hd),rev_temps);
-        let size_exp = 
-          subtract_exp(structmember_exp(var_exp(temp,DL),
-                                        last_plus_one_sp,DL),
-                       structmember_exp(var_exp(temp,DL),curr_sp,DL),
-                       DL);
-        let cstring_exp = structmember_exp(var_exp(temp,DL),curr_sp,DL);
+	// assume sizeof(char) is 1
+        let size_exp = fncall_exp(_get_arr_size_e,
+				  list(temp_e, uint_exp(1,DL)), DL);
+        let cstring_exp = structmember_exp(temp_e,curr_sp,DL);
         rev_result = rnew(r) List(size_exp,rev_result);
         rev_result = rnew(r) List(cstring_exp,rev_result);
         args = args->tl;
@@ -815,7 +789,7 @@ static $(tqual_t, type_t)@ tup_to_c(exp_t e) {
 }
 static $(list_t<designator_t>,exp_t)@ add_designator(env_t nv, exp_t e) {
   exp_to_c(nv,e);
-  return new{$(null,e)};
+  return new $(null,e);
 }
 
 static exp_t make_struct(env_t nv, qvar_t x, type_t struct_typ, stmt_t s,
@@ -936,7 +910,6 @@ static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
 static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
                                list_t<$(list_t<designator_t>,exp_t)@> dles,
                                stmt_t s) {
-
   for(let es = List::rev(dles); es != null; es = es->tl) {
     let &$(ds,e) = es->hd;
     if(ds == null)
@@ -948,14 +921,11 @@ static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
       exp_t lval = structmember_exp(lhs,f,DL);
       switch (e->r) {
       case &Array_e(dles):
-        s = init_array(nv, lval, dles, s);
-        break;
+        s = init_array(nv, lval, dles, s); break;
       case &Comprehension_e(vd,e1,e2):
-        s = init_comprehension(nv, lval, vd, e1, e2, s, false);
-        break;
+        s = init_comprehension(nv, lval, vd, e1, e2, s, false); break;
       case &AnonStruct_e(st2,dles):
-        s = init_anon_struct(nv, lval, st2, dles, s);
-        break;
+        s = init_anon_struct(nv, lval, st2, dles, s); break;
       default:
         exp_to_c(nv,e);
         // cast to void* if necessary
@@ -1176,35 +1146,23 @@ static void exp_to_c(env_t nv, exp_t e) {
   type_t old_typ = e->topt->v;
   switch (r) {
   case &Const_e(Null_c):
-    switch (compress(old_typ)) {
-    case &PointerType(PtrInfo{elt,_,_,_,b}):
-      switch (conref_def(bounds_one,b)) {
-      case Unknown_b:
-	if(nv->toplevel)
-	  e->r = make_toplevel_tagged_arr(old_typ, 
-					  uint_exp(0,DL), uint_exp(0,DL))->r;
-	else
-	  e->r = fncall_exp(_tag_arr_e,
-			    list(uint_exp(0,DL), 
-				 sizeoftyp_exp(typ_to_c(elt),DL),
-				 uint_exp(0,DL)), DL)->r;
-	break;
-      case &Upper_b(_): 
-	// null -> 0  -- this is okay according to C's rules!
-	e->r = signed_int_exp(0,DL)->r; 
-	break;
-      }
-      break;
-    default: toc_impos(xprintf("exp_to_c: null given type %s",
-			       typ2string(old_typ)));
-      break;
-    }
+    // null translate to 0 unless a tagged array, then {0,0,0}, via runtime
+    // call unless at top-level
+    // note: we don't need the element type b/c the length is 0 (so we lie)
+    // note: should share all these uint_exp(0,DL) things
+    let zero = uint_exp(0,DL);
+    if(is_tagged_pointer_typ(old_typ))
+      if(nv->toplevel) 
+	e->r = make_toplevel_tagged_arr(old_typ, zero, zero)->r;
+      else
+	e->r = fncall_exp(_tag_arr_e, list(zero,zero,zero), DL)->r;
+    else
+      e->r = signed_int_exp(0,DL)->r; 
     break;
   case &Const_e(_): break;
   case &Var_e(qv,b): 
     try e->r = Dict::lookup(nv->varmap,qv)->r;
-    catch {
-    case Dict::Absent:
+    catch { case Dict::Absent:
        toc_impos(xprintf("Can't find %s in exp_to_c, Var\n", qvar2string(qv)));
        return;
     }
@@ -1217,7 +1175,6 @@ static void exp_to_c(env_t nv, exp_t e) {
     let typs = List::map(get_c_typ,es);
     // Translate args
     List::iter_c(exp_to_c,nv,es);
-    // FIX:  look at these carefully and make sure this is okay
     switch (p) {
     case Size:
       exp_t arg = es->hd;
@@ -1225,12 +1182,12 @@ static void exp_to_c(env_t nv, exp_t e) {
       case &ArrayType(_,_,e2): e->r = e2->r;  break;
       case &PointerType(PtrInfo{elt_typ,_,_,_,bound}):
 	switch(conref_def(bounds_one,bound)) {
-	case Unknown_b:
+	case Unknown_b: // retrive last_plus_one - curr via runtime call
 	  e->r = fncall_exp(_get_arr_size_e,
 			    list(es->hd, 
 				 sizeoftyp_exp(typ_to_c(elt_typ),DL)), DL)->r;
 	  break;
-	case &Upper_b(e2): e->r = e2->r; break;
+	case &Upper_b(e2): e->r = e2->r; break; // compile-time evaluation
 	}
 	break;
       default: 
@@ -1260,45 +1217,31 @@ static void exp_to_c(env_t nv, exp_t e) {
       // only translation is for tagged arrays:
       //   _tag_arr_plus(e1,sizeof(elt_typ),e2)
       // FIX: allow arithmetic on t ? types at top-level!
-      switch(compress(old_typs->hd)) {
-      case &PointerType(PtrInfo(elt_typ,_,_,_,bounds)):
-	switch(conref_def(bounds_one,bounds)) {
-	case Unknown_b: 
-	  exp_t e1 = es->hd;
-	  exp_t e2 = es->tl->hd;
-	  e->r = fncall_exp(_tagged_arr_plus_e,
-			    list(e1,sizeoftyp_exp(typ_to_c(elt_typ),DL),e2),
-			    DL)->r;
-	  break;
-	default: break;
-	}
-	break;
-      default: break;
+      type_t elt_typ = VoidType;
+      if(is_tagged_pointer_typ_elt(old_typs->hd,&elt_typ)) {
+	exp_t e1 = es->hd;
+	exp_t e2 = es->tl->hd;
+	e->r = fncall_exp(_tagged_arr_plus_e,
+			  list(e1,sizeoftyp_exp(typ_to_c(elt_typ),DL),e2),
+			  DL)->r;
       }
       break;
     case Minus:
       // only translation is for tagged arrays:
       // if e2 is not a tagged array, do just like plus of negation,
       // else result type is unsigned int, so just subtract curr fields
-      switch(compress(old_typs->hd)) {
-      case &PointerType(PtrInfo(elt_typ,_,_,_,bounds)):
-	switch(conref_def(bounds_one,bounds)) {
-	case Unknown_b: 
-	  exp_t e1 = es->hd;
-	  exp_t e2 = es->tl->hd;
-	  if(is_tagged_pointer_typ(old_typs->tl->hd)) {
-	    e1->r = structmember_exp(new_exp(e1->r,DL),curr_sp,DL)->r;
-	    e2->r = structmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
-	  } else {
-	    e->r = fncall_exp(_tagged_arr_plus_e,
-			      list(e1,sizeoftyp_exp(typ_to_c(elt_typ),DL),
-				   prim1_exp(Minus,e2,DL)), DL)->r;
-	  }
-	  break;
-	default: break;
+      type_t elt_typ = VoidType;
+      if(is_tagged_pointer_typ_elt(old_typs->hd,&elt_typ)) {
+	exp_t e1 = es->hd;
+	exp_t e2 = es->tl->hd;
+	if(is_tagged_pointer_typ(old_typs->tl->hd)) {
+	  e1->r = structmember_exp(new_exp(e1->r,DL),curr_sp,DL)->r;
+	  e2->r = structmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
+	} else {
+	  e->r = fncall_exp(_tagged_arr_plus_e,
+			    list(e1,sizeoftyp_exp(typ_to_c(elt_typ),DL),
+				 prim1_exp(Minus,e2,DL)), DL)->r;
 	}
-	break;
-      default: break;
       }
       break;
     case Eq : fallthru;
@@ -1324,29 +1267,20 @@ static void exp_to_c(env_t nv, exp_t e) {
     type_t e2_cyc_typ = e2->topt->v;
     exp_to_c(nv,e2);
     // only t ? types are translated funny, note that e2 is an lvalue!
-    switch(compress(old_typ)) {
-    case &PointerType(PtrInfo(elt_typ,_,_,_,bounds)):
-      switch(conref_def(bounds_one,bounds)) {
-      case Unknown_b: 
-	// eg. x++ becomes _tagged_arr_inplace_plus_post(&x,sizeof(elt_typ),1)
-	let fn_e = 
-	  (incr==PostInc || incr==PostDec) ? _tagged_arr_inplace_plus_post_e
-	                                   : _tagged_arr_inplace_plus_e;
-	let change = (incr==PreInc || incr==PostInc) ? 1 : -1;
-	e->r = fncall_exp(fn_e,
-			  list(address_exp(e2,DL),
-			       sizeoftyp_exp(typ_to_c(elt_typ),DL),
-			       signed_int_exp(change,DL)), DL)->r;
-	break;
-      default: break;
-      }
-      break;
-    default:
-      if(!is_lvalue(e2)) {
-	lvalue_assign(e2,null,incr_lvalue,incr);
-	e->r = e2->r;
-      }
-      break;
+    type_t elt_typ = VoidType;
+    if(is_tagged_pointer_typ_elt(old_typ,&elt_typ)) {
+      // eg. x++ becomes _tagged_arr_inplace_plus_post(&x,sizeof(elt_typ),1)
+      let fn_e =
+	(incr==PostInc || incr==PostDec) ? _tagged_arr_inplace_plus_post_e
+	                                 : _tagged_arr_inplace_plus_e;
+      let change = (incr==PreInc || incr==PostInc) ? 1 : -1;
+      e->r = fncall_exp(fn_e, list(address_exp(e2,DL),
+				   sizeoftyp_exp(typ_to_c(elt_typ),DL),
+				   signed_int_exp(change,DL)), DL)->r;
+    }
+    if(elt_typ == VoidType && !is_lvalue(e2)) {
+      lvalue_assign(e2,null,incr_lvalue,incr);
+      e->r = e2->r;
     }
     break;
   case &AssignOp_e(e1,popt,e2):
@@ -1360,29 +1294,23 @@ static void exp_to_c(env_t nv, exp_t e) {
     exp_to_c(nv,e2);
     // special case for pointer arithmetic of t ? types
     bool done = false;
-    if(popt != null)
-      switch(compress(e1_old_typ)) {
-      case &PointerType(PtrInfo(elt_typ,_,_,_,bounds)):
-	switch(conref_def(bounds_one,bounds)) {
-	case Unknown_b: 
-	  _ change;
-	  switch(popt->v) {
-	  case Plus:  change = e2; break;
-	  case Minus: change = prim1_exp(Minus,e2,DL); break;
-	  default:    throw impos("bad t ? pointer arithmetic"); break;
-	  }
-	  done = true;
-	  // FIX: Is e1 definitely still an lvalue? Probably not!!
-	  e->r = fncall_exp(_tagged_arr_inplace_plus_e,
-			    list(address_exp(e1,DL),
-				 sizeoftyp_exp(typ_to_c(elt_typ),DL),
-				 change), DL)->r;
-	  break;
-	default: break;
+    if(popt != null) {
+      type_t elt_typ = VoidType;
+      if(is_tagged_pointer_typ_elt(old_typ,&elt_typ)) {
+	_ change;
+	switch(popt->v) {
+	case Plus:  change = e2; break;
+	case Minus: change = prim1_exp(Minus,e2,DL); break;
+	default:    throw impos("bad t ? pointer arithmetic"); break;
 	}
-	break;
-      default: break;
+	done = true;
+	// FIX: Is e1 definitely still an lvalue? Probably not!!
+	e->r = fncall_exp(_tagged_arr_inplace_plus_e,
+			  list(address_exp(e1,DL),
+			       sizeoftyp_exp(typ_to_c(elt_typ),DL),
+			       change), DL)->r;
       }
+    }
     if(!done) {
       // this cast is necessary to avoid gcc warnings
       if (e1_poly) 
@@ -2342,7 +2270,8 @@ static $(var_t,var_t,switch_clause_t)@`r gen_label(region_t<`r> r,
                                                    switch_clause_t sc) {
   return rnew(r) $(fresh_label(),fresh_label(),sc);
 }
-static void xlate_switch(env_t nv, stmt_t whole_s, exp_t e, list_t<switch_clause_t> scs) {
+static void xlate_switch(env_t nv, stmt_t whole_s, 
+			 exp_t e, list_t<switch_clause_t> scs) {
   exp_to_c(nv,e);
   let t = e->topt->v;
 
@@ -2369,7 +2298,6 @@ static void xlate_switch(env_t nv, stmt_t whole_s, exp_t e, list_t<switch_clause
     }
     return;
   }
-
   // no dice, translate to a nest of gotos...
   qvar_t v     = temp_var();
   exp_t  r     = var_exp(v,DL);
@@ -2517,9 +2445,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
     case &Continue_s(dest):
       if (nv->continue_lab != null)
 	s->r = goto_stmt(nv->continue_lab->v, DL)->r;
-      // reset handler
-      do_npop_before(s->try_depth - dest->try_depth, s);
-      return;
+      fallthru(dest);
     case &Goto_s(_,dest): 
       // reset handler (note: earlier checks prevent jump into handler)
       do_npop_before(s->try_depth - dest->try_depth, s);
@@ -2543,8 +2469,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       let es2 = List::rev(es);
       for(; vs2 != null; vs2 = vs2->tl, es2 = es2->tl) {
 	exp_to_c(nv,es2->hd);
-	s2 = seq_stmt(assign_stmt(Dict::lookup(other_vmap,vs2->hd),
-				  es2->hd,DL),
+	s2 = seq_stmt(assign_stmt(Dict::lookup(other_vmap,vs2->hd), es2->hd,DL),
 		      s2,DL);
       }
       s->r = s2->r;
@@ -2673,9 +2598,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       let xexp = var_exp(x,DL);
       let x_vd = new_vardecl(x,exn_typ,null);
       xexp->topt = new Opt(exn_typ);
-      let p = new Pat{.r=new Var_p(x_vd),
-                      .topt=new Opt(exn_typ),
-                      .loc=DL};
+      let p = new Pat{.r=new Var_p(x_vd), .topt=new Opt(exn_typ), .loc=DL};
       let te = throw_exp(xexp,DL);
       te->topt = new Opt(VoidType);
       let rs = exp_stmt(te,DL);
@@ -2718,30 +2641,26 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       // NOTE:  _npop_handler has to deal with regions as well as exceptions
       // { struct _RegionHandle rh = _new_region();
       //   struct _RegionHandle *x = &rh;
-      //   _push_rgn(x);
+      //   _push_region(x);
       //   body; 
-      //   _pop_region(&rh);
+      //   _pop_region(x);
       // }
-      type_t rh_struct_typ = strct(_RegionHandle_sp);
+      type_t rh_struct_typ     = strct(_RegionHandle_sp);
       type_t rh_struct_ptr_typ = cstar_typ(rh_struct_typ,mt_tq);
-      type_t h_typ = strct(_handler_cons_sp);
       qvar_t rh_var = temp_var();
-      qvar_t x_var = vd->name;
+      qvar_t x_var  = vd->name;
       exp_t  rh_exp = var_exp(rh_var,DL);
-      exp_t  x_exp = varb_exp(x_var,new Local_b(vd),DL);
-      exp_t addr_rh_exp = address_exp(rh_exp,DL);
-      exp_t newregion_call = fncall_exp(_new_region_e, null, DL);
-      exp_t popregion_call = fncall_exp(_pop_region_e,
-					new List(addr_rh_exp,null),DL);
-      exp_t pushregion_call = fncall_exp(_push_region_e,
-					 new List(x_exp,null), DL);
+      exp_t  x_exp  = var_exp(x_var, DL);
+
       stmt_to_c(add_varmap(nv,x_var,x_exp),body);
-      stmt_t s2 = seq_stmt(body,exp_stmt(popregion_call,DL),DL);
-      s2 = seq_stmt(exp_stmt(pushregion_call,DL),s2,DL);
+
       s->r = 
-        declare_stmt(rh_var, rh_struct_typ, newregion_call,
-                     declare_stmt(x_var, rh_struct_ptr_typ, addr_rh_exp,
-                                  s2,DL),DL)->r;
+	declare_stmt(rh_var,rh_struct_typ,    fncall_exp(_new_region_e,null,DL),
+	declare_stmt(x_var, rh_struct_ptr_typ,address_exp(rh_exp,DL),
+  	seq_stmt(exp_stmt(fncall_exp(_push_region_e, list(x_exp), DL),DL),
+        seq_stmt(body,
+		 exp_stmt(fncall_exp(_pop_region_e,  list(x_exp), DL),DL),
+		 DL),DL),DL),DL)->r;
       return;
     case &SwitchC_s(_,_): toc_impos("switchC_s"); return;
     case &Cut_s(_):       unimp("cut");    return;
@@ -2807,11 +2726,7 @@ static void structdecl_to_c(structdecl_t s) {
       seen_defn_before = true;
   }
 
-  s->sc =
-    // C does not like extern or static on struct declarations -- this avoids
-    // a gcc warning
-    (s->sc == Extern || s->sc == Static || s->sc == ExternC) ? Public 
-    : scope_to_c(s->sc);
+  s->sc   = Public; // gcc warns if we have Extern or Static on a struct
   s->tvs  = null;
   s->name = new Opt(n);
   if (s->fields != null)

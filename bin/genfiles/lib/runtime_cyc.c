@@ -319,7 +319,7 @@ extern unsigned char *Cyc_Inet_sockaddr_in;
 
 // We handle Unix domain sockets properly here: the sa field is an
 // argument, since it could be bigger (or smaller) than 16
-struct sa_xtunion *Csockaddr_to_sockaddr(struct sockaddr *addr, socklen_t len) {
+struct sa_xtunion *Csockaddr_to_sockaddr(struct sockaddr *addr, int len) {
   // I hope structure alignment doesn't cause any problem here
   struct sa_xtunion *result = GC_malloc_atomic(sizeof(unsigned char*)+len);
   if (result == NULL) {

@@ -133,6 +133,8 @@ resolve_struct_designators(region_t<`r>rgn, seg_t loc,
                            list_t<structfield_t> fields);
 // returns true if this is a t ? -- side effect unconstrained bounds
 extern bool is_tagged_pointer_typ(type_t);
+// like above, but puts element type in elt_typ_dest when returning true.
+extern bool is_tagged_pointer_typ_elt(type_t t, type_t@`r elt_typ_dest);
 
 // if exp is of array type, cast it to an appropriate pointer type --
 // assumes the expression has already been type-checked and that t is

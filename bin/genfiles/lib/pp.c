@@ -98,11 +98,11 @@ _temp19) == Cyc_PP_Append: 0){ _LL32: _temp31=( void*)(( struct Cyc_PP_Append_st
 _temp19)->f1; goto _LL30; _LL30: _temp29=( void*)(( struct Cyc_PP_Append_struct*)
 _temp19)->f2; goto _LL26;} else{ goto _LL20;} _LL22: -- last; goto _LL20; _LL24:
 -- last;({ struct _tagged_arr _temp33=* _temp27; fprintf( _sfile_to_file( f),"%.*s",
-_temp33.last_plus_one - _temp33.curr, _temp33.curr);}); goto _LL20; _LL26:((
-void(*)( struct Cyc_Xarray_Xarray*, int, void*)) Cyc_Xarray_set)( _temp17, last,
-_temp29); if( last ==(( int(*)( struct Cyc_Xarray_Xarray*)) Cyc_Xarray_length)(
-_temp17) - 1){(( void(*)( struct Cyc_Xarray_Xarray*, void*)) Cyc_Xarray_add)(
-_temp17, _temp31);} else{(( void(*)( struct Cyc_Xarray_Xarray*, int, void*)) Cyc_Xarray_set)(
+_get_arr_size( _temp33, 1u), _temp33.curr);}); goto _LL20; _LL26:(( void(*)(
+struct Cyc_Xarray_Xarray*, int, void*)) Cyc_Xarray_set)( _temp17, last, _temp29);
+if( last ==(( int(*)( struct Cyc_Xarray_Xarray*)) Cyc_Xarray_length)( _temp17) -
+1){(( void(*)( struct Cyc_Xarray_Xarray*, void*)) Cyc_Xarray_add)( _temp17,
+_temp31);} else{(( void(*)( struct Cyc_Xarray_Xarray*, int, void*)) Cyc_Xarray_set)(
 _temp17, last + 1, _temp31);} ++ last; goto _LL20; _LL20:;}}} void Cyc_PP_file_of_doc(
 struct Cyc_PP_Doc* d, int w, struct Cyc_Stdio___sFILE* f){ struct Cyc_PP_Out* o=((
 struct Cyc_PP_Out*(*)( void* f, struct Cyc_PP_Ppstate* x)) Cyc_Fn_apply)(( void*)

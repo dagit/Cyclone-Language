@@ -52,41 +52,49 @@ int _maxwds; int _sign; int _wds; unsigned int _x[ 1u]; } ; struct Cyc__atexit{
 struct Cyc__atexit* _next; int _ind; void(* _fns[ 32u])(); } ; struct Cyc___sbuf{
 unsigned char* _base; int _size; } ; struct Cyc___sFILE{ unsigned char* _p; int
 _r; int _w; short _flags; short _file; struct Cyc___sbuf _bf; int _lbfsize; void*
-_cookie; int(* _read)( void* _cookie, unsigned char* _buf, int _n); int(* _write)(
-void* _cookie, const unsigned char* _buf, int _n); int(* _seek)( void* _cookie,
-int _offset, int _whence); int(* _close)( void* _cookie); struct Cyc___sbuf _ub;
-unsigned char* _up; int _ur; unsigned char _ubuf[ 3u]; unsigned char _nbuf[ 1u];
-struct Cyc___sbuf _lb; int _blksize; int _offset; struct Cyc__reent* _data; } ;
-struct Cyc__reent_u1{ unsigned int _unused_rand; int _strtok_last; unsigned char
-_asctime_buf[ 26u]; struct Cyc_Time_tm _localtime_buf; int _gamma_signgam;
-unsigned long long _rand_next; } ; struct Cyc__reent_u2{ unsigned int _nextf[ 30u];
-unsigned int _nmalloc[ 30u]; } ; union Cyc__reent_union{ struct Cyc__reent_u1
-_reent; struct Cyc__reent_u2 _unused; } ; struct Cyc__reent{ int _errno; struct
-Cyc___sFILE* _stdin; struct Cyc___sFILE* _stdout; struct Cyc___sFILE* _stderr;
-int _inc; unsigned char _emergency[ 25u]; int _current_category; const
-unsigned char* _current_locale; int __sdidinit; void(* __cleanup)( struct Cyc__reent*);
-struct Cyc__Bigint* _result; int _result_k; struct Cyc__Bigint* _p5s; struct Cyc__Bigint**
-_freelist; int _cvtlen; unsigned char* _cvtbuf; union Cyc__reent_union _new;
-struct Cyc__atexit* _atexit; struct Cyc__atexit _atexit0; void(** _sig_func)(
-int); struct Cyc__glue __sglue; struct Cyc___sFILE __sf[ 3u]; } ; extern struct
-Cyc__reent* _impure_ptr; extern void _reclaim_reent( struct Cyc__reent*); struct
-Cyc_Stdlib__Div{ int quot; int rem; } ; struct Cyc_Stdlib__Ldiv{ int quot; int
-rem; } ; extern int __mb_cur_max; extern int abs( int); extern int atexit( void(*
-__func)()); extern struct Cyc_Stdlib__Div div( int __numer, int __denom); extern
-struct Cyc_Stdlib__Ldiv ldiv( int __numer, int __denom); extern int rand();
-extern void srand( unsigned int __seed); extern int rand_r( unsigned int* __seed);
-extern struct _tagged_arr Cyc_Stdlib_getenv( struct _tagged_arr); extern int Cyc_String_strlen(
-struct _tagged_arr s); extern int Cyc_String_strcmp( struct _tagged_arr s1,
-struct _tagged_arr s2); extern struct _tagged_arr Cyc_String_strconcat( struct
-_tagged_arr, struct _tagged_arr); extern struct _tagged_arr Cyc_String_str_sepstr(
-struct Cyc_List_List*, struct _tagged_arr); extern struct _tagged_arr Cyc_String_substring(
-struct _tagged_arr, int ofs, int n); extern struct _tagged_arr Cyc_String_strchr(
-struct _tagged_arr s, unsigned char c); struct Cyc_Dict_Dict; extern
-unsigned char Cyc_Dict_Present[ 12u]; extern unsigned char Cyc_Dict_Absent[ 11u];
-extern struct _tagged_arr Cyc_Filename_concat( struct _tagged_arr, struct
-_tagged_arr); extern struct _tagged_arr Cyc_Filename_chop_extension( struct
-_tagged_arr); extern int Cyc_Filename_check_suffix( struct _tagged_arr, struct
-_tagged_arr); struct Cyc_Id_id; struct Cyc_Lineno_Pos{ struct _tagged_arr
+_cookie; int(* _read)( void* _cookie, unsigned char* _buf, int _n)
+ __attribute__(( cdecl )) ; int(* _write)( void* _cookie, const unsigned char*
+_buf, int _n)  __attribute__(( cdecl )) ; int(* _seek)( void* _cookie, int
+_offset, int _whence)  __attribute__(( cdecl )) ; int(* _close)( void* _cookie)
+ __attribute__(( cdecl )) ; struct Cyc___sbuf _ub; unsigned char* _up; int _ur;
+unsigned char _ubuf[ 3u]; unsigned char _nbuf[ 1u]; struct Cyc___sbuf _lb; int
+_blksize; int _offset; struct Cyc__reent* _data; } ; struct Cyc__reent_u1{
+unsigned int _unused_rand; int _strtok_last; unsigned char _asctime_buf[ 26u];
+struct Cyc_Time_tm _localtime_buf; int _gamma_signgam; unsigned long long
+_rand_next; } ; struct Cyc__reent_u2{ unsigned int _nextf[ 30u]; unsigned int
+_nmalloc[ 30u]; } ; union Cyc__reent_union{ struct Cyc__reent_u1 _reent; struct
+Cyc__reent_u2 _unused; } ; struct Cyc__reent{ int _errno; struct Cyc___sFILE*
+_stdin; struct Cyc___sFILE* _stdout; struct Cyc___sFILE* _stderr; int _inc;
+unsigned char _emergency[ 25u]; int _current_category; const unsigned char*
+_current_locale; int __sdidinit; void(* __cleanup)( struct Cyc__reent*)
+ __attribute__(( cdecl )) ; struct Cyc__Bigint* _result; int _result_k; struct
+Cyc__Bigint* _p5s; struct Cyc__Bigint** _freelist; int _cvtlen; unsigned char*
+_cvtbuf; union Cyc__reent_union _new; struct Cyc__atexit* _atexit; struct Cyc__atexit
+_atexit0; void(** _sig_func)( int); struct Cyc__glue __sglue; struct Cyc___sFILE
+__sf[ 3u]; } ; extern struct Cyc__reent* _impure_ptr; extern void _reclaim_reent(
+struct Cyc__reent*); struct Cyc_Stdlib__Div{ int quot; int rem; } ; struct Cyc_Stdlib__Ldiv{
+int quot; int rem; } ; extern int __mb_cur_max  __attribute__(( dllimport )) ;
+extern int abs( int)  __attribute__(( cdecl )) ; extern int atexit( void(*
+__func)())  __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Div div( int
+__numer, int __denom)  __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Ldiv
+ldiv( int __numer, int __denom)  __attribute__(( cdecl )) ; extern int rand()
+ __attribute__(( cdecl )) ; extern void srand( unsigned int __seed)
+ __attribute__(( cdecl )) ; extern int rand_r( unsigned int* __seed)
+ __attribute__(( cdecl )) ; extern int random()  __attribute__(( cdecl )) ;
+extern int srandom( unsigned int __seed)  __attribute__(( cdecl )) ; extern int
+grantpt( int)  __attribute__(( cdecl )) ; extern int unlockpt( int)
+ __attribute__(( cdecl )) ; extern struct _tagged_arr Cyc_Stdlib_getenv( struct
+_tagged_arr); extern int Cyc_String_strlen( struct _tagged_arr s); extern int
+Cyc_String_strcmp( struct _tagged_arr s1, struct _tagged_arr s2); extern struct
+_tagged_arr Cyc_String_strconcat( struct _tagged_arr, struct _tagged_arr);
+extern struct _tagged_arr Cyc_String_str_sepstr( struct Cyc_List_List*, struct
+_tagged_arr); extern struct _tagged_arr Cyc_String_substring( struct _tagged_arr,
+int ofs, int n); extern struct _tagged_arr Cyc_String_strchr( struct _tagged_arr
+s, unsigned char c); struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[
+12u]; extern unsigned char Cyc_Dict_Absent[ 11u]; extern struct _tagged_arr Cyc_Filename_concat(
+struct _tagged_arr, struct _tagged_arr); extern struct _tagged_arr Cyc_Filename_chop_extension(
+struct _tagged_arr); extern int Cyc_Filename_check_suffix( struct _tagged_arr,
+struct _tagged_arr); struct Cyc_Id_id; struct Cyc_Lineno_Pos{ struct _tagged_arr
 logical_file; struct _tagged_arr line; int line_no; int col; } ; extern
 unsigned char Cyc_Position_Exit[ 9u]; extern void Cyc_Position_reset_position(
 struct _tagged_arr); struct Cyc_Position_Segment; static const int Cyc_Position_Lex=
@@ -636,15 +644,14 @@ filename, mode); _npop_handler( 0u); return _temp29;}; _pop_handler();} else{
 void* _temp27=( void*) _exn_thrown; void* _temp31= _temp27; _LL33: goto _LL34;
 _LL35: goto _LL36; _LL34: Cyc_compile_failure= 1;({ struct _tagged_arr _temp37=
 msg_part; struct _tagged_arr _temp38= filename; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"\nError: couldn't open %.*s %.*s\n",
-_temp37.last_plus_one - _temp37.curr, _temp37.curr, _temp38.last_plus_one -
-_temp38.curr, _temp38.curr);}); Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*)
-Cyc_Stdio_stderr); return 0; _LL36:( void) _throw( _temp31); _LL32:;}}} struct
-Cyc_List_List* Cyc_do_stage( struct _tagged_arr stage_name, struct Cyc_List_List*(*
-f)( void*, struct Cyc_List_List*), void* env, struct Cyc_List_List* tds){ struct
-_tagged_arr exn_string= _tag_arr("", sizeof( unsigned char), 1u); struct
-_tagged_arr explain_string= _tag_arr("", sizeof( unsigned char), 1u); int
-other_exn= 0; void* ex=( void*)({ struct Cyc_Core_Impossible_struct* _temp65=(
-struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
+_get_arr_size( _temp37, 1u), _temp37.curr, _get_arr_size( _temp38, 1u), _temp38.curr);});
+Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*) Cyc_Stdio_stderr); return 0; _LL36:(
+void) _throw( _temp31); _LL32:;}}} struct Cyc_List_List* Cyc_do_stage( struct
+_tagged_arr stage_name, struct Cyc_List_List*(* f)( void*, struct Cyc_List_List*),
+void* env, struct Cyc_List_List* tds){ struct _tagged_arr exn_string= _tag_arr("",
+sizeof( unsigned char), 1u); struct _tagged_arr explain_string= _tag_arr("",
+sizeof( unsigned char), 1u); int other_exn= 0; void* ex=( void*)({ struct Cyc_Core_Impossible_struct*
+_temp65=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp65[ 0]=({ struct Cyc_Core_Impossible_struct _temp66; _temp66.tag= Cyc_Core_Impossible;
 _temp66.f1= _tag_arr("", sizeof( unsigned char), 1u); _temp66;}); _temp65;});
 struct Cyc_List_List* _temp39= 0; goto _LL40; _LL40:{ struct _handler_cons
@@ -667,65 +674,64 @@ Cyc_compile_failure= 1;} if( Cyc_String_strcmp( exn_string, _tag_arr("", sizeof(
 unsigned char), 1u)) != 0){ Cyc_compile_failure= 1;({ struct _tagged_arr _temp61=
 exn_string; struct _tagged_arr _temp62= stage_name; struct _tagged_arr _temp63=
 explain_string; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"\n%.*s thrown during %.*s: %.*s",
-_temp61.last_plus_one - _temp61.curr, _temp61.curr, _temp62.last_plus_one -
-_temp62.curr, _temp62.curr, _temp63.last_plus_one - _temp63.curr, _temp63.curr);});}
-if( Cyc_compile_failure){ fprintf( _sfile_to_file( Cyc_Stdio_stderr),"\nCOMPILATION FAILED!\n");
-Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*) Cyc_Stdio_stderr); if( other_exn){(
-int) _throw( ex);} return _temp39;} else{ if( Cyc_v_r){({ struct _tagged_arr
-_temp64= stage_name; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s completed.\n",
-_temp64.last_plus_one - _temp64.curr, _temp64.curr);}); Cyc_Stdio_fflush((
-struct Cyc_Stdio___sFILE*) Cyc_Stdio_stderr); return _temp39;}} return _temp39;}
-struct Cyc_List_List* Cyc_do_parse( struct Cyc_Stdio___sFILE* f, struct Cyc_List_List*
-ignore){ Cyc_Lex_lex_init();{ struct Cyc_List_List* _temp67= Cyc_Parse_parse_file(
-f); goto _LL68; _LL68: Cyc_Lex_lex_init(); return _temp67;}} struct Cyc_List_List*
-Cyc_do_typecheck( struct Cyc_Tcenv_Tenv* te, struct Cyc_List_List* tds){ Cyc_Tc_tc(
-te, 1, tds); if( ! Cyc_noshake_r){ tds= Cyc_Tc_treeshake( te, tds);} return tds;}
-struct Cyc_List_List* Cyc_do_cfcheck( int ignore, struct Cyc_List_List* tds){
-Cyc_NewControlFlow_cf_check( tds); return tds;} struct _tuple10{ struct Cyc_Tcenv_Tenv*
-f1; struct Cyc_Stdio___sFILE* f2; struct Cyc_Stdio___sFILE* f3; } ; struct Cyc_List_List*
-Cyc_do_interface( struct _tuple10* params, struct Cyc_List_List* tds){ struct
-_tuple10 _temp71; struct Cyc_Stdio___sFILE* _temp72; struct Cyc_Stdio___sFILE*
-_temp74; struct Cyc_Tcenv_Tenv* _temp76; struct _tuple10* _temp69= params;
-_temp71=* _temp69; _LL77: _temp76= _temp71.f1; goto _LL75; _LL75: _temp74=
-_temp71.f2; goto _LL73; _LL73: _temp72= _temp71.f3; goto _LL70; _LL70: { struct
-Cyc_Interface_I* _temp78= Cyc_Interface_extract( _temp76->ae); goto _LL79; _LL79:
-if( _temp74 == 0){ Cyc_Interface_save( _temp78, _temp72);} else{ struct Cyc_Interface_I*
-_temp80= Cyc_Interface_parse(( struct Cyc_Stdio___sFILE*) _check_null( _temp74));
-goto _LL81; _LL81: if( ! Cyc_Interface_is_subinterface( _temp80, _temp78,({
-struct _tuple9* _temp82=( struct _tuple9*) GC_malloc( sizeof( struct _tuple9));
-_temp82->f1= _tag_arr("written interface", sizeof( unsigned char), 18u); _temp82->f2=
-_tag_arr("maximal interface", sizeof( unsigned char), 18u); _temp82;}))){ Cyc_compile_failure=
-1;} else{ Cyc_Interface_save( _temp80, _temp72);}} return tds;}} struct Cyc_List_List*
-Cyc_do_translate( int ignore, struct Cyc_List_List* tds){ return Cyc_Toc_toc(
-tds);} struct Cyc_List_List* Cyc_do_tovc( int ignore, struct Cyc_List_List* tds){
-return Cyc_Tovc_tovc( tds);} struct Cyc_List_List* Cyc_do_print( struct Cyc_Stdio___sFILE*
-out_file, struct Cyc_List_List* tds){ struct Cyc_Absynpp_Params params_r; if(
-Cyc_tc_r){ params_r= Cyc_Absynpp_cyc_params_r;} else{ params_r= Cyc_Absynpp_c_params_r;}
-params_r.expand_typedefs= ! Cyc_noexpand_r; params_r.to_VC= Cyc_tovc_r; params_r.add_cyc_prefix=
-Cyc_add_cyc_namespace_r; params_r.print_full_evars= Cyc_print_full_evars_r;
-params_r.print_all_tvars= Cyc_print_all_tvars_r; params_r.print_all_kinds= Cyc_print_all_kinds_r;
-if( Cyc_pp_r){ Cyc_Absynpp_set_params(& params_r); Cyc_Absynpp_decllist2file(
-tds, out_file);} else{ Cyc_Absyndump_set_params(& params_r); Cyc_Absyndump_dumpdecllist2file(
-tds, out_file);} Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*) out_file); return
-tds;} static struct Cyc_List_List* Cyc_cfiles= 0; static void Cyc_remove_cfiles(){
-if( ! Cyc_save_c_r){ for( 0; Cyc_cfiles != 0; Cyc_cfiles=(( struct Cyc_List_List*)
-_check_null( Cyc_cfiles))->tl){ Cyc_remove_file(*(( struct _tagged_arr*)((
-struct Cyc_List_List*) _check_null( Cyc_cfiles))->hd));}}} static struct Cyc_List_List*
-Cyc_split_by_char( struct _tagged_arr s, unsigned char c){ if( s.curr ==((
-struct _tagged_arr) _tag_arr( 0u, sizeof( unsigned char), 0u)).curr){ return 0;}{
-struct Cyc_List_List* _temp83= 0; goto _LL84; _LL84: { int _temp85= Cyc_String_strlen(
-s); goto _LL86; _LL86: while( _temp85 > 0) { struct _tagged_arr _temp87= Cyc_String_strchr(
-s, c); goto _LL88; _LL88: if( _temp87.curr ==(( struct _tagged_arr) _tag_arr( 0u,
-sizeof( unsigned char), 0u)).curr){ _temp83=({ struct Cyc_List_List* _temp89=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp89->hd=(
-void*)({ struct _tagged_arr* _temp90=( struct _tagged_arr*) GC_malloc( sizeof(
-struct _tagged_arr)); _temp90[ 0]= s; _temp90;}); _temp89->tl= _temp83; _temp89;});
-break;} else{ _temp83=({ struct Cyc_List_List* _temp91=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp91->hd=( void*)({ struct
-_tagged_arr* _temp92=( struct _tagged_arr*) GC_malloc( sizeof( struct
-_tagged_arr)); _temp92[ 0]=( struct _tagged_arr) Cyc_String_substring( s, 0,((
-struct _tagged_arr) _temp87).curr - s.curr); _temp92;}); _temp91->tl= _temp83;
-_temp91;}); _temp85 -=(( struct _tagged_arr) _temp87).curr - s.curr; s=
+_get_arr_size( _temp61, 1u), _temp61.curr, _get_arr_size( _temp62, 1u), _temp62.curr,
+_get_arr_size( _temp63, 1u), _temp63.curr);});} if( Cyc_compile_failure){
+fprintf( _sfile_to_file( Cyc_Stdio_stderr),"\nCOMPILATION FAILED!\n"); Cyc_Stdio_fflush((
+struct Cyc_Stdio___sFILE*) Cyc_Stdio_stderr); if( other_exn){( int) _throw( ex);}
+return _temp39;} else{ if( Cyc_v_r){({ struct _tagged_arr _temp64= stage_name;
+fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s completed.\n", _get_arr_size(
+_temp64, 1u), _temp64.curr);}); Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*)
+Cyc_Stdio_stderr); return _temp39;}} return _temp39;} struct Cyc_List_List* Cyc_do_parse(
+struct Cyc_Stdio___sFILE* f, struct Cyc_List_List* ignore){ Cyc_Lex_lex_init();{
+struct Cyc_List_List* _temp67= Cyc_Parse_parse_file( f); goto _LL68; _LL68: Cyc_Lex_lex_init();
+return _temp67;}} struct Cyc_List_List* Cyc_do_typecheck( struct Cyc_Tcenv_Tenv*
+te, struct Cyc_List_List* tds){ Cyc_Tc_tc( te, 1, tds); if( ! Cyc_noshake_r){
+tds= Cyc_Tc_treeshake( te, tds);} return tds;} struct Cyc_List_List* Cyc_do_cfcheck(
+int ignore, struct Cyc_List_List* tds){ Cyc_NewControlFlow_cf_check( tds);
+return tds;} struct _tuple10{ struct Cyc_Tcenv_Tenv* f1; struct Cyc_Stdio___sFILE*
+f2; struct Cyc_Stdio___sFILE* f3; } ; struct Cyc_List_List* Cyc_do_interface(
+struct _tuple10* params, struct Cyc_List_List* tds){ struct _tuple10 _temp71;
+struct Cyc_Stdio___sFILE* _temp72; struct Cyc_Stdio___sFILE* _temp74; struct Cyc_Tcenv_Tenv*
+_temp76; struct _tuple10* _temp69= params; _temp71=* _temp69; _LL77: _temp76=
+_temp71.f1; goto _LL75; _LL75: _temp74= _temp71.f2; goto _LL73; _LL73: _temp72=
+_temp71.f3; goto _LL70; _LL70: { struct Cyc_Interface_I* _temp78= Cyc_Interface_extract(
+_temp76->ae); goto _LL79; _LL79: if( _temp74 == 0){ Cyc_Interface_save( _temp78,
+_temp72);} else{ struct Cyc_Interface_I* _temp80= Cyc_Interface_parse(( struct
+Cyc_Stdio___sFILE*) _check_null( _temp74)); goto _LL81; _LL81: if( ! Cyc_Interface_is_subinterface(
+_temp80, _temp78,({ struct _tuple9* _temp82=( struct _tuple9*) GC_malloc(
+sizeof( struct _tuple9)); _temp82->f1= _tag_arr("written interface", sizeof(
+unsigned char), 18u); _temp82->f2= _tag_arr("maximal interface", sizeof(
+unsigned char), 18u); _temp82;}))){ Cyc_compile_failure= 1;} else{ Cyc_Interface_save(
+_temp80, _temp72);}} return tds;}} struct Cyc_List_List* Cyc_do_translate( int
+ignore, struct Cyc_List_List* tds){ return Cyc_Toc_toc( tds);} struct Cyc_List_List*
+Cyc_do_tovc( int ignore, struct Cyc_List_List* tds){ return Cyc_Tovc_tovc( tds);}
+struct Cyc_List_List* Cyc_do_print( struct Cyc_Stdio___sFILE* out_file, struct
+Cyc_List_List* tds){ struct Cyc_Absynpp_Params params_r; if( Cyc_tc_r){ params_r=
+Cyc_Absynpp_cyc_params_r;} else{ params_r= Cyc_Absynpp_c_params_r;} params_r.expand_typedefs=
+! Cyc_noexpand_r; params_r.to_VC= Cyc_tovc_r; params_r.add_cyc_prefix= Cyc_add_cyc_namespace_r;
+params_r.print_full_evars= Cyc_print_full_evars_r; params_r.print_all_tvars= Cyc_print_all_tvars_r;
+params_r.print_all_kinds= Cyc_print_all_kinds_r; if( Cyc_pp_r){ Cyc_Absynpp_set_params(&
+params_r); Cyc_Absynpp_decllist2file( tds, out_file);} else{ Cyc_Absyndump_set_params(&
+params_r); Cyc_Absyndump_dumpdecllist2file( tds, out_file);} Cyc_Stdio_fflush((
+struct Cyc_Stdio___sFILE*) out_file); return tds;} static struct Cyc_List_List*
+Cyc_cfiles= 0; static void Cyc_remove_cfiles(){ if( ! Cyc_save_c_r){ for( 0; Cyc_cfiles
+!= 0; Cyc_cfiles=(( struct Cyc_List_List*) _check_null( Cyc_cfiles))->tl){ Cyc_remove_file(*((
+struct _tagged_arr*)(( struct Cyc_List_List*) _check_null( Cyc_cfiles))->hd));}}}
+static struct Cyc_List_List* Cyc_split_by_char( struct _tagged_arr s,
+unsigned char c){ if( s.curr ==(( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){
+return 0;}{ struct Cyc_List_List* _temp83= 0; goto _LL84; _LL84: { int _temp85=
+Cyc_String_strlen( s); goto _LL86; _LL86: while( _temp85 > 0) { struct
+_tagged_arr _temp87= Cyc_String_strchr( s, c); goto _LL88; _LL88: if( _temp87.curr
+==(( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){ _temp83=({ struct Cyc_List_List*
+_temp89=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp89->hd=( void*)({ struct _tagged_arr* _temp90=( struct _tagged_arr*)
+GC_malloc( sizeof( struct _tagged_arr)); _temp90[ 0]= s; _temp90;}); _temp89->tl=
+_temp83; _temp89;}); break;} else{ _temp83=({ struct Cyc_List_List* _temp91=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp91->hd=(
+void*)({ struct _tagged_arr* _temp92=( struct _tagged_arr*) GC_malloc( sizeof(
+struct _tagged_arr)); _temp92[ 0]=( struct _tagged_arr) Cyc_String_substring( s,
+0,(( struct _tagged_arr) _temp87).curr - s.curr); _temp92;}); _temp91->tl=
+_temp83; _temp91;}); _temp85 -=(( struct _tagged_arr) _temp87).curr - s.curr; s=
 _tagged_arr_plus( _temp87, sizeof( unsigned char), 1);}} return(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x)) Cyc_List_imp_rev)( _temp83);}}} int Cyc_file_exists(
 struct _tagged_arr file){ struct Cyc_Stdio___sFILE* f= 0;{ struct _handler_cons
@@ -737,97 +743,95 @@ goto _LL102; _LL100: goto _LL98; _LL102:( void) _throw( _temp97); _LL98:;}}} if(
 f == 0){ return 0;} else{ Cyc_Stdio_fclose(( struct Cyc_Stdio___sFILE*)
 _check_null( f)); return 1;}} struct _tagged_arr* Cyc_find( struct Cyc_List_List*
 dirs, struct _tagged_arr file){ if( file.curr ==(( struct _tagged_arr) _tag_arr(
-0u, sizeof( unsigned char), 0u)).curr){ return 0;} for( 0; dirs != 0; dirs=((
-struct Cyc_List_List*) _check_null( dirs))->tl){ struct _tagged_arr _temp103=*((
-struct _tagged_arr*)(( struct Cyc_List_List*) _check_null( dirs))->hd); goto
-_LL104; _LL104: if( _temp103.curr ==(( struct _tagged_arr) _tag_arr( 0u, sizeof(
-unsigned char), 0u)).curr? 1: Cyc_String_strlen( _temp103) == 0){ continue;}{
-struct _tagged_arr s=( struct _tagged_arr) Cyc_Filename_concat( _temp103, file);
-if( Cyc_file_exists( s)){ return({ struct _tagged_arr* _temp105=( struct
-_tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)); _temp105[ 0]= s; _temp105;});}}}
-return 0;} struct _tagged_arr Cyc_do_find( struct Cyc_List_List* dirs, struct
-_tagged_arr file){ struct _tagged_arr* _temp106= Cyc_find( dirs, file); goto
-_LL107; _LL107: if( _temp106 == 0){({ struct _tagged_arr _temp108= file; fprintf(
-_sfile_to_file( Cyc_Stdio_stderr),"Error: can't find internal compiler file %.*s",
-_temp108.last_plus_one - _temp108.curr, _temp108.curr);}); Cyc_compile_failure=
-1; Cyc_remove_cfiles(); exit( 1);} return*(( struct _tagged_arr*) _check_null(
-_temp106));} void Cyc_process_file( struct _tagged_arr filename){ struct
-_tagged_arr _temp109= Cyc_Filename_chop_extension( filename); goto _LL110;
-_LL110: { struct _tagged_arr _temp111= Cyc_String_strconcat(( struct _tagged_arr)
-_temp109, _tag_arr(".cyp", sizeof( unsigned char), 5u)); goto _LL112; _LL112: {
-struct _tagged_arr _temp113= Cyc_String_strconcat(( struct _tagged_arr) _temp109,
-_tag_arr(".cyci", sizeof( unsigned char), 6u)); goto _LL114; _LL114: { struct
-_tagged_arr _temp115= Cyc_String_strconcat(( struct _tagged_arr) _temp109,
-_tag_arr(".cycio", sizeof( unsigned char), 7u)); goto _LL116; _LL116: { struct
-_tagged_arr _temp117= Cyc_String_strconcat(( struct _tagged_arr) _temp109,
-_tag_arr(".c", sizeof( unsigned char), 3u)); goto _LL118; _LL118: if( Cyc_v_r){({
-struct _tagged_arr _temp119= filename; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"Compiling %.*s\n",
-_temp119.last_plus_one - _temp119.curr, _temp119.curr);});}{ struct Cyc_Stdio___sFILE*
-f0= Cyc_try_file_open( filename, _tag_arr("r", sizeof( unsigned char), 2u),
-_tag_arr("input file", sizeof( unsigned char), 11u)); if( Cyc_compile_failure){
-return;} Cyc_Stdio_fclose(( struct Cyc_Stdio___sFILE*) _check_null( f0));{
-struct _tagged_arr _temp121= Cyc_String_str_sepstr(({ struct Cyc_List_List*
-_temp120=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp120->hd=( void*) _init_tag_arr(( struct _tagged_arr*) GC_malloc( sizeof(
-struct _tagged_arr)),"", sizeof( unsigned char), 1u); _temp120->tl=(( struct Cyc_List_List*(*)(
-struct Cyc_List_List* x)) Cyc_List_rev)( Cyc_cppargs); _temp120;}), _tag_arr(" ",
-sizeof( unsigned char), 2u)); goto _LL122; _LL122: { struct _tagged_arr
-stdinc_string= _tag_arr(" -Ic:/cyclone/include", sizeof( unsigned char), 22u);
-struct _tagged_arr _temp123= Cyc_Stdlib_getenv( _tag_arr("CYCLONE_INCLUDE_PATH",
-sizeof( unsigned char), 21u)); goto _LL124; _LL124: if( _temp123.curr !=(
-_tag_arr( 0u, sizeof( unsigned char), 0u)).curr){ struct Cyc_List_List* _temp125=
-Cyc_split_by_char(( struct _tagged_arr) _temp123,':'); goto _LL126; _LL126: {
-struct _tagged_arr _temp128= Cyc_String_str_sepstr(({ struct Cyc_List_List*
+0u, 0u, 0u)).curr){ return 0;} for( 0; dirs != 0; dirs=(( struct Cyc_List_List*)
+_check_null( dirs))->tl){ struct _tagged_arr _temp103=*(( struct _tagged_arr*)((
+struct Cyc_List_List*) _check_null( dirs))->hd); goto _LL104; _LL104: if(
+_temp103.curr ==(( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr? 1: Cyc_String_strlen(
+_temp103) == 0){ continue;}{ struct _tagged_arr s=( struct _tagged_arr) Cyc_Filename_concat(
+_temp103, file); if( Cyc_file_exists( s)){ return({ struct _tagged_arr* _temp105=(
+struct _tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)); _temp105[ 0]= s;
+_temp105;});}}} return 0;} struct _tagged_arr Cyc_do_find( struct Cyc_List_List*
+dirs, struct _tagged_arr file){ struct _tagged_arr* _temp106= Cyc_find( dirs,
+file); goto _LL107; _LL107: if( _temp106 == 0){({ struct _tagged_arr _temp108=
+file; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"Error: can't find internal compiler file %.*s",
+_get_arr_size( _temp108, 1u), _temp108.curr);}); Cyc_compile_failure= 1; Cyc_remove_cfiles();
+exit( 1);} return*(( struct _tagged_arr*) _check_null( _temp106));} void Cyc_process_file(
+struct _tagged_arr filename){ struct _tagged_arr _temp109= Cyc_Filename_chop_extension(
+filename); goto _LL110; _LL110: { struct _tagged_arr _temp111= Cyc_String_strconcat((
+struct _tagged_arr) _temp109, _tag_arr(".cyp", sizeof( unsigned char), 5u));
+goto _LL112; _LL112: { struct _tagged_arr _temp113= Cyc_String_strconcat((
+struct _tagged_arr) _temp109, _tag_arr(".cyci", sizeof( unsigned char), 6u));
+goto _LL114; _LL114: { struct _tagged_arr _temp115= Cyc_String_strconcat((
+struct _tagged_arr) _temp109, _tag_arr(".cycio", sizeof( unsigned char), 7u));
+goto _LL116; _LL116: { struct _tagged_arr _temp117= Cyc_String_strconcat((
+struct _tagged_arr) _temp109, _tag_arr(".c", sizeof( unsigned char), 3u)); goto
+_LL118; _LL118: if( Cyc_v_r){({ struct _tagged_arr _temp119= filename; fprintf(
+_sfile_to_file( Cyc_Stdio_stderr),"Compiling %.*s\n", _get_arr_size( _temp119, 1u),
+_temp119.curr);});}{ struct Cyc_Stdio___sFILE* f0= Cyc_try_file_open( filename,
+_tag_arr("r", sizeof( unsigned char), 2u), _tag_arr("input file", sizeof(
+unsigned char), 11u)); if( Cyc_compile_failure){ return;} Cyc_Stdio_fclose((
+struct Cyc_Stdio___sFILE*) _check_null( f0));{ struct _tagged_arr _temp121= Cyc_String_str_sepstr(({
+struct Cyc_List_List* _temp120=( struct Cyc_List_List*) GC_malloc( sizeof(
+struct Cyc_List_List)); _temp120->hd=( void*) _init_tag_arr(( struct _tagged_arr*)
+GC_malloc( sizeof( struct _tagged_arr)),"", sizeof( unsigned char), 1u);
+_temp120->tl=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_rev)(
+Cyc_cppargs); _temp120;}), _tag_arr(" ", sizeof( unsigned char), 2u)); goto
+_LL122; _LL122: { struct _tagged_arr stdinc_string= _tag_arr(" -Ic:/cyclone/include",
+sizeof( unsigned char), 22u); struct _tagged_arr _temp123= Cyc_Stdlib_getenv(
+_tag_arr("CYCLONE_INCLUDE_PATH", sizeof( unsigned char), 21u)); goto _LL124;
+_LL124: if( _temp123.curr !=( _tag_arr( 0u, 0u, 0u)).curr){ struct Cyc_List_List*
+_temp125= Cyc_split_by_char(( struct _tagged_arr) _temp123,':'); goto _LL126;
+_LL126: { struct _tagged_arr _temp128= Cyc_String_str_sepstr(({ struct Cyc_List_List*
 _temp127=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
 _temp127->hd=( void*) _init_tag_arr(( struct _tagged_arr*) GC_malloc( sizeof(
 struct _tagged_arr)),"", sizeof( unsigned char), 1u); _temp127->tl= _temp125;
 _temp127;}), _tag_arr(" -I", sizeof( unsigned char), 4u)); goto _LL129; _LL129:
 stdinc_string=( struct _tagged_arr)({ struct _tagged_arr _temp130=( struct
 _tagged_arr) _temp128; struct _tagged_arr _temp131= stdinc_string; xprintf("%.*s%.*s",
-_temp130.last_plus_one - _temp130.curr, _temp130.curr, _temp131.last_plus_one -
-_temp131.curr, _temp131.curr);});}}{ struct _tagged_arr ofile_string; if( Cyc_stop_after_cpp_r){
+_get_arr_size( _temp130, 1u), _temp130.curr, _get_arr_size( _temp131, 1u),
+_temp131.curr);});}}{ struct _tagged_arr ofile_string; if( Cyc_stop_after_cpp_r){
 if( Cyc_output_file != 0){ ofile_string=( struct _tagged_arr)({ struct
 _tagged_arr _temp132=*(( struct _tagged_arr*) _check_null( Cyc_output_file));
-xprintf(" > %.*s", _temp132.last_plus_one - _temp132.curr, _temp132.curr);});}
-else{ ofile_string= _tag_arr("", sizeof( unsigned char), 1u);}} else{
-ofile_string=( struct _tagged_arr)({ struct _tagged_arr _temp133=( struct
-_tagged_arr) _temp111; xprintf(" > %.*s", _temp133.last_plus_one - _temp133.curr,
-_temp133.curr);});}{ struct _tagged_arr fixup_string; if( Cyc_produce_dependencies){
-if( Cyc_dependencies_target == 0){ fixup_string= _tag_arr(" | sed 's/^\\(.*\\)\\.cyc\\.o:/\\1.o:/'",
-sizeof( unsigned char), 35u);} else{ fixup_string=( struct _tagged_arr)({ struct
+xprintf(" > %.*s", _get_arr_size( _temp132, 1u), _temp132.curr);});} else{
+ofile_string= _tag_arr("", sizeof( unsigned char), 1u);}} else{ ofile_string=(
+struct _tagged_arr)({ struct _tagged_arr _temp133=( struct _tagged_arr) _temp111;
+xprintf(" > %.*s", _get_arr_size( _temp133, 1u), _temp133.curr);});}{ struct
+_tagged_arr fixup_string; if( Cyc_produce_dependencies){ if( Cyc_dependencies_target
+== 0){ fixup_string= _tag_arr(" | sed 's/^\\(.*\\)\\.cyc\\.o:/\\1.o:/'", sizeof(
+unsigned char), 35u);} else{ fixup_string=( struct _tagged_arr)({ struct
 _tagged_arr _temp134=*(( struct _tagged_arr*) _check_null( Cyc_dependencies_target));
-xprintf(" | sed 's/^.*\\.cyc\\.o:/%.*s:/'", _temp134.last_plus_one - _temp134.curr,
+xprintf(" | sed 's/^.*\\.cyc\\.o:/%.*s:/'", _get_arr_size( _temp134, 1u),
 _temp134.curr);});}} else{ fixup_string= _tag_arr("", sizeof( unsigned char), 1u);}{
 struct _tagged_arr _temp140=({ struct _tagged_arr _temp135=( struct _tagged_arr)
 _temp121; struct _tagged_arr _temp136= stdinc_string; struct _tagged_arr
 _temp137= filename; struct _tagged_arr _temp138= fixup_string; struct
 _tagged_arr _temp139= ofile_string; xprintf("gcc -x c -E -U__GNUC__ -nostdinc%.*s%.*s %.*s%.*s%.*s",
-_temp135.last_plus_one - _temp135.curr, _temp135.curr, _temp136.last_plus_one -
-_temp136.curr, _temp136.curr, _temp137.last_plus_one - _temp137.curr, _temp137.curr,
-_temp138.last_plus_one - _temp138.curr, _temp138.curr, _temp139.last_plus_one -
-_temp139.curr, _temp139.curr);}); goto _LL141; _LL141: if( Cyc_v_r){({ struct
-_tagged_arr _temp142=( struct _tagged_arr) _temp140; fprintf( _sfile_to_file(
-Cyc_Stdio_stderr),"%.*s\n", _temp142.last_plus_one - _temp142.curr, _temp142.curr);});}
-if( system( string_to_Cstring(( struct _tagged_arr) _temp140)) != 0){ Cyc_compile_failure=
-1; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"\nError: preprocessing\n");
-return;} if( Cyc_stop_after_cpp_r){ return;} Cyc_Position_reset_position((
-struct _tagged_arr) _temp111);{ struct Cyc_Stdio___sFILE* in_file= Cyc_try_file_open((
-struct _tagged_arr) _temp111, _tag_arr("r", sizeof( unsigned char), 2u),
-_tag_arr("file", sizeof( unsigned char), 5u)); if( Cyc_compile_failure){ return;}{
-struct Cyc_List_List* tds= 0;{ struct _handler_cons _temp143; _push_handler(&
-_temp143);{ int _temp145= 0; if( setjmp( _temp143.handler)){ _temp145= 1;} if( !
-_temp145){ tds=(( struct Cyc_List_List*(*)( struct _tagged_arr stage_name,
-struct Cyc_List_List*(* f)( struct Cyc_Stdio___sFILE*, struct Cyc_List_List*),
-struct Cyc_Stdio___sFILE* env, struct Cyc_List_List* tds)) Cyc_do_stage)(
-_tag_arr("parsing", sizeof( unsigned char), 8u), Cyc_do_parse,( struct Cyc_Stdio___sFILE*)
-_check_null( in_file), tds);; _pop_handler();} else{ void* _temp144=( void*)
-_exn_thrown; void* _temp147= _temp144; _LL149: goto _LL150; _LL151: goto _LL152;
-_LL150: Cyc_Stdio_file_close(( struct Cyc_Stdio___sFILE*) _check_null( in_file));
-Cyc_remove_file(( struct _tagged_arr) _temp111);( int) _throw( _temp147); _LL152:(
-void) _throw( _temp147); _LL148:;}}} Cyc_Stdio_file_close(( struct Cyc_Stdio___sFILE*)
-_check_null( in_file)); if( Cyc_compile_failure){ Cyc_remove_file(( struct
-_tagged_arr) _temp111); return;}{ struct Cyc_Tcenv_Tenv* _temp153= Cyc_Tcenv_tc_init();
-goto _LL154; _LL154: if( Cyc_parseonly_r){ goto PRINTC;} tds=(( struct Cyc_List_List*(*)(
+_get_arr_size( _temp135, 1u), _temp135.curr, _get_arr_size( _temp136, 1u),
+_temp136.curr, _get_arr_size( _temp137, 1u), _temp137.curr, _get_arr_size(
+_temp138, 1u), _temp138.curr, _get_arr_size( _temp139, 1u), _temp139.curr);});
+goto _LL141; _LL141: if( Cyc_v_r){({ struct _tagged_arr _temp142=( struct
+_tagged_arr) _temp140; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s\n",
+_get_arr_size( _temp142, 1u), _temp142.curr);});} if( system( string_to_Cstring((
+struct _tagged_arr) _temp140)) != 0){ Cyc_compile_failure= 1; fprintf(
+_sfile_to_file( Cyc_Stdio_stderr),"\nError: preprocessing\n"); return;} if( Cyc_stop_after_cpp_r){
+return;} Cyc_Position_reset_position(( struct _tagged_arr) _temp111);{ struct
+Cyc_Stdio___sFILE* in_file= Cyc_try_file_open(( struct _tagged_arr) _temp111,
+_tag_arr("r", sizeof( unsigned char), 2u), _tag_arr("file", sizeof(
+unsigned char), 5u)); if( Cyc_compile_failure){ return;}{ struct Cyc_List_List*
+tds= 0;{ struct _handler_cons _temp143; _push_handler(& _temp143);{ int _temp145=
+0; if( setjmp( _temp143.handler)){ _temp145= 1;} if( ! _temp145){ tds=(( struct
+Cyc_List_List*(*)( struct _tagged_arr stage_name, struct Cyc_List_List*(* f)(
+struct Cyc_Stdio___sFILE*, struct Cyc_List_List*), struct Cyc_Stdio___sFILE* env,
+struct Cyc_List_List* tds)) Cyc_do_stage)( _tag_arr("parsing", sizeof(
+unsigned char), 8u), Cyc_do_parse,( struct Cyc_Stdio___sFILE*) _check_null(
+in_file), tds);; _pop_handler();} else{ void* _temp144=( void*) _exn_thrown;
+void* _temp147= _temp144; _LL149: goto _LL150; _LL151: goto _LL152; _LL150: Cyc_Stdio_file_close((
+struct Cyc_Stdio___sFILE*) _check_null( in_file)); Cyc_remove_file(( struct
+_tagged_arr) _temp111);( int) _throw( _temp147); _LL152:( void) _throw( _temp147);
+_LL148:;}}} Cyc_Stdio_file_close(( struct Cyc_Stdio___sFILE*) _check_null(
+in_file)); if( Cyc_compile_failure){ Cyc_remove_file(( struct _tagged_arr)
+_temp111); return;}{ struct Cyc_Tcenv_Tenv* _temp153= Cyc_Tcenv_tc_init(); goto
+_LL154; _LL154: if( Cyc_parseonly_r){ goto PRINTC;} tds=(( struct Cyc_List_List*(*)(
 struct _tagged_arr stage_name, struct Cyc_List_List*(* f)( struct Cyc_Tcenv_Tenv*,
 struct Cyc_List_List*), struct Cyc_Tcenv_Tenv* env, struct Cyc_List_List* tds))
 Cyc_do_stage)( _tag_arr("type checking", sizeof( unsigned char), 14u), Cyc_do_typecheck,
@@ -1168,19 +1172,18 @@ Cyc_compile_failure){ return 1;}}} if((( Cyc_stop_after_cpp_r? 1: Cyc_parseonly_
 1: Cyc_tc_r)? 1: Cyc_toc_r){ return 0;} if( Cyc_ccargs == 0){ return 0;}{ struct
 _tagged_arr cyclone_exec_prefix=( struct _tagged_arr) Cyc_Stdlib_getenv(
 _tag_arr("CYCLONE_EXEC_PREFIX", sizeof( unsigned char), 20u)); if(
-cyclone_exec_prefix.curr !=(( struct _tagged_arr) _tag_arr( 0u, sizeof(
-unsigned char), 0u)).curr){ Cyc_cyclone_exec_prefix_path=({ struct Cyc_List_List*
-_temp191=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp191->hd=( void*)({ struct _tagged_arr* _temp192=( struct _tagged_arr*)
-GC_malloc( sizeof( struct _tagged_arr)); _temp192[ 0]= cyclone_exec_prefix;
-_temp192;}); _temp191->tl= Cyc_cyclone_exec_prefix_path; _temp191;});} Cyc_cyclone_exec_prefix_path=({
-struct Cyc_List_List* _temp193=( struct Cyc_List_List*) GC_malloc( sizeof(
-struct Cyc_List_List)); _temp193->hd=( void*) _init_tag_arr(( struct _tagged_arr*)
-GC_malloc( sizeof( struct _tagged_arr)),"c:/cyclone/bin/cyc-lib", sizeof(
-unsigned char), 23u); _temp193->tl= Cyc_cyclone_exec_prefix_path; _temp193;});
-Cyc_cyclone_exec_prefix_path=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
-x)) Cyc_List_imp_rev)( Cyc_cyclone_exec_prefix_path);{ struct _tagged_arr
-_temp194= Cyc_do_find( Cyc_cyclone_exec_prefix_path, _tag_arr("include/cyc_include.h",
+cyclone_exec_prefix.curr !=(( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){
+Cyc_cyclone_exec_prefix_path=({ struct Cyc_List_List* _temp191=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp191->hd=( void*)({ struct
+_tagged_arr* _temp192=( struct _tagged_arr*) GC_malloc( sizeof( struct
+_tagged_arr)); _temp192[ 0]= cyclone_exec_prefix; _temp192;}); _temp191->tl= Cyc_cyclone_exec_prefix_path;
+_temp191;});} Cyc_cyclone_exec_prefix_path=({ struct Cyc_List_List* _temp193=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp193->hd=(
+void*) _init_tag_arr(( struct _tagged_arr*) GC_malloc( sizeof( struct
+_tagged_arr)),"c:/cyclone/bin/cyc-lib", sizeof( unsigned char), 23u); _temp193->tl=
+Cyc_cyclone_exec_prefix_path; _temp193;}); Cyc_cyclone_exec_prefix_path=((
+struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_cyclone_exec_prefix_path);{
+struct _tagged_arr _temp194= Cyc_do_find( Cyc_cyclone_exec_prefix_path, _tag_arr("include/cyc_include.h",
 sizeof( unsigned char), 22u)); goto _LL195; _LL195: Cyc_ccargs=(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x)) Cyc_List_rev)( Cyc_ccargs);{ struct _tagged_arr
 _temp196= Cyc_String_str_sepstr( Cyc_ccargs, _tag_arr(" ", sizeof( unsigned char),
@@ -1208,31 +1211,30 @@ _tagged_arr)); _temp211[ 0]= _temp203; _temp211;}); struct _tagged_arr* _temp208
 1u]={ _temp210}; struct _tagged_arr _temp209={( void*) _temp208,( void*)
 _temp208,( void*)( _temp208 + 1u)}; _temp207( _temp209);}); stdlib_string=(
 struct _tagged_arr)({ struct _tagged_arr _temp212= _temp203; struct _tagged_arr
-_temp213= _temp205; xprintf(" %.*s %.*s", _temp212.last_plus_one - _temp212.curr,
-_temp212.curr, _temp213.last_plus_one - _temp213.curr, _temp213.curr);});}} if(
-Cyc_ic_r){ struct _handler_cons _temp214; _push_handler(& _temp214);{ int
-_temp216= 0; if( setjmp( _temp214.handler)){ _temp216= 1;} if( ! _temp216){ Cyc_ccargs=((
-struct Cyc_List_List*(*)( int(* f)( struct _tagged_arr*), struct Cyc_List_List*
-l)) Cyc_List_filter)( Cyc_is_cfile, Cyc_ccargs); Cyc_libargs=(( struct Cyc_List_List*(*)(
+_temp213= _temp205; xprintf(" %.*s %.*s", _get_arr_size( _temp212, 1u), _temp212.curr,
+_get_arr_size( _temp213, 1u), _temp213.curr);});}} if( Cyc_ic_r){ struct
+_handler_cons _temp214; _push_handler(& _temp214);{ int _temp216= 0; if( setjmp(
+_temp214.handler)){ _temp216= 1;} if( ! _temp216){ Cyc_ccargs=(( struct Cyc_List_List*(*)(
 int(* f)( struct _tagged_arr*), struct Cyc_List_List* l)) Cyc_List_filter)( Cyc_is_cfile,
-Cyc_libargs);{ struct Cyc_List_List* _temp217=(( struct Cyc_List_List*(*)(
-struct Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_append)( stdlib,((
-struct Cyc_List_List*(*)( struct Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_append)(
-Cyc_ccargs, Cyc_libargs)); goto _LL218; _LL218: if( ! _temp201){ _temp217=({
-struct Cyc_List_List* _temp219=( struct Cyc_List_List*) GC_malloc( sizeof(
-struct Cyc_List_List)); _temp219->hd=( void*) Cyc_final_strptr; _temp219->tl=
-_temp217; _temp219;});}{ struct Cyc_Interface_I* _temp220=(( struct Cyc_Interface_I*(*)(
-struct Cyc_Interface_I*(* get)( struct _tagged_arr*), struct Cyc_List_List* la,
-struct Cyc_List_List* linfo)) Cyc_Interface_get_and_merge_list)( Cyc_read_cycio,
-_temp217, _temp217); goto _LL221; _LL221: if( _temp220 == 0){ fprintf(
-_sfile_to_file( Cyc_Stdio_stderr),"Error: interfaces incompatible\n"); Cyc_compile_failure=
-1; Cyc_remove_cfiles();{ int _temp222= 1; _npop_handler( 0u); return _temp222;}}
-if( _temp201){ if( Cyc_output_file != 0){ struct _tagged_arr _temp224=({ struct
-_tagged_arr _temp223=( struct _tagged_arr) Cyc_Filename_chop_extension(*((
+Cyc_ccargs); Cyc_libargs=(( struct Cyc_List_List*(*)( int(* f)( struct
+_tagged_arr*), struct Cyc_List_List* l)) Cyc_List_filter)( Cyc_is_cfile, Cyc_libargs);{
+struct Cyc_List_List* _temp217=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
+x, struct Cyc_List_List* y)) Cyc_List_append)( stdlib,(( struct Cyc_List_List*(*)(
+struct Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_append)( Cyc_ccargs,
+Cyc_libargs)); goto _LL218; _LL218: if( ! _temp201){ _temp217=({ struct Cyc_List_List*
+_temp219=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp219->hd=( void*) Cyc_final_strptr; _temp219->tl= _temp217; _temp219;});}{
+struct Cyc_Interface_I* _temp220=(( struct Cyc_Interface_I*(*)( struct Cyc_Interface_I*(*
+get)( struct _tagged_arr*), struct Cyc_List_List* la, struct Cyc_List_List*
+linfo)) Cyc_Interface_get_and_merge_list)( Cyc_read_cycio, _temp217, _temp217);
+goto _LL221; _LL221: if( _temp220 == 0){ fprintf( _sfile_to_file( Cyc_Stdio_stderr),"Error: interfaces incompatible\n");
+Cyc_compile_failure= 1; Cyc_remove_cfiles();{ int _temp222= 1; _npop_handler( 0u);
+return _temp222;}} if( _temp201){ if( Cyc_output_file != 0){ struct _tagged_arr
+_temp224=({ struct _tagged_arr _temp223=( struct _tagged_arr) Cyc_Filename_chop_extension(*((
 struct _tagged_arr*) _check_null( Cyc_output_file))); xprintf("%.*s.cycio",
-_temp223.last_plus_one - _temp223.curr, _temp223.curr);}); goto _LL225; _LL225: {
-struct Cyc_Stdio___sFILE* _temp226= Cyc_try_file_open(( struct _tagged_arr)
-_temp224, _tag_arr("w", sizeof( unsigned char), 2u), _tag_arr("interface object file",
+_get_arr_size( _temp223, 1u), _temp223.curr);}); goto _LL225; _LL225: { struct
+Cyc_Stdio___sFILE* _temp226= Cyc_try_file_open(( struct _tagged_arr) _temp224,
+_tag_arr("w", sizeof( unsigned char), 2u), _tag_arr("interface object file",
 sizeof( unsigned char), 22u)); goto _LL227; _LL227: if( _temp226 == 0){ Cyc_compile_failure=
 1; Cyc_remove_cfiles();{ int _temp228= 1; _npop_handler( 0u); return _temp228;}}
 Cyc_Interface_save(( struct Cyc_Interface_I*) _check_null( _temp220),( struct
@@ -1252,27 +1254,26 @@ _LL237;} else{ goto _LL238;} _LL238: if(*(( void**) _temp232) == Cyc_Core_Invali
 _LL247: _temp246=(( struct Cyc_Core_InvalidArg_struct*) _temp232)->f1; goto
 _LL239;} else{ goto _LL240;} _LL240: goto _LL241; _LL242: goto _LL243; _LL235:({
 struct _tagged_arr _temp248= _temp244; printf("Exception Core::Impossible %.*s\n",
-_temp248.last_plus_one - _temp248.curr, _temp248.curr);}); Cyc_compile_failure=
-1; Cyc_remove_cfiles(); return 1; _LL237: printf("Exception Dict::Absent\n");
-Cyc_compile_failure= 1; Cyc_remove_cfiles(); return 1; _LL239:({ struct
-_tagged_arr _temp249= _temp246; printf("Exception Core::InvalidArg %.*s\n",
-_temp249.last_plus_one - _temp249.curr, _temp249.curr);}); Cyc_compile_failure=
-1; Cyc_remove_cfiles(); return 1; _LL241: printf("Uncaught exception\n"); Cyc_compile_failure=
-1; Cyc_remove_cfiles(); return 1; _LL243:( void) _throw( _temp232); _LL233:;}}}{
-struct _tagged_arr _temp256=({ struct _tagged_arr _temp251= _temp194; struct
-_tagged_arr _temp252= Cyc_output_file == 0? _tag_arr("", sizeof( unsigned char),
-1u):( struct _tagged_arr)({ struct _tagged_arr _temp250=*(( struct _tagged_arr*)
-_check_null( Cyc_output_file)); xprintf(" -o %.*s", _temp250.last_plus_one -
-_temp250.curr, _temp250.curr);}); struct _tagged_arr _temp253=( struct
-_tagged_arr) _temp196; struct _tagged_arr _temp254= stdlib_string; struct
-_tagged_arr _temp255=( struct _tagged_arr) _temp199; xprintf("gcc -include %.*s%.*s %.*s%.*s%.*s",
-_temp251.last_plus_one - _temp251.curr, _temp251.curr, _temp252.last_plus_one -
-_temp252.curr, _temp252.curr, _temp253.last_plus_one - _temp253.curr, _temp253.curr,
-_temp254.last_plus_one - _temp254.curr, _temp254.curr, _temp255.last_plus_one -
-_temp255.curr, _temp255.curr);}); goto _LL257; _LL257: if( Cyc_v_r){({ struct
-_tagged_arr _temp258=( struct _tagged_arr) _temp256; fprintf( _sfile_to_file(
-Cyc_Stdio_stderr),"%.*s\n", _temp258.last_plus_one - _temp258.curr, _temp258.curr);});}
-if( system( string_to_Cstring(( struct _tagged_arr) _temp256)) != 0){ fprintf(
-_sfile_to_file( Cyc_Stdio_stderr),"Error: C compiler failed\n"); Cyc_compile_failure=
-1; Cyc_remove_cfiles(); return 1;} Cyc_remove_cfiles(); return Cyc_compile_failure?
-1: 0;}}}}}}}
+_get_arr_size( _temp248, 1u), _temp248.curr);}); Cyc_compile_failure= 1; Cyc_remove_cfiles();
+return 1; _LL237: printf("Exception Dict::Absent\n"); Cyc_compile_failure= 1;
+Cyc_remove_cfiles(); return 1; _LL239:({ struct _tagged_arr _temp249= _temp246;
+printf("Exception Core::InvalidArg %.*s\n", _get_arr_size( _temp249, 1u),
+_temp249.curr);}); Cyc_compile_failure= 1; Cyc_remove_cfiles(); return 1; _LL241:
+printf("Uncaught exception\n"); Cyc_compile_failure= 1; Cyc_remove_cfiles();
+return 1; _LL243:( void) _throw( _temp232); _LL233:;}}}{ struct _tagged_arr
+_temp256=({ struct _tagged_arr _temp251= _temp194; struct _tagged_arr _temp252=
+Cyc_output_file == 0? _tag_arr("", sizeof( unsigned char), 1u):( struct
+_tagged_arr)({ struct _tagged_arr _temp250=*(( struct _tagged_arr*) _check_null(
+Cyc_output_file)); xprintf(" -o %.*s", _get_arr_size( _temp250, 1u), _temp250.curr);});
+struct _tagged_arr _temp253=( struct _tagged_arr) _temp196; struct _tagged_arr
+_temp254= stdlib_string; struct _tagged_arr _temp255=( struct _tagged_arr)
+_temp199; xprintf("gcc -include %.*s%.*s %.*s%.*s%.*s", _get_arr_size( _temp251,
+1u), _temp251.curr, _get_arr_size( _temp252, 1u), _temp252.curr, _get_arr_size(
+_temp253, 1u), _temp253.curr, _get_arr_size( _temp254, 1u), _temp254.curr,
+_get_arr_size( _temp255, 1u), _temp255.curr);}); goto _LL257; _LL257: if( Cyc_v_r){({
+struct _tagged_arr _temp258=( struct _tagged_arr) _temp256; fprintf(
+_sfile_to_file( Cyc_Stdio_stderr),"%.*s\n", _get_arr_size( _temp258, 1u),
+_temp258.curr);});} if( system( string_to_Cstring(( struct _tagged_arr) _temp256))
+!= 0){ fprintf( _sfile_to_file( Cyc_Stdio_stderr),"Error: C compiler failed\n");
+Cyc_compile_failure= 1; Cyc_remove_cfiles(); return 1;} Cyc_remove_cfiles();
+return Cyc_compile_failure? 1: 0;}}}}}}}

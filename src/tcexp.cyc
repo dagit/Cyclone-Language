@@ -700,6 +700,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t *`r topt,
     let t_result = tcBinPrimop(te,loc,null,p,e1,e2);
     if (!(unify(t_result,t1) || coerceable(t_result)))
       return expr_err(te,loc, "Cannot use this operator in an assignment");
+    return t_result;
   }
   return t2;
 }

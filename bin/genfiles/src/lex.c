@@ -707,26 +707,25 @@ y)) Cyc_List_append)(( struct Cyc_List_List*)(( struct Cyc_List_List*)
 _check_null( x))->hd,( struct Cyc_List_List*) ns);}}}} Cyc_yyerror(( struct
 _tagged_arr)({ struct _tagged_arr _temp116=( struct _tagged_arr) Cyc_String_str_sepstr((
 struct Cyc_List_List*) ns, _tag_arr("::", sizeof( unsigned char), 3u)); xprintf("undeclared namespace %.*s",
-_temp116.last_plus_one - _temp116.curr, _temp116.curr);})); return 0;} static
-void Cyc_Lex_recompute_typedefs(){ Cyc_Lex_typedefs_trie=({ struct Cyc_Lex_Trie*
-_temp117=( struct Cyc_Lex_Trie*) GC_malloc( sizeof( struct Cyc_Lex_Trie));
-_temp117->children= 0; _temp117->shared_str= 0; _temp117;});{ struct Cyc_List_List*
-ls=( struct Cyc_List_List*)(( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*)
-_check_null( Cyc_Lex_lstate))->v)->lstack; for( 0; ls != 0; ls=(( struct Cyc_List_List*)
-_check_null( ls))->tl){ struct Cyc_Lex_Lvis* lv=( struct Cyc_Lex_Lvis*)(( struct
-Cyc_List_List*) _check_null( ls))->hd; struct Cyc_List_List* x=({ struct Cyc_List_List*
-_temp118=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp118->hd=( void*) lv->current_namespace; _temp118->tl= lv->imported_namespaces;
-_temp118;}); for( 0; x != 0; x=(( struct Cyc_List_List*) _check_null( x))->tl){
-struct Cyc_Lex_Ldecls* ld=(( struct Cyc_Lex_Ldecls*(*)( struct Cyc_Dict_Dict* d,
-struct Cyc_List_List* key)) Cyc_Dict_lookup)((( struct Cyc_Lex_Lstate*)(( struct
-Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->decls,( struct Cyc_List_List*)((
-struct Cyc_List_List*) _check_null( x))->hd);(( void(*)( void(* f)( struct
-_tagged_arr*), struct Cyc_Set_Set* s)) Cyc_Set_iter)( Cyc_Lex_insert_typedef, ld->typedefs);}}}}
-static int Cyc_Lex_is_typedef_in_namespace( struct Cyc_List_List* ns, struct
-_tagged_arr* v){ struct Cyc_List_List* ans= Cyc_Lex_get_absolute_namespace( ns);
-struct _handler_cons _temp119; _push_handler(& _temp119);{ int _temp121= 0; if(
-setjmp( _temp119.handler)){ _temp121= 1;} if( ! _temp121){{ struct Cyc_Lex_Ldecls*
+_get_arr_size( _temp116, 1u), _temp116.curr);})); return 0;} static void Cyc_Lex_recompute_typedefs(){
+Cyc_Lex_typedefs_trie=({ struct Cyc_Lex_Trie* _temp117=( struct Cyc_Lex_Trie*)
+GC_malloc( sizeof( struct Cyc_Lex_Trie)); _temp117->children= 0; _temp117->shared_str=
+0; _temp117;});{ struct Cyc_List_List* ls=( struct Cyc_List_List*)(( struct Cyc_Lex_Lstate*)((
+struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->lstack; for( 0; ls != 0;
+ls=(( struct Cyc_List_List*) _check_null( ls))->tl){ struct Cyc_Lex_Lvis* lv=(
+struct Cyc_Lex_Lvis*)(( struct Cyc_List_List*) _check_null( ls))->hd; struct Cyc_List_List*
+x=({ struct Cyc_List_List* _temp118=( struct Cyc_List_List*) GC_malloc( sizeof(
+struct Cyc_List_List)); _temp118->hd=( void*) lv->current_namespace; _temp118->tl=
+lv->imported_namespaces; _temp118;}); for( 0; x != 0; x=(( struct Cyc_List_List*)
+_check_null( x))->tl){ struct Cyc_Lex_Ldecls* ld=(( struct Cyc_Lex_Ldecls*(*)(
+struct Cyc_Dict_Dict* d, struct Cyc_List_List* key)) Cyc_Dict_lookup)((( struct
+Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->decls,(
+struct Cyc_List_List*)(( struct Cyc_List_List*) _check_null( x))->hd);(( void(*)(
+void(* f)( struct _tagged_arr*), struct Cyc_Set_Set* s)) Cyc_Set_iter)( Cyc_Lex_insert_typedef,
+ld->typedefs);}}}} static int Cyc_Lex_is_typedef_in_namespace( struct Cyc_List_List*
+ns, struct _tagged_arr* v){ struct Cyc_List_List* ans= Cyc_Lex_get_absolute_namespace(
+ns); struct _handler_cons _temp119; _push_handler(& _temp119);{ int _temp121= 0;
+if( setjmp( _temp119.handler)){ _temp121= 1;} if( ! _temp121){{ struct Cyc_Lex_Ldecls*
 ld=(( struct Cyc_Lex_Ldecls*(*)( struct Cyc_Dict_Dict* d, struct Cyc_List_List*
 key)) Cyc_Dict_lookup)((( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*)
 _check_null( Cyc_Lex_lstate))->v)->decls, ans); int _temp122=(( int(*)( struct
