@@ -334,7 +334,7 @@ namespace Absyn {
     typ        type;
     Opt_t<exp> initializer; // ignored for pattern variables
     int        shadow; // FIX: NOT USED PROPERLY RIGHT NOW!!!
-    int        block;  // FIX: not used yet and may not be int
+    int        block;  
   };
 
   EXTERN_DEFINITION struct Fndecl {

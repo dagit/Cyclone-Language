@@ -1,4 +1,3 @@
-// #define DEBUG 1
 // Toc.pop:  copyright (c) 2000, Greg Morrisett and Trevor Jim
 //
 // Translation of Cyclone abstract syntax to C abstract syntax.
@@ -108,7 +107,7 @@ static qvar collapse_qvar_tag(qvar x,string tag) {
 static list<$(var,list<typ>)@> tuple_types = null;
 static int tuple_type_counter = 0;
 static var add_tuple_type(list<$(tqual,typ)@> tqs0) {
-  for (let tts = tuple_types; tts != null; tts = tts->tl) {
+  for (_ tts = tuple_types; tts != null; tts = tts->tl) {
     let &$(x,ts) = tts->hd;
     bool okay = true;
     _    tqs  = tqs0;
@@ -137,7 +136,7 @@ static var add_tagged_array_type(typ t,tqual tq) {
   case IntType(Unsigned,B1,Unboxed): return "_tagged_string";
   default: break; //skip
   }
-  for(let tts = tagged_array_types; tts != null; tts = tts->tl) {
+  for(_ tts = tagged_array_types; tts != null; tts = tts->tl) {
     let &$(x,t2) = tts->hd;
     if (!unify(t,t2)) continue;
     return x;
@@ -248,8 +247,7 @@ static typ typ_to_c(typ t) {
     }
   case FnType(_,t2,args,vararg):
     // just drop the type arguments and translate the nested types
-    // FIX:  problem with higher-order functions?  Again C's rules
-    // are strange.
+    // FIX:  problem with higher-order functions?  Again C's rules are strange.
     return FnType(null,typ_to_c(t2),List::map(arg_to_c,args),vararg);
   case TupleType(tqs):
     // $(t1,...,tn) maps to struct tuple_type_n where we define
@@ -507,7 +505,6 @@ static exp box_double_conv(bool toplevel, exp e) {
   } else {
     // ({ Double x = (Double)malloc(sizeof(struct _boxed_double_struct));
     //    x->v = e; x; })
-    //
     qvar x = temp_var();
     exp init = cast_exp(Double_typ,
 			malloc_atomic(sizeof_exp(strct("_boxed_double_struct"),
@@ -539,10 +536,9 @@ static exp null_check_conv(bool toplevel, typ t, exp e) {
     unimp("can't do null-check conversion at top-level");
   // ({ t* x = e; if (x == 0) throw(Null); x })
   qvar x = temp_var();
-  stmt s =
-    ifthenelse_stmt(eq_exp(var_exp(x,DL),signed_int_exp(0,DL),DL),
-		    exp_stmt(newthrow_exp(null_pointer_exn_exp(DL)),DL),
-		    skip_stmt(DL),DL);
+  stmt s = ifthenelse_stmt(eq_exp(var_exp(x,DL),signed_int_exp(0,DL),DL),
+			   exp_stmt(newthrow_exp(null_pointer_exn_exp(DL)),DL),
+			   skip_stmt(DL),DL);
   s = seq_stmt(s,exp_stmt(var_exp(x,DL),DL),DL);
   return stmt_exp(declare_stmt(x,t,&Opt(cast_exp(t,e,DL)),s,DL),DL);
 }
@@ -564,7 +560,7 @@ static exp tag_fixedarray_conv(bool toplevel,typ t, exp sz, exp e) {
   case PointerType(elt,_,_,_):
     // FIX:  what about tqual ??
     elt_typ = elt;
-    let n = add_tagged_array_type(elt,empty_tqual());
+    _ n = add_tagged_array_type(elt,empty_tqual());
     strt_typ = strct(n);
     break;
   default:
@@ -687,112 +683,95 @@ typedef struct Env @env;
 
 // the empty environment
 static env empty_env() {
-  return &Env{.break_lab     = null,
-              .continue_lab  = null,
-	      .fallthru_info = null,
-              .varmap = Dict::empty(qvar_cmp),
+  return &Env{.break_lab       = null,
+              .continue_lab    = null,
+	      .fallthru_info   = null,
+              .varmap          = Dict::empty(qvar_cmp),
               .to_pop_break    = 0,
               .to_pop_continue = 0,
               .to_pop_return   = 0,
 	      .to_pop_fallthru = 0,
-	      .toplevel = true};
+	      .toplevel        = true};
+}
+static env copy_env(env e) {
+  return &Env{.break_lab       = e->break_lab,
+              .continue_lab    = e->continue_lab,
+	      .fallthru_info   = e->fallthru_info,
+	      .varmap          = e->varmap,
+	      .to_pop_break    = e->to_pop_break,
+              .to_pop_continue = e->to_pop_continue,
+              .to_pop_return   = e->to_pop_return,
+	      .to_pop_fallthru = e->to_pop_fallthru,
+	      .toplevel        = e->toplevel};
 }
 
 static env clear_toplevel(env e) {
-  return &Env{ .break_lab     = e->break_lab,
-               .continue_lab  = e->continue_lab,
-	       .fallthru_info = e->fallthru_info,
-               .varmap = e->varmap,
-               .to_pop_break    = e->to_pop_break,
-               .to_pop_continue = e->to_pop_continue,
-               .to_pop_return   = e->to_pop_return,
-	       .to_pop_fallthru = e->to_pop_fallthru,
-               .toplevel = false};
+  env ans = copy_env(e);
+  ans->toplevel = false;
+  return ans;
 }
 
 // add x->y to variable map in environment
-// The type allows y to be a general exp, but in practice it is always
-// a var_exp
+// The type allows y to be a general exp, but in practice it is always a var_exp
 static env add_varmap(env e, qvar x, exp y) {
-  return &Env{ .break_lab     = e->break_lab,
-               .continue_lab  = e->continue_lab,
-               .fallthru_info = e->fallthru_info,
-               .varmap = Dict::insert(e->varmap, x, y),
-               .to_pop_break    = e->to_pop_break,
-               .to_pop_continue = e->to_pop_continue,
-               .to_pop_return   = e->to_pop_return,
-	       .to_pop_fallthru = e->to_pop_fallthru,
-               .toplevel        = e->toplevel};
+  env ans = copy_env(e);
+  ans->varmap = Dict::insert(ans->varmap, x, y);
+  return ans;
 }
 
 // env for loop body: break and continue labels are set to null,
 // exception handler pop counters for break and continue are zeroed
 static env loop_env(env e) {
-  return &Env{.break_lab     = null,
-              .continue_lab  = null,
-              .fallthru_info = e->fallthru_info,
-              .varmap = e->varmap,
-              .to_pop_break    = 0,
-              .to_pop_continue = 0,
-              .to_pop_return   = e->to_pop_return,
-	      .to_pop_fallthru = e->to_pop_fallthru,
-              .toplevel = e->toplevel};
+  env ans = copy_env(e);
+  ans->break_lab       = null;
+  ans->continue_lab    = null;
+  ans->to_pop_break    = 0;
+  ans->to_pop_continue = 0;
+  return ans;
 }
 
 // env for try: increment exception handler pop counters
 static env try_env(env e) {
-  return &Env{.break_lab     = e->break_lab,
-              .continue_lab  = e->continue_lab,
-              .fallthru_info = e->fallthru_info,
-              .varmap = e->varmap,
-              .to_pop_break    = e->to_pop_break+1,
-              .to_pop_continue = e->to_pop_continue+1,
-              .to_pop_return   = e->to_pop_return+1,
-	      .to_pop_fallthru = e->to_pop_fallthru+1,
-              .toplevel = e->toplevel};
+  env ans = copy_env(e);
+  ans->to_pop_break++;
+  ans->to_pop_continue++;
+  ans->to_pop_return++;
+  ans->to_pop_fallthru++;
+  return ans;
 }
 
 // env for a switch clause: give new label for break, and zero its pop counter
 static env non_last_switchclause_env(env e, var break_l, var fallthru_l,
 				     list<qvar> fallthru_binders,
 				     env next_case_env) {
-  return &Env{.break_lab     = &Opt(break_l),
-              .continue_lab  = e->continue_lab,
-	      .fallthru_info = &Opt(&$(fallthru_l,
-				       fallthru_binders,
-				       next_case_env->varmap)),
-              .varmap = e->varmap,
-              .to_pop_break    = 0,
-              .to_pop_continue = e->to_pop_continue,
-              .to_pop_return   = e->to_pop_return,
-	      .to_pop_fallthru = 0,
-              .toplevel = e->toplevel};
+  env ans = copy_env(e);
+  ans->break_lab       = &Opt(break_l);
+  ans->fallthru_info   = &Opt(&$(fallthru_l,
+				 fallthru_binders,
+				 next_case_env->varmap));
+  ans->to_pop_break    = 0;
+  ans->to_pop_fallthru = 0;
+  return ans;
 }
+
 static env last_switchclause_env(env e, var break_l) {
-  return &Env{.break_lab     = &Opt(break_l),
-              .continue_lab  = e->continue_lab,
-	      .fallthru_info = null, // not allowed in last case
-              .varmap = e->varmap,
-              .to_pop_break    = 0,
-              .to_pop_continue = e->to_pop_continue,
-              .to_pop_return   = e->to_pop_return,
-	      .to_pop_fallthru = 0, // impossible
-              .toplevel = e->toplevel};
+  env ans = copy_env(e);
+  ans->break_lab     = &Opt(break_l);
+  ans->fallthru_info = null; // not allowed in last case
+  ans->to_pop_break  = 0;
+  return ans;
 }
 
 // must have no pattern vars and type is int, char, or enum of a type
 // with no value constructors. (If it weren't for allowing fallthru
 // anywhere, we wouldn't need the next_l.)
 static env switch_as_switch_env(env e, var next_l) {
-  return &Env{.break_lab     = null,
-	      .continue_lab  = e->continue_lab,
-	      .fallthru_info = &Opt(&$(next_l,null,Dict::empty(qvar_cmp))),
-	      .varmap = e->varmap,
-	      .to_pop_break    = 0,
-              .to_pop_continue = e->to_pop_continue,
-              .to_pop_return   = e->to_pop_return,
-	      .to_pop_fallthru = 0,
-              .toplevel = e->toplevel};
+  env ans = copy_env(e);
+  ans->break_lab       = null;
+  ans->fallthru_info   = &Opt(&$(next_l,null,Dict::empty(qvar_cmp)));
+  ans->to_pop_break    = 0;
+  ans->to_pop_fallthru = 0;
+  return ans;
 }
 
 // printf_to_c(p,aopt,args,typs)
@@ -896,7 +875,7 @@ static exp printf_to_c(primop p,Opt_t<exp> aopt,list<exp> args,list<typ> typs) {
       if (c2 != '%') { // all but %% consume an arg and typ
         if (args == null || typs == null)
             toc_impos(xprintf("missing arg to %s", Absynpp::prim2string(p)));
-        let temp = temp_var();
+        _ temp = temp_var();
         rev_temps  = &cons(&$(temp,typs->hd,args->hd),rev_temps);
         rev_result = &cons(var_exp(temp,DL),rev_result);
         args = args->tl;
@@ -972,14 +951,14 @@ static exp make_struct(qvar x, typ struct_typ, stmt s,
 static exp init_tuple(env nv, bool pointer, list<exp> es) {
   // $(e1,...,en)  -> ({ t x;   x.f1 = e1; ... x.fn = en; x})
   // &$(e1,...,en) -> ({ t * x; x->f1 = e1; ... x->fn = en; x})
-  let tqs = List::map(tup_to_c,es);
-  let n   = add_tuple_type(tqs);
+  _ tqs = List::map(tup_to_c,es);
+  _ n   = add_tuple_type(tqs);
 
-  let x    = temp_var();
-  let xexp = var_exp(x,DL);
-  let s    = exp_stmt(xexp,DL);
+  _ x    = temp_var();
+  _ xexp = var_exp(x,DL);
+  _ s    = exp_stmt(xexp,DL);
 
-  let lval_f = pointer ? structarrow_exp : structmember_exp;
+  _ lval_f = pointer ? structarrow_exp : structmember_exp;
 
   bool is_atomic = true;
   es = List::rev(es);
@@ -995,23 +974,23 @@ static exp init_tuple(env nv, bool pointer, list<exp> es) {
 
 static exp init_struct(env nv,bool pointer,list<$(list<designator>,exp)@> dles, 
 		       typedef_name_t tdn) {
-  let x    = temp_var();
-  let xexp = var_exp(x,DL);
-  let s    = exp_stmt(xexp,DL);
+  _ x    = temp_var();
+  _ xexp = var_exp(x,DL);
+  _ s    = exp_stmt(xexp,DL);
 
-  let lval_f = pointer ? structarrow_exp : structmember_exp;
+  _ lval_f = pointer ? structarrow_exp : structmember_exp;
 
   bool is_atomic = true;
 
-  for(let es = List::rev(dles); es != null; es = es->tl) {
+  for(_ es = List::rev(dles); es != null; es = es->tl) {
     let &$(ds,e) = es->hd;
     is_atomic = is_atomic && atomic_typ(e->topt->v);
     if(ds == null)
       toc_impos("empty designator list");
     if(ds->tl != null) {
       // untested
-      let y    = temp_var();
-      let yexp = var_exp(y,DL);
+      _ y    = temp_var();
+      _ yexp = var_exp(y,DL);
       for(; ds != null; ds = ds->tl)
 	switch (ds->hd) {
 	case FieldName(f):
@@ -1093,8 +1072,7 @@ static void exp_to_c(env nv, exp e) {
     e->r = signed_int_exp(0,DL)->r; break;
   case Const_e(_): break;
   case Var_e(qv,b): 
-    try
-      e->r = Dict::lookup(nv->varmap,qv)->r;
+    try e->r = Dict::lookup(nv->varmap,qv)->r;
     catch {
     case Dict::Absent:
        toc_impos(xprintf("Can't find %s in exp_to_c, Var\n", qvar2string(qv)));
@@ -1471,14 +1449,14 @@ static void exp_to_c(env nv, exp e) {
     decls = &cons(&$(a,ptr_typ,(Opt_t<exp>)&Opt(ainit)),decls);
     decls = &cons(&$(x1,uint_t,null),decls);
     if (is_tagged_array) {
-      let b = temp_var();
-      let t = typ_to_c(old_typ);
+      _ b = temp_var();
+      _ t = typ_to_c(old_typ);
       typ strt_typ;
       switch (compress(t)) {
       case PointerType(st,_,_,_): strt_typ = st; break;
       default: strt_typ = toc_impos("comprehension: not a pointer"); break;
       }
-      let binit = &Opt(cast_exp(t,malloc_ptr(sizeof_exp(strt_typ,DL)),DL));
+      _ binit = &Opt(cast_exp(t,malloc_ptr(sizeof_exp(strt_typ,DL)),DL));
       decls = &cons(&$(b,t,(Opt_t<exp>)binit),decls);
       s = seq_stmt(assign_stmt(structarrow_exp(var_exp(b,DL),"sz",DL),
 			       var_exp(max,DL),DL),s,DL);
@@ -1487,8 +1465,8 @@ static void exp_to_c(env nv, exp e) {
       s = seq_stmt(s,exp_stmt(var_exp(b,DL),DL),DL);
     } else // not a tagged array -- just return a
       s = seq_stmt(s,exp_stmt(var_exp(a,DL),DL),DL);
-    for (let ds = decls; ds != null; ds = ds->tl) {
-      let d = ds->hd;
+    for (_ ds = decls; ds != null; ds = ds->tl) {
+      _ d = ds->hd;
       s = declare_stmt(d[0],d[1],d[2],s,DL);
     }
     e->r = stmt_exp(s,DL)->r;
@@ -1500,8 +1478,8 @@ static void exp_to_c(env nv, exp e) {
       e->r = init_struct(nv,false,dles,tdn)->r;
     else {
       // At top-level must use deisignators
-      let n = collapse_qvar(tdn);
-      for (let es = dles; es != null; es = es->tl)
+      _ n = collapse_qvar(tdn);
+      for (_ es = dles; es != null; es = es->tl)
 	exp_to_c(nv,es->hd[1]);
       e->r = cast_exp(strctq(n), unresolvedmem_exp(null,dles,DL),DL)->r;
     }
@@ -1817,6 +1795,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
 			  goto_stmt(fail_lab,DL), DL);
     }
     break;
+
   case Tuple_p(ps):
     // given the pattern $(p1,p2,...,pn)
     //    v1 = r->f1; if (matches(v1,p1)) goto L1 else goto fail_lab;
@@ -1846,23 +1825,6 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
     }
     s = seq_stmts(ss,DL);
     break;
-  case Pointer_p(p2):
-    // if (r == 0) goto fail_lab; v = *r; match(v,p2);
-    _ v = temp_var();
-    _ t2 = p2->topt->v;
-    decls = &cons(&$(v,typ_to_c(t2)),decls);
-    _ result = xlate_pat(nv,t2,var_exp(v,DL),r,p2, succ_lab,fail_lab,decls);
-    nv    = result[0];
-    decls = result[1];
-    _ s2 = result[2];
-    _ s3 = seq_stmt(assign_stmt(var_exp(v,DL),deref_exp(r,DL),DL),s2,DL);
-    if (really_is_nullable(t))
-      s = ifthenelse_stmt(eq_exp(r,signed_int_exp(0,DL),DL),
-			  goto_stmt(fail_lab,DL),
-			  s3,DL);
-    else
-      s = s3;
-    break;
   case Struct_p(sd,ot,ts,dlps0):
     // similar to translation of tuple pattern
     list<stmt> ss = null;
@@ -1887,6 +1849,23 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
     s = seq_stmts(ss,DL);
     break;
 
+  case Pointer_p(p2):
+    // if (r == 0) goto fail_lab; v = *r; match(v,p2);
+    _ v = temp_var();
+    _ t2 = p2->topt->v;
+    decls = &cons(&$(v,typ_to_c(t2)),decls);
+    _ result = xlate_pat(nv,t2,var_exp(v,DL),r,p2, succ_lab,fail_lab,decls);
+    nv    = result[0];
+    decls = result[1];
+    _ s2 = result[2];
+    _ s3 = seq_stmt(assign_stmt(var_exp(v,DL),deref_exp(r,DL),DL),s2,DL);
+    if (really_is_nullable(t))
+      s = ifthenelse_stmt(eq_exp(r,signed_int_exp(0,DL),DL),
+			  goto_stmt(fail_lab,DL),
+			  s3,DL);
+    else
+      s = s3;
+    break;
   case UnknownId_p(_):         s = toc_impos("unknownid");     break;
   case UnknownCall_p(_,_,_):   s = toc_impos("unknowncall");   break;
   case UnknownFields_p(_,_,_): s = toc_impos("unknownfields"); break;
@@ -1935,7 +1914,7 @@ static $(var,var,switch_clause)@ gen_label(switch_clause sc) {
 }
 static void xlate_switch(env nv, stmt whole_s, exp e, list<switch_clause> scs) {
   exp_to_c(nv,e);
-  let t = e->topt->v;
+  _ t = e->topt->v;
 
   // decide if we can leave it as a switch
   bool leave_as_switch;
@@ -1943,7 +1922,7 @@ static void xlate_switch(env nv, stmt whole_s, exp e, list<switch_clause> scs) {
   case IntType(_,_,Unboxed): leave_as_switch = true;  break;
   default:                   leave_as_switch = false; break;
   }
-  for(let scs1 = scs; scs1 != null; scs1 = scs1->tl)
+  for(_ scs1 = scs; scs1 != null; scs1 = scs1->tl)
     if(scs1->hd->pat_vars->v != null) {
       leave_as_switch = false;
       break;
@@ -1951,8 +1930,8 @@ static void xlate_switch(env nv, stmt whole_s, exp e, list<switch_clause> scs) {
   if(leave_as_switch) {
     // note: fallthru in last case can't happen, else this is busted
     var next_l = fresh_label();
-    for(let scs1 = scs; scs1 != null; scs1 = scs1->tl) {
-      let s = scs1->hd->body;
+    for(_ scs1 = scs; scs1 != null; scs1 = scs1->tl) {
+      _ s = scs1->hd->body;
       scs1->hd->body = label_stmt(next_l,s,DL);
       next_l = fresh_label();
       stmt_to_c(switch_as_switch_env(nv,next_l),s);
@@ -1973,19 +1952,19 @@ static void xlate_switch(env nv, stmt whole_s, exp e, list<switch_clause> scs) {
   // generate the tests for each case, branching to the case's
   // label on success and to the next test on false.
   // do tests backwards so as to get vars for fallthrus
-  for (let lscs2 = lscs; lscs2 != null; lscs2 = lscs2->tl) {
+  for (_ lscs2 = lscs; lscs2 != null; lscs2 = lscs2->tl) {
     switch_clause sc = lscs2->hd[2];
     var fail_lab = (lscs2->tl == null) ? end_l : lscs2->tl->hd[0];
     var succ_lab = lscs2->hd[1];
     if (sc->where_clause == null) {
-      let res = xlate_pat(nv,t,r,path,sc->pattern,succ_lab,fail_lab,decls);
+      _ res = xlate_pat(nv,t,r,path,sc->pattern,succ_lab,fail_lab,decls);
       nvs   = &cons(res[0],nvs);
       decls = res[1];
       test_stmts = &cons(label_stmt(lscs2->hd[0],res[2],DL),test_stmts);
     } else {
-      let e = sc->where_clause->v;
-      let intermed_lab = fresh_label();
-      let res = xlate_pat(nv,t,r,path,sc->pattern,intermed_lab,fail_lab,decls);
+      _ e = sc->where_clause->v;
+      _ intermed_lab = fresh_label();
+      _ res = xlate_pat(nv,t,r,path,sc->pattern,intermed_lab,fail_lab,decls);
       exp_to_c(res[0], e); // Translate where clause with pattern vars in scope
       nvs   = &cons(res[0],nvs);
       decls = res[1];
@@ -1996,13 +1975,13 @@ static void xlate_switch(env nv, stmt whole_s, exp e, list<switch_clause> scs) {
 			 test_stmts);
     }
   }
-  let test_stmt = seq_stmts(List::imp_rev(test_stmts),DL);
+  _ test_stmt = seq_stmts(List::imp_rev(test_stmts),DL);
   nvs = List::imp_rev(nvs);
   // now generate all of the statements for the cases
   stmt clauses = skip_stmt(DL);
   if(lscs != null) {
     for (; lscs->tl != null; lscs = lscs->tl, nvs = nvs->tl) {
-      let  e = nvs->hd;
+      _ e = nvs->hd;
       stmt s = lscs->hd[2]->body;
       stmt_to_c(non_last_switchclause_env(e,
 					  end_l,
@@ -2012,7 +1991,7 @@ static void xlate_switch(env nv, stmt whole_s, exp e, list<switch_clause> scs) {
 		s);
       clauses = seq_stmt(clauses, label_stmt(lscs->hd[1], s, DL), DL);
     }
-    let  e = nvs->hd;
+    _    e = nvs->hd;
     stmt s = lscs->hd[2]->body;
     stmt_to_c(last_switchclause_env(e, end_l), s);
     clauses = seq_stmt(clauses, label_stmt(lscs->hd[1], s, DL), DL);
@@ -2043,9 +2022,6 @@ extern $(env,list<decl>) decls_to_c(env nv, list<decl> ds, bool top);
 static void stmt_to_c(env nv, stmt s) {
   // written to be self-tail recursive
   while (true) {
-#ifdef DEBUG
-    warn(s->loc,"translating statement");
-#endif
     switch (s->r) {
     case Skip_s:
       return;
@@ -2065,14 +2041,14 @@ static void stmt_to_c(env nv, stmt s) {
       // reset handler
       // FIX:  share code between break, continue, return, fallthru
       if (nv->to_pop_return != 0) {
-	let call_exp = fncall_exp(var_exp(&$(null,(string)"_npop_handler"),DL),
+	_ call_exp = fncall_exp(var_exp(&$(null,(string)"_npop_handler"),DL),
 				&cons(uint_exp(nv->to_pop_return-1,DL),null),
 				DL);
-	let call_stmt = exp_stmt(call_exp,DL);
+	_ call_stmt = exp_stmt(call_exp,DL);
 	// must run the expression before popping the handler
 	if (topt != null) {
-	  let x = temp_var();
-	  let retn_stmt = return_stmt(&Opt(var_exp(x,DL)),DL);
+	  _ x = temp_var();
+	  _ retn_stmt = return_stmt(&Opt(var_exp(x,DL)),DL);
 	  s->r = declare_stmt(x,topt->v,eopt,seq_stmt(call_stmt,
 							   retn_stmt,DL),
 				    DL)->r;
@@ -2096,10 +2072,10 @@ static void stmt_to_c(env nv, stmt s) {
       // reset handler
       // FIX:  share code between break, continue, return, fallthru
       if (nv->to_pop_break != 0) {
-	let call_exp = fncall_exp(var_exp(&$(null,(string)"_npop_handler"),DL),
+	_ call_exp = fncall_exp(var_exp(&$(null,(string)"_npop_handler"),DL),
 				&cons(uint_exp(nv->to_pop_break-1,DL),null),
 				DL);
-	let call_stmt = exp_stmt(call_exp,DL);
+	_ call_stmt = exp_stmt(call_exp,DL);
 	s->r = seq_stmt(call_stmt,new_stmt(s->r,DL),DL)->r;
       }
       return;
@@ -2109,10 +2085,10 @@ static void stmt_to_c(env nv, stmt s) {
       // reset handler
       // FIX:  share code between break, continue, return, fallthru
       if (nv->to_pop_continue != 0) {
-	let call_exp = fncall_exp(var_exp(&$(null,(string)"_npop_handler"),DL),
+	_ call_exp = fncall_exp(var_exp(&$(null,(string)"_npop_handler"),DL),
 				&cons(uint_exp(nv->to_pop_continue-1,DL),null),
 				DL);
-	let call_stmt = exp_stmt(call_exp,DL);
+	_ call_stmt = exp_stmt(call_exp,DL);
 	s->r = seq_stmt(call_stmt,new_stmt(s->r,DL),DL)->r;
       }
       return;
@@ -2131,8 +2107,8 @@ static void stmt_to_c(env nv, stmt s) {
       }
       let &$(l,vs,other_vmap) = nv->fallthru_info->v;
       stmt s2 = goto_stmt(l, DL);
-      let vs2 = List::rev(vs);
-      let es2 = List::rev(es);
+      _ vs2 = List::rev(vs);
+      _ es2 = List::rev(es);
       for(; vs2 != null; vs2 = vs2->tl, es2 = es2->tl) {
 	exp_to_c(nv,es2->hd);
 	s2 = seq_stmt(assign_stmt(Dict::lookup(other_vmap,vs2->hd),
@@ -2143,10 +2119,10 @@ static void stmt_to_c(env nv, stmt s) {
       // reset handler
       // FIX:  share code between break, continue, return, fallthru
       if (nv->to_pop_fallthru != 0) {
-	let call_exp = fncall_exp(var_exp(&$(null,(string)"_npop_handler"),DL),
+	_ call_exp = fncall_exp(var_exp(&$(null,(string)"_npop_handler"),DL),
 				 &cons(uint_exp(nv->to_pop_fallthru-1,DL),null),
 				 DL);
-	let call_stmt = exp_stmt(call_exp,DL);
+	_ call_stmt = exp_stmt(call_exp,DL);
 	s->r = seq_stmt(call_stmt,new_stmt(s->r,DL),DL)->r;
       }
       return;
@@ -2191,41 +2167,41 @@ static void stmt_to_c(env nv, stmt s) {
       //
       // [Auxillary functions are defined in cyc_runtime.c]
       qvar e = temp_var();
-      let e_exp = var_exp(e,DL);
+      _ e_exp = var_exp(e,DL);
       // e_exp needs a typ because it'll go through exp_to_c;
       // as well, it must be in varmap
-      let e_typ = typ_to_c(exn_typ);
+      _ e_typ = typ_to_c(exn_typ);
       e_exp->topt = &Opt(e_typ);
       nv = add_varmap(nv,e,e_exp);
-      let h     = temp_var();
-      let h_exp = var_exp(h,DL);
-      let h_typ = nullableptr_typ(strct("_handler_cons"),empty_tqual());
-      let setjmp_exp      = var_exp(&$(null,(string)"setjmp"),DL);
-      let pushhandler_exp = var_exp(&$(null,(string)"_push_handler"),DL);
-      let pophandler_exp  = var_exp(&$(null,(string)"_pop_handler"),DL);
+      _ h     = temp_var();
+      _ h_exp = var_exp(h,DL);
+      _ h_typ = nullableptr_typ(strct("_handler_cons"),empty_tqual());
+      _ setjmp_exp      = var_exp(&$(null,(string)"setjmp"),DL);
+      _ pushhandler_exp = var_exp(&$(null,(string)"_push_handler"),DL);
+      _ pophandler_exp  = var_exp(&$(null,(string)"_pop_handler"),DL);
       //    let trycatch_exp = var_exp(&$(null,(string)"_trycatch"),DL);
       stmt_to_c(try_env(nv),body);
-      let tryandpop_stmt = seq_stmt(body,
+      _ tryandpop_stmt = seq_stmt(body,
 				  exp_stmt(fncall_exp(pophandler_exp, null,
 						      DL), DL),DL);
       // add a default case which re-throws the exception
-      let x    = temp_var();
-      let xexp = var_exp(x,DL);
+      _ x    = temp_var();
+      _ xexp = var_exp(x,DL);
       xexp->topt = &Opt(exn_typ);
-      let p = &Pat{.r=Var_p(new_vardecl(x,exn_typ,null)),
+      _ p = &Pat{.r=Var_p(new_vardecl(x,exn_typ,null)),
 		   .topt=&Opt(exn_typ),
 		   .loc=DL};
-      let te = throw_exp(xexp,DL);
+      _ te = throw_exp(xexp,DL);
       te->topt = &Opt(VoidType);
-      let rs = exp_stmt(te,DL);
-      let default_case =
+      _ rs = exp_stmt(te,DL);
+      _ default_case =
         &Switch_clause{.pattern=p,.pat_vars=&Opt((list<qvar>)&cons(x,null)),
 		       .where_clause=null,.body=rs,.loc=DL};
-      let handler_stmt = switch_stmt(e_exp,
-				     List::append(scs,
-						  &cons(default_case,null)),DL);
+      _ handler_stmt = switch_stmt(e_exp,
+				   List::append(scs,
+						&cons(default_case,null)),DL);
       stmt_to_c(nv,handler_stmt);
-      let setjmp_call = // (exn)setjmp(h->handler)
+      _ setjmp_call = // (exn)setjmp(h->handler)
 	cast_exp(e_typ,
 		 fncall_exp(setjmp_exp,
 			    &cons(structarrow_exp(h_exp,"handler",DL), null),
@@ -2247,15 +2223,12 @@ static void stmt_to_c(env nv, stmt s) {
 ///////////////////////////////////////////////////////////////
 // function declaration translation -- straightforward
 static void fndecl_to_c(env nv, fndecl f) {
-#ifdef DEBUG
-  warn(f->body->loc,xprintf("translating %s",qvar2string(f->name)));
-#endif DEBUG
   f->name     = collapse_qvar(f->name);
   f->tvs      = null;
   f->ret_type = typ_to_c(f->ret_type);
-  for (let args=f->args; args != null; args = args->tl) {
+  for (_ args=f->args; args != null; args = args->tl) {
     args->hd[2] = typ_to_c(args->hd[2]);
-    let x = &$(null,args->hd[0]);
+    _ x = &$(null,args->hd[0]);
     nv = add_varmap(nv,x,var_exp(x,DL));
   }
   stmt_to_c(clear_toplevel(nv),f->body);
@@ -2272,11 +2245,11 @@ static scope scope_to_c(scope s) {
 // struct declarations -- straightforward
 Opt_t<Dict::Dict<var,structdecl>> structs_so_far = null;
 static void structdecl_to_c(structdecl s) {
-  let n = collapse_qvar(s->name->v);
+  _ n = collapse_qvar(s->name->v);
   if (structs_so_far == null) structs_so_far =
 				&Opt(Dict::empty(String::zstrcmp));
   bool seen_defn_before;
-  let dopt = Dict::lookup_opt(structs_so_far->v, n[1]);
+  _ dopt = Dict::lookup_opt(structs_so_far->v, n[1]);
   if (dopt == null) {
     seen_defn_before = false;
     structs_so_far->v = Dict::insert(structs_so_far->v,n[1],s);
@@ -2294,15 +2267,13 @@ static void structdecl_to_c(structdecl s) {
     (s->sc == Extern || s->sc == Static) ? Public : scope_to_c(s->sc);
   s->tvs  = null;
   s->name = &Opt(n);
-  if (s->fields != null) {
+  if (s->fields != null)
     if (seen_defn_before)
       s->fields = null;
     else {
-      for (let fields = s->fields->v; fields != null; fields = fields->tl) {
+      for (_ fields = s->fields->v; fields != null; fields = fields->tl)
 	fields->hd[2] = typ_to_c_array(fields->hd[2]);
-      }
     }
-  }
 }
 
 // enum declarations -- tricky
@@ -2340,16 +2311,16 @@ static void structdecl_to_c(structdecl s) {
 //
 static Opt_t<Dict::Dict<var,enumdecl>> enums_so_far = null;
 static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
-  let n = collapse_qvar(ed->name->v);
+  _ n = collapse_qvar(ed->name->v);
   if (enums_so_far == null)
     enums_so_far = &Opt(Dict::empty(String::zstrcmp));
   bool seen_before;
   bool seen_defn_before;
-  let dopt = Dict::lookup_opt(enums_so_far->v, n[1]);
+  _ dopt = Dict::lookup_opt(enums_so_far->v, n[1]);
   if (dopt == null) {
-    seen_before = false;
+    seen_before      = false;
     seen_defn_before = false;
-    enums_so_far->v = Dict::insert(enums_so_far->v,n[1],ed);
+    enums_so_far->v  = Dict::insert(enums_so_far->v,n[1],ed);
   } else {
     seen_before = true;
     if (dopt->v->fields == null) {
@@ -2361,7 +2332,7 @@ static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
 
   if (!seen_before) {
     // add "typedef void *n" to the declarations
-    let tdef = &Typedefdecl{.name=n,.tvs=null,.defn=void_star_typ()};
+    _ tdef = &Typedefdecl{.name=n,.tvs=null,.defn=void_star_typ()};
     res = &cons(new_decl(Typedef_d(tdef),DL),res);
   }
   typ t = TypedefType(n,null,&Opt(void_star_typ()));
@@ -2369,40 +2340,40 @@ static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
   // FIX:  need to deal with explicit tags
   int tag_count = 0;
   int box_count = 0;
-  for (let fields = (ed->fields == null) ? null : ed->fields->v;
+  for (_ fields = (ed->fields == null) ? null : ed->fields->v;
        fields != null; fields = fields->tl) {
     enumfield f = fields->hd;
     // FIX
     if (f->tag != null) toc_impos("can't deal with enum tags yet");
     if (f->typs == null) {
       // Declare an integer constant for the unboxed field
-      let eopt = (ed->sc == Extern) ? null :
+      _ eopt = (ed->sc == Extern) ? null :
 	        &Opt(cast_exp(t,signed_int_exp(tag_count++,DL),DL));
-      let vd = new_vardecl(collapse_qvar(f->name), t, eopt);
+      _ vd = new_vardecl(collapse_qvar(f->name), t, eopt);
       vd->sc = scope_to_c(ed->sc);
       vd->tq = &Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
       res = &cons(new_decl(Var_d(vd),DL),res);
     } else {
       // Declare an integer constant for the tag and a struct for the field
-      let eopt = (ed->sc == Extern) ? null :
-               &Opt(signed_int_exp(box_count++,DL));
-      let vd = new_vardecl(collapse_qvar_tag(f->name,"_tag"), sint_t, eopt);
+      _ eopt = (ed->sc == Extern) ? null : &Opt(signed_int_exp(box_count++,DL));
+      _ vd   = new_vardecl(collapse_qvar_tag(f->name,"_tag"), sint_t, eopt);
       vd->sc = scope_to_c(ed->sc);
       vd->tq = &Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
       res = &cons(new_decl(Var_d(vd),DL),res);
       // compute the fields for the struct, adding in a tag field
       if (!seen_defn_before) {
-        let fs = null;
-        int i = 1;
-        for (let ts = f->typs; ts != null; ts = ts->tl, i++) {
-          let fname = xprintf("f%d",i);
+        _   fs = null;
+        int i  = 1;
+        for (_ ts = f->typs; ts != null; ts = ts->tl, i++) {
+          _ fname = xprintf("f%d",i);
           fs = &cons(&$(fname,ts->hd[0],typ_to_c_array(ts->hd[1])),fs);
         }
         fs = List::imp_rev(fs);
         fs = &cons(&$((string)"tag",empty_tqual(),sint_t),fs);
-        let sd = &Structdecl{.sc = Public,
-                             .name = &Opt(collapse_qvar_tag(f->name,"_struct")),
-                             .tvs = null, .fields = &Opt(fs)};
+        _ sd = &Structdecl{.sc = Public,
+			   .name = &Opt(collapse_qvar_tag(f->name,"_struct")),
+			   .tvs = null, 
+			   .fields = &Opt(fs)};
         res = &cons(new_decl(Struct_d(sd),DL),res);
       }
     }
@@ -2438,32 +2409,32 @@ static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
 //
 static Opt_t<Dict::Dict<var,xenumdecl>> xenums_so_far = null;
 static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
-  let n = collapse_qvar(xd->name);
+  _ n = collapse_qvar(xd->name);
 
   if (xd->fields == null) {
-    let t  = nullableptr_typ(strct("_xenum_struct"),empty_tqual());
-    let td = &Typedefdecl{.name = n, .tvs = null, .defn = t};
+    _ t  = nullableptr_typ(strct("_xenum_struct"),empty_tqual());
+    _ td = &Typedefdecl{.name = n, .tvs = null, .defn = t};
     res = &cons(new_decl(Typedef_d(td),DL),res);
   } else {
     if (xenums_so_far == null)
       xenums_so_far = &Opt(Dict::empty(String::zstrcmp));
-    for (let fs = xd->fields; fs != null; fs = fs->tl) {
+    for (_ fs = xd->fields; fs != null; fs = fs->tl) {
       enumfield f = fs->hd;
       if (f->tag != null) unimp("xenum:  can't deal with explicit tags");
       string fn      = collapse_qvar(f->name)[1];
-      let    sz_exp  = uint_exp(fn.size,DL);
-      let    tag_typ = ArrayType(uchar_t,empty_tqual(),FixedArray(sz_exp));
+      _      sz_exp  = uint_exp(fn.size,DL);
+      _      tag_typ = ArrayType(uchar_t,empty_tqual(),FixedArray(sz_exp));
       Opt_t<exp> initopt = null;
       if (xd->sc != Extern)
 	initopt = &Opt(string_exp(fn,DL));
-      let tag_decl = new_vardecl(collapse_qvar_tag(f->name,"_tag"),
-				 tag_typ, initopt);
+      _ tag_decl = new_vardecl(collapse_qvar_tag(f->name,"_tag"),
+			       tag_typ, initopt);
       tag_decl->sc = xd->sc;
       res = &cons(new_decl(Var_d(tag_decl),DL),res);
 
       bool seen_before;
       bool seen_defn_before;
-      let dopt = Dict::lookup_opt(xenums_so_far->v,fn);
+      _ dopt = Dict::lookup_opt(xenums_so_far->v,fn);
       if (dopt == null) {
 	seen_before      = false;
 	seen_defn_before = false;
@@ -2481,13 +2452,13 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
         list<$(field_name,tqual,typ)@> fields = null;
         int i = 1;
         for (list<$(tqual,typ)@> ts = f->typs; ts != null; ts = ts->tl, i++) {
-          let newf = &$(xprintf("f%d",i),ts->hd[0],typ_to_c_array(ts->hd[1]));
+          _ newf = &$(xprintf("f%d",i),ts->hd[0],typ_to_c_array(ts->hd[1]));
           fields = &cons(newf,fields);
         }
         fields = &cons(&$((string)"tag",empty_tqual(),
 			  nullableptr_typ(uchar_t,empty_tqual())),
         List::rev(fields));
-        let strct_decl =
+        _ strct_decl =
 	  &Structdecl{.sc     = Public,
 		      .name   = &Opt(collapse_qvar_tag(f->name,"_struct")),
 		      .tvs    = null,
@@ -2516,12 +2487,12 @@ static stmt letdecl_to_c(env nv, pat p, Opt_t<typ> topt, exp e,
     xlate_pat(nv, t, var_exp(x,DL),address_exp(var_exp(x,DL),DL),p,
 	      succ_lab, fail_lab, null);
   stmt_to_c(nv,s);
-  let succ_stmt = label_stmt(succ_lab,s,DL);
+  _ succ_stmt = label_stmt(succ_lab,s,DL);
   if(exhaust)
     s = declare_stmt(x,typ_to_c(t),&Opt(e),seq_stmt(test_stmt,succ_stmt,DL),DL);
   else {
-    let e3 = newthrow_exp(var_exp(&$(null,(string)"Match_Exception"),DL));
-    let fail_stmt = label_stmt(fail_lab,exp_stmt(e3,DL),DL);
+    _ e3 = newthrow_exp(var_exp(&$(null,(string)"Match_Exception"),DL));
+    _ fail_stmt = label_stmt(fail_lab,exp_stmt(e3,DL),DL);
     s = declare_stmt(x,typ_to_c(t),&Opt(e),
 		     seq_stmt(test_stmt,
 			      seq_stmt(fail_stmt,succ_stmt,DL),DL),DL);
@@ -2590,12 +2561,12 @@ static $(env,list<decl>) decls_to_c(env nv, list<decl> ds, bool top) {
       res = &cons(d,res);
       break;
     case Namespace_d(v,ds2):
-      let p = decls_to_c(nv,ds2,top);
+      _ p = decls_to_c(nv,ds2,top);
       nv = p[0];
       res = List::append(List::rev(p[1]),res);
       break;
     case Using_d(q,ds2):
-      let p = decls_to_c(nv,ds2,top);
+      _ p = decls_to_c(nv,ds2,top);
       nv = p[0];
       res = List::append(List::rev(p[1]),res);
       break;

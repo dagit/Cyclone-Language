@@ -142,9 +142,14 @@ static bool ok_field_type(segment loc, tenv te, typ t) {
   }    
 }
 
-static void var_redecl_okay(genv_t ge, segment loc, var name, typ t, scope sc) {
-  switch (Dict::lookup_opt(ge->ordinaries,name)) {
-  case &Opt(VarRes(Global_b(vd))):
+// now returns whether there is a redeclaration or not -- needed for treeshaking
+static bool var_redecl_okay(genv_t ge, segment loc, var name, typ t, scope sc) {
+  Opt_t<$(resolved_t,bool)@> ans = Dict::lookup_opt(ge->ordinaries,name);
+  if(ans == null)
+    return false;
+  ans->v[1] = true; // this is very important or we'd shake out too much
+  switch (ans->v[0]) {
+  case VarRes(Global_b(vd)):
     // at most one non-extern
     if(sc != Extern && vd->sc != Extern) 
       terr(loc,xprintf("redeclaration of %s",name));
@@ -157,6 +162,7 @@ static void var_redecl_okay(genv_t ge, segment loc, var name, typ t, scope sc) {
     break;
   default: break;
   }
+  return true;
 }
 
 static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
@@ -174,7 +180,7 @@ static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
   // reject ill-formed type
   check_valid_type(loc,te,null,t);
   // check for redeclaration
-  var_redecl_okay(ge,loc,v,t,sc);
+  bool is_redecl = var_redecl_okay(ge,loc,v,t,sc);
   // if extern, make sure it has no initializer
   if (sc == Extern) {
     if(vd->initializer != null) 
@@ -198,7 +204,8 @@ static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
       terr(loc,"initializer is not a constant expression");
   }
   // add to environment
-  ge->ordinaries = Dict::insert(ge->ordinaries, v, VarRes(Global_b(vd)));
+  ge->ordinaries = Dict::insert(ge->ordinaries, v, 
+				&$(VarRes(Global_b(vd)),is_redecl));
 }
 
 static void tcFndecl(tenv te, genv_t ge, segment loc, fndecl fd) {
@@ -216,9 +223,10 @@ static void tcFndecl(tenv te, genv_t ge, segment loc, fndecl fd) {
   // reject ill-formed type
   check_fndecl_valid_type(loc,te,fd);
   // check for redeclaration
-  var_redecl_okay(ge, loc, v, t, sc);
+  bool is_redecl = var_redecl_okay(ge, loc, v, t, sc);
   // due to recursion, add function to environment before checking body
-  ge->ordinaries = Dict::insert(ge->ordinaries, v, VarRes(Funname_b(fd)));
+  ge->ordinaries = Dict::insert(ge->ordinaries, v, 
+				&$(VarRes(Funname_b(fd)),is_redecl));
   // DAN: Here is where I'm assuming the te can be imperatively screwed with
   //      while we're dealing with top-level stuff (though it's not too hard
   //      to undo that assumption)
@@ -360,7 +368,8 @@ static void tcStructdecl(tenv te, genv_t ge, segment loc, structdecl sd) {
     // FIX: check for consistent tquals?
   }
   // add the constructor to the environment
-  ge->ordinaries = Dict::insert(ge->ordinaries,  v, StructRes(sd));
+  ge->ordinaries = Dict::insert(ge->ordinaries,  v, 
+				&$(StructRes(sd), true));
   // undo our clobbering with the abstract version
   *sdp = sd;
 }
@@ -471,7 +480,8 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
       check_valid_type(f->loc,te,alltvs,typs->hd[1]);
     // FIX: check valid tquals?
     f->name[0] = te->ns;
-    ge->ordinaries = Dict::insert(ge->ordinaries, f->name[1], EnumRes(ed,f));
+    ge->ordinaries = Dict::insert(ge->ordinaries, f->name[1], 
+				  &$(EnumRes(ed,f), true));
   }
   // add the decl to the environment -- must be after variant-checking
   // (where we added an abstract version)
@@ -545,19 +555,22 @@ static void tcXenumdecl(tenv te, genv_t ge, segment loc, xenumdecl xd) {
       return;
     }
     ge_f->ordinaries = Dict::insert(ge_f->ordinaries, f->name[1],
-				    XenumRes(xd_result, f));
+				    &$(XenumRes(xd_result, f), true));
   }
 }
 
 // Typecheck a list, ds, of declarations in environment te.
 // As a side effect, all declarations and variable references are made
-// absolute, and "namespace" and "using" go away.
+// absolute, so later passes just recurse through namespace and using
+// New: a second pass shakes out unnecessary vardecls.
+// FIX: shake out type definitions too.
 void tc(tenv te, list<decl> ds0) {
+
+  genv_t ge = Dict::lookup(te->ae,te->ns); // no longer a copy!!!
 
   for (_ ds = ds0; ds != null; ds = ds->tl) {
     decl    d   = ds->hd;
     segment loc = d->loc;
-    genv_t  ge  = Dict::lookup(te->ae,te->ns); // no longer a copy!!!
 
     switch (d->r) {
     case Let_d(_,_,_,_): // FIX
@@ -597,4 +610,29 @@ void tc(tenv te, list<decl> ds0) {
       break;
     }
   }
+
+}
+
+// for tree-shaking (so we don't include the world)
+// Note: We must shake after all type-checking or we'll be too eager.
+// Note: All names should now be absolute.
+static bool vardecl_needed(tenv te, decl d) {
+  switch(d->r) {
+  case Var_d(vd): 
+    // get rid of externs that are never referenced
+    if(vd->sc != Extern)
+      return true;
+    let &$(nsl,name) = vd->name;
+    _ ge = Dict::lookup(te->ae,nsl);
+    return Dict::lookup(ge->ordinaries,name)[1];
+  case Using_d(_,*ds2p): fallthru(ds2p);
+  case Namespace_d(_,*ds2p):
+    *ds2p = treeshake(te,*ds2p);
+    return true;
+  default: return true;
+  }
+}
+
+list<decl> treeshake(tenv te, list<decl> ds) {
+  return List::filter_c(vardecl_needed,te,ds);
 }

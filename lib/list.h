@@ -161,5 +161,8 @@ extern list<`a> from_array<`a>(`a arr[?]);
 extern list<`a> tabulate<`a>(int n, `a f(int));
 extern list<`a> tabulate_c<`a,`b>(int n, `a f(`b,int), `b env);
 
+// Warning: Fairly inefficient implementation.
+extern list<`a> filter_c<`a,`b>(bool f(`b,`a), `b env, list<`a> l);
+
 }
 #endif

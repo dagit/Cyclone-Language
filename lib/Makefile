@@ -29,7 +29,7 @@ $(OUT_PREFIX)$(CYCLIB): $(addprefix $(OUT_PREFIX), $(O_LIBS) $(RUNTIME).o)
 	ar qc $@ $^
 
 precore_c.h: precore.h
-	$(CYCC) $(CYC_FLAGS_PP) -noexpandtypedefs $^ | grep -v __sFILE > $@
+	$(CYCC) $(CYC_FLAGS_PP) -noremoveunused -noexpandtypedefs $^ | grep -v __sFILE > $@
 
 # For machine-generated we need special targets (the .cyc is prefixed)
 $(OUT_PREFIX)lineno.c : $(OUT_PREFIX)lineno.cyc

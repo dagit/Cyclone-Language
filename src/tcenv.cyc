@@ -90,7 +90,7 @@ struct Genv {
   Dict::Dict<var,enumdecl@>   enumdecls;
   Dict::Dict<var,xenumdecl@>  xenumdecls;
   Dict::Dict<var,typedefdecl> typedefs; // no indirection b/c no redeclaration
-  Dict::Dict<var,resolved_t>  ordinaries;
+  Dict::Dict<var,$(resolved_t,bool)@> ordinaries; // bool for tree-shaking
   list<list<var>>             availables; // "using" namespaces
 };
 
@@ -214,16 +214,18 @@ static $(list<var>,`a) * scoped_lookup<`a>(tenv te, segment loc,
 }
 
 static resolved_t lookup_ordinary_global_f(genv_t ge,var v) {
-  return Dict::lookup(ge->ordinaries,v);
+  $(resolved_t,bool)@ ans = Dict::lookup(ge->ordinaries,v);
+  ans[1] = true;
+  return ans[0];
 }
 static resolved_t lookup_ordinary_global(tenv te,segment loc,qvar q) {
   let &$(nsl,v) = q;
   try {
     if (nsl == null)
       return scoped_lookup(te, loc, lookup_ordinary_global_f, v)[1];
-    genv_t ge = lookup_namespace(te,loc,nsl);
-    return Dict::lookup(ge->ordinaries,v);
-  } catch { case Dict::Absent: return VarRes(Unresolved_b); }
+    return lookup_ordinary_global_f(lookup_namespace(te,loc,nsl),v);
+  } catch { case Dict::Absent: 
+    return VarRes(Unresolved_b); }
 }
 
 list<var> resolve_namespace(tenv te, segment loc, list<var> ns) {

@@ -30,12 +30,14 @@ using String;
 static bool pp_r       = false;
 static bool up_r       = false;
 static bool noexpand_r = false;
+static bool noshake_r  = false;
 static bool tc_r       = false;
 static bool toc_r      = false;
 
 bool @ pp       = &pp_r;
 bool @ up       = &up_r;
 bool @ noexpand = &noexpand_r;
+bool @ noshake  = &noshake_r;
 bool @ tc       = &tc_r;
 bool @ toc      = &toc_r;
 
@@ -98,12 +100,13 @@ void compile_file(string filename) {
   // typecheck
   if (tds != null && *tc) try {
     Absynpp::expand_typedefs = ! *noexpand;
-    Tc::tc(Tcenv::tc_init(),tds);
-    fprintf(cyc_stderr,"Type checking completed\n");
-    fflush(cyc_stderr);
+    Tcenv::tenv te = Tcenv::tc_init();
+    Tc::tc(te,tds);
+    if(! *noshake)
+      tds = Tc::treeshake(te,tds);
+    fprintf(cyc_stderr,"Type checking completed\n"); fflush(cyc_stderr);
     ControlFlow::cf_check(tds);
-    fprintf(cyc_stderr,"Control-flow checking completed\n");
-    fflush(cyc_stderr);
+    fprintf(cyc_stderr,"Control-flow checking completed\n"); fflush(cyc_stderr);
   } catch {
   case Tcutil::TypeErr: 
     fprintf(cyc_stderr,"Type error!\n");
@@ -176,6 +179,8 @@ int cyc_main() {
 	     (string)"ugly print"),
     &cons(&$((string)"-noexpandtypedefs",Set_spec(noexpand),
              (string)"don't expand typedefs in pretty printing"),
+    &cons(&$((string)"-noremoveunused",Set_spec(noshake),
+	     (string)"don't remove externed variables that aren't used"),
     &cons(&$((string)"-tc",Set_spec(tc), 
 	     (string)"type check"),
     &cons(&$((string)"-toc",Set_spec(toc), 
@@ -186,7 +191,7 @@ int cyc_main() {
 	     (string)"pass definition to pre-processor"),
     &cons(&$((string)"-check_null",Unit_spec(set_check_null), 
 	     (string)"turn on null-checking in generated C code"),
-	  null)))))))));
+	  null))))))))));
 
   Lex::lex_init();
   Arg::parse(options, compile_file, "Options:");

@@ -27,13 +27,16 @@ extern enum Resolved {
 typedef enum Resolved resolved_t;
 
 // Global environments -- what's declared in a global scope 
+// Warning: ordinaries should really be abstract so we can ensure that any
+// lookup sets the bool field to true!
+// FIX: We should tree-shake the type declarations too!
 extern struct Genv {
   Set<var>               namespaces;
   Dict<var,structdecl@>  structdecls;
   Dict<var,enumdecl@>    enumdecls;
   Dict<var,xenumdecl@>   xenumdecls;
   Dict<var,typedefdecl>  typedefs; // indirection unneeded b/c no redeclaration
-  Dict<var,resolved_t>   ordinaries;
+  Dict::Dict<var,$(resolved_t,bool)@> ordinaries; // bool for tree-shaking
   list<list<var>>        availables; // "using" namespaces
 };
 typedef struct Genv @genv_t;

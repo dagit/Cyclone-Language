@@ -13,5 +13,9 @@ using Tcenv;
 
 extern void tc(tenv te, list<decl>);
 
+  // if called, must be after tc is called
+  // removes extern variables that are never referred to
+extern list<decl> treeshake(tenv te, list<decl>);
+
 }
 #endif
