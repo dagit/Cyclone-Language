@@ -736,7 +736,7 @@ struct Cyc_Core_Not_found_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found};cha
 Cyc_Core_Unreachable[12]="Unreachable";struct Cyc_Core_Opt;struct Cyc_Core_Opt*Cyc_Core_opt_map(
 void*(*f)(void*),struct Cyc_Core_Opt*o);struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*
 f)(void*),struct Cyc_Core_Opt*o){if(o == 0)return 0;{struct Cyc_Core_Opt*_tmp6;
-return(_tmp6=_cycalloc(sizeof(*_tmp6)),((_tmp6->v=(void*)f((void*)o->v),_tmp6)));}}
+return(_tmp6=_cycalloc(sizeof(*_tmp6)),((_tmp6->v=(void*)f((void*)o->v),_tmp6)));};}
 struct _dyneither_ptr Cyc_Core_new_string(unsigned int i);struct _dyneither_ptr Cyc_Core_new_string(
 unsigned int i){char*_tmp8;unsigned int _tmp7;return(_tmp7=i,((_tmp8=
 _cyccalloc_atomic(sizeof(char),_tmp7),_tag_dyneither(_tmp8,sizeof(char),_tmp7))));}

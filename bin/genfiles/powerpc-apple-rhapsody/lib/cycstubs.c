@@ -815,7 +815,7 @@ struct Cyc___SIG_BUILTIN_struct*_tmp1A=(struct Cyc___SIG_BUILTIN_struct*)_tmp15;
 if(_tmp1A->tag != 0)goto _LLC;else{_tmp1B=_tmp1A->f1;if(_tmp1B != Cyc_SIG_IGN)goto
 _LLC;}}_LLB: return signal_SIG_IGN(a);_LLC: {struct Cyc___SIG_HANDLER_struct*_tmp1C=(
 struct Cyc___SIG_HANDLER_struct*)_tmp15;if(_tmp1C->tag != 1)goto _LL5;else{_tmp1D=
-_tmp1C->f1;}}_LLD: return signal(a,_tmp1D);_LL5:;}}struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;
+_tmp1C->f1;}}_LLD: return signal(a,_tmp1D);_LL5:;};}struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;
 struct Cyc___cycFILE*Cyc_fromCfile(struct Cyc_Cstdio___abstractFILE*cf);struct Cyc_String_pa_struct{
 int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;}
 ;struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{int
@@ -880,7 +880,7 @@ int n,struct Cyc___cycFILE*f){if(!((unsigned int)s.curr))(int)_throw((void*)& Cy
 char*result;char*buffer=(char*)_check_null(_untag_dyneither_ptr(s,sizeof(char),1));
 unsigned int len=_get_dyneither_size(s,sizeof(char));if(len < n)(int)_throw((void*)&
 Cyc___fgets_failure_2);result=fgets(buffer,n,f->file);if(result == 0)return
-_tag_dyneither(0,0,0);else{return s;}}}int fileno(struct Cyc_Cstdio___abstractFILE*);
+_tag_dyneither(0,0,0);else{return s;}};}int fileno(struct Cyc_Cstdio___abstractFILE*);
 int Cyc_fileno(struct Cyc___cycFILE*f);int Cyc_fileno(struct Cyc___cycFILE*f){return
 fileno(f->file);}struct Cyc_Cstdio___abstractFILE*fopen(const char*,const char*);
 struct Cyc___cycFILE*Cyc_fopen(const char*name,const char*type);struct Cyc___cycFILE*
@@ -1053,46 +1053,46 @@ _check_dyneither_subscript(ap,sizeof(void*),0)),((_tmpD9.f2=*((void**)
 _check_dyneither_subscript(ap,sizeof(void*),1)),_tmpD9)));void*_tmp45;struct Cyc_sockaddr_in*
 _tmp47;void*_tmp48;int*_tmp4A;_LLF: _tmp45=_tmp44.f1;{struct Cyc_SA_sockaddr_in_struct*
 _tmp46=(struct Cyc_SA_sockaddr_in_struct*)_tmp45;if(_tmp46->tag != 0)goto _LL11;
-else{_tmp47=_tmp46->f1;}}_tmp48=_tmp44.f2;{struct Cyc_SA_socklenptr_struct*_tmp49=(
-struct Cyc_SA_socklenptr_struct*)_tmp48;if(_tmp49->tag != 1)goto _LL11;else{_tmp4A=
-_tmp49->f1;}}_LL10: return accept_in(fd,(const struct Cyc_sockaddr_in*)_tmp47,_tmp4A);
-_LL11:;_LL12:(int)_throw((void*)& Cyc_SocketError_val);_LLE:;}}int bind_in(int,
-const struct Cyc_sockaddr_in*,int);int Cyc_bind(int fd,struct _dyneither_ptr ap);int
-Cyc_bind(int fd,struct _dyneither_ptr ap){if(_get_dyneither_size(ap,sizeof(void*))
-!= 2)(int)_throw((void*)& Cyc_SocketError_val);{struct _tuple0 _tmpDA;struct _tuple0
-_tmp4C=(_tmpDA.f1=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0)),((
-_tmpDA.f2=*((void**)_check_dyneither_subscript(ap,sizeof(void*),1)),_tmpDA)));
-void*_tmp4D;struct Cyc_sockaddr_in*_tmp4F;void*_tmp50;int _tmp52;_LL14: _tmp4D=
-_tmp4C.f1;{struct Cyc_SA_sockaddr_in_struct*_tmp4E=(struct Cyc_SA_sockaddr_in_struct*)
-_tmp4D;if(_tmp4E->tag != 0)goto _LL16;else{_tmp4F=_tmp4E->f1;}}_tmp50=_tmp4C.f2;{
-struct Cyc_SA_socklen_struct*_tmp51=(struct Cyc_SA_socklen_struct*)_tmp50;if(
-_tmp51->tag != 2)goto _LL16;else{_tmp52=_tmp51->f1;}}_LL15: return bind_in(fd,(const
-struct Cyc_sockaddr_in*)_tmp4F,_tmp52);_LL16:;_LL17:(int)_throw((void*)& Cyc_SocketError_val);
-_LL13:;}}int connect_in(int,const struct Cyc_sockaddr_in*,int);int Cyc_connect(int fd,
-struct _dyneither_ptr ap);int Cyc_connect(int fd,struct _dyneither_ptr ap){if(
+else{_tmp47=_tmp46->f1;}};_tmp48=_tmp44.f2;{struct Cyc_SA_socklenptr_struct*
+_tmp49=(struct Cyc_SA_socklenptr_struct*)_tmp48;if(_tmp49->tag != 1)goto _LL11;
+else{_tmp4A=_tmp49->f1;}};_LL10: return accept_in(fd,(const struct Cyc_sockaddr_in*)
+_tmp47,_tmp4A);_LL11:;_LL12:(int)_throw((void*)& Cyc_SocketError_val);_LLE:;};}
+int bind_in(int,const struct Cyc_sockaddr_in*,int);int Cyc_bind(int fd,struct
+_dyneither_ptr ap);int Cyc_bind(int fd,struct _dyneither_ptr ap){if(
 _get_dyneither_size(ap,sizeof(void*))!= 2)(int)_throw((void*)& Cyc_SocketError_val);{
-struct _tuple0 _tmpDB;struct _tuple0 _tmp54=(_tmpDB.f1=*((void**)
-_check_dyneither_subscript(ap,sizeof(void*),0)),((_tmpDB.f2=*((void**)
-_check_dyneither_subscript(ap,sizeof(void*),1)),_tmpDB)));void*_tmp55;struct Cyc_sockaddr_in*
-_tmp57;void*_tmp58;int _tmp5A;_LL19: _tmp55=_tmp54.f1;{struct Cyc_SA_sockaddr_in_struct*
-_tmp56=(struct Cyc_SA_sockaddr_in_struct*)_tmp55;if(_tmp56->tag != 0)goto _LL1B;
-else{_tmp57=_tmp56->f1;}}_tmp58=_tmp54.f2;{struct Cyc_SA_socklen_struct*_tmp59=(
-struct Cyc_SA_socklen_struct*)_tmp58;if(_tmp59->tag != 2)goto _LL1B;else{_tmp5A=
-_tmp59->f1;}}_LL1A: return connect_in(fd,(const struct Cyc_sockaddr_in*)_tmp57,
-_tmp5A);_LL1B:;_LL1C:(int)_throw((void*)& Cyc_SocketError_val);_LL18:;}}int
-getpeername_in(int,const struct Cyc_sockaddr_in*,int*);int Cyc_getpeername(int fd,
-struct _dyneither_ptr ap);int Cyc_getpeername(int fd,struct _dyneither_ptr ap){if(
-_get_dyneither_size(ap,sizeof(void*))!= 2)(int)_throw((void*)& Cyc_SocketError_val);{
+struct _tuple0 _tmpDA;struct _tuple0 _tmp4C=(_tmpDA.f1=*((void**)
+_check_dyneither_subscript(ap,sizeof(void*),0)),((_tmpDA.f2=*((void**)
+_check_dyneither_subscript(ap,sizeof(void*),1)),_tmpDA)));void*_tmp4D;struct Cyc_sockaddr_in*
+_tmp4F;void*_tmp50;int _tmp52;_LL14: _tmp4D=_tmp4C.f1;{struct Cyc_SA_sockaddr_in_struct*
+_tmp4E=(struct Cyc_SA_sockaddr_in_struct*)_tmp4D;if(_tmp4E->tag != 0)goto _LL16;
+else{_tmp4F=_tmp4E->f1;}};_tmp50=_tmp4C.f2;{struct Cyc_SA_socklen_struct*_tmp51=(
+struct Cyc_SA_socklen_struct*)_tmp50;if(_tmp51->tag != 2)goto _LL16;else{_tmp52=
+_tmp51->f1;}};_LL15: return bind_in(fd,(const struct Cyc_sockaddr_in*)_tmp4F,_tmp52);
+_LL16:;_LL17:(int)_throw((void*)& Cyc_SocketError_val);_LL13:;};}int connect_in(
+int,const struct Cyc_sockaddr_in*,int);int Cyc_connect(int fd,struct _dyneither_ptr ap);
+int Cyc_connect(int fd,struct _dyneither_ptr ap){if(_get_dyneither_size(ap,sizeof(
+void*))!= 2)(int)_throw((void*)& Cyc_SocketError_val);{struct _tuple0 _tmpDB;struct
+_tuple0 _tmp54=(_tmpDB.f1=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0)),((
+_tmpDB.f2=*((void**)_check_dyneither_subscript(ap,sizeof(void*),1)),_tmpDB)));
+void*_tmp55;struct Cyc_sockaddr_in*_tmp57;void*_tmp58;int _tmp5A;_LL19: _tmp55=
+_tmp54.f1;{struct Cyc_SA_sockaddr_in_struct*_tmp56=(struct Cyc_SA_sockaddr_in_struct*)
+_tmp55;if(_tmp56->tag != 0)goto _LL1B;else{_tmp57=_tmp56->f1;}};_tmp58=_tmp54.f2;{
+struct Cyc_SA_socklen_struct*_tmp59=(struct Cyc_SA_socklen_struct*)_tmp58;if(
+_tmp59->tag != 2)goto _LL1B;else{_tmp5A=_tmp59->f1;}};_LL1A: return connect_in(fd,(
+const struct Cyc_sockaddr_in*)_tmp57,_tmp5A);_LL1B:;_LL1C:(int)_throw((void*)& Cyc_SocketError_val);
+_LL18:;};}int getpeername_in(int,const struct Cyc_sockaddr_in*,int*);int Cyc_getpeername(
+int fd,struct _dyneither_ptr ap);int Cyc_getpeername(int fd,struct _dyneither_ptr ap){
+if(_get_dyneither_size(ap,sizeof(void*))!= 2)(int)_throw((void*)& Cyc_SocketError_val);{
 struct _tuple0 _tmpDC;struct _tuple0 _tmp5C=(_tmpDC.f1=*((void**)
 _check_dyneither_subscript(ap,sizeof(void*),0)),((_tmpDC.f2=*((void**)
 _check_dyneither_subscript(ap,sizeof(void*),1)),_tmpDC)));void*_tmp5D;struct Cyc_sockaddr_in*
 _tmp5F;void*_tmp60;int*_tmp62;_LL1E: _tmp5D=_tmp5C.f1;{struct Cyc_SA_sockaddr_in_struct*
 _tmp5E=(struct Cyc_SA_sockaddr_in_struct*)_tmp5D;if(_tmp5E->tag != 0)goto _LL20;
-else{_tmp5F=_tmp5E->f1;}}_tmp60=_tmp5C.f2;{struct Cyc_SA_socklenptr_struct*_tmp61=(
-struct Cyc_SA_socklenptr_struct*)_tmp60;if(_tmp61->tag != 1)goto _LL20;else{_tmp62=
-_tmp61->f1;}}_LL1F: return getpeername_in(fd,(const struct Cyc_sockaddr_in*)_tmp5F,
-_tmp62);_LL20:;_LL21:(int)_throw((void*)& Cyc_SocketError_val);_LL1D:;}}int
-getsockname_in(int,const struct Cyc_sockaddr_in*,int*);int Cyc_getsockname(int fd,
+else{_tmp5F=_tmp5E->f1;}};_tmp60=_tmp5C.f2;{struct Cyc_SA_socklenptr_struct*
+_tmp61=(struct Cyc_SA_socklenptr_struct*)_tmp60;if(_tmp61->tag != 1)goto _LL20;
+else{_tmp62=_tmp61->f1;}};_LL1F: return getpeername_in(fd,(const struct Cyc_sockaddr_in*)
+_tmp5F,_tmp62);_LL20:;_LL21:(int)_throw((void*)& Cyc_SocketError_val);_LL1D:;};}
+int getsockname_in(int,const struct Cyc_sockaddr_in*,int*);int Cyc_getsockname(int fd,
 struct _dyneither_ptr ap);int Cyc_getsockname(int fd,struct _dyneither_ptr ap){if(
 _get_dyneither_size(ap,sizeof(void*))!= 2)(int)_throw((void*)& Cyc_SocketError_val);{
 struct _tuple0 _tmpDD;struct _tuple0 _tmp64=(_tmpDD.f1=*((void**)
@@ -1100,12 +1100,12 @@ _check_dyneither_subscript(ap,sizeof(void*),0)),((_tmpDD.f2=*((void**)
 _check_dyneither_subscript(ap,sizeof(void*),1)),_tmpDD)));void*_tmp65;struct Cyc_sockaddr_in*
 _tmp67;void*_tmp68;int*_tmp6A;_LL23: _tmp65=_tmp64.f1;{struct Cyc_SA_sockaddr_in_struct*
 _tmp66=(struct Cyc_SA_sockaddr_in_struct*)_tmp65;if(_tmp66->tag != 0)goto _LL25;
-else{_tmp67=_tmp66->f1;}}_tmp68=_tmp64.f2;{struct Cyc_SA_socklenptr_struct*_tmp69=(
-struct Cyc_SA_socklenptr_struct*)_tmp68;if(_tmp69->tag != 1)goto _LL25;else{_tmp6A=
-_tmp69->f1;}}_LL24: return getsockname_in(fd,(const struct Cyc_sockaddr_in*)_tmp67,
-_tmp6A);_LL25:;_LL26:(int)_throw((void*)& Cyc_SocketError_val);_LL22:;}}int
-getsockopt_int(int,int,int,int*,int*);int getsockopt_timeval(int,int,int,struct
-Cyc_timeval*,int*);int Cyc_getsockopt(int fd,int level,int optname,struct
+else{_tmp67=_tmp66->f1;}};_tmp68=_tmp64.f2;{struct Cyc_SA_socklenptr_struct*
+_tmp69=(struct Cyc_SA_socklenptr_struct*)_tmp68;if(_tmp69->tag != 1)goto _LL25;
+else{_tmp6A=_tmp69->f1;}};_LL24: return getsockname_in(fd,(const struct Cyc_sockaddr_in*)
+_tmp67,_tmp6A);_LL25:;_LL26:(int)_throw((void*)& Cyc_SocketError_val);_LL22:;};}
+int getsockopt_int(int,int,int,int*,int*);int getsockopt_timeval(int,int,int,
+struct Cyc_timeval*,int*);int Cyc_getsockopt(int fd,int level,int optname,struct
 _dyneither_ptr ap);int Cyc_getsockopt(int fd,int level,int optname,struct
 _dyneither_ptr ap){if(_get_dyneither_size(ap,sizeof(void*))!= 2)(int)_throw((void*)&
 Cyc_SocketError_val);{struct _tuple0 _tmpDE;struct _tuple0 _tmp6C=(_tmpDE.f1=*((void**)
@@ -1115,23 +1115,23 @@ void*_tmp70;int*_tmp72;void*_tmp73;int*_tmp75;void*_tmp76;int*_tmp78;void*_tmp79
 struct Cyc_timeval*_tmp7B;void*_tmp7C;int*_tmp7E;void*_tmp7F;struct Cyc_timeval*
 _tmp81;void*_tmp82;int*_tmp84;_LL28: _tmp6D=_tmp6C.f1;{struct Cyc_SO_int_struct*
 _tmp6E=(struct Cyc_SO_int_struct*)_tmp6D;if(_tmp6E->tag != 0)goto _LL2A;else{_tmp6F=
-_tmp6E->f1;}}_tmp70=_tmp6C.f2;{struct Cyc_SO_socklenptr_struct*_tmp71=(struct Cyc_SO_socklenptr_struct*)
-_tmp70;if(_tmp71->tag != 2)goto _LL2A;else{_tmp72=_tmp71->f1;}}_LL29: return
+_tmp6E->f1;}};_tmp70=_tmp6C.f2;{struct Cyc_SO_socklenptr_struct*_tmp71=(struct Cyc_SO_socklenptr_struct*)
+_tmp70;if(_tmp71->tag != 2)goto _LL2A;else{_tmp72=_tmp71->f1;}};_LL29: return
 getsockopt_int(fd,level,optname,_tmp6F,_tmp72);_LL2A: _tmp73=_tmp6C.f1;{struct Cyc_SO_int_struct*
 _tmp74=(struct Cyc_SO_int_struct*)_tmp73;if(_tmp74->tag != 0)goto _LL2C;else{_tmp75=
-_tmp74->f1;}}_tmp76=_tmp6C.f2;{struct Cyc_SO_int_struct*_tmp77=(struct Cyc_SO_int_struct*)
-_tmp76;if(_tmp77->tag != 0)goto _LL2C;else{_tmp78=_tmp77->f1;}}_LL2B: return
+_tmp74->f1;}};_tmp76=_tmp6C.f2;{struct Cyc_SO_int_struct*_tmp77=(struct Cyc_SO_int_struct*)
+_tmp76;if(_tmp77->tag != 0)goto _LL2C;else{_tmp78=_tmp77->f1;}};_LL2B: return
 getsockopt_int(fd,level,optname,_tmp75,(int*)_tmp78);_LL2C: _tmp79=_tmp6C.f1;{
 struct Cyc_SO_timeval_struct*_tmp7A=(struct Cyc_SO_timeval_struct*)_tmp79;if(
-_tmp7A->tag != 1)goto _LL2E;else{_tmp7B=_tmp7A->f1;}}_tmp7C=_tmp6C.f2;{struct Cyc_SO_socklenptr_struct*
+_tmp7A->tag != 1)goto _LL2E;else{_tmp7B=_tmp7A->f1;}};_tmp7C=_tmp6C.f2;{struct Cyc_SO_socklenptr_struct*
 _tmp7D=(struct Cyc_SO_socklenptr_struct*)_tmp7C;if(_tmp7D->tag != 2)goto _LL2E;
-else{_tmp7E=_tmp7D->f1;}}_LL2D: return getsockopt_timeval(fd,level,optname,_tmp7B,
+else{_tmp7E=_tmp7D->f1;}};_LL2D: return getsockopt_timeval(fd,level,optname,_tmp7B,
 _tmp7E);_LL2E: _tmp7F=_tmp6C.f1;{struct Cyc_SO_timeval_struct*_tmp80=(struct Cyc_SO_timeval_struct*)
-_tmp7F;if(_tmp80->tag != 1)goto _LL30;else{_tmp81=_tmp80->f1;}}_tmp82=_tmp6C.f2;{
+_tmp7F;if(_tmp80->tag != 1)goto _LL30;else{_tmp81=_tmp80->f1;}};_tmp82=_tmp6C.f2;{
 struct Cyc_SO_int_struct*_tmp83=(struct Cyc_SO_int_struct*)_tmp82;if(_tmp83->tag != 
-0)goto _LL30;else{_tmp84=_tmp83->f1;}}_LL2F: return getsockopt_timeval(fd,level,
+0)goto _LL30;else{_tmp84=_tmp83->f1;}};_LL2F: return getsockopt_timeval(fd,level,
 optname,_tmp81,(int*)_tmp84);_LL30:;_LL31:(int)_throw((void*)& Cyc_SocketError_val);
-_LL27:;}}int recv_wrapped(int,struct _dyneither_ptr,unsigned long,int);int Cyc_recv(
+_LL27:;};}int recv_wrapped(int,struct _dyneither_ptr,unsigned long,int);int Cyc_recv(
 int fd,struct _dyneither_ptr buf,unsigned long n,int flags);int Cyc_recv(int fd,struct
 _dyneither_ptr buf,unsigned long n,int flags){return recv_wrapped(fd,buf,n,flags);}
 int recvfrom_in(int,struct _dyneither_ptr,unsigned long,int,const struct Cyc_sockaddr_in*,
@@ -1143,27 +1143,27 @@ struct _tuple0 _tmp86=(_tmpDF.f1=*((void**)_check_dyneither_subscript(ap,sizeof(
 void*),0)),((_tmpDF.f2=*((void**)_check_dyneither_subscript(ap,sizeof(void*),1)),
 _tmpDF)));void*_tmp87;struct Cyc_sockaddr_in*_tmp89;void*_tmp8A;int*_tmp8C;_LL33:
 _tmp87=_tmp86.f1;{struct Cyc_SA_sockaddr_in_struct*_tmp88=(struct Cyc_SA_sockaddr_in_struct*)
-_tmp87;if(_tmp88->tag != 0)goto _LL35;else{_tmp89=_tmp88->f1;}}_tmp8A=_tmp86.f2;{
+_tmp87;if(_tmp88->tag != 0)goto _LL35;else{_tmp89=_tmp88->f1;}};_tmp8A=_tmp86.f2;{
 struct Cyc_SA_socklenptr_struct*_tmp8B=(struct Cyc_SA_socklenptr_struct*)_tmp8A;
-if(_tmp8B->tag != 1)goto _LL35;else{_tmp8C=_tmp8B->f1;}}_LL34: return recvfrom_in(fd,
-buf,n,flags,(const struct Cyc_sockaddr_in*)_tmp89,_tmp8C);_LL35:;_LL36:(int)_throw((
-void*)& Cyc_SocketError_val);_LL32:;}}int send_wrapped(int,struct _dyneither_ptr,
-unsigned long,int);int Cyc_send(int fd,struct _dyneither_ptr buf,unsigned long n,int
-flags);int Cyc_send(int fd,struct _dyneither_ptr buf,unsigned long n,int flags){return
-send_wrapped(fd,buf,n,flags);}int sendto_in(int,struct _dyneither_ptr,
-unsigned long,int,const struct Cyc_sockaddr_in*,int);int Cyc_sendto(int fd,struct
-_dyneither_ptr buf,unsigned long n,int flags,struct _dyneither_ptr ap);int Cyc_sendto(
-int fd,struct _dyneither_ptr buf,unsigned long n,int flags,struct _dyneither_ptr ap){
-if(_get_dyneither_size(ap,sizeof(void*))!= 2)(int)_throw((void*)& Cyc_SocketError_val);{
-struct _tuple0 _tmpE0;struct _tuple0 _tmp8E=(_tmpE0.f1=*((void**)
+if(_tmp8B->tag != 1)goto _LL35;else{_tmp8C=_tmp8B->f1;}};_LL34: return recvfrom_in(
+fd,buf,n,flags,(const struct Cyc_sockaddr_in*)_tmp89,_tmp8C);_LL35:;_LL36:(int)
+_throw((void*)& Cyc_SocketError_val);_LL32:;};}int send_wrapped(int,struct
+_dyneither_ptr,unsigned long,int);int Cyc_send(int fd,struct _dyneither_ptr buf,
+unsigned long n,int flags);int Cyc_send(int fd,struct _dyneither_ptr buf,unsigned long
+n,int flags){return send_wrapped(fd,buf,n,flags);}int sendto_in(int,struct
+_dyneither_ptr,unsigned long,int,const struct Cyc_sockaddr_in*,int);int Cyc_sendto(
+int fd,struct _dyneither_ptr buf,unsigned long n,int flags,struct _dyneither_ptr ap);
+int Cyc_sendto(int fd,struct _dyneither_ptr buf,unsigned long n,int flags,struct
+_dyneither_ptr ap){if(_get_dyneither_size(ap,sizeof(void*))!= 2)(int)_throw((void*)&
+Cyc_SocketError_val);{struct _tuple0 _tmpE0;struct _tuple0 _tmp8E=(_tmpE0.f1=*((void**)
 _check_dyneither_subscript(ap,sizeof(void*),0)),((_tmpE0.f2=*((void**)
 _check_dyneither_subscript(ap,sizeof(void*),1)),_tmpE0)));void*_tmp8F;struct Cyc_sockaddr_in*
 _tmp91;void*_tmp92;int _tmp94;_LL38: _tmp8F=_tmp8E.f1;{struct Cyc_SA_sockaddr_in_struct*
 _tmp90=(struct Cyc_SA_sockaddr_in_struct*)_tmp8F;if(_tmp90->tag != 0)goto _LL3A;
-else{_tmp91=_tmp90->f1;}}_tmp92=_tmp8E.f2;{struct Cyc_SA_socklen_struct*_tmp93=(
+else{_tmp91=_tmp90->f1;}};_tmp92=_tmp8E.f2;{struct Cyc_SA_socklen_struct*_tmp93=(
 struct Cyc_SA_socklen_struct*)_tmp92;if(_tmp93->tag != 2)goto _LL3A;else{_tmp94=
-_tmp93->f1;}}_LL39: return sendto_in(fd,buf,n,flags,(const struct Cyc_sockaddr_in*)
-_tmp91,_tmp94);_LL3A:;_LL3B:(int)_throw((void*)& Cyc_SocketError_val);_LL37:;}}
+_tmp93->f1;}};_LL39: return sendto_in(fd,buf,n,flags,(const struct Cyc_sockaddr_in*)
+_tmp91,_tmp94);_LL3A:;_LL3B:(int)_throw((void*)& Cyc_SocketError_val);_LL37:;};}
 int setsockopt_int(int,int,int,const int*,int);int setsockopt_timeval(int,int,int,
 const struct Cyc_timeval*,int);int Cyc_setsockopt(int fd,int level,int optname,struct
 _dyneither_ptr ap);int Cyc_setsockopt(int fd,int level,int optname,struct
@@ -1173,28 +1173,28 @@ _check_dyneither_subscript(ap,sizeof(void*),0)),((_tmpE1.f2=*((void**)
 _check_dyneither_subscript(ap,sizeof(void*),1)),_tmpE1)));void*_tmp97;int*_tmp99;
 void*_tmp9A;int _tmp9C;void*_tmp9D;struct Cyc_timeval*_tmp9F;void*_tmpA0;int _tmpA2;
 _LL3D: _tmp97=_tmp96.f1;{struct Cyc_SO_int_struct*_tmp98=(struct Cyc_SO_int_struct*)
-_tmp97;if(_tmp98->tag != 0)goto _LL3F;else{_tmp99=_tmp98->f1;}}_tmp9A=_tmp96.f2;{
+_tmp97;if(_tmp98->tag != 0)goto _LL3F;else{_tmp99=_tmp98->f1;}};_tmp9A=_tmp96.f2;{
 struct Cyc_SO_socklen_struct*_tmp9B=(struct Cyc_SO_socklen_struct*)_tmp9A;if(
-_tmp9B->tag != 3)goto _LL3F;else{_tmp9C=_tmp9B->f1;}}_LL3E: return setsockopt_int(fd,
-level,optname,(const int*)_tmp99,_tmp9C);_LL3F: _tmp9D=_tmp96.f1;{struct Cyc_SO_timeval_struct*
+_tmp9B->tag != 3)goto _LL3F;else{_tmp9C=_tmp9B->f1;}};_LL3E: return setsockopt_int(
+fd,level,optname,(const int*)_tmp99,_tmp9C);_LL3F: _tmp9D=_tmp96.f1;{struct Cyc_SO_timeval_struct*
 _tmp9E=(struct Cyc_SO_timeval_struct*)_tmp9D;if(_tmp9E->tag != 1)goto _LL41;else{
-_tmp9F=_tmp9E->f1;}}_tmpA0=_tmp96.f2;{struct Cyc_SO_socklen_struct*_tmpA1=(struct
-Cyc_SO_socklen_struct*)_tmpA0;if(_tmpA1->tag != 3)goto _LL41;else{_tmpA2=_tmpA1->f1;}}
-_LL40: return setsockopt_timeval(fd,level,optname,(const struct Cyc_timeval*)_tmp9F,
-_tmpA2);_LL41:;_LL42:(int)_throw((void*)& Cyc_SocketError_val);_LL3C:;}}struct Cyc_stat{
-int st_dev;unsigned int st_ino;unsigned short st_mode;unsigned short st_nlink;
-unsigned int st_uid;unsigned int st_gid;int st_rdev;struct Cyc_timespec st_atimespec;
-struct Cyc_timespec st_mtimespec;struct Cyc_timespec st_ctimespec;long long st_size;
-long long st_blocks;unsigned int st_blksize;unsigned int st_flags;unsigned int
-st_gen;int st_lspare;long long st_qspare[2];};struct Cyc_timezone{int tz_minuteswest;
-int tz_dsttime;};struct Cyc_itimerval{struct Cyc_timeval it_interval;struct Cyc_timeval
-it_value;};int Cyc_gettimeofday(struct Cyc_timeval*,struct Cyc_timezone*);int Cyc_select(
-int,struct Cyc_fd_set*,struct Cyc_fd_set*,struct Cyc_fd_set*,struct Cyc_timeval*);
-void Cyc_FD_CLR(int,struct Cyc_fd_set*);int Cyc_FD_ISSET(int,struct Cyc_fd_set*);
-void Cyc_FD_SET(int,struct Cyc_fd_set*);void Cyc_FD_ZERO(struct Cyc_fd_set*);int
-gettimeofday(struct Cyc_timeval*,struct Cyc_timezone*);int Cyc_gettimeofday(struct
-Cyc_timeval*a,struct Cyc_timezone*b);int Cyc_gettimeofday(struct Cyc_timeval*a,
-struct Cyc_timezone*b){return gettimeofday(a,0);}struct Cyc_timeb{long time;
+_tmp9F=_tmp9E->f1;}};_tmpA0=_tmp96.f2;{struct Cyc_SO_socklen_struct*_tmpA1=(
+struct Cyc_SO_socklen_struct*)_tmpA0;if(_tmpA1->tag != 3)goto _LL41;else{_tmpA2=
+_tmpA1->f1;}};_LL40: return setsockopt_timeval(fd,level,optname,(const struct Cyc_timeval*)
+_tmp9F,_tmpA2);_LL41:;_LL42:(int)_throw((void*)& Cyc_SocketError_val);_LL3C:;};}
+struct Cyc_stat{int st_dev;unsigned int st_ino;unsigned short st_mode;unsigned short
+st_nlink;unsigned int st_uid;unsigned int st_gid;int st_rdev;struct Cyc_timespec
+st_atimespec;struct Cyc_timespec st_mtimespec;struct Cyc_timespec st_ctimespec;
+long long st_size;long long st_blocks;unsigned int st_blksize;unsigned int st_flags;
+unsigned int st_gen;int st_lspare;long long st_qspare[2];};struct Cyc_timezone{int
+tz_minuteswest;int tz_dsttime;};struct Cyc_itimerval{struct Cyc_timeval it_interval;
+struct Cyc_timeval it_value;};int Cyc_gettimeofday(struct Cyc_timeval*,struct Cyc_timezone*);
+int Cyc_select(int,struct Cyc_fd_set*,struct Cyc_fd_set*,struct Cyc_fd_set*,struct
+Cyc_timeval*);void Cyc_FD_CLR(int,struct Cyc_fd_set*);int Cyc_FD_ISSET(int,struct
+Cyc_fd_set*);void Cyc_FD_SET(int,struct Cyc_fd_set*);void Cyc_FD_ZERO(struct Cyc_fd_set*);
+int gettimeofday(struct Cyc_timeval*,struct Cyc_timezone*);int Cyc_gettimeofday(
+struct Cyc_timeval*a,struct Cyc_timezone*b);int Cyc_gettimeofday(struct Cyc_timeval*
+a,struct Cyc_timezone*b){return gettimeofday(a,0);}struct Cyc_timeb{long time;
 unsigned short millitm;short timezone;short dstflag;};struct Cyc_tms{unsigned long
 tms_utime;unsigned long tms_stime;unsigned long tms_cutime;unsigned long tms_cstime;
 };struct Cyc_sockaddr_un{unsigned char sun_len;unsigned char sun_family;char
@@ -1245,14 +1245,14 @@ const char**)_check_dyneither_subscript(_tmpEF,sizeof(const char*),0)),((_tmpF1=
 const char**)_check_dyneither_subscript(argv,sizeof(const char*),i)),((
 _get_dyneither_size(_tmpEF,sizeof(const char*))== 1  && (_tmpF0 == 0  && _tmpF1 != 0)?
 _throw_arraybounds(): 1,*((const char**)_tmpEF.curr)=_tmpF1)))))));}}return execvp(
-path,(const char**)newargs);}}char*getcwd(char*buf,unsigned long size);static char
+path,(const char**)newargs);};}char*getcwd(char*buf,unsigned long size);static char
 _tmpB4[29]="getcwd: invalid buf argument";static struct Cyc_Core_Failure_struct Cyc___getcwd_failure={
 Cyc_Core_Failure,{_tmpB4,_tmpB4,_tmpB4 + 29}};struct _dyneither_ptr Cyc_getcwd(
 struct _dyneither_ptr buf,unsigned long size);struct _dyneither_ptr Cyc_getcwd(struct
 _dyneither_ptr buf,unsigned long size){if(_get_dyneither_size(buf,sizeof(char))< 
 size)(int)_throw((void*)& Cyc___getcwd_failure);{char*_tmpB5=getcwd((char*)
 _check_null(_untag_dyneither_ptr(buf,sizeof(char),1)),size);return(unsigned int)
-_tmpB5?buf: _tag_dyneither(0,0,0);}}int gethostname(char*,unsigned long);static
+_tmpB5?buf: _tag_dyneither(0,0,0);};}int gethostname(char*,unsigned long);static
 char _tmpB7[34]="gethostname: called with NULL buf";static struct Cyc_Core_Failure_struct
 Cyc___gethostname_failure_1={Cyc_Core_Failure,{_tmpB7,_tmpB7,_tmpB7 + 34}};static
 char _tmpB9[46]="gethostname: called with count > numelts(buf)";static struct Cyc_Core_Failure_struct

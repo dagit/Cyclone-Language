@@ -869,8 +869,8 @@ Cyc_Splay_Node_struct _tmp49;_tmp49.tag=1;_tmp49.f1=({struct Cyc_Splay_noderef*
 _tmp4A=_cycalloc(sizeof(*_tmp4A));_tmp4A->v=({struct Cyc_Splay_node*_tmp4B=
 _cycalloc(sizeof(*_tmp4B));_tmp4B->key=(void*)((void*)newtop->key);_tmp4B->data=(
 void*)((void*)newtop->data);_tmp4B->left=newtop->left;_tmp4B->right=n->right;
-_tmp4B;});_tmp4A;});_tmp49;});_tmp48;});_tmp47;});}_LL23:;}_LL1E:;}_LL19:;}else{
-return d;}}struct Cyc_SlowDict_Dict*Cyc_SlowDict_delete_present(struct Cyc_SlowDict_Dict*
+_tmp4B;});_tmp4A;});_tmp49;});_tmp48;});_tmp47;});};_LL23:;}_LL1E:;}_LL19:;}
+else{return d;}}struct Cyc_SlowDict_Dict*Cyc_SlowDict_delete_present(struct Cyc_SlowDict_Dict*
 d,void*key){struct Cyc_SlowDict_Dict*_tmp4C=Cyc_SlowDict_delete(d,key);if(d == 
 _tmp4C)(int)_throw((void*)& Cyc_SlowDict_Absent_val);return _tmp4C;}static void*Cyc_SlowDict_fold_tree(
 void*(*f)(void*,void*,void*),void*t,void*accum){void*_tmp4D=t;struct Cyc_Splay_noderef*

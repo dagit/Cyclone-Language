@@ -798,9 +798,9 @@ _tmp22=(struct Cyc_LongDouble_pa_struct*)_tmp1F;if(_tmp22->tag != 3)goto _LL26;
 else{_tmp23=_tmp22->f1;}}_LL25: return(double)_tmp23;_LL26:;_LL27:(int)_throw(((
 void*(*)(struct _dyneither_ptr s))Cyc_badarg)((struct _dyneither_ptr)({struct Cyc_String_pa_struct
 _tmp26;_tmp26.tag=0;_tmp26.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_parg2string(*((
-void**)_check_dyneither_subscript(ap,sizeof(void*),0))));{void*_tmp24[1]={&
+void**)_check_dyneither_subscript(ap,sizeof(void*),0))));({void*_tmp24[1]={&
 _tmp26};Cyc_aprintf(({const char*_tmp25="printf expected double but found %s";
-_tag_dyneither(_tmp25,sizeof(char),36);}),_tag_dyneither(_tmp24,sizeof(void*),1));}})));
+_tag_dyneither(_tmp25,sizeof(char),36);}),_tag_dyneither(_tmp24,sizeof(void*),1));});})));
 _LL21:;}static short*Cyc_va_arg_short_ptr(struct _dyneither_ptr ap){void*_tmp27=*((
 void**)_check_dyneither_subscript(ap,sizeof(void*),0));short*_tmp29;_LL29: {
 struct Cyc_ShortPtr_pa_struct*_tmp28=(struct Cyc_ShortPtr_pa_struct*)_tmp27;if(
@@ -979,8 +979,8 @@ ioputc_env,(struct _dyneither_ptr)cp2,size)!= size)goto error;}while(0);else{if(
 which_cp == 3)do{if(Cyc__IO_nzsputn(ioputc,ioputc_env,(struct _dyneither_ptr)cp3,
 size)!= size)goto error;}while(0);}}if(Cyc__IO_padn(ioputc,ioputc_env,'0',fpprec)
 < fpprec)goto error;if(flags & 16){if(Cyc__IO_padn(ioputc,ioputc_env,' ',width - 
-fieldsz)< width - fieldsz)goto error;}ret +=width > fieldsz?width: fieldsz;}}done:
-return ret;error: return - 1;}}static struct _dyneither_ptr Cyc_exponent(struct
+fieldsz)< width - fieldsz)goto error;}ret +=width > fieldsz?width: fieldsz;};}done:
+return ret;error: return - 1;};}static struct _dyneither_ptr Cyc_exponent(struct
 _dyneither_ptr p,int exp,int fmtch){struct _dyneither_ptr t;char expbuffer[309];{
 unsigned int _tmp72=308;unsigned int i;for(i=0;i < _tmp72;i ++){expbuffer[i]='0';}
 expbuffer[_tmp72]=(char)0;}{struct _dyneither_ptr expbuf=({char*_tmp71=(char*)
@@ -1020,7 +1020,7 @@ _tmp6D;});({struct _dyneither_ptr _tmp6E=_dyneither_ptr_inplace_plus_post(& p,
 sizeof(char),1);char _tmp6F=*((char*)_check_dyneither_subscript(_tmp6E,sizeof(
 char),0));char _tmp70=(char)(exp + '0');if(_get_dyneither_size(_tmp6E,sizeof(char))
 == 1  && (_tmp6F == '\000'  && _tmp70 != '\000'))_throw_arraybounds();*((char*)
-_tmp6E.curr)=_tmp70;});}return p;}}static struct _dyneither_ptr Cyc_sround(double
+_tmp6E.curr)=_tmp70;});}return p;};}static struct _dyneither_ptr Cyc_sround(double
 fract,int*exp,struct _dyneither_ptr start,struct _dyneither_ptr end,char ch,int*signp){
 double tmp=(double)0.0;if(fract != 0.0)modf(fract * 10,& tmp);else{tmp=(double)(ch - '0');}
 if(tmp > 4)for(0;1;_dyneither_ptr_inplace_plus(& end,sizeof(char),-1)){if(*((char*)
@@ -1192,7 +1192,7 @@ _dyneither_ptr*_tmpC3;unsigned int*_tmpC4;struct _tuple0*_tmpC1=sptr_n;_tmpC2=*
 _tmpC1;_tmpC3=_tmpC2.f1;_tmpC4=_tmpC2.f2;{struct _dyneither_ptr s=*_tmpC3;
 unsigned int n=*_tmpC4;if(n == 0)return - 1;*((char*)_check_dyneither_subscript(s,
 sizeof(char),0))=(char)c;_dyneither_ptr_inplace_plus(_tmpC3,sizeof(char),1);*
-_tmpC4=n - 1;return 1;}}int Cyc_vsnprintf(struct _dyneither_ptr s,unsigned int n,
+_tmpC4=n - 1;return 1;};}int Cyc_vsnprintf(struct _dyneither_ptr s,unsigned int n,
 struct _dyneither_ptr fmt,struct _dyneither_ptr ap){int ans;struct _dyneither_ptr
 _tmpC5=s;unsigned int _tmpC6=n;struct _tuple0 _tmpC7=({struct _tuple0 _tmpC8;_tmpC8.f1=&
 _tmpC5;_tmpC8.f2=& _tmpC6;_tmpC8;});ans=((int(*)(int(*ioputc)(int,struct _tuple0*),

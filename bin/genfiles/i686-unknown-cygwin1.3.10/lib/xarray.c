@@ -778,7 +778,7 @@ void*)({struct Cyc_Core_Invalid_argument_struct*_tmp10=_cycalloc(sizeof(*_tmp10)
 _tmp10[0]=({struct Cyc_Core_Invalid_argument_struct _tmp11;_tmp11.tag=Cyc_Core_Invalid_argument;
 _tmp11.f1=({const char*_tmp12="singleton xarray must have size >=1";
 _tag_dyneither(_tmp12,sizeof(char),36);});_tmp11;});_tmp10;}));{struct Cyc_Xarray_Xarray*
-x=Cyc_Xarray_rcreate(r,len,a);x->num_elmts=1;return x;}}struct Cyc_Xarray_Xarray*
+x=Cyc_Xarray_rcreate(r,len,a);x->num_elmts=1;return x;};}struct Cyc_Xarray_Xarray*
 Cyc_Xarray_singleton(int len,void*a){return Cyc_Xarray_rsingleton(Cyc_Core_heap_region,
 len,a);}void Cyc_Xarray_add(struct Cyc_Xarray_Xarray*xarr,void*a){if(xarr->num_elmts
 == _get_dyneither_size(xarr->elmts,sizeof(void*))){if(xarr->num_elmts == 0)xarr->elmts=
@@ -803,7 +803,7 @@ xarr->num_elmts;void**_tmp1C=(void**)_region_malloc(r,_check_times(sizeof(void*)
 _tmp1B));struct _dyneither_ptr _tmp1E=_tag_dyneither(_tmp1C,sizeof(void*),_tmp1B);{
 unsigned int _tmp1D=_tmp1B;unsigned int i;for(i=0;i < _tmp1D;i ++){_tmp1C[i]=*((void**)
 _check_dyneither_subscript(xarr->elmts,sizeof(void*),(int)i));}}_tmp1E;});return
-ans;}}struct _dyneither_ptr Cyc_Xarray_to_array(struct Cyc_Xarray_Xarray*xarr){
+ans;};}struct _dyneither_ptr Cyc_Xarray_to_array(struct Cyc_Xarray_Xarray*xarr){
 return Cyc_Xarray_rto_array(Cyc_Core_heap_region,xarr);}struct Cyc_Xarray_Xarray*
 Cyc_Xarray_rfrom_array(struct _RegionHandle*r,struct _dyneither_ptr arr){if(
 _get_dyneither_size(arr,sizeof(void*))== 0)return Cyc_Xarray_rcreate_empty(r);{
@@ -813,7 +813,7 @@ _get_dyneither_size(arr,sizeof(void*));void**_tmp21=(void**)_region_malloc(r,
 _check_times(sizeof(void*),_tmp20));struct _dyneither_ptr _tmp23=_tag_dyneither(
 _tmp21,sizeof(void*),_tmp20);{unsigned int _tmp22=_tmp20;unsigned int i;for(i=0;i < 
 _tmp22;i ++){_tmp21[i]=((void**)arr.curr)[(int)i];}}_tmp23;});_tmp1F->num_elmts=(
-int)_get_dyneither_size(arr,sizeof(void*));_tmp1F;});return ans;}}struct Cyc_Xarray_Xarray*
+int)_get_dyneither_size(arr,sizeof(void*));_tmp1F;});return ans;};}struct Cyc_Xarray_Xarray*
 Cyc_Xarray_from_array(struct _dyneither_ptr arr){return Cyc_Xarray_rfrom_array(Cyc_Core_heap_region,
 arr);}struct Cyc_Xarray_Xarray*Cyc_Xarray_rappend(struct _RegionHandle*r,struct Cyc_Xarray_Xarray*
 xarr1,struct Cyc_Xarray_Xarray*xarr2){int newsz=(int)(_get_dyneither_size(xarr1->elmts,
@@ -829,7 +829,7 @@ _tmp27=_tmp25;unsigned int i;for(i=0;i < _tmp27;i ++){_tmp26[i]=init;}}_tmp28;})
 _tmp24->num_elmts=0;_tmp24;});{int i=0;for(0;i < xarr1->num_elmts;++ i){Cyc_Xarray_add(
 ans,*((void**)_check_dyneither_subscript(xarr1->elmts,sizeof(void*),i)));}}{int i=
 0;for(0;i < xarr2->num_elmts;++ i){Cyc_Xarray_add(ans,*((void**)
-_check_dyneither_subscript(xarr2->elmts,sizeof(void*),i)));}}return ans;}}struct
+_check_dyneither_subscript(xarr2->elmts,sizeof(void*),i)));}}return ans;};}struct
 Cyc_Xarray_Xarray*Cyc_Xarray_append(struct Cyc_Xarray_Xarray*xarr1,struct Cyc_Xarray_Xarray*
 xarr2){return Cyc_Xarray_rappend(Cyc_Core_heap_region,xarr1,xarr2);}void Cyc_Xarray_app(
 void*(*f)(void*),struct Cyc_Xarray_Xarray*xarr){int i=0;for(0;i < xarr->num_elmts;
@@ -852,7 +852,7 @@ unsigned int i;for(i=0;i < _tmp2C;i ++){_tmp2B[i]=f(*((void**)
 _check_dyneither_subscript(xarr->elmts,sizeof(void*),0)));}}_tmp2D;});_tmp29->num_elmts=
 xarr->num_elmts;_tmp29;});{int i=1;for(0;i < xarr->num_elmts;++ i){*((void**)
 _check_dyneither_subscript(ans->elmts,sizeof(void*),i))=f(*((void**)
-_check_dyneither_subscript(xarr->elmts,sizeof(void*),i)));}}return ans;}}struct
+_check_dyneither_subscript(xarr->elmts,sizeof(void*),i)));}}return ans;};}struct
 Cyc_Xarray_Xarray*Cyc_Xarray_map(void*(*f)(void*),struct Cyc_Xarray_Xarray*xarr){
 return Cyc_Xarray_rmap(Cyc_Core_heap_region,f,xarr);}struct Cyc_Xarray_Xarray*Cyc_Xarray_rmap_c(
 struct _RegionHandle*r,void*(*f)(void*,void*),void*env,struct Cyc_Xarray_Xarray*
@@ -865,7 +865,7 @@ _tmp31=_tmp2F;unsigned int i;for(i=0;i < _tmp31;i ++){_tmp30[i]=f(env,*((void**)
 _check_dyneither_subscript(xarr->elmts,sizeof(void*),0)));}}_tmp32;});_tmp2E->num_elmts=
 xarr->num_elmts;_tmp2E;});{int i=1;for(0;i < xarr->num_elmts;++ i){*((void**)
 _check_dyneither_subscript(ans->elmts,sizeof(void*),i))=f(env,*((void**)
-_check_dyneither_subscript(xarr->elmts,sizeof(void*),i)));}}return ans;}}struct
+_check_dyneither_subscript(xarr->elmts,sizeof(void*),i)));}}return ans;};}struct
 Cyc_Xarray_Xarray*Cyc_Xarray_map_c(void*(*f)(void*,void*),void*env,struct Cyc_Xarray_Xarray*
 xarr){return Cyc_Xarray_rmap_c(Cyc_Core_heap_region,f,env,xarr);}void Cyc_Xarray_reuse(
 struct Cyc_Xarray_Xarray*xarr){xarr->num_elmts=0;}void Cyc_Xarray_delete(struct Cyc_Xarray_Xarray*

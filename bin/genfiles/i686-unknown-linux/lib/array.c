@@ -857,7 +857,7 @@ _check_dyneither_subscript(from,sizeof(void*),lstart ++));}while(rstart < rend){
 void**)_check_dyneither_subscript(to,sizeof(void*),dest ++))=*((void**)
 _check_dyneither_subscript(from,sizeof(void*),rstart ++));}}}if(swapped){int i=0;
 for(0;i < len;++ i){*((void**)_check_dyneither_subscript(from,sizeof(void*),i))=*((
-void**)_check_dyneither_subscript(to,sizeof(void*),i));}}}}struct _dyneither_ptr
+void**)_check_dyneither_subscript(to,sizeof(void*),i));}}};}struct _dyneither_ptr
 Cyc_Array_from_list(struct Cyc_List_List*x){return Cyc_List_to_array(x);}struct Cyc_List_List*
 Cyc_Array_to_list(struct _dyneither_ptr x){return Cyc_List_from_array(x);}struct
 _dyneither_ptr Cyc_Array_copy(struct _dyneither_ptr x){int sx=(int)
@@ -907,25 +907,25 @@ void*,void*),struct _dyneither_ptr x,struct _dyneither_ptr y){int sx=(int)
 _get_dyneither_size(x,sizeof(void*));if(sx != _get_dyneither_size(y,sizeof(void*)))(
 int)_throw((void*)& Cyc_Array_Array_mismatch_val);{int i=0;for(0;i < sx;++ i){f(*((
 void**)_check_dyneither_subscript(x,sizeof(void*),i)),*((void**)
-_check_dyneither_subscript(y,sizeof(void*),i)));}}}void Cyc_Array_app2_c(void*(*f)(
-void*,void*,void*),void*env,struct _dyneither_ptr x,struct _dyneither_ptr y){int sx=(
-int)_get_dyneither_size(x,sizeof(void*));if(sx != _get_dyneither_size(y,sizeof(
-void*)))(int)_throw((void*)& Cyc_Array_Array_mismatch_val);{int i=0;for(0;i < sx;++
-i){f(env,*((void**)_check_dyneither_subscript(x,sizeof(void*),i)),*((void**)
-_check_dyneither_subscript(y,sizeof(void*),i)));}}}void Cyc_Array_iter2(void(*f)(
+_check_dyneither_subscript(y,sizeof(void*),i)));}};}void Cyc_Array_app2_c(void*(*
+f)(void*,void*,void*),void*env,struct _dyneither_ptr x,struct _dyneither_ptr y){int
+sx=(int)_get_dyneither_size(x,sizeof(void*));if(sx != _get_dyneither_size(y,
+sizeof(void*)))(int)_throw((void*)& Cyc_Array_Array_mismatch_val);{int i=0;for(0;i
+< sx;++ i){f(env,*((void**)_check_dyneither_subscript(x,sizeof(void*),i)),*((void**)
+_check_dyneither_subscript(y,sizeof(void*),i)));}};}void Cyc_Array_iter2(void(*f)(
 void*,void*),struct _dyneither_ptr x,struct _dyneither_ptr y){int sx=(int)
 _get_dyneither_size(x,sizeof(void*));if(sx != _get_dyneither_size(y,sizeof(void*)))(
 int)_throw((void*)& Cyc_Array_Array_mismatch_val);{int i=0;for(0;i < sx;++ i){f(*((
 void**)_check_dyneither_subscript(x,sizeof(void*),i)),*((void**)
-_check_dyneither_subscript(y,sizeof(void*),i)));}}}void Cyc_Array_iter2_c(void(*f)(
-void*,void*,void*),void*env,struct _dyneither_ptr x,struct _dyneither_ptr y){int sx=(
-int)_get_dyneither_size(x,sizeof(void*));if(sx != _get_dyneither_size(y,sizeof(
-void*)))(int)_throw((void*)& Cyc_Array_Array_mismatch_val);{int i=0;for(0;i < sx;++
-i){f(env,*((void**)_check_dyneither_subscript(x,sizeof(void*),i)),*((void**)
-_check_dyneither_subscript(y,sizeof(void*),i)));}}}void*Cyc_Array_fold_left(void*(*
-f)(void*,void*),void*accum,struct _dyneither_ptr x){int sx=(int)_get_dyneither_size(
-x,sizeof(void*));{int i=0;for(0;i < sx;++ i){accum=f(accum,*((void**)
-_check_dyneither_subscript(x,sizeof(void*),i)));}}return accum;}void*Cyc_Array_fold_left_c(
+_check_dyneither_subscript(y,sizeof(void*),i)));}};}void Cyc_Array_iter2_c(void(*
+f)(void*,void*,void*),void*env,struct _dyneither_ptr x,struct _dyneither_ptr y){int
+sx=(int)_get_dyneither_size(x,sizeof(void*));if(sx != _get_dyneither_size(y,
+sizeof(void*)))(int)_throw((void*)& Cyc_Array_Array_mismatch_val);{int i=0;for(0;i
+< sx;++ i){f(env,*((void**)_check_dyneither_subscript(x,sizeof(void*),i)),*((void**)
+_check_dyneither_subscript(y,sizeof(void*),i)));}};}void*Cyc_Array_fold_left(
+void*(*f)(void*,void*),void*accum,struct _dyneither_ptr x){int sx=(int)
+_get_dyneither_size(x,sizeof(void*));{int i=0;for(0;i < sx;++ i){accum=f(accum,*((
+void**)_check_dyneither_subscript(x,sizeof(void*),i)));}}return accum;}void*Cyc_Array_fold_left_c(
 void*(*f)(void*,void*,void*),void*env,void*accum,struct _dyneither_ptr x){int sx=(
 int)_get_dyneither_size(x,sizeof(void*));{int i=0;for(0;i < sx;++ i){accum=f(env,
 accum,*((void**)_check_dyneither_subscript(x,sizeof(void*),i)));}}return accum;}

@@ -78,7 +78,7 @@ void dumpntyp(type_t t);
 void dumpexp(exp_t);
 void dumpexp_prec(int,exp_t);
 void dumppat(pat_t);
-void dumpstmt(stmt_t);
+void dumpstmt(stmt_t,bool expstmt);
 void dumpvardecl(vardecl_t,Position::seg_t);
 void dumpdecl(decl_t);
 void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a);
@@ -783,7 +783,11 @@ void dumpexp_prec(int inprec, exp_t e) {
     group(dumpde, des, "{","}",",");
     break;
 
-  case &StmtExp_e(s): dump_nospace("({"); dumpstmt(s); dump_nospace("})"); break;
+  case &StmtExp_e(s): 
+    dump_nospace("({"); 
+    dumpstmt(s,true);
+    dump_nospace("})"); 
+    break;
   }
   if(inprec >= myprec)
     dump_char(')');
@@ -807,11 +811,11 @@ void dumpswitchclauses(list_t<switch_clause_t> scs) {
       }
       dump_nospace(":");
     }
-    dumpstmt(c->body);
+    dumpstmt(c->body,false);
   }
 }
 
-void dumpstmt(stmt_t s) {
+void dumpstmt(stmt_t s,bool expstmt) {
   //  dumploc(s->loc);
   switch(s->r) {
   case &Skip_s:   dump_semi(); break;
@@ -821,13 +825,16 @@ void dumpstmt(stmt_t s) {
     // It is verbose for Cyclone; maybe it should be controlled by a flag.
   case &Seq_s(s1,s2):
     if(Absynpp::is_declaration(s1)) {
-      dump_char('{'); dumpstmt(s1); dump_char('}');
+      dump_char('{'); dumpstmt(s1,false); dump_char('}');
     } else
-      dumpstmt(s1);
+      dumpstmt(s1,false);
     if(Absynpp::is_declaration(s2)) {
-      dump_char('{'); dumpstmt(s2); dump_char('}');
+      if (expstmt) dump_char('(');
+      dump_char('{'); dumpstmt(s2,expstmt); 
+      dump_char('}');
+      if (expstmt) dump_char(')'); dump_semi();
     } else
-      dumpstmt(s2);
+      dumpstmt(s2,expstmt);
     break;
   case &Return_s(NULL): dumploc(s->loc); dump("return;"); break;
   case &Return_s(e): dumploc(s->loc); dump("return"); dumpexp((exp_t)e); dump_semi(); break;
@@ -837,17 +844,17 @@ void dumpstmt(stmt_t s) {
     case &Seq_s(_,_):
     case &Decl_s(_,_): 
     case &IfThenElse_s(_,_,_):
-    case &Label_s(_,_): dump_nospace("){"); dumpstmt(s1); dump_char('}'); break;
-    default: dump_char(')'); dumpstmt(s1);
+    case &Label_s(_,_): dump_nospace("){"); dumpstmt(s1,false); dump_char('}'); break;
+    default: dump_char(')'); dumpstmt(s1,false);
     }
     switch (s2->r) {
     case &Skip_s: break;
-    default: dump("else{"); dumpstmt(s2); dump_char('}'); break;
+    default: dump("else{"); dumpstmt(s2,false); dump_char('}'); break;
     }
     break;
   case &While_s($(e,_),s1):
     dumploc(s->loc); dump("while("); dumpexp(e); dump_nospace("){");
-    dumpstmt(s1);
+    dumpstmt(s1,false);
     dump_char('}');
     break;
   case &Break_s(_):    dumploc(s->loc); dump("break;");    break;
@@ -856,7 +863,7 @@ void dumpstmt(stmt_t s) {
 
   case &For_s(e1,$(e2,_),$(e3,_),s1):
     dumploc(s->loc); dump("for("); dumpexp(e1);dump_semi(); dumpexp(e2);dump_semi(); dumpexp(e3);
-    dump_nospace("){"); dumpstmt(s1); dump_char('}');
+    dump_nospace("){"); dumpstmt(s1,false); dump_char('}');
     break;
   case &Switch_s(e,ss):
     dumploc(s->loc); dump("switch("); dumpexp(e); dump_nospace("){");
@@ -864,21 +871,24 @@ void dumpstmt(stmt_t s) {
     dump_char('}');
     break;
 
-  case &Decl_s(d,s1): dumpdecl(d); dumpstmt(s1); break;
+  case &Decl_s(d,s1): dumpdecl(d); dumpstmt(s1,expstmt); break;
 
   case &Label_s(x,s1):
     // FIX:  gcc does not allow declarations to be used immediately after
     // labels.  This next case forces an explicit block to be written.
     // It is verbose for Cyclone; maybe it should be controlled by a flag.
     if(Absynpp::is_declaration(s1)) {
-      dump_str(x); dump_nospace(": {"); dumpstmt(s1); dump_char('}');
+      dump_str(x); 
+      if (expstmt) dump_nospace(": ({"); else dump_nospace(": {"); 
+      dumpstmt(s1,expstmt); 
+      if (expstmt) dump_nospace("});}"); else dump_char('}');
     } else {
-      dump_str(x); dump_char(':'); dumpstmt(s1);
+      dump_str(x); dump_char(':'); dumpstmt(s1,expstmt);
     }
     break;
 
   case &Do_s(s1,$(e,_)):
-    dumploc(s->loc); dump("do{"); dumpstmt(s1); 
+    dumploc(s->loc); dump("do{"); dumpstmt(s1,false); 
     dump_nospace("}while("); dumpexp(e); dump_nospace(");");
     break;
 
@@ -887,7 +897,7 @@ void dumpstmt(stmt_t s) {
     dump("fallthru("); dumpexps_prec(20,es); dump_nospace(");"); break;
 
   case &TryCatch_s(s1,ss):
-    dumploc(s->loc); dump("try"); dumpstmt(s1); 
+    dumploc(s->loc); dump("try"); dumpstmt(s1,false); 
     dump("catch{");
     dumpswitchclauses(ss); dump_char('}');
     break;
@@ -1110,7 +1120,7 @@ void dumpdecl(decl_t d) {
       break;  
     }
     dump_char('{');
-    dumpstmt(fd->body);
+    dumpstmt(fd->body,false);
     dump_char('}');
     break;
   case &Aggr_d(ad):

@@ -790,20 +790,20 @@ const char**_tmp3=args;_tag_dyneither(_tmp3,sizeof(const char*),
 _get_zero_arr_size_voidstar(_tmp3,5));}),sizeof(const char*),3);const char*_tmp5=*((
 const char**)_check_dyneither_subscript(_tmp4,sizeof(const char*),0));const char*
 _tmp9=(const char*)_check_null(_untag_dyneither_ptr(({struct Cyc_Int_pa_struct
-_tmp8;_tmp8.tag=1;_tmp8.f1=(unsigned long)self_pid;{void*_tmp6[1]={& _tmp8};Cyc_aprintf(({
+_tmp8;_tmp8.tag=1;_tmp8.f1=(unsigned long)self_pid;({void*_tmp6[1]={& _tmp8};Cyc_aprintf(({
 const char*_tmp7="/proc/%d/exe";_tag_dyneither(_tmp7,sizeof(char),13);}),
-_tag_dyneither(_tmp6,sizeof(void*),1));}}),sizeof(char),1));if(
+_tag_dyneither(_tmp6,sizeof(void*),1));});}),sizeof(char),1));if(
 _get_dyneither_size(_tmp4,sizeof(const char*))== 1  && (_tmp5 == 0  && _tmp9 != 0))
 _throw_arraybounds();*((const char**)_tmp4.curr)=_tmp9;});if(execvp((const char*)"addr2line",(
 const char**)args)== - 1)perror((const char*)"execlp failed during backtrace");exit(
-1);}}else{if(pid < 0){close(tochild[0]);close(tochild[1]);close(fromchild[0]);
+1);};}else{if(pid < 0){close(tochild[0]);close(tochild[1]);close(fromchild[0]);
 close(fromchild[1]);return 1;}}close(tochild[0]);close(fromchild[1]);{int infd=
 fromchild[0];int outfd=tochild[1];int n=Cyc_Execinfo_backtrace(_tag_dyneither(bt,
 sizeof(int),20),(int)20);{int c=0;for(0;c < n;++ c){char buf[100];int len=({struct Cyc_Int_pa_struct
-_tmpC;_tmpC.tag=1;_tmpC.f1=(unsigned int)bt[_check_known_subscript_notnull(20,c)];{
+_tmpC;_tmpC.tag=1;_tmpC.f1=(unsigned int)bt[_check_known_subscript_notnull(20,c)];({
 void*_tmpA[1]={& _tmpC};Cyc_sprintf(_tag_dyneither(buf,sizeof(char),100),({const
 char*_tmpB="%#x\n";_tag_dyneither(_tmpB,sizeof(char),5);}),_tag_dyneither(_tmpA,
-sizeof(void*),1));}});Cyc_write(outfd,_tag_dyneither(buf,sizeof(char),100),(
+sizeof(void*),1));});});Cyc_write(outfd,_tag_dyneither(buf,sizeof(char),100),(
 unsigned int)len);}}({void*_tmpD=0;Cyc_printf(({const char*_tmpE="Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n";
 _tag_dyneither(_tmpE,sizeof(char),94);}),_tag_dyneither(_tmpD,sizeof(void*),0));});{
 int c=0;for(0;c < n;++ c){int unknown=1;char d;int ret;int pos=0;({void*_tmpF=0;Cyc_printf(({
@@ -811,15 +811,15 @@ const char*_tmp10="  ";_tag_dyneither(_tmp10,sizeof(char),3);}),_tag_dyneither(
 _tmpF,sizeof(void*),0));});do{ret=Cyc_read(infd,_tag_dyneither(& d,sizeof(char),1),
 1);if(d == '\n')break;if(d != '?')unknown=0;++ pos;putchar((int)d);}while(1);if(
 unknown){char buf[100];int len=({struct Cyc_Int_pa_struct _tmp16;_tmp16.tag=1;_tmp16.f1=(
-unsigned int)bt[_check_known_subscript_notnull(20,c)];{void*_tmp14[1]={& _tmp16};
+unsigned int)bt[_check_known_subscript_notnull(20,c)];({void*_tmp14[1]={& _tmp16};
 Cyc_sprintf(_tag_dyneither(buf,sizeof(char),100),({const char*_tmp15="(%#x)";
-_tag_dyneither(_tmp15,sizeof(char),6);}),_tag_dyneither(_tmp14,sizeof(void*),1));}});({
+_tag_dyneither(_tmp15,sizeof(char),6);}),_tag_dyneither(_tmp14,sizeof(void*),1));});});({
 struct Cyc_String_pa_struct _tmp13;_tmp13.tag=0;_tmp13.f1=(struct _dyneither_ptr)
-_tag_dyneither(buf,sizeof(char),100);{void*_tmp11[1]={& _tmp13};Cyc_printf(({
+_tag_dyneither(buf,sizeof(char),100);({void*_tmp11[1]={& _tmp13};Cyc_printf(({
 const char*_tmp12="%s";_tag_dyneither(_tmp12,sizeof(char),3);}),_tag_dyneither(
-_tmp11,sizeof(void*),1));}});pos +=len;}while(pos ++ < 16){putchar((int)' ');}({
+_tmp11,sizeof(void*),1));});});pos +=len;}while(pos ++ < 16){putchar((int)' ');}({
 void*_tmp17=0;Cyc_printf(({const char*_tmp18="  ";_tag_dyneither(_tmp18,sizeof(
 char),3);}),_tag_dyneither(_tmp17,sizeof(void*),0));});do{ret=Cyc_read(infd,
 _tag_dyneither(& d,sizeof(char),1),1);if(d == '\n')break;putchar((int)d);}while(1);
 putchar((int)'\n');}}close(infd);if(infd != outfd)close(outfd);kill(pid,15);
-waitpid(pid,0,0);return 0;}}}
+waitpid(pid,0,0);return 0;};};}

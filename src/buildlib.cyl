@@ -226,6 +226,12 @@ and args = parse
   current_args = new List(a,current_args);
   return args(lexbuf);
 }
+| idchar+ ',' 
+{ let a = new (string_t)substring(lexeme(lexbuf), 0,
+                                  lexeme_end(lexbuf)-lexeme_start(lexbuf)-1);
+  current_args = new List(a,current_args);
+  return args(lexbuf);
+}
 | idchar+ ')'
 { let a = new (string_t)substring(lexeme(lexbuf), 0,
                                   lexeme_end(lexbuf)-lexeme_start(lexbuf)-1);

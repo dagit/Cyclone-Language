@@ -777,7 +777,7 @@ char*_tmp1E;const char*_tmp1D;len <= _get_dyneither_size(src1,sizeof(int)) && le
 assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(((_tmp1D="len <= numelts(src1) && len <= numelts(src2)",
 _tag_dyneither(_tmp1D,sizeof(char),45))),((_tmp1E="bitvec.cyc",_tag_dyneither(
 _tmp1E,sizeof(char),11))),71);}{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=((
-int*)src1.curr)[i]| ((int*)src2.curr)[i];}}}void Cyc_Bitvec_intersect_two(struct
+int*)src1.curr)[i]| ((int*)src2.curr)[i];}};}void Cyc_Bitvec_intersect_two(struct
 _dyneither_ptr dest,struct _dyneither_ptr src1,struct _dyneither_ptr src2);void Cyc_Bitvec_intersect_two(
 struct _dyneither_ptr dest,struct _dyneither_ptr src1,struct _dyneither_ptr src2){
 unsigned int len=_get_dyneither_size(dest,sizeof(int));{const char*_tmp20;const
@@ -786,7 +786,7 @@ _get_dyneither_size(src2,sizeof(int))?0:((int(*)(struct _dyneither_ptr assertion
 struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(((_tmp1F="len <= numelts(src1) && len <= numelts(src2)",
 _tag_dyneither(_tmp1F,sizeof(char),45))),((_tmp20="bitvec.cyc",_tag_dyneither(
 _tmp20,sizeof(char),11))),78);}{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=((
-int*)src1.curr)[i]& ((int*)src2.curr)[i];}}}void Cyc_Bitvec_diff_two(struct
+int*)src1.curr)[i]& ((int*)src2.curr)[i];}};}void Cyc_Bitvec_diff_two(struct
 _dyneither_ptr dest,struct _dyneither_ptr src1,struct _dyneither_ptr src2);void Cyc_Bitvec_diff_two(
 struct _dyneither_ptr dest,struct _dyneither_ptr src1,struct _dyneither_ptr src2){
 unsigned int len=_get_dyneither_size(dest,sizeof(int));{const char*_tmp22;const
@@ -795,7 +795,7 @@ _get_dyneither_size(src2,sizeof(int))?0:((int(*)(struct _dyneither_ptr assertion
 struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(((_tmp21="len <= numelts(src1) && len <= numelts(src2)",
 _tag_dyneither(_tmp21,sizeof(char),45))),((_tmp22="bitvec.cyc",_tag_dyneither(
 _tmp22,sizeof(char),11))),85);}{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=((
-int*)src1.curr)[i]& ~((int*)src2.curr)[i];}}}int Cyc_Bitvec_compare_two(struct
+int*)src1.curr)[i]& ~((int*)src2.curr)[i];}};}int Cyc_Bitvec_compare_two(struct
 _dyneither_ptr src1,struct _dyneither_ptr src2);int Cyc_Bitvec_compare_two(struct
 _dyneither_ptr src1,struct _dyneither_ptr src2){unsigned int len=_get_dyneither_size(
 src1,sizeof(int));{const char*_tmp24;const char*_tmp23;len <= _get_dyneither_size(
@@ -859,4 +859,4 @@ unsigned long)(Cyc_Bitvec_get(bvec,i)?1: 0),((_tmp3E[0]=& _tmp3D,Cyc_printf(((
 _tmp3F="%d",_tag_dyneither(_tmp3F,sizeof(char),3))),_tag_dyneither(_tmp3E,
 sizeof(void*),1)))))));}}{const char*_tmp42;void*_tmp41;(_tmp41=0,Cyc_printf(((
 _tmp42="\n",_tag_dyneither(_tmp42,sizeof(char),2))),_tag_dyneither(_tmp41,
-sizeof(void*),0)));}}
+sizeof(void*),0)));};}

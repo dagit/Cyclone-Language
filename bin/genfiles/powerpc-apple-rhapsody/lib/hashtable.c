@@ -800,7 +800,7 @@ struct Cyc_List_List*l=((struct Cyc_List_List**)tab.curr)[bucket];if(l == 0)retu
 if((*cmp)(key,(((struct _tuple0*)l->hd)[_check_known_subscript_notnull(1,0)]).f1)
 == 0){((struct Cyc_List_List**)tab.curr)[bucket]=l->tl;return;}{struct Cyc_List_List*
 prev=l;l=l->tl;for(0;l->tl != 0;(prev=l,l=l->tl)){if((*cmp)(key,(((struct _tuple0*)
-l->hd)[_check_known_subscript_notnull(1,0)]).f1)== 0){prev->tl=l->tl;return;}}}}
+l->hd)[_check_known_subscript_notnull(1,0)]).f1)== 0){prev->tl=l->tl;return;}}};}
 int Cyc_Hashtable_hash_string(struct _dyneither_ptr s);int Cyc_Hashtable_hash_string(
 struct _dyneither_ptr s){int ans=0;int sz=(int)_get_dyneither_size(s,sizeof(char));
 int shift=0;{int i=0;for(0;i < sz;++ i){ans=ans ^ *((const char*)
@@ -817,7 +817,7 @@ int nidx=(int)((*hash)(key)% _get_dyneither_size(tab,sizeof(struct Cyc_List_List
 struct _tuple0*_tmp37;struct Cyc_List_List*_tmp36;((struct Cyc_List_List**)tab.curr)[
 nidx]=((_tmp36=_region_malloc(r,sizeof(*_tmp36)),((_tmp36->hd=((_tmp37=
 _region_malloc(r,sizeof(*_tmp37)),((_tmp37->f1=key,((_tmp37->f2=val,_tmp37)))))),((
-_tmp36->tl=((struct Cyc_List_List**)tab.curr)[nidx],_tmp36))))));}}void Cyc_Hashtable_resize(
+_tmp36->tl=((struct Cyc_List_List**)tab.curr)[nidx],_tmp36))))));};}void Cyc_Hashtable_resize(
 struct Cyc_Hashtable_Table*t);static void _tmp3D(struct Cyc_List_List**mt,
 unsigned int*_tmp3C,unsigned int*_tmp3B,struct Cyc_List_List***_tmp39){for(*
 _tmp3C=0;*_tmp3C < *_tmp3B;(*_tmp3C)++){(*_tmp39)[*_tmp3C]=*mt;}}void Cyc_Hashtable_resize(
@@ -862,6 +862,6 @@ void*),0)));}prn_key((((struct _tuple0*)iter->hd)[_check_known_subscript_notnull
 _tag_dyneither(_tmp47,sizeof(char),2))),_tag_dyneither(_tmp46,sizeof(void*),0)));}
 prn_val((((struct _tuple0*)iter->hd)[_check_known_subscript_notnull(1,0)]).f2);{
 const char*_tmp4A;void*_tmp49;(_tmp49=0,Cyc_printf(((_tmp4A=") ",_tag_dyneither(
-_tmp4A,sizeof(char),3))),_tag_dyneither(_tmp49,sizeof(void*),0)));}}}{const char*
+_tmp4A,sizeof(char),3))),_tag_dyneither(_tmp49,sizeof(void*),0)));};}}{const char*
 _tmp4D;void*_tmp4C;(_tmp4C=0,Cyc_printf(((_tmp4D="\n",_tag_dyneither(_tmp4D,
-sizeof(char),2))),_tag_dyneither(_tmp4C,sizeof(void*),0)));}}}
+sizeof(char),2))),_tag_dyneither(_tmp4C,sizeof(void*),0)));};}}

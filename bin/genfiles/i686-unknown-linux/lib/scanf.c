@@ -858,8 +858,8 @@ _dyneither_ptr_inplace_plus(& _tmp2C,sizeof(char),1);++ sum;-- width;}nread +=su
 nassigned;}break;case 1: _LL4B: if(width == 0)width=(long long)~ 0;if(flags & 8){n=0;{
 int c=_IO_peekc(fp);while((int)ccltab[_check_known_subscript_notnull(256,(int)((
 char)c))]){++ n;_IO_getc(fp);if(-- width == 0)break;if((c=_IO_peekc(fp))== - 1){if(n
-== 0)goto eof_failure;++ seen_eof;break;}}if(n == 0)goto match_failure;}}else{struct
-_dyneither_ptr p4=(struct _dyneither_ptr)Cyc_va_arg_string_ptr(*((void**)
+== 0)goto eof_failure;++ seen_eof;break;}}if(n == 0)goto match_failure;};}else{
+struct _dyneither_ptr p4=(struct _dyneither_ptr)Cyc_va_arg_string_ptr(*((void**)
 _check_dyneither_subscript(ap,sizeof(void*),0)));_dyneither_ptr_inplace_plus(& ap,
 sizeof(void*),1);{struct _dyneither_ptr p5=p4;int c=_IO_peekc(fp);while((int)ccltab[
 _check_known_subscript_notnull(256,(int)((char)c))]){if(_get_dyneither_size(p5,
@@ -868,10 +868,10 @@ char),0))=(char)c;_dyneither_ptr_inplace_plus(& p5,sizeof(char),1);_IO_getc(fp);
 if(-- width == 0)break;if((c=_IO_peekc(fp))== - 1){if(p5.curr == p0.curr)goto
 eof_failure;++ seen_eof;break;}}n=(p5.curr - p4.curr)/ sizeof(char);if(n == 0)goto
 match_failure;if(_get_dyneither_size(p5,sizeof(char))== 0)goto eof_failure;*((
-char*)_check_dyneither_subscript(p5,sizeof(char),0))='\000';++ nassigned;}}nread +=
-n;break;case 2: _LL4C: if(width == 0)width=(long long)~ 0;if(flags & 8){n=0;{int c=
+char*)_check_dyneither_subscript(p5,sizeof(char),0))='\000';++ nassigned;};}nread
++=n;break;case 2: _LL4C: if(width == 0)width=(long long)~ 0;if(flags & 8){n=0;{int c=
 _IO_peekc(fp);while(!isspace((int)((unsigned char)c))){++ n;_IO_getc(fp);if(--
-width == 0)break;if((c=_IO_peekc(fp))== - 1){++ seen_eof;break;}}nread +=n;}}else{
+width == 0)break;if((c=_IO_peekc(fp))== - 1){++ seen_eof;break;}}nread +=n;};}else{
 struct _dyneither_ptr _tmp2D=Cyc_va_arg_string_ptr(*((void**)
 _check_dyneither_subscript(ap,sizeof(void*),0)));_dyneither_ptr_inplace_plus(& ap,
 sizeof(void*),1);{struct _dyneither_ptr _tmp2E=_tmp2D;int c=_IO_peekc(fp);while(!
@@ -881,7 +881,7 @@ sizeof(char),0))=(char)c;_dyneither_ptr_inplace_plus(& _tmp2E,sizeof(char),1);if
 -- width == 0)break;if((c=_IO_peekc(fp))== - 1){++ seen_eof;break;}}if(
 _get_dyneither_size(_tmp2E,sizeof(char))== 0)goto eof_failure;*((char*)
 _check_dyneither_subscript(_tmp2E,sizeof(char),0))='\000';nread +=(_tmp2E.curr - 
-_tmp2D.curr)/ sizeof(char);++ nassigned;}}continue;case 3: _LL4D: if(width == 0  || 
+_tmp2D.curr)/ sizeof(char);++ nassigned;};}continue;case 3: _LL4D: if(width == 0  || 
 width > sizeof(buf)- 1)width=(long long)(sizeof(buf)- 1);flags |=(64 | 128)| 512;
 for(p=({char*_tmp2F=buf;_tag_dyneither(_tmp2F,sizeof(char),
 _get_zero_arr_size_char(_tmp2F,351));});width != 0;-- width){c=(int)((
@@ -959,7 +959,7 @@ struct Cyc_Core_Impossible_struct _tmp41;_tmp41.tag=Cyc_Core_Impossible;_tmp41.f
 const char*_tmp42="scanf3";_tag_dyneither(_tmp42,sizeof(char),7);});_tmp41;});
 _tmp40;}));}}eof_failure: ++ seen_eof;input_failure: if(nassigned == 0)nassigned=- 1;
 control_failure: match_failure: if((unsigned int)errp)*errp |=2;done: if((
-unsigned int)errp  && seen_eof)*errp |=1;return nassigned;}}static struct
+unsigned int)errp  && seen_eof)*errp |=1;return nassigned;};}static struct
 _dyneither_ptr Cyc___sccl(char*tab,struct _dyneither_ptr fmt){int c;int n;int v;c=(int)*((
 const char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus_post(& fmt,
 sizeof(char),1),sizeof(char),0));if(c == '^'){v=1;c=(int)*((const char*)

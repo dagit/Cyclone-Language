@@ -774,7 +774,7 @@ _dyneither_ptr_decrease_size(_dyneither_ptr_plus(lexbuf->lex_buffer,sizeof(char)
 lexbuf->lex_buffer_len - n),sizeof(char),1),(struct _dyneither_ptr)Cyc_Lexing_aux_buffer,(
 unsigned int)n);lexbuf->lex_abs_pos=lexbuf->lex_abs_pos + n;lexbuf->lex_curr_pos=
 lexbuf->lex_curr_pos - n;lexbuf->lex_start_pos=lexbuf->lex_start_pos - n;lexbuf->lex_last_pos=
-lexbuf->lex_last_pos - n;}}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(int(*
+lexbuf->lex_last_pos - n;};}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(int(*
 read_fun)(struct _dyneither_ptr,int,void*),void*read_fun_state){return({struct Cyc_Lexing_lexbuf*
 _tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->refill_buff=Cyc_Lexing_lex_refill;_tmp0->refill_state=({
 struct Cyc_Lexing_function_lexbuf_state*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->read_fun=

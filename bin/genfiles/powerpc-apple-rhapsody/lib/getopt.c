@@ -1056,7 +1056,7 @@ char),39))),_tag_dyneither(_tmp89,sizeof(void*),2)))))))))))));}Cyc_optopt=(int)
 c;if(*((const char*)_check_dyneither_subscript(optstring,sizeof(char),0))== ':')c=':';
 else{c='?';}}else{Cyc_optarg=*((struct _dyneither_ptr*)_check_dyneither_subscript(
 argv,sizeof(struct _dyneither_ptr),Cyc_optind ++));}}Cyc_nextchar=_tag_dyneither(0,
-0,0);}}return(int)c;}}int Cyc_getopt(int argc,struct _dyneither_ptr argv,struct
+0,0);}}return(int)c;};}int Cyc_getopt(int argc,struct _dyneither_ptr argv,struct
 _dyneither_ptr optstring);int Cyc_getopt(int argc,struct _dyneither_ptr argv,struct
 _dyneither_ptr optstring){return Cyc__getopt_internal(argc,argv,optstring,(struct
 _dyneither_ptr)_tag_dyneither(0,0,0),(int*)0,0);}

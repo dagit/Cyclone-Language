@@ -2730,15 +2730,19 @@ cycstub fseek {
   }
 }
 hstub fseeko {
+  #ifndef __CYGWIN__
   extern int fseeko(FILE @, off_t, int);
+  #endif
 }
 cycstub fseeko {
+  #ifndef __CYGWIN__
   namespace Cstdio {
     extern "C" int fseeko(__cFILE @, off_t, int);
   }
   int fseeko(FILE @a, off_t b, int c) {
     return Cstdio::fseeko(a->file,b,c);
   }
+  #endif
 }
 hstub fsetpos {
   extern int fsetpos(FILE @, const fpos_t @);
@@ -2763,15 +2767,19 @@ cycstub ftell {
   }
 }
 hstub ftello {
+  #ifndef __CYGWIN__
   extern off_t ftello(FILE @);
+  #endif
 }
 cycstub ftello {
+  #ifndef __CYGWIN__
   namespace Cstdio {
     extern "C" off_t ftello(__cFILE @);
   }
   off_t ftello(FILE @f) {
     return Cstdio::ftello(f->file);
   }
+  #endif
 }
 hstub ftrylockfile {
   #ifndef __CYGWIN__

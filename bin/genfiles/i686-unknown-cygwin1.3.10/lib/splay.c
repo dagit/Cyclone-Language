@@ -779,14 +779,14 @@ _tmp2A);break;case Cyc_Splay_RIGHT: _LL12: Cyc_Splay_rotate_left(r,_tmp26);Cyc_S
 r,_tmp2A);break;}break;case Cyc_Splay_RIGHT: _LL10: switch(_tmp29){case Cyc_Splay_LEFT:
 _LL15: Cyc_Splay_rotate_right(r,_tmp26);Cyc_Splay_rotate_left(r,_tmp2A);break;
 case Cyc_Splay_RIGHT: _LL16: Cyc_Splay_rotate_right(r,_tmp2A);Cyc_Splay_rotate_right(
-r,_tmp2A);break;}break;}}}}}int Cyc_Splay_rsplay(struct _RegionHandle*r,int(*reln)(
-void*,void*),void*reln_first_arg,void*tree){struct _RegionHandle _tmp2B=
+r,_tmp2A);break;}break;}};};}}int Cyc_Splay_rsplay(struct _RegionHandle*r,int(*
+reln)(void*,void*),void*reln_first_arg,void*tree){struct _RegionHandle _tmp2B=
 _new_region("temp");struct _RegionHandle*temp=& _tmp2B;_push_region(temp);{struct
 Cyc_List_List*path=0;while(1){void*_tmp2C=tree;struct Cyc_Splay_noderef*_tmp2E;
 _LL19: {struct Cyc_Splay_Node_struct*_tmp2D=(struct Cyc_Splay_Node_struct*)_tmp2C;
 if(_tmp2D->tag != 1)goto _LL1B;else{_tmp2E=_tmp2D->f1;}}_LL1A: {struct Cyc_Splay_node*
 _tmp30=_tmp2E->v;int _tmp31=reln(reln_first_arg,(void*)_tmp30->key);if(_tmp31 == 0){
-Cyc_Splay_lift(r,path);{int _tmp32=1;_npop_handler(0);return _tmp32;}}else{if(
+Cyc_Splay_lift(r,path);{int _tmp32=1;_npop_handler(0);return _tmp32;};}else{if(
 _tmp31 < 0){path=({struct Cyc_List_List*_tmp33=_region_malloc(temp,sizeof(*_tmp33));
 _tmp33->hd=({struct _tuple0*_tmp34=_region_malloc(temp,sizeof(*_tmp34));_tmp34->f1=(
 enum Cyc_Splay_direction)Cyc_Splay_LEFT;_tmp34->f2=_tmp2E;_tmp34;});_tmp33->tl=
@@ -796,6 +796,6 @@ _region_malloc(temp,sizeof(*_tmp36));_tmp36->f1=(enum Cyc_Splay_direction)Cyc_Sp
 _tmp36->f2=_tmp2E;_tmp36;});_tmp35->tl=path;_tmp35;});tree=_tmp30->right;}}goto
 _LL18;}_LL1B: {struct Cyc_Splay_Leaf_struct*_tmp2F=(struct Cyc_Splay_Leaf_struct*)
 _tmp2C;if(_tmp2F->tag != 0)goto _LL18;}_LL1C: if(path != 0)Cyc_Splay_lift(r,path->tl);{
-int _tmp37=0;_npop_handler(0);return _tmp37;}_LL18:;}};_pop_region(temp);}int Cyc_Splay_splay(
+int _tmp37=0;_npop_handler(0);return _tmp37;};_LL18:;}};_pop_region(temp);}int Cyc_Splay_splay(
 int(*reln)(void*,void*),void*reln_first_arg,void*tree){return Cyc_Splay_rsplay(
 Cyc_Core_heap_region,reln,reln_first_arg,tree);}
