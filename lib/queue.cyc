@@ -28,7 +28,11 @@ namespace Queue;
 
 using List;
 
-struct Queue<`a,`r::R> { list_t<`a,`r> front; list_t<`a,`r> rear; };
+struct Queue<`a,`r::R> { 
+  list_t<`a,`r> front; 
+  list_t<`a,`r> rear; 
+  unsigned int len;
+};
 
 // true when the queue is empty
 bool is_empty(queue_t q)  {
@@ -40,7 +44,7 @@ xtunion exn { Empty };
 
 // create a new queue
 queue_t create() {
-  return new Queue(NULL,NULL);
+  return new Queue(NULL,NULL,0);
 }
 
 // insert an element into the rear of the queue (side effect)
@@ -54,6 +58,7 @@ void radd(region_t<`r> r, queue_t<`a,`r> q,`a x) {
     q->rear->tl = cell;
     q->rear = cell;
   }
+  q->len++;
 }
 
 void add(queue_t<`a,`H> q, `a x) {
@@ -71,6 +76,7 @@ void add(queue_t<`a,`H> q, `a x) {
     if (q->front == NULL) {  // necessary to ensure last cell is
       q->rear = NULL;        // garbage collected
     }
+    q->len--;
     return x;
   }
 }
@@ -88,11 +94,32 @@ void add(queue_t<`a,`H> q, `a x) {
 void clear(queue_t<`a> q) {
   q->front = NULL;
   q->rear = NULL;
+  q->len = 0;
+}
+
+// remove a specific member (side effect)
+void remove(queue_t<`a,`r> q,`a v) {
+  list_t<`a,`r> x, y;
+  for (x = q->front, y = NULL; x != NULL; y = x, x = x->tl) {
+    if (x->hd == v) {
+      // fix pointers at the front of the q
+      if (q->front == x)
+	q->front = x->tl;
+      else
+	y->tl = x->tl;
+      // fix pointers at the rear
+      if (q->rear == x) {
+	q->rear = y;
+      }
+      break;
+    }      
+  }
 }
 
 // return the number of elements in the queue
 int length(queue_t<`a> q) {
-  return(List::length(q->front));
+//    return(List::length(q->front));
+  return q->len;
 }
 
 // apply f to each element in the queue from the front to the back

@@ -2,16 +2,14 @@ include ../../Makefile.inc
 
 # use the installed compiler ..
 CYC_BIN_PATH=$(CYCDIR)/bin
-
-# ... but the source libraries
-CYC_LIB_PATH=$(CYCDIR)/lib
-CYC_INC_PATH=$(CYCDIR)/lib
+CYC_LIB_PATH=$(CYCDIR)/bin/cyc-lib
+CYC_INC_PATH=$(CYCDIR)/include
 
 CYCC=$(CYC_BIN_PATH)/$(CYCCOMP)
 CYCBISON=$(CYC_BIN_PATH)/cycbison$(EXE)
 CYCLEX=$(CYC_BIN_PATH)/cyclex$(EXE)
 
-override CYC_FLAGS+= -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -B$(CYCDIR)/bin/cyc-lib
+override CYC_FLAGS+= -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH)
 
 SRCS=xml xmlparse_tab xmlscan xmldump
 
@@ -19,6 +17,11 @@ OBJS=$(addsuffix .o, $(SRCS))
 CSRCS=$(addsuffix .c, $(SRCS))
 
 all: xmlecho$(EXE) libxml.a
+
+install: all $(CYCDIR)/bin/cyc-lib/libxml.a
+
+$(CYCDIR)/bin/cyc-lib/libxml.a: libxml.a
+	cp libxml.a $(CYCDIR)/bin/cyc-lib
 
 xmlecho$(EXE): $(OBJS) xmlecho.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)

@@ -60,6 +60,10 @@ extern `a peek(queue_t<`a>);
 extern void clear(queue_t<`a>);
   /** [clear(q)] removes all elements from [q]. */
 
+extern void remove(queue_t<`a>,`a);
+  /** [remove(q,x)] removes the first occurence of element [x] from [q], 
+      if present. **/
+
 extern int length(queue_t<`a>);
   /** [length(q)] returns the number of elements in [q]. */
 

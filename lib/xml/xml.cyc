@@ -18,3 +18,68 @@
 
 #define _XML_CYC
 #include "xml.h"
+#include <string.h>
+
+namespace Xml;
+
+using Core;
+using List;
+
+/* [getElemData(doc,tag)] checks that the document [doc] is a single
+   element with tag [tag], and returns the contents and attributes of
+   that element.  On error, a [parseConfigFailed] exception is thrown.  */
+$(list_t<content_t>,list_t<attribute_t>)
+getElemData(content_t doc, string_t tagname)
+{
+  switch (doc) {
+  case &Element(e):
+    switch (e) {
+    case &StartEnd(nm,atrs,content):
+      if (!strcmp(nm,tagname)) {
+	return $(content,atrs);
+      }
+      break;
+    default:
+      break;
+    }
+    break;
+  default:
+    break;
+  }
+  throw procXMLdocFailed;
+}
+
+/* [getAttributes(a,n)] returns the attribute values from [a] that
+   match the names in [n].  The lists must match up exactly
+   (i.e. order matters).  If order shouldn't matter, you can sort both
+   lists first.  */
+list_t<attvalue_t>
+getAttributes(list_t<attribute_t> atrs,list_t<name @> names) 
+{
+  list_t<attvalue_t,`H> res = NULL;
+  while (names != NULL) {
+    if (atrs != NULL) {
+      let &$(nm,val) = atrs->hd;
+      if (!strcmp(nm,*(names->hd))) {
+	res = new List(val,res);
+      }
+      else
+	throw procXMLdocFailed;
+    }
+    else
+      throw procXMLdocFailed;
+    names = names->tl;
+    atrs = atrs->tl;
+  }
+  return res;
+}
+
+/* [getAttribute(atr,nm)] returns the value associated with attribute
+   [atr] if it has name [nm]; throws [procXMLdocFailed] if not.  */
+attvalue_t getAttribute(attribute_t atr, name nm) {
+  let &$(anm,aval) = atr;
+  if (!strcmp(anm,nm))
+    return aval;
+  else
+    throw procXMLdocFailed;
+}

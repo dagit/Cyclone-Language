@@ -36,7 +36,7 @@ CYC_INC_PATH := $(CYCDIR)/lib
 CYCC:=$(CYC_BIN_PATH)/$(CYCCOMP) 
 OUT_PREFIX=
 
-build: $(CYC_LIB_PATH)/gc.a cyclone tools
+build: $(CYC_LIB_PATH)/gc.a cyclone tools libs
 
 # This target builds off the C files in bin/genfiles
 cyclone:
@@ -47,6 +47,12 @@ tools:
 	$(MAKE) install -C tools/cyclex
 	$(MAKE) install -C tools/aprof
 .PHONY: tools
+
+libs:
+ifndef NO_XML_LIB
+	$(MAKE) install -C lib/xml
+endif
+.PHONY: libs
 
 $(CYC_LIB_PATH)/gc.a:
 	$(MAKE) -C gc gc.a CC=$(CC) CFLAGS=" $(CFLAGS) -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DSILENT -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"
@@ -258,5 +264,6 @@ clean_nogc:
 clean: clean_nogc
 	$(MAKE) clean -C gc
 	$(RM) gc/*.exe gc/base_lib gc/*.obj gc/gc.lib
-	$(RM) bin/cyc-lib/gc.a bin/gc_pg.a 
-	$(RM) bin/cyc-lib/nogc.a bin/cyc-lib/nogc_a.a
+# 	$(RM) bin/cyc-lib/gc.a bin/gc_pg.a 
+# 	$(RM) bin/cyc-lib/nogc.a bin/cyc-lib/nogc_a.a
+	$(RM) bin/cyc-lib/*.a
