@@ -98,49 +98,64 @@ static void field_redecl_okay(tunionfield_t f1, tunionfield_t f2,
   }
 }
 
-// FIX:  we should really check that static or public function prototypes
-// are eventually declared.  However, C will catch this for us, so I'm
-// not bothering to do this now.
-
 // now returns whether there is a redeclaration or not -- needed for treeshaking
 static bool var_redecl_okay(genv_t ge, seg_t loc, var_t name, type_t t, 
-                            scope_t sc, attributes_t atts) {
+                            scope_t sc, attributes_t atts, bool check_no_fun) {
   opt_t<$(resolved_t,bool)@> ans = Dict::lookup_opt(ge->ordinaries,name);
-  if(ans == null)
+  if(ans == null) {
     return false;
-  (*ans->v)[1] = true; // this is very important or we'd shake out too much
-  switch ((*ans->v)[0]) {
-  case &VarRes(&Global_b(vd)):
-    if (sc == Static && vd->sc != Static)
+  } else {
+    scope_t sc2;
+    type_t t2;
+    attributes_t atts2;
+    
+    //(*ans->v)[1] = true; // this is very important or we'd shake out too much
+    // Mathieu : useless because we will soon overwrite this entry in the dictionnary
+
+    switch ((*ans->v)[0]) {
+    case &VarRes(&Funname_b(fd)):
+      if (check_no_fun) {
+	terr(loc,xprintf("redefinition of function %s", *name));
+	// FIX : print the location of the previous definition (as gcc)
+      }
+      sc2 = fd -> sc;
+      t2 = fd -> cached_typ -> v;
+      atts2 = fd -> attributes;
+      break;
+    case &VarRes(&Global_b(vd)):
+      sc2 = vd -> sc;
+      t2 = vd -> type;
+      atts2 = vd -> attributes;
+      break;
+    default: return true;
+    }
+    if (sc == Static && sc2 != Static)
       warn(loc,
            xprintf("static declaration of %s follows non-static declaration",
                    *name));
-    if (vd->sc == Static && sc != Static)
+    if (sc2 == Static && sc != Static)
       warn(loc,
 	   xprintf("non-static declaration of %s follows static declaration",
 		   *name));
-    if ((vd->sc == ExternC && sc != ExternC) ||
-	(vd->sc != ExternC && sc == ExternC))
+    if ((sc2 == ExternC && sc != ExternC) ||
+	(sc2 != ExternC && sc == ExternC))
       terr(loc,xprintf("incompatible redeclaration of %s",*name));
     // either they must both be static, both public, or at most one non-extern
-    else if ((sc != Extern && vd->sc != Extern) &&
-	!(sc == Static && vd->sc == Static) &&
-	!(sc == Public && vd->sc == Public))
+    else if ((sc != Extern && sc2 != Extern) &&
+	!(sc == Static && sc2 == Static) &&
+	!(sc == Public && sc2 == Public))
       terr(loc,xprintf("incompatible redeclaration of %s",*name));
     // all must be at the same type
-    if (!unify(vd->type,t))
+    if (!unify(t,t2))
       // FIX: should the test be unification?
       // FIX: we should also check the tqual
       terr(loc,xprintf("redeclaration of %s at a different type: %s != %s",
-		       *name, typ2string(t), typ2string(vd->type)));
-    if (!same_atts(atts, vd->attributes))
+		       *name, typ2string(t), typ2string(t2)));
+    if (!same_atts(atts, atts2))
       terr(loc,xprintf("redeclaration of %s with different attributes",*name));
-    break;
-  case &VarRes(&Funname_b(fd)): terr(loc,xprintf("redefinition of function %s", *name)); break;
-    // FIX : print the location of the previous definition (as gcc)
-  default: break;
+
+    return true;
   }
-  return true;
 }
 
 // Transfer any function type attributes from the given list to the
@@ -209,7 +224,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd) {
     atts = transfer_fn_type_atts(t,atts);
   }
   // check for redeclaration
-  bool is_redecl = var_redecl_okay(ge,loc,v,t,sc,atts);
+  bool is_redecl = var_redecl_okay(ge,loc,v,t,sc,atts,false);
   // if extern, make sure it has no initializer
   if (sc == Extern || sc == ExternC) {
     if(vd->initializer != null)
@@ -274,9 +289,12 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd) {
       }
     }
   }
-  // add to environment
-  ge->ordinaries = Dict::insert(ge->ordinaries, v,
-				new $(new VarRes(new Global_b(vd)),is_redecl));
+  // add it to the environment
+  // unless it's an redeclaration as extern or redeclaration of prototype
+  if (! (is_redecl && (sc == Extern || is_function_type(t)))) {
+    ge->ordinaries = Dict::insert(ge->ordinaries, v,
+				  new $(new VarRes(new Global_b(vd)),is_redecl));
+  }
 }
 
 static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
@@ -302,7 +320,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
   check_fndecl_valid_type(loc,te,fd);
   // check for redeclaration
   type_t t = fndecl2typ(fd);
-  bool is_redecl = var_redecl_okay(ge, loc, v, t, sc, fd->attributes);
+  bool is_redecl = var_redecl_okay(ge, loc, v, t, sc, fd->attributes, true);
   // check that packed and aligned don't show up in the attributes
   for (_ atts = fd->attributes; atts != null; atts = atts->tl) {
     switch (atts->hd) {

@@ -19,8 +19,6 @@ namespace Interface {
     
   // build a maximal interface from the global environment computed by the type-checker
   // also check that each (non extern) function prototyp is eventually provided
-  // if a static function prototyp has not been declared, give an error message
-  // if a public function prototyp has not been declared, set it extern and print a warning message
   extern t extract(Dict::dict_t<list_t<var_t>, genv_t> ae);
 
   // check if i1 may safely be used instead of i2 :
@@ -28,8 +26,9 @@ namespace Interface {
   // _ everything needed by i1 was needed by i2
   extern bool is_subinterface(t i1, t i2);
 
+  // extern bool consistent(list_t<t>);
+
   // try to merge 2 interfaces
-  // (same as concat & simplify but faster for we assume that each interface is already consistent)
   // extern t merge(t, t);
 
   // pretty print to a text file 

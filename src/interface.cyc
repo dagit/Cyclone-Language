@@ -36,8 +36,8 @@ struct Ienv { // clone of Genv, but with only what we need
 typedef struct Ienv @ienv_t;
 
 struct T {
-  Dict::dict_t<list_t<var_t>,ienv_t> externs; // what is needed
-  Dict::dict_t<list_t<var_t>,ienv_t> publics; // what is provided
+  Dict::dict_t<list_t<var_t>,ienv_t> imports; // what is needed
+  Dict::dict_t<list_t<var_t>,ienv_t> exports; // what is provided
 };
 
 ienv_t new_ienv() {
@@ -149,7 +149,7 @@ static void extract_xtuniondecl(t i, var_t x, xtuniondecl_t@ dp) {
       let fd = new *d;
       fd -> name = new $(new Abs_n(ns), (*(fd -> name))[1]);
       fd -> fields = new List(f -> hd, null);
-      let pub = Dict::lookup(i -> publics, ns);
+      let pub = Dict::lookup(i -> exports, ns);
       pub -> xtuniondecls = Dict::insert(pub -> xtuniondecls, x, fd);
     }
     break;
@@ -166,7 +166,7 @@ static void extract_xtuniondecl(t i, var_t x, xtuniondecl_t@ dp) {
       let fd = new *d;
       fd -> name = new $(new Abs_n(ns), (*(fd -> name))[1]);
       fd -> fields = new List(f -> hd, null);
-      let ext = Dict::lookup(i -> externs, ns);
+      let ext = Dict::lookup(i -> imports, ns);
       ext -> xtuniondecls = Dict::insert(ext -> xtuniondecls, x, fd);
     }
     break;
@@ -225,6 +225,8 @@ static void extract_ordinarie($(ienv_t, ienv_t, bool) @ env, var_t x, $(resolved
       check_fun_definition = false; // the body of the function is defined
       fallthru(vd);
     case &Global_b(d):
+      d = new *d;
+      d -> initializer = null; // drop the initializer
       switch(d -> sc) {
       case Static:
 	if (check_fun_definition && Tcutil::is_function_type(d -> type)) {
@@ -240,7 +242,6 @@ static void extract_ordinarie($(ienv_t, ienv_t, bool) @ env, var_t x, $(resolved
 		       xprintf("public function %s has never been defined",
 			       Absynpp::qvar2string(d -> name)));
 	}
-	// FIX: drop the initializer
 	pub -> vardecls = Dict::insert(pub -> vardecls, x, d);
 	break;
       case ExternC: fallthru;
@@ -259,7 +260,7 @@ static void extract_ordinarie($(ienv_t, ienv_t, bool) @ env, var_t x, $(resolved
 static void extract_f($(t, bool) @ env_f, list_t<var_t> ns, genv_t ge) {
   let i = (*env_f)[0];
   let check_fun_definition = (*env_f)[1];
-  let env = new $(Dict::lookup(i -> externs, ns), Dict::lookup(i -> publics, ns));
+  let env = new $(Dict::lookup(i -> imports, ns), Dict::lookup(i -> exports, ns));
   Dict::iter_c(extract_structdecl,  env, ge->structdecls);
   Dict::iter_c(extract_uniondecl,   env, ge->uniondecls);
   Dict::iter_c(extract_tuniondecl,  env, ge->tuniondecls);
@@ -390,8 +391,8 @@ namespace Check {
 
 bool is_subinterface(t i1,t i2) {
   try {
-    Dict::iter2(Check::incl_ns, i1 -> publics, i2 -> publics);
-    Dict::iter2(Check::incl_ns, i2 -> externs, i1 -> externs);
+    Dict::iter2(Check::incl_ns, i1 -> exports, i2 -> exports);
+    Dict::iter2(Check::incl_ns, i2 -> imports, i1 -> imports);
   } catch {
   case &Check::False: fallthru;
   case &Dict::Absent: return false;
@@ -522,21 +523,20 @@ static void print_ns_decls(FILE @f, list_t<var_t> ns, ienv_t ie) {
 
 void print(t i, FILE @f) {
   fprintf(f,   "/****** needed (headers) ******/\n");
-  Dict::iter_c(print_ns_headers, f, i -> externs); // no typedefs here
+  Dict::iter_c(print_ns_headers, f, i -> imports); // no typedefs here
 
   fprintf(f, "\n/****** provided (headers) ******/\n");
-  Dict::iter_c(print_ns_headers, f, i -> publics);
+  Dict::iter_c(print_ns_headers, f, i -> exports);
 
   //typedefs are always public...
-
   fprintf(f, "\n/****** provided (typedefs) ******/\n");
-  Dict::iter_c(print_ns_typedefs, f, i -> publics);
+  Dict::iter_c(print_ns_typedefs, f, i -> exports);
 
   fprintf(f, "\n/****** needed (declarations) ******/\n");
-  Dict::iter_c(print_ns_decls, f, i -> externs);
+  Dict::iter_c(print_ns_decls, f, i -> imports);
 
   fprintf(f, "\n/****** provided (declarations) ******/\n");
-  Dict::iter_c(print_ns_decls, f, i -> publics);
+  Dict::iter_c(print_ns_decls, f, i -> exports);
 }
 
 /* ------ parsing a text file ------ */
