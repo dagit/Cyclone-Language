@@ -135,7 +135,7 @@ cmp:
 # This target updates what is in bin/genfiles and include.
 # It would be "dangerous" to invoke this target if we did not have 
 # version control.  Only updates changed files (makes cvs faster).
-ifeq ($(TARGET),$(ARCH))
+ifndef TARGET
 SRCDIR:=src
 LIBDIR:=lib
 ARCHDIR:=bin/genfiles/$(ARCH)

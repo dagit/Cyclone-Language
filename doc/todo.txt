@@ -39,8 +39,6 @@ BUG FIXES and UNSOUNDNESSES:
 
 * minimize initializing
 
-* should allow casting to void
-
 * need two versions of the .h files for the standard C library --
   one which uses the namespace automatically, and one that doesn't.
   Note that this requires fixing the using Foo; using Foo; bug.

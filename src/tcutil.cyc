@@ -1633,6 +1633,7 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
       }
       return bounds_ok && ptrsub && 
         (unify(rt_a,rt_b) || region_outlives(te,rt_a,rt_b));
+    case VoidType: return true;
     default: break;
     }
     return false;
@@ -1662,7 +1663,8 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     fallthru;
   case &IntType(_,_): fallthru;
   case FloatType :  fallthru;
-  case DoubleType:  return coerceable(t2);
+  case DoubleType:  return coerceable(t2) || t2 == VoidType;
+  case VoidType: return t2 == VoidType;
   default: return false;
   }
 }
