@@ -86,9 +86,8 @@ Lexbuf<Function_lexbuf_state<`b>>
 from_function<`b>(int read_fun(string,int,`b),
                   `b read_fun_state) {
   return &lexbuf(lex_refill, // @ <`b>,
-                 &function_lexbuf_state(read_fun,
-                                       read_fun_state),
-		 new_string(BUFFER_SIZE+1),
+                 &function_lexbuf_state(read_fun, read_fun_state),
+		 new_string(BUFFER_SIZE),
                  BUFFER_SIZE, -BUFFER_SIZE,
 		 BUFFER_SIZE, BUFFER_SIZE, BUFFER_SIZE,
                  0,

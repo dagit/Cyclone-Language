@@ -849,6 +849,8 @@ static bool ptrsubtype(tenv te, list<$(typ,typ)@> assume, typ t1, typ t2) {
 bool castable(tenv te, segment loc, typ t1, typ t2) {
   t1 = compress(t1);
   t2 = compress(t2);
+  if(unify(t1,t2))
+    return true;
   switch (t1) {
   case EnumType(name_opt,ts):
     // can cast an enum to an int -- extracts the tag
@@ -902,7 +904,7 @@ bool castable(tenv te, segment loc, typ t1, typ t2) {
     }
   case FloatType(_) : return coerceable(t2);
   case DoubleType(_): return coerceable(t2);
-  default: return unify(t1,t2);
+  default: return false;
   }
 }
 

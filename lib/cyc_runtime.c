@@ -234,7 +234,23 @@ int f_string_read(FILE *fd, string dest, int dest_offset, int max_count) {
   }
   return fread((dest->contents)+dest_offset, 1, max_count, fd);
 }
-
+int f_string_write(FILE *fd, string src, int src_offset, int max_count) {
+  check_fd(fd);
+  if(src_offset + max_count > src->sz) {
+    fprintf(stderr,"Attempt to write off end of string.\n");
+    exit(255);
+  } 
+  return fwrite((src->contents)+src_offset, 1, max_count, fd);
+}
+// FIX: Make more C-like.
+int f_seek(FILE *fd, int offset) {
+  check_fd(fd);
+  if(fseek(fd, (long int) offset, SEEK_SET)) {
+    fprintf(stderr, "file seek failed, offset %d.\n", offset);
+    exit(255);
+  }
+  return 0;
+}
 // extern int fflush(FILE *); // supplied by stdio
 // extern int fgetc(FILE *);  // supplied by stdio
 

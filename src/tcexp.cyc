@@ -1363,23 +1363,23 @@ static synth tcExpNoInst(tenv te, Opt_t<typ> topt, exp e) {
   synth esyn;
 
   switch (e->r) {
-  case NoInstantiate_e(_)        :
+  case NoInstantiate_e(e2)        :
     // This would handle two NoInstantiates in a row; but note that
     // for now the parser does not produce this ( x<><> won't parse ).
-    return tcExp(te,null,e);
+    return tcExpNoInst(te,null,e2);
   case UnknownId_e(q)            :
     // resolve the identifier and then re-type-check the expression
     resolve_unknown_id(te,e,q);
-    return tcExp(te,topt,e);
+    return tcExpNoInst(te,topt,e);
   case UnknownCall_e(e1,es)     :
     // resolve e1 as a function or struct, enum, or xenum constructor and
     // then re-type-check the expression
     resolve_unknown_fn(te,e,e1,es);
-    return tcExp(te,topt,e);
+    return tcExpNoInst(te,topt,e);
   case UnresolvedMem_e(nopt,ds) :
     // resolve as an array or struct and then re-type-check the expression
     resolve_unresolved_mem(te,loc,topt,e,nopt,ds);
-    return tcExp(te,topt,e);
+    return tcExpNoInst(te,topt,e);
     // Dispatch the other cases 
   case Const_e(c)               : esyn = tcConst(te,loc,topt,c); break;
   case Var_e(q)                 : esyn = tcVar(te,loc,topt,q,e); break;

@@ -34,15 +34,15 @@ $(OUT_PREFIX)lex.c : $(OUT_PREFIX)lex.cyc
 $(OUT_PREFIX)lex.cyc : lex.cyl
 	$(CYCLEX) $< $@
 
-$(OUT_PREFIX)parse_tab.c : $(OUT_PREFIX)parse_tab.cyc
+$(OUT_PREFIX)parse_tab.c: $(OUT_PREFIX)parse_tab.cyc
 	$(CYCC) $(CYC_FLAGS) $< > $@
-$(OUT_PREFIX)parse_tab.cyc : parse.y
+$(OUT_PREFIX)parse_tab.cyc: parse.y
 	$(CYCBISON) -v -d $< -o $@
-$(OUT_PREFIX)parse_tab.h : parse.y
-	$(CYCBISON) -v -d $< -o $@
+$(OUT_PREFIX)parse_tab.h: parse.y
+	$(CYCBISON) -v -d $< -o $(OUT_PREFIX)parse_tab.cyc
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
-$(OUT_PREFIX)%.c : %.cyc
+$(OUT_PREFIX)%.c: %.cyc
 	$(CYCC) $(CYC_FLAGS) $< > $@
 
 # delete generated files with a particular prefix

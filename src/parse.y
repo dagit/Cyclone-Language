@@ -55,14 +55,14 @@ namespace Parse {
 enum Struct_or_union {
   Struct_su, Union_su;
 };
-typedef enum Struct_or_union struct_or_union;
+typedef enum Struct_or_union struct_or_union_t;
 
 enum Blockitem {
   TopDecls_bl(list<decl>);
   Stmt_bl(stmt);
   FnDecl_bl(fndecl);
 };
-typedef enum Blockitem blockitem;
+typedef enum Blockitem blockitem_t;
 
 enum Type_specifier {
   Signed_spec(segment);
@@ -72,31 +72,31 @@ enum Type_specifier {
   Type_spec(typ,segment);    /* int, bool, `a, list<`a>, etc. */
   Decl_spec(decl);
 };
-typedef enum Type_specifier type_specifier;
+typedef enum Type_specifier type_specifier_t;
 
 enum Storage_class {
   Typedef_sc, Extern_sc, Static_sc, Auto_sc, Register_sc, Abstract_sc;
 };
-typedef enum Storage_class storage_class;
+typedef enum Storage_class storage_class_t;
 
 struct Declaration_spec {
-  Opt_t<storage_class> sc;
-  tqual                tq;
-  list<type_specifier> type_specs;
-  bool                 is_inline;
+  Opt_t<storage_class_t> sc;
+  tqual                  tq;
+  list<type_specifier_t>   type_specs;
+  bool                   is_inline;
 };
-typedef struct Declaration_spec @decl_spec;
+typedef struct Declaration_spec @decl_spec_t;
 
 struct Declarator {
   qvar                id;
   list<type_modifier> tms;
 };
-typedef struct Declarator @declarator;
+typedef struct Declarator @declarator_t;
 
 struct Abstractdeclarator {
   list<type_modifier> tms;
 };
-typedef struct Abstractdeclarator @abstractdeclarator;
+typedef struct Abstractdeclarator @abstractdeclarator_t;
 // declare prototypes for functions
 extern void err(string msg, segment sg);
 extern `a abort<`a>(string msg, segment sg);
@@ -108,7 +108,7 @@ extern $(var,tqual,typ)@
 extern $(Opt_t<var>,tqual,typ)@ make_param(segment loc,
 					   $(Opt_t<qvar>,tqual,typ,
 					     list<tvar>)@ field);
-extern type_specifier type_spec(typ t,segment loc);
+extern type_specifier_t type_spec(typ t,segment loc);
 extern $(tqual,typ)@ get_tqual_typ(segment loc,$(Opt_t<var>,tqual,typ)@ t);
 extern $(var,tqual,typ)@ make_fn_args(segment loc,$(Opt_t<qvar>,tqual,typ)@ t);
 extern bool exists_param(string x, list<string> params);
@@ -118,7 +118,7 @@ extern $(Opt_t<var>,tqual,typ)@ get_param_type($(list<decl>,segment)@ env,
 extern bool is_typeparam(type_modifier tm);
 extern list<type_modifier> oldstyle2newstyle(list<type_modifier> tms,
 					     list<decl> tds, segment loc);
-extern fndecl make_function(Opt_t<decl_spec> dso, declarator d,
+extern fndecl make_function(Opt_t<decl_spec_t> dso, declarator_t d,
 			    list<decl> tds, stmt body, segment loc);
 
 extern $(var,tqual,typ)@ fnargspec_to_arg(segment loc,
@@ -127,17 +127,17 @@ extern typ change_signed(bool s,typ t,segment seg);
 extern typ change_size(size_of sz, bool is_boxed, typ t,segment seg);
 extern typ new_box_evar(tvar v);
 extern $(typ,Opt_t<decl>)@
-  collapse_type_specifiers (list<type_specifier> ts, segment loc);
+  collapse_type_specifiers (list<type_specifier_t> ts, segment loc);
 extern list<$(qvar,tqual,typ,list<tvar>)@>
-  apply_tmss(tqual tq,typ t,list<declarator> ds);
+  apply_tmss(tqual tq,typ t,list<declarator_t> ds);
 extern $(tqual,typ,list<tvar>)@
   apply_tms(tqual tq,typ t,list<type_modifier> tms);
 extern var typ2tvar(segment loc, typ t);
 extern typ tvar2typ(var v);
 extern stmt flatten_decl(decl d,stmt s);
 extern stmt flatten_declarations(list<decl> ds, stmt s);
-extern list<decl> make_declarations(Opt_t<decl_spec> dso,
-				    list<$(declarator,Opt_t<exp>)@> ids,
+extern list<decl> make_declarations(Opt_t<decl_spec_t> dso,
+				    list<$(declarator_t,Opt_t<exp>)@> ids,
 				    segment loc);
 extern decl v_typ_to_typedef(segment loc, $(qvar,tqual,typ,list<tvar>)@ t);
 Opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf = null;
@@ -192,7 +192,7 @@ static $(Opt_t<var>,tqual,typ)@
 }
 
 /* Functions for creating abstract syntax */
-static type_specifier type_spec(typ t,segment loc) {
+static type_specifier_t type_spec(typ t,segment loc) {
   return Type_spec(t,loc);
 }
 
@@ -343,7 +343,7 @@ oldstyle2newstyle(list<type_modifier> tms, list<decl> tds, segment loc) {
  * a declaration list (for old-style function definitions),
  * and a statement */
 static fndecl
-make_function(Opt_t<decl_spec> dso, declarator d,
+make_function(Opt_t<decl_spec_t> dso, declarator_t d,
               list<decl> tds, stmt body, segment loc) {
   // Handle old-style parameter declarations
   if (tds!=null) {
@@ -351,7 +351,7 @@ make_function(Opt_t<decl_spec> dso, declarator d,
   }
 
   scope sc = Public;
-  list<type_specifier> tss = null;
+  list<type_specifier_t> tss = null;
   tqual tq = empty_tqual();
   bool is_inline = false;
 
@@ -442,7 +442,7 @@ static typ new_box_evar(tvar v) {
  * unsigned int" and so forth.  I don't think anyone will care...
  * (famous last words.)  */
 static $(typ,Opt_t<decl>)@
-collapse_type_specifiers (list<type_specifier> ts, segment loc) {
+collapse_type_specifiers (list<type_specifier_t> ts, segment loc) {
 
   /* flags that record what we've seen in the qualifiers */
   Opt_t<Bool> signopt = null;      /* true->signed, false->unsigned */
@@ -575,7 +575,7 @@ collapse_type_specifiers (list<type_specifier> ts, segment loc) {
 }
 
 static list<$(qvar,tqual,typ,list<tvar>)@>
-apply_tmss(tqual tq,typ t,list<declarator> ds) {
+apply_tmss(tqual tq,typ t,list<declarator_t> ds) {
   if (ds==null) return null;
   let d = ds->hd;
   let q = d->id;
@@ -682,9 +682,9 @@ static stmt flatten_declarations(list<decl> ds, stmt s){
    produce a list of top-level declarations.  By far, this is the most
    involved function and thus I expect a number of subtle errors. */
 static list<decl>
-make_declarations(Opt_t<decl_spec> dso,list<$(declarator,Opt_t<exp>)@> ids,
+make_declarations(Opt_t<decl_spec_t> dso,list<$(declarator_t,Opt_t<exp>)@> ids,
                   segment loc) {
-  list<type_specifier> tss = null;
+  list<type_specifier_t> tss = null;
   Opt_t<scope> scopeopt = null; /* Extern, Static, Auto, Register, Abstract */
   bool istypedef = false;       /* Typedef */
   tqual tq = empty_tqual();
@@ -731,7 +731,7 @@ make_declarations(Opt_t<decl_spec> dso,list<$(declarator,Opt_t<exp>)@> ids,
 
   /* separate the declarators from their initializers */
   let pair = List::split(ids);
-  list<declarator> declarators = pair[0];
+  list<declarator_t> declarators = pair[0];
   list<Opt_t<exp>> exprs = pair[1];
   /* check to see if there are no initializers -- useful later on */
   bool exps_empty = true;
@@ -896,24 +896,24 @@ using Parse;
   PatternList_tok(list<pat>);
   FnDecl_tok(fndecl);
   DeclList_tok(list<decl>);
-  DeclSpec_tok(decl_spec);
-  InitDecl_tok($(declarator,Opt_t<exp>)@);
-  InitDeclList_tok(list<$(declarator,Opt_t<exp>)@>);
-  StorageClass_tok(storage_class);
-  TypeSpecifier_tok(type_specifier);
-  QualSpecList_tok($(tqual,list<type_specifier>)@);
+  DeclSpec_tok(decl_spec_t);
+  InitDecl_tok($(declarator_t,Opt_t<exp>)@);
+  InitDeclList_tok(list<$(declarator_t,Opt_t<exp>)@>);
+  StorageClass_tok(storage_class_t);
+  TypeSpecifier_tok(type_specifier_t);
+  QualSpecList_tok($(tqual,list<type_specifier_t>)@);
   TypeQual_tok(tqual);
   StructFieldDeclList_tok(list<$(string,tqual,typ)@>);
   StructFieldDeclListList_tok(list<list<$(string,tqual,typ)@>>);
-  Declarator_tok(declarator);
-  DeclaratorList_tok(list<declarator>);
-  AbstractDeclarator_tok(abstractdeclarator);
+  Declarator_tok(declarator_t);
+  DeclaratorList_tok(list<declarator_t>);
+  AbstractDeclarator_tok(abstractdeclarator_t);
   EnumeratorField_tok(enumfield);
   EnumeratorFieldList_tok(list<enumfield>);
   ParamDecl_tok($(Opt_t<var>,tqual,typ)@);
   ParamDeclList_tok(list<$(Opt_t<var>,tqual,typ)@>);
   ParamDeclListBool_tok(list<$(Opt_t<var>,tqual,typ)@>,bool);
-  StructOrUnion_tok(struct_or_union);
+  StructOrUnion_tok(struct_or_union_t);
   IdList_tok(list<var>);
   Designator_tok(designator);
   DesignatorList_tok(list<designator>);
@@ -921,7 +921,7 @@ using Parse;
   InitializerList_tok(list<$(list<designator>,exp)@>);
   FieldPattern_tok($(list<designator>,pat)@);
   FieldPatternList_tok(list<$(list<designator>,pat)@>);
-  BlockItem_tok(blockitem);
+  BlockItem_tok(blockitem_t);
 }
 /* types for productions */
 %type <Int_tok> INTEGER_CONSTANT
@@ -1319,7 +1319,7 @@ struct_declaration:
        * and then convert this to a list of struct fields: (1) id,
        * (2) tqual, (3) type. */
       tqual tq = $1[0];
-      list<type_specifier> tss = $1[1];
+      list<type_specifier_t> tss = $1[1];
       let ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
       if (ts_info[1] != null)
         warn("struct declaration contains nested type declaration",LOC(@1,@1));
@@ -1332,9 +1332,9 @@ struct_declaration:
 specifier_qualifier_list:
   type_specifier
     // Fix: casts needed
-    { $$=^$(&$(empty_tqual(),(list<type_specifier>)(&cons($1,null)))); }
+    { $$=^$(&$(empty_tqual(),(list<type_specifier_t>)(&cons($1,null)))); }
 | type_specifier specifier_qualifier_list
-    { $$=^$(&$($2[0],(list<type_specifier>)(&cons($1,$2[1])))); }
+    { $$=^$(&$($2[0],(list<type_specifier_t>)(&cons($1,$2[1])))); }
 | type_qualifier
     { $$=^$(&$($1,null)); }
 | type_qualifier specifier_qualifier_list

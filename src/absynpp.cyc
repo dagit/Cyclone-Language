@@ -356,9 +356,9 @@ int exp_prec(exp e) {
   case UnknownId_e(_):    return 10000;
   case Primop_e(p,_):
     switch (p) {
-    case Plus:           return 100; // hiding ++ (not currently decompiled)
+    case Plus:           return 100; 
     case Times:          return 110;
-    case Minus:          return 100; // hiding -- (not currently decompiled)
+    case Minus:          return 100; 
     case Div:            return 110;
     case Mod:            return 110;
     case Eq:             return  70;
@@ -572,7 +572,7 @@ Doc exp2doc_prec(int inprec, exp e) {
              text(")"));
     break;
   }
-  if(inprec > myprec)
+  if(inprec >= myprec)
     s = cat3(text("("), s, text(")"));
   return s;
 }

@@ -27,8 +27,10 @@ extern string new_string(int);
 extern Cstring string_to_Cstring(string);
 extern int system(Cstring);
 
-extern int f_string_read (FILE *,string,int,int);
-extern int fflush        (FILE *);
-extern int fgetc         (FILE *);
+extern int f_string_read  (FILE *,string,int,int);
+extern int f_string_write (FILE *,string,int,int);
+extern int f_seek         (FILE *,int);
+extern int fflush         (FILE *);
+extern int fgetc          (FILE *);
 
 #endif
