@@ -575,7 +575,7 @@ rule token = parse
 | "..." { return ELLIPSIS; }
 /* comments */
 | "#"[^ '\n' '\r']*(newline)      { return  token(lexbuf); }
-| [' ' '\009' '\011' '\012' '\n' '\r']+     { return  token(lexbuf); }
+| [' ' '\011' '\013' '\014' '\n' '\r']+     { return  token(lexbuf); }
 | "//"[^'\n' '\r']* newline       { return  token(lexbuf); }
 | "/*"  { comment_depth = 1; 
 	  runaway_start = lexeme_start(lexbuf); 

@@ -63,7 +63,7 @@ void reset_string_buffer() {
 
 void store_string_char(char c) {
   if(string_index >= string_buff.size) {
-    string new_buff = new_string(string_buff.size)*2);
+    string new_buff = new_string(string_buff.size*2);
     String::strncpy(string_buff, 0, new_buff, 0, string_buff.size);
     string_buff = new_buff;
   }
@@ -86,10 +86,10 @@ char char_for_backslash(char c) {
 
 // FIX: Maybe the Cyclone version should interpret things in octal instead
 //      of decimal.  If so, change this code and all existing lexers.
-char char_for_decimal_code<`a>(Lexbuf<`a> lbuf, int i) {
-  return (char)(100 * (((int) lexeme_char(lbuf,i))   - 48) +
-		10  * (((int) lexeme_char(lbuf,i+1)) - 48) +
-		      (((int) lexeme_char(lbuf,i+2)) - 48));
+char char_for_octal_code<`a>(Lexbuf<`a> lbuf, int i) {
+  return (char)(64 * (((int) lexeme_char(lbuf,i))   - '0') +
+		 8 * (((int) lexeme_char(lbuf,i+1)) - '0') +
+		     (((int) lexeme_char(lbuf,i+2)) - '0'));
 }
 
 static int handle_lexical_error<`a>(lexfun_t fn, Lexbuf<`a>lbuf) {
@@ -122,8 +122,8 @@ namespace Lexer;
 }
 
 rule lexmain = parse
-  [' ' '\013' '\009' '\012']+ { return lexmain(lexbuf); }
-| '\010' { line_start_pos = lexeme_end(lexbuf);
+  [' ' '\015' '\011' '\014']+ { return lexmain(lexbuf); }
+| '\012' { line_start_pos = lexeme_end(lexbuf);
            ++line_num;
            return lexmain(lexbuf); }
 | "/*" { comment_depth = 1;
@@ -149,9 +149,8 @@ rule lexmain = parse
 | "'" '\\' ['\\' '\'' 'n' 't' 'b' 'r'] "'" 
     { token_char = (Char)char_for_backslash(lexeme_char(lexbuf,2)); 
       return TCHAR; }
-| "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'" 
-  { /* FIX: change to octal */
-      token_char = (Char)char_for_decimal_code(lexbuf,2);
+| "'" '\\' ['0'-'7'] ['0'-'7'] ['0'-'7'] "'" 
+    { token_char = (Char)char_for_octal_code(lexbuf,2);
       return TCHAR; }
 | '{'
     { 
@@ -194,23 +193,23 @@ and action = parse
     { return action(lexbuf); }
 | "'" '\\' ['\\' '\'' 'n' 't' 'b' 'r'] "'" 
     { return action(lexbuf); }
-| "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'" 
+| "'" '\\' ['0'-'7'] ['0'-'7'] ['0'-'7'] "'" 
     { return action(lexbuf); }
 | "/*" { comment_depth = 1; /* FIX: Add // style too! */
          comment(lexbuf); 
          return action(lexbuf);
        }
 | eof { throw Lexical_error("unterminated action", 0, 0); }
-| '\010' { line_start_pos = lexeme_end(lexbuf);
+| '\012' { line_start_pos = lexeme_end(lexbuf);
            ++line_num;
            return action(lexbuf);
          }
-| [^ '{' '}' '"' '\'' '/' '\010'] + { return action(lexbuf); }
+| [^ '{' '}' '"' '\'' '/' '\012'] + { return action(lexbuf); }
 | _ { return action(lexbuf); }
 
 and strng = parse
   '"' { return 0; /* ignored */ }
-| '\\' [' ' '\013' '\009' '\012'] * '\010' [' ' '\013' '\009' '\012'] *
+| '\\' [' ' '\015' '\011' '\014'] * '\012' [' ' '\015' '\011' '\014'] *
   { line_start_pos = lexeme_end(lexbuf);
     ++line_num;
     return strng(lexbuf);
@@ -218,12 +217,12 @@ and strng = parse
 | '\\' ['\\' '"' 'n' 't' 'b' 'r'] 
   { store_string_char(char_for_backslash(lexeme_char(lexbuf,1)));
     return strng(lexbuf); }
-| '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] 
-  { store_string_char(char_for_decimal_code(lexbuf,1)); 
+| '\\' ['0'-'7'] ['0'-'7'] ['0'-'7'] 
+  { store_string_char(char_for_octal_code(lexbuf,1)); 
     return strng(lexbuf); }
 | eof
   { throw Lexical_error("unterminated string", 0, 0); }
-| '\010'
+| '\012'
   { store_string_char('\012'); 
     line_start_pos = lexeme_end(lexbuf);
     ++line_num;
@@ -242,9 +241,9 @@ and comment = parse
 | "''"                                    { return comment(lexbuf); }
 | "'" [^ '\\' '\''] "'"                   { return comment(lexbuf); }
 | "'\\" ['\\' '\'' 'n' 't' 'b' 'r'] "'"   { return comment(lexbuf); }
-| "'\\" ['0'-'9'] ['0'-'9'] ['0'-'9'] "'" { return comment(lexbuf); }
+| "'\\" ['0'-'7'] ['0'-'7'] ['0'-'7'] "'" { return comment(lexbuf); }
 | eof { throw Lexical_error("unterminated comment", 0, 0); }
-| '\010' { line_start_pos = lexeme_end(lexbuf);
+| '\012' { line_start_pos = lexeme_end(lexbuf);
            ++line_num;
            return comment(lexbuf);
          }
