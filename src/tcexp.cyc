@@ -2655,6 +2655,8 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcConst(te,loc,topt,c,e); break;
   case &Var_e(*b):
     t = tcVar(te,loc,topt,e,b); break;
+  case &Pragma_e(_):
+    t = sint_typ; break;
   case &Primop_e(p,es):
     t = tcPrimop(te,loc,topt,p,es); break;
   case &Increment_e(e1,i):

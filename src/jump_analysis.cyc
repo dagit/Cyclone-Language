@@ -111,6 +111,7 @@ static void anal_exp(senv_t env, exp_t e) { // only care about nested StmtExp_e
   case &Valueof_e(_):
   case &Enum_e(...):
   case &AnonEnum_e(...):
+  case &Pragma_e(_):
   case &Var_e(...):  break;
 
   case &Datatype_e(es,_,_): fallthru(es);

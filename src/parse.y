@@ -1066,7 +1066,7 @@ using Parse;
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE
 %token MALLOC RMALLOC RMALLOC_INLINE CALLOC RCALLOC SWAP
 %token REGION_T TAG_T REGION RNEW REGIONS 
-%token PORTON PORTOFF DYNREGION_T
+%token PORTON PORTOFF PRAGMA DYNREGION_T
 // %token ALIAS
 %token NUMELTS VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
 %token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL REQUIRES_QUAL ENSURES_QUAL
@@ -2844,7 +2844,7 @@ field_pattern_list0:
     {$$=^$(new List($3,$1)); }
 ;
 
-/***************************** EXPRESSIONS *****************************/
+/***************************** EXPESSIONS *****************************/
 expression:
   assignment_expression
     { $$=$!1; }
@@ -3080,6 +3080,8 @@ primary_expression:
   qual_opt_identifier
     /* Could be an identifier, a struct tag, or an datatype constructor */
     { $$=^$(unknownid_exp($1,SLOC(@1))); }
+| PRAGMA '(' IDENTIFIER ')'
+    { $$=^$(pragma_exp($3,LOC(@1,@4))); }
 | constant
     { $$= $!1; }
 | STRING

@@ -1516,6 +1516,7 @@ static ctype_t gen_exp(bool takeaddress,cenv_t env, exp_t e) {
     leq(gen_exp(false,env,e1),arith_ct());
     let t = (topt) ? type_to_ctype(env,*topt) : var();
     return ptr_ct(t,var(),fat_ct(),heap_ct(),var());
+  case &Pragma_e(_): impos("Pragma_e");
   case &Swap_e(e1,e2): impos("Swap_e");
   case &New_e(_,_): impos("New_e");
   case &Tuple_e(_): impos("Tuple_e");

@@ -1116,6 +1116,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       }
       return;
     case &Asm_e(...): return;
+    case &Pragma_e(_):
+      fprintf(stderr,"Error: unexpected Pragma_e\n");
+      exit(1); return;
     case &Swap_e(_,_):
       fprintf(stderr,"Error: unexpected Swap_e\n");
       exit(1); return;

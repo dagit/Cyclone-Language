@@ -139,7 +139,6 @@ static char cnst2char(cnst_t cnst, Lexbuf lb) {
 static $(string_t,short,bool) rw_array[] = {
   $("__attribute__", ATTRIBUTE, true),
   $("abstract", ABSTRACT, false),
-//   $("alias", ALIAS, false),
   $("auto", AUTO, true),
   $("break", BREAK, true),
   $("__builtin_va_list", BUILTIN_VA_LIST, true),
@@ -177,6 +176,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("offsetof", OFFSETOF, true),
   $("__cyclone_port_on__", PORTON, false),
   $("__cyclone_port_off__", PORTOFF, false),
+  $("__cyclone_pragma__", PRAGMA, false),
   $("rcalloc", RCALLOC, false),
   $("region_t", REGION_T, false),
   $("region", REGION, false),

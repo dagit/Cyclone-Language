@@ -51,20 +51,28 @@ EXTERN_CFFLOW datatype Root {
 };
 typedef datatype Root @`r root_t<`r>;
 
+EXTERN_CFFLOW datatype PathCon {
+  Dot(int num);
+  Star;
+};
+typedef datatype PathCon @`r pathcon_t<`r>;
+typedef List::list_t<pathcon_t<`r>,`r> path_t<`r>;
+
 EXTERN_CFFLOW struct Place<`r::R> {
   root_t<`r> root; 
-  List::list_t<int,`r> fields; 
+  path_t<`r> path;
   //the "path" of projections off the root -- these correspond to
-  //either tuple offsets or field names.  For field names, we use the
-  //order in the struct declaration to determine the index.  For
-  //example, x[0][1] would have fields 0 and 1 if x is a tuple, while
-  //x.tl.tl would have fields 1 and 1 if tl was the second field.
+  //either to dereferences (Star) or tuple offsets or field names (Dot
+  //i).  The star is only sensible if it's dereferencing a unique
+  //pointer.  For field names, we use the order in the struct
+  //declaration to determine the index.  For example, x[0][1] would
+  //have fields 0 and 1 if x is a tuple, while x.tl.tl would have
+  //fields 1 and 1 if tl was the second field.
 };
 typedef struct Place<`r1> @`r2 place_t<`r1,`r2>;
 
 EXTERN_CFFLOW enum InitLevel { 
   NoneIL, // may not be initialized
-  ThisIL, // this is initialized, but things it points to may not be
   AllIL   // initialized, and everything it points to is initialized
 };
 typedef enum InitLevel initlevel_t;
@@ -99,12 +107,10 @@ typedef struct UnionRInfo union_rinfo_t;
 EXTERN_CFFLOW datatype AbsRVal<`r::R> {
   Zero;      // the value is zero and initialized
   NotZeroAll; // the value is not zero & everything reachable from it is init
-  NotZeroThis; // the value is not zero, it is initialized, but not necessarily
-               // what it points to
   UnknownR(initlevel_t); // don't know what the value is
   Esc(initlevel_t); // as an rval means same thing as UnknownR!!
   AddressOf(place_t<`r,`r>); // I am a pointer to this place; implies not zero
-                             // when not introduced by deref of unique pointer
+  UniquePtr(absRval_t<`r>); // An anonymous unique pointer; does not imply not zero
   // if you're a tagged union, struct, or tuple, you should always
   // evaluate to an Aggregate in the abstract interpretation (datatype?)
   Aggregate(union_rinfo_t, aggrdict_t<`r>);
@@ -136,12 +142,9 @@ EXTERN_CFFLOW struct FlowEnv<`r::R> {
   region_t<`r>    r;
   absRval_t<`r>   zero;
   absRval_t<`r>   notzeroall;
-  absRval_t<`r>   notzerothis;
   absRval_t<`r>   unknown_none;
-  absRval_t<`r>   unknown_this;
   absRval_t<`r>   unknown_all;
   absRval_t<`r>   esc_none;
-  absRval_t<`r>   esc_this;
   absRval_t<`r>   esc_all;
   flowdict_t<`r>  mt_flowdict;
   place_t<`r,`r>  dummy_place;
@@ -171,6 +174,7 @@ extern bool flow_lessthan_approx(flow_t<`r> f1, flow_t<`r> f2);
 extern void print_absrval(absRval_t rval);
 extern void print_initlevel(initlevel_t il);
 extern void print_root(root_t root);
+extern void print_path(path_t p);
 extern void print_place(place_t p);
 extern void print_list(List::list_t<`a> p, void (@pr)(`a));
 extern void print_flowdict(flowdict_t d);
@@ -179,8 +183,9 @@ extern void print_flow(flow_t f);
 // debugging
 // #define DEBUG_FLOW
 #ifdef DEBUG_FLOW
-#define DEBUG_PRINT(arg...) fprintf(stderr,##arg)
-#define DEBUG_PRINT_F(f,arg...) f ## (##arg)
+extern bool debug_msgs;
+#define DEBUG_PRINT(arg...) if (debug_msgs) fprintf(stderr,##arg)
+#define DEBUG_PRINT_F(f,arg...) if (debug_msgs) f ## (##arg)
 #else
 #define DEBUG_PRINT_F(f,arg...) {}
 #define DEBUG_PRINT(arg...) {}

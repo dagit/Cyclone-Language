@@ -30,6 +30,10 @@ using List;
 using Absynpp;
 namespace CfFlowInfo;
 
+#ifdef DEBUG_FLOW
+bool debug_msgs = true;
+#endif
+
 bool anal_error = false; // set to true before checking each top-level decl
 void aerr(Position::seg_t loc, string_t fmt, ... inject parg_t ap)
   __attribute__((format(printf,2,3))) {
@@ -69,12 +73,9 @@ flow_env_t<`r> new_flow_env(region_t<`r> r) {
     FlowEnv { .r = r,
               .zero = rnew(r) Zero,
               .notzeroall = rnew (r) NotZeroAll,
-              .notzerothis = rnew (r) NotZeroThis,
               .unknown_none = rnew(r) UnknownR(NoneIL),
-              .unknown_this = rnew(r) UnknownR(ThisIL),
               .unknown_all  = rnew(r) UnknownR(AllIL),
               .esc_none = rnew(r) Esc(NoneIL),
-              .esc_this = rnew(r) Esc(ThisIL),
               .esc_all = rnew(r) Esc(AllIL),
               .mt_flowdict = Dict::rempty(r,root_cmp),
               .dummy_place = rnew(r) Place(rnew(r) MallocPt(&dummy_exp,&VoidType_val),NULL)
@@ -132,37 +133,31 @@ int root_cmp(root_t r1, root_t r2) {
   }
 }
 
-static int intlist_cmp(List::list_t<int> list1,
-		       List::list_t<int> list2) {
-  return list_cmp(Core::intcmp,list1,list2);
+static int pathcon_cmp(pathcon_t p1, pathcon_t p2) {
+  switch ($(p1,p2)) {
+  case $(&Dot(i1),&Dot(i2)):
+    if (i1 == i2) return 0;
+    if (i1 < i2) return -1;
+    else return 1;
+  case $(&Star,&Star): return 0;
+  case $(&Star,&Dot(_)): return -1;
+  case $(&Dot(_),&Star): return 1;
+  }
+}
+
+static int path_cmp(path_t path1, path_t path2) {
+  return list_cmp(pathcon_cmp,path1,path2);
 }
 
 int place_cmp(place_t p1, place_t p2) {
   if(((int)p1) == ((int)p2))
     return 0;
-  let Place{root1,fields1} = *p1;
-  let Place{root2,fields2} = *p2;
+  let Place{root1,path1} = *p1;
+  let Place{root2,path2} = *p2;
   int i = root_cmp(root1,root2);
   if(i != 0)
     return i;
-  return intlist_cmp(fields1,fields2);
-}
-
-// for debugging
-static mstringptr_t place2string(place_t p) {
-  list_t<mstringptr_t> sl = NULL;
-  let Place{root,fields} = *p;
-  switch(root) {
-  case &VarRoot(vd): sl = new List(new aprintf("%s",*(*vd->name)[1]),sl); break;
-  case &MallocPt(e,_):  sl = new List(new aprintf("mpt%d",(int)e),sl); break;
-  case &InitParam(i,_): sl = new List(new aprintf("param%d",i),sl); break;
-  }
-  for(; fields != NULL; fields = fields->tl)
-    sl = new List(new aprintf("%d", fields->hd), sl);
-  let ans = new aprintf("%s","");
-  for(; sl != NULL; sl = sl->tl)
-    *ans = aprintf("%s.%s", *sl->hd, *ans);
-  return ans;
+  return path_cmp(path1,path2);
 }
 
 // Note: We don't have to worry about instantiating polymorphic struct fields
@@ -286,7 +281,6 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
   case &TagType(t): return leafval;
   case &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,_,_,_}}) && !conref_def(false,nbl):
     switch(leafval) {
-    case &UnknownR(ThisIL): return fenv->notzerothis;
     case &UnknownR(AllIL): return fenv->notzeroall;
     default: break;
     }
@@ -479,19 +473,23 @@ static aggrdict_t<`r> aggr_dict_insert(region_t<`r> r, aggrdict_t<`r> d,
 // dictionary [d] as it unwinds, avoiding changes if pointer equality
 // is maintained.
 static absRval_t<`r> insert_place_outer(region_t<`r> r,
-                                        list_t<int> fs,
+                                        path_t path,
                                         absRval_t<`r> old_val,
                                         absRval_t<`r> new_val) {
-  if(fs==NULL)
+  if(path==NULL)
     return insert_place_inner(r,new_val,old_val);
-  switch($(fs,old_val)) {
-  case $(&List(hd,tl),&Aggregate(UnionRInfo(is_union,_),d)):
-    let new_child = insert_place_outer(r,tl,d[hd],new_val);
-    let new_d = aggr_dict_insert(r, d, hd,new_child);
+  switch($(path,old_val)) {
+  case $(&List(&Dot(i),tl),&Aggregate(UnionRInfo(is_union,_),d)):
+    let new_child = insert_place_outer(r,tl,d[i],new_val);
+    let new_d = aggr_dict_insert(r, d, i,new_child);
     if (new_d == d) return old_val;
     else return rnew(r) Aggregate(UnionRInfo(is_union,-1),new_d);
+  case $(&List(&Star,tl),&UniquePtr(rval)):
+    let new_rval = insert_place_outer(r,tl,rval,new_val);
+    if (new_rval == rval) return old_val;
+    else return rnew(r) UniquePtr(new_rval);
   case $(_,&NamedLocation(n,rval)):
-    let new_rval = insert_place_outer(r,fs,rval,new_val);
+    let new_rval = insert_place_outer(r,path,rval,new_val);
     if (new_rval == rval) return old_val;
     else return rnew(r) NamedLocation(n,new_rval);
   default: throw new Core::Impossible("bad insert place");
@@ -512,14 +510,13 @@ static flowdict_t<`r> escape_these(flow_env_t<`r> fenv,
     catch { case &Dict::Absent: continue; }
     switch(initlevel(fenv,d,oldval)) {
     case AllIL:  newval = fenv->esc_all;  break;
-    case ThisIL: newval = fenv->esc_this; break;
     case NoneIL: newval = fenv->esc_none; break;
     }
     add_places(pile, oldval);
-    let Place{root,fields} = *place;
+    let Place{root,path} = *place;
     d = Dict::insert(d,root,
 		     insert_place_outer(fenv->r,
-                                        fields,
+                                        path,
 					Dict::lookup(d,root),
 					newval));
   }
@@ -541,7 +538,6 @@ static initlevel_t initlevel_approx(absRval_t r) {
   case &Esc(il):      return il;
   case &Zero:
   case &NotZeroAll:    return AllIL;
-  case &NotZeroThis:   return ThisIL;
   case &Consumed(_,_,r): return NoneIL;
   default: throw new Core::Impossible("initlevel_approx");
   }
@@ -582,15 +578,14 @@ static initlevel_t initlevel_rec(struct InitlevelEnv<`r,`e> @ env,
       env->seen = rnew(env->e) List(p, env->seen);
       this_ans  = initlevel_rec(env,lookup_place(env->d,p),AllIL);
       env->seen = env->seen->tl;
-      if(this_ans == NoneIL)
-	this_ans = ThisIL;
+//       if(this_ans == NoneIL)
+// 	this_ans = ThisIL;
     }
     break;
-  default: this_ans = initlevel_approx(r);
+  case &UniquePtr(r): this_ans = initlevel_rec(env,r,AllIL); break;
+  default: this_ans = initlevel_approx(r); break;
   }
-  if(this_ans == NoneIL) return NoneIL;
-  if(this_ans == ThisIL || acc == ThisIL) return ThisIL;
-  return AllIL;
+  return this_ans;
 }
 initlevel_t initlevel(flow_env_t env, flowdict_t<`r> d, absRval_t<`r> r) {
   ANAL_RGN(env,env_rgn) {
@@ -600,18 +595,26 @@ initlevel_t initlevel(flow_env_t env, flowdict_t<`r> d, absRval_t<`r> r) {
 }
 
 absRval_t<`r> lookup_place(flowdict_t<`r> d, place_t<`r,`r> place) {
-  let Place{root,fields} = *place;
+  let Place{root,path} = *place;
   let ans = Dict::lookup(d,root);
-  for(; fields != NULL; fields = fields->tl)
-    retry: switch($(ans,fields->hd)) {
-    case $(&NamedLocation(_,rval), fname):
+  for(; path != NULL; path = path->tl)
+    retry: switch($(ans,path->hd)) {
+    case $(&NamedLocation(_,rval), _):
       ans = rval; goto retry;
-    case $(&Aggregate(is_union,d2), fname):
+    // FIX: any case when I don't want to go under the Consumed ?
+    case $(&Consumed(_,_,rval), _):
+      ans = rval; goto retry;
+    case $(&Aggregate(is_union,d2), &Dot(fname)):
       ans = d2[fname];
+      break;
+    case $(&UniquePtr(rval),&Star):
+      ans = rval;
       break;
     default:
       DEBUG_PRINT("found bad lookup place ");
       DEBUG_PRINT_F(print_absrval,ans);
+      DEBUG_PRINT(", path=");
+      DEBUG_PRINT_F(print_path,path);
       DEBUG_PRINT("\n");
       throw new Core::Impossible("bad lookup_place");
     }
@@ -704,7 +707,6 @@ static absRval_t<`r2> assign_place_inner(struct AssignEnv<`r,`r2> @ env,
   case $(_, &Esc(il)): // we already know we don't have an escaped location
     switch(il) {
     case NoneIL: return env->fenv->unknown_none;
-    case ThisIL: return env->fenv->unknown_this;
     case AllIL:  return env->fenv->unknown_all;
     }
   default: return newval;
@@ -718,21 +720,35 @@ static bool nprefix(int @n, `a unused) {
   else return false;
 }
 static absRval_t<`r2> assign_place_outer(struct AssignEnv<`r,`r2> @ env,
-                                         list_t<int> fs,
-					 int fs_prefix,
+                                         path_t path,
+					 int path_prefix,
                                          absRval_t<`r2> oldval,
                                          absRval_t<`r2> newval) {
-  if(fs == NULL) return assign_place_inner(env,oldval,newval);
-  switch($(fs,oldval)) {
+//   DEBUG_PRINT("assign_place_outer: assigning to ");
+//   DEBUG_PRINT_F(print_absrval,oldval);
+//   DEBUG_PRINT("path ");
+//   DEBUG_PRINT_F(print_path,path);
+//   DEBUG_PRINT("\n");
+
+  if(path == NULL) return assign_place_inner(env,oldval,newval);
+  switch($(path,oldval)) {
   case $(_,&NamedLocation(n,r)):
-    let new_r = assign_place_outer(env,fs,fs_prefix,r,newval);
+    let new_r = assign_place_outer(env,path,path_prefix,r,newval);
     if (new_r == r) return oldval;
     else return rnew (env->fenv->r) NamedLocation(n,new_r);
-  case $(&List(hd,tl),&Aggregate(UnionRInfo(is_union,fldnum),d)):
-    let new_child = assign_place_outer(env,tl,fs_prefix+1,
-				       d[hd],newval);
-    let new_child_agg = aggr_dict_insert(env->fenv->r, d, hd, new_child);
-    if (new_child_agg == d && (!is_union || fldnum == hd)) return oldval;
+  case $(_,&Consumed(x,y,r)):
+    let new_r = assign_place_outer(env,path,path_prefix,r,newval);
+    if (new_r == r) return oldval;
+    else return rnew (env->fenv->r) Consumed(x,y,new_r);
+  case $(&List(&Star,tl),&UniquePtr(r)):
+    let new_r = assign_place_outer(env,tl,path_prefix+1,r,newval);
+    if (new_r == r) return oldval;
+    else return rnew (env->fenv->r) UniquePtr(new_r);    
+  case $(&List(&Dot(fnum),tl),&Aggregate(UnionRInfo(is_union,fldnum),d)):
+    let new_child = assign_place_outer(env,tl,path_prefix+1,
+				       d[fnum],newval);
+    let new_child_agg = aggr_dict_insert(env->fenv->r, d, fnum, new_child);
+    if (new_child_agg == d && (!is_union || fldnum == fnum)) return oldval;
     d = new_child_agg;
     // if this is a union, we want to initialize all of the other
     // fields of the aggregate, so that joins work out later
@@ -740,7 +756,7 @@ static absRval_t<`r2> assign_place_outer(struct AssignEnv<`r,`r2> @ env,
       bool changed = false;
       int sz = numelts(d);
       for (int i = 0; i<sz; i++) {
-	if (i != hd) {
+	if (i != fnum) {
 	  let new_d =
 	    aggr_dict_insert(env->fenv->r, d, i,
 			     insert_place_inner(env->fenv->r,
@@ -755,12 +771,12 @@ static absRval_t<`r2> assign_place_outer(struct AssignEnv<`r,`r2> @ env,
       // if in updating the initialization of the other fields the
       // dictionary was changed, we have to update the place set
       if (changed) {
-	let &Place{root,fs} = env->root_place;
-	let new_fs = List::rfilter_c(env->pile->rgn,nprefix,new fs_prefix,fs);
-	let curr_place = rnew (env->pile->rgn) Place(root,new_fs);
+	let &Place{root,path} = env->root_place;
+	let new_path = List::rfilter_c(env->pile->rgn,nprefix,new path_prefix,path);
+	let curr_place = rnew (env->pile->rgn) Place(root,new_path);
       }
     }
-    return rnew(env->fenv->r) Aggregate(UnionRInfo(is_union,hd),d);
+    return rnew(env->fenv->r) Aggregate(UnionRInfo(is_union,fnum),d);
   default: throw new Core::Impossible("bad assign place");
   }
 }
@@ -775,9 +791,9 @@ flowdict_t<`r> assign_place(flow_env_t<`r> fenv,
   DEBUG_PRINT("\n");
 
   ANAL_RGN(fenv, rgn) {
-    let &Place{root,fs} = place;
-    struct AssignEnv/*<`rgn>*/ env = AssignEnv(fenv, rnew(rgn) EscPile(rgn,NULL), d, loc, place);
-    absRval_t newval= assign_place_outer(&env,fs,0,Dict::lookup(d,root),r);
+    let &Place{root,path} = place;
+    struct AssignEnv env = AssignEnv(fenv, rnew(rgn) EscPile(rgn,NULL), d, loc, place);
+    absRval_t newval= assign_place_outer(&env,path,0,Dict::lookup(d,root),r);
     return escape_these(fenv, env.pile, Dict::insert(d, root, newval));
   }
 }
@@ -839,30 +855,35 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
     add_place(env->pile,p2);
     break;
 
-  case $(&AddressOf(p), &NotZeroThis): fallthru(p);
-  case $(&NotZeroThis, &AddressOf(p)):
-    add_place(env->pile,p);
-    return env->fenv->notzerothis;
-
   case $(&AddressOf(p), &NotZeroAll):
     add_place(env->pile,p);
     switch (initlevel(env->fenv,env->d1,r1)) {
     case AllIL: return env->fenv->notzeroall;
-    default: return env->fenv->notzerothis;
+    default: return env->fenv->unknown_none;
     }
   case $(&NotZeroAll, &AddressOf(p)):
     add_place(env->pile,p);
     switch (initlevel(env->fenv,env->d2,r2)) {
     case AllIL: return env->fenv->notzeroall;
-    default: return env->fenv->notzerothis;
+    default: return env->fenv->unknown_none;
+    }
+
+  case $(&UniquePtr(r1), &UniquePtr(r2)):
+    return rnew(rgn) UniquePtr(join_absRval(env,a,r1,r2));
+
+  case $(&UniquePtr(r1), &NotZeroAll):
+    switch (initlevel(env->fenv,env->d1,r1)) {
+    case AllIL: return env->fenv->notzeroall;
+    default: return env->fenv->unknown_none;
+    }
+  case $(&NotZeroAll, &UniquePtr(r2)):
+    switch (initlevel(env->fenv,env->d2,r2)) {
+    case AllIL: return env->fenv->notzeroall;
+    default: return env->fenv->unknown_none;
     }
 
   case $(&AddressOf(p), _): add_place(env->pile,p); break;
   case $(_, &AddressOf(p)): add_place(env->pile,p); break;
-
-
-  case $(&NotZeroAll,  &NotZeroThis):
-  case $(&NotZeroThis, &NotZeroAll): return env->fenv->notzerothis;
 
   case $(&Aggregate(UnionRInfo(is_union1,field_no1),d1), &Aggregate(UnionRInfo(is_union2,field_no2),d2)):
     aggrdict_t new_d =
@@ -901,13 +922,11 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
   case $(_,&Esc(_)):
     switch($(il1,il2)) {
     case $(_,NoneIL): case $(NoneIL,_): return env->fenv->esc_none;
-    case $(_,ThisIL): case $(ThisIL,_): return env->fenv->esc_this;
     default: return env->fenv->esc_all;
     }
   default:
     switch($(il1,il2)) {
     case $(_,NoneIL): case $(NoneIL,_): return env->fenv->unknown_none;
-    case $(_,ThisIL): case $(ThisIL,_): return env->fenv->unknown_this;
     default: return env->fenv->unknown_all;
     }
   }
@@ -963,7 +982,6 @@ join_flow_and_rval(flow_env_t<`r> fenv,
 static bool absRval_lessthan_approx(`a::B ignore, absRval_t<`r> r1, absRval_t<`r> r2) {
   if(r1 == r2) return true;
 
-  // XXX: should we put Consumed and NamedLocation here as separate cases?
   switch ($(r1,r2)) {
   case $(&NamedLocation(n1,r1), &NamedLocation(n2,r2)):
     return n1 == n2 && absRval_lessthan_approx(ignore,r1,r2);
@@ -972,6 +990,9 @@ static bool absRval_lessthan_approx(`a::B ignore, absRval_t<`r> r1, absRval_t<`r
   case $(&AddressOf(p1), &AddressOf(p2)): return place_cmp(p1,p2)==0;
   case $(&AddressOf(_),_):
   case $(_,&AddressOf(_)): return false;
+  case $(&UniquePtr(r1), &UniquePtr(r2)): return absRval_lessthan_approx(ignore,r1,r2);
+  case $(&UniquePtr(_),_):
+  case $(_,&UniquePtr(_)): return false;
   case $(&Aggregate(UnionRInfo{is_union1,fld1},d1), 
          &Aggregate(UnionRInfo{is_union2,fld2},d2)):
     if (is_union1 && fld1 != fld2) return false;
@@ -979,20 +1000,22 @@ static bool absRval_lessthan_approx(`a::B ignore, absRval_t<`r> r1, absRval_t<`r
     for (int i = 0; i < numelts(d1); i++)
       if (!absRval_lessthan_approx(0,d1[i],d2[i])) return false;
     return true;
-  case $(&NotZeroAll, &NotZeroThis): return true;
-  case $(_, &NotZeroThis): return false;
   case $(_, &Zero):
   case $(_, &NotZeroAll): return false;
   case $(&Esc(_),&Esc(_)): break;
   case $(&Esc(_),_): return false;
-  default: break;
+  default: 
+    DEBUG_PRINT("lessthan_approx: r1 = ");
+    DEBUG_PRINT_F(print_absrval,r1);
+    DEBUG_PRINT(", r2 = ");
+    DEBUG_PRINT_F(print_absrval,r2);
+    DEBUG_PRINT("\n");
+    break;
   }
   switch($(initlevel_approx(r1), initlevel_approx(r2))) {
   case $(AllIL,AllIL): return true;
   case $(_,NoneIL): return true;
   case $(NoneIL,_): return false;
-  case $(_,ThisIL): return true;
-  case $(ThisIL,_): return false;
   }
 }
 
@@ -1032,7 +1055,6 @@ $(absRval_t<`r>,list_t<vardecl_t,`rgn>) unname_rval(region_t<`rgn> rgn,
 void print_initlevel(initlevel_t il) {
   switch (il) {
   case NoneIL: fprintf(stderr,"uninitialized"); break;
-  case ThisIL: fprintf(stderr,"this-initialized"); break;
   case AllIL: fprintf(stderr,"all-initialized"); break;
   }
 }
@@ -1049,14 +1071,31 @@ void print_root(root_t root) {
   }
 }
 
-void print_place(place_t p) {
-  print_root(p->root);
-  let x = p->fields;
-  while (x != NULL) {
-    fprintf(stderr,".%d",x->hd);
-    x = x->tl;
+void print_path(path_t p) {
+  for (path_t x = p; x != NULL; x=x->tl) {
+    switch (x->hd) {
+    case &Dot(i):
+      fprintf(stderr,".%d",i);
+      break;
+    case &Star:
+      if (x->tl != NULL) {
+	switch (x->tl->hd) {
+	case &Dot(i):
+	  x = x->tl;
+	  fprintf(stderr,"->%d",i);
+	  continue;
+	default: break;
+	}
+      }
+      fprintf(stderr,"*");
+    }
   }
   fprintf(stderr," ");
+}
+
+void print_place(place_t p) {
+  print_root(p->root);
+  print_path(p->path);
 }
 
 void print_list(List::list_t<`a> x, void (@pr)(`a)) {
@@ -1073,12 +1112,13 @@ void print_absrval(absRval_t rval) {
   switch (rval) {
   case &Zero: fprintf(stderr,"Zero"); break;
   case &NotZeroAll: fprintf(stderr,"NotZeroAll"); break;
-  case &NotZeroThis: fprintf(stderr,"NotZeroThis"); break;
   case &UnknownR(il): fprintf(stderr,"Unknown("); print_initlevel(il);
     fprintf(stderr,")"); break;
   case &Esc(il): fprintf(stderr,"Esc("); print_initlevel(il);
     fprintf(stderr,")"); break;
   case &AddressOf(p): fprintf(stderr,"AddrOf("); print_place(p);
+    fprintf(stderr,")"); break;
+  case &UniquePtr(r): fprintf(stderr,"UniquePtr("); print_absrval(r);
     fprintf(stderr,")"); break;
   case &Aggregate(UnionRInfo(is_union,f),d):
     if (is_union) {

@@ -161,6 +161,7 @@ static enum SideEffect exp_effect(exp_t e) {
   case &StmtExp_e(s):
     return stmt_effect(s);
 
+  case &Pragma_e(...): bad_form = "Pragma_e"; break;
   case &Throw_e(...): bad_form = "Throw_e"; break;
   case &New_e(...): bad_form = "New_e"; break;
   case &Tuple_e(...): bad_form = "Tuple_e"; break;
@@ -347,6 +348,7 @@ static void exp_to_seqc(exp_t e) {
 
   case &Asm_e(...): return;
 
+  case &Pragma_e(...): bad_form = "Pragma_e"; break;
   case &Throw_e(...): bad_form = "Throw_e"; break;
   case &New_e(...): bad_form = "New_e"; break;
   case &Tuple_e(...): bad_form = "Tuple_e"; break;

@@ -1043,6 +1043,7 @@ int exp_prec(exp_t e) {
   case &Or_e(...):              return  30; // FIX: right precedence for ||
   case &SeqExp_e(...):          return  10;
   case &FnCall_e(...):        return 140;
+  case &Pragma_e(...):        return 140;
   case &Throw_e(...):             return 130;
   case &NoInstantiate_e(e2):    return exp_prec(e2);
   case &Instantiate_e(e2,_):    return exp_prec(e2);
@@ -1086,6 +1087,8 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   switch (e->r) {
   case &Const_e(c):     s = cnst2doc(c); break;
   case &Var_e(b):       s = qvar2doc(binding2qvar(b)); break;
+  case &Pragma_e(p):
+    s = cat(text("__cyclone_pragma__"),text("("),text(p),text(")")); break;
   case &Primop_e(p,es): s = primapp2doc(myprec,p,es); break;
   case &AssignOp_e(e1,popt,e2):
     s = cat(exp2doc_prec(myprec,e1),

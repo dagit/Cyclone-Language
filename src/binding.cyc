@@ -472,6 +472,7 @@ void resolve_exp(env_t env, exp_t e) {
     resolve_type(e->loc,env,t);
     return;
 
+  case &Pragma_e(_):
   case &Const_e(_): return;
 
   case &Tuple_e(es): fallthru(es);

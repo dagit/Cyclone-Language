@@ -455,6 +455,7 @@ static bool is_zero(exp_t e) {
   case &Const_e({.Short_c = $(_,i)}):    return i == 0;
   case &Const_e({.Int_c = $(_,i)}):      return i == 0;
   case &Const_e({.LongLong_c = $(_,i)}): return i == 0;
+  case &Pragma_e(...):
   case &Const_e({.Null_c = _}): return true;
   case &Cast_e(_,e1,_,_): return is_zero(e1);
   case &Tuple_e(es): return List::forall(is_zero,es);
@@ -2427,6 +2428,9 @@ static void exp_to_c(env_t nv, exp_t e) {
   //  fprintf(stderr,"in_lhs for %s\n",exp2string(e));
   type_t old_typ = (type_t)e->topt;
   switch (r) {
+  case &Pragma_e(...):
+    e->r = (raw_exp_t)(&zero_exp);
+    break;
   case &Const_e({.Null_c = _}):
     // NULL translate to 0 unless a tagged array, then {0,0,0}, via runtime
     // call unless at top-level
@@ -5074,6 +5078,7 @@ static void exptypes_to_c(exp_t e) {
   case &Asm_e(...):     
   case &AnonEnum_e(...): break;
 
+  case &Pragma_e(...): 
   case &AnonStruct_e(...): 
   case &Datatype_e(...):  
   case &Aggregate_e(...):

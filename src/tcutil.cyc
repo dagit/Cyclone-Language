@@ -322,6 +322,7 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
   switch (e->r) {
   case &Const_e(c): new_e = const_exp(c,e->loc); break;
   case &Var_e(b):   new_e = varb_exp(b,e->loc);  break;
+  case &Pragma_e(p): new_e = pragma_exp(p,e->loc); break;
   case &Primop_e(p, es): new_e = primop_exp(p, map_c(DC,pt,es),e->loc); break;
   case &AssignOp_e(e1,po,e2):
     new_e=assignop_exp(DC(pt,e1),po ? new Opt(po->v) : NULL,DC(pt,e2),e->loc);
@@ -2226,6 +2227,7 @@ bool is_zero(exp_t e) {
   case &Const_e({.Char_c = $(_,0)}):
   case &Const_e({.Short_c = $(_,0)}):
   case &Const_e({.LongLong_c = $(_,0)}):
+  case &Pragma_e(...):
     return true;
   case &Const_e({.Wchar_c = s}):
     let l = strlen(s);
@@ -3210,6 +3212,7 @@ exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst, exp_t e) {
   case &Const_e(_):
   case &Enum_e(...):
   case &AnonEnum_e(...):
+  case &Pragma_e(...):
   case &Var_e(...): return e;
 
   case &Primop_e(p,es):
@@ -4651,6 +4654,7 @@ i_check_valid_type_level_exp(exp_t e, tenv_t te, cvtenv_t<`r> cvtenv) {
   case &Const_e(_):
   case &Enum_e(...):
   case &AnonEnum_e(...):
+  case &Pragma_e(...):
   case &Var_e(...): break;
   case &Primop_e(_,es):
     for (; es != NULL; es = es->tl)
@@ -5434,6 +5438,7 @@ bool is_var_exp(exp_t e) {
 static bool cnst_exp(bool var_okay, exp_t e) {
   switch (e->r) {
   case &Const_e(_):
+  case &Pragma_e(...):
   case &Sizeoftyp_e(_):
   case &Sizeofexp_e(_):
   case &Offsetof_e(_,_):

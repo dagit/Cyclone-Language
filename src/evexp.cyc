@@ -177,6 +177,7 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
   // needed since we allow arrays!
   case &Var_e(...): return $(Int_c(Signed,0), false); 
   case &Const_e(c): return $(c,true); // return eagerly to avoid allocation
+  case &Pragma_e(_): return $(Int_c(Signed,0),true);
   case &Conditional_e(e1,e2,e3):
     let $(bool1,known1) = eval_const_bool_exp(e1);
     if(!known1) {
