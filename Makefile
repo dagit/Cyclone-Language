@@ -148,7 +148,8 @@ update:
 	    ./extract_patch $(PATCH_ARCH) $$arch;\
 	  done; cd ../..;\
 	else\
-	  ./extract_patch $(PATCH_ARCH) $(UPDATEARCH);\
+	  cd bin/genfiles; ./extract_patch $(PATCH_ARCH) $(UPDATEARCH);\
+	  cd ../..;\
 	fi
 	@for i in $(C_SRCS); do (cmp -s $(SRCDIR)/$$i $(ARCHDIR)/src/$$i || (echo UPDATING $(SRCDIR)/$$i; cp $(SRCDIR)/$$i $(ARCHDIR)/src/$$i)) done
 	@for i in $(C_LIBS); do (cmp -s $(LIBDIR)/$$i $(ARCHDIR)/lib/$$i || (echo UPDATING $(LIBDIR)/$$i; cp $(LIBDIR)/$$i $(ARCHDIR)/lib/$$i)) done
@@ -171,9 +172,9 @@ endif
 	elif [ -f "$(ARCHDIR).patch" ]; then\
 	  echo "PATCHIFYING $(UPDATEARCH)";\
 	  $(MAKE) -s -C bin/genfiles $(UPDATEARCH).patch && \
-	  if [ "$(UPDATEARCH)" != "$(ARCH)" ]; then
+	  if [ "$(UPDATEARCH)" != "$(ARCH)" ]; then\
 	    $(RM) -rf $(ARCHDIR);\
-	  fi
+	  fi;\
 	fi
 
 # This will compile (C files) and update for all supported architectures
