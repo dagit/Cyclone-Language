@@ -1228,14 +1228,23 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 	outdict = assign_place(fenv,e1->loc,outdict,env->all_changed,
 			       lp,right_rval);
 	break;
-      case {.UnknownL = _}: break;
+      case {.UnknownL = _}: 
+	// if we don't have a place for this, then it must be a global
+	// variable.  Since these are assumed all initialized, we must
+	// make sure the swap doesn't violate this assumption
+	if (initlevel(fenv,outdict,right_rval) != AllIL)
+	  Tcutil::terr(e2->loc,"expression may not be fully initialized");
+	break;
       }
       switch(right_lval) {
       case {.PlaceL = rp}:
 	outdict = assign_place(fenv,e2->loc,outdict,env->all_changed,
 			       rp,left_rval);
 	break;
-      case {.UnknownL = _}: break;
+      case {.UnknownL = _}:
+	if (initlevel(fenv,outdict,left_rval) != AllIL)
+	  Tcutil::terr(e1->loc,"expression may not be fully initialized");
+	break;
       }
       // FIX: should swap the relation information
       relns = reln_kill_exp(fenv->r,relns,e1);
