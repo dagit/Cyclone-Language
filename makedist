@@ -76,7 +76,7 @@ find cyclone -print | egrep -e $grepstr > $TMP
 
 # tar 'em up
 #
-filename=cyclone-$version-src
+filename=cyclone-$version
 tar -cvf ${filename}.tar -X $TMP cyclone
 if [ $? != 0 ]; then
   echo Failed to tar the files into ${filename}.tar

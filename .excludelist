@@ -9,6 +9,12 @@ cyclone/bin/genfiles/src
 cyclone/makedist
 cyclone/\.excludelist
 cyclone/\.version
-cyclone/Makefile.inc
+cyclone/Makefile.inc$
 cyclone/doc/web
-cyclone/tests/smlng/*.txt
+cyclone/tests/smlng/001-null.txt
+cyclone/tests/smlng/002-almost-empty.txt
+cyclone/tests/smlng/003-third-step.txt
+cyclone/tests/smlng/004-random.txt
+cyclone/tests/smlng/005-icfp2000.txt
+cyclone/tests/smlng/006-exhaustive.txt
+cyclone/tests/smlng/example3.txt

@@ -6,9 +6,13 @@
 # get the root directory of the source tree
 CYCDIR=`pwd`
 
-incdir="$CYCDIR/include"
-libdir="$CYCDIR/bin/cyc-lib"
-bindir=
+#  incdir="$CYCDIR/include"
+#  libdir="$CYCDIR/bin/cyc-lib"
+#  bindir=
+
+incdir="/usr/include/cyclone"
+libdir="/usr/local/lib/cyclone"
+bindir="/usr/local/bin"
 
 # arguments
 #
@@ -46,34 +50,20 @@ while [ $# != 0 ]; do
 done
 
 if [ -n "$prefix" ]; then
-bindir="$prefix/bin"
-libdir="$prefix/lib/cyclone"
-incdir="/usr/include/cyclone"
+  bindir="$prefix/bin"
+  libdir="$prefix/lib/cyclone"
 fi
-
-# configure the install location
-
-dirs=
-if [ -n "$bindir" ]; then
-  dirs=$bindir
-fi
-if [ -n "$libdir" ]; then
-  dirs="$dirs $libdir"
-fi
-if [ -n "$incdir" ]; then
-  dirs="$dirs $incdir"
-fi
-
-# make sure the provided directories exist
-for dir in $dirs; do
-  if [ ! -d "$dir" ]; then
-    echo "Warning: $dir directory will be created during install"
-  fi
-done
 
 # now figure out the architecture
 cd config
 ARCH=`./config.guess`
+
+# function to cleanup if we can't port the arch
+function cleanup {
+  \rm -f ${CYCDIR}/lib/arch/${ARCH}.h ${CYCDIR}/include/arch/${ARCH}.h ${CYCDIR}/config/arch/${ARCH}*
+  \rm -rf ${CYCDIR}/bin/genfiles/${ARCH}
+  exit 1
+}
 
 # see if we have #defines for this architecture
 if [ ! -f "arch/${ARCH}" ] || [ ! -f "arch/${ARCH}.undef" ]; then
@@ -83,12 +73,20 @@ if [ ! -f "arch/${ARCH}" ] || [ ! -f "arch/${ARCH}.undef" ]; then
     echo | gcc -E -dM - > arch/$ARCH
     if [ $? != 0 ]; then
       echo "error creating arch #define file"
-      exit 1
+      cleanup
     fi
-    awk '$2 { printf("#undef %s\n",$2); }' arch/$ARCH > arch/$ARCH.undef
+    awk '{ printf("#undef %s\n",$2); }' arch/$ARCH > arch/$ARCH.undef
     if [ $? != 0 ]; then
       echo "error creating arch #undef file"
-      exit 1
+      cleanup
+    fi
+    echo "Creating architecture-specific include file"
+    ./arch_include > ${CYCDIR}/lib/arch/${ARCH}.h
+    cp ${CYCDIR}/lib/arch/${ARCH}.h ${CYCDIR}/include/arch/${ARCH}.h
+    if [ $? != 0 ]; then
+      echo "  failed.  Try altering the version of egrep used by"
+      echo "  the script config/arch_include."
+      cleanup
     fi
     if [ -d "${CYCDIR}/bin/genfiles/${ARCH}" ]; then
       echo "Warning: genfiles directory for ${ARCH} exists"
@@ -112,10 +110,22 @@ else
   echo "Supported architecture ${ARCH}"
 fi
 
-# figure out all supported architectures by checking for config files
-ALL_ARCHS=`cd arch; \ls -1 -I*.undef | grep -v CVS | awk '{printf("%s ",$1);}'`
-
 # set up the installation paths
+function chkdir {
+  echo -n "  $1=$2"
+  if [ ! -d "$2" ]; then
+    echo " (will create)"
+  else
+    echo
+  fi
+}
+echo "Will install into"
+chkdir "binaries" $bindir
+chkdir "libraries" $libdir
+chkdir "include files" $incdir
+
+# figure out all supported architectures by checking for config files
+ALL_ARCHS=`cd arch; \ls -1 | grep -v undef | grep -v CVS | awk '{printf("%s ",$1);}'`
 
 # write the config Makefile
 cd ..
