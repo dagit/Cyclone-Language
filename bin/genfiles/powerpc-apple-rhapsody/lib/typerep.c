@@ -969,12 +969,12 @@ int(*rel)(void*,void*);struct _RegionHandle*r;struct Cyc_Dict_T*t;};extern char 
 Cyc_Dict_rchoose(struct _RegionHandle*r,struct Cyc_Dict_Dict d);struct _tuple5*Cyc_Dict_rchoose(
 struct _RegionHandle*,struct Cyc_Dict_Dict d);int Cyc_strcmp(struct _dynforward_ptr s1,
 struct _dynforward_ptr s2);struct _tuple4 Cyc_Typerep_tuple_tl(void*typ);static void
-_tmp16D(int*pos1,unsigned int*_tmp16C,unsigned int*_tmp16B,struct _tuple1***
-_tmp169,struct _dynforward_ptr*_tmp2){for(*_tmp16C=0;*_tmp16C < *_tmp16B;(*_tmp16C)
-++){struct _tuple1*_tmp167;(*_tmp169)[*_tmp16C]=((_tmp167=_cycalloc(sizeof(*
-_tmp167)),((_tmp167->f1=(*(*((struct _tuple1**)_check_dynforward_subscript(*_tmp2,
-sizeof(struct _tuple1*),(int)(*_tmp16C + 1))))).f1 - *pos1,((_tmp167->f2=(*(*((
-struct _tuple1**)_check_dynforward_subscript(*_tmp2,sizeof(struct _tuple1*),(int)(*
+_tmp16D(int*pos1,struct _dynforward_ptr*_tmp2,unsigned int*_tmp16C,unsigned int*
+_tmp16B,struct _tuple1***_tmp169){for(*_tmp16C=0;*_tmp16C < *_tmp16B;(*_tmp16C)++){
+struct _tuple1*_tmp167;(*_tmp169)[*_tmp16C]=((_tmp167=_cycalloc(sizeof(*_tmp167)),((
+_tmp167->f1=(*(*((struct _tuple1**)_check_dynforward_subscript(*_tmp2,sizeof(
+struct _tuple1*),(int)(*_tmp16C + 1))))).f1 - *pos1,((_tmp167->f2=(*(*((struct
+_tuple1**)_check_dynforward_subscript(*_tmp2,sizeof(struct _tuple1*),(int)(*
 _tmp16C + 1))))).f2,_tmp167))))));}}struct _tuple4 Cyc_Typerep_tuple_tl(void*typ){
 void*_tmp0=typ;unsigned int _tmp1;struct _dynforward_ptr _tmp2;_LL1: if(_tmp0 <= (
 void*)2)goto _LL3;if(*((int*)_tmp0)!= 4)goto _LL3;_tmp1=((struct Cyc_Typerep_Tuple_struct*)
@@ -986,7 +986,7 @@ _tuple1**_tmp169;unsigned int _tmp168;struct _dynforward_ptr _tmp3=(_tmp168=
 _get_dynforward_size(_tmp2,sizeof(struct _tuple1*))- 1,((_tmp169=(struct _tuple1**)
 _cycalloc(_check_times(sizeof(struct _tuple1*),_tmp168)),((_tmp16A=
 _tag_dynforward(_tmp169,sizeof(struct _tuple1*),_tmp168),((((_tmp16B=_tmp168,
-_tmp16D(& pos1,& _tmp16C,& _tmp16B,& _tmp169,& _tmp2))),_tmp16A)))))));struct Cyc_Typerep_Tuple_struct*
+_tmp16D(& pos1,& _tmp2,& _tmp16C,& _tmp16B,& _tmp169))),_tmp16A)))))));struct Cyc_Typerep_Tuple_struct*
 _tmp173;struct Cyc_Typerep_Tuple_struct _tmp172;struct _tuple4 _tmp171;return(
 _tmp171.f1=pos1,((_tmp171.f2=(void*)((_tmp173=_cycalloc(sizeof(*_tmp173)),((
 _tmp173[0]=((_tmp172.tag=4,((_tmp172.f1=_tmp1 - pos1,((_tmp172.f2=_tmp3,_tmp172)))))),
@@ -1073,15 +1073,15 @@ _tmp44;struct _dynforward_ptr*_tmp45;int _tmp46;struct _dynforward_ptr _tmp47;st
 _dynforward_ptr*_tmp48;int _tmp49;struct _dynforward_ptr _tmp4A;_LL1F: if(_tmp31 <= (
 void*)2)goto _LL21;if(*((int*)_tmp31)!= 0)goto _LL21;_tmp32=((struct Cyc_Typerep_Int_struct*)
 _tmp31)->f1;_tmp33=((struct Cyc_Typerep_Int_struct*)_tmp31)->f2;_LL20:{const char*
-_tmp19B;const char*_tmp19A;const char*_tmp199;void*_tmp198[2];struct Cyc_String_pa_struct
+_tmp19B;void*_tmp19A[2];const char*_tmp199;const char*_tmp198;struct Cyc_String_pa_struct
 _tmp197;struct Cyc_Int_pa_struct _tmp196;(_tmp196.tag=1,((_tmp196.f1=(
 unsigned long)((int)_tmp33),((_tmp197.tag=0,((_tmp197.f1=(struct _dynforward_ptr)((
-struct _dynforward_ptr)(_tmp32?(struct _dynforward_ptr)((_tmp19A="signed",
-_tag_dynforward(_tmp19A,sizeof(char),_get_zero_arr_size_char(_tmp19A,7)))):(
-struct _dynforward_ptr)((_tmp19B="unsigned",_tag_dynforward(_tmp19B,sizeof(char),
-_get_zero_arr_size_char(_tmp19B,9)))))),((_tmp198[0]=& _tmp197,((_tmp198[1]=&
-_tmp196,Cyc_printf(((_tmp199="Int(%s,%d)",_tag_dynforward(_tmp199,sizeof(char),
-_get_zero_arr_size_char(_tmp199,11)))),_tag_dynforward(_tmp198,sizeof(void*),2)))))))))))));}
+struct _dynforward_ptr)(_tmp32?(struct _dynforward_ptr)((_tmp198="signed",
+_tag_dynforward(_tmp198,sizeof(char),_get_zero_arr_size_char(_tmp198,7)))):(
+struct _dynforward_ptr)((_tmp199="unsigned",_tag_dynforward(_tmp199,sizeof(char),
+_get_zero_arr_size_char(_tmp199,9)))))),((_tmp19A[0]=& _tmp197,((_tmp19A[1]=&
+_tmp196,Cyc_printf(((_tmp19B="Int(%s,%d)",_tag_dynforward(_tmp19B,sizeof(char),
+_get_zero_arr_size_char(_tmp19B,11)))),_tag_dynforward(_tmp19A,sizeof(void*),2)))))))))))));}
 goto _LL1E;_LL21: if((int)_tmp31 != 0)goto _LL23;_LL22:{const char*_tmp19E;void*
 _tmp19D;(_tmp19D=0,Cyc_printf(((_tmp19E="Float",_tag_dynforward(_tmp19E,sizeof(
 char),_get_zero_arr_size_char(_tmp19E,6)))),_tag_dynforward(_tmp19D,sizeof(void*),

@@ -1175,16 +1175,16 @@ struct _tuple2*clo,struct Cyc_PP_Ppstate*st);static struct Cyc_PP_Out*Cyc_PP_hyp
 struct _tuple2*clo,struct Cyc_PP_Ppstate*st){struct _tuple2 _tmp5D;int _tmp5E;struct
 _dynforward_ptr _tmp5F;struct _dynforward_ptr _tmp60;struct _tuple2*_tmp5C=clo;
 _tmp5D=*_tmp5C;_tmp5E=_tmp5D.f1;_tmp5F=_tmp5D.f2;_tmp60=_tmp5D.f3;{struct Cyc_PP_Single_struct*
-_tmpFC;struct _dynforward_ptr*_tmpFB;struct Cyc_PP_Single_struct _tmpFA;struct Cyc_PP_Single_struct*
-_tmpF9;struct _tuple3*_tmpF8;struct Cyc_PP_Single_struct _tmpF7;struct Cyc_PP_Out*
+_tmpFC;struct _tuple3*_tmpFB;struct Cyc_PP_Single_struct _tmpFA;struct Cyc_PP_Single_struct*
+_tmpF9;struct _dynforward_ptr*_tmpF8;struct Cyc_PP_Single_struct _tmpF7;struct Cyc_PP_Out*
 _tmpF6;return(_tmpF6=_cycalloc(sizeof(*_tmpF6)),((_tmpF6->newcc=st->cc + _tmp5E,((
-_tmpF6->newcl=st->cl,((_tmpF6->ppout=(void*)((void*)((_tmpFC=_cycalloc(sizeof(*
-_tmpFC)),((_tmpFC[0]=((_tmpFA.tag=0,((_tmpFA.f1=(void*)((_tmpFB=_cycalloc(
-sizeof(struct _dynforward_ptr)* 1),((_tmpFB[0]=_tmp5F,_tmpFB)))),_tmpFA)))),
-_tmpFC))))),((_tmpF6->links=(void*)((void*)((_tmpF9=_cycalloc(sizeof(*_tmpF9)),((
-_tmpF9[0]=((_tmpF7.tag=0,((_tmpF7.f1=(void*)((_tmpF8=_cycalloc(sizeof(*_tmpF8)),((
-_tmpF8->f1=st->cl,((_tmpF8->f2=st->cc,((_tmpF8->f3=_tmp5E,((_tmpF8->f4=_tmp60,
-_tmpF8)))))))))),_tmpF7)))),_tmpF9))))),_tmpF6)))))))));}}struct Cyc_PP_Doc*Cyc_PP_hyperlink(
+_tmpF6->newcl=st->cl,((_tmpF6->ppout=(void*)((void*)((_tmpF9=_cycalloc(sizeof(*
+_tmpF9)),((_tmpF9[0]=((_tmpF7.tag=0,((_tmpF7.f1=(void*)((_tmpF8=_cycalloc(
+sizeof(struct _dynforward_ptr)* 1),((_tmpF8[0]=_tmp5F,_tmpF8)))),_tmpF7)))),
+_tmpF9))))),((_tmpF6->links=(void*)((void*)((_tmpFC=_cycalloc(sizeof(*_tmpFC)),((
+_tmpFC[0]=((_tmpFA.tag=0,((_tmpFA.f1=(void*)((_tmpFB=_cycalloc(sizeof(*_tmpFB)),((
+_tmpFB->f1=st->cl,((_tmpFB->f2=st->cc,((_tmpFB->f3=_tmp5E,((_tmpFB->f4=_tmp60,
+_tmpFB)))))))))),_tmpFA)))),_tmpFC))))),_tmpF6)))))))));}}struct Cyc_PP_Doc*Cyc_PP_hyperlink(
 struct _dynforward_ptr shrt,struct _dynforward_ptr full);struct Cyc_PP_Doc*Cyc_PP_hyperlink(
 struct _dynforward_ptr shrt,struct _dynforward_ptr full){int slen=(int)Cyc_strlen((
 struct _dynforward_ptr)shrt);struct _tuple2*_tmpFF;struct Cyc_PP_Doc*_tmpFE;return(

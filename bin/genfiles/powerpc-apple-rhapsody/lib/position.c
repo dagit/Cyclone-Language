@@ -1066,14 +1066,14 @@ f2;};struct Cyc_List_List*Cyc_Position_strings_of_segments(struct Cyc_List_List*
 segs);struct Cyc_List_List*Cyc_Position_strings_of_segments(struct Cyc_List_List*
 segs){struct Cyc_List_List*places=0;{struct Cyc_List_List*_tmp24=segs;for(0;_tmp24
 != 0;_tmp24=_tmp24->tl){if((struct Cyc_Position_Segment*)_tmp24->hd == 0)continue;{
-struct _tuple4*_tmpA5;struct Cyc_List_List*_tmpA4;struct _tuple4*_tmpA3;struct Cyc_List_List*
-_tmpA2;places=((_tmpA2=_cycalloc(sizeof(*_tmpA2)),((_tmpA2->hd=((_tmpA5=
-_cycalloc(sizeof(*_tmpA5)),((_tmpA5->f1=((struct Cyc_Position_Segment*)
-_check_null((struct Cyc_Position_Segment*)_tmp24->hd))->end,((_tmpA5->f2=Cyc_Position_new_pos(),
-_tmpA5)))))),((_tmpA2->tl=((_tmpA4=_cycalloc(sizeof(*_tmpA4)),((_tmpA4->hd=((
-_tmpA3=_cycalloc(sizeof(*_tmpA3)),((_tmpA3->f1=((struct Cyc_Position_Segment*)
-_check_null((struct Cyc_Position_Segment*)_tmp24->hd))->start,((_tmpA3->f2=Cyc_Position_new_pos(),
-_tmpA3)))))),((_tmpA4->tl=places,_tmpA4)))))),_tmpA2))))));}}}Cyc_Lineno_poss_of_abss(
+struct Cyc_List_List*_tmpA5;struct _tuple4*_tmpA4;struct _tuple4*_tmpA3;struct Cyc_List_List*
+_tmpA2;places=((_tmpA2=_cycalloc(sizeof(*_tmpA2)),((_tmpA2->hd=((_tmpA3=
+_cycalloc(sizeof(*_tmpA3)),((_tmpA3->f1=((struct Cyc_Position_Segment*)
+_check_null((struct Cyc_Position_Segment*)_tmp24->hd))->end,((_tmpA3->f2=Cyc_Position_new_pos(),
+_tmpA3)))))),((_tmpA2->tl=((_tmpA5=_cycalloc(sizeof(*_tmpA5)),((_tmpA5->hd=((
+_tmpA4=_cycalloc(sizeof(*_tmpA4)),((_tmpA4->f1=((struct Cyc_Position_Segment*)
+_check_null((struct Cyc_Position_Segment*)_tmp24->hd))->start,((_tmpA4->f2=Cyc_Position_new_pos(),
+_tmpA4)))))),((_tmpA5->tl=places,_tmpA5)))))),_tmpA2))))));}}}Cyc_Lineno_poss_of_abss(
 Cyc_Position_source,places);{struct Cyc_List_List*ans=0;places=((struct Cyc_List_List*(*)(
 struct Cyc_List_List*x))Cyc_List_imp_rev)(places);for(0;segs != 0;segs=segs->tl){
 if((struct Cyc_Position_Segment*)segs->hd == 0){struct _dynforward_ptr*_tmpB2;const

@@ -1329,16 +1329,16 @@ cmp)(void*,void*),struct Cyc_List_List*x){while(x != 0){struct Cyc_List_List*_tm
 x->tl;if(_tmp2E != 0){if(cmp((void*)x->hd,(void*)_tmp2E->hd)== 0){struct Cyc_Core_Opt*
 _tmp75;return(_tmp75=_cycalloc(sizeof(*_tmp75)),((_tmp75->v=(void*)((void*)x->hd),
 _tmp75)));}}x=_tmp2E;}return 0;}struct _dynforward_ptr Cyc_List_rto_array(struct
-_RegionHandle*r2,struct Cyc_List_List*x);static void _tmp7C(unsigned int*_tmp7B,
-unsigned int*_tmp7A,void***_tmp78,struct Cyc_List_List**x){for(*_tmp7B=0;*_tmp7B < *
+_RegionHandle*r2,struct Cyc_List_List*x);static void _tmp7C(struct Cyc_List_List**x,
+unsigned int*_tmp7B,unsigned int*_tmp7A,void***_tmp78){for(*_tmp7B=0;*_tmp7B < *
 _tmp7A;(*_tmp7B)++){void*_tmp76;(*_tmp78)[*_tmp7B]=((_tmp76=(void*)((struct Cyc_List_List*)
 _check_null(*x))->hd,((*x=(*x)->tl,_tmp76))));}}struct _dynforward_ptr Cyc_List_rto_array(
 struct _RegionHandle*r2,struct Cyc_List_List*x){int s;struct _dynforward_ptr arr;s=
 Cyc_List_length(x);{unsigned int _tmp7B;unsigned int _tmp7A;struct _dynforward_ptr
 _tmp79;void**_tmp78;unsigned int _tmp77;arr=((_tmp77=(unsigned int)s,((_tmp78=(
 void**)_region_malloc(r2,_check_times(sizeof(void*),_tmp77)),((_tmp79=
-_tag_dynforward(_tmp78,sizeof(void*),_tmp77),((((_tmp7A=_tmp77,_tmp7C(& _tmp7B,&
-_tmp7A,& _tmp78,& x))),_tmp79))))))));}return arr;}struct _dynforward_ptr Cyc_List_to_array(
+_tag_dynforward(_tmp78,sizeof(void*),_tmp77),((((_tmp7A=_tmp77,_tmp7C(& x,& _tmp7B,&
+_tmp7A,& _tmp78))),_tmp79))))))));}return arr;}struct _dynforward_ptr Cyc_List_to_array(
 struct Cyc_List_List*x);struct _dynforward_ptr Cyc_List_to_array(struct Cyc_List_List*
 x){return Cyc_List_rto_array(Cyc_Core_heap_region,x);}struct Cyc_List_List*Cyc_List_rfrom_array(
 struct _RegionHandle*r2,struct _dynforward_ptr arr);struct Cyc_List_List*Cyc_List_rfrom_array(

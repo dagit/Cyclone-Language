@@ -1094,7 +1094,7 @@ Cyc_Xarray_Xarray*xarr);void Cyc_Xarray_iter_c(void(*f)(void*,void*),void*env,
 struct Cyc_Xarray_Xarray*xarr){int i=0;for(0;i < xarr->num_elmts;++ i){f(env,*((void**)
 _check_dynforward_subscript(xarr->elmts,sizeof(void*),i)));}}struct Cyc_Xarray_Xarray*
 Cyc_Xarray_rmap(struct _RegionHandle*r,void*(*f)(void*),struct Cyc_Xarray_Xarray*
-xarr);static void _tmp8E(void*(**f)(void*),struct Cyc_Xarray_Xarray**xarr,
+xarr);static void _tmp8E(struct Cyc_Xarray_Xarray**xarr,void*(**f)(void*),
 unsigned int*_tmp8D,unsigned int*_tmp8C,void***_tmp8A){for(*_tmp8D=0;*_tmp8D < *
 _tmp8C;(*_tmp8D)++){(*_tmp8A)[*_tmp8D]=(*f)(*((void**)
 _check_dynforward_subscript((*xarr)->elmts,sizeof(void*),0)));}}struct Cyc_Xarray_Xarray*
@@ -1105,7 +1105,7 @@ _tmp90;struct Cyc_Xarray_Xarray*_tmp8F;struct Cyc_Xarray_Xarray*ans=(_tmp8F=
 _region_malloc(r,sizeof(*_tmp8F)),((_tmp8F->r=r,((_tmp8F->elmts=((_tmp94=
 _get_dynforward_size(xarr->elmts,sizeof(void*)),((_tmp93=(void**)_region_malloc(
 r,_check_times(sizeof(void*),_tmp94)),((_tmp92=_tag_dynforward(_tmp93,sizeof(
-void*),_tmp94),((((_tmp91=_tmp94,_tmp8E(& f,& xarr,& _tmp90,& _tmp91,& _tmp93))),
+void*),_tmp94),((((_tmp91=_tmp94,_tmp8E(& xarr,& f,& _tmp90,& _tmp91,& _tmp93))),
 _tmp92)))))))),((_tmp8F->num_elmts=xarr->num_elmts,_tmp8F)))))));{int i=1;for(0;i
 < xarr->num_elmts;++ i){*((void**)_check_dynforward_subscript(ans->elmts,sizeof(
 void*),i))=f(*((void**)_check_dynforward_subscript(xarr->elmts,sizeof(void*),i)));}}
@@ -1113,8 +1113,8 @@ return ans;}}struct Cyc_Xarray_Xarray*Cyc_Xarray_map(void*(*f)(void*),struct Cyc
 xarr);struct Cyc_Xarray_Xarray*Cyc_Xarray_map(void*(*f)(void*),struct Cyc_Xarray_Xarray*
 xarr){return Cyc_Xarray_rmap(Cyc_Core_heap_region,f,xarr);}struct Cyc_Xarray_Xarray*
 Cyc_Xarray_rmap_c(struct _RegionHandle*r,void*(*f)(void*,void*),void*env,struct
-Cyc_Xarray_Xarray*xarr);static void _tmp9A(unsigned int*_tmp99,unsigned int*_tmp98,
-void***_tmp96,void*(**f)(void*,void*),void**env,struct Cyc_Xarray_Xarray**xarr){
+Cyc_Xarray_Xarray*xarr);static void _tmp9A(struct Cyc_Xarray_Xarray**xarr,void*(**f)(
+void*,void*),void**env,unsigned int*_tmp99,unsigned int*_tmp98,void***_tmp96){
 for(*_tmp99=0;*_tmp99 < *_tmp98;(*_tmp99)++){(*_tmp96)[*_tmp99]=(*f)(*env,*((void**)
 _check_dynforward_subscript((*xarr)->elmts,sizeof(void*),0)));}}struct Cyc_Xarray_Xarray*
 Cyc_Xarray_rmap_c(struct _RegionHandle*r,void*(*f)(void*,void*),void*env,struct
@@ -1124,7 +1124,7 @@ unsigned int _tmp9C;struct Cyc_Xarray_Xarray*_tmp9B;struct Cyc_Xarray_Xarray*ans
 _tmp9B=_region_malloc(r,sizeof(*_tmp9B)),((_tmp9B->r=r,((_tmp9B->elmts=((_tmpA0=
 _get_dynforward_size(xarr->elmts,sizeof(void*)),((_tmp9F=(void**)_region_malloc(
 r,_check_times(sizeof(void*),_tmpA0)),((_tmp9E=_tag_dynforward(_tmp9F,sizeof(
-void*),_tmpA0),((((_tmp9D=_tmpA0,_tmp9A(& _tmp9C,& _tmp9D,& _tmp9F,& f,& env,& xarr))),
+void*),_tmpA0),((((_tmp9D=_tmpA0,_tmp9A(& xarr,& f,& env,& _tmp9C,& _tmp9D,& _tmp9F))),
 _tmp9E)))))))),((_tmp9B->num_elmts=xarr->num_elmts,_tmp9B)))))));{int i=1;for(0;i
 < xarr->num_elmts;++ i){*((void**)_check_dynforward_subscript(ans->elmts,sizeof(
 void*),i))=f(env,*((void**)_check_dynforward_subscript(xarr->elmts,sizeof(void*),

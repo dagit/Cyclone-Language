@@ -2048,9 +2048,9 @@ e1,struct Cyc_Absyn_Exp*e2,struct Cyc_Absyn_Exp*e3,struct Cyc_Absyn_Stmt*s,struc
 Cyc_Position_Segment*loc){struct Cyc_Absyn_For_s_struct _tmp5CD;struct _tuple2
 _tmp5CC;struct _tuple2 _tmp5CB;struct Cyc_Absyn_For_s_struct*_tmp5CA;return Cyc_Absyn_new_stmt((
 void*)((_tmp5CA=_cycalloc(sizeof(*_tmp5CA)),((_tmp5CA[0]=((_tmp5CD.tag=8,((
-_tmp5CD.f1=e1,((_tmp5CD.f2=((_tmp5CB.f1=e2,((_tmp5CB.f2=Cyc_Absyn_skip_stmt(e3->loc),
-_tmp5CB)))),((_tmp5CD.f3=((_tmp5CC.f1=e3,((_tmp5CC.f2=Cyc_Absyn_skip_stmt(e3->loc),
-_tmp5CC)))),((_tmp5CD.f4=s,_tmp5CD)))))))))),_tmp5CA)))),loc);}struct Cyc_Absyn_Stmt*
+_tmp5CD.f1=e1,((_tmp5CD.f2=((_tmp5CC.f1=e2,((_tmp5CC.f2=Cyc_Absyn_skip_stmt(e3->loc),
+_tmp5CC)))),((_tmp5CD.f3=((_tmp5CB.f1=e3,((_tmp5CB.f2=Cyc_Absyn_skip_stmt(e3->loc),
+_tmp5CB)))),((_tmp5CD.f4=s,_tmp5CD)))))))))),_tmp5CA)))),loc);}struct Cyc_Absyn_Stmt*
 Cyc_Absyn_switch_stmt(struct Cyc_Absyn_Exp*e,struct Cyc_List_List*scs,struct Cyc_Position_Segment*
 loc);struct Cyc_Absyn_Stmt*Cyc_Absyn_switch_stmt(struct Cyc_Absyn_Exp*e,struct Cyc_List_List*
 scs,struct Cyc_Position_Segment*loc){struct Cyc_Absyn_Switch_s_struct _tmp5D0;
