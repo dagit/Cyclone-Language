@@ -350,6 +350,28 @@ int fcntl_with_lock(int fd, int cmd, void *lock) {
 }
 
 ///////////////////////////////////////////////
+// Signals (goes with signal.cyc)
+
+extern void Cyc_Signal__SIG_DFL(int);
+extern void Cyc_Signal__SIG_IGN(int);
+extern void Cyc_Signal__SIG_ERR(int);
+typedef void (*signal_t)(int);
+
+signal_t signal_fromC(signal_t p) {
+  if (p == (void(*)(int)) 0) return Cyc_Signal__SIG_DFL;
+  else if (p == (void(*)(int)) 1) return Cyc_Signal__SIG_IGN;
+  else if (p == (void(*)(int))-1) return Cyc_Signal__SIG_ERR;
+  else return p;
+}
+
+signal_t signal_toC(signal_t p) {
+  if (p == Cyc_Signal__SIG_DFL) return ((void(*)(int)) 0);
+  else if (p == Cyc_Signal__SIG_IGN) return ((void(*)(int)) 1);
+  else if (p == Cyc_Signal__SIG_ERR) return ((void(*)(int))-1);
+  else return p;
+}
+
+///////////////////////////////////////////////
 // Regions
 
 #ifdef CYC_REGION_PROFILE

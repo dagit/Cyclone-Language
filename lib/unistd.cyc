@@ -7,6 +7,10 @@ namespace Cunistd {
     int chdir(Cstring);
     Cstring getcwd(Cstring buf, size_t size);
     int execv(Cstring path, Cstring *argv);
+    int execve(Cstring path, Cstring *argv, Cstring *envp);
+    ssize_t read(int fd, Cstring buf, size_t count);
+    ssize_t write(int fd, Cstring buf, size_t count);
+    int unlink(Cstring pathname);
   }
 }
 
@@ -29,10 +33,42 @@ int execl(string_t path, string_t arg0, ...`r string_t argv) {
   if (argv[argv.size - 1] != null)
     throw new Failure("execl: arg list must be null-terminated");
 
+  // We allocate 1+argv.size because we need to prepend arg0
   Cstring ?newargs = new {for i < 1 + argv.size : null};
   newargs[0] = string_to_Cstring(arg0);
-  for (int i = 0; i < argv.size; i++) {
+  for (int i = 0; i < argv.size; i++)
     newargs[i+1] = string_to_Cstring(argv[i]);
-  }
   return Cunistd::execv(string_to_Cstring(path), (Cstring*) newargs);
+}
+
+int execve(string_t filename, string_t ?argv, string_t ?envp) {
+  if (argv[argv.size - 1] != null)
+    throw new Failure("execve: arg list must be null-terminated");
+
+  Cstring ?newargs = new {for i < argv.size : null};
+  for (int i = 0; i < argv.size; i++)
+    newargs[i] = string_to_Cstring(argv[i]);
+
+  Cstring ?newenvp = new {for i < envp.size : null};
+  for (int i = 0; i < envp.size; i++)
+    newenvp[i] = string_to_Cstring(envp[i]);
+
+  return Cunistd::execve(string_to_Cstring(filename),
+                         (Cstring*) newargs, (Cstring*) newenvp);
+}
+
+ssize_t read(int fd, mstring_t buf, size_t count) {
+  if (count > buf.size)
+    throw new Failure("read: called with count > buf.size");
+  return Cunistd::read(fd, underlying_Cstring(buf), count);
+}
+
+ssize_t write(int fd, string_t buf, size_t count) {
+  if (count > buf.size)
+    throw new Failure("write: called with count > buf.size");
+  return Cunistd::write(fd, string_to_Cstring(buf), count);
+}
+
+int unlink(string_t pathname) {
+  return Cunistd::unlink(string_to_Cstring(pathname));
 }

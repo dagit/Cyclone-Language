@@ -72,11 +72,7 @@ typedef	char *	caddr_t;
 #ifdef __MS_types__
 typedef	unsigned long	ino_t;
 #else
-#ifdef __sparc__
-typedef	unsigned long	ino_t;
-#else
 typedef	unsigned short	ino_t;
-#endif
 #endif
 
 #ifdef __MS_types__
@@ -134,6 +130,14 @@ typedef	struct _types_fd_set {
 
 #undef __MS_types__
 #undef _ST_INT32
+
+struct dirent {
+  long d_ino;
+  off_t d_off;
+  unsigned short d_reclen;
+  unsigned char d_type;
+  char d_name[256];
+};
 
 typedef unsigned int socklen_t;
 

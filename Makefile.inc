@@ -36,6 +36,7 @@ CYCLONE_LIBS:=arg\
         buffer\
         core\
         dict\
+	dirent\
         errno\
 	fcntl\
         filename\
@@ -57,6 +58,7 @@ CYCLONE_LIBS:=arg\
         ref\
         rope\
         set\
+	signal\
         slowdict\
         splay\
 	stat\
@@ -76,6 +78,7 @@ CYCLONE_H:=arg.h\
         buffer.h\
         core.h\
         dict.h\
+	dirent.h\
         errno.h\
 	fcntl.h\
         filename.h\
@@ -95,6 +98,7 @@ CYCLONE_H:=arg.h\
         ref.h\
         rope.h\
         set.h\
+	signal.h\
         slowdict.h\
         splay.h\
 	stdio.h\

@@ -1,0 +1,13 @@
+#include <core.h>
+#include <dirent.h>
+using Core;
+
+namespace Cdirent {
+  extern "C" Dirent::DIR *opendir(Cstring name);
+}
+
+namespace Dirent;
+
+DIR *opendir(string_t name) {
+  return Cdirent::opendir(string_to_Cstring(name));
+}

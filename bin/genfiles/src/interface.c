@@ -1,10 +1,12 @@
  struct Cyc_timeval{ int tv_sec; int tv_usec; } ; struct Cyc_timespec{
 unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
 it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{ int
-fds_bits[ 2u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
-void* v; } ; extern void* Cyc_Core_identity( void*); extern unsigned char Cyc_Core_InvalidArg[
-15u]; struct Cyc_Core_InvalidArg_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+fds_bits[ 2u]; } ; struct Cyc_dirent{ int d_ino; int d_off; unsigned short
+d_reclen; unsigned char d_type; unsigned char d_name[ 256u]; } ; extern void
+exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; extern void*
+Cyc_Core_identity( void*); extern unsigned char Cyc_Core_InvalidArg[ 15u];
+struct Cyc_Core_InvalidArg_struct{ unsigned char* tag; struct _tagged_arr f1; }
+; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
 15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
 f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
