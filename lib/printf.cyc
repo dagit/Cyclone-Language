@@ -960,29 +960,48 @@ int printf(const char ?`r fmt, ... inject parg_t<`r2> ap)
   return ans;
 }
 
-static int putc_string(int c, char ?`r @`r2 sptr) {
+static int putc_string(int c, $(char ?`r @`r2,size_t @`r3)@`r4 sptr_n) {
+  let &$(sptr,nptr) = sptr_n;
   char ?`r s = *sptr;
-  if (s.size == 0) return EOF;
+  size_t n = *nptr;
+  if ((s.size == 0) || (n == 0)) return EOF;
   *s = (char)c;
   *sptr = s+1;
+  *nptr = n-1;
   return 1;
 }
 
-int vsprintf(char ?`r1 s, const char ?`r2 fmt, parg_t<`r4> ? `r3 ap) 
-  __attribute__((format(printf,2,0)))
+int vsnprintf(char ?`r1 s, size_t n, const char ?`r2 fmt, 
+	      parg_t<`r4> ? `r3 ap) 
+  __attribute__((format(printf,3,0)))
 {
   int ans;
   let sptr = s;
-  ans = _IO_vfprintf(putc_string, &sptr, fmt, ap);
+  let nptr = n;
+  let sptr_n = $(&sptr,&nptr);
+  ans = _IO_vfprintf(putc_string, &sptr_n, fmt, ap);
   if (0 <= ans)
     s[ans] = '\0';
   return ans;
 }
 
+int snprintf(char ?`r1 s, size_t n, 
+	     const char ?`r2 fmt, ... inject parg_t<`r4> ap) 
+  __attribute__((format(printf,3,4)))
+{
+  return vsnprintf(s, n, fmt, ap);
+}
+
+int vsprintf(char ?`r1 s, const char ?`r2 fmt, parg_t<`r4> ? `r3 ap) 
+  __attribute__((format(printf,2,0)))
+{
+  return vsnprintf(s,s.size,fmt,ap);
+}
+
 int sprintf(char ?`r1 s, const char ?`r2 fmt, ... inject parg_t<`r4> ap) 
   __attribute__((format(printf,2,3)))
 {
-  return vsprintf(s, fmt, ap);
+  return vsnprintf(s, s.size, fmt, ap);
 }
 
 static int putc_void(int c, int dummy) {

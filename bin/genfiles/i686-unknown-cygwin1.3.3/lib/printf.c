@@ -242,16 +242,19 @@ int tag; short* f1; } ; static const int Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_In
 int tag; unsigned int* f1; } ; extern int Cyc_Std_fprintf( struct Cyc_Std___sFILE*,
 struct _tagged_arr fmt, struct _tagged_arr); extern int Cyc_Std_printf( struct
 _tagged_arr fmt, struct _tagged_arr); extern int Cyc_Std_sprintf( struct
-_tagged_arr s, struct _tagged_arr fmt, struct _tagged_arr); extern struct
-_tagged_arr Cyc_Std_aprintf( struct _tagged_arr fmt, struct _tagged_arr); extern
-struct _tagged_arr Cyc_Std_rprintf( struct _RegionHandle*, struct _tagged_arr
-fmt, struct _tagged_arr ap); extern int Cyc_Std_vfprintf( struct Cyc_Std___sFILE*,
-struct _tagged_arr fmt, struct _tagged_arr ap); extern int Cyc_Std_vprintf(
-struct _tagged_arr fmt, struct _tagged_arr); extern int Cyc_Std_vsprintf( struct
-_tagged_arr s, struct _tagged_arr fmt, struct _tagged_arr); extern struct
-_tagged_arr Cyc_Std_vrprintf( struct _RegionHandle* r1, struct _tagged_arr fmt,
-struct _tagged_arr ap); static const int Cyc_Std_ShortPtr_sa= 0; struct Cyc_Std_ShortPtr_sa_struct{
-int tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa= 1; struct Cyc_Std_UShortPtr_sa_struct{
+_tagged_arr s, struct _tagged_arr fmt, struct _tagged_arr); extern int Cyc_Std_snprintf(
+struct _tagged_arr s, unsigned int n, struct _tagged_arr fmt, struct _tagged_arr
+ap); extern struct _tagged_arr Cyc_Std_aprintf( struct _tagged_arr fmt, struct
+_tagged_arr); extern struct _tagged_arr Cyc_Std_rprintf( struct _RegionHandle*,
+struct _tagged_arr fmt, struct _tagged_arr ap); extern int Cyc_Std_vfprintf(
+struct Cyc_Std___sFILE*, struct _tagged_arr fmt, struct _tagged_arr ap); extern
+int Cyc_Std_vprintf( struct _tagged_arr fmt, struct _tagged_arr); extern int Cyc_Std_vsprintf(
+struct _tagged_arr s, struct _tagged_arr fmt, struct _tagged_arr); extern int
+Cyc_Std_vsnprintf( struct _tagged_arr s, unsigned int n, struct _tagged_arr fmt,
+struct _tagged_arr ap); extern struct _tagged_arr Cyc_Std_vrprintf( struct
+_RegionHandle* r1, struct _tagged_arr fmt, struct _tagged_arr ap); static const
+int Cyc_Std_ShortPtr_sa= 0; struct Cyc_Std_ShortPtr_sa_struct{ int tag; short*
+f1; } ; static const int Cyc_Std_UShortPtr_sa= 1; struct Cyc_Std_UShortPtr_sa_struct{
 int tag; unsigned short* f1; } ; static const int Cyc_Std_IntPtr_sa= 2; struct
 Cyc_Std_IntPtr_sa_struct{ int tag; int* f1; } ; static const int Cyc_Std_UIntPtr_sa=
 3; struct Cyc_Std_UIntPtr_sa_struct{ int tag; unsigned int* f1; } ; static const
@@ -681,28 +684,39 @@ ans=(( int(*)( int(* ioputc)( int, struct Cyc_Std___sFILE*), struct Cyc_Std___sF
 ioputc_env, struct _tagged_arr fmt0, struct _tagged_arr ap)) Cyc_Std__IO_vfprintf)(
 Cyc_Std_putc, Cyc_Std_stdout, fmt, ap); return ans;} int Cyc_Std_printf( struct
 _tagged_arr fmt, struct _tagged_arr ap){ int ans; ans= Cyc_Std_vprintf( fmt, ap);
-return ans;} static int Cyc_Std_putc_string( int c, struct _tagged_arr* sptr){
-struct _tagged_arr s=* sptr; if( _get_arr_size( s, sizeof( unsigned char)) ==  0){
-return - 1;}*(( unsigned char*) _check_unknown_subscript( s, sizeof(
-unsigned char), 0u))=( unsigned char) c;* sptr= _tagged_arr_plus( s, sizeof(
-unsigned char), 1); return 1;} int Cyc_Std_vsprintf( struct _tagged_arr s,
-struct _tagged_arr fmt, struct _tagged_arr ap){ int ans; struct _tagged_arr
-_temp136= s; ans=(( int(*)( int(* ioputc)( int, struct _tagged_arr*), struct
-_tagged_arr* ioputc_env, struct _tagged_arr fmt0, struct _tagged_arr ap)) Cyc_Std__IO_vfprintf)(
-Cyc_Std_putc_string,& _temp136, fmt, ap); if( 0 <=  ans){*(( unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), ans))='\000';} return ans;}
-int Cyc_Std_sprintf( struct _tagged_arr s, struct _tagged_arr fmt, struct
-_tagged_arr ap){ return Cyc_Std_vsprintf( s, fmt, ap);} static int Cyc_Std_putc_void(
+return ans;} struct _tuple0{ struct _tagged_arr* f1; unsigned int* f2; } ;
+static int Cyc_Std_putc_string( int c, struct _tuple0* sptr_n){ struct _tuple0
+_temp138; unsigned int* _temp139; struct _tagged_arr* _temp141; struct _tuple0*
+_temp136= sptr_n; _temp138=* _temp136; _LL142: _temp141= _temp138.f1; goto
+_LL140; _LL140: _temp139= _temp138.f2; goto _LL137; _LL137: { struct _tagged_arr
+s=* _temp141; unsigned int n=* _temp139; if( _get_arr_size( s, sizeof(
+unsigned char)) ==  0? 1: n ==  0){ return - 1;}*(( unsigned char*)
+_check_unknown_subscript( s, sizeof( unsigned char), 0u))=( unsigned char) c;*
+_temp141= _tagged_arr_plus( s, sizeof( unsigned char), 1);* _temp139= n -  1;
+return 1;}} int Cyc_Std_vsnprintf( struct _tagged_arr s, unsigned int n, struct
+_tagged_arr fmt, struct _tagged_arr ap){ int ans; struct _tagged_arr _temp143= s;
+unsigned int _temp144= n; struct _tuple0 _temp145=({ struct _tuple0 _temp146;
+_temp146.f1=& _temp143; _temp146.f2=& _temp144; _temp146;}); ans=(( int(*)( int(*
+ioputc)( int, struct _tuple0*), struct _tuple0* ioputc_env, struct _tagged_arr
+fmt0, struct _tagged_arr ap)) Cyc_Std__IO_vfprintf)( Cyc_Std_putc_string,&
+_temp145, fmt, ap); if( 0 <=  ans){*(( unsigned char*) _check_unknown_subscript(
+s, sizeof( unsigned char), ans))='\000';} return ans;} int Cyc_Std_snprintf(
+struct _tagged_arr s, unsigned int n, struct _tagged_arr fmt, struct _tagged_arr
+ap){ return Cyc_Std_vsnprintf( s, n, fmt, ap);} int Cyc_Std_vsprintf( struct
+_tagged_arr s, struct _tagged_arr fmt, struct _tagged_arr ap){ return Cyc_Std_vsnprintf(
+s, _get_arr_size( s, sizeof( unsigned char)), fmt, ap);} int Cyc_Std_sprintf(
+struct _tagged_arr s, struct _tagged_arr fmt, struct _tagged_arr ap){ return Cyc_Std_vsnprintf(
+s, _get_arr_size( s, sizeof( unsigned char)), fmt, ap);} static int Cyc_Std_putc_void(
 int c, int dummy){ return 1;} struct _tagged_arr Cyc_Std_vrprintf( struct
 _RegionHandle* r1, struct _tagged_arr fmt, struct _tagged_arr ap){ int size=((
 int(*)( int(* ioputc)( int, int), int ioputc_env, struct _tagged_arr fmt0,
 struct _tagged_arr ap)) Cyc_Std__IO_vfprintf)( Cyc_Std_putc_void, 0, fmt, ap) + 
-1; struct _tagged_arr s=({ unsigned int _temp137=( unsigned int) size;
-unsigned char* _temp138=( unsigned char*) _region_malloc( r1, _check_times(
-sizeof( unsigned char), _temp137)); struct _tagged_arr _temp140= _tag_arr(
-_temp138, sizeof( unsigned char),( unsigned int) size);{ unsigned int _temp139=
-_temp137; unsigned int i; for( i= 0; i <  _temp139; i ++){ _temp138[ i]='\000';}};
-_temp140;}); Cyc_Std_vsprintf( s, fmt, ap); return s;} struct _tagged_arr Cyc_Std_rprintf(
+1; struct _tagged_arr s=({ unsigned int _temp147=( unsigned int) size;
+unsigned char* _temp148=( unsigned char*) _region_malloc( r1, _check_times(
+sizeof( unsigned char), _temp147)); struct _tagged_arr _temp150= _tag_arr(
+_temp148, sizeof( unsigned char),( unsigned int) size);{ unsigned int _temp149=
+_temp147; unsigned int i; for( i= 0; i <  _temp149; i ++){ _temp148[ i]='\000';}};
+_temp150;}); Cyc_Std_vsprintf( s, fmt, ap); return s;} struct _tagged_arr Cyc_Std_rprintf(
 struct _RegionHandle* r1, struct _tagged_arr fmt, struct _tagged_arr ap){ return
 Cyc_Std_vrprintf( r1, fmt, ap);} struct _tagged_arr Cyc_Std_aprintf( struct
 _tagged_arr fmt, struct _tagged_arr ap){ return Cyc_Std_vrprintf( Cyc_Core_heap_region,

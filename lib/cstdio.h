@@ -213,6 +213,10 @@ extern int printf(const char ?`r fmt, ... inject parg_t<`r2>)
 extern int sprintf(char ?`r1 s, const char ?`r2 fmt, ... inject parg_t<`r4>)
   __attribute__((format(printf,2,3)))
   ;
+extern int snprintf(char ?`r1 s, size_t n, 
+		    const char ?`r2 fmt, ... inject parg_t<`r4> ap)
+  __attribute__((format(printf,3,4)))
+  ;
 // Similar to sprintf but allocates a result of the right size
 extern char ? aprintf(const char ?`r2 fmt, ... inject parg_t<`r4>)
   __attribute__((format(printf,1,2)))
@@ -231,6 +235,10 @@ extern int vprintf(const char ?`r fmt, parg_t<`r2> ? `r1)
   ;
 extern int vsprintf(char ?`r1 s, const char ?`r2 fmt, parg_t<`r4> ? `r3)
   __attribute__((format(printf,2,0)))
+  ;
+extern int vsnprintf(char ?`r1 s, size_t n, const char ?`r2 fmt, 
+		     parg_t<`r4> ? `r3 ap) 
+  __attribute__((format(printf,3,0)))
   ;
 extern char ?`r1 vrprintf(region_t<`r1> r1, const char ?`r2 fmt, 
                           parg_t<`r4> ? `r3 ap)
