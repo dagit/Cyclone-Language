@@ -1,9 +1,10 @@
+#include "config.h"
 #include "core.h"
 #include "errno.h"
 using Core;
 
 namespace Errno {
-  extern "C" __attribute__((dllimport)) Cstring _sys_errlist[135];
+  extern "C" __IMPORT Cstring _sys_errlist[__CYCLONE_SYS_NUM_ERR];
 
   char ?sys_err(int i) {
     if (i < 0 || i > Errno::_sys_nerr)
