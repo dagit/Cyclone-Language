@@ -78,9 +78,6 @@ Todo now:
   types and values.  At link-time, we should suck in all of these and make
   sure they're consistent.
 
-* better formatting support in printf & friends (i.e., deal with full
-  %-specifiers)
-
 * new { for i < x : ' ' }
   causes core dump for negative x.  (Not surprising -- x is treated as
   unsigned so that's a really big number and likely, malloc is returning
@@ -143,27 +140,8 @@ Todo now:
 
 * qualifiers on tuples (how)?
 
-* Maybe we should treat the following as the same in the
-  type-checker/parser:
-    void foo(int x[]) == void foo( int (@x)[] )
-    void foo(int x[3]) == void foo( int (@x)[3] )
-  Problem: this is incompatible with C.  Instead C uses
-    void foo(int x[]) == void foo( int *x )
-    void foo(int x[3]) == void foo( int *x )
-  And, in C there is a difference between (int *x) and (int (*x)[]).
-    Consider x[4].  If we have (int *x) then we obtain the (int *) to
-    dereference by adding to x.  If we have (int (*x)[]), then
-    we have to explicitly dereference x to get an (int[]), and then
-    C does an implicit address-of to get the original pointer back,
-    but at type (int *).  Only then does the final addition take
-    place.
-  Note that since [?] arrays are boxed we can already use the notation
-    int f(int x[?])[?]
-  so, this is really only a concern with C arrays.  We could simply
-  live with the inconvenience of the verbose notation for these types
-  of arrays -- force the programmer to write int (*f(int (*x[4]))[5].
-  However, there is still the question of whether to DISallow things
-  like   void f(int x[4])   which in C involves a cast to a int *.
+* translation to C is busted with -noexpandtypedefs because we hoist
+tuples to the top (before typedef declarations)
 
 Todo later:
 

@@ -1,6 +1,6 @@
 {
-// WARNING: Because we now intern identifiers, you better never mutate them!!!
-// Also, lex_init must be called for each source file!!!
+// WARNING: Because we now intern identifiers, you better never mutate them!
+// WARNING: lex_init must be called for each source file!
 
 #include "core.h"
 #include "stdio.h"

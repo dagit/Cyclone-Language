@@ -217,7 +217,6 @@ void compile_file(string filename) {
       Absyndump::dumpdecllist2file(tds,out_file);
     fflush(out_file);
     PRINT_STAGE("Printing completed\n");
-    if (!(*v || *q)) fprintf(stderr,"\n"); // for "...." progress indicator
   }
   if (Position::error_p()) {
     fprintf(stderr,"COMPILATION FAILED!\n");
@@ -225,6 +224,7 @@ void compile_file(string filename) {
     Stdio::remove(preprocfile);
     compile_failure=true;
   } else {
+    if (!(*v || *q)) fprintf(stderr,"\n"); // for "...." progress indicator
     Tcutil::flush_warnings();
   }
   // I believe this duplicate file_close is the cause of the segfault -- Jeff

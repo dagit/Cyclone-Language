@@ -519,8 +519,9 @@ void unify_it(typ t1, typ t2) {
     if(k2 == k1 && String::zstrptrcmp(x2,x1) == 0) return;
     break;
 
-  case $(StructType(nopt2,ts2,sd2),StructType(nopt1,ts1,sd1)): 
-    // FIX: equivalent and more efficient to pointer-compare sds
+    // Note: don't use sdp or edp in next two cases because they
+    //       might not be set due to an earlier type error.
+  case $(StructType(nopt2,ts2,sdp2),StructType(nopt1,ts1,sdp1)): 
     if ((nopt1 != null && nopt2 != null
 	 && qvar_cmp((qvar)nopt1,(qvar)nopt2) == 0) 
 	|| (nopt1 == null && nopt2 == null)) {
@@ -530,7 +531,9 @@ void unify_it(typ t1, typ t2) {
     break;
 
   case $(EnumType(nopt2,ts2,edp2),EnumType(nopt1,ts1,edp1)):
-    if (*edp2 == *edp1) {
+    if ((nopt1 != null && nopt2 != null
+	 && qvar_cmp((qvar)nopt1,(qvar)nopt2) == 0) 
+	|| (nopt1 == null && nopt2 == null)) {
       unify_list(ts1,ts2);
       return;
     }
@@ -1186,6 +1189,7 @@ typ fndecl2typ(fndecl fd) {
   return (fd->cached_typ->v);
 }
 
+static `a fst3($(`a,`b,`c)@ t) { return (*t)[0]; }
 // Check that the function declaration has a valid type:  all
 // we do is build a FnType and then check that it is well-formed
 // which has the side effect of giving us the effect and any
@@ -1201,6 +1205,9 @@ void check_fndecl_valid_type(seg_t loc,tenv te,fndecl fd) {
     break;
   default: impos("check_fndecl_valid_type: not a FnType"); return;
   };
+  // check for repeated paramater names (not allowed in C and makes no sense)
+  check_unique_vars(map(fst3,fd->args), loc, 
+		    "function declaration has repeated parameter");
   // cache the type on the declaration so we don't have to recompute it
   fd->cached_typ = &Opt(t);
 }
@@ -1756,8 +1763,8 @@ void check_valid_toplevel_type(seg_t loc, tenv te, typ t) {
 
 // Same as i_check_valid_type except that we ensure the free type variables
 // are compatible with a list of bound type variables.  
-void check_type(seg_t loc, tenv te, list_t<tvar> bound_tvars, 
-                       bool abs_type_okay, typ t) {
+void check_type(seg_t loc, tenv_t te, list_t<tvar> bound_tvars, 
+		bool abs_type_okay, typ t) {
   list_t<tvar> free_tvars = i_check_valid_type(loc, te, null, abs_type_okay, t);
   for (_ fs = free_tvars; fs != null; fs = fs->tl) {
     tvar ftv = fs->hd;
@@ -1788,11 +1795,11 @@ void check_type(seg_t loc, tenv te, list_t<tvar> bound_tvars,
 }
 
 // Same as check_type except that we don't allow abstract mem types
-void check_valid_type(seg_t loc, tenv te, list_t<tvar> bound_tvars, typ t) {
+void check_valid_type(seg_t loc, tenv_t te, list_t<tvar> bound_tvars, typ t) {
   check_type(loc,te,bound_tvars,false,t);
 }
 
-void check_valid_kinded_type(seg_t loc, tenv te, list_t<tvar> bound_tvars, 
+void check_valid_kinded_type(seg_t loc, tenv_t te, list_t<tvar> bound_tvars, 
                              kind_t k, typ t) {
   _ free_vars = remove_bound_tvars(i_check_valid_kinded_type(loc,te,null,k,t),
                                    bound_tvars);
@@ -1806,8 +1813,8 @@ void check_valid_kinded_type(seg_t loc, tenv te, list_t<tvar> bound_tvars,
 // Note: we expect lists to be very short.  Otherwise, a hashtable would
 // be a better choice.
 static void check_unique_unsorted(int (@cmp)(`a,`a), list_t<`a> vs,
-				      seg_t loc, 
-                                      string a2string(`a), string msg) {
+				  seg_t loc, 
+				  string a2string(`a), string msg) {
   for(; vs != null; vs = vs->tl)
     for(_ vs2 = vs->tl; vs2 != null; vs2 = vs2->tl)
       if(cmp(vs->hd, vs2->hd)== 0)
@@ -1876,7 +1883,7 @@ resolve_struct_designators(seg_t loc,
 	terr(loc, "array designator used in argument to struct");
 	break;
       case FieldName(v):
-	_ fields2 = fields;
+	let fields2 = fields;
 	for(; fields2 != null; fields2 = fields2->tl)
 	  if(String::zstrptrcmp(v,(*(*fields2->hd)[0])[0]) == 0) {
 	    if((*fields2->hd)[1])
