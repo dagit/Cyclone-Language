@@ -335,10 +335,13 @@ string_t string_escape(string_t<`H> s) {
     case c:
       if (c>=' ' && c<='~') t[j++] = c;
       else {
+        unsigned char uc = c; // NB: typechecker declares c to have type char, might not be
+                              // unsigned, and this makes a difference to the calculations
+                              // below when the high bit is set
         t[j++] = '\\';
-        t[j++] = (char)('0'+((c>>6)&7));
-        t[j++] = (char)('0'+((c>>3)&7));
-        t[j++] = (char)('0'+(c&7));
+        t[j++] = (char)('0'+((uc>>6)&7));
+        t[j++] = (char)('0'+((uc>>3)&7));
+        t[j++] = (char)('0'+(uc&7));
       }
       break;
     }
