@@ -1,0 +1,919 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Cyclone Version 1</title>
+</head>
+
+<body>
+
+<h1 align="center">Cyclone Version 1.0 User's Guide</h1>
+<h2 align="center">Greg Morrisett</h2>
+<h2 align="center">Cornell University</h2>
+<p align="center">November, 2000</p>
+<hr>
+<h2>Goals</h2>
+<p>Cyclone is intended to be a type-safe variant of C.&nbsp; The primary goals
+of Cyclone are to:</p>
+<ol>
+  <li><b>Be type safe</b> --- at a minimum, this should include support for
+    memory safety, and ideally, much more.&nbsp; As with languages such as ML or
+    Java, modern typing features such as polymorphism, subtyping, abstract data
+    types, etc. should all be supported so that programs may be easily assembled
+    and debugged.&nbsp; Ideally, the type system should support static detection
+    and elimination of as many errors as possible, falling back on dynamic
+    checks only when necessary.</li>
+  <li><b>Support as much of C as possible</b> --- Cyclone should share as much
+    with C as possible, including syntax, static semantics, data
+    representations, calling conventions, and dynamic semantics.&nbsp; This rule
+    should only be violated when it in direct conflict with the first goal of
+    supporting type safety.</li>
+</ol>
+<p>The intended user of Cyclone is someone who is either (a) writing systems
+code, or (b) needs to port C code to a safe environment.&nbsp; Though languages
+such as Java or ML are safe, they do not give the control over data
+representations, calling conventions, etc. that C does.&nbsp; Hence, they are
+often unsuitable for building systems where performance and control
+matter.&nbsp; In addition, these languages make it relatively difficult to
+interface with legacy code written in C or to incrementally move program units
+from C to the safe setting.&nbsp; The goals of Cyclone are aimed at making it
+easier to build systems software without sacrificing safety or
+control.&nbsp;&nbsp;</p>
+<p>Of course, the two goals above are in direct conflict and thus we also see
+Cyclone as a driver for new research into safe, low-level languages.&nbsp; For
+instance, right now, all heap-allocated memory is reclaimed via (conservative)
+garbage collection.&nbsp; This is type safe, but prevents systems programmers
+from using Cyclone for latency-critical or space-sensitive applications.&nbsp;
+One of the big research goals of Cyclone is to introduce new typing
+abstractions, such as linear types or regions, that support programmer control
+over memory management without sacrificing safety.</p>
+<hr>
+<h2>Installing Cyclone</h2>
+<p>Cyclone currently only runs on 32-bit machines, and has only been tested on
+Win32 and Linux platforms.&nbsp; Other platforms might or might not work.&nbsp;
+There are definitely 32-bit dependencies, so the system will not work on a
+64-bit machine without major surgery.&nbsp; To install and use Cyclone, you'll
+need to use the Gnu utitlities, including GCC (the Gnu C compiler) and
+Gnu-Make.&nbsp; For Win32, you should first install the latest version of the <a href="http://cygwin.com/">Cygwin</a>
+utilities to do the build, and make sure that the Cygwin bin directory is on
+your path.</p>
+<p>The file cyclone.zip (or cyclone.tar.gz) contains all of the files that you
+need to build and install the system.&nbsp; After unzipping the file into a
+directory, you should have a directory structure that looks like this:</p>
+<pre>cyclone/
+    bin/
+        genfiles/
+             lib/
+             src/
+     doc/
+     lib/
+     src/
+     tests/
+     tools/
+         cycbison/
+         cyclex/</pre>
+<p>There is a Makefile at the top-level.&nbsp; To build the system, change into
+the Cyclone directory, and then type &quot;make&quot;.&nbsp; This should produce
+files cycbison.exe, cyclex.exe, cyclib.a, cyclone.exe, and gc.a appropriate for
+your architecture, and place them in the bin/ directory.&nbsp; (<i>Note:&nbsp;
+someone should get rid of the silly &quot;.exe&quot;'s for Unix platforms.)</i>&nbsp;
+The cyclone executable is the compiler which translates Cyclone code into GCC
+code.&nbsp; The cycbison executable is a version of Gnu's Bison parser generator
+which emits Cyclone code for parsing.&nbsp; The cyclex executable is a version
+of the Ocaml lexer generator which emits Cyclone code for lexing.&nbsp; The gc.a
+library is the Boehm-Demers-Weiser garbage collector.&nbsp; And cyclib.a is a
+library of pre-built Cyclone functions.&nbsp; After building the system, you may
+want to add the bin/ directory to your path (and possibly the lib directory to
+your include path.)</p>
+<p>The cycbison utility is written in C (soon to be ported to Cyclone) and its
+source is in the tools/cycbison/ sub-directory.&nbsp; The BDW garbage collector
+is also written in C and can be found on<a href="http://www.hpl.hp.com/personal/Hans_Boehm/gc/">
+Hans Boehm's GC page</a>.&nbsp; We just include pre-built libraries for Windows
+and Linux.&nbsp; If you have another platform, you'll need to grab the sources
+and compile this yourself.</p>
+<p>The rest of the code is written in Cyclone.&nbsp; However, the directory bin/genfiles
+contains the C code that the Cyclone compiler produces when run on itself.&nbsp;
+This is what allows you to build the initial executable.&nbsp;&nbsp;</p>
+<p>Once you've built the compiler from the C courses, you can use it to compile
+the Cyclone code in lib/, src/, tests/, or tools/cyclex.&nbsp; To do so, simply
+type &quot;make cyclone_src&quot;.&nbsp; This will use the Cyclone compiler to
+compile all of the files in these directories and place the resulting
+executables in the appropriate directory.&nbsp; (It will <i>not</i> overwrite
+the binaries in the bin/ directory.)&nbsp; If you want to make a change to the
+compiler and then start using the change, you can type &quot;make update&quot;
+which will update the genfiles/ with any different C files that you
+generated.&nbsp; Then you can type &quot;make cyclone&quot; to bootstrap with
+the new code.</p>
+<hr>
+<h2>Using Cyclone</h2>
+<p>Once you've successfully installed Cyclone, you can use it to compile Cyclone
+programs to C, and then use GCC to compile the resulting code to machine
+code.&nbsp; Typically, if one wants to compile the file foo.cyc to an object
+file foo.o, one would write:</p>
+<pre>  cyclone -tc -toc -pp foo.cyc &gt; foo.c
+  gcc -c foo.c</pre>
+<p>The &quot;tc&quot; flag tells Cyclone to type-check the code, the &quot;toc&quot;
+flag tells it to translate the code to C, and the &quot;pp&quot; flag says to
+pretty print the resulting C code to standad out.&nbsp; In the example above,
+this would type-check foo.cyc, translate it to C, and then print the output to
+foo.c.&nbsp; Then we invoke GCC to compile the foo.c file to foo.o</p>
+<p>Note that Cyclone runs the C pre-processor on the file before actually
+compiling it (just as with C).&nbsp;&nbsp;</p>
+<p>The cyclone compiler takes the following command line arguments:</p>
+<ul>
+  <li>-I <i>dir</i> :&nbsp; add <i>dir</i> to the search path for #include files
+    (as in C)</li>
+  <li>-tc:&nbsp; type-check the input code</li>
+  <li>-toc:&nbsp; translate the input code to C</li>
+  <li>-pp: pretty-print the code to standard out</li>
+  <li>-D <i>defn</i>: pass a definition to the pre-processor (as in C)</li>
+  <li>-check-null:&nbsp; generate explicit tests for null (currently broken)</li>
+  <li>-noexpandtypedefs:&nbsp; do not expand type-defs during pretty-printing</li>
+</ul>
+<p>We expect to put a more realistic front-end driver on Cyclone so that it will
+look just like a C compiler (and transparently invoke GCC for you.)&nbsp; Note
+that if you simply pass -tc and -pp to cyclone, then it will type-check the code
+and pretty-print it without translating to C.&nbsp; Note also that translation
+to C requires the -toc flag.&nbsp;&nbsp;</p>
+<p>The output of Cyclone includes the file &quot;cyc_include.h&quot; in the
+top-level directory, so make sure it's accessible when you invoke GCC on the
+resulting code.&nbsp;&nbsp;</p>
+<p>To write standalone Cyclone applications, your best best is to follow the
+Makefile examples in the directories.&nbsp; For instance, the Makefile in tests/
+builds an application cyctest.exe which we've used during development to test
+various features. At a minimum, you'll need to link against the cyclib.a and
+gc.a libraries in the bin/ directory.&nbsp;&nbsp;</p>
+<hr>
+<h2>Quick Guide to Cyclone for C/C++ Programmers</h2>
+<p>C programmers should find it fairly easy to get up to speed in Cyclone.&nbsp;
+We'll begin by going over the new features that Cyclone adds to C.&nbsp; Then
+we'll go over the common idioms that Cyclone prohibits, and see how these can be
+coded using the new facilities.</p>
+<h4>C-9X Additions:&nbsp;</h4>
+<p>Cyclone includes a number of features that GCC and the proposed <a href="http://web.onetelnet.ch/~twolf/tw/c/c9x_changes.html">ANSI
+C-9X</a> standard include.&nbsp; A quick summary of the ones that Cyclone
+currently includes are as follows:</p>
+<ul>
+  <li>expressions can include statements of the form <font face="Courier New">({<i>stmt;</i>
+    <i>exp</i>})</font></li>
+  <li>struct expressions:&nbsp; If you've declared <font face="Courier New">struct
+    point{int x; int y;};</font> then you can write <font face="Courier New">point{.x=<i>exp,
+    </i>.y=<i>exp</i>}</font> as a <font face="Courier New">struct point</font>
+    expression.&nbsp;&nbsp;</li>
+  <li>the implicit &quot;int&quot; for the return type of a function is removed</li>
+  <li>// comments as in Java or C++</li>
+  <li>trailing comma allowed in enum declarations.&nbsp; Also, you can use
+    semi-colons instead of commas.</li>
+  <li>the boolean type is built in</li>
+</ul>
+<p>We expect to follow the C-9X standard fairly closely.&nbsp;&nbsp;</p>
+<h4>Namespaces:&nbsp;&nbsp;</h4>
+<p>As in C++, namespaces are used to avoid name clashes in code.&nbsp; For
+example:&nbsp;</p>
+<pre><font face="Courier New"><b>    </b></font><font face="Courier New"><b>namespace</b> Foo { 
+      int x = 0; 
+      int f() { <b>return</b> x; }<i> 
+    </i>}</font></pre>
+<p>declares an integer named <font face="Courier New">Foo::x</font> and a
+function named <font face="Courier New">Foo::f</font>.&nbsp; Note that within
+the namespace, you don't need to use the qualified name.&nbsp; For instance, <font face="courier new">Foo::f
+</font>refers to <font face="courier new">Foo::x</font> as simply <font face="courier new">x</font>.&nbsp;
+We could also simply write &quot;<font face="Courier New"><b>namespace</b> Foo;</font>&quot;
+(note the trailing semi-colon) and leave out the enclosing braces.&nbsp; Every
+declaration following this namespace declaration would be placed in the <font face="courier new">Foo</font>
+namespace.&nbsp;&nbsp;</p>
+<p>As noted before, you can refer to elements of a namespace using the
+&quot;::&quot; notation.&nbsp; Alternatively, you can open up a namespace.&nbsp;
+For example, we could follow the above code with:</p>
+<pre>    <b>namespace </b>Bar {
+      <b>open </b>Foo {
+        int g() { <b>return</b> f(); }
+      }
+      int h() { <b>return</b> Foo::f(); }
+    }</pre>
+<p>Here, we opened the <font face="courier new">Foo</font> namespace within the
+definition of <font face="courier new">Bar::g</font>.&nbsp; One can also write
+&quot;<b><font face="courier new">open</font></b><font face="courier new"> Foo;</font>&quot;
+to open a namespace for the remaining definitions in the current block.</p>
+<p>Namespaces can nest as in C++.&nbsp;&nbsp;</p>
+<p>Currently, namespaces are only supported at the top-level and you can't
+declare a qualified variable directly.&nbsp; Rather, you have to write a
+namespace declaration to encapsulate it.&nbsp;&nbsp;</p>
+<h4>Tuples:</h4>
+<p>Tuples are like lightweight structs.&nbsp; They need not be declared in
+advance, and have member or field names that are implicitly 0, 1, 2, 3,
+etc.&nbsp; For example, the following code declares x to be a 3-tuple of an
+integer, a character, and a boolean, initialized with the values 42, 'z', and
+true respectively.&nbsp; It then checks to see whether the third component in
+the tuple is true (it is) and if so, increments the first component in the tuple.</p>
+<pre>   $(int,char,bool) x = $(42,'z',<b>true</b>)
+
+   <b>if</b> (x[2]) 
+     x[0]++;</pre>
+<p>The above code would be roughly equivalent to writing:</p>
+<pre>   <b>struct </b>{int f0; char f1; bool f2;} x = {42,z,<b>true</b>};</pre>
+<pre>   <b>if</b> (x.f2)
+     x.f1++;</pre>
+<p>Thus, tuple types are written $(<i>type1,...,typen</i>), tuple constructor
+expressions are written $(<i>exp1,...,expn</i>), and extracting the ith
+component of a tuple is written using subscript notation <i>exp[i-1]</i>.&nbsp;
+Note that, consistent with the rest of C, the members start with 0, not 1.&nbsp;
+Also note that when you have a pointer to a tuple (e.g., $(int,char,bool) *x),
+then you can continue to access the fields using the subscript notation.</p>
+<p>Unlike structs, tuple types are treated equivalent as long as they are
+structurally equivalent.&nbsp; As in C, struct types are equivalent only if they
+have the same <i>tag</i> or name.&nbsp; (Note that in C, all struct declarations
+have a tag, even if the compiler has to gensym one.)&nbsp;&nbsp;</p>
+<h4>Non-null Pointers:</h4>
+<p>In Cyclone, when a variable has a pointer type (e.g., int *x), then you can't
+be sure at compile time whether or not the pointer is null.&nbsp; To avoid
+memory safety problems, the compiler and/or runtime system checks each time you
+dereference a pointer to ensure that it is not null.&nbsp; If it is null, then
+an exception (NullPointer???) is raised.&nbsp; Thus, when reading or writing
+code, you're never sure whether or not you'll get a NullPointer exception.&nbsp;
+Java has a similar problem.&nbsp;&nbsp;</p>
+<p>Thus, Cyclone provides a different pointer type @.&nbsp; When x has type int@
+(as opposed to int*), then we know that x is not null.&nbsp; Consequently, there
+is no overhead for dereferencing x, nor is there the potential for raising an
+exception.&nbsp;&nbsp;</p>
+<p>You can cast a @ pointer to a * pointer with no overhead, assuming the things
+that point to are the same type.&nbsp; You can also cast a * pointer to a @
+pointer, but this induces a run-time check.&nbsp; If the pointer is null, then
+the (NullPointer???) exception is raised.</p>
+<h4>Exceptions:</h4>
+<p>Cyclone provides exceptions, throw, and try/catch statements similar to
+Java.&nbsp; This avoids the error-prone and type-unsafe approach in C of
+returning a value (e.g., -1).&nbsp; Exception values are a special case of
+extensible datatype enums (xenums) described below.&nbsp; The following example
+shows how to declare a couple of exceptions, how to throw an exception, and how
+to catch an exception:</p>
+<h4>Variable Sized Arrays:</h4>
+<h4>Subtyping:</h4>
+<h4>Datatype Enums:</h4>
+<h4>Pattern Matching:</h4>
+<h4>Let Declarations:</h4>
+<h4>Extensible Enums (xenums):</h4>
+<h4>Polymorphic Functions:</h4>
+<h4>Polymorphic Data Structures:</h4>
+<h4>Abstract Types:</h4>
+<h4>Existential Types:</h4>
+<hr>
+<h2>The Grammar of Cyclone</h2>
+
+Cyclone's grammar is derived from the next proposed OSI C standard,
+C9X.  Changes from and additions to the C9X grammar are noted in red.
+The start symbol is <i>translation-unit</i>.
+<p>
+
+<b>Quick links:</b>
+<a href=#declaration><i>declaration</i></a>,
+<a href=#struct-or-union-specifier><i>struct-or-union-specifier</i></a>,
+<a href=#enum-specifier><i>enum-specifier</i></a>,
+<a href=#declarator><i>declarator</i></a>,
+<a href=#statement><i>statement</i></a>,
+<a href=#pattern><i>pattern</i></a>,
+<a href=#expression><i>expression</i></a>
+
+<p>
+<font color=blue>
+<ul>
+<i>translation-unit</i>:<br>
+<ul>
+  <i>external-declaration</i> <i>translation-unit<sub>opt</sub></i><br>
+<font color=red>
+  <code>using</code> <i>identifier</i> <code>;</code> <i>translation-unit</i><br>
+  <code>namespace</code> <i>identifier</i> <code>;</code> <i>translation-unit</i><br>
+  <code>using</code> <i>identifier</i> <code>{</code> <i>translation-unit</i> <code>}</code><br>
+  <code>namespace</code> <i>identifier</i> <code>{</code> <i>translation-unit</i> <code>}</code><br>
+</font>
+</ul>
+<br>
+<i>external-declaration</i>:<br>
+<ul>
+  <i>function-definition</i><br>
+  <i>declaration</i><br>
+</ul>
+<br>
+<i>function-definition</i>:<br>
+<ul>
+  <i>declaration-specifiers<sub>opt</sub></i> <i>declarator</i> <i>declaration-list<sub>opt</sub></i> <i>compound-statement</i><br>
+</ul>
+<br>
+<a name=declaration></a>
+<i>declaration</i>:<br>
+<ul>
+  <i>declaration-specifiers</i> <i>init-declarator-list<sub>opt</sub></i> <code>;</code><br>
+<font color=red>
+  <code>let</code> <i>pattern</i> <code>=</code> <i>expression</i> <code>;</code><br>
+</font>
+</ul>
+<br>
+<i>declaration-list</i>:<br>
+<ul>
+  <i>declaration</i><br>
+  <i>declaration-list</i> <i>declaration</i><br>
+</ul>
+<br>
+<i>declaration-specifiers</i>:<br>
+<ul>
+  <i>storage-class-specifier</i> <i>declaration-specifiers<sub>opt</sub></i><br>
+  <i>type-specifier</i> <i>declaration-specifiers<sub>opt</sub></i><br>
+  <i>type-qualifier</i> <i>declaration-specifiers<sub>opt</sub></i><br>
+  <i>function-specifier</i> <i>declaration-specifiers<sub>opt</sub></i><br>
+</ul>
+<br>
+<i>storage-class-specifier</i>: <font color=black>one of</font><br>
+<ul>
+  <code>auto</code>
+  <code>register</code>
+  <code>static</code>
+  <code>extern</code>
+  <code>typedef</code>
+<font color=red>
+  <code>abstract</code>
+</font>
+<br>
+</ul>
+<br>
+<font color=green>
+(The C9X type-specifiers
+<code>_Bool</code>,
+<code>_Complex</code>, and
+<code>_Imaginary</code>
+are not yet supported)
+</font><br>
+<i>type-specifier</i>: <font color=black>one of</font><br>
+<ul>
+  <code>void</code>
+  <code>char</code>
+  <code>short</code>
+  <code>int</code>
+  <code>long</code>
+  <code>float</code>
+  <code>double</code>
+  <code>signed</code><br>
+  <code>unsigned</code>
+  <i>struct-or-union-specifier</i>
+  <i>enum-specifier</i><br>
+  <i>typedef-name</i> <font color=red><i>type-params<sub>opt</sub></i></font><br>
+  <font color=red>
+  <i>type-var</i>
+  <code>bool</code>
+  <code>Bool</code>
+  <code>Char</code>
+  <code>Short</code>
+  <code>Int</code>
+  <code>Long</code>
+  <code>Float</code>
+  <code>Double</code><br>
+  <code>$</code> <code>(</code> <i>parameter-list</i> <code>)</code><br>
+</font>
+</ul>
+<br>
+<i>type-qualifier</i>: <font color=black>one of</font><br>
+<ul>
+  <code>const</code>
+  <code>restrict</code>
+  <code>volatile</code><br>
+</ul>
+<br>
+<i>function-specifier</i>:
+<ul>
+  <code>inline</code><br>
+</ul>
+<br>
+<a name=struct-or-union-specifier></a>
+<i>struct-or-union-specifier</i>:<br>
+<ul>
+  <i>struct-or-union</i> <code>{</code> <i>struct-declaration-list</i> <code>}</code><br>
+  <i>struct-or-union</i> <i>identifier</i> <font color=red><i>type-params<sub>opt</sub></i></font> <code>{</code> <i>struct-declaration-list</i> <code>}</code><br>
+  <i>struct-or-union</i> <i>identifier</i> <font color=red><i>type-params<sub>opt</sub></i></font><br>
+</ul>
+<br>
+<font color=red>
+<i>type-params</i>:<br>
+<ul>
+  <code><</code> <i>type-name-list</i> <code>></code><br>
+</ul>
+</font>
+<br>
+<i>struct-or-union</i>: <font color=black>one of</font><br>
+<ul>
+  <code>struct</code>
+  <code>union</code><br>
+</ul>
+<br>
+<i>struct-declaration-list</i>:<br>
+<ul>
+  <i>struct-declaration</i><br>
+  <i>struct-declaration-list</i> <i>struct-declaration</i><br>
+</ul>
+<br>
+<i>init-declarator-list</i>:<br>
+<ul>
+  <i>init-declarator</i><br>
+  <i>init-declarator-list</i> <code>,</code> <i>init-declarator</i><br>
+</ul>
+<br>
+<i>init-declarator</i>:<br>
+<ul>
+  <i>declarator</i><br>
+  <i>declarator</i> <code>=</code> <i>initializer</i><br>
+</ul>
+<br>
+<i>struct-declaration</i>:<br>
+<ul>
+  <i>specifier-qualifier-list</i> <i>struct-declarator-list</i> <code>;</code><br>
+</ul>
+<br>
+<i>specifier-qualifier-list</i>:<br>
+<ul>
+  <i>type-specifier</i> <i>specifier-qualifier-list<sub>opt</sub></i><br>
+  <i>type-qualifier</i> <i>specifier-qualifier-list<sub>opt</sub></i><br>
+</ul>
+<br>
+<i>struct-declarator-list</i>:<br>
+<ul>
+  <i>struct-declarator</i><br>
+  <i>struct-declarator-list</i> <code>,</code> <i>struct-declarator</i><br>
+</ul>
+<br>
+<i>struct-declarator</i>:<br>
+<ul>
+  <i>declarator</i><br>
+  <i>declarator<sub>opt</sub></i> <code>:</code> <i>constant-expression</i><br>
+</ul>
+<br>
+<a name=enum-specifier></a>
+<i>enum-specifier</i>:<br>
+<ul>
+  <code>enum</code> <code>{</code> <i>enumerator-list</i> <code>}</code><br>
+  <code>enum</code> <i>identifier</i> <font color=red><i>type-params<sub>opt</sub></i></font> <code>{</code> <i>enumerator-list</i> <code>}</code><br>
+  <code>enum</code> <i>identifier</i> <font color=red><i>type-params<sub>opt</sub></i></font><br>
+<font color=red>
+  <code>xenum</code> <i>identifier</i> <code>{</code> <i>enumerator-list</i> <code>}</code><br>
+  <code>xenum</code> <i>identifier</i><br>
+</font>
+</ul>
+<br>
+<i>enumerator-list</i>:<br>
+<ul>
+<font color=red>
+  <i>enumerator</i><br>
+  <i>enumerator</i> <code>,</code> <i>enumerator-list</i><br>
+  <i>enumerator</i> <code>;</code><br>
+  <i>enumerator</i> <code>;</code> <i>enumerator-list</i><br>
+</font>
+</ul>
+<br>
+<i>enumerator</i>:<br>
+<ul>
+  <i>identifier</i><br>
+  <i>identifier</i> <code>=</code> <i>constant-expression</i><br>
+<font color=red>
+  <i>identifier</i> <code>(</code> <i>parameter-list</i> <code>)</code><br>
+</font>
+</ul>
+<br>
+<a name=declarator></a>
+<i>declarator</i>:<br>
+<ul>
+  <i>pointer<sub>opt</sub></i> <i>direct-declarator</i><br>
+</ul>
+<br>
+<font color=green>(We do not support C9X <code>[*]</code> direct-declarators.)</font><br>
+<i>direct-declarator</i>:<br>
+<ul>
+  <i>identifier</i><br>
+  <code>(</code> <i>declarator</i> <code>)</code><br>
+  <i>direct-declarator</i> <code>[</code> <i>constant-expression<sub>opt</sub></i> <code>]</code><br>
+  <i>direct-declarator</i> <code>(</code> <i>parameter-type-list</i> <code>)</code><br>
+  <i>direct-declarator</i> <code>(</code> <i>identifier-list<sub>opt</sub></i> <code>)</code><br>
+<font color=red>
+  <i>direct-declarator</i> <code>[</code> <code>?</code> <code>]</code><br>
+  <i>direct-declarator</i> <code><</code> <i>type-name-list</i> <code>></code><br>
+</font>
+</ul>
+<br>
+<i>pointer</i>:<br>
+<ul>
+  <code>*</code> <i>type-qualifier-list<sub>opt</sub></i> <i>pointer<sub>opt</sub></i><br>
+<font color=red>
+  <code>@</code> <i>type-qualifier-list<sub>opt</sub></i> <i>pointer<sub>opt</sub></i><br>
+</font>
+</ul>
+<br>
+<i>type-qualifier-list</i>:<br>
+<ul>
+  <i>type-qualifier</i><br>
+  <i>type-qualifier-list</i> <i>type-qualifier</i><br>
+</ul>
+<br>
+<i>parameter-type-list</i>:<br>
+<ul>
+  <i>parameter-list</i><br>
+  <i>parameter-list</i> <code>,</code> <code>...</code><br>
+</ul>
+<br>
+<i>parameter-list</i>:<br>
+<ul>
+  <i>parameter-declaration</i><br>
+  <i>parameter-list</i> <code>,</code> <i>parameter-declaration</i><br>
+</ul>
+<br>
+<i>parameter-declaration</i>:<br>
+<ul>
+  <font color=red><i>specifier-qualifier-list</i></font> <i>declarator</i><br>
+  <font color=red><i>specifier-qualifier-list</i></font> <i>abstract-declarator<sub>opt</sub></i><br>
+</ul>
+<br>
+<i>identifier-list</i>:<br>
+<ul>
+  <i>identifier</i><br>
+  <i>identifier-list</i> <code>,</code> <i>identifier</i><br>
+</ul>
+<br>
+<i>initializer</i>:<br>
+<ul>
+  <i>assignment-expression</i><br>
+  <code>{</code> <i>initializer-list<font color=red><sub>opt</sub></font></i> <code>}</code><br>
+  <code>{</code> <i>initializer-list</i> <code>,</code> <code>}</code><br>
+</ul>
+<br>
+<i>initializer-list</i>:<br>
+<ul>
+  <i>designation<sub>opt</sub></i> <i>initializer</i><br>
+  <i>initializer-list</i> <code>,</code> <i>designation<sub>opt</sub></i> <i>initializer</i><br>
+</ul>
+<br>
+<i>designation</i>:<br>
+<ul>
+  <i>designator-list</i> <code>=</code><br>
+</ul>
+<br>
+<i>designator-list</i>:
+<ul>
+  <i>designator</i><br>
+  <i>designator-list</i> <i>designator</i><br>
+</ul>
+<br>
+<i>designator</i>:
+<ul>
+  <code>[</code> <i>constant-expression</i> <code>]</code><br>
+  <code>.</code> <i>identifier</i><br>
+</ul>
+<br>
+<i>type-name</i>:<br>
+<ul>
+  <i>specifier-qualifier-list</i> <i>abstract-declarator<sub>opt</sub></i><br>
+</ul>
+<br>
+<i>type-name-list</i>:<br>
+<ul>
+  <i>type-name</i><br>
+  <i>type-name-list</i> <code>,</code> <i>type-name</i><br>
+</ul>
+<br>
+<i>abstract-declarator</i>:<br>
+<ul>
+  <i>pointer</i><br>
+  <i>pointer<sub>opt</sub></i> <i>direct-abstract-declarator</i><br>
+</ul>
+<br>
+<font color=green>(We do not support C9X <code>[*]</code> direct-abstract-declarators.)</font><br>
+<i>direct-abstract-declarator</i>:<br>
+<ul>
+  <code>(</code> <i>abstract-declarator</i> <code>)</code><br>
+  <i>direct-abstract-declarator<sub>opt</sub></i> <code>[</code> <i>constant-expression<sub>opt</sub></i> <code>]</code><br>
+  <i>direct-abstract-declarator<sub>opt</sub></i> <code>(</code> <i>parameter-type-list<sub>opt</sub></i> <code>)</code><br>
+<font color=red>
+  <i>direct-abstract-declarator<sub>opt</sub></i> <code>[</code> <code>?</code> <code>]</code><br>
+  <i>direct-abstract-declarator</i> <code><</code> <i>type-name-list</i> <code>></code><br>
+</font>
+</ul>
+<br>
+<a name=statement></a>
+<i>statement</i>:<br>
+<ul>
+  <i>labeled-statement</i><br>
+  <i>expression-statement</i><br>
+  <i>compound-statement</i><br>
+  <i>selection-statement</i><br>
+  <i>iteration-statement</i><br>
+  <i>jump-statement</i><br>
+<font color=red>
+  <code>cut</code> <i>statement</i><br>
+  <code>splice</code> <i>statement</i><br>
+</font>
+</ul>
+<br>
+<font color=green>
+(We treat the 
+<code>case</code> and <code>default</code> labels specially;
+see <code>switch-clauses</code>)
+</font><br>
+<i>labeled-statement</i>:<br>
+<ul>
+  <i>identifier</i> <code>:</code> <i>statement</i><br>
+</ul>
+<br>
+<i>expression-statement</i>:<br>
+<ul>
+  <i>expression<sub>opt</sub></i> <code>;</code><br>
+</ul>
+<br>
+<i>compound-statement</i>:<br>
+<ul>
+  <code>{</code> <i>block-item-list<sub>opt</sub></i> <code>}</code><br>
+</ul>
+<br>
+<i>block-item-list</i>:<br>
+<ul>
+  <i>block-item</i><br>
+  <i>block-item</i> <i>block-item-list</i><br>
+</ul>
+<br>
+<i>block-item</i>:<br>
+<ul>
+  <i>declaration</i><br>
+  <i>statement</i><br>
+</ul>
+<br>
+<i>selection-statement</i>:<br>
+<ul>
+  <code>if</code> <code>(</code> <i>expression</i> <code>)</code> <i>statement</i><br>
+  <code>if</code> <code>(</code> <i>expression</i> <code>)</code> <i>statement</i> <code>else</code> <i>statement</i><br>
+  <code>switch</code> <code>(</code> <i>expression</i> <code>)</code> <font color=red><code>{</code> <i>switch-clauses</i> <code>}</code></font><br>
+<font color=red>
+  <code>try</code> <i>statement</i> <code>catch</code> <code>{</code> <i>switch-clauses</i> <code>}</code><br>
+</ul>
+<br>
+<i>switch-clauses</i>:<br>
+<ul>
+  <font color=green>(empty)</font><br>
+  <code>default</code> <code>:</code> <i>block-item-list</i><br>
+  <code>case</code> <i>pattern</i> <code>:</code> <i>block-item-list<sub>opt</sub></i> <i>switch-clauses</i><br>
+  <code>case</code> <i>pattern</i> <code>where</code> <i>expression</i> <code>:</code> <i>block-item-list<sub>opt</sub></i> <i>switch-clauses</i><br>
+</font>
+</ul>
+<br>
+<i>iteration-statement</i>:<br>
+<ul>
+  <code>while</code> <code>(</code> <i>expression</i> <code>)</code> <i>statement</i><br>
+  <code>do</code> <i>statement</i> <code>while</code> <code>(</code> <i>expression</i> <code>)</code> <code>;</code><br>
+  <code>for</code> <code>(</code> <i>expression<sub>opt</sub></i> <code>;</code> <i>expression<sub>opt</sub></i> <code>;</code> <i>expression<sub>opt</sub></i> <code>)</code> <i>statement</i><br>
+  <code>for</code> <code>(</code> <i>declaration</i> <i>expression<sub>opt</sub></i> <code>;</code> <i>expression<sub>opt</sub></i> <code>)</code> <i>statement</i><br>
+</ul>
+<br>
+<i>jump-statement</i>:<br>
+<ul>
+  <code>goto</code> <i>identifier</i> <code>;</code><br>
+  <code>continue</code> <code>;</code><br>
+  <code>break</code> <code>;</code><br>
+  <code>return</code> <code>;</code><br>
+  <code>return</code> <i>expression</i> <code>;</code><br>
+<font color=red>
+  <code>fallthru</code> <code>;</code><br>
+</font>
+</ul>
+<br>
+<font color=red>
+<a name=pattern></a>
+<i>pattern</i>:<br>
+<ul>
+  <code><i>_</i></code><br>
+  <code>(</code> <i>pattern</i> <code>)</code><br>
+  <i>integer-constant</i><br>
+  <code><i>-</i></code> <i>integer-constant</i><br>
+  <i>floating-constant</i><br>
+  <i>character-constant</i><br>
+  <code>null</code><br>
+  <code>true</code><br>
+  <code>false</code><br>
+  <i>identifier</i><br>
+  <i>identifier</i> <i>type-params<sub>opt</sub></i> <code>(</code> <i>tuple-pattern-list</i> <code>)</code><br>
+  <code>$</code> <code>(</code> <i>tuple-pattern-list</i> <code>)</code><br>
+
+  <i>identifier</i> <i>type-params<sub>opt</sub></i> <code>{</code> <code>}</code><br>
+  <i>identifier</i> <i>type-params<sub>opt</sub></i> <code>{</code> <i>field-pattern-list</i> <code>}</code><br>
+  <code>&</code> <i>pattern</i><br>
+</ul>
+<br>
+<i>tuple-pattern-list</i>:<br>
+<ul>
+  <font color=green>(empty)</font><br>
+  <i>pattern</i><br>
+  <i>tuple-pattern-list</i> <code>,</code> <i>pattern</i><br>
+</ul>
+<br>
+<i>field-pattern-list</i>:<br>
+<ul>
+  <i>field-pattern</i><br>
+  <i>field-pattern-list</i> <code>,</code> <i>field-pattern</i><br>
+</ul>
+<br>
+<i>field-pattern</i>:<br>
+<ul>
+  <i>pattern</i><br>
+  <i>designation</i> <i>pattern</i><br>
+</ul>
+</font>
+<br>
+<a name=expression></a>
+<i>expression</i>:<br>
+<ul>
+  <i>assignment-expression</i><br>
+  <i>expression</i> <code>,</code> <i>assignment-expression</i><br>
+</ul>
+<br>
+<i>assignment-expression</i>:<br>
+<ul>
+  <i>conditional-expression</i><br>
+  <i>unary-expression</i> <i>assignment-operator</i> <i>assignment-expression</i><br>
+</ul>
+<br>
+<i>assignment-operator</i>: <font color=black>one of</font><br>
+<ul>
+  <code>=</code>
+  <code>*=</code>
+  <code>/=</code>
+  <code>%=</code>
+  <code>+=</code>
+  <code>-=</code>
+  <code><<=</code>
+  <code>>>=</code>
+  <code>&=</code>
+  <code>^=</code>
+  <code>|=</code><br>
+</ul>
+<br>
+<i>conditional-expression</i>:<br>
+<ul>
+  <i>logical-or-expression</i><br>
+  <i>logical-or-expression</i> <code>?</code> <i>expression</i> <code>:</code> <i>conditional-expression</i><br>
+</ul>
+<br>
+<i>constant-expression</i>:<br>
+<ul>
+  <i>conditional-expression</i><br>
+</ul>
+<br>
+<i>logical-or-expression</i>:<br>
+<ul>
+  <i>logical-and-expression</i><br>
+  <i>logical-or-expression</i> <code>||</code> <i>logical-and-expression</i><br>
+</ul>
+<br>
+<i>logical-and-expression</i>:<br>
+<ul>
+  <i>inclusive-or-expression</i><br>
+  <i>logical-and-expression</i> <code>&&</code> <i>inclusive-or-expression</i><br>
+</ul>
+<br>
+<i>inclusive-or-expression</i>:<br>
+<ul>
+  <i>exclusive-or-expression</i><br>
+  <i>inclusive-or-expression</i> <code>|</code> <i>exclusive-or-expression</i><br>
+</ul>
+<br>
+<i>exclusive-or-expression</i>:<br>
+<ul>
+  <i>and-expression</i><br>
+  <i>exclusive-or-expression</i> <code>^</code> <i>and-expression</i><br>
+</ul>
+<br>
+<i>and-expression</i>:<br>
+<ul>
+  <i>equality-expression</i><br>
+  <i>and-expression</i> <code>&</code> <i>equality-expression</i><br>
+</ul>
+<br>
+<i>equality-expression</i>:<br>
+<ul>
+  <i>relational-expression</i><br>
+  <i>equality-expression</i> <code>==</code> <i>relational-expression</i><br>
+  <i>equality-expression</i> <code>!=</code> <i>relational-expression</i><br>
+</ul>
+<br>
+<i>relational-expression</i>:<br>
+<ul>
+  <i>shift-expression</i><br>
+  <i>relational-expression</i> <code><</code> <i>shift-expression</i><br>
+  <i>relational-expression</i> <code>></code> <i>shift-expression</i><br>
+  <i>relational-expression</i> <code><=</code> <i>shift-expression</i><br>
+  <i>relational-expression</i> <code>>=</code> <i>shift-expression</i><br>
+</ul>
+<br>
+<i>shift-expression</i>:<br>
+<ul>
+  <i>additive-expression</i><br>
+  <i>shift-expression</i> <code><<</code> <i>additive-expression</i><br>
+  <i>shift-expression</i> <code>>></code> <i>additive-expression</i><br>
+</ul>
+<br>
+<i>additive-expression</i>:<br>
+<ul>
+  <i>multiplicative-expression</i><br>
+  <i>additive-expression</i> <code>+</code> <i>multiplicative-expression</i><br>
+  <i>additive-expression</i> <code><i>-</i></code> <i>multiplicative-expression</i><br>
+</ul>
+<br>
+<i>multiplicative-expression</i>:<br>
+<ul>
+  <i>cast-expression</i><br>
+  <i>multiplicative-expression</i> <code>*</code> <i>cast-expression</i><br>
+  <i>multiplicative-expression</i> <code>/</code> <i>cast-expression</i><br>
+  <i>multiplicative-expression</i> <code>%</code> <i>cast-expression</i><br>
+</ul>
+<br>
+<i>cast-expression</i>:<br>
+<ul>
+  <i>unary-expression</i><br>
+  <code>(</code> <i>type-name</i> <code>)</code> <i>cast-expression</i><br>
+</ul>
+<br>
+<i>unary-expression</i>:<br>
+<ul>
+  <i>postfix-expression</i><br>
+  <code>++</code> <i>unary-expression</i><br>
+  <code>--</code> <i>unary-expression</i><br>
+  <i>unary-operator</i> <i>cast-expression</i><br>
+  <code>sizeof</code> <i>unary-expression</i><br>
+  <code>sizeof</code> <code>(</code> <i>type-name</i> <code>)</code><br>
+<font color=red>
+  <code>raise</code> <i>unary-expression</i><br>
+</ul>
+</font>
+<br>
+<i>unary-operator</i>: <font color=black>one of</font><br>
+<ul>
+  <code>&</code>
+  <code>*</code>
+  <code>+</code>
+  <code>-</code>
+  <code>~</code>
+  <code>!</code><br>
+</ul>
+<br>
+<i>postfix-expression</i>:<br>
+<ul>
+  <i>primary-expression</i><br>
+  <i>postfix-expression</i> <code>[</code> <i>expression</i> <code>]</code><br>
+  <i>postfix-expression</i> <code>(</code> <code>)</code><br>
+  <i>postfix-expression</i> <code>(</code> <i>argument-expression-list</i> <code>)</code><br>
+  <i>postfix-expression</i> <code>.</code> <i>identifier</i><br>
+  <i>postfix-expression</i> <code>-></code> <i>identifier</i><br>
+  <i>postfix-expression</i> <code>++</code><br>
+  <i>postfix-expression</i> <code>--</code><br>
+ <code>( <i>type-name</i>  ) { <i>initializer-list</i>  }<br>
+ ( <i>type-name</i>  ) { <i>initializer-list</i>  , }<br>
+<font color=red>
+  new { <i>initializer-list<sub>opt</sub></i>  }<br>
+  new { <i>initializer-list</i>  , }<br>
+  new { for <i>identifier</i>  < <i>expression</i>  : <i>expression</i>  }<br>
+  fill ( <i>expression</i>  )<br>
+  codegen ( <i>function-definition</i>  )<br>
+</font>
+</ul>
+<br>
+<i>primary-expression</i>:<br>
+<ul>
+  <i>identifier</i><br>
+  <i>constant</i><br>
+  <i>string</i><br>
+  ( <i>expression</i>  )<br>
+<font color=red>
+  <i>identifier</i>  <><br>
+  $ ( <i>argument-expression-list</i>  )<br>
+  <i>identifier</i>  { <i>initializer-list</i>  }<br>
+  ( { <i>block-item-list</i>  } )<br>
+</font>
+</ul>
+<br>
+<i>argument-expression-list</i>:<br>
+<ul>
+  <i>assignment-expression</i><br>
+  <i>argument-expression-list</i>  , <i>assignment-expression</i><br>
+</ul>
+<br>
+<i>constant</i>:<br>
+<ul>
+  <i>integer-constant</i><br>
+  <i>character-constant</i><br>
+  <i>floating-constant</i><br>
+  <i>enumeration-constant</i><br>
+<font color=red>
+  true<br>
+  false<br>
+  null<br>
+</font>
+</ul>
+</ul>
+</font>
+
+</body>
+
+</html>
