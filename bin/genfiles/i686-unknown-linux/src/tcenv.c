@@ -541,14 +541,12 @@ Cyc_Tcutil_subset_effect(int set_to_empty,void*e1,void*e2);int Cyc_Tcutil_region
 int constrain,void*r,void*e);void Cyc_Tcutil_check_unique_tvars(struct Cyc_Position_Segment*,
 struct Cyc_List_List*);struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);int*Cyc_Tcutil_new_tvar_id();
 void Cyc_Tcutil_add_tvar_identity(struct Cyc_Absyn_Tvar*);void Cyc_Tcutil_add_tvar_identities(
-struct Cyc_List_List*);struct Cyc_RgnOrder_RgnPO;int Cyc_RgnOrder_region_ancestor(
-struct Cyc_List_List*ancestors,struct Cyc_Absyn_Tvar*r);int Cyc_RgnOrder_is_region_resetable(
-struct Cyc_List_List*po,struct Cyc_Absyn_Tvar*r);int Cyc_RgnOrder_check_region_outlives(
-struct Cyc_List_List*po,struct Cyc_Absyn_Tvar*r1,struct Cyc_Absyn_Tvar*r2);struct
-Cyc_List_List*Cyc_RgnOrder_initial_region_po(struct Cyc_Position_Segment*loc,
-struct Cyc_List_List*tvs,struct Cyc_List_List*po);struct Cyc_List_List*Cyc_RgnOrder_non_resetable_ancestors(
-struct Cyc_List_List*po);struct Cyc_List_List*Cyc_RgnOrder_add_region_po(struct Cyc_List_List*
-po,struct Cyc_Absyn_Tvar*tv,int resetable);char Cyc_Tcenv_Env_error[14]="\000\000\000\000Env_error";
+struct Cyc_List_List*);struct Cyc_RgnOrder_RgnPO;struct Cyc_List_List*Cyc_RgnOrder_initial_region_po(
+struct Cyc_Position_Segment*loc,struct Cyc_List_List*tvs,struct Cyc_List_List*po);
+struct Cyc_List_List*Cyc_RgnOrder_add_region_po(struct Cyc_List_List*po,struct Cyc_Absyn_Tvar*
+tv,int resetable);int Cyc_RgnOrder_is_region_resetable(struct Cyc_List_List*po,
+struct Cyc_Absyn_Tvar*r);int Cyc_RgnOrder_check_region_outlives(struct Cyc_List_List*
+po,struct Cyc_Absyn_Tvar*r1,struct Cyc_Absyn_Tvar*r2);char Cyc_Tcenv_Env_error[14]="\000\000\000\000Env_error";
 void*Cyc_Tcenv_env_err(struct _tagged_arr msg){({struct Cyc_Std_String_pa_struct
 _tmp1;_tmp1.tag=0;_tmp1.f1=(struct _tagged_arr)msg;{void*_tmp0[1]={& _tmp1};Cyc_Std_fprintf(
 Cyc_Std_stderr,_tag_arr("Error: %s\n",sizeof(char),11),_tag_arr(_tmp0,sizeof(

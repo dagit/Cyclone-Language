@@ -778,8 +778,7 @@ bool region_outlives(tenv_t te, type_t rt_a, type_t rt_b) {
   return false;
 }
 
-// Check that a function call's effect is contained in the current
-// capability.
+// Check that a function call's effect is contained in the current capability.
 void check_effect_accessible(tenv_t te, seg_t loc, type_t eff) {
   type_t capability;
   if (te->le == NULL) 

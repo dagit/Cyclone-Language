@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapsody/lib/cycstubs.c
 *** i686-unknown-linux/lib/cycstubs.c	Mon Jan 14 10:05:40 2002
---- powerpc-apple-rhapsody/lib/cycstubs.c	Wed Jan 23 17:55:18 2002
+--- powerpc-apple-rhapsody/lib/cycstubs.c	Thu Jan 24 09:55:52 2002
 ***************
 *** 284,294 ****
   _check_unknown_subscript(ms,sizeof(unsigned int),0)));else{return
@@ -60,7 +60,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   filename),buf);}int Cyc_Std_mkdir(struct _tagged_arr pathname,unsigned int mode){
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapsody/lib/execinfo.c
 *** i686-unknown-linux/lib/execinfo.c	Mon Jan 14 10:05:40 2002
---- powerpc-apple-rhapsody/lib/execinfo.c	Wed Jan 23 17:55:18 2002
+--- powerpc-apple-rhapsody/lib/execinfo.c	Thu Jan 24 09:55:52 2002
 ***************
 *** 256,333 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
@@ -168,7 +168,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! sizeof(char),42);_tmp1;});_tmp0;}));return 0;}int Cyc_Execinfo_bt(){return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody/lib/getopt.c
 *** i686-unknown-linux/lib/getopt.c	Mon Jan 14 10:05:40 2002
---- powerpc-apple-rhapsody/lib/getopt.c	Wed Jan 23 17:55:18 2002
+--- powerpc-apple-rhapsody/lib/getopt.c	Thu Jan 24 09:55:52 2002
 ***************
 *** 271,284 ****
   quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};struct _tagged_arr Cyc_Std_getenv(
@@ -199,7 +199,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody
   unsigned int,unsigned int);struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapsody/src/buildlib.c
 *** i686-unknown-linux/src/buildlib.c	Wed Jan 23 17:52:14 2002
---- powerpc-apple-rhapsody/src/buildlib.c	Wed Jan 23 17:55:20 2002
+--- powerpc-apple-rhapsody/src/buildlib.c	Thu Jan 24 09:55:52 2002
 ***************
 *** 583,608 ****
   struct Cyc_Std__Div{int quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};int Cyc_Std_system(

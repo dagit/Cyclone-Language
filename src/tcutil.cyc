@@ -557,6 +557,7 @@ static type_t rgns_of(type_t t) {
     switch (typ_kind(t)) {
     case RgnKind: return new AccessEff(t);
     case EffKind: return t;
+    case IntKind: return empty_effect;
     default: return new RgnsEff(t);
     }
   case &RgnHandleType(t): return new AccessEff(t);
@@ -578,7 +579,7 @@ static type_t rgns_of(type_t t) {
   case &AnonAggrType(_,fs): 
     return normalize_effect(new JoinEff(map(rgns_of_field,fs)));
   case &SizeofType(t): return rgns_of(t);
-  case &TagType(t): return rgns_of(t);
+  case &TagType(_): return rgns_of(t);
   case &FnType(FnInfo{tvs,eff,rt,args,_,cyc_varargs,rpo,_}):
     // NOTE:  we define RgnsEff(t) in this case to be the regions in the
     // effect.  So, if the effect is smaller than the argument or return
@@ -605,16 +606,17 @@ static type_t normalize_effect(type_t e) {
   e = compress(e);
   switch (e) {
   case &JoinEff(*es):
-    bool nested_join = true;
+    bool redo_join = false; // Dan: changed from true
     for (_ effs = *es; effs != NULL; effs = effs->tl) {
       let eff = effs->hd;
       effs->hd = compress(normalize_effect(eff));
       switch (effs->hd) {
-      case &JoinEff(_): nested_join = true; break;
+      case &JoinEff(_): 
+      case &AccessEff(HeapRgn): redo_join = true; break;
       default: break;
       }
     }
-    if (!nested_join) return e;
+    if (!redo_join) return e;
     list_t<type_t> effects = NULL;
     for (_ effs = *es; effs != NULL; effs = effs->tl) {
       switch (compress(effs->hd)) {

@@ -42,7 +42,7 @@ namespace Tcdecl;
 xtunion exn {Incompatible};
 
 void merr(seg_t loc,string_t<`r2> * msg1,string_t fmt, ... inject parg_t<`r> ap
-	  : `r2 < `r)
+	  : `r2 > `r)
   __attribute__((format(printf,3,4)))
 {
   if (msg1 == NULL)

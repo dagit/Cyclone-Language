@@ -27,7 +27,6 @@
 #include "rgnorder.h"
 #include "tcutil.h"
 #include "tcenv.h"
-
 using List;
 using Absyn;
 using Tcutil;
@@ -41,7 +40,7 @@ struct RgnPO {
 };
 
 // is region r reachable from the list of ancestors?
-bool region_ancestor(rgn_po_t ancestors, tvar_t r) {
+static bool region_ancestor(rgn_po_t ancestors, tvar_t r) {
   // look in immediate ancestors
   for (_ a = ancestors; a != NULL; a = a->tl)
     if (tvar_cmp(a->hd->tvar,r) == 0) return true;
@@ -52,19 +51,28 @@ bool region_ancestor(rgn_po_t ancestors, tvar_t r) {
 }
 
 static struct RgnPO @find_region_in_po(rgn_po_t po, tvar_t r) {
-  for (; po != NULL; po = po->tl) {
-    if (tvar_cmp(po->hd->tvar,r) == 0) return po->hd;
-  }
+  for (; po != NULL; po = po->tl)
+    if (tvar_cmp(po->hd->tvar,r) == 0) 
+      return po->hd;
   return Tcenv::env_err(aprintf("can't find region variable %s in po",
 				*(r->name)));
 }
 
-// does r1 outlive r2?
-bool check_region_outlives(rgn_po_t po, tvar_t r1, tvar_t r2) {
-  rgn_po_t r2_ancestors;
-  while (po != NULL && tvar_cmp(po->hd->tvar, r2) != 0) po=po->tl;
-  if (po == NULL) return false;
-  return region_ancestor(po->hd->ancestors,r1);
+// given a po list, return those tvars that aren't resetable
+static rgn_po_t non_resetable_ancestors(rgn_po_t po) {
+  // first check to see if any are resetable
+  for (_ p = po; p != NULL; p = p->tl)
+    if (p->hd->resetable) { 
+      // we found a resetable one -- going to have to build a new list
+      rgn_po_t res = NULL;
+      for (p = po; p != NULL; p = p->tl) {
+        if (p->hd->resetable) continue;
+        res = new List(p->hd,res);
+      }
+      return (List::imp_rev(res));
+    }
+  // none were resetable -- return the po
+  return po;
 }
 
 // given the list of type-variables for a function, build the initial
@@ -106,23 +114,6 @@ rgn_po_t initial_region_po(Position::seg_t loc, list_t<tvar_t> tvs,
   return result;
 }
 
-// given a po list, return those tvars that aren't resetable
-rgn_po_t non_resetable_ancestors(rgn_po_t po) {
-  // first check to see if any are resetable
-  for (_ p = po; p != NULL; p = p->tl)
-    if (p->hd->resetable) { 
-      // we found a resetable one -- going to have to build a new list
-      rgn_po_t res = NULL;
-      for (p = po; p != NULL; p = p->tl) {
-        if (p->hd->resetable) continue;
-        res = new List(p->hd,res);
-      }
-      return (List::imp_rev(res));
-    }
-  // none were resetable -- return the po
-  return po;
-}
-
 // add a new region variable to the given partial order.  only allow
 // as ancestors those regions that are not resetable.
 rgn_po_t add_region_po(rgn_po_t po, tvar_t tv, bool resetable) {
@@ -132,4 +123,12 @@ rgn_po_t add_region_po(rgn_po_t po, tvar_t tv, bool resetable) {
 
 bool is_region_resetable(rgn_po_t po, Absyn::tvar_t r) {
   return find_region_in_po(po,r)->resetable;
+}
+
+// does r1 outlive r2?
+bool check_region_outlives(rgn_po_t po, tvar_t r1, tvar_t r2) {
+  rgn_po_t r2_ancestors;
+  while (po != NULL && tvar_cmp(po->hd->tvar, r2) != 0) po=po->tl;
+  if (po == NULL) return false;
+  return region_ancestor(po->hd->ancestors,r1);
 }

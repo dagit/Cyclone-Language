@@ -1603,11 +1603,11 @@ optional_rgn_order:
 ;
 
 rgn_order:
-  TYPE_VAR '<' TYPE_VAR
-  { $$ = ^$(new List(new $(id2type($1,new Eq_kb(RgnKind)),
-                           id2type($3,new Eq_kb(RgnKind))),NULL)); }
-| TYPE_VAR '<' TYPE_VAR ',' rgn_order 
-  { $$ = ^$(new List(new $(id2type($1,new Eq_kb(RgnKind)),
+  specifier_qualifier_list '>' TYPE_VAR
+{ $$ = ^$(new List(new $(speclist2typ((*($1))[1],LOC(@1,@1)),
+			 id2type($3,new Eq_kb(RgnKind))),NULL)); }
+| specifier_qualifier_list '>' TYPE_VAR ',' rgn_order 
+  { $$ = ^$(new List(new $(speclist2typ((*($1))[1],LOC(@1,@1)),
                            id2type($3,new Eq_kb(RgnKind))),$5)); }
 ;
 

@@ -43,7 +43,7 @@ namespace Tcdecl {
   // if msg0 == null, don't print any message; just throw exception Incompatible
   // otherwise call terr(loc, msg) where msg is *msg0 + " " + msg1
 extern void merr(seg_t loc, string_t<`r2> * msg1, string_t fmt,
-		 ... inject parg_t<`r> ap : `r2 < `r) 
+		 ... inject parg_t<`r> ap : `r2 > `r) 
   __attribute__((format(printf,3,4)));
 
   // all these functions work the same way :
