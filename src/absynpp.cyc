@@ -630,6 +630,7 @@ int exp_prec(exp e) {
   case NoInstantiate_e(e2): return exp_prec(e2);
   case Instantiate_e(e2,_): return exp_prec(e2);
   case Cast_e(_,_):          return 120;
+  case New_e(_):           return 15; // ???
   case Address_e(_):       return 130;
   case Sizeoftyp_e(_):     return 130;
   case Sizeofexp_e(_):     return 130;
@@ -639,7 +640,7 @@ int exp_prec(exp e) {
   case Subscript_e(_,_):     return 140;
   case Tuple_e(_):         return 150;
   case CompoundLit_e(_,_):   fallthru;
-  case Array_e(_,_):         fallthru;
+  case Array_e(_):           fallthru;
   case Comprehension_e(_,_,_): fallthru;
   case Struct_e(_,_,_,_):    fallthru;
   case Enum_e(_,_,_,_,_):    fallthru;
@@ -742,6 +743,10 @@ doc_t exp2doc_prec(int inprec, exp e) {
     s = cat2(text("&"),
              exp2doc_prec(myprec,e1));
     break;
+  case New_e(e1):
+    s = cat2(text("new "),
+             exp2doc_prec(myprec,e1));
+    break;
   case Sizeoftyp_e(t):
     s = cat3(text("sizeof("),
              typ2doc(t),
@@ -777,10 +782,7 @@ doc_t exp2doc_prec(int inprec, exp e) {
              text(")"),
              group("{","}",",",List::map(de2doc,des)));
     break;
-  case Array_e(true,des): 
-    s = group("new {","}",",",List::map(de2doc,des));
-    break;
-  case Array_e(_,des): 
+  case Array_e(des): 
     s = group("{","}",",",List::map(de2doc,des));
     break;
   case Comprehension_e(vd,e1,e2):
@@ -869,9 +871,7 @@ doc_t cnst2doc(cnst_t c) {
   case LongLong_c(sg,i):  return text("<<FIX LONG LONG CONSTANT>>"); // FIX
   case Float_c(x):  return text(x);
   case Null_c:      return text("null");
-  case String_c(true,s):
-    return cat3(text("new \""), text(string_escape(s)), text("\""));
-  case String_c(_,s):
+  case String_c(s):
     return cat3(text("\""), text(string_escape(s)), text("\""));
   }
 }
@@ -1504,10 +1504,10 @@ $(tqual,typ,list_t<type_modifier>) to_tms(tqual tq,typ t) {
     // Throw away tq, can't qualify an array
     let $(tq3,t3,tml3) = to_tms(tq2,t2);
     type_modifier tm;
-    if (Evexp::eval_const_uint_exp(e) == 0)
+    if (e == null)
       tm = Carray_mod;
     else
-      tm = ConstArray_mod(e);
+      tm = ConstArray_mod((exp)e);
     return $(tq3, t3, (list_t<type_modifier>)&List(tm,tml3));
 
   case PointerType(PtrInfo{.elt_typ = t2, .rgn_typ = rgntyp,
@@ -1591,8 +1591,13 @@ doc_t tqtd2doc(tqual tq, typ t, opt_t<doc_t> dopt) {
 }
 
 doc_t structfield2doc(structfield_t f) {
-  return cat3(tqtd2doc(f->tq, f->type, &Opt(textptr(f->name))),
-              atts2doc(f->attributes), text(";"));
+  if (f->width != null) 
+    return cat5(tqtd2doc(f->tq, f->type, &Opt(textptr(f->name))),
+                text(":"), exp2doc(f->width->v),
+                atts2doc(f->attributes), text(";"));
+  else 
+    return cat3(tqtd2doc(f->tq, f->type, &Opt(textptr(f->name))),
+                atts2doc(f->attributes), text(";"));
 }
 
 doc_t structfields2doc(list_t<structfield_t> fields) {

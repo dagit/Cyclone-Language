@@ -199,6 +199,22 @@ static void tcVardecl(tenv te, genv_t ge, seg_t loc, vardecl vd) {
   }
   // expand to qualified name
   (*vd->name)[0] = Abs_n(te->ns);
+  // if it's an array or string, fill in the size on the type
+  switch (compress(t)) {
+  case ArrayType(telt,tq,null) && vd->initializer != null:
+    switch (vd->initializer->r) {
+    case Const_e(String_c(s)):
+      t = vd->type = ArrayType(telt,tq,uint_exp(s.size,null));
+      break;
+    case UnresolvedMem_e(_,es): fallthru(es);
+    case Array_e(es):
+      t = vd->type = ArrayType(telt,tq,uint_exp(List::length(es),null));
+      break;
+    default: break;
+    }
+    break;
+  default: break;
+  }
   // reject ill-formed type
   check_valid_toplevel_type(loc,te,t);
   if (is_function_type(t)) {
@@ -239,24 +255,6 @@ static void tcVardecl(tenv te, genv_t ge, seg_t loc, vardecl vd) {
       vd->initializer = e;
     } else {
       e = (exp)vd->initializer;
-      // special case for t[] -- fill in the size for the user
-      switch (compress(t)) {
-      case ArrayType(telt,tq,sz):
-	if (Evexp::eval_const_uint_exp(sz) == 0) {
-	  switch (e->r) {
-	  case Const_e(String_c(_,s)):
-	    t = vd->type = ArrayType(telt,tq,uint_exp(s.size,null));
-	    break;
-	  case UnresolvedMem_e(_,es): fallthru(es);
-	  case Array_e(_,es):
-	    t = vd->type = ArrayType(telt,tq,uint_exp(List::length(es),null));
-	    break;
-	  default: break;
-	  }
-	}
-	break;
-      default: break;
-      }
     }
     // type-check the initializer
     let t2 = Tcexp::tcExpInitializer(te,&t,e);
@@ -265,7 +263,7 @@ static void tcVardecl(tenv te, genv_t ge, seg_t loc, vardecl vd) {
 	   xprintf("%s is declared with type %s but initialized with type %s",
 		   qvar2string(vd->name), typ2string(t), typ2string(t2)));
     // reject non-constant initializers
-    if (!Tcexp::is_const_exp(te,e))
+    if (!Tcutil::is_const_exp(te,e))
       terr(loc,"initializer is not a constant expression");
   } else {
     // it is a function type -- check that the attributes are okay
@@ -474,9 +472,9 @@ static void tcStructdecl(tenv te, genv_t ge, seg_t loc, structdecl sd) {
       let f1s = sd->fields->v;
       let f2s = sd2->fields->v;
       for(; f1s != null && f2s != null; f1s = f1s->tl, f2s = f2s->tl) {
-	let &Structfield(fn1,tq1,t1,atts1) = f1s->hd;
-	let &Structfield(fn2,tq2,t2,atts2) = f2s->hd;
-	// names, qualifiers, types, and attributes all must agree
+	let &Structfield(fn1,tq1,t1,width1,atts1) = f1s->hd;
+	let &Structfield(fn2,tq2,t2,width2,atts2) = f2s->hd;
+	// names, qualifiers, types, widths, and attributes all must agree
 	if (String::zstrptrcmp(fn1,fn2) != 0)
 	  terr(loc, xprintf("redeclaration of struct %s: field name mismatch "
 			    "%s != %s", *v, *fn1, *fn2));
@@ -486,6 +484,15 @@ static void tcStructdecl(tenv te, genv_t ge, seg_t loc, structdecl sd) {
 	if (!equal_tqual(tq1,tq2))
 	  terr(loc, xprintf("redeclaration of struct %s: qualifier mismatch on"
 			    " field %s", *v, *fn1));
+        if (width1 != null && !Tcutil::is_const_exp(te,width1->v))
+          terr(loc, xprintf("redeclaration of struct %s: bad bitfield %s",
+                            *v, *fn1));
+        else if ((width1 != null && width2 != null && 
+                  Evexp::eval_const_uint_exp(width1->v) != 
+                  Evexp::eval_const_uint_exp(width2->v)) ||
+                 width1 != width2)
+          terr(loc, xprintf("redeclaration of struct %s: bitfield mismatch on"
+                            " field %s", *v, *fn1));
 	// important side-effects on t1
 	check_type(loc, te, tvs, MemKind, t1);
 	typ subst_t2 = substitute(inst,t2);
@@ -512,13 +519,46 @@ static void tcStructdecl(tenv te, genv_t ge, seg_t loc, structdecl sd) {
   let sdp = Dict::lookup(ge->structdecls, v);
   *sdp = &Structdecl(sd->sc, sd->name, tvs, null, null);
   // check fields, rejecting ill-formed types, bad fields, and duplicates
+  // (unless the field name is empty)
   list_t<field_name> prev_fields = null;
   for (let fs = sd->fields->v; fs != null; fs = fs->tl) {
-    let &Structfield(fn,tq,t,atts) = fs->hd;
+    let &Structfield(fn,tq,t,width,atts) = fs->hd;
     if (List::mem(String::zstrptrcmp,prev_fields,fn))
 	terr(loc,xprintf("duplicate field %s in struct",*fn));
-    prev_fields = &List(fn,prev_fields);
+    // add the field to previous fields only if it's not an empty name
+    // (empty names arise for bitfield padding.)
+    if (String::strcmp(*fn,"") != 0)
+      prev_fields = &List(fn,prev_fields);
     check_type(loc,te,tvs,MemKind,t);
+    // if width is non-null then t must be of integral type
+    if (width != null) {
+      unsigned int w = 0;
+      if (!Tcutil::is_const_exp(te,width->v))
+        terr(loc,xprintf("bitfield %s does not have constant width",*fn));
+      else w = Evexp::eval_const_uint_exp(width->v);
+      switch (compress(t)) {
+      case IntType(_,b): 
+        switch (b) {
+        case B1:
+          if (w > 8) terr(loc,"bitfield larger than type");
+          break;
+        case B2:
+          if (w > 16) terr(loc,"bitfield larger than type");
+          break;
+        case B4:
+          if (w > 32) terr(loc,"bitfield larger than type");
+          break;
+        case B8:
+          if (w > 64) terr(loc,"bitfield larger than type");
+          break;
+        }
+        break;
+      default: 
+        terr(loc,xprintf("bitfield %s must have integral type but "
+                         "has type %s",*fn,typ2string(t)));
+        break;
+      }
+    }
     // check that we have only packed or aligned attributes
     for (; atts != null; atts = atts->tl) {
       switch (atts->hd) {
@@ -641,8 +681,8 @@ static void tcUniondecl(tenv te, genv_t ge, seg_t loc, uniondecl_t ud) {
       let f1s = ud->fields->v;
       let f2s = ud2->fields->v;
       for(; f1s != null && f2s != null; f1s = f1s->tl, f2s = f2s->tl) {
-	let &Structfield(fn1,tq1,t1,atts1) = f1s->hd;
-	let &Structfield(fn2,tq2,t2,atts2) = f2s->hd;
+	let &Structfield(fn1,tq1,t1,width1,atts1) = f1s->hd;
+	let &Structfield(fn2,tq2,t2,width2,atts2) = f2s->hd;
 	// names, qualifiers, types, and attributes all must agree
 	if (String::zstrptrcmp(fn1,fn2) != 0)
 	  terr(loc, xprintf("redeclaration of union %s: field name mismatch "
@@ -653,6 +693,15 @@ static void tcUniondecl(tenv te, genv_t ge, seg_t loc, uniondecl_t ud) {
 	if (!equal_tqual(tq1,tq2))
 	  terr(loc, xprintf("redeclaration of union %s: qualifier mismatch on"
 			    " field %s", *v, *fn1));
+        if (width1 != null && !Tcutil::is_const_exp(te,width1->v))
+          terr(loc, xprintf("redeclaration of struct %s: bad bitfield %s",
+                            *v, *fn1));
+        else if ((width1 != null && width2 != null && 
+                  Evexp::eval_const_uint_exp(width1->v) != 
+                  Evexp::eval_const_uint_exp(width2->v)) ||
+                 width1 != width2)
+          terr(loc, xprintf("redeclaration of struct %s: bitfield mismatch on"
+                            " field %s", *v, *fn1));
 	// important side-effects on t1
 	check_type(loc, te, tvs, MemKind, t1);
 	typ subst_t2 = substitute(inst,t2);
@@ -682,11 +731,40 @@ static void tcUniondecl(tenv te, genv_t ge, seg_t loc, uniondecl_t ud) {
   list_t<field_name> prev_fields = null;
   list_t<typ> prev_types = null;
   for (let fs = ud->fields->v; fs != null; fs = fs->tl) {
-    let &Structfield(fn,tq,t,atts) = fs->hd;
+    let &Structfield(fn,tq,t,width,atts) = fs->hd;
     if (List::mem(String::zstrptrcmp,prev_fields,fn))
 	terr(loc,xprintf("duplicate field %s in union",*fn));
     prev_fields = &List(fn,prev_fields);
     check_type(loc,te,tvs,MemKind,t);
+    // if width is non-null then t must be of integral type
+    if (width != null) {
+      unsigned int w = 0;
+      if (!Tcutil::is_const_exp(te,width->v))
+        terr(loc,xprintf("bitfield %s does not have constant width",*fn));
+      else w = Evexp::eval_const_uint_exp(width->v);
+      switch (compress(t)) {
+      case IntType(_,b): 
+        switch (b) {
+        case B1:
+          if (w > 8) terr(loc,"bitfield larger than type");
+          break;
+        case B2:
+          if (w > 16) terr(loc,"bitfield larger than type");
+          break;
+        case B4:
+          if (w > 32) terr(loc,"bitfield larger than type");
+          break;
+        case B8:
+          if (w > 64) terr(loc,"bitfield larger than type");
+          break;
+        }
+        break;
+      default: 
+        terr(loc,xprintf("bitfield %s must have integral type but "
+                         "has type %s",*fn,typ2string(t)));
+        break;
+      }
+    }
     // check that the type t only consists of "bits" -- later we may
     // want to allow a more permissive form of unions.
     if (!bits_only(t))

@@ -53,7 +53,7 @@ static list_t<stringptr> warning_msgs = null;
 void warn(seg_t sg, string msg) {
   warning_segs = &List(sg, warning_segs);
   // FIX:  cast to stringptr is necessary here...
-  warning_msgs = &List((stringptr)new {msg},warning_msgs);
+  warning_msgs = &List((stringptr)(new {msg}),warning_msgs);
 }
 void flush_warnings() {
   if(warning_segs == null)
@@ -638,7 +638,10 @@ void unify_it(typ t1, typ t2) {
   case $(ArrayType(t2a,tq2a,e1), ArrayType(t1a,tq1a,e2)):
     unify_it(t1a,t2a);
     unify_tqual(tq1a,tq2a);
-    if (Evexp::eval_const_uint_exp(e1) == Evexp::eval_const_uint_exp(e2)) 
+    if (e1 == e2) return;
+    if (e1 == null || e2 == null) break;
+    if (Evexp::eval_const_uint_exp((exp)e1) == 
+        Evexp::eval_const_uint_exp((exp)e2))
       return;
     break;
 
@@ -839,7 +842,11 @@ bool silent_castable(tenv te, seg_t loc, typ t1, typ t2) {
 
   case $(ArrayType(t1a,tq1a,e1),ArrayType(t2a,tq2a,e2)):
     bool okay;
-    okay = (Evexp::eval_const_uint_exp(e1)>=Evexp::eval_const_uint_exp(e2));
+    // JGM: we could allow e1 >= e2 but I think it's best to give an error
+    okay = 
+      (e1 != null && e2 != null &&
+       Evexp::eval_const_uint_exp((exp)e1) ==
+       Evexp::eval_const_uint_exp((exp)e2));
     return (okay && unify(t1a,t2a) && (!tq1a->q_const || tq2a->q_const));
 
   default: return unify(t1,t2);
@@ -1075,7 +1082,10 @@ bool castable(tenv te, seg_t loc, typ t1, typ t2) {
     switch (t2) {
     case ArrayType(t2a,tq2a,e2):
       bool okay;
-      okay=(Evexp::eval_const_uint_exp(e1) >= Evexp::eval_const_uint_exp(e2));
+      okay=
+        (e1 != null && e2 != null && 
+         Evexp::eval_const_uint_exp((exp)e1) >= 
+         Evexp::eval_const_uint_exp((exp)e2));
       return (okay && unify(t1a,t2a) && (!tq1a->q_const || tq2a->q_const));
     default: return false;
     }
@@ -1583,7 +1593,9 @@ list_t<tvar> check_valid_type(seg_t loc, tenv te, list_t<tvar> free_vars,
     free_vars = check_valid_type(loc,te,free_vars,MemKind,t1);
     // FIX: should memoize the size so that we don't have to worry about
     // evaluating it during unification
-    Evexp::eval_const_uint_exp(e); // check that e is of constant size
+    if (e == null || !is_const_exp(te,(exp)e))
+      terr(loc,"array bounds expression is not constant");
+    Evexp::eval_const_uint_exp((exp)e); // check that e is of constant size
     break;
   case FnType(FnInfo{*btvs,*eff,tr,args,vararg,atts}):
     if (atts != null) {
@@ -1888,10 +1900,14 @@ resolve_struct_designators(seg_t loc,
   if(sd->fields == null)
     terr(loc, "inappropriate use of abstract struct");
 
-  // grab all the fields and mark them unused
+  // grab all the fields and mark them unused unless the field has an
+  // empty name -- these are bitfields for padding and shouldn't be
+  // initialized or projected.
   list_t<$(structfield_t,bool)@> fields = null;
-  for(_ sd_fields = sd->fields->v; sd_fields != null; sd_fields = sd_fields->tl)
-    fields = &List(&$(sd_fields->hd,false), fields);
+  for(_ sd_fields = sd->fields->v; sd_fields != null; sd_fields = sd_fields->tl) {
+    if (String::strcmp(*sd_fields->hd->name,"") != 0)
+      fields = &List(&$(sd_fields->hd,false), fields);
+  }
   fields = imp_rev(fields);
 
   // match up each element of des
@@ -1999,10 +2015,11 @@ $(bool,typ) addressof_props(tenv te, exp e) {
     }
   case StructMember_e(e1,f):
     // we have an unboxed thing, so we inherit e2's region
+    // must check that f isn't a bitfield.
     switch (compress(e1->topt->v)) {
     case StructType(_,_,&sd):
       let finfo = lookup_struct_field(sd,f);
-      if(finfo != null)
+      if(finfo != null && finfo->width != null)
 	return $(finfo->tq->q_const, addressof_props(te,e1)[1]);
       return bogus_ans;
     case UnionType(_,_,&ud):
@@ -2014,12 +2031,13 @@ $(bool,typ) addressof_props(tenv te, exp e) {
     }
   case StructArrow_e(e1,f): 
     // we have a boxed thing, so the region is in the pointer-type.
+    // must check that f isn't a bitfield.
     switch (compress(e1->topt->v)) {
     case PointerType(PtrInfo{t1,r,_,_,_}): 
       switch (compress(t1)) {
       case StructType(_,_,&sd):
 	let finfo = lookup_struct_field(sd,f);
-	if(finfo != null)
+	if(finfo != null && finfo->width != null)
 	  return $(finfo->tq->q_const, r);
 	return bogus_ans;
       case UnionType(_,_,&ud):
@@ -2148,5 +2166,68 @@ bool bits_only(typ t) {
     return true;
   default: return false;
   }
+}
+
+// FIX: there are other expressions we could allow, such as
+// &(x->y) or &(x[0]) that we do not support here...
+static bool cnst_exp(tenv te, bool var_okay, exp e) {
+  switch (e->r) {
+  case Const_e(_):  return true;
+  case Sizeoftyp_e(t): return true;
+  case Sizeofexp_e(e1): return cnst_exp(te,true,e1);
+
+  case Var_e(qv,_):
+    // NB: top-level function names and arrays are "constant"
+    // Ignore unbound variables b/c should be reported elsewhere
+    try switch (lookup_ordinary(te, e->loc, qv)) {
+    case VarRes(Funname_b(_)): return true;
+    case VarRes(Global_b(vd)):
+      switch (compress(vd->type)) {
+      case ArrayType(_,_,_): return true;
+      default: return var_okay;
+      }
+    default: return var_okay;
+    } catch { case Dict::Absent: return false; }
+
+  case Conditional_e(e1,e2,e3):
+    return (cnst_exp(te,false,e1)
+            && cnst_exp(te,false,e2)
+            && cnst_exp(te,false,e3));
+  case SeqExp_e(e1,e2):
+    return (cnst_exp(te,false,e1) && cnst_exp(te,false,e2));
+  case Instantiate_e(e2,_):
+    return cnst_exp(te,var_okay,e2);
+  case Cast_e(_,e2):
+    // FIX:  We cannot allow casts w/ run-time effect b/c C will complain!
+    return cnst_exp(te,var_okay,e2);
+  case Address_e(e2):
+    return cnst_exp(te,true,e2);
+  case Comprehension_e(_,e1,e2):
+    return cnst_exp(te,false,e1) && cnst_exp(te,false,e2);
+  case Array_e(des): fallthru(des);
+  case Struct_e(_,_,des,_):
+    for (; des != null; des = des->tl)
+      if (!cnst_exp(te,false,(*des->hd)[1]))
+        return false;
+    return true;
+
+  case Primop_e(p,es):     fallthru(es);
+  case Tuple_e(es):        fallthru(es);
+  case Enum_e(_,_,es,_,_): fallthru(es);
+  case Xenum_e(_,es,_,_):
+    for (; es != null; es = es->tl)
+      if (!cnst_exp(te,false,es->hd))
+        return false;
+    return true;
+    // eventually -- should support comprehensions for initializers
+  //case Comprehension_e(vd,e1,e2):
+  //return (cnst_exp(te,false,e1) && cnst_exp(te,false,e2));
+  default:
+    return false;
+  }
+}
+
+bool is_const_exp(tenv te, exp e) {
+  return cnst_exp(te,false,e);
 }
 

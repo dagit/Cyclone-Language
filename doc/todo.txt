@@ -6,9 +6,6 @@ BUG FIXES and UNSOUNDNESSES:
 
 * are we treating void properly?
 
-* "sizeof e" doesn't do the right thing.  (It's treated as e.size instead
-  of the actual size of e.)
-
 * link-checking:  we need to spit out an internal interface for each
   module and check for consistency at link-time.  Note that we should
   also check that main has the right type.  We should have the compiler
@@ -28,15 +25,9 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
 ----------------------------------------
 * Need to port more C libraries
 
-* We should add unions in, and allow them when the different variants
-  don't contain pointers or abstract types.  Ultimately, we should support
-  dependent types so that enums can be coded in terms of unions.
-
 * default array initializers, at top level and local, e.g., int x[4];
 
 * nested type declarations? nested exception declarations? nested using?
-
-* bit fields within structs
 
 * structs and enums without a name
 

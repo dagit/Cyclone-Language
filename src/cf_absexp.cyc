@@ -122,8 +122,10 @@ static void ok_lvalue(absop_t ao) {
 static int num_mallocpts = 0;
 static dict_t<exp,int> * mallocpt_dict = null;
 int mallocpt_int(exp e) {
-  if(mallocpt_dict == null)
-    mallocpt_dict = new{Dict::empty(Core::ptrcmp)};
+  if(mallocpt_dict == null) {
+    dict_t<exp,int> d = Dict::empty(Core::ptrcmp);
+    mallocpt_dict = new{d};
+  }
   int i = 0;
   if(!Dict::lookup_bool(*mallocpt_dict,e,&i))
     *mallocpt_dict = Dict::insert(*mallocpt_dict,e,i=++num_mallocpts);

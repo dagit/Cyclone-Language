@@ -219,6 +219,9 @@ typ unionq_typ(qvar name) {
 exp new_exp(raw_exp_t r, seg_t loc) {
   return &Exp{.topt=null, .r=r, .loc=loc};
 }
+exp New_exp(exp e, seg_t loc) {
+  return new_exp(New_e(e), loc);
+}
 exp copy_exp(exp e) {
   return &Exp{.topt=e->topt, .r=e->r, .loc=e->loc};
 }
@@ -234,9 +237,7 @@ exp true_exp(seg_t loc)  { return bool_exp(true, loc); }
 exp false_exp(seg_t loc) { return bool_exp(false, loc); }
 exp char_exp(char c, seg_t loc)    {return const_exp(Char_c(Unsigned,c),loc);}
 exp float_exp(string f, seg_t loc) {return const_exp(Float_c(f),loc);}
-exp string_exp(bool heap_allocate, string s, seg_t loc){
-  return const_exp(String_c(heap_allocate,s),loc);
-}
+exp string_exp(string s, seg_t loc){ return const_exp(String_c(s),loc); }
 
 // This should only be used after type checking.
 // Right now it's only used in Toc and is the only source of Unresolved_b.
@@ -337,12 +338,12 @@ static stringptr ne = &ne_str;
 exp null_pointer_exn_exp(seg_t loc) { 
   return var_exp(&$(Abs_n(null),ne), loc); 
 }
-exp array_exp(bool heap_allocate, list_t<exp> es, seg_t loc) {
+exp array_exp(list_t<exp> es, seg_t loc) {
   let dles = null;
   for (; es != null; es = es->tl)
     dles = &List(&$(null,es->hd),dles);
   dles = List::imp_rev(dles);
-  return new_exp(Array_e(heap_allocate,dles),loc);
+  return new_exp(Array_e(dles),loc);
 }
 exp unresolvedmem_exp(opt_t<typedef_name_t> n,
                       list_t<$(list_t<designator>,exp)@> dles,seg_t loc) {

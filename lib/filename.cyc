@@ -14,7 +14,7 @@ using List;
 
 string concat(string s1, string s2) {
   return String::strconcat_l(&List(new {s1},
-				   &List(new {DIR_SEPARATOR_STR},
+				   &List(new {(string)DIR_SEPARATOR_STR},
 					 &List(new {s2},null))));
 }
 

@@ -61,20 +61,18 @@ struct _tagged_string, int ofs, unsigned int n); char Cyc_Position_Exit_tag[ 5u]
 static char _temp2[ 1u]=""; static struct _tagged_string Cyc_Position_source=(
 struct _tagged_string){ _temp2, _temp2, _temp2 + 1u}; struct Cyc_Position_Segment{
 int start; int end; } ; struct Cyc_Position_Segment* Cyc_Position_segment_of_abs(
-int start, int end){ return( struct Cyc_Position_Segment*)({ struct Cyc_Position_Segment*
-_temp3=( struct Cyc_Position_Segment*) GC_malloc( sizeof( struct Cyc_Position_Segment)
-* 1); _temp3[ 0]=({ struct Cyc_Position_Segment _temp4; _temp4.start= start;
-_temp4.end= end; _temp4;}); _temp3;});} struct Cyc_Position_Segment* Cyc_Position_segment_join(
-struct Cyc_Position_Segment* s1, struct Cyc_Position_Segment* s2){ if( s1 == 0){
-return s2;} if( s2 == 0){ return s1;} return( struct Cyc_Position_Segment*)({
-struct Cyc_Position_Segment* _temp5=( struct Cyc_Position_Segment*) GC_malloc(
-sizeof( struct Cyc_Position_Segment) * 1); _temp5[ 0]=({ struct Cyc_Position_Segment
-_temp6; _temp6.start= s1->start; _temp6.end= s2->end; _temp6;}); _temp5;});}
-struct _tagged_string Cyc_Position_string_of_loc( int loc){ struct Cyc_Lineno_Pos*
-pos= Cyc_Lineno_pos_of_abs( Cyc_Position_source, loc); return({ struct
-_tagged_string _temp7= pos->logical_file; int _temp8= pos->line_no; int _temp9=
-pos->col; xprintf("%.*s (%d:%d)", _temp7.last_plus_one - _temp7.curr, _temp7.curr,
-_temp8, _temp9);});} static struct _tagged_string Cyc_Position_string_of_pos_pr(
+int start, int end){ return({ struct Cyc_Position_Segment* _temp3=( struct Cyc_Position_Segment*)
+GC_malloc( sizeof( struct Cyc_Position_Segment) * 1); _temp3[ 0]=({ struct Cyc_Position_Segment
+_temp4; _temp4.start= start; _temp4.end= end; _temp4;}); _temp3;});} struct Cyc_Position_Segment*
+Cyc_Position_segment_join( struct Cyc_Position_Segment* s1, struct Cyc_Position_Segment*
+s2){ if( s1 == 0){ return s2;} if( s2 == 0){ return s1;} return({ struct Cyc_Position_Segment*
+_temp5=( struct Cyc_Position_Segment*) GC_malloc( sizeof( struct Cyc_Position_Segment)
+* 1); _temp5[ 0]=({ struct Cyc_Position_Segment _temp6; _temp6.start= s1->start;
+_temp6.end= s2->end; _temp6;}); _temp5;});} struct _tagged_string Cyc_Position_string_of_loc(
+int loc){ struct Cyc_Lineno_Pos* pos= Cyc_Lineno_pos_of_abs( Cyc_Position_source,
+loc); return({ struct _tagged_string _temp7= pos->logical_file; int _temp8= pos->line_no;
+int _temp9= pos->col; xprintf("%.*s (%d:%d)", _temp7.last_plus_one - _temp7.curr,
+_temp7.curr, _temp8, _temp9);});} static struct _tagged_string Cyc_Position_string_of_pos_pr(
 struct Cyc_Lineno_Pos* pos_s, struct Cyc_Lineno_Pos* pos_e){ if( Cyc_String_strcmp(
 pos_s->logical_file, pos_e->logical_file) == 0){ return({ struct _tagged_string
 _temp10= pos_s->logical_file; int _temp11= pos_s->line_no; int _temp12= pos_s->col;

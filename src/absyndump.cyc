@@ -346,9 +346,7 @@ void dumpexp_prec(int inprec, exp e) {
     dump("<<FIX LONG LONG CONSTANT>>"); break; // FIX
   case Const_e(Float_c(x)):    dump(x);      break;
   case Const_e(Null_c):        dump("null"); break;
-  case Const_e(String_c(heap_allocate,s)):
-    if (heap_allocate)
-      dump("new ");
+  case Const_e(String_c(s)):
     dump_char('"'); dump_nospace(Absynpp::string_escape(s)); dump_char('"');
     break;
 
@@ -426,6 +424,9 @@ void dumpexp_prec(int inprec, exp e) {
   case Address_e(e1):
     dump_char('&'); dumpexp_prec(myprec,e1); break;
 
+  case New_e(e1):
+    dump("new "); dumpexp_prec(myprec,e1); break;
+
   case Sizeoftyp_e(t):
     dump("sizeof("); dumptyp(t); dump_char(')'); break;
 
@@ -457,8 +458,8 @@ void dumpexp_prec(int inprec, exp e) {
     group(dumpde,des,"{","}",",");
     break;
 
-  case Array_e(b,des):  // FIX:  what about heap/local flag?
-    group(dumpde,des,"new {","}",",");
+  case Array_e(des):  
+    group(dumpde,des,"{","}",",");
     break;
 
   case Comprehension_e(vd,e1,e2):
@@ -659,9 +660,11 @@ void dumpenumfields(list_t<enumfield> fields) {
 
 void dumpstructfields(list_t<structfield_t> fields) {
   for(; fields != null; fields = fields->tl) {
-    let &Structfield{name,tq,type,atts} = fields->hd;
+    let &Structfield{name,tq,type,width,atts} = fields->hd;
     dumptqtd(tq,type,dump_str,name);
     dumpatts(atts);
+    if (width != null)
+      dumpexp(width->v);
     dump_semi();
   }
 }

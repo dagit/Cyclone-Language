@@ -260,13 +260,14 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
 	// special case -- fill in the size for t[] arrays
 	switch (compress(t)) {
 	case ArrayType(telt,tq,sz):
-	  if (Evexp::eval_const_uint_exp(sz) == 0) {
+          if (sz == null) {
 	    switch (initializer->r) {
-	    case Const_e(String_c(_,s)):
+	    case Const_e(String_c(s)):
 	      t = vd->type = ArrayType(telt,tq,uint_exp(s.size,null)); break;
 	    case UnresolvedMem_e(_,es): fallthru(es);
-	    case Array_e(_,es):
-	      t = vd->type = ArrayType(telt,tq,uint_exp(List::length(es),null));
+	    case Array_e(es):
+	      t = vd->type = 
+                ArrayType(telt,tq,uint_exp(List::length(es),null));
 	      break;
 	    default: break;
 	    }

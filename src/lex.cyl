@@ -144,8 +144,9 @@ static int str_index(string buff, int offset, int len) {
     if(t->children == null) {
       // new string, extend the trie and return
       while(i <= last) {
-	t->children = 
-	  (trie_child_t) new {(trie_child_v_t) new { for i < 75 : null }};
+        let temp = (trie_child_v_t)(new { for i < 75 : null });
+        let temp2 = new {temp};
+	t->children = (trie_child_t)temp2;
 	(*(t->children))[ch] = &Trie(null,-1);
 	t = (*(t->children))[ch];
 	++i;
@@ -737,7 +738,7 @@ and comment = parse
 void lex_init() {
   ids_trie      = new {Trie(null,-1)};
   typedefs_trie = new {Trie(null,false)};
-  symbols       = Xarray::create(101,new{""});
+  symbols       = Xarray::create(101,new{(string)""});
   num_kws       = rw_array.size;
   kw_nums       = new {for i < num_kws : 0};
   for (int i=0; i < num_kws; ++i) {

@@ -146,5 +146,8 @@ extern bool same_atts(attributes_t, attributes_t);
 // returns true iff t contains only "bits" and no pointers or enums. 
 // This is used to restrict the members of unions to ensure safety.
 extern bool bits_only(typ t);
+
+// returns true iff e is an expression that can be evaluated at compile time
+extern bool is_const_exp(tenv te, exp e);
 }
 #endif

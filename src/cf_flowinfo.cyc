@@ -83,8 +83,10 @@ path_info_t typ_to_unesc_none_pinfo(typ t) {
   case StructType(_,_, & &Structdecl(_,_,_,&Core::Opt(fs),_)):
     let d = Dict::empty(String::zstrptrcmp);
     for(; fs != null; fs = fs->tl) {
-      let &Structfield{n,_,t2,_} = fs->hd;
-      d = Dict::insert(d, n, typ_to_unesc_none_pinfo(t2));
+      let &Structfield{n,_,t2,_,_} = fs->hd;
+      // don't insert the field if the name is empty -- it's a bit field
+      if (String::strcmp(*n,"") != 0)
+        d = Dict::insert(d, n, typ_to_unesc_none_pinfo(t2));
     }
     return StructPI(d);
   default: 

@@ -113,13 +113,13 @@ static void resolve_unresolved_mem(tenv te, seg_t loc, typ *`r topt, exp e,
   // NOTE: must always bang e->r or caller will loop!
   if (topt == null) {
     // guess it is an array
-    e->r = Array_e(false,des);
+    e->r = Array_e(des);
     return;
   }
   typ t = *topt;
   switch (compress(t)) {
   case ArrayType(at,aq,_):
-    e->r = Array_e(false,des);
+    e->r = Array_e(des);
     break;
   case StructType(tdnopt,ts,sdp):
     if(sdp==null || tdnopt == null)
@@ -128,7 +128,7 @@ static void resolve_unresolved_mem(tenv te, seg_t loc, typ *`r topt, exp e,
     break;
   default:
     // guess it is an array
-    e->r = Array_e(false,des);
+    e->r = Array_e(des);
     break;
   }
 }
@@ -187,55 +187,30 @@ static typ tcConst(tenv te, seg_t loc, typ *`r topt, cnst_t c, exp e) {
         break;
     }
     break;
-  case String_c(heap_allocate,s):
-    // FIX: deal with topt being pointer???
+  case String_c(s):
     int len  = s.size; // includes the trailing 0 character
     let r    = Const_e(Int_c(Unsigned,len));
     exp elen = new_exp(r,loc);
     elen->topt = &Opt(uint_t);
-    // The default is to treat a string as if it's heap allocated
-    // Note that such strings are shared...
+    // The default is to treat a string as if it's statically heap allocated
+    // and return a pointer to that string.  However, if the string is used
+    // as an initializer, then we should return an array type.
     t = atb_typ(uchar_t, HeapRgn, empty_tqual(), Upper_b(elen));
     if (topt != null) {
       switch (compress(*topt)) {
       case ArrayType(telt,tq,e2):
-	if (heap_allocate)
-	  terr(loc,"string is dynamically allocated -- returns char pointer");
-	uint len2 = Evexp::eval_const_uint_exp(e2);
-	if (!unify(telt,uchar_t))
-	  terr(loc,xprintf("string constant cannot be used as %s array",
-			   typ2string(telt)));
-	if (len != len2)
-	  terr(loc,xprintf("string has length %d instead of %d",len,len2));
-	return *topt;
+        return ArrayType(uchar_t, tq, elen);
       case PointerType(PtrInfo(telt,trgn,nullable,tq,b)):
-	if (!unify(telt,uchar_t))
-	  terr(loc,xprintf("string cannot be used as %s pointer",
-			   typ2string(telt)));
-	if (!unify(trgn,HeapRgn))
-	  terr(loc,"this string literal is heap allocated");
-	b = compress_conref(b);
-	switch (b->v) {
-	case Eq_constr(Upper_b(elen2)):
-	  uint len2 = Evexp::eval_const_uint_exp(elen2);
-	  if (len != len2)
-	    terr(loc,xprintf("string has length %d instead of %d",len,len2));
-	  break;
-	case Eq_constr(Unknown_b):
-	  // must cast e so that translation to C boxes the string
-	  e->topt = &Opt(t);
-	  unchecked_cast(te, e, *topt);
-	  break;
-	default:
-	  b->v = Eq_constr(Upper_b(elen));
-	  break;
-	}
-	return *topt;
-      default:
-	break;
+        if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
+          e->topt = &Opt(t);
+          unchecked_cast(te, e, *topt);
+          t = *topt;
+        }
+        break;
+      default: break;
       }
     }
-    break;
+    return t;
   case Null_c:
     // FIX: take advantage of topt
     t = PointerType(PtrInfo(new_evar(MemKind), 
@@ -270,7 +245,7 @@ static void check_format_args(tenv te, exp fmt, list_t<exp> args,
   // check the format string and get the types it requires
   list_t<typ> desc_types;
   switch (fmt->r) {
-  case Const_e(String_c(false,s)): desc_types = type_getter(s,fmt->loc); break;
+  case Const_e(String_c(s)): desc_types = type_getter(s,fmt->loc); break;
   default: terr(fmt->loc, "expecting a literal format string"); return;
   }
   // check that each expression has the right type
@@ -784,7 +759,7 @@ static typ tcStructMember(tenv te, seg_t loc, typ *`r topt,
     return t2;
   case UnionType(tdnopt,ts,&ud):
     if (tdnopt == null)
-      return expr_err(te,loc,"unresolved struct type (COMPILER ERROR)");
+      return expr_err(te,loc,"unresolved union type (COMPILER ERROR)");
     let finfo = lookup_union_field(ud,f);
     if (finfo == null)
       return expr_err(te,loc,xprintf("union %s has no %s field",
@@ -921,38 +896,20 @@ static typ tcCompoundLit(tenv te, seg_t loc, typ *`r topt,
  ///////////////////// Array ({e1,...,en}) /////////////////////////
  // FIX:  only a very limited class of designators (basically, the proper
  // index) is supported and all of the array elements must be present.
-static typ tcArray(tenv te,seg_t loc,typ *`r topt, exp e, bool heap_allocated,
+ // 
+ // Note that we pass in an optional element type, not the (optional)
+ // expected type of the array.  See tcNew and the call to tcArray.
+static typ tcArray(tenv te,seg_t loc,typ *`r elt_topt, 
                    list_t<$(list_t<designator>,exp)@> des) {
   list_t<exp> es = List::map(snd,des);
   typ res      = new_evar(MemKind);
   let sz_rexp  = Const_e(Int_c(Unsigned,List::length(es)));
   exp sz_exp   = new_exp(sz_rexp,loc);
   sz_exp->topt = &Opt(uint_t);
-  typ res_t2;
-  if (heap_allocated)
-    res_t2 = atb_typ(res,HeapRgn,empty_tqual(),Upper_b(sz_exp));
-  else
-    res_t2 = ArrayType(res, empty_tqual(), sz_exp);
+  typ res_t2 = ArrayType(res, empty_tqual(), sz_exp);
 
-  if (topt == null) {
-    for (_ es2 = es; es2 != null; es2 = es2->tl) {
-      tcExpInitializer(te,null,es2->hd);
-    }
-  } else {
-    switch (compress(*topt)) {
-    case PointerType(PtrInfo{elt_typ,_,_,_,_}): fallthru(elt_typ);
-    case ArrayType(elt_typ,_,_):
-      let topt1 = elt_typ;
-      for (let es1 = es; es1 != null; es1 = es1->tl) {
-	exp e = es1->hd;
-	tcExpInitializer(te,&topt1,e);
-	coerce_arg(te,e,elt_typ);
-      }
-      break;
-    default:
-      tcExpList(te,es);
-      break;
-    }
+  for (_ es2 = es; es2 != null; es2 = es2->tl) {
+    tcExpInitializer(te,elt_topt,es2->hd);
   }
 
   if (!coerce_list(te,res,es))
@@ -978,13 +935,14 @@ static typ tcArray(tenv te,seg_t loc,typ *`r topt, exp e, bool heap_allocated,
 	break;
       }
   }
-  if (topt != null) {
-    if (!unify(*topt,res_t2) && silent_castable(te,loc,res_t2,*topt)) {
-      e->topt = &Opt(res_t2);
-      unchecked_cast(te, e, *topt);
-      res_t2 = *topt;
-    }
-  }
+  
+  //if (topt != null) {
+  // if (!unify(*topt,res_t2) && silent_castable(te,loc,res_t2,*topt)) {
+  //    e->topt = &Opt(res_t2);
+  //    unchecked_cast(te, e, *topt);
+  //    res_t2 = *topt;
+  //}
+  //}
   return res_t2;
 }
 
@@ -995,51 +953,34 @@ static typ tcComprehension(tenv te,seg_t loc,typ *`r topt,
   if (!coerce_uint_typ(te,bound))
     terr(bound->loc,xprintf("expecting unsigned int, found %s",
 			    typ2string(bound->topt->v)));
-  // add x to the environment with the type unsigned int
-  te = Tcenv::new_block(te);
-  te = add_local_var(loc, te, vd);
+  // add x to the environment with the type unsigned int only if te->le
+  // is not null.
+  if (te->le != null) {
+    te = Tcenv::new_block(te);
+    te = add_local_var(loc, te, vd);
+  } 
   _ pinfo;
   let topt2 = null;
-  let nopt  = null;
   let tqopt = null;
-  let bopt  = null;
 
   if (topt != null) {
     switch (compress(*topt)) {
     case PointerType(x):
       pinfo = x;
       topt2 = &pinfo.elt_typ;
-      nopt  = &pinfo.nullable;
       tqopt = &pinfo.tq;
-      bopt  = &pinfo.bounds;
+      break;
+    case ArrayType(*t,*tq,b):
+      topt2 = t;
+      tqopt = tq;
       break;
     default:
       break;
     }
    }
    // type-check the body in the new environment
-   tcExp(te,topt2,body);
-   bounds_t b_result;
-   bool bound_is_const = is_const_exp(te,bound);
-   if (bopt != null)
-     switch (compress_conref(*bopt)->v) {
-     case Eq_constr(Unknown_b): b_result = Unknown_b; break;
-     case Eq_constr(Upper_b(e)):
-       if (bound_is_const &&
-	   (Evexp::eval_const_uint_exp(e)<=Evexp::eval_const_uint_exp(bound))) {
-	 b_result = Upper_b(e);
-	 break;
-       } 
-       fallthru;
-     default:
-       b_result = bound_is_const ? Upper_b(bound) : Unknown_b;
-       break;
-     }
-   else 
-     b_result = bound_is_const ? Upper_b(bound) : Unknown_b;
-   tqual tq_result = (tqopt != null) ? *tqopt : empty_tqual();
-   let ptr_maker = (b_result == Unknown_b) ? starb_typ : atb_typ;
-  return ptr_maker(body->topt->v,HeapRgn,tq_result,b_result);
+   typ t = tcExp(te,topt2,body);
+   return ArrayType(t,(tqopt == null) ? empty_tqual() : *tqopt, bound);
 }
 
  //////////////////// Struct (f{e1,...,en}) ///////////////////
@@ -1234,66 +1175,95 @@ static typ tcFill(tenv_t te, seg_t loc, typ *`r topt, exp e) {
   return expr_err(te,loc,"tcFill");
 }
 
-// FIX: there are other expressions we could allow, such as
-// &(x->y) or &(x[0]) that we do not support here...
-static bool cnst_exp(tenv te, bool var_okay, exp e) {
-  switch (e->r) {
-  case Const_e(_):  return true;
-  case Sizeoftyp_e(t): return true;
-  case Sizeofexp_e(e1): return cnst_exp(te,true,e1);
-
-  case Var_e(qv,_):
-    // NB: top-level function names and arrays are "constant"
-    // Ignore unbound variables b/c should be reported elsewhere
-    try switch (lookup_ordinary(te, e->loc, qv)) {
-    case VarRes(Funname_b(_)): return true;
-    case VarRes(Global_b(vd)):
-      switch (compress(vd->type)) {
-      case ArrayType(_,_,_): return true;
-      default: return var_okay;
+// new e
+static typ tcNew(tenv te, seg_t loc, typ *`r topt, exp e, exp e1) {
+  switch (e1->r) {
+  case Comprehension_e(vd,ebound,egen):
+    // note that tcComprehension expects us to pass in the pointer type,
+    // not an array type.
+    let t_arr = tcExpNoPromote(te,topt,e1);
+    switch (compress(t_arr)) {
+    case ArrayType(et_arr,tq_arr,_):
+      bounds_t b = is_const_exp(te,ebound) ? Upper_b(ebound) : Unknown_b;
+      let res_typ = PointerType(PtrInfo{et_arr,HeapRgn,empty_conref(),tq_arr,
+                                        new_conref(b)});
+      if (topt != null) {
+        if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
+          e->topt = &Opt(res_typ);
+          unchecked_cast(te, e, *topt);
+          res_typ = *topt;
+        }
       }
-    default: return var_okay;
-    } catch { case Dict::Absent: return false; }
-
-  case Conditional_e(e1,e2,e3):
-    return (cnst_exp(te,false,e1)
-            && cnst_exp(te,false,e2)
-            && cnst_exp(te,false,e3));
-  case SeqExp_e(e1,e2):
-    return (cnst_exp(te,false,e1) && cnst_exp(te,false,e2));
-  case Instantiate_e(e2,_):
-    return cnst_exp(te,var_okay,e2);
-  case Cast_e(_,e2):
-    // FIX:  We cannot allow casts w/ run-time effect b/c C will complain!
-    return cnst_exp(te,var_okay,e2);
-  case Address_e(e2):
-    return cnst_exp(te,true,e2);
-
-  case Array_e(_,des): fallthru(des);
-  case Struct_e(_,_,des,_):
-    for (; des != null; des = des->tl)
-      if (!cnst_exp(te,false,(*des->hd)[1]))
-        return false;
-    return true;
-
-  case Primop_e(p,es):     fallthru(es);
-  case Tuple_e(es):        fallthru(es);
-  case Enum_e(_,_,es,_,_): fallthru(es);
-  case Xenum_e(_,es,_,_):
-    for (; es != null; es = es->tl)
-      if (!cnst_exp(te,false,es->hd))
-        return false;
-    return true;
-    // eventually -- should support comprehensions for initializers
-  //case Comprehension_e(vd,e1,e2):
-  //return (cnst_exp(te,false,e1) && cnst_exp(te,false,e2));
+      return res_typ;
+    default: return impos("tcNew: comprehension returned non-array type");
+    }
+  case UnresolvedMem_e(nopt,des):
+    e1->r = Array_e(des);
+    fallthru(des);
+  case Array_e(des):
+    typ *elt_typ_opt = null;
+    if (topt != null) {
+      switch (compress(*topt)) {
+      case PointerType(PtrInfo{*elt_typ,_,_,tq,_}):
+        // tcArray only needs the element type, so the bound is bogus
+        elt_typ_opt = elt_typ;
+        break;
+      default: break;
+      }
+    }
+    let t_array = tcExpNoPromote(te, elt_typ_opt, e1);
+    typ res_typ;
+    switch (compress(t_array)) {
+    case ArrayType(et,tq,sz): 
+      res_typ = PointerType(PtrInfo{et,HeapRgn,empty_conref(),tq,
+                                    new_conref(Upper_b((exp)sz))});
+      if (topt != null) {
+        // try unifying res_typ and topt -- if that fails, then see if we
+        // can cast res_typ to topt, and insert the cast so that the code
+        // generator knows what to do.
+        if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
+          e->topt = &Opt(res_typ);
+          unchecked_cast(te, e, *topt);
+          res_typ = *topt;
+        }
+      }
+      break;
+    default: 
+      return impos("tcExpNoPromote on Array_e returned non-array type");
+    }
+    return res_typ;
+  case Const_e(String_c(s)):
+    // here I'm going to guess that the user wants a char ?@ instead of
+    // a char @{n}@.  They can get the char@{n}@ by using a cast.  This
+    // is a total hack...
+    let topt2 = atb_typ(uchar_t, HeapRgn, empty_tqual(), Unknown_b);
+    let t = tcExp(te,&topt2,e1);
+    return atb_typ(t, HeapRgn, empty_tqual(), Upper_b(uint_exp(1,null)));
   default:
-    return false;
+    // code that's equivalent to "new {e1}" -- i.e., an array of size 1.
+    // Note that we could simplify everything by rewriting the expression
+    // to use an Array_e, but this would involve more allocation.
+    let topt2 = null;
+    if (topt != null) {
+      switch (compress(*topt)) {
+      case PointerType(PtrInfo{*elttype,_,tq,_,_}):
+        topt2 = elttype; break;
+      default: break;
+      }
+    }
+    let telt = tcExp(te,topt2,e1);
+    let res_typ = PointerType(PtrInfo{telt,HeapRgn,empty_conref(),
+                                      empty_tqual(),
+                                      new_conref(Upper_b(uint_exp(1,null)))});
+    if (topt != null) {
+      if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
+        e->topt = &Opt(res_typ);
+        unchecked_cast(te,e,*topt);
+        res_typ = *topt;
+      }
+    }
+    return res_typ;
   }
-}
-
-bool is_const_exp(tenv te, exp e) {
-  return cnst_exp(te,false,e);
 }
 
 // The default:  type-check and promote any array types to pointer types
@@ -1303,7 +1273,8 @@ typ tcExp(tenv te, typ *`r topt, exp e) {
   switch (t) {
   case ArrayType(elt_typ,tq,e2):
     let $(_,rgn) = addressof_props(te,e);
-    t = atb_typ(elt_typ,rgn,tq,Upper_b(e2));
+    let b = (e2 == null) ? Unknown_b : Upper_b((exp)e2);
+    t = atb_typ(elt_typ,rgn,tq,b);
     unchecked_cast(te,e,t);
     return t;
   default:
@@ -1311,19 +1282,22 @@ typ tcExp(tenv te, typ *`r topt, exp e) {
   }
 }
 
-// Type-check the expression -- if it's an Array_e or String_c expression,
-// do not promote its type from array to pointer.  Otherwise, do so.
+// Type-check the expression -- if it's an Array_e, Comprehension_e, 
+// or String_c expression, do not promote its type from array to pointer.  
+// Otherwise, do so.
 typ tcExpInitializer(tenv te, typ *`r topt, exp e) {
   typ t = tcExpNoPromote(te, topt, e);
   switch (e->r) {
-  case Array_e(_,_): return t;
-  case Const_e(String_c(_,_)): return t;
+  case Array_e(_): return t;
+  case Comprehension_e(_,_,_): return t;
+  case Const_e(String_c(_)): return t;
   default:
     t = compress(t);
     switch (t) {
     case ArrayType(elt_typ,tq,e2):
       let $(_,rgn) = addressof_props(te,e);
-      t = atb_typ(elt_typ,rgn,tq,Upper_b(e2));
+      let b = (e2 == null) ? Unknown_b : Upper_b((exp)e2);
+      t = atb_typ(elt_typ,rgn,tq,b);
       unchecked_cast(te,e,t);
       return t;
     default:
@@ -1431,6 +1405,8 @@ static void tcExpNoInst(tenv te, typ *`r topt, exp e) {
     t = tcCast(te,loc,topt,t1,e1); break;
   case Address_e(e1):
     t = tcAddress(te,loc,topt,e1); break;
+  case New_e(e1):
+    t = tcNew(te,loc,topt,e,e1); break;
   case Sizeofexp_e(e1):
     let t1 = tcExpNoPromote(te, null, e1);
     t = tcSizeof(te,loc,topt,t1); break;
@@ -1448,8 +1424,17 @@ static void tcExpNoInst(tenv te, typ *`r topt, exp e) {
     t = tcTuple(te,loc,topt,es); break;
   case CompoundLit_e(t1,des):
     t = tcCompoundLit(te,loc,topt,t1,des); break;
-  case Array_e(b,des):
-    t = tcArray(te,loc,topt,e,b,des); break;
+  case Array_e(des):
+    // tcArray expects us to pass in an optional element type, not
+    // the array type.  See also tcNew.
+    typ *elt_topt = null;
+    if (topt != null) {
+      switch (compress(*topt)) {
+      case ArrayType(*et,_,_): elt_topt = et; break;
+      default: break;
+      }
+    }
+    t = tcArray(te,loc,elt_topt,des); break;
   case StmtExp_e(s):
     t = tcStmtExp(te,loc,topt,s); break;
   case Codegen_e(fd):

@@ -31,7 +31,7 @@ using Ref;
 using Fn;
 using Array;
 
-#define allocstr(s) ((stringptr) new {(string)s})
+#define allocstr(s) ((stringptr) (new s))
 
 void test_begin(string t) {
   int x = 12-t.size;
@@ -199,7 +199,7 @@ void list_test() {
 
   // FIX:  casts are required for typechecking.  Should string constants
   // have type char? or char[sz] ??
-  let slist = &List(allocstr("hello"),&List(allocstr("world"),null));
+  let slist = &List(new "hello",&List(new "world",null));
   let rlist = List::rev(slist);
   okfail(0==test_list_cmp(String::strptrcmp,slist,List::rev(rlist)));
 
@@ -366,7 +366,7 @@ void set_test() {
   okfail(!Set::is_empty(x));
 
   set_t<stringptr> s = Set::empty(String::strptrcmp);
-  s = Set::insert(s,allocstr("hello"));
+  s = Set::insert(s,new "hello");
   s = Set::insert(s,allocstr("world"));
   s = Set::insert(s,allocstr("sphinx"));
   s = Set::insert(s,allocstr("quartz"));

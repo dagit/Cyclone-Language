@@ -149,7 +149,7 @@ static list_t<decl> added_decls = null;
 static void add_tuple_decl(var x, list_t<typ> ts) {
   let fs = null;
   for (int i=1; ts != null; ts = ts->tl, i++)
-    fs = &List(&Structfield(new {xprintf("f%d",i)},mt_tq,ts->hd,null),fs);
+    fs = &List(&Structfield(new {xprintf("f%d",i)},mt_tq,ts->hd,null,null),fs);
   fs = List::imp_rev(fs);
   let sd = &Structdecl{.sc = Public, .name = &Opt(&$(abs_ns,x)),
                        .tvs = null, .fields = &Opt(fs), .attributes = null};
@@ -158,9 +158,9 @@ static void add_tuple_decl(var x, list_t<typ> ts) {
 
 static void add_tagged_ptr_decl(var x, typ t) {
   typ tptr = star_typ(t,HeapRgn,empty_tqual());
-  let f1 = &Structfield(curr_sp,mt_tq,tptr,null);
-  let f2 = &Structfield(base_sp,mt_tq,tptr,null);
-  let f3 = &Structfield(last_plus_one_sp,mt_tq,tptr,null);
+  let f1 = &Structfield(curr_sp,mt_tq,tptr,null,null);
+  let f2 = &Structfield(base_sp,mt_tq,tptr,null,null);
+  let f3 = &Structfield(last_plus_one_sp,mt_tq,tptr,null,null);
   let fs = &List(f1,&List(f2,&List(f3,null)));
   let sd = &Structdecl{.sc = Public,
                        .name = &Opt(&$(abs_ns,x)),
@@ -802,7 +802,7 @@ static exp printf_to_c(primop p, opt_t<exp> aopt,
   string fmt_str;
   // get out the literal format string
   switch (args->hd->r) {
-  case Const_e(String_c(_,s)): fmt_str = s; break;
+  case Const_e(String_c(s)): fmt_str = s; break;
   default: return toc_impos("expecting a literal format string");
   }
   // Check for the usual case: no %s.
@@ -898,7 +898,7 @@ static exp printf_to_c(primop p, opt_t<exp> aopt,
       typs = typs->tl;
     }
   }
-  let es = &List(string_exp(false,String::implode(List::rev(rev_fmt)),DL),
+  let es = &List(string_exp(String::implode(List::rev(rev_fmt)),DL),
 		 List::rev(rev_result));
   if (aopt != null) es = &List(aopt->v,es);
   let e = primop_exp(p,es,DL);
@@ -995,11 +995,11 @@ static exp init_struct(env nv,typ struct_type,
       for(; ds != null; ds = ds->tl)
 	switch (ds->hd) {
 	case FieldName(f):
-	  // cast to void* if necessary
-	  if (is_poly_field(struct_type,f))
-	    yexp = cast_exp(void_star_typ(),yexp,DL);
-	  s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,f,DL), yexp, DL), DL),
-		       s, DL);
+          // cast to void* if necessary
+          if (is_poly_field(struct_type,f))
+            yexp = cast_exp(void_star_typ(),yexp,DL);
+          s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,f,DL), yexp, DL), DL),
+                       s, DL);
 	  break;
 	default: throw toc_impos("array designator in struct");
 	}
@@ -1008,13 +1008,13 @@ static exp init_struct(env nv,typ struct_type,
     } else
       switch (ds->hd) {
       case FieldName(f):
-	exp_to_c(nv,e);
-	// cast to void* if necessary
-	if (is_poly_field(struct_type,f))
-	  e = cast_exp(void_star_typ(),e,DL);
-	s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,f,DL), e, DL), DL),
-		     s, DL);
-	break;
+        exp_to_c(nv,e);
+        // cast to void* if necessary
+        if (is_poly_field(struct_type,f))
+          e = cast_exp(void_star_typ(),e,DL);
+        s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,f,DL), e, DL), DL),
+                     s, DL);
+        break;
       default: throw toc_impos("array designator in struct");
       }
   }
@@ -1140,12 +1140,6 @@ static void exp_to_c(env nv, exp e) {
 			       typ2string(old_typ)));
       break;
     }
-    break;
-  case Const_e(String_c(heap_allocate,s)) && heap_allocate:
-    // Cyc_new_string(s)
-    e->r = fncall_exp(var_exp(&$(abs_ns,Cyc_new_string_sp),DL),
-		      &List(new_exp(Const_e(String_c(false,s)),DL),null),
-		      DL)->r;
     break;
   case Const_e(_): break;
   case Var_e(qv,b): 
@@ -1397,6 +1391,162 @@ static void exp_to_c(env nv, exp e) {
       break;
     }
     break;
+  case New_e(e1):
+    if (nv->toplevel)
+      unimp(xprintf("%s: new at top-level", 
+                    Position::string_of_segment(e1->loc)));
+    switch (e1->r) {
+    case Array_e(dles0):
+      // FIX: MAY BE SUSCEPTIBLE TO GCC BUG!
+      // ({ t *x = (t*)(malloc(sizeof(t)*length(dles0)));
+      //    x[d1] = e1; ... x[dn] = en; x; })
+      let x = temp_var();
+      let s = exp_stmt(var_exp(x,DL),DL);
+      int count = List::length(dles0)-1;
+      for (let dles = List::rev(dles0); dles != null; dles = dles->tl) {
+	// add x[e_index] = e to sequence of assignments
+	let &$(dl,e1) = dles->hd;
+	// calculate the index expression -- the front end checks that
+	// the designators are in ascending order...
+	// FIX:  real designator lists
+	exp e_index;
+	if (dl == null)
+	  e_index = signed_int_exp(count--,DL);
+	else {
+	  if (dl->tl != null) unimp("multiple designators in array");
+	  let d = dl->hd;
+	  switch (d) {
+	  case ArrayElement(e3):
+	    exp_to_c(nv,e3);
+	    e_index = e3;
+            break;
+	  case FieldName(_):
+            e_index = unimp("field name designators in array");
+            break;
+	  }
+	}
+	exp_to_c(nv,e1);
+	s = seq_stmt(assign_stmt(subscript_exp(var_exp(x,DL),e_index,DL),
+				 e1,DL),s,DL);
+      }
+      typ old_elt_typ;
+      switch (compress(old_typ)) {
+      case PointerType(PtrInfo{et,_,_,tq,_}):
+	old_elt_typ = et; break;
+      default:
+	old_elt_typ =
+          toc_impos("exp_to_c:new array expression doesn't have ptr type");
+        break;
+      }
+      typ elt_typ=typ_to_c(old_elt_typ);
+      let ptr_typ = cstar_typ(elt_typ,mt_tq);
+      let e2 = times_exp(sizeoftyp_exp(elt_typ,DL),
+                         signed_int_exp(List::length(dles0),DL),DL);
+      let e1 = malloc_exp(old_elt_typ,e2);
+      let e0 = cast_exp(ptr_typ,e1,DL);
+      e->r = stmt_exp(declare_stmt(x,ptr_typ,e0,s,DL),DL)->r;
+      break;
+    case Const_e(String_c(s)):
+      // Cyc_new_string(s)
+      e->r = fncall_exp(var_exp(&$(abs_ns,Cyc_new_string_sp),DL),
+                        &List(new_exp(Const_e(String_c(s)),DL),null),
+                        DL)->r;
+      break;
+    case Comprehension_e(vd,e1,e2):
+      // Drop the "tagged_ptr_t" struct stuff when type is a fixed-size array
+      // ({ unsigned int max = e1;
+      //    unsigned int x ;
+      //    t *a = (t*)malloc(sizeof(t)*max);
+      //    struct tagged_ptr_t b = {a, a, a+max};
+      //    for (x = 0; x < max; x++) a[x] = e2;
+      //    b; })
+      qvar x1 = vd->name;
+      bool is_tagged_ptr = false;
+      switch (compress(old_typ)) {
+      case PointerType(PtrInfo{et,_,_,tq,b}):
+        switch (compress_conref(b)->v) {
+        case Eq_constr(Unknown_b): is_tagged_ptr = true; break;
+        default: break;
+        }
+        break;
+      default:
+        toc_impos("exp_to_c: comprehension not an array type");
+        break;
+      }
+      typ old_elt_typ = e2->topt->v;
+      typ elt_typ = typ_to_c(old_elt_typ);
+      typ ptr_typ = cstar_typ(elt_typ,mt_tq);
+      exp_to_c(nv,e1);
+      env nv2 = add_varmap(nv,x1,varb_exp(x1,Local_b(vd),DL));
+      exp_to_c(nv2,e2);
+      qvar max = temp_var();
+      qvar a = temp_var();
+      exp ea = assign_exp(var_exp(x1,DL),signed_int_exp(0,DL),DL);
+      exp eb = lt_exp(var_exp(x1,DL),var_exp(max,DL),DL);
+      exp ec = post_inc_exp(var_exp(x1,DL),DL);
+      stmt s = for_stmt(ea,eb,ec,
+                        assign_stmt(subscript_exp(var_exp(a,DL),
+                                                  var_exp(x1,DL),DL),e2,DL),
+                        DL);
+      // FIX:  casts needed on exp_opts
+      list_t<$(qvar,typ,exp_opt)@> decls =
+        &List(&$(max,uint_t,(exp_opt)e1),null);
+      exp ainit = cast_exp(ptr_typ,
+                           malloc_exp(old_elt_typ,
+                                      times_exp(sizeoftyp_exp(elt_typ,DL),
+                                                var_exp(max,DL),DL)),DL);
+      decls = &List(&$(a,ptr_typ,(exp_opt)ainit),decls);
+      decls = &List(&$(x1,uint_t,null),decls);
+      if (is_tagged_ptr) {
+        let b = temp_var();
+        let t = typ_to_c(old_typ);
+        let binit = 
+          unresolvedmem_exp(null,
+                            &List{&$(null,var_exp(a,DL)),
+                                  &List{&$(null,var_exp(a,DL)),
+                                        &List{&$(null,add_exp(var_exp(a,DL),
+                                                              var_exp(max,DL),
+                                                              DL)),
+                                              null}}},DL);
+        decls = &List(&$(b,t,(exp_opt)binit),decls);
+        s = seq_stmt(s,exp_stmt(var_exp(b,DL),DL),DL);
+      } else // not a tagged array -- just return a
+        s = seq_stmt(s,exp_stmt(var_exp(a,DL),DL),DL);
+      for (let ds = decls; ds != null; ds = ds->tl) {
+        let $(d0,d1,d2) = *(ds->hd);
+        s = declare_stmt(d0,d1,d2,s,DL);
+      }
+      e->r = stmt_exp(s,DL)->r;
+      break;
+    case Struct_e(tdn,_,es,_):
+      // try to avoid the GCC bug
+      e->r = init_struct(nv, e1->topt->v, true, es, tdn)->r;
+      break;
+    case Tuple_e(es):
+      // try to avoid the GCC bug
+      e->r = init_tuple(nv, true, es)->r;
+      break;
+    default:
+      // treated just like an array of size 1
+      // FIX: MAY BE SUSCEPTIBLE TO GCC BUG!
+      // ({ t *x = (t*)(malloc(sizeof(t)));
+      //    x[0] = e1; x; })
+      let old_elt_typ = e1->topt->v;
+      let x = temp_var();
+      let s = exp_stmt(var_exp(x,DL),DL);
+      let e_index = signed_int_exp(0,DL);
+      exp_to_c(nv,e1);
+      s = seq_stmt(assign_stmt(subscript_exp(var_exp(x,DL),e_index,DL),
+                               e1,DL),s,DL);
+      typ elt_typ=typ_to_c(old_elt_typ);
+      let ptr_typ = cstar_typ(elt_typ,mt_tq);
+      let e2 = sizeoftyp_exp(elt_typ,DL);
+      let e1 = malloc_exp(old_elt_typ,e2);
+      let e0 = cast_exp(ptr_typ,e1,DL);
+      e->r = stmt_exp(declare_stmt(x,ptr_typ,e0,s,DL),DL)->r;
+      break;
+    }
+    break;
   case Sizeoftyp_e(t): e->r = Sizeoftyp_e(typ_to_c_array(t)); break;
   case Sizeofexp_e(e1): exp_to_c(nv,e1); break;
   case Deref_e(e1):
@@ -1487,7 +1637,9 @@ static void exp_to_c(env nv, exp e) {
       break;
     case ArrayType(ta,tq,esz):
       // is this possible (was it not promoted by the type-checker)
-      e->r = known_size_subscript(e1,e2,esz,ta,tq,false)->r;
+      if (esz == null) 
+        toc_impos("exp_to_c: Subscript_e array type bound null");
+      e->r = known_size_subscript(e1,e2,(exp)esz,ta,tq,false)->r;
       break;
     case PointerType(PtrInfo{ta,rgn,bcr,tq,b}):
       switch (conref_val(b)) {
@@ -1551,128 +1703,24 @@ static void exp_to_c(env nv, exp e) {
     // the type-checker doesn't deal with these yet...
     unimp("compoundlit");
     break;
-  case Array_e(heap_allocate,dles0):
-    if (nv->toplevel || !heap_allocate) {
-      // {e1,...,en}
-      e->r = unresolvedmem_exp(null,dles0,DL)->r;
-      for (let dles = dles0; dles != null; dles = dles->tl) {
-	let &$(_,e) = dles->hd;
-	exp_to_c(nv,e);
-      }
-    } else {
-      // FIX: MAY BE SUSCEPTIBLE TO GCC BUG!
-      // ({ t *x = (t*)(malloc(sizeof(t)*length(dles0)));
-      //    x[d1] = e1; ... x[dn] = en; x; })
-      let x = temp_var();
-      let s = exp_stmt(var_exp(x,DL),DL);
-      int count = List::length(dles0)-1;
-      for (let dles = List::rev(dles0); dles != null; dles = dles->tl) {
-	// add x[e_index] = e to sequence of assignments
-	let &$(dl,e1) = dles->hd;
-	// calculate the index expression -- the front end checks that
-	// the designators are in ascending order...
-	// FIX:  real designator lists
-	exp e_index;
-	if (dl == null)
-	  e_index = signed_int_exp(count--,DL);
-	else {
-	  if (dl->tl != null) unimp("multiple designators in array");
-	  let d = dl->hd;
-	  switch (d) {
-	  case ArrayElement(e3):
-	    exp_to_c(nv,e3);
-	    e_index = e3;
-            break;
-	  case FieldName(_):
-            e_index = unimp("field name designators in array");
-            break;
-	  }
-	}
-	exp_to_c(nv,e1);
-	s = seq_stmt(assign_stmt(subscript_exp(var_exp(x,DL),e_index,DL),
-				 e1,DL),s,DL);
-      }
-      typ old_elt_typ;
-      switch (compress(old_typ)) {
-      case PointerType(PtrInfo{et,_,_,tq,_}):
-	old_elt_typ = et; break;
-      default:
-	old_elt_typ=toc_impos("exp_to_c:array expression doesn't have array type");
-        break;
-      }
-      typ elt_typ=typ_to_c(old_elt_typ);
-      let ptr_typ = cstar_typ(elt_typ,mt_tq);
-      let e2 = times_exp(sizeoftyp_exp(elt_typ,DL),
-                         signed_int_exp(List::length(dles0),DL),DL);
-      let e1 = malloc_exp(old_elt_typ,e2);
-      let e0 = cast_exp(ptr_typ,e1,DL);
-      e->r = stmt_exp(declare_stmt(x,ptr_typ,e0,s,DL),DL)->r;
+  case Array_e(dles0):
+    // An array not under a "new"
+    // {e1,...,en}
+    e->r = unresolvedmem_exp(null,dles0,DL)->r;
+    for (let dles = dles0; dles != null; dles = dles->tl) {
+      let &$(_,e) = dles->hd;
+      exp_to_c(nv,e);
     }
     break;
   case Comprehension_e(vd,e1,e2):
-    // Drop the "tagged_ptr_t" struct stuff when type is a fixed-size array
-    // ({ unsigned int max = e1;
-    //    unsigned int x ;
-    //    t *a = (t*)malloc(sizeof(t)*max);
-    //    struct tagged_ptr_t b = {a, a, a+max};
-    //    for (x = 0; x < max; x++) a[x] = e2;
-    //    b; })
-    qvar x1 = vd->name;
-    bool is_tagged_ptr = false;
-    switch (compress(old_typ)) {
-    case PointerType(PtrInfo{et,_,_,tq,b}):
-      switch (compress_conref(b)->v) {
-      case Eq_constr(Unknown_b): is_tagged_ptr = true; break;
-      default: break;
-      }
-      break;
-    default:
-      toc_impos("exp_to_c: comprehension not an array type");
-      break;
-    }
-    typ old_elt_typ = e2->topt->v;
-    typ elt_typ = typ_to_c(old_elt_typ);
-    typ ptr_typ = cstar_typ(elt_typ,mt_tq);
-    exp_to_c(nv,e1);
-    env nv2 = add_varmap(nv,x1,varb_exp(x1,Local_b(vd),DL));
-    exp_to_c(nv2,e2);
-    qvar max = temp_var();
-    qvar a = temp_var();
-    exp ea = assign_exp(var_exp(x1,DL),signed_int_exp(0,DL),DL);
-    exp eb = lt_exp(var_exp(x1,DL),var_exp(max,DL),DL);
-    exp ec = post_inc_exp(var_exp(x1,DL),DL);
-    stmt s = for_stmt(ea,eb,ec,
-                      assign_stmt(subscript_exp(var_exp(a,DL),
-                                                var_exp(x1,DL),DL),e2,DL),DL);
-    // FIX:  casts needed on exp_opts
-    list_t<$(qvar,typ,exp_opt)@> decls =
-      &List(&$(max,uint_t,(exp_opt)e1),null);
-    exp ainit = cast_exp(ptr_typ,
-                         malloc_exp(old_elt_typ,
-                                    times_exp(sizeoftyp_exp(elt_typ,DL),
-                                              var_exp(max,DL),DL)),DL);
-    decls = &List(&$(a,ptr_typ,(exp_opt)ainit),decls);
-    decls = &List(&$(x1,uint_t,null),decls);
-    if (is_tagged_ptr) {
-      let b = temp_var();
-      let t = typ_to_c(old_typ);
-      let binit = 
-        unresolvedmem_exp(null,
-                          &List{&$(null,var_exp(a,DL)),
-                                &List{&$(null,var_exp(a,DL)),
-                                      &List{&$(null,add_exp(var_exp(a,DL),
-                                                            var_exp(max,DL),
-                                                            DL)),
-                                            null}}},DL);
-      decls = &List(&$(b,t,(exp_opt)binit),decls);
-      s = seq_stmt(s,exp_stmt(var_exp(b,DL),DL),DL);
-    } else // not a tagged array -- just return a
-      s = seq_stmt(s,exp_stmt(var_exp(a,DL),DL),DL);
-    for (let ds = decls; ds != null; ds = ds->tl) {
-      let $(d0,d1,d2) = *(ds->hd);
-      s = declare_stmt(d0,d1,d2,s,DL);
-    }
-    e->r = stmt_exp(s,DL)->r;
+    // a comprehension not under a "new" -- should only be the case
+    // when e1 is constant.  At top-level, e2 should be too.
+    let sz = Evexp::eval_const_uint_exp(e1);
+    exp_to_c(nv,e2);
+    list_t<$(list_t<designator>,exp)@> es = null;
+    for (unsigned int i = 0; i < sz; i++)
+      es = &List(&$(null,e2),es);
+    e->r = unresolvedmem_exp(null,es,DL)->r;
     break;
   case Struct_e(tdn,ots,dles,sd):
     // Due to a GCC bug w.r.t. to nested designators, we expand this out
@@ -1680,7 +1728,7 @@ static void exp_to_c(env nv, exp e) {
     if(!nv->toplevel)
       e->r = init_struct(nv,old_typ,false,dles,tdn)->r;
     else {
-      // At top-level must use deisignators
+      // At top-level must use designators
       let n = tdn;
       structdecl sd2 = 
 	(structdecl)((sd == null) ? toc_impos(xprintf("no structdecl %s",qvar2string(tdn))) : sd);
@@ -2641,13 +2689,13 @@ static list_t<decl> enumdecl_to_c(enumdecl ed, list_t<decl> res) {
         let fs = null;
         int i  = 1;
         for (let ts = f->typs; ts != null; ts = ts->tl, i++) {
-          let fname = (stringptr)new {xprintf("f%d",i)};
+          let fname = (stringptr)(new {xprintf("f%d",i)});
           let f = &Structfield(fname,(*ts->hd)[0],
-                               typ_to_c_array((*ts->hd)[1]),null);
+                               typ_to_c_array((*ts->hd)[1]),null,null);
           fs = &List(f,fs);
         }
         fs = List::imp_rev(fs);
-        fs = &List(&Structfield(tag_sp,mt_tq,sint_t,null),fs);
+        fs = &List(&Structfield(tag_sp,mt_tq,sint_t,null,null),fs);
         let sd = 
           &Structdecl{.sc = Public,
                       .name = &Opt(collapse_qvar_tag(f->name,"_struct")),
@@ -2705,7 +2753,7 @@ static list_t<decl> xenumdecl_to_c(xenumdecl xd, list_t<decl> res) {
       let       tag_typ = ArrayType(uchar_t,mt_tq,sz_exp);
       exp_opt initopt = null;
       if (xd->sc != Extern)
-	initopt = string_exp(false,*fn,DL);
+	initopt = string_exp(*fn,DL);
       let tag_decl = new_vardecl(collapse_qvar_tag(f->name,"_tag"),
                                  tag_typ, initopt);
       tag_decl->sc = xd->sc;
@@ -2731,13 +2779,13 @@ static list_t<decl> xenumdecl_to_c(xenumdecl xd, list_t<decl> res) {
         list_t<structfield_t> fields = null;
         int i = 1;
         for (list_t<$(tqual,typ)@> ts = f->typs; ts != null; ts = ts->tl,i++) {
-	  let field_n = (stringptr)new {xprintf("f%d",i)};
+	  let field_n = (stringptr)(new {xprintf("f%d",i)});
           let newf = &Structfield(field_n,(*ts->hd)[0],
-                                  typ_to_c_array((*ts->hd)[1]),null);
+                                  typ_to_c_array((*ts->hd)[1]),null,null);
           fields = &List(newf,fields);
         }
         fields = &List(&Structfield(tag_sp,mt_tq,
-                                    cstar_typ(uchar_t,mt_tq),null),
+                                    cstar_typ(uchar_t,mt_tq),null,null),
                        List::imp_rev(fields));
         let strct_decl =
 	  &Structdecl{.sc     = Public,

@@ -7,9 +7,10 @@ struct Cyc_Absyn_Tqual* f2; void* f3; } ; struct _tuple2{ struct Cyc_Absyn_Exp*
 f1; struct Cyc_Absyn_Stmt* f2; } ; struct _tuple3{ void* f1; int f2; } ; struct
 _tuple4{ struct Cyc_Declarator* f1; struct Cyc_Absyn_Exp* f2; } ; struct _tuple5{
 struct Cyc_Absyn_Tqual* f1; struct Cyc_List_List* f2; struct Cyc_List_List* f3;
-} ; struct _tuple6{ struct Cyc_List_List* f1; int f2; struct Cyc_Core_Opt* f3; }
-; struct _tuple7{ struct Cyc_List_List* f1; struct Cyc_Absyn_Pat* f2; } ; struct
-_tuple8{ struct _tagged_string f1; short f2; } ; struct _tuple9{ struct Cyc_Lex_Trie**
+} ; struct _tuple6{ struct Cyc_Declarator* f1; struct Cyc_Core_Opt* f2; } ;
+struct _tuple7{ struct Cyc_List_List* f1; int f2; struct Cyc_Core_Opt* f3; } ;
+struct _tuple8{ struct Cyc_List_List* f1; struct Cyc_Absyn_Pat* f2; } ; struct
+_tuple9{ struct _tagged_string f1; short f2; } ; struct _tuple10{ struct Cyc_Lex_Trie**
 f1; } ; typedef unsigned int Cyc_uint; typedef char* Cyc_Cstring; typedef struct
 _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
 struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void* exit(
@@ -203,8 +204,8 @@ Cyc_Absyn_Int_c_struct{ int tag; void* f1; int f2; } ; extern const int Cyc_Absy
 struct Cyc_Absyn_LongLong_c_struct{ int tag; void* f1; long long f2; } ; extern
 const int Cyc_Absyn_Float_c_tag; struct Cyc_Absyn_Float_c_struct{ int tag;
 struct _tagged_string f1; } ; extern const int Cyc_Absyn_String_c_tag; struct
-Cyc_Absyn_String_c_struct{ int tag; int f1; struct _tagged_string f2; } ; extern
-void* Cyc_Absyn_Null_c; extern void* Cyc_Absyn_Plus; extern void* Cyc_Absyn_Times;
+Cyc_Absyn_String_c_struct{ int tag; struct _tagged_string f1; } ; extern void*
+Cyc_Absyn_Null_c; extern void* Cyc_Absyn_Plus; extern void* Cyc_Absyn_Times;
 extern void* Cyc_Absyn_Minus; extern void* Cyc_Absyn_Div; extern void* Cyc_Absyn_Mod;
 extern void* Cyc_Absyn_Eq; extern void* Cyc_Absyn_Neq; extern void* Cyc_Absyn_Gt;
 extern void* Cyc_Absyn_Lt; extern void* Cyc_Absyn_Gte; extern void* Cyc_Absyn_Lte;
@@ -245,8 +246,9 @@ int tag; struct Cyc_Absyn_Exp* f1; struct Cyc_List_List* f2; } ; extern const
 int Cyc_Absyn_Cast_e_tag; struct Cyc_Absyn_Cast_e_struct{ int tag; void* f1;
 struct Cyc_Absyn_Exp* f2; } ; extern const int Cyc_Absyn_Address_e_tag; struct
 Cyc_Absyn_Address_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; extern const
-int Cyc_Absyn_Sizeoftyp_e_tag; struct Cyc_Absyn_Sizeoftyp_e_struct{ int tag;
-void* f1; } ; extern const int Cyc_Absyn_Sizeofexp_e_tag; struct Cyc_Absyn_Sizeofexp_e_struct{
+int Cyc_Absyn_New_e_tag; struct Cyc_Absyn_New_e_struct{ int tag; struct Cyc_Absyn_Exp*
+f1; } ; extern const int Cyc_Absyn_Sizeoftyp_e_tag; struct Cyc_Absyn_Sizeoftyp_e_struct{
+int tag; void* f1; } ; extern const int Cyc_Absyn_Sizeofexp_e_tag; struct Cyc_Absyn_Sizeofexp_e_struct{
 int tag; struct Cyc_Absyn_Exp* f1; } ; extern const int Cyc_Absyn_Deref_e_tag;
 struct Cyc_Absyn_Deref_e_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; extern
 const int Cyc_Absyn_StructMember_e_tag; struct Cyc_Absyn_StructMember_e_struct{
@@ -258,7 +260,7 @@ Cyc_Absyn_Exp* f2; } ; extern const int Cyc_Absyn_Tuple_e_tag; struct Cyc_Absyn_
 int tag; struct Cyc_List_List* f1; } ; extern const int Cyc_Absyn_CompoundLit_e_tag;
 struct Cyc_Absyn_CompoundLit_e_struct{ int tag; struct _tuple1* f1; struct Cyc_List_List*
 f2; } ; extern const int Cyc_Absyn_Array_e_tag; struct Cyc_Absyn_Array_e_struct{
-int tag; int f1; struct Cyc_List_List* f2; } ; extern const int Cyc_Absyn_Comprehension_e_tag;
+int tag; struct Cyc_List_List* f1; } ; extern const int Cyc_Absyn_Comprehension_e_tag;
 struct Cyc_Absyn_Comprehension_e_struct{ int tag; struct Cyc_Absyn_Vardecl* f1;
 struct Cyc_Absyn_Exp* f2; struct Cyc_Absyn_Exp* f3; } ; extern const int Cyc_Absyn_Struct_e_tag;
 struct Cyc_Absyn_Struct_e_struct{ int tag; struct _tuple0* f1; struct Cyc_Core_Opt*
@@ -348,16 +350,16 @@ name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt* effect; void* ret_type;
 struct Cyc_List_List* args; int varargs; struct Cyc_Absyn_Stmt* body; struct Cyc_Core_Opt*
 cached_typ; struct Cyc_Core_Opt* param_vardecls; struct Cyc_List_List*
 attributes; } ; struct Cyc_Absyn_Structfield{ struct _tagged_string* name;
-struct Cyc_Absyn_Tqual* tq; void* type; struct Cyc_List_List* attributes; } ;
-struct Cyc_Absyn_Structdecl{ void* sc; struct Cyc_Core_Opt* name; struct Cyc_List_List*
-tvs; struct Cyc_Core_Opt* fields; struct Cyc_List_List* attributes; } ; struct
-Cyc_Absyn_Uniondecl{ void* sc; struct Cyc_Core_Opt* name; struct Cyc_List_List*
-tvs; struct Cyc_Core_Opt* fields; struct Cyc_List_List* attributes; } ; struct
-Cyc_Absyn_Enumfield{ struct _tuple0* name; struct Cyc_Absyn_Exp* tag; struct Cyc_List_List*
-tvs; struct Cyc_List_List* typs; struct Cyc_Position_Segment* loc; } ; struct
-Cyc_Absyn_Enumdecl{ void* sc; struct Cyc_Core_Opt* name; struct Cyc_List_List*
-tvs; struct Cyc_Core_Opt* fields; } ; struct Cyc_Absyn_Xenumdecl{ void* sc;
-struct _tuple0* name; struct Cyc_List_List* fields; } ; struct Cyc_Absyn_Typedefdecl{
+struct Cyc_Absyn_Tqual* tq; void* type; struct Cyc_Core_Opt* width; struct Cyc_List_List*
+attributes; } ; struct Cyc_Absyn_Structdecl{ void* sc; struct Cyc_Core_Opt* name;
+struct Cyc_List_List* tvs; struct Cyc_Core_Opt* fields; struct Cyc_List_List*
+attributes; } ; struct Cyc_Absyn_Uniondecl{ void* sc; struct Cyc_Core_Opt* name;
+struct Cyc_List_List* tvs; struct Cyc_Core_Opt* fields; struct Cyc_List_List*
+attributes; } ; struct Cyc_Absyn_Enumfield{ struct _tuple0* name; struct Cyc_Absyn_Exp*
+tag; struct Cyc_List_List* tvs; struct Cyc_List_List* typs; struct Cyc_Position_Segment*
+loc; } ; struct Cyc_Absyn_Enumdecl{ void* sc; struct Cyc_Core_Opt* name; struct
+Cyc_List_List* tvs; struct Cyc_Core_Opt* fields; } ; struct Cyc_Absyn_Xenumdecl{
+void* sc; struct _tuple0* name; struct Cyc_List_List* fields; } ; struct Cyc_Absyn_Typedefdecl{
 struct _tuple0* name; struct Cyc_List_List* tvs; void* defn; } ; extern const
 int Cyc_Absyn_Var_d_tag; struct Cyc_Absyn_Var_d_struct{ int tag; struct Cyc_Absyn_Vardecl*
 f1; } ; extern const int Cyc_Absyn_Fn_d_tag; struct Cyc_Absyn_Fn_d_struct{ int
@@ -428,63 +430,65 @@ char* tag; struct Cyc_Absyn_Tqual* f1; } ; extern char Cyc_StructFieldDeclList_t
 f1; } ; extern char Cyc_StructFieldDeclListList_tok_tag[ 28u]; struct Cyc_StructFieldDeclListList_tok_struct{
 char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_Declarator_tok_tag[ 15u];
 struct Cyc_Declarator_tok_struct{ char* tag; struct Cyc_Declarator* f1; } ;
-extern char Cyc_DeclaratorList_tok_tag[ 19u]; struct Cyc_DeclaratorList_tok_struct{
-char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_AbstractDeclarator_tok_tag[
-23u]; struct Cyc_AbstractDeclarator_tok_struct{ char* tag; struct Cyc_Abstractdeclarator*
-f1; } ; extern char Cyc_EnumeratorField_tok_tag[ 20u]; struct Cyc_EnumeratorField_tok_struct{
-char* tag; struct Cyc_Absyn_Enumfield* f1; } ; extern char Cyc_EnumeratorFieldList_tok_tag[
-24u]; struct Cyc_EnumeratorFieldList_tok_struct{ char* tag; struct Cyc_List_List*
-f1; } ; extern char Cyc_ParamDecl_tok_tag[ 14u]; struct Cyc_ParamDecl_tok_struct{
-char* tag; struct _tuple1* f1; } ; extern char Cyc_ParamDeclList_tok_tag[ 18u];
-struct Cyc_ParamDeclList_tok_struct{ char* tag; struct Cyc_List_List* f1; } ;
-extern char Cyc_ParamDeclListBool_tok_tag[ 22u]; struct Cyc_ParamDeclListBool_tok_struct{
-char* tag; struct _tuple6* f1; } ; extern char Cyc_StructOrUnion_tok_tag[ 18u];
-struct Cyc_StructOrUnion_tok_struct{ char* tag; void* f1; } ; extern char Cyc_IdList_tok_tag[
-11u]; struct Cyc_IdList_tok_struct{ char* tag; struct Cyc_List_List* f1; } ;
-extern char Cyc_Designator_tok_tag[ 15u]; struct Cyc_Designator_tok_struct{ char*
-tag; void* f1; } ; extern char Cyc_DesignatorList_tok_tag[ 19u]; struct Cyc_DesignatorList_tok_struct{
-char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_TypeModifierList_tok_tag[
-21u]; struct Cyc_TypeModifierList_tok_struct{ char* tag; struct Cyc_List_List*
-f1; } ; extern char Cyc_Rgn_tok_tag[ 8u]; struct Cyc_Rgn_tok_struct{ char* tag;
-void* f1; } ; extern char Cyc_InitializerList_tok_tag[ 20u]; struct Cyc_InitializerList_tok_struct{
-char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_FieldPattern_tok_tag[
-17u]; struct Cyc_FieldPattern_tok_struct{ char* tag; struct _tuple7* f1; } ;
-extern char Cyc_FieldPatternList_tok_tag[ 21u]; struct Cyc_FieldPatternList_tok_struct{
-char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_BlockItem_tok_tag[ 14u];
-struct Cyc_BlockItem_tok_struct{ char* tag; void* f1; } ; extern char Cyc_Kind_tok_tag[
-9u]; struct Cyc_Kind_tok_struct{ char* tag; void* f1; } ; extern char Cyc_Attribute_tok_tag[
-14u]; struct Cyc_Attribute_tok_struct{ char* tag; void* f1; } ; extern char Cyc_AttributeList_tok_tag[
-18u]; struct Cyc_AttributeList_tok_struct{ char* tag; struct Cyc_List_List* f1;
-} ; struct Cyc_Yyltype{ int timestamp; int first_line; int first_column; int
-last_line; int last_column; struct _tagged_string text; } ; typedef struct Cyc_Yyltype
-Cyc_yyltype; extern struct Cyc_Yyltype Cyc_yylloc; extern struct _xenum_struct*
-Cyc_yylval; struct Cyc_Dict_Dict; typedef struct Cyc_Dict_Dict* Cyc_Dict_hdict_t;
-typedef struct Cyc_Dict_Dict* Cyc_Dict_dict_t; extern char Cyc_Dict_Present_tag[
-8u]; struct Cyc_Dict_Present_struct{ char* tag; } ; extern char Cyc_Dict_Absent_tag[
-7u]; extern struct Cyc_Dict_Dict* Cyc_Dict_empty( int(* comp)( void*, void*));
-extern struct Cyc_Dict_Dict* Cyc_Dict_insert( struct Cyc_Dict_Dict* d, void* key,
-void* data); extern void* Cyc_Dict_lookup( struct Cyc_Dict_Dict* d, void* key);
-void Cyc_yyerror( struct _tagged_string s){ Cyc_Position_post_error( Cyc_Position_mk_err_parse(
-Cyc_Position_segment_of_abs( Cyc_yylloc.first_line, Cyc_yylloc.last_line), s));}
-struct Cyc_Lex_Trie; typedef struct Cyc_Lex_Trie* Cyc_Lex_trie_t; typedef struct
-Cyc_Lex_Trie** Cyc_Lex_trie_child_v_t; typedef struct Cyc_Lex_Trie*** Cyc_Lex_trie_child_t;
-struct Cyc_Lex_Trie{ struct Cyc_Lex_Trie*** children; int shared_str; } ; static
-int Cyc_Lex_num_kws= 0; static struct _tagged_ptr0 Cyc_Lex_kw_nums={ 0, 0, 0};
-static struct Cyc_Xarray_Xarray* Cyc_Lex_symbols= 0; static struct Cyc_Lex_Trie*
-Cyc_Lex_ids_trie= 0; static struct Cyc_Lex_Trie* Cyc_Lex_typedefs_trie= 0;
-static int Cyc_Lex_comment_depth= 0; static struct _tuple3 Cyc_Lex_token_int_pair=(
-struct _tuple3){.f1=( void*) 0u,.f2= 0}; static char _temp2[ 8u]="*bogus*";
-static struct _tagged_string Cyc_Lex_bogus_string=( struct _tagged_string){
-_temp2, _temp2, _temp2 + 8u}; static struct Cyc_Absyn_Abs_n_struct _temp3={ 1u,
-0}; static struct _tuple0 Cyc_Lex_token_id_pair=( struct _tuple0){.f1=( struct
-Cyc_Absyn_Abs_n_struct*)& _temp3,.f2=& Cyc_Lex_bogus_string}; static char Cyc_Lex_token_char='\000';
-static char _temp6[ 1u]=""; static struct _tagged_string Cyc_Lex_token_string=(
-struct _tagged_string){ _temp6, _temp6, _temp6 + 1u}; static struct _tuple3* Cyc_Lex_token_int=&
-Cyc_Lex_token_int_pair; static struct _tuple0* Cyc_Lex_token_qvar=& Cyc_Lex_token_id_pair;
-static int Cyc_Lex_runaway_start= 0; static void Cyc_Lex_err( struct
-_tagged_string msg, struct Cyc_Lexing_lexbuf* lb){ struct Cyc_Position_Segment*
-s= Cyc_Position_segment_of_abs((( int(*)( struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme_start)(
-lb),(( int(*)( struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme_end)( lb)); Cyc_Position_post_error(
+extern char Cyc_DeclaratorExpopt_tok_tag[ 21u]; struct Cyc_DeclaratorExpopt_tok_struct{
+char* tag; struct _tuple6* f1; } ; extern char Cyc_DeclaratorExpoptList_tok_tag[
+25u]; struct Cyc_DeclaratorExpoptList_tok_struct{ char* tag; struct Cyc_List_List*
+f1; } ; extern char Cyc_AbstractDeclarator_tok_tag[ 23u]; struct Cyc_AbstractDeclarator_tok_struct{
+char* tag; struct Cyc_Abstractdeclarator* f1; } ; extern char Cyc_EnumeratorField_tok_tag[
+20u]; struct Cyc_EnumeratorField_tok_struct{ char* tag; struct Cyc_Absyn_Enumfield*
+f1; } ; extern char Cyc_EnumeratorFieldList_tok_tag[ 24u]; struct Cyc_EnumeratorFieldList_tok_struct{
+char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_ParamDecl_tok_tag[ 14u];
+struct Cyc_ParamDecl_tok_struct{ char* tag; struct _tuple1* f1; } ; extern char
+Cyc_ParamDeclList_tok_tag[ 18u]; struct Cyc_ParamDeclList_tok_struct{ char* tag;
+struct Cyc_List_List* f1; } ; extern char Cyc_ParamDeclListBool_tok_tag[ 22u];
+struct Cyc_ParamDeclListBool_tok_struct{ char* tag; struct _tuple7* f1; } ;
+extern char Cyc_StructOrUnion_tok_tag[ 18u]; struct Cyc_StructOrUnion_tok_struct{
+char* tag; void* f1; } ; extern char Cyc_IdList_tok_tag[ 11u]; struct Cyc_IdList_tok_struct{
+char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_Designator_tok_tag[ 15u];
+struct Cyc_Designator_tok_struct{ char* tag; void* f1; } ; extern char Cyc_DesignatorList_tok_tag[
+19u]; struct Cyc_DesignatorList_tok_struct{ char* tag; struct Cyc_List_List* f1;
+} ; extern char Cyc_TypeModifierList_tok_tag[ 21u]; struct Cyc_TypeModifierList_tok_struct{
+char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_Rgn_tok_tag[ 8u];
+struct Cyc_Rgn_tok_struct{ char* tag; void* f1; } ; extern char Cyc_InitializerList_tok_tag[
+20u]; struct Cyc_InitializerList_tok_struct{ char* tag; struct Cyc_List_List* f1;
+} ; extern char Cyc_FieldPattern_tok_tag[ 17u]; struct Cyc_FieldPattern_tok_struct{
+char* tag; struct _tuple8* f1; } ; extern char Cyc_FieldPatternList_tok_tag[ 21u];
+struct Cyc_FieldPatternList_tok_struct{ char* tag; struct Cyc_List_List* f1; } ;
+extern char Cyc_BlockItem_tok_tag[ 14u]; struct Cyc_BlockItem_tok_struct{ char*
+tag; void* f1; } ; extern char Cyc_Kind_tok_tag[ 9u]; struct Cyc_Kind_tok_struct{
+char* tag; void* f1; } ; extern char Cyc_Attribute_tok_tag[ 14u]; struct Cyc_Attribute_tok_struct{
+char* tag; void* f1; } ; extern char Cyc_AttributeList_tok_tag[ 18u]; struct Cyc_AttributeList_tok_struct{
+char* tag; struct Cyc_List_List* f1; } ; struct Cyc_Yyltype{ int timestamp; int
+first_line; int first_column; int last_line; int last_column; struct
+_tagged_string text; } ; typedef struct Cyc_Yyltype Cyc_yyltype; extern struct
+Cyc_Yyltype Cyc_yylloc; extern struct _xenum_struct* Cyc_yylval; struct Cyc_Dict_Dict;
+typedef struct Cyc_Dict_Dict* Cyc_Dict_hdict_t; typedef struct Cyc_Dict_Dict*
+Cyc_Dict_dict_t; extern char Cyc_Dict_Present_tag[ 8u]; struct Cyc_Dict_Present_struct{
+char* tag; } ; extern char Cyc_Dict_Absent_tag[ 7u]; extern struct Cyc_Dict_Dict*
+Cyc_Dict_empty( int(* comp)( void*, void*)); extern struct Cyc_Dict_Dict* Cyc_Dict_insert(
+struct Cyc_Dict_Dict* d, void* key, void* data); extern void* Cyc_Dict_lookup(
+struct Cyc_Dict_Dict* d, void* key); void Cyc_yyerror( struct _tagged_string s){
+Cyc_Position_post_error( Cyc_Position_mk_err_parse( Cyc_Position_segment_of_abs(
+Cyc_yylloc.first_line, Cyc_yylloc.last_line), s));} struct Cyc_Lex_Trie; typedef
+struct Cyc_Lex_Trie* Cyc_Lex_trie_t; typedef struct Cyc_Lex_Trie** Cyc_Lex_trie_child_v_t;
+typedef struct Cyc_Lex_Trie*** Cyc_Lex_trie_child_t; struct Cyc_Lex_Trie{ struct
+Cyc_Lex_Trie*** children; int shared_str; } ; static int Cyc_Lex_num_kws= 0;
+static struct _tagged_ptr0 Cyc_Lex_kw_nums={ 0, 0, 0}; static struct Cyc_Xarray_Xarray*
+Cyc_Lex_symbols= 0; static struct Cyc_Lex_Trie* Cyc_Lex_ids_trie= 0; static
+struct Cyc_Lex_Trie* Cyc_Lex_typedefs_trie= 0; static int Cyc_Lex_comment_depth=
+0; static struct _tuple3 Cyc_Lex_token_int_pair=( struct _tuple3){.f1=( void*) 0u,.f2=
+0}; static char _temp2[ 8u]="*bogus*"; static struct _tagged_string Cyc_Lex_bogus_string=(
+struct _tagged_string){ _temp2, _temp2, _temp2 + 8u}; static struct Cyc_Absyn_Abs_n_struct
+_temp3={ 1u, 0}; static struct _tuple0 Cyc_Lex_token_id_pair=( struct _tuple0){.f1=(
+struct Cyc_Absyn_Abs_n_struct*)& _temp3,.f2=& Cyc_Lex_bogus_string}; static char
+Cyc_Lex_token_char='\000'; static char _temp6[ 1u]=""; static struct
+_tagged_string Cyc_Lex_token_string=( struct _tagged_string){ _temp6, _temp6,
+_temp6 + 1u}; static struct _tuple3* Cyc_Lex_token_int=& Cyc_Lex_token_int_pair;
+static struct _tuple0* Cyc_Lex_token_qvar=& Cyc_Lex_token_id_pair; static int
+Cyc_Lex_runaway_start= 0; static void Cyc_Lex_err( struct _tagged_string msg,
+struct Cyc_Lexing_lexbuf* lb){ struct Cyc_Position_Segment* s= Cyc_Position_segment_of_abs(((
+int(*)( struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme_start)( lb),(( int(*)(
+struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme_end)( lb)); Cyc_Position_post_error(
 Cyc_Position_mk_err_lex( s, msg));} static void Cyc_Lex_runaway_err( struct
 _tagged_string msg, struct Cyc_Lexing_lexbuf* lb){ struct Cyc_Position_Segment*
 s= Cyc_Position_segment_of_abs( Cyc_Lex_runaway_start,(( int(*)( struct Cyc_Lexing_lexbuf*))
@@ -514,89 +518,90 @@ static char _temp156[ 6u]="union"; static char _temp159[ 9u]="unsigned"; static
 char _temp162[ 6u]="using"; static char _temp165[ 5u]="void"; static char
 _temp168[ 9u]="volatile"; static char _temp171[ 6u]="while"; static char
 _temp174[ 6u]="xenum"; static char _temp177[ 8u]="xprintf"; static struct
-_tuple8 Cyc_Lex_rw_array[ 57u]={( struct _tuple8){.f1=( struct _tagged_string){
-_temp9, _temp9, _temp9 + 14u},.f2= (short)346},( struct _tuple8){.f1=( struct
+_tuple9 Cyc_Lex_rw_array[ 57u]={( struct _tuple9){.f1=( struct _tagged_string){
+_temp9, _temp9, _temp9 + 14u},.f2= (short)346},( struct _tuple9){.f1=( struct
 _tagged_string){ _temp12, _temp12, _temp12 + 9u},.f2= (short)298},( struct
-_tuple8){.f1=( struct _tagged_string){ _temp15, _temp15, _temp15 + 5u},.f2=
-(short)258},( struct _tuple8){.f1=( struct _tagged_string){ _temp18, _temp18,
-_temp18 + 6u},.f2= (short)288},( struct _tuple8){.f1=( struct _tagged_string){
-_temp21, _temp21, _temp21 + 5u},.f2= (short)277},( struct _tuple8){.f1=( struct
+_tuple9){.f1=( struct _tagged_string){ _temp15, _temp15, _temp15 + 5u},.f2=
+(short)258},( struct _tuple9){.f1=( struct _tagged_string){ _temp18, _temp18,
+_temp18 + 6u},.f2= (short)288},( struct _tuple9){.f1=( struct _tagged_string){
+_temp21, _temp21, _temp21 + 5u},.f2= (short)277},( struct _tuple9){.f1=( struct
 _tagged_string){ _temp24, _temp24, _temp24 + 6u},.f2= (short)296},( struct
-_tuple8){.f1=( struct _tagged_string){ _temp27, _temp27, _temp27 + 5u},.f2=
-(short)264},( struct _tuple8){.f1=( struct _tagged_string){ _temp30, _temp30,
-_temp30 + 8u},.f2= (short)304},( struct _tuple8){.f1=( struct _tagged_string){
-_temp33, _temp33, _temp33 + 6u},.f2= (short)272},( struct _tuple8){.f1=( struct
+_tuple9){.f1=( struct _tagged_string){ _temp27, _temp27, _temp27 + 5u},.f2=
+(short)264},( struct _tuple9){.f1=( struct _tagged_string){ _temp30, _temp30,
+_temp30 + 8u},.f2= (short)304},( struct _tuple9){.f1=( struct _tagged_string){
+_temp33, _temp33, _temp33 + 6u},.f2= (short)272},( struct _tuple9){.f1=( struct
 _tagged_string){ _temp36, _temp36, _temp36 + 9u},.f2= (short)287},( struct
-_tuple8){.f1=( struct _tagged_string){ _temp39, _temp39, _temp39 + 4u},.f2=
-(short)305},( struct _tuple8){.f1=( struct _tagged_string){ _temp42, _temp42,
-_temp42 + 8u},.f2= (short)278},( struct _tuple8){.f1=( struct _tagged_string){
-_temp45, _temp45, _temp45 + 3u},.f2= (short)284},( struct _tuple8){.f1=( struct
+_tuple9){.f1=( struct _tagged_string){ _temp39, _temp39, _temp39 + 4u},.f2=
+(short)305},( struct _tuple9){.f1=( struct _tagged_string){ _temp42, _temp42,
+_temp42 + 8u},.f2= (short)278},( struct _tuple9){.f1=( struct _tagged_string){
+_temp45, _temp45, _temp45 + 3u},.f2= (short)284},( struct _tuple9){.f1=( struct
 _tagged_string){ _temp48, _temp48, _temp48 + 7u},.f2= (short)269},( struct
-_tuple8){.f1=( struct _tagged_string){ _temp51, _temp51, _temp51 + 5u},.f2=
-(short)281},( struct _tuple8){.f1=( struct _tagged_string){ _temp54, _temp54,
-_temp54 + 5u},.f2= (short)291},( struct _tuple8){.f1=( struct _tagged_string){
-_temp57, _temp57, _temp57 + 7u},.f2= (short)261},( struct _tuple8){.f1=( struct
+_tuple9){.f1=( struct _tagged_string){ _temp51, _temp51, _temp51 + 5u},.f2=
+(short)281},( struct _tuple9){.f1=( struct _tagged_string){ _temp54, _temp54,
+_temp54 + 5u},.f2= (short)291},( struct _tuple9){.f1=( struct _tagged_string){
+_temp57, _temp57, _temp57 + 7u},.f2= (short)261},( struct _tuple9){.f1=( struct
 _tagged_string){ _temp60, _temp60, _temp60 + 9u},.f2= (short)299},( struct
-_tuple8){.f1=( struct _tagged_string){ _temp63, _temp63, _temp63 + 5u},.f2=
-(short)303},( struct _tuple8){.f1=( struct _tagged_string){ _temp66, _temp66,
-_temp66 + 6u},.f2= (short)268},( struct _tuple8){.f1=( struct _tagged_string){
-_temp69, _temp69, _temp69 + 4u},.f2= (short)285},( struct _tuple8){.f1=( struct
+_tuple9){.f1=( struct _tagged_string){ _temp63, _temp63, _temp63 + 5u},.f2=
+(short)303},( struct _tuple9){.f1=( struct _tagged_string){ _temp66, _temp66,
+_temp66 + 6u},.f2= (short)268},( struct _tuple9){.f1=( struct _tagged_string){
+_temp69, _temp69, _temp69 + 4u},.f2= (short)285},( struct _tuple9){.f1=( struct
 _tagged_string){ _temp72, _temp72, _temp72 + 8u},.f2= (short)308},( struct
-_tuple8){.f1=( struct _tagged_string){ _temp75, _temp75, _temp75 + 7u},.f2=
-(short)311},( struct _tuple8){.f1=( struct _tagged_string){ _temp78, _temp78,
-_temp78 + 5u},.f2= (short)286},( struct _tuple8){.f1=( struct _tagged_string){
-_temp81, _temp81, _temp81 + 3u},.f2= (short)280},( struct _tuple8){.f1=( struct
+_tuple9){.f1=( struct _tagged_string){ _temp75, _temp75, _temp75 + 7u},.f2=
+(short)311},( struct _tuple9){.f1=( struct _tagged_string){ _temp78, _temp78,
+_temp78 + 5u},.f2= (short)286},( struct _tuple9){.f1=( struct _tagged_string){
+_temp81, _temp81, _temp81 + 3u},.f2= (short)280},( struct _tuple9){.f1=( struct
 _tagged_string){ _temp84, _temp84, _temp84 + 7u},.f2= (short)279},( struct
-_tuple8){.f1=( struct _tagged_string){ _temp87, _temp87, _temp87 + 4u},.f2=
-(short)266},( struct _tuple8){.f1=( struct _tagged_string){ _temp90, _temp90,
-_temp90 + 4u},.f2= (short)293},( struct _tuple8){.f1=( struct _tagged_string){
-_temp93, _temp93, _temp93 + 5u},.f2= (short)267},( struct _tuple8){.f1=( struct
+_tuple9){.f1=( struct _tagged_string){ _temp87, _temp87, _temp87 + 4u},.f2=
+(short)266},( struct _tuple9){.f1=( struct _tagged_string){ _temp90, _temp90,
+_temp90 + 4u},.f2= (short)293},( struct _tuple9){.f1=( struct _tagged_string){
+_temp93, _temp93, _temp93 + 5u},.f2= (short)267},( struct _tuple9){.f1=( struct
 _tagged_string){ _temp96, _temp96, _temp96 + 7u},.f2= (short)313},( struct
-_tuple8){.f1=( struct _tagged_string){ _temp99, _temp99, _temp99 + 10u},.f2=
-(short)301},( struct _tuple8){.f1=( struct _tagged_string){ _temp102, _temp102,
-_temp102 + 4u},.f2= (short)297},( struct _tuple8){.f1=( struct _tagged_string){
-_temp105, _temp105, _temp105 + 5u},.f2= (short)292},( struct _tuple8){.f1=(
+_tuple9){.f1=( struct _tagged_string){ _temp99, _temp99, _temp99 + 10u},.f2=
+(short)301},( struct _tuple9){.f1=( struct _tagged_string){ _temp102, _temp102,
+_temp102 + 4u},.f2= (short)297},( struct _tuple9){.f1=( struct _tagged_string){
+_temp105, _temp105, _temp105 + 5u},.f2= (short)292},( struct _tuple9){.f1=(
 struct _tagged_string){ _temp108, _temp108, _temp108 + 7u},.f2= (short)307},(
-struct _tuple8){.f1=( struct _tagged_string){ _temp111, _temp111, _temp111 + 9u},.f2=
-(short)259},( struct _tuple8){.f1=( struct _tagged_string){ _temp114, _temp114,
-_temp114 + 9u},.f2= (short)274},( struct _tuple8){.f1=( struct _tagged_string){
-_temp117, _temp117, _temp117 + 7u},.f2= (short)289},( struct _tuple8){.f1=(
+struct _tuple9){.f1=( struct _tagged_string){ _temp111, _temp111, _temp111 + 9u},.f2=
+(short)259},( struct _tuple9){.f1=( struct _tagged_string){ _temp114, _temp114,
+_temp114 + 9u},.f2= (short)274},( struct _tuple9){.f1=( struct _tagged_string){
+_temp117, _temp117, _temp117 + 7u},.f2= (short)289},( struct _tuple9){.f1=(
 struct _tagged_string){ _temp120, _temp120, _temp120 + 6u},.f2= (short)310},(
-struct _tuple8){.f1=( struct _tagged_string){ _temp123, _temp123, _temp123 + 6u},.f2=
-(short)265},( struct _tuple8){.f1=( struct _tagged_string){ _temp126, _temp126,
-_temp126 + 7u},.f2= (short)270},( struct _tuple8){.f1=( struct _tagged_string){
-_temp129, _temp129, _temp129 + 7u},.f2= (short)290},( struct _tuple8){.f1=(
+struct _tuple9){.f1=( struct _tagged_string){ _temp123, _temp123, _temp123 + 6u},.f2=
+(short)265},( struct _tuple9){.f1=( struct _tagged_string){ _temp126, _temp126,
+_temp126 + 7u},.f2= (short)270},( struct _tuple9){.f1=( struct _tagged_string){
+_temp129, _temp129, _temp129 + 7u},.f2= (short)290},( struct _tuple9){.f1=(
 struct _tagged_string){ _temp132, _temp132, _temp132 + 7u},.f2= (short)306},(
-struct _tuple8){.f1=( struct _tagged_string){ _temp135, _temp135, _temp135 + 7u},.f2=
-(short)312},( struct _tuple8){.f1=( struct _tagged_string){ _temp138, _temp138,
-_temp138 + 7u},.f2= (short)260},( struct _tuple8){.f1=( struct _tagged_string){
-_temp141, _temp141, _temp141 + 7u},.f2= (short)275},( struct _tuple8){.f1=(
+struct _tuple9){.f1=( struct _tagged_string){ _temp135, _temp135, _temp135 + 7u},.f2=
+(short)312},( struct _tuple9){.f1=( struct _tagged_string){ _temp138, _temp138,
+_temp138 + 7u},.f2= (short)260},( struct _tuple9){.f1=( struct _tagged_string){
+_temp141, _temp141, _temp141 + 7u},.f2= (short)275},( struct _tuple9){.f1=(
 struct _tagged_string){ _temp144, _temp144, _temp144 + 7u},.f2= (short)282},(
-struct _tuple8){.f1=( struct _tagged_string){ _temp147, _temp147, _temp147 + 6u},.f2=
-(short)294},( struct _tuple8){.f1=( struct _tagged_string){ _temp150, _temp150,
-_temp150 + 4u},.f2= (short)295},( struct _tuple8){.f1=( struct _tagged_string){
-_temp153, _temp153, _temp153 + 8u},.f2= (short)262},( struct _tuple8){.f1=(
+struct _tuple9){.f1=( struct _tagged_string){ _temp147, _temp147, _temp147 + 6u},.f2=
+(short)294},( struct _tuple9){.f1=( struct _tagged_string){ _temp150, _temp150,
+_temp150 + 4u},.f2= (short)295},( struct _tuple9){.f1=( struct _tagged_string){
+_temp153, _temp153, _temp153 + 8u},.f2= (short)262},( struct _tuple9){.f1=(
 struct _tagged_string){ _temp156, _temp156, _temp156 + 6u},.f2= (short)276},(
-struct _tuple8){.f1=( struct _tagged_string){ _temp159, _temp159, _temp159 + 9u},.f2=
-(short)271},( struct _tuple8){.f1=( struct _tagged_string){ _temp162, _temp162,
-_temp162 + 6u},.f2= (short)300},( struct _tuple8){.f1=( struct _tagged_string){
-_temp165, _temp165, _temp165 + 5u},.f2= (short)263},( struct _tuple8){.f1=(
+struct _tuple9){.f1=( struct _tagged_string){ _temp159, _temp159, _temp159 + 9u},.f2=
+(short)271},( struct _tuple9){.f1=( struct _tagged_string){ _temp162, _temp162,
+_temp162 + 6u},.f2= (short)300},( struct _tuple9){.f1=( struct _tagged_string){
+_temp165, _temp165, _temp165 + 5u},.f2= (short)263},( struct _tuple9){.f1=(
 struct _tagged_string){ _temp168, _temp168, _temp168 + 9u},.f2= (short)273},(
-struct _tuple8){.f1=( struct _tagged_string){ _temp171, _temp171, _temp171 + 6u},.f2=
-(short)283},( struct _tuple8){.f1=( struct _tagged_string){ _temp174, _temp174,
-_temp174 + 6u},.f2= (short)302},( struct _tuple8){.f1=( struct _tagged_string){
+struct _tuple9){.f1=( struct _tagged_string){ _temp171, _temp171, _temp171 + 6u},.f2=
+(short)283},( struct _tuple9){.f1=( struct _tagged_string){ _temp174, _temp174,
+_temp174 + 6u},.f2= (short)302},( struct _tuple9){.f1=( struct _tagged_string){
 _temp177, _temp177, _temp177 + 8u},.f2= (short)309}}; static int Cyc_Lex_str_index(
 struct _tagged_string buff, int offset, int len){ int i= offset; int last=(
 offset + len) - 1; struct Cyc_Lex_Trie* t= Cyc_Lex_ids_trie; while( i <= last) {
 int ch=( int)({ struct _tagged_string _temp178= buff; char* _temp180= _temp178.curr
 + i; if( _temp180 < _temp178.base? 1: _temp180 >= _temp178.last_plus_one){
 _throw( Null_Exception);}* _temp180;}) - 48; if( t->children == 0){ while( i <=
-last) { t->children=( struct Cyc_Lex_Trie***)({ struct Cyc_Lex_Trie*** _temp181=(
-struct Cyc_Lex_Trie***) GC_malloc( sizeof( struct Cyc_Lex_Trie**) * 1); _temp181[
-0]=( struct Cyc_Lex_Trie**)({ unsigned int _temp182= 75u; struct Cyc_Lex_Trie**
-_temp183=( struct Cyc_Lex_Trie**) GC_malloc( sizeof( struct Cyc_Lex_Trie*) *
-_temp182); unsigned int i; for( i= 0; i < _temp182; i ++){ _temp183[ i]= 0;}
-_temp183;}); _temp181;});({ struct Cyc_Lex_Trie** _temp184=* t->children;
+last) { struct Cyc_Lex_Trie** temp=( struct Cyc_Lex_Trie**)({ unsigned int
+_temp181= 75u; struct Cyc_Lex_Trie** _temp182=( struct Cyc_Lex_Trie**) GC_malloc(
+sizeof( struct Cyc_Lex_Trie*) * _temp181); unsigned int i; for( i= 0; i <
+_temp181; i ++){ _temp182[ i]= 0;} _temp182;}); struct Cyc_Lex_Trie*** temp2=({
+struct Cyc_Lex_Trie*** _temp183=( struct Cyc_Lex_Trie***) GC_malloc( sizeof(
+struct Cyc_Lex_Trie**) * 1); _temp183[ 0]= temp; _temp183;}); t->children=(
+struct Cyc_Lex_Trie***) temp2;({ struct Cyc_Lex_Trie** _temp184=* t->children;
 unsigned int _temp185= ch; if( _temp185 >= 75u){ _throw( Null_Exception);}
 _temp184[ _temp185]=({ struct Cyc_Lex_Trie* _temp186=( struct Cyc_Lex_Trie*)
 GC_malloc( sizeof( struct Cyc_Lex_Trie)); _temp186->children= 0; _temp186->shared_str=
@@ -636,11 +641,11 @@ struct Cyc_Lex_Trie* t= Cyc_Lex_typedefs_trie;{ int i= 0; for( 0; i < len; ++ i)
 int ch=( int)({ struct _tagged_string _temp204= s; char* _temp206= _temp204.curr
 + i; if( _temp206 < _temp204.base? 1: _temp206 >= _temp204.last_plus_one){
 _throw( Null_Exception);}* _temp206;}) - 48; if( t->children == 0){ while( i <
-len) { t->children=( struct Cyc_Lex_Trie***)({ struct _tuple9* _temp207=( struct
-_tuple9*) GC_malloc( sizeof( struct _tuple9)); _temp207->f1=({ unsigned int
-_temp208= 75u; struct Cyc_Lex_Trie** _temp209=( struct Cyc_Lex_Trie**) GC_malloc(
-sizeof( struct Cyc_Lex_Trie*) * _temp208); unsigned int i; for( i= 0; i <
-_temp208; i ++){ _temp209[ i]= 0;} _temp209;}); _temp207;});({ struct Cyc_Lex_Trie**
+len) { t->children=( struct Cyc_Lex_Trie***)({ struct _tuple10* _temp207=(
+struct _tuple10*) GC_malloc( sizeof( struct _tuple10)); _temp207->f1=({
+unsigned int _temp208= 75u; struct Cyc_Lex_Trie** _temp209=( struct Cyc_Lex_Trie**)
+GC_malloc( sizeof( struct Cyc_Lex_Trie*) * _temp208); unsigned int i; for( i= 0;
+i < _temp208; i ++){ _temp209[ i]= 0;} _temp209;}); _temp207;});({ struct Cyc_Lex_Trie**
 _temp210=* t->children; unsigned int _temp211= ch; if( _temp211 >= 75u){ _throw(
 Null_Exception);} _temp210[ _temp211]=({ struct Cyc_Lex_Trie* _temp212=( struct
 Cyc_Lex_Trie*) GC_malloc( sizeof( struct Cyc_Lex_Trie)); _temp212->children= 0;
@@ -1343,29 +1348,29 @@ struct _tagged_string _temp487; _temp487.curr= _temp486; _temp487.base= _temp486
 _temp487.last_plus_one= _temp486 + 27; _temp487;});( struct _xenum_struct*)
 _temp485;}));} int Cyc_Lex_comment( struct Cyc_Lexing_lexbuf* lexbuf){ return((
 int(*)( struct Cyc_Lexing_lexbuf* lexbuf, int lexstate)) Cyc_Lex_comment_rec)(
-lexbuf, 2);} void Cyc_Lex_lex_init(){ Cyc_Lex_ids_trie=( struct Cyc_Lex_Trie*)({
-struct Cyc_Lex_Trie* _temp488=( struct Cyc_Lex_Trie*) GC_malloc( sizeof( struct
-Cyc_Lex_Trie) * 1); _temp488[ 0]=({ struct Cyc_Lex_Trie _temp489; _temp489.children=
-0; _temp489.shared_str= - 1; _temp489;}); _temp488;}); Cyc_Lex_typedefs_trie=(
-struct Cyc_Lex_Trie*)({ struct Cyc_Lex_Trie* _temp490=( struct Cyc_Lex_Trie*)
-GC_malloc( sizeof( struct Cyc_Lex_Trie) * 1); _temp490[ 0]=({ struct Cyc_Lex_Trie
-_temp491; _temp491.children= 0; _temp491.shared_str= 0; _temp491;}); _temp490;});
-Cyc_Lex_symbols=( struct Cyc_Xarray_Xarray*)(( struct Cyc_Xarray_Xarray*(*)( int,
-struct _tagged_string*)) Cyc_Xarray_create)( 101,({ struct _tagged_string*
-_temp492=( struct _tagged_string*) GC_malloc( sizeof( struct _tagged_string) * 1);
-_temp492[ 0]=( struct _tagged_string)({ char* _temp493=( char*)""; struct
-_tagged_string _temp494; _temp494.curr= _temp493; _temp494.base= _temp493;
-_temp494.last_plus_one= _temp493 + 1; _temp494;}); _temp492;})); Cyc_Lex_num_kws=(
-int) 57u; Cyc_Lex_kw_nums=({ unsigned int _temp495=( unsigned int) Cyc_Lex_num_kws;
-int* _temp496=( int*) GC_malloc_atomic( sizeof( int) * _temp495); unsigned int i;
-struct _tagged_ptr0 _temp497={ _temp496, _temp496, _temp496 + _temp495}; for( i=
-0; i < _temp495; i ++){ _temp496[ i]= 0;} _temp497;});{ int i= 0; for( 0; i <
-Cyc_Lex_num_kws; ++ i){ struct _tagged_string str=({ struct _tuple8* _temp498=(
-struct _tuple8*) Cyc_Lex_rw_array; unsigned int _temp499= i; if( _temp499 >= 57u){
-_throw( Null_Exception);} _temp498[ _temp499];}).f1; Cyc_Lex_str_index( str, 0,(
-int) Cyc_String_strlen( str));({ struct _tagged_ptr0 _temp500= Cyc_Lex_kw_nums;
-int* _temp502= _temp500.curr + i; if( _temp502 < _temp500.base? 1: _temp502 >=
-_temp500.last_plus_one){ _throw( Null_Exception);}* _temp502=( int)({ struct
-_tuple8* _temp503=( struct _tuple8*) Cyc_Lex_rw_array; unsigned int _temp504= i;
-if( _temp504 >= 57u){ _throw( Null_Exception);} _temp503[ _temp504];}).f2;});}}
-Cyc_Lex_typedef_init(); Cyc_Lex_comment_depth= 0;}
+lexbuf, 2);} void Cyc_Lex_lex_init(){ Cyc_Lex_ids_trie=({ struct Cyc_Lex_Trie*
+_temp488=( struct Cyc_Lex_Trie*) GC_malloc( sizeof( struct Cyc_Lex_Trie) * 1);
+_temp488[ 0]=({ struct Cyc_Lex_Trie _temp489; _temp489.children= 0; _temp489.shared_str=
+- 1; _temp489;}); _temp488;}); Cyc_Lex_typedefs_trie=({ struct Cyc_Lex_Trie*
+_temp490=( struct Cyc_Lex_Trie*) GC_malloc( sizeof( struct Cyc_Lex_Trie) * 1);
+_temp490[ 0]=({ struct Cyc_Lex_Trie _temp491; _temp491.children= 0; _temp491.shared_str=
+0; _temp491;}); _temp490;}); Cyc_Lex_symbols=( struct Cyc_Xarray_Xarray*)((
+struct Cyc_Xarray_Xarray*(*)( int, struct _tagged_string*)) Cyc_Xarray_create)(
+101,({ struct _tagged_string* _temp492=( struct _tagged_string*) GC_malloc(
+sizeof( struct _tagged_string) * 1); _temp492[ 0]=( struct _tagged_string)({
+char* _temp493=( char*)""; struct _tagged_string _temp494; _temp494.curr=
+_temp493; _temp494.base= _temp493; _temp494.last_plus_one= _temp493 + 1;
+_temp494;}); _temp492;})); Cyc_Lex_num_kws=( int) 57u; Cyc_Lex_kw_nums=({
+unsigned int _temp495=( unsigned int) Cyc_Lex_num_kws; int* _temp496=( int*)
+GC_malloc_atomic( sizeof( int) * _temp495); unsigned int i; struct _tagged_ptr0
+_temp497={ _temp496, _temp496, _temp496 + _temp495}; for( i= 0; i < _temp495; i
+++){ _temp496[ i]= 0;} _temp497;});{ int i= 0; for( 0; i < Cyc_Lex_num_kws; ++ i){
+struct _tagged_string str=({ struct _tuple9* _temp498=( struct _tuple9*) Cyc_Lex_rw_array;
+unsigned int _temp499= i; if( _temp499 >= 57u){ _throw( Null_Exception);}
+_temp498[ _temp499];}).f1; Cyc_Lex_str_index( str, 0,( int) Cyc_String_strlen(
+str));({ struct _tagged_ptr0 _temp500= Cyc_Lex_kw_nums; int* _temp502= _temp500.curr
++ i; if( _temp502 < _temp500.base? 1: _temp502 >= _temp500.last_plus_one){
+_throw( Null_Exception);}* _temp502=( int)({ struct _tuple9* _temp503=( struct
+_tuple9*) Cyc_Lex_rw_array; unsigned int _temp504= i; if( _temp504 >= 57u){
+_throw( Null_Exception);} _temp503[ _temp504];}).f2;});}} Cyc_Lex_typedef_init();
+Cyc_Lex_comment_depth= 0;}

@@ -126,12 +126,12 @@ struct _tagged_ptr0 bvec, int sz){ struct Cyc_List_List* ans= 0;{ int pos= sz -
 _temp68= bvec; int* _temp70= _temp68.curr + word; if( _temp70 < _temp68.base? 1:
 _temp70 >= _temp68.last_plus_one){ _throw( Null_Exception);}* _temp70;}); int
 offset= pos & 31; for( 0; offset >= 0; -- offset, -- pos){ if(( bits >> offset &
-1) == 1){ ans=( struct Cyc_List_List*)({ struct Cyc_List_List* _temp71=( struct
-Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List) * 1); _temp71[ 0]=({
-struct Cyc_List_List _temp72; _temp72.hd=( void*) pos; _temp72.tl= ans; _temp72;});
-_temp71;});}}}} return ans;} void Cyc_Bitvec_clear_all( struct _tagged_ptr0 bvec){
-int len=( int)({ struct _tagged_ptr0 _temp73= bvec;( unsigned int)( _temp73.last_plus_one
-- _temp73.curr);}); int i= 0; for( 0; i < len; ++ i){({ struct _tagged_ptr0
+1) == 1){ ans=({ struct Cyc_List_List* _temp71=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List) * 1); _temp71[ 0]=({ struct Cyc_List_List
+_temp72; _temp72.hd=( void*) pos; _temp72.tl= ans; _temp72;}); _temp71;});}}}}
+return ans;} void Cyc_Bitvec_clear_all( struct _tagged_ptr0 bvec){ int len=( int)({
+struct _tagged_ptr0 _temp73= bvec;( unsigned int)( _temp73.last_plus_one -
+_temp73.curr);}); int i= 0; for( 0; i < len; ++ i){({ struct _tagged_ptr0
 _temp74= bvec; int* _temp76= _temp74.curr + i; if( _temp76 < _temp74.base? 1:
 _temp76 >= _temp74.last_plus_one){ _throw( Null_Exception);}* _temp76= 0;});}}
 void Cyc_Bitvec_set_all( struct _tagged_ptr0 bvec){ int len=( int)({ struct

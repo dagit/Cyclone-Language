@@ -456,7 +456,8 @@ static simple_pat_t compile_pat(pat p) {
   case Struct_p(sd,_,_,dlps):
     list_t<simple_pat_t> ps = null;
     for (_ fields = sd->fields->v; fields != null; fields = fields->tl) {
-      bool found = false;
+      // leave out bit fields without a name
+      bool found = (String::strcmp(*fields->hd->name,"") == 0);
       for(_ dlps0 = dlps; !found && dlps0 != null; dlps0 = dlps0->tl) {
 	let &$(dl,p) = dlps0->hd;
 	switch (dl) {

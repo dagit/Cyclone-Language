@@ -140,7 +140,9 @@ unsigned int szof(typ t, seg_t loc) {
   case DoubleType:    return 8u;
   case ArrayType(t2,_,e): 
     // FIX: insert padding for alignment
-    return szof(t2,loc) * eval_const_uint_exp(e);
+    if (e == null) 
+      terr(loc, "cannot apply sizeof to an array of unknown size");
+    return szof(t2,loc) * eval_const_uint_exp((exp)e);
   case FnType(_): terr(loc, "cannot apply sizeof to function type"); return 0u;
   case TupleType(tqs):
     // FIX: we need to insert padding to ensure alignment

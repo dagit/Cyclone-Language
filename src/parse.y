@@ -142,7 +142,9 @@ static void unimp2(string msg,seg_t sg) {
 // Functions for creating abstract syntax 
 static structfield_t 
 make_struct_field(seg_t loc,
-                  $(qvar,tqual,typ,list_t<tvar>,list_t<attribute_t>)@ field) {
+                  $($(qvar,tqual,typ,list_t<tvar>,list_t<attribute_t>)@,
+                    opt_t<exp>)@ field_info) {
+  let $(field,expopt) = *field_info;
   if ((*field)[3] != null)
     err("bad type params in struct field",loc);
   let qid = (*field)[0];
@@ -156,7 +158,9 @@ make_struct_field(seg_t loc,
   }
   let atts = (*field)[4];
   return &Structfield{.name = (*qid)[1], .tq = (*field)[1], 
-                         .type = (*field)[2], .attributes = atts};
+                         .type = (*field)[2], 
+                         .width = expopt,
+                         .attributes = atts};
 }
 
 static $(opt_t<var>,tqual,typ)@ 
@@ -186,8 +190,9 @@ static type_specifier_t type_spec(typ t,seg_t loc) {
 // convert any array types to pointer types 
 static typ array2ptr(typ t) {
   switch (t) {
-  case ArrayType(t1,tq,e):
-    return starb_typ(t1,HeapRgn,tq,Upper_b(e));
+  case ArrayType(t1,tq,eopt):
+    return starb_typ(t1,HeapRgn,tq,
+                     eopt == null ? Unknown_b : Upper_b((exp)eopt));
   default: return t;
   }
 }
@@ -399,7 +404,7 @@ static $(var,tqual,typ)@ fnargspec_to_arg(seg_t loc,
 					  $(opt_t<var>,tqual,typ)@ t) {
   if ((*t)[0] == null) {
     err("missing argument variable in function prototype",loc);
-    return &$(new{"?"},(*t)[1],(*t)[2]);
+    return &$(new{(string)"?"},(*t)[1],(*t)[2]);
   } else
     return &$((*t)[0]->v,(*t)[1],(*t)[2]);
 }
@@ -564,8 +569,7 @@ static $(tqual,typ,list_t<tvar>,list_t<attribute_t>)
   if (tms==null) return $(tq,t,null,atts);
   switch (tms->hd) {
     case Carray_mod:
-      return apply_tms(empty_tqual(),ArrayType(t,tq,uint_exp(0,null)),
-                       atts,tms->tl);
+      return apply_tms(empty_tqual(),ArrayType(t,tq,null),atts,tms->tl);
     case ConstArray_mod(e):
       return apply_tms(empty_tqual(),ArrayType(t,tq,e),atts,tms->tl);
     case Function_mod(args): {
@@ -908,7 +912,8 @@ using Parse;
   StructFieldDeclList_tok(list_t<structfield_t>);
   StructFieldDeclListList_tok(list_t<list_t<structfield_t>>);
   Declarator_tok(declarator_t);
-  DeclaratorList_tok(list_t<declarator_t>);
+  DeclaratorExpopt_tok($(declarator_t,opt_t<exp>)@);
+  DeclaratorExpoptList_tok(list_t<$(declarator_t,opt_t<exp>)@>);
   AbstractDeclarator_tok(abstractdeclarator_t);
   EnumeratorField_tok(enumfield);
   EnumeratorFieldList_tok(list_t<enumfield>);
@@ -976,8 +981,9 @@ using Parse;
 %type <StructFieldDeclListList_tok> struct_declaration_list0
 %type <TypeModifierList_tok> pointer
 %type <Rgn_tok> rgn_opt
-%type <Declarator_tok> declarator direct_declarator struct_declarator
-%type <DeclaratorList_tok> struct_declarator_list struct_declarator_list0
+%type <Declarator_tok> declarator direct_declarator 
+%type <DeclaratorExpopt_tok> struct_declarator
+%type <DeclaratorExpoptList_tok> struct_declarator_list struct_declarator_list0
 %type <AbstractDeclarator_tok> abstract_declarator direct_abstract_declarator
 %type <EnumeratorField_tok> enumerator
 %type <EnumeratorFieldList_tok> enumerator_list
@@ -1419,7 +1425,8 @@ struct_declaration:
       tqual tq = (*$1)[0];
       let atts = (*$1)[2];
       let t = speclist2typ((*$1)[1], LOC(@1,@1));
-      let info = apply_tmss(tq,t,$2,atts);
+      let $(decls, widths) = List::split($2);
+      let info = List::zip(apply_tmss(tq,t,decls,atts),widths);
       $$=^$(List::map_c(make_struct_field,LOC(@1,@2),info));
     }
 ;
@@ -1452,15 +1459,15 @@ struct_declarator_list0:
 
 struct_declarator:
   declarator
-    { $$=$!1; }
+    { $$=^$(&$($1,null)); }
 | ':' constant_expression
-    { /* FIX: TEMPORARY TO TEST PARSING */
-      unimp2("bit fields",LOC(@1,@2));
-      // Fix: cast needed
-      $$=^$(&Declarator(&$(Rel_n(null),new {""}),null)); }
+    { 
+      // HACK: give the field an empty name -- see elsewhere in the
+      // compiler where we use this invariant
+      $$=^$(&$((&Declarator(&$(Rel_n(null),new {(string)""}),null)),&Opt($2))); 
+    }
 | declarator ':' constant_expression
-    { unimp2("bit fields",LOC(@1,@2));
-      $$=$!1; }
+    { $$=^$(&$($1,&Opt($3))); }
 ;
 
 enum_specifier:
@@ -1719,6 +1726,13 @@ initializer:
     { $$=^$(new_exp(UnresolvedMem_e(null,List::imp_rev($2)),LOC(@1,@3))); }
 | '{' initializer_list ',' '}'
     { $$=^$(new_exp(UnresolvedMem_e(null,List::imp_rev($2)),LOC(@1,@4))); }
+| '{' FOR IDENTIFIER '<' expression ':' expression '}'
+    { $$=^$(new_exp(Comprehension_e(new_vardecl(&$(Loc_n,new {$3}),
+                                                uint_t,
+						uint_exp(0,LOC(@3,@3))),
+				    $5, $7),LOC(@1,@8))); 
+    }
+
 ;
 
 /* NB: returns list in reverse order */
@@ -2135,6 +2149,9 @@ assignment_expression:
     { $$=$!1; }
 | unary_expression assignment_operator assignment_expression
     { $$=^$(assignop_exp($1,$2,$3,LOC(@1,@3))); }
+/* Cyc: expressions to build heap-allocated objects and arrays */
+| NEW initializer
+    { $$=^$(New_exp($2,LOC(@1,@3))); }
 ;
 
 assignment_operator:
@@ -2340,23 +2357,6 @@ postfix_expression:
     { $$=^$(new_exp(CompoundLit_e($2,List::imp_rev($5)),LOC(@1,@6))); }
 | '(' type_name ')' '{' initializer_list ',' '}'
     { $$=^$(new_exp(CompoundLit_e($2,List::imp_rev($5)),LOC(@1,@7))); }
-/* Cyc: expressions to build arrays */
-| NEW '{' '}'
-  /* empty arrays */
-    { $$=^$(new_exp(Array_e(true,null),LOC(@1,@3))); }
-  /* constant-sized arrays */
-| NEW '{' initializer_list '}'
-    { $$=^$(new_exp(Array_e(true,List::imp_rev($3)),LOC(@1,@3))); }
-| NEW '{' initializer_list ',' '}'
-    { $$=^$(new_exp(Array_e(true,List::imp_rev($3)),LOC(@1,@4))); }
-  /* array comprehension */
-| NEW '{' FOR IDENTIFIER '<' expression ':' expression '}'
-    { $$=^$(new_exp(Comprehension_e(new_vardecl(&$(Loc_n,new {$4}),
-                                                uint_t,
-						uint_exp(0,LOC(@4,@4))),
-				    $6, $8),LOC(@1,@9))); }
-| NEW STRING
-    { $$=^$(string_exp(true,$2,LOC(@1,@2))); }
 /* Cyc: added fill and codegen */
 | FILL '(' expression ')'
     { $$=^$(new_exp(Fill_e($3),LOC(@1,@4))); }
@@ -2372,7 +2372,7 @@ primary_expression:
 | constant
     { $$= $!1; }
 | STRING
-    { $$=^$(string_exp(false,$1,LOC(@1,@1))); }
+    { $$=^$(string_exp($1,LOC(@1,@1))); }
 | '(' expression ')'
     { $$= $!2; }
 /* Cyc: stop instantiation */

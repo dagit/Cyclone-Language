@@ -220,7 +220,7 @@ namespace Absyn {
     IntType(sign_t,size_of_t);                     // MemKind unless B4
     FloatType;                                             // MemKind
     DoubleType;                                            // MemKind
-    ArrayType(typ/* element typ*/,tqual,exp /* size */);   // MemKind
+    ArrayType(typ/* element typ*/,tqual,exp_opt /* size */);   // MemKind
     FnType(fn_info_t);                                     // MemKind
     TupleType(list_t<$(tqual,typ)@>); // MemKind
     StructType(typedef_name_opt_t,list_t<typ>,structdecl *); // MemKind
@@ -284,7 +284,7 @@ namespace Absyn {
     Int_c(sign_t,int);
     LongLong_c(sign_t,long long);
     Float_c(string);
-    String_c(bool,string); // bool is true when heap allocate
+    String_c(string); 
     Null_c;
   };
 
@@ -323,6 +323,7 @@ namespace Absyn {
     Instantiate_e(exp,list_t<typ>);
     Cast_e(typ,exp);
     Address_e(exp);
+    New_e(exp);
     Sizeoftyp_e(typ);
     Sizeofexp_e(exp);
     Deref_e(exp);
@@ -331,7 +332,7 @@ namespace Absyn {
     Subscript_e(exp,exp);
     Tuple_e(list_t<exp>);
     CompoundLit_e($(opt_t<var>,tqual,typ)@,list_t<$(list_t<designator>,exp)@>);
-    Array_e(bool,list_t<$(list_t<designator>,exp)@>);//true == came with "new"
+    Array_e(list_t<$(list_t<designator>,exp)@>);
     Comprehension_e(vardecl,exp,exp); // much of vardecl is known
     Struct_e(typedef_name_t,opt_t<list_t<typ>>,
 	     list_t<$(list_t<designator>,exp)@>, struct Structdecl *);
@@ -462,9 +463,10 @@ namespace Absyn {
   };
 
   EXTERN_DEFINITION struct Structfield {
-    field_name   name;    
+    field_name   name;       // empty-string when a bitfield used for padding
     tqual        tq;
     typ          type;
+    opt_t<exp>   width;      // bit fields: (unsigned) int and int fields only
     attributes_t attributes; // only valid ones are aligned(i) or packed
   };
 
@@ -592,6 +594,7 @@ namespace Absyn {
 
   /////////////////////////////// Expressions ////////////////////////
   extern exp new_exp(raw_exp_t, seg_t);
+  extern exp New_exp(exp, seg_t); // New_e
   extern exp copy_exp(exp);
   extern exp const_exp(cnst_t, seg_t);
   extern exp null_exp(seg_t);
@@ -603,7 +606,7 @@ namespace Absyn {
   extern exp uint_exp(unsigned int, seg_t);
   extern exp char_exp(char c, seg_t);
   extern exp float_exp(string f, seg_t);
-  extern exp string_exp(bool heap_allocate, string s, seg_t);
+  extern exp string_exp(string s, seg_t);
   extern exp var_exp(qvar, seg_t);
   extern exp varb_exp(qvar, binding_t, seg_t);
   extern exp unknownid_exp(qvar, seg_t);
@@ -647,7 +650,7 @@ namespace Absyn {
   extern exp tuple_exp(list_t<exp>, seg_t);
   extern exp stmt_exp(stmt, seg_t);
   extern exp null_pointer_exn_exp(seg_t);
-  extern exp array_exp(bool heap_allocate, list_t<exp>, seg_t);
+  extern exp array_exp(list_t<exp>, seg_t);
   extern exp unresolvedmem_exp(opt_t<typedef_name_t>,
 			       list_t<$(list_t<designator>,exp)@>,seg_t);
   /////////////////////////// Statements ///////////////////////////////

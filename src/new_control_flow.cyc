@@ -396,6 +396,38 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
 			       use_it_list());
     }
 
+  case New_e(e1):
+    switch (e1->r) {
+      // For structs and tuples, we follow what happens with Address_e below.
+    case Struct_e(_,_,_,_): fallthru;
+    case Tuple_e(_):
+      let malloc_op = mkMallocOp(e);
+      add_malloc_root(env, e, e1->topt->v);
+      let inner_env = change_lhs(env, new{List(malloc_op,null)});
+      inner_env.access_path = null; 
+      let AbsSynOne(inner,assigns) = meet_absexp(abstract_exp(inner_env, e1));
+      let ans = malloc_and_init(env, e, inner, assigns);
+      // this is rather bizarre case...
+      if(env.access_path != null)
+	switch(env.access_path->hd->r) {
+	case Subscript_e(_,e2):  // x[0] same as *x
+	  assert(Evexp::eval_const_uint_exp(e2) == 0);
+	  fallthru;
+	case Deref_e(_): 
+	  env.access_path = env.access_path->tl;
+	  ans.lvalues = new{List(destruct_path(env, malloc_op),null)};
+	  break;
+	case StructArrow_e(e2,f):
+	  env.access_path = new{List(structmember_exp(e2,f,null),
+				     env.access_path->tl)}; 
+	  ans.lvalues = new{List(destruct_path(env, malloc_op),null)};
+	  break;
+	default: throw Core::Impossible("bad malloc access path");
+	}
+      return ans;
+    default:
+      return use_exp_unordered(env, &List(e1,null), null);
+    }
   case Address_e(e1):
     //This might really be a malloc-and-initialize
     //Note: This code is much like that for Enum_e and Xenum_e (they're mallocs)
@@ -454,7 +486,7 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
     return abstract_exp(env,e1);
 
   case Deref_e(e1):
-    // only complication is cancelling out *&.
+    // only complication is cancelling out *& or * new.
     switch(env.access_path) {
     case &List(&Exp(_,Address_e(_),_),tl): 
       env.access_path = tl; 
@@ -607,7 +639,7 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
 
   // We don't track through arrays, so all array elements must be 
   // fully initialized.  The result is an initialized.
-  case Array_e(_,l): return use_exp_unordered(env, map(snd,l), null);
+  case Array_e(l): return use_exp_unordered(env, map(snd,l), null);
     
   case Increment_e(e1,_): // note: e1 must be an lvalue
     // we don't care about lvalues here, just use what's there
