@@ -17,13 +17,18 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-// An adaptation of the ISO C grammar for Cyclone.  This grammar
-// is adapted from the proposed C9X standard, but the productions are
-// arranged as in Kernighan and Ritchie's "The C Programming
-// Language (ANSI C)", Second Edition, pages 234-239.
-//
-// The grammar has 1 shift-reduce conflict, due to the "dangling else"
-// problem, which (the Cyclone port of) Bison properly resolves.
+/*
+An adaptation of the ISO C grammar for Cyclone.  This grammar
+is adapted from the proposed C9X standard, but the productions are
+arranged as in Kernighan and Ritchie's "The C Programming
+Language (ANSI C)", Second Edition, pages 234-239.
+
+The grammar has 1 shift-reduce conflict due to the "dangling else"
+problem, which (the Cyclone port of) Bison properly resolves.
+
+There are 2 additional shift-reduce conflicts due to ambiguities in
+attribute parsing -- see the comments at function_definition.
+*/
 
 %{
 #define YYDEBUG 0 // 1 to debug, 0 otherwise
@@ -1021,6 +1026,16 @@ function_definition:
     { $$=^$(make_function(NULL,$1,NULL,$2,LOC(@1,@2))); }
 | declaration_specifiers declarator compound_statement
     { $$=^$(make_function(new Opt($1),$2,NULL,$3,LOC(@1,@3))); }
+/* 2 shift-reduce conflicts come up because of the next two rules and
+   the final rule of function_definition2.  A declarator can be followed
+   by an attribute to become a declarator, and a declaration list can
+   begin with an attribute.  The default action of shift means the
+   attribute will end up attached to the declarator, which is probably
+   not the right decision.  However, this only comes up with old-style
+   function definitions, and, both attributes following declarators and
+   attributes beginning declarations are needed; so we ignore the issue
+   for now.
+*/
 | declarator declaration_list compound_statement
     { $$=^$(make_function(NULL,$1,$2,$3,LOC(@1,@3))); }
 | declaration_specifiers declarator declaration_list compound_statement
@@ -1080,36 +1095,43 @@ declaration_list:
 
 /* Cyc: added optional attributes */
 declaration_specifiers:
-  storage_class_specifier attributes_opt
-    { $$=^$(new Declaration_spec(new Opt($1),empty_tqual(),NULL,false,$2)); }
-| storage_class_specifier attributes_opt declaration_specifiers
-    { if ($3->sc != NULL)
+  storage_class_specifier
+    { $$=^$(new Declaration_spec(new Opt($1),empty_tqual(),NULL,false,NULL)); }
+| storage_class_specifier declaration_specifiers
+    { if ($2->sc != NULL)
         Tcutil::warn(LOC(@1,@2),
                      "Only one storage class is allowed in a declaration");
-      $$=^$(new Declaration_spec(new Opt($1),$3->tq,$3->type_specs,
-                                 $3->is_inline,
-                                 List::imp_append($2,$3->attributes)));
+      $$=^$(new Declaration_spec(new Opt($1),$2->tq,$2->type_specs,
+                                 $2->is_inline,
+                                 $2->attributes));
     }
-| type_specifier attributes_opt
+| type_specifier
     { $$=^$(new Declaration_spec(NULL,empty_tqual(),
-                                 new List($1,NULL),false,$2)); }
-| type_specifier attributes_opt declaration_specifiers
-    { $$=^$(new Declaration_spec($3->sc,$3->tq,new List($1,$3->type_specs),
-                                 $3->is_inline,
-                                 List::imp_append($2,$3->attributes))); }
-| type_qualifier attributes_opt
-    { $$=^$(new Declaration_spec(NULL,$1,NULL,false,$2)); }
-| type_qualifier attributes_opt declaration_specifiers
-    { $$=^$(new Declaration_spec($3->sc,combine_tqual($1,$3->tq),
-                                 $3->type_specs, $3->is_inline,
-                                 List::imp_append($2,$3->attributes))); }
-
-| INLINE attributes_opt
-    { $$=^$(new Declaration_spec(NULL,empty_tqual(),NULL,true,$2)); }
-| INLINE attributes_opt declaration_specifiers
-    { $$=^$(new Declaration_spec($3->sc,$3->tq,$3->type_specs,true,
-                              List::imp_append($2,$3->attributes)));
+                                 new List($1,NULL),false,NULL)); }
+| type_specifier declaration_specifiers
+    { $$=^$(new Declaration_spec($2->sc,$2->tq,new List($1,$2->type_specs),
+                                 $2->is_inline,
+                                 $2->attributes));
     }
+| type_qualifier
+    { $$=^$(new Declaration_spec(NULL,$1,NULL,false,NULL)); }
+| type_qualifier declaration_specifiers
+    { $$=^$(new Declaration_spec($2->sc,combine_tqual($1,$2->tq),
+                                 $2->type_specs, $2->is_inline,
+                                 $2->attributes));
+    }
+| INLINE
+    { $$=^$(new Declaration_spec(NULL,empty_tqual(),NULL,true,NULL)); }
+| INLINE declaration_specifiers
+    { $$=^$(new Declaration_spec($2->sc,$2->tq,$2->type_specs,true,
+                                 $2->attributes));
+    }
+| attributes
+    { $$=^$(new Declaration_spec(NULL,empty_tqual(),NULL,false,$1)); }
+| attributes declaration_specifiers
+    { $$=^$(new Declaration_spec($2->sc,$2->tq,
+                                 $2->type_specs, $2->is_inline,
+                                 List::imp_append($1,$2->attributes))); }
 ;
 
 storage_class_specifier:
@@ -1398,14 +1420,18 @@ struct_declaration:
 ;
 
 specifier_qualifier_list:
-  type_specifier attributes_opt
-    { $$=^$(new $(empty_tqual(), new List($1,NULL), $2)); }
-| type_specifier attributes_opt specifier_qualifier_list
-    { $$=^$(new $((*$3)[0], new List($1,(*$3)[1]), append($2,(*$3)[2])));}
-| type_qualifier attributes_opt
-    { $$=^$(new $($1,NULL,$2)); }
-| type_qualifier attributes_opt specifier_qualifier_list
-    { $$=^$(new $(combine_tqual($1,(*$3)[0]),(*$3)[1], append($2,(*$3)[2]))); }
+  type_specifier
+    { $$=^$(new $(empty_tqual(), new List($1,NULL), NULL)); }
+| type_specifier specifier_qualifier_list
+    { $$=^$(new $((*$2)[0], new List($1,(*$2)[1]), (*$2)[2]));}
+| type_qualifier
+    { $$=^$(new $($1,NULL,NULL)); }
+| type_qualifier specifier_qualifier_list
+    { $$=^$(new $(combine_tqual($1,(*$2)[0]), (*$2)[1], (*$2)[2])); }
+| attributes
+    { $$=^$(new $(empty_tqual(), NULL, $1)); }
+| attributes specifier_qualifier_list
+    { $$=^$(new $((*$2)[0], (*$2)[1], append($1,(*$2)[2]))); }
 ;
 
 struct_declarator_list:
