@@ -149,7 +149,11 @@ gc.a libraries in the bin/ directory.&nbsp;&nbsp;</p>
 <hr>
 <h2>Quick Guide to Cyclone for C/C++ Programmers</h2>
 <p>C programmers should find it fairly easy to get up to speed in Cyclone.&nbsp;
-We'll begin by going over the new features that Cyclone adds to C.&nbsp; Then
+In particular, the syntax that we use is lifted directly from ANSI C and
+wherever possible, we try to follow the static and dynamic semantics.&nbsp;
+Nonetheless, there are a number of additions and restrictions that you need to
+know in order to use the language effectively.</p>
+<p>We'll begin by going over the new features that Cyclone adds to C.&nbsp; Then
 we'll go over the common idioms that Cyclone prohibits, and see how these can be
 coded using the new facilities.</p>
 <h4>C-9X Additions:&nbsp;</h4>
@@ -253,6 +257,12 @@ shows how to declare a couple of exceptions, how to throw an exception, and how
 to catch an exception:</p>
 <pre>  <b>xenum </b>exn { NotFound(string); }  <i><font color="#FF0000">// NotFound takes a string as an argument</font></i>
   <b>xenum </b>exn { Foo; }              <i><font color="#FF0000"> // Foo takes no arguments</font></i></pre>
+<pre>  <b>void </b>bar() {
+    <b>if</b> (coin_toss()) 
+      <b>throw</b> Foo;
+    <b>else</b> <b>if</b> (!lookup(&quot;<font color="#0000FF">friday</font>&quot;))
+      <b>throw</b> NotFound(&quot;<font color="#0000FF">friday isn't here</font>&quot;);
+  }</pre>
 <pre>  <b>void</b> foo() {
     <b>try</b> {
       bar();
@@ -431,7 +441,104 @@ semantic values) and for exceptions.&nbsp; We might add better subtyping support
 for them so that you can extend them depth-wise as well as
 width-wise.&nbsp;&nbsp;</p>
 <h4>Polymorphic Functions:</h4>
+<p>As mentioned above, Cyclone supports a limited amount of subtyping
+polymorphism.&nbsp; It also supports a fairly powerful form of parametric
+polymorphism.&nbsp; Those of you coming from ML or Haskell will find this
+familiar.&nbsp; Those of you coming from C++ will also find it somewhat
+familiar.&nbsp; The basic idea is that you can write one function that abstracts
+the types of some of the values it manipulates.&nbsp; For instance, consider the
+following two functions:</p>
+<pre>  $(string,int) swap1($(int,string) x) {
+     <b>return</b> $(x[1], x[0]);
+  }</pre>
+<pre>  $(int,int) swap2($(int,int) x) {
+     <b>return</b> $(x[1], x[0]);
+  }</pre>
+<p>The two functions are quite similar:&nbsp; They both take in a pair (i.e., a
+2-tuple) and return a pair with the components swapped.&nbsp; At the
+machine-level, the code for these two functions will be exactly the same,
+assuming that ints and strings (char *) are represented the same way.&nbsp; So
+it seems silly to write the code twice.&nbsp; Normally, a C programmer would
+replace the definition with simply:</p>
+<pre>  $(void *,void *) swap1($(void *,void *) x) {
+     <b>return</b> $(x[1], x[0]);
+  }</pre>
+<p>(assuming you added tuples to C).&nbsp; But of course, this isn't type-safe
+because once I cast the values to void *, then I can't be sure what type I'm
+getting out.&nbsp; In Cyclone, you can instead write something like this:</p>
+<pre>  $(`b,`a) swap&lt;`a,`b&gt;($(`a,`b) x) {
+     <b>return </b>$(x[1],x[0]);
+  }</pre>
+<p>The code is the same, but it abstracts what the types are.&nbsp; The extra
+parameters &lt;`a,`b&gt; are type variables that can be instantiated with any <i>word-sized,
+general-purpose register </i>type.&nbsp; So, for instance, you can call swap on
+pairs of integers, pairs of pointers, pairs of an integer and a pointer, etc.:</p>
+<pre>  <b>let</b> $(x,y) = swap($(&quot;<font color="#0000FF">hello</font>&quot;,3));  <font color="#FF0000"><i>// x is 3, y is hello</i></font>
+  <b>let</b> $(w,z) = swap($(4,3));        <i><font color="#FF0000">// w is 3, z is 4</font></i></pre>
+<p>Note that when calling a polymorphic function, you need not tell it what
+types you're using to instantiate the type variables.&nbsp; Rather, Cyclone
+figures this out through unification.&nbsp;&nbsp;</p>
+<p>C++ supports similar functionality with templates.&nbsp; However, C++ and
+Cyclone differ considerably in their implementation strategies.&nbsp; First,
+Cyclone only produces one copy of the code, whereas a C++ template is
+specialized and duplicated at each type that it is used.&nbsp; This approach
+requires that you include definitions of templates in interfaces and thus
+defeats separate compilation.&nbsp; However, the approach used by Cyclone does
+have its drawbacks:&nbsp; In particular, the only types that can instantiate
+type variables are those that can be treated uniformly.&nbsp; This ensures that
+we can use the same code for different types.&nbsp; The general rule is that
+values of the types that instantiate a type variable must fit into a machine
+word and must be passed in general-purpose (as opposed to floating-point)
+registers.&nbsp; Examples of such types include int, pointer, enum, xenum, and
+array types.&nbsp; Other types, including bool, char, short, long long, float,
+double, struct, and tuple types violate this rule and thus cannot be passed to a
+function like swap in place of the type variables.&nbsp;&nbsp;</p>
+<p>In practice, this means that you tend to manipulate a lot of pointers in
+Cyclone code.&nbsp; To deal with the base types, Cyclone also provides
+&quot;boxed&quot; versions (Bool, Char, Short, Long Long, Float, Double) that
+can be used to instantiate polymorphic code.&nbsp; Boxed types such as Bool,
+Char, and Short take up a full machine word in a struct, tuple or array.&nbsp;
+Thus, Char[10] consists of 10 words, whereas char[10] consists of 10
+bytes.&nbsp; Boxed types such as Long Long and Double that take up more than one
+machine word are allocated on the heap and referenced via pointer.&nbsp; This is
+similar to the Java boxed base types.&nbsp; Of course, you can cast to/from base
+types and their boxed versions.&nbsp; In general, you need not explicitly cast
+from the Boxed type to the unboxed type, but you may have to explicitly cast
+when going from the unboxed version to the boxed version.&nbsp; (This lets you
+know when allocation is happening.)</p>
+<p>The combination of parametric polymorphism and sub-typing means that you can
+cover a lot of C idioms where void* or unsafe casts were used without
+sacrificing type-safety.&nbsp; We use polymorphism a lot when coding in
+Cyclone.&nbsp; For instance, the standard library includes many container
+abstractions (lists, sets, queues, etc.) that are all polymorphic in the element
+type.&nbsp; This allows us to re-use a lot of code.&nbsp; In addition, unlike
+C++, those libraries can be compiled once and need not be specialized.&nbsp; On
+the downside, this style of polymorphism does not allow you to do any
+type-specific things (e.g., overloading or ad-hoc polymorphism.)&nbsp; Someday,
+we may add support for this, but in the short run, we're happy not to have
+it&nbsp;</p>
 <h4>Polymorphic Data Structures:</h4>
+<p>Just as function definitions can be parameterized by types, so can struct
+definitions, enum definitions, and even typedefs.&nbsp; For instance, the
+following struct definition is used in the standard library for lists:</p>
+<pre>  <b>struct</b> cons&lt;`a&gt; {`a hd; <b>struct</b> cons&lt;`a&gt; *tl; };
+  <b>typedef</b> <b>struct</b> cons&lt;`a&gt; *list&lt;`a&gt;;</pre>
+<p>Here, we've declared a struct cons parameterized by a type `a.&nbsp; The hd
+field contains an element of type `a and the tl field contains a (possibly null)
+pointer to a struct cons with elements of type `a.&nbsp; We then define
+list&lt;`a&gt; as an abbreviation for struct cons&lt;`a&gt;.&nbsp; So, for
+instance, we can declare both integer and string lists like this:</p>
+<pre>  list&lt;int&gt; ilist = &amp;cons{1,&amp;cons{2,null}};
+  list&lt;string&gt; slist = &amp;cons{.hd=&quot;<font color="#0000FF">foo</font>&quot;,.tl=&amp;cons{&quot;<font color="#0000FF">bar</font>&quot;,null}};</pre>
+<p>Note that we use &quot;&amp;&quot; like &quot;new&quot; in C++ to allocate a
+new struct cons on the heap and return a pointer to the resulting (initialized)
+cons object.&nbsp; Note also that the field designatore (&quot;.hd&quot;,
+&quot;.tl&quot;) are optional.</p>
+<p>Once you have polymorphic data structures, you can write lots of useful
+polymorphic code and use it over and over again.&nbsp; For instance, the
+standard list library includes functions for mapping over a list, looking up
+items in a list, concatenating two lists, copying lists, sorting lists,
+etc.&nbsp;&nbsp;</p>
 <h4>Abstract Types:</h4>
 <h4>Existential Types:</h4>
 <hr>
