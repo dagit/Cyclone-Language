@@ -43,7 +43,7 @@ tunion context {
 
 static tunion context current = Normal;
 
-void setContext(tunion context c) {
+void setContext(tunion `H context c) {
   current = c;
 }
 
