@@ -781,18 +781,20 @@ static void check_writable(tenv_t te, exp_t e) {
     break;
   case &AggrArrow_e(e1,f,...):
     switch (compress((type_t)e1->topt)) {
-    case &PointerType(PtrInfo{elt_typ,_,_}):
-      switch (compress(elt_typ)) {
-      case &AggrType(AggrInfo({.KnownAggr = adp},_)):
-	struct Aggrfield *sf =
-	  (adp == NULL) ? NULL : lookup_decl_field(*adp, f);
-	if (sf == NULL || !sf->tq.real_const) return;
-	break;
-      case &AnonAggrType(_,fs):
-	struct Aggrfield *sf = lookup_field(fs, f);
-	if (sf == NULL || !sf->tq.real_const) return;
-	break;
-      default: break;
+    case &PointerType(PtrInfo{elt_typ,tq,_}):
+      if (!tq.real_const) {
+        switch (compress(elt_typ)) {
+        case &AggrType(AggrInfo({.KnownAggr = adp},_)):
+          struct Aggrfield *sf =
+            (adp == NULL) ? NULL : lookup_decl_field(*adp, f);
+          if (sf == NULL || !sf->tq.real_const) return;
+          break;
+        case &AnonAggrType(_,fs):
+          struct Aggrfield *sf = lookup_field(fs, f);
+          if (sf == NULL || !sf->tq.real_const) return;
+          break;
+        default: break;
+        }
       }
       break;
     default: break;
