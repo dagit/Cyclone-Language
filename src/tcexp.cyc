@@ -223,8 +223,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t *`r topt, cnst_t c, exp_t e){
     elen->topt = new Opt(uint_t);
     // The default is to treat a string as if it's statically heap 
     // allocated and return a pointer to that string.  However, if the 
-    // string is used as an initializer, then we should return an array 
-    // type.
+    // string is used as an initializer, then we should return an array type.
     t = atb_typ(uchar_t, HeapRgn, const_tqual(), new Upper_b(elen));
     if (topt != null) {
       switch (compress(*topt)) {
@@ -810,9 +809,8 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
             opt_t<list_t<exp_t>> fmt_args;
             if (arg_start_pos == 0)
               fmt_args = null;
-            else {
+            else
               fmt_args = new Opt(nth_tail(args,arg_start_pos - 1));
-            }
             switch (ft) {
             case Printf_ft:
               check_format_args(te,fmt_arg,fmt_args,
@@ -856,8 +854,8 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t *`r topt,
                          exp_t e, list_t<type_t> ts) {
   tcExpNoInst(te,null,e);
   // turn any functions into function pointers
-  e->topt->v = pointer_expand(compress(e->topt->v));
-  type_t         t1 = compress(e->topt->v);
+  e->topt->v = pointer_expand(e->topt->v);
+  type_t t1 = compress(e->topt->v);
   switch (t1) {
   case &PointerType(PtrInfo{t0,rt,x,tq,b}):
     switch (compress(t0)) {
@@ -1519,8 +1517,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt,
 
   switch (e1->r) {
   case &Comprehension_e(vd,ebound,egen):
-    // note that tcComprehension expects us to pass in the pointer type,
-    // not an array type.
+    // Note: tcComprehension expects the pointer type, not an array type.
     let t_arr = tcExpNoPromote(te,topt,e1);
     switch (compress(t_arr)) {
     case &ArrayType(et_arr,tq_arr,_):
@@ -1598,7 +1595,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt,
       default: break;
       }
     }
-    let telt = tcExp(te,topt2,e1);
+    type_t telt = tcExp(te,topt2,e1);
     type_t res_typ =
       new PointerType(PtrInfo{telt,rgn,empty_conref(),
                               empty_tqual(),
@@ -1614,17 +1611,15 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt,
   }
 }
 
-// The default:  type-check and promote any array types to pointer types
+// The default: type-check and promote any array types to pointer types
 type_t tcExp(tenv_t te, type_t *`r topt, exp_t e) {
-  type_t t = tcExpNoPromote(te, topt, e);
-  t = compress(t);
+  type_t t = compress(tcExpNoPromote(te, topt, e));
   switch (t) {
   case &ArrayType(elt_typ,tq,e2):
     let $(_,rgn) = addressof_props(te,e);
     let b = (e2 == null) ? (bounds_t)Unknown_b : new Upper_b((exp_t)e2);
     t = atb_typ(elt_typ,rgn,tq,b);
     e->topt->v = t;
-    //    unchecked_cast(te,e,t);
     return t;
   default:
     return t;
@@ -1667,13 +1662,13 @@ static type_t tcExpNoPromote(tenv_t te, type_t *`r topt, exp_t e) {
   case &NoInstantiate_e(e2):
     // the user has asked not to implicitly instantiate any quantifiers
     tcExpNoInst(te,topt,e2);
-    e2->topt->v = pointer_expand(compress(e2->topt->v));
+    e2->topt->v = pointer_expand(e2->topt->v);
     e->topt = e2->topt;
     break;
   default:
     // first, typecheck without instantiating
     tcExpNoInst(te,topt,e);
-    e->topt->v = pointer_expand(compress(e->topt->v));
+    e->topt->v = pointer_expand(e->topt->v);
     // implicitly instantiate the expression if it has a polymorphic type
     switch (compress(e->topt->v)) {
     case &PointerType(PtrInfo{t,rt,x,tq,b}):

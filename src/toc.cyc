@@ -119,14 +119,11 @@ MAKE_STRING(_handler_cons);
 MAKE_STRING(handler);
 MAKE_STRING(_RegionHandle);
 
-// some pre-allocated qvars -- use foo_qv for qvar_t w/ contents "foo" 
-// and foo_e for the corresponding variable expression.
-// FIX: Next step is to make the exp_t, not just the qvar_t
+// some pre-allocated qvars -- use foo_e for exp that is var "foo"
 #define MAKE_VAR(str)\
   static string_t                  str##_str = #str;\
   static $(nmspace_t, stringptr_t) str##_pr  = $((nmspace_t)&rel_ns_null_value,\
 						  &str##_str);\
-  static qvar_t                    str##_qv  = &str##_pr;\
   static tunion Raw_exp.Var_e      str##_re  = Var_e(&str##_pr,Unresolved_b);\
   static struct Exp                str##_ev  = Exp{null, &str##_re, null};\
   static exp_t                     str##_e   = &str##_ev
@@ -155,7 +152,6 @@ MAKE_VAR(_region_malloc);
 MAKE_VAR(_new_region);
 MAKE_VAR(_push_region);
 MAKE_VAR(_pop_region);
-MAKE_VAR(_sfile_to_file); // goes away when printf is in Cyclone
 
 #undef MAKE_STRING
 #undef MAKE_VAR
@@ -211,6 +207,8 @@ static bool is_nullable(type_t t) {
   }
 }
 
+// FIX: Share the results to save compile-time space and time.
+//      Alternately, put struct names for tunion variants in the environment.
 static qvar_t collapse_qvar_tag(qvar_t x,string_t tag) {
   return new $((*x)[0], 
                new (string_t)String::strconcat(*((*x)[1]),tag));
@@ -218,7 +216,6 @@ static qvar_t collapse_qvar_tag(qvar_t x,string_t tag) {
 
 // used to generate struct definitions for tuple types
 // we share the struct definitions where possible.  
-// FIX: should use an efficient map data structure.
 static var_t add_tuple_type(glist_t<$(tqual_t,type_t)@,`r> tqs0) {
   // look for the same tuple-type already declared
   for (let tts = tuple_types; tts != null; tts = tts->tl) {
@@ -377,12 +374,9 @@ static type_t typ_to_c(type_t t) {
     return new TypedefType(tdn,null, new Opt(typ_to_c_array(topt->v)));
   case &RgnHandleType(t):
     return cstar_typ(strct(_RegionHandle_sp),mt_tq); // could be shared
-  case HeapRgn: 
-    return toc_impos("Toc::typ_to_c: type translation passed the heap region");
-  case &AccessEff(_):
-    return toc_impos("Toc::typ_to_c: type translation passed the access eff");
-  case &JoinEff(_):
-    return toc_impos("Toc::typ_to_c: type translation passed the join eff");
+  case HeapRgn:       return toc_impos("Toc::typ_to_c: passed the heap region");
+  case &AccessEff(_): return toc_impos("Toc::typ_to_c: passed the access eff");
+  case &JoinEff(_):   return toc_impos("Toc::typ_to_c: passed the join eff");
   }
 }
 
@@ -396,13 +390,13 @@ static exp_t array_to_ptr_cast(type_t t,exp_t e,seg_t l) {
 // returns true when the type contains no pointers
 static bool atomic_typ(type_t t) {
   switch (compress(t)) {
-  case VoidType:      return true;
-  case &VarType(_):   return false;
-  case &IntType(_,_): return true;
-  case &EnumType(_,_):    return true;
-  case FloatType:     return true;
-  case DoubleType:    return true;
-  case &FnType(_):    return true;
+  case VoidType:       return true;
+  case &VarType(_):    return false;
+  case &IntType(_,_):  return true;
+  case &EnumType(_,_): return true;
+  case FloatType:      return true;
+  case DoubleType:     return true;
+  case &FnType(_):     return true;
   case &ArrayType(t,_,_): return atomic_typ(t);
     // FIX: really should compute in terms of the instantiation
     // to be as aggressive as possible.
@@ -502,12 +496,6 @@ static exp_t malloc_exp(type_t t,exp_t s) {
 // region malloc something
 static exp_t rmalloc_exp(exp_t rgn, exp_t s) {
   return fncall_exp(_region_malloc_e, list(rgn,s), DL);
-}
-
-// goes away when printf is in C
-// convert a Cyc_Stdio___sFILE to a FILE (aka Cyc_Cstdio___sFILE)
-static exp_t fdconv(exp_t e) {
-  return fncall_exp(_sfile_to_file_e, new List(e,null), DL);
 }
 
 // throw an exception -- this is turned into a function call
@@ -1048,18 +1036,16 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Primop_e(p,es):
     // Save Cyclone types -- needed for pointer arith stuff
     let old_typs = List::map(get_cyc_typ,es);
-    // Save C types of args, needed for printf
-    let typs = List::map(get_c_typ,es);
     // Translate args
     List::iter_c(exp_to_c,nv,es);
     switch (p) {
     case Size:
       exp_t arg = es->hd;
-      switch (arg->topt->v) {
+      switch (compress(arg->topt->v)) {
       case &ArrayType(_,_,e2): e->r = e2->r;  break;
       case &PointerType(PtrInfo{elt_typ,_,_,_,bound}):
 	switch(conref_def(bounds_one,bound)) {
-	case Unknown_b: // retrive last_plus_one - curr via runtime call
+	case Unknown_b: // retrieve (last_plus_one - curr) via runtime call
 	  e->r = fncall_exp(_get_arr_size_e,
 			    list(es->hd, 
 				 sizeoftyp_exp(typ_to_c(elt_typ),DL)), DL)->r;
@@ -1069,7 +1055,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	break;
       default: 
 	toc_impos("size primop applied to non-array %s (%s)",
-                  typ2string(typs->hd),typ2string(arg->topt->v)); 
+                  typ2string(arg->topt->v),typ2string(arg->topt->v)); 
 	return;
       }
       break;
@@ -1097,8 +1083,8 @@ static void exp_to_c(env_t nv, exp_t e) {
 	if(is_tagged_pointer_typ(old_typs->tl->hd)) {
 	  e1->r = structmember_exp(new_exp(e1->r,DL),curr_sp,DL)->r;
 	  e2->r = structmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
-	  e->r  = prim2_exp(Div, copy_exp(e),
-			    sizeoftyp_exp(typ_to_c(elt_typ),DL),DL)->r;
+	  e->r  = divide_exp(copy_exp(e),
+			     sizeoftyp_exp(typ_to_c(elt_typ),DL),DL)->r;
 	} else {
 	  e->r = fncall_exp(_tagged_arr_plus_e,
 			    list(e1,sizeoftyp_exp(typ_to_c(elt_typ),DL),
@@ -1106,11 +1092,11 @@ static void exp_to_c(env_t nv, exp_t e) {
 	}
       }
       break;
-    case Eq : fallthru;
-    case Neq: fallthru;
-    case Gt : fallthru;
-    case Gte: fallthru;
-    case Lt : fallthru;
+    case Eq : 
+    case Neq: 
+    case Gt : 
+    case Gte: 
+    case Lt : 
     case Lte: 
       // need to extract .curr field of tagged arrays for comparisons
       exp_t e1 = es->hd;
@@ -1285,7 +1271,6 @@ static void exp_to_c(env_t nv, exp_t e) {
 		       s, DL);
 	}
 	s = declare_stmt(argv, arr_type, null, s, DL);
-
 	/*	glist_t<exp_t,`r> array_args = null;
 	for(; es != null; es = es->tl) {
 	  exp_to_c(nv, es->hd);
@@ -1761,9 +1746,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     list_t<structfield_t> fs;
     switch (compress(st)) {
     case &AnonStructType(afs): fs = afs; break;
-    default: 
-      fs = toc_impos("anon struct has type %s",typ2string(st)); 
-      break;
+    default: fs = toc_impos("anon struct has type %s",typ2string(st)); break;
     }
     region rgn {
       let fields = Tcutil::resolve_struct_designators(rgn, e->loc, dles, fs);
@@ -1777,6 +1760,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       }
       //for (let es = dles; es != null; es = es->tl)
       //  exp_to_c(nv,es->hd[1]);
+      //FIX: this has GCC bug written all over it.
       e->r = unresolvedmem_exp(null,dles,DL)->r;
     }
     break;
@@ -1850,8 +1834,8 @@ static void exp_to_c(env_t nv, exp_t e) {
 	exp_to_c(nv,cur_e);
 	if (is_void_star(field_typ))
 	  cur_e = cast_exp(field_typ,cur_e,DL);
-	let a = assign_stmt(structmember_exp(xexp,fieldname(i),
-                                             DL),cur_e,DL);
+	let a = assign_stmt(structmember_exp(xexp,fieldname(i), DL),
+			    cur_e,DL);
 	rev_assign = new List(a,rev_assign);
       }
       let final_stmt = exp_stmt(xexp,DL);
@@ -1875,7 +1859,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 
   case &StmtExp_e(s): stmt_to_c(nv,s);  break;
   case &UnresolvedMem_e(_,_): toc_impos("UnresolvedMem"); break;
-  case &CompoundLit_e(_,_):    unimp("compoundlit");       break;
+  case &CompoundLit_e(_,_):   unimp("compoundlit");       break;
   case &Codegen_e(fd):        unimp("codegen");           break;
   case &Fill_e(_):            unimp("fill");              break;
   }
@@ -1903,9 +1887,6 @@ static void exp_to_c(env_t nv, exp_t e) {
 //
 // FIX: adapt the decision tree code in the type-checker so that we
 // have much more efficient traversal of patterns.
-// FIX: I think the Address pattern (*) code is too liberal -- lets
-// you get pointers to a local variable if you do a switch on a
-// local variable...
 // DO NOT FIX:  though it looks like all of the goto's are bad and
 // we could collapse a lot of if-then-else's and avoid some of the
 // jumping around, GCC -O does this for us.  So the only reason to
@@ -2177,7 +2158,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
   bool leave_as_switch;
   switch (compress(t)) {
   case &IntType(_,_): leave_as_switch = true;  break;
-  default:           leave_as_switch = false; break;
+  default:            leave_as_switch = false; break;
   }
   for(let scs1 = scs; scs1 != null; scs1 = scs1->tl)
     if(scs1->hd->pat_vars->v != null || scs1->hd->where_clause != null) {
@@ -2290,7 +2271,6 @@ void do_npop_before(int n, stmt_t s) { // mutates s as necessary!
     s->r = seq_stmt(make_npop_handler(n),new_stmt(s->r,DL),DL)->r;
 }
 
-// This is surprisingly straightforward... a good sign.
 static void stmt_to_c(env_t nv, stmt_t s) {
   // written to be self-tail recursive
   while (true) {
@@ -2311,7 +2291,6 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 	exp_to_c(nv,(exp_t)eopt);
       }
       // reset handler **after** evaluating expression
-      // FIX:  share code between break, continue, return, fallthru
       if (s->try_depth > 0) 
 	if (topt != null) {
 	  let x = temp_var();
@@ -2745,7 +2724,7 @@ static void tuniondecl_to_c(tuniondecl_t tud) {
 //   *t = (struct _Baz_struct){.tag=Baz, .f1 = e1, .f2 = e2};
 //   t;})
 static opt_t<Dict::dict_t<qvar_t, bool>> xtunion_fields_so_far = null;
-// true if already seen & initialized, false if already seen but non initialized (extern)
+//true if already seen & initialized, false if seen but non initialized (extern)
 
 static void xtuniondecl_to_c(tuniondecl_t xd) {
   if (xtunion_fields_so_far == null)
@@ -2756,8 +2735,8 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
   for (let fs = xd->fields->v; fs != null; fs = fs->tl) {
     tunionfield_t f  = fs->hd;
     stringptr_t fn = (*f->name)[1];
-    let       sz_exp  = uint_exp((*fn).size+4,DL);
-    let       tag_typ = new ArrayType(uchar_t,mt_tq,sz_exp);
+    let sz_exp  = uint_exp((*fn).size+4,DL);
+    let tag_typ = new ArrayType(uchar_t,mt_tq,sz_exp);
     // FIX: making bad alignment and pointer-size assumptions!
     switch (Dict::lookup_opt(xtunion_fields_so_far->v,f->name)) {
     case null:
@@ -2799,7 +2778,8 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
 	let tag_decl = new_vardecl(f->name, tag_typ, initopt);
 	tag_decl->sc = f->sc;
 	result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
-	xtunion_fields_so_far->v = Dict::insert(xtunion_fields_so_far->v, f->name, true);
+	xtunion_fields_so_far->v = Dict::insert(xtunion_fields_so_far->v, 
+						f->name, true);
       }
       break;
     default: break;

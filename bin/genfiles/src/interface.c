@@ -428,14 +428,13 @@ unsigned char* tag; struct Cyc_Abstractdeclarator* f1; } ; extern unsigned char
 Cyc_AttributeList_tok[ 22u]; struct Cyc_AttributeList_tok_struct{ unsigned char*
 tag; struct Cyc_List_List* f1; } ; extern unsigned char Cyc_Attribute_tok[ 18u];
 struct Cyc_Attribute_tok_struct{ unsigned char* tag; void* f1; } ; extern
-unsigned char Cyc_BlockItem_tok[ 18u]; struct Cyc_BlockItem_tok_struct{
-unsigned char* tag; void* f1; } ; extern unsigned char Cyc_Bool_tok[ 13u];
-struct Cyc_Bool_tok_struct{ unsigned char* tag; int f1; } ; extern unsigned char
-Cyc_Char_tok[ 13u]; struct Cyc_Char_tok_struct{ unsigned char* tag;
-unsigned char f1; } ; extern unsigned char Cyc_DeclList_tok[ 17u]; struct Cyc_DeclList_tok_struct{
-unsigned char* tag; struct Cyc_List_List* f1; } ; extern unsigned char Cyc_DeclSpec_tok[
-17u]; struct Cyc_DeclSpec_tok_struct{ unsigned char* tag; struct Cyc_Declaration_spec*
-f1; } ; extern unsigned char Cyc_DeclaratorExpoptList_tok[ 29u]; struct Cyc_DeclaratorExpoptList_tok_struct{
+unsigned char Cyc_Bool_tok[ 13u]; struct Cyc_Bool_tok_struct{ unsigned char* tag;
+int f1; } ; extern unsigned char Cyc_Char_tok[ 13u]; struct Cyc_Char_tok_struct{
+unsigned char* tag; unsigned char f1; } ; extern unsigned char Cyc_DeclList_tok[
+17u]; struct Cyc_DeclList_tok_struct{ unsigned char* tag; struct Cyc_List_List*
+f1; } ; extern unsigned char Cyc_DeclSpec_tok[ 17u]; struct Cyc_DeclSpec_tok_struct{
+unsigned char* tag; struct Cyc_Declaration_spec* f1; } ; extern unsigned char
+Cyc_DeclaratorExpoptList_tok[ 29u]; struct Cyc_DeclaratorExpoptList_tok_struct{
 unsigned char* tag; struct Cyc_List_List* f1; } ; extern unsigned char Cyc_DeclaratorExpopt_tok[
 25u]; struct _tuple4{ struct Cyc_Declarator* f1; struct Cyc_Core_Opt* f2; } ;
 struct Cyc_DeclaratorExpopt_tok_struct{ unsigned char* tag; struct _tuple4* f1;

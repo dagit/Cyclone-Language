@@ -23,9 +23,9 @@
 
 #include <list.h>
 #include <set.h>
-#include "absyn.h"
 #include <position.h>
 #include <stdio.h>
+#include "absyn.h"
 #include "tcenv.h"
 
 namespace Tcutil {
@@ -33,7 +33,6 @@ namespace Tcutil {
 using List;
 using Absyn;
 using Position;
-using Set;
 using Tcenv;
 using Stdio;
 
@@ -49,7 +48,7 @@ extern void err_noloc(string_t);
 
 // set by by Tcenv::tc_init, just to cut down on allocation and calls
 // to Set::empty.
-extern Core::opt_t<set_t<var_t>> empty_var_set;
+extern Core::opt_t<Set::set_t<var_t>> empty_var_set;
 
 // returns a deep copy of a type -- note that the evars will
 // still share and if the identity is set on type variables,

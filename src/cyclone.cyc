@@ -25,7 +25,6 @@
 #include <string.h>
 #include <dict.h>
 #include <filename.h>
-#include <id.h>
 #include "parse.h"
 #include <position.h>
 #include "absyn.h"
@@ -506,14 +505,12 @@ static void process_file(string_t filename) {
   catch {
   case x:
     file_close((FILE@)in_file);
-    //    Tcutil::flush_warnings();
-    remove_file(preprocfile); // Can't remove this before warnings are flushed!
+    remove_file(preprocfile); // Can't flush warnings after removal
     throw x;
   }
   file_close((FILE@)in_file);
   if (compile_failure) {
-    //    Tcutil::flush_warnings();
-    remove_file(preprocfile); // Can't remove this before warnings are flushed!
+    remove_file(preprocfile); // Can't flush warnings after removal
     return;
   } 
 
@@ -524,13 +521,13 @@ static void process_file(string_t filename) {
   tds = do_stage("type checking", do_typecheck, te, tds);
   if (compile_failure) {
     //    Tcutil::flush_warnings();
-    remove_file(preprocfile); // Can't remove this before warnings are flushed!
+    remove_file(preprocfile); // Can't flush warnings after removal
     return;
   } 
   tds = do_stage("control-flow checking", do_cfcheck, true, tds);
   if(!compile_failure)
     Tcutil::flush_warnings();
-  remove_file(preprocfile); // Can't remove this before warnings are flushed!
+  remove_file(preprocfile); // Can't flush warnings after removal
   if (compile_failure) return;
 
   // Interface checking

@@ -51,7 +51,6 @@
 //  B6. The pat_vars field of switch_clause is non-null and correct.
 // Note that translation to C willfully violates B3 and B4, but that's okay.
 
-
 // A cute hack to avoid defining the abstract syntax twice.
 #ifdef ABSYN_CYC
 #define EXTERN_ABSYN
@@ -743,7 +742,6 @@ namespace Absyn {
   extern exp_t prim1_exp(primop_t, exp_t, seg_t);
   extern exp_t prim2_exp(primop_t, exp_t, exp_t, seg_t);
   extern exp_t add_exp(exp_t, exp_t, seg_t);
-  extern exp_t subtract_exp(exp_t, exp_t, seg_t);
   extern exp_t times_exp(exp_t, exp_t, seg_t);
   extern exp_t divide_exp(exp_t, exp_t, seg_t);
   extern exp_t eq_exp(exp_t, exp_t, seg_t);

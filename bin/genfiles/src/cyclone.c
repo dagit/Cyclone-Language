@@ -117,17 +117,17 @@ s, unsigned char c); struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present
 12u]; extern unsigned char Cyc_Dict_Absent[ 11u]; extern struct _tagged_arr Cyc_Filename_concat(
 struct _tagged_arr, struct _tagged_arr); extern struct _tagged_arr Cyc_Filename_chop_extension(
 struct _tagged_arr); extern int Cyc_Filename_check_suffix( struct _tagged_arr,
-struct _tagged_arr); struct Cyc_Id_id; struct Cyc_Lineno_Pos{ struct _tagged_arr
-logical_file; struct _tagged_arr line; int line_no; int col; } ; extern
-unsigned char Cyc_Position_Exit[ 9u]; extern void Cyc_Position_reset_position(
-struct _tagged_arr); struct Cyc_Position_Segment; static const int Cyc_Position_Lex=
-0; static const int Cyc_Position_Parse= 1; static const int Cyc_Position_Elab= 2;
-struct Cyc_Position_Error{ struct _tagged_arr source; struct Cyc_Position_Segment*
-seg; void* kind; struct _tagged_arr desc; } ; extern unsigned char Cyc_Position_Nocontext[
-14u]; extern int Cyc_Position_error_p(); struct _tuple0{ void* f1; struct
-_tagged_arr* f2; } ; struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual; struct Cyc_Absyn_Conref;
-struct Cyc_Absyn_PtrInfo; struct Cyc_Absyn_VarargInfo; struct Cyc_Absyn_FnInfo;
-struct Cyc_Absyn_TunionInfo; struct Cyc_Absyn_TunionFieldInfo; struct Cyc_Absyn_VarargCallInfo;
+struct _tagged_arr); struct Cyc_Lineno_Pos{ struct _tagged_arr logical_file;
+struct _tagged_arr line; int line_no; int col; } ; extern unsigned char Cyc_Position_Exit[
+9u]; extern void Cyc_Position_reset_position( struct _tagged_arr); struct Cyc_Position_Segment;
+static const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1;
+static const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct
+_tagged_arr source; struct Cyc_Position_Segment* seg; void* kind; struct
+_tagged_arr desc; } ; extern unsigned char Cyc_Position_Nocontext[ 14u]; extern
+int Cyc_Position_error_p(); struct _tuple0{ void* f1; struct _tagged_arr* f2; }
+; struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual; struct Cyc_Absyn_Conref; struct
+Cyc_Absyn_PtrInfo; struct Cyc_Absyn_VarargInfo; struct Cyc_Absyn_FnInfo; struct
+Cyc_Absyn_TunionInfo; struct Cyc_Absyn_TunionFieldInfo; struct Cyc_Absyn_VarargCallInfo;
 struct Cyc_Absyn_Exp; struct Cyc_Absyn_Stmt; struct Cyc_Absyn_Pat; struct Cyc_Absyn_Switch_clause;
 struct Cyc_Absyn_SwitchC_clause; struct Cyc_Absyn_Fndecl; struct Cyc_Absyn_Structdecl;
 struct Cyc_Absyn_Uniondecl; struct Cyc_Absyn_Tuniondecl; struct Cyc_Absyn_Tunionfield;
@@ -440,14 +440,13 @@ unsigned char* tag; struct Cyc_Abstractdeclarator* f1; } ; extern unsigned char
 Cyc_AttributeList_tok[ 22u]; struct Cyc_AttributeList_tok_struct{ unsigned char*
 tag; struct Cyc_List_List* f1; } ; extern unsigned char Cyc_Attribute_tok[ 18u];
 struct Cyc_Attribute_tok_struct{ unsigned char* tag; void* f1; } ; extern
-unsigned char Cyc_BlockItem_tok[ 18u]; struct Cyc_BlockItem_tok_struct{
-unsigned char* tag; void* f1; } ; extern unsigned char Cyc_Bool_tok[ 13u];
-struct Cyc_Bool_tok_struct{ unsigned char* tag; int f1; } ; extern unsigned char
-Cyc_Char_tok[ 13u]; struct Cyc_Char_tok_struct{ unsigned char* tag;
-unsigned char f1; } ; extern unsigned char Cyc_DeclList_tok[ 17u]; struct Cyc_DeclList_tok_struct{
-unsigned char* tag; struct Cyc_List_List* f1; } ; extern unsigned char Cyc_DeclSpec_tok[
-17u]; struct Cyc_DeclSpec_tok_struct{ unsigned char* tag; struct Cyc_Declaration_spec*
-f1; } ; extern unsigned char Cyc_DeclaratorExpoptList_tok[ 29u]; struct Cyc_DeclaratorExpoptList_tok_struct{
+unsigned char Cyc_Bool_tok[ 13u]; struct Cyc_Bool_tok_struct{ unsigned char* tag;
+int f1; } ; extern unsigned char Cyc_Char_tok[ 13u]; struct Cyc_Char_tok_struct{
+unsigned char* tag; unsigned char f1; } ; extern unsigned char Cyc_DeclList_tok[
+17u]; struct Cyc_DeclList_tok_struct{ unsigned char* tag; struct Cyc_List_List*
+f1; } ; extern unsigned char Cyc_DeclSpec_tok[ 17u]; struct Cyc_DeclSpec_tok_struct{
+unsigned char* tag; struct Cyc_Declaration_spec* f1; } ; extern unsigned char
+Cyc_DeclaratorExpoptList_tok[ 29u]; struct Cyc_DeclaratorExpoptList_tok_struct{
 unsigned char* tag; struct Cyc_List_List* f1; } ; extern unsigned char Cyc_DeclaratorExpopt_tok[
 25u]; struct _tuple3{ struct Cyc_Declarator* f1; struct Cyc_Core_Opt* f2; } ;
 struct Cyc_DeclaratorExpopt_tok_struct{ unsigned char* tag; struct _tuple3* f1;

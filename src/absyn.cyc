@@ -372,20 +372,16 @@ exp_t prim1_exp(primop_t p, exp_t e, seg_t loc) {
 exp_t prim2_exp(primop_t p, exp_t e1, exp_t e2, seg_t loc) {
   return primop_exp(p, new List(e1,new List(e2,null)), loc);
 }
-exp_t add_exp(exp_t e1,exp_t e2,seg_t loc) {
-  return prim2_exp(Plus, e1, e2, loc);
-}
-exp_t subtract_exp(exp_t e1,exp_t e2,seg_t loc) {
-  return prim2_exp(Minus, e1, e2, loc);
-}
-exp_t times_exp(exp_t e1,exp_t e2,seg_t loc){return prim2_exp(Times, e1, e2, loc);}
-exp_t divide_exp(exp_t e1,exp_t e2,seg_t loc){return prim2_exp(Div, e1, e2, loc);}
-exp_t eq_exp(exp_t e1,  exp_t e2, seg_t loc) {return prim2_exp(Eq,  e1, e2, loc);}
-exp_t neq_exp(exp_t e1, exp_t e2, seg_t loc) {return prim2_exp(Neq, e1, e2, loc);}
-exp_t gt_exp(exp_t e1,  exp_t e2, seg_t loc) {return prim2_exp(Gt,  e1, e2, loc);}
-exp_t lt_exp(exp_t e1,  exp_t e2, seg_t loc) {return prim2_exp(Lt,  e1, e2, loc);}
-exp_t gte_exp(exp_t e1, exp_t e2, seg_t loc) {return prim2_exp(Gte, e1, e2, loc);}
-exp_t lte_exp(exp_t e1, exp_t e2, seg_t loc) {return prim2_exp(Lte, e1, e2, loc);}
+exp_t add_exp(exp_t e1,exp_t e2,seg_t loc)   {return prim2_exp(Plus,e1,e2,loc);}
+exp_t times_exp(exp_t e1,exp_t e2,seg_t loc){return prim2_exp(Times,e1,e2,loc);}
+exp_t divide_exp(exp_t e1,exp_t e2,seg_t loc){return prim2_exp(Div,e1,e2,loc);}
+exp_t eq_exp(exp_t e1,  exp_t e2, seg_t loc) {return prim2_exp(Eq,e1,e2,loc);}
+exp_t neq_exp(exp_t e1, exp_t e2, seg_t loc) {return prim2_exp(Neq,e1,e2,loc);}
+exp_t gt_exp(exp_t e1,  exp_t e2, seg_t loc) {return prim2_exp(Gt,e1,e2,loc);}
+exp_t lt_exp(exp_t e1,  exp_t e2, seg_t loc) {return prim2_exp(Lt,e1,e2,loc);}
+exp_t gte_exp(exp_t e1, exp_t e2, seg_t loc) {return prim2_exp(Gte,e1,e2,loc);}
+exp_t lte_exp(exp_t e1, exp_t e2, seg_t loc) {return prim2_exp(Lte,e1,e2,loc);}
+
 exp_t assignop_exp(exp_t e1, opt_t<primop_t> popt, exp_t e2, seg_t loc) {
   return new_exp(new AssignOp_e(e1,popt,e2),loc);
 }
@@ -520,8 +516,8 @@ stmt_t declare_stmt(qvar_t x, type_t t, exp_opt_t init, stmt_t s, seg_t loc) {
   decl_t d = new_decl(new Var_d(new_vardecl(x,t,init)),loc);
   return new_stmt(new Decl_s(d,s),loc);
 }
-stmt_t cut_stmt   (stmt_t s, seg_t loc) { return new_stmt(new Cut_s(s),    loc); }
-stmt_t splice_stmt(stmt_t s, seg_t loc) { return new_stmt(new Splice_s(s), loc); }
+stmt_t cut_stmt   (stmt_t s, seg_t loc) { return new_stmt(new Cut_s(s),   loc);}
+stmt_t splice_stmt(stmt_t s, seg_t loc) { return new_stmt(new Splice_s(s),loc);}
 stmt_t label_stmt(var_t v, stmt_t s, seg_t loc) {
   return new_stmt(new Label_s(v,s), loc);
 }
@@ -602,15 +598,8 @@ type_t function_typ(list_t<tvar_t> tvs, opt_t<type_t> eff_typ, type_t ret_typ,
                               .attributes=atts});
 }
 type_t pointer_expand(type_t t) {
-  //  switch (compress(t)) {
-  switch (t) {
+  switch (Tcutil::compress(t)) {
   case &FnType(_): return at_typ(t,HeapRgn,empty_tqual());
-// Disabled for now because it is incompatible with C
-//  case ArrayType*(_,_,ak): 
-//    return
-//      (ak == TaggedArray) ? t : nonnullableptr_typ(t,empty_tqual());
-//  case TypedefType*(n,_,_): 
-//    return impos(sprintf("pointer_expand: typedef %s", qvar2string(n)));
   default: return t;
   }
 }
@@ -625,7 +614,6 @@ type_t pointer_expand(type_t t) {
 //    e.name   e is an lvalue
 //    e->name
 //    *e
-//
 // (We may have more in Cyclone...)
 
 // must be called after the expression is type-checked.
@@ -639,13 +627,13 @@ bool is_lvalue(exp_t e) {
     case &ArrayType(_,_,_): return false;
     default: return true; 
     }
-  case &Var_e(_,_): return true;
-  case &Subscript_e(e1,e2):    return true;
-  case &StructMember_e(e1,f):  return is_lvalue(e1);
-  case &StructArrow_e(e1,f):   return true;
-  case &Deref_e(e1):           return true;
-  case &Instantiate_e(e1,_): return is_lvalue(e1);
-  case &NoInstantiate_e(e1): return is_lvalue(e1);
+  case &Var_e(_,_):           return true;
+  case &Subscript_e(e1,e2):   return true;
+  case &StructMember_e(e1,f): return is_lvalue(e1);
+  case &StructArrow_e(e1,f):  return true;
+  case &Deref_e(e1):          return true;
+  case &Instantiate_e(e1,_):  return is_lvalue(e1);
+  case &NoInstantiate_e(e1):  return is_lvalue(e1);
   default:                    return false;
   }
 }
@@ -720,4 +708,3 @@ bool fntype_att(attribute_t a) {
   default: return false;
   }
 }
-
