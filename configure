@@ -36,12 +36,16 @@ else
   echo "Supported architecture ${ARCH}"
 fi
 
+# figure out all supported architectures by checking for config files
+ALL_ARCHS=`cd arch; \ls -1 | grep -v CVS | awk '{ printf("%s ",$1); }`
+
 # write the config Makefile
 cd ..
 (cat <<EOF
 # architecture specific defines
 CYCDIR=${CYCDIR}
 ARCH=${ARCH}
+ALL_ARCHS=${ALL_ARCHS}
 
 EOF
 cat Makefile.inc.in) > Makefile.inc

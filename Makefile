@@ -116,6 +116,11 @@ update: cyclone_src
 	@cmp -s lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h || (echo UPDATING cyc-lib/include/cyc_include.h; cp lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h)
 	@cmp -s lib/nogc.c bin/genfiles/$(TARGET)/lib/nogc.c || (echo UPDATING lib/nogc.c; cp lib/nogc.c bin/genfiles/$(TARGET)/lib/nogc.c)
 
+# This will destroy any existing compiled files in lib and src
+#   and then compile and install for all supported architectures
+update_all_archs:
+	@for arch in $(ALL_ARCHS); do $(MAKE) clean_src update TARGET=$$arch; done
+
 test:
 	$(MAKE) -C tests CYCC=$(CYCC) OUT_PREFIX=$(OUT_PREFIX)
 

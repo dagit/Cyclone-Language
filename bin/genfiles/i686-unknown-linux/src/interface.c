@@ -1589,38 +1589,42 @@ struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp701->v=(
 void*) _temp700.f2; _temp701;});} else{ return 0;}} struct Cyc_Interface_Ienv*
 Cyc_Interface_disj_merge_ienv( struct Cyc_Interface_Ienv* ie1, struct Cyc_Interface_Ienv*
 ie2, struct _tagged_arr* msg){ struct Cyc_Core_Opt* _temp703=(( struct Cyc_Core_Opt*(*)(
-struct Cyc_Dict_Dict* dic1, struct Cyc_Dict_Dict* dic2, struct _tagged_arr t,
-struct _tagged_arr* msg)) Cyc_Interface_disj_merge_dict)( ie1->structdecls, ie2->structdecls,
-_tag_arr("struct", sizeof( unsigned char), 7u), msg); struct Cyc_Core_Opt*
-_temp704=(( struct Cyc_Core_Opt*(*)( struct Cyc_Dict_Dict* dic1, struct Cyc_Dict_Dict*
-dic2, struct _tagged_arr t, struct _tagged_arr* msg)) Cyc_Interface_disj_merge_dict)(
-ie1->uniondecls, ie2->uniondecls, _tag_arr("union", sizeof( unsigned char), 6u),
-msg); struct Cyc_Core_Opt* _temp705=(( struct Cyc_Core_Opt*(*)( struct Cyc_Dict_Dict*
-dic1, struct Cyc_Dict_Dict* dic2, struct _tagged_arr t, struct _tagged_arr* msg))
-Cyc_Interface_disj_merge_dict)( ie1->tuniondecls, ie2->tuniondecls, _tag_arr("[x]tunion",
-sizeof( unsigned char), 10u), msg); struct Cyc_Core_Opt* _temp706=(( struct Cyc_Core_Opt*(*)(
-struct Cyc_Dict_Dict* dic1, struct Cyc_Dict_Dict* dic2, struct _tagged_arr t,
-struct _tagged_arr* msg)) Cyc_Interface_disj_merge_dict)( ie1->enumdecls, ie2->enumdecls,
-_tag_arr("enum", sizeof( unsigned char), 5u), msg); struct Cyc_Core_Opt*
-_temp707=(( struct Cyc_Core_Opt*(*)( struct Cyc_Dict_Dict* dic1, struct Cyc_Dict_Dict*
-dic2, struct Cyc_Dict_Dict* excl, struct Cyc_Absyn_Typedefdecl*(* merge_f)(
-struct Cyc_Absyn_Typedefdecl*, struct Cyc_Absyn_Typedefdecl*, struct Cyc_Position_Segment*,
-struct _tagged_arr*), struct _tagged_arr t, struct _tagged_arr* msg)) Cyc_Interface_compat_merge_dict)(
-ie1->typedefdecls, ie2->typedefdecls,(( struct Cyc_Dict_Dict*(*)( int(* comp)(
+struct Cyc_Dict_Dict* dic1, struct Cyc_Dict_Dict* dic2, struct Cyc_Dict_Dict*
+excl, struct Cyc_Absyn_Structdecl*(* merge_f)( struct Cyc_Absyn_Structdecl*,
+struct Cyc_Absyn_Structdecl*, struct Cyc_Position_Segment*, struct _tagged_arr*),
+struct _tagged_arr t, struct _tagged_arr* msg)) Cyc_Interface_compat_merge_dict)(
+ie1->structdecls, ie2->structdecls,(( struct Cyc_Dict_Dict*(*)( int(* comp)(
 struct _tagged_arr*, struct _tagged_arr*))) Cyc_Dict_empty)( Cyc_String_zstrptrcmp),
-Cyc_Tcdecl_merge_typedefdecl, _tag_arr("typedef", sizeof( unsigned char), 8u),
-msg); struct Cyc_Core_Opt* _temp708=(( struct Cyc_Core_Opt*(*)( struct Cyc_Dict_Dict*
+Cyc_Tcdecl_merge_structdecl, _tag_arr("struct", sizeof( unsigned char), 7u), msg);
+struct Cyc_Core_Opt* _temp704=(( struct Cyc_Core_Opt*(*)( struct Cyc_Dict_Dict*
 dic1, struct Cyc_Dict_Dict* dic2, struct _tagged_arr t, struct _tagged_arr* msg))
-Cyc_Interface_disj_merge_dict)( ie1->vardecls, ie2->vardecls, _tag_arr("variable",
-sizeof( unsigned char), 9u), msg); struct Cyc_Core_Opt* _temp709=(( struct Cyc_Core_Opt*(*)(
+Cyc_Interface_disj_merge_dict)( ie1->uniondecls, ie2->uniondecls, _tag_arr("union",
+sizeof( unsigned char), 6u), msg); struct Cyc_Core_Opt* _temp705=(( struct Cyc_Core_Opt*(*)(
 struct Cyc_Dict_Dict* dic1, struct Cyc_Dict_Dict* dic2, struct _tagged_arr t,
-struct _tagged_arr* msg)) Cyc_Interface_disj_merge_dict)( ie1->xtunionfielddecls,
-ie2->xtunionfielddecls, _tag_arr("xtunionfield", sizeof( unsigned char), 13u),
-msg); if(((((( !(( unsigned int) _temp703)? 1: !(( unsigned int) _temp704))? 1:
-!(( unsigned int) _temp705))? 1: !(( unsigned int) _temp706))? 1: !((
-unsigned int) _temp707))? 1: !(( unsigned int) _temp708))? 1: !(( unsigned int)
-_temp709)){ return 0;} else{ return({ struct Cyc_Interface_Ienv* _temp710=(
-struct Cyc_Interface_Ienv*) GC_malloc( sizeof( struct Cyc_Interface_Ienv));
+struct _tagged_arr* msg)) Cyc_Interface_disj_merge_dict)( ie1->tuniondecls, ie2->tuniondecls,
+_tag_arr("[x]tunion", sizeof( unsigned char), 10u), msg); struct Cyc_Core_Opt*
+_temp706=(( struct Cyc_Core_Opt*(*)( struct Cyc_Dict_Dict* dic1, struct Cyc_Dict_Dict*
+dic2, struct _tagged_arr t, struct _tagged_arr* msg)) Cyc_Interface_disj_merge_dict)(
+ie1->enumdecls, ie2->enumdecls, _tag_arr("enum", sizeof( unsigned char), 5u),
+msg); struct Cyc_Core_Opt* _temp707=(( struct Cyc_Core_Opt*(*)( struct Cyc_Dict_Dict*
+dic1, struct Cyc_Dict_Dict* dic2, struct Cyc_Dict_Dict* excl, struct Cyc_Absyn_Typedefdecl*(*
+merge_f)( struct Cyc_Absyn_Typedefdecl*, struct Cyc_Absyn_Typedefdecl*, struct
+Cyc_Position_Segment*, struct _tagged_arr*), struct _tagged_arr t, struct
+_tagged_arr* msg)) Cyc_Interface_compat_merge_dict)( ie1->typedefdecls, ie2->typedefdecls,((
+struct Cyc_Dict_Dict*(*)( int(* comp)( struct _tagged_arr*, struct _tagged_arr*)))
+Cyc_Dict_empty)( Cyc_String_zstrptrcmp), Cyc_Tcdecl_merge_typedefdecl, _tag_arr("typedef",
+sizeof( unsigned char), 8u), msg); struct Cyc_Core_Opt* _temp708=(( struct Cyc_Core_Opt*(*)(
+struct Cyc_Dict_Dict* dic1, struct Cyc_Dict_Dict* dic2, struct _tagged_arr t,
+struct _tagged_arr* msg)) Cyc_Interface_disj_merge_dict)( ie1->vardecls, ie2->vardecls,
+_tag_arr("variable", sizeof( unsigned char), 9u), msg); struct Cyc_Core_Opt*
+_temp709=(( struct Cyc_Core_Opt*(*)( struct Cyc_Dict_Dict* dic1, struct Cyc_Dict_Dict*
+dic2, struct _tagged_arr t, struct _tagged_arr* msg)) Cyc_Interface_disj_merge_dict)(
+ie1->xtunionfielddecls, ie2->xtunionfielddecls, _tag_arr("xtunionfield", sizeof(
+unsigned char), 13u), msg); if(((((( !(( unsigned int) _temp703)? 1: !((
+unsigned int) _temp704))? 1: !(( unsigned int) _temp705))? 1: !(( unsigned int)
+_temp706))? 1: !(( unsigned int) _temp707))? 1: !(( unsigned int) _temp708))? 1:
+!(( unsigned int) _temp709)){ return 0;} else{ return({ struct Cyc_Interface_Ienv*
+_temp710=( struct Cyc_Interface_Ienv*) GC_malloc( sizeof( struct Cyc_Interface_Ienv));
 _temp710->structdecls=( struct Cyc_Dict_Dict*)(( struct Cyc_Core_Opt*)
 _check_null( _temp703))->v; _temp710->uniondecls=( struct Cyc_Dict_Dict*)((
 struct Cyc_Core_Opt*) _check_null( _temp704))->v; _temp710->tuniondecls=( struct
