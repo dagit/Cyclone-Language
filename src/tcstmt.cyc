@@ -431,7 +431,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	terr(d->loc,"bad abstract scope for local variable"); 
 	fallthru;
       case Register: 
-      case Public: is_local = true; break;
+      case Public: 
+      default: is_local = true; break;
       }
       // side effect
       *rgn_ptr = is_local ? curr_bl : heap_rgn_type;

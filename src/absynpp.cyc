@@ -369,30 +369,30 @@ string_t kind2string(kind_t ka) {
     switch (a) {
     case Aliasable: return "A";
     case Unique: return "UA";
-    case Top: return "TA";
+    case Top: default: return "TA";
     }
   case MemKind:
     switch (a) {
     case Aliasable: return "M";
     case Unique: return "UM";
-    case Top: return "TM";
+    case Top: default: return "TM";
     }
   case BoxKind:
     switch (a) {
     case Aliasable: return "B";
     case Unique: return "UB";
-    case Top: return "TB";
+    case Top: default: return "TB";
     }
   case RgnKind:
     switch (a) {
     case Aliasable: return "R";
     case Unique: return "UR";
-    case Top: return "TR";
+    case Top: default: return "TR";
     }
   case EffKind: return "E";
   case IntKind: return "I";
   case BoolKind: return "BOOL";
-  case PtrBndKind: return "PTRBND";
+  case PtrBndKind: default: return "PTRBND";
   }
 }
 doc_t kind2doc(kind_t k) { return text(kind2string(k)); }
@@ -511,7 +511,8 @@ doc_t atts2doc(attributes_t atts) {
   if (atts == NULL) return nil_doc();
   switch(c_compiler) {
   case Vc_c:  return noncallconv2doc(atts);
-  case Gcc_c: return(cat(text(" __attribute__"),
+  default:
+    return(cat(text(" __attribute__"),
                         group("((","))",",",List::map(att2doc,atts))));
   }
 }
@@ -625,7 +626,7 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
     case Gcc_c:
       if (next_is_pointer(tms->tl)) rest = p_rest;
       return cat(rest, atts2doc(atts));
-    case Vc_c:
+    default:
      if(next_is_pointer(tms->tl))
 	return cat(callconv2doc(atts), rest);
      return rest;
@@ -716,7 +717,7 @@ doc_t eff2doc(type_t t) {
 doc_t aggr_kind2doc(aggr_kind_t k) {
   switch(k) {
   case StructA: return text("struct ");
-  case UnionA:  return text("union ");
+  default:  return text("union ");
   }
 }
 
@@ -787,14 +788,14 @@ doc_t ntyp2doc(type_t t) {
     switch (sn) {
     case None:
     case Signed:   sns = "";          break;
-    case Unsigned: sns = "unsigned "; break;
+    default: sns = "unsigned "; break;
     }
     switch (sz) {
     case Char_sz:
       switch (sn) {
       case None:     sns = ""; break;
       case Signed:   sns = "signed "; break;
-      case Unsigned: sns = "unsigned "; break;
+      default: sns = "unsigned "; break;
       }
       ts = "char";
       break;
@@ -802,9 +803,10 @@ doc_t ntyp2doc(type_t t) {
     case Int_sz: ts = "int";   break;
     case Long_sz: ts = "long";   break;
     case LongLong_sz:
+    default:
       switch(c_compiler) {
       case Gcc_c: ts = "long long"; break;
-      case Vc_c:  ts = "__int64";   break;
+      default:  ts = "__int64";   break;
       }
       break;
     }
@@ -1044,6 +1046,7 @@ int exp_prec(exp_t e) {
     case Bitlrshift:     return  80; // unlike C (see grammar)
     case Bitarshift:     return  80; // doesn't actually exist (see grammar)
     case Numelts:           return 140; // numelts(foo)
+    default:            return 140;
     }
   case &AssignOp_e(...):      return  20;
   case &Increment_e(...):       return 130;
@@ -1113,7 +1116,8 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     case PreInc:  s = cat(text("++"),es); break;
     case PreDec:  s = cat(text("--"),es); break;
     case PostInc: s = cat(es,text("++")); break;
-    case PostDec: s = cat(es,text("--")); break;
+    case PostDec: 
+    default: s = cat(es,text("--")); break;
     }
     break;
   case &Conditional_e(e1,e2,e3):
@@ -1411,6 +1415,7 @@ string_t prim2str(primop_t p) {
   case Bitlrshift: return ">>";
   case Bitarshift: return ">>>";
   case Numelts: return "numelts";
+  default: return "?";
   }
 }
 
@@ -1714,7 +1719,7 @@ doc_t vardecl2doc(vardecl_t vd) {
   doc_t beforenamedoc;
   switch(c_compiler){
   case Gcc_c: beforenamedoc = attsdoc; break;
-  case Vc_c:
+  default:
     switch(compress(type)) {
     case &FnType(FnInfo{.attributes = atts2,...}):
       beforenamedoc = callconv2doc(atts2);
@@ -1727,7 +1732,7 @@ doc_t vardecl2doc(vardecl_t vd) {
   doc_t tmp_doc;
   switch(c_compiler){
   case Gcc_c: tmp_doc = nil_doc(); break;
-  case Vc_c:  tmp_doc = attsdoc;   break;
+  default:  tmp_doc = attsdoc;   break;
   }
   s = cat(/*(to_VC ? attsdoc : nil_doc()),*/
           tmp_doc,
@@ -1815,7 +1820,7 @@ doc_t decl2doc(decl_t d) {
     if(fd->is_inline)
       switch(c_compiler) {
       case Gcc_c:  inlinedoc = text("inline ");    break;
-      case Vc_c:   inlinedoc = text("__inline ");  break;
+      default:   inlinedoc = text("__inline ");  break;
       }
     else
       inlinedoc = nil_doc();
@@ -1823,7 +1828,7 @@ doc_t decl2doc(decl_t d) {
     doc_t beforenamedoc;
     switch(c_compiler){
     case Gcc_c: beforenamedoc = attsdoc; break;
-    case Vc_c:  beforenamedoc = callconv2doc(fd->i.attributes); break;
+    default:  beforenamedoc = callconv2doc(fd->i.attributes); break;
     }
     doc_t namedoc   = typedef_name2doc(fd->name);
     doc_t tqtddoc   = tqtd2doc(empty_tqual(0), t,
@@ -1993,6 +1998,7 @@ doc_t scope2doc(scope_t sc) {
   case ExternC:  return text("extern \"C\" ");
   case Abstract: return text("abstract ");
   case Register: return text("register ");
+  default: return nil_doc();
   }
 }
 
@@ -2097,7 +2103,7 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
                                                         cyc_varargs,effopt,
                                                         rgn_po,req,ens)),tms);
       break;
-    case Vc_c:
+    default:
       tms = rnew(r) List(rnew(r)
                          Function_mod(rnew(r) WithTypes(args,c_varargs,
                                                         cyc_varargs,effopt,
@@ -2190,7 +2196,7 @@ doc_t aggrfield2doc(aggrfield_t f) {
     else
       return cat(tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
                  atts2doc(f->attributes), requires_doc, text(";"));
-  case Vc_c:
+  default:
     if (f->width != NULL)
       return cat(atts2doc(f->attributes),
                  tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),

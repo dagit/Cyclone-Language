@@ -275,6 +275,7 @@ void dumpscope(scope_t sc) {
   case ExternC:  dump("extern \"C\""); return;
   case Abstract: dump("abstract"); return;
   case Register: dump("register"); return;
+  default: return;
   }
 }
 
@@ -285,37 +286,37 @@ void dumpkind(kind_t ka) {
     switch (a) {
     case Aliasable: dump("A"); return;
     case Unique: dump("UA"); return;
-    case Top: dump("TA"); return;
+    case Top: default: dump("TA"); return;
     }
   case MemKind:
     switch (a) {
     case Aliasable: dump("M"); return;
     case Unique: dump("UM"); return;
-    case Top: dump("TM"); return;
+    case Top: default: dump("TM"); return;
     }
   case BoxKind:
     switch (a) {
     case Aliasable: dump("B"); return;
     case Unique: dump("UB"); return;
-    case Top: dump("TB"); return;
+    case Top: default: dump("TB"); return;
     }
   case RgnKind: 
     switch (a) {
     case Aliasable: dump("R"); return;
     case Unique: dump("UR"); return;
-    case Top: dump("TR"); return;
+    case Top: default: dump("TR"); return;
     }
   case EffKind: dump("E"); return;
   case IntKind: dump("I"); return;
   case BoolKind: dump("BOOL"); return;
-  case PtrBndKind: dump("PTRBND"); return;
+  case PtrBndKind: default: dump("PTRBND"); return;
   }
 }
 
 void dumpaggr_kind(aggr_kind_t k) {
   switch(k) {
   case StructA: dump("struct "); return;
-  case UnionA:  dump("union ");  return;
+  case UnionA:  default: dump("union ");  return;
   }
 }
 
@@ -402,7 +403,7 @@ void dumpatts(attributes_t atts) {
     }
     dump(")) ");
     return;
-  case Vc_c:
+  default:
     dump_noncallconv(atts);
     return;
   }
@@ -513,12 +514,12 @@ void dumpntyp(type_t t) {
   case &AppType(&IntCon(Signed, LongLong_sz),_): 
     switch(c_compiler){
     case Gcc_c: dump("long long"); return;
-    case Vc_c: dump("__int64"); return;
+    default: dump("__int64"); return;
     }
   case &AppType(&IntCon(Unsigned, LongLong_sz),_): 
     switch(c_compiler){
     case Vc_c:  dump("unsigned __int64");return;
-    case Gcc_c: dump("unsigned long long"); return;
+    default: dump("unsigned long long"); return;
     }
   case &AppType(&FloatCon(i),_): 
     if (i==0) 
@@ -658,7 +659,7 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Const_e({.Short_c = $(sg,s)}):     dump(aprintf("%d",s)); break;
   case &Const_e({.Int_c = $(None,i)}):     fallthru(i);
   case &Const_e({.Int_c = $(Signed,i)}):   dump(aprintf("%d",i)); break;
-  case &Const_e({.Int_c = $(Unsigned,i)}): dump(aprintf("%uU",i)); break;
+  case &Const_e({.Int_c = $(_,i)}): dump(aprintf("%uU",i)); break;
   case &Const_e({.LongLong_c = $(sg,i)}):
     // FIX -- take sign into account
     dump(Absynpp::longlong2string(i)); break;
@@ -710,7 +711,7 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Increment_e(e2,PreInc):  dump("++"); dumpexp_prec(myprec,e2); break;
   case &Increment_e(e2,PreDec):  dump("--"); dumpexp_prec(myprec,e2); break;
   case &Increment_e(e2,PostInc): dumpexp_prec(myprec,e2); dump("++"); break;
-  case &Increment_e(e2,PostDec): dumpexp_prec(myprec,e2); dump("--"); break;
+  case &Increment_e(e2,_): dumpexp_prec(myprec,e2); dump("--"); break;
 
   case &Conditional_e(e1,e2,e3):
     dumploc(e->loc);
@@ -1044,7 +1045,7 @@ void dumppat(pat_t p) {
   case &Null_p: dump("NULL");   break;
   case &Int_p(None,i):     fallthru(i);
   case &Int_p(Signed,i):   dump(aprintf("%d",i)); break;
-  case &Int_p(Unsigned,i): dump(aprintf("%u",i)); break;
+  case &Int_p(_,i): dump(aprintf("%u",i)); break;
   case &Char_p(ch):
     dump("'"); dump_nospace(Absynpp::char_escape(ch)); dump_nospace("'"); break;
   case &Float_p(x,_): dump(x); break;
@@ -1121,7 +1122,7 @@ void dumpaggrfields(list_t<aggrfield_t> fields) {
       dumptqtd(tq,type,dump_str,name);
       dumpatts(atts);
       break;
-    case Vc_c:
+    default:
       dumpatts(atts);
       dumptqtd(tq,type,dump_str,name);
       break;
@@ -1200,7 +1201,7 @@ void dumpvardecl(vardecl_t vd,Position::seg_t loc,bool do_semi) {
     dumptqtd(tq, type, dumpqvar, name);
     dumpatts(atts);
     break;
-  case Vc_c:
+  default:
     dumpatts(atts);
     dumpscope(sc);
     region temp; {
@@ -1292,12 +1293,12 @@ void dumpdecl(decl_t d) {
     //    fprintf(stderr,"%s",*(*fd->name)[1]); fflush(stdout);
     switch(c_compiler) {
     case Vc_c: dumpatts(fd->i.attributes); break;
-    case Gcc_c: break;
+    default: break;
     }
     if(fd->is_inline) 
       switch(c_compiler){
       case Vc_c: dump("__inline"); break;
-      case Gc_c: dump("inline");   break;
+      default: dump("inline");   break;
       }
     dumpscope(fd->sc);
     fn_info_t type_info = fd->i;
@@ -1307,7 +1308,7 @@ void dumpdecl(decl_t d) {
     case Gcc_c:
       dumptqtd(empty_tqual(0), t, dump_atts_qvar,fd);
       break;
-    case Vc_c:
+    default:
       dumptqtd(empty_tqual(0), t, dump_callconv_fdqvar,fd);
       break;  
     }

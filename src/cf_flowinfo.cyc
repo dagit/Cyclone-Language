@@ -491,7 +491,7 @@ static flowdict_t escape_these(flow_env_t fenv, escpile_t pile, flowdict_t d) {
     catch { case &Dict::Absent: continue; }
     switch(initlevel(fenv,d,oldval)) {
     case AllIL:  newval = fenv->esc_all;  break;
-    case NoneIL: newval = fenv->esc_none; break;
+    default: newval = fenv->esc_none; break;
     }
     add_places(pile, oldval);
     let Place{root,path} = *place;
@@ -686,7 +686,7 @@ static absRval_t assign_place_inner(struct AssignEnv @ env,
   case $(_, &Esc(il)): // we already know we don't have an escaped location
     switch(il) {
     case NoneIL: return env->fenv->unknown_none;
-    case AllIL:  return env->fenv->unknown_all;
+    default:  return env->fenv->unknown_all;
     }
   default: return newval;
   }
@@ -979,7 +979,7 @@ static bool absRval_lessthan_approx(`a ignore, absRval_t r1, absRval_t r2) {
   switch($(initlevel_approx(r1), initlevel_approx(r2))) {
   case $(AllIL,_):
   case $(_,NoneIL): return true;
-  case $(NoneIL,_): return false;
+  case $(_,_): return false;
   }
 }
 
@@ -1018,7 +1018,7 @@ $(absRval_t,list_t<vardecl_t>) unname_rval(absRval_t rv) {
 void print_initlevel(initlevel_t il) {
   switch (il) {
   case NoneIL: fprintf(stderr,"uninitialized");   break;
-  case AllIL:  fprintf(stderr,"all-initialized"); break;
+  default:  fprintf(stderr,"all-initialized"); break;
   }
 }
 

@@ -861,7 +861,7 @@ kind_t type_kind(type_t t) {
       switch (type_kind(pinfo.ptr_atts.rgn)->aliasqual) {
       case Aliasable: return &bk;
       case Unique: return &ubk;
-      case Top: return &tbk;
+      case Top: default: return &tbk;
       }
     // must assume worst case when the bounds are unconstrained
     case &AppType(&FatCon,_):
@@ -869,7 +869,7 @@ kind_t type_kind(type_t t) {
       switch (type_kind(pinfo.ptr_atts.rgn)->aliasqual) {
       case Aliasable: return &mk;
       case Unique: return &umk;
-      case Top: return &tmk;
+      case Top: default: return &tmk;
       }
     }
   case &ValueofType(_): return &ik;
@@ -1566,6 +1566,7 @@ int tycon2int(tycon_t t) {
   case &DatatypeCon(...):             return 34;
   case &DatatypeFieldCon(...):        return 35;
   case &AggrCon(...):                 return 36;
+  default: impos("bad con");
   }
 }
 
@@ -2488,7 +2489,7 @@ opt_t<kind_t> kind_to_opt(kind_t ka) {
     case EffKind: return &eko;
     case IntKind: return &iko;
     case BoolKind: return &bko;
-    case PtrBndKind: return &ptrbko;
+    case PtrBndKind: default: return &ptrbko;
     }
   case Unique:
     switch (k) {
@@ -2499,7 +2500,7 @@ opt_t<kind_t> kind_to_opt(kind_t ka) {
     default: break;
     }
     break;
-  case Top:
+  case Top: 
     switch (k) {
     case AnyKind: return &tako;
     case MemKind: return &tmko;
@@ -2508,6 +2509,7 @@ opt_t<kind_t> kind_to_opt(kind_t ka) {
     default: break;
     }
     break;
+  default: break;
   }
   impos("kind_to_opt: bad kind %s\n",Absynpp::kind2string(ka));
 }
@@ -3691,7 +3693,8 @@ void check_bitfield(seg_t loc, tenv_t te, type_t field_type,
       case Long_sz:
       case Int_sz:
         if (w > 32) warn(loc,"bitfield larger than type"); break;
-      case LongLong_sz:
+      case LongLong_sz: 
+      default:
         if (w > 64) warn(loc,"bitfield larger than type"); break;
       }
       break;
@@ -4232,7 +4235,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     switch (expected_kind->aliasqual) {
     case Aliasable: k = &rk; break;
     case Unique: k = &urk; break;
-    case Top: k = &trk; break;
+    case Top: 
+    default: k = &trk; break;
     }
     cvtenv = i_check_valid_type(loc,te,cvtenv,k,rgn_type,true,true);
     // if zero_term is unconstrained, then set it to false unless

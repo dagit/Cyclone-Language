@@ -341,7 +341,7 @@ string_t relation2string(relation_t r) {
   case Req: return "==";
   case Rneq: return "!=";
   case Rlt: return "<";
-  case Rlte: return "<=";
+  case Rlte: default: return "<=";
   }
 }
 
@@ -429,7 +429,7 @@ static bool consist_relations(Pratt::graph_t *G, relns_t rlns) {
       case Req: if (i != j) return false; break;
       case Rneq: if (i == j) return false; break;
       case Rlt: if ((unsigned)i >= (unsigned)j) return false; break;
-      case Rlte: if ((unsigned)i > (unsigned)j) return false; break;
+      case Rlte: default: if ((unsigned)i > (unsigned)j) return false; break;
       }
       break;
     // r1 != r2 is a pain -- we have to check whether r1 < r2 is 
@@ -555,7 +555,7 @@ relation_t flip_relation(relation_t r) {
   case Req: return Rneq;
   case Rneq: return Req;
   case Rlt: return Rlte;
-  case Rlte: return Rlt;
+  case Rlte: default: return Rlt;
   }
 }
 

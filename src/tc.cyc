@@ -901,6 +901,7 @@ static bool okay_externC(seg_t loc, scope_t sc, bool in_include) {
   case Register: 
   case Extern: return true;
   case ExternC:
+  default:
     warn(loc,"nested extern \"C\" declaration");
     return true;
   }

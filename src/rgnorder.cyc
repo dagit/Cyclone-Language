@@ -257,7 +257,7 @@ initial_env(region_t<`r> listrgn, rgn_po_t po, type_t rgn) {
       break;
     case Unique:
       add_to_search(&ans,po->these_outlive_unique); break;
-    case Top:
+    case Top: default:
       // can't say anything about what top-level regions outlive
       // a top-kinded region variable, because we just don't know
       // how this variable was created/is being used.

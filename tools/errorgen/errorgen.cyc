@@ -62,7 +62,7 @@ int main(int argc, const char ?`H ? argv) {
 #ifdef DEBUG
     fprintf(stderr,"opening file %s\n",infile);
 #endif
-    FILE *i = fopen(infile, "r");
+    FILE *i = fopen((const char @)infile, "r");
     if (i == NULL) error("cannot find input file %s",infile);
     inf = i;
   }
@@ -74,7 +74,7 @@ int main(int argc, const char ?`H ? argv) {
   // the state, token, and comment associated with the fragment
   // to stdout.
   while (true) {
-    FILE *tmp = fopen(tmpname, "w");
+    FILE *tmp = fopen((const char @)tmpname, "w");
     if (tmp == NULL) error("cannot open file %s",tmpname);
     int c = fgetc(inf);
     // skip white space 
@@ -105,11 +105,11 @@ int main(int argc, const char ?`H ? argv) {
 #endif
     // run the compiler on the tmp file to generate an error, and record
     // the output into tmpname2
-    int j = system(command);
+    int j = system((const char @)command);
     // read in the output from the compiler which should be of the form
     // parse error: state [%d], token [%d]
     char buf[100]@zeroterm; 
-    tmp = fopen(tmpname2,"r");
+    tmp = fopen((const char @)tmpname2,"r");
     if (tmp == NULL) error("unable to open %s!",tmpname2);
     int state, token;
     int i = fscanf(tmp, "parse error: state [%d], token [%d]\n", &state, &token);

@@ -837,8 +837,8 @@ struct _dyneither_ptr Cyc_Relations_relation2string(enum Cyc_Relations_Relation 
 enum Cyc_Relations_Relation _tmp58=r;switch(_tmp58){case Cyc_Relations_Req: _LL1: _LL2:
  return({const char*_tmp59="==";_tag_dyneither(_tmp59,sizeof(char),3U);});case Cyc_Relations_Rneq: _LL3: _LL4:
  return({const char*_tmp5A="!=";_tag_dyneither(_tmp5A,sizeof(char),3U);});case Cyc_Relations_Rlt: _LL5: _LL6:
- return({const char*_tmp5B="<";_tag_dyneither(_tmp5B,sizeof(char),2U);});default: _LL7: _LL8:
- return({const char*_tmp5C="<=";_tag_dyneither(_tmp5C,sizeof(char),3U);});}_LL0:;}
+ return({const char*_tmp5B="<";_tag_dyneither(_tmp5B,sizeof(char),2U);});case Cyc_Relations_Rlte: _LL7: _LL8:
+ goto _LLA;default: _LL9: _LLA: return({const char*_tmp5C="<=";_tag_dyneither(_tmp5C,sizeof(char),3U);});}_LL0:;}
 # 348
 struct _dyneither_ptr Cyc_Relations_rop2string(union Cyc_Relations_RelnOp r){
 union Cyc_Relations_RelnOp _tmp5D=r;unsigned int _tmp74;unsigned int _tmp73;struct Cyc_Absyn_Vardecl*_tmp72;void*_tmp71;struct Cyc_Absyn_Vardecl*_tmp70;unsigned int _tmp6F;switch((_tmp5D.RParamNumelts).tag){case 1U: _LL1: _tmp6F=(_tmp5D.RConst).val;_LL2:
@@ -908,8 +908,8 @@ struct Cyc_Relations_Reln*_tmp91=_tmp90;union Cyc_Relations_RelnOp _tmpAB;enum C
 {enum Cyc_Relations_Relation _tmp92=_tmp9B;switch(_tmp92){case Cyc_Relations_Req: _LL10: _LL11:
  if(_tmp9C != _tmp9A)return 0;goto _LLF;case Cyc_Relations_Rneq: _LL12: _LL13:
  if(_tmp9C == _tmp9A)return 0;goto _LLF;case Cyc_Relations_Rlt: _LL14: _LL15:
- if(_tmp9C >= _tmp9A)return 0;goto _LLF;default: _LL16: _LL17:
- if(_tmp9C > _tmp9A)return 0;goto _LLF;}_LLF:;}
+ if(_tmp9C >= _tmp9A)return 0;goto _LLF;case Cyc_Relations_Rlte: _LL16: _LL17:
+ goto _LL19;default: _LL18: _LL19: if(_tmp9C > _tmp9A)return 0;goto _LLF;}_LLF:;}
 # 434
 goto _LL0;}else{if(((struct Cyc_Relations_Reln*)_tmp91)->relation == Cyc_Relations_Rneq){_LL5: _tmp9E=((_tmp91->rop1).RConst).val;_tmp9D=_tmp91->rop2;_LL6: {
 # 441
@@ -989,8 +989,8 @@ enum Cyc_Relations_Relation Cyc_Relations_flip_relation(enum Cyc_Relations_Relat
 enum Cyc_Relations_Relation _tmpAF=r;switch(_tmpAF){case Cyc_Relations_Req: _LL1: _LL2:
  return Cyc_Relations_Rneq;case Cyc_Relations_Rneq: _LL3: _LL4:
  return Cyc_Relations_Req;case Cyc_Relations_Rlt: _LL5: _LL6:
- return Cyc_Relations_Rlte;default: _LL7: _LL8:
- return Cyc_Relations_Rlt;}_LL0:;}
+ return Cyc_Relations_Rlte;case Cyc_Relations_Rlte: _LL7: _LL8:
+ goto _LLA;default: _LL9: _LLA: return Cyc_Relations_Rlt;}_LL0:;}
 # 562
 struct Cyc_Relations_Reln*Cyc_Relations_negate(struct _RegionHandle*r,struct Cyc_Relations_Reln*rln){
 return({struct Cyc_Relations_Reln*_tmpB0=_region_malloc(r,sizeof(*_tmpB0));_tmpB0->rop1=rln->rop2,({enum Cyc_Relations_Relation _tmp13D=Cyc_Relations_flip_relation(rln->relation);_tmpB0->relation=_tmp13D;}),_tmpB0->rop2=rln->rop1;_tmpB0;});}

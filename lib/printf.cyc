@@ -601,11 +601,9 @@ number:			if ((dprec = prec) >= 0)
 						_ulong >>= 4;
 					} while (_ulong);
 					break;
-                                        /*
 				default:
-					cp = dup("bug in vform: bad base");
+					cp = strdup("bug in vform: bad base");
 					goto skipsize;
-                                        */
 				}
 			}
 			size = ((char ?)buf) + BUF - cp;

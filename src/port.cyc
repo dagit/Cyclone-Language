@@ -1262,7 +1262,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
       (*n)[0] = Loc_n;
       let p = lookup_struct_decl(env,n);
       return known_aggr_ct(p);
-    case {.UnknownAggr = $(UnionA,n,_)}:
+    case {.UnknownAggr = $(_,n,_)}:
       (*n)[0] = Loc_n;
       let p = lookup_union_decl(env,n);
       return known_aggr_ct(p);
@@ -1272,7 +1272,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
       case StructA:
         let p = lookup_struct_decl(env,ad->name);
         return known_aggr_ct(p);
-      case UnionA:
+      default:
         let p = lookup_union_decl(env,ad->name);
         return known_aggr_ct(p);
       }
@@ -1826,7 +1826,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     case StructA:
       previous = lookup_struct_decl(env,name);
       break;
-    case UnionA:
+    default:
       previous = lookup_union_decl(env,name);
       break;
     }

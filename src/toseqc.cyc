@@ -41,7 +41,7 @@ static string_t eff_to_string(enum SideEffect e) {
   case Const: return "Const";
   case NoEffect: return "NoEffect";
   case ExnEffect: return "ExnEffect";
-  case AnyEffect: return "AnyEffect";
+  default: return "AnyEffect";
   }
 }
 
@@ -56,6 +56,7 @@ static enum SideEffect join_side_effect(enum SideEffect e1, enum SideEffect e2) 
   case $(NoEffect,_): return NoEffect;
   case $(_,NoEffect): return NoEffect;
   case $(Const,Const): return Const;
+  default: Tcutil::impos("join_side_effect");
   }
 }
 

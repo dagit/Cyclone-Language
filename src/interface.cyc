@@ -383,6 +383,7 @@ static void extract_aggrdecl($(ienv_t,ienv_t,bool,genv_t,seen_t,i_t) @ env,
       imp->aggrdecls = Dict::insert(imp->aggrdecls, x, d);
     break;
   case Register: 
+  default:
     invalid_arg("add_aggrdecl");
     break;
   }
@@ -422,6 +423,7 @@ static void extract_enumdecl($(ienv_t,ienv_t,bool,genv_t,seen_t,i_t) @ env,
       imp->enumdecls = Dict::insert(imp->enumdecls, x, d);
     break;
   case Register: 
+  default:
     invalid_arg("add_enumdecl");
     break;
   }
@@ -497,6 +499,7 @@ static void extract_datatypedecl($(ienv_t,ienv_t,bool,genv_t,seen_t,i_t) @ env,
     }
     break;
   case Register: 
+  default:
     invalid_arg("add_datatypedecl");
     break;
   }
@@ -550,6 +553,7 @@ static void extract_ordinarie($(ienv_t,ienv_t,bool,genv_t,seen_t,i_t) @ env,
       break;
     case ExternC:
     case Extern:
+    default:
       if (check_public_vardecl(ae, seen, d))
 	imp->vardecls = Dict::insert(imp->vardecls, x, d);
       break;

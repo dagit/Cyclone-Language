@@ -264,7 +264,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
 
   case &Int_p(Unsigned,_): t = num_type(topt, uint_type);  break;
   case &Int_p(None,_):
-  case &Int_p(Signed,_):   t = num_type(topt, sint_type);  break;
+  case &Int_p(_,_):   t = num_type(topt, sint_type);  break;
   case &Char_p(_):         t = num_type(topt, char_type);  break;
   case &Float_p(_,i):      t = num_type(topt, gen_float_type(i)); break;
   case &Enum_p(ed,_):      
@@ -1091,17 +1091,10 @@ static simple_pat_t compile_pat(pat_t p) {
   case &Enum_p(ed,ef):
     // FIX: two different enum constructors can have the same value so we
     // might not get a duplicate warning when we should.
-    switch (compress((type_t)p->topt)) {
-    case &AppType(&IntCon(...),_): 
-      // When it's an integer, we have to pretend like there's an infinite
-      // span...
-      s = con_pat(*((*ef->name)[1]), NULL, NULL, p);
-      break;
-    default:
-      int span = List::length(ed->fields->v);
-      s = con_pat(*((*ef->name)[1]), new span, NULL, p);
-      break;
-    }
+    // JGM: we have to pretend like it's an infinite span since
+    // we don't enforce that enum values are actually drawn from
+    // only the given tags...
+    s = con_pat(*((*ef->name)[1]), NULL, NULL, p);
     break;
   case &AnonEnum_p(tenum,ef):
     // FIX: I had to put `H in here.  The problem must be that we type-check
@@ -1114,17 +1107,10 @@ static simple_pat_t compile_pat(pat_t p) {
     };
     // FIX: two different enum constructors can have the same value so we
     // might not get a duplicate warning when we should.
-    switch (compress((type_t)p->topt)) {
-    case &AppType(&IntCon(...),_):
-      // When it's an integer, we have to pretend like there's an infinite
-      // span to avoid errors for redundant patterns.
-      s = con_pat(*((*ef->name)[1]), NULL, NULL, p);
-      break;
-    default:
-      int span = List::length(fields);
-      s = con_pat(*((*ef->name)[1]), new span, NULL, p);
-      break;
-    }
+    // JGM: we have to pretend like it's an infinite span since
+    // we don't enforce that enum values are actually drawn from
+    // only the given tags...
+    s = con_pat(*((*ef->name)[1]), NULL, NULL, p);
     break;
   case &UnknownId_p(_):     
   case &UnknownCall_p(_,_,_): 
@@ -1491,7 +1477,7 @@ match(simple_pat_t p, path_t obj, term_desc_t dsc,
       return and_match(ctx2,work2,right_hand_side,rules);
     case No:
       return or_match(build_desc(ctx,dsc,work),rules);
-    case Maybe:
+    default:
       context_t ctx2       = new List(new $(pcon,NULL), ctx);
       work_stack_frame_t work_frame = new $(pargs,getoargs(pcon,obj),
                                                     getdargs(pcon,dsc));

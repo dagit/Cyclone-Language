@@ -145,7 +145,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
   switch (*c) {
   case {.Char_c = $(Signed,_)}:   t = schar_type; break;
   case {.Char_c = $(Unsigned,_)}: t = uchar_type; break;
-  case {.Char_c = $(None,_)}:     t = char_type;  break;
+  case {.Char_c = $(_,_)}:        t = char_type;  break;
   case {.Wchar_c = _}:            t = wchar_type();  break;
   case {.Short_c = $(sn,_)}:
     t = (sn == Unsigned) ? ushort_type : sshort_type; break;
@@ -178,7 +178,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
         switch(sn) {
 	case Unsigned: t = uchar_type; break;
 	case Signed: t = schar_type; break;
-	case None: t = char_type; break;
+	default: t = char_type; break;
 	}
         *c = Char_c(sn,(char)(i)); // i gets truncated here
         break;
@@ -1042,7 +1042,8 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 				arg_start_pos - 1,alias_arg_exps,c_vararg,
 				Formatstr::get_format_types);
 	      break;
-	    case Scanf_ft:
+	    case Scanf_ft: 
+            default:
 	      check_format_args(te,fmt_arg,fmt_args,
 				arg_start_pos - 1,alias_arg_exps,c_vararg,
 				Formatstr::get_scanf_types);

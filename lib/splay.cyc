@@ -110,7 +110,7 @@ static void lift(region_t<`r> r,
     if (dnl->tl == NULL) {
       switch (dnl->hd) {
       case &$(LEFT,nr):  rotate_left(r,nr);  break;
-      case &$(RIGHT,nr): rotate_right(r,nr); break;
+      case &$(_,nr): rotate_right(r,nr); break;
       }
       return;
     }
@@ -121,13 +121,13 @@ static void lift(region_t<`r> r,
     case LEFT:
       switch (grandparent_dir) {
       case LEFT: rotate_left(r,grandparent); rotate_left(r,grandparent); break;
-      case RIGHT: rotate_left(r,parent); rotate_right(r,grandparent); break;
+      case _: rotate_left(r,parent); rotate_right(r,grandparent); break;
       }
       break;
-    case RIGHT:
+    case _:
       switch (grandparent_dir) {
       case LEFT: rotate_right(r,parent); rotate_left(r,grandparent); break;
-      case RIGHT: rotate_right(r,grandparent); rotate_right(r,grandparent); break;
+      case _: rotate_right(r,grandparent); rotate_right(r,grandparent); break;
       }
       break;
     }

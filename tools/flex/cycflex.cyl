@@ -1256,7 +1256,7 @@ rule mangle = parse
       exit(1);
     }
     /* Mangle the output of flex */
-    maybe = fopen(flexoutfile,"r");
+    maybe = fopen((const char @)flexoutfile,"r");
     if (!maybe) {
       fprintf(stderr,"cycflex: can't read flex output\n");
       if (tmpskeletonfile) remove(tmpskeletonfile);
@@ -1268,7 +1268,7 @@ rule mangle = parse
     if (!mangle_out) {
       fprintf(stderr,"cycflex: can't open %s\n",finaloutfile);
       if (tmpskeletonfile) remove(tmpskeletonfile);
-      remove(flexoutfile);
+      remove((const char @)flexoutfile);
       exit(1);
     }
     while (mangle(l))
@@ -1277,7 +1277,7 @@ rule mangle = parse
     fclose((FILE @)mangle_out);
 
     if (tmpskeletonfile) remove(tmpskeletonfile);
-    remove(flexoutfile);
+    remove((const char @)flexoutfile);
 
     return 0;
   }

@@ -586,9 +586,9 @@ goto _LLC;case Cyc_Absyn_Extern: goto _LLF;default: _LL11: _LL12:
 # 81
  goto _LL16;}else{goto _LL1B;}case Cyc_Absyn_Abstract: if(_tmpE.f2 == Cyc_Absyn_Abstract){_LL17: _LL18:
 # 83
- goto _LL0;}else{goto _LL1B;}default: if(_tmpE.f2 == Cyc_Absyn_Register){_LL19: _LL1A:
- goto _LL0;}else{_LL1B: _LL1C:
- Cyc_Tcdecl_merge_scope_err(s0,s1,t,v,loc,msg);return({struct _tuple10 _tmp16E;_tmp16E.f1=s1,_tmp16E.f2=0;_tmp16E;});}}}}_LL0:;}
+ goto _LL0;}else{goto _LL1B;}case Cyc_Absyn_Register: if(_tmpE.f2 == Cyc_Absyn_Register){_LL19: _LL1A:
+ goto _LL0;}else{goto _LL1B;}default: _LL1B: _LL1C:
+ Cyc_Tcdecl_merge_scope_err(s0,s1,t,v,loc,msg);return({struct _tuple10 _tmp16E;_tmp16E.f1=s1,_tmp16E.f2=0;_tmp16E;});}}}_LL0:;}
 # 87
 return({struct _tuple10 _tmp170;_tmp170.f1=s1,_tmp170.f2=1;_tmp170;});}
 # 90

@@ -230,7 +230,7 @@ int main(int argc, const char ?`H? argv) {
     }
   }
   if (argc > 0) {
-    FILE *inp = fopen(*argv,"r");
+    FILE *inp = fopen((const char @)(*argv),"r");
     if (!inp) {
       fprintf(stderr,"could not open file %s for reading",*argv);
       exit(0);
@@ -293,8 +293,8 @@ int main(int argc, const char ?`H? argv) {
     let fileout = strconcat(basename,"_new.cyc");
     rewrites = rimp_merge_sort(cmp_rewrite, rewrites);
     printf("Rewriting file %s to %s\n",file,fileout);
-    FILE @fin = (FILE @)fopen(file,"r");
-    FILE @fout = (FILE @)fopen(fileout,"w");
+    FILE @fin = (FILE @)fopen((const char @)file,"r");
+    FILE @fout = (FILE @)fopen((const char @)fileout,"w");
     int cur_line = 1;
     int cur_off = 0;
     for (; rewrites; rewrites = rewrites->tl) {

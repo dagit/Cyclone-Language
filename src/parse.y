@@ -860,7 +860,8 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
    case Static_sc:   s = Static;   break;
    case Auto_sc:     s = Public;   break;
    case Register_sc: if(no_register) s = Public; else s = Register;   break;
-   case Abstract_sc: s = Abstract; break;
+   case Abstract_sc: 
+   default: s = Abstract; break;
    }
 
  // separate the declarators from their initializers

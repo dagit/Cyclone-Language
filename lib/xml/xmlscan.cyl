@@ -66,7 +66,8 @@ int yylex(YYLEX_PARAM_ARG) {
   int ans = 0;
   switch (getContext()) {
   case Normal: aa = XmlScan::data(lbuf->v,yyoutregion); break;
-  case InTag: aa = XmlScan::intag(lbuf->v,yyoutregion); break;
+  case InTag: 
+  default: aa = XmlScan::intag(lbuf->v,yyoutregion); break;
   }
   switch (aa) {
   case {.ATTVALUE1_LV = s}:

@@ -25,6 +25,7 @@ string_t stb_info(streambuff_t stb) {
   case CharBuffer:
     return aprintf("CharBuffer(%d)",sz);
   case Packet:
+  default:
     return aprintf("Packet(%d)",sz);
   }
 }

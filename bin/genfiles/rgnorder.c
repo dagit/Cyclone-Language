@@ -665,18 +665,19 @@ enum Cyc_Absyn_AliasQual _tmp4A=_tmp51;switch(_tmp4A){case Cyc_Absyn_Aliasable: 
 Cyc_RgnOrder_add_to_search(& _tmp47,po->these_outlive_heap);
 goto _LL3;case Cyc_Absyn_Unique: _LL6: _LL7:
 # 259
- Cyc_RgnOrder_add_to_search(& _tmp47,po->these_outlive_unique);goto _LL3;default: _LL8: _LL9:
+ Cyc_RgnOrder_add_to_search(& _tmp47,po->these_outlive_unique);goto _LL3;case Cyc_Absyn_Top: _LL8: _LL9:
+ goto _LLB;default: _LLA: _LLB:
 # 264
  goto _LL3;}_LL3:;}else{
 # 268
 ({void*_tmp4B=0U;({struct _dyneither_ptr _tmpCF=({const char*_tmp4C="RgnOrder: rgn not of correct kind";_tag_dyneither(_tmp4C,sizeof(char),34U);});((int(*)(struct _dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Warn_impos)(_tmpCF,_tag_dyneither(_tmp4B,sizeof(void*),0U));});});}{
 # 270
-void*_tmp4D=r;struct Cyc_Absyn_Tvar*_tmp50;if(((struct Cyc_Absyn_VarType_Absyn_Type_struct*)_tmp4D)->tag == 2U){_LLB: _tmp50=((struct Cyc_Absyn_VarType_Absyn_Type_struct*)_tmp4D)->f1;_LLC:
+void*_tmp4D=r;struct Cyc_Absyn_Tvar*_tmp50;if(((struct Cyc_Absyn_VarType_Absyn_Type_struct*)_tmp4D)->tag == 2U){_LLD: _tmp50=((struct Cyc_Absyn_VarType_Absyn_Type_struct*)_tmp4D)->f1;_LLE:
 # 272
 ({struct Cyc_List_List*_tmpD0=({struct Cyc_List_List*_tmp4E=_region_malloc(listrgn,sizeof(*_tmp4E));_tmp4E->hd=_tmp50,_tmp4E->tl=_tmp47.seen;_tmp4E;});_tmp47.seen=_tmpD0;});
 ({struct Cyc_List_List*_tmpD1=({struct Cyc_List_List*_tmp4F=_region_malloc(listrgn,sizeof(*_tmp4F));_tmp4F->hd=_tmp50,_tmp4F->tl=_tmp47.todo;_tmp4F;});_tmp47.todo=_tmpD1;});
-goto _LLE;}else{_LLD: _LLE:
- return _tmp47;}_LLA:;};}
+goto _LL10;}else{_LLF: _LL10:
+ return _tmp47;}_LLC:;};}
 # 281
 static int Cyc_RgnOrder_atomic_effect_outlives(struct Cyc_RgnOrder_RgnPO*po,void*eff,void*rgn){
 struct _RegionHandle _tmp53=_new_region("listrgn");struct _RegionHandle*listrgn=& _tmp53;_push_region(listrgn);
