@@ -597,14 +597,18 @@ EWOULDBLOCK
 EXDEV
 }
 hstub {
-extern "C" int __CYCLONE_ERRNO();
-#define errno (__CYCLONE_ERRNO())
+extern "C" int *__CYCLONE_ERRNO();
+#define errno (*__CYCLONE_ERRNO())
 }
 cstub {
-  // We do this because errno is probably a C macro
+  // We do this because errno is probably a C macro that refers to
+  // a C function, and buildlib's closure algorithm does not properly
+  // declare an indirectly-needed C function as extern "C".
+  // Also, if it's a macro we don't want a declaration for it in Cyclone,
+  // but we don't have a nice way of suppressing this with buildlib.
   #include <errno.h>
-  int __CYCLONE_ERRNO() {
-    return errno;
+  int *__CYCLONE_ERRNO() {
+    return &errno;
   }
 }
 ;
@@ -3713,13 +3717,44 @@ hstub {
   #endif
 }
 hstub pselect {
-  /* FIX: check for possible fd_set overflow */
-  extern "C" int pselect(int, fd_set *, fd_set *, fd_set *,
-                       const struct timespec *, const sigset_t *);
+  extern int pselect(int a, fd_set *b, fd_set *c, fd_set *d,
+                     const struct timespec *e, const sigset_t *f);
+}
+cycstub pselect {
+  namespace Csysselect {
+    extern "C" int pselect(int, fd_set *, fd_set *, fd_set *,
+                           const struct timespec *, const sigset_t *);
+  }
+  #include <errno.h>
+  extern int pselect(int a, fd_set *b, fd_set *c, fd_set *d,
+                     const struct timespec *e, const sigset_t *f) {
+    /* C probably doesn't check for fd_set overflow, so we do */
+    if (a<0 || a>FD_SETSIZE) {
+      errno = EINVAL;
+      return -1;
+    }
+    return Csysselect::pselect(a,b,c,d,e,f);
+  }
+
 }
 hstub select {
-  /* FIX: check for possible fd_set overflow */
-  extern "C" int select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
+  extern int select(int a, fd_set *b, fd_set *c, fd_set *d,
+                    struct timeval *e);
+}
+cycstub select {
+  namespace Csysselect {
+    extern "C" int select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
+  }
+  #include <errno.h>
+  extern int select(int a, fd_set *b, fd_set *c, fd_set *d,
+                    struct timeval *e) {
+    /* C probably doesn't check for fd_set overflow, so we do */
+    if (a<0 || a>FD_SETSIZE) {
+      errno = EINVAL;
+      return -1;
+    }
+    return Csysselect::select(a,b,c,d,e);
+  }
 }
 hstub {
   /* Posix says these can be macros or functions.  Typically they are
@@ -3737,14 +3772,16 @@ cycstub {
     extern "C" void __stub_FD_SET(int, fd_set @);
     extern "C" void __stub_FD_ZERO(fd_set @);
   }
-  /* FIX: check for possible fd_set overflow on these */
   void FD_CLR(int a, fd_set @b) {
+    if (a<0 || a>FD_SETSIZE) return; /* force fd_set overflow check */
     return Csysselect::__stub_FD_CLR(a,b);
   }
   int FD_ISSET(int a, fd_set @b) {
+    if (a<0 || a>FD_SETSIZE) return 0; /* force fd_set overflow check */
     return Csysselect::__stub_FD_ISSET(a,b);
   }
   void FD_SET(int a, fd_set @b) {
+    if (a<0 || a>FD_SETSIZE) return; /* force fd_set overflow check */
     return Csysselect::__stub_FD_SET(a,b);
   }
   void FD_ZERO(fd_set @a) {
@@ -4354,9 +4391,8 @@ cycstub gettimeofday {
   }
 }
 hstub select {
-  /* FIX: check for possible fd_set overflow */
-  extern "C" int select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
   /* Stubs for these are defined by sys/select.h */
+  extern int select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
   extern void FD_CLR(int, fd_set @);
   extern int FD_ISSET(int, fd_set @);
   extern void FD_SET(int, fd_set @);

@@ -30,10 +30,14 @@
     DIR *dir;
   };
 
-  // We do this because errno is probably a C macro
+  // We do this because errno is probably a C macro that refers to
+  // a C function, and buildlib's closure algorithm does not properly
+  // declare an indirectly-needed C function as extern "C".
+  // Also, if it's a macro we don't want a declaration for it in Cyclone,
+  // but we don't have a nice way of suppressing this with buildlib.
   #include <errno.h>
-  int __CYCLONE_ERRNO() {
-    return errno;
+  int *__CYCLONE_ERRNO() {
+    return &errno;
   }
 
   #include "precore_c.h"

@@ -205,6 +205,10 @@ THINGS NEEDED TO MAKE REGIONS MORE REAL:
 
 THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 --------------------------------------------------
+* We should have pointer qualifiers FAT/NONFAT, MAYBENULL/NOTNULL
+  so that we can express any combination.  In particular, we need
+  NOTNULL+ZEROTERM to safely interface to some C functions.
+
 * better type error messages:  it would be good to drop region information
   when it's not germaine to the error (e.g., regions).
 
@@ -254,6 +258,11 @@ THINGS THAT WOULD MAKE THE COMPILER FASTER OR THE CODE BETTER:
 
 * We need to re-do the pattern match compilation -- we should take
   advantage of the decision tree built during type-checking.
+
+* The code for type checking explicit format strings for printf should
+  be the same as the code for implementing printf; right now the type
+  checking code disallows some format directives that the
+  implementation supports.
 
 MISCELLANEOUS
 -------------

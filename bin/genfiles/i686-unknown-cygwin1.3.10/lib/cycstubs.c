@@ -473,12 +473,12 @@ struct Cyc___cycDIR*d){return readdir(d->dir);}void rewinddir(struct Cyc_Cdirent
 d);void Cyc_rewinddir(struct Cyc___cycDIR*d){return rewinddir(d->dir);}void seekdir(
 struct Cyc_Cdirent___abstractDIR*d,int);void Cyc_seekdir(struct Cyc___cycDIR*d,int x){
 return seekdir(d->dir,x);}int telldir(struct Cyc_Cdirent___abstractDIR*d);int Cyc_telldir(
-struct Cyc___cycDIR*d){return telldir(d->dir);}struct Cyc_flock{short l_type;short
-l_whence;int l_start;int l_len;short l_pid;short l_xxx;};struct Cyc_Flock_struct{int
-tag;struct Cyc_flock*f1;};struct Cyc_Long_struct{int tag;int f1;};int Cyc_fcntl(int fd,
-int cmd,struct _tagged_arr);int Cyc_open(const char*,int,struct _tagged_arr);int fcntl(
-int fd,int cmd);int fcntl_with_arg(int fd,int cmd,int arg);int fcntl_with_lock(int fd,
-int cmd,struct Cyc_flock*lock);int open_without_mode(const char*,int);int
+struct Cyc___cycDIR*d){return telldir(d->dir);}int*__CYCLONE_ERRNO();struct Cyc_flock{
+short l_type;short l_whence;int l_start;int l_len;short l_pid;short l_xxx;};struct Cyc_Flock_struct{
+int tag;struct Cyc_flock*f1;};struct Cyc_Long_struct{int tag;int f1;};int Cyc_fcntl(
+int fd,int cmd,struct _tagged_arr);int Cyc_open(const char*,int,struct _tagged_arr);
+int fcntl(int fd,int cmd);int fcntl_with_arg(int fd,int cmd,int arg);int fcntl_with_lock(
+int fd,int cmd,struct Cyc_flock*lock);int open_without_mode(const char*,int);int
 open_with_mode(const char*,int,int);static char _tmp5[21]="fcntl: too many args";
 static struct Cyc_Core_Failure_struct Cyc___fcntl_failure={Cyc_Core_Failure,{_tmp5,
 _tmp5,_tmp5 + 21}};int Cyc_fcntl(int fd,int cmd,struct _tagged_arr argv){if(
@@ -689,15 +689,20 @@ struct Cyc_timeval ru_utime;struct Cyc_timeval ru_stime;int ru_maxrss;int ru_ixr
 ru_idrss;int ru_isrss;int ru_minflt;int ru_majflt;int ru_nswap;int ru_inblock;int
 ru_oublock;int ru_msgsnd;int ru_msgrcv;int ru_nsignals;int ru_nvcsw;int ru_nivcsw;};
 struct Cyc_timespec{int tv_sec;int tv_nsec;};struct Cyc__types_fd_set{int fds_bits[(
-64 + (sizeof(int)* 8 - 1))/ (sizeof(int)* 8)];};int select(int,struct Cyc__types_fd_set*,
-struct Cyc__types_fd_set*,struct Cyc__types_fd_set*,struct Cyc_timeval*);void Cyc_FD_CLR(
-int,struct Cyc__types_fd_set*);int Cyc_FD_ISSET(int,struct Cyc__types_fd_set*);void
-Cyc_FD_SET(int,struct Cyc__types_fd_set*);void Cyc_FD_ZERO(struct Cyc__types_fd_set*);
-void __stub_FD_CLR(int,struct Cyc__types_fd_set*);int __stub_FD_ISSET(int,struct Cyc__types_fd_set*);
+64 + (sizeof(int)* 8 - 1))/ (sizeof(int)* 8)];};int Cyc_select(int a,struct Cyc__types_fd_set*
+b,struct Cyc__types_fd_set*c,struct Cyc__types_fd_set*d,struct Cyc_timeval*e);void
+Cyc_FD_CLR(int,struct Cyc__types_fd_set*);int Cyc_FD_ISSET(int,struct Cyc__types_fd_set*);
+void Cyc_FD_SET(int,struct Cyc__types_fd_set*);void Cyc_FD_ZERO(struct Cyc__types_fd_set*);
+int select(int,struct Cyc__types_fd_set*,struct Cyc__types_fd_set*,struct Cyc__types_fd_set*,
+struct Cyc_timeval*);extern int Cyc_select(int a,struct Cyc__types_fd_set*b,struct Cyc__types_fd_set*
+c,struct Cyc__types_fd_set*d,struct Cyc_timeval*e){if(a < 0  || a > 64){*((int*)
+_check_null(__CYCLONE_ERRNO()))=22;return - 1;}return select(a,b,c,d,e);}void
+__stub_FD_CLR(int,struct Cyc__types_fd_set*);int __stub_FD_ISSET(int,struct Cyc__types_fd_set*);
 void __stub_FD_SET(int,struct Cyc__types_fd_set*);void __stub_FD_ZERO(struct Cyc__types_fd_set*);
-void Cyc_FD_CLR(int a,struct Cyc__types_fd_set*b){return __stub_FD_CLR(a,b);}int Cyc_FD_ISSET(
-int a,struct Cyc__types_fd_set*b){return __stub_FD_ISSET(a,b);}void Cyc_FD_SET(int a,
-struct Cyc__types_fd_set*b){return __stub_FD_SET(a,b);}void Cyc_FD_ZERO(struct Cyc__types_fd_set*
+void Cyc_FD_CLR(int a,struct Cyc__types_fd_set*b){if(a < 0  || a > 64)return;return
+__stub_FD_CLR(a,b);}int Cyc_FD_ISSET(int a,struct Cyc__types_fd_set*b){if(a < 0  || a
+> 64)return 0;return __stub_FD_ISSET(a,b);}void Cyc_FD_SET(int a,struct Cyc__types_fd_set*
+b){if(a < 0  || a > 64)return;return __stub_FD_SET(a,b);}void Cyc_FD_ZERO(struct Cyc__types_fd_set*
 a){return __stub_FD_ZERO(a);}struct Cyc_linger{unsigned short l_onoff;
 unsigned short l_linger;};struct Cyc_SA_sockaddr_in_struct{int tag;struct Cyc_sockaddr_in*
 f1;};struct Cyc_SA_socklenptr_struct{int tag;int*f1;};struct Cyc_SA_socklen_struct{
@@ -826,7 +831,7 @@ int st_atime;unsigned int __st_uid32;int st_mtime;unsigned int __st_gid32;int
 st_ctime;int st_spare3;int st_blksize;int st_blocks;long long __st_size64;};struct
 Cyc_timezone{int tz_minuteswest;int tz_dsttime;};struct Cyc_itimerval{struct Cyc_timeval
 it_interval;struct Cyc_timeval it_value;};int Cyc_gettimeofday(struct Cyc_timeval*,
-struct Cyc_timezone*);int select(int,struct Cyc__types_fd_set*,struct Cyc__types_fd_set*,
+struct Cyc_timezone*);int Cyc_select(int,struct Cyc__types_fd_set*,struct Cyc__types_fd_set*,
 struct Cyc__types_fd_set*,struct Cyc_timeval*);void Cyc_FD_CLR(int,struct Cyc__types_fd_set*);
 int Cyc_FD_ISSET(int,struct Cyc__types_fd_set*);void Cyc_FD_SET(int,struct Cyc__types_fd_set*);
 void Cyc_FD_ZERO(struct Cyc__types_fd_set*);int gettimeofday(struct Cyc_timeval*,

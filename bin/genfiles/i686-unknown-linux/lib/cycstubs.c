@@ -473,45 +473,46 @@ struct Cyc___cycDIR*d){return readdir(d->dir);}void rewinddir(struct Cyc_Cdirent
 d);void Cyc_rewinddir(struct Cyc___cycDIR*d){return rewinddir(d->dir);}void seekdir(
 struct Cyc_Cdirent___abstractDIR*d,int);void Cyc_seekdir(struct Cyc___cycDIR*d,int x){
 return seekdir(d->dir,x);}int telldir(struct Cyc_Cdirent___abstractDIR*d);int Cyc_telldir(
-struct Cyc___cycDIR*d){return telldir(d->dir);}struct Cyc_flock{short l_type;short
-l_whence;int l_start;int l_len;int l_pid;};struct Cyc_Flock_struct{int tag;struct Cyc_flock*
-f1;};struct Cyc_Long_struct{int tag;int f1;};int Cyc_fcntl(int fd,int cmd,struct
-_tagged_arr);int Cyc_open(const char*,int,struct _tagged_arr);int fcntl(int fd,int cmd);
-int fcntl_with_arg(int fd,int cmd,int arg);int fcntl_with_lock(int fd,int cmd,struct Cyc_flock*
-lock);int open_without_mode(const char*,int);int open_with_mode(const char*,int,
-unsigned int);static char _tmp5[21]="fcntl: too many args";static struct Cyc_Core_Failure_struct
-Cyc___fcntl_failure={Cyc_Core_Failure,{_tmp5,_tmp5,_tmp5 + 21}};int Cyc_fcntl(int
-fd,int cmd,struct _tagged_arr argv){if(_get_arr_size(argv,sizeof(void*))== 0)return
-fcntl(fd,cmd);else{if(_get_arr_size(argv,sizeof(void*))!= 1)(int)_throw((void*)&
-Cyc___fcntl_failure);else{void*_tmp6=*((void**)_check_unknown_subscript(argv,
-sizeof(void*),0));int _tmp7;struct Cyc_flock*_tmp8;_LL1: if(*((int*)_tmp6)!= 1)goto
-_LL3;_tmp7=((struct Cyc_Long_struct*)_tmp6)->f1;_LL2: return fcntl_with_arg(fd,cmd,
-_tmp7);_LL3: if(*((int*)_tmp6)!= 0)goto _LL0;_tmp8=((struct Cyc_Flock_struct*)_tmp6)->f1;
-_LL4: return fcntl_with_lock(fd,cmd,(struct Cyc_flock*)_tmp8);_LL0:;}}}int Cyc_open(
-const char*s,int i,struct _tagged_arr ms){if(_get_arr_size(ms,sizeof(unsigned int))
->= 1)return open_with_mode(s,i,*((unsigned int*)_check_unknown_subscript(ms,
-sizeof(unsigned int),0)));else{return open_without_mode(s,i);}}enum Cyc___anonymous_enum_51__{
-Cyc_FE_INVALID  = 1,Cyc___FE_DENORM  = 2,Cyc_FE_DIVBYZERO  = 4,Cyc_FE_OVERFLOW  = 8,
-Cyc_FE_UNDERFLOW  = 16,Cyc_FE_INEXACT  = 32};enum Cyc___anonymous_enum_52__{Cyc_FE_TONEAREST
- = 0,Cyc_FE_DOWNWARD  = 1024,Cyc_FE_UPWARD  = 2048,Cyc_FE_TOWARDZERO  = 3072};
-typedef struct{unsigned short __control_word;unsigned short __unused1;
-unsigned short __status_word;unsigned short __unused2;unsigned short __tags;
-unsigned short __unused3;unsigned int __eip;unsigned short __cs_selector;
-unsigned int __opcode: 11;unsigned int __unused4: 5;unsigned int __data_offset;
-unsigned short __data_selector;unsigned short __unused5;}Cyc_fenv_t;union Cyc___convert_long_double{
-unsigned int __convert_long_double_i[4];long double __convert_long_double_d;};
-enum Cyc___anonymous_enum_61__{Cyc_MM_HARD  = 1,Cyc_MM_SOFT  = 2,Cyc_MM_FIRM  = 4,
-Cyc_MM_APPL  = 8,Cyc_MM_UTIL  = 16,Cyc_MM_OPSYS  = 32,Cyc_MM_RECOVER  = 64,Cyc_MM_NRECOV
- = 128,Cyc_MM_PRINT  = 256,Cyc_MM_CONSOLE  = 512};enum Cyc___anonymous_enum_62__{
-Cyc_MM_NOSEV  = 0,Cyc_MM_HALT  = 1,Cyc_MM_ERROR  = 2,Cyc_MM_WARNING  = 3,Cyc_MM_INFO
- = 4};enum Cyc___anonymous_enum_63__{Cyc_MM_NOTOK  = -1,Cyc_MM_OK  = 0,Cyc_MM_NOMSG
- = 1,Cyc_MM_NOCON  = 4};enum Cyc___anonymous_enum_119__{Cyc_IPPORT_ECHO  = 7,Cyc_IPPORT_DISCARD
- = 9,Cyc_IPPORT_SYSTAT  = 11,Cyc_IPPORT_DAYTIME  = 13,Cyc_IPPORT_NETSTAT  = 15,Cyc_IPPORT_FTP
- = 21,Cyc_IPPORT_TELNET  = 23,Cyc_IPPORT_SMTP  = 25,Cyc_IPPORT_TIMESERVER  = 37,Cyc_IPPORT_NAMESERVER
- = 42,Cyc_IPPORT_WHOIS  = 43,Cyc_IPPORT_MTP  = 57,Cyc_IPPORT_TFTP  = 69,Cyc_IPPORT_RJE
- = 77,Cyc_IPPORT_FINGER  = 79,Cyc_IPPORT_TTYLINK  = 87,Cyc_IPPORT_SUPDUP  = 95,Cyc_IPPORT_EXECSERVER
- = 512,Cyc_IPPORT_LOGINSERVER  = 513,Cyc_IPPORT_CMDSERVER  = 514,Cyc_IPPORT_EFSSERVER
- = 520,Cyc_IPPORT_BIFFUDP  = 512,Cyc_IPPORT_WHOSERVER  = 513,Cyc_IPPORT_ROUTESERVER
+struct Cyc___cycDIR*d){return telldir(d->dir);}int*__CYCLONE_ERRNO();struct Cyc_flock{
+short l_type;short l_whence;int l_start;int l_len;int l_pid;};struct Cyc_Flock_struct{
+int tag;struct Cyc_flock*f1;};struct Cyc_Long_struct{int tag;int f1;};int Cyc_fcntl(
+int fd,int cmd,struct _tagged_arr);int Cyc_open(const char*,int,struct _tagged_arr);
+int fcntl(int fd,int cmd);int fcntl_with_arg(int fd,int cmd,int arg);int fcntl_with_lock(
+int fd,int cmd,struct Cyc_flock*lock);int open_without_mode(const char*,int);int
+open_with_mode(const char*,int,unsigned int);static char _tmp5[21]="fcntl: too many args";
+static struct Cyc_Core_Failure_struct Cyc___fcntl_failure={Cyc_Core_Failure,{_tmp5,
+_tmp5,_tmp5 + 21}};int Cyc_fcntl(int fd,int cmd,struct _tagged_arr argv){if(
+_get_arr_size(argv,sizeof(void*))== 0)return fcntl(fd,cmd);else{if(_get_arr_size(
+argv,sizeof(void*))!= 1)(int)_throw((void*)& Cyc___fcntl_failure);else{void*_tmp6=*((
+void**)_check_unknown_subscript(argv,sizeof(void*),0));int _tmp7;struct Cyc_flock*
+_tmp8;_LL1: if(*((int*)_tmp6)!= 1)goto _LL3;_tmp7=((struct Cyc_Long_struct*)_tmp6)->f1;
+_LL2: return fcntl_with_arg(fd,cmd,_tmp7);_LL3: if(*((int*)_tmp6)!= 0)goto _LL0;
+_tmp8=((struct Cyc_Flock_struct*)_tmp6)->f1;_LL4: return fcntl_with_lock(fd,cmd,(
+struct Cyc_flock*)_tmp8);_LL0:;}}}int Cyc_open(const char*s,int i,struct _tagged_arr
+ms){if(_get_arr_size(ms,sizeof(unsigned int))>= 1)return open_with_mode(s,i,*((
+unsigned int*)_check_unknown_subscript(ms,sizeof(unsigned int),0)));else{return
+open_without_mode(s,i);}}enum Cyc___anonymous_enum_51__{Cyc_FE_INVALID  = 1,Cyc___FE_DENORM
+ = 2,Cyc_FE_DIVBYZERO  = 4,Cyc_FE_OVERFLOW  = 8,Cyc_FE_UNDERFLOW  = 16,Cyc_FE_INEXACT
+ = 32};enum Cyc___anonymous_enum_52__{Cyc_FE_TONEAREST  = 0,Cyc_FE_DOWNWARD  = 
+1024,Cyc_FE_UPWARD  = 2048,Cyc_FE_TOWARDZERO  = 3072};typedef struct{unsigned short
+__control_word;unsigned short __unused1;unsigned short __status_word;
+unsigned short __unused2;unsigned short __tags;unsigned short __unused3;
+unsigned int __eip;unsigned short __cs_selector;unsigned int __opcode: 11;
+unsigned int __unused4: 5;unsigned int __data_offset;unsigned short __data_selector;
+unsigned short __unused5;}Cyc_fenv_t;union Cyc___convert_long_double{unsigned int
+__convert_long_double_i[4];long double __convert_long_double_d;};enum Cyc___anonymous_enum_61__{
+Cyc_MM_HARD  = 1,Cyc_MM_SOFT  = 2,Cyc_MM_FIRM  = 4,Cyc_MM_APPL  = 8,Cyc_MM_UTIL  = 16,
+Cyc_MM_OPSYS  = 32,Cyc_MM_RECOVER  = 64,Cyc_MM_NRECOV  = 128,Cyc_MM_PRINT  = 256,Cyc_MM_CONSOLE
+ = 512};enum Cyc___anonymous_enum_62__{Cyc_MM_NOSEV  = 0,Cyc_MM_HALT  = 1,Cyc_MM_ERROR
+ = 2,Cyc_MM_WARNING  = 3,Cyc_MM_INFO  = 4};enum Cyc___anonymous_enum_63__{Cyc_MM_NOTOK
+ = -1,Cyc_MM_OK  = 0,Cyc_MM_NOMSG  = 1,Cyc_MM_NOCON  = 4};enum Cyc___anonymous_enum_119__{
+Cyc_IPPORT_ECHO  = 7,Cyc_IPPORT_DISCARD  = 9,Cyc_IPPORT_SYSTAT  = 11,Cyc_IPPORT_DAYTIME
+ = 13,Cyc_IPPORT_NETSTAT  = 15,Cyc_IPPORT_FTP  = 21,Cyc_IPPORT_TELNET  = 23,Cyc_IPPORT_SMTP
+ = 25,Cyc_IPPORT_TIMESERVER  = 37,Cyc_IPPORT_NAMESERVER  = 42,Cyc_IPPORT_WHOIS  = 
+43,Cyc_IPPORT_MTP  = 57,Cyc_IPPORT_TFTP  = 69,Cyc_IPPORT_RJE  = 77,Cyc_IPPORT_FINGER
+ = 79,Cyc_IPPORT_TTYLINK  = 87,Cyc_IPPORT_SUPDUP  = 95,Cyc_IPPORT_EXECSERVER  = 512,
+Cyc_IPPORT_LOGINSERVER  = 513,Cyc_IPPORT_CMDSERVER  = 514,Cyc_IPPORT_EFSSERVER  = 
+520,Cyc_IPPORT_BIFFUDP  = 512,Cyc_IPPORT_WHOSERVER  = 513,Cyc_IPPORT_ROUTESERVER
  = 520,Cyc_IPPORT_RESERVED  = 1024,Cyc_IPPORT_USERRESERVED  = 5000};struct Cyc_servent{
 char*s_name;char**s_aliases;int s_port;char*s_proto;};struct Cyc_protoent{char*
 p_name;char**p_aliases;int p_proto;};struct Cyc_hostent{char*h_name;char**
@@ -748,14 +749,18 @@ ru_isrss;int ru_minflt;int ru_majflt;int ru_nswap;int ru_inblock;int ru_oublock;
 ru_msgsnd;int ru_msgrcv;int ru_nsignals;int ru_nvcsw;int ru_nivcsw;};enum Cyc___priority_which{
 Cyc_PRIO_PROCESS  = 0,Cyc_PRIO_PGRP  = 1,Cyc_PRIO_USER  = 2};struct Cyc_timespec{int
 tv_sec;int tv_nsec;};typedef struct{int __fds_bits[1024 / (8 * sizeof(int))];}Cyc_fd_set;
-int select(int,Cyc_fd_set*,Cyc_fd_set*,Cyc_fd_set*,struct Cyc_timeval*);void Cyc_FD_CLR(
-int,Cyc_fd_set*);int Cyc_FD_ISSET(int,Cyc_fd_set*);void Cyc_FD_SET(int,Cyc_fd_set*);
-void Cyc_FD_ZERO(Cyc_fd_set*);void __stub_FD_CLR(int,Cyc_fd_set*);int
-__stub_FD_ISSET(int,Cyc_fd_set*);void __stub_FD_SET(int,Cyc_fd_set*);void
-__stub_FD_ZERO(Cyc_fd_set*);void Cyc_FD_CLR(int a,Cyc_fd_set*b){return
-__stub_FD_CLR(a,b);}int Cyc_FD_ISSET(int a,Cyc_fd_set*b){return __stub_FD_ISSET(a,b);}
-void Cyc_FD_SET(int a,Cyc_fd_set*b){return __stub_FD_SET(a,b);}void Cyc_FD_ZERO(Cyc_fd_set*
-a){return __stub_FD_ZERO(a);}enum Cyc___socket_type{Cyc_SOCK_STREAM  = 1,Cyc_SOCK_DGRAM
+int Cyc_select(int a,Cyc_fd_set*b,Cyc_fd_set*c,Cyc_fd_set*d,struct Cyc_timeval*e);
+void Cyc_FD_CLR(int,Cyc_fd_set*);int Cyc_FD_ISSET(int,Cyc_fd_set*);void Cyc_FD_SET(
+int,Cyc_fd_set*);void Cyc_FD_ZERO(Cyc_fd_set*);int select(int,Cyc_fd_set*,Cyc_fd_set*,
+Cyc_fd_set*,struct Cyc_timeval*);extern int Cyc_select(int a,Cyc_fd_set*b,Cyc_fd_set*
+c,Cyc_fd_set*d,struct Cyc_timeval*e){if(a < 0  || a > 1024){*((int*)_check_null(
+__CYCLONE_ERRNO()))=22;return - 1;}return select(a,b,c,d,e);}void __stub_FD_CLR(int,
+Cyc_fd_set*);int __stub_FD_ISSET(int,Cyc_fd_set*);void __stub_FD_SET(int,Cyc_fd_set*);
+void __stub_FD_ZERO(Cyc_fd_set*);void Cyc_FD_CLR(int a,Cyc_fd_set*b){if(a < 0  || a > 
+1024)return;return __stub_FD_CLR(a,b);}int Cyc_FD_ISSET(int a,Cyc_fd_set*b){if(a < 0
+ || a > 1024)return 0;return __stub_FD_ISSET(a,b);}void Cyc_FD_SET(int a,Cyc_fd_set*b){
+if(a < 0  || a > 1024)return;return __stub_FD_SET(a,b);}void Cyc_FD_ZERO(Cyc_fd_set*a){
+return __stub_FD_ZERO(a);}enum Cyc___socket_type{Cyc_SOCK_STREAM  = 1,Cyc_SOCK_DGRAM
  = 2,Cyc_SOCK_RAW  = 3,Cyc_SOCK_RDM  = 4,Cyc_SOCK_SEQPACKET  = 5,Cyc_SOCK_PACKET  = 
 10};enum Cyc___anonymous_enum_271__{Cyc_MSG_OOB  = 1,Cyc_MSG_PEEK  = 2,Cyc_MSG_DONTROUTE
  = 4,Cyc_MSG_CTRUNC  = 8,Cyc_MSG_PROXY  = 16,Cyc_MSG_TRUNC  = 32,Cyc_MSG_DONTWAIT
@@ -900,39 +905,39 @@ int st_ctime;unsigned int __unused3;unsigned int __unused4;unsigned int __unused
 struct Cyc_timezone{int tz_minuteswest;int tz_dsttime;};enum Cyc___itimer_which{Cyc_ITIMER_REAL
  = 0,Cyc_ITIMER_VIRTUAL  = 1,Cyc_ITIMER_PROF  = 2};struct Cyc_itimerval{struct Cyc_timeval
 it_interval;struct Cyc_timeval it_value;};int Cyc_gettimeofday(struct Cyc_timeval*,
-struct Cyc_timezone*);int select(int,Cyc_fd_set*,Cyc_fd_set*,Cyc_fd_set*,struct Cyc_timeval*);
-void Cyc_FD_CLR(int,Cyc_fd_set*);int Cyc_FD_ISSET(int,Cyc_fd_set*);void Cyc_FD_SET(
-int,Cyc_fd_set*);void Cyc_FD_ZERO(Cyc_fd_set*);int gettimeofday(struct Cyc_timeval*,
-struct Cyc_timezone*);int Cyc_gettimeofday(struct Cyc_timeval*a,struct Cyc_timezone*
-b){return gettimeofday(a,0);}struct Cyc_timeb{int time;unsigned short millitm;short
-timezone;short dstflag;};struct Cyc_tms{int tms_utime;int tms_stime;int tms_cutime;
-int tms_cstime;};struct Cyc_sockaddr_un{unsigned short sun_family;char sun_path[108];
-};struct Cyc_utsname{char sysname[65];char nodename[65];char release[65];char version[
-65];char machine[65];char __domainname[65];};typedef enum {Cyc_P_ALL  = 0,Cyc_P_PID
- = 1,Cyc_P_PGID  = 2 }Cyc_idtype_t;struct Cyc_tm{int tm_sec;int tm_min;int tm_hour;int
-tm_mday;int tm_mon;int tm_year;int tm_wday;int tm_yday;int tm_isdst;int tm_gmtoff;
-const char*tm_zone;};struct Cyc_itimerspec{struct Cyc_timespec it_interval;struct Cyc_timespec
-it_value;};unsigned int Cyc_strftime(struct _tagged_arr,unsigned int,struct
-_tagged_arr,const struct Cyc_tm*);unsigned int strftime(char*,unsigned int,const
-char*,const struct Cyc_tm*);static char _tmp8B[27]="fgets: buffer insufficient";
-static struct Cyc_Core_Failure_struct Cyc___strftime_failure={Cyc_Core_Failure,{
-_tmp8B,_tmp8B,_tmp8B + 27}};unsigned int Cyc_strftime(struct _tagged_arr s,
-unsigned int maxsize,struct _tagged_arr fmt,const struct Cyc_tm*t){if(maxsize > 
-_get_arr_size(s,sizeof(char)))(int)_throw((void*)& Cyc___strftime_failure);return
-strftime((char*)_check_null(_untag_arr(s,sizeof(char),1)),maxsize,(const char*)
-_check_null(_untag_arr(fmt,sizeof(char),1)),t);}enum Cyc___anonymous_enum_368__{
-Cyc__PC_LINK_MAX  = 0,Cyc__PC_MAX_CANON  = 1,Cyc__PC_MAX_INPUT  = 2,Cyc__PC_NAME_MAX
- = 3,Cyc__PC_PATH_MAX  = 4,Cyc__PC_PIPE_BUF  = 5,Cyc__PC_CHOWN_RESTRICTED  = 6,Cyc__PC_NO_TRUNC
- = 7,Cyc__PC_VDISABLE  = 8,Cyc__PC_SYNC_IO  = 9,Cyc__PC_ASYNC_IO  = 10,Cyc__PC_PRIO_IO
- = 11,Cyc__PC_SOCK_MAXBUF  = 12,Cyc__PC_FILESIZEBITS  = 13,Cyc__PC_REC_INCR_XFER_SIZE
- = 14,Cyc__PC_REC_MAX_XFER_SIZE  = 15,Cyc__PC_REC_MIN_XFER_SIZE  = 16,Cyc__PC_REC_XFER_ALIGN
- = 17,Cyc__PC_ALLOC_SIZE_MIN  = 18,Cyc__PC_SYMLINK_MAX  = 19};enum Cyc___anonymous_enum_370__{
-Cyc__CS_PATH  = 0,Cyc__CS_V6_WIDTH_RESTRICTED_ENVS  = 1};struct Cyc_option{struct
-_tagged_arr name;int has_arg;int*flag;int val;};int Cyc_execlp(const char*,const char*,
-struct _tagged_arr);int execvp(const char*file,const char**argv);struct _tagged_arr
-Cyc_getcwd(struct _tagged_arr buf,unsigned int size);int Cyc_gethostname(struct
-_tagged_arr,unsigned int);int Cyc_read(int,struct _tagged_arr,unsigned int);int Cyc_write(
-int,struct _tagged_arr,unsigned int);static char _tmp8D[36]="execlp arg list not NULL-terminated";
+struct Cyc_timezone*);int Cyc_select(int,Cyc_fd_set*,Cyc_fd_set*,Cyc_fd_set*,
+struct Cyc_timeval*);void Cyc_FD_CLR(int,Cyc_fd_set*);int Cyc_FD_ISSET(int,Cyc_fd_set*);
+void Cyc_FD_SET(int,Cyc_fd_set*);void Cyc_FD_ZERO(Cyc_fd_set*);int gettimeofday(
+struct Cyc_timeval*,struct Cyc_timezone*);int Cyc_gettimeofday(struct Cyc_timeval*a,
+struct Cyc_timezone*b){return gettimeofday(a,0);}struct Cyc_timeb{int time;
+unsigned short millitm;short timezone;short dstflag;};struct Cyc_tms{int tms_utime;
+int tms_stime;int tms_cutime;int tms_cstime;};struct Cyc_sockaddr_un{unsigned short
+sun_family;char sun_path[108];};struct Cyc_utsname{char sysname[65];char nodename[65];
+char release[65];char version[65];char machine[65];char __domainname[65];};typedef
+enum {Cyc_P_ALL  = 0,Cyc_P_PID  = 1,Cyc_P_PGID  = 2 }Cyc_idtype_t;struct Cyc_tm{int
+tm_sec;int tm_min;int tm_hour;int tm_mday;int tm_mon;int tm_year;int tm_wday;int
+tm_yday;int tm_isdst;int tm_gmtoff;const char*tm_zone;};struct Cyc_itimerspec{struct
+Cyc_timespec it_interval;struct Cyc_timespec it_value;};unsigned int Cyc_strftime(
+struct _tagged_arr,unsigned int,struct _tagged_arr,const struct Cyc_tm*);
+unsigned int strftime(char*,unsigned int,const char*,const struct Cyc_tm*);static
+char _tmp8B[27]="fgets: buffer insufficient";static struct Cyc_Core_Failure_struct
+Cyc___strftime_failure={Cyc_Core_Failure,{_tmp8B,_tmp8B,_tmp8B + 27}};
+unsigned int Cyc_strftime(struct _tagged_arr s,unsigned int maxsize,struct
+_tagged_arr fmt,const struct Cyc_tm*t){if(maxsize > _get_arr_size(s,sizeof(char)))(
+int)_throw((void*)& Cyc___strftime_failure);return strftime((char*)_check_null(
+_untag_arr(s,sizeof(char),1)),maxsize,(const char*)_check_null(_untag_arr(fmt,
+sizeof(char),1)),t);}enum Cyc___anonymous_enum_368__{Cyc__PC_LINK_MAX  = 0,Cyc__PC_MAX_CANON
+ = 1,Cyc__PC_MAX_INPUT  = 2,Cyc__PC_NAME_MAX  = 3,Cyc__PC_PATH_MAX  = 4,Cyc__PC_PIPE_BUF
+ = 5,Cyc__PC_CHOWN_RESTRICTED  = 6,Cyc__PC_NO_TRUNC  = 7,Cyc__PC_VDISABLE  = 8,Cyc__PC_SYNC_IO
+ = 9,Cyc__PC_ASYNC_IO  = 10,Cyc__PC_PRIO_IO  = 11,Cyc__PC_SOCK_MAXBUF  = 12,Cyc__PC_FILESIZEBITS
+ = 13,Cyc__PC_REC_INCR_XFER_SIZE  = 14,Cyc__PC_REC_MAX_XFER_SIZE  = 15,Cyc__PC_REC_MIN_XFER_SIZE
+ = 16,Cyc__PC_REC_XFER_ALIGN  = 17,Cyc__PC_ALLOC_SIZE_MIN  = 18,Cyc__PC_SYMLINK_MAX
+ = 19};enum Cyc___anonymous_enum_370__{Cyc__CS_PATH  = 0,Cyc__CS_V6_WIDTH_RESTRICTED_ENVS
+ = 1};struct Cyc_option{struct _tagged_arr name;int has_arg;int*flag;int val;};int Cyc_execlp(
+const char*,const char*,struct _tagged_arr);int execvp(const char*file,const char**
+argv);struct _tagged_arr Cyc_getcwd(struct _tagged_arr buf,unsigned int size);int Cyc_gethostname(
+struct _tagged_arr,unsigned int);int Cyc_read(int,struct _tagged_arr,unsigned int);
+int Cyc_write(int,struct _tagged_arr,unsigned int);static char _tmp8D[36]="execlp arg list not NULL-terminated";
 static struct Cyc_Core_Failure_struct Cyc___execlp_failure={Cyc_Core_Failure,{
 _tmp8D,_tmp8D,_tmp8D + 36}};int Cyc_execlp(const char*path,const char*arg0,struct
 _tagged_arr argv){if(*((const char**)_check_unknown_subscript(argv,sizeof(const
