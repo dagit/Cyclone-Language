@@ -1672,13 +1672,14 @@ _temp918)->f2; goto _LL925;} else{ goto _LL926;} _LL926: if((( struct
 _enum_struct*) _temp918)->tag == Cyc_Absyn_Xenum_m_tag){ _LL939: _temp938=(
 struct Cyc_Absyn_Xenumdecl*)(( struct Cyc_Absyn_Xenum_m_struct*) _temp918)->f1;
 goto _LL937; _LL937: _temp936=( struct Cyc_Absyn_Enumfield*)(( struct Cyc_Absyn_Xenum_m_struct*)
-_temp918)->f2; goto _LL927;} else{ goto _LL919;} _LL921: { void*(* ptr_maker)(
-void* t, void* rgn, struct Cyc_Absyn_Tqual* tq)= Cyc_Absyn_at_typ; if( topt != 0){
-void* _temp940= Cyc_Tcutil_compress(* topt); struct Cyc_Absyn_PtrInfo _temp946;
-struct Cyc_Absyn_Conref* _temp948; struct Cyc_Absyn_Tqual* _temp950; struct Cyc_Absyn_Conref*
-_temp952; void* _temp954; void* _temp956; _LL942: if(( unsigned int) _temp940 >
-5u?(( struct _enum_struct*) _temp940)->tag == Cyc_Absyn_PointerType_tag: 0){
-_LL947: _temp946=( struct Cyc_Absyn_PtrInfo)(( struct Cyc_Absyn_PointerType_struct*)
+_temp918)->f2; goto _LL927;} else{ goto _LL919;} _LL921: Cyc_Tcutil_check_type(
+loc, te, Cyc_Tcenv_lookup_type_vars( te), Cyc_Absyn_MemKind, _temp928);{ void*(*
+ptr_maker)( void* t, void* rgn, struct Cyc_Absyn_Tqual* tq)= Cyc_Absyn_at_typ;
+if( topt != 0){ void* _temp940= Cyc_Tcutil_compress(* topt); struct Cyc_Absyn_PtrInfo
+_temp946; struct Cyc_Absyn_Conref* _temp948; struct Cyc_Absyn_Tqual* _temp950;
+struct Cyc_Absyn_Conref* _temp952; void* _temp954; void* _temp956; _LL942: if((
+unsigned int) _temp940 > 5u?(( struct _enum_struct*) _temp940)->tag == Cyc_Absyn_PointerType_tag:
+0){ _LL947: _temp946=( struct Cyc_Absyn_PtrInfo)(( struct Cyc_Absyn_PointerType_struct*)
 _temp940)->f1; _LL957: _temp956=( void*) _temp946.elt_typ; goto _LL955; _LL955:
 _temp954=( void*) _temp946.rgn_typ; goto _LL953; _LL953: _temp952=( struct Cyc_Absyn_Conref*)
 _temp946.nullable; goto _LL951; _LL951: _temp950=( struct Cyc_Absyn_Tqual*)

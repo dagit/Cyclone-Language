@@ -1224,9 +1224,9 @@ struct Cyc_List_List* escaping_pinfos= 0; Cyc_CfAbsexp_assign_escape(&
 escaping_pinfos, old_pinfo, new_pinfo); for( 0; escaping_pinfos != 0;
 escaping_pinfos= escaping_pinfos->tl){ void* esc_pinfo=( void*) escaping_pinfos->hd;
 if( ! Cyc_CfFlowInfo_isAllInit( pinfo_dict, esc_pinfo)){ Cyc_Tcutil_terr( loc,(
-struct _tagged_string)({ char* _temp815=( char*)"uninitialized value assigned to escaped place";
+struct _tagged_string)({ char* _temp815=( char*)"uninitialized value assigned to ambiguous place";
 struct _tagged_string _temp816; _temp816.curr= _temp815; _temp816.base= _temp815;
-_temp816.last_plus_one= _temp815 + 46; _temp816;})); return Cyc_CfFlowInfo_BottomFL;}
+_temp816.last_plus_one= _temp815 + 48; _temp816;})); return Cyc_CfFlowInfo_BottomFL;}
 pinfo_dict= Cyc_CfFlowInfo_escape_pointsto( esc_pinfo, pinfo_dict);} pinfo_dict=
 Cyc_CfFlowInfo_insert_place( pinfo_dict, _temp779, new_pinfo);{ void* ans=({
 struct Cyc_CfFlowInfo_InitsFL_struct* _temp817=( struct Cyc_CfFlowInfo_InitsFL_struct*)

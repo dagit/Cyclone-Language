@@ -1151,6 +1151,7 @@ static typ tcXenum(tenv te, seg_t loc, typ *`r topt,
 static typ tcMalloc(tenv_t te, seg_t loc, typ *`r topt, mallocarg_t @ ma_ptr) {
   switch (*ma_ptr) {
   case Typ_m(t):
+    check_type(loc,te,lookup_type_vars(te),MemKind,t);
     // Avoid casts when we're passed down a nullable type
     let ptr_maker = at_typ;
     if(topt != null)

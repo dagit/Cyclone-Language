@@ -460,7 +460,7 @@ flow_info_t eval_absexp(analenv_t env, seg_t loc,
 	for(; escaping_pinfos != null; escaping_pinfos = escaping_pinfos->tl) {
 	  let esc_pinfo = escaping_pinfos->hd;
 	  if(!isAllInit(pinfo_dict, esc_pinfo)) {
-	    Tcutil::terr(loc,"uninitialized value assigned to escaped place");
+	    Tcutil::terr(loc,"uninitialized value assigned to ambiguous place");
 	    return BottomFL; // attempt to avoid cascaded messages
 	  }
 	  pinfo_dict = escape_pointsto(esc_pinfo, pinfo_dict);
