@@ -4,7 +4,7 @@ include ../../Makefile.inc
 CYC_LIB_PATH=$(CYCDIR)/bin/cyc-lib
 CYC_BIN_PATH=$(CYCDIR)/bin
 
-CFLAGS=-include $(CYC_LIB_PATH)/include/cyc_include.h
+#CFLAGS=-include $(CYC_LIB_PATH)/include/cyc_include.h
 
 # general targets
 

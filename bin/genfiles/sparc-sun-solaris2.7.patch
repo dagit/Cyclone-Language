@@ -1,8 +1,8 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.7/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Fri Aug 24 14:04:59 2001
---- sparc-sun-solaris2.7/lib/execinfo.c	Sun Sep  9 12:31:29 2001
+*** i686-unknown-linux/lib/execinfo.c	Mon Sep 10 11:30:36 2001
+--- sparc-sun-solaris2.7/lib/execinfo.c	Mon Sep 10 12:25:33 2001
 ***************
-*** 11,105 ****
+*** 230,324 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); int Cyc_Execinfo_backtrace(
   struct _tagged_arr, int); int Cyc_Execinfo_bt(); struct Cyc_Std___sFILE; extern
@@ -98,7 +98,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.7
 ! Cyc_Std_putc( d, Cyc_Std_stdout);} Cyc_Std_putc(( int)'\n', Cyc_Std_stdout);}}
 ! Cyc_Std_fclose( r); Cyc_Std_fclose( w); kill( pid, 15); waitpid( pid, 0, 0);
 ! return 0;}}}
---- 11,38 ----
+--- 230,257 ----
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); int Cyc_Execinfo_backtrace(
   struct _tagged_arr, int); int Cyc_Execinfo_bt(); struct Cyc_Std___sFILE; extern

@@ -313,6 +313,9 @@ list_t<Absyn::decl_t> do_tovc(bool ignore, list_t<Absyn::decl_t> tds) {
   return Tovc::tovc(tds);
 }
 
+/* The absolute file name of cyc_include.h */
+static string_t cyc_include = "";
+
 list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
   struct Absynpp::Params params_r;
 
@@ -329,6 +332,33 @@ list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
   params_r.print_all_kinds = print_all_kinds_r;
 
   //  fprintf(out_file, "#include \"cyc_include.h\"\n\n");
+  /* Copy cyc_include.h to out_file. */
+  /* FIX: would be better to use open, stat, and read but we don't
+     have all those functions in the library yet. */
+  let cyc_include_f = try_file_open(cyc_include,"r","internal compiler file");
+  if (cyc_include_f == NULL) return tds;
+  let cyc_include_fnotnull = (FILE@)cyc_include_f;
+  size_t n_read = 1024;
+  size_t n_written;
+  char buf[1024] = { for i < 1024 : 0 }; // init to avoid warning
+  while (n_read == 1024) {
+    n_read = fread(buf,1,1024,cyc_include_fnotnull);
+    if (n_read != 1024 && !(feof(cyc_include_fnotnull))) {
+      compile_failure = true;
+      fprintf(stderr, "\nError: problem copying cyc_include.h\n");
+      fflush(stderr);
+      return tds;
+    }
+    n_written = fwrite(buf,1,n_read,out_file);
+    if (n_read != n_written) {
+      compile_failure = true;
+      fprintf(stderr, "\nError: problem copying cyc_include.h\n");
+      fflush(stderr);
+      return tds;
+    }
+  }
+  fclose(cyc_include_fnotnull);
+  
   if (pp_r) {
     Absynpp::set_params(&params_r);
     Absynpp::decllist2file(tds,out_file);
@@ -795,20 +825,7 @@ int main(int argc, string_t<`H> ?`H argv) {
 
   Arg::parse(options, add_other, "Options:", argv);
 
-  for (let l = rev(cyclone_files); l != NULL; l = l->tl) {
-    process_file(*(l->hd));
-    if (compile_failure) return 1;
-  }
-
-  if (stop_after_cpp_r || parseonly_r || tc_r || toc_r) return 0;
-
-  // If there are no files for the C compiler to process don't bother
-  // to run it.
-  if (ccargs == NULL) return 0;
-
-  // Run the C compiler
-  // First, find the files libcyc.a, gc.a, cyc_include.h
-
+  // Find the file cyc_include.h, needed to produce the .c output.
   // The Cyclone lib-path is specified with the following order (where
   // the earlier in the order, the first place we look for the file):
   // 1) command line arguments (with -B)
@@ -821,7 +838,22 @@ int main(int argc, string_t<`H> ?`H argv) {
   if (strlen(def_lib_path) > 0)
     cyclone_lib_path = new List(new def_lib_path, cyclone_lib_path);
   cyclone_lib_path = List::imp_rev(cyclone_lib_path);
-  let cyc_include = do_find(cyclone_lib_path,"include/cyc_include.h");
+  /* The absolute file name is kept in a global variable */
+  cyc_include = do_find(cyclone_lib_path,"include/cyc_include.h");
+
+  for (let l = rev(cyclone_files); l != NULL; l = l->tl) {
+    process_file(*(l->hd));
+    if (compile_failure) return 1;
+  }
+
+  if (stop_after_cpp_r || parseonly_r || tc_r || toc_r) return 0;
+
+  // If there are no files for the C compiler to process don't bother
+  // to run it.
+  if (ccargs == NULL) return 0;
+
+  // Run the C compiler
+  // First, find the files libcyc.a, gc.a
 
   ccargs = rev(ccargs);
   let ccargs_string = str_sepstr(List::map(sh_escape_stringptr,ccargs), " ");
@@ -921,8 +953,7 @@ int main(int argc, string_t<`H> ?`H argv) {
   }
 
   let cccmd =
-    aprintf("gcc -include %s%s %s%s%s",
-            cyc_include,
+    aprintf("gcc %s %s%s%s",
             (output_file==NULL?((string_t)""):aprintf(" -o %s",sh_escape_string(*output_file))),
             ccargs_string,
             stdlib_string,

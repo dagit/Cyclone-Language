@@ -22,8 +22,13 @@
 #include <stdio.h>
 #include <string.h> // for memcpy
 #include <stdarg.h>
-//#include "cyc_include.h"
 #include <errno.h>
+
+// The C include file precore_c.h is produced (semi) automatically
+// from the Cyclone include file precore.h.  Note, it now includes
+// the contents of cyc_include.h
+#include "precore_c.h"
+
 extern void exit(int);
 
 int *__errno(void) { return &errno; }
@@ -146,10 +151,6 @@ int _throw_arraybounds() {
 int _throw_badalloc() {
   throw(Cyc_Bad_alloc);
 }
-
-// The C include file precore_c.h is produced (semi) automatically
-// from the Cyclone include file precore.h.
-#include "precore_c.h"
 
 struct _tagged_arr wrap_Cstring_as_string(Cstring s, size_t len) {
   struct _tagged_arr str;
