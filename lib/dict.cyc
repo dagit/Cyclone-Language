@@ -119,7 +119,7 @@ Dict<`a,`b> delete<`a,`b>(Dict<`a,`b> d,`a key) {
 	switch (n->right) {
 	case Leaf:    return &dict(d->reln, n->left);
 	case Node(node_ref_right): 
-	  splay(get_largest /*<`a>*/, key, n->left);
+	  splay(get_largest, key, n->left);
 	  struct node<`a,`b> @newtop = noderef_left->v; // splay changes this
 	  return &dict(d->reln,
 		       Node(&noderef(&node(newtop->key, newtop->data,
@@ -257,7 +257,7 @@ Dict<`a,`c> map_c<`a,`b,`c,`d>(`c f(`d,`b), `d env, Dict<`a,`b> d) {
 
 $(`a,`b)@ choose<`a,`b>(Dict<`a,`b> d) {
   switch (d->tree) {
-  case Leaf:          throw Absent();
+  case Leaf:     throw Absent();
   case Node(nr): return &$(nr->v->key, nr->v->data);
   }
 }
@@ -267,6 +267,6 @@ List::list<$(`a,`b)@> to_list_f<`a,`b>(`a k, `b v, List::list<$(`a,`b)@> accum) 
 }
 
 List::list<$(`a,`b)@> to_list<`a,`b>(Dict<`a,`b> d) {
-  return fold(to_list_f/*<`a,`b>*/, d, null);
+  return fold(to_list_f, d, null);
 }
 

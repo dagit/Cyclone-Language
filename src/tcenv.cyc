@@ -375,6 +375,7 @@ list<tvar> lookup_type_vars(tenv te) {
   return get_fenv(te)->type_vars;
 }
 
+// FIX: common fast case for tvs == null
 tenv add_type_vars(segment loc,tenv te,list<tvar> tvs) {
   list<tvar> new_tvs = List::append(tvs,lookup_type_vars(te));
   Tcutil::check_unique_tvars(loc,new_tvs);
@@ -485,7 +486,6 @@ $(stmt,list<tvar>,list<typ>)* process_fallthru(tenv te, stmt s) {
   default: return env_err("Tcenv: process_fallthru given a non-fallthru");
   }
 }
-
 tenv set_fallthru(tenv te, $(list<tvar>,list<vardecl>) * pat_typ, stmt body) {
   if(te->le == null) env_err("Tcenv: unexpected set_fallthru");
   let ft_typ = null;

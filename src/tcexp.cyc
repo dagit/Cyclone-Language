@@ -1082,20 +1082,20 @@ static synth tcEnum(tenv te, segment loc, Opt_t<typ> topt,
 		    list<exp> es,
 		    enumdecl  ed,
 		    enumfield ef) {
-  // FIX: the topt arg is not used ??
   let list_result = tcExpList(te,es);
   let all_inst    = List::map(make_inst_var,ed->tvs);
   let exist_inst  = List::map(make_inst_var,ef->tvs);
-  let all_typs    = List::map(snd,all_inst);   // @<var,typ>
-  let exist_typs  = List::map(snd,exist_inst); // @<var,typ>
-  let inst = List::append(all_inst,exist_inst);
-  *all_ref = &Opt(all_typs);
+  let all_typs    = List::map(snd,all_inst);   
+  let exist_typs  = List::map(snd,exist_inst); 
+  let inst        = List::append(all_inst,exist_inst);
+  *all_ref   = &Opt(all_typs);
   *exist_ref = &Opt(exist_typs);
   typ res = EnumType(ed->name,all_typs);
   list<$(tqual,typ)@> ts = ef->typs;
   while (es != null && ts != null) {
-    exp e = es->hd; es = es->tl;
+    exp e = es->hd; 
     typ t = substitute(inst,ts->hd[1]); 
+    es = es->tl;
     ts = ts->tl;
     if (!coerce_arg(te,e,t))
       terr(e->loc,
@@ -1108,11 +1108,10 @@ static synth tcEnum(tenv te, segment loc, Opt_t<typ> topt,
     return expr_err(te,es->hd->loc,
 		    xprintf("too many arguments for enum constructor %s",
 			    qvar2string(f)));
-  else if (ts != null) 
+  if (ts != null) 
     return expr_err(te,loc, xprintf("too few arguments for enum constructor %s",
 				    qvar2string(f)));
-  else
-    return synth_set_typ(list_result,res);
+  return synth_set_typ(list_result,res);
 }
 
 // f(es)   where f is an xenum 

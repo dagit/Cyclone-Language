@@ -99,9 +99,9 @@ static kind typ_kind(typ t) {
   case XenumType(_):       return box_k;
   case PointerType(_,_,_): return box_k;
   case IntType(_,sz,bx):   return (sz == B4 || bx == Boxed) ? box_k : reg_k;
-  case FloatType(bx):      return (bx == Boxed) ? box_k : reg_k;
-  case DoubleType(bx):     return (bx == Boxed) ? box_k : reg_k;
-  case ArrayType(_,_,ak):  return (ak == TaggedArray) ? box_k : mem_k;
+  case FloatType(bx):      return (bx == Boxed)             ? box_k : reg_k;
+  case DoubleType(bx):     return (bx == Boxed)             ? box_k : reg_k;
+  case ArrayType(_,_,ak):  return (ak == TaggedArray)       ? box_k : mem_k;
   case FnType(_,_,_,_):    return mem_k;
   case TupleType(_):       return mem_k;
   case StructType(_,_):    return mem_k;
@@ -170,9 +170,9 @@ static void unify_list(list<typ> t1, list<typ> t2) {
 
 // unify two type qualifiers -- throws Unify unless they are the same
 static void unify_tqual(tqual tq1, tqual tq2) {
-  if ((tq1->q_const != tq2->q_const) ||
-      (tq1->q_volatile != tq2->q_volatile) ||
-      (tq1->q_restrict != tq2->q_restrict))
+  if ((tq1->q_const != tq2->q_const)    
+      || (tq1->q_volatile != tq2->q_volatile) 
+      || (tq1->q_restrict != tq2->q_restrict))
     throw Unify;
 }
 

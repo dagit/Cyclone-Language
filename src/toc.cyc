@@ -1238,6 +1238,7 @@ static void exp_to_c(env nv, exp e) {
     unimp("compoundlit");
     break;
   case Array_e(dles0): 
+    // FIX: May be susceptible to gcc bug!
     if (nv->toplevel) {
       // {e1,...,en}
       e->r = unresolvedmem_exp(null,dles0,DL)->r;
@@ -1376,37 +1377,52 @@ static void exp_to_c(env nv, exp e) {
     e->r = stmt_exp(s,DL)->r;
     break;
   case Struct_e(tdn,ots,dles,sdopt): 
-    // (struct tdn){.f1=e1,...,.fn=en}
-    let n = collapse_qvar(tdn);
-    for (let es = dles; es != null; es = es->tl) 
-      exp_to_c(nv,es->hd[1]);
-    e->r = cast_exp(strctq(n), unresolvedmem_exp(null,dles,DL),DL)->r;
-    break;
-
-//     // ({ struct tdn *x = (struct tdn*)malloc(sizeof(struct tdn));
-//     //    *x = (struct tdn){ dles };
-//     //    *x; })
-//     for (let es = dles; es != null; es = es->tl) {
-//       exp_to_c(nv,es->hd[1]);
-//     }
-// 
-//     let x = temp_var();
-//     let xexp = var_exp(x,DL);
-//     let n = collapse_qvar(tdn);
-//     let strct_t = strct(n[1]);
-//     let pstrct_t = nullableptr_t(strct_t,empty_tqual());
-//     let e1 = // (struct tdn*)malloc(sizeof(struct tdn));
-//       cast_exp(pstrct_t,malloc_exp(sizeof_exp(strct_t,DL)),DL);
-// 
-//     let body = // *x = (struct tdn){->f1=e1,...,->fn=en}; *x;
-//       seq_stmt(assign_stmt(deref_exp(xexp,DL),
-//                            cast_exp(strct_t,
-//                                     unresolvedmem_exp(null,dles,DL),DL),
-//                            DL),
-//                exp_stmt(deref_exp(xexp,DL),DL),
-//                DL);
-// 
-//     e->r = stmt_exp(declare_stmt(x,pstrct_t,&Opt(e1),body,DL),DL)->r;
+    // Due to a GCC bug w.r.t. to nested designators, we expand this out
+    // to ({ t temp; t.f1 = e1, ..., t.fn = en; t}).
+    if(!nv->toplevel) {
+      let x    = temp_var();
+      let xexp = var_exp(x,DL);
+      let s    = exp_stmt(xexp,DL);
+      for(let es = dles; es != null; es = es->tl) {
+	let &$(ds,e) = es->hd;
+	if(ds == null)
+	  toc_impos("empty designator list");
+	if(ds->tl != null) {
+	  // untested
+	  let y    = temp_var();
+	  let yexp = var_exp(y,DL);
+	  for(; ds != null; ds = ds->tl) 
+	    switch (ds->hd) {
+	    case FieldName(f):
+	      s = seq_stmt(exp_stmt(assign_exp(structmember_exp(xexp,f,DL),
+					       yexp, DL), DL),
+			   s, DL);
+	      break;
+	    default: throw toc_impos("array designator in struct");
+	    }
+	  exp_to_c(nv,e);
+	  s = seq_stmt(exp_stmt(assign_exp(yexp, e, DL), DL), s, DL);
+	} else 
+	  switch (ds->hd) {
+	  case FieldName(f):
+	    exp_to_c(nv,e);
+	    s = seq_stmt(exp_stmt(assign_exp(structmember_exp(xexp,f,DL), e, DL), DL),
+			 s, DL);
+	    break;
+	  default: throw toc_impos("array designator in struct");
+	  }
+      }
+      e->r = stmt_exp(declare_stmt(x,strctq(collapse_qvar(tdn)), null, s, DL), DL)->r;
+      break;
+    } else {
+      // Old way that is susceptible to the GCC bug: (struct tdn){.f1=e1,...,.fn=en}
+      // Still need to do this at top-level though!
+      let n = collapse_qvar(tdn);
+      for (let es = dles; es != null; es = es->tl) 
+	exp_to_c(nv,es->hd[1]);
+      e->r = cast_exp(strctq(n), unresolvedmem_exp(null,dles,DL),DL)->r;
+      break;
+    }
 
   case Enum_e(qv,_,_,es,ed,ef): 
     if (es == null) {
@@ -1549,10 +1565,10 @@ static void exp_to_c(env nv, exp e) {
       e->r = stmt_exp(declare_stmt(x,pstrct_typ,&Opt(e1),s2,DL),DL)->r;
     }
     break;
-  case UnresolvedMem_e(_,_): toc_impos("UnresolvedMem"); break;
   case StmtExp_e(s):  stmt_to_c(nv,s);  break;
-  case Codegen_e(fd): unimp("codegen"); break;
-  case Fill_e(_):     unimp("fill");    break;
+  case UnresolvedMem_e(_,_): toc_impos("UnresolvedMem"); break;
+  case Codegen_e(fd):        unimp("codegen");           break;
+  case Fill_e(_):            unimp("fill");              break;
   }
 }
 
@@ -1578,7 +1594,6 @@ static void exp_to_c(env nv, exp e) {
 //
 // FIX: adapt the decision tree code in the type-checker so that we
 // have much more efficient traversal of patterns.
-// DAN: Also gives you middle pointers which GC may not like.
 // FIX: I think the Address pattern (*) code is too liberal -- lets
 // you get pointers to a local variable if you do a switch on a 
 // local variable...

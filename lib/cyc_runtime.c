@@ -38,9 +38,10 @@ struct _tagged_string *xprintf(char *fmt, ...) {
   result = (struct _tagged_string *)GC_malloc(sizeof(struct _tagged_string));
   result->sz       = len1+1;
   result->contents = (char *)GC_malloc(len1+1);
+  result->contents[len1] = '\0';
 
   va_start(argp,fmt);
-  len2 = vsnprintf(result->contents,len1+1,fmt,argp);
+  len2 = vsnprintf(result->contents,len1,fmt,argp);
   va_end(argp);
 
   if (len1 != len2) {

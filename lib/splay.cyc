@@ -92,26 +92,24 @@ static void lift<`a,`b>(list<$(enum direction,struct noderef<`a,`b> @)@> dnl) {
   while (dnl != null) {
     if (dnl->tl == null) {
       switch (dnl->hd) {
-      case &$(LEFT,nr):
-        rotate_left(nr); break;
-      case &$(RIGHT,nr):
-        rotate_right(nr); break;
+      case &$(LEFT,nr):  rotate_left(nr);  break;
+      case &$(RIGHT,nr): rotate_right(nr); break;
       }
       return;
     }
-    let &$(parent_dir,parent) = dnl->hd;
+    let &$(parent_dir,     parent)      = dnl->hd;
     let &$(grandparent_dir,grandparent) = dnl->tl->hd;
     dnl = dnl->tl->tl;
     switch (parent_dir) {
     case LEFT:
       switch (grandparent_dir) {
       case LEFT:  rotate_left(grandparent); rotate_left (grandparent); break;
-      case RIGHT: rotate_left(parent); rotate_right(grandparent); break;
+      case RIGHT: rotate_left(parent);      rotate_right(grandparent); break;
       }
       break;
     case RIGHT:
       switch (grandparent_dir) {
-      case LEFT:  rotate_right(parent); rotate_left (grandparent); break;
+      case LEFT:  rotate_right(parent);      rotate_left (grandparent); break;
       case RIGHT: rotate_right(grandparent); rotate_right(grandparent); break;
       }
       break;

@@ -421,8 +421,8 @@ void register_typedef(qvar q) {
   let current = lstate->v->lstack->hd->current_namespace;
   let ds = lstate->v->decls;
   let ld = Dict::lookup(ds,current);
-  let new_ld = &Ldecls{.typedefs = Set::insert(ld->typedefs,q[1]),
-                     .namespaces = ld->namespaces};
+  let new_ld = &Ldecls{.typedefs   = Set::insert(ld->typedefs,q[1]),
+		       .namespaces = ld->namespaces};
   lstate->v->decls = Dict::insert(ds,current,new_ld);
 }
 
