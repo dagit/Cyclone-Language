@@ -115,6 +115,25 @@ EXTERN_CFFLOW tunion AbsRVal {
   // evaluate to an Aggregate in the abstract interpretation (tunion?)
 };
 
+typedef Dict::dict_t<place_t,Position::seg_t> place_set_t;
+extern place_set_t mt_place_set();
+extern bool update_place_set(place_set_t *set, place_t<`H,`H> place,
+			     Position::seg_t loc);
+extern place_set_t union_place_set(place_set_t s1, place_set_t s2, bool disjoint);
+extern bool place_set_subset(place_set_t s1, place_set_t s2);
+extern bool place_set_equals(place_set_t s1, place_set_t s2);
+
+EXTERN_CFFLOW struct ConsumeInfo {
+  place_set_t consumed;              // variables consumed by this flow
+  List::list_t<place_t> may_consume; // variables to possibly consume
+    // INVARIANT: should be sorted at all times!
+};
+typedef struct ConsumeInfo consume_t;
+
+extern consume_t and_consume(consume_t c1, consume_t c2);
+  // checks that the same variables are not consumed
+extern bool consume_approx(consume_t c1, consume_t c2);
+
 // Note: It would be correct to make the domain of the flowdict_t
 //       constant (all roots in the function), but it easy to argue
 //       that we at program point p, we only need those roots that
@@ -125,12 +144,9 @@ EXTERN_CFFLOW tunion AbsRVal {
 // join takes the intersection of the dictionaries.
 EXTERN_CFFLOW tunion FlowInfo {
   BottomFL;
-  ReachableFL(flowdict_t,relns_t);
+  ReachableFL(flowdict_t,relns_t,consume_t);
 };
 typedef tunion FlowInfo flow_t;
-
-typedef Set::set_t<place_t> place_set_t;
-extern place_set_t mt_place_set();
 
 extern absRval_t unknown_none;
 extern absRval_t unknown_this;
@@ -149,6 +165,24 @@ extern absRval_t   lookup_place(flowdict_t d, place_t place);
 extern bool        is_unescaped(flowdict_t d, place_t place);
 extern bool flow_lessthan_approx(flow_t f1, flow_t f2);
 
+extern void print_absrval(absRval_t rval);
+extern void print_initlevel(initlevel_t il);
+extern void print_root(root_t root);
+extern void print_place_set(place_set_t p);
+extern void print_place_list(List::list_t<place_t> p);
+extern void print_flowdict(flowdict_t d);
+extern void print_flow(flow_t f);
+
+// debugging
+//  #define DEBUG_FLOW
+#ifdef DEBUG_FLOW
+#define DEBUG_PRINT(arg...) fprintf(stderr,##arg)
+#define DEBUG_PRINT_F(f,arg...) f ## (##arg)
+#else
+#define DEBUG_PRINT_F(f,arg...) {}
+#define DEBUG_PRINT(arg...) {}
+#endif
+
 extern relns_t reln_assign_var(relns_t, Absyn::vardecl_t, Absyn::exp_t);
 extern relns_t reln_assign_exp(relns_t, Absyn::exp_t, Absyn::exp_t);
 extern relns_t reln_kill_var(relns_t, Absyn::vardecl_t);
@@ -162,12 +196,29 @@ extern flowdict_t escape_deref(flowdict_t d, place_set_t * all_changed,
 extern flowdict_t assign_place(Position::seg_t loc, flowdict_t d,
 			       place_set_t * all_changed, place_t<`H,`H> place,
 			       absRval_t r);
-extern flow_t join_flow(place_set_t*,flow_t,flow_t); 
+extern flow_t join_flow(place_set_t*,flow_t,flow_t,bool); 
 extern $(flow_t,absRval_t) join_flow_and_rval(place_set_t* all_changed,
 					      $(flow_t,absRval_t) pr1,
-					      $(flow_t,absRval_t) pr2);
+					      $(flow_t,absRval_t) pr2,
+					      bool);
 extern flow_t after_flow(place_set_t*,flow_t,flow_t,place_set_t,place_set_t);
   // reset anything that points into rgn to be uninitialized
 extern flow_t kill_flow_region(flow_t f, Absyn::type_t rgn);
+
+tunion KillRgn {
+  UniqueRgn_k;
+  Region_k(Absyn::tvar_t);
+};
+typedef tunion `r KillRgn killrgn_t<`r::R>;
+
+extern bool contains_region(killrgn_t rgn, Absyn::type_t t);
+
+extern flow_t consume_unique_rvals(Position::seg_t loc,flow_t f);
+extern void check_unique_rvals(Position::seg_t loc, flow_t f);
+extern flow_t readthrough_unique_rvals(Position::seg_t loc,flow_t f);
+extern flow_t drop_unique_rvals(Position::seg_t loc,flow_t f);
+
+extern $(consume_t,flow_t) save_consume_info(flow_t f, bool clear);
+extern flow_t restore_consume_info(flow_t f, consume_t c);
 }
 #endif

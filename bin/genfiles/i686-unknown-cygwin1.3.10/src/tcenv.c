@@ -1280,7 +1280,7 @@ if(te->le == 0)((int(*)(struct _tagged_arr msg))Cyc_Tcenv_env_err)(({const char*
 _tmp115="Tcenv::add_region: unexpected add_region";_tag_arr(_tmp115,sizeof(char),
 _get_zero_arr_size(_tmp115,41));}));{struct Cyc_Tcenv_Fenv*fe=Cyc_Tcenv_copy_fenv_old_ctrl(
 Cyc_Tcenv_get_fenv(te));struct Cyc_Absyn_Tvar*tv;{void*_tmp116=Cyc_Tcutil_compress(
-r);struct Cyc_Absyn_Tvar*_tmp117;_LL92: if(_tmp116 <= (void*)3  || *((int*)_tmp116)
+r);struct Cyc_Absyn_Tvar*_tmp117;_LL92: if(_tmp116 <= (void*)4  || *((int*)_tmp116)
 != 1)goto _LL94;_tmp117=((struct Cyc_Absyn_VarType_struct*)_tmp116)->f1;_LL93: tv=
 _tmp117;goto _LL91;_LL94:;_LL95: tv=((struct Cyc_Absyn_Tvar*(*)(struct _tagged_arr
 msg))Cyc_Tcenv_env_err)(({const char*_tmp118="bad add region";_tag_arr(_tmp118,
@@ -1345,7 +1345,7 @@ struct Cyc_Position_Segment*loc,void*rgn){if(te->le == 0)((int(*)(struct
 _tagged_arr msg))Cyc_Tcenv_env_err)(({const char*_tmp135="Tcenv: unexpected check_rgn_resetable";
 _tag_arr(_tmp135,sizeof(char),_get_zero_arr_size(_tmp135,38));}));Cyc_Tcenv_check_rgn_accessible(
 te,loc,rgn);{void*_tmp136=Cyc_Tcutil_compress(rgn);struct Cyc_Absyn_Tvar*_tmp137;
-_LL97: if(_tmp136 <= (void*)3  || *((int*)_tmp136)!= 1)goto _LL99;_tmp137=((struct
+_LL97: if(_tmp136 <= (void*)4  || *((int*)_tmp136)!= 1)goto _LL99;_tmp137=((struct
 Cyc_Absyn_VarType_struct*)_tmp136)->f1;_LL98: if(!Cyc_RgnOrder_is_region_resetable((
 Cyc_Tcenv_get_fenv(te))->region_order,_tmp137))({struct Cyc_String_pa_struct
 _tmp13A;_tmp13A.tag=0;_tmp13A.f1=(struct _tagged_arr)((struct _tagged_arr)Cyc_Absynpp_typ2string(

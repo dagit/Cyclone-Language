@@ -116,7 +116,8 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
   default: break;
   }
   // reject ill-formed type
-  check_valid_toplevel_type(loc,te,t);
+  check_valid_toplevel_type(loc,te,t,false);
+  
   vd->tq.real_const = extract_const_from_typedef(loc,vd->tq.print_const,t);
   // top-level arrays don't escape because they can't be assigned to, so
   // their sizes do not change over time. All other globals escape.
@@ -258,6 +259,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
   check_fndecl_valid_type(loc,te,fd);
   // check for redeclaration
   type_t t = fndecl2typ(fd);
+
   // move any function type attributes into the function's type
   fd->attributes = transfer_fn_type_atts(t,fd->attributes);
   // check that packed and aligned don't show up in the attributes
@@ -399,6 +401,7 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   add_tvar_identities(td->tvs);
   if (td->defn != NULL) {
     check_type(loc,te,td->tvs,AnyKind,false,td->defn->v);
+
     td->tq.real_const = 
       extract_const_from_typedef(loc,td->tq.print_const,td->defn->v);
     // FIX: check that attributes are okay for this kind of type
@@ -428,6 +431,9 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, list_t<tvar_t,`H> tvs,
       let &$(e,r) = rpo->hd;
       check_type(loc,te,tvs,EffKind,false,e);
       check_type(loc,te,tvs,RgnKind,false,r);
+      if (r == UniqueRgn)
+	terr(loc,"Currently only allow `U on variables");
+        /** should I also go through the effect variable to forbid `U? **/
     }
 
     list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
@@ -443,6 +449,7 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, list_t<tvar_t,`H> tvs,
 	prev_fields = rnew(uprev_rgn) List(fn,prev_fields);
 
       check_type(loc,te,tvs,MemKind,false,t);
+
       fs->hd->tq.real_const = extract_const_from_typedef(loc,fs->hd->tq.print_const,t);
 
       // if width is non-NULL then t must be of integral type

@@ -1011,7 +1011,7 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
   return t;
 }
 
-// &e
+// e0 has the form &e, and optional type topt
 static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0, 
                         type_t * topt, exp_t e) {
   let topt2 = NULL;
@@ -1042,7 +1042,10 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
     switch (compress(e1->topt->v)) {
     case &TupleType(_): break; // leave & for tuple types alone.
     default: 
-      // we have &e[i] -- rewrite the whole expression as (e+i)
+      // we have &e[i] -- rewrite the whole expression as (e+i);
+      // don't check for taking address of a unique pointer here,
+      // since we aren't creating an alias.
+
       // This ensures that we get the right size for an array or ? pointer.
       e0->r = add_exp(e1,e2,NULL)->r; 
       return tcPlus(te,e1,e2);
@@ -1050,6 +1053,9 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
     break;
   default: break;
   }
+
+  // now make sure we aren't taking the address of a unique pointer
+//    check_no_unique_region(loc,te,e->topt->v);
 
   // we've got an address-of
   let $(is_const,rgn) = addressof_props(te,e);
@@ -1682,6 +1688,7 @@ static bool zeroable_type(type_t t) {
 
   case &TypeInt(_):
   case HeapRgn:
+  case UniqueRgn:
   case &AccessEff(_):
   case &JoinEff(_):
   case &RgnsEff(_): impos("bad type `%s' in zeroable type",typ2string(t));
@@ -1708,7 +1715,9 @@ static void check_malloc_type(bool allow_zero, seg_t loc,
 static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt, 
                        type_t *@t, exp_t @e, bool @is_calloc,
                        bool @is_fat) {
-  type_t rgn = HeapRgn;
+  // by default, we allocate heap pointers; this is for making inference
+  // simpler.  If you want a unique pointer, do rnew (Core::unique_region)
+  type_t rgn = HeapRgn; 
   if (ropt != NULL) {
     // check that the region handle is still valid
     type_t expected_type = 
@@ -1828,10 +1837,12 @@ static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
     }
 }
 
-// new e
+// e has the form new e1
 static type_t tcNew(tenv_t te, seg_t loc, type_t * topt, 
                     exp_opt_t rgn_handle, exp_t e, exp_t e1) {
-  type_t rgn = HeapRgn;
+  // by default, we allocate heap pointers; this is for making inference
+  // simpler.  If you want a unique pointer, do rnew (Core::unique_region)
+  type_t rgn = HeapRgn; 
   if (rgn_handle != NULL) {
     // check that the region handle is still valid
     type_t expected_type = 
@@ -1876,6 +1887,10 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
           res_typ = *topt;
         }
       }
+      // make sure we don't allocate a pointer around a unique
+      // pointer.  Ultimately, "paths" of unique pointers should
+      // be fine, but we're not permitting them for now.
+//        check_no_unique_region(loc, te, res_typ, true);
       return res_typ;
     default: impos("tcNew: comprehension returned non-array type");
     }
@@ -1918,6 +1933,10 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       break;
     default: impos("tcExpNoPromote on Array_e returned non-array type");
     }
+    // make sure we don't allocate a pointer around a unique
+    // pointer.  Ultimately, "paths" of unique pointers should
+    // be fine, but we're not permitting them for now.
+//      check_no_unique_region(loc, te, res_typ, true);
     return res_typ;
   case &Const_e(&String_c(s)):
     // here I'm going to guess that the user wants a char *@ instead of
@@ -1958,6 +1977,10 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
         res_typ = *topt;
       }
     }
+    // make sure we don't allocate a pointer around a unique
+    // pointer.  Ultimately, "paths" of unique pointers should
+    // be fine, but we're not permitting them for now.
+//      check_no_unique_region(loc, te, res_typ, true);
     return res_typ;
   }
 }

@@ -1,0 +1,133 @@
+#include <stdio.h>
+#include <list.h>
+
+extern void one(int *`U x);
+extern void two(int *`U x, int *`U y);
+extern void three(int *`U x, int *`U y, int *`U z);
+extern int rand();
+extern void g(int,int);
+
+void f() {
+  int *`U x = unew 3;
+}
+
+#ifdef ONE
+int outoforder() {
+  int d = 0;
+  int *`U x = unew 3;
+  int *`U y;
+  while (!d || (y = x)) {
+    if (rand())
+      d = 1;
+  }
+  return x;
+}
+#endif
+
+struct s1 {
+  int x; int y;
+};
+
+int *`U h(int b) {
+  int *`U x = unew 3;
+  int *`U y = unew 4;
+  int *`U z = unew 5;
+  
+  let a1 = unew { x, y };  // consumed = { x, y }
+
+  x = unew 3; // consumed = { y }
+  y = unew 3; // consumed = { }
+  int ok = 1;
+  int ?`U a2 = unew { (ok = rand(), (int)z), (ok ? (int)x : (int)y) }; // consumed = { x, y, z }
+
+  a2++; // consumed = { x, y, z }
+  int yy = ((int)(int *`H)a2) * 1; // consumed = { x, y, z }
+  a2 = a2 + 1; // consumed = { x, y, z }
+
+  y = unew 4; // consumed = { x, z }
+  try {
+    z = unew 5; // consumed = { x }
+  } catch {
+  case Core::Not_found:
+    x = y; // consumed = { y, z }
+    break;
+  }
+  // @join: consumed = { x, y, z }
+  x = unew 3; // consumed = { y, z }
+  int *`H h = (int *`H)x; // consumed = { x, y, z }
+
+  struct s1 *`U ps1 = unew s1(1,2);
+  int i;
+  i = (*ps1).x;
+  i = (*ps1).y;
+
+  x = unew 5; // consumed = { y, z }
+  y = unew 4; // consumed = { z }
+  struct s1 ls1 = { (int)x, (int)y }; // consumed = { x, y, z }
+
+  x = unew 3; // consumed = { y, z }
+
+  g(*x,*x);
+  i = *x;
+  i = x[0];
+  i = x[x[0]];
+
+  y = unew 3; // consumed = { z }
+
+  switch (b) {
+  case 1:
+    z = x; // consumed = { x }
+    fallthru;
+  case 2:
+    z = y; // consumed = { x, y }
+    break;
+  default:
+    z = unew 7; // consumed = { }
+    break;
+  }
+  // @join: consumed = { x, y }
+
+ retry:
+  x = z; // consumed = { y, z }
+  if (b) {
+    z = unew 7; // consumed = { y }
+    b = rand();
+    goto retry; 
+  }
+  // @join: consumed = { y, z }
+
+  y = unew 1; // consumed = { z }
+
+  int zz;
+  zz = ({ z; *y; y; }); // consumed = { y, z }
+
+  y = (z = unew 4, unew 1); // consumed = { z } DUE TO ANALYSIS INACCURACY
+
+  while (i < 5) {
+    x = y; // consumed = { y, z }
+    y = x; // consumed = { x, z }
+    i++;
+  }
+  // @join: consumed = { x, z }
+
+  do {
+    z = y; // consumed = { x, y, z }
+    y = z; // consumed = { x, z }
+    i--;
+  } while ((x = unew 4) && (i > 0));
+  // @join: consumed = { z }
+
+  for (i=0, y = x /* consumed = { z, x } */; i<5; i++) {
+    z = y; // consumed = { x, y }
+    break;
+  }
+  // @join: consumed = { x, y, z }
+
+  if (b) // b is 0 due to above test, so first clause not invoked
+    y = z;
+  else
+    y = unew 5; // consumed = { x, z }
+  // @join: consumed = { x, z }
+
+  return y;
+}

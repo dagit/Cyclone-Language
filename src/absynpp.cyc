@@ -629,6 +629,7 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
 doc_t rgn2doc(type_t t) {
   switch (compress(t)) {
   case HeapRgn: return text("`H");
+  case UniqueRgn: return text("`U");
   default: return ntyp2doc(t);
   }
 }
@@ -799,6 +800,7 @@ doc_t ntyp2doc(type_t t) {
     s = text(aprintf("`%d",t)); break;
   case &TagType(t):
     s = cat(text("tag_t<"),typ2doc(t),text(">")); break;
+  case UniqueRgn:
   case HeapRgn:
     s = rgn2doc(t); break;
   case &RgnsEff(t):

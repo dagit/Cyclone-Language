@@ -155,14 +155,17 @@ initial_env(region_t<`r> listrgn, rgn_po_t po, type_t rgn) {
   }
 }
 
-// does po prove that rgn1 outlives rgn2 
+// does po prove that rgn1 (parm [eff]) outlives rgn2 (parm [rgn])
 // evar treatment: return false and do not constrain
 static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
   region listrgn { // FIX: make a small initial size
   switch(compress(eff)) {
   case &AccessEff(vt):
     switch(compress(vt)) {
-    case HeapRgn: return true;
+    case UniqueRgn: return true;
+    case HeapRgn:
+      if (rgn != UniqueRgn) return true;
+      else return false;
     case &VarType(tv):
       let env = initial_env(listrgn,po,rgn);
       while(env.todo != NULL) {

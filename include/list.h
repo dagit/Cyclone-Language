@@ -325,7 +325,12 @@ namespace List {
   extern list_t<`a,`r::R> delete(list_t<`a,`r::R> l, `a x);
   /** [delete(l,k)] returns the list with the first occurence of [x]
       removed from it, if [x] was in the list; otherwise raises
-      [Core::Not_found].  */
+      [Core::Not_found].  Side-effects original list [l]. */
+
+  extern list_t<`a,`r::R> delete_cmp(int cmp(`a,`a), list_t<`a,`r::R> l, `a x);
+  /** [delete(l,k)] returns the list with the first [e] in the list
+      such that [cmp]([x],[e]) == 0.  If no such [e] exists, raises
+      [Core::Not_found].  Side-effects original list [l]. */
 
   extern Core::opt_t<`c> check_unique(int cmp(`c,`c),list_t<`c> x);
   /** [check_unique(cmp,x)] checks whether the sorted list [x] has

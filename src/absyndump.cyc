@@ -466,6 +466,7 @@ void dumpntyp(type_t t) {
   case &RgnHandleType(rgn): dumprgn(rgn); return;
   case &TypeInt(i): dump(aprintf("`%d",i)); return;
   case &TagType(t): dump("tag_t<"); dumpntyp(t); dump(">"); return;
+  case UniqueRgn: dump("`U"); break;
   case HeapRgn: 
   case &AccessEff(_): 
   case &RgnsEff(_): 

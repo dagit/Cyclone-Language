@@ -150,7 +150,7 @@ extern void check_contains_assign(exp_t);
 // Similar to the above except that (a) there are no bound type variables,
 // (b) for function types, we bind the free type variables, (c) the expected
 // kind defaults to MemKind.
-extern void check_valid_toplevel_type(seg_t,tenv_t,type_t);
+extern void check_valid_toplevel_type(seg_t,tenv_t,type_t,bool allow_unique);
 // Special cased for function declarations
 extern void check_fndecl_valid_type(seg_t,tenv_t,fndecl_t);
 // Same as check_valid_type but ensures that the resulting free variables
@@ -165,6 +165,9 @@ extern void check_type(seg_t, tenv_t, list_t<tvar_t,`H> bound_tvars, kind_t k,
 
 extern void check_unique_vars(list_t<var_t,`r> vs, seg_t loc, string_t err_msg);
 extern void check_unique_tvars(seg_t,list_t<tvar_t>);
+
+// Sees if the unique region `U occurs in the type t
+extern void check_no_unique_region(seg_t loc, tenv_t te, type_t t);
 
 // Check that bounds are not zero -- constrain to 1 if necessary
 extern void check_nonzero_bound(seg_t, conref_t<bounds_t>);

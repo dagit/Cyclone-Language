@@ -693,15 +693,15 @@ bool mem(int cmp(`a,`a), list_t<`a> l, `a x) {
   throw Core::Not_found;
 }
 
-// Given a list [x1,x2,...xn] and a key y, removes the first
-// occurence x1 in the list, if x1 == y.  Uses side effects,
-// and will return the whole list (in case it's the first
-// element that is removed).
-list_t<`a,`r::R> delete(list_t<`a,`r::R> l, `a x) {
+// Given a list [x1,x2,...xn] and a key y, removes the first occurence
+// x1 in the list, if cmp(x1,y) == 0.  Uses side effects, and will
+// return the whole list (in case it's the first element that is
+// removed).
+list_t<`a,`r::R> delete_cmp(int cmp(`a,`a), list_t<`a,`r::R> l, `a x) {
   list_t<`a,`r> prev = NULL;
   let iter = l;
   while (iter != NULL) {
-    if (iter->hd == x) {
+    if (cmp(iter->hd,x) == 0) {
       if (prev == NULL)
 	return l->tl;
       else {
@@ -713,6 +713,17 @@ list_t<`a,`r::R> delete(list_t<`a,`r::R> l, `a x) {
     iter = iter->tl;
   }
   throw Core::Not_found;
+}
+
+static int ptrequal(`a x, `a y) {
+  return (x == y);
+}
+// Given a list [x1,x2,...xn] and a key y, removes the first
+// occurence x1 in the list, if x1 == y.  Uses side effects,
+// and will return the whole list (in case it's the first
+// element that is removed).
+list_t<`a,`r::R> delete(list_t<`a,`r::R> l, `a x) {
+  return delete_cmp(ptrequal, l, x);
 }
 
 // Given an association list [(k1,d1),...,(kn,dn)] and a key x,

@@ -46,7 +46,11 @@ seg_t segment_join(seg_t s1, seg_t s2) {
   if(s2 == NULL) return s1;
   return new Segment(s1->start,s2->end); 
 }
-
+bool segment_equals(seg_t s1, seg_t s2) {
+  if (s1 == s2) return true;
+  if (s1 == NULL) return (s2 == NULL);
+  return (s2 != NULL) && (s1->start == s2->start && s1->end == s2->end);
+}
 
 mstring_t string_of_loc(int loc) {
   Lineno::pos_t pos = Lineno::pos_of_abs(source,loc);

@@ -145,7 +145,7 @@ void msort(cmpfn_t<`a,`H,`H> less_eq, `a ?`H arr, int len) {
   if (len > arr.size || len < 0)
     throw new Core::Invalid_argument("Array::msort");
 
-  `a ?from = new {for i < len : arr[0]}; // fill with `a junk
+  `a ?`H from = new {for i < len : arr[0]}; // fill with `a junk
   `a ?to   = arr;
   `a ?swap;
 

@@ -732,7 +732,7 @@ if(Cyc_strptrcmp(_tmp4,(*((struct Cyc_Absyn_Vardecl*)(env.boundvars)->hd)->name)
 == 0)return;}for(0;env.all_locals != 0;env.all_locals=(env.all_locals)->tl){
 struct Cyc_Absyn_Vardecl*_tmp1F=(struct Cyc_Absyn_Vardecl*)(env.all_locals)->hd;
 if(Cyc_strptrcmp(_tmp4,(*_tmp1F->name).f2)== 0){{void*_tmp20=(void*)_tmp1F->type;
-_LL36: if(_tmp20 <= (void*)3  || *((int*)_tmp20)!= 7)goto _LL38;_LL37: goto _LL35;
+_LL36: if(_tmp20 <= (void*)4  || *((int*)_tmp20)!= 7)goto _LL38;_LL37: goto _LL35;
 _LL38:;_LL39:(void*)(e->r=(void*)((void*)(Cyc_Absyn_deref_exp(Cyc_Absyn_var_exp(
 _tmp1F->name,0),0))->r));goto _LL35;_LL35:;}*env.freevars=((struct Cyc_Set_Set*(*)(
 struct _RegionHandle*r,struct Cyc_Set_Set*s,struct Cyc_Absyn_Vardecl*elt))Cyc_Set_rinsert)(
@@ -857,7 +857,7 @@ _tmp58->tq=Cyc_Absyn_empty_tqual(0);_tmp58->type=(void*)((void*)0);_tmp58->initi
 0;_tmp58->rgn=0;_tmp58->attributes=0;_tmp58->escapes=0;_tmp58;});while(((int(*)(
 struct Cyc_Iter_Iter,struct Cyc_Absyn_Vardecl**))Cyc_Iter_next)(_tmp49,& _tmp4A)){
 void*_tmp4B=(void*)_tmp4A->type;struct Cyc_Absyn_ArrayInfo _tmp4C;void*_tmp4D;
-_LL5F: if(_tmp4B <= (void*)3  || *((int*)_tmp4B)!= 7)goto _LL61;_tmp4C=((struct Cyc_Absyn_ArrayType_struct*)
+_LL5F: if(_tmp4B <= (void*)4  || *((int*)_tmp4B)!= 7)goto _LL61;_tmp4C=((struct Cyc_Absyn_ArrayType_struct*)
 _tmp4B)->f1;_tmp4D=(void*)_tmp4C.elt_type;_LL60: params=({struct Cyc_List_List*
 _tmp4E=_cycalloc(sizeof(*_tmp4E));_tmp4E->hd=({struct _tuple5*_tmp4F=_cycalloc(
 sizeof(*_tmp4F));_tmp4F->f1=(*_tmp4A->name).f2;_tmp4F->f2=_tmp4A->tq;_tmp4F->f3=
@@ -1086,7 +1086,7 @@ struct Cyc_Absyn_Decl_s_struct*)_tmpAF)->f1;_tmpC7=((struct Cyc_Absyn_Decl_s_str
 _tmpAF)->f2;_LL100:{void*_tmpC8=(void*)_tmpC6->r;struct Cyc_Absyn_Vardecl*_tmpC9;
 _LL104: if(_tmpC8 <= (void*)2  || *((int*)_tmpC8)!= 0)goto _LL106;_tmpC9=((struct Cyc_Absyn_Var_d_struct*)
 _tmpC8)->f1;_LL105:{void*_tmpCA=Cyc_Tcutil_compress((void*)_tmpC9->type);_LL109:
-if(_tmpCA <= (void*)3  || *((int*)_tmpCA)!= 7)goto _LL10B;_LL10A: if(_tmpC9->initializer
+if(_tmpCA <= (void*)4  || *((int*)_tmpCA)!= 7)goto _LL10B;_LL10A: if(_tmpC9->initializer
 != 0){void*_tmpCB=(void*)((struct Cyc_Absyn_Exp*)_check_null(_tmpC9->initializer))->r;
 struct Cyc_List_List*_tmpCC;_LL10E: if(*((int*)_tmpCB)!= 36)goto _LL110;_tmpCC=((
 struct Cyc_Absyn_UnresolvedMem_e_struct*)_tmpCB)->f2;_LL10F: _tmpC9->initializer=0;{

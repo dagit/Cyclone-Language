@@ -38,6 +38,7 @@ namespace Position {
   typedef struct Segment *seg_t; // same as segment, but better emacs coloring
   extern seg_t  segment_of_abs(int,int);
   extern seg_t  segment_join(seg_t,seg_t);
+  extern bool   segment_equals(seg_t,seg_t);
   extern mstring_t string_of_loc(int);
   extern mstring_t string_of_segment(seg_t);
   extern list_t<mstringptr_t> strings_of_segments(list_t<seg_t,`r>);

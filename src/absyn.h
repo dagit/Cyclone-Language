@@ -355,6 +355,7 @@ namespace Absyn {
     TagType(type_t);         // tag_t<t>.  IntKind -> BoxKind.
     TypeInt(int);            // `i, i a const int.  IntKind
     HeapRgn;                 // The heap region.  RgnKind 
+    UniqueRgn;               // The heap region.  RgnKind 
     AccessEff(type_t);       // Uses region r.  RgnKind -> EffKind
     JoinEff(list_t<type_t>); // e1+e2.  EffKind list -> EffKind
     RgnsEff(type_t);         // regions(t).  AnyKind -> EffKind

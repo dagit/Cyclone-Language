@@ -252,6 +252,15 @@ void iter_c(void f(`c,`a,`b),`c env, dict_t<`a,`b,`r> d) {
     iter_tree_c(f,env,(struct T<`a,`b,`r>@`r)(d->t));
 }
 
+static void count_elem(int @cnt, `a a, `b b) {
+  *cnt = *cnt + 1;
+}
+int cardinality(dict_t<`a,`b,`r> d) {
+  int num = 0;
+  iter_c(count_elem, &num, d);
+  return num;
+}
+
 static void iter2_f($(void (@f)(`b, `b), dict_t<`a,`b,`r1>) @ `r env, 
                     `a a, `b b1) {
   let &$(f, d2) = env;

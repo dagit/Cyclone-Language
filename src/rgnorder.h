@@ -25,8 +25,6 @@
 #include <position.h>
 #include "absyn.h"
 
-// due to mutual recursion, rgn_po_t is defined in absyn.h.  Sigh.
-
 namespace RgnOrder {
 using Absyn;
 using List;

@@ -325,6 +325,7 @@ static int heap_total_atomic_bytes = 0;
 
 // exported in core.h
 struct _RegionHandle *Cyc_Core_heap_region = NULL;
+struct _RegionHandle *Cyc_Core_unique_region = NULL;
 
 // defined below so profiling macros work
 struct _RegionHandle _new_region(const char *);

@@ -50,8 +50,102 @@ place_set_t mt_place_set() {
   static place_set_t * mt_place_set_opt = NULL;
 
   if(mt_place_set_opt == NULL)
-    mt_place_set_opt = new Set::empty(place_cmp);
+    mt_place_set_opt = new Dict::empty(place_cmp);
   return *mt_place_set_opt;
+}
+
+// updates the given set if not NULL.  Returns true if the place
+// is already in the set.
+bool update_place_set(place_set_t *set, place_t<`H,`H> place,
+		      Position::seg_t loc) {
+  if (set != NULL) {
+    // see if there's already an entry here
+    if (Dict::member(*set,place))
+      return true;
+    else
+      *set = Dict::insert(*set, place, loc);
+  }
+  return false;
+}
+
+static void unique_err(place_t place,
+		       string_t err_msg1, string_t err_msg2,
+		       Position::seg_t consumed_loc,
+		       Position::seg_t loc) {  
+  let &Place(root,_) = place;
+  switch (root) {
+  case &VarRoot(vd):
+    if (!Position::segment_equals(consumed_loc,loc)) {
+      let s = Position::string_of_segment(consumed_loc);
+      Tcutil::terr(loc,err_msg1,Absynpp::qvar2string(vd->name), s);
+    }
+    else
+      Tcutil::terr(loc,err_msg2,Absynpp::qvar2string(vd->name));
+    break;
+  default:
+    Tcutil::impos("error locations not for VarRoots");
+  }
+}
+
+// checks for conflicts when merging consumed sets
+static Position::seg_t combine_consume_f(bool isErr,
+					 place_t<`H,`H> place,
+					 Position::seg_t loc1,
+					 Position::seg_t loc2) {
+  if (isErr)
+    unique_err(place, "May consume unique pointer %s more than once (cf. %s)",
+	       "May consume unique pointer %s more than once", loc1, loc2);
+  return loc1;
+}
+
+// updates the given set if not NULL.  Returns true if the place
+// is already in the set.
+place_set_t union_place_set(place_set_t s1, place_set_t s2, bool disjoint) {
+//    DEBUG_PRINT("**union_place_set:\n");
+//    DEBUG_PRINT("  s1= ");
+//    print_place_set(s1);
+//    DEBUG_PRINT("\n  s2= ");
+//    print_place_set(s2);
+  let res = Dict::union_two_c(combine_consume_f,disjoint,s1,s2);
+//    DEBUG_PRINT("\n  res= ");
+//    print_place_set(res);
+//    DEBUG_PRINT("\n");
+  return res;
+}
+
+void print_place(place_t p);
+bool place_set_subset(place_set_t s1, place_set_t s2) {
+  if (s1 == s2) return true;
+  try {
+    region r { 
+      let iter = Dict::make_iter(r,s1);
+      let elem = *Dict::rchoose(r,s1);
+      while(Iter::next(iter,&elem)) {
+	let place = elem[0];
+	if (!Dict::member(s2,place)) {
+	  DEBUG_PRINT("could not find ");
+	  DEBUG_PRINT_F(print_place,place);
+	  DEBUG_PRINT("  in s2\n");
+	  return false;
+	}
+      }
+      return true;
+    }
+  } catch {
+  case Absent: // only if rchoose fails, which means s1 is empty
+    return true;
+  }
+}
+
+bool place_set_equals(place_set_t s1, place_set_t s2) {
+//    let sz1 = Dict::cardinality(s1);
+//    let sz2 = Dict::cardinality(s2);
+//    if (sz1 == sz2) {
+//      let d = Dict::intersect_c(combine_consume_f,false,s1,s2);
+//      return (Dict::cardinality(d) == sz1);
+//    }
+//    else return false;
+  return place_set_subset(s1,s2) && place_set_subset(s2,s1);
 }
 
 //////////////////////////// Utilities ///////////////////////////////
@@ -164,10 +258,11 @@ absRval_t typ_to_absrval(type_t t, absRval_t leafval) {
 }
 
 static bool prefix_of_member(region_t<`r> r, place_t<`r2,`r3> place,
-			     Set::set_t<place_t<`r2,`r3>> set) {
-  let place2 = place;
-  let iter = Set::make_iter(r,set);
-  while(Iter::next(iter,&place2)) {
+			     Dict::dict_t<place_t<`r2,`r3>,Position::seg_t,`H> set) {
+  let elem = $(place,NULL);
+  let iter = Dict::make_iter(r,set);
+  while(Iter::next(iter,&elem)) {
+    let place2 = elem[0];
     if(root_cmp(place->root, place2->root) != 0)
       continue;
     let fs1 = place->fields;
@@ -234,8 +329,7 @@ static flowdict_t escape_these(escpile_t pile, place_set_t * all_changed,
   while(pile->places != NULL) {
     let place = pile->places->hd;
     pile->places = pile->places->tl;
-    if(all_changed != NULL)
-      *all_changed = Set::insert(*all_changed, place);
+    update_place_set(all_changed,place,NULL);
     absRval_t oldval, newval;
     try oldval = lookup_place(d,place); 
     catch { case Dict::Absent: continue; }
@@ -381,8 +475,7 @@ static absRval_t assign_place_outer(struct AssignEnv @ env,
 flowdict_t assign_place(Position::seg_t loc, flowdict_t d,
 			place_set_t * all_changed, place_t<`H,`H> place, 
 			absRval_t r) {
-  if(all_changed != NULL)
-    *all_changed = Set::insert(*all_changed,place);
+  update_place_set(all_changed,place,NULL);
   region rgn {
     let &Place(root,fs) = place;
     struct AssignEnv<`rgn> env = AssignEnv(rnew(rgn) EscPile(rgn,NULL), d, loc);
@@ -401,8 +494,8 @@ typedef struct JoinEnv<`r1> @`r2 joinenv_t<`r1,`r2>;
 static enum WhoIsChanged { Neither, One, Two }; // if both changed, take join
 static struct AfterEnv<`r::R> {
   struct JoinEnv<`r> joinenv;
-  Set::set_t<place_t> chg1; // should region-allocate!
-  Set::set_t<place_t> chg2; // should region-allocate!
+  place_set_t chg1; // should region-allocate!
+  place_set_t chg2; // should region-allocate!
   place_t curr_place; // a pain to stack-allocate, but should!
   list_t<field_name_t> @ last_field_cell;
   enum WhoIsChanged changed;
@@ -531,46 +624,105 @@ static relns_t join_relns(relns_t r1s, relns_t r2s) {
   //  fprintf(stderr,"result ["); print_relns(res); fprintf(stderr,"]\n");
   return res;
 }
+// for merging the "may consume" lists of two flows.
+static void remove_f(List::list_t<place_t<`H,`H>> @l,
+		     place_t<`H,`H> place) {
+  try {
+    *l = List::delete_cmp(place_cmp,*l,place);
+    DEBUG_PRINT("  --deleted elem\n");
+  } catch {
+  case Core::Not_found:
+    break; // no sweat if it's not there
+  }
+}
+void print_place_list(List::list_t<place_t> x) {
+  let first = true;
+  while (x != NULL) {
+    if (!first) { fprintf(stderr,", "); first = false; }
+    print_place(x->hd);
+    x = x->tl;
+  }
+  fprintf(stderr,"\n");
+}
 
-flow_t join_flow(place_set_t* all_changed, flow_t f1, flow_t f2){
+static consume_t or_consume(consume_t c1, consume_t c2) {
+  DEBUG_PRINT("in or_consume:\n");
+  DEBUG_PRINT("  c1.may_consume = ");
+  DEBUG_PRINT_F(print_place_list,c1.may_consume);
+  DEBUG_PRINT("  c2.may_consume = ");
+  DEBUG_PRINT_F(print_place_list,c2.may_consume);
+  // merge the may_consume lists
+  List::list_t<place_t<`H,`H>,`H> mc = c2.may_consume;
+  region r {
+    // duplicate the first list, since it will be side-effected by delete.
+    let x = rcopy(r,c1.may_consume);
+    List::iter_c(remove_f,&x,c2.may_consume);
+    // now concatenate the two lists
+    while (x != NULL) {
+      mc = new List::List(x->hd, mc);
+      x = x->tl;
+    }
+  }
+  // merge the consume sets: just union
+  DEBUG_PRINT("  final may_consume = ");
+  DEBUG_PRINT_F(print_place_list,mc);
+  return ConsumeInfo(union_place_set(c1.consumed,c2.consumed,false),mc);
+}
+
+// the join above treats things like "or"; this is treating them
+//   like "and"
+consume_t and_consume(consume_t c1, consume_t c2) {
+  // concatenate the may_consume lists
+  let mc = List::append(c1.may_consume, c2.may_consume);
+  // merge the consume sets; duplicates indicate an error
+  return ConsumeInfo(union_place_set(c1.consumed,c2.consumed,true),mc);
+}
+
+flow_t join_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
+		 bool or_consumed){
   if(f1 == f2) return f1;
   switch($(f1,f2)) {
   case $(BottomFL,_): return f2;
   case $(_,BottomFL): return f1;
-  case $(&ReachableFL(d1,r1),&ReachableFL(d2,r2)):
+  case $(&ReachableFL(d1,r1,c1), &ReachableFL(d2,r2,c2)):
     // A lot of computation to avoid allocation, but profiling suggests
     // that's the right thing to do.
-    if(d1 == d2 && r1 == r2) return f1;
+    if(d1 == d2 && r1 == r2 && 
+       c1.may_consume == c2.may_consume &&
+       c1.consumed == c2.consumed) return f1;
     if(flow_lessthan_approx(f1,f2)) return f2;
     if(flow_lessthan_approx(f2,f1)) return f1;
     region rgn {
       let env     = JoinEnv(rnew(rgn) EscPile(rgn,NULL),d1,d2);
       let outdict = Dict::intersect_c(join_absRval,&env,d1,d2);
       let r       = join_relns(r1,r2);
-      return new ReachableFL(escape_these(env.pile, all_changed, outdict),r);
+      let c       = or_consumed ? or_consume(c1,c2) : and_consume(c1,c2);
+      return new ReachableFL(escape_these(env.pile, all_changed, outdict),r,c);
     }
   }
 }
 
 $(flow_t,absRval_t) join_flow_and_rval(place_set_t* all_changed,
 				       $(flow_t,absRval_t) pr1,
-				       $(flow_t,absRval_t) pr2) {
+				       $(flow_t,absRval_t) pr2,
+				       bool or_consumed) {
   // possibly wasteful because it could do the escape shtuff twice
   // and it can because of && and || using 0 which abstracts to Zero. Sigh.
   let $(f1,r1) = pr1;
   let $(f2,r2) = pr2;
-  flow_t outflow = join_flow(all_changed,f1,f2);
+  flow_t outflow = join_flow(all_changed,f1,f2,or_consumed);
   switch($(f1,f2,outflow)) {
   case $(BottomFL,_,_): return $(outflow,r2);
   case $(_,BottomFL,_): return $(outflow,r1);
-  case $(&ReachableFL(d1,_),&ReachableFL(d2,_), &ReachableFL(outd,relns)):
+  case $(&ReachableFL(d1,_,_),&ReachableFL(d2,_,_), 
+	 &ReachableFL(outd,relns,cinfo)):
     if(absRval_lessthan_approx(0,r1,r2)) return $(outflow,r2);
     if(absRval_lessthan_approx(0,r2,r1)) return $(outflow,r1);
     region rgn {
       let env  = JoinEnv(rnew(rgn) EscPile(rgn,NULL),d1,d2);
       let outr = join_absRval(&env,0,r1,r2);
-      return $(new ReachableFL(escape_these(env.pile,all_changed,outd),relns),
-	       outr);
+      return $(new ReachableFL(escape_these(env.pile,all_changed,outd),
+			       relns,cinfo), outr);
     }
   default: throw new Core::Impossible("join_flow_and_rval: BottomFL outflow");
   }
@@ -578,8 +730,8 @@ $(flow_t,absRval_t) join_flow_and_rval(place_set_t* all_changed,
 
 static absRval_t after_absRval_d(afterenv_t,field_name_t,absRval_t,absRval_t);
 static absRval_t after_absRval(afterenv_t env, absRval_t r1, absRval_t r2) {
-  bool changed1 = env->changed == One || Set::member(env->chg1,env->curr_place);
-  bool changed2 = env->changed == Two || Set::member(env->chg2,env->curr_place);
+  bool changed1 = env->changed == One || Dict::member(env->chg1,env->curr_place);
+  bool changed2 = env->changed == Two || Dict::member(env->chg2,env->curr_place);
   if(changed1 && changed2)
     return join_absRval(&env->joinenv, 0, r1, r2);
   // checking for "is a contained object changed in the other pinfo" is
@@ -595,6 +747,8 @@ static absRval_t after_absRval(afterenv_t env, absRval_t r1, absRval_t r2) {
       return r2;
     env->changed = Two;
   }
+  // neither one change, but they are not pointer equal.  Thus we assume
+  // that they point to things that have changed.
   switch($(r1,r2)) {
   case $(&Aggregate(d1),&Aggregate(d2)):
     let new_d = Dict::union_two_c(after_absRval_d,env,d1,d2);
@@ -636,8 +790,10 @@ flow_t after_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
   switch($(f1,f2)) {
   case $(BottomFL,_): 
   case $(_,BottomFL): return BottomFL;
-  case $(&ReachableFL(d1,r1),&ReachableFL(d2,r2)):
-    if(d1 == d2 && r1 == r2) return f1;
+  case $(&ReachableFL(d1,r1,c1),&ReachableFL(d2,r2,c2)):
+    if(d1 == d2 && r1 == r2 && 
+       c1.may_consume == c2.may_consume &&
+       c1.consumed == c2.consumed) return f1;
     // Should think about ways to avoid allocation here: (curr_place and
     // cut-off in presence of changes)
     region rgn {
@@ -648,8 +804,9 @@ flow_t after_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
 			  Neither);
       let new_d = Dict::union_two_c(after_root,&env,d1,d2);
       let new_r = join_relns(r1,r2);
+      let new_c = and_consume(c1,c2);
       return new ReachableFL(escape_these(env.joinenv.pile,all_changed,new_d),
-                             new_r);
+                             new_r,new_c);
     }
   }
 }
@@ -720,6 +877,26 @@ static bool relns_approx(relns_t r2s, relns_t r1s) {
   return true;
 }
 
+bool consume_approx(consume_t c1, consume_t c2) {
+  // first check that c2 is a sublist of c1; assumes they are sorted
+  if (c1.may_consume != c2.may_consume) {
+    let l2 = c2.may_consume;
+    let l1 = c1.may_consume;
+    for (; l1 != NULL && l2 != NULL; l1 = l1->tl) {
+      if ((unsigned int)l1 == (unsigned int)l2)
+	goto compare_consumed_set;
+      let i = place_cmp(l1->hd,l2->hd);
+      if (i == 0) // if equal, move l2's pointer to the next element
+	l2 = l2->tl;
+    }
+    if (l2 != NULL) // didn't find them all
+      return false;
+  }
+ compare_consumed_set:
+  // now check that c1 is a superset of c2
+  return place_set_subset(c2.consumed, c1.consumed);
+}
+
 // WARNING: We assume anything not in the intersection is IRRELEVANT.
 // WARNING: We might return false even when f1 < f2, but that's okay b/c
 //  that will just cause clients to take joins/afters and we always return true
@@ -730,10 +907,12 @@ bool flow_lessthan_approx(flow_t f1, flow_t f2) {
   switch($(f1,f2)) {
   case $(BottomFL,_): return true;
   case $(_,BottomFL): return false;
-  case $(&ReachableFL(d1,r1),&ReachableFL(d2,r2)):
-    if(d1 == d2 && r1 == r2) return true;
+  case $(&ReachableFL(d1,r1,c1),&ReachableFL(d2,r2,c2)):
+    if(d1 == d2 && r1 == r2 &&
+       c1.may_consume == c2.may_consume &&
+       c1.consumed == c2.consumed) return true;
     return Dict::forall_intersect(absRval_lessthan_approx,d1,d2) &&
-      relns_approx(r1,r2);
+      relns_approx(r1,r2) && consume_approx(c1,c2);
   }
 }
 
@@ -887,6 +1066,97 @@ void print_relns(relns_t r) {
   }
 }
 
+void print_initlevel(initlevel_t il) {
+  switch (il) {
+  case NoneIL: fprintf(stderr,"uninitialized"); break;
+  case ThisIL: fprintf(stderr,"this-initialized"); break;
+  case AllIL: fprintf(stderr,"all-initialized"); break;
+  }
+}
+
+void print_root(root_t root) {
+  switch (root) {
+  case &VarRoot(vd): 
+    fprintf(stderr,"Root(%s): ",Absynpp::qvar2string(vd->name)); break;
+  case &MallocPt(_,_):
+    fprintf(stderr,"MallocPt(_,_)"); break;
+  case &InitParam(_,_):
+    fprintf(stderr,"InitParam(_,_)"); break;
+  }
+}
+
+void print_place(place_t p) {
+  print_root(p->root);
+  if (p->fields != NULL) fprintf(stderr,"+(...)");
+}
+
+void print_place_set(place_set_t p) {
+  region r {
+    try {
+      let iter = Dict::make_iter(r,p);
+      let elem = *Dict::rchoose(r,p);
+      bool first = true;
+      fprintf(stderr,"{ ");
+      while(Iter::next(iter,&elem)) {
+	let p = elem[0];
+	if (!first) {
+	  fprintf(stderr,", ");
+	  first = false;
+	}
+	print_place(p);
+      }
+      fprintf(stderr,"}\n");
+    } catch {
+    case Absent:
+      fprintf(stderr,"{ }\n");
+      return;
+    }
+  }
+}
+
+void print_absrval(absRval_t rval) {
+  switch (rval) {
+  case Zero: fprintf(stderr,"Zero"); break;
+  case NotZeroAll: fprintf(stderr,"NotZeroAll"); break;
+  case NotZeroThis: fprintf(stderr,"NotZeroThis"); break;
+  case &UnknownR(il): fprintf(stderr,"Unknown("); print_initlevel(il);
+    fprintf(stderr,")"); break;
+  case &Esc(il): fprintf(stderr,"Esc("); print_initlevel(il);
+    fprintf(stderr,")"); break;
+  case &AddressOf(p): fprintf(stderr,"AddrOf("); print_place(p); 
+    fprintf(stderr,")"); break;
+  case &TagCmps(_): fprintf(stderr,"TagCmps(?)"); break;
+  case &Aggregate(d): fprintf(stderr,"Aggregate(?)"); break;
+  }
+}
+
+static void print_flow_mapping(root_t root, absRval_t rval) {
+  fprintf(stderr,"    ");
+  print_root(root);
+  fprintf(stderr," --> ");
+  print_absrval(rval);
+  fprintf(stderr,"\n");
+}
+
+void print_flowdict(flowdict_t d) {
+  Dict::iter(print_flow_mapping,d);
+}
+
+void print_flow(flow_t f) {
+  switch (f) {
+  case BottomFL: fprintf(stderr,"  BottomFL\n"); break;
+  case &ReachableFL(fd,_,cinfo):
+    fprintf(stderr,"  ReachableFL:\n");
+    Dict::iter(print_flow_mapping,fd);
+    fprintf(stderr,"\n    consumed: ");
+    print_place_set(cinfo.consumed);
+    fprintf(stderr,"\n    may_consume: ");
+    print_place_list(cinfo.may_consume);
+    fprintf(stderr,"\n");
+    break;
+  }
+}
+
 // returns true when t contains the region rgn with a few exceptions:
 //  * doesn't count rgn in function types
 //  * doesn't count rgn in region_t types (i.e., handles)
@@ -895,7 +1165,7 @@ void print_relns(relns_t r) {
 // can't have any dangling pointers into rgn.  Region handles aren't
 // "killed" when we reset a region and in fact we need them to ensure
 // that we can allocate stuff in the region.  
-static bool contains_region(tvar_t rgn, type_t t) {
+bool contains_region(killrgn_t rgn, type_t t) {
   switch (Tcutil::compress(t)) {
   case VoidType: // these cases can't contain rgn
   case &IntType(_,_):    
@@ -906,9 +1176,18 @@ static bool contains_region(tvar_t rgn, type_t t) {
   case &SizeofType(_):   
   case &TagType(_):      
   case &TypeInt(_):      
-  case HeapRgn:          
+  case HeapRgn:
   case &Evar(_,_,_,_): return false; // because of compress above
-  case &VarType(tv): return tvar_cmp(tv,rgn) == 0;
+  case UniqueRgn:
+    switch (rgn) {
+    case UniqueRgn_k: return true;
+    default: return false;
+    }
+  case &VarType(tv): 
+    switch (rgn) {
+    case UniqueRgn_k: return false;
+    case &Region_k(rgn): return tvar_cmp(tv,rgn) == 0;
+    }
     // for parameterized types, we just look to see if rgn shows up 
     // in the parameters -- this is overly aggressive since the regions
     // might not actually get used or may only get used in a handle or
@@ -946,7 +1225,7 @@ static bool contains_region(tvar_t rgn, type_t t) {
 }
 
 // used by kill_flowdict_region below
-static void kill_root($(flowdict_t,tvar_t)@ env, root_t root, absRval_t rval) {
+static void kill_root($(flowdict_t,killrgn_t)@ env, root_t root, absRval_t rval) {
   let &$(*fd,rgn) = env;
   switch (root) {
   case &VarRoot(vd): 
@@ -970,14 +1249,21 @@ static void kill_root($(flowdict_t,tvar_t)@ env, root_t root, absRval_t rval) {
 
 // "kill" all roots in the flowdict that have rgn in their type
 static flowdict_t kill_flowdict_region(flowdict_t fd, type_t rgn) {
-  tvar_t rgn_tvar;
   switch (Tcutil::compress(rgn)) {
-  case &VarType(tv): rgn_tvar = tv; break;
-  default: throw new Core::Impossible("kill_flowdict_region"); break;
+  case &VarType(tv): 
+    tunion KillRgn.Region_k v = Region_k(tv);
+    tunion _ KillRgn v2 = &v;
+    $(flowdict_t,killrgn_t) env = $(Dict::empty(root_cmp),v2);
+    Dict::iter_c(kill_root,&env,fd);
+    return env[0];
+    
+  case UniqueRgn: 
+    $(flowdict_t,killrgn_t) env = $(Dict::empty(root_cmp),UniqueRgn_k);
+    Dict::iter_c(kill_root,&env,fd);
+    return env[0];
+
+  default: throw new Core::Impossible("kill_flowdict_region");
   }
-  $(flowdict_t,tvar_t) env = $(Dict::empty(root_cmp),rgn_tvar);
-  Dict::iter_c(kill_root,&env,fd);
-  return env[0];
 }
 
 // "kill" all relations in the flow analysis that involve the given region
@@ -991,9 +1277,106 @@ static relns_t kill_relns_region(relns_t relns, type_t rgn) {
 flow_t kill_flow_region(flow_t f, type_t rgn) {
   switch (f) {
   case BottomFL: return f;
-  case &ReachableFL(fd,r): 
+  case &ReachableFL(fd,r,c): 
     let fd2 = kill_flowdict_region(fd,rgn);
     let r2 = kill_relns_region(r,rgn);
-    return new ReachableFL(fd2,r2);
+    // FIX: deal with killing consumed values?
+    return new ReachableFL(fd2,r2,c);
+  }
+}
+
+static void consume_f($(place_set_t @, Position::seg_t) @env, 
+		      place_t<`H,`H> place) {
+  let &$(consume, loc) = env;
+  DEBUG_PRINT("  adding ");
+  DEBUG_PRINT_F(print_place,place);
+  DEBUG_PRINT("  to consumed\n");
+  if (update_place_set(consume, place, loc)) {
+    let consume_loc = Dict::lookup(*consume,place);
+    unique_err(place, "May consume unique pointer %s more than once (cf. %s)",
+	       "May consume unique pointer %s more than once",
+	       consume_loc, loc);
+  }
+}
+
+// for each place in the may consume list, add it to the consume list;
+//   if it's already there, then this is a conflict
+flow_t consume_unique_rvals(Position::seg_t loc, flow_t f) {
+  switch(f) {
+  case BottomFL: return f;
+  case &ReachableFL(fd,relns,cinfo):
+    if (cinfo.may_consume == NULL) return f;
+    let x = cinfo.consumed;
+    List::iter_c(consume_f,new $(&x,loc),cinfo.may_consume);
+    return new ReachableFL(fd,relns,ConsumeInfo(x,NULL));
+  }
+}
+
+// Make sure none of the values in the may_consume list appear in the
+// consumed set.
+void check_unique_rvals(Position::seg_t loc, flow_t f) {
+  switch (f) {
+  case BottomFL: return;
+  case &ReachableFL(d,r,c):
+    let x = c.may_consume;
+    // make sure these haven't been consumed
+    while (x != NULL) {
+      if (Dict::member(c.consumed,x->hd)) {
+	let consume_loc = Dict::lookup(c.consumed, x->hd);
+	unique_err(x->hd, 
+		   "Read through possibly consumed unique pointer %s (cf. %s)",
+		   "Read through possibly consumed unique pointer %s",
+		   consume_loc, loc);
+	break;
+      }
+      x = x->tl;
+    }
+    return;
+  }
+}
+
+// drop unique rvals.  This is the case where they are in read position,
+// but we don't do anything with them (i.e. x;)
+flow_t drop_unique_rvals(Position::seg_t loc, flow_t f) {
+  switch (f) {
+  case BottomFL: return f;
+  case &ReachableFL(d,r,c):
+    c.may_consume = NULL;
+    return new ReachableFL(d,r,c);
+  }
+}
+
+// When reading through a variable, simply make sure that the unique
+// pointers are OK, and then purge the may_consume list
+flow_t readthrough_unique_rvals(Position::seg_t loc, flow_t f) {
+  check_unique_rvals(loc,f);
+  switch (f) {
+  case BottomFL: return f;
+  case &ReachableFL(d,r,c):
+    c.may_consume = NULL;
+    return new ReachableFL(d,r,c);
+  }
+}
+
+$(consume_t,flow_t) save_consume_info(flow_t f, bool clear) {
+  static place_set_t *empty_info = NULL;
+  switch (f) {
+  case BottomFL: 
+    if (empty_info == NULL)
+      empty_info = new mt_place_set();
+    return $(ConsumeInfo(*empty_info,NULL),f);
+  case &ReachableFL(d,r,c):
+    if (clear)
+      return $(c,new ReachableFL(d,r,ConsumeInfo(mt_place_set(),NULL)));
+    else
+      return $(c,f);
+  }
+}
+
+flow_t restore_consume_info(flow_t f, consume_t c) {
+  switch (f) {
+  case BottomFL: return f;
+  case &ReachableFL(d,r,_):
+    return new ReachableFL(d,r,c);
   }
 }

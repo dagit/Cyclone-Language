@@ -66,6 +66,9 @@ extern dict_t<`a,`b,`r> rempty(region_t<`r>,int cmp(`a,`a));
 extern bool is_empty(dict_t d);
 /** [is_empty(d)] returns true if [d] is empty, and returns false otherwise. */
 
+extern int cardinality(dict_t d);
+/** [cardinality(d)] returns the number of keys in the dictionary. */
+
 extern bool member(dict_t<`a> d,`a k);
 /** [member(d,k)] returns true if [k] is mapped to some value in [d],
     and returns false otherwise. */

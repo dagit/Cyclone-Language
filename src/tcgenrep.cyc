@@ -1105,6 +1105,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     break;
     // conceivably we might have to marshal these somehow... how?
   case &RgnHandleType(_): 
+  case UniqueRgn:           
   case HeapRgn:           
   case &AccessEff(_):     
   case &JoinEff(_):
@@ -1353,8 +1354,8 @@ $(dict_t<type_t,repinfo_t,`H>,list_t<decl_t>,exp_t)
   tcGenrep(tenv_t te, genv_t ge, seg_t loc, type_t type,dict_t<type_t,repinfo_t,`H> dict)
 {
   // first check that type is well-formed
-  Tcutil::check_valid_toplevel_type(loc,te,type);
-  Tcutil::check_valid_toplevel_type(loc,te,type);
+  Tcutil::check_valid_toplevel_type(loc,te,type,false);
+  Tcutil::check_valid_toplevel_type(loc,te,type,false);
 
   // generate the declarations
   let &$(dict,ri) = lookupRep(te, dict, loc, type);  

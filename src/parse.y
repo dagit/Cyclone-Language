@@ -216,6 +216,8 @@ static bool is_typeparam(type_modifier_t tm) {
 static type_t id2type(string_t<`H> s, kindbound_t k) {
   if (zstrcmp(s,"`H") == 0)
     return HeapRgn;
+  else if (zstrcmp(s,"`U") == 0)
+    return UniqueRgn;
   else
     return new VarType(new Tvar(new s,NULL,k));
 }
@@ -2061,8 +2063,8 @@ statement:
 | jump_statement        { $$=$!1; }
 /* Cyc: region statements */
 | REGION '<' TYPE_VAR '>' IDENTIFIER statement
-  { if (zstrcmp($3,"`H") == 0)
-      err("bad occurrence of heap region `H",LOC(@3,@3));
+  { if (zstrcmp($3,"`H") == 0 || zstrcmp($3,"`U") == 0)
+      err(aprintf("bad occurrence of heap region %s",$3),LOC(@3,@3));
     tvar_t tv = new Tvar(new $3,NULL,new Eq_kb(RgnKind));
     type_t t  = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $5),
@@ -2084,8 +2086,8 @@ statement:
 | REGION '[' IDENTIFIER ']' '<' TYPE_VAR '>' IDENTIFIER statement
   { if (zstrcmp($3,"resetable") != 0)
       err("expecting [resetable]",LOC(@3,@3));
-    if (zstrcmp($6,"`H") == 0)
-      err("bad occurrence of heap region `H",LOC(@6,@6));
+    if (zstrcmp($6,"`H") == 0 || zstrcmp($6,"`U"))
+      err(aprintf("bad occurrence of heap region %s",$6),LOC(@6,@6));
     tvar_t tv = new Tvar(new $6,NULL,new Eq_kb(RgnKind));
     type_t t  = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $8),

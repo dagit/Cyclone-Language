@@ -752,16 +752,19 @@ struct Cyc_CfFlowInfo_PlaceL_struct{int tag;struct Cyc_CfFlowInfo_Place*f1;};str
 Cyc_CfFlowInfo_UnknownR_struct{int tag;void*f1;};struct Cyc_CfFlowInfo_Esc_struct{
 int tag;void*f1;};struct Cyc_CfFlowInfo_AddressOf_struct{int tag;struct Cyc_CfFlowInfo_Place*
 f1;};struct Cyc_CfFlowInfo_TagCmps_struct{int tag;struct Cyc_List_List*f1;};struct
-Cyc_CfFlowInfo_Aggregate_struct{int tag;struct Cyc_Dict_Dict*f1;};struct Cyc_CfFlowInfo_ReachableFL_struct{
-int tag;struct Cyc_Dict_Dict*f1;struct Cyc_List_List*f2;};void Cyc_NewControlFlow_set_encloser(
-struct Cyc_Absyn_Stmt*enclosee,struct Cyc_Absyn_Stmt*encloser);void Cyc_Tcstmt_tcStmt(
-struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Stmt*s,int new_block);static void Cyc_Tcstmt_decorate_stmt(
-struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Stmt*s){Cyc_NewControlFlow_set_encloser(
-s,Cyc_Tcenv_get_encloser(te));s->try_depth=Cyc_Tcenv_get_try_depth(te);}static
-void Cyc_Tcstmt_pattern_synth(struct Cyc_Position_Segment*loc,struct Cyc_Tcenv_Tenv*
-te,struct Cyc_Tcpat_TcPatResult pat_res,struct Cyc_Absyn_Stmt*s,struct Cyc_Absyn_Exp*
-where_opt,int new_block){struct _tuple6*_tmp1;struct Cyc_List_List*_tmp2;struct Cyc_Tcpat_TcPatResult
-_tmp0=pat_res;_tmp1=_tmp0.tvars_and_bounds_opt;_tmp2=_tmp0.patvars;{struct Cyc_List_List*
+Cyc_CfFlowInfo_Aggregate_struct{int tag;struct Cyc_Dict_Dict*f1;};struct Cyc_CfFlowInfo_ConsumeInfo{
+struct Cyc_Dict_Dict*consumed;struct Cyc_List_List*may_consume;};struct Cyc_CfFlowInfo_ReachableFL_struct{
+int tag;struct Cyc_Dict_Dict*f1;struct Cyc_List_List*f2;struct Cyc_CfFlowInfo_ConsumeInfo
+f3;};struct Cyc_CfFlowInfo_Region_k_struct{int tag;struct Cyc_Absyn_Tvar*f1;};void
+Cyc_NewControlFlow_set_encloser(struct Cyc_Absyn_Stmt*enclosee,struct Cyc_Absyn_Stmt*
+encloser);void Cyc_Tcstmt_tcStmt(struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Stmt*s,
+int new_block);static void Cyc_Tcstmt_decorate_stmt(struct Cyc_Tcenv_Tenv*te,struct
+Cyc_Absyn_Stmt*s){Cyc_NewControlFlow_set_encloser(s,Cyc_Tcenv_get_encloser(te));
+s->try_depth=Cyc_Tcenv_get_try_depth(te);}static void Cyc_Tcstmt_pattern_synth(
+struct Cyc_Position_Segment*loc,struct Cyc_Tcenv_Tenv*te,struct Cyc_Tcpat_TcPatResult
+pat_res,struct Cyc_Absyn_Stmt*s,struct Cyc_Absyn_Exp*where_opt,int new_block){
+struct _tuple6*_tmp1;struct Cyc_List_List*_tmp2;struct Cyc_Tcpat_TcPatResult _tmp0=
+pat_res;_tmp1=_tmp0.tvars_and_bounds_opt;_tmp2=_tmp0.patvars;{struct Cyc_List_List*
 _tmp3=_tmp1 == 0?0:(*_tmp1).f1;struct Cyc_List_List*_tmp4=_tmp1 == 0?0:(*_tmp1).f2;
 struct Cyc_Tcenv_Tenv*te2=Cyc_Tcenv_add_type_vars(loc,te,_tmp3);te2=Cyc_Tcenv_new_outlives_constraints(
 te2,_tmp4);if(new_block)te2=Cyc_Tcenv_new_block(loc,te2);{struct Cyc_Core_Opt*
@@ -988,7 +991,7 @@ _tag_arr(_tmp9C,sizeof(char),_get_zero_arr_size(_tmp9C,42));}),_tag_arr(_tmp9B,
 sizeof(void*),0));});goto _LL59;_LL59:;}{void*_tmp9D=Cyc_Tcutil_compress(_tmp8B);
 struct Cyc_Absyn_ArrayInfo _tmp9E;void*_tmp9F;struct Cyc_Absyn_Tqual _tmpA0;struct
 Cyc_Absyn_Exp*_tmpA1;struct Cyc_Absyn_Conref*_tmpA2;struct Cyc_Position_Segment*
-_tmpA3;_LL63: if(_tmp9D <= (void*)3  || *((int*)_tmp9D)!= 7)goto _LL65;_tmp9E=((
+_tmpA3;_LL63: if(_tmp9D <= (void*)4  || *((int*)_tmp9D)!= 7)goto _LL65;_tmp9E=((
 struct Cyc_Absyn_ArrayType_struct*)_tmp9D)->f1;_tmp9F=(void*)_tmp9E.elt_type;
 _tmpA0=_tmp9E.tq;_tmpA1=_tmp9E.num_elts;if(_tmpA1 != 0)goto _LL65;_tmpA2=_tmp9E.zero_term;
 _tmpA3=_tmp9E.zt_loc;if(!(_tmp79->initializer != 0))goto _LL65;_LL64:{void*_tmpA4=(
