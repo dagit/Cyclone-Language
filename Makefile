@@ -17,64 +17,64 @@ BL=bin/lib
 all: directories cyclone tools
 
 $(BL)/libcycboot.a: $(BB)/libcycboot.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/libcycboot_a.a: $(BB)/aprof/libcycboot.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/libcycboot_pg.a: $(BB)/gprof/libcycboot.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/libcycboot_nocheck.a: $(BB)/nocheck/libcycboot.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/libcyc.a: $(BB)/libcyc.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/libcyc_a.a: $(BB)/aprof/libcyc.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/libcyc_pg.a: $(BB)/gprof/libcyc.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/libcyc_nocheck.a: $(BB)/nocheck/libcyc.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/libxml.a: $(BB)/libxml.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/libxml_a.a: $(BB)/aprof/libxml.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/libxml_pg.a: $(BB)/gprof/libxml.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/libxml_nocheck.a: $(BB)/nocheck/libxml.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/%/nogc.a: build/%/nogc.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/%/nogc_a.a: build/%/aprof/nogc.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/%/nogc_pg.a: build/%/gprof/nogc.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/%/nogc_nocheck.a: build/%/nocheck/nogc.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/%/runtime_cyc.a: build/%/runtime_cyc.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/%/runtime_cyc_a.a: build/%/aprof/runtime_cyc.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/%/runtime_cyc_pg.a: build/%/gprof/runtime_cyc.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/%/runtime_cyc_nocheck.a: build/%/nocheck/runtime_cyc.a
-	cp $< $@
+	cp -p $< $@
 
 bin/cyclone$(EXE): $(BB)/cyclone$(EXE)
 	cp $< $@
@@ -242,7 +242,7 @@ $(BL)/cyc-lib/cyc_include.h: $(CYCDIR)/bin/cyc-lib/cyc_include.h
 	cp $< $@
 
 $(BL)/cyc-lib/$(build)/gc.a: gc/.libs/libgc.a
-	cp -p $< $@
+	cp -p -p $< $@
 
 gc/.libs/libgc.a:
 	$(MAKE) -C gc libgc.la CC="$(CC)" CFLAGS="$(CFLAGS)"
@@ -310,40 +310,40 @@ endif
 ifneq ($(build),$(target))
 
 $(BL)/cyc-lib/$(target)/libcycboot.a: $(BT)/libcycboot.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/$(target)/libcycboot_a.a: $(BT)/aprof/libcycboot.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/$(target)/libcycboot_pg.a: $(BT)/gprof/libcycboot.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/$(target)/libcycboot_nocheck.a: $(BT)/nocheck/libcycboot.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/$(target)/libcyc.a: $(BT)/libcyc.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/$(target)/libcyc_a.a: $(BT)/aprof/libcyc.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/$(target)/libcyc_pg.a: $(BT)/gprof/libcyc.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/$(target)/libcyc_nocheck.a: $(BT)/nocheck/libcyc.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/$(target)/libxml.a: $(BT)/libxml.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/$(target)/libxml_a.a: $(BT)/aprof/libxml.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/$(target)/libxml_pg.a: $(BT)/gprof/libxml.a
-	cp $< $@
+	cp -p $< $@
 
 $(BL)/cyc-lib/$(target)/libxml_nocheck.a: $(BT)/nocheck/libxml.a
-	cp $< $@
+	cp -p $< $@
 
 BTARGET=-b $(target)
 
