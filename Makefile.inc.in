@@ -149,7 +149,7 @@ BUILDLIB_SRCS:=buildlib\
 	rgnorder\
 	tcenv\
 	tcpat\
-        partt\
+        pratt\
 	new_control_flow\
 	cf_flowinfo\
 	absyn
