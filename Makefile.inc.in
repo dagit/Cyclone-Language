@@ -178,8 +178,11 @@ ifndef NO_XML_LIB
 CYCLONE_H := $(CYCLONE_H) xml/xml.h xml/xmldump.h xml/xmlparse.h
 endif
 
-# Makefiles assume this is only one file, but they could be changed.
-RUNTIME:=runtime_cyc
+# Files for the runtime system
+RUNTIME:=runtime_cyc \
+	runtime_stack \
+	runtime_exception \
+	runtime_memory
 
 CYCLIB:=libcyc.$(A)
 CYCBOOTLIB:=libcycboot.$(A)
@@ -200,6 +203,9 @@ PG_LIBS:=$(addsuffix _pg.$(O), $(CYCLONE_LIBS))
 NOCHECK_BOOT_LIBS:=$(addsuffix _nocheck.$(O), $(CYCLONE_BOOT_LIBS))
 NOCHECK_LIBS:=$(addsuffix _nocheck.$(O), $(CYCLONE_LIBS))
 C_RUNTIME:=$(addsuffix .c, $(RUNTIME))
+O_RUNTIME:=$(addsuffix .$(O), $(RUNTIME))
+A_RUNTIME:=$(addsuffix _a.$(O), $(RUNTIME))
+PG_RUNTIME:=$(addsuffix _pg.$(O), $(RUNTIME))
 O_NOOPT_SRCS:=$(addsuffix .$(O),$(NOOPT_SRCS))
 OPTFLAG:=-O
 

@@ -6,6 +6,37 @@
 #ifndef _CYC_INCLUDE_H_
 #define _CYC_INCLUDE_H_
 
+/***********************************************************************/
+/* Runtime Stack routines (runtime_stack.c).                           */
+/***********************************************************************/
+
+/* Need one of these per thread (we don't have threads)
+   The runtime maintains a stack that contains either _handler_cons
+   structs or _RegionHandle structs.  The tag is 0 for a handler_cons
+   and 1 for a region handle.  */
+struct _RuntimeStack {
+  int tag; /* 0 for an exception handler, 1 for a region handle */
+  struct _RuntimeStack *next;
+  void (*cleanup)(struct _RuntimeStack *frame);
+};
+
+// pushes a frame on the stack
+void _push_frame(struct _RuntimeStack *frame);
+
+// pop N+1 frames from the stack (error if stack_size < N+1)
+void _npop_frame(unsigned int n);
+
+// returns top frame on the stack (NULL if stack is empty)
+struct _RuntimeStack * _top_frame();
+
+// pops off frames until a frame with the given tag is reached.  This
+// frame is returned, or else NULL if none found.
+struct _RuntimeStack * _pop_frame_until(int tag);
+
+/***********************************************************************/
+/* Low-level representations etc.                                      */
+/***********************************************************************/
+
 #ifdef NO_CYC_PREFIX
 #define ADD_PREFIX(x) x
 #else
@@ -26,15 +57,6 @@ struct _dyneither_ptr {
 
 /* Discriminated Unions */
 struct _xtunion_struct { char *tag; };
-
-/* Need one of these per thread (we don't have threads)
-   The runtime maintains a stack that contains either _handler_cons
-   structs or _RegionHandle structs.  The tag is 0 for a handler_cons
-   and 1 for a region handle.  */
-struct _RuntimeStack {
-  int tag; /* 0 for an exception handler, 1 for a region handle */
-  struct _RuntimeStack *next;
-};
 
 /* Regions */
 struct _RegionPage {
@@ -837,19 +859,25 @@ struct Cyc_Core_NewDynamicRegion Cyc_Core_new_ukey();
 void Cyc_Core_free_ukey(struct Cyc_Core_DynamicRegion*k);
 # 251
 void*Cyc_Core_open_region(struct Cyc_Core_DynamicRegion*key,void*arg,void*(*body)(struct _RegionHandle*h,void*arg));
-# 299 "core.h"
+# 295 "core.h"
 typedef void*Cyc_Core___cyclone_internal_array_t;
 typedef unsigned int Cyc_Core___cyclone_internal_singleton;
-# 303
+# 299
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
-# 308
+# 304
 if(bd >> 20  || sz >> 12)
 return 0;{
 unsigned char*ptrbd=dyn.curr + bd * sz;
 if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
-# 315
+# 311
 return 0;
-return dyn.curr;};}extern char Cyc_Lexing_Error[6];struct Cyc_Lexing_Error_exn_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;struct _dyneither_ptr lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;int lex_eof_reached;};
+return dyn.curr;};}
+# 317
+static unsigned int arr_prevsize(struct _dyneither_ptr arr,unsigned int elt_sz){
+unsigned char*_get_arr_size_curr=arr.curr;
+unsigned char*_get_arr_size_base=arr.base;
+return
+(_get_arr_size_curr < _get_arr_size_base  || _get_arr_size_curr >= arr.last_plus_one)?0:(_get_arr_size_curr - _get_arr_size_base)/ elt_sz;}extern char Cyc_Lexing_Error[6];struct Cyc_Lexing_Error_exn_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;struct _dyneither_ptr lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;int lex_eof_reached;};
 # 57 "lexing.h"
 typedef struct Cyc_Lexing_lexbuf*Cyc_Lexing_Lexbuf;struct Cyc_Lexing_function_lexbuf_state{int(*read_fun)(struct _dyneither_ptr,int,void*);void*read_fun_state;};
 # 64

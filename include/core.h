@@ -289,10 +289,6 @@ extern "C" mstring_t<`H> Cstring_to_string(Cstring);
 extern "C" mbuffer_t<`r> wrap_Cbuffer_as_buffer(Cbuffer_t<`r>, size_t);
 //  extern "C" mbuffer_t<`r> wrap_Cstring_as_string(Cbuffer_t<`r>, size_t);
 // extern "C" mstring_t<`H> ?`H ntCsl_to_ntsl(Cstring @);
-extern "C" unsigned int arr_prevsize(`a::A ?,sizeof_t<`a>);
-  /** [arr_prevsize(p,sz)] returns the buffer space available preceding
-      the pointer [p] in the dynamic array [p] points into.  [sz] is the
-      size of the elements in the array returned by [sizeof]. */
 
   // JGM: I have to define this using a typedef here because
   // valueof(-) is not considered a Cyclone keyword.
@@ -315,7 +311,18 @@ extern "C include" {
       return 0;
     return dyn.curr;
   } 
-} export { arrcast; }
+  // Returns the size of an array from the current pointer back to
+  // its starting point.  If the curr pointer = start pointer, or 
+  // the curr pointer is out of bounds, then this is 0.
+  static unsigned int arr_prevsize(`a ?`r arr, sizeof_t<`a> elt_sz) {
+    unsigned char *_get_arr_size_curr=arr.curr;
+    unsigned char *_get_arr_size_base=arr.base;
+    return 
+      (_get_arr_size_curr < _get_arr_size_base ||
+       _get_arr_size_curr >= arr.last_plus_one) ? 0 :
+      ((_get_arr_size_curr - _get_arr_size_base) / (elt_sz));
+  }
+} export { arrcast, arr_prevsize; }
 
 }
 

@@ -39,7 +39,7 @@ cyclone: \
 	bin/lib/$(CYCBOOTLIB) \
 	$(addprefix bin/, cyclone$(EXE) cycdoc$(EXE) buildlib$(EXE)) \
 	bin/lib/cyc-lib/$(ARCH)/cycspecs \
-	$(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc.a $(RUNTIME).$(O)) \
+	$(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc.a runtime_cyc.a) \
 	bin/lib/cyc-lib/$(ARCH)/cyc_setjmp.h \
 	bin/lib/$(CYCLIB)
 
@@ -63,7 +63,7 @@ endif
 aprof: $(CYC_INCLUDE_H) \
   bin/lib/libcycboot_a.a \
   bin/lib/libcyc_a.a \
-  $(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc_a.a $(RUNTIME)_a.$(O)) \
+  $(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc_a.a runtime_cyc_a.a) \
   a_libs
 	$(MAKE) -C tools/aprof install
 
@@ -72,10 +72,10 @@ cyclone_a: aprof bin/cyclone_a$(EXE)
 cyclone_pg: bin/cyclone_pg$(EXE)
 
 gprof: bin/lib/libcyc_pg.a \
-  $(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc_pg.a $(RUNTIME)_pg.$(O))
+  $(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc_pg.a runtime_cyc_pg.a)
 
 nocheck: bin/lib/libcyc_nocheck.a \
-  $(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc.a $(RUNTIME).$(O))
+  $(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc.a runtime_cyc.a)
 
 .PHONY: all tools cyclone aprof gprof libs nocheck
 
@@ -83,35 +83,35 @@ nocheck: bin/lib/libcyc_nocheck.a \
 bin/cyclone$(EXE): \
   $(addprefix bin/genfiles/, $(O_SRCS) install_path.$(O)) \
   bin/lib/$(CYCBOOTLIB) \
-  bin/lib/cyc-lib/$(ARCH)/$(RUNTIME).$(O) \
+  bin/lib/cyc-lib/$(ARCH)/runtime_cyc.a \
   bin/lib/cyc-lib/$(ARCH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 bin/cyclone_a$(EXE): \
   $(addprefix bin/genfiles/, $(A_SRCS) install_path.$(O)) \
   bin/lib/libcycboot_a.a \
-  bin/lib/cyc-lib/$(ARCH)/$(RUNTIME)_a.$(O) \
+  bin/lib/cyc-lib/$(ARCH)/runtime_cyc_a.a \
   bin/lib/cyc-lib/$(ARCH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 bin/cyclone_pg$(EXE): \
   $(addprefix bin/genfiles/, $(PG_SRCS) install_path.$(O)) \
   bin/lib/$(CYCBOOTLIB) \
-  bin/lib/cyc-lib/$(ARCH)/$(RUNTIME)_pg.$(O) \
+  bin/lib/cyc-lib/$(ARCH)/runtime_cyc_pg.a \
   bin/lib/cyc-lib/$(ARCH)/gc.a
 	$(CC) -pg -o $@ $^ $(LDFLAGS)
 
 bin/cycdoc$(EXE): \
   $(addprefix bin/genfiles/, $(addsuffix .$(O), $(CYCDOC_SRCS)) install_path.$(O)) \
   bin/lib/$(CYCBOOTLIB) \
-  bin/lib/cyc-lib/$(ARCH)/$(RUNTIME).$(O) \
+  bin/lib/cyc-lib/$(ARCH)/runtime_cyc.a \
   bin/lib/cyc-lib/$(ARCH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 bin/buildlib$(EXE): \
   $(addprefix bin/genfiles/, $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O))\
   bin/lib/$(CYCBOOTLIB) \
-  bin/lib/cyc-lib/$(ARCH)/$(RUNTIME).$(O) \
+  bin/lib/cyc-lib/$(ARCH)/runtime_cyc.a \
   bin/lib/cyc-lib/$(ARCH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
@@ -134,7 +134,7 @@ bin/buildlib$(EXE): \
 #         cstubs.{c,o}        #  an artifact of the build process, should
 #         cycstubs.{cyc,o}    #  properly be deleted before install
 #       nogc.a
-#       runtime_cyc.o
+#       runtime_cyc_cyc.o
 #
 # Note, every file in this hierarchy has $(CYC_INCLUDE_H) as a
 # prerequisite (except for cyc_include.h).  This is because the rule
@@ -321,20 +321,26 @@ bin/lib/cyc-lib/$(ARCH)/nogc_pg.a: \
 	ar rc $@ $<
 	$(RANLIB) $@
 
-bin/lib/cyc-lib/$(ARCH)/$(RUNTIME).$(O): $(CYC_INCLUDE_H)
-bin/lib/cyc-lib/$(ARCH)/$(RUNTIME).$(O): \
-  bin/genfiles/$(RUNTIME).$(O)
-	cp $< $@
+bin/lib/cyc-lib/$(ARCH)/runtime_cyc.a: $(CYC_INCLUDE_H)
+bin/lib/cyc-lib/$(ARCH)/runtime_cyc.a: \
+  $(addprefix bin/genfiles/, $(O_RUNTIME))
+	-$(RM) $@
+	ar rc $@ $(addprefix bin/genfiles/, $(O_RUNTIME))
+	$(RANLIB) $@
 
-bin/lib/cyc-lib/$(ARCH)/$(RUNTIME)_a.$(O): $(CYC_INCLUDE_H)
-bin/lib/cyc-lib/$(ARCH)/$(RUNTIME)_a.$(O): \
-  bin/genfiles/$(RUNTIME)_a.$(O)
-	cp $< $@
+bin/lib/cyc-lib/$(ARCH)/runtime_cyc_a.a: $(CYC_INCLUDE_H)
+bin/lib/cyc-lib/$(ARCH)/runtime_cyc_a.a: \
+  $(addprefix bin/genfiles/, $(A_RUNTIME))
+	-$(RM) $@
+	ar rc $@ $(addprefix bin/genfiles/, $(A_RUNTIME))
+	$(RANLIB) $@
 
-bin/lib/cyc-lib/$(ARCH)/$(RUNTIME)_pg.$(O): $(CYC_INCLUDE_H)
-bin/lib/cyc-lib/$(ARCH)/$(RUNTIME)_pg.$(O): \
-  bin/genfiles/$(RUNTIME)_pg.$(O)
-	cp $< $@
+bin/lib/cyc-lib/$(ARCH)/runtime_cyc_pg.a: $(CYC_INCLUDE_H)
+bin/lib/cyc-lib/$(ARCH)/runtime_cyc_pg.a: \
+  $(addprefix bin/genfiles/, $(PG_RUNTIME))
+	-$(RM) $@
+	ar rc $@ $(addprefix bin/genfiles/, $(PG_RUNTIME))
+	$(RANLIB) $@
 
 # The rule for creating cyc_include.h creates as a side effect
 # the entire cyclone lib directory structure; see above.

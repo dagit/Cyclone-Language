@@ -6,6 +6,37 @@
 #ifndef _CYC_INCLUDE_H_
 #define _CYC_INCLUDE_H_
 
+/***********************************************************************/
+/* Runtime Stack routines (runtime_stack.c).                           */
+/***********************************************************************/
+
+/* Need one of these per thread (we don't have threads)
+   The runtime maintains a stack that contains either _handler_cons
+   structs or _RegionHandle structs.  The tag is 0 for a handler_cons
+   and 1 for a region handle.  */
+struct _RuntimeStack {
+  int tag; /* 0 for an exception handler, 1 for a region handle */
+  struct _RuntimeStack *next;
+  void (*cleanup)(struct _RuntimeStack *frame);
+};
+
+// pushes a frame on the stack
+void _push_frame(struct _RuntimeStack *frame);
+
+// pop N+1 frames from the stack (error if stack_size < N+1)
+void _npop_frame(unsigned int n);
+
+// returns top frame on the stack (NULL if stack is empty)
+struct _RuntimeStack * _top_frame();
+
+// pops off frames until a frame with the given tag is reached.  This
+// frame is returned, or else NULL if none found.
+struct _RuntimeStack * _pop_frame_until(int tag);
+
+/***********************************************************************/
+/* Low-level representations etc.                                      */
+/***********************************************************************/
+
 #ifdef NO_CYC_PREFIX
 #define ADD_PREFIX(x) x
 #else
@@ -26,15 +57,6 @@ struct _dyneither_ptr {
 
 /* Discriminated Unions */
 struct _xtunion_struct { char *tag; };
-
-/* Need one of these per thread (we don't have threads)
-   The runtime maintains a stack that contains either _handler_cons
-   structs or _RegionHandle structs.  The tag is 0 for a handler_cons
-   and 1 for a region handle.  */
-struct _RuntimeStack {
-  int tag; /* 0 for an exception handler, 1 for a region handle */
-  struct _RuntimeStack *next;
-};
 
 /* Regions */
 struct _RegionPage {
@@ -868,19 +890,25 @@ const char*Cyc_Core_get_exn_filename();
 int Cyc_Core_get_exn_lineno();
 # 288
 struct _dyneither_ptr Cstring_to_string(char*);
-# 299
+# 295
 typedef void*Cyc_Core___cyclone_internal_array_t;
 typedef unsigned int Cyc_Core___cyclone_internal_singleton;
-# 303
+# 299
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
-# 308
+# 304
 if(bd >> 20  || sz >> 12)
 return 0;{
 unsigned char*ptrbd=dyn.curr + bd * sz;
 if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
-# 315
+# 311
 return 0;
-return dyn.curr;};}struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
+return dyn.curr;};}
+# 317
+static unsigned int arr_prevsize(struct _dyneither_ptr arr,unsigned int elt_sz){
+unsigned char*_get_arr_size_curr=arr.curr;
+unsigned char*_get_arr_size_base=arr.base;
+return
+(_get_arr_size_curr < _get_arr_size_base  || _get_arr_size_curr >= arr.last_plus_one)?0:(_get_arr_size_curr - _get_arr_size_base)/ elt_sz;}struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 39 "list.h"
 typedef struct Cyc_List_List*Cyc_List_list_t;
 # 49 "list.h"
@@ -2444,24 +2472,24 @@ struct _dyneither_ptr gc_filename;
 if(Cyc_pa_r){
 libcyc_flag=({const char*_tmp2C4="-lcyc_a";_tag_dyneither(_tmp2C4,sizeof(char),8);});
 nogc_filename=({const char*_tmp2C5="nogc_a.a";_tag_dyneither(_tmp2C5,sizeof(char),9);});
-runtime_filename=({const char*_tmp2C6="runtime_cyc_a.o";_tag_dyneither(_tmp2C6,sizeof(char),16);});}else{
+runtime_filename=({const char*_tmp2C6="runtime_cyc_a.a";_tag_dyneither(_tmp2C6,sizeof(char),16);});}else{
 if(Cyc_nocheck_r){
 libcyc_flag=({const char*_tmp2C7="-lcyc_nocheck";_tag_dyneither(_tmp2C7,sizeof(char),14);});
 nogc_filename=({const char*_tmp2C8="nogc.a";_tag_dyneither(_tmp2C8,sizeof(char),7);});
-runtime_filename=({const char*_tmp2C9="runtime_cyc.o";_tag_dyneither(_tmp2C9,sizeof(char),14);});}else{
+runtime_filename=({const char*_tmp2C9="runtime_cyc.a";_tag_dyneither(_tmp2C9,sizeof(char),14);});}else{
 if(Cyc_pg_r){
 libcyc_flag=({const char*_tmp2CA="-lcyc_pg";_tag_dyneither(_tmp2CA,sizeof(char),9);});
-runtime_filename=({const char*_tmp2CB="runtime_cyc_pg.o";_tag_dyneither(_tmp2CB,sizeof(char),17);});
+runtime_filename=({const char*_tmp2CB="runtime_cyc_pg.a";_tag_dyneither(_tmp2CB,sizeof(char),17);});
 nogc_filename=({const char*_tmp2CC="nogc_pg.a";_tag_dyneither(_tmp2CC,sizeof(char),10);});}else{
 if(Cyc_Lex_compile_for_boot_r){
 # 1582
 libcyc_flag=({const char*_tmp2CD="-lcycboot";_tag_dyneither(_tmp2CD,sizeof(char),10);});
 nogc_filename=({const char*_tmp2CE="nogc.a";_tag_dyneither(_tmp2CE,sizeof(char),7);});
-runtime_filename=({const char*_tmp2CF="runtime_cyc.o";_tag_dyneither(_tmp2CF,sizeof(char),14);});}else{
+runtime_filename=({const char*_tmp2CF="runtime_cyc.a";_tag_dyneither(_tmp2CF,sizeof(char),14);});}else{
 # 1586
 libcyc_flag=({const char*_tmp2D0="-lcyc";_tag_dyneither(_tmp2D0,sizeof(char),6);});
 nogc_filename=({const char*_tmp2D1="nogc.a";_tag_dyneither(_tmp2D1,sizeof(char),7);});
-runtime_filename=({const char*_tmp2D2="runtime_cyc.o";_tag_dyneither(_tmp2D2,sizeof(char),14);});}}}}
+runtime_filename=({const char*_tmp2D2="runtime_cyc.a";_tag_dyneither(_tmp2D2,sizeof(char),14);});}}}}
 # 1590
 gc_filename=({const char*_tmp2D3="gc.a";_tag_dyneither(_tmp2D3,sizeof(char),5);});{
 # 1592

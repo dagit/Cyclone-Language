@@ -70,7 +70,7 @@ CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))
 
 all: libs $(CYCCOMP) cycdoc$(EXE) buildlib$(EXE) 
 
-libs: $(CYCBOOTLIB) nogc.a $(RUNTIME).$(O) $(CYCLIB)
+libs: $(CYCBOOTLIB) nogc.a runtime_cyc.a $(CYCLIB)
 
 cfiles: $(C_SRCS) cycdoc.c buildlib.c $(C_BOOT_LIBS) boot_cycstubs.c precore_c.h other_cfiles
 
@@ -163,6 +163,10 @@ endif
 endif
 
 nogc.a: nogc.o
+	ar rc $@ $^
+	$(RANLIB) $@
+
+runtime_cyc.a: $(O_RUNTIME)
 	ar rc $@ $^
 	$(RANLIB) $@
 
