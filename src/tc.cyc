@@ -555,6 +555,11 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge, seg_t loc,
 	terr(f->loc,xprintf("duplicate field name %s in %s", *((*f->name)[1]), obj));
       else
 	prev_fields = rnew(uprev_rgn) List((*f->name)[1], prev_fields);
+      // erase the scope of the field (which has no meaning)
+      if (f->sc != Public) {
+	warn(loc, xprintf("ignoring scope of field %s", *((*f->name)[1])));
+	f->sc = Public;
+      }
     }
     fields2 = fields;
   }

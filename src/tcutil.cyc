@@ -1549,7 +1549,7 @@ static glist_t<type_t,`r2> substs(region_t<`r> rgn,
   let new_tl = substs(rgn, inst, old_tl);
   if(old_hd == new_hd && old_tl == new_tl)
     return ts;
-  return new List(new_hd,new_tl);
+  return (glist_t<type_t,`r2>)(new List(new_hd,new_tl));
 }
 
 extern type_t substitute(list_t<$(tvar_t,type_t)@> inst, type_t t) {

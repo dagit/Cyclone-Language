@@ -957,6 +957,7 @@ using Parse;
   AttributeList_tok(list_t<attribute_t>);
   Enumfield_tok(enumfield_t);
   EnumfieldList_tok(list_t<enumfield_t>);
+  Scope_tok(scope_t)
 }
 /* types for productions */
 %type <Int_tok> INTEGER_CONSTANT
@@ -1010,6 +1011,7 @@ using Parse;
 %type <DeclaratorExpoptList_tok> struct_declarator_list struct_declarator_list0
 %type <AbstractDeclarator_tok> abstract_declarator direct_abstract_declarator
 %type <Bool_tok> tunion_or_xtunion
+%type <Scope_tok> tunionfield_scope
 %type <TunionField_tok> tunionfield
 %type <TunionFieldList_tok> tunionfield_list
 %type <QualSpecList_tok> specifier_qualifier_list
@@ -1558,13 +1560,18 @@ tunionfield_list:
 | tunionfield ';' tunionfield_list { $$=^$(new List($1,$3)); }
 ;
 
+tunionfield_scope:
+                                   { $$=^$(Public);}
+| EXTERN                           { $$=^$(Extern);}
+| STATIC                           { $$=^$(Static);}
+
 tunionfield:
-  qual_opt_identifier
-    { $$=^$(new Tunionfield($1,null,null,LOC(@1,@1))); }
-| qual_opt_identifier type_params_opt '(' parameter_list ')'
-    { let typs = List::map_c(get_tqual_typ,LOC(@4,@4),List::imp_rev($4));
-      let tvs  = List::map_c(typ2tvar,LOC(@2,@2),$2);
-      $$=^$(new Tunionfield($1,tvs,typs,LOC(@1,@5))); }
+  tunionfield_scope qual_opt_identifier
+    { $$=^$(new Tunionfield($2,null,null,LOC(@1,@2),$1)); }
+| tunionfield_scope qual_opt_identifier type_params_opt '(' parameter_list ')'
+    { let typs = List::map_c(get_tqual_typ,LOC(@5,@5),List::imp_rev($5));
+      let tvs  = List::map_c(typ2tvar,LOC(@3,@3),$3);
+      $$=^$(new Tunionfield($2,tvs,typs,LOC(@1,@6),$1)); }
 ;
 
 declarator:

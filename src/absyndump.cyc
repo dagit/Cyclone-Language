@@ -278,7 +278,7 @@ void dumpntyp(type_t t) {
     case &UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
       fallthru(tname,is_x,fname);
     case &KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x),
-			   &Tunionfield(fname,_,_,_)):
+			   &Tunionfield(fname,_,_,_,_)):
       if(is_x) dump("xtunion "); else dump("tunion ");
       dumpqvar(tname);
       dump(".");

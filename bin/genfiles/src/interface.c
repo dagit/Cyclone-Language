@@ -26,9 +26,9 @@ struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
 _tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
 struct _tagged_string Cstring_to_string( char*); extern int system( char*);
 struct Cyc_Stdio___sFILE; typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE;
-typedef int Cyc_Stdio_fpos_t; extern char Cyc_Stdio_FileCloseError[ 19u]; extern
-char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{ char*
-tag; struct _tagged_string f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List*
+typedef int Cyc_Stdio_fpos_t; extern char Cyc_Stdio_FileOpenError[ 18u]; struct
+Cyc_Stdio_FileOpenError_struct{ char* tag; struct _tagged_string f1; } ; extern
+char Cyc_Stdio_FileCloseError[ 19u]; struct Cyc_List_List{ void* hd; struct Cyc_List_List*
 tl; } ; typedef struct Cyc_List_List* Cyc_List_glist_t; typedef struct Cyc_List_List*
 Cyc_List_list_t; typedef struct Cyc_List_List* Cyc_List_List_t; extern char Cyc_List_List_empty[
 15u]; extern char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List* Cyc_List_imp_rev(
@@ -331,11 +331,11 @@ fields; struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_Uniondecl{ void*
 sc; struct Cyc_Core_Opt* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
 fields; struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_Tunionfield{
 struct _tuple0* name; struct Cyc_List_List* tvs; struct Cyc_List_List* typs;
-struct Cyc_Position_Segment* loc; } ; struct Cyc_Absyn_Tuniondecl{ void* sc;
-struct _tuple0* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt* fields;
-int is_xtunion; } ; struct Cyc_Absyn_Enumfield{ struct _tuple0* name; struct Cyc_Absyn_Exp*
-tag; struct Cyc_Position_Segment* loc; } ; struct Cyc_Absyn_Enumdecl{ void* sc;
-struct _tuple0* name; struct Cyc_Core_Opt* fields; } ; struct Cyc_Absyn_Typedefdecl{
+struct Cyc_Position_Segment* loc; void* sc; } ; struct Cyc_Absyn_Tuniondecl{
+void* sc; struct _tuple0* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
+fields; int is_xtunion; } ; struct Cyc_Absyn_Enumfield{ struct _tuple0* name;
+struct Cyc_Absyn_Exp* tag; struct Cyc_Position_Segment* loc; } ; struct Cyc_Absyn_Enumdecl{
+void* sc; struct _tuple0* name; struct Cyc_Core_Opt* fields; } ; struct Cyc_Absyn_Typedefdecl{
 struct _tuple0* name; struct Cyc_List_List* tvs; void* defn; } ; static const
 int Cyc_Absyn_Var_d= 0; struct Cyc_Absyn_Var_d_struct{ int tag; struct Cyc_Absyn_Vardecl*
 f1; } ; static const int Cyc_Absyn_Fn_d= 1; struct Cyc_Absyn_Fn_d_struct{ int
@@ -429,89 +429,89 @@ typedef void* Cyc_type_specifier_t; typedef void* Cyc_storage_class_t; struct
 Cyc_Declaration_spec; typedef struct Cyc_Declaration_spec* Cyc_decl_spec_t;
 struct Cyc_Declarator; typedef struct Cyc_Declarator* Cyc_declarator_t; struct
 Cyc_Abstractdeclarator; typedef struct Cyc_Abstractdeclarator* Cyc_abstractdeclarator_t;
-extern char Cyc_AbstractDeclarator_tok[ 27u]; struct Cyc_AbstractDeclarator_tok_struct{
-char* tag; struct Cyc_Abstractdeclarator* f1; } ; extern char Cyc_AttributeList_tok[
-22u]; struct Cyc_AttributeList_tok_struct{ char* tag; struct Cyc_List_List* f1;
-} ; extern char Cyc_Attribute_tok[ 18u]; struct Cyc_Attribute_tok_struct{ char*
-tag; void* f1; } ; extern char Cyc_BlockItem_tok[ 18u]; struct Cyc_BlockItem_tok_struct{
-char* tag; void* f1; } ; extern char Cyc_Bool_tok[ 13u]; struct Cyc_Bool_tok_struct{
-char* tag; int f1; } ; extern char Cyc_Char_tok[ 13u]; struct Cyc_Char_tok_struct{
-char* tag; char f1; } ; extern char Cyc_DeclList_tok[ 17u]; struct Cyc_DeclList_tok_struct{
-char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_DeclSpec_tok[ 17u];
-struct Cyc_DeclSpec_tok_struct{ char* tag; struct Cyc_Declaration_spec* f1; } ;
-extern char Cyc_DeclaratorExpoptList_tok[ 29u]; struct Cyc_DeclaratorExpoptList_tok_struct{
-char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_DeclaratorExpopt_tok[
-25u]; struct _tuple4{ struct Cyc_Declarator* f1; struct Cyc_Core_Opt* f2; } ;
-struct Cyc_DeclaratorExpopt_tok_struct{ char* tag; struct _tuple4* f1; } ;
-extern char Cyc_Declarator_tok[ 19u]; struct Cyc_Declarator_tok_struct{ char*
-tag; struct Cyc_Declarator* f1; } ; extern char Cyc_DesignatorList_tok[ 23u];
-struct Cyc_DesignatorList_tok_struct{ char* tag; struct Cyc_List_List* f1; } ;
-extern char Cyc_Designator_tok[ 19u]; struct Cyc_Designator_tok_struct{ char*
-tag; void* f1; } ; extern char Cyc_EnumfieldList_tok[ 22u]; struct Cyc_EnumfieldList_tok_struct{
-char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_Enumfield_tok[ 18u];
-struct Cyc_Enumfield_tok_struct{ char* tag; struct Cyc_Absyn_Enumfield* f1; } ;
-extern char Cyc_ExpList_tok[ 16u]; struct Cyc_ExpList_tok_struct{ char* tag;
+extern char Cyc_Okay_tok[ 13u]; extern char Cyc_Bool_tok[ 13u]; struct Cyc_Bool_tok_struct{
+char* tag; int f1; } ; extern char Cyc_Int_tok[ 12u]; struct _tuple4{ void* f1;
+int f2; } ; struct Cyc_Int_tok_struct{ char* tag; struct _tuple4* f1; } ; extern
+char Cyc_Char_tok[ 13u]; struct Cyc_Char_tok_struct{ char* tag; char f1; } ;
+extern char Cyc_Pointer_Sort_tok[ 21u]; struct Cyc_Pointer_Sort_tok_struct{ char*
+tag; void* f1; } ; extern char Cyc_Short_tok[ 14u]; struct Cyc_Short_tok_struct{
+char* tag; short f1; } ; extern char Cyc_String_tok[ 15u]; struct Cyc_String_tok_struct{
+char* tag; struct _tagged_string f1; } ; extern char Cyc_Stringopt_tok[ 18u];
+struct Cyc_Stringopt_tok_struct{ char* tag; struct Cyc_Core_Opt* f1; } ; extern
+char Cyc_Type_tok[ 13u]; struct Cyc_Type_tok_struct{ char* tag; void* f1; } ;
+extern char Cyc_TypeList_tok[ 17u]; struct Cyc_TypeList_tok_struct{ char* tag;
 struct Cyc_List_List* f1; } ; extern char Cyc_Exp_tok[ 12u]; struct Cyc_Exp_tok_struct{
-char* tag; struct Cyc_Absyn_Exp* f1; } ; extern char Cyc_FieldPatternList_tok[
-25u]; struct Cyc_FieldPatternList_tok_struct{ char* tag; struct Cyc_List_List*
-f1; } ; extern char Cyc_FieldPattern_tok[ 21u]; struct _tuple5{ struct Cyc_List_List*
-f1; struct Cyc_Absyn_Pat* f2; } ; struct Cyc_FieldPattern_tok_struct{ char* tag;
-struct _tuple5* f1; } ; extern char Cyc_FnDecl_tok[ 15u]; struct Cyc_FnDecl_tok_struct{
-char* tag; struct Cyc_Absyn_Fndecl* f1; } ; extern char Cyc_IdList_tok[ 15u];
-struct Cyc_IdList_tok_struct{ char* tag; struct Cyc_List_List* f1; } ; extern
-char Cyc_InitDeclList_tok[ 21u]; struct Cyc_InitDeclList_tok_struct{ char* tag;
-struct Cyc_List_List* f1; } ; extern char Cyc_InitDecl_tok[ 17u]; struct _tuple6{
-struct Cyc_Declarator* f1; struct Cyc_Absyn_Exp* f2; } ; struct Cyc_InitDecl_tok_struct{
-char* tag; struct _tuple6* f1; } ; extern char Cyc_InitializerList_tok[ 24u];
-struct Cyc_InitializerList_tok_struct{ char* tag; struct Cyc_List_List* f1; } ;
-extern char Cyc_Int_tok[ 12u]; struct _tuple7{ void* f1; int f2; } ; struct Cyc_Int_tok_struct{
-char* tag; struct _tuple7* f1; } ; extern char Cyc_Kind_tok[ 13u]; struct Cyc_Kind_tok_struct{
-char* tag; void* f1; } ; extern char Cyc_Okay_tok[ 13u]; extern char Cyc_ParamDeclListBool_tok[
+char* tag; struct Cyc_Absyn_Exp* f1; } ; extern char Cyc_ExpList_tok[ 16u];
+struct Cyc_ExpList_tok_struct{ char* tag; struct Cyc_List_List* f1; } ; extern
+char Cyc_Primop_tok[ 15u]; struct Cyc_Primop_tok_struct{ char* tag; void* f1; }
+; extern char Cyc_Primopopt_tok[ 18u]; struct Cyc_Primopopt_tok_struct{ char*
+tag; struct Cyc_Core_Opt* f1; } ; extern char Cyc_QualId_tok[ 15u]; struct Cyc_QualId_tok_struct{
+char* tag; struct _tuple0* f1; } ; extern char Cyc_Stmt_tok[ 13u]; struct Cyc_Stmt_tok_struct{
+char* tag; struct Cyc_Absyn_Stmt* f1; } ; extern char Cyc_SwitchClauseList_tok[
+25u]; struct Cyc_SwitchClauseList_tok_struct{ char* tag; struct Cyc_List_List*
+f1; } ; extern char Cyc_Pattern_tok[ 16u]; struct Cyc_Pattern_tok_struct{ char*
+tag; struct Cyc_Absyn_Pat* f1; } ; extern char Cyc_PatternList_tok[ 20u]; struct
+Cyc_PatternList_tok_struct{ char* tag; struct Cyc_List_List* f1; } ; extern char
+Cyc_FnDecl_tok[ 15u]; struct Cyc_FnDecl_tok_struct{ char* tag; struct Cyc_Absyn_Fndecl*
+f1; } ; extern char Cyc_DeclList_tok[ 17u]; struct Cyc_DeclList_tok_struct{ char*
+tag; struct Cyc_List_List* f1; } ; extern char Cyc_DeclSpec_tok[ 17u]; struct
+Cyc_DeclSpec_tok_struct{ char* tag; struct Cyc_Declaration_spec* f1; } ; extern
+char Cyc_InitDecl_tok[ 17u]; struct _tuple5{ struct Cyc_Declarator* f1; struct
+Cyc_Absyn_Exp* f2; } ; struct Cyc_InitDecl_tok_struct{ char* tag; struct _tuple5*
+f1; } ; extern char Cyc_InitDeclList_tok[ 21u]; struct Cyc_InitDeclList_tok_struct{
+char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_StorageClass_tok[ 21u];
+struct Cyc_StorageClass_tok_struct{ char* tag; void* f1; } ; extern char Cyc_TypeSpecifier_tok[
+22u]; struct Cyc_TypeSpecifier_tok_struct{ char* tag; void* f1; } ; extern char
+Cyc_QualSpecList_tok[ 21u]; struct _tuple6{ struct Cyc_Absyn_Tqual f1; struct
+Cyc_List_List* f2; struct Cyc_List_List* f3; } ; struct Cyc_QualSpecList_tok_struct{
+char* tag; struct _tuple6* f1; } ; extern char Cyc_TypeQual_tok[ 17u]; struct
+Cyc_TypeQual_tok_struct{ char* tag; struct Cyc_Absyn_Tqual f1; } ; extern char
+Cyc_StructFieldDeclList_tok[ 28u]; struct Cyc_StructFieldDeclList_tok_struct{
+char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_StructFieldDeclListList_tok[
+32u]; struct Cyc_StructFieldDeclListList_tok_struct{ char* tag; struct Cyc_List_List*
+f1; } ; extern char Cyc_Declarator_tok[ 19u]; struct Cyc_Declarator_tok_struct{
+char* tag; struct Cyc_Declarator* f1; } ; extern char Cyc_DeclaratorExpopt_tok[
+25u]; struct _tuple7{ struct Cyc_Declarator* f1; struct Cyc_Core_Opt* f2; } ;
+struct Cyc_DeclaratorExpopt_tok_struct{ char* tag; struct _tuple7* f1; } ;
+extern char Cyc_DeclaratorExpoptList_tok[ 29u]; struct Cyc_DeclaratorExpoptList_tok_struct{
+char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_AbstractDeclarator_tok[
+27u]; struct Cyc_AbstractDeclarator_tok_struct{ char* tag; struct Cyc_Abstractdeclarator*
+f1; } ; extern char Cyc_TunionField_tok[ 20u]; struct Cyc_TunionField_tok_struct{
+char* tag; struct Cyc_Absyn_Tunionfield* f1; } ; extern char Cyc_TunionFieldList_tok[
+24u]; struct Cyc_TunionFieldList_tok_struct{ char* tag; struct Cyc_List_List* f1;
+} ; extern char Cyc_ParamDecl_tok[ 18u]; struct Cyc_ParamDecl_tok_struct{ char*
+tag; struct _tuple1* f1; } ; extern char Cyc_ParamDeclList_tok[ 22u]; struct Cyc_ParamDeclList_tok_struct{
+char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_ParamDeclListBool_tok[
 26u]; struct _tuple8{ struct Cyc_List_List* f1; int f2; struct Cyc_Core_Opt* f3;
 } ; struct Cyc_ParamDeclListBool_tok_struct{ char* tag; struct _tuple8* f1; } ;
-extern char Cyc_ParamDeclList_tok[ 22u]; struct Cyc_ParamDeclList_tok_struct{
-char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_ParamDecl_tok[ 18u];
-struct Cyc_ParamDecl_tok_struct{ char* tag; struct _tuple1* f1; } ; extern char
-Cyc_PatternList_tok[ 20u]; struct Cyc_PatternList_tok_struct{ char* tag; struct
-Cyc_List_List* f1; } ; extern char Cyc_Pattern_tok[ 16u]; struct Cyc_Pattern_tok_struct{
-char* tag; struct Cyc_Absyn_Pat* f1; } ; extern char Cyc_Pointer_Sort_tok[ 21u];
-struct Cyc_Pointer_Sort_tok_struct{ char* tag; void* f1; } ; extern char Cyc_Primop_tok[
-15u]; struct Cyc_Primop_tok_struct{ char* tag; void* f1; } ; extern char Cyc_Primopopt_tok[
-18u]; struct Cyc_Primopopt_tok_struct{ char* tag; struct Cyc_Core_Opt* f1; } ;
-extern char Cyc_QualId_tok[ 15u]; struct Cyc_QualId_tok_struct{ char* tag;
-struct _tuple0* f1; } ; extern char Cyc_QualSpecList_tok[ 21u]; struct _tuple9{
-struct Cyc_Absyn_Tqual f1; struct Cyc_List_List* f2; struct Cyc_List_List* f3; }
-; struct Cyc_QualSpecList_tok_struct{ char* tag; struct _tuple9* f1; } ; extern
-char Cyc_Rgn_tok[ 12u]; struct Cyc_Rgn_tok_struct{ char* tag; void* f1; } ;
-extern char Cyc_Short_tok[ 14u]; struct Cyc_Short_tok_struct{ char* tag; short
-f1; } ; extern char Cyc_Stmt_tok[ 13u]; struct Cyc_Stmt_tok_struct{ char* tag;
-struct Cyc_Absyn_Stmt* f1; } ; extern char Cyc_StorageClass_tok[ 21u]; struct
-Cyc_StorageClass_tok_struct{ char* tag; void* f1; } ; extern char Cyc_String_tok[
-15u]; struct Cyc_String_tok_struct{ char* tag; struct _tagged_string f1; } ;
-extern char Cyc_Stringopt_tok[ 18u]; struct Cyc_Stringopt_tok_struct{ char* tag;
-struct Cyc_Core_Opt* f1; } ; extern char Cyc_StructFieldDeclListList_tok[ 32u];
-struct Cyc_StructFieldDeclListList_tok_struct{ char* tag; struct Cyc_List_List*
-f1; } ; extern char Cyc_StructFieldDeclList_tok[ 28u]; struct Cyc_StructFieldDeclList_tok_struct{
-char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_StructOrUnion_tok[ 22u];
-struct Cyc_StructOrUnion_tok_struct{ char* tag; void* f1; } ; extern char Cyc_SwitchClauseList_tok[
-25u]; struct Cyc_SwitchClauseList_tok_struct{ char* tag; struct Cyc_List_List*
-f1; } ; extern char Cyc_TunionFieldList_tok[ 24u]; struct Cyc_TunionFieldList_tok_struct{
-char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_TunionField_tok[ 20u];
-struct Cyc_TunionField_tok_struct{ char* tag; struct Cyc_Absyn_Tunionfield* f1;
-} ; extern char Cyc_TypeList_tok[ 17u]; struct Cyc_TypeList_tok_struct{ char*
-tag; struct Cyc_List_List* f1; } ; extern char Cyc_TypeModifierList_tok[ 25u];
-struct Cyc_TypeModifierList_tok_struct{ char* tag; struct Cyc_List_List* f1; } ;
-extern char Cyc_TypeQual_tok[ 17u]; struct Cyc_TypeQual_tok_struct{ char* tag;
-struct Cyc_Absyn_Tqual f1; } ; extern char Cyc_TypeSpecifier_tok[ 22u]; struct
-Cyc_TypeSpecifier_tok_struct{ char* tag; void* f1; } ; extern char Cyc_Type_tok[
-13u]; struct Cyc_Type_tok_struct{ char* tag; void* f1; } ; struct Cyc_Yyltype{
-int timestamp; int first_line; int first_column; int last_line; int last_column;
-struct _tagged_string text; } ; typedef struct Cyc_Yyltype Cyc_yyltype; extern
-int Cyc_String_zstrptrcmp( struct _tagged_string*, struct _tagged_string*);
-extern char Cyc_Tcutil_TypeErr[ 12u]; extern void Cyc_Tcutil_terr( struct Cyc_Position_Segment*,
-struct _tagged_string); extern void* Cyc_Tcutil_compress( void* t); extern int
-Cyc_Tcutil_is_function_type( void* t); extern char Cyc_Tcdecl_Incompatible[ 17u];
-extern void Cyc_Tcdecl_merr( struct Cyc_Position_Segment* loc, struct
+extern char Cyc_StructOrUnion_tok[ 22u]; struct Cyc_StructOrUnion_tok_struct{
+char* tag; void* f1; } ; extern char Cyc_IdList_tok[ 15u]; struct Cyc_IdList_tok_struct{
+char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_Designator_tok[ 19u];
+struct Cyc_Designator_tok_struct{ char* tag; void* f1; } ; extern char Cyc_DesignatorList_tok[
+23u]; struct Cyc_DesignatorList_tok_struct{ char* tag; struct Cyc_List_List* f1;
+} ; extern char Cyc_TypeModifierList_tok[ 25u]; struct Cyc_TypeModifierList_tok_struct{
+char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_Rgn_tok[ 12u]; struct
+Cyc_Rgn_tok_struct{ char* tag; void* f1; } ; extern char Cyc_InitializerList_tok[
+24u]; struct Cyc_InitializerList_tok_struct{ char* tag; struct Cyc_List_List* f1;
+} ; extern char Cyc_FieldPattern_tok[ 21u]; struct _tuple9{ struct Cyc_List_List*
+f1; struct Cyc_Absyn_Pat* f2; } ; struct Cyc_FieldPattern_tok_struct{ char* tag;
+struct _tuple9* f1; } ; extern char Cyc_FieldPatternList_tok[ 25u]; struct Cyc_FieldPatternList_tok_struct{
+char* tag; struct Cyc_List_List* f1; } ; extern char Cyc_BlockItem_tok[ 18u];
+struct Cyc_BlockItem_tok_struct{ char* tag; void* f1; } ; extern char Cyc_Kind_tok[
+13u]; struct Cyc_Kind_tok_struct{ char* tag; void* f1; } ; extern char Cyc_Attribute_tok[
+18u]; struct Cyc_Attribute_tok_struct{ char* tag; void* f1; } ; extern char Cyc_AttributeList_tok[
+22u]; struct Cyc_AttributeList_tok_struct{ char* tag; struct Cyc_List_List* f1;
+} ; extern char Cyc_Enumfield_tok[ 18u]; struct Cyc_Enumfield_tok_struct{ char*
+tag; struct Cyc_Absyn_Enumfield* f1; } ; extern char Cyc_EnumfieldList_tok[ 22u];
+struct Cyc_EnumfieldList_tok_struct{ char* tag; struct Cyc_List_List* f1; } ;
+extern char Cyc_Scope_tok[ 14u]; struct Cyc_Scope_tok_struct{ char* tag; void*
+f1; } ; struct Cyc_Yyltype{ int timestamp; int first_line; int first_column; int
+last_line; int last_column; struct _tagged_string text; } ; typedef struct Cyc_Yyltype
+Cyc_yyltype; extern int Cyc_String_zstrptrcmp( struct _tagged_string*, struct
+_tagged_string*); extern char Cyc_Tcutil_TypeErr[ 12u]; extern void Cyc_Tcutil_terr(
+struct Cyc_Position_Segment*, struct _tagged_string); extern void* Cyc_Tcutil_compress(
+void* t); extern int Cyc_Tcutil_is_function_type( void* t); extern char Cyc_Tcdecl_Incompatible[
+17u]; extern void Cyc_Tcdecl_merr( struct Cyc_Position_Segment* loc, struct
 _tagged_string* msg0, struct _tagged_string msg1); extern struct Cyc_Absyn_Structdecl*
 Cyc_Tcdecl_merge_structdecl( struct Cyc_Absyn_Structdecl* d0, struct Cyc_Absyn_Structdecl*
 d1, struct Cyc_Position_Segment* loc, struct _tagged_string* msg); extern struct
@@ -1041,7 +1041,7 @@ if( Cyc_Interface_check_public_typedefdecl( _temp363, d)){ _temp367->typedefdecl
 struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict* d, struct _tagged_string* key,
 struct Cyc_Absyn_Typedefdecl* data)) Cyc_Dict_insert)( _temp367->typedefdecls, x,
 d);}} static void Cyc_Interface_extract_ordinarie( struct _tuple11* env, struct
-_tagged_string* x, struct _tuple7* v){ struct _tuple11 _temp373; struct Cyc_Interface_Seen*
+_tagged_string* x, struct _tuple4* v){ struct _tuple11 _temp373; struct Cyc_Interface_Seen*
 _temp374; int _temp376; struct Cyc_Interface_Ienv* _temp378; struct Cyc_Interface_Ienv*
 _temp380; struct _tuple11* _temp371= env; _temp373=* _temp371; _LL381: _temp380=
 _temp373.f1; goto _LL379; _LL379: _temp378= _temp373.f2; goto _LL377; _LL377:
@@ -1118,7 +1118,7 @@ d)) Cyc_Dict_iter_c)( Cyc_Interface_extract_enumdecl,& env, ge->enumdecls);((
 void(*)( void(* f)( struct _tuple11*, struct _tagged_string*, struct Cyc_Absyn_Typedefdecl*),
 struct _tuple11* env, struct Cyc_Dict_Dict* d)) Cyc_Dict_iter_c)( Cyc_Interface_extract_typedef,&
 env, ge->typedefs);(( void(*)( void(* f)( struct _tuple11*, struct
-_tagged_string*, struct _tuple7*), struct _tuple11* env, struct Cyc_Dict_Dict* d))
+_tagged_string*, struct _tuple4*), struct _tuple11* env, struct Cyc_Dict_Dict* d))
 Cyc_Dict_iter_c)( Cyc_Interface_extract_ordinarie,& env, ge->ordinaries);}}
 static struct Cyc_Interface_I* Cyc_Interface_gen_extract( struct Cyc_Dict_Dict*
 ae, int check_complete_defs){ struct _tuple12 env=({ struct _tuple12 _temp436;

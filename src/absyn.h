@@ -517,6 +517,7 @@ namespace Absyn {
     list_t<tvar_t>             tvs;
     list_t<$(tqual_t,type_t)@> typs;
     seg_t                      loc;
+    scope_t                    sc; // only relevant for xtunions
   };
 
   EXTERN_ABSYN struct Tuniondecl {

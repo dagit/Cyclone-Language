@@ -447,7 +447,7 @@ doc_t ntyp2doc(type_t t) {
     case &UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
       fallthru(tname,is_x,fname);
     case &KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x),
-			   &Tunionfield(fname,_,_,_)):
+			   &Tunionfield(fname,_,_,_,_)):
       let kw = text(is_x ? "xtunion " : "tunion ");
       s = cat4(kw, qvar2doc(tname),text("."),textptr((*fname)[1]));
       break;
@@ -1657,7 +1657,7 @@ doc_t structfields2doc(list_t<structfield_t> fields) {
 }
 
 doc_t tunionfield2doc(tunionfield_t f) {
-  return cat3(typedef_name2doc(f->name),
+  return cat4(scope2doc(f->sc), typedef_name2doc(f->name),
 	      (f->tvs==null)?nil_doc(): ktvars2doc(f->tvs),
 	      (f->typs==null)?nil_doc():args2doc(f->typs));
 }
