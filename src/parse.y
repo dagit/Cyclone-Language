@@ -75,6 +75,11 @@ namespace Lex {
   extern void leave_using();
 }
 
+// State that we thread through the lexer and parser.
+#define YYLEX_PARAM_ARG Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>>
+#define YYLEX_ARG yylex_buf
+#define YYPARSE_PARAM_ARG Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> yylex_buf
+
 #define LOC(s,e) Position::segment_of_abs(s.first_line,e.last_line)
 #define DUMMYLOC NULL
 
@@ -126,7 +131,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
   apply_tms(tqual_t,type_t,list_t<attribute_t,`H>,list_t<type_modifier_t>);
 
 ////////////////// global state (we're not re-entrant) ////////////////
-opt_t<Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>>> lbuf = NULL;
+  //opt_t<Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>>> lbuf = NULL;
 static list_t<decl_t> parse_result = NULL;
 
 //////////////////// Error functions ///////////////////////
@@ -260,7 +265,7 @@ static void set_vartyp_kind(type_t t, kind_t k) {
 }
 
 // Convert an old-style function into a new-style function
-static list_t<type_modifier_t> oldstyle2newstyle(list_t<type_modifier_t,`H> tms,
+static list_t<type_modifier_t> oldstyle2newstyle(list_t<type_modifier_t<`H>,`H> tms,
 						 list_t<decl_t> tds, 
 						 seg_t loc) {
   // Not an old-style function
@@ -478,13 +483,13 @@ static $(type_t,opt_t<decl_t>)
         switch (d->r) {
         case &Aggr_d(ad):
           let args = List::map(tvar2typ,List::map(copy_tvar,ad->tvs));
-          t = new AggrType(AggrInfo(new UnknownAggr(ad->kind,ad->name),args));
+          t = new AggrType(AggrInfo(UnknownAggr(ad->kind,ad->name),args));
           if (ad->impl!=NULL) declopt = new Opt(d);
 	  break;
         case &Tunion_d(tud):
           let args = List::map(tvar2typ,List::map(copy_tvar,tud->tvs));
           opt_t<type_t> ropt = tud->is_flat ? NULL : new Opt(HeapRgn);
-          t = new TunionType(TunionInfo(new KnownTunion(new tud),args,ropt));
+          t = new TunionType(TunionInfo(KnownTunion(new tud),args,ropt));
 	  if(tud->fields != NULL) declopt = new Opt(d);
 	  break;
         case &Enum_d(ed):
@@ -506,12 +511,18 @@ static $(type_t,opt_t<decl_t>)
   } else {
     if(seen_sign)
       switch (t) {
-      case &IntType(_,sz2): t = new IntType(sgn,sz2); break;
+      case &IntType(sgn2,sz2): 
+        if (sgn2 != sgn)
+          t = new IntType(sgn,sz2); 
+        break;
       default: err("sign specification on non-integral type",last_loc); break;
       }
     if(seen_size)
       switch (t) {
-      case &IntType(sgn2,_): t = new IntType(sgn2,sz); break;
+      case &IntType(sgn2,sz2): 
+        if (sz2 != sz)
+          t = new IntType(sgn2,sz); 
+        break;
         // hack -- if we've seen "long" then sz will be B8
       case &DoubleType(_): t = new DoubleType(true); break;
       default: err("size qualifier on non-integral type",last_loc); break;
@@ -520,8 +531,8 @@ static $(type_t,opt_t<decl_t>)
   return $(t, declopt);
 }
 
-static list_t<$(qvar_t,tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)@>
-  apply_tmss(tqual_t tq, type_t t,list_t<declarator_t> ds,
+static list_t<$(qvar_t,tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)@`r,`r>
+  apply_tmss(region_t<`r> r, tqual_t tq, type_t t,list_t<declarator_t> ds,
              attributes_t shared_atts)
 {
   if (ds==NULL) return NULL;
@@ -529,8 +540,12 @@ static list_t<$(qvar_t,tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)@>
   let q = d->id;
   let $(tq,new_typ,tvs,atts) = apply_tms(tq,t,shared_atts,d->tms);
   // NB: we copy the type here to avoid sharing definitions
-  return new List(new $(q,tq,new_typ,tvs,atts),
-                  apply_tmss(tq,Tcutil::copy_type(t),ds->tl,shared_atts));
+  // but we avoid the copy when ds->tl is NULL
+  if (ds->tl == NULL) 
+    return rnew(r) List(rnew(r) $(q,tq,new_typ,tvs,atts),NULL);
+  else
+    return rnew(r) List(rnew(r) $(q,tq,new_typ,tvs,atts),
+                    apply_tmss(r,tq,Tcutil::copy_type(t),ds->tl,shared_atts));
 }
 
 static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
@@ -653,7 +668,7 @@ static decl_t v_typ_to_typedef(seg_t loc, $(qvar_t,tqual_t,type_t,list_t<tvar_t,
 
 // given a local declaration and a statement produce a decl statement
 static stmt_t flatten_decl(decl_t d,stmt_t s) {
-  return new_stmt(new Decl_s(d,s),segment_join(d->loc,s->loc));
+  return new_stmt(new Decl_s(d,s),d->loc);
 }
 
 // given a list of local declarations and a statement, produce a big
@@ -671,6 +686,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
 					list_t<$(declarator_t,exp_opt_t)@> ids,
                                         seg_t tqual_loc,
 					seg_t loc) {
+ region mkrgn {
   let &Declaration_spec(_,tq,tss,_,atts) = ds;
   if (tq.loc == NULL) tq.loc = tqual_loc;
   if (ds->is_inline)
@@ -694,7 +710,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
     }
 
   // separate the declarators from their initializers
-  let $(declarators, exprs) = List::split(ids);
+  let $(declarators, exprs) = List::rsplit(mkrgn,mkrgn,ids);
   // check to see if there are no initializers -- useful later on
   bool exps_empty = true;
   for (list_t<exp_opt_t> es = exprs; es != NULL; es = es->tl)
@@ -727,15 +743,15 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
       return new List(d,NULL);
     } else {
       switch (t) {
-      case &AggrType(AggrInfo(&UnknownAggr(k,n),ts)):
+      case &AggrType(AggrInfo(UnknownAggr(k,n),ts)):
 	let ts2 = List::map_c(typ2tvar,loc,ts);
 	let ad  = new Aggrdecl(k,s,n,ts2,NULL,NULL);
 	if (atts != NULL) err("bad attributes on type declaration",loc);
 	return new List(new_decl(new Aggr_d(ad),loc),NULL);
-      case &TunionType(TunionInfo(&KnownTunion(tudp),_,_)):
+      case &TunionType(TunionInfo(KnownTunion(tudp),_,_)):
 	if(atts != NULL) err("bad attributes on tunion", loc);
 	return new List(new_decl(new Tunion_d(*tudp),loc),NULL);
-      case &TunionType(TunionInfo(&UnknownTunion(UnknownTunionInfo(n,isx,is_flat)),ts,_)):
+      case &TunionType(TunionInfo(UnknownTunion(UnknownTunionInfo(n,isx,is_flat)),ts,_)):
         let ts2 = List::map_c(typ2tvar,loc,ts);
         let tud = tunion_decl(s, n, ts2, NULL, isx, is_flat, loc);
         if (atts != NULL) err("bad attributes on tunion",loc);
@@ -756,7 +772,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
   } else {
     // declarators != NULL
     type_t t = ts_info[0];
-    let fields = apply_tmss(tq,t,declarators,atts);
+    let fields = apply_tmss(mkrgn,tq,t,declarators,atts);
     if (istypedef) {
       // we can have a nested struct, union, tunion, or xtunion
       // declaration within the typedef as in:
@@ -801,6 +817,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
       return List::imp_rev(decls);
     }
   }
+ }
 }
 
 // Convert an identifier to a kind
@@ -1361,7 +1378,8 @@ kind:
 ;
 
 type_qualifier:
-  CONST    { $$=^$(Tqual(true,false,false,true,LOC(@1,@1))); }
+  CONST    { seg_t loc = (Absyn::porting_c_code) ? LOC(@1,@1) : NULL; 
+             $$=^$(Tqual(true,false,false,true,loc)); }
 | VOLATILE { $$=^$(Tqual(false,true,false,false,NULL)); }
 | RESTRICT { $$=^$(Tqual(false,false,true,false,NULL)); }
 ;
@@ -1408,7 +1426,7 @@ struct_or_union_specifier:
     }
 /* Cyc:  type_params_opt are added */
 | struct_or_union struct_union_name type_params_opt 
-    { $$=^$(type_spec(new AggrType(AggrInfo(new UnknownAggr($1,$2),$3)),
+    { $$=^$(type_spec(new AggrType(AggrInfo(UnknownAggr($1,$2),$3)),
 		      LOC(@1,@3)));
     }
 ;
@@ -1468,12 +1486,15 @@ struct_declaration:
        * declarations.  We must check that each id is actually present
        * and then convert this to a list of struct fields: (1) id,
        * (2) tqual, (3) type. */
-      let &$(tq,tspecs,atts) = $1;
-      if (tq.loc == NULL) tq.loc = LOC(@1,@1);
-      let $(decls, widths) = List::split($2);
-      let t = speclist2typ(tspecs, LOC(@1,@1));
-      let info = List::zip(apply_tmss(tq,t,decls,atts),widths);
-      $$=^$(List::map_c(make_aggr_field,LOC(@1,@2),info));
+      region temp {
+        let &$(tq,tspecs,atts) = $1;
+        if (tq.loc == NULL) tq.loc = LOC(@1,@1);
+        let $(decls, widths) = List::rsplit(temp,temp,$2);
+        let t = speclist2typ(tspecs, LOC(@1,@1));
+        let info = List::rzip(temp,temp,
+                              apply_tmss(temp,tq,t,decls,atts),widths);
+        $$=^$(List::map_c(make_aggr_field,LOC(@1,@2),info));
+      }
     }
 ;
 
@@ -1545,11 +1566,10 @@ tunion_specifier:
                                         $2,$1,LOC(@1,@8))));
     }
 | flat_opt tunion_or_xtunion opt_rgn_opt qual_opt_identifier type_params_opt
-    { $$=^$(type_spec(new TunionType(TunionInfo(new
-                                                UnknownTunion(UnknownTunionInfo($4,$2,$1)), $5, $3)), LOC(@1,@5)));
+    { $$=^$(type_spec(new TunionType(TunionInfo(UnknownTunion(UnknownTunionInfo($4,$2,$1)), $5, $3)), LOC(@1,@5)));
     }
 | flat_opt tunion_or_xtunion opt_rgn_opt qual_opt_identifier '.' qual_opt_identifier type_params_opt
-    { $$=^$(type_spec(new TunionFieldType(TunionFieldInfo(new
+    { $$=^$(type_spec(new TunionFieldType(TunionFieldInfo(
 		  UnknownTunionfield(UnknownTunionFieldInfo($4,$6,$2)),$7)),
 		      LOC(@1,@7)));
     }
@@ -1706,18 +1726,33 @@ one_pointer:
   { list_t<type_modifier_t> ans = NULL;
     if($4 != NULL)
       ans = new List(new Attributes_mod(LOC(@4,@4),$4), ans);
-    let ptrloc = new PtrLoc{.ptr_loc=(*$1)[0],.rgn_loc=LOC(@3,@3),
-                            .zt_loc=LOC(@2,@2)};
+    // don't put location info on every pointer -- too expensive
+    ptrloc_t ptrloc = NULL;
+    if (Absyn::porting_c_code)
+      ptrloc = new PtrLoc{.ptr_loc=(*$1)[0],.rgn_loc=LOC(@3,@3),
+                          .zt_loc=LOC(@2,@2)};
     ans = new List(new Pointer_mod(PtrAtts($3,(*$1)[1],(*$1)[2],$2,ptrloc),$5), ans);
     $$ = ^$(ans);
   }
 
 pointer_null_and_bound:
-  '*' pointer_bound { $$=^$(new $(LOC(@1,@1),true_conref, $2)); }
-| '@' pointer_bound { $$=^$(new $(LOC(@1,@1), false_conref, $2)); }
-| '?' { $$=^$(new $(LOC(@1,@1), true_conref,  bounds_dynforward_conref));  }
+  '*' pointer_bound 
+   { // avoid putting location info on here when not porting C code
+     seg_t loc = (Absyn::porting_c_code) ? LOC(@1,@1) : NULL;
+     $$=^$(new $(loc,true_conref, $2)); 
+   }
+| '@' pointer_bound 
+  {  seg_t loc = (Absyn::porting_c_code) ? LOC(@1,@1) : NULL;
+     $$=^$(new $(loc, false_conref, $2)); 
+  }
+| '?' 
+  { seg_t loc = (Absyn::porting_c_code) ? LOC(@1,@1) : NULL; 
+    $$=^$(new $(loc, true_conref,  bounds_dynforward_conref));  
+  }
 | '?' '-' 
-      { $$=^$(new $(LOC(@1,@1), true_conref,  bounds_dyneither_conref));  }
+  { seg_t loc = (Absyn::porting_c_code) ? LOC(@1,@1) : NULL; 
+    $$=^$(new $(loc, true_conref,  bounds_dyneither_conref));  
+  }
 
 pointer_bound:
 /* empty */ { $$=^$(bounds_one_conref); }
@@ -2410,7 +2445,7 @@ pattern:
 | qual_opt_identifier '{' type_params_opt field_pattern_list '}'
    {  let $(fps, dots) = *($4); 
       let exist_ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
-      $$=^$(new_pat(new Aggr_p(AggrInfo(new UnknownAggr(StructA,$1),NULL),
+      $$=^$(new_pat(new Aggr_p(AggrInfo(UnknownAggr(StructA,$1),NULL),
 			       exist_ts,fps,dots),LOC(@1,@5)));
    }
 | '&' pattern
@@ -2747,7 +2782,7 @@ field_name:
 // Hack for parsing >> as two > when dealing with nested type-parameter lists
 right_angle:
   '>' {}
-| RIGHT_OP { lbuf->v->lex_curr_pos -= 1; }
+| RIGHT_OP { yylex_buf->lex_curr_pos -= 1; }
 %%
 
 void yyprint(int i, tunion YYSTYPE v) {
@@ -2773,8 +2808,7 @@ void yyprint(int i, tunion YYSTYPE v) {
 namespace Parse{
 list_t<decl_t> parse_file(FILE @`H f) {
   parse_result = NULL;
-  lbuf = new Opt(Lexing::from_file(f));
-  yyparse();
+  yyparse(Lexing::from_file(f));
   return parse_result;
 }
 }

@@ -89,16 +89,16 @@ static cf_stmt_annot_t @ get_stmt_annot(stmt_t s) {
 // Note: w/o passing down whether we're in a "pointer context", we'll 
 // unnecessarily escape points-to on branches of conditional expressions.
 // Note: for *(e1 ? e2 : e3) we're requiring e2 and e3 to be all-init.
-struct AnalEnv {
+struct AnalEnv<`r::R> {
   bool          iterate_again; // set to true when a visited flow is updated
   int           iteration_num; // update annotations with this on each visit
   bool          in_try;      // an optimization for the common case
   flow_t        tryflow;     // updated by any flow change while in a try-block.
   place_set_t * all_changed; // NULL for "not in unorderd so don't bother"
   bool          noreturn;    // true when function is "noreturn"
-  list_t<place_t> param_roots;
+  list_t<place_t,`r> param_roots;
 };
-typedef struct AnalEnv @ analenv_t;
+typedef struct AnalEnv<`r> @`r analenv_t<`r>;
 
 static flow_t              anal_stmt(analenv_t, flow_t, stmt_t);
 static flow_t              anal_decl(analenv_t, flow_t, decl_t);
@@ -114,6 +114,29 @@ static cf_stmt_annot_t@ pre_stmt_check(analenv_t env, flow_t inflow, stmt_t s){
   // in an unordered position!
   annot->visited = env->iteration_num;
   return annot;
+}
+
+static int get_field_index_fs(list_t<aggrfield_t> fs, field_name_t f) {
+  int n = 0;
+  for (; fs; fs = fs->tl) {
+    let f2 = fs->hd->name;
+    if (strptrcmp(f2,f) == 0) return n;
+    n = n+1;
+  }
+  throw new Core::Impossible(aprintf("get_field_index_fs failed: %s",*f));
+}
+
+static int get_field_index(type_t t, field_name_t f) {
+  switch (Tcutil::compress(t)) {
+  case &AggrType(AggrInfo(info,_)):
+    let fs = get_known_aggrdecl(info)->impl->fields;
+    fallthru(fs);
+  case &AnonAggrType(_,fs):
+    return get_field_index_fs(fs, f);
+  default: 
+    throw new Core::Impossible(aprintf("get_field_index failed: %s",
+                                       Absynpp::typ2string(t)));
+  }
 }
 
 // Sound KLUDGE: The changed should go on the destination, but it's easier
@@ -202,7 +225,7 @@ static flow_t use_Rval(analenv_t env, seg_t loc, flow_t inflow, absRval_t r){
     if(initlevel(d,r) != AllIL)
       Tcutil::terr(loc,"expression may not be fully initialized");
     let ans_d = escape_deref(d, env->all_changed, r);
-    if(d == ans_d) return inflow;
+    if(d.t == ans_d.t) return inflow;
     let ans = ReachableFL(ans_d,relns,cinfo);
     update_tryflow(env, ans);
     return ans;
@@ -555,7 +578,8 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     return $(f,r);
 
   case &Increment_e(e1,_):   
-    let $(f,_) = anal_use_ints(env,inflow,list(e1),false);
+    let arg = List{e1,NULL};
+    let $(f,_) = anal_use_ints(env,inflow,&arg,false);
     check_unique_rvals(e1->loc,f);
     let $(_,lval) = anal_Lexp(env,f,e1);
     switch($(lval,f)) {
@@ -570,7 +594,9 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     return $(f,unknown_all);
 
   case &AssignOp_e(l,&_,r): 
-    let $(f,_) = anal_use_ints(env,inflow,list(l,r),true);
+    let arg2 = List{r,NULL};
+    let arg1 = List{l,&arg2};
+    let $(f,_) = anal_use_ints(env,inflow,&arg1,true);
     let $(_,lval) = anal_Lexp(env,f,e);
     f = consume_unique_rvals(e->loc,f); // consume the rhs of the assignment
     switch($(lval,f)) {
@@ -604,7 +630,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 	// certain loop-based errors).
 	if (env->all_changed == NULL) {
 	  let c = Dict::delete(cinfo.consumed,p);
-	  if (cinfo.consumed != c)
+	  if (cinfo.consumed.t != c.t)
 	    DEBUG_PRINT("  assign lhs; unconsumed |%s|\n",
 			Absynpp::exp2string(l));
 	  cinfo.consumed = c;
@@ -706,7 +732,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 	      //   member from the flow on certain loop-based errors).
 	      if (env->all_changed == NULL) {
 		let c = Dict::delete(cinfo.consumed,p);
-		if (cinfo.consumed != c)
+		if (cinfo.consumed.t != c.t)
 		  DEBUG_PRINT("  assign lhs; unconsumed |%s|\n",
 			      Absynpp::exp2string(e1));
 		cinfo.consumed = c;
@@ -878,9 +904,13 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     //   pointer, I think ...
     if(is_union_type(e1->topt->v))
       return $(f,typ_to_absrval(e->topt->v,unknown_all)); 
-    switch(r) {
-    case &Aggregate(rdict): return $(f,Dict::lookup(rdict,field));
-    default: throw new Core::Impossible("anal_Rexp: AggrMember");
+    switch (r) {
+    case &Aggregate(rdict):
+      let field_no = get_field_index(e1->topt->v,field);
+      return $(f,rdict[field_no]);
+    default: 
+      throw new Core::Impossible(aprintf("anal_Rexp: AggrMember: %s",
+                                         Absynpp::exp2string(e)));
     }
     
   case &AggrArrow_e(e1,field): // composition of * and ., of course
@@ -891,13 +921,14 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     case &PointerType(PtrInfo{t2,_,_}):
       if(is_union_type(t2))
 	return $(f2,typ_to_absrval(e->topt->v,unknown_all)); 
-      break;
+      switch (r2) {
+      case &Aggregate(rdict):
+        let field_no = get_field_index(t2,field);
+        return $(f2,rdict[field_no]);
+      default: throw new Core::Impossible("anal_Rexp: AggrArrow");
+      }  
     default: throw new Core::Impossible("anal_Rexp: AggrArrow ptr");
     }
-    switch(r2) {
-    case &Aggregate(rdict): return $(f2,Dict::lookup(rdict,field));
-    default: throw new Core::Impossible("anal_Rexp: AggrArrow");
-    }  
       
   case &Conditional_e(e1,e2,e3): 
     let $(f1t,f1f) = anal_test(env,inflow,e1);
@@ -948,17 +979,17 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
       default: break;
       }
       switch(Tcutil::compress(e1->topt->v)) {
-      case &TupleType(_):
+      case &TupleType(tqts):
         switch(rvals->hd) {
         case &Aggregate(rdict): 
-          return $(f2,Dict::lookup(rdict,
-                                   fieldname(Evexp::eval_const_uint_exp(e2)[0])));
+          unsigned int i = Evexp::eval_const_uint_exp(e2)[0];
+          return $(f2,rdict[i]);
         default: throw new Core::Impossible("anal_Rexp: Subscript");
         }
       case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_,_))):
         // translation to C reports "can't prove in bounds" errors
         switch(compress_conref(b)->v) {
-        case &Eq_constr(&AbsUpper_b(_)):
+        case Eq_constr(&AbsUpper_b(_)):
           switch(rvals->tl->hd) {
           case &TagCmps(cl): e2->annot = new HasTagCmps(cl); break;
           default: break;
@@ -992,26 +1023,41 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     region temp {
       let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,es,false);
       f = consume_unique_rvals(e->loc,f); // consume init exprs
-      aggrdict_t aggrdict = empty_aggrdict();
-      for(int i=0; rvals != NULL; rvals = rvals->tl, ++i)
-        aggrdict = Dict::insert(aggrdict, fieldname(i), rvals->hd);
+      aggrdict_t aggrdict = 
+        new {for i < List::length(es) : 
+             ({ let temp = rvals->hd;
+                rvals = rvals->tl;
+                temp; })};
+
       return $(f, new Aggregate(aggrdict));
     }
-  case &AnonStruct_e(_,des): fallthru(des);
-  case &Struct_e(_,_,des,_): 
+  case &AnonStruct_e(_,des): 
+    list_t<Absyn::aggrfield_t> fs;
+    switch (Tcutil::compress(e->topt->v)) {
+    case &AnonAggrType(_,f): fs = f; break;
+    default: throw new Core::Impossible("anal_Rexp:anon struct has bad type");
+    }
+    fallthru(des,fs);
+  case &Struct_e(_,_,des,&Aggrdecl{.impl = &AggrdeclImpl{.fields=fs,...},...}):
     region temp {
       let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,
                                             rmap(temp,Core::snd,des),false);
+      
       f = consume_unique_rvals(e->loc,f); // consume init exprs
-      aggrdict_t aggrdict = empty_aggrdict();
+      aggrdict_t aggrdict = aggrfields_to_aggrdict(fs,unknown_all);
       for(int i=0; rvals != NULL; rvals = rvals->tl, des = des->tl, ++i)
         for(_ ds = (*des->hd)[0]; ds != NULL; ds = ds->tl)
           switch (ds->hd) {
           case &ArrayElement(_): throw new Core::Impossible("anal_Rexp:Struct_e");
-          case &FieldName(fld): aggrdict = Dict::insert(aggrdict, fld, rvals->hd);
+          case &FieldName(fld): 
+            // find the field and update the aggrdict imperatively
+            let field_no = get_field_index_fs(fs,fld);
+            aggrdict[field_no] = rvals->hd;
           }
       return $(f, new Aggregate(aggrdict));
     }
+  case &Struct_e(_,_,_,_):
+    throw new Core::Impossible("anal_Rexp:missing aggrdeclimpl");
   case &Array_e(dles): 
     region temp {
       let es = rmap(temp,Core::snd,dles);
@@ -1137,7 +1183,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 
 static $(flow_t,absLval_t) anal_derefL(analenv_t env, flow_t inflow, flow_t f, 
 				       exp_t e, absRval_t r, 
-				       list_t<field_name_t,`H> flds) {
+				       list_t<int,`H> flds) {
   switch(Tcutil::compress(e->topt->v)) {
   case &PointerType(PtrInfo{elttype,_,PtrAtts(_,_,bd,zt,_)}):
     switch(f) {
@@ -1173,7 +1219,7 @@ static $(flow_t,absLval_t) anal_derefL(analenv_t env, flow_t inflow, flow_t f,
 // in these cases to track any effects.
 // Note: As with anal_Rexp, it's okay to return immediately on BottomFL.
 static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow, 
-					 exp_t e, list_t<field_name_t,`H> flds){
+					 exp_t e, list_t<int,`H> flds){
   flowdict_t d;
   switch(inflow) {
   case BottomFL: return $(BottomFL, UnknownL); // absLval_t irrelvent
@@ -1199,7 +1245,7 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
     switch(Tcutil::compress(e1->topt->v)) {
     case &PointerType(PtrInfo{t2,_,_}):
       if(!is_union_type(t2))
-	flds = new List(f,flds);
+	flds = new List(get_field_index(t2,f),flds);
       break;
     default: throw new Core::Impossible("anal_Rexp: AggrArrow ptr");
     }
@@ -1213,7 +1259,7 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
     // assumes that tuple-projection implies e2 is pure and is evaluable
     switch(Tcutil::compress(e1->topt->v)) {
     case &TupleType(_):
-      let fld = fieldname(Evexp::eval_const_uint_exp(e2)[0]);
+      let fld = Evexp::eval_const_uint_exp(e2)[0];
       return anal_Lexp_rec(env,inflow,e1,new List(fld,flds));
     case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_,_))):
       // by setting the last flag to true, we make sure not to consume
@@ -1235,7 +1281,7 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
         }
         // translation to C reports "can't prove in bounds" errors
         switch(compress_conref(b)->v) {
-        case &Eq_constr(&AbsUpper_b(_)):
+        case Eq_constr(&AbsUpper_b(_)):
           switch(rvals->tl->hd) {
           case &TagCmps(cl): e2->annot = new HasTagCmps(cl); break;
           default: break;
@@ -1255,7 +1301,8 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
   case &AggrMember_e(e1,fld): 
     if(is_union_type(e1->topt->v))
       return $(inflow,UnknownL);
-    return anal_Lexp_rec(env,inflow,e1,new List(fld,flds)); 
+    return anal_Lexp_rec(env,inflow,e1,
+                         new List(get_field_index(e1->topt->v,fld),flds)); 
 
   default: return $(BottomFL, UnknownL); // see comment before function
   }
@@ -1824,9 +1871,10 @@ static void check_fun(fndecl_t fd) {
 static void check_nested_fun(flow_t inflow, fndecl_t fd) {
   //fprintf(stderr,"checking %s of type %s\n",*(*fd->name)[1],
   //        Absynpp::typ2string(Tcutil::fndecl2typ(fd)));
+  region frgn {
   let loc = fd->body->loc;
   inflow = add_vars(inflow, fd->param_vardecls->v, unknown_all, loc);
-  let param_roots = NULL; // only for "initializes"
+  list_t<place_t,`frgn> param_roots = NULL; // only for "initializes"
   switch(inflow) {
   case BottomFL: Tcutil::impos("check_fun");
   case ReachableFL(d,relns,cinfo):
@@ -1862,7 +1910,7 @@ static void check_nested_fun(flow_t inflow, fndecl_t fd) {
 	  let rp = new Place(r,NULL);
 	  d = Dict::insert(d,r,typ_to_absrval(t,esc_none));
 	  d = Dict::insert(d,new VarRoot(vd),new AddressOf(rp));
-	  param_roots = new List(rp,param_roots);
+	  param_roots = rnew(frgn) List(rp,param_roots);
 	  break;
 	default: Tcutil::terr(loc, "initializes attribute on non-pointer");
 	}
@@ -1873,7 +1921,7 @@ static void check_nested_fun(flow_t inflow, fndecl_t fd) {
   }
 
   bool      noreturn = Tcutil::is_noreturn(Tcutil::fndecl2typ(fd));
-  analenv_t env = new AnalEnv(true,0,false,inflow,NULL,noreturn,param_roots);
+  analenv_t env = rnew(frgn) AnalEnv(true,0,false,inflow,NULL,noreturn,param_roots);
   flow_t    outflow  = inflow;
   while(env->iterate_again && !Position::error_p()) {
     ++(env->iteration_num);
@@ -1903,7 +1951,7 @@ static void check_nested_fun(flow_t inflow, fndecl_t fd) {
       }
     break;
   }
-
+  } // end of frgn
   postpass(fd->body);
 }
 

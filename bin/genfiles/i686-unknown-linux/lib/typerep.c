@@ -693,13 +693,14 @@ _dynforward_ptr);extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenErro
 struct Cyc_FileOpenError_struct{char*tag;struct _dynforward_ptr f1;};struct Cyc_List_List{
 void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];extern char
 Cyc_List_Nth[8];struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};
-int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc_Dict_Dict;extern char Cyc_Dict_Present[
+int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc_Dict_T;struct Cyc_Dict_Dict{
+int(*rel)(void*,void*);struct _RegionHandle*r;struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[
 12];extern char Cyc_Dict_Absent[11];struct _tuple5{void*f1;void*f2;};struct _tuple5*
-Cyc_Dict_rchoose(struct _RegionHandle*r,struct Cyc_Dict_Dict*d);struct _tuple5*Cyc_Dict_rchoose(
-struct _RegionHandle*,struct Cyc_Dict_Dict*d);int Cyc_strcmp(struct _dynforward_ptr
-s1,struct _dynforward_ptr s2);struct _tuple4 Cyc_Typerep_tuple_tl(void*typ){void*
-_tmp0=typ;unsigned int _tmp1;struct _dynforward_ptr _tmp2;_LL1: if(_tmp0 <= (void*)2)
-goto _LL3;if(*((int*)_tmp0)!= 4)goto _LL3;_tmp1=((struct Cyc_Typerep_Tuple_struct*)
+Cyc_Dict_rchoose(struct _RegionHandle*r,struct Cyc_Dict_Dict d);struct _tuple5*Cyc_Dict_rchoose(
+struct _RegionHandle*,struct Cyc_Dict_Dict d);int Cyc_strcmp(struct _dynforward_ptr s1,
+struct _dynforward_ptr s2);struct _tuple4 Cyc_Typerep_tuple_tl(void*typ){void*_tmp0=
+typ;unsigned int _tmp1;struct _dynforward_ptr _tmp2;_LL1: if(_tmp0 <= (void*)2)goto
+_LL3;if(*((int*)_tmp0)!= 4)goto _LL3;_tmp1=((struct Cyc_Typerep_Tuple_struct*)
 _tmp0)->f1;_tmp2=((struct Cyc_Typerep_Tuple_struct*)_tmp0)->f2;_LL2: if(
 _get_dynforward_size(_tmp2,sizeof(struct _tuple1*))< 2)goto _LL4;{int pos1=(int)(*(*((
 struct _tuple1**)_check_dynforward_subscript(_tmp2,sizeof(struct _tuple1*),1)))).f1;

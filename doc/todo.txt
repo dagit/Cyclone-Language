@@ -13,6 +13,14 @@ CONFIGURATION BUGS:
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
+* We allow comparisons between things like structs or flattened tunions
+which then barfs at the C level.
+
+* There's a weird ordering bug with declaring __flat__ tunions.
+
+* We still get warnings on some flat tunion patterns at the C level
+(assignment makes integer from pointer without a cast.)
+
 * Variables do not shadow typedef's properly.  For instance:
 
   typedef int foo;

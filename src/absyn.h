@@ -87,7 +87,7 @@ namespace Absyn {
 
   // forward declarations
   EXTERN_ABSYN struct Conref<`a>;
-  EXTERN_ABSYN tunion Constraint<`a>;
+  EXTERN_ABSYN __flat__ tunion Constraint<`a>;
   EXTERN_ABSYN __flat__ tunion Cnst;
 
   // typedefs -- in general, we define foo_t to be struct Foo@ or tunion Foo.
@@ -111,8 +111,6 @@ namespace Absyn {
   typedef struct AggrInfo aggr_info_t;
   typedef struct ArrayInfo array_info_t;
   typedef tunion Type type_t, rgntype_t;
-  typedef tunion Funcparams funcparams_t;
-  typedef tunion Type_modifier type_modifier_t;
   typedef tunion Cnst cnst_t;
   typedef tunion Primop primop_t;
   typedef tunion Incrementor incrementor_t;
@@ -164,7 +162,7 @@ namespace Absyn {
     bool q_volatile; 
     bool q_restrict; 
     bool real_const;
-    seg_t loc;
+    seg_t loc; // only present when porting C code
   };
 
   EXTERN_ABSYN tunion Size_of { 
@@ -190,10 +188,10 @@ namespace Absyn {
 
   // constraint refs are used during unification to figure out what
   // something should be when it's under-specified
-  EXTERN_ABSYN struct Conref<`a> { constraint_t<`a> v; };
-  EXTERN_ABSYN tunion Constraint<`a> { 
+  EXTERN_ABSYN __flat__ tunion Constraint<`a> { 
     Eq_constr(`a), Forward_constr(conref_t<`a>), No_constr 
   };
+  EXTERN_ABSYN struct Conref<`a> { tunion Constraint<`a> v; };
 
   // kind bounds are used on tvar's to infer their kinds
   //   Eq_kb(k):  the tvar has kind k
@@ -233,7 +231,8 @@ namespace Absyn {
     conref_t<bool>     nullable;  // type admits NULL (* vs. @)
     conref_t<bounds_t> bounds;    // legal bounds for pointer indexing
     conref_t<bool>     zero_term; // true => zero terminated array
-    ptrloc_t           ptrloc;    // location information
+    ptrloc_t           ptrloc;    // location information -- only present
+                                  // when porting C code
   };
 
   // information about a pointer type
@@ -277,7 +276,7 @@ namespace Absyn {
     bool   is_xtunion; // true -> xtunion, false -> tunion
     bool   is_flat;       // only used when we have an abstract union decl
   };
-  EXTERN_ABSYN tunion TunionInfoU {
+  EXTERN_ABSYN __flat__ tunion TunionInfoU {
     UnknownTunion(struct UnknownTunionInfo); // don't know definition yet
     KnownTunion(tuniondecl_t@);              // known definition
   };
@@ -293,7 +292,7 @@ namespace Absyn {
     qvar_t field_name;    // name of the tunion field
     bool   is_xtunion;    // true -> xtunion, false -> tunion
   };
-  EXTERN_ABSYN tunion TunionFieldInfoU {
+  EXTERN_ABSYN __flat__ tunion TunionFieldInfoU {
     UnknownTunionfield(struct UnknownTunionFieldInfo);
     KnownTunionfield(tuniondecl_t, tunionfield_t);
   };
@@ -302,7 +301,7 @@ namespace Absyn {
     list_t<type_t>          targs;
   };
 
-  EXTERN_ABSYN tunion AggrInfoU {
+  EXTERN_ABSYN __flat__ tunion AggrInfoU {
     UnknownAggr(aggr_kind_t,typedef_name_t);
     KnownAggr(aggrdecl_t@);
   };
@@ -374,6 +373,7 @@ namespace Absyn {
               opt_t<type_t>,                           // effect
               list_t<$(type_t,type_t)@>);              // region partial order
   };
+  typedef tunion `r Funcparams funcparams_t<`r>;
 
   // Used in attributes below.
   EXTERN_ABSYN tunion Format_Type { Printf_ft, Scanf_ft };
@@ -410,14 +410,15 @@ namespace Absyn {
   };
 
   // Type modifiers are used for parsing/pretty-printing
-  EXTERN_ABSYN tunion Type_modifier {
+  EXTERN_ABSYN tunion Type_modifier<`r::R> {
     Carray_mod(conref_t<bool>,seg_t); // [], conref controls zero-term
     ConstArray_mod(exp_t,conref_t<bool>,seg_t); // [c], conref controls zero-term
     Pointer_mod(ptr_atts_t,tqual_t); // qualifer for the point (**not** elts)
-    Function_mod(funcparams_t);
+    Function_mod(funcparams_t<`r>);
     TypeParams_mod(list_t<tvar_t>,seg_t,bool);// when bool is true, print kinds
     Attributes_mod(seg_t,attributes_t);
   };
+  typedef tunion `r Type_modifier<`r> type_modifier_t<`r>;
 
   // Constants
   EXTERN_ABSYN __flat__ tunion Cnst {

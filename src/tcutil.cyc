@@ -188,8 +188,8 @@ static list_t<type_t> copy_types(list_t<type_t> ts) {
 static conref_t<`a> copy_conref(conref_t<`a> c) {
   switch (c->v) {
   case No_constr: return empty_conref();
-  case &Eq_constr(x): return new_conref(x);
-  case &Forward_constr(cr): return copy_conref(cr);
+  case Eq_constr(x): return new_conref(x);
+  case Forward_constr(cr): return copy_conref(cr);
   }
 }
 static kindbound_t copy_kindbound(kindbound_t kb) {
@@ -263,10 +263,10 @@ type_t copy_type(type_t t) {
     return new FnType(FnInfo{tvs2,effopt2,rt2,args2,c_varargs2,
                                cyc_varargs2,rgn_po2,atts2});
   case &TupleType(tqts): return new TupleType(List::map(copy_tqt,tqts));
-  case &AggrType(AggrInfo(&UnknownAggr(k,n),ts)):
-    return new AggrType(AggrInfo(new UnknownAggr(k,n),copy_types(ts)));
-  case &AggrType(AggrInfo(&KnownAggr(adp),ts)):
-    return new AggrType(AggrInfo(new KnownAggr(adp),copy_types(ts)));
+  case &AggrType(AggrInfo(UnknownAggr(k,n),ts)):
+    return new AggrType(AggrInfo(UnknownAggr(k,n),copy_types(ts)));
+  case &AggrType(AggrInfo(KnownAggr(adp),ts)):
+    return new AggrType(AggrInfo(KnownAggr(adp),copy_types(ts)));
   case &AnonAggrType(k,fs): return new AnonAggrType(k,List::map(copy_field,fs));
   case &EnumType(tdn,fs): return new EnumType(tdn,fs);
   case &AnonEnumType(fs): return new AnonEnumType(List::map(copy_enumfield,fs));
@@ -328,22 +328,22 @@ kind_t typ_kind(type_t t) {
   case &RgnHandleType(_): return BoxKind; 
   case UniqueRgn:
   case HeapRgn:           return RgnKind;
-  case &TunionType(TunionInfo{&UnknownTunion(uti),...}):
+  case &TunionType(TunionInfo{UnknownTunion(uti),...}):
     // flat tunions always have MemKind -- they're like structs.
     if (uti.is_flat) return MemKind; else return BoxKind;
-  case &TunionType(TunionInfo{&KnownTunion(&tud),...}):
+  case &TunionType(TunionInfo{KnownTunion(&tud),...}):
     if (tud->is_flat) return MemKind; else return BoxKind;
-  case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(tud,tuf),_)):
+  case &TunionFieldType(TunionFieldInfo(KnownTunionfield(tud,tuf),_)):
     if (tud->is_flat) return MemKind;
     else if(tuf->typs == NULL) return BoxKind;
     else return MemKind;
-  case &TunionFieldType(TunionFieldInfo(&UnknownTunionfield(_),_)):
+  case &TunionFieldType(TunionFieldInfo(UnknownTunionfield(_),_)):
     impos("typ_kind: Unresolved TunionFieldType");
     // for structs, unions, or enums without definitions, we must be 
     // conservative and treat them as having AnyKind
   case &EnumType(_,NULL):     
-  case &AggrType(AggrInfo(&UnknownAggr(_,_),_)): return AnyKind;
-  case &AggrType(AggrInfo(&KnownAggr(& &Aggrdecl(_,_,_,_,i,_)),_)):    
+  case &AggrType(AggrInfo(UnknownAggr(_,_),_)): return AnyKind;
+  case &AggrType(AggrInfo(KnownAggr(& &Aggrdecl(_,_,_,_,i,_)),_)):    
     return (i==NULL ? AnyKind : MemKind);
   case &AnonAggrType(_,_):    
   case &AnonEnumType(_):   return MemKind;
@@ -352,11 +352,11 @@ kind_t typ_kind(type_t t) {
   case &PointerType(pinfo):
     switch (compress_conref(pinfo.ptr_atts.bounds)->v) {
     case No_constr: // be conservative, in case later constrained with DynForward_b or DynEither_b
-    case &Eq_constr(DynForward_b): return MemKind;
-    case &Eq_constr(DynEither_b): return MemKind;
-    case &Eq_constr(&Upper_b(_)): 
-    case &Eq_constr(&AbsUpper_b(_)): return BoxKind;
-    case &Forward_constr(_): impos("typ_kind: forward constr in ptr bounds");
+    case Eq_constr(DynForward_b): return MemKind;
+    case Eq_constr(DynEither_b): return MemKind;
+    case Eq_constr(&Upper_b(_)): 
+    case Eq_constr(&AbsUpper_b(_)): return BoxKind;
+    case Forward_constr(_): impos("typ_kind: forward constr in ptr bounds");
     }
   case &SizeofType(_): return BoxKind;
   case &TypeInt(_): return IntKind;
@@ -423,7 +423,7 @@ static void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
     occurs(evar,r,env,pinfo.elt_typ); 
     occurs(evar,r,env,pinfo.ptr_atts.rgn); 
     switch(compress_conref(pinfo.ptr_atts.bounds)->v) {
-    case &Eq_constr(&AbsUpper_b(s)): occurs(evar,r,env,s); break;
+    case Eq_constr(&AbsUpper_b(s)): occurs(evar,r,env,s); break;
     default: break;
     }
     break;
@@ -513,19 +513,19 @@ static void unify_it_conrefs(int cmp(`a,`a), conref_t<`a> x, conref_t<`a> y,
   y = compress_conref(y);
   if (x == y) return;
   switch (x->v) {
-  case No_constr: x->v = new Forward_constr(y); return;
-  case &Eq_constr(xv):
+  case No_constr: x->v = Forward_constr(y); return;
+  case Eq_constr(xv):
     switch (y->v) {
     case No_constr: y->v = x->v; return;
-    case &Eq_constr(yv):
+    case Eq_constr(yv):
       if (cmp(xv,yv) != 0) {
         failure_reason = reason;
         throw Unify;
       }
       return;
-    case &Forward_constr(_): impos("unify_conref: forward after compress(2)");
+    case Forward_constr(_): impos("unify_conref: forward after compress(2)");
     }
-  case &Forward_constr(_): impos("unify_conref: forward after compress");
+  case Forward_constr(_): impos("unify_conref: forward after compress");
   }
 }
 
@@ -636,12 +636,14 @@ static type_t rgns_of_field(aggrfield_t af) {
   return rgns_of(af->type);
 }
 
+static tunion Type.TypeInt tizero = TypeInt(0);
+
 static $(tvar_t,type_t)@ region_free_subst(tvar_t tv) {
   type_t t;
   switch (tvar_kind(tv)) {
   case RgnKind: t = HeapRgn;      break;
   case EffKind: t = empty_effect; break;
-  case IntKind: t = new TypeInt(0); break; // FIX: avoid allocation
+  case IntKind: t = &tizero;      break; 
   default:      t = sint_typ;     break; // lives in every kind
   }
   return new $(tv,t);
@@ -689,7 +691,7 @@ static type_t rgns_of(type_t t) {
   case &AnonAggrType(_,fs): 
     return normalize_effect(new JoinEff(map(rgns_of_field,fs)));
   case &SizeofType(t): return rgns_of(t);
-  case &TagType(_): return rgns_of(t);
+  case &TagType(_): return empty_effect;
   case &FnType(FnInfo{tvs,eff,rt,args,_,cyc_varargs,rpo,_}):
     // NOTE:  we define RgnsEff(t) in this case to be the regions in the
     // effect.  So, if the effect is smaller than the argument or return
@@ -1067,7 +1069,7 @@ void unify_it(type_t t1, type_t t2) {
         switch (c->v) {
         case No_constr:
           // set the pointer to be a * or @ to an array of size 1
-          c->v = new Eq_constr(bounds_one);
+          c->v = Eq_constr(bounds_one);
           *ref1_ref = new Opt(t2);
           return;
         default: break;
@@ -1152,8 +1154,8 @@ void unify_it(type_t t1, type_t t2) {
     failure_reason = "(different number of fields for enums)";
     break;
 
-  case $(&TunionType(TunionInfo(&KnownTunion(&tud2),ts2,r2)),
-	 &TunionType(TunionInfo(&KnownTunion(&tud1),ts1,r1))):
+  case $(&TunionType(TunionInfo(KnownTunion(&tud2),ts2,r2)),
+	 &TunionType(TunionInfo(KnownTunion(&tud1),ts1,r1))):
     if(tud2 == tud1 || qvar_cmp(tud2->name,tud1->name) == 0) {
       if (r1 != NULL && r2 != NULL)
         unify_it(r1->v,r2->v);
@@ -1165,8 +1167,8 @@ void unify_it(type_t t1, type_t t2) {
     failure_reason = "(different tunion types)";
     break;
 
-  case $(&TunionFieldType(TunionFieldInfo(&KnownTunionfield(tud2,tuf2),ts2)),
-	 &TunionFieldType(TunionFieldInfo(&KnownTunionfield(tud1,tuf1),ts1))):
+  case $(&TunionFieldType(TunionFieldInfo(KnownTunionfield(tud2,tuf2),ts2)),
+	 &TunionFieldType(TunionFieldInfo(KnownTunionfield(tud1,tuf1),ts1))):
     if((tud2 == tud1 || qvar_cmp(tud2->name,tud1->name)==0)
        && (tuf2 == tuf1 || qvar_cmp(tuf2->name, tuf1->name)==0)) {
       unify_list(ts1,ts2);
@@ -1186,8 +1188,8 @@ void unify_it(type_t t1, type_t t2) {
     unify_it_conrefs(unify_it_bounds,b1,b2,"(different pointer bounds)");
     // Don't force the nullable's to be the same when the bounds are dyn.
     switch (compress_conref(b1)->v) {
-    case &Eq_constr(DynForward_b): return;
-    case &Eq_constr(DynEither_b): return;
+    case Eq_constr(DynForward_b): return;
+    case Eq_constr(DynEither_b): return;
     default: break;
     }
     unify_it_conrefs(intcmp,null1a,null2a,"(incompatible pointer types)");
@@ -1409,13 +1411,13 @@ static int conrefs_cmp(int cmp(`a,`a), conref_t<`a> x, conref_t<`a> y) {
   if (x == y) return 0;
   switch (x->v) {
   case No_constr: return -1;
-  case &Eq_constr(xv):
+  case Eq_constr(xv):
     switch (y->v) {
     case No_constr: return 1;
-    case &Eq_constr(yv): return cmp(xv,yv);
-    case &Forward_constr(_): impos("unify_conref: forward after compress(2)");
+    case Eq_constr(yv): return cmp(xv,yv);
+    case Forward_constr(_): impos("unify_conref: forward after compress(2)");
     }
-  case &Forward_constr(_): impos("unify_conref: forward after compress");
+  case Forward_constr(_): impos("unify_conref: forward after compress");
   }
 }
 
@@ -1509,8 +1511,8 @@ int typecmp(type_t t1, type_t t2) {
   case $(&AnonEnumType(efs1), &AnonEnumType(efs2)):
     return list_cmp(enumfield_cmp,efs1,efs2);
     
-  case $(&TunionType(TunionInfo(&KnownTunion(&tud2),ts2,r2)),
-	 &TunionType(TunionInfo(&KnownTunion(&tud1),ts1,r1))):
+  case $(&TunionType(TunionInfo(KnownTunion(&tud2),ts2,r2)),
+	 &TunionType(TunionInfo(KnownTunion(&tud1),ts1,r1))):
     if(tud1 == tud2) return 0;
     let qc = qvar_cmp(tud1->name,tud2->name);
     if(qc != 0) return qc;
@@ -1521,8 +1523,8 @@ int typecmp(type_t t1, type_t t2) {
     else return 1;
     return list_cmp(typecmp,ts1,ts2);
 
-  case $(&TunionFieldType(TunionFieldInfo(&KnownTunionfield(tud2,tuf2),ts2)),
-	 &TunionFieldType(TunionFieldInfo(&KnownTunionfield(tud1,tuf1),ts1))):
+  case $(&TunionFieldType(TunionFieldInfo(KnownTunionfield(tud2,tuf2),ts2)),
+	 &TunionFieldType(TunionFieldInfo(KnownTunionfield(tud1,tuf1),ts1))):
     if(tud1 == tud2) return 0;
     let qc1 =  qvar_cmp(tud2->name,tud1->name);
     if(qc1 != 0) return qc1;
@@ -1543,8 +1545,8 @@ int typecmp(type_t t1, type_t t2) {
     let zc = conrefs_cmp(intcmp,zt1,zt2);
     if (zc != 0) return zc;
     switch (compress_conref(b1)->v) {
-    case &Eq_constr(DynForward_b): return 0;
-    case &Eq_constr(DynEither_b): return 0;
+    case Eq_constr(DynForward_b): return 0;
+    case Eq_constr(DynEither_b): return 0;
     default: break;
     }
     return conrefs_cmp(intcmp,null1a,null2a);
@@ -1653,17 +1655,20 @@ bool will_lose_precision(type_t t1, type_t t2) {
 bool coerce_list(tenv_t te, type_t t, list_t<exp_t> es) {
   // find the biggest arithmetic type (if any) for the list and determine
   // if all of the elements are boxed.
-  opt_t<type_t> max_arith_type = NULL;
-  for (list_t<exp_t> el = es; el != NULL; el = el->tl) {
-    type_t t1 = compress(el->hd->topt->v);
-    if (is_arithmetic_type(t1)) 
-      if (max_arith_type == NULL || will_lose_precision(t1,max_arith_type->v))
-	max_arith_type = new Opt(t1);
-  }
-  // unify the max arithmetic type with the result type t
-  if (max_arith_type != NULL)
-    if (!unify(t,max_arith_type->v))
+  region r {
+    opt_t<type_t,`r> max_arith_type = NULL;
+    for (list_t<exp_t> el = es; el != NULL; el = el->tl) {
+      type_t t1 = compress(el->hd->topt->v);
+      if (is_arithmetic_type(t1)) 
+        if (max_arith_type == NULL || 
+            will_lose_precision(t1,max_arith_type->v))
+          max_arith_type = rnew(r) Opt(t1);
+    }
+    // unify the max arithmetic type with the result type t
+    if (max_arith_type != NULL)
+      if (!unify(t,max_arith_type->v))
       return false;
+  }
   // now coerce each expression to the type t as if by assignment
   for (list_t<exp_t> el = es; el != NULL; el = el->tl)
     if (!coerce_assign(te,el->hd,t)) {
@@ -1736,7 +1741,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 		       pinfo_a.ptr_atts.nullable,
 		       pinfo_b.ptr_atts.nullable))
       switch(compress_conref(pinfo_a.ptr_atts.nullable)->v) {
-      case &Eq_constr(b): okay = !b; break;
+      case Eq_constr(b): okay = !b; break;
       default: impos("silent_castable conref not eq");
       }
     // can coerce *{e} to ? and *{e1} to *{e2} when e2 <= e1
@@ -1745,7 +1750,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 		       pinfo_b.ptr_atts.bounds))
       switch ($(compress_conref(pinfo_a.ptr_atts.bounds)->v, 
 		compress_conref(pinfo_b.ptr_atts.bounds)->v)) {
-      case $(&Eq_constr(b1), &Eq_constr(b2)):
+      case $(Eq_constr(b1), Eq_constr(b2)):
 	switch ($(b1,b2)) {
 	case $(&Upper_b(_), DynForward_b): // okay regardless of nullable
 	case $(&Upper_b(_), DynEither_b): // okay regardless of nullable
@@ -1816,8 +1821,8 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 
     // allow casting tunion `r1 T<t1,...,tn> to tunion `r2 T<t1,...,tn>
     // when `r1 outlives `r2
-  case $(&TunionType(TunionInfo{&KnownTunion(&tud1),ts1,&Opt(r1)}),
-         &TunionType(TunionInfo{&KnownTunion(&tud2),ts2,&Opt(r2)})):
+  case $(&TunionType(TunionInfo{KnownTunion(&tud1),ts1,&Opt(r1)}),
+         &TunionType(TunionInfo{KnownTunion(&tud2),ts2,&Opt(r2)})):
     if (tud1 != tud2 || !region_outlives(te,r1,r2)) return false;
     for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl)
       if (!unify(ts1->hd,ts2->hd)) return false;
@@ -1835,8 +1840,8 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 
   // can cast a TunionFieldType to a TunionType if the field doesn't 
   // carry values or the TunionType is flat.
-  case $(&TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud1,tuf),ts1}),
-         &TunionType(TunionInfo(&KnownTunion(&tud2),ts2,_))):
+  case $(&TunionFieldType(TunionFieldInfo{KnownTunionfield(tud1,tuf),ts1}),
+         &TunionType(TunionInfo(KnownTunion(&tud2),ts2,_))):
        if ((tud1 == tud2 || qvar_cmp(tud1->name,tud2->name) == 0) 
 	   && (tuf->typs == NULL || tud1->is_flat)) {
 	 for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl)
@@ -1851,10 +1856,10 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
   //   field f carries values and r1==r2 or r1 outlives r2 and T is
   //   not flat.
   case $(&PointerType(PtrInfo(t_a,q_a,PtrAtts(rt_a,null_a,b_a,zt1,_))),
-	 &TunionType(TunionInfo{&KnownTunion(&tud2),ts2,r2}))&&!tud2->is_flat:
+	 &TunionType(TunionInfo{KnownTunion(&tud2),ts2,r2}))&&!tud2->is_flat:
 	   //n2,ts2,r2,_})):
     switch (compress(t_a)) {
-    case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud1,tuf1),ts1}):
+    case &TunionFieldType(TunionFieldInfo{KnownTunionfield(tud1,tuf1),ts1}):
       //n1,ts1,f1,_,tufd}):
       // regions must unify or rt_a must outlive r2
       if (!unify(rt_a,r2->v) && !region_outlives(te,rt_a,r2->v))
@@ -1995,33 +2000,42 @@ bool coerceable(type_t t) {
 // but doing so is tricky because we have to get the padding and
 // alignment right.  This seems to be particularly weird on the
 // x86 -- I need to find precise documentation on it before we do this.
-static $(tqual_t,type_t)@ flatten_typ_f(list_t<$(tvar_t,type_t)@`H,`H> inst,
-					aggrfield_t x) {
-  return new $(x->tq,substitute(inst,x->type));
+static $(tqual_t,type_t)@`r flatten_typ_f($(list_t<$(tvar_t,type_t)@`r,`r>,
+                                             region_t<`r>)@ env,aggrfield_t x){
+  let $(inst,r) = *env;
+  return rnew(r) $(x->tq,rsubstitute(r,inst,x->type));
 }
-static list_t<$(tqual_t,type_t)@> flatten_typ(tenv_t te,type_t t1) {
+static $(tqual_t,type_t)@`r rcopy_tqt(region_t<`r> r,$(tqual_t,type_t)@ x) {
+  let $(tq,t) = *x;
+  return rnew(r) $(tq,t);
+}
+static list_t<$(tqual_t,type_t)@`r,`r> flatten_typ(region_t<`r> r,
+                                                   tenv_t te,type_t t1) {
   t1 = compress(t1);
   switch (t1) {
   case VoidType: return NULL;
-  case &TupleType(tqs): return tqs; // FIX: recursively flatten here
-  case &AggrType(AggrInfo(&KnownAggr(&ad),ts)):
+  case &TupleType(tqs): 
+    return rmap_c(r,rcopy_tqt,r,tqs);// FIX: recursively flatten here
+  case &AggrType(AggrInfo(KnownAggr(&ad),ts)):
     // FIX: to strict with existentials and constraints??
     if(ad->kind==UnionA || ad->impl==NULL 
        || ad->impl->exist_vars != NULL || ad->impl->rgn_po != NULL) 
-      return new List(new $(empty_tqual(NULL),t1),NULL);
-    let inst = List::zip(ad->tvs,ts);
+      return rnew(r) List(rnew(r) $(empty_tqual(NULL),t1),NULL);
+    let inst = List::rzip(r,r,ad->tvs,ts);
     // FIX: recursively flatten here (if alignment allows??)
-    return List::map_c(flatten_typ_f,inst,ad->impl->fields);
+    $(list_t<_,`r>,region_t<`r>) env = $(inst,r);
+    return List::rmap_c(r,flatten_typ_f,&env,ad->impl->fields);
   case &AnonAggrType(StructA,fs):
     // FIX: recursively flatten here (if alignment allows??)
-    return List::map_c(flatten_typ_f,NULL,fs);
+    $(list_t<_,`r>,region_t<`r>) env = $(NULL,r);
+    return List::rmap_c(r,flatten_typ_f,&env,fs);
   case &FnType(fi):
     // NOTE: we consider function types to be qualified with "const" here
     // because you can't get a function value, only a pointer to a function
     // so there's no way to update the value.  This is crucial to achieve
     // subtyping on functions.
-    return new List(new $(const_tqual(NULL),t1),NULL);
-  default: return new List(new $(empty_tqual(NULL),t1),NULL);
+    return rnew(r) List(rnew(r) $(const_tqual(NULL),t1),NULL);
+  default: return rnew(r) List(rnew(r) $(empty_tqual(NULL),t1),NULL);
   }
 }
 
@@ -2094,8 +2108,8 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
 
     // allow tunion `r1 T<t1,...,tn> <= tunion `r2 T<t1,...,tn> when
     // `r1 outlives `r2.
-  case $(&TunionType(TunionInfo{&KnownTunion(&tud1),ts1,&Opt(r1)}),
-         &TunionType(TunionInfo{&KnownTunion(&tud2),ts2,&Opt(r2)})):
+  case $(&TunionType(TunionInfo{KnownTunion(&tud1),ts1,&Opt(r1)}),
+         &TunionType(TunionInfo{KnownTunion(&tud2),ts2,&Opt(r2)})):
     if (tud1 != tud2 || !region_outlives(te,r1,r2)) return false;
     for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl)
       if (!unify(ts1->hd,ts2->hd)) return false;
@@ -2177,19 +2191,21 @@ static bool isomorphic(type_t t1, type_t t2) {
 //   and for each field, either (a) both t1 and t2 have qualifier "const"
 //   and the t1 field is a subtype of the t2 field, or (b) t1 = t2.
 static bool ptrsubtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume, type_t t1, type_t t2) {
-  list_t<$(tqual_t,type_t)@> tqs1 = flatten_typ(te,t1);
-  list_t<$(tqual_t,type_t)@> tqs2 = flatten_typ(te,t2);
-  for (; tqs2 != NULL; tqs2 = tqs2->tl, tqs1 = tqs1->tl) {
-    if (tqs1 == NULL) return false;
-    let &$(tq1,t1a) = tqs1->hd;
-    let &$(tq2,t2a) = tqs2->hd;
+  region temp {
+    list_t<$(tqual_t,type_t)@> tqs1 = flatten_typ(temp,te,t1);
+    list_t<$(tqual_t,type_t)@> tqs2 = flatten_typ(temp,te,t2);
+    for (; tqs2 != NULL; tqs2 = tqs2->tl, tqs1 = tqs1->tl) {
+      if (tqs1 == NULL) return false;
+      let &$(tq1,t1a) = tqs1->hd;
+      let &$(tq2,t2a) = tqs2->hd;
       // FIX: we need to take any qualifiers into account on typedefs
-    if (tq2.real_const && subtype(te,assume,t1a,t2a)) continue;
-    else if (unify(t1a,t2a)) continue;
-    else if (isomorphic(t1a,t2a)) continue;
-    else return false;
+      if (tq2.real_const && subtype(te,assume,t1a,t2a)) continue;
+      else if (unify(t1a,t2a)) continue;
+      else if (isomorphic(t1a,t2a)) continue;
+      else return false;
+    }
+    return true;
   }
-  return true;
 }
 
 static bool is_char_type(type_t t) {
@@ -2516,7 +2532,7 @@ type_t rsubstitute(region_t<`r> rgn,
     let new_r  = rsubstitute(rgn,inst,r);
     let new_b  = b;
     switch(compress_conref(b)->v) {
-    case &Eq_constr(&AbsUpper_b(tb)): 
+    case Eq_constr(&AbsUpper_b(tb)): 
       let new_tb = rsubstitute(rgn,inst,tb);
       if(tb != new_tb)
 	new_b = new_conref(new AbsUpper_b(new_tb));
@@ -2907,7 +2923,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
   case &TunionType(TunionInfo(*info,*targsp,*rgn_opt)):
     let targs = *targsp;
     switch(*info) {
-    case &UnknownTunion(UnknownTunionInfo(n,is_x,is_flat)):
+    case UnknownTunion(UnknownTunionInfo(n,is_x,is_flat)):
       tuniondecl_t@ tudp;
       try tudp = lookup_tuniondecl(te,loc,n);// FIX: lookup_xtuniondecl needed?
       catch { case Dict::Absent:
@@ -2929,9 +2945,9 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       if((*tudp)->is_xtunion != is_x)
 	terr(loc,"[x]tunion is different from type declaration %s",
 			 qvar2string(n));
-      *info = new KnownTunion(tudp);
+      *info = KnownTunion(tudp);
       fallthru(*tudp);
-    case &KnownTunion(&tud):
+    case KnownTunion(&tud):
       // if this is a flat tunion, there shouldn't be a region variable
       if (tud->is_flat && *rgn_opt)
         terr(loc,"flat tunion has region %s",typ2string((*rgn_opt)->v));
@@ -2970,7 +2986,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
 
   case &TunionFieldType(TunionFieldInfo{*info,targs}):
     switch(*info) {
-    case &UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
+    case UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
       tuniondecl_t  tud;
       tunionfield_t tuf;
       try *lookup_tuniondecl(te,loc,tname);//FIX lookup_xtuniondecl needed?
@@ -2999,9 +3015,9 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
              qvar2string(fname), qvar2string(tname));
         return cvtenv;
       }  
-      *info = new KnownTunionfield(tud,tuf);
+      *info = KnownTunionfield(tud,tuf);
       fallthru(tud,tuf);
-    case &KnownTunionfield(tud,tuf):
+    case KnownTunionfield(tud,tuf):
       // check the type arguments are well-formed
       list_t<tvar_t> tvs = tud->tvs;
       for (; targs != NULL && tvs != NULL; targs = targs->tl, tvs = tvs->tl) {
@@ -3040,7 +3056,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         break;
       }
       break;
-    case &Eq_constr(true):
+    case Eq_constr(true):
       // check that t1 admits zero as an element
       if (!admits_zero(t1))
         terr(loc,"cannot have a pointer to zero-terminated %s elements",
@@ -3054,9 +3070,9 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     // check the bound
     switch (compress_conref(b)->v) {
     case No_constr:
-    case &Eq_constr(DynForward_b): break;
-    case &Eq_constr(DynEither_b): break;
-    case &Eq_constr(&Upper_b(e)): // must be a constant expression
+    case Eq_constr(DynForward_b): break;
+    case Eq_constr(DynEither_b): break;
+    case Eq_constr(&Upper_b(e)): // must be a constant expression
       Tcexp::tcExp(te,NULL,e);
       if (!coerce_uint_typ(te,e))
         terr(loc,"pointer bounds expression is not an unsigned int");
@@ -3064,9 +3080,9 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       if (is_zero_terminated && (!known || sz < 1))
         terr(loc,"zero-terminated pointer cannot point to empty sequence");
       break;
-    case &Eq_constr(&AbsUpper_b(tb)):
+    case Eq_constr(&AbsUpper_b(tb)):
       cvtenv = i_check_valid_type(loc,te,cvtenv,IntKind,tb,false); break;
-    case &Forward_constr(_): impos("forward constraint");
+    case Forward_constr(_): impos("forward constraint");
     }
     break;
   case &TagType(t1):
@@ -3102,7 +3118,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       }
       */
       break;
-    case &Eq_constr(true):
+    case Eq_constr(true):
       // check that t1 supports 0 as an element
       if (!admits_zero(t1)) 
         terr(loc,"cannot have a zero-terminated array of %s elements",
@@ -3215,7 +3231,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       // FIX: does this work with flat tunions???
       if (vi)
         switch (compress(vt)) {
-        case &TunionType(TunionInfo{&KnownTunion(tud),_,_}): 
+        case &TunionType(TunionInfo{KnownTunion(tud),_,_}): 
           if ((*tud)->is_flat)
             terr(loc,"cant inject into a flat tunion");
           break;
@@ -3250,9 +3266,9 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
 	  // FIX: shouldn't we just do this once when the declaration is made?
           bool problem;
           switch ($(ft,compress(cyc_vararg->type))) {
-          case $(Printf_ft, &TunionType(TunionInfo(&KnownTunion(&tud),_,_))):
+          case $(Printf_ft, &TunionType(TunionInfo(KnownTunion(&tud),_,_))):
 	    problem = (qvar_cmp(tud->name,tunion_print_arg_qvar) != 0); break;
-	  case $(Scanf_ft,  &TunionType(TunionInfo(&KnownTunion(&tud),_,_))):  
+	  case $(Scanf_ft,  &TunionType(TunionInfo(KnownTunion(&tud),_,_))):  
 	    problem = (qvar_cmp(tud->name,tunion_scanf_arg_qvar) != 0); break;
 	  default: 
 	    problem = true; break;
@@ -3367,11 +3383,11 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
 
   case &AggrType(AggrInfo(*info,*targs)):
     switch(*info) {
-    case &UnknownAggr(k,n):
+    case UnknownAggr(k,n):
       aggrdecl_t @ adp;
       try {
 	adp = lookup_aggrdecl(te,loc,n);
-	*info = new KnownAggr(adp);
+	*info = KnownAggr(adp);
       } catch { case Dict::Absent:
 	// add as an abstract type declaration
 	// FIX: use the correct namespace by examining the qvar_t n
@@ -3379,7 +3395,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
 	let ad = new Aggrdecl{k,Extern,n,NULL,NULL,NULL};
 	Tc::tcAggrdecl(te,ge,loc,ad);
 	adp = lookup_aggrdecl(te,loc,n);
-	*info = new KnownAggr(adp);
+	*info = KnownAggr(adp);
         // give an error here if targs is non-empty:
         if (*targs != NULL) {
           terr(loc,"declare parameterized type %s before using",
@@ -3389,7 +3405,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         break;
       }
       fallthru(*adp);
-    case &KnownAggr(&ad):
+    case KnownAggr(&ad):
       list_t<tvar_t> tvs = ad->tvs;
       list_t<type_t> ts = *targs;
       for (; ts != NULL && tvs != NULL; ts = ts->tl, tvs = tvs->tl) {
@@ -3906,15 +3922,15 @@ bool is_tagged_pointer_typ_elt(type_t t, type_t@ elt_typ_dest,
   case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,_,b,_,_))):
     let b = compress_conref(b);
     switch (compress_conref(b)->v) {
-    case &Eq_constr(DynForward_b): 
+    case Eq_constr(DynForward_b): 
       *forward_only = true; 
       *elt_typ_dest = elt_typ; 
       return true;
-    case &Eq_constr(DynEither_b): 
+    case Eq_constr(DynEither_b): 
       *elt_typ_dest = elt_typ; 
       return true;
     case No_constr: 
-      b->v = new Eq_constr(DynForward_b); 
+      b->v = Eq_constr(DynForward_b); 
       *forward_only = true;
       *elt_typ_dest = elt_typ; 
       return true;
@@ -3987,7 +4003,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       if(finfo != NULL && finfo->width != NULL)
 	return $(finfo->tq.real_const, addressof_props(te,e1)[1]);
       return bogus_ans;
-    case &AggrType(AggrInfo(&KnownAggr(&ad),_)):
+    case &AggrType(AggrInfo(KnownAggr(&ad),_)):
       let finfo = lookup_decl_field(ad,f);
       if(finfo != NULL && finfo->width != NULL)
 	return $(finfo->tq.real_const, addressof_props(te,e1)[1]);
@@ -4004,7 +4020,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       switch (compress(t1)) {
       case &AnonAggrType(_,fs): 
 	finfo = lookup_field(fs,f); break;
-      case &AggrType(AggrInfo(&KnownAggr(&ad),_)):
+      case &AggrType(AggrInfo(KnownAggr(&ad),_)):
 	finfo = lookup_decl_field(ad,f); break;
       default: return bogus_ans;
       }
@@ -4073,20 +4089,20 @@ type_t array_to_ptr(tenv_t te, type_t e_typ, exp_t e) {
 void check_bound(seg_t loc, unsigned int i, conref_t<bounds_t> b) {
   b = compress_conref(b);
   switch (b->v) {
-  case &Eq_constr(DynEither_b): return; // always checked dynamically
-  case &Eq_constr(DynForward_b): 
+  case Eq_constr(DynEither_b): return; // always checked dynamically
+  case Eq_constr(DynForward_b): 
     if (i < 0) 
       terr(loc, "dereference is out of bounds");
     return; // otherwise checked dynamically
-  case &Eq_constr(&Upper_b(e)):
+  case Eq_constr(&Upper_b(e)):
     let $(j,known) = Evexp::eval_const_uint_exp(e);
     if(known && j <= i)
       terr(loc, "dereference is out of bounds: %d <= %d", j, i);
     return;
-  case &Eq_constr(&AbsUpper_b(_)): return; // control-flows problem
+  case Eq_constr(&AbsUpper_b(_)): return; // control-flows problem
   case No_constr:
     // constrain the bounds to be i+1
-    b->v = new Eq_constr((bounds_t)(new Upper_b(uint_exp(i+1,NULL))));
+    b->v = Eq_constr((bounds_t)(new Upper_b(uint_exp(i+1,NULL))));
     return;
   default: impos("check_bound -- bad compressed conref");
   }
@@ -4098,7 +4114,7 @@ void check_nonzero_bound(seg_t loc, conref_t<bounds_t> b) {
 
 bool is_bound_one(conref_t<bounds_t> b) {
   switch(compress_conref(b)->v) {
-  case &Eq_constr(&Upper_b(e)): 
+  case Eq_constr(&Upper_b(e)): 
     let $(i,known) = Evexp::eval_const_uint_exp(e);
     return known && i==1;
   default: return false;
@@ -4121,8 +4137,8 @@ bool bits_only(type_t t) {
     for (; tqs != NULL; tqs = tqs->tl) 
       if (!bits_only((*tqs->hd)[1])) return false;
     return true;
-  case &AggrType(AggrInfo(&UnknownAggr(_,_),_)): return false;
-  case &AggrType(AggrInfo(&KnownAggr(&ad),ts)):
+  case &AggrType(AggrInfo(UnknownAggr(_,_),_)): return false;
+  case &AggrType(AggrInfo(KnownAggr(&ad),ts)):
     if(ad->impl==NULL)
       return false;
     region rgn {
@@ -4270,11 +4286,11 @@ bool admits_zero(type_t t) {
       // for now, we're not allowing fat pointers to be in zero-terminated
       // arrays.  They cause way too many problems in the translation and
       // are of dubious use (I hope.)
-    case &Eq_constr(DynForward_b): return false; 
-    case &Eq_constr(DynEither_b): return false; 
-    case &Eq_constr(_):
+    case Eq_constr(DynForward_b): return false; 
+    case Eq_constr(DynEither_b): return false; 
+    case Eq_constr(_):
       switch (compress_conref(nullable)->v) {
-      case &Eq_constr(b): return b;
+      case Eq_constr(b): return b;
       default: return false;
       }
     default: return false;

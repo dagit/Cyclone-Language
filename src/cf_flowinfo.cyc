@@ -118,7 +118,7 @@ place_set_t union_place_set(place_set_t s1, place_set_t s2, bool disjoint) {
 
 void print_place(place_t p);
 bool place_set_subset(place_set_t s1, place_set_t s2) {
-  if (s1 == s2) return true;
+  if (s1.t == s2.t) return true;
   try {
     region r { 
       let iter = Dict::make_iter(r,s1);
@@ -180,7 +180,7 @@ int place_cmp(place_t p1, place_t p2) {
   int i = root_cmp(p1->root,p2->root);
   if(i != 0)
     return i;
-  return list_cmp(strptrcmp,p1->fields,p2->fields);
+  return list_cmp(Core::intcmp,p1->fields,p2->fields);
 }
 
 // for debugging
@@ -192,7 +192,7 @@ static mstringptr_t place2string(place_t p) {
   case &InitParam(i,_): sl = new List(new aprintf("param%d",i),sl); break;
   }
   for(_ fields = p->fields; fields != NULL; fields = fields->tl)
-    sl = new List(new aprintf("%s", *fields->hd), sl);
+    sl = new List(new aprintf("%d", fields->hd), sl);
   let ans = new aprintf("%s","");
   for(; sl != NULL; sl = sl->tl)
     *ans = aprintf("%s.%s", *sl->hd, *ans);
@@ -207,12 +207,23 @@ static mstringptr_t place2string(place_t p) {
 //   (If we ever have memory kinds, then we either need to figure out field's
 //    instantiated types or not allow partial initialization of such fields.)
 // Note: We could memoize answers here.
-aggrdict_t empty_aggrdict() {
-  static aggrdict_t *d = NULL;
-  if (d == NULL) {
-    d = new Dict::empty(strptrcmp);
+
+// forward declaration
+static absRval_t i_typ_to_absrval(bool allow_zeroterm,
+				  type_t t, absRval_t leafval);
+
+
+aggrdict_t aggrfields_to_aggrdict(list_t<aggrfield_t> fs, absRval_t leafval) {
+  // we treat bitfields as if always initialized -- those are fields with
+  // names that are of size 1 ("\0").
+  unsigned sz = List::length(fs);
+  aggrdict_t d = new { for i < sz: unknown_all };
+  for(int i = 0; i < sz; i++, fs = fs->tl) {
+    let &Aggrfield(n,_,t2,_,_) = fs->hd;
+    if((*n).size != 1) 
+      d[i] = i_typ_to_absrval(false, t2,leafval);
   }
-  return *d;
+  return d;
 }
 
 static absRval_t i_typ_to_absrval(bool allow_zeroterm,
@@ -221,30 +232,27 @@ static absRval_t i_typ_to_absrval(bool allow_zeroterm,
     return unknown_all;
 
   switch(Tcutil::compress(t)) {
-  case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
+  case &TunionFieldType(TunionFieldInfo(KnownTunionfield(_,tuf),_)):
     if(tuf->typs == NULL)
       return leafval;
     fallthru(tuf->typs);
   case &TupleType(tqts):
-    aggrdict_t d = empty_aggrdict();
-    for(int i=0; tqts != NULL; tqts = tqts->tl, ++i)
-      d = Dict::insert(d,fieldname(i),
-		       i_typ_to_absrval(false,(*tqts->hd)[1],leafval));
+    unsigned sz = List::length(tqts);
+    // we use *bogus* for all of the field names since they're looked up
+    // by index, not name.  Avoids creating the field names...
+    aggrdict_t d = new { for i < sz : unknown_all };
+    for (int i = 0; i < sz; i++) { 
+      d[i] = i_typ_to_absrval(false,(*tqts->hd)[1],leafval);
+      tqts = tqts->tl;
+    }
     return new Aggregate(d);
-
   case &AggrType(AggrInfo(info,_)):
     let ad = get_known_aggrdecl(info);
     if(ad->impl==NULL)
       break;
     fallthru(ad->impl->fields);
   case &AnonAggrType(StructA,fs):
-    aggrdict_t d = empty_aggrdict();
-    for(; fs != NULL; fs = fs->tl) {
-      let &Aggrfield(n,_,t2,_,_) = fs->hd;
-      if((*n).size != 1) //empty name means bit field so no need to include it
-	d = Dict::insert(d, n, i_typ_to_absrval(false, t2,leafval));
-    }
-    return new Aggregate(d);
+    return new Aggregate(aggrfields_to_aggrdict(fs,leafval));
   case &ArrayType(ArrayInfo{et,_,_,zeroterm,_}) && conref_def(false,zeroterm):
     // special case for zero-terminated arrays of bits-only things -- 
     // here, we initialize them at translation by putting a 0 in at the end.
@@ -288,8 +296,7 @@ static bool prefix_of_member(region_t<`r> r, place_t<`r2,`r3> place,
     let fs1 = place->fields;
     let fs2 = place2->fields;
     for(; fs1 != NULL && fs2 != NULL; fs1 = fs1->tl, fs2 = fs2->tl)
-      if(strptrcmp(fs1->hd,fs2->hd) != 0)
-	break;
+      if (fs1->hd != fs2->hd) break;
     if(fs1 == NULL)
       return true;
   }
@@ -313,10 +320,13 @@ static void add_place(escpile_t pile, place_t<`H,`H> place) {
   if(!List::mem(place_cmp, pile->places, place))
     pile->places = rnew(pile->rgn) List(place, pile->places);
 }
-static void add_places(escpile_t pile, `a a, absRval_t r) {
+static void add_places(escpile_t pile, absRval_t r) {
   switch(r) {
   case &AddressOf(p): add_place(pile, p); return;
-  case &Aggregate(d): Dict::iter_c(add_places, pile, d); return;
+  case &Aggregate(d): 
+    for (int i = 0; i < d.size; i++) 
+      add_places(pile, d[i]);
+    return;
   default: return;
   }
 }
@@ -324,19 +334,32 @@ static void add_places(escpile_t pile, `a a, absRval_t r) {
 // WARNING: do not use this to clobber with an Esc unless that's the point!
 static absRval_t insert_place_inner(absRval_t new_val,absRval_t old_val) {
   switch(old_val) {
-  case &Aggregate(d): return new Aggregate(Dict::map_c(insert_place_inner,
-						       new_val, d));
+  case &Aggregate(d): 
+    aggrdict_t d2 = new { for i < d.size : 
+                          insert_place_inner(new_val,d[i]) };
+    return new Aggregate(d2);
   default: return new_val;
   }
 }
-static absRval_t insert_place_outer(list_t<field_name_t> fs,
+
+static aggrdict_t aggr_dict_insert(aggrdict_t d, int n, absRval_t r) {
+  let old_r = d[n];
+  if (old_r == r) return d;
+  aggrdict_t res = new {for i < d.size : d[i]};
+  res[n] = r;
+  return res;
+}
+
+static absRval_t insert_place_outer(list_t<int> fs,
 				    absRval_t old_val, absRval_t new_val) {
   if(fs==NULL) 
     return insert_place_inner(new_val,old_val);
   switch($(fs,old_val)) {
   case $(&List(hd,tl),&Aggregate(d)):
-    let new_child = insert_place_outer(tl,Dict::lookup(d,hd), new_val);
-    return new Aggregate(Dict::insert(d, hd, new_child));
+    let new_child = insert_place_outer(tl,d[hd],new_val);
+    let new_child_agg = aggr_dict_insert(d, hd,new_child);
+    if (new_child_agg == d) return old_val;
+    else return new Aggregate(new_child_agg);
   default: throw new Core::Impossible("bad insert place");
   }
 }
@@ -358,7 +381,7 @@ static flowdict_t escape_these(escpile_t pile, place_set_t * all_changed,
     case ThisIL: newval = esc_this; break;
     case NoneIL: newval = esc_none; break;
     }
-    add_places(pile, 0, oldval);
+    add_places(pile, oldval);
     d = Dict::insert(d,place->root,
 		     insert_place_outer(place->fields,
 					Dict::lookup(d,place->root),
@@ -389,18 +412,23 @@ static initlevel_t initlevel_approx(absRval_t r) {
   default: throw new Core::Impossible("initlevel_approx");
   }
 }
-static initlevel_t initlevel_rec(struct InitlevelEnv @ env, `a a, 
+static initlevel_t initlevel_rec(struct InitlevelEnv @ env, 
 				 absRval_t r, initlevel_t acc) {
   initlevel_t this_ans;
   if(acc == NoneIL) return NoneIL;
   switch(r) {
-  case &Aggregate(d): this_ans = Dict::fold_c(initlevel_rec,env,d,AllIL); break;
+  case &Aggregate(d): 
+    let sz = d.size;
+    this_ans = AllIL;
+    for (int i = 0; i < sz; i++) 
+      this_ans = initlevel_rec(env,d[i],this_ans);
+    break;
   case &AddressOf(p): 
     if(List::mem(place_cmp, env->seen, p))
       this_ans = AllIL;
     else {
       env->seen = new List(p, env->seen);
-      this_ans  = initlevel_rec(env,0,lookup_place(env->d,p),AllIL);
+      this_ans  = initlevel_rec(env,lookup_place(env->d,p),AllIL);
       env->seen = env->seen->tl;
       if(this_ans == NoneIL)
 	this_ans = ThisIL;
@@ -414,7 +442,7 @@ static initlevel_t initlevel_rec(struct InitlevelEnv @ env, `a a,
 }
 initlevel_t initlevel(flowdict_t d, absRval_t r) {
   let env = InitlevelEnv(d,NULL);
-  return initlevel_rec(&env,0,r,AllIL);
+  return initlevel_rec(&env,r,AllIL);
 }
 
 absRval_t lookup_place(flowdict_t d, place_t place) {
@@ -423,29 +451,33 @@ absRval_t lookup_place(flowdict_t d, place_t place) {
   for(; fields != NULL; fields = fields->tl)
     switch($(ans,fields->hd)) {
     case $(&Aggregate(d2), fname): 
-      ans = Dict::lookup(d2,fname); 
+      ans = d2[fname];
       break;
     default: throw new Core::Impossible("bad lookup_place");
     }
   return ans;
 }
 
-static bool is_rval_unescaped(`a a, `b b, absRval_t rval) {
+static bool is_rval_unescaped(absRval_t rval) {
   switch(rval) {
   case &Esc(_):       return false;
-  case &Aggregate(d): return Dict::forall_c(is_rval_unescaped,0,d);
+  case &Aggregate(d): 
+    unsigned sz = d.size;
+    for (int i = 0; i < sz; i++) 
+      if (!is_rval_unescaped(d[i])) return false;
+    return true;
   default:            return true;
   }
 }
 bool is_unescaped(flowdict_t d, place_t place) {
-  return is_rval_unescaped(0,0,lookup_place(d,place));
+  return is_rval_unescaped(lookup_place(d,place));
 }
 
 // only things pointed to escape
 flowdict_t escape_deref(flowdict_t d, place_set_t * all_changed, absRval_t r) {
   region rgn {
     escpile_t pile = rnew(rgn) EscPile(rgn,NULL);
-    add_places(pile, 0, r);
+    add_places(pile, r);
     return escape_these(pile, all_changed, d);
   }
 }
@@ -455,7 +487,7 @@ static struct AssignEnv<`r::R> {
   flowdict_t       d;
   Position::seg_t  loc;
 };
-static absRval_t assign_place_inner(struct AssignEnv @ env, `a a,
+static absRval_t assign_place_inner(struct AssignEnv @ env, 
 				    absRval_t oldval, absRval_t newval) {
   // assignments to escaped places must be fully-init because other aliases
   // might assume fully-init.  Always causes place to be added for same reason.
@@ -467,10 +499,24 @@ static absRval_t assign_place_inner(struct AssignEnv @ env, `a a,
 		   "an escaped location");
     return esc_all;
   case $(&Aggregate(d1), &Aggregate(d2)):
-    // re-ordering dicts may reduce allocation?
-    let new_d = Dict::union_two_c(assign_place_inner, env, d1, d2);
-    if(new_d == d1) return oldval;
-    if(new_d == d2) return newval;
+    aggrdict_t new_d = 
+      new {for i < d1.size : assign_place_inner(env,d1[i],d2[i]) };
+    // try to preserve sharing by returning one of the original arrays
+    // if there was no change
+    bool change = false;
+    for (int i = 0; i < d1.size; i++)
+      if (new_d[i] != d1[i]) {
+        change = true; break;
+      }
+    if (!change)
+      return oldval;
+    change = false;
+    for (int i = 0; i < d1.size; i++)
+      if (new_d[i] != d2[i]) {
+        change = true; break;
+      }
+    if (!change)
+      return newval;
     return new Aggregate(new_d);
   case $(_, &Esc(il)): // we already know we don't have an escaped location
     switch(il) {
@@ -482,13 +528,15 @@ static absRval_t assign_place_inner(struct AssignEnv @ env, `a a,
   }
 }
 static absRval_t assign_place_outer(struct AssignEnv @ env, 
-				    list_t<field_name_t> fs,
+				    list_t<int> fs,
 				    absRval_t oldval, absRval_t newval) {
-  if(fs == NULL) return assign_place_inner(env,0,oldval,newval);
+  if(fs == NULL) return assign_place_inner(env,oldval,newval);
   switch($(fs,oldval)) {
   case $(&List(hd,tl),&Aggregate(d)):
-    let new_child = assign_place_outer(env,tl,Dict::lookup(d,hd),newval);
-    return new Aggregate(Dict::insert(d, hd, new_child));
+    let new_child = assign_place_outer(env,tl,d[hd],newval);
+    let new_child_agg = aggr_dict_insert(d, hd, new_child);
+    if (new_child_agg == d) return oldval;
+    else return new Aggregate(new_child_agg);
   default: throw new Core::Impossible("bad assign place");
   }
 }
@@ -517,7 +565,7 @@ static struct AfterEnv<`r::R> {
   place_set_t chg1; // should region-allocate!
   place_set_t chg2; // should region-allocate!
   place_t curr_place; // a pain to stack-allocate, but should!
-  list_t<field_name_t> @ last_field_cell;
+  list_t<int> @ last_field_cell;
   enum WhoIsChanged changed;
 };
 typedef struct AfterEnv<`r1> @`r2 afterenv_t<`r1,`r2>;
@@ -575,11 +623,26 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
   case $(NotZeroThis, NotZeroAll): return NotZeroThis;
 
   case $(&Aggregate(d1), &Aggregate(d2)):
-    let new_d = Dict::union_two_c(join_absRval, env, d1, d2);
-    if(new_d == d1) return r1;
-    if(new_d == d2) return r2;
+    aggrdict_t new_d = 
+      new {for i < d1.size : join_absRval(env,0,d1[i],d2[i]) };
+
+    // try to preserve sharing by returning one of the original arrays
+    // if there was no change
+    bool change = false;
+    for (int i = 0; i < d1.size; i++)
+      if (new_d[i] != d1[i]) {
+        change = true; break;
+      }
+    if (!change)
+      return r1;
+    change = false;
+    for (int i = 0; i < d1.size; i++)
+      if (new_d[i] != d2[i]) {
+        change = true; break;
+      }
+    if (!change)
+      return r2;
     return new Aggregate(new_d);
-    
   case $(&TagCmps(l1),&TagCmps(l2)):
     let new_l = join_tag_cmps(l1,l2);
     if(new_l==l1) return r1;
@@ -706,9 +769,9 @@ flow_t join_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
   case $(ReachableFL(d1,r1,c1), ReachableFL(d2,r2,c2)):
     // A lot of computation to avoid allocation, but profiling suggests
     // that's the right thing to do.
-    if(d1 == d2 && r1 == r2 && 
+    if(d1.t == d2.t && r1 == r2 && 
        c1.may_consume == c2.may_consume &&
-       c1.consumed == c2.consumed) return f1;
+       c1.consumed.t == c2.consumed.t) return f1;
     if(flow_lessthan_approx(f1,f2)) return f2;
     if(flow_lessthan_approx(f2,f1)) return f1;
     region rgn {
@@ -747,7 +810,7 @@ $(flow_t,absRval_t) join_flow_and_rval(place_set_t* all_changed,
   }
 }
 
-static absRval_t after_absRval_d(afterenv_t,field_name_t,absRval_t,absRval_t);
+static absRval_t after_absRval_d(afterenv_t,int,absRval_t,absRval_t);
 static absRval_t after_absRval(afterenv_t env, absRval_t r1, absRval_t r2) {
   bool changed1 = env->changed == One || Dict::member(env->chg1,env->curr_place);
   bool changed2 = env->changed == Two || Dict::member(env->chg2,env->curr_place);
@@ -770,15 +833,31 @@ static absRval_t after_absRval(afterenv_t env, absRval_t r1, absRval_t r2) {
   // that they point to things that have changed.
   switch($(r1,r2)) {
   case $(&Aggregate(d1),&Aggregate(d2)):
-    let new_d = Dict::union_two_c(after_absRval_d,env,d1,d2);
-    if(new_d == d1) return r1;
-    if(new_d == d2) return r2;
+    aggrdict_t new_d = 
+      new {for i < d1.size : after_absRval_d(env,i,d1[i],d2[i]) };
+                                                         
+    // try to preserve sharing by returning one of the original arrays
+    // if there was no change
+    bool change = false;
+    for (int i = 0; i < d1.size; i++)
+      if (new_d[i] != d1[i]) {
+        change = true; break;
+      }
+    if (!change)
+      return r1;
+    change = false;
+    for (int i = 0; i < d1.size; i++)
+      if (new_d[i] != d2[i]) {
+        change = true; break;
+      }
+    if (!change)
+      return r2;
     return new Aggregate(new_d);
   default: throw new Core::Impossible("after_absRval -- non-aggregates!");
   }
 }
-static absRval_t after_absRval_d(afterenv_t env, field_name_t key,
-				 absRval_t r1, absRval_t r2) {
+static absRval_t after_absRval_d(afterenv_t env, int key, 
+                                 absRval_t r1, absRval_t r2) {
   if(r1 == r2) return r1;
   let old_last_field = env->last_field_cell; 
   let old_changed    = env->changed;
@@ -804,19 +883,20 @@ flow_t after_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
   static tunion Raw_exp.Const_e dummy_rawexp = Const_e(Null_c);
   static struct Exp dummy_exp = Exp(NULL,&dummy_rawexp,NULL,EmptyAnnot);
   static tunion Root.MallocPt dummy_root = MallocPt(&dummy_exp,VoidType);
+  static struct Place<`H> dummy_place = Place(&dummy_root,NULL);
 
   //if(f1 == f2) return f1;
   switch($(f1,f2)) {
   case $(BottomFL,_): 
   case $(_,BottomFL): return BottomFL;
   case $(ReachableFL(d1,r1,c1),ReachableFL(d2,r2,c2)):
-    if(d1 == d2 && r1 == r2 && 
+    if(d1.t == d2.t && r1 == r2 && 
        c1.may_consume == c2.may_consume &&
-       c1.consumed == c2.consumed) return f1;
+       c1.consumed.t == c2.consumed.t) return f1;
     // Should think about ways to avoid allocation here: (curr_place and
     // cut-off in presence of changes)
     region rgn {
-      let curr_place = new Place(&dummy_root,NULL);
+      let curr_place = &dummy_place; // new Place(&dummy_root,NULL);
       let env  = AfterEnv(JoinEnv(rnew(rgn) EscPile(rgn,NULL), d1, d2), 
 			  chg1, chg2, 
 			  curr_place, &curr_place->fields,
@@ -849,7 +929,7 @@ static bool tag_cmps_lessthan_approx(list_t<tag_cmp_t> l1,
 }
 
 // WARNING: This is where we cheat ("approx") for performance.
-static bool absRval_lessthan_approx(`a ignore, absRval_t r1, absRval_t r2) {
+static bool absRval_lessthan_approx(`a::B ignore, absRval_t r1, absRval_t r2) {
   if(r1 == r2) return true;
 
   switch ($(r1,r2)) {
@@ -857,7 +937,10 @@ static bool absRval_lessthan_approx(`a ignore, absRval_t r1, absRval_t r2) {
   case $(&AddressOf(_),_):
   case $(_,&AddressOf(_)): return false;
   case $(&Aggregate(d1), &Aggregate(d2)):
-    return (d1 == d2) || Dict::forall_intersect(absRval_lessthan_approx,d1,d2);
+    if (d1 == d2) return true;
+    for (int i = 0; i < d1.size; i++) 
+      if (!absRval_lessthan_approx(0,d1[i],d2[i])) return false;
+    return true;
   case $(_, NotZeroThis): return r1==NotZeroAll;
   case $(_, Zero): 
   case $(_, NotZeroAll): return false;
@@ -927,9 +1010,9 @@ bool flow_lessthan_approx(flow_t f1, flow_t f2) {
   case $(BottomFL,_): return true;
   case $(_,BottomFL): return false;
   case $(ReachableFL(d1,r1,c1),ReachableFL(d2,r2,c2)):
-    if(d1 == d2 && r1 == r2 &&
+    if(d1.t == d2.t && r1 == r2 &&
        c1.may_consume == c2.may_consume &&
-       c1.consumed == c2.consumed) return true;
+       c1.consumed.t == c2.consumed.t) return true;
     return Dict::forall_intersect(absRval_lessthan_approx,d1,d2) &&
       relns_approx(r1,r2) && consume_approx(c1,c2);
   }
@@ -1145,7 +1228,14 @@ void print_absrval(absRval_t rval) {
   case &AddressOf(p): fprintf(stderr,"AddrOf("); print_place(p); 
     fprintf(stderr,")"); break;
   case &TagCmps(_): fprintf(stderr,"TagCmps(?)"); break;
-  case &Aggregate(d): fprintf(stderr,"Aggregate(?)"); break;
+  case &Aggregate(d): 
+    fprintf(stderr,"Aggregate{"); 
+    for (int i = 0; i < d.size; i++) {
+      print_absrval(d[i]);
+      if (i+1 < d.size) fprintf(stderr,",");
+    }
+    fprintf(stderr,"}");
+    break;
   }
 }
 

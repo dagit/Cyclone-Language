@@ -674,13 +674,14 @@ int tag;struct _dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;doubl
 };struct Cyc_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int
 tag;struct _dynforward_ptr f1;};int Cyc_printf(struct _dynforward_ptr,struct
 _dynforward_ptr);extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[18];
-struct Cyc_FileOpenError_struct{char*tag;struct _dynforward_ptr f1;};struct Cyc_Dict_Dict;
-extern char Cyc_Dict_Present[12];extern char Cyc_Dict_Absent[11];void*Cyc_Dict_lookup(
-struct Cyc_Dict_Dict*d,void*k);struct _tuple0{void*f1;void*f2;};struct _tuple0*Cyc_Dict_rchoose(
-struct _RegionHandle*r,struct Cyc_Dict_Dict*d);struct _tuple0*Cyc_Dict_rchoose(
-struct _RegionHandle*,struct Cyc_Dict_Dict*d);struct _dynforward_ptr Cyc_Bitvec_new_empty(
+struct Cyc_FileOpenError_struct{char*tag;struct _dynforward_ptr f1;};struct Cyc_Dict_T;
+struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;struct Cyc_Dict_T*
+t;};extern char Cyc_Dict_Present[12];extern char Cyc_Dict_Absent[11];void*Cyc_Dict_lookup(
+struct Cyc_Dict_Dict d,void*k);struct _tuple0{void*f1;void*f2;};struct _tuple0*Cyc_Dict_rchoose(
+struct _RegionHandle*r,struct Cyc_Dict_Dict d);struct _tuple0*Cyc_Dict_rchoose(
+struct _RegionHandle*,struct Cyc_Dict_Dict d);struct _dynforward_ptr Cyc_Bitvec_new_empty(
 int);struct _dynforward_ptr Cyc_Bitvec_new_full(int);struct _dynforward_ptr Cyc_Bitvec_new_copy(
-struct _dynforward_ptr);struct _dynforward_ptr Cyc_Bitvec_from_list(struct Cyc_Dict_Dict*
+struct _dynforward_ptr);struct _dynforward_ptr Cyc_Bitvec_from_list(struct Cyc_Dict_Dict
 d,int(*f)(void*),int sz,struct Cyc_List_List*);struct Cyc_List_List*Cyc_Bitvec_to_sorted_list(
 struct _dynforward_ptr bvec,int sz);void Cyc_Bitvec_print_bvec(struct _dynforward_ptr
 bvec);int Cyc_Bitvec_get(struct _dynforward_ptr,int);void Cyc_Bitvec_set(struct
@@ -750,7 +751,7 @@ _tmpC;unsigned int i;for(i=0;i < _tmpE;i ++){_tmpD[i]=-1;}}_tmpF;});return ans;}
 struct _dynforward_ptr Cyc_Bitvec_new_copy(struct _dynforward_ptr old){struct
 _dynforward_ptr copy=Cyc_Bitvec_new_empty((int)_get_dynforward_size(old,sizeof(
 int)));Cyc_Bitvec_union_two(copy,copy,old);return copy;}struct _dynforward_ptr Cyc_Bitvec_from_list(
-struct Cyc_Dict_Dict*d,int(*f)(void*),int sz,struct Cyc_List_List*l){struct
+struct Cyc_Dict_Dict d,int(*f)(void*),int sz,struct Cyc_List_List*l){struct
 _dynforward_ptr ans=({unsigned int _tmp10=(unsigned int)(sz % 32 + 1);int*_tmp11=(
 int*)_cycalloc_atomic(_check_times(sizeof(int),_tmp10));struct _dynforward_ptr
 _tmp13=_tag_dynforward(_tmp11,sizeof(int),_tmp10);{unsigned int _tmp12=_tmp10;

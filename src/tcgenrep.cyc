@@ -280,15 +280,14 @@ static int size_of2int(size_of_t sz) {
 
 static type_t tunion_typ(qvar_t name) {
   return new TunionType(
-			TunionInfo(
-				   new UnknownTunion(UnknownTunionInfo(name,
-								       false,
-                                                                       false)),
+			TunionInfo(UnknownTunion(UnknownTunionInfo(name,
+                                                                   false,
+                                                                   false)),
 				   NULL,
 				   new Opt(HeapRgn)));
 }
 static type_t tunionfield_typ(qvar_t name, qvar_t fieldname) {
-  return new TunionFieldType(TunionFieldInfo(new UnknownTunionfield(UnknownTunionFieldInfo(name,fieldname,false)),NULL));
+  return new TunionFieldType(TunionFieldInfo(UnknownTunionfield(UnknownTunionFieldInfo(name,fieldname,false)),NULL));
 }
 
 static exp_t call_exp(qvar_t name, list_t<exp_t,`H> args, seg_t loc) {
@@ -582,9 +581,9 @@ type_t monomorphize_type(type_t type) {
     let impl = ad->impl==NULL ? NULL : new AggrdeclImpl(NULL, NULL, fields);
     aggrdecl_t ad2 = new Aggrdecl{ad->kind,ad->sc,ad->name,NULL,impl,
 				  ad->attributes};
-    return new AggrType(AggrInfo(new KnownAggr(new ad2),NULL));
+    return new AggrType(AggrInfo(KnownAggr(new ad2),NULL));
 
-  case &TunionType(TunionInfo{&KnownTunion(&tud),params,rgn}):
+  case &TunionType(TunionInfo{KnownTunion(&tud),params,rgn}):
     let tvs = tud->tvs;
     if(List::length(params) != List::length(tvs))
       Tcutil::impos("gen(): number of params %d differs from number of tyvars %d",List::length(params), List::length(tvs));
@@ -594,7 +593,7 @@ type_t monomorphize_type(type_t type) {
     if(tud->fields != NULL) 
       fields = new Opt{List::map_c(substitute_tunionfield_type,subst,tud->fields->v)};
     let tud2 = new Tuniondecl{tud->sc,tud->name,NULL,fields,tud->is_xtunion,tud->is_flat};
-    let type2 = new TunionType(TunionInfo{new KnownTunion(new tud2),params,rgn});
+    let type2 = new TunionType(TunionInfo{KnownTunion(new tud2),params,rgn});
     
     let loc = segment_of_abs(0,0);
     //printf("before: %s\n after: %s\n", 
@@ -1116,7 +1115,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
   case &RgnsEff(_):       
     Tcutil::terr(loc,"gen(): unhandled region, handle or effect type");
     break;
-  case &TunionType(TunionInfo{&KnownTunion(&tudecl),params,rgn}):
+  case &TunionType(TunionInfo{KnownTunion(&tudecl),params,rgn}):
     if(tudecl->tvs != NULL) 
       Tcutil::impos("gen(): tunion type variables not handled yet");
     if(tudecl->fields == NULL) {      
@@ -1165,7 +1164,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     if(tfieldinfo.targs != NULL)
       Tcutil::impos("gen(): tunionfield type parameters not handled yet");
     switch (tfieldinfo.field_info) {
-    case &KnownTunionfield(decl,field):
+    case KnownTunionfield(decl,field):
       let types = List::map(get_second,field->typs);
       let types2 = new List(uint_typ,types);
       let varname = toplevel_name(new_gen_id("rep"));

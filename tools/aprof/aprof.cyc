@@ -241,11 +241,13 @@ collate_dyn_region(stringptr_t<`H,`H> createloc,
       last = curr;
   }
   /* print out the regions for which there was no allocation */
+  /* JGM: commenting out for now -- too much data
   if (!is_empty(dynregions)) {
     fprintf(stderr,"No allocation events for dyn regions @%s\n",*createloc);
     iter(print_strptrs,dynregions);
     fprintf(stderr,"\n");
   }
+  */
   /* no allocation events for this region */
   if (tab == NULL)
     tab = new (create(101, strptrcmp, hash_stringptr));

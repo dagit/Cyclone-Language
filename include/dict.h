@@ -42,8 +42,14 @@ namespace Dict {
 
 using List;
 
-extern struct Dict<`a,`b,`r::R>;
-typedef struct Dict<`a,`b,`r> @`r dict_t<`a,`b,`r>;
+extern struct T<`a::B,`b::B,`r::R>;
+typedef struct T<`a,`b,`r> *`r tree<`a,`b,`r>;
+extern struct Dict<`a,`b,`r::R> {
+  int (@`H rel)(`a,`a);
+  region_t<`r> r;
+  tree<`a,`b,`r> t;
+};
+typedef struct Dict<`a,`b,`r> dict_t<`a,`b,`r>;
 /** A value of type [dict_t<`a,`b,`r>] is a dictionary that maps
     keys of type [`a] to values of type [`b]; the dictionary
     datatypes live in region [`r]. */

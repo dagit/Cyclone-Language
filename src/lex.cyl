@@ -550,10 +550,10 @@ int comment(Lexbuf<`a>);
 } // namespace Lex
 
 // for parser -- must not be prefixed
-int yylex() { 
- int ans = Lex::token(lbuf->v);
- yylloc.first_line = lexeme_start(lbuf->v);
- yylloc.last_line  = lexeme_end(lbuf->v);
+int yylex(Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> lbuf) { 
+ int ans = Lex::token(lbuf);
+ yylloc.first_line = lexeme_start(lbuf);
+ yylloc.last_line  = lexeme_end(lbuf);
  switch (ans) {
  case IDENTIFIER        : yylval = String_tok(Lex::token_string); break;
  case TYPEDEF_NAME      : yylval = String_tok(Lex::token_string); break;

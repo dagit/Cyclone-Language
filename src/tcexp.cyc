@@ -147,8 +147,8 @@ void resolve_unresolved_mem(tenv_t te, seg_t loc, type_t * topt, exp_t e,
   switch (compress(t)) {
   case &AggrType(AggrInfo(info,_)):
     switch(info) {
-    case &UnknownAggr(_,_): impos("struct type not properly set");
-    case &KnownAggr(&ad):   e->r = new Struct_e(ad->name,NULL,des,ad);
+    case UnknownAggr(_,_): impos("struct type not properly set");
+    case KnownAggr(&ad):   e->r = new Struct_e(ad->name,NULL,des,ad);
     }
     break;
   case &ArrayType(ArrayInfo{at,aq,_,_,_}): e->r = new Array_e(des); break;
@@ -369,9 +369,9 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
     case &ArrayType(_): break;
     case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_,_))): 
       switch(compress_conref(b)->v) {
-      case &Eq_constr(DynForward_b):
-      case &Eq_constr(DynEither_b):
-      case &Eq_constr(&Upper_b(_)): break;
+      case Eq_constr(DynForward_b):
+      case Eq_constr(DynEither_b):
+      case Eq_constr(&Upper_b(_)): break;
       default: terr(loc,"can't apply size to pointer/array of abstract length");
       }
       break;
@@ -411,11 +411,11 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
       terr(e2->loc,"expecting int but found %s",typ2string(t2));
     b = compress_conref(b);
     switch (b->v) {
-    case &Eq_constr(DynForward_b): 
+    case Eq_constr(DynForward_b): 
       // FIX: warn if e2 is negative
       return t1;
-    case &Eq_constr(DynEither_b): return t1;
-    case &Eq_constr(&Upper_b(ub)):
+    case Eq_constr(DynEither_b): return t1;
+    case Eq_constr(&Upper_b(ub)):
       // if we have a zero-terminated array, warn that this could
       // be expensive, since coercing to a fat pointer involves a loop.  
       if (conref_def(false,zt)) 
@@ -432,11 +432,11 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
                                                    NULL)));
       unchecked_cast(te, e1, new_t1, Other_coercion);
       return new_t1;
-    case &Eq_constr(&AbsUpper_b(_)):
+    case Eq_constr(&AbsUpper_b(_)):
       terr(e1->loc, "pointer arithmetic not allowed on pointers with "
 	   "abstract bounds");
       return t1;
-    default: b->v = new Eq_constr(DynForward_b); return t1;
+    default: b->v = Eq_constr(DynForward_b); return t1;
     }
   default: return tcArithBinop(te, e1, e2, is_numeric);
   }
@@ -595,7 +595,7 @@ static void check_writable(tenv_t te, exp_t e) {
     break;
   case &AggrMember_e(e1,f):
     switch (compress(e1->topt->v)) {
-    case &AggrType(AggrInfo(&KnownAggr(adp),_)):
+    case &AggrType(AggrInfo(KnownAggr(adp),_)):
       struct Aggrfield *sf = 
         (adp == NULL) ? NULL : lookup_decl_field(*adp, f);
       if (sf == NULL || !sf->tq.real_const) return;
@@ -611,7 +611,7 @@ static void check_writable(tenv_t te, exp_t e) {
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{elt_typ,_,_}):
       switch (compress(elt_typ)) {
-      case &AggrType(AggrInfo(&KnownAggr(adp),_)):
+      case &AggrType(AggrInfo(KnownAggr(adp),_)):
 	struct Aggrfield *sf = 
 	  (adp == NULL) ? NULL : lookup_decl_field(*adp, f);
 	if (sf == NULL || !sf->tq.real_const) return;
@@ -904,7 +904,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
               // this is trickier, we have to match up the type of the
               // actual argument with a constructor from the [x]tunion.
               switch (compress(vt)) {
-              case &TunionType(TunionInfo{&KnownTunion(&td),targs,tur}):
+              case &TunionType(TunionInfo{KnownTunion(&td),targs,tur}):
                 // unfortunately, td may not be the "latest" declaration of
                 // an xtunion, so we re-look it up in the environment.
                 let td = *lookup_tuniondecl(te,loc,td->name);
@@ -1126,7 +1126,7 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
   case &StructField(n):
     bool bad_type = true;
     switch(compress(t)) {
-    case &AggrType(AggrInfo(&KnownAggr(adp),_)):
+    case &AggrType(AggrInfo(KnownAggr(adp),_)):
       if((*adp)->impl == NULL)
 	break;
       if(!exists_c(structfield_has_name,n,(*adp)->impl->fields))
@@ -1146,7 +1146,7 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
   case &TupleIndex(n):
     bool bad_type = true;
     switch(compress(t)) {
-    case &AggrType(AggrInfo(&KnownAggr(adp),_)):
+    case &AggrType(AggrInfo(KnownAggr(adp),_)):
       if((*adp)->impl == NULL)
 	break;
       fallthru((*adp)->impl->fields);
@@ -1162,7 +1162,7 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
 		     List::length(l),n);
       bad_type = false;
       break;
-    case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
+    case &TunionFieldType(TunionFieldInfo(KnownTunionfield(_,tuf),_)):
       if(List::length(tuf->typs) < n)
 	Tcutil::terr(loc,"tunionfield has too few components: %d < %d",
 		     List::length(tuf->typs),n);
@@ -1202,7 +1202,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
   // As per K&R, don't promote e from array to pointer type
   tcExpNoPromote(te,NULL,e);
   switch (compress(e->topt->v)) {
-  case &AggrType(AggrInfo(&KnownAggr(&ad),ts)):
+  case &AggrType(AggrInfo(KnownAggr(&ad),ts)):
     let finfo = lookup_decl_field(ad,f);
     if (finfo == NULL)
       return expr_err(te,loc,topt,"type %s has no %s field",
@@ -1252,7 +1252,7 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
   case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_))):
     check_nonzero_bound(loc, b);
     switch (compress(t2)) {
-    case &AggrType(AggrInfo(&KnownAggr(&ad),ts)):
+    case &AggrType(AggrInfo(KnownAggr(&ad),ts)):
       let finfo = lookup_decl_field(ad,f);
       if (finfo == NULL)
 	return expr_err(te,loc,topt,"type %s has no %s field",
@@ -1321,7 +1321,7 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
       if (conref_def(false,zt)) {
         bool emit_warning = true;
         switch (compress_conref(b)->v) {
-        case &Eq_constr(&Upper_b(e3)):
+        case Eq_constr(&Upper_b(e3)):
           if (is_const_exp(te, e2)) {
             let $(i,known) = Evexp::eval_const_uint_exp(e2);
             if (known) {
@@ -1330,8 +1330,8 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
             }
           }
           break;
-        case &Eq_constr(DynForward_b): emit_warning = false; break;
-        case &Eq_constr(DynEither_b): emit_warning = false; break;
+        case Eq_constr(DynForward_b): emit_warning = false; break;
+        case Eq_constr(DynEither_b): emit_warning = false; break;
         default: break;
         }
         if (emit_warning) 
@@ -1406,30 +1406,33 @@ static type_t tcCompoundLit(tenv_t te, seg_t loc, type_t * topt,
  // We also pass in whether or not the array is to be zero terminated.
 static type_t tcArray(tenv_t te,seg_t loc,type_t * elt_topt, bool zero_term,
                    list_t<$(list_t<designator_t>,exp_t)@> des) {
-  list_t<exp_t> es      = List::map(snd,des);
-  type_t        res     = new_evar(&mk,new Opt(lookup_type_vars(te)));
-  let           num_es  = List::length(es);
-  let           sz_rexp = new Const_e(Int_c(Unsigned,num_es));
-  exp_t         sz_exp  = new_exp(sz_rexp,loc);
-  // if zero_term, check that last element in array is zero terminated.
-  // Note that if we ever fix designators, then we need to fix this too.
-  if (zero_term) {
-    let e = List::nth(es, num_es - 1);
-    if (!Tcutil::is_zero(e))
-      terr(e->loc,"zero-terminated array doesn't end with zero.");
-  }
-  sz_exp->topt = new Opt(uint_typ);
-  type_t res_t2   = array_typ(res, empty_tqual(NULL), sz_exp, 
-                              zero_term ? true_conref : false_conref,NULL);
+  type_t res_t2;
+  region r {
+    let           num_es  = List::length(des);
+    list_t<exp_t,`r>  es  = List::rmap(r,snd,des);
+    type_t        res     = new_evar(&mk,new Opt(lookup_type_vars(te)));
+    let           sz_rexp = new Const_e(Int_c(Unsigned,num_es));
+    exp_t         sz_exp  = new_exp(sz_rexp,loc);
+    // if zero_term, check that last element in array is zero terminated.
+    // Note that if we ever fix designators, then we need to fix this too.
+    if (zero_term) {
+      let e = List::nth(es, num_es - 1);
+      if (!Tcutil::is_zero(e))
+        terr(e->loc,"zero-terminated array doesn't end with zero.");
+    }
+    sz_exp->topt = new Opt(uint_typ);
+    res_t2   = array_typ(res, empty_tqual(NULL), sz_exp, 
+                         zero_term ? true_conref : false_conref,NULL);
+    
+    for (_ es2 = es; es2 != NULL; es2 = es2->tl)
+      tcExpInitializer(te,elt_topt,es2->hd);
 
-  for (_ es2 = es; es2 != NULL; es2 = es2->tl)
-    tcExpInitializer(te,elt_topt,es2->hd);
-
-  if (!coerce_list(te,res,es))
+    if (!coerce_list(te,res,es))
     // JGMFIX: lousy error messages...
-    terr(es->hd->loc,"elements of array do not all have the same type (%s)",
-         typ2string(res));
+      terr(es->hd->loc,"elements of array do not all have the same type (%s)",
+           typ2string(res));
   // check that any designators make sense
+  }
   for(int offset = 0; des != NULL; offset++, des = des->tl) {
     list_t<designator_t> ds = (*des->hd)[0];
     if (ds != NULL)
@@ -1560,7 +1563,7 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t * topt,
   let all_typs   = List::map(snd,all_inst);
   let exist_typs = List::map(snd,exist_inst);
   let inst       = List::rappend(rgn,all_inst,exist_inst);
-  let res_typ = new AggrType(AggrInfo(new KnownAggr(new ad),all_typs));
+  let res_typ = new AggrType(AggrInfo(KnownAggr(new ad),all_typs));
   // integrate any witnesses the programmer wrote explicitly
   let user_ex_ts = *ts;
   let ex_ts = exist_typs;
@@ -1640,7 +1643,7 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t * topt, exp_t e,
   let inst     = List::rmap_c(rgn,r_make_inst_var,&env,tud->tvs);
   let all_typs = List::map(snd,inst);
   type_t res =
-    new TunionFieldType(TunionFieldInfo{new KnownTunionfield(tud,tuf),
+    new TunionFieldType(TunionFieldInfo{KnownTunionfield(tud,tuf),
 					all_typs});
   // this instantiates the type variables if we have top-down type info
   if (topt != NULL) {
@@ -1654,8 +1657,7 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t * topt, exp_t e,
       // or the tunion is flat.
       if (tud->is_flat || (tuf->typs == NULL && es == NULL)) {
         e->topt = new Opt(res);
-        res = new TunionType(TunionInfo{new KnownTunion(new tud),
-					all_typs,r});
+        res = new TunionType(TunionInfo{KnownTunion(new tud),all_typs,r});
         unchecked_cast(te, e, res, No_coercion);
         // return res;
       }
@@ -1832,7 +1834,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
   // Don't yet support existential types (to do it, add to TunionFieldInfo
   // and here generate fresh evars).
   switch(elt_type) {
-  case &AggrType(AggrInfo(&KnownAggr(&ad),_)):
+  case &AggrType(AggrInfo(KnownAggr(&ad),_)):
     if(ad->impl != NULL && ad->impl->exist_vars != NULL)
       terr(loc,"malloc with existential types not yet implemented");
     break;

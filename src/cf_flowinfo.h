@@ -49,8 +49,10 @@ EXTERN_CFFLOW tunion Root {
 typedef tunion Root root_t;
 
 EXTERN_CFFLOW struct Place<`r::R> {
-  root_t root;
-  List::list_t<Absyn::field_name_t,`r> fields;
+  root_t root; 
+  List::list_t<int,`r> fields; // projections off the root -- these correspond
+  //to either tuple offsets or field names.  For field names, we use the order
+  //in the struct declaration to determine the index.
 };
 typedef struct Place<`r1> @`r2 place_t<`r1,`r2>;
 
@@ -97,8 +99,8 @@ typedef tunion AbsLVal absLval_t;
 
 typedef tunion AbsRVal absRval_t;
 typedef Dict::dict_t<root_t,             absRval_t> flowdict_t;
-typedef Dict::dict_t<Absyn::field_name_t,absRval_t> aggrdict_t;
-extern aggrdict_t empty_aggrdict();
+typedef absRval_t ?aggrdict_t;
+extern aggrdict_t aggrfields_to_aggrdict(List::list_t<Absyn::aggrfield_t>, absRval_t);
 extern flowdict_t empty_flowdict();
 EXTERN_CFFLOW tunion AbsRVal {
   Zero;      // the value is zero and initialized
@@ -176,7 +178,7 @@ extern void print_flowdict(flowdict_t d);
 extern void print_flow(flow_t f);
 
 // debugging
-//  #define DEBUG_FLOW
+  // #define DEBUG_FLOW
 #ifdef DEBUG_FLOW
 #define DEBUG_PRINT(arg...) fprintf(stderr,##arg)
 #define DEBUG_PRINT_F(f,arg...) f ## (##arg)

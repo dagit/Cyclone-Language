@@ -71,8 +71,16 @@ while (0)
 
 
 extern void yyerror(string_t);
-// no support for YYLEX_PARAM 
-extern int yylex();
+
+/* The user can define YYLEX_PARAM_ARG for the prototype to yylex 
+ * and YYLEX_ARG for the actual argument to yylex -- typically
+ * this will be some part of YYPARSE_PARAM_ARG.
+ */
+#ifndef YYLEX_PARAM_ARG
+#define YYLEX_PARAM_ARG
+#define YYLEX_ARG
+#endif
+extern int yylex(YYLEX_PARAM_ARG);
 
 
 static int	yychar = '\000';       /*  the lookahead symbol		*/
@@ -245,7 +253,7 @@ yybackup:
       if (yydebug)
 	fprintf(stderr,"Reading a token: ");
 #endif
-      yychar = yylex();
+      yychar = yylex(YYLEX_ARG);
     }
 
   /* Convert token to internal form (in yychar1) for indexing tables with */

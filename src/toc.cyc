@@ -187,22 +187,15 @@ MAKE_VAR(_dyneither_ptr_decrease_size);
 #undef MAKE_STRING
 #undef MAKE_VAR
 
-//static tunion AggrInfoU.UnknownAggr tagged_arr_typ_u = 
-//                           UnknownAggr(StructA,&_tagged_arr_pr);
-//static tunion Type.AggrType tagged_arr_typ_v =
-//                           AggrType(AggrInfo(&tagged_arr_typ_u,NULL));
-//static tunion Type tagged_arr_typ = &tagged_arr_typ_v;
-
-static tunion AggrInfoU.UnknownAggr dynforward_ptr_typ_u = 
-                           UnknownAggr(StructA,&_dynforward_ptr_pr);
 static tunion Type.AggrType dynforward_ptr_typ_v =
-                           AggrType(AggrInfo(&dynforward_ptr_typ_u,NULL));
+AggrType(AggrInfo(UnknownAggr(StructA,&_dynforward_ptr_pr),
+                  NULL));
 static tunion Type dynforward_ptr_typ = &dynforward_ptr_typ_v;
 
-static tunion AggrInfoU.UnknownAggr dyneither_ptr_typ_u = 
-                           UnknownAggr(StructA,&_dyneither_ptr_pr);
 static tunion Type.AggrType dyneither_ptr_typ_v =
-                           AggrType(AggrInfo(&dyneither_ptr_typ_u,NULL));
+                           AggrType(AggrInfo(UnknownAggr(StructA,
+                                                         &_dyneither_ptr_pr),
+                                             NULL));
 static tunion Type dyneither_ptr_typ = &dyneither_ptr_typ_v;
 
 static tqual_t mt_tq = Tqual(false,false,false,false,NULL);
@@ -425,12 +418,12 @@ static type_t typ_to_c(type_t t) {
   case &VarType(tv): 
     if (tvar_kind(tv) == AnyKind) return VoidType;
     else return void_star_typ(); // map `a to void *
-  case &TunionType(TunionInfo{&KnownTunion(&tud),_,_}): 
+  case &TunionType(TunionInfo{KnownTunion(&tud),_,_}): 
     if (tud->is_flat)
       return unionq_typ(collapse_qvar_tag(tud->name,"_union"));
     else return void_star_typ();
   case &TunionType(_): toc_impos("unresolved TunionType");
-  case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud,tuf),_}):
+  case &TunionFieldType(TunionFieldInfo{KnownTunionfield(tud,tuf),_}):
     // for flat tunion fields, it's the same as the tunion type.
     // for tunion fields that carry no arguments, it's an unsigned int
     // for xtunion fields that carry no argument, it's a char *.
@@ -450,8 +443,8 @@ static type_t typ_to_c(type_t t) {
     t2 = typ_to_c_array(t2);
     switch (compress_conref(bnds)->v) {
     case No_constr:
-    case &Eq_constr(DynForward_b): return dynforward_ptr_typ;
-    case &Eq_constr(DynEither_b): return dyneither_ptr_typ;
+    case Eq_constr(DynForward_b): return dynforward_ptr_typ;
+    case Eq_constr(DynEither_b): return dyneither_ptr_typ;
     default: return star_typ(t2,HeapRgn,tq,false_conref);
     }
   case &IntType(_,_): 
@@ -551,7 +544,7 @@ static bool atomic_typ(type_t t) {
     // post-translation (with unchecked C types)?? (We shouldn't)
   case &AggrType(AggrInfo(info,_)):
     switch(info) {
-    case &UnknownAggr(_,_): return false; // see above!
+    case UnknownAggr(_,_): return false; // see above!
     default: break;
     }
     let ad = get_known_aggrdecl(info);
@@ -564,7 +557,7 @@ static bool atomic_typ(type_t t) {
     for (; fs != NULL; fs = fs->tl)
       if (!atomic_typ(fs->hd->type)) return false;
     return true;
-  case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud,tuf),_}):
+  case &TunionFieldType(TunionFieldInfo{KnownTunionfield(tud,tuf),_}):
     fallthru(tuf->typs);
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl)
@@ -714,83 +707,109 @@ static exp_t make_toplevel_dyn_arr(type_t t, exp_t sz, exp_t e,
 // where the ith element of fallthru_info->v[1] is qvi
 // and varmap' is fallthru_info->v[2]
 // (We also have to pop handlers as explained above.)
-static struct Env {
-  opt_t<var_t> break_lab;
-  opt_t<var_t> continue_lab;
-  opt_t<$(var_t,list_t<qvar_t>,Dict::dict_t<qvar_t,exp_t>)@> fallthru_info;
-  Dict::dict_t<qvar_t,exp_t> varmap;
+static struct FallthruInfo<`r::R> {
+  var_t label;
+  list_t<qvar_t,`r> binders;
+  Dict::dict_t<qvar_t,exp_t,`r> next_case_env;
+};
+
+static struct Env<`r::R> {
+  <`r2::R> : {`r2} > `r
+  var_t *`r       break_lab;
+  var_t *`r       continue_lab;
+  struct FallthruInfo<`r2> *`r2 fallthru_info;
+  Dict::dict_t<qvar_t,exp_t,`r> varmap;
   bool toplevel;
 };
-typedef struct Env @env_t;
+typedef struct Env<`r> @`r env_t<`r>;
 
-// the empty environment
-static env_t empty_env() {
-  return new Env{.break_lab     = NULL,
-                 .continue_lab  = NULL,
-                 .fallthru_info = NULL,
-                 .varmap        = Dict::empty(qvar_cmp),
-                 .toplevel      = true};
+static bool is_toplevel(env_t nv) {
+  let &Env{.toplevel=t,...} = nv;
+  return t;
 }
 
-static env_t clear_toplevel(env_t e) {
-  env_t ans = new *e;
-  ans->toplevel = false;
-  return ans;
+static exp_t lookup_varmap(env_t nv, qvar_t x) {
+  let &Env{.varmap=v,...} = nv;
+  return Dict::lookup(v,x);
+}
+
+// the empty environment
+static env_t<`r> empty_env(region_t<`r> r) {
+  return rnew(r) Env{.break_lab     = NULL,
+                     .continue_lab  = NULL,
+                     .fallthru_info = NULL,
+                     .varmap        = Dict::rempty(r,qvar_cmp),
+                     .toplevel      = true};
+}
+
+static env_t<`r> share_env(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
+  let &Env{b,c,f,v,t} = e;
+  return rnew(r) Env{b,c,f,Dict::rshare(r,v),t};
+}
+
+static env_t<`r> clear_toplevel(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
+  let &Env{b,c,f,v,t} = e;
+  return rnew(r) Env{b,c,f,Dict::rshare(r,v),false};
+}
+static env_t<`r> set_toplevel(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
+  let &Env{b,c,f,v,t} = e;
+  return rnew(r) Env{b,c,f,Dict::rshare(r,v),true};
 }
 
 // add x->y to variable map in environment
 // The type allows y to be a general exp, but in practice it is always a var_exp
-static env_t add_varmap(env_t e, qvar_t x, exp_t y) {
+static env_t<`r> add_varmap(region_t<`r> r, env_t<`r2> e, qvar_t x, exp_t y : {`r2} > `r) {
   switch ((*x)[0]) {
   case Rel_n(_): toc_impos("Toc::add_varmap on Rel_n: %s\n", qvar2string(x));
   default: break;
   }
-  env_t ans = new *e;
-  ans->varmap = Dict::insert(ans->varmap, x, y);
-  return ans;
+  let &Env{b,c,f,v,t} = e;
+  let new_v = Dict::insert(Dict::rshare(r,v), x, y);
+  return rnew(r) Env{b,c,f,new_v,t};
 }
 
 // env for loop body: break and continue labels are set to null,
 // exception handler pop counters for break and continue are zeroed
-static env_t loop_env(env_t e) {
-  env_t ans = new *e;
-  ans->break_lab    = NULL;
-  ans->continue_lab = NULL;
-  return ans;
+static env_t<`r> loop_env(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
+  let &Env{b,c,f,v,t} = e;
+  return rnew(r) Env{NULL,NULL,f,Dict::rshare(r,v),t};
 }
 
 // env for a switch clause: give new label for break, and zero its pop counter
-static env_t non_last_switchclause_env(env_t e, var_t break_l, var_t fallthru_l,
-				     list_t<vardecl_t> fallthru_binders,
-				     env_t next_case_env) {
-  let fallthru_vars = NULL;
+static env_t<`r>
+non_last_switchclause_env(region_t<`r> r,
+                          env_t<`r2> e, var_t break_l, var_t fallthru_l,
+                          list_t<vardecl_t> fallthru_binders,
+                          env_t<`r3> next_case_env : {`r2} > `r, {`r3} > `r) {
+  list_t<qvar_t,`r> fallthru_vars = NULL;
   for(; fallthru_binders != NULL; fallthru_binders = fallthru_binders->tl)
-    fallthru_vars = new List(fallthru_binders->hd->name, fallthru_vars);
+    fallthru_vars = rnew(r) List(fallthru_binders->hd->name, fallthru_vars);
   fallthru_vars = List::imp_rev(fallthru_vars);
-    
-  env_t ans = new *e;
-  ans->break_lab     = new Opt(break_l);
-  ans->fallthru_info = new Opt(new $(fallthru_l,
-				     fallthru_vars,
-				     next_case_env->varmap));
-  return ans;
+  let &Env{b,c,f,v,t} = e;
+  let &Env{_,_,_,next_case_varmap,_} = next_case_env;
+  struct FallthruInfo<`r>*`r fi = 
+    rnew(r) FallthruInfo{fallthru_l,fallthru_vars,
+                           Dict::rshare(r,next_case_varmap)};
+  return rnew(r) Env{rnew(r) break_l, c, fi, Dict::rshare(r,v),t};
 }
 
-static env_t last_switchclause_env(env_t e, var_t break_l) {
-  env_t ans = new *e;
-  ans->break_lab     = new Opt(break_l);
-  ans->fallthru_info = NULL; // not allowed in last case
-  return ans;
+static env_t<`r> 
+last_switchclause_env(region_t<`r> r, env_t<`r2> e, var_t break_l : 
+                      {`r2} > `r) {
+  let &Env{b,c,f,v,t} = e;
+  return rnew(r) Env{rnew(r) break_l, c, NULL, Dict::rshare(r,v), t};
 }
 
 // must have no pattern vars and type is int, char, or tunion of a type
 // with no value constructors. (If it weren't for allowing fallthru
 // anywhere, we wouldn't need the next_l.)
-static env_t switch_as_switch_env(env_t e, var_t next_l) {
-  env_t ans = new *e;
-  ans->break_lab     = NULL;
-  ans->fallthru_info = new Opt(new $(next_l,NULL,Dict::empty(qvar_cmp)));
-  return ans;
+static env_t<`r> 
+switch_as_switch_env(region_t<`r> r, env_t<`r2> e, var_t next_l :
+                     {`r2} > `r) {
+  let &Env{b,c,f,v,t} = e;
+  return rnew(r) Env{NULL,c,rnew(r) FallthruInfo{next_l,NULL,
+                                                   Dict::rempty(r,qvar_cmp)},
+                       Dict::rshare(r,v), t};
 }
 
 ///////////////////////////////////////////////////////////////
@@ -1068,44 +1087,46 @@ static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
   let elt_typ = typ_to_c(e2->topt->v);
   if (!e1_already_translated)
     exp_to_c(nv,e1);
-  env_t nv2 = add_varmap(nv,x1,varb_exp(x1,new Local_b(vd),DL));
-  qvar_t max = temp_var();
-  exp_t ea = assign_exp(var_exp(x1,DL),signed_int_exp(0,DL),DL);
-  exp_t eb = lt_exp(var_exp(x1,DL),var_exp(max,DL),DL);
-  exp_t ec = post_inc_exp(var_exp(x1,DL),DL);
-  // FIX: lval may be "const" -- we need to use pointer arithmetic
-  // here and cast it to be a non-const pointer to the element type.
-  exp_t lval = subscript_exp(lhs,var_exp(x1,DL),DL);
-  stmt_t body;
-  // since we don't yet allow arrays or comprehensions within comprehensions
-  // these two cases shouldn't arise -- but we ought to support this.
-  switch (e2->r) {
-  case &Array_e(dles):
-    body = init_array(nv2, lval, dles, skip_stmt_dl());
-    break;
-  case &Comprehension_e(vd2,g1,g2,zt):
-    body = init_comprehension(nv2, lval, vd2, g1,g2,zt,skip_stmt_dl(), false);
-    break;
-  case &AnonStruct_e(st,dles):
-    body = init_anon_struct(nv, lval, st, dles, skip_stmt_dl());
-    break;
-  default:
-    exp_to_c(nv2,e2);
-    body = assign_stmt(lval,e2,DL);
-    break;
-  }
-  stmt_t s2 = for_stmt(ea,eb,ec,body,DL);
-  // for zero-terminated comprehensions, we must initialize the last elt to 0
-  if (zero_term) {
-    // FIX: lhs[max] may be "const" -- we need to use pointer arithmetic
+  region r2 {
+    env_t nv2 = add_varmap(r2,nv,x1,varb_exp(x1,new Local_b(vd),DL));
+    qvar_t max = temp_var();
+    exp_t ea = assign_exp(var_exp(x1,DL),signed_int_exp(0,DL),DL);
+    exp_t eb = lt_exp(var_exp(x1,DL),var_exp(max,DL),DL);
+    exp_t ec = post_inc_exp(var_exp(x1,DL),DL);
+    // FIX: lval may be "const" -- we need to use pointer arithmetic
     // here and cast it to be a non-const pointer to the element type.
-    exp_t ex = assign_exp(subscript_exp(lhs,var_exp(max,DL),DL),
-                          cast_it(elt_typ,uint_exp(0,DL)),DL);
-    s2 = seq_stmt(s2,exp_stmt(ex,DL),DL);
+    exp_t lval = subscript_exp(lhs,var_exp(x1,DL),DL);
+    stmt_t body;
+    // since we don't yet allow arrays or comprehensions within comprehensions
+    // these two cases shouldn't arise -- but we ought to support this.
+    switch (e2->r) {
+    case &Array_e(dles):
+      body = init_array(nv2, lval, dles, skip_stmt_dl());
+      break;
+    case &Comprehension_e(vd2,g1,g2,zt):
+      body = init_comprehension(nv2, lval, vd2, g1,g2,zt,skip_stmt_dl(), false);
+      break;
+    case &AnonStruct_e(st,dles):
+      body = init_anon_struct(nv, lval, st, dles, skip_stmt_dl());
+      break;
+    default:
+      exp_to_c(nv2,e2);
+      body = assign_stmt(lval,e2,DL);
+      break;
+    }
+    stmt_t s2 = for_stmt(ea,eb,ec,body,DL);
+    // for zero-terminated comprehensions, we must initialize the last elt to 0
+    if (zero_term) {
+      // FIX: lhs[max] may be "const" -- we need to use pointer arithmetic
+      // here and cast it to be a non-const pointer to the element type.
+      exp_t ex = assign_exp(subscript_exp(lhs,var_exp(max,DL),DL),
+                            cast_it(elt_typ,uint_exp(0,DL)),DL);
+      s2 = seq_stmt(s2,exp_stmt(ex,DL),DL);
+    }
+    // note that we get rid of the const on the index variable x1 here
+    return seq_stmt(declare_stmt(max,uint_typ,e1,
+                                 declare_stmt(x1,uint_typ,NULL,s2,DL),DL),s,DL);
   }
-  // note that we get rid of the const on the index variable x1 here
-  return seq_stmt(declare_stmt(max,uint_typ,e1,
-			       declare_stmt(x1,uint_typ,NULL,s2,DL),DL),s,DL);
 }
 
 static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
@@ -1485,67 +1506,69 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
   default: toc_impos("found bad lhs for zero-terminated pointer assignment");
   }
   let x = temp_var();                // build ptr_type x = ea + eb;
-  nv = add_varmap(nv, x, var_exp(x,DL));  // add x to the varmap
-  let x_vd = new Vardecl {Public,x,mt_tq,c_fat_ptr_type,xinit,NULL,NULL,false};
-  let x_bnd = new Local_b(x_vd);     // build *x -- need to translate here
-  let x_exp = varb_exp(x,x_bnd,DL);  // to check the bound and for NULL
-  x_exp->topt = new Opt(fat_ptr_type);
-  let deref_x = deref_exp(x_exp,DL);
-  deref_x->topt = new Opt(elt_type);
-  exp_to_c(nv,deref_x);
-  let y = temp_var();                // build elt_type y = *x;
-  nv = add_varmap(nv, y, var_exp(y,DL));  // add y to the varmap
-  let y_vd = new Vardecl {Public,y,mt_tq,c_elt_type,deref_x,NULL,NULL,false};
-  let y_bnd = new Local_b(y_vd);
-  exp_t z_init = e2;                 // build y op e2 and translate
-  if (popt != NULL) {
-    let y_exp = varb_exp(y,y_bnd,DL);
-    y_exp->topt = deref_x->topt;
-    z_init = prim2_exp(popt->v,y_exp,e2,DL);
-    z_init->topt = y_exp->topt;
+  region rgn2 {
+    let nv = add_varmap(rgn2, nv, x, var_exp(x,DL));  // add x to the varmap
+    let x_vd = new Vardecl {Public,x,mt_tq,c_fat_ptr_type,xinit,NULL,NULL,false};
+    let x_bnd = new Local_b(x_vd);     // build *x -- need to translate here
+    let x_exp = varb_exp(x,x_bnd,DL);  // to check the bound and for NULL
+    x_exp->topt = new Opt(fat_ptr_type);
+    let deref_x = deref_exp(x_exp,DL);
+    deref_x->topt = new Opt(elt_type);
+    exp_to_c(nv,deref_x);
+    let y = temp_var();                // build elt_type y = *x;
+    nv = add_varmap(rgn2, nv, y, var_exp(y,DL));  // add y to the varmap
+    let y_vd = new Vardecl {Public,y,mt_tq,c_elt_type,deref_x,NULL,NULL,false};
+    let y_bnd = new Local_b(y_vd);
+    exp_t z_init = e2;                 // build y op e2 and translate
+    if (popt != NULL) {
+      let y_exp = varb_exp(y,y_bnd,DL);
+      y_exp->topt = deref_x->topt;
+      z_init = prim2_exp(popt->v,y_exp,e2,DL);
+      z_init->topt = y_exp->topt;
+    }
+    exp_to_c(nv,z_init);
+    let z = temp_var();                // build z = y op e2;
+    let z_vd = new Vardecl {Public,z,mt_tq,c_elt_type,z_init,NULL,NULL,false};
+    let z_bnd = new Local_b(z_vd);
+    nv = add_varmap(rgn2, nv, z, var_exp(z,DL));  // add z to the varmap
+    // build y == zero and translate -- here, we need to know what
+    // the element type is to generate the right zero.  
+    let y2_exp = varb_exp(y,y_bnd,DL); y2_exp->topt = deref_x->topt;
+    let zero1_exp = generate_zero(elt_type);
+    let comp1_exp = prim2_exp(Eq,y2_exp,zero1_exp,DL);
+    comp1_exp->topt = new Opt(sint_typ);
+    exp_to_c(nv,comp1_exp);
+    // build z != zero and translate
+    let z_exp = varb_exp(z,z_bnd,DL); z_exp->topt = deref_x->topt;
+    let zero2_exp = generate_zero(elt_type);
+    let comp2_exp = prim2_exp(Neq,z_exp,zero2_exp,DL);
+    comp2_exp->topt = new Opt(sint_typ);
+    exp_to_c(nv,comp2_exp);
+    // build x.size == 1 directly (no translation)
+    let xsizeargs = list(varb_exp(x,x_bnd,DL),
+                         sizeoftyp_exp(typ_to_c(elt_type),DL));
+    let oneexp = uint_exp(1,DL);
+    exp_t xsize;
+    if (is_dynforward) 
+      xsize = prim2_exp(Eq,fncall_exp(_get_dynforward_size_e,xsizeargs,DL),
+                        oneexp,DL);
+    else 
+      xsize = prim2_exp(Eq,fncall_exp(_get_dyneither_size_e,xsizeargs,DL),
+                        oneexp,DL);
+    // start assembling the statement
+    let comp_exp = and_exp(xsize,and_exp(comp1_exp,comp2_exp,DL),DL);
+    let thr_stmt = exp_stmt(fncall_exp(_throw_arraybounds_e,NULL,DL),DL);
+    let xcurr = aggrmember_exp(varb_exp(x,x_bnd,DL),curr_sp,DL);
+    xcurr = cast_it(c_ptr_type,xcurr);
+    let deref_xcurr = deref_exp(xcurr,DL);
+    let asn_exp = assign_exp(deref_xcurr,var_exp(z,DL),DL);
+    let s = exp_stmt(asn_exp,DL);
+    s = seq_stmt(ifthenelse_stmt(comp_exp,thr_stmt,skip_stmt(DL),DL),s,DL);
+    s = decl_stmt(new Decl(new Var_d(z_vd),DL),s,DL);
+    s = decl_stmt(new Decl(new Var_d(y_vd),DL),s,DL);
+    s = decl_stmt(new Decl(new Var_d(x_vd),DL),s,DL);
+    e->r = stmt_exp_r(s);
   }
-  exp_to_c(nv,z_init);
-  let z = temp_var();                // build z = y op e2;
-  let z_vd = new Vardecl {Public,z,mt_tq,c_elt_type,z_init,NULL,NULL,false};
-  let z_bnd = new Local_b(z_vd);
-  nv = add_varmap(nv, z, var_exp(z,DL));  // add z to the varmap
-  // build y == zero and translate -- here, we need to know what
-  // the element type is to generate the right zero.  
-  let y2_exp = varb_exp(y,y_bnd,DL); y2_exp->topt = deref_x->topt;
-  let zero1_exp = generate_zero(elt_type);
-  let comp1_exp = prim2_exp(Eq,y2_exp,zero1_exp,DL);
-  comp1_exp->topt = new Opt(sint_typ);
-  exp_to_c(nv,comp1_exp);
-  // build z != zero and translate
-  let z_exp = varb_exp(z,z_bnd,DL); z_exp->topt = deref_x->topt;
-  let zero2_exp = generate_zero(elt_type);
-  let comp2_exp = prim2_exp(Neq,z_exp,zero2_exp,DL);
-  comp2_exp->topt = new Opt(sint_typ);
-  exp_to_c(nv,comp2_exp);
-  // build x.size == 1 directly (no translation)
-  let xsizeargs = list(varb_exp(x,x_bnd,DL),
-                       sizeoftyp_exp(typ_to_c(elt_type),DL));
-  let oneexp = uint_exp(1,DL);
-  exp_t xsize;
-  if (is_dynforward) 
-    xsize = prim2_exp(Eq,fncall_exp(_get_dynforward_size_e,xsizeargs,DL),
-                      oneexp,DL);
-  else 
-    xsize = prim2_exp(Eq,fncall_exp(_get_dyneither_size_e,xsizeargs,DL),
-                      oneexp,DL);
-  // start assembling the statement
-  let comp_exp = and_exp(xsize,and_exp(comp1_exp,comp2_exp,DL),DL);
-  let thr_stmt = exp_stmt(fncall_exp(_throw_arraybounds_e,NULL,DL),DL);
-  let xcurr = aggrmember_exp(varb_exp(x,x_bnd,DL),curr_sp,DL);
-  xcurr = cast_it(c_ptr_type,xcurr);
-  let deref_xcurr = deref_exp(xcurr,DL);
-  let asn_exp = assign_exp(deref_xcurr,var_exp(z,DL),DL);
-  let s = exp_stmt(asn_exp,DL);
-  s = seq_stmt(ifthenelse_stmt(comp_exp,thr_stmt,skip_stmt(DL),DL),s,DL);
-  s = decl_stmt(new Decl(new Var_d(z_vd),DL),s,DL);
-  s = decl_stmt(new Decl(new Var_d(y_vd),DL),s,DL);
-  s = decl_stmt(new Decl(new Var_d(x_vd),DL),s,DL);
-  e->r = stmt_exp_r(s);
 }
 
 static void exp_to_c(env_t nv, exp_t e) {
@@ -1562,7 +1585,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     let zero = uint_exp(0,DL);
     bool forward_only = false;
     if(is_tagged_pointer_typ(old_typ,&forward_only)) {
-      if(nv->toplevel) 
+      if(is_toplevel(nv))
 	e->r = make_toplevel_dyn_arr(old_typ, zero, zero, forward_only)->r;
       else if (forward_only)
 	e->r = fncall_exp_r(_tag_dynforward_e, list(zero,zero,zero));
@@ -1574,7 +1597,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &Const_e(_): break;
   case &Var_e(qv,b): 
-    try e->r = Dict::lookup(nv->varmap,qv)->r;
+    try e->r = lookup_varmap(nv,qv)->r;
     catch { case Dict::Absent:
        toc_impos("Can't find %s in exp_to_c, Var\n", qvar2string(qv));
     }
@@ -1889,7 +1912,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       if(vai->inject) {
 	tuniondecl_t tud;
 	switch(compress(vai->type)) {
-	case &TunionType(TunionInfo(&KnownTunion(&x),_,_)): tud = x; break;
+	case &TunionType(TunionInfo(KnownTunion(&x),_,_)): tud = x; break;
 	default: toc_impos("toc: unknown tunion in vararg with inject");
 	}
 	qvar_t ? vs = rnew(r) {for i < num_varargs : temp_var()};
@@ -2003,7 +2026,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       switch($(b1,b2)) {
       case $(&Upper_b(b1), &Upper_b(b2)):
 	if(n1 && !n2) {
-	  if(nv->toplevel)
+	  if(is_toplevel(nv))
 	    unimp("can't do NULL-check conversion at top-level");
 	  // cast from t* to t@ -- run-time check: (t*)_check_null(e)
 	  // flow analysis may not set annotation correctly here!
@@ -2031,7 +2054,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         // sanity checking
         if (coercion == NonNull_to_Null)
             impos("conversion mis-classified as null-check: %s",exp2string(e));
-	if(nv->toplevel) {
+	if(is_toplevel(nv)) {
 	  // can't use a function at top-level and don't want macros
           if (zt1 && !p2.elt_tq.real_const && !zt2) {
             // If p2 is not zero-terminated and not const, then we subtract
@@ -2073,7 +2096,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         p1_forward_only = true;
         fallthru(e2);
       case $(DynEither_b, &Upper_b(e2)):
-	if(nv->toplevel)
+	if(is_toplevel(nv))
 	  unimp("can't coerce t? to t* or t@ at the top-level");
         // When we have t?ZEROTERM and are casting to 
         // t*{e2} or t@{e2} *without* the ZEROTERM, then we
@@ -2116,7 +2139,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       case $(DynEither_b, DynEither_b):
 DynCast:
         if (zt1 && !zt2 && !p2.elt_tq.real_const) {
-          if (nv->toplevel)
+          if (is_toplevel(nv))
             unimp("can't coerce a ZEROTERM to a non-const NOZEROTERM pointer at toplevel");
           let td_e = p1_forward_only ? _dynforward_ptr_decrease_size_e :
             _dyneither_ptr_decrease_size_e;
@@ -2132,7 +2155,7 @@ DynCast:
                                   list(copy_exp(e)));
           
         } else if (p1_forward_only != p2_forward_only) {
-          if (nv->toplevel)
+          if (is_toplevel(nv))
             unimp("can't coerce between ? and ?+- at toplevel");
           if (p1_forward_only)
             e->r = fncall_exp_r(_dynforward_to_dyneither_e,list(e1));
@@ -2142,7 +2165,7 @@ DynCast:
 	break;
       case $(&AbsUpper_b(t1),&AbsUpper_b(t2)): 
 	if(n1 && !n2) {
-	  if(nv->toplevel)
+	  if(is_toplevel(nv))
 	    unimp("can't do NULL-check conversion at top-level");
 	  // cast from t* to t@ -- run-time check: (t*)_check_null(e)
 	  // flow analysis may not set annotation correctly here!
@@ -2180,13 +2203,13 @@ DynCast:
     // When e1 is a struct or a tuple, this is really a "new".
     switch (e1->r) {
     case &Struct_e(tdn,ts,es,_):
-      if (nv->toplevel)
+      if (is_toplevel(nv))
 	unimp("%s: & on non-identifiers at the top-level",
               Position::string_of_segment(e1->loc));
       e->r = init_struct(nv, e1->topt->v, ts != NULL, true, NULL, es, tdn)->r;
       break;
     case &Tuple_e(es):
-      if (nv->toplevel)
+      if (is_toplevel(nv))
 	unimp("%s: & on non-identifiers at the top-level",
               Position::string_of_segment(e1->loc));
       e->r = init_tuple(nv, true, NULL, es)->r;
@@ -2203,7 +2226,7 @@ DynCast:
     break;
   case &New_e(rgnopt,e1):
     // FIX: need to deal with zero-terminated arrays
-    if (nv->toplevel)
+    if (is_toplevel(nv))
       unimp("%s: new at top-level", Position::string_of_segment(e1->loc));
     switch (e1->r) {
     case &Array_e(dles0):
@@ -2600,7 +2623,7 @@ DynCast:
     }
     break;
   case &Tuple_e(es):
-    if(!nv->toplevel)
+    if(!is_toplevel(nv))
       e->r = init_tuple(nv,false,NULL,es)->r;
     else {
       // At top-level use an initializer
@@ -2649,7 +2672,7 @@ DynCast:
   case &Struct_e(tdn,ts,dles,sd):
     // Due to a GCC bug w.r.t. to nested designators, we expand this out
     // to ({ t temp; t.f1 = e1, ..., t.fn = en; t}).
-    if(!nv->toplevel)
+    if(!is_toplevel(nv))
       e->r = init_struct(nv,old_typ,ts != NULL,false,NULL,dles,tdn)->r;
     else {
       // At top-level must create an initializer.  For MSVC, sort fields
@@ -2727,7 +2750,7 @@ DynCast:
     }
     let tqts = tuf->typs;
     // we have to do this differently for the toplevel
-    if (nv->toplevel) {
+    if (is_toplevel(nv)) {
       // {i, e1, ... , en};
       list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> dles = NULL;
       for(; es != NULL; es = es->tl, tqts = tqts->tl) {
@@ -2861,27 +2884,28 @@ static stmt_t if_neq_stmt(exp_t e1,exp_t e2,stmt_t fail_stmt) {
 			 fail_stmt,
 			 skip_stmt_dl(),DL);
 }
-static $(env_t,list_t<$(qvar_t,type_t)@`rgn,`rgn>,stmt_t)
-xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
+static $(env_t<`rgn>,list_t<$(qvar_t,type_t)@`rgn,`rgn>,stmt_t)
+xlate_pat(env_t<`rgn> nv, 
+          region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
 	  stmt_t* tag_fail_stmt, stmt_t fail_stmt, 
           list_t<$(qvar_t,type_t)@`rgn,`rgn> decls) {
   stmt_t s; // the test statement
   switch (p->r) {
   case &Var_p(&Vardecl(_,x,_,_,_,_,_,_),p2): 
     // in essence, x = r; but achieved through the varmap
-    return 
-      xlate_pat(add_varmap(nv,x,r), rgn, t, r, path, p2, tag_fail_stmt, 
-                fail_stmt, decls);
+    return xlate_pat(add_varmap(rgn,nv,x,r),
+                     rgn, t, r, path, p2, tag_fail_stmt, 
+                     fail_stmt, decls);
   case &TagInt_p(_,&Vardecl(_,x,_,_,_,_,_,_)): // type translation erases tvar
     // in essence, x = r; but achieved through the varmap
-    nv = add_varmap(nv,x,r);
+    nv = add_varmap(rgn,nv,x,r);
     fallthru;
   case Wild_p: s = skip_stmt_dl(); break; // potentially wasteful
   case &Reference_p(vd,p2):
     // v = path
     let v = temp_var();
     decls = rnew(rgn) List(rnew(rgn) $(v,cstar_typ(typ_to_c(t),mt_tq)),decls);
-    nv    = add_varmap(nv,vd->name,var_exp(v,DL));
+    nv    = add_varmap(rgn,nv,vd->name,var_exp(v,DL));
     // cast is needed to avoid a C warning when pointing to a polymorphic field
     s     = assign_stmt(var_exp(v,DL),
 			cast_it(cstar_typ(typ_to_c(t),mt_tq),
@@ -3128,7 +3152,7 @@ static $(var_t,var_t,switch_clause_t)@`r gen_label(region_t<`r> r,
 
 static bool is_mixed_tunion(type_t t) {
   switch (compress(t)) {
-  case &TunionType(TunionInfo{&KnownTunion(&tud),...}) && !tud->is_flat:
+  case &TunionType(TunionInfo{KnownTunion(&tud),...}) && !tud->is_flat:
     bool seen_novalue = false;
     bool seen_value = false;
     for (let fs = tud->fields->v; fs; fs = fs->tl) {
@@ -3178,7 +3202,9 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
       let s = scs1->hd->body;
       scs1->hd->body = label_stmt(next_l,s,DL);
       next_l = fresh_label();
-      stmt_to_c(switch_as_switch_env(nv,next_l),s);
+      region rgn {
+        stmt_to_c(switch_as_switch_env(rgn,nv,next_l),s);
+      }
     }
     return;
   }
@@ -3189,6 +3215,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
   var_t  end_l = fresh_label();
   // for each case, generate a test label and an entry label
   region rgn {
+    let nv = share_env(rgn,nv);
     list_t<$(var_t,var_t,switch_clause_t)@`rgn,`rgn> lscs = 
       List::rmap_c(rgn,gen_label,rgn,scs);
     list_t<stmt_t,`rgn>                test_stmts = NULL;
@@ -3246,13 +3273,16 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
       let &$(test_lab,body_lab,body_sc) = lscs->hd;
       let env = nvs->hd;
       stmt_t s = body_sc->body;
-      if(lscs->tl != NULL) {
-	let &$(_,fallthru_lab,next_sc) = lscs->tl->hd;
-	stmt_to_c(non_last_switchclause_env(env, end_l, fallthru_lab,
-					    next_sc->pat_vars->v, nvs->tl->hd),
-		  s);
-      } else
-	stmt_to_c(last_switchclause_env(env, end_l), s);
+      region rgn2 {
+        if(lscs->tl != NULL) {
+          let &$(_,fallthru_lab,next_sc) = lscs->tl->hd;
+          stmt_to_c(non_last_switchclause_env(rgn2, env, end_l, fallthru_lab,
+                                              next_sc->pat_vars->v, 
+                                              nvs->tl->hd),
+                    s);
+        } else
+          stmt_to_c(last_switchclause_env(rgn2,env, end_l), s);
+      }
       s = seq_stmt(label_stmt(test_lab,test_stmts->hd,DL),
 		   label_stmt(body_lab,s,DL), DL);
       stmts = rnew(rgn) List(s, stmts);
@@ -3325,18 +3355,22 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       continue;
     case &While_s($(e,_),s2):
       exp_to_c(nv,e);
-      stmt_to_c(loop_env(nv),s2);
+      region temp {
+        stmt_to_c(loop_env(temp,nv),s2);
+      }
       return;
     case &Break_s(dest_opt): // dest is NULL when break to end of void function
-      if (nv->break_lab != NULL)
-	s->r = goto_stmt_r(nv->break_lab->v,NULL);
+      let &Env{.break_lab=b,...} = nv;
+      if (b != NULL)
+	s->r = goto_stmt_r(*b,NULL);
       // reset handler
       int dest_depth = dest_opt == NULL ? 0 : dest_opt->try_depth;
       do_npop_before(s->try_depth - dest_depth, s);
       return;
     case &Continue_s(dest):
-      if (nv->continue_lab != NULL)
-	s->r = goto_stmt_r(nv->continue_lab->v,NULL);
+      let &Env{.continue_lab=c,...} = nv;
+      if (c != NULL)
+	s->r = goto_stmt_r(*c,NULL);
       fallthru(dest);
     case &Goto_s(_,dest): 
       // reset handler (note: earlier checks prevent jump into handler)
@@ -3345,15 +3379,18 @@ static void stmt_to_c(env_t nv, stmt_t s) {
     case &For_s(e1,$(e2,_),$(e3,_),s2):
       // FIX:  should e3 be translated in nv?
       exp_to_c(nv,e1); exp_to_c(nv,e2); exp_to_c(nv,e3);
-      stmt_to_c(loop_env(nv),s2);
+      region temp {
+        stmt_to_c(loop_env(temp,nv),s2);
+      }
       return;
     case &Switch_s(e,scs):
       xlate_switch(nv,s,e,scs);
       return;
     case &Fallthru_s(es,dest_clause):
-      if(nv->fallthru_info == NULL)
+      let &Env{.fallthru_info = fi,...} = nv;
+      if(fi == NULL)
 	toc_impos("fallthru in unexpected place"); 
-      let &$(l,vs,other_vmap) = nv->fallthru_info->v;
+      let FallthruInfo{l,vs,other_vmap} = *fi;
       stmt_t s2 = goto_stmt(l, DL);
       // reset handler (after the es evaluation)
       do_npop_before(s->try_depth - (*dest_clause)->body->try_depth, s2);
@@ -3372,8 +3409,11 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       // "statements".  See letdecl_to_c and decls_to_c below.
       switch (d->r) {
       case &Var_d(vd):
-	let nv2 = add_varmap(nv,vd->name,varb_exp(vd->name,new Local_b(vd),DL));
-	local_decl_to_c(nv2, nv2, vd, s1);
+        region temp {
+          let nv2 = add_varmap(temp,nv,vd->name,
+                               varb_exp(vd->name,new Local_b(vd),DL));
+          local_decl_to_c(nv2, nv2, vd, s1);
+        }
 	break;
       case &Let_d(p,_,e):
         // Handle the special case where the pattern is a variable just like
@@ -3385,9 +3425,12 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 	  vd->name = new_name;
           vd->initializer = e;
           d->r = new Var_d(vd);
-	  let nv2 = 
-	    add_varmap(nv,old_name,varb_exp(new_name,new Local_b(vd),DL));
-	  local_decl_to_c(nv2, nv, vd, s1);
+          region temp {
+            let nv2 = 
+              add_varmap(temp,nv,old_name,
+                         varb_exp(new_name,new Local_b(vd),DL));
+            local_decl_to_c(nv2, nv, vd, s1);
+          }
           break;
         default: 
 	  // we treat let declarations specially because they may need
@@ -3422,9 +3465,11 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         break;
       case &Fn_d(fd):
         let c_name = fd->name;
-        nv = add_varmap(nv,fd->name,var_exp(c_name,DL));
-        fndecl_to_c(nv, fd, false);
-        stmt_to_c(nv,s1);
+        region temp {
+          let nv = add_varmap(temp,nv,fd->name,var_exp(c_name,DL));
+          fndecl_to_c(nv, fd, false);
+          stmt_to_c(nv,s1);
+        }
         break;
       default: impos("bad nested declaration within function");
       }
@@ -3432,8 +3477,10 @@ static void stmt_to_c(env_t nv, stmt_t s) {
     case &Label_s(lab,s1):
       s = s1; continue;
     case &Do_s(s2,$(e,_)):
-      stmt_to_c(loop_env(nv),s2);
-      exp_to_c(nv,e);
+      region temp {
+        stmt_to_c(loop_env(temp,nv),s2);
+        exp_to_c(nv,e);
+      }
       return;
     case &TryCatch_s(body,scs):
       // NOTE: Because explicit fallthru is not allowed in the last case,
@@ -3463,57 +3510,56 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       // e_exp needs a typ because it'll go through exp_to_c;
       // as well, it must be in varmap
       e_exp->topt = new Opt(e_typ);
-      nv = add_varmap(nv,e_var,e_exp);
+      region temp {
+        let nv = add_varmap(temp,nv,e_var,e_exp);
+        // translate the body
+        stmt_to_c(nv,body);
+        let tryandpop_stmt = seq_stmt(body,
+                                      exp_stmt(fncall_exp(_pop_handler_e, 
+                                                          NULL,
+                                                          DL), DL),DL);
+        // add a default case which re-throws the exception
+        let x    = temp_var();
+        let xexp = var_exp(x,DL);
+        let x_vd = new_vardecl(x,exn_typ,NULL);
+        xexp->topt = new Opt(exn_typ);
+        let p = new Pat{.r=new Var_p(x_vd,new Pat{.r=Wild_p,.topt = new Opt(exn_typ), .loc = DL}), .topt=new Opt(exn_typ), .loc=DL};
+        let te = throw_exp(xexp,DL);
+        te->topt = new Opt(VoidType);
+        let rs = exp_stmt(te,DL);
+        let default_case =
+          new Switch_clause{.pattern=p,.pat_vars=new Opt(new List(x_vd,NULL)),
+                            .where_clause=NULL,.body=rs,.loc=DL};
+        let handler_stmt = switch_stmt(e_exp,
+                                       List::append(scs,
+                                                    new List(default_case,NULL)),DL);
+        // translate the switches
+        stmt_to_c(nv,handler_stmt);
 
-      // translate the body
-      stmt_to_c(nv,body);
-      let tryandpop_stmt = seq_stmt(body,
-                                    exp_stmt(fncall_exp(_pop_handler_e, NULL,
-                                                        DL), DL),DL);
-
-      // add a default case which re-throws the exception
-      let x    = temp_var();
-      let xexp = var_exp(x,DL);
-      let x_vd = new_vardecl(x,exn_typ,NULL);
-      xexp->topt = new Opt(exn_typ);
-      let p = new Pat{.r=new Var_p(x_vd,new Pat{.r=Wild_p,.topt = new Opt(exn_typ), .loc = DL}), .topt=new Opt(exn_typ), .loc=DL};
-      let te = throw_exp(xexp,DL);
-      te->topt = new Opt(VoidType);
-      let rs = exp_stmt(te,DL);
-      let default_case =
-        new Switch_clause{.pattern=p,.pat_vars=new Opt(new List(x_vd,NULL)),
-                          .where_clause=NULL,.body=rs,.loc=DL};
-      let handler_stmt = switch_stmt(e_exp,
-                                     List::append(scs,
-                                                  new List(default_case,NULL)),DL);
-      // translate the switches
-      stmt_to_c(nv,handler_stmt);
-
-      // wrap with the conditional, declarations, and setjmp
-      let setjmp_call = // setjmp(h.handler)
-        fncall_exp(setjmp_e,
-                   new List(aggrmember_exp(h_exp,handler_sp,DL), NULL),
-                   DL);
-      let pushhandler_call = // _pushhandler(h);
-        exp_stmt(fncall_exp(_push_handler_e, 
-                            new List(address_exp(h_exp,DL), NULL),
-                            DL),
-                 DL);
-      let zero_exp = int_exp(Signed,0,DL);
-      let one_exp = int_exp(Signed,1,DL);
-      s->r =
-        declare_stmt(h_var, h_typ, NULL,
-        seq_stmt(pushhandler_call,
-        declare_stmt(was_thrown_var,was_thrown_typ,zero_exp,
-        seq_stmt(ifthenelse_stmt(setjmp_call,
-                                 assign_stmt(was_thrown_exp,one_exp,DL),
-                                 skip_stmt_dl(),
-                                 DL),
-        ifthenelse_stmt(prim1_exp(Not, was_thrown_exp,DL),
-                        tryandpop_stmt,
-                        declare_stmt(e_var,e_typ,
-                                     cast_it(e_typ,_exn_thrown_e),
-                        handler_stmt,DL),DL),DL),DL),DL),DL)->r;
+        // wrap with the conditional, declarations, and setjmp
+        let setjmp_call = // setjmp(h.handler)
+          fncall_exp(setjmp_e,
+                     new List(aggrmember_exp(h_exp,handler_sp,DL), NULL),
+                     DL);
+        let pushhandler_call = // _pushhandler(h);
+          exp_stmt(fncall_exp(_push_handler_e, 
+                              new List(address_exp(h_exp,DL), NULL),
+                              DL),DL);
+        let zero_exp = int_exp(Signed,0,DL);
+        let one_exp = int_exp(Signed,1,DL);
+        s->r =
+          declare_stmt(h_var, h_typ, NULL,
+          seq_stmt(pushhandler_call,
+          declare_stmt(was_thrown_var,was_thrown_typ,zero_exp,
+          seq_stmt(ifthenelse_stmt(setjmp_call,
+                                   assign_stmt(was_thrown_exp,one_exp,DL),
+                                   skip_stmt_dl(),DL),
+          ifthenelse_stmt(prim1_exp(Not, was_thrown_exp,DL),
+                          tryandpop_stmt,
+                          declare_stmt(e_var,e_typ,
+                                       cast_it(e_typ,_exn_thrown_e),
+                          handler_stmt,DL),DL),DL),DL),DL),DL)->r;
+      }
       return;
     case &Region_s(tv, vd, resetable, body):
       // NOTE:  _npop_handler has to deal with regions as well as exceptions
@@ -3530,7 +3576,9 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       exp_t  rh_exp = var_exp(rh_var,DL);
       exp_t  x_exp  = var_exp(x_var, DL);
 
-      stmt_to_c(add_varmap(nv,x_var,x_exp),body);
+      region temp {
+        stmt_to_c(add_varmap(temp,nv,x_var,x_exp),body);
+      }
 
       s->r = 
 	declare_stmt(rh_var,rh_struct_typ, 
@@ -3561,30 +3609,33 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
   f->effect   = NULL;
   f->rgn_po   = NULL;
   f->ret_type = typ_to_c(f->ret_type);
-  for (let args=f->args; args != NULL; args = args->tl) {
-    let x = new $((nmspace_t)Loc_n,(*args->hd)[0]);
-    (*args->hd)[2] = typ_to_c((*args->hd)[2]);
-    nv = add_varmap(nv,x,var_exp(x,DL));
+  region frgn {
+    let nv = share_env(frgn,nv);
+    for (let args=f->args; args != NULL; args = args->tl) {
+      let x = new $((nmspace_t)Loc_n,(*args->hd)[0]);
+      (*args->hd)[2] = typ_to_c((*args->hd)[2]);
+      nv = add_varmap(frgn,nv,x,var_exp(x,DL));
+    }
+    // for C code, we need to go through and convert all of the types 
+    // from Cyclone types to C, but otherwise leave the code alone.
+    if (cinclude) {
+      stmttypes_to_c(f->body);
+      return;
+    }
+    if (f->cyc_varargs && f->cyc_varargs->name != NULL) {
+      let VarargInfo{n,tq,t,i} = *f->cyc_varargs;
+      let t2 = typ_to_c(dynforward_typ(t,HeapRgn,tq,false_conref));// region irrelevant
+      let x2 = new $((nmspace_t)Loc_n,n->v);
+      f->args = List::append(f->args,new List(new $(n->v,tq,t2),NULL));
+      nv = add_varmap(frgn,nv,x2,var_exp(x2,DL));
+      f->cyc_varargs = NULL;
+    }
+    // Tovc would like to use param_vardecls:
+    for(let arg_vds = f->param_vardecls->v; arg_vds!=NULL; arg_vds=arg_vds->tl) {
+      arg_vds->hd->type = typ_to_c(arg_vds->hd->type);
+    }
+    stmt_to_c(clear_toplevel(frgn,nv),f->body);
   }
-  // for C code, we need to go through and convert all of the types 
-  // from Cyclone types to C, but otherwise leave the code alone.
-  if (cinclude) {
-    stmttypes_to_c(f->body);
-    return;
-  }
-  if (f->cyc_varargs && f->cyc_varargs->name != NULL) {
-    let VarargInfo{n,tq,t,i} = *f->cyc_varargs;
-    let t2 = typ_to_c(dynforward_typ(t,HeapRgn,tq,false_conref));// region irrelevant
-    let x2 = new $((nmspace_t)Loc_n,n->v);
-    f->args = List::append(f->args,new List(new $(n->v,tq,t2),NULL));
-    nv = add_varmap(nv,x2,var_exp(x2,DL));
-    f->cyc_varargs = NULL;
-  }
-  // Tovc would like to use param_vardecls:
-  for(let arg_vds = f->param_vardecls->v; arg_vds!=NULL; arg_vds=arg_vds->tl) {
-    arg_vds->hd->type = typ_to_c(arg_vds->hd->type);
-  }
-  stmt_to_c(clear_toplevel(nv),f->body);
 }
 
 // there's no abstract scope in C
@@ -3597,19 +3648,19 @@ static scope_t scope_to_c(scope_t s) {
 }
 
 // struct declarations -- straightforward
-opt_t<Dict::dict_t<qvar_t,aggrdecl_t>> aggrs_so_far = NULL;
+Dict::dict_t<qvar_t,aggrdecl_t> * aggrs_so_far = NULL;
 static void aggrdecl_to_c(aggrdecl_t ad) {
   let n = ad->name;
   if (aggrs_so_far == NULL) 
-    aggrs_so_far = new Opt(Dict::empty(qvar_cmp));
+    aggrs_so_far = new Dict::empty(qvar_cmp);
   bool seen_defn_before;
-  let dopt = Dict::lookup_opt(aggrs_so_far->v, n);
+  let dopt = Dict::lookup_opt(*aggrs_so_far, n);
   if (dopt == NULL) {
     seen_defn_before = false;
-    aggrs_so_far->v = Dict::insert(aggrs_so_far->v,n,ad);
+    *aggrs_so_far = Dict::insert(*aggrs_so_far,n,ad);
   } else {
     if (dopt->v->impl == NULL) {
-      aggrs_so_far->v = Dict::insert(aggrs_so_far->v,n,ad);
+      *aggrs_so_far = Dict::insert(*aggrs_so_far,n,ad);
       seen_defn_before = false;
     } else
       seen_defn_before = true;
@@ -3706,7 +3757,7 @@ static void tuniondecl_to_c(tuniondecl_t tud) {
       result_decls = new List(new_decl(new Aggr_d(ad),DL),result_decls);
       if (tud->is_flat) {
         let field = new Aggrfield((*f->name)[1], mt_tq,
-                                  new AggrType(AggrInfo(new KnownAggr(new ad), NULL)),
+                                  new AggrType(AggrInfo(KnownAggr(new ad), NULL)),
                                   NULL,NULL);
         flat_structs = new List(field,flat_structs);
       }
@@ -3742,12 +3793,12 @@ static void tuniondecl_to_c(tuniondecl_t tud) {
 //     (struct _Baz_struct*)malloc(sizeof(struct _Baz_struct));
 //   *t = (struct _Baz_struct){.tag=Baz, .f1 = e1, .f2 = e2};
 //   t;})
-static opt_t<Dict::dict_t<qvar_t, bool>> xtunion_fields_so_far = NULL;
+static Dict::dict_t<qvar_t, bool> * xtunion_fields_so_far = NULL;
 //true if already seen & initialized, false if seen but non initialized (extern)
 
 static void xtuniondecl_to_c(tuniondecl_t xd) {
   if (xtunion_fields_so_far == NULL)
-    xtunion_fields_so_far = new Opt(Dict::empty(qvar_cmp));
+    xtunion_fields_so_far = new Dict::empty(qvar_cmp);
   if(xd->fields == NULL)
     return;
   let n = xd->name;
@@ -3757,7 +3808,7 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
     let sz_exp  = uint_exp((*fn).size+4,DL);
     let tag_typ = array_typ(char_typ,mt_tq,sz_exp,false_conref,NULL);
     // FIX: making bad alignment and pointer-size assumptions!
-    switch (Dict::lookup_opt(xtunion_fields_so_far->v,f->name)) {
+    switch (Dict::lookup_opt(*xtunion_fields_so_far,f->name)) {
     case NULL:
       exp_opt_t initopt = NULL;
       if (f->sc != Extern) {
@@ -3770,8 +3821,8 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
       let tag_decl = new_vardecl(f->name, tag_typ, initopt);
       tag_decl->sc = f->sc;
       result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
-      xtunion_fields_so_far->v = 
-	Dict::insert(xtunion_fields_so_far->v, f->name, f->sc != Extern);
+      *xtunion_fields_so_far = 
+	Dict::insert(*xtunion_fields_so_far, f->name, f->sc != Extern);
       if(f->typs != NULL) {
 	list_t<aggrfield_t> fields = NULL;
 	int i = 1;
@@ -3806,8 +3857,8 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
 	let tag_decl = new_vardecl(f->name, tag_typ, initopt);
 	tag_decl->sc = f->sc;
 	result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
-	xtunion_fields_so_far->v = Dict::insert(xtunion_fields_so_far->v, 
-						f->name, true);
+	*xtunion_fields_so_far = Dict::insert(*xtunion_fields_so_far, 
+                                              f->name, true);
       }
       break;
     default: break;
@@ -3844,9 +3895,10 @@ static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s) {
         // static declarations have to be treated as if they're toplevel
         // w.r.t. the translation.  NB: Any other generated declarations
 	// will also be left at top-level??
-        let nv2 = new *init_nv;
-        nv2->toplevel = true;
-        exp_to_c(nv2, init);
+        region temp {
+          let nv2 = set_toplevel(temp,init_nv);
+          exp_to_c(nv2, init);
+        }
       } else 
         exp_to_c(init_nv, init);
       break;
@@ -3886,6 +3938,7 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, type_t t, exp_t e, stmt_t s) {
   qvar_t x = temp_var();
   region prgn {
     let fail = throw_match_stmt();
+    let nv = share_env(prgn,nv);
     let $(nv,vars,test_stmt) =
       xlate_pat(nv, prgn, t, var_exp(x,DL), var_exp(x,DL), p, 
 		&fail, throw_match_stmt(),NULL);
@@ -4032,9 +4085,9 @@ static void stmttypes_to_c(stmt_t s) {
 // and a new translation environment.  All source-level variables should
 // be entered in the varmap of the env.  Note that top-level variable
 // declarations are treated differently.
-static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top, bool cinclude) {
+static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, bool top, bool cinclude) {
   for (; ds != NULL; ds = ds->tl) {
-    if (!nv->toplevel)
+    if (!is_toplevel(nv))
       impos("decls_to_c: not at toplevel!");
     decl_t d = ds->hd;
     switch (d->r) {
@@ -4049,7 +4102,7 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top, bool cinclude) {
         else 
           exp_to_c(nv, (exp_t)vd->initializer);
       }
-      nv = add_varmap(nv,vd->name,varb_exp(c_name,new Global_b(vd),DL));
+      nv = add_varmap(r,nv,vd->name,varb_exp(c_name,new Global_b(vd),DL));
       vd->name = c_name;
       vd->sc   = scope_to_c(vd->sc);
       vd->type = typ_to_c_array(vd->type);
@@ -4062,7 +4115,7 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top, bool cinclude) {
 	c_name = new $(Rel_n(NULL),(*c_name)[1]);
         fd->sc = Public; // function declarations can't be extern
       }
-      nv = add_varmap(nv,fd->name,var_exp(c_name,DL));
+      nv = add_varmap(r,nv,fd->name,var_exp(c_name,DL));
       fd->name = c_name;
       fndecl_to_c(nv, fd, cinclude);
       result_decls = new List(d,result_decls);
@@ -4102,8 +4155,8 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top, bool cinclude) {
       break;
     case &Namespace_d(_,ds2): fallthru(ds2);
     case &Using_d(_,ds2):     fallthru(ds2);
-    case &ExternC_d(ds2): nv = decls_to_c(nv,ds2,top,cinclude); break;
-    case &ExternCinclude_d(ds2,_): nv = decls_to_c(nv,ds2,top,true); break;
+    case &ExternC_d(ds2): nv = decls_to_c(r,nv,ds2,top,cinclude); break;
+    case &ExternCinclude_d(ds2,_): nv = decls_to_c(r,nv,ds2,top,true); break;
     }
   }
   return nv;
@@ -4127,10 +4180,12 @@ static void init() {
 // a list of C declarations.
 list_t<decl_t> toc(list_t<decl_t> ds) {
   init();
-  decls_to_c(empty_env(),ds,true,false);
+  region start {
+    decls_to_c(start,empty_env(start),ds,true,false);
 #ifdef BCE_DEBUG
-  fprintf(stderr,"***eliminated %d out of %d bounds checks\n",
-          bounds_checks_eliminated, total_bounds_checks);
+    fprintf(stderr,"***eliminated %d out of %d bounds checks\n",
+            bounds_checks_eliminated, total_bounds_checks);
 #endif
+  }
   return imp_rev(result_decls);
 }

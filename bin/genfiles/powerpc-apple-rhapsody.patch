@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c powerpc-apple-rhapsody/lib/arg.c
 *** i686-unknown-linux/lib/arg.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/arg.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/arg.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 653,661 ****
   #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
@@ -96,7 +96,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c powerpc-apple-rhapsody/li
   _tmp8)+ 1;char*_tmpD=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmpC + 1));
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/assert.c powerpc-apple-rhapsody/lib/assert.c
 *** i686-unknown-linux/lib/assert.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/assert.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/assert.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 660,672 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -125,8 +125,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/assert.c powerpc-apple-rhapsody
   struct Cyc___cycFILE*,struct _dynforward_ptr,struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{
   int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/bitvec.c powerpc-apple-rhapsody/lib/bitvec.c
-*** i686-unknown-linux/lib/bitvec.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/bitvec.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/lib/bitvec.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/lib/bitvec.c	Wed Jul  3 15:53:00 2002
 ***************
 *** 661,671 ****
   _dynforward_ptr f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern
@@ -152,7 +152,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/bitvec.c powerpc-apple-rhapsody
   Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/buffer.c powerpc-apple-rhapsody/lib/buffer.c
 *** i686-unknown-linux/lib/buffer.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/buffer.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/buffer.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 661,688 ****
   Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
@@ -240,8 +240,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/buffer.c powerpc-apple-rhapsody
   struct Cyc_Buffer_t*bs){Cyc_Buffer_add_substring(b,(struct _dynforward_ptr)bs->buffer,
   0,(int)bs->position);return;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cstubs.c powerpc-apple-rhapsody/lib/cstubs.c
-*** i686-unknown-linux/lib/cstubs.c	Wed Jul  3 13:45:34 2002
---- powerpc-apple-rhapsody/lib/cstubs.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/lib/cstubs.c	Wed Jul  3 15:39:26 2002
+--- powerpc-apple-rhapsody/lib/cstubs.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 108,121 ****
       *Cyc_stdout = &Cyc_stdout_v,
@@ -261,7 +261,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cstubs.c powerpc-apple-rhapsody
 --- 108,113 ----
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cstubs.c.orig powerpc-apple-rhapsody/lib/cstubs.c.orig
 *** i686-unknown-linux/lib/cstubs.c.orig	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/lib/cstubs.c.orig	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/cstubs.c.orig	Wed Jul  3 15:52:56 2002
 ***************
 *** 0 ****
 --- 1,249 ----
@@ -516,7 +516,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cstubs.c.orig powerpc-apple-rha
 +   }
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapsody/lib/cycstubs.c
 *** i686-unknown-linux/lib/cycstubs.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/cycstubs.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/cycstubs.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 660,666 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -1545,7 +1545,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   struct Cyc_utimbuf{long actime;long modtime;};
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c.orig powerpc-apple-rhapsody/lib/cycstubs.c.orig
 *** i686-unknown-linux/lib/cycstubs.c.orig	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/lib/cycstubs.c.orig	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/cycstubs.c.orig	Wed Jul  3 15:52:56 2002
 ***************
 *** 0 ****
 --- 1,981 ----
@@ -2532,7 +2532,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c.orig powerpc-apple-r
 + int actime;int modtime;};
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c.rej powerpc-apple-rhapsody/lib/cycstubs.c.rej
 *** i686-unknown-linux/lib/cycstubs.c.rej	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/lib/cycstubs.c.rej	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/cycstubs.c.rej	Wed Jul  3 15:52:56 2002
 ***************
 *** 0 ****
 --- 1,528 ----
@@ -3065,8 +3065,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c.rej powerpc-apple-rh
 +   return write(fd,(const char*)_untag_arr(buf,sizeof(char),1),count);}struct Cyc_utimbuf{
 +   int actime;int modtime;};
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/dict.c powerpc-apple-rhapsody/lib/dict.c
-*** i686-unknown-linux/lib/dict.c	Mon Jul  1 15:16:08 2002
---- powerpc-apple-rhapsody/lib/dict.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/lib/dict.c	Wed Jul  3 15:52:02 2002
+--- powerpc-apple-rhapsody/lib/dict.c	Wed Jul  3 15:53:00 2002
 ***************
 *** 662,672 ****
   void*hd;struct Cyc_List_List*tl;};int Cyc_List_length(struct Cyc_List_List*x);
@@ -3092,7 +3092,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/dict.c powerpc-apple-rhapsody/l
   Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapsody/lib/execinfo.c
 *** i686-unknown-linux/lib/execinfo.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/execinfo.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/execinfo.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 653,751 ****
   #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
@@ -3224,7 +3224,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! _tmp0;}));return 0;}int Cyc_Execinfo_bt(){return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/filename.c powerpc-apple-rhapsody/lib/filename.c
 *** i686-unknown-linux/lib/filename.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/filename.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/filename.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 668,674 ****
   struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[
@@ -3271,7 +3271,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/filename.c powerpc-apple-rhapso
   i))!= '/'){-- i;}return Cyc_substring((struct _dynforward_ptr)filename,i + 1,
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody/lib/getopt.c
 *** i686-unknown-linux/lib/getopt.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/getopt.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/getopt.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 659,667 ****
   _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -3434,7 +3434,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody
   _check_dynforward_subscript(p,sizeof(struct Cyc_option),0))->name)){pfound=
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/grp.c powerpc-apple-rhapsody/lib/grp.c
 *** i686-unknown-linux/lib/grp.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/grp.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/grp.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 667,673 ****
   _dynforward_ptr groups);struct Cyc_Cgrp_Cgroup{char*gr_name;char*gr_passwd;
@@ -3454,7 +3454,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/grp.c powerpc-apple-rhapsody/li
   _tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->gr_name=(struct _dynforward_ptr)
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/hashtable.c powerpc-apple-rhapsody/lib/hashtable.c
 *** i686-unknown-linux/lib/hashtable.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/hashtable.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/hashtable.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 669,681 ****
   _dynforward_ptr s);int Cyc_Hashtable_hash_stringptr(struct _dynforward_ptr*p);void
@@ -3484,7 +3484,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/hashtable.c powerpc-apple-rhaps
   int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lexing.c powerpc-apple-rhapsody/lib/lexing.c
 *** i686-unknown-linux/lib/lexing.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/lexing.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/lexing.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 659,668 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -3575,7 +3575,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lexing.c powerpc-apple-rhapsody
    && _tmp5 != '\000'))_throw_arraybounds();*((char*)_tmp3.curr)=_tmp5;});return s;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lineno.c powerpc-apple-rhapsody/lib/lineno.c
 *** i686-unknown-linux/lib/lineno.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/lineno.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/lineno.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 660,669 ****
   _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -3657,8 +3657,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lineno.c powerpc-apple-rhapsody
   _cycalloc(sizeof(*_tmp10));_tmp10->f1=fname;_tmp10->f2=number;_tmp10;});_tmpF;});
   _npop_handler(0);return _tmp11;}}}}};_pop_handler();}else{void*_tmp7=(void*)
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c powerpc-apple-rhapsody/lib/marshal.c
-*** i686-unknown-linux/lib/marshal.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/marshal.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/lib/marshal.c	Wed Jul  3 15:52:02 2002
+--- powerpc-apple-rhapsody/lib/marshal.c	Wed Jul  3 15:53:00 2002
 ***************
 *** 684,702 ****
   struct _dynforward_ptr l);struct _dynforward_ptr Cyc_Typerep_get_tagname2(
@@ -3700,7 +3700,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c powerpc-apple-rhapsod
   int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dynforward_ptr f1;};
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/position.c powerpc-apple-rhapsody/lib/position.c
 *** i686-unknown-linux/lib/position.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/position.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/position.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 661,672 ****
   Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
@@ -3824,7 +3824,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/position.c powerpc-apple-rhapso
   sizeof(*_tmp49));_tmp49->f1=({struct Cyc_String_pa_struct _tmp4F;_tmp4F.tag=0;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/pp.c powerpc-apple-rhapsody/lib/pp.c
 *** i686-unknown-linux/lib/pp.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/pp.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/pp.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 660,669 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -3864,8 +3864,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/pp.c powerpc-apple-rhapsody/lib
   _dynforward_ptr*);struct _dynforward_ptr Cyc_str_sepstr(struct Cyc_List_List*,
   struct _dynforward_ptr);struct Cyc_Hashtable_Table;struct Cyc_Hashtable_Table*Cyc_Hashtable_create(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/printf.c powerpc-apple-rhapsody/lib/printf.c
-*** i686-unknown-linux/lib/printf.c	Wed Jul  3 13:45:34 2002
---- powerpc-apple-rhapsody/lib/printf.c	Wed Jul  3 13:47:02 2002
+*** i686-unknown-linux/lib/printf.c	Wed Jul  3 15:39:26 2002
+--- powerpc-apple-rhapsody/lib/printf.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 659,670 ****
   _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -4019,7 +4019,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/printf.c powerpc-apple-rhapsody
   char)),fmt,ap);}int Cyc_sprintf(struct _dynforward_ptr s,struct _dynforward_ptr fmt,
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/rope.c powerpc-apple-rhapsody/lib/rope.c
 *** i686-unknown-linux/lib/rope.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/rope.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/rope.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 667,675 ****
   struct Cyc_Rope_Rope_node*Cyc_Rope_concata(struct _dynforward_ptr);struct Cyc_Rope_Rope_node*
@@ -4060,7 +4060,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/rope.c powerpc-apple-rhapsody/l
   int*)_tmp14)!= 1)goto _LL5;_tmp16=((struct Cyc_Rope_Array_rope_struct*)_tmp14)->f1;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/scanf.c powerpc-apple-rhapsody/lib/scanf.c
 *** i686-unknown-linux/lib/scanf.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/scanf.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/scanf.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 662,675 ****
   _dynforward_ptr f1;};int isspace(int);int isupper(int);typedef struct{int quot;int rem;}
@@ -4109,7 +4109,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/scanf.c powerpc-apple-rhapsody/
   _dyneither_ptr fmt);static short*Cyc_va_arg_short_ptr(void*a){void*_tmp0=a;short*
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody/lib/string.c
 *** i686-unknown-linux/lib/string.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/string.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/string.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 661,679 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -4969,7 +4969,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   void))< n)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp7B=
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/tmp.c powerpc-apple-rhapsody/lib/tmp.c
 *** i686-unknown-linux/lib/tmp.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/tmp.c	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/lib/tmp.c	Wed Jul  3 15:52:56 2002
 ***************
 *** 658,667 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -4992,8 +4992,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/tmp.c powerpc-apple-rhapsody/li
   };struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/typerep.c powerpc-apple-rhapsody/lib/typerep.c
-*** i686-unknown-linux/lib/typerep.c	Sun Jun 23 17:46:10 2002
---- powerpc-apple-rhapsody/lib/typerep.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/lib/typerep.c	Wed Jul  3 15:52:02 2002
+--- powerpc-apple-rhapsody/lib/typerep.c	Wed Jul  3 15:53:00 2002
 ***************
 *** 677,687 ****
   struct _dynforward_ptr l);struct _dynforward_ptr Cyc_Typerep_get_tagname2(
@@ -5018,10 +5018,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/typerep.c powerpc-apple-rhapsod
   int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
   Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyn.c powerpc-apple-rhapsody/src/absyn.c
-*** i686-unknown-linux/src/absyn.c	Mon Jul  1 15:16:08 2002
---- powerpc-apple-rhapsody/src/absyn.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/absyn.c	Wed Jul  3 15:51:58 2002
+--- powerpc-apple-rhapsody/src/absyn.c	Wed Jul  3 15:52:56 2002
 ***************
-*** 1031,1045 ****
+*** 1040,1054 ****
   int tag;struct _dynforward_ptr*f1;int f2;struct _dynforward_ptr f3;};struct Cyc_Typerep_Enum_struct{
   int tag;struct _dynforward_ptr*f1;int f2;struct _dynforward_ptr f3;};unsigned int Cyc_Typerep_size_type(
   void*rep);extern void*Cyc_decls_rep;extern struct Cyc_Typerep_Struct_struct Cyc_struct_Position_Segment_rep;
@@ -5037,7 +5037,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyn.c powerpc-apple-rhapsody/
   int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
   int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct
   _dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
---- 1031,1043 ----
+--- 1040,1052 ----
   int tag;struct _dynforward_ptr*f1;int f2;struct _dynforward_ptr f3;};struct Cyc_Typerep_Enum_struct{
   int tag;struct _dynforward_ptr*f1;int f2;struct _dynforward_ptr f3;};unsigned int Cyc_Typerep_size_type(
   void*rep);extern void*Cyc_decls_rep;extern struct Cyc_Typerep_Struct_struct Cyc_struct_Position_Segment_rep;
@@ -5052,8 +5052,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyn.c powerpc-apple-rhapsody/
   int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct
   _dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyndump.c powerpc-apple-rhapsody/src/absyndump.c
-*** i686-unknown-linux/src/absyndump.c	Mon Jul  1 15:16:08 2002
---- powerpc-apple-rhapsody/src/absyndump.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/absyndump.c	Wed Jul  3 15:51:58 2002
+--- powerpc-apple-rhapsody/src/absyndump.c	Wed Jul  3 15:52:58 2002
 ***************
 *** 658,666 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -5091,8 +5091,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyndump.c powerpc-apple-rhaps
   struct _dynforward_ptr line;int line_no;int col;};extern char Cyc_Position_Exit[9];
   struct Cyc_Position_Segment;struct Cyc_Position_Error{struct _dynforward_ptr source;
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/absynpp.c powerpc-apple-rhapsody/src/absynpp.c
-*** i686-unknown-linux/src/absynpp.c	Mon Jul  1 15:16:08 2002
---- powerpc-apple-rhapsody/src/absynpp.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/absynpp.c	Wed Jul  3 15:51:58 2002
+--- powerpc-apple-rhapsody/src/absynpp.c	Wed Jul  3 15:52:58 2002
 ***************
 *** 659,667 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -5113,25 +5113,25 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/absynpp.c powerpc-apple-rhapsod
   _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_struct{
   int tag;double f1;};struct Cyc_LongDouble_pa_struct{int tag;long double f1;};struct
 ***************
-*** 901,907 ****
+*** 909,915 ****
   struct Cyc_Absyn_Exp*Cyc_Absyn_sizeoftyp_exp(void*t,struct Cyc_Position_Segment*);
   struct _dynforward_ptr Cyc_Absyn_attribute2string(void*);struct _tuple3{void*f1;
-  struct _tuple0*f2;};struct _tuple3 Cyc_Absyn_aggr_kinded_name(void*);struct Cyc_Buffer_t;
-! unsigned int Cyc_strlen(struct _dynforward_ptr s);int Cyc_strptrcmp(struct
-  _dynforward_ptr*s1,struct _dynforward_ptr*s2);struct _dynforward_ptr Cyc_strconcat(
+  struct _tuple0*f2;};struct _tuple3 Cyc_Absyn_aggr_kinded_name(union Cyc_Absyn_AggrInfoU_union);
+! struct Cyc_Buffer_t;unsigned int Cyc_strlen(struct _dynforward_ptr s);int Cyc_strptrcmp(
+  struct _dynforward_ptr*s1,struct _dynforward_ptr*s2);struct _dynforward_ptr Cyc_strconcat(
   struct _dynforward_ptr,struct _dynforward_ptr);struct _dynforward_ptr Cyc_str_sepstr(
   struct Cyc_List_List*,struct _dynforward_ptr);struct _tuple4{unsigned int f1;int f2;}
---- 899,905 ----
+--- 907,913 ----
   struct Cyc_Absyn_Exp*Cyc_Absyn_sizeoftyp_exp(void*t,struct Cyc_Position_Segment*);
   struct _dynforward_ptr Cyc_Absyn_attribute2string(void*);struct _tuple3{void*f1;
-  struct _tuple0*f2;};struct _tuple3 Cyc_Absyn_aggr_kinded_name(void*);struct Cyc_Buffer_t;
-! unsigned long Cyc_strlen(struct _dynforward_ptr s);int Cyc_strptrcmp(struct
-  _dynforward_ptr*s1,struct _dynforward_ptr*s2);struct _dynforward_ptr Cyc_strconcat(
+  struct _tuple0*f2;};struct _tuple3 Cyc_Absyn_aggr_kinded_name(union Cyc_Absyn_AggrInfoU_union);
+! struct Cyc_Buffer_t;unsigned long Cyc_strlen(struct _dynforward_ptr s);int Cyc_strptrcmp(
+  struct _dynforward_ptr*s1,struct _dynforward_ptr*s2);struct _dynforward_ptr Cyc_strconcat(
   struct _dynforward_ptr,struct _dynforward_ptr);struct _dynforward_ptr Cyc_str_sepstr(
   struct Cyc_List_List*,struct _dynforward_ptr);struct _tuple4{unsigned int f1;int f2;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapsody/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Mon Jul  1 15:16:10 2002
---- powerpc-apple-rhapsody/src/buildlib.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/buildlib.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/buildlib.c	Wed Jul  3 15:53:00 2002
 ***************
 *** 660,672 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -5185,7 +5185,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   struct Cyc_Hashtable_Table*t,void*key,void*val);void*Cyc_Hashtable_lookup(struct
   Cyc_Hashtable_Table*t,void*key);int Cyc_Hashtable_hash_stringptr(struct
 ***************
-*** 1023,1047 ****
+*** 1032,1056 ****
   le;};struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tc_init(struct _RegionHandle*);void Cyc_Tc_tc(
   struct _RegionHandle*,struct Cyc_Tcenv_Tenv*te,int var_default_init,struct Cyc_List_List*
   ds);typedef struct{int quot;int rem;}Cyc_div_t;typedef struct{long quot;long rem;}Cyc_ldiv_t;
@@ -5211,7 +5211,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   int);int toupper(int);void Cyc_Lex_lex_init(int use_cyclone_keywords);extern char*
   Ccomp;struct Cyc___cycFILE*Cyc_log_file=0;struct Cyc___cycFILE*Cyc_cstubs_file=0;
   struct Cyc___cycFILE*Cyc_cycstubs_file=0;int Cyc_log(struct _dynforward_ptr fmt,
---- 1021,1038 ----
+--- 1030,1047 ----
   le;};struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tc_init(struct _RegionHandle*);void Cyc_Tc_tc(
   struct _RegionHandle*,struct Cyc_Tcenv_Tenv*te,int var_default_init,struct Cyc_List_List*
   ds);typedef struct{int quot;int rem;}Cyc_div_t;typedef struct{long quot;long rem;}Cyc_ldiv_t;
@@ -5231,7 +5231,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   Ccomp;struct Cyc___cycFILE*Cyc_log_file=0;struct Cyc___cycFILE*Cyc_cstubs_file=0;
   struct Cyc___cycFILE*Cyc_cycstubs_file=0;int Cyc_log(struct _dynforward_ptr fmt,
 ***************
-*** 1458,1470 ****
+*** 1467,1479 ****
   lexstate=Cyc_lex_engine(lexstate,lexbuf);switch(lexstate){case 0: _LL5: Cyc_current_source=({
   struct _dynforward_ptr*_tmpC=_cycalloc(sizeof(*_tmpC));_tmpC[0]=(struct
   _dynforward_ptr)Cyc_substring((struct _dynforward_ptr)Cyc_Lexing_lexeme(lexbuf),0,(
@@ -5245,7 +5245,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   lexbuf)- Cyc_Lexing_lexeme_start(lexbuf))- 1));_tmpE;});Cyc_current_args=0;Cyc_current_targets=({
   struct Cyc_Set_Set**_tmpF=_cycalloc(sizeof(*_tmpF));_tmpF[0]=((struct Cyc_Set_Set*(*)(
   int(*cmp)(struct _dynforward_ptr*,struct _dynforward_ptr*)))Cyc_Set_empty)(Cyc_strptrcmp);
---- 1449,1461 ----
+--- 1458,1470 ----
   lexstate=Cyc_lex_engine(lexstate,lexbuf);switch(lexstate){case 0: _LL5: Cyc_current_source=({
   struct _dynforward_ptr*_tmpC=_cycalloc(sizeof(*_tmpC));_tmpC[0]=(struct
   _dynforward_ptr)Cyc_substring((struct _dynforward_ptr)Cyc_Lexing_lexeme(lexbuf),0,(
@@ -5260,7 +5260,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   struct Cyc_Set_Set**_tmpF=_cycalloc(sizeof(*_tmpF));_tmpF[0]=((struct Cyc_Set_Set*(*)(
   int(*cmp)(struct _dynforward_ptr*,struct _dynforward_ptr*)))Cyc_Set_empty)(Cyc_strptrcmp);
 ***************
-*** 1483,1495 ****
+*** 1492,1504 ****
   Cyc_lex_engine(lexstate,lexbuf);switch(lexstate){case 0: _LLA: {struct
   _dynforward_ptr*_tmp15=({struct _dynforward_ptr*_tmp17=_cycalloc(sizeof(*_tmp17));
   _tmp17[0]=(struct _dynforward_ptr)Cyc_substring((struct _dynforward_ptr)Cyc_Lexing_lexeme(
@@ -5274,7 +5274,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   1));_tmp1A;});Cyc_current_args=({struct Cyc_List_List*_tmp19=_cycalloc(sizeof(*
   _tmp19));_tmp19->hd=_tmp18;_tmp19->tl=Cyc_current_args;_tmp19;});return Cyc_token(
   lexbuf);}default: _LLC:(lexbuf->refill_buff)(lexbuf);return Cyc_args_rec(lexbuf,
---- 1474,1486 ----
+--- 1483,1495 ----
   Cyc_lex_engine(lexstate,lexbuf);switch(lexstate){case 0: _LLA: {struct
   _dynforward_ptr*_tmp15=({struct _dynforward_ptr*_tmp17=_cycalloc(sizeof(*_tmp17));
   _tmp17[0]=(struct _dynforward_ptr)Cyc_substring((struct _dynforward_ptr)Cyc_Lexing_lexeme(
@@ -5289,7 +5289,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   _tmp19));_tmp19->hd=_tmp18;_tmp19->tl=Cyc_current_args;_tmp19;});return Cyc_token(
   lexbuf);}default: _LLC:(lexbuf->refill_buff)(lexbuf);return Cyc_args_rec(lexbuf,
 ***************
-*** 1700,1706 ****
+*** 1709,1715 ****
   _tuple15*Cyc_spec_rec(struct Cyc_Lexing_lexbuf*lexbuf,int lexstate){lexstate=Cyc_lex_engine(
   lexstate,lexbuf);switch(lexstate){case 0: _LL93: return Cyc_spec(lexbuf);case 1: _LL94:
   Cyc_current_headerfile=(struct _dynforward_ptr)Cyc_substring((struct
@@ -5297,7 +5297,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   lexbuf)- Cyc_Lexing_lexeme_start(lexbuf))- 1));Cyc_current_symbols=0;Cyc_current_omit_symbols=
   0;Cyc_current_cstubs=0;Cyc_current_cycstubs=0;Cyc_current_hstubs=0;while(Cyc_commands(
   lexbuf)){;}Cyc_current_hstubs=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))
---- 1691,1697 ----
+--- 1700,1706 ----
   _tuple15*Cyc_spec_rec(struct Cyc_Lexing_lexbuf*lexbuf,int lexstate){lexstate=Cyc_lex_engine(
   lexstate,lexbuf);switch(lexstate){case 0: _LL93: return Cyc_spec(lexbuf);case 1: _LL94:
   Cyc_current_headerfile=(struct _dynforward_ptr)Cyc_substring((struct
@@ -5306,7 +5306,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   0;Cyc_current_cstubs=0;Cyc_current_cycstubs=0;Cyc_current_hstubs=0;while(Cyc_commands(
   lexbuf)){;}Cyc_current_hstubs=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))
 ***************
-*** 1742,1748 ****
+*** 1751,1757 ****
   _dynforward_ptr t=_tmp72;while(!isspace((int)*((char*)_check_dynforward_subscript(
   t,sizeof(char),0)))){_dynforward_ptr_inplace_plus_post(& t,sizeof(char),1);}{
   struct _dynforward_ptr _tmp74=Cyc_substring((struct _dynforward_ptr)_tmp72,0,(
@@ -5314,7 +5314,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   struct Cyc_Buffer_t*)Cyc_Buffer_create(255);while(Cyc_block(lexbuf)){;}{struct
   _tuple14*x=({struct _tuple14*_tmp76=_cycalloc(sizeof(*_tmp76));_tmp76->f1=(struct
   _dynforward_ptr)_tmp74;_tmp76->f2=(struct _dynforward_ptr)Cyc_Buffer_contents((
---- 1733,1739 ----
+--- 1742,1748 ----
   _dynforward_ptr t=_tmp72;while(!isspace((int)*((char*)_check_dynforward_subscript(
   t,sizeof(char),0)))){_dynforward_ptr_inplace_plus_post(& t,sizeof(char),1);}{
   struct _dynforward_ptr _tmp74=Cyc_substring((struct _dynforward_ptr)_tmp72,0,(
@@ -5323,7 +5323,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   _tuple14*x=({struct _tuple14*_tmp76=_cycalloc(sizeof(*_tmp76));_tmp76->f1=(struct
   _dynforward_ptr)_tmp74;_tmp76->f2=(struct _dynforward_ptr)Cyc_Buffer_contents((
 ***************
-*** 1763,1769 ****
+*** 1772,1778 ****
   _dynforward_ptr t=_tmp79;while(!isspace((int)*((char*)_check_dynforward_subscript(
   t,sizeof(char),0)))){_dynforward_ptr_inplace_plus_post(& t,sizeof(char),1);}{
   struct _dynforward_ptr _tmp7B=Cyc_substring((struct _dynforward_ptr)_tmp79,0,(
@@ -5331,7 +5331,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   struct Cyc_Buffer_t*)Cyc_Buffer_create(255);while(Cyc_block(lexbuf)){;}{struct
   _tuple14*x=({struct _tuple14*_tmp7D=_cycalloc(sizeof(*_tmp7D));_tmp7D->f1=(struct
   _dynforward_ptr)_tmp7B;_tmp7D->f2=(struct _dynforward_ptr)Cyc_Buffer_contents((
---- 1754,1760 ----
+--- 1763,1769 ----
   _dynforward_ptr t=_tmp79;while(!isspace((int)*((char*)_check_dynforward_subscript(
   t,sizeof(char),0)))){_dynforward_ptr_inplace_plus_post(& t,sizeof(char),1);}{
   struct _dynforward_ptr _tmp7B=Cyc_substring((struct _dynforward_ptr)_tmp79,0,(
@@ -5340,7 +5340,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   _tuple14*x=({struct _tuple14*_tmp7D=_cycalloc(sizeof(*_tmp7D));_tmp7D->f1=(struct
   _dynforward_ptr)_tmp7B;_tmp7D->f2=(struct _dynforward_ptr)Cyc_Buffer_contents((
 ***************
-*** 1784,1790 ****
+*** 1793,1799 ****
   _dynforward_ptr t=_tmp80;while(!isspace((int)*((char*)_check_dynforward_subscript(
   t,sizeof(char),0)))){_dynforward_ptr_inplace_plus_post(& t,sizeof(char),1);}{
   struct _dynforward_ptr _tmp82=Cyc_substring((struct _dynforward_ptr)_tmp80,0,(
@@ -5348,7 +5348,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   struct Cyc_Buffer_t*)Cyc_Buffer_create(255);while(Cyc_block(lexbuf)){;}{struct
   _tuple14*x=({struct _tuple14*_tmp84=_cycalloc(sizeof(*_tmp84));_tmp84->f1=(struct
   _dynforward_ptr)_tmp82;_tmp84->f2=(struct _dynforward_ptr)Cyc_Buffer_contents((
---- 1775,1781 ----
+--- 1784,1790 ----
   _dynforward_ptr t=_tmp80;while(!isspace((int)*((char*)_check_dynforward_subscript(
   t,sizeof(char),0)))){_dynforward_ptr_inplace_plus_post(& t,sizeof(char),1);}{
   struct _dynforward_ptr _tmp82=Cyc_substring((struct _dynforward_ptr)_tmp80,0,(
@@ -5357,7 +5357,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   _tuple14*x=({struct _tuple14*_tmp84=_cycalloc(sizeof(*_tmp84));_tmp84->f1=(struct
   _dynforward_ptr)_tmp82;_tmp84->f2=(struct _dynforward_ptr)Cyc_Buffer_contents((
 ***************
-*** 2222,2230 ****
+*** 2231,2239 ****
   _dynforward_ptr)((struct _dynforward_ptr)d);{void*_tmp16F[2]={& _tmp171,& _tmp172};
   Cyc_prscript(({const char*_tmp170="if ! test -e %s; then mkdir %s; fi\n";
   _tag_dynforward(_tmp170,sizeof(char),_get_zero_arr_size(_tmp170,36));}),
@@ -5367,7 +5367,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   mkdir((const char*)_untag_dynforward_ptr(d,sizeof(char),1),448)== - 1){({struct Cyc_String_pa_struct
   _tmp176;_tmp176.tag=0;_tmp176.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)
   d);{void*_tmp174[1]={& _tmp176};Cyc_fprintf(Cyc_stderr,({const char*_tmp175="Error: could not create directory %s\n";
---- 2213,2221 ----
+--- 2222,2230 ----
   _dynforward_ptr)((struct _dynforward_ptr)d);{void*_tmp16F[2]={& _tmp171,& _tmp172};
   Cyc_prscript(({const char*_tmp170="if ! test -e %s; then mkdir %s; fi\n";
   _tag_dynforward(_tmp170,sizeof(char),_get_zero_arr_size(_tmp170,36));}),
@@ -5378,10 +5378,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   _tmp176;_tmp176.tag=0;_tmp176.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)
   d);{void*_tmp174[1]={& _tmp176};Cyc_fprintf(Cyc_stderr,({const char*_tmp175="Error: could not create directory %s\n";
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/cf_flowinfo.c powerpc-apple-rhapsody/src/cf_flowinfo.c
-*** i686-unknown-linux/src/cf_flowinfo.c	Mon Jul  1 15:16:10 2002
---- powerpc-apple-rhapsody/src/cf_flowinfo.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/cf_flowinfo.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/cf_flowinfo.c	Wed Jul  3 15:52:58 2002
 ***************
-*** 670,681 ****
+*** 672,683 ****
   int(*cmp)(void*,void*),struct Cyc_List_List*l,void*x);int Cyc_List_list_cmp(int(*
   cmp)(void*,void*),struct Cyc_List_List*l1,struct Cyc_List_List*l2);struct Cyc_Iter_Iter{
   void*env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(struct Cyc_Iter_Iter,
@@ -5394,7 +5394,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cf_flowinfo.c powerpc-apple-rha
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
   int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
   struct _dynforward_ptr);int Cyc_fprintf(struct Cyc___cycFILE*,struct _dynforward_ptr,
---- 670,679 ----
+--- 672,681 ----
   int(*cmp)(void*,void*),struct Cyc_List_List*l,void*x);int Cyc_List_list_cmp(int(*
   cmp)(void*,void*),struct Cyc_List_List*l1,struct Cyc_List_List*l2);struct Cyc_Iter_Iter{
   void*env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(struct Cyc_Iter_Iter,
@@ -5406,8 +5406,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cf_flowinfo.c powerpc-apple-rha
   int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
   struct _dynforward_ptr);int Cyc_fprintf(struct Cyc___cycFILE*,struct _dynforward_ptr,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/cycdoc.c powerpc-apple-rhapsody/src/cycdoc.c
-*** i686-unknown-linux/src/cycdoc.c	Mon Jul  1 15:16:10 2002
---- powerpc-apple-rhapsody/src/cycdoc.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/cycdoc.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/cycdoc.c	Wed Jul  3 15:53:00 2002
 ***************
 *** 661,669 ****
   _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -5455,7 +5455,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cycdoc.c powerpc-apple-rhapsody
   _dynforward_ptr filename,struct Cyc_List_List*places);struct _dynforward_ptr Cyc_Filename_chop_extension(
   struct _dynforward_ptr);extern char Cyc_Position_Exit[9];void Cyc_Position_reset_position(
 ***************
-*** 1030,1042 ****
+*** 1038,1050 ****
   7;return({struct _tuple11*_tmp5=_cycalloc(sizeof(*_tmp5));_tmp5->f1=Cyc_Lexing_lexeme_start(
   lexbuf);_tmp5->f2=(void*)({struct Cyc_Standalone_struct*_tmp6=_cycalloc(sizeof(*
   _tmp6));_tmp6[0]=({struct Cyc_Standalone_struct _tmp7;_tmp7.tag=1;_tmp7.f1=Cyc_substring((
@@ -5469,7 +5469,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cycdoc.c powerpc-apple-rhapsody
   _tmpA;});}case 2: _LL2: return 0;case 3: _LL3: return Cyc_token(lexbuf);default: _LL4:(
   lexbuf->refill_buff)(lexbuf);return Cyc_token_rec(lexbuf,lexstate);}(int)_throw((
   void*)({struct Cyc_Lexing_Error_struct*_tmpD=_cycalloc(sizeof(*_tmpD));_tmpD[0]=({
---- 1028,1040 ----
+--- 1036,1048 ----
   7;return({struct _tuple11*_tmp5=_cycalloc(sizeof(*_tmp5));_tmp5->f1=Cyc_Lexing_lexeme_start(
   lexbuf);_tmp5->f2=(void*)({struct Cyc_Standalone_struct*_tmp6=_cycalloc(sizeof(*
   _tmp6));_tmp6[0]=({struct Cyc_Standalone_struct _tmp7;_tmp7.tag=1;_tmp7.f1=Cyc_substring((
@@ -5484,7 +5484,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cycdoc.c powerpc-apple-rhapsody
   lexbuf->refill_buff)(lexbuf);return Cyc_token_rec(lexbuf,lexstate);}(int)_throw((
   void*)({struct Cyc_Lexing_Error_struct*_tmpD=_cycalloc(sizeof(*_tmpD));_tmpD[0]=({
 ***************
-*** 1101,1107 ****
+*** 1110,1116 ****
   case ')': _LLB: goto _LLC;case '|': _LLC: goto _LLD;case '^': _LLD: goto _LLE;case '<': _LLE:
   goto _LLF;case '>': _LLF: goto _LL10;case ' ': _LL10: goto _LL11;case '\n': _LL11: goto _LL12;
   case '\t': _LL12: return 1;default: _LL13: return 0;}}static struct _dynforward_ptr Cyc_sh_escape_string(
@@ -5492,7 +5492,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cycdoc.c powerpc-apple-rhapsody
   int _tmp1B=0;int _tmp1C=0;{int i=0;for(0;i < _tmp1A;i ++){char _tmp1D=*((const char*)
   _check_dynforward_subscript(s,sizeof(char),i));if(_tmp1D == '\'')_tmp1B ++;else{
   if(Cyc_is_other_special(_tmp1D))_tmp1C ++;}}}if(_tmp1B == 0  && _tmp1C == 0)return s;
---- 1099,1105 ----
+--- 1108,1114 ----
   case ')': _LLB: goto _LLC;case '|': _LLC: goto _LLD;case '^': _LLD: goto _LLE;case '<': _LLE:
   goto _LLF;case '>': _LLF: goto _LL10;case ' ': _LL10: goto _LL11;case '\n': _LL11: goto _LL12;
   case '\t': _LL12: return 1;default: _LL13: return 0;}}static struct _dynforward_ptr Cyc_sh_escape_string(
@@ -5501,7 +5501,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cycdoc.c powerpc-apple-rhapsody
   _check_dynforward_subscript(s,sizeof(char),i));if(_tmp1D == '\'')_tmp1B ++;else{
   if(Cyc_is_other_special(_tmp1D))_tmp1C ++;}}}if(_tmp1B == 0  && _tmp1C == 0)return s;
 ***************
-*** 1111,1117 ****
+*** 1120,1126 ****
   _cycalloc(sizeof(*_tmp20));_tmp20[0]=(struct _dynforward_ptr)s;_tmp20;});_tmp1E[0]=
   _init_dynforward_ptr(_cycalloc(sizeof(struct _dynforward_ptr)),"'",sizeof(char),2);((
   struct Cyc_List_List*(*)(struct _dynforward_ptr))Cyc_List_list)(_tag_dynforward(
@@ -5509,7 +5509,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cycdoc.c powerpc-apple-rhapsody
   _tmp1B)+ _tmp1C;struct _dynforward_ptr s2=({unsigned int _tmp2C=_tmp22 + 1;char*
   _tmp2D=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp2C + 1));struct
   _dynforward_ptr _tmp2F=_tag_dynforward(_tmp2D,sizeof(char),_tmp2C + 1);{
---- 1109,1115 ----
+--- 1118,1124 ----
   _cycalloc(sizeof(*_tmp20));_tmp20[0]=(struct _dynforward_ptr)s;_tmp20;});_tmp1E[0]=
   _init_dynforward_ptr(_cycalloc(sizeof(struct _dynforward_ptr)),"'",sizeof(char),2);((
   struct Cyc_List_List*(*)(struct _dynforward_ptr))Cyc_List_list)(_tag_dynforward(
@@ -5518,8 +5518,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cycdoc.c powerpc-apple-rhapsody
   _tmp2D=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp2C + 1));struct
   _dynforward_ptr _tmp2F=_tag_dynforward(_tmp2D,sizeof(char),_tmp2C + 1);{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsody/src/cyclone.c
-*** i686-unknown-linux/src/cyclone.c	Mon Jul  1 15:16:10 2002
---- powerpc-apple-rhapsody/src/cyclone.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/cyclone.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/cyclone.c	Wed Jul  3 15:53:00 2002
 ***************
 *** 676,712 ****
   void(*f1)(int);};struct Cyc_Arg_Rest_spec_struct{int tag;void(*f1)(struct
@@ -5557,8 +5557,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   struct _dynforward_ptr);struct _dynforward_ptr Cyc_substring(struct _dynforward_ptr,
 ! int ofs,unsigned int n);struct _dynforward_ptr Cyc_strchr(struct _dynforward_ptr s,
   char c);struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(
-  struct Cyc_Iter_Iter,void*);struct Cyc_Dict_Dict;extern char Cyc_Dict_Present[12];
-  extern char Cyc_Dict_Absent[11];struct _tuple0{void*f1;void*f2;};struct _tuple0*Cyc_Dict_rchoose(
+  struct Cyc_Iter_Iter,void*);struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,
+  void*);struct _RegionHandle*r;struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[12];
 --- 676,710 ----
   void(*f1)(int);};struct Cyc_Arg_Rest_spec_struct{int tag;void(*f1)(struct
   _dynforward_ptr);};void Cyc_Arg_parse(struct Cyc_List_List*specs,void(*anonfun)(
@@ -5593,10 +5593,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   struct _dynforward_ptr);struct _dynforward_ptr Cyc_substring(struct _dynforward_ptr,
 ! int ofs,unsigned long n);struct _dynforward_ptr Cyc_strchr(struct _dynforward_ptr s,
   char c);struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(
-  struct Cyc_Iter_Iter,void*);struct Cyc_Dict_Dict;extern char Cyc_Dict_Present[12];
-  extern char Cyc_Dict_Absent[11];struct _tuple0{void*f1;void*f2;};struct _tuple0*Cyc_Dict_rchoose(
+  struct Cyc_Iter_Iter,void*);struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,
+  void*);struct _RegionHandle*r;struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[12];
 ***************
-*** 1098,1104 ****
+*** 1107,1113 ****
   void*_tmpE[1]={& _tmp10};Cyc_printf(({const char*_tmpF="Standard include directory: %s\n";
   _tag_dynforward(_tmpF,sizeof(char),_get_zero_arr_size(_tmpF,32));}),
   _tag_dynforward(_tmpE,sizeof(void*),1));}});exit(0);}static int Cyc_is_cyclone_sourcefile(
@@ -5604,7 +5604,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   if(_tmp11 <= 4)return 0;else{return Cyc_strcmp((struct _dynforward_ptr)
   _dynforward_ptr_plus(s,sizeof(char),(int)(_tmp11 - 4)),({const char*_tmp12=".cyc";
   _tag_dynforward(_tmp12,sizeof(char),_get_zero_arr_size(_tmp12,5));}))== 0;}}
---- 1096,1102 ----
+--- 1105,1111 ----
   void*_tmpE[1]={& _tmp10};Cyc_printf(({const char*_tmpF="Standard include directory: %s\n";
   _tag_dynforward(_tmpF,sizeof(char),_get_zero_arr_size(_tmpF,32));}),
   _tag_dynforward(_tmpE,sizeof(void*),1));}});exit(0);}static int Cyc_is_cyclone_sourcefile(
@@ -5613,7 +5613,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _dynforward_ptr_plus(s,sizeof(char),(int)(_tmp11 - 4)),({const char*_tmp12=".cyc";
   _tag_dynforward(_tmp12,sizeof(char),_get_zero_arr_size(_tmp12,5));}))== 0;}}
 ***************
-*** 1107,1113 ****
+*** 1116,1122 ****
   _tmp13));_tmp13->hd=({struct _dynforward_ptr*_tmp14=_cycalloc(sizeof(*_tmp14));
   _tmp14[0]=s;_tmp14;});_tmp13->tl=Cyc_ccargs;_tmp13;});}static struct Cyc_List_List*
   Cyc_cyclone_exec_path=0;static void Cyc_add_cyclone_exec_path(struct
@@ -5621,7 +5621,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _tmp15 <= 2)return;{struct _dynforward_ptr _tmp16=(struct _dynforward_ptr)Cyc_substring((
   struct _dynforward_ptr)s,2,_tmp15 - 2);Cyc_cyclone_exec_path=({struct Cyc_List_List*
   _tmp17=_cycalloc(sizeof(*_tmp17));_tmp17->hd=({struct _dynforward_ptr*_tmp18=
---- 1105,1111 ----
+--- 1114,1120 ----
   _tmp13));_tmp13->hd=({struct _dynforward_ptr*_tmp14=_cycalloc(sizeof(*_tmp14));
   _tmp14[0]=s;_tmp14;});_tmp13->tl=Cyc_ccargs;_tmp13;});}static struct Cyc_List_List*
   Cyc_cyclone_exec_path=0;static void Cyc_add_cyclone_exec_path(struct
@@ -5630,7 +5630,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   struct _dynforward_ptr)s,2,_tmp15 - 2);Cyc_cyclone_exec_path=({struct Cyc_List_List*
   _tmp17=_cycalloc(sizeof(*_tmp17));_tmp17->hd=({struct _dynforward_ptr*_tmp18=
 ***************
-*** 1268,1275 ****
+*** 1277,1284 ****
   Cyc___cycFILE*_tmp6E=Cyc_try_file_open(Cyc_cyc_include,({const char*_tmp74="r";
   _tag_dynforward(_tmp74,sizeof(char),_get_zero_arr_size(_tmp74,2));}),({const char*
   _tmp75="internal compiler file";_tag_dynforward(_tmp75,sizeof(char),
@@ -5639,7 +5639,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   for(i=0;i < _tmp73;i ++){buf[i]='\000';}}while(n_read == 1024){n_read=Cyc_fread(
   _tag_dynforward(buf,sizeof(char),1024),1,1024,(struct Cyc___cycFILE*)_tmp6E);if(
   n_read != 1024  && !Cyc_feof((struct Cyc___cycFILE*)_tmp6E)){Cyc_compile_failure=1;({
---- 1266,1273 ----
+--- 1275,1282 ----
   Cyc___cycFILE*_tmp6E=Cyc_try_file_open(Cyc_cyc_include,({const char*_tmp74="r";
   _tag_dynforward(_tmp74,sizeof(char),_get_zero_arr_size(_tmp74,2));}),({const char*
   _tmp75="internal compiler file";_tag_dynforward(_tmp75,sizeof(char),
@@ -5649,7 +5649,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _tag_dynforward(buf,sizeof(char),1024),1,1024,(struct Cyc___cycFILE*)_tmp6E);if(
   n_read != 1024  && !Cyc_feof((struct Cyc___cycFILE*)_tmp6E)){Cyc_compile_failure=1;({
 ***************
-*** 1289,1295 ****
+*** 1298,1304 ****
   _check_null(Cyc_cfiles))->tl){Cyc_remove_file(*((struct _dynforward_ptr*)((struct
   Cyc_List_List*)_check_null(Cyc_cfiles))->hd));}}static struct Cyc_List_List*Cyc_split_by_char(
   struct _dynforward_ptr s,char c){if(s.curr == ((struct _dynforward_ptr)
@@ -5657,7 +5657,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _tmp77=Cyc_strlen((struct _dynforward_ptr)s);while(_tmp77 > 0){struct
   _dynforward_ptr _tmp78=Cyc_strchr(s,c);if(_tmp78.curr == ((struct _dynforward_ptr)
   _tag_dynforward(0,0,0)).curr){_tmp76=({struct Cyc_List_List*_tmp79=_cycalloc(
---- 1287,1293 ----
+--- 1296,1302 ----
   _check_null(Cyc_cfiles))->tl){Cyc_remove_file(*((struct _dynforward_ptr*)((struct
   Cyc_List_List*)_check_null(Cyc_cfiles))->hd));}}static struct Cyc_List_List*Cyc_split_by_char(
   struct _dynforward_ptr s,char c){if(s.curr == ((struct _dynforward_ptr)
@@ -5666,7 +5666,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _dynforward_ptr _tmp78=Cyc_strchr(s,c);if(_tmp78.curr == ((struct _dynforward_ptr)
   _tag_dynforward(0,0,0)).curr){_tmp76=({struct Cyc_List_List*_tmp79=_cycalloc(
 ***************
-*** 1297,1303 ****
+*** 1306,1312 ****
   _tmp7A));_tmp7A[0]=s;_tmp7A;});_tmp79->tl=_tmp76;_tmp79;});break;}else{_tmp76=({
   struct Cyc_List_List*_tmp7B=_cycalloc(sizeof(*_tmp7B));_tmp7B->hd=({struct
   _dynforward_ptr*_tmp7C=_cycalloc(sizeof(*_tmp7C));_tmp7C[0]=(struct
@@ -5674,7 +5674,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   struct _dynforward_ptr)_tmp78).curr - s.curr)/ sizeof(char)));_tmp7C;});_tmp7B->tl=
   _tmp76;_tmp7B;});_tmp77 -=(((struct _dynforward_ptr)_tmp78).curr - s.curr)/ sizeof(
   char);s=_dynforward_ptr_plus(_tmp78,sizeof(char),1);}}return((struct Cyc_List_List*(*)(
---- 1295,1301 ----
+--- 1304,1310 ----
   _tmp7A));_tmp7A[0]=s;_tmp7A;});_tmp79->tl=_tmp76;_tmp79;});break;}else{_tmp76=({
   struct Cyc_List_List*_tmp7B=_cycalloc(sizeof(*_tmp7B));_tmp7B->hd=({struct
   _dynforward_ptr*_tmp7C=_cycalloc(sizeof(*_tmp7C));_tmp7C[0]=(struct
@@ -5683,7 +5683,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _tmp76;_tmp7B;});_tmp77 -=(((struct _dynforward_ptr)_tmp78).curr - s.curr)/ sizeof(
   char);s=_dynforward_ptr_plus(_tmp78,sizeof(char),1);}}return((struct Cyc_List_List*(*)(
 ***************
-*** 1364,1370 ****
+*** 1373,1379 ****
   _LL1D;case '|': _LL1D: goto _LL1E;case '^': _LL1E: goto _LL1F;case '<': _LL1F: goto _LL20;
   case '>': _LL20: goto _LL21;case ' ': _LL21: goto _LL22;case '\n': _LL22: goto _LL23;case '\t':
   _LL23: return 1;default: _LL24: return 0;}}static struct _dynforward_ptr Cyc_sh_escape_string(
@@ -5691,7 +5691,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   int _tmp9B=0;int _tmp9C=0;{int i=0;for(0;i < _tmp9A;i ++){char _tmp9D=*((const char*)
   _check_dynforward_subscript(s,sizeof(char),i));if(_tmp9D == '\'')_tmp9B ++;else{
   if(Cyc_is_other_special(_tmp9D))_tmp9C ++;}}}if(_tmp9B == 0  && _tmp9C == 0)return s;
---- 1362,1368 ----
+--- 1371,1377 ----
   _LL1D;case '|': _LL1D: goto _LL1E;case '^': _LL1E: goto _LL1F;case '<': _LL1F: goto _LL20;
   case '>': _LL20: goto _LL21;case ' ': _LL21: goto _LL22;case '\n': _LL22: goto _LL23;case '\t':
   _LL23: return 1;default: _LL24: return 0;}}static struct _dynforward_ptr Cyc_sh_escape_string(
@@ -5700,7 +5700,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _check_dynforward_subscript(s,sizeof(char),i));if(_tmp9D == '\'')_tmp9B ++;else{
   if(Cyc_is_other_special(_tmp9D))_tmp9C ++;}}}if(_tmp9B == 0  && _tmp9C == 0)return s;
 ***************
-*** 1374,1380 ****
+*** 1383,1389 ****
   _cycalloc(sizeof(*_tmpA0));_tmpA0[0]=(struct _dynforward_ptr)s;_tmpA0;});_tmp9E[0]=
   _init_dynforward_ptr(_cycalloc(sizeof(struct _dynforward_ptr)),"'",sizeof(char),2);((
   struct Cyc_List_List*(*)(struct _dynforward_ptr))Cyc_List_list)(_tag_dynforward(
@@ -5708,7 +5708,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _tmp9B)+ _tmp9C;struct _dynforward_ptr s2=({unsigned int _tmpAC=_tmpA2 + 1;char*
   _tmpAD=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmpAC + 1));struct
   _dynforward_ptr _tmpAF=_tag_dynforward(_tmpAD,sizeof(char),_tmpAC + 1);{
---- 1372,1378 ----
+--- 1381,1387 ----
   _cycalloc(sizeof(*_tmpA0));_tmpA0[0]=(struct _dynforward_ptr)s;_tmpA0;});_tmp9E[0]=
   _init_dynforward_ptr(_cycalloc(sizeof(struct _dynforward_ptr)),"'",sizeof(char),2);((
   struct Cyc_List_List*(*)(struct _dynforward_ptr))Cyc_List_list)(_tag_dynforward(
@@ -5717,8 +5717,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _tmpAD=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmpAC + 1));struct
   _dynforward_ptr _tmpAF=_tag_dynforward(_tmpAD,sizeof(char),_tmpAC + 1);{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/evexp.c powerpc-apple-rhapsody/src/evexp.c
-*** i686-unknown-linux/src/evexp.c	Mon Jul  1 15:16:10 2002
---- powerpc-apple-rhapsody/src/evexp.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/evexp.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/evexp.c	Wed Jul  3 15:52:58 2002
 ***************
 *** 663,677 ****
   struct _dynforward_ptr logical_file;struct _dynforward_ptr line;int line_no;int col;};
@@ -5751,8 +5751,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/evexp.c powerpc-apple-rhapsody/
   int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct
   _dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhapsody/src/formatstr.c
-*** i686-unknown-linux/src/formatstr.c	Mon Jul  1 15:16:10 2002
---- powerpc-apple-rhapsody/src/formatstr.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/formatstr.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/formatstr.c	Wed Jul  3 15:52:58 2002
 ***************
 *** 660,674 ****
   Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
@@ -5785,7 +5785,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhaps
   };struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
 ***************
-*** 912,924 ****
+*** 920,932 ****
   int i);static struct Cyc_Core_Opt Cyc_Formatstr_rk={(void*)((void*)3)};struct _tuple4{
   struct Cyc_List_List*f1;struct Cyc_List_List*f2;struct Cyc_List_List*f3;struct Cyc_List_List*
   f4;char f5;int f6;};struct Cyc_Core_Opt*Cyc_Formatstr_parse_conversionspecification(
@@ -5799,7 +5799,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhaps
   struct Cyc_List_List*x))Cyc_List_imp_rev)(_tmp1);{struct Cyc_List_List*_tmp3=0;c=*((
   const char*)_check_dynforward_subscript(s,sizeof(char),i));if(c == '*'){_tmp3=({
   struct Cyc_List_List*_tmp4=_cycalloc(sizeof(*_tmp4));_tmp4->hd=(void*)((int)c);
---- 910,922 ----
+--- 918,930 ----
   int i);static struct Cyc_Core_Opt Cyc_Formatstr_rk={(void*)((void*)3)};struct _tuple4{
   struct Cyc_List_List*f1;struct Cyc_List_List*f2;struct Cyc_List_List*f3;struct Cyc_List_List*
   f4;char f5;int f6;};struct Cyc_Core_Opt*Cyc_Formatstr_parse_conversionspecification(
@@ -5814,7 +5814,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhaps
   const char*)_check_dynforward_subscript(s,sizeof(char),i));if(c == '*'){_tmp3=({
   struct Cyc_List_List*_tmp4=_cycalloc(sizeof(*_tmp4));_tmp4->hd=(void*)((int)c);
 ***************
-*** 961,1001 ****
+*** 969,1009 ****
   struct _tuple4*_tmp11=_cycalloc(sizeof(*_tmp11));_tmp11->f1=_tmp1;_tmp11->f2=
   _tmp3;_tmp11->f3=_tmp6;_tmp11->f4=_tmpA;_tmp11->f5=c;_tmp11->f6=i + 1;_tmp11;});
   _tmp10;});}}}}}struct Cyc_List_List*Cyc_Formatstr_get_format_typs(struct Cyc_Tcenv_Tenv*
@@ -5856,7 +5856,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhaps
   sizeof(char),_get_zero_arr_size(_tmp34,32));}),_tag_dynforward(_tmp33,sizeof(
   void*),1));}});return 0;}}}{struct Cyc_List_List*_tmp36=_tmp1C;struct Cyc_List_List
   _tmp37;int _tmp38;struct Cyc_List_List*_tmp39;struct Cyc_List_List _tmp3A;int _tmp3B;
---- 959,1000 ----
+--- 967,1008 ----
   struct _tuple4*_tmp11=_cycalloc(sizeof(*_tmp11));_tmp11->f1=_tmp1;_tmp11->f2=
   _tmp3;_tmp11->f3=_tmp6;_tmp11->f4=_tmpA;_tmp11->f5=c;_tmp11->f6=i + 1;_tmp11;});
   _tmp10;});}}}}}struct Cyc_List_List*Cyc_Formatstr_get_format_typs(struct Cyc_Tcenv_Tenv*
@@ -5900,7 +5900,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhaps
   void*),1));}});return 0;}}}{struct Cyc_List_List*_tmp36=_tmp1C;struct Cyc_List_List
   _tmp37;int _tmp38;struct Cyc_List_List*_tmp39;struct Cyc_List_List _tmp3A;int _tmp3B;
 ***************
-*** 1137,1143 ****
+*** 1145,1151 ****
   _tag_dynforward(_tmp9A,sizeof(void*),1));}});return 0;}break;default: _LL6E: return
   0;}}}}}return Cyc_List_imp_rev(_tmp13);}struct _tuple5{int f1;struct Cyc_List_List*
   f2;struct Cyc_List_List*f3;char f4;int f5;};struct Cyc_Core_Opt*Cyc_Formatstr_parse_inputformat(
@@ -5908,7 +5908,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhaps
   _dynforward_ptr)s);if(i < 0  || i >= _tmp9D)return 0;{int _tmp9E=0;char _tmp9F=*((
   const char*)_check_dynforward_subscript(s,sizeof(char),i));if(_tmp9F == '*'){
   _tmp9E=1;i ++;if(i >= _tmp9D)return 0;}{struct Cyc_List_List*_tmpA0=0;for(0;i < 
---- 1136,1142 ----
+--- 1144,1150 ----
   _tag_dynforward(_tmp9A,sizeof(void*),1));}});return 0;}break;default: _LL6E: return
   0;}}}}}return Cyc_List_imp_rev(_tmp13);}struct _tuple5{int f1;struct Cyc_List_List*
   f2;struct Cyc_List_List*f3;char f4;int f5;};struct Cyc_Core_Opt*Cyc_Formatstr_parse_inputformat(
@@ -5917,7 +5917,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhaps
   const char*)_check_dynforward_subscript(s,sizeof(char),i));if(_tmp9F == '*'){
   _tmp9E=1;i ++;if(i >= _tmp9D)return 0;}{struct Cyc_List_List*_tmpA0=0;for(0;i < 
 ***************
-*** 1172,1178 ****
+*** 1180,1186 ****
   _tuple5*_tmpA9=_cycalloc(sizeof(*_tmpA9));_tmpA9->f1=_tmp9E;_tmpA9->f2=_tmpA0;
   _tmpA9->f3=_tmpA2;_tmpA9->f4=_tmp9F;_tmpA9->f5=i + 1;_tmpA9;});_tmpA8;});}}}}
   struct Cyc_List_List*Cyc_Formatstr_get_scanf_typs(struct Cyc_Tcenv_Tenv*te,struct
@@ -5925,7 +5925,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhaps
   struct _dynforward_ptr)s);struct Cyc_List_List*_tmpAB=0;int i;for(i=0;i < _tmpAA;i ++){
   if(*((const char*)_check_dynforward_subscript(s,sizeof(char),i))!= '%')continue;{
   struct Cyc_Core_Opt*_tmpAC=Cyc_Formatstr_parse_inputformat(s,i + 1);if(_tmpAC == 0){({
---- 1171,1177 ----
+--- 1179,1185 ----
   _tuple5*_tmpA9=_cycalloc(sizeof(*_tmpA9));_tmpA9->f1=_tmp9E;_tmpA9->f2=_tmpA0;
   _tmpA9->f3=_tmpA2;_tmpA9->f4=_tmp9F;_tmpA9->f5=i + 1;_tmpA9;});_tmpA8;});}}}}
   struct Cyc_List_List*Cyc_Formatstr_get_scanf_typs(struct Cyc_Tcenv_Tenv*te,struct
@@ -5935,7 +5935,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhaps
   struct Cyc_Core_Opt*_tmpAC=Cyc_Formatstr_parse_inputformat(s,i + 1);if(_tmpAC == 0){({
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/install_path.c.orig powerpc-apple-rhapsody/src/install_path.c.orig
 *** i686-unknown-linux/src/install_path.c.orig	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/src/install_path.c.orig	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/src/install_path.c.orig	Wed Jul  3 15:52:56 2002
 ***************
 *** 0 ****
 --- 1,5 ----
@@ -5946,7 +5946,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/install_path.c.orig powerpc-app
 + char *Cversion = "0.2";
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/install_path.c.rej powerpc-apple-rhapsody/src/install_path.c.rej
 *** i686-unknown-linux/src/install_path.c.rej	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/src/install_path.c.rej	Wed Jul  3 13:47:00 2002
+--- powerpc-apple-rhapsody/src/install_path.c.rej	Wed Jul  3 15:52:56 2002
 ***************
 *** 0 ****
 --- 1,8 ----
@@ -5959,8 +5959,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/install_path.c.rej powerpc-appl
 + - char *Cversion = "0.2";
 + --- 0 ----
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/interface.c powerpc-apple-rhapsody/src/interface.c
-*** i686-unknown-linux/src/interface.c	Mon Jul  1 15:16:10 2002
---- powerpc-apple-rhapsody/src/interface.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/interface.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/interface.c	Wed Jul  3 15:52:58 2002
 ***************
 *** 659,668 ****
   _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -5983,8 +5983,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/interface.c powerpc-apple-rhaps
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
   int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/lex.c powerpc-apple-rhapsody/src/lex.c
-*** i686-unknown-linux/src/lex.c	Mon Jul  1 15:16:12 2002
---- powerpc-apple-rhapsody/src/lex.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/lex.c	Wed Jul  3 15:51:58 2002
+--- powerpc-apple-rhapsody/src/lex.c	Wed Jul  3 15:52:58 2002
 ***************
 *** 659,668 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -6036,7 +6036,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/lex.c powerpc-apple-rhapsody/sr
   struct Cyc_Xarray_Xarray*,void*);struct Cyc_Lineno_Pos{struct _dynforward_ptr
   logical_file;struct _dynforward_ptr line;int line_no;int col;};extern char Cyc_Position_Exit[
 ***************
-*** 1075,1081 ****
+*** 1083,1089 ****
   Cyc_Lex_ids_trie,buff,offset,len);if(_tmp58->shared_str == 0){struct
   _dynforward_ptr _tmp59=Cyc_Core_new_string((unsigned int)(len + 1));Cyc_zstrncpy(
   _dynforward_ptr_decrease_size(_tmp59,sizeof(char),1),(struct _dynforward_ptr)
@@ -6044,7 +6044,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/lex.c powerpc-apple-rhapsody/sr
   struct Cyc_Xarray_Xarray*,struct _dynforward_ptr*))Cyc_Xarray_add_ind)((struct Cyc_Xarray_Xarray*)
   _check_null(Cyc_Lex_symbols),({struct _dynforward_ptr*_tmp5A=_cycalloc(sizeof(*
   _tmp5A));_tmp5A[0]=(struct _dynforward_ptr)_tmp59;_tmp5A;}));_tmp58->shared_str=
---- 1073,1079 ----
+--- 1081,1087 ----
   Cyc_Lex_ids_trie,buff,offset,len);if(_tmp58->shared_str == 0){struct
   _dynforward_ptr _tmp59=Cyc_Core_new_string((unsigned int)(len + 1));Cyc_zstrncpy(
   _dynforward_ptr_decrease_size(_tmp59,sizeof(char),1),(struct _dynforward_ptr)
@@ -6053,52 +6053,55 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/lex.c powerpc-apple-rhapsody/sr
   _check_null(Cyc_Lex_symbols),({struct _dynforward_ptr*_tmp5A=_cycalloc(sizeof(*
   _tmp5A));_tmp5A[0]=(struct _dynforward_ptr)_tmp59;_tmp5A;}));_tmp58->shared_str=
 ***************
-*** 1120,1126 ****
+*** 1128,1134 ****
    && (_tmp67 == '\000'  && _tmp68 != '\000'))_throw_arraybounds();*((char*)_tmp66.curr)=
   _tmp68;});++ Cyc_Lex_string_pos;}struct _dynforward_ptr Cyc_Lex_get_stored_string(){
   struct _dynforward_ptr str=Cyc_substring((struct _dynforward_ptr)Cyc_Lex_string_buffer,
 ! 0,(unsigned int)Cyc_Lex_string_pos);Cyc_Lex_string_pos=0;return str;}struct Cyc_Lex_Ldecls{
   struct Cyc_Set_Set*typedefs;struct Cyc_Set_Set*namespaces;};struct Cyc_Lex_Lvis{
   struct Cyc_List_List*current_namespace;struct Cyc_List_List*imported_namespaces;};
-  struct Cyc_Lex_Lstate{struct Cyc_List_List*lstack;struct Cyc_Dict_Dict*decls;};
---- 1118,1124 ----
+  struct Cyc_Lex_Lstate{struct Cyc_List_List*lstack;struct Cyc_Dict_Dict decls;};
+--- 1126,1132 ----
    && (_tmp67 == '\000'  && _tmp68 != '\000'))_throw_arraybounds();*((char*)_tmp66.curr)=
   _tmp68;});++ Cyc_Lex_string_pos;}struct _dynforward_ptr Cyc_Lex_get_stored_string(){
   struct _dynforward_ptr str=Cyc_substring((struct _dynforward_ptr)Cyc_Lex_string_buffer,
 ! 0,(unsigned long)Cyc_Lex_string_pos);Cyc_Lex_string_pos=0;return str;}struct Cyc_Lex_Ldecls{
   struct Cyc_Set_Set*typedefs;struct Cyc_Set_Set*namespaces;};struct Cyc_Lex_Lvis{
   struct Cyc_List_List*current_namespace;struct Cyc_List_List*imported_namespaces;};
-  struct Cyc_Lex_Lstate{struct Cyc_List_List*lstack;struct Cyc_Dict_Dict*decls;};
+  struct Cyc_Lex_Lstate{struct Cyc_List_List*lstack;struct Cyc_Dict_Dict decls;};
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/new_control_flow.c powerpc-apple-rhapsody/src/new_control_flow.c
-*** i686-unknown-linux/src/new_control_flow.c	Mon Jul  1 15:16:12 2002
---- powerpc-apple-rhapsody/src/new_control_flow.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/new_control_flow.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/new_control_flow.c	Wed Jul  3 15:52:58 2002
 ***************
-*** 671,682 ****
-  x,struct Cyc_List_List*y);extern char Cyc_List_Nth[8];void*Cyc_List_nth(struct Cyc_List_List*
-  x,int n);int Cyc_List_memq(struct Cyc_List_List*l,void*x);struct Cyc_Iter_Iter{void*
-  env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);
-! struct Cyc_Set_Set;extern char Cyc_Set_Absent[11];typedef struct{int __count;union{
-! unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;typedef struct{long
-! __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t Cyc_fpos_t;
-! struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
+*** 670,682 ****
+  struct Cyc_List_List*x,struct Cyc_List_List*y);extern char Cyc_List_Nth[8];void*Cyc_List_nth(
+  struct Cyc_List_List*x,int n);int Cyc_List_memq(struct Cyc_List_List*l,void*x);
+  struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(
+! struct Cyc_Iter_Iter,void*);struct Cyc_Set_Set;extern char Cyc_Set_Absent[11];
+! typedef struct{int __count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;
+! typedef struct{long __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t
+! Cyc_fpos_t;struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
 ! int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;
 ! };struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
-  int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
-  int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
-  Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
---- 671,679 ----
-  x,struct Cyc_List_List*y);extern char Cyc_List_Nth[8];void*Cyc_List_nth(struct Cyc_List_List*
-  x,int n);int Cyc_List_memq(struct Cyc_List_List*l,void*x);struct Cyc_Iter_Iter{void*
-  env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);
-! struct Cyc_Set_Set;extern char Cyc_Set_Absent[11];struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;
-! struct Cyc_String_pa_struct{int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{
-! int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
-  int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
-  int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
-  Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
+! int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+  int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
+  struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
+  int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
+--- 670,680 ----
+  struct Cyc_List_List*x,struct Cyc_List_List*y);extern char Cyc_List_Nth[8];void*Cyc_List_nth(
+  struct Cyc_List_List*x,int n);int Cyc_List_memq(struct Cyc_List_List*l,void*x);
+  struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(
+! struct Cyc_Iter_Iter,void*);struct Cyc_Set_Set;extern char Cyc_Set_Absent[11];struct
+! Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{int tag;
+! struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};
+! struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{int
+! tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+  int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
+  struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
+  int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/parse_tab.c powerpc-apple-rhapsody/src/parse_tab.c
-*** i686-unknown-linux/src/parse_tab.c	Mon Jul  1 15:16:12 2002
---- powerpc-apple-rhapsody/src/parse_tab.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/parse_tab.c	Wed Jul  3 15:51:58 2002
+--- powerpc-apple-rhapsody/src/parse_tab.c	Wed Jul  3 15:52:58 2002
 ***************
 *** 658,669 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -6125,11 +6128,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/parse_tab.c powerpc-apple-rhaps
   int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
   struct _dynforward_ptr);int Cyc_fprintf(struct Cyc___cycFILE*,struct _dynforward_ptr,
 ***************
-*** 696,731 ****
-  struct Cyc_List_List*x);extern char Cyc_List_Nth[8];struct Cyc_List_List*Cyc_List_zip(
-  struct Cyc_List_List*x,struct Cyc_List_List*y);struct _tuple0{struct Cyc_List_List*
-  f1;struct Cyc_List_List*f2;};struct _tuple0 Cyc_List_split(struct Cyc_List_List*x);
-! unsigned int Cyc_strlen(struct _dynforward_ptr s);int Cyc_strcmp(struct
+*** 697,732 ****
+  struct _RegionHandle*r1,struct _RegionHandle*r2,struct Cyc_List_List*x,struct Cyc_List_List*
+  y);struct _tuple0{struct Cyc_List_List*f1;struct Cyc_List_List*f2;};struct _tuple0
+  Cyc_List_rsplit(struct _RegionHandle*r1,struct _RegionHandle*r2,struct Cyc_List_List*
+! x);unsigned int Cyc_strlen(struct _dynforward_ptr s);int Cyc_strcmp(struct
   _dynforward_ptr s1,struct _dynforward_ptr s2);int Cyc_zstrcmp(struct _dynforward_ptr,
   struct _dynforward_ptr);int Cyc_zstrptrcmp(struct _dynforward_ptr*,struct
   _dynforward_ptr*);struct _dynforward_ptr Cyc_strcat(struct _dynforward_ptr dest,
@@ -6138,8 +6141,44 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/parse_tab.c powerpc-apple-rhaps
 ! _dynforward_ptr,int ofs,unsigned int n);struct Cyc_Lineno_Pos{struct _dynforward_ptr
 ! logical_file;struct _dynforward_ptr line;int line_no;int col;};extern char Cyc_Position_Exit[
 ! 9];struct Cyc_Position_Segment;struct Cyc_Position_Segment*Cyc_Position_segment_of_abs(
-! int,int);struct Cyc_Position_Segment*Cyc_Position_segment_join(struct Cyc_Position_Segment*,
-! struct Cyc_Position_Segment*);struct _dynforward_ptr Cyc_Position_string_of_segment(
+! int,int);struct _dynforward_ptr Cyc_Position_string_of_segment(struct Cyc_Position_Segment*);
+! struct Cyc_Position_Error{struct _dynforward_ptr source;struct Cyc_Position_Segment*
+! seg;void*kind;struct _dynforward_ptr desc;};struct Cyc_Position_Error*Cyc_Position_mk_err_parse(
+! struct Cyc_Position_Segment*,struct _dynforward_ptr);extern char Cyc_Position_Nocontext[
+! 14];void Cyc_Position_post_error(struct Cyc_Position_Error*);struct Cyc_Absyn_Loc_n_struct{
+! int tag;};struct Cyc_Absyn_Rel_n_struct{int tag;struct Cyc_List_List*f1;};struct Cyc_Absyn_Abs_n_struct{
+! int tag;struct Cyc_List_List*f1;};union Cyc_Absyn_Nmspace_union{struct Cyc_Absyn_Loc_n_struct
+! Loc_n;struct Cyc_Absyn_Rel_n_struct Rel_n;struct Cyc_Absyn_Abs_n_struct Abs_n;};
+! struct _tuple1{union Cyc_Absyn_Nmspace_union f1;struct _dynforward_ptr*f2;};struct
+! Cyc_Absyn_Conref;struct Cyc_Absyn_Tqual{int print_const;int q_volatile;int
+! q_restrict;int real_const;struct Cyc_Position_Segment*loc;};struct Cyc_Absyn_Eq_constr_struct{
+! int tag;void*f1;};struct Cyc_Absyn_Forward_constr_struct{int tag;struct Cyc_Absyn_Conref*
+! f1;};struct Cyc_Absyn_No_constr_struct{int tag;};union Cyc_Absyn_Constraint_union{
+! struct Cyc_Absyn_Eq_constr_struct Eq_constr;struct Cyc_Absyn_Forward_constr_struct
+! Forward_constr;struct Cyc_Absyn_No_constr_struct No_constr;};struct Cyc_Absyn_Conref{
+! union Cyc_Absyn_Constraint_union v;};struct Cyc_Absyn_Eq_kb_struct{int tag;void*f1;}
+! ;struct Cyc_Absyn_Unknown_kb_struct{int tag;struct Cyc_Core_Opt*f1;};struct Cyc_Absyn_Less_kb_struct{
+! int tag;struct Cyc_Core_Opt*f1;void*f2;};struct Cyc_Absyn_Tvar{struct
+! _dynforward_ptr*name;int*identity;void*kind;};struct Cyc_Absyn_Upper_b_struct{int
+! tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_AbsUpper_b_struct{int tag;void*f1;};
+! struct Cyc_Absyn_PtrLoc{struct Cyc_Position_Segment*ptr_loc;struct Cyc_Position_Segment*
+  rgn_loc;struct Cyc_Position_Segment*zt_loc;};struct Cyc_Absyn_PtrAtts{void*rgn;
+  struct Cyc_Absyn_Conref*nullable;struct Cyc_Absyn_Conref*bounds;struct Cyc_Absyn_Conref*
+  zero_term;struct Cyc_Absyn_PtrLoc*ptrloc;};struct Cyc_Absyn_PtrInfo{void*elt_typ;
+--- 695,730 ----
+  struct _RegionHandle*r1,struct _RegionHandle*r2,struct Cyc_List_List*x,struct Cyc_List_List*
+  y);struct _tuple0{struct Cyc_List_List*f1;struct Cyc_List_List*f2;};struct _tuple0
+  Cyc_List_rsplit(struct _RegionHandle*r1,struct _RegionHandle*r2,struct Cyc_List_List*
+! x);unsigned long Cyc_strlen(struct _dynforward_ptr s);int Cyc_strcmp(struct
+  _dynforward_ptr s1,struct _dynforward_ptr s2);int Cyc_zstrcmp(struct _dynforward_ptr,
+  struct _dynforward_ptr);int Cyc_zstrptrcmp(struct _dynforward_ptr*,struct
+  _dynforward_ptr*);struct _dynforward_ptr Cyc_strcat(struct _dynforward_ptr dest,
+  struct _dynforward_ptr src);struct _dynforward_ptr Cyc_strcpy(struct _dynforward_ptr
+  dest,struct _dynforward_ptr src);struct _dynforward_ptr Cyc_substring(struct
+! _dynforward_ptr,int ofs,unsigned long n);struct Cyc_Lineno_Pos{struct
+! _dynforward_ptr logical_file;struct _dynforward_ptr line;int line_no;int col;};extern
+! char Cyc_Position_Exit[9];struct Cyc_Position_Segment;struct Cyc_Position_Segment*
+! Cyc_Position_segment_of_abs(int,int);struct _dynforward_ptr Cyc_Position_string_of_segment(
 ! struct Cyc_Position_Segment*);struct Cyc_Position_Error{struct _dynforward_ptr
 ! source;struct Cyc_Position_Segment*seg;void*kind;struct _dynforward_ptr desc;};
 ! struct Cyc_Position_Error*Cyc_Position_mk_err_parse(struct Cyc_Position_Segment*,
@@ -6150,61 +6189,24 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/parse_tab.c powerpc-apple-rhaps
 ! Rel_n;struct Cyc_Absyn_Abs_n_struct Abs_n;};struct _tuple1{union Cyc_Absyn_Nmspace_union
 ! f1;struct _dynforward_ptr*f2;};struct Cyc_Absyn_Conref;struct Cyc_Absyn_Tqual{int
 ! print_const;int q_volatile;int q_restrict;int real_const;struct Cyc_Position_Segment*
-! loc;};struct Cyc_Absyn_Conref{void*v;};struct Cyc_Absyn_Eq_constr_struct{int tag;
-! void*f1;};struct Cyc_Absyn_Forward_constr_struct{int tag;struct Cyc_Absyn_Conref*f1;
-! };struct Cyc_Absyn_Eq_kb_struct{int tag;void*f1;};struct Cyc_Absyn_Unknown_kb_struct{
-! int tag;struct Cyc_Core_Opt*f1;};struct Cyc_Absyn_Less_kb_struct{int tag;struct Cyc_Core_Opt*
-! f1;void*f2;};struct Cyc_Absyn_Tvar{struct _dynforward_ptr*name;int*identity;void*
-! kind;};struct Cyc_Absyn_Upper_b_struct{int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_AbsUpper_b_struct{
-! int tag;void*f1;};struct Cyc_Absyn_PtrLoc{struct Cyc_Position_Segment*ptr_loc;
-! struct Cyc_Position_Segment*rgn_loc;struct Cyc_Position_Segment*zt_loc;};struct Cyc_Absyn_PtrAtts{
-! void*rgn;struct Cyc_Absyn_Conref*nullable;struct Cyc_Absyn_Conref*bounds;struct Cyc_Absyn_Conref*
+! loc;};struct Cyc_Absyn_Eq_constr_struct{int tag;void*f1;};struct Cyc_Absyn_Forward_constr_struct{
+! int tag;struct Cyc_Absyn_Conref*f1;};struct Cyc_Absyn_No_constr_struct{int tag;};
+! union Cyc_Absyn_Constraint_union{struct Cyc_Absyn_Eq_constr_struct Eq_constr;struct
+! Cyc_Absyn_Forward_constr_struct Forward_constr;struct Cyc_Absyn_No_constr_struct
+! No_constr;};struct Cyc_Absyn_Conref{union Cyc_Absyn_Constraint_union v;};struct Cyc_Absyn_Eq_kb_struct{
+! int tag;void*f1;};struct Cyc_Absyn_Unknown_kb_struct{int tag;struct Cyc_Core_Opt*f1;
+! };struct Cyc_Absyn_Less_kb_struct{int tag;struct Cyc_Core_Opt*f1;void*f2;};struct
+! Cyc_Absyn_Tvar{struct _dynforward_ptr*name;int*identity;void*kind;};struct Cyc_Absyn_Upper_b_struct{
+! int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_AbsUpper_b_struct{int tag;void*f1;
+! };struct Cyc_Absyn_PtrLoc{struct Cyc_Position_Segment*ptr_loc;struct Cyc_Position_Segment*
+  rgn_loc;struct Cyc_Position_Segment*zt_loc;};struct Cyc_Absyn_PtrAtts{void*rgn;
+  struct Cyc_Absyn_Conref*nullable;struct Cyc_Absyn_Conref*bounds;struct Cyc_Absyn_Conref*
   zero_term;struct Cyc_Absyn_PtrLoc*ptrloc;};struct Cyc_Absyn_PtrInfo{void*elt_typ;
-  struct Cyc_Absyn_Tqual elt_tq;struct Cyc_Absyn_PtrAtts ptr_atts;};struct Cyc_Absyn_VarargInfo{
-  struct Cyc_Core_Opt*name;struct Cyc_Absyn_Tqual tq;void*type;int inject;};struct Cyc_Absyn_FnInfo{
---- 694,730 ----
-  struct Cyc_List_List*x);extern char Cyc_List_Nth[8];struct Cyc_List_List*Cyc_List_zip(
-  struct Cyc_List_List*x,struct Cyc_List_List*y);struct _tuple0{struct Cyc_List_List*
-  f1;struct Cyc_List_List*f2;};struct _tuple0 Cyc_List_split(struct Cyc_List_List*x);
-! unsigned long Cyc_strlen(struct _dynforward_ptr s);int Cyc_strcmp(struct
-  _dynforward_ptr s1,struct _dynforward_ptr s2);int Cyc_zstrcmp(struct _dynforward_ptr,
-  struct _dynforward_ptr);int Cyc_zstrptrcmp(struct _dynforward_ptr*,struct
-  _dynforward_ptr*);struct _dynforward_ptr Cyc_strcat(struct _dynforward_ptr dest,
-  struct _dynforward_ptr src);struct _dynforward_ptr Cyc_strcpy(struct _dynforward_ptr
-  dest,struct _dynforward_ptr src);struct _dynforward_ptr Cyc_substring(struct
-! _dynforward_ptr,int ofs,unsigned long n);struct Cyc_Lineno_Pos{struct
-! _dynforward_ptr logical_file;struct _dynforward_ptr line;int line_no;int col;};extern
-! char Cyc_Position_Exit[9];struct Cyc_Position_Segment;struct Cyc_Position_Segment*
-! Cyc_Position_segment_of_abs(int,int);struct Cyc_Position_Segment*Cyc_Position_segment_join(
-! struct Cyc_Position_Segment*,struct Cyc_Position_Segment*);struct _dynforward_ptr
-! Cyc_Position_string_of_segment(struct Cyc_Position_Segment*);struct Cyc_Position_Error{
-! struct _dynforward_ptr source;struct Cyc_Position_Segment*seg;void*kind;struct
-! _dynforward_ptr desc;};struct Cyc_Position_Error*Cyc_Position_mk_err_parse(struct
-! Cyc_Position_Segment*,struct _dynforward_ptr);extern char Cyc_Position_Nocontext[14];
-! void Cyc_Position_post_error(struct Cyc_Position_Error*);struct Cyc_Absyn_Loc_n_struct{
-! int tag;};struct Cyc_Absyn_Rel_n_struct{int tag;struct Cyc_List_List*f1;};struct Cyc_Absyn_Abs_n_struct{
-! int tag;struct Cyc_List_List*f1;};union Cyc_Absyn_Nmspace_union{struct Cyc_Absyn_Loc_n_struct
-! Loc_n;struct Cyc_Absyn_Rel_n_struct Rel_n;struct Cyc_Absyn_Abs_n_struct Abs_n;};
-! struct _tuple1{union Cyc_Absyn_Nmspace_union f1;struct _dynforward_ptr*f2;};struct
-! Cyc_Absyn_Conref;struct Cyc_Absyn_Tqual{int print_const;int q_volatile;int
-! q_restrict;int real_const;struct Cyc_Position_Segment*loc;};struct Cyc_Absyn_Conref{
-! void*v;};struct Cyc_Absyn_Eq_constr_struct{int tag;void*f1;};struct Cyc_Absyn_Forward_constr_struct{
-! int tag;struct Cyc_Absyn_Conref*f1;};struct Cyc_Absyn_Eq_kb_struct{int tag;void*f1;}
-! ;struct Cyc_Absyn_Unknown_kb_struct{int tag;struct Cyc_Core_Opt*f1;};struct Cyc_Absyn_Less_kb_struct{
-! int tag;struct Cyc_Core_Opt*f1;void*f2;};struct Cyc_Absyn_Tvar{struct
-! _dynforward_ptr*name;int*identity;void*kind;};struct Cyc_Absyn_Upper_b_struct{int
-! tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_AbsUpper_b_struct{int tag;void*f1;};
-! struct Cyc_Absyn_PtrLoc{struct Cyc_Position_Segment*ptr_loc;struct Cyc_Position_Segment*
-! rgn_loc;struct Cyc_Position_Segment*zt_loc;};struct Cyc_Absyn_PtrAtts{void*rgn;
-! struct Cyc_Absyn_Conref*nullable;struct Cyc_Absyn_Conref*bounds;struct Cyc_Absyn_Conref*
-  zero_term;struct Cyc_Absyn_PtrLoc*ptrloc;};struct Cyc_Absyn_PtrInfo{void*elt_typ;
-  struct Cyc_Absyn_Tqual elt_tq;struct Cyc_Absyn_PtrAtts ptr_atts;};struct Cyc_Absyn_VarargInfo{
-  struct Cyc_Core_Opt*name;struct Cyc_Absyn_Tqual tq;void*type;int inject;};struct Cyc_Absyn_FnInfo{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/port.c powerpc-apple-rhapsody/src/port.c
-*** i686-unknown-linux/src/port.c	Mon Jul  1 15:16:14 2002
---- powerpc-apple-rhapsody/src/port.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/port.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/port.c	Wed Jul  3 15:52:58 2002
 ***************
-*** 867,876 ****
+*** 875,884 ****
   Cyc_Position_Segment*);struct Cyc_Absyn_Conref*Cyc_Absyn_empty_conref();void*Cyc_Absyn_conref_val(
   struct Cyc_Absyn_Conref*x);void*Cyc_Absyn_wildtyp(struct Cyc_Core_Opt*);extern void*
   Cyc_Absyn_sint_typ;void*Cyc_Absyn_string_typ(void*rgn);void*Cyc_Absyn_dynforward_typ(
@@ -6215,7 +6217,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/port.c powerpc-apple-rhapsody/s
   struct Cyc_String_pa_struct{int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{
   int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
---- 867,874 ----
+--- 875,882 ----
   Cyc_Position_Segment*);struct Cyc_Absyn_Conref*Cyc_Absyn_empty_conref();void*Cyc_Absyn_conref_val(
   struct Cyc_Absyn_Conref*x);void*Cyc_Absyn_wildtyp(struct Cyc_Core_Opt*);extern void*
   Cyc_Absyn_sint_typ;void*Cyc_Absyn_string_typ(void*rgn);void*Cyc_Absyn_dynforward_typ(
@@ -6225,8 +6227,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/port.c powerpc-apple-rhapsody/s
   int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/rgnorder.c powerpc-apple-rhapsody/src/rgnorder.c
-*** i686-unknown-linux/src/rgnorder.c	Mon Jul  1 15:16:14 2002
---- powerpc-apple-rhapsody/src/rgnorder.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/rgnorder.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/rgnorder.c	Wed Jul  3 15:52:58 2002
 ***************
 *** 653,661 ****
   #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
@@ -6247,10 +6249,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/rgnorder.c powerpc-apple-rhapso
   };struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tc.c powerpc-apple-rhapsody/src/tc.c
-*** i686-unknown-linux/src/tc.c	Mon Jul  1 15:16:14 2002
---- powerpc-apple-rhapsody/src/tc.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/tc.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/tc.c	Wed Jul  3 15:52:58 2002
 ***************
-*** 871,918 ****
+*** 879,923 ****
   Cyc_Absyn_array_typ(void*elt_type,struct Cyc_Absyn_Tqual tq,struct Cyc_Absyn_Exp*
   num_elts,struct Cyc_Absyn_Conref*zero_term,struct Cyc_Position_Segment*ztloc);
   struct Cyc_Absyn_Exp*Cyc_Absyn_uint_exp(unsigned int,struct Cyc_Position_Segment*);
@@ -6280,26 +6282,23 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tc.c powerpc-apple-rhapsody/src
 ! int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc_Set_Set;struct Cyc_Set_Set*
 ! Cyc_Set_rempty(struct _RegionHandle*r,int(*cmp)(void*,void*));struct Cyc_Set_Set*
 ! Cyc_Set_rinsert(struct _RegionHandle*r,struct Cyc_Set_Set*s,void*elt);int Cyc_Set_member(
-! struct Cyc_Set_Set*s,void*elt);extern char Cyc_Set_Absent[11];struct Cyc_Dict_Dict;
-! extern char Cyc_Dict_Present[12];extern char Cyc_Dict_Absent[11];int Cyc_Dict_is_empty(
-! struct Cyc_Dict_Dict*d);int Cyc_Dict_member(struct Cyc_Dict_Dict*d,void*k);struct
-! Cyc_Dict_Dict*Cyc_Dict_insert(struct Cyc_Dict_Dict*d,void*k,void*v);void*Cyc_Dict_lookup(
-! struct Cyc_Dict_Dict*d,void*k);struct Cyc_Core_Opt*Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict*
-! d,void*k);struct Cyc_Dict_Dict*Cyc_Dict_rmap_c(struct _RegionHandle*,void*(*f)(
-! void*,void*),void*env,struct Cyc_Dict_Dict*d);struct _tuple3{void*f1;void*f2;};
-! struct _tuple3*Cyc_Dict_rchoose(struct _RegionHandle*r,struct Cyc_Dict_Dict*d);
-! struct _tuple3*Cyc_Dict_rchoose(struct _RegionHandle*,struct Cyc_Dict_Dict*d);
-! struct Cyc_Dict_Dict*Cyc_Dict_rfilter_c(struct _RegionHandle*,int(*f)(void*,void*,
-! void*),void*env,struct Cyc_Dict_Dict*d);struct Cyc_Iter_Iter Cyc_Dict_make_iter(
-! struct _RegionHandle*rgn,struct Cyc_Dict_Dict*d);struct Cyc_RgnOrder_RgnPO;struct
-! Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_initial_fn_po(struct Cyc_List_List*tvs,struct Cyc_List_List*
-! po,void*effect,struct Cyc_Absyn_Tvar*fst_rgn);struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_outlives_constraint(
-! struct Cyc_RgnOrder_RgnPO*po,void*eff,void*rgn);struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_youngest(
-! struct Cyc_RgnOrder_RgnPO*po,struct Cyc_Absyn_Tvar*rgn,int resetable);int Cyc_RgnOrder_is_region_resetable(
-  struct Cyc_RgnOrder_RgnPO*po,struct Cyc_Absyn_Tvar*r);int Cyc_RgnOrder_effect_outlives(
-  struct Cyc_RgnOrder_RgnPO*po,void*eff,void*rgn);int Cyc_RgnOrder_satisfies_constraints(
-  struct Cyc_RgnOrder_RgnPO*po,struct Cyc_List_List*constraints,void*default_bound,
---- 871,916 ----
+! struct Cyc_Set_Set*s,void*elt);extern char Cyc_Set_Absent[11];struct Cyc_Dict_T;
+! struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;struct Cyc_Dict_T*
+! t;};extern char Cyc_Dict_Present[12];extern char Cyc_Dict_Absent[11];int Cyc_Dict_is_empty(
+! struct Cyc_Dict_Dict d);int Cyc_Dict_member(struct Cyc_Dict_Dict d,void*k);struct Cyc_Dict_Dict
+! Cyc_Dict_insert(struct Cyc_Dict_Dict d,void*k,void*v);void*Cyc_Dict_lookup(struct
+! Cyc_Dict_Dict d,void*k);struct Cyc_Core_Opt*Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict
+! d,void*k);struct Cyc_Dict_Dict Cyc_Dict_rmap_c(struct _RegionHandle*,void*(*f)(void*,
+! void*),void*env,struct Cyc_Dict_Dict d);struct _tuple3{void*f1;void*f2;};struct
+! _tuple3*Cyc_Dict_rchoose(struct _RegionHandle*r,struct Cyc_Dict_Dict d);struct
+! _tuple3*Cyc_Dict_rchoose(struct _RegionHandle*,struct Cyc_Dict_Dict d);struct Cyc_Dict_Dict
+! Cyc_Dict_rfilter_c(struct _RegionHandle*,int(*f)(void*,void*,void*),void*env,
+! struct Cyc_Dict_Dict d);struct Cyc_Iter_Iter Cyc_Dict_make_iter(struct _RegionHandle*
+! rgn,struct Cyc_Dict_Dict d);struct Cyc_RgnOrder_RgnPO;struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_initial_fn_po(
+  struct Cyc_List_List*tvs,struct Cyc_List_List*po,void*effect,struct Cyc_Absyn_Tvar*
+  fst_rgn);struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_outlives_constraint(struct Cyc_RgnOrder_RgnPO*
+  po,void*eff,void*rgn);struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_youngest(struct
+--- 879,921 ----
   Cyc_Absyn_array_typ(void*elt_type,struct Cyc_Absyn_Tqual tq,struct Cyc_Absyn_Exp*
   num_elts,struct Cyc_Absyn_Conref*zero_term,struct Cyc_Position_Segment*ztloc);
   struct Cyc_Absyn_Exp*Cyc_Absyn_uint_exp(unsigned int,struct Cyc_Position_Segment*);
@@ -6327,28 +6326,25 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tc.c powerpc-apple-rhapsody/src
 ! void*);struct Cyc_Set_Set;struct Cyc_Set_Set*Cyc_Set_rempty(struct _RegionHandle*r,
 ! int(*cmp)(void*,void*));struct Cyc_Set_Set*Cyc_Set_rinsert(struct _RegionHandle*r,
 ! struct Cyc_Set_Set*s,void*elt);int Cyc_Set_member(struct Cyc_Set_Set*s,void*elt);
-! extern char Cyc_Set_Absent[11];struct Cyc_Dict_Dict;extern char Cyc_Dict_Present[12];
-! extern char Cyc_Dict_Absent[11];int Cyc_Dict_is_empty(struct Cyc_Dict_Dict*d);int Cyc_Dict_member(
-! struct Cyc_Dict_Dict*d,void*k);struct Cyc_Dict_Dict*Cyc_Dict_insert(struct Cyc_Dict_Dict*
-! d,void*k,void*v);void*Cyc_Dict_lookup(struct Cyc_Dict_Dict*d,void*k);struct Cyc_Core_Opt*
-! Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict*d,void*k);struct Cyc_Dict_Dict*Cyc_Dict_rmap_c(
-! struct _RegionHandle*,void*(*f)(void*,void*),void*env,struct Cyc_Dict_Dict*d);
+! extern char Cyc_Set_Absent[11];struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,
+! void*);struct _RegionHandle*r;struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[12];
+! extern char Cyc_Dict_Absent[11];int Cyc_Dict_is_empty(struct Cyc_Dict_Dict d);int Cyc_Dict_member(
+! struct Cyc_Dict_Dict d,void*k);struct Cyc_Dict_Dict Cyc_Dict_insert(struct Cyc_Dict_Dict
+! d,void*k,void*v);void*Cyc_Dict_lookup(struct Cyc_Dict_Dict d,void*k);struct Cyc_Core_Opt*
+! Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict d,void*k);struct Cyc_Dict_Dict Cyc_Dict_rmap_c(
+! struct _RegionHandle*,void*(*f)(void*,void*),void*env,struct Cyc_Dict_Dict d);
 ! struct _tuple3{void*f1;void*f2;};struct _tuple3*Cyc_Dict_rchoose(struct
-! _RegionHandle*r,struct Cyc_Dict_Dict*d);struct _tuple3*Cyc_Dict_rchoose(struct
-! _RegionHandle*,struct Cyc_Dict_Dict*d);struct Cyc_Dict_Dict*Cyc_Dict_rfilter_c(
-! struct _RegionHandle*,int(*f)(void*,void*,void*),void*env,struct Cyc_Dict_Dict*d);
-! struct Cyc_Iter_Iter Cyc_Dict_make_iter(struct _RegionHandle*rgn,struct Cyc_Dict_Dict*
+! _RegionHandle*r,struct Cyc_Dict_Dict d);struct _tuple3*Cyc_Dict_rchoose(struct
+! _RegionHandle*,struct Cyc_Dict_Dict d);struct Cyc_Dict_Dict Cyc_Dict_rfilter_c(
+! struct _RegionHandle*,int(*f)(void*,void*,void*),void*env,struct Cyc_Dict_Dict d);
+! struct Cyc_Iter_Iter Cyc_Dict_make_iter(struct _RegionHandle*rgn,struct Cyc_Dict_Dict
 ! d);struct Cyc_RgnOrder_RgnPO;struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_initial_fn_po(
-! struct Cyc_List_List*tvs,struct Cyc_List_List*po,void*effect,struct Cyc_Absyn_Tvar*
-! fst_rgn);struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_outlives_constraint(struct Cyc_RgnOrder_RgnPO*
-! po,void*eff,void*rgn);struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_youngest(struct
-! Cyc_RgnOrder_RgnPO*po,struct Cyc_Absyn_Tvar*rgn,int resetable);int Cyc_RgnOrder_is_region_resetable(
-  struct Cyc_RgnOrder_RgnPO*po,struct Cyc_Absyn_Tvar*r);int Cyc_RgnOrder_effect_outlives(
-  struct Cyc_RgnOrder_RgnPO*po,void*eff,void*rgn);int Cyc_RgnOrder_satisfies_constraints(
-  struct Cyc_RgnOrder_RgnPO*po,struct Cyc_List_List*constraints,void*default_bound,
+  struct Cyc_List_List*tvs,struct Cyc_List_List*po,void*effect,struct Cyc_Absyn_Tvar*
+  fst_rgn);struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_outlives_constraint(struct Cyc_RgnOrder_RgnPO*
+  po,void*eff,void*rgn);struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_youngest(struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcdecl.c powerpc-apple-rhapsody/src/tcdecl.c
-*** i686-unknown-linux/src/tcdecl.c	Mon Jul  1 15:16:14 2002
---- powerpc-apple-rhapsody/src/tcdecl.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/tcdecl.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/tcdecl.c	Wed Jul  3 15:52:58 2002
 ***************
 *** 653,661 ****
   #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
@@ -6369,8 +6365,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcdecl.c powerpc-apple-rhapsody
   int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcenv.c powerpc-apple-rhapsody/src/tcenv.c
-*** i686-unknown-linux/src/tcenv.c	Mon Jul  1 15:16:14 2002
---- powerpc-apple-rhapsody/src/tcenv.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/tcenv.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/tcenv.c	Wed Jul  3 15:52:58 2002
 ***************
 *** 658,666 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -6391,35 +6387,92 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcenv.c powerpc-apple-rhapsody/
   _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_struct{
   int tag;double f1;};struct Cyc_LongDouble_pa_struct{int tag;long double f1;};struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcexp.c powerpc-apple-rhapsody/src/tcexp.c
-*** i686-unknown-linux/src/tcexp.c	Mon Jul  1 15:16:14 2002
---- powerpc-apple-rhapsody/src/tcexp.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/tcexp.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/tcexp.c	Wed Jul  3 15:52:58 2002
 ***************
-*** 893,904 ****
+*** 902,941 ****
   Cyc_Absyn_lookup_field(struct Cyc_List_List*,struct _dynforward_ptr*);struct Cyc_Absyn_Aggrfield*
   Cyc_Absyn_lookup_decl_field(struct Cyc_Absyn_Aggrdecl*,struct _dynforward_ptr*);
-  struct Cyc_Absyn_Aggrdecl*Cyc_Absyn_get_known_aggrdecl(void*info);int Cyc_strcmp(
-! struct _dynforward_ptr s1,struct _dynforward_ptr s2);typedef struct{int __count;union{
-! unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;typedef struct{long
-! __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t Cyc_fpos_t;
-! struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
+  struct Cyc_Absyn_Aggrdecl*Cyc_Absyn_get_known_aggrdecl(union Cyc_Absyn_AggrInfoU_union
+! info);int Cyc_strcmp(struct _dynforward_ptr s1,struct _dynforward_ptr s2);typedef
+! struct{int __count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;
+! typedef struct{long __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t
+! Cyc_fpos_t;struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
 ! int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;
 ! };struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
-  int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
-  int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
-  Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
---- 893,901 ----
+! int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+! int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
+! Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
+! int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{
+! int tag;struct _dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;
+! };struct Cyc_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int
+! tag;struct _dynforward_ptr f1;};struct _dynforward_ptr Cyc_vrprintf(struct
+! _RegionHandle*,struct _dynforward_ptr,struct _dynforward_ptr);extern char Cyc_FileCloseError[
+! 19];extern char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{char*tag;
+! struct _dynforward_ptr f1;};struct Cyc_PP_Ppstate;struct Cyc_PP_Out;struct Cyc_PP_Doc;
+! struct Cyc_Absynpp_Params{int expand_typedefs: 1;int qvar_to_Cids: 1;int
+! add_cyc_prefix: 1;int to_VC: 1;int decls_first: 1;int rewrite_temp_tvars: 1;int
+! print_all_tvars: 1;int print_all_kinds: 1;int print_all_effects: 1;int
+! print_using_stmts: 1;int print_externC_stmts: 1;int print_full_evars: 1;int
+! print_zeroterm: 1;int generate_line_directives: 1;int use_curr_namespace: 1;struct Cyc_List_List*
+! curr_namespace;};struct _dynforward_ptr Cyc_Absynpp_typ2string(void*);struct
+! _dynforward_ptr Cyc_Absynpp_exp2string(struct Cyc_Absyn_Exp*);struct
+! _dynforward_ptr Cyc_Absynpp_qvar2string(struct _tuple1*);struct Cyc_Iter_Iter{void*
+! env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);
+! struct Cyc_Set_Set;extern char Cyc_Set_Absent[11];struct Cyc_Dict_T;struct Cyc_Dict_Dict{
+! int(*rel)(void*,void*);struct _RegionHandle*r;struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[
+! 12];extern char Cyc_Dict_Absent[11];struct _tuple0*Cyc_Dict_rchoose(struct
+! _RegionHandle*r,struct Cyc_Dict_Dict d);struct _tuple0*Cyc_Dict_rchoose(struct
+! _RegionHandle*,struct Cyc_Dict_Dict d);struct Cyc_RgnOrder_RgnPO;struct Cyc_RgnOrder_RgnPO*
+! Cyc_RgnOrder_initial_fn_po(struct Cyc_List_List*tvs,struct Cyc_List_List*po,void*
+! effect,struct Cyc_Absyn_Tvar*fst_rgn);struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_outlives_constraint(
+! struct Cyc_RgnOrder_RgnPO*po,void*eff,void*rgn);struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_youngest(
+! struct Cyc_RgnOrder_RgnPO*po,struct Cyc_Absyn_Tvar*rgn,int resetable);int Cyc_RgnOrder_is_region_resetable(
+  struct Cyc_RgnOrder_RgnPO*po,struct Cyc_Absyn_Tvar*r);int Cyc_RgnOrder_effect_outlives(
+  struct Cyc_RgnOrder_RgnPO*po,void*eff,void*rgn);int Cyc_RgnOrder_satisfies_constraints(
+  struct Cyc_RgnOrder_RgnPO*po,struct Cyc_List_List*constraints,void*default_bound,
+--- 902,939 ----
   Cyc_Absyn_lookup_field(struct Cyc_List_List*,struct _dynforward_ptr*);struct Cyc_Absyn_Aggrfield*
   Cyc_Absyn_lookup_decl_field(struct Cyc_Absyn_Aggrdecl*,struct _dynforward_ptr*);
-  struct Cyc_Absyn_Aggrdecl*Cyc_Absyn_get_known_aggrdecl(void*info);int Cyc_strcmp(
-! struct _dynforward_ptr s1,struct _dynforward_ptr s2);struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;
-! struct Cyc_String_pa_struct{int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{
-! int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
-  int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
-  int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
-  Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
+  struct Cyc_Absyn_Aggrdecl*Cyc_Absyn_get_known_aggrdecl(union Cyc_Absyn_AggrInfoU_union
+! info);int Cyc_strcmp(struct _dynforward_ptr s1,struct _dynforward_ptr s2);struct Cyc___cycFILE;
+! struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{int tag;struct
+! _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_struct{
+! int tag;double f1;};struct Cyc_LongDouble_pa_struct{int tag;long double f1;};struct
+! Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{int tag;
+! unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
+! int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
+! int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct
+! _dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
+! int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dynforward_ptr f1;};
+! struct _dynforward_ptr Cyc_vrprintf(struct _RegionHandle*,struct _dynforward_ptr,
+! struct _dynforward_ptr);extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[
+! 18];struct Cyc_FileOpenError_struct{char*tag;struct _dynforward_ptr f1;};struct Cyc_PP_Ppstate;
+! struct Cyc_PP_Out;struct Cyc_PP_Doc;struct Cyc_Absynpp_Params{int expand_typedefs: 1;
+! int qvar_to_Cids: 1;int add_cyc_prefix: 1;int to_VC: 1;int decls_first: 1;int
+! rewrite_temp_tvars: 1;int print_all_tvars: 1;int print_all_kinds: 1;int
+! print_all_effects: 1;int print_using_stmts: 1;int print_externC_stmts: 1;int
+! print_full_evars: 1;int print_zeroterm: 1;int generate_line_directives: 1;int
+! use_curr_namespace: 1;struct Cyc_List_List*curr_namespace;};struct _dynforward_ptr
+! Cyc_Absynpp_typ2string(void*);struct _dynforward_ptr Cyc_Absynpp_exp2string(struct
+! Cyc_Absyn_Exp*);struct _dynforward_ptr Cyc_Absynpp_qvar2string(struct _tuple1*);
+! struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(
+! struct Cyc_Iter_Iter,void*);struct Cyc_Set_Set;extern char Cyc_Set_Absent[11];struct
+! Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;
+! struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[12];extern char Cyc_Dict_Absent[11];
+! struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*r,struct Cyc_Dict_Dict d);
+! struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*,struct Cyc_Dict_Dict d);struct
+! Cyc_RgnOrder_RgnPO;struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_initial_fn_po(struct Cyc_List_List*
+! tvs,struct Cyc_List_List*po,void*effect,struct Cyc_Absyn_Tvar*fst_rgn);struct Cyc_RgnOrder_RgnPO*
+! Cyc_RgnOrder_add_outlives_constraint(struct Cyc_RgnOrder_RgnPO*po,void*eff,void*
+! rgn);struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_youngest(struct Cyc_RgnOrder_RgnPO*
+! po,struct Cyc_Absyn_Tvar*rgn,int resetable);int Cyc_RgnOrder_is_region_resetable(
+  struct Cyc_RgnOrder_RgnPO*po,struct Cyc_Absyn_Tvar*r);int Cyc_RgnOrder_effect_outlives(
+  struct Cyc_RgnOrder_RgnPO*po,void*eff,void*rgn);int Cyc_RgnOrder_satisfies_constraints(
+  struct Cyc_RgnOrder_RgnPO*po,struct Cyc_List_List*constraints,void*default_bound,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcgenrep.c powerpc-apple-rhapsody/src/tcgenrep.c
-*** i686-unknown-linux/src/tcgenrep.c	Mon Jul  1 15:16:16 2002
---- powerpc-apple-rhapsody/src/tcgenrep.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/tcgenrep.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/tcgenrep.c	Wed Jul  3 15:52:58 2002
 ***************
 *** 675,684 ****
   struct Cyc_List_List*x);struct Cyc_List_List*Cyc_List_tabulate(int n,void*(*f)(int));
@@ -6442,24 +6495,24 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcgenrep.c powerpc-apple-rhapso
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
   int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
 ***************
-*** 697,703 ****
+*** 698,704 ****
   d);struct _tuple1{void*f1;void*f2;};struct _tuple1*Cyc_Dict_rchoose(struct
-  _RegionHandle*r,struct Cyc_Dict_Dict*d);struct _tuple1*Cyc_Dict_rchoose(struct
-  _RegionHandle*,struct Cyc_Dict_Dict*d);struct Cyc_Dict_Dict*Cyc_Dict_delete(struct
-! Cyc_Dict_Dict*,void*);unsigned int Cyc_strlen(struct _dynforward_ptr s);int Cyc_strcmp(
+  _RegionHandle*r,struct Cyc_Dict_Dict d);struct _tuple1*Cyc_Dict_rchoose(struct
+  _RegionHandle*,struct Cyc_Dict_Dict d);struct Cyc_Dict_Dict Cyc_Dict_delete(struct
+! Cyc_Dict_Dict,void*);unsigned int Cyc_strlen(struct _dynforward_ptr s);int Cyc_strcmp(
   struct _dynforward_ptr s1,struct _dynforward_ptr s2);struct _dynforward_ptr Cyc_strconcat(
   struct _dynforward_ptr,struct _dynforward_ptr);struct _dynforward_ptr Cyc_strdup(
   struct _dynforward_ptr src);struct Cyc_Hashtable_Table;struct Cyc_Hashtable_Table*
---- 695,701 ----
+--- 696,702 ----
   d);struct _tuple1{void*f1;void*f2;};struct _tuple1*Cyc_Dict_rchoose(struct
-  _RegionHandle*r,struct Cyc_Dict_Dict*d);struct _tuple1*Cyc_Dict_rchoose(struct
-  _RegionHandle*,struct Cyc_Dict_Dict*d);struct Cyc_Dict_Dict*Cyc_Dict_delete(struct
-! Cyc_Dict_Dict*,void*);unsigned long Cyc_strlen(struct _dynforward_ptr s);int Cyc_strcmp(
+  _RegionHandle*r,struct Cyc_Dict_Dict d);struct _tuple1*Cyc_Dict_rchoose(struct
+  _RegionHandle*,struct Cyc_Dict_Dict d);struct Cyc_Dict_Dict Cyc_Dict_delete(struct
+! Cyc_Dict_Dict,void*);unsigned long Cyc_strlen(struct _dynforward_ptr s);int Cyc_strcmp(
   struct _dynforward_ptr s1,struct _dynforward_ptr s2);struct _dynforward_ptr Cyc_strconcat(
   struct _dynforward_ptr,struct _dynforward_ptr);struct _dynforward_ptr Cyc_strdup(
   struct _dynforward_ptr src);struct Cyc_Hashtable_Table;struct Cyc_Hashtable_Table*
 ***************
-*** 721,730 ****
+*** 722,731 ****
   int tag;struct _dynforward_ptr f1;struct _dynforward_ptr f2;};struct Cyc_Typerep_Union_struct{
   int tag;struct _dynforward_ptr*f1;int f2;struct _dynforward_ptr f3;};struct Cyc_Typerep_Enum_struct{
   int tag;struct _dynforward_ptr*f1;int f2;struct _dynforward_ptr f3;};unsigned int Cyc_Typerep_size_type(
@@ -6470,7 +6523,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcgenrep.c powerpc-apple-rhapso
   struct Cyc_Absyn_Rel_n_struct{int tag;struct Cyc_List_List*f1;};struct Cyc_Absyn_Abs_n_struct{
   int tag;struct Cyc_List_List*f1;};union Cyc_Absyn_Nmspace_union{struct Cyc_Absyn_Loc_n_struct
   Loc_n;struct Cyc_Absyn_Rel_n_struct Rel_n;struct Cyc_Absyn_Abs_n_struct Abs_n;};
---- 719,727 ----
+--- 720,728 ----
   int tag;struct _dynforward_ptr f1;struct _dynforward_ptr f2;};struct Cyc_Typerep_Union_struct{
   int tag;struct _dynforward_ptr*f1;int f2;struct _dynforward_ptr f3;};struct Cyc_Typerep_Enum_struct{
   int tag;struct _dynforward_ptr*f1;int f2;struct _dynforward_ptr f3;};unsigned int Cyc_Typerep_size_type(
@@ -6481,32 +6534,37 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcgenrep.c powerpc-apple-rhapso
   int tag;struct Cyc_List_List*f1;};union Cyc_Absyn_Nmspace_union{struct Cyc_Absyn_Loc_n_struct
   Loc_n;struct Cyc_Absyn_Rel_n_struct Rel_n;struct Cyc_Absyn_Abs_n_struct Abs_n;};
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcpat.c powerpc-apple-rhapsody/src/tcpat.c
-*** i686-unknown-linux/src/tcpat.c	Mon Jul  1 15:16:16 2002
---- powerpc-apple-rhapsody/src/tcpat.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/tcpat.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/tcpat.c	Wed Jul  3 15:52:58 2002
 ***************
-*** 675,683 ****
-  x,struct Cyc_List_List*y);struct Cyc_List_List*Cyc_List_rtabulate_c(struct
-  _RegionHandle*r,int n,void*(*f)(void*,int),void*env);struct Cyc_Iter_Iter{void*env;
-  int(*next)(void*env,void*dest);};int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);
-! typedef struct{int __count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;
-! typedef struct{long __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t
-! Cyc_fpos_t;struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
-  int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;
-  };struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
-  int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
---- 675,681 ----
-  x,struct Cyc_List_List*y);struct Cyc_List_List*Cyc_List_rtabulate_c(struct
-  _RegionHandle*r,int n,void*(*f)(void*,int),void*env);struct Cyc_Iter_Iter{void*env;
-  int(*next)(void*env,void*dest);};int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);
+*** 674,685 ****
+  _RegionHandle*r1,struct _RegionHandle*r2,struct Cyc_List_List*x,struct Cyc_List_List*
+  y);struct Cyc_List_List*Cyc_List_rtabulate_c(struct _RegionHandle*r,int n,void*(*f)(
+  void*,int),void*env);struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);
+! };int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);typedef struct{int __count;union{
+! unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;typedef struct{long
+! __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t Cyc_fpos_t;
 ! struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
-  int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;
-  };struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
+! int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;
+! };struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+  int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
+  struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
+--- 674,682 ----
+  _RegionHandle*r1,struct _RegionHandle*r2,struct Cyc_List_List*x,struct Cyc_List_List*
+  y);struct Cyc_List_List*Cyc_List_rtabulate_c(struct _RegionHandle*r,int n,void*(*f)(
+  void*,int),void*env);struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);
+! };int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;
+! struct Cyc_String_pa_struct{int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{
+! int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
+  int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+  int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
+  struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcstmt.c powerpc-apple-rhapsody/src/tcstmt.c
-*** i686-unknown-linux/src/tcstmt.c	Mon Jul  1 15:16:16 2002
---- powerpc-apple-rhapsody/src/tcstmt.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/tcstmt.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/tcstmt.c	Wed Jul  3 15:52:58 2002
 ***************
-*** 866,877 ****
+*** 874,885 ****
   ztloc);struct Cyc_Absyn_Exp*Cyc_Absyn_uint_exp(unsigned int,struct Cyc_Position_Segment*);
   struct Cyc_Absyn_Stmt*Cyc_Absyn_new_stmt(void*s,struct Cyc_Position_Segment*loc);
   struct Cyc_Absyn_Stmt*Cyc_Absyn_skip_stmt(struct Cyc_Position_Segment*loc);struct
@@ -6519,7 +6577,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcstmt.c powerpc-apple-rhapsody
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
   int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
   struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
---- 866,874 ----
+--- 874,882 ----
   ztloc);struct Cyc_Absyn_Exp*Cyc_Absyn_uint_exp(unsigned int,struct Cyc_Position_Segment*);
   struct Cyc_Absyn_Stmt*Cyc_Absyn_new_stmt(void*s,struct Cyc_Position_Segment*loc);
   struct Cyc_Absyn_Stmt*Cyc_Absyn_skip_stmt(struct Cyc_Position_Segment*loc);struct
@@ -6530,8 +6588,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcstmt.c powerpc-apple-rhapsody
   int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
   struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcutil.c powerpc-apple-rhapsody/src/tcutil.c
-*** i686-unknown-linux/src/tcutil.c	Mon Jul  1 15:16:16 2002
---- powerpc-apple-rhapsody/src/tcutil.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/tcutil.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/tcutil.c	Wed Jul  3 15:52:58 2002
 ***************
 *** 659,670 ****
   _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -6558,7 +6616,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcutil.c powerpc-apple-rhapsody
   int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
   struct _dynforward_ptr);int Cyc_fflush(struct Cyc___cycFILE*);int Cyc_fprintf(struct
 ***************
-*** 963,969 ****
+*** 971,977 ****
   struct Cyc_Position_Segment*,struct _tuple1*);struct Cyc_Absyn_Typedefdecl*Cyc_Tcenv_lookup_typedefdecl(
   struct Cyc_Tcenv_Tenv*,struct Cyc_Position_Segment*,struct _tuple1*);struct Cyc_List_List*
   Cyc_Tcenv_lookup_type_vars(struct Cyc_Tcenv_Tenv*);int Cyc_Tcenv_region_outlives(
@@ -6566,7 +6624,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcutil.c powerpc-apple-rhapsody
   _dynforward_ptr s);int Cyc_strcmp(struct _dynforward_ptr s1,struct _dynforward_ptr s2);
   int Cyc_strptrcmp(struct _dynforward_ptr*s1,struct _dynforward_ptr*s2);struct
   _dynforward_ptr Cyc_strconcat(struct _dynforward_ptr,struct _dynforward_ptr);struct
---- 961,967 ----
+--- 969,975 ----
   struct Cyc_Position_Segment*,struct _tuple1*);struct Cyc_Absyn_Typedefdecl*Cyc_Tcenv_lookup_typedefdecl(
   struct Cyc_Tcenv_Tenv*,struct Cyc_Position_Segment*,struct _tuple1*);struct Cyc_List_List*
   Cyc_Tcenv_lookup_type_vars(struct Cyc_Tcenv_Tenv*);int Cyc_Tcenv_region_outlives(
@@ -6575,8 +6633,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcutil.c powerpc-apple-rhapsody
   int Cyc_strptrcmp(struct _dynforward_ptr*s1,struct _dynforward_ptr*s2);struct
   _dynforward_ptr Cyc_strconcat(struct _dynforward_ptr,struct _dynforward_ptr);struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/toc.c powerpc-apple-rhapsody/src/toc.c
-*** i686-unknown-linux/src/toc.c	Mon Jul  1 15:16:18 2002
---- powerpc-apple-rhapsody/src/toc.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/toc.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/toc.c	Wed Jul  3 15:52:58 2002
 ***************
 *** 658,669 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -6603,8 +6661,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/toc.c powerpc-apple-rhapsody/sr
   int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
   struct _dynforward_ptr);int Cyc_fflush(struct Cyc___cycFILE*);int Cyc_fprintf(struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tovc.c powerpc-apple-rhapsody/src/tovc.c
-*** i686-unknown-linux/src/tovc.c	Mon Jul  1 15:16:18 2002
---- powerpc-apple-rhapsody/src/tovc.c	Wed Jul  3 13:47:00 2002
+*** i686-unknown-linux/src/tovc.c	Wed Jul  3 15:52:00 2002
+--- powerpc-apple-rhapsody/src/tovc.c	Wed Jul  3 15:52:58 2002
 ***************
 *** 666,674 ****
   struct Cyc_List_List*x);struct Cyc_List_List*Cyc_List_append(struct Cyc_List_List*x,

@@ -199,21 +199,21 @@ static $(int, list_t<int>)@ split_trans_set(set_t<transition_t,`H> trans_set) {
 
 // The Ocaml I'm porting from isn't functional (re-entrant) here either:
 // (It doesn't look too hard to pass the state around functionally.)
-static opt_t<dict_t<set_t<transition_t>, int>> state_map      = NULL;
+static dict_t<set_t<transition_t>, int> *state_map      = NULL;
 static list_t<$(set_t<transition_t>,int)@>     todo           = NULL;
 static int                                 next_state_num = 0;
 
 static void reset_state_mem() {
-  state_map      = new Opt(Dict::empty(Set::setcmp));
+  state_map      = new Dict::empty(Set::setcmp);
   todo           = NULL;
   next_state_num = 0;
 }
 
 static int get_state(set_t<transition_t,`H> st) {
-  try return Dict::lookup(state_map->v, st);
+  try return Dict::lookup(*state_map, st);
   catch {
   case Dict::Absent:
-    state_map->v = Dict::insert(state_map->v, st, next_state_num);
+    *state_map = Dict::insert(*state_map, st, next_state_num);
     todo         = new List(new $(st, next_state_num), todo);
     return next_state_num++; // post-increment!
   }

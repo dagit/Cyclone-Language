@@ -344,7 +344,7 @@ bool okay_szofarg(type_t t) {
   case &Evar(&Opt{BoxKind},_,_,_): return true; // Possible?
   case &Evar(_,_,_,_): return false;
   case &TunionType(_): return true;
-  case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(_,tuf),_}):
+  case &TunionFieldType(TunionFieldInfo{KnownTunionfield(_,tuf),_}):
     fallthru(tuf->typs);
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl)
@@ -369,8 +369,8 @@ bool okay_szofarg(type_t t) {
   case &AggrType(AggrInfo(info,_)):
     _ ad;
     switch(info) {
-    case &UnknownAggr(_,_): impos("szof on unchecked StructType");
-    case &KnownAggr(&ad2): ad = ad2;
+    case UnknownAggr(_,_): impos("szof on unchecked StructType");
+    case KnownAggr(&ad2): ad = ad2;
     }
     if(ad->impl == NULL)
       return false;

@@ -716,9 +716,9 @@ doc_t ntyp2doc(type_t t) {
     break;
   case &TunionType(TunionInfo(tu_info,ts,ropt)):
     switch(tu_info) {
-    case &UnknownTunion(UnknownTunionInfo(n,is_x,_)): 
+    case UnknownTunion(UnknownTunionInfo(n,is_x,_)): 
       fallthru(n,is_x);
-    case &KnownTunion(&&Tuniondecl(_,n,_,_,is_x,_)):
+    case KnownTunion(&&Tuniondecl(_,n,_,_,is_x,_)):
       let kw = text(is_x ? "xtunion " : "tunion ");
       type_t r = (ropt) ? ropt->v : HeapRgn;
       switch (compress(r)) {
@@ -732,10 +732,10 @@ doc_t ntyp2doc(type_t t) {
     break;
   case &TunionFieldType(TunionFieldInfo(tuf_info,ts)):
     switch(tuf_info) {
-    case &UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
+    case UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
       fallthru(tname,is_x,fname);
-    case &KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x,_),
-			   &Tunionfield(fname,_,_,_)):
+    case KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x,_),
+                          &Tunionfield(fname,_,_,_)):
 			     let kw = text(is_x ? "xtunion " : "tunion ");
       s = cat(kw, qvar2doc(tname),text("."),qvar2doc(fname));
       break;
@@ -1848,9 +1848,9 @@ bool is_anon_aggrtype(type_t t) {
 
 // bubble the attribute modifier past a running series of 
 // Pointer_mod Function_mod's
-static list_t<type_modifier_t,`r> 
-bubble_attributes(region_t<`r> r,type_modifier_t atts,
-                  list_t<type_modifier_t,`r> tms) {
+static list_t<type_modifier_t<`r>,`r> 
+bubble_attributes(region_t<`r> r,type_modifier_t<`r> atts,
+                  list_t<type_modifier_t<`r>,`r> tms) {
   if (tms != NULL && tms->tl != NULL) {
     switch ($(tms->hd,tms->tl->hd)) {
     case $(&Pointer_mod(_,_),&Function_mod(_)):
@@ -1862,22 +1862,22 @@ bubble_attributes(region_t<`r> r,type_modifier_t atts,
 
 
 // Conversion between alternate forms of types
-$(tqual_t,type_t,list_t<type_modifier_t,`r>) to_tms(region_t<`r> r, 
-                                                    tqual_t tq,type_t t) {
+$(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r, 
+                                                        tqual_t tq,type_t t) {
   switch (t) {
   case &ArrayType(ArrayInfo{t2,tq2,e,zeroterm,ztl}):
     // Throw away tq, can't qualify an array
     let $(tq3,t3,tml3) = to_tms(r,tq2,t2);
     type_modifier_t tm;
     if (e == NULL)
-      tm = new Carray_mod(zeroterm,ztl);
+      tm = rnew(r) Carray_mod(zeroterm,ztl);
     else
-      tm = new ConstArray_mod((exp_t)e,zeroterm,ztl);
+      tm = rnew(r) ConstArray_mod((exp_t)e,zeroterm,ztl);
     return $(tq3, t3, rnew(r) List(tm,tml3));
 
   case &PointerType(PtrInfo(t2,tq2,ptratts)):
     let $(tq3,t3,tml3) = to_tms(r,tq2,t2);
-    tml3 = rnew(r) List(new Pointer_mod(ptratts,tq),tml3);
+    tml3 = rnew(r) List(rnew(r) Pointer_mod(ptratts,tq),tml3);
     return $(tq3, t3, tml3);
 
   case &FnType(FnInfo{typvars,effopt,t2,args,c_varargs,cyc_varargs,
@@ -1900,7 +1900,7 @@ $(tqual_t,type_t,list_t<type_modifier_t,`r>) to_tms(region_t<`r> r,
 
     // discard tq because you can't qualify a function
     let $(tq3,t3,tml3) = to_tms(r,empty_tqual(NULL),t2);
-    list_t<type_modifier_t,`r> tms = tml3;
+    list_t<type_modifier_t<`r>,`r> tms = tml3;
     // mess with attributes and arguments:
     // * for gcc: we put all attributes after the args
     // * for VC: 
@@ -1912,9 +1912,10 @@ $(tqual_t,type_t,list_t<type_modifier_t,`r>) to_tms(region_t<`r> r,
     if (fn_atts != NULL && !to_VC) {
       // if the return type is a function pointer, then we have to
       // move the attributes past that function modifier and so forth
-      tms = bubble_attributes(r,new Attributes_mod(NULL,fn_atts),tms);
+      tms = bubble_attributes(r,rnew(r) Attributes_mod(NULL,fn_atts),tms);
     }
-    tms = rnew(r) List(new Function_mod(new WithTypes(args,c_varargs,
+    tms = rnew(r) List(rnew(r) 
+                       Function_mod(rnew(r) WithTypes(args,c_varargs,
                                                       cyc_varargs,effopt,
                                                       rgn_po)),tms);
     if(to_VC)
@@ -1923,15 +1924,13 @@ $(tqual_t,type_t,list_t<type_modifier_t,`r>) to_tms(region_t<`r> r,
 	case Stdcall_att: 
 	case Cdecl_att:   
 	case Fastcall_att:
-	  tms = rnew(r) List(new Attributes_mod(NULL,
-                                                new List(fn_atts->hd,NULL)),
-                             tms);
+	  tms = rnew(r) List(rnew(r) Attributes_mod(NULL,new List(fn_atts->hd,NULL)),tms);
 	  goto AfterAtts;
 	default: break;
 	}
   AfterAtts:
     if (typvars != NULL)
-      tms = rnew(r) List(new TypeParams_mod(typvars,NULL,true),tms);
+      tms = rnew(r) List(rnew(r) TypeParams_mod(typvars,NULL,true),tms);
     return $(tq3,t3,tms);
 
   case &Evar(k,topt,i,_):

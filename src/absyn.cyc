@@ -110,12 +110,11 @@ static tunion Bounds.Upper_b one_bt = Upper_b(&exp_unsigned_one_v);
 tunion Bounds bounds_one = &one_bt;
 
 //////////////////////////// Constraints /////////////////////////
-conref_t<`a> new_conref(`a x) { return new Conref{.v = new Eq_constr(x)};}
+conref_t<`a> new_conref(`a x) { return new Conref{.v = Eq_constr(x)};}
 conref_t<`a> empty_conref()   { return new Conref{.v = No_constr};}
 
 #define MAKE_EQ_CONSTR(str,type,val)\
-  static tunion Constraint.Eq_constr<type> str##_constraint = Eq_constr(val);\
-  static struct Conref<type> str##_v = Conref(&str##_constraint);\
+  static struct Conref<type> str##_v = Conref(Eq_constr(val));\
   conref_t<type> str = &str##_v
 
 MAKE_EQ_CONSTR(true_conref,bool,true);
@@ -129,24 +128,24 @@ MAKE_EQ_CONSTR(bounds_dyneither_conref,bounds_t,DynEither_b);
 conref_t<`a> compress_conref(conref_t<`a> x) {
   switch (x->v) {
   case No_constr:    
-  case &Eq_constr(_): return x;
-  case &Forward_constr(*y):
-    let z = compress_conref(*y);
-    *y = z;
+  case Eq_constr(_): return x;
+  case Forward_constr(y):
+    let z = compress_conref(y);
+    x->v = Forward_constr(z);
     return z;
   }
 }
 
 `a conref_val(conref_t<`a> x) {
   switch (compress_conref(x)->v) {
-  case &Eq_constr(v): return v;
+  case Eq_constr(v): return v;
   default: Tcutil::impos("conref_val");
   }
 }
 
 `a conref_def(`a y, conref_t<`a> x) {
   switch (compress_conref(x)->v) {
-  case &Eq_constr(v): return v;
+  case Eq_constr(v): return v;
   default: return y;
   }
 }
@@ -232,10 +231,10 @@ static struct Tuniondecl exn_tud_v = Tuniondecl(Extern, &exn_name_v, NULL,
 						&exn_ol, true, false);
 tuniondecl_t exn_tud = &exn_tud_v;
 
-static tunion TunionInfoU.KnownTunion exn_tinfou = KnownTunion(&exn_tud);
+  //static tunion TunionInfoU.KnownTunion exn_tinfou = KnownTunion(&exn_tud);
 static struct Opt<type_t> heap_opt = Opt(HeapRgn);
 static tunion Type.TunionType exn_typ_tt =
-                  TunionType(TunionInfo(&exn_tinfou,NULL,&heap_opt));
+                  TunionType(TunionInfo(KnownTunion(&exn_tud),NULL,&heap_opt));
 type_t exn_typ = &exn_typ_tt;
 
 // tunion PrintArg and tunion ScanfArg qvars
@@ -345,7 +344,7 @@ type_t file_typ() {
   if(file_t_opt == NULL) {
     typedef_name_t file_t_name = new $(Abs_n(NULL), sf);
     aggrdecl_t sd = new Aggrdecl(StructA,Abstract,file_t_name,NULL,NULL,NULL);
-    type_t file_struct_typ = new AggrType(AggrInfo(new KnownAggr(new sd),NULL));
+    type_t file_struct_typ = new AggrType(AggrInfo(KnownAggr(new sd),NULL));
     file_t_opt = new at_typ(file_struct_typ,HeapRgn,empty_tqual(NULL),
                             false_conref);
   }
@@ -368,17 +367,17 @@ type_t empty_effect = &empty_eff;
 //          the aggrdecl field.  Beware using them anywhere else!
 // (Probably we should require setting the third field even in Toc.)
 type_t aggr_typ(aggr_kind_t k, var_t name) {
-  return new AggrType(AggrInfo(new UnknownAggr(k, new $(rel_ns_null,name)),
+  return new AggrType(AggrInfo(UnknownAggr(k, new $(rel_ns_null,name)),
 			       NULL));
 }
 type_t strct(var_t name)     { return aggr_typ(StructA,name); }
 type_t union_typ(var_t name) { return aggr_typ(UnionA,name);  }
 
 type_t strctq(qvar_t name) {
-  return new AggrType(AggrInfo(new UnknownAggr(StructA,name), NULL));
+  return new AggrType(AggrInfo(UnknownAggr(StructA,name), NULL));
 }
 type_t unionq_typ(qvar_t name) {
-  return new AggrType(AggrInfo(new UnknownAggr(UnionA,name), NULL));
+  return new AggrType(AggrInfo(UnknownAggr(UnionA,name), NULL));
 }
 
 ///////////////////////// Expressions //////////////////////////////
@@ -787,14 +786,14 @@ stringptr_t fieldname(int i) {
 
 $(aggr_kind_t,qvar_t) aggr_kinded_name(tunion AggrInfoU info) {
   switch(info) {
-  case &UnknownAggr(k,n): return $(k,n);
-  case &KnownAggr(&&Aggrdecl(k,_,n,_,_,_)): return $(k,n);
+  case UnknownAggr(k,n): return $(k,n);
+  case KnownAggr(&&Aggrdecl(k,_,n,_,_,_)): return $(k,n);
   }
 }
 aggrdecl_t get_known_aggrdecl(tunion AggrInfoU info) {
   switch(info) {
-  case &UnknownAggr(k,n): Tcutil::impos("unchecked aggrdecl");
-  case &KnownAggr(&ad): return ad;
+  case UnknownAggr(k,n): Tcutil::impos("unchecked aggrdecl");
+  case KnownAggr(&ad): return ad;
   }
 }
 bool is_union_type(type_t t) {

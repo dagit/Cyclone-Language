@@ -312,7 +312,7 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
     }
     return true /*check_public_enum(ae, seen, ed)*/;
 
-  case &TunionType(TunionInfo(&KnownTunion(&tud0),targs,_)):
+  case &TunionType(TunionInfo(KnownTunion(&tud0),targs,_)):
     let &$(tns, v) = tud0->name;
     let ns = get_abs_ns(tns);
     tuniondecl_t tud;
@@ -330,7 +330,7 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
     return check_public_type_list(ae, seen, obj, name, identity, targs)
       && check_public_tuniondecl(ae, seen, tud);
 
-  case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud0,tuf0), targs}):
+  case &TunionFieldType(TunionFieldInfo{KnownTunionfield(tud0,tuf0), targs}):
     let &$(tns, v) = tud0->name;
     let ns = get_abs_ns(tns);
     tuniondecl_t tud;
@@ -700,7 +700,7 @@ INCL_DECL(xtunionfield, "xtunionfield", ->field->name)
 #define INCL_DICT(OBJ, NAMEOBJ)\
   incl_dict(ie1->OBJ##decls, ie2->OBJ##decls, incl_##OBJ##decl, NAMEOBJ, msg)
 
-opt_t<Dict::dict_t<var_t, `a::A @>> 
+Dict::dict_t<var_t, `a::A @> *
 compat_merge_dict(Dict::dict_t<var_t, `a @`H,`H> dic1,
 		  Dict::dict_t<var_t, `a @`H,`H> dic2,
 		  Dict::dict_t<var_t, `a @`H,`H> excl,
@@ -814,7 +814,7 @@ void compat_merge_dict_f($(bool,
   }
 }
 
-opt_t<Dict::dict_t<var_t, `a::A @>> 
+Dict::dict_t<var_t, `a::A @> *
 compat_merge_dict(Dict::dict_t<var_t, `a @`H,`H> dic1,
 		  Dict::dict_t<var_t, `a @`H,`H> dic2,
 		  Dict::dict_t<var_t, `a @`H,`H> excl,
@@ -827,7 +827,7 @@ compat_merge_dict(Dict::dict_t<var_t, `a @`H,`H> dic1,
   Dict::iter_c(compat_merge_dict_f, &env, dic2);
 
   if (env[0])
-    return new Opt(env[1]);
+    return new env[1];
   return NULL;
 }
 
@@ -845,7 +845,7 @@ struct Ienv * compat_merge_ienv(ienv_t ie1, ienv_t ie2, ienv_t iexcl, string_t<`
   let r6 = COMPAT_MERGE_DICT(xtunionfield, "xtunionfield");
   if (!r1 || !r2 || !r3 || !r4 || !r5 || !r6 )
     return NULL;
-  return new Ienv(r1->v, r2->v, r3->v, r4->v, r5->v, r6->v);
+  return new Ienv(*r1, *r2, *r3, *r4, *r5, *r6);
 }
 
 void compat_merge_ns_f($(bool,
@@ -881,7 +881,7 @@ void compat_merge_ns_f($(bool,
       *res_dic = Dict::insert(*res_dic, ns, (ienv_t) ie);
 }
 
-opt_t<Dict::dict_t<list_t<var_t>, ienv_t>> 
+Dict::dict_t<list_t<var_t>, ienv_t> *
 compat_merge_ns(Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> dic1,
 		Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> dic2,
 		Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> excl,
@@ -892,7 +892,7 @@ compat_merge_ns(Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> dic1,
   Dict::iter_c(compat_merge_ns_f, &env, dic2);
 
   if (env[0])
-    return new Opt(env[1]);
+    return new env[1];
   return NULL;
 }
 
@@ -909,14 +909,14 @@ void disj_merge_dict_f($(bool, Dict::dict_t<var_t,`a,`H>,
   }
 }
 
-opt_t<Dict::dict_t<var_t, `a>> disj_merge_dict(Dict::dict_t<var_t, `a,`H> dic1,
-					       Dict::dict_t<var_t, `a,`H> dic2,
-					       string_t<`H> t, 
-					       string_t<`H> *`H msg) {
+Dict::dict_t<var_t, `a>* disj_merge_dict(Dict::dict_t<var_t, `a,`H> dic1,
+                                         Dict::dict_t<var_t, `a,`H> dic2,
+                                         string_t<`H> t, 
+                                         string_t<`H> *`H msg) {
   let env = $(true, dic1, dic1, t, msg);
   Dict::iter_c(disj_merge_dict_f, &env, dic2);
   if (env[0])
-    return new Opt(env[1]);
+    return new env[1];
   return NULL;
 }
 
@@ -936,7 +936,7 @@ struct Ienv * disj_merge_ienv(ienv_t ie1, ienv_t ie2, string_t<`H> *`H msg) {
 
   if (!r1 || !r2 || !r3 || !r4 || !r5 || !r6)
     return NULL;
-  return new Ienv(r1->v, r2->v, r3->v, r4->v, r5->v, r6->v);
+  return new Ienv(*r1, *r2, *r3, *r4, *r5, *r6);
 }
 
 void disj_merge_ns_f($(bool, Dict::dict_t<list_t<var_t,`H>, ienv_t,`H>,
@@ -958,14 +958,14 @@ void disj_merge_ns_f($(bool, Dict::dict_t<list_t<var_t,`H>, ienv_t,`H>,
       *res_dic = Dict::insert(*res_dic, ns, (ienv_t) ie);
 }
 
-opt_t<Dict::dict_t<list_t<var_t>, ienv_t>> 
+Dict::dict_t<list_t<var_t>, ienv_t> * 
 disj_merge_ns(Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> dic1,
 	      Dict::dict_t<list_t<var_t,`H>, ienv_t,`H> dic2,
 	      string_t<`H> *`H msg) {
   let env = $(true, dic1, dic1, msg);
   Dict::iter_c(disj_merge_ns_f, &env, dic2);
   if (env[0])
-    return new Opt(env[1]);
+    return new env[1];
   return NULL;
 }
 
@@ -985,10 +985,10 @@ struct I * merge(i_t i1, i_t i2, $(string_t<`H>, string_t<`H>) * info) {
       msg = new ((string_t)aprintf("merging imports of %s and %s,", 
 				   (*info)[0], (*info)[1]));
 
-    let imp = compat_merge_ns(i1->imports, i2->imports, exp->v, msg);
+    let imp = compat_merge_ns(i1->imports, i2->imports, *exp, msg);
     if (imp == NULL) return NULL;
 
-    return new I(imp->v, exp->v);
+    return new I(*imp, *exp);
   } catch { case Tcdecl::Incompatible: return NULL; }
 }
 

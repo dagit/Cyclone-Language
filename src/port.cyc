@@ -1134,7 +1134,11 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
       new_rgn = heap_ct(); break; 
     }
     let orig_fat = (conref_val(b) == DynForward_b);
-    let orig_zt = (zt->v == No_constr) ? is_char(env,et) : conref_val(zt);
+    bool orig_zt;
+    switch (zt->v) {
+    case No_constr: orig_zt = is_char(env,et); break;
+    default: orig_zt = conref_val(zt); break;
+    }
     if (env->gcenv->porting) {
       let cqv = var(); 
       // Register the constraint variable that is used for the qualifier
@@ -1160,8 +1164,12 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
       // zeroterm constraint.
       register_zeroterm_cvars(env, czv, orig_zt ? zterm_ct() : nozterm_ct(), zt_loc);
       // Trust the user if they explicitly wrote ZEROTERM or NOZEROTERM
-      if (zt->v != No_constr) 
+      switch (zt->v) {
+      case No_constr:
         unify_ct(czv, conref_val(zt) ? zterm_ct() : nozterm_ct());
+        break;
+      default: break;
+      }
       // Note that the type returned has unconstrained variables for
       // the qualifier, bounds, rgn, and zeroterm unless the user 
       // explicitly wrote something down.
@@ -1179,7 +1187,11 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
   case &ArrayType(ArrayInfo{et,tq,_,zt,ztloc}):
     // Similar to the pointer case.
     let cet = type_to_ctype(env,et);
-    let orig_zt = (zt->v == No_constr) ? false : conref_val(zt);
+    bool orig_zt;
+    switch (zt->v) {
+    case No_constr: orig_zt = false; break;
+    default: orig_zt = conref_val(zt); break;
+    }
     if (env->gcenv->porting) {
       let cqv = var(); 
       register_const_cvar(env,cqv,tq.print_const ? const_ct() : notconst_ct(),
@@ -1192,8 +1204,11 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
       let czv = var();
       register_zeroterm_cvars(env, czv, orig_zt ? zterm_ct() : nozterm_ct(), ztloc);
       // Trust the user if they explicitly wrote ZEROTERM or NOZEROTERM
-      if (zt->v != No_constr) 
-        unify_ct(czv, conref_val(zt) ? zterm_ct() : nozterm_ct());
+      switch (zt->v) {
+      case No_constr:
+        unify_ct(czv, conref_val(zt) ? zterm_ct() : nozterm_ct()); break;
+      default: break;
+      }
       return array_ct(cet,cqv,czv);
     } else {
       return array_ct(cet,tq.print_const ? const_ct() : notconst_ct(),
@@ -1210,15 +1225,15 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
     return fn_ct(crt,List::imp_rev(cargs));
   case &AggrType(AggrInfo{ai,_}):
     switch (ai) {
-    case &UnknownAggr(StructA,n): 
+    case UnknownAggr(StructA,n): 
       (*n)[0] = Loc_n;
       let p = lookup_struct_decl(env,n);
       return known_aggr_ct(p);
-    case &UnknownAggr(UnionA,n): 
+    case UnknownAggr(UnionA,n): 
       (*n)[0] = Loc_n;
       let p = lookup_union_decl(env,n);
       return known_aggr_ct(p);
-    case &KnownAggr(adp): 
+    case KnownAggr(adp): 
       let ad = *adp;
       switch (ad->kind) {
       case StructA: 
@@ -1541,12 +1556,12 @@ static ctype_t gen_initializer(cenv_t env, type_t t, exp_t e) {
         leq(te,v);
       }
       return array_ct(v,q,z);
-    case &AggrType(AggrInfo{&UnknownAggr(StructA, n),_}):
+    case &AggrType(AggrInfo{UnknownAggr(StructA, n),_}):
       (*n)[0] = Loc_n;
       let $(ad,_) = *lookup_struct_decl(env,n);
       if (ad == NULL) impos("struct is not yet defined");
       fallthru(ad);
-    case &AggrType(AggrInfo{&KnownAggr(&ad),_}):
+    case &AggrType(AggrInfo{KnownAggr(&ad),_}):
       let fields = ad->impl->fields;
       for (; dles != 0; dles = dles->tl) {
         let $(d,e) = *dles->hd;
