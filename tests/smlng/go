@@ -14,13 +14,20 @@
 
 INPUTFILE=/tmp/smlng-in$$
 OUTPUTFILE=/tmp/smlng-out$$
+SMLNG="./smlng"
+VALIDATE="./validate"
+
+if [ -n "$WINDIR" ]; then
+SMLNG="${SMLNG}.exe"
+VALIDATE="${VALIDATE}.exe"
+fi
 
 SLOP=5
 INTERVAL=2
 
 # Get the time limit
 #  from command-line
-if [ $# -gt 1 ]; then
+if [ $# -gt 0 ]; then
   TLIMIT=$1
 fi
 #   from environment
@@ -34,18 +41,20 @@ fi
 cat > $INPUTFILE
 
 # optimize it
-cat $INPUTFILE | ./smlng.exe > $OUTPUTFILE &
+cat $INPUTFILE | $SMLNG > $OUTPUTFILE &
+PID=$!
 
 # check output file to see if we've completed
 i=$((TLIMIT-SLOP))
 while [ $i -gt 0 ]; do
   sleep $INTERVAL
   if [ -s "$OUTPUTFILE" ]; then
+    # file is non-empty; wait for program to finish writing it out
     wait
     if [ $? != 0 ]; then 
       cat $INPUTFILE
     else
-      ./validate.exe $INPUTFILE $OUTPUTFILE > /dev/null
+      $VALIDATE $INPUTFILE $OUTPUTFILE > /dev/null
       if [ $? != 0 ]; then
         cat $INPUTFILE
       else
@@ -59,6 +68,7 @@ while [ $i -gt 0 ]; do
 done
 
 # timed out; just cat the $INPUTFILE
+kill $PID
 cat $INPUTFILE
 rm -f $INPUTFILE $OUTPUTFILE
 exit 0
