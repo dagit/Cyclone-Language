@@ -21,10 +21,10 @@
 #ifndef _TCDECL_H_
 #define _TCDECL_H_
 
-#include "absyn.h"
-//#include <cstring.h>
+#include <stdio.h>
 #include <position.h>
 #include <list.h>
+#include "absyn.h"
 
 namespace Tcdecl {
   using Absyn;
@@ -42,7 +42,9 @@ namespace Tcdecl {
 
   // if msg0 == null, don't print any error message and throw exception Incompatible
   // otherwise call terr(loc, msg) where msg is *msg0 + " " + msg1
-  extern void merr(seg_t loc, string_t * `r msg0, string_t msg1);
+extern void merr(seg_t loc, string_t<`r2> * msg1, string_t fmt,
+		 ... inject parg_t<`r> ap : `r2 < `r) 
+  __attribute__((format(printf,3,4)));
 
   // all these functions work the same way :
   // _ they check compatibility between d0 (previous top-level declaration)

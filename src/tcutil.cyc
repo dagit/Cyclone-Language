@@ -43,13 +43,13 @@ xtunion exn {TypeErr};
 
 extern void unify_it(type_t t1, type_t t2);
 
-void terr(seg_t loc, string_t fmt, ... inject parg_t<`r2> ap) 
+void terr(seg_t loc, string_t fmt, ... inject parg_t ap) 
   __attribute__((format(printf,2,3)))
 {
   Position::post_error(Position::mk_err_elab(loc,vrprintf(heap_region,fmt,ap)));
 }
 
-`a impos(string_t fmt, ... inject parg_t<`r2> ap) 
+`a impos(string_t fmt, ... inject parg_t ap) 
   __attribute__((format(printf,1,2)))
 {
   string_t msg = vrprintf(heap_region,fmt,ap);

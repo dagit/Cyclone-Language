@@ -634,10 +634,10 @@ i_t extract(Dict::dict_t<list_t<var_t,`H>, genv_t,`H> ae) {
   return gen_extract(ae, true);
 }
 
-/* ------- checking inclusion ------- */
+////// checking inclusion ///////
 
-inline static void check_err(string_t<`H> *msg1, string_t<`H> msg2) {
-  Tcdecl::merr(NULL, msg1, msg2);
+inline static void check_err(string_t<`H> * msg1, string_t<`H> msg2) {
+  Tcdecl::merr(NULL, msg1, "%s", msg2);
 }
 
 static void incl_dict_f($(bool,
