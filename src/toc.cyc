@@ -43,7 +43,7 @@
 #include "absynpp.h"
 #include "tcutil.h"
 #include "evexp.h"
-#include "Formatstr.h"
+#include "formatstr.h"
 #include "toc.h"
 using Core;
 using List;
