@@ -709,18 +709,22 @@ char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cy
 char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
 char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
-char*tag;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[
-14];struct Cyc_List_List_mismatch_struct{char*tag;};extern char Cyc_List_Nth[4];
-struct Cyc_List_Nth_struct{char*tag;};unsigned long Cyc_strlen(struct
-_dyneither_ptr s);int Cyc_strcmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2);
-int Cyc_strncmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2,unsigned long len);
-struct _dyneither_ptr Cyc_strconcat(struct _dyneither_ptr,struct _dyneither_ptr);
-extern char Cyc_Arg_Bad[4];struct Cyc_Arg_Bad_struct{char*tag;struct _dyneither_ptr
-f1;};extern char Cyc_Arg_Error[6];struct Cyc_Arg_Error_struct{char*tag;};struct Cyc_Arg_Unit_spec_struct{
-int tag;void(*f1)();};struct Cyc_Arg_Flag_spec_struct{int tag;void(*f1)(struct
-_dyneither_ptr);};struct Cyc_Arg_FlagString_spec_struct{int tag;void(*f1)(struct
-_dyneither_ptr,struct _dyneither_ptr);};struct Cyc_Arg_Set_spec_struct{int tag;int*
-f1;};struct Cyc_Arg_Clear_spec_struct{int tag;int*f1;};struct Cyc_Arg_String_spec_struct{
+char*tag;};static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,unsigned int bd,
+unsigned int sz);inline static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,
+unsigned int bd,unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*
+ptrbd=dyn.curr + bd * sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base)
+ || ptrbd > dyn.last_plus_one)return 0;return dyn.curr;};}struct Cyc_List_List{void*
+hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{
+char*tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};
+unsigned long Cyc_strlen(struct _dyneither_ptr s);int Cyc_strcmp(struct
+_dyneither_ptr s1,struct _dyneither_ptr s2);int Cyc_strncmp(struct _dyneither_ptr s1,
+struct _dyneither_ptr s2,unsigned long len);struct _dyneither_ptr Cyc_strconcat(
+struct _dyneither_ptr,struct _dyneither_ptr);extern char Cyc_Arg_Bad[4];struct Cyc_Arg_Bad_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Arg_Error[6];struct Cyc_Arg_Error_struct{
+char*tag;};struct Cyc_Arg_Unit_spec_struct{int tag;void(*f1)();};struct Cyc_Arg_Flag_spec_struct{
+int tag;void(*f1)(struct _dyneither_ptr);};struct Cyc_Arg_FlagString_spec_struct{
+int tag;void(*f1)(struct _dyneither_ptr,struct _dyneither_ptr);};struct Cyc_Arg_Set_spec_struct{
+int tag;int*f1;};struct Cyc_Arg_Clear_spec_struct{int tag;int*f1;};struct Cyc_Arg_String_spec_struct{
 int tag;void(*f1)(struct _dyneither_ptr);};struct Cyc_Arg_Int_spec_struct{int tag;
 void(*f1)(int);};struct Cyc_Arg_Rest_spec_struct{int tag;void(*f1)(struct
 _dyneither_ptr);};void Cyc_Arg_usage(struct Cyc_List_List*,struct _dyneither_ptr);

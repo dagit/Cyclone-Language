@@ -706,14 +706,18 @@ char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cy
 char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
 char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
-char*tag;};struct _dyneither_ptr Cyc_Filename_concat(struct _dyneither_ptr,struct
-_dyneither_ptr);struct _dyneither_ptr Cyc_Filename_chop_extension(struct
-_dyneither_ptr);struct _dyneither_ptr Cyc_Filename_dirname(struct _dyneither_ptr);
-struct _dyneither_ptr Cyc_Filename_basename(struct _dyneither_ptr);int Cyc_Filename_check_suffix(
-struct _dyneither_ptr,struct _dyneither_ptr);struct _dyneither_ptr Cyc_Filename_gnuify(
-struct _dyneither_ptr);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
-extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{char*
-tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};struct
+char*tag;};static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,unsigned int bd,
+unsigned int sz);inline static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,
+unsigned int bd,unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*
+ptrbd=dyn.curr + bd * sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base)
+ || ptrbd > dyn.last_plus_one)return 0;return dyn.curr;};}struct _dyneither_ptr Cyc_Filename_concat(
+struct _dyneither_ptr,struct _dyneither_ptr);struct _dyneither_ptr Cyc_Filename_chop_extension(
+struct _dyneither_ptr);struct _dyneither_ptr Cyc_Filename_dirname(struct
+_dyneither_ptr);struct _dyneither_ptr Cyc_Filename_basename(struct _dyneither_ptr);
+int Cyc_Filename_check_suffix(struct _dyneither_ptr,struct _dyneither_ptr);struct
+_dyneither_ptr Cyc_Filename_gnuify(struct _dyneither_ptr);struct Cyc_List_List{void*
+hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{
+char*tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};struct
 _dyneither_ptr Cyc_strconcat(struct _dyneither_ptr,struct _dyneither_ptr);struct
 _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,unsigned long n);struct
 _dyneither_ptr Cyc_Filename_concat(struct _dyneither_ptr s1,struct _dyneither_ptr s2);

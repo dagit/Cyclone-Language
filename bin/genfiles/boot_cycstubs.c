@@ -717,13 +717,17 @@ char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cy
 char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
 char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
-char*tag;};int open_without_mode(const char*,int);int open_with_mode(const char*,int,
-unsigned short);int Cyc_open(const char*s,int i,struct _dyneither_ptr ms);int Cyc_open(
-const char*s,int i,struct _dyneither_ptr ms){if(_get_dyneither_size(ms,sizeof(
-unsigned short))>= 1)return open_with_mode(s,i,*((unsigned short*)
-_check_dyneither_subscript(ms,sizeof(unsigned short),0)));else{return
-open_without_mode(s,i);}}struct Cyc_Cstdio___abstractFILE;struct Cyc___cycFILE{
-struct Cyc_Cstdio___abstractFILE*file;};int fclose(struct Cyc_Cstdio___abstractFILE*);
+char*tag;};static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,unsigned int bd,
+unsigned int sz);inline static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,
+unsigned int bd,unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*
+ptrbd=dyn.curr + bd * sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base)
+ || ptrbd > dyn.last_plus_one)return 0;return dyn.curr;};}int open_without_mode(
+const char*,int);int open_with_mode(const char*,int,unsigned short);int Cyc_open(
+const char*s,int i,struct _dyneither_ptr ms);int Cyc_open(const char*s,int i,struct
+_dyneither_ptr ms){if(_get_dyneither_size(ms,sizeof(unsigned short))>= 1)return
+open_with_mode(s,i,*((unsigned short*)_check_dyneither_subscript(ms,sizeof(
+unsigned short),0)));else{return open_without_mode(s,i);}}struct Cyc_Cstdio___abstractFILE;
+struct Cyc___cycFILE{struct Cyc_Cstdio___abstractFILE*file;};int fclose(struct Cyc_Cstdio___abstractFILE*);
 int Cyc_fclose(struct Cyc___cycFILE*f);int Cyc_fclose(struct Cyc___cycFILE*f){return
 fclose(f->file);}int feof(struct Cyc_Cstdio___abstractFILE*);int Cyc_feof(struct Cyc___cycFILE*
 f);int Cyc_feof(struct Cyc___cycFILE*f){return feof(f->file);}int fflush(struct Cyc_Cstdio___abstractFILE*);

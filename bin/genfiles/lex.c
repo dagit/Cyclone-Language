@@ -708,16 +708,21 @@ char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_stru
 char*tag;struct _dyneither_ptr f1;};struct Cyc_Core_NewRegion Cyc_Core_new_dynregion();
 extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{char*tag;};
 extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{char*tag;};
-void Cyc_Core_free_dynregion(struct _DynRegionHandle*);struct Cyc_List_List{void*hd;
-struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{
-char*tag;};struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*x);struct Cyc_List_List*
-Cyc_List_append(struct Cyc_List_List*x,struct Cyc_List_List*y);extern char Cyc_List_Nth[
-4];struct Cyc_List_Nth_struct{char*tag;};extern char Cyc_Lexing_Error[6];struct Cyc_Lexing_Error_struct{
-char*tag;struct _dyneither_ptr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(
-struct Cyc_Lexing_lexbuf*);void*refill_state;struct _dyneither_ptr lex_buffer;int
-lex_buffer_len;int lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;
-int lex_last_action;int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{
-int(*read_fun)(struct _dyneither_ptr,int,void*);void*read_fun_state;};struct Cyc_Lexing_lex_tables{
+void Cyc_Core_free_dynregion(struct _DynRegionHandle*);static void*Cyc_Core_arrcast(
+struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz);inline static void*Cyc_Core_arrcast(
+struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){if(bd >> 20  || sz >> 12)
+return 0;{unsigned char*ptrbd=dyn.curr + bd * sz;if(((ptrbd < dyn.curr  || dyn.curr == 
+0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)return 0;return dyn.curr;};}
+struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[
+14];struct Cyc_List_List_mismatch_struct{char*tag;};struct Cyc_List_List*Cyc_List_imp_rev(
+struct Cyc_List_List*x);struct Cyc_List_List*Cyc_List_append(struct Cyc_List_List*x,
+struct Cyc_List_List*y);extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*
+tag;};extern char Cyc_Lexing_Error[6];struct Cyc_Lexing_Error_struct{char*tag;
+struct _dyneither_ptr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);
+void*refill_state;struct _dyneither_ptr lex_buffer;int lex_buffer_len;int
+lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;
+int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{int(*read_fun)(
+struct _dyneither_ptr,int,void*);void*read_fun_state;};struct Cyc_Lexing_lex_tables{
 struct _dyneither_ptr lex_base;struct _dyneither_ptr lex_backtrk;struct
 _dyneither_ptr lex_default;struct _dyneither_ptr lex_trans;struct _dyneither_ptr
 lex_check;};struct _dyneither_ptr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*);char

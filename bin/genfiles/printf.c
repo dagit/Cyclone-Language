@@ -717,19 +717,23 @@ char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_stru
 char*tag;struct _dyneither_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;
 extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{char*tag;};
 extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{char*tag;};
-struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[
-14];struct Cyc_List_List_mismatch_struct{char*tag;};extern char Cyc_List_Nth[4];
-struct Cyc_List_Nth_struct{char*tag;};static struct _dyneither_ptr Cyc_parg2string(
-void*x);static struct _dyneither_ptr Cyc_parg2string(void*x){void*_tmp0=x;_LL1: {
-struct Cyc_String_pa_struct*_tmp1=(struct Cyc_String_pa_struct*)_tmp0;if(_tmp1->tag
-!= 0)goto _LL3;}_LL2: {const char*_tmpCD;return(_tmpCD="string",_tag_dyneither(
-_tmpCD,sizeof(char),7));}_LL3: {struct Cyc_Int_pa_struct*_tmp2=(struct Cyc_Int_pa_struct*)
-_tmp0;if(_tmp2->tag != 1)goto _LL5;}_LL4: {const char*_tmpCE;return(_tmpCE="int",
-_tag_dyneither(_tmpCE,sizeof(char),4));}_LL5: {struct Cyc_Double_pa_struct*_tmp3=(
-struct Cyc_Double_pa_struct*)_tmp0;if(_tmp3->tag != 2)goto _LL7;}_LL6: {const char*
-_tmpCF;return(_tmpCF="double",_tag_dyneither(_tmpCF,sizeof(char),7));}_LL7: {
-struct Cyc_LongDouble_pa_struct*_tmp4=(struct Cyc_LongDouble_pa_struct*)_tmp0;if(
-_tmp4->tag != 3)goto _LL9;}_LL8: {const char*_tmpD0;return(_tmpD0="long double",
+static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int
+sz);inline static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,unsigned int bd,
+unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*ptrbd=dyn.curr + bd * 
+sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
+return 0;return dyn.curr;};}struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
+extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{char*
+tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};static
+struct _dyneither_ptr Cyc_parg2string(void*x);static struct _dyneither_ptr Cyc_parg2string(
+void*x){void*_tmp0=x;_LL1: {struct Cyc_String_pa_struct*_tmp1=(struct Cyc_String_pa_struct*)
+_tmp0;if(_tmp1->tag != 0)goto _LL3;}_LL2: {const char*_tmpCD;return(_tmpCD="string",
+_tag_dyneither(_tmpCD,sizeof(char),7));}_LL3: {struct Cyc_Int_pa_struct*_tmp2=(
+struct Cyc_Int_pa_struct*)_tmp0;if(_tmp2->tag != 1)goto _LL5;}_LL4: {const char*
+_tmpCE;return(_tmpCE="int",_tag_dyneither(_tmpCE,sizeof(char),4));}_LL5: {struct
+Cyc_Double_pa_struct*_tmp3=(struct Cyc_Double_pa_struct*)_tmp0;if(_tmp3->tag != 2)
+goto _LL7;}_LL6: {const char*_tmpCF;return(_tmpCF="double",_tag_dyneither(_tmpCF,
+sizeof(char),7));}_LL7: {struct Cyc_LongDouble_pa_struct*_tmp4=(struct Cyc_LongDouble_pa_struct*)
+_tmp0;if(_tmp4->tag != 3)goto _LL9;}_LL8: {const char*_tmpD0;return(_tmpD0="long double",
 _tag_dyneither(_tmpD0,sizeof(char),12));}_LL9: {struct Cyc_ShortPtr_pa_struct*
 _tmp5=(struct Cyc_ShortPtr_pa_struct*)_tmp0;if(_tmp5->tag != 4)goto _LLB;}_LLA: {
 const char*_tmpD1;return(_tmpD1="short *",_tag_dyneither(_tmpD1,sizeof(char),8));}

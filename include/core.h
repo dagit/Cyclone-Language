@@ -208,7 +208,27 @@ extern "C" unsigned int arr_prevsize(`a::A ?,sizeof_t<`a>);
   /** [arr_prevsize(p,sz)] returns the buffer space available preceding
       the pointer [p] in the dynamic array [p] points into.  [sz] is the
       size of the elements in the array returned by [sizeof]. */
+
+extern "C include" {
+  static inline `a::A*{valueof(`i)}`r
+  arrcast(`a ?`r dyn, tag_t<`i> bd, Core::sizeof_t<`a> sz) {
+    // check that the multiplication cannot overflow
+    // FIX: could be more lenient here!
+    // (currently allows up to 1M-1 elements each of size up to 4K-1)
+    if((bd >> 20) || (sz >> 12))
+      return 0;
+    unsigned char *ptrbd = dyn.curr + bd*sz;
+    if((ptrbd < dyn.curr)              // check for overflow
+       || (dyn.curr == 0)              // check for NULL
+       || (dyn.curr < dyn.base)        // check large enough
+       || (ptrbd > dyn.last_plus_one)) // check small enough
+      return 0;
+    return dyn.curr;
+  } 
+} export { arrcast; }
+
 }
+
 #endif
 
 #endif

@@ -717,12 +717,17 @@ char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_stru
 char*tag;struct _dyneither_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;
 extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{char*tag;};
 extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{char*tag;};
-struct _dyneither_ptr Cstring_to_string(char*);extern char Cyc_Lexing_Error[6];
-struct Cyc_Lexing_Error_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_Lexing_lexbuf{
-void(*refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;struct
-_dyneither_ptr lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;int
-lex_curr_pos;int lex_last_pos;int lex_last_action;int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{
-int(*read_fun)(struct _dyneither_ptr,int,void*);void*read_fun_state;};struct Cyc_Lexing_lex_tables{
+struct _dyneither_ptr Cstring_to_string(char*);static void*Cyc_Core_arrcast(struct
+_dyneither_ptr dyn,unsigned int bd,unsigned int sz);inline static void*Cyc_Core_arrcast(
+struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){if(bd >> 20  || sz >> 12)
+return 0;{unsigned char*ptrbd=dyn.curr + bd * sz;if(((ptrbd < dyn.curr  || dyn.curr == 
+0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)return 0;return dyn.curr;};}
+extern char Cyc_Lexing_Error[6];struct Cyc_Lexing_Error_struct{char*tag;struct
+_dyneither_ptr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);
+void*refill_state;struct _dyneither_ptr lex_buffer;int lex_buffer_len;int
+lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;
+int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{int(*read_fun)(
+struct _dyneither_ptr,int,void*);void*read_fun_state;};struct Cyc_Lexing_lex_tables{
 struct _dyneither_ptr lex_base;struct _dyneither_ptr lex_backtrk;struct
 _dyneither_ptr lex_default;struct _dyneither_ptr lex_trans;struct _dyneither_ptr
 lex_check;};struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc___cycFILE*);
