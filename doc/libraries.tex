@@ -94,7 +94,7 @@ using Array;
   If \vvar{x} and \vvar{y} both have size $n$, then \code{map2}
   heap-allocates a new array where the $i^{\rm th}$ element, for $i$
   between 0 and $n$, is \code{f(x[$i$],y[$i$])}.
-    
+
   \code{Array_mismatch} is thrown if \vvar{x} and \vvar{y} don't have
   the same size.
 \end{defun2}
@@ -1025,7 +1025,7 @@ int                    \textbf{hash_string}(string_t s);
 int                    \textbf{hash_stringptr}(stringptr_t s);
 void                   \textbf{iter}(void f(`a,`b), table_t<`a,`b,`e1,`e2> t);
 void                   \textbf{print_table_map}(table_t<`a,`b,`e1,`e2> t,
-                                       void prn_key(`a), 
+                                       void prn_key(`a),
                                        void prn_val(`b));
 \end{alltt}
 
@@ -1390,7 +1390,7 @@ right.  The returned list may share some cons cells with elements of
 \subsubsection*{Functions}
 \begin{verbatim}
 list_t<`a>      merge_sort(int less_eq(`a,`a), glist_t<`a,`r> x);
-glist_t<`a,`r2> rmerge_sort(region_t<`r2>, int less_eq(`a,`a), 
+glist_t<`a,`r2> rmerge_sort(region_t<`r2>, int less_eq(`a,`a),
 glist_t<`a,`r>  rimp_merge_sort(int less_eq(`a,`a), glist_t<`a,`r> x);
 list_t<`a>      merge(int less_eq(`a,`a),list_t<`a> a,list_t<`a> b);
 glist_t<`a,`r3> rmerge(region_t<`r3>, int less_eq(`a,`a),
@@ -1466,15 +1466,15 @@ glist_t<$(`a,`b)@`r4,`r3> rzip(region_t<`r3> r3, region_t<`r4> r4,
 $(list_t<`a>,list_t<`b>)            split(glist_t<$(`a,`b)@`r1,`r2> x);
 $(list_t<`a>,list_t<`b>,list_t<`c>) split3(glist_t<$(`a,`b,`c)@`r1,`r2> x);
 
-$(glist_t<`a,`r3>,glist_t<`b,`r4>) 
+$(glist_t<`a,`r3>,glist_t<`b,`r4>)
 rsplit(region_t<`r3> r3, region_t<`r4> r4,
            glist_t<$(`a,`b)@`r1,`r2> x);
 
-$(glist_t<`a,`r3>,glist_t<`b,`r4>,glist_t<`c,`r5>) 
+$(glist_t<`a,`r3>,glist_t<`b,`r4>,glist_t<`c,`r5>)
 rsplit3(region_t<`r3> r3, region_t<`r4> r4, region_t<`r5> r5,
         glist_t<$(`a,`b,`c)@`r1,`r2> x);
 \end{verbatim}
-  
+
 \subsubsection*{Use}
 
 \begin{defun}{zip}{(x,y)}
@@ -1496,7 +1496,7 @@ A version of split that takes a list of triples and returns a triple
 of lists.
 \end{defun}
 
-  
+
 \subsubsection*{Association lists}
 \subsubsection*{Functions}
 \begin{verbatim}
@@ -1571,9 +1571,9 @@ int  \textbf{list_cmp}(int cmp(`a,`a), glist_t<`a,`r1> l1, glist_t<`a,`r1> l2);
 bool \textbf{list_prefix}(int cmp(`a,`a), glist_t<`a,`r1> l1, glist_t<`a,`r1> l2);
 
 list_t<`a>      \textbf{filter_c}(bool f(`b,`a), `b env, glist_t<`a,`r> l);
-glist_t<`a,`r2> \textbf{rfilter_c}(region_t<`r2> r2, bool f(`b,`a), 
+glist_t<`a,`r2> \textbf{rfilter_c}(region_t<`r2> r2, bool f(`b,`a),
                           `b env, glist_t<`a,`r> l);
-  
+
 list_t<`a>      \textbf{filter}(bool f(`a), glist_t<`a,`r> l);
 glist_t<`a,`r2> \textbf{rfilter}(region_t<`r2> r2,bool f(`a),glist_t<`a,`r> l);
 \end{alltt}
@@ -1635,7 +1635,7 @@ void      add<`a>(Queue<`a>,`a x);
 `a        peek<`a>(Queue<`a>);
 bool      is_empty<`a>(Queue<`a>);
 void      clear<`a>(Queue<`a>);
-int       length<`a>(Queue<`a>);  
+int       length<`a>(Queue<`a>);
 \end{verbatim}
 
 \subsubsection*{Use}
@@ -2013,14 +2013,17 @@ using Stdio;
 The namespace \texttt{Stdio} provides input and output primitives.
 
 
-\subsubsection*{Printing}
+\subsubsection*{Formatted output}
 
 Cyclone provides safe versions of \code{printf} and \code{fprintf} as
 built-in primitives.  It also provides a built-in function,
 \code{aprintf}, that allocates a string, prints to it, and returns it.
-Cyclone protects against format string attacks by using its type safe
-vararg features; the library verifies the format string and
-corresponding arguments at run time.
+If the format string argument of these functions is given as a string
+constant, the types of the remaining arguments are checked at compile
+time; if the format string is not given as a string constant, the
+types of the remaining arguments are checked at run time, using
+Cyclone's safe vararg feature.  This prevents format string attacks in
+Cyclone.
 
 The permissible types for the varargs of \texttt{printf},
 \texttt{fprintf}, and \texttt{aprintf} are given by the type
@@ -2189,8 +2192,11 @@ The \code{\%} specifier prints a \code{\%} character.
 \subsubsection*{Formatted input}
 
 Cyclone provides safe versions of \code{scanf}, \code{fscanf}, and
-\code{sscanf}, using its type safe vararg feature; the library
-verifies the format string and corresponding arguments at run time.
+\code{sscanf}.  If the format string argument of these functions is
+given as a string constant, the types of the remaining arguments are
+checked at compile time; if the format string is not given as a string
+constant, the types of the remaining arguments are checked at run
+time, using Cyclone's safe vararg feature.
 
 The permissible types for the varargs of the input functions are given
 by the type \texttt{sarg_t}; if you need to know the details of
@@ -2419,12 +2425,12 @@ is the standard, lexicographic ordering.
       const char {?}`r4 \vvar{s});\end{tabular}}
   A version of \code{str_sepstr} that allocates the resulting string
   in the region given by \vvar{r}.
-\end{defun2}  
+\end{defun2}
 
 \subsubsection*{Copying strings and substrings}
 \subsubsection*{Functions}
 \begin{verbatim}
-string strcpy(string dest,string src); 
+string strcpy(string dest,string src);
 string strncpy(string,string,size_t);
 string zstrncpy(string,string,size_t);
 string expand(string s, size_t sz);

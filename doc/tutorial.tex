@@ -1,7 +1,7 @@
 \section{Cyclone for C Programmers}
 
 We begin with a quick overview of Cyclone, suitable for those who
-already know how to program in C\@.  We will explain some of the ways
+already know how to program in C\@.  We'll explain some of the ways
 that Cyclone differs from C, and some of the reasons why; you should
 come away with enough knowledge to start writing, compiling, and
 running your own Cyclone programs.  We assume that the Cyclone
@@ -21,7 +21,7 @@ Here's a Cyclone program that prints the words ``\texttt{hello,
       printf("hello, world\n");
       return 0;
     }
-\end{verbatim}  
+\end{verbatim}
 
 Except for the \texttt{using} statement, it looks very much like a C
 program: it uses \texttt{\#include} to tell the preprocessor to import
@@ -67,8 +67,9 @@ Cyclone version makes sure to return a 0.
 Definite return is important for both safety and security.  The caller
 of the function expects to receive a value of the return type; if the
 function does not execute a \texttt{return} statement, the caller will
-receive some random value instead, and this could easily lead to a
-crash.  We don't expect that problem here (since the return type is
+receive some random value instead.  This could easily lead to a crash
+(for example, the caller might expect a pointer to be returned).  We
+don't expect that problem here (since the return type is
 \texttt{int}), but there is another problem: the random value returned
 is probably drawn from the space occupied by local variables of the
 function.  The caller can exploit this to inspect the internal
@@ -174,10 +175,10 @@ example, here is a program that echoes its command line arguments:
     }
 \end{verbatim}
 
-Except for the declaration of \texttt{argv}, the argument vector, the
-program looks just like you would write it in \texttt{C}: pointer
-arithmetic (\texttt{argv++}) is used to move \texttt{argv} to point
-to each argument in turn, so it can be printed.
+Except for the declaration of \texttt{argv}, which holds the
+command-line arguments, the program looks just like you would write it
+in \texttt{C}: pointer arithmetic (\texttt{argv++}) is used to move
+\texttt{argv} to point to each argument in turn, so it can be printed.
 
 In C, \texttt{argv} would typically be declared with type \texttt{char
   **}, a pointer to a pointer to a character, which is thought of as
@@ -222,8 +223,8 @@ decide what to do if it is in fact null.
 In C, the argument of \texttt{getc} is declared to have type
 \texttt{FILE *}, and programmers can call \texttt{getc} with
 \texttt{NULL}\@.  So for safety, C's \texttt{getc} ought to check for
-\texttt{NULL}\@.  In practice, C omits the check, and
-\texttt{getc(NULL)} is an easy way to crash a program.
+\texttt{NULL}\@.  In practice, many C implementations omit the check,
+so that \texttt{getc(NULL)} is an easy way to crash a program.
 
 In Cyclone, you can still call \texttt{getc} with a possibly-null
 \texttt{FILE} pointer (a \texttt{FILE *}).  However, Cyclone insists
@@ -244,8 +245,209 @@ is required.  For example, \texttt{stdin} is a \texttt{FILE @} in
 Cyclone, so you can simply call \texttt{getc(stdin)}.  In Cyclone you
 will find that many functions return \texttt{@} pointers, so, many of
 the pointers you deal with will already be \texttt{@} pointers, and
-neither the caller or the called function needs to handle the null
-case.
+neither the caller nor the called function needs to do null checks.
+
+\subsubsection*{Other features of pointers}
+
+There's much more to Cyclone pointers than we've described here.
+A pointer type can also specify that it points to a particular
+\emph{region} of memory, or that it points to a sequence of known
+length.  See Section~\ref{sec:pointers} for details.
+
+\subsection{Tagged Unions and Pattern Matching}
+
+It's often necessary to write a function that accepts an argument with
+more than one possible type.  For example, in
+\begin{verbatim}
+    printf("%d",x);
+\end{verbatim}
+\texttt{x} should be an integer, but in
+\begin{verbatim}
+    printf("%s",x);
+\end{verbatim}
+\texttt{x} should be a pointer to a sequence of characters.
+
+If we call \texttt{printf("\%s",x)} with an integer \texttt{x},
+instead of a pointer \texttt{x}, the program will likely crash.
+To prevent this, most C compilers treat \texttt{printf} specially:
+they examine the first argument and require that the remaining
+arguments have the appropriate types.  However, a compiler can't check
+this if \texttt{printf} isn't called with a literal string:
+\begin{verbatim}
+    printf(s,x);
+\end{verbatim}
+where \texttt{s} is a string variable.  This means that in C, programs
+that use \texttt{printf} (or \texttt{scanf}, or a number of related
+functions) are vulnerable to crashes and corrupted memory.  In fact,
+it's possible for someone else to crash your program by causing it to
+call \texttt{printf} with arguments that don't match the format
+string.  This is called a \emph{format string attack}, and it's an
+increasingly common exploit.
+
+Cyclone provides \emph{tagged unions} so that you can safely write
+functions that accept an argument with more than one possible type.
+Like a C \texttt{union}, a Cyclone \texttt{tunion} is a type that has
+several possible cases.  Here's a simple example:
+\begin{verbatim}
+    tunion t {
+      Integer(int);
+      String(char ?);
+    };
+    tunion t x = new Integer(3);
+    tunion t y = new String("hello, world");
+\end{verbatim}
+This declares a new type, \texttt{tunion t}, that can hold either an
+integer or a string (remember, a string is a \texttt{char ?}\ in
+Cyclone).  \texttt{Integer} and \texttt{String} are \emph{tags} for
+the two possibilities.  The tags are used to build values of type
+\texttt{tunion t}, as in the declarations of \texttt{x} and
+\texttt{y}.
+
+\emph{Pattern matching} is used to determine the tag of a value of
+type \texttt{tunion t}, and to extract the underlying value.  For
+example, here is a function that will print either an integer or a
+string:
+\begin{verbatim}
+    void print(tunion t a) {
+      switch (a) {
+      case &Integer(i): printf("%d",i); return;
+      case &String(s): printf("%s",s); return;
+      }
+    }
+\end{verbatim}
+The argument \texttt{a} has type \texttt{tunion t}, so it is either
+built with tag \texttt{Integer} or tag \texttt{String}.  Cyclone
+extends \texttt{switch} statements with \emph{patterns} that
+distinguish between the cases.  The first case,
+\begin{verbatim}
+   case &Integer(i): printf("%d",i); return;
+\end{verbatim}
+contains a pattern, \texttt{\&Integer(i)}, that will only match values
+that have been built with the \texttt{Integer} tag.  The variable
+\texttt{i} is bound to the underlying integer, and it can be used in
+the body of the case.  For example, \texttt{print(x)} will print 3,
+since \texttt{x} was initialized by \texttt{new Integer(3)}.
+
+The cases of a \texttt{tunion} can carry any number of values,
+including none, and they can be recursive.  For example, we can define
+a tree datatype as follows.
+\begin{verbatim}
+    tunion tree {
+      Empty;
+      Leaf(int);
+      Node(tunion tree, tunion tree);
+    };
+\end{verbatim}
+A tree can be empty, or it can be a single (leaf) node holding an
+integer, or it can be an internal node with a left and a right
+subtree.  In other words, \texttt{tunion tree} is the type of possibly
+empty binary trees with integer leaves.
+
+Here's a function, \texttt{sum}, that calculates the sum of the leaves
+of a tree:
+\begin{verbatim}
+    int sum(tunion tree x) {
+      switch (x) {
+      case Empty: return 0;
+      case &Leaf(i): return i;
+      case &Node(y,z): return sum(y)+sum(z);
+      }
+    }
+\end{verbatim}
+
+It's written in a straightforward way, with a case for each possible
+tag in the type \texttt{tunion tree}.  The \texttt{Empty} case is
+noticeably different than the other two cases: the pattern does not
+use the \texttt{\&} character.  The reason has to do with how
+\texttt{tunion} is implemented.  Every value of \texttt{tunion} type
+must have the same size; for example, the \texttt{Node} case
+recursively calls \texttt{sum} on the subtrees \texttt{y} and
+\texttt{z}, \emph{without knowing} whether they are empty, leaves, or
+internal nodes.  The only way that it can extract \texttt{y} and
+\texttt{z} from \texttt{x} without knowing this is if all possible
+cases of \texttt{tunion tree} have the same size.
+
+At the same time, each tag of a \texttt{tunion} can carry a different
+number of values, so obviously each can require a different amount of
+space.  To make it all work, the value-carrying cases of a
+\texttt{tunion} are represented as pointers to structures containing a
+distinguishing integer plus the values, and the non-value-carrying
+cases of a \texttt{tunion} are represented just as distinguishing
+integers.  Since integers and pointers have the same size in Cyclone,
+this achieves the goal.
+
+The data representation is reflected both in how \texttt{tunion}
+values are constructed and in the patterns used to take them apart.
+Value-carrying cases are built using the \texttt{new} keyword, which
+performs a heap allocation and results in a pointer to the new
+storage.  Non-value-carrying cases don't require any allocation, and
+so they don't use \texttt{new}.  For example,
+\begin{verbatim}
+   new Node(Empty,new Leaf(5))
+\end{verbatim}
+builds a tree consisting of an internal node with an empty left
+subtree, and a right subtree consisting of a single leaf, 5.  We use
+\texttt{new} for the value-carrying cases, \texttt{Node} and
+\texttt{Leaf}, but not for \texttt{Empty}.
+
+In pattern matching, we use the \texttt{\&} character to match a
+pointer.  So in the function \texttt{sum}, since \texttt{Leaf} and
+\texttt{Node} are constructed as pointers, the \texttt{\&} is required
+to match them.  Since \texttt{Empty} is not built as a pointer, the
+\texttt{\&} is not needed.
+
+You might be wondering, how does Cyclone tell whether a
+\texttt{tunion} comes from a value-carrying case or a
+non-value-carrying case?  In particular, how can Cyclone tell the
+integers used for non-value-carrying cases apart from the pointers
+used for the other cases?  Here's how we do it in our current
+implementation.  We reserve a space in the low part of memory where we
+will never allocate Cyclone objects using \texttt{new}.  If a value of
+a \texttt{tunion} is an address in this space, then it represents a
+tag without values, and if it is an address outside of this space, it
+represents a pointer to a structure containing a tag plus the values
+that it carries.
+  
+You can find out more about patterns in Section~\ref{sec:patterns};
+for more about \texttt{tunion} and memory management, see
+Section~\ref{sec:regions}.
+
+%%% For example, \texttt{connect} is a C
+%%% library function used to initiate communication with a machine on the
+%%% Internet.  It can do so using a number of communication protocols,
+%%% including IPv4 (Internet Protocol Version 4) and IPv6.  Each protocol
+%%% uses a different form of address for machines on the Internet; to make
+%%% an IPv4 connection, you call \texttt{connect} with an IPv4 address,
+%%% and to make an IPv6 connection, you call \texttt{connect} with an IPv6
+%%% address.  In other words, \texttt{connect}'s address argument has
+%%% a different type depending on whether an IPv4 or IPv6 connection is
+%%% being made.
+%%%
+%%% To make this work in C, \texttt{connect} is given the following type:
+%%% \begin{alltt}
+%%%     int \textbf{connect}(int \textit{fd}, const struct sockaddr *\textit{a}, socklen_t \textit{len});
+%%% \end{alltt}
+%%% The address argument, \textit{\texttt{a}}, is declared with type
+%%% \texttt{struct sockaddr *}.  However, \texttt{connect} is never called
+%%% with an argument of that type.  Instead, it will be called with an
+%%% argument of type \texttt{struct sockaddr_in *} for an IPv4 connection,
+%%% or \texttt{struct sockaddr_in6 *} for an IPv6 connection.  The
+%%% \texttt{connect} function casts \textit{\texttt{a}} from type
+%%% \texttt{struct sockaddr *} to type \texttt{struct sockaddr_in *} or
+%%% type \texttt{struct sockaddr_in6 *} as appropriate.
+%%%
+%%% How does \texttt{connect} know whether to cast to an IPv4 address or
+%%% an IPv6 address?  It expects all address structures to have a common
+%%% field, at the same place in each structure, that gives the kind of
+%%% address.  So \texttt{connect} examines the field and does the
+%%% appropriate cast.  This can work quite well, but it isn't safe.  It's
+%%% possible to call \texttt{connect} with an address structure where the
+%%% common field is fill out incorrectly, either by accident or by
+%%% malicious intent.  C has no protections against this, and
+%%% \texttt{connect} has no way of detecting it; the cast will succeed and
+%%% \texttt{connect}'s ``address'' argument might be something very
+%%% different.
+
 
 \subsection{Exceptions}
 
@@ -262,31 +464,97 @@ an error message: it throws an \emph{exception}.  The advantage of
 exceptions is that they can be \emph{caught} by the programmer, who
 can then take corrective action and perhaps continue with the program.
 If the exception is not caught, the program halts and prints an error
-message.
-
-Exception values are a special case of extensible tagged unions
-(\texttt{xtunions}) described below.  The following example shows how
-to declare a couple of exceptions, how to throw an exception, and how
-to catch an exception:
+message.  Consider our earlier example:
 \begin{verbatim}
-  xtunion exn { NotFound(string); }  // NotFound takes a string as an argument
-  xtunion exn { Foo; }               // Foo takes no arguments
-  void bar() {
-    if (coin_toss()) 
-      throw new Foo;
-    else if (!lookup("friday"))
-      throw new NotFound("friday isn't here");
-  }
-  void foo() {
-    try {
-      bar();
-    } catch {
-    case &NotFound(s):  fprintf(stderr, "not found: %s\n",s); break;
-    case &Foo: fprintf(stderr, "foo raised!\n"); break;
-    }
-    printf("no exception raised.\n");
-  }
+    FILE *f = fopen("/etc/passwd","r");
+    int c = getc((FILE @)f);
 \end{verbatim}
+Suppose that there is no file \texttt{/etc/passwd}; then
+\texttt{fopen} will return null, and when \texttt{f} is cast to
+\texttt{FILE @}, the implied null check will fail.  The program will
+halt with an error message,
+\begin{verbatim}
+    Uncaught exception Null_Exception
+\end{verbatim}
+\texttt{Null_Exception} is one of a handful of standard exceptions
+used in Cyclone.  Each exception is like a case of a \texttt{tunion}:
+it can carry along some values with it.  For example, the standard
+exception \texttt{InvalidArg} carries a string.  Exceptions can be
+handled in \texttt{try}-\texttt{catch} statements, using pattern
+matching:
+\begin{verbatim}
+    FILE *f = fopen("/etc/passwd","r");
+    int c;
+    try {
+      c = getc((FILE @)f);
+    }
+    catch {
+    case Null_Exception:
+      printf("Error: can't open /etc/passwd\n");
+      exit(1);
+    case InvalidArg(s):
+      printf("Error: InvalidArg(\%s)\n",s);
+      exit(1);
+    }
+\end{verbatim}
+Here we've ``wrapped'' the call to \texttt{getc} in a
+\texttt{try}-\texttt{catch} statement.  If \texttt{f} isn't null and
+the \texttt{getc} succeeds, then execution just continues, ignoring
+the \texttt{catch}.  But if \texttt{f} is null, then the null check
+will fail and the exception \texttt{Null_Exception} will be thrown;
+execution immediately continues with the \texttt{catch} (the call to
+\texttt{getc} never happens).  In the \texttt{catch} the thrown
+exception is pattern matched against the cases.  Since the thrown
+exception is \texttt{Null_Exception}, the first case is executed here.
+
+There is one important difference between an exception and a case of a
+\texttt{tunion}: with \texttt{tunion}, all of the cases have to be
+declared at once, while a new exception can be declared at any time.
+So, exceptions are an \emph{extensible} \texttt{tunion}, or
+\texttt{xtunion}.  Here's how to declare a new exception:
+\begin{verbatim}
+    xtunion exn {
+      My_Exception(char ?);
+    };
+\end{verbatim}
+The type \texttt{xtunion exn} is the type of exceptions, and this
+declaration introduces a new case for the \texttt{xtunion exn} type:
+\texttt{My_Exception}, which carries a single value (a string).
+
+\subsection{Tuples}
+
+Tuples are like lightweight structs.  They need not be declared in
+advance, and have member or field names that are implicitly 0, 1, 2,
+3, etc.  For example, the following code declares \texttt{x} to be a
+3-tuple of an integer, a character, and a boolean, initialized with
+the values 42, \texttt{'z'}, and \texttt{true} respectively.  It then
+checks to see whether the third component in the tuple is \texttt{true}
+(it is) and if so, increments the first component in the tuple.
+\begin{verbatim}
+  $(int,char,bool) x = $(42,'z',true)
+
+  if (x[2])
+    x[0]++;
+\end{verbatim}
+
+The above code would be roughly equivalent to writing:
+\begin{verbatim}
+  struct {int f0; char f1; bool f2;} x = {42,'z',true};
+  if (x.f2)
+    x.f1++;
+\end{verbatim}
+
+Thus, tuple types are written \texttt{\$(type1,...,typen)}, tuple
+constructor expressions are written \texttt{\$(exp1,...,expn)}, and
+extracting the ith component of a tuple is written using subscript
+notation \texttt{exp[i-1]}.  Note that, consistent with the rest of C,
+the members start with 0, not 1.
+
+Unlike structs, tuple types are treated equivalent as long as they are
+structurally equivalent.  As in C, struct types are equivalent only if
+they have the same tag or name.  (Note that in C, all struct
+declarations have a tag, even if the compiler has to gensym one.)
+
 
 \subsection{Features Added}
 
@@ -313,7 +581,7 @@ support for checked pointer arithmetic and ensures that all pointer
 accesses are to valid objects.  Again, these features are aimed at
 making it easy to port C code to Cyclone.
 
-In what follows, we give a brief overview of these added features.  
+In what follows, we give a brief overview of these added features.
 
 \subsection{GCC and C99 Additions}
 
@@ -339,49 +607,14 @@ Cyclone. Some of the ones that we current support:
   \verb|for (int x=0; x < n; x++) { ... }|
 \end{itemize}
 
-We expect to follow the C99 standard fairly closely.  
-
-
-\subsection{Tuples}
-Tuples are like lightweight structs.  They need not be declared in
-advance, and have member or field names that are implicitly 0, 1, 2,
-3, etc.  For example, the following code declares \texttt{x} to be a
-3-tuple of an integer, a character, and a boolean, initialized with
-the values 42, \texttt{'z'}, and \texttt{true} respectively.  It then
-checks to see whether the third component in the tuple is \texttt{true}
-(it is) and if so, increments the first component in the tuple.
-\begin{verbatim}
-  $(int,char,bool) x = $(42,'z',true)
-
-  if (x[2]) 
-    x[0]++;
-\end{verbatim}
-
-The above code would be roughly equivalent to writing:
-\begin{verbatim}
-  struct {int f0; char f1; bool f2;} x = {42,'z',true};
-  if (x.f2)
-    x.f1++;
-\end{verbatim}
-
-Thus, tuple types are written \texttt{\$(type1,...,typen)}, tuple
-constructor expressions are written \texttt{\$(exp1,...,expn)}, and
-extracting the ith component of a tuple is written using subscript
-notation \texttt{exp[i-1]}.  Note that, consistent with the rest of C,
-the members start with 0, not 1.
-
-Unlike structs, tuple types are treated equivalent as long as they are
-structurally equivalent.  As in C, struct types are equivalent only if
-they have the same tag or name.  (Note that in C, all struct
-declarations have a tag, even if the compiler has to gensym one.)
-
+We expect to follow the C99 standard fairly closely.
 
 %%% \subsection{Pointers}
 %%% There are three different pointer types in Cyclone, written
 %%% ``\texttt{t*},'' ``\texttt{t@},'' and ``\texttt{t?}.''  Actually, pointers
 %%% are quite a bit more complicated than this, but these are the pointer
 %%% types that you'll most likely use the most.
-%%% 
+%%%
 %%% A value of type \texttt{t*} is a possibly \texttt{null} pointer to a
 %%% value of type \texttt{t}.  When these values are dereferenced, a
 %%% \texttt{null} check is performed and an exception is raised if the
@@ -392,7 +625,7 @@ declarations have a tag, even if the compiler has to gensym one.)
 %%% (except for 0) are not supported for values of type \texttt{t*} or
 %%% \texttt{t@} (but see below).  Both kinds of pointers are represented
 %%% the same way as C pointers.
-%%% 
+%%%
 %%% In general, one can write ``\verb|t*{e}|'' to describe a pointer to an
 %%% array of \texttt{t} values with \texttt{e} elements, where \texttt{e} is a
 %%% constant expression.  For instance, the following code is permissible:
@@ -400,27 +633,27 @@ declarations have a tag, even if the compiler has to gensym one.)
 %%%   int x[5] = {0,1,2,3,4};
 %%%   int *{5}p = x;
 %%% \end{verbatim}
-%%% 
+%%%
 %%% Here, we've said that \texttt{p} is a (possibly \texttt{null}) pointer to
 %%% an array of five integers. When a pointer has type \verb|t*{e}|, then
 %%% it is permissible to use subscripts in the range 0 to \texttt{e}-1 to
 %%% access the elements of \texttt{p}.  Note that \texttt{t*} is short hand
 %%% for \verb|t*{1}| (and similarly \texttt{t@} is short hand for
 %%% \verb|t@{1}|).
-%%% 
+%%%
 %%% A value of type \texttt{t?}\ is a checked pointer to a (possibly empty)
 %%% array of values of type \texttt{t}.  Unlike \texttt{*} or \texttt{@}
 %%% pointers, checked pointers support arbitrary pointer arithmetic
 %%% (following the rules of C), arbitrary integer subscripts, etc.
 %%% However, each access is checked to ensure that the pointer is within
 %%% the bounds of the original underlying array.
-%%% 
+%%%
 %%% Values of type \verb|t*{e}| or \verb|t@{e}| or \texttt{t[e]} can be cast
 %%% to type \texttt{t?}\ to support pointer arithmetic.  Furthermore, values
 %%% of type \texttt{t?}\ can be cast to type \verb|t*{e}| or \verb|t@{e}|,
 %%% but this requires a run-time check to ensure that the corresponding
 %%% array slice is in bounds.
-%%% 
+%%%
 %%% Obviously, checked pointers require more information than \texttt{*} or
 %%% \texttt{@} pointers, so that we can determine whether the access is in
 %%% bounds.  Consequently, checked pointers are larger than normal
@@ -429,7 +662,7 @@ declarations have a tag, even if the compiler has to gensym one.)
 %%% you're performing lots of pointer arithmetic. In subsequent releases,
 %%% we hope to support checked but untagged representations for these
 %%% pointers using technology from dependent type theory.
-%%% 
+%%%
 %%% Finally, we should note that in fact all pointers in Cyclone point
 %%% into a region. By default, if you don't mention a region, then the
 %%% pointer points into the disgtinguished heap region (written `H).
@@ -496,49 +729,49 @@ We expect to add more support for subtyping in the future (e.g.,
 subtyping on function pointers, bounded subtyping, etc.)
 
 
-\subsection{Tagged Unions}
-
-Cyclone's tagged unions (\texttt{tunion}) are based on the algebraic
-datatypes that first appeared in functional languages such as Hope,
-Miranda, ML, and Haskell.  They provide a safe way for building data
-structures that contain possibly many different types and can be used
-to build algebraic or inductively defined structures, such as lists,
-trees, graphs, etc.  For instance, the following tunion declarations
-give a way to construct abstract syntax trees for a simple calculator
-language:
-\begin{verbatim}
-  tunion operator { Plus, Times, Minus, Divide }
-  tunion absyn {
-    Integer(int);
-    Term(tunion absyn, tunion operator, tunion absyn);
-  }
-  tunion absyn e1 = new Term(new Integer(3),Plus,new Integer(4));
-  tunion absyn e2 = new Term(e1,Times,new Integer(5));
-\end{verbatim}
-
-The operator definition is like an enum---it just defines symbolic
-constants for \texttt{Plus}, \texttt{Times}, \texttt{Minus}, and
-\texttt{Divide}.  The \texttt{absyn} definition defines an inductive
-tree-like data type for abstract syntax.  The \texttt{Integer}
-constructor takes an \texttt{int} argument and returns an \texttt{absyn}
-value.  The \texttt{Term} constructor takes an abstract syntax tree, an
-operator, and an abstract syntax tree and returns a new abstract
-syntax tree.  So, for example, \texttt{e1} is a tree representing the
-term ``3 + 4'' while \texttt{e2} is a tree representing the term ``(3 +
-4) * 5.''
-
-Internally, \texttt{tunion} constructors are either represented as an
-integer value (as with \texttt{Plus}, \texttt{Times}, \texttt{Minus}, and
-\texttt{Divide}) or a pointer to an object containing a tag and the
-arguments to the constructor.  The object is always allocated on the
-heap.  To traverse the tree, we use pattern matching, again in the
-style of functional languages such as ML or Haskell.
-
-In the future, we plan to make the representation of tunions explicit
-and to allow programmers to control tag placement and do explicit
-tests on the tag to refine the type of an object in a more
-traditional, data-flow fashion.  We will probably keep the tunion
-construct as is for convenience.
+%%% \subsection{Tagged Unions}
+%%% 
+%%% Cyclone's tagged unions (\texttt{tunion}) are based on the algebraic
+%%% datatypes that first appeared in functional languages such as Hope,
+%%% Miranda, ML, and Haskell.  They provide a safe way for building data
+%%% structures that contain possibly many different types and can be used
+%%% to build algebraic or inductively defined structures, such as lists,
+%%% trees, graphs, etc.  For instance, the following tunion declarations
+%%% give a way to construct abstract syntax trees for a simple calculator
+%%% language:
+%%% \begin{verbatim}
+%%%   tunion operator { Plus, Times, Minus, Divide }
+%%%   tunion absyn {
+%%%     Integer(int);
+%%%     Term(tunion absyn, tunion operator, tunion absyn);
+%%%   }
+%%%   tunion absyn e1 = new Term(new Integer(3),Plus,new Integer(4));
+%%%   tunion absyn e2 = new Term(e1,Times,new Integer(5));
+%%% \end{verbatim}
+%%% 
+%%% The operator definition is like an enum---it just defines symbolic
+%%% constants for \texttt{Plus}, \texttt{Times}, \texttt{Minus}, and
+%%% \texttt{Divide}.  The \texttt{absyn} definition defines an inductive
+%%% tree-like data type for abstract syntax.  The \texttt{Integer}
+%%% constructor takes an \texttt{int} argument and returns an \texttt{absyn}
+%%% value.  The \texttt{Term} constructor takes an abstract syntax tree, an
+%%% operator, and an abstract syntax tree and returns a new abstract
+%%% syntax tree.  So, for example, \texttt{e1} is a tree representing the
+%%% term ``3 + 4'' while \texttt{e2} is a tree representing the term ``(3 +
+%%% 4) * 5.''
+%%% 
+%%% Internally, \texttt{tunion} constructors are either represented as an
+%%% integer value (as with \texttt{Plus}, \texttt{Times}, \texttt{Minus}, and
+%%% \texttt{Divide}) or a pointer to an object containing a tag and the
+%%% arguments to the constructor.  The object is always allocated on the
+%%% heap.  To traverse the tree, we use pattern matching, again in the
+%%% style of functional languages such as ML or Haskell.
+%%% 
+%%% In the future, we plan to make the representation of tunions explicit
+%%% and to allow programmers to control tag placement and do explicit
+%%% tests on the tag to refine the type of an object in a more
+%%% traditional, data-flow fashion.  We will probably keep the tunion
+%%% construct as is for convenience.
 
 \subsection{Pattern Matching}
 Pattern matching in Cyclone generalizes the switch construct of C
@@ -550,16 +783,16 @@ prints the tree to stdout:
   void print_absyn(tunion absyn tree) {
      switch (tree) {
      case &Integer(i)       : printf("%d",i); break;
-     case &Term(t1,Plus,t2) : printf("("; print_absyn(t1); 
-                              printf("+"); 
+     case &Term(t1,Plus,t2) : printf("("; print_absyn(t1);
+                              printf("+");
                               print_absyn(t2); printf(")"); break;
-     case &Term(t1,Times,t2): printf("("; print_absyn(t1); 
-                              printf("*"); 
+     case &Term(t1,Times,t2): printf("("; print_absyn(t1);
+                              printf("*");
                               print_absyn(t2); printf(")"); break;
-     case &Term(t1,Minus,t2): printf("("; print_absyn(t1); 
+     case &Term(t1,Minus,t2): printf("("; print_absyn(t1);
                               printf("-");
                               print_absyn(t2); printf(")"); break;
-     case &Term(t1,Divide,t2):printf("("; print_absyn(t1); 
+     case &Term(t1,Divide,t2):printf("("; print_absyn(t1);
                               printf("/");
                               print_absyn(t2); printf(")"); break;
   }
@@ -607,7 +840,6 @@ if we pass it a tree \texttt{Term(Integer(3),Plus,Integer(4))} then we
 will see ``It's a plus 4 3,'' but if we pass it
 \texttt{Term(Integer(3),Times,Integer(4))} we will see ``3 4.''
 
-
 \subsection{Let Declarations}
 Sometimes, it's painful to declare a variable because you have to
 write down its type.  Cyclone includes some limited support for type
@@ -633,21 +865,6 @@ can extract the components as follows:
     return (x+y+z);
   }
 \end{verbatim}
-
-\subsection{Extensible Tagged Unions}
-Extensible tunions (\texttt{xtunion}s) are just like \texttt{tunion}s
-except that you can add new constructors anytime you want.  Thus,
-\texttt{tunion}s are ``closed world'' datatypes, whereas \texttt{xtunion}s
-are ``open world'' datatypes.  Both are useful.  For instance, with a
-close world representation of abstract syntax trees, when we write a
-function such as \texttt{print_absyn}, we can be sure that we've covered
-all of the cases.  However, if we want an extensible setting, where
-programmers are adding new kinds of nodes all the time, then it's
-useful to use \texttt{xtunion}s.  Right now, we really only use
-\texttt{xtunion}s in the parser (for various semantic values) and for
-exceptions.  We might add better subtyping support for them so that
-you can extend them depth-wise as well as width-wise.
-
 
 \subsection{Polymorphic Functions}
 As mentioned above, Cyclone supports a limited amount of subtyping
@@ -812,7 +1029,6 @@ to explicitly ``pack'' the types to be abstracted.  Rather, the types
 are discovered through unification.  For an example of the use of
 existential types, see the \texttt{fn.h} and \texttt{fn.cyc} files in the
 standard library which implement first-class closures.
-
 
 \subsection{Restrictions}
 \begin{itemize}
