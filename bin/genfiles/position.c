@@ -371,7 +371,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 extern struct _fat_ptr Cyc_Core_new_string(unsigned);extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _fat_ptr f1;};
 # 173
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};struct Cyc___cycFILE;
-# 51 "/tmp/cyclone/include/cycboot.h"
+# 51 "cycboot.h"
 extern struct Cyc___cycFILE*Cyc_stdout;
 # 53
 extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
@@ -381,20 +381,20 @@ extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);
 extern int Cyc_fflush(struct Cyc___cycFILE*);
 # 100
 extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _fat_ptr f1;};struct Cyc_timeval{long tv_sec;long tv_usec;};
-# 38 "/tmp/cyclone/include/string.h"
+# 38 "string.h"
 extern unsigned long Cyc_strlen(struct _fat_ptr s);
-# 72 "/tmp/cyclone/include/string.h"
+# 72 "string.h"
 extern struct _fat_ptr Cyc_strncpy(struct _fat_ptr,struct _fat_ptr,unsigned long);struct Cyc_Lineno_Pos{struct _fat_ptr logical_file;struct _fat_ptr line;int line_no;int col;};
-# 31 "/tmp/cyclone/include/lineno.h"
+# 31 "lineno.h"
 struct Cyc_Lineno_Pos*Cyc_Lineno_pos_of_abs(struct _fat_ptr,int);
-# 36 "/tmp/cyclone/include/position.h"
+# 36 "position.h"
 struct _fat_ptr Cyc_Position_string_of_loc(unsigned);
 struct _fat_ptr Cyc_Position_string_of_segment(unsigned);struct Cyc_Position_Error;
 # 46
 extern int Cyc_Position_use_gcc_style_location;
 extern int Cyc_Position_num_errors;
 extern int Cyc_Position_max_errors;
-# 32 "/tmp/cyclone/lib/position.cyc"
+# 32 "position.cyc"
 int Cyc_Position_use_gcc_style_location=1;static char _tmp0[1U]="";
 # 35
 static struct _fat_ptr Cyc_Position_source={_tmp0,_tmp0,_tmp0 + 1U};
@@ -432,7 +432,7 @@ struct Cyc_List_List*ans=0;
 for(0;segs != 0;segs=segs->tl){
 ans=({struct Cyc_List_List*_tmp16=_cycalloc(sizeof(*_tmp16));({struct _fat_ptr*_tmp3A=({struct _fat_ptr*_tmp15=_cycalloc(sizeof(*_tmp15));({struct _fat_ptr _tmp39=Cyc_Position_string_of_segment((unsigned)segs->hd);*_tmp15=_tmp39;});_tmp15;});_tmp16->hd=_tmp3A;}),_tmp16->tl=ans;_tmp16;});}
 return ans;}struct Cyc_Position_Error{struct _fat_ptr source;unsigned seg;struct _fat_ptr desc;};
-# 97 "/tmp/cyclone/lib/position.cyc"
+# 97 "position.cyc"
 struct Cyc_Position_Error*Cyc_Position_mk_err(unsigned l,struct _fat_ptr desc){
 return({struct Cyc_Position_Error*_tmp17=_cycalloc(sizeof(*_tmp17));_tmp17->source=Cyc_Position_source,_tmp17->seg=l,_tmp17->desc=desc;_tmp17;});}
 # 103

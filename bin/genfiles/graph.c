@@ -371,11 +371,11 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 extern int Cyc_Core_intcmp(int,int);extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _fat_ptr f1;};
 # 173
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
-# 61 "/tmp/cyclone/include/list.h"
+# 61 "list.h"
 extern int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
-# 100 "/tmp/cyclone/include/cycboot.h"
+# 100 "cycboot.h"
 extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _fat_ptr f1;};struct Cyc_timeval{long tv_sec;long tv_usec;};struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};struct Cyc_Set_Set;
-# 51 "/tmp/cyclone/include/set.h"
+# 51 "set.h"
 extern struct Cyc_Set_Set*Cyc_Set_empty(int(*cmp)(void*,void*));
 # 63
 extern struct Cyc_Set_Set*Cyc_Set_insert(struct Cyc_Set_Set*s,void*elt);
@@ -391,7 +391,7 @@ extern int Cyc_Set_is_empty(struct Cyc_Set_Set*s);
 extern int Cyc_Set_member(struct Cyc_Set_Set*s,void*elt);extern char Cyc_Set_Absent[7U];struct Cyc_Set_Absent_exn_struct{char*tag;};
 # 137
 extern void*Cyc_Set_choose(struct Cyc_Set_Set*s);struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;const struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[8U];struct Cyc_Dict_Present_exn_struct{char*tag;};extern char Cyc_Dict_Absent[7U];struct Cyc_Dict_Absent_exn_struct{char*tag;};
-# 62 "/tmp/cyclone/include/dict.h"
+# 62 "dict.h"
 extern struct Cyc_Dict_Dict Cyc_Dict_empty(int(*cmp)(void*,void*));
 # 83
 extern int Cyc_Dict_member(struct Cyc_Dict_Dict d,void*k);
@@ -399,13 +399,13 @@ extern int Cyc_Dict_member(struct Cyc_Dict_Dict d,void*k);
 extern struct Cyc_Dict_Dict Cyc_Dict_insert(struct Cyc_Dict_Dict d,void*k,void*v);
 # 110
 extern void*Cyc_Dict_lookup(struct Cyc_Dict_Dict d,void*k);
-# 122 "/tmp/cyclone/include/dict.h"
+# 122 "dict.h"
 extern void**Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict d,void*k);
 # 233
 extern struct Cyc_List_List*Cyc_Dict_to_list(struct Cyc_Dict_Dict d);
 # 270
 extern struct Cyc_Dict_Dict Cyc_Dict_delete(struct Cyc_Dict_Dict,void*);
-# 50 "/tmp/cyclone/include/graph.h"
+# 50 "graph.h"
 struct Cyc_Dict_Dict Cyc_Graph_empty(int(*cmp)(void*,void*));
 # 53
 struct Cyc_Dict_Dict Cyc_Graph_add_node(struct Cyc_Dict_Dict g,void*s);
@@ -417,7 +417,7 @@ struct Cyc_Dict_Dict Cyc_Graph_add_edges(struct Cyc_Dict_Dict g,void*s,struct Cy
 int Cyc_Graph_is_edge(struct Cyc_Dict_Dict g,void*s,void*t);
 # 72
 struct Cyc_Set_Set*Cyc_Graph_get_targets(struct Cyc_Dict_Dict,void*s);
-# 27 "/tmp/cyclone/lib/graph.cyc"
+# 27 "graph.cyc"
 struct Cyc_Dict_Dict Cyc_Graph_empty(int(*cmp)(void*,void*)){
 return((struct Cyc_Dict_Dict(*)(int(*cmp)(void*,void*)))Cyc_Dict_empty)(cmp);}
 # 34
@@ -481,7 +481,7 @@ nodeprint(f,s);
 ({void*_tmp1B=0U;({struct Cyc___cycFILE*_tmpA9=f;struct _fat_ptr _tmpA8=({const char*_tmp1C="; // no targets\n";_tag_fat(_tmp1C,sizeof(char),17U);});Cyc_fprintf(_tmpA9,_tmpA8,_tag_fat(_tmp1B,sizeof(void*),0U));});});}}}
 # 131
 ({void*_tmp1D=0U;({struct Cyc___cycFILE*_tmpAB=f;struct _fat_ptr _tmpAA=({const char*_tmp1E="}\n";_tag_fat(_tmp1E,sizeof(char),3U);});Cyc_fprintf(_tmpAB,_tmpAA,_tag_fat(_tmp1D,sizeof(void*),0U));});});}}
-# 141 "/tmp/cyclone/lib/graph.cyc"
+# 141 "graph.cyc"
 static struct Cyc_List_List*Cyc_Graph_sourcesOf(struct Cyc_Dict_Dict g,void*node){
 struct Cyc_List_List*_tmp1F=0;struct Cyc_List_List*result=_tmp1F;
 # 144
@@ -638,7 +638,7 @@ nodes=Cyc_Set_delete(nodes,v);
 result=Cyc_Graph_add_edges(result,v,targets);}}}}
 # 343
 return result;}}
-# 356 "/tmp/cyclone/lib/graph.cyc"
+# 356 "graph.cyc"
 static void Cyc_Graph_traverse(struct Cyc_Dict_Dict input,struct Cyc_Dict_Dict*output,struct Cyc_Dict_Dict*N,struct Cyc_List_List**S,void*x,unsigned k){
 # 360
 ({struct Cyc_List_List*_tmpBD=({struct Cyc_List_List*_tmp69=_cycalloc(sizeof(*_tmp69));_tmp69->hd=x,_tmp69->tl=*S;_tmp69;});*S=_tmpBD;});

@@ -369,17 +369,17 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
  struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _fat_ptr f1;};
 # 173 "core.h"
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc___cycFILE;
-# 52 "/tmp/cyclone/include/cycboot.h"
+# 52 "cycboot.h"
 extern struct Cyc___cycFILE*Cyc_stdin;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
 # 90
 extern int Cyc_fgetc(struct Cyc___cycFILE*);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};
-# 142 "/tmp/cyclone/include/cycboot.h"
+# 142 "cycboot.h"
 extern int Cyc_getc(struct Cyc___cycFILE*);
-# 222 "/tmp/cyclone/include/cycboot.h"
+# 222 "cycboot.h"
 extern int Cyc_ungetc(int,struct Cyc___cycFILE*);
 # 247
 int Cyc_vsscanf(struct _fat_ptr,struct _fat_ptr,struct _fat_ptr);extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _fat_ptr f1;};
-# 300 "/tmp/cyclone/include/cycboot.h"
+# 300 "cycboot.h"
 extern int isspace(int);
 # 302
 extern int isupper(int);
@@ -388,7 +388,7 @@ extern double atof(const char*);
 extern long strtol(char*,char**,int);
 # 317
 extern unsigned long strtoul(char*,char**,int);struct Cyc_timeval{long tv_sec;long tv_usec;};
-# 126 "/tmp/cyclone/lib/scanf.cyc"
+# 126 "scanf.cyc"
 static struct _fat_ptr Cyc___sccl(char*tab,struct _fat_ptr fmt);
 # 139
 static short*Cyc_va_arg_short_ptr(void*a){
@@ -511,7 +511,7 @@ goto again;case 48U: _LLB: _LLC:
 flags |=64;
 width=(width * (long long)10 + (long long)c)- (long long)'0';
 goto again;case 68U: _LL1F: _LL20:
-# 298 "/tmp/cyclone/lib/scanf.cyc"
+# 298 "scanf.cyc"
  flags |=1;
 goto _LL22;case 100U: _LL21: _LL22:
 # 301
@@ -729,7 +729,7 @@ for(p=({char*_tmp21=buf;_tag_fat(_tmp21,sizeof(char),351U);});width != (long lon
 c=(int)((unsigned char)_IO_peekc(fp));
 # 560
 {int _tmp22=c;switch(_tmp22){case 48U: _LL55: _LL56:
-# 575 "/tmp/cyclone/lib/scanf.cyc"
+# 575 "scanf.cyc"
  if(base == 0){
 base=8;
 flags |=256;}
@@ -930,7 +930,7 @@ for(n=0;n < 256;++ n){
 *((char*)_check_known_subscript_notnull(tab,256U,sizeof(char),n))=(char)v;}
 if(c == 0)
 return _fat_ptr_plus(fmt,sizeof(char),- 1);
-# 829 "/tmp/cyclone/lib/scanf.cyc"
+# 829 "scanf.cyc"
 v=1 - v;
 for(0;1;0){
 *((char*)_check_known_subscript_notnull(tab,256U,sizeof(char),c))=(char)v;
@@ -939,7 +939,7 @@ doswitch:
 int _tmp35=n;switch(_tmp35){case 0U: _LL1: _LL2:
 # 837
  return _fat_ptr_plus(fmt,sizeof(char),- 1);case 45U: _LL3: _LL4:
-# 858 "/tmp/cyclone/lib/scanf.cyc"
+# 858 "scanf.cyc"
  n=(int)*((const char*)_check_fat_subscript(fmt,sizeof(char),0U));
 if(n == (int)']' || n < c){
 c=(int)'-';

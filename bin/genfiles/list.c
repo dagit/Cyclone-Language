@@ -373,7 +373,7 @@ extern struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val;extern char C
 extern struct _RegionHandle*Cyc_Core_heap_region;
 # 173
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
-# 61 "/tmp/cyclone/include/list.h"
+# 61 "list.h"
 int Cyc_List_length(struct Cyc_List_List*x);
 # 72
 struct Cyc_List_List*Cyc_List_rcopy(struct _RegionHandle*,struct Cyc_List_List*x);
@@ -428,7 +428,7 @@ struct Cyc_List_List*Cyc_List_rtabulate_c(struct _RegionHandle*r,int n,void*(*f)
 struct Cyc_List_List*Cyc_List_rfilter(struct _RegionHandle*r,int(*f)(void*),struct Cyc_List_List*x);
 # 400
 struct Cyc_List_List*Cyc_List_rfilter_c(struct _RegionHandle*r,int(*f)(void*,void*),void*env,struct Cyc_List_List*x);
-# 32 "/tmp/cyclone/lib/list.cyc"
+# 32 "list.cyc"
 int Cyc_List_length(struct Cyc_List_List*x){
 int i=0;
 # 35

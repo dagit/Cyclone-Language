@@ -371,7 +371,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 extern struct _RegionHandle*Cyc_Core_heap_region;
 # 173
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
-# 61 "/tmp/cyclone/include/list.h"
+# 61 "list.h"
 extern int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};
 # 117
 extern void Cyc_List_app(void*(*f)(void*),struct Cyc_List_List*x);
@@ -381,11 +381,11 @@ extern void Cyc_List_iter(void(*f)(void*),struct Cyc_List_List*x);
 extern void Cyc_List_iter_c(void(*f)(void*,void*),void*env,struct Cyc_List_List*x);
 # 210
 extern struct Cyc_List_List*Cyc_List_merge_sort(int(*cmp)(void*,void*),struct Cyc_List_List*x);extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};struct Cyc_Set_Set;
-# 100 "/tmp/cyclone/include/set.h"
+# 100 "set.h"
 int Cyc_Set_member(struct Cyc_Set_Set*s,void*elt);
 # 106
 int Cyc_Set_setcmp(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2);extern char Cyc_Set_Absent[7U];struct Cyc_Set_Absent_exn_struct{char*tag;};struct Cyc_Set_Set{int(*cmp)(void*,void*);int cardinality;struct Cyc_List_List*nodes;};
-# 39 "/tmp/cyclone/lib/set.cyc"
+# 39 "set.cyc"
 struct Cyc_Set_Set*Cyc_Set_empty(int(*comp)(void*,void*)){
 return({struct Cyc_Set_Set*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->cmp=comp,_tmp0->cardinality=0,_tmp0->nodes=0;_tmp0;});}
 # 42

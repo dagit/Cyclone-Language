@@ -373,28 +373,28 @@ extern struct _fat_ptr Cyc_Core_new_string(unsigned);
 extern int Cyc_Core_intcmp(int,int);extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _fat_ptr f1;};
 # 173
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};
-# 197 "/tmp/cyclone/include/cycboot.h"
+# 197 "cycboot.h"
 extern int Cyc_sscanf(struct _fat_ptr,struct _fat_ptr,struct _fat_ptr);extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _fat_ptr f1;};
-# 271 "/tmp/cyclone/include/cycboot.h"
+# 271 "cycboot.h"
 extern struct Cyc___cycFILE*Cyc_file_open(struct _fat_ptr,struct _fat_ptr);
 extern void Cyc_file_close(struct Cyc___cycFILE*);struct Cyc_timeval{long tv_sec;long tv_usec;};extern char Cyc_Lexing_Error[6U];struct Cyc_Lexing_Error_exn_struct{char*tag;struct _fat_ptr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;struct _fat_ptr lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{int(*read_fun)(struct _fat_ptr,int,void*);void*read_fun_state;};struct Cyc_Lexing_lex_tables{struct _fat_ptr lex_base;struct _fat_ptr lex_backtrk;struct _fat_ptr lex_default;struct _fat_ptr lex_trans;struct _fat_ptr lex_check;};
-# 78 "/tmp/cyclone/include/lexing.h"
+# 78 "lexing.h"
 extern struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc___cycFILE*);
 # 82
 extern struct _fat_ptr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*);
 # 85
 extern int Cyc_Lexing_lexeme_end(struct Cyc_Lexing_lexbuf*);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};
-# 210 "/tmp/cyclone/include/list.h"
+# 210 "list.h"
 extern struct Cyc_List_List*Cyc_List_merge_sort(int(*cmp)(void*,void*),struct Cyc_List_List*x);extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
-# 38 "/tmp/cyclone/include/string.h"
+# 38 "string.h"
 extern unsigned long Cyc_strlen(struct _fat_ptr s);
-# 104 "/tmp/cyclone/include/string.h"
+# 104 "string.h"
 extern struct _fat_ptr Cyc_strdup(struct _fat_ptr src);
 # 109
 extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int ofs,unsigned long n);struct Cyc_Lineno_Pos{struct _fat_ptr logical_file;struct _fat_ptr line;int line_no;int col;};
-# 32 "/tmp/cyclone/include/lineno.h"
+# 32 "lineno.h"
 void Cyc_Lineno_poss_of_abss(struct _fat_ptr filename,struct Cyc_List_List*places);
-# 26 "/tmp/cyclone/lib/lineno.cyl"
+# 26 "lineno.cyl"
 enum Cyc_Lineno_token_val{Cyc_Lineno_NEWLINE =0U,Cyc_Lineno_LINEDEF =1U,Cyc_Lineno_END =2U};
 # 34
 const int Cyc_Lineno_lex_base[10U]={0,1,- 2,2,6,- 3,16,7,- 1,8};
@@ -447,11 +447,11 @@ if(c == 256)lbuf->lex_eof_reached=0;}}}
 enum Cyc_Lineno_token_val Cyc_Lineno_token_rec(struct Cyc_Lexing_lexbuf*lexbuf,int lexstate){
 lexstate=Cyc_Lineno_lex_engine(lexstate,lexbuf);
 {int _tmp2=lexstate;switch(_tmp2){case 0U: _LL1: _LL2:
-# 49 "/tmp/cyclone/lib/lineno.cyl"
+# 49 "lineno.cyl"
  return Cyc_Lineno_LINEDEF;case 1U: _LL3: _LL4:
-# 50 "/tmp/cyclone/lib/lineno.cyl"
+# 50 "lineno.cyl"
  return Cyc_Lineno_NEWLINE;case 2U: _LL5: _LL6:
-# 51 "/tmp/cyclone/lib/lineno.cyl"
+# 51 "lineno.cyl"
  return Cyc_Lineno_END;default: _LL7: _LL8:
 ((lexbuf->refill_buff))(lexbuf);
 return Cyc_Lineno_token_rec(lexbuf,lexstate);}_LL0:;}
@@ -459,7 +459,7 @@ return Cyc_Lineno_token_rec(lexbuf,lexstate);}_LL0:;}
 (int)_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_tmp4=_cycalloc(sizeof(*_tmp4));_tmp4->tag=Cyc_Lexing_Error,({struct _fat_ptr _tmp21=({const char*_tmp3="some action didn't return!";_tag_fat(_tmp3,sizeof(char),27U);});_tmp4->f1=_tmp21;});_tmp4;}));}
 # 57
 enum Cyc_Lineno_token_val Cyc_Lineno_token(struct Cyc_Lexing_lexbuf*lexbuf){return Cyc_Lineno_token_rec(lexbuf,0);}struct _tuple0{struct _fat_ptr f1;int f2;};
-# 65 "/tmp/cyclone/lib/lineno.cyl"
+# 65 "lineno.cyl"
 static struct _tuple0*Cyc_Lineno_parse_linedef(struct _fat_ptr line){
 struct _handler_cons _tmp5;_push_handler(& _tmp5);{int _tmp7=0;if(setjmp(_tmp5.handler))_tmp7=1;if(!_tmp7){
 {int i=0;
