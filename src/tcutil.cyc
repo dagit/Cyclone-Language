@@ -3833,7 +3833,6 @@ bool bits_only(type_t t) {
 // Actually need to distinguish two kinds of constant expressions, as in ANSI C
 // This is now sort of for top-level expressions
 static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
-  fprintf(stderr,"cnst_exp(%s)\n",exp2string(e));
   switch (e->r) {
   case &Const_e(_):     return true;
   case &Sizeoftyp_e(_): return true;
