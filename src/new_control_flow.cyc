@@ -1129,7 +1129,11 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     
   case &AggrArrow_e(e1,field,...): // composition of * and ., of course
     let $(f1,r1) = anal_Rexp(env,false,inflow,e1);
+    DEBUG_PRINT("f1 flow is ");
+    DEBUG_PRINT_F(print_flow,f1);
     let $(f2,r2) = anal_derefR(env,inflow,f1,e1,r1);
+    DEBUG_PRINT("\nf2 flow is ");
+    DEBUG_PRINT_F(print_flow,f2);
     switch(Tcutil::compress(e1->topt->v)) {
     case &PointerType(PtrInfo{t2,_,_}):
       if(is_nontagged_union_type(t2))
@@ -1427,7 +1431,7 @@ static $(flow_t<`r>,absLval_t<`r>)
     }
     fallthru(e1);
   case &Deref_e(e1): 
-    if (Tcutil::is_noalias_pointer(e1->topt->v)) {
+    if (expand_unique && Tcutil::is_noalias_pointer(e1->topt->v)) {
       let $(f,lval) = anal_Lexp(env,inflow,true,e1);
       switch $(f,lval) {
       case $({.ReachableFL = $(fd,r)},{.PlaceL = p}):
@@ -1438,7 +1442,7 @@ static $(flow_t<`r>,absLval_t<`r>)
         DEBUG_PRINT_F(print_absrval,rval);
         DEBUG_PRINT("\n");
         switch (rval) {
-        case &AddressOf(...): return anal_derefL(env,inflow,e1,f,rval,flds);
+        case &AddressOf(...): return anal_derefL(env,f,e1,f,rval,flds);
         default:
           initlevel_t il = initlevel(fenv,fd,rval);
           absRval_t leaf = (il == AllIL) ? fenv->unknown_all : fenv->unknown_none;
@@ -1453,7 +1457,7 @@ static $(flow_t<`r>,absLval_t<`r>)
           DEBUG_PRINT("after expansion, flow is ");
           DEBUG_PRINT_F(print_flow,outflow);
           DEBUG_PRINT("\n");
-          return anal_derefL(env,inflow,e1,outflow,res,flds);
+          return anal_derefL(env,outflow,e1,outflow,res,flds);
         }
       default: break;
       }
