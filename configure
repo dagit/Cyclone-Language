@@ -44,6 +44,7 @@ function egrep_path {
 incdir="/usr/include/cyclone"
 libdir="/usr/local/lib/cyclone"
 bindir="/usr/local/bin"
+PATCH_ARCH=i686-unknown-linux
 
 # arguments
 #
@@ -147,6 +148,7 @@ else
   # make sure all of the needed configuration files are here
   if [ -f "arch/${ARCH}.undef" -a -f "../lib/arch/${ARCH}.h" -a -f "../include/arch/${ARCH}.h" ]; then
     echo "Supported architecture ${ARCH}"
+    cd ../bin/genfiles; ./extract_patch ${PATCH_ARCH} ${ARCH}; cd -
     if [ ! -d "${CYCDIR}/bin/genfiles/${ARCH}" ]; then
       echo "Warning: genfiles directory for ${ARCH} not present"
       # XXX replicates the code above

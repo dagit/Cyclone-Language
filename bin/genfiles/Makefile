@@ -60,4 +60,4 @@ a_%.o: %.c
 # for creating genfiles from patches
 
 %.patch: %
-	diff -rbBcN $(PATCH_ARCH) $< > $@; exit 0
+	diff -rbBcN --exclude=CVS $(PATCH_ARCH) $< > $@; exit 0
