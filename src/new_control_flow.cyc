@@ -1,6 +1,7 @@
 // TO DO: Share more lvalues and rvalues by putting in shared.
 // TO DO: Get patterns right rather than require fully initialized
 // TO DO: Look up the "real" rules for order-of-evaluation rexstrictions.
+// For debugging, may want to put unique ints in the MallocPts
 
 // The previous pass (type-checking) sets up:
 // * decorating all stmts with their correct non_local_preds
@@ -46,7 +47,6 @@
 #include "evexp.h"
 
 // for debugging
-#include "position.h"
 #include "absynpp.h"
 #include "stdio.h"
 
@@ -54,8 +54,6 @@ using Core;
 using List;
 using Absyn;
 namespace NewControlFlow;
-
-bool locater = true;
 
 typedef vardecl             vardecl_t;
 typedef field_name          field_name_t;
@@ -126,8 +124,7 @@ string noaddr2string(noaddress_t n) {
 string addr2string(addressable_t a) {
   switch(a) {
   case LocalOp(VarRoot(vd)): return *(*vd->name)[1];
-  case LocalOp(MallocPt(e)): return xprintf("mpt %s",
-					   Position::string_of_segment(e->loc));
+  case LocalOp(MallocPt(e)): return "<<mpt>>";//return xprintf("mpt %p", e);
   case MemberOp(n,f): 
     _ fs;
     switch(f) {
@@ -157,8 +154,7 @@ string absexp2string(absexp_t ae, int depth) {
   switch(ae) {
   case SkipAE:   ans = xprintf("%sskip",ans); break;
   case UseAE(r): ans = xprintf("%suse %s",ans,rval2string(r)); break;
-  case MallocAE(e): ans = xprintf("%smalloc %s",ans,
-				  Position::string_of_segment(e->loc)); break;
+  case MallocAE(e): ans = xprintf("%s<<malloc>>",ans); break;
   case AssignAE(l,r): ans = xprintf("%sassign %s %s",ans,
 				    lval2string(l), rval2string(r)); break;
   case GroupAE(g,l):
@@ -171,8 +167,7 @@ string absexp2string(absexp_t ae, int depth) {
       ans = xprintf("%s\n%s",ans,absexp2string(l->hd, depth+1));
     break;
     
-  case StmtAE(s): ans = xprintf("%smalloc %s",ans,
-				Position::string_of_segment(s->loc)); break;
+  case StmtAE(s): ans = xprintf("%s<<malloc>>",ans); break;
   case BottomAE: ans = xprintf("%sbottom",ans); break;
   }
   return ans;
@@ -199,7 +194,9 @@ absexp_t make_groupexp(absexpgroup_t g, absexp_t ae1, absexp_t ae2) {
   case $(g,GroupAE(g1,l1),GroupAE(g2,l2)) && g == g1 && g == g2:
     return GroupAE(g,append(l1,l2));
   case $(g,GroupAE(g1,l1),_) && g == g1 && g != OrderedG:
-    return GroupAE(g, new {List(ae2,l1)});
+    return GroupAE(g, new{List(ae2,l1)});
+  case $(OrderedG,GroupAE(OrderedG,l1),_):
+    return GroupAE(OrderedG, append(l1, new{List(ae2,null)}));
   case $(g,_,GroupAE(g2,l2)) && g == g2:
     return GroupAE(g, new {List(ae1,l2)});
   default:
@@ -371,10 +368,6 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
       case StructArrow_e(_,f):  absop=DerefOp(absop); fallthru(f);
       case StructMember_e(_,f): absop=OtherOp(MemberOp(absop,StructF(f)));break;
       case Subscript_e(_,e2):    
-	switch(Tcutil::compress(path->hd->topt->v)) { // an assertion
-	case TupleType(_): break;
-	default: throw Impossible("abstract_exp: non-tuple subscript in path");
-	}
 	let i = Evexp::eval_const_uint_exp(e2);
 	absop=OtherOp(MemberOp(absop,TupleF(i)));
 	break;
@@ -401,12 +394,15 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
     for(int i = 0; es != null; es = es->tl, ++i) {
       // Gulp: this is a lot of allocation, no?
       let lhs = NoaddressOp(OtherOp(MemberOp(noaddr,TupleF(i))));
-      env = change_lhs(env, new{List(lhs,null)});
+      let field_env = change_lhs(env, new{List(lhs,null)});
       ansexp = make_groupexp(UnorderedG,
-			     meet_absexp(abstract_exp(env,es->hd)),
+			     meet_absexp(abstract_exp(field_env,es->hd)),
 			     ansexp);
     }
     ansexp = make_groupexp(OrderedG, MallocAE(e), ansexp);
+    let ae = make_assigns(env.lhsides, 
+			  LvalueOp(NoaddressOp(OtherOp(LocalOp(MallocPt(e))))));
+    ansexp = make_groupexp(OrderedG, ansexp, ae);
     return AbsSyn(ansexp,ansexp,null);
 
     // I don't think order is quite right here for nested assignment.
@@ -449,7 +445,7 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
 
   case Subscript_e(e1,e2):
     // FIX: x[0] is just like *x, so must cancel out & !!!
-    switch(Tcutil::compress(e->topt->v)) {
+    switch(Tcutil::compress(e1->topt->v)) {
     // we track aggregate paths through tuples
     case TupleType(_):
       env.access_path = new{List(e,env.access_path)};
@@ -503,7 +499,7 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
       syn1.lvalues = use_it_list;
     return syn1;
 
-  case StructArrow_e(e1,f)  && locater == true:
+  case StructArrow_e(e1,f):
     fallthru(e1,f);
     env.access_path = new{List(e,env.access_path)}; 
     let syn1 = abstract_exp(env,e1);
@@ -517,9 +513,6 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
     if(syn1.lvalues == null)
       syn1.lvalues = use_it_list;
     return syn1;
-
-  case StructArrow_e(e1,f): throw Impossible("");
-
 
     // All complicated b/c of x = $(1,2) which has to translate to
     // unordered x[0] = 1, x[1]=2.
@@ -633,14 +626,20 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
     let e1syn = abstract_exp(use_it_env(env),e1);
     let e2syn = abstract_exp(env,e2);
     let e3syn = abstract_exp(env,e3);
-    let ans_true_exp = 
+    _ ans_true_exp = 
       make_groupexp(OneofG, 
 		    make_groupexp(OrderedG,e1syn.when_true, e2syn.when_true),
 		    make_groupexp(OrderedG,e1syn.when_false,e3syn.when_true));
-    let ans_false_exp = 
-      make_groupexp(OneofG, 
-		    make_groupexp(OrderedG,e1syn.when_true, e2syn.when_false),
-		    make_groupexp(OrderedG,e1syn.when_false,e3syn.when_false));
+    _ ans_false_exp;
+    // the conditional is an optimization to get more sharing.
+    if(e2syn.when_true == e2syn.when_true 
+       && e3syn.when_true == e3syn.when_false)
+      ans_false_exp = ans_true_exp;
+    else 
+      ans_false_exp = 
+	make_groupexp(OneofG, 
+	      make_groupexp(OrderedG,e1syn.when_true, e2syn.when_false),
+	      make_groupexp(OrderedG,e1syn.when_false,e3syn.when_false));
     // could be more aggressive about removing repeats
     // Note: it's okay to ignore access_path when adding unknown, 
     //       because path of unknown is still unknown
@@ -663,15 +662,16 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
   // in order to get this right.
   case StmtExp_e(s):
     let access_path = env.access_path;
-    env.access_path = null;
-    abstract_stmt(env,s);
-    env.access_path = access_path;
+    let env2 = change_lhs(env,null);
+    env2.access_path = null;
+    abstract_stmt(env2,s);
     while(true)
       switch(s->r) {
       case Seq_s(s1,s2): s = s2; continue;
       case Decl_s(d,s1): s = s1; continue;
       case Exp_s(e):     
-	get_stmt_annot(s)->absexps->hd = meet_absexp(abstract_exp(env,e));
+	// FIX: STUBBED OUT B/C WE HAVE THE OLD ANNOTATION ON THE STMT
+	//	get_stmt_annot(s)->absexps->hd = meet_absexp(abstract_exp(env,e));
 	let ae = StmtAE(s);
 	return AbsSyn(ae,ae,null);
       default: throw Impossible("abstract_exp: ill-formed StmtExp");
@@ -730,7 +730,7 @@ void dump_exp(absenv_t env, exp e) {
 	    Absynpp::exp2string(e), 
 	    absexp2string(syn.when_true,4),
 	    absexp2string(syn.when_false,5));
-}
+	    }
 
 void abstract_scs(absenv_t env, list_t<switch_clause> scs) {
   for(; scs != null; scs = scs->tl) {
@@ -766,12 +766,12 @@ void abstract_stmt(absenv_t env, stmt s) {
     dump_exp(env,e);
     abstract_stmt(env,s2);
     return;
-  case Break_s(null): return;
-  case Break_s(s1): abstract_stmt(env,(stmt)s1); return;
-  case Continue_s(null): return;
-  case Continue_s(s1): abstract_stmt(env,(stmt)s1); return;
-  case Goto_s(_,null): return;
-  case Goto_s(v,s1): abstract_stmt(env,(stmt)s1); return;
+  case Break_s(_): return;
+  case Continue_s(_): return;
+  case Goto_s(_,null): throw Impossible("abstract_stmt: goto w/o destination");
+  case Goto_s(v,s1): 
+    // TO DO: paste over check for not jumping into scope!
+    return;
   case For_s(e1,$(e2,_),$(e3,_),s1):
     dump_exp(env,e1);
     dump_exp(env,e2);
@@ -840,7 +840,7 @@ void abstract_fun(fndecl fd) {
     switch(roots->hd) {
     case VarRoot(vd): fprintf(*dump_file, " %s ", *(*vd->name)[1]); break;
     case MallocPt(e): 
-      fprintf(*dump_file, "mpt %s", Position::string_of_segment(e->loc)); break;
+      fprintf(*dump_file, "<<mpt>>"); break;
     }
 }
 

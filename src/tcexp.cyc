@@ -982,44 +982,45 @@ static typ tcComprehension(tenv te,seg_t loc,typ *`r topt,
   // add x to the environment with the type unsigned int
   te = Tcenv::new_block(te);
   te = add_local_var(loc, te, vd);
-  let topt2 = null;
-  let nopt = null;
-  let tqopt = null;
-  let bopt = null;
+  _ pinfo;
+  _ topt2 = null;
+  _ nopt  = null;
+  _ tqopt = null;
+  _ bopt  = null;
 
   if (topt != null) {
     switch (compress(*topt)) {
-    case PointerType(PtrInfo{elt_typ,_,n,tq,b}):
-      // FIX:  bug in compiler prevents stack allocation...
-      topt2 = new {elt_typ};
-      nopt  = new {n};
-      tqopt = new {tq};
-      bopt  = new {b};
+    case PointerType(x):
+      pinfo = x;
+      topt2 = &pinfo.elt_typ;
+      nopt  = &pinfo.nullable;
+      tqopt = &pinfo.tq;
+      bopt  = &pinfo.bounds;
       break;
     default:
       terr(loc,xprintf("initializer for %s is an array",typ2string(*topt)));
       break;
     }
-  }
-  // type-check the body in the new environment
-  tcExp(te,topt2,body);
-  bounds_t b_result;
-  bool bound_is_const = is_const_exp(te,bound);
-  if (bopt != null)
-    switch (compress_conref(*bopt)->v) {
-    case Eq_constr(Unknown_b): b_result = Unknown_b; break;
-    case Eq_constr(Upper_b(e)):
-      if (bound_is_const &&
-	  (Evexp::eval_const_uint_exp(e)<=Evexp::eval_const_uint_exp(bound))) {
-	b_result = Upper_b(e);
-	break;
-      } else fallthru;
-    default:
-      b_result = bound_is_const ? Upper_b(bound) : Unknown_b;
-      break;
-    }
-  else b_result = bound_is_const ? Upper_b(bound) : Unknown_b;
-  tqual tq_result = (tqopt != null) ? *tqopt : empty_tqual();
+   }
+   // type-check the body in the new environment
+   tcExp(te,topt2,body);
+   bounds_t b_result;
+   bool bound_is_const = is_const_exp(te,bound);
+   if (bopt != null)
+     switch (compress_conref(*bopt)->v) {
+     case Eq_constr(Unknown_b): b_result = Unknown_b; break;
+     case Eq_constr(Upper_b(e)):
+       if (bound_is_const &&
+	   (Evexp::eval_const_uint_exp(e)<=Evexp::eval_const_uint_exp(bound))) {
+	 b_result = Upper_b(e);
+	 break;
+       } else fallthru;
+     default:
+       b_result = bound_is_const ? Upper_b(bound) : Unknown_b;
+       break;
+     }
+   else b_result = bound_is_const ? Upper_b(bound) : Unknown_b;
+   tqual tq_result = (tqopt != null) ? *tqopt : empty_tqual();
   return 
     (b_result == Unknown_b) ?
     starb_typ(body->topt->v,HeapRgn,tq_result,b_result) :
