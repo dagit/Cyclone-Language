@@ -253,19 +253,20 @@ struct _tagged_arr); extern struct _tagged_arr Cyc_Std_ctime_r( const int*,
 struct _tagged_arr); extern int timezone; extern int daylight; struct Cyc_Std_timeval{
 int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
 tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
-__z); struct Cyc_Std_timespec{ int tv_sec; int tv_nsec; } ; struct Cyc_Std_timeval;
-struct Cyc_Std___fd_set{ int __fds_bits[ 32u]; } ; extern int select( int,
-struct Cyc_Std___fd_set*, struct Cyc_Std___fd_set*, struct Cyc_Std___fd_set*,
-struct Cyc_Std_timeval*); struct Cyc_List_List{ void* hd; struct Cyc_List_List*
-tl; } ; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
-Cyc_List_Nth[ 8u]; extern unsigned int Cyc_Std_strlen( struct _tagged_arr s);
-extern struct _tagged_arr Cyc_Std_strcpy( struct _tagged_arr dest, struct
-_tagged_arr src); extern unsigned char* asctime( const struct Cyc_Std_tm*
-timeptr); extern unsigned char* ctime( const int* timep); extern unsigned int
-strftime( unsigned char* s, unsigned int maxsize, unsigned char* fmt, const
-struct Cyc_Std_tm* t); extern unsigned char* asctime_r( const struct Cyc_Std_tm*,
-unsigned char*); extern unsigned char* ctime_r( const int*, unsigned char*);
-struct _tagged_arr Cyc_Std_asctime( const struct Cyc_Std_tm* timeptr){ return
+__z); typedef struct { unsigned int __val[ 64u]; } Cyc_Std___sigset_t; struct
+Cyc_Std_timespec{ int tv_sec; int tv_nsec; } ; struct Cyc_Std_timeval; struct
+Cyc_Std___fd_set{ int __fds_bits[ 32u]; } ; extern int select( int, struct Cyc_Std___fd_set*,
+struct Cyc_Std___fd_set*, struct Cyc_Std___fd_set*, struct Cyc_Std_timeval*);
+struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
+unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[ 8u];
+extern unsigned int Cyc_Std_strlen( struct _tagged_arr s); extern struct
+_tagged_arr Cyc_Std_strcpy( struct _tagged_arr dest, struct _tagged_arr src);
+extern unsigned char* asctime( const struct Cyc_Std_tm* timeptr); extern
+unsigned char* ctime( const int* timep); extern unsigned int strftime(
+unsigned char* s, unsigned int maxsize, unsigned char* fmt, const struct Cyc_Std_tm*
+t); extern unsigned char* asctime_r( const struct Cyc_Std_tm*, unsigned char*);
+extern unsigned char* ctime_r( const int*, unsigned char*); struct _tagged_arr
+Cyc_Std_asctime( const struct Cyc_Std_tm* timeptr){ return
 wrap_Cstring_as_string( asctime( timeptr), - 1);} struct _tagged_arr Cyc_Std_ctime(
 const int* timep){ return wrap_Cstring_as_string( ctime( timep), - 1);}
 unsigned int Cyc_Std_strftime( struct _tagged_arr s, unsigned int maxsize,

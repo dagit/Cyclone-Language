@@ -590,8 +590,9 @@ int decls_first: 1; int rewrite_temp_tvars: 1; int print_all_tvars: 1; int
 print_all_kinds: 1; int print_using_stmts: 1; int print_externC_stmts: 1; int
 print_full_evars: 1; int use_curr_namespace: 1; struct Cyc_List_List*
 curr_namespace; } ; extern void Cyc_Absynpp_set_params( struct Cyc_Absynpp_Params*
-fs); extern struct _tagged_arr* Cyc_Absynpp_cyc_stringptr; extern int Cyc_Absynpp_exp_prec(
-struct Cyc_Absyn_Exp*); extern struct _tagged_arr Cyc_Absynpp_char_escape(
+fs); extern int Cyc_Absynpp_is_anon_structtype( void* t); extern struct
+_tagged_arr* Cyc_Absynpp_cyc_stringptr; extern int Cyc_Absynpp_exp_prec( struct
+Cyc_Absyn_Exp*); extern struct _tagged_arr Cyc_Absynpp_char_escape(
 unsigned char); extern struct _tagged_arr Cyc_Absynpp_string_escape( struct
 _tagged_arr); extern struct _tagged_arr Cyc_Absynpp_prim2str( void* p); extern
 int Cyc_Absynpp_is_declaration( struct Cyc_Absyn_Stmt* s); struct _tuple3{
@@ -1838,8 +1839,9 @@ sizeof( unsigned char), 4u)); Cyc_Absyndump_dumppat( _temp998); Cyc_Absyndump_du
 int)'='); Cyc_Absyndump_dumpexp( _temp996); Cyc_Absyndump_dump_semi(); goto
 _LL928; _LL944: Cyc_Absyndump_dump( _tag_arr("let ", sizeof( unsigned char), 5u));
 Cyc_Absyndump_dumpids( _temp1000); Cyc_Absyndump_dump_semi(); goto _LL928;
-_LL946: if( ! Cyc_Absyndump_expand_typedefs){ Cyc_Absyndump_dump( _tag_arr("typedef",
-sizeof( unsigned char), 8u));(( void(*)( struct Cyc_Absyn_Tqual, void*, void(* f)(
+_LL946: if( ! Cyc_Absyndump_expand_typedefs? 1: Cyc_Absynpp_is_anon_structtype((
+void*) _temp1002->defn)){ Cyc_Absyndump_dump( _tag_arr("typedef", sizeof(
+unsigned char), 8u));(( void(*)( struct Cyc_Absyn_Tqual, void*, void(* f)(
 struct Cyc_Absyn_Typedefdecl*), struct Cyc_Absyn_Typedefdecl*)) Cyc_Absyndump_dumptqtd)(({
 struct Cyc_Absyn_Tqual _temp1046; _temp1046.q_const= 0; _temp1046.q_volatile= 0;
 _temp1046.q_restrict= 0; _temp1046;}),( void*) _temp1002->defn, Cyc_Absyndump_dumptypedefname,

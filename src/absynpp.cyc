@@ -1664,6 +1664,18 @@ bool exists_temp_tvar_in_effect(type_t t) {
   }
 }
 
+/* This is used in deciding whether to expand a typedef -- we don't
+   expand a typedef of an anonymous function even if expand_typedefs
+   is true, because we end up with anonymous structs in, e.g.,
+   function parameters where gcc does not like them. */
+bool is_anon_structtype(type_t t) {
+  switch (t) {
+  case &StructType(NULL,_,_): return true; // FIX: is this even possible??
+  case &AnonStructType(_): return true;
+  default: return false;
+  }
+}
+
 // Conversion between alternate forms of types
 $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
   switch (t) {
@@ -1753,7 +1765,7 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
       return to_tms(tq,topt->v);
 
   case &TypedefType(n,ts,topt):
-    if (topt == NULL || !expand_typedefs)
+    if (topt == NULL || !expand_typedefs || is_anon_structtype(topt->v))
       return $(tq,t,NULL);
     else
       return to_tms(tq,topt->v);

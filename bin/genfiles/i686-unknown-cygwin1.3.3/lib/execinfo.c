@@ -261,15 +261,16 @@ int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double
 f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
 int tag; float* f1; } ; struct Cyc_Std_timeval{ int tv_sec; int tv_usec; } ;
 struct Cyc_Std_timezone{ int tz_minuteswest; int tz_dsttime; } ; extern int
-gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone* __z); struct
-Cyc_Std_timespec{ int tv_sec; int tv_nsec; } ; struct Cyc_Std_timeval; extern
-int select( int, struct Cyc_Std__types_fd_set*, struct Cyc_Std__types_fd_set*,
-struct Cyc_Std__types_fd_set*, struct Cyc_Std_timeval*); struct Cyc_Std_rlimit{
-unsigned int rlim_cur; unsigned int rlim_max; } ; struct Cyc_Std_rusage{ struct
-Cyc_Std_timeval ru_utime; struct Cyc_Std_timeval ru_stime; int ru_maxrss; int
-ru_ixrss; int ru_idrss; int ru_isrss; int ru_minflt; int ru_majflt; int ru_nswap;
-int ru_inblock; int ru_oublock; int ru_msgsnd; int ru_msgrcv; int ru_nsignals;
-int ru_nvcsw; int ru_nivcsw; } ; extern int getrlimit( int resource, struct Cyc_Std_rlimit*
+gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone* __z);
+typedef struct { unsigned int __val[ 64u]; } Cyc_Std___sigset_t; struct Cyc_Std_timespec{
+int tv_sec; int tv_nsec; } ; struct Cyc_Std_timeval; extern int select( int,
+struct Cyc_Std__types_fd_set*, struct Cyc_Std__types_fd_set*, struct Cyc_Std__types_fd_set*,
+struct Cyc_Std_timeval*); struct Cyc_Std_rlimit{ unsigned int rlim_cur;
+unsigned int rlim_max; } ; struct Cyc_Std_rusage{ struct Cyc_Std_timeval
+ru_utime; struct Cyc_Std_timeval ru_stime; int ru_maxrss; int ru_ixrss; int
+ru_idrss; int ru_isrss; int ru_minflt; int ru_majflt; int ru_nswap; int
+ru_inblock; int ru_oublock; int ru_msgsnd; int ru_msgrcv; int ru_nsignals; int
+ru_nvcsw; int ru_nivcsw; } ; extern int getrlimit( int resource, struct Cyc_Std_rlimit*
 rlim); extern int setrlimit( int resource, const struct Cyc_Std_rlimit* rlim);
 extern int getrusage( int who, struct Cyc_Std_rusage* rusage); extern int wait(
 int* status); extern int waitpid( int pid, int* status, int options); extern int

@@ -1035,7 +1035,7 @@ void dumpdecl(decl_t d) {
     dump_semi();
     break;
   case &Typedef_d(td):
-    if(!expand_typedefs) {
+    if (!expand_typedefs || Absynpp::is_anon_structtype(td->defn)) {
       dump("typedef");
       dumptqtd(Tqual(false,false,false),td->defn,dumptypedefname,td);
       dump_semi();

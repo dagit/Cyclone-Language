@@ -69,6 +69,7 @@ extern string_t pat2string(pat_t p);
 extern string_t scope2string(scope_t sc);
 
   // These are only exposed so Absyndump can use them:
+  extern bool is_anon_structtype(type_t t);
   extern string_t cyc_string;
   extern stringptr_t cyc_stringptr;
   extern int exp_prec(exp_t);

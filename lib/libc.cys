@@ -4382,7 +4382,7 @@ LOG_PERROR
 }
 epilogue {
 extern "C" void closelog (void);
-exetrn "C" int setlogmask (int);
+extern "C" int setlogmask (int);
   // This declares a not quite printf like function, we need to write
   // it in Cyclone.
   // void openlog (const char *, int, int);

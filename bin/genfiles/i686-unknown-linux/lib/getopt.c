@@ -271,12 +271,13 @@ unsigned int* __seed); extern int grantpt( int __fd); extern int unlockpt( int
 __fd); extern struct _tagged_arr Cyc_Std_getenv( struct _tagged_arr); struct Cyc_Std_timeval{
 int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
 tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
-__z); struct Cyc_Std_timespec{ int tv_sec; int tv_nsec; } ; struct Cyc_Std_timeval;
-struct Cyc_Std___fd_set{ int __fds_bits[ 32u]; } ; extern int select( int,
-struct Cyc_Std___fd_set*, struct Cyc_Std___fd_set*, struct Cyc_Std___fd_set*,
-struct Cyc_Std_timeval*); extern struct _tagged_arr Cyc_Std_optarg; extern int
-Cyc_Std_optind; extern int Cyc_Std_opterr; extern int Cyc_Std_optopt; struct Cyc_Std_option{
-struct _tagged_arr name; int has_arg; int* flag; int val; } ; extern int Cyc_Std_getopt(
+__z); typedef struct { unsigned int __val[ 64u]; } Cyc_Std___sigset_t; struct
+Cyc_Std_timespec{ int tv_sec; int tv_nsec; } ; struct Cyc_Std_timeval; struct
+Cyc_Std___fd_set{ int __fds_bits[ 32u]; } ; extern int select( int, struct Cyc_Std___fd_set*,
+struct Cyc_Std___fd_set*, struct Cyc_Std___fd_set*, struct Cyc_Std_timeval*);
+extern struct _tagged_arr Cyc_Std_optarg; extern int Cyc_Std_optind; extern int
+Cyc_Std_opterr; extern int Cyc_Std_optopt; struct Cyc_Std_option{ struct
+_tagged_arr name; int has_arg; int* flag; int val; } ; extern int Cyc_Std_getopt(
 int __argc, struct _tagged_arr __argv, struct _tagged_arr __shortopts); extern
 int Cyc_Std__getopt_internal( int __argc, struct _tagged_arr __argv, struct
 _tagged_arr __shortopts, struct _tagged_arr __longopts, int* __longind, int
