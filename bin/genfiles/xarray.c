@@ -800,60 +800,14 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
-
-# 35 "core.h"
- typedef char*Cyc_Cstring;
-typedef char*Cyc_CstringNN;
-typedef struct _dyneither_ptr Cyc_string_t;
-# 40
-typedef struct _dyneither_ptr Cyc_mstring_t;
-# 43
-typedef struct _dyneither_ptr*Cyc_stringptr_t;
-# 47
-typedef struct _dyneither_ptr*Cyc_mstringptr_t;
-# 50
-typedef char*Cyc_Cbuffer_t;
-# 52
-typedef char*Cyc_CbufferNN_t;
-# 54
-typedef struct _dyneither_ptr Cyc_buffer_t;
-# 56
-typedef struct _dyneither_ptr Cyc_mbuffer_t;
-# 59
-typedef int Cyc_bool;
-# 26 "cycboot.h"
-typedef unsigned long Cyc_size_t;
-# 33
-typedef unsigned short Cyc_mode_t;struct Cyc___cycFILE;
-# 49
-typedef struct Cyc___cycFILE Cyc_FILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
-# 68
-typedef void*Cyc_parg_t;struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
-# 127
-typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};
-# 79 "core.h"
-typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{void*v;};
-# 83
-typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
+ struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 167 "core.h"
 extern struct _RegionHandle*Cyc_Core_heap_region;
 # 170
 extern struct _RegionHandle*Cyc_Core_unique_region;
 # 177
-void Cyc_Core_ufree(void*ptr);struct Cyc_Core_DynamicRegion;
-# 205
-typedef struct Cyc_Core_DynamicRegion*Cyc_Core_region_key_t;
-# 211
-typedef struct Cyc_Core_DynamicRegion*Cyc_Core_uregion_key_t;
-# 216
-typedef struct Cyc_Core_DynamicRegion*Cyc_Core_rcregion_key_t;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
-# 290 "core.h"
-typedef void*Cyc_Core___cyclone_internal_array_t;
-typedef void*Cyc_Core___nn_cyclone_internal_array_t;
-typedef unsigned int Cyc_Core___cyclone_internal_singleton;struct Cyc_Xarray_Xarray{struct _dyneither_ptr elmts;int num_elmts;};
-# 38 "xarray.h"
-typedef struct Cyc_Xarray_Xarray*Cyc_Xarray_xarray_t;
-# 40
+void Cyc_Core_ufree(void*ptr);struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Xarray_Xarray{struct _dyneither_ptr elmts;int num_elmts;};
+# 40 "xarray.h"
 int Cyc_Xarray_length(struct Cyc_Xarray_Xarray*);
 # 42
 void*Cyc_Xarray_get(struct Cyc_Xarray_Xarray*,int);
@@ -924,7 +878,7 @@ if(i < 0  || i >= xarr->num_elmts)
 *((void**)_check_dyneither_subscript(xarr->elmts,sizeof(void*),i))=a;}
 # 41
 struct Cyc_Xarray_Xarray*Cyc_Xarray_rcreate_empty(struct _RegionHandle*r){
-struct _dyneither_ptr x=_tag_dyneither(0U,0U,0U);
+struct _dyneither_ptr x=_tag_dyneither(0,0,0);
 return({struct Cyc_Xarray_Xarray*_tmp6=_region_malloc(r,sizeof(*_tmp6));_tmp6->elmts=x;_tmp6->num_elmts=0;_tmp6;});}
 # 45
 struct Cyc_Xarray_Xarray*Cyc_Xarray_create_empty(){return Cyc_Xarray_rcreate_empty(Cyc_Core_heap_region);}
@@ -1042,7 +996,7 @@ struct Cyc_Xarray_Xarray*Cyc_Xarray_map_c(void*(*f)(void*,void*),void*env,struct
 return Cyc_Xarray_rmap_c(Cyc_Core_heap_region,f,env,xarr);}
 # 182
 void Cyc_Xarray_reuse(struct Cyc_Xarray_Xarray*xarr){
-struct _dyneither_ptr newarr=_tag_dyneither(0U,0U,0U);
+struct _dyneither_ptr newarr=_tag_dyneither(0,0,0);
 ({struct _dyneither_ptr _tmp34=newarr;struct _dyneither_ptr _tmp35=xarr->elmts;newarr=_tmp35;xarr->elmts=_tmp34;});
 xarr->num_elmts=0;
 Cyc_Core_ufree((void**)_untag_dyneither_ptr(newarr,sizeof(void*),1U));}

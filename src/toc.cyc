@@ -56,8 +56,9 @@ using Absyn;
 using Absynpp;
 using Tcutil;
 
-// in Cyclone.cyc:  controls whether or not we expand typedefs
-extern bool noexpand_r;
+// Note: expansion of typedefs is done in Absynpp::to_tms, but here we
+//  trim out typedefs that won't be used
+extern bool noexpand_r; // in cyclone.cyc
 
 namespace Toc;
 
@@ -67,24 +68,40 @@ namespace Toc;
 // padding for variable-length array allocations
 #define PAD_BYTES sizeof(double)
 
+static `a unimp(string_t fmt, ... inject parg_t<`r2> ap)
+  __attribute__((format(printf,1,2), noreturn)) {
+  Warn::vimpos(strconcat("Toc (unimplemented): ",fmt), ap);
+}
+static `a toc_impos(string_t fmt, ... inject parg_t<`r2> ap)
+  __attribute__((format(printf,1,2), noreturn)) {
+  Warn::vimpos(strconcat("Toc: ",fmt), ap);
+}
+
 // #define BCE_DEBUG
 bool warn_bounds_checks = false;
 bool warn_all_null_deref = false;
 unsigned total_bounds_checks = 0;
 unsigned bounds_checks_eliminated = 0;
 
+stringptr_t ?globals = NULL;
+
 // should be folded into environment, but for now use globals
-table_t<fndecl_t,table_t<stmt_t,int>> * gpop_tables  = NULL;
-table_t<stmt_t,int>                   * fn_pop_table = NULL;
-static int get_npop(stmt_t s) {
-  return Hashtable::lookup(*fn_pop_table,s);
-}
+static table_t<fndecl_t,table_t<stmt_t,int>> * gpop_tables  = NULL;
+static table_t<stmt_t,int>                   * fn_pop_table = NULL;
+static int tuple_type_counter  = 0;
+static int temp_var_counter    = 0;
+static int fresh_label_counter = 0;
 
 // we aren't re-entrant -- we build this list of output decls (in
 // reverse order)  It's global b/c tuple types, tagged pointer types, and
 // strange top-level initializers need to "splice in" toplevel decls and
 // it's a pain to pass this list around everywhere
 static list_t<decl_t> result_decls = NULL;
+
+static int get_npop(stmt_t s) {
+  return Hashtable::lookup(*fn_pop_table,s);
+}
+
 // for gensymming, etc.
 struct TocState<`d> {
   // tuple types seen so far and the struct they map to
@@ -104,7 +121,7 @@ struct TocState<`d> {
   Xarray::xarray_t<var_t,`d>                    temp_labels;
 };
 
-int qvar_tag_cmp($(qvar_t,qvar_t)@ x, $(qvar_t,qvar_t)@ y) {
+static int qvar_tag_cmp($(qvar_t,qvar_t)@ x, $(qvar_t,qvar_t)@ y) {
   let $(qx,sx) = *x;
   let $(qy,sy) = *y;
   int i = qvar_cmp(qx,qy);
@@ -170,19 +187,6 @@ static type_t aggrdecl_type(qvar_t q, type_t (@`H type_maker)(qvar_t)) {
   return use_toc_state(&env, (aggrdecl_type_body@<`aggrdecl_type>)<>);
 }
 
-static int tuple_type_counter  = 0;
-static int temp_var_counter    = 0;
-static int fresh_label_counter = 0;
-
-static `a unimp(string_t fmt, ... inject parg_t<`r2> ap)
-  __attribute__((format(printf,1,2), noreturn)) {
-  Warn::vimpos(strconcat("Toc (unimplemented): ",fmt), ap);
-}
-static `a toc_impos(string_t fmt, ... inject parg_t<`r2> ap)
-  __attribute__((format(printf,1,2), noreturn)) {
-  Warn::vimpos(strconcat("Toc: ",fmt), ap);
-}
-
 /////////////////////////// Pre-Allocated Stuff /////////////////////////////
 // Don't use any of these things if they might get mutated!!!
 
@@ -204,7 +208,6 @@ MAKE_STRING(_DynRegionFrame);
    NB we must record all of these so that tovc knows about them;
    this is done by initializing the external variable globals in the
    function init(), below. */
-stringptr_t ?globals = NULL;
 #define MAKE_VAR(str)\
   static string_t            str##_str = #str;\
   static $(nmspace_t, var_t) str##_pr  = $(Nmspace{.Loc_n=0},&str##_str);\
@@ -410,7 +413,7 @@ struct functionSet _zero_arr_inplace_plus_post_functionSet = {
 // choose which function to call based on argument type
 static exp_t getFunctionType(struct functionSet @fS, type_t t) {
   exp_t function;
-  switch(Tcutil::compress(t)) {
+  switch(compress(t)) {
   case &IntType(_,sz):
     switch(sz) {
     case Char_sz:  function = fS->fchar;  break;
@@ -439,7 +442,7 @@ static exp_t getFunctionRemovePointer(struct functionSet @fS, exp_t arr) {
 /* FIX: this is duplicated in tcutil; but the functions are slightly different */
 static bool is_zero(exp_t e) {
   switch (e->r) {
-  case &Const_e({.Char_c = $(_,c)}):     return c == '\0';
+  case &Const_e({.Char_c = $(_,c)}): return c == '\0';
   case &Const_e({.Wchar_c = s}):
     let l = strlen(s);
     int i = 0;
@@ -467,14 +470,6 @@ static bool is_zero(exp_t e) {
       if (!is_zero((*dles->hd)[1])) return false;
     return true;
   default: return false;
-  }
-}
-
-// return true if t is a nullable pointer type i.e., *
-static bool is_nullable(type_t t) {
-  switch (compress(t)) {
-  case &PointerType(PtrInfo(_,_,PtrAtts(_,n,...))): return conref_def(false,n);
-  default: toc_impos("Toc::is_nullable");
   }
 }
 
@@ -710,8 +705,7 @@ static exp_t datatype_tag(datatypedecl_t td, qvar_t name) {
 static void enumdecl_to_c(enumdecl_t ed);
 static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_result_decls);
 static void datatypedecl_to_c(datatypedecl_t tud);
-static $(var_opt_t,tqual_t,type_t)@
-arg_to_c($(var_opt_t,tqual_t,type_t)@ a) {
+static $(var_opt_t,tqual_t,type_t)@ arg_to_c($(var_opt_t,tqual_t,type_t)@ a) {
   let $(x,y,z) = *a;
   return new $(x,y,typ_to_c(z));
 }
@@ -759,29 +753,25 @@ static void enumfields_to_c(list_t<enumfield_t> fs) {
 
 static type_t char_star_typ() {
   static type_t* cs = NULL;
-  if (cs == NULL) {
+  if (cs == NULL)
     cs = new star_typ(char_typ,&HeapRgn_val,mt_tq,false_conref);
-  }
   return *cs;
 }
 static type_t rgn_typ() {
   static type_t* r = NULL;
-  if (r == NULL) {
+  if (r == NULL)
     r = new cstar_typ(strct(_RegionHandle_sp),mt_tq);
-  }
   return *r;
 }
 static type_t dyn_rgn_typ() {
   static type_t* r = NULL;
-  if (r == NULL) {
+  if (r == NULL)
     r = new cstar_typ(strct(_DynRegionHandle_sp),mt_tq);
-  }
   return *r;
 }
 static bool is_boxed_tvar(type_t t) {
   switch (compress(t)) {
-  case &VarType(tv):
-    return kind_leq(typ_kind(t),&tbk);
+  case &VarType(tv): return kind_leq(typ_kind(t),&tbk);
   default: return false;
   }
 }
@@ -869,9 +859,9 @@ type_t typ_to_c(type_t t) {
     if (ad->expected_mem_kind) {
       // check that it turned out to be a mem!
       if (ad->impl == NULL) 
-        Tcutil::warn(0, "%s %s was never defined.",
-                     (ad->kind==UnionA) ? "union" : "struct",
-                     qvar2string(ad->name));
+        warn(0, "%s %s was never defined.",
+	     (ad->kind==UnionA) ? "union" : "struct",
+	     qvar2string(ad->name));
     }
     // XXX I think this is where new instantiation types are
     // generated; want to adapt this for unions here.
@@ -884,8 +874,7 @@ type_t typ_to_c(type_t t) {
     let last_type = fs->hd->type;
     if (kind_leq(&ak,typ_kind(last_type))) {
       if (ad->expected_mem_kind) {
-        Tcutil::warn(0, "struct %s ended up being abstract.",
-                     qvar2string(ad->name));
+        warn(0, "struct %s ended up being abstract.", qvar2string(ad->name));
       }                     
       // To avoid looping, make sure the instantiation of the last
       // type is not still abstract.  If it is, we can just return
@@ -900,12 +889,14 @@ type_t typ_to_c(type_t t) {
   case &EnumType(tdn,_): return t;
   case &AnonEnumType(fs): enumfields_to_c(fs); return t;
   case &TypedefType(tdn,ts,td,topt):
-    if (topt == NULL || noexpand_r)
+    // just drop the type arguments and translate the nested types
+    // typedef expansion is done in Absynpp::to_tms.
+    if (topt == NULL) {
       if (ts != NULL)
         return new TypedefType(tdn,NULL,td,NULL);
       else return t;
-    // just drop the type arguments and translate the nested types
-    else return new TypedefType(tdn,NULL,td,typ_to_c((type_t)topt));
+    } else 
+      return new TypedefType(tdn,NULL,td,typ_to_c((type_t)topt));
   case &TagType(_): return uint_typ; // must be unsigned!
   case &RgnHandleType(_): return rgn_typ();
   case &DynRgnType(_,_): return dyn_rgn_typ();
@@ -959,7 +950,7 @@ static bool atomic_typ(type_t t) {
   case &FloatType(_):
   case &FnType(_):
   case &TagType(_): return true;
-  case &ArrayType(ArrayInfo{t,_,_,_,_}): return atomic_typ(t);
+  case &ArrayType(ArrayInfo{t,...}): return atomic_typ(t);
     // FIX: really should compute in terms of the instantiation
     // to be as aggressive as possible.
     // note even without this we'll allocate Position::seg_t with atomic.
@@ -1108,7 +1099,7 @@ static exp_t make_toplevel_dyn_arr(type_t t, exp_t sz, exp_t e) {
   //   {e,e,e+sz};
   bool is_string = false;
   switch (e->r) {
-  case &Const_e({.String_c = _}): is_string = true; break;
+  case &Const_e({.String_c  = _}): 
   case &Const_e({.Wstring_c = _}): is_string = true; break;
   default: break;
   }
@@ -1126,11 +1117,9 @@ static exp_t make_toplevel_dyn_arr(type_t t, exp_t sz, exp_t e) {
     // Note: If e is NULL, element size of 0 is fine!
     xplussz = cast_it(void_star_typ(),add_exp(e,sz,DL));
   }
-  exp_t urm_exp;
-  urm_exp = unresolvedmem_exp(NULL,list(new $(NULL,xexp),
-                                        new $(NULL,xexp),
-                                        new $(NULL,xplussz)),DL);
-  return urm_exp;
+  return unresolvedmem_exp(NULL,list(new $(NULL,xexp),
+				     new $(NULL,xexp),
+				     new $(NULL,xplussz)),DL);
 }
 
 ///////////////////////////////////////////////////////////////
@@ -1277,12 +1266,15 @@ static bool need_null_check(exp_t e) { // e must be pre-translation!
   switch(e->annot) {
   case &CfFlowInfo::UnknownZ(_): 
     //fprintf(stderr,"annotation is unknown\n");
-    return is_nullable((type_t)e->topt);
+    switch (compress((type_t)e->topt)) {
+    case &PointerType(PtrInfo(_,_,PtrAtts(_,n,...))): return conref_def(false,n);
+    default: toc_impos("Toc::is_nullable");
+  }
   case &CfFlowInfo::NotZero(_):  
     //fprintf(stderr,"annotation is notzero\n");
     return false;
   case &CfFlowInfo::IsZero:
-    Tcutil::terr(e->loc,"NULL pointer check will definitely fail");
+    terr(e->loc,"NULL pointer check will definitely fail");
     return false;
   case &EmptyAnnot:
     // warning is unfounded under sizeof as in memcpy
@@ -1298,7 +1290,7 @@ static Relations::relns_t get_relns(exp_t e) { // e must be pre-translation!
   case &CfFlowInfo::UnknownZ(r): return r;
   case &CfFlowInfo::NotZero(r):  return r;
   case &CfFlowInfo::IsZero:
-    Tcutil::terr(e->loc,"dereference of NULL pointer");
+    terr(e->loc,"dereference of NULL pointer");
     return NULL;
   case &EmptyAnnot: return NULL;
   default: toc_impos("get_relns");
@@ -1645,7 +1637,7 @@ static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
 static exp_t init_tuple(env_t nv, bool pointer,
                         exp_opt_t rgnopt, list_t<exp_t> es) {
   // $(e1,...,en)  -> ({ t x;   x.f1 = e1; ... x.fn = en; x})
-  // &$(e1,...,en) -> ({ t * x=malloc(sizeof(t); x->f1 = e1; ... x->fn = en; x})
+  // &$(e1,...,en) -> ({ t* x=malloc(sizeof(t); x->f1 = e1; ... x->fn = en; x})
   TOC_RGN(nv,r) {
     let tqs = List::rmap(r,tup_to_c,es);
     let n   = add_tuple_type(tqs);
@@ -2434,7 +2426,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     // call unless at top-level
     // note: we don't need the element type b/c the length is 0 (so we lie)
     // note: should share all these uint_exp(0,DL) things
-    let zero = uint_exp(0,DL);
+    let zero = signed_int_exp(0,DL);
     if(is_tagged_pointer_typ(old_typ)) {
       if(is_toplevel(nv))
 	e->r = make_toplevel_dyn_arr(old_typ, zero, zero)->r;
@@ -2579,7 +2571,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     string_t incr_str = "increment";
     if (incr == PreDec || incr == PostDec) incr_str = "decrement";
     if (is_zero_ptr_deref(e2,&ptr_type,&is_dyneither,&elt_type)) {
-      Tcutil::terr(e->loc,"in-place %s is not supported when dereferencing a zero-terminated pointer", incr_str);
+      terr(e->loc,"in-place %s is not supported when dereferencing a zero-terminated pointer", incr_str);
       toc_impos("in-place inc/dec on zero-term");
     }
     type_t tunion_member_type = &VoidType_val;
@@ -2597,8 +2589,8 @@ static void exp_to_c(env_t nv, exp_t e) {
         exp_to_c(nv,e);
         return;
       default:
-        Tcutil::terr(e->loc,"in-place post-%s is not supported on @tagged "
-                     "union members", incr_str);
+        terr(e->loc,"in-place post%s is not supported on @tagged union members",
+	     incr_str);
         toc_impos("in-place inc/dec on @tagged union");
       }
     }
@@ -2922,8 +2914,8 @@ static void exp_to_c(env_t nv, exp_t e) {
           bool do_null_check = need_null_check(e1);
           if (do_null_check) {
             if (!user_inserted)
-              Tcutil::warn(e->loc,"inserted null check due to implicit "
-                           "cast from * to @ type");
+              warn(e->loc,"inserted null check due to implicit "
+		          "cast from * to @ type");
             e->r = cast_it_r(*t,fncall_exp(_check_null_e,
                                            new List(e1,NULL),DL));
           } else {
@@ -3397,7 +3389,7 @@ DynCast:
       default:
 	in_bnds = in_bnds || check_bounds(e1_typ,relns,e1,e2);
 	if(warn_bounds_checks && !in_bnds)
-	  Tcutil::warn(e->loc,"bounds check necessary for %s", exp2string(e));
+	  warn(e->loc,"bounds check necessary for %s", exp2string(e));
 #ifdef BCE_DEBUG
       fprintf(stderr,"check bounds returned %s\n", in_bnds ? "true " : "false");
 #endif
@@ -3508,7 +3500,7 @@ DynCast:
     // generate an "empty" array intializer to avoid giant arrays
     if (!is_zero(e2)) {
       if(!known)
-	Tcutil::terr(e1->loc, "cannot determine value of constant");
+	terr(e1->loc, "cannot determine value of constant");
       for (unsigned int i = 0; i < sz; i++)
         es = new List(new $(NULL,e2),es);
       // for a zero-terminated comprehension, add in an implicit 0 to the end
@@ -3520,8 +3512,7 @@ DynCast:
     e->r = unresolvedmem_exp_r(NULL,es);
     break;
   case &ComprehensionNoinit_e(e1,t1,iszeroterm):
-    // we just inherit the size from the context by returning an
-    // empty array
+    // we just inherit the size from the context by returning an empty array
     e->r = unresolvedmem_exp_r(NULL,NULL);
     break;
   case &Aggregate_e(tdn,ts,dles,sd):
@@ -3825,7 +3816,7 @@ static exp_t compile_path(Tcpat::path_t ps, exp_t v) {
     // but it's a lot more uniform.
     if (tagcheck(p->orig_pat.pattern)) {
       type_t t = (type_t)p->orig_pat.pattern->topt; 
-      let t2 = Tcutil::compress(typ_to_c_array(t));
+      let t2 = compress(typ_to_c_array(t));
       switch (t2) {
         // avoid casts that C will not like.
       case &VoidType: 
@@ -3885,7 +3876,7 @@ static exp_t compile_pat_test(exp_t v, Tcpat::pat_test_t t) {
   case &Tcpat::EqAnonEnum(t, ef): 
     return eq_exp(v, new_exp(new AnonEnum_e(t, ef),DL), DL);
   case &Tcpat::EqFloat(s,i): return eq_exp(v, float_exp(s,i,DL), DL);
-  case &Tcpat::EqConst(i): return eq_exp(v, uint_exp(i,DL), DL);
+  case &Tcpat::EqConst(i): return eq_exp(v, signed_int_exp(i,DL), DL);
   case &Tcpat::EqDatatypeTag(i,tud,tuf):
     // The compilation of the path has already done a dereference, so
     // get rid of any dereference in the path (peeking under casts.)
@@ -3898,9 +3889,11 @@ static exp_t compile_pat_test(exp_t v, Tcpat::pat_test_t t) {
     // cast v to a pointer to the datatype field
     v = cast_it(cstar_typ(strctq(collapse_qvars(tuf->name, tud->name)), mt_tq),v);
     return eq_exp(aggrarrow_exp(v,tag_sp,DL), uint_exp(i,DL),DL);
+    //v = cast_it(cstar_typ(sint_typ,mt_tq),v); // FIX: share type
+    //return eq_exp(deref_exp(v,DL), signed_int_exp(i,DL),DL);
   case &Tcpat::EqTaggedUnion(f,i):
     v = member_exp(member_exp(v,f,DL),tag_sp,DL);
-    return eq_exp(v,uint_exp(i,DL),DL);
+    return eq_exp(v,signed_int_exp(i,DL),DL);
   case &Tcpat::EqExtensibleDatatype(tud,tuf): 
     // Same as with datatypes, so get rid of any dereference in the path.
   LOOP2:
@@ -3912,6 +3905,8 @@ static exp_t compile_pat_test(exp_t v, Tcpat::pat_test_t t) {
     // cast v to a pointer to the datatype field
     v = cast_it(cstar_typ(strctq(collapse_qvars(tuf->name, tud->name)), mt_tq),v);
     return eq_exp(aggrarrow_exp(v,tag_sp,DL), var_exp(tuf->name,DL), DL);
+    //v = cast_it(cstar_typ(cstar_typ(char_typ,mt_tq),mt_tq),v); // FIX: share type
+    //return eq_exp(deref_exp(v,DL), var_exp(tuf->name,DL), DL);
   }
 }
 
@@ -5086,9 +5081,7 @@ static void exptypes_to_c(exp_t e) {
   case &Instantiate_e(...): 
   case &New_e(...):         
   case &Valueof_e(...):       
-  case &Tagcheck_e(...):
-    Tcutil::terr(e->loc,"Cyclone expression within C code");
-    break;
+  case &Tagcheck_e(...): terr(e->loc,"Cyclone expression within C code"); break;
   }
 }
 
@@ -5121,7 +5114,7 @@ static void decltypes_to_c(decl_t d) {
   case &ExternC_d(_):
   case &ExternCinclude_d(_,_):
   case &Region_d(...): // DJG: impossible because of parser, no?
-    Tcutil::terr(d->loc,"Cyclone declaration within C code");
+    terr(d->loc,"Cyclone declaration within C code");
     break;
   case &Porton_d:
   case &Portoff_d:
@@ -5158,18 +5151,19 @@ static void stmttypes_to_c(stmt_t s) {
     s->r = new Skip_s;
     break;
   case &TryCatch_s(...):
-    Tcutil::terr(s->loc,aprintf("Cyclone statement in C code: %s",stmt2string(s)));
+    terr(s->loc,aprintf("Cyclone statement in C code: %s",stmt2string(s)));
     break;
   }
 }
 
 // Translate the given declarations, producing a new list of declarations
-// and a new translation environment.  Note that top-level variable
+// and a new translation environment.  Top-level variable
 // declarations are treated differently.
 static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, bool top, bool cinclude) {
   for (; ds != NULL; ds = ds->tl) {
     if (!is_toplevel(nv))
       impos("decls_to_c: not at toplevel!");
+    fresh_label_counter = 0; // DJG: why not?
     decl_t d = ds->hd;
     switch (d->r) {
     case &Var_d(vd):
@@ -5219,14 +5213,17 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
     case &Typedef_d(td):
       td->tvs  = NULL;
       if (td->defn != NULL)
-        td->defn = typ_to_c((type_t)td->defn);
+	td->defn = typ_to_c((type_t)td->defn);
       else {
-        switch (td->kind->v->kind) {
-        case BoxKind: td->defn = void_star_typ(); break;
-        default: td->defn = &VoidType_val; break;
-        }
+	switch (td->kind->v->kind) {
+	case BoxKind: td->defn = void_star_typ(); break;
+	default: td->defn = &VoidType_val; break;
+	}
       }
-      result_decls = new List(d,result_decls);
+      // for non-anonymous-aggregates, this is wasteful b/c the printer
+      // will skip any use of the typedef
+      if(noexpand_r || Absynpp::is_anon_aggrtype((type_t)td->defn))
+	result_decls = new List(d,result_decls);
       break;
     case &Porton_d:
     case &Portoff_d:
@@ -5303,7 +5300,7 @@ static int destroy_labels(region_t<`d> d, struct TocState<`d>@`d ts) {
   return 0;
 }
 
-void finish() {
+void finish() { 
   toc_state_t ts = NULL;
   ts :=: toc_state;
   let TocStateWrap{dyn, s} = *ts;

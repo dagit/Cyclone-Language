@@ -875,13 +875,14 @@ static void process_file(string_t<`H> filename) {
   if (cf_r) goto PRINTC;
 
   // Translation to C
-  tds = do_stage("translation to C", tds, do_translate, jump_tables->pop_tables,
+  tds = do_stage("translation to C",tds, do_translate, jump_tables->pop_tables,
 		 remove_fileptr, preprocfileptr);
   if (compile_failure) return;
 
   // Translation to left-to-right evaluation order
   if (toseqc_r)
-    tds = do_stage("post-pass to L-to-R evaluation order", tds, do_toseqc, true, ignore, true);
+    tds = do_stage("post-pass to L-to-R evaluation order", tds, do_toseqc, 
+		   true, ignore, true);
   // Clean up state common to last two passes
   Toc::finish();
 

@@ -177,8 +177,8 @@ static enum SideEffect exp_effect(exp_t e) {
   case &Tagcheck_e(...): bad_form = "Tagcheck_e"; break;
   case &Valueof_e(...): bad_form = "Valueof_e"; break;
   }
-  throw new Impossible(aprintf("bad exp form %s (exp=|%s|) after xlation to C",
-			       bad_form, Absynpp::exp2string(e)));
+  Warn::impos("bad exp form %s (exp=|%s|) after xlation to C",
+	      bad_form, Absynpp::exp2string(e));
 }
 static enum SideEffect stmt_effect(stmt_t s) {
   // This is just the recursive descent; we are not under a StmtExp.
@@ -206,7 +206,7 @@ static enum SideEffect stmt_effect(stmt_t s) {
     case &Do_s(...):
     case &Decl_s(...):
     case &Switch_s(...): return AnyEffect;
-    default: throw new Impossible("bad stmt after xlation to C");
+    default: Warn::impos("bad stmt after xlation to C");
     }
   }
 }
@@ -365,8 +365,8 @@ static void exp_to_seqc(exp_t e) {
   case &Tagcheck_e(...): bad_form = "Tagcheck_e"; break;
   case &Valueof_e(...): bad_form = "Valueof_e"; break;
   }
-  throw new Impossible(aprintf("bad exp form %s (exp=|%s|) after xlation to C",
-			       bad_form, Absynpp::exp2string(e)));
+  Warn::impos("bad exp form %s (exp=|%s|) after xlation to C",
+	      bad_form, Absynpp::exp2string(e));
 }
 
 static void stmt_to_seqc(stmt_t s) {
@@ -428,6 +428,8 @@ static void stmt_to_seqc(stmt_t s) {
       switch (d->r) {
       case &Var_d(vd):
 	if (vd->initializer != NULL) {
+	  // DJG: the aggregate-removal phase could make this unnecessary,
+	  // but it's unclear if that's the best thing to do
 	  switch (vd->initializer->r) {
 	    // need to handle struct, array initialization specially so that
 	    //   let v = { e1, e2 }
@@ -459,11 +461,13 @@ static void stmt_to_seqc(stmt_t s) {
 		  s->r = s3->r;
 		  break;
 		default:
-		  throw new Impossible(aprintf("exps_to_seqc updated to non-stmt-exp |%s|", Absynpp::exp2string((exp_t)vd->initializer)));
+		  Warn::impos("exps_to_seqc updated to non-stmt-exp |%s|", 
+			      Absynpp::exp2string((exp_t)vd->initializer));
 		}
 		break;
 	      default:
-		throw new Impossible(aprintf("exps_to_seqc returned non-exp-stmt |%s|", Absynpp::stmt2string(laststmt)));
+		Warn::impos("exps_to_seqc returned non-exp-stmt |%s|", 
+			    Absynpp::stmt2string(laststmt));
 	      }
 	      break;
 	  default:
@@ -477,7 +481,7 @@ static void stmt_to_seqc(stmt_t s) {
       default: break;
       }
       fallthru;
-    default: throw new Impossible("bad stmt after xlation to C");
+    default: Warn::impos("bad stmt after xlation to C");
     }
   }
 }
@@ -505,8 +509,8 @@ list_t<decl_t> toseqc(list_t<decl_t,`H> ds) {
     case &ExternC_d(ds2):     fallthru(ds2);
     case &ExternCinclude_d(ds2,_):
     case &Porton_d:
-    case &Portoff_d:
-      throw new Impossible("nested translation unit after translation to C");
+    case &Portoff_d: 
+      Warn::impos("nested translation unit after translation to C");
     }
   }
   return ds;
