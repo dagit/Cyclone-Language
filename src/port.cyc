@@ -1531,6 +1531,7 @@ static void gen_stmt(cenv_t env, stmt_t s) {
   case &TryCatch_s(_,_): impos("try/catch");
   case &Region_s(_,_,_,_,_): impos("region");
   case &ResetRegion_s(_): impos("reset region");
+  case &Alias_s(_,_,_,_): impos("alias");
   }
 }
 

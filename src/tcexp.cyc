@@ -62,7 +62,7 @@ static type_t expr_err(tenv_t te,seg_t loc,type_t * topt, string_t msg,
 }
 
 #ifdef NO_PATHS
-#define UNIQUE_ERR_MSG "Cannot consume paths; do swap instead"
+#define UNIQUE_ERR_MSG "Cannot consume paths; do swap instead %d"
 #else
 #define UNIQUE_ERR_MSG "Cannot consume non-unique paths; do swap instead"
 #endif
@@ -329,7 +329,7 @@ void check_format_args(tenv_t<`g,`r> te, exp_t fmt,
       for (; args != NULL; args = args->tl) {
         tcExp(te,NULL,args->hd);
 	if (is_unique_pointer(args->hd->topt->v) && !is_unique_path(args->hd))
-	  terr(args->hd->loc, UNIQUE_ERR_MSG);
+	  terr(args->hd->loc, UNIQUE_ERR_MSG, __LINE__);
       }
     }
     return; 
@@ -348,7 +348,7 @@ void check_format_args(tenv_t<`g,`r> te, exp_t fmt,
         explain_failure();
       }
       if (is_unique_pointer(t) && !is_unique_path(e))
-	terr(args->hd->loc,UNIQUE_ERR_MSG);
+	terr(args->hd->loc,UNIQUE_ERR_MSG, __LINE__);
     }
     // check arity
     if (desc_types != NULL)
@@ -741,7 +741,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
   check_writable(te, e1);
   if (po == NULL) {
     if (is_unique_pointer(t2) && !is_unique_path(e2))
-      terr(e2->loc,UNIQUE_ERR_MSG);
+      terr(e2->loc,UNIQUE_ERR_MSG, __LINE__);
     if (!coerce_assign(te,e2,t1)) {
       let result = expr_err(te,loc,topt,"type mismatch: %s != %s",
                             typ2string(t1), typ2string(t2));
@@ -858,7 +858,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
             explain_failure();
           }
 	  if (is_unique_pointer(t2) && !is_unique_path(e1))
-	    terr(e1->loc,UNIQUE_ERR_MSG);
+	    terr(e1->loc,UNIQUE_ERR_MSG, __LINE__);
           es = es->tl;
           args_info = args_info->tl;
         }
@@ -921,7 +921,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
                   explain_failure();
                 }
 		if (is_unique_pointer(vt) && !is_unique_path(e1))
-		  terr(e1->loc,UNIQUE_ERR_MSG);
+		  terr(e1->loc,UNIQUE_ERR_MSG, __LINE__);
               }
             } else {
               // this is trickier, we have to match up the type of the
@@ -947,7 +947,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
                       tcExp(te,NULL,e1); 
 		      if (is_unique_pointer(e1->topt->v) && 
 			  !is_unique_path(e1))
-			terr(e1->loc,UNIQUE_ERR_MSG);
+			terr(e1->loc,UNIQUE_ERR_MSG, __LINE__);
 		    }
                     let f = tcInjection(te,e1,vt,rgn,inst,fields);
                     if (f != NULL)
@@ -2109,8 +2109,13 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   type_t t = tcExpNoPromote(te, topt, e);
   // expression initializers are copied, and therefore consumed,
   // so check for uniqueness
-  if (is_unique_pointer(t) && !is_unique_path(e))
-    terr(e->loc,UNIQUE_ERR_MSG);
+  if (is_unique_pointer(t) && !is_unique_path(e)) {
+    fprintf(stderr,"topt=%s, e->topt->v=%s, e=%s\n",
+	    topt == NULL ? "NULL" : Absynpp::typ2string(*topt),
+	    Absynpp::typ2string(e->topt->v),
+	    Absynpp::exp2string(e));
+    terr(e->loc,UNIQUE_ERR_MSG, __LINE__);
+  }
   switch (e->r) {
   case &Array_e(_): 
   case &Comprehension_e(_,_,_,_):

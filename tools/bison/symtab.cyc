@@ -109,7 +109,7 @@ bucket * getsym(const char? key)
       bp->prec = 0u;
       bp->assoc = 0u;
       bp->user_token_number = 0u;
-      bp->alias = NULL;
+      bp->_alias = NULL;
 
 
       if (firstsymbol == NULL)

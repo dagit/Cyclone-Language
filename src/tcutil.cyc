@@ -4097,9 +4097,8 @@ static bool is_unique_field(type_t t, field_name_t f) {
 // returns true if the path [e] is entirely unique.  I.e. **x is unique
 // if x has type (e.g.) int *`U*`U*`U x but not if it has type (e.g.)
 // int *`U*`H*`U x
-bool is_unique_path(exp_t e) {
+bool is_unique_path_aux(exp_t e, bool ignore_leaf) {
   switch (e->r) {
-  case &Const_e(_):
   case &Increment_e(_,_):
   case &And_e(_,_):
   case &Or_e(_,_):
@@ -4121,49 +4120,56 @@ bool is_unique_path(exp_t e) {
   case &Swap_e(_,_): // has void type
   case &Primop_e(_,_): return false;
 
+  case &Const_e(_):
   case &Malloc_e(_):
   case &New_e(_,_):
-  case &Var_e(_,_): return is_unique_pointer(e->topt->v);
+  case &Var_e(_,_): return ignore_leaf || is_unique_pointer(e->topt->v);
   case &Conditional_e(_,e1,_): fallthru(e1);
   case &SeqExp_e(_,e1): fallthru(e1);
-  case &AssignOp_e(e1,_,_): return is_unique_path(e1);
+  case &AssignOp_e(e1,_,_): return is_unique_path_aux(e1,ignore_leaf);
   case &FnCall_e(e1,_,_):
     switch (compress(e1->topt->v)) {
-    case &FnType(FnInfo(_,_,rt,_,_,_,_,_)): return is_unique_pointer(rt);
+    case &FnType(FnInfo(_,_,rt,_,_,_,_,_)):
+      return ignore_leaf || is_unique_pointer(rt);
     case &PointerType(PtrInfo(t,_,_)):
       switch (compress(t)) {
-      case &FnType(FnInfo(_,_,rt,_,_,_,_,_)): return is_unique_pointer(rt);
+      case &FnType(FnInfo(_,_,rt,_,_,_,_,_)):
+	return ignore_leaf || is_unique_pointer(rt);
       default: break;
       }
       fallthru;
     default: Tcutil::impos("Fncall has non function type %s",
 			   typ2string(e1->topt->v));
     }
-  case &Cast_e(t,e1,_,_): return is_unique_path(e1) && is_unique_pointer(t);
+  case &Cast_e(t,e1,_,_):
+    return is_unique_pointer(t) && is_unique_path_aux(e1,true);
   case &Deref_e(e1):
-    return is_unique_path(e1) && is_unique_pointer(e->topt->v);
+    return (ignore_leaf || is_unique_pointer(e->topt->v)) && 
+      is_unique_path_aux(e1, false);
   case &AggrArrow_e(e1,f):
-    if (is_unique_path(e1)) {
-      switch (compress(e1->topt->v)) {
-      case &PointerType(PtrInfo(t2,_,_)): return is_unique_field(t2,f);
-      default: Tcutil::impos("is_unique_path: -> on non-pointer");
-      }
+    switch (compress(e1->topt->v)) {
+    case &PointerType(PtrInfo(t2,_,_)): 
+      return (ignore_leaf || is_unique_field(t2,f)) &&
+	is_unique_path_aux(e1,false);
+    default: Tcutil::impos("is_unique_path_aux: -> on non-pointer");
     }
     return false;
-  case &AggrMember_e(e1,f): return is_unique_field(e1->topt->v,f);
+  case &AggrMember_e(e1,f):
+    return ignore_leaf || is_unique_field(e1->topt->v,f);
   case &Subscript_e(e1,e2):
     switch (compress(e1->topt->v)) {
-    case &PointerType(PtrInfo(t,_,_)): return is_unique_pointer(t);
+    case &PointerType(PtrInfo(t,_,_)):
+      return ignore_leaf || is_unique_pointer(t);
     case &TupleType(ts): 
       let $(i,known) = Evexp::eval_const_uint_exp(e2);
-      if(!known) Tcutil::impos("is_unique_path: non-constant subscript");
+      if(!known) Tcutil::impos("is_unique_path_aux: non-constant subscript");
       try {
 	let t = (*List::nth(ts,i))[1];
-	return is_unique_pointer(t);
+	return ignore_leaf || is_unique_pointer(t);
       } catch { case Nth:
-	return Tcutil::impos("is_unique_path: out-of-bounds subscript");
+	return Tcutil::impos("is_unique_path_aux: out-of-bounds subscript");
       }
-    default: Tcutil::impos("is_unique_path: subscript on non-pointer/tuple");
+    default: Tcutil::impos("is_unique_path_aux: subscript on non-pointer/tuple");
     }
   case &StmtExp_e(s):
     // keep looking for the final expression of the statement,
@@ -4172,11 +4178,11 @@ bool is_unique_path(exp_t e) {
       switch(s->r) {
       case &Seq_s(s1,s2): s = s2; break;
       case &Decl_s(d,s1): s = s1; break;
-      case &Exp_s(e): return is_unique_path(e);
+      case &Exp_s(e): return is_unique_path_aux(e,ignore_leaf);
       default: Tcutil::impos("is_unique_stmt_exp: ill-formed StmtExp");
       }
     }
-  default: Tcutil::impos("Called is_unique_path with bogus exp |%s|\n",
+  default: Tcutil::impos("Called is_unique_path_aux with bogus exp |%s|\n",
 			 exp2string(e));
   }  
 }
@@ -4184,9 +4190,8 @@ bool is_unique_path(exp_t e) {
 // the real version of this is above; this version makes sure that e
 // is *NOT* a path but is a unique pointer.  This forces unique
 // pointers in structures to be swapped.
-bool is_unique_path(exp_t e) {
+static bool is_unique_path_aux(exp_t e, bool ignore_leaf) {
   switch (e->r) {
-  case &Const_e(_):
   case &Increment_e(_,_):
   case &And_e(_,_):
   case &Or_e(_,_):
@@ -4207,34 +4212,37 @@ bool is_unique_path(exp_t e) {
   case &AnonEnum_e(_,_,_):
   case &Swap_e(_,_): // has void type
 
-  // These next three are allowed above ... 
+  // These next four are allowed above ... 
   case &AggrArrow_e(_,_): 
   case &AggrMember_e(_,_):
   case &Subscript_e(_,_):
+  case &Deref_e(_):
 
   case &Primop_e(_,_): return false;
 
+  case &Const_e(_):
   case &Malloc_e(_):
   case &New_e(_,_):
-  case &Var_e(_,_): return is_unique_pointer(e->topt->v);
+  case &Var_e(_,_): return ignore_leaf || is_unique_pointer(e->topt->v);
   case &Conditional_e(_,e1,_): fallthru(e1);
   case &SeqExp_e(_,e1): fallthru(e1);
-  case &AssignOp_e(e1,_,_): return is_unique_path(e1);
+  case &AssignOp_e(e1,_,_): return is_unique_path_aux(e1,ignore_leaf);
   case &FnCall_e(e1,_,_):
     switch (compress(e1->topt->v)) {
-    case &FnType(FnInfo(_,_,rt,_,_,_,_,_)): return is_unique_pointer(rt);
+    case &FnType(FnInfo(_,_,rt,_,_,_,_,_)):
+      return ignore_leaf || is_unique_pointer(rt);
     case &PointerType(PtrInfo(t,_,_)):
       switch (compress(t)) {
-      case &FnType(FnInfo(_,_,rt,_,_,_,_,_)): return is_unique_pointer(rt);
+      case &FnType(FnInfo(_,_,rt,_,_,_,_,_)):
+	return ignore_leaf || is_unique_pointer(rt);
       default: break;
       }
       fallthru;
     default: Tcutil::impos("Fncall has non function type %s",
 			   typ2string(e1->topt->v));
     }
-  case &Cast_e(t,e1,_,_): return is_unique_path(e1) && is_unique_pointer(t);
-  case &Deref_e(e1):
-    return is_unique_path(e1) && is_unique_pointer(e->topt->v);
+  case &Cast_e(t,e1,_,_): 
+    return is_unique_pointer(t) && is_unique_path_aux(e1,true);
   case &StmtExp_e(s):
     // keep looking for the final expression of the statement,
     //   and recurse into that to find the unique path
@@ -4242,15 +4250,16 @@ bool is_unique_path(exp_t e) {
       switch(s->r) {
       case &Seq_s(s1,s2): s = s2; break;
       case &Decl_s(d,s1): s = s1; break;
-      case &Exp_s(e): return is_unique_path(e);
+      case &Exp_s(e): return is_unique_path_aux(e,ignore_leaf);
       default: Tcutil::impos("is_unique_stmt_exp: ill-formed StmtExp");
       }
     }
-  default: Tcutil::impos("Called is_unique_path with bogus exp |%s|\n",
+  default: Tcutil::impos("Called is_unique_path_aux with bogus exp |%s|\n",
 			 exp2string(e));
-  }  
-}  
+  }
+}
 #endif
+bool is_unique_path(exp_t e) { return is_unique_path_aux(e,false); }
 
 // used by address of.  
 // Ensure e is an lvalue or function designator.

@@ -893,6 +893,13 @@ void dumpstmt(stmt_t s) {
     dumploc(s->loc); dump("reset_region("); dumpexp(e); dump(");");
     break;
 
+  case &Alias_s(e,tv,vd,s1):
+    dumploc(s->loc); 
+    dump("alias("); dumpexp(e); dump(") = ");
+    dump("<"); dumptvar(tv); dump(">" );
+    dumpqvar(vd->name);
+    dump("{"); dumpstmt(s1); dump("}");
+    break;
   }
 }
 

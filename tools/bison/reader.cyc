@@ -551,8 +551,8 @@ parse_token_decl (int what_is, int what_is_not)
 	  symval->user_token_number = symbol->user_token_number;
 	  symbol->user_token_number = SALIAS;
 
-	  symval->alias = symbol;	
-	  symbol->alias = symval;	
+	  symval->_alias = symbol;	
+	  symbol->_alias = symval;	
 	  symbol = NULL;
 
  	  nsyms--;   /* symbol and symval combined are only one symbol */
@@ -662,8 +662,8 @@ parse_thong_decl ()
   symval->type_name = typename;
   symval->user_token_number = (short)usrtoknum;
 
-  symval->alias = symbol;	
-  symbol->alias = symval;	
+  symval->_alias = symbol;	
+  symbol->_alias = symval;	
 
   nsyms--;			/* symbol and symval combined are only one symbol */
 }
@@ -2228,7 +2228,7 @@ packsymbols()
 	{
 	  bp->value += ntokens;
 	}
-      else if (bp->alias)
+      else if (bp->_alias)
 	{
 		/* this symbol and its alias are a single token defn.
 		  allocate a tokno, and assign to both
@@ -2236,24 +2236,24 @@ packsymbols()
 			and make both the same
 		*/
 		if (bp->value == 0)
-			bp->value = bp->alias->value = (short)tokno++;
+			bp->value = bp->_alias->value = (short)tokno++;
 
-		if (bp->prec != bp->alias->prec) {
-			if (bp->prec != 0 && bp->alias->prec != 0
+		if (bp->prec != bp->_alias->prec) {
+			if (bp->prec != 0 && bp->_alias->prec != 0
                                         && bp->user_token_number == SALIAS)
 			        warnss("conflicting precedences for %s and %s",
-                                       bp->tag, bp->alias->tag);
-			if (bp->prec != 0) bp->alias->prec = bp->prec;
-			else bp->prec = bp->alias->prec;
+                                       bp->tag, bp->_alias->tag);
+			if (bp->prec != 0) bp->_alias->prec = bp->prec;
+			else bp->prec = bp->_alias->prec;
 		}
 
-		if (bp->assoc != bp->alias->assoc) {
-			if (bp->assoc != 0 && bp->alias->assoc != 0
+		if (bp->assoc != bp->_alias->assoc) {
+			if (bp->assoc != 0 && bp->_alias->assoc != 0
                                          && bp->user_token_number == SALIAS)
                           	warnss("conflicting assoc values for %s and %s",
-                          		bp->tag, bp->alias->tag);
-			if (bp->assoc != 0) bp->alias->assoc = bp->assoc;
-			else bp->assoc = bp->alias->assoc;
+                          		bp->tag, bp->_alias->tag);
+			if (bp->assoc != 0) bp->_alias->assoc = bp->assoc;
+			else bp->assoc = bp->_alias->assoc;
 		}
 
 		if (bp->user_token_number == SALIAS)
@@ -2366,8 +2366,8 @@ output_token_defines(FILE @file)
       if ('\"' == *symbol) 
 	{
 		/* use literal string only if given a symbol with an alias */
-		if (bp->alias)
-			symbol = bp->alias->tag;
+		if (bp->_alias)
+			symbol = bp->_alias->tag;
 		else
 			continue;
 	}

@@ -578,6 +578,7 @@ namespace Absyn {
     // region h = open(e) { s }.
     // When bool is true, resetable.  When exp_opt_t is present, an open.
     ResetRegion_s(exp_t); // reset_region(e)
+    Alias_s(exp_t, tvar_t, vardecl_t, stmt_t); // alias (e) = <t>v { s }
   };
   // statements with auxiliary info
   EXTERN_ABSYN struct Stmt {

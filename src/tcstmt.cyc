@@ -555,5 +555,35 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // check that `r is resetable
     check_rgn_resetable(te,s0->loc,rgn_type);
     return;
+
+  case &Alias_s(e,tv,vd,s1):
+    tcExpInitializer(te,NULL,e);
+    //   FIX: figure out how to supply the right type to tcExpInitializer
+    //   to do the check there instead?
+    // set type of bound variable to that of exp, but alter region
+    if (!is_pointer_type(e->topt->v))
+      terr(e->loc,"%s is not a pointer type",
+	   Absynpp::typ2string(e->topt->v));
+    vd->type = copy_type(e->topt->v);
+    switch (vd->type) {
+    case &PointerType(PtrInfo(_,_,PtrAtts(*r,_,_,_,_))):
+      *r = new VarType(tv);
+      break;
+    default:
+      impos("Not a pointer type in tcstmt:Alias_s");
+    }
+    vd->rgn = new Opt(Tcenv::curr_rgn(te));
+    region r {
+//       te2 = Tcenv::new_block(r,s0->loc,te2); // ??
+      tenv_t te2 = add_type_vars(r,s0->loc,te,rlist(r,tv));
+      te2 = add_region(r, te2, new VarType(tv), false, true);
+      check_type(s0->loc,te,lookup_type_vars(te2),
+		 typ_kind(vd->type),true,vd->type);
+      te2 = add_local_var(r,s0->loc, te2, vd);
+      te2 = set_encloser(r,te2,s1); // for substatements inside of s
+      tcStmt(te2,s1,false);
+    }
+    NewControlFlow::set_encloser(s0,get_encloser(te));
+    return;
   }
 }

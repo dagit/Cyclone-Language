@@ -173,7 +173,8 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
     switch(compress(vt)) {
     case UniqueRgn: return true;
     case HeapRgn:
-      if (rgn != UniqueRgn) return true;
+      if (compress(rgn) != UniqueRgn)
+	return true;
       else return false;
     case &VarType(tv):
       let env = initial_env(listrgn,po,rgn);
@@ -223,7 +224,8 @@ bool effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
       if(!effect_outlives(po,effs->hd,rgn))
 	return false;
     return true;
-  default: return atomic_effect_outlives(po,eff,rgn);
+  default:
+    return atomic_effect_outlives(po,eff,rgn);
   }
 }
 

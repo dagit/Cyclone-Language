@@ -639,8 +639,9 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     case $(PlaceL(p),ReachableFL(outdict,relns,cinfo)): 
       relns = reln_kill_exp(fenv->r,relns,l);
       outdict = assign_place(fenv,l->loc,outdict,env->all_changed,p,fenv->unknown_all);
-      // add lhs to consume list if it's unique
-      if (Tcutil::is_unique_pointer(l->topt->v)) {
+      // add lhs to consume list if it's unique and not a path
+      if (Tcutil::is_unique_pointer(l->topt->v) &&
+	  Tcutil::is_unique_path(l)) {
 	DEBUG_PRINT("  assign lhs; adding |%s| to may_consume\n",
 		    Absynpp::exp2string(l));
 	cinfo.may_consume = List::rmerge(fenv->r,place_cmp,
@@ -744,7 +745,8 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
 	  case PlaceL(p): 
 	    outdict = assign_place(fenv,e->loc,outdict,env->all_changed,p,rval);
 	    // add lhs to consume list if it's unique
-	    if (Tcutil::is_unique_pointer(e1->topt->v)) {
+	    if (Tcutil::is_unique_pointer(e1->topt->v) &&
+		Tcutil::is_unique_path(e1)) {
 	      DEBUG_PRINT("  assign lhs; adding |%s| to may consume\n",
 			  Absynpp::exp2string(e1));
 	      cinfo.may_consume = 
@@ -761,7 +763,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
 		  Tcutil::warn(e1->loc,"may clobber unique pointer %s", s);
 		  break;
 		default:
-		  Tcutil::impos("warning locations not for VarRoots");
+		  Tcutil::terr(e->loc,"warning locations not for VarRoots");
 		}
 	      }
 	      // if we are not in a unordered expression context, we can
@@ -1881,6 +1883,32 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
       outflow = kill_flow_region(fenv,f,r);
       break;
     default: throw new Core::Impossible("anal_stmt -- reset_region");
+    }
+    break;
+
+  case &Alias_s(e,tv,vd,s1):
+    let $(f,r) = anal_Rexp(env,inflow,e);
+    // save may consume info for rhs to restore after the stmt
+    let $(ConsumeInfo(_,mc),_) = save_consume_info(fenv,f,false);
+    f = consume_unique_rvals(e->loc,f); // consume rhs
+    f = use_Rval(env,e->loc,f,r);
+    let vds = List(vd,NULL);
+    f = add_vars(fenv,f,&vds,fenv->unknown_all,s->loc);
+    outflow = anal_stmt(env,f,s1);
+    switch (outflow) {
+    case BottomFL: break;
+    case ReachableFL(o,r,c):
+      // restore rhs if it was consumed
+      while (mc != NULL) {
+	let old = c.consumed;
+	c.consumed = Dict::rdelete(fenv->r,c.consumed,mc->hd);
+	if (c.consumed.t != old.t)
+	  DEBUG_PRINT("  alias; unconsumed alias rhs |%s|\n",
+		      Absynpp::exp2string(e));
+	mc = mc->tl;
+      }
+      outflow = ReachableFL(o,r,c);
+      break;
     }
     break;
 

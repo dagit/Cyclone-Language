@@ -1253,7 +1253,9 @@ static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
   bool is_atomic = true;
   aggrdecl_t ad;
   switch(compress(struct_type)) {
-  case &AggrType(AggrInfo(info,_)): ad = get_known_aggrdecl(info); break;
+  case &AggrType(AggrInfo(info,_)): 
+    ad = get_known_aggrdecl(info);
+    break;
   default: toc_impos("init_struct: bad struct type");
   }
 
@@ -3631,6 +3633,20 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       exp_to_c(nv,e);
       s->r = exp_stmt_r(fncall_exp(_reset_region_e,new List(e,NULL),DL));
       return;
+    case &Alias_s(e,tv,vd,s1):
+      // Handle this like a variable declaration 
+      qvar_t old_name = vd->name;
+      qvar_t new_name = temp_var();
+      vd->name = new_name;
+      vd->initializer = e;
+      s->r = new Decl_s(new Decl(new Var_d(vd),DL),s1);
+      region temp {
+	let nv2 = 
+	  add_varmap(temp,nv,old_name,
+		     varb_exp(new_name,new Local_b(vd),DL));
+	local_decl_to_c(nv2, nv, vd, s1);
+      }
+      return;
     }
   }
 }
@@ -4114,6 +4130,7 @@ static void stmttypes_to_c(stmt_t s) {
   case &Label_s(_,_):
   case &TryCatch_s(_,_):
   case &Region_s(_,_,_,_,_):
+  case &Alias_s(_,_,_,_):
   case &ResetRegion_s(_): Tcutil::terr(s->loc,"Cyclone statement in C code");
     break;
   }

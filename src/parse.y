@@ -878,6 +878,7 @@ using Parse;
 %token MALLOC RMALLOC CALLOC RCALLOC SWAP
 %token REGION_T SIZEOF_T TAG_T REGION RNEW REGIONS RESET_REGION
 %token GEN NOZEROTERM_kw ZEROTERM_kw PORTON PORTOFF FLAT_kw DYNREGION_T
+%token ALIAS
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -2130,6 +2131,13 @@ statement:
 /* Cyc: reset_region(e) statement */
 | RESET_REGION '(' expression ')' ';'
   { $$=^$(new_stmt(new ResetRegion_s($3),LOC(@1,@5))); }
+/* Cyc: alias e = v<t> s statement */
+| ALIAS unary_expression '=' '<' TYPE_VAR '>' IDENTIFIER statement
+  { tvar_t tv = new Tvar(new $5,NULL,new Eq_kb(RgnKind));
+    $$=^$(new_stmt(new Alias_s($2,tv,
+			       new_vardecl(new $(Loc_n, new $7),
+					   VoidType,NULL),$8),LOC(@1,@8)));
+  }
 ;
 
 open_exp_opt:

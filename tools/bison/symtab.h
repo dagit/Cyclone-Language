@@ -43,7 +43,7 @@ typedef
       short user_token_number;
 			/* special value SALIAS in the identifier
 			 half of the identifier-symbol pair for an alias */
-      struct bucket *alias;      
+      struct bucket *_alias;      
 			/* points to the other in the identifier-symbol
 			 pair for an alias */
       char class;

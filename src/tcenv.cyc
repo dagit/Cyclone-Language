@@ -943,8 +943,11 @@ void check_rgn_resetable(tenv_t te, seg_t loc, type_t rgn) {
 // Note: inefficient allocation here!
 bool region_outlives(tenv_t te, type_t rt_a, type_t rt_b) {
   let le = te->le;
-  if(le==NULL) 
+  if(le==NULL) {
+    if (rt_a == UniqueRgn || rt_b == UniqueRgn)
+      impos("region_outlives");
     return rt_a==HeapRgn;
+  }
   fenv_t fe = le;
   let &Fenv{<`f,`c> .region_order = ro, ...} = fe;
   let res = effect_outlives(ro,new AccessEff(rt_a),rt_b);
