@@ -38,7 +38,7 @@ LC_FLAG=
 G_FLAG=
 PG_FLAG=
 
-CYC_FLAGS += -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -save-c $(G_FLAG) $(PG_FLAG) $(LC_FLAG) $(TOVC_FLAG) $(CYC_APROF_FLAG) 
+override CYC_FLAGS += -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -save-c $(G_FLAG) $(PG_FLAG) $(LC_FLAG) $(TOVC_FLAG) $(CYC_APROF_FLAG) 
 
 all: $(OUT_PREFIX)$(CYCLIB) nogc.a xml/libxml.a
 

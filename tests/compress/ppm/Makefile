@@ -9,7 +9,7 @@ include $(CYCDIR)/Makefile.inc
 
 CYCC=$(CYCDIR)/bin/$(CYCCOMP)
 
-CYC_FLAGS+=-I$(CYCDIR)/lib -B$(CYCDIR)/lib 
+override CYC_FLAGS += -I$(CYCDIR)/lib -B$(CYCDIR)/lib 
 
 encode$(EXE): arithcode.o model.o encode.o
 	$(CYCC) $(CYC_FLAGS) -g -o $@ $^ -lm

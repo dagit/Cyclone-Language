@@ -53,4 +53,4 @@ gcc-%$(EXE): %.gcc
 	gcc $(CFLAGS) -o $@ -x c $^ -lm
 
 %$(EXE): %.cyc
-	$(CYCC) $(CYCFLAGS) -o $@ $^ -lm
+	$(CYCC) $(CYC_FLAGS) -o $@ $^ -lm
