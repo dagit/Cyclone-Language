@@ -442,6 +442,13 @@ void resolve_exp(env_t env, exp_t e) {
 
   case &Comprehension_e(vd,e1,e2,_): 
     resolve_exp(env,e1);
+    if(at_toplevel(env)) {
+      env->local_vars = new Dict::empty(strptrcmp);
+      resolve_and_add_vardecl(e->loc, env, vd);
+      resolve_exp(env,e2);
+      env->local_vars = NULL;
+      return;
+    }
     let old_locals = *env->local_vars;
     resolve_and_add_vardecl(e->loc, env, vd);
     resolve_exp(env,e2);
