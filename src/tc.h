@@ -1,5 +1,5 @@
 /* Type checking for top-level declarations
-   Copyright (C) 2001 Greg Morrisett
+   Copyright (C) 2001 Greg Morrisett, AT&T
    This file is part of the Cyclone compiler.
 
    The Cyclone compiler is free software; you can redistribute it

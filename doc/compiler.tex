@@ -34,6 +34,8 @@ The Cyclone compiler has the following command-line options:
   Compile for profiling with the \texttt{prof} tool.
 \item[-pg]
   Compile for profiling with the \texttt{gprof} tool.
+\item[-pa]
+  Compile for profiling with the \texttt{aprof} tool.
 \item[-S]
   Stop after producing assembly code.
 \item[-M]
@@ -59,7 +61,7 @@ to its developers:
   Compile for debugging.  This is currently only useful for compiler
   developers, as the debugging information reflects the C code that
   the Cyclone code is compiled to, and not the Cyclone code itself.
-\item[-parseonly] 
+\item[-parseonly]
   Stop after parsing.
 \item[-tc]
   Stop after type checking.
@@ -79,17 +81,15 @@ to its developers:
   Don't delete temporary C files.
 \item[-nocyc]
   Don't add the implicit namespace Cyc to variable names in the C output.
-\item[-mprof]
-  Compile for memory profiling.
-\item[-noremoveunused] 
+\item[-noremoveunused]
   Don't remove externed variables that aren't used.
-\item[-noexpandtypedefs] 
+\item[-noexpandtypedefs]
   Don't expand typedefs in pretty printing.
-\item[-printalltvars] 
+\item[-printalltvars]
   Print all type variables (even implicit default effects).
-\item[-printallkinds] 
+\item[-printallkinds]
   Always print kinds of type variables.
-\item[-printfullevars] 
+\item[-printfullevars]
   Print full information for evars (type debugging).
 \end{description}
 
