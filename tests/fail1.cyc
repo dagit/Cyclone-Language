@@ -1038,6 +1038,4 @@ void f251(int @ @zeroterm x) __attribute__((initializes(1)));
 void f252(int x) __attribute__((initializes(1)));
 // noliveunique allowed only on unique pointers
 void f253(int x) __attribute__((noliveunique(1)));
-// noconsume attribute allowed only on unique pointers
-void f254(int x) __attribute__((noconsume(1)));
 

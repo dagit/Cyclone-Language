@@ -4,6 +4,8 @@
 #include <assert.h>
 #include "streambuff.h"
 
+#define myassert(e) ((e) ? 0 : (exit(1),0))
+
 /* counts the total size of the data collected by the streambuffer */
 unsigned int stb_size(streambuff_t stb) {
   unsigned int sz = 0;
@@ -108,7 +110,7 @@ streambuff_t<`r> stb_clone(region_t<`r::TR> rgn, streambuff_t stb) {
   char ? @nozeroterm `RC buf = NULL;
   { alias <`r2> streambuff_t<`r2> astb = newstb;
     let &StreamBuff{<`j> .numbufs=nn,.bufs=bufsn,...} = astb;
-    assert (nn == n); // dumb array bounds checker
+    myassert (nn == n); // dumb array bounds checker
     for (unsigned int i = 0; i<n; i++) {
       bufs[i].buf :=: buf;
       char ? @nozeroterm `RC buf2 = Core::alias_refptr(buf);
@@ -167,68 +169,71 @@ streambuff_t<`r> stb_copy(region_t<`r::TR> rgnhdr,
 
 streambuff_t<`U> stb_rest(int ofs, streambuff_t<`U> stb) {
   char ? @nozeroterm `RC buf = NULL;
-  alias <`r>streambuff_t<`r> stb2 = stb;
-  let &StreamBuff{<`i> .numbufs=n, .bufs=bufs,
+  streambuff_opt_t<`U> newstb = NULL;
+  { alias <`r>streambuff_t<`r> stb2 = stb;
+    let &StreamBuff{<`i> .numbufs=n, .bufs=bufs,
 		       .priority=prio, .device=dev,
-		     .typ=t } = stb2;
-  if (n == 1) {
-    if (bufs[0].buf != NULL) {
-      let szb = numelts(bufs[0].buf);
-      if (bufs[0].ofs + ofs > szb)
-	throw new Core::Invalid_argument("ofs > sz");
-      bufs[0].ofs = bufs[0].ofs + ofs;
+		       .typ=t } = stb2;
+    if (n == 1) {
+      if (bufs[0].buf != NULL) {
+	let szb = numelts(bufs[0].buf);
+	if (bufs[0].ofs + ofs > szb)
+	  throw new Core::Invalid_argument("ofs > sz");
+	bufs[0].ofs = bufs[0].ofs + ofs;
+      }
+      else throw new Core::Invalid_argument("null buffer");
     }
-    else throw new Core::Invalid_argument("null buffer");
-  }
-  else {
-    // FIX: could use the same stb if the number of buffers
-    // doesn't change.  Alternatively could use the same stb
-    // and set some to NULL.
-    struct StreamBuff *`U newstb = NULL;
-    unsigned int i;
-    unsigned int x = ofs;
-    // look for the start of the buffers to copy over
-    for (i=0; i<n; i++) {
-      if (bufs[i].buf != NULL) {
-	let szb = numelts(bufs[i].buf);
-	let bofs = bufs[i].ofs;
-	// ok, we've found the offset.  Now modify the offset in this
-	// buf and copy over the rest next...
-	if (szb-bofs > x) {
-	  bufs[i].ofs += x;
-	  let j<_> = n-i;
-	  newstb = new StreamBuff{.typ=t,
-				  .device=dev,
-				  .priority=prio,
-				  .numbufs=j,
-				  .bufs={for z < j : DataBuff{0,NULL}}};
-	  break;
+    else {
+      // FIX: could use the same stb if the number of buffers
+      // doesn't change.  Alternatively could use the same stb
+      // and set some to NULL.
+      unsigned int i;
+      unsigned int x = ofs;
+      // look for the start of the buffers to copy over
+      for (i=0; i<n; i++) {
+	if (bufs[i].buf != NULL) {
+	  let szb = numelts(bufs[i].buf);
+	  let bofs = bufs[i].ofs;
+	  // ok, we've found the offset.  Now modify the offset in this
+	  // buf and copy over the rest next...
+	  if (szb-bofs > x) {
+	    bufs[i].ofs += x;
+	    let j<_> = n-i;
+	    newstb = new StreamBuff{.typ=t,
+				    .device=dev,
+				    .priority=prio,
+				    .numbufs=j,
+				    .bufs={for z < j : DataBuff{0,NULL}}};
+	    break;
+	  }
+	  x = x - (szb-bofs);
 	}
-	x = x - (szb-bofs);
       }
-    }
-    // now copy over the saved buffers, and free the ones that aren't
-    // being used.  also free the original stb
-    if (newstb == NULL)
-      throw new Core::Invalid_argument("ofs exceeds length");
-    { alias <`r2>struct StreamBuff *`r2 stb2 = newstb;
-      let &StreamBuff{<`j> .numbufs=n2, .bufs=bufs2,...} = stb2;
-      unsigned int j, k;
-      // first free the unused buffers in the old stb
-      for (k = 0; k<n; k++) {
-	if (k < i) {
-	  char ? @nozeroterm `RC b = NULL;
-	  b :=: bufs[k].buf;
-	  Core::drop_refptr(b);
+      // now copy over the saved buffers, and free the ones that aren't
+      // being used.  also free the original stb
+      if (newstb == NULL)
+	throw new Core::Invalid_argument("ofs exceeds length");
+      { alias <`r2>struct StreamBuff *`r2 stb2 = newstb;
+        let &StreamBuff{<`j> .numbufs=n2, .bufs=bufs2,...} = stb2;
+	unsigned int j, k;
+	// first free the unused buffers in the old stb
+	for (k = 0; k<n; k++) {
+	  if (k < i) {
+	    char ? @nozeroterm `RC b = NULL;
+	    b :=: bufs[k].buf;
+	    Core::drop_refptr(b);
+	  }
+	  else break;
 	}
-	else break;
-      }
-      // now move over the remaining ones
-      for (j = 0; j<n2 && k<n; j++, k++) {
-	bufs2[j].buf :=: bufs[k].buf;
-	bufs2[j].ofs = bufs[k].ofs;
-      }
-    }
+	// now move over the remaining ones
+	for (j = 0; j<n2 && k<n; j++, k++) {
+	  bufs2[j].buf :=: bufs[k].buf;
+	  bufs2[j].ofs = bufs[k].ofs;
+	}
+      } // end alias newstb
+    } // end else --> !(n == 1)
+  } // end alias stb
+  if (newstb != NULL) {
     stb_free_unique(stb);
     stb = (streambuff_t)newstb;
   }
@@ -277,9 +282,11 @@ int stb_with_buffer(streambuff_t stb, int idx,
   char ? @nozeroterm `RC buf = NULL;
   let &StreamBuff{.numbufs=n, .bufs=bufs,...} = stb;
   if (idx < n) {
+    int retval;
     buf :=: bufs[idx].buf;
-    alias <`r2>char ? @nozeroterm `r2 abuf = buf;
-    int retval = f(env, abuf + bufs[idx].ofs);
+    { alias <`r2>char ? @nozeroterm `r2 abuf = buf;
+      retval = f(env, abuf + bufs[idx].ofs);
+    }
     buf :=: bufs[idx].buf;
     return retval;
   }

@@ -114,7 +114,15 @@ static void check_alias_coercion(tenv_t tenv, seg_t loc, type_t old_type,
   list_t<$(type_t,type_t)@> assump = new List{new $(&UniqueRgn_val,new VarType(tv)), NULL};
   if (subtype(tenv, assump, old_type, new_type)) {
     // next, check that the types are pointer types
-    unchecked_cast(tenv,initializer,new_type,Other_coercion);
+
+    // MWH: removed this check because it was causing the the type of
+    // the rhs of the alias to no longer be unique, foiling the flow
+    // analysis.  However, without this cast we might not properly
+    // insert computational coercions, such as converting from ? to *.
+    // Seems like we need to have unchecked_cast take a parameter
+    // that includes whether or not to leave the region variables alone.
+    // 
+//     unchecked_cast(tenv,initializer,new_type,Other_coercion);
     switch $(compress(new_type),compress(new_type)) {
     case $(&PointerType(pold), &PointerType(pnew)): break;
     default: terr(loc,"alias requires pointer type"); break;

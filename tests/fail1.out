@@ -297,6 +297,5 @@ fail1.cyc:1036: initializes attribute allowed only on pointers of size 1
 fail1.cyc:1037: initializes attribute allowed only on pointers to non-zero-terminated arrays
 fail1.cyc:1038: initializes attribute allowed only on pointers
 fail1.cyc:1040: noliveunique attribute allowed only on unique pointers
-fail1.cyc:1042: noconsume attribute allowed only on unique pointers
 
 COMPILATION FAILED!

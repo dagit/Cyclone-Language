@@ -1067,7 +1067,7 @@ void Cyc_Tcutil_terr(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_pt
 void Cyc_Tcutil_warn(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);extern char Cyc_Tcutil_AbortTypeCheckingFunction[26];struct Cyc_Tcutil_AbortTypeCheckingFunction_exn_struct{char*tag;};
 # 71
 void*Cyc_Tcutil_compress(void*t);
-void Cyc_Tcutil_unchecked_cast(struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Exp*,void*,enum Cyc_Absyn_Coercion);
+# 73
 int Cyc_Tcutil_coerce_arg(struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Exp*,void*,int*alias_coercion);
 int Cyc_Tcutil_coerce_assign(struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Exp*,void*);
 # 87
@@ -1227,11 +1227,10 @@ static void Cyc_Tcstmt_check_alias_coercion(struct Cyc_Tcenv_Tenv*tenv,unsigned 
 # 114
 struct _tuple13*_tmp1A4;struct Cyc_Absyn_VarType_Absyn_Type_struct _tmp1A3;struct Cyc_Absyn_VarType_Absyn_Type_struct*_tmp1A2;struct Cyc_List_List*_tmp1A1;struct Cyc_List_List*assump=(_tmp1A1=_cycalloc(sizeof(*_tmp1A1)),((_tmp1A1->hd=((_tmp1A4=_cycalloc(sizeof(*_tmp1A4)),((_tmp1A4->f1=(void*)& Cyc_Absyn_UniqueRgn_val,((_tmp1A4->f2=(void*)((_tmp1A2=_cycalloc(sizeof(*_tmp1A2)),((_tmp1A2[0]=((_tmp1A3.tag=2,((_tmp1A3.f1=tv,_tmp1A3)))),_tmp1A2)))),_tmp1A4)))))),((_tmp1A1->tl=0,_tmp1A1)))));
 if(Cyc_Tcutil_subtype(tenv,assump,old_type,new_type)){
-# 117
-Cyc_Tcutil_unchecked_cast(tenv,initializer,new_type,Cyc_Absyn_Other_coercion);{
+# 118
 struct _tuple13 _tmp1A5;struct _tuple13 _tmp17=(_tmp1A5.f1=Cyc_Tcutil_compress(new_type),((_tmp1A5.f2=Cyc_Tcutil_compress(new_type),_tmp1A5)));struct _tuple13 _tmp18=_tmp17;struct Cyc_Absyn_PtrInfo _tmp1A;struct Cyc_Absyn_PtrInfo _tmp1C;_LL8:{struct Cyc_Absyn_PointerType_Absyn_Type_struct*_tmp19=(struct Cyc_Absyn_PointerType_Absyn_Type_struct*)_tmp18.f1;if(_tmp19->tag != 5)goto _LLA;else{_tmp1A=_tmp19->f1;}}{struct Cyc_Absyn_PointerType_Absyn_Type_struct*_tmp1B=(struct Cyc_Absyn_PointerType_Absyn_Type_struct*)_tmp18.f2;if(_tmp1B->tag != 5)goto _LLA;else{_tmp1C=_tmp1B->f1;}};_LL9:
  goto _LL7;_LLA:;_LLB:
-{const char*_tmp1A8;void*_tmp1A7;(_tmp1A7=0,Cyc_Tcutil_terr(loc,((_tmp1A8="alias requires pointer type",_tag_dyneither(_tmp1A8,sizeof(char),28))),_tag_dyneither(_tmp1A7,sizeof(void*),0)));}goto _LL7;_LL7:;};}else{
+{const char*_tmp1A8;void*_tmp1A7;(_tmp1A7=0,Cyc_Tcutil_terr(loc,((_tmp1A8="alias requires pointer type",_tag_dyneither(_tmp1A8,sizeof(char),28))),_tag_dyneither(_tmp1A7,sizeof(void*),0)));}goto _LL7;_LL7:;}else{
 # 123
 const char*_tmp1AD;void*_tmp1AC[2];struct Cyc_String_pa_PrintArg_struct _tmp1AB;struct Cyc_String_pa_PrintArg_struct _tmp1AA;(_tmp1AA.tag=0,((_tmp1AA.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)
 Cyc_Absynpp_typ2string(new_type)),((_tmp1AB.tag=0,((_tmp1AB.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Absynpp_typ2string(old_type)),((_tmp1AC[0]=& _tmp1AB,((_tmp1AC[1]=& _tmp1AA,Cyc_Tcutil_terr(loc,((_tmp1AD="cannot alias value of type %s to type %s",_tag_dyneither(_tmp1AD,sizeof(char),41))),_tag_dyneither(_tmp1AC,sizeof(void*),2)))))))))))));}}

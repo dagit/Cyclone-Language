@@ -2520,54 +2520,67 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     // similar to the copy situation at the top of anal_Rexp
     exp_t e = (exp_t)vd->initializer;
     let $(f,lval) = anal_Lexp(env,inflow,true,false,e);
+    // FIX: might we want to do an anal_Rexp on e as well?  I guess
+    // the fact that this is an lexp implies it's side-effect free; hmmm
     DEBUG_PRINT("inflow on alias is {\n");
     DEBUG_PRINT_F(print_flow,inflow);
-    DEBUG_PRINT("}\n");
+    DEBUG_PRINT("} e =|%s|\n",exp2string(e));
     switch $(f,lval) {
     case $({.ReachableFL = $(fd,relns)},{.PlaceL = p}):
+      // first figure out the current rval of the rhs of the alias,
+      //   consume it, and then name it
       let old_rval = lookup_place(fd,p);
       type_t t = (type_t)e->topt;
-      let new_rval = make_unique_consumed(fenv,t,e,env->iteration_num,old_rval);
+      let new_rval=make_unique_consumed(fenv,t,e,env->iteration_num,old_rval);
       new_rval = rnew (fenv->r) NamedLocation(vd, new_rval);
       fd = assign_place(fenv,e->loc,fd,env->all_changed,p,new_rval);
-      f = ReachableFL(fd,relns);
+      f = use_Rval(env,e->loc,ReachableFL(fd,relns),old_rval);
       DEBUG_PRINT("flow after consuming is {\n");
       DEBUG_PRINT_F(print_flow,f);
       DEBUG_PRINT("}\n");
-      // create an approximate version of the old rvalue, to restore
-      // after analyzing the statement; using an approximate value
-      // avoids some complications with expanded nodes that end up
-      // escaping.
-      absRval_t leaf;
-      switch (initlevel(fenv,fd,old_rval)) {
-      case AllIL: leaf = fenv->unknown_all; break;
-      case NoneIL: leaf = fenv->unknown_none; break;
-      case ThisIL: leaf = fenv->unknown_this; break;
-      }
-      let old_rval_approx = typ_to_absrval(fenv,t,false,leaf);
-      f = use_Rval(env,e->loc,f,old_rval);
+      // add the alias variable to the flow and initialize it
       let vds = List(vd,NULL);
       // FIX: could propagate the actual rvalue directly?
       f = add_vars(fenv,f,&vds,fenv->unknown_all,s->loc,false);
+      let newp = rnew(env->r) Place(rnew(env->r) VarRoot(vd),NULL);
       DEBUG_PRINT("flow for alias body is {\n");
       DEBUG_PRINT_F(print_flow,f);
       DEBUG_PRINT("}\n");
       f = anal_stmt(env,f,s1,rval_opt);
       // plug approximate old rvalue back into place
+      _ old_rval_approx;
       switch (f) {
       case {.ReachableFL = $(fd,relns)}:
         // first, check that the named location hasn't been messed with.
         switch (lookup_place(fd,p)) {
-        case &NamedLocation(l2,new_rv): 
+        case &NamedLocation(l2,_): 
           if (l2 != vd) fallthru;
           // JGM: a little bit of an optimization to preserve an
           // rvalue if it's unchanged.
+	  // MWH: need to get the rval for the aliased var, not the original
+	  let new_rv = lookup_place(fd,newp);
+	  DEBUG_PRINT("new_rv is ");
+	  DEBUG_PRINT_F(print_absrval,new_rv);
+	  DEBUG_PRINT("for place ");
+	  DEBUG_PRINT_F(print_place,p);
+	  DEBUG_PRINT("\n");
           let $(_,rv) = join_flow_and_rval(fenv,env->all_changed,
                                            $(f,old_rval),$(f,new_rv));
           old_rval_approx = rv;
           break;
         default:
           aerr(s->loc,"aliased location was overwritten");
+	  // create an approximate version of the old rvalue, to restore
+	  // after analyzing the statement; using an approximate value
+	  // avoids some complications with expanded nodes that end up
+	  // escaping.
+	  absRval_t leaf;
+	  switch (initlevel(fenv,fd,old_rval)) {
+	  case AllIL: leaf = fenv->unknown_all; break;
+	  case NoneIL: leaf = fenv->unknown_none; break;
+	  case ThisIL: leaf = fenv->unknown_this; break;
+	  }
+	  old_rval_approx = typ_to_absrval(fenv,t,false,leaf);
           break;
         }
         fd = assign_place(fenv,s->loc,fd,env->all_changed,p,old_rval_approx);
