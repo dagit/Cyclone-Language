@@ -22,7 +22,7 @@
 #include <set.h>
 #include <dict.h>
 #include "absyn.h"
-#include "relations.h"
+#include "relations-ap.h"
 
 // Note: Okasaki's dictionaries may be the wrong thing here because
 //       we're doing a lot of intersections.  I don't know what's better,

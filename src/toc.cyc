@@ -45,7 +45,7 @@
 #include "absynpp.h"
 #include "tcutil.h"
 #include "evexp.h"
-#include "relations.h"
+#include "relations-ap.h"
 #include "cf_flowinfo.h"
 #include "toc.h"
 #include "tcpat.h"

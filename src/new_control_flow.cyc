@@ -28,7 +28,7 @@
 
 #include "tcutil.h"
 #include "evexp.h"
-#include "relations.h"
+#include "relations-ap.h"
 #include "new_control_flow.h"
 #include "rgnorder.h"
 #include "tcpat.h"

@@ -24,7 +24,7 @@
 #include "evexp.h"
 #include "tc.h"
 #include "tcdecl.h"
-#include "relations.h"
+#include "relations-ap.h"
 using Core;
 using List;
 using Absyn;

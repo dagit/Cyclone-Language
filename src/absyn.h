@@ -65,7 +65,7 @@
 #include <position.h>
 
 namespace Relations {
-  struct Reln; // see relations.h
+  struct Reln; // see relations-ap.h
   typedef struct Reln@`r reln_t<`r>;
   typedef List::list_t<reln_t<`r>,`r> relns_t<`r>;
 }

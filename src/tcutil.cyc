@@ -25,7 +25,7 @@
 #include "tcexp.h"
 #include "tc.h"
 #include "cyclone.h"
-#include "relations.h"
+#include "relations-ap.h"
 
 using Core;
 using List;
