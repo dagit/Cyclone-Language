@@ -471,39 +471,57 @@ void string_test() {
 
   let s1 = "hello";
   okfail(String::strlen(s1)==5);
-  okfail(String::strleno(s1,2)==3);
+  okfail(String::strlen((string)s1+2)==3);
   s1[3]='\000'; // Note, this writes over a string constant.
   okfail(String::strlen(s1)==3);
-  okfail(String::strleno(s1,2)==1);
-  okfail(String::strleno(s1,3)==0);
-  okfail(String::strleno(s1,4)==1);
+  okfail(String::strlen((string)s1+2)==1);
+  okfail(String::strlen((string)s1+3)==0);
+  okfail(String::strlen((string)s1+4)==1);
   let s2 = new { for i < 20 : '\000' };
   okfail(String::strlen(s2)==0);
   String::strcat(s2,s1);
   okfail(String::strcmp(s2,s1)==0);
   okfail(String::strcmp(s2,"hel")==0);
   String::strcat(s2,s1);
-  okfail(String::strcmpo(s2,0,"helhel",0)==0);
-  okfail(String::strcmpo(s2,2,"helhel",2)==0);
-  okfail(String::strcmpo(s2,2,"xxlhel",2)==0);
-  String::strcato(s2,s1,4);
+  okfail(String::strcmp((string)s2+2,(string)"helhel"+2)==0);
+  okfail(String::strcmp((string)s2+2,(string)"xxlhel"+2)==0);
+  String::strcat(s2,(string)s1+4);
   okfail(String::strcmp(s2,"helhelo")==0);
   String::strcpy(s2,"foobar");
   okfail(String::strcmp(s2,"foobar")==0);
   String::strncpy(s2,1,"foobar",2,3);
   okfail(String::strcmp(s2,"fobaar")==0);
-  okfail(String::strcmpo(s2,0,"xxxfobaar",3)==0);
-  okfail(String::strchr(s2,1,'a')==3);
-  okfail(String::strchr(s2,2,'z')==-1);
-  okfail(String::strrchr(s2,1,'a')==4);
-  okfail(String::strrchr(s2,2,'o')==-1);
-  okfail(String::strncmp(s2,1,"xxxobaax",3,4)==0);
-  okfail(String::strncmp(s2,1,"xxxobaax",3,5)!=0);
-  okfail(String::strncasecmp(s2,1,"xxxObAax",3,4)==0);
+  okfail(String::strcmp(s2,(string)"xxxfobaar"+3)==0);
+  okfail(String::strcmp(String::strchr((string)s2+1,'a'),"aar")==0);
+  okfail(String::strchr((string)s2+2,'z')==null);
+  okfail(String::strcmp(String::strrchr((string)s2+1,'a'),"ar")==0);
+  okfail(String::strrchr((string)s2+2,'o')==null);
+  okfail(String::strncmp((string)s2+1,(string)"xxxobaax"+3,4)==0);
+  okfail(String::strncmp((string)s2+1,(string)"xxxobaax"+3,5)!=0);
+  okfail(String::strncasecmp((string)s2+1,(string)"xxxObAax"+3,4)==0);
   let s3 = String::strdup(s2);
   okfail(String::strcmp(s3,s2)==0);
 
-  test_end();;
+  test_end();
+}
+
+// THIS DOESN'T WORK!!
+string bad_strrchr(string s, char c) {
+  int len = String::strlen(s);
+
+  for (int i = len-1; i>=0; i--) {
+    if (s[i] == c)
+      return &s[i];
+  }
+  return null;
+}
+void bad_test() {
+  test_begin("KNOWN TO BE BAD");
+  let s2 = "fobaar";
+  printf("\nDa  IN string is %s\n",(string)s2+1);
+  printf("Da OUT string is %s\n",bad_strrchr((string)s2+1,'a'));
+  okfail(String::strcmp(bad_strrchr((string)s2+1,'a'),"ar")==0);
+  test_end();
 }
 
 void buffer_test() {

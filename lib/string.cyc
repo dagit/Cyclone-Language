@@ -34,12 +34,6 @@ static size_t int_strleno(string s, int ofs, string error) {
   return (size_t)(i-ofs);
 }
 
-// Length after offset
-size_t strleno(string s, int ofs) {
-  return int_strleno(s,ofs,"String::strleno");
-}
-
-
 ///////////////////////// COMPARISONS
 static int case_cmp(char c1, char c2) {
   return (c1-c2);
@@ -77,13 +71,6 @@ int strptrcmp(stringptr s1, stringptr s2) {
   return strcmp(*s1, *s2);
 }
 
-// Like strcmp, but start comparing at offsets.
-int strcmpo(string s1, int ofs1, string s2, int ofs2) {
-  size_t len1 = int_strleno(s1,ofs1,"String::strcmp");
-  size_t len2 = int_strleno(s2,ofs2,"String::strcmp");
-  return cmp(s1,ofs1,len1,s2,ofs2,len2,case_cmp);
-}
-
 static int ncmp(string s1, int ofs1, size_t len1,
                 string s2, int ofs2, size_t len2,
                 size_t n, int f(char, char))
@@ -101,21 +88,19 @@ static int ncmp(string s1, int ofs1, size_t len1,
   return(0);
 }
 
-// Like strcmpo but compare no more than n characters.
+// Like strcmp but compare no more than n characters.
 // If n<0 return 0 (equal).
-// (The C version has no offsets)
-int strncmp(string s1, int ofs1, string s2, int ofs2, size_t n) {
-  size_t len1 = int_strleno(s1,ofs1,"String::strncmp");
-  size_t len2 = int_strleno(s2,ofs2,"String::strncmp");
-  return ncmp(s1,ofs1,len1,s2,ofs2,len2,n,case_cmp);
+int strncmp(string s1, string s2, size_t n) {
+  size_t len1 = int_strleno(s1,0,"String::strncmp");
+  size_t len2 = int_strleno(s2,0,"String::strncmp");
+  return ncmp(s1,0,len1,s2,0,len2,n,case_cmp);
 }
 
-// Like strncmp, but case insensitive.
-// (No C version; the GCC version has no offsets)
-int strncasecmp(string s1, int ofs1, string s2, int ofs2, size_t n) {
-  size_t len1 = int_strleno(s1,ofs1,"String::strncasecmp");
-  size_t len2 = int_strleno(s2,ofs2,"String::strncasecmp");
-  return ncmp(s1,ofs1,len1,s2,ofs2,len2,n,nocase_cmp);
+// Like strncmp, but case insensitive.  GCC has it but not C.
+int strncasecmp(string s1, string s2, size_t n) {
+  size_t len1 = int_strleno(s1,0,"String::strncasecmp");
+  size_t len2 = int_strleno(s2,0,"String::strncasecmp");
+  return ncmp(s1,0,len1,s2,0,len2,n,nocase_cmp);
 }
 
 
@@ -191,9 +176,6 @@ static string int_strcato(string dest,string src,int srcOfs,string error) {
 // and returned
 string strcat(string dest,string src) {
   return int_strcato(dest,src,0,"String::strcat");
-}
-string strcato(string dest,string src,int srcOfs) {
-  return int_strcato(dest,src,srcOfs,"String::strcato");
 }
 
 // Allocate a new string and fill it with the concatenation of a and b
@@ -423,62 +405,54 @@ string replace_suffix (string src, string curr_suffix, string new_suffix) {
 
 ////////////////////////// SEARCHING
 
-// Search for character of accept in s, starting at ofs.
-// Return the index in s of the first such character found, or -1 if none.
-// (C returns a char *, has no offset, and returns the length of the
-// string if no char is found)
-int strpbrk(string s, int ofs, string accept) {
-  int endOfs =
-    int_strleno(s,ofs,"String::strpbrk") + ofs; // End of string after ofs
+// Search for any character of accept in s.
+// Return a ? pointer to the first such character, or null if none.
+string strpbrk(string s, string accept) {
+  int len = int_strleno(s,0,"String::strpbrk");
+  char c = '\000';
 
-  for (int i=ofs; i<endOfs; i++)
+  for (; len>0 && (c=*s)!=0; len--,s++) {
     for (int j=0; j<accept.size; j++)
-      if (s[i] == accept[j])
-	return i;
-  return -1;
-}
-
-// Return the first index after ofs in s that contains c,
-// or the length of s after ofs if none.
-// (C version has no offset and returns a pointer)
-int strchr(string s, int ofs, char c) {
-  int endOfs =
-    int_strleno(s,ofs,"String::strchr") + ofs; // End of string after ofs
-
-  for (int i = ofs; i<endOfs; i++) {
-    if (s[i] == c)
-      return i;
+      if (c == accept[j])
+	return s;
   }
-  return -1;
+  return null;
 }
 
-// Return the greatest index of s > ofs that contains c,
-// or the length of s after ofs if none.
-// (C version has no offset and returns a pointer)
-int strrchr(string s, int ofs, char c) {
-  int endOfs =
-    int_strleno(s,ofs,"String::strchr") + ofs; // End of string after ofs
+// Return a pointer to the first occurrence of c in s, 
+// or null if none.
+string strchr(string s, char c) {
+  int len = int_strleno(s,0,"String::strchr");
+  char c2 = '\000';
 
-  for (int i = endOfs-1; i>=ofs; i--) {
-    if (s[i] == c)
-      return i;
+  for (; len>0 && (c2=*s)!=0; len--,s++) {
+    if (c2 == c)
+      return s;
   }
-  return -1;
+  return null;
 }
 
+// Return a pointer to the last occurrence of c in s,
+// or null if none.
+string strrchr(string s, char c) {
+  int len = int_strleno(s,0,"String::strrchr");
+  int i = len - 1;
+  s += i;
 
-// Search s for first occurrence of a character not in accept,
-// starting from the offset; return its index from the start of s.
-// If all characters of s starting at offset are in accept,
-// then return the length of s after ofs.
-// (C version has no offset arg, returns size_t=length of initial sequence
-// that consists entirely of accept characters=length of string if no
-// such char found)
-int strspn(string s, int ofs, string accept) {
-  int endOfs =
-    int_strleno(s,ofs,"String::strspn") + ofs; // End of string after ofs
+  for (; i>=0; i--, s--) {
+    if (*s == c)
+      return s;
+  }
+  return null;
+}
 
-  for (int i=ofs; i<endOfs; i++) {
+// Search s for an occurrence of a character not in accept.
+// Return the offset to the first such character, or the length
+// of s if none.
+size_t strspn(string s, string accept) {
+  size_t len = int_strleno(s,0,"String::strspn");
+
+  for (size_t i=0; i<len; i++) {
     int j;
     for (j=0; j<accept.size; j++)
       if (s[i] == accept[j])
@@ -487,7 +461,7 @@ int strspn(string s, int ofs, string accept) {
       return i;
   }
       
-  return -1;
+  return len;
 }
 
 ////////////////////////// CONVERSIONS
