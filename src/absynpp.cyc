@@ -1062,7 +1062,7 @@ doc_t cnst2doc(cnst_t c) {
   switch (c) {
   case &Char_c(sg,ch):     return text(aprintf("'%s'",char_escape(ch)));
   case &Short_c(sg,s):     return text(aprintf("%d",(int)s));
-  case &Int_c(Signed,i):   return text(string_of_int(i));
+  case &Int_c(Signed,i):   return text(aprintf("%d",i));
   case &Int_c(Unsigned,i): return text(aprintf("%u",(unsigned)i));
   case &LongLong_c(sg,i):  return text("<<FIX LONG LONG CONSTANT>>"); // FIX
   case &Float_c(x):  return text(x);

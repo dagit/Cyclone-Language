@@ -10,20 +10,19 @@ extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
 unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
 wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); struct Cyc_List_List{
-void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[
-15u]; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
-Cyc_List_Nth[ 8u]; struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[
-12u]; extern unsigned char Cyc_Dict_Absent[ 11u]; extern struct Cyc_Dict_Dict*
-Cyc_Dict_empty( int(* comp)( void*, void*)); extern struct Cyc_Dict_Dict* Cyc_Dict_rempty(
-struct _RegionHandle*, int(* comp)( void*, void*)); extern int Cyc_Dict_is_empty(
-struct Cyc_Dict_Dict* d); extern int Cyc_Dict_member( struct Cyc_Dict_Dict* d,
-void* key); extern struct Cyc_Dict_Dict* Cyc_Dict_insert( struct Cyc_Dict_Dict*
-d, void* key, void* data); extern struct Cyc_Dict_Dict* Cyc_Dict_insert_new(
+ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{ void* hd; struct Cyc_List_List*
+tl; } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Dict_Dict; extern
+unsigned char Cyc_Dict_Present[ 12u]; extern unsigned char Cyc_Dict_Absent[ 11u];
+extern struct Cyc_Dict_Dict* Cyc_Dict_empty( int(* comp)( void*, void*)); extern
+struct Cyc_Dict_Dict* Cyc_Dict_rempty( struct _RegionHandle*, int(* comp)( void*,
+void*)); extern int Cyc_Dict_is_empty( struct Cyc_Dict_Dict* d); extern int Cyc_Dict_member(
+struct Cyc_Dict_Dict* d, void* key); extern struct Cyc_Dict_Dict* Cyc_Dict_insert(
 struct Cyc_Dict_Dict* d, void* key, void* data); extern struct Cyc_Dict_Dict*
-Cyc_Dict_inserts( struct Cyc_Dict_Dict* d, struct Cyc_List_List* kds); extern
-struct Cyc_Dict_Dict* Cyc_Dict_singleton( int(* comp)( void*, void*), void* key,
-void* data); extern struct Cyc_Dict_Dict* Cyc_Dict_rsingleton( struct
+Cyc_Dict_insert_new( struct Cyc_Dict_Dict* d, void* key, void* data); extern
+struct Cyc_Dict_Dict* Cyc_Dict_inserts( struct Cyc_Dict_Dict* d, struct Cyc_List_List*
+kds); extern struct Cyc_Dict_Dict* Cyc_Dict_singleton( int(* comp)( void*, void*),
+void* key, void* data); extern struct Cyc_Dict_Dict* Cyc_Dict_rsingleton( struct
 _RegionHandle*, int(* comp)( void*, void*), void* key, void* data); extern void*
 Cyc_Dict_lookup( struct Cyc_Dict_Dict* d, void* key); extern struct Cyc_Core_Opt*
 Cyc_Dict_lookup_opt( struct Cyc_Dict_Dict* d, void* key); extern int Cyc_Dict_lookup_bool(

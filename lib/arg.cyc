@@ -233,10 +233,8 @@ void parse(speclist_t<`r1,`r2> speclist,
 	  break;
 	case &Int_spec(f):
 	  string_t arg = args[current+1];
-	  int n;
-	  try n = int_of_string(arg);
-	  catch {
-	  case &InvalidArg(x):
+	  int n = 0;
+	  if (sscanf(arg,"%d",&n) != 1) {
 	    stop(initpos,new Wrong(s,arg,"an integer"),speclist,errmsg);
 	    return;
 	  }

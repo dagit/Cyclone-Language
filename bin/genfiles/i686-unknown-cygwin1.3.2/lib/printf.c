@@ -10,10 +10,10 @@ extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
 unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
 wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); struct Cyc_std___sFILE;
-extern struct Cyc_std___sFILE* Cyc_std_stdout; extern int Cyc_std_putc( int __c,
-struct Cyc_std___sFILE* __stream); extern unsigned char Cyc_std_FileCloseError[
-19u]; extern unsigned char Cyc_std_FileOpenError[ 18u]; struct Cyc_std_FileOpenError_struct{
+ntCsl_to_ntsl( unsigned char**); struct Cyc_std___sFILE; extern struct Cyc_std___sFILE*
+Cyc_std_stdout; extern int Cyc_std_putc( int __c, struct Cyc_std___sFILE*
+__stream); extern unsigned char Cyc_std_FileCloseError[ 19u]; extern
+unsigned char Cyc_std_FileOpenError[ 18u]; struct Cyc_std_FileOpenError_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_std_String_pa=
 0; struct Cyc_std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
 const int Cyc_std_Int_pa= 1; struct Cyc_std_Int_pa_struct{ int tag; unsigned int
@@ -48,51 +48,51 @@ extern int isgraph( int); extern int islower( int); extern int isprint( int);
 extern int ispunct( int); extern int isspace( int); extern int isupper( int);
 extern int isxdigit( int); extern int toascii( int); extern int tolower( int);
 extern int toupper( int); extern int _tolower( int); extern int _toupper( int);
-struct Cyc_std__Div{ int quot; int rem; } ; struct Cyc_std__Ldiv{ int quot; int
-rem; } ; extern int abs( int __x); extern int atexit( void(* __func)()); extern
-struct Cyc_std__Div div( int __numer, int __denom); extern struct Cyc_std__Ldiv
-ldiv( int __numer, int __denom); extern int random(); extern void srandom(
-unsigned int __seed); extern int rand(); extern void srand( unsigned int __seed);
-extern int rand_r( unsigned int* __seed); extern int grantpt( int __fd); extern
-int unlockpt( int __fd); extern double acos( double); extern float acosf( float);
-extern double acosh( double); extern float acoshf( float); extern double asin(
-double); extern float asinf( float); extern double asinh( double); extern float
-asinhf( float); extern double atan( double); extern double atan2( double, double);
-extern float atan2f( float, float); extern float atanf( float); extern double
-atanh( double); extern float atanhf( float); extern double cbrt( double); extern
-float cbrtf( float); extern double ceil( double); extern float ceilf( float);
-extern double copysign( double, double); extern float copysignf( float, float);
-extern double cos( double); extern float cosf( float); extern double cosh(
-double); extern float coshf( float); extern double drem( double, double); extern
-float dremf( float, float); extern double erf( double); extern double erfc(
-double); extern float erfcf( float); extern float erff( float); extern double
-exp( double); extern float expf( float); extern double expm1( double); extern
-float expm1f( float); extern double fabs( double); extern float fabsf( float);
-extern int finite( double); extern int finitef( float); extern double floor(
-double); extern float floorf( float); extern double fmod( double, double);
-extern float fmodf( float, float); extern double frexp( double, int*); extern
-float frexpf( float, int*); extern double gamma( double); extern float gammaf(
-float); extern double hypot( double, double); extern float hypotf( float, float);
-extern int ilogb( double); extern int ilogbf( float); extern int isinf( double);
-extern int isinff( float); extern int isnan( double); extern int isnanf( float);
-extern double j0( double); extern float j0f( float); extern double j1( double);
-extern float j1f( float); extern double jn( int, double); extern float jnf( int,
-float); extern double ldexp( double, int); extern float ldexpf( float, int);
-extern double lgamma( double); extern float lgammaf( float); extern double log(
-double); extern float logf( float); extern double log10( double); extern float
-log10f( float); extern double log1p( double); extern float log1pf( float);
-extern double modf( double, double*); extern float modff( float, float*); extern
-double nextafter( double, double); extern float nextafterf( float, float);
-extern double pow( double, double); extern float powf( float, float); extern
-double remainder( double, double); extern float remainderf( float, float);
-extern double rint( double); extern float rintf( float); extern double scalbn(
-double, int); extern float scalbnf( float, int); extern double sin( double);
-extern float sinf( float); extern double sinh( double); extern float sinhf(
-float); extern double sqrt( double); extern float sqrtf( float); extern double
-tan( double); extern float tanf( float); extern double tanh( double); extern
-float tanhf( float); extern double y0( double); extern float y0f( float); extern
-double y1( double); extern float y1f( float); extern double yn( int, double);
-extern float ynf( int, float); static struct _tagged_arr Cyc_std_parg2string(
+extern int system( unsigned char*); struct Cyc_std__Div{ int quot; int rem; } ;
+struct Cyc_std__Ldiv{ int quot; int rem; } ; extern int abs( int __x); extern
+int atexit( void(* __func)()); extern struct Cyc_std__Div div( int __numer, int
+__denom); extern struct Cyc_std__Ldiv ldiv( int __numer, int __denom); extern
+int random(); extern void srandom( unsigned int __seed); extern int rand();
+extern void srand( unsigned int __seed); extern int rand_r( unsigned int* __seed);
+extern int grantpt( int __fd); extern int unlockpt( int __fd); extern double
+acos( double); extern float acosf( float); extern double acosh( double); extern
+float acoshf( float); extern double asin( double); extern float asinf( float);
+extern double asinh( double); extern float asinhf( float); extern double atan(
+double); extern double atan2( double, double); extern float atan2f( float, float);
+extern float atanf( float); extern double atanh( double); extern float atanhf(
+float); extern double cbrt( double); extern float cbrtf( float); extern double
+ceil( double); extern float ceilf( float); extern double copysign( double,
+double); extern float copysignf( float, float); extern double cos( double);
+extern float cosf( float); extern double cosh( double); extern float coshf(
+float); extern double drem( double, double); extern float dremf( float, float);
+extern double erf( double); extern double erfc( double); extern float erfcf(
+float); extern float erff( float); extern double exp( double); extern float expf(
+float); extern double expm1( double); extern float expm1f( float); extern double
+fabs( double); extern float fabsf( float); extern int finite( double); extern
+int finitef( float); extern double floor( double); extern float floorf( float);
+extern double fmod( double, double); extern float fmodf( float, float); extern
+double frexp( double, int*); extern float frexpf( float, int*); extern double
+gamma( double); extern float gammaf( float); extern double hypot( double, double);
+extern float hypotf( float, float); extern int ilogb( double); extern int ilogbf(
+float); extern int isinf( double); extern int isinff( float); extern int isnan(
+double); extern int isnanf( float); extern double j0( double); extern float j0f(
+float); extern double j1( double); extern float j1f( float); extern double jn(
+int, double); extern float jnf( int, float); extern double ldexp( double, int);
+extern float ldexpf( float, int); extern double lgamma( double); extern float
+lgammaf( float); extern double log( double); extern float logf( float); extern
+double log10( double); extern float log10f( float); extern double log1p( double);
+extern float log1pf( float); extern double modf( double, double*); extern float
+modff( float, float*); extern double nextafter( double, double); extern float
+nextafterf( float, float); extern double pow( double, double); extern float powf(
+float, float); extern double remainder( double, double); extern float remainderf(
+float, float); extern double rint( double); extern float rintf( float); extern
+double scalbn( double, int); extern float scalbnf( float, int); extern double
+sin( double); extern float sinf( float); extern double sinh( double); extern
+float sinhf( float); extern double sqrt( double); extern float sqrtf( float);
+extern double tan( double); extern float tanf( float); extern double tanh(
+double); extern float tanhf( float); extern double y0( double); extern float y0f(
+float); extern double y1( double); extern float y1f( float); extern double yn(
+int, double); extern float ynf( int, float); static struct _tagged_arr Cyc_std_parg2string(
 void* x){ void* _temp0= x; _LL2: if(*(( int*) _temp0) ==  Cyc_std_String_pa){
 goto _LL3;} else{ goto _LL4;} _LL4: if(*(( int*) _temp0) ==  Cyc_std_Int_pa){
 goto _LL5;} else{ goto _LL6;} _LL6: if(*(( int*) _temp0) ==  Cyc_std_Double_pa){

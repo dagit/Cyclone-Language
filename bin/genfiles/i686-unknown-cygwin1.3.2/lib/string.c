@@ -11,22 +11,21 @@ f1; } ; extern struct _RegionHandle* Cyc_Core_heap_region; extern unsigned char*
 string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
-unsigned char*); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ;
-extern int Cyc_List_length( struct Cyc_List_List* x); extern unsigned char Cyc_List_List_empty[
-15u]; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
-Cyc_List_Nth[ 8u]; extern int isalnum( int); extern int isalpha( int); extern
-int isascii( int); extern int iscntrl( int); extern int isdigit( int); extern
-int isgraph( int); extern int islower( int); extern int isprint( int); extern
-int ispunct( int); extern int isspace( int); extern int isupper( int); extern
-int isxdigit( int); extern int toascii( int); extern int tolower( int); extern
-int toupper( int); extern int _tolower( int); extern int _toupper( int); extern
-struct _tagged_arr Cyc_std_strerror( int); extern unsigned int Cyc_std_strlen(
-struct _tagged_arr s); extern int Cyc_std_strcmp( struct _tagged_arr s1, struct
-_tagged_arr s2); extern int Cyc_std_strptrcmp( struct _tagged_arr* s1, struct
-_tagged_arr* s2); extern int Cyc_std_strncmp( struct _tagged_arr s1, struct
-_tagged_arr s2, unsigned int len); extern int Cyc_std_strncasecmp( struct
-_tagged_arr s1, struct _tagged_arr s2, unsigned int len); extern int Cyc_std_zstrcmp(
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{
+void* hd; struct Cyc_List_List* tl; } ; extern int Cyc_List_length( struct Cyc_List_List*
+x); extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern int isalnum( int); extern
+int isalpha( int); extern int isascii( int); extern int iscntrl( int); extern
+int isdigit( int); extern int isgraph( int); extern int islower( int); extern
+int isprint( int); extern int ispunct( int); extern int isspace( int); extern
+int isupper( int); extern int isxdigit( int); extern int toascii( int); extern
+int tolower( int); extern int toupper( int); extern int _tolower( int); extern
+int _toupper( int); extern struct _tagged_arr Cyc_std_strerror( int); extern
+unsigned int Cyc_std_strlen( struct _tagged_arr s); extern int Cyc_std_strcmp(
+struct _tagged_arr s1, struct _tagged_arr s2); extern int Cyc_std_strptrcmp(
+struct _tagged_arr* s1, struct _tagged_arr* s2); extern int Cyc_std_strncmp(
+struct _tagged_arr s1, struct _tagged_arr s2, unsigned int len); extern int Cyc_std_strncasecmp(
+struct _tagged_arr s1, struct _tagged_arr s2, unsigned int len); extern int Cyc_std_zstrcmp(
 struct _tagged_arr, struct _tagged_arr); extern int Cyc_std_zstrncmp( struct
 _tagged_arr s1, struct _tagged_arr s2, unsigned int n); extern int Cyc_std_zstrptrcmp(
 struct _tagged_arr*, struct _tagged_arr*); extern struct _tagged_arr Cyc_std_strcat(

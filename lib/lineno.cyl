@@ -57,7 +57,9 @@ static opt_t<$(mstring_t,int)@> parse_linedef(mstring_t line) {
     int j = i;
     while (j < line.size && line[j] >= '0' && line[j] <= '9') ++j;
     if (i == line.size) return NULL; // if there's no number
-    int number = int_of_string(substring(line,i,j-i));
+    int number = 0;
+    if (sscanf(substring(line,i,j-i),"%d",&number) != 1)
+      return NULL;
     while (j < line.size && line[j] != '"') ++j;
     int k = ++j;
     while (k < line.size && line[k] != '"') ++k;

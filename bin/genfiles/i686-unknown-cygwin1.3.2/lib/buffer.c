@@ -10,13 +10,13 @@ f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
 unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
 wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); struct Cyc_Buffer_t;
-extern struct Cyc_Buffer_t* Cyc_Buffer_create( unsigned int n); extern struct
-_tagged_arr Cyc_Buffer_contents( struct Cyc_Buffer_t*); extern unsigned int Cyc_Buffer_length(
-struct Cyc_Buffer_t*); extern void Cyc_Buffer_clear( struct Cyc_Buffer_t*);
-extern void Cyc_Buffer_reset( struct Cyc_Buffer_t*); extern void Cyc_Buffer_add_char(
-struct Cyc_Buffer_t*, unsigned char); extern void Cyc_Buffer_add_substring(
-struct Cyc_Buffer_t*, struct _tagged_arr, int offset, int len); extern void Cyc_Buffer_add_string(
+ntCsl_to_ntsl( unsigned char**); struct Cyc_Buffer_t; extern struct Cyc_Buffer_t*
+Cyc_Buffer_create( unsigned int n); extern struct _tagged_arr Cyc_Buffer_contents(
+struct Cyc_Buffer_t*); extern unsigned int Cyc_Buffer_length( struct Cyc_Buffer_t*);
+extern void Cyc_Buffer_clear( struct Cyc_Buffer_t*); extern void Cyc_Buffer_reset(
+struct Cyc_Buffer_t*); extern void Cyc_Buffer_add_char( struct Cyc_Buffer_t*,
+unsigned char); extern void Cyc_Buffer_add_substring( struct Cyc_Buffer_t*,
+struct _tagged_arr, int offset, int len); extern void Cyc_Buffer_add_string(
 struct Cyc_Buffer_t*, struct _tagged_arr); extern void Cyc_Buffer_add_buffer(
 struct Cyc_Buffer_t* buf_dest, struct Cyc_Buffer_t* buf_source); struct Cyc_List_List{
 void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[

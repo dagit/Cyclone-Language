@@ -9,10 +9,10 @@ unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
-unsigned char*); struct Cyc_std___sFILE; extern struct Cyc_std___sFILE* Cyc_std_stderr;
-extern int Cyc_std_fflush( struct Cyc_std___sFILE*); extern unsigned char Cyc_std_FileCloseError[
-19u]; extern unsigned char Cyc_std_FileOpenError[ 18u]; struct Cyc_std_FileOpenError_struct{
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_std___sFILE;
+extern struct Cyc_std___sFILE* Cyc_std_stderr; extern int Cyc_std_fflush( struct
+Cyc_std___sFILE*); extern unsigned char Cyc_std_FileCloseError[ 19u]; extern
+unsigned char Cyc_std_FileOpenError[ 18u]; struct Cyc_std_FileOpenError_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_std_String_pa=
 0; struct Cyc_std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
 const int Cyc_std_Int_pa= 1; struct Cyc_std_Int_pa_struct{ int tag; unsigned int

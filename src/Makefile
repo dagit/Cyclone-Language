@@ -118,12 +118,12 @@ clean:
 # We don't use $(CYCC) here because this would create a circular
 # dependency when OUT_PREFIX and CYCC are overridden on the command line
 $(OUT_PREFIX)%.d: %.cyc
-	$(CYCDIR)/bin/$(CYCCOMP) -M -MG -I$(CYC_INC_PATH) $< > $@
+	$(CYCDIR)/bin/$(CYCCOMP) -M -MG -I$(CYC_INC_PATH) $(CYC_FLAGS) $< > $@
 
 # We need this as well as the above to handle $(OUT_PREFIX)lex.d,
 # which depends on $(OUT_PREFIX)lex.cyc, not lex.cyc
 %.d: %.cyc
-	$(CYCDIR)/bin/$(CYCCOMP) -M -MG -I$(CYC_INC_PATH) $< > $@
+	$(CYCDIR)/bin/$(CYCCOMP) -M -MG -I$(CYC_INC_PATH) $(CYC_FLAGS) $< > $@
 
 # Include the dependencies unless we are doing a clean
 ifneq ($(MAKECMDGOALS),clean)

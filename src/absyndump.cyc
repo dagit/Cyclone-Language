@@ -485,11 +485,12 @@ void dumpexp_prec(int inprec, exp_t e) {
     dump_char('\''); dump_nospace(Absynpp::char_escape(ch)); dump_char('\''); 
     break;
   case &Const_e(&Short_c(sg,s)):
-    dump(string_of_int(s)); break;
+    dump(aprintf("%d",s));
+    break;
   case &Const_e(&Int_c(Signed,i)):
-    dump(string_of_int(i)); break;
+    dump(aprintf("%d",i)); break;
   case &Const_e(&Int_c(Unsigned,i)):
-    dump(string_of_int(i)); dump_nospace("u"); break;
+    dump(aprintf("%d",i)); dump_nospace("u"); break;
   case &Const_e(&LongLong_c(sg,i)):
     dump("<<FIX LONG LONG CONSTANT>>"); break; // FIX
   case &Const_e(&Float_c(x)):    dump(x);      break;

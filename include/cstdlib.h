@@ -32,6 +32,8 @@
 namespace std {
 extern "C" {
 
+int system(Cstring);
+
 /* Returned by `div'.  */
 typedef struct _Div
   {

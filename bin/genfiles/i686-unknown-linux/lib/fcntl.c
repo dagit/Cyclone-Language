@@ -14,19 +14,18 @@ f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
 unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
 wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); extern int
-fcntl( int fd, int cmd); extern int fcntl_with_arg( int fd, int cmd, int arg);
-extern int fcntl_with_lock( int fd, int cmd, struct Cyc_std_flock* lock); int
-Cyc_std_fcntl( int fd, int cmd, struct _tagged_arr argv){ if( _get_arr_size(
-argv, sizeof( void*)) ==  0){ return fcntl( fd, cmd);} else{ if( _get_arr_size(
-argv, sizeof( void*)) !=  1){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
-_temp0=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
-_temp0[ 0]=({ struct Cyc_Core_Failure_struct _temp1; _temp1.tag= Cyc_Core_Failure;
-_temp1.f1= _tag_arr("fcntl: too many args", sizeof( unsigned char), 21u); _temp1;});
-_temp0;}));} else{ void* _temp2=*(( void**) _check_unknown_subscript( argv,
-sizeof( void*), 0)); int _temp8; struct Cyc_std_flock* _temp10; _LL4: if(*(( int*)
-_temp2) ==  Cyc_std_Long){ _LL9: _temp8=(( struct Cyc_std_Long_struct*) _temp2)->f1;
-goto _LL5;} else{ goto _LL6;} _LL6: if(*(( int*) _temp2) ==  Cyc_std_Flock){
-_LL11: _temp10=(( struct Cyc_std_Flock_struct*) _temp2)->f1; goto _LL7;} else{
-goto _LL3;} _LL5: return fcntl_with_arg( fd, cmd, _temp8); _LL7: return
-fcntl_with_lock( fd, cmd, _temp10); _LL3:;}}}
+ntCsl_to_ntsl( unsigned char**); extern int fcntl( int fd, int cmd); extern int
+fcntl_with_arg( int fd, int cmd, int arg); extern int fcntl_with_lock( int fd,
+int cmd, struct Cyc_std_flock* lock); int Cyc_std_fcntl( int fd, int cmd, struct
+_tagged_arr argv){ if( _get_arr_size( argv, sizeof( void*)) ==  0){ return fcntl(
+fd, cmd);} else{ if( _get_arr_size( argv, sizeof( void*)) !=  1){( int) _throw((
+void*)({ struct Cyc_Core_Failure_struct* _temp0=( struct Cyc_Core_Failure_struct*)
+GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp0[ 0]=({ struct Cyc_Core_Failure_struct
+_temp1; _temp1.tag= Cyc_Core_Failure; _temp1.f1= _tag_arr("fcntl: too many args",
+sizeof( unsigned char), 21u); _temp1;}); _temp0;}));} else{ void* _temp2=*((
+void**) _check_unknown_subscript( argv, sizeof( void*), 0)); int _temp8; struct
+Cyc_std_flock* _temp10; _LL4: if(*(( int*) _temp2) ==  Cyc_std_Long){ _LL9:
+_temp8=(( struct Cyc_std_Long_struct*) _temp2)->f1; goto _LL5;} else{ goto _LL6;}
+_LL6: if(*(( int*) _temp2) ==  Cyc_std_Flock){ _LL11: _temp10=(( struct Cyc_std_Flock_struct*)
+_temp2)->f1; goto _LL7;} else{ goto _LL3;} _LL5: return fcntl_with_arg( fd, cmd,
+_temp8); _LL7: return fcntl_with_lock( fd, cmd, _temp10); _LL3:;}}}

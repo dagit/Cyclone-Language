@@ -9,28 +9,28 @@ unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
-unsigned char*); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ;
-extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Dict_Dict; extern
-unsigned char Cyc_Dict_Present[ 12u]; extern unsigned char Cyc_Dict_Absent[ 11u];
-extern void* Cyc_Dict_lookup( struct Cyc_Dict_Dict* d, void* key); extern int
-Cyc_Bitvec_get( struct _tagged_arr, int); extern void Cyc_Bitvec_set( struct
-_tagged_arr, int); extern void Cyc_Bitvec_clear( struct _tagged_arr, int);
-extern int Cyc_Bitvec_get_and_set( struct _tagged_arr, int); extern void Cyc_Bitvec_union_two(
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{
+void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[
+15u]; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
+Cyc_List_Nth[ 8u]; struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[
+12u]; extern unsigned char Cyc_Dict_Absent[ 11u]; extern void* Cyc_Dict_lookup(
+struct Cyc_Dict_Dict* d, void* key); extern int Cyc_Bitvec_get( struct
+_tagged_arr, int); extern void Cyc_Bitvec_set( struct _tagged_arr, int); extern
+void Cyc_Bitvec_clear( struct _tagged_arr, int); extern int Cyc_Bitvec_get_and_set(
+struct _tagged_arr, int); extern void Cyc_Bitvec_union_two( struct _tagged_arr
+dest, struct _tagged_arr src1, struct _tagged_arr src2); extern void Cyc_Bitvec_intersect_two(
 struct _tagged_arr dest, struct _tagged_arr src1, struct _tagged_arr src2);
-extern void Cyc_Bitvec_intersect_two( struct _tagged_arr dest, struct
-_tagged_arr src1, struct _tagged_arr src2); extern void Cyc_Bitvec_diff_two(
-struct _tagged_arr dest, struct _tagged_arr src1, struct _tagged_arr src2);
-extern int Cyc_Bitvec_compare_two( struct _tagged_arr src1, struct _tagged_arr
-src2); extern struct _tagged_arr Cyc_Bitvec_new_empty( int); extern struct
-_tagged_arr Cyc_Bitvec_new_full( int); extern struct _tagged_arr Cyc_Bitvec_new_copy(
-struct _tagged_arr); extern struct _tagged_arr Cyc_Bitvec_from_list( struct Cyc_Dict_Dict*
-d, int(* f)( void*), int sz, struct Cyc_List_List*); extern struct Cyc_List_List*
-Cyc_Bitvec_to_sorted_list( struct _tagged_arr bvec, int sz); extern void Cyc_Bitvec_clear_all(
-struct _tagged_arr); extern void Cyc_Bitvec_set_all( struct _tagged_arr); extern
-int Cyc_Bitvec_all_set( struct _tagged_arr bvec, int sz); extern void Cyc_Bitvec_print_bvec(
-struct _tagged_arr bvec); struct Cyc_std___sFILE; extern unsigned char Cyc_std_FileCloseError[
+extern void Cyc_Bitvec_diff_two( struct _tagged_arr dest, struct _tagged_arr
+src1, struct _tagged_arr src2); extern int Cyc_Bitvec_compare_two( struct
+_tagged_arr src1, struct _tagged_arr src2); extern struct _tagged_arr Cyc_Bitvec_new_empty(
+int); extern struct _tagged_arr Cyc_Bitvec_new_full( int); extern struct
+_tagged_arr Cyc_Bitvec_new_copy( struct _tagged_arr); extern struct _tagged_arr
+Cyc_Bitvec_from_list( struct Cyc_Dict_Dict* d, int(* f)( void*), int sz, struct
+Cyc_List_List*); extern struct Cyc_List_List* Cyc_Bitvec_to_sorted_list( struct
+_tagged_arr bvec, int sz); extern void Cyc_Bitvec_clear_all( struct _tagged_arr);
+extern void Cyc_Bitvec_set_all( struct _tagged_arr); extern int Cyc_Bitvec_all_set(
+struct _tagged_arr bvec, int sz); extern void Cyc_Bitvec_print_bvec( struct
+_tagged_arr bvec); struct Cyc_std___sFILE; extern unsigned char Cyc_std_FileCloseError[
 19u]; extern unsigned char Cyc_std_FileOpenError[ 18u]; struct Cyc_std_FileOpenError_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_std_String_pa=
 0; struct Cyc_std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static

@@ -336,7 +336,7 @@ static tunionfield_t substitute_tunionfield(list_t<tvar_t,`H> d0tvs,
       string_t base = *(tv->name);
       string_t @ new_name;
       do {
-	new_name = new ((string_t)strconcat(base, string_of_int(i)));
+	new_name = new ((string_t)strconcat(base, aprintf("%d",i)));
 	i++;
       } while(List::exists_c(substitute_tunionfield_f1, new_name, d0tvs) ||
 	      List::exists_c(substitute_tunionfield_f1, tv->name, d1tvs));

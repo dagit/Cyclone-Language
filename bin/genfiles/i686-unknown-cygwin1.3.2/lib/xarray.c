@@ -9,25 +9,24 @@ unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
-unsigned char*); struct Cyc_Xarray_Xarray{ struct _tagged_arr elmts; int
-num_elmts; } ; extern int Cyc_Xarray_length( struct Cyc_Xarray_Xarray*); extern
-void* Cyc_Xarray_get( struct Cyc_Xarray_Xarray*, int); extern void Cyc_Xarray_set(
-struct Cyc_Xarray_Xarray*, int, void*); extern struct Cyc_Xarray_Xarray* Cyc_Xarray_create(
-int, void*); extern struct Cyc_Xarray_Xarray* Cyc_Xarray_create_empty(); extern
-struct Cyc_Xarray_Xarray* Cyc_Xarray_singleton( int, void*); extern void Cyc_Xarray_add(
-struct Cyc_Xarray_Xarray*, void*); extern int Cyc_Xarray_add_ind( struct Cyc_Xarray_Xarray*,
-void*); extern struct _tagged_arr Cyc_Xarray_to_array( struct Cyc_Xarray_Xarray*);
-extern struct Cyc_Xarray_Xarray* Cyc_Xarray_from_array( struct _tagged_arr arr);
-extern struct Cyc_Xarray_Xarray* Cyc_Xarray_append( struct Cyc_Xarray_Xarray*,
-struct Cyc_Xarray_Xarray*); extern void Cyc_Xarray_app( void*(* f)( void*),
-struct Cyc_Xarray_Xarray*); extern void Cyc_Xarray_app_c( void*(* f)( void*,
-void*), void*, struct Cyc_Xarray_Xarray*); extern void Cyc_Xarray_iter( void(* f)(
-void*), struct Cyc_Xarray_Xarray*); extern void Cyc_Xarray_iter_c( void(* f)(
-void*, void*), void*, struct Cyc_Xarray_Xarray*); extern struct Cyc_Xarray_Xarray*
-Cyc_Xarray_map( void*(* f)( void*), struct Cyc_Xarray_Xarray*); extern struct
-Cyc_Xarray_Xarray* Cyc_Xarray_map_c( void*(* f)( void*, void*), void*, struct
-Cyc_Xarray_Xarray*); extern void Cyc_Xarray_reuse( struct Cyc_Xarray_Xarray*
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Xarray_Xarray{
+struct _tagged_arr elmts; int num_elmts; } ; extern int Cyc_Xarray_length(
+struct Cyc_Xarray_Xarray*); extern void* Cyc_Xarray_get( struct Cyc_Xarray_Xarray*,
+int); extern void Cyc_Xarray_set( struct Cyc_Xarray_Xarray*, int, void*); extern
+struct Cyc_Xarray_Xarray* Cyc_Xarray_create( int, void*); extern struct Cyc_Xarray_Xarray*
+Cyc_Xarray_create_empty(); extern struct Cyc_Xarray_Xarray* Cyc_Xarray_singleton(
+int, void*); extern void Cyc_Xarray_add( struct Cyc_Xarray_Xarray*, void*);
+extern int Cyc_Xarray_add_ind( struct Cyc_Xarray_Xarray*, void*); extern struct
+_tagged_arr Cyc_Xarray_to_array( struct Cyc_Xarray_Xarray*); extern struct Cyc_Xarray_Xarray*
+Cyc_Xarray_from_array( struct _tagged_arr arr); extern struct Cyc_Xarray_Xarray*
+Cyc_Xarray_append( struct Cyc_Xarray_Xarray*, struct Cyc_Xarray_Xarray*); extern
+void Cyc_Xarray_app( void*(* f)( void*), struct Cyc_Xarray_Xarray*); extern void
+Cyc_Xarray_app_c( void*(* f)( void*, void*), void*, struct Cyc_Xarray_Xarray*);
+extern void Cyc_Xarray_iter( void(* f)( void*), struct Cyc_Xarray_Xarray*);
+extern void Cyc_Xarray_iter_c( void(* f)( void*, void*), void*, struct Cyc_Xarray_Xarray*);
+extern struct Cyc_Xarray_Xarray* Cyc_Xarray_map( void*(* f)( void*), struct Cyc_Xarray_Xarray*);
+extern struct Cyc_Xarray_Xarray* Cyc_Xarray_map_c( void*(* f)( void*, void*),
+void*, struct Cyc_Xarray_Xarray*); extern void Cyc_Xarray_reuse( struct Cyc_Xarray_Xarray*
 xarr); int Cyc_Xarray_length( struct Cyc_Xarray_Xarray* xarr){ return xarr->num_elmts;}
 void* Cyc_Xarray_get( struct Cyc_Xarray_Xarray* xarr, int i){ if( i <  0? 1: i
 >=  xarr->num_elmts){( int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*

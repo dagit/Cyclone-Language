@@ -9,13 +9,13 @@ unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
-unsigned char*); extern int isalnum( int); extern int isalpha( int); extern int
-isascii( int); extern int iscntrl( int); extern int isdigit( int); extern int
-isgraph( int); extern int islower( int); extern int isprint( int); extern int
-ispunct( int); extern int isspace( int); extern int isupper( int); extern int
-isxdigit( int); extern int toascii( int); extern int tolower( int); extern int
-toupper( int); extern int _tolower( int); extern int _toupper( int); struct Cyc_std__Div{
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int isalnum(
+int); extern int isalpha( int); extern int isascii( int); extern int iscntrl(
+int); extern int isdigit( int); extern int isgraph( int); extern int islower(
+int); extern int isprint( int); extern int ispunct( int); extern int isspace(
+int); extern int isupper( int); extern int isxdigit( int); extern int toascii(
+int); extern int tolower( int); extern int toupper( int); extern int _tolower(
+int); extern int _toupper( int); extern int system( unsigned char*); struct Cyc_std__Div{
 int quot; int rem; } ; struct Cyc_std__Ldiv{ int quot; int rem; } ; extern int
 abs( int __x); extern int atexit( void(* __func)()); extern struct Cyc_std__Div
 div( int __numer, int __denom); extern struct Cyc_std__Ldiv ldiv( int __numer,
