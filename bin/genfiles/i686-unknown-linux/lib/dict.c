@@ -932,17 +932,16 @@ return _tmp69;};}struct Cyc_Dict_Dict Cyc_Dict_insert_new(struct Cyc_Dict_Dict d
 key,void*data){if(Cyc_Dict_member(d,key))(int)_throw((void*)& Cyc_Dict_Absent_val);
 return Cyc_Dict_insert(d,key,data);}struct Cyc_Dict_Dict Cyc_Dict_inserts(struct Cyc_Dict_Dict
 d,struct Cyc_List_List*kds){for(0;kds != 0;kds=kds->tl){d=Cyc_Dict_insert(d,(((
-struct _tuple0*)kds->hd)[_check_known_subscript_notnull(1,0)]).f1,(((struct
-_tuple0*)kds->hd)[_check_known_subscript_notnull(1,0)]).f2);}return d;}static void*
-Cyc_Dict_fold_tree(void*(*f)(void*,void*,void*),struct Cyc_Dict_T*t,void*accum){
-struct Cyc_Dict_T _tmp6D;struct Cyc_Dict_T*_tmp6E;struct Cyc_Dict_T*_tmp6F;struct
-_tuple0 _tmp70;void*_tmp71;void*_tmp72;struct Cyc_Dict_T*_tmp6C=t;_tmp6D=*_tmp6C;
-_tmp6E=_tmp6D.left;_tmp6F=_tmp6D.right;_tmp70=_tmp6D.key_val;_tmp71=_tmp70.f1;
-_tmp72=_tmp70.f2;if(_tmp6E != 0)accum=Cyc_Dict_fold_tree(f,(struct Cyc_Dict_T*)
-_tmp6E,accum);accum=f(_tmp71,_tmp72,accum);if(_tmp6F != 0)accum=Cyc_Dict_fold_tree(
-f,(struct Cyc_Dict_T*)_tmp6F,accum);return accum;}void*Cyc_Dict_fold(void*(*f)(
-void*,void*,void*),struct Cyc_Dict_Dict d,void*accum){if(d.t == 0)return accum;
-return Cyc_Dict_fold_tree(f,(struct Cyc_Dict_T*)d.t,accum);}static void*Cyc_Dict_fold_tree_c(
+struct _tuple0*)kds->hd)[0]).f1,(((struct _tuple0*)kds->hd)[0]).f2);}return d;}
+static void*Cyc_Dict_fold_tree(void*(*f)(void*,void*,void*),struct Cyc_Dict_T*t,
+void*accum){struct Cyc_Dict_T _tmp6D;struct Cyc_Dict_T*_tmp6E;struct Cyc_Dict_T*
+_tmp6F;struct _tuple0 _tmp70;void*_tmp71;void*_tmp72;struct Cyc_Dict_T*_tmp6C=t;
+_tmp6D=*_tmp6C;_tmp6E=_tmp6D.left;_tmp6F=_tmp6D.right;_tmp70=_tmp6D.key_val;
+_tmp71=_tmp70.f1;_tmp72=_tmp70.f2;if(_tmp6E != 0)accum=Cyc_Dict_fold_tree(f,(
+struct Cyc_Dict_T*)_tmp6E,accum);accum=f(_tmp71,_tmp72,accum);if(_tmp6F != 0)accum=
+Cyc_Dict_fold_tree(f,(struct Cyc_Dict_T*)_tmp6F,accum);return accum;}void*Cyc_Dict_fold(
+void*(*f)(void*,void*,void*),struct Cyc_Dict_Dict d,void*accum){if(d.t == 0)return
+accum;return Cyc_Dict_fold_tree(f,(struct Cyc_Dict_T*)d.t,accum);}static void*Cyc_Dict_fold_tree_c(
 void*(*f)(void*,void*,void*,void*),void*env,struct Cyc_Dict_T*t,void*accum){
 struct Cyc_Dict_T _tmp74;struct Cyc_Dict_T*_tmp75;struct Cyc_Dict_T*_tmp76;struct
 _tuple0 _tmp77;void*_tmp78;void*_tmp79;struct Cyc_Dict_T*_tmp73=t;_tmp74=*_tmp73;
