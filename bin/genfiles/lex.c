@@ -1,6 +1,6 @@
 #include <setjmp.h>
-/* This is a C header file to be used by the output of the Cyclone to
-   C translator  The corresponding definitions are in file lib/runtime_*.c */
+/* This is a C header used by the output of the Cyclone to
+   C translator.  Corresponding definitions are in file lib/runtime_*.c */
 #ifndef _CYC_INCLUDE_H_
 #define _CYC_INCLUDE_H_
 
@@ -15,7 +15,7 @@ struct _RuntimeStack {
 
 #ifndef offsetof
 /* should be size_t but int is fine */
-#define offsetof(t,n) ((int)(&(((t *)0)->n)))
+#define offsetof(t,n) ((int)(&(((t*)0)->n)))
 #endif
 
 /* Fat pointers */
@@ -67,17 +67,17 @@ struct _RegionHandle _new_region(const char*);
 void* _region_malloc(struct _RegionHandle*, unsigned);
 void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
 void* _region_vmalloc(struct _RegionHandle*, unsigned);
-void   _free_region(struct _RegionHandle*);
+void _free_region(struct _RegionHandle*);
 struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
-void   _pop_dynregion();
+void _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
   struct _RuntimeStack s;
   jmp_buf handler;
 };
-void _push_handler(struct _handler_cons *);
-void _push_region(struct _RegionHandle *);
+void _push_handler(struct _handler_cons*);
+void _push_region(struct _RegionHandle*);
 void _npop_handler(int);
 void _pop_handler();
 void _pop_region();
@@ -793,7 +793,7 @@ struct _tuple31 _Tmp0=*env;struct _fat_ptr _Tmp1;void*_Tmp2;void*_Tmp3;_Tmp3=_Tm
 int len=(int)(_get_fat_size(s,sizeof(char))- 1U);
 {int i=0;for(0;i < len;++ i){
 union Cyc_Lex_TrieChildren _Tmp4=_check_null(t)->children;void*_Tmp5;int _Tmp6;switch(_Tmp4.One.tag){case 1:
- return 0;case 2: _Tmp6=_Tmp4.One.val.f1;_Tmp5=_Tmp4.One.val.f2;if(_Tmp6!=(int)*((const char*)_check_fat_subscript(s,sizeof(char),i))){int one_ch=_Tmp6;struct Cyc_Lex_Trie*one_trie=_Tmp5;
+ return 0;case 2: _Tmp6=_Tmp4.One.val.f1;_Tmp5=_Tmp4.One.val.f2;if((int)_Tmp6!=(int)*((const char*)_check_fat_subscript(s,sizeof(char),i))){int one_ch=_Tmp6;struct Cyc_Lex_Trie*one_trie=_Tmp5;
 return 0;}else{_Tmp5=_Tmp4.One.val.f2;{struct Cyc_Lex_Trie*one_trie=_Tmp5;
 t=one_trie;goto _LL3;}}default: _Tmp5=_Tmp4.Many.val;{struct Cyc_Lex_Trie**arr=_Tmp5;
 # 548

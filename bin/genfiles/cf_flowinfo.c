@@ -1,6 +1,6 @@
 #include <setjmp.h>
-/* This is a C header file to be used by the output of the Cyclone to
-   C translator  The corresponding definitions are in file lib/runtime_*.c */
+/* This is a C header used by the output of the Cyclone to
+   C translator.  Corresponding definitions are in file lib/runtime_*.c */
 #ifndef _CYC_INCLUDE_H_
 #define _CYC_INCLUDE_H_
 
@@ -15,7 +15,7 @@ struct _RuntimeStack {
 
 #ifndef offsetof
 /* should be size_t but int is fine */
-#define offsetof(t,n) ((int)(&(((t *)0)->n)))
+#define offsetof(t,n) ((int)(&(((t*)0)->n)))
 #endif
 
 /* Fat pointers */
@@ -67,17 +67,17 @@ struct _RegionHandle _new_region(const char*);
 void* _region_malloc(struct _RegionHandle*, unsigned);
 void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
 void* _region_vmalloc(struct _RegionHandle*, unsigned);
-void   _free_region(struct _RegionHandle*);
+void _free_region(struct _RegionHandle*);
 struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
-void   _pop_dynregion();
+void _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
   struct _RuntimeStack s;
   jmp_buf handler;
 };
-void _push_handler(struct _handler_cons *);
-void _push_region(struct _RegionHandle *);
+void _push_handler(struct _handler_cons*);
+void _push_region(struct _RegionHandle*);
 void _npop_handler(int);
 void _pop_handler();
 void _pop_region();
@@ -851,7 +851,7 @@ static enum Cyc_CfFlowInfo_InitLevel Cyc_CfFlowInfo_initlevel_rec(struct Cyc_CfF
 enum Cyc_CfFlowInfo_InitLevel this_ans;
 if((int)acc==0)return 0U;
 {struct _fat_ptr _Tmp0;int _Tmp1;int _Tmp2;void*_Tmp3;switch(*((int*)r)){case 8: _Tmp3=(void*)((struct Cyc_CfFlowInfo_NamedLocation_CfFlowInfo_AbsRVal_struct*)r)->f2;{void*r=_Tmp3;
-return Cyc_CfFlowInfo_initlevel_rec(env,r,acc);}case 6: _Tmp2=((struct Cyc_CfFlowInfo_Aggregate_CfFlowInfo_AbsRVal_struct*)r)->f1.is_union;_Tmp1=((struct Cyc_CfFlowInfo_Aggregate_CfFlowInfo_AbsRVal_struct*)r)->f1.fieldnum;_Tmp0=((struct Cyc_CfFlowInfo_Aggregate_CfFlowInfo_AbsRVal_struct*)r)->f2;if(_Tmp2){int iu=_Tmp2;int f=_Tmp1;struct _fat_ptr d=_Tmp0;
+return Cyc_CfFlowInfo_initlevel_rec(env,r,acc);}case 6: _Tmp2=((struct Cyc_CfFlowInfo_Aggregate_CfFlowInfo_AbsRVal_struct*)r)->f1.is_union;_Tmp1=((struct Cyc_CfFlowInfo_Aggregate_CfFlowInfo_AbsRVal_struct*)r)->f1.fieldnum;_Tmp0=((struct Cyc_CfFlowInfo_Aggregate_CfFlowInfo_AbsRVal_struct*)r)->f2;if((int)_Tmp2){int iu=_Tmp2;int f=_Tmp1;struct _fat_ptr d=_Tmp0;
 # 533
 unsigned sz=_get_fat_size(d,sizeof(void*));
 this_ans=0U;

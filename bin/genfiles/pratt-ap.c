@@ -1,6 +1,6 @@
 #include <setjmp.h>
-/* This is a C header file to be used by the output of the Cyclone to
-   C translator  The corresponding definitions are in file lib/runtime_*.c */
+/* This is a C header used by the output of the Cyclone to
+   C translator.  Corresponding definitions are in file lib/runtime_*.c */
 #ifndef _CYC_INCLUDE_H_
 #define _CYC_INCLUDE_H_
 
@@ -15,7 +15,7 @@ struct _RuntimeStack {
 
 #ifndef offsetof
 /* should be size_t but int is fine */
-#define offsetof(t,n) ((int)(&(((t *)0)->n)))
+#define offsetof(t,n) ((int)(&(((t*)0)->n)))
 #endif
 
 /* Fat pointers */
@@ -67,17 +67,17 @@ struct _RegionHandle _new_region(const char*);
 void* _region_malloc(struct _RegionHandle*, unsigned);
 void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
 void* _region_vmalloc(struct _RegionHandle*, unsigned);
-void   _free_region(struct _RegionHandle*);
+void _free_region(struct _RegionHandle*);
 struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
-void   _pop_dynregion();
+void _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
   struct _RuntimeStack s;
   jmp_buf handler;
 };
-void _push_handler(struct _handler_cons *);
-void _push_region(struct _RegionHandle *);
+void _push_handler(struct _handler_cons*);
+void _push_region(struct _RegionHandle*);
 void _npop_handler(int);
 void _pop_handler();
 void _pop_region();

@@ -1,6 +1,6 @@
 #include <setjmp.h>
-/* This is a C header file to be used by the output of the Cyclone to
-   C translator  The corresponding definitions are in file lib/runtime_*.c */
+/* This is a C header used by the output of the Cyclone to
+   C translator.  Corresponding definitions are in file lib/runtime_*.c */
 #ifndef _CYC_INCLUDE_H_
 #define _CYC_INCLUDE_H_
 
@@ -15,7 +15,7 @@ struct _RuntimeStack {
 
 #ifndef offsetof
 /* should be size_t but int is fine */
-#define offsetof(t,n) ((int)(&(((t *)0)->n)))
+#define offsetof(t,n) ((int)(&(((t*)0)->n)))
 #endif
 
 /* Fat pointers */
@@ -67,17 +67,17 @@ struct _RegionHandle _new_region(const char*);
 void* _region_malloc(struct _RegionHandle*, unsigned);
 void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
 void* _region_vmalloc(struct _RegionHandle*, unsigned);
-void   _free_region(struct _RegionHandle*);
+void _free_region(struct _RegionHandle*);
 struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
-void   _pop_dynregion();
+void _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
   struct _RuntimeStack s;
   jmp_buf handler;
 };
-void _push_handler(struct _handler_cons *);
-void _push_region(struct _RegionHandle *);
+void _push_handler(struct _handler_cons*);
+void _push_region(struct _RegionHandle*);
 void _npop_handler(int);
 void _pop_handler();
 void _pop_region();
@@ -1477,7 +1477,7 @@ Cyc_Warn_err((*hides).f1,({const char*_Tmp5="export wildcard expects empty expor
 env->in_cinclude=old;
 ({struct _tuple16*_Tmp5=({struct _tuple16*_Tmp6=_cycalloc(sizeof(struct _tuple16));_Tmp6->f1=exports,_Tmp6->f2=& out_dict,_Tmp6->f3=env,_Tmp6->f4=hides;_Tmp6;});({(void(*)(void(*)(struct _tuple16*,struct _fat_ptr*,void*),struct _tuple16*,struct Cyc_Dict_Dict))Cyc_Dict_iter_c;})(Cyc_Binding_export_all_symbols,_Tmp5,
 Cyc_Dict_difference(new_dict,old_dict));});}else{
-# 1199
+# 1198
 struct Cyc_List_List*exs=*exports;for(0;exs!=0;exs=exs->tl){
 struct _tuple17*_Tmp5=(struct _tuple17*)exs->hd;void*_Tmp6;unsigned _Tmp7;_Tmp7=_Tmp5->f1;_Tmp6=_Tmp5->f2->f2;{unsigned loc=_Tmp7;struct _fat_ptr*v=_Tmp6;
 if(!({(int(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_member;})(new_dict,v)||
@@ -1485,21 +1485,21 @@ if(!({(int(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_member;})(new_dict
 void*_Tmp8=({(void*(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_lookup;})(old_dict,v);_Tmp8==({(void*(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_lookup;})(new_dict,v);}))
 ({struct Cyc_String_pa_PrintArg_struct _Tmp8=({struct Cyc_String_pa_PrintArg_struct _Tmp9;_Tmp9.tag=0,_Tmp9.f1=*v;_Tmp9;});void*_Tmp9[1];_Tmp9[0]=& _Tmp8;Cyc_Warn_err(loc,({const char*_TmpA="%s is exported but not defined";_tag_fat(_TmpA,sizeof(char),31U);}),_tag_fat(_Tmp9,sizeof(void*),1));});
 out_dict=({struct Cyc_Dict_Dict _Tmp8=out_dict;struct _fat_ptr*_Tmp9=v;({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _fat_ptr*,void*))Cyc_Dict_insert;})(_Tmp8,_Tmp9,({(void*(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_lookup;})(new_dict,v));});}}}
-# 1208
+# 1207
 data->ordinaries=out_dict;
 env->in_cinclude=old;
-# 1213
+# 1212
 goto _LL0;}}}case 13:
-# 1215
+# 1214
  goto _LL1E;case 14: _LL1E:
  goto _LL20;case 15: _LL20:
  goto _LL22;default: _LL22:
  goto _LL0;}_LL0:;}
-# 1222
+# 1221
 void Cyc_Binding_resolve_decls(struct Cyc_Binding_Env*env,struct Cyc_List_List*tds){
 for(1;tds!=0;tds=tds->tl){
 Cyc_Binding_resolve_decl(env,(struct Cyc_Absyn_Decl*)tds->hd);}}
-# 1227
+# 1226
 void Cyc_Binding_resolve_all(struct Cyc_List_List*tds){
 struct Cyc_Binding_Env*env;env=_cycalloc(sizeof(struct Cyc_Binding_Env)),env->in_cinclude=0,env->in_cyc_override=0,({struct Cyc_Binding_NSCtxt*_Tmp0=({(struct Cyc_Binding_NSCtxt*(*)(int,struct Cyc_Binding_ResolveNSEnv*(*)(int)))Cyc_Binding_mt_nsctxt;})(1,Cyc_Binding_mt_renv);env->ns=_Tmp0;}),env->local_vars=0;
 ({struct Cyc_Binding_Env*_Tmp0=env;Cyc_Binding_resolve_decl(_Tmp0,({struct Cyc_Absyn_Decl*_Tmp1=_cycalloc(sizeof(struct Cyc_Absyn_Decl));({void*_Tmp2=(void*)({struct Cyc_Absyn_Datatype_d_Absyn_Raw_decl_struct*_Tmp3=_cycalloc(sizeof(struct Cyc_Absyn_Datatype_d_Absyn_Raw_decl_struct));_Tmp3->tag=6,({struct Cyc_Absyn_Datatypedecl*_Tmp4=Cyc_Absyn_exn_tud();_Tmp3->f1=_Tmp4;});_Tmp3;});_Tmp1->r=_Tmp2;}),_Tmp1->loc=0U;_Tmp1;}));});

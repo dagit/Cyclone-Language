@@ -1,6 +1,6 @@
 #include <setjmp.h>
-/* This is a C header file to be used by the output of the Cyclone to
-   C translator  The corresponding definitions are in file lib/runtime_*.c */
+/* This is a C header used by the output of the Cyclone to
+   C translator.  Corresponding definitions are in file lib/runtime_*.c */
 #ifndef _CYC_INCLUDE_H_
 #define _CYC_INCLUDE_H_
 
@@ -15,7 +15,7 @@ struct _RuntimeStack {
 
 #ifndef offsetof
 /* should be size_t but int is fine */
-#define offsetof(t,n) ((int)(&(((t *)0)->n)))
+#define offsetof(t,n) ((int)(&(((t*)0)->n)))
 #endif
 
 /* Fat pointers */
@@ -67,17 +67,17 @@ struct _RegionHandle _new_region(const char*);
 void* _region_malloc(struct _RegionHandle*, unsigned);
 void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
 void* _region_vmalloc(struct _RegionHandle*, unsigned);
-void   _free_region(struct _RegionHandle*);
+void _free_region(struct _RegionHandle*);
 struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
-void   _pop_dynregion();
+void _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
   struct _RuntimeStack s;
   jmp_buf handler;
 };
-void _push_handler(struct _handler_cons *);
-void _push_region(struct _RegionHandle *);
+void _push_handler(struct _handler_cons*);
+void _push_region(struct _RegionHandle*);
 void _npop_handler(int);
 void _pop_handler();
 void _pop_region();
@@ -2218,7 +2218,7 @@ return Cyc_List_exists(Cyc_Absynpp_exists_temp_tvar_in_effect,l);}}else{goto _LL
 int Cyc_Absynpp_is_anon_aggrtype(void*t){
 void*_Tmp0;void*_Tmp1;switch(*((int*)t)){case 7:
  return 1;case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)t)->f1)==16)
-return 1;else{goto _LL7;}case 8: _Tmp1=((struct Cyc_Absyn_TypedefType_Absyn_Type_struct*)t)->f3;_Tmp0=(void*)((struct Cyc_Absyn_TypedefType_Absyn_Type_struct*)t)->f4;if(_Tmp0!=0){struct Cyc_Absyn_Typedefdecl*td=_Tmp1;void*x=_Tmp0;
+return 1;else{goto _LL7;}case 8: _Tmp1=((struct Cyc_Absyn_TypedefType_Absyn_Type_struct*)t)->f3;_Tmp0=(void*)((struct Cyc_Absyn_TypedefType_Absyn_Type_struct*)t)->f4;if((void*)_Tmp0!=0){struct Cyc_Absyn_Typedefdecl*td=_Tmp1;void*x=_Tmp0;
 # 2011
 return Cyc_Absynpp_is_anon_aggrtype(x);}else{goto _LL7;}default: _LL7:
  return 0;};}
@@ -2318,12 +2318,12 @@ return Cyc_Absynpp_to_tms(r,tq,topt);}}default:
 # 2143
 static int Cyc_Absynpp_is_char_ptr(void*t){
 # 2145
-void*_Tmp0;switch(*((int*)t)){case 1: _Tmp0=(void*)((struct Cyc_Absyn_Evar_Absyn_Type_struct*)t)->f2;if(_Tmp0!=0){void*def=_Tmp0;
+void*_Tmp0;switch(*((int*)t)){case 1: _Tmp0=(void*)((struct Cyc_Absyn_Evar_Absyn_Type_struct*)t)->f2;if((void*)_Tmp0!=0){void*def=_Tmp0;
 return Cyc_Absynpp_is_char_ptr(def);}else{goto _LL5;}case 3: _Tmp0=((struct Cyc_Absyn_PointerType_Absyn_Type_struct*)t)->f1.elt_type;{void*elt_typ=_Tmp0;
 # 2148
 L: {
-void*_Tmp1;switch(*((int*)elt_typ)){case 1: _Tmp1=(void*)((struct Cyc_Absyn_Evar_Absyn_Type_struct*)elt_typ)->f2;if(_Tmp1!=0){void*t=_Tmp1;
-elt_typ=t;goto L;}else{goto _LLE;}case 8: _Tmp1=(void*)((struct Cyc_Absyn_TypedefType_Absyn_Type_struct*)elt_typ)->f4;if(_Tmp1!=0){void*t=_Tmp1;
+void*_Tmp1;switch(*((int*)elt_typ)){case 1: _Tmp1=(void*)((struct Cyc_Absyn_Evar_Absyn_Type_struct*)elt_typ)->f2;if((void*)_Tmp1!=0){void*t=_Tmp1;
+elt_typ=t;goto L;}else{goto _LLE;}case 8: _Tmp1=(void*)((struct Cyc_Absyn_TypedefType_Absyn_Type_struct*)elt_typ)->f4;if((void*)_Tmp1!=0){void*t=_Tmp1;
 elt_typ=t;goto L;}else{goto _LLE;}case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)elt_typ)->f1)==1){if(((struct Cyc_Absyn_IntCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)elt_typ)->f1)->f2==Cyc_Absyn_Char_sz)
 return 1;else{goto _LLE;}}else{goto _LLE;}default: _LLE:
  return 0;};}}default: _LL5:

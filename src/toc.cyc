@@ -3166,8 +3166,6 @@ static void subst_pattern_vars(patdecls_t env, exp_t e) {
   case &SeqExp_e(e1,e2):
     subst_pattern_vars(env,e1); fallthru(e2);
   case &Extension_e(e): fallthru(e);
-  case &Tagcheck_e(e,_): fallthru(e);
-  case &Throw_e(e,...): fallthru(e);
   case &NoInstantiate_e(e): fallthru(e);
   case &Instantiate_e(e,...): fallthru(e);
   case &Cast_e(_,e,...): fallthru(e);
@@ -3177,12 +3175,12 @@ static void subst_pattern_vars(patdecls_t env, exp_t e) {
   case &AggrArrow_e(e,...): fallthru(e);
   case &ComprehensionNoinit_e(e,...): fallthru(e);
   case &Address_e(e): subst_pattern_vars(env,e); break;
-  case &Malloc_e(MallocInfo{_,eopt,_,e,...}): fallthru(eopt,e);
-  case &New_e(eopt,e):
-    if (eopt != NULL) subst_pattern_vars(env,eopt);
-    subst_pattern_vars(env,e); break;
+  case &AssignOp_e(e1,_,e2): 
+    subst_pattern_vars(env,e1); 
+    subst_pattern_vars(env,e2); 
+    break;
+  case &FnCall_e(e,es,_,_): subst_pattern_vars(env,e); fallthru(es);
   case &Primop_e(_,es): fallthru(es);
-  case &Datatype_e(es,...): fallthru(es);
   case &Tuple_e(es): List::iter_c(subst_pattern_vars,env,es); break;
   case &UnresolvedMem_e(_,dles): fallthru(dles);
   case &Aggregate_e(_,_,dles,_): fallthru(dles);
@@ -3192,6 +3190,11 @@ static void subst_pattern_vars(patdecls_t env, exp_t e) {
     for (; dles != NULL; dles = dles->tl)
       subst_pattern_vars(env,(*dles->hd)[1]);
     break;
+  case &Tagcheck_e(...):
+  case &Throw_e(...):
+  case &Malloc_e(...):
+  case &New_e(...):
+  case &Datatype_e(...): Warn::impos2("subst_pattern_vars, unexpected exp");
   default: break;
   }
 }
@@ -3335,8 +3338,8 @@ compile_decision_tree(region_t<`rgn> rgn,
               // compile the where-clause
               // PROBLEM: we have to map the pattern variables in the
               // where clause to the associated temps.
+              exp_to_c(nv,e); // must do before substitution on next line
               subst_pattern_vars(*decls,e);
-              exp_to_c(nv,e);
               r = ifthenelse_stmt(e,r,res,DL);
               if (init_opt != NULL)
                 r = seq_stmt(init_opt, r, DL);

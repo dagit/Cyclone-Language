@@ -1194,8 +1194,7 @@ void resolve_decl(env_t env, decl_t d) {
       env->in_cinclude = old;
       Dict::iter_c(export_all_symbols, new $(exports, &out_dict, env, hides), 
 		   Dict::difference(new_dict, old_dict));
-    }
-    else {
+    } else {
       for (let exs = *exports; exs != NULL; exs = exs->tl) {
 	let &$(loc,&$(_,v),_) = exs->hd;
 	if(!Dict::member(new_dict,v)
