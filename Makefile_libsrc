@@ -219,12 +219,24 @@ endif
 # Note: the hairy stuff with sed is so that the dependency target
 #       is the .c file rather than the default .o file produced by -M.
 #       I'd prefer to use -MT but am having trouble.
-# Note: depends on parse_tab.cyc because it really depends on parse_tab.h
-#       Without it some dependency generation fails; possibly a -MG bug in gcc
-%.d: %.cyc cstubs.c parse_tab.cyc
+# Note: depends on parse_tab.h because of a bug in -MG in gcc.
+#	Namely, some files include parse.h which includes parse_tab.h
+#	which is a generated file; -MG is supposed to assume it is
+#	generated, but instead seems to handle it as an error, so that
+#	the generated .d file is empty.  So, we force parse_tab.h to
+#	be generated first.  The gcc bug occurs at least in gcc 3.1
+#	on Mac.
+# Note: the .SECONDARY causes the files to be treated as intermediate
+#	(generated) files EXCEPT they are not automatically deleted.
+#	This means they only get generated once; since one of the files
+#	is parse_tab.h this is particularly important, it means
+#	dependency analysis only happens once.
+%.d: %.cyc cstubs.c parse_tab.h
 	$(CYCDIR)/bin/$(CYCCOMP) -M -MG $(CYCFLAGS) -B$(CYCDIR)/bin/lib/cyc-lib $< > $@d
 	sed -e 's/\.o:/\.c:/' $@d > $@
 	$(RM) $@d
+
+.SECONDARY: parse_tab.cyc parse_tab.h lex.cyc lineno.cyc cycdoc.cyc buildlib.cyc
 
 ifndef NODEPS
 -include $(addsuffix .d, $(CYCLONE_BOOT_LIBS) $(CYCLONE_LIBS) $(CYCLONE_SRCS) cycdoc buildlib)
