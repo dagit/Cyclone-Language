@@ -43,13 +43,13 @@ xtunion exn {TypeErr};
 
 extern void unify_it(type_t t1, type_t t2);
 
-void terr(seg_t loc, string_t fmt, ...`r1 inject parg_t<`r2> ap) 
+void terr(seg_t loc, string_t fmt, ... inject parg_t<`r2> ap) 
   __attribute__((format(printf,2,3)))
 {
   Position::post_error(Position::mk_err_elab(loc,vrprintf(heap_region,fmt,ap)));
 }
 
-`a impos(string_t fmt, ...`r1 inject parg_t<`r2> ap) 
+`a impos(string_t fmt, ... inject parg_t<`r2> ap) 
   __attribute__((format(printf,1,2)))
 {
   string_t msg = vrprintf(heap_region,fmt,ap);
@@ -73,7 +73,7 @@ static list_t<stringptr_t> warning_msgs = NULL;
 
 // we batch warnings because we have to parse the file to determine
 // line and column information.
-void warn(seg_t sg, string_t fmt, ...`r1 inject parg_t<`r2> ap) 
+void warn(seg_t sg, string_t fmt, ... inject parg_t<`r2> ap) 
   __attribute__((format(printf,2,3)))
 {
   string_t msg = vrprintf(heap_region,fmt,ap);
@@ -198,7 +198,7 @@ type_t copy_type(type_t t) {
     if (cyc_varargs != NULL) {
       vararg_info_t @cv = (vararg_info_t @)cyc_varargs;
       cyc_varargs2 = new VarargInfo{cv->name,cv->tq,copy_type(cv->type),
-                                    copy_type(cv->rgn),cv->inject};
+                                    cv->inject};
     }
     let rgn_po2 = List::map(copy_rgncmp,rgn_po);
     let atts2 = atts;
@@ -347,8 +347,8 @@ static void occurs(type_t evar, list_t<tvar_t> env, type_t t) {
     for(; args != NULL; args = args->tl)
       occurs(evar,env,(*args->hd)[2]);
     if (cyc_varargs != NULL) {
-      let VarargInfo(_,_,t,r,_) = *cyc_varargs;
-      occurs(evar,env,t); occurs(evar,env,r);
+      let VarargInfo(_,_,t,_) = *cyc_varargs;
+      occurs(evar,env,t); 
     }
     for (; rgn_po != NULL; rgn_po = rgn_po->tl) {
       let &$(r1,r2) = rgn_po->hd;
@@ -1116,10 +1116,9 @@ void unify_it(type_t t1, type_t t2) {
     case $(NULL,NULL): break;
     case $(NULL,_): fallthru;
     case $(_,NULL): bad_cyc_vararg = true; break;
-    case $(&VarargInfo{n1,tq1,tp1,r1,i1}, &VarargInfo{n2,tq2,tp2,r2,i2}):
+    case $(&VarargInfo{n1,tq1,tp1,i1}, &VarargInfo{n2,tq2,tp2,i2}):
       unify_tqual(tq1,tq2);
       unify_it(tp1,tp2);
-      unify_it(r1,r2);
       if (i1 != i2) bad_cyc_vararg = true;
       break;
     }
@@ -1892,12 +1891,11 @@ type_t rsubstitute(region_t<`r> rgn,
     if (cyc_varargs == NULL) 
       cyc_varargs2 = NULL;
     else {
-      let VarargInfo{n,tq,t,r,i} = *cyc_varargs;
+      let VarargInfo{n,tq,t,i} = *cyc_varargs;
       let t2 = rsubstitute(rgn,inst,t);
-      let r2 = rsubstitute(rgn,inst,r);
-      if (t2 == t && r == r2) cyc_varargs2 = cyc_varargs;
+      if (t2 == t) cyc_varargs2 = cyc_varargs;
       else 
-        cyc_varargs2 = new VarargInfo{n,tq,t2,r2,i};
+        cyc_varargs2 = new VarargInfo{n,tq,t2,i};
     }
     list_t<$(type_t,type_t)@> rgn_po2;
     let $(rpo1a,rpo1b) = List::rsplit(rgn,rgn,rgn_po);
@@ -2415,9 +2413,8 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     // check the varargs
     if (cyc_vararg != NULL) {
       if (c_vararg) impos("both c_vararg and cyc_vararg"); // sanity
-      let VarargInfo{vn,vtq,vt,vr,vi} = *cyc_vararg;
+      let VarargInfo{vn,vtq,vt,vi} = *cyc_vararg;
       new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,vt);
-      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,RgnKind,vr);
       // if inject, then check the type is an appropriate [x]tunion
       if (vi) {
         switch (compress(vt)) {

@@ -86,7 +86,7 @@ static int fresh_label_counter = 0;
 // errors and reporting
 xtunion exn {Toc_Unimplemented};
 xtunion exn {Toc_Impossible};
-static `a unimp(string_t fmt, ...`r1 inject parg_t<`r2> ap) 
+static `a unimp(string_t fmt, ... inject parg_t<`r2> ap) 
   __attribute__((format(printf,1,2)))
 {
   vfprintf(stderr,fmt,ap);
@@ -94,7 +94,7 @@ static `a unimp(string_t fmt, ...`r1 inject parg_t<`r2> ap)
   fflush(stderr);
   throw Toc_Unimplemented;
 }
-static `a toc_impos(string_t fmt, ...`r1 inject parg_t<`r2> ap) 
+static `a toc_impos(string_t fmt, ... inject parg_t<`r2> ap) 
   __attribute__((format(printf,1,2)))
 {
   vfprintf(stderr,fmt,ap);
@@ -340,7 +340,8 @@ static type_t typ_to_c(type_t t) {
       }
     let new_args = List::map(arg_to_c,args);
     if (cyc_vararg != NULL) {
-      let t = typ_to_c(tagged_typ(cyc_vararg->type,cyc_vararg->rgn,mt_tq));
+      // region for array type irrelevant
+      let t = typ_to_c(tagged_typ(cyc_vararg->type,HeapRgn,mt_tq));
       let vararg = new $(cyc_vararg->name,cyc_vararg->tq,t);
       new_args = List::imp_append(new_args,new List(vararg,NULL));
     }
@@ -2552,8 +2553,8 @@ static void fndecl_to_c(env_t nv, fndecl_t f) {
     nv = add_varmap(nv,x,var_exp(x,DL));
   }
   if (f->cyc_varargs && f->cyc_varargs->name != NULL) {
-    let VarargInfo{n,tq,t,r,i} = *f->cyc_varargs;
-    let t2 = typ_to_c(tagged_typ(t,r,tq));
+    let VarargInfo{n,tq,t,i} = *f->cyc_varargs;
+    let t2 = typ_to_c(tagged_typ(t,HeapRgn,tq));// region irrelevant
     let x2 = new $((nmspace_t)Loc_n,n->v);
     f->args = List::append(f->args,new List(new $(n->v,tq,t2),NULL));
     nv = add_varmap(nv,x2,var_exp(x2,DL));

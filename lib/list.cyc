@@ -59,7 +59,7 @@ list_t<`a,`r> tl(list_t<`a,`r> x) {
 
 // allows one to write rlist(r,e1,e2,...,en) to create a list
 // out of e1,e2,...,en.
-list_t<`a,`r> rlist(region_t<`r> r, ...`r2 `a argv) {
+list_t<`a,`r> rlist(region_t<`r> r, ... `a argv) {
   list_t result = NULL;
   for (int i = argv.size - 1; i >= 0; i--) 
     result = rnew(r) List{argv[i],result};
@@ -68,7 +68,7 @@ list_t<`a,`r> rlist(region_t<`r> r, ...`r2 `a argv) {
 
 // can't write this in terms of rlist yet because there's no way
 // to forward varargs yet.
-list_t<`a> list(...`r `a argv) {
+list_t<`a> list(... `a argv) {
   list_t result = NULL;
   for (int i = argv.size - 1; i >= 0; i--) 
     result = new List{argv[i],result};

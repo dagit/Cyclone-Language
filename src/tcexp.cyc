@@ -47,7 +47,7 @@ using Tcutil;
 namespace Tcexp;
 
 static type_t expr_err(tenv_t te,seg_t loc,string_t msg,
-                       ...`r1 inject parg_t<`r2> ap) 
+                       ... inject parg_t<`r2> ap) 
   __attribute__((format(printf,3,4)))
 {
   terr(loc,vrprintf(heap_region,msg,ap));
@@ -745,17 +745,11 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
 	else if(cyc_vararg == NULL)
 	  terr(loc, "too many arguments for function");
 	else {
-          let VarargInfo{_,_,vt,vr,inject} = *cyc_vararg;
+          let VarargInfo{_,_,vt,inject} = *cyc_vararg;
           let vci = new VarargCallInfo {.num_varargs = 0, 
                                         .injectors = NULL,
                                         .vai = (vararg_info_t @)cyc_vararg};
           *vararg_call_info = vci;
-          if (!unify(curr_rgn(te),vr))
-            terr(loc,"I have no idea how this could fail, but it did "
-                 "because the region for the varargs (%s) doesn't "
-                 "unify with the expected new_block region (%s).",
-                 typ2string(vr),
-                 typ2string(curr_rgn(te)));
 
           if (!inject) {
             // all the rest of the arguments are the same type
@@ -775,12 +769,12 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
               // unfortunately, td may not be the "latest" declaration of
               // an xtunion, so we re-look it up in the environment.
               let td = *lookup_tuniondecl(te,loc,td->name);
-              if (!unify(tur,vr)) 
-                terr(loc,"bad region for injected varargs");
               list_t<tunionfield_t> fields = NULL;
               if (td->fields == NULL) 
                 terr(loc,"can't inject into %s",typ2string(vt));
               else fields = td->fields->v;
+	      if(!unify(tur,curr_rgn(te)))
+		terr(loc,"bad region for injected varargs");
               region rgn {
                 let inst = List::rzip(rgn,rgn,td->tvs,targs);
                 for (; es != NULL; es = es->tl) {

@@ -59,8 +59,8 @@ namespace Std {
 
   int chdir(string_t);
   char ?`r getcwd(char ?`r buf, size_t size);
-  int execl(string_t path, string_t arg0, ...`r string_t argv);
-  int execlp(string_t file, string_t arg0, ...`r string_t argv);
+  int execl(string_t path, string_t arg0, ... string_t argv);
+  int execlp(string_t file, string_t arg0, ... string_t argv);
   //int execv(string_t path, string_t const ?argv);
   //int execp(string_t file, string_t const ?argv);
   int execve(string_t filename, string_t const ?argv, string_t const ?envp);

@@ -928,7 +928,7 @@ int vsscanf(const char ?`r src, const char ?`r1 fmt,
 }
 
 int sscanf(const char ?`r src, const char ?`r1 fmt, 
-              ...`r2 inject sarg_t<`r3,`r4> ap) 
+              ... inject sarg_t<`r3,`r4> ap) 
   __attribute__((format(scanf,2,3)))
 {
   return vsscanf(src, fmt, ap);
@@ -950,13 +950,13 @@ int vfscanf(FILE @`r5 stream, const char ?`r1 fmt,
 }
 
 int fscanf(FILE @`r5 stream, const char ?`r1 fmt, 
-              ...`r2 inject sarg_t<`r3,`r4> ap) 
+              ... inject sarg_t<`r3,`r4> ap) 
   __attribute__((format(scanf,2,3)))
 {
   return vfscanf(stream, fmt, ap);
 }
 
-int scanf(const char ?`r1 fmt, ...`r2 inject sarg_t<`r3,`r4> ap) 
+int scanf(const char ?`r1 fmt, ... inject sarg_t<`r3,`r4> ap) 
   __attribute__((format(scanf,1,2)))
 {
   return vfscanf(stdin, fmt, ap);

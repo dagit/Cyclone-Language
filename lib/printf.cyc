@@ -937,7 +937,7 @@ int vfprintf(FILE @`r3 f ,const char ?`r fmt, parg_t<`r2> ? `r1 ap)
   return ans;
 }  
 
-int fprintf(FILE @`r3 f,const char ?`r fmt, ...`r1 inject parg_t<`r2> ap)
+int fprintf(FILE @`r3 f,const char ?`r fmt, ... inject parg_t<`r2> ap)
 //FIX: commented out because types have changed
   __attribute__((format(printf,2,3)))
 {
@@ -952,7 +952,7 @@ int vprintf(const char ?`r fmt, parg_t<`r2> ? `r1 ap)
   return ans;
 }
 
-int printf(const char ?`r fmt, ...`r1 inject parg_t<`r2> ap) 
+int printf(const char ?`r fmt, ... inject parg_t<`r2> ap) 
   __attribute__((format(printf,1,2)))
 {
   int ans;
@@ -979,7 +979,7 @@ int vsprintf(char ?`r1 s, const char ?`r2 fmt, parg_t<`r4> ? `r3 ap)
   return ans;
 }
 
-int sprintf(char ?`r1 s, const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap) 
+int sprintf(char ?`r1 s, const char ?`r2 fmt, ... inject parg_t<`r4> ap) 
   __attribute__((format(printf,2,3)))
 {
   return vsprintf(s, fmt, ap);
@@ -1000,13 +1000,13 @@ char ?`r1 vrprintf(region_t<`r1> r1, const char ?`r2 fmt, parg_t<`r4> ?`r3 ap)
 }
 
 char ?`r1 rprintf(region_t<`r1> r1, const char ?`r2 fmt, 
-                   ...`r3 inject parg_t<`r4> ap) 
+                   ... inject parg_t<`r4> ap) 
   __attribute__((format(printf,2,3)))
 {
   return vrprintf(r1, fmt, ap);
 }
 
-char ? aprintf(const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap) 
+char ? aprintf(const char ?`r2 fmt, ... inject parg_t<`r4> ap) 
   __attribute__((format(printf,1,2)))
 {
   return vrprintf(heap_region, fmt, ap);

@@ -42,4 +42,4 @@ clean:
 	$(RM) main-screen.html
 	$(RM) -r online-manual
 
-.PHONY: main-screen.html main-screen.pdf main-letter.pdf main-a4.pdf
+.PHONY: main-screen.html main-screen.pdf main-letter.pdf main-a4.pdf online-manual

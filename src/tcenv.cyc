@@ -929,25 +929,25 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   let vds = NULL;
   for(let args = fd->args; args != NULL; args = args->tl) {
     let vd = new{Vardecl{.sc = Public, 
-			 .name = new{$((nmspace_t)Loc_n,(*args->hd)[0])},
+			 .name = new $((nmspace_t)Loc_n,(*args->hd)[0]),
 			 .tq = (*args->hd)[1],
 			 .type = (*args->hd)[2],
 			 .initializer = NULL, 
-                         .rgn = new{Opt(param_rgn)}, 
+                         .rgn = new Opt(param_rgn), 
                          .attributes = NULL}};
     vds = new{List(vd, vds)};
     locals = Dict::insert(locals, (*args->hd)[0], new Param_b(vd));
   }
   if (fd->cyc_varargs != NULL) {
-    let VarargInfo{nopt,tq,t,r,i} = *fd->cyc_varargs;
+    let VarargInfo{nopt,tq,t,i} = *fd->cyc_varargs;
     if (nopt != NULL) {
-      let typ = tagged_typ(t, r, tq);
+      let typ = tagged_typ(t, param_rgn, tq);
       let vd = new{Vardecl{.sc = Public,
-                           .name = new{$((nmspace_t)Loc_n,nopt->v)},
+                           .name = new $((nmspace_t)Loc_n,nopt->v),
                            .tq = empty_tqual(),
                            .type = typ,
                            .initializer = NULL,
-                           .rgn = new{Opt(param_rgn)},
+                           .rgn = new Opt(param_rgn),
                            .attributes = NULL}};
       vds = new List(vd,vds);
       locals = Dict::insert(locals, nopt->v, new Param_b(vd));

@@ -46,7 +46,7 @@ extern doc_t text(string_t<`H> s);
 extern doc_t textptr(stringptr_t<`H> s);
 extern doc_t hyperlink(string_t<`H> shrt, string_t<`H> full);
 extern doc_t nest(int k, doc_t d);
-extern doc_t cat(...`r doc_t);
+extern doc_t cat(... doc_t);
 extern doc_t cats(list_t<doc_t,`H> doclist);
 extern doc_t cats_arr(doc_t ?`H docs);
 extern doc_t doc_union(doc_t d, doc_t d2);

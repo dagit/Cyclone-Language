@@ -441,7 +441,6 @@ void dumpfunargs(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, bool c_varargs,
   else if (cyc_varargs != NULL) {
     let arg = new $(cyc_varargs->name, cyc_varargs->tq, cyc_varargs->type);
     dump("...");
-    dumptyp(cyc_varargs->rgn);
     if (cyc_varargs->inject) dump(" inject ");
     dumpfunarg(arg);
   }

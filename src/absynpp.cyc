@@ -711,7 +711,7 @@ doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,bool c_varargs,
   if (c_varargs) 
     arg_docs = List::append(arg_docs,new List(text("..."),NULL));
   else if (cyc_varargs != NULL) {
-    let varargs_doc = cat(text("..."),typ2doc(cyc_varargs->rgn),
+    let varargs_doc = cat(text("..."),
                           cyc_varargs->inject ? text(" inject ") : text(" "),
                           funarg2doc(new $(cyc_varargs->name,cyc_varargs->tq,
                                            cyc_varargs->type)));

@@ -48,7 +48,7 @@ char ?`r getcwd(char ?`r buf, size_t size) {
 }
 
 // This is untested; I'd be surprised if it actually works
-int execl(string_t path, string_t arg0, ...`r string_t argv) {
+int execl(string_t path, string_t arg0, ... string_t argv) {
   if (argv[argv.size - 1] != NULL)
     throw new Failure("execl: arg list must be NULL-terminated");
 
@@ -60,7 +60,7 @@ int execl(string_t path, string_t arg0, ...`r string_t argv) {
   return Cunistd::execv(string_to_Cstring(path), (Cstring*) newargs);
 }
 
-int execlp(string_t path, string_t arg0, ...`r string_t argv) {
+int execlp(string_t path, string_t arg0, ... string_t argv) {
   if (argv[argv.size - 1] != NULL)
     throw new Failure("execl: arg list must be NULL-terminated");
 

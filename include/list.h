@@ -33,8 +33,8 @@ namespace List {
   typedef struct List<`a,`r> @List_t<`a,`r>;
 
   // calling list(e1,e2,...,en) will generate the list [e1,e2,...,en]
-  extern list_t<`a> list(...`r `a);
-  extern list_t<`a,`r> rlist(region_t<`r>,...`r2 `a);
+  extern list_t<`a> list(... `a);
+  extern list_t<`a,`r> rlist(region_t<`r>,... `a);
 
   // Return the length of a list.
   extern int length(list_t x);

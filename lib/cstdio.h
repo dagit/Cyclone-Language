@@ -204,21 +204,21 @@ extern tunion PrintArg<`r::R> {
 typedef tunion `r PrintArg<`r> parg_t<`r>;
 
 // Printing functions behave as with C
-extern int fprintf(FILE @`r1,const char ?`r2 fmt, ...`r3 inject parg_t<`r4>)
+extern int fprintf(FILE @`r1,const char ?`r2 fmt, ... inject parg_t<`r4>)
   __attribute__((format(printf,2,3)))
   ;
-extern int printf(const char ?`r fmt, ...`r1 inject parg_t<`r2>)
+extern int printf(const char ?`r fmt, ... inject parg_t<`r2>)
   __attribute__((format(printf,1,2)))
   ;
-extern int sprintf(char ?`r1 s, const char ?`r2 fmt, ...`r3 inject parg_t<`r4>)
+extern int sprintf(char ?`r1 s, const char ?`r2 fmt, ... inject parg_t<`r4>)
   __attribute__((format(printf,2,3)))
   ;
 // Similar to sprintf but allocates a result of the right size
-extern char ? aprintf(const char ?`r2 fmt, ...`r3 inject parg_t<`r4>)
+extern char ? aprintf(const char ?`r2 fmt, ... inject parg_t<`r4>)
   __attribute__((format(printf,1,2)))
   ;
 extern char ?`r1 rprintf(region_t<`r1>, const char ?`r2 fmt, 
-                         ...`r3 inject parg_t<`r4> ap)
+                         ... inject parg_t<`r4> ap)
   __attribute__((format(printf,2,3)))
   ;
 
@@ -253,15 +253,15 @@ extern tunion ScanfArg<`r::R> {
 typedef tunion `r2 ScanfArg<`r1> sarg_t<`r1,`r2>;
 
 // Scanning functions behave as in C...
-extern int scanf(const char ?`r1 fmt, ...`r2 inject sarg_t<`r3,`r4>)
+extern int scanf(const char ?`r1 fmt, ... inject sarg_t<`r3,`r4>)
   __attribute__((format(scanf,1,2)))
   ;
 extern int fscanf(FILE @`r1 stream, const char ?`r2 fmt, 
-                     ...`r3 inject sarg_t<`r4,`r5>)
+                     ... inject sarg_t<`r4,`r5>)
   __attribute__((format(scanf,2,3)))
   ;
 extern int sscanf(const char ?`r src, const char ?`r1 fmt, 
-                     ...`r2 inject sarg_t<`r3,`r4>)
+                     ... inject sarg_t<`r3,`r4>)
   __attribute__((format(scanf,2,3)))
   ;
 

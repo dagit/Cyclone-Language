@@ -221,7 +221,6 @@ namespace Absyn {
     opt_t<var_t> name;
     tqual_t tq;
     type_t  type;
-    type_t  rgn;
     bool    inject;
   };
 

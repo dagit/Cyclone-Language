@@ -286,7 +286,7 @@ static doc_t concat(doc_t d1, doc_t d2) {
               min(d1->mw, d1->mwo+d2->mw),
               make_fn(concat_f, new $(d1,d2)));
 }    
-doc_t cat(...`r doc_t l) {
+doc_t cat(... doc_t l) {
   let d = nil_doc();
   for (int i = l.size - 1; i >= 0; i--) {
     d = concat(l[i],d);

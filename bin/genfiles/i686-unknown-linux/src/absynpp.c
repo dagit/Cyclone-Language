@@ -92,19 +92,18 @@ const int Cyc_Absyn_Unknown_b= 0; static const int Cyc_Absyn_Upper_b= 0; struct
 Cyc_Absyn_Upper_b_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; struct Cyc_Absyn_PtrInfo{
 void* elt_typ; void* rgn_typ; struct Cyc_Absyn_Conref* nullable; struct Cyc_Absyn_Tqual
 tq; struct Cyc_Absyn_Conref* bounds; } ; struct Cyc_Absyn_VarargInfo{ struct Cyc_Core_Opt*
-name; struct Cyc_Absyn_Tqual tq; void* type; void* rgn; int inject; } ; struct
-Cyc_Absyn_FnInfo{ struct Cyc_List_List* tvars; struct Cyc_Core_Opt* effect; void*
-ret_typ; struct Cyc_List_List* args; int c_varargs; struct Cyc_Absyn_VarargInfo*
-cyc_varargs; struct Cyc_List_List* rgn_po; struct Cyc_List_List* attributes; } ;
-struct Cyc_Absyn_UnknownTunionInfo{ struct _tuple0* name; int is_xtunion; } ;
-static const int Cyc_Absyn_UnknownTunion= 0; struct Cyc_Absyn_UnknownTunion_struct{
-int tag; struct Cyc_Absyn_UnknownTunionInfo f1; } ; static const int Cyc_Absyn_KnownTunion=
-1; struct Cyc_Absyn_KnownTunion_struct{ int tag; struct Cyc_Absyn_Tuniondecl* f1;
-} ; struct Cyc_Absyn_TunionInfo{ void* tunion_info; struct Cyc_List_List* targs;
-void* rgn; } ; struct Cyc_Absyn_UnknownTunionFieldInfo{ struct _tuple0*
-tunion_name; struct _tuple0* field_name; int is_xtunion; } ; static const int
-Cyc_Absyn_UnknownTunionfield= 0; struct Cyc_Absyn_UnknownTunionfield_struct{ int
-tag; struct Cyc_Absyn_UnknownTunionFieldInfo f1; } ; static const int Cyc_Absyn_KnownTunionfield=
+name; struct Cyc_Absyn_Tqual tq; void* type; int inject; } ; struct Cyc_Absyn_FnInfo{
+struct Cyc_List_List* tvars; struct Cyc_Core_Opt* effect; void* ret_typ; struct
+Cyc_List_List* args; int c_varargs; struct Cyc_Absyn_VarargInfo* cyc_varargs;
+struct Cyc_List_List* rgn_po; struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_UnknownTunionInfo{
+struct _tuple0* name; int is_xtunion; } ; static const int Cyc_Absyn_UnknownTunion=
+0; struct Cyc_Absyn_UnknownTunion_struct{ int tag; struct Cyc_Absyn_UnknownTunionInfo
+f1; } ; static const int Cyc_Absyn_KnownTunion= 1; struct Cyc_Absyn_KnownTunion_struct{
+int tag; struct Cyc_Absyn_Tuniondecl* f1; } ; struct Cyc_Absyn_TunionInfo{ void*
+tunion_info; struct Cyc_List_List* targs; void* rgn; } ; struct Cyc_Absyn_UnknownTunionFieldInfo{
+struct _tuple0* tunion_name; struct _tuple0* field_name; int is_xtunion; } ;
+static const int Cyc_Absyn_UnknownTunionfield= 0; struct Cyc_Absyn_UnknownTunionfield_struct{
+int tag; struct Cyc_Absyn_UnknownTunionFieldInfo f1; } ; static const int Cyc_Absyn_KnownTunionfield=
 1; struct Cyc_Absyn_KnownTunionfield_struct{ int tag; struct Cyc_Absyn_Tuniondecl*
 f1; struct Cyc_Absyn_Tunionfield* f2; } ; struct Cyc_Absyn_TunionFieldInfo{ void*
 field_info; struct Cyc_List_List* targs; } ; static const int Cyc_Absyn_VoidType=
@@ -1047,33 +1046,32 @@ struct Cyc_List_List* _temp454=( struct Cyc_List_List*) GC_malloc( sizeof(
 struct Cyc_List_List)); _temp454->hd=( void*) Cyc_PP_text( _tag_arr("...",
 sizeof( unsigned char), 4u)); _temp454->tl= 0; _temp454;}));} else{ if(
 cyc_varargs !=  0){ struct Cyc_PP_Doc* _temp455=({ struct Cyc_PP_Doc* _temp457[
-4u]; _temp457[ 3u]= Cyc_Absynpp_funarg2doc(({ struct _tuple1* _temp458=( struct
+3u]; _temp457[ 2u]= Cyc_Absynpp_funarg2doc(({ struct _tuple1* _temp458=( struct
 _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp458->f1=(( struct Cyc_Absyn_VarargInfo*)
 _check_null( cyc_varargs))->name; _temp458->f2=(( struct Cyc_Absyn_VarargInfo*)
 _check_null( cyc_varargs))->tq; _temp458->f3=( void*)(( struct Cyc_Absyn_VarargInfo*)
-_check_null( cyc_varargs))->type; _temp458;})); _temp457[ 2u]=(( struct Cyc_Absyn_VarargInfo*)
+_check_null( cyc_varargs))->type; _temp458;})); _temp457[ 1u]=(( struct Cyc_Absyn_VarargInfo*)
 _check_null( cyc_varargs))->inject? Cyc_PP_text( _tag_arr(" inject ", sizeof(
 unsigned char), 9u)): Cyc_PP_text( _tag_arr(" ", sizeof( unsigned char), 2u));
-_temp457[ 1u]= Cyc_Absynpp_typ2doc(( void*)(( struct Cyc_Absyn_VarargInfo*)
-_check_null( cyc_varargs))->rgn); _temp457[ 0u]= Cyc_PP_text( _tag_arr("...",
-sizeof( unsigned char), 4u)); Cyc_PP_cat( _tag_arr( _temp457, sizeof( struct Cyc_PP_Doc*),
-4u));}); _temp453=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x, struct
-Cyc_List_List* y)) Cyc_List_append)( _temp453,({ struct Cyc_List_List* _temp456=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp456->hd=(
-void*) _temp455; _temp456->tl= 0; _temp456;}));}}{ struct Cyc_PP_Doc* _temp459=
-Cyc_PP_group( _tag_arr("", sizeof( unsigned char), 1u), _tag_arr("", sizeof(
-unsigned char), 1u), _tag_arr(",", sizeof( unsigned char), 2u), _temp453); if(
-effopt !=  0){ _temp459=({ struct Cyc_PP_Doc* _temp460[ 3u]; _temp460[ 2u]= Cyc_Absynpp_eff2doc((
-void*)(( struct Cyc_Core_Opt*) _check_null( effopt))->v); _temp460[ 1u]= Cyc_PP_text(
-_tag_arr(";", sizeof( unsigned char), 2u)); _temp460[ 0u]= _temp459; Cyc_PP_cat(
-_tag_arr( _temp460, sizeof( struct Cyc_PP_Doc*), 3u));});} if( rgn_po !=  0){
-_temp459=({ struct Cyc_PP_Doc* _temp461[ 3u]; _temp461[ 2u]= Cyc_Absynpp_rgnpo2doc(
-rgn_po); _temp461[ 1u]= Cyc_PP_text( _tag_arr(":", sizeof( unsigned char), 2u));
-_temp461[ 0u]= _temp459; Cyc_PP_cat( _tag_arr( _temp461, sizeof( struct Cyc_PP_Doc*),
-3u));});} return({ struct Cyc_PP_Doc* _temp462[ 3u]; _temp462[ 2u]= Cyc_PP_text(
-_tag_arr(")", sizeof( unsigned char), 2u)); _temp462[ 1u]= _temp459; _temp462[ 0u]=
-Cyc_PP_text( _tag_arr("(", sizeof( unsigned char), 2u)); Cyc_PP_cat( _tag_arr(
-_temp462, sizeof( struct Cyc_PP_Doc*), 3u));});}} struct _tuple1* Cyc_Absynpp_arg_mk_opt(
+_temp457[ 0u]= Cyc_PP_text( _tag_arr("...", sizeof( unsigned char), 4u)); Cyc_PP_cat(
+_tag_arr( _temp457, sizeof( struct Cyc_PP_Doc*), 3u));}); _temp453=(( struct Cyc_List_List*(*)(
+struct Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_append)( _temp453,({
+struct Cyc_List_List* _temp456=( struct Cyc_List_List*) GC_malloc( sizeof(
+struct Cyc_List_List)); _temp456->hd=( void*) _temp455; _temp456->tl= 0;
+_temp456;}));}}{ struct Cyc_PP_Doc* _temp459= Cyc_PP_group( _tag_arr("", sizeof(
+unsigned char), 1u), _tag_arr("", sizeof( unsigned char), 1u), _tag_arr(",",
+sizeof( unsigned char), 2u), _temp453); if( effopt !=  0){ _temp459=({ struct
+Cyc_PP_Doc* _temp460[ 3u]; _temp460[ 2u]= Cyc_Absynpp_eff2doc(( void*)(( struct
+Cyc_Core_Opt*) _check_null( effopt))->v); _temp460[ 1u]= Cyc_PP_text( _tag_arr(";",
+sizeof( unsigned char), 2u)); _temp460[ 0u]= _temp459; Cyc_PP_cat( _tag_arr(
+_temp460, sizeof( struct Cyc_PP_Doc*), 3u));});} if( rgn_po !=  0){ _temp459=({
+struct Cyc_PP_Doc* _temp461[ 3u]; _temp461[ 2u]= Cyc_Absynpp_rgnpo2doc( rgn_po);
+_temp461[ 1u]= Cyc_PP_text( _tag_arr(":", sizeof( unsigned char), 2u)); _temp461[
+0u]= _temp459; Cyc_PP_cat( _tag_arr( _temp461, sizeof( struct Cyc_PP_Doc*), 3u));});}
+return({ struct Cyc_PP_Doc* _temp462[ 3u]; _temp462[ 2u]= Cyc_PP_text( _tag_arr(")",
+sizeof( unsigned char), 2u)); _temp462[ 1u]= _temp459; _temp462[ 0u]= Cyc_PP_text(
+_tag_arr("(", sizeof( unsigned char), 2u)); Cyc_PP_cat( _tag_arr( _temp462,
+sizeof( struct Cyc_PP_Doc*), 3u));});}} struct _tuple1* Cyc_Absynpp_arg_mk_opt(
 struct _tuple3* arg){ return({ struct _tuple1* _temp463=( struct _tuple1*)
 GC_malloc( sizeof( struct _tuple1)); _temp463->f1=({ struct Cyc_Core_Opt*
 _temp464=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));

@@ -310,7 +310,7 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
     bool b = check_public_type_list(ae, seen, obj, name, get_type2, args)
       && check_public_type(ae, seen, obj, name, ret);
     if (cyc_varargs != NULL) {
-      let VarargInfo{_,_,vt,_,_} = *cyc_varargs;
+      let VarargInfo{_,_,vt,_} = *cyc_varargs;
       b = check_public_type(ae, seen, obj, name, vt);
     }
     return b;

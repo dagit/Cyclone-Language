@@ -1675,17 +1675,17 @@ parameter_type_list:
     { $$=^$(new $(List::imp_rev($1),false,NULL,$2,$3)); }
 | parameter_list ',' ELLIPSIS optional_effect optional_rgn_order
     { $$=^$(new $(List::imp_rev($1),true,NULL,$4,$5)); }
-| ELLIPSIS rgn optional_inject parameter_declaration optional_effect
+| ELLIPSIS optional_inject parameter_declaration optional_effect
   optional_rgn_order
-{ let &$(n,tq,t) = $4;
-  let v = new VarargInfo {.name = n,.tq = tq,.type = t,.rgn = $2,.inject = $3};
-  $$=^$(new $(NULL,false,v,$5,$6)); 
+{ let &$(n,tq,t) = $3;
+  let v = new VarargInfo {.name = n,.tq = tq,.type = t,.inject = $2};
+  $$=^$(new $(NULL,false,v,$4,$5)); 
 }
-| parameter_list ',' ELLIPSIS rgn optional_inject parameter_declaration
+| parameter_list ',' ELLIPSIS optional_inject parameter_declaration
   optional_effect optional_rgn_order
-{ let &$(n,tq,t) = $6;
-  let v = new VarargInfo {.name = n,.tq = tq,.type = t,.rgn = $4,.inject = $5};
-  $$=^$(new $(List::imp_rev($1),false,v,$7,$8)); 
+{ let &$(n,tq,t) = $5;
+  let v = new VarargInfo {.name = n,.tq = tq,.type = t,.inject = $4};
+  $$=^$(new $(List::imp_rev($1),false,v,$6,$7)); 
 }
 ;
 

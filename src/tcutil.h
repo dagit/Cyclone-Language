@@ -36,11 +36,11 @@ using Position;
 using Tcenv;
 
 extern xtunion exn {extern TypeErr};
-extern `a impos(string_t fmt, ...`r1 inject parg_t<`r2> ap)
+extern `a impos(string_t fmt, ... inject parg_t<`r2> ap)
    __attribute__((format(printf,1,2))) ;
-extern void terr(seg_t, string_t fmt, ...`r1 inject parg_t<`r2> ap)
+extern void terr(seg_t, string_t fmt, ... inject parg_t<`r2> ap)
    __attribute__((format(printf,2,3))) ;
-extern void warn(seg_t, string_t fmt, ...`r1 inject parg_t<`r2> ap)
+extern void warn(seg_t, string_t fmt, ... inject parg_t<`r2> ap)
    __attribute__((format(printf,2,3))) ;
 extern void flush_warnings();
 extern void err_noloc(string_t);

@@ -75,7 +75,7 @@ namespace Std {
   };
 
   // Why is open() not with close() in unistd.h?  Historical?
-  extern int open(string_t pathname, int flags, ...`r mode_t mode);
+  extern int open(string_t pathname, int flags, ... mode_t mode);
   extern int stat(string_t filename, struct stat_t @`r buf);
   extern "C" int fstat(int fd, struct stat_t @`r buf);
   extern int lstat(string_t filename, struct stat_t @`r buf);

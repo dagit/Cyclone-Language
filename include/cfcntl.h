@@ -57,7 +57,7 @@ namespace Std {
     Flock(struct flock *);
   };
 
-  extern int fcntl(int fd, int cmd, ...`r tunion FcntlArg argv);
+  extern int fcntl(int fd, int cmd, ... tunion FcntlArg argv);
 }
 
 #endif
