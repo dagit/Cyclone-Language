@@ -542,14 +542,14 @@ ds->dinfo |=(int)Cyc_PrattProver_Unsigned_valid;
 return;}{
 # 196
 struct Cyc_PrattProver_Dist d=({struct Cyc_PrattProver_Dist _tmp79;_tmp79.length=dist,_tmp79.prim=origin;_tmp79;});
-({struct Cyc_PrattProver_Distance*_tmp97=({struct Cyc_PrattProver_Distance*_tmp2A=_cycalloc(sizeof(*_tmp2A));_tmp2A->next=i->distance,_tmp2A->target=j,is_signed?_tmp2A->dinfo=2:(_tmp2A->dinfo=1),_tmp2A->unsigned_dist=d,_tmp2A->signed_dist=d;_tmp2A;});i->distance=_tmp97;});}}}struct _tuple12{int f1;int f2;};
+({struct Cyc_PrattProver_Distance*_tmp97=({struct Cyc_PrattProver_Distance*_tmp2A=_cycalloc(sizeof(*_tmp2A));_tmp2A->next=i->distance,_tmp2A->target=j,is_signed?_tmp2A->dinfo=Cyc_PrattProver_Signed_valid:(_tmp2A->dinfo=Cyc_PrattProver_Unsigned_valid),_tmp2A->unsigned_dist=d,_tmp2A->signed_dist=d;_tmp2A;});i->distance=_tmp97;});}}}struct _tuple12{int f1;int f2;};
 # 207 "pratt_prover.cyc"
 static struct _tuple12 Cyc_PrattProver_is_sum_overflow(int c1,int c2){
 int _tmp2B=c1 + c2;int sum=_tmp2B;
 # 210
 if((~(c1 ^ c2)& (sum ^ c1))>> 31){
 if(sum >> 31)return({struct _tuple12 _tmp7A;_tmp7A.f1=1,_tmp7A.f2=2147483647;_tmp7A;});else{
-return({struct _tuple12 _tmp7B;_tmp7B.f1=1,_tmp7B.f2=-2147483648;_tmp7B;});}}
+return({struct _tuple12 _tmp7B;_tmp7B.f1=1,_tmp7B.f2=- -2147483648;_tmp7B;});}}
 # 214
 return({struct _tuple12 _tmp7C;_tmp7C.f1=0,_tmp7C.f2=c1 + c2;_tmp7C;});}
 # 225 "pratt_prover.cyc"
@@ -826,14 +826,14 @@ res->distance=dist_res;}}}}
 return res;}
 # 581
 void*Cyc_PrattProver_int2term(int is_signed,int c){
-enum Cyc_Absyn_Sign _tmp64=is_signed?0U: 1U;enum Cyc_Absyn_Sign s=_tmp64;
+enum Cyc_Absyn_Sign _tmp64=is_signed?Cyc_Absyn_Signed: Cyc_Absyn_Unsigned;enum Cyc_Absyn_Sign s=_tmp64;
 struct Cyc_Absyn_Exp*_tmp65=Cyc_Absyn_int_exp(s,c,0U);struct Cyc_Absyn_Exp*e=_tmp65;
 ({void*_tmpBC=Cyc_Absyn_int_type(s,Cyc_Absyn_Int_sz);e->topt=_tmpBC;});
 return Cyc_AssnDef_cnst(e);}
 # 587
 void*Cyc_PrattProver_edge2assn(void*source,void*target,int weight,int is_signed){
-enum Cyc_AssnDef_Primreln _tmp66=is_signed?3U: 5U;enum Cyc_AssnDef_Primreln s=_tmp66;
-enum Cyc_AssnDef_Primreln _tmp67=is_signed?2U: 4U;enum Cyc_AssnDef_Primreln s1=_tmp67;
+enum Cyc_AssnDef_Primreln _tmp66=is_signed?Cyc_AssnDef_SLte: Cyc_AssnDef_ULte;enum Cyc_AssnDef_Primreln s=_tmp66;
+enum Cyc_AssnDef_Primreln _tmp67=is_signed?Cyc_AssnDef_SLt: Cyc_AssnDef_ULt;enum Cyc_AssnDef_Primreln s1=_tmp67;
 void*result=(void*)& Cyc_AssnDef_true_assn;
 if(({void*_tmpBD=source;_tmpBD == Cyc_AssnDef_zero();}))
 result=({void*_tmpBF=Cyc_PrattProver_int2term(is_signed,- weight);enum Cyc_AssnDef_Primreln _tmpBE=s;Cyc_AssnDef_prim(_tmpBF,_tmpBE,target);});else{

@@ -401,8 +401,8 @@ int Cyc_Position_use_gcc_style_location=1;static char _tmp0[1U]="";
 static struct _fat_ptr Cyc_Position_source={_tmp0,_tmp0,_tmp0 + 1U};
 # 37
 unsigned Cyc_Position_segment_join(unsigned s1,unsigned s2){
-if(s1 == 0U)return s2;
-if(s2 == 0U)return s1;
+if(s1 == (unsigned)0)return s2;
+if(s2 == (unsigned)0)return s1;
 return s1;}
 # 42
 int Cyc_Position_segment_equals(unsigned s1,unsigned s2){

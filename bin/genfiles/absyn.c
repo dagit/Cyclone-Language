@@ -529,7 +529,7 @@ int i=Cyc_strptrcmp((struct _fat_ptr*)ss1->hd,(struct _fat_ptr*)ss2->hd);
 if(i != 0)return i;}
 # 40
 if(ss1 != 0)return 1;
-if(ss2 != 0)return -1;
+if(ss2 != 0)return - 1;
 return 0;}
 # 44
 int Cyc_Absyn_varlist_cmp(struct Cyc_List_List*vs1,struct Cyc_List_List*vs2){
@@ -545,15 +545,15 @@ if(i != 0)return i;{
 struct _tuple12 _tmp6=({struct _tuple12 _tmpF5;_tmpF5.f1=n1,_tmpF5.f2=n2;_tmpF5;});struct _tuple12 _stmttmp0=_tmp6;struct _tuple12 _tmp7=_stmttmp0;void*_tmp9;void*_tmp8;switch(((_tmp7.f1).Abs_n).tag){case 4: if(((_tmp7.f2).Loc_n).tag == 4)
 return 0;else{
 # 60
-return -1;}case 1: switch(((_tmp7.f2).Loc_n).tag){case 1: _tmp8=((_tmp7.f1).Rel_n).val;_tmp9=((_tmp7.f2).Rel_n).val;{struct Cyc_List_List*x1=_tmp8;struct Cyc_List_List*x2=_tmp9;
+return - 1;}case 1: switch(((_tmp7.f2).Loc_n).tag){case 1: _tmp8=((_tmp7.f1).Rel_n).val;_tmp9=((_tmp7.f2).Rel_n).val;{struct Cyc_List_List*x1=_tmp8;struct Cyc_List_List*x2=_tmp9;
 # 56
 return Cyc_Absyn_strlist_cmp(x1,x2);}case 4: goto _LL11;default:
 # 62
- return -1;}case 2: switch(((_tmp7.f2).Rel_n).tag){case 2: _tmp8=((_tmp7.f1).Abs_n).val;_tmp9=((_tmp7.f2).Abs_n).val;{struct Cyc_List_List*x1=_tmp8;struct Cyc_List_List*x2=_tmp9;
+ return - 1;}case 2: switch(((_tmp7.f2).Rel_n).tag){case 2: _tmp8=((_tmp7.f1).Abs_n).val;_tmp9=((_tmp7.f2).Abs_n).val;{struct Cyc_List_List*x1=_tmp8;struct Cyc_List_List*x2=_tmp9;
 # 57
 return Cyc_Absyn_strlist_cmp(x1,x2);}case 4: goto _LL11;case 1: goto _LL15;default:
 # 64
- return -1;}default: switch(((_tmp7.f2).Rel_n).tag){case 3: _tmp8=((_tmp7.f1).C_n).val;_tmp9=((_tmp7.f2).C_n).val;{struct Cyc_List_List*x1=_tmp8;struct Cyc_List_List*x2=_tmp9;
+ return - 1;}default: switch(((_tmp7.f2).Rel_n).tag){case 3: _tmp8=((_tmp7.f1).C_n).val;_tmp9=((_tmp7.f2).C_n).val;{struct Cyc_List_List*x1=_tmp8;struct Cyc_List_List*x2=_tmp9;
 # 58
 return Cyc_Absyn_strlist_cmp(x1,x2);}case 4: _LL11:
 # 61
@@ -912,8 +912,8 @@ return Cyc_Absyn_int_exp(Cyc_Absyn_Signed,i,loc);}
 struct Cyc_Absyn_Exp*Cyc_Absyn_uint_exp(unsigned i,unsigned loc){
 static struct Cyc_Absyn_Const_e_Absyn_Raw_exp_struct uzero={0,{.Int_c={5,{Cyc_Absyn_Unsigned,0}}}};
 static struct Cyc_Absyn_Const_e_Absyn_Raw_exp_struct uone={0,{.Int_c={5,{Cyc_Absyn_Unsigned,1}}}};
-if(i == 0U)return Cyc_Absyn_new_exp((void*)& uzero,loc);
-if(i == 1U)return Cyc_Absyn_new_exp((void*)& uone,loc);
+if(i == (unsigned)0)return Cyc_Absyn_new_exp((void*)& uzero,loc);
+if(i == (unsigned)1)return Cyc_Absyn_new_exp((void*)& uone,loc);
 return Cyc_Absyn_int_exp(Cyc_Absyn_Unsigned,(int)i,loc);}
 # 497
 struct Cyc_Absyn_Exp*Cyc_Absyn_bool_exp(int b,unsigned loc){return Cyc_Absyn_signed_int_exp(b?1: 0,loc);}
@@ -1283,7 +1283,7 @@ if(((struct Cyc_Absyn_AggrdeclImpl*)_check_null(impl))->tagged)return 0;{
 struct Cyc_List_List*_tmpD4=impl->fields;struct Cyc_List_List*fields=_tmpD4;
 return fields == 0 ||((struct Cyc_Absyn_Aggrfield*)fields->hd)->requires_clause == 0;}}}}else{if(((_tmpCF.UnknownAggr).val).f3 == 0){_tmpD0=((_tmpCF.UnknownAggr).val).f1;{enum Cyc_Absyn_AggrKind k=_tmpD0;
 return(int)k == (int)Cyc_Absyn_UnionA;}}else{_tmpD0=((_tmpCF.UnknownAggr).val).f1;_tmpD1=(int)(((_tmpCF.UnknownAggr).val).f3)->v;{enum Cyc_Absyn_AggrKind k=_tmpD0;int b=_tmpD1;
-return(int)k == 1 && !b;}}};}}else{goto _LL5;}default: _LL5:
+return(int)k == (int)1U && !b;}}};}}else{goto _LL5;}default: _LL5:
 # 943
  return 0;};}
 # 946

@@ -454,7 +454,7 @@ if(n < 0)
 Cyc_XP_fromint(((struct Cyc_AP_T*)_check_null(z))->size,z->digits,(unsigned long)(- n));else{
 # 49
 Cyc_XP_fromint(((struct Cyc_AP_T*)_check_null(z))->size,z->digits,(unsigned long)n);}}
-z->sign=n < 0?-1: 1;
+z->sign=n < 0?- 1: 1;
 return Cyc_normalize(z,z->size);}
 # 53
 static struct Cyc_AP_T*Cyc_normalize(struct Cyc_AP_T*z,int n){
@@ -533,7 +533,7 @@ z=Cyc_mk(x->ndigits + y->ndigits);
 Cyc_XP_mul(((struct Cyc_AP_T*)_check_null(z))->digits,x->ndigits,x->digits,y->ndigits,y->digits);
 # 120
 Cyc_normalize(z,z->size);
-z->sign=(z->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0 ||(x->sign ^ y->sign)== 0)?1: -1;
+z->sign=(z->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0 ||(x->sign ^ y->sign)== 0)?1: - 1;
 # 123
 return z;}
 # 125
@@ -584,7 +584,7 @@ struct _fat_ptr tmp=({unsigned _tmp1B=(unsigned)((x->ndigits + y->ndigits)+ 2)* 
 # 172
 Cyc_normalize(q,q->size);
 Cyc_normalize(r,r->size);
-q->sign=(q->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(q->digits,sizeof(unsigned char),0))== 0 ||(x->sign ^ y->sign)== 0)?1: -1;
+q->sign=(q->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(q->digits,sizeof(unsigned char),0))== 0 ||(x->sign ^ y->sign)== 0)?1: - 1;
 # 176
 return q;}
 # 178
@@ -774,7 +774,7 @@ carry=({int _tmpA7=((struct Cyc_AP_T*)_check_null(z))->size;struct _fat_ptr _tmp
 # 367
 carry == 0?0:({struct _fat_ptr _tmpA8=({const char*_tmp3E="carry == 0";_tag_fat(_tmp3E,sizeof(char),11U);});((int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail)(_tmpA8,({const char*_tmp3F="ap.cyc";_tag_fat(_tmp3F,sizeof(char),7U);}),367U);});
 Cyc_normalize(z,z->size);
-z->sign=(z->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0 ||(int)sign != 45)?1: -1;
+z->sign=(z->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0 ||(int)sign != (int)'-')?1: - 1;
 return z;}
 # 372
 char*Cyc_AP_tostr(struct Cyc_AP_T*x,int base){

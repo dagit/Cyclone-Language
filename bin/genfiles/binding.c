@@ -1016,7 +1016,7 @@ struct _handler_cons _tmp13D;_push_handler(& _tmp13D);{int _tmp13F=0;if(setjmp(_
 {struct Cyc_Absyn_Aggrdecl*_tmp140=((struct Cyc_Absyn_Aggrdecl*(*)(unsigned,struct Cyc_Binding_NSCtxt*,struct _tuple0*,struct Cyc_Absyn_Aggrdecl*(*)(struct Cyc_Binding_ResolveNSEnv*,struct _fat_ptr*)))Cyc_Binding_resolve_lookup)(loc,env->ns,qv,Cyc_Binding_lookup_aggrdecl);struct Cyc_Absyn_Aggrdecl*ad=_tmp140;
 if((int)ad->kind != (int)ak)
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmp142=({struct Cyc_Warn_String_Warn_Warg_struct _tmp259;_tmp259.tag=0,({struct _fat_ptr _tmp2CD=({const char*_tmp143="struct vs. union mismatch with earlier declaration";_tag_fat(_tmp143,sizeof(char),51U);});_tmp259.f1=_tmp2CD;});_tmp259;});void*_tmp141[1];_tmp141[0]=& _tmp142;({unsigned _tmp2CE=loc;Cyc_Warn_err2(_tmp2CE,_tag_fat(_tmp141,sizeof(void*),1));});});
-if((((int)ak == 1 && bo != 0)&& ad->impl != 0)&&((struct Cyc_Absyn_AggrdeclImpl*)_check_null(ad->impl))->tagged != (int)bo->v)
+if((((int)ak == (int)1U && bo != 0)&& ad->impl != 0)&&((struct Cyc_Absyn_AggrdeclImpl*)_check_null(ad->impl))->tagged != (int)bo->v)
 # 695
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmp145=({struct Cyc_Warn_String_Warn_Warg_struct _tmp25A;_tmp25A.tag=0,({struct _fat_ptr _tmp2CF=({const char*_tmp146="@tagged mismatch with earlier declaration";_tag_fat(_tmp146,sizeof(char),42U);});_tmp25A.f1=_tmp2CF;});_tmp25A;});void*_tmp144[1];_tmp144[0]=& _tmp145;({unsigned _tmp2D0=loc;Cyc_Warn_err2(_tmp2D0,_tag_fat(_tmp144,sizeof(void*),1));});});
 ({union Cyc_Absyn_AggrInfo _tmp2D1=Cyc_Absyn_UnknownAggr(ak,ad->name,bo);*info=_tmp2D1;});
@@ -1328,7 +1328,7 @@ if(!Cyc_Binding_at_toplevel(env)){
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmp1DB=({struct Cyc_Warn_String_Warn_Warg_struct _tmp264;_tmp264.tag=0,({struct _fat_ptr _tmp31B=({const char*_tmp1DC="nested type definitions are not yet supported";_tag_fat(_tmp1DC,sizeof(char),46U);});_tmp264.f1=_tmp31B;});_tmp264;});void*_tmp1DA[1];_tmp1DA[0]=& _tmp1DB;({unsigned _tmp31C=loc;Cyc_Warn_err2(_tmp31C,_tag_fat(_tmp1DA,sizeof(void*),1));});});
 goto _LL0;}
 # 1023
-Cyc_Binding_absolutize_decl(loc,env,td->name,td->extern_c?4U: 2U);{
+Cyc_Binding_absolutize_decl(loc,env,td->name,td->extern_c?Cyc_Absyn_ExternC: Cyc_Absyn_Public);{
 struct _tuple0*_tmp1DD=td->name;struct _tuple0*_stmttmp1C=_tmp1DD;struct _tuple0*_tmp1DE=_stmttmp1C;void*_tmp1E0;union Cyc_Absyn_Nmspace _tmp1DF;_tmp1DF=_tmp1DE->f1;_tmp1E0=_tmp1DE->f2;{union Cyc_Absyn_Nmspace decl_ns=_tmp1DF;struct _fat_ptr*decl_name=_tmp1E0;
 # 1026
 struct Cyc_Binding_ResolveNSEnv*_tmp1E1=((struct Cyc_Binding_ResolveNSEnv*(*)(struct Cyc_Binding_NSCtxt*,union Cyc_Absyn_Nmspace))Cyc_Binding_get_ns_data)(env->ns,decl_ns);struct Cyc_Binding_ResolveNSEnv*decl_ns_data=_tmp1E1;

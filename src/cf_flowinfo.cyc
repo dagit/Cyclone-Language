@@ -292,7 +292,7 @@ absRval_t typ_to_absrval(flow_env_t fenv, type_t t, bool no_init_bits_only, absR
 // abstract r-values pointed to are made Consumed.
 bool is_unique_consumed(exp_t e, int env_iteration, absRval_t r, bool @needs_unconsume) {
   switch (r) {
-  case &Consumed(consumer,iteration,r):
+  case &Consumed(consumer,iteration,r,local):
     if (consumer==e && iteration==env_iteration) {
       *needs_unconsume = true;
       return false;
@@ -319,7 +319,7 @@ bool is_unique_consumed(exp_t e, int env_iteration, absRval_t r, bool @needs_unc
 // abstract r-values pointed to are made Consumed.
 absRval_t make_unique_unconsumed(flow_env_t fenv, absRval_t r) {
   switch (r) {
-  case &Consumed(consumer,iteration,r):
+  case &Consumed(consumer,iteration,r,local):
     return r;
   case &Aggregate(uinfo,d):
     let sz = numelts(d);
@@ -344,17 +344,17 @@ absRval_t make_unique_unconsumed(flow_env_t fenv, absRval_t r) {
 
 // The invariant here is that for aggregates and named locations, the
 // abstract r-values pointed to are made Consumed.
-absRval_t make_unique_consumed(flow_env_t fenv, type_t t, exp_t consumer, int iteration, absRval_t r) {
+absRval_t make_unique_consumed(flow_env_t fenv, type_t t, exp_t consumer, int iteration, absRval_t r, bool local_alias) {
   switch $(compress(t),r) {
   case $(_,&NamedLocation(s,r2)):
-    let r3 = make_unique_consumed(fenv,t,consumer,iteration,r2);
+    let r3 = make_unique_consumed(fenv,t,consumer,iteration,r2,local_alias);
     if (r3 != r2) return new NamedLocation(s,r3);
     else return r;
   case $(&TupleType(tqts),&Aggregate(b,d)):
     let sz = numelts(d);
     aggrdict_t d2 = new { for i < sz : fenv->unknown_all };
     for (int i = 0; i < sz; i++) {
-      d2[i] = make_unique_consumed(fenv,(*tqts->hd)[1],consumer,iteration,d[i]);
+      d2[i] = make_unique_consumed(fenv,(*tqts->hd)[1],consumer,iteration,d[i],local_alias);
       tqts = tqts->tl;
     }
     return new Aggregate(b,d2);
@@ -368,12 +368,12 @@ absRval_t make_unique_consumed(flow_env_t fenv, type_t t, exp_t consumer, int it
     for (int i = 0; i < sz; i++, fs = fs->tl) {
       let &Aggrfield(n,_,t2,_,_,_) = fs->hd;
       if (numelts(*n) != 1)
-        d2[i] = make_unique_consumed(fenv,t2,consumer,iteration,d[i]);
+        d2[i] = make_unique_consumed(fenv,t2,consumer,iteration,d[i],local_alias);
     }
     return new Aggregate(b,d2);
   default: 
     if (Tcutil::is_noalias_pointer(t,false))
-      return new Consumed(consumer,iteration,r);
+      return new Consumed(consumer,iteration,r,local_alias);
     return r;
   }
 }
@@ -412,7 +412,7 @@ static void add_place(escpile_t pile, place_t place) {
 }
 static void add_places(escpile_t pile, absRval_t r) {
   switch(r) {
-  case &Consumed(_,_,r): add_places(pile,r); return;
+  case &Consumed(_,_,r,_): add_places(pile,r); return;
   case &NamedLocation(_,r): add_places(pile,r); return;
   case &AddressOf(p): add_place(pile, p); return;
   case &Aggregate(b,d):
@@ -434,8 +434,8 @@ static absRval_t insert_place_inner(absRval_t new_val, absRval_t old_val) {
     // we eliminate the distinction as to which field was last
     // written since we're changing the values of things
     return new Aggregate(UnionRInfo(is_union,-1),d2);
-  case &Consumed(e,i,rval):
-    return new Consumed(e,i,insert_place_inner(new_val,rval));
+  case &Consumed(e,i,rval,l):
+    return new Consumed(e,i,insert_place_inner(new_val,rval),l);
   case &NamedLocation(n,rval):
     return new NamedLocation(n,insert_place_inner(new_val,rval));
   default: return new_val;
@@ -516,7 +516,7 @@ static initlevel_t initlevel_approx(absRval_t r) {
   case &Esc(il):      return il;
   case &Zero:
   case &NotZeroAll:    return AllIL;
-  case &Consumed(_,_,r): return NoneIL;
+  case &Consumed(_,_,r,_): return NoneIL;
   default: Warn::impos("initlevel_approx");
   }
 }
@@ -576,7 +576,7 @@ absRval_t lookup_place(flowdict_t d, place_t place) {
     case $(&NamedLocation(_,rval), _):
       ans = rval; goto retry;
     // FIX: any case when I don't want to go under the Consumed ?
-    case $(&Consumed(_,_,rval), _):
+    case $(&Consumed(_,_,rval,_), _):
       ans = rval; goto retry;
     case $(&Aggregate(is_union,d2), &Dot(fname)):
       ans = d2[fname];
@@ -598,7 +598,7 @@ absRval_t lookup_place(flowdict_t d, place_t place) {
 static bool is_rval_unescaped(absRval_t rval) {
   switch(rval) {
   case &Esc(_):       return false;
-  case &Consumed(_,_,r): return is_rval_unescaped(r);
+  case &Consumed(_,_,r,_): return is_rval_unescaped(r);
   case &NamedLocation(_,r): return is_rval_unescaped(r);
   case &Aggregate(UnionRInfo(is_union,field_no),d):
     if (is_union && field_no != -1)
@@ -715,10 +715,10 @@ static absRval_t assign_place_outer(struct AssignEnv @ env,
     let new_r = assign_place_outer(env,path,path_prefix,r,newval);
     if (new_r == r) return oldval;
     else return new NamedLocation(n,new_r);
-  case $(_,&Consumed(x,y,r)):
+  case $(_,&Consumed(x,y,r,l)):
     let new_r = assign_place_outer(env,path,path_prefix,r,newval);
     if (new_r == r) return oldval;
-    else return new Consumed(x,y,new_r);
+    else return new Consumed(x,y,new_r,l);
   case $(&List(&Star,tl),&UniquePtr(r)):
     let new_r = assign_place_outer(env,tl,path_prefix+1,r,newval);
     if (new_r == r) return oldval;
@@ -777,10 +777,43 @@ static struct JoinEnv {
   escpile_t  pile;
   flowdict_t d1;
   flowdict_t d2;
+  bool is_try_flow; //this is used by join_absRval when joining aggregates in a tryflow
 };
 typedef struct JoinEnv @`r joinenv_t<`r>;
 
 static bool absRval_lessthan_approx(`a ignore, absRval_t r1, absRval_t r2);
+
+static bool contains_local_consumed(absRval_t r) {
+  switch(r) {
+  case &Consumed(_,_,_,l):
+    return l;
+  case &UniquePtr(r1):
+    return contains_local_consumed(r1);
+  case &NamedLocation(_, ac):
+    return contains_local_consumed(ac);
+  case &Aggregate(...):
+    return false;
+  default:
+    return false;
+  }
+}
+
+
+static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2);//forward decl
+
+//The case aggregate values is the only special one since we need to examine
+//the fields of the aggregate and join them individually.
+//For this, fall back on the join_absRval which now has a special case for
+//joining aggregates in a tryflow. 
+static absRval_t join_absRval_tryflow(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
+  if(r1 == r2) return r1;
+  switch($(contains_local_consumed(r1),contains_local_consumed(r2))) {
+  case $(true, false): return r2;
+  case $(false, true): return r1;
+  default:
+    return join_absRval(env, a, r1, r2);
+  }
+}	   
 
 // note: There is another reasonable policy for losing an alias to AllInit:
 //   (when destination unescaped!)
@@ -801,9 +834,9 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
   case $(&NamedLocation(n1,r1),_): return join_absRval(env,a,r1,r2);
   case $(_,&NamedLocation(n2,r2)): return join_absRval(env,a,r1,r2);
 
-  case $(&Consumed(e1,i1,r1),&Consumed(e2,i2,r2)):
+  case $(&Consumed(e1,i1,r1,l1),&Consumed(e2,i2,r2,l2)):
     if (e1 == e2)
-      return new Consumed(e1,(i1 > i2 ? i1 : i2), join_absRval(env,a,r1,r2));
+      return new Consumed(e1,(i1 > i2 ? i1 : i2), join_absRval(env,a,r1,r2), l1&&l2);
     switch (r1) {
     case &AddressOf(p): add_place(env->pile,p); break;
     default: break;
@@ -813,10 +846,10 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
     default: break;
     }
     break;
-  case $(&Consumed(e1,i1,r1),_):
-    return new Consumed(e1,i1,join_absRval(env,a,r1,r2));
-  case $(_,&Consumed(e2,i2,r2)):
-    return new Consumed(e2,i2,join_absRval(env,a,r1,r2));
+  case $(&Consumed(e1,i1,r1,l1),_):
+    return new Consumed(e1,i1,join_absRval(env,a,r1,r2),l1);
+  case $(_,&Consumed(e2,i2,r2,l2)):
+    return new Consumed(e2,i2,join_absRval(env,a,r1,r2),l2);
 
   case $(&AddressOf(p1), &AddressOf(p2)):
     if(place_cmp(p1,p2)==0) return r1;
@@ -856,8 +889,9 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
 
   case $(&Aggregate(UnionRInfo(is_union1,field_no1),d1), &Aggregate(UnionRInfo(is_union2,field_no2),d2)):
     aggrdict_t new_d =
-      new {for i < numelts(d1) : join_absRval(env,0,d1[i],d2[i]) };
-
+      new {for i < numelts(d1) : (env->is_try_flow ? join_absRval_tryflow(env,0,d1[i],d2[i]) :
+				  join_absRval(env,a,d1[i],d2[i])) };
+    
     // try to preserve sharing by returning one of the original arrays
     // if there was no change
     bool change = false;
@@ -901,6 +935,28 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
   }
 }
 
+//in the case of tryflows, values that are consumed within the scope of
+//the try-block due to a local alias (let alias<`r>) are to be treated as
+//unconsumed in the catch block. In particular, we want the join of (x and Consumed(...,local)) 
+//to be x, where x != Consumed(...,local)
+flow_t join_tryflow(flow_env_t fenv, flow_t newflow, flow_t oldflow){
+  // if(f1 == f2) return f1;
+  switch($(newflow,oldflow)) {
+  case $({.BottomFL = _},_): return oldflow;
+  case $(_,{.BottomFL = _}): return newflow;
+  case $({.ReachableFL = $(d1,r1)}, {.ReachableFL = $(d2,r2)}):
+    // A lot of computation to avoid allocation, but profiling suggests
+    // that's the right thing to do.
+    if(d1.t == d2.t && r1 == r2) return newflow;
+    if(flow_lessthan_approx(newflow,oldflow)) return oldflow;
+    if(flow_lessthan_approx(oldflow,newflow)) return newflow;
+    let env     = JoinEnv(fenv, new EscPile(NULL),d1,d2,true);
+    let outdict = Dict::intersect_c(join_absRval_tryflow,&env,d1,d2);
+    let r       = Relations::join_relns(Core::heap_region,r1,r2);
+    return ReachableFL(escape_these(fenv, env.pile, outdict),r);
+  }
+}
+
 flow_t join_flow(flow_env_t fenv, flow_t f1, flow_t f2){
   // if(f1 == f2) return f1;
   switch($(f1,f2)) {
@@ -912,7 +968,7 @@ flow_t join_flow(flow_env_t fenv, flow_t f1, flow_t f2){
     if(d1.t == d2.t && r1 == r2) return f1;
     if(flow_lessthan_approx(f1,f2)) return f2;
     if(flow_lessthan_approx(f2,f1)) return f1;
-    let env     = JoinEnv(fenv, new EscPile(NULL),d1,d2);
+    let env     = JoinEnv(fenv, new EscPile(NULL),d1,d2,false);
     let outdict = Dict::intersect_c(join_absRval,&env,d1,d2);
     let r       = Relations::join_relns(Core::heap_region,r1,r2);
     return ReachableFL(escape_these(fenv, env.pile, outdict),r);
@@ -934,7 +990,7 @@ $(flow_t,absRval_t) join_flow_and_rval(flow_env_t fenv,
 	 {.ReachableFL = $(outd,relns)}):
     if(absRval_lessthan_approx(0,r1,r2)) return $(outflow,r2);
     if(absRval_lessthan_approx(0,r2,r1)) return $(outflow,r1);
-    let env  = JoinEnv(fenv, new EscPile(NULL),d1,d2);
+    let env  = JoinEnv(fenv, new EscPile(NULL),d1,d2,false);
     let outr = join_absRval(&env,0,r1,r2);
     return $(ReachableFL(escape_these(fenv, env.pile,outd),
 			 relns), outr);
@@ -1096,9 +1152,9 @@ void print_absrval(absRval_t rval) {
     }
     fprintf(stderr,"}");
     break;
-  case &Consumed(e,i,r):
+  case &Consumed(e,i,r,l):
     fprintf(stderr,"[Consumed(%s,%d,",Absynpp::exp2string(e),i);
-    print_absrval(r); fprintf(stderr,")]");
+    print_absrval(r); fprintf(stderr,",%s)]", l?"local":"");
     break;
   case &NamedLocation(n,r):
     fprintf(stderr,"[NamedLocation(%s,",Absynpp::qvar2string(n->name));

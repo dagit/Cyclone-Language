@@ -24,7 +24,7 @@
 
 namespace Tcstmt {
   void tcStmt(Tcenv::tenv_t, Absyn::stmt_t, bool new_block);
-  bool ensure_no_throws(Absyn::stmt_t s);
+  bool ensure_no_throw_stmt(Absyn::stmt_t s);
 }
 
 #endif

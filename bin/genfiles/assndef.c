@@ -525,21 +525,21 @@ return(void*)({struct Cyc_AssnDef_LogicVar_AssnDef_Term_struct*_tmp24=_cycalloc(
 int Cyc_AssnDef_cmp_term(void*t1,void*t2){
 struct _tuple11 _tmp25=({struct _tuple11 _tmp102;_tmp102.f1=t1,_tmp102.f2=t2;_tmp102;});struct _tuple11 _stmttmp0=_tmp25;struct _tuple11 _tmp26=_stmttmp0;enum Cyc_Absyn_Primop _tmp29;enum Cyc_Absyn_Primop _tmp27;void*_tmp2C;void*_tmp2B;int _tmp2E;int _tmp2D;void*_tmp2A;void*_tmp28;if(*((int*)_tmp26.f1)== 0){if(*((int*)_tmp26.f2)== 0){_tmp28=((struct Cyc_AssnDef_Const_AssnDef_Term_struct*)_tmp26.f1)->f1;_tmp2A=((struct Cyc_AssnDef_Const_AssnDef_Term_struct*)_tmp26.f2)->f1;{struct Cyc_Absyn_Exp*e1=_tmp28;struct Cyc_Absyn_Exp*e2=_tmp2A;
 return Cyc_Evexp_exp_cmp(e1,e2);}}else{
-return -1;}}else{if(*((int*)_tmp26.f2)== 0)
+return - 1;}}else{if(*((int*)_tmp26.f2)== 0)
 return 1;else{if(*((int*)_tmp26.f1)== 1){if(*((int*)_tmp26.f2)== 1){_tmp28=((struct Cyc_AssnDef_Var_AssnDef_Term_struct*)_tmp26.f1)->f1;_tmp2A=((struct Cyc_AssnDef_Var_AssnDef_Term_struct*)_tmp26.f2)->f1;{struct Cyc_Absyn_Vardecl*vd1=_tmp28;struct Cyc_Absyn_Vardecl*vd2=_tmp2A;
 return(int)vd1 - (int)vd2;}}else{
-return -1;}}else{if(*((int*)_tmp26.f2)== 1)
+return - 1;}}else{if(*((int*)_tmp26.f2)== 1)
 return 1;else{if(*((int*)_tmp26.f1)== 2){if(*((int*)_tmp26.f2)== 2){_tmp28=((struct Cyc_AssnDef_LogicVar_AssnDef_Term_struct*)_tmp26.f1)->f1;_tmp2D=((struct Cyc_AssnDef_LogicVar_AssnDef_Term_struct*)_tmp26.f1)->f2;_tmp2A=((struct Cyc_AssnDef_LogicVar_AssnDef_Term_struct*)_tmp26.f2)->f1;_tmp2E=((struct Cyc_AssnDef_LogicVar_AssnDef_Term_struct*)_tmp26.f2)->f2;{struct Cyc_Absyn_Vardecl*vd1=_tmp28;int i=_tmp2D;struct Cyc_Absyn_Vardecl*vd2=_tmp2A;int j=_tmp2E;
 # 115
 if(vd1 == vd2)return i - j;
 return(int)vd1 - (int)vd2;}}else{
-return -1;}}else{if(*((int*)_tmp26.f2)== 2)
+return - 1;}}else{if(*((int*)_tmp26.f2)== 2)
 return 1;else{if(*((int*)_tmp26.f1)== 4){if(*((int*)_tmp26.f2)== 4){_tmp28=(void*)((struct Cyc_AssnDef_Cast_AssnDef_Term_struct*)_tmp26.f1)->f1;_tmp2A=(void*)((struct Cyc_AssnDef_Cast_AssnDef_Term_struct*)_tmp26.f1)->f2;_tmp2B=(void*)((struct Cyc_AssnDef_Cast_AssnDef_Term_struct*)_tmp26.f2)->f1;_tmp2C=(void*)((struct Cyc_AssnDef_Cast_AssnDef_Term_struct*)_tmp26.f2)->f2;{void*tp1=_tmp28;void*tm1=_tmp2A;void*tp2=_tmp2B;void*tm2=_tmp2C;
 # 120
 int c=Cyc_Tcutil_typecmp(tp1,tp2);
 if(c != 0)return c;
 return Cyc_AssnDef_cmp_term(tm1,tm2);}}else{
-return -1;}}else{if(*((int*)_tmp26.f2)== 4)
+return - 1;}}else{if(*((int*)_tmp26.f2)== 4)
 return 1;else{_tmp27=((struct Cyc_AssnDef_Primop_AssnDef_Term_struct*)_tmp26.f1)->f1;_tmp28=((struct Cyc_AssnDef_Primop_AssnDef_Term_struct*)_tmp26.f1)->f2;_tmp29=((struct Cyc_AssnDef_Primop_AssnDef_Term_struct*)_tmp26.f2)->f1;_tmp2A=((struct Cyc_AssnDef_Primop_AssnDef_Term_struct*)_tmp26.f2)->f2;{enum Cyc_Absyn_Primop p1=_tmp27;struct Cyc_List_List*ts1=_tmp28;enum Cyc_Absyn_Primop p2=_tmp29;struct Cyc_List_List*ts2=_tmp2A;
 # 126
 if((int)p1 != (int)p2)return(int)p1 - (int)p2;
@@ -640,14 +640,14 @@ LOOP:
  if(a1 == a2)return 0;{
 struct _tuple11 _tmp63=({struct _tuple11 _tmp110;_tmp110.f1=a1,_tmp110.f2=a2;_tmp110;});struct _tuple11 _stmttmp1=_tmp63;struct _tuple11 _tmp64=_stmttmp1;void*_tmp6A;void*_tmp69;enum Cyc_AssnDef_Primreln _tmp6C;enum Cyc_AssnDef_Primreln _tmp6B;void*_tmp68;void*_tmp67;void*_tmp66;void*_tmp65;if(*((int*)_tmp64.f1)== 0){if(*((int*)_tmp64.f2)== 0)
 return 0;else{
-return -1;}}else{if(*((int*)_tmp64.f2)== 0)
+return - 1;}}else{if(*((int*)_tmp64.f2)== 0)
 return 1;else{if(*((int*)_tmp64.f1)== 1){if(*((int*)_tmp64.f2)== 1)
 return 0;else{
-return -1;}}else{if(*((int*)_tmp64.f2)== 1)
+return - 1;}}else{if(*((int*)_tmp64.f2)== 1)
 return 1;else{switch(*((int*)_tmp64.f1)){case 4: if(*((int*)_tmp64.f2)== 4){_tmp65=(void*)((struct Cyc_AssnDef_Or_AssnDef_Assn_struct*)_tmp64.f1)->f1;_tmp66=(void*)((struct Cyc_AssnDef_Or_AssnDef_Assn_struct*)_tmp64.f1)->f2;_tmp67=(void*)((struct Cyc_AssnDef_Or_AssnDef_Assn_struct*)_tmp64.f2)->f1;_tmp68=(void*)((struct Cyc_AssnDef_Or_AssnDef_Assn_struct*)_tmp64.f2)->f2;{void*a11=_tmp65;void*a12=_tmp66;void*a21=_tmp67;void*a22=_tmp68;
 _tmp65=a11;_tmp66=a12;_tmp67=a21;_tmp68=a22;goto _LL10;}}else{
 # 285
-return -1;}case 3: switch(*((int*)_tmp64.f2)){case 3: _tmp65=(void*)((struct Cyc_AssnDef_And_AssnDef_Assn_struct*)_tmp64.f1)->f1;_tmp66=(void*)((struct Cyc_AssnDef_And_AssnDef_Assn_struct*)_tmp64.f1)->f2;_tmp67=(void*)((struct Cyc_AssnDef_And_AssnDef_Assn_struct*)_tmp64.f2)->f1;_tmp68=(void*)((struct Cyc_AssnDef_And_AssnDef_Assn_struct*)_tmp64.f2)->f2;_LL10: {void*a11=_tmp65;void*a12=_tmp66;void*a21=_tmp67;void*a22=_tmp68;
+return - 1;}case 3: switch(*((int*)_tmp64.f2)){case 3: _tmp65=(void*)((struct Cyc_AssnDef_And_AssnDef_Assn_struct*)_tmp64.f1)->f1;_tmp66=(void*)((struct Cyc_AssnDef_And_AssnDef_Assn_struct*)_tmp64.f1)->f2;_tmp67=(void*)((struct Cyc_AssnDef_And_AssnDef_Assn_struct*)_tmp64.f2)->f1;_tmp68=(void*)((struct Cyc_AssnDef_And_AssnDef_Assn_struct*)_tmp64.f2)->f2;_LL10: {void*a11=_tmp65;void*a12=_tmp66;void*a21=_tmp67;void*a22=_tmp68;
 # 280
 int c=Cyc_AssnDef_assncmp(a11,a21);
 if(c != 0)return c;
@@ -655,7 +655,7 @@ a1=a12;
 a2=a22;
 goto LOOP;}case 4: goto _LL13;default:
 # 287
- return -1;}default: switch(*((int*)_tmp64.f2)){case 4: _LL13:
+ return - 1;}default: switch(*((int*)_tmp64.f2)){case 4: _LL13:
 # 286
  return 1;case 3:
 # 288
@@ -666,10 +666,10 @@ if(c != 0)return c;
 c=Cyc_AssnDef_cmp_term(t11,t21);
 if(c != 0)return c;
 return Cyc_AssnDef_cmp_term(t12,t22);}}else{
-return -1;}}else{if(*((int*)_tmp64.f2)== 2)
+return - 1;}}else{if(*((int*)_tmp64.f2)== 2)
 return 1;else{if(*((int*)_tmp64.f1)== 6){if(*((int*)_tmp64.f2)== 6){_tmp65=(void*)((struct Cyc_AssnDef_Kill_AssnDef_Assn_struct*)_tmp64.f1)->f1;_tmp66=(void*)((struct Cyc_AssnDef_Kill_AssnDef_Assn_struct*)_tmp64.f2)->f1;{void*a1=_tmp65;void*a2=_tmp66;
 return Cyc_AssnDef_assncmp(a1,a2);}}else{
-return -1;}}else{if(*((int*)_tmp64.f2)== 6)
+return - 1;}}else{if(*((int*)_tmp64.f2)== 6)
 return 1;else{_tmp65=((struct Cyc_AssnDef_Subst_AssnDef_Assn_struct*)_tmp64.f1)->f1;_tmp66=(void*)((struct Cyc_AssnDef_Subst_AssnDef_Assn_struct*)_tmp64.f1)->f2;_tmp67=(void*)((struct Cyc_AssnDef_Subst_AssnDef_Assn_struct*)_tmp64.f1)->f3;_tmp68=((struct Cyc_AssnDef_Subst_AssnDef_Assn_struct*)_tmp64.f2)->f1;_tmp69=(void*)((struct Cyc_AssnDef_Subst_AssnDef_Assn_struct*)_tmp64.f2)->f2;_tmp6A=(void*)((struct Cyc_AssnDef_Subst_AssnDef_Assn_struct*)_tmp64.f2)->f3;{struct Cyc_Absyn_Vardecl*vd1=_tmp65;void*t1=_tmp66;void*a11=_tmp67;struct Cyc_Absyn_Vardecl*vd2=_tmp68;void*t2=_tmp69;void*a22=_tmp6A;
 # 301
 int c=(int)vd1 - (int)vd2;

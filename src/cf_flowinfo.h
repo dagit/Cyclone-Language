@@ -114,7 +114,11 @@ EXTERN_CFFLOW datatype AbsRVal {
   // if you're a tagged union, struct, or tuple, you should always
   // evaluate to an Aggregate in the abstract interpretation (datatype?)
   Aggregate(union_rinfo_t, aggrdict_t);
-  Consumed(Absyn::exp_t consumer, int iteration, absRval_t oldvalue);
+  Consumed(Absyn::exp_t consumer, int iteration, absRval_t oldvalue, bool local_alias);
+  //the local_alias field is used for updating tryflows in the case where the
+  //`U/`RC pointer is consumed by using an alias<`r> pattern. In this case, we
+  //do not want to treat the `U ptr as consumed in the catch block, nor in the try's 
+  //continuation
   NamedLocation(Absyn::vardecl_t name, absRval_t actvalue);
   // A NamedLocation is simply a name for a location.  This is used to
   // track the value pointed to by a unique pointer for a function
@@ -160,7 +164,7 @@ extern int place_cmp(place_t, place_t);
 
 extern aggrdict_t aggrfields_to_aggrdict(flow_env_t, List::list_t<struct Absyn::Aggrfield@>, bool no_init_bits_only, absRval_t);
 extern absRval_t typ_to_absrval(flow_env_t, Absyn::type_t t, bool no_init_bits_only, absRval_t leafval);
-extern absRval_t make_unique_consumed(flow_env_t fenv, Absyn::type_t t, Absyn::exp_t consumer, int iteration, absRval_t);
+extern absRval_t make_unique_consumed(flow_env_t fenv, Absyn::type_t t, Absyn::exp_t consumer, int iteration, absRval_t, bool);
 extern bool is_unique_consumed(Absyn::exp_t e, int env_iteration, absRval_t r, bool @needs_unconsume);
 extern absRval_t make_unique_unconsumed(flow_env_t fenv, absRval_t r);
 extern $(absRval_t,List::list_t<Absyn::vardecl_t>) unname_rval(absRval_t rv);
@@ -181,7 +185,8 @@ extern void print_flowdict(flowdict_t d);
 extern void print_flow(flow_t f);
 
 // debugging
-  //#define DEBUG_FLOW
+//#define DEBUG_FLOW
+
 #ifdef DEBUG_FLOW
 extern bool debug_msgs;
 #define DEBUG_PRINT(arg...) if (debug_msgs) fprintf(stderr,##arg)
@@ -198,6 +203,7 @@ extern flowdict_t assign_place(flow_env_t fenv,
 			       Position::seg_t loc, flowdict_t d,
 			       place_t place,
 			       absRval_t r);
+extern flow_t join_tryflow(flow_env_t,flow_t,flow_t); 
 extern flow_t join_flow(flow_env_t,flow_t,flow_t); 
 extern $(flow_t,absRval_t) join_flow_and_rval(flow_env_t,
 					      $(flow_t,absRval_t) pr1,

@@ -383,7 +383,7 @@ extern struct _fat_ptr Cyc_zstrncpy(struct _fat_ptr,struct _fat_ptr,unsigned lon
 extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int,unsigned long);struct Cyc_Buffer_t{struct _fat_ptr buffer;unsigned position;unsigned length;struct _fat_ptr initial_buffer;};
 # 48 "buffer.cyc"
 struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned n){
-if(n > 0U){
+if(n > (unsigned)0){
 struct _fat_ptr s=({unsigned _tmp1=n + (unsigned)1;_tag_fat(_region_calloc(Cyc_Core_unique_region,sizeof(char),_tmp1),sizeof(char),_tmp1);});
 return({struct Cyc_Buffer_t*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->buffer=s,_tmp0->position=0U,_tmp0->length=n,({struct _fat_ptr _tmp36=_tag_fat(0,0,0);_tmp0->initial_buffer=_tmp36;});_tmp0;});}else{
 # 53
@@ -437,7 +437,7 @@ return;}
 # 109
 static void Cyc_Buffer_resize(struct Cyc_Buffer_t*b,unsigned more){
 unsigned long len=b->length;
-unsigned long new_len=len == 0U?1U: len;
+unsigned long new_len=len == (unsigned long)0?1U: len;
 struct _fat_ptr new_buffer;
 while(b->position + more > new_len){
 new_len=(unsigned long)2 * new_len;}

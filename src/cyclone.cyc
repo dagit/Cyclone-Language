@@ -38,6 +38,7 @@
 #include "warn.h"
 #include "flags.h"
 #include "specsfile.h"
+#include "cifc.h"
 #include "cyclone.h"
 namespace Port {
   void port(List::list_t<Absyn::decl_t>);
@@ -1192,7 +1193,10 @@ using Arg {
   make_option(opt76,"--vcgen",false, "",
               Set_spec,&vcgen_r,
               "compute verification-conditions");
-  make_option(opt77,"-stopafter-crgn",false, "",
+  make_option(opt77,"--cifc-inst-tvar",false, "",
+              Unit_spec,Cifc::set_inst_tvar,
+              "instantiate type variables instead of introducing new ones");
+  make_option(opt78,"-stopafter-crgn",false, "",
               Unit_spec,Flags::set_crgnonly,
               "Stop after currrgn");
 
@@ -1206,7 +1210,7 @@ using Arg {
     &opt41,&opt42,&opt43,&opt44,&opt45,&opt46,&opt47,&opt48,&opt49,
     &opt50,&opt51,&opt52,&opt53,&opt54,&opt55,&opt56,&opt57,&opt58,&opt59,
     &opt60,&opt61,&opt62,&opt63,&opt64,&opt65,&opt66,&opt67,&opt68,&opt69,
-    &opt70,&opt71,&opt72,&opt73,&opt74,&opt75,&opt76,&opt77
+	    &opt70,&opt71,&opt72,&opt73,&opt74,&opt75,&opt76, &opt77, &opt78
   };
 
   void print_options() {

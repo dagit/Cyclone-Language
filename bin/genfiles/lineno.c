@@ -449,11 +449,11 @@ enum Cyc_Lineno_token_val Cyc_Lineno_token_rec(struct Cyc_Lexing_lexbuf*lexbuf,i
 lexstate=Cyc_Lineno_lex_engine(lexstate,lexbuf);
 {int _tmp2=lexstate;switch((int)_tmp2){case 0:
 # 49 "lineno.cyl"
- return 1U;case 1:
+ return Cyc_Lineno_LINEDEF;case 1:
 # 50 "lineno.cyl"
- return 0U;case 2:
+ return Cyc_Lineno_NEWLINE;case 2:
 # 51 "lineno.cyl"
- return 2U;default:
+ return Cyc_Lineno_END;default:
 ((lexbuf->refill_buff))(lexbuf);
 return Cyc_Lineno_token_rec(lexbuf,lexstate);};}
 # 55
@@ -503,10 +503,10 @@ eol=((int(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_lexeme_end)(lbuf);
 # 105
 this_line=((struct _fat_ptr(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_lexeme)(lbuf);
 # 107
-if((int)next == 2 || eol > (*((struct _tuple1*)places->hd)).f1)
+if((int)next == (int)2U || eol > (*((struct _tuple1*)places->hd)).f1)
 break;
 # 110
-if((int)next == 0)++ line;else{
+if((int)next == (int)0U)++ line;else{
 # 112
 struct _tuple0*fno=Cyc_Lineno_parse_linedef(this_line);
 if(fno == 0)
@@ -515,7 +515,7 @@ if(fno == 0)
 source_file=(struct _fat_ptr)(*fno).f1;
 line=(*fno).f2;}}}
 # 123
-while(places != 0 &&((int)next == 2 || eol > (*((struct _tuple1*)places->hd)).f1)){
+while(places != 0 &&((int)next == (int)2U || eol > (*((struct _tuple1*)places->hd)).f1)){
 struct Cyc_Lineno_Pos*_tmp16=(*((struct _tuple1*)places->hd)).f2;struct Cyc_Lineno_Pos*p=_tmp16;
 ({struct _fat_ptr _tmp25=(struct _fat_ptr)Cyc_strdup((struct _fat_ptr)source_file);p->logical_file=_tmp25;});
 p->line=this_line;

@@ -220,13 +220,16 @@ static void anal_stmt(senv_t env, stmt_t s) {
     env = add_encloser(s,env);
     switch(d->r) {
     case &Region_d(_,_,eo): 
-      // we push an exception handler and count this as a pattern?!
+      //kind of a hack -- popping exn handler same as popping a lexical region
+      //this results in an npop_handler instead of pop_region being generated
+      //but that's ok
       if(eo != NULL) {
 	anal_exp(env,eo);
 	++env.save_env.pat_var_depth;
       }
-      if(!Flags::no_regions)
-	++env.save_env.try_depth;
+      //dynamic regions are not pushed, so don't add to the depth
+      else if(!Flags::no_regions)  
+	++env.save_env.try_depth; 
       break;
     case &Var_d(&Vardecl{.initializer=eo,...}):
       if(eo != NULL) anal_exp(env,eo);

@@ -556,10 +556,10 @@ env=Cyc_JumpAnalysis_add_encloser(s,env);
 # 224
 if(eo != 0){
 Cyc_JumpAnalysis_anal_exp(env,eo);
-++(env.save_env).pat_var_depth;}
+++(env.save_env).pat_var_depth;}else{
 # 228
 if(!Cyc_Flags_no_regions)
-++(env.save_env).try_depth;
+++(env.save_env).try_depth;}
 goto _LL26;}case 0: _tmp31=(((struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct*)_tmp30)->f1)->initializer;{struct Cyc_Absyn_Exp*eo=_tmp31;
 # 232
 if(eo != 0)Cyc_JumpAnalysis_anal_exp(env,eo);

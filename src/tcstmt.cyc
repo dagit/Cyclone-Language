@@ -25,6 +25,7 @@
 #include "tcexp.h"
 #include "tcpat.h"
 #include "tcstmt.h"
+
 using Core;
 using List;
 using Absyn;
@@ -527,20 +528,164 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   }
 }
 
-//hook, to be enhanced
-//guarantee that s doesn't throw an exception
-//for now, restrict s to be just a return cnst
-static bool ensures_no_throws_exp(exp_t e) {
-  switch(e->r) {
-  case &Const_e(_): return true;
-  case &Primop_e(_, es): return List::forall(ensures_no_throws_exp,es);
-  default: return false;
-  }
-}
-bool ensure_no_throws(stmt_t s) {
-  switch(s->r) {
-  case &Return_s(e): return (e==NULL) ? true : ensures_no_throws_exp(e);
-  default: return false;
+
+//When the attribute no_throw is set, the function body must 
+//be a try block with a default handler
+//The only statements that precede the try block can be calls to
+//no_throw functions, with constant arguments, or passing arguments as is
+//The no_throw fncalls are useful for registering thread-local slots
+//for modules that are compiled independently of the runtime_cyc
+//Used for functions that may be called from C
+static bool check_catchall_handler(stmt_t b){
+  switch(b->r) {
+  case &TryCatch_s(_, case_list, _):
+    bool found_wild = false;
+    while(case_list) {
+      let clause = case_list->hd;
+      switch(clause->pattern->r) {
+      case &Wild_p:
+	found_wild = true;
+ 	break;
+     default:
+	break;
+      }
+      if(!ensure_no_throw_stmt(clause->body))
+	return false;
+      case_list = case_list->tl;
+    }
+    return found_wild;
+  default:
+    return false;
   }
 }
 
+static bool ensure_no_throw_exp(exp_t e) {
+  switch(e->r) {
+  case &Const_e(_):
+    return true;
+
+  case &Primop_e(_, es):
+    return List::forall(ensure_no_throw_exp, es);
+  case &And_e(e1, e2): fallthru (e1, e2);
+  case &Or_e(e1, e2): fallthru (e1, e2);
+  case &Swap_e(e1, e2): fallthru (e1, e2);
+  case &SeqExp_e(e1, e2):
+    return ensure_no_throw_exp(e1) && ensure_no_throw_exp(e2);
+  case &FnCall_e(fname, args, vargs, res):
+    if(!res) //should be impossible at this point
+      return false;
+    bool fname_ok = false;
+    switch(fname->r) { 
+    case &Instantiate_e(e1, ts):
+      fname_ok = ensure_no_throw_exp(e1);
+      break;
+    case &Var_e(b):
+      fname_ok = ensure_no_throw_exp(fname);
+      break;
+    default: //fname must be a Var_e or Inst_e
+      break;
+    }
+    return fname_ok && List::forall(ensure_no_throw_exp, args);
+  case &Var_e(b):
+    switch(b) {
+      case &Funname_b(fd): { //attributes should have been transferred already
+	switch(fd->cached_type) {
+	case &FnType(fi):
+	  return List::mem(Atts::attribute_cmp,
+			   fi.attributes,
+			   &Atts::No_throw_att_val);
+	case NULL:
+	  return List::mem(Atts::attribute_cmp,
+			   fd->i.attributes,
+			   &Atts::No_throw_att_val);
+	default: //impos
+	  return false;
+	}
+      }
+    case &Global_b(fvard): {
+      switch(fvard->type) {
+      case &FnType(fi):
+	return List::mem(Atts::attribute_cmp,
+			 fi.attributes,
+			 &Atts::No_throw_att_val) ||
+	  List::mem(Atts::attribute_cmp,
+		    fvard->attributes,
+		    &Atts::No_throw_att_val);
+      default:
+	return false;
+      }
+    }
+    case &Param_b(_):
+    case &Local_b(_):
+      return true;
+    default:
+      return false;  //only funname supported
+    }
+  case &Address_e(e1):
+    return ensure_no_throw_exp(e1);
+  case &Aggregate_e(_, _, exps, _):
+    return List::forall(ensure_no_throw_exp,
+			List::map(snd,
+				  exps));
+  case &Cast_e(ct,e1,b,c): //no user cast
+    return !b && ensure_no_throw_exp(e1);
+  case &Deref_e(e1): fallthru(e1);
+  case &AggrArrow_e(e1, ...):
+    switch(e1->topt) {
+    case &PointerType(*pi):
+      return !pi->ptr_atts.nullable;
+    default:
+      return false; //impos
+    }
+  default: //exp may throw
+    //    fprintf(stderr, "Expression %s may throw exception", Absynpp::exp2string(e));
+    return false;
+  }
+}
+
+
+//hook, to be enhanced
+//guarantee that body doesn't throw an exception
+//allow the following:
+//1. try/catch that catch default without rethrowing
+//2. fncall of no_throw functions with constant args
+//3. Const expressions
+//4. Sequences, primops or returns of constant exp
+//5. Declarations with no_throw initializers
+bool ensure_no_throw_stmt(stmt_t s) {
+  switch(s->r) {
+  case &Break_s:
+  case &Continue_s:
+    return true;
+  case &TryCatch_s(...):
+    return check_catchall_handler(s);
+  case &Seq_s(s1, s2):
+    return ensure_no_throw_stmt(s1) && ensure_no_throw_stmt(s2);
+  case &Exp_s(e):
+    return ensure_no_throw_exp(e);
+  case &Return_s(e): 
+    if(e){
+      return ensure_no_throw_exp(e);
+    }
+    return true;
+  case &Decl_s(d, s2):
+    bool init_okay = false;
+    switch(d->r) {
+    case &Var_d(vd):
+      init_okay = vd->initializer ? ensure_no_throw_exp(vd->initializer) : true;
+      break;
+    case &Let_d(_, _, i, _):
+      init_okay  = ensure_no_throw_exp(i);
+      break;
+    default:
+      return false;
+    }
+    return init_okay && ensure_no_throw_stmt(s2);
+  case &Label_s(l, s1):
+    return ensure_no_throw_stmt(s1);
+  case &IfThenElse_s(e1, s1, s2):
+    return ensure_no_throw_exp(e1) && ensure_no_throw_stmt(s1) && ensure_no_throw_stmt(s2);
+  default:
+    return false;
+  }
+}

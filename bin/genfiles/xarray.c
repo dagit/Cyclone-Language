@@ -458,7 +458,7 @@ struct _fat_ptr Cyc_Xarray_to_array(struct Cyc_Xarray_Xarray*xarr){
 return Cyc_Xarray_rto_array(Cyc_Core_heap_region,xarr);}
 # 100
 struct Cyc_Xarray_Xarray*Cyc_Xarray_rfrom_array(struct _RegionHandle*r,struct _fat_ptr arr){
-if(_get_fat_size(arr,sizeof(void*))== 0U)
+if(_get_fat_size(arr,sizeof(void*))== (unsigned)0)
 return Cyc_Xarray_rcreate_empty(r);{
 struct Cyc_Xarray_Xarray*ans=({struct Cyc_Xarray_Xarray*_tmp18=_region_malloc(r,sizeof(*_tmp18));({
 struct _fat_ptr _tmp3D=({unsigned _tmp17=_get_fat_size(arr,sizeof(void*));void**_tmp16=({struct _RegionHandle*_tmp3C=Cyc_Core_unique_region;_region_malloc(_tmp3C,_check_times(_tmp17,sizeof(void*)));});({{unsigned _tmp2C=_get_fat_size(arr,sizeof(void*));unsigned i;for(i=0;i < _tmp2C;++ i){_tmp16[i]=((void**)arr.curr)[(int)i];}}0;});_tag_fat(_tmp16,sizeof(void*),_tmp17);});_tmp18->elmts=_tmp3D;}),_tmp18->num_elmts=(int)

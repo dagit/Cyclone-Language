@@ -881,7 +881,7 @@ t=t->left;
 # 590
 t=d.t;{
 struct _fat_ptr _tmpB2=({unsigned _tmpB5=(unsigned)(2 * half_max_size);const struct Cyc_Dict_T**_tmpB4=({struct _RegionHandle*_tmp104=rgn;_region_malloc(_tmp104,_check_times(_tmpB5,sizeof(const struct Cyc_Dict_T*)));});({{unsigned _tmpD4=(unsigned)(2 * half_max_size);unsigned i;for(i=0;i < _tmpD4;++ i){_tmpB4[i]=t;}}0;});_tag_fat(_tmpB4,sizeof(const struct Cyc_Dict_T*),_tmpB5);});struct _fat_ptr stack=_tmpB2;
-return({struct Cyc_Iter_Iter _tmpD3;({struct _tuple10*_tmp105=({struct _tuple10*_tmpB3=_region_malloc(rgn,sizeof(*_tmpB3));_tmpB3->f1=stack,(unsigned)t?_tmpB3->f2=0:(_tmpB3->f2=-1);_tmpB3;});_tmpD3.env=_tmp105;}),_tmpD3.next=Cyc_Dict_iter_f;_tmpD3;});}}
+return({struct Cyc_Iter_Iter _tmpD3;({struct _tuple10*_tmp105=({struct _tuple10*_tmpB3=_region_malloc(rgn,sizeof(*_tmpB3));_tmpB3->f1=stack,(unsigned)t?_tmpB3->f2=0:(_tmpB3->f2=- 1);_tmpB3;});_tmpD3.env=_tmp105;}),_tmpD3.next=Cyc_Dict_iter_f;_tmpD3;});}}
 # 600
 void*Cyc_Dict_marshal(struct _RegionHandle*rgn,void*env,void*(*write_key)(void*,struct Cyc___cycFILE*,void*),void*(*write_val)(void*,struct Cyc___cycFILE*,void*),struct Cyc___cycFILE*fp,struct Cyc_Dict_Dict dict){
 # 607

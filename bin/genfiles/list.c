@@ -1026,7 +1026,7 @@ return i;}}
 if(l1 != 0)
 return 1;
 if(l2 != 0)
-return -1;
+return - 1;
 return 0;}
 # 793
 int Cyc_List_list_prefix(int(*cmp)(void*,void*),struct Cyc_List_List*l1,struct Cyc_List_List*l2){

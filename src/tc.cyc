@@ -168,33 +168,6 @@ static bool is_main(qvar_t n) {
   }
 }
 
-//When the attribute no_throw is set, the function body must 
-//be a try block with a default handler
-//Used for functions that may be called from C
-static bool check_catchall_handler(fndecl_t fd) {
-  let b = fd->body;
-  switch(b->r) {
-  case &TryCatch_s(_, case_list, _):
-    bool found_wild = false;
-    while(case_list) {
-      let clause = case_list->hd;
-      switch(clause->pattern->r) {
-      case &Wild_p:
-	found_wild = true;
- 	break;
-      default:
-	break;
-      }
-      if(!Tcstmt::ensure_no_throws(clause->body))
-	return false;
-      case_list = case_list->tl;
-    }
-    return found_wild;
-  default:
-    return false;
-  }
-}
-
 static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
                      list_t<$(seg_t,qvar_t,bool)@>* exports) {
   qvar_t q = fd->name;
@@ -258,8 +231,8 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
     check_fndecl_valid_type(loc,te,fd);
     te->tempest_generalize = false;
   }
-  if(nothrow && !check_catchall_handler(fd))
-    Warn::err2(loc, "Function with attribute no_throw must have a catch-all handler");
+  if(nothrow && !Tcstmt::ensure_no_throw_stmt(fd->body))
+    Warn::err2(loc, "Function ", fd->name, " has attribute no_throw but may throw an exception");
   // look for main and check that it has a good type
   if (is_main(q)) {
     // result type should be int

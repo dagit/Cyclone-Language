@@ -430,7 +430,7 @@ Cyc_Specsfile_target_arch=s;}
 struct Cyc_List_List*Cyc_Specsfile_cyclone_exec_path=0;
 void Cyc_Specsfile_add_cyclone_exec_path(struct _fat_ptr s){
 unsigned long _tmp0=Cyc_strlen((struct _fat_ptr)s);unsigned long len=_tmp0;
-if(len <= 2U)return;{
+if(len <= (unsigned long)2)return;{
 struct _fat_ptr _tmp1=(struct _fat_ptr)Cyc_substring((struct _fat_ptr)s,2,len - (unsigned long)2);struct _fat_ptr dir=_tmp1;
 Cyc_Specsfile_cyclone_exec_path=({struct Cyc_List_List*_tmp3=_cycalloc(sizeof(*_tmp3));({struct _fat_ptr*_tmp64=({struct _fat_ptr*_tmp2=_cycalloc(sizeof(*_tmp2));*_tmp2=dir;_tmp2;});_tmp3->hd=_tmp64;}),_tmp3->tl=Cyc_Specsfile_cyclone_exec_path;_tmp3;});}}struct _tuple0{struct _fat_ptr*f1;struct _fat_ptr*f2;};
 # 57
@@ -451,7 +451,7 @@ while(1){
 while(1){
 c=Cyc_fgetc(spec_file);
 if(isspace(c))continue;
-if(c == 42)break;
+if(c == (int)'*')break;
 if(c != -1){
 ({struct Cyc_String_pa_PrintArg_struct _tmpA=({struct Cyc_String_pa_PrintArg_struct _tmp59;_tmp59.tag=0,_tmp59.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp59;});struct Cyc_Int_pa_PrintArg_struct _tmpB=({struct Cyc_Int_pa_PrintArg_struct _tmp58;_tmp58.tag=1,_tmp58.f1=(unsigned long)c;_tmp58;});void*_tmp8[2];_tmp8[0]=& _tmpA,_tmp8[1]=& _tmpB;({struct Cyc___cycFILE*_tmp68=Cyc_stderr;struct _fat_ptr _tmp67=({const char*_tmp9="Error reading spec file %s: unexpected character '%c'\n";_tag_fat(_tmp9,sizeof(char),55U);});Cyc_fprintf(_tmp68,_tmp67,_tag_fat(_tmp8,sizeof(void*),2));});});
 # 80
@@ -469,7 +469,7 @@ if(c == -1){
 Cyc_fflush(Cyc_stderr);
 goto CLEANUP_AND_RETURN;}
 # 95
-if(c == 58){
+if(c == (int)':'){
 *((char*)_check_known_subscript_notnull(strname,256U,sizeof(char),i))='\000';
 break;}
 # 99
@@ -486,7 +486,7 @@ c=Cyc_fgetc(spec_file);
 if(isspace(c))continue;
 break;}
 # 114
-if(c == 42){
+if(c == (int)'*'){
 # 116
 result=({struct Cyc_List_List*_tmp16=_cycalloc(sizeof(*_tmp16));({struct _tuple0*_tmp71=({struct _tuple0*_tmp15=_cycalloc(sizeof(*_tmp15));({struct _fat_ptr*_tmp70=({struct _fat_ptr*_tmp12=_cycalloc(sizeof(*_tmp12));({struct _fat_ptr _tmp6F=(struct _fat_ptr)Cyc_strdup(_tag_fat(strname,sizeof(char),256U));*_tmp12=_tmp6F;});_tmp12;});_tmp15->f1=_tmp70;}),({
 struct _fat_ptr*_tmp6E=({struct _fat_ptr*_tmp14=_cycalloc(sizeof(*_tmp14));({struct _fat_ptr _tmp6D=(struct _fat_ptr)Cyc_strdup(({const char*_tmp13="";_tag_fat(_tmp13,sizeof(char),1U);}));*_tmp14=_tmp6D;});_tmp14;});_tmp15->f2=_tmp6E;});_tmp15;});
@@ -499,7 +499,7 @@ strvalue[0]=(char)c;
 i=1;
 while(1){
 c=Cyc_fgetc(spec_file);
-if((c == -1 || c == 10)|| c == 13){*((char*)_check_known_subscript_notnull(strvalue,4096U,sizeof(char),i))='\000';break;}
+if((c == -1 || c == (int)'\n')|| c == (int)'\r'){*((char*)_check_known_subscript_notnull(strvalue,4096U,sizeof(char),i))='\000';break;}
 *((char*)_check_known_subscript_notnull(strvalue,4096U,sizeof(char),i))=(char)c;
 ++ i;
 if(i >= 4096){
@@ -527,7 +527,7 @@ struct Cyc_List_List*_tmp20=0;struct Cyc_List_List*l=_tmp20;
 char buf[4096U];
 int i=0;
 int j=0;
-if(n > 4096U)goto DONE;
+if(n > (unsigned long)4096)goto DONE;
 while(1){
 # 158
 while(1){

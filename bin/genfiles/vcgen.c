@@ -684,7 +684,7 @@ return(struct _fat_ptr)({struct Cyc_String_pa_PrintArg_struct _tmp37=({struct Cy
 return Cyc_Vcgen_stmt2shortstring(s);}default:  {
 # 415
 struct _fat_ptr _tmp38=Cyc_Absynpp_stmt2string(s);struct _fat_ptr s=_tmp38;
-unsigned max=_get_fat_size(s,sizeof(char))< 11U?_get_fat_size(s,sizeof(char)): 11U;
+unsigned max=_get_fat_size(s,sizeof(char))< (unsigned)11?_get_fat_size(s,sizeof(char)): 11U;
 struct _fat_ptr res=({unsigned _tmp3C=sizeof(char)* max;_tag_fat(_cycalloc_atomic(_tmp3C),1U,_tmp3C);});
 {int i=0;for(0;(unsigned)i < max - (unsigned)1;++ i){
 ({char _tmp216=*((const char*)_check_fat_subscript(s,sizeof(char),i));*((char*)_check_fat_subscript(res,sizeof(char),i))=_tmp216;});}}
@@ -1119,7 +1119,7 @@ return Cyc_Vcgen_vcgen_rexp_nodebug(env,e,ain);}case 13: _tmp100=((struct Cyc_Ab
 return Cyc_Vcgen_vcgen_rexp_nodebug(env,e,ain);}case 14: _tmp100=(void*)((struct Cyc_Absyn_Cast_e_Absyn_Raw_exp_struct*)_tmpFF)->f1;_tmp102=((struct Cyc_Absyn_Cast_e_Absyn_Raw_exp_struct*)_tmpFF)->f2;_tmp105=((struct Cyc_Absyn_Cast_e_Absyn_Raw_exp_struct*)_tmpFF)->f4;{void*tp=_tmp100;struct Cyc_Absyn_Exp*e=_tmp102;enum Cyc_Absyn_Coercion c=_tmp105;
 # 987
 struct _tuple12 _tmp15D=Cyc_Vcgen_vcgen_rexp_nodebug(env,e,ain);struct _tuple12 _stmttmp38=_tmp15D;struct _tuple12 _tmp15E=_stmttmp38;void*_tmp160;void*_tmp15F;_tmp15F=_tmp15E.f1;_tmp160=_tmp15E.f2;{void*topt=_tmp15F;void*a=_tmp160;
-if((int)c == 1){
+if((int)c == (int)1U){
 if(topt == 0)return({struct _tuple12 _tmp1DD;_tmp1DD.f1=0,_tmp1DD.f2=a;_tmp1DD;});{
 void*t=topt;
 # 997

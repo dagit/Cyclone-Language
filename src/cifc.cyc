@@ -39,7 +39,11 @@ using Warn;
 
 namespace Cifc;
 static int glob_tvar_id=0;
+bool opt_inst_tvar = false;
 
+void set_inst_tvar(){
+  opt_inst_tvar=true;
+}
 //debug function
 string_t list2string(list_t<`a> l, string_t (*tostr)(`a)){
   let ret = aprintf("(");
@@ -175,6 +179,9 @@ static bool is_boxed_kind(type_t t) {
   }
 }
 
+//forward decl
+static bool check_fntype_kinds(seg_t loc, tenv_t te, type_t c_typ, type_t u_typ);
+
 // Make copies of the types to make sure we don't get screwed up by]
 // side-effects with unification
 // FIX: we could be more liberal than unification alone.  E.g. we could allow
@@ -187,10 +194,17 @@ static bool c_types_ok(seg_t loc, tenv_t te, type_t ctyp, type_t cyctyp) {
 
   let c_typ = Toc::typ_to_c(ctyp_cp);
   let u_typ = Toc::typ_to_c(utyp_cp);
+  //  fprintf(stderr, "c_types_ok -- (%s --> %s \n\t %s --> %s)\n", Absynpp::typ2string(ctyp), Absynpp::typ2string(c_typ),
+  //	  Absynpp::typ2string(utyp_cp), Absynpp::typ2string(u_typ));
+  
   if(!Unify::unify(c_typ, u_typ)) {  //if types are the same, we're ok, o.w
     c_typ = expand_c_type(loc, te, c_typ); //try expanding typedefs
     u_typ = expand_c_type(loc, te, u_typ);
-    if(!Unify::unify(c_typ,u_typ)) { //ow, accept if they're both boxed kinds 
+    if(!Unify::unify(c_typ,u_typ)) { 
+      //ow, accept if they're both boxed kinds 
+      //need to de-construct the types ... damn!
+      if(Tcutil::is_function_type(c_typ))
+	return check_fntype_kinds(loc, te, c_typ, u_typ);
       return is_boxed_kind(c_typ) && is_boxed_kind(u_typ);
     }
   }
@@ -204,6 +218,29 @@ static bool c_types_ok(seg_t loc, tenv_t te, type_t ctyp, type_t cyctyp) {
       Absynpp::typ2string(c_typ),
       Absynpp::typ2string(cyctyp),
       Absynpp::typ2string(u_typ)); */
+}
+
+static bool check_fntype_kinds(seg_t loc, tenv_t te, type_t c_typ, type_t u_typ) {
+  switch( $(c_typ, u_typ) ) {
+  case $(&FnType(cfi), &FnType(ufi)):
+    bool typesOk = c_types_ok(loc, te, cfi.ret_type, ufi.ret_type); 
+    if(typesOk) {
+      let ca= cfi.args;
+      let ua = ufi.args;
+      while(ca && typesOk) {
+	if(!ua)
+	  return false;
+	typesOk = c_types_ok(loc, te, (*ca->hd)[2],
+			     (*ua->hd)[2]);
+	ca = ca->tl;
+	ua = ua->tl;
+      }
+    }
+    return typesOk;
+    break;
+  default:
+    return false;
+  }
 }
 
 // Merges a C declaration with a representation-compatible Cyclone
@@ -498,14 +535,22 @@ static type_t instantiate_tvar(seg_t loc, tvar_t tv) {
   case &Less_kb(_, k):
     if(k->kind == BoxKind || k->kind == AnyKind)
       return cstar_type(void_type, empty_tqual(loc));
+    else if(k->kind == RgnKind)
+      return new AppType(new HeapCon, NULL);
     break;
   case &Unknown_kb(_): 
     return cstar_type(void_type, empty_tqual(loc));
   }
-  err2(loc, "Unable to instantiate tvar %s", Absynpp::tvar2string(tv));
+  err2(loc, "Unable to instantiate tvar ", Absynpp::tvar2string(tv));
   return void_type;
 }
 
+//te: the type environment
+//tv_ovrs: the user overrides that introduced new tvars
+//t: a type that may use a type that was overriden
+//enclosing_decl: the context in which t appears; if a tvar is added the enclosing decl needs to be updated
+//instantiate: a flag that controls whether a tvar is introduced, or if the free var is instantiated to void*
+//returns: first elt is the added tvars, snd is the removed tvars if any; null implies no-action taken
 static $(list_t<tvar_t>, list_t<tvar_t>)* update_tvars(tenv_t te, list_t<decl_t> tv_ovrs, 
 						       type_t t, decl_t enclosing_decl,
 						       bool instantiate) {
@@ -520,32 +565,34 @@ static $(list_t<tvar_t>, list_t<tvar_t>)* update_tvars(tenv_t te, list_t<decl_t>
 	//	fprintf(stderr, "!!!!Got app type <%s> with types(%s) ", 
 	//     Absynpp::typ2string(t), list2string(*ts, Absynpp::typ2string));
  	let ovd = lookup_decl(tv_ovrs, name);
- 	if(ovd) {
+ 	if(ovd) { //ok .. the type t maybe need to be updated
 	  //	  fprintf(stderr, "\t overriden by decl <%s>\n",
 	  //		  Absynpp::decllist2string(new List(ovd, NULL)));
 	  switch(ovd->r) {
 	  case &Aggr_d(ad):
 	    list_t<tvar_t> removed_tvars = NULL;
-	    try {
+	    try { //nuke the old tvars
 	      removed_tvars = extract_tvars(*ts);
 	    }catch {
 	    case &Contains_nontvar: 
-	      //don't attempt to introduce new tvars -- the tvar has been instantiated by the user 
-		return NULL;
+	      //don't attempt to introduce new tvars -- some tvar has been instantiated by the user 
+	      //requires manual override
+	      return NULL;
 	    }
 	    *ts = NULL; //nuke any existing tvars
 	    list_t<tvar_t> added_tvars=NULL;
 	    let tvs = ad->tvs;
 	    while(tvs) {
 	      let tv = tvs->hd;
-	      if(enclosing_decl == ovd) {
+	      if(enclosing_decl == ovd) { //recursive case -- just use the same tvars as the outer
 		*ts = new  List(new VarType(tv), *ts);
 	      }
 	      else {
-		if(instantiate) {
+		if(instantiate || opt_inst_tvar) { 
+		  //since "foo<`a> f;" is illegal generarate "foo<void*> f;" instead
 		  *ts = new List(instantiate_tvar(enclosing_decl->loc, tv), *ts);
 		}
-		else {
+		else { //normal case -- add a new tvar
 		  let tvcpy = new *tv;
 		  let tvn = new ((string_t)aprintf("`ovr_%d", ++glob_tvar_id));
 		  tvcpy->name = tvn;
@@ -555,8 +602,8 @@ static $(list_t<tvar_t>, list_t<tvar_t>)* update_tvars(tenv_t te, list_t<decl_t>
 	      }
 	      tvs = tvs->tl;
 	    }
-	    *ts = imp_rev(*ts);
-	    return (enclosing_decl == ovd) ? NULL : new $(added_tvars, removed_tvars);
+	    *ts = imp_rev(*ts); //recursive case does not require any changes to outer decl
+	    return (enclosing_decl == ovd || opt_inst_tvar || instantiate) ? NULL : new $(added_tvars, removed_tvars);
 	  default:
 	    impos("ovd must be an aggr type");
 	  }
@@ -575,6 +622,9 @@ static $(list_t<tvar_t>, list_t<tvar_t>)* update_tvars(tenv_t te, list_t<decl_t>
   case &FnType(fi)://this case is only possible in function pointer cases ... no need to add tvars at this level
     let added_tvars = NULL;
     let removed_tvars = NULL; //ignore return type ... bound variable; no reasonable binding strategy-- use manual override in that case
+    if(opt_inst_tvar) {
+      update_tvars(te, tv_ovrs, fi.ret_type, enclosing_decl, instantiate);
+    }
     let argit = fi.args;
     while(argit) {
       let &$(_,_,at) = argit->hd;
@@ -590,6 +640,8 @@ static $(list_t<tvar_t>, list_t<tvar_t>)* update_tvars(tenv_t te, list_t<decl_t>
     if(added_tvars || removed_tvars) 
       return new $(added_tvars, removed_tvars);
     return NULL;
+  case &ArrayType(*ai):
+    return update_tvars(te, tv_ovrs, ai->elt_type, enclosing_decl, instantiate);
   default:
     return NULL;
   }
@@ -656,6 +708,7 @@ static int decl_name_cmp(decl_t a, decl_t b) {
 //if a type struct foo {..} --override--> struct foo<`a>{...}
 //then usages of struct foo require the additional tvar inserted 
 // for instance void func(struct foo *a) ----> void func<`ovr_1>(struct foo<`ovr_1> *a)
+// if the option cifc-inst-tvar is set, then we don't add tvars, instead instantiating with void*
 static list_t<decl_t, `H> update_usages(seg_t loc, tenv_t te, list_t<decl_t,`H> in_tv_ovrs, list_t<decl_t> dsmm) {
   unsigned niter = 0;
   list_t<decl_t> abs_decls = NULL;
@@ -906,6 +959,7 @@ void user_overrides(seg_t loc, tenv_t te, list_t<decl_t, `H> *ds, list_t<decl_t>
   if(abs_decls) {
     *ds = List::append(abs_decls, *ds);
   }
+  //  fprintf(stderr, "After merges -- decls = { %s }", Absynpp::decllist2string(*ds));
 }
 
 

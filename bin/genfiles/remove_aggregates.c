@@ -456,7 +456,7 @@ static void Cyc_RemoveAggrs_remove_aggrs_stmt(struct Cyc_Absyn_Stmt*);
 # 88
 static void Cyc_RemoveAggrs_noarray_remove_aggrs_exp(struct Cyc_RemoveAggrs_Env env,struct Cyc_Absyn_Exp*e){
 struct Cyc_RemoveAggrs_Result _tmp3=Cyc_RemoveAggrs_remove_aggrs_exp(env,e);struct Cyc_RemoveAggrs_Result _stmttmp1=_tmp3;struct Cyc_RemoveAggrs_Result _tmp4=_stmttmp1;enum Cyc_RemoveAggrs_ExpResult _tmp5;_tmp5=_tmp4.res;{enum Cyc_RemoveAggrs_ExpResult r=_tmp5;
-if((int)r != 1)
+if((int)r != (int)1U)
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmp7=({struct Cyc_Warn_String_Warn_Warg_struct _tmp56;_tmp56.tag=0,({struct _fat_ptr _tmp61=({const char*_tmp9="remove_aggrs_exp -- unexpected array or comprehension: ";_tag_fat(_tmp9,sizeof(char),56U);});_tmp56.f1=_tmp61;});_tmp56;});struct Cyc_Warn_Exp_Warn_Warg_struct _tmp8=({struct Cyc_Warn_Exp_Warn_Warg_struct _tmp55;_tmp55.tag=4,_tmp55.f1=e;_tmp55;});void*_tmp6[2];_tmp6[0]=& _tmp7,_tmp6[1]=& _tmp8;((int(*)(struct _fat_ptr))Cyc_Warn_impos2)(_tag_fat(_tmp6,sizeof(void*),2));});}}struct _tuple11{struct Cyc_List_List*f1;struct Cyc_Absyn_Exp*f2;};
 # 94
 static struct Cyc_RemoveAggrs_Result Cyc_RemoveAggrs_remove_aggrs_exp(struct Cyc_RemoveAggrs_Env env,struct Cyc_Absyn_Exp*e){
@@ -702,7 +702,7 @@ return;}
 if(vd->initializer != 0){
 struct Cyc_RemoveAggrs_Result _tmp46=({struct Cyc_RemoveAggrs_Env _tmp8B=({struct Cyc_RemoveAggrs_Env _tmp60;_tmp60.ctxt=Cyc_RemoveAggrs_Initializer,({struct Cyc_Absyn_Exp*_tmp8A=Cyc_Absyn_var_exp(vd->name,0U);_tmp60.dest=_tmp8A;});_tmp60;});Cyc_RemoveAggrs_remove_aggrs_exp(_tmp8B,(struct Cyc_Absyn_Exp*)_check_null(vd->initializer));});struct Cyc_RemoveAggrs_Result _stmttmpB=_tmp46;struct Cyc_RemoveAggrs_Result _tmp47=_stmttmpB;enum Cyc_RemoveAggrs_ExpResult _tmp48;_tmp48=_tmp47.res;{enum Cyc_RemoveAggrs_ExpResult r=_tmp48;
 # 363
-if((int)r == 0){
+if((int)r == (int)0U){
 ({void*_tmp8E=({struct Cyc_Absyn_Decl*_tmp8D=d;Cyc_Absyn_decl_stmt(_tmp8D,({struct Cyc_Absyn_Stmt*_tmp8C=Cyc_Absyn_exp_stmt((struct Cyc_Absyn_Exp*)_check_null(vd->initializer),0U);Cyc_Absyn_seq_stmt(_tmp8C,s2,0U);}),0U);})->r;s->r=_tmp8E;});
 # 366
 vd->initializer=0;}}}
