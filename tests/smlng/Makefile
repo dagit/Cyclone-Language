@@ -17,17 +17,19 @@ CYCBISON=../../bin/cycbison$(EXE)
 OUT_PREFIX=
 
 LC_FLAG=
-CYC_FLAGS= $(LC_FLAG) -save-c -pp -I../../lib -B../../lib -O2
-#CYC_FLAGS= $(LC_FLAG) -save-c -pp -I../../lib -B../../lib -g
+#CYC_FLAGS= $(LC_FLAG) -save-c -pp -I../../lib -B../../lib -O2
+CYC_FLAGS= $(LC_FLAG) -save-c -pp -I../../lib -B../../lib -g
 
 LIB=../../bin/cyc-lib/$(OUT_PREFIX)$(CYCLIB)
 
 all: $(CYCC) $(LIB) \
   smlng$(EXE) generate$(EXE) validate$(EXE) decorate$(EXE)
 
+GCC_LIBS = ../../bin/cyc-lib/libcyc.a ../../bin/cyc-lib/gc.a
+
 smlng$(EXE): smlng.o tag_elim.o timer.o buffer.o parser.o 
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
-#	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
+#	gcc -g -o $@ $^ $(GCC_LIBS) $(LDFLAGS)
 
 generate$(EXE): generate.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)

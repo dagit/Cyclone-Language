@@ -14,13 +14,18 @@ TMP2=/tmp/smlng2-test$$
 n=$1
 i=1
 while true; do
-./generate > $TMP
-cat $TMP | ./smlng.exe > $TMP2
-./validate.exe $TMP $TMP2
-i=$((i+1))
-if [ $i -gt $n ]; then
-  break
-fi
+  ./generate > $TMP
+  cat $TMP | ./smlng.exe > $TMP2
+  ./validate.exe $TMP $TMP2
+  if [ $? != 0 ]; then
+    echo original is in $TMP
+    echo processed is in $TMP2
+    break
+  fi
+  i=$((i+1))
+  if [ $i -gt $n ]; then
+    break
+  fi
 done
 
 #rm -f $TMP $TMP2

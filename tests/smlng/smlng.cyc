@@ -2,6 +2,7 @@
 #include <list.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "smlng.h"
 #include "tag_elim.h"
 #include "timer.h"
@@ -11,6 +12,7 @@ using Core;
 using Stdio;
 using Buffer;
 using Parser;
+using String;
 
 bool is_change = true;
 
@@ -56,7 +58,9 @@ void dump(buf_t b, doc_t d) {
   case &Seq(ds): for (; ds != null; ds=ds->tl) dump(b,ds->hd); break;
   case &Text(i): Buffer::write_buf(stdout,b,i); break;
   case &Tagged(tag,d):
-    fputs(start_tags[tag],stdout); dump(b,d); fputs(end_tags[tag],stdout);
+    fwrite(start_tags[tag],1,strlen(start_tags[tag]),stdout); 
+    dump(b,d); 
+    fwrite(end_tags[tag],1,strlen(end_tags[tag]),stdout);
     break;
   }
 }
@@ -188,10 +192,34 @@ doc_t down_opt(context_t ctxt, doc_t d) {
   }
 }
 
+/* removes all of the Seq's from a document, returning it as a list of 
+   non-Seq-containing docs */
+List::list_t<doc_t> flatten(doc_t d) {
+  switch (d) {
+  case &Seq(ds):
+    List::list_t<doc_t> ds1, ds_tot = null;
+    while (ds != null) {
+      ds1 = flatten(ds->hd);
+      ds_tot = List::imp_append(ds_tot,ds1);
+      ds = ds->tl;
+    }
+    return ds_tot;
+  case &Text(i): return new List::List(d,null);
+  case &Tagged(tag,d):
+    List::list_t<doc_t> ds = flatten(d);
+    while (ds != null) {
+      ds->hd = new Tagged(tag,ds->hd);
+      ds = ds->tl;
+    }
+    return ds;
+  }
+}  
+
 extern void validate_docs(buf_t,doc_t,doc_t);
 
 int main(int argc, char ??argv) {
   string_t tlimit = "182";
+  FILE @f = stdin;
 
   if (argc <= 1) {
     tlimit = Stdlib::getenv("TLIMIT");
@@ -202,15 +230,21 @@ int main(int argc, char ??argv) {
     }
   } else {
     tlimit = argv[1];
+    if (argc >= 3) {
+      FILE *g = fopen(argv[2],"r");
+      if (g != null) f = (FILE @)g;
+    }
   }
   start_timer(tlimit);
   if(sizeof(TagElim::synth_t) != sizeof(unsigned long long))
     fprintf(stderr, "TagElim::synth_t has gotten too big!!!");
   buf_t b = init_buf();
   fprintf(stderr,"getting docs..."); fflush(stderr);
-  doc_t orig = get_docs(init_context,b,stdin);
+  doc_t orig = get_docs(init_context,b,f);
   fprintf(stderr,"%d\ncopying docs...",check_time()); fflush(stderr);
   doc_t d = copy_doc(orig);
+//    List::list_t<doc_t> fds = flatten(d);
+//    d = new Seq(fds);
   is_change = true;
   while(is_change && check_time() > 2) {
     is_change = false;
