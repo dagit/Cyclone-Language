@@ -213,7 +213,7 @@ static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist){
   // FIX -- distance could overflow
   if (ji_dist != NULL){
     int sum = *ji_dist + dist;
-    if(~((*ji_dist) ^ dist) & (sum ^ dist) >> 31){
+    if(( ~((*ji_dist) ^ dist) & (sum ^ dist)) >> 31){
       // overflow happened, the two operands have the same sign while the sum
       // has a different sign bit from the operand
       if (dist >> 31){
@@ -233,60 +233,73 @@ static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist){
 
   // update shortest path for each pair of nodes
   let jrow = lookup_row(g,j);
+  bool overflow;
   for (let ks = g->rows; ks != NULL; ks = ks->next) {
     let k = ks->source;
     let ki_dist = lookup_distance(ks,is_signed,i);
-    if (ki_dist == NULL) continue;
+    if (ki_dist == NULL) continue;//no new path through ij
     for (let ls = g->rows; ls != NULL; ls = ls->next) {
       let l = ls->source;
+      let kl_dist = lookup_distance(ks,is_signed,l);
+      //if kl_dist is the smallest, no need to update.
+      if (kl_dist != NULL && *kl_dist == (int)MININT) continue;
+
       let jl_dist = lookup_distance(jrow,is_signed,l);
-      if (jl_dist != NULL) {
-        let kl_dist = lookup_distance(ks,is_signed,l);
-        // FIX -- distance could overflow
-	int sum1, sum2;
-	if(*ki_dist ^ dist >> 31){
-	  //two operands with different signs, no overflow;
-	  sum1 = *ki_dist+dist;
-	  sum2 = *ji_dist;
-	}else if (dist ^ *jl_dist >> 31){
-	  //two operands with different signs, no overflow;
-	  sum1 = dist + *jl_dist;
-	  sum2 = *ki_dist;
-	}else{
-	  // *ki_dist, dist and jl_dist all have the same sign
-	  //might overflow here, need to check:
-	  sum1 = *ki_dist+dist;
-	  //sum1 should have the same sign as dist
-	}
-	int new_dist = sum1 + sum2;
-	bool overflow;
-	if (sum1 ^ sum2 >> 31){
-	  //sum1 and sum2 have different signs, no overflow here
-	  //nothing needs to be done
+      if (jl_dist == NULL) continue;//no new path through ij
+
+      overflow = false;
+      int sum1, sum2;
+      int new_dist;
+      if((*ki_dist ^ dist) >> 31){
+	//two operands with different signs, no overflow;
+	sum1 = *ki_dist+dist;
+	sum2 = *jl_dist;
+      }else if ((dist ^ *jl_dist) >> 31){
+	//two operands with different signs, no overflow;
+	sum1 = dist + *jl_dist;
+	sum2 = *ki_dist;
+      }else{
+	// *ki_dist, dist and jl_dist all have the same sign
+	//might overflow here, need to check:
+	sum1 = *ki_dist+dist;
+	if ((sum1 ^ dist) >>31) overflow = true;
+	sum2 = *jl_dist;
+      }
+      //positive overflow, has to throw out the edge.
+      if (overflow && sum1 < 0) continue;
+      //negative overflow, could assign MININT;
+      if (overflow && sum1 >= 0) {
+	insert_distance(ks, is_signed, l, (int)MININT);
+	continue;
+      }
+      new_dist = sum1 + sum2;
+      if ((sum1 ^ sum2) >> 31){
+	//sum1 and sum2 have different signs, no overflow here
+	//nothing needs to be done
+	overflow = false;
+      }else {
+	//sum1 and sum2 have the same sign, might overflow here
+	if (sum1 < 0 && new_dist > 0){
+	  //underflow happened, 
+	  //new dist is less than MININT
+	  new_dist = (int)MININT;
 	  overflow = false;
-	}else {
-	  //sum1 and sum2 have the same sign, might overflow here
-	  if (sum1 < 0 && new_dist > 0){
-	    //underflow happened, 
-	    //new dist is less than MININT
-	    new_dist = (int)MININT;
-	    overflow = false;
-	  }else if (sum1 > 0 && new_dist < 0){
-	    overflow = true;
-	    //new dist is bigger than MAXINT, overflow happened
-	  }
+	}else if (sum1 > 0 && new_dist < 0){
+	  overflow = true;
+	  //new dist is bigger than MAXINT, overflow happened
 	}
-        let new_dist = *ki_dist + dist + *jl_dist;
-        if (kl_dist == NULL && !overflow) {
+      }
+      if (kl_dist == NULL){
+	if (!overflow) {
 	  //when distance is too big to be represented by int,
 	  //just throw out the edge.
-          insert_distance(ks,is_signed,l,new_dist);
-        } else if (*kl_dist > new_dist && !overflow) {
-	  //when the distance is too small to be represented by int,
-	  //it 's actually sound to replace it with an edge with
-	  //greater weight to get a distance representable by int
-          *kl_dist = new_dist;
-        }
+	  insert_distance(ks,is_signed,l,new_dist);
+	}
+      } else if (*kl_dist > new_dist && !overflow) {
+	//when the distance is too small to be represented by int,
+	//it 's actually sound to replace it with an edge with
+	//greater weight to get a distance representable by int
+	*kl_dist = new_dist;
       }
     }
   }
