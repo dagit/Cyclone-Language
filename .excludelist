@@ -1,0 +1,11 @@
+~
+\.#
+CVS
+cyclone/tools/cyclex/qdist
+cyclone/tools/cycocamllex
+cyclone/tools/cycbison
+cyclone/bin/genfiles/lib
+cyclone/bin/genfiles/src
+cyclone/makedist
+cyclone/.excludelist
+cyclone/Makefile.inc

@@ -1,0 +1,69 @@
+#!/bin/bash
+# Generates a .tar.gz file containing all of the files to distribute.
+# It gathers all of the files in the cyclone source tree, minus those
+# appearing the file .excludelist.  This file should contain a bunch
+# of regular expressions of filenames to exclude.
+#
+# TODO:
+# 1) automatically generate a version # to include in the compiler
+# 2) tag the CVS repository with this version #
+# 3) tar the files into the directory cyclone-$version
+#
+# usage: makedist version_num
+
+if [ $# != 1 ]; then
+  echo "usage: $0 version_num"
+  exit 1
+fi
+
+version=$1
+TMP=/tmp/makedist$$
+
+# grepexpr 
+#   given the file .excludelist which has elements x y z ..., it echos
+#   a string of the form x|y|z to be used as the expression to egrep.
+#
+function grepexpr {
+  first=0
+  if [ -f ".excludelist" ]; then
+    for file in `cat .excludelist`; do
+      if [ $first != 0 ]; then
+        echo -n "|"
+      else
+        first=1
+      fi
+      echo -n $file
+    done
+  else
+    echo
+  fi
+}
+
+# figure out files to exclude
+#
+if [ "`basename $PWD`" != "cyclone" ]; then
+  echo "Assumes that we are working the cyclone directory, exiting"
+  exit 1
+fi
+grepstr=`grepexpr`
+cd ..
+find cyclone -print | egrep -e $grepstr > $TMP
+
+# tar 'em up
+#
+filename=cyclone-$version-src
+tar -cvf ${filename}.tar -X $TMP cyclone
+if [ $? != 0 ]; then
+  echo Failed to tar the files into ${filename}.tar
+  exit 1
+fi
+gzip ${filename}.tar
+if [ $? != 0 ]; then
+  echo Failed to gzip ${filename}.tar
+  \rm -f ${filename}.tar
+  exit 1
+fi
+mv $filename.tar.gz cyclone
+if [ -f "$TMP" ]; then
+  \rm -f $TMP
+fi
