@@ -66,10 +66,13 @@ static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
     list_t<int> nolive_unique_params = NULL;
     list_t<int> noconsume_params = NULL;
     switch (compress(t)) {
-    case &FnType(FnInfo{.attributes=atts,...}):
+    case &FnType(FnInfo{.attributes=atts,.args=args,...}):
+      int nargs = List::length(args);
       for ( ; atts != NULL; atts = atts->tl) {
 	switch(atts->hd) {
 	case &Initializes_att(i):
+	  if (i < 1 || i > nargs)
+	    terr(loc,"initializes attribute: index %d out of range",i);
 	  if (List::memq(nolive_unique_params,i))
 	    terr(loc, rprintf(temp,"incompatible initializes() and "
 			      "noliveunique() attributes on parameter %d",
@@ -79,6 +82,8 @@ static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
 			      " attributes on parameter %d",i));
 	  init_params=rnew(temp) List(i,init_params); break;
 	case &Noliveunique_att(i):
+	  if (i < 1 || i > nargs)
+	    terr(loc,"noliveunique attribute: index %d out of range",i);
 	  if (List::memq(init_params,i))
 	    terr(loc, rprintf(temp,"incompatible initializes() and "
 			      "noliveunique() attributes on parameter %d",
@@ -88,6 +93,10 @@ static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
 			     " attributes on parameter %d",i));
 	  nolive_unique_params= rnew(temp) List(i,nolive_unique_params); break;
 	case &Noconsume_att(i):
+	  if (i < 1 || i > nargs) {
+	    terr(loc,"noconsume attribute: index %d out of range",i);
+	    continue;
+	  }
 	  if (List::memq(init_params,i))
 	    terr(loc, rprintf(temp,"incompatible initializes() and "
 			      "noconsume() attributes on parameter %d",
@@ -95,6 +104,9 @@ static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
 	  if (List::memq(nolive_unique_params,i))
 	    terr(loc,rprintf(temp,"incompatible noliveunique() and noconsume()"
 			     " attributes on parameter %d",i));
+	  let &$(_,_,t) = List::nth(args,i-1);
+	  if (!is_noalias_pointer(t,false))
+	    terr(loc,"noconsume attribute only allowed on unique pointers");
 	  noconsume_params = rnew(temp) List(i,noconsume_params); break;
 	default: break;
 	}

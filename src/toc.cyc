@@ -1872,13 +1872,13 @@ static exp_t init_struct(env_t nv, type_t struct_type,
                                                  orig_aggrfields),f)->type,
                                    lval, vd, e1, e2, zt, s, false);
 	    e1_translated = true;
-	    fallthru(e1);
-          case &ComprehensionNoinit_e(e1,...):
+	    fallthru(e1,(type_t)e2->topt);
+          case &ComprehensionNoinit_e(e1,t,...):
 	    // if this is a dynamic comprehension, grab the bound
 	    // for doing the malloc
 	    if (index != NULL && !strptrcmp(*index,f)) {
 	      if (!e1_translated) exp_to_c(nv,e1);
-	      let t2 = typ_to_c((type_t)e1->topt);
+	      let t2 = typ_to_c(t);
 	      *nv->struct_info.varsizeexp =
 		add_exp(fncall_exp(_check_times_e,
 				   list(e1,sizeoftyp_exp(t2,DL)),DL),

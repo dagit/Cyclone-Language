@@ -251,7 +251,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     // We allow arrays as long as the rgn_pat is defined, since
     // you can't update them (i.e., the whole array).  
     switch (compress(t)) {
-    case &ArrayType(_): 
+    case &ArrayType(_):
       if (rgn_pat == NULL || !allow_ref_pat)
         terr(p->loc, "array reference would point into unknown/unallowed region");
       break;
@@ -451,7 +451,9 @@ DONT_PROMOTE:
     if (ad->kind == UnionA && ad->impl->tagged)
       allow_ref_pat = false;
     if (exist_ts != NULL) {
-      // we can allow a reference as long as the whole structure is abstract
+      // we can allow a reference as long as the whole structure is abstract;
+      // this is because there's no way to alter the structure and thus
+      // violate the assumption of the open existential
       if (topt == NULL || typ_kind(*topt) != &ak)
         allow_ref_pat = false;
     }
@@ -662,25 +664,28 @@ tcpat_result_t tcPat(tenv_t te, pat_t  p, type_t @ topt,
 
 // This makes sure that any mentioned region is accessible, and that
 // reference patterns are not used on unique pointers
-void check_pat_regions_rec(tenv_t te, pat_t p,
+void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
 			   list_t<$(vardecl_t *,exp_opt_t)@> patvars) {
+//   fprintf(stderr,"check_pat_regions_rec: pattern %s, did_noalias_deref=%s\n",
+// 	  pat2string(p),did_noalias_deref ? "yes" : "no");
   switch(p->r) {
   case &Pointer_p(p2):
-    check_pat_regions_rec(te,p2,patvars);
     switch ((type_t)p->topt) {
     case &PointerType(PtrInfo(_,_,PtrAtts(rt,_,_,_,_))): 
       check_rgn_accessible(te,p->loc,rt);
+      check_pat_regions_rec(te,p2,is_noalias_region(rt,false),patvars);
       return;
     default: impos("check_pat_regions: bad pointer type");
     }
   case &Aggr_p(ai,exist_ts,dps,_): 
     for (; dps != NULL; dps = dps->tl)
-      check_pat_regions_rec(te,(*dps->hd)[1],patvars);
+      check_pat_regions_rec(te,(*dps->hd)[1],did_noalias_deref,patvars);
     return;
   // FIX: ultimately should allow unique pointers in datatype patterns
-  case &Datatype_p(_,_,ps,_): fallthru(ps);
+  case &Datatype_p(_,_,ps,_): did_noalias_deref = false; fallthru(ps);
   case &Tuple_p(ps,_):
-    for(; ps != NULL; ps = ps->tl) check_pat_regions_rec(te,ps->hd,patvars);
+    for(; ps != NULL; ps = ps->tl)
+      check_pat_regions_rec(te,ps->hd,did_noalias_deref,patvars);
     return;
   case &Reference_p(vd,p2): 
     for (_ x = patvars; x != NULL; x=x->tl) {
@@ -702,8 +707,20 @@ void check_pat_regions_rec(tenv_t te, pat_t p,
 	break;
       }
     }
-    fallthru(p2);
-  case &Var_p(_,p2): check_pat_regions_rec(te,p2,patvars); return;
+    check_pat_regions_rec(te,p2,did_noalias_deref,patvars);
+    return;
+  case &Var_p(vd,p2):
+    switch (p->topt) {
+    case &ArrayType(_):
+      if (did_noalias_deref) {
+	terr(p->loc,"pattern to array would create alias of no-alias pointer");
+	return;
+      }
+      break;
+    default: break;
+    }
+    check_pat_regions_rec(te,p2,did_noalias_deref,patvars);
+    return;
   default: return;
   }
 }
@@ -721,7 +738,7 @@ void check_pat_regions_rec(tenv_t te, pat_t p,
 // each of the access expressions.
 void check_pat_regions(tenv_t te, pat_t p,
 		       list_t<$(vardecl_t *,exp_opt_t)@> patvars) {
-  check_pat_regions_rec(te,p,patvars);
+  check_pat_regions_rec(te,p,false,patvars);
   TEMP_RGN(te, r) {  
     for (_ x = patvars; x != NULL; x=x->tl) {
       let &$(vdopt,eopt) = x->hd;

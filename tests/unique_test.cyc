@@ -227,10 +227,12 @@ void poly() {
   let l2 = poly_length(l);
 }
 
-struct MyList<`a,`r>{`a hd; struct MyList<`a,`r> *`r tl;};
+typedef struct List::List<`a,`U> *`U llist_t<`a>;
 
-void mylist() {
-  struct MyList<int,`U> *`U l = new MyList(1,NULL);
+llist_t<`a> append(llist_t<`a> x, llist_t<`a> y) {
+  if (x == NULL) return y;
+  x->tl = append(x->tl,y);
+  return x;
 }
 
 int main() {

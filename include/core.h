@@ -220,7 +220,7 @@ extern bool try_free_dynregion(dynregion_t<`r1,`r2>);
       with the dynamic region handle d.  If d has been opened or d has already
       been freed, then it returns 0, and otherwise returns 1 upon success. */
 
-  extern `a?`r mkfat(`a @{valueof(`n)}`r arr, Core::sizeof_t<`a> s, tag_t<`n> n);
+  extern `a?`r mkfat(`a @{valueof(`n)}`r::TR arr, Core::sizeof_t<`a> s, tag_t<`n> n);
   /** mkfat can be used to convert a thin pointer (@) of elements of type `a
       to a fat pointer (?).  It requires that you pass in the size of the
       element type, as well as the number of elements. */

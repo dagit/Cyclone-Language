@@ -1916,6 +1916,11 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
       bound = add_exp(bound,e1,0); bound->topt = uint_typ;
       *is_zero_term = true;
     }
+    TEMP_RGN(te, r) {
+      if (is_noalias_pointer_or_aggr(r,(type_t)body->topt) &&
+	  !is_noalias_path(r,body))
+	terr(body->loc, UNIQUE_ERR_MSG);
+    }
     // FIX:  bound may not be a constant here...
     let res = array_typ(t,(tqopt == NULL) ? empty_tqual(0) : *tqopt, bound,
                         (ztopt == NULL) ? false_conref : *ztopt, 0);

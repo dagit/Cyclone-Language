@@ -1,0 +1,132 @@
+#include <core.h>
+#include <stdio.h>
+
+struct s1<`r> {
+  int *`r p;
+  int y;
+};
+
+void func1(struct s1<`U> @`U s) {
+  int y = 0;
+  { let &s1{.p=p,...} = s; // consumes s->p
+    y = *p;
+//     Core::ufree(s->p); // fails
+  } // unconsumes s->p
+  Core::ufree(s->p);
+  Core::ufree(s);
+  return;
+}
+
+void func1a(struct s1<`U> @`U s) {
+  int y = 0;
+  { let &s1{.p=p,...} = s; // consumes s->p
+    y = *p;
+    Core::ufree(p);
+  } // does not unconsume s->p
+//   Core::ufree(s->p); // fails
+  Core::ufree(s);
+  return;
+}
+
+struct s2<`r> {
+  struct s1<`r> *`r ps;
+  int *`r x;
+};
+
+void func2a(struct s2<`U> @`U s) {
+  { let &s2{.ps=ps,...} = s; // consumes s->ps
+    Core::ufree(ps->p);
+  } // unconsumes s->ps, but makes it ThisIL
+//   Core::ufree(s->ps); // fails unfortunately
+  Core::ufree(s->x);
+  Core::ufree(s);
+}
+
+void func2b(struct s2<`U> @`U s) {
+  int zvar;
+  { let &s2{.ps=ps as &s1{.p=p,...},.x=x} = s; 
+    // consumes s->ps, s->ps->p s->x
+    zvar = *x + *p;
+    Core::ufree(ps);
+  } // unconsumes s->ps->p, s->x
+//   Core::ufree(s->ps); // fails
+  Core::ufree(s->x);
+  Core::ufree(s);
+}
+
+// testing flat patterns
+void func3a(struct s2<`U> s) {
+  int zvar;
+  { let s2{.ps=ps as &s1{.p=p,...},.x=x} = s; 
+    // consumes s, s.ps, s.ps->p, s.x
+    zvar = *p + *x;
+  }
+  Core::ufree(s.x);
+  Core::ufree(s.ps->p);
+  Core::ufree(s.ps);
+}
+
+struct s3<`r> {
+  struct s2<`r> s;
+  int * x;
+};
+
+void func3b(struct s3<`U> @`U s) {
+  int z;
+//   { let &s3{.s=xs as s2{.ps=ps,...},...} = s; // fails
+  { let &s3{.s=s2{.ps=ps,...},.x=x} = s;
+    z = *ps->p + *x;
+  } // unconsumes all (but x not considered)
+  { let &s3{.s=xs,...} = s;
+    z = *xs.ps->p;
+    xs.ps = new s1(NULL,1);
+  } // xs is *not* unconsumed
+//   Core::ufree(s->s.ps); // fails
+}
+
+void func3c(struct s3<`U> *`U s) {
+  int z;
+  switch (s) {
+  case &s3{.s=s2{.ps=ps,...},.x=x}:
+    z = *ps->p + *x; 
+//     Core::ufree(ps); // causes failure below
+    let &s1{.p=p,...} = ps;
+    goto lab;
+  default:
+    z = 0;
+  }
+ lab:
+  { let &s3{.s=s2{.ps=ps,...},...} = s;
+    { let &s1{.p=p,...} = ps;
+      z += *p;
+      goto lab2;
+    }
+  lab2:
+//     Core::ufree(s->s.ps); // fail
+    goto lab3;
+  }
+  lab3:
+  Core::ufree(s->s.ps->p);
+  Core::ufree(s->s.ps);
+  Core::ufree(s->s.x);
+  Core::ufree(s);
+}
+
+// noconsume(x) parameters
+void func4a(struct s3<`U> @`U s) __attribute__((noconsume(1))) {
+  int z;
+  { let &s3{.s=s2{.ps=ps,...},.x=x} = s;
+    z = *ps->p + *x;
+  } // unconsumes all (but x not considered)
+//   Core::ufree(s->s.ps); // results in failure
+}
+
+void func4b() {
+  int @x = new 1;
+  struct s3<`U> @`U s = new s3(s2{new s1(new 1,1),new 1},x);
+  func4a(s);
+  Core::ufree(s->s.ps->p);
+  Core::ufree(s->s.ps);
+  Core::ufree(s->s.x);
+  Core::ufree(s);
+}

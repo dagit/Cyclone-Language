@@ -86,7 +86,8 @@ extern void app(`b f(`a), queue_t<`a>);
        no-aliasable and/or unique pointers. */
 
 extern `a *`U take_match(region_t<`r> r, queue_t<`a::TA *`U,`r> q,
-			 bool (@f)<`r2::R>(`b,`a *`r2), `b env);
+			 bool (@f)(`b,`a *`U) __attribute__((noconsume(2))),
+			 `b env);
   /** [take_match(r,q,f,c)] looks through the queue (starting from the
       front) and returns the element [x] for which [f(x,c)] returns
       true. */
