@@ -8,47 +8,99 @@
 
 \subsection{C Libraries}
 Cyclone provides partial support for the following C library headers:
-\begin{quote}\ttfamily
-  <arpa/inet.h>
-  <assert.h>
-  <ctype.h>
-  <dirent.h>
-  <errno.h>
-  <fcntl.h>
-  <getopt.h>
-  <grp.h>
-  <math.h>
-  <netdb.h>
-  <netinet/in.h>
-  <netinet/tcp.h>
-  <pwd.h>
-  <signal.h>
-  <stddef.h>
-  <stdio.h>
-  <stdlib.h>
-  <string.h>
-  <strings.h>
-  <sys/mman.h>
-  <sys/resource.h>
-  <sys/select.h>
-  <sys/socket.h>
-  <sys/stat.h>
-  <sys/time.h>
-  <sys/types.h>
-  <sys/wait.h>
-  <time.h>
-  <unistd.h>
-\end{quote}
 
-For each supported C library header \texttt{<XXX.h>}, we also provide
-a header \texttt{<cXXX.h>}, which has the same declarations as
-\texttt{<XXX.h>}, except that they are all contained in namespace Std.
-For example, \texttt{<cstdio.h>} declares \texttt{Std::printf}.  Each
-file \texttt{<XXX.h>} is equivalent to
-\begin{verbatim}
-    #include <cXXX.h>
-    using Std;
-\end{verbatim}
+\begin{tabular}{lll}\ttfamily
+<aio.h> &
+<arpa/inet.h> &
+<assert.h> \\
+<complex.h> &
+<cpio.h> &
+<ctype.h> \\
+<dirent.h> &
+<dlfcn.h> &
+<errno.h> \\
+<fcntl.h> &
+<fenv.h> &
+<float.h> \\
+<fmtmsg.h> &
+<fnmatch.h> &
+<ftw.h> \\
+<getopt.h> &
+<glob.h> &
+<grp.h> \\
+<inttypes.h> &
+<iso646.h> &
+<langinfo.h> \\
+<libgen.h> &
+<limits.h> &
+<locale.h> \\
+<math.h> &
+<monetary.h> &
+<mqueue.h> \\
+<ndbm.h> &
+<net/if.h> &
+<netdb.h> \\
+<netinet/in.h> &
+<netinet/tcp.h> &
+<nl_types.h> \\
+<poll.h> &
+<pthread.h> &
+<pwd.h> \\
+<regexp.h> &
+<sched.h> &
+<search.h> \\
+<semaphore.h> &
+<setjmp.h> &
+<signal.h> \\
+<spawn.h> &
+<stdarg.h> &
+<stdbool.h> \\
+<stddef.h> &
+<stdint.h> &
+<stdio.h> \\
+<stdlib.h> &
+<string.h> &
+<strings.h> \\
+<stropts.h> &
+<sys/dir.h> &
+<sys/file.h> \\
+<sys/ioctl.h> &
+<sys/ipc.h> &
+<sys/mman.h> \\
+<sys/msg.h> &
+<sys/resource.h> &
+<sys/select.h> \\
+<sys/sem.h> &
+<sys/shm.h> &
+<sys/socket.h> \\
+<sys/stat.h> &
+<sys/statvfs.h> &
+<sys/syslog.h> \\
+<sys/time.h> &
+<sys/timeb.h> &
+<sys/times.h> \\
+<sys/types.h> &
+<sys/uio.h> &
+<sys/un.h> \\
+<sys/utsname.h> &
+<sys/wait.h> &
+<tar.h> \\
+<termios.h> &
+<tgmath.h> &
+<time.h> \\
+<trace.h> &
+<ucontext.h> &
+<ulimit.h> \\
+<unistd.h> &
+<utime.h> &
+<utmpx.h> \\
+<wchar.h> &
+<wctype.h> &
+<wordexp.h>
+\end{tabular}
+
+
+
 
 \input{gen-libdoc}
 

@@ -37,8 +37,7 @@ The form of a spec file is given by the following grammar.
 \begin{rules}{directive}
 \tk{cpp} \tk{\lb} \nt{balanced-braces} \tk{\rb} \\
 \tk{include} \tk{\lb} \nt{ids} \tk{\rb} \\
-\tk{epilogue} \nt{id}\opt \tk{\lb} \nt{balanced-braces} \tk{\rb} \\
-\tk{prologue} \nt{id}\opt \tk{\lb} \nt{balanced-braces} \tk{\rb} \\
+\tk{hstub} \nt{id}\opt \tk{\lb} \nt{balanced-braces} \tk{\rb} \\
 \tk{cycstub} \nt{id}\opt \tk{\lb} \nt{balanced-braces} \tk{\rb} \\
 \tk{cstub} \nt{id}\opt \tk{\lb} \nt{balanced-braces} \tk{\rb}
 \end{rules}
@@ -88,7 +87,7 @@ you do not explicitly \texttt{include}, those other definitions will
 be placed into the Cyclone header too.
 
 Currently, \texttt{include} does not work for variable or function
-declarations.  You have to use the \texttt{epilogue} directive to add
+declarations.  You have to use the \texttt{hstub} directive to add
 variable and function declarations to your Cyclone header.
 
 \item[cstub]
@@ -102,8 +101,8 @@ subset of the C standard library.
 The \texttt{cycstub} directive is like the \texttt{cstub} directive,
 except that the code is added to the Cyclone stub file.
 
-\item[epilogue]
-The \texttt{epilogue} directive is like the \texttt{cstub} directive,
+\item[hstub]
+The \texttt{hstub} directive is like the \texttt{cstub} directive,
 except that the code is added to the Cyclone header file.
 
 \item[cpp]

@@ -148,21 +148,19 @@ string_t current_line = NULL;
 typedef $(string_t<`H>,string_t<`H>) @ifdefined_t;
 
 typedef $(string_t,list_t<stringptr_t>,list_t<stringptr_t>,
-          list_t<ifdefined_t>,list_t<ifdefined_t>,
-          list_t<ifdefined_t>,list_t<ifdefined_t>) *spec_t;
+          list_t<ifdefined_t>,list_t<ifdefined_t>,list_t<ifdefined_t>) *spec_t;
 extern spec_t spec(Lexbuf<`a>);
 extern int commands(Lexbuf<`a>);
 extern int snarfsymbols(Lexbuf<`a>);
 extern int block(Lexbuf<`a>);
 extern int block_string(Lexbuf<`a>);
 extern int block_comment(Lexbuf<`a>);
-string_t current_header = NULL;
+string_t current_headerfile = NULL;
 list_t<stringptr_t> snarfed_symbols = NULL;
 list_t<stringptr_t> current_symbols = NULL;
 list_t<ifdefined_t> current_cstubs = NULL;
 list_t<ifdefined_t> current_cycstubs = NULL;
-list_t<ifdefined_t> current_prologue = NULL;
-list_t<ifdefined_t> current_epilogue = NULL;
+list_t<ifdefined_t> current_hstubs = NULL;
 list_t<stringptr_t> current_omit_symbols = NULL;
 list_t<stringptr_t> current_cpp = NULL;
 struct Buffer::t *specbuf = NULL;
@@ -546,25 +544,22 @@ and spec "spec_t" = parse
   "//" [^'\n''\r']*
 { return spec(lexbuf); }
 | ['A'-'Z''a'-'z''0'-'9''_''.''/']+ ':'
-{ current_header =
+{ current_headerfile =
   (string_t)substring(lexeme(lexbuf), 0,
                       lexeme_end(lexbuf)-lexeme_start(lexbuf)-1);
   current_symbols = NULL;
   current_omit_symbols = NULL;
   current_cstubs = NULL;
   current_cycstubs = NULL;
-  current_prologue = NULL;
-  current_epilogue = NULL;
+  current_hstubs = NULL;
   while (commands(lexbuf)) /* skip */;
-  current_prologue = imp_rev(current_prologue);
-  current_epilogue = imp_rev(current_epilogue);
+  current_hstubs = imp_rev(current_hstubs);
   current_cstubs = imp_rev(current_cstubs);
   current_cycstubs = imp_rev(current_cycstubs);
-  return new $(current_header,
+  return new $(current_headerfile,
                current_symbols,
                current_omit_symbols,
-               current_prologue,
-               current_epilogue,
+               current_hstubs,
                current_cstubs,
                current_cycstubs);
 }
@@ -593,17 +588,17 @@ and commands = parse /* returns 1 if more to do, 0 if all done */
   while (snarfsymbols(lexbuf)) /* skip */;
   current_omit_symbols = append(snarfed_symbols,current_omit_symbols);
   return 1; }
-| "prologue" ws+ '{'
+| "hstub" ws+ '{'
 { braces_to_match = 1;
   specbuf = Buffer::create(255);
   while (block(lexbuf)) /* skip */;
   ifdefined_t x = new $((string_t)NULL,
                         (string_t)Buffer::contents((Buffer::T)specbuf));
-  current_prologue = new List(x,current_prologue);
+  current_hstubs = new List(x,current_hstubs);
   return 1; }
-| "prologue" ws+ idchar+ ws+ '{'
+| "hstub" ws+ idchar+ ws+ '{'
 { let s = lexeme(lexbuf);
-  s += strlen("prologue");
+  s += strlen("hstub");
   while (isspace(*s)) s++;
   char ?t = s;
   while (!isspace(*t)) t++;
@@ -613,29 +608,7 @@ and commands = parse /* returns 1 if more to do, 0 if all done */
   while (block(lexbuf)) /* skip */;
   ifdefined_t x = new $((string_t)symbol,
                         (string_t)Buffer::contents((Buffer::T)specbuf));
-  current_prologue = new List(x,current_prologue);
-  return 1; }
-| "epilogue" ws+ '{'
-{ braces_to_match = 1;
-  specbuf = Buffer::create(255);
-  while (block(lexbuf)) /* skip */;
-  ifdefined_t x = new $((string_t)NULL,
-                        (string_t)Buffer::contents((Buffer::T)specbuf));
-  current_epilogue = new List(x,current_epilogue);
-  return 1; }
-| "epilogue" ws+ idchar+ ws+ '{'
-{ let s = lexeme(lexbuf);
-  s += strlen("epilogue");
-  while (isspace(*s)) s++;
-  char ?t = s;
-  while (!isspace(*t)) t++;
-  let symbol = substring(s,0,t-s);
-  braces_to_match = 1;
-  specbuf = Buffer::create(255);
-  while (block(lexbuf)) /* skip */;
-  ifdefined_t x = new $((string_t)symbol,
-                        (string_t)Buffer::contents((Buffer::T)specbuf));
-  current_epilogue = new List(x,current_epilogue);
+  current_hstubs = new List(x,current_hstubs);
   return 1; }
 | "cstub" ws+ '{'
 { braces_to_match = 1;
@@ -1208,8 +1181,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   int process_file(const char @filename,
                    list_t<stringptr_t<`H,`H>,`H> start_symbols,
                    list_t<stringptr_t<`H,`H>,`H> omit_symbols,
-                   list_t<ifdefined_t,`H> prologue,
-                   list_t<ifdefined_t,`H> epilogue,
+                   list_t<ifdefined_t,`H> hstubs,
                    list_t<ifdefined_t,`H> cstubs,
                    list_t<ifdefined_t,`H> cycstubs) {
     FILE *maybe;
@@ -1435,18 +1407,6 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
             ifdefmacro,
             ifdefmacro);
 
-    if (prologue != NULL) {
-      for (let x = prologue; x != NULL; x = x->tl) {
-        let &$(symbol,text) = x->hd;
-        if (text != NULL &&
-            (symbol == NULL || Set::member(defined_symbols, new symbol)))
-          // FIX: FPUTS DUMPS CORE ON LINUX IF FIRST ARG IS NULL!!
-          fputs((const char @)text,out_file);
-        else
-          log("%s is not supported on this platform\n",symbol);
-      }
-    }
-
     /* gather all of the declarations to print */
     let print_decls = NULL;
     let names = NULL;
@@ -1535,8 +1495,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     fclose(in_file);
     if (mode != FINISH) remove(macrosfile);
 
-    if (epilogue != NULL) {
-      for (let x = epilogue; x != NULL; x = x->tl) {
+    if (hstubs != NULL) {
+      for (let x = hstubs; x != NULL; x = x->tl) {
         let &$(symbol,text) = x->hd;
         if (text != NULL &&
             (symbol == NULL || Set::member(defined_symbols, new symbol)))
@@ -1637,9 +1597,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     let entry;
     while ( (entry = spec(l)) != NULL) {
       let &$(headerfile,start_symbols,omit_symbols,
-             prologue,epilogue,cstubs,cycstubs) = (_ @)entry;
+             hstubs,cstubs,cycstubs) = (_ @)entry;
       if (process_file((const char @)headerfile,start_symbols,omit_symbols, 
-                       prologue,epilogue,cstubs,cycstubs))
+                       hstubs,cstubs,cycstubs))
         return 1; /* fatal error in process_file */
     }
     fclose(in_file);

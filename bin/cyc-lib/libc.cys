@@ -19,7 +19,7 @@ INET6_ADDRSTRLEN
 uint32_t
 uint16_t
 }
-epilogue {
+hstub {
   /* Cygwin does not define these types so we take a guess :-( */
   /* FIX: make this specific to cygwin ?? */
   #ifndef _in_addr_t_def_
@@ -35,34 +35,34 @@ epilogue {
   typedef unsigned long uint32_t;
   #endif
 }
-epilogue htonl {
+hstub htonl {
   extern "C" uint32_t htonl(uint32_t);
 }
-epilogue htons {
+hstub htons {
   extern "C" uint16_t htons(uint16_t);
 }
-epilogue ntohl {
+hstub ntohl {
   extern "C" uint32_t ntohl(uint32_t);
 }
-epilogue ntohs {
+hstub ntohs {
   extern "C" uint16_t ntohs(uint16_t);
 }
-epilogue inet_addr {
+hstub inet_addr {
   // FIX: should I worry about Cstring being not-NULL?
   extern "C" in_addr_t inet_addr(const char *);
 }
-epilogue inet_aton {
+hstub inet_aton {
   /* Note, inet_aton is not required by POSIX */
   // FIX: should I worry about char * being not-NULL?
   extern "C" int inet_aton(const char *, struct in_addr @);
 }
-epilogue inet_ntoa {
+hstub inet_ntoa {
   extern "C" char * inet_ntoa(struct in_addr);
 }
-epilogue inet_ntop {
+hstub inet_ntop {
   // inet_ntop is not supported yet
 }
-epilogue inet_pton {
+hstub inet_pton {
   // inet_pton is not supported yet
 }
 ;
@@ -77,202 +77,202 @@ complex.h:
 // _Imaginary_I
 // I
 // }
-// epilogue cabs {
+// hstub cabs {
 //   extern "C" double cabs(double complex);
 // }
-// epilogue cabsf {
+// hstub cabsf {
 //   extern "C" float cabsf(float complex);
 // }
-// epilogue cabsl {
+// hstub cabsl {
 //   extern "C" long double cabsl(long double complex);
 // }
-// epilogue cacos {
+// hstub cacos {
 //   extern "C" double complex cacos(double complex);
 // }
-// epilogue cacosf {
+// hstub cacosf {
 //   extern "C" float complex cacosf(float complex);
 // }
-// epilogue cacosh {
+// hstub cacosh {
 //   extern "C" double complex cacosh(double complex);
 // }
-// epilogue cacoshf {
+// hstub cacoshf {
 //   extern "C" float complex cacoshf(float complex);
 // }
-// epilogue cacoshl {
+// hstub cacoshl {
 //   extern "C" long double complex cacoshl(long double complex);
 // }
-// epilogue cacosl {
+// hstub cacosl {
 //   extern "C" long double complex cacosl(long double complex);
 // }
-// epilogue carg {
+// hstub carg {
 //   extern "C" double carg(double complex);
 // }
-// epilogue cargf {
+// hstub cargf {
 //   extern "C" float cargf(float complex);
 // }
-// epilogue cargl {
+// hstub cargl {
 //   extern "C" long double cargl(long double complex);
 // }
-// epilogue casin {
+// hstub casin {
 //   extern "C" double complex casin(double complex);
 // }
-// epilogue casinf {
+// hstub casinf {
 //   extern "C" float complex casinf(float complex);
 // }
-// epilogue casinh {
+// hstub casinh {
 //   extern "C" double complex casinh(double complex);
 // }
-// epilogue casinhf {
+// hstub casinhf {
 //   extern "C" float complex casinhf(float complex);
 // }
-// epilogue casinhl {
+// hstub casinhl {
 //   extern "C" long double complex casinhl(long double complex);
 // }
-// epilogue casinl {
+// hstub casinl {
 //   extern "C" long double complex casinl(long double complex);
 // }
-// epilogue catan {
+// hstub catan {
 //   extern "C" double complex catan(double complex);
 // }
-// epilogue catanf {
+// hstub catanf {
 //   extern "C" float complex catanf(float complex);
 // }
-// epilogue catanh {
+// hstub catanh {
 //   extern "C" double complex catanh(double complex);
 // }
-// epilogue catanhf {
+// hstub catanhf {
 //   extern "C" float complex catanhf(float complex);
 // }
-// epilogue catanhl {
+// hstub catanhl {
 //   extern "C" long double complex catanhl(long double complex);
 // }
-// epilogue catanl {
+// hstub catanl {
 //   extern "C" long double complex catanl(long double complex);
 // }
-// epilogue ccos {
+// hstub ccos {
 //   extern "C" double complex ccos(double complex);
 // }
-// epilogue ccosf {
+// hstub ccosf {
 //   extern "C" float complex ccosf(float complex);
 // }
-// epilogue ccosh {
+// hstub ccosh {
 //   extern "C" double complex ccosh(double complex);
 // }
-// epilogue ccoshf {
+// hstub ccoshf {
 //   extern "C" float complex ccoshf(float complex);
 // }
-// epilogue ccoshl {
+// hstub ccoshl {
 //   extern "C" long double complex ccoshl(long double complex);
 // }
-// epilogue ccosl {
+// hstub ccosl {
 //   extern "C" long double complex ccosl(long double complex);
 // }
-// epilogue cexp {
+// hstub cexp {
 //   extern "C" double complex cexp(double complex);
 // }
-// epilogue cexpf {
+// hstub cexpf {
 //   extern "C" float complex cexpf(float complex);
 // }
-// epilogue cexpl {
+// hstub cexpl {
 //   extern "C" long double complex cexpl(long double complex);
 // }
-// epilogue cimag {
+// hstub cimag {
 //   extern "C" double cimag(double complex);
 // }
-// epilogue cimagf {
+// hstub cimagf {
 //   extern "C" float cimagf(float complex);
 // }
-// epilogue cimagl {
+// hstub cimagl {
 //   extern "C" long double cimagl(long double complex);
 // }
-// epilogue clog {
+// hstub clog {
 //   extern "C" double complex clog(double complex);
 // }
-// epilogue clogf {
+// hstub clogf {
 //   extern "C" float complex clogf(float complex);
 // }
-// epilogue clogl {
+// hstub clogl {
 //   extern "C" long double complex clogl(long double complex);
 // }
-// epilogue conj {
+// hstub conj {
 //   extern "C" double complex conj(double complex);
 // }
-// epilogue conjf {
+// hstub conjf {
 //   extern "C" float complex conjf(float complex);
 // }
-// epilogue conjl {
+// hstub conjl {
 //   extern "C" long double complex conjl(long double complex);
 // }
-// epilogue cpow {
+// hstub cpow {
 //   extern "C" double complex cpow(double complex, double complex);
 // }
-// epilogue cpowf {
+// hstub cpowf {
 //   extern "C" float complex cpowf(float complex, float complex);
 // }
-// epilogue cpowl {
+// hstub cpowl {
 //   extern "C" long double complex cpowl(long double complex, long double complex);
 // }
-// epilogue cproj {
+// hstub cproj {
 //   extern "C" double complex cproj(double complex);
 // }
-// epilogue cprojf {
+// hstub cprojf {
 //   extern "C" float complex cprojf(float complex);
 // }
-// epilogue cprojl {
+// hstub cprojl {
 //   extern "C" long double complex cprojl(long double complex);
 // }
-// epilogue creal {
+// hstub creal {
 //   extern "C" double creal(double complex);
 // }
-// epilogue crealf {
+// hstub crealf {
 //   extern "C" float crealf(float complex);
 // }
-// epilogue creall {
+// hstub creall {
 //   extern "C" long double creall(long double complex);
 // }
-// epilogue csin {
+// hstub csin {
 //   extern "C" double complex csin(double complex);
 // }
-// epilogue csinf {
+// hstub csinf {
 //   extern "C" float complex csinf(float complex);
 // }
-// epilogue csinh {
+// hstub csinh {
 //   extern "C" double complex csinh(double complex);
 // }
-// epilogue csinhf {
+// hstub csinhf {
 //   extern "C" float complex csinhf(float complex);
 // }
-// epilogue csinhl {
+// hstub csinhl {
 //   extern "C" long double complex csinhl(long double complex);
 // }
-// epilogue csinl {
+// hstub csinl {
 //   extern "C" long double complex csinl(long double complex);
 // }
-// epilogue csqrt {
+// hstub csqrt {
 //   extern "C" double complex csqrt(double complex);
 // }
-// epilogue csqrtf {
+// hstub csqrtf {
 //   extern "C" float complex csqrtf(float complex);
 // }
-// epilogue csqrtl {
+// hstub csqrtl {
 //   extern "C" long double complex csqrtl(long double complex);
 // }
-// epilogue ctan {
+// hstub ctan {
 //   extern "C" double complex ctan(double complex);
 // }
-// epilogue ctanf {
+// hstub ctanf {
 //   extern "C" float complex ctanf(float complex);
 // }
-// epilogue ctanh {
+// hstub ctanh {
 //   extern "C" double complex ctanh(double complex);
 // }
-// epilogue ctanhf {
+// hstub ctanhf {
 //   extern "C" float complex ctanhf(float complex);
 // }
-// epilogue ctanhl {
+// hstub ctanhl {
 //   extern "C" long double complex ctanhl(long double complex);
 // }
-// epilogue ctanl {
+// hstub ctanl {
 //   extern "C" long double complex ctanl(long double complex);
 // }
 ;
@@ -304,55 +304,55 @@ MAGIC
 ;
 
 ctype.h:
-epilogue {
+hstub {
   extern "C" int isalnum(int);
 }
-epilogue {
+hstub {
   extern "C" int isalpha(int);
 }
-epilogue {
+hstub {
   extern "C" int isascii(int);
 }
-epilogue {
+hstub {
   extern "C" int iscntrl(int);
 }
-epilogue {
+hstub {
   extern "C" int isdigit(int);
 }
-epilogue {
+hstub {
   extern "C" int isgraph(int);
 }
-epilogue {
+hstub {
   extern "C" int islower(int);
 }
-epilogue {
+hstub {
   extern "C" int isprint(int);
 }
-epilogue {
+hstub {
   extern "C" int ispunct(int);
 }
-epilogue {
+hstub {
   extern "C" int isspace(int);
 }
-epilogue {
+hstub {
   extern "C" int isupper(int);
 }
-epilogue {
+hstub {
   extern "C" int isxdigit(int);
 }
-epilogue {
+hstub {
   extern "C" int toascii(int);
 }
-epilogue {
+hstub {
   extern "C" int tolower(int);
 }
-epilogue {
+hstub {
   extern "C" int toupper(int);
 }
-epilogue _tolower {
+hstub _tolower {
   extern "C" int _tolower(int);
 }
-epilogue _toupper {
+hstub _toupper {
   extern "C" int _toupper(int);
 }
 ;
@@ -371,7 +371,7 @@ dirent
 ino_t
 NAME_MAX
 }
-epilogue {
+hstub {
   // We define DIR as an abstract struct because it can contain
   // pointers, e.g., in cygwin
   extern struct __cycDIR;  
@@ -394,7 +394,7 @@ cstub {
     DIR *dir;
   };
 }
-epilogue closedir {
+hstub closedir {
   extern int closedir(DIR @);
 }
 cycstub closedir {
@@ -405,7 +405,7 @@ cycstub closedir {
     return Cdirent::closedir(d->dir);
   }
 }
-epilogue opendir {
+hstub opendir {
   extern DIR *opendir(const char @);
 }
 cycstub opendir {
@@ -420,7 +420,7 @@ cycstub opendir {
     return cd ? new __cycDIR((Cdirent::__cDIR @)cd) : NULL;
   }
 }
-epilogue readdir {
+hstub readdir {
   extern struct dirent @readdir(DIR @);
 }
 cycstub readdir {
@@ -431,12 +431,12 @@ cycstub readdir {
     return Cdirent::readdir(d->dir);
   }
 }
-epilogue {
+hstub {
   // FIX: We don't handle this yet. The third arg is an array,
   // needs a wrapper
   //int readdir_r(DIR *, struct dirent *, struct dirent **);
 }
-epilogue rewinddir {
+hstub rewinddir {
   extern void rewinddir(DIR @);
 }
 cycstub rewinddir {
@@ -447,7 +447,7 @@ cycstub rewinddir {
     return Cdirent::rewinddir(d->dir);
   }
 }
-epilogue seekdir {
+hstub seekdir {
   extern void seekdir(DIR @, long);
 }
 cycstub seekdir {
@@ -458,7 +458,7 @@ cycstub seekdir {
     return Cdirent::seekdir(d->dir,x);
   }
 }
-epilogue telldir {
+hstub telldir {
   extern long telldir(DIR @);
 }
 cycstub telldir {
@@ -550,7 +550,7 @@ ETXTBSY
 EWOULDBLOCK
 EXDEV
 }
-epilogue {
+hstub {
 extern "C" int __CYCLONE_ERRNO();
 #define errno (__CYCLONE_ERRNO())
 }
@@ -600,7 +600,7 @@ mode_t
 off_t
 pid_t
 }
-epilogue {
+hstub {
   // FIX: ADV is not supported
 
   tunion FcntlArg<`r::R> {
@@ -682,37 +682,37 @@ FE_TOWARDZERO
 FE_UPWARD
 FE_DFL_ENV
 }
-epilogue feclearexcept {
+hstub feclearexcept {
   extern "C" int feclearexcept(int);
 }
-epilogue fegetexceptflag {
+hstub fegetexceptflag {
   extern "C" int fegetexceptflag(fexcept_t @, int);
 }
-epilogue feraiseexcept {
+hstub feraiseexcept {
   extern "C" int feraiseexcept(int);
 }
-epilogue fesetexceptflag {
+hstub fesetexceptflag {
   extern "C" int fesetexceptflag(const fexcept_t @, int);
 }
-epilogue fetestexcept {
+hstub fetestexcept {
   extern "C" int fetestexcept(int);
 }
-epilogue fegetround {
+hstub fegetround {
   extern "C" int fegetround(void);
 }
-epilogue fesetround {
+hstub fesetround {
   extern "C" int fesetround(int);
 }
-epilogue fegetenv {
+hstub fegetenv {
   extern "C" int fegetenv(fenv_t @);
 }
-epilogue feholdexcept {
+hstub feholdexcept {
   extern "C" int feholdexcept(fenv_t @);
 }
-epilogue fesetenv {
+hstub fesetenv {
   extern "C" int fesetenv(const fenv_t @);
 }
-epilogue feupdateenv {
+hstub feupdateenv {
   extern "C" int feupdateenv(const fenv_t @);
 }
 ;
@@ -777,7 +777,7 @@ MM_NOTOK
 MM_NOMSG
 MM_NOCON
 }
-epilogue {
+hstub {
 #define MM_NULLLBL ((const char ?)NULL)
 #define MM_NULLTXT ((const char ?)NULL)
 #define MM_NULLACT ((const char ?)NULL)
@@ -796,7 +796,7 @@ FNM_PERIOD
 FNM_NOESCAPE
 FNM_NOSYS
 }
-epilogue {
+hstub {
   // FIX: does this old comment still apply:
   // Our implementation copies the first two arguments.  This is
   // only a stopgap measure, the function should be rewitten in
@@ -859,12 +859,12 @@ ftw.h:
 // S_TYPEISSHM
 // S_TYPEISTMO
 // }
-// epilogue ftw {
+// hstub ftw {
 //   extern int ftw(const char ?,
 //                  int (@)(const char ?, const struct stat @, int),
 //                  int);
 // }
-// epilogue nftw {
+// hstub nftw {
 //   extern int nftw(const char ?
 //                   int (@)(const char ?, const struct stat @, int, struct FTW @),
 //                   int,
@@ -887,7 +887,7 @@ inttypes.h:
 // include {
 // imaxdiv_t
 // }
-// epilogue {
+// hstub {
 //   // This isn't quite right.  Posix requires <inttypes.h> to include
 //   // <stdint.h>, but this include is not making the definitions of
 //   // <stdint.h> available in the Std namespace.
@@ -916,7 +916,7 @@ langinfo.h:
 ;
 
 libgen.h:
-epilogue {
+hstub {
   // Probably best to do entirely in Cyclone
 }
 ;
@@ -1167,7 +1167,7 @@ MATH_ERRNO
 MATH_ERREXCEPT
 math_errhandling
 }
-epilogue {
+hstub {
   /* I'd like to do
      include { HUGE_VAL }
      but under Cygwin this brings in 
@@ -1177,544 +1177,544 @@ epilogue {
   */
 }
 
-epilogue acos {
+hstub acos {
   extern "C" double acos(double);
 }
-epilogue acosf {
+hstub acosf {
   extern "C" float acosf(float);
 }
-epilogue acosh {
+hstub acosh {
   extern "C" double acosh(double);
 }
-epilogue acoshf {
+hstub acoshf {
   extern "C" float acoshf(float);
 }
-epilogue acoshl {
+hstub acoshl {
   extern "C" long double acoshl(long double);
 }
-epilogue acosl {
+hstub acosl {
   extern "C" long double acosl(long double);
 }
-epilogue asin {
+hstub asin {
   extern "C" double asin(double);
 }
-epilogue asinf {
+hstub asinf {
   extern "C" float asinf(float);
 }
-epilogue asinh {
+hstub asinh {
   extern "C" double asinh(double);
 }
-epilogue asinhf {
+hstub asinhf {
   extern "C" float asinhf(float);
 }
-epilogue asinhl {
+hstub asinhl {
   extern "C" long double asinhl(long double);
 }
-epilogue asinl {
+hstub asinl {
   extern "C" long double asinl(long double);
 }
-epilogue atan {
+hstub atan {
   extern "C" double atan(double);
 }
-epilogue atan2 {
+hstub atan2 {
   extern "C" double atan2(double, double);
 }
-epilogue atan2f {
+hstub atan2f {
   extern "C" float atan2f(float, float);
 }
-epilogue atan2l {
+hstub atan2l {
   extern "C" long double atan2l(long double, long double);
 }
-epilogue atanf {
+hstub atanf {
   extern "C" float atanf(float);
 }
-epilogue atanh {
+hstub atanh {
   extern "C" double atanh(double);
 }
-epilogue atanhf {
+hstub atanhf {
   extern "C" float atanhf(float);
 }
-epilogue atanhl {
+hstub atanhl {
   extern "C" long double atanhl(long double);
 }
-epilogue atanl {
+hstub atanl {
   extern "C" long double atanl(long double);
 }
-epilogue cbrt {
+hstub cbrt {
   extern "C" double cbrt(double);
 }
-epilogue cbrtf {
+hstub cbrtf {
   extern "C" float cbrtf(float);
 }
-epilogue cbrtl {
+hstub cbrtl {
   extern "C" long double cbrtl(long double);
 }
-epilogue ceil {
+hstub ceil {
   extern "C" double ceil(double);
 }
-epilogue ceilf {
+hstub ceilf {
   extern "C" float ceilf(float);
 }
-epilogue ceill {
+hstub ceill {
   extern "C" long double ceill(long double);
 }
-epilogue copysign {
+hstub copysign {
   extern "C" double copysign(double, double);
 }
-epilogue copysignf {
+hstub copysignf {
   extern "C" float copysignf(float, float);
 }
-epilogue copysignl {
+hstub copysignl {
   extern "C" long double copysignl(long double, long double);
 }
-epilogue cos {
+hstub cos {
   extern "C" double cos(double);
 }
-epilogue cosf {
+hstub cosf {
   extern "C" float cosf(float);
 }
-epilogue cosh {
+hstub cosh {
   extern "C" double cosh(double);
 }
-epilogue coshf {
+hstub coshf {
   extern "C" float coshf(float);
 }
-epilogue coshl {
+hstub coshl {
   extern "C" long double coshl(long double);
 }
-epilogue cosl {
+hstub cosl {
   extern "C" long double cosl(long double);
 }
-epilogue erf {
+hstub erf {
   extern "C" double erf(double);
 }
-epilogue erfc {
+hstub erfc {
   extern "C" double erfc(double);
 }
-epilogue erfcf {
+hstub erfcf {
   extern "C" float erfcf(float);
 }
-epilogue erfcl {
+hstub erfcl {
   extern "C" long double erfcl(long double);
 }
-epilogue erff {
+hstub erff {
   extern "C" float erff(float);
 }
-epilogue erfl {
+hstub erfl {
   extern "C" long double erfl(long double);
 }
-epilogue exp {
+hstub exp {
   extern "C" double exp(double);
 }
-epilogue exp2 {
+hstub exp2 {
   extern "C" double exp2(double);
 }
-epilogue exp2f {
+hstub exp2f {
   extern "C" float exp2f(float);
 }
-epilogue exp2l {
+hstub exp2l {
   extern "C" long double exp2l(long double);
 }
-epilogue expf {
+hstub expf {
   extern "C" float expf(float);
 }
-epilogue expl {
+hstub expl {
   extern "C" long double expl(long double);
 }
-epilogue expm1 {
+hstub expm1 {
   extern "C" double expm1(double);
 }
-epilogue expm1f {
+hstub expm1f {
   extern "C" float expm1f(float);
 }
-epilogue expm1l {
+hstub expm1l {
   extern "C" long double expm1l(long double);
 }
-epilogue fabs {
+hstub fabs {
   extern "C" double fabs(double);
 }
-epilogue fabsf {
+hstub fabsf {
   extern "C" float fabsf(float);
 }
-epilogue fabsl {
+hstub fabsl {
   extern "C" long double fabsl(long double);
 }
-epilogue fdim {
+hstub fdim {
   extern "C" double fdim(double, double);
 }
-epilogue fdimf {
+hstub fdimf {
   extern "C" float fdimf(float, float);
 }
-epilogue fdiml {
+hstub fdiml {
   extern "C" long double fdiml(long double, long double);
 }
-epilogue floor {
+hstub floor {
   extern "C" double floor(double);
 }
-epilogue floorf {
+hstub floorf {
   extern "C" float floorf(float);
 }
-epilogue floorl {
+hstub floorl {
   extern "C" long double floorl(long double);
 }
-epilogue fma {
+hstub fma {
   extern "C" double fma(double, double, double);
 }
-epilogue fmaf {
+hstub fmaf {
   extern "C" float fmaf(float, float, float);
 }
-epilogue fmal {
+hstub fmal {
   extern "C" long double fmal(long double, long double, long double);
 }
-epilogue fmax {
+hstub fmax {
   extern "C" double fmax(double, double);
 }
-epilogue fmaxf {
+hstub fmaxf {
   extern "C" float fmaxf(float, float);
 }
-epilogue fmaxl {
+hstub fmaxl {
   extern "C" long double fmaxl(long double, long double);
 }
-epilogue fmin {
+hstub fmin {
   extern "C" double fmin(double, double);
 }
-epilogue fminf {
+hstub fminf {
   extern "C" float fminf(float, float);
 }
-epilogue fminl {
+hstub fminl {
   extern "C" long double fminl(long double, long double);
 }
-epilogue fmod {
+hstub fmod {
   extern "C" double fmod(double, double);
 }
-epilogue fmodf {
+hstub fmodf {
   extern "C" float fmodf(float, float);
 }
-epilogue fmodl {
+hstub fmodl {
   extern "C" long double fmodl(long double, long double);
 }
-epilogue frexp {
+hstub frexp {
   extern "C" double frexp(double, int @);
 }
-epilogue frexpf {
+hstub frexpf {
   extern "C" float frexpf(float value, int @);
 }
-epilogue frexpl {
+hstub frexpl {
   extern "C" long double frexpl(long double value, int @);
 }
-epilogue hypot {
+hstub hypot {
   extern "C" double hypot(double, double);
 }
-epilogue hypotf {
+hstub hypotf {
   extern "C" float hypotf(float, float);
 }
-epilogue hypotl {
+hstub hypotl {
   extern "C" long double hypotl(long double, long double);
 }
-epilogue ilogb {
+hstub ilogb {
   extern "C" int ilogb(double);
 }
-epilogue ilogbf {
+hstub ilogbf {
   extern "C" int ilogbf(float);
 }
-epilogue ilogbl {
+hstub ilogbl {
   extern "C" int ilogbl(long double);
 }
-epilogue j0 {
+hstub j0 {
   extern "C" double j0(double);
 }
-epilogue j1 {
+hstub j1 {
   extern "C" double j1(double);
 }
-epilogue jn {
+hstub jn {
   extern "C" double jn(int, double);
 }
-epilogue ldexp {
+hstub ldexp {
   extern "C" double ldexp(double, int);
 }
-epilogue ldexpf {
+hstub ldexpf {
   extern "C" float ldexpf(float, int);
 }
-epilogue ldexpl {
+hstub ldexpl {
   extern "C" long double ldexpl(long double, int);
 }
-epilogue lgamma {
+hstub lgamma {
   extern "C" double lgamma(double);
 }
-epilogue lgammaf {
+hstub lgammaf {
   extern "C" float lgammaf(float);
 }
-epilogue lgammal {
+hstub lgammal {
   extern "C" long double lgammal(long double);
 }
-epilogue llrint {
+hstub llrint {
   extern "C" long long llrint(double);
 }
-epilogue llrintf {
+hstub llrintf {
   extern "C" long long llrintf(float);
 }
-epilogue llrintl {
+hstub llrintl {
   extern "C" long long llrintl(long double);
 }
-epilogue llround {
+hstub llround {
   extern "C" long long llround(double);
 }
-epilogue llroundf {
+hstub llroundf {
   extern "C" long long llroundf(float);
 }
-epilogue llroundl {
+hstub llroundl {
   extern "C" long long llroundl(long double);
 }
-epilogue log {
+hstub log {
   extern "C" double log(double);
 }
-epilogue log10 {
+hstub log10 {
   extern "C" double log10(double);
 }
-epilogue log10f {
+hstub log10f {
   extern "C" float log10f(float);
 }
-epilogue log10l {
+hstub log10l {
   extern "C" long double log10l(long double);
 }
-epilogue log1p {
+hstub log1p {
   extern "C" double log1p(double);
 }
-epilogue log1pf {
+hstub log1pf {
   extern "C" float log1pf(float);
 }
-epilogue log1pl {
+hstub log1pl {
   extern "C" long double log1pl(long double);
 }
-epilogue log2 {
+hstub log2 {
   extern "C" double log2(double);
 }
-epilogue log2f {
+hstub log2f {
   extern "C" float log2f(float);
 }
-epilogue log2l {
+hstub log2l {
   extern "C" long double log2l(long double);
 }
-epilogue logb {
+hstub logb {
   extern "C" double logb(double);
 }
-epilogue logbf {
+hstub logbf {
   extern "C" float logbf(float);
 }
-epilogue logbl {
+hstub logbl {
   extern "C" long double logbl(long double);
 }
-epilogue logf {
+hstub logf {
   extern "C" float logf(float);
 }
-epilogue logl {
+hstub logl {
   extern "C" long double logl(long double);
 }
-epilogue lrint {
+hstub lrint {
   extern "C" long lrint(double);
 }
-epilogue lrintf {
+hstub lrintf {
   extern "C" long lrintf(float);
 }
-epilogue lrintl {
+hstub lrintl {
   extern "C" long lrintl(long double);
 }
-epilogue lround {
+hstub lround {
   extern "C" long lround(double);
 }
-epilogue lroundf {
+hstub lroundf {
   extern "C" long lroundf(float);
 }
-epilogue lroundl {
+hstub lroundl {
   extern "C" long lroundl(long double);
 }
-epilogue modf {
+hstub modf {
   extern "C" double modf(double, double @);
 }
-epilogue modff {
+hstub modff {
   extern "C" float modff(float, float @);
 }
-epilogue modfl {
+hstub modfl {
   extern "C" long double modfl(long double, long double @);
 }
-epilogue nan {
+hstub nan {
   // FIX: not yet implemented
   //  extern "C" double nan(const char *);
 }
-epilogue nanf {
+hstub nanf {
   // FIX: not yet implemented
   //  extern "C" float nanf(const char *);
 }
-epilogue nanl {
+hstub nanl {
   // FIX: not yet implemented
   //  extern "C" long double nanl(const char *);
 }
-epilogue nearbyint {
+hstub nearbyint {
   extern "C" double nearbyint(double);
 }
-epilogue nearbyintf {
+hstub nearbyintf {
   extern "C" float nearbyintf(float);
 }
-epilogue nearbyintl {
+hstub nearbyintl {
   extern "C" long double nearbyintl(long double);
 }
-epilogue nextafter {
+hstub nextafter {
   extern "C" double nextafter(double, double);
 }
-epilogue nextafterf {
+hstub nextafterf {
   extern "C" float nextafterf(float, float);
 }
-epilogue nextafterl {
+hstub nextafterl {
   extern "C" long double nextafterl(long double, long double);
 }
-epilogue nexttoward {
+hstub nexttoward {
   extern "C" double nexttoward(double, long double);
 }
-epilogue nexttowardf {
+hstub nexttowardf {
   extern "C" float nexttowardf(float, long double);
 }
-epilogue nexttowardl {
+hstub nexttowardl {
   extern "C" long double nexttowardl(long double, long double);
 }
-epilogue pow {
+hstub pow {
   extern "C" double pow(double, double);
 }
-epilogue powf {
+hstub powf {
   extern "C" float powf(float, float);
 }
-epilogue powl {
+hstub powl {
   extern "C" long double powl(long double, long double);
 }
-epilogue remainder {
+hstub remainder {
   extern "C" double remainder(double, double);
 }
-epilogue remainderf {
+hstub remainderf {
   extern "C" float remainderf(float, float);
 }
-epilogue remainderl {
+hstub remainderl {
   extern "C" long double remainderl(long double, long double);
 }
-epilogue remquo {
+hstub remquo {
   extern "C" double remquo(double, double, int @);
 }
-epilogue remquof {
+hstub remquof {
   extern "C" float remquof(float, float, int @);
 }
-epilogue remquol {
+hstub remquol {
   extern "C" long double remquol(long double, long double, int @);
 }
-epilogue rint {
+hstub rint {
   extern "C" double rint(double);
 }
-epilogue rintf {
+hstub rintf {
   extern "C" float rintf(float);
 }
-epilogue rintl {
+hstub rintl {
   extern "C" long double rintl(long double);
 }
-epilogue round {
+hstub round {
   extern "C" double round(double);
 }
-epilogue roundf {
+hstub roundf {
   extern "C" float roundf(float);
 }
-epilogue roundl {
+hstub roundl {
   extern "C" long double roundl(long double);
 }
-epilogue scalb {
+hstub scalb {
   extern "C" double scalb(double, double);
 }
-epilogue scalbln {
+hstub scalbln {
   extern "C" double scalbln(double, long);
 }
-epilogue scalblnf {
+hstub scalblnf {
   extern "C" float scalblnf(float, long);
 }
-epilogue scalblnl {
+hstub scalblnl {
   extern "C" long double scalblnl(long double, long);
 }
-epilogue scalbn {
+hstub scalbn {
   extern "C" double scalbn(double, int);
 }
-epilogue scalbnf {
+hstub scalbnf {
   extern "C" float scalbnf(float, int);
 }
-epilogue scalbnl {
+hstub scalbnl {
   extern "C" long double scalbnl(long double, int);
 }
-epilogue sin {
+hstub sin {
   extern "C" double sin(double);
 }
-epilogue sinf {
+hstub sinf {
   extern "C" float sinf(float);
 }
-epilogue sinh {
+hstub sinh {
   extern "C" double sinh(double);
 }
-epilogue sinhf {
+hstub sinhf {
   extern "C" float sinhf(float);
 }
-epilogue sinhl {
+hstub sinhl {
   extern "C" long double sinhl(long double);
 }
-epilogue sinl {
+hstub sinl {
   extern "C" long double sinl(long double);
 }
-epilogue sqrt {
+hstub sqrt {
   extern "C" double sqrt(double);
 }
-epilogue sqrtf {
+hstub sqrtf {
   extern "C" float sqrtf(float);
 }
-epilogue sqrtl {
+hstub sqrtl {
   extern "C" long double sqrtl(long double);
 }
-epilogue tan {
+hstub tan {
   extern "C" double tan(double);
 }
-epilogue tanf {
+hstub tanf {
   extern "C" float tanf(float);
 }
-epilogue tanh {
+hstub tanh {
   extern "C" double tanh(double);
 }
-epilogue tanhf {
+hstub tanhf {
   extern "C" float tanhf(float);
 }
-epilogue tanhl {
+hstub tanhl {
   extern "C" long double tanhl(long double);
 }
-epilogue tanl {
+hstub tanl {
   extern "C" long double tanl(long double);
 }
-epilogue tgamma {
+hstub tgamma {
   extern "C" double tgamma(double);
 }
-epilogue tgammaf {
+hstub tgammaf {
   extern "C" float tgammaf(float);
 }
-epilogue tgammal {
+hstub tgammal {
   extern "C" long double tgammal(long double);
 }
-epilogue trunc {
+hstub trunc {
   extern "C" double trunc(double);
 }
-epilogue truncf {
+hstub truncf {
   extern "C" float truncf(float);
 }
-epilogue truncl {
+hstub truncl {
   extern "C" long double truncl(long double);
 }
-epilogue y0 {
+hstub y0 {
   extern "C" double y0(double);
 }
-epilogue y1 {
+hstub y1 {
   extern "C" double y1(double);
 }
-epilogue yn {
+hstub yn {
   extern "C" double yn(int, double);
 }
-epilogue {
+hstub {
   extern "C" int signgam;
 }
 ;
@@ -1753,14 +1753,14 @@ socklen_t
 servent
 protoent
 }
-epilogue {
+hstub {
   /* Not defined in OS X or cygwin so we guess :-( */
   #ifndef _in_port_t_def_
   #define _in_port_t_def_
   typedef unsigned short in_port_t;
   #endif
 }
-epilogue {
+hstub {
   // FIX:  Need to put in by hand so that we can translate
   // to struct in_addr, rather than the prescribed char *.
   // We thus bake in the fact that addresses are 4 bytes long; 
@@ -1780,22 +1780,22 @@ epilogue {
 #define h_addr h_addr_list[0]
   };
 }
-epilogue getservbyname {
+hstub getservbyname {
   // FIX: might this be unsafe?  In particular, we might either end up
   //   with a memory leak, since this was probably malloced, or
   //   with some clobbered memory if it's using a static buffer.
   // FIX: should strings be non-NULL?
   extern "C" struct servent *getservbyname(const char * name, const char * proto);
 }
-epilogue gethostbyname {
+hstub gethostbyname {
   // FIX: see getservbyname comment
   extern "C" struct hostent *gethostbyname(const char * name);
 }
-epilogue getprotobyname {
+hstub getprotobyname {
   // FIX: see getservbyname comment
   extern "C" struct protoent * getprotobyname(const char * name);
 }
-epilogue herror {
+hstub herror {
   // FIX: should string be non-NULL
   extern "C" void herror(const char *);
 }
@@ -1845,7 +1845,7 @@ IN6_IS_ADDR_MC_SITELOCAL
 IN6_IS_ADDR_MC_ORGLOCAL
 IN6_IS_ADDR_MC_GLOBAL
 }
-epilogue {
+hstub {
   /* We'd like to do
      include {
      IN6_IS_ADDR_LINKLOCAL
@@ -1858,7 +1858,7 @@ epilogue {
      conflict with the declarations below.
   */
 }
-epilogue {
+hstub {
   /* These aren't defined in OS X or Cygwin so we guess :-( */
   #ifndef _in_port_t_def_
   #define _in_port_t_def_
@@ -1870,16 +1870,16 @@ epilogue {
   #endif
 }
 // Not sure why these were here -- they aren't according to POSIX
-// epilogue htonl {
+// hstub htonl {
 //   extern "C" uint32_t htonl(uint32_t);
 // }
-// epilogue htons {
+// hstub htons {
 //   extern "C" uint16_t htons(uint16_t);
 // }
-// epilogue ntohl {
+// hstub ntohl {
 //   extern "C" uint32_t ntohl(uint32_t);
 // }
-// epilogue ntohs {
+// hstub ntohs {
 //   extern "C" uint16_t ntohs(uint16_t);
 // }
 ;
@@ -1910,7 +1910,7 @@ POLLERR
 POLLHUP
 POLLNVAL
 }
-epilogue {
+hstub {
   /* Cygwin does not define this type so we take a guess :-( */
   /* FIX: make this specific to cygwin ?? */
   #ifndef _nfds_t_def_
@@ -1918,7 +1918,7 @@ epilogue {
   typedef unsigned int nfds_t;
   #endif
 }
-epilogue poll {
+hstub poll {
   extern int poll (struct pollfd?, nfds_t, int);
 }
 cycstub poll {
@@ -2032,7 +2032,7 @@ mcontext_t
 SIG_HOLD
 sigset_t
 }
-epilogue {
+hstub {
   // We'd like to
   // include { sigevent sigval stack_t sigstack siginfo_t }
   // but in Linux this pulls in structures that contain void *'s.
@@ -2046,13 +2046,13 @@ epilogue {
   #undef SIG_HOLD
   #endif
 }
-epilogue kill {
+hstub kill {
   extern "C" int kill(pid_t, int);
 }
-epilogue raise {
+hstub raise {
   extern "C" int raise(int);
 }
-epilogue sigaddset {
+hstub sigaddset {
   #ifndef __CYGWIN__
   /* In Cygwin, the #include <setjmp.h> in precore_c.h pollutes
      the namespace of the C output with a different declaration
@@ -2061,42 +2061,42 @@ epilogue sigaddset {
   extern "C" int sigaddset(sigset_t@, int);  
   #endif
 }
-epilogue sigdelset {
+hstub sigdelset {
   #ifndef __CYGWIN__
   extern "C" int sigdelset(sigset_t@, int);
   #endif
 }
-epilogue sigemptyset {
+hstub sigemptyset {
   #ifndef __CYGWIN__
   extern "C" int sigemptyset(sigset_t@);
   #endif
 }
-epilogue sigfillset {
+hstub sigfillset {
   #ifndef __CYGWIN__
   extern "C" int sigfillset(sigset_t@);
   #endif
 }
-epilogue sighold {
+hstub sighold {
   extern "C" int sighold(int);
 }
-epilogue sigignore {
+hstub sigignore {
   extern "C" int sigignore(int);
 }
-epilogue siginterrupt {
+hstub siginterrupt {
   extern "C" int siginterrupt(int,int);
 }
-epilogue sigismember {
+hstub sigismember {
   #ifndef __CYGWIN__
   extern "C" int sigismember(sigset_t@, int);
   #endif
 }
-epilogue sigpause {
+hstub sigpause {
   extern "C" int sigpause(int);
 }
-epilogue sigrelse {
+hstub sigrelse {
   extern "C" int sigrelse(int);
 }
-epilogue {
+hstub {
   extern tunion SigBuiltin {
     SIG_DFL;
     SIG_ERR;
@@ -2114,7 +2114,7 @@ epilogue {
 cycstub {
   #include <signal.h>
 }
-epilogue sigset {
+hstub sigset {
   extern sigarg_t sigset(int, sigarg_t);
 }
 cycstub {
@@ -2205,7 +2205,7 @@ cstub sigset {
     return sig_wrap(sigset(a,f));
   }
 }
-epilogue signal {
+hstub signal {
   #ifndef __CYGWIN__
   extern sigarg_t signal(int, ... inject sigarg_t);
   #endif
@@ -2257,7 +2257,7 @@ cstub signal {
   }
   #endif
 }
-epilogue {
+hstub {
   // If we do 
   // include { sigaction }
   // in Linux we pull in a bad type
@@ -2289,7 +2289,7 @@ ptrdiff_t
 wchar_t
 size_t
 }
-epilogue {
+hstub {
   // NULL is not defined here because it is a keyword in Cyclone
 }
 ;
@@ -2353,7 +2353,7 @@ UINTN_C
 INTMAX_C
 UINTMAX_C
 }
-epilogue {
+hstub {
   // Note that intptr_t, uintptr_t, and related macros
   // all involve casting to and from void *, so they
   // are probably useless in Cyclone
@@ -2379,19 +2379,19 @@ P_tmpdir
 fpos_t
 size_t
 }
-epilogue {
+hstub {
   // NOTES:
   // NULL is not defined because it is a keyword in Cyclone.
   // va_list is not defined because Cyclone has safe varargs.
 }
-epilogue {
+hstub {
   extern struct __cycFILE;  
   typedef struct __cycFILE FILE;
   extern FILE @stdout;
   extern FILE @stdin;
   extern FILE @stderr;
 }
-epilogue {
+hstub {
   namespace Cstdio {
     extern "C" struct __abstractFILE;    // needed by tmp.cyc
   }
@@ -2405,7 +2405,7 @@ cycstub {
     Cstdio::__cFILE @file;
   };
 }
-epilogue {
+hstub {
   // fromCfile needed by tmp.cyc
   extern FILE *`H fromCfile(struct Cstdio::__abstractFILE *`H cf);
 }
@@ -2424,7 +2424,7 @@ cstub {
     *Cyc_stdout = &Cyc_stdout_v,
     *Cyc_stderr = &Cyc_stderr_v;
 }
-epilogue {
+hstub {
   // vararg for printf functions.  The functions themselves are defined
   // in printf.cyc.
   extern tunion PrintArg<`r::R> {
@@ -2443,7 +2443,7 @@ epilogue {
     __attribute__((format(printf,1,2)))
     ;
 }
-epilogue clearerr {
+hstub clearerr {
   extern void clearerr(FILE @);
 }
 cycstub clearerr {
@@ -2454,11 +2454,11 @@ cycstub clearerr {
     return Cstdio::clearerr(f->file);
   }
 }
-epilogue ctermid {
+hstub ctermid {
   // FIX: not supported yet
   //  char *ctermid(char *);
 }
-epilogue fclose {
+hstub fclose {
   extern int fclose(FILE @);
 }
 cycstub fclose {
@@ -2469,7 +2469,7 @@ cycstub fclose {
     return Cstdio::fclose(f->file);
   }
 }
-epilogue fdopen {
+hstub fdopen {
   // FIX: second arg allowed to be NULL?
   extern FILE *fdopen(int, const char *);
 }
@@ -2483,7 +2483,7 @@ cycstub fdopen {
     return cf ? new __cycFILE((Cstdio::__cFILE @)cf) : NULL;
   }
 }
-epilogue feof {
+hstub feof {
   extern int feof(FILE @);
 }
 cycstub feof {
@@ -2494,7 +2494,7 @@ cycstub feof {
     return Cstdio::feof(f->file);
   }
 }
-epilogue ferror {
+hstub ferror {
   extern int ferror(FILE @);
 }
 cycstub ferror {
@@ -2505,7 +2505,7 @@ cycstub ferror {
     return Cstdio::ferror(f->file);
   }
 }
-epilogue fflush {
+hstub fflush {
   extern int fflush(FILE *);
 }
 cycstub fflush {
@@ -2518,7 +2518,7 @@ cycstub fflush {
     else return Cstdio::fflush(NULL);
   }
 }
-epilogue fgetc {
+hstub fgetc {
   extern int fgetc(FILE @);
 }
 cycstub fgetc {
@@ -2529,7 +2529,7 @@ cycstub fgetc {
     return Cstdio::fgetc(f->file);
   }
 }
-epilogue fgetpos {
+hstub fgetpos {
   extern int fgetpos(FILE @, fpos_t @);
 }
 cycstub fgetpos {
@@ -2540,7 +2540,7 @@ cycstub fgetpos {
     return Cstdio::fgetpos(f->file,x);
   }
 }
-epilogue fgets {
+hstub fgets {
   extern char ?NOZEROTERM`r fgets(char ?NOZEROTERM`r, int, FILE @);
 }
 cycstub fgets {
@@ -2565,7 +2565,7 @@ cycstub fgets {
       return s;
   }
 }
-epilogue fileno {
+hstub fileno {
   extern int fileno(FILE @);
 }
 cycstub fileno {
@@ -2576,7 +2576,7 @@ cycstub fileno {
     return Cstdio::fileno(f->file);
   }
 }
-epilogue flockfile {
+hstub flockfile {
   extern void flockfile(FILE @);
 }
 cycstub flockfile {
@@ -2587,7 +2587,7 @@ cycstub flockfile {
     return Cstdio::flockfile(f->file);
   }
 }
-epilogue fopen {
+hstub fopen {
   extern FILE *fopen(const char @, const char @);
 }
 cycstub fopen {
@@ -2600,12 +2600,12 @@ cycstub fopen {
     return cf ? new __cycFILE((Cstdio::__cFILE @)cf) : NULL;
   }
 }
-epilogue {
+hstub {
   extern int fprintf(FILE @,const char ?, ... inject parg_t)
     __attribute__((format(printf,2,3)))
     ;
 }
-epilogue fputc {
+hstub fputc {
   extern int fputc(int, FILE @);
 }
 cycstub fputc {
@@ -2616,7 +2616,7 @@ cycstub fputc {
     return Cstdio::fputc(x,f->file);
   }
 }
-epilogue fputs {
+hstub fputs {
   extern int fputs(const char @, FILE @);
 }
 cycstub fputs {
@@ -2627,7 +2627,7 @@ cycstub fputs {
     return Cstdio::fputs(x,f->file);
   }
 }
-epilogue fread {
+hstub fread {
   extern size_t fread(char ?NOZEROTERM, size_t, size_t, FILE @);
 }
 cycstub fread {
@@ -2641,7 +2641,7 @@ cycstub fread {
     return Cstdio::fread((char *NOZEROTERM)ptr, size, nmemb, f->file);
   }
 }
-epilogue freopen {
+hstub freopen {
   extern FILE *`r freopen(const char *, const char @, FILE @`r);
 }
 cycstub freopen {
@@ -2656,7 +2656,7 @@ cycstub freopen {
     return cf ? new __cycFILE((Cstdio::__cFILE @)cf) : NULL;
   }
 }
-epilogue {
+hstub {
   // vararg for scanf functions.  The functions themselves are defined
   // in scanf.cyc.
   extern tunion ScanfArg<`r::R> {
@@ -2671,12 +2671,12 @@ epilogue {
   };
   typedef tunion `r2 ScanfArg<`r1> sarg_t<`r1,`r2>;
 }
-epilogue {
+hstub {
   extern int fscanf(FILE @, const char ?, ... inject sarg_t)
     __attribute__((format(scanf,2,3)))
     ;
 }
-epilogue fseek {
+hstub fseek {
   extern int fseek(FILE @, long, int);
 }
 cycstub fseek {
@@ -2687,7 +2687,7 @@ cycstub fseek {
     return Cstdio::fseek(a->file,b,c);
   }
 }
-epilogue fseeko {
+hstub fseeko {
   extern int fseeko(FILE @, off_t, int);
 }
 cycstub fseeko {
@@ -2698,7 +2698,7 @@ cycstub fseeko {
     return Cstdio::fseeko(a->file,b,c);
   }
 }
-epilogue fsetpos {
+hstub fsetpos {
   extern int fsetpos(FILE @, const fpos_t @);
 }
 cycstub fsetpos {
@@ -2709,7 +2709,7 @@ cycstub fsetpos {
     return Cstdio::fsetpos(f->file,b);
   }
 }
-epilogue ftell {
+hstub ftell {
   extern long ftell(FILE @);
 }
 cycstub ftell {
@@ -2720,7 +2720,7 @@ cycstub ftell {
     return Cstdio::ftell(f->file);
   }
 }
-epilogue ftello {
+hstub ftello {
   extern off_t ftello(FILE @);
 }
 cycstub ftello {
@@ -2731,7 +2731,7 @@ cycstub ftello {
     return Cstdio::ftello(f->file);
   }
 }
-epilogue ftrylockfile {
+hstub ftrylockfile {
   extern int ftrylockfile(FILE @);
 }
 cycstub ftrylockfile {
@@ -2742,7 +2742,7 @@ cycstub ftrylockfile {
     return Cstdio::ftrylockfile(f->file);
   }
 }
-epilogue ftryunlockfile {
+hstub ftryunlockfile {
   extern int ftryunlockfile(FILE @);
 }
 cycstub ftryunlockfile {
@@ -2753,7 +2753,7 @@ cycstub ftryunlockfile {
     return Cstdio::ftryunlockfile(f->file);
   }
 }
-epilogue funlockfile {
+hstub funlockfile {
   extern void funlockfile(FILE @);
 }
 cycstub funlockfile {
@@ -2764,7 +2764,7 @@ cycstub funlockfile {
     return Cstdio::funlockfile(f->file);
   }
 }
-epilogue fwrite {
+hstub fwrite {
   extern size_t fwrite(const char ?NOZEROTERM, size_t, size_t, FILE @);
 }
 cycstub fwrite {
@@ -2783,7 +2783,7 @@ cycstub fwrite {
     }
   }
 }
-epilogue getc {
+hstub getc {
   extern int getc(FILE @);
 }
 cycstub getc {
@@ -2794,7 +2794,7 @@ cycstub getc {
     return Cstdio::getc(f->file);
   }
 }
-epilogue getchar {
+hstub getchar {
   extern int getchar(void);
 }
 cycstub getchar {
@@ -2805,7 +2805,7 @@ cycstub getchar {
     return Cstdio::getchar();
   }
 }
-epilogue getc_unlocked {
+hstub getc_unlocked {
   extern int getc_unlocked(FILE @);
 }
 cycstub getc_unlocked {
@@ -2816,7 +2816,7 @@ cycstub getc_unlocked {
     return Cstdio::getc_unlocked(f->file);
   }
 }
-epilogue getchar_unlocked {
+hstub getchar_unlocked {
   extern int getchar_unlocked(void);
 }
 cycstub getchar_unlocked {
@@ -2827,12 +2827,12 @@ cycstub getchar_unlocked {
     return Cstdio::getchar_unlocked();
   }
 }
-epilogue gets {
+hstub gets {
   // FIX: we don't support gets because the C version is completely
   // unsafe.  We could support it safely by writing it in Cyclone.
   //  extern char *gets(char *);
 }
-epilogue pclose {
+hstub pclose {
   extern int pclose(FILE @);
 }
 cycstub pclose {
@@ -2843,11 +2843,11 @@ cycstub pclose {
     return Cstdio::pclose(f->file);
   }
 }
-epilogue perror {
+hstub perror {
   // FIX: worry about char * being NULL?
   extern "C" void perror(const char *);
 }
-epilogue popen {
+hstub popen {
   extern FILE *popen(const char @, const char @);
 }
 cycstub popen {
@@ -2860,12 +2860,12 @@ cycstub popen {
     return cf ? new __cycFILE((Cstdio::__cFILE @)cf) : NULL;
   }
 }
-epilogue {
+hstub {
   extern int printf(const char ?, ... inject parg_t)
     __attribute__((format(printf,1,2)))
     ;
 }
-epilogue putc {
+hstub putc {
   extern int putc(int, FILE @);
 }
 cycstub putc {
@@ -2876,10 +2876,10 @@ cycstub putc {
     return Cstdio::putc(x,f->file);
   }
 }
-epilogue putchar {
+hstub putchar {
   extern "C" int putchar(int);
 }
-epilogue putc_unlocked {
+hstub putc_unlocked {
   extern int putc_unlocked(int, FILE @);
 }
 cycstub putc_unlocked {
@@ -2890,19 +2890,19 @@ cycstub putc_unlocked {
     return Cstdio::putc_unlocked(x,f->file);
   }
 }
-epilogue putchar_unlocked {
+hstub putchar_unlocked {
   extern "C" int putchar_unlocked(int);
 }
-epilogue puts {
+hstub puts {
   extern "C" int puts(const char @);
 }
-epilogue remove {
+hstub remove {
   extern "C" int remove(const char @);
 }
-epilogue rename {
+hstub rename {
   extern "C" int rename(const char @, const char @);
 }
-epilogue rewind {
+hstub rewind {
   extern void rewind(FILE @);
 }
 cycstub rewind {
@@ -2913,18 +2913,18 @@ cycstub rewind {
     return Cstdio::rewind(f->file);
   }
 }
-epilogue {
+hstub {
   // Cyclone specific.
   extern char ?`r rprintf(region_t<`r>, const char ?, ... inject parg_t)
     __attribute__((format(printf,2,3)))
     ;
 }
-epilogue {
+hstub {
   extern int scanf(const char ?, ... inject sarg_t)
     __attribute__((format(scanf,1,2)))
     ;
 }
-epilogue setvbuf {
+hstub setvbuf {
   // FIX: should the second arg be const?
   extern int setvbuf(FILE @, char ?NOZEROTERM`H, int, size_t);
   // The second arg of setvbuf must be heap-allocated because
@@ -2944,7 +2944,7 @@ cycstub setvbuf {
     return Cstdio::setvbuf(f->file,(char *NOZEROTERM`H)buf,type,size);
   }
 }
-epilogue setbuf {
+hstub setbuf {
   extern void setbuf(FILE @, char ?NOZEROTERM`H);
 }
 cycstub setbuf {
@@ -2953,22 +2953,22 @@ cycstub setbuf {
     return;
   }
 }
-epilogue {
+hstub {
   extern int snprintf(char ?, size_t, const char ?, ... inject parg_t)
     __attribute__((format(printf,3,4)))
     ;
 }
-epilogue {
+hstub {
   extern int sprintf(char ?, const char ?, ... inject parg_t)
     __attribute__((format(printf,2,3)))
     ;
 }
-epilogue {
+hstub {
   extern int sscanf(const char ?, const char ?, ... inject sarg_t)
     __attribute__((format(scanf,2,3)))
     ;
 }
-epilogue tempnam {
+hstub tempnam {
   // FIX: tempnam is not yet supported.  The C version does a heap
   // allocation (with malloc).  We need to write a C stub to free
   // this.
@@ -2977,7 +2977,7 @@ epilogue tempnam {
   // fresh name.
   //  extern char *tempnam(const char *, const char *);
 }
-epilogue tmpfile {
+hstub tmpfile {
   extern FILE *tmpfile(void);
 }
 cycstub tmpfile {
@@ -2991,7 +2991,7 @@ cycstub tmpfile {
 //    return cf ? new __cycFILE((Cstdio::__cFILE @)cf) : NULL;
 //  }
 }
-epilogue tmpnam {
+hstub tmpnam {
   // Note, tmpnam is considered insecure because in between the call
   // of tmpnam and open, a file can be created with the supposedly
   // fresh name.
@@ -3018,7 +3018,7 @@ cycstub tmpnam {
 //    return s ? strcpy(s, name) : name;
 //  }
 }
-epilogue ungetc {
+hstub ungetc {
   extern int ungetc(int, FILE @);
 }
 cycstub ungetc {
@@ -3029,46 +3029,46 @@ cycstub ungetc {
     return Cstdio::ungetc(x,f->file);
   }
 }
-epilogue vfprintf {
+hstub vfprintf {
   extern int vfprintf(FILE @, const char ?, parg_t ?)
     __attribute__((format(printf,2,0)))
     ;
 }
-epilogue vfscanf {
+hstub vfscanf {
   extern int vfscanf(FILE @, const char ?, sarg_t ?)
     __attribute__((format(scanf,2,0)))
     ;
 }
-epilogue vprintf {
+hstub vprintf {
   extern int vprintf(const char ?, parg_t ?)
     __attribute__((format(printf,1,0)))
     ;
 }
-epilogue {
+hstub {
   extern char ?`r vrprintf(region_t<`r>, const char ?, parg_t ?)
     __attribute__((format(printf,2,0)))
     ;
 }
-epilogue vscanf {
+hstub vscanf {
   // WE NEED TO ADD THIS TO SCANF.CYC
   //  extern int vscanf(const char *restrict, va_list);
 }
-epilogue vsnprintf {
+hstub vsnprintf {
   extern int vsnprintf(char ?, size_t, const char ?, parg_t ?) 
     __attribute__((format(printf,3,0)))
     ;
 }
-epilogue vsprintf {
+hstub vsprintf {
   extern int vsprintf(char ?, const char ?, parg_t ?)
     __attribute__((format(printf,2,0)))
     ;
 }
-epilogue vsscanf {
+hstub vsscanf {
   extern int vsscanf(const char ?, const char ?, sarg_t ?)
     __attribute__((format(scanf,2,0)))
     ;
 }
-epilogue getw {
+hstub getw {
   // getw is a glibc function but does not appear in posix; remove ??
   extern int getw(FILE @);
 }
@@ -3080,7 +3080,7 @@ cycstub getw {
     return Cstdio::getw(f->file);
   }
 }
-epilogue putw {
+hstub putw {
   // putw is a glibc function but does not appear in posix; remove ??
   extern int putw(int, FILE @);
 }
@@ -3092,13 +3092,13 @@ cycstub putw {
     return Cstdio::putw(x,f->file);
   }
 }
-epilogue {
+hstub {
   // These functions appear in glibc but are not part of the posix
   // standard.  They are omitted for now.
   //  extern void setbuffer (FILE @, char ?, size_t);
   //  extern void setlinebuf (FILE @);
 }
-epilogue {
+hstub {
   // FIX: These functions are are not part of POSIX, they
   // are Cyclone-specific.  We should get rid of them or move
   // them elsewhere.
@@ -3201,7 +3201,7 @@ WIFSTOPPED
 WSTOPSIG
 WTERMSIG
 }
-epilogue {
+hstub {
   // malloc is a primitive in Cyclone so we don't need this declaration
   //  extern "C" void *malloc(size_t);
 
@@ -3239,18 +3239,18 @@ epilogue {
   //  extern "C" int wctomb(char *, wchar_t);
 
 }
-epilogue _Exit {
+hstub _Exit {
   extern "C" void _Exit(int);
 }
-epilogue abort {
+hstub abort {
   // This is the type of abort according to Posix, but we have a
   // conflicting type for abort in core.h
   //  extern "C" void abort(void);
 }
-epilogue abs {
+hstub abs {
   extern "C" int abs(int);
 }
-epilogue atexit {
+hstub atexit {
   // FIX: this might not be safe.  The posix docs say that if
   // a function registered with atexit uses longjmp when called
   // by exit(), the results are undefined.  Since we use longjmp
@@ -3258,79 +3258,79 @@ epilogue atexit {
   // having to write our own exit() function.
   extern "C" int atexit(void (@)(void));
 }
-epilogue atof {
+hstub atof {
   extern "C" double atof(const char @);
 }
-epilogue atoi {
+hstub atoi {
   extern "C" int atoi(const char @);
 }
-epilogue atol {
+hstub atol {
   extern "C" long atol(const char @);
 }
-epilogue atoll {
+hstub atoll {
   extern long long atoll(const char @);
 }
-epilogue div {
+hstub div {
   extern "C" div_t div(int, int);
 }
-epilogue drand48 {
+hstub drand48 {
   extern "C" double drand48(void);
 }
-epilogue erand48 {
+hstub erand48 {
   extern "C" double erand48(unsigned short @{3});
 }
-epilogue exit {
+hstub exit {
 // currently causes ambiguity
 //  extern "C" void exit(int);
 }
-epilogue free {
+hstub free {
   extern void free(`a::A ?);
 }
 cycstub free {
   void free(`a::A ?ptr) {}
 }
-epilogue getenv {
+hstub getenv {
   // FIX: should this be const?  Seems like we want these things
   //   immutable
   extern "C" char @ getenv(const char @);
 }
-epilogue grantpt {
+hstub grantpt {
   extern "C" int grantpt(int);
 }
-epilogue jrand48 {
+hstub jrand48 {
   extern "C" long jrand48(unsigned short @{3});
 }
-epilogue labs {
+hstub labs {
   // This is the correct type according to Posix but it produces
   // an error under Linux.  It looks like we are translating long
   // to int; not sure if this is the problem.
   //  extern "C" long labs(long);
 }
-epilogue lcong48 {
+hstub lcong48 {
   extern "C" void lcong48(unsigned short @{7});
 }
-epilogue ldiv {
+hstub ldiv {
   extern "C" ldiv_t ldiv(long, long);
 }
-epilogue llabs {
+hstub llabs {
   extern "C" long long llabs(long long);
 }
-epilogue lldiv {
+hstub lldiv {
   extern "C" lldiv_t lldiv(long long, long long);
 }
-epilogue lrand48 {
+hstub lrand48 {
   extern "C" long lrand48(void);
 }
-epilogue mrand48 {
+hstub mrand48 {
   extern "C" long mrand48(void);
 }
-epilogue nrand48 {
+hstub nrand48 {
   extern "C" long nrand48(unsigned short @{3});
 }
-epilogue putenv {
+hstub putenv {
   extern "C" int putenv(const char @);
 }
-epilogue {
+hstub {
   extern void qsort(`a::A ?, size_t, sizeof_t<`a>,
                     int (@)(const `a @, const `a @));
 }
@@ -3350,43 +3350,43 @@ cycstub {
     Cstdlib::qsort((_@)tab,nmemb,szmemb,compar);
   }
 }
-epilogue rand {
+hstub rand {
   extern "C" int rand(void);
 }
-epilogue rand_r {
+hstub rand_r {
   extern "C" int rand_r(unsigned @);
 }
-epilogue random {
+hstub random {
   extern "C" long random(void);
 }
-epilogue seed48 {
+hstub seed48 {
   extern "C" unsigned short seed48(unsigned short @{3});
 }
-epilogue srand {
+hstub srand {
   extern "C" void srand(unsigned);
 }
-epilogue srand48 {
+hstub srand48 {
   extern "C" void srand48(long);
 }
-epilogue srandom {
+hstub srandom {
   extern "C" void srandom(unsigned);
 }
-epilogue strtod {
+hstub strtod {
   // FIX: should be const?
   extern "C" double strtod(char @`r, char @`r *);
 }
-epilogue strtol {
+hstub strtol {
   // FIX: should be const?
   extern "C" long strtol(char @`r, char @`r *, int);
 }
-epilogue strtoul {
+hstub strtoul {
   // FIX: should be const?
   extern "C" unsigned long strtoul(char @`r, char @`r *, int);
 }
-epilogue system {
+hstub system {
   extern "C" int system(const char @);
 }
-epilogue unlockpt {
+hstub unlockpt {
   extern "C" int unlockpt(int);
 }
 ;
@@ -3400,14 +3400,14 @@ epilogue unlockpt {
 // ;
 
 stropts.h:
-epilogue {
+hstub {
   // FIX: stropts.h is not yet supported.
   // The problem is that the strbuf structure has a char * field. 
 }
 ;
 
 sys/dir.h:
-epilogue {
+hstub {
   #include <dirent.h>
 }
 ;
@@ -3423,7 +3423,7 @@ X_OK
 W_OK
 R_OK
 }
-prologue {
+hstub {
   #include <fcntl.h>
 }
 ;
@@ -3439,7 +3439,7 @@ include {
 FIONREAD
 FIONBIO
 }
-epilogue ioctl {
+hstub ioctl {
   // ioctl normally takes a void * as its arg, but
   //   for the moment we forbid it to taking only ints.
   //   Ultimately should change to use tunions as
@@ -3463,7 +3463,7 @@ IPC_RMID
 IPC_SET    
 IPC_STAT   
 }
-epilogue ftok {
+hstub ftok {
   extern "C" key_t ftok(const char @, int);
 }
 ;
@@ -3477,7 +3477,7 @@ PROT_READ
 MAP_SHARED
 MAP_PRIVATE
 }
-epilogue {
+hstub {
   // We leave out many of the functions/flags, and just allow
   // mapping in read-only, shared files and unmapping them.
 
@@ -3517,7 +3517,7 @@ cycstub mmap {
 ;
 
 sys/msg.h:
-epilogue {
+hstub {
   // We don't support this yet
 }
 ;
@@ -3542,7 +3542,7 @@ rusage
 timeval
 id_t
 }
-epilogue {
+hstub {
   // We'd like to
   // include {
   // RLIMIT_CORE
@@ -3557,7 +3557,7 @@ epilogue {
   // enum { foo, bar = foo };
   // which Cyclone can't handle
 }
-epilogue getpriority {
+hstub getpriority {
   /* OS X doesn't define id_t */
   #ifndef _id_t_def_
   #define _id_t_def_
@@ -3565,16 +3565,16 @@ epilogue getpriority {
   #endif
   extern "C" int getpriority(int, id_t);
 }
-epilogue getrlimit {
+hstub getrlimit {
   extern "C" int getrlimit(int, struct rlimit @);
 }
-epilogue getrusage {
+hstub getrusage {
   extern "C" int getrusage(int, struct rusage @);
 }
-epilogue setpriority {
+hstub setpriority {
   extern "C" int setpriority(int, id_t, int);
 }
-epilogue setrlimit {
+hstub setrlimit {
   extern "C" int setrlimit(int, const struct rlimit @);
 }
 ;
@@ -3593,7 +3593,7 @@ timespec
 fd_set
 FD_SETSIZE
 }
-epilogue {
+hstub {
   /* FIX: Cygwin defines a struct _types_fd_set and then a typedef with the
      same name.  Our current scheme for omitting repeated declarations does
      not use separate namespaces for structs and typedefs, so the typedef
@@ -3605,7 +3605,7 @@ epilogue {
   #endif
   #endif
 }
-epilogue {
+hstub {
   /* FIX: OS X defines a struct fd_set and then a typedef with the
      same name.  Our current scheme for omitting repeated declarations does
      not use separate namespaces for structs and typedefs, so the typedef
@@ -3614,16 +3614,16 @@ epilogue {
   typedef struct fd_set fd_set;
   #endif
 }
-epilogue pselect {
+hstub pselect {
   /* FIX: check for possible fd_set overflow */
   extern "C" int pselect(int, fd_set *, fd_set *, fd_set *,
                        const struct timespec *, const sigset_t *);
 }
-epilogue select {
+hstub select {
   /* FIX: check for possible fd_set overflow */
   extern "C" int select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
 }
-epilogue {
+hstub {
   /* Posix says these can be macros or functions.  Typically they are
      macros but in Linux at least they use asm, which we don't support
      in Cyclone.  So, we make them functions. */
@@ -3721,7 +3721,7 @@ SHUT_RDWR
 SHUT_WR
 ssize_t
 }
-epilogue {
+hstub {
   /* We omit struct sockaddr because we don't use it in Cyclone */
   /* We omit struct sockaddr_storage because we don't use it in Cyclone */
   /* We omit struct msghdr because it contains a void * field */
@@ -3734,7 +3734,7 @@ epilogue {
     extern ssize_t recvmsg(int fd, struct msghdr *message, int flags);
   */
 }
-epilogue {
+hstub {
   /* Many architectures don't define this :-( */
   #ifndef _socklen_t_def_
   #define _socklen_t_def_
@@ -3744,7 +3744,7 @@ epilogue {
   #endif
   #endif
 }
-epilogue {
+hstub {
   extern tunion SockAddr<`r::R> {
     SA_sockaddr_in(struct sockaddr_in @`r);
     /* We will add other cases as necessary, e.g., SockAddr_In6 */
@@ -3757,7 +3757,7 @@ epilogue {
   };
   typedef tunion `r SockAddr<`r> SA<`r>;
 }
-epilogue {
+hstub {
   extern tunion SockOpt<`r::R> {
     SO_int(int @`r);
     SO_timeval(struct timeval @`r);
@@ -3768,7 +3768,7 @@ epilogue {
   };
   typedef tunion `r SockOpt<`r> SO<`r>;
 }
-epilogue accept {
+hstub accept {
   extern int accept(int fd, ... inject SA);
 }
 cycstub {
@@ -3801,7 +3801,7 @@ cstub accept {
     return accept(a,(struct sockaddr *)b,c);
   }
 }
-epilogue bind {
+hstub bind {
   extern int bind(int fd, ... inject SA);
 }
 cycstub bind {
@@ -3822,7 +3822,7 @@ cstub bind {
     return bind(a,(struct sockaddr *)b,c);
   }
 }
-epilogue connect {
+hstub connect {
   extern int connect(int fd, ... inject SA);
 }
 cycstub connect {
@@ -3843,7 +3843,7 @@ cstub connect {
     return connect(a,(struct sockaddr *)b,c);
   }
 }
-epilogue getpeername {
+hstub getpeername {
   extern int getpeername(int fd, ... inject SA);
 }
 cycstub getpeername {
@@ -3864,7 +3864,7 @@ cstub getpeername {
     return getpeername(a,(struct sockaddr *)b,c);
   }
 }
-epilogue getsockname {
+hstub getsockname {
   extern int getsockname(int fd, ... inject SA);
 }
 cycstub getsockname {
@@ -3885,7 +3885,7 @@ cstub getsockname {
     return getsockname(a,(struct sockaddr *)b,c);
   }
 }
-epilogue getsockopt {
+hstub getsockopt {
   extern int getsockopt(int fd, int level, int optname, ... inject SO);
 }
 cycstub getsockopt {
@@ -3918,10 +3918,10 @@ cstub getsockopt {
     return getsockopt(a,b,c,d,e);
   }
 }
-epilogue listen {
+hstub listen {
   extern "C" int listen(int fd, int n);
 }
-epilogue recv {
+hstub recv {
   extern ssize_t recv(int fd, char ?NOZEROTERM buf, size_t n, int flags);
 }
 cycstub recv {
@@ -3942,7 +3942,7 @@ cstub recv {
     return recv(a,p,c,d);
   }
 }
-epilogue recvfrom {
+hstub recvfrom {
   extern ssize_t recvfrom(int fd, char ?NOZEROTERM buf, size_t n, int flags,
                           ... inject SA);
 }
@@ -3970,7 +3970,7 @@ cstub recvfrom {
     return recvfrom(a,p,c,d,(struct sockaddr *)e,f);
   }
 }
-epilogue send {
+hstub send {
   extern ssize_t send(int fd, const char ?NOZEROTERM buf, size_t n, int flags);
 }
 cycstub send {
@@ -3989,7 +3989,7 @@ cstub send {
     return send(a,p,c,d);
   }
 }
-epilogue sendto {
+hstub sendto {
   extern ssize_t sendto(int fd, const char ?NOZEROTERM buf, size_t n, int flags,
                         ... inject SA);
 }
@@ -4017,7 +4017,7 @@ cstub sendto {
     return sendto(a,p,c,d,(struct sockaddr *)e,f);
   }
 }
-epilogue setsockopt {
+hstub setsockopt {
   extern int setsockopt(int fd, int level, int optname, ... inject SO);
 }
 cycstub setsockopt {
@@ -4044,16 +4044,16 @@ cstub setsockopt {
     return setsockopt(a,b,c,d,e);
   }
 }
-epilogue shutdown {
+hstub shutdown {
   extern "C" int shutdown(int fd, int how);
 }
-epilogue sockatmark {
+hstub sockatmark {
   extern "C" int sockatmark(int);
 }
-epilogue socket {
+hstub socket {
   extern "C" int socket(int domain, int type, int protocol);
 }
-epilogue socketpair {
+hstub socketpair {
   extern "C" int socketpair(int domain, int type, int protocol, int @{2} fds);
 }
 ;
@@ -4107,7 +4107,7 @@ S_TYPEISSEM
 S_TYPEISSHM
 S_TYPEISTMO
 }
-epilogue {
+hstub {
   // EXTREMELY irritating: under Linux, mode_t, etc., are not defined
   // in sys/stat.h, CONTRARY to the posix spec.  Instead __mode_t, etc.,
   // are defined.  This makes mode_t, etc., defined under Linux.
@@ -4152,31 +4152,31 @@ epilogue {
   typedef __time_t time_t;
   #endif
 }
-epilogue chmod {
+hstub chmod {
   extern "C" int chmod(const char @, mode_t);
 }
-epilogue fchmod {
+hstub fchmod {
   extern "C" int fchmod(int, mode_t);
 }
-epilogue fstat {
+hstub fstat {
   extern "C" int fstat(int fd, struct stat @buf);
 }
-epilogue lstat {
+hstub lstat {
   extern "C" int lstat(const char @ filename, struct stat @buf);
 }
-epilogue mkdir {
+hstub mkdir {
   extern "C" int mkdir(const char @ pathname, mode_t mode);
 }
-epilogue mkfifo {
+hstub mkfifo {
   extern "C" int mkfifo(const char @ pathname, mode_t mode);
 }
-epilogue mknod {
+hstub mknod {
   extern "C" int mknod(const char @ pathname, mode_t mode, dev_t);
 }
-epilogue stat {
+hstub stat {
   extern "C" int stat(const char @, struct stat @);
 }
-epilogue umask {
+hstub umask {
   extern "C" mode_t umask(mode_t mask);
 }
 ;
@@ -4202,7 +4202,7 @@ timezone
 fd_set
 FD_SETSIZE
 }
-epilogue {
+hstub {
   /* FIX: Cygwin defines a struct _types_fd_set and then a typedef with the
      same name.  Our current scheme for omitting repeated declarations does
      not use separate namespaces for structs and typedefs, so the typedef
@@ -4214,10 +4214,10 @@ epilogue {
   #endif
   #endif
 }
-epilogue getitimer {
+hstub getitimer {
   extern "C" int getitimer(int, struct itimerval @);
 }
-epilogue gettimeofday {
+hstub gettimeofday {
   /* The second arg here looks like it is a legacy feature.  The POSIX
      docs say that if it is non-NULL, then the behavior is undefined.
      Therefore, we have a stub that forces the argument to be NULL. */
@@ -4231,7 +4231,7 @@ cycstub gettimeofday {
     return Csystime::gettimeofday(a,NULL);
   }
 }
-epilogue select {
+hstub select {
   /* FIX: check for possible fd_set overflow */
   extern "C" int select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
   /* Stubs for these are defined by sys/select.h */
@@ -4240,10 +4240,10 @@ epilogue select {
   extern void FD_SET(int, fd_set @);
   extern void FD_ZERO(fd_set @);
 }
-epilogue setitimer {
+hstub setitimer {
   extern "C" int setitimer(int, const struct itimerval @, struct itimerval *);
 }
-epilogue utimes {
+hstub utimes {
   extern "C" int utimes(const char @, const struct timeval *{2}); // LEGACY
 }
 ;
@@ -4253,7 +4253,7 @@ include {
 time_t
 timeb
 }
-epilogue ftime {
+hstub ftime {
   extern "C" int ftime(struct timeb @); // (LEGACY)
 }
 ;
@@ -4263,7 +4263,7 @@ include {
 clock_t
 tms
 }
-epilogue times {
+hstub times {
   extern "C" clock_t times(struct tms @);
 }
 ;
@@ -4293,7 +4293,7 @@ timer_t
 uid_t
 useconds_t
 }
-epilogue {
+hstub {
 /* The pthread types are omitted for now since we don't support
    threads */
 /* The trace types are also omitted */
@@ -4315,7 +4315,7 @@ sys/utsname.h:
 include {
 utsname
 }
-epilogue uname {
+hstub uname {
   extern "C" int uname(struct utsname @);
 }
 ;
@@ -4342,14 +4342,14 @@ __pid_t
 pid_t
 rusage
 }
-epilogue {
+hstub {
   /* siginfo_t is omitted because it contains a pointer */
   /* waitid is omitted because it needs siginfo_t */
   /*
     extern "C" int waitid(idtype_t, id_t, siginfo_t @, int);
   */
 }
-epilogue {
+hstub {
   // EXTREMELY irritating: under Linux, pid_t is not defined
   // in sys/wait.h, CONTRARY to the posix spec.  Instead __pid_t
   // is defined.  So we include __pid_t above and do the following:
@@ -4358,10 +4358,10 @@ epilogue {
   typedef __pid_t pid_t;
   #endif
 }
-epilogue wait {
+hstub wait {
   extern "C" pid_t wait(int *);
 }
-epilogue waitpid {
+hstub waitpid {
   extern "C" pid_t waitpid(pid_t, int *, int);
 }
 ;
@@ -4411,7 +4411,7 @@ LOG_NDELAY
 LOG_NOWAIT
 LOG_PERROR
 }
-epilogue {
+hstub {
 extern "C" void closelog (void);
 extern "C" int setlogmask (int);
   // This declares a not quite printf like function, we need to write
@@ -4473,7 +4473,7 @@ time_t
 clockid_t
 timer_t
 }
-epilogue {
+hstub {
   /* Missing declarations for
      strptime
      tzname;
@@ -4492,45 +4492,45 @@ epilogue {
 
 }
 // FIX: should these be null-terminated?
-epilogue asctime {
+hstub asctime {
   extern "C" char @{26} asctime(const struct tm @);
 }
-epilogue asctime_r {
+hstub asctime_r {
   extern "C" char @{26}`r asctime_r(const struct tm @, char @{26}`r);
 }
-epilogue clock {
+hstub clock {
   extern "C" clock_t clock(void);
 }
-epilogue clock_getcpuclockid {
+hstub clock_getcpuclockid {
   extern "C" int clock_getcpuclockid(pid_t, clockid_t @);
 }
-epilogue clock_getres {
+hstub clock_getres {
   // Note, posix says the second arg of clock_getres can be NULL
   extern "C" int clock_getres(pid_t, struct timespec *);
 }
-epilogue clock_gettime {
+hstub clock_gettime {
   extern "C" int clock_gettime(pid_t, struct timespec @);
 }
-epilogue clock_nanosleep {
+hstub clock_nanosleep {
   extern "C" int clock_nanosleep(clockid_t, itn, const struct timespec @,
                                  struct timespec @);
 }
-epilogue clock_settime {
+hstub clock_settime {
   extern "C" int clock_settime(pid_t, const struct timespec @);
 }
-epilogue ctime {
+hstub ctime {
   extern "C" char @{26} ctime(const time_t @);
 }
-epilogue ctime_r {
+hstub ctime_r {
   extern "C" char @{26}`r ctime_r(const time_t @, char @{26}`r);
 }
-epilogue difftime {
+hstub difftime {
   extern "C" double difftime(time_t,time_t);
 }
-epilogue getdate {
+hstub getdate {
   extern struct tm *getdate(const char @);
 }
-epilogue getdate {
+hstub getdate {
 extern "C" int __CYCLONE_GETDATE_ERR();
 #define getdate_err (__CYCLONE_GETDATE_ERR())
 }
@@ -4541,26 +4541,26 @@ cstub getdate {
     return getdate_err;
   }
 }
-epilogue gmtime {
+hstub gmtime {
   extern "C" struct tm @gmtime(const time_t @);
 }
-epilogue gmtime_r {
+hstub gmtime_r {
   extern "C" struct tm @`r gmtime_r(const time_t @, struct tm @`r);
 }
-epilogue localtime {
+hstub localtime {
   extern "C" struct tm @localtime(const time_t @);
 }
-epilogue localtime_r {
+hstub localtime_r {
   extern "C" struct tm @`r localtime_r(const time_t @, struct tm @`r);
 }
-epilogue mktime {
+hstub mktime {
   extern "C" time_t mktime(const struct tm @);
 }
-epilogue nanosleep {
+hstub nanosleep {
   // Note, posix says the second arg of nanosleep may be NULL
   //  extern "C" int nanosleep(const struct timespec @, struct timespec *);
 }
-epilogue strftime {
+hstub strftime {
   extern size_t strftime(char ?, size_t, const char ?, const struct tm @);
 }
 cycstub strftime {
@@ -4576,39 +4576,39 @@ cycstub strftime {
     return Ctime::strftime(s,maxsize,fmt,t);
   }
 }
-epilogue strptime {
+hstub strptime {
   // Not supported for now, needs a stub to be written
   //  extern char ?`r strptime(const char ?`r, const char ?, struct tm @);
 }
-epilogue time {
+hstub time {
   extern "C" time_t time(time_t *);
 }
-epilogue timer_create {
+hstub timer_create {
   // Omitted because of the sigevent problem
   // Note, posix says the second arg of timer_create may be NULL
   //  extern "C" int timer_create(clockid_t, struct sigevent *, timer_t @);
 }
-epilogue timer_delete {
+hstub timer_delete {
   extern "C" int timer_delete(timer_t);
 }
-epilogue timer_getoverrun {
+hstub timer_getoverrun {
   extern "C" int timer_getoverrun(timer_t);
 }
-epilogue timer_gettime {
+hstub timer_gettime {
   extern "C" int timer_gettime(timer_t, struct itimerspec @);
 }
-epilogue timer_settime {
+hstub timer_settime {
   // Note, posix says the third arg of timer_settime may be NULL
   extern "C" int timer_settime(timer_t, int, const struct itimerspec @,
                                struct itimerspec *);
 }
-epilogue tzset {
+hstub tzset {
   extern "C" void tzset(void);
 }
-epilogue timezone {
+hstub timezone {
   extern "C" long timezone;
 }
-epilogue daylight {
+hstub daylight {
   extern "C" int daylight;
 }
 ;
@@ -4768,7 +4768,7 @@ pid_t
 __useconds_t
 useconds_t
 }
-epilogue {
+hstub {
   // EXTREMELY irritating: under Linux, useconds_t is not defined
   // in sys/wait.h, CONTRARY to the posix spec.  Instead __useconds_t
   // is defined.  So we include __useconds_t above and do the following:
@@ -4777,7 +4777,7 @@ epilogue {
   typedef __useconds_t useconds_t;
   #endif
 }
-epilogue {
+hstub {
   /* Cygwin does not define this type so we take a guess :-( */
   /* FIX: make this specific to cygwin ?? */
   #ifndef _useconds_t_def_
@@ -4785,7 +4785,7 @@ epilogue {
   typedef unsigned int useconds_t;
   #endif
 }
-epilogue {
+hstub {
   // We'd like to do
   // include {
   // _SC_2_C_BIND
@@ -4912,52 +4912,52 @@ epilogue {
   // and cyclone complains that the expression (foo) of field bar is not
   // a constant.
 }
-epilogue {
+hstub {
 // Under Linux, crypt doesn't always get included here for some reason
 #ifdef __linux__
   extern "C" char *crypt (const char @__key, const char @__salt);
 #endif
 }
-epilogue access {
+hstub access {
   extern "C" int access(const char @,int);
 }
-epilogue alarm {
+hstub alarm {
   extern "C" unsigned alarm(unsigned);
 }
-epilogue chdir {
+hstub chdir {
   extern "C" int chdir(const char @);
 }
-epilogue chown {
+hstub chown {
   extern "C" int chown(const char @,uid_t,gid_t);
 }
-epilogue chroot {
+hstub chroot {
   extern "C" int chroot(const char @);
 }
-epilogue close {
+hstub close {
   extern "C" int close(int);
 }
-epilogue confstr {
+hstub confstr {
   // Not supported yet
   // extern size_t confstr(int, char *, size_t);
 }
-epilogue crypt {
+hstub crypt {
   extern "C" char @ crypt(const char @ key, const char @ salt);
 }
-epilogue ctermid {
+hstub ctermid {
   // Not supported yet
   // extern char *ctermid(char *);
 }
-epilogue dup {
+hstub dup {
   extern "C" int dup(int);
 }
-epilogue dup2 {
+hstub dup2 {
   extern "C" int dup2(int, int);
 }
-epilogue encrypt {
+hstub encrypt {
   // FIX: should this be null-terminated or not?
   extern "C" void encrypt(char @{64}, int);
 }
-epilogue execl {
+hstub execl {
   //  extern int execl(const char ?, const char ?, ... const char ?);
 }
 cycstub execl {
@@ -4974,11 +4974,11 @@ cycstub execl {
   //    return Cunistd::execv(string_to_char *(path), (char **) newargs);
   //  }
 }
-epilogue execle {
+hstub execle {
   // Not supported yet
   // extern int execle(const char *, const char *, ...);
 }
-epilogue execlp {
+hstub execlp {
   extern int execlp(const char @, const char @`r, ... const char *`r);
 }
 cycstub execlp {
@@ -4996,7 +4996,7 @@ cycstub execlp {
     return execvp(path, newargs);
   }
 }
-epilogue execv {
+hstub execv {
   // Not supported yet
   // extern int execv(const char *, char *const []);
 }
@@ -5005,7 +5005,7 @@ cycstub execv {
   //    extern "C" int execv(char * path, char * *argv);
   //  }
 }
-epilogue execve {
+hstub execve {
   // FIX: what did I lose by removing the const from this spec?
   //  extern int execve(const char ?, const char ? const ?, const char ? const ?);
     extern "C" int execve(const char @ path, 
@@ -5034,34 +5034,34 @@ cycstub execve {
 //                             (char **) newargs, (char **) newenvp);
 //    }
 }
-epilogue execvp {
+hstub execvp {
   extern "C" int execvp(const char @ file, const char **ZEROTERM argv);
 }
-epilogue _exit {
+hstub _exit {
   extern "C" void _exit(int);
 }
-epilogue fchown {
+hstub fchown {
   extern "C" int fchown(int, uid_t, gid_t);
 }
-epilogue fchdir {
+hstub fchdir {
   extern "C" int fchdir(int);
 }
-epilogue fdatasync {
+hstub fdatasync {
   extern "C" int fdatasync(int);
 }
-epilogue fork {
+hstub fork {
   extern "C" pid_t fork(void);
 }
-epilogue fpathconf {
+hstub fpathconf {
   extern "C" long fpathconf(int, int);
 }
-epilogue fsync {
+hstub fsync {
   extern "C" int fsync(int);
 }
-epilogue ftruncate {
+hstub ftruncate {
   extern "C" int ftruncate(int, off_t);
 }
-epilogue getcwd {
+hstub getcwd {
   extern char ?`r getcwd(char ?`r buf, size_t size);
 }
 cycstub getcwd {
@@ -5078,23 +5078,23 @@ cycstub getcwd {
     return response ? buf : NULL;
   }
 }
-epilogue getegid {
+hstub getegid {
   extern "C" gid_t getegid(void);
 }
-epilogue geteuid {
+hstub geteuid {
   extern "C" uid_t geteuid(void);
 }
-epilogue getgid {
+hstub getgid {
   extern "C" gid_t getgid(void);
 }
-epilogue getgroups {
+hstub getgroups {
   // Not supported yet
   // extern int getgroups(int, gid_t []);
 }
-epilogue gethostid {
+hstub gethostid {
   extern "C" long gethostid(void);
 }
-epilogue gethostname {
+hstub gethostname {
   extern int gethostname(char ?NOZEROTERM, size_t);
 }
 cycstub gethostname {
@@ -5113,82 +5113,82 @@ cycstub gethostname {
     }
   }
 }
-epilogue getlogin {
+hstub getlogin {
   // Not supported yet
   // extern char *getlogin(void);
 }
-epilogue getlogin_r {
+hstub getlogin_r {
   // Not supported yet
   // extern int getlogin_r(char *, size_t);
 }
-epilogue getopt {
+hstub getopt {
   // Not supported yet
   // extern int getopt(int, char * const [], const char *);
 }
-epilogue getpass {
+hstub getpass {
   /* Note, getpass is not required by POSIX */
   extern "C" char * getpass(const char @);
 }
-epilogue getpgid {
+hstub getpgid {
   extern "C" pid_t getpgid(pid_t);
 }
-epilogue getpgrp {
+hstub getpgrp {
   extern "C" pid_t getpgrp(void);
 }
-epilogue getpid {
+hstub getpid {
   extern "C" pid_t getpid(void);
 }
-epilogue getppid {
+hstub getppid {
   extern "C" pid_t getppid(void);
 }
-epilogue getsid {
+hstub getsid {
   extern "C" pid_t getsid(pid_t);
 }
-epilogue getuid {
+hstub getuid {
   extern "C" uid_t getuid(void);
 }
-epilogue getwd {
+hstub getwd {
   // Not supported yet
   // extern char *getwd(char *); (LEGACY)
 }
-epilogue isatty {
+hstub isatty {
   extern "C" int isatty(int);
 }
-epilogue lchown {
+hstub lchown {
   // Not supported yet
   // extern int lchown(const char *, uid_t, gid_t);
 }
-epilogue link {
+hstub link {
   extern "C" int link(const char @,const char @);
 }
-epilogue lockf {
+hstub lockf {
   extern "C" int lockf(int, int, off_t);
 }
-epilogue lseek {
+hstub lseek {
   extern "C" off_t lseek(int, off_t, int);
 }
-epilogue nice {
+hstub nice {
   extern "C" int nice(int);
 }
-epilogue pathconf {
+hstub pathconf {
   // Not supported yet
   // extern long pathconf(const char *, int);
 }
-epilogue pause {
+hstub pause {
   extern "C" int pause(void);
 }
-epilogue pipe {
+hstub pipe {
   extern "C" int pipe(int @{2});
 }
-epilogue pread {
+hstub pread {
   // Not supported yet
   // extern ssize_t pread(int, void *, size_t, off_t);
 }
-epilogue pwrite {
+hstub pwrite {
   // Not supported yet
   // extern ssize_t pwrite(int, const void *, size_t, off_t);
 }
-epilogue read {
+hstub read {
   extern ssize_t read(int, char ?NOZEROTERM, size_t);
 }
 cycstub read {
@@ -5202,86 +5202,86 @@ cycstub read {
     return Cunistd::read(fd, (char *NOZEROTERM)buf, count);
   }
 }
-epilogue readlink {
+hstub readlink {
   // Not supported yet
   // extern ssize_t readlink(const char *restrict, char *restrict, size_t);
 }
-epilogue rmdir {
+hstub rmdir {
   extern "C" int rmdir(const char @);
 }
-epilogue setegid {
+hstub setegid {
   extern "C" int setegid(gid_t);
 }
-epilogue seteuid {
+hstub seteuid {
   extern "C" int seteuid(uid_t);
 }
-epilogue setgid {
+hstub setgid {
   extern "C" int setgid(gid_t);
 }
-epilogue setpgid {
+hstub setpgid {
   extern "C" int setpgid(pid_t, pid_t);
 }
-epilogue setpgrp {
+hstub setpgrp {
   extern "C" pid_t setpgrp(void);
 }
-epilogue setregid {
+hstub setregid {
   extern "C" int setregid(gid_t, gid_t);
 }
-epilogue setreuid {
+hstub setreuid {
   extern "C" int setreuid(uid_t, uid_t);
 }
-epilogue setsid {
+hstub setsid {
   extern "C" pid_t setsid(void);
 }
-epilogue setuid {
+hstub setuid {
   extern "C" int setuid(uid_t);
 }
-epilogue sleep {
+hstub sleep {
   extern "C" unsigned sleep(unsigned);
 }
-epilogue swab {
+hstub swab {
   // Not supported yet
   // extern void swab(const void *restrict, void *restrict, ssize_t);
 }
-epilogue symlink {
+hstub symlink {
   extern "C" int symlink(const char @ path1, const char @ path2);
 }
-epilogue sync {
+hstub sync {
   extern "C" void sync(void);
 }
-epilogue sysconf {
+hstub sysconf {
   extern "C" long sysconf(int);
 }
-epilogue tcgetpgrp {
+hstub tcgetpgrp {
   extern "C" pid_t tcgetpgrp(int);
 }
-epilogue tcsetpgrp {
+hstub tcsetpgrp {
   extern "C" int tcsetpgrp(int, pid_t);
 }
-epilogue truncate {
+hstub truncate {
   extern int truncate(const char @, off_t);
 }
-epilogue ttyname {
+hstub ttyname {
   // Not supported yet
   // extern char *ttyname(int);
 }
-epilogue ttyname_r {
+hstub ttyname_r {
   // Not supported yet
   // extern int ttyname_r(int, char *, size_t);
 }
-epilogue ualarm {
+hstub ualarm {
   extern "C" useconds_t ualarm(useconds_t, useconds_t);
 }
-epilogue unlink {
+hstub unlink {
   extern "C" int unlink(const char @ pathname);
 }
-epilogue usleep {
+hstub usleep {
   extern "C" int usleep(useconds_t);
 }
-epilogue vfork {
+hstub vfork {
   extern "C" pid_t vfork(void);
 }
-epilogue write {
+hstub write {
   extern ssize_t write(int, const char ?NOZEROTERM, size_t);
 }
 cycstub write {
@@ -5295,19 +5295,19 @@ cycstub write {
     return Cunistd::write(fd, (const char @NOZEROTERM)buf, count);
   }
 }
-epilogue {
+hstub {
   /* intptr_t is omitted */
   /* optarg is omitted */
 }
-epilogue optind {
+hstub optind {
 // Conflict with hand-coded getopt.h so not supported yet
 //  extern "C" int optind;
 }
-epilogue opterr {
+hstub opterr {
 // Conflict with hand-coded getopt.h so not supported yet
 //  extern "C" int opterr;
 }
-epilogue optopt {
+hstub optopt {
 // Conflict with hand-coded getopt.h so not supported yet
 //  extern "C" int optopt;
 }
@@ -5318,7 +5318,7 @@ include {
 utimbuf
 time_t
 }
-epilogue {
+hstub {
   // Note, posix says the second arg of utime may be NULL
   extern "C" int utime(const char @, const struct utimbuf *);
 }
