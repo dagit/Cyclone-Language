@@ -154,18 +154,20 @@ static struct SharedFenv {
   type_t                                 return_typ;
   Dict::dict_t<var_t,stmt_t>             seen_labels;
   SlowDict::dict_t<var_t,list_t<stmt_t>> needed_labels;
+  list_t<$(type_t,type_t,rgn_po_t,seg_t)@> delayed_effect_checks;
+  list_t<$(rgn_po_t,list_t<$(type_t,type_t)@>,seg_t)@>delayed_constraint_checks;
 };
 
 // Local function environments -- this is getting a bit out of hand, no?
 abstract struct Fenv {
-  struct SharedFenv @      shared;
-  list_t<tvar_t>           type_vars; //type variables that can occur free
-  RgnOrder::rgn_po_t       region_order; // partial order on region variables 
+  struct SharedFenv @ shared;
+  list_t<tvar_t>      type_vars; //type variables that can occur free
+  rgn_po_t            region_order; // partial order on region variables 
   Dict::dict_t<var_t,binding_t> locals;//binding one of Param_b, Local_b, Pat_b
-  stmt_t                   encloser;  // nearest stmt with a binder or a try
-  ctrl_env_t               ctrl_env;
-  type_t                   capability; 
-  type_t                   curr_rgn;   // current block's region
+  stmt_t              encloser;  // nearest stmt with a binder or a try
+  ctrl_env_t          ctrl_env;
+  type_t              capability; 
+  type_t              curr_rgn;   // current block's region
 };
 
 //////////////////////// Top-level Environment Manipulation //////////////////
@@ -747,42 +749,6 @@ type_t curr_rgn(tenv_t te) {
   return get_fenv(te)->curr_rgn;
 }
 
-static bool eff_outlives_atomic_eff(rgn_po_t po, type_t eff1, type_t eff2) {
-  // assumes eff1 is compressed and normalized
-  eff2 = compress(normalize_effect(eff2));
-  switch(eff2) {
-  case &JoinEff(effs):
-    for(; effs != NULL; effs = effs->tl)
-      if(eff_outlives_atomic_eff(po, eff1, effs->hd))
-	return true;
-    return false;
-  case &AccessEff(vt): return effect_outlives(po, eff1, vt);
-  case &RgnsEff(vt1):
-    switch(eff1) {
-    case &RgnsEff(vt2):
-      switch ($(compress(vt1),compress(vt2))) {
-      case $(&VarType(tv1),&VarType(tv2)): return tvar_cmp(tv1,tv2)==0;
-      default: break;
-      }
-      fallthru;
-    default: return eff1==HeapRgn;
-    }
-  default: return eff1==HeapRgn;
-  }
-}
-
-static bool eff_outlives_eff(rgn_po_t po, type_t eff1, type_t eff2) {
-  eff1 = compress(normalize_effect(eff1));
-  switch(eff1) {
-  case &JoinEff(effs):
-    for(; effs != NULL; effs = effs->tl)
-      if(!eff_outlives_eff(po,effs->hd,eff2))
-	return false;
-    return true;
-  default: return eff_outlives_atomic_eff(po, eff1, eff2);
-  }
-}
-
 // Check that rgn_typ is currently accessible:  the heap region is always
 // accessible, and a region variable r is accessible if it appears in the
 // capability or outlives something in the capability.
@@ -822,23 +788,39 @@ bool region_outlives(tenv_t te, type_t rt_a, type_t rt_b) {
 }
 
 // Check that a function call's effect is contained in the current capability.
+// Do not constrain evars -- delay the check instead.
 void check_effect_accessible(tenv_t te, seg_t loc, type_t eff) {
   if(te->le == NULL) env_err("Tcenv: unexpected check_effect_accessible");
   let fe = get_fenv(te);
   let capability = fe->capability;
-  if(subset_effect(true, eff, capability))
+  if(subset_effect(false, eff, capability))
     return;
   if(eff_outlives_eff(fe->region_order, eff, capability))
     return;
-  terr(loc, "Capability %s does not cover function's effect %s",
-       typ2string(capability), typ2string(eff));
+  fe->shared->delayed_effect_checks = 
+    new List(new $(capability,eff,fe->region_order,loc), 
+	     fe->shared->delayed_effect_checks);
+}
+void check_delayed_effects(tenv_t te) {
+  if(te->le == NULL) env_err("Tcenv: unexpected check_delayed_effects");
+  let checks = get_fenv(te)->shared->delayed_effect_checks;
+  for(; checks != NULL; checks = checks->tl) {
+    let &$(capability,eff,rgn_order,loc) = checks->hd;
+    if(subset_effect(true, eff, capability))
+      continue;
+    if(eff_outlives_eff(rgn_order, eff, capability))
+      continue;
+    terr(loc, "Capability %s does not cover function's effect %s",
+	 typ2string(capability), typ2string(eff));
+  }
 }
 
 // Check that a function call's region partial order is compatible
 // with the current region partial order
+// Do not constrain evars -- delay the check instead.
 // FIX: better error message!
 void check_rgn_partial_order(tenv_t te, seg_t loc, 
-                             list_t<$(type_t,type_t)@> po) {
+                             list_t<$(type_t,type_t)@`H,`H> po) {
   if(te->le == NULL) {
     // not sure this could ever fail
     for(; po != NULL; po=po->tl)
@@ -848,8 +830,20 @@ void check_rgn_partial_order(tenv_t te, seg_t loc,
     return;
   }
   let fe = get_fenv(te);
-  if(!satisfies_constraints(fe->region_order,po,fe->curr_rgn))
-    terr(loc,"the required region ordering is not satisfied here");
+  if(!satisfies_constraints(fe->region_order,po,HeapRgn,false))
+    fe->shared->delayed_constraint_checks = 
+      new List(new $(fe->region_order,po,loc),
+	       fe->shared->delayed_constraint_checks);
+}
+
+void check_delayed_constraints(tenv_t te) {
+  if(te->le == NULL) env_err("Tcenv: unexpected check_delayed_constraints");
+  let checks = get_fenv(te)->shared->delayed_constraint_checks;
+  for(; checks != NULL; checks = checks->tl) {
+    let &$(rgn_order,po,loc) = checks->hd;
+    if(!satisfies_constraints(rgn_order,po,HeapRgn,true))
+      terr(loc,"the required region ordering is not satisfied here");
+  }
 }
 
 fenv_t new_fenv(seg_t loc, fndecl_t fd) {
@@ -895,8 +889,9 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
     Fenv{.shared = new SharedFenv{
                      .return_typ = fd->ret_type,
                      .seen_labels = Dict::empty(zstrptrcmp),
-                     .needed_labels = 
-                       SlowDict::empty(zstrptrcmp)
+                     .needed_labels = SlowDict::empty(zstrptrcmp),
+		     .delayed_effect_checks = NULL,
+		     .delayed_constraint_checks = NULL
                    },
          .type_vars   = tvs,
          .region_order = rgn_po,

@@ -26,5 +26,4 @@ using Typerep;
 // typerep of declarations
 extern typestruct_t decls_rep;
 
-
 #endif

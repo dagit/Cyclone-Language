@@ -456,7 +456,7 @@ namespace Absyn {
     UnknownCall_e(exp_t,list_t<exp_t>); // used during parsing
     // the vararg_call_info_t is non-null only if this is a vararg call
     // and is set during type-checking and used only for code generation.
-    FnCall_e(exp_t,list_t<exp_t>,vararg_call_info_t *); // fn call
+    FnCall_e(exp_t,list_t<exp_t>,vararg_call_info_t *); //fn call
     Throw_e(exp_t); // throw
     NoInstantiate_e(exp_t); // e@<>
     Instantiate_e(exp_t,list_t<type_t>); // instantiation of polymorphic defn

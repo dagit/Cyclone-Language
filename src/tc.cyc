@@ -286,6 +286,11 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
   te->le = new Opt(new Outermost(new_fenv(loc,fd)));
   // check the body, then get rid of local environment
   Tcstmt::tcStmt(te,fd->body,false);
+  // we've delayed checking some capabilities and constraints so that inference
+  // works a bit better, and now it's time to check them:
+  check_delayed_effects(te);
+  check_delayed_constraints(te);
+
   // check for undefined labels FIX: get better error message
   if(!all_labels_resolved(te))
     terr(loc,"function has goto statements to undefined labels");

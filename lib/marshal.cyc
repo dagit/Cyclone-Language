@@ -165,7 +165,7 @@ fprint_type_base(typestruct_t rep, addr_set_t env, FILE@ fp,`a::A @ val)
       if (y != 0) {
 	int typ_szb = size_type(typ);
 	for (int i = 0; i<sz; i++) {
-	  env = fprint_type_base(typ,env, fp,unsafe_cast@<_,`a@>(y));
+	  env = fprint_type_base(typ,env, fp,unsafe_cast(y));
 	  if (i != (sz-1))
 	    fprintf(fp,", ");
 	  y += typ_szb;
@@ -188,7 +188,7 @@ fprint_type_base(typestruct_t rep, addr_set_t env, FILE@ fp,`a::A @ val)
     if(!mem) {
       fprintf(fp,"[(@%x) ",base);
       for (addr_t i = base; i<last_plus_one; i += typ_szb) {
-	env = fprint_type_base(typ, env, fp,unsafe_cast@<_,`a@>(i));
+	env = fprint_type_base(typ, env, fp,unsafe_cast(i));
 	if ((i+typ_szb) < last_plus_one)
 	  fprintf(fp,", ");
       }
@@ -207,7 +207,7 @@ fprint_type_base(typestruct_t rep, addr_set_t env, FILE@ fp,`a::A @ val)
       let $(ofs,nm,typ) = *(l[i]);
       fprintf(fp,"%s=",nm);
       int x_ofs = x + ofs;
-      env = fprint_type_base(typ, env, fp,unsafe_cast@<_,`a@>(x_ofs));
+      env = fprint_type_base(typ, env, fp,unsafe_cast(x_ofs));
       if (i != (l.size-1))
 	fprintf(fp,", ");
     }

@@ -708,30 +708,30 @@ bool region_in_effect(bool constrain, type_t r, type_t e) {
 // Returns true if the type t is in the effect e t as RgnsEff(t).
 // If constrain is true, this might cause evars to become constrained.
 // Note that t must either be an evar or a tvar.
-static bool type_in_effect(bool constrain, type_t t, type_t e) {
+static bool type_in_effect(bool may_constrain_evars, type_t t, type_t e) {
   t = compress(t);
-  switch (compress(e)) {
+  switch (normalize_effect(compress(e))) {
   case &AccessEff(_): return false;
   case &JoinEff(es): 
     for (; es != NULL; es = es->tl) 
-      if (type_in_effect(constrain, t, es->hd)) 
+      if (type_in_effect(may_constrain_evars, t, es->hd)) 
 	return true;
     return false;
   case &RgnsEff(t2):
     t2 = compress(t2);
     if (t == t2) return true;
-    if (constrain) return unify(t,t2);
+    if (may_constrain_evars) return unify(t,t2);
     switch (rgns_of(t)) {
     case &RgnsEff(t3):
       switch ($(compress(t3),t2)) {
-      case $(&VarType(tv1),&VarType(tv2)): return unify(t,t2);
+      case $(&VarType(tv1),&VarType(tv2)): return unify(t,t2); // ???
       default: return t3 == t2;
       }
-    case e2: return type_in_effect(constrain,t,e2);
+    case e2: return type_in_effect(may_constrain_evars,t,e2);
     }
   case &Evar(k,*p,_,s): 
     if (k == NULL || k->v != EffKind) impos("effect evar has wrong kind");
-    if (!constrain) return false;
+    if (!may_constrain_evars) return false;
     // we found a non-canonical evar -- we can grow it to include t
     // but this may cause problems later on with other constraints.
     let ev = new_evar(&ek,s);
@@ -748,18 +748,19 @@ static bool type_in_effect(bool constrain, type_t t, type_t e) {
 
 // Returns true if the effect type variable v is in the effect e.
 // If constrain is true, this might cause effect evars to become constrained.
-static bool variable_in_effect(bool constrain, tvar_t v, type_t e) {
+static bool variable_in_effect(bool may_constrain_evars, tvar_t v, type_t e) {
   e = compress(e);
   switch (e) {
   case &VarType(v2): return (tvar_cmp(v, v2) == 0);
   case &JoinEff(es):
     for (; es != NULL; es = es->tl) 
-      if (variable_in_effect(constrain, v, es->hd)) return true;
+      if (variable_in_effect(may_constrain_evars, v, es->hd)) 
+	return true;
     return false;
   case &RgnsEff(t):
     switch (rgns_of(t)) {
     case &RgnsEff(t2): 
-      if (!constrain) return false;
+      if (!may_constrain_evars) return false;
       switch (compress(t2)) {
       case &Evar(k,*p,_,s):
         // we found regions(ev) where ev is an evar -- set ev to
@@ -773,7 +774,7 @@ static bool variable_in_effect(bool constrain, tvar_t v, type_t e) {
         return true;
       default: return false;
       }
-    case e2: return variable_in_effect(constrain,v,e2);
+    case e2: return variable_in_effect(may_constrain_evars,v,e2);
     }
   case &Evar(k,*p,_,s):
     if (k == NULL || k->v != EffKind) impos("effect evar has wrong kind");
@@ -796,7 +797,8 @@ static bool evar_in_effect(type_t evar, type_t e) {
   switch (e) {
   case &JoinEff(es):
     for (; es != NULL; es = es->tl) 
-      if (evar_in_effect(evar, es->hd)) return true;
+      if (evar_in_effect(evar, es->hd)) 
+	return true;
     return false;
   case &RgnsEff(t):
     switch (rgns_of(t)) {
@@ -817,13 +819,13 @@ static bool evar_in_effect(type_t evar, type_t e) {
 // thing for when a function call needs to constrain the effect to 
 // an upper bound.  When set_to_empty is false, we instantiate 
 // unconstrained evars in e1 to be e2.
-bool subset_effect(bool set_to_empty, type_t e1, type_t e2) {
+bool subset_effect(bool may_constrain_evars, type_t e1, type_t e2) {
   // if e2 is of the form JoinEff(ev::rest) where ev is an effect evar,
   // then we can instantiate ev to JoinEff(ev'::e1) where ev' is fresh
   switch (compress(e1)) {
   case &JoinEff(es): 
     for (; es != NULL; es = es->tl)
-      if (!subset_effect(set_to_empty,es->hd,e2))
+      if (!subset_effect(may_constrain_evars,es->hd,e2))
 	return false;
     return true;
   case &AccessEff(r): 
@@ -833,38 +835,29 @@ bool subset_effect(bool set_to_empty, type_t e1, type_t e2) {
     // best to just pin the region to HeapRgn or try to unify it with
     // some region already in the effect e2.  I'm opting for doing the
     // latter first, and then the former.
-    return (region_in_effect(false,r,e2) || region_in_effect(true,r,e2) ||
-            unify(r,HeapRgn));
-  case &VarType(v): 
-    // Same idea with effect variables -- going away
-    return variable_in_effect(false,v,e2) || variable_in_effect(true,v,e2);
+    return (region_in_effect(false,r,e2) 
+	    || region_in_effect(true,r,e2) 
+	    || (may_constrain_evars && unify(r,HeapRgn)));
+  case &VarType(v): return variable_in_effect(may_constrain_evars,v,e2);
   case &RgnsEff(t):
     switch (rgns_of(t)) {
     case &RgnsEff(t2): 
       // similar to AccessEff(r) but we're grepping around for RgnsEff(t2)
       // within e2 -- if we don't find it, try unifying something, and 
       // failing that, just try to pin it down to something without regions.
-      return (type_in_effect(false,t2,e2) || 
-              type_in_effect(true,t2,e2) ||
-              unify(t2,sint_typ));
-    case e: return subset_effect(set_to_empty,e,e2);
+      return (type_in_effect(may_constrain_evars,t2,e2) || 
+	      (may_constrain_evars && unify(t2,sint_typ)));
+    case e: return subset_effect(may_constrain_evars,e,e2);
     }
   case &Evar(_,*p,_,s): 
     if (!evar_in_effect(e1,e2)) 
-      // We can set the evar to be any subset of e2.  When set_to_empty
-      // is true, we set it to the empty effect, and otherwise set it to
-      // e2.  Setting it to the empty effect is the right thing to do at
-      // a function call when the instatiation and call occur simultaneously. 
-      // For other situations, it's not clear what is the right thing to do.
-      if (set_to_empty)
-        *p = new Opt(new JoinEff(NULL));
-      else {
-        // check that e1 doesn't occur in e2 and that the free type
-        // variables of e2 are contained in s.
-        occurs(e1,heap_region,s->v,e2);
-        *p = new Opt(e2);
-      }
-
+      // We can set the evar to be any subset of e2. 
+      // We set it to e2 basically.
+      //      if (may_constrain_evars) {
+	*p = new Opt(empty_effect);
+	//	occurs(e1,heap_region,s->v,e2);
+	//        *p = new Opt(e2);
+    //      }
     return true;
   default: impos("subset_effect: bad effect: %s",typ2string(e1));
   }
@@ -884,7 +877,11 @@ bool subset_effect(bool set_to_empty, type_t e1, type_t e2) {
 static bool unify_effect(type_t e1, type_t e2) {
   e1 = normalize_effect(e1);
   e2 = normalize_effect(e2);
-  return subset_effect(false, e1, e2) && subset_effect(false, e2, e1); 
+  if(subset_effect(false, e1, e2) && subset_effect(false, e2, e1))
+    return true;
+  if(subset_effect(true, e1, e2) && subset_effect(true, e2, e1))
+    return true;
+  return false;
 }
 
 // returns true when rpo1 is a sub-partial order of rpo2.  By this
@@ -1884,14 +1881,15 @@ static list_t<$(tqual_t,type_t)@> flatten_typ(tenv_t te,type_t t1) {
   case VoidType: return NULL;
   case &TupleType(tqs): return tqs; // FIX: recursively flatten here
   case &AggrType(AggrInfo(&KnownAggr(&ad),ts)):
-    // FIX: what about existential vars?!? (we're letting tyvars escape)
-    if(ad->kind==UnionA || ad->impl==NULL) 
+    // FIX: to strict with existentials and constraints??
+    if(ad->kind==UnionA || ad->impl==NULL 
+       || ad->impl->exist_vars != NULL || ad->impl->rgn_po != NULL) 
       return new List(new $(empty_tqual(),t1),NULL);
     let inst = List::zip(ad->tvs,ts);
-    // FIX: recursively flatten here
+    // FIX: recursively flatten here (if alignment allows??)
     return List::map_c(flatten_typ_f,inst,ad->impl->fields);
   case &AnonAggrType(StructA,fs):
-    // FIX: recursively flatten here
+    // FIX: recursively flatten here (if alignment allows??)
     return List::map_c(flatten_typ_f,NULL,fs);
   default: return new List(new $(empty_tqual(),t1),NULL);
   }

@@ -45,34 +45,30 @@ typedef struct Function<`arg,`res,`bd> @fn_t<`arg,`res,`bd>;
       closure; [`arg] is the argument type of the function, [`res] is
       the result type, and [`bd] is a region that [regions(`arg)] outlive. */
 
-extern fn_t<`arg,`res,`bd> make_fn(`res f(`env,`arg), `env x : regions(`env) > `bd);
-  /** [make_fn(f,env)] builds a closure out of a function and an
-      environment. */
+extern fn_t<`arg,`res,`bd> make_fn(`res f(`env,`arg),`env x :regions(`env)>`bd);
+  /** [make_fn(f,env)] builds a closure out of a function and an environment. */
 
-extern fn_t<`arg,`res,`bd> fp2fn(`res f(`arg) : regions(`arg) > `bd, regions(`res) > `bd);
+extern fn_t<`arg,`res,`bd> fp2fn(`res f(`arg) : regions($(`arg,`res)) > `bd);
   /** [fp2fn(f)] converts a function pointer to a closure. */
 
 extern `res apply(fn_t<`arg,`res> f, `arg x);
   /** [apply(f,x)] applies closure [f] to argument [x] (taking care of
       the hidden environment in the process). */
 
-extern fn_t<`a,`c,`bd> compose(fn_t<`a,`b,`bd> g,
-			       fn_t<`b,`c,`bd> f
-			       : regions(`a) > `bd, 
-			       regions(`b) > `bd, 
-			       regions(`c) > `bd);
+extern fn_t<`a,`c,`bd> compose(fn_t<`a,`b,`bd> g, fn_t<`b,`c,`bd> f 
+			       : regions($(`a,`b,`c)) > `bd);
   /** [compose(g,f)] returns the composition of closures [f] and [g];
       [apply(compose(g,f),x)] has the same effect as
       [apply(f,apply(g,x))]. */
 
 extern fn_t<`a,fn_t<`b,`c,`bd>,`bd> curry(fn_t<$(`a,`b)@`H,`c,`bd> f
-		  : regions(`a) > `bd, regions(`b) > `bd, regions(`c) > `bd);
+					  : regions($(`a,`b,`c)) > `bd);
   /** [curry(f)] curries a closure that takes a pair as argument: if
       [x] points to a pair [\$(x1,x2)], then [apply(f,x)] has the same
       effect as [apply(apply(curry(f),x1),x2)].  */
 
 extern fn_t<$(`a,`b)@,`c,`bd> uncurry(fn_t<`a,fn_t<`b,`c,`bd>,`bd> f
-		  : regions(`a) > `bd, regions(`b) > `bd, regions(`c) > `bd);
+				      : regions($(`a,`b,`c)) > `bd);
   /** [uncurry(f)] converts a closure that takes two arguments in
       sequence into a closure that takes the two arguments as a pair:
       if [x] points to a pair [\$(x1,x2)], then [apply(uncurry(f),x)]

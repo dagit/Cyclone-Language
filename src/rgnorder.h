@@ -25,11 +25,13 @@
 #include <position.h>
 #include "absyn.h"
 
+// due to mutual recursion, rgn_po_t is defined in absyn.h.  Sigh.
+
 namespace RgnOrder {
 using Absyn;
 using List;
 
-struct RgnPO;
+extern struct RgnPO;
 typedef struct RgnPO @ rgn_po_t;
 
 rgn_po_t initial_fn_po(list_t<tvar_t> tvs, 
@@ -41,8 +43,8 @@ rgn_po_t add_youngest(rgn_po_t po, tvar_t rgn, bool resetable);
 bool is_region_resetable(rgn_po_t po, tvar_t r);
 bool effect_outlives(rgn_po_t po, type_t eff, type_t rgn);
 bool satisfies_constraints(rgn_po_t po, list_t<$(type_t,type_t)@> constraints,
-			   type_t default_bound);
-
+			   type_t default_bound, bool do_pin);
+bool eff_outlives_eff(rgn_po_t po, type_t eff1, type_t eff2);
 }
 
 #endif

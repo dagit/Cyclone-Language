@@ -44,7 +44,7 @@ static `res fp_apply(`res f(`arg), `arg x) {
 }
 
 // convert a function pointer to a closure
-fn_t<`arg,`res,`bd> fp2fn(`res f(`arg) : regions(`arg) > `bd, regions(`res) > `bd) {
+fn_t<`arg,`res,`bd> fp2fn(`res f(`arg) : regions($(`arg,`res)) > `bd) {
   return make_fn(fp_apply, f);
 }
 
@@ -61,11 +61,8 @@ static `c fn_compose($(fn_t<`b,`c,`bd>, fn_t<`a,`b,`bd>)@`H f_and_g,`a arg) {
 }
 
 // compose closures
-fn_t<`a,`c,`bd> compose(fn_t<`a,`b,`bd> g, 
-			fn_t<`b,`c,`bd> f
-			: regions(`a) > `bd, 
-			regions(`b) > `bd, 
-			regions(`c) > `bd) {
+fn_t<`a,`c,`bd> compose(fn_t<`a,`b,`bd> g, fn_t<`b,`c,`bd> f 
+			: regions($(`a,`b,`c)) > `bd) {
   return make_fn(fn_compose,new $(f,g));
 }
 
@@ -81,21 +78,19 @@ static fn_t<`b,`c,`bd> outer($(fn_t<`b,`c,`bd>, `a*@`H)@`H env, `a first) {
 
 // curry a closure that takes a pair
 fn_t<`a,fn_t<`b,`c,`bd>,`bd> curry(fn_t<$(`a,`b)@`H,`c,`bd> f
-             : regions(`a) > `bd, regions(`b) > `bd, regions(`c) > `bd) {
+				   : regions($(`a,`b,`c)) > `bd) {
   $(fn_t<$(`a,`b)@`H,`c,`bd>, `a*`H)@ inner_env = new $(f, NULL);
   fn_t<`b,`c,`bd> inner_fn = make_fn(inner, inner_env);
   return make_fn(outer, new $(inner_fn, &((*inner_env)[1])));
 }
 
-static `c lambda(fn_t<`a,fn_t<`b,`c,`bd>,`bd> f,
-		 $(`a,`b)@`H arg) {
+static `c lambda(fn_t<`a,fn_t<`b,`c,`bd>,`bd> f, $(`a,`b)@`H arg) {
   return apply(apply(f,(*arg)[0]),(*arg)[1]);
 }
 
 // uncurry a closure
 fn_t<$(`a,`b)@,`c,`bd> uncurry(fn_t<`a,fn_t<`b,`c,`bd>,`bd> f
-             : regions(`a) > `bd, regions(`b) > `bd, regions(`c) > `bd) {
-
+			       : regions($(`a,`b,`c)) > `bd) {
   return make_fn(lambda,f);
 }
 

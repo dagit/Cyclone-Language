@@ -707,7 +707,7 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
 // e(es)
 static type_t tcFnCall(tenv_t te,seg_t loc,type_t * topt,exp_t e,
 		       list_t<exp_t> args,
-		       vararg_call_info_t *@vararg_call_info){
+		       vararg_call_info_t *@vararg_call_info) {
   // if e is a vararg function then we need to declare a new local
   // region block -- we just do it always here.
   let es = args;
@@ -836,10 +836,10 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t * topt,exp_t e,
         }
       }
       // Check that the effect of the function is compatible with the current
-      // capability.
+      // capability.  May be delayed.
       Tcenv::check_effect_accessible(te, loc, eff->v);
-      // Check that the partial-order on region lifetimes required by the
-      // function is compatible with the current region partial order
+      // Check that the function's partial-order on region lifetimes 
+      // is compatible with the current region partial order. May be delayed.
       Tcenv::check_rgn_partial_order(te, loc, rgn_po);
       return res_typ;
     default: return expr_err(te,loc,"expected pointer to function");

@@ -112,7 +112,7 @@ bitvec_t new_copy(bitvec_t old) {
   return copy;
 }
 
-bitvec_t from_list(Dict::dict_t<`a,`b,`e> d, int f(`b), 
+bitvec_t from_list(Dict::dict_t<`a,`b> d, int f(`b), 
                    int sz, List::list_t<`a> l) {
   bitvec_t ans = new {for i < (sz % INTSZ)+1 : 0};
   for(; l!=NULL;l=l->tl)

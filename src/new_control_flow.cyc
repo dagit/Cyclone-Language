@@ -47,6 +47,7 @@
 #include "evexp.h"
 #include "cf_flowinfo.h"
 #include "new_control_flow.h"
+#include "rgnorder.h"
 
 // for debugging
 #include "absynpp.h"

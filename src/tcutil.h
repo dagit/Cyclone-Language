@@ -103,9 +103,8 @@ extern type_t substitute(list_t<$(tvar_t,type_t)@`H,`H>, type_t);
   // could also have a version with two regions, but doesn't seem useful
 extern type_t rsubstitute(region_t<`r>,list_t<$(tvar_t,type_t)@`r,`r>,type_t);
 
-// true when e1 is a sub-effect of e2 -- might cause side effects
-// to constrain evars...
-extern bool subset_effect(bool set_to_empty, type_t e1, type_t e2);
+// true when e1 is a sub-effect of e2
+extern bool subset_effect(bool may_constrain_evars, type_t e1, type_t e2);
 
 // returns true when rgn is in effect -- won't side-effect any evars when
 // constrain is false.

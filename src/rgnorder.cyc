@@ -103,8 +103,12 @@ bool is_region_resetable(rgn_po_t po, Absyn::tvar_t r) {
 }
 
 static bool contains_rgnseff(tvar_t rgns_of_var, type_t eff) {
-  switch(compress(eff)) {
-  case &RgnsEff(&VarType(tv)): return tvar_cmp(tv,rgns_of_var)==0;
+  switch(normalize_effect(compress(eff))) {
+  case &RgnsEff(t): 
+    switch(compress(t)) {
+    case &VarType(tv): return tvar_cmp(tv,rgns_of_var)==0;
+    default: return false;
+    }
   case &JoinEff(effs):
     for(; effs != NULL; effs = effs->tl)
       if(contains_rgnseff(rgns_of_var,effs->hd))
@@ -243,7 +247,7 @@ static void pin_effect(type_t eff, type_t bd) {
 // Of course, this sucks without explicit type instantiation on structs, but
 // the topt in tcexp, lets struct Foo<`r> x = Foo(...) do what we want. Sigh.
 bool satisfies_constraints(rgn_po_t po, list_t<$(type_t,type_t)@> constraints,
-			   type_t default_bound) {
+			   type_t default_bound, bool do_pin) {
   // do all the bounds first so order doesn't matter
   for(let cs=constraints; cs != NULL; cs = cs->tl) {
     let &$(_,bd) = cs->hd;
@@ -254,10 +258,47 @@ bool satisfies_constraints(rgn_po_t po, list_t<$(type_t,type_t)@> constraints,
   }
   for(let cs=constraints; cs != NULL; cs = cs->tl) {
     let &$(eff,bd) = cs->hd;
-    pin_effect(eff,bd);
+    if(do_pin)
+      pin_effect(eff,bd);
     if(!effect_outlives(po,eff,bd))
       return false;
   }
   return true;
+}
+
+static bool eff_outlives_atomic_eff(rgn_po_t po, type_t eff1, type_t eff2) {
+  // assumes eff1 is compressed and normalized
+  eff2 = compress(normalize_effect(eff2));
+  switch(eff2) {
+  case &JoinEff(effs):
+    for(; effs != NULL; effs = effs->tl)
+      if(eff_outlives_atomic_eff(po, eff1, effs->hd))
+	return true;
+    return false;
+  case &AccessEff(vt): return effect_outlives(po, eff1, vt);
+  case &RgnsEff(vt1):
+    switch(eff1) {
+    case &RgnsEff(vt2):
+      switch ($(compress(vt1),compress(vt2))) {
+      case $(&VarType(tv1),&VarType(tv2)): return tvar_cmp(tv1,tv2)==0;
+      default: break;
+      }
+      fallthru;
+    default: return eff1==HeapRgn;
+    }
+  default: return eff1==HeapRgn;
+  }
+}
+
+bool eff_outlives_eff(rgn_po_t po, type_t eff1, type_t eff2) {
+  eff1 = compress(normalize_effect(eff1));
+  switch(eff1) {
+  case &JoinEff(effs):
+    for(; effs != NULL; effs = effs->tl)
+      if(!eff_outlives_eff(po,effs->hd,eff2))
+	return false;
+    return true;
+  default: return eff_outlives_atomic_eff(po, eff1, eff2);
+  }
 }
 

@@ -25,7 +25,7 @@
 #include <set.h>
 #include <dict.h>
 #include "absyn.h"
-#include <position.h>
+#include "rgnorder.h"
 
 namespace Tcenv {
 
@@ -141,20 +141,24 @@ extern tenv_t new_named_block(seg_t,tenv_t,tvar_t name);
 extern tenv_t new_outlives_constraints(tenv_t te, list_t<$(type_t,type_t)@> cs);
 
 extern type_t curr_rgn(tenv_t);
+
 extern tenv_t add_region(tenv_t te, type_t r, bool resetable);
 // Check that the region is in the current capability
 extern void check_rgn_accessible(tenv_t,seg_t,type_t rgn);
 // Check that the region is in the current capability and is resetable
 extern void check_rgn_resetable(tenv_t,seg_t,type_t rgn);
-// Check that an effect is a sub-effect of the current capability
+// Check that an effect is a sub-effect of the current capability, may delay
 extern void check_effect_accessible(tenv_t te, seg_t loc, type_t eff);
 // Returns the region in which a function's parameters live
 extern type_t parameter_rgn(tenv_t);
 // Returns true when region r1 outlives region r2 -- assumes r1 <> r2
 extern bool region_outlives(tenv_t, type_t r1, type_t r2);
 // Checks that for each pair of regions (r1,r2), r1 outlives r2 under
-// the current partial order on region lifetimes in the environment.
+// the current partial order on region lifetimes in the environment, may delay
 extern void check_rgn_partial_order(tenv_t te, seg_t loc, 
-                                    list_t<$(type_t,type_t)@> po);
+                                    list_t<$(type_t,type_t)@`H,`H> po);
+
+extern void check_delayed_effects(tenv_t te);
+extern void check_delayed_constraints(tenv_t te);
 }
 #endif
