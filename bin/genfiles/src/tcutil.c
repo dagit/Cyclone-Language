@@ -350,13 +350,13 @@ struct Cyc_Absyn_Reference_p_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ;
 static const int Cyc_Absyn_Struct_p_tag= 7; struct Cyc_Absyn_Struct_p_struct{
 int tag; struct Cyc_Absyn_Structdecl* f1; struct Cyc_Core_Opt* f2; struct Cyc_List_List*
 f3; struct Cyc_List_List* f4; } ; static const int Cyc_Absyn_Tunion_p_tag= 8;
-struct Cyc_Absyn_Tunion_p_struct{ int tag; struct _tuple1* f1; struct Cyc_Core_Opt*
-f2; struct Cyc_List_List* f3; struct Cyc_List_List* f4; struct Cyc_Absyn_Tuniondecl*
-f5; struct Cyc_Absyn_Tunionfield* f6; } ; static const int Cyc_Absyn_XTunion_p_tag=
-9; struct Cyc_Absyn_XTunion_p_struct{ int tag; struct _tuple1* f1; struct Cyc_List_List*
-f2; struct Cyc_List_List* f3; struct Cyc_Absyn_XTuniondecl* f4; struct Cyc_Absyn_Tunionfield*
-f5; } ; static const int Cyc_Absyn_Enum_p_tag= 10; struct Cyc_Absyn_Enum_p_struct{
-int tag; struct _tuple1* f1; struct Cyc_Absyn_Enumdecl* f2; struct Cyc_Absyn_Enumfield*
+struct Cyc_Absyn_Tunion_p_struct{ int tag; struct _tuple1* f1; struct Cyc_List_List*
+f2; struct Cyc_List_List* f3; struct Cyc_Absyn_Tuniondecl* f4; struct Cyc_Absyn_Tunionfield*
+f5; } ; static const int Cyc_Absyn_XTunion_p_tag= 9; struct Cyc_Absyn_XTunion_p_struct{
+int tag; struct _tuple1* f1; struct Cyc_List_List* f2; struct Cyc_List_List* f3;
+struct Cyc_Absyn_XTuniondecl* f4; struct Cyc_Absyn_Tunionfield* f5; } ; static
+const int Cyc_Absyn_Enum_p_tag= 10; struct Cyc_Absyn_Enum_p_struct{ int tag;
+struct _tuple1* f1; struct Cyc_Absyn_Enumdecl* f2; struct Cyc_Absyn_Enumfield*
 f3; } ; static const int Cyc_Absyn_UnknownId_p_tag= 11; struct Cyc_Absyn_UnknownId_p_struct{
 int tag; struct _tuple1* f1; } ; static const int Cyc_Absyn_UnknownCall_p_tag=
 12; struct Cyc_Absyn_UnknownCall_p_struct{ int tag; struct _tuple1* f1; struct
@@ -531,8 +531,8 @@ struct Cyc_List_List*); extern void Cyc_Tcutil_check_nonzero_bound( struct Cyc_P
 struct Cyc_Absyn_Conref*); extern void Cyc_Tcutil_check_bound( struct Cyc_Position_Segment*,
 unsigned int i, struct Cyc_Absyn_Conref*); extern int Cyc_Tcutil_equal_tqual(
 struct Cyc_Absyn_Tqual tq1, struct Cyc_Absyn_Tqual tq2); extern struct Cyc_List_List*
-Cyc_Tcutil_resolve_struct_designators( struct Cyc_Position_Segment* loc, struct
-Cyc_List_List* des, struct Cyc_Absyn_Structdecl* sd); extern int Cyc_Tcutil_is_tagged_pointer_typ(
+Cyc_Tcutil_resolve_struct_designators( struct _RegionHandle* rgn, struct Cyc_Position_Segment*
+loc, struct Cyc_List_List* des, struct Cyc_Absyn_Structdecl* sd); extern int Cyc_Tcutil_is_tagged_pointer_typ(
 void*); extern void* Cyc_Tcutil_array_to_ptr( struct Cyc_Tcenv_Tenv*, void* t,
 struct Cyc_Absyn_Exp* e); struct _tuple6{ int f1; void* f2; } ; extern struct
 _tuple6 Cyc_Tcutil_addressof_props( struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Exp*
@@ -3677,19 +3677,19 @@ _temp2945; _temp2946.base= _temp2945; _temp2946.last_plus_one= _temp2945 + 24;
 _temp2946;}));} struct _tuple15{ struct Cyc_Absyn_Structfield* f1; int f2; } ;
 struct _tuple16{ struct Cyc_List_List* f1; void* f2; } ; struct _tuple17{ struct
 Cyc_Absyn_Structfield* f1; void* f2; } ; struct Cyc_List_List* Cyc_Tcutil_resolve_struct_designators(
-struct Cyc_Position_Segment* loc, struct Cyc_List_List* des, struct Cyc_Absyn_Structdecl*
-sd){ if( sd->fields == 0){ Cyc_Tcutil_terr( loc,( struct _tagged_string)({ char*
-_temp2947=( char*)"inappropriate use of abstract struct"; struct _tagged_string
-_temp2948; _temp2948.curr= _temp2947; _temp2948.base= _temp2947; _temp2948.last_plus_one=
-_temp2947 + 37; _temp2948;}));}{ struct Cyc_List_List* fields= 0;{ struct Cyc_List_List*
-sd_fields=( struct Cyc_List_List*)({ struct Cyc_Core_Opt* _temp2956= sd->fields;
-if( _temp2956 == 0){ _throw( Null_Exception);} _temp2956->v;}); for( 0;
-sd_fields != 0; sd_fields=({ struct Cyc_List_List* _temp2949= sd_fields; if(
-_temp2949 == 0){ _throw( Null_Exception);} _temp2949->tl;})){ if( Cyc_String_strcmp(*((
-struct Cyc_Absyn_Structfield*)({ struct Cyc_List_List* _temp2950= sd_fields; if(
-_temp2950 == 0){ _throw( Null_Exception);} _temp2950->hd;}))->name,( struct
-_tagged_string)({ char* _temp2951=( char*)""; struct _tagged_string _temp2952;
-_temp2952.curr= _temp2951; _temp2952.base= _temp2951; _temp2952.last_plus_one=
+struct _RegionHandle* rgn, struct Cyc_Position_Segment* loc, struct Cyc_List_List*
+des, struct Cyc_Absyn_Structdecl* sd){ if( sd->fields == 0){ Cyc_Tcutil_terr(
+loc,( struct _tagged_string)({ char* _temp2947=( char*)"inappropriate use of abstract struct";
+struct _tagged_string _temp2948; _temp2948.curr= _temp2947; _temp2948.base=
+_temp2947; _temp2948.last_plus_one= _temp2947 + 37; _temp2948;}));}{ struct Cyc_List_List*
+fields= 0;{ struct Cyc_List_List* sd_fields=( struct Cyc_List_List*)({ struct
+Cyc_Core_Opt* _temp2956= sd->fields; if( _temp2956 == 0){ _throw( Null_Exception);}
+_temp2956->v;}); for( 0; sd_fields != 0; sd_fields=({ struct Cyc_List_List*
+_temp2949= sd_fields; if( _temp2949 == 0){ _throw( Null_Exception);} _temp2949->tl;})){
+if( Cyc_String_strcmp(*(( struct Cyc_Absyn_Structfield*)({ struct Cyc_List_List*
+_temp2950= sd_fields; if( _temp2950 == 0){ _throw( Null_Exception);} _temp2950->hd;}))->name,(
+struct _tagged_string)({ char* _temp2951=( char*)""; struct _tagged_string
+_temp2952; _temp2952.curr= _temp2951; _temp2952.base= _temp2951; _temp2952.last_plus_one=
 _temp2951 + 1; _temp2952;})) != 0){ fields=({ struct Cyc_List_List* _temp2953=(
 struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2953->hd=(
 void*)({ struct _tuple15* _temp2954=( struct _tuple15*) GC_malloc( sizeof(
@@ -3719,12 +3719,12 @@ Cyc_Absyn_FieldName_struct _temp2972; _temp2972.tag= Cyc_Absyn_FieldName_tag;
 _temp2972.f1=((*(( struct _tuple15*)({ struct Cyc_List_List* _temp2973= fields2;
 if( _temp2973 == 0){ _throw( Null_Exception);} _temp2973->hd;}))).f1)->name;
 _temp2972;}); _temp2971;})); _temp2970->tl= 0; _temp2970;}); ans=({ struct Cyc_List_List*
-_temp2974=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp2974=( struct Cyc_List_List*) _region_malloc( rgn, sizeof( struct Cyc_List_List));
 _temp2974->hd=( void*)({ struct _tuple17* _temp2975=( struct _tuple17*)
-GC_malloc( sizeof( struct _tuple17)); _temp2975->f1=(*(( struct _tuple15*)({
-struct Cyc_List_List* _temp2976= fields2; if( _temp2976 == 0){ _throw(
-Null_Exception);} _temp2976->hd;}))).f1; _temp2975->f2= _temp2962; _temp2975;});
-_temp2974->tl= ans; _temp2974;}); break;}} if( fields2 == 0){ Cyc_Tcutil_terr(
+_region_malloc( rgn, sizeof( struct _tuple17)); _temp2975->f1=(*(( struct
+_tuple15*)({ struct Cyc_List_List* _temp2976= fields2; if( _temp2976 == 0){
+_throw( Null_Exception);} _temp2976->hd;}))).f1; _temp2975->f2= _temp2962;
+_temp2975;}); _temp2974->tl= ans; _temp2974;}); break;}} if( fields2 == 0){ Cyc_Tcutil_terr(
 loc,( struct _tagged_string)({ char* _temp2977=( char*)"too many arguments to struct";
 struct _tagged_string _temp2978; _temp2978.curr= _temp2977; _temp2978.base=
 _temp2977; _temp2978.last_plus_one= _temp2977 + 29; _temp2978;}));}} else{ if(({
@@ -3756,12 +3756,12 @@ _tagged_string _temp2998=* _temp2991; xprintf("field %.*s has already been used 
 _temp2998.last_plus_one - _temp2998.curr, _temp2998.curr);}));}(*(( struct
 _tuple15*)({ struct Cyc_List_List* _temp2999= fields2; if( _temp2999 == 0){
 _throw( Null_Exception);} _temp2999->hd;}))).f2= 1; ans=({ struct Cyc_List_List*
-_temp3000=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp3000=( struct Cyc_List_List*) _region_malloc( rgn, sizeof( struct Cyc_List_List));
 _temp3000->hd=( void*)({ struct _tuple17* _temp3001=( struct _tuple17*)
-GC_malloc( sizeof( struct _tuple17)); _temp3001->f1=(*(( struct _tuple15*)({
-struct Cyc_List_List* _temp3002= fields2; if( _temp3002 == 0){ _throw(
-Null_Exception);} _temp3002->hd;}))).f1; _temp3001->f2= _temp2962; _temp3001;});
-_temp3000->tl= ans; _temp3000;}); break;}} if( fields2 == 0){ Cyc_Tcutil_terr(
+_region_malloc( rgn, sizeof( struct _tuple17)); _temp3001->f1=(*(( struct
+_tuple15*)({ struct Cyc_List_List* _temp3002= fields2; if( _temp3002 == 0){
+_throw( Null_Exception);} _temp3002->hd;}))).f1; _temp3001->f2= _temp2962;
+_temp3001;}); _temp3000->tl= ans; _temp3000;}); break;}} if( fields2 == 0){ Cyc_Tcutil_terr(
 loc,({ struct _tagged_string _temp3003=* _temp2991; xprintf("bad field designator %.*s",
 _temp3003.last_plus_one - _temp3003.curr, _temp3003.curr);}));} goto _LL2984;}
 _LL2984:;}}} for( 0; fields != 0; fields=({ struct Cyc_List_List* _temp3004=

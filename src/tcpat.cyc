@@ -649,10 +649,19 @@ static simple_pat_t compile_pat(pat_t p) {
     s = tuple_pat(ps);
     break;
   case &Tunion_p(_,_,ps,ed,ef):
-    int span = List::length(ed->fields->v);
+    int span;
+    switch(compress(p->topt->v)) {
+    case &TunionFieldType(_): span = 1; break;
+    default: span = List::length(ed->fields->v); break;
+    }
     s = con_pat(*((*ef->name)[1]),new Opt(span),List::map(compile_pat,ps)); 
     break;
   case &XTunion_p(_,_,ps,xd,ef):
+    opt_t<int> span;
+    switch(compress(p->topt->v)) {
+    case &XTunionFieldType(_): span = new Opt(1); break;
+    default: span = null; break;
+    }
     s = con_pat(*((*ef->name)[1]),null,List::map(compile_pat,ps)); 
     break;
   case &Enum_p(q,ed,ef):

@@ -2160,11 +2160,12 @@ xlate_pat(env_t nv, type_t t, exp_t r, exp_t path, pat_t p,
                         var_exp(qv,DL), succ_lab, fail_lab);
     break;
 
-  case &Pointer_p(&Pat{&Tunion_p(qv,ts,ps,ed,ef),_,_}):
+  case &Pointer_p(&Pat{&Tunion_p(qv,ts,ps,ed,ef),_,_}) && ps != null:
     // when ps == p1,...,pn:
     //   if ((unsigned int)r > max_tag && ((t)r)->tag == qv_tag)
     //      <similar to tuple and struct patterns>
     //   else goto fail_lab
+    // FIX: When type is TunionField, can avoid all checks
     // It's unfortunate that we have to always check that r > max_tag.
     // If we had the decision tree information, we could avoid doing so.
     list_t<stmt_t> ss = null;
@@ -2213,12 +2214,13 @@ xlate_pat(env_t nv, type_t t, exp_t r, exp_t path, pat_t p,
                         seq_stmts(ss,DL),
                         goto_stmt(fail_lab,DL), DL);
     break;
-  case &Pointer_p(&Pat{&XTunion_p(qv,ts,ps,xd,xf),_,_}):
+  case &Pointer_p(&Pat{&XTunion_p(qv,ts,ps,xd,xf),_,_}) && ps != null:
     // similar to tunion patterns except that we cast the root to an 
     // _xtunion_struct
     // and compare r->tag against qv (and then the nested patterns and so
     // forth.)  Lots of casting needed to get this to type-check.
     // Note: There are no non-pointer variants, hence no max tag.
+    // FIX: When type is XTunionField, can avoid all checks
     list_t<stmt_t> ss = null;
     int cnt = List::length(ps);
     qvar_t xfstrct = collapse_qvar_tag(xf->name,"_struct");
@@ -2260,6 +2262,8 @@ xlate_pat(env_t nv, type_t t, exp_t r, exp_t path, pat_t p,
     }
     break;
 
+  case &Tunion_p(_,_,ps,_,_):  fallthru(ps);
+  case &XTunion_p(_,_,ps,_,_): fallthru(ps);
   case &Tuple_p(ps):
     // given the pattern $(p1,p2,...,pn)
     //    v1 = r->f1; if (matches(v1,p1)) goto L1 else goto fail_lab;
@@ -2267,8 +2271,8 @@ xlate_pat(env_t nv, type_t t, exp_t r, exp_t path, pat_t p,
     // L2:v3 = r->f3; if (matches(v3,p2)) goto L3 else goto fail_lab;
     //    ...
     // Ln-1:vn = r->fn; if (matches(vn,p2)) goto succ_lab else goto fail_lab;
-    list_t<stmt_t> ss  = null;
-    int        cnt = List::length(ps);
+    list_t<stmt_t> ss = null;
+    int cnt = List::length(ps);
     for(let rps = List::rev(ps); rps != null; rps = rps->tl, cnt--) {
       let p2  = rps->hd;
       let v   = temp_var();
@@ -2345,9 +2349,6 @@ xlate_pat(env_t nv, type_t t, exp_t r, exp_t path, pat_t p,
   case &UnknownId_p(_):         s = toc_impos("unknownid");     break;
   case &UnknownCall_p(_,_,_):   s = toc_impos("unknowncall");   break;
   case &UnknownFields_p(_,_,_): s = toc_impos("unknownfields"); break;
-  case &Tunion_p(_,_,_,_,_): fallthru;
-  case &XTunion_p(_,_,_,_,_):
-    s = toc_impos("non-null [x]tunion pattern not under &"); break;
   }
   return $(nv,decls,s);
 }
