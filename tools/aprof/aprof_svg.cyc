@@ -47,6 +47,9 @@ const char ?font_size = NULL;
 bool black_and_white = false;
 bool gc_caps = false;
 bool sort_changes = false;
+bool no_legend = false;
+bool omit_gc = false;
+unsigned int MAX_Y = 0;
 
 char ?text_properties() {
   static int first_time = 1;
@@ -119,12 +122,12 @@ bool fixed_colors = false;
 static void init_fixed_colors() {
   if (!fixed_colors) return;
   /* Should be called in initialization.  Forces default colors for regions. */
+  color_of_region("other");
+  color_of_region("heap");
   color_of_region("unique");
   color_of_region("refcnt");
-  color_of_region("heap");
-  color_of_region("other");
   color_of_region("available");
-  color_of_region("reserved");
+  color_of_region("reserved"); 
 }
 
 /* Dimensions of the graph on the printed page, in points (pt).
@@ -649,30 +652,32 @@ static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t 
   }
 
   /* the garbage collections */
-  printf("<!-- garbage collections -->\n");
-  gc_scale();
-  for (let l = gc_list; l != NULL; l = l->tl) {
-    let &$(x1,x2) = l->hd;
-    printf("<rect x='%d' y='0' width='%d' height='%d'"
-           " fill='%s' stroke='none' opacity='%s'/>\n",
-           x1,x2-x1,max_y,gc_fill,gc_opacity);
-    if (gc_caps)
-      printf("<polygon points='%f,%f %f,%f %f,%f'"
-             " fill='black' stroke='none'/>\n",
-             ((x2-x1)/2.0)+x1-(xres*0.01), 1.01*max_y,
-             ((x2-x1)/2.0)+x1+(xres*0.01), 1.01*max_y,
-             ((x2-x1)/2.0)+x1, max_y);
-    //             x1,max_y,x2,max_y,((x2-x1)/2.0+x1),1.01*max_y);
-//      printf("<polygon points='%d,%d %d,%d %f,%f'"
-//             " fill='black' stroke='none'/>\n",
-//             x1,max_y,x2,max_y,((x2-x1)/2.0+x1),1.01*max_y);
-  }
+  if (!omit_gc) {
+    printf("<!-- garbage collections -->\n");
+    gc_scale();
+    for (let l = gc_list; l != NULL; l = l->tl) {
+      let &$(x1,x2) = l->hd;
+      printf("<rect x='%d' y='0' width='%d' height='%d'"
+	     " fill='%s' stroke='none' opacity='%s'/>\n",
+	     x1,x2-x1,max_y,gc_fill,gc_opacity);
+      if (gc_caps)
+	printf("<polygon points='%f,%f %f,%f %f,%f'"
+	       " fill='black' stroke='none'/>\n",
+	       ((x2-x1)/2.0)+x1-(xres*0.01), 1.01*max_y,
+	       ((x2-x1)/2.0)+x1+(xres*0.01), 1.01*max_y,
+	       ((x2-x1)/2.0)+x1, max_y);
+      //             x1,max_y,x2,max_y,((x2-x1)/2.0+x1),1.01*max_y);
+      //      printf("<polygon points='%d,%d %d,%d %f,%f'"
+      //             " fill='black' stroke='none'/>\n",
+      //             x1,max_y,x2,max_y,((x2-x1)/2.0+x1),1.01*max_y);
+    }
 
-  printf("<!-- marks -->\n");
-  for (let l = mark_list; l != NULL; l = l->tl) {
-    let &$(time,m) = l->hd;
-    printf("<path d='M%u,0 v%u' stroke='red' fill='none' opacity='.7'/>\n",
-           time,max_y);
+    printf("<!-- marks -->\n");
+    for (let l = mark_list; l != NULL; l = l->tl) {
+      let &$(time,m) = l->hd;
+      printf("<path d='M%u,0 v%u' stroke='red' fill='none' opacity='.7'/>\n",
+	     time,max_y);
+    }
   }
 
   printf("</g>\n");
@@ -823,6 +828,7 @@ int generate_svg(string_t<`H> file) {
     }
     max_y += l->hd->max_y;
   }
+  if (max_y < MAX_Y) max_y = MAX_Y; /* user preference, if possible */
 
   double memory_footprint = env->mem_total->area;
   double data_footprint =
@@ -874,10 +880,11 @@ int generate_svg(string_t<`H> file) {
     else
       namecolors = new List(new $("reserved",color_of_region("reserved")),namecolors);
   }
-  printf("<g transform='translate(%f,0)'>\n",WIDTH+20);
-  output_legend(namecolors);
-  printf("</g>\n");
-
+  if (!no_legend) {
+    printf("<g transform='translate(%f,0)'>\n",WIDTH+20);
+    output_legend(namecolors);
+    printf("</g>\n");
+  }
   printf("<!-- x and y axes -->\n");
   printf("<path d='M-5,0 0,0 0,%f %f,%f %f,%f' fill='none'"
          " stroke='black' stroke-width='0.2'/>\n",
@@ -912,8 +919,12 @@ int generate_svg(string_t<`H> file) {
     else
       x_caption =
         aprintf("Data footprint %s*%s", print_bytes(data_footprint),CE);
-  printf("<text x='%f' y='%f' text-anchor='middle'%s>%s</text>\n",
-         WIDTH/2,HEIGHT+x_caption_gap, text_properties(), x_caption);
+  output_comment(aprintf("all data area: %s*%s (%d%%)",
+			 print_bytes(data_footprint),CE,
+			 (int)((data_footprint * 100.0)/memory_footprint)));
+  if (strcmp(x_caption,"") != 0)
+    printf("<text x='%f' y='%f' text-anchor='middle'%s>%s</text>\n",
+	   WIDTH/2,HEIGHT+x_caption_gap, text_properties(), x_caption);
 
   printf("<!-- y axis caption -->\n");
   if (y_caption) {

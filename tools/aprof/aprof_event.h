@@ -179,6 +179,7 @@ namespace Aprof {
 // Colors etc. to use on the graph
 extern double WIDTH;
 extern double HEIGHT;
+extern unsigned int MAX_Y;
 extern unsigned int XMAXRES;
 extern bool landscape;
 extern const char ??colors;
@@ -196,5 +197,7 @@ extern bool black_and_white;
 extern bool gc_caps;
 extern bool sort_changes;
 extern bool fixed_colors;
+extern bool no_legend;
+extern bool omit_gc;
 
 #endif

@@ -57,6 +57,9 @@ static void usage(string_t<`H> argv0) __attribute__((noreturn)) {
           "  -xmaxres <n>\n"
           "         use <n> as maximum number of points to plot on the x axis.\n"
           "         Default is 1000.  Larger xmaxres gives a more accurate but bigger graph.\n"
+          "  -max-y <n>\n"
+          "         use <n> as the height of the y axis.\n"
+          "         If this is less than the maximum curve height, the default is used instead.\n"
           "  -color <c>\n"
           "         use <c> as a color in -svg instead of the defaults\n"
           "         Examples: black, rgb(148,208,84)\n"
@@ -92,7 +95,11 @@ static void usage(string_t<`H> argv0) __attribute__((noreturn)) {
           "         use <s> as the font-size in points\n"
           "  -d X   show dynamic regions that are >= X (a fraction) of the total heap (def=%g)\n"
           "  -fixed-colors\n"
-          "         use fixed colors for the regions instead of sorting by size\n",
+          "         use fixed colors for the regions instead of sorting by size\n"
+          "  -omit-legend\n"
+          "         do not output the legend (useful in combination with -fixed-colors)\n"
+          "  -omit-gc\n"
+          "         do not put marks where GCs occur\n",
           argv0,
           dyn_threshhold);
   exit(1);
@@ -204,6 +211,9 @@ int main(int argc, string_t<`H> ?`H argv) {
     else if ( strcmp( argv[argn], "-xmaxres" ) == 0 && argn+1 < argc ) {
       XMAXRES = atoi(argv[++argn]);
     }
+    else if ( strcmp( argv[argn], "-max-y" ) == 0) {
+      MAX_Y = atoi(argv[++argn]);
+    }
     else if ( strcmp( argv[argn], "-ev" ) == 0 ) {
       use_events = true;
     }
@@ -212,6 +222,12 @@ int main(int argc, string_t<`H> ?`H argv) {
     }
     else if ( strcmp( argv[argn], "-fixed-colors" ) == 0) {
       fixed_colors = true;
+    }
+    else if ( strcmp( argv[argn], "-omit-legend" ) == 0) {
+      no_legend = true;
+    }
+    else if ( strcmp( argv[argn], "-omit-gc" ) == 0) {
+      omit_gc = true;
     }
     else
       usage(argv[0]);

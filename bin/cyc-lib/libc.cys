@@ -1239,10 +1239,10 @@ locale_t
 lconv
 }
 hstub setlocale {
-  extern char *setlocale (int category, const char *locale);
+  extern "C" char *setlocale (int category, const char *locale);
 }
 hstub localeconv {
-  extern struct lconv *localeconv (void);
+  extern "C" struct lconv *localeconv (void);
 }
 ;
 
