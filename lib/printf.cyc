@@ -991,9 +991,9 @@ int printf(const char ? fmt, ... inject parg_t ap)
   return ans;
 }
 
-static int putc_string(int c, $(char ? @,size_t @)@ sptr_n) {
+static int putc_string(int c, $(char ?NOZEROTERM @,size_t @)@ sptr_n) {
   let &$(sptr,nptr) = sptr_n;
-  char ? s = *sptr;
+  char ?NOZEROTERM s = *sptr;
   size_t n = *nptr;
   if ((s.size == 0) || (n == 0)) return EOF;
   *s = (char)c;
@@ -1002,7 +1002,7 @@ static int putc_string(int c, $(char ? @,size_t @)@ sptr_n) {
   return 1;
 }
 
-int vsnprintf(char ? s, size_t n, const char ? fmt, parg_t ? ap) 
+int vsnprintf(char ?NOZEROTERM s, size_t n, const char ? fmt, parg_t ? ap) 
   __attribute__((format(printf,3,0)))
 {
   int ans;
@@ -1015,19 +1015,19 @@ int vsnprintf(char ? s, size_t n, const char ? fmt, parg_t ? ap)
   return ans;
 }
 
-int snprintf(char ? s, size_t n, const char ? fmt, ... inject parg_t ap) 
+int snprintf(char ?NOZEROTERM s, size_t n, const char ? fmt, ... inject parg_t ap) 
   __attribute__((format(printf,3,4)))
 {
   return vsnprintf(s, n, fmt, ap);
 }
 
-int vsprintf(char ? s, const char ? fmt, parg_t ? ap) 
+int vsprintf(char ?NOZEROTERM s, const char ? fmt, parg_t ? ap) 
   __attribute__((format(printf,2,0)))
 {
   return vsnprintf(s,s.size,fmt,ap);
 }
 
-int sprintf(char ? s, const char ? fmt, ... inject parg_t ap) 
+int sprintf(char ?NOZEROTERM s, const char ? fmt, ... inject parg_t ap) 
   __attribute__((format(printf,2,3)))
 {
   return vsnprintf(s, s.size, fmt, ap);

@@ -925,8 +925,8 @@ glob.h:
 
 // This may need to be written entirely in Cyclone, since it manipulates
 // arrays of paths
-// grp.h:
-// ;
+//grp.h:
+//;
 
 // Not supported yet
 inttypes.h:
@@ -3006,12 +3006,12 @@ cycstub setbuf {
   }
 }
 hstub {
-  extern int snprintf(char ?, size_t, const char ?, ... inject parg_t)
+  extern int snprintf(char ?NOZEROTERM, size_t, const char ?, ... inject parg_t)
     __attribute__((format(printf,3,4)))
     ;
 }
 hstub {
-  extern int sprintf(char ?, const char ?, ... inject parg_t)
+  extern int sprintf(char ?NOZEROTERM, const char ?, ... inject parg_t)
     __attribute__((format(printf,2,3)))
     ;
 }
@@ -3106,12 +3106,12 @@ hstub vscanf {
   //  extern int vscanf(const char *restrict, va_list);
 }
 hstub vsnprintf {
-  extern int vsnprintf(char ?, size_t, const char ?, parg_t ?) 
+  extern int vsnprintf(char ?NOZEROTERM, size_t, const char ?, parg_t ?) 
     __attribute__((format(printf,3,0)))
     ;
 }
 hstub vsprintf {
-  extern int vsprintf(char ?, const char ?, parg_t ?)
+  extern int vsprintf(char ?NOZEROTERM, const char ?, parg_t ?)
     __attribute__((format(printf,2,0)))
     ;
 }
@@ -3850,6 +3850,9 @@ hstub {
 }
 hstub accept {
   extern int accept(int fd, ... inject SA);
+}
+hstub {
+  xtunion exn { extern SocketError };
 }
 cycstub {
   xtunion exn { SocketError };

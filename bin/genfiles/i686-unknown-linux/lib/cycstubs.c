@@ -769,21 +769,22 @@ f1;};struct Cyc_SA_socklenptr_struct{int tag;unsigned int*f1;};struct Cyc_SA_soc
 int tag;unsigned int f1;};struct Cyc_SO_int_struct{int tag;int*f1;};struct Cyc_SO_timeval_struct{
 int tag;struct Cyc_timeval*f1;};struct Cyc_SO_socklenptr_struct{int tag;unsigned int*
 f1;};struct Cyc_SO_socklen_struct{int tag;unsigned int f1;};int Cyc_accept(int fd,
-struct _tagged_arr);int Cyc_bind(int fd,struct _tagged_arr);int Cyc_connect(int fd,
-struct _tagged_arr);int Cyc_getpeername(int fd,struct _tagged_arr);int Cyc_getsockname(
-int fd,struct _tagged_arr);int Cyc_getsockopt(int fd,int level,int optname,struct
-_tagged_arr);int Cyc_recv(int fd,struct _tagged_arr buf,unsigned int n,int flags);int
-Cyc_recvfrom(int fd,struct _tagged_arr buf,unsigned int n,int flags,struct _tagged_arr);
-int Cyc_send(int fd,struct _tagged_arr buf,unsigned int n,int flags);int Cyc_sendto(int
-fd,struct _tagged_arr buf,unsigned int n,int flags,struct _tagged_arr);int Cyc_setsockopt(
-int fd,int level,int optname,struct _tagged_arr);char Cyc_SocketError[16]="\000\000\000\000SocketError\000";
-int accept_in(int,const struct Cyc_sockaddr_in*,unsigned int*);struct _tuple0{void*
-f1;void*f2;};int Cyc_accept(int fd,struct _tagged_arr ap){if(_get_arr_size(ap,
-sizeof(void*))!= 2)(int)_throw((void*)Cyc_SocketError);{struct _tuple0 _tmp45=({
-struct _tuple0 _tmp44;_tmp44.f1=*((void**)_check_unknown_subscript(ap,sizeof(void*),
-0));_tmp44.f2=*((void**)_check_unknown_subscript(ap,sizeof(void*),1));_tmp44;});
-void*_tmp46;struct Cyc_sockaddr_in*_tmp47;void*_tmp48;unsigned int*_tmp49;_LL14:
-_tmp46=_tmp45.f1;if(*((int*)_tmp46)!= 0)goto _LL16;_tmp47=((struct Cyc_SA_sockaddr_in_struct*)
+struct _tagged_arr);extern char Cyc_SocketError[16];int Cyc_bind(int fd,struct
+_tagged_arr);int Cyc_connect(int fd,struct _tagged_arr);int Cyc_getpeername(int fd,
+struct _tagged_arr);int Cyc_getsockname(int fd,struct _tagged_arr);int Cyc_getsockopt(
+int fd,int level,int optname,struct _tagged_arr);int Cyc_recv(int fd,struct _tagged_arr
+buf,unsigned int n,int flags);int Cyc_recvfrom(int fd,struct _tagged_arr buf,
+unsigned int n,int flags,struct _tagged_arr);int Cyc_send(int fd,struct _tagged_arr buf,
+unsigned int n,int flags);int Cyc_sendto(int fd,struct _tagged_arr buf,unsigned int n,
+int flags,struct _tagged_arr);int Cyc_setsockopt(int fd,int level,int optname,struct
+_tagged_arr);char Cyc_SocketError[16]="\000\000\000\000SocketError\000";int
+accept_in(int,const struct Cyc_sockaddr_in*,unsigned int*);struct _tuple0{void*f1;
+void*f2;};int Cyc_accept(int fd,struct _tagged_arr ap){if(_get_arr_size(ap,sizeof(
+void*))!= 2)(int)_throw((void*)Cyc_SocketError);{struct _tuple0 _tmp45=({struct
+_tuple0 _tmp44;_tmp44.f1=*((void**)_check_unknown_subscript(ap,sizeof(void*),0));
+_tmp44.f2=*((void**)_check_unknown_subscript(ap,sizeof(void*),1));_tmp44;});void*
+_tmp46;struct Cyc_sockaddr_in*_tmp47;void*_tmp48;unsigned int*_tmp49;_LL14: _tmp46=
+_tmp45.f1;if(*((int*)_tmp46)!= 0)goto _LL16;_tmp47=((struct Cyc_SA_sockaddr_in_struct*)
 _tmp46)->f1;_tmp48=_tmp45.f2;if(*((int*)_tmp48)!= 1)goto _LL16;_tmp49=((struct Cyc_SA_socklenptr_struct*)
 _tmp48)->f1;_LL15: return accept_in(fd,(const struct Cyc_sockaddr_in*)_tmp47,_tmp49);
 _LL16:;_LL17:(int)_throw((void*)Cyc_SocketError);_LL13:;}}int bind_in(int,const

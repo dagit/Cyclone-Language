@@ -890,34 +890,29 @@ fmt,ap);return ans;}struct _tuple0{struct _tagged_arr*f1;unsigned int*f2;};stati
 int Cyc_putc_string(int c,struct _tuple0*sptr_n){struct _tuple0 _tmpB2;struct
 _tagged_arr*_tmpB3;unsigned int*_tmpB4;struct _tuple0*_tmpB1=sptr_n;_tmpB2=*
 _tmpB1;_tmpB3=_tmpB2.f1;_tmpB4=_tmpB2.f2;{struct _tagged_arr s=*_tmpB3;
-unsigned int n=*_tmpB4;if(_get_arr_size(s,sizeof(char))== 0?1: n == 0)return - 1;({
-struct _tagged_arr _tmpB5=s;char _tmpB6=*((char*)_check_unknown_subscript(_tmpB5,
-sizeof(char),0));char _tmpB7=(char)c;if(_get_arr_size(_tmpB5,sizeof(char))== 1?
-_tmpB6 == '\000'?_tmpB7 != '\000': 0: 0)_throw_arraybounds();*((char*)_tmpB5.curr)=
-_tmpB7;});*_tmpB3=_tagged_arr_plus(s,sizeof(char),1);*_tmpB4=n - 1;return 1;}}int
-Cyc_vsnprintf(struct _tagged_arr s,unsigned int n,struct _tagged_arr fmt,struct
-_tagged_arr ap){int ans;struct _tagged_arr _tmpB8=s;unsigned int _tmpB9=n;struct
-_tuple0 _tmpBA=({struct _tuple0 _tmpBE;_tmpBE.f1=& _tmpB8;_tmpBE.f2=& _tmpB9;_tmpBE;});
-ans=((int(*)(int(*ioputc)(int,struct _tuple0*),struct _tuple0*ioputc_env,struct
-_tagged_arr fmt0,struct _tagged_arr ap))Cyc__IO_vfprintf)(Cyc_putc_string,& _tmpBA,
-fmt,ap);if(0 <= ans)({struct _tagged_arr _tmpBB=_tagged_arr_plus(s,sizeof(char),ans);
-char _tmpBC=*((char*)_check_unknown_subscript(_tmpBB,sizeof(char),0));char _tmpBD='\000';
-if(_get_arr_size(_tmpBB,sizeof(char))== 1?_tmpBC == '\000'?_tmpBD != '\000': 0: 0)
-_throw_arraybounds();*((char*)_tmpBB.curr)=_tmpBD;});return ans;}int Cyc_snprintf(
-struct _tagged_arr s,unsigned int n,struct _tagged_arr fmt,struct _tagged_arr ap){
-return Cyc_vsnprintf(s,n,fmt,ap);}int Cyc_vsprintf(struct _tagged_arr s,struct
+unsigned int n=*_tmpB4;if(_get_arr_size(s,sizeof(char))== 0?1: n == 0)return - 1;*((
+char*)_check_unknown_subscript(s,sizeof(char),0))=(char)c;*_tmpB3=
+_tagged_arr_plus(s,sizeof(char),1);*_tmpB4=n - 1;return 1;}}int Cyc_vsnprintf(
+struct _tagged_arr s,unsigned int n,struct _tagged_arr fmt,struct _tagged_arr ap){int
+ans;struct _tagged_arr _tmpB5=s;unsigned int _tmpB6=n;struct _tuple0 _tmpB7=({struct
+_tuple0 _tmpB8;_tmpB8.f1=& _tmpB5;_tmpB8.f2=& _tmpB6;_tmpB8;});ans=((int(*)(int(*
+ioputc)(int,struct _tuple0*),struct _tuple0*ioputc_env,struct _tagged_arr fmt0,
+struct _tagged_arr ap))Cyc__IO_vfprintf)(Cyc_putc_string,& _tmpB7,fmt,ap);if(0 <= 
+ans)*((char*)_check_unknown_subscript(s,sizeof(char),ans))='\000';return ans;}int
+Cyc_snprintf(struct _tagged_arr s,unsigned int n,struct _tagged_arr fmt,struct
+_tagged_arr ap){return Cyc_vsnprintf(s,n,fmt,ap);}int Cyc_vsprintf(struct
+_tagged_arr s,struct _tagged_arr fmt,struct _tagged_arr ap){return Cyc_vsnprintf(s,
+_get_arr_size(s,sizeof(char)),fmt,ap);}int Cyc_sprintf(struct _tagged_arr s,struct
 _tagged_arr fmt,struct _tagged_arr ap){return Cyc_vsnprintf(s,_get_arr_size(s,
-sizeof(char)),fmt,ap);}int Cyc_sprintf(struct _tagged_arr s,struct _tagged_arr fmt,
-struct _tagged_arr ap){return Cyc_vsnprintf(s,_get_arr_size(s,sizeof(char)),fmt,ap);}
-static int Cyc_putc_void(int c,int dummy){return 1;}struct _tagged_arr Cyc_vrprintf(
-struct _RegionHandle*r1,struct _tagged_arr fmt,struct _tagged_arr ap){int size=((int(*)(
-int(*ioputc)(int,int),int ioputc_env,struct _tagged_arr fmt0,struct _tagged_arr ap))
-Cyc__IO_vfprintf)(Cyc_putc_void,0,fmt,ap)+ 1;struct _tagged_arr s=({unsigned int
-_tmpBF=(unsigned int)size;char*_tmpC0=(char*)_region_malloc(r1,_check_times(
-sizeof(char),_tmpBF + 1));struct _tagged_arr _tmpC2=_tag_arr(_tmpC0,sizeof(char),
-_tmpBF + 1);{unsigned int _tmpC1=_tmpBF;unsigned int i;for(i=0;i < _tmpC1;i ++){
-_tmpC0[i]='\000';}_tmpC0[_tmpC1]=(char)0;}_tmpC2;});Cyc_vsprintf(s,fmt,ap);
-return s;}struct _tagged_arr Cyc_rprintf(struct _RegionHandle*r1,struct _tagged_arr
-fmt,struct _tagged_arr ap){return Cyc_vrprintf(r1,fmt,ap);}struct _tagged_arr Cyc_aprintf(
-struct _tagged_arr fmt,struct _tagged_arr ap){return Cyc_vrprintf(Cyc_Core_heap_region,
-fmt,ap);}
+sizeof(char)),fmt,ap);}static int Cyc_putc_void(int c,int dummy){return 1;}struct
+_tagged_arr Cyc_vrprintf(struct _RegionHandle*r1,struct _tagged_arr fmt,struct
+_tagged_arr ap){int size=((int(*)(int(*ioputc)(int,int),int ioputc_env,struct
+_tagged_arr fmt0,struct _tagged_arr ap))Cyc__IO_vfprintf)(Cyc_putc_void,0,fmt,ap)+ 
+1;struct _tagged_arr s=({unsigned int _tmpB9=(unsigned int)size;char*_tmpBA=(char*)
+_region_malloc(r1,_check_times(sizeof(char),_tmpB9 + 1));struct _tagged_arr _tmpBC=
+_tag_arr(_tmpBA,sizeof(char),_tmpB9 + 1);{unsigned int _tmpBB=_tmpB9;unsigned int i;
+for(i=0;i < _tmpBB;i ++){_tmpBA[i]='\000';}_tmpBA[_tmpBB]=(char)0;}_tmpBC;});Cyc_vsprintf(
+_tagged_ptr_decrease_size(s,sizeof(char),1),fmt,ap);return s;}struct _tagged_arr
+Cyc_rprintf(struct _RegionHandle*r1,struct _tagged_arr fmt,struct _tagged_arr ap){
+return Cyc_vrprintf(r1,fmt,ap);}struct _tagged_arr Cyc_aprintf(struct _tagged_arr fmt,
+struct _tagged_arr ap){return Cyc_vrprintf(Cyc_Core_heap_region,fmt,ap);}

@@ -705,14 +705,14 @@ f1;};struct Cyc_SA_socklenptr_struct{int tag;int*f1;};struct Cyc_SA_socklen_stru
 int tag;int f1;};struct Cyc_SO_int_struct{int tag;int*f1;};struct Cyc_SO_timeval_struct{
 int tag;struct Cyc_timeval*f1;};struct Cyc_SO_socklenptr_struct{int tag;int*f1;};
 struct Cyc_SO_socklen_struct{int tag;int f1;};int Cyc_accept(int fd,struct _tagged_arr);
-int Cyc_bind(int fd,struct _tagged_arr);int Cyc_connect(int fd,struct _tagged_arr);int
-Cyc_getpeername(int fd,struct _tagged_arr);int Cyc_getsockname(int fd,struct
-_tagged_arr);int Cyc_getsockopt(int fd,int level,int optname,struct _tagged_arr);int
-Cyc_recv(int fd,struct _tagged_arr buf,unsigned int n,int flags);int Cyc_recvfrom(int
-fd,struct _tagged_arr buf,unsigned int n,int flags,struct _tagged_arr);int Cyc_send(
-int fd,struct _tagged_arr buf,unsigned int n,int flags);int Cyc_sendto(int fd,struct
-_tagged_arr buf,unsigned int n,int flags,struct _tagged_arr);int Cyc_setsockopt(int fd,
-int level,int optname,struct _tagged_arr);char Cyc_SocketError[16]="\000\000\000\000SocketError\000";
+extern char Cyc_SocketError[16];int Cyc_bind(int fd,struct _tagged_arr);int Cyc_connect(
+int fd,struct _tagged_arr);int Cyc_getpeername(int fd,struct _tagged_arr);int Cyc_getsockname(
+int fd,struct _tagged_arr);int Cyc_getsockopt(int fd,int level,int optname,struct
+_tagged_arr);int Cyc_recv(int fd,struct _tagged_arr buf,unsigned int n,int flags);int
+Cyc_recvfrom(int fd,struct _tagged_arr buf,unsigned int n,int flags,struct _tagged_arr);
+int Cyc_send(int fd,struct _tagged_arr buf,unsigned int n,int flags);int Cyc_sendto(int
+fd,struct _tagged_arr buf,unsigned int n,int flags,struct _tagged_arr);int Cyc_setsockopt(
+int fd,int level,int optname,struct _tagged_arr);char Cyc_SocketError[16]="\000\000\000\000SocketError\000";
 int accept_in(int,const struct Cyc_sockaddr_in*,int*);struct _tuple0{void*f1;void*f2;
 };int Cyc_accept(int fd,struct _tagged_arr ap){if(_get_arr_size(ap,sizeof(void*))!= 
 2)(int)_throw((void*)Cyc_SocketError);{struct _tuple0 _tmp3E=({struct _tuple0 _tmp3D;
