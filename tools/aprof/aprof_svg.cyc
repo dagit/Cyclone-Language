@@ -525,6 +525,11 @@ static int curve_area_cmp(curve_t x, curve_t y) {
 }
 
 static int curve_changes_cmp(curve_t x, curve_t y) {
+#define AREA_THRESH 5.0
+  // only go by changes when the areas are within a certain threshhold
+  if (x->area * AREA_THRESH < y->area) return -1;
+  else if (x->area > y->area * AREA_THRESH) return 1;
+  // now check by number of changes
   if (x->changes_y < y->changes_y) return -1;
   else if (x->changes_y > y->changes_y) return 1;
   /* equal changes in y, secondary compare by area */
@@ -733,8 +738,6 @@ int generate_svg(string_t<`H> file) {
 
   /* sort the curves by area, with bigger curves to be printed
      above smaller curves */
-  if (!omitted("reserved") && env->mem_total->area > 0.0)
-    all_curves = new List(env->mem_total,all_curves);
   if (!omitted("heap") && env->heap_live->area > 0.0)
     all_curves = new List(env->heap_live,all_curves);
   if (!omitted("unique") && env->unique_live->area > 0.0)
@@ -746,6 +749,8 @@ int generate_svg(string_t<`H> file) {
   if (sort_changes)
     all_curves = merge_sort(curve_changes_cmp,all_curves);
   else all_curves = merge_sort(curve_area_cmp,all_curves);
+  if (!omitted("reserved") && env->mem_total->area > 0.0)
+    all_curves = imp_append(all_curves,new List(env->mem_total,NULL));
 
   /* Phase 2: compute the curves */
   Xarray::iter(phase2,(_@)events);
