@@ -363,7 +363,7 @@ int Cyc_Filename_check_suffix(struct _fat_ptr filename,struct _fat_ptr suffix){
 int i=(int)(_get_fat_size(filename,sizeof(char))- 1U);
 int j=(int)(_get_fat_size(suffix,sizeof(char))- 1U);
 while(i >= 0 && j >= 0){
-if((int)((const char*)filename.curr)[i --]!=(int)((const char*)suffix.curr)[j --])return 0;}
+if(({int _Tmp0=(int)*((const char*)_check_fat_subscript(filename,sizeof(char),i --));_Tmp0!=(int)*((const char*)_check_fat_subscript(suffix,sizeof(char),j --));}))return 0;}
 if(j >= 0)return 0;
 return 1;}
 # 75

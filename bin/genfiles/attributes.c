@@ -429,8 +429,8 @@ void*Cyc_Atts_parse_nullary_att(unsigned loc,struct _fat_ptr s){
 static struct Cyc_Absyn_Aligned_att_Absyn_Attribute_struct att_aligned={6,0};
 static struct _tuple11 att_map[19U]={{{_TmpG0,_TmpG0,_TmpG0 + 8U},(void*)& Cyc_Atts_Stdcall_att_val},{{_TmpG1,_TmpG1,_TmpG1 + 6U},(void*)& Cyc_Atts_Cdecl_att_val},{{_TmpG2,_TmpG2,_TmpG2 + 9U},(void*)& Cyc_Atts_Fastcall_att_val},{{_TmpG3,_TmpG3,_TmpG3 + 9U},(void*)& Cyc_Atts_Noreturn_att_val},{{_TmpG4,_TmpG4,_TmpG4 + 6U},(void*)& Cyc_Atts_Const_att_val},{{_TmpG5,_TmpG5,_TmpG5 + 8U},(void*)& att_aligned},{{_TmpG6,_TmpG6,_TmpG6 + 7U},(void*)& Cyc_Atts_Packed_att_val},{{_TmpG7,_TmpG7,_TmpG7 + 7U},(void*)& Cyc_Atts_Shared_att_val},{{_TmpG8,_TmpG8,_TmpG8 + 7U},(void*)& Cyc_Atts_Unused_att_val},{{_TmpG9,_TmpG9,_TmpG9 + 5U},(void*)& Cyc_Atts_Weak_att_val},{{_TmpGA,_TmpGA,_TmpGA + 10U},(void*)& Cyc_Atts_Dllimport_att_val},{{_TmpGB,_TmpGB,_TmpGB + 10U},(void*)& Cyc_Atts_Dllexport_att_val},{{_TmpGC,_TmpGC,_TmpGC + 23U},(void*)& Cyc_Atts_No_instrument_function_att_val},{{_TmpGD,_TmpGD,_TmpGD + 12U},(void*)& Cyc_Atts_Constructor_att_val},{{_TmpGE,_TmpGE,_TmpGE + 11U},(void*)& Cyc_Atts_Destructor_att_val},{{_TmpGF,_TmpGF,_TmpGF + 22U},(void*)& Cyc_Atts_No_check_memory_usage_att_val},{{_TmpG10,_TmpG10,_TmpG10 + 5U},(void*)& Cyc_Atts_Pure_att_val},{{_TmpG11,_TmpG11,_TmpG11 + 14U},(void*)& Cyc_Atts_Always_inline_att_val},{{_TmpG12,_TmpG12,_TmpG12 + 9U},(void*)& Cyc_Atts_No_throw_att_val}};
 # 77
-if((((_get_fat_size(s,sizeof(char))> 4U &&(int)((const char*)s.curr)[0]==95)&&(int)((const char*)s.curr)[1]==95)&&(int)*((const char*)_check_fat_subscript(s,sizeof(char),(int)(_get_fat_size(s,sizeof(char))- 2U)))==95)&&(int)*((const char*)_check_fat_subscript(s,sizeof(char),(int)(_get_fat_size(s,sizeof(char))- 3U)))==95)
-# 79
+if((((_get_fat_size(s,sizeof(char))> 4U &&(int)((const char*)s.curr)[0]==95)&&(int)((const char*)s.curr)[1]==95)&&(int)((const char*)s.curr)[(int)(
+_get_fat_size(s,sizeof(char))- 2U)]==95)&&(int)((const char*)s.curr)[(int)(_get_fat_size(s,sizeof(char))- 3U)]==95)
 s=Cyc_substring(s,2,_get_fat_size(s,sizeof(char))- 5U);{
 int i=0;
 for(1;(unsigned)i < 19U;++ i){

@@ -155,6 +155,7 @@ typedef struct Distance {
   struct Distance *next;
   node_t @target;
   int    dist;
+  bool   associated_ud_sd;
 } distance_t;
 
 
@@ -238,9 +239,9 @@ static void add_type_info(graph_t @g, term_t term) {
   switch (term) {
   case &Unop(Absyn::Numelts,x,_):
     // add term s< MAXINT and term u< MAXINT and 0 u<= term
-    set_distance(g,term,zero(),MAXINT-1,true);
+    //    set_distance(g,term,zero(),MAXINT-1,true);
     set_distance(g,term,zero(),MAXINT-1,false);
-    set_distance(g,zero(),term,0,false);
+    //    set_distance(g,zero(),term,0,true);
     break;
   default: break;
   }
@@ -322,8 +323,19 @@ static int *lookup_dist(node_t @`H source, node_t @`H target, bool is_signed) {
   if (source == target) return &zero;
   distance_t *ds = is_signed ? source->signed_distances : 
     source->unsigned_distances;
-  for (; ds != NULL; ds = ds->next) 
+  for (; ds != NULL; ds = ds->next)
     if (ds->target == target) return &ds->dist;
+  return NULL;
+}
+
+static bool *lookup_dist_flag(node_t @`H source, node_t @`H target, bool is_signed){
+  static int zero = 0;
+  static bool flag = false;
+  if (source == target) return &flag;
+  distance_t *ds = is_signed ? source->signed_distances : 
+    source->unsigned_distances;
+  for (; ds != NULL; ds = ds->next) 
+    if (ds->target == target) return &ds->associated_ud_sd;
   return NULL;
 }
 
@@ -388,7 +400,7 @@ static $(bool, int) is_signed_overflow(int c1, int c2){
 // assumes source and target do not have a distance between them in the
 // graph.  inserts a new distance reflecting source - target <= d.
 static void new_distance(node_t @`H source, node_t @`H target, bool is_signed, int d) {
-  let dist = new Distance{NULL,target,d};
+  let dist = new Distance{NULL,target,d,false};
   if (is_signed) {
     dist->next = source->signed_distances;
     source->signed_distances = dist;
@@ -414,7 +426,7 @@ static void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_s
   let ji_dist = lookup_dist(j,i,is_signed);
   // if  j --n--> i --dist--> j  and n+dist is negative, contradiction.
   if (ji_dist != NULL) {
-    let $(overflow,sum) = is_signed_overflow(*ji_dist,dist);
+    let $(_,sum) = is_signed_overflow(*ji_dist,dist);
     if (sum < 0) throw(&inconsistent); // there is a negative loop 
   }
   for (let k = g->rows; k != NULL; k = k->next) {
@@ -425,7 +437,7 @@ static void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_s
       if (k == l) continue;
       let kl_dist = lookup_dist(k,l,is_signed);
       // if kl_dist is already MININT, no need to update.
-      if (kl_dist != NULL && *kl_dist == MININT) continue;
+      if (kl_dist != NULL && (unsigned)*kl_dist == MININT) continue;
       let jl_dist = lookup_dist(j,l,is_signed);
       if (jl_dist == NULL) continue; // no new path through i->j
       // computing w(kj) = w(ki) + w(ij)
@@ -450,14 +462,24 @@ static void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_s
       let $(final_overflow,sum) = final_sum;
       // either there is no overflow in computing the sums, or there is
       // an underflow, so the true_sum < MININT
+      bool *associated_ud_sd_flag;
+      associated_ud_sd_flag = lookup_dist_flag(k,i,is_signed);
       if (!final_overflow) {
         // old k->l distance is infinite -- try adding a new edge.
         if (kl_dist == NULL) new_distance(k,l,is_signed,sum);
         // old k->l distance is greater than new dist -- update edge.
-        else if (*kl_dist > sum) *kl_dist = sum;
+        else if (*kl_dist > sum) {
+	  *kl_dist = sum;
+	  if (associated_ud_sd_flag != NULL)
+	    *associated_ud_sd_flag = false;
+	}
       } else if (sum < 0) {//underflow happened
 	if (kl_dist == NULL) new_distance(k,l,is_signed,MININT);
-	else *kl_dist = MININT;
+	else {
+	  *kl_dist = MININT;
+	  if (associated_ud_sd_flag != NULL)
+	    *associated_ud_sd_flag = false;
+	}
       }
     }
   }
@@ -475,7 +497,7 @@ static distance_t *copy_distances(graph_t @newg, distance_t *ds) {
   distance_t *res = NULL;
   for (; ds != NULL; ds = ds->next) {
     let t = ds->target->rep;
-    res = new Distance{res,term2node(newg,t),ds->dist};
+    res = new Distance{res,term2node(newg,t),ds->dist,ds->associated_ud_sd};
   }
   return res;
 }
@@ -686,24 +708,32 @@ static $(bool, term_t, int) break_term(graph_t @g, term_t t, bool is_signed){
   switch (t){
   case &Binop(Absyn::Plus,t1,&Uint(c2),_):
     if ((int)c2 >= 0){
-      // want to show that s[t1]+c2 not overflowing, i.e., s[t1] <= MAXINT-c2
-      let dist = lookup_dist(term2node(g,t1),term2node(g,zero()),true);
       if (is_signed){
+	let dist = lookup_dist(term2node(g,t1),term2node(g,zero()),true);
+	// want to show that s[t1]+c2 not overflowing, i.e., s[t1] <= MAXINT-c2
 	if (dist != NULL && *dist <= MAXINT- (int)c2){
 	  return $(true,t1,(int)c2);
 	}
       } else {
-	if (dist != NULL) return $(true,t1,(int)c2);
+	// want to show that u[t1]+c2 not overflowing, i.e., u[t1] <= MAXINT
+	let dist = lookup_dist(term2node(g,t1),term2node(g,zero()),false);
+	if (dist != NULL) {
+	  return $(true,t1,(int)c2);
+	}
       }
     } else {// int(c2) < 0
-      // want to show that s[t1]+c2 not underflowing, i.e., 0-s[t1] <= c2-MININT
-      let dist = lookup_dist(term2node(g,zero()),term2node(g,t1),true);
       if (is_signed){
+	// want to show that s[t1]+c2 not underflowing, i.e., 0-s[t1] <= c2-MININT
+	let dist = lookup_dist(term2node(g,zero()),term2node(g,t1),true);
 	if (dist != NULL && *dist <= (int)(c2-MININT)){
 	  return $(true,t1,(int)c2);
 	}
       } else {
-	if (dist != NULL) return $(true,t1,(int)c2);
+	// want to show that u[t1]+c2 does not underflow, i.e.u[t1] >= -c2
+	let dist = lookup_dist(term2node(g,zero()), term2node(g,t1),false);
+	if (dist != NULL && *dist <=(int)c2) {
+	  return $(true,t1,(int)c2);
+	}
       }
     }
     break;
@@ -753,6 +783,77 @@ static graph_t *break_term_in_graphs(graph_t *`H gs){
   return app_graphs(break_term_in_graph, 0, gs);
 }
 
+static void associate_ud_sd_in_graph(int dummy, graph_t @g){
+  node_t @zero_node = term2node(g,zero());
+  for(let rs = g->rows; rs != NULL; rs = rs->next){
+    bool src_big;
+    bool src_small;
+
+    // checking if src u> MAXINT
+    let dist = lookup_dist(zero_node,rs,false);
+    if (dist != NULL && (unsigned)*dist == MININT)
+      src_big = true;
+    else
+      src_big = false;
+    // checking if src u<= MAXINT
+    let dist = lookup_dist(rs,zero_node,false);
+    if (dist != NULL && *dist <= MAXINT)
+      src_small = true;
+    else
+      src_small = false;
+    for(let uds = rs->unsigned_distances; uds != NULL; uds=uds->next){
+      if (!uds->associated_ud_sd){
+	if (!src_big && src_small) {//src u> MAXINT, check tgt u> MAXINT
+	  let dist = lookup_dist(uds->target,zero_node,false);
+	  if (dist != NULL && *dist <= MAXINT) {
+	    set_distance(g,rs->rep,uds->target->rep,uds->dist,true);
+	    uds->associated_ud_sd = true;
+	  }
+	} else if (src_big && !src_small) {//src u<= MAXINT, check tgt u<= MAXINT
+	  let dist = lookup_dist(zero_node,uds->target,false);
+	  if (dist != NULL && (unsigned)*dist == MININT) {
+	    set_distance(g,rs->rep,uds->target->rep,uds->dist,true);
+	    uds->associated_ud_sd = true;
+	  }
+	}
+      }
+    }
+    // checking if src s>= 0
+    let dist = lookup_dist(zero_node,rs,true);
+    if (dist != NULL && *dist <= 0) 
+      src_big = true;
+    else
+      src_big = false;
+    // checking if src s< 0
+    let dist = lookup_dist(rs,zero_node,true);
+    if (dist != NULL && *dist < 0)
+      src_small = true;
+    else
+      src_small = false;
+    for(let sds = rs->signed_distances; sds != NULL; sds=sds->next) {
+      if (!sds->associated_ud_sd){
+	if (!src_big && src_small){ // src s< 0, check tgt s< 0
+	  let dist = lookup_dist(sds->target,zero_node,true);
+	  if (dist != NULL && *dist < 0) {
+	    set_distance(g,rs->rep,sds->target->rep,sds->dist,false);
+	    sds->associated_ud_sd = true;
+	  }
+	} else if (src_big && !src_small) { //src s>= 0, check tgt s>= 0
+	  let dist = lookup_dist(zero_node,sds->target,true);
+	  if (dist != NULL && *dist <= 0){
+	    set_distance(g,rs->rep,sds->target->rep,sds->dist,false);
+	    sds->associated_ud_sd = true;
+	  }
+	}
+      }
+    }
+  }
+  return;
+}
+
+static graph_t *associate_ud_sd_in_graphs(graph_t *`H gs){
+  return app_graphs(associate_ud_sd_in_graph,0,gs);
+}
 // convert a primitive assertion to a constraint and add it to the graph.
 // returns true if the resulting graph remains consistent, false otherwise.
 // This does not deal with equality constraints -- those should've already
@@ -778,7 +879,7 @@ static void add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
       fallthru;
     case ULte:
       // must check that c2 can be represented by an int.
-      if (c2 <= MAXINT){
+      if (c2 <= (unsigned)MAXINT){
 	// we know that  u[t1]-0 u< c2 and s[t1]-0 < c2
 	set_distance(g,t1,zero(),(int)c2,false);
       }
@@ -807,7 +908,7 @@ static void add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
       if (c1 > MAXINT) {
 	//-u[c1] can't be represented by an integer, but we know that
 	//0-u[t2] <= -u[c1] <= MININT
-	set_distance(g,zero(),t2,-MAXINT,false);
+	set_distance(g,zero(),t2,MININT,false);
       }
       else { 
 	//-u[c1] could be represented by an integer
@@ -907,14 +1008,18 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
     graph_t *gs2 = copy_graphs(gs);
     // compute (gs and a1)
     gs1 = cgraph(gs1,a1);
+    gs1 = associate_ud_sd_in_graphs(gs1);
     gs1 = break_term_in_graphs(gs1);
     // try to weed out graphs through congruence closure
     gs1 = congruence_close_graphs(gs1);
+    gs1 = associate_ud_sd_in_graphs(gs1);
     // compute (gs and a2)
     gs2 = cgraph(gs2,a2);
+    gs2 = associate_ud_sd_in_graphs(gs2);
     gs2 = break_term_in_graphs(gs2); 
     // try to weed out graphs through congruence closure
     gs2 = congruence_close_graphs(gs2);
+    gs2 = associate_ud_sd_in_graphs(gs2);
     // return (gs and a1) or (gs and a2)
     gs = graph_append(gs1,gs2);
     break;
@@ -952,8 +1057,10 @@ static bool consistent(assn_t a) {
     // start with just an empty graph (true) and then add in assertion a
     graph_t *gs = cgraph(true_graph(),a);
     // run congruence closure to weed out graphs
+    gs = associate_ud_sd_in_graphs(gs);
     gs = congruence_close_graphs(gs);
     gs = break_term_in_graphs(gs);
+    gs = associate_ud_sd_in_graphs(gs);
     // if we get back an empty list of disjuncts (false) then
     // the graph is not consistent.
     return (gs != NULL);

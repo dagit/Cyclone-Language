@@ -950,11 +950,11 @@ return t;}}case 4: _Tmp1=((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)t)->f1;_
 # 754
 void*tm2=Cyc_AssnDef_reduce_term(tm,non_esc_subst,esc_subst);
 if(tm!=tm2)return Cyc_AssnDef_unop(p,tm2,tp);else{
-return t;}}case 5: _Tmp1=((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f1;_Tmp3=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f2;_Tmp2=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f3;_Tmp0=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f4;{enum Cyc_Absyn_Primop p=_Tmp1;void*t1=_Tmp3;void*s=_Tmp2;void*tp=_Tmp0;
+return t;}}case 5: _Tmp1=((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f1;_Tmp3=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f2;_Tmp2=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f3;_Tmp0=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f4;{enum Cyc_Absyn_Primop p=_Tmp1;void*t1=_Tmp3;void*s1=_Tmp2;void*tp=_Tmp0;
 # 758
 void*t2=Cyc_AssnDef_reduce_term(t1,non_esc_subst,esc_subst);
-void*s2=Cyc_AssnDef_reduce_term(s,non_esc_subst,esc_subst);
-if(t1!=t2 || s!=s2)return Cyc_AssnDef_binop(p,t2,s2,tp);else{
+void*s2=Cyc_AssnDef_reduce_term(s1,non_esc_subst,esc_subst);
+if(t1!=t2 || s1!=s2)return Cyc_AssnDef_binop(p,t2,s2,tp);else{
 return t;}}default: _Tmp3=((struct Cyc_AssnDef_Var_AssnDef_Term_struct*)t)->f1;{struct Cyc_Absyn_Vardecl*vd=_Tmp3;
 # 763
 if(vd->escapes && esc_subst!=0){
@@ -1029,12 +1029,12 @@ if(vd==x)return newx;
 return t;}case 4: _Tmp2=((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)t)->f1;_Tmp3=(void*)((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)t)->f2;_Tmp1=(void*)((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)t)->f3;{enum Cyc_Absyn_Primop p=_Tmp2;void*t1=_Tmp3;void*tp=_Tmp1;
 # 850
 void*t2=Cyc_AssnDef_subst_term(t1,x,newx);
-if(t!=t2)return Cyc_AssnDef_unop(p,t2,tp);
-return t;}case 5: _Tmp2=((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f1;_Tmp3=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f2;_Tmp1=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f3;_Tmp0=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f4;{enum Cyc_Absyn_Primop p=_Tmp2;void*t=_Tmp3;void*s=_Tmp1;void*tp=_Tmp0;
+if(t1!=t2)return Cyc_AssnDef_unop(p,t2,tp);
+return t;}case 5: _Tmp2=((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f1;_Tmp3=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f2;_Tmp1=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f3;_Tmp0=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f4;{enum Cyc_Absyn_Primop p=_Tmp2;void*t1=_Tmp3;void*s1=_Tmp1;void*tp=_Tmp0;
 # 854
-void*t2=Cyc_AssnDef_subst_term(t,x,newx);
-void*s2=Cyc_AssnDef_subst_term(s,x,newx);
-if(t!=t2 || s!=s2)return Cyc_AssnDef_binop(p,t2,s2,tp);else{
+void*t2=Cyc_AssnDef_subst_term(t1,x,newx);
+void*s2=Cyc_AssnDef_subst_term(s1,x,newx);
+if(t1!=t2 || s1!=s2)return Cyc_AssnDef_binop(p,t2,s2,tp);else{
 return t;}}case 6: _Tmp3=(void*)((struct Cyc_AssnDef_Cast_AssnDef_Term_struct*)t)->f1;_Tmp1=(void*)((struct Cyc_AssnDef_Cast_AssnDef_Term_struct*)t)->f2;{void*tp=_Tmp3;void*tm=_Tmp1;
 # 859
 void*tm2=Cyc_AssnDef_subst_term(tm,x,newx);

@@ -1981,7 +1981,7 @@ _throw(& Cyc_Yystack_overflow_val);}
 yystacksize *=2;
 if(yystacksize > 10000)
 yystacksize=10000;{
-struct _fat_ptr yyss1=({unsigned _Tmp1=(unsigned)yystacksize;_tag_fat(({short*_Tmp2=({struct _RegionHandle*_Tmp3=yyregion;_region_malloc(_Tmp3,_check_times(_Tmp1,sizeof(short)));});({{unsigned _Tmp3=(unsigned)yystacksize;unsigned i;for(i=0;i < _Tmp3;++ i){i <= (unsigned)yyssp_offset?_Tmp2[i]=((short*)yyss.curr)[(int)i]:(_Tmp2[i]=0);}}0;});_Tmp2;}),sizeof(short),_Tmp1);});
+struct _fat_ptr yyss1=({unsigned _Tmp1=(unsigned)yystacksize;_tag_fat(({short*_Tmp2=({struct _RegionHandle*_Tmp3=yyregion;_region_malloc(_Tmp3,_check_times(_Tmp1,sizeof(short)));});({{unsigned _Tmp3=(unsigned)yystacksize;unsigned i;for(i=0;i < _Tmp3;++ i){i <= (unsigned)yyssp_offset?_Tmp2[i]=*((short*)_check_fat_subscript(yyss,sizeof(short),(int)i)):(_Tmp2[i]=0);}}0;});_Tmp2;}),sizeof(short),_Tmp1);});
 # 222
 struct _fat_ptr yyvs1=({unsigned _Tmp1=(unsigned)yystacksize;
 _tag_fat(({struct Cyc_Yystacktype*_Tmp2=({struct _RegionHandle*_Tmp3=yyregion;_region_malloc(_Tmp3,_check_times(_Tmp1,sizeof(struct Cyc_Yystacktype)));});({{unsigned _Tmp3=(unsigned)yystacksize;unsigned i;for(i=0;i < _Tmp3;++ i){i <= (unsigned)yyssp_offset?_Tmp2[i]=*((struct Cyc_Yystacktype*)_check_fat_subscript(yyvs,sizeof(struct Cyc_Yystacktype),(int)i)):(_Tmp2[i]=*((struct Cyc_Yystacktype*)_check_fat_subscript(yyvs,sizeof(struct Cyc_Yystacktype),0)));}}0;});_Tmp2;}),sizeof(struct Cyc_Yystacktype),_Tmp1);});
@@ -2005,10 +2005,10 @@ if(yychar <= 0){
 yychar1=0;
 yychar=0;}else{
 # 282
-yychar1=yychar > 0 && yychar <= 390?(int)*((short*)_check_known_subscript_notnull(Cyc_yytranslate,391U,sizeof(short),yychar)): 335;}
+yychar1=yychar > 0 && yychar <= 390?(int)Cyc_yytranslate[yychar]: 335;}
 # 299 "cycbison.simple"
 yyn +=yychar1;
-if((yyn < 0 || yyn > 7446)||(int)*((short*)_check_known_subscript_notnull(Cyc_yycheck,7447U,sizeof(short),yyn))!=yychar1)goto yydefault;
+if((yyn < 0 || yyn > 7446)||(int)Cyc_yycheck[yyn]!=yychar1)goto yydefault;
 # 302
 yyn=(int)*((short*)_check_known_subscript_notnull(Cyc_yytable,7447U,sizeof(short),yyn));
 # 309
@@ -4193,8 +4193,8 @@ p[1].l.last_column=p[0].l.last_column;}else{
 yyn=(int)*((short*)_check_known_subscript_notnull(Cyc_yyr1,572U,sizeof(short),yyn));
 # 411
 yystate=({int _Tmp1=(int)*((short*)_check_known_subscript_notnull(Cyc_yypgoto,172U,sizeof(short),yyn - 163));_Tmp1 + (int)*((short*)_check_fat_subscript(yyss,sizeof(short),yyssp_offset));});
-if((yystate >= 0 && yystate <= 7446)&&(int)*((short*)_check_known_subscript_notnull(Cyc_yycheck,7447U,sizeof(short),yystate))==(int)((short*)yyss.curr)[yyssp_offset])
-yystate=(int)*((short*)_check_known_subscript_notnull(Cyc_yytable,7447U,sizeof(short),yystate));else{
+if((yystate >= 0 && yystate <= 7446)&&(int)Cyc_yycheck[yystate]==(int)((short*)yyss.curr)[yyssp_offset])
+yystate=(int)Cyc_yytable[yystate];else{
 # 415
 yystate=(int)*((short*)_check_known_subscript_notnull(Cyc_yydefgoto,172U,sizeof(short),yyn - 163));}
 # 417
@@ -4269,7 +4269,7 @@ yyerrhandle:
 if(yyn==-32768)goto yyerrdefault;
 # 525
 yyn +=1;
-if((yyn < 0 || yyn > 7446)||(int)*((short*)_check_known_subscript_notnull(Cyc_yycheck,7447U,sizeof(short),yyn))!=1)goto yyerrdefault;
+if((yyn < 0 || yyn > 7446)||(int)Cyc_yycheck[yyn]!=1)goto yyerrdefault;
 # 528
 yyn=(int)*((short*)_check_known_subscript_notnull(Cyc_yytable,7447U,sizeof(short),yyn));
 if(yyn < 0){
@@ -4306,7 +4306,7 @@ if(token==378)
 return Cyc_Lex_token_string;
 if(token==387)
 return Cyc_Absynpp_qvar2string(Cyc_Lex_token_qvar);{
-int z=token > 0 && token <= 390?(int)*((short*)_check_known_subscript_notnull(Cyc_yytranslate,391U,sizeof(short),token)): 335;
+int z=token > 0 && token <= 390?(int)Cyc_yytranslate[token]: 335;
 if((unsigned)z < 335U)
 return Cyc_yytname[z];
 return _tag_fat(0,0,0);}}

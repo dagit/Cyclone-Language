@@ -754,10 +754,10 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
     let tm2 = reduce_term(tm,non_esc_subst,esc_subst);
     if (tm != tm2) return unop(p,tm2,tp);
     else return t;
-  case &Binop(p,t1,s,tp):
+  case &Binop(p,t1,s1,tp):
     let t2 = reduce_term(t1,non_esc_subst,esc_subst);
-    let s2 = reduce_term(s,non_esc_subst,esc_subst);
-    if (t1 != t2 || s != s2) return binop(p,t2,s2,tp);
+    let s2 = reduce_term(s1,non_esc_subst,esc_subst);
+    if (t1 != t2 || s1 != s2) return binop(p,t2,s2,tp);
     else return t;
   case &Var(vd):
     if (vd->escapes && esc_subst != NULL) {
@@ -848,12 +848,12 @@ term_t subst_term(term_t t, vardecl_t x, term_t newx) {
     return t;
   case &Unop(p,t1,tp):
     let t2 = subst_term(t1,x,newx);
-    if (t != t2) return unop(p,t2,tp);
+    if (t1 != t2) return unop(p,t2,tp);
     return t;
-  case &Binop(p,t,s,tp):
-    let t2 = subst_term(t,x,newx);
-    let s2 = subst_term(s,x,newx);
-    if (t != t2 || s != s2) return binop(p,t2,s2,tp);
+  case &Binop(p,t1,s1,tp):
+    let t2 = subst_term(t1,x,newx);
+    let s2 = subst_term(s1,x,newx);
+    if (t1 != t2 || s1 != s2) return binop(p,t2,s2,tp);
     else return t;
   case &Cast(tp,tm):
     let tm2 = subst_term(tm,x,newx);
