@@ -1019,15 +1019,16 @@ tenv_t<`g,`r> set_encloser(region_t<`r> r, tenv_t<`g,`r2> te, stmt_t s :
 tenv_t<`g,`r> add_region(region_t<`r> r, tenv_t<`g,`r2> te, type_t rgn,
                          bool resetable, bool opened : {`r2} > `r) {
 
-  tvar_t tv;
-  switch (compress(rgn)) {
-  case &VarType(x): tv = x; break;
-  default: tv = env_err("bad add region"); break;
-  }
   let Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
               capability,curr_rgn,flags,_} =
     *get_fenv(te,"add_region");
-  region_order = add_youngest(shared->frgn, region_order, tv, resetable, opened);
+  switch (compress(rgn)) {
+  case &VarType(x): 
+    region_order = add_youngest(shared->frgn, region_order, x, 
+                                resetable, opened);
+    break;
+  default: break;
+  }
   capability = new JoinEff(new List(new AccessEff(rgn),
                                     new List(capability,NULL)));
   let fe =
