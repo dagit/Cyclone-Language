@@ -316,6 +316,8 @@ extern int file_string_write(FILE @, const char ?src, int src_offset,
   // FIX: should be const?
   extern "C" unsigned long strtoul(char @`r, char @`r *, int);
   extern "C" int system(const char @);
+  extern "C" void exit(int) __attribute__((noreturn)) ;
+  extern "C" `a abort() __attribute__((noreturn));
 
 /***** <sys/stat.h> *****/
   extern "C" int mkdir(const char @ pathname, mode_t mode);

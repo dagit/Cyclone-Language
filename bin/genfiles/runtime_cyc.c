@@ -73,7 +73,7 @@ struct Cyc___cycFILE { // must match defn in boot_cstubs.c and boot_cycstubs.cyc
   *Cyc_stderr = &Cyc_stderr_v;
 
 extern int Cyc_main(int argc, struct _dyneither_ptr argv);
-extern int _set_top_handler(); // defined in runtime_exception.c
+extern char *_set_top_handler(); // defined in runtime_exception.c
 extern int _init_regions();    // defined in runtime_memory.c
 extern int _fini_regions();    // defined in runtime_memory.c
 
@@ -81,7 +81,8 @@ int main(int argc, char **argv) {
   // initialize region system
   _init_regions();
   // install outermost exception handler
-  if (_set_top_handler() != 0) return 1;
+/*   if (_set_catchall_handler(&top_handler) != NULL) return 1; */
+  if (_set_top_handler() != NULL) return 1;
   // set standard file descriptors
   Cyc_stdin->file  = stdin;
   Cyc_stdout->file = stdout;

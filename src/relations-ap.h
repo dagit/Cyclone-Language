@@ -19,6 +19,7 @@
 #ifndef RELATIONS_H
 #define RELATIONS_H
 #include "absyn.h"
+#include <cycboot.h> // for FILE
 
 namespace Relations {
 //////////////////////////////////////////////////////////////////////

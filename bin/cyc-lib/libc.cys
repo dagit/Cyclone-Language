@@ -2533,7 +2533,7 @@ cycstub {
     typedef struct __abstractFILE __cFILE;
   }
   abstract struct __cycFILE { // must match defn in c stub
-    Cstdio::__cFILE @file;
+    Cstdio::__cFILE *file;
   };
 }
 hstub {
@@ -2597,8 +2597,13 @@ cycstub fclose {
   namespace Cstdio {
     extern "C" int fclose(__cFILE @);
   }
+  static datatype exn.Failure __fclose_failure =
+    Failure("fclose: FILE already closed");
   int fclose(FILE @f) {
-    return Cstdio::fclose(f->file);
+    if (f->file == NULL) throw &__fclose_failure;
+    int retc = Cstdio::fclose(f->file);
+    f->file = NULL;
+    return retc;
   }
 }
 hstub fdopen {

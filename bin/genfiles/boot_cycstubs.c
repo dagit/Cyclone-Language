@@ -312,21 +312,11 @@ void ** _zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i,const char
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 
-/* Decrease the upper bound on a fat pointer by numelts where sz is
-   the size of the pointer's type.  Note that this can't be a macro
-   if we're to get initializers right. */
-static struct
- _dyneither_ptr _dyneither_ptr_decrease_size(struct _dyneither_ptr x,
-                                            unsigned int sz,
-                                            unsigned int numelts) {
-  unsigned delta = sz * numelts;
-  /* Don't let someone decrease the size so much that it wraps around.
-   * This is crucial to get NULL right. */
-  if (x.last_plus_one - x.base >= delta)
-    x.last_plus_one -= delta;
-  else x.last_plus_one = x.base;
-  return x; 
-}
+/* This is not a macro since initialization order matters.  Defined in
+   runtime_zeroterm.c. */
+extern struct _dyneither_ptr _dyneither_ptr_decrease_size(struct _dyneither_ptr x,
+  unsigned int sz,
+  unsigned int numelts);
 
 /* Allocation */
 extern void* GC_malloc(int);
@@ -428,9 +418,11 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
-
+ struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
+# 168 "core.h"
+extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
 # 38 "cycboot.h"
- int Cyc_open(const char*,int,struct _dyneither_ptr);struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
+int Cyc_open(const char*,int,struct _dyneither_ptr);struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
 # 79
 int Cyc_fclose(struct Cyc___cycFILE*);
 # 84
@@ -462,10 +454,8 @@ int Cyc_putw(int,struct Cyc___cycFILE*);extern char Cyc_FileCloseError[15U];stru
 # 271 "cycboot.h"
 struct Cyc___cycFILE*Cyc_file_open(struct _dyneither_ptr,struct _dyneither_ptr);
 void Cyc_file_close(struct Cyc___cycFILE*);
-# 326
-struct _dyneither_ptr Cyc_getcwd(struct _dyneither_ptr buf,unsigned long size);struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
-# 170 "core.h"
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
+# 328
+struct _dyneither_ptr Cyc_getcwd(struct _dyneither_ptr buf,unsigned long size);
 # 28 "boot_cycstubs.cyc"
 int open_without_mode(const char*,int);
 int open_with_mode(const char*,int,unsigned short);

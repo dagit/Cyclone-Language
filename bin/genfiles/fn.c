@@ -312,21 +312,11 @@ void ** _zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i,const char
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 
-/* Decrease the upper bound on a fat pointer by numelts where sz is
-   the size of the pointer's type.  Note that this can't be a macro
-   if we're to get initializers right. */
-static struct
- _dyneither_ptr _dyneither_ptr_decrease_size(struct _dyneither_ptr x,
-                                            unsigned int sz,
-                                            unsigned int numelts) {
-  unsigned delta = sz * numelts;
-  /* Don't let someone decrease the size so much that it wraps around.
-   * This is crucial to get NULL right. */
-  if (x.last_plus_one - x.base >= delta)
-    x.last_plus_one -= delta;
-  else x.last_plus_one = x.base;
-  return x; 
-}
+/* This is not a macro since initialization order matters.  Defined in
+   runtime_zeroterm.c. */
+extern struct _dyneither_ptr _dyneither_ptr_decrease_size(struct _dyneither_ptr x,
+  unsigned int sz,
+  unsigned int numelts);
 
 /* Allocation */
 extern void* GC_malloc(int);
@@ -428,8 +418,8 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
-# 170 "core.h"
+ struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
+# 168 "core.h"
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};
 # 178 "list.h"
 struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*x);extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};struct Cyc_Fn_Function{void*(*f)(void*,void*);void*env;};
@@ -490,6 +480,6 @@ return((struct Cyc_Fn_Function*(*)(void*(*f)(struct Cyc_Fn_Function*,struct _tup
 struct Cyc_List_List*Cyc_Fn_map_fn(struct Cyc_Fn_Function*f,struct Cyc_List_List*x){
 struct Cyc_List_List*res=0;
 for(0;x != 0;x=x->tl){
-res=({struct Cyc_List_List*_tmpA=_cycalloc(sizeof(*_tmpA));({void*_tmpE=Cyc_Fn_apply(f,x->hd);_tmpA->hd=_tmpE;}),_tmpA->tl=res;_tmpA;});}
-res=Cyc_List_imp_rev(res);
+({struct Cyc_List_List*_tmpF=({struct Cyc_List_List*_tmpA=_cycalloc(sizeof(*_tmpA));({void*_tmpE=Cyc_Fn_apply(f,x->hd);_tmpA->hd=_tmpE;}),_tmpA->tl=res;_tmpA;});res=_tmpF;});}
+({struct Cyc_List_List*_tmp10=Cyc_List_imp_rev(res);res=_tmp10;});
 return res;}

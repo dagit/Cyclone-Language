@@ -66,13 +66,11 @@ typedef int bool;
 #ifndef true
 #define true (1)
 #endif
-extern "C" void exit(int) __attribute__((noreturn)) ;
-extern "C" `a abort() __attribute__((noreturn));
 
 /*** The rest of the declarations are in namespace Core. */
 
 #ifndef _CYC_GENERATE_PRECORE_C_
-#include <cycboot.h>
+// #include <cycboot.h>
 
 /* The rest of these are implemented in Cyclone, in core.cyc. */
 namespace Core {
@@ -90,7 +88,7 @@ typedef struct Opt<`a> *`r opt_t<`a,`r>;
       return a pointer to [t].  The [opt_t] type is useful primarily
       when porting Objective Caml code, which has a corresponding
       type. */
-extern opt_t<`b,`H> opt_map(`b f(`a), opt_t<`a,`r> x);
+extern opt_t<`b,`U> opt_map(`b f(`a), opt_t<`a,`r> x);
   /** [opt_map(f,x)] applies [f] to the value contained in option [x],
       if any, and returns the result as an option; if [x] is NULL,
       [opt_map(f,x)] returns NULL. */

@@ -19,11 +19,11 @@
 // This is the C "runtime library" to be used with the output of the
 // Cyclone to C translator
 
-#include <stdio.h>
+#ifdef CYC_REGION_PROFILE
 #include <stdarg.h>
 #include <signal.h>
 #include <time.h> // for clock()
-#include <limits.h>
+#endif
 
 #include "runtime_internal.h"
 
@@ -47,6 +47,8 @@ extern size_t GC_get_heap_size();
 extern size_t GC_get_free_bytes();
 extern size_t GC_get_total_bytes();
 
+extern void GC_free(void *);
+
 static int region_get_heap_size(struct _RegionHandle *r);
 static int region_get_free_bytes(struct _RegionHandle *r);
 static int region_get_total_bytes(struct _RegionHandle *r);
@@ -63,18 +65,17 @@ void *GC_calloc_atomic(unsigned int n, unsigned int t) {
   // the collector does not zero things when you call malloc atomic...
   void *res = GC_malloc_atomic(p);
   if (res == NULL) {
-    fprintf(stderr,"GC_calloc_atomic failure");
+    errprintf("GC_calloc_atomic failure");
     _throw_badalloc();
   }
   bzero(res,p);
   return res;
 }
 
-#define MAX_ALLOC_SIZE INT_MAX
 void *_bounded_GC_malloc(int n, const char*file, int lineno){
   void * res = NULL;
   if((unsigned)n >= MAX_ALLOC_SIZE){
-    fprintf(stderr, "malloc size ( = %d ) is too big or negative\n",n);
+    errprintf( "malloc size ( = %d ) is too big or negative\n",n);
     _throw_badalloc_fn(file, lineno);
   }else{
     res = GC_malloc(n) ;
@@ -87,7 +88,7 @@ void *_bounded_GC_malloc(int n, const char*file, int lineno){
 void *_bounded_GC_malloc_atomic(int n, const char*file, int lineno){
   void * res = NULL;
   if((unsigned)n >= MAX_ALLOC_SIZE){
-    fprintf(stderr, "malloc size ( = %d ) is too big or negative\n",n);
+    errprintf( "malloc size ( = %d ) is too big or negative\n",n);
     _throw_badalloc_fn(file, lineno);
   }else{
     res = GC_malloc_atomic(n);
@@ -101,7 +102,7 @@ void *_bounded_GC_calloc(unsigned n, unsigned s, const char*file, int lineno){
   unsigned int p = n*s;
   void * res = NULL;
   if(p >= MAX_ALLOC_SIZE){
-    fprintf(stderr, "calloc size ( = %d ) is too big or negative\n",p);
+    errprintf( "calloc size ( = %d ) is too big or negative\n",p);
     _throw_badalloc_fn(file, lineno);
   }else{
     res =GC_calloc(n,s);
@@ -115,7 +116,7 @@ void *_bounded_GC_calloc_atomic(unsigned n,unsigned s,const char*file,int lineno
   unsigned int p = n*s;
   void * res = NULL;
   if(p >= MAX_ALLOC_SIZE){
-    fprintf(stderr, "calloc size ( = %d ) is too big or negative\n",p);
+    errprintf( "calloc size ( = %d ) is too big or negative\n",p);
     _throw_badalloc_fn(file, lineno);
   }else{
     res = GC_calloc(n,s);
@@ -133,7 +134,7 @@ void _profile_free_region_cleanup(struct _RuntimeStack *handler) {
 #endif
 
 void _push_region(struct _RegionHandle * r) {
-  //fprintf(stderr,"pushing region %x\n",(unsigned int)r);  
+  //errprintf("pushing region %x\n",(unsigned int)r);  
   r->s.tag = 1;
 #ifdef CYC_REGION_PROFILE
   r->s.cleanup = _profile_free_region_cleanup;
@@ -145,8 +146,7 @@ void _push_region(struct _RegionHandle * r) {
 
 void _pop_region() {
   if (_top_frame() == NULL || _top_frame()->tag != 1) {
-    fprintf(stderr,"internal error: _pop_region");
-    exit(1);
+    errquit("internal error: _pop_region");
   }
   _npop_frame(0);
 }
@@ -208,7 +208,7 @@ static int *get_refcnt(unsigned char *ptr) {
   if (ptr == NULL) return NULL;
   else {
     int *res = (int *)(ptr - sizeof(int));
-/*     fprintf(stderr,"getting count, refptr=%x, cnt=%x\n",ptr.base,res); */
+/*     errprintf("getting count, refptr=%x, cnt=%x\n",ptr.base,res); */
     return res;
   }
 }
@@ -226,7 +226,7 @@ int Cyc_Core_refptr_count(unsigned char *ptr) {
 struct _dyneither_ptr Cyc_Core_alias_refptr(struct _dyneither_ptr ptr) {
   int *cnt = get_refcnt(ptr.base);
   if (cnt != NULL) *cnt = *cnt + 1;
-/*   fprintf(stderr,"refptr=%x, cnt=%x, updated *cnt=%d\n",ptr.base,cnt, */
+/*   errprintf("refptr=%x, cnt=%x, updated *cnt=%d\n",ptr.base,cnt, */
 /* 	  cnt != NULL ? *cnt : 0); */
   return ptr;
 }
@@ -234,10 +234,10 @@ struct _dyneither_ptr Cyc_Core_alias_refptr(struct _dyneither_ptr ptr) {
 void Cyc_Core_drop_refptr(unsigned char *ptr) {
   int *cnt = get_refcnt(ptr);
   if (cnt != NULL) {
-/*     fprintf(stderr,"refptr=%x, cnt=%x, *cnt=%d\n",ptr.base,cnt,*cnt); */
+/*     errprintf("refptr=%x, cnt=%x, *cnt=%d\n",ptr.base,cnt,*cnt); */
     *cnt = *cnt - 1;
     if (*cnt == 0) { // no more references
-/*       fprintf(stderr,"freeing refptr=%x\n",ptr.base); */
+/*       errprintf("freeing refptr=%x\n",ptr.base); */
 #ifdef CYC_REGION_PROFILE
       unsigned int sz = GC_size(ptr - sizeof(int));
       refcnt_freed_bytes += sz;
@@ -308,7 +308,7 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
   // Note, we call calloc here to ensure we get zero-filled pages
   p = _bounded_GC_calloc(sizeof(struct _RegionPage) + next_size,1,__FILE__, __LINE__);
   if (!p) {
-    fprintf(stderr,"grow_region failure");
+    errprintf("grow_region failure");
     _throw_badalloc();
   }
   p->next = r->curr;
@@ -414,7 +414,7 @@ void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
     refcnt_total_bytes += GC_size(result);
 #endif
     result += sizeof(int);
-/*     fprintf(stderr,"alloc refptr=%x\n",result); */
+/*     errprintf("alloc refptr=%x\n",result); */
     return (void *)result;
   }
 }
@@ -510,7 +510,6 @@ struct _RegionHandle _new_region(const char *rgn_name) {
 // free all the resources associated with a region (except the handle)
 //   (assumes r is not heap or unique region)
 void _free_region(struct _RegionHandle *r) {
-  struct _DynRegionHandle *d;
   struct _RegionPage *p;
 
   /* free pages */
@@ -572,12 +571,12 @@ struct Cyc_Core_NewDynamicRegion Cyc_Core__new_rckey(const char *file,
   struct Cyc_Core_NewDynamicRegion res;
   int *krc = _bounded_GC_malloc(sizeof(int)+sizeof(struct Cyc_Core_DynamicRegion),
 				__FILE__, __LINE__);
-  //fprintf(stderr,"creating rckey.  Initial address is %x\n",krc);fflush(stderr);
+  //errprintf("creating rckey.  Initial address is %x\n",krc);fflush(stderr);
   if (!krc)
     _throw_badalloc();
   *krc = 1;
   res.key = (struct Cyc_Core_DynamicRegion *)(krc + 1);
-  //fprintf(stderr,"results key address is %x\n",res.key);fflush(stderr);
+  //errprintf("results key address is %x\n",res.key);fflush(stderr);
 #ifdef CYC_REGION_PROFILE
   res.key->h = _profile_new_region("dynamic_refcnt",file,func,lineno);
 #else
@@ -598,23 +597,22 @@ void Cyc_Core_free_ukey(struct Cyc_Core_DynamicRegion *k) {
 
 // Drop a reference for a dynamic region, possibly freeing it.
 void Cyc_Core_free_rckey(struct Cyc_Core_DynamicRegion *k) {
-  //fprintf(stderr,"freeing rckey %x\n",k);
+  //errprintf("freeing rckey %x\n",k);
   int *p = ((int *)k) - 1;
-  //fprintf(stderr,"count is address %x, value %d\n",p,*p);
+  //errprintf("count is address %x, value %d\n",p,*p);
   unsigned c = (*p) - 1;
   if (c >= *p) {
-    fprintf(stderr,"internal error: free rckey bad count");
-    exit(1);
+    errquit("internal error: free rckey bad count");
   }
   *p = c;
   if (c == 0) {
-    //fprintf(stderr,"count at zero, freeing region\n");
+    //errprintf("count at zero, freeing region\n");
 #ifdef CYC_REGION_PROFILE
     _profile_free_region(&k->h,NULL,NULL,0);
 #else
     _free_region(&k->h);
 #endif
-    //fprintf(stderr,"freeing ref-counted pointer\n");
+    //errprintf("freeing ref-counted pointer\n");
     GC_free(p);
   }
 }
@@ -841,7 +839,7 @@ static void *_do_profile(void *result, int is_atomic,
 
 void * _profile_GC_malloc(int n, const char *file, const char *func, int lineno) {
   void * result;
-  result =  _bounded_GC_malloc(n,__FILE__, __LINE__,);
+  result =  _bounded_GC_malloc(n,__FILE__, __LINE__);
   if(!result)
     _throw_badalloc();
   return _do_profile(result,0,file,func,lineno);
@@ -886,7 +884,6 @@ static int region_get_heap_size(struct _RegionHandle *r) {
 
 static int region_get_free_bytes(struct _RegionHandle *r) {
   if (r > (struct _RegionHandle *)_CYC_MAX_REGION_CONST) {
-    struct _RegionPage *p = r->curr;
     unsigned free_bytes = r->last_plus_one - r->offset;
     return free_bytes;
   }
@@ -896,7 +893,6 @@ static int region_get_free_bytes(struct _RegionHandle *r) {
 
 static int region_get_total_bytes(struct _RegionHandle *r) {
   if (r > (struct _RegionHandle *)_CYC_MAX_REGION_CONST) {
-    struct _RegionPage *p = r->curr;
     unsigned used_bytes = r->used_bytes;
     unsigned wasted_bytes = r->wasted_bytes;
     unsigned free_bytes = r->last_plus_one - r->offset;

@@ -25,14 +25,39 @@
 // from the Cyclone include file core.h.  Note, it now includes
 // the contents of cyc_include.h
 
+#if defined(GEEKOS)
+
+#include <geekos/setjmp.h>
+#include <geekos/screen.h>  // for error printing
+#include <geekos/kthread.h> // for Exit
+#include <geekos/string.h> // for memset
+
+// #include <limits.h> // for magic numbers
+#define INT_MAX 0x7fffffff
+#define bzero(_addr,_szb) memset(_addr,'\0',_szb)
+
+// error printing functions
+#define errprintf Print
+#define errquit(arg...) { Print(arg); Exit(1); }
+
+#else
+
 #include <setjmp.h> // precore_c.h uses jmp_buf without defining it
+#include <stdio.h>  // for error printing
+#include <limits.h> // for magic numbers
+
+// error printing functions
+#define errprintf(arg...) fprintf(stderr,##arg)
+#define errquit(arg...) { fprintf(stderr,##arg); exit(1); }
+
+#endif
+
+#define MAX_ALLOC_SIZE INT_MAX
 
 /* RUNTIME_CYC defined to prevent including parts of precore_c.h 
    that might cause problems, particularly relating to region profiling */
 #define RUNTIME_CYC
 #include "precore_c.h"
-
-extern void exit(int);
 
 // pushes a frame on the stack
 void _push_frame(struct _RuntimeStack *frame);

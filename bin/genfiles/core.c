@@ -312,21 +312,11 @@ void ** _zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i,const char
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 
-/* Decrease the upper bound on a fat pointer by numelts where sz is
-   the size of the pointer's type.  Note that this can't be a macro
-   if we're to get initializers right. */
-static struct
- _dyneither_ptr _dyneither_ptr_decrease_size(struct _dyneither_ptr x,
-                                            unsigned int sz,
-                                            unsigned int numelts) {
-  unsigned delta = sz * numelts;
-  /* Don't let someone decrease the size so much that it wraps around.
-   * This is crucial to get NULL right. */
-  if (x.last_plus_one - x.base >= delta)
-    x.last_plus_one -= delta;
-  else x.last_plus_one = x.base;
-  return x; 
-}
+/* This is not a macro since initialization order matters.  Defined in
+   runtime_zeroterm.c. */
+extern struct _dyneither_ptr _dyneither_ptr_decrease_size(struct _dyneither_ptr x,
+  unsigned int sz,
+  unsigned int numelts);
 
 /* Allocation */
 extern void* GC_malloc(int);
@@ -428,36 +418,36 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_Core_Opt{void*v;};
-# 93 "core.h"
+ struct Cyc_Core_Opt{void*v;};
+# 91 "core.h"
 struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*x);
-# 97
+# 95
 struct _dyneither_ptr Cyc_Core_new_string(unsigned int);
-# 101
+# 99
 struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned int);
-# 105
+# 103
 int Cyc_Core_true_f(void*);
-# 108
+# 106
 int Cyc_Core_false_f(void*);struct _tuple0{void*f1;void*f2;};
-# 110
+# 108
 void*Cyc_Core_fst(struct _tuple0*);
-# 113
+# 111
 void*Cyc_Core_snd(struct _tuple0*);struct _tuple1{void*f1;void*f2;void*f3;};
-# 116
+# 114
 void*Cyc_Core_third(struct _tuple1*);
-# 119
+# 117
 void*Cyc_Core_identity(void*);
-# 121
+# 119
 int Cyc_Core_intcmp(int,int);
-# 126
+# 124
 int Cyc_Core_charcmp(char,char);
-# 128
+# 126
 int Cyc_Core_ptrcmp(void*,void*);
-# 130
+# 128
 int Cyc_Core_nptrcmp(void*,void*);extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};
-# 148
+# 146
 extern struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val;extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
-# 170
+# 168
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};char Cyc_Core_Invalid_argument[17U]="Invalid_argument";char Cyc_Core_SysError[9U]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[8U]="Failure";char Cyc_Core_Impossible[11U]="Impossible";char Cyc_Core_Not_found[10U]="Not_found";
 # 31 "core.cyc"
 struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found};char Cyc_Core_Unreachable[12U]="Unreachable";
@@ -465,7 +455,7 @@ struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found}
 struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*o){
 if(o == 0)
 return 0;
-return({struct Cyc_Core_Opt*_tmp0=_cycalloc(sizeof(*_tmp0));({void*_tmp4=f(o->v);_tmp0->v=_tmp4;});_tmp0;});}
+return({struct Cyc_Core_Opt*_tmp0=_region_malloc(Cyc_Core_unique_region,sizeof(*_tmp0));({void*_tmp4=f(o->v);_tmp0->v=_tmp4;});_tmp0;});}
 # 40
 struct _dyneither_ptr Cyc_Core_new_string(unsigned int i){
 return({unsigned int _tmp1=i;_tag_dyneither(_cyccalloc_atomic(sizeof(char),_tmp1),sizeof(char),_tmp1);});}

@@ -20,6 +20,7 @@
 #define _TCDECL_H_
 
 #include "absyn.h"
+#include <cycboot.h>
 
 namespace Tcdecl {
   using Absyn;

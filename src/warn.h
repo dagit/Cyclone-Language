@@ -20,6 +20,7 @@
 #define _WARN_H
 
 #include <position.h>
+#include <cycboot.h>
 
 namespace Warn {
   void vwarn(Position::seg_t loc, string_t fmt, parg_t ? ap);

@@ -34,6 +34,7 @@
 #ifndef _BUFFER_H_
 #define _BUFFER_H_
 #include <core.h> // for string_t, mstring_t
+#include <cycboot.h> // for size_t
 
 namespace Buffer {
 

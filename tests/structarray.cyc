@@ -3,6 +3,7 @@
 
 #include <core.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 
 // Ptr contains a size and array with size elements -- because

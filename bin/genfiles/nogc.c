@@ -16,6 +16,8 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
+#include <stddef.h> // for size_t
+
 #ifdef CYC_REGION_PROFILE
 #undef GC_malloc
 #undef GC_malloc_atomic
@@ -23,9 +25,56 @@
 #undef GC_size
 #endif
 
+/****************************************************************************/
+/* Stuff that's shared amongst all the different ways to implement malloc() */
+/****************************************************************************/
+
+/* total number of bytes allocated */
+static size_t total_bytes_allocd = 0;
+
+unsigned int GC_gc_no = 0;
+int GC_dont_expand = 0;
+int GC_use_entire_heap = 0;
+
+size_t GC_get_total_bytes() {
+  return total_bytes_allocd;
+}
+
+void GC_set_max_heap_size(unsigned int sz) {
+  return;
+}
+
+/* These type/macro defns are taken from gc/include/gc.h and must
+   be kept in sync. */
+#   define GC_PROTO(args) args
+typedef unsigned long GC_word;
+typedef void (*GC_warn_proc) GC_PROTO((char *msg, GC_word arg));
+
+void GC_default_warn_proc(char *msg, GC_word arg) {
+  return;
+}
+GC_warn_proc GC_set_warn_proc(GC_warn_proc p) {
+  return GC_default_warn_proc;
+}
+
+typedef void * GC_PTR;
+typedef void (*GC_finalization_proc)
+  	GC_PROTO((GC_PTR obj, GC_PTR client_data));
+#define GC_API extern
+
+GC_API void
+GC_register_finalizer_no_order (GC_PTR obj, GC_finalization_proc fn, GC_PTR cd,
+                                GC_finalization_proc *ofn, GC_PTR *ocd) {
+  // empty
+}
+
+
+#if !defined(GEEKOS)
+
 /* This is the Doug Lea allocator, rather than the platform malloc.  
    At the moment, only allow this for Linux & Apple, though in principle it
    should work in general. */
+
 #if (defined(__linux__) || defined(__APPLE__))
 
 #ifdef CYC_REGION_PROFILE
@@ -66,6 +115,9 @@ size_t GC_get_free_bytes() {
 }
 
 #else
+
+/* This is the platform default allocator (malloc) */
+
 #include <stddef.h> // needed for size_t
 
 static size_t last_alloc_bytes = 0;
@@ -87,12 +139,9 @@ size_t GC_get_free_bytes() {
 
 #endif
 
-/* total number of bytes allocated */
-static size_t total_bytes_allocd = 0;
-
 void *GC_malloc(int x) {
   // FIX:  I'm calling calloc to ensure the memory is zero'd.  This
-  // is because I had to define GC_calloc in runtime_cyc.c
+  // is because I had to define GC_calloc in runtime_memory.c
   void *p = (void*)calloc(sizeof(char),x);
   total_bytes_allocd += malloc_sizeb(p,x);
   return p;
@@ -100,7 +149,7 @@ void *GC_malloc(int x) {
 
 void *GC_malloc_atomic(int x) {
   // FIX:  I'm calling calloc to ensure the memory is zero'd.  This
-  // is because I had to define GC_calloc in runtime_cyc.c
+  // is because I had to define GC_calloc in runtime_memory.c
   void *p = (void*)calloc(sizeof(char),x);
   total_bytes_allocd += malloc_sizeb(p,x);
   return p;
@@ -117,38 +166,80 @@ void GC_free(void *x) {
   free(x);
 }
 
-unsigned int GC_gc_no = 0;
-int GC_dont_expand = 0;
-int GC_use_entire_heap = 0;
+#else /* defined(GEEKOS) */
 
-size_t GC_get_total_bytes() {
-  return total_bytes_allocd;
+#include <stddef.h> // needed for size_t
+#include <geekos/int.h>
+#include <geekos/bget.h>
+
+#if defined(CYC_REGION_PROFILE)
+#error "Region profiling not supported for GeekOS (no GC_size function)"
+#endif
+
+size_t GC_get_heap_size() {
+  bool iflag;
+  bufsize allocsize, freesize, ign2, ign3, ign4;
+
+  iflag = Begin_Int_Atomic();
+  bstats(&allocsize,&freesize,&ign2,&ign3,&ign4);
+  End_Int_Atomic(iflag);
+
+  return allocsize+freesize;
 }
 
-void GC_set_max_heap_size(unsigned int sz) {
-  return;
+size_t GC_get_free_bytes() {
+  bool iflag;
+  bufsize freesize, ign1, ign2, ign3, ign4;
+
+  iflag = Begin_Int_Atomic();
+  bstats(&ign1,&freesize,&ign2,&ign3,&ign4);
+  End_Int_Atomic(iflag);
+
+  return freesize;
 }
 
-/* These type/macro defns are taken from gc/include/gc.h and must
-   be kept in sync. */
-#   define GC_PROTO(args) args
-typedef unsigned long GC_word;
-typedef void (*GC_warn_proc) GC_PROTO((char *msg, GC_word arg));
+void *GC_malloc(int x) {
+  bool iflag;
+  void *result;
 
-void GC_default_warn_proc(char *msg, GC_word arg) {
-  return;
-}
-GC_warn_proc GC_set_warn_proc(GC_warn_proc p) {
-  return GC_default_warn_proc;
+  KASSERT(x > 0);
+
+  iflag = Begin_Int_Atomic();
+  /* FIX: I'm calling bgetz to ensure the memory is zero'd.  This is
+     because I had to define GC_calloc in runtime_memory.c */
+  result = bgetz(x);
+  total_bytes_allocd += x; /* FIX: include overhead? */
+  End_Int_Atomic(iflag);
+
+  return result;
 }
 
-typedef void * GC_PTR;
-typedef void (*GC_finalization_proc)
-  	GC_PROTO((GC_PTR obj, GC_PTR client_data));
-#define GC_API extern
-
-GC_API void
-GC_register_finalizer_no_order (GC_PTR obj, GC_finalization_proc fn, GC_PTR cd,
-                                GC_finalization_proc *ofn, GC_PTR *ocd) {
-  // empty
+void *GC_malloc_atomic(int x) {
+  return GC_malloc(x);
 }
+
+void *GC_realloc(void *x, size_t n) {
+  bool iflag;
+  void *result;
+
+  KASSERT(n > 0);
+
+  iflag = Begin_Int_Atomic();
+  /* FIX: I'm calling bgetz to ensure the memory is zero'd.  This is
+     because I had to define GC_calloc in runtime_memory.c */
+  result = bgetr(x,n);
+  total_bytes_allocd += n; /* FIX: subtract old size, add overhead */
+  End_Int_Atomic(iflag);
+
+  return result;
+}
+
+void GC_free(void *x) {
+  bool iflag;
+  
+  iflag = Begin_Int_Atomic();
+  brel(x);
+  End_Int_Atomic(iflag);
+}
+
+#endif

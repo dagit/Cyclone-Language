@@ -18,8 +18,6 @@
 
 // This is implements the stack used by exceptions and lexical regions.
 
-#include <stdio.h>
-
 #include "runtime_internal.h"
 
 // Need one per thread
@@ -36,8 +34,7 @@ void _npop_frame(unsigned int n) {
   unsigned int i;
   for(i = n; i <= n; i--) {
     if(_current_frame == NULL) {
-      fprintf(stderr,"internal error: empty frame stack\n");
-      exit(1);
+      errquit("internal error: empty frame stack\n");
     } 
     if (_current_frame->cleanup != NULL)
       _current_frame->cleanup(_current_frame);

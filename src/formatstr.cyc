@@ -162,7 +162,7 @@ parse_conversionspecification(region_t<`r> r, string_t s, int i) {
   return rnew(r) Opt(rnew(r) $(flags,width,precision,lenmod,c,i+1));
 }
 
-list_t<type_t> get_format_types(tenv_t te,string_t s,seg_t loc) {
+list_t<type_t> get_format_types(tenv_t te,string_t s,bool isCproto, seg_t loc) {
   // FIX: on error we return NULL.  This will probably lead to
   // cascading errors (e.g., too many arguments to printf).
   let len = strlen(s);
@@ -301,11 +301,18 @@ list_t<type_t> get_format_types(tenv_t te,string_t s,seg_t loc) {
           return NULL;
         }
         // We make this a buffer_t (i.e., NOZEROTERM) because more things
-        // will then match.
-        type_t ptr = fatptr_type(char_type, 
-				   new_evar(&rko,
-                                             new Opt(lookup_type_vars(te))),
-                                    const_tqual(0), false_type);
+        // will then match, but only if Cyclone vararg function
+        type_t ptr;
+	if (!isCproto)
+	  ptr = fatptr_type(char_type, 
+			    new_evar(&rko,
+				     new Opt(lookup_type_vars(te))),
+			    const_tqual(0), false_type);
+	else
+	  ptr = at_type(char_type, 
+			new_evar(&rko,
+				 new Opt(lookup_type_vars(te))),
+			const_tqual(0), true_type);
         typs = new List(ptr,typs);
         break;
       case 'p':
@@ -451,7 +458,7 @@ parse_inputformat(region_t<`r> r, string_t s, int i) {
   }
   return rnew(r)Opt(rnew(r)$(suppress,width,lenmod,c,i+1));
 }
-list_t<type_t> get_scanf_types(tenv_t te,string_t s,seg_t loc) {
+list_t<type_t> get_scanf_types(tenv_t te,string_t s,bool isCproto, seg_t loc) {
   // FIX: on error we return NULL.  This will probably lead to
   // cascading errors (e.g., too many arguments to scanf).
   let len = strlen(s);
@@ -535,15 +542,27 @@ list_t<type_t> get_scanf_types(tenv_t te,string_t s,seg_t loc) {
       //JGM: need to fix and synch up with lib/scanf.cyc
     case 'c':
       let tvs = new Opt(lookup_type_vars(te));
-      typs = new List(fatptr_type(char_type,new_evar(&rko,tvs),
-				    empty_tqual(0),
-				    false_type),typs);
+      type_t ptr;
+      if (!isCproto)
+	ptr = fatptr_type(char_type,new_evar(&rko,tvs),
+			  empty_tqual(0),
+			  false_type);
+      else
+	ptr = at_type(char_type, 
+		      new_evar(&rko,tvs),
+		      empty_tqual(0), false_type);
+      typs = new List(ptr,typs);
       break;
     case 's':
       let tvs = new Opt(lookup_type_vars(te));
       // we use a mbuffer_t here because this matches more things.
-      type_t ptr = fatptr_type(char_type, new_evar(&rko,tvs),
-				 empty_tqual(0), false_type);
+      type_t ptr;
+      if (!isCproto) 
+	ptr = fatptr_type(char_type, new_evar(&rko,tvs),
+			  empty_tqual(0), false_type);
+      else
+	ptr = at_type(char_type, new_evar(&rko,tvs),
+		      empty_tqual(0), true_type);
       typs = new List(ptr,typs);
       break;
     case '[':

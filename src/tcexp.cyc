@@ -335,13 +335,14 @@ void check_format_args(tenv_t te, exp_t fmt,
                        opt_t<list_t<exp_t>> opt_args,
 		       int arg_cnt,
 		       list_t<int> @alias_arg_exps,
-		       list_t<type_t> type_getter(tenv_t,string_t,seg_t)) {
+		       bool isCproto,
+		       list_t<type_t> type_getter(tenv_t,string_t,bool,seg_t)) {
   // check the format string and get the types it requires
   list_t<type_t> desc_types;
   switch (fmt->r) {
   case &Const_e({.String_c = s}): fallthru(s);
   case &Cast_e(_,&Exp(_,&Const_e({.String_c = s}),_,_),_,_):
-    desc_types = type_getter(te,s,fmt->loc); break;
+    desc_types = type_getter(te,s,isCproto,fmt->loc); break;
   default:
     // without a string literal argument, we can't check the args against
     // the format string, but we still have to check they are type-correct.
@@ -1024,12 +1025,12 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	    switch (ft) {
 	    case Printf_ft:
 	      check_format_args(te,fmt_arg,fmt_args,
-				arg_start_pos - 1,alias_arg_exps,
+				arg_start_pos - 1,alias_arg_exps,c_vararg,
 				Formatstr::get_format_types);
 	      break;
 	    case Scanf_ft:
 	      check_format_args(te,fmt_arg,fmt_args,
-				arg_start_pos - 1,alias_arg_exps,
+				arg_start_pos - 1,alias_arg_exps,c_vararg,
 				Formatstr::get_scanf_types);
 	      break;
 	    }

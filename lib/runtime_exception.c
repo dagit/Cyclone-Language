@@ -18,7 +18,6 @@
 
 /* This part of the runtime system implements exceptions. */
 
-#include <stdio.h>
 #include "runtime_internal.h"
 
 // FIX: makes alignment and pointer-size assumptions
@@ -36,6 +35,7 @@ struct _xtunion_struct Cyc_Bad_alloc_struct = { Cyc_Bad_alloc };
 struct _xtunion_struct * Cyc_Bad_alloc_val = &Cyc_Bad_alloc_struct;
 
 // The exception that was thrown
+// (Need one per thread)
 struct _xtunion_struct *_exn_thrown = NULL;
 static const char *_exn_filename = "?";
 static unsigned _exn_lineno = 0;
@@ -43,7 +43,7 @@ static unsigned _exn_lineno = 0;
 // create a new handler, put it on the stack, and return it so its
 // jmp_buf can be filled in by the caller
 void _push_handler(struct _handler_cons * new_handler) {
-  //fprintf(stderr,"pushing handler %x\n",(unsigned int)new_handler);  
+  //errprintf("pushing handler %x\n",(unsigned int)new_handler);  
   new_handler->s.tag = 0;
   new_handler->s.cleanup = NULL;
   _push_frame((struct _RuntimeStack *)new_handler);
@@ -55,15 +55,14 @@ void _npop_handler(int n) { _npop_frame(n); }
 
 void _pop_handler() {
   if (_top_frame() == NULL || _top_frame()->tag != 0) {
-    fprintf(stderr,"internal error: _pop_handler");
-    exit(1);
+    errquit("internal error: _pop_handler");
   }
   _npop_handler(0);
 }
 
 // FIX: would be better to support a real closure here
 static int (*uncaught_fun)() = NULL;
-static struct _handler_cons top_handler;
+struct _handler_cons top_handler;
 static int in_uncaught_fun = 0; // avoid infinite exception chain
 
 const char *Cyc_Core_get_exn_filename() {
@@ -80,19 +79,28 @@ void Cyc_Core_set_uncaught_exn_fun(int f()) {
   uncaught_fun = f;
 }
 
+#define SET_HANDLER(_handler)							\
+  int status = 0;								\
+  if (setjmp(_handler->handler)) status = 1;					\
+  if (status) {									\
+    char *exn_name;								\
+    exn_name = _exn_thrown->tag;						\
+    errprintf("Uncaught exception %s thrown from around %s:%d\n",exn_name,	\
+	      _exn_filename,_exn_lineno);					\
+    return exn_name;								\
+  }										\
+  _push_handler(_handler);							\
+  return NULL;
+
+
+// Used by C code to call Cyclone code
+char *_set_catchall_handler(struct _handler_cons *handler) {
+  SET_HANDLER(handler)
+}
+
 // Called by main to set the topmost exception handler
-int _set_top_handler() {
-  int status = 0;
-  if (setjmp(top_handler.handler)) status = 1;
-  _push_handler(&top_handler);
-  if (status) {
-    char *exn_name;
-    exn_name = _exn_thrown->tag;
-    fprintf(stderr,"Uncaught exception %s thrown from around %s:%d\n",exn_name,
-            _exn_filename,_exn_lineno);
-    return 1;
-  }
-  return 0;
+char *_set_top_handler() {
+  SET_HANDLER((&top_handler))
 }
 
 void* _throw_fn(void* e, const char *filename, unsigned lineno) {
@@ -110,11 +118,13 @@ void* _throw_fn(void* e, const char *filename, unsigned lineno) {
       uncaught_fun();
   }
   longjmp(my_handler->handler,1);
+  return NULL; // unreached
 }
 
 /* re-throw an exception, but keep the filename and lineno info */
 void* _rethrow(void *e) {
   _throw_fn(e, _exn_filename, _exn_lineno);
+  return NULL; // unreached
 }
 void Cyc_Core_rethrow(void *e) {
   _rethrow(e);
@@ -123,17 +133,17 @@ void Cyc_Core_rethrow(void *e) {
 #ifdef throw
 #undef throw
 #endif
-void* throw(void *e) { _throw_fn(e,"?",0); }
+void* throw(void *e) { return _throw_fn(e,"?",0); }
 
 void* _throw_null_fn(const char *filename, unsigned lineno) {
-  _throw_fn(Cyc_Null_Exception_val,filename,lineno);
+  return _throw_fn(Cyc_Null_Exception_val,filename,lineno);
 }
 void* _throw_arraybounds_fn(const char *filename, unsigned lineno) {
-  _throw_fn(Cyc_Array_bounds_val,filename,lineno);
+  return _throw_fn(Cyc_Array_bounds_val,filename,lineno);
 }
 void* _throw_badalloc_fn(const char *filename, unsigned lineno) {
-  _throw_fn(Cyc_Bad_alloc_val,filename,lineno);
+  return _throw_fn(Cyc_Bad_alloc_val,filename,lineno);
 }
 void* _throw_match_fn(const char *filename, unsigned lineno) {
-  _throw_fn(Cyc_Match_Exception_val,filename,lineno);
+  return _throw_fn(Cyc_Match_Exception_val,filename,lineno);
 }

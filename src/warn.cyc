@@ -18,6 +18,7 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 
 #include <position.h>
+#include <cycboot.h>
 
 typedef Position::seg_t seg_t;
 
