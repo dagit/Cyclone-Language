@@ -27,7 +27,7 @@ upon dereference.  This qualifier is not present by default and must be
 put in explicitly.  The qualifier may be abbreviated by using ``\texttt{@}''
 in place of the usual pointer ``\texttt{*}''.  So, for instance,
 the type ``\texttt{int *@notnull}'' can be abbreviated by 
-``\texttt{int @}''.  Currently, the \texttt{@nonnull} qualifier cannot be 
+``\texttt{int @}''.  Currently, the \texttt{@notnull} qualifier cannot be 
 used on pointers with the \texttt{@fat} qualifier.  
 
 \item \texttt{@thin}:  Pointers with this qualifier have the same
@@ -44,7 +44,7 @@ uses three words in total.)  Each dereference of a fat
 pointer incurs both a \texttt{NULL}-check and a bounds check to
 ensure that the pointer points to a valid object.  The 
 \texttt{@fat} qualifier
-cannot be used with the \texttt{@nonnull} or \texttt{@numelts}
+cannot be used with the \texttt{@notnull} or \texttt{@numelts}
 qualifiers (though we expect to change this in the future.)  
 The \texttt{numelts} operation may be applied to fat pointers to
 determine the number of elements in the (forward) sequence that
@@ -96,7 +96,7 @@ used to override the implicit \texttt{@zeroterm} qualfier for
 region into which a pointer points (in this case region \texttt{`r}).
 The qualifier may be abbreviated by simply writing the region name
 after any other Cyclone qualifiers.  
-For instance, the type ``\texttt{int *@nonnull @region{`r}}''
+For instance, the type ``\texttt{int *@notnull @region{`r}}''
 may be abbreviated as ``\texttt{int @`r}''.  The rules about default
 region annotations are context-dependent and therefore described below.
 \end{itemize}

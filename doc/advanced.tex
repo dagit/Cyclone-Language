@@ -24,7 +24,7 @@ such a value, expressions of any appropriate type suffice:
 Optionally, you can explicitly give the type being used for
 \texttt{`a}:
 \begin{verbatim}
-  struct T x = T{<int*@nonnull> new 3, new 4};
+  struct T x = T{<int*@notnull> new 3, new 4};
 \end{verbatim}
 As with other lists of type variables, multiple existentially bound
 types should be comma-separated.
@@ -215,7 +215,7 @@ at the call site.  But with the bound, we know that
 \subsection{Interprocedural Memory Initialization}
 
 We currently have limited support for functions that initialize
-parameters.  if you have an *@nonnulll{1} parameter (pointing into any region),
+parameters.  if you have an *@notnulll{1} parameter (pointing into any region),
 you can use an attribute __attribute__((initializes(1))) (where it's
 the first parameter, use a different number otherwise) to indicate
 that the function initializes through the parameter.
@@ -225,7 +225,7 @@ callee and the call-site.  In the callee, we know the parameter is
 initialized, but not what it points to.  The memory pointed to must be
 initialized before returning.  Care must be taken to reject this code:
 \begin{verbatim}
-void f(int *@nonnull*@nonnull x) __attribute__((initializes(1))) { 
+void f(int *@notnull*@notnull x) __attribute__((initializes(1))) { 
   x = new (new 0); 
   return x; 
 }

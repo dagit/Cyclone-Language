@@ -120,6 +120,18 @@ first because we have already explained their use informally.
       \texttt{e}.
   \end{itemize}
   
+\item \textbf{As patterns}
+  \begin{itemize}
+  \item Syntax: \texttt{p as x} where \texttt{p} is a pattern and \texttt{x}
+    is an identifier.
+  \item Types for match: all types
+  \item Expressions matched: all expressions
+  \item Bindings introduced: the identifier x is bound to the expression
+    being matched, and the expression is further matched against the
+    pattern \texttt{p}.  Thus, a variable pattern is simply shorthand
+    for ``\texttt{_ as x}''.
+  \end{itemize}
+
 \item \textbf{Reference patterns}
   \begin{itemize}
   \item Syntax: \texttt{*x} (i.e., the * character followed by an
@@ -156,7 +168,7 @@ first because we have already explained their use informally.
   \item Bindings introduced: none
   \end{itemize}
   
-\item \textbf{enum patterns}
+\item \textbf{Enum patterns}
   \begin{itemize}
   \item Syntax: an enum constant
   \item Types for match: the enum type containing the constant
@@ -166,9 +178,12 @@ first because we have already explained their use informally.
   
 \item \textbf{Tuple patterns}
   \begin{itemize}
-  \item Syntax: \texttt{\$(p1,...,pn)} where p1,...,pn are patterns
-  \item Types for match: tuple types where pi matches the type of the
-    tuple's ith field \texttt{i} between 1 and \texttt{n}.
+  \item Syntax: \texttt{\$(p1,...,pn[,...])} where p1,...,pn are patterns.
+   The trailing comma and ellipses (\texttt{...}) are optional.
+  \item Types for match: if no ellipses, then tuple types with exactly
+    n fields, where pi matches 
+    the type of the tuple's ith field.  If the ellipses are present,
+    then matches a tuple with at least n fields.  
   \item Expressions matched: tuples where the ith field matches \texttt{pi} for
     \texttt{i} between 1 and \texttt{n}.
   \item Bindings introduced: bindings introduced by \texttt{p1}, \ldots,
@@ -177,22 +192,45 @@ first because we have already explained their use informally.
   
 \item \textbf{Struct patterns}
   \begin{itemize}
-  \item Syntax: There are two forms:
+  \item Syntax: There are three forms:
     \begin{itemize}
-    \item \texttt{X(p1,...,pn)} where \texttt{X} is the name of a struct
+    \item \texttt{X(p1,...,pn[,...])} where \texttt{X} is the name of a struct
       with \texttt{n} fields and p1,...,pn are patterns.  This syntax is
-      shorthand for \verb|X{.f1 = p1, ..., .fn = pn}| where fi is the
-      ith field in X\@.
-    \item \verb|X{.f1 = p1, ..., .fn = pn}| where the fields of X
+      shorthand for \verb|X{.f1 = p1, ..., .fn = pn [,...]}| 
+      where \texttt{fi} is the
+      ith field in \texttt{X}\@.
+    \item \verb|X{.f1 = p1, ..., .fn = pn [,...]}| 
+      where the fields of \texttt{X}
       are f1, ..., fn but not necessarily in that order
+    \item \verb|{{.f1 = p1, ..., .fn = pn} [,...]| which is the same as above
+      except that struct name \texttt{X} has been omitted.
     \end{itemize}
       
   \item Types for match: \texttt{struct X} (or instantiations when
     \texttt{struct X} is polymorphic) such that pi matches the type of
-    fi for \texttt{i} between 1 and \texttt{n}.
+    fi for \texttt{i} between 1 and \texttt{n}.  If the ellipses are not
+    present, then each member of the struct must have a pattern.
   \item Expressions matched: structs where the value in fi matches pi
     for \texttt{i} between 1 and \texttt{n}.
   \item Bindings introduced: bindings introduced by p1,...,pn
+  \end{itemize}
+  
+\item \textbf{Tagged Union patterns}
+  \begin{itemize}
+  \item Syntax: There are two forms:
+    \begin{itemize}
+    \item \verb|X{.fi = p}|
+      where the members of \texttt{X}
+      are f1, ..., fn and fi is one of those members.
+    \item \verb|{{.f1 = p| which is the same as above
+      except that union name \texttt{X} has been omitted.
+    \end{itemize}
+  \item Types for match: \texttt{union X} (or instantiations when
+    \texttt{union X} is polymorphic) such that p matches the type of
+    fi.
+  \item Expressions matched: tagged unions where the last member
+    written was fi and the value of that member matches p.
+  \item Bindings introduced: bindings introduced by p.
   \end{itemize}
   
 \item \textbf{Pointer patterns}
@@ -211,21 +249,17 @@ first because we have already explained their use informally.
   \item Bindings introduced: bindings introduced by p
   \end{itemize}
   
-\item \textbf{datatype patterns}
+\item \textbf{Datatype patterns}
   \begin{itemize}
   \item Syntax: \texttt{X} if X is a variant that carries no values.
-    Else \texttt{X(p1,...,pn)} where X is the name of a variant (that
-    has no existential type parameters) and p1, ..., pn are patterns.
-    If X has existential type parameters, the syntax is
-    \texttt{X<`t1,...,`tm>(p1,...,pn)} for distinct \texttt{`t1}, \ldots,
-    \texttt{`tm}.
-  \item Types for match: \texttt{datatype Foo.X} (or instantiations of
-    it). The number of existential type variables in the pattern must
-    be the number of existential type variables for 
-    \texttt{datatype Foo.X}.
+    Else \texttt{X(p1,...,pn[,...])} where X is the name of a variant 
+    and p1, ..., pn are patterns.  As with tuple and struct patterns,
+    the ellipses are optional.  
+  \item Types for match: \texttt{datatype Foo} (or instantiations of
+    it). 
   \item Expressions matched: If \texttt{X} is non-value-carrying, then
     \texttt{X}.  If \texttt{X} is value-carrying, then values created from
-    the constructor \texttt{X} such that pi matches the ith field.
+    the constructor \texttt{X} such that pi matches the ith field.  
   \item Bindings introduced: bindings introduced by p1,...,pn
   \end{itemize}
 \end{itemize}
@@ -307,8 +341,8 @@ values of the type switched upon (e.g., \texttt{default:},
 \texttt{case _:},
 \texttt{case x:}) must appear last, otherwise later cases would be
 unreachable.  (Note that other types may have even more such patterns.
-For example Pair(x,y) matches all values of type struct Pair {int x;
-int y};).
+For example \texttt{Pair(x,y)} matches all values of type 
+\texttt{struct Pair {int x; int y};}).
 
 \paragraph{Much More Powerful}
 

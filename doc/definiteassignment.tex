@@ -233,13 +233,13 @@ function below is accepted but not the second (the \texttt{list_t}
 typedefs is defined in the \texttt{List} library):
 \begin{verbatim}
   list_t<`a,`H> copy(list_t<`a> x) {
-    struct List *@nonnull result, *@nonnull prev;
+    struct List *@notnull result, *@notnull prev;
 
     if (x == NULL) return NULL;
     result = new List{.hd=x->hd,.tl=NULL};
     prev = result;
     for (x=x->tl; x != NULL; x=x->tl) {
-      struct List *@nonnull temp = malloc(sizeof(struct List));
+      struct List *@notnull temp = malloc(sizeof(struct List));
       temp->hd = x->hd;
       temp->tl = NULL;
       prev->tl = temp;
@@ -249,7 +249,7 @@ typedefs is defined in the \texttt{List} library):
   }  
 
   list_t<`a,`r2> rcopy(region_t<`r2> r2, list_t<`a> x) {
-    struct List *@nonnull result, *@nonnull prev;
+    struct List *@notnull result, *@notnull prev;
 
     if (x == NULL) return NULL;
     result = rnew(r2) List{.hd=x->hd,.tl=NULL};

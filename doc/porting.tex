@@ -147,7 +147,7 @@ options when compiling your code.
 
 \begin{porta}{port:pointers}{Change pointer types to fat pointer types where necessary.}  
 Ideally, you should examine the code and use thin pointers (e.g., \texttt{int*}
-or better \texttt{int*@nonnull}) wherever possible as these require fewer
+or better \texttt{int*@notnull}) wherever possible as these require fewer
 run-time checks and less storage.  However, recall that thin pointers
 do not support pointer arithmetic.  In those situations, you'll need
 to use fat pointers (e.g., \texttt{int*@fat} which can also be written
@@ -187,8 +187,8 @@ so that you can construct an appropriate initial value.  For instance,
 suppose you have the following declarations at top-level:
 \begin{verbatim}
 struct DICT; 
-struct DICT *@nonnull new_dict();
-struct DICT *@nonnull d;
+struct DICT *@notnull new_dict();
+struct DICT *@notnull d;
 void init() {
   d = new_dict();
 }

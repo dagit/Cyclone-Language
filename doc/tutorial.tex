@@ -201,19 +201,19 @@ instead of the more verbose:
 
 
 Another kind of pointer in Cyclone is the non-NULL pointer.
-A non-NULL pointer is indicated by the qualifier \texttt{@nonnull}.  A
-\texttt{@nonnull} pointer is like an unqualified pointer, except that it is
+A non-NULL pointer is indicated by the qualifier \texttt{@notnull}.  A
+\texttt{@notnull} pointer is like an unqualified pointer, except that it is
 guaranteed not to be NULL\@.  This means that when you dereference a
-\texttt{@nonnull} pointer or assign to its contents, a null check is
+\texttt{@notnull} pointer or assign to its contents, a null check is
 sometimes unnecessary.
 
-\texttt{@nonnull} pointers are useful in Cyclone both for efficiency and as
+\texttt{@notnull} pointers are useful in Cyclone both for efficiency and as
 documentation.  This can be seen at work in the standard library,
-where many functions take \texttt{@nonnull} pointers as arguments, or return
+where many functions take \texttt{@notnull} pointers as arguments, or return
 \texttt{@nonull} pointers as results.  For example, the \texttt{getc}
 function that reads a character from a file is declared,
 \begin{verbatim}
-    int getc(FILE *@nonnull);
+    int getc(FILE *@notnull);
 \end{verbatim}
 This says that \texttt{getc} expects to be called with a non-NULL
 pointer to a \texttt{FILE}\@.  Cyclone guarantees that, in fact, when
@@ -232,11 +232,11 @@ In Cyclone, you can still call \texttt{getc} with a possibly-\texttt{NULL}
 that you insert a check before the actual call:
 \begin{verbatim}
     FILE *f = fopen("/etc/passwd","r");
-    int c = getc((FILE *@nonnull)f);
+    int c = getc((FILE *@notnull)f);
 \end{verbatim}
 Here \texttt{f} will be \texttt{NULL} if the file \texttt{/etc/passwd}
 doesn't exist or can't be read.  So, in Cyclone \texttt{f} must be
-cast to \texttt{FILE *@nonnull} before the call to \texttt{getc}.  The
+cast to \texttt{FILE *@notnull} before the call to \texttt{getc}.  The
 cast causes a null check.  If you try to call \texttt{getc} without
 the cast, Cyclone will insert one for you automatically, and warn you
 that it is doing so.
@@ -261,17 +261,17 @@ non-\texttt{NULL} file descriptor:
 then Cyclone no longer issues a warning at the call to \texttt{getc}
 and the resulting code does not have to do a null check.
 
-If you call \texttt{getc} with a \texttt{FILE *@nonnull}, of course, no check
-is required.  For example, \texttt{stdin} is a \texttt{FILE *@nonnull} in
+If you call \texttt{getc} with a \texttt{FILE *@notnull}, of course, no check
+is required.  For example, \texttt{stdin} is a \texttt{FILE *@notnull} in
 Cyclone, so you can simply call \texttt{getc(stdin)}.  In Cyclone you
-will find that many functions return \texttt{*@nonnull} pointers, so many of
+will find that many functions return \texttt{*@notnull} pointers, so many of
 the pointers you deal with will already be \texttt{*@nonull} pointers, and
 neither the caller nor the called function needs to do null
 checks---and this is perfectly safe.
 
-Like \texttt{@fat} pointers, \texttt{@nonnull} pointers are so useful,
+Like \texttt{@fat} pointers, \texttt{@notnull} pointers are so useful,
 Cyclone provides an abbreviation.  Instead of writing \texttt{FILE
-*@nonnull}, you can simply write \texttt{FILE @} when you want to
+*@notnull}, you can simply write \texttt{FILE @} when you want to
 write the type of a non-\texttt{NULL} pointer to a \texttt{FILE}.
 
 \subsubsection*{Zero-Terminated Pointers}
@@ -293,10 +293,10 @@ example.  In Cyclone, the type of C's strings can be written as
 \texttt{char *@zeroterm}.  The \texttt{@zeroterm} qualifier indicates
 that the pointer points to a zero-terminated sequence.  The qualifier
 is orthogonal to other qualifiers, such as \texttt{@fat} or
-\texttt{@nonnull}, so you can freely combine them.
+\texttt{@notnull}, so you can freely combine them.
 
 Because C strings arise so frequently, the types \texttt{char *},
-\texttt{char *@nonnull}, and \texttt{char *@fat} are by default
+\texttt{char *@notnull}, and \texttt{char *@fat} are by default
 qualified with \texttt{@zeroterm}.  You can override the
 \texttt{@zeroterm} qualifier on \texttt{char} pointers by putting in
 an explicit \texttt{@nozeroterm} qualifier (e.g., \texttt{char
@@ -542,7 +542,7 @@ cut down on the region annotations you have to write.
 First off, you can omit the \texttt{@region} qualifier keyword
 and simply write the region name (e.g., \texttt{`r}) as long
 as you put the region name after any other qualifiers.  For
-instance, instead of writing ``\texttt{int *@nonnull @region(`r)}''
+instance, instead of writing ``\texttt{int *@notnull @region(`r)}''
 we can simply write ``\texttt{int @`r}''.  In this document,
 we will use an explicit \texttt{@region} qualifier, but
 you'll find that the libraries and other example programs tend
@@ -1155,7 +1155,7 @@ message.  Consider our earlier example:
 \end{verbatim}
 Suppose that there is no file \texttt{/etc/passwd}; then
 \texttt{fopen} will return NULL, and when \texttt{f} is cast to
-\texttt{FILE *@nonnull}, the implied null check will fail.  The program will
+\texttt{FILE *@notnull}, the implied null check will fail.  The program will
 halt with an error message,
 \begin{verbatim}
     Uncaught exception Null_Exception
@@ -1170,7 +1170,7 @@ matching:
     FILE *f = fopen("/etc/passwd","r");
     int c;
     try {
-      c = getc((FILE *@nonnull)f);
+      c = getc((FILE *@notnull)f);
     }
     catch {
     case &Null_Exception:

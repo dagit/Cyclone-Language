@@ -10,7 +10,7 @@ code easier to write and more readable.  For example,
 \end{verbatim}
 is a fine substitute for
 \begin{verbatim}
-  sometype_t @ x = malloc(sizeof(sometype_t));
+  sometype_t * x = malloc(sizeof(sometype_t));
 \end{verbatim}
 Of course, explicit types can make code more readable, so it is often
 better style not to use inference.
@@ -33,7 +33,8 @@ should):
 
 \begin{itemize}
 \item As part of a top-level variable or function's type.
-\item As part of a \texttt{struct}, \texttt{tunion}, \texttt{xtunion}, or
+\item As part of a \texttt{struct}, \texttt{union}, 
+ \texttt{datatype}, or
   \texttt{typedef} declaration.
 \end{itemize}
 
@@ -43,7 +44,7 @@ a non-nullable pointer (to avoid a compiler warning).  For example:
 \begin{verbatim}
   void f(some_big_type * x, some_big_type @ y) {
   if(x != NULL) {
-    y = (_ @) x;
+    y = (_ *@notnull) x;
   }
 \end{verbatim}
 
@@ -74,9 +75,9 @@ type-checked in order.  This is true, but \emph{in general the
   type-checker's order is unspecified}.
 
 \paragraph{Subtleties}
-In general, inference has subtle interactions with implicit casts
-(such as from \texttt{t@} to \texttt{t*}) and constants that have multiple
-types (such as numeric constants).
+In general, inference has subtle interactions with implicit coercions
+(such as from \texttt{t*@notnull} to \texttt{t*@nullable}) and
+constants that have multiple types (such as numeric constants).
 
 The following is a desirable property: If a program is modified by
 replacing some explicit types with \texttt{_} and the program still
@@ -103,7 +104,7 @@ type-checks, then its meaning is the same.  \emph{This property does
 Here is an example where the function's meaning depends on the order
 the type-checker examines the function:
 \begin{verbatim}
-  void h1(int @ c, int maybe) {
+  void h1(int *@notnull c, int maybe) {
     _ a;
     if(maybe)
       a = c;
@@ -113,7 +114,7 @@ the type-checker examines the function:
 \end{verbatim}
 At first, the type of \texttt{a} is completely unconstrained.  If we
 next consider \texttt{a = c}, we will give \texttt{a} the type of
-\texttt{c}, namely \texttt{int @}, an int pointer that cannot be
+\texttt{c}, namely \texttt{int *@notnull}, an int pointer that cannot be
 \texttt{NULL}.  Clearly that makes the assignment \texttt{a = NULL}
 problematic, but Cyclone allows assignment from nullable pointers to
 non-nullable pointers; it gives a compile-time warning and inserts a
@@ -125,7 +126,7 @@ But what if the type-checker examines \texttt{a = NULL} first?  Then the
 type-checker will constrain \texttt{a}'s type to be a nullable pointer
 to an unconstrained type.  Then the assignment \texttt{a = c} will
 constrain that type to be \texttt{int}, so the type of \texttt{a} is
-\texttt{int *}.  An assignment from \texttt{int @} to \texttt{int *} is
+\texttt{int *}.  An assignment from \texttt{int *@notnull} to \texttt{int *} is
 safe, so there is no warning.  Moreover, the assignment \texttt{a = NULL} is
 not a run-time error.
 

@@ -81,14 +81,14 @@ type of printf in Cyclone is:
 
 \begin{verbatim}
 extern datatype PrintArg<`r::R> {
-  String_pa(const char ? *@nonnull @nozeroterm`r);
+  String_pa(const char ? *@notnull @nozeroterm`r);
   Int_pa(unsigned long);
   Double_pa(double);
   LongDouble_pa(long double);
-  ShortPtr_pa(short *@nonnull `r);
-  IntPtr_pa(unsigned long *@nonnull `r);
+  ShortPtr_pa(short *@notnull `r);
+  IntPtr_pa(unsigned long *@notnull `r);
 };
-typedef datatype PrintArg<`r> *@nonnull `r parg_t<`r>;
+typedef datatype PrintArg<`r> *@notnull `r parg_t<`r>;
 int printf(const char *@fat fmt, ... inject parg_t);
 \end{verbatim}
 
