@@ -36,7 +36,7 @@
 
 #ifndef lint
 /*static char sccsid[] = "from: @(#)net.c	5.5 (Berkeley) 6/1/90";*/
-const char net_rcsid[]ZEROTERM = "$Id: finger.cyc,v 1.10 2002-02-20 20:54:07 jgm Exp $";
+const char net_rcsid[]ZEROTERM = "$Id: finger.cyc,v 1.11 2002-02-21 14:43:16 jgm Exp $";
 #endif /* not lint */
 
 #include <core.h>
@@ -50,19 +50,19 @@ const char net_rcsid[]ZEROTERM = "$Id: finger.cyc,v 1.10 2002-02-20 20:54:07 jgm
 #include <string.h>
 #include <unistd.h>
 
-using Core;
+#ifdef __CYGWIN__
+#ifndef sin_zero
+#define sin_zero __pad   /* this is in Cygwin's in.h */
+#endif
+#endif
 
 int main(int argc, char ?`H argv[]) {
-  FILE *fp;
+  FILE *fpopt, @fp;
   struct in_addr @defaddr = new in_addr { 0 };
   int c, sawret, ateol;
   struct hostent *`main hp, def;
   struct servent *sp;
-#ifdef __APPLE__
-  struct sockaddr_in sn = { 0, 0, 0, {0}, { for i < 8: 0 }};
-#else
-  struct sockaddr_in sn = { 0, 0, {0}, { for i < 8: 0 }};
-#endif
+  struct sockaddr_in sn; 
   int s;
   struct in_addr *@alist = new { NULL };
   char ?`H host;
@@ -72,14 +72,16 @@ int main(int argc, char ?`H argv[]) {
     exit(1);
   }
 
-  host = strdup(strrchr(argv[1], '@'));
+  host = mstrrchr(argv[1], '@');
   if (!host) {
     fprintf(stderr, "%s: no host given\n", argv[0]);
     exit(1);
   }
   *host++ = '\0';
 
-  for (int i=0; i<8; i++) sn.sin_zero[i] = '\0';
+  sn.sin_family = 0;
+  sn.sin_port = 0;
+  for (int i=0; i<sizeof(sn.sin_zero); i++) sn.sin_zero[i] = '\0';
 
   sp = getservbyname("finger", "tcp");
   if (!sp) {
@@ -102,7 +104,7 @@ int main(int argc, char ?`H argv[]) {
     def.h_aliases = NULL;
     hp = &def;
   }
-  sn.sin_family = hp->h_addrtype;
+  sn.sin_family = (short)hp->h_addrtype;
   if (hp->h_length > (int)sizeof(sn.sin_addr)) {
     hp->h_length = sizeof(sn.sin_addr);
   }
@@ -133,12 +135,13 @@ int main(int argc, char ?`H argv[]) {
    * a newline; if followed by a newline character, only output one
    * newline.
    */ 
-  fp = fdopen(s, "r");
-  if (!fp) {
+  fpopt = fdopen(s, "r");
+  if (!fpopt) {
     fprintf(stderr, "%s: fdopen: %s\n", argv[0], strerror(errno));
     close(s);
     exit(1);
   }
+  fp = (FILE @)fpopt;
 
   sawret = 0;
   ateol = 1;
