@@ -1440,19 +1440,21 @@ case Cyc_Absyn_Long_sz: _LL59: return Cyc_Absyn_nlong_typ;case Cyc_Absyn_LongLon
 _LL5A: return Cyc_Absyn_nlonglong_typ;}}}void*Cyc_Absyn_float_typ=(void*)& Cyc_Absyn_FloatType_val;
 void*Cyc_Absyn_double_typ(int b){static struct Cyc_Absyn_DoubleType_struct dt={8,1};
 static struct Cyc_Absyn_DoubleType_struct df={8,0};return(void*)(b?& dt:& df);}extern
-int Sizeof_wchar_t;void*Cyc_Absyn_wchar_typ(){switch(Sizeof_wchar_t){case 1: _LL5C:
-return Cyc_Absyn_schar_typ;case 2: _LL5D: return Cyc_Absyn_sshort_typ;default: _LL5E:
-return Cyc_Absyn_sint_typ;}}static char _tmp80[4]="exn";static struct _dyneither_ptr
-Cyc_Absyn_exn_str={_tmp80,_tmp80,_tmp80 + 4};static struct _tuple0 Cyc_Absyn_exn_name_v={{.Abs_n={
-2,0}},& Cyc_Absyn_exn_str};struct _tuple0*Cyc_Absyn_exn_name=& Cyc_Absyn_exn_name_v;
-static char _tmp81[15]="Null_Exception";static struct _dyneither_ptr Cyc_Absyn_Null_Exception_str={
-_tmp81,_tmp81,_tmp81 + 15};static struct _tuple0 Cyc_Absyn_Null_Exception_pr={{.Abs_n={
-2,0}},& Cyc_Absyn_Null_Exception_str};struct _tuple0*Cyc_Absyn_Null_Exception_name=&
-Cyc_Absyn_Null_Exception_pr;static struct Cyc_Absyn_Datatypefield Cyc_Absyn_Null_Exception_tuf_v={&
-Cyc_Absyn_Null_Exception_pr,0,0,Cyc_Absyn_Extern};struct Cyc_Absyn_Datatypefield*
-Cyc_Absyn_Null_Exception_tuf=& Cyc_Absyn_Null_Exception_tuf_v;static char _tmp82[13]="Array_bounds";
-static struct _dyneither_ptr Cyc_Absyn_Array_bounds_str={_tmp82,_tmp82,_tmp82 + 13};
-static struct _tuple0 Cyc_Absyn_Array_bounds_pr={{.Abs_n={2,0}},& Cyc_Absyn_Array_bounds_str};
+int Wchar_t_unsigned;extern int Sizeof_wchar_t;void*Cyc_Absyn_wchar_typ(){switch(
+Sizeof_wchar_t){case 1: _LL5C: return Wchar_t_unsigned?Cyc_Absyn_uchar_typ: Cyc_Absyn_schar_typ;
+case 2: _LL5D: return Wchar_t_unsigned?Cyc_Absyn_ushort_typ: Cyc_Absyn_sshort_typ;
+default: _LL5E: return Wchar_t_unsigned?Cyc_Absyn_uint_typ: Cyc_Absyn_sint_typ;}}
+static char _tmp80[4]="exn";static struct _dyneither_ptr Cyc_Absyn_exn_str={_tmp80,
+_tmp80,_tmp80 + 4};static struct _tuple0 Cyc_Absyn_exn_name_v={{.Abs_n={2,0}},& Cyc_Absyn_exn_str};
+struct _tuple0*Cyc_Absyn_exn_name=& Cyc_Absyn_exn_name_v;static char _tmp81[15]="Null_Exception";
+static struct _dyneither_ptr Cyc_Absyn_Null_Exception_str={_tmp81,_tmp81,_tmp81 + 15};
+static struct _tuple0 Cyc_Absyn_Null_Exception_pr={{.Abs_n={2,0}},& Cyc_Absyn_Null_Exception_str};
+struct _tuple0*Cyc_Absyn_Null_Exception_name=& Cyc_Absyn_Null_Exception_pr;static
+struct Cyc_Absyn_Datatypefield Cyc_Absyn_Null_Exception_tuf_v={& Cyc_Absyn_Null_Exception_pr,
+0,0,Cyc_Absyn_Extern};struct Cyc_Absyn_Datatypefield*Cyc_Absyn_Null_Exception_tuf=&
+Cyc_Absyn_Null_Exception_tuf_v;static char _tmp82[13]="Array_bounds";static struct
+_dyneither_ptr Cyc_Absyn_Array_bounds_str={_tmp82,_tmp82,_tmp82 + 13};static struct
+_tuple0 Cyc_Absyn_Array_bounds_pr={{.Abs_n={2,0}},& Cyc_Absyn_Array_bounds_str};
 struct _tuple0*Cyc_Absyn_Array_bounds_name=& Cyc_Absyn_Array_bounds_pr;static
 struct Cyc_Absyn_Datatypefield Cyc_Absyn_Array_bounds_tuf_v={& Cyc_Absyn_Array_bounds_pr,
 0,0,Cyc_Absyn_Extern};struct Cyc_Absyn_Datatypefield*Cyc_Absyn_Array_bounds_tuf=&

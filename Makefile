@@ -183,6 +183,7 @@ bin/genfiles/install_path.c: $(CYCDIR)/Makefile.inc
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
 	  echo "char *Ccomp = \"$(CC)\";"; \
 	  echo "char *Cversion = \"$(VERSION)\";"; \
+	  echo "int Wchar_t_unsigned = $(WCHAR_T_UNSIGNED);"; \
 	  echo "int Sizeof_wchar_t = $(SIZEOF_WCHAR_T);") > $@
 
 bin/lib/$(CYCLIB): $(CYC_INCLUDE_H)

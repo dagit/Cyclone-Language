@@ -55,9 +55,11 @@ if [[ "$ac_cv_sizeof_int" != "$ac_cv_sizeof_void_p" ]]; then
   exit
 fi
 
-# The compiler needs to know the size of wchar_t
+# The compiler needs to know the size of wchar_t...
 AC_CHECK_SIZEOF(wchar_t)
 AC_SUBST(ac_cv_sizeof_wchar_t)
+# ... and whether it is unsigned
+AC_C_WCHAR_T_UNSIGNED
 
 # The rest...
 AC_SET_MAKE

@@ -293,21 +293,26 @@ type_t double_typ(bool b) {
   return b ? &dt : &df;
 }
 // from install_path.c
-// FIX: we should determine whether wchar_t is signed
-// FIX: we can't use NONE because in an initialization
-//   wchar_t x[] = L"abc"; the RHS is promoted
-// to signed array, while the LHS is still a NONE array, hence fails
-// typechecking.
 extern "C" {
+  extern int Wchar_t_unsigned;
   extern int Sizeof_wchar_t;
 }
 type_t wchar_typ() {
   switch (Sizeof_wchar_t) {
-  case 1: return schar_typ;
-  case 2: return sshort_typ;
+  case 1:
+    /* This is a problem case.  If wchar_t is declared to be
+       char instead of unsigned char or signed char in the
+       header files, then
+         wchar_t x[] = L"abc";
+       won't typecheck, because wchar_t will be filled in by
+       just char and the type of the initializer will be
+       signed or unsigned char.  Since we have a sign None
+       as well as Signed and Unsigned, this won't work. */
+    return (Wchar_t_unsigned?uchar_typ:schar_typ);
+  case 2: return (Wchar_t_unsigned?ushort_typ:sshort_typ);
   default:
     /* FIX: We're assuming 4 is the max size */
-    return sint_typ;
+    return (Wchar_t_unsigned?uint_typ:sint_typ);
   }
 }
 // exceptions
