@@ -82,7 +82,9 @@ But when pointers are used improperly in C, they cause core dumps and
 buffer overflows.  To prevent this, Cyclone introduces different kinds
 of pointers and either (a) puts some restrictions on how you can use pointers
 of a given kind or (b) places no restrictions but may insert additional
-run-time checks.
+run-time checks.  Here we present a basic overview of Cyclone
+pointers; they are summarized and covered in more detail in
+\hyperref[{sec:pointers}]{Section~\ref{sec:pointers}}.
 
 \subsubsection*{Nullable Pointers}
 
@@ -398,6 +400,80 @@ void Cyc_foo(char *s,int offset){
 Notice that here, the compiler is able to eliminate all bounds
 checks within the loop and still ensure safety.
 
+\subsubsection*{Bounded Pointers}
+
+A pointer type can also specify that it points to a
+sequence of a particular (statically known) length using the
+\texttt{@numelts} qualifier.  For instance, we can write:
+\begin{verbatim}
+void foo(int *@numelts(4) arr);
+\end{verbatim}
+Here, the parameter \texttt{arr} is a pointer to a sequence of four
+integer values.  Both the non-null and nullable pointers (but not fat
+pointers) support explicit sequence bounds that are tracked
+statically.  Indeed, both pointer kinds always have length information
+and when you write ``\texttt{int *}'' this is just short-hand for
+``\texttt{int *@numelts(1)}''.
+
+Bounded pointers are most often constructed from arrays.  In
+particular, whenever you pass an array as a parameter to a function,
+it is \emph{promoted} automatically to a pointer, following the rules
+of C.  This pointer will have a sequence bound that is the same as the
+length of the array.  Here is an example of calling \texttt{foo} above:
+\begin{verbatim}
+int x[4] = {1,2,3,4};
+int y[8] = {1,2,3,4,5,6,7,8};
+foo(x);
+foo(y);
+\end{verbatim}
+In the first call, the parameter \texttt{x} being passed to
+\texttt{foo} is automatically cast to type \texttt{int *@numelts(4)},
+which is the type expected by \texttt{foo}.  In the second case, the
+type of \texttt{y} is automatically cast to type \texttt{int
+*@numelts(8)}.  Since $8 \geq 4$, the call is safe and so Cyclone
+accepts it but emits a warning ``implicit cast to shorter array.''
+Finally, the following code will be rejected, because the pointer
+being passed is too short:
+\begin{verbatim}
+int bad[2] = {1,2};
+foo(bad); // does not typecheck
+\end{verbatim}
+
+Finally, bounded pointers can also be used to correlate a pointer to
+an array whose length is not known statically with a variable that
+defines it.  For example, C programmers often write code like the
+following:
+\begin{verbatim}
+  int sum(int num, int *p) {
+    int a = 0;
+    for (unsigned i = 0; i < num; i++) 
+      a += p[i];
+  }
+\end{verbatim}
+Here, \texttt{num} is the length of the array pointed at by
+\texttt{p}.  In Cyclone, this relationship can be expressed by giving
+\texttt{sum} the following type (the body of the function is the
+same):
+\begin{verbatim}
+int sum(tag_t<`n> num, 
+        int *@notnull @numelts(valueof(`n)) p) {
+\end{verbatim}
+The type of \texttt{num} is specified as \texttt{tag_t<`n>}.  This
+simply means that \texttt{num} holds an integer value, called \texttt{`n},
+and the number of elements of \texttt{p} is equal to \texttt{n}.  
+This form of dependency is common enough that it can be abbreviated
+as follows:
+\begin{verbatim}
+  int sum(tag_t num, int p[num]);
+\end{verbatim}
+and the compiler will fill in the missing information.
+
+A bounded pointer paired with a \texttt{tag_t} is quite similar
+to a fat pointer.  Indeed, you can convert between the two using the
+library functions \texttt{mkfat} and \texttt{mkthin}.  See
+\hyperref[{sec:libraries}]{Section~\ref{sec:libraries}} for a further
+description.
+
 \subsubsection*{Initializing Pointers}
 
 Pointers must be initialized before they are used to ensure that unknown
@@ -406,27 +482,9 @@ variables that have pointer type, as well for arrays, elements of arrays,
 and for fields in structures.  Conversely, data that does not have pointer
 type need not be initialized before it is used, since doing so cannot result
 in a violation of safety.  This decision adheres to the philosophy of C, but
-diverges from that of traditional type-safe languages like Java and ML.
-
-\subsubsection*{Other features of pointers}
-
-There's much more to Cyclone pointers than we've described here.  
-
-In particular, a pointer type can also specify that it points to a
-sequence of a particular (statically known) length using the
-\texttt{@numelts} qualifier.  For instance, we can write:
-\begin{verbatim}
-void foo(int *@numelts(4) arr);
-\end{verbatim}
-Here, the parameter \texttt{arr} is a pointer to a sequence of
-four integer values.  Both the non-null and nullable pointers
-support explicit sequence bounds that are tracked statically.
-Indeed, both pointer kinds always have length information and
-when you write ``\texttt{int *}'' this is just short-hand for
-``\texttt{int *@numelts(1)}''.
-
-We explain pointers in more detail in
-\hyperref[{sec:pointers}]{Section~\ref{sec:pointers}}.
+diverges from that of traditional type-safe languages like Java and
+ML.  The rules for initialization of pointers used by Cyclone are
+described in \hyperref[{sec:definite}]{Section~\ref{sec:definite}}.
 
 \subsection{Regions}
 \label{sec:tut-regions}
@@ -476,8 +534,8 @@ a pointer to an object can only be dereferenced if that object
 has not been deallocated.  
 
 Cyclone achieves this by assigning each object a symbolic
-\emph{region} that corresponds to the lexical block in which the
-object is declared.  Cyclone also tracks, for every pointer, what
+\emph{region} that corresponds to the area of memory in which the
+object is allocated.  Cyclone also tracks, for every pointer, what
 region it points into.  The region pointed to can be written as part
 of the pointer type, but usually the region can be omitted---the
 compiler is smart enough to discover the region automatically in many
@@ -492,8 +550,11 @@ pointer into region \texttt{`newPoint}.  The full Cyclone type of
 \texttt{\&result}, with the explicit region, is \texttt{struct Point
 * @region(`newPoint)}.
 
+A region that corresponds to a lexical block, like an activation
+record, is referred to as a \emph{stack region}, since it corresponds
+to a piece of the runtime stack.
 When control flow exits a block, the storage (\emph{i.e.}, 
-the region) for that 
+the stack region) for that 
 block is deallocated.  Cyclone keeps track of the set of regions that
 are allocated and deallocated at every control-flow point and ensures
 that you only dereference pointers to allocated regions.  For example,
@@ -547,16 +608,16 @@ First off, you can omit the \texttt{@region} qualifier keyword
 and simply write the region name (e.g., \texttt{`r}) as long
 as you put the region name after any other qualifiers.  For
 instance, instead of writing ``\texttt{int *@notnull @region(`r)}''
-we can simply write ``\texttt{int @`r}''.  In this document,
-we will use an explicit \texttt{@region} qualifier, but
-you'll find that the libraries and other example programs tend
-to use the abbreviations.  
+we can simply write ``\texttt{int @`r}''.  For clarity,
+we will often use an explicit \texttt{@region} qualifier, but
+you'll find that the libraries and other example programs frequently
+use the abbreviations.  
 
 In addition, Cyclone often figures out the region of a pointer
 without the programmer providing the information.  This is called {\em
 region inference}.  For instance, we can rewrite the function
 \texttt{f} above without any region annotations, and without 
-labelling the blocks:
+labeling the blocks:
 \begin{verbatim}
 1 int f() {
 2    int x = 0;
@@ -576,14 +637,20 @@ region annotations into the code to convince the type-checker that
 something points into a particular region, or that two things point
 into the same region.  In addition, it is sometimes useful to put in
 the region annotations for documentation purposes, or to make type
-errors a little less cryptic.
+errors less cryptic.  See
+Section~\hyperref[{sec:typeinference}]{Section~\ref{sec:typeinference}}
+for more information about region inference.
+
 
 You need to understand a few more details about regions to
-be an effective Cyclone programmer:  the heap region, growable
-regions, region polymorphism, dynamic regions, and default region 
+be an effective Cyclone programmer:  the heap region, LIFO
+regions, region polymorphism, and default region 
 annotations for
 function parameters.  The following sections give a brief overview
-of these details.
+of these topics.  Information about additional region-based
+constructs, including the unique and reference-counted regions, and
+dynamic regions, can be found in
+\hyperref[{sec:regions}]{Section~\ref{sec:regions}}.
 
 \subsubsection*{The Heap Region}
 
@@ -622,17 +689,21 @@ struct Point *@region(`H) good_newPoint(int x,int y) {
 }
 \end{verbatim}
 
-\subsubsection*{Growable Regions}
+\subsubsection*{LIFO Regions}
 
 Storage on the stack is implicitly allocated and recycled when you
 enter and leave a block.  Storage in the heap is explicitly allocated
 via \texttt{new} or \texttt{malloc}, but there is no support in
 Cyclone for explicitly freeing an object in the heap.  The reason is
-that Cyclone cannot accurately track the lifetimes of individual
-objects within the heap, so it can't be sure whether dereferencing a
+that Cyclone cannot in general track the lifetimes of individual
+objects within the heap accurately, so it can't be sure whether dereferencing a
 pointer into the heap would cause problems.  Instead, unless otherwise
 specified, a conservative
 garbage collector is used to reclaim the data allocated in the heap.
+We also support \emph{unique pointers} and \emph{reference-counted
+  pointers} that programmers can safely free manually, but we defer
+discussion of these features until
+\hyperref[{sec:regions}]{Section~\ref{sec:regions}}.
 
 Using a garbage collector to recycle memory is the right thing to do
 for most applications.  For instance, the Cyclone compiler uses
@@ -642,22 +713,22 @@ can introduce pauses in the program, and as a general purpose memory
 manager, might not be as space- or time-efficient as routines tailored
 to an application.
 
-To address these applications, Cyclone provides support for \emph{growable
-regions} and \emph{dynamic regions}.  A growable region is similar to the 
-region associated with
-a code block.  In particular, when you execute:
+To address these applications, Cyclone provides support for \emph{LIFO
+regions}.  A LIFO region is similar to a stack region in that its
+lifetime is lexically-scoped (last-in-first-out, or LIFO) but permits
+dynamic allocation.  Consider the following syntax:
 \begin{verbatim}
 { region<`r> h;
    ...
 }
 \end{verbatim}
-this declares a new region \texttt{`r} along with a \emph{region handle}
-\texttt{h}.  The handle can be used for dynamically allocating objects within
-the region \texttt{`r}.  All of the storage for
+This declares a new region \texttt{`r} along with a \emph{region handle}
+\texttt{h}.  The handle can be used for dynamically-allocating objects within
+the region \texttt{`r}.  Like a stack region, all of the storage for
 the region is deallocated at the point of the closing brace.  
-Unlike block
-regions, the number (and size) of objects that you allocate into
-the region is not fixed at compile time.  In this respect, growable
+Unlike stack
+regions, the number (and size) of objects that you allocate into a LIFO
+region is not fixed at compile time.  In this respect, LIFO
 regions are more like the heap.  You can use the \texttt{rnew(h)} and
 \texttt{rmalloc(h,...)} operations to allocate objects within a growable
 region, where \texttt{h} is the handle for the region.
@@ -682,89 +753,114 @@ into the region \texttt{`r} using the supplied handle.
 After processing the array, we exit the region which deallocates
 the array, and then return the calculated result.
 
-It is worth remarking that the heap is really just a growable region
-with global scope, and you can use the global variable 
-\texttt{Core::heap_region}
-as a handle on the heap.  Indeed, \texttt{new} and \texttt{malloc(...)}
-are just abbreviations for \texttt{rnew(Core::heap_region)} and
-\texttt{rmalloc(Core::heap_region,...)} respectively.  
-
-\subsubsection*{Dynamic Regions}
-
-\emph{This section is out of date.  The new interface for dynamic
-regions is discussed in Section~\ref{sec:dynamic-regions}.}
-
-Block regions and growable regions allow you to create arenas that
-are lexically scoped.  The lifetimes of these regions begin and end
-in a last-in-first-out (LIFO) manner that follows the block structure
-of the code.  They are particularly good for allocating temporary
-data during a computation.  But they are not so good when we cannot
-statically bound the lifetime of an object that we wish to allocate.
-
-For example, consider an event loop where each event contains some
-data that should be passed to the event handler when the event is
-triggered.  And assume that the event handler wishes to deallocate
-the data when it is invoked.  Since we cannot determine when (or even
-if) the event handler will be invoked, we cannot statically determine
-the lifetime of its associated data.
-
-In these situations, you can use a \emph{dynamic region}.  A dynamic
-region can be deallocated at (almost) any point within a program.
-However, before the data within a dynamic region can be accessed
-and before you can allocate new data into a dynamic region, the
-region must be \emph{opened}.  When you open a dynamic region, this
-checks that the region has not been deallocated, and also prevents
-someone from deallocating the region as long as it is open.  In
-other words, once open, you are free to access or allocate data 
-within the region, but you cannot free the region.  
-
-If you attempt to open a dynamic region that has already been freed, then
-an exception will be thrown.  Dually, if you attempt to free a
-dynamic region that is currently open, then an exception will be
-thrown.  
-
-A dynamic region is created as follows:
+LIFO regions are particularly useful in this circumstance; i.e. when
+you want the result of a function call to be allocated in the caller,
+but you don't know how much space you'll need.l An another example,
+consider the following usage of the Cyclone library function
+\texttt{rprintf}:
 \begin{verbatim}
-  let NewRegion{<`d> dh} = Core::rnew_dynregion(rh);
-\end{verbatim}
-where \texttt{rh} is a handle for a region \texttt{`r}, \texttt{`d} is
-the name of the new dynamic region, and \texttt{dh} is the dynamic region handle.
-The dynamic region handle \texttt{dh} has type \texttt{dynregion_t<`d,`r>}.
-We say that it is a handle for \texttt{`d} and is contained in the
-region \texttt{`r}.
-
-To access or allocate data within a dynamic region, you must
-open the region as follows:
-\begin{verbatim}
-  { region sh = open(dh);
-    ...
+  { region<`r> h;
+    char ?`H s = get_username();
+    char ?`r z = rprintf(h,"hello %s\n");
+    emit(z);
   }
 \end{verbatim}
-In this case, the dynamic region handle \texttt{dh} is opened and we
-are given a \emph{static} region handle \texttt{sh}.  The region
-remains opened throughout the scope of the static region handle.
-That is, the code in the curly braces (\texttt{...}) can access
-the region, but outside the curly braces, the data within the
-region may not be accessed.  The static region
-handle \texttt{sh} can be used to allocate data within the dynamic 
-region \texttt{`d}.
+After allocating the region and acquring a user's name, the region
+handle is passed to the library function \texttt{rprintf}.
+\texttt{rprintf} is like \texttt{sprintf}, except that it does not
+print to a fixed-sized buffer; instead it allocates a buffer in a
+region, places the formatted output in the buffer, and returns a
+pointer to the buffer.  In the example above, \texttt{z} is
+initialized with a pointer to the string ``hello'' followed by the
+user's name; \texttt{z} is allocated in \texttt{h}'s region.  Unlike
+\texttt{sprintf}, there is no risk of a buffer overflow, and unlike
+\texttt{snprintf}, there is no risk of passing a buffer that is too
+small.  Moreover, the allocated buffer will be freed when the region
+goes out of scope, just as a stack-allocated buffer would be.
 
-If the region \texttt{`d} has already been freed, then the 
-\texttt{open} will fail by throwing the exception \texttt{Core::Open_Region}.
+Finally, it is worth remarking that it may help to think of the heap
+as just a LIFO region with unbounded scope.  Indeed, you can use the
+global variable \texttt{Core::heap_region} as a handle on the heap,
+and \texttt{new} and \texttt{malloc(...)}  are just abbreviations for
+\texttt{rnew(Core::heap_region)} and
+\texttt{rmalloc(Core::heap_region,...)} respectively.
 
-You can free a dynamic region (as long as it is not open) by 
-calling the following function and passing in the dynamic
-region handle:
-\begin{verbatim}
-  Core::free_dynregion(dh);
-\end{verbatim}
-If the dynamic region has already been freed or if it is currently
-open, the \texttt{free_dynregion} will throw the exception
-\texttt{Core::Free_Region}.
+%% \subsubsection*{Dynamic Regions}
 
-The dynamic region handle \texttt{dh} is contained in the region
-\texttt{`r}.  When \texttt{`r} is deallocated, then \texttt{dh}
-becomes inaccessible and thus \texttt{`d} is deallocated as well.  
+%% \emph{This section is out of date.  The new interface for dynamic
+%% regions is discussed in Section~\ref{sec:dynamic-regions}.}
+
+%% Block regions and growable regions allow you to create arenas that
+%% are lexically scoped.  The lifetimes of these regions begin and end
+%% in a last-in-first-out (LIFO) manner that follows the block structure
+%% of the code.  They are particularly good for allocating temporary
+%% data during a computation.  But they are not so good when we cannot
+%% statically bound the lifetime of an object that we wish to allocate.
+
+%% For example, consider an event loop where each event contains some
+%% data that should be passed to the event handler when the event is
+%% triggered.  And assume that the event handler wishes to deallocate
+%% the data when it is invoked.  Since we cannot determine when (or even
+%% if) the event handler will be invoked, we cannot statically determine
+%% the lifetime of its associated data.
+
+%% In these situations, you can use a \emph{dynamic region}.  A dynamic
+%% region can be deallocated at (almost) any point within a program.
+%% However, before the data within a dynamic region can be accessed
+%% and before you can allocate new data into a dynamic region, the
+%% region must be \emph{opened}.  When you open a dynamic region, this
+%% checks that the region has not been deallocated, and also prevents
+%% someone from deallocating the region as long as it is open.  In
+%% other words, once open, you are free to access or allocate data 
+%% within the region, but you cannot free the region.  
+
+%% If you attempt to open a dynamic region that has already been freed, then
+%% an exception will be thrown.  Dually, if you attempt to free a
+%% dynamic region that is currently open, then an exception will be
+%% thrown.  
+
+%% A dynamic region is created as follows:
+%% \begin{verbatim}
+%%   let NewRegion{<`d> dh} = Core::rnew_dynregion(rh);
+%% \end{verbatim}
+%% where \texttt{rh} is a handle for a region \texttt{`r}, \texttt{`d} is
+%% the name of the new dynamic region, and \texttt{dh} is the dynamic region handle.
+%% The dynamic region handle \texttt{dh} has type \texttt{dynregion_t<`d,`r>}.
+%% We say that it is a handle for \texttt{`d} and is contained in the
+%% region \texttt{`r}.
+
+%% To access or allocate data within a dynamic region, you must
+%% open the region as follows:
+%% \begin{verbatim}
+%%   { region sh = open(dh);
+%%     ...
+%%   }
+%% \end{verbatim}
+%% In this case, the dynamic region handle \texttt{dh} is opened and we
+%% are given a \emph{static} region handle \texttt{sh}.  The region
+%% remains opened throughout the scope of the static region handle.
+%% That is, the code in the curly braces (\texttt{...}) can access
+%% the region, but outside the curly braces, the data within the
+%% region may not be accessed.  The static region
+%% handle \texttt{sh} can be used to allocate data within the dynamic 
+%% region \texttt{`d}.
+
+%% If the region \texttt{`d} has already been freed, then the 
+%% \texttt{open} will fail by throwing the exception \texttt{Core::Open_Region}.
+
+%% You can free a dynamic region (as long as it is not open) by 
+%% calling the following function and passing in the dynamic
+%% region handle:
+%% \begin{verbatim}
+%%   Core::free_dynregion(dh);
+%% \end{verbatim}
+%% If the dynamic region has already been freed or if it is currently
+%% open, the \texttt{free_dynregion} will throw the exception
+%% \texttt{Core::Free_Region}.
+
+%% The dynamic region handle \texttt{dh} is contained in the region
+%% \texttt{`r}.  When \texttt{`r} is deallocated, then \texttt{dh}
+%% becomes inaccessible and thus \texttt{`d} is deallocated as well.  
 
 \subsubsection*{Region Polymorphism}
 
@@ -801,7 +897,13 @@ Note that in the first call to \texttt{foo}, we are passing
 a pointer into region \texttt{`g}, and in the second call to 
 \texttt{foo}, we are passing in a pointer into the heap.  In
 the first call, \texttt{`r} is implicitly instantiated with
-\texttt{`g}, and in the second call, with \texttt{`H}.  
+\texttt{`g}, and in the second call, with \texttt{`H}.
+
+Region polymorphism is a specific form of \emph{paramteric
+polymorphism} which Cyclone supports in general, as we describe 
+\hyperref[{sec:polyfun}]{below}.
+
+\subsubsection*{Default Region Annotations}
 
 Cyclone automatically assigns region variables to function
 arguments that have pointer type, so you rarely have to write them.  For instance,
@@ -847,8 +949,10 @@ Cyclone will reject the code because it assumes that in general,
 \texttt{p1} and \texttt{p2} might point into \emph{different}
 regions.  The error is roughly the following:
 \begin{verbatim}
-foo.cyc:2: type mismatch: struct Point *`GR0 != struct Point *`GR1
-  `GR1 and `GR0 are not compatible. (variable types are not the same)
+foo.cyc:2: type mismatch:
+     struct Point *`GR0 != struct Point *`GR1
+  `GR1 and `GR0 are not compatible. 
+     (variable types are not the same)
 \end{verbatim}
 Cyclone has picked the name \texttt{GR1} for \texttt{p1}'s region, and
 \texttt{GR2} for \texttt{p2}'s region.  That is, Cyclone fills in the
@@ -862,9 +966,22 @@ void j(struct Point *@region(`GR1) p1,
 Now it is clear that the assignment does not type-check because
 the types of \texttt{p1} and \texttt{p2} differ.  In other words,
 \texttt{`GR1} and \texttt{`GR2} \emph{might} be instantiated with
-different regions, in which case the code would be incorrect.
-But you can require that they be instantiated with the same region by
-explicitly specifying the same explicit region variable
+different regions, in which case the code would be incorrect.  For
+example, we could call \texttt{j} as follows:
+\begin{verbatim}
+void g() {
+  struct Point p = {0,1};
+  struct Point *@region(`g) ptr1 = &p;
+  struct Point *@region(`H) ptr2 = new Point{2,3};
+  j(ptr2,ptr1);
+}
+\end{verbatim}
+Doing this would effectively allow us to assign \texttt{ptr1} to
+\texttt{ptr2}, which is unsafe in general, since the heap outlives the
+stack region for \texttt{g}.  
+
+But you can require that \texttt{j}'s regions be instantiated with the
+same region by explicitly specifying the same explicit region variable
 for each pointer.  Thus, the following code does type-check:
 \begin{verbatim}
 void j(struct Point *@region(`r) p1, 
@@ -872,6 +989,9 @@ void j(struct Point *@region(`r) p1,
   p1 = p2;
 }
 \end{verbatim}
+This would prevent the situation in function \texttt{g} above, since
+the arguments passed to \texttt{j} must be allocated in the same
+region.
 
 So, Cyclone assumes that each pointer argument to a function is
 in a (potentially) different region unless you specify otherwise.
@@ -952,9 +1072,10 @@ block allocates storage within the region.  The storage is
 deallocated upon exit of the block.  LIFO regions are
 similar, except that a dynamic number of objects can be allocated
 within the region using the region's handle.  Both stack
-and LIFO regions have structured lifetimes.  Dynamic
-regions, in contrast, support arbitrary lifetimes, but
-must be opened to be accessed.  Finally, the heap is a
+and LIFO regions have structured lifetimes.  %% Dynamic
+%% regions, in contrast, support arbitrary lifetimes, but
+%% must be opened to be accessed.  
+Finally, the heap region \texttt{`H} is a
 special region whose dead objects are garbage collected.  
 
 Region polymorphism and region inference make it possible to omit many
@@ -974,11 +1095,126 @@ over the lifetimes of objects and without (always) having to resort to
 garbage collection.  As more advanced features, we also provide
 even finer control over object lifetimes, but at the expense of
 more work from the programmer, using the \emph{unique region} and
-\emph{reference-counted} regions.  For more information on these,
+\emph{reference-counted} regions.  In turn, these can be used to
+create \emph{dynamic regions}, which support run-time allocation like
+LIFO regions, but have dynamic scope.  For more information on these,
 and regions in general, see
 \hyperref[{sec:regions}]{Section~\ref{sec:regions}}.
 
-\subsection{Tagged Unions and Datatypes}
+\subsection{Arrays}
+
+Arrays in Cyclone are much as in C, and have a similar relationship to
+pointers, as we discussed earlier.  However, there are more ways to
+create arrays in Cyclone, but with some restrictions on how they are
+initialized.
+
+One can always declare an array and provide an initializer as in
+C\@. For instance:
+\begin{verbatim}
+  int foo[8] = {1,2,3,4,5,6,7,8};
+  char s[4] = "bar";
+\end{verbatim}
+are both examples from C for creating arrays.  Note that Cyclone
+follows C's conventions here, so that if you declare arrays as above
+within a function, then the lifetime of the array coincides with the
+activation record of the enclosing scope.  In other words, such arrays
+will be stack-allocated.  Also note that by default, \texttt{char}
+arrays are \emph{not} considered zero-terminated.  To make them so,
+you must add the \texttt{@zeroterm} qualifier following the size of
+the array, as in
+\begin{verbatim}
+  char s[4] @zeroterm = "bar";
+\end{verbatim}
+In both cases, the size of the array must include the zero terminator.
+
+To create heap-allocated arrays (or strings) within a Cyclone
+function, you should either use ``\texttt{new}'' or ``\texttt{rnew}''
+operator with either an array initializer or an \emph{array
+comprehension}.  The following code demonstrates this:
+\begin{verbatim}
+  // foo is a pointer to a heap-allocated array
+  int * @numelts(8) foo = new {1,2,3,4,5,6,7,8};
+
+  // s is a checked pointer to a heap-allocated string
+  char * @fat s = new {'b','a','r',0};
+
+  // a non-null pointer to the first 100 even numbers
+  int * @notnull @numelts(100) evens = new {for i < 100 : 2*i};
+\end{verbatim}
+The last initializer is an array comprehension.  The syntax is a
+simplified \texttt{for} loop: it declares the iterator variable
+\texttt{i} and its bound $100$, indicating that \texttt{i} will
+iterate between $0$ and $99$.  The part following the colon is the
+expression used to initialize the \texttt{i}th element of the array.
+In this example, the initializer is equivalent to writing
+\begin{verbatim}
+  int * @notnull @numelts(100) evens = new {0,2,4,6,...,198};
+\end{verbatim}
+Where the \texttt{...} represents the remaining even numbers in the
+sequence.
+
+Finally, we note that it is not possible to create arrays that contain
+pointers without initializing them first.  This is just as with normal
+pointers as discussed earlier.  Moreover, Cyclone requires that
+pointerful arrays are initialized all at once, rather than one
+statement at a time.  This is because Cyclone is not smart enough to
+know whether you have initialized an entire array, in general.  For
+example, the following code would be rejected:
+\begin{verbatim}
+void f(int * p) {
+  int *x[2];
+  x[0] = p;
+  x[1] = p;
+}
+\end{verbatim}
+Arrays that do not contain pointers need not be completely
+initialized in general to ensure safety, so how they are initilaized
+is up to the programmer.
+
+\subsection{Structs}
+
+Cyclone supports \texttt{struct} types just as in C.  Quite often, a C
+\texttt{struct} declaration will be accepted without change by the
+Cyclone compiler.  Cyclone supports two extensions to \texttt{struct}
+types in C: \emph{tuples}, which are lightweight, ``unnamed'' structs,
+and \emph{parameterization} for creating more generic datastructures.
+We consider tuples below, and delay talking about parameterization
+until \hyperref[{sec:polydat}]{a bit later}; 
+
+Tuples are like structs that need not be declared in advance; they
+have member or field names that are implicitly 0, 1, 2, 3, etc.  For
+example, the following code declares \texttt{x} to be a 3-tuple of an
+integer, a character, and a boolean, initialized with the values 42,
+\texttt{'z'}, and \texttt{true} respectively.  It then checks to see
+whether the third component in the tuple is \texttt{true} (it is) and
+if so, increments the first component in the tuple.
+\begin{verbatim}
+  $(int,char,bool) x = $(42,'z',true)
+
+  if (x[2])
+    x[0]++;
+\end{verbatim}
+
+The above code would be roughly equivalent to writing:
+\begin{verbatim}
+  struct {int f0; char f1; bool f2;} x = {42,'z',true};
+  if (x.f2)
+    x.f1++;
+\end{verbatim}
+
+Thus, tuple types are written \texttt{\$(type1,...,typen)}, tuple
+constructor expressions are written \texttt{\$(exp1,...,expn)}, and
+extracting the ith component of a tuple is written using subscript
+notation \texttt{exp[i-1]}.  Note that, consistent with the rest of C,
+the members start with 0, not 1.
+
+Unlike structs, tuple types are treated equivalent as long as they are
+structurally equivalent.  As in C, struct types are equivalent only if
+they have the same tag or name.  (Note that in C, all struct
+declarations have a tag, even if the compiler has to generate one.)
+
+
+\subsection{Unions}
 
 It's often necessary to write a function that accepts an argument with
 more than one possible type.  For example, in
@@ -1161,8 +1397,128 @@ we can write \texttt{printT(\&x)} to print out the integer
 value in \texttt{x}, and we can write \texttt{printT(\&y)}
 to print out the \texttt{"hello, world"} string in y.
 
-For more on datatypes, see
+We can use datatypes to implement a safe form of variable arguments
+(or \emph{varargs}), as described in
+\hyperref[{sec:varargs}]{Section~\ref{sec:varargs}}.  More information
+on Cyclone unions is presented in
 \hyperref[{sec:taggedunions}]{Section~\ref{sec:taggedunions}}.
+
+\subsection{C++, GCC and C99 Additions}
+
+C++, GCC and the
+\href{http://web.onetelnet.ch/~twolf/tw/c/c9x_changes.html}{ISO C99
+  standard} have some useful new features that we have adopted for
+Cyclone.  From C++ we borrow the idea of \emph{namespaces} for
+avoiding conflicts among library and program definitions.  In short,
+if a function \texttt{f} is defined in a namespace \texttt{Foo}, then
+we would access the function by referring to \texttt{Foo::f}.  The
+Cyclone standard libraries, such as \texttt{Core} or \texttt{List}
+(covered in detail in
+\hyperref[{sec:libraries}]{Section~\ref{sec:libraries}}) are defined
+each in their own namespace.  Cyclone also provides polymorphism
+similar to C++ templates.
+
+Some of the GCC and C99 features that we currently support are:
+\begin{itemize}
+\item Statement expressions: There is a new expression form,
+  \texttt{(\lb} \textit{statement} \textit{expression} \texttt{\rb)}.
+  The statement is executed first, then the expression, and the value
+  of the entire expression is the value of the expression
+\item Struct and Union expressions:  If you've declared
+  \texttt{struct point\{int x; int y;\};} then you can write
+  \texttt{point\{.x=\textit{expression}, .y=\textit{expression}\}}
+ to allocate and initialize a struct point.  The same sort of
+ constructors may be used for unions, tagged or not, as we showed
+  above.
+\item \texttt{//} comments as in Java or C++
+\item Declarations can appear in any statement position.  It is not
+  necessary to wrap braces around the declaration of a local variable.
+\item For-statements can include a declaration. For instance:
+\begin{verbatim}
+  for (int x=0; x < n; x++) { 
+    ...
+  }
+\end{verbatim}
+\end{itemize}
+We have attempted to follow the C99 standard fairly closely.
+
+\subsection{Additional Features of Cyclone}
+
+So far we have focused on features common to both Cyclone and GCC
+extensions of C\@.  In the remainder of this tutorial, we overview
+some of the new language features that have been added to Cyclone,
+inspired from other programming languages.  These include (a)
+exceptions (as in ML and Java), (b) type inference for local
+variables (as in ML), (c) parametric polymorphism (as in ML and
+Generic Java), (d) structural subtyping, to approximate
+object-oriented features, and (e) abstract and existential types.  
+
+In many cases, these features are useful for writing simpler code.
+Some features, like polymorphism and subtyping, are necessary to
+type-check or port a number of potentially-unsafe C idioms, usually
+involving ``\texttt{void *}'' or the like.  We conclude the tutorial
+by enumerating some unsafe C idioms that are not supported in Cyclone.
+
+%%% \subsection{Pointers}
+%%% There are three different pointer types in Cyclone, written
+%%% ``\texttt{t*},'' ``\texttt{t@},'' and ``\texttt{t?}.''  Actually, pointers
+%%% are quite a bit more complicated than this, but these are the pointer
+%%% types that you'll most likely use the most.
+%%%
+%%% A value of type \texttt{t*} is a possibly \texttt{null} pointer to a
+%%% value of type \texttt{t}.  When these values are dereferenced, a
+%%% \texttt{null} check is performed and an exception is raised if the
+%%% value is actually \texttt{null}. To ensure statically that a pointer
+%%% cannot be \texttt{null}, you can use the type \texttt{t@} instead.
+%%% Dereferencing a \texttt{@} pointer requires no run-time overhead and
+%%% will not raise an exception.  Pointer arithmetic and subscripting
+%%% (except for 0) are not supported for values of type \texttt{t*} or
+%%% \texttt{t@} (but see below).  Both kinds of pointers are represented
+%%% the same way as C pointers.
+%%%
+%%% In general, one can write ``\verb|t*{e}|'' to describe a pointer to an
+%%% array of \texttt{t} values with \texttt{e} elements, where \texttt{e} is a
+%%% constant expression.  For instance, the following code is permissible:
+%%% \begin{verbatim}
+%%%   int x[5] = {0,1,2,3,4};
+%%%   int *{5}p = x;
+%%% \end{verbatim}
+%%%
+%%% Here, we've said that \texttt{p} is a (possibly \texttt{null}) pointer to
+%%% an array of five integers. When a pointer has type \verb|t*{e}|, then
+%%% it is permissible to use subscripts in the range 0 to \texttt{e}-1 to
+%%% access the elements of \texttt{p}.  Note that \texttt{t*} is short hand
+%%% for \verb|t*{1}| (and similarly \texttt{t@} is short hand for
+%%% \verb|t@{1}|).
+%%%
+%%% A value of type \texttt{t?}\ is a checked pointer to a (possibly empty)
+%%% array of values of type \texttt{t}.  Unlike \texttt{*} or \texttt{@}
+%%% pointers, checked pointers support arbitrary pointer arithmetic
+%%% (following the rules of C), arbitrary integer subscripts, etc.
+%%% However, each access is checked to ensure that the pointer is within
+%%% the bounds of the original underlying array.
+%%%
+%%% Values of type \verb|t*{e}| or \verb|t@{e}| or \texttt{t[e]} can be cast
+%%% to type \texttt{t?}\ to support pointer arithmetic.  Furthermore, values
+%%% of type \texttt{t?}\ can be cast to type \verb|t*{e}| or \verb|t@{e}|,
+%%% but this requires a run-time check to ensure that the corresponding
+%%% array slice is in bounds.
+%%%
+%%% Obviously, checked pointers require more information than \texttt{*} or
+%%% \texttt{@} pointers, so that we can determine whether the access is in
+%%% bounds.  Consequently, checked pointers are larger than normal
+%%% pointers.  (The current implementation uses three words for each
+%%% checked pointer.)  However, one rarely needs checked pointers unless
+%%% you're performing lots of pointer arithmetic. In subsequent releases,
+%%% we hope to support checked but untagged representations for these
+%%% pointers using technology from dependent type theory.
+%%%
+%%% Finally, we should note that in fact all pointers in Cyclone point
+%%% into a region. By default, if you don't mention a region, then the
+%%% pointer points into the disgtinguished heap region (written `H).
+%%% Pointers to stack-allocated objects live in regions that are private
+%%% to the enclosing scope. More on this later\ldots
+
 
 \subsection{Exceptions}
 
@@ -1258,215 +1614,6 @@ So a more typical way to declare a new exception in Cyclone is
       My_Exception(char ?);
     };
 \end{verbatim}
-
-\subsection{Additional Features of Cyclone}
-
-So far we've mentioned a number of advanced features of
-Cyclone that provide facilities needed to avoid common bugs
-or security holes in C.  
-But there are many other features in Cyclone that are
-aimed at making it easier to write code, ranging from convenient
-expression forms, to advanced typing constructs.  For instance,
-like GCC and C99, Cyclone allows you declare variables just
-about anywhere, instead of at the top of a block.  As another
-example, like Java, Cyclone lets you declare variables within
-the initializer of a \texttt{for}-statement.  
-
-In addition, Cyclone adds advanced typing support in the form of (a)
-parametric polymorphism, (b) structural subtyping, and (c) some
-unification-based, local-type inference.  These features are necessary
-to type-check or port a number of (potentially) unsafe C idioms,
-usually involving ``\texttt{void *}'' or the like.  Similarly,
-\texttt{@tagged union} types and \texttt{datatypes} 
-can be used to code around many of the uses
-for C's \texttt{union} types -- another potential source of
-unsoundness.  The rest of this section is a brief overview of these
-added features.
-
-\subsection{GCC and C99 Additions}
-
-GCC and the
-\href{http://web.onetelnet.ch/~twolf/tw/c/c9x_changes.html}{ISO C99
-  standard} have some useful new features that we have adopted for
-Cyclone. Some of the ones that we currently support are:
-\begin{itemize}
-\item Statement expressions: There is a new expression form,
-  \texttt{(\lb} \textit{statement} \textit{expression} \texttt{\rb)}.
-  The statement is executed first, then the expression, and the value
-  of the entire expression is the value of the expression
-\item Struct and Union expressions:  If you've declared
-  \texttt{struct point\{int x; int y;\};} then you can write
-  \texttt{point\{.x=\textit{expression}, .y=\textit{expression}\}}
- to allocate and initialize a struct point.  The same sort of
- constructors may be used for unions, tagged or not.
-\item \texttt{//} comments as in Java or C++
-\item Declarations can appear in any statement position.  It is not
-  necessary to wrap braces around the declaration of a local variable.
-\item For-statements can include a declaration. For instance:
-\begin{verbatim}
-  for (int x=0; x < n; x++) { 
-    ...
-  }
-\end{verbatim}
-\end{itemize}
-
-We expect to follow the C99 standard fairly closely.
-
-%%% \subsection{Pointers}
-%%% There are three different pointer types in Cyclone, written
-%%% ``\texttt{t*},'' ``\texttt{t@},'' and ``\texttt{t?}.''  Actually, pointers
-%%% are quite a bit more complicated than this, but these are the pointer
-%%% types that you'll most likely use the most.
-%%%
-%%% A value of type \texttt{t*} is a possibly \texttt{null} pointer to a
-%%% value of type \texttt{t}.  When these values are dereferenced, a
-%%% \texttt{null} check is performed and an exception is raised if the
-%%% value is actually \texttt{null}. To ensure statically that a pointer
-%%% cannot be \texttt{null}, you can use the type \texttt{t@} instead.
-%%% Dereferencing a \texttt{@} pointer requires no run-time overhead and
-%%% will not raise an exception.  Pointer arithmetic and subscripting
-%%% (except for 0) are not supported for values of type \texttt{t*} or
-%%% \texttt{t@} (but see below).  Both kinds of pointers are represented
-%%% the same way as C pointers.
-%%%
-%%% In general, one can write ``\verb|t*{e}|'' to describe a pointer to an
-%%% array of \texttt{t} values with \texttt{e} elements, where \texttt{e} is a
-%%% constant expression.  For instance, the following code is permissible:
-%%% \begin{verbatim}
-%%%   int x[5] = {0,1,2,3,4};
-%%%   int *{5}p = x;
-%%% \end{verbatim}
-%%%
-%%% Here, we've said that \texttt{p} is a (possibly \texttt{null}) pointer to
-%%% an array of five integers. When a pointer has type \verb|t*{e}|, then
-%%% it is permissible to use subscripts in the range 0 to \texttt{e}-1 to
-%%% access the elements of \texttt{p}.  Note that \texttt{t*} is short hand
-%%% for \verb|t*{1}| (and similarly \texttt{t@} is short hand for
-%%% \verb|t@{1}|).
-%%%
-%%% A value of type \texttt{t?}\ is a checked pointer to a (possibly empty)
-%%% array of values of type \texttt{t}.  Unlike \texttt{*} or \texttt{@}
-%%% pointers, checked pointers support arbitrary pointer arithmetic
-%%% (following the rules of C), arbitrary integer subscripts, etc.
-%%% However, each access is checked to ensure that the pointer is within
-%%% the bounds of the original underlying array.
-%%%
-%%% Values of type \verb|t*{e}| or \verb|t@{e}| or \texttt{t[e]} can be cast
-%%% to type \texttt{t?}\ to support pointer arithmetic.  Furthermore, values
-%%% of type \texttt{t?}\ can be cast to type \verb|t*{e}| or \verb|t@{e}|,
-%%% but this requires a run-time check to ensure that the corresponding
-%%% array slice is in bounds.
-%%%
-%%% Obviously, checked pointers require more information than \texttt{*} or
-%%% \texttt{@} pointers, so that we can determine whether the access is in
-%%% bounds.  Consequently, checked pointers are larger than normal
-%%% pointers.  (The current implementation uses three words for each
-%%% checked pointer.)  However, one rarely needs checked pointers unless
-%%% you're performing lots of pointer arithmetic. In subsequent releases,
-%%% we hope to support checked but untagged representations for these
-%%% pointers using technology from dependent type theory.
-%%%
-%%% Finally, we should note that in fact all pointers in Cyclone point
-%%% into a region. By default, if you don't mention a region, then the
-%%% pointer points into the disgtinguished heap region (written `H).
-%%% Pointers to stack-allocated objects live in regions that are private
-%%% to the enclosing scope. More on this later\ldots
-
-\subsection{Tuples}
-
-Tuples are like lightweight structs.  They need not be declared in
-advance, and have member or field names that are implicitly 0, 1, 2,
-3, etc.  For example, the following code declares \texttt{x} to be a
-3-tuple of an integer, a character, and a boolean, initialized with
-the values 42, \texttt{'z'}, and \texttt{true} respectively.  It then
-checks to see whether the third component in the tuple is \texttt{true}
-(it is) and if so, increments the first component in the tuple.
-\begin{verbatim}
-  $(int,char,bool) x = $(42,'z',true)
-
-  if (x[2])
-    x[0]++;
-\end{verbatim}
-
-The above code would be roughly equivalent to writing:
-\begin{verbatim}
-  struct {int f0; char f1; bool f2;} x = {42,'z',true};
-  if (x.f2)
-    x.f1++;
-\end{verbatim}
-
-Thus, tuple types are written \texttt{\$(type1,...,typen)}, tuple
-constructor expressions are written \texttt{\$(exp1,...,expn)}, and
-extracting the ith component of a tuple is written using subscript
-notation \texttt{exp[i-1]}.  Note that, consistent with the rest of C,
-the members start with 0, not 1.
-
-Unlike structs, tuple types are treated equivalent as long as they are
-structurally equivalent.  As in C, struct types are equivalent only if
-they have the same tag or name.  (Note that in C, all struct
-declarations have a tag, even if the compiler has to gensym one.)
-
-
-\subsection{Creating Arrays}
-
-There are about four ways to create arrays in Cyclone. One can always
-declare an array and provide an initializer as in C\@. For instance:
-\begin{verbatim}
-  int foo[8] = {1,2,3,4,5,6,7,8};
-  char s[4] = "bar";
-\end{verbatim}
-are both examples from C for creating arrays.  Note that Cyclone
-follows C's conventions here, so that if you declare arrays as above
-within a function, then the lifetime of the array coincides with the
-activation record of the enclosing scope.  In other words, such arrays
-will be stack allocated.
-
-To create heap-allocated arrays (or strings) within a Cyclone
-function, you should either use ``\texttt{new}'' operator with either an
-array initializer or an array comprehension. The following code
-demonstrates this:
-\begin{verbatim}
-  // foo is a pointer to a heap-allocated array
-  int *{8}foo = new {1,2,3,4,5,6,7,8};
-
-  // s is a checked pointer to a heap-allocated string
-  char ?s = new {'b','a','r',0};
-
-  // a non-null pointer to the first 100 even numbers
-  int @{100}evens = new {for i < 100 : 2*i};
-\end{verbatim}
-
-\subsection{Subtyping}
-Cyclone supports ``extension on the right'' and ``covariant depth on
-\texttt{const}'' subtyping for pointers.  This simply means that you
-can cast a value \texttt{x} from having a type ``pointer to a struct
-with 10 fields,'' to ``pointer to a struct having only the first 5
-fields.''  For example, if we have the following definitions:
-\begin{verbatim}
-  typedef struct Point {float x,y;} *point;
-
-  typedef struct CPoint {float x,y; int color;} *cpoint;
-
-  float xcoord(point p) {
-    return p->x;
-  }
-\end{verbatim}
-then you can call \texttt{xcoord} with either a \texttt{point} or
-\texttt{cpoint} object.  You can also cast a pointer to a tuple having 3
-fields (e.g., \texttt{\$(int,bool,double)*}) to a pointer to a tuple
-having only 2 fields (e.g., \texttt{\$(int,bool)*}).  In other words, you
-can forget about the ``tail'' of the object.  This allows a degree of
-polymorphism that is useful when porting C code.  In addition, you can
-do ``deep'' casts on pointer fields that are \texttt{const}.  (It is
-unsafe to allow deep casts on non-const fields.)  Also, you can cast
-a field from being non-const to being const.  You can also cast a
-constant-sized array to an equivalent pointer to a struct or tuple.
-In short, Cyclone attempts to allow you to cast one type to another as
-long as it is safe.  Note, however, that these casts must be explicit.
-
-We expect to add more support for subtyping in the future (e.g.,
-subtyping on function pointers, bounded subtyping, etc.)
-
 
 %%% \subsection{Tagged Unions}
 %%% 
@@ -1579,7 +1726,7 @@ subtyping on function pointers, bounded subtyping, etc.)
 %%% will see ``It's a plus 4 3,'' but if we pass it
 %%% \texttt{Term(Integer(3),Times,Integer(4))} we will see ``3 4.''
 
-\subsection{Let Declarations}
+\subsection{Let Declarations and Pattern Matching}
 
 Sometimes, it's painful to declare a variable because you have to
 write down its type, and Cyclone types can be big when compared
@@ -1593,25 +1740,92 @@ inference using let declarations.  In particular, you can write:
     return (int)(y*z);
   }
 \end{verbatim}
+Here, we declared two variables \texttt{y} and \texttt{z} using
+``\texttt{let}.''  When you use \texttt{let}, you don't have to write
+down the type of the variable.  Rather, the compiler infers the type
+from the expression that initializes the variable.
 
-Here, we declared two variables y and z using ``\texttt{let}.''  When
-you use \texttt{let}, you don't have to write down the type of the
-variable.  Rather, the compiler infers the type from the expression
-that initializes the variable.  More generally, you can write
-``\texttt{let pattern = exp;}'' to destructure a value into a bunch of
-variables.  For instance, if you pass a tuple to a function, then you
-can extract the components as follows:
+More generally, you can write ``\texttt{let pattern = exp;}'' to
+destructure a value into a bunch of variables.  For instance, if you
+pass a tuple to a function, then you can extract the components as
+follows:
 \begin{verbatim}
   int sum($(int,int,int) args) {
     let $(x,y,z) = args;
     return (x+y+z);
   }
 \end{verbatim}
+This feature is called pattern matching, and is inspired from
+functional languages like ML and Haskell.  Patterns can appear as part
+of \texttt{let} declarations, exception clauses (as we saw above), and
+\texttt{switch} statements.  For example, we could rewrite the above
+code as follows using \texttt{switch}:
+\begin{verbatim}
+  int sum($(int,int,int) args) {
+    switch (args) {
+    case $(x,y,z):
+      return (x+y+z);
+    }
+  }
+\end{verbatim}
+Notice there is no need for a \texttt{default} case, since
+\texttt{args} will always be a valid 3-tuple.  On the other hand, if
+we were to pass a pointer to the tuple, rather than a tuple itself, we
+would have code as follows:
+\begin{verbatim}
+  int sum($(int,int,int) *argsp) {
+    switch (argsp) {
+    case &$(x,y,z):
+      return (x+y+z);
+    default:
+      return 0;
+    }
+  }
+\end{verbatim}
+The \texttt{switch} statement first handles the situation that the
+argument is a pointer to a tuple, designated by putting an \texttt{\&}
+in front of the tuple pattern.  Recall that we did something similar
+when matching exceptions in \texttt{catch} clauses, above.  The
+default case is for when \texttt{argsp} is NULL.  Many more details
+about pattern matching are presented in
+\hyperref[{sec:patterns}]{Section~\ref{sec:patterns}}.
+
+\subsection{Subtyping}
+Cyclone supports ``extension on the right'' and ``covariant depth on
+\texttt{const}'' subtyping for pointers.  This simply means that you
+can cast a value \texttt{x} from having a type ``pointer to a struct
+with 10 fields,'' to ``pointer to a struct having only the first 5
+fields.''  For example, if we have the following definitions:
+\begin{verbatim}
+  typedef struct Point {float x,y;} *point;
+
+  typedef struct CPoint {float x,y; int color;} *cpoint;
+
+  float xcoord(point p) {
+    return p->x;
+  }
+\end{verbatim}
+then you can call \texttt{xcoord} with either a \texttt{point} or
+\texttt{cpoint} object.  You can also cast a pointer to a tuple having 3
+fields (e.g., \texttt{\$(int,bool,double)*}) to a pointer to a tuple
+having only 2 fields (e.g., \texttt{\$(int,bool)*}).  In other words, you
+can forget about the ``tail'' of the object.  This allows a degree of
+polymorphism that is useful when porting C code.  In addition, you can
+do ``deep'' casts on pointer fields that are \texttt{const}.  (It is
+unsafe to allow deep casts on non-const fields.)  Also, you can cast
+a field from being non-const to being const.  You can also cast a
+constant-sized array to an equivalent pointer to a struct or tuple.
+In short, Cyclone attempts to allow you to cast one type to another as
+long as it is safe.  Note, however, that these casts must be explicit.
+
+We expect to add more support for subtyping in the future (e.g.,
+subtyping on function pointers, bounded subtyping, etc.)
 
 \subsection{Polymorphic Functions}
-As mentioned above, Cyclone supports a limited amount of subtyping
-polymorphism.  It also supports a fairly powerful form of parametric
-polymorphism.  Those of you coming from ML or Haskell will find this
+\label{sec:polyfun}
+
+Cyclone supports a fairly powerful form of \emph{parametric
+polymorphism}.  Those of you coming from ML or Haskell will find this
 familiar.  Those of you coming from C++ will also find it somewhat
 familiar.  The basic idea is that you can write one function that
 abstracts the types of some of the values it manipulates.  For
@@ -1693,6 +1907,8 @@ this, but in the short run, we're happy not to have it.
 
 
 \subsection{Polymorphic Data Structures}
+\label{sec:polydat}
+
 Just as function definitions can be parameterized by types, so can
 \texttt{struct} definitions, \texttt{datatype} definitions, and even
 \texttt{typedef}s.  For instance, the following \texttt{struct} definition
@@ -1726,6 +1942,7 @@ mapping over a list, looking up items in a list, concatenating two
 lists, copying lists, sorting lists, etc.
 
 \subsection{Abstract and Existential Types}
+
 Suppose you want to declare an abstract type for implementing stacks.
 In Cyclone, the way this is accomplished is by declaring a struct that
 encapsulates the implementation type, and by adding the
@@ -1751,7 +1968,7 @@ does not leak to a client.
 % struct \texttt{abstract}.  That way, clients are always given an
 % abstract struct to manipulate.
 
-\texttt{Typedef}s can be made abstract by writing:
+A \texttt{typedef} can be made abstract by writing:
 \begin{verbatim}
 typedef _ foo_t;
 \end{verbatim}

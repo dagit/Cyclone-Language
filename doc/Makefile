@@ -25,7 +25,8 @@ INPUTS= advanced.tex \
 	taggedunions.tex \
 	tutorial.tex \
 	typeinference.tex \
-	varargs.tex
+	varargs.tex \
+	version.tex
 
 all: screen html
 
@@ -66,6 +67,13 @@ online-manual: main-screen.html
 %.ps: %.dvi
 	dvips -o $@ $<
 
+# Format of version.tex should be a single line looking like
+# {\Large Version 0.8.2, August 29, 2004}\\[3ex]
+version.tex: ../configure
+	@(VERSION=`grep ^PACKAGE_VERSION ../configure | cut -c17- | sed -e "s/'//g"`; \
+	DATE=`date "+%B %d, %G"`; \
+	echo "{\Large Version $$VERSION, $$DATE}\\\\[3ex]" > $@)
+
 gen-libdoc.tex: \
   ../include/array.h \
   ../include/bitvec.h \
@@ -90,7 +98,7 @@ clean:
 	$(RM) *.aux *.dvi *.hind *.haux *.idx *.ilg *.ind *.ing *.log
 	$(RM) *.pdf *.ps *.toc *.out *~
 	$(RM) main-screen.html
-	$(RM) gen-libdoc.tex
+	$(RM) gen-libdoc.tex version.tex
 	$(RM) -r online-manual
 
 #.PHONY: main-screen.html main-screen.pdf main-letter.pdf main-a4.pdf online-manual
