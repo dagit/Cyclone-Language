@@ -308,10 +308,7 @@ static datatype Type @ dyneither_ptr_typ = &dyneither_ptr_typ_v;
 static tqual_t mt_tq = Tqual(false,false,false,false,0);
 
 static stmt_t skip_stmt_dl() {
-  static stmt_t * skip_stmt_opt = NULL;
-  if(skip_stmt_opt == NULL)
-    skip_stmt_opt = new skip_stmt(DL);
-  return *skip_stmt_opt;
+  return skip_stmt(DL);
 }
 
 // These constructors are useful when we want to just update the
@@ -3896,269 +3893,6 @@ DynCast:
   }
 }
 
-// Translate a pattern generating tests which jump goes to fail_lab
-// on unsuccessful match.
-// Returns:
-// * a new translation environment (mapping variables bound in the pattern
-//   to temps generated)
-// * a list of temps to be declared (along with their types.)
-//   This list contains the decls parameter
-// * The statement for actually doing the test.
-//
-// (The temps must be declared with a wide enough
-// scope to cover the tests and any cases in a switch (hence the reason
-// they're pulled out.  Also needed for translating fallthru.)
-//
-// xlate_pat(env,t,r,path,p,fail_lab)
-//
-//  r is the "root" variable that contains the value we're matching.
-//  path is the address of this value -- used in the Reference pattern.
-//  p is the pattern
-//  we do nothing on successful match -- caller puts the right code next
-//  fail_lab is where to go upon failure to match
-//
-// FIX: adapt the decision tree code in the type-checker so that we
-// have much more efficient traversal of patterns.
-//
-// Note: Extra labels and gotos aren't a big deal b/c gcc -O collapses them.
-//
-// Warning: We end sharing the fail_exps -- they should be copied if they
-//          might be mutated later!
-static stmt_t if_neq_stmt(exp_t e1,exp_t e2,stmt_t fail_stmt) {
-  return ifthenelse_stmt(neq_exp(e1,e2,DL),
-			 fail_stmt,
-			 skip_stmt_dl(),DL);
-}
-
-static int path_length(exp_t e) {
-  switch (e->r) {
-  case &Cast_e(_,e1,_,_): return path_length(e1);
-  case &Deref_e(e1): return 1 + path_length(e1);
-  case &AggrMember_e(e1,...): return path_length(e1);
-  default: return 0;
-  }
-}
-
-static $(env_t<`rgn>,list_t<$(qvar_t,type_t)@`rgn,`rgn>,stmt_t)
-xlate_pat(env_t<`rgn> nv,
-          region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
-	  stmt_t fail_stmt,
-          list_t<$(qvar_t,type_t)@`rgn,`rgn> decls) {
-  stmt_t s; // the test statement
-  switch (p->r) {
-  case &AliasVar_p(_,&Vardecl(_,x,_,_,_,_,_,_)):
-    let p2 = new_pat(&Wild_p_val,0);
-    p2->topt = p->topt;
-    fallthru(x,p2);
-  case &Var_p(&Vardecl(_,x,_,_,_,_,_,_),p2):
-    // v = r (and substitute v for x) and continue matching p2 against r
-    qvar_t v = temp_var();
-    let t2 = (type_t)p2->topt;
-    decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c_array(t2)), decls);
-    let result = xlate_pat(add_varmap(rgn,nv,x,var_exp(v,DL)),
-                           rgn,t2,var_exp(v,DL),path,p2,fail_stmt,decls);
-    nv = result[0];
-    decls = result[1];
-    let s2 = result[2];
-    let s3 = assign_stmt(var_exp(v,DL),r,DL);
-    s = seq_stmt(s3,s2,DL);
-    break;
-  case &TagInt_p(_,&Vardecl(_,x,_,_,_,_,_,_)): // type translation erases tvar
-    // v = r  (and substitute v for x)
-    let v = temp_var();
-    let t2 = (type_t)p->topt;
-    decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c_array(t2)), decls);
-    nv = add_varmap(rgn,nv,x,var_exp(v,DL));
-    s = assign_stmt(var_exp(v,DL),r,DL);
-    break;
-  case &Wild_p: s = skip_stmt_dl(); break; 
-  case &Reference_p(vd,p2):
-    // v = &path
-    let v = temp_var();
-    decls = rnew(rgn) List(rnew(rgn) $(v,cstar_typ(typ_to_c_array(t),mt_tq)),decls);
-    nv    = add_varmap(rgn,nv,vd->name,var_exp(v,DL));
-    // cast is needed to avoid a C warning when pointing to a polymorphic field
-    s     = assign_stmt(var_exp(v,DL),
-			cast_it(cstar_typ(typ_to_c_array(t),mt_tq),
-                                push_address_exp(path)),DL);
-    let result = xlate_pat(nv,rgn,t,r,path,p2,fail_stmt,decls);
-    result[2] = seq_stmt(s,result[2],DL);
-    return result;
-  // for these cases, if (r != value) goto fail_label.
-  case &Null_p:       s=if_neq_stmt(r,signed_int_exp(0,DL),fail_stmt); break;
-  case &Int_p(sn,i):  s=if_neq_stmt(r,int_exp(sn,i,DL),    fail_stmt); break;
-  case &Char_p(c):    s=if_neq_stmt(r,char_exp(c,DL),      fail_stmt); break;
-  case &Float_p(f,i): s=if_neq_stmt(r,float_exp(f,i,DL),   fail_stmt); break;
-  case &Enum_p(ed,ef):
-    s = if_neq_stmt(r,new_exp(new Enum_e(ef->name,ed,ef),DL),fail_stmt);
-    break;
-  case &AnonEnum_p(t2,ef):
-    s = if_neq_stmt(r,new_exp(new AnonEnum_e(ef->name,t2,ef),DL),fail_stmt);
-    break;
-
-  case &Pointer_p(&Pat{&Datatype_p(tud,tuf,ps,_),_,_}):
-    // when ps is p1,...,pn:
-    //   struct C* temp = (struct C*)r;
-    //   if (temp->tag == qv_tag)
-    //      <similar to tuple and struct patterns>
-    //   else goto fail_lab
-    // FIX: When type is DatatypeField, can avoid all checks
-    s = skip_stmt_dl();
-    let temp        = temp_var();
-    qvar_t tufstrct = collapse_qvars(tuf->name,tud->name);
-    let field_ptr_typ = cstar_typ(strctq(tufstrct),mt_tq);
-    int    cnt      = 1;
-    exp_t  rcast    = cast_it(field_ptr_typ,r);
-    let tuf_tqts = tuf->typs;
-    for(; ps != NULL; ps = ps->tl, tuf_tqts = tuf_tqts->tl, ++cnt) {
-      let p2  = ps->hd;
-      if(p2->r == &Wild_p_val)
-	continue;
-      let tuf_typ = (*tuf_tqts->hd)[1];
-      let t2  = (type_t)p2->topt;
-      let t2c = typ_to_c_array(t2);
-      let arrow_exp = aggrarrow_exp(var_exp(temp,DL), fieldname(cnt), DL);
-      if(is_void_star_or_boxed_tvar(typ_to_c(tuf_typ)))
-	arrow_exp = cast_it(t2c, arrow_exp);
-      // FIX?  why aren't we using path->fi for the path?
-      let result = xlate_pat(nv,rgn,t2,arrow_exp,arrow_exp,
-			     p2,fail_stmt,decls);
-      nv = result[0];
-      decls = result[1];
-      s = seq_stmt(s, result[2], DL);
-    }
-    exp_t temp_tag = aggrarrow_exp(var_exp(temp,DL), tag_sp, DL);
-    exp_t tag_exp =
-      tud->is_extensible ? var_exp(tuf->name,DL) : datatype_tag(tud,tuf->name);
-    exp_t test_exp = neq_exp(temp_tag, tag_exp, DL);
-    s = ifthenelse_stmt(test_exp,fail_stmt,s,DL);
-    if (is_nullable((type_t)p->topt)) {
-      // must check for null first -- note that the type-checker
-      // prevents fat or zero-terminated pointers from showing up here.
-      s = ifthenelse_stmt(eq_exp(var_exp(temp,DL),uint_exp(0,DL),DL),
-                          fail_stmt, s, DL);
-    }
-    s = declare_stmt(temp,field_ptr_typ,rcast,s,DL);
-    break;
-
-  case &Datatype_p(_,_,ps,_): fallthru(ps);
-  case &Tuple_p(ps,_):
-    // given the pattern $(p1,p2,...,pn)
-    //    v1 = r->f1; if (matches(v1,p1)) goto L1 else goto fail_lab;
-    // L1:v2 = r->f2; if (matches(v2,p2)) goto L2 else goto fail_lab;
-    // L2:v3 = r->f3; if (matches(v3,p2)) goto L3 else goto fail_lab;
-    //    ...
-    // Ln-1:vn = r->fn; if (matches(vn,p2)) goto succ_lab else goto fail_lab;
-    s = skip_stmt_dl(); // wasteful
-    int cnt = 1;
-    for(; ps != NULL; ps = ps->tl, ++cnt) {
-      let p2  = ps->hd;
-      if(p2->r == &Wild_p_val)
-	continue;
-      let t2  = (type_t)p2->topt;
-      let f = fieldname(cnt);
-      let result = xlate_pat(nv,rgn,t2,member_exp(r,f,DL),
-                             member_exp(path,f,DL),p2,fail_stmt,decls);
-      nv = result[0];
-      decls = result[1];
-      s = seq_stmt(s,result[2],DL);
-    }
-    break;
-  case &Aggr_p(NULL,...):
-    toc_impos("unresolved aggregate pattern!");
-  case &Aggr_p(&AggrInfo(info,_),_,dlps,_):
-    let ad = get_known_aggrdecl(info);
-    if (ad->impl->tagged) {
-      // tagged union pattern:  Foo{.f = pat}
-      // if (r.f.tag != f_tag) goto fail_lab;
-      let &$(designators,pat) = dlps->hd;
-      field_name_t f;
-      switch (designators->hd) {
-      case &FieldName(fn): f = fn; break;
-      default: toc_impos("no field name in tagged union pattern");
-      }
-      //let v = temp_var();
-      let t2 = (type_t)pat->topt;
-      let t2c = typ_to_c_array(t2);
-      //decls = rnew(rgn) List(rnew(rgn) $(v,t2c),decls);
-      let pexp = aggrmember_exp(member_exp(path,f,DL),val_sp,DL);
-      let memexp = aggrmember_exp(member_exp(r,f,DL),val_sp,DL);
-      memexp = cast_it(t2c, memexp);
-      pexp = cast_it(t2c,pexp);
-      let result = xlate_pat(nv,rgn,t2,
-                             memexp,
-                             //var_exp(v,DL),
-                             pexp,pat,fail_stmt,decls);
-      nv = result[0];
-      decls = result[1];
-      let s2 = result[2];
-      let s4 = if_neq_stmt(aggrmember_exp(member_exp(r,f,DL),tag_sp,DL),
-                           signed_int_exp(get_member_offset(ad,f),DL),
-                           fail_stmt);
-      //let s3 = assign_stmt(var_exp(v,DL),memexp,DL);
-      //s = seq_stmt(s4,seq_stmt(s3,s2,DL),DL);
-      s = seq_stmt(s4,s2,DL);
-    } else {
-      // similar to translation of tuple pattern
-      s = skip_stmt_dl();
-      for (; dlps != NULL; dlps = dlps->tl) {
-        let tup = dlps->hd;
-        let p2  = (*tup)[1];
-        if(p2->r == &Wild_p_val)
-          continue;
-        _ f;
-        switch ((*tup)[0]->hd) {
-        case &FieldName(f2): f=f2; break;
-        default: throw new Match_error; // FIX:  assumes one field name designator
-        }
-        let t2 = (type_t)p2->topt;
-        let t2c = typ_to_c_array(t2);
-        let memexp = member_exp(r,f,DL);
-        let ftype = lookup_field(ad->impl->fields,f)->type;
-        let new_path = member_exp(path,f,DL);
-        if (is_void_star_or_boxed_tvar(ftype))
-          memexp = cast_it(t2c, memexp);
-        else if (!is_array_type(ftype) && kind_leq(&ak,typ_kind(ftype))) {
-          // for abstract members, we have to convert to the right
-          // pointer type...
-          memexp = deref_exp(cast_it(cstar_typ(t2c,mt_tq), 
-                                     address_exp(memexp,DL)),DL);
-          
-          new_path = push_address_exp(new_path);
-          new_path = cast_it(cstar_typ(t2c,mt_tq),new_path);
-          new_path = deref_exp(new_path, DL);
-        }
-        let result = xlate_pat(nv,rgn,t2,memexp,new_path,p2,fail_stmt,decls);
-        nv = result[0];
-        decls = result[1];
-        s = seq_stmt(s, result[2], DL);
-      }
-    }
-    break;
-
-  case &Pointer_p(p2):
-    let t2 = (type_t)p2->topt;
-    // if (path_length(r) > 2)
-    // could insert a variable here but not a big deal.
-    let result = xlate_pat(nv,rgn,t2,deref_exp(r,DL), deref_exp(path,DL),p2,
-			   fail_stmt,decls);
-    nv = result[0];
-    decls = result[1];
-    let s2 = result[2];
-    if (is_nullable(t))
-      s = seq_stmt(ifthenelse_stmt(eq_exp(r,signed_int_exp(0,DL),DL),
-				   fail_stmt,
-				   skip_stmt_dl(), DL), s2, DL);
-    else
-      s = s2;
-    break;
-  case &UnknownId_p(_):     toc_impos("unknownid pat");
-  case &UnknownCall_p(_,_,_): toc_impos("unknowncall pat");
-  case &Exp_p(_):           toc_impos("exp pat");
-  }
-  return $(nv,decls,s);
-}
-
 ///////////////////////////////////////////////////////////////
 //              Translation of Switch Statements             //
 ///////////////////////////////////////////////////////////////
@@ -4363,8 +4097,7 @@ static stmt_opt_t seq_stmt_opt(stmt_opt_t s1, stmt_opt_t s2) {
 }
 
 // given a pattern, produce code and environment to initialize the pattern
-// variables with the appropriate values.  Essentially the same code as
-// xlate_pat above, but without the tests.  Updates the environment and
+// variables with the appropriate values.  Updates the environment and
 // decls which are passed in by reference.
 static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
                                        list_t<$(qvar_t,type_t)@`rgn,`rgn>@ decls,
@@ -4411,12 +4144,13 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
 
     // special case for pointer to datatype
   case &Pointer_p(&Pat{&Datatype_p(tud,tuf,ps,_),_,_}):
-    stmt_opt_t s    = NULL;
+    if (ps == NULL) return NULL;
     qvar_t tufstrct = collapse_qvars(tuf->name,tud->name);
     let field_ptr_typ = cstar_typ(strctq(tufstrct),mt_tq);
+    path = cast_it(field_ptr_typ,path);
     int cnt      = 1;
     let tuf_tqts = tuf->typs;
-    path = cast_it(field_ptr_typ, path);
+    stmt_opt_t s = NULL;
     for(; ps != NULL; ps = ps->tl, tuf_tqts = tuf_tqts->tl, ++cnt) {
       let p2  = ps->hd;
       if(p2->r == &Wild_p_val) continue;
@@ -4476,7 +4210,8 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
     }
     return s;
 
-  case &Pointer_p(p2): return extract_pattern_vars(rgn,nv,decls,deref_exp(path,DL),p2);
+  case &Pointer_p(p2): 
+    return extract_pattern_vars(rgn,nv,decls,deref_exp(path,DL),p2);
 
   case &UnknownId_p(_):       toc_impos("unknownid pat");
   case &UnknownCall_p(_,_,_): toc_impos("unknowncall pat");
@@ -4636,7 +4371,7 @@ find_case_env(list_t<$(env_t<`rgn>,var_t,stmt_t)@`rgn,`rgn> bodies, stmt_t s) {
 }
 
 // translate a switch according to the given decision tree.
-static void xlate_switch(env_t nv, stmt_t whole_s,
+static void xlate_switch(bool nested_fallthru, env_t nv, stmt_t whole_s,
 			 exp_t e, list_t<switch_clause_t> scs,
                          Tcpat::decision_opt_t dopt) {
   exp_to_c(nv,e);
@@ -4673,8 +4408,13 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
       // must be dead code (not reachable in the decision tree.)
       if (envp == NULL) continue; 
       let env = *envp;
-      // find the environment for the fallthru case if it's there.
-      if (lscs2->tl != NULL) {
+      if (!nested_fallthru) {
+        // for let-declarations, we don't want to overwrite the fallthru or
+        // break labels.
+        stmt_to_c(env, s);
+      }
+      // else find the environment for the fallthru case if it's there.
+      else if (lscs2->tl != NULL) {
         let &$(_,_,fallthru_lab,next_sc) = lscs2->tl->hd;
         let next_case_env = find_case_env(mybodies,next_sc->body);
         // if the next case is never called, then it must've been the default
@@ -4685,8 +4425,11 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
           stmt_to_c(last_switchclause_env(rgn,env,end_l),s);
         } else {
           // set up the environment with the fallthru information.
-          let vs = Tcutil::filter_nulls(List::split(next_sc->pat_vars->v)[0]);
-          vs = List::imp_rev(vs);
+          list_t<vardecl_t> vs = NULL;
+          if (next_sc->pat_vars != NULL) {
+            vs = Tcutil::filter_nulls(List::split(next_sc->pat_vars->v)[0]);
+            vs = List::imp_rev(vs);
+          }
           stmt_to_c(non_last_switchclause_env(rgn, env, end_l, fallthru_lab,
                                               vs, *next_case_env),s);
         }
@@ -4708,7 +4451,8 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
 }
 
 // forward declarations
-static stmt_t letdecl_to_c(env_t nv, pat_t p, type_t t, exp_t e, stmt_t s);
+static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t, 
+                           type_t t, exp_t e, stmt_t s);
 static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s);
 
 ///////////////////////////////////////////////////////////////
@@ -4792,7 +4536,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       }
       return;
     case &Switch_s(e,scs,dec_tree_opt):
-      xlate_switch(nv,s,e,scs,dec_tree_opt);
+      xlate_switch(true,nv,s,e,scs,dec_tree_opt);
       return;
     case &Fallthru_s(es,dest_clause):
       let &Env{.fallthru_info = fi,...} = nv;
@@ -4844,7 +4588,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 	  // we treat let declarations specially because they may need
 	  // statements in addition to declarations, so we splice them in
 	  // as a statement.  Other declarations only produce declarations.
-	  s->r = letdecl_to_c(nv, p, (type_t)e->topt, e, s1)->r;
+	  s->r = letdecl_to_c(nv, p, dec_tree, (type_t)e->topt, e, s1)->r;
 	  break;
         }
 	break;
@@ -5364,28 +5108,50 @@ static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s) {
   }
 }
 
+// Destructively rewrite the decision tree so that Failure nodes are 
+// replaced with Success(fail) and Success(_) is replaced with Success(s)
+static Tcpat::decision_t rewrite_decision(Tcpat::decision_t d,
+                                          stmt_t success,
+                                          stmt_t fail) {
+  switch (d) {
+  case &Tcpat::Failure(_): 
+    return new Tcpat::Success(new Tcpat::Rhs{true,0,fail});
+  case &Tcpat::Success(rhs): rhs->rhs = success; return d;
+  case &Tcpat::SwitchDec(path, sws, *d2):
+    *d2 = rewrite_decision(*d2, success, fail);
+    for (; sws != NULL; sws = sws->tl) {
+      let &$(_,*d2) = sws->hd;
+      *d2 = rewrite_decision(*d2, success, fail);
+    }
+    return d;
+  }
+}
+
 // let declarations -- tricky
 // Unlike other declarations, lets need to execute statements and
 // so return a statement.  (See stmt_to_c, case for Decl above.)
 // We treat this similar to the compilation of a switch (see xlate_switch
 // above) with one case, but where the failure throws Match_Exception
-static stmt_t letdecl_to_c(env_t nv, pat_t p, type_t t, exp_t e, stmt_t s) {
-  exp_to_c(nv,e);
-  qvar_t x = temp_var();
-  TOC_RGN(nv, prgn) {
-    let fail = throw_match_stmt();
-    let nv = share_env(prgn,nv);
-    let $(nv,vars,test_stmt) =
-      xlate_pat(nv, prgn, t, var_exp(x,DL), var_exp(x,DL), p,
-		throw_match_stmt(),NULL);
-    stmt_to_c(nv,s);
-    s = declare_stmt(x,typ_to_c(t),e,seq_stmt(test_stmt,s,DL),DL);
-    for (; vars != NULL; vars = vars->tl) {
-      let &$(qv,t2) = vars->hd;
-      s = declare_stmt(qv,t2,NULL,s,DL);
-    }
+static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t dopt, 
+                           type_t t, exp_t e, stmt_t s) {
+  // we us a bogus fail statement since it has to pass through translation.
+  // we overwrite it with _throw_match() below.
+  let bogus_fail = skip_stmt_dl();
+  let fail_pat = new_pat(&Wild_p_val,0);
+  fail_pat->topt = p->topt;
+  let c1 = new Switch_clause{p, NULL, NULL, s, 0};
+  let c2 = new Switch_clause{fail_pat, NULL, NULL, bogus_fail, 0};
+  list_t<switch_clause_t> swcs = list(c1,c2);
+  // rewrite the decision tree so that on failure we throw Match
+  // and on success, continue with the body of the let.
+  if (dopt != NULL) {
+    dopt = rewrite_decision(dopt, s, bogus_fail);
   }
-  return s;
+  let res = skip_stmt_dl();
+  xlate_switch(false, nv, res, e, swcs, dopt);
+  // overwrite the bogus fail statement with _throw_match()
+  bogus_fail->r = throw_match_stmt()->r;
+  return res;
 }
 
 // These next few functions clean up the types in C code, getting

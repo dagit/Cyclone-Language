@@ -1521,14 +1521,14 @@ ans=Cyc_vprintf(fmt,ap);
 return ans;}struct _tuple0{struct _dyneither_ptr*f1;unsigned long*f2;};
 # 994
 static int Cyc_putc_string(int c,struct _tuple0*sptr_n){
-struct _dyneither_ptr*_tmpBE;unsigned long*_tmpBF;struct _tuple0*_tmpBD=sptr_n;_tmpBE=_tmpBD->f1;_tmpBF=_tmpBD->f2;{
+struct _tuple0*_tmpBD=sptr_n;struct _dyneither_ptr*_tmpBE;unsigned long*_tmpBF;_LL9D: _tmpBE=_tmpBD->f1;_tmpBF=_tmpBD->f2;_LL9E: {
 struct _dyneither_ptr s=*_tmpBE;
 unsigned long n=*_tmpBF;
 if(n == 0)return - 1;
 *((char*)_check_dyneither_subscript(s,sizeof(char),0))=(char)c;
 _dyneither_ptr_inplace_plus(_tmpBE,sizeof(char),1);
 *_tmpBF=n - 1;
-return 1;};}
+return 1;}_LL9C:;}
 # 1005
 int Cyc_vsnprintf(struct _dyneither_ptr s,unsigned long n,struct _dyneither_ptr fmt,struct _dyneither_ptr ap){
 # 1008
