@@ -1,0 +1,164 @@
+#include <string.h>
+#include <stdio.h>
+#include <list.h>
+using List;
+
+/* This code demonstrates how to do interface-based OO programming
+ * in Cyclone, including a form of downcasting to support multi-
+ * parameter methods.
+ */
+
+/* Obj<T> is an unwrapped object where T is manifest */
+struct Obj<`a::A>;
+/* Object is a wrapped object where T is hidden */
+typedef struct Object obj_t;
+
+/* A Class<T> holds methods for Obj<T>'s.  In addition, the Class has
+ * a special cast_value which is used to support down-casting (see
+ * below.)  In this case, I've only defined one single-dispatch method,
+ * tostring, and one multi-method cmp.
+ */
+struct Class<`a::A> {
+  const char @(@tostring)(struct Obj<`a> @self);
+  int (@cmp)(struct Obj<`a>@, struct Obj<`a>@);
+  struct Obj<`a> *cast_value;
+};
+
+/* An Obj<T> consists of a vtable pointer an some abstract data `a.
+ * Note that `a has kind A meaning that `a can be instantiated with
+ * any type.
+ */
+struct Obj<`a::A> {
+  struct Class<`a> @vtable;
+  `a instance;
+};
+
+/* An Object is simply an Obj<T> where the T is held abstract.  To
+ * appease the region gods, we must require that the regions in
+ * T outlive the heap (we could parameterize Object and Obj by some
+ * region and use that as the bound instead.)
+ */
+struct Object {
+  <`a> : regions(`a) > `H
+  struct Obj<`a> @self;
+};
+
+/* upcast a Obj<`T> to an Object */
+obj_t upcast(struct Obj<`a> @`H p : regions(`a) > `H) {
+  return Object(p);
+}
+
+/* Call the tostring method on an Object x. */
+const char @tostring(obj_t x) {
+  let Object{<`x> .self = xobj} = x;
+  return xobj->vtable->tostring(xobj);
+}
+
+/* Forward declaration -- this is the real magic we need to support
+ * downcasting or multi-methods.  Given a Class<`a> C, and an
+ * Obj<`b> b, try to cast b to an Obj<`a>.  Returns NULL on failure,
+ * and otherwise returns b.  See below for how this is done in a
+ * type-safe way.
+ */
+struct Obj<`a> *cast_obj(struct Class<`a>@ C,struct Obj<`b>@`H b);
+
+/* Call the cmp multi-method for a pair of objects.  We try to
+ * cast y to x's Class and if that succeeds, then we can call
+ * x's cmp method.
+ */
+int cmp(obj_t x, obj_t y) {
+  let Object{<`x> xobj} = x;
+  let Object{<`y> yobj} = y;
+  struct Obj<`x> *yasx_opt = cast_obj(xobj->vtable,yobj);
+  if (yasx_opt == NULL)
+    return (int)(xobj->vtable) - (int)(yobj->vtable);
+  struct Obj<`x> @yasx = (_@)yasx_opt;
+  return xobj->vtable->cmp(xobj,yasx);
+}
+
+/* We achieve the cast by first setting the `a Class's cast_value to NULL
+ * and then set the `b Class's cast_value to the Obj<`b>.  Then we read
+ * out from the `a Class's cast_value the pointer.  If `a and `b
+ * happen to have the same class, then you'll get back the pointer
+ * to the Obj<`b>.  This is not thread-safe.  An alternative would
+ * be to use an extensible datatype have the b object throw an exception
+ * that only its class knows how to handle.  That would be thread-safe
+ * but more expensive.
+ */
+struct Obj<`a> *cast_obj(struct Class<`a>@ C,struct Obj<`b>@`H b) {
+  C->cast_value = NULL;
+  b->vtable->cast_value = b;
+  return C->cast_value;
+}
+
+/* Methods for Class<int> */
+static const char @ int2string(struct Obj<int> @self) {
+  return (char @)aprintf("%d",self->instance);
+}
+static int intcmp(struct Obj<int> @x, struct Obj<int> @y) {
+  return x->instance - y->instance;
+}
+
+/* Constructor for Obj<int> */
+struct Obj<int> @int_ctor(int i) {
+  static struct Class<int> intvtable = {
+    .tostring = int2string,
+    .cmp = intcmp,
+    .cast_value = NULL
+  };
+  return new Obj{.vtable = &intvtable, .instance = i};
+}
+
+/* Methods for Class<double> */
+const char @ double2string(struct Obj<double> @self) {
+  return (char @)aprintf("%g",self->instance);
+}
+int doublecmp(struct Obj<double> @x, struct Obj<double> @y) {
+  if (x->instance == y->instance) return 0;
+  if (x->instance < y->instance) return -1;
+  return 1;
+}
+
+/* Constructor for Obj<double> */
+struct Obj<double> @double_ctor(double d) {
+  static struct Class<double> doublevtable = {
+    .tostring = double2string,
+    .cmp = doublecmp,
+    .cast_value = NULL
+  };
+  return new Obj{.vtable = &doublevtable, .instance = d};
+}
+
+/* Methods for Class<string_t> */
+const char @string2string(struct Obj<const char ?`H>@self) {
+  return (const char @)self->instance;
+}
+
+int stringptrcmp(struct Obj<const char ?`H>@x, struct Obj<const char ?`H>@y) {
+  return strcmp(x->instance,y->instance);
+}
+
+/* Constructor for Obj<string_t> */
+struct Obj<const char ?>@ string_ctor(const char ?`H s) {
+  static struct Class<const char ?`H> stringvtable = {
+    .tostring = string2string,
+    .cmp = stringptrcmp,
+    .cast_value = NULL
+  };
+  return new Obj{.vtable = &stringvtable, .instance = s};
+}
+
+/* Demonstration */
+int main() {
+  obj_t objs[] = {upcast(int_ctor(3)), upcast(int_ctor(4)),
+                  upcast(string_ctor("fred")),
+                  upcast(string_ctor("fred")),
+                  upcast(double_ctor(3.14159))};
+  for (unsigned i = 0; i < numelts(objs) - 1; i++) {
+    let o1 = objs[i];
+    let o2 = objs[i+1];
+    printf("comparing %s and %s yields %d\n",tostring(o1),tostring(o2),cmp(o1,o2));
+  }
+  return 0;
+}
+
