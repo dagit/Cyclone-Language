@@ -72,7 +72,6 @@ install_path.c: ../Makefile.inc
 	@(echo "char *Carch = \"$(ARCH)\";"; \
 	  echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
-	  echo "char *Ccflags = \"$(CFLAGS)\";"; \
 	  echo "char *Ccomp = \"$(CC)\";") > $@
 
 cyclone.$(O): version.h

@@ -2436,9 +2436,9 @@ t= Cyc_new_deps(); struct _tagged_arr _temp777= Cstring_to_string( Ccomp);
 struct _tagged_arr _temp778=({ struct Cyc_Std_String_pa_struct _temp1066;
 _temp1066.tag= Cyc_Std_String_pa; _temp1066.f1=( struct _tagged_arr) _temp773;{
 struct Cyc_Std_String_pa_struct _temp1065; _temp1065.tag= Cyc_Std_String_pa;
-_temp1065.f1=( struct _tagged_arr) filename;{ struct Cyc_Std_String_pa_struct
+_temp1065.f1=( struct _tagged_arr) _temp777;{ struct Cyc_Std_String_pa_struct
 _temp1064; _temp1064.tag= Cyc_Std_String_pa; _temp1064.f1=( struct _tagged_arr)
-_temp777;{ void* _temp1063[ 3u]={& _temp1064,& _temp1065,& _temp1066}; Cyc_Std_aprintf(
+filename;{ void* _temp1063[ 3u]={& _temp1064,& _temp1065,& _temp1066}; Cyc_Std_aprintf(
 _tag_arr("echo '#include <%s>' | %s -E -dM -o %s -", sizeof( unsigned char), 41u),
 _tag_arr( _temp1063, sizeof( void*), 3u));}}}}); if( Cyc_Std_system(( struct
 _tagged_arr) _temp778) !=  0){ maybe= Cyc_Std_fopen( filename, _tag_arr("w",
@@ -2485,8 +2485,8 @@ Cyc_Hashtable_insert)( t, _temp798, _temp796);} Cyc_Std_fclose( in_file);
 _temp778=({ struct Cyc_Std_String_pa_struct _temp803; _temp803.tag= Cyc_Std_String_pa;
 _temp803.f1=( struct _tagged_arr) _temp773;{ struct Cyc_Std_String_pa_struct
 _temp802; _temp802.tag= Cyc_Std_String_pa; _temp802.f1=( struct _tagged_arr)
-filename;{ struct Cyc_Std_String_pa_struct _temp801; _temp801.tag= Cyc_Std_String_pa;
-_temp801.f1=( struct _tagged_arr) _temp777;{ void* _temp800[ 3u]={& _temp801,&
+_temp777;{ struct Cyc_Std_String_pa_struct _temp801; _temp801.tag= Cyc_Std_String_pa;
+_temp801.f1=( struct _tagged_arr) filename;{ void* _temp800[ 3u]={& _temp801,&
 _temp802,& _temp803}; Cyc_Std_aprintf( _tag_arr("echo '#include <%s>' | %s -E -o %s -",
 sizeof( unsigned char), 37u), _tag_arr( _temp800, sizeof( void*), 3u));}}}});
 if( Cyc_Std_system(( struct _tagged_arr) _temp778) !=  0){ return 1;} maybe= Cyc_Std_fopen((
@@ -2718,9 +2718,9 @@ _tagged_arr)) Cyc_List_list)( _tag_arr( _temp1007, sizeof( struct Cyc_Absyn_Decl
 1u));}), out_file);}}} _temp778=({ struct Cyc_Std_String_pa_struct _temp1011;
 _temp1011.tag= Cyc_Std_String_pa; _temp1011.f1=( struct _tagged_arr) _temp773;{
 struct Cyc_Std_String_pa_struct _temp1010; _temp1010.tag= Cyc_Std_String_pa;
-_temp1010.f1=( struct _tagged_arr) filename;{ struct Cyc_Std_String_pa_struct
+_temp1010.f1=( struct _tagged_arr) _temp777;{ struct Cyc_Std_String_pa_struct
 _temp1009; _temp1009.tag= Cyc_Std_String_pa; _temp1009.f1=( struct _tagged_arr)
-_temp777;{ void* _temp1008[ 3u]={& _temp1009,& _temp1010,& _temp1011}; Cyc_Std_aprintf(
+filename;{ void* _temp1008[ 3u]={& _temp1009,& _temp1010,& _temp1011}; Cyc_Std_aprintf(
 _tag_arr("echo '#include <%s>' | %s -E -dM -o %s -", sizeof( unsigned char), 41u),
 _tag_arr( _temp1008, sizeof( void*), 3u));}}}}); if( Cyc_Std_system(( struct
 _tagged_arr) _temp778) !=  0){ return 1;} maybe= Cyc_Std_fopen(( struct

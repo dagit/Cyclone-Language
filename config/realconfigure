@@ -69,13 +69,6 @@ function get_cc {
   fi
 }
 
-# sets up default Cyclone compile flags
-#
-function get_cflags {
-  CFLAGS=
-  echo $CFLAGS
-}
-
 # sets up default Cyclone load flags
 #
 function get_ldflags {
@@ -246,8 +239,7 @@ chkdir "include files" $incdir
 # figure out all supported architectures by checking for config files
 ALL_ARCHS=`cd arch; \ls -1 | grep -v undef | grep -v CVS | awk '{printf("%s ",$1);}'`
 
-# get default compile and load flags
-CFLAGS=`get_cflags`
+# get default load flags
 LD_FLAGS=`get_ldflags`
 
 # write the config Makefile
@@ -265,7 +257,6 @@ BIN_INSTALL=${bindir}
 LIB_INSTALL=${libdir}
 ALL_ARCHS=${ALL_ARCHS}
 CC=${CC}
-CFLAGS=${CFLAGS}
 NET_LD_FLAGS=${LD_FLAGS}
 SHELL=${CONFIGSHELL}
 

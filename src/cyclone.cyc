@@ -82,7 +82,6 @@ extern "C" {
   extern Cstring Cdef_lib_path;
   extern Cstring Carch;
   extern Cstring Ccomp;
-  extern Cstring Ccflags;
 }
 
 static string_t cpp = "";
@@ -98,9 +97,8 @@ static void add_cpparg(string_t<`H> s) {
 // Prints the version # and exits
 static void print_version() {
   printf("The Cyclone compiler, version %s\n", version);
-  printf("Compiled for architecture: %s CC=\"%s %s\"\n", 
-	 Cstring_to_string(Carch), Cstring_to_string(Ccomp),
-	 Cstring_to_string(Ccflags));
+  printf("Compiled for architecture: %s CC=\"%s\"\n", 
+	 Cstring_to_string(Carch), Cstring_to_string(Ccomp));
   printf("Standard library directory: %s\n",Cstring_to_string(Cdef_lib_path));
   printf("Standard include directory: %s\n", Cstring_to_string(Cdef_inc_path));
   exit(0);
@@ -757,13 +755,6 @@ int main(int argc, string_t<`H> ?`H argv) {
   string_t comp = Cstring_to_string(Ccomp);
   set_cpp(strconcat(comp," -x c -E -U__GNUC__ -nostdinc"));
 
-  // set up default ccargs
-  string_t cflags = Cstring_to_string(Ccflags);
-  if (strlen(cflags) != 0) {
-    add_ccarg(cflags);
-    add_cpparg(cflags);
-  }
-
   // now parse the arguments
   Arg::speclist_t<`H,`H> options =
     list(new $("-v",false,"",
@@ -799,6 +790,9 @@ int main(int argc, string_t<`H> ?`H argv) {
          new $("-s",false,"",
                new Flag_spec(add_ccarg),
                "Remove all symbol table and relocation info from executable"),
+         new $("-O0",false,"",
+               new Flag_spec(add_ccarg),
+               "Don't optimize"),
          new $("-O",false,"",
                new Flag_spec(add_ccarg),
                "Optimize"),
