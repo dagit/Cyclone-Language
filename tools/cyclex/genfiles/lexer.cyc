@@ -70,7 +70,7 @@ void reset_string_buffer() {
 void store_string_char(char c) {
   if(string_index + 1 >= numelts(string_buff)) {
     mstring_t new_buff = new_string(numelts(string_buff)*2);
-    strncpy(new_buff, string_buff, numelts(string_buff));
+    strncpy((char ?@nozeroterm)new_buff, string_buff, numelts(string_buff));
     string_buff = new_buff;
   }
   string_buff[string_index++] = c;

@@ -1549,6 +1549,14 @@ void unify_it(type_t t1, type_t t2) {
     t2_failure = t2;
     failure_reason = "(different number of members)";
     break;
+  case $(&TypedefType(_,ts1,td1,_),&TypedefType(_,ts2,td2,_)):
+    if (td1 != td2) {
+      failure_reason = "(different abstract typedefs)";
+      break;
+    }
+    failure_reason = "(type parameters to typedef differ)";
+    unify_list(ts1,ts2);
+    return;
   case $(&HeapRgn, &HeapRgn): return;
   case $(&UniqueRgn, &UniqueRgn): return;
   case $(&RefCntRgn, &RefCntRgn): return;

@@ -675,14 +675,12 @@ static bool is_boxed_tvar(type_t t) {
   default: return false;
   }
 }
-static bool is_abs_tvar(type_t t) {
-  switch (compress(t)) {
-  case &VarType(tv):
-    return kind_leq(&ak,typ_kind(t));
+static bool is_abstract_type(type_t t) {
+  switch (typ_kind(t)) {
+  case &Kind{.kind = AnyKind, ...}: return true;
   default: return false;
   }
 }
-
 
 static type_t typ_to_c(type_t t) {
   switch (t) {
@@ -766,7 +764,7 @@ static type_t typ_to_c(type_t t) {
       // the struct type.
       region r;
       let t = rsubstitute(r,rzip(r,r,ad->tvs,ts),last_type);
-      if (is_abs_tvar(t)) return aggrdecl_type(ad->name,strctq);
+      if (is_abstract_type(t)) return aggrdecl_type(ad->name,strctq);
       return add_struct_type(ad->name,ad->tvs,ts,ad->impl->fields);
     }
     return aggrdecl_type(ad->name,strctq);
@@ -1589,9 +1587,10 @@ static int get_member_offset(aggrdecl_t ad, field_name_t f) {
   toc_impos(aprintf("get_member_offset %s failed",*f));
 }
 
-static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
-                         bool pointer, exp_opt_t rgnopt,
-                         list_t<$(list_t<designator_t>,exp_t)@> dles,
+static exp_t init_struct(env_t nv, type_t struct_type, 
+                         list_t<type_t> exist_types,
+                         bool pointer, exp_opt_t rgnopt, 
+                         list_t<$(list_t<designator_t>,exp_t)@> dles, 
                          typedef_name_t tdn) {
   let x    = temp_var();
   let xexp = var_exp(x,DL);
@@ -1601,12 +1600,56 @@ static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
   let aggr_typ = typ_to_c(struct_type); //aggrdecl_type(tdn,strctq);
 
   bool is_atomic = true;
+  list_t<type_t> forall_types;
   aggrdecl_t ad;
+  list_t<aggrfield_t> aggrfields;
   switch(compress(struct_type)) {
-  case &AggrType(AggrInfo(info,_)):
+  case &AggrType(AggrInfo(info,ts)): 
     ad = get_known_aggrdecl(info);
+    aggrfields = ad->impl->fields;
+    forall_types = ts;
     break;
   default: toc_impos("init_struct: bad struct type");
+  }
+  type_t orig_typ = typ_to_c(struct_type); 
+  type_t aggr_typ = orig_typ;
+  if (exist_types != NULL && ad->impl->fields != NULL) {
+    // we have an aggregate with existential types that are instantiated.
+    // have to come up with (potentially) a new struct type if the last
+    // member is of abstract type.
+    let fields = ad->impl->fields;
+    for (; fields->tl != NULL; fields = fields->tl);
+    let last_field = fields->hd;
+    TOC_RGN(nv,temp) {
+      type_t cast_type;
+      if (pointer)
+        cast_type = cstar_typ(orig_typ,mt_tq);
+      else 
+        cast_type = orig_typ;
+      s = exp_stmt(cast_it(cast_type,copy_exp(xexp)),DL);
+      let inst1 = List::rzip(temp,temp,ad->tvs,forall_types);
+      if (is_abstract_type(rsubstitute(temp,inst1,last_field->type))) {
+        
+        let inst2 = List::rzip(temp,temp,ad->impl->exist_vars,exist_types);
+        let inst = List::rappend(temp,inst1,inst2);
+        // now create a new aggregate according to the full instantiation
+        list_t<aggrfield_t> new_fields = NULL;
+        for (fields = ad->impl->fields; fields != NULL; fields = fields->tl) {
+          let old_field = fields->hd;
+          let new_field = new Aggrfield{.name= old_field->name,
+                                        .tq = mt_tq,
+                                        .type = rsubstitute(temp,inst,
+                                                            old_field->type),
+                                        .width = old_field->width,
+                                        .attributes = old_field->attributes};
+          new_fields = new List(new_field,new_fields);
+        }
+        exist_types = NULL;
+        aggrfields = List::rev(new_fields);
+        struct_type = new AnonAggrType(ad->kind,aggrfields);
+        aggr_typ = typ_to_c(struct_type);
+      }
+    }
   }
   bool is_tagged_union = ad->impl->tagged;
   TOC_RGN(nv,r) {
@@ -1656,12 +1699,12 @@ static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
           default:
 	    bool was_ptr_type = is_pointer_type(e->topt->v);
             exp_to_c(nv,e);
-            let ad = lookup_decl_field(ad,f);
+            let ad = lookup_field(aggrfields,f);
             // cast to void* to avoid gcc warnings (does it more than needed)
 	    if (is_poly_field(struct_type,f) && !was_ptr_type)
 	      e = cast_it(void_star_typ(),e);
 	    // more warning avoidance -- watch out if existentials are common
-	    if(has_exists)
+	    if(exist_types != NULL)
 	      e = cast_it(typ_to_c(ad->type),e);
             // FIX: deal with nested arrays and comprehensions
             s = seq_stmt(exp_stmt(assign_exp(lval, e, DL), DL), s, DL);
@@ -2688,7 +2731,7 @@ DynCast:
       if (is_toplevel(nv))
 	unimp("%s: & on non-identifiers at the top-level",
               Position::string_of_segment(e1->loc));
-      e->r = init_struct(nv, e1->topt->v, ts != NULL, true, NULL, es, tdn)->r;
+      e->r = init_struct(nv, e1->topt->v, ts, true, NULL, es, tdn)->r;
       break;
     case &Tuple_e(es):
       if (is_toplevel(nv))
@@ -2814,7 +2857,7 @@ DynCast:
       break;
     case &Aggregate_e(tdn,ts,es,ad):
       // try to avoid the GCC bug
-      e->r = init_struct(nv, e1->topt->v, ts != NULL, true, rgnopt, es, tdn)->r;
+      e->r = init_struct(nv, e1->topt->v, ts, true, rgnopt, es, tdn)->r;
       break;
     case &Tuple_e(es):
       // try to avoid the GCC bug
@@ -3163,7 +3206,7 @@ DynCast:
     // Due to a GCC bug w.r.t. to nested designators, we expand this out
     // to ({ t temp; t.f1 = e1, ..., t.fn = en; t}).
     if(!is_toplevel(nv))
-      e->r = init_struct(nv,old_typ,ts != NULL,false,NULL,dles,tdn)->r;
+      e->r = init_struct(nv,old_typ,ts,false,NULL,dles,tdn)->r;
     else {
       // At top-level must create an initializer.  For MSVC, sort fields
       // and drop initializers (sorting okay b/c we're at top-level)

@@ -696,31 +696,39 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};int Cyc_open(const
-char*,int,struct _dyneither_ptr);struct Cyc___cycFILE;struct Cyc_String_pa_struct{
-int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};
+ typedef char*Cyc_Cstring;typedef char*Cyc_CstringNN;typedef struct _dyneither_ptr Cyc_string_t;
+typedef struct _dyneither_ptr Cyc_mstring_t;typedef struct _dyneither_ptr*Cyc_stringptr_t;
+typedef struct _dyneither_ptr*Cyc_mstringptr_t;typedef char*Cyc_Cbuffer_t;typedef
+char*Cyc_CbufferNN_t;typedef struct _dyneither_ptr Cyc_buffer_t;typedef struct
+_dyneither_ptr Cyc_mbuffer_t;typedef int Cyc_bool;struct Cyc_Core_NewRegion{struct
+_DynRegionHandle*dynregion;};typedef unsigned long Cyc_size_t;typedef
+unsigned short Cyc_mode_t;int Cyc_open(const char*,int,struct _dyneither_ptr);struct
+Cyc___cycFILE;typedef struct Cyc___cycFILE Cyc_FILE;struct Cyc_String_pa_struct{int
+tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};
 struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{int
 tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
-int tag;unsigned long*f1;};int Cyc_fclose(struct Cyc___cycFILE*);int Cyc_feof(struct
-Cyc___cycFILE*);int Cyc_fflush(struct Cyc___cycFILE*);int Cyc_fgetc(struct Cyc___cycFILE*);
-struct Cyc___cycFILE*Cyc_fopen(const char*,const char*);int Cyc_fputc(int,struct Cyc___cycFILE*);
-int Cyc_fputs(const char*,struct Cyc___cycFILE*);unsigned long Cyc_fread(struct
-_dyneither_ptr,unsigned long,unsigned long,struct Cyc___cycFILE*);struct Cyc_ShortPtr_sa_struct{
-int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};
-struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;
-unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
-struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
+int tag;unsigned long*f1;};typedef void*Cyc_parg_t;int Cyc_fclose(struct Cyc___cycFILE*);
+int Cyc_feof(struct Cyc___cycFILE*);int Cyc_fflush(struct Cyc___cycFILE*);int Cyc_fgetc(
+struct Cyc___cycFILE*);struct Cyc___cycFILE*Cyc_fopen(const char*,const char*);int
+Cyc_fputc(int,struct Cyc___cycFILE*);int Cyc_fputs(const char*,struct Cyc___cycFILE*);
+unsigned long Cyc_fread(struct _dyneither_ptr,unsigned long,unsigned long,struct
+Cyc___cycFILE*);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
+int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
+int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct
+_dyneither_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
 int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
-unsigned long Cyc_fwrite(struct _dyneither_ptr,unsigned long,unsigned long,struct
-Cyc___cycFILE*);int Cyc_getc(struct Cyc___cycFILE*);int Cyc_putc(int,struct Cyc___cycFILE*);
-int Cyc_ungetc(int,struct Cyc___cycFILE*);int Cyc_getw(struct Cyc___cycFILE*);int Cyc_putw(
-int,struct Cyc___cycFILE*);extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{
-char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*
-tag;struct _dyneither_ptr f1;};struct Cyc___cycFILE*Cyc_file_open(struct
-_dyneither_ptr,struct _dyneither_ptr);void Cyc_file_close(struct Cyc___cycFILE*);
-struct _dyneither_ptr Cyc_getcwd(struct _dyneither_ptr buf,unsigned long size);struct
-Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
+typedef void*Cyc_sarg_t;unsigned long Cyc_fwrite(struct _dyneither_ptr,
+unsigned long,unsigned long,struct Cyc___cycFILE*);int Cyc_getc(struct Cyc___cycFILE*);
+int Cyc_putc(int,struct Cyc___cycFILE*);int Cyc_ungetc(int,struct Cyc___cycFILE*);
+int Cyc_getw(struct Cyc___cycFILE*);int Cyc_putw(int,struct Cyc___cycFILE*);extern
+char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{char*tag;};extern char
+Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*tag;struct
+_dyneither_ptr f1;};struct Cyc___cycFILE*Cyc_file_open(struct _dyneither_ptr,struct
+_dyneither_ptr);void Cyc_file_close(struct Cyc___cycFILE*);struct _dyneither_ptr Cyc_getcwd(
+struct _dyneither_ptr buf,unsigned long size);typedef unsigned int Cyc_Core_sizeof_t;
+struct Cyc_Core_Opt{void*v;};typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;extern char
+Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{char*tag;
+struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
 char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
@@ -734,36 +742,37 @@ return 0;return dyn.curr;};}int open_without_mode(const char*,int);int open_with
 const char*,int,unsigned short);int Cyc_open(const char*s,int i,struct _dyneither_ptr
 ms){if(_get_dyneither_size(ms,sizeof(unsigned short))>= 1)return open_with_mode(s,
 i,*((unsigned short*)_check_dyneither_subscript(ms,sizeof(unsigned short),0)));
-else{return open_without_mode(s,i);}}struct __abstractFILE;struct Cyc___cycFILE{
-struct __abstractFILE*file;};int fclose(struct __abstractFILE*);int Cyc_fclose(
-struct Cyc___cycFILE*f){return fclose(f->file);}int feof(struct __abstractFILE*);
-int Cyc_feof(struct Cyc___cycFILE*f){return feof(f->file);}int fflush(struct 
-__abstractFILE*);int Cyc_fflush(struct Cyc___cycFILE*f){if((unsigned int)f)return
-fflush((struct __abstractFILE*)f->file);else{return fflush(0);}}int fgetc(struct 
-__abstractFILE*);int Cyc_fgetc(struct Cyc___cycFILE*f){return fgetc(f->file);}
-struct __abstractFILE*fopen(const char*,const char*);struct Cyc___cycFILE*Cyc_fopen(
-const char*name,const char*type){struct __abstractFILE*_tmp0=fopen(name,type);
-struct Cyc___cycFILE*_tmp12;return(unsigned int)_tmp0?(_tmp12=_cycalloc(sizeof(*
-_tmp12)),((_tmp12->file=(struct __abstractFILE*)_tmp0,_tmp12))): 0;}int fputc(int,
-struct __abstractFILE*);int Cyc_fputc(int x,struct Cyc___cycFILE*f){return fputc(x,f->file);}
-int fputs(const char*,struct __abstractFILE*);int Cyc_fputs(const char*x,struct Cyc___cycFILE*
-f){return fputs(x,f->file);}unsigned long fread(char*,unsigned long,unsigned long,
-struct __abstractFILE*);static char _tmp3[27]="fread: buffer insufficient";static
-struct Cyc_Core_Failure_struct Cyc___fread_failure={Cyc_Core_Failure,{_tmp3,_tmp3,
-_tmp3 + 27}};unsigned long Cyc_fread(struct _dyneither_ptr ptr,unsigned long size,
-unsigned long nmemb,struct Cyc___cycFILE*f){if(size * nmemb > _get_dyneither_size(
-ptr,sizeof(char)))(int)_throw((void*)& Cyc___fread_failure);return fread((char*)
-_check_null(_untag_dyneither_ptr(ptr,sizeof(char),1)),size,nmemb,f->file);}
-unsigned long fwrite(const char*,unsigned long,unsigned long,struct __abstractFILE*);
-static char _tmp5[31]="fwrite called with NULL string";static struct Cyc_Core_Failure_struct
-Cyc___fwrite_failure_1={Cyc_Core_Failure,{_tmp5,_tmp5,_tmp5 + 31}};static char
-_tmp7[28]="fwrite: buffer insufficient";static struct Cyc_Core_Failure_struct Cyc___fwrite_failure_2={
-Cyc_Core_Failure,{_tmp7,_tmp7,_tmp7 + 28}};unsigned long Cyc_fwrite(struct
-_dyneither_ptr ptr,unsigned long size,unsigned long nmemb,struct Cyc___cycFILE*f){
-if(!((unsigned int)ptr.curr))(int)_throw((void*)& Cyc___fwrite_failure_1);else{
-if(size * nmemb > _get_dyneither_size(ptr,sizeof(char)))(int)_throw((void*)& Cyc___fwrite_failure_2);
-return fwrite((const char*)_untag_dyneither_ptr(ptr,sizeof(char),1),size,nmemb,f->file);}}
-int getc(struct __abstractFILE*);int Cyc_getc(struct Cyc___cycFILE*f){return getc(f->file);}
+else{return open_without_mode(s,i);}}struct __abstractFILE;typedef struct 
+__abstractFILE Cyc_Cstdio___cFILE;struct Cyc___cycFILE{struct __abstractFILE*file;
+};int fclose(struct __abstractFILE*);int Cyc_fclose(struct Cyc___cycFILE*f){return
+fclose(f->file);}int feof(struct __abstractFILE*);int Cyc_feof(struct Cyc___cycFILE*
+f){return feof(f->file);}int fflush(struct __abstractFILE*);int Cyc_fflush(struct
+Cyc___cycFILE*f){if((unsigned int)f)return fflush((struct __abstractFILE*)f->file);
+else{return fflush(0);}}int fgetc(struct __abstractFILE*);int Cyc_fgetc(struct Cyc___cycFILE*
+f){return fgetc(f->file);}struct __abstractFILE*fopen(const char*,const char*);
+struct Cyc___cycFILE*Cyc_fopen(const char*name,const char*type){struct 
+__abstractFILE*_tmp0=fopen(name,type);struct Cyc___cycFILE*_tmp12;return(
+unsigned int)_tmp0?(_tmp12=_cycalloc(sizeof(*_tmp12)),((_tmp12->file=(struct 
+__abstractFILE*)_tmp0,_tmp12))): 0;}int fputc(int,struct __abstractFILE*);int Cyc_fputc(
+int x,struct Cyc___cycFILE*f){return fputc(x,f->file);}int fputs(const char*,struct 
+__abstractFILE*);int Cyc_fputs(const char*x,struct Cyc___cycFILE*f){return fputs(x,f->file);}
+unsigned long fread(char*,unsigned long,unsigned long,struct __abstractFILE*);
+static char _tmp3[27]="fread: buffer insufficient";static struct Cyc_Core_Failure_struct
+Cyc___fread_failure={Cyc_Core_Failure,{_tmp3,_tmp3,_tmp3 + 27}};unsigned long Cyc_fread(
+struct _dyneither_ptr ptr,unsigned long size,unsigned long nmemb,struct Cyc___cycFILE*
+f){if(size * nmemb > _get_dyneither_size(ptr,sizeof(char)))(int)_throw((void*)& Cyc___fread_failure);
+return fread((char*)_check_null(_untag_dyneither_ptr(ptr,sizeof(char),1)),size,
+nmemb,f->file);}unsigned long fwrite(const char*,unsigned long,unsigned long,
+struct __abstractFILE*);static char _tmp5[31]="fwrite called with NULL string";
+static struct Cyc_Core_Failure_struct Cyc___fwrite_failure_1={Cyc_Core_Failure,{
+_tmp5,_tmp5,_tmp5 + 31}};static char _tmp7[28]="fwrite: buffer insufficient";static
+struct Cyc_Core_Failure_struct Cyc___fwrite_failure_2={Cyc_Core_Failure,{_tmp7,
+_tmp7,_tmp7 + 28}};unsigned long Cyc_fwrite(struct _dyneither_ptr ptr,unsigned long
+size,unsigned long nmemb,struct Cyc___cycFILE*f){if(!((unsigned int)ptr.curr))(int)
+_throw((void*)& Cyc___fwrite_failure_1);else{if(size * nmemb > _get_dyneither_size(
+ptr,sizeof(char)))(int)_throw((void*)& Cyc___fwrite_failure_2);return fwrite((
+const char*)_untag_dyneither_ptr(ptr,sizeof(char),1),size,nmemb,f->file);}}int
+getc(struct __abstractFILE*);int Cyc_getc(struct Cyc___cycFILE*f){return getc(f->file);}
 int putc(int,struct __abstractFILE*);int Cyc_putc(int x,struct Cyc___cycFILE*f){
 return putc(x,f->file);}int ungetc(int,struct __abstractFILE*);int Cyc_ungetc(int x,
 struct Cyc___cycFILE*f){return ungetc(x,f->file);}int getw(struct __abstractFILE*);

@@ -696,18 +696,26 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc___cycFILE;
+ typedef char*Cyc_Cstring;typedef char*Cyc_CstringNN;typedef struct _dyneither_ptr Cyc_string_t;
+typedef struct _dyneither_ptr Cyc_mstring_t;typedef struct _dyneither_ptr*Cyc_stringptr_t;
+typedef struct _dyneither_ptr*Cyc_mstringptr_t;typedef char*Cyc_Cbuffer_t;typedef
+char*Cyc_CbufferNN_t;typedef struct _dyneither_ptr Cyc_buffer_t;typedef struct
+_dyneither_ptr Cyc_mbuffer_t;typedef int Cyc_bool;struct Cyc_Core_NewRegion{struct
+_DynRegionHandle*dynregion;};typedef unsigned long Cyc_size_t;typedef
+unsigned short Cyc_mode_t;struct Cyc___cycFILE;typedef struct Cyc___cycFILE Cyc_FILE;
 struct Cyc_String_pa_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{
 int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
 int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
-int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
-Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
-int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{
-int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};
-struct Cyc_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int
-tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{
+int tag;unsigned long*f1;};typedef void*Cyc_parg_t;struct Cyc_ShortPtr_sa_struct{
+int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};
+struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;
+unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
+struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
+int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
+typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{
 char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*
-tag;struct _dyneither_ptr f1;};struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[
+tag;struct _dyneither_ptr f1;};typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{
+void*v;};typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;extern char Cyc_Core_Invalid_argument[
 17];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dyneither_ptr f1;};
 extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{char*tag;struct
 _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
@@ -720,18 +728,20 @@ inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned i
 if(bd >> 20  || sz >> 12)return 0;{unsigned char*ptrbd=dyn.curr + bd * sz;if(((ptrbd < 
 dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
 return 0;return dyn.curr;};}struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
+typedef struct Cyc_List_List*Cyc_List_list_t;typedef struct Cyc_List_List*Cyc_List_List_t;
 extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{char*
 tag;};struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*x);extern char Cyc_List_Nth[
 4];struct Cyc_List_Nth_struct{char*tag;};struct Cyc_Fn_Function{void*(*f)(void*,
-void*);void*env;};struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(void*,void*),
-void*x);struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(void*));void*Cyc_Fn_apply(
-struct Cyc_Fn_Function*f,void*x);struct Cyc_Fn_Function*Cyc_Fn_compose(struct Cyc_Fn_Function*
-g,struct Cyc_Fn_Function*f);struct Cyc_Fn_Function*Cyc_Fn_curry(struct Cyc_Fn_Function*
-f);struct Cyc_Fn_Function*Cyc_Fn_uncurry(struct Cyc_Fn_Function*f);struct Cyc_List_List*
-Cyc_Fn_map_fn(struct Cyc_Fn_Function*f,struct Cyc_List_List*x);struct Cyc_Fn_Function;
-struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(void*,void*),void*x){struct Cyc_Fn_Function*
-_tmpF;return(_tmpF=_cycalloc(sizeof(*_tmpF)),((_tmpF->f=(void*(*)(void*,void*))f,((
-_tmpF->env=(void*)((void*)x),_tmpF)))));}static void*Cyc_Fn_fp_apply(void*(*f)(
+void*);void*env;};typedef struct Cyc_Fn_Function*Cyc_Fn_fn_t;struct Cyc_Fn_Function*
+Cyc_Fn_make_fn(void*(*f)(void*,void*),void*x);struct Cyc_Fn_Function*Cyc_Fn_fp2fn(
+void*(*f)(void*));void*Cyc_Fn_apply(struct Cyc_Fn_Function*f,void*x);struct Cyc_Fn_Function*
+Cyc_Fn_compose(struct Cyc_Fn_Function*g,struct Cyc_Fn_Function*f);struct Cyc_Fn_Function*
+Cyc_Fn_curry(struct Cyc_Fn_Function*f);struct Cyc_Fn_Function*Cyc_Fn_uncurry(
+struct Cyc_Fn_Function*f);struct Cyc_List_List*Cyc_Fn_map_fn(struct Cyc_Fn_Function*
+f,struct Cyc_List_List*x);struct Cyc_Fn_Function;struct Cyc_Fn_Function*Cyc_Fn_make_fn(
+void*(*f)(void*,void*),void*x){struct Cyc_Fn_Function*_tmpF;return(_tmpF=
+_cycalloc(sizeof(*_tmpF)),((_tmpF->f=(void*(*)(void*,void*))f,((_tmpF->env=(void*)((
+void*)x),(struct Cyc_Fn_Function*)_tmpF)))));}static void*Cyc_Fn_fp_apply(void*(*f)(
 void*),void*x){return f(x);}struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(void*)){
 return((struct Cyc_Fn_Function*(*)(void*(*f)(void*(*)(void*),void*),void*(*x)(
 void*)))Cyc_Fn_make_fn)((void*(*)(void*(*)(void*),void*))Cyc_Fn_fp_apply,f);}

@@ -12,7 +12,7 @@ CYCC=../build/boot/cyclone$(EXE)
 CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g
 endif
 
-all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt)
+all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt flatlist)
 	./test_regions
 	./cyctest
 	./foo < foo_input
@@ -65,7 +65,7 @@ clean:
 	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions unique_test)\
 	$(RM) foo_tab.* unsafe_cast.o pcredemo.o pcredemo.c pcredemo
 	$(RM) hello cyctest foo histogram merge_sort test_getopt
-	$(RM) test_regions
+	$(RM) test_regions flatlist
 	$(RM) unique_test
 	$(RM) *~ *.exe *.output *.stackdump
 #	$(MAKE) clean -C benchmarks

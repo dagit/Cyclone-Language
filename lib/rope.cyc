@@ -59,7 +59,7 @@ static unsigned int flatten_it(mstring_t s, unsigned int i, rope_t r) {
   switch (r->v) {
   case &String_rope(ss):
     let len = strlen(ss);
-    strncpy(s+i,ss,len);
+    strncpy((char ?@nozeroterm)s+i,ss,len);
     return i+len;
   case &Array_rope(rs):
     let len = numelts(rs);

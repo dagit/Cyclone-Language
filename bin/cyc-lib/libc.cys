@@ -3445,7 +3445,7 @@ cycstub {
              int (@compar)(const `a @, const `a @)) {
     if (!tab) throw &__qsort_failure_1;
     if (numelts(tab) < nmemb) throw &__qsort_failure_2;
-    Cstdlib::qsort((_@)tab,nmemb,szmemb,compar);
+    Cstdlib::qsort((_@)tab,nmemb,(size_t)szmemb,compar);
   }
 }
 hstub rand {
@@ -5209,13 +5209,14 @@ cycstub execlp {
   int execlp(const char @ path, const char @`r arg0, ... const char *`r argv) {
     if (argv[numelts(argv) - 1] != NULL) throw &__execlp_failure;
     // We allocate 1+numelts(argv) because we need to prepend arg0
-    // FIX: can region-allocate ...
-    const char *`r @ @zeroterm newargs = 
-      new {for i < numelts(argv) : (const char *`r)NULL};
-    newargs[0] = arg0;
-    for (int i = 0; i < numelts(argv)-1; i++)
-      newargs[i+1] = argv[i];
-    return execvp(path, newargs);
+    { region r2; 
+      const char *`r ? @zeroterm newargs = 
+        rnew(r2) {for i < numelts(argv) : (const char *`r)NULL};
+      newargs[0] = arg0;
+      for (int i = 0; i < numelts(argv)-1; i++)
+        newargs[i+1] = argv[i];
+      return execvp(path, newargs);
+    }
   }
 }
 hstub execv {

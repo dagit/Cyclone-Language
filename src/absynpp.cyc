@@ -586,6 +586,8 @@ static void print_tms(list_t<type_modifier_t> tms) {
   fprintf(stderr,"\n");
 }
 
+doc_t rgn2doc(type_t t);
+
 doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
   if (tms==NULL) return d;
   doc_t rest = dtms2doc(false,d,tms->tl);
@@ -645,7 +647,7 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
     switch(compress(rgn)) {
     case &HeapRgn: break;
     case &Evar(_,_,_,_) && print_for_cycdoc: break;
-    default: ptr = cat(ptr,typ2doc(rgn),text(" "));
+    default: ptr = cat(ptr,rgn2doc(rgn),text(" "));
     }
     ptr = cat(ptr,tqual2doc(tq2));
     return cat(ptr,rest);
@@ -657,7 +659,8 @@ doc_t rgn2doc(type_t t) {
   case &HeapRgn: return text("`H");
   case &UniqueRgn: return text("`U");
   case &RefCntRgn: return text("`RC");
-  default: return ntyp2doc(t);
+  case &VarType(_): return ntyp2doc(t);
+  default: return cat(text("@region("),ntyp2doc(t),text(")"));
   }
 }
 

@@ -153,7 +153,7 @@ static void gobble(Lexbuf<`a> lbuf) {
       newbuf[i] = buf_buf[i];
     buf_len = newlen;
     buf_buf :=: newbuf;
-    if (newbuf) ufree(newbuf);
+    if (newbuf) ufree((char ?@nozeroterm)newbuf);
   }
   char ?from = lbuf->lex_buffer + lbuf->lex_start_pos;
   for (int i = 0; i < howmuch; i++,from++,buf_pos++)
@@ -164,7 +164,7 @@ static void purge() {
   if (buf_buf) buf_buf[0] = '\0';
 }
 static string_t<`r> regurgitate(region_t<`r> r) {
-  mstring_t<`r> x = rmalloc(r, (buf_pos+1) * sizeof(char));
+  mstring_t<`r> x = rcalloc(r, (buf_pos+1), sizeof(char));
   for (int i = 0; i<buf_pos; i++)
     x[i] = buf_buf[i];
   x[buf_pos] = '\0';

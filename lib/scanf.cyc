@@ -617,7 +617,7 @@ literal:
 
 				/* x ok iff flag still set & 2nd char */
 				case 'x': case 'X':
-					if (flags & PFXOK && p == buf + 1) {
+					if (flags & PFXOK && p - 1 == buf) {
 						base = 16;	/* if %i */
 						flags &= ~PFXOK;
 						goto ok;

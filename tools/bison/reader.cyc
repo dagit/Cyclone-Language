@@ -1237,6 +1237,7 @@ parse_expect_decl()
   register int c;
   register int count;
   char buffer[21]@zeroterm = {for i<20:0};
+  char ?bufp = buffer;
 
   c = getc((FILE @)finput);
   while (c == ' ' || c == '\t')
@@ -1246,10 +1247,10 @@ parse_expect_decl()
   while (c >= '0' && c <= '9')
     {
       if (count < 20)
-	buffer[count++] = (char)c;
+	bufp[count++] = (char)c;
       c = getc((FILE @)finput);
     }
-  buffer[count] = 0;
+  bufp[count] = 0;
 
   ungetc (c, (FILE @)finput);
 

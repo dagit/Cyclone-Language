@@ -1254,7 +1254,9 @@ void dumpdecl(decl_t d) {
     break;
 
   case &Typedef_d(td):
-    if (!expand_typedefs || (td->defn != NULL) && (Absynpp::is_anon_aggrtype(td->defn->v))) {
+    // JGM: commenting out because abstract typdefs don't get printed
+    // otherwise (e.g., typedef _ T;)
+    // if (!expand_typedefs || (td->defn != NULL) && (Absynpp::is_anon_aggrtype(td->defn->v))) {
       dump("typedef");
       type_t t;
       if (td->defn == NULL) 
@@ -1264,7 +1266,7 @@ void dumpdecl(decl_t d) {
       dumptqtd(td->tq,t,dumptypedefname,td);
       dumpatts(td->atts);
       dump_semi();
-    }
+      //}
     break;
   case &Namespace_d(v,tdl):
     dump("namespace");
@@ -1342,6 +1344,7 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
     case &RefCntRgn: dump("`RC"); break;
     case &VarType(tv): dump_str(tv->name); break;
     case &Evar(_,NULL,_,_): dumpntyp(Tcutil::compress(rgn)); break;
+    case &TypedefType(...): dump("@region("); dumptyp(rgn); dump(")"); break;
     default: Tcutil::impos("dumptms: bad rgn type in Pointer_mod");
     }
     dumptq(tq2); // rare
