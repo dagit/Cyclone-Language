@@ -25,14 +25,12 @@
    and control-flow analysis (and is now in-between them):
    (1) Check that we do not jump into a scope, try-block, etc.
    (2) Create a Hashtable for the flow-analysis mapping a statement
-       to its non-local control-flow predecessors (if no such preds, then not
-       in the table).  Another table is for non-local successors.
+       to its non-local control-flow successors.
        We used to hang this on the abstract syntax.
    (3) Create a Hashtable for the code-generator mapping a (jump) statement
        to how many (local) exception handlers it should pop off (if not in
        the table, then 0).
    (4) check that jumps are to well-defined destinations
-   tables-of-tables, mapping functions to tables.
 */
 
 #include <list.h>
@@ -116,7 +114,7 @@ static void anal_exp(senv_t env, exp_t e) { // only care about nested StmtExp_e
   case &Var_e(...):  break;
 
   case &Datatype_e(es,_,_): fallthru(es);
-  case &Tuple_e(es):    fallthru(es);
+  case &Tuple_e(es):        fallthru(es);
   case &Primop_e(_,es): anal_exps(env,es); break;
 
   case &FnCall_e(e1,es,_,_): anal_exp(env,e1); anal_exps(env,es); break;
@@ -168,6 +166,7 @@ static void anal_scs(senv_t env, list_t<switch_clause_t> scs) {
   // encloser for clause changes only if it has pattern-vars, which the
   // type-checker sets up for us!
   env.break_stmt = env.next_stmt;
+  env.next_stmt  = &CaseEnd_j_val;
   for(; scs!=NULL; scs=scs->tl) {
     let sc = scs->hd;
     let wc = sc->where_clause;

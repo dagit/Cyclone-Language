@@ -149,27 +149,10 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       simplify_unused_result_exp(e);
     return;
 
-  case &Seq_s(s1,s2):
+  case &Seq_s(s1,s2): // we used to try to avoid recursion on nested Seq
     tcStmt(te,s1,true); // pass new_block in case of weird associativity??
     tcStmt(te,s2,true);
     return;
-    /*
-    // JGM: try to treat sequences as "tail-calls" to avoid a deep stack.
-    // (Of course, this depends on the parser's associativity.)
-    while (true)
-      switch (s2->r) {
-      case &Seq_s(s3,s4):
-	decorate_stmt(te,s2);
-	te2 = set_next(te,new Stmt_j(s4));
-	tcStmt(te2,s3,true);
-	s2  = s4;
-	continue;
-      default: goto seq_end; // break out of loop
-      }
-  seq_end:
-    tcStmt(te,s2,true);
-    return;
-    */
 
   case &Return_s(eopt):
     type_t t = return_typ(te);
@@ -178,16 +161,14 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       case &VoidType: break;
       case &FloatType(_):
       case &IntType(_,_):
-	warn(s0->loc,"should return a value of type %s",typ2string(t));
-        break;
+	warn(s0->loc,"should return a value of type %s",typ2string(t)); break;
       default:
-	terr(s0->loc,"must return a value of type %s",typ2string(t));
-        break;
+	terr(s0->loc,"must return a value of type %s",typ2string(t)); break;
       }
     } else {
       // don't introduce alias expressions here; would be useless
       bool bogus = false;
-      exp_t e = (exp_t)eopt;
+      exp_t e = eopt;
       tcExp(te,&t,e);
       if (!coerce_arg(te,e,t,&bogus)) {
         terr(s0->loc, "returns value of type %s but requires %s",
@@ -224,9 +205,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   case &While_s($(e,cont_s),s):
     decorate_stmt(te,cont_s);
     tcTest(te,e,"while loop");
-    TEMP_RGN(te, r) {
-      tcStmt(set_in_loop(r,te,cont_s),s,true);
-    }
+    tcStmt(te,s,true);
     return;
 
   case &For_s(e1,$(e2,guard_s),$(e3,cont_s),s):
@@ -235,7 +214,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     tcExp(te,NULL,e1);
     tcTest(te,e2,"for loop");
     TEMP_RGN(te, r) {
-      let te = set_in_loop(r,te,cont_s);
       tcStmt(te,s,true);
       tcExp(te,NULL,e3); // ??? what does a break/continue in e3 mean ???
       simplify_unused_result_exp(e3);
@@ -244,17 +222,13 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
   case &Do_s(s,$(e,cont_s)):
     decorate_stmt(te,cont_s);
-    TEMP_RGN(te,r) {
-      tcStmt(set_in_loop(r,te,cont_s),s,true);
-    }
+    tcStmt(te,s,true);
     tcTest(te,e,"do loop");
     return;
 
-    // In the next 4 cases, the function call assigns through sopt
-    // We leave the work to Tcenv b/c it has all the control information
   case &Break_s:    
-  case &Continue_s: return;
-  case &Goto_s(l):  process_goto(te,s0,l);   return;
+  case &Continue_s:
+  case &Goto_s(_):  return;
 
   case &Fallthru_s(es,*clauseopt):
     let trip_opt = process_fallthru(te,s0,clauseopt);
@@ -297,7 +271,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // Note that we set new_block to false because we're explicitly creating
     // a new named block here.
     TEMP_RGN(te,r) {
-      tcStmt(Tcenv::new_named_block(r,s0->loc,add_label(te,l,s),
+      tcStmt(Tcenv::new_named_block(r,s0->loc,te,
                                     new Tvar(new ((string_t)aprintf("`%s",*l)),
                                              new_tvar_id(),
                                              kind_to_bound(&rk))),s,false); 
@@ -334,8 +308,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     TEMP_RGN(te,r) {
       if (is_noalias_pointer_or_aggr(r,t) && !is_noalias_path(r,e))
         terr(e->loc,UNIQUE_ERR_MSG);
-      let te = set_in_switch(r,te);
-      te = clear_fallthru(r,te);
+      let te = clear_fallthru(r,te);
       for (_ scs = List::rev(scs0); scs != NULL; scs = scs->tl) {
         let p = scs->hd->pattern;
         let pat_res = tcPat(te,p,&t,e);
@@ -366,6 +339,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     return;
 
   case &TryCatch_s(s,*scs0,*dtp):
+    // DJG: KLUDGE necessary?
     // This is a KLUDGE so that we have a next statement that is not
     // outside of the handler, eg. for try while(b) break; catch ...
     // We have to do this b/c the translation to C uses the destinations
@@ -388,9 +362,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     
     TEMP_RGN(te,r2) {
       // similar to Switch_s -- check the patterns in reverse order:
-      let te = set_in_switch(r2,te);
-      te = clear_fallthru(r2,te);
+      let te = clear_fallthru(r2,te);
       for (let scs = List::rev(*scs0); scs != NULL; scs = scs->tl) {
+	te = copy_tenv(r2,te);
         let p = scs->hd->pattern;
         let exception_type = exn_typ();
         let pat_res = tcPat(te,p,&exception_type,NULL);
@@ -681,21 +655,19 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         tcStmt(te,fd->body,false);
         check_delayed_effects(te);
         check_delayed_constraints(te);
-        if (!all_labels_resolved(te))
-          terr(d->loc,"function has goto statements to undefined labels");
         te->le = old_fenv;
         tcStmt(set_encloser(decl_rgn,te,s0),s,false);
         return;
-      case &Namespace_d(n,tds): unimp_msg_part = "namespace"; break;
-      case &Using_d(q,tds):     unimp_msg_part = "using";     break; //FIX: allow
-      case &Aggr_d(_):          unimp_msg_part = "type";      break;
-      case &Datatype_d(_):        unimp_msg_part = "datatype"; break;
-      case &Enum_d(_):          unimp_msg_part = "enum";   break;
-      case &Typedef_d(_):       unimp_msg_part = "typedef";   break;
+      case &Namespace_d(n,tds): unimp_msg_part = "namespace";    break;
+      case &Using_d(q,tds):     unimp_msg_part = "using";  break; //FIX: allow
+      case &Aggr_d(_):          unimp_msg_part = "type";         break;
+      case &Datatype_d(_):      unimp_msg_part = "datatype";     break;
+      case &Enum_d(_):          unimp_msg_part = "enum";         break;
+      case &Typedef_d(_):       unimp_msg_part = "typedef";      break;
       case &ExternC_d(_):       unimp_msg_part = "extern \"C\""; break;
       case &ExternCinclude_d(_,_):
-        unimp_msg_part = "extern \"C include\""; break;
-      case &Porton_d:          unimp_msg_part = "__cyclone_port_on__"; break;
+	unimp_msg_part = "extern \"C include\""; break;
+      case &Porton_d:          unimp_msg_part = "__cyclone_port_on__";  break;
       case &Portoff_d:         unimp_msg_part = "__cyclone_port_off__"; break;
       }
     }

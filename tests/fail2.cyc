@@ -1,11 +1,41 @@
 // goto enters local scope or exception handler
-void a13() {
+void j1() {
   goto L;
   int x;
  L: 37;
 }
 // goto enters local scope or exception handler
-void a14() {
+void j2() {
   goto L;
   try { L: 37; } catch { default: break; }
 }
+// jump has no target
+void j3() {
+  break;
+}
+// jump has no target
+void j4() {
+  switch(34) {
+  case x: continue;
+  }
+}
+// break causes outer switch to implicitly fallthru
+void j5(int x, int y) {
+  switch(x) {
+  case 1:
+    switch (y) {
+    default: break;
+    }
+  default: break;
+  }
+}
+// label L undefined
+void j6() {
+  goto L;
+}
+// repeated label
+void j7() {
+ L: ;
+ L: ;
+}
+

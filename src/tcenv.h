@@ -28,7 +28,6 @@
 #include "rgnorder.h"
 
 namespace Tcenv {
-
 using Core;
 using List;
 using Set;
@@ -40,7 +39,7 @@ using Position;
 // not within a function definition...
 datatype exn {extern Env_error};
 
-extern struct CList<`a,`r::R> { `a hd; struct CList<`a,`r> const *`r const tl; };
+extern struct CList<`a,`r::R> { `a hd; struct CList<`a,`r> const *`r const tl;};
 typedef struct CList<`a,`r> const *`r mclist_t<`a,`r>;
 typedef mclist_t<`a,`r> const clist_t<`a,`r>;
 
@@ -60,14 +59,14 @@ typedef datatype Resolved @`r resolved_t<`r>;
 // FIX: We should tree-shake the type declarations too!
 extern struct Genv<`g::R> {
   region_t<`g> grgn;
-  set_t<var_t,`g>                   namespaces;
-  Dict::dict_t<var_t,aggrdecl_t@,`g> aggrdecls;
-  Dict::dict_t<var_t,datatypedecl_t@,`g> datatypedecls;
-  Dict::dict_t<var_t,enumdecl_t@,`g>   enumdecls;
+  set_t<var_t,`g>                  namespaces;
+  dict_t<var_t,aggrdecl_t@,`g>     aggrdecls;
+  dict_t<var_t,datatypedecl_t@,`g> datatypedecls;
+  dict_t<var_t,enumdecl_t@,`g>     enumdecls;
   // no indirection b/c no redeclaration
-  Dict::dict_t<var_t,typedefdecl_t,`g> typedefs; 
+  dict_t<var_t,typedefdecl_t,`g>   typedefs; 
   // bool for tree-shaking
-  Dict::dict_t<var_t,$(resolved_t,bool)@`g,`g> ordinaries;
+  dict_t<var_t,$(resolved_t,bool)@`g,`g> ordinaries;
   // abs. names of "using" namespaces 
   list_t<list_t<var_t>,`g> availables; 
 };
@@ -77,24 +76,12 @@ typedef struct Genv<`r> @`r genv_t<`r>;
 extern struct Fenv<`l::R>;
 typedef struct Fenv<`l> @`l fenv_t<`l>; 
 
-extern datatype Jumpee {
-  NotLoop_j;
-  CaseEnd_j;
-  FnEnd_j;
-  Stmt_j(stmt_t);
-};
-extern_datacon(Jumpee,NotLoop_j);
-extern_datacon(Jumpee,CaseEnd_j);
-extern_datacon(Jumpee,FnEnd_j);
-typedef datatype Jumpee @`r jumpee_t<`r>;
-
 // Type environments -- `g is the region for global information
 // and `l is the region for local information
 extern struct Tenv<`g::R,`l::R> {
-  list_t<var_t> ns; // current namespace
-  // absolute environment
-  Dict::dict_t<list_t<var_t>,genv_t<`g>,`g> ae; 
-  struct Fenv<`l> *`l le; // local environment
+  list_t<var_t>                       ns; // current namespace
+  dict_t<list_t<var_t>,genv_t<`g>,`g> ae; // absolute environment
+  struct Fenv<`l> *`l                 le; // local environment
   bool allow_valueof;   // controls whether we allow valueof(T) in an expr
   bool in_extern_c_include;
 };
@@ -108,13 +95,11 @@ extern region_t<`r> get_fnrgn(tenv_t<`g,`r>);
 // regions.  Basically, we use one region for each function during
 // each of the type-checking, flow analysis, and translation stages.
 //#define COARSE_REGIONS
-
 #ifdef COARSE_REGIONS
 #define TEMP_RGN(te,x) let x = Tcenv::get_fnrgn(te);
 #else
 #define TEMP_RGN(te,x) region x;
 #endif
-
 
 extern tenv_t<`r,`r> tc_init(region_t<`r>);
 extern genv_t<`r> empty_genv(region_t<`r>);
@@ -157,15 +142,12 @@ extern list_t<tvar_t> lookup_type_vars(tenv_t<`r>);
 extern opt_t<list_t<tvar_t>> lookup_opt_type_vars(tenv_t te);
 extern tenv_t<`g,`r> add_type_vars(region_t<`r>,seg_t,tenv_t<`g,`r2>,list_t<tvar_t> : {`r2} > `r);
 
-extern tenv_t<`g,`r> set_in_loop(region_t<`r>,tenv_t<`g,`r2> te, stmt_t continue_dest : {`r2}>`r);
-extern tenv_t<`g,`r> set_in_switch(region_t<`r>,tenv_t<`g,`r2> : {`r2} > `r);
 extern tenv_t<`g,`r> set_fallthru(region_t<`r>,
                                   tenv_t<`g,`r2> te, 
                                   list_t<tvar_t,`H> new_tvs, 
                                   list_t<vardecl_t> vds,
                                   switch_clause_t clause : {`r2} > `r);
 extern tenv_t<`g,`r> clear_fallthru(region_t<`r>,tenv_t<`g,`r2> : {`r2} > `r);
-extern tenv_t<`g,`r> set_next(region_t<`r>,tenv_t<`g,`r2>, jumpee_t<`r> : {`r2} > `r);
 
 // used to record whether we're type-checking an expression that is doing
 // a read.  Some expressions (e.g., x++) are both reading and writing so
@@ -177,13 +159,11 @@ extern tenv_t<`g,`r> enter_notreadctxt(region_t<`r>,tenv_t<`g,`r2> te : {`r2}>`r
 extern tenv_t<`g,`r> clear_notreadctxt(region_t<`r>,tenv_t<`g,`r2> te : {`r2}>`r);
 extern bool in_notreadctxt(tenv_t te);
 
-//used to track whether or not we're in a left-hand-side or right-hand-side
-//context.
+//used to track whether we're in a left-hand-side or right-hand-side context
 extern tenv_t<`g,`r> enter_lhs(region_t<`r>,tenv_t<`g,`r2> te : {`r2}>`r);
 extern tenv_t<`g,`r> clear_lhs(region_t<`r>,tenv_t<`g,`r2> te : {`r2}>`r);
 extern bool in_lhs(tenv_t te);
 
-extern void process_goto(tenv_t,stmt_t,var_t);
 // assigns through its last arg
 extern $(switch_clause_t,list_t<tvar_t>,clist_t<type_t,`r>)const*`r const
 process_fallthru(tenv_t<`g,`r>,stmt_t,switch_clause_t *@);
@@ -191,9 +171,6 @@ process_fallthru(tenv_t<`g,`r>,stmt_t,switch_clause_t *@);
 
 extern stmt_t get_encloser(tenv_t);
 extern tenv_t<`g,`r> set_encloser(region_t<`r>,tenv_t<`g,`r2>,stmt_t:{`r2}>`r);
-
-extern tenv_t<`g,`r> add_label(tenv_t<`g,`r>, var_t, stmt_t);
-extern bool all_labels_resolved(tenv_t);
 
 extern tenv_t<`g,`r> new_block(region_t<`r>,seg_t,tenv_t<`g,`r2>:{`r2}>`r);
 extern tenv_t<`g,`r> new_named_block(region_t<`r>,seg_t,tenv_t<`g,`r2>,tvar_t name:{`r2}>`r);
@@ -225,6 +202,5 @@ extern void check_delayed_effects(tenv_t te);
 extern void check_delayed_constraints(tenv_t te);
 
 extern bool warn_override;
-
 }
 #endif

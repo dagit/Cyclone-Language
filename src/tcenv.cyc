@@ -152,8 +152,6 @@ typedef struct CtrlEnv<`r> @`r2 ctrl_env_t<`r,`r2>;
 static struct SharedFenv<`f::R> {
   region_t<`f>  frgn;
   type_t                              return_typ;
-  Dict::dict_t<var_t,stmt_t,`f>       seen_labels;
-  Dict::dict_t<var_t,list_t<stmt_t,`H>,`f> needed_labels;
   list_t<$(type_t,type_t,rgn_po_t<`f>,seg_t)@`f,`f> delayed_effect_checks;
   list_t<$(rgn_po_t<`f>,list_t<$(type_t,type_t)@>,seg_t)@`f,`f> delayed_constraint_checks;
 };
@@ -427,7 +425,7 @@ datatypedecl_t@*`r lookup_xdatatypedecl(region_t<`r> r, tenv_t te,seg_t loc,qvar
     try return rnew(r) scoped_lookup(te, loc, lookup_xdatatypedecl_f, v,false);
     catch { case &Dict::Absent: return NULL; }
   case {.Loc_n = _}: // impossible case
-    terr(loc,"lookup_xdatatypedecl: impossible");
+    Tcutil::impos("lookup_xdatatypedecl: impossible");
     return NULL;
   case {.Rel_n = &List(x,y)}:
     // qualified name, it's an error if the namespace is bad or the
@@ -498,17 +496,13 @@ static fenv_t<`r> get_fenv(tenv_t<`g,`r> te, const char ?err_msg) {
   return (fenv_t)le;
 }
 
-region_t<`r> coerce_heap_region() {
-  return (region_t<`r>)Core::heap_region;
-}
-
 region_t<`r> get_fnrgn(tenv_t<`g,`r> te) {
   let le = te->le;
   if (le != NULL) {
     let &Fenv{<`f,`c> .fnrgn=f,...} = (fenv_t)le;
     return f;
   }
-  return coerce_heap_region();
+  return (region_t<`r>)Core::heap_region;
 }
 
 static tenv_t<`g,`l> put_fenv(region_t<`l> l, tenv_t<`g,`l2> te, fenv_t<`l> fe) {
@@ -733,12 +727,15 @@ tenv_t<`g,`r> add_pat_var(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te,
                           vardecl_t vd : {`r2} > `r) {
   if (Tcenv::warn_override)
     try {
-      switch(lookup_ordinary(r,te,loc,vd->name,true))
-      {
-      case &VarRes(&Local_b(_)):  Tcutil::warn(loc,"pattern variable hides local"); break;
-      case &VarRes(&Global_b(_)): Tcutil::warn(loc,"pattern variable hides global"); break;
-      case &VarRes(&Pat_b(_)):    Tcutil::warn(loc,"pattern variable hides pattern variable"); break;
-      case &VarRes(&Param_b(_)):  Tcutil::warn(loc,"pattern variable hides parameter"); break;
+      switch(lookup_ordinary(r,te,loc,vd->name,true)) {
+      case &VarRes(&Local_b(_)):  
+	Tcutil::warn(loc,"pattern variable hides local"); break;
+      case &VarRes(&Global_b(_)): 
+	Tcutil::warn(loc,"pattern variable hides global"); break;
+      case &VarRes(&Pat_b(_)):    
+	Tcutil::warn(loc,"pattern variable hides pattern variable"); break;
+      case &VarRes(&Param_b(_)):  
+	Tcutil::warn(loc,"pattern variable hides parameter"); break;
       default: break;
       }
     } catch { case &Dict::Absent: break; }
@@ -776,20 +773,6 @@ resolved_t<`r> lookup_ordinary(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q,bool
   }
 }
 
-void process_goto(tenv_t te, stmt_t s, var_t l) {
-  let &Fenv{<`f,`c> .shared = shared, ...} = get_fenv(te,"process_goto");
-  stmt_t* sopt2 = Dict::lookup_opt(shared->seen_labels,l);
-  if(sopt2 == NULL) {
-    let needed = shared->needed_labels;
-    list_t<stmt_t,`H>* slopt = Dict::lookup_opt(needed,l);
-    region_t<`f> frgn = shared->frgn;
-    if(slopt == NULL)
-      slopt = rnew(frgn) NULL;
-    list_t<stmt_t,`H> new_needed = new List(s,*slopt);
-    shared->needed_labels = Dict::insert(needed,l,new_needed);
-  } 
-}
-
 // do not stop setting clauseopt -- JumpAnalysis needs it!
 $(switch_clause_t,list_t<tvar_t>,clist_t<type_t,`r>)const*`r const
 process_fallthru(tenv_t<`g,`r> te,stmt_t s, switch_clause_t *@ clauseopt){
@@ -812,7 +795,7 @@ tenv_t<`g,`r> set_fallthru(region_t<`r> r, tenv_t<`g,`r2> te,
   list_t<type_t,`c> ft_typ = NULL;
   for(; vds!=NULL; vds=vds->tl)
     ft_typ = new List(vds->hd->type,ft_typ);
-  let cft_typ = (mclist_t<_,`c>)List::imp_rev(ft_typ);
+  let cft_typ = List::imp_rev(ft_typ);
   let new_ctrl_env =
     rnew(r) CtrlEnv{new $(clause,new_tvs,cft_typ)};
   let new_fe = rnew(r) Fenv{shared,type_vars,region_order,
@@ -827,47 +810,6 @@ tenv_t<`g,`r> clear_fallthru(region_t<`r> r, tenv_t<`g,`r2> te : {`r2} > `r) {
   let &Fenv{<`f,`c> .ctrl_env = ctrl_env,...} = fe;
   ctrl_env->fallthru_clause = NULL;
   return put_fenv(r,te,fe);
-}
-
-tenv_t<`g,`r> set_in_loop(region_t<`r> r, tenv_t<`g,`r2> te,
-                          stmt_t continue_dest : {`r2} > `r) {
-  let &Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
-            capability,curr_rgn,flags,_} =
-    get_fenv(te,"set_in_loop");
-  ctrl_env_t<`r,`r> new_cenv =
-    rnew(r) CtrlEnv{.fallthru_clause = ctrl_env->fallthru_clause};
-  fenv_t<`r> new_fenv =
-    rnew(r) Fenv{shared,type_vars,region_order,(bnds_t<`r>)locals,
-                   encloser,new_cenv,capability,curr_rgn,flags,r};
-  return put_fenv(r,te,new_fenv);
-}
-
-// each non-last case must also call set_fallthru, here we just
-// change the break destination
-// FIX: a no-op now that jump_analysis exists
-tenv_t<`g,`r> set_in_switch(region_t<`r> r, tenv_t<`g,`r2> te : {`r2}>`r) {
-  fenv_t fe  = copy_fenv_new_ctrl(r,get_fenv(te,"set_in_switch"));
-  let &Fenv{<`f,`c> .ctrl_env = ctrl_env,...} = fe;
-  return put_fenv(r,te,fe);
-}
-
-tenv_t<`g,`r> add_label(tenv_t<`g,`r> te, var_t v, stmt_t s) {
-  let &Fenv{<`f,`c> .shared = shared, ...} = get_fenv(te,"add_label");
-  Dict::dict_t<var_t,list_t<stmt_t,`H>,`f> needed = shared->needed_labels;
-  list_t<stmt_t,`H>* sl_opt = Dict::lookup_opt(needed, v);
-  region_t<`f> frgn = shared->frgn;
-  if(sl_opt != NULL) {
-    shared->needed_labels = Dict::rdelete(frgn, needed, v);
-  }
-  if(Dict::member(shared->seen_labels, v))
-    Tcutil::terr(s->loc, "Repeated label: %s", *v);
-  shared->seen_labels = Dict::insert(shared->seen_labels, v, s);
-  return te;
-}
-
-bool all_labels_resolved(tenv_t te) {
-  let &Fenv{<`f,`c> .shared = shared,...} = get_fenv(te,"all_labels_resolved");
-  return Dict::is_empty(shared->needed_labels);
 }
 
 stmt_t get_encloser(tenv_t te) {
@@ -1047,8 +989,7 @@ void check_rgn_resetable(tenv_t te, seg_t loc, type_t rgn) {
     if(!RgnOrder::is_region_resetable(ro,r))
       terr(loc, "Region %s is not resetable", typ2string(rgn));
     return;
-  default:
-    impos("check_rgn_resetable");
+  default: impos("check_rgn_resetable");
   }
 }
 
@@ -1187,8 +1128,6 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
     Fenv{.shared = rnew(r) SharedFenv{
                      .frgn = r,
                      .return_typ = fd->ret_type,
-                     .seen_labels = Dict::rempty(r,strptrcmp),
-                     .needed_labels = Dict::rempty(r,strptrcmp),
 		     .delayed_effect_checks = NULL,
 		     .delayed_constraint_checks = NULL
                    },
@@ -1234,8 +1173,6 @@ fenv_t<`r> bogus_fenv(region_t<`r> r, type_t ret_type,
     Fenv{.shared = rnew(r) SharedFenv{
                      .frgn = r,
                      .return_typ = ret_type,
-                     .seen_labels = Dict::rempty(r,strptrcmp),
-                     .needed_labels = Dict::rempty(r,strptrcmp),
 		     .delayed_effect_checks = NULL,
 		     .delayed_constraint_checks = NULL
                    },
@@ -1266,7 +1203,7 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
       if (a == Aliasable)
 	rgn_po = add_youngest(r, rgn_po, tvars->hd, false, false);
       else
-	Tcutil::impos("non-intuitionistic tvar in nested_fenv");
+	impos("non-intuitionistic tvar in nested_fenv");
   }
   rgn_po = add_youngest(r, rgn_po, rgn0, false, false);
   let tvs = new List(rgn0,List::append(fd->tvs,type_vars));
@@ -1309,8 +1246,6 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
     Fenv{.shared = rnew(r) SharedFenv{
                      .frgn = r,
                      .return_typ = fd->ret_type,
-                     .seen_labels = Dict::rempty(r,strptrcmp),
-                     .needed_labels = Dict::rempty(r,strptrcmp),
 		     .delayed_effect_checks = NULL,
 		     .delayed_constraint_checks = NULL
                    },

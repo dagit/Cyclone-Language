@@ -402,11 +402,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
       // works a bit better, and now it's time to check them:
       check_delayed_effects(te);
       check_delayed_constraints(te);
-      
-      // check for undefined labels FIX: get better error message
-      if(!all_labels_resolved(te))
-        terr(loc,"function has goto statements to undefined labels");
-    } catch {
+          } catch {
     case &Tcutil::AbortTypeCheckingFunction: break;
     case e: Core::rethrow(e);
     }
