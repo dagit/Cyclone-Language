@@ -32,6 +32,8 @@ if [ ! -f "arch/${ARCH}" ]; then
     echo "aborting."
     exit 1
   fi
+else
+  echo "Supported architecture ${ARCH}"
 fi
 
 # write the config Makefile
