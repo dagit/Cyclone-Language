@@ -25,9 +25,7 @@ rule token = parse
 {
 
 using Core;
-using Stdio;
 using Lexing;
-using String;
 
 struct Pos {
   string_t logical_file;
@@ -98,7 +96,7 @@ void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@,`H> places) {
       }
       while(places != NULL && eol >= (*places->hd)[0]) {
 	let p = (*places->hd)[1];
-	p->logical_file = String::strdup(source_file);
+	p->logical_file = strdup(source_file);
 	p->line         = this_line;
 	p->line_no      = line;
 	p->col          = strlen(this_line)-(eol-(*places->hd)[0]);

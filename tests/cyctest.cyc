@@ -20,12 +20,10 @@
 #include <arg.h>
 #include <errno.h>
 
-using Stdio;
 using List;
 using Set;
 using Dict;
 using Hashtable;
-using Ctype;
 using Xarray;
 using Bitvec;
 using Ref;
@@ -58,7 +56,7 @@ void okfail(bool b) {
   if (b) ok(); else fail();
 }
 void eqstrings(string_t s1,string_t s2) {
-  int i = String::strcmp(s1,s2);
+  int i = strcmp(s1,s2);
   if (i != 0)
     fprintf(stderr,"%s != %s",s1,s2);
   okfail(i == 0);
@@ -205,7 +203,7 @@ void list_test() {
   // have type char? or char[sz] ??
   let slist = new List(allocstr("hello"),new List(allocstr("world"),NULL));
   let rlist = List::rev(slist);
-  okfail(0==test_list_cmp(String::strptrcmp,slist,List::rev(rlist)));
+  okfail(0==test_list_cmp(strptrcmp,slist,List::rev(rlist)));
 
   list_t<int> xx = NULL;
   list_t<int> yy = NULL;
@@ -369,12 +367,12 @@ void set_test() {
   okfail(Set::member(Set::union_two(x,x3),11));
   okfail(!Set::is_empty(x));
 
-  set_t<stringptr_t<`H,`H>,`H> s = Set::empty(String::strptrcmp);
+  set_t<stringptr_t<`H,`H>,`H> s = Set::empty(strptrcmp);
   s = Set::insert(s,allocstr("hello"));
   s = Set::insert(s,allocstr("world"));
   s = Set::insert(s,allocstr("sphinx"));
   s = Set::insert(s,allocstr("quartz"));
-  okfail(test_list_cmp(String::strptrcmp,Set::elements(s),
+  okfail(test_list_cmp(strptrcmp,Set::elements(s),
                   new List(allocstr("hello"),
                         new List(allocstr("quartz"),
                               new List(allocstr("sphinx"),
@@ -412,12 +410,12 @@ void hashtable_test() {
   okfail(Hashtable::lookup(x,300)==2828);
 
   table_t<stringptr_t<`H,`H>,stringptr_t<`H,`H>> x2 = 
-    Hashtable::create(17,String::strptrcmp,hash_stringptr);
+    Hashtable::create(17,strptrcmp,hash_stringptr);
   Hashtable::insert(x2,allocstr("foo"),allocstr("bar"));
   Hashtable::insert(x2,allocstr("baz"),allocstr("rogue"));
-  okfail(String::strptrcmp(Hashtable::lookup(x2,allocstr("foo")),
+  okfail(strptrcmp(Hashtable::lookup(x2,allocstr("foo")),
 			   allocstr("bar"))==0);
-  okfail(String::strptrcmp(Hashtable::lookup(x2,allocstr("baz")),
+  okfail(strptrcmp(Hashtable::lookup(x2,allocstr("baz")),
 			   allocstr("rogue"))==0);
 
   test_end();;
@@ -432,87 +430,87 @@ void string_test() {
 
   test_begin("String");
 
-  okfailn(1,String::to_int("1234",NULL) == 1234);
-  okfailn(2,String::to_int("-1234",NULL) == -1234);
-  okfailn(3,String::to_int("  -1234   ",NULL) == -1234);
+  okfailn(1,to_int("1234",NULL) == 1234);
+  okfailn(2,to_int("-1234",NULL) == -1234);
+  okfailn(3,to_int("  -1234   ",NULL) == -1234);
   int x = 1;
-  okfailn(4,String::to_int("-1234  ",&x) == 1234);
+  okfailn(4,to_int("-1234  ",&x) == 1234);
   okfailn(5,x == 5);
-  okfailn(6,String::to_double("0",NULL) == 0.0);
-  okfailn(7,String::to_double(".0",NULL) == 0.0);
-  okfailn(8,String::to_double("1.",NULL) == 1.0);
-  okfailn(9,(String::to_double("3.14159",NULL) - 3.14159) < 0.000000001);
-  okfailn(10,(String::to_double("-3.14159",NULL) - -3.14159) < 0.000000001);
-  okfailn(11,(String::to_double("3.14e3",NULL) - 3.14e3) < 0.000000001);
-  okfailn(12,(String::to_double("3.14e-3",NULL) - 3.14e-3) < 0.000000001);
-  okfailn(13,(String::to_double("  \t3.14e-3",NULL) - 3.14e-3) < 0.000000001);
+  okfailn(6,to_double("0",NULL) == 0.0);
+  okfailn(7,to_double(".0",NULL) == 0.0);
+  okfailn(8,to_double("1.",NULL) == 1.0);
+  okfailn(9,(to_double("3.14159",NULL) - 3.14159) < 0.000000001);
+  okfailn(10,(to_double("-3.14159",NULL) - -3.14159) < 0.000000001);
+  okfailn(11,(to_double("3.14e3",NULL) - 3.14e3) < 0.000000001);
+  okfailn(12,(to_double("3.14e-3",NULL) - 3.14e-3) < 0.000000001);
+  okfailn(13,(to_double("  \t3.14e-3",NULL) - 3.14e-3) < 0.000000001);
 
-  okfailn(14,String::strcmp("hello","world") < 0);
-  okfailn(15,String::strcmp("hello","hello") == 0);
-  okfailn(16,String::strcmp("world","hello") > 0);
+  okfailn(14,strcmp("hello","world") < 0);
+  okfailn(15,strcmp("hello","hello") == 0);
+  okfailn(16,strcmp("world","hello") > 0);
 
-  okfail(String::strcmp(String::substring("hello",2,2),"ll")==0);
-  okfail(String::strcmp(String::replace_suffix("hello.world","world","bar"),
+  okfail(strcmp(substring("hello",2,2),"ll")==0);
+  okfail(strcmp(replace_suffix("hello.world","world","bar"),
                         "hello.bar")==0);
   // FIX:  polymorphism requires the cast char[sz]->char?
-  okfail(String::strcmp(String::strconcat_l(new List(allocstr("hello "),
+  okfail(strcmp(strconcat_l(new List(allocstr("hello "),
                                                   new List(allocstr("world"),NULL))),
                         "hello world")==0);
-  okfail(String::strcmp(String::str_sepstr(new List(allocstr("hello"),
+  okfail(strcmp(str_sepstr(new List(allocstr("hello"),
                                                  new List(allocstr("world"),NULL)),
                                            "**"),
                         "hello**world")==0);
   // FIX:  polymorphism requires the cast char->int
-  okfail(String::strcmp(String::implode(new List((int)'a',
+  okfail(strcmp(implode(new List((int)'a',
                                               new List((int)'b',
                                                     new List((int)'c',NULL)))),
                         "abc")==0);
-  switch ((char)String::explode("abc")->tl->hd) {
+  switch ((char)explode("abc")->tl->hd) {
   case 'a': fail(); break;
   case 'b': ok(); break;
   case 'c': fail(); break;
   default: fail(); break;
   }
 
-  let s1 = String::strdup("hello");
-  okfail(String::strlen(s1)==5);
-  okfail(String::strlen((string_t)s1+2)==3);
+  let s1 = strdup("hello");
+  okfail(strlen(s1)==5);
+  okfail(strlen((string_t)s1+2)==3);
   s1[3]='\000'; // Note, this writes over a string constant.
-  okfail(String::strlen(s1)==3);
-  okfail(String::strlen((mstring_t)s1+2)==1);
-  okfail(String::strlen((mstring_t)s1+3)==0);
-  okfail(String::strlen((mstring_t)s1+4)==1);
+  okfail(strlen(s1)==3);
+  okfail(strlen((mstring_t)s1+2)==1);
+  okfail(strlen((mstring_t)s1+3)==0);
+  okfail(strlen((mstring_t)s1+4)==1);
   mstring_t s2 = new { for i < 20 : '\000' };
-  okfail(String::strlen(s2)==0);
-  String::strcat(s2,s1);
-  okfail(String::strcmp(s2,s1)==0);
-  okfail(String::strcmp(s2,"hel")==0);
-  String::strcat(s2,s1);
-  okfail(String::strcmp(s2+2,"helhel"+2)==0);
-  okfail(String::strcmp(s2+2,"xxlhel"+2)==0);
-  String::strcat(s2,(mstring_t)s1+4);
-  okfail(String::strcmp(s2,"helhelo")==0);
-  String::strcpy(s2,"foobar");
-  okfail(String::strcmp(s2,"foobar")==0);
-  String::strncpy(s2+1,"foobar"+2,3);
-  okfail(String::strcmp(s2,"fobaar")==0);
-  okfail(String::strcmp(s2,"xxxfobaar"+3)==0);
-  okfail(String::strcmp(String::strchr((mstring_t)s2+1,'a'),"aar")==0);
-  okfail(String::strchr((mstring_t)s2+2,'z')==NULL);
-  okfail(String::strcmp(String::strrchr((mstring_t)s2+1,'a'),"ar")==0);
-  okfail(String::strrchr((mstring_t)s2+2,'o')==NULL);
-  okfail(String::strncmp((mstring_t)s2+1,"xxxobaax"+3,4)==0);
-  okfail(String::strncmp((mstring_t)s2+1,"xxxobaax"+3,5)!=0);
-  okfail(Strings::strncasecmp((mstring_t)s2+1,"xxxObAax"+3,4)==0);
-  let s3 = String::strdup(s2);
-  okfail(String::strcmp(s3,s2)==0);
+  okfail(strlen(s2)==0);
+  strcat(s2,s1);
+  okfail(strcmp(s2,s1)==0);
+  okfail(strcmp(s2,"hel")==0);
+  strcat(s2,s1);
+  okfail(strcmp(s2+2,"helhel"+2)==0);
+  okfail(strcmp(s2+2,"xxlhel"+2)==0);
+  strcat(s2,(mstring_t)s1+4);
+  okfail(strcmp(s2,"helhelo")==0);
+  strcpy(s2,"foobar");
+  okfail(strcmp(s2,"foobar")==0);
+  strncpy(s2+1,"foobar"+2,3);
+  okfail(strcmp(s2,"fobaar")==0);
+  okfail(strcmp(s2,"xxxfobaar"+3)==0);
+  okfail(strcmp(strchr((mstring_t)s2+1,'a'),"aar")==0);
+  okfail(strchr((mstring_t)s2+2,'z')==NULL);
+  okfail(strcmp(strrchr((mstring_t)s2+1,'a'),"ar")==0);
+  okfail(strrchr((mstring_t)s2+2,'o')==NULL);
+  okfail(strncmp((mstring_t)s2+1,"xxxobaax"+3,4)==0);
+  okfail(strncmp((mstring_t)s2+1,"xxxobaax"+3,5)!=0);
+  okfail(strncasecmp((mstring_t)s2+1,"xxxObAax"+3,4)==0);
+  let s3 = strdup(s2);
+  okfail(strcmp(s3,s2)==0);
 
   test_end();
 }
 
 // THIS DOESN'T WORK!!
 string_t bad_strrchr(string_t<`H> s, char c) {
-  int len = String::strlen(s);
+  int len = strlen(s);
 
   for (int i = len-1; i>=0; i--) {
     if (s[i] == c)
@@ -525,7 +523,7 @@ void bad_test() {
   let s2 = "fobaar";
   printf("\nDa  IN string is %s\n",s2+1);
   printf("Da OUT string is %s\n",bad_strrchr(s2+1,'a'));
-  okfail(String::strcmp(bad_strrchr(s2+1,'a'),"ar")==0);
+  okfail(strcmp(bad_strrchr(s2+1,'a'),"ar")==0);
   test_end();
 }
 
@@ -533,13 +531,13 @@ void buffer_test() {
   test_begin("Buffer");
   Buffer::T b = Buffer::create(5);
   Buffer::add_char(b,'a');
-  okfail(String::strcmp(Buffer::contents(b),"a")==0);
+  okfail(strcmp(Buffer::contents(b),"a")==0);
   Buffer::add_string(b,"bc");
-  okfail(String::strcmp(Buffer::contents(b),"abc")==0);
+  okfail(strcmp(Buffer::contents(b),"abc")==0);
   Buffer::add_string(b,"defg");
-  okfail(String::strcmp(Buffer::contents(b),"abcdefg")==0);
+  okfail(strcmp(Buffer::contents(b),"abcdefg")==0);
   Buffer::add_substring(b,"efghijkl",3,4);
-  okfail(String::strcmp(Buffer::contents(b),"abcdefghijk")==0);
+  okfail(strcmp(Buffer::contents(b),"abcdefghijk")==0);
   okfail(Buffer::length(b)==11);
   test_end();;
 }
@@ -551,8 +549,8 @@ void queue_test() {
   Queue::add(q,allocstr("a"));
   okfail(!Queue::is_empty(q));
   Queue::add(q,allocstr("b"));
-  okfail(String::strcmp(*(Queue::peek(q)),"a") == 0);
-  okfail(String::strcmp(*(Queue::take(q)),"a") == 0);
+  okfail(strcmp(*(Queue::peek(q)),"a") == 0);
+  okfail(strcmp(*(Queue::take(q)),"a") == 0);
   okfail(Queue::length(q) == 1);
   test_end();;
 }
@@ -563,13 +561,13 @@ void rope_test() {
   let r2 = Rope::concat(r,r);
   let r3 = Rope::concatl(new List(Rope::from_string("xx"),
                                new List(Rope::from_string("yy"),NULL)));
-  okfail(Rope::length(r) == String::strlen("hello world*"));
-  okfail(Rope::length(r2) == 2*String::strlen("hello world*"));
+  okfail(Rope::length(r) == strlen("hello world*"));
+  okfail(Rope::length(r2) == 2*strlen("hello world*"));
   okfail(Rope::cmp(r,r2) != 0);
   okfail(Rope::cmp(r3,r3) == 0);
-  okfail(String::strcmp(Rope::to_string(r),"hello world*")==0);
-  okfail(String::strcmp(Rope::to_string(r2),"hello world*hello world*")==0);
-  okfail(String::strcmp(Rope::to_string(r3),"xxyy")==0);
+  okfail(strcmp(Rope::to_string(r),"hello world*")==0);
+  okfail(strcmp(Rope::to_string(r2),"hello world*hello world*")==0);
+  okfail(strcmp(Rope::to_string(r3),"xxyy")==0);
   test_end();;
 }
 
@@ -676,11 +674,11 @@ void ref_test() {
   okfail(Ref::get(x)!=4);
 
   ref_t<stringptr_t> y = new_ref(allocstr("hello")); // FIX: cast required!
-  okfail(0==String::strcmp(*(Ref::get(y)),"hello"));
-  okfail(0!=String::strcmp(*(Ref::get(y)),"world"));
+  okfail(0==strcmp(*(Ref::get(y)),"hello"));
+  okfail(0!=strcmp(*(Ref::get(y)),"world"));
   Ref::set(y,allocstr("world"));
-  okfail(0!=String::strcmp(*(Ref::get(y)),"hello"));
-  okfail(0==String::strcmp(*(Ref::get(y)),"world"));
+  okfail(0!=strcmp(*(Ref::get(y)),"hello"));
+  okfail(0==strcmp(*(Ref::get(y)),"world"));
   test_end();
 }
 
@@ -692,13 +690,13 @@ void filename_test() {
 
   test_begin("Filename");
   let cwd = ".";
-  okfail(0==String::strcmp(Filename::concat(cwd,"foo"),
+  okfail(0==strcmp(Filename::concat(cwd,"foo"),
                            "./foo"));
-  okfail(0==String::strcmp(Filename::chop_extension("foo.bar"),
+  okfail(0==strcmp(Filename::chop_extension("foo.bar"),
                            "foo"));
-  okfail(0==String::strcmp(Filename::dirname("/foo/bar"),
+  okfail(0==strcmp(Filename::dirname("/foo/bar"),
                            "/foo"));
-  okfail(0==String::strcmp(Filename::basename("/foo/bar"),
+  okfail(0==strcmp(Filename::basename("/foo/bar"),
                            "bar"));
   okfail(Filename::check_suffix("/foo/bar","bar"));
   okfail(!Filename::check_suffix("/foo/bar","foo"));
@@ -787,8 +785,8 @@ void pp_test() {
   let z = new Var("z");
   let t1 = new Lam("x",new App(x,x));
   let t2 = new App(t1,t1);
-  okfail(0==String::strcmp("\\x.x(x)",string_of_doc(pp_term(t1),72)));
-  okfail(0==String::strcmp("(\\x.x(x))(\\x.x(x))",
+  okfail(0==strcmp("\\x.x(x)",string_of_doc(pp_term(t1),72)));
+  okfail(0==strcmp("(\\x.x(x))(\\x.x(x))",
                            string_of_doc(pp_term(t2),72)));
   test_end();
 }
@@ -805,12 +803,12 @@ void id_test() {
   okfail(0 != Id::id_compare(i1,i2));
   okfail(0 != Id::id_compare(i1,i3));
   okfail(0 != Id::id_compare(i3,i2));
-  okfail(0 == String::strcmp(Id::id_to_source(i1),Id::id_to_source(i2)));
-  okfail(0 == String::strcmp(Id::id_to_source(i1),Id::id_to_source(i3)));
-  okfail(0 == String::strcmp(Id::id_to_source(i3),Id::id_to_source(i2)));
-  okfail(0 != String::strcmp(Id::id_to_string(i1),Id::id_to_string(i2)));
-  okfail(0 != String::strcmp(Id::id_to_string(i1),Id::id_to_string(i3)));
-  okfail(0 != String::strcmp(Id::id_to_string(i3),Id::id_to_string(i2)));
+  okfail(0 == strcmp(Id::id_to_source(i1),Id::id_to_source(i2)));
+  okfail(0 == strcmp(Id::id_to_source(i1),Id::id_to_source(i3)));
+  okfail(0 == strcmp(Id::id_to_source(i3),Id::id_to_source(i2)));
+  okfail(0 != strcmp(Id::id_to_string(i1),Id::id_to_string(i2)));
+  okfail(0 != strcmp(Id::id_to_string(i1),Id::id_to_string(i3)));
+  okfail(0 != strcmp(Id::id_to_string(i3),Id::id_to_string(i2)));
   let i4 = Id::id_make("foo",3);
   let i5 = Id::id_make("foo",3);
   okfail(0 == Id::id_compare(i4,i5));
@@ -981,7 +979,6 @@ namespace MyMath {
 }
 
 // test out attribute stuff
-using Errno {
   int att_f(int g(int) __attribute__((stdcall)) , int i) {
     return g(i);
   }
@@ -1003,7 +1000,6 @@ using Errno {
     okfail(att_f(att_foo,3) == 4);
     test_end();
   }
-}
 
 void letv_test() {
     test_begin("Letv");

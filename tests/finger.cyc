@@ -36,7 +36,7 @@
 
 #ifndef lint
 /*static char sccsid[] = "from: @(#)net.c	5.5 (Berkeley) 6/1/90";*/
-char net_rcsid[] = "$Id: finger.cyc,v 1.5 2001-08-06 20:01:01 tjim Exp $";
+char net_rcsid[] = "$Id: finger.cyc,v 1.6 2001-08-10 22:26:25 tjim Exp $";
 #endif /* not lint */
 
 #include <core.h>
@@ -51,12 +51,6 @@ char net_rcsid[] = "$Id: finger.cyc,v 1.5 2001-08-06 20:01:01 tjim Exp $";
 #include <unistd.h>
 
 using Core;
-using String;
-using Stdio;
-using NetDB;
-using Inet;
-using Socket;
-using Unistd;
 
 int main(int argc, char ?`H argv[]) {
   FILE *fp;

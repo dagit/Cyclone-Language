@@ -2,8 +2,6 @@
 #include "core.h"
 #include "stdio.h"
 using Core;
-using Stdio;
-using Getopt;
 
 static struct option long_options[]=
 {

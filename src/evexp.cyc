@@ -31,7 +31,6 @@
 using Core;
 using Absyn;
 using List;
-using Stdio;
 using Position;
 using Absynpp;
 using Tcutil;

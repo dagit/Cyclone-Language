@@ -10,29 +10,29 @@ int); extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
 unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
 wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); struct Cyc_Stdio___sFILE;
-extern struct Cyc_Stdio___sFILE* Cyc_Stdio_stdout; extern int Cyc_Stdio_fputc(
-int __c, struct Cyc_Stdio___sFILE* __stream); extern unsigned char Cyc_Stdio_FileCloseError[
-19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern int Cyc_Stdio_file_string_write(
-struct Cyc_Stdio___sFILE* fd, struct _tagged_arr src, int src_offset, int
-max_count); static const int Cyc_Stdio_String_pa= 0; struct Cyc_Stdio_String_pa_struct{
-int tag; struct _tagged_arr f1; } ; static const int Cyc_Stdio_Int_pa= 1; struct
-Cyc_Stdio_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Stdio_Double_pa=
-2; struct Cyc_Stdio_Double_pa_struct{ int tag; double f1; } ; static const int
-Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{ int tag; short*
-f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
-int tag; unsigned int* f1; } ; extern int Cyc_Stdio_fprintf( struct Cyc_Stdio___sFILE*,
-struct _tagged_arr fmt, struct _tagged_arr); extern struct _tagged_arr Cyc_Stdio_aprintf(
-struct _tagged_arr fmt, struct _tagged_arr); static const int Cyc_Stdio_ShortPtr_sa=
-0; struct Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int
-Cyc_Stdio_UShortPtr_sa= 1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag;
-unsigned short* f1; } ; static const int Cyc_Stdio_IntPtr_sa= 2; struct Cyc_Stdio_IntPtr_sa_struct{
-int tag; int* f1; } ; static const int Cyc_Stdio_UIntPtr_sa= 3; struct Cyc_Stdio_UIntPtr_sa_struct{
-int tag; unsigned int* f1; } ; static const int Cyc_Stdio_StringPtr_sa= 4;
-struct Cyc_Stdio_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static
-const int Cyc_Stdio_DoublePtr_sa= 5; struct Cyc_Stdio_DoublePtr_sa_struct{ int
-tag; double* f1; } ; static const int Cyc_Stdio_FloatPtr_sa= 6; struct Cyc_Stdio_FloatPtr_sa_struct{
+ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); struct Cyc_std___sFILE;
+extern struct Cyc_std___sFILE* Cyc_std_stdout; extern int Cyc_std_fputc( int __c,
+struct Cyc_std___sFILE* __stream); extern unsigned char Cyc_std_FileCloseError[
+19u]; extern unsigned char Cyc_std_FileOpenError[ 18u]; struct Cyc_std_FileOpenError_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern int Cyc_std_file_string_write(
+struct Cyc_std___sFILE* fd, struct _tagged_arr src, int src_offset, int
+max_count); static const int Cyc_std_String_pa= 0; struct Cyc_std_String_pa_struct{
+int tag; struct _tagged_arr f1; } ; static const int Cyc_std_Int_pa= 1; struct
+Cyc_std_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_std_Double_pa=
+2; struct Cyc_std_Double_pa_struct{ int tag; double f1; } ; static const int Cyc_std_ShortPtr_pa=
+3; struct Cyc_std_ShortPtr_pa_struct{ int tag; short* f1; } ; static const int
+Cyc_std_IntPtr_pa= 4; struct Cyc_std_IntPtr_pa_struct{ int tag; unsigned int* f1;
+} ; extern int Cyc_std_fprintf( struct Cyc_std___sFILE*, struct _tagged_arr fmt,
+struct _tagged_arr); extern struct _tagged_arr Cyc_std_aprintf( struct
+_tagged_arr fmt, struct _tagged_arr); static const int Cyc_std_ShortPtr_sa= 0;
+struct Cyc_std_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int Cyc_std_UShortPtr_sa=
+1; struct Cyc_std_UShortPtr_sa_struct{ int tag; unsigned short* f1; } ; static
+const int Cyc_std_IntPtr_sa= 2; struct Cyc_std_IntPtr_sa_struct{ int tag; int*
+f1; } ; static const int Cyc_std_UIntPtr_sa= 3; struct Cyc_std_UIntPtr_sa_struct{
+int tag; unsigned int* f1; } ; static const int Cyc_std_StringPtr_sa= 4; struct
+Cyc_std_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static const
+int Cyc_std_DoublePtr_sa= 5; struct Cyc_std_DoublePtr_sa_struct{ int tag; double*
+f1; } ; static const int Cyc_std_FloatPtr_sa= 6; struct Cyc_std_FloatPtr_sa_struct{
 int tag; float* f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
 } ; extern int Cyc_List_length( struct Cyc_List_List* x); extern unsigned char
 Cyc_List_List_empty[ 15u]; extern struct Cyc_List_List* Cyc_List_map( void*(* f)(
@@ -399,21 +399,21 @@ void Cyc_Absyndump_dumpstmt( struct Cyc_Absyn_Stmt*); void Cyc_Absyndump_dumpdec
 struct Cyc_Absyn_Decl*); void Cyc_Absyndump_dumptms( struct Cyc_List_List* tms,
 void(* f)( void*), void* a); void Cyc_Absyndump_dumptqtd( struct Cyc_Absyn_Tqual,
 void*, void(* f)( void*), void*); void Cyc_Absyndump_dumpstructfields( struct
-Cyc_List_List* fields); struct Cyc_Stdio___sFILE** Cyc_Absyndump_dump_file=& Cyc_Stdio_stdout;
+Cyc_List_List* fields); struct Cyc_std___sFILE** Cyc_Absyndump_dump_file=& Cyc_std_stdout;
 void Cyc_Absyndump_ignore( void* x){ return;} static unsigned int Cyc_Absyndump_pos=
 0; void Cyc_Absyndump_dump( struct _tagged_arr s){ int sz=( int) _get_arr_size(
 s, sizeof( unsigned char)); if( !(( int)*(( const unsigned char*)
 _check_unknown_subscript( s, sizeof( unsigned char), sz -  1)))){ -- sz;} Cyc_Absyndump_pos
 += sz +  1; if( Cyc_Absyndump_pos >  80){ Cyc_Absyndump_pos=( unsigned int) sz;
-Cyc_Stdio_fputc(( int)'\n',* Cyc_Absyndump_dump_file);} else{ Cyc_Stdio_fputc((
-int)' ',* Cyc_Absyndump_dump_file);} Cyc_Stdio_file_string_write(* Cyc_Absyndump_dump_file,
+Cyc_std_fputc(( int)'\n',* Cyc_Absyndump_dump_file);} else{ Cyc_std_fputc(( int)' ',*
+Cyc_Absyndump_dump_file);} Cyc_std_file_string_write(* Cyc_Absyndump_dump_file,
 s, 0, sz);} void Cyc_Absyndump_dump_nospace( struct _tagged_arr s){ int sz=( int)
 _get_arr_size( s, sizeof( unsigned char)); if( !(( int)*(( const unsigned char*)
 _check_unknown_subscript( s, sizeof( unsigned char), sz -  1)))){ -- sz;} Cyc_Absyndump_pos
-+= sz; Cyc_Stdio_file_string_write(* Cyc_Absyndump_dump_file, s, 0, sz);} void
-Cyc_Absyndump_dump_char( int c){ ++ Cyc_Absyndump_pos; Cyc_Stdio_fputc( c,* Cyc_Absyndump_dump_file);}
-void Cyc_Absyndump_dump_str( struct _tagged_arr* s){ Cyc_Absyndump_dump(* s);}
-void Cyc_Absyndump_dump_semi(){ Cyc_Absyndump_dump_char(( int)';');} void Cyc_Absyndump_dump_sep(
++= sz; Cyc_std_file_string_write(* Cyc_Absyndump_dump_file, s, 0, sz);} void Cyc_Absyndump_dump_char(
+int c){ ++ Cyc_Absyndump_pos; Cyc_std_fputc( c,* Cyc_Absyndump_dump_file);} void
+Cyc_Absyndump_dump_str( struct _tagged_arr* s){ Cyc_Absyndump_dump(* s);} void
+Cyc_Absyndump_dump_semi(){ Cyc_Absyndump_dump_char(( int)';');} void Cyc_Absyndump_dump_sep(
 void(* f)( void*), struct Cyc_List_List* l, struct _tagged_arr sep){ if( l ==  0){
 return;} for( 0;(( struct Cyc_List_List*) _check_null( l))->tl !=  0; l=((
 struct Cyc_List_List*) _check_null( l))->tl){ f(( void*)(( struct Cyc_List_List*)
@@ -724,9 +724,9 @@ sizeof( unsigned char), 5u)); return; _LL130: Cyc_Absyndump_dump_str( _temp191->
 return; _LL132: Cyc_Absyndump_dump( _tag_arr("%", sizeof( unsigned char), 2u));
 if( _temp197 ==  0){ Cyc_Absyndump_dump( _tag_arr("?", sizeof( unsigned char), 2u));}
 else{ Cyc_Absyndump_dumpkind(( void*)(( struct Cyc_Core_Opt*) _check_null(
-_temp197))->v);} Cyc_Absyndump_dump(( struct _tagged_arr)({ struct Cyc_Stdio_Int_pa_struct
-_temp297; _temp297.tag= Cyc_Stdio_Int_pa; _temp297.f1=( int)(( unsigned int)
-_temp193);{ void* _temp296[ 1u]={& _temp297}; Cyc_Stdio_aprintf( _tag_arr("(%d)",
+_temp197))->v);} Cyc_Absyndump_dump(( struct _tagged_arr)({ struct Cyc_std_Int_pa_struct
+_temp297; _temp297.tag= Cyc_std_Int_pa; _temp297.f1=( int)(( unsigned int)
+_temp193);{ void* _temp296[ 1u]={& _temp297}; Cyc_std_aprintf( _tag_arr("(%d)",
 sizeof( unsigned char), 5u), _tag_arr( _temp296, sizeof( void*), 1u));}}));
 return; _LL134: Cyc_Absyndump_dumpntyp( _temp204); return; _LL136:{ void*
 _temp298= _temp214; struct Cyc_Absyn_UnknownTunionInfo _temp304; int _temp306;
@@ -1368,13 +1368,13 @@ _LL807;} _LL807: if(( unsigned int) _temp775 >  2u?*(( int*) _temp775) ==  Cyc_A
 0){ _LL856: _temp855=(( struct Cyc_Absyn_Enum_p_struct*) _temp775)->f2; goto
 _LL808;} else{ goto _LL776;} _LL778: Cyc_Absyndump_dump_char(( int)'_'); goto
 _LL776; _LL780: Cyc_Absyndump_dump( _tag_arr("NULL", sizeof( unsigned char), 5u));
-goto _LL776; _LL782: Cyc_Absyndump_dump(( struct _tagged_arr)({ struct Cyc_Stdio_Int_pa_struct
-_temp858; _temp858.tag= Cyc_Stdio_Int_pa; _temp858.f1=( int)(( unsigned int)
-_temp809);{ void* _temp857[ 1u]={& _temp858}; Cyc_Stdio_aprintf( _tag_arr("%d",
+goto _LL776; _LL782: Cyc_Absyndump_dump(( struct _tagged_arr)({ struct Cyc_std_Int_pa_struct
+_temp858; _temp858.tag= Cyc_std_Int_pa; _temp858.f1=( int)(( unsigned int)
+_temp809);{ void* _temp857[ 1u]={& _temp858}; Cyc_std_aprintf( _tag_arr("%d",
 sizeof( unsigned char), 3u), _tag_arr( _temp857, sizeof( void*), 1u));}})); goto
-_LL776; _LL784: Cyc_Absyndump_dump(( struct _tagged_arr)({ struct Cyc_Stdio_Int_pa_struct
-_temp860; _temp860.tag= Cyc_Stdio_Int_pa; _temp860.f1=( unsigned int) _temp813;{
-void* _temp859[ 1u]={& _temp860}; Cyc_Stdio_aprintf( _tag_arr("%u", sizeof(
+_LL776; _LL784: Cyc_Absyndump_dump(( struct _tagged_arr)({ struct Cyc_std_Int_pa_struct
+_temp860; _temp860.tag= Cyc_std_Int_pa; _temp860.f1=( unsigned int) _temp813;{
+void* _temp859[ 1u]={& _temp860}; Cyc_std_aprintf( _tag_arr("%u", sizeof(
 unsigned char), 3u), _tag_arr( _temp859, sizeof( void*), 1u));}})); goto _LL776;
 _LL786: Cyc_Absyndump_dump( _tag_arr("'", sizeof( unsigned char), 2u)); Cyc_Absyndump_dump_nospace(
 Cyc_Absynpp_char_escape( _temp817)); Cyc_Absyndump_dump_nospace( _tag_arr("'",
@@ -1747,9 +1747,9 @@ _temp1132= Cyc_Absynpp_to_tms( tq, t); _LL1139: _temp1138= _temp1132.f1; goto
 _LL1137; _LL1137: _temp1136= _temp1132.f2; goto _LL1135; _LL1135: _temp1134=
 _temp1132.f3; goto _LL1133; _LL1133: Cyc_Absyndump_dumptq( _temp1138); Cyc_Absyndump_dumpntyp(
 _temp1136); Cyc_Absyndump_dumptms( Cyc_List_imp_rev( _temp1134), f, a);} void
-Cyc_Absyndump_dumpdecllist2file( struct Cyc_List_List* tdl, struct Cyc_Stdio___sFILE*
+Cyc_Absyndump_dumpdecllist2file( struct Cyc_List_List* tdl, struct Cyc_std___sFILE*
 f){ Cyc_Absyndump_pos= 0;* Cyc_Absyndump_dump_file= f; for( 0; tdl !=  0; tdl=((
 struct Cyc_List_List*) _check_null( tdl))->tl){ Cyc_Absyndump_dumpdecl(( struct
 Cyc_Absyn_Decl*)(( struct Cyc_List_List*) _check_null( tdl))->hd);}({ void*
-_temp1140[ 0u]={}; Cyc_Stdio_fprintf( f, _tag_arr("\n", sizeof( unsigned char),
-2u), _tag_arr( _temp1140, sizeof( void*), 0u));});}
+_temp1140[ 0u]={}; Cyc_std_fprintf( f, _tag_arr("\n", sizeof( unsigned char), 2u),
+_tag_arr( _temp1140, sizeof( void*), 0u));});}

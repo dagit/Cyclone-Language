@@ -26,6 +26,7 @@
 
 #include "absyn.h"
 #include <string.h>
+#include <stdio.h>
 #include <position.h>
 #include "absynpp.h"
 #include "tcenv.h"
@@ -42,7 +43,6 @@ using Absyn;
 using Absynpp;
 using Tcenv;
 using Tcutil;
-using Stdio;
 
 namespace Tcexp;
 
@@ -1037,14 +1037,14 @@ static type_t tcStructMember(tenv_t te, seg_t loc, type_t *`r topt,
     let inst = List::zip(ud->tvs,ts);
     let t2   = substitute(inst,finfo->type);
     return t2;
-  case &ArrayType(_,_,_) && (String::zstrcmp(*f,"size") == 0):
+  case &ArrayType(_,_,_) && (zstrcmp(*f,"size") == 0):
     outer_e->r = new Primop_e(Size,new List(e,NULL));
     return uint_t;
-  case &PointerType(_) && (String::zstrcmp(*f,"size") == 0):
+  case &PointerType(_) && (zstrcmp(*f,"size") == 0):
     outer_e->r = new Primop_e(Size,new List(e,NULL));
     return uint_t;
   default:
-    if (String::zstrcmp(*f,"size") == 0)
+    if (zstrcmp(*f,"size") == 0)
       return expr_err(te,loc,"expecting struct, union or array, found %s",
                       typ2string(t));
     else

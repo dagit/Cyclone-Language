@@ -7,9 +7,7 @@
 #include "ctype.h"
 #include "string.h"
 
-using Stdio;
 using Core;
-using Ctype;
 
 void strings(string_t, FILE @);
 
@@ -52,7 +50,7 @@ void strings(string_t name, FILE @fin)
     }
     if (i >= MINLEN)  /* print if long enough */
       {
-	string_t sub = String::substring(buf,0,i);
+	string_t sub = substring(buf,0,i);
 	printf("%s:%s\n", name, sub);
       }
   } while (c != EOF);

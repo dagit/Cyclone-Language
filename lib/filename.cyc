@@ -24,7 +24,6 @@
 
 namespace Filename;
 using Core;
-using String;
 using List;
 
 // FIX: this produces a bad initializer.
@@ -32,7 +31,7 @@ using List;
 //string current_dir_name = ".";
 
 mstring_t concat(string_t s1, string_t s2) {
-  return String::strconcat(s1,String::strconcat(DIR_SEPARATOR_STR,s2));
+  return strconcat(s1,strconcat(DIR_SEPARATOR_STR,s2));
 }
 
 mstring_t chop_extension(string_t filename) {
@@ -41,7 +40,7 @@ mstring_t chop_extension(string_t filename) {
     --i;
   if (i < 0)
     throw new InvalidArg("chop_extension");
-  return String::substring(filename, 0, i);
+  return substring(filename, 0, i);
 }
 
 // FIX: I've always thought the type of this was wrong.
@@ -51,7 +50,7 @@ mstring_t dirname(string_t filename) {
   while (i >= 0 && filename[i] != DIR_SEPARATOR)
     --i;
   if (i < 0) return new_string(0);;
-  return String::substring(filename, 0, i);
+  return substring(filename, 0, i);
 }
 
 // FIX: similarly, this should return an option.
@@ -59,7 +58,7 @@ mstring_t basename(string_t filename) {
   int i = filename.size - 1;
   while (i >= 0 && filename[i] != DIR_SEPARATOR)
     --i;
-  return String::substring(filename, i+1, filename.size-(i+1));
+  return substring(filename, i+1, filename.size-(i+1));
 }
 
 bool check_suffix(string_t filename, string_t suffix) {

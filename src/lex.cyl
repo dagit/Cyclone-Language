@@ -33,12 +33,10 @@
 #include <dict.h>
 
 using Core;
-using Stdio;
 using List;
 using Lexing;
 using Parse;
 using Absyn;
-using String;
 using Position;
 
 void yyerror(string_t<`H> s) { 
@@ -210,7 +208,7 @@ static int str_index(string_t buff, int offset, int len) {
   // build string if necessary and return
   if(t->shared_str == 0) {
     let newstr = new_string(len+1);
-    String::zstrncpy(newstr,buff+offset,len);
+    zstrncpy(newstr,buff+offset,len);
     int ans = Xarray::add_ind((Xarray::xarray_t<stringptr_t>)symbols, 
 			      new ((string_t)newstr));
     t->shared_str = ans;
@@ -289,7 +287,7 @@ void store_string_char(char c) {
   ++string_pos;
 }
 mstring_t get_stored_string() {
-  mstring_t str = String::substring(string_buffer,0,string_pos);
+  mstring_t str = substring(string_buffer,0,string_pos);
   string_pos = 0;
   return str;
 } 
@@ -349,7 +347,7 @@ static list_t<var_t> get_absolute_namespace(List_t<var_t,`H> ns) {
         return List::append(x->hd,ns);
     }
   }
-  yyerror(aprintf("undeclared namespace %s",String::str_sepstr(ns,"::")));
+  yyerror(aprintf("undeclared namespace %s",str_sepstr(ns,"::")));
   return NULL; 
 }
 
@@ -737,7 +735,7 @@ void lex_init() {
   kw_nums       = new {for i < num_kws : 0};
   for (int i=0; i < num_kws; ++i) {
     let str = rw_array[i][0];
-    str_index(str, 0, String::strlen(str));
+    str_index(str, 0, strlen(str));
     kw_nums[i] = rw_array[i][1];
   }
   typedef_init();

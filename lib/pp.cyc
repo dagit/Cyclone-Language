@@ -34,9 +34,7 @@
 #include <xarray.h>
 
 using Core;
-using Stdio;
 using List;
-using String;
 using Hashtable;
 using Fn;
 
@@ -120,7 +118,7 @@ void file_of_doc(doc_t d,int w,FILE @f) {
 // Convert a doc_t to a string.  Takes a doc_t and a width as arguments.
 string_t string_of_doc(doc_t d, int w) {
   out_t o = apply(d->f,new Ppstate(0,0,1,w,w));
-  return String::str_sepstr(list_of_alist(o->ppout),"");
+  return str_sepstr(list_of_alist(o->ppout),"");
 }
 
 // Convert a doc_t to a string and hyperlinks.
@@ -128,7 +126,7 @@ string_t string_of_doc(doc_t d, int w) {
 $(string_t,list_t<$(int,int,int,string_t)@>) @string_and_links(doc_t d, int w) {
   out_t o = apply(d->f,new Ppstate(0,0,1,w,w));
   return new $((string_t)
-               String::str_sepstr(list_of_alist(o->ppout),""),
+               str_sepstr(list_of_alist(o->ppout),""),
                list_of_alist(o->links));
 }
 
@@ -169,7 +167,7 @@ static out_t text_doc_f($(int,string_t<`H>) @clo,ppstate_t st) {
                  Empty);
 }
 static doc_t text_doc(string_t<`H> s) {
-  int slen = String::strlen(s);
+  int slen = strlen(s);
   return
     new Doc(slen,
             infinity,
@@ -223,7 +221,7 @@ static out_t hyperlink_f($(int,string_t<`H>,string_t<`H>) @clo, ppstate_t st) {
               new Single(new $(st->cl,st->cc,slen,full)));
 }
 doc_t hyperlink(string_t<`H> shrt, string_t<`H> full) {
-  int slen = String::strlen(shrt);
+  int slen = strlen(shrt);
   return new Doc(slen,
                  infinity,
                  make_fn (hyperlink_f, new $(slen,shrt,full)));

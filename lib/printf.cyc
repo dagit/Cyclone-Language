@@ -49,12 +49,8 @@ the executable file might be covered by the GNU General Public License. */
 //#include <float.h>
 
 using Core;
-using Stdio;
-using String;
-using Ctype;
-using Stdlib;
-using Math;
-namespace Stdio;
+
+namespace std;
 
 // vararg union for printf, fprintf, sprintf 
 tunion PrintArg<`r::R> {
@@ -915,6 +911,7 @@ int vfprintf(FILE @`r3 f ,const char ?`r fmt, parg_t<`r2> ? `r1 ap)
 }  
 
 int fprintf(FILE @`r3 f,const char ?`r fmt, ...`r1 inject parg_t<`r2> ap)
+//FIX: commented out because types have changed
   __attribute__((format(printf,2,3)))
 {
   return vfprintf(f,fmt,ap);

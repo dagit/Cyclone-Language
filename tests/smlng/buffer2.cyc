@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "buffer.h"
-using Stdio;
 using Buffer;
 namespace Buffer;
 

@@ -21,11 +21,11 @@
 #ifndef _PARSE_H_
 #define _PARSE_H_
 #include "absyn.h"
-#include <stdio.h>
+#include <cstdio.h>
 #include <list.h>
 #include <lexing.h>
 using Core {
-using Stdio {
+using std {
 using Absyn {
 using List {
 using Lexing {

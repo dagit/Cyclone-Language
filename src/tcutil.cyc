@@ -25,12 +25,11 @@
 #include <set.h>
 #include <position.h>
 #include "tcenv.h"
-#include "string.h"
+#include <string.h>
 #include "evexp.h"
 #include "tcutil.h"
 #include "tcexp.h"
 using Core;
-using Stdio;
 using List;
 using Set;
 using Position;
@@ -453,7 +452,7 @@ static bool equal_att(attribute_t a1, attribute_t a2) {
   case $(&Regparm_att(i1), &Regparm_att(i2)): fallthru(i1,i2);
   case $(&Aligned_att(i1), &Aligned_att(i2)): return i1 == i2;
   case $(&Section_att(s1), &Section_att(s2)):
-    return String::strcmp(s1,s2) == 0;
+    return strcmp(s1,s2) == 0;
   default: return false;
   }
 }
@@ -996,7 +995,7 @@ void unify_it(type_t t1, type_t t2) {
     let k1 = conref_val(tv1->kind);
     // kinds should already be resolved.  
     // FIX: shouldn't need the zstrptrcmp any more...
-    if (id1 == id2 && String::zstrptrcmp(x2,x1) == 0) {
+    if (id1 == id2 && zstrptrcmp(x2,x1) == 0) {
       // sanity check
       if (k2 != k1)
         impos("same type variable %s has kinds %s and %s",
@@ -1155,7 +1154,7 @@ void unify_it(type_t t1, type_t t2) {
     for (; fs1 != NULL && fs2 != NULL; fs1 = fs1->tl, fs2 = fs2->tl) {
       let f1 = fs1->hd;
       let f2 = fs2->hd;
-      if (String::zstrptrcmp(f1->name,f2->name) != 0) throw Unify;
+      if (zstrptrcmp(f1->name,f2->name) != 0) throw Unify;
       unify_tqual(f1->tq, f2->tq);
       unify_it(f1->type, f2->type);
       if (!same_atts(f1->attributes,f2->attributes) ||
@@ -1775,7 +1774,7 @@ bool is_temp_tvar(tvar_t t) {
 
 void rewrite_temp_tvar(tvar_t t) { // change t->name from "#xxx" to "`txxx"
   if (! is_temp_tvar(t)) return;
-  let s = String::strconcat("`", *(t -> name));
+  let s = strconcat("`", *(t -> name));
   s[1] = 't';
   t -> name = new{(string_t)s};
 }
@@ -2021,7 +2020,7 @@ static list_t<tvar_t> add_free_tvar(seg_t loc, list_t<tvar_t,`H> tvs,
                                     tvar_t tv)
 {
   for (_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
-    if (String::zstrptrcmp(tvs2->hd->name, tv->name) == 0) {
+    if (zstrptrcmp(tvs2->hd->name, tv->name) == 0) {
       conref_t<kind_t> k1 = tvs2->hd->kind;
       conref_t<kind_t> k2 = tv->kind;
       if (!constrain_kinds(k1,k2))
@@ -2584,9 +2583,9 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       list_t<field_name_t,`sprev_rgn> prev_fields = NULL;
       for (; fs != NULL; fs = fs->tl) {
         let &Structfield{fn,tq,t,width,atts} = fs->hd;
-        if (List::mem(String::zstrptrcmp,prev_fields,fn))
+        if (List::mem(zstrptrcmp,prev_fields,fn))
           terr(loc,"duplicate field %s in struct",*fn);
-        if (String::strcmp(*fn,"") != 0)
+        if (strcmp(*fn,"") != 0)
           prev_fields = rnew(sprev_rgn) List(fn,prev_fields);
         cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t);
         check_bitfield(loc,te,t,width,fn);
@@ -2601,9 +2600,9 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       list_t<field_name_t,`uprev_rgn> prev_fields = NULL;
       for (; fs != NULL; fs = fs->tl) {
         let &Structfield{fn,tq,t,width,atts} = fs->hd;
-        if (List::mem(String::zstrptrcmp,prev_fields,fn))
+        if (List::mem(zstrptrcmp,prev_fields,fn))
           terr(loc,"duplicate field %s in struct",*fn);
-        if (String::strcmp(*fn,"") != 0)
+        if (strcmp(*fn,"") != 0)
           prev_fields = rnew(uprev_rgn) List(fn,prev_fields);
         cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t);
         if (!bits_only(t)) 
@@ -2908,7 +2907,7 @@ static string_t<`r> strptr2string(string_t<`r> @s) {
 
 void check_unique_vars(list_t<var_t,`r> vs, seg_t loc, string_t msg)
 {
-  check_unique_unsorted(String::zstrptrcmp,vs,loc,strptr2string,msg);
+  check_unique_unsorted(zstrptrcmp,vs,loc,strptr2string,msg);
 }
 
 void check_unique_tvars(seg_t loc, list_t<tvar_t> tvs) {
@@ -2936,7 +2935,7 @@ resolve_struct_designators(region_t<`r> rgn, seg_t loc,
   // initialized or projected.
   list_t<$(structfield_t,bool)@> fields = NULL;
   for(_ sd_fields = sdfields; sd_fields != NULL; sd_fields = sd_fields->tl) {
-    if (String::strcmp(*sd_fields->hd->name,"") != 0)
+    if (strcmp(*sd_fields->hd->name,"") != 0)
       fields = new List(new $(sd_fields->hd,false), fields);
   }
   fields = imp_rev(fields);
@@ -2969,7 +2968,7 @@ resolve_struct_designators(region_t<`r> rgn, seg_t loc,
       case &FieldName(v):
 	let fields2 = fields;
 	for(; fields2 != NULL; fields2 = fields2->tl)
-	  if(String::zstrptrcmp(v,((*fields2->hd)[0])->name) == 0) {
+	  if(zstrptrcmp(v,((*fields2->hd)[0])->name) == 0) {
 	    if((*fields2->hd)[1])
 	      terr(loc, "field %s has already been used as an argument", *v);
 	    (*fields2->hd)[1] = true;

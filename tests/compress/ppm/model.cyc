@@ -3,7 +3,6 @@
 #include "assert.h"
 #include "arithcode.h"
 #include "model.h"
-using Stdio;
 
 #define FILE_SIZE 13000000 /* Maximum size of a file */
 #define TRIE_SIZE 2000000 /* Maximum number of trie records. */

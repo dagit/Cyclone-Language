@@ -6,7 +6,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-using Stdlib; using Stdio;
 
 #define MAXLINELEN 128
 

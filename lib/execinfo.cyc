@@ -3,7 +3,6 @@
 using Core;
 
 #include <stdio.h>
-//#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
@@ -16,7 +15,6 @@ namespace Cexecinfo {
 #endif
 
 namespace Execinfo;
-using Stdio;
 
 int backtrace(int ?array, int size) {
 #ifdef __linux__
@@ -36,19 +34,19 @@ int bt(void) {
   int tochild[2] = {0,0}, fromchild[2] = {0,0};
   pid_t pid, self_pid;
 
-  if (Unistd::pipe(tochild) || Unistd::pipe(fromchild)) return 1;
+  if (pipe(tochild) || pipe(fromchild)) return 1;
 
-  self_pid = Unistd::getpid(); // gotta get it before we fork
-  if ((pid = Unistd::fork()) == 0) { // we are child
-    if (Unistd::dup2(tochild[0], STDIN_FILENO) == -1 ||
-        Unistd::dup2(fromchild[1], STDOUT_FILENO) == -1)
+  self_pid = getpid(); // gotta get it before we fork
+  if ((pid = fork()) == 0) { // we are child
+    if (dup2(tochild[0], STDIN_FILENO) == -1 ||
+        dup2(fromchild[1], STDOUT_FILENO) == -1)
       return 1;
-    Unistd::execlp("addr2line", "addr2line", "--functions", "-e",
+    execlp("addr2line", "addr2line", "--functions", "-e",
                    aprintf("/proc/%d/exe", self_pid), NULL);
     return 1;
   } else if (pid < 0) { // fork failed
-    Unistd::close(tochild[0]); Unistd::close(tochild[1]);
-    Unistd::close(fromchild[0]); Unistd::close(fromchild[1]);
+    close(tochild[0]); close(tochild[1]);
+    close(fromchild[0]); close(fromchild[1]);
     return 1;
   }
 
@@ -78,8 +76,8 @@ int bt(void) {
     putchar('\n');
   }
   fclose(r); fclose(w);
-  Signal::kill(pid, SIGTERM);
-  Wait::waitpid(pid, NULL, 0);
+  kill(pid, SIGTERM);
+  waitpid(pid, NULL, 0);
   return 0;
 }
 #endif

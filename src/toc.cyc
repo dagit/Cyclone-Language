@@ -60,7 +60,6 @@
 #include "formatstr.h"
 #include "toc.h"
 using Core;
-using Stdio;
 using List;
 using Set;
 using Position;
@@ -211,7 +210,7 @@ static bool is_nullable(type_t t) {
 //      Alternately, put struct names for tunion variants in the environment.
 static qvar_t collapse_qvar_tag(qvar_t x,string_t tag) {
   return new $((*x)[0], 
-               new (string_t)String::strconcat(*((*x)[1]),tag));
+               new (string_t)strconcat(*((*x)[1]),tag));
 }
 
 // used to generate struct definitions for tuple types
@@ -2577,7 +2576,7 @@ opt_t<Dict::dict_t<var_t,structdecl_t>> structs_so_far = NULL;
 static void structdecl_to_c(structdecl_t s) {
   let n = s->name->v;
   if (structs_so_far == NULL) 
-    structs_so_far = new Opt(Dict::empty(String::zstrptrcmp));
+    structs_so_far = new Opt(Dict::empty(zstrptrcmp));
   bool seen_defn_before;
   let dopt = Dict::lookup_opt(structs_so_far->v, (*n)[1]);
   if (dopt == NULL) {
@@ -2608,7 +2607,7 @@ opt_t<Dict::dict_t<var_t,uniondecl_t>> unions_so_far = NULL;
 static void uniondecl_to_c(uniondecl_t u) {
   let n = u->name->v;
   if (unions_so_far == NULL) unions_so_far =
-                               new Opt(Dict::empty(String::zstrptrcmp));
+                               new Opt(Dict::empty(zstrptrcmp));
   bool seen_defn_before;
   let dopt = Dict::lookup_opt(unions_so_far->v, (*n)[1]);
   if (dopt == NULL) {

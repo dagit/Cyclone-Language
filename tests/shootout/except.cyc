@@ -6,8 +6,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-using Stdio;
-using Stdlib;
 
 int HI = 0, LO = 0;
 

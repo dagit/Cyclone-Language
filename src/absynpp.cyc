@@ -31,7 +31,6 @@
 namespace Absynpp;
 
 using Core;
-using Stdio;
 using PP;
 using Absyn;
 using List;
@@ -744,19 +743,19 @@ doc_t qvar2doc(qvar_t q) {
     prefix = x;
     break;
   case &Abs_n(x):
-    match = use_curr_namespace && list_prefix(String::strptrcmp, x, curr_namespace);
+    match = use_curr_namespace && list_prefix(strptrcmp, x, curr_namespace);
     prefix = qvar_to_Cids && add_cyc_prefix ? new List(cyc_stringptr, x) : x;
     break;
   }
   if (qvar_to_Cids) {
-    return text(String::str_sepstr(List::append(prefix,
+    return text(str_sepstr(List::append(prefix,
 						new List((*q)[1],NULL)),"_"));
   } else {
     // don't print the prefix it matches the current namespaces
     if (match)
       return var2doc((*q)[1]);
     else
-      return text(String::str_sepstr(List::append(prefix,
+      return text(str_sepstr(List::append(prefix,
 						  new List((*q)[1],NULL)),"::"));
   }
 }
@@ -771,7 +770,7 @@ doc_t typedef_name2doc(qvar_t v) {
     case Loc_n: fallthru;
     case &Rel_n(NULL): return var2doc((*v)[1]);
     case &Abs_n(l):
-      if (list_cmp(String::strptrcmp, l, curr_namespace) == 0) {
+      if (list_cmp(strptrcmp, l, curr_namespace) == 0) {
 	return var2doc((*v)[1]);
       } else {
 	fallthru;

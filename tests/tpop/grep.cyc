@@ -6,9 +6,7 @@
 #include "stdio.h"
 #include "string.h"
 
-using Stdio;
 using Core;
-using String;
 
 int grep(string_t, FILE@, string_t);
 int match(string_t, string_t);
@@ -49,7 +47,7 @@ int grep(string_t regexp, FILE @f, string_t name)
 
   nmatch = 0;
   while (fgets(buf, BUFSIZ, f) != NULL) {
-    n = String::strlen(buf);
+    n = strlen(buf);
     
     if (n > 0 && buf[n-1] == '\n')
       buf[n-1] = '\0';

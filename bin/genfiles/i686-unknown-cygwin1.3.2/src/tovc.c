@@ -23,26 +23,26 @@ void*, void*)); extern int Cyc_Dict_member( struct Cyc_Dict_Dict* d, void* key);
 extern struct Cyc_Dict_Dict* Cyc_Dict_insert( struct Cyc_Dict_Dict* d, void* key,
 void* data); extern void* Cyc_Dict_lookup( struct Cyc_Dict_Dict* d, void* key);
 extern struct Cyc_Dict_Dict* Cyc_Dict_rdelete_same( struct Cyc_Dict_Dict*, void*);
-struct Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[ 19u];
-extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Stdio_String_pa=
-0; struct Cyc_Stdio_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
-const int Cyc_Stdio_Int_pa= 1; struct Cyc_Stdio_Int_pa_struct{ int tag;
-unsigned int f1; } ; static const int Cyc_Stdio_Double_pa= 2; struct Cyc_Stdio_Double_pa_struct{
-int tag; double f1; } ; static const int Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{
-int tag; short* f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
-int tag; unsigned int* f1; } ; extern struct _tagged_arr Cyc_Stdio_aprintf(
-struct _tagged_arr fmt, struct _tagged_arr); static const int Cyc_Stdio_ShortPtr_sa=
-0; struct Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int
-Cyc_Stdio_UShortPtr_sa= 1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag;
-unsigned short* f1; } ; static const int Cyc_Stdio_IntPtr_sa= 2; struct Cyc_Stdio_IntPtr_sa_struct{
-int tag; int* f1; } ; static const int Cyc_Stdio_UIntPtr_sa= 3; struct Cyc_Stdio_UIntPtr_sa_struct{
-int tag; unsigned int* f1; } ; static const int Cyc_Stdio_StringPtr_sa= 4;
-struct Cyc_Stdio_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static
-const int Cyc_Stdio_DoublePtr_sa= 5; struct Cyc_Stdio_DoublePtr_sa_struct{ int
-tag; double* f1; } ; static const int Cyc_Stdio_FloatPtr_sa= 6; struct Cyc_Stdio_FloatPtr_sa_struct{
-int tag; float* f1; } ; extern int Cyc_String_zstrptrcmp( struct _tagged_arr*,
-struct _tagged_arr*); struct Cyc_Lineno_Pos{ struct _tagged_arr logical_file;
+extern int Cyc_std_zstrptrcmp( struct _tagged_arr*, struct _tagged_arr*); struct
+Cyc_std___sFILE; extern unsigned char Cyc_std_FileCloseError[ 19u]; extern
+unsigned char Cyc_std_FileOpenError[ 18u]; struct Cyc_std_FileOpenError_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_std_String_pa=
+0; struct Cyc_std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_std_Int_pa= 1; struct Cyc_std_Int_pa_struct{ int tag; unsigned int
+f1; } ; static const int Cyc_std_Double_pa= 2; struct Cyc_std_Double_pa_struct{
+int tag; double f1; } ; static const int Cyc_std_ShortPtr_pa= 3; struct Cyc_std_ShortPtr_pa_struct{
+int tag; short* f1; } ; static const int Cyc_std_IntPtr_pa= 4; struct Cyc_std_IntPtr_pa_struct{
+int tag; unsigned int* f1; } ; extern struct _tagged_arr Cyc_std_aprintf( struct
+_tagged_arr fmt, struct _tagged_arr); static const int Cyc_std_ShortPtr_sa= 0;
+struct Cyc_std_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int Cyc_std_UShortPtr_sa=
+1; struct Cyc_std_UShortPtr_sa_struct{ int tag; unsigned short* f1; } ; static
+const int Cyc_std_IntPtr_sa= 2; struct Cyc_std_IntPtr_sa_struct{ int tag; int*
+f1; } ; static const int Cyc_std_UIntPtr_sa= 3; struct Cyc_std_UIntPtr_sa_struct{
+int tag; unsigned int* f1; } ; static const int Cyc_std_StringPtr_sa= 4; struct
+Cyc_std_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static const
+int Cyc_std_DoublePtr_sa= 5; struct Cyc_std_DoublePtr_sa_struct{ int tag; double*
+f1; } ; static const int Cyc_std_FloatPtr_sa= 6; struct Cyc_std_FloatPtr_sa_struct{
+int tag; float* f1; } ; struct Cyc_Lineno_Pos{ struct _tagged_arr logical_file;
 struct _tagged_arr line; int line_no; int col; } ; extern unsigned char Cyc_Position_Exit[
 9u]; struct Cyc_Position_Segment; static const int Cyc_Position_Lex= 0; static
 const int Cyc_Position_Parse= 1; static const int Cyc_Position_Elab= 2; struct
@@ -469,11 +469,11 @@ d, struct _tagged_arr* key)) Cyc_Dict_member)( env.varmap, _temp51)){( void*)( e
 void*)(( void*)((( struct Cyc_Absyn_Exp*(*)( struct Cyc_Dict_Dict* d, struct
 _tagged_arr* key)) Cyc_Dict_lookup)( env.varmap, _temp51))->r)); continue;} for(
 0; env.boundvars !=  0; env.boundvars=(( struct Cyc_List_List*) _check_null( env.boundvars))->tl){
-if( Cyc_String_zstrptrcmp( _temp51,(*(( struct Cyc_Absyn_Vardecl*)(( struct Cyc_List_List*)
+if( Cyc_std_zstrptrcmp( _temp51,(*(( struct Cyc_Absyn_Vardecl*)(( struct Cyc_List_List*)
 _check_null( env.boundvars))->hd)->name).f2) ==  0){ return;}} for( 0; env.all_locals
 !=  0; env.all_locals=(( struct Cyc_List_List*) _check_null( env.all_locals))->tl){
 struct Cyc_Absyn_Vardecl* _temp99=( struct Cyc_Absyn_Vardecl*)(( struct Cyc_List_List*)
-_check_null( env.all_locals))->hd; if( Cyc_String_zstrptrcmp( _temp51,(* _temp99->name).f2)
+_check_null( env.all_locals))->hd; if( Cyc_std_zstrptrcmp( _temp51,(* _temp99->name).f2)
 ==  0){{ void* _temp100=( void*) _temp99->type; _LL102: if(( unsigned int)
 _temp100 >  4u?*(( int*) _temp100) ==  Cyc_Absyn_ArrayType: 0){ goto _LL103;}
 else{ goto _LL104;} _LL104: goto _LL105; _LL103: goto _LL101; _LL105:( void*)( e->r=(
@@ -483,9 +483,9 @@ _RegionHandle* rgn, struct Cyc_Set_Set* s, struct Cyc_Absyn_Vardecl* elt)) Cyc_S
 env.rgn,* env.freevars, _temp99); return;}}( int) _throw(( void*)({ struct Cyc_Core_Impossible_struct*
 _temp106=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp106[ 0]=({ struct Cyc_Core_Impossible_struct _temp107; _temp107.tag= Cyc_Core_Impossible;
-_temp107.f1=( struct _tagged_arr)({ struct Cyc_Stdio_String_pa_struct _temp109;
-_temp109.tag= Cyc_Stdio_String_pa; _temp109.f1=( struct _tagged_arr)* _temp51;{
-void* _temp108[ 1u]={& _temp109}; Cyc_Stdio_aprintf( _tag_arr("unbound variable %s found in box_free_vars_exp",
+_temp107.f1=( struct _tagged_arr)({ struct Cyc_std_String_pa_struct _temp109;
+_temp109.tag= Cyc_std_String_pa; _temp109.f1=( struct _tagged_arr)* _temp51;{
+void* _temp108[ 1u]={& _temp109}; Cyc_std_aprintf( _tag_arr("unbound variable %s found in box_free_vars_exp",
 sizeof( unsigned char), 47u), _tag_arr( _temp108, sizeof( void*), 1u));}});
 _temp107;}); _temp106;})); _LL5: return; _LL7: return; _LL9: Cyc_Tovc_box_free_vars_exp(
 env, _temp57); _temp59= _temp55; goto _LL11; _LL11: for( 0; _temp59 !=  0;
@@ -973,7 +973,7 @@ _temp616.all_locals=(( struct Cyc_List_List*(*)( struct _RegionHandle*, struct
 Cyc_List_List* src)) Cyc_List_rcopy)( rgn,( struct Cyc_List_List*)(( struct Cyc_Core_Opt*)
 _check_null( _temp606->param_vardecls))->v); _temp616.varmap=(( struct Cyc_Dict_Dict*(*)(
 struct _RegionHandle*, int(* comp)( struct _tagged_arr*, struct _tagged_arr*)))
-Cyc_Dict_rempty)( rgn, Cyc_String_zstrptrcmp); _temp616.encloser= _temp606->body;
+Cyc_Dict_rempty)( rgn, Cyc_std_zstrptrcmp); _temp616.encloser= _temp606->body;
 _temp616.gen_ds= _temp615; _temp616;}), _temp606->body); _temp578=(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_append)(* _temp615,
 _temp578);}; _pop_region( rgn);} goto _LL585; _LL585: goto _LL587; _LL587: goto

@@ -2,7 +2,6 @@
 #include "stdio.h"
 #include "model.h"
 #include "arithcode.h"
-using Stdio;
 
 void report_model(); /* Report back on stats collected from the model */
 

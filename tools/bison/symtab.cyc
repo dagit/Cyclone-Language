@@ -24,7 +24,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "gram.h"
 #include <string.h>
-using String;
 
 bucket *?symtab;
 bucket *firstsymbol;

@@ -21,11 +21,11 @@
 #define _ID_H_
 
 #include <core.h>
-#include <stdio.h>
+#include <cstdio.h>
 
 namespace Id {
 using Core;
-using Stdio;
+using std;
 
 // id.h:    defines an identifiers used in compilers, type-checkers, etc.
 

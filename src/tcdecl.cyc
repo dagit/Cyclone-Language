@@ -32,8 +32,6 @@ using Core;
 using List;
 using Absyn;
 using Tcutil;
-using String;
-using Stdio;
 using Absynpp;
 using Position;
 
@@ -168,7 +166,7 @@ static struct Structdecl * merge_struct_or_union_decl(structdecl_t d0, structdec
       let &Structfield(fn0,tq0,t0,width0,atts0) = f0s->hd;
       let &Structfield(fn1,tq1,t1,width1,atts1) = f1s->hd;
       // names, qualifiers, types, widths, and attributes all must agree
-      if (String::zstrptrcmp(fn0, fn1) != 0) {
+      if (zstrptrcmp(fn0, fn1) != 0) {
 	merr(loc, msg, aprintf("%s %s : field name mismatch "
 			  "%s != %s", t, v, *fn0, *fn1));
 	return NULL; // we don't need further messages
@@ -254,7 +252,7 @@ static struct Tunionfield * merge_tunionfield(tunionfield_t f0, tunionfield_t f1
   seg_t loc = f1->loc;
 
   // check name
-  if (String::zstrptrcmp((*f0->name)[1],(*f1->name)[1]) != 0) {
+  if (zstrptrcmp((*f0->name)[1],(*f1->name)[1]) != 0) {
     merr(loc, msg, aprintf("%s %s: field name mismatch %s != %s",
 			   t, v, *((*f1->name)[1]), *((*f0->name)[1])));
     return NULL;
@@ -600,7 +598,7 @@ struct Enumdecl * merge_enumdecl (enumdecl_t d0, enumdecl_t d1, seg_t loc, strin
       let &Enumfield{n1,tag1,loc1} = f1s->hd;
 
       // names and tags must agree
-      if (String::zstrptrcmp((*n1)[1],(*n0)[1]) != 0) {
+      if (zstrptrcmp((*n1)[1],(*n0)[1]) != 0) {
 	merr(loc, msg, aprintf("enum %s: field name mismatch %s != %s",
 			       v, *(*n1)[1], *(*n0)[1]));
 	res = false;

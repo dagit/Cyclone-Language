@@ -22,7 +22,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <getopt.h>
 #include "system.h"
 #include "files.h"
-using Getopt;
 int verboseflag;
 int definesflag;
 int debugflag;

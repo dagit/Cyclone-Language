@@ -2,7 +2,6 @@
 #include <stdio.h>
 
 using Core;
-using Stdio;
 
 int main(int argc, string_t ? args) {
   // The first string is the name of the program.

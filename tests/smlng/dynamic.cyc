@@ -5,7 +5,6 @@
 #include "smlng.h"
 #include "timer.h"
 #include "stdio.h"
-using Stdio;
 using List;
 
 #define MAX_COST 0x7FFF // see below!!!

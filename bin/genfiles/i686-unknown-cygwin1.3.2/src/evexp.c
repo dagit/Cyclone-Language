@@ -18,25 +18,24 @@ extern unsigned char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment; static
 const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1; static
 const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct _tagged_arr
 source; struct Cyc_Position_Segment* seg; void* kind; struct _tagged_arr desc; }
-; extern unsigned char Cyc_Position_Nocontext[ 14u]; struct Cyc_Stdio___sFILE;
-extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
-18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
-_tagged_arr f1; } ; static const int Cyc_Stdio_String_pa= 0; struct Cyc_Stdio_String_pa_struct{
-int tag; struct _tagged_arr f1; } ; static const int Cyc_Stdio_Int_pa= 1; struct
-Cyc_Stdio_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Stdio_Double_pa=
-2; struct Cyc_Stdio_Double_pa_struct{ int tag; double f1; } ; static const int
-Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{ int tag; short*
-f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
-int tag; unsigned int* f1; } ; extern struct _tagged_arr Cyc_Stdio_aprintf(
-struct _tagged_arr fmt, struct _tagged_arr); static const int Cyc_Stdio_ShortPtr_sa=
-0; struct Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int
-Cyc_Stdio_UShortPtr_sa= 1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag;
-unsigned short* f1; } ; static const int Cyc_Stdio_IntPtr_sa= 2; struct Cyc_Stdio_IntPtr_sa_struct{
-int tag; int* f1; } ; static const int Cyc_Stdio_UIntPtr_sa= 3; struct Cyc_Stdio_UIntPtr_sa_struct{
-int tag; unsigned int* f1; } ; static const int Cyc_Stdio_StringPtr_sa= 4;
-struct Cyc_Stdio_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static
-const int Cyc_Stdio_DoublePtr_sa= 5; struct Cyc_Stdio_DoublePtr_sa_struct{ int
-tag; double* f1; } ; static const int Cyc_Stdio_FloatPtr_sa= 6; struct Cyc_Stdio_FloatPtr_sa_struct{
+; extern unsigned char Cyc_Position_Nocontext[ 14u]; struct Cyc_std___sFILE;
+extern unsigned char Cyc_std_FileCloseError[ 19u]; extern unsigned char Cyc_std_FileOpenError[
+18u]; struct Cyc_std_FileOpenError_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; static const int Cyc_std_String_pa= 0; struct Cyc_std_String_pa_struct{
+int tag; struct _tagged_arr f1; } ; static const int Cyc_std_Int_pa= 1; struct
+Cyc_std_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_std_Double_pa=
+2; struct Cyc_std_Double_pa_struct{ int tag; double f1; } ; static const int Cyc_std_ShortPtr_pa=
+3; struct Cyc_std_ShortPtr_pa_struct{ int tag; short* f1; } ; static const int
+Cyc_std_IntPtr_pa= 4; struct Cyc_std_IntPtr_pa_struct{ int tag; unsigned int* f1;
+} ; extern struct _tagged_arr Cyc_std_aprintf( struct _tagged_arr fmt, struct
+_tagged_arr); static const int Cyc_std_ShortPtr_sa= 0; struct Cyc_std_ShortPtr_sa_struct{
+int tag; short* f1; } ; static const int Cyc_std_UShortPtr_sa= 1; struct Cyc_std_UShortPtr_sa_struct{
+int tag; unsigned short* f1; } ; static const int Cyc_std_IntPtr_sa= 2; struct
+Cyc_std_IntPtr_sa_struct{ int tag; int* f1; } ; static const int Cyc_std_UIntPtr_sa=
+3; struct Cyc_std_UIntPtr_sa_struct{ int tag; unsigned int* f1; } ; static const
+int Cyc_std_StringPtr_sa= 4; struct Cyc_std_StringPtr_sa_struct{ int tag; struct
+_tagged_arr f1; } ; static const int Cyc_std_DoublePtr_sa= 5; struct Cyc_std_DoublePtr_sa_struct{
+int tag; double* f1; } ; static const int Cyc_std_FloatPtr_sa= 6; struct Cyc_std_FloatPtr_sa_struct{
 int tag; float* f1; } ; struct _tuple0{ void* f1; struct _tagged_arr* f2; } ;
 struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual; struct Cyc_Absyn_Conref; struct
 Cyc_Absyn_PtrInfo; struct Cyc_Absyn_VarargInfo; struct Cyc_Absyn_FnInfo; struct
@@ -500,9 +499,9 @@ struct Cyc_List_List*) _check_null( _temp127))->hd)->type)){ return 0;}} return
 1; _LL85: return 1; _LL87: return 0; _LL89: return 0; _LL91: return 0; _LL93:
 return 0; _LL95: return({ void* _temp149[ 0u]={};(( int(*)( struct _tagged_arr
 fmt, struct _tagged_arr ap)) Cyc_Tcutil_impos)(( struct _tagged_arr)({ struct
-Cyc_Stdio_String_pa_struct _temp151; _temp151.tag= Cyc_Stdio_String_pa; _temp151.f1=(
+Cyc_std_String_pa_struct _temp151; _temp151.tag= Cyc_std_String_pa; _temp151.f1=(
 struct _tagged_arr) Cyc_Absynpp_typ2string( t);{ void* _temp150[ 1u]={& _temp151};
-Cyc_Stdio_aprintf( _tag_arr("szof typedeftype %s", sizeof( unsigned char), 20u),
+Cyc_std_aprintf( _tag_arr("szof typedeftype %s", sizeof( unsigned char), 20u),
 _tag_arr( _temp150, sizeof( void*), 1u));}}), _tag_arr( _temp149, sizeof( void*),
 0u));}); _LL45:;} struct _tuple4{ void* f1; void* f2; } ; void* Cyc_Evexp_eval_const_unprimop(
 void* p, struct Cyc_Absyn_Exp* e){ void* cn= Cyc_Evexp_promote_const( Cyc_Evexp_eval_const_exp(
@@ -769,18 +768,17 @@ int) _temp467; goto _LL450; _LL450: if( _temp487 !=  _temp481){ cn=( void*)({
 struct Cyc_Absyn_Int_c_struct* _temp489=( struct Cyc_Absyn_Int_c_struct*)
 GC_malloc( sizeof( struct Cyc_Absyn_Int_c_struct)); _temp489[ 0]=({ struct Cyc_Absyn_Int_c_struct
 _temp490; _temp490.tag= Cyc_Absyn_Int_c; _temp490.f1=( void*) _temp487; _temp490.f2=
-_temp479; _temp490;}); _temp489;});} goto _LL444; _LL452:({ struct Cyc_Stdio_String_pa_struct
-_temp492; _temp492.tag= Cyc_Stdio_String_pa; _temp492.f1=( struct _tagged_arr)
-Cyc_Absynpp_typ2string( _temp426);{ void* _temp491[ 1u]={& _temp492}; Cyc_Tcutil_terr(
-e->loc, _tag_arr("eval_const: cannot cast to %s", sizeof( unsigned char), 30u),
-_tag_arr( _temp491, sizeof( void*), 1u));}}); return( void*)({ struct Cyc_Absyn_Int_c_struct*
-_temp493=( struct Cyc_Absyn_Int_c_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Int_c_struct));
-_temp493[ 0]=({ struct Cyc_Absyn_Int_c_struct _temp494; _temp494.tag= Cyc_Absyn_Int_c;
-_temp494.f1=( void*)(( void*) Cyc_Absyn_Signed); _temp494.f2= 0; _temp494;});
-_temp493;}); _LL444:;} goto _LL393; _LL409: return Cyc_Evexp_eval_const_exp((
-struct Cyc_Absyn_Exp*) _check_null((( struct Cyc_Absyn_Enumfield*) _check_null(
-_temp428))->tag)); _LL411:({ void* _temp495[ 0u]={}; Cyc_Tcutil_terr( e->loc,
-_tag_arr("bad static expression", sizeof( unsigned char), 22u), _tag_arr(
+_temp479; _temp490;}); _temp489;});} goto _LL444; _LL452:({ struct Cyc_std_String_pa_struct
+_temp492; _temp492.tag= Cyc_std_String_pa; _temp492.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+_temp426);{ void* _temp491[ 1u]={& _temp492}; Cyc_Tcutil_terr( e->loc, _tag_arr("eval_const: cannot cast to %s",
+sizeof( unsigned char), 30u), _tag_arr( _temp491, sizeof( void*), 1u));}});
+return( void*)({ struct Cyc_Absyn_Int_c_struct* _temp493=( struct Cyc_Absyn_Int_c_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Int_c_struct)); _temp493[ 0]=({ struct Cyc_Absyn_Int_c_struct
+_temp494; _temp494.tag= Cyc_Absyn_Int_c; _temp494.f1=( void*)(( void*) Cyc_Absyn_Signed);
+_temp494.f2= 0; _temp494;}); _temp493;}); _LL444:;} goto _LL393; _LL409: return
+Cyc_Evexp_eval_const_exp(( struct Cyc_Absyn_Exp*) _check_null((( struct Cyc_Absyn_Enumfield*)
+_check_null( _temp428))->tag)); _LL411:({ void* _temp495[ 0u]={}; Cyc_Tcutil_terr(
+e->loc, _tag_arr("bad static expression", sizeof( unsigned char), 22u), _tag_arr(
 _temp495, sizeof( void*), 0u));}); return( void*)({ struct Cyc_Absyn_Int_c_struct*
 _temp496=( struct Cyc_Absyn_Int_c_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Int_c_struct));
 _temp496[ 0]=({ struct Cyc_Absyn_Int_c_struct _temp497; _temp497.tag= Cyc_Absyn_Int_c;

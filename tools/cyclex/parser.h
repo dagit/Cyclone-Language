@@ -8,7 +8,7 @@
 #include "syntax.h"
 
 using Core {
-using Stdio {
+using std {
 using List {
 using Lexing {
 using Syntax {

@@ -42,7 +42,6 @@ using Absynpp;
 using Tcutil;
 using Tcenv;
 using Tcexp;
-using Stdio;
 
 /////////////////////////////////////////////////////////////////////////
 // type-check a pattern and return a list of the bound type variables,
@@ -475,7 +474,7 @@ static int compare_con(con_t c1, con_t c2) {
   switch (c1->name) {
   case &Name_v(n1):
     switch (c2->name) {
-    case &Name_v(n2): return String::zstrcmp(n1,n2);
+    case &Name_v(n2): return zstrcmp(n1,n2);
     case &Int_v(_):   return -1;
     }
   case &Int_v(i1):
@@ -610,12 +609,12 @@ static simple_pat_t compile_pat(pat_t p) {
     list_t<simple_pat_t> ps = NULL;
     for (_ fields = sd->fields->v; fields != NULL; fields = fields->tl) {
       // leave out bit fields without a name
-      bool found = (String::strcmp(*fields->hd->name,"") == 0);
+      bool found = (strcmp(*fields->hd->name,"") == 0);
       for(_ dlps0 = dlps; !found && dlps0 != NULL; dlps0 = dlps0->tl) {
 	let &$(dl,p) = dlps0->hd;
 	switch (dl) {
 	case &List{.hd=&FieldName(f), .tl=NULL}: 
-	  if(String::zstrptrcmp(f,fields->hd->name) == 0) {
+	  if(zstrptrcmp(f,fields->hd->name) == 0) {
 	    ps = new List(compile_pat(p),ps);
 	    found = true;
 	  }

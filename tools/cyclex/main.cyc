@@ -12,7 +12,6 @@
 #include "output.h"
 
 using Core;
-using Stdio;
 
 int main(int argc, string_t ? argv) {
   if(argc < 2 || argc > 3) {
@@ -24,10 +23,10 @@ int main(int argc, string_t ? argv) {
   if(argc==3)
     dest_name = argv[2];
   else if (Filename::check_suffix(source_name,".cyl"))
-    dest_name = String::strconcat(Filename::chop_extension(source_name),
+    dest_name = strconcat(Filename::chop_extension(source_name),
 				  ".cyc");
   else
-    dest_name = String::strconcat(source_name, ".cyc");
+    dest_name = strconcat(source_name, ".cyc");
 
   FILE @ ic;
   FILE @ oc; 

@@ -1,5 +1,4 @@
 #include <stdio.h>
-using Stdio;
 
 #include "contexts.h"
 

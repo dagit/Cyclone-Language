@@ -4,10 +4,9 @@
  * simple hashtable map: Cstring -> Int
  */
 
-#include <stdio.h>
-#include <string.h>
-using Stdio {
-using String {
+#include <cstdio.h>
+#include <cstring.h>
+using std {
 
 #define ht_num_primes 28
 
@@ -189,4 +188,4 @@ inline int ht_count(struct ht_ht @ht) {
     return(ht->items);
 }
 
-}}
+}

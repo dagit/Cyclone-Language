@@ -59,7 +59,6 @@ using Absyn;
 using List;
 using CfFlowInfo;
 using NewControlFlow;
-using Stdio;
 namespace CfAbsexp;
 
 xtunion exn {BadAbsexp};
@@ -405,7 +404,7 @@ path_info_t assign_escape(List::list_t<path_info_t,`H>@`r escaping_states,
 				     Dict::empty(Core::intcmp)));
   case $(&StructPI(d1), &StructPI(d2)):
     return new StructPI(Dict::fold2_c(assign_escape_f, escaping_states, d1, d2,
-				      Dict::empty(String::zstrptrcmp)));
+				      Dict::empty(zstrptrcmp)));
   default: throw new Core::Impossible("bad pinfos in assign_escape");
   }
 }

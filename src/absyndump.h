@@ -21,7 +21,7 @@
 #define _ABSYNDUMP_H_
 
 #include <core.h>
-#include <stdio.h>
+#include <cstdio.h>
 #include <list.h>
 #include "absyn.h"
 
@@ -29,7 +29,7 @@
 
 namespace Absyndump {
 extern void set_params(struct Absynpp::Params @ `r fs);
-extern void dumpdecllist2file(List::list_t<Absyn::decl_t> tdl, Stdio::FILE @f);
+extern void dumpdecllist2file(List::list_t<Absyn::decl_t> tdl, std::FILE @f);
 }
 
 #endif

@@ -24,10 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-using Stdio;
-using Stdlib;
-using String;
-
 /****************************************/
 /* Parameters for the mother of random  */
 /* number generation programs: Mother() */

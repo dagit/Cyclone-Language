@@ -8,9 +8,6 @@
 #include <stdio.h>
 #include <math.h>
 
-using Stdio;
-using Math;
-
 #ifndef PI
 #define PI  3.14159265358979323846
 #endif

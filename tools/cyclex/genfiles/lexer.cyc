@@ -28,7 +28,6 @@
 #include "parser.h"
 
 using Core;
-using Stdio;
 using Lexing;
 using Parser;
 
@@ -71,14 +70,14 @@ void reset_string_buffer() {
 void store_string_char(char c) {
   if(string_index >= string_buff.size) {
     mstring_t new_buff = new_string(string_buff.size*2);
-    String::strncpy(string_buff, new_buff, string_buff.size);
+    strncpy(string_buff, new_buff, string_buff.size);
     string_buff = new_buff;
   }
   string_buff[string_index++] = c;
 }
 
 mstring_t get_stored_string() {
-  return String::substring(string_buff,0,string_index);
+  return substring(string_buff,0,string_index);
 }
 
 char char_for_backslash(char c) {
@@ -207,11 +206,11 @@ case 2:
 case 3: 
 #line 148 "lexer.cyl"
     mstring_t s = lexeme(lexbuf);
-    if     (String::strcmp(s,"rule")  == 0) return TRULE;
-    else if(String::strcmp(s,"parse") == 0) return TPARSE;
-    else if(String::strcmp(s,"and")   == 0) return TAND;
-    else if(String::strcmp(s,"eof")   == 0) return TEOF;
-    else if(String::strcmp(s,"let")   == 0) return TLET;
+    if     (strcmp(s,"rule")  == 0) return TRULE;
+    else if(strcmp(s,"parse") == 0) return TPARSE;
+    else if(strcmp(s,"and")   == 0) return TAND;
+    else if(strcmp(s,"eof")   == 0) return TEOF;
+    else if(strcmp(s,"let")   == 0) return TLET;
     else { token_string = s; return TIDENT; }
   
 case 4: 

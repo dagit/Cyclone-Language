@@ -24,8 +24,6 @@
 namespace Position;
 using Core;
 using List;
-using Stdio;
-using String;
 
 xtunion exn {Exit};
 

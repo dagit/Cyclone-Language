@@ -44,11 +44,9 @@ extern void yyprint(int i, xtunion YYSTYPE v);
 #include "absyn.h"
 #include "tcutil.h"
 using Core;
-using Stdio;
 using List;
 using Absyn;
 using Position;
-using String;
 
 // Typedef processing must be split between the parser and lexer.
 // These functions are called by the parser to communicate typedefs

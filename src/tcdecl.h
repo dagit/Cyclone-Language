@@ -22,7 +22,7 @@
 #define _TCDECL_H_
 
 #include "absyn.h"
-#include <string.h>
+//#include <cstring.h>
 #include <position.h>
 #include <list.h>
 

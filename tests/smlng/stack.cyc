@@ -1,10 +1,8 @@
 /* Try to find the address of the end of the stack */
 
 #include <stdio.h>
-using Stdio;
 
 #include <sys/resource.h>
-using Resource;
 
 unsigned int stacklimit_predict() {
   unsigned int stack_now;

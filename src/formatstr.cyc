@@ -29,7 +29,6 @@
 #include "formatstr.h"
 using Core;
 using List;
-using Stdio;
 using Position;
 using Absyn;
 using Tcutil;
@@ -49,7 +48,7 @@ static struct Opt<kind_t> rk = {RgnKind};
 opt_t<$(list_t<int>, list_t<int>, list_t<int>, list_t<int>, char, int)@>
 parse_conversionspecification(string_t s, int i) {
   //  fprintf(cyc_stderr, "String: %s\n" "Position: %d\n",s,i);
-  let len = String::strlen(s);
+  let len = strlen(s);
   if (i<0 || i>=len) return NULL;
 
   // Parse flags: ['+' '-' ' ' '#' '0']*
@@ -79,7 +78,7 @@ parse_conversionspecification(string_t s, int i) {
   } else {
     for (; i<len; i++) {
       c = s[i];
-      if (Ctype::isdigit(c)) width = new List((int)c,width);
+      if (isdigit(c)) width = new List((int)c,width);
       else break;
     }
   }
@@ -100,7 +99,7 @@ parse_conversionspecification(string_t s, int i) {
     } else {
       for (; i<len; i++) {
         c = s[i];
-        if (Ctype::isdigit(c)) precision = new List((int)c,precision);
+        if (isdigit(c)) precision = new List((int)c,precision);
         else break;
       }
     }
@@ -168,17 +167,17 @@ parse_conversionspecification(string_t s, int i) {
   //          "Width: %s\n"
   //          "Precision: %s\n"
   //          "Lenmod: %s\n",
-  //          String::implode(flags),
-  //          String::implode(width),
-  //          String::implode(precision),
-  //          String::implode(lenmod));
+  //          implode(flags),
+  //          implode(width),
+  //          implode(precision),
+  //          implode(lenmod));
   return new Opt(new $(flags,width,precision,lenmod,c,i+1));
 }
 
 list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
   // FIX: on error we return NULL.  This will probably lead to
   // cascading errors (e.g., too many arguments to printf).
-  let len = String::strlen(s);
+  let len = strlen(s);
   let typs = NULL;
   int i;
   for (i=0; i<len; i++) {
@@ -226,7 +225,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
       // We don't support ll
       default:
         terr(loc,"length modifier '%s' is not allowed with %%%c",
-             String::implode(lenmod), c);
+             implode(lenmod), c);
         return NULL;
       }
       typs = new List(t,typs);
@@ -250,7 +249,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
       // We don't support ll
       default:
         terr(loc,"length modifier '%s' is not allowed with %%%c",
-             String::implode(lenmod), c);
+             implode(lenmod), c);
         return NULL;
       }
       typs = new List(t,typs);
@@ -281,12 +280,12 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
       // in particular, we don't allow l (wint_t)
       if (lenmod != NULL) {
         terr(loc,"length modifier '%s' not allowed with %%c",
-             String::implode(lenmod));
+             implode(lenmod));
         return NULL;
       }
       if (precision != NULL) {
         terr(loc,"precision '%s' not allowed with %%c",
-             String::implode(precision));
+             implode(precision));
         return NULL;
       }
       typs = new List(sint_t,typs);
@@ -318,7 +317,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
         }
       if (precision != NULL) {
         terr(loc,"precision '%s' not allowed with %%n",
-             String::implode(precision));
+             implode(precision));
         return NULL;
       }
       let tenv_tvs = new Opt(lookup_type_vars(te));
@@ -334,7 +333,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
       // We don't support ll
       default:
         terr(loc,"length modifier '%s' not allowed with %%n",
-             String::implode(lenmod));
+             implode(lenmod));
         return NULL;
       }
       typs = new List(t,typs);
@@ -342,22 +341,22 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
     case '%':
       if (flags != NULL) {
         terr(loc,"flags '%s' not allowed with %%%%",
-             String::implode(flags));
+             implode(flags));
         return NULL;
       }
       if (width != NULL) {
         terr(loc,"width '%s' not allowed with %%%%",
-             String::implode(width));
+             implode(width));
         return NULL;
       }
       if (precision != NULL) {
         terr(loc,"precision '%s' not allowed with %%%%",
-             String::implode(precision));
+             implode(precision));
         return NULL;
       }
       if (lenmod != NULL) {
         terr(loc,"length modifier '%s' not allowed with %%%%",
-             String::implode(lenmod));
+             implode(lenmod));
         return NULL;
       }
       break;
@@ -377,7 +376,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
 // and the index of the character following the conversion specifier.
 opt_t<$(bool, list_t<int>, list_t<int>, char, int)@>
 parse_inputformat(string_t s, int i) {
-  let len = String::strlen(s);
+  let len = strlen(s);
   if (i<0 || i>=len) return NULL;
 
   let suppress = false;
@@ -391,7 +390,7 @@ parse_inputformat(string_t s, int i) {
   let width = NULL;
   for (; i<len; i++) {
     c = s[i];
-    if (Ctype::isdigit(c)) width = new List((int)c,width);
+    if (isdigit(c)) width = new List((int)c,width);
     else break;
   }
   if (i>=len) return NULL;
@@ -457,7 +456,7 @@ parse_inputformat(string_t s, int i) {
 list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
   // FIX: on error we return NULL.  This will probably lead to
   // cascading errors (e.g., too many arguments to scanf).
-  let len = String::strlen(s);
+  let len = strlen(s);
   let typs = NULL;
   int i;
   for (i=0; i<len; i++) {
@@ -494,7 +493,7 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
       // We don't support ll
       default:
         terr(loc,"length modifier '%s' is not allowed with %%%c",
-              String::implode(lenmod), c);
+              implode(lenmod), c);
         return NULL;
       }
       typs = new List(t,typs);
@@ -518,7 +517,7 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
       // We don't support ll
       default:
         terr(loc,"length modifier '%s' is not allowed with %%%c",
-              String::implode(lenmod), c);
+              implode(lenmod), c);
         return NULL;
       }
       typs = new List(t,typs);
@@ -541,7 +540,7 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
       // We don't support L
       default:
         terr(loc,"length modifier '%s' is not allowed with %%%c",
-              String::implode(lenmod), c);
+              implode(lenmod), c);
         return NULL;
       }
       typs = new List(t,typs);
@@ -573,7 +572,7 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
       // We don't support ll
       default:
         terr(loc,"length modifier '%s' not allowed with %%n",
-              String::implode(lenmod));
+              implode(lenmod));
         return NULL;
       }
       typs = new List(t,typs);
@@ -585,12 +584,12 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
       }
       if (width != NULL) {
         terr(loc,"width '%s' not allowed with %%%%",
-              String::implode(width));
+              implode(width));
         return NULL;
       }
       if (lenmod != NULL) {
         terr(loc,"length modifier '%s' not allowed with %%%%",
-              String::implode(lenmod));
+             implode(lenmod));
         return NULL;
       }
       break;

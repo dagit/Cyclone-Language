@@ -46,10 +46,8 @@ namespace Lex {
   extern void lex_init();
 }
 using Core;
-using Stdio;
 using List;
 using Arg;
-using String;
 
 static bool pp_r       = false;
 static bool noexpand_r = false;
@@ -175,7 +173,7 @@ static void add_other(string_t<`H> s) {
 
 static void remove_file(string_t<`H> s) {
   if (save_temps_r) return;
-  else Stdio::remove(s);
+  else remove(s);
 }
 
 bool compile_failure = false; // for exit code (helps Makefile)
@@ -449,7 +447,7 @@ static void process_file(string_t<`H> filename) {
   // Run the preprocessor, by building and running a command-line
   // Pass -I and -D things onto preprocessor
   let cppargs_string =
-    String::str_sepstr(new List(new (string_t)"",
+    str_sepstr(new List(new (string_t)"",
                                 List::map(sh_escape_stringptr,rev(cppargs))),
                        " ");
   // About the cyclone include path---this path is specified with the
@@ -464,10 +462,10 @@ static void process_file(string_t<`H> filename) {
 #else
   "";
 #endif
-  let cyclone_include_path = Stdlib::getenv("CYCLONE_INCLUDE_PATH");
+  let cyclone_include_path = getenv("CYCLONE_INCLUDE_PATH");
   if (cyclone_include_path != NULL) {
     let x = split_by_char(cyclone_include_path,':');
-    let s = String::str_sepstr(new List(new (string_t)"",
+    let s = str_sepstr(new List(new (string_t)"",
                                         List::map(sh_escape_stringptr,x)),
                                " -I");
     stdinc_string = aprintf("%s%s",s,stdinc_string);
@@ -780,7 +778,7 @@ int main(int argc, string_t<`H> ?`H argv) {
   // 1) command line arguments (with -B)
   // 2) environment var (with CYCLONE_EXEC_PREFIX)
   // 3) hardwired in the build (by #defining CYCLONE_LIB_PATH) 
-  string_t cyclone_exec_prefix = Stdlib::getenv("CYCLONE_EXEC_PREFIX");
+  string_t cyclone_exec_prefix = getenv("CYCLONE_EXEC_PREFIX");
   if (cyclone_exec_prefix != NULL)
     cyclone_lib_path = new List(new cyclone_exec_prefix, cyclone_lib_path);
 #if defined(CYCLONE_LIB_PATH)
@@ -791,9 +789,9 @@ int main(int argc, string_t<`H> ?`H argv) {
   let cyc_include = do_find(cyclone_lib_path,"include/cyc_include.h");
 
   ccargs = rev(ccargs);
-  let ccargs_string = String::str_sepstr(List::map(sh_escape_stringptr,ccargs), " ");
+  let ccargs_string = str_sepstr(List::map(sh_escape_stringptr,ccargs), " ");
   libargs = rev(libargs);
-  let libargs_string = String::str_sepstr(new List(new ((string_t)""),
+  let libargs_string = str_sepstr(new List(new ((string_t)""),
                                                    List::map(sh_escape_stringptr,libargs)), " ");
 
   let stdlib;

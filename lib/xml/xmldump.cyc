@@ -23,7 +23,6 @@ namespace XmlDump;
 
 using Xml;
 using List;
-using Stdio;
 
 void dumpAttvalue(FILE @fd, attvalue_t av) {
   switch (av) {

@@ -23,14 +23,14 @@ using Core;
 namespace Cstat {
   extern "C" {
     int open(Cstring pathname, int flags, mode_t mode);
-    int stat(Cstring filename, struct Stat::stat_t @`r buf);
-    int fstat(int fd, struct Stat::stat_t @`r buf);
-    int lstat(Cstring filename, struct Stat::stat_t @`r buf);
+    int stat(Cstring filename, struct stat_t @`r buf);
+    int fstat(int fd, struct stat_t @`r buf);
+    int lstat(Cstring filename, struct stat_t @`r buf);
   }
 #define s2c(x) (string_to_Cstring(x))
 }
 
-namespace Stat;
+namespace std;
 
 int open(string_t pathname, int flags, ...`r mode_t mode) {
   mode_t my_mode;

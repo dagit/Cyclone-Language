@@ -2,15 +2,15 @@
 #define LEXER_H
 
 #include "core.h"
-#include "stdio.h"
-#include "string.h"
+#include "cstdio.h"
+//#include "cstring.h"
 #include "lexing.h"
 
 #include "syntax.h"
 #include "parser.h"
 
 using Core {
-using Stdio {
+using std {
 using Lexing {
 using Parser {
 namespace Lexer {

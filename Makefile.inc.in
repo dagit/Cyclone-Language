@@ -74,59 +74,88 @@ CYCLONE_LIBS:=arg\
         xarray
 
 CYCLONE_H:=arg.h\
+	arpa/cinet.h\
 	arpa/inet.h\
-        array.h\
-        assert.h\
-        bitvec.h\
-        buffer.h\
-        core.h\
-        dict.h\
+	array.h\
+	assert.h\
+	bitvec.h\
+	buffer.h\
+	cassert.h\
+	cctype.h\
+	cdirent.h\
+	cerrno.h\
+	cfcntl.h\
+	cgetopt.h\
+	cgrp.h\
+	cmath.h\
+	cnetdb.h\
+	core.h\
+	cpwd.h\
+	csignal.h\
+	cstddef.h\
+	cstdio.h\
+	cstdlib.h\
+	cstring.h\
+	cstrings.h\
+	ctime.h\
+	ctype.h\
+	cunistd.h\
+	dict.h\
 	dirent.h\
-        errno.h\
+	errno.h\
 	execinfo.h\
 	fcntl.h\
-        filename.h\
-        fn.h\
-        getopt.h\
+	filename.h\
+	fn.h\
+	getopt.h\
 	grp.h\
-        hashtable.h\
-        id.h\
-        lexing.h\
-        lineno.h\
-        list.h\
-        netdb.h\
-        netinet/in.h\
-	netinet/tcp.h\
-        position.h\
-        pp.h\
-	pwd.h\
-        queue.h\
-        ref.h\
-        rope.h\
-        set.h\
-	signal.h\
-        slowdict.h\
-        splay.h\
-	stdio.h\
-        stdlib.h\
-        string.h\
-        strings.h\
-        sys/select.h\
-        sys/socket.h\
-        sys/time.h\
-        time.h\
-        xarray.h\
-	ctype.h\
+	hashtable.h\
+	id.h\
+	lexing.h\
+	lineno.h\
+	list.h\
 	math.h\
+	netdb.h\
+	netinet/cin.h\
+	netinet/ctcp.h\
+	netinet/in.h\
+	netinet/tcp.h\
+	position.h\
+	pp.h\
 	precore.h\
+	pwd.h\
+	queue.h\
+	ref.h\
+	rope.h\
+	set.h\
 	signal.h\
+	signal.h\
+	slowdict.h\
+	splay.h\
 	stddef.h\
+	stdio.h\
+	stdlib.h\
+	string.h\
+	strings.h\
+	sys/cmman.h\
+	sys/cresource.h\
+	sys/cselect.h\
+	sys/csocket.h\
+	sys/cstat.h\
+	sys/ctime.h\
+	sys/ctypes.h\
+	sys/cwait.h\
 	sys/mman.h\
 	sys/resource.h\
+	sys/select.h\
+	sys/socket.h\
 	sys/stat.h\
+	sys/time.h\
 	sys/types.h\
 	sys/wait.h\
-	unistd.h
+	time.h\
+	unistd.h\
+	xarray.h
 
 CYCLONE_SRCS:=absyn\
          parse_tab\

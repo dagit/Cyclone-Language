@@ -2,7 +2,6 @@
 #define _BUFFER_H_
 #include <stdio.h>
 namespace Buffer {
-using Stdio;
 
 // abstract buffers for storing text
 extern struct Buf;

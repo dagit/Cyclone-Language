@@ -34,7 +34,7 @@ namespace Cstdlib {
 }
 
 using Core;
-namespace Stdlib {
+namespace std {
   double atof(const char ?`r _nptr) {
     return Cstdlib::atof(s2c(_nptr));
   }

@@ -23,13 +23,12 @@
 #include <ctype.h>
 #include <string.h>
 #include <strings.h>
-#include <stdio.h> // for size_t
+#include <stddef.h> // for size_t
 #include <math.h> //  for pow
 
-namespace String {
+namespace std {
 using Core;
 using List;
-using Stdio; // for size_t
 
 ///////////////////////// WRAPPERS
 namespace C_string {
@@ -87,8 +86,8 @@ static int cmp(const char ?`r1 s1, int ofs1, size_t len1,
 int strcmp(const char ?`r1 s1, const char ?`r2 s2) {
   if (s1 == s2)
     return 0;
-  size_t len1 = int_strleno(s1,0,"String::strcmp");
-  size_t len2 = int_strleno(s2,0,"String::strcmp");
+  size_t len1 = int_strleno(s1,0,"std::strcmp");
+  size_t len2 = int_strleno(s2,0,"std::strcmp");
   return cmp(s1,0,len1,s2,0,len2,case_cmp);
 }
 
@@ -116,8 +115,8 @@ static int ncmp(const char ? s1, int ofs1, size_t len1,
 // Like strcmp but compare no more than n characters.
 // If n<0 return 0 (equal).
 int strncmp(const char ? s1, const char? s2, size_t n) {
-  size_t len1 = int_strleno(s1,0,"String::strncmp");
-  size_t len2 = int_strleno(s2,0,"String::strncmp");
+  size_t len1 = int_strleno(s1,0,"std::strncmp");
+  size_t len2 = int_strleno(s2,0,"std::strncmp");
   return ncmp(s1,0,len1,s2,0,len2,n,case_cmp);
 }
 
@@ -192,7 +191,7 @@ static char ?`r int_strcato(char ?`r dest,const char ? src,int srcOfs,string_t<`
 // Destructive concatenation: the first argument is modified,
 // and returned
 char ?`r strcat(char ?`r dest,const char ? src) {
-  return int_strcato(dest,src,0,"String::strcat");
+  return int_strcato(dest,src,0,"std::strcat");
 }
 
 // Allocate a new string and fill it with the concatenation of a and b
@@ -299,7 +298,7 @@ char ?`r strncpy(char ?`r dest, const char ? src, size_t n) {
   let srcSz = src.size;
   if (n <= 0) return dest;
   if (n > destSz || n > srcSz)
-    throw new InvalidArg("String::strncpy");
+    throw new InvalidArg("std::strncpy");
   int i;
   for (i=0; i<n; i++) {
     let srcChar = src[i];
@@ -337,7 +336,7 @@ char ?`r zstrncpy(char ?`r dest, const char ? src, size_t n) {
   let srcSz  = src.size;
   if (n <= 0) return dest;
   if (n > destSz || n > srcSz)
-    throw new InvalidArg("String::zstrncpy");
+    throw new InvalidArg("std::zstrncpy");
   int i;
   for (i=0; i<n; i++) 
     dest[i] = src[i];
@@ -418,7 +417,7 @@ mstring_t realloc_str(mstring_t<`H> str, size_t sz) {
 char ?`r rsubstring(region_t<`r> r,const char ? s, 
                      int start, size_t amt) {
   if (start < 0 || amt < 0 || start + ((int)amt) - 1 > (int)(s.size))
-    throw new InvalidArg("String::substring");
+    throw new InvalidArg("std::substring");
   char ? ans = rnew_string(r,amt+1);
   for(size_t i=0; i<amt; ++i)
     ans[i] = s[start+i];
@@ -435,7 +434,7 @@ mstring_t substring(const char ?`r1 s, int start, size_t amt) {
 char ?`r rreplace_suffix (region_t<`r> r,const char ? src, const char ? curr_suffix, const char ? new_suffix) {
   size_t m = src.size;
   size_t n = curr_suffix.size;
-  string_t err = "String::replace_suffix";
+  string_t err = "std::replace_suffix";
   if (m < n) 
     throw new InvalidArg(err);
   for (size_t i = 1; i <= n; ++i)
@@ -455,7 +454,7 @@ mstring_t replace_suffix (const char ? src, const char ? curr_suffix, const char
 // Search for any character of accept in s.
 // Return a ? pointer to the first such character, or NULL if none.
 char ?`r strpbrk(char ?`r s, const char ? accept) {
-  int len = int_strleno(s,0,"String::strpbrk");
+  int len = int_strleno(s,0,"std::strpbrk");
   char c = '\000';
 
   for (; len>0 && (c=*s)!=0; len--,s++) {
@@ -469,7 +468,7 @@ char ?`r strpbrk(char ?`r s, const char ? accept) {
 // Return a pointer to the first occurrence of c in s, 
 // or NULL if none.
 const char ?`r1 strchr(const char ?`r1 s, char c) {
-  int len = int_strleno(s,0,"String::strchr");
+  int len = int_strleno(s,0,"std::strchr");
   char c2 = '\000';
 
   for (; len>0 && (c2=*s)!=0; len--,s++) {
@@ -482,7 +481,7 @@ const char ?`r1 strchr(const char ?`r1 s, char c) {
 // Return a pointer to the last occurrence of c in s,
 // or NULL if none.
 char ?`r1 strrchr(char ?`r1 s, char c) {
-  int len = int_strleno(s,0,"String::strrchr");
+  int len = int_strleno(s,0,"std::strrchr");
   int i = len - 1;
   s += i;
 
@@ -496,10 +495,10 @@ char ?`r1 strrchr(char ?`r1 s, char c) {
 // Return a pointer to the beginning of the substring needle within
 // haystack, or NULL if the substring is not found.
 const char ?`r strstr(const char ?`r haystack, const char ?`r2 needle) {
-  if (!haystack || !needle) throw new InvalidArg("String::strstr");
+  if (!haystack || !needle) throw new InvalidArg("std::strstr");
   if (*needle == '\0') return haystack;
 
-  int len = int_strleno(needle, 0, "String::strstr");
+  int len = int_strleno(needle, 0, "std::strstr");
   for (const char ?`r start = haystack;
        (start = strchr(start, *needle)) != NULL;
        start = strchr(start+1, *needle))
@@ -513,7 +512,7 @@ const char ?`r strstr(const char ?`r haystack, const char ?`r2 needle) {
 // Return the offset to the first such character, or the length
 // of s if none.
 size_t strspn(const char ?`r1 s, const char ? accept) {
-  size_t len = int_strleno(s,0,"String::strspn");
+  size_t len = int_strleno(s,0,"std::strspn");
 
   for (size_t i=0; i<len; i++) {
     int j;
@@ -558,22 +557,22 @@ int to_int(const char ? s, int * offset) {
   int i = (offset == NULL) ? 0 : *offset;
 
   // skip any white space
-  while (i < s.size && Ctype::isspace(s[i])) i++;
+  while (i < s.size && isspace(s[i])) i++;
   // check for a sign
   if (i < s.size && s[i] == '-') {
     i++;
     sn = -1;
   }
   // skip any white space
-  while (i < s.size && Ctype::isspace(s[i])) i++;
+  while (i < s.size && isspace(s[i])) i++;
   // parse digits
-  while (i < s.size && Ctype::isdigit(s[i])) {
+  while (i < s.size && isdigit(s[i])) {
     digit_seen = true;
     ans = (ans * 10) + (int)(s[i] - '0');
     i++;
   }
   ans = ans*sn;
-  if (!digit_seen) throw new InvalidArg("String::to_int");
+  if (!digit_seen) throw new InvalidArg("std::to_int");
   if (offset != NULL) *offset = i;
   return ans;
 }
@@ -589,14 +588,14 @@ double to_double(const char ? s, int * offset) {
   int i = (offset == NULL) ? 0 : *offset;
   
   // skip any white space
-  while (i < s.size && Ctype::isspace(s[i])) i++;
+  while (i < s.size && isspace(s[i])) i++;
   // check for a sign
   if (i < s.size && s[i] == '-') {
     i++;
     sn = -1;
   }
   // get mantissa
-  while (i < s.size && Ctype::isdigit(s[i])) {
+  while (i < s.size && isdigit(s[i])) {
     digit_seen = true;
     ans = (ans * 10.0) + (double)(s[i] - '0');
     i++;
@@ -606,14 +605,14 @@ double to_double(const char ? s, int * offset) {
     i++;
     // get fractional part
     double divisor = 0.1;
-    while (i < s.size && Ctype::isdigit(s[i])) {
+    while (i < s.size && isdigit(s[i])) {
       digit_seen = true;
       ans = ans + (((double)(s[i] - '0')) * divisor);
       divisor = divisor / 10.0;
       i++;
     }
   }
-  if (!digit_seen) throw new InvalidArg("String::to_double");
+  if (!digit_seen) throw new InvalidArg("std::to_double");
   // look for exponent
   if (i < s.size && (s[i] == 'e' || s[i] == 'E')) {
     i++;
@@ -626,41 +625,36 @@ double to_double(const char ? s, int * offset) {
       exp_sign = -1;
     } else if (i < s.size && s[i] == '+') i++;
     // get exponent
-    while (i < s.size && Ctype::isdigit(s[i])) {
+    while (i < s.size && isdigit(s[i])) {
       digit_seen = true;
       exponent = exponent * 10 + ((int)(s[i] - '0'));
       i++;
     }
-    if (!digit_seen) throw new InvalidArg("String::to_double");
-    ans = ans * Math::pow(10.0, (double)(exponent*exp_sign));
+    if (!digit_seen) throw new InvalidArg("std::to_double");
+    ans = ans * pow(10.0, (double)(exponent*exp_sign));
   }
   if (offset != NULL) *offset = i;
   return ans*sn;
 }
 
-}
-
-/* Perhaps the remainder should be broken out into a separate file */
-namespace Strings {
-
 // Like strcmp, but case insensitive.
 int strcasecmp(const char ?`r1 s1, const char ?`r2 s2) {
   if (s1 == s2)
     return 0;
-  size_t len1 = String::int_strleno(s1,0,"Strings::strcasecmp");
-  size_t len2 = String::int_strleno(s2,0,"Strings::strcasecmp");
-  return String::cmp(s1,0,len1,s2,0,len2,String::case_cmp);
+  size_t len1 = int_strleno(s1,0,"std::strcasecmp");
+  size_t len2 = int_strleno(s2,0,"std::strcasecmp");
+  return cmp(s1,0,len1,s2,0,len2,case_cmp);
 }
 
 static int nocase_cmp(char c1, char c2) {
-  return String::case_cmp((char)Ctype::toupper(c1),(char)Ctype::toupper(c2));
+  return case_cmp((char)toupper(c1),(char)toupper(c2));
 }
 
 // Like strncmp, but case insensitive.
 int strncasecmp(const char ?`r1 s1, const char ?`r2 s2, size_t n) {
-  size_t len1 = String::int_strleno(s1,0,"Strings::strncasecmp");
-  size_t len2 = String::int_strleno(s2,0,"Strings::strncasecmp");
-  return String::ncmp(s1,0,len1,s2,0,len2,n,nocase_cmp);
+  size_t len1 = int_strleno(s1,0,"std::strncasecmp");
+  size_t len2 = int_strleno(s2,0,"std::strncasecmp");
+  return ncmp(s1,0,len1,s2,0,len2,n,nocase_cmp);
 }
 
 }

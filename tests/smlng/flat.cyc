@@ -4,7 +4,6 @@
 #include "smlng.h"
 using Core;
 using List;
-using Stdio;
 namespace Flat;
 
 typedef struct Context ctxt_t;

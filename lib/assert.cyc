@@ -23,8 +23,7 @@
 #include <core.h>
 #include <stdio.h>
 
-namespace Assert {
-  using Stdio;
+namespace std {
 
   `a
   __assert_fail (string_t assertion, string_t file, unsigned int line) {

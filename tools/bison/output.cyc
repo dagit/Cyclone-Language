@@ -110,7 +110,6 @@ YYNTBASE = ntokens.
 #include "files.h"
 #include "gram.h"
 #include "state.h"
-using String;
 
 extern int debugflag;
 extern int nolinesflag;

@@ -7,7 +7,6 @@
 #include "dynamic.h"
 using Core;
 using List;
-using Stdio;
 namespace TagElim;
 
 // field is true if all text in the doc is guarded by an appropriate tag,

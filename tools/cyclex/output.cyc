@@ -4,7 +4,6 @@
 #include "stdio.h"
 
 namespace Output;
-using Stdio;
 
 static mstring_t copy_buffer = NULL; // initialized in output_lexdef
 

@@ -29,9 +29,7 @@
 #include <id.h>
 
 using Core;
-using String;
 using List;
-using Stdio;
 
 namespace Id;
 
@@ -59,7 +57,7 @@ Id id_unique   (string_t<`H> s) { return id_new(s); }
 
 mstring_t id_to_string(Id x) {
   if (x->i == -1)
-    return String::strdup(x->s);
+    return strdup(x->s);
   return strconcat_l(new List(new {x->s},
                               new List(new ((string_t)"$"), 
                                        new List(new {(string_t)string_of_int(x->i)},
@@ -71,7 +69,7 @@ mstring_t id_to_source(Id x) { return strdup(x->s); }
 
 int id_compare(Id x1,Id x2) {
   if (x1->i == x2->i)
-    return(String::zstrcmp(x1->s,x2->s));
+    return(zstrcmp(x1->s,x2->s));
   else if (x1->i < x2->i) return(-1);
   else return(1);
 }

@@ -28,7 +28,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gram.h"
 #include "state.h"
 
-using String;
 
 extern char ??tags;
 extern int nstates;

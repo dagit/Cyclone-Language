@@ -20,12 +20,12 @@
 #define _PP_H_
 
 #include <core.h>
-#include <stdio.h>
+#include <cstdio.h>
 #include <list.h>
 
 namespace PP {
 using Core;
-using Stdio;
+using std;
 using List;
 extern struct Ppstate;
 typedef struct Ppstate @ppstate_t;

@@ -14,7 +14,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-using Stdio; using Stdlib;
 
 int
 main(int argc, char ??argv) {

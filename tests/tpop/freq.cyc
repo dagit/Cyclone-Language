@@ -7,8 +7,7 @@
 #include "ctype.h"
 
 using Core;
-using Stdio;
-using Ctype;
+
 
 /* freq main: display byte frequency counts */
 int main(void)

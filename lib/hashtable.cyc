@@ -25,12 +25,11 @@
 #include <list.h>
 #include <core.h>
 #include <hashtable.h>
-#include <string.h>
+//#include <string.h>
 #include <stdio.h>
 
 namespace Hashtable;
 using List;
-using Stdio;
 
 /*abstract*/
 struct Table<`a,`b> {

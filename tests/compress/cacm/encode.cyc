@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 #include "model.h"
-using Stdio;
 
 void start_model();
 void start_outputing_bits();

@@ -36,9 +36,7 @@ The entry point is reader().  */
 #include "lex.h"
 #include "gram.h"
 #include "machine.h"
-using Ctype;
-using String;
-using Stdlib;
+
 /* DJG: I think the parser generator is still busted if you try to
  * re-define YYLTYPE.  Note that = is used on locs, so they shouldn't
  * be pointers!

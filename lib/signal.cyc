@@ -22,11 +22,11 @@ using Core;
 
 namespace Csignal {
   extern "C" {
-    Signal::__sighandler_t signal_func(int sig, Signal::__sighandler_t func);
+    __sighandler_t signal_func(int sig, __sighandler_t func);
   }
 }
 
-namespace Signal;
+namespace std;
 
 void _SIG_DFL(int n;{}) {} // equate to 0
 void _SIG_IGN(int n;{}) {} // equate to 1

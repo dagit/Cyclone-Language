@@ -7,8 +7,6 @@
 #include <list.h>
 #include "parser.h"
 using Core;
-using Stdio;
-using String;
 using List;
 using Buffer;
 

@@ -22,8 +22,8 @@
 #include <sys/socket.h>
 using Core;
 
-namespace Inet;
+namespace std;
 
-extern xtunion Socket::sockaddr {
+extern xtunion sockaddr {
   sockaddr_in(struct sockaddr_in);
 };

@@ -1,7 +1,6 @@
 #include <core.h>
 #include <stdio.h>
 #include "foo_tab.h"
-using Stdio;
 
 int c = (int)' ';
 

@@ -6,7 +6,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-using Stdio; using Stdlib;
 
 static char flags[8192 + 1];
 

@@ -38,7 +38,6 @@ using Absyn;
 using Absynpp;
 using Tcutil;
 using Tcenv;
-using Stdio;
 
 namespace Tc;
 
@@ -327,11 +326,11 @@ static void tcStructFields(tenv_t te, genv_t ge, seg_t loc,
     for (let fs = fields; fs != NULL; fs = fs->tl) {
       let &Structfield(fn,tq,t,width,atts) = fs->hd;
       
-      if (List::mem(String::zstrptrcmp,prev_fields,fn))
+      if (List::mem(zstrptrcmp,prev_fields,fn))
 	terr(loc, "duplicate field %s in %s", *fn, obj);
       // add the field to previous fields only if it's not an empty name
       // (empty names arise for bitfield padding.)
-      if (String::strcmp(*fn,"") != 0)
+      if (strcmp(*fn,"") != 0)
 	prev_fields = rnew(uprev_rgn) List(fn,prev_fields);
       
       check_type(loc,te,tvs,MemKind,false,t);
@@ -568,7 +567,7 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
     list_t<var_t, `uprev_rgn> prev_fields = NULL;
     for (_ fs = fields; fs != NULL; fs = fs-> tl) {
       let f = fs->hd;
-      if (List::mem(String::zstrptrcmp, prev_fields, (*f->name)[1]))
+      if (List::mem(zstrptrcmp, prev_fields, (*f->name)[1]))
 	terr(f->loc,"duplicate field name %s in %s", *((*f->name)[1]), obj);
       else
 	prev_fields = rnew(uprev_rgn) List((*f->name)[1], prev_fields);
@@ -715,7 +714,7 @@ static void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
     for (_ fs = ed->fields->v; fs != NULL; fs = fs->tl) {
       let f = fs->hd;
       
-      if (List::mem(String::zstrptrcmp,prev_fields,(*f->name)[1]))
+      if (List::mem(zstrptrcmp,prev_fields,(*f->name)[1]))
 	terr(f->loc,"duplicate field name %s",*((*f->name)[1]));
       else
 	prev_fields = rnew(uprev_rgn) List((*f->name)[1],prev_fields);
@@ -931,7 +930,7 @@ static void treeshake_remove(list_t<var_t> ns,
 }
 			     			     
 static $(genv_t, Set::set_t<var_t>)@ treeshake_make_env_f(genv_t ge) {
-  return new $(ge, Set::empty(String::strptrcmp));
+  return new $(ge, Set::empty(strptrcmp));
 }
 
 list_t<decl_t> treeshake(tenv_t te, list_t<decl_t> ds) {

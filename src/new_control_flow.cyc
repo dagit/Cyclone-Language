@@ -46,7 +46,7 @@
 #include <core.h>
 #include <list.h>
 #include <dict.h>
-#include <string.h>
+#include <cstring.h>
 #include <assert.h>
 #include "absyn.h"
 #include "tcutil.h"
@@ -597,7 +597,7 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
 	  switch (ds->hd) {
 	  case &ArrayElement(_): throw new Impossible("bad struct designator");
 	  case &FieldName(f2):
-	    if(String::zstrptrcmp(f,f2)==0)
+	    if(std::zstrptrcmp(f,f2)==0)
 	      used = true;
 	    break;
 	  }

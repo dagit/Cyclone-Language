@@ -10,25 +10,24 @@ f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
 unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
 wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); struct Cyc_Stdio___sFILE;
-extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
-18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
-_tagged_arr f1; } ; static const int Cyc_Stdio_String_pa= 0; struct Cyc_Stdio_String_pa_struct{
-int tag; struct _tagged_arr f1; } ; static const int Cyc_Stdio_Int_pa= 1; struct
-Cyc_Stdio_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Stdio_Double_pa=
-2; struct Cyc_Stdio_Double_pa_struct{ int tag; double f1; } ; static const int
-Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{ int tag; short*
-f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
-int tag; unsigned int* f1; } ; extern struct _tagged_arr Cyc_Stdio_aprintf(
-struct _tagged_arr fmt, struct _tagged_arr); static const int Cyc_Stdio_ShortPtr_sa=
-0; struct Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int
-Cyc_Stdio_UShortPtr_sa= 1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag;
-unsigned short* f1; } ; static const int Cyc_Stdio_IntPtr_sa= 2; struct Cyc_Stdio_IntPtr_sa_struct{
-int tag; int* f1; } ; static const int Cyc_Stdio_UIntPtr_sa= 3; struct Cyc_Stdio_UIntPtr_sa_struct{
-int tag; unsigned int* f1; } ; static const int Cyc_Stdio_StringPtr_sa= 4;
-struct Cyc_Stdio_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static
-const int Cyc_Stdio_DoublePtr_sa= 5; struct Cyc_Stdio_DoublePtr_sa_struct{ int
-tag; double* f1; } ; static const int Cyc_Stdio_FloatPtr_sa= 6; struct Cyc_Stdio_FloatPtr_sa_struct{
+ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); struct Cyc_std___sFILE;
+extern unsigned char Cyc_std_FileCloseError[ 19u]; extern unsigned char Cyc_std_FileOpenError[
+18u]; struct Cyc_std_FileOpenError_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; static const int Cyc_std_String_pa= 0; struct Cyc_std_String_pa_struct{
+int tag; struct _tagged_arr f1; } ; static const int Cyc_std_Int_pa= 1; struct
+Cyc_std_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_std_Double_pa=
+2; struct Cyc_std_Double_pa_struct{ int tag; double f1; } ; static const int Cyc_std_ShortPtr_pa=
+3; struct Cyc_std_ShortPtr_pa_struct{ int tag; short* f1; } ; static const int
+Cyc_std_IntPtr_pa= 4; struct Cyc_std_IntPtr_pa_struct{ int tag; unsigned int* f1;
+} ; extern struct _tagged_arr Cyc_std_aprintf( struct _tagged_arr fmt, struct
+_tagged_arr); static const int Cyc_std_ShortPtr_sa= 0; struct Cyc_std_ShortPtr_sa_struct{
+int tag; short* f1; } ; static const int Cyc_std_UShortPtr_sa= 1; struct Cyc_std_UShortPtr_sa_struct{
+int tag; unsigned short* f1; } ; static const int Cyc_std_IntPtr_sa= 2; struct
+Cyc_std_IntPtr_sa_struct{ int tag; int* f1; } ; static const int Cyc_std_UIntPtr_sa=
+3; struct Cyc_std_UIntPtr_sa_struct{ int tag; unsigned int* f1; } ; static const
+int Cyc_std_StringPtr_sa= 4; struct Cyc_std_StringPtr_sa_struct{ int tag; struct
+_tagged_arr f1; } ; static const int Cyc_std_DoublePtr_sa= 5; struct Cyc_std_DoublePtr_sa_struct{
+int tag; double* f1; } ; static const int Cyc_std_FloatPtr_sa= 6; struct Cyc_std_FloatPtr_sa_struct{
 int tag; float* f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
 } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
 18u]; extern struct Cyc_List_List* Cyc_List_imp_rev( struct Cyc_List_List* x);
@@ -50,68 +49,67 @@ extern struct Cyc_Set_Set* Cyc_Set_empty( int(* comp)( void*, void*)); extern
 struct Cyc_Set_Set* Cyc_Set_insert( struct Cyc_Set_Set* s, void* elt); extern
 int Cyc_Set_member( struct Cyc_Set_Set* s, void* elt); extern void Cyc_Set_iter(
 void(* f)( void*), struct Cyc_Set_Set* s); extern unsigned char Cyc_Set_Absent[
-11u]; extern unsigned int Cyc_String_strlen( struct _tagged_arr s); extern int
-Cyc_String_zstrptrcmp( struct _tagged_arr*, struct _tagged_arr*); extern struct
-_tagged_arr Cyc_String_str_sepstr( struct Cyc_List_List*, struct _tagged_arr);
-extern struct _tagged_arr Cyc_String_zstrncpy( struct _tagged_arr, struct
-_tagged_arr, unsigned int); extern struct _tagged_arr Cyc_String_substring(
-struct _tagged_arr, int ofs, unsigned int n); struct Cyc_Xarray_Xarray{ struct
-_tagged_arr elmts; int num_elmts; } ; extern void* Cyc_Xarray_get( struct Cyc_Xarray_Xarray*,
-int); extern struct Cyc_Xarray_Xarray* Cyc_Xarray_create( int, void*); extern
-void Cyc_Xarray_add( struct Cyc_Xarray_Xarray*, void*); extern int Cyc_Xarray_add_ind(
-struct Cyc_Xarray_Xarray*, void*); struct Cyc_Lineno_Pos{ struct _tagged_arr
-logical_file; struct _tagged_arr line; int line_no; int col; } ; extern
-unsigned char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment; extern struct
-Cyc_Position_Segment* Cyc_Position_segment_of_abs( int, int); static const int
-Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1; static const int
-Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct _tagged_arr source;
-struct Cyc_Position_Segment* seg; void* kind; struct _tagged_arr desc; } ;
-extern struct Cyc_Position_Error* Cyc_Position_mk_err_lex( struct Cyc_Position_Segment*,
-struct _tagged_arr); extern struct Cyc_Position_Error* Cyc_Position_mk_err_parse(
-struct Cyc_Position_Segment*, struct _tagged_arr); extern unsigned char Cyc_Position_Nocontext[
-14u]; extern void Cyc_Position_post_error( struct Cyc_Position_Error*); struct
-_tuple0{ void* f1; struct _tagged_arr* f2; } ; struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual;
-struct Cyc_Absyn_Conref; struct Cyc_Absyn_PtrInfo; struct Cyc_Absyn_VarargInfo;
-struct Cyc_Absyn_FnInfo; struct Cyc_Absyn_TunionInfo; struct Cyc_Absyn_TunionFieldInfo;
-struct Cyc_Absyn_VarargCallInfo; struct Cyc_Absyn_Exp; struct Cyc_Absyn_Stmt;
-struct Cyc_Absyn_Pat; struct Cyc_Absyn_Switch_clause; struct Cyc_Absyn_SwitchC_clause;
-struct Cyc_Absyn_Fndecl; struct Cyc_Absyn_Structdecl; struct Cyc_Absyn_Uniondecl;
-struct Cyc_Absyn_Tuniondecl; struct Cyc_Absyn_Tunionfield; struct Cyc_Absyn_Enumfield;
-struct Cyc_Absyn_Enumdecl; struct Cyc_Absyn_Typedefdecl; struct Cyc_Absyn_Vardecl;
-struct Cyc_Absyn_Decl; struct Cyc_Absyn_Structfield; static const int Cyc_Absyn_Loc_n=
-0; static const int Cyc_Absyn_Rel_n= 0; struct Cyc_Absyn_Rel_n_struct{ int tag;
-struct Cyc_List_List* f1; } ; static const int Cyc_Absyn_Abs_n= 1; struct Cyc_Absyn_Abs_n_struct{
-int tag; struct Cyc_List_List* f1; } ; static const int Cyc_Absyn_Static= 0;
-static const int Cyc_Absyn_Abstract= 1; static const int Cyc_Absyn_Public= 2;
-static const int Cyc_Absyn_Extern= 3; static const int Cyc_Absyn_ExternC= 4;
-struct Cyc_Absyn_Tqual{ int q_const: 1; int q_volatile: 1; int q_restrict: 1; }
-; static const int Cyc_Absyn_B1= 0; static const int Cyc_Absyn_B2= 1; static
-const int Cyc_Absyn_B4= 2; static const int Cyc_Absyn_B8= 3; static const int
-Cyc_Absyn_AnyKind= 0; static const int Cyc_Absyn_MemKind= 1; static const int
-Cyc_Absyn_BoxKind= 2; static const int Cyc_Absyn_RgnKind= 3; static const int
-Cyc_Absyn_EffKind= 4; static const int Cyc_Absyn_Signed= 0; static const int Cyc_Absyn_Unsigned=
-1; struct Cyc_Absyn_Conref{ void* v; } ; static const int Cyc_Absyn_Eq_constr= 0;
-struct Cyc_Absyn_Eq_constr_struct{ int tag; void* f1; } ; static const int Cyc_Absyn_Forward_constr=
-1; struct Cyc_Absyn_Forward_constr_struct{ int tag; struct Cyc_Absyn_Conref* f1;
-} ; static const int Cyc_Absyn_No_constr= 0; struct Cyc_Absyn_Tvar{ struct
-_tagged_arr* name; int* identity; struct Cyc_Absyn_Conref* kind; } ; static
-const int Cyc_Absyn_Unknown_b= 0; static const int Cyc_Absyn_Upper_b= 0; struct
-Cyc_Absyn_Upper_b_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; struct Cyc_Absyn_PtrInfo{
-void* elt_typ; void* rgn_typ; struct Cyc_Absyn_Conref* nullable; struct Cyc_Absyn_Tqual
-tq; struct Cyc_Absyn_Conref* bounds; } ; struct Cyc_Absyn_VarargInfo{ struct Cyc_Core_Opt*
-name; struct Cyc_Absyn_Tqual tq; void* type; void* rgn; int inject; } ; struct
-Cyc_Absyn_FnInfo{ struct Cyc_List_List* tvars; struct Cyc_Core_Opt* effect; void*
-ret_typ; struct Cyc_List_List* args; int c_varargs; struct Cyc_Absyn_VarargInfo*
-cyc_varargs; struct Cyc_List_List* rgn_po; struct Cyc_List_List* attributes; } ;
-struct Cyc_Absyn_UnknownTunionInfo{ struct _tuple0* name; int is_xtunion; } ;
-static const int Cyc_Absyn_UnknownTunion= 0; struct Cyc_Absyn_UnknownTunion_struct{
-int tag; struct Cyc_Absyn_UnknownTunionInfo f1; } ; static const int Cyc_Absyn_KnownTunion=
-1; struct Cyc_Absyn_KnownTunion_struct{ int tag; struct Cyc_Absyn_Tuniondecl* f1;
-} ; struct Cyc_Absyn_TunionInfo{ void* tunion_info; struct Cyc_List_List* targs;
-void* rgn; } ; struct Cyc_Absyn_UnknownTunionFieldInfo{ struct _tuple0*
-tunion_name; struct _tuple0* field_name; int is_xtunion; } ; static const int
-Cyc_Absyn_UnknownTunionfield= 0; struct Cyc_Absyn_UnknownTunionfield_struct{ int
-tag; struct Cyc_Absyn_UnknownTunionFieldInfo f1; } ; static const int Cyc_Absyn_KnownTunionfield=
+11u]; extern unsigned int Cyc_std_strlen( struct _tagged_arr s); extern int Cyc_std_zstrptrcmp(
+struct _tagged_arr*, struct _tagged_arr*); extern struct _tagged_arr Cyc_std_str_sepstr(
+struct Cyc_List_List*, struct _tagged_arr); extern struct _tagged_arr Cyc_std_zstrncpy(
+struct _tagged_arr, struct _tagged_arr, unsigned int); extern struct _tagged_arr
+Cyc_std_substring( struct _tagged_arr, int ofs, unsigned int n); struct Cyc_Xarray_Xarray{
+struct _tagged_arr elmts; int num_elmts; } ; extern void* Cyc_Xarray_get( struct
+Cyc_Xarray_Xarray*, int); extern struct Cyc_Xarray_Xarray* Cyc_Xarray_create(
+int, void*); extern void Cyc_Xarray_add( struct Cyc_Xarray_Xarray*, void*);
+extern int Cyc_Xarray_add_ind( struct Cyc_Xarray_Xarray*, void*); struct Cyc_Lineno_Pos{
+struct _tagged_arr logical_file; struct _tagged_arr line; int line_no; int col;
+} ; extern unsigned char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment;
+extern struct Cyc_Position_Segment* Cyc_Position_segment_of_abs( int, int);
+static const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1;
+static const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct
+_tagged_arr source; struct Cyc_Position_Segment* seg; void* kind; struct
+_tagged_arr desc; } ; extern struct Cyc_Position_Error* Cyc_Position_mk_err_lex(
+struct Cyc_Position_Segment*, struct _tagged_arr); extern struct Cyc_Position_Error*
+Cyc_Position_mk_err_parse( struct Cyc_Position_Segment*, struct _tagged_arr);
+extern unsigned char Cyc_Position_Nocontext[ 14u]; extern void Cyc_Position_post_error(
+struct Cyc_Position_Error*); struct _tuple0{ void* f1; struct _tagged_arr* f2; }
+; struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual; struct Cyc_Absyn_Conref; struct
+Cyc_Absyn_PtrInfo; struct Cyc_Absyn_VarargInfo; struct Cyc_Absyn_FnInfo; struct
+Cyc_Absyn_TunionInfo; struct Cyc_Absyn_TunionFieldInfo; struct Cyc_Absyn_VarargCallInfo;
+struct Cyc_Absyn_Exp; struct Cyc_Absyn_Stmt; struct Cyc_Absyn_Pat; struct Cyc_Absyn_Switch_clause;
+struct Cyc_Absyn_SwitchC_clause; struct Cyc_Absyn_Fndecl; struct Cyc_Absyn_Structdecl;
+struct Cyc_Absyn_Uniondecl; struct Cyc_Absyn_Tuniondecl; struct Cyc_Absyn_Tunionfield;
+struct Cyc_Absyn_Enumfield; struct Cyc_Absyn_Enumdecl; struct Cyc_Absyn_Typedefdecl;
+struct Cyc_Absyn_Vardecl; struct Cyc_Absyn_Decl; struct Cyc_Absyn_Structfield;
+static const int Cyc_Absyn_Loc_n= 0; static const int Cyc_Absyn_Rel_n= 0; struct
+Cyc_Absyn_Rel_n_struct{ int tag; struct Cyc_List_List* f1; } ; static const int
+Cyc_Absyn_Abs_n= 1; struct Cyc_Absyn_Abs_n_struct{ int tag; struct Cyc_List_List*
+f1; } ; static const int Cyc_Absyn_Static= 0; static const int Cyc_Absyn_Abstract=
+1; static const int Cyc_Absyn_Public= 2; static const int Cyc_Absyn_Extern= 3;
+static const int Cyc_Absyn_ExternC= 4; struct Cyc_Absyn_Tqual{ int q_const: 1;
+int q_volatile: 1; int q_restrict: 1; } ; static const int Cyc_Absyn_B1= 0;
+static const int Cyc_Absyn_B2= 1; static const int Cyc_Absyn_B4= 2; static const
+int Cyc_Absyn_B8= 3; static const int Cyc_Absyn_AnyKind= 0; static const int Cyc_Absyn_MemKind=
+1; static const int Cyc_Absyn_BoxKind= 2; static const int Cyc_Absyn_RgnKind= 3;
+static const int Cyc_Absyn_EffKind= 4; static const int Cyc_Absyn_Signed= 0;
+static const int Cyc_Absyn_Unsigned= 1; struct Cyc_Absyn_Conref{ void* v; } ;
+static const int Cyc_Absyn_Eq_constr= 0; struct Cyc_Absyn_Eq_constr_struct{ int
+tag; void* f1; } ; static const int Cyc_Absyn_Forward_constr= 1; struct Cyc_Absyn_Forward_constr_struct{
+int tag; struct Cyc_Absyn_Conref* f1; } ; static const int Cyc_Absyn_No_constr=
+0; struct Cyc_Absyn_Tvar{ struct _tagged_arr* name; int* identity; struct Cyc_Absyn_Conref*
+kind; } ; static const int Cyc_Absyn_Unknown_b= 0; static const int Cyc_Absyn_Upper_b=
+0; struct Cyc_Absyn_Upper_b_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ;
+struct Cyc_Absyn_PtrInfo{ void* elt_typ; void* rgn_typ; struct Cyc_Absyn_Conref*
+nullable; struct Cyc_Absyn_Tqual tq; struct Cyc_Absyn_Conref* bounds; } ; struct
+Cyc_Absyn_VarargInfo{ struct Cyc_Core_Opt* name; struct Cyc_Absyn_Tqual tq; void*
+type; void* rgn; int inject; } ; struct Cyc_Absyn_FnInfo{ struct Cyc_List_List*
+tvars; struct Cyc_Core_Opt* effect; void* ret_typ; struct Cyc_List_List* args;
+int c_varargs; struct Cyc_Absyn_VarargInfo* cyc_varargs; struct Cyc_List_List*
+rgn_po; struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_UnknownTunionInfo{
+struct _tuple0* name; int is_xtunion; } ; static const int Cyc_Absyn_UnknownTunion=
+0; struct Cyc_Absyn_UnknownTunion_struct{ int tag; struct Cyc_Absyn_UnknownTunionInfo
+f1; } ; static const int Cyc_Absyn_KnownTunion= 1; struct Cyc_Absyn_KnownTunion_struct{
+int tag; struct Cyc_Absyn_Tuniondecl* f1; } ; struct Cyc_Absyn_TunionInfo{ void*
+tunion_info; struct Cyc_List_List* targs; void* rgn; } ; struct Cyc_Absyn_UnknownTunionFieldInfo{
+struct _tuple0* tunion_name; struct _tuple0* field_name; int is_xtunion; } ;
+static const int Cyc_Absyn_UnknownTunionfield= 0; struct Cyc_Absyn_UnknownTunionfield_struct{
+int tag; struct Cyc_Absyn_UnknownTunionFieldInfo f1; } ; static const int Cyc_Absyn_KnownTunionfield=
 1; struct Cyc_Absyn_KnownTunionfield_struct{ int tag; struct Cyc_Absyn_Tuniondecl*
 f1; struct Cyc_Absyn_Tunionfield* f2; } ; struct Cyc_Absyn_TunionFieldInfo{ void*
 field_info; struct Cyc_List_List* targs; } ; static const int Cyc_Absyn_VoidType=
@@ -600,7 +598,7 @@ _temp83; _temp85;}); _temp84;}))); t= _temp83;} return t; _LL61:;} return t;}
 static int Cyc_Lex_str_index( struct _tagged_arr buff, int offset, int len){
 struct Cyc_Lex_Trie* _temp87= Cyc_Lex_trie_lookup( Cyc_Lex_ids_trie, buff,
 offset, len); if((( struct Cyc_Lex_Trie*) _check_null( _temp87))->shared_str == 
-0){ struct _tagged_arr _temp88= Cyc_Core_new_string( len +  1); Cyc_String_zstrncpy(
+0){ struct _tagged_arr _temp88= Cyc_Core_new_string( len +  1); Cyc_std_zstrncpy(
 _temp88, _tagged_arr_plus( buff, sizeof( unsigned char), offset),( unsigned int)
 len);{ int ans=(( int(*)( struct Cyc_Xarray_Xarray*, struct _tagged_arr*)) Cyc_Xarray_add_ind)((
 struct Cyc_Xarray_Xarray*) _check_null( Cyc_Lex_symbols),({ struct _tagged_arr*
@@ -649,7 +647,7 @@ unsigned char*) _check_unknown_subscript( Cyc_Lex_string_buffer, sizeof(
 unsigned char),( int) i)):'\000';}}; _temp105;}); Cyc_Lex_string_buffer= str;}}*((
 unsigned char*) _check_unknown_subscript( Cyc_Lex_string_buffer, sizeof(
 unsigned char), Cyc_Lex_string_pos))= c; ++ Cyc_Lex_string_pos;} struct
-_tagged_arr Cyc_Lex_get_stored_string(){ struct _tagged_arr str= Cyc_String_substring((
+_tagged_arr Cyc_Lex_get_stored_string(){ struct _tagged_arr str= Cyc_std_substring((
 struct _tagged_arr) Cyc_Lex_string_buffer, 0,( unsigned int) Cyc_Lex_string_pos);
 Cyc_Lex_string_pos= 0; return str;} struct Cyc_Lex_Ldecls{ struct Cyc_Set_Set*
 typedefs; struct Cyc_Set_Set* namespaces; } ; struct Cyc_Lex_Lvis{ struct Cyc_List_List*
@@ -666,9 +664,9 @@ struct Cyc_Lex_Ldecls* data)) Cyc_Dict_insert)((( struct Cyc_Dict_Dict*(*)( int(
 comp)( struct Cyc_List_List*, struct Cyc_List_List*))) Cyc_Dict_empty)( Cyc_Absyn_varlist_cmp),
 0,({ struct Cyc_Lex_Ldecls* _temp110=( struct Cyc_Lex_Ldecls*) GC_malloc(
 sizeof( struct Cyc_Lex_Ldecls)); _temp110->typedefs=(( struct Cyc_Set_Set*(*)(
-int(* comp)( struct _tagged_arr*, struct _tagged_arr*))) Cyc_Set_empty)( Cyc_String_zstrptrcmp);
+int(* comp)( struct _tagged_arr*, struct _tagged_arr*))) Cyc_Set_empty)( Cyc_std_zstrptrcmp);
 _temp110->namespaces=(( struct Cyc_Set_Set*(*)( int(* comp)( struct _tagged_arr*,
-struct _tagged_arr*))) Cyc_Set_empty)( Cyc_String_zstrptrcmp); _temp110;})); Cyc_Lex_lstate=({
+struct _tagged_arr*))) Cyc_Set_empty)( Cyc_std_zstrptrcmp); _temp110;})); Cyc_Lex_lstate=({
 struct Cyc_Core_Opt* _temp108=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
 Cyc_Core_Opt)); _temp108->v=( void*)({ struct Cyc_Lex_Lstate* _temp109=( struct
 Cyc_Lex_Lstate*) GC_malloc( sizeof( struct Cyc_Lex_Lstate)); _temp109->lstack=
@@ -689,31 +687,30 @@ struct Cyc_List_List*) _check_null( x))->hd); if((( int(*)( struct Cyc_Set_Set*
 s, struct _tagged_arr* elt)) Cyc_Set_member)( ld->namespaces, n)){ return((
 struct Cyc_List_List*(*)( struct Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_append)((
 struct Cyc_List_List*)(( struct Cyc_List_List*) _check_null( x))->hd,( struct
-Cyc_List_List*) ns);}}}} Cyc_yyerror(( struct _tagged_arr)({ struct Cyc_Stdio_String_pa_struct
-_temp115; _temp115.tag= Cyc_Stdio_String_pa; _temp115.f1=( struct _tagged_arr)
-Cyc_String_str_sepstr(( struct Cyc_List_List*) ns, _tag_arr("::", sizeof(
-unsigned char), 3u));{ void* _temp114[ 1u]={& _temp115}; Cyc_Stdio_aprintf(
-_tag_arr("undeclared namespace %s", sizeof( unsigned char), 24u), _tag_arr(
-_temp114, sizeof( void*), 1u));}})); return 0;} static void Cyc_Lex_recompute_typedefs(){
-Cyc_Lex_typedefs_trie=({ struct Cyc_Lex_Trie* _temp116=( struct Cyc_Lex_Trie*)
-GC_malloc( sizeof( struct Cyc_Lex_Trie)); _temp116->children=( void*)(( void*)
-Cyc_Lex_Zero); _temp116->shared_str= 0; _temp116;});{ struct Cyc_List_List* ls=(
-struct Cyc_List_List*)(( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*)
-_check_null( Cyc_Lex_lstate))->v)->lstack; for( 0; ls !=  0; ls=(( struct Cyc_List_List*)
-_check_null( ls))->tl){ struct Cyc_Lex_Lvis* lv=( struct Cyc_Lex_Lvis*)(( struct
-Cyc_List_List*) _check_null( ls))->hd; struct Cyc_List_List* x=({ struct Cyc_List_List*
-_temp117=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp117->hd=( void*) lv->current_namespace; _temp117->tl= lv->imported_namespaces;
-_temp117;}); for( 0; x !=  0; x=(( struct Cyc_List_List*) _check_null( x))->tl){
-struct Cyc_Lex_Ldecls* ld=(( struct Cyc_Lex_Ldecls*(*)( struct Cyc_Dict_Dict* d,
-struct Cyc_List_List* key)) Cyc_Dict_lookup)((( struct Cyc_Lex_Lstate*)(( struct
-Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->decls,( struct Cyc_List_List*)((
-struct Cyc_List_List*) _check_null( x))->hd);(( void(*)( void(* f)( struct
-_tagged_arr*), struct Cyc_Set_Set* s)) Cyc_Set_iter)( Cyc_Lex_insert_typedef, ld->typedefs);}}}}
-static int Cyc_Lex_is_typedef_in_namespace( struct Cyc_List_List* ns, struct
-_tagged_arr* v){ struct Cyc_List_List* ans= Cyc_Lex_get_absolute_namespace( ns);
-struct _handler_cons _temp118; _push_handler(& _temp118);{ int _temp120= 0; if(
-setjmp( _temp118.handler)){ _temp120= 1;} if( ! _temp120){{ struct Cyc_Lex_Ldecls*
+Cyc_List_List*) ns);}}}} Cyc_yyerror(( struct _tagged_arr)({ struct Cyc_std_String_pa_struct
+_temp115; _temp115.tag= Cyc_std_String_pa; _temp115.f1=( struct _tagged_arr) Cyc_std_str_sepstr((
+struct Cyc_List_List*) ns, _tag_arr("::", sizeof( unsigned char), 3u));{ void*
+_temp114[ 1u]={& _temp115}; Cyc_std_aprintf( _tag_arr("undeclared namespace %s",
+sizeof( unsigned char), 24u), _tag_arr( _temp114, sizeof( void*), 1u));}}));
+return 0;} static void Cyc_Lex_recompute_typedefs(){ Cyc_Lex_typedefs_trie=({
+struct Cyc_Lex_Trie* _temp116=( struct Cyc_Lex_Trie*) GC_malloc( sizeof( struct
+Cyc_Lex_Trie)); _temp116->children=( void*)(( void*) Cyc_Lex_Zero); _temp116->shared_str=
+0; _temp116;});{ struct Cyc_List_List* ls=( struct Cyc_List_List*)(( struct Cyc_Lex_Lstate*)((
+struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->lstack; for( 0; ls != 
+0; ls=(( struct Cyc_List_List*) _check_null( ls))->tl){ struct Cyc_Lex_Lvis* lv=(
+struct Cyc_Lex_Lvis*)(( struct Cyc_List_List*) _check_null( ls))->hd; struct Cyc_List_List*
+x=({ struct Cyc_List_List* _temp117=( struct Cyc_List_List*) GC_malloc( sizeof(
+struct Cyc_List_List)); _temp117->hd=( void*) lv->current_namespace; _temp117->tl=
+lv->imported_namespaces; _temp117;}); for( 0; x !=  0; x=(( struct Cyc_List_List*)
+_check_null( x))->tl){ struct Cyc_Lex_Ldecls* ld=(( struct Cyc_Lex_Ldecls*(*)(
+struct Cyc_Dict_Dict* d, struct Cyc_List_List* key)) Cyc_Dict_lookup)((( struct
+Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->decls,(
+struct Cyc_List_List*)(( struct Cyc_List_List*) _check_null( x))->hd);(( void(*)(
+void(* f)( struct _tagged_arr*), struct Cyc_Set_Set* s)) Cyc_Set_iter)( Cyc_Lex_insert_typedef,
+ld->typedefs);}}}} static int Cyc_Lex_is_typedef_in_namespace( struct Cyc_List_List*
+ns, struct _tagged_arr* v){ struct Cyc_List_List* ans= Cyc_Lex_get_absolute_namespace(
+ns); struct _handler_cons _temp118; _push_handler(& _temp118);{ int _temp120= 0;
+if( setjmp( _temp118.handler)){ _temp120= 1;} if( ! _temp120){{ struct Cyc_Lex_Ldecls*
 ld=(( struct Cyc_Lex_Ldecls*(*)( struct Cyc_Dict_Dict* d, struct Cyc_List_List*
 key)) Cyc_Dict_lookup)((( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*)
 _check_null( Cyc_Lex_lstate))->v)->decls, ans); int _temp121=(( int(*)( struct
@@ -773,9 +770,9 @@ struct Cyc_List_List* key, struct Cyc_Lex_Ldecls* data)) Cyc_Dict_insert)(((
 struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->decls,
 new_ns,({ struct Cyc_Lex_Ldecls* _temp153=( struct Cyc_Lex_Ldecls*) GC_malloc(
 sizeof( struct Cyc_Lex_Ldecls)); _temp153->typedefs=(( struct Cyc_Set_Set*(*)(
-int(* comp)( struct _tagged_arr*, struct _tagged_arr*))) Cyc_Set_empty)( Cyc_String_zstrptrcmp);
+int(* comp)( struct _tagged_arr*, struct _tagged_arr*))) Cyc_Set_empty)( Cyc_std_zstrptrcmp);
 _temp153->namespaces=(( struct Cyc_Set_Set*(*)( int(* comp)( struct _tagged_arr*,
-struct _tagged_arr*))) Cyc_Set_empty)( Cyc_String_zstrptrcmp); _temp153;}));}((
+struct _tagged_arr*))) Cyc_Set_empty)( Cyc_std_zstrptrcmp); _temp153;}));}((
 void(*)( void(* f)( struct _tagged_arr*), struct Cyc_Set_Set* s)) Cyc_Set_iter)(
 Cyc_Lex_insert_typedef,((( struct Cyc_Lex_Ldecls*(*)( struct Cyc_Dict_Dict* d,
 struct Cyc_List_List* key)) Cyc_Dict_lookup)((( struct Cyc_Lex_Lstate*)(( struct
@@ -1233,6 +1230,6 @@ unsigned int) Cyc_Lex_num_kws);{ unsigned int _temp313= _temp311; unsigned int i
 for( i= 0; i <  _temp313; i ++){ _temp312[ i]= 0;}}; _temp314;});{ int i= 0;
 for( 0; i <  Cyc_Lex_num_kws; ++ i){ struct _tagged_arr _temp315=( Cyc_Lex_rw_array[
 _check_known_subscript_notnull( 58u, i)]).f1; Cyc_Lex_str_index( _temp315, 0,(
-int) Cyc_String_strlen( _temp315));*(( int*) _check_unknown_subscript( Cyc_Lex_kw_nums,
+int) Cyc_std_strlen( _temp315));*(( int*) _check_unknown_subscript( Cyc_Lex_kw_nums,
 sizeof( int), i))=( int)( Cyc_Lex_rw_array[ _check_known_subscript_notnull( 58u,
 i)]).f2;}} Cyc_Lex_typedef_init(); Cyc_Lex_comment_depth= 0;}

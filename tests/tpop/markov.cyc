@@ -12,11 +12,7 @@
 #include "time.h"
 #include "stdlib.h"
 
-using Stdio;
 using Core;
-using String;
-using Stdlib;
-using Time;
 
 #define NPREF	(2)	/* number of prefix words */
 #define NHASH	(4093)	/* size of state hash table array */
@@ -78,7 +74,7 @@ int main(void)
   int c;
   long seed;
 
-  seed = Time::time(NULL);
+  seed = time(NULL);
   
   srand(seed);
   for (i = 0; i < NPREF; i++)	/* set up initial prefix */
@@ -156,7 +152,7 @@ void add(string_t<`H>*{NPREF} prefix, string_t<`H> suffix)
 /* build: read input, build prefix table */
 void build(string_t<`H> *{NPREF} prefix, FILE @f)
 {
-  mstring_t buf = String::expand("",100);
+  mstring_t buf = expand("",100);
 
   /* create a format string; %s could overflow buf */
   /* FIX: this doesn't work in Cyclone; no sprintf */

@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "buffer.h"
-using Stdio;
 namespace Buffer;
 // Buffers for reading text
 #define DEF_BUFSIZE 1024

@@ -14,14 +14,6 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <netinet/in.h>
-using Signal;
-using Stdlib;
-using Wait;
-using String;
-using Stdio;
-using Inet;
-using Socket;
-using Unistd;
 
 //typedef int (@SOCKACTION_P)(int fd, const xtunion sockaddr addr);
 #define DATA "Hello there sailor\n"

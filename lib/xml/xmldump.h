@@ -21,13 +21,13 @@
 
 #include "xml.h"
 #include <list.h>
-#include <stdio.h>
+#include <cstdio.h>
 
 namespace XmlDump {
 
 using List;
 using Xml;
-using Stdio;
+using std;
 
 void dumpAttvalue(FILE @fd,attvalue_t av);
 void dumpAttribute(FILE @fd,attribute_t a);

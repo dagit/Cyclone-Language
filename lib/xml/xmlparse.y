@@ -20,6 +20,7 @@
 #include "xmlparse.h"
 #include "xmlscan.h"
 #include <string.h>
+#include <stdio.h>
 
 using Core;
 using List;
@@ -29,7 +30,7 @@ using Lexing;
 
 // global state (we're not re-entrant)
 namespace XmlParse {
-Core::opt_t<Lexbuf<Function_lexbuf_state<Stdio::FILE@>>> lbuf = NULL;
+Core::opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf = NULL;
 static list_t<content_t> parse_result = NULL;
 void error(string_t<`H> msg) {
   throw new Core::Failure(msg);
@@ -117,7 +118,7 @@ element:
   emptyElemTag      { let $(n,a) = *($1); $$ = ^$(new Empty(n,a)); }
 | sTag content eTag { let $(sn,a) = *($1);
                       let en = $3;
-                      if (String::strcmp(sn,en) == 0)
+                      if (strcmp(sn,en) == 0)
                         $$ = ^$(new StartEnd(sn,a,$2));
                       else error("tag mismatch");
                     }
@@ -165,7 +166,7 @@ slashcls:
 void yyerror(string_t s) { return; } 
 
 namespace XmlParse{
-  list_t<content_t> parse_file(Stdio::FILE @`H f) {
+  list_t<content_t> parse_file(FILE @`H f) {
     parse_result = NULL;
     lbuf = new Core::Opt(from_file(f));
     XmlScan::init();

@@ -18,17 +18,17 @@
 
 
 #include <core.h>
-#include <arpa/inet.h>
+#include <arpa/cinet.h>
 using Core;
 
 namespace Cinet {
   extern "C" {
-    int inet_aton(const Cstring cp, struct Inet::in_addr @`r inp);
+    int inet_aton(const Cstring cp, struct std::in_addr @`r inp);
   }
 #define s2c(x) (string_to_Cstring(x))
 }
 
-namespace Inet;
+namespace std;
 
 int inet_aton(string_t cp, struct in_addr @`r inp) {
   return Cinet::inet_aton(s2c(cp), inp);

@@ -17,7 +17,7 @@
    330, Boston, MA 02111-1307 USA. */
 
 #include <core.h>
-#include <sys/mman.h>
+#include <sys/cmman.h>
 using Core;
 
 namespace Cmman {
@@ -28,7 +28,7 @@ namespace Cmman {
   }
 }
 
-namespace Mman;
+namespace std;
 
 char ?mmap(size_t length, int prot, int flags, int fd, off_t offset) {
   return

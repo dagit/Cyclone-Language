@@ -37,10 +37,7 @@
 #include <ctype.h>
 namespace Arg;
 using Core;
-using Stdio;
 using List;
-using String;
-using Ctype;
 
 extern xtunion exn {Error, Bad(string_t)};
 
@@ -71,12 +68,12 @@ static tunion error {
 static spec_t lookup(speclist_t<`r1,`r2> l, string_t x) {
   while (l != NULL) {
     let flag = (*l->hd)[0];
-    let len = String::strlen(flag);
+    let len = strlen(flag);
     if (len > 0 && (*l->hd)[1]) {
-      if (String::strncmp(x,(*l->hd)[0],len) == 0)
+      if (strncmp(x,(*l->hd)[0],len) == 0)
         return (*l->hd)[3];
     }
-    else if (String::strcmp(x,(*l->hd)[0]) == 0)
+    else if (strcmp(x,(*l->hd)[0]) == 0)
       return (*l->hd)[3];
     l = l->tl;
   }
@@ -179,7 +176,7 @@ static void stop(int prog_pos, tunion error e,
   string_t progname = prog_pos < args.size ? args[prog_pos] : "(?)";
   switch (e) {
   case &Unknown(s):
-     if (String::strcmp(s,"-help")!=0)
+     if (strcmp(s,"-help")!=0)
        fprintf(stderr, "%s: unknown option `%s'.\n", progname, s);
      break;
   case &Missing(s):

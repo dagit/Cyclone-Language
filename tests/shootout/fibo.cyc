@@ -6,8 +6,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-using Stdio;
-using Stdlib;
 
 unsigned long
 fib(unsigned long n) {

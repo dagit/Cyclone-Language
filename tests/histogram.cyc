@@ -12,8 +12,6 @@
 // stdout just prints the sum totals for the unique elements in the
 // first field.
 using Core;
-using Stdio;
-using String;
 using Hashtable;
 
 
@@ -67,7 +65,7 @@ int main(int argc, string_t ?argv) {
 
   // get the program point
   while (gettoken(f)) {
-    string_t @s = new ((string_t)String::strdup(buf));
+    string_t @s = new ((string_t)strdup(buf));
     // get the allocation amount
     if (!gettoken(f)) {
       fprintf(stderr,"missing allocation amount for %s\n",*s); return -1;

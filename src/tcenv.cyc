@@ -76,7 +76,6 @@
 namespace Tcenv;
 
 using Core;
-using Stdio;
 using List;
 using Set;
 using Position;
@@ -179,7 +178,7 @@ abstract struct Fenv {
 
 tenv_t tc_init() {
   // Initialize globals
-  empty_var_set = new Opt(Set::empty(String::zstrptrcmp));
+  empty_var_set = new Opt(Set::empty(zstrptrcmp));
   // Set up initial environment so that xtunion exn, etc. is defined
   let ge     = empty_genv();
   let top_ns = NULL;
@@ -214,7 +213,7 @@ static bool same_namespace(list_t<var_t,`H> n1, list_t<var_t,`H> n2) {
   if (n1 == n2) return true;
   for (; n1 != NULL; n1 = n1->tl) {
     if (n2 == NULL) return false;
-    if (String::zstrptrcmp(n1->hd,n2->hd) != 0) return false;
+    if (zstrptrcmp(n1->hd,n2->hd) != 0) return false;
     n2 = n2->tl;
   }
   if (n2 != NULL) return false;
@@ -453,12 +452,12 @@ typedefdecl_t lookup_typedefdecl(tenv_t te, seg_t loc, qvar_t q) {
 genv_t empty_genv() {
   return new 
     Genv{.namespaces  = empty_var_set->v,
-            .structdecls   = Dict::empty(String::zstrptrcmp),
-            .uniondecls    = Dict::empty(String::zstrptrcmp),
-            .tuniondecls   = Dict::empty(String::zstrptrcmp),
-            .enumdecls     = Dict::empty(String::zstrptrcmp),
-            .typedefs      = Dict::empty(String::zstrptrcmp),
-            .ordinaries    = Dict::empty(String::zstrptrcmp),
+            .structdecls   = Dict::empty(zstrptrcmp),
+            .uniondecls    = Dict::empty(zstrptrcmp),
+            .tuniondecls   = Dict::empty(zstrptrcmp),
+            .enumdecls     = Dict::empty(zstrptrcmp),
+            .typedefs      = Dict::empty(zstrptrcmp),
+            .ordinaries    = Dict::empty(zstrptrcmp),
             .availables    = NULL};
 }
 
@@ -918,7 +917,7 @@ void check_rgn_partial_order(tenv_t te, seg_t loc,
 }
 
 fenv_t new_fenv(seg_t loc, fndecl_t fd) {
-  Dict::dict_t<var_t,binding_t> locals = Dict::empty(String::zstrptrcmp);
+  Dict::dict_t<var_t,binding_t> locals = Dict::empty(zstrptrcmp);
   tvar_t rgn0 = 
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
              new_tvar_id(),
@@ -959,9 +958,9 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   return new 
     Fenv{.shared = new SharedFenv{
                      .return_typ = fd->ret_type,
-                     .seen_labels = Dict::empty(String::zstrptrcmp),
+                     .seen_labels = Dict::empty(zstrptrcmp),
                      .needed_labels = 
-                       SlowDict::empty(String::zstrptrcmp)
+                       SlowDict::empty(zstrptrcmp)
                    },
          .type_vars   = tvs,
          .region_order = rgn_po,

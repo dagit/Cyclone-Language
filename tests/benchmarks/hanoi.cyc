@@ -18,9 +18,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-using Stdio;
-using Stdlib;
-
 #define other(i,j) (6-(i+j))
 
 int num[4];

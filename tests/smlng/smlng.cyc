@@ -11,11 +11,9 @@
 #include "parser.h"
 #include "flat.h"
 using Core;
-using Stdio;
 using List;
 using Buffer;
 using Parser;
-using String;
 using TagElim;
 
 // we conservatively guess that we get only 8M of stack (set in main)
@@ -484,7 +482,7 @@ int main(int argc, char ?`H ?`H argv) {
 #endif
 
   if (argc <= 1) {
-    tlimit = Stdlib::getenv("TLIMIT");
+    tlimit = getenv("TLIMIT");
     if (tlimit == NULL) {
       fprintf(stderr,"please set the TLIMIT environment variable\n"
 	      "or give a time limit command argument.\n");

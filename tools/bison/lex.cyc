@@ -34,8 +34,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "lex.h"
 #include "new.h"
-using String;
-using Ctype;
+
 /* flags set by % directives */
 extern int definesflag;    	/* for -d */
 extern int toknumflag;   	/* for -k */

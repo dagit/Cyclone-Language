@@ -27,7 +27,7 @@ int eof_symbol();
 void encode_symbol(int symbol, int load);
 int decode_symbol();
 int preloadInput();
-int loadInput(Stdio::FILE@ fp, int p, int max);
+int loadInput(FILE@ fp, int p, int max);
 void startInput();
 int getInput();
 int lengthInput();

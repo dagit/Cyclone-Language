@@ -3,7 +3,6 @@
 #include <list.h>
 #include <time.h>
 #include <string.h>
-using Stdio;
 
 #define TAGB	0
 #define TAGEM	1
@@ -101,8 +100,8 @@ int size_tag(int tag) {
 }
 
 /* Generate a random int between 0 and n-1 */
-int random(int n) {
-  let x = (int)(((double)Stdlib::rand()/(double)RAND_MAX)*((double)n));
+int my_random(int n) {
+  let x = (int)(((double)rand()/(double)RAND_MAX)*((double)n));
   if (x < 0 || x >= n) {
     fprintf(stderr,"ERROR: Random number %d out of range %d\n",x,n);
     exit(1);
@@ -138,7 +137,7 @@ bool printable_ok = true;
 
 /* generate a SPC, CR, LF, or TAB */
 void generate_space() {
-  let choice = random(4);
+  let choice = my_random(4);
   if (choice == 0) printf("%c",0x20);
   else if (choice == 1) printf("%c",0x0d);
   else if (choice == 2) printf("%c",0x0a);
@@ -149,7 +148,7 @@ void generate_space() {
 
 /* generate some printable character */
 void generate_printable() {
-  let choice = random(26);
+  let choice = my_random(26);
   printf("%c",'a'+choice);
   //  printf("x");
   len--;
@@ -166,7 +165,7 @@ void generate_end_tag() {
 /* generate a tag */
 void generate_tag() {
   /* generate 1 of 25 possible tags */
-  int tag = random(25);
+  int tag = my_random(25);
   printf(tag_strings[tag]); // SEEMS BUGGY!
   push(tag);
   len -= size_tag(tag);
@@ -179,7 +178,7 @@ void random_generate0() {
        end a tag, or generate a printable character;
        but don't bother to generate two printables in a row. */ 
     let possibilities = 1 + 1 + (empty() ? 0 : 1) + (printable_ok ? 1 : 0);
-    int choice = random(possibilities);
+    int choice = my_random(possibilities);
     if (choice == 0) generate_tag();
     else if (choice == 1) generate_space();
     else if (choice == 2 && !empty()) generate_end_tag();
@@ -191,7 +190,7 @@ void random_generate0() {
 
   /* Finish up the rest with spaces and printable characters */
   while (len > 0) {
-    if (random(2))
+    if (my_random(2))
       generate_printable();
     else
       generate_space();
@@ -201,9 +200,9 @@ void random_generate0() {
 #include "contexts.h"
 
 context_t random_context() {
-  let r = random(1<<15);
-  if (CL(r)>=9) r = setCL(r,random(9));   // 8 colors plus initial color
-  if (SZ(r)>=11) r = setSZ(r,random(11)); // 10 sizes plus initial size
+  let r = my_random(1<<15);
+  if (CL(r)>=9) r = setCL(r,my_random(9));   // 8 colors plus initial color
+  if (SZ(r)>=11) r = setSZ(r,my_random(11)); // 10 sizes plus initial size
   return (context_t)r;
 }
 
@@ -308,7 +307,7 @@ void random_generate1() {
   for (int i = 0; i < len; i++) {
     tag_stack = delta(ctxt,ctxts[i],tag_stack);
     ctxt = ctxts[i];
-    if (random(2)) printf(" ");
+    if (my_random(2)) printf(" ");
     else printf("x");
   }
   tag_stack = delta(ctxt,outside_ctxt,tag_stack);
@@ -322,7 +321,7 @@ void random_generate1() {
 void random_generate2() {
   for (let lastcolor = -1; len > 0; len--) {
     let color;
-    while ((color = random(9)) == lastcolor) // 8 colors plus original color
+    while ((color = my_random(9)) == lastcolor) // 8 colors plus original color
       /* skip */ ;
     if (color==8) printf("x");
     else {
@@ -337,7 +336,7 @@ void random_generate2() {
 void random_generate3() {
   for (let lastsize = -1; len > 0; len--) {
     let sz;
-    while ((sz = random(11)) == lastsize) // 10 sizes plus original size
+    while ((sz = my_random(11)) == lastsize) // 10 sizes plus original size
       /* skip */ ;
     if (sz==10) printf("x");
     else {
@@ -368,7 +367,7 @@ void random_generate5() {
 int main(int argc, char ??argv) {
   let algorithm = 0;
 
-  if (argc > 3 || (argc > 1 && String::strcmp(argv[1],"-help")==0)) {
+  if (argc > 3 || (argc > 1 && strcmp(argv[1],"-help")==0)) {
     fprintf(stderr,
             "Usage: %s args\n",argv[0]);
     fprintf(stderr,
@@ -398,12 +397,12 @@ int main(int argc, char ??argv) {
   //  fprintf(stderr,"Length is %d and algorithm is %d\n",len,algorithm);
 
   /* initialize random number generator */
-  let t = new Time::time(NULL);
+  let t = new time(NULL);
   if (*t<0) {
     fprintf(stderr,"Error: the time is not available\n");
     exit(1);
   }
-  else Stdlib::srand(*t);
+  else srand(*t);
 
   if (algorithm == 0)
     random_generate0();

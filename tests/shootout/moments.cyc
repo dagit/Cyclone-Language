@@ -8,10 +8,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <array.h>
-using Stdio;
-using Stdlib;
-using Math;
-using Array;
 
 #define MAXLINELEN 128
 

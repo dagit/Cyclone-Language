@@ -8,9 +8,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "simple_hash_cyc.h"
-using Stdio;
-using Stdlib;
-using Unistd;
 
 char buf[32];
 int main(int argc, char ??argv) {

@@ -4,12 +4,9 @@
  * http://www.bagley.org/~doug/shootout/
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-using Stdio;  // For printf
-using Stdlib; // For atoi
-using Unistd; // For sleep but it's missing
+#include <stdio.h> // For printf
+#include <stdlib.h> // For atoi
+#include <unistd.h> // For sleep but it's missing
 
 int 
 Ack(int M, int N) {

@@ -77,10 +77,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-using Stdio;
-using Stdlib;
-using Math;
-
 int LIMIT = 9;
 
 #ifndef TRUE

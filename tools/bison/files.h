@@ -24,7 +24,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define PFILE	XPFILE		/* Simple parser */
 #define PFILE1	XPFILE1		/* Semantic parser */
-using Stdio;
 extern FILE *finput;   /* read grammar specifications */
 extern FILE *foutput;  /* optionally output messages describing the actions taken */
 extern FILE *fdefines; /* optionally output #define's for token numbers. */

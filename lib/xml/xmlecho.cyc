@@ -25,9 +25,9 @@
 using Core;
 
 void doit(string_t file) {
-  let fd = Stdio::file_open(file,"r");
-  XmlDump::dumpContents(Stdio::stdout,XmlParse::parse_file(fd));
-  Stdio::fclose(fd);
+  let fd = file_open(file,"r");
+  XmlDump::dumpContents(stdout,XmlParse::parse_file(fd));
+  fclose(fd);
 }
 
 int main(int argc, string_t ? argv) {

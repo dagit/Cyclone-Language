@@ -17,17 +17,17 @@
    330, Boston, MA 02111-1307 USA. */
 
 
-#include <fcntl.h>
+#include <cfcntl.h>
 #include <core.h>
 using Core;
 
 namespace Cfcntl {
   extern "C" int fcntl(int fd, int cmd);
   extern "C" int fcntl_with_arg(int fd, int cmd, long arg);
-  extern "C" int fcntl_with_lock(int fd, int cmd, struct Fcntl::flock *lock);
+  extern "C" int fcntl_with_lock(int fd, int cmd, struct std::flock *lock);
 }
 
-namespace Fcntl;
+namespace std;
 
 int fcntl(int fd, int cmd, ...`r tunion FcntlArg argv) {
   if (argv.size == 0) return Cfcntl::fcntl(fd, cmd);

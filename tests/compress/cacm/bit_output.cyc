@@ -1,7 +1,6 @@
 /* BIT OUTPUT ROUTINES. */
 
 #include <stdio.h>
-using Stdio;
 
 
 /* THE BIT BUFFER. */

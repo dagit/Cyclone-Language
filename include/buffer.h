@@ -34,7 +34,7 @@
 #ifndef _BUFFER_H_
 #define _BUFFER_H_
 #include <core.h>
-#include <stdio.h>
+//#include <stdio.h>
 namespace Buffer {
 
 //(* Module [Buffer]: extensible string buffers *)

@@ -43,7 +43,6 @@ using Tcutil;
 using Tcenv;
 using Tcexp;
 using Tcpat;
-using Stdio;
 
 static void decorate_stmt(tenv_t te, stmt_t s) {
   NewControlFlow::set_encloser(s, get_encloser(te));

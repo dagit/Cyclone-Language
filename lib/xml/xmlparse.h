@@ -23,13 +23,13 @@
 #include <lexing.h>
 #include <list.h>
 #include <core.h>
-#include <stdio.h>
+#include <cstdio.h>
 
 namespace XmlParse {
 using Lexing;
 using List;
 using Core;
-using Stdio;
+using std;
 using Xml;
 
 extern list_t<content_t> parse_file(FILE @`H f);

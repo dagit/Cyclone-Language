@@ -54,7 +54,6 @@ If LA[l, i] and LA[l, j] are both 1 for i != j, it is a conflict.
 #include "state.h"
 #include "new.h"
 #include "gram.h"
-using Stdio;
 
 extern short ??derives;
 extern char ?nullable;

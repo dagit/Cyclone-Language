@@ -24,7 +24,7 @@
 #include "tc.h"
 #include "parse.h"
 #include <pp.h>
-#include <string.h>
+#include <cstring.h>
 #include "tcutil.h"
 #include "tcdecl.h"
 #include <position.h>
@@ -32,11 +32,9 @@
 using Core;
 using List;
 using Absyn;
-using Stdio;
 using Tcenv;
 using Absynpp;
 using Tcutil;
-using String;
 
 namespace Lex {
   extern void lex_init();
@@ -69,13 +67,13 @@ struct I {
 
 static ienv_t new_ienv() {
   return new Ienv {
-    .structdecls  = Dict::empty(String::zstrptrcmp),
-    .uniondecls   = Dict::empty(String::zstrptrcmp),
-    .tuniondecls  = Dict::empty(String::zstrptrcmp),
-    .enumdecls    = Dict::empty(String::zstrptrcmp),
-    .typedefdecls = Dict::empty(String::zstrptrcmp),
-    .vardecls     = Dict::empty(String::zstrptrcmp),
-    .xtunionfielddecls = Dict::empty(String::zstrptrcmp)
+    .structdecls  = Dict::empty(std::zstrptrcmp),
+    .uniondecls   = Dict::empty(std::zstrptrcmp),
+    .tuniondecls  = Dict::empty(std::zstrptrcmp),
+    .enumdecls    = Dict::empty(std::zstrptrcmp),
+    .typedefdecls = Dict::empty(std::zstrptrcmp),
+    .vardecls     = Dict::empty(std::zstrptrcmp),
+    .xtunionfielddecls = Dict::empty(std::zstrptrcmp)
   };
 }
 

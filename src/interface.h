@@ -22,7 +22,7 @@
 #define _INTERFACE_H_
 
 #include <core.h>
-#include <stdio.h>
+#include <cstdio.h>
 #include <list.h>
 #include "absyn.h"
 #include "tcenv.h"
@@ -30,7 +30,7 @@
 namespace Interface {
   using List;
   using Absyn;
-  using Stdio;
+  using std;
   using Tcenv;
 
   // abstract type for program interfaces

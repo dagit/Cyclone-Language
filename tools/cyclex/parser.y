@@ -12,7 +12,6 @@
 #include "syntax.h"
 
 using Core;
-using Stdio;
 using List;
 
 using Syntax;
@@ -35,7 +34,7 @@ htbl * named_regexps = NULL;
 lexer_definition_t parse_result = NULL;
 
 regular_expression_t regexp_for_string(string_t s) {
-  int len = String::strlen(s);
+  int len = strlen(s);
   if(len == 0)
     return Epsilon;
   regular_expression_t ans = new Characters(new List((int)(s[len-1]), NULL));
@@ -181,7 +180,7 @@ char_class1:
 
 namespace Parser {
 lexer_definition_t parse_file(FILE @`H f) {
-  named_regexps = Hashtable::create(13, String::strptrcmp, 
+  named_regexps = Hashtable::create(13, strptrcmp, 
 				    Hashtable::hash_stringptr);
   parse_result = NULL;
   lbuf = new Opt(Lexing::from_file(f));

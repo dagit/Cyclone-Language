@@ -34,10 +34,9 @@
 #include <core.h>
 #include <stdio.h>
 #include <lexing.h>
-#include <string.h>
+#include <cstring.h>
 
 using Core;
-using Stdio;
 
 namespace Lexing;
 
@@ -92,7 +91,7 @@ void lex_refill(Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
     int    newlen = oldlen*2;
 
     mstring_t newbuf = new_string(newlen+1);
-    String::zstrncpy(newbuf+oldlen, lexbuf->lex_buffer, oldlen);
+    std::zstrncpy(newbuf+oldlen, lexbuf->lex_buffer, oldlen);
     lexbuf->lex_buffer     = newbuf;
     lexbuf->lex_buffer_len = newlen;
     lexbuf->lex_abs_pos    = lexbuf->lex_abs_pos   - oldlen;
@@ -100,10 +99,10 @@ void lex_refill(Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
     lexbuf->lex_start_pos  = lexbuf->lex_start_pos + oldlen;
     lexbuf->lex_last_pos   = lexbuf->lex_last_pos  + oldlen;
   }
-  String::zstrncpy(lexbuf->lex_buffer,
+  std::zstrncpy(lexbuf->lex_buffer,
                    lexbuf->lex_buffer + n,
                    lexbuf->lex_buffer_len-n);
-  String::zstrncpy(lexbuf->lex_buffer + lexbuf->lex_buffer_len-n,
+  std::zstrncpy(lexbuf->lex_buffer + lexbuf->lex_buffer_len-n,
                    aux_buffer, n);
   lexbuf->lex_abs_pos    = lexbuf->lex_abs_pos   + n;
   lexbuf->lex_curr_pos   = lexbuf->lex_curr_pos  - n;
@@ -142,7 +141,7 @@ Lexbuf<bool> from_string(mstring_t s) {
   return 
     new lexbuf(set_eof,
                false,     //ignored but can't instantiate with void
-               String::strdup(s), // copy to keep lexer shielded from updates
+               std::strdup(s), // copy to keep lexer shielded from updates
                s.size,
                0,0,0,0,0,
                true);
@@ -151,11 +150,11 @@ Lexbuf<bool> from_string(mstring_t s) {
 mstring_t lexeme(Lexbuf<`a> lbuf) {
    int    len = lbuf->lex_curr_pos - lbuf->lex_start_pos;
    mstring_t s   = new_string(len+1);
-   String::zstrncpy(s, lbuf->lex_buffer + lbuf->lex_start_pos, len);
+   std::zstrncpy(s, lbuf->lex_buffer + lbuf->lex_start_pos, len);
    s[len] = '\000';
 //     if (len == 0) {
 //       fprintf(cyc_stderr,"Lexing::lexeme: 0 length!!\n");
-//     } else if (String::strlen(s)==0) {
+//     } else if (std::strlen(s)==0) {
 //       fprintf(cyc_stderr,"!! Lexing::lexeme: 0 length!!\n");
 //     }
    return s;

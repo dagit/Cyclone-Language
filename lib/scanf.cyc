@@ -51,10 +51,8 @@ static char sccsid[] = "%W% (Berkeley) %G%";
 #include <stdlib.h>
 #include <stdio.h>
 using Core;
-using Ctype;
-using Stdlib;
-using Stdio;
-namespace Stdio;
+
+namespace std;
 
 typedef long long int _IO_ssize_t;
 

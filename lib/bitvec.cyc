@@ -30,8 +30,6 @@
 #include <bitvec.h>
 #include <stdio.h>
 
-using Stdio;
-
 namespace Bitvec {
 // POS_TO_WORD is division by 32
 // POS_TO_BIT is mod by 32

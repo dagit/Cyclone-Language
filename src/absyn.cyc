@@ -27,9 +27,7 @@
 
 using Core;
 using List;
-using String;
 using Position;
-using Stdio;
 namespace Absyn;
 
 // return a negative, zero, or positive int according to whether the
@@ -61,7 +59,7 @@ int qvar_cmp(qvar_t q1, qvar_t q2) {
 }
 // WARNING: Ignores the kinds.
 int tvar_cmp(tvar_t tv1, tvar_t tv2) {
-  int i = String::zstrptrcmp(tv1->name,tv2->name);
+  int i = zstrptrcmp(tv1->name,tv2->name);
   if (i != 0) return i;
   if (tv1->identity == tv2->identity) return 0;
   if (tv1->identity != NULL && tv2->identity != NULL) 
@@ -212,13 +210,13 @@ type_t exn_typ = &exn_typ_tt;
 static string_t printarg_str = "PrintArg";
 static string_t scanfarg_str = "ScanfArg";
 static string_t cyc_str = "Cyc";
-static string_t stdio_str = "Stdio";
-static struct List<var_t,`H> stdio_list = {&stdio_str, NULL};
-static tunion Nmspace.Abs_n stdio_namespace = Abs_n(&stdio_list);
+static string_t std_str = "std";
+static struct List<var_t,`H> std_list = {&std_str, NULL};
+static tunion Nmspace.Abs_n std_namespace = Abs_n(&std_list);
 static $(nmspace_t,var_t) tunion_print_arg_qvar_p = 
-  $((tunion Nmspace)&stdio_namespace, &printarg_str);
+  $((tunion Nmspace)&std_namespace, &printarg_str);
 static $(nmspace_t,var_t) tunion_scanf_arg_qvar_p = 
-  $((tunion Nmspace)&stdio_namespace, &scanfarg_str);
+  $((tunion Nmspace)&std_namespace, &scanfarg_str);
 qvar_t tunion_print_arg_qvar = &tunion_print_arg_qvar_p;
 qvar_t tunion_scanf_arg_qvar = &tunion_scanf_arg_qvar_p;
 
@@ -292,7 +290,7 @@ static opt_t<type_t> file_t_opt = NULL;
 // If so, we'll need a rgn_t argument.
 static string_t sf_str = "__sFILE";
 static stringptr_t sf = &sf_str;
-static string_t st_str = "Stdio";
+static string_t st_str = "std";
 static stringptr_t st = &st_str;
 
 type_t file_typ() {
@@ -656,7 +654,7 @@ bool is_lvalue(exp_t e) {
 struct Structfield * lookup_field(list_t<structfield_t,`H> fields, var_t v) {
   for(_ fs = fields; fs != NULL; fs = fs->tl) {
     let f = fs->hd;
-    if (String::zstrptrcmp(f->name,v) == 0)
+    if (zstrptrcmp(f->name,v) == 0)
       return f;
   }
   return NULL;

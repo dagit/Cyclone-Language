@@ -31,11 +31,11 @@
 (***********************************************************************/
 
 #include <buffer.h>
-#include <string.h>
+#include <cstring.h>
+#include <stddef.h> // for size_t
 
 namespace Buffer;
 using Core;
-using Stdio; // for size_t
 
 //(* Extensible buffers *)
 
@@ -53,7 +53,7 @@ T create (unsigned int n) {
 }
 
 mstring_t contents(T b) {
-  return (String::substring( b->buffer, 0, b->position));
+  return (std::substring( b->buffer, 0, b->position));
 }
 
 size_t length (T b) {
@@ -80,7 +80,7 @@ static void resize(T b, unsigned int more) {
     new_len = 2 * new_len;
   }
   new_buffer = new_string(new_len);
-  String::strncpy(new_buffer, b->buffer, b->position);
+  std::strncpy(new_buffer, b->buffer, b->position);
   b->buffer = new_buffer;
   b->length = new_len;
   return;
@@ -95,24 +95,24 @@ void add_char(T b, char c) {
 }
 
 
-// Note: like String::substring, this does not check for
+// Note: like std::substring, this does not check for
 // NUL terminators within the specified substring
 void add_substring(T b, string_t s, int offset, int len) {
   if (offset < 0 || len < 0 || offset + len > s.size)
     throw new InvalidArg("Buffer::add_substring");
   int new_position = b->position + len;
   if (new_position > b->length) resize (b, len);
-  String::zstrncpy(b->buffer + b->position, s + offset, len);
+  std::zstrncpy(b->buffer + b->position, s + offset, len);
   b->position = new_position;
   return;
 }
 
 // This DOES check for NUL terminators
 void add_string (T b, string_t s) {
-  int len = String::strlen(s);
+  int len = std::strlen(s);
   int new_position = b->position + len;
   if (new_position > b->length) resize(b, len);
-  String::strncpy(b->buffer + b->position, s, len);
+  std::strncpy(b->buffer + b->position, s, len);
   b->position = new_position;
   return;
 }

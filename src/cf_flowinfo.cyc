@@ -21,7 +21,7 @@
 #include <list.h>
 #include <set.h>
 #include <dict.h>
-#include <string.h>
+#include <cstring.h>
 #include "absyn.h"
 #include "tcutil.h"
 
@@ -119,11 +119,11 @@ path_info_t typ_to_unesc_none_pinfo(type_t t) {
     return new TuplePI(d);
   case &AnonStructType(fs): fallthru(fs);
   case &StructType(_,_, & &Structdecl(_,_,_,&Core::Opt(fs),_)):
-    pinfo_dict_t<field_name_t> d = Dict::empty(String::zstrptrcmp);
+    pinfo_dict_t<field_name_t> d = Dict::empty(std::zstrptrcmp);
     for(; fs != NULL; fs = fs->tl) {
       let &Structfield{n,_,t2,_,_} = fs->hd;
       // don't insert the field if the name is empty -- it's a bit field
-      if (String::strcmp(*n,"") != 0)
+      if (std::strcmp(*n,"") != 0)
         d = Dict::insert(d, n, typ_to_unesc_none_pinfo(t2));
     }
     return new StructPI(d);

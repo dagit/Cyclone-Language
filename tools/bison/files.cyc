@@ -37,9 +37,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "new.h"
 #include "gram.h"
 #include <string.h>
-using String;
-using Stdlib;
-using Unistd;
 
 FILE *finput=NULL;
 FILE *foutput=NULL;

@@ -12,7 +12,6 @@
 // write the code so that it will be useful for modifying to other
 // representations.
 using Core;
-using Stdio;
 using Buffer;
 
 // int is character position in d1 of first different character
