@@ -12,9 +12,8 @@ CYCC=../build/boot/cyclone$(EXE)
 CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g #--vcgen
 endif
 HAVE_PTHREAD=no
-#EXES := $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme cinclude testasm patterns)
 # test asm doesn't work for me on cygwin
-EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme cinclude patterns multimethod testasm)
+EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme cinclude patterns multimethod rc testasm)
  # testsexp)
 
 ifeq ($(HAVE_PTHREAD),yes)
@@ -73,6 +72,7 @@ all: $(EXES) failtest
 	./cinclude
 	./multimethod
 #	./testsexp
+	./rc
 	./testasm
 ifeq ($(HAVE_PTHREAD),yes)
 	./testexn

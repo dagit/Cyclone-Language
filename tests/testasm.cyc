@@ -1,5 +1,9 @@
 #include <stdio.h>
 
+#ifdef __APPLE__
+int main() { return 0; }
+#else
+
 int gar(int, int) __attribute__((regparm(0))); //regparm(0) is optional
 
 struct Foo {
@@ -31,3 +35,4 @@ int main() {
     return 0;
   return -1;
 }
+#endif
