@@ -1,6 +1,7 @@
 #include <core.h>
 #include <stdio.h>
 #include <string.h>
+
 using Core;
 
 namespace Cstdio {

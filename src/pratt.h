@@ -43,6 +43,7 @@
    of variables and constraints.
 */
 #include "absyn.h"
+
 namespace Pratt {
   using Absyn;
   // nodes of the graph are either variables, the distinguished constant zero,
