@@ -35,7 +35,10 @@ $(CYC_LIB_PATH)/nogc_a.a: $(ARCH)/lib/nogc_a.a
 $(CYC_LIB_PATH)/$(RUNTIME)_a.$(O): $(ARCH)/lib/$(RUNTIME)_a.$(O)
 	cp $< $@
 
-install_nocheck: $(ARCH) $(addprefix $(CYC_LIB_PATH)/, libcyc_nocheck.a nogc.a $(RUNTIME).$(O))
+install_nocheck: $(ARCH) $(addprefix $(CYC_LIB_PATH)/, libcyc_nocheck.a nogc_nocheck.a $(RUNTIME).$(O))
+
+$(CYC_LIB_PATH)/nogc_nocheck.a: $(ARCH)/lib/nogc.a
+	cp $< $@
 
 $(CYC_LIB_PATH)/libcyc_nocheck.a: $(ARCH)/lib/libcyc_nocheck.a
 	cp $< $@
