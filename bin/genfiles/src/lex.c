@@ -456,110 +456,110 @@ f1; } ; extern unsigned char Cyc_TypeSpecifier_tok[ 22u]; struct Cyc_TypeSpecifi
 unsigned char* tag; void* f1; } ; extern unsigned char Cyc_Type_tok[ 13u];
 struct Cyc_Type_tok_struct{ unsigned char* tag; void* f1; } ; struct Cyc_Yyltype{
 int timestamp; int first_line; int first_column; int last_line; int last_column;
-struct _tagged_arr text; } ; extern struct Cyc_Yyltype Cyc_yylloc; extern void*
-Cyc_yylval; struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[ 12u];
-extern unsigned char Cyc_Dict_Absent[ 11u]; extern struct Cyc_Dict_Dict* Cyc_Dict_empty(
-int(* comp)( void*, void*)); extern struct Cyc_Dict_Dict* Cyc_Dict_insert(
-struct Cyc_Dict_Dict* d, void* key, void* data); extern void* Cyc_Dict_lookup(
-struct Cyc_Dict_Dict* d, void* key); void Cyc_yyerror( struct _tagged_arr s){
-Cyc_Position_post_error( Cyc_Position_mk_err_parse( Cyc_Position_segment_of_abs(
-Cyc_yylloc.first_line, Cyc_yylloc.last_line), s));} struct Cyc_Lex_Trie; static
-const int Cyc_Lex_Zero= 0; static const int Cyc_Lex_One= 0; struct Cyc_Lex_One_struct{
-int tag; int f1; struct Cyc_Lex_Trie* f2; } ; static const int Cyc_Lex_Many= 1;
-struct Cyc_Lex_Many_struct{ int tag; struct Cyc_Lex_Trie** f1; } ; struct Cyc_Lex_Trie{
-void* children; int shared_str; } ; static int Cyc_Lex_num_kws= 0; static struct
-_tagged_arr Cyc_Lex_kw_nums={( void*) 0u,( void*) 0u,( void*) 0u + 0u}; static
-struct Cyc_Xarray_Xarray* Cyc_Lex_symbols= 0; static struct Cyc_Lex_Trie* Cyc_Lex_ids_trie=
-0; static struct Cyc_Lex_Trie* Cyc_Lex_typedefs_trie= 0; static int Cyc_Lex_comment_depth=
-0; static struct _tuple6 Cyc_Lex_token_int_pair={( void*) 0u, 0}; static
-unsigned char _temp0[ 8u]="*bogus*"; static struct _tagged_arr Cyc_Lex_bogus_string={
-_temp0, _temp0, _temp0 + 8u}; static struct _tuple0 Cyc_Lex_token_id_pair={(
-void*)& Cyc_Absyn_rel_ns_null_value,& Cyc_Lex_bogus_string}; static
-unsigned char Cyc_Lex_token_char='\000'; static unsigned char _temp1[ 1u]="";
-static struct _tagged_arr Cyc_Lex_token_string={ _temp1, _temp1, _temp1 + 1u};
-static struct _tuple6* Cyc_Lex_token_int=& Cyc_Lex_token_int_pair; static struct
-_tuple0* Cyc_Lex_token_qvar=& Cyc_Lex_token_id_pair; static int Cyc_Lex_runaway_start=
-0; static void Cyc_Lex_err( struct _tagged_arr msg, struct Cyc_Lexing_lexbuf* lb){
-struct Cyc_Position_Segment* s= Cyc_Position_segment_of_abs((( int(*)( struct
-Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme_start)( lb),(( int(*)( struct Cyc_Lexing_lexbuf*))
-Cyc_Lexing_lexeme_end)( lb)); Cyc_Position_post_error( Cyc_Position_mk_err_lex(
-s, msg));} static void Cyc_Lex_runaway_err( struct _tagged_arr msg, struct Cyc_Lexing_lexbuf*
-lb){ struct Cyc_Position_Segment* s= Cyc_Position_segment_of_abs( Cyc_Lex_runaway_start,((
-int(*)( struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme_start)( lb)); Cyc_Position_post_error(
-Cyc_Position_mk_err_lex( s, msg));} struct _tuple9{ struct _tagged_arr f1; short
-f2; } ; static unsigned char _temp2[ 14u]="__attribute__"; static unsigned char
-_temp3[ 9u]="abstract"; static unsigned char _temp4[ 5u]="auto"; static
-unsigned char _temp5[ 6u]="break"; static unsigned char _temp6[ 5u]="case";
-static unsigned char _temp7[ 6u]="catch"; static unsigned char _temp8[ 5u]="char";
-static unsigned char _temp9[ 8u]="codegen"; static unsigned char _temp10[ 6u]="const";
-static unsigned char _temp11[ 9u]="continue"; static unsigned char _temp12[ 4u]="cut";
-static unsigned char _temp13[ 8u]="default"; static unsigned char _temp14[ 3u]="do";
-static unsigned char _temp15[ 7u]="double"; static unsigned char _temp16[ 5u]="else";
-static unsigned char _temp17[ 5u]="enum"; static unsigned char _temp18[ 7u]="extern";
-static unsigned char _temp19[ 9u]="fallthru"; static unsigned char _temp20[ 5u]="fill";
-static unsigned char _temp21[ 6u]="float"; static unsigned char _temp22[ 4u]="for";
-static unsigned char _temp23[ 8u]="fprintf"; static unsigned char _temp24[ 7u]="fscanf";
-static unsigned char _temp25[ 5u]="goto"; static unsigned char _temp26[ 3u]="if";
-static unsigned char _temp27[ 7u]="inline"; static unsigned char _temp28[ 4u]="int";
-static unsigned char _temp29[ 4u]="let"; static unsigned char _temp30[ 5u]="long";
-static unsigned char _temp31[ 7u]="malloc"; static unsigned char _temp32[ 10u]="namespace";
-static unsigned char _temp33[ 4u]="new"; static unsigned char _temp34[ 5u]="null";
-static unsigned char _temp35[ 9u]="offsetof"; static unsigned char _temp36[ 7u]="printf";
-static unsigned char _temp37[ 9u]="region_t"; static unsigned char _temp38[ 7u]="region";
-static unsigned char _temp39[ 9u]="register"; static unsigned char _temp40[ 9u]="restrict";
-static unsigned char _temp41[ 7u]="return"; static unsigned char _temp42[ 8u]="rmalloc";
-static unsigned char _temp43[ 5u]="rnew"; static unsigned char _temp44[ 6u]="scanf";
-static unsigned char _temp45[ 6u]="short"; static unsigned char _temp46[ 7u]="signed";
-static unsigned char _temp47[ 7u]="sizeof"; static unsigned char _temp48[ 7u]="splice";
-static unsigned char _temp49[ 7u]="sscanf"; static unsigned char _temp50[ 7u]="static";
-static unsigned char _temp51[ 7u]="struct"; static unsigned char _temp52[ 7u]="switch";
-static unsigned char _temp53[ 6u]="throw"; static unsigned char _temp54[ 4u]="try";
-static unsigned char _temp55[ 7u]="tunion"; static unsigned char _temp56[ 8u]="typedef";
-static unsigned char _temp57[ 6u]="union"; static unsigned char _temp58[ 9u]="unsigned";
-static unsigned char _temp59[ 6u]="using"; static unsigned char _temp60[ 5u]="void";
-static unsigned char _temp61[ 9u]="volatile"; static unsigned char _temp62[ 6u]="while";
-static unsigned char _temp63[ 8u]="xtunion"; static unsigned char _temp64[ 8u]="xprintf";
-static struct _tuple9 Cyc_Lex_rw_array[ 63u]={{{ _temp2, _temp2, _temp2 + 14u},
-352},{{ _temp3, _temp3, _temp3 + 9u}, 299},{{ _temp4, _temp4, _temp4 + 5u}, 258},{{
-_temp5, _temp5, _temp5 + 6u}, 290},{{ _temp6, _temp6, _temp6 + 5u}, 277},{{
-_temp7, _temp7, _temp7 + 6u}, 297},{{ _temp8, _temp8, _temp8 + 5u}, 264},{{
-_temp9, _temp9, _temp9 + 8u}, 306},{{ _temp10, _temp10, _temp10 + 6u}, 272},{{
-_temp11, _temp11, _temp11 + 9u}, 289},{{ _temp12, _temp12, _temp12 + 4u}, 307},{{
-_temp13, _temp13, _temp13 + 8u}, 278},{{ _temp14, _temp14, _temp14 + 3u}, 286},{{
-_temp15, _temp15, _temp15 + 7u}, 269},{{ _temp16, _temp16, _temp16 + 5u}, 283},{{
-_temp17, _temp17, _temp17 + 5u}, 292},{{ _temp18, _temp18, _temp18 + 7u}, 261},{{
-_temp19, _temp19, _temp19 + 9u}, 300},{{ _temp20, _temp20, _temp20 + 5u}, 305},{{
-_temp21, _temp21, _temp21 + 6u}, 268},{{ _temp22, _temp22, _temp22 + 4u}, 287},{{
-_temp23, _temp23, _temp23 + 8u}, 310},{{ _temp24, _temp24, _temp24 + 7u}, 313},{{
-_temp25, _temp25, _temp25 + 5u}, 288},{{ _temp26, _temp26, _temp26 + 3u}, 282},{{
-_temp27, _temp27, _temp27 + 7u}, 279},{{ _temp28, _temp28, _temp28 + 4u}, 266},{{
-_temp29, _temp29, _temp29 + 4u}, 294},{{ _temp30, _temp30, _temp30 + 5u}, 267},{{
-_temp31, _temp31, _temp31 + 7u}, 315},{{ _temp32, _temp32, _temp32 + 10u}, 302},{{
-_temp33, _temp33, _temp33 + 4u}, 298},{{ _temp34, _temp34, _temp34 + 5u}, 293},{{
-_temp35, _temp35, _temp35 + 9u}, 281},{{ _temp36, _temp36, _temp36 + 7u}, 309},{{
-_temp37, _temp37, _temp37 + 9u}, 316},{{ _temp38, _temp38, _temp38 + 7u}, 317},{{
-_temp39, _temp39, _temp39 + 9u}, 259},{{ _temp40, _temp40, _temp40 + 9u}, 274},{{
-_temp41, _temp41, _temp41 + 7u}, 291},{{ _temp42, _temp42, _temp42 + 8u}, 319},{{
-_temp43, _temp43, _temp43 + 5u}, 318},{{ _temp44, _temp44, _temp44 + 6u}, 312},{{
-_temp45, _temp45, _temp45 + 6u}, 265},{{ _temp46, _temp46, _temp46 + 7u}, 270},{{
-_temp47, _temp47, _temp47 + 7u}, 280},{{ _temp48, _temp48, _temp48 + 7u}, 308},{{
-_temp49, _temp49, _temp49 + 7u}, 314},{{ _temp50, _temp50, _temp50 + 7u}, 260},{{
-_temp51, _temp51, _temp51 + 7u}, 275},{{ _temp52, _temp52, _temp52 + 7u}, 284},{{
-_temp53, _temp53, _temp53 + 6u}, 295},{{ _temp54, _temp54, _temp54 + 4u}, 296},{{
-_temp55, _temp55, _temp55 + 7u}, 303},{{ _temp56, _temp56, _temp56 + 8u}, 262},{{
-_temp57, _temp57, _temp57 + 6u}, 276},{{ _temp58, _temp58, _temp58 + 9u}, 271},{{
-_temp59, _temp59, _temp59 + 6u}, 301},{{ _temp60, _temp60, _temp60 + 5u}, 263},{{
-_temp61, _temp61, _temp61 + 9u}, 273},{{ _temp62, _temp62, _temp62 + 6u}, 285},{{
-_temp63, _temp63, _temp63 + 8u}, 304},{{ _temp64, _temp64, _temp64 + 8u}, 311}};
-static int Cyc_Lex_trie_char( int c){ if( c >= 95){ return c - 59;} else{ if( c
-> 64){ return c - 55;}} return c - 48;} static struct Cyc_Lex_Trie* Cyc_Lex_trie_lookup(
-struct Cyc_Lex_Trie* t, struct _tagged_arr buff, int offset, int len){ int i=
-offset; int last=( offset + len) - 1; while( i <= last) { void* _temp65=( void*)((
-struct Cyc_Lex_Trie*) _check_null( t))->children; struct Cyc_Lex_Trie** _temp73;
-struct Cyc_Lex_Trie* _temp75; int _temp77; _LL67: if(( unsigned int) _temp65 > 1u?*((
-int*) _temp65) == Cyc_Lex_Many: 0){ _LL74: _temp73=(( struct Cyc_Lex_Many_struct*)
-_temp65)->f1; goto _LL68;} else{ goto _LL69;} _LL69: if(( unsigned int) _temp65
-> 1u?*(( int*) _temp65) == Cyc_Lex_One: 0){ _LL78: _temp77=(( struct Cyc_Lex_One_struct*)
+} ; extern struct Cyc_Yyltype Cyc_yylloc; extern void* Cyc_yylval; struct Cyc_Dict_Dict;
+extern unsigned char Cyc_Dict_Present[ 12u]; extern unsigned char Cyc_Dict_Absent[
+11u]; extern struct Cyc_Dict_Dict* Cyc_Dict_empty( int(* comp)( void*, void*));
+extern struct Cyc_Dict_Dict* Cyc_Dict_insert( struct Cyc_Dict_Dict* d, void* key,
+void* data); extern void* Cyc_Dict_lookup( struct Cyc_Dict_Dict* d, void* key);
+void Cyc_yyerror( struct _tagged_arr s){ Cyc_Position_post_error( Cyc_Position_mk_err_parse(
+Cyc_Position_segment_of_abs( Cyc_yylloc.first_line, Cyc_yylloc.last_line), s));}
+struct Cyc_Lex_Trie; static const int Cyc_Lex_Zero= 0; static const int Cyc_Lex_One=
+0; struct Cyc_Lex_One_struct{ int tag; int f1; struct Cyc_Lex_Trie* f2; } ;
+static const int Cyc_Lex_Many= 1; struct Cyc_Lex_Many_struct{ int tag; struct
+Cyc_Lex_Trie** f1; } ; struct Cyc_Lex_Trie{ void* children; int shared_str; } ;
+static int Cyc_Lex_num_kws= 0; static struct _tagged_arr Cyc_Lex_kw_nums={( void*)
+0u,( void*) 0u,( void*) 0u + 0u}; static struct Cyc_Xarray_Xarray* Cyc_Lex_symbols=
+0; static struct Cyc_Lex_Trie* Cyc_Lex_ids_trie= 0; static struct Cyc_Lex_Trie*
+Cyc_Lex_typedefs_trie= 0; static int Cyc_Lex_comment_depth= 0; static struct
+_tuple6 Cyc_Lex_token_int_pair={( void*) 0u, 0}; static unsigned char _temp0[ 8u]="*bogus*";
+static struct _tagged_arr Cyc_Lex_bogus_string={ _temp0, _temp0, _temp0 + 8u};
+static struct _tuple0 Cyc_Lex_token_id_pair={( void*)& Cyc_Absyn_rel_ns_null_value,&
+Cyc_Lex_bogus_string}; static unsigned char Cyc_Lex_token_char='\000'; static
+unsigned char _temp1[ 1u]=""; static struct _tagged_arr Cyc_Lex_token_string={
+_temp1, _temp1, _temp1 + 1u}; static struct _tuple6* Cyc_Lex_token_int=& Cyc_Lex_token_int_pair;
+static struct _tuple0* Cyc_Lex_token_qvar=& Cyc_Lex_token_id_pair; static int
+Cyc_Lex_runaway_start= 0; static void Cyc_Lex_err( struct _tagged_arr msg,
+struct Cyc_Lexing_lexbuf* lb){ struct Cyc_Position_Segment* s= Cyc_Position_segment_of_abs(((
+int(*)( struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme_start)( lb),(( int(*)(
+struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme_end)( lb)); Cyc_Position_post_error(
+Cyc_Position_mk_err_lex( s, msg));} static void Cyc_Lex_runaway_err( struct
+_tagged_arr msg, struct Cyc_Lexing_lexbuf* lb){ struct Cyc_Position_Segment* s=
+Cyc_Position_segment_of_abs( Cyc_Lex_runaway_start,(( int(*)( struct Cyc_Lexing_lexbuf*))
+Cyc_Lexing_lexeme_start)( lb)); Cyc_Position_post_error( Cyc_Position_mk_err_lex(
+s, msg));} struct _tuple9{ struct _tagged_arr f1; short f2; } ; static
+unsigned char _temp2[ 14u]="__attribute__"; static unsigned char _temp3[ 9u]="abstract";
+static unsigned char _temp4[ 5u]="auto"; static unsigned char _temp5[ 6u]="break";
+static unsigned char _temp6[ 5u]="case"; static unsigned char _temp7[ 6u]="catch";
+static unsigned char _temp8[ 5u]="char"; static unsigned char _temp9[ 8u]="codegen";
+static unsigned char _temp10[ 6u]="const"; static unsigned char _temp11[ 9u]="continue";
+static unsigned char _temp12[ 4u]="cut"; static unsigned char _temp13[ 8u]="default";
+static unsigned char _temp14[ 3u]="do"; static unsigned char _temp15[ 7u]="double";
+static unsigned char _temp16[ 5u]="else"; static unsigned char _temp17[ 5u]="enum";
+static unsigned char _temp18[ 7u]="extern"; static unsigned char _temp19[ 9u]="fallthru";
+static unsigned char _temp20[ 5u]="fill"; static unsigned char _temp21[ 6u]="float";
+static unsigned char _temp22[ 4u]="for"; static unsigned char _temp23[ 8u]="fprintf";
+static unsigned char _temp24[ 7u]="fscanf"; static unsigned char _temp25[ 5u]="goto";
+static unsigned char _temp26[ 3u]="if"; static unsigned char _temp27[ 7u]="inline";
+static unsigned char _temp28[ 4u]="int"; static unsigned char _temp29[ 4u]="let";
+static unsigned char _temp30[ 5u]="long"; static unsigned char _temp31[ 7u]="malloc";
+static unsigned char _temp32[ 10u]="namespace"; static unsigned char _temp33[ 4u]="new";
+static unsigned char _temp34[ 5u]="null"; static unsigned char _temp35[ 9u]="offsetof";
+static unsigned char _temp36[ 7u]="printf"; static unsigned char _temp37[ 9u]="region_t";
+static unsigned char _temp38[ 7u]="region"; static unsigned char _temp39[ 9u]="register";
+static unsigned char _temp40[ 9u]="restrict"; static unsigned char _temp41[ 7u]="return";
+static unsigned char _temp42[ 8u]="rmalloc"; static unsigned char _temp43[ 5u]="rnew";
+static unsigned char _temp44[ 6u]="scanf"; static unsigned char _temp45[ 6u]="short";
+static unsigned char _temp46[ 7u]="signed"; static unsigned char _temp47[ 7u]="sizeof";
+static unsigned char _temp48[ 7u]="splice"; static unsigned char _temp49[ 7u]="sscanf";
+static unsigned char _temp50[ 7u]="static"; static unsigned char _temp51[ 7u]="struct";
+static unsigned char _temp52[ 7u]="switch"; static unsigned char _temp53[ 6u]="throw";
+static unsigned char _temp54[ 4u]="try"; static unsigned char _temp55[ 7u]="tunion";
+static unsigned char _temp56[ 8u]="typedef"; static unsigned char _temp57[ 6u]="union";
+static unsigned char _temp58[ 9u]="unsigned"; static unsigned char _temp59[ 6u]="using";
+static unsigned char _temp60[ 5u]="void"; static unsigned char _temp61[ 9u]="volatile";
+static unsigned char _temp62[ 6u]="while"; static unsigned char _temp63[ 8u]="xtunion";
+static unsigned char _temp64[ 8u]="xprintf"; static struct _tuple9 Cyc_Lex_rw_array[
+63u]={{{ _temp2, _temp2, _temp2 + 14u}, 352},{{ _temp3, _temp3, _temp3 + 9u},
+299},{{ _temp4, _temp4, _temp4 + 5u}, 258},{{ _temp5, _temp5, _temp5 + 6u}, 290},{{
+_temp6, _temp6, _temp6 + 5u}, 277},{{ _temp7, _temp7, _temp7 + 6u}, 297},{{
+_temp8, _temp8, _temp8 + 5u}, 264},{{ _temp9, _temp9, _temp9 + 8u}, 306},{{
+_temp10, _temp10, _temp10 + 6u}, 272},{{ _temp11, _temp11, _temp11 + 9u}, 289},{{
+_temp12, _temp12, _temp12 + 4u}, 307},{{ _temp13, _temp13, _temp13 + 8u}, 278},{{
+_temp14, _temp14, _temp14 + 3u}, 286},{{ _temp15, _temp15, _temp15 + 7u}, 269},{{
+_temp16, _temp16, _temp16 + 5u}, 283},{{ _temp17, _temp17, _temp17 + 5u}, 292},{{
+_temp18, _temp18, _temp18 + 7u}, 261},{{ _temp19, _temp19, _temp19 + 9u}, 300},{{
+_temp20, _temp20, _temp20 + 5u}, 305},{{ _temp21, _temp21, _temp21 + 6u}, 268},{{
+_temp22, _temp22, _temp22 + 4u}, 287},{{ _temp23, _temp23, _temp23 + 8u}, 310},{{
+_temp24, _temp24, _temp24 + 7u}, 313},{{ _temp25, _temp25, _temp25 + 5u}, 288},{{
+_temp26, _temp26, _temp26 + 3u}, 282},{{ _temp27, _temp27, _temp27 + 7u}, 279},{{
+_temp28, _temp28, _temp28 + 4u}, 266},{{ _temp29, _temp29, _temp29 + 4u}, 294},{{
+_temp30, _temp30, _temp30 + 5u}, 267},{{ _temp31, _temp31, _temp31 + 7u}, 315},{{
+_temp32, _temp32, _temp32 + 10u}, 302},{{ _temp33, _temp33, _temp33 + 4u}, 298},{{
+_temp34, _temp34, _temp34 + 5u}, 293},{{ _temp35, _temp35, _temp35 + 9u}, 281},{{
+_temp36, _temp36, _temp36 + 7u}, 309},{{ _temp37, _temp37, _temp37 + 9u}, 316},{{
+_temp38, _temp38, _temp38 + 7u}, 317},{{ _temp39, _temp39, _temp39 + 9u}, 259},{{
+_temp40, _temp40, _temp40 + 9u}, 274},{{ _temp41, _temp41, _temp41 + 7u}, 291},{{
+_temp42, _temp42, _temp42 + 8u}, 319},{{ _temp43, _temp43, _temp43 + 5u}, 318},{{
+_temp44, _temp44, _temp44 + 6u}, 312},{{ _temp45, _temp45, _temp45 + 6u}, 265},{{
+_temp46, _temp46, _temp46 + 7u}, 270},{{ _temp47, _temp47, _temp47 + 7u}, 280},{{
+_temp48, _temp48, _temp48 + 7u}, 308},{{ _temp49, _temp49, _temp49 + 7u}, 314},{{
+_temp50, _temp50, _temp50 + 7u}, 260},{{ _temp51, _temp51, _temp51 + 7u}, 275},{{
+_temp52, _temp52, _temp52 + 7u}, 284},{{ _temp53, _temp53, _temp53 + 6u}, 295},{{
+_temp54, _temp54, _temp54 + 4u}, 296},{{ _temp55, _temp55, _temp55 + 7u}, 303},{{
+_temp56, _temp56, _temp56 + 8u}, 262},{{ _temp57, _temp57, _temp57 + 6u}, 276},{{
+_temp58, _temp58, _temp58 + 9u}, 271},{{ _temp59, _temp59, _temp59 + 6u}, 301},{{
+_temp60, _temp60, _temp60 + 5u}, 263},{{ _temp61, _temp61, _temp61 + 9u}, 273},{{
+_temp62, _temp62, _temp62 + 6u}, 285},{{ _temp63, _temp63, _temp63 + 8u}, 304},{{
+_temp64, _temp64, _temp64 + 8u}, 311}}; static int Cyc_Lex_trie_char( int c){
+if( c >= 95){ return c - 59;} else{ if( c > 64){ return c - 55;}} return c - 48;}
+static struct Cyc_Lex_Trie* Cyc_Lex_trie_lookup( struct Cyc_Lex_Trie* t, struct
+_tagged_arr buff, int offset, int len){ int i= offset; int last=( offset + len)
+- 1; while( i <= last) { void* _temp65=( void*)(( struct Cyc_Lex_Trie*)
+_check_null( t))->children; struct Cyc_Lex_Trie** _temp73; struct Cyc_Lex_Trie*
+_temp75; int _temp77; _LL67: if(( unsigned int) _temp65 > 1u?*(( int*) _temp65)
+== Cyc_Lex_Many: 0){ _LL74: _temp73=(( struct Cyc_Lex_Many_struct*) _temp65)->f1;
+goto _LL68;} else{ goto _LL69;} _LL69: if(( unsigned int) _temp65 > 1u?*(( int*)
+_temp65) == Cyc_Lex_One: 0){ _LL78: _temp77=(( struct Cyc_Lex_One_struct*)
 _temp65)->f1; goto _LL76; _LL76: _temp75=(( struct Cyc_Lex_One_struct*) _temp65)->f2;
 goto _LL70;} else{ goto _LL71;} _LL71: if( _temp65 ==( void*) Cyc_Lex_Zero){
 goto _LL72;} else{ goto _LL66;} _LL68: { int ch= Cyc_Lex_trie_char(( int)*((

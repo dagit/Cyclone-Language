@@ -48,15 +48,14 @@ The entry point is reader().  */
 "\n      int first_column;"\
 "\n      int last_line;"\
 "\n      int last_column;"\
-"\n      string_t text;"\
 "\n   };"\
 "\ntypedef struct Yyltype yyltype;"\
 "\n\n"\
 "\n#define YYLTYPE yyltype"\
 "\nYYLTYPE yynewloc() { "\
-"\n  return Yyltype{0,0,0,0,0,(string_t)\"\"}; "\
+"\n  return Yyltype{0,0,0,0,0}; "\
 "\n}"\
-"\nyyltype yylloc=Yyltype{0,0,0,0,0,(string_t)\"\"};"\
+"\nyyltype yylloc=Yyltype{0,0,0,0,0};"\
 "\n#endif\n\n"
 
 #define EXTERN_LTYPESTR \
@@ -67,7 +66,6 @@ The entry point is reader().  */
 "\n      int first_column;"\
 "\n      int last_line;"\
 "\n      int last_column;"\
-"\n      string_t text;"\
 "\n};"\
 "\ntypedef struct Yyltype yyltype;"\
 "\n\n"\

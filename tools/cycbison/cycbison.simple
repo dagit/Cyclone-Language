@@ -379,12 +379,11 @@ $    /* the action file gets copied in place of this dollarsign */
       yyls[yylsp_offset].first_column = yylloc.first_column;
       yyls[yylsp_offset].last_line    = yyls[yylsp_offset-1].last_line; 
       yyls[yylsp_offset].last_column  = yyls[yylsp_offset-1].last_column;  
-      yyls[yylsp_offset].text = "";
     }
   else
     {
-     yyls[yylsp_offset].last_line   =yyls[yylsp_offset+yylen-1].last_line;  
-     yyls[yylsp_offset].last_column =yyls[yylsp_offset+yylen-1].last_column; 
+      yyls[yylsp_offset].last_line   =yyls[yylsp_offset+yylen-1].last_line;  
+      yyls[yylsp_offset].last_column =yyls[yylsp_offset+yylen-1].last_column; 
     }
 #endif
 

@@ -15,11 +15,11 @@ xtunion exn {Exit};
 static string_t source = ""; // initialized by overall control
 struct Segment { int start; int end; };
 
-seg_t segment_of_abs(int start, int end) { return new{Segment(start,end)}; }
+seg_t segment_of_abs(int start, int end) { return new Segment(start,end); }
 seg_t segment_join(seg_t s1, seg_t s2) { 
   if(s1 == null) return s2;
   if(s2 == null) return s1;
-  return new{Segment(s1->start,s2->end)}; 
+  return new Segment(s1->start,s2->end); 
 }
 
 mstring_t string_of_loc(int loc) {
@@ -47,7 +47,7 @@ mstring_t string_of_segment(seg_t s) {
 }
 
 static Lineno::pos_t new_pos() {
-  return new {Lineno::Pos("",new_string(0),0,0)};
+  return new Lineno::Pos("",new_string(0),0,0);
 }
 
 list_t<mstringptr_t> strings_of_segments(glist_t<seg_t,`r> segs) {
@@ -64,10 +64,10 @@ list_t<mstringptr_t> strings_of_segments(glist_t<seg_t,`r> segs) {
   places = List::imp_rev(places);
   for(; segs != null; segs = segs->tl) 
     if(segs->hd == null)
-      ans = new List(new {xprintf("%s(unknown)", source)}, ans);
+      ans = new List(new xprintf("%s(unknown)", source), ans);
     else {
-      ans = new List(new {string_of_pos_pr((*places->hd)[1],
-                                           (*places->tl->hd)[1])},
+      ans = new List(new string_of_pos_pr((*places->hd)[1],
+					  (*places->tl->hd)[1]),
                      ans);
       places = places->tl->tl;
     }
@@ -78,10 +78,10 @@ list_t<mstringptr_t> strings_of_segments(glist_t<seg_t,`r> segs) {
 
 tunion Error_kind { Lex, Parse, Elab };
 struct Error {
-  string_t       source;
+  string_t     source;
   seg_t        seg;
   error_kind_t kind;
-  string_t       desc;
+  string_t     desc;
 };
 error_t mk_err_lex(seg_t l, string_t desc) {
   return new Error(source, l, Lex, desc);

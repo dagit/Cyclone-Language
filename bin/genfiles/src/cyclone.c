@@ -509,14 +509,14 @@ f1; } ; extern unsigned char Cyc_TypeSpecifier_tok[ 22u]; struct Cyc_TypeSpecifi
 unsigned char* tag; void* f1; } ; extern unsigned char Cyc_Type_tok[ 13u];
 struct Cyc_Type_tok_struct{ unsigned char* tag; void* f1; } ; struct Cyc_Yyltype{
 int timestamp; int first_line; int first_column; int last_line; int last_column;
-struct _tagged_arr text; } ; struct Cyc_PP_Ppstate; struct Cyc_PP_Out; struct
-Cyc_PP_Doc; struct Cyc_Absynpp_Params{ int expand_typedefs: 1; int qvar_to_Cids:
-1; int add_cyc_prefix: 1; int to_VC: 1; int decls_first: 1; int
-rewrite_temp_tvars: 1; int print_all_tvars: 1; int print_all_kinds: 1; int
-print_using_stmts: 1; int print_externC_stmts: 1; int print_full_evars: 1; int
-use_curr_namespace: 1; struct Cyc_List_List* curr_namespace; } ; extern void Cyc_Absynpp_set_params(
-struct Cyc_Absynpp_Params* fs); extern struct Cyc_Absynpp_Params Cyc_Absynpp_cyc_params_r;
-extern struct Cyc_Absynpp_Params Cyc_Absynpp_c_params_r; extern void Cyc_Absynpp_decllist2file(
+} ; struct Cyc_PP_Ppstate; struct Cyc_PP_Out; struct Cyc_PP_Doc; struct Cyc_Absynpp_Params{
+int expand_typedefs: 1; int qvar_to_Cids: 1; int add_cyc_prefix: 1; int to_VC: 1;
+int decls_first: 1; int rewrite_temp_tvars: 1; int print_all_tvars: 1; int
+print_all_kinds: 1; int print_using_stmts: 1; int print_externC_stmts: 1; int
+print_full_evars: 1; int use_curr_namespace: 1; struct Cyc_List_List*
+curr_namespace; } ; extern void Cyc_Absynpp_set_params( struct Cyc_Absynpp_Params*
+fs); extern struct Cyc_Absynpp_Params Cyc_Absynpp_cyc_params_r; extern struct
+Cyc_Absynpp_Params Cyc_Absynpp_c_params_r; extern void Cyc_Absynpp_decllist2file(
 struct Cyc_List_List* tdl, struct Cyc_Stdio___sFILE* f); extern void Cyc_Absyndump_set_params(
 struct Cyc_Absynpp_Params* fs); extern void Cyc_Absyndump_dumpdecllist2file(
 struct Cyc_List_List* tdl, struct Cyc_Stdio___sFILE* f); struct Cyc_Set_Set;

@@ -402,7 +402,12 @@ static bool atomic_typ(type_t t) {
     // FIX: really should compute in terms of the instantiation
     // to be as aggressive as possible.
     // note even without this we'll allocate Position::seg_t with atomic.
-  case &StructType(_,_,_): return false;
+  case &StructType(_,_,sdp): 
+    if(sdp == null || (*sdp)->fields == null)
+      return false;
+    for(let fs = (*sdp)->fields->v; fs != null; fs = fs->tl)
+      if (!atomic_typ(fs->hd->type)) return false;
+    return true;
   case &TunionType(_):     return false;
   case &AnonStructType(fs): fallthru(fs);
   case &AnonUnionType(fs):

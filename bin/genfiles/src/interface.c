@@ -500,20 +500,19 @@ f1; } ; extern unsigned char Cyc_TypeSpecifier_tok[ 22u]; struct Cyc_TypeSpecifi
 unsigned char* tag; void* f1; } ; extern unsigned char Cyc_Type_tok[ 13u];
 struct Cyc_Type_tok_struct{ unsigned char* tag; void* f1; } ; struct Cyc_Yyltype{
 int timestamp; int first_line; int first_column; int last_line; int last_column;
-struct _tagged_arr text; } ; extern int Cyc_String_strptrcmp( struct _tagged_arr*
-s1, struct _tagged_arr* s2); extern int Cyc_String_zstrptrcmp( struct
-_tagged_arr*, struct _tagged_arr*); extern unsigned char Cyc_Tcutil_TypeErr[ 12u];
-extern void Cyc_Tcutil_terr( struct Cyc_Position_Segment*, struct _tagged_arr);
-extern void* Cyc_Tcutil_compress( void* t); extern int Cyc_Tcutil_is_function_type(
-void* t); extern unsigned char Cyc_Tcdecl_Incompatible[ 17u]; struct Cyc_Tcdecl_Xtunionfielddecl{
-struct Cyc_Absyn_Tuniondecl* base; struct Cyc_Absyn_Tunionfield* field; } ;
-extern void Cyc_Tcdecl_merr( struct Cyc_Position_Segment* loc, struct
-_tagged_arr* msg0, struct _tagged_arr msg1); extern struct Cyc_Absyn_Structdecl*
-Cyc_Tcdecl_merge_structdecl( struct Cyc_Absyn_Structdecl* d0, struct Cyc_Absyn_Structdecl*
-d1, struct Cyc_Position_Segment* loc, struct _tagged_arr* msg); extern struct
-Cyc_Absyn_Uniondecl* Cyc_Tcdecl_merge_uniondecl( struct Cyc_Absyn_Uniondecl* d0,
-struct Cyc_Absyn_Uniondecl* d1, struct Cyc_Position_Segment* loc, struct
-_tagged_arr* msg); extern struct Cyc_Absyn_Tuniondecl* Cyc_Tcdecl_merge_tuniondecl(
+} ; extern int Cyc_String_strptrcmp( struct _tagged_arr* s1, struct _tagged_arr*
+s2); extern int Cyc_String_zstrptrcmp( struct _tagged_arr*, struct _tagged_arr*);
+extern unsigned char Cyc_Tcutil_TypeErr[ 12u]; extern void Cyc_Tcutil_terr(
+struct Cyc_Position_Segment*, struct _tagged_arr); extern void* Cyc_Tcutil_compress(
+void* t); extern int Cyc_Tcutil_is_function_type( void* t); extern unsigned char
+Cyc_Tcdecl_Incompatible[ 17u]; struct Cyc_Tcdecl_Xtunionfielddecl{ struct Cyc_Absyn_Tuniondecl*
+base; struct Cyc_Absyn_Tunionfield* field; } ; extern void Cyc_Tcdecl_merr(
+struct Cyc_Position_Segment* loc, struct _tagged_arr* msg0, struct _tagged_arr
+msg1); extern struct Cyc_Absyn_Structdecl* Cyc_Tcdecl_merge_structdecl( struct
+Cyc_Absyn_Structdecl* d0, struct Cyc_Absyn_Structdecl* d1, struct Cyc_Position_Segment*
+loc, struct _tagged_arr* msg); extern struct Cyc_Absyn_Uniondecl* Cyc_Tcdecl_merge_uniondecl(
+struct Cyc_Absyn_Uniondecl* d0, struct Cyc_Absyn_Uniondecl* d1, struct Cyc_Position_Segment*
+loc, struct _tagged_arr* msg); extern struct Cyc_Absyn_Tuniondecl* Cyc_Tcdecl_merge_tuniondecl(
 struct Cyc_Absyn_Tuniondecl* d0, struct Cyc_Absyn_Tuniondecl* d1, struct Cyc_Position_Segment*
 loc, struct _tagged_arr* msg); extern struct Cyc_Absyn_Enumdecl* Cyc_Tcdecl_merge_enumdecl(
 struct Cyc_Absyn_Enumdecl* d0, struct Cyc_Absyn_Enumdecl* d1, struct Cyc_Position_Segment*

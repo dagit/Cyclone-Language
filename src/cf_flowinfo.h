@@ -58,8 +58,6 @@ typedef Dict::dict_t<`a,path_info_t> pinfo_dict_t<`a>;
 typedef tunion FlowInfo flow_info_t;
 // Do not ever mutate any data structures built from these -- they share like
 // crazy.
-// Maybe we'll make a lot of this abstract and cf_flowinfo will just
-// publish the evaluation primitives (like assign, getr, and getl) ???
 EXTERN_CFFLOW tunion LocalRoot {
   VarRoot(Absyn::vardecl_t);
   MallocPt(Absyn::exp_t);
