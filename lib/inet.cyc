@@ -24,6 +24,7 @@ using Core;
 namespace Cinet {
   extern "C" {
     int inet_aton(const Cstring cp, struct Std::in_addr @`r inp);
+    Cstring inet_ntoa(struct Std::in_addr);
   }
 #define s2c(x) (string_to_Cstring(x))
 }
@@ -32,4 +33,8 @@ namespace Std;
 
 int inet_aton(string_t cp, struct in_addr @`r inp) {
   return Cinet::inet_aton(s2c(cp), inp);
+}
+
+char ?inet_ntoa(struct in_addr x) {
+  return Cstring_to_string(Cinet::inet_ntoa(x));
 }

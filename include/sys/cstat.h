@@ -41,6 +41,7 @@ namespace Std {
 #define S_IRUSR  00400
 #define S_IWUSR  00200
 #define S_IXUSR  00100
+#define S_IEXEC  00100
 #define S_IRWXG  00070
 #define S_IRGRP  00040
 #define S_IWGRP  00020

@@ -20,7 +20,7 @@
  *
  */
 
-/* $Id: boa.h,v 1.3 2001-09-29 00:23:51 tjim Exp $*/
+/* $Id: boa.h,v 1.4 2001-10-01 20:56:46 tjim Exp $*/
 
 #ifndef _BOA_H
 #define _BOA_H
@@ -183,7 +183,7 @@ int write_from_pipe(request @ req);
 
 /* ip.c */
 int bind_server(int server_s, char ?server_ip);
-char ?ascii_sockaddr(struct SOCKADDR @s, char ?dest, int len);
+char ?ascii_sockaddr(struct SOCKADDR @s, char ?`H dest, int len);
 int net_port(struct SOCKADDR @s);
 
 #endif

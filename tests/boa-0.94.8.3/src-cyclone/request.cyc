@@ -20,7 +20,7 @@
  *
  */
 
-/* $Id: request.cyc,v 1.2 2001-09-29 00:23:51 tjim Exp $*/
+/* $Id: request.cyc,v 1.3 2001-10-01 20:56:46 tjim Exp $*/
 
 #include "boa.h"
 #include <netinet/tcp.h>
@@ -74,9 +74,9 @@ request @new_request(void)
         .response_status = 0,
         .if_modified_since = NULL,
         .last_modified = 0,
-        .local_ip_addr = new { for i < NI_MAXHOST : '\0' },
+        .local_ip_addr = { for i < NI_MAXHOST : '\0' },
         .remote_port = 0,
-        .remote_ip_addr = new { for i < NI_MAXHOST : '\0' },
+        .remote_ip_addr = { for i < NI_MAXHOST : '\0' },
         .is_cgi = 0,
         .cgi_status = 0,
         .cgi_env = NULL,
@@ -93,11 +93,11 @@ request @new_request(void)
         .mmap_entry_var = NULL,
         .next = NULL,
         .prev = NULL,
-        .buffer = new { for i < BUFFER_SIZE + 1 : '\0' },
-        .request_uri = new { for i < MAX_HEADER_LENGTH + 1 : '\0' },
-        .client_stream = new { for i < CLIENT_STREAM_SIZE : '\0' }
+        .buffer = { for i < BUFFER_SIZE + 1 : '\0' },
+        .request_uri = { for i < MAX_HEADER_LENGTH + 1 : '\0' },
+        .client_stream = { for i < CLIENT_STREAM_SIZE : '\0' }
 #ifdef ACCEPT_ON
-        ,.accept = new { for i < MAX_ACCEPT_LENGTH : '\0' }
+        ,.accept = { for i < MAX_ACCEPT_LENGTH : '\0' }
 #endif
       };
     }
@@ -123,7 +123,7 @@ void get_request(int server_s)
     static int system_bufsize = 0; /* Default size of SNDBUF given by system */
 
     remote_addr.S_FAMILY = 0xdead;
-    fd = accept(server_s, (struct sockaddr *) &remote_addr,
+    fd = accept(server_s, &remote_addr,
                 &remote_addrlen);
 
     if (fd == -1) {
@@ -184,7 +184,7 @@ void get_request(int server_s)
     if (virtualhost) {
         struct SOCKADDR salocal;
         int dummy = sizeof (salocal);
-        if (getsockname(conn->fd, (struct sockaddr *) &salocal, &dummy) ==
+        if (getsockname(conn->fd, &salocal, &dummy) ==
             -1) {
             log_error_mesg(__FILE__, __LINE__, "getsockname");
             exit(errno);
@@ -267,7 +267,7 @@ void get_request(int server_s)
  * down socket.
  */
 
-static void free_request(request ** list_head_addr, request @ req)
+static void free_request(request ** list_head_addr, request @`H req)
 {
     /* free_request should *never* get called by anything but
        process_requests */
@@ -329,7 +329,7 @@ static void free_request(request ** list_head_addr, request @ req)
         conn->time_last = req->time_last;
 
         /* for log file and possible use by CGI programs */
-        memcpy(conn->remote_ip_addr, req->remote_ip_addr, NI_MAXHOST);
+        strncpy(conn->remote_ip_addr, req->remote_ip_addr, NI_MAXHOST);
 
         /* for possible use by CGI programs */
         conn->remote_port = req->remote_port;
@@ -343,7 +343,7 @@ static void free_request(request ** list_head_addr, request @ req)
             bytes_to_move = req->client_stream_pos - req->parse_pos;
 
             if (bytes_to_move) {
-                memcpy(conn->client_stream,
+                strncpy(conn->client_stream,
                        req->client_stream + req->parse_pos, bytes_to_move);
                 conn->client_stream_pos = bytes_to_move;
                 FD_CLR(conn->fd, &block_read_fdset);
@@ -492,15 +492,15 @@ void process_requests(void)
 int process_logline(request @ req)
 {
     char ?stop, ?stop2;
-    static char ?SIMPLE_HTTP_VERSION = "HTTP/0.9";
+    static char SIMPLE_HTTP_VERSION[] = "HTTP/0.9";
 
     req->logline = req->client_stream;
-    if (!memcmp(req->logline, "GET ", 4))
+    if (!strncmp(req->logline, "GET ", 4))
         req->method = M_GET;
-    else if (!memcmp(req->logline, "HEAD ", 5))
+    else if (!strncmp(req->logline, "HEAD ", 5))
         /* head is just get w/no body */
         req->method = M_HEAD;
-    else if (!memcmp(req->logline, "POST ", 5))
+    else if (!strncmp(req->logline, "POST ", 5))
         req->method = M_POST;
     else {
         log_error_time();
@@ -530,7 +530,7 @@ int process_logline(request @ req)
         send_r_bad_request(req);
         return 0;
     }
-    memcpy(req->request_uri, stop, stop2 - stop);
+    strncpy(req->request_uri, stop, stop2 - stop);
     req->request_uri[stop2 - stop] = '\0';
 
     if (*stop2 == ' ') {
@@ -548,7 +548,7 @@ int process_logline(request @ req)
         }
 
     } else {
-        req->http_version = SIMPLE_HTTP_VERSION;
+        req->http_version = strdup(SIMPLE_HTTP_VERSION);
         req->simple = 1;
     }
 
@@ -625,7 +625,7 @@ void process_option_line(request @ req)
     fprintf(stderr, "%s:%d - Parsing \"%s\"\n", __FILE__, __LINE__, line);
 #endif
 
-    value = strchr(line, ':');
+    value = mstrchr(line, ':');
     if (value == NULL)
         return;
     *value++ = '\0';            /* overwrite the : */

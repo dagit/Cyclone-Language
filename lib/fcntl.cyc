@@ -32,7 +32,7 @@ namespace Cfcntl {
 
 namespace Std;
 
-int fcntl(int fd, int cmd, ... tunion FcntlArg argv) {
+int fcntl(int fd, int cmd, ... inject fcntlarg_t argv) {
   if (argv.size == 0) return Cfcntl::fcntl(fd, cmd);
   else if (argv.size != 1) throw new Failure("fcntl: too many args");
   else switch (argv[0]) {

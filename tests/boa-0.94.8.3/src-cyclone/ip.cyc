@@ -60,8 +60,7 @@ int bind_server(int server_s, char ?server_ip)
     memcpy(&server_sockaddr.sin6_addr, &in6addr_any, sizeof (in6addr_any));
     server_sockaddr.sin6_port = htons(server_port);
 #else
-    struct sockaddr_in server_sockaddr;
-    memset(&server_sockaddr, 0, sizeof server_sockaddr);
+    struct sockaddr_in server_sockaddr = { 0, 0, {0}, { for i < 8: 0 }};
 #ifdef BSD                      /* uncomment for BSDs */
     /* NOTE:  This *will* get improved when the authors get a chance
        to learn what a good #define to use is
@@ -77,11 +76,11 @@ int bind_server(int server_s, char ?server_ip)
     server_sockaddr.sin_port = htons(server_port);
 #endif
 
-    return bind(server_s, (struct sockaddr *) &server_sockaddr,
+    return bind(server_s, &server_sockaddr,
                 sizeof (server_sockaddr));
 }
 
-char ?ascii_sockaddr(struct SOCKADDR @s, char ?dest, int len)
+char ?ascii_sockaddr(struct SOCKADDR @s, char ?`H dest, int len)
 {
 #ifdef INET6
     if (getnameinfo((struct sockaddr *) s,

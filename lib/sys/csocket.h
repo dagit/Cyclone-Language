@@ -37,7 +37,7 @@ typedef unsigned int socklen_t;
 //#define SO_ERROR 4
 //#define SO_DONTROUTE 5
 //#define SO_BROADCAST 6
-//#define SO_SNDBUF 7
+#define SO_SNDBUF 7
 //#define SO_RCVBUF 8
 // ...
 

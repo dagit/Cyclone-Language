@@ -20,7 +20,7 @@
  *
  */
 
-/* $Id: boa_grammar.y,v 1.1 2001-09-24 21:59:18 mharris Exp $*/
+/* $Id: boa_grammar.y,v 1.2 2001-10-01 20:56:46 tjim Exp $*/
 
 #include <string.h>
 #include <stdio.h>
@@ -28,7 +28,6 @@
 #include <unistd.h>
 /* #include "boa.h" */
 #include "parse.h"
-using String;
 
 void yyerror(string_t msg);
 

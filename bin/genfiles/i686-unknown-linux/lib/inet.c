@@ -247,6 +247,9 @@ sin_addr; unsigned char sin_zero[ 8u]; } ; extern unsigned int htonl(
 unsigned int); extern unsigned short htons( unsigned short); extern unsigned int
 ntohl( unsigned int); extern unsigned short ntohs( unsigned short); extern int
 Cyc_Std_inet_aton( struct _tagged_arr cp, struct Cyc_Std_in_addr* inp); extern
-int inet_aton( unsigned char* cp, struct Cyc_Std_in_addr* inp); int Cyc_Std_inet_aton(
-struct _tagged_arr cp, struct Cyc_Std_in_addr* inp){ return inet_aton(
-string_to_Cstring( cp), inp);}
+struct _tagged_arr Cyc_Std_inet_ntoa( struct Cyc_Std_in_addr); extern int
+inet_aton( unsigned char* cp, struct Cyc_Std_in_addr* inp); extern unsigned char*
+inet_ntoa( struct Cyc_Std_in_addr); int Cyc_Std_inet_aton( struct _tagged_arr cp,
+struct Cyc_Std_in_addr* inp){ return inet_aton( string_to_Cstring( cp), inp);}
+struct _tagged_arr Cyc_Std_inet_ntoa( struct Cyc_Std_in_addr x){ return
+Cstring_to_string( inet_ntoa( x));}

@@ -233,7 +233,7 @@ short l_type; int l_start; short l_whence; int l_len; int l_pid; } ; static
 const int Cyc_Std_Long= 0; struct Cyc_Std_Long_struct{ int tag; int f1; } ;
 static const int Cyc_Std_Flock= 1; struct Cyc_Std_Flock_struct{ int tag; struct
 Cyc_Std_flock* f1; } ; extern int Cyc_Std_fcntl( int fd, int cmd, struct
-_tagged_arr argv); extern int Cyc_Std_open( struct _tagged_arr, int, struct
+_tagged_arr); extern int Cyc_Std_open( struct _tagged_arr, int, struct
 _tagged_arr); extern int Cyc_Std_creat( struct _tagged_arr, unsigned int);
 extern int fcntl( int fd, int cmd); extern int fcntl_with_arg( int fd, int cmd,
 int arg); extern int fcntl_with_lock( int fd, int cmd, struct Cyc_Std_flock*

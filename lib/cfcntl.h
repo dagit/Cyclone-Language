@@ -53,12 +53,13 @@ namespace Std {
     pid_t l_pid;
   };
 
-  tunion FcntlArg {
+  tunion FcntlArg<`r::R> {
     Long(long);
-    Flock(struct flock *);
+    Flock(struct flock *`r);
   };
+  typedef tunion `r FcntlArg<`r> fcntlarg_t<`r>;
 
-  extern int fcntl(int fd, int cmd, ... tunion FcntlArg argv);
+  extern int fcntl(int fd, int cmd, ... inject fcntlarg_t);
   extern int open(string_t,int,... mode_t);
   extern int creat(string_t,mode_t);
 }
