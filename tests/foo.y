@@ -12,7 +12,7 @@
   Integer(int);
 }
 
-%type <Integer> INT exp exp0   // give "types" to productions as constructors
+%type <int> INT exp exp0   // give "types" to productions as constructors
 
 %start prog
 %%

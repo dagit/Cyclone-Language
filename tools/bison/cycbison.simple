@@ -74,7 +74,6 @@ extern void yyerror(string_t);
 // no support for YYLEX_PARAM 
 extern int yylex();
 
-xtunion YYSTYPE { YYINITIALSVAL };
 
 static int	yychar = '\000';       /*  the lookahead symbol		*/
 xtunion YYSTYPE yylval = YYINITIALSVAL;/* semantic value of lookahead symbol */

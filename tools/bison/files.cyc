@@ -43,6 +43,7 @@ FILE *foutput=NULL;
 FILE *fdefines=NULL;
 FILE *ftable=NULL;
 FILE *fattrs=NULL;
+FILE *fattrs0=NULL;
 FILE *fguard=NULL;
 FILE *faction=NULL;
 FILE *fparser=NULL;
@@ -55,15 +56,16 @@ char ?outfile;
 char ?defsfile;
 char ?tabfile;
 char ?attrsfile;
+char ?attrs0file;
 char ?guardfile;
 char ?actfile;
 char ?tmpattrsfile;
+char ?tmpattrs0file;
 char ?tmptabfile;
 char ?tmpdefsfile;
 
 extern int noparserflag;
 /*the following three functions should be in stdio.h or stdlib.h*/
-extern char	?mktemp(char?);	/* So the compiler won't complain */
 //extern char	?getenv(const char?);
 /*perror already defined in stdio.h */
 //extern void	perror(char *);
@@ -224,22 +226,16 @@ openfiles()
 
 #ifdef MSDOS
   if (! noparserflag)
-    actfile = mktemp(stringappend(tmp_base, tmp_len, "acXXXXXX"));
-  tmpattrsfile = mktemp(stringappend(tmp_base, tmp_len, "atXXXXXX"));
-  tmptabfile = mktemp(stringappend(tmp_base, tmp_len, "taXXXXXX"));
-  tmpdefsfile = mktemp(stringappend(tmp_base, tmp_len, "deXXXXXX"));
+    actfile = stringappend(tmp_base, tmp_len, "acXXXXXX");
+  tmpattrsfile = stringappend(tmp_base, tmp_len, "atXXXXXX");
+  tmpattrs0file = stringappend(tmp_base, tmp_len, "at0XXXXXX");
+  tmptabfile = stringappend(tmp_base, tmp_len, "taXXXXXX");
+  tmpdefsfile = stringappend(tmp_base, tmp_len, "deXXXXXX");
 #else
-  /*need to fix this, no mktemp yet*/
-  /*
-  if (! noparserflag)
-    actfile = mktemp(stringappend(tmp_base, tmp_len, "act.XXXXXX"));
-  tmpattrsfile = mktemp(stringappend(tmp_base, tmp_len, "attrs.XXXXXX"));
-  tmptabfile = mktemp(stringappend(tmp_base, tmp_len, "tab.XXXXXX"));
-  tmpdefsfile = mktemp(stringappend(tmp_base, tmp_len, "defs.XXXXXX"));
-  */
   if (! noparserflag)
     actfile = stringappend(tmp_base, tmp_len, "act.XXXXXX");
   tmpattrsfile = stringappend(tmp_base, tmp_len, "attrs.XXXXXX");
+  tmpattrs0file = stringappend(tmp_base, tmp_len, "attrs0.XXXXXX");
   tmptabfile = stringappend(tmp_base, tmp_len, "tab.XXXXXX");
   tmpdefsfile = stringappend(tmp_base, tmp_len, "defs.XXXXXX");
   
@@ -248,6 +244,7 @@ openfiles()
   if (! noparserflag)
     faction = tryopen(actfile, "w+");
   fattrs = tryopen(tmpattrsfile,"w+");
+  fattrs0 = tryopen(tmpattrs0file,"w+");
   ftable = tryopen(tmptabfile, "w+");
 
   if (definesflag)
@@ -261,6 +258,7 @@ openfiles()
   if (! noparserflag)
     unlink(actfile);
   unlink(tmpattrsfile);
+  unlink(tmpattrs0file);
   unlink(tmptabfile);
   unlink(tmpdefsfile);
 #endif
@@ -273,13 +271,16 @@ openfiles()
 
 #ifdef VMS
   attrsfile = stringappend(name_base, short_base_length, "_stype.h");
+  attrs0file = stringappend(name_base, short_base_length, "_stype0.h");
   guardfile = stringappend(name_base, short_base_length, "_guard.c");
 #else
 #ifdef MSDOS
   attrsfile = stringappend(name_base, short_base_length, ".sth");
+  attrs0file = stringappend(name_base, short_base_length, ".st0");
   guardfile = stringappend(name_base, short_base_length, ".guc");
 #else
   attrsfile = stringappend(name_base, short_base_length, ".stype.h");
+  attrs0file = stringappend(name_base, short_base_length, ".stype0.h");
   guardfile = stringappend(name_base, short_base_length, ".guard.c");
 #endif /* not MSDOS */
 #endif /* not VMS */
@@ -353,6 +354,9 @@ void done(int k)
   if (fattrs)
     fclose((FILE @)fattrs);
 
+  if (fattrs0)
+    fclose((FILE @)fattrs0);
+
   if (fguard)
     fclose((FILE @)fguard);
 
@@ -395,6 +399,8 @@ void done(int k)
     delete(actfile);
   if (fattrs)
     delete(tmpattrsfile);
+  if (fattrs0)
+    delete(tmpattrs0file);
   if (ftable)
     delete(tmptabfile);
   if (k==0) sys$exit(SS$_NORMAL);
@@ -403,6 +409,7 @@ void done(int k)
 #ifdef MSDOS
   if (actfile && ! noparserflag) unlink(actfile);
   if (tmpattrsfile) unlink(tmpattrsfile);
+  if (tmpattrs0file) unlink(tmpattrs0file);
   if (tmptabfile) unlink(tmptabfile);
   if (tmpdefsfile) unlink(tmpdefsfile);
 #endif /* MSDOS */

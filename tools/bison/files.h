@@ -30,6 +30,7 @@ extern FILE *fdefines; /* optionally output #define's for token numbers. */
 extern FILE *ftable;   /* output the tables and the parser */
 extern FILE *fattrs;   /* if semantic parser, output a .h file that defines YYSTYPE */
 		       /* and also contains all the %{ ... %} definitions.  */
+extern FILE *fattrs0;    /*contains %{...%} definitions and union declarations--wangyl*/
 extern FILE *fguard;   /* if semantic parser, output yyguard, containing all the guard code */
 extern FILE *faction;  /* output all the action code; precise form depends on which parser */
 extern FILE *fparser;  /* read the parser to copy into ftable */
@@ -47,5 +48,6 @@ extern char ?outfile;
 extern char ?defsfile;
 extern char ?tabfile;
 extern char ?attrsfile;
+extern char ?attrs0file;
 extern char ?guardfile;
 extern char ?actfile;

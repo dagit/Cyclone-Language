@@ -96,17 +96,17 @@ using Parser;
   Charclass_tok(list_t<int>);
 }
 
-%type <Lexer_definition_tok> lexer_definition
-%type <Location_tok> header TACTION
-%type <Int_tok> named_regexps
-%type <Entrypoint_List_tok> other_definitions
-%type <Entrypoint_tok> definition
-%type <Acase_List_tok> entry rest_of_entry
-%type <Acase_tok> acase
-%type <Regexp_tok> regexp
-%type <Char_tok> TCHAR
-%type <String_tok> TSTRING TIDENT
-%type <Charclass_tok> char_class char_class1
+%type <lexer_definition_t> lexer_definition
+%type <location_t> header TACTION
+%type <int> named_regexps
+%type <list_t<entrypoint_t>> other_definitions
+%type <entrypoint_t> definition
+%type <list_t<acase_t>> entry rest_of_entry
+%type <acase_t> acase
+%type <regular_expression_t> regexp
+%type <char> TCHAR
+%type <string_t> TSTRING TIDENT
+%type <list_t<int>> char_class char_class1
 
 %%
 

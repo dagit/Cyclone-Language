@@ -88,6 +88,8 @@ extern bucket *symval;
 extern int numval;
 extern int expected_conflicts;
 extern char ?token_buffer;
+extern int maxtoken;
+extern char? grow_token_buffer(char ?);
 
 extern char? printable_version(char);
 extern void init_lex();
@@ -129,6 +131,7 @@ void parse_start_decl();
 void parse_type_decl();
 void parse_assoc_decl(int);
 void parse_union_decl();
+void print_union_decl();
 void parse_expect_decl();
 void parse_thong_decl();
 void copy_action(symbol_list *, int);
@@ -290,6 +293,8 @@ read_declarations ()
 	  switch (tok)
 	    {
 	    case TWO_PERCENTS:
+              //spit out union at the end of declaration
+              print_union_decl();
 	      return;
 
 	    case PERCENT_LEFT_CURLY:
@@ -313,7 +318,8 @@ read_declarations ()
 	      break;
 	
 	    case UNION:
-	      parse_union_decl();
+              parse_union_decl();
+              //              fatal("no union is allowed any more!\n");
 	      break;
 	
 	    case EXPECT:
@@ -379,7 +385,7 @@ copy_definition ()
   int cplus_comment;
 
   if (!nolinesflag)
-    fprintf((FILE @)fattrs, "#line %d \"%s\"\n", lineno, infile);
+    fprintf((FILE @)fattrs0, "#line %d \"%s\"\n", lineno, infile);
 
   after_percent = 0;
 
@@ -390,7 +396,7 @@ copy_definition ()
       switch (c)
 	{
 	case '\n':
-	  putc(c, (FILE @)fattrs);
+	  putc(c, (FILE @)fattrs0);
 	  lineno++;
 	  break;
 
@@ -401,7 +407,7 @@ copy_definition ()
 	case '\'':
 	case '"':
 	  match = c;
-	  putc(c, (FILE @)fattrs);
+	  putc(c, (FILE @)fattrs0);
 	  c = getc((FILE @)finput);
 
 	  while (c != match)
@@ -416,14 +422,14 @@ copy_definition ()
 		  continue;
 		}
 
-	      putc(c, (FILE @)fattrs);
+	      putc(c, (FILE @)fattrs0);
 	      
 	      if (c == '\\')
 		{
 		  c = getc((FILE @)finput);
 		  if (c == EOF)
 		    fatal("unterminated string at end of file");
-		  putc(c, (FILE @)fattrs);
+		  putc(c, (FILE @)fattrs0);
 		  if (c == '\n')
 		    lineno++;
 		}
@@ -431,17 +437,17 @@ copy_definition ()
 	      c = getc((FILE @)finput);
 	    }
 
-	  putc(c, (FILE @)fattrs);
+	  putc(c, (FILE @)fattrs0);
 	  break;
 
 	case '/':
-	  putc(c, (FILE @)fattrs);
+	  putc(c, (FILE @)fattrs0);
 	  c = getc((FILE @)finput);
 	  if (c != '*' && c != '/')
 	    continue;
 
 	  cplus_comment = (c == '/');
-	  putc(c, (FILE @)fattrs);
+	  putc(c, (FILE @)fattrs0);
 	  c = getc((FILE @)finput);
 
 	  ended = 0;
@@ -451,20 +457,20 @@ copy_definition ()
 		{
 		  while (c == '*')
 		    {
-		      putc(c, (FILE @)fattrs);
+		      putc(c, (FILE @)fattrs0);
 		      c = getc((FILE @)finput);
 		    }
 
 		  if (c == '/')
 		    {
-		      putc(c, (FILE @)fattrs);
+		      putc(c, (FILE @)fattrs0);
 		      ended = 1;
 		    }
 		}
 	      else if (c == '\n')
 		{
 		  lineno++;
-		  putc(c, (FILE @)fattrs);
+		  putc(c, (FILE @)fattrs0);
 		  if (cplus_comment)
 		    ended = 1;
 		  else
@@ -474,7 +480,7 @@ copy_definition ()
 		fatal("unterminated comment in `%{' definition");
 	      else
 		{
-		  putc(c, (FILE @)fattrs);
+		  putc(c, (FILE @)fattrs0);
 		  c = getc((FILE @)finput);
 		}
 	    }
@@ -486,7 +492,7 @@ copy_definition ()
           break;
 
 	default:
-	  putc(c, (FILE @)fattrs);
+	  putc(c, (FILE @)fattrs0);
           break;
 	}
 
@@ -496,7 +502,7 @@ copy_definition ()
 	{
 	  if (c == '}')
 	    return;
-	  putc('%', (FILE @)fattrs);
+	  putc('%', (FILE @)fattrs0);
 	}
       after_percent = 0;
 
@@ -690,19 +696,61 @@ parse_start_decl ()
    Note: We're relying heavily on Cyclone's type inference -- else this
    is a real pain since bison doesn't really parse YYSTYPE!
 */
-struct strlist { char ? str; struct strlist * tl; };
+static int type_count = 0;
+struct strlist { char ? str; char ?nth; bool seen; struct strlist * tl; };
 struct strlist *seen_destructors = NULL;
-static int has_been_seen(char ?`H str) {
+static char? has_been_seen(char ?`H str) {
   struct strlist *`H l1 = seen_destructors;
   struct strlist *`H l2;
   for(; l1 != NULL; l1 = l1->tl)
-    if(strcmp(l1->str,str)==0)
-      return 1;
+    if (strcmp(l1->str,str)==0){
+      if (l1->seen)
+	return NULL;//we have already made deconstructor for this type
+      else
+	l1->seen = true;
+	return l1->nth; //we haven't made deconstructor.
+    }
+
+  //this is a new type
+  type_count++;
   l2 = (struct strlist *)malloc(sizeof(struct strlist));
   l2->str = str;
+  l2->nth = aprintf("YY%d",type_count);
+  l2->seen = true;
   l2->tl  = seen_destructors;
   seen_destructors = l2;
-  return 0;
+  return l2->nth;
+}
+
+static void add_to_list(char ?`H str, char ?`H constructor){
+  struct strlist *`H l1 = seen_destructors;
+  struct strlist *`H l2;
+  for(; l1 != NULL; l1 = l1->tl)
+    if (strcmp(l1->str,str)==0){
+      warns("you refered to the type %s before you define it\n",str);
+      l1->nth = constructor;
+      l1->seen = false;
+      return;
+    }
+
+  l2 = (struct strlist *)malloc(sizeof(struct strlist));
+  l2->str = str;
+  l2->nth = constructor;
+  l2->seen = false;
+  l2->tl  = seen_destructors;
+  seen_destructors = l2;
+  return;
+
+}
+
+static char? type2nth(char ? type_name){
+  struct strlist *`H l1 = seen_destructors;
+  for(; l1 != NULL; l1 = l1->tl)
+    if(strcmp(l1->str,type_name)==0)
+      return l1->nth;
+  fatal("no such type defined\n");
+  return NULL;
+  
 }
 
 void
@@ -723,16 +771,17 @@ parse_type_decl ()
   strcpy(name, token_buffer);
 
   /* DAN -- spit out the strip function */
-  if(!has_been_seen(name)) {
+  char ? deconstructor = has_been_seen(name);
+  if(deconstructor) {
     if(!nolinesflag)
       fprintf((FILE @)fattrs, "\n#line %d \"%s\"", lineno, infile);
-    fprintf((FILE @)fattrs, "\n static xtunion exn.Core::Failure yyfail_%s = Core::Failure(\"%s\");\n",name,name);
+    fprintf((FILE @)fattrs, "\n static xtunion exn.Core::Failure yyfail_%s = Core::Failure(\"%s\");\n",deconstructor,name);
     // JGM: the new type system does not allow evars in function types so I am
     // going back to a macro like we used to have.  The right solution is to
     // modify bison so that we get rid of the union definition and gensym
     // tokens appropriately.
     //fprintf((FILE @)fattrs, "\n_ yyget_%s(xtunion YYSTYPE yy1) {switch(yy1) {case &%s(yy2): return yy2; default: throw &yyfail_%s;}}\n", name, name, name);
-    fprintf((FILE @)fattrs, "\n#define yyget_%s(yy1) ({_ yyzzz; switch(yy1) {case &%s(yyzzzz): yyzzz = yyzzzz; break; default: throw &yyfail_%s;}; yyzzz;})",name,name,name);
+    fprintf((FILE @)fattrs, "\n%s yyget_%s(xtunion YYSTYPE yy1) {\n  _ yyzzz; \n  switch(yy1) {\n    case &%s(yyzzzz): \n      yyzzz = yyzzzz;\n      break;\n    default: throw &yyfail_%s;\n  }; \n  return yyzzz;\n}",name,deconstructor,deconstructor,deconstructor);
   }
 
   for (;;)
@@ -849,8 +898,6 @@ parse_assoc_decl (int assoc)
     }
 }
 
-
-
 /* copy the union declaration into fattrs (and fdefines),
    where it is made into the
    definition of YYSTYPE, the type of elements of the parser value stack.  */
@@ -863,7 +910,16 @@ parse_union_decl()
   register int in_comment;
   int cplus_comment;
   char new_field;
+  char state; /* before reading constructor, state =0;
+	       * after reading constructor, state = 1;
+	       * after reading type, state = 2;
+	       * after reading semicolon, state = 0;*/
 
+  char ? p; /*used in conjunction with token_buffer
+              to get constructor name and type name*/
+  char ? constructor = NULL;
+  char ? type_name = NULL;
+ 
   if (typed)
     warn("multiple %union declarations");
 
@@ -879,12 +935,11 @@ parse_union_decl()
     fprintf((FILE @)fdefines, 
 	"\nextern int yyparse();\nextern xtunion YYSTYPE; "
 	    "\nextern xtunion YYSTYPE ");
-    /* DAN */
-    /* fprintf(fdefines, "\nextern int yyparse();\nextern union YYSTYPE "); */
 
   count = 0;
   in_comment = 0;
   new_field = 1;
+  state = 0;
 
   c = getc((FILE @)finput);
 
@@ -903,6 +958,7 @@ parse_union_decl()
 	{
 	case ';':
 	  new_field = 1;
+	  state = 0;
 	  break;
 
 	case '\n':
@@ -976,13 +1032,139 @@ parse_union_decl()
 	      return;
 	    }
           break;
+
+	case 'A':  case 'B':  case 'C':  case 'D':  case 'E':
+	case 'F':  case 'G':  case 'H':  case 'I':  case 'J':
+	case 'K':  case 'L':  case 'M':  case 'N':  case 'O':
+	case 'P':  case 'Q':  case 'R':  case 'S':  case 'T':
+	case 'U':  case 'V':  case 'W':  case 'X':  case 'Y':
+	case 'Z':
+	case 'a':  case 'b':  case 'c':  case 'd':  case 'e':
+	case 'f':  case 'g':  case 'h':  case 'i':  case 'j':
+	case 'k':  case 'l':  case 'm':  case 'n':  case 'o':
+	case 'p':  case 'q':  case 'r':  case 's':  case 't':
+	case 'u':  case 'v':  case 'w':  case 'x':  case 'y':
+	case 'z':
+	case '.':  case '_':
+	  if (state!=0)
+	    warn("we are not expecting this identifier\n");
+	  p = token_buffer;
+	  *p++ = (char)c;
+	  c = getc((FILE @)finput);
+	  while (isalnum(c) || c == '_' || c == '.')
+	    {
+	      putc(c, (FILE @)fattrs);
+	      if (fdefines)
+		putc(c, (FILE @)fdefines);
+
+	      if (p == token_buffer + maxtoken)
+		p = grow_token_buffer(p);
+
+	      *p++ = (char)c;
+	      c = getc((FILE @)finput);
+	    }
+
+	  *p = 0;
+	  ungetc(c, (FILE @)finput);
+	  constructor = strdup(token_buffer);
+	  state = 1; /* now waiting for type name*/
+	  break;
          
+	case '(':
+	  int level = 0;
+
+	  if (state!=1)
+	    warn("not expecting a type here\n");
+
+	  p = token_buffer;
+	  c = getc((FILE @)finput);
+
+	  while (c != ')'||level>0)
+	    {
+	      putc(c, (FILE @)fattrs);
+	      if (fdefines)
+		putc(c, (FILE @)fdefines);
+
+	      if (c == EOF)
+		fatal("unterminated type name at end of file");
+	      if (c == '\n') 
+		{
+		  warn("unterminated type name");
+		  lineno++;
+		}
+	      if (c == '(') 
+		{
+		  level++;
+		}
+	      if (c == ')') 
+		{
+		  level--;
+		  if (level<0){
+		    warn("unmatched () inside union definition");
+		    ungetc(c, (FILE @)finput);
+		    break;
+		  }
+		}
+
+	      if (p == token_buffer + maxtoken)
+		p = grow_token_buffer(p);
+
+	      *p++ =(char) c;
+	      c = getc((FILE @)finput);
+	    }
+	  
+	  putc(c, (FILE @)fattrs);
+	  if (fdefines)
+	    putc(c, (FILE @)fdefines);
+
+	  *p = 0;
+	  type_name = strdup(token_buffer);
+	  state = 2;
+	  add_to_list(type_name, constructor);
+	  /*add this constructor(typename) pair into the list*/
+	  break;
+
         default:
           break;
 	}
 
       c = getc((FILE @)finput);
     }
+
+
+}
+
+
+
+/* copy the union declaration into fattrs (and fdefines),
+   where it is made into the
+   definition of YYSTYPE, the type of elements of the parser value stack.  */
+void
+print_union_decl()
+{
+  struct strlist *`H l1 = seen_destructors;
+  fprintf((FILE @)fattrs0,"\nxtunion YYSTYPE;\nxtunion YYSTYPE ");
+  fprintf((FILE @)fattrs0,"\n{");
+  for(; l1 != NULL; l1 = l1->tl){
+    fprintf((FILE @)fattrs0,"\n  %s(%s),",
+            l1->nth, l1->str);
+  }
+  fprintf((FILE @)fattrs0,"\n  YYINITIALSVAL");
+  fprintf((FILE @)fattrs0,"\n};\n");
+  if (fdefines){
+    fprintf((FILE @)fdefines,"\nextern int yyparse();");
+    fprintf((FILE @)fdefines,"\nextern xtunion YYSTYPE ");
+    fprintf((FILE @)fdefines,"\n{");
+    l1 = seen_destructors;
+    for(; l1 != NULL; l1 = l1->tl){
+      fprintf((FILE @)fdefines,"\n  extern %s(%s),",
+              l1->nth, l1->str);
+    }
+    fprintf((FILE @)fdefines,"\n  extern YYINITIALSVAL");
+    fprintf((FILE @)fdefines,"\n};\n");
+  }
+
+  
 }
 
 /* parse the declaration %expect N which says to expect N
@@ -1231,7 +1413,8 @@ copy_guard(symbol_list *rule, int stack_offset)
                        rule->sym->tag);
 		type_name = strdup("BOGUS");
 	      }
-	      fprintf((FILE @)fguard, "yyget_%s(yyvsp[%d])", type_name, n-stack_offset);
+              
+	      fprintf((FILE @)fguard, "yyget_%s(yyvsp[%d])", type2nth(type_name), n-stack_offset);
 	      continue;
 	    }
 	  else if (c == '(') {
@@ -1434,7 +1617,7 @@ copy_action(symbol_list *rule, int stack_offset)
 		c = getc((FILE @)finput);
 		type_name = get_type_name(0,rule);
 		if (type_name)
-		  fprintf((FILE @)faction,"new %s",type_name);
+		  fprintf((FILE @)faction,"new %s",type2nth(type_name));
 		else
 		  fatal("rule has no type for ^$");
 		continue;
@@ -1516,7 +1699,7 @@ copy_action(symbol_list *rule, int stack_offset)
 		      fprintf((FILE @)faction, "(yyvs[yyvsp_offset-%d])", -m);
 		  } else {
 		    /* DAN: calling functions makes for smaller files. */
-		    fprintf((FILE @)faction," yyget_%s",type_name);
+		    fprintf((FILE @)faction," yyget_%s",type2nth(type_name));
 		    if (m==0)
 		      fprintf((FILE @)faction, "(yyvs[yyvsp_offset])");
 		    else if (m > 0) 

@@ -251,6 +251,9 @@ output()
   /* output_token_defines(ftable);	/ * JF put out token defines FIRST */
   if (!semantic_parser)		/* JF Put out other stuff */
     {
+      rewind((FILE @)fattrs0);
+      while ((c=getc((FILE @)fattrs0))!=EOF)
+        putc(c,(FILE @)ftable);
       rewind((FILE @)fattrs);
       while ((c=getc((FILE @)fattrs))!=EOF)
         putc(c,(FILE @)ftable);

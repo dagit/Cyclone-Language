@@ -64,7 +64,7 @@ extern void warn(const char ?);
 char ?token_buffer;
 
 /* Allocated size of token_buffer, not including space for terminator.  */
-static int maxtoken;
+int maxtoken;
 
 bucket *symval;
 int numval;
@@ -81,7 +81,7 @@ init_lex()
 }
 
 
-static char ? grow_token_buffer (char ?`H p)
+char ? grow_token_buffer (char ?`H p)
 {
   int offset = p - token_buffer;
   maxtoken *= 2;
@@ -455,9 +455,10 @@ lex()
 	}
 
     case '<':
+      int level = 0;
       p = token_buffer;
       c = getc((FILE @)finput);
-      while (c != '>')
+      while (c != '>'||level>0)
 	{
 	  if (c == EOF)
 	    fatal("unterminated type name at end of file");
@@ -466,6 +467,19 @@ lex()
 	      warn("unterminated type name");
 	      ungetc(c, (FILE @)finput);
 	      break;
+	    }
+	  if (c == '<') 
+	    {
+              level++;
+	    }
+	  if (c == '>') 
+	    {
+              level--;
+              if (level<0){
+                warn("unmatched <> inside type definition");
+                ungetc(c, (FILE @)finput);
+                break;
+              }
 	    }
 
 	  if (p == token_buffer + maxtoken)

@@ -83,30 +83,30 @@ using XmlParse;
   Attribute_tok(Xml::attribute_t);
   Attributes_tok(List::list_t<Xml::attribute_t>);
   STag_tok($(string_t,List::list_t<Xml::attribute_t>)@);
-  EmptyElemTag_tok($(string_t,List::list_t<Xml::attribute_t>)@);
+  /*EmptyElemTag_tok($(string_t,List::list_t<Xml::attribute_t>)@);*/
 }
 
 // Tags for productions
-%type <String_tok> ATTVALUE1
-%type <String_tok> ATTVALUE2
-%type <String_tok> CDSECT
-%type <String_tok> CHARDATA
-%type <String_tok> COMMENT
-%type <String_tok> NAME
-%type <String_tok> OPEN
-%type <String_tok> opn
-%type <String_tok> OPENSLASH
-%type <String_tok> opnslash
-%type <Pi_tok>     PI
-%type <String_tok> REFERENCE
-%type <Element_tok> element
-%type <Content_tok> content
-%type <Content_tok> content0
-%type <Attribute_tok> attribute
-%type <Attributes_tok> attributes
-%type <STag_tok> sTag
-%type <String_tok> eTag
-%type <EmptyElemTag_tok> emptyElemTag
+%type <string_t> ATTVALUE1
+%type <string_t> ATTVALUE2
+%type <string_t> CDSECT
+%type <string_t> CHARDATA
+%type <string_t> COMMENT
+%type <string_t> NAME
+%type <string_t> OPEN
+%type <string_t> opn
+%type <string_t> OPENSLASH
+%type <string_t> opnslash
+%type <$(Xml::name,string_t)@>     PI
+%type <string_t> REFERENCE
+%type <Xml::element_t> element
+%type <List::list_t<Xml::content_t>> content
+%type <List::list_t<Xml::content_t>> content0
+%type <Xml::attribute_t> attribute
+%type <List::list_t<Xml::attribute_t>> attributes
+%type <$(string_t,List::list_t<Xml::attribute_t>)@> sTag
+%type <string_t> eTag
+%type <$(string_t,List::list_t<Xml::attribute_t>)@> emptyElemTag
 
 %start content0
 

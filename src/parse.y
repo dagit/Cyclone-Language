@@ -940,16 +940,12 @@ using Parse;
   StructFieldDeclList_tok(list_t<structfield_t>);
   StructFieldDeclListList_tok(list_t<list_t<structfield_t>>);
   Declarator_tok(declarator_t);
-  DeclaratorExpopt_tok($(declarator_t,exp_opt_t)@);
-  DeclaratorExpoptList_tok(list_t<$(declarator_t,exp_opt_t)@>);
   AbstractDeclarator_tok(abstractdeclarator_t);
   TunionField_tok(tunionfield_t);
   TunionFieldList_tok(list_t<tunionfield_t>);
   ParamDecl_tok($(opt_t<var_t>,tqual_t,type_t)@);
   ParamDeclList_tok(list_t<$(opt_t<var_t>,tqual_t,type_t)@>);
-  ParamDeclListBool_tok($(list_t<$(opt_t<var_t>,tqual_t,type_t)@>,
-                          bool,vararg_info_t *,opt_t<type_t>,
-                          list_t<$(type_t,type_t)@>)@);
+  ParamDeclListBool_tok($(list_t<$(opt_t<var_t>,tqual_t,type_t)@>,bool,vararg_info_t *,opt_t<type_t>,list_t<$(type_t,type_t)@>)@);
   StructOrUnion_tok(struct_or_union_t);
   IdList_tok(list_t<var_t>);
   Designator_tok(designator_t);
@@ -968,76 +964,76 @@ using Parse;
   Rgnorder_tok(list_t<$(type_t,type_t)@>)
 }
 /* types for productions */
-%type <Int_tok> INTEGER_CONSTANT
-%type <String_tok> FLOATING_CONSTANT
-%type <Char_tok> CHARACTER_CONSTANT
-%type <Pointer_Sort_tok> pointer_char
-%type <String_tok> IDENTIFIER TYPE_VAR STRING
-%type <String_tok> namespace_action
-%type <Exp_tok> primary_expression postfix_expression unary_expression
-%type <Exp_tok> cast_expression constant multiplicative_expression
-%type <Exp_tok> additive_expression shift_expression relational_expression
-%type <Exp_tok> equality_expression and_expression exclusive_or_expression
-%type <Exp_tok> inclusive_or_expression logical_and_expression
-%type <Exp_tok> logical_or_expression conditional_expression
-%type <Exp_tok> assignment_expression expression constant_expression
-%type <Exp_tok> initializer array_initializer
-%type <ExpList_tok> argument_expression_list argument_expression_list0
-%type <InitializerList_tok> initializer_list
-%type <Primop_tok> unary_operator 
-%type <Primopopt_tok> assignment_operator
-%type <QualId_tok> QUAL_IDENTIFIER QUAL_TYPEDEF_NAME qual_opt_identifier
-%type <QualId_tok> using_action
-%type <Stmt_tok> statement labeled_statement
-%type <Stmt_tok> compound_statement block_item_list
-%type <Stmt_tok> expression_statement selection_statement iteration_statement
-%type <Stmt_tok> jump_statement
-%type <SwitchClauseList_tok> switch_clauses
-%type <SwitchCClauseList_tok> switchC_clauses
-%type <Pattern_tok> pattern
-%type <PatternList_tok> tuple_pattern_list tuple_pattern_list0
-%type <FieldPattern_tok> field_pattern
-%type <FieldPatternList_tok> field_pattern_list field_pattern_list0
-%type <FnDecl_tok> function_definition function_definition2
-%type <DeclList_tok> declaration declaration_list
-%type <DeclList_tok> prog
-%type <DeclList_tok> translation_unit external_declaration
-%type <DeclSpec_tok> declaration_specifiers
-%type <InitDecl_tok> init_declarator
-%type <InitDeclList_tok> init_declarator_list init_declarator_list0
-%type <StorageClass_tok> storage_class_specifier
-%type <TypeSpecifier_tok> type_specifier enum_specifier
-%type <TypeSpecifier_tok> struct_or_union_specifier tunion_specifier
-%type <StructOrUnion_tok> struct_or_union
-%type <TypeQual_tok> type_qualifier type_qualifier_list
-%type <StructFieldDeclList_tok> struct_declaration_list struct_declaration
-%type <StructFieldDeclListList_tok> struct_declaration_list0
-%type <TypeModifierList_tok> pointer
-%type <Declarator_tok> declarator direct_declarator
-%type <DeclaratorExpopt_tok> struct_declarator
-%type <DeclaratorExpoptList_tok> struct_declarator_list struct_declarator_list0
-%type <AbstractDeclarator_tok> abstract_declarator direct_abstract_declarator
-%type <Bool_tok> tunion_or_xtunion optional_inject
-%type <Scope_tok> tunionfield_scope
-%type <TunionField_tok> tunionfield
-%type <TunionFieldList_tok> tunionfield_list
-%type <QualSpecList_tok> specifier_qualifier_list
-%type <IdList_tok> identifier_list identifier_list0
-%type <ParamDecl_tok> parameter_declaration type_name
-%type <ParamDeclList_tok> parameter_list
-%type <ParamDeclListBool_tok> parameter_type_list
-%type <TypeList_tok> type_name_list type_params_opt effect_set region_set
-%type <TypeList_tok> atomic_effect
-%type <DesignatorList_tok> designation designator_list
-%type <Designator_tok> designator
-%type <Kind_tok> kind
-%type <Type_tok> any_type_name type_var rgn_opt rgn
-%type <AttributeList_tok> attributes_opt attributes attribute_list
-%type <Attribute_tok> attribute
-%type <Enumfield_tok> enum_field
-%type <EnumfieldList_tok> enum_declaration_list
-%type <TypeOpt_tok> optional_effect
-%type <Rgnorder_tok> optional_rgn_order rgn_order
+%type <$(sign_t,int)@> INTEGER_CONSTANT
+%type <string_t> FLOATING_CONSTANT
+%type <char> CHARACTER_CONSTANT
+%type <tunion Pointer_Sort> pointer_char
+%type <string_t> IDENTIFIER TYPE_VAR STRING
+%type <string_t> namespace_action
+%type <exp_t> primary_expression postfix_expression unary_expression
+%type <exp_t> cast_expression constant multiplicative_expression
+%type <exp_t> additive_expression shift_expression relational_expression
+%type <exp_t> equality_expression and_expression exclusive_or_expression
+%type <exp_t> inclusive_or_expression logical_and_expression
+%type <exp_t> logical_or_expression conditional_expression
+%type <exp_t> assignment_expression expression constant_expression
+%type <exp_t> initializer array_initializer
+%type <list_t<exp_t>> argument_expression_list argument_expression_list0
+%type <list_t<$(list_t<designator_t>,exp_t)@>> initializer_list
+%type <primop_t> unary_operator 
+%type <opt_t<primop_t>> assignment_operator
+%type <qvar_t> QUAL_IDENTIFIER QUAL_TYPEDEF_NAME qual_opt_identifier
+%type <qvar_t> using_action
+%type <stmt_t> statement labeled_statement
+%type <stmt_t> compound_statement block_item_list
+%type <stmt_t> expression_statement selection_statement iteration_statement
+%type <stmt_t> jump_statement
+%type <list_t<switch_clause_t>> switch_clauses
+%type <list_t<switchC_clause_t>> switchC_clauses
+%type <pat_t> pattern
+%type <list_t<pat_t>> tuple_pattern_list tuple_pattern_list0
+%type <$(list_t<designator_t>,pat_t)@> field_pattern
+%type <list_t<$(list_t<designator_t>,pat_t)@>> field_pattern_list field_pattern_list0
+%type <fndecl_t> function_definition function_definition2
+%type <list_t<decl_t>> declaration declaration_list
+%type <list_t<decl_t>> prog
+%type <list_t<decl_t>> translation_unit external_declaration
+%type <decl_spec_t> declaration_specifiers
+%type <$(declarator_t,exp_opt_t)@> init_declarator
+%type <list_t<$(declarator_t,exp_opt_t)@>> init_declarator_list init_declarator_list0
+%type <storage_class_t> storage_class_specifier
+%type <type_specifier_t> type_specifier enum_specifier
+%type <type_specifier_t> struct_or_union_specifier tunion_specifier
+%type <struct_or_union_t> struct_or_union
+%type <tqual_t> type_qualifier type_qualifier_list
+%type <list_t<structfield_t>> struct_declaration_list struct_declaration
+%type <list_t<list_t<structfield_t>>> struct_declaration_list0
+%type <list_t<type_modifier_t>> pointer
+%type <declarator_t> declarator direct_declarator
+%type <$(declarator_t,exp_opt_t)@> struct_declarator
+%type <list_t<$(declarator_t,exp_opt_t)@>> struct_declarator_list struct_declarator_list0
+%type <abstractdeclarator_t> abstract_declarator direct_abstract_declarator
+%type <bool> tunion_or_xtunion optional_inject
+%type <scope_t> tunionfield_scope
+%type <tunionfield_t> tunionfield
+%type <list_t<tunionfield_t>> tunionfield_list
+%type <$(tqual_t,list_t<type_specifier_t>,attributes_t)@> specifier_qualifier_list
+%type <list_t<var_t>> identifier_list identifier_list0
+%type <$(opt_t<var_t>,tqual_t,type_t)@> parameter_declaration type_name
+%type <list_t<$(opt_t<var_t>,tqual_t,type_t)@>> parameter_list
+%type <$(list_t<$(opt_t<var_t>,tqual_t,type_t)@>, bool,vararg_info_t *,opt_t<type_t>, list_t<$(type_t,type_t)@>)@> parameter_type_list
+%type <list_t<type_t>> type_name_list type_params_opt effect_set region_set
+%type <list_t<type_t>> atomic_effect
+%type <list_t<designator_t>> designation designator_list
+%type <designator_t> designator
+%type <kind_t> kind
+%type <type_t> any_type_name type_var rgn_opt rgn
+%type <list_t<attribute_t>> attributes_opt attributes attribute_list
+%type <attribute_t> attribute
+%type <enumfield_t> enum_field
+%type <list_t<enumfield_t>> enum_declaration_list
+%type <opt_t<type_t>> optional_effect
+%type <list_t<$(type_t,type_t)@>> optional_rgn_order rgn_order
 /* start production */
 %start prog
 %%
