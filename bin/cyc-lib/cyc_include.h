@@ -51,10 +51,11 @@ struct _RegionHandle {
   char               *offset;
   char               *last_plus_one;
   struct _DynRegionHandle *sub_regions;
-  unsigned total_bytes;
-  unsigned free_bytes;
 #ifdef CYC_REGION_PROFILE
   const char         *name;
+#else
+  unsigned used_bytes;
+  unsigned wasted_bytes;
 #endif
 };
 
