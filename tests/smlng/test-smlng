@@ -3,29 +3,75 @@
 # usage: test-smlng <n>
 #   where n is an integer, and the number of tests to perform
 
-if [ $# != 1 ]; then
-  echo "usage: $0 <n>"
-  exit 1
-fi
-
 TMP=/tmp/smlng-test$$
 TMP2=/tmp/smlng2-test$$
+timer=180
+files=
+n=
 
-n=$1
-i=1
-while true; do
-  ./generate > $TMP
-  cat $TMP | ./smlng.exe > $TMP2
-  ./validate.exe $TMP $TMP2
+# usage: doit inputfile outputfile
+#
+function doit {
+  cat $1 | ./runme $timer > $2
+  ./validate $1 $2
   if [ $? != 0 ]; then
     echo original is in $TMP
     echo processed is in $TMP2
-    break
+    exit 1
   fi
-  i=$((i+1))
-  if [ $i -gt $n ]; then
-    break
-  fi
+}
+
+# arguments
+#
+while [ $# != 0 ]; do
+  case "$1" in
+    -g) # invoke generate to create the input, n times
+        shift
+        [[ $# = 0 ]] && echo "-g must specify number of tests";
+        n=$1
+        shift
+    ;;
+    -t) # set the computation timer
+        shift
+        [[ $# = 0 ]] && echo "-t must specify time limit in seconds";
+        timer=$1
+        shift
+    ;;
+    -*) # illegal flag
+        echo "usage: $0 [-t timer] [-g n | file1 file2 ...]"
+        exit 1
+    ;;
+    *) # list of files to do
+        files=$*
+        break;
+    ;;
+  esac
 done
 
-#rm -f $TMP $TMP2
+if [ -z "$n" -a -z "$files" ]; then
+  echo "usage: $0 [-t timer] [-g n | file1 file2 ...]"
+  exit 1
+fi
+
+# use generate ...
+#
+if [ -n "$n" ]; then
+  i=1
+  while true; do
+    ./generate > $TMP
+    doit $TMP $TMP2
+    i=$((i+1))
+    if [ $i -gt $n ]; then
+      break
+    fi
+  done
+
+# use file list
+#
+else
+  for file in $files; do
+    doit $file $TMP2
+  done
+fi
+
+rm -f $TMP $TMP2
