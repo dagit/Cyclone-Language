@@ -347,13 +347,17 @@ bool is_unique_consumed(exp_t e, int env_iteration, absRval_t<`r> r, bool @needs
       return false;
     }
     return true;
-  case &Aggregate(_,d):
-    let sz = numelts(d);
-    for (int i=0; i<sz; i++) {
-      if (is_unique_consumed(e,env_iteration,d[i],needs_unconsume))
-	return true;
+  case &Aggregate(UnionRInfo(is_union,field_no),d):
+    if (!is_union || field_no == -1) {
+      let sz = numelts(d);
+      for (int i=0; i<sz; i++) {
+	if (is_unique_consumed(e,env_iteration,d[i],needs_unconsume))
+	  return true;
+      }
+      return false;
     }
-    return false;
+    else
+      return is_unique_consumed(e,env_iteration,d[field_no],needs_unconsume);
   default: return false;
   }
 }  
@@ -680,16 +684,22 @@ static absRval_t<`r2> assign_place_inner(struct AssignEnv<`r,`r2> @ env,
       if (new_d[i] != d1[i]) {
         change = true; break;
       }
-    if (!change)
-      return oldval;
-    change = false;
-    for (int i = 0; i < numelts(d1); i++)
-      if (new_d[i] != d2[i]) {
-        change = true; break;
+    if (!change) {
+      if (!is_union1.is_union) return oldval;
+      new_d = d1;
+    }
+    else {
+      change = false;
+      for (int i = 0; i < numelts(d1); i++)
+	if (new_d[i] != d2[i]) {
+	  change = true; break;
+	}
+      if (!change) {
+	if (!is_union1.is_union) return newval;
+	new_d = d2;
       }
-    if (!change)
-      return newval;
-    return rnew(env->fenv->r) Aggregate(is_union1,new_d);
+    }
+    return rnew(env->fenv->r) Aggregate(is_union2,new_d);
   case $(_, &Esc(il)): // we already know we don't have an escaped location
     switch(il) {
     case NoneIL: return env->fenv->unknown_none;
@@ -979,13 +989,15 @@ static absRval_t<`r> after_absRval(afterenv_t<`r1,`r2,`r> env, absRval_t<`r> r1,
   switch($(r1,r2)) {
   case $(&Consumed(...),_):
   case $(_,&Consumed(...)): return join_absRval(&env->joinenv, 0, r1, r2);
-  case $(&Aggregate(is_union1,d1),&Aggregate(is_union2,d2)):
+  case $(&Aggregate(UnionRInfo(is_union1,field_no1),d1),
+	 &Aggregate(UnionRInfo(is_union2,field_no2),d2)):
     aggrdict_t new_d = 
       rnew(env->joinenv.fenv->r) 
         {for i < numelts(d1) : after_absRval_d(env,i,d1[i],d2[i]) };
                                                          
     // try to preserve sharing by returning one of the original arrays
-    // if there was no change
+    // if there was no change; moreover, we will preserve the fieldnum
+    // information for the unchanged side if this is a union
     bool change = false;
     for (int i = 0; i < numelts(d1); i++)
       if (new_d[i] != d1[i]) {
@@ -1000,7 +1012,10 @@ static absRval_t<`r> after_absRval(afterenv_t<`r1,`r2,`r> env, absRval_t<`r> r1,
       }
     if (!change)
       return r2;
-    return rnew(env->joinenv.fenv->r) Aggregate(is_union1,new_d);
+    // both sides changed, so we have to be conservative about union
+    // field information here
+    return rnew(env->joinenv.fenv->r) Aggregate(UnionRInfo(is_union1,field_no1 == field_no2 ? field_no1 : -1),new_d);
+
   default: 
     DEBUG_PRINT("after_absRval, rvalues are ");
     DEBUG_PRINT_F(print_absrval,r1);
