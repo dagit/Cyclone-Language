@@ -914,8 +914,8 @@ struct _dyneither_ptr _tmp7=t->tab;
 struct Cyc_List_List*_tmp8=((struct Cyc_List_List**)_tmp7.curr)[(int)((t->hash)(key)% _get_dyneither_size(_tmp7,sizeof(struct Cyc_List_List*)))];
 int(*_tmp9)(void*,void*)=t->cmp;
 for(0;_tmp8 != 0;_tmp8=_tmp8->tl){
-struct _tuple0*_tmpA=(struct _tuple0*)_tmp8->hd;struct _tuple0*_tmpB=_tmpA;void*_tmpC;void**_tmpD;_LL1: _tmpC=_tmpB->f1;_tmpD=(void**)& _tmpB->f2;_LL2:
- if(_tmp9(key,_tmpC)== 0)return _tmpD;_LL0:;}
+struct _tuple0*_tmpA=(struct _tuple0*)_tmp8->hd;struct _tuple0*_tmpB=_tmpA;void*_tmpC;void**_tmpD;_LL1: _tmpC=_tmpB->f1;_tmpD=(void**)& _tmpB->f2;_LL2:;
+if(_tmp9(key,_tmpC)== 0)return _tmpD;}
 # 76
 return 0;}
 # 79
@@ -924,10 +924,10 @@ struct _dyneither_ptr _tmpE=t->tab;
 struct Cyc_List_List*_tmpF=((struct Cyc_List_List**)_tmpE.curr)[(int)((t->hash)(key)% _get_dyneither_size(_tmpE,sizeof(struct Cyc_List_List*)))];
 int(*_tmp10)(void*,void*)=t->cmp;
 for(0;_tmpF != 0;_tmpF=_tmpF->tl){
-struct _tuple0 _tmp11=*((struct _tuple0*)_tmpF->hd);struct _tuple0 _tmp12=_tmp11;void*_tmp13;void*_tmp14;_LL6: _tmp13=_tmp12.f1;_tmp14=_tmp12.f2;_LL7:
- if(_tmp10(key,_tmp13)== 0){
+struct _tuple0 _tmp11=*((struct _tuple0*)_tmpF->hd);struct _tuple0 _tmp12=_tmp11;void*_tmp13;void*_tmp14;_LL4: _tmp13=_tmp12.f1;_tmp14=_tmp12.f2;_LL5:;
+if(_tmp10(key,_tmp13)== 0){
 *data=_tmp14;
-return 1;}_LL5:;}
+return 1;}}
 # 90
 return 0;}
 # 93

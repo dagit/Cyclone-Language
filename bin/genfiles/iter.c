@@ -852,5 +852,5 @@ typedef struct Cyc_Iter_Iter Cyc_Iter_iter_t;
 int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);
 # 22 "iter.cyc"
 int Cyc_Iter_next(struct Cyc_Iter_Iter iter,void*dest){
-struct Cyc_Iter_Iter _tmp0=iter;void*_tmp1;int(*_tmp2)(void*env,void*dest);_LL1: _tmp1=(void*)_tmp0.env;_tmp2=_tmp0.next;_LL2:
- return _tmp2(_tmp1,dest);_LL0:;}
+struct Cyc_Iter_Iter _tmp0=iter;void*_tmp1;int(*_tmp2)(void*env,void*dest);_LL1: _tmp1=(void*)_tmp0.env;_tmp2=_tmp0.next;_LL2:;
+return _tmp2(_tmp1,dest);}

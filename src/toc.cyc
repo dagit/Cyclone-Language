@@ -4234,8 +4234,8 @@ static stmt_t compile_decision_tree(region_t<`rgn> rgn,
                                     qvar_t v) {
   switch (dopt) {
   // these two cases shouldn't occur -- we let them through silently.
-  case NULL: fallthru;
-  case &Tcpat::Failure(_): return skip_stmt(0);
+  case NULL: return skip_stmt(0);
+  case &Tcpat::Failure(_): return throw_match_stmt();
 
   case &Tcpat::Success(rhs):
     // find the corresponding rhs in lscs
@@ -4371,15 +4371,13 @@ find_case_env(list_t<$(env_t<`rgn>,var_t,stmt_t)@`rgn,`rgn> bodies, stmt_t s) {
 }
 
 // translate a switch according to the given decision tree.
-static void xlate_switch(bool nested_fallthru, env_t nv, stmt_t whole_s,
+static void xlate_switch(env_t nv, stmt_t whole_s,
 			 exp_t e, list_t<switch_clause_t> scs,
                          Tcpat::decision_opt_t dopt) {
-  exp_to_c(nv,e);
   let t = (type_t)e->topt;
+  exp_to_c(nv,e);
 
   qvar_t v     = temp_var();
-  exp_t  r     = var_exp(v,DL);
-  r->topt      = typ_to_c((type_t)e->topt);
   exp_t  path  = var_exp(v,DL);
   var_t  end_l = fresh_label();
   TOC_RGN(nv,rgn) {
@@ -4393,8 +4391,8 @@ static void xlate_switch(bool nested_fallthru, env_t nv, stmt_t whole_s,
     // well as a big test statement.  
     list_t<$(qvar_t,type_t)@`rgn,`rgn> mydecls = NULL;
     list_t<$(env_t<`rgn>,var_t,stmt_t)@`rgn,`rgn> mybodies = NULL;
-    stmt_t test_tree = compile_decision_tree(rgn, nv, &mydecls, &mybodies, dopt, 
-                                             lscs, v);
+    stmt_t test_tree = compile_decision_tree(rgn, nv, &mydecls, &mybodies, 
+                                             dopt, lscs, v);
     // Note that at this point, test_tree contains all of the rhs's, but they
     // have not yet been translated.  That's because we need the compiler environment
     // for the fallthru case which is only generated after compiling the decision
@@ -4408,13 +4406,8 @@ static void xlate_switch(bool nested_fallthru, env_t nv, stmt_t whole_s,
       // must be dead code (not reachable in the decision tree.)
       if (envp == NULL) continue; 
       let env = *envp;
-      if (!nested_fallthru) {
-        // for let-declarations, we don't want to overwrite the fallthru or
-        // break labels.
-        stmt_to_c(env, s);
-      }
-      // else find the environment for the fallthru case if it's there.
-      else if (lscs2->tl != NULL) {
+      // find the environment for the fallthru case if it's there.
+      if (lscs2->tl != NULL) {
         let &$(_,_,fallthru_lab,next_sc) = lscs2->tl->hd;
         let next_case_env = find_case_env(mybodies,next_sc->body);
         // if the next case is never called, then it must've been the default
@@ -4536,7 +4529,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       }
       return;
     case &Switch_s(e,scs,dec_tree_opt):
-      xlate_switch(true,nv,s,e,scs,dec_tree_opt);
+      xlate_switch(nv,s,e,scs,dec_tree_opt);
       return;
     case &Fallthru_s(es,dest_clause):
       let &Env{.fallthru_info = fi,...} = nv;
@@ -5110,18 +5103,15 @@ static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s) {
 
 // Destructively rewrite the decision tree so that Failure nodes are 
 // replaced with Success(fail) and Success(_) is replaced with Success(s)
-static Tcpat::decision_t rewrite_decision(Tcpat::decision_t d,
-                                          stmt_t success,
-                                          stmt_t fail) {
+static Tcpat::decision_t rewrite_decision(Tcpat::decision_t d,stmt_t success) {
   switch (d) {
-  case &Tcpat::Failure(_): 
-    return new Tcpat::Success(new Tcpat::Rhs{true,0,fail});
+  case &Tcpat::Failure(_): return d;
   case &Tcpat::Success(rhs): rhs->rhs = success; return d;
   case &Tcpat::SwitchDec(path, sws, *d2):
-    *d2 = rewrite_decision(*d2, success, fail);
+    *d2 = rewrite_decision(*d2, success);
     for (; sws != NULL; sws = sws->tl) {
       let &$(_,*d2) = sws->hd;
-      *d2 = rewrite_decision(*d2, success, fail);
+      *d2 = rewrite_decision(*d2, success);
     }
     return d;
   }
@@ -5131,27 +5121,58 @@ static Tcpat::decision_t rewrite_decision(Tcpat::decision_t d,
 // Unlike other declarations, lets need to execute statements and
 // so return a statement.  (See stmt_to_c, case for Decl above.)
 // We treat this similar to the compilation of a switch (see xlate_switch
-// above) with one case, but where the failure throws Match_Exception
+// above) with one case, but where the failure throws Match_Exception.
+// Lots of hacks to get this to work right and re-use the pattern
+// match compiler.
 static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t dopt, 
                            type_t t, exp_t e, stmt_t s) {
-  // we us a bogus fail statement since it has to pass through translation.
-  // we overwrite it with _throw_match() below.
-  let bogus_fail = skip_stmt_dl();
-  let fail_pat = new_pat(&Wild_p_val,0);
-  fail_pat->topt = p->topt;
-  let c1 = new Switch_clause{p, NULL, NULL, s, 0};
-  let c2 = new Switch_clause{fail_pat, NULL, NULL, bogus_fail, 0};
-  list_t<switch_clause_t> swcs = list(c1,c2);
-  // rewrite the decision tree so that on failure we throw Match
-  // and on success, continue with the body of the let.
-  if (dopt != NULL) {
-    dopt = rewrite_decision(dopt, s, bogus_fail);
+  TOC_RGN(nv,rgn) {
+    let nv = share_env(rgn,nv);
+    let t = (type_t)e->topt;
+    exp_to_c(nv,e);
+    qvar_t v     = temp_var();
+    exp_t  path  = var_exp(v,DL);
+    var_t  end_l = fresh_label();
+    // we us a bogus fail statement since it has to pass through translation.
+    // we overwrite it with _throw_match() below.  For a success, we goto
+    // th end label.
+    let succ_stmt = skip_stmt_dl();
+    if (dopt != NULL) {
+      // rewrite the decision tree so that on failure we throw Match
+      // and on success, continue with the body of the let.
+      dopt = rewrite_decision(dopt, succ_stmt);
+    }
+    let c1 = new Switch_clause{p, NULL, NULL, succ_stmt, 0};
+    let lscs = List::rmap_c(rgn,gen_labels,rgn,rlist(rgn,c1));
+    // declarations and environments generated while compiling decision tree
+    list_t<$(qvar_t,type_t)@> mydecls = NULL;
+    list_t<$(env_t<`rgn>,var_t,stmt_t)@`rgn,`rgn> mybodies = NULL;
+    // compile the pattern -- this essentially generates
+    // if e matches p then <skip> else _throw_match()
+    stmt_t test_tree = compile_decision_tree(rgn, nv, &mydecls, &mybodies, 
+                                             dopt, lscs, v);
+    // get out the env to translate s
+    env_t<`rgn> senv;
+    for (; mybodies != NULL; mybodies = mybodies->tl) {
+      let &$(env,_,st) = mybodies->hd;
+      if (st == succ_stmt) { senv = env; goto FOUND_ENV; }
+    }
+    toc_impos("letdecl_to_c: couldn't find env!");
+  FOUND_ENV:
+    // translate the body of the let under the env we get out of match
+    // compilation.
+    stmt_to_c(senv,s);
+    // put the tests in front
+    stmt_t res = seq_stmt(test_tree,s,DL);
+    // add declarations to the front
+    for (; mydecls != NULL; mydecls = mydecls->tl) {
+      let &$(qv,t) = mydecls->hd;
+      res = declare_stmt(qv,t,NULL,res,DL);
+    }
+    // finally declare the root variable v and initialize it with e
+    res = declare_stmt(v,typ_to_c(t),e,res,DL);
+    return res;
   }
-  let res = skip_stmt_dl();
-  xlate_switch(false, nv, res, e, swcs, dopt);
-  // overwrite the bogus fail statement with _throw_match()
-  bogus_fail->r = throw_match_stmt()->r;
-  return res;
 }
 
 // These next few functions clean up the types in C code, getting
