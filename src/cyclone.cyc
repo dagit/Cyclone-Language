@@ -181,9 +181,6 @@ static void set_lineno() {
   set_save_temps();
 }
 
-static void set_fomit_frame_pointer() {
-  add_ccarg("-fomit-frame-pointer");
-}
 static void set_inline_functions() {
   add_ccarg("-D_INLINE_FUNCTIONS");
 }
@@ -950,9 +947,6 @@ int main(int argc, string_t<`H> ?`H argv) {
          new $("--noboundschecks",false,"",
                new Unit_spec(set_noboundschecks),
                "Disable bounds checks"),
-         new $("-fomit-frame-pointer",false,"",
-               new Unit_spec(set_fomit_frame_pointer),
-               "Tell gcc to -fomit-frame-pointer"),
          new $("--inline-checks",false,"",
                new Unit_spec(set_inline_functions),
                "Inline bounds checks instead of #define"),
