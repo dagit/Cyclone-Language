@@ -202,10 +202,10 @@ static `a scoped_lookup<`a>(tenv_t te, seg_t loc, `a lookup(genv_t,var), var v){
     try {
       result = lookup(ge,v);
       check_repeat(te, loc, lookup, v, ge->availables);
-      return lookup(ge,v);
+      return result;
     } catch { case Dict::Absent: break; }
     // Check available namespaces
-    for (_ nss = ge->availables; nss != null; nss = nss->tl) {
+    for (let nss = ge->availables; nss != null; nss = nss->tl) {
       genv_t ge2 = Dict::lookup(te->ae,nss->hd);
       try {
 	result = lookup(ge2,v);

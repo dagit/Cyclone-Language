@@ -36,7 +36,7 @@ static scope scope_redecl_okay<`a>(scope s1, Opt_t<`a> fields1,
                                    segment loc, string t, stringptr v) {
   switch ($(s1,s2)) {
   case $(ExternC, ExternC): break;
-  case $(_,       ExternC): 
+  case $(_,       ExternC):
     redecl_err(loc, t, v, "non-extern \"C\"", "extern \"C\""); break;
   case $(Static,  Static): break;
   case $(_,       Static): redecl_err(loc, t, v, "non-static", "static"); break;
@@ -44,12 +44,12 @@ static scope scope_redecl_okay<`a>(scope s1, Opt_t<`a> fields1,
   case $(Abstract,Public): redecl_err(loc, t, v, "abstract",   "public"); break;
   case $(_,       Public): s1 = Public; break;
   case $(Static,  Extern): redecl_err(loc, t, v, "static",     "extern"); break;
-  case $(Abstract,Extern) && fields2 != null: 
+  case $(Abstract,Extern) && fields2 != null:
     redecl_err(loc,t,v, "abstract", "transparent"); break;
   case $(_,       Extern): break;
   case $(Static,Abstract): redecl_err(loc, t, v, "static", "abstract"); break;
   case $(Public,Abstract): redecl_err(loc, t, v, "public", "abstract"); break;
-  case $(Extern,Abstract) && fields1 != null: 
+  case $(Extern,Abstract) && fields1 != null:
     redecl_err(loc,t,v, "[extern] transparent", "abstract"); break;
   case $(_,     Abstract): s1 = Abstract; break;
   }
@@ -59,13 +59,13 @@ static scope scope_redecl_okay<`a>(scope s1, Opt_t<`a> fields1,
 // check that an enumfield in a redeclaration matches the previous declaration
 // We only check [1] of the qvars b/c qualified field names aren't allowed (?)
 static void field_redecl_okay(enumfield f1, enumfield f2,
-			      list<$(tvar,typ)@> inst, tenv te, 
+			      list<$(tvar,typ)@> inst, tenv te,
 			      string t, stringptr v) {
   segment loc = f1->loc;
   // must have same name
   if (String::zstrptrcmp((*f1->name)[1],(*f2->name)[1]) != 0)
     terr(loc,xprintf("redeclaration of %s %s: field name mismatch %s != %s",
-		     t, *v, *((*f1->name)[1]), 
+		     t, *v, *((*f1->name)[1]),
 		     *((*f2->name)[1])));
   // must have same tag
   if ((f1->tag == null && f2->tag != null) ||
@@ -76,16 +76,16 @@ static void field_redecl_okay(enumfield f1, enumfield f2,
     terr(loc,xprintf("redeclaration of %s %s: tag mismatch for field %s",
 		     t, *v, *((*f1->name)[1])));
   }
-  _ tvs1 = f1->tvs;
-  _ tvs2 = f2->tvs;
+  let tvs1 = f1->tvs;
+  let tvs2 = f2->tvs;
   if (List::length(tvs1) != List::length(tvs2))
     terr(loc,xprintf("redeclaration of %s %s, field %s: type parameter number "
 		     "mismatch", t, *v, *((*f1->name)[1])));
   for (; tvs1 != null; tvs1 = tvs1->tl, tvs2 = tvs2->tl)
     inst = &cons(&$(tvs2->hd,VarType(tvs1->hd)),inst);
   // must have same number of types
-  _ typs1 = f1->typs;
-  _ typs2 = f2->typs;
+  let typs1 = f1->typs;
+  let typs2 = f2->typs;
   if (List::length(typs1) != List::length(typs2))
     terr(loc,xprintf("redeclaration of %s %s, field %s: parameter number "
 		     "mismatch", t, *v, *((*f1->name)[1])));
@@ -129,12 +129,12 @@ static bool ok_field_type(segment loc, tenv te, typ t) {
   case XenumType(_,_):       return true;
 
   case TupleType(tq_ts):
-    for (; tq_ts != null; tq_ts = tq_ts->tl) 
+    for (; tq_ts != null; tq_ts = tq_ts->tl)
       if(!ok_field_type(loc, te, (*tq_ts->hd)[1]))
 	return false;
     return true;
   case StructType(tdnopt,_,sdp):
-    if (tdnopt == null) 
+    if (tdnopt == null)
       return false;
       // Every structdecl entered in te already has ok fields,
       // so we only need to check whether the struct is abstract.
@@ -145,7 +145,7 @@ static bool ok_field_type(segment loc, tenv te, typ t) {
   case Evar(_,_,_):        throw Impossible("Evar in ok_field_type");
   case TypedefType(_,_,_): throw Impossible("Typedef in ok_field_type");
   case HeapRgnType:        throw Impossible("HeapRgnType in ok_field_type");
-  }    
+  }
 }
 
 // FIX:  we should really check that static or public function prototypes
@@ -160,7 +160,7 @@ static bool var_redecl_okay(genv_t ge, segment loc, var name, typ t, scope sc) {
   (*ans->v)[1] = true; // this is very important or we'd shake out too much
   switch ((*ans->v)[0]) {
   case VarRes(Global_b(vd)):
-    if (sc == Static && vd->sc != Static) 
+    if (sc == Static && vd->sc != Static)
       warn(loc,
            xprintf("static declaration of %s follows non-static declaration",
                    *name));
@@ -168,11 +168,11 @@ static bool var_redecl_okay(genv_t ge, segment loc, var name, typ t, scope sc) {
       warn(loc,
 	   xprintf("non-static declaration of %s follows static declaration",
 		   *name));
-    if ((vd->sc == ExternC && sc != ExternC) || 
+    if ((vd->sc == ExternC && sc != ExternC) ||
 	(vd->sc != ExternC && sc == ExternC))
       terr(loc,xprintf("incompatible redeclaration of %s",*name));
     // either they must both be static, both public, or at most one non-extern
-    else if ((sc != Extern && vd->sc != Extern) && 
+    else if ((sc != Extern && vd->sc != Extern) &&
 	!(sc == Static && vd->sc == Static) &&
 	!(sc == Public && vd->sc == Public))
       terr(loc,xprintf("incompatible redeclaration of %s",*name));
@@ -196,7 +196,7 @@ static bool is_function_type(typ t) {
 }
 
 static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
-  var   v  = (*vd->name)[1]; 
+  var   v  = (*vd->name)[1];
   typ   t  = vd->type;
   scope sc = vd->sc;
 
@@ -213,7 +213,7 @@ static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
   bool is_redecl = var_redecl_okay(ge,loc,v,t,sc);
   // if extern, make sure it has no initializer
   if (sc == Extern || sc == ExternC) {
-    if(vd->initializer != null) 
+    if(vd->initializer != null)
       terr(loc,"extern declaration should not have initializer");
   } else if (!is_function_type(t)) {
     // we skip over function types -- these are function protypes.
@@ -230,7 +230,7 @@ static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
 	if (Evexp::eval_const_uint_exp(sz) == 0) {
 	  switch (e->r) {
 	  case Const_e(String_c(_,s)):
-	    t = vd->type = ArrayType(telt,tq,uint_exp(s.size,null)); 
+	    t = vd->type = ArrayType(telt,tq,uint_exp(s.size,null));
 	    break;
 	  case UnresolvedMem_e(_,es): fallthru(es);
 	  case Array_e(_,es):
@@ -244,8 +244,8 @@ static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
       }
     }
     // type-check the initializer
-    _ t2 = Tcexp::tcExpInitializer(te,&t,e);
-    if (!coerce_assign(te,e,t)) 
+    let t2 = Tcexp::tcExpInitializer(te,&t,e);
+    if (!coerce_assign(te,e,t))
       terr(loc,
 	   xprintf("%s is declared with type %s but initialized with type %s",
 		   qvar2string(vd->name), typ2string(t), typ2string(t2)));
@@ -254,7 +254,7 @@ static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
       terr(loc,"initializer is not a constant expression");
   }
   // add to environment
-  ge->ordinaries = Dict::insert(ge->ordinaries, v, 
+  ge->ordinaries = Dict::insert(ge->ordinaries, v,
 				&$(VarRes(Global_b(vd)),is_redecl));
 }
 
@@ -275,7 +275,7 @@ static void tcFndecl(tenv te, genv_t ge, segment loc, fndecl fd) {
   // check for redeclaration
   bool is_redecl = var_redecl_okay(ge, loc, v, t, sc);
   // due to recursion, add function to environment before checking body
-  ge->ordinaries = Dict::insert(ge->ordinaries, v, 
+  ge->ordinaries = Dict::insert(ge->ordinaries, v,
 				&$(VarRes(Funname_b(fd)),is_redecl));
   // DAN: Here is where I'm assuming the te can be imperatively screwed with
   //      while we're dealing with top-level stuff (though it's not too hard
@@ -316,7 +316,7 @@ static void tcTypedefdecl(tenv te, genv_t ge, segment loc, typedefdecl td) {
 //      packable fields.  Better yet is packable polymorphism.
 static void tcStructdecl(tenv te, genv_t ge, segment loc, structdecl sd) {
   // reject anonymous top-level
-  if (sd->name == null) { 
+  if (sd->name == null) {
     terr(loc,"anonymous structs are not allowed at top level");
     return;
   }
@@ -329,12 +329,12 @@ static void tcStructdecl(tenv te, genv_t ge, segment loc, structdecl sd) {
   }
   // expand to qualified name
   (*sd->name->v)[0] = te->ns;
-  // reject ill-formed type 
+  // reject ill-formed type
   check_unique_tvars(loc,tvs);
 
   // redeclarations have to be handled differently
   switch (Dict::lookup_opt(ge->structdecls,v)) {
-  case null: 
+  case null:
     // add the declaration to the environment, then go check the fields
     ge->structdecls = Dict::insert(ge->structdecls, v, (structdecl@)(&$(sd)));
     if(sd->fields == null) {
@@ -347,9 +347,9 @@ static void tcStructdecl(tenv te, genv_t ge, segment loc, structdecl sd) {
     }
     break;
 
-  case &Opt(sdp): // a redeclaration 
-    _ sd2  = *sdp;
-    _ tvs2 = sd2->tvs;
+  case &Opt(sdp): // a redeclaration
+    let sd2  = *sdp;
+    let tvs2 = sd2->tvs;
     // reject if type-arity is different
     if(List::length(tvs) != List::length(tvs2))
       terr(loc,xprintf("redeclaration of struct %s "
@@ -365,11 +365,11 @@ static void tcStructdecl(tenv te, genv_t ge, segment loc, structdecl sd) {
     case $(_,   _):
       // both declare fields, so they must agree (with renaming w.r.t. tyvars)
       list <$(tvar,typ)@> inst = null;
-      for(_ tvs0 = tvs; tvs0 != null; tvs0 = tvs0->tl, tvs2 = tvs2->tl)
+      for(let tvs0 = tvs; tvs0 != null; tvs0 = tvs0->tl, tvs2 = tvs2->tl)
 	inst = &cons(&$(tvs2->hd,VarType(tvs0->hd)), inst);
       // check each field under the map
-      _ f1s = sd->fields->v;
-      _ f2s = sd2->fields->v;
+      let f1s = sd->fields->v;
+      let f2s = sd2->fields->v;
       for(; f1s != null && f2s != null; f1s = f1s->tl, f2s = f2s->tl) {
 	let &$(fn1,tq1,t1) = f1s->hd;
 	let &$(fn2,tq2,t2) = f2s->hd;
@@ -385,15 +385,15 @@ static void tcStructdecl(tenv te, genv_t ge, segment loc, structdecl sd) {
 	typ subst_t2 = substitute(inst,t2);
 	if(!unify(t1,subst_t2)) // FIX: unify definitely seems wrong here
 	  terr(loc,xprintf("redeclaration of struct %s: type mismatch on field"
-			   " %s: %s != %s", *v, *fn1, 
+			   " %s: %s != %s", *v, *fn1,
 			   typ2string(t1), typ2string(subst_t2)));
       }
       // check for field-number mismatch
       if (f2s != null)
-	terr(loc,xprintf("redeclaration of struct %s is missing field %s", 
+	terr(loc,xprintf("redeclaration of struct %s is missing field %s",
 			 *v, *((*f2s->hd)[0])));
       if (f1s != null)
-	terr(loc,xprintf("redeclaration of struct %s has extra field %s", 
+	terr(loc,xprintf("redeclaration of struct %s has extra field %s",
 			 *v, *((*f1s->hd)[0])));
       return;
     }
@@ -403,8 +403,8 @@ static void tcStructdecl(tenv te, genv_t ge, segment loc, structdecl sd) {
   // may not be the first declaration, so must not overwrite the dict
   // entry!
   // for the sake of recursive fields, make name abstract in body
-  _ sdp = Dict::lookup(ge->structdecls, v);
-  *sdp = &Structdecl(sd->sc, sd->name, tvs, null); 
+  let sdp = Dict::lookup(ge->structdecls, v);
+  *sdp = &Structdecl(sd->sc, sd->name, tvs, null);
   // check fields, rejecting ill-formed types, bad fields, and duplicates
   list<field_name> prev_fields = null;
   for (let fs = sd->fields->v; fs != null; fs = fs->tl) {
@@ -418,7 +418,7 @@ static void tcStructdecl(tenv te, genv_t ge, segment loc, structdecl sd) {
     // FIX: check for consistent tquals?
   }
   // add the constructor to the environment
-  ge->ordinaries = Dict::insert(ge->ordinaries,  v, 
+  ge->ordinaries = Dict::insert(ge->ordinaries,  v,
 				&$(StructRes(sd), true));
   // undo our clobbering with the abstract version
   *sdp = sd;
@@ -447,7 +447,7 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
   // redeclarations have to be handled differently
   // check for redeclaration
   switch (Dict::lookup_opt(ge->enumdecls, v)) {
-  case null: 
+  case null:
     // add the declaration to the environment, then go check the fields
     ge->enumdecls = Dict::insert(ge->enumdecls, v, (enumdecl@)(&$(ed)));
     if(ed->fields == null) {
@@ -461,8 +461,8 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
     break;
 
   case &Opt(edp):
-    _ ed2  = *edp;
-    _ tvs2 = ed2->tvs;
+    let ed2  = *edp;
+    let tvs2 = ed2->tvs;
     // reject if type-arity is different
     if(List::length(tvs) != List::length(tvs2))
       terr(loc,xprintf("redeclaration of enum %s "
@@ -478,21 +478,21 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
     case $(_,   _):
       // both declare fields, so they must agree (with renaming w.r.t. tyvars)
       list<$(tvar,typ)@> inst = null;
-      for(_ tvs0 = tvs; tvs0 != null; tvs0 = tvs0->tl, tvs2 = tvs2->tl)
+      for(let tvs0 = tvs; tvs0 != null; tvs0 = tvs0->tl, tvs2 = tvs2->tl)
 	inst = &cons(&$(tvs2->hd,VarType(tvs0->hd)), inst);
       // check each field under the map
-      _ f1s = ed->fields->v;
-      _ f2s = ed2->fields->v;
+      let f1s = ed->fields->v;
+      let f2s = ed2->fields->v;
       // the types in f1 haven't been checked yet, which does important
       // side effects
-      
+
       for (; f1s != null && f2s != null; f1s = f1s->tl, f2s = f2s->tl) {
 	(*f1s->hd->name)[0] = te->ns;
 	// check f1s->hd types for the important side effects
 	list<tvar> alltvs = List::append(tvs, f1s->hd->tvs);
 	check_unique_tvars(f1s->hd->loc,alltvs);
-	for(_ typs = f1s->hd->typs; typs != null; typs = typs->tl) {
-	  _ t = (*typs->hd)[1];
+	for(let typs = f1s->hd->typs; typs != null; typs = typs->tl) {
+	  let t = (*typs->hd)[1];
 	  check_valid_type(f1s->hd->loc,te,alltvs,t);
 	}
 	// now we can check against previous definition of field
@@ -513,28 +513,28 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
   // may not be the first declaration, so must not overwrite the dict
   // entry!
   // for the sake of recursive fields, make name abstract in body
-  _ edp = Dict::lookup(ge->enumdecls, v);
+  let edp = Dict::lookup(ge->enumdecls, v);
   *edp = &Enumdecl(ed->sc, ed->name, tvs, null);
   // check variants, rejecting ill-formed types, non-constant tags,
   // repeated tyvars (why?), and duplicate field names
   // finally, add variants
   list<field_name> prev_fields = null;
-  for(_ fs = ed->fields->v; fs != null; fs = fs->tl) {
-    _ f = fs->hd;
-    if (List::mem(String::zstrptrcmp,prev_fields,(*f->name)[1])) 
+  for(let fs = ed->fields->v; fs != null; fs = fs->tl) {
+    let f = fs->hd;
+    if (List::mem(String::zstrptrcmp,prev_fields,(*f->name)[1]))
       terr(f->loc,xprintf("duplicate field name %s",*((*f->name)[1])));
     prev_fields = &cons((*f->name)[1],prev_fields);
-    if (f->tag != null) 
-      Evexp::eval_const_uint_exp((exp)f->tag); 
+    if (f->tag != null)
+      Evexp::eval_const_uint_exp((exp)f->tag);
     list<tvar> alltvs = List::append(tvs,f->tvs);
     check_unique_tvars(loc,alltvs);
     for (list<$(tqual,typ)@> typs = f->typs; typs != null; typs=typs->tl) {
-      _ t = (*typs->hd)[1];
+      let t = (*typs->hd)[1];
       check_valid_type(f->loc,te,alltvs,t);
     }
     // FIX: check valid tquals?
     (*f->name)[0] = te->ns;
-    ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1], 
+    ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
 				  &$(EnumRes(ed,f), true));
   }
   // add the decl to the environment -- must be after variant-checking
@@ -570,7 +570,7 @@ static void tcXenumdecl(tenv te, genv_t ge, segment loc, xenumdecl xd) {
     let x = *(xd2o->v);
     x->sc = scope_redecl_okay(xd->sc, &Opt(0), x->sc, &Opt(0), loc, "xenum", v);
   }
-  // now check that we can add each "field" by ensuring that 
+  // now check that we can add each "field" by ensuring that
   // duplicates are the same.  Note that fields are qualified by the current
   // namespace if implicit, not the namespace of the xenum
   // Notice that we're "hoisting" the fields into the earlier definition,
@@ -585,7 +585,7 @@ static void tcXenumdecl(tenv te, genv_t ge, segment loc, xenumdecl xd) {
     list<tvar>tvs = f->tvs;
     check_unique_tvars(loc,tvs);
     for(let typs = f->typs; typs != null; typs = typs->tl) {
-      _ t = (*typs->hd)[1];
+      let t = (*typs->hd)[1];
       check_valid_type(f->loc,te,tvs,t);
     }
     // notice we now allow duplicates, they just have to have the same type
@@ -644,7 +644,7 @@ static void tc_decls(tenv te, list<decl> ds0, bool in_externC) {
 
   genv_t ge = Dict::lookup(te->ae,te->ns); // no longer a copy!!!
 
-  for (_ ds = ds0; ds != null; ds = ds->tl) {
+  for (let ds = ds0; ds != null; ds = ds->tl) {
     decl    d   = ds->hd;
     segment loc = d->loc;
 
@@ -655,30 +655,30 @@ static void tc_decls(tenv te, list<decl> ds0, bool in_externC) {
     case Union_d: // FIX
       terr(loc,"union is not implemented");
       break;
-    case Var_d(vd):     
+    case Var_d(vd):
       if (in_externC && okay_externC(d->loc,vd->sc))
 	vd->sc = ExternC;
       tcVardecl(te,ge,loc,vd);
       break;
-    case Fn_d(fd):      
+    case Fn_d(fd):
       if (in_externC && okay_externC(d->loc,fd->sc))
 	fd->sc = ExternC;
       tcFndecl(te,ge,loc,fd);
       break;
-    case Typedef_d(td): 
+    case Typedef_d(td):
       tcTypedefdecl(te,ge,loc,td);
       break;
-    case Struct_d(sd):  
+    case Struct_d(sd):
       if (in_externC && okay_externC(d->loc,sd->sc))
 	sd->sc = ExternC;
       tcStructdecl(te,ge,loc,sd);
       break;
-    case Enum_d(ed):    
+    case Enum_d(ed):
       if (in_externC && okay_externC(d->loc,ed->sc))
 	ed->sc = ExternC;
       tcEnumdecl(te,ge,loc,ed);
       break;
-    case Xenum_d(xd):   
+    case Xenum_d(xd):
       if (in_externC && okay_externC(d->loc,xd->sc))
 	xd->sc = ExternC;
       tcXenumdecl(te,ge,loc,xd);
@@ -686,8 +686,8 @@ static void tc_decls(tenv te, list<decl> ds0, bool in_externC) {
 
     case Namespace_d(v,ds2):
       // DAN: This case is much more imperative than it used to be.
-      _ ns  = te->ns;
-      _ ns2 = List::append(ns,&cons(v,null));
+      let ns  = te->ns;
+      let ns2 = List::append(ns,&cons(v,null));
       // Make sure namespace v has been declared in the current namespace
       if (!Set::member(ge->namespaces,v)) {
         ge->namespaces = Set::insert(ge->namespaces,v);
@@ -698,10 +698,10 @@ static void tc_decls(tenv te, list<decl> ds0, bool in_externC) {
       tc_decls(te,ds2,in_externC);
       te->ns = ns;
       break;
-      
+
     case Using_d(&$(nsl,v),ds2):
       // DAN: We're more imperative here too.
-      _ ns2 = resolve_namespace(te,loc,List::append(nsl,&cons(v,null)));
+      let ns2 = resolve_namespace(te,loc,List::append(nsl,&cons(v,null)));
       ge->availables = &cons(ns2,ge->availables);
       tc_decls(te,ds2,in_externC);
       ge->availables = ge->availables->tl;
@@ -730,12 +730,12 @@ void tc(tenv te, bool add_cyc_namespace, list<decl> ds) {
 // Note: All names should now be absolute.
 static bool vardecl_needed(tenv te, decl d) {
   switch(d->r) {
-  case Var_d(vd): 
+  case Var_d(vd):
     // get rid of externs that are never referenced
     if(vd->sc != Extern)
       return true;
     let &$(nsl,name) = vd->name;
-    _ ge = Dict::lookup(te->ae,nsl);
+    let ge = Dict::lookup(te->ae,nsl);
     return (*Dict::lookup(ge->ordinaries,name))[1];
   case Using_d(_,*ds2p): fallthru(ds2p);
   case Namespace_d(_,*ds2p):
