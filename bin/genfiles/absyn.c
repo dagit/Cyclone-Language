@@ -1253,6 +1253,10 @@ extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
 extern struct Cyc_Core_Opt Cyc_Tcutil_tmko;
 # 144
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
+# 372 "tcutil.h"
+int Cyc_Tcutil_is_array(void*t);
+# 376
+void*Cyc_Tcutil_promote_array(void*t,void*rgn);
 # 25 "cyclone.h"
 extern int Cyc_Cyclone_tovc_r;
 # 27

@@ -1104,18 +1104,22 @@ void Cyc_Tcutil_check_unique_tvars(unsigned int,struct Cyc_List_List*);
 int Cyc_Tcutil_is_noalias_pointer(void*t,int must_be_unique);
 # 293
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct _RegionHandle*,void*t);
-# 318
+# 313
 void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);
-# 329
+# 324
 int Cyc_Tcutil_bits_only(void*t);
-# 332
+# 327
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*e);
-# 342
+# 337
 int Cyc_Tcutil_supports_default(void*);
-# 353
+# 348
 int Cyc_Tcutil_extract_const_from_typedef(unsigned int,int declared_const,void*);
-# 357
+# 352
 struct Cyc_List_List*Cyc_Tcutil_transfer_fn_type_atts(void*t,struct Cyc_List_List*atts);
+# 372
+int Cyc_Tcutil_is_array(void*t);
+# 376
+void*Cyc_Tcutil_promote_array(void*t,void*rgn);
 # 32 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);
 void*Cyc_Tcexp_tcExpInitializer(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);struct Cyc_Tcexp_TestEnv{struct _tuple10*eq;int isTrue;};

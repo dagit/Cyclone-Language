@@ -218,13 +218,10 @@ static pat_t wild_pat(seg_t loc) {
   return new Pat { .loc = loc, .topt = NULL, .r = &Wild_p_val };
 }
 
-static type_t promote_array(tenv_t te, type_t t, type_opt_t rgn_opt) {
-  switch (compress(t)) {
-  case &ArrayType(ArrayInfo(et,tq,n,zt,ztl)):
-    type_t rgn = (rgn_opt == NULL) ? new_evar(&Tcutil::rko,new Opt(lookup_type_vars(te))) : rgn_opt;
-    return atb_typ(et,rgn,tq,new Upper_b((exp_t)n),zt);
-  default: return t;
-  }
+// Promote an array, using an evar for the region if necessary.
+static type_t pat_promote_array(tenv_t te, type_t t, type_opt_t rgn_opt) {
+  return is_array(t) ?
+    promote_array(t, (rgn_opt == NULL) ? new_evar(&Tcutil::rko,new Opt(lookup_type_vars(te))) : rgn_opt) : t;
 }
 
 #define DL 0
@@ -260,7 +257,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
         terr(p->loc, "pattern would point to an abstract member");
       break;
     }
-    set_vd(new vd, access_exp, &res.patvars, promote_array(te,t,rgn_pat));
+    set_vd(new vd, access_exp, &res.patvars, pat_promote_array(te,t,rgn_pat));
     break;
   case &Reference_p(vd,p2):
     res = tcPatRec(te,p2,topt,rgn_pat,allow_ref_pat,access_exp);
@@ -555,7 +552,7 @@ DONT_PROMOTE:
         for(; fields != NULL; fields = fields->tl) {
           let &$(field,pat)     = fields->hd;
           let inst_fieldtyp     = rsubstitute(rgn,inst,field->type);
-          //inst_fieldtyp = promote_array(te,inst_fieldtyp,rgn_pat);
+          //inst_fieldtyp = pat_promote_array(te,inst_fieldtyp,rgn_pat);
 	  exp_opt_t new_access_exp = NULL;
 	  if (access_exp)
 	    new_access_exp = aggrmember_exp(access_exp,field->name,DL);

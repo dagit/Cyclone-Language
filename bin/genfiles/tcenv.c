@@ -1132,13 +1132,17 @@ int Cyc_Tcutil_subset_effect(int may_constrain_evars,void*e1,void*e2);
 int Cyc_Tcutil_region_in_effect(int constrain,void*r,void*e);
 # 241 "tcutil.h"
 void Cyc_Tcutil_check_unique_tvars(unsigned int,struct Cyc_List_List*);
-# 313
+# 308
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);
-# 315
+# 310
 int Cyc_Tcutil_new_tvar_id();
-# 317
+# 312
 void Cyc_Tcutil_add_tvar_identity(struct Cyc_Absyn_Tvar*);
-void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);char Cyc_Tcenv_Env_error[10]="Env_error";
+void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);
+# 372
+int Cyc_Tcutil_is_array(void*t);
+# 376
+void*Cyc_Tcutil_promote_array(void*t,void*rgn);char Cyc_Tcenv_Env_error[10]="Env_error";
 # 88 "tcenv.cyc"
 struct Cyc_Tcenv_Env_error_exn_struct Cyc_Tcenv_Env_error_val={Cyc_Tcenv_Env_error};
 # 90

@@ -1018,6 +1018,10 @@ enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_I
 void*Cyc_Tcutil_impos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);extern char Cyc_Tcutil_AbortTypeCheckingFunction[26];struct Cyc_Tcutil_AbortTypeCheckingFunction_exn_struct{char*tag;};
 # 71
 void*Cyc_Tcutil_compress(void*t);
+# 372 "tcutil.h"
+int Cyc_Tcutil_is_array(void*t);
+# 376
+void*Cyc_Tcutil_promote_array(void*t,void*rgn);
 # 27 "cyclone.h"
 enum Cyc_Cyclone_C_Compilers{Cyc_Cyclone_Gcc_c  = 0,Cyc_Cyclone_Vc_c  = 1};
 # 33

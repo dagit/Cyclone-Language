@@ -1006,10 +1006,14 @@ void*Cyc_Tcutil_impos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
 void Cyc_Tcutil_terr(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);extern char Cyc_Tcutil_AbortTypeCheckingFunction[26];struct Cyc_Tcutil_AbortTypeCheckingFunction_exn_struct{char*tag;};
 # 71
 void*Cyc_Tcutil_compress(void*t);
-# 332 "tcutil.h"
+# 327 "tcutil.h"
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*e);
-# 371
-struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*b);struct _union_Node_NZero{int tag;int val;};struct _union_Node_NVar{int tag;struct Cyc_Absyn_Vardecl*val;};struct _union_Node_NNumelts{int tag;struct Cyc_Absyn_Vardecl*val;};struct _union_Node_NTvar{int tag;struct Cyc_Absyn_Tvar*val;};union Cyc_Pratt_Node{struct _union_Node_NZero NZero;struct _union_Node_NVar NVar;struct _union_Node_NNumelts NNumelts;struct _union_Node_NTvar NTvar;};
+# 366
+struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*b);
+# 372
+int Cyc_Tcutil_is_array(void*t);
+# 376
+void*Cyc_Tcutil_promote_array(void*t,void*rgn);struct _union_Node_NZero{int tag;int val;};struct _union_Node_NVar{int tag;struct Cyc_Absyn_Vardecl*val;};struct _union_Node_NNumelts{int tag;struct Cyc_Absyn_Vardecl*val;};struct _union_Node_NTvar{int tag;struct Cyc_Absyn_Tvar*val;};union Cyc_Pratt_Node{struct _union_Node_NZero NZero;struct _union_Node_NVar NVar;struct _union_Node_NNumelts NNumelts;struct _union_Node_NTvar NTvar;};
 # 58 "pratt.h"
 extern union Cyc_Pratt_Node Cyc_Pratt_zero_node;
 typedef union Cyc_Pratt_Node Cyc_Pratt_node_t;

@@ -2583,35 +2583,18 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     case &ComprehensionNoinit_e(...):
       // Note: tcComprehension expects the pointer type, not an array type.
       // Also, we don't set the in_new flag here so as not to biff the tag
-      let t_arr = tcExpNoPromote(te,topt,e1);
-      switch (compress(t_arr)) {
-      case &ArrayType(ArrayInfo{et_arr,tq_arr,bndopt,zt,_}):
-	exp_t bnd = (exp_t)bndopt;
-	bounds_t b;
-	switch(compress((type_t)bnd->topt)) {
-	case &TagType(t):
-	  b = new Upper_b(cast_exp(uint_typ,valueof_exp(t,0),false,No_coercion,0));
-	  break;
-	default:
-	  if(is_const_exp(bnd))
-	    b = new Upper_b(bnd);
-	  else
-	    b = &DynEither_b_val;
+      type_t res_typ = tcExpNoPromote(te,topt,e1);
+      if (!is_array(res_typ))
+        impos("tcNew: comprehension returned non-array type");
+      res_typ = promote_array(res_typ,rgn);
+      if (topt != NULL) {
+	if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
+	  e->topt = res_typ;
+	  unchecked_cast(te, e, *topt, Other_coercion);
+	  res_typ = *topt;
 	}
-	type_t res_typ =
-	  new PointerType(PtrInfo(et_arr,tq_arr,
-				  PtrAtts(rgn,empty_conref(),new_conref(b),zt,
-					  NULL)));
-	if (topt != NULL) {
-	  if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
-	    e->topt = res_typ;
-	    unchecked_cast(te, e, *topt, Other_coercion);
-	    res_typ = *topt;
-	  }
-	}
-	return res_typ;
-      default: impos("tcNew: comprehension returned non-array type");
       }
+      return res_typ;
     case &UnresolvedMem_e(nopt,des):
       e1->r = new Array_e(des);
       fallthru(des);
@@ -2628,28 +2611,20 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
 	default: break;
 	}
       }
-      let t_array = tcArray(te,e1->loc,elt_typ_opt,NULL,zero_term,des);
-      e1->topt = t_array;
-      type_t res_typ;
-      switch (compress(t_array)) {
-      case &ArrayType(ArrayInfo{et,tq,sz,zt,_}):
-	res_typ =
-	  new PointerType(PtrInfo(et,tq,
-				  PtrAtts(rgn,empty_conref(),
-					  new_conref(new Upper_b((exp_t)sz)),
-					  zt,NULL)));
-	if (topt != NULL) {
-	  // try unifying res_typ and topt -- if that fails, then see if we
-	  // can cast res_typ to topt, and insert the cast so that the code
-	  // generator knows what to do.
-	  if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
-	    e->topt = res_typ;
-	    unchecked_cast(te, e, *topt, Other_coercion);
-	    res_typ = *topt;
-	  }
+      type_t res_typ = tcArray(te,e1->loc,elt_typ_opt,NULL,zero_term,des);
+      e1->topt = res_typ;
+      if (!is_array(res_typ))
+	impos("tcExpNoPromote on Array_e returned non-array type");
+      res_typ = promote_array(res_typ,rgn);
+      if (topt != NULL) {
+	// try unifying res_typ and topt -- if that fails, then see if we
+	// can cast res_typ to topt, and insert the cast so that the code
+	// generator knows what to do.
+	if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
+	  e->topt = res_typ;
+	  unchecked_cast(te, e, *topt, Other_coercion);
+	  res_typ = *topt;
 	}
-	break;
-      default: impos("tcExpNoPromote on Array_e returned non-array type");
       }
       return res_typ;
     case &Const_e({.String_c = _}):
@@ -2716,16 +2691,9 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
 // The default: type-check and promote any array types to pointer types
 type_t tcExp(tenv_t te, type_t * topt, exp_t e) {
   type_t t = compress(tcExpNoPromote(te, topt, e));
-  switch (t) {
-  case &ArrayType(ArrayInfo{elt_typ,tq,e2,zt,_}):
-    let $(_,rgn) = addressof_props(te,e);
-    let b = (e2 == NULL) ? (bounds_t)&DynEither_b_val : new Upper_b((exp_t)e2);
-    t = atb_typ(elt_typ,rgn,tq,b,zt);
-    e->topt = t;
-    return t;
-  default:
-    return t;
-  }
+  if (is_array(t))
+    e->topt = t = promote_array(t,addressof_props(te,e)[1]);
+  return t;
 }
 
 // Type-check the expression -- if it's an Array_e, Comprehension_e, String_c,
@@ -2752,17 +2720,12 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   case &Const_e({.String_c = _}): return t;
   default:
     t = compress(t);
-    switch (t) {
-    case &ArrayType(ArrayInfo{elt_typ,tq,e2,zt,_}):
-      let $(_,rgn) = addressof_props(te,e);
-      bounds_t b = (e2 == NULL) ? (bounds_t)&DynEither_b_val :
-        new Upper_b((exp_t)e2);
-      t = atb_typ(elt_typ,rgn,tq,b,zt);
+    if (is_array(t))
+    {
+      t = promote_array(t,addressof_props(te,e)[1]);
       unchecked_cast(te,e,t,Other_coercion);
-      return t;
-    default:
-      return t;
     }
+    return t;
   }
 }
 

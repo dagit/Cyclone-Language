@@ -1022,8 +1022,12 @@ void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);
 struct Cyc_Absyn_Exp*Cyc_Tcutil_rsubsexp(struct _RegionHandle*r,struct Cyc_List_List*,struct Cyc_Absyn_Exp*);
 # 283 "tcutil.h"
 int Cyc_Tcutil_is_noalias_pointer(void*t,int must_be_unique);
-# 329
-int Cyc_Tcutil_bits_only(void*t);struct Cyc_PP_Ppstate;
+# 324
+int Cyc_Tcutil_bits_only(void*t);
+# 372
+int Cyc_Tcutil_is_array(void*t);
+# 376
+void*Cyc_Tcutil_promote_array(void*t,void*rgn);struct Cyc_PP_Ppstate;
 # 41 "pp.h"
 typedef struct Cyc_PP_Ppstate*Cyc_PP_ppstate_t;struct Cyc_PP_Out;
 # 43

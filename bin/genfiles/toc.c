@@ -1224,14 +1224,18 @@ int Cyc_Tcutil_is_tagged_pointer_typ_elt(void*t,void**elt_typ_dest);
 int Cyc_Tcutil_is_zero_pointer_typ_elt(void*t,void**elt_typ_dest);
 # 275
 int Cyc_Tcutil_is_zero_ptr_deref(struct Cyc_Absyn_Exp*e1,void**ptr_type,int*is_dyneither,void**elt_type);struct _tuple11{struct Cyc_Absyn_Tqual f1;void*f2;};
-# 338
+# 333
 void*Cyc_Tcutil_snd_tqt(struct _tuple11*);
-# 367
+# 362
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_type_bound(void*t);
-# 371
+# 366
 struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*b);
-# 374
-struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*l);struct _tuple12{unsigned int f1;int f2;};
+# 369
+struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*l);
+# 372
+int Cyc_Tcutil_is_array(void*t);
+# 376
+void*Cyc_Tcutil_promote_array(void*t,void*rgn);struct _tuple12{unsigned int f1;int f2;};
 # 28 "evexp.h"
 struct _tuple12 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);
 # 32

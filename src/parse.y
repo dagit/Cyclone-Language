@@ -294,17 +294,9 @@ static type_specifier_t long_spec(seg_t loc) {
 
 // convert any array types to pointer types
 static type_t array2ptr(type_t t, bool argposn) {
-  switch (t) {
     // FIX: don't lose zero-term location
-  case &ArrayType(ArrayInfo{t1,tq,eopt,zeroterm,ztl}):
-    return starb_typ(t1,
-                     argposn ? new_evar(&Tcutil::rko, NULL) : &HeapRgn_val,
-                     tq,
-                     eopt == NULL ? ((bounds_t)&DynEither_b_val) : 
-                                    ((bounds_t)(new Upper_b((exp_t)eopt))),
-                     zeroterm);
-  default: return t;
-  }
+  return Tcutil::is_array(t) ? 
+    Tcutil::promote_array(t, argposn ? new_evar(&Tcutil::rko, NULL) : &HeapRgn_val) : t;
 }
 
 // The next few functions are used when we have a function (or aggregate)

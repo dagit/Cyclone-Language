@@ -1092,18 +1092,22 @@ void Cyc_Tcutil_check_type(unsigned int,struct Cyc_Tcenv_Tenv*,struct Cyc_List_L
 int Cyc_Tcutil_is_noalias_path(struct _RegionHandle*,struct Cyc_Absyn_Exp*e);
 # 293
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct _RegionHandle*,void*t);
-# 315
+# 310
 int Cyc_Tcutil_new_tvar_id();
-# 332
+# 327
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*e);
-# 335
+# 330
 int Cyc_Tcutil_is_var_exp(struct Cyc_Absyn_Exp*e);
-# 353
+# 348
 int Cyc_Tcutil_extract_const_from_typedef(unsigned int,int declared_const,void*);
-# 357
+# 352
 struct Cyc_List_List*Cyc_Tcutil_transfer_fn_type_atts(void*t,struct Cyc_List_List*atts);
-# 374
+# 369
 struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*l);
+# 372
+int Cyc_Tcutil_is_array(void*t);
+# 376
+void*Cyc_Tcutil_promote_array(void*t,void*rgn);
 # 32 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);
 void*Cyc_Tcexp_tcExpInitializer(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);struct _tuple13{void*f1;void*f2;};struct Cyc_Tcexp_TestEnv{struct _tuple13*eq;int isTrue;};

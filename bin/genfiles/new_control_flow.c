@@ -1044,14 +1044,18 @@ int Cyc_Tcutil_is_bound_one(union Cyc_Absyn_Constraint*b);
 int Cyc_Tcutil_is_noalias_pointer(void*t,int must_be_unique);
 # 293
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct _RegionHandle*,void*t);
-# 349
+# 344
 int Cyc_Tcutil_is_noreturn(void*);
-# 367
+# 362
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_type_bound(void*t);
-# 371
+# 366
 struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*b);
-# 374
-struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*l);struct _tuple12{unsigned int f1;int f2;};
+# 369
+struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*l);
+# 372
+int Cyc_Tcutil_is_array(void*t);
+# 376
+void*Cyc_Tcutil_promote_array(void*t,void*rgn);struct _tuple12{unsigned int f1;int f2;};
 # 28 "evexp.h"
 struct _tuple12 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);struct _union_RelnOp_RConst{int tag;unsigned int val;};struct _union_RelnOp_RVar{int tag;struct Cyc_Absyn_Vardecl*val;};struct _union_RelnOp_RNumelts{int tag;struct Cyc_Absyn_Vardecl*val;};struct _union_RelnOp_RTvar{int tag;struct Cyc_Absyn_Tvar*val;};union Cyc_Relations_RelnOp{struct _union_RelnOp_RConst RConst;struct _union_RelnOp_RVar RVar;struct _union_RelnOp_RNumelts RNumelts;struct _union_RelnOp_RTvar RTvar;};
 # 37 "relations.h"

@@ -4107,17 +4107,13 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         (*trip)[1].real_const = ec;
         // after resolving t, it may be an array type.  if so, as an argument
         // to a function, we need to convert it to a pointer type.
-        switch (compress(t)) {
-        case &ArrayType(ArrayInfo{elt_type,tq,num_elts,zero_term,zt_loc}):
+	if (is_array(t))
+	{
           // create a new region variable for the pointer
           let ptr_rgn = new_evar(NULL,NULL);
-          new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&rk,ptr_rgn,true);
-          let t2 = atb_typ(elt_type, ptr_rgn, tq,
-                           new Upper_b((exp_t)num_elts), zero_term);
-          (*trip)[2] = t2;
-          break;
-        default: break;
-        }
+          new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&rk,ptr_rgn,true);          
+          (*trip)[2] = promote_array(t,ptr_rgn);
+	}
       }
 
       // varargs
@@ -4913,12 +4909,8 @@ bool is_zero_ptr_type(type_t t, type_t @ptr_type,
   case &ArrayType(ArrayInfo{elt,tq,n,zt,_}):
     if (conref_def(false,zt)) {
       *elt_type = elt;
-      *is_dyneither = false;
-      *ptr_type =
-	new PointerType(PtrInfo(elt,tq,
-				PtrAtts(&HeapRgn_val,false_conref,
-					new_conref(new Upper_b((exp_t)n)),
-					zt,NULL)));
+      *is_dyneither = false;      
+      *ptr_type = promote_array(t,&HeapRgn_val);
       return true;
     } else return false;
   default: return false;
@@ -5242,23 +5234,6 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
   }
 }
 
-// Coerce an expression of array type to a pointer type.  In
-// certain situations, we undo this coercion, notably when e is
-// a string constant or Array_e expression occurring as follows:
-//    t x[c] = e
-//    {.... e ... }  where the {...} is an Array_e
-//    Foo(.... e ....)  where Foo is a struct or datatype with a
-//     corresponding field that has type t
-type_t array_to_ptr(tenv_t te, type_t e_typ, exp_t e) {
-  switch (compress(e_typ)) {
-  case &ArrayType(ArrayInfo{t,tq,_,zt,_}):
-    let $(_,rgn) = addressof_props(te,e);
-    return atb_typ(t,rgn,tq,new Upper_b(e),zt);
-  default:
-    return e_typ;
-  }
-}
-
 // give an error when we can statically tell that the array bounds aren't
 // large enough -- if the bounds are unconstrained, set them to i+1.
 void check_bound(seg_t loc, unsigned int i, conref_t<bounds_t> b) {
@@ -5575,3 +5550,36 @@ list_t<`a> filter_nulls(list_t<`a *,`H> l) {
   return res;
 }
 
+bool is_array(type_t t)
+{
+  switch(compress(t))
+  {
+  case &ArrayType(_): return true;
+  default: return false;
+  }
+}
+
+type_t promote_array(type_t t, type_t rgn)
+{
+  switch(compress(t))
+  { 
+  case &ArrayType(ArrayInfo(et,tq,eopt,zt,ztl)):
+    exp_t bnd = (exp_t)eopt;
+    bounds_t b;
+    if (bnd->topt == NULL) impos("promote_array");
+    switch(compress((type_t)bnd->topt)) {
+    case &TagType(t):
+      b = new Upper_b(cast_exp(uint_typ,valueof_exp(t,0),false,No_coercion,0));
+      break;
+    default:
+      if(is_const_exp(bnd))
+        b = new Upper_b(bnd);
+      else
+        b = &DynEither_b_val;
+    }
+    return atb_typ(et,rgn,tq,
+		   b,
+	           zt);
+  default: return t;
+  }
+}

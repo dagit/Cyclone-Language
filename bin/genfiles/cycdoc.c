@@ -1146,6 +1146,10 @@ typedef void*Cyc_Tcenv_jumpee_t;struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;st
 typedef struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tenv_t;
 # 134 "tcenv.h"
 enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_InNewAggr  = 2};extern char Cyc_Tcutil_AbortTypeCheckingFunction[26];struct Cyc_Tcutil_AbortTypeCheckingFunction_exn_struct{char*tag;};
+# 372 "tcutil.h"
+int Cyc_Tcutil_is_array(void*t);
+# 376
+void*Cyc_Tcutil_promote_array(void*t,void*rgn);
 # 73 "cycdoc.cyl"
 static void Cyc_dump_begin(){
 # 75

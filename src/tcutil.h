@@ -292,11 +292,6 @@ extern bool is_noalias_path(region_t<`r>, exp_t e);
 // The region is used for allocating temporary stuff
 extern bool is_noalias_pointer_or_aggr(region_t<`temp>, type_t t);
 
-// if exp is of array type, cast it to an appropriate pointer type --
-// assumes the expression has already been type-checked and that t is
-// the type of the expression e
-extern type_t array_to_ptr(tenv_t, type_t t, exp_t e);
-
 // Ensure e is an lvalue or function designator -- return whether
 // or not &e is const and what region e is in.
 extern $(bool,type_t) addressof_props(tenv_t te, exp_t e);
@@ -372,6 +367,13 @@ extern struct Vardecl *nonesc_vardecl(binding_t b);
 
   // filters out null elements
 extern list_t<`a> filter_nulls(list_t<`a *,`H> l);
+
+// Is the given type an array?
+bool is_array(type_t t);
+
+// If t is an array type, promote it to an at-pointer type into the
+// specified region.
+type_t promote_array(type_t t, type_t rgn);
 
 }
 #endif
