@@ -851,3 +851,28 @@ void * _profile_GC_malloc_atomic(int n, char *file, int lineno) {
 void *unsafe_cast(void *a) {
   return a;
 }
+
+/******* for turning off gc warnings about blacklisted blocks *******/
+/* These type/macro defns are taken from gc/include/gc.h and must
+   be kept in sync. */
+#   define GC_PROTO(args) args
+typedef unsigned long GC_word;
+typedef void (*GC_warn_proc) GC_PROTO((char *msg, GC_word arg));
+
+extern void GC_default_warn_proc(char *msg, GC_word arg);
+extern GC_warn_proc GC_set_warn_proc(GC_warn_proc p);
+
+static void GC_noblacklist_warn_proc(char *msg, GC_word arg) {
+  if (!msg) return;
+  if (!strcmp(msg,"Needed to allocate blacklisted block"))
+    return;
+  GC_default_warn_proc(msg,arg);
+}
+
+/* Use these in Cyclone programs */
+void GC_blacklist_warn_set() {
+  GC_set_warn_proc(GC_default_warn_proc);
+}
+void GC_blacklist_warn_clear() {
+  GC_set_warn_proc(GC_noblacklist_warn_proc);
+}

@@ -58,5 +58,15 @@ void *GC_realloc(void *x, size_t n) {
   return (void *)realloc(x,n);
 }
 
+/* These type/macro defns are taken from gc/include/gc.h and must
+   be kept in sync. */
+#   define GC_PROTO(args) args
+typedef unsigned long GC_word;
+typedef void (*GC_warn_proc) GC_PROTO((char *msg, GC_word arg));
 
-
+void GC_default_warn_proc(char *msg, GC_word arg) {
+  return;
+}
+GC_warn_proc GC_set_warn_proc(GC_warn_proc p) {
+  return GC_default_warn_proc;
+}
