@@ -37,6 +37,7 @@
 #include "warn.h"
 #include "flags.h"
 #include "insert_checks.h"
+#include "vcgen.h"
 
 //#define BCE_DEBUG
 #ifdef BCE_DEBUG
@@ -75,13 +76,26 @@ static exp_t shared_zero_exp() {
 }
 
 static struct Env {
+  JumpAnalysis::jump_anal_res_t tables;
+  Vcgen::assn_info_t assn_info;
   bool in_sizeof   : 1;
   bool at_toplevel : 1;
+  bool vcgen_r     : 1;
 };
+
 typedef struct Env env_t; // not a pointer
-static env_t toplevel_env() { return Env(false,true); }
-static env_t fn_body_env()  { return Env(false,false); }
-static env_t enter_sizeof(env_t nv) { return Env(true,nv.at_toplevel); }
+static env_t toplevel_env(JumpAnalysis::jump_anal_res_t tables, bool do_vcgen) { 
+  return Env(tables, NULL,false,true, do_vcgen);
+}
+
+static env_t 
+fn_body_env(env_t nv) {
+  return Env(nv.tables, nv.assn_info, false,false, nv.vcgen_r);
+}
+
+static env_t enter_sizeof(env_t nv) {
+  return Env(nv.tables, nv.assn_info,true,nv.at_toplevel, nv.vcgen_r);
+}
 
 // for warning and statistics purposes, call need_*_check, only if true
 // result _will_ cause an inserted check
@@ -425,7 +439,11 @@ static void do_exp(env_t nv, exp_t e) {
 static void do_decl(env_t nv, decl_t d) {
   switch(d->r) {
   case &Var_d(vd): do_exp_opt(nv,vd->initializer); break;
-  case &Fn_d(fd): do_stmt(fn_body_env(),fd->body); break;//forgets if in sizeof
+  case &Fn_d(fd): 
+    if (nv.vcgen_r){
+      Vcgen::vcgen_fundecl(nv.tables, fd);
+    }
+    do_stmt(fn_body_env(nv),fd->body); break;//forgets if in sizeof
   case &Let_d(_,_,e,_): do_exp(nv,e); break;    
   case &Letv_d(_): break;
   case &Region_d(_,_,eo): do_exp_opt(nv,eo); break; //key for open can't be NULL
@@ -485,7 +503,7 @@ static void do_stmt(env_t nv, stmt_t s) {
 
 void insert_checks(List::list_t<decl_t,`H> tds,
 		   JumpAnalysis::jump_anal_res_t tables, bool do_vcgen) {
-  let nv = toplevel_env();
+  let nv = toplevel_env(tables, do_vcgen);
   for(; tds != NULL; tds = tds->tl)
     do_decl(nv,tds->hd);
 }

@@ -101,6 +101,7 @@ namespace Vcgen;
 using List;
 using AssnDef;
 using PrattProver;
+
 ////// Forward Declaration for Environments /////
 struct Env;
 typedef struct Env @env_t;
@@ -544,11 +545,15 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
   case &Absyn::Fallthru_s(es,&dest):
     // Also a forward jump so we can do an or.
     let $(ts,a) = vcgen_rexps_always(env,es,ain);
-    // initialize the pattern variables with their corresponding terms
-    for (let x = dest->pat_vars->v; x != NULL; x = x->tl,ts = ts->tl) {
-      let &$(vd,ve) = x->hd;
-      if (vd != NULL) 
-        a = do_assign(env,a,new Var(*vd),ts->hd);
+    if (ts != NULL){
+      //pat_vars has a bunch of nulls before meaning full pat vars;
+      let x = Tcutil::filter_nulls(List::split(dest->pat_vars->v)[0]);
+      // initialize the pattern variables with their corresponding terms
+      for (; x != NULL; x = x->tl,ts = ts->tl) {
+	let vd = x->hd;
+	if (vd != NULL) 
+	  a = do_assign(env,a,new Var(vd),ts->hd);
+      }
     }
     forward_assn(env, dest->body, a);
     return &false_assn;
@@ -766,7 +771,7 @@ static $(list_t<term_t>,assn_t) vcgen_rexps_always(env_t env, list_t<exp_t> es, 
     ain = a;
     res = new List(t,res);
   }
-  return $(res,ain);
+  return $(List::imp_rev(res),ain);
 }
 
 static vardecl_t bind2vardecl(Absyn::binding_t b) {

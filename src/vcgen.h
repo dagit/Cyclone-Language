@@ -20,11 +20,16 @@
 #define _VCGEN_H_
 
 #include <list.h>
+#include <hashtable.h>
 #include "absyn.h"
 #include "jump_analysis.h"
+#include "assndef.h"
+
+
 
 namespace Vcgen {
   extern void vcgen_fundecl(JumpAnalysis::jump_anal_res_t tables, 
 			    Absyn::fndecl_t fd);
+  typedef Hashtable::table_t<Absyn::exp_t, $(AssnDef::assn_t, AssnDef::assn_t)@> *assn_info_t;
 }
 #endif
