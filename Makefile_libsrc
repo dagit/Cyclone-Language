@@ -11,18 +11,19 @@
 
 include $(CYCDIR)/Makefile.inc
 VPATH=$(CYCDIR)/lib $(CYCDIR)/src $(CYCDIR)
+export CYCFLAGS
 
 # For bootstrapping, may want to override these with somehting appropriate
 CYCC:=$(CYCDIR)/bin/$(CYCCOMP)
 CYCLEX:=$(CYCDIR)/bin/cyclex$(EXE)
 CYCBISON:=$(CYCDIR)/bin/cycbison$(EXE)
-INC_PATH:=$(CYCDIR)/lib
+INC_PATH:=. $(CYCDIR)/lib $(CYCDIR)/src
 LIB_PATH:=$(CYCDIR)/lib
 LIBR:=$(CYCLIB)
 
 CYCINC_H:=$(LIB_PATH)/include/cyc_include.h
 
-override CYCFLAGS += -I. -I$(INC_PATH) -B$(LIB_PATH) -save-c
+override CYCFLAGS += $(addprefix -I, $(INC_PATH)) -B$(LIB_PATH) -save-c
 
 CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))
 
@@ -97,8 +98,8 @@ precore_c.h: core.h $(CYCC) $(CYCINC_H)
 	$(CC) $(CFLAGS) -I. -c -o $@ $<
 # Always use the original compiler to avoid circularities
 # Note: In most cases, it would be correct to share .d files
-%.d: %.cyc
-	$(CYCDIR)/bin/$(CYCCOMP) -M -MG $(CYC_FLAGS) $< > $@
+%.d: %.cyc cstdio.h csignal.h
+	$(CYCDIR)/bin/$(CYCCOMP) -M -MG $(CYCFLAGS) $< > $@
 
 ifdef MS
 %.obj: %.c precore_c.h $(CYCINC_H)
