@@ -5,7 +5,7 @@ target=@target@
 CC=@CC@
 CFLAGS=@CFLAGS@
 TARGET_CFLAGS=@TARGET_CFLAGS@
-ifneq ($(build),$(target))
+ifeq ($(build),$(target))
 BTARGET=
 else
 BTARGET=-b $(target)
