@@ -105,7 +105,7 @@ clean_src_prefix:
 	$(MAKE) clean_prefix -C lib OUT_PREFIX=$(OUT_PREFIX)
 
 clean_nogc:
-	$(MAKE) clean -C tools/cycbison
+	$(MAKE) clean -C tools/bison
 	$(MAKE) clean -C tools/cyclex
 	$(MAKE) clean -C tools/aprof
 #	$(MAKE) clean -C tools/cycocamllex
