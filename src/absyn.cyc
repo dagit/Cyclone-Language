@@ -120,14 +120,14 @@ typ file_typ() {
     typedef_name file_t_name = &$(null,(string)"__sFILE");
     typ file_struct_t = StructType(&Opt(file_t_name),null);
     file_t_opt = &Opt(PointerType(file_struct_t,
-				  new_conref((Bool)false),
+				  new_conref(false),
 				  empty_tqual()));
   }
   return file_t_opt->v;
 }
 // pointers
 typ nullableptr_t(typ t, tqual tq) {
-  return PointerType(t,new_conref((Bool)true),tq);
+  return PointerType(t,new_conref(true),tq);
 }
 static Opt_t<typ> void_star_t_opt = null;
 typ void_star_typ() {
@@ -137,7 +137,7 @@ typ void_star_typ() {
   return void_star_t_opt->v;
 }
 typ pureptr_t(typ t, tqual tq) {
-  return PointerType(t,new_conref((Bool)false),tq);
+  return PointerType(t,new_conref(false),tq);
 }
 
 // structs

@@ -86,7 +86,7 @@ bool special(string s){
   return false;
 }
 
-string escape(Bool in_string,Char c) {
+string escape(bool in_string,Char c) {
   switch ((char)c) {
   case '\a': return("\\a");
   case '\b': return("\\b");
@@ -117,7 +117,7 @@ string char_escape(Char c) {
 string string_escape(string s) {
   if (special(s))
     // Inefficient but I'm having trouble linking in the buffer stuff
-    return String::strconcat_l(List::map_c(escape, (Bool)true,
+    return String::strconcat_l(List::map_c(escape, true,
 					   String::explode(s)));
   else 
     return s;
@@ -452,12 +452,15 @@ Doc exp2doc_prec(int inprec, exp e) {
   case Conditional_e(e1,e2,e3):
     // decompile to && and || if possible
     switch ($(e2->r,e3->r)) {
+      /* JGM:  this causes a bug in some places...notably the
+       * file tools/cyclex/compact.cyc
     case $(Const_e(Int_c(Signed,1)),_):  
       s = cat3(exp2doc_prec(33,e1), text(" || "), exp2doc_prec(33,e3)); 
       break;
     case $(_,Const_e(Int_c(Signed,0))):
       s = cat3(exp2doc_prec(37,e1), text(" && "), exp2doc_prec(37,e2)); 
       break;
+      */
     default:
       s = cat5(exp2doc_prec(myprec,e1), text(" ? "), exp2doc_prec(0,e2),
 	                                text(" : "), exp2doc_prec(myprec,e3));

@@ -195,7 +195,7 @@ static typ typ_to_c(typ t) {
                      &Opt(nullableptr_t(strct("_xenum_struct"),empty_tqual())));
   case PointerType(t2,b,tq):
     // we map t@ to t*
-    return PointerType(typ_to_c(t2),new_conref((Bool)true),tq);
+    return PointerType(typ_to_c(t2),new_conref(true),tq);
   // We assume that these are suitably defined already in an appropriate
   // include file -- especially the boxed versions and the bools.
   case IntType(sn,B8,Boxed): return longlong_typ; 

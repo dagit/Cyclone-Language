@@ -160,7 +160,7 @@ static synth tcConst(tenv te, segment loc, Opt_t<typ> topt, cnst c) {
     break;
   case Null_c:
     // FIX: take advantage of topt
-    t = PointerType(wildtyp(), &Conref(Eq_constr((Bool)true)), empty_tqual());
+    t = PointerType(wildtyp(), &Conref(Eq_constr(true)), empty_tqual());
     break;
   }
   return standard_synth(te,t);
@@ -687,7 +687,7 @@ static synth tcAddress(tenv te, segment loc, Opt_t<typ> topt, exp e) {
   tqual tq = &Tqual{.q_const = lhs_const(te,e),
 		    .q_volatile=false, .q_restrict=false};
   typ t = PointerType(synth_typ(esyn),
-                      &Conref(Eq_constr((Bool)false)),tq);
+                      &Conref(Eq_constr(false)),tq);
   return synth_set_typ(esyn,t);
 }
 

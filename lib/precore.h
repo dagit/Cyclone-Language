@@ -24,7 +24,6 @@ typedef char Cstring[];
 // a boxed and tagged string: struct {uint sz; Cstring *contents;}@
 typedef char string[?];
 typedef int bool;
-typedef int Bool; // only for now
 #define false (0)
 #define true (1)
 extern Cstring string_to_Cstring(string);

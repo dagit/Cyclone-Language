@@ -5,7 +5,7 @@ include ../Makefile.inc
 # an absolute path)
 CYCC=../bin/$(CYCCOMP)
 
-CYCLEX=../bin/cycocamllex.exe
+CYCLEX=../bin/cyclex.exe
 
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX=
@@ -32,13 +32,13 @@ precore_c.h: precore.h
 
 # For machine-generated we need special targets (the .cyc is prefixed)
 $(OUT_PREFIX)lineno.c : $(OUT_PREFIX)lineno.cyc
-	$(CYCC) $(CYC_FLAGS) $< > $@
+	$(CYCC) $(CYC_FLAGS) -o $@ $<
 $(OUT_PREFIX)lineno.cyc : lineno.cyl
 	$(CYCLEX) $< $@
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
 $(OUT_PREFIX)%.c : %.cyc
-	$(CYCC) $(CYC_FLAGS) $< > $@ 
+	$(CYCC) $(CYC_FLAGS) -o $@ $<
 
 # We need a special target becaue the .c file won't have the OUT_PREFIX
 $(OUT_PREFIX)$(RUNTIME).o: $(RUNTIME).c precore_c.h 

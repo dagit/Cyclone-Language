@@ -297,10 +297,13 @@ void dumpexp_prec(int inprec, exp e) {
   case Conditional_e(e1,e2,e3):
     // decompile to && and || if possible
     switch ($(e2->r,e3->r)) {
+      /* JGM:  this causes a bug in some cases...
+       * notably tools/cyclex/compact.cyc
     case $(Const_e(Int_c(Signed,1)),_): 
       dumpexp_prec(33,e1); dump("||"); dumpexp_prec(33,e3); break;
     case $(_,Const_e(Int_c(Signed,0))):
       dumpexp_prec(37,e1); dump("&&"); dumpexp_prec(37,e2); break;
+      */
     default:
       dumpexp_prec(myprec,e1);
       dump("?"); dumpexp_prec(0,e2);

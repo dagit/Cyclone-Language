@@ -34,8 +34,8 @@ cyclone:
 
 tools:
 	$(MAKE) install -C tools/cycbison
-#	$(MAKE) install -C tools/cyclex
-	$(MAKE) install -C tools/cycocamllex
+	$(MAKE) install -C tools/cyclex
+#	$(MAKE) install -C tools/cycocamllex
 .PHONY: tools
 
 bin/gc.a:
@@ -82,6 +82,7 @@ clean_src_prefix:
 clean:
 	$(MAKE) clean -C tools/cycbison
 	$(MAKE) clean -C tools/cyclex
+#	$(MAKE) clean -C tools/cycocamllex
 	$(MAKE) clean -C src
 	$(MAKE) clean -C lib
 	$(MAKE) clean -C bin/genfiles

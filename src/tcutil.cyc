@@ -232,7 +232,7 @@ static bool unify_conrefs<`a>(int cmp(`a,`a), conref<`a> x, conref<`a> y) {
   }
 }
 
-static int cmp_bool(Bool x,Bool y) {
+static int cmp_bool(bool x,bool y) {
   if (x == y) return 0;
   if (x == false) return -1;
   return 1;
@@ -451,9 +451,9 @@ bool coerce_list(tenv te, typ t, list<exp> es) {
   return true;
 }
 
-// coerce e to have type "bool" (uint_t) -- used in conditionals 
+// coerce e to have type "bool" (int) -- used in conditionals 
 bool coerce_to_bool(tenv te, exp e) {
-  if (!coerce_uint_typ(te,e)) {
+  if (!coerce_sint_typ(te,e)) {
     switch (compress(e->topt->v)) {
     case PointerType(_,cr,_): unchecked_cast(te,e,uint_t); break;
     default: return false;
@@ -469,7 +469,7 @@ bool is_integral_type(typ t) {
   }
 }
 
-// coerce e to have type unsigned int -- used in subscript 
+// coerce e to have type unsigned int -- used in subscript
 bool coerce_uint_typ(tenv te, exp e) {
   if (unify(e->topt->v,uint_t)) 
     return true;
@@ -484,6 +484,26 @@ bool coerce_uint_typ(tenv te, exp e) {
     if (will_lose_precision(e->topt->v,uint_t))
       warn(e->loc,"integral size mismatch; conversion supplied");
     unchecked_cast(te,e,uint_t);
+    return true;
+  }
+  return false;
+}
+
+// coerce e to have type [signed] int -- used in coercions to "bool"
+bool coerce_sint_typ(tenv te, exp e) {
+  if (unify(e->topt->v,sint_t)) 
+    return true;
+  // try unboxing e
+  if (typ_kind(e->topt->v) == box_k) {
+    unbox_exp(te,e);
+    if (unify(e->topt->v,sint_t)) 
+      return true;
+  }
+  // try arithmetic conversions -- we only allow integral values
+  if (is_integral_type(e->topt->v)) {
+    if (will_lose_precision(e->topt->v,sint_t))
+      warn(e->loc,"integral size mismatch; conversion supplied");
+    unchecked_cast(te,e,sint_t);
     return true;
   }
   return false;

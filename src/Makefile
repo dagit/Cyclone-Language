@@ -10,7 +10,7 @@ include ../Makefile.inc
 CYCC=../bin/$(CYCCOMP)
 
 #CYCLEX=../bin/cyclex.exe
-CYCLEX=../bin/cycocamllex.exe
+CYCLEX=../bin/cyclex.exe
 CYCBISON=../bin/cycbison.exe
 
 # Override this prefix to check the compiler on itself w/o clobbering files
@@ -33,12 +33,12 @@ $(OUT_PREFIX)$(CYCCOMP): $(addprefix $(OUT_PREFIX), $(O_SRCS)) $(LIB)
 
 # For machine-generated we need special targets (the .cyc is prefixed)
 $(OUT_PREFIX)lex.c : $(OUT_PREFIX)lex.cyc
-	$(CYCC) $(CYC_FLAGS) $^ > $@ 
+	$(CYCC) $(CYC_FLAGS) -o $@ $^
 $(OUT_PREFIX)lex.cyc : lex.cyl
 	$(CYCLEX) $< $@
 
 $(OUT_PREFIX)parse_tab.c: $(OUT_PREFIX)parse_tab.cyc
-	$(CYCC) $(CYC_FLAGS) $< > $@ 
+	$(CYCC) $(CYC_FLAGS) -o $@ $< 
 $(OUT_PREFIX)parse_tab.cyc: parse.y
 	$(CYCBISON) -v -d $< -o $@
 $(OUT_PREFIX)parse_tab.h: parse.y
@@ -46,7 +46,7 @@ $(OUT_PREFIX)parse_tab.h: parse.y
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
 $(OUT_PREFIX)%.c: %.cyc
-	$(CYCC) $(CYC_FLAGS) $< > $@
+	$(CYCC) $(CYC_FLAGS) -o $@ $<
 
 # delete generated files with a particular prefix
 clean_prefix:

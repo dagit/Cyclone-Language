@@ -40,6 +40,7 @@ extern bool coerce_assign(tenv, exp, typ);
 extern bool coerce_to_bool(tenv, exp);
 extern bool coerce_list(tenv, typ, list<exp>);
 extern bool coerce_uint_typ(tenv, exp);
+extern bool coerce_sint_typ(tenv, exp);
 extern bool coerce_use(tenv, exp, typ);
 extern bool coerceable(typ); // true if numeric or character
 // true when expressions of type t1 can be cast to t2
