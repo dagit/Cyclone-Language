@@ -608,6 +608,20 @@ static unsigned eval_unop(Absyn::primop_t p, unsigned c){
   }
   return 0;
 }
+
+static $(bool, unsigned int) eq_node_const(node_t @`H n, node_t @`H z, bool is_signed){
+  let n2z = lookup_dist(n,z,is_signed);
+  let z2n = lookup_dist(z,n,is_signed);
+  if (n2z != NULL && z2n != NULL && *z2n == *n2z) return $(true, *n2z);
+  return $(false,0xBAD);
+}
+
+static $(bool, unsigned int) equal_node_const(node_t @`H n, node_t @`H z){
+  let $(ok, c) = eq_node_const(n,z,true);
+  if (!ok) return eq_node_const(n,z,false);
+  else return $(ok,c);
+}
+
 // when ok, the term t is equal to the value i in the graph g.
 static $(bool, unsigned,term_opt_t) subst_term_with_const(graph_t @g, term_t t) {
   term_opt_t newterm = NULL;
@@ -652,21 +666,11 @@ static $(bool, unsigned,term_opt_t) subst_term_with_const(graph_t @g, term_t t) 
     break;
   default: break;
   }
-  let n = term2node(g,t);
-  let z = term2node(g,zero());
-  let n2z_s = lookup_dist(n,z,true);
-  if (n2z_s != NULL) {
-    let z2n_s = lookup_dist(z,n,true);
-    if (z2n_s != NULL && *n2z_s == -(*z2n_s)) return $(true,*n2z_s,NULL);
-  }
-  let n2z_u = lookup_dist(n,z,false);
-  if (n2z_u != NULL) {
-    let z2n_u = lookup_dist(z,n,false);
-    if (z2n_u != NULL && *n2z_u == -(*z2n_u)) return $(true,*n2z_u,NULL);
-  }
-  if (newterm != NULL){
-    if (t == newterm) newterm = NULL;
-  }
+  if (t == newterm) newterm = NULL;
+  let n_node = term2node(g,t);
+  let z_node = term2node(g,zero());
+  let $(ok, c) = equal_node_const(n_node,z_node);
+  if (ok) return $(true,c,newterm);
   return $(false,0xbad,newterm);
 }
 

@@ -810,167 +810,168 @@ switch((int)p){case Cyc_Absyn_Not:
  return - c;default:
 ({struct _fat_ptr _Tmp0=(struct _fat_ptr)({struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,({struct _fat_ptr _Tmp3=(struct _fat_ptr)((struct _fat_ptr)Cyc_Absynpp_prim2string(p));_Tmp2.f1=_Tmp3;});_Tmp2;});void*_Tmp2[1];_Tmp2[0]=& _Tmp1;Cyc_aprintf(_tag_fat("Invalid unop %s during constant evaluation",sizeof(char),43U),_tag_fat(_Tmp2,sizeof(void*),1));});({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_Tmp0,_tag_fat(0U,sizeof(void*),0));});};
 # 609
-return 0U;}
+return 0U;}struct _tuple14{int f0;unsigned f1;};
 # 612
+static struct _tuple14 Cyc_PrattProver_eq_node_const(struct Cyc_PrattProver_Node*n,struct Cyc_PrattProver_Node*z,int is_signed){
+int*n2z=Cyc_PrattProver_lookup_dist(n,z,is_signed);
+int*z2n=Cyc_PrattProver_lookup_dist(z,n,is_signed);
+if((n2z!=0 && z2n!=0)&&*z2n==*n2z)return({struct _tuple14 _Tmp0;_Tmp0.f0=1,_Tmp0.f1=(unsigned)*n2z;_Tmp0;});
+return({struct _tuple14 _Tmp0;_Tmp0.f0=0,_Tmp0.f1=2989U;_Tmp0;});}
+# 619
+static struct _tuple14 Cyc_PrattProver_equal_node_const(struct Cyc_PrattProver_Node*n,struct Cyc_PrattProver_Node*z){
+struct _tuple14 _Tmp0=Cyc_PrattProver_eq_node_const(n,z,1);unsigned _Tmp1;int _Tmp2;_Tmp2=_Tmp0.f0;_Tmp1=_Tmp0.f1;{int ok=_Tmp2;unsigned c=_Tmp1;
+if(!ok)return Cyc_PrattProver_eq_node_const(n,z,0);else{
+return({struct _tuple14 _Tmp3;_Tmp3.f0=ok,_Tmp3.f1=c;_Tmp3;});}}}
+# 626
 static struct _tuple11 Cyc_PrattProver_subst_term_with_const(struct Cyc_PrattProver_Graph*g,void*t){
 void*newterm=0;
 {void*_Tmp0;void*_Tmp1;void*_Tmp2;enum Cyc_Absyn_Primop _Tmp3;unsigned _Tmp4;switch(*((int*)t)){case 0: _Tmp4=((struct Cyc_AssnDef_Uint_AssnDef_Term_struct*)t)->f1;{unsigned c=_Tmp4;
 return({struct _tuple11 _Tmp5;_Tmp5.f0=1,_Tmp5.f1=c,_Tmp5.f2=0;_Tmp5;});}case 5: _Tmp3=((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f1;_Tmp2=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f2;_Tmp1=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f3;_Tmp0=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f4;{enum Cyc_Absyn_Primop p=_Tmp3;void*t1=_Tmp2;void*t2=_Tmp1;void*topt=_Tmp0;
-# 620
+# 634
 if(Cyc_PrattProver_is_relation(p))goto _LL0;{
 struct _tuple11 _Tmp5=Cyc_PrattProver_subst_term_with_const(g,t1);void*_Tmp6;unsigned _Tmp7;int _Tmp8;_Tmp8=_Tmp5.f0;_Tmp7=_Tmp5.f1;_Tmp6=_Tmp5.f2;{int ok1=_Tmp8;unsigned c1=_Tmp7;void*nt1=_Tmp6;
 struct _tuple11 _Tmp9=Cyc_PrattProver_subst_term_with_const(g,t2);void*_TmpA;unsigned _TmpB;int _TmpC;_TmpC=_Tmp9.f0;_TmpB=_Tmp9.f1;_TmpA=_Tmp9.f2;{int ok2=_TmpC;unsigned c2=_TmpB;void*nt2=_TmpA;
-# 625
+# 639
 if(nt1!=0){
 newterm=Cyc_AssnDef_binop(p,nt1,t2,topt);
 Cyc_PrattProver_add_eq(g,t,newterm);}
-# 629
+# 643
 if(nt2!=0){
 newterm=Cyc_AssnDef_binop(p,t1,nt2,topt);
 Cyc_PrattProver_add_eq(g,t,newterm);}
-# 633
+# 647
 if(ok1){
 newterm=({enum Cyc_Absyn_Primop _TmpD=p;void*_TmpE=Cyc_AssnDef_uint(c1);void*_TmpF=t2;Cyc_AssnDef_binop(_TmpD,_TmpE,_TmpF,topt);});
 Cyc_PrattProver_add_eq(g,t,newterm);}
-# 637
+# 651
 if(ok2){
 newterm=({enum Cyc_Absyn_Primop _TmpD=p;void*_TmpE=t1;void*_TmpF=Cyc_AssnDef_uint(c2);Cyc_AssnDef_binop(_TmpD,_TmpE,_TmpF,topt);});
 Cyc_PrattProver_add_eq(g,t,newterm);}
-# 641
+# 655
 if(ok1 && ok2)
 return({struct _tuple11 _TmpD;_TmpD.f0=1,({unsigned _TmpE=Cyc_PrattProver_eval_binop(p,c1,c2);_TmpD.f1=_TmpE;}),_TmpD.f2=0;_TmpD;});
-# 644
+# 658
 goto _LL0;}}}}case 4: _Tmp3=((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)t)->f1;_Tmp2=(void*)((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)t)->f2;_Tmp1=(void*)((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)t)->f3;{enum Cyc_Absyn_Primop p=_Tmp3;void*t1=_Tmp2;void*topt=_Tmp1;
-# 646
+# 660
 if((int)p==18)goto _LL0;{
 struct _tuple11 _Tmp5=Cyc_PrattProver_subst_term_with_const(g,t1);unsigned _Tmp6;int _Tmp7;_Tmp7=_Tmp5.f0;_Tmp6=_Tmp5.f1;{int ok1=_Tmp7;unsigned c1=_Tmp6;
 if(ok1){
 ({struct Cyc_PrattProver_Graph*_Tmp8=g;void*_Tmp9=t;Cyc_PrattProver_add_eq(_Tmp8,_Tmp9,Cyc_AssnDef_uint(Cyc_PrattProver_eval_unop(p,c1)));});
 return({struct _tuple11 _Tmp8;_Tmp8.f0=1,({unsigned _Tmp9=Cyc_PrattProver_eval_unop(p,c1);_Tmp8.f1=_Tmp9;}),_Tmp8.f2=0;_Tmp8;});}
-# 652
+# 666
 goto _LL0;}}}default:
- goto _LL0;}_LL0:;}{
-# 655
-struct Cyc_PrattProver_Node*n=Cyc_PrattProver_term2node(g,t);
-struct Cyc_PrattProver_Node*z=({struct Cyc_PrattProver_Graph*_Tmp0=g;Cyc_PrattProver_term2node(_Tmp0,Cyc_AssnDef_zero());});
-int*n2z_s=Cyc_PrattProver_lookup_dist(n,z,1);
-if(n2z_s!=0){
-int*z2n_s=Cyc_PrattProver_lookup_dist(z,n,1);
-if(z2n_s!=0 &&*n2z_s==-*z2n_s)return({struct _tuple11 _Tmp0;_Tmp0.f0=1,_Tmp0.f1=(unsigned)*n2z_s,_Tmp0.f2=0;_Tmp0;});}{
-# 662
-int*n2z_u=Cyc_PrattProver_lookup_dist(n,z,0);
-if(n2z_u!=0){
-int*z2n_u=Cyc_PrattProver_lookup_dist(z,n,0);
-if(z2n_u!=0 &&*n2z_u==-*z2n_u)return({struct _tuple11 _Tmp0;_Tmp0.f0=1,_Tmp0.f1=(unsigned)*n2z_u,_Tmp0.f2=0;_Tmp0;});}
-# 667
-if(newterm!=0){
-if(t==newterm)newterm=0;}
-# 670
-return({struct _tuple11 _Tmp0;_Tmp0.f0=0,_Tmp0.f1=2989U,_Tmp0.f2=newterm;_Tmp0;});}}}
-# 681 "pratt_prover.cyc"
+ goto _LL0;}_LL0:;}
+# 669
+if(t==newterm)newterm=0;{
+struct Cyc_PrattProver_Node*n_node=Cyc_PrattProver_term2node(g,t);
+struct Cyc_PrattProver_Node*z_node=({struct Cyc_PrattProver_Graph*_Tmp0=g;Cyc_PrattProver_term2node(_Tmp0,Cyc_AssnDef_zero());});
+struct _tuple14 _Tmp0=Cyc_PrattProver_equal_node_const(n_node,z_node);unsigned _Tmp1;int _Tmp2;_Tmp2=_Tmp0.f0;_Tmp1=_Tmp0.f1;{int ok=_Tmp2;unsigned c=_Tmp1;
+if(ok)return({struct _tuple11 _Tmp3;_Tmp3.f0=1,_Tmp3.f1=c,_Tmp3.f2=newterm;_Tmp3;});
+return({struct _tuple11 _Tmp3;_Tmp3.f0=0,_Tmp3.f1=2989U,_Tmp3.f2=newterm;_Tmp3;});}}}
+# 685 "pratt_prover.cyc"
 static void Cyc_PrattProver_congruence_close_graph(int dummy,struct Cyc_PrattProver_Graph*g){
 struct Cyc_PrattProver_Node*rs=g->rows;for(0;rs!=0;rs=rs->next){
 struct Cyc_PrattProver_Node*ts=g->rows;for(0;ts!=0;ts=ts->next){
 struct _tuple12 _Tmp0=({struct _tuple12 _Tmp1;_Tmp1.f0=rs->rep,_Tmp1.f1=ts->rep;_Tmp1;});void*_Tmp1;void*_Tmp2;enum Cyc_Absyn_Primop _Tmp3;void*_Tmp4;void*_Tmp5;enum Cyc_Absyn_Primop _Tmp6;switch(*((int*)_Tmp0.f0)){case 5: if(*((int*)_Tmp0.f1)==5){_Tmp6=((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)_Tmp0.f0)->f1;_Tmp5=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)_Tmp0.f0)->f2;_Tmp4=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)_Tmp0.f0)->f3;_Tmp3=((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)_Tmp0.f1)->f1;_Tmp2=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)_Tmp0.f1)->f2;_Tmp1=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)_Tmp0.f1)->f3;if((int)((enum Cyc_Absyn_Primop)_Tmp6)==(int)((enum Cyc_Absyn_Primop)_Tmp3)){enum Cyc_Absyn_Primop p1=_Tmp6;void*t11=_Tmp5;void*t12=_Tmp4;enum Cyc_Absyn_Primop p2=_Tmp3;void*t21=_Tmp2;void*t22=_Tmp1;
-# 686
+# 690
 if(!Cyc_PrattProver_equal_terms(g,t11,t21))goto _LL0;
 if(!Cyc_PrattProver_equal_terms(g,t12,t22))goto _LL0;
 Cyc_PrattProver_add_eq(g,rs->rep,ts->rep);
 goto _LL0;}else{goto _LL7;}}else{goto _LL7;}case 4: if(*((int*)_Tmp0.f1)==4){_Tmp6=((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)_Tmp0.f0)->f1;_Tmp5=(void*)((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)_Tmp0.f0)->f2;_Tmp3=((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)_Tmp0.f1)->f1;_Tmp4=(void*)((struct Cyc_AssnDef_Unop_AssnDef_Term_struct*)_Tmp0.f1)->f2;if((int)((enum Cyc_Absyn_Primop)_Tmp6)==(int)((enum Cyc_Absyn_Primop)_Tmp3)){enum Cyc_Absyn_Primop p1=_Tmp6;void*t1=_Tmp5;enum Cyc_Absyn_Primop p2=_Tmp3;void*t2=_Tmp4;
-# 691
+# 695
 if(!Cyc_PrattProver_equal_terms(g,t1,t2))goto _LL0;
 Cyc_PrattProver_add_eq(g,rs->rep,ts->rep);
 goto _LL0;}else{goto _LL7;}}else{goto _LL7;}case 6: if(*((int*)_Tmp0.f1)==6){_Tmp5=(void*)((struct Cyc_AssnDef_Cast_AssnDef_Term_struct*)_Tmp0.f0)->f1;_Tmp4=(void*)((struct Cyc_AssnDef_Cast_AssnDef_Term_struct*)_Tmp0.f0)->f2;_Tmp2=(void*)((struct Cyc_AssnDef_Cast_AssnDef_Term_struct*)_Tmp0.f1)->f1;_Tmp1=(void*)((struct Cyc_AssnDef_Cast_AssnDef_Term_struct*)_Tmp0.f1)->f2;{void*tp1=_Tmp5;void*t1=_Tmp4;void*tp2=_Tmp2;void*t2=_Tmp1;
-# 695
+# 699
 if(Cyc_Tcutil_typecmp(tp1,tp2)==0){
 if(!Cyc_PrattProver_equal_terms(g,t1,t2))goto _LL0;
 Cyc_PrattProver_add_eq(g,rs->rep,ts->rep);}
-# 699
+# 703
 goto _LL0;}}else{goto _LL7;}default: _LL7:
  goto _LL0;}_LL0:;}}}
-# 707
+# 711
 static struct Cyc_PrattProver_Graph*Cyc_PrattProver_congruence_close_graphs(struct Cyc_PrattProver_Graph*gs){
-return({(struct Cyc_PrattProver_Graph*(*)(void(*)(int,struct Cyc_PrattProver_Graph*),int,struct Cyc_PrattProver_Graph*))Cyc_PrattProver_app_graphs;})(Cyc_PrattProver_congruence_close_graph,0,gs);}struct _tuple14{int f0;void*f1;int f2;};
-# 713
-static struct _tuple14 Cyc_PrattProver_break_term(struct Cyc_PrattProver_Graph*g,void*t,int is_signed){
+return({(struct Cyc_PrattProver_Graph*(*)(void(*)(int,struct Cyc_PrattProver_Graph*),int,struct Cyc_PrattProver_Graph*))Cyc_PrattProver_app_graphs;})(Cyc_PrattProver_congruence_close_graph,0,gs);}struct _tuple15{int f0;void*f1;int f2;};
+# 717
+static struct _tuple15 Cyc_PrattProver_break_term(struct Cyc_PrattProver_Graph*g,void*t,int is_signed){
 {unsigned _Tmp0;void*_Tmp1;if(*((int*)t)==5){if(((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f1==Cyc_Absyn_Plus){if(*((int*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f3)==0){_Tmp1=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f2;_Tmp0=((struct Cyc_AssnDef_Uint_AssnDef_Term_struct*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)t)->f3)->f1;{void*t1=_Tmp1;unsigned c2=_Tmp0;
-# 716
+# 720
 if((int)c2 >= 0){
 if(is_signed){
 int*dist=({struct Cyc_PrattProver_Node*_Tmp2=Cyc_PrattProver_term2node(g,t1);Cyc_PrattProver_lookup_dist(_Tmp2,({struct Cyc_PrattProver_Graph*_Tmp3=g;Cyc_PrattProver_term2node(_Tmp3,Cyc_AssnDef_zero());}),1);});
-# 720
+# 724
 if(dist!=0 &&*dist <= 2147483647 - (int)c2)
-return({struct _tuple14 _Tmp2;_Tmp2.f0=1,_Tmp2.f1=t1,_Tmp2.f2=(int)c2;_Tmp2;});}else{
-# 725
+return({struct _tuple15 _Tmp2;_Tmp2.f0=1,_Tmp2.f1=t1,_Tmp2.f2=(int)c2;_Tmp2;});}else{
+# 729
 int*dist=({struct Cyc_PrattProver_Node*_Tmp2=Cyc_PrattProver_term2node(g,t1);Cyc_PrattProver_lookup_dist(_Tmp2,({struct Cyc_PrattProver_Graph*_Tmp3=g;Cyc_PrattProver_term2node(_Tmp3,Cyc_AssnDef_zero());}),0);});
 if(dist!=0)
-return({struct _tuple14 _Tmp2;_Tmp2.f0=1,_Tmp2.f1=t1,_Tmp2.f2=(int)c2;_Tmp2;});}}else{
-# 731
+return({struct _tuple15 _Tmp2;_Tmp2.f0=1,_Tmp2.f1=t1,_Tmp2.f2=(int)c2;_Tmp2;});}}else{
+# 735
 if(is_signed){
-# 733
+# 737
 int*dist=({struct Cyc_PrattProver_Node*_Tmp2=({struct Cyc_PrattProver_Graph*_Tmp3=g;Cyc_PrattProver_term2node(_Tmp3,Cyc_AssnDef_zero());});Cyc_PrattProver_lookup_dist(_Tmp2,Cyc_PrattProver_term2node(g,t1),1);});
 if(dist!=0 &&*dist <= (int)(c2 - 2147483648U))
-return({struct _tuple14 _Tmp2;_Tmp2.f0=1,_Tmp2.f1=t1,_Tmp2.f2=(int)c2;_Tmp2;});}else{
-# 739
+return({struct _tuple15 _Tmp2;_Tmp2.f0=1,_Tmp2.f1=t1,_Tmp2.f2=(int)c2;_Tmp2;});}else{
+# 743
 int*dist=({struct Cyc_PrattProver_Node*_Tmp2=({struct Cyc_PrattProver_Graph*_Tmp3=g;Cyc_PrattProver_term2node(_Tmp3,Cyc_AssnDef_zero());});Cyc_PrattProver_lookup_dist(_Tmp2,Cyc_PrattProver_term2node(g,t1),0);});
 if(dist!=0 &&*dist <= (int)c2)
-return({struct _tuple14 _Tmp2;_Tmp2.f0=1,_Tmp2.f1=t1,_Tmp2.f2=(int)c2;_Tmp2;});}}
-# 745
-goto _LL0;}}else{goto _LL3;}}else{goto _LL3;}}else{_LL3:
-# 747
- goto _LL0;}_LL0:;}
+return({struct _tuple15 _Tmp2;_Tmp2.f0=1,_Tmp2.f1=t1,_Tmp2.f2=(int)c2;_Tmp2;});}}
 # 749
-return({struct _tuple14 _Tmp0;_Tmp0.f0=0,_Tmp0.f1=t,_Tmp0.f2=0;_Tmp0;});}
-# 752
+goto _LL0;}}else{goto _LL3;}}else{goto _LL3;}}else{_LL3:
+# 751
+ goto _LL0;}_LL0:;}
+# 753
+return({struct _tuple15 _Tmp0;_Tmp0.f0=0,_Tmp0.f1=t,_Tmp0.f2=0;_Tmp0;});}
+# 756
 static void Cyc_PrattProver_break_term_in_graph(int dummy,struct Cyc_PrattProver_Graph*g){
 struct Cyc_PrattProver_Node*rs=g->rows;for(0;rs!=0;rs=rs->next){
 if(!rs->broken_as_signed){
-struct _tuple14 _Tmp0=Cyc_PrattProver_break_term(g,rs->rep,1);int _Tmp1;void*_Tmp2;int _Tmp3;_Tmp3=_Tmp0.f0;_Tmp2=_Tmp0.f1;_Tmp1=_Tmp0.f2;{int ok=_Tmp3;void*t1=_Tmp2;int c1=_Tmp1;
+struct _tuple15 _Tmp0=Cyc_PrattProver_break_term(g,rs->rep,1);int _Tmp1;void*_Tmp2;int _Tmp3;_Tmp3=_Tmp0.f0;_Tmp2=_Tmp0.f1;_Tmp1=_Tmp0.f2;{int ok=_Tmp3;void*t1=_Tmp2;int c1=_Tmp1;
 if(ok){
 rs->broken_as_signed=1;
 Cyc_PrattProver_set_distance(g,rs->rep,t1,c1,1);
 if((unsigned)c1!=2147483648U)
 Cyc_PrattProver_set_distance(g,t1,rs->rep,- c1,1);}}}
-# 763
+# 767
 if(!rs->broken_as_unsigned){
-struct _tuple14 _Tmp0=Cyc_PrattProver_break_term(g,rs->rep,0);int _Tmp1;void*_Tmp2;int _Tmp3;_Tmp3=_Tmp0.f0;_Tmp2=_Tmp0.f1;_Tmp1=_Tmp0.f2;{int ok=_Tmp3;void*t1=_Tmp2;int c1=_Tmp1;
+struct _tuple15 _Tmp0=Cyc_PrattProver_break_term(g,rs->rep,0);int _Tmp1;void*_Tmp2;int _Tmp3;_Tmp3=_Tmp0.f0;_Tmp2=_Tmp0.f1;_Tmp1=_Tmp0.f2;{int ok=_Tmp3;void*t1=_Tmp2;int c1=_Tmp1;
 if(ok){
 rs->broken_as_unsigned=1;
 Cyc_PrattProver_set_distance(g,rs->rep,t1,c1,0);
 if((unsigned)c1!=2147483648U)
 Cyc_PrattProver_set_distance(g,t1,rs->rep,- c1,0);}}}{
-# 772
+# 776
 struct _tuple11 _Tmp0=Cyc_PrattProver_subst_term_with_const(g,rs->rep);unsigned _Tmp1;int _Tmp2;_Tmp2=_Tmp0.f0;_Tmp1=_Tmp0.f1;{int ok=_Tmp2;unsigned c1=_Tmp1;
-# 774
+# 778
 if(ok){
 void*_Tmp3=rs->rep;unsigned _Tmp4;void*_Tmp5;if(*((int*)_Tmp3)==5){if(((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)_Tmp3)->f1==Cyc_Absyn_Plus){if(*((int*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)_Tmp3)->f3)==0){_Tmp5=(void*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)_Tmp3)->f2;_Tmp4=((struct Cyc_AssnDef_Uint_AssnDef_Term_struct*)((struct Cyc_AssnDef_Binop_AssnDef_Term_struct*)_Tmp3)->f3)->f1;{void*t1=_Tmp5;unsigned c2=_Tmp4;
-# 777
+# 781
 rs->broken_as_signed=1;
 rs->broken_as_unsigned=1;
 ({struct Cyc_PrattProver_Graph*_Tmp6=g;void*_Tmp7=t1;Cyc_PrattProver_add_eq(_Tmp6,_Tmp7,Cyc_AssnDef_uint(c1 - c2));});
 goto _LL9;}}else{goto _LLC;}}else{goto _LLC;}}else{_LLC:
-# 782
+# 786
  goto _LL9;}_LL9:;}}}}}
-# 788
+# 792
 static struct Cyc_PrattProver_Graph*Cyc_PrattProver_break_term_in_graphs(struct Cyc_PrattProver_Graph*gs){
 return({(struct Cyc_PrattProver_Graph*(*)(void(*)(int,struct Cyc_PrattProver_Graph*),int,struct Cyc_PrattProver_Graph*))Cyc_PrattProver_app_graphs;})(Cyc_PrattProver_break_term_in_graph,0,gs);}
-# 792
+# 796
 static void Cyc_PrattProver_associate_ud_sd_in_graph(int dummy,struct Cyc_PrattProver_Graph*g){
 struct Cyc_PrattProver_Node*zero_node=({struct Cyc_PrattProver_Graph*_Tmp0=g;Cyc_PrattProver_term2node(_Tmp0,Cyc_AssnDef_zero());});
 {struct Cyc_PrattProver_Node*rs=g->rows;for(0;rs!=0;rs=rs->next){
 int src_big;
 int src_small;
-# 799
+# 803
 int*dist=Cyc_PrattProver_lookup_dist(zero_node,rs,0);
 if(dist!=0 &&(unsigned)*dist==2147483648U)
 src_big=1;else{
-# 803
+# 807
 src_big=0;}{
-# 805
+# 809
 int*dist=Cyc_PrattProver_lookup_dist(rs,zero_node,0);
 if(dist!=0 &&*dist <= 2147483647)
 src_small=1;else{
-# 809
+# 813
 src_small=0;}
 {struct Cyc_PrattProver_Distance*uds=rs->unsigned_distances;for(0;uds!=0;uds=uds->next){
 if(!uds->associated_ud_sd){
@@ -979,23 +980,23 @@ int*dist=Cyc_PrattProver_lookup_dist(uds->target,zero_node,0);
 if(dist!=0 &&*dist <= 2147483647){
 Cyc_PrattProver_set_distance(g,rs->rep,uds->target->rep,uds->dist,1);
 uds->associated_ud_sd=1;}}else{
-# 818
+# 822
 if(src_big && !src_small){
 int*dist=Cyc_PrattProver_lookup_dist(zero_node,uds->target,0);
 if(dist!=0 &&(unsigned)*dist==2147483648U){
 Cyc_PrattProver_set_distance(g,rs->rep,uds->target->rep,uds->dist,1);
 uds->associated_ud_sd=1;}}}}}}{
-# 828
+# 832
 int*dist=Cyc_PrattProver_lookup_dist(zero_node,rs,1);
 if(dist!=0 &&*dist <= 0)
 src_big=1;else{
-# 832
+# 836
 src_big=0;}{
-# 834
+# 838
 int*dist=Cyc_PrattProver_lookup_dist(rs,zero_node,1);
 if(dist!=0 &&*dist < 0)
 src_small=1;else{
-# 838
+# 842
 src_small=0;}{
 struct Cyc_PrattProver_Distance*sds=rs->signed_distances;for(0;sds!=0;sds=sds->next){
 if(!sds->associated_ud_sd){
@@ -1004,178 +1005,178 @@ int*dist=Cyc_PrattProver_lookup_dist(sds->target,zero_node,1);
 if(dist!=0 &&*dist < 0){
 Cyc_PrattProver_set_distance(g,rs->rep,sds->target->rep,sds->dist,0);
 sds->associated_ud_sd=1;}}else{
-# 847
+# 851
 if(src_big && !src_small){
 int*dist=Cyc_PrattProver_lookup_dist(zero_node,sds->target,1);
 if(dist!=0 &&*dist <= 0){
 Cyc_PrattProver_set_distance(g,rs->rep,sds->target->rep,sds->dist,0);
 sds->associated_ud_sd=1;}}}}}}}}}}}
-# 857
+# 861
 return;}
-# 860
+# 864
 static struct Cyc_PrattProver_Graph*Cyc_PrattProver_associate_ud_sd_in_graphs(struct Cyc_PrattProver_Graph*gs){
 return({(struct Cyc_PrattProver_Graph*(*)(void(*)(int,struct Cyc_PrattProver_Graph*),int,struct Cyc_PrattProver_Graph*))Cyc_PrattProver_app_graphs;})(Cyc_PrattProver_associate_ud_sd_in_graph,0,gs);}
-# 867
+# 871
 static void Cyc_PrattProver_add_constraint(struct Cyc_PrattProver_Graph*g,void*t1,enum Cyc_AssnDef_Primreln p,void*t2){
 {struct _tuple12 _Tmp0=({struct _tuple12 _Tmp1;_Tmp1.f0=t1,_Tmp1.f1=t2;_Tmp1;});unsigned _Tmp1;unsigned _Tmp2;if(*((int*)_Tmp0.f0)==0){if(*((int*)_Tmp0.f1)==0){_Tmp2=((struct Cyc_AssnDef_Uint_AssnDef_Term_struct*)_Tmp0.f0)->f1;_Tmp1=((struct Cyc_AssnDef_Uint_AssnDef_Term_struct*)_Tmp0.f1)->f1;{unsigned c1=_Tmp2;unsigned c2=_Tmp1;
-# 870
+# 874
 switch((int)p){case Cyc_AssnDef_ULt:
  if(c1 < c2)return;goto _LL9;case Cyc_AssnDef_ULte:
  if(c1 <= c2)return;goto _LL9;case Cyc_AssnDef_SLt:
  if((int)c1 < (int)c2)return;goto _LL9;case Cyc_AssnDef_SLte:
  if((int)c1 <= (int)c2)return;goto _LL9;default:
 ({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("Vcgen: found bad primop in add_constraint",sizeof(char),42U),_tag_fat(0U,sizeof(void*),0));}_LL9:;
-# 877
+# 881
 _throw(& Cyc_PrattProver_inconsistent);}}else{_Tmp2=((struct Cyc_AssnDef_Uint_AssnDef_Term_struct*)_Tmp0.f0)->f1;{unsigned c1=_Tmp2;
-# 906
+# 910
 switch((int)p){case Cyc_AssnDef_ULt:
-# 909
+# 913
  if(c1==4294967295U)_throw(& Cyc_PrattProver_inconsistent);
 c1=c1 + 1U;
 goto _LL23;case Cyc_AssnDef_ULte: _LL23:
-# 914
+# 918
  if(c1 > 2147483647U)
-# 917
+# 921
 ({struct Cyc_PrattProver_Graph*_Tmp3=g;void*_Tmp4=Cyc_AssnDef_zero();Cyc_PrattProver_set_distance(_Tmp3,_Tmp4,t2,-2147483648,0);});else{
-# 922
+# 926
 ({struct Cyc_PrattProver_Graph*_Tmp3=g;void*_Tmp4=Cyc_AssnDef_zero();void*_Tmp5=t2;Cyc_PrattProver_set_distance(_Tmp3,_Tmp4,_Tmp5,-(int)c1,0);});}
-# 924
+# 928
 return;case Cyc_AssnDef_SLt:
-# 927
+# 931
  if(c1==2147483647U)_throw(& Cyc_PrattProver_inconsistent);
 c1=c1 + 1U;
 goto _LL27;case Cyc_AssnDef_SLte: _LL27:
-# 933
+# 937
  if(c1==2147483648U)return;
 return({struct Cyc_PrattProver_Graph*_Tmp3=g;void*_Tmp4=Cyc_AssnDef_zero();void*_Tmp5=t2;Cyc_PrattProver_set_distance(_Tmp3,_Tmp4,_Tmp5,-(int)c1,1);});default:
 ({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("Vcgen: found bad primop in add_constraint",sizeof(char),42U),_tag_fat(0U,sizeof(void*),0));};}}}else{if(*((int*)_Tmp0.f1)==0){_Tmp2=((struct Cyc_AssnDef_Uint_AssnDef_Term_struct*)_Tmp0.f1)->f1;{unsigned c2=_Tmp2;
-# 880
+# 884
 switch((int)p){case Cyc_AssnDef_ULt:
-# 883
+# 887
  if(c2==0U)_throw(& Cyc_PrattProver_inconsistent);
 c2=c2 - 1U;
 goto _LL18;case Cyc_AssnDef_ULte: _LL18:
-# 888
- if(c2 <= 2147483647U)
-# 890
-({struct Cyc_PrattProver_Graph*_Tmp3=g;void*_Tmp4=t1;void*_Tmp5=Cyc_AssnDef_zero();Cyc_PrattProver_set_distance(_Tmp3,_Tmp4,_Tmp5,(int)c2,0);});
 # 892
+ if(c2 <= 2147483647U)
+# 894
+({struct Cyc_PrattProver_Graph*_Tmp3=g;void*_Tmp4=t1;void*_Tmp5=Cyc_AssnDef_zero();Cyc_PrattProver_set_distance(_Tmp3,_Tmp4,_Tmp5,(int)c2,0);});
+# 896
 return;case Cyc_AssnDef_SLt:
-# 895
+# 899
  if(c2==2147483648U)_throw(& Cyc_PrattProver_inconsistent);
 c2=c2 - 1U;
 goto _LL1C;case Cyc_AssnDef_SLte: _LL1C:
-# 900
+# 904
 ({struct Cyc_PrattProver_Graph*_Tmp3=g;void*_Tmp4=t1;void*_Tmp5=Cyc_AssnDef_zero();Cyc_PrattProver_set_distance(_Tmp3,_Tmp4,_Tmp5,(int)c2,1);});
 return;default:
 ({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("Vcgen: found bad primop in add_constraint",sizeof(char),42U),_tag_fat(0U,sizeof(void*),0));};}}else{
-# 937
-goto _LL0;}}_LL0:;}
 # 941
+goto _LL0;}}_LL0:;}
+# 945
 switch((int)p){case Cyc_AssnDef_ULt:
-# 944
+# 948
  return Cyc_PrattProver_set_distance(g,t1,t2,-1,0);case Cyc_AssnDef_ULte:
-# 947
+# 951
  return Cyc_PrattProver_set_distance(g,t1,t2,0,0);case Cyc_AssnDef_SLt:
-# 950
+# 954
  return Cyc_PrattProver_set_distance(g,t1,t2,-1,1);case Cyc_AssnDef_SLte:
-# 953
+# 957
  return Cyc_PrattProver_set_distance(g,t1,t2,0,1);default:
 ({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("Vcgen:found bad primop in add_constraint",sizeof(char),41U),_tag_fat(0U,sizeof(void*),0));};}
-# 959
+# 963
 static void Cyc_PrattProver_add_eq(struct Cyc_PrattProver_Graph*g,void*t1,void*t2){
 if(t1==t2)return;
 Cyc_PrattProver_add_constraint(g,t1,5U,t2);
 Cyc_PrattProver_add_constraint(g,t2,5U,t1);
 Cyc_PrattProver_add_constraint(g,t1,3U,t2);
-Cyc_PrattProver_add_constraint(g,t2,3U,t1);}struct _tuple15{void*f0;enum Cyc_AssnDef_Primreln f1;void*f2;};
-# 967
-static void Cyc_PrattProver_add_prim(struct _tuple15*p,struct Cyc_PrattProver_Graph*g){
-struct _tuple15 _Tmp0=*p;void*_Tmp1;enum Cyc_AssnDef_Primreln _Tmp2;void*_Tmp3;_Tmp3=_Tmp0.f0;_Tmp2=_Tmp0.f1;_Tmp1=_Tmp0.f2;{void*t1=_Tmp3;enum Cyc_AssnDef_Primreln p=_Tmp2;void*t2=_Tmp1;
+Cyc_PrattProver_add_constraint(g,t2,3U,t1);}struct _tuple16{void*f0;enum Cyc_AssnDef_Primreln f1;void*f2;};
+# 971
+static void Cyc_PrattProver_add_prim(struct _tuple16*p,struct Cyc_PrattProver_Graph*g){
+struct _tuple16 _Tmp0=*p;void*_Tmp1;enum Cyc_AssnDef_Primreln _Tmp2;void*_Tmp3;_Tmp3=_Tmp0.f0;_Tmp2=_Tmp0.f1;_Tmp1=_Tmp0.f2;{void*t1=_Tmp3;enum Cyc_AssnDef_Primreln p=_Tmp2;void*t2=_Tmp1;
 if((int)p==0)
 Cyc_PrattProver_add_eq(g,t1,t2);else{
-# 972
-Cyc_PrattProver_add_constraint(g,t1,p,t2);}}}char Cyc_PrattProver_TooLarge[9U]="TooLarge";struct Cyc_PrattProver_TooLarge_exn_struct{char*tag;};
 # 976
+Cyc_PrattProver_add_constraint(g,t1,p,t2);}}}char Cyc_PrattProver_TooLarge[9U]="TooLarge";struct Cyc_PrattProver_TooLarge_exn_struct{char*tag;};
+# 980
 struct Cyc_PrattProver_TooLarge_exn_struct Cyc_PrattProver_too_large={Cyc_PrattProver_TooLarge};
-# 979
+# 983
 unsigned Cyc_PrattProver_max_paths=33U;
 unsigned Cyc_PrattProver_max_paths_seen=0U;
-# 993 "pratt_prover.cyc"
+# 997 "pratt_prover.cyc"
 static struct Cyc_PrattProver_Graph*Cyc_PrattProver_cgraph(struct Cyc_PrattProver_Graph*gs,void*a){
 LOOP:
-# 997
+# 1001
  if(gs==0)return gs;
 {enum Cyc_AssnDef_Primreln _Tmp0;void*_Tmp1;void*_Tmp2;switch(*((int*)a)){case 0:
  goto _LL0;case 1:
  gs=0;goto _LL0;case 3: _Tmp2=(void*)((struct Cyc_AssnDef_And_AssnDef_Assn_struct*)a)->f1;_Tmp1=(void*)((struct Cyc_AssnDef_And_AssnDef_Assn_struct*)a)->f2;{void*a1=_Tmp2;void*a2=_Tmp1;
-# 1002
+# 1006
 gs=Cyc_PrattProver_cgraph(gs,a1);
 a=a2;
 goto LOOP;}case 4: _Tmp2=(void*)((struct Cyc_AssnDef_Or_AssnDef_Assn_struct*)a)->f1;_Tmp1=(void*)((struct Cyc_AssnDef_Or_AssnDef_Assn_struct*)a)->f2;{void*a1=_Tmp2;void*a2=_Tmp1;
-# 1006
+# 1010
 unsigned n=Cyc_PrattProver_num_graphs(gs);
 if(Cyc_PrattProver_max_paths_seen < n)Cyc_PrattProver_max_paths_seen=n;
-# 1009
+# 1013
 if(n >= Cyc_PrattProver_max_paths)
 _throw(& Cyc_PrattProver_too_large);{
-# 1013
+# 1017
 struct Cyc_PrattProver_Graph*gs1=gs;
 struct Cyc_PrattProver_Graph*gs2=Cyc_PrattProver_copy_graphs(gs);
-# 1016
+# 1020
 gs1=Cyc_PrattProver_cgraph(gs1,a1);
 gs1=Cyc_PrattProver_associate_ud_sd_in_graphs(gs1);
 gs1=Cyc_PrattProver_break_term_in_graphs(gs1);
-# 1020
+# 1024
 gs1=Cyc_PrattProver_congruence_close_graphs(gs1);
 gs1=Cyc_PrattProver_associate_ud_sd_in_graphs(gs1);
-# 1023
+# 1027
 gs2=Cyc_PrattProver_cgraph(gs2,a2);
 gs2=Cyc_PrattProver_associate_ud_sd_in_graphs(gs2);
 gs2=Cyc_PrattProver_break_term_in_graphs(gs2);
-# 1027
+# 1031
 gs2=Cyc_PrattProver_congruence_close_graphs(gs2);
 gs2=Cyc_PrattProver_associate_ud_sd_in_graphs(gs2);
-# 1030
+# 1034
 gs=Cyc_PrattProver_graph_append(gs1,gs2);
 goto _LL0;}}case 2: if(*((int*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f1)==0){if(((struct Cyc_AssnDef_Uint_AssnDef_Term_struct*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f1)->f1==0){if(((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f2==Cyc_AssnDef_Neq){_Tmp2=(void*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f3;{void*t2=_Tmp2;
 _Tmp2=t2;goto _LLC;}}else{goto _LLF;}}else{if(((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f2==Cyc_AssnDef_Neq){if(*((int*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f3)==0){if(((struct Cyc_AssnDef_Uint_AssnDef_Term_struct*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f3)->f1==0)goto _LLB;else{goto _LLD;}}else{goto _LLD;}}else{goto _LLF;}}}else{if(((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f2==Cyc_AssnDef_Neq){if(*((int*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f3)==0){if(((struct Cyc_AssnDef_Uint_AssnDef_Term_struct*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f3)->f1==0){_LLB: _Tmp2=(void*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f1;_LLC: {void*t1=_Tmp2;
-# 1036
+# 1040
 void*topt=Cyc_AssnDef_get_term_type(t1);
 if(topt==0 || Cyc_Tcutil_is_signed_type(topt)){
 _Tmp2=t1;_Tmp1=Cyc_AssnDef_zero();goto _LLE;}
 a=({void*_Tmp3=Cyc_AssnDef_zero();Cyc_AssnDef_ult(_Tmp3,t1);});
 goto LOOP;}}else{goto _LLD;}}else{_LLD: _Tmp2=(void*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f1;_Tmp1=(void*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f3;_LLE: {void*t1=_Tmp2;void*t2=_Tmp1;
-# 1044
+# 1048
 a=({void*_Tmp3=({void*_Tmp4=Cyc_AssnDef_slt(t1,t2);Cyc_AssnDef_or(_Tmp4,Cyc_AssnDef_slt(t2,t1));});Cyc_AssnDef_and(_Tmp3,({void*_Tmp4=Cyc_AssnDef_ult(t1,t2);Cyc_AssnDef_or(_Tmp4,Cyc_AssnDef_ult(t2,t1));}));});
 goto LOOP;}}}else{_LLF: _Tmp2=(void*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f1;_Tmp0=((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f2;_Tmp1=(void*)((struct Cyc_AssnDef_Prim_AssnDef_Assn_struct*)a)->f3;{void*t1=_Tmp2;enum Cyc_AssnDef_Primreln p=_Tmp0;void*t2=_Tmp1;
-# 1053
-struct _tuple15 env=({struct _tuple15 _Tmp3;_Tmp3.f0=t1,_Tmp3.f1=p,_Tmp3.f2=t2;_Tmp3;});
-gs=({(struct Cyc_PrattProver_Graph*(*)(void(*)(struct _tuple15*,struct Cyc_PrattProver_Graph*),struct _tuple15*,struct Cyc_PrattProver_Graph*))Cyc_PrattProver_app_graphs;})(Cyc_PrattProver_add_prim,& env,gs);
-# 1058
+# 1057
+struct _tuple16 env=({struct _tuple16 _Tmp3;_Tmp3.f0=t1,_Tmp3.f1=p,_Tmp3.f2=t2;_Tmp3;});
+gs=({(struct Cyc_PrattProver_Graph*(*)(void(*)(struct _tuple16*,struct Cyc_PrattProver_Graph*),struct _tuple16*,struct Cyc_PrattProver_Graph*))Cyc_PrattProver_app_graphs;})(Cyc_PrattProver_add_prim,& env,gs);
+# 1062
 goto _LL0;}}}default:
-# 1061
+# 1065
  a=Cyc_AssnDef_reduce(a);
 goto LOOP;}_LL0:;}
-# 1064
+# 1068
 return gs;}
-# 1070
+# 1074
 static int Cyc_PrattProver_consistent(void*a){
 struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.handler))_Tmp1=1;if(!_Tmp1){
-# 1073
+# 1077
 {struct Cyc_PrattProver_Graph*gs=({struct Cyc_PrattProver_Graph*_Tmp2=Cyc_PrattProver_true_graph();Cyc_PrattProver_cgraph(_Tmp2,a);});
-# 1075
+# 1079
 gs=Cyc_PrattProver_associate_ud_sd_in_graphs(gs);
 gs=Cyc_PrattProver_congruence_close_graphs(gs);
 gs=Cyc_PrattProver_break_term_in_graphs(gs);
 gs=Cyc_PrattProver_associate_ud_sd_in_graphs(gs);{
-# 1081
-int _Tmp2=gs!=0;_npop_handler(0);return _Tmp2;}}
-# 1073
-;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;if(((struct Cyc_PrattProver_TooLarge_exn_struct*)_Tmp2)->tag==Cyc_PrattProver_TooLarge)
 # 1085
+int _Tmp2=gs!=0;_npop_handler(0);return _Tmp2;}}
+# 1077
+;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;if(((struct Cyc_PrattProver_TooLarge_exn_struct*)_Tmp2)->tag==Cyc_PrattProver_TooLarge)
+# 1089
 return 1;else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}};}}}
-# 1090
+# 1094
 int Cyc_PrattProver_constraint_prove(void*ctxt,void*a){
 void*b=({void*_Tmp0=ctxt;Cyc_AssnDef_and(_Tmp0,Cyc_AssnDef_not(a));});
 return !Cyc_PrattProver_consistent(b);}
