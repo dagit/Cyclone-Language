@@ -1483,8 +1483,16 @@ static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
   case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_))):
     check_rgn_accessible(te,loc,rt);
     check_nonzero_bound(loc, b);
-    if (!kind_leq(typ_kind(t2),&tmk) && !abstract_val_ok(te))
-      terr(loc,"can't dereference abstract pointer type");
+    if (!kind_leq(typ_kind(t2),&tmk) && !abstract_val_ok(te)) {
+      switch (compress(t2)) {
+      case &FnType(...):
+        if (Tc::aggressive_warn)
+          warn(loc,"unnecessary dereference for function type");
+        return t;
+      default:
+        terr(loc,"can't dereference abstract pointer type");
+      }
+    }
     return t2;
   default:
     return expr_err(te,loc,topt,"expecting *, @, or ? type but found %s",typ2string(t));
