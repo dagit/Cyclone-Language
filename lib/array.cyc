@@ -147,17 +147,11 @@ void msort(int less_eq(`a,`a),`a ?arr,int base_ofs, int len) {
   if (base_ofs < 0 || base_ofs + len > arr.size || len < 0)
     throw new Core::InvalidArg("Array::msort");
 
-  int limit_ofs = base_ofs + len; // This is one past the last elt to sort
-
-  // This doesn't need two scratch arrays, since we could go back and 
-  // forth from the to-be-sorted slice of the original array, but
-  // I'm not sure how the need to add base_ofs to every subscript and
-  // update would compare with the cost of the extra copy and space
-  // usage, but it really made my head hurt to think about, so I
-  // decided not to do it both ways just to benchmark.
-  `a ?from = new {for i < len : arr[0]}; // fill with junk
-  `a ?to   = new {for i < len : arr[i+base_ofs]};
+  `a ?from = new {for i < len : arr[0]}; // fill with `a junk
+  `a ?to   = arr+base_ofs;
   `a ?swap;
+
+  bool swapped = false;
    
   int stepsize; // Non-recursive mergesort repeatedly walks over
                 // the array, each time in bigger steps.
@@ -176,11 +170,11 @@ void msort(int less_eq(`a,`a),`a ?arr,int base_ofs, int len) {
     to = swap;
     dest = 0;
 
-    for (start = 0; start < limit_ofs; start = start + (stepsize * 2)) {
+    for (start = 0; start < len; start = start + (stepsize * 2)) {
       lstart = start;
-      rstart = MIN(start + stepsize, limit_ofs);
+      rstart = MIN(start + stepsize, len);
       lend = rstart;
-      rend = MIN(start + (stepsize * 2), limit_ofs);
+      rend = MIN(start + (stepsize * 2), len);
 
       while (lstart < lend && rstart < rend) {
         if (LESSEQ(lstart,rstart) <= 0) { // The <= makes it a stable sort
@@ -200,7 +194,8 @@ void msort(int less_eq(`a,`a),`a ?arr,int base_ofs, int len) {
     }
   }
 
-  for (int i = 0; i < len; i++) arr[i+base_ofs] = to[i];
+  if (swapped)
+    for (int i = 0; i < len; i++) from[i] = to[i];
 }
 
 
