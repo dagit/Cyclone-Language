@@ -84,6 +84,8 @@ using Absynpp;
 using RgnOrder;
 namespace Tcenv;
 
+bool warn_override = false;
+
 datatype exn {Env_error};
 datacon(exn,Env_error);
 
@@ -611,6 +613,17 @@ tenv_t<`g,`r> add_local_var(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te, vardec
     // This is a fail-safe. Maybe we should just clobber with Loc_n?
     throw new Impossible("add_local_var: called with Rel_n");
   }
+  if (Tcenv::warn_override)
+    try {
+      switch(lookup_ordinary(r,te,loc,vd->name,true))
+      {
+      case &VarRes(&Local_b(_)):  Tcutil::warn(loc,"declaration hides local"); break;
+      case &VarRes(&Global_b(_)): Tcutil::warn(loc,"declaration hides global"); break;
+      case &VarRes(&Pat_b(_)):    Tcutil::warn(loc,"declaration hides pattern variable"); break;
+      case &VarRes(&Param_b(_)):  Tcutil::warn(loc,"declaration hides parameter"); break;
+      default: break;
+      }
+    } catch { case &Dict::Absent: break; }
   let &Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
               capability,curr_rgn,flags,_} =
     get_fenv(te,"add_local_var");
@@ -739,6 +752,17 @@ bool in_lhs(tenv_t te) {
 // assume uniqueness has been checked elsewhere
 tenv_t<`g,`r> add_pat_var(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te,
                           vardecl_t vd : {`r2} > `r) {
+  if (Tcenv::warn_override)
+    try {
+      switch(lookup_ordinary(r,te,loc,vd->name,true))
+      {
+      case &VarRes(&Local_b(_)):  Tcutil::warn(loc,"pattern variable hides local"); break;
+      case &VarRes(&Global_b(_)): Tcutil::warn(loc,"pattern variable hides global"); break;
+      case &VarRes(&Pat_b(_)):    Tcutil::warn(loc,"pattern variable hides pattern variable"); break;
+      case &VarRes(&Param_b(_)):  Tcutil::warn(loc,"pattern variable hides parameter"); break;
+      default: break;
+      }
+    } catch { case &Dict::Absent: break; }
   let v  = (*vd->name)[1];
   let &Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
 	      capability,curr_rgn,flags,_} =

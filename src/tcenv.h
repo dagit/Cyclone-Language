@@ -223,5 +223,8 @@ extern void check_rgn_partial_order(tenv_t te, seg_t loc,
 
 extern void check_delayed_effects(tenv_t te);
 extern void check_delayed_constraints(tenv_t te);
+
+extern bool warn_override;
+
 }
 #endif
