@@ -612,7 +612,7 @@ namespace Absyn {
     // the vararg_call_info_t is non-null only if this is a vararg call
     // and is set during type-checking and used only for code generation.
     FnCall_e(exp_t,list_t<exp_t>,vararg_call_info_t *,bool resolved); //fn call
-    Throw_e(exp_t); // throw
+    Throw_e(exp_t,bool preserve_lineinfo); // throw.  
     NoInstantiate_e(exp_t); // e@<>
     Instantiate_e(exp_t,list_t<type_t>); // instantiation of polymorphic defn
     // (t)e.  bool indicates whether user inserted cast
@@ -1064,6 +1064,7 @@ namespace Absyn {
   extern exp_t unknowncall_exp(exp_t, list_t<exp_t,`H>, seg_t);
   extern exp_t fncall_exp(exp_t, list_t<exp_t,`H>, seg_t);
   extern exp_t throw_exp(exp_t, seg_t);
+  extern exp_t rethrow_exp(exp_t, seg_t);
   extern exp_t noinstantiate_exp(exp_t, seg_t);
   extern exp_t instantiate_exp(exp_t, list_t<type_t,`H>, seg_t);
   extern exp_t cast_exp(type_t, exp_t, bool user_cast, coercion_t, seg_t);

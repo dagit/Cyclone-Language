@@ -94,6 +94,7 @@ extern int _throw_arraybounds_fn(const char *filename, unsigned lineno);
 extern int _throw_badalloc_fn(const char *filename, unsigned lineno);
 extern int _throw_match_fn(const char *filename, unsigned lineno);
 extern int _throw_fn(void* e, const char *filename, unsigned lineno);
+extern int _rethrow(void* e);
 #define _throw_null() (_throw_null_fn(__FILE__,__LINE__))
 #define _throw_arraybounds() (_throw_arraybounds_fn(__FILE__,__LINE__))
 #define _throw_badalloc() (_throw_badalloc_fn(__FILE__,__LINE__))
@@ -933,7 +934,7 @@ struct _tuple0*_tmp36;struct Cyc_Core_Opt*_tmp35;struct Cyc_Core_Opt*_tmp11=(_tm
 # 69
 ;_pop_handler();}else{void*_tmp7=(void*)_exn_thrown;void*_tmp13=_tmp7;void*_tmp14;_LL6:;_LL7:
 # 85
- return 0;_LL8: _tmp14=_tmp13;_LL9:(void)_throw(_tmp14);_LL5:;}};}struct _tuple1{int f1;struct Cyc_Lineno_Pos*f2;};
+ return 0;_LL8: _tmp14=_tmp13;_LL9:(void)_rethrow(_tmp14);_LL5:;}};}struct _tuple1{int f1;struct Cyc_Lineno_Pos*f2;};
 # 89
 int Cyc_Lineno_place_cmp(struct _tuple1*place1,struct _tuple1*place2){
 return Cyc_Core_intcmp((*place1).f1,(*place2).f1);}
@@ -981,7 +982,7 @@ places=places->tl;}
 # 98
 ;_pop_handler();}else{void*_tmp16=(void*)_exn_thrown;void*_tmp1C=_tmp16;void*_tmp1D;void*_tmp1E;_LLB: _tmp1D=_tmp1C;_LLC:
 # 141
- Cyc_file_close(f);(int)_throw(_tmp1D);_LLD: _tmp1E=_tmp1C;_LLE:(void)_throw(_tmp1E);_LLA:;}};}
+ Cyc_file_close(f);(int)_throw(_tmp1D);_LLD: _tmp1E=_tmp1C;_LLE:(void)_rethrow(_tmp1E);_LLA:;}};}
 Cyc_file_close(f);
 return;};}
 # 146

@@ -1127,7 +1127,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
             exps2doc_prec(20,es),
             text(")"));
     break;
-  case &Throw_e(e1):
+  case &Throw_e(e1,_):
     s = cat(text("throw "), exp2doc_prec(myprec,e1));
     break;
   case &NoInstantiate_e(e1):

@@ -1211,7 +1211,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     let $(f,r) = anal_Rexp(env,false,inflow,e1);
     return anal_Rexp(env, copy_ctxt, f, e2);
 
-  case &Throw_e(e1):
+  case &Throw_e(e1,_):
     let $(f,r) = anal_Rexp(env,true,inflow,e1);
     use_Rval(env,e1->loc,f,r); // result irrelevant so long as initialized
     return $(BottomFL(),typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));

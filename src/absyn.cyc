@@ -666,7 +666,12 @@ exp_t instantiate_exp(exp_t e, list_t<type_t,`H> ts, seg_t loc) {
 exp_t cast_exp(type_t t, exp_t e, bool user_cast, coercion_t c, seg_t loc) { 
   return new_exp(new Cast_e(t,e,user_cast,c), loc);
 }
-exp_t throw_exp(exp_t e, seg_t loc) { return new_exp(new Throw_e(e),   loc); }
+exp_t throw_exp(exp_t e, seg_t loc) { 
+  return new_exp(new Throw_e(e,false),loc); 
+}
+exp_t rethrow_exp(exp_t e, seg_t loc) { 
+  return new_exp(new Throw_e(e,true),loc); 
+}
 exp_t address_exp(exp_t e, seg_t loc) { return new_exp(new Address_e(e), loc); }
 exp_t sizeoftyp_exp(type_t t, seg_t loc) {
   return new_exp(new Sizeoftyp_e(t), loc); 

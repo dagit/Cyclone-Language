@@ -747,7 +747,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     generate_line_directives = old_generate_line_directives;
     break;
 
-  case &Throw_e(e1): 
+  case &Throw_e(e1,_): 
     dumploc(e->loc);
     dump("throw"); dumpexp_prec(myprec,e1); break;
 

@@ -293,6 +293,7 @@ MAKE_VAR(_dyneither_ptr_decrease_size);
 MAKE_VAR(_swap_word);
 MAKE_VAR(_swap_dyneither);
 MAKE_VAR(_throw_match);
+MAKE_VAR(_rethrow);
 
 #undef MAKE_STRING
 #undef MAKE_VAR
@@ -1114,6 +1115,9 @@ static exp_t rcalloc_exp(exp_t rgn, exp_t s, exp_t n) {
 // throw an exception -- this is turned into a function call
 static exp_t newthrow_exp(exp_t e) {
   return fncall_exp(_throw_e, new List(e,NULL), DL);
+}
+static exp_t newrethrow_exp(exp_t e) {
+  return fncall_exp(_rethrow_e, new List(e,NULL), DL);
 }
 // throw a match exception
 static stmt_t throw_match_stmt() {
@@ -2932,10 +2936,11 @@ static void exp_to_c(env_t nv, exp_t e) {
       e->r = stmt_exp_r(s);
     }
     break;
-  case &Throw_e(e1):
+  case &Throw_e(e1,b):
     // throw e -> (t)(throw(e)), the latter being a function call to throw
     exp_to_c(nv,e1);
-    e->r = array_to_ptr_cast(typ_to_c(old_typ),newthrow_exp(e1),DL)->r;
+    let nt = b ? newrethrow_exp(e1) : newthrow_exp(e1);
+    e->r = array_to_ptr_cast(typ_to_c(old_typ),nt,DL)->r;
     break;
   case &NoInstantiate_e(e1): exp_to_c(nv,e1); break;
   case &Instantiate_e(e1,ts):
@@ -4529,7 +4534,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         let x_vd = new_vardecl(x,exn_typ(),NULL);
         xexp->topt = exn_typ();
         let p = new Pat{.r=new Var_p(x_vd,new Pat{.r=&Wild_p_val,.topt = exn_typ(), .loc = DL}), .topt=exn_typ(), .loc=DL};
-        let te = throw_exp(xexp,DL);
+        let te = rethrow_exp(xexp,DL);
         te->topt = &VoidType_val;
         let rs = exp_stmt(te,DL);
         let default_case =
@@ -4970,7 +4975,7 @@ static void exptypes_to_c(exp_t e) {
   case &AggrMember_e(e,...):   fallthru(e);
   case &AggrArrow_e(e,...):    fallthru(e);
   case &Address_e(e):        fallthru(e);
-  case &Throw_e(e):          fallthru(e);
+  case &Throw_e(e,_):        fallthru(e);
   case &NoInstantiate_e(e):  fallthru(e);
   case &Sizeofexp_e(e):      fallthru(e);
   case &Increment_e(e1,_):   exptypes_to_c(e1); break;

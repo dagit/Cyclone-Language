@@ -2913,7 +2913,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
       return;
     }
     break;
-  case &Throw_e(e1):
+  case &Throw_e(e1,_):
     t = tcThrow(te,loc,topt,e1); break;
   case &Instantiate_e(e2,ts):
     t = tcInstantiate(te,loc,topt,e2,ts); break;

@@ -93,6 +93,7 @@ extern int _throw_arraybounds_fn(const char *filename, unsigned lineno);
 extern int _throw_badalloc_fn(const char *filename, unsigned lineno);
 extern int _throw_match_fn(const char *filename, unsigned lineno);
 extern int _throw_fn(void* e, const char *filename, unsigned lineno);
+extern int _rethrow(void* e);
 #define _throw_null() (_throw_null_fn(__FILE__,__LINE__))
 #define _throw_arraybounds() (_throw_arraybounds_fn(__FILE__,__LINE__))
 #define _throw_badalloc() (_throw_badalloc_fn(__FILE__,__LINE__))

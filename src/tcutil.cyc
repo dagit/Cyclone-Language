@@ -389,7 +389,9 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
       break;
     }
     break;
-  case &Throw_e(e1): new_e = throw_exp(DC(pt,e1),e->loc); break;
+  case &Throw_e(e1,b): 
+    new_e = b ? rethrow_exp(DC(pt,e1),e->loc) : throw_exp(DC(pt,e1),e->loc); 
+    break;
   case &NoInstantiate_e(e1): new_e = noinstantiate_exp(DC(pt,e1),e->loc);
     break;
   case &Instantiate_e(e1,ts):

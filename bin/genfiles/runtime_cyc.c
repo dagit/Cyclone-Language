@@ -191,8 +191,11 @@ int _throw_fn(void* e, const char *filename, unsigned lineno) {// FIX: use struc
 }
 
 /* re-throw an exception, but keep the filename and lineno info */
-void Cyc_Core_rethrow(void *e) {
+int _rethrow(void *e) {
   _throw_fn(e, _exn_filename, _exn_lineno);
+}
+void Cyc_Core_rethrow(void *e) {
+  _rethrow(e);
 }
 
 #ifdef throw
