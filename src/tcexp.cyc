@@ -241,7 +241,9 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
     if (topt != NULL) {
       switch (compress(*topt)) {
       case &ArrayType(ArrayInfo{_,tq,_,_}):
-        return array_typ(char_typ, tq, elen, true_conref);
+        // as an array initializer, a string literal can be either
+        // treated as zero-terminated or not, hence the empty_conref.
+        return array_typ(char_typ, tq, elen, empty_conref());
       case &PointerType(_):
         if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
           e->topt = new Opt(t);

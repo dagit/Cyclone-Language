@@ -137,6 +137,7 @@ tunion ScanfArg<`r::R> {
   StringPtr_sa(char ?`r);
   DoublePtr_sa(double @`r);
   FloatPtr_sa(float @`r);
+  CharPtr_sa(char ?NOZEROTERM`r)
 };
 
 static short @`r va_arg_short_ptr(sarg_t<`r,`r2> a) {
@@ -176,6 +177,13 @@ static float @`r va_arg_float_ptr(sarg_t<`r,`r2> a) {
   }
 }  
 
+static char?NOZEROTERM`r va_arg_char_ptr(sarg_t<`r,`r2> a) {
+  switch (a) {
+  case &CharPtr_sa(p): return p;
+  case &StringPtr_sa(p): return (char ?NOZEROTERM)p;
+  default: throw new Invalid_argument("scan expects char pointer");
+  }
+}
 
 /* If errp != NULL, *errp|=1 if we see a premature EOF;
    *errp|=2 if we an invalid character. */
@@ -417,7 +425,7 @@ literal:
 				width = 1;
 			if (flags & SUPPRESS) {
 			    _IO_ssize_t sum = 0;
-                            for (;;) {
+                            for (;width > 0;) {
                               n = _IO_getc(fp);
                               if (n == EOF && width != 0) 
                                 goto eof_failure;
@@ -431,8 +439,8 @@ literal:
                             nread += sum;
 			} else {
 			    _IO_ssize_t sum = 0;
-                            let z = va_arg_string_ptr(*ap); ap++;
-                            for (;;) {
+                            let z = va_arg_char_ptr(*ap); ap++;
+                            for (;width > 0;) {
                               n = _IO_getc(fp);
                               if (n == EOF && width != 0)
                                 goto eof_failure;
@@ -440,16 +448,12 @@ literal:
                                 seen_eof++;
                                 break;
                               }
-                              if (z.size == 0) 
-                                goto eof_failure;
                               *z = (char)n;
+                              z++;
                               sum++;
                               width--;
-                              z++;
                             }
                             nread += sum;
-                            if (z.size != 0) 
-                              *z = '\0';
                             nassigned++;
                         }
 			break;

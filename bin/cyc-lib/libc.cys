@@ -2570,6 +2570,7 @@ epilogue {
     Int_pa(unsigned long);
     Double_pa(double);
     ShortPtr_pa(short @`r);
+    Buffer_pa(const char ?NOZEROTERM`r);
     IntPtr_pa(unsigned long @`r);
   };
   typedef tunion `r PrintArg<`r> parg_t<`r>;
@@ -2806,6 +2807,7 @@ epilogue {
     StringPtr_sa(char ?`r);
     DoublePtr_sa(double @`r);
     FloatPtr_sa(float @`r);
+    CharPtr_sa(char ?NOZEROTERM`r);
   };
   typedef tunion `r2 ScanfArg<`r1> sarg_t<`r1,`r2>;
 }

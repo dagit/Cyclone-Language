@@ -332,23 +332,24 @@ typedef struct{int __pos;Cyc_Std___mbstate_t __state;}Cyc_Std__G_fpos_t;typedef 
 Cyc_Std_fpos_t;struct Cyc_Std___cycFILE;struct Cyc_Std_Cstdio___abstractFILE;
 struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
 int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct
-Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int
-tag;unsigned int*f1;};struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct
-Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
-int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
-Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
-int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};int Cyc_Std_printf(
-struct _tagged_arr,struct _tagged_arr);extern char Cyc_Std_FileCloseError[19];extern
-char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{char*tag;struct
-_tagged_arr f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char
-Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];struct Cyc_Iter_Iter{void*
-env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);
-struct Cyc_Dict_Dict;extern char Cyc_Dict_Present[12];extern char Cyc_Dict_Absent[11];
-struct _tuple5{void*f1;void*f2;};struct _tuple5*Cyc_Dict_rchoose(struct
-_RegionHandle*r,struct Cyc_Dict_Dict*d);struct _tuple5*Cyc_Dict_rchoose(struct
-_RegionHandle*,struct Cyc_Dict_Dict*d);int Cyc_Std_strcmp(struct _tagged_arr s1,
-struct _tagged_arr s2);struct _tuple4 Cyc_Typerep_tuple_tl(void*typ){void*_tmp0=typ;
-unsigned int _tmp1;struct _tagged_arr _tmp2;_LL1: if(_tmp0 <= (void*)2?1:*((int*)
+Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_Buffer_pa_struct{int
+tag;struct _tagged_arr f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;
+};struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{
+int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
+Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
+int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
+};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_Std_CharPtr_sa_struct{
+int tag;struct _tagged_arr f1;};int Cyc_Std_printf(struct _tagged_arr,struct
+_tagged_arr);extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[
+18];struct Cyc_Std_FileOpenError_struct{char*tag;struct _tagged_arr f1;};struct Cyc_List_List{
+void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];extern char
+Cyc_List_Nth[8];struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};
+int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc_Dict_Dict;extern char Cyc_Dict_Present[
+12];extern char Cyc_Dict_Absent[11];struct _tuple5{void*f1;void*f2;};struct _tuple5*
+Cyc_Dict_rchoose(struct _RegionHandle*r,struct Cyc_Dict_Dict*d);struct _tuple5*Cyc_Dict_rchoose(
+struct _RegionHandle*,struct Cyc_Dict_Dict*d);int Cyc_Std_strcmp(struct _tagged_arr
+s1,struct _tagged_arr s2);struct _tuple4 Cyc_Typerep_tuple_tl(void*typ){void*_tmp0=
+typ;unsigned int _tmp1;struct _tagged_arr _tmp2;_LL1: if(_tmp0 <= (void*)2?1:*((int*)
 _tmp0)!= 4)goto _LL3;_tmp1=((struct Cyc_Typerep_Tuple_struct*)_tmp0)->f1;_tmp2=((
 struct Cyc_Typerep_Tuple_struct*)_tmp0)->f2;_LL2: if(_get_arr_size(_tmp2,sizeof(
 struct _tuple1*))< 2)goto _LL4;{int pos1=(int)(*((struct _tuple1*)*((struct _tuple1**)
@@ -394,11 +395,12 @@ _tag_arr(_tmp20,sizeof(char),_get_zero_arr_size(_tmp20,30));});_tmp1F;});_tmp1E;
 struct _tuple4 Cyc_Typerep_get_xtunionbranch(struct _tagged_arr tag,struct
 _tagged_arr l){{int i=0;for(0;i < _get_arr_size(l,sizeof(struct _tuple3*));i ++){
 struct _tagged_arr _tmp22;void*_tmp23;struct _tuple3 _tmp21=*((struct _tuple3*)((
-struct _tuple3**)l.curr)[i]);_tmp22=_tmp21.f1;_tmp23=_tmp21.f2;if(Cyc_Std_strcmp(
-_tmp22,tag)== 0)return Cyc_Typerep_tuple_tl(_tmp23);}}(int)_throw((void*)({struct
-Cyc_Core_Failure_struct*_tmp24=_cycalloc(sizeof(*_tmp24));_tmp24[0]=({struct Cyc_Core_Failure_struct
-_tmp25;_tmp25.tag=Cyc_Core_Failure;_tmp25.f1=({const char*_tmp26="Could not find tag in XTUnion";
-_tag_arr(_tmp26,sizeof(char),_get_zero_arr_size(_tmp26,30));});_tmp25;});_tmp24;}));}
+struct _tuple3**)l.curr)[i]);_tmp22=_tmp21.f1;_tmp23=_tmp21.f2;if(Cyc_Std_strcmp((
+struct _tagged_arr)_tmp22,(struct _tagged_arr)tag)== 0)return Cyc_Typerep_tuple_tl(
+_tmp23);}}(int)_throw((void*)({struct Cyc_Core_Failure_struct*_tmp24=_cycalloc(
+sizeof(*_tmp24));_tmp24[0]=({struct Cyc_Core_Failure_struct _tmp25;_tmp25.tag=Cyc_Core_Failure;
+_tmp25.f1=({const char*_tmp26="Could not find tag in XTUnion";_tag_arr(_tmp26,
+sizeof(char),_get_zero_arr_size(_tmp26,30));});_tmp25;});_tmp24;}));}
 unsigned int Cyc_Typerep_size_type(void*rep){void*_tmp27=rep;int _tmp28;
 unsigned int _tmp29;unsigned int _tmp2A;unsigned int _tmp2B;unsigned int _tmp2C;int
 _tmp2D;int _tmp2E;struct _tagged_arr _tmp2F;_LL6: if(_tmp27 <= (void*)2?1:*((int*)

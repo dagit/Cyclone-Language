@@ -1684,8 +1684,10 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
                     region_outlives(te,pinfo_a.rgn_typ,pinfo_b.rgn_typ));
     // can only move from non-const to const or stay same
     okay = okay && (!pinfo_a.tq.q_const || pinfo_b.tq.q_const);
-    // must preserve zero-termination
-    okay = okay && unify_conrefs(intcmp,pinfo_a.zero_term,pinfo_b.zero_term);
+    // must preserve zero-termination or second pointer must be const
+    okay = okay && (unify_conrefs(intcmp,pinfo_a.zero_term,pinfo_b.zero_term) 
+                    || (conref_def(true,pinfo_a.zero_term) && 
+                        pinfo_b.tq.q_const));
     return okay;
 
   case $(&ArrayType(ArrayInfo{t1a,tq1a,e1,zt1}),

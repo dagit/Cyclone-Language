@@ -314,16 +314,17 @@ __pos;Cyc_Std___mbstate_t __state;}Cyc_Std__G_fpos_t;typedef Cyc_Std__G_fpos_t C
 struct Cyc_Std___cycFILE;struct Cyc_Std_Cstdio___abstractFILE;struct Cyc_Std_String_pa_struct{
 int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;}
 ;struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{
-int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};struct
-_tagged_arr Cyc_Std_aprintf(struct _tagged_arr,struct _tagged_arr);int Cyc_Std_fclose(
-struct Cyc_Std___cycFILE*);struct Cyc_Std___cycFILE*Cyc_Std_fdopen(int,struct
-_tagged_arr);int Cyc_Std_fflush(struct Cyc_Std___cycFILE*);int Cyc_Std_fprintf(
-struct Cyc_Std___cycFILE*,struct _tagged_arr,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{
-int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};
-struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{
-int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{int tag;struct
-_tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{
-int tag;float*f1;};int Cyc_Std_getc(struct Cyc_Std___cycFILE*);int Cyc_Std_printf(
+int tag;short*f1;};struct Cyc_Std_Buffer_pa_struct{int tag;struct _tagged_arr f1;};
+struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};struct _tagged_arr Cyc_Std_aprintf(
+struct _tagged_arr,struct _tagged_arr);int Cyc_Std_fclose(struct Cyc_Std___cycFILE*);
+struct Cyc_Std___cycFILE*Cyc_Std_fdopen(int,struct _tagged_arr);int Cyc_Std_fflush(
+struct Cyc_Std___cycFILE*);int Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,struct
+_tagged_arr,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;
+};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
+int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
+Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
+int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_Std_CharPtr_sa_struct{
+int tag;struct _tagged_arr f1;};int Cyc_Std_getc(struct Cyc_Std___cycFILE*);int Cyc_Std_printf(
 struct _tagged_arr,struct _tagged_arr);int putchar(int);extern char Cyc_Std_FileCloseError[
 19];extern char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{char*
 tag;struct _tagged_arr f1;};struct Cyc_Std_timeval{int tv_sec;int tv_usec;};struct Cyc_Std_rusage{

@@ -49,7 +49,7 @@ string_t strerror(int errnum) {
 }
 
 ///////////////////////// LENGTH
-size_t strlen(string_t s) {
+size_t strlen(buffer_t s) {
   size_t i;
   unsigned int sz = s.size;
   for (i = 0; i < sz; i++) {
@@ -59,22 +59,10 @@ size_t strlen(string_t s) {
   return i;
 }
 
-// Internal length after offset function, parameterized by what
-// to throw if the offset is out of range.
-static inline size_t int_strleno(string_t s, string_t<`H> error) {
-  int i;
-  unsigned int sz = s.size;
-  for (i = 0; i < sz; i++) {
-    if (s[i] == '\000')
-      break;
-  }
-  return (size_t)(i);
-}
-
 ///////////////////////// COMPARISONS
 // Compare two strings lexicographically.
 // Return <0, 0, or >0 depending on whether s1<s2, s1==s2, or s1>s2.
-int strcmp(string_t s1, string_t s2) {
+int strcmp(buffer_t s1, buffer_t s2) {
   if (s1 == s2)
     return 0;
   int i = 0;
@@ -109,7 +97,7 @@ int strptrcmp(stringptr_t s1, stringptr_t s2) {
   return strcmp(*s1, *s2);
 }
 
-static inline int ncmp(string_t s1, size_t len1, string_t s2, size_t len2, 
+static inline int ncmp(buffer_t s1, size_t len1, buffer_t s2, size_t len2, 
                        size_t n) 
 {
   if (n <= 0) return 0;
@@ -131,9 +119,9 @@ static inline int ncmp(string_t s1, size_t len1, string_t s2, size_t len2,
 
 // Like strcmp but compare no more than n characters.
 // If n<0 return 0 (equal).
-int strncmp(string_t s1, string_t s2, size_t n) {
-  size_t len1 = int_strleno(s1,"Std::strncmp");
-  size_t len2 = int_strleno(s2,"Std::strncmp");
+int strncmp(buffer_t s1, buffer_t s2, size_t n) {
+  size_t len1 = strlen(s1);
+  size_t len2 = strlen(s2);
   return ncmp(s1,len1,s2,len2,n);
 }
 
@@ -141,7 +129,7 @@ int strncmp(string_t s1, string_t s2, size_t n) {
 // the end of strings. 
 // JGM: I'm changing this because we no longer get such strong guarantees
 // about things being the right size.
-int zstrcmp(string_t a, string_t b) {
+int zstrcmp(buffer_t a, buffer_t b) {
   if(a == b)
     return 0;
   size_t as = a.size;
@@ -159,7 +147,7 @@ int zstrcmp(string_t a, string_t b) {
   return ((int)as)-((int)bs);
 }
 // Like zstrcmp but consider at most n characters
-int zstrncmp(string_t s1, string_t s2,size_t n) {
+int zstrncmp(buffer_t s1, buffer_t s2,size_t n) {
   if (n <= 0) return 0;
 
   size_t s1size = s1.size;
@@ -194,13 +182,13 @@ int zstrptrcmp(stringptr_t a, stringptr_t b) {
 
 // Internal string concatenation function, parametized by what
 // to throw on bounds error
-static inline mstring_t<`r> int_strcato(mstring_t<`r> dest,string_t src,string_t<`H> error) {
+static inline mstring_t<`r> int_strcato(mstring_t<`r> dest,buffer_t src) {
   int i;
   size_t dsize, slen, dlen;
 
   dsize = dest.size;
   dlen = strlen(dest);
-  slen = int_strleno(src,error);
+  slen = strlen(src);
   
   if ((slen + dlen) <= dsize) {
     assert(slen <= src.size);
@@ -211,18 +199,18 @@ static inline mstring_t<`r> int_strcato(mstring_t<`r> dest,string_t src,string_t
       dest[i+dlen] = '\000';
   }
   else
-    throw new Invalid_argument(error);
+    throw new Invalid_argument("strcat");
   return dest;
 }
 
 // Destructive concatenation: the first argument is modified,
 // and returned
-mstring_t<`r> strcat(mstring_t<`r> dest,string_t src) {
-  return int_strcato(dest,src,"Std::strcat");
+mstring_t<`r> strcat(mstring_t<`r> dest,buffer_t src) {
+  return int_strcato(dest,src);
 }
 
 // Allocate a new string and fill it with the concatenation of a and b
-mstring_t<`r> rstrconcat(region_t<`r> r, string_t a, string_t b) {
+mstring_t<`r> rstrconcat(region_t<`r> r, buffer_t a, buffer_t b) {
   let alen = strlen(a);
   let blen = strlen(b);
   mstring_t<`r> ans = rnew_string(r,alen+blen+1);
@@ -234,7 +222,7 @@ mstring_t<`r> rstrconcat(region_t<`r> r, string_t a, string_t b) {
   return ans;
 }
 
-mstring_t strconcat(string_t a, string_t b) {
+mstring_t strconcat(buffer_t a, buffer_t b) {
   return rstrconcat(heap_region, a, b);
 }
 
@@ -276,7 +264,7 @@ mstring_t strconcat_l(list_t<stringptr_t> strs) {
 
 // Allocate a new string and fill it with the concatenation of strs,
 // using separator between each element
-mstring_t<`r> rstr_sepstr(region_t<`r> r,list_t<stringptr_t> strs, string_t separator) {
+mstring_t<`r> rstr_sepstr(region_t<`r> r,list_t<stringptr_t> strs, buffer_t separator) {
   if (strs == NULL)    return rnew_string(r,0);
   if (strs->tl == NULL) return rstrdup(r,*(strs->hd));
   let p = strs;
@@ -313,12 +301,12 @@ mstring_t<`r> rstr_sepstr(region_t<`r> r,list_t<stringptr_t> strs, string_t sepa
   }
 }
 
-mstring_t str_sepstr(list_t<stringptr_t> strs, string_t separator) {
+mstring_t str_sepstr(list_t<stringptr_t> strs, buffer_t separator) {
   return rstr_sepstr(heap_region,strs,separator);
 }
 ///////////////////////// COPYING
 // Destructively copy at most n characters from src into dest
-mstring_t<`r> strncpy(mstring_t<`r> dest, string_t src, size_t n) {
+mstring_t<`r> strncpy(mstring_t<`r> dest, buffer_t src, size_t n) {
   int i;
   assert(n <= src.size && n <= dest.size);
   for (i=0; i<n; i++) {
@@ -333,7 +321,7 @@ mstring_t<`r> strncpy(mstring_t<`r> dest, string_t src, size_t n) {
 }
 
 // Strncpy that does not pay attention to zero chars
-mstring_t<`r> zstrncpy(mstring_t<`r> dest, string_t src, size_t n) {
+mstring_t<`r> zstrncpy(mstring_t<`r> dest, buffer_t src, size_t n) {
   assert(n <= dest.size && n <= src.size);
   int i;
   for (i=0; i<n; i++) 
@@ -341,7 +329,7 @@ mstring_t<`r> zstrncpy(mstring_t<`r> dest, string_t src, size_t n) {
   return dest;
 }
 // Non-allocating string copy: first arg is returned
-mstring_t<`r> strcpy(mstring_t<`r> dest, string_t src) {
+mstring_t<`r> strcpy(mstring_t<`r> dest, buffer_t src) {
   unsigned ssz = src.size;
   unsigned dsz = dest.size;
   if (ssz <= dsz) {
@@ -364,7 +352,7 @@ mstring_t<`r> strcpy(mstring_t<`r> dest, string_t src) {
 // Allocating functions
 
 // Not an ISO function, but available in gcc
-mstring_t<`r> rstrdup(region_t<`r> r, string_t src) {
+mstring_t<`r> rstrdup(region_t<`r> r, buffer_t src) {
   size_t len;
   mstring_t<`r> temp;
 
@@ -374,11 +362,11 @@ mstring_t<`r> rstrdup(region_t<`r> r, string_t src) {
   return temp;
 }
 
-mstring_t strdup(string_t src) {
+mstring_t strdup(buffer_t src) {
   return rstrdup(heap_region, src);
 }
 
-mstring_t<`r> rexpand(region_t<`r> r,string_t s, size_t sz) {
+mstring_t<`r> rexpand(region_t<`r> r,buffer_t s, size_t sz) {
   mstring_t temp;
   size_t slen;
 
@@ -394,7 +382,7 @@ mstring_t<`r> rexpand(region_t<`r> r,string_t s, size_t sz) {
   return temp;
 }
 
-mstring_t expand(string_t s, size_t sz) {
+mstring_t expand(buffer_t s, size_t sz) {
   return rexpand(heap_region,s,sz);
 }
 
@@ -424,8 +412,8 @@ mstring_t realloc_str(mstring_t<`H> str, size_t sz) {
 // Return a substring of a string, by allocation.
 // FIX: This adds an extra NUL character at the end of the string.
 // I'd like to remove it but it causes a bug in the lexer on bootstrapping.
-mstring_t<`r> rsubstring(region_t<`r> r,string_t s, 
-                     int start, size_t amt) {
+mstring_t<`r> rsubstring(region_t<`r> r,buffer_t s, 
+                         int start, size_t amt) {
   //if (start < 0 || amt < 0 || start + ((int)amt) - 1 > (int)(s.size))
   //  throw new Invalid_argument("Std::substring");
   mstring_t ans = rnew_string(r,amt+1);
@@ -437,13 +425,13 @@ mstring_t<`r> rsubstring(region_t<`r> r,string_t s,
   return ans;
 }
 
-mstring_t substring(string_t s, int start, size_t amt) {
+mstring_t substring(buffer_t s, int start, size_t amt) {
   return rsubstring(heap_region,s,start,amt);
 }
 
 // replace last with second at end of first
 // raise Invalid_argument if second is not end of first.
-mstring_t<`r> rreplace_suffix (region_t<`r> r,string_t src, string_t curr_suffix, string_t new_suffix) {
+mstring_t<`r> rreplace_suffix (region_t<`r> r,buffer_t src, buffer_t curr_suffix, buffer_t new_suffix) {
   size_t m = src.size;
   size_t n = curr_suffix.size;
   string_t err = "Std::replace_suffix";
@@ -458,14 +446,14 @@ mstring_t<`r> rreplace_suffix (region_t<`r> r,string_t src, string_t curr_suffix
   return ans;
 }
 
-mstring_t replace_suffix (string_t src, string_t curr_suffix, string_t new_suffix) {
+mstring_t replace_suffix (buffer_t src, buffer_t curr_suffix, buffer_t new_suffix) {
   return rreplace_suffix(heap_region,src,curr_suffix,new_suffix);
 }
 ////////////////////////// SEARCHING
 
 // Search for any character of accept in s.
 // Return a ? pointer to the first such character, or NULL if none.
-string_t<`r> strpbrk(string_t<`r> s, string_t accept) {
+string_t<`r> strpbrk(string_t<`r> s, buffer_t accept) {
   int len = s.size;
   unsigned asize = accept.size;
   char c;
@@ -478,7 +466,7 @@ string_t<`r> strpbrk(string_t<`r> s, string_t accept) {
   return NULL;
 }
 
-mstring_t<`r> mstrpbrk(mstring_t<`r> s, string_t accept) {
+mstring_t<`r> mstrpbrk(mstring_t<`r> s, buffer_t accept) {
   int len = s.size;
   unsigned asize = accept.size;
   char c;
@@ -518,7 +506,7 @@ string_t<`r> strchr(string_t<`r> s, char c) {
 // Return a pointer to the last occurrence of c in s,
 // or NULL if none.
 string_t<`r> strrchr(string_t<`r> s, char c) {
-  int len = int_strleno(s,"Std::strrchr");
+  int len = strlen(s);
   int i = len - 1;
   s += i;
 
@@ -530,7 +518,7 @@ string_t<`r> strrchr(string_t<`r> s, char c) {
 }
 
 mstring_t<`r> mstrrchr(mstring_t<`r> s, char c) {
-  int len = int_strleno(s,"Std::mstrrchr");
+  int len = strlen(s);
   int i = len - 1;
   s += i;
 
@@ -547,7 +535,7 @@ string_t<`r> strstr(string_t<`r> haystack, string_t needle) {
   if (!haystack || !needle) throw new Invalid_argument("Std::strstr");
   if (*needle == '\0') return haystack;
 
-  int len = int_strleno(needle, "Std::strstr");
+  int len = strlen(needle);
   for (string_t<`r> start = haystack;
        (start = strchr(start, *needle)) != NULL;
        start = strchr(start+1, *needle))
@@ -561,7 +549,7 @@ mstring_t<`r> mstrstr(mstring_t<`r> haystack, string_t needle) {
   if (!haystack || !needle) throw new Invalid_argument("Std::mstrstr");
   if (*needle == '\0') return haystack;
 
-  int len = int_strleno(needle, "Std::mstrstr");
+  int len = strlen(needle);
   for (mstring_t<`r> start = haystack;
        (start = mstrchr(start, *needle)) != NULL;
        start = mstrchr(start+1, *needle))
@@ -575,7 +563,7 @@ mstring_t<`r> mstrstr(mstring_t<`r> haystack, string_t needle) {
 // Return the offset to the first such character, or the length
 // of s if none.
 size_t strspn(string_t s, string_t accept) {
-  size_t len = int_strleno(s,"Std::strspn");
+  size_t len = strlen(s);
   unsigned asize = accept.size;
 
   assert(len <= s.size);
@@ -595,7 +583,7 @@ size_t strspn(string_t s, string_t accept) {
 // Return the offset to the first such character, or the length
 // of s if none.
 size_t strcspn(string_t s, string_t accept) {
-  size_t len = int_strleno(s,"Std::strspn");
+  size_t len = strlen(s);
   unsigned asize = accept.size;
 
   assert(len <= s.size);
@@ -652,14 +640,14 @@ mstring_t<`H> strtok (mstring_t<`H> s, string_t delim)
 }
 
 ////////////////////////// CONVERSIONS
-list_t<int,`r> rexplode(region_t<`r> r,string_t s) {
+list_t<int,`r> rexplode(region_t<`r> r,buffer_t s) {
   list_t result = NULL;
   for (int i = strlen(s) - 1; i >= 0; i--)
     result = rnew(r) List((int)s[i],result);
   return result;
 }
 
-list_t<int> explode(string_t s) {
+list_t<int> explode(buffer_t s) {
   return rexplode(heap_region, s);
 }
 
@@ -674,8 +662,8 @@ mstring_t implode(list_t<int> chars) {
 }
 
 // Like strcmp, but case insensitive.
-static inline int casecmp(string_t s1, size_t len1,
-                          string_t s2, size_t len2)
+static inline int casecmp(buffer_t s1, size_t len1,
+                          buffer_t s2, size_t len2)
 {
   size_t min_length = (len1 < len2) ? len1 : len2;
 
@@ -690,15 +678,15 @@ static inline int casecmp(string_t s1, size_t len1,
   return ((int)len1)-((int)len2);
 }
 
-int strcasecmp(string_t s1, string_t s2) {
+int strcasecmp(buffer_t s1, buffer_t s2) {
   if (s1 == s2)
     return 0;
-  size_t len1 = int_strleno(s1,"Std::strcasecmp");
-  size_t len2 = int_strleno(s2,"Std::strcasecmp");
+  size_t len1 = strlen(s1);
+  size_t len2 = strlen(s2);
   return casecmp(s1,len1,s2,len2);
 }
 
-static inline int caseless_ncmp(string_t s1, size_t len1,string_t s2, 
+static inline int caseless_ncmp(buffer_t s1, size_t len1,buffer_t s2, 
                                 size_t len2, size_t n)
 {
   if (n <= 0) return 0;
@@ -719,9 +707,9 @@ static inline int caseless_ncmp(string_t s1, size_t len1,string_t s2,
 }
 
 // Like strncmp, but case insensitive.
-int strncasecmp(string_t s1, string_t s2, size_t n) {
-  size_t len1 = int_strleno(s1,"Std::strncasecmp");
-  size_t len2 = int_strleno(s2,"Std::strncasecmp");
+int strncasecmp(buffer_t s1, buffer_t s2, size_t n) {
+  size_t len1 = strlen(s1);
+  size_t len2 = strlen(s2);
   return caseless_ncmp(s1,len1,s2,len2,n);
 }
 
@@ -730,8 +718,8 @@ namespace Cstr {
     `a*`r memcpy(`a::A*`r, const `a*, size_t n);
     `a*`r memmove(`a::A*`r, const `a*, size_t n);
     int memcmp(const void*, const void*, size_t n);
-    char *`r memchr(const char *`r, char c, size_t n);
-    void *`r memset(void *`r, int c, size_t n);
+    char *NOZEROTERM `r memchr(const char *NOZEROTERM `r, char c, size_t n);
+    void *NOZEROTERM `r memset(void *NOZEROTERM `r, int c, size_t n);
     void bcopy (const `a::A*src, `a *dest, size_t n);
     void bzero(`a::A*s, size_t n);
     Cstring GC_realloc(char *`H, size_t n);
@@ -757,47 +745,47 @@ char ? realloc(char ?`H s, size_t n) {
   return d;
 }
 
-int memcmp(const char ?s1, const char ?s2, size_t n) {
+int memcmp(const char ?NOZEROTERM s1, const char ?NOZEROTERM s2, size_t n) {
   if (s1 == NULL || s2 == NULL || s1.size >= n || s2.size >= n)
     throw new Invalid_argument("Std::memcmp");
   return Cstr::memcmp((const void *)s1, (const void *)s2, n);
 }
 
-const char?`r memchr(const char ?`r s, char c, size_t n) {
+const char?NOZEROTERM `r memchr(const char ?NOZEROTERM `r s, char c, size_t n) {
   unsigned int sz = s.size;
   if (s == NULL || n > sz)
     throw new Invalid_argument("Std::memchr");
-  let p = Cstr::memchr((const char *)s, c, n);
+  let p = Cstr::memchr((const char *NOZEROTERM)s, c, n);
   if (p == NULL) return NULL;
-  let sval = (unsigned int)((const char *)s);
-  let pval = (unsigned int)(const char *)p;
+  let sval = (unsigned int)((const char *NOZEROTERM)s);
+  let pval = (unsigned int)(const char *NOZEROTERM)p;
   let delta = pval - sval;
   return (s + delta);
 }
 
-char?`r mmemchr(char ?`r s, char c, size_t n) {
+char?NOZEROTERM`r mmemchr(char ?NOZEROTERM`r s, char c, size_t n) {
   unsigned int sz = s.size;
   if (s == NULL || n > sz)
     throw new Invalid_argument("Std::mmemchr");
-  let p = Cstr::memchr((const char *)s, c, n);
+  let p = Cstr::memchr((const char *NOZEROTERM)s, c, n);
   if (p == NULL) return NULL;
-  let sval = (unsigned int)((const char *)s);
+  let sval = (unsigned int)((const char *NOZEROTERM)s);
   let pval = (unsigned int)p;
   let delta = pval - sval;
   return (s + delta);
 }
 
-char ?`r memset(char ?`r s, char c, size_t n) {
+char ?NOZEROTERM`r memset(char ?NOZEROTERM`r s, char c, size_t n) {
   if (s == NULL || n > s.size)
     throw new Invalid_argument("Std::memset");
-  Cstr::memset((void *)((char *)s), c, n);
+  Cstr::memset((void *)((char *NOZEROTERM)s), c, n);
   return s;
 }
  
-void bzero(char? s, size_t n) {
+void bzero(char?NOZEROTERM s, size_t n) {
   if(s == NULL || s.size < n)
     throw new Invalid_argument("Std::bzero");
-  Cstr::bzero((_*)s,n);
+  Cstr::bzero((_*NOZEROTERM)s,n);
 }
 
 void _bcopy(const `a::A? src, `a?`r dst, size_t n, sizeof_t<`a> sz) {

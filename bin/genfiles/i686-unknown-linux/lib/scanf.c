@@ -317,36 +317,37 @@ __state;}Cyc_Std__G_fpos_t;typedef Cyc_Std__G_fpos_t Cyc_Std_fpos_t;struct Cyc_S
 extern struct Cyc_Std___cycFILE*Cyc_Std_stdin;struct Cyc_Std_Cstdio___abstractFILE;
 struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
 int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct
-Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int
-tag;unsigned int*f1;};int Cyc_Std_fgetc(struct Cyc_Std___cycFILE*);struct Cyc_Std_ShortPtr_sa_struct{
+Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_Buffer_pa_struct{int
+tag;struct _tagged_arr f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;
+};int Cyc_Std_fgetc(struct Cyc_Std___cycFILE*);struct Cyc_Std_ShortPtr_sa_struct{
 int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};
 struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{
 int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{int tag;struct
 _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{
-int tag;float*f1;};int Cyc_Std_fscanf(struct Cyc_Std___cycFILE*,struct _tagged_arr,
-struct _tagged_arr);int Cyc_Std_getc(struct Cyc_Std___cycFILE*);int Cyc_Std_scanf(
-struct _tagged_arr,struct _tagged_arr);int Cyc_Std_sscanf(struct _tagged_arr,struct
-_tagged_arr,struct _tagged_arr);int Cyc_Std_ungetc(int,struct Cyc_Std___cycFILE*);
-extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[18];struct
-Cyc_Std_FileOpenError_struct{char*tag;struct _tagged_arr f1;};static struct
-_tagged_arr Cyc_Std___sccl(char*tab,struct _tagged_arr fmt);static short*Cyc_Std_va_arg_short_ptr(
-void*a){void*_tmp0=a;short*_tmp1;unsigned short*_tmp2;_LL1: if(*((int*)_tmp0)!= 0)
-goto _LL3;_tmp1=((struct Cyc_Std_ShortPtr_sa_struct*)_tmp0)->f1;_LL2: return _tmp1;
-_LL3: if(*((int*)_tmp0)!= 1)goto _LL5;_tmp2=((struct Cyc_Std_UShortPtr_sa_struct*)
-_tmp0)->f1;_LL4: return(short*)_tmp2;_LL5:;_LL6:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
-_tmp3=_cycalloc(sizeof(*_tmp3));_tmp3[0]=({struct Cyc_Core_Invalid_argument_struct
-_tmp4;_tmp4.tag=Cyc_Core_Invalid_argument;_tmp4.f1=({const char*_tmp5="scan expects short pointer";
-_tag_arr(_tmp5,sizeof(char),_get_zero_arr_size(_tmp5,27));});_tmp4;});_tmp3;}));
-_LL0:;}static int*Cyc_Std_va_arg_int_ptr(void*a){void*_tmp6=a;int*_tmp7;
-unsigned int*_tmp8;_LL8: if(*((int*)_tmp6)!= 2)goto _LLA;_tmp7=((struct Cyc_Std_IntPtr_sa_struct*)
-_tmp6)->f1;_LL9: return _tmp7;_LLA: if(*((int*)_tmp6)!= 3)goto _LLC;_tmp8=((struct
-Cyc_Std_UIntPtr_sa_struct*)_tmp6)->f1;_LLB: return(int*)_tmp8;_LLC:;_LLD:(int)
-_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp9=_cycalloc(sizeof(*
-_tmp9));_tmp9[0]=({struct Cyc_Core_Invalid_argument_struct _tmpA;_tmpA.tag=Cyc_Core_Invalid_argument;
-_tmpA.f1=({const char*_tmpB="scan expects int pointer";_tag_arr(_tmpB,sizeof(char),
-_get_zero_arr_size(_tmpB,25));});_tmpA;});_tmp9;}));_LL7:;}static struct
-_tagged_arr Cyc_Std_va_arg_string_ptr(void*a){void*_tmpC=a;struct _tagged_arr _tmpD;
-_LLF: if(*((int*)_tmpC)!= 4)goto _LL11;_tmpD=((struct Cyc_Std_StringPtr_sa_struct*)
+int tag;float*f1;};struct Cyc_Std_CharPtr_sa_struct{int tag;struct _tagged_arr f1;};
+int Cyc_Std_fscanf(struct Cyc_Std___cycFILE*,struct _tagged_arr,struct _tagged_arr);
+int Cyc_Std_getc(struct Cyc_Std___cycFILE*);int Cyc_Std_scanf(struct _tagged_arr,
+struct _tagged_arr);int Cyc_Std_sscanf(struct _tagged_arr,struct _tagged_arr,struct
+_tagged_arr);int Cyc_Std_ungetc(int,struct Cyc_Std___cycFILE*);extern char Cyc_Std_FileCloseError[
+19];extern char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{char*
+tag;struct _tagged_arr f1;};static struct _tagged_arr Cyc_Std___sccl(char*tab,struct
+_tagged_arr fmt);static short*Cyc_Std_va_arg_short_ptr(void*a){void*_tmp0=a;short*
+_tmp1;unsigned short*_tmp2;_LL1: if(*((int*)_tmp0)!= 0)goto _LL3;_tmp1=((struct Cyc_Std_ShortPtr_sa_struct*)
+_tmp0)->f1;_LL2: return _tmp1;_LL3: if(*((int*)_tmp0)!= 1)goto _LL5;_tmp2=((struct
+Cyc_Std_UShortPtr_sa_struct*)_tmp0)->f1;_LL4: return(short*)_tmp2;_LL5:;_LL6:(int)
+_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp3=_cycalloc(sizeof(*
+_tmp3));_tmp3[0]=({struct Cyc_Core_Invalid_argument_struct _tmp4;_tmp4.tag=Cyc_Core_Invalid_argument;
+_tmp4.f1=({const char*_tmp5="scan expects short pointer";_tag_arr(_tmp5,sizeof(
+char),_get_zero_arr_size(_tmp5,27));});_tmp4;});_tmp3;}));_LL0:;}static int*Cyc_Std_va_arg_int_ptr(
+void*a){void*_tmp6=a;int*_tmp7;unsigned int*_tmp8;_LL8: if(*((int*)_tmp6)!= 2)
+goto _LLA;_tmp7=((struct Cyc_Std_IntPtr_sa_struct*)_tmp6)->f1;_LL9: return _tmp7;
+_LLA: if(*((int*)_tmp6)!= 3)goto _LLC;_tmp8=((struct Cyc_Std_UIntPtr_sa_struct*)
+_tmp6)->f1;_LLB: return(int*)_tmp8;_LLC:;_LLD:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+_tmp9=_cycalloc(sizeof(*_tmp9));_tmp9[0]=({struct Cyc_Core_Invalid_argument_struct
+_tmpA;_tmpA.tag=Cyc_Core_Invalid_argument;_tmpA.f1=({const char*_tmpB="scan expects int pointer";
+_tag_arr(_tmpB,sizeof(char),_get_zero_arr_size(_tmpB,25));});_tmpA;});_tmp9;}));
+_LL7:;}static struct _tagged_arr Cyc_Std_va_arg_string_ptr(void*a){void*_tmpC=a;
+struct _tagged_arr _tmpD;_LLF: if(*((int*)_tmpC)!= 4)goto _LL11;_tmpD=((struct Cyc_Std_StringPtr_sa_struct*)
 _tmpC)->f1;_LL10: return _tmpD;_LL11:;_LL12:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
 _tmpE=_cycalloc(sizeof(*_tmpE));_tmpE[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmpF;_tmpF.tag=Cyc_Core_Invalid_argument;_tmpF.f1=({const char*_tmp10="scan expects char pointer";
@@ -363,7 +364,16 @@ _tmp16)->f1;_LL1A: return _tmp17;_LL1B:;_LL1C:(int)_throw((void*)({struct Cyc_Co
 _tmp18=_cycalloc(sizeof(*_tmp18));_tmp18[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmp19;_tmp19.tag=Cyc_Core_Invalid_argument;_tmp19.f1=({const char*_tmp1A="scan expects float pointer";
 _tag_arr(_tmp1A,sizeof(char),_get_zero_arr_size(_tmp1A,27));});_tmp19;});_tmp18;}));
-_LL18:;}int Cyc_Std__IO_vfscanf(int(*_IO_getc)(void*),int(*_IO_ungetc)(int,void*),
+_LL18:;}static struct _tagged_arr Cyc_Std_va_arg_char_ptr(void*a){void*_tmp1B=a;
+struct _tagged_arr _tmp1C;struct _tagged_arr _tmp1D;_LL1E: if(*((int*)_tmp1B)!= 7)
+goto _LL20;_tmp1C=((struct Cyc_Std_CharPtr_sa_struct*)_tmp1B)->f1;_LL1F: return
+_tmp1C;_LL20: if(*((int*)_tmp1B)!= 4)goto _LL22;_tmp1D=((struct Cyc_Std_StringPtr_sa_struct*)
+_tmp1B)->f1;_LL21: return _tagged_ptr_decrease_size(_tmp1D,sizeof(char),1);_LL22:;
+_LL23:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp1E=
+_cycalloc(sizeof(*_tmp1E));_tmp1E[0]=({struct Cyc_Core_Invalid_argument_struct
+_tmp1F;_tmp1F.tag=Cyc_Core_Invalid_argument;_tmp1F.f1=({const char*_tmp20="scan expects char pointer";
+_tag_arr(_tmp20,sizeof(char),_get_zero_arr_size(_tmp20,26));});_tmp1F;});_tmp1E;}));
+_LL1D:;}int Cyc_Std__IO_vfscanf(int(*_IO_getc)(void*),int(*_IO_ungetc)(int,void*),
 int(*_IO_peekc)(void*),void*fp,struct _tagged_arr fmt0,struct _tagged_arr ap,int*
 errp){struct _tagged_arr fmt=fmt0;int c;long long width;struct _tagged_arr p=_tag_arr(
 0,0,0);int n;int flags=0;struct _tagged_arr p0=_tag_arr(0,0,0);int nassigned;int nread;
@@ -376,52 +386,45 @@ goto done;if(isspace(c)){for(0;1;0){c=_IO_getc(fp);if(c == - 1){seen_eof ++;brea
 if(!isspace(c)){_IO_ungetc(c,fp);break;}nread ++;}continue;}if(c != '%')goto
 literal;width=(long long)0;flags=0;again: c=(int)*((const char*)
 _check_unknown_subscript(_tagged_arr_inplace_plus_post(& fmt,sizeof(char),1),
-sizeof(char),0));switch(c){case '%': _LL1D: literal: n=_IO_getc(fp);if(n == - 1)goto
+sizeof(char),0));switch(c){case '%': _LL24: literal: n=_IO_getc(fp);if(n == - 1)goto
 eof_failure;if(n != c){_IO_ungetc(n,fp);goto match_failure;}nread ++;continue;case '*':
-_LL1E: if(flags)goto control_failure;flags=8;goto again;case 'l': _LL1F: if(flags & ~(8
-| 64))goto control_failure;flags |=1;goto again;case 'L': _LL20: if(flags & ~(8 | 64))
-goto control_failure;flags |=2;goto again;case 'h': _LL21: if(flags & ~(8 | 64))goto
-control_failure;flags |=4;goto again;case '0': _LL22: goto _LL23;case '1': _LL23: goto
-_LL24;case '2': _LL24: goto _LL25;case '3': _LL25: goto _LL26;case '4': _LL26: goto _LL27;
-case '5': _LL27: goto _LL28;case '6': _LL28: goto _LL29;case '7': _LL29: goto _LL2A;case '8':
-_LL2A: goto _LL2B;case '9': _LL2B: if(flags & ~(8 | 64))goto control_failure;flags |=64;
-width=(width * 10 + c)- '0';goto again;case 'D': _LL2C: flags |=1;goto _LL2D;case 'd':
-_LL2D: c=3;use_strtoul=0;base=10;break;case 'i': _LL2E: c=3;use_strtoul=0;base=0;
-break;case 'O': _LL2F: flags |=1;goto _LL30;case 'o': _LL30: c=3;use_strtoul=1;base=8;
-break;case 'u': _LL31: c=3;use_strtoul=1;base=10;break;case 'X': _LL32: goto _LL33;case
-'x': _LL33: flags |=256;c=3;use_strtoul=1;base=16;break;case 'E': _LL34: goto _LL35;
-case 'F': _LL35: goto _LL36;case 'e': _LL36: goto _LL37;case 'f': _LL37: goto _LL38;case 'g':
-_LL38: c=4;break;case 's': _LL39: c=2;break;case '[': _LL3A: fmt=Cyc_Std___sccl(ccltab,
-fmt);flags |=32;c=1;break;case 'c': _LL3B: flags |=32;c=0;break;case 'p': _LL3C: flags |=
-16 | 256;c=3;use_strtoul=1;base=16;break;case 'n': _LL3D: if(flags & 8)continue;if(
+_LL25: if(flags)goto control_failure;flags=8;goto again;case 'l': _LL26: if(flags & ~(8
+| 64))goto control_failure;flags |=1;goto again;case 'L': _LL27: if(flags & ~(8 | 64))
+goto control_failure;flags |=2;goto again;case 'h': _LL28: if(flags & ~(8 | 64))goto
+control_failure;flags |=4;goto again;case '0': _LL29: goto _LL2A;case '1': _LL2A: goto
+_LL2B;case '2': _LL2B: goto _LL2C;case '3': _LL2C: goto _LL2D;case '4': _LL2D: goto _LL2E;
+case '5': _LL2E: goto _LL2F;case '6': _LL2F: goto _LL30;case '7': _LL30: goto _LL31;case '8':
+_LL31: goto _LL32;case '9': _LL32: if(flags & ~(8 | 64))goto control_failure;flags |=64;
+width=(width * 10 + c)- '0';goto again;case 'D': _LL33: flags |=1;goto _LL34;case 'd':
+_LL34: c=3;use_strtoul=0;base=10;break;case 'i': _LL35: c=3;use_strtoul=0;base=0;
+break;case 'O': _LL36: flags |=1;goto _LL37;case 'o': _LL37: c=3;use_strtoul=1;base=8;
+break;case 'u': _LL38: c=3;use_strtoul=1;base=10;break;case 'X': _LL39: goto _LL3A;case
+'x': _LL3A: flags |=256;c=3;use_strtoul=1;base=16;break;case 'E': _LL3B: goto _LL3C;
+case 'F': _LL3C: goto _LL3D;case 'e': _LL3D: goto _LL3E;case 'f': _LL3E: goto _LL3F;case 'g':
+_LL3F: c=4;break;case 's': _LL40: c=2;break;case '[': _LL41: fmt=Cyc_Std___sccl(ccltab,
+fmt);flags |=32;c=1;break;case 'c': _LL42: flags |=32;c=0;break;case 'p': _LL43: flags |=
+16 | 256;c=3;use_strtoul=1;base=16;break;case 'n': _LL44: if(flags & 8)continue;if(
 flags & 4)*((short*)Cyc_Std_va_arg_short_ptr(*((void**)_check_unknown_subscript(
 ap,sizeof(void*),0))))=(short)nread;else{if(flags & 1)*((int*)Cyc_Std_va_arg_int_ptr(*((
 void**)_check_unknown_subscript(ap,sizeof(void*),0))))=(int)nread;else{*((int*)
 Cyc_Std_va_arg_int_ptr(*((void**)_check_unknown_subscript(ap,sizeof(void*),0))))=(
 int)nread;}}_tagged_arr_inplace_plus_post(& ap,sizeof(void*),1);continue;case '\000':
-_LL3E: nassigned=- 1;goto done;default: _LL3F: if(isupper(c))flags |=1;c=3;use_strtoul=
+_LL45: nassigned=- 1;goto done;default: _LL46: if(isupper(c))flags |=1;c=3;use_strtoul=
 0;base=10;break;}if(_IO_peekc(fp)== - 1)goto eof_failure;if((flags & 32)== 0){n=
 _IO_peekc(fp);while(isspace(n)){n=_IO_getc(fp);nread ++;n=_IO_peekc(fp);if(n == - 1)
-goto eof_failure;}}switch(c){case 0: _LL41: if(width == 0)width=(long long)1;if(flags
-& 8){long long sum=(long long)0;for(0;1;0){n=_IO_getc(fp);if(n == - 1?width != 0: 0)
-goto eof_failure;else{if(n == - 1){seen_eof ++;break;}}sum ++;width --;}nread +=sum;}
-else{long long sum=(long long)0;struct _tagged_arr _tmp1B=Cyc_Std_va_arg_string_ptr(*((
+goto eof_failure;}}switch(c){case 0: _LL48: if(width == 0)width=(long long)1;if(flags
+& 8){long long sum=(long long)0;for(0;width > 0;0){n=_IO_getc(fp);if(n == - 1?width
+!= 0: 0)goto eof_failure;else{if(n == - 1){seen_eof ++;break;}}sum ++;width --;}nread +=
+sum;}else{long long sum=(long long)0;struct _tagged_arr _tmp21=Cyc_Std_va_arg_char_ptr(*((
 void**)_check_unknown_subscript(ap,sizeof(void*),0)));
-_tagged_arr_inplace_plus_post(& ap,sizeof(void*),1);for(0;1;0){n=_IO_getc(fp);if(
-n == - 1?width != 0: 0)goto eof_failure;else{if(n == - 1){seen_eof ++;break;}}if(
-_get_arr_size(_tmp1B,sizeof(char))== 0)goto eof_failure;({struct _tagged_arr _tmp1C=
-_tmp1B;char _tmp1D=*((char*)_check_unknown_subscript(_tmp1C,sizeof(char),0));char
-_tmp1E=(char)n;if(_get_arr_size(_tmp1C,sizeof(char))== 1?_tmp1D == '\000'?_tmp1E
-!= '\000': 0: 0)_throw_arraybounds();*((char*)_tmp1C.curr)=_tmp1E;});sum ++;width --;
-_tagged_arr_inplace_plus_post(& _tmp1B,sizeof(char),1);}nread +=sum;if(
-_get_arr_size(_tmp1B,sizeof(char))!= 0)({struct _tagged_arr _tmp1F=_tmp1B;char
-_tmp20=*((char*)_check_unknown_subscript(_tmp1F,sizeof(char),0));char _tmp21='\000';
-if(_get_arr_size(_tmp1F,sizeof(char))== 1?_tmp20 == '\000'?_tmp21 != '\000': 0: 0)
-_throw_arraybounds();*((char*)_tmp1F.curr)=_tmp21;});nassigned ++;}break;case 1:
-_LL42: if(width == 0)width=(long long)~ 0;if(flags & 8){n=0;{int c=_IO_peekc(fp);
-while((int)ccltab[_check_known_subscript_notnull(256,(int)((char)c))]){n ++;
-_IO_getc(fp);if(-- width == 0)break;if((c=_IO_peekc(fp))== - 1){if(n == 0)goto
-eof_failure;seen_eof ++;break;}}if(n == 0)goto match_failure;}}else{struct
+_tagged_arr_inplace_plus_post(& ap,sizeof(void*),1);for(0;width > 0;0){n=_IO_getc(
+fp);if(n == - 1?width != 0: 0)goto eof_failure;else{if(n == - 1){seen_eof ++;break;}}*((
+char*)_check_unknown_subscript(_tmp21,sizeof(char),0))=(char)n;
+_tagged_arr_inplace_plus_post(& _tmp21,sizeof(char),1);sum ++;width --;}nread +=sum;
+nassigned ++;}break;case 1: _LL49: if(width == 0)width=(long long)~ 0;if(flags & 8){n=0;{
+int c=_IO_peekc(fp);while((int)ccltab[_check_known_subscript_notnull(256,(int)((
+char)c))]){n ++;_IO_getc(fp);if(-- width == 0)break;if((c=_IO_peekc(fp))== - 1){if(n
+== 0)goto eof_failure;seen_eof ++;break;}}if(n == 0)goto match_failure;}}else{struct
 _tagged_arr _tmp22=Cyc_Std_va_arg_string_ptr(*((void**)_check_unknown_subscript(
 ap,sizeof(void*),0)));_tagged_arr_inplace_plus_post(& ap,sizeof(void*),1);{struct
 _tagged_arr _tmp23=_tmp22;int c=_IO_peekc(fp);while((int)ccltab[
@@ -437,7 +440,7 @@ match_failure;if(_get_arr_size(_tmp23,sizeof(char))== 0)goto eof_failure;({struc
 _tagged_arr _tmp27=_tmp23;char _tmp28=*((char*)_check_unknown_subscript(_tmp27,
 sizeof(char),0));char _tmp29='\000';if(_get_arr_size(_tmp27,sizeof(char))== 1?
 _tmp28 == '\000'?_tmp29 != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp27.curr)=
-_tmp29;});nassigned ++;}}nread +=n;break;case 2: _LL43: if(width == 0)width=(long long)
+_tmp29;});nassigned ++;}}nread +=n;break;case 2: _LL4A: if(width == 0)width=(long long)
 ~ 0;if(flags & 8){n=0;{int c=_IO_peekc(fp);while(!isspace((int)((unsigned char)c))){
 n ++;_IO_getc(fp);if(-- width == 0)break;if((c=_IO_peekc(fp))== - 1){seen_eof ++;
 break;}}nread +=n;}}else{struct _tagged_arr _tmp2A=Cyc_Std_va_arg_string_ptr(*((
@@ -454,25 +457,25 @@ _IO_peekc(fp))== - 1){seen_eof ++;break;}}if(_get_arr_size(_tmp2B,sizeof(char))=
 _check_unknown_subscript(_tmp2F,sizeof(char),0));char _tmp31='\000';if(
 _get_arr_size(_tmp2F,sizeof(char))== 1?_tmp30 == '\000'?_tmp31 != '\000': 0: 0)
 _throw_arraybounds();*((char*)_tmp2F.curr)=_tmp31;});nread +=(_tmp2B.curr - _tmp2A.curr)
-/ sizeof(char);nassigned ++;}}continue;case 3: _LL44: if(width == 0?1: width > sizeof(
+/ sizeof(char);nassigned ++;}}continue;case 3: _LL4B: if(width == 0?1: width > sizeof(
 buf)- 1)width=(long long)(sizeof(buf)- 1);flags |=(64 | 128)| 512;for(p=({char*
 _tmp32=buf;_tag_arr(_tmp32,sizeof(char),_get_zero_arr_size(_tmp32,351));});width
-!= 0;width --){c=(int)((unsigned char)_IO_peekc(fp));switch(c){case '0': _LL46: if(
+!= 0;width --){c=(int)((unsigned char)_IO_peekc(fp));switch(c){case '0': _LL4D: if(
 base == 0){base=8;flags |=256;}if(flags & 512)flags &=~((64 | 512)| 128);else{flags &=
-~((64 | 256)| 128);}goto ok;case '1': _LL47: goto _LL48;case '2': _LL48: goto _LL49;case '3':
-_LL49: goto _LL4A;case '4': _LL4A: goto _LL4B;case '5': _LL4B: goto _LL4C;case '6': _LL4C:
-goto _LL4D;case '7': _LL4D: base=(int)basefix[_check_known_subscript_notnull(17,base)];
-flags &=~((64 | 256)| 128);goto ok;case '8': _LL4E: goto _LL4F;case '9': _LL4F: base=(int)
+~((64 | 256)| 128);}goto ok;case '1': _LL4E: goto _LL4F;case '2': _LL4F: goto _LL50;case '3':
+_LL50: goto _LL51;case '4': _LL51: goto _LL52;case '5': _LL52: goto _LL53;case '6': _LL53:
+goto _LL54;case '7': _LL54: base=(int)basefix[_check_known_subscript_notnull(17,base)];
+flags &=~((64 | 256)| 128);goto ok;case '8': _LL55: goto _LL56;case '9': _LL56: base=(int)
 basefix[_check_known_subscript_notnull(17,base)];if(base <= 8)break;flags &=~((64 | 
-256)| 128);goto ok;case 'A': _LL50: goto _LL51;case 'B': _LL51: goto _LL52;case 'C': _LL52:
-goto _LL53;case 'D': _LL53: goto _LL54;case 'E': _LL54: goto _LL55;case 'F': _LL55: goto
-_LL56;case 'a': _LL56: goto _LL57;case 'b': _LL57: goto _LL58;case 'c': _LL58: goto _LL59;
-case 'd': _LL59: goto _LL5A;case 'e': _LL5A: goto _LL5B;case 'f': _LL5B: if(base <= 10)
-break;flags &=~((64 | 256)| 128);goto ok;case '+': _LL5C: goto _LL5D;case '-': _LL5D: if(
-flags & 64){flags &=~ 64;goto ok;}break;case 'x': _LL5E: goto _LL5F;case 'X': _LL5F: if(
+256)| 128);goto ok;case 'A': _LL57: goto _LL58;case 'B': _LL58: goto _LL59;case 'C': _LL59:
+goto _LL5A;case 'D': _LL5A: goto _LL5B;case 'E': _LL5B: goto _LL5C;case 'F': _LL5C: goto
+_LL5D;case 'a': _LL5D: goto _LL5E;case 'b': _LL5E: goto _LL5F;case 'c': _LL5F: goto _LL60;
+case 'd': _LL60: goto _LL61;case 'e': _LL61: goto _LL62;case 'f': _LL62: if(base <= 10)
+break;flags &=~((64 | 256)| 128);goto ok;case '+': _LL63: goto _LL64;case '-': _LL64: if(
+flags & 64){flags &=~ 64;goto ok;}break;case 'x': _LL65: goto _LL66;case 'X': _LL66: if(
 flags & 256?p.curr == (_tagged_arr_plus(({char*_tmp33=buf;_tag_arr(_tmp33,sizeof(
 char),_get_zero_arr_size(_tmp33,351));}),sizeof(char),1)).curr: 0){base=16;flags &=
-~ 256;goto ok;}break;default: _LL60: break;}break;ok:({struct _tagged_arr _tmp34=
+~ 256;goto ok;}break;default: _LL67: break;}break;ok:({struct _tagged_arr _tmp34=
 _tagged_arr_inplace_plus_post(& p,sizeof(char),1);char _tmp35=*((char*)
 _check_unknown_subscript(_tmp34,sizeof(char),0));char _tmp36=(char)c;if(
 _get_arr_size(_tmp34,sizeof(char))== 1?_tmp35 == '\000'?_tmp36 != '\000': 0: 0)
@@ -498,17 +501,17 @@ int*)Cyc_Std_va_arg_int_ptr(*((void**)_check_unknown_subscript(ap,sizeof(void*),
 _check_unknown_subscript(ap,sizeof(void*),0))))=(int)res;}}}
 _tagged_arr_inplace_plus_post(& ap,sizeof(void*),1);nassigned ++;}nread +=(p.curr - ({
 char*_tmp3D=buf;_tag_arr(_tmp3D,sizeof(char),_get_zero_arr_size(_tmp3D,351));}).curr)
-/ sizeof(char);break;case 4: _LL45: if(width == 0?1: width > sizeof(buf)- 1)width=(
+/ sizeof(char);break;case 4: _LL4C: if(width == 0?1: width > sizeof(buf)- 1)width=(
 long long)(sizeof(buf)- 1);flags |=((64 | 128)| 256)| 512;for(p=({char*_tmp3E=buf;
 _tag_arr(_tmp3E,sizeof(char),_get_zero_arr_size(_tmp3E,351));});width != 0;width
---){c=_IO_peekc(fp);switch(c){case '0': _LL63: goto _LL64;case '1': _LL64: goto _LL65;
-case '2': _LL65: goto _LL66;case '3': _LL66: goto _LL67;case '4': _LL67: goto _LL68;case '5':
-_LL68: goto _LL69;case '6': _LL69: goto _LL6A;case '7': _LL6A: goto _LL6B;case '8': _LL6B:
-goto _LL6C;case '9': _LL6C: flags &=~(64 | 128);goto fok;case '+': _LL6D: goto _LL6E;case '-':
-_LL6E: if(flags & 64){flags &=~ 64;goto fok;}break;case '.': _LL6F: if(flags & 256){flags
-&=~(64 | 256);goto fok;}break;case 'e': _LL70: goto _LL71;case 'E': _LL71: if((flags & (
+--){c=_IO_peekc(fp);switch(c){case '0': _LL6A: goto _LL6B;case '1': _LL6B: goto _LL6C;
+case '2': _LL6C: goto _LL6D;case '3': _LL6D: goto _LL6E;case '4': _LL6E: goto _LL6F;case '5':
+_LL6F: goto _LL70;case '6': _LL70: goto _LL71;case '7': _LL71: goto _LL72;case '8': _LL72:
+goto _LL73;case '9': _LL73: flags &=~(64 | 128);goto fok;case '+': _LL74: goto _LL75;case '-':
+_LL75: if(flags & 64){flags &=~ 64;goto fok;}break;case '.': _LL76: if(flags & 256){flags
+&=~(64 | 256);goto fok;}break;case 'e': _LL77: goto _LL78;case 'E': _LL78: if((flags & (
 128 | 512))== 512){flags=(flags & ~(512 | 256)| 64)| 128;goto fok;}break;default:
-_LL72: break;}break;fok:({struct _tagged_arr _tmp3F=_tagged_arr_inplace_plus_post(&
+_LL79: break;}break;fok:({struct _tagged_arr _tmp3F=_tagged_arr_inplace_plus_post(&
 p,sizeof(char),1);char _tmp40=*((char*)_check_unknown_subscript(_tmp3F,sizeof(
 char),0));char _tmp41=(char)c;if(_get_arr_size(_tmp3F,sizeof(char))== 1?_tmp40 == '\000'?
 _tmp41 != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp3F.curr)=_tmp41;});
@@ -530,7 +533,7 @@ ap,sizeof(void*),0))))=res;else{*((float*)Cyc_Std_va_arg_float_ptr(*((void**)
 _check_unknown_subscript(ap,sizeof(void*),0))))=(float)res;}
 _tagged_arr_inplace_plus_post(& ap,sizeof(void*),1);nassigned ++;}nread +=(p.curr - ({
 char*_tmp47=buf;_tag_arr(_tmp47,sizeof(char),_get_zero_arr_size(_tmp47,351));}).curr)
-/ sizeof(char);break;default: _LL62:(int)_throw((void*)({struct Cyc_Core_Impossible_struct*
+/ sizeof(char);break;default: _LL69:(int)_throw((void*)({struct Cyc_Core_Impossible_struct*
 _tmp48=_cycalloc(sizeof(*_tmp48));_tmp48[0]=({struct Cyc_Core_Impossible_struct
 _tmp49;_tmp49.tag=Cyc_Core_Impossible;_tmp49.f1=({const char*_tmp4A="scanf3";
 _tag_arr(_tmp4A,sizeof(char),_get_zero_arr_size(_tmp4A,7));});_tmp49;});_tmp48;}));}}
@@ -546,11 +549,11 @@ _check_known_subscript_notnull(256,n)]=(char)v;}if(c == 0)return _tagged_arr_plu
 fmt,sizeof(char),- 1);v=1 - v;for(0;1;0){tab[_check_known_subscript_notnull(256,c)]=(
 char)v;doswitch: n=(int)*((const char*)_check_unknown_subscript(
 _tagged_arr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0));switch(n){
-case 0: _LL75: return _tagged_arr_plus(fmt,sizeof(char),- 1);case '-': _LL76: n=(int)*((
+case 0: _LL7C: return _tagged_arr_plus(fmt,sizeof(char),- 1);case '-': _LL7D: n=(int)*((
 const char*)_check_unknown_subscript(fmt,sizeof(char),0));if(n == ']'?1: n < c){c=(
 int)'-';break;}_tagged_arr_inplace_plus_post(& fmt,sizeof(char),1);do{tab[
 _check_known_subscript_notnull(256,++ c)]=(char)v;}while(c < n);goto doswitch;
-break;case ']': _LL77: return fmt;default: _LL78: c=n;break;}}}static int Cyc_Std_string_getc(
+break;case ']': _LL7E: return fmt;default: _LL7F: c=n;break;}}}static int Cyc_Std_string_getc(
 struct _tagged_arr*sptr){char c;struct _tagged_arr s=*((struct _tagged_arr*)sptr);if((
 s.curr == ((struct _tagged_arr)_tag_arr(0,0,0)).curr?1: _get_arr_size(s,sizeof(char))
 == 0)?1:(c=*((const char*)_check_unknown_subscript(s,sizeof(char),0)))== '\000')

@@ -305,7 +305,9 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 typedef char *Cstring;
 typedef struct _tagged_arr string_t;
+typedef struct _tagged_arr buffer_t;
 typedef struct _tagged_arr mstring_t;
+typedef struct _tagged_arr mbuffer_t;
 typedef string_t *stringptr_t;
 typedef mstring_t *mstringptr_t;
 typedef int bool;

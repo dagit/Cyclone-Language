@@ -314,16 +314,18 @@ Cyc_List_imp_rev(struct Cyc_List_List*x);extern char Cyc_List_Nth[8];struct Cyc_
 extern struct Cyc_Std___cycFILE*Cyc_Std_stdout;extern struct Cyc_Std___cycFILE*Cyc_Std_stderr;
 struct Cyc_Std_Cstdio___abstractFILE;struct Cyc_Std_String_pa_struct{int tag;struct
 _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{
-int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{
-int tag;unsigned int*f1;};struct _tagged_arr Cyc_Std_aprintf(struct _tagged_arr,
-struct _tagged_arr);int Cyc_Std_fflush(struct Cyc_Std___cycFILE*);int Cyc_Std_fprintf(
-struct Cyc_Std___cycFILE*,struct _tagged_arr,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{
-int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};
-struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{
-int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{int tag;struct
-_tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{
-int tag;float*f1;};extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[
-18];struct Cyc_Std_FileOpenError_struct{char*tag;struct _tagged_arr f1;};struct Cyc_Lineno_Pos{
+int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_Buffer_pa_struct{
+int tag;struct _tagged_arr f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*
+f1;};struct _tagged_arr Cyc_Std_aprintf(struct _tagged_arr,struct _tagged_arr);int
+Cyc_Std_fflush(struct Cyc_Std___cycFILE*);int Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,
+struct _tagged_arr,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{int tag;
+short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct
+Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;
+unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;}
+;struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{
+int tag;float*f1;};struct Cyc_Std_CharPtr_sa_struct{int tag;struct _tagged_arr f1;};
+extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[18];struct
+Cyc_Std_FileOpenError_struct{char*tag;struct _tagged_arr f1;};struct Cyc_Lineno_Pos{
 struct _tagged_arr logical_file;struct _tagged_arr line;int line_no;int col;};struct
 Cyc_Lineno_Pos*Cyc_Lineno_pos_of_abs(struct _tagged_arr,int);void Cyc_Lineno_poss_of_abss(
 struct _tagged_arr filename,struct Cyc_List_List*places);extern char Cyc_Position_Exit[
@@ -374,12 +376,12 @@ _tmp5;_tmp5.tag=0;_tmp5.f1=(struct _tagged_arr)pos->logical_file;{void*_tmp3[3]=
 _tmp5,& _tmp6,& _tmp7};Cyc_Std_aprintf(({const char*_tmp4="%s (%d:%d)";_tag_arr(
 _tmp4,sizeof(char),_get_zero_arr_size(_tmp4,11));}),_tag_arr(_tmp3,sizeof(void*),
 3));}}}});}static struct _tagged_arr Cyc_Position_string_of_pos_pr(struct Cyc_Lineno_Pos*
-pos_s,struct Cyc_Lineno_Pos*pos_e){if(Cyc_Std_strcmp(pos_s->logical_file,pos_e->logical_file)
-== 0)return({struct Cyc_Std_Int_pa_struct _tmpE;_tmpE.tag=1;_tmpE.f1=(int)((
-unsigned int)pos_e->col);{struct Cyc_Std_Int_pa_struct _tmpD;_tmpD.tag=1;_tmpD.f1=(
-int)((unsigned int)pos_e->line_no);{struct Cyc_Std_Int_pa_struct _tmpC;_tmpC.tag=1;
-_tmpC.f1=(int)((unsigned int)pos_s->col);{struct Cyc_Std_Int_pa_struct _tmpB;_tmpB.tag=
-1;_tmpB.f1=(int)((unsigned int)pos_s->line_no);{struct Cyc_Std_String_pa_struct
+pos_s,struct Cyc_Lineno_Pos*pos_e){if(Cyc_Std_strcmp((struct _tagged_arr)pos_s->logical_file,(
+struct _tagged_arr)pos_e->logical_file)== 0)return({struct Cyc_Std_Int_pa_struct
+_tmpE;_tmpE.tag=1;_tmpE.f1=(int)((unsigned int)pos_e->col);{struct Cyc_Std_Int_pa_struct
+_tmpD;_tmpD.tag=1;_tmpD.f1=(int)((unsigned int)pos_e->line_no);{struct Cyc_Std_Int_pa_struct
+_tmpC;_tmpC.tag=1;_tmpC.f1=(int)((unsigned int)pos_s->col);{struct Cyc_Std_Int_pa_struct
+_tmpB;_tmpB.tag=1;_tmpB.f1=(int)((unsigned int)pos_s->line_no);{struct Cyc_Std_String_pa_struct
 _tmpA;_tmpA.tag=0;_tmpA.f1=(struct _tagged_arr)pos_s->logical_file;{void*_tmp8[5]={&
 _tmpA,& _tmpB,& _tmpC,& _tmpD,& _tmpE};Cyc_Std_aprintf(({const char*_tmp9="%s(%d:%d-%d:%d)";
 _tag_arr(_tmp9,sizeof(char),_get_zero_arr_size(_tmp9,16));}),_tag_arr(_tmp8,

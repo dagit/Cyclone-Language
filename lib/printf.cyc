@@ -86,6 +86,7 @@ tunion PrintArg<`r::R> {
   //  Float_pa(float);
   Double_pa(double);
   ShortPtr_pa(short @`r);
+  Buffer_pa(const char ?NOZEROTERM`r);
   IntPtr_pa(unsigned long @`r);
 };
 
@@ -96,6 +97,7 @@ static string_t parg2string(parg_t x) {
     // case &Float_pa(_): return "float";
   case &Double_pa(_): return "double";
   case &ShortPtr_pa(_): return "short *";
+  case &Buffer_pa(_): return "buffer";
   case &IntPtr_pa(_): return "unsigned long *";
   }
 }
@@ -223,6 +225,18 @@ static int _IO_sputn(int (@ioputc)(int,`a), `a ioputc_env, const char ? s,
   return i;
 }
 
+static int _IO_nzsputn(int (@ioputc)(int,`a), `a ioputc_env, 
+                       const char ?NOZEROTERM s, int howmany) {
+  int i = 0;
+  while (i < howmany) {
+    char c;
+    if (s.size == 0 || (c = *s) == 0 || ioputc(c,ioputc_env) == EOF) return i;
+    s++;
+    i++;
+  }
+  return i;
+}
+
 /* Print out n=howmany copies of the character c using the given io closure.
  * Returns a count of how many characters were successfully spit out.
  */
@@ -246,6 +260,22 @@ static const char ?`r my_memchr(const char ?`r s, char c, int n) {
   return NULL;
 }
 
+static const char ?NOZEROTERM`r my_nzmemchr(const char?NOZEROTERM`r s, char c, int n) {
+  int sz = s.size;
+  n = (n < sz) ? n : sz;
+  for (; n != 0; n--, s++) {
+    if (*s == c) return s;
+  }
+  return NULL;
+}
+
+static const size_t my_strlen(const char ?NOZEROTERM s) {
+  unsigned sz = s.size;
+  unsigned i = 0;
+  while (i < sz && s[i] != 0) i++;
+  return i;
+}
+
 /* Generic printf function.  ioputc and ioputc_env form a closure for doing
  * the actual character-level printing (either to a FILE or string).  fmt0
  * is the format string, and ap is the array of printf arguments. 
@@ -258,12 +288,16 @@ int _IO_vfprintf (int (@ioputc)(int,`a), `a ioputc_env,
 	register int ch;	/* character from fmt */
 	register int n;		/* handy integer (short term usage) */
         /* cp is a handy char pointer (short term usage) for a local buffer */
-	register char ? cp = NULL;	
+	char ? cp = NULL;	
         /* cp2 is a handy char pointer (short term usage) for the case when
          * the argument is a string -- that lives in a different region. */
-	register const char ? cp2 = NULL;
-        /* the flag use_cp2 controls whether or not we PRINT from cp or cp2 */
-        bool use_cp2; 
+	const char ? cp2 = NULL;
+        /* cp3 is like cp2 except that here the argument is not necessarily
+         * zero-terminated. */
+        const char ?NOZEROTERM cp3 = NULL;
+        /* the flag which_cp controls whether or not we PRINT from cp,cp2,
+         * or cp3. */
+        int which_cp; 
 	const char ? fmark;	/* for remembering a place in fmt */
 	register int flags;	/* flags as above */
 	int ret;		/* return value accumulator */
@@ -292,6 +326,8 @@ int _IO_vfprintf (int (@ioputc)(int,`a), `a ioputc_env,
 	 */
 #define	PRINT(ptr, len) \
   do { if (_IO_sputn(ioputc,ioputc_env,ptr,len) != len) goto error; } while (0)
+#define	PRINTNOZEROTERM(ptr, len) \
+  do { if (_IO_nzsputn(ioputc,ioputc_env,ptr,len) != len) goto error; } while (0)
 #define PAD_SP(howmany) if (_IO_padn(ioputc,ioputc_env,' ',howmany) < (howmany)) goto error;
 #define PAD_0(howmany) if (_IO_padn(ioputc,ioputc_env,'0',howmany) < (howmany)) goto error;
 
@@ -339,7 +375,7 @@ int _IO_vfprintf (int (@ioputc)(int,`a), `a ioputc_env,
 		sign = '\0';
 
 rflag:		ch = *fmt++;
-reswitch:	use_cp2 = false;
+reswitch:	which_cp = 0;
                 switch (ch) {
 		case ' ':
 			/*
@@ -489,26 +525,42 @@ reswitch:	use_cp2 = false;
 			ch = 'x';
 			goto nosign;
 		case 's':
-                        use_cp2 = true;
-                        cp2 = va_arg_string(ap); ap++;
-			if (cp2 == NULL)
-				cp2 = "(NULL)";
-			if (prec >= 0) {
+                        switch (*ap) {
+                        case &String_pa(s):
+                          which_cp = 2; cp2 = s;
+                          if (cp2 == NULL) cp2 = "(NULL)";
+                          if (prec >= 0) {
 				/*
 				 * can't use strlen; can only look for the
 				 * NUL in the first `prec' characters, and
 				 * strlen() will go further.
 				 */
 				const char ? p = my_memchr(cp2, 0, prec);
-
 				if (p != NULL) {
-					size = p - cp2;
-					if (size > prec)
-						size = prec;
+                                  size = p - cp2;
+                                  if (size > prec)
+                                    size = prec;
 				} else
-					size = prec;
-			} else
-				size = strlen(cp2);
+                                  size = prec;
+                          } else
+                            size = strlen(cp2);
+                          break;
+                        case &Buffer_pa(b):
+                          which_cp = 3; cp3 = b;
+                          if (prec >= 0) {
+                            const char ?NOZEROTERM p = my_nzmemchr(cp3,0,prec);
+                            if (p != NULL) {
+                              size = p - cp3;
+                              if (size > prec)
+                                size = prec;
+                            } else
+                              size = prec;
+                          } else
+                            size = my_strlen(cp3);
+                          break;
+                        default: throw badarg("printf expected string");
+                        }
+                        ap++;
 			sign = '\0';
 			break;
 		case 'U':
@@ -600,8 +652,8 @@ number:			if ((dprec = prec) >= 0)
 		}
 
                 /* The comment below is accurate except that the flag
-                 * use_cp2 controls whether or not we should use cp2
-                 * instead of cp.
+                 * which_cp controls whether or not we should use cp2
+                 * or cp3 instead of cp.
                  */
 
 		/*
@@ -654,10 +706,12 @@ number:			if ((dprec = prec) >= 0)
 		PAD_0(dpad);
 
 		/* the string or number proper */
-                if (use_cp2)
-                  PRINT(cp2, size);
-                else
+                if (which_cp == 0)
                   PRINT(cp, size);
+                else if (which_cp == 2)
+                  PRINT(cp2, size);
+                else if (which_cp == 3)
+                  PRINTNOZEROTERM(cp3, size);
 
 		/* trailing f.p. zeroes */
 		PAD_0(fpprec);

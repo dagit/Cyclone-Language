@@ -296,7 +296,10 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
          terr(loc,"length modifiers not allowed with %%s");
          return NULL;
        }
-      typs = new List(const_string_typ(new_evar(&rk,new Opt(lookup_type_vars(te)))),typs);
+       type_t ptr = tagged_typ(char_typ, 
+                               new_evar(&rk,new Opt(lookup_type_vars(te))),
+                               const_tqual(), empty_conref());
+       typs = new List(ptr,typs);
       break;
     case 'p':
       // Note:  we require pointers to be cast to integers
@@ -520,6 +523,10 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
       break;
       //JGM: need to fix and synch up with lib/scanf.cyc
     case 'c':
+      let tvs = new Opt(lookup_type_vars(te));
+      typs = new List(tagged_typ(char_typ,new_evar(&rk,tvs),empty_tqual(),
+                                 false_conref),typs);
+      break;
     case 's':
       let tvs = new Opt(lookup_type_vars(te));
       typs = new List(string_typ(new_evar(&rk,tvs)),typs);

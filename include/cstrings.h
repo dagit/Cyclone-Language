@@ -24,8 +24,8 @@
 
 #ifndef __CYGWIN__
 namespace Std {
-extern int strcasecmp(string_t, string_t);
-extern int strncasecmp(string_t s1, string_t s2, size_t len);
+extern int strcasecmp(buffer_t, buffer_t);
+extern int strncasecmp(buffer_t s1, buffer_t s2, size_t len);
 }
 #endif
 

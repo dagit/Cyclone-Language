@@ -348,11 +348,12 @@ _tmp5;_tmp5.tag=Cyc_Core_Invalid_argument;_tmp5.f1=({const char*_tmp6="Buffer::a
 _tag_arr(_tmp6,sizeof(char),_get_zero_arr_size(_tmp6,22));});_tmp5;});_tmp4;}));{
 int new_position=(int)(b->position + len);if(new_position > b->length)Cyc_Buffer_resize(
 b,(unsigned int)len);Cyc_Std_zstrncpy(_tagged_arr_plus(b->buffer,sizeof(char),(
-int)b->position),_tagged_arr_plus(s,sizeof(char),offset),(unsigned int)len);b->position=(
-unsigned int)new_position;return;}}void Cyc_Buffer_add_string(struct Cyc_Buffer_t*
-b,struct _tagged_arr s){int len=(int)Cyc_Std_strlen(s);int new_position=(int)(b->position
-+ len);if(new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);Cyc_Std_strncpy(
-_tagged_arr_plus(b->buffer,sizeof(char),(int)b->position),s,(unsigned int)len);b->position=(
+int)b->position),(struct _tagged_arr)_tagged_arr_plus(s,sizeof(char),offset),(
+unsigned int)len);b->position=(unsigned int)new_position;return;}}void Cyc_Buffer_add_string(
+struct Cyc_Buffer_t*b,struct _tagged_arr s){int len=(int)Cyc_Std_strlen((struct
+_tagged_arr)s);int new_position=(int)(b->position + len);if(new_position > b->length)
+Cyc_Buffer_resize(b,(unsigned int)len);Cyc_Std_strncpy(_tagged_arr_plus(b->buffer,
+sizeof(char),(int)b->position),(struct _tagged_arr)s,(unsigned int)len);b->position=(
 unsigned int)new_position;return;}void Cyc_Buffer_add_buffer(struct Cyc_Buffer_t*b,
 struct Cyc_Buffer_t*bs){Cyc_Buffer_add_substring(b,(struct _tagged_arr)bs->buffer,
 0,(int)bs->position);return;}

@@ -308,16 +308,18 @@ typedef struct{int __pos;Cyc_Std___mbstate_t __state;}Cyc_Std__G_fpos_t;typedef 
 Cyc_Std_fpos_t;struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*Cyc_Std_stderr;
 struct Cyc_Std_Cstdio___abstractFILE;struct Cyc_Std_String_pa_struct{int tag;struct
 _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{
-int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{
-int tag;unsigned int*f1;};int Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,struct
-_tagged_arr,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;
-};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
-int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
-Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
-int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};int Cyc_Std_sscanf(
-struct _tagged_arr,struct _tagged_arr,struct _tagged_arr);extern char Cyc_Std_FileCloseError[
-19];extern char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{char*
-tag;struct _tagged_arr f1;};struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[
+int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_Buffer_pa_struct{
+int tag;struct _tagged_arr f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*
+f1;};int Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,struct _tagged_arr,struct
+_tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{
+int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
+Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
+int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
+};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_Std_CharPtr_sa_struct{
+int tag;struct _tagged_arr f1;};int Cyc_Std_sscanf(struct _tagged_arr,struct
+_tagged_arr,struct _tagged_arr);extern char Cyc_Std_FileCloseError[19];extern char
+Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{char*tag;struct
+_tagged_arr f1;};struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[
 21];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _tagged_arr f1;};extern
 char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
 _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -351,31 +353,33 @@ _tagged_arr f1;};struct Cyc_Arg_Wrong_struct{int tag;struct _tagged_arr f1;struc
 _tagged_arr f2;struct _tagged_arr f3;};struct _tuple0{struct _tagged_arr f1;int f2;
 struct _tagged_arr f3;void*f4;struct _tagged_arr f5;};static void*Cyc_Arg_lookup(
 struct Cyc_List_List*l,struct _tagged_arr x){while(l != 0){struct _tagged_arr _tmp0=(*((
-struct _tuple0*)((struct _tuple0*)l->hd))).f1;unsigned int _tmp1=Cyc_Std_strlen(
-_tmp0);if(_tmp1 > 0?(*((struct _tuple0*)((struct _tuple0*)l->hd))).f2: 0){if(Cyc_Std_strncmp(
-x,(*((struct _tuple0*)((struct _tuple0*)l->hd))).f1,_tmp1)== 0)return(*((struct
-_tuple0*)((struct _tuple0*)l->hd))).f4;}else{if(Cyc_Std_strcmp(x,(*((struct
-_tuple0*)((struct _tuple0*)l->hd))).f1)== 0)return(*((struct _tuple0*)((struct
-_tuple0*)l->hd))).f4;}l=l->tl;}(int)_throw((void*)Cyc_Core_Not_found);}static
-struct _tagged_arr Cyc_Arg_Justify_break_line(struct Cyc_Buffer_t*b,int howmuch,
-struct _tagged_arr s){if(s.curr == ((struct _tagged_arr)_tag_arr(0,0,0)).curr)return(
-struct _tagged_arr)_tag_arr(0,0,0);if(howmuch < 0)howmuch=0;{unsigned int _tmp2=Cyc_Std_strlen(
-s);_tmp2 <= _get_arr_size(s,sizeof(char))?0:((int(*)(struct _tagged_arr assertion,
-struct _tagged_arr file,unsigned int line))Cyc_Std___assert_fail)(({const char*_tmp3="len <= s.size";
-_tag_arr(_tmp3,sizeof(char),_get_zero_arr_size(_tmp3,14));}),({const char*_tmp4="arg.cyc";
-_tag_arr(_tmp4,sizeof(char),_get_zero_arr_size(_tmp4,8));}),94);if(howmuch > 
-_tmp2){Cyc_Buffer_add_string(b,s);return(struct _tagged_arr)_tag_arr(0,0,0);}{int
-i;for(i=howmuch - 1;i >= 0?!isspace((int)*((const char*)_check_unknown_subscript(s,
-sizeof(char),i))): 0;i --){;}if(i < 0)for(i=howmuch?howmuch - 1: 0;(i < _tmp2?(int)((
-const char*)s.curr)[i]: 0)?!isspace((int)((const char*)s.curr)[i]): 0;i ++){;}Cyc_Buffer_add_substring(
-b,s,0,i);{struct _tagged_arr whatsleft=(struct _tagged_arr)_tag_arr(0,0,0);for(0;(i
-< _tmp2?(int)((const char*)s.curr)[i]: 0)?isspace((int)((const char*)s.curr)[i]): 0;
-i ++){;}if(i < _tmp2?(int)((const char*)s.curr)[i]: 0)whatsleft=_tagged_arr_plus(s,
-sizeof(char),i);return whatsleft;}}}}void Cyc_Arg_Justify_justify_b(struct Cyc_Buffer_t*
-b,int indent,int margin,struct _tagged_arr item,struct _tagged_arr desc){if(item.curr
-!= ((struct _tagged_arr)_tag_arr(0,0,0)).curr)Cyc_Buffer_add_string(b,item);if(
-desc.curr == ((struct _tagged_arr)_tag_arr(0,0,0)).curr)return;if(indent < 0)indent=
-0;if(margin < 0)margin=0;{struct _tagged_arr indentstr=({unsigned int _tmp11=(
+struct _tuple0*)((struct _tuple0*)l->hd))).f1;unsigned int _tmp1=Cyc_Std_strlen((
+struct _tagged_arr)_tmp0);if(_tmp1 > 0?(*((struct _tuple0*)((struct _tuple0*)l->hd))).f2:
+0){if(Cyc_Std_strncmp((struct _tagged_arr)x,(struct _tagged_arr)(*((struct _tuple0*)((
+struct _tuple0*)l->hd))).f1,_tmp1)== 0)return(*((struct _tuple0*)((struct _tuple0*)
+l->hd))).f4;}else{if(Cyc_Std_strcmp((struct _tagged_arr)x,(struct _tagged_arr)(*((
+struct _tuple0*)((struct _tuple0*)l->hd))).f1)== 0)return(*((struct _tuple0*)((
+struct _tuple0*)l->hd))).f4;}l=l->tl;}(int)_throw((void*)Cyc_Core_Not_found);}
+static struct _tagged_arr Cyc_Arg_Justify_break_line(struct Cyc_Buffer_t*b,int
+howmuch,struct _tagged_arr s){if(s.curr == ((struct _tagged_arr)_tag_arr(0,0,0)).curr)
+return(struct _tagged_arr)_tag_arr(0,0,0);if(howmuch < 0)howmuch=0;{unsigned int
+_tmp2=Cyc_Std_strlen((struct _tagged_arr)s);_tmp2 <= _get_arr_size(s,sizeof(char))?
+0:((int(*)(struct _tagged_arr assertion,struct _tagged_arr file,unsigned int line))
+Cyc_Std___assert_fail)(({const char*_tmp3="len <= s.size";_tag_arr(_tmp3,sizeof(
+char),_get_zero_arr_size(_tmp3,14));}),({const char*_tmp4="arg.cyc";_tag_arr(
+_tmp4,sizeof(char),_get_zero_arr_size(_tmp4,8));}),94);if(howmuch > _tmp2){Cyc_Buffer_add_string(
+b,s);return(struct _tagged_arr)_tag_arr(0,0,0);}{int i;for(i=howmuch - 1;i >= 0?!
+isspace((int)*((const char*)_check_unknown_subscript(s,sizeof(char),i))): 0;i --){;}
+if(i < 0)for(i=howmuch?howmuch - 1: 0;(i < _tmp2?(int)((const char*)s.curr)[i]: 0)?!
+isspace((int)((const char*)s.curr)[i]): 0;i ++){;}Cyc_Buffer_add_substring(b,s,0,i);{
+struct _tagged_arr whatsleft=(struct _tagged_arr)_tag_arr(0,0,0);for(0;(i < _tmp2?(
+int)((const char*)s.curr)[i]: 0)?isspace((int)((const char*)s.curr)[i]): 0;i ++){;}
+if(i < _tmp2?(int)((const char*)s.curr)[i]: 0)whatsleft=_tagged_arr_plus(s,sizeof(
+char),i);return whatsleft;}}}}void Cyc_Arg_Justify_justify_b(struct Cyc_Buffer_t*b,
+int indent,int margin,struct _tagged_arr item,struct _tagged_arr desc){if(item.curr != ((
+struct _tagged_arr)_tag_arr(0,0,0)).curr)Cyc_Buffer_add_string(b,item);if(desc.curr
+== ((struct _tagged_arr)_tag_arr(0,0,0)).curr)return;if(indent < 0)indent=0;if(
+margin < 0)margin=0;{struct _tagged_arr indentstr=({unsigned int _tmp11=(
 unsigned int)(indent + 2);char*_tmp12=(char*)_cycalloc_atomic(_check_times(
 sizeof(char),_tmp11 + 1));struct _tagged_arr _tmp14=_tag_arr(_tmp12,sizeof(char),
 _tmp11 + 1);{unsigned int _tmp13=_tmp11;unsigned int i;for(i=0;i < _tmp13;i ++){
@@ -384,30 +388,31 @@ indent + 1;i ++){({struct _tagged_arr _tmp5=_tagged_arr_plus(indentstr,sizeof(ch
 int)i);char _tmp6=*((char*)_check_unknown_subscript(_tmp5,sizeof(char),0));char
 _tmp7=i == 0?'\n':' ';if(_get_arr_size(_tmp5,sizeof(char))== 1?_tmp6 == '\000'?
 _tmp7 != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp5.curr)=_tmp7;});}}{
-unsigned int _tmp8=Cyc_Std_strlen(item);struct _tagged_arr itemsep;if(Cyc_Std_strlen(
-desc)> 0){if(_tmp8 + 1 > indent)itemsep=indentstr;else{struct _tagged_arr temp=({
-unsigned int _tmpC=(indent - _tmp8)+ 1;char*_tmpD=(char*)_cycalloc_atomic(
-_check_times(sizeof(char),_tmpC + 1));struct _tagged_arr _tmpF=_tag_arr(_tmpD,
-sizeof(char),_tmpC + 1);{unsigned int _tmpE=_tmpC;unsigned int i;for(i=0;i < _tmpE;i
-++){_tmpD[i]='\000';}_tmpD[_tmpE]=(char)0;}_tmpF;});{unsigned int i=0;for(0;i < 
-indent - _tmp8;i ++){({struct _tagged_arr _tmp9=_tagged_arr_plus(temp,sizeof(char),(
-int)i);char _tmpA=*((char*)_check_unknown_subscript(_tmp9,sizeof(char),0));char
-_tmpB=' ';if(_get_arr_size(_tmp9,sizeof(char))== 1?_tmpA == '\000'?_tmpB != '\000':
-0: 0)_throw_arraybounds();*((char*)_tmp9.curr)=_tmpB;});}}itemsep=temp;}}else{
-return;}Cyc_Buffer_add_string(b,(struct _tagged_arr)itemsep);while(desc.curr != ((
-struct _tagged_arr)_tag_arr(0,0,0)).curr){desc=Cyc_Arg_Justify_break_line(b,
-margin - indent,desc);if(desc.curr != ((struct _tagged_arr)_tag_arr(0,0,0)).curr)
-Cyc_Buffer_add_string(b,(struct _tagged_arr)indentstr);else{Cyc_Buffer_add_string(
-b,({const char*_tmp10="\n";_tag_arr(_tmp10,sizeof(char),_get_zero_arr_size(_tmp10,
-2));}));}}return;}}}void Cyc_Arg_usage(struct Cyc_List_List*speclist,struct
-_tagged_arr errmsg){({struct Cyc_Std_String_pa_struct _tmp17;_tmp17.tag=0;_tmp17.f1=(
-struct _tagged_arr)errmsg;{void*_tmp15[1]={& _tmp17};Cyc_Std_fprintf(Cyc_Std_stderr,({
-const char*_tmp16="%s\n";_tag_arr(_tmp16,sizeof(char),_get_zero_arr_size(_tmp16,4));}),
-_tag_arr(_tmp15,sizeof(void*),1));}});{struct Cyc_Buffer_t*_tmp18=Cyc_Buffer_create(
-1024);while(speclist != 0){Cyc_Arg_Justify_justify_b(_tmp18,12,72,(struct
-_tagged_arr)Cyc_Std_strconcat((*((struct _tuple0*)((struct _tuple0*)speclist->hd))).f1,(*((
-struct _tuple0*)((struct _tuple0*)speclist->hd))).f3),(*((struct _tuple0*)((struct
-_tuple0*)speclist->hd))).f5);speclist=speclist->tl;}({struct Cyc_Std_String_pa_struct
+unsigned int _tmp8=Cyc_Std_strlen((struct _tagged_arr)item);struct _tagged_arr
+itemsep;if(Cyc_Std_strlen((struct _tagged_arr)desc)> 0){if(_tmp8 + 1 > indent)
+itemsep=indentstr;else{struct _tagged_arr temp=({unsigned int _tmpC=(indent - _tmp8)
++ 1;char*_tmpD=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmpC + 1));
+struct _tagged_arr _tmpF=_tag_arr(_tmpD,sizeof(char),_tmpC + 1);{unsigned int _tmpE=
+_tmpC;unsigned int i;for(i=0;i < _tmpE;i ++){_tmpD[i]='\000';}_tmpD[_tmpE]=(char)0;}
+_tmpF;});{unsigned int i=0;for(0;i < indent - _tmp8;i ++){({struct _tagged_arr _tmp9=
+_tagged_arr_plus(temp,sizeof(char),(int)i);char _tmpA=*((char*)
+_check_unknown_subscript(_tmp9,sizeof(char),0));char _tmpB=' ';if(_get_arr_size(
+_tmp9,sizeof(char))== 1?_tmpA == '\000'?_tmpB != '\000': 0: 0)_throw_arraybounds();*((
+char*)_tmp9.curr)=_tmpB;});}}itemsep=temp;}}else{return;}Cyc_Buffer_add_string(b,(
+struct _tagged_arr)itemsep);while(desc.curr != ((struct _tagged_arr)_tag_arr(0,0,0)).curr){
+desc=Cyc_Arg_Justify_break_line(b,margin - indent,desc);if(desc.curr != ((struct
+_tagged_arr)_tag_arr(0,0,0)).curr)Cyc_Buffer_add_string(b,(struct _tagged_arr)
+indentstr);else{Cyc_Buffer_add_string(b,({const char*_tmp10="\n";_tag_arr(_tmp10,
+sizeof(char),_get_zero_arr_size(_tmp10,2));}));}}return;}}}void Cyc_Arg_usage(
+struct Cyc_List_List*speclist,struct _tagged_arr errmsg){({struct Cyc_Std_String_pa_struct
+_tmp17;_tmp17.tag=0;_tmp17.f1=(struct _tagged_arr)errmsg;{void*_tmp15[1]={& _tmp17};
+Cyc_Std_fprintf(Cyc_Std_stderr,({const char*_tmp16="%s\n";_tag_arr(_tmp16,sizeof(
+char),_get_zero_arr_size(_tmp16,4));}),_tag_arr(_tmp15,sizeof(void*),1));}});{
+struct Cyc_Buffer_t*_tmp18=Cyc_Buffer_create(1024);while(speclist != 0){Cyc_Arg_Justify_justify_b(
+_tmp18,12,72,(struct _tagged_arr)Cyc_Std_strconcat((struct _tagged_arr)(*((struct
+_tuple0*)((struct _tuple0*)speclist->hd))).f1,(struct _tagged_arr)(*((struct
+_tuple0*)((struct _tuple0*)speclist->hd))).f3),(*((struct _tuple0*)((struct _tuple0*)
+speclist->hd))).f5);speclist=speclist->tl;}({struct Cyc_Std_String_pa_struct
 _tmp1B;_tmp1B.tag=0;_tmp1B.f1=(struct _tagged_arr)Cyc_Buffer_contents(_tmp18);{
 void*_tmp19[1]={& _tmp1B};Cyc_Std_fprintf(Cyc_Std_stderr,({const char*_tmp1A="%s";
 _tag_arr(_tmp1A,sizeof(char),_get_zero_arr_size(_tmp1A,3));}),_tag_arr(_tmp19,
@@ -420,18 +425,18 @@ prog_pos)):({const char*_tmp36="(?)";_tag_arr(_tmp36,sizeof(char),
 _get_zero_arr_size(_tmp36,4));});{void*_tmp1C=e;struct _tagged_arr _tmp1D;struct
 _tagged_arr _tmp1E;struct _tagged_arr _tmp1F;struct _tagged_arr _tmp20;struct
 _tagged_arr _tmp21;struct _tagged_arr _tmp22;_LL1: if(*((int*)_tmp1C)!= 0)goto _LL3;
-_tmp1D=((struct Cyc_Arg_Unknown_struct*)_tmp1C)->f1;_LL2: if(Cyc_Std_strcmp(_tmp1D,({
-const char*_tmp23="-help";_tag_arr(_tmp23,sizeof(char),_get_zero_arr_size(_tmp23,
-6));}))!= 0)({struct Cyc_Std_String_pa_struct _tmp27;_tmp27.tag=0;_tmp27.f1=(
-struct _tagged_arr)_tmp1D;{struct Cyc_Std_String_pa_struct _tmp26;_tmp26.tag=0;
-_tmp26.f1=(struct _tagged_arr)progname;{void*_tmp24[2]={& _tmp26,& _tmp27};Cyc_Std_fprintf(
-Cyc_Std_stderr,({const char*_tmp25="%s: unknown option `%s'.\n";_tag_arr(_tmp25,
-sizeof(char),_get_zero_arr_size(_tmp25,26));}),_tag_arr(_tmp24,sizeof(void*),2));}}});
-goto _LL0;_LL3: if(*((int*)_tmp1C)!= 1)goto _LL5;_tmp1E=((struct Cyc_Arg_Missing_struct*)
-_tmp1C)->f1;_LL4:({struct Cyc_Std_String_pa_struct _tmp2B;_tmp2B.tag=0;_tmp2B.f1=(
-struct _tagged_arr)_tmp1E;{struct Cyc_Std_String_pa_struct _tmp2A;_tmp2A.tag=0;
-_tmp2A.f1=(struct _tagged_arr)progname;{void*_tmp28[2]={& _tmp2A,& _tmp2B};Cyc_Std_fprintf(
-Cyc_Std_stderr,({const char*_tmp29="%s: option `%s' needs an argument.\n";
+_tmp1D=((struct Cyc_Arg_Unknown_struct*)_tmp1C)->f1;_LL2: if(Cyc_Std_strcmp((
+struct _tagged_arr)_tmp1D,({const char*_tmp23="-help";_tag_arr(_tmp23,sizeof(char),
+_get_zero_arr_size(_tmp23,6));}))!= 0)({struct Cyc_Std_String_pa_struct _tmp27;
+_tmp27.tag=0;_tmp27.f1=(struct _tagged_arr)_tmp1D;{struct Cyc_Std_String_pa_struct
+_tmp26;_tmp26.tag=0;_tmp26.f1=(struct _tagged_arr)progname;{void*_tmp24[2]={&
+_tmp26,& _tmp27};Cyc_Std_fprintf(Cyc_Std_stderr,({const char*_tmp25="%s: unknown option `%s'.\n";
+_tag_arr(_tmp25,sizeof(char),_get_zero_arr_size(_tmp25,26));}),_tag_arr(_tmp24,
+sizeof(void*),2));}}});goto _LL0;_LL3: if(*((int*)_tmp1C)!= 1)goto _LL5;_tmp1E=((
+struct Cyc_Arg_Missing_struct*)_tmp1C)->f1;_LL4:({struct Cyc_Std_String_pa_struct
+_tmp2B;_tmp2B.tag=0;_tmp2B.f1=(struct _tagged_arr)_tmp1E;{struct Cyc_Std_String_pa_struct
+_tmp2A;_tmp2A.tag=0;_tmp2A.f1=(struct _tagged_arr)progname;{void*_tmp28[2]={&
+_tmp2A,& _tmp2B};Cyc_Std_fprintf(Cyc_Std_stderr,({const char*_tmp29="%s: option `%s' needs an argument.\n";
 _tag_arr(_tmp29,sizeof(char),_get_zero_arr_size(_tmp29,36));}),_tag_arr(_tmp28,
 sizeof(void*),2));}}});goto _LL0;_LL5: if(*((int*)_tmp1C)!= 3)goto _LL7;_tmp1F=((
 struct Cyc_Arg_Wrong_struct*)_tmp1C)->f1;_tmp20=((struct Cyc_Arg_Wrong_struct*)

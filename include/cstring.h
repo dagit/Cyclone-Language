@@ -39,7 +39,7 @@ using List;
 extern string_t strerror(int);
 
 ///////////////////////// LENGTH
-extern size_t strlen(string_t s);
+extern size_t strlen(buffer_t s);
 
 ///////////////////////// COMPARISONS
 // Return <0 if s1 < s2, 0 if s1 == s2, and >0 if s1 > s2.
@@ -50,31 +50,31 @@ extern size_t strlen(string_t s);
 // strncasecmp is like strncmp but is case insensitive.
 // zstrcmp and zstrncmp do not consider zero (NUL) characters
 //   to be end-of-string markers. 
-extern int strcmp(string_t s1, string_t s2);
+extern int strcmp(buffer_t s1, buffer_t s2);
 extern int strptrcmp(stringptr_t s1, stringptr_t s2);
-extern int strncmp(string_t s1, string_t s2, size_t len);
-extern int zstrcmp(string_t,string_t);
-extern int zstrncmp(string_t s1, string_t s2, size_t n);
+extern int strncmp(buffer_t s1, buffer_t s2, size_t len);
+extern int zstrcmp(buffer_t,buffer_t);
+extern int zstrncmp(buffer_t s1, buffer_t s2, size_t n);
 extern int zstrptrcmp(stringptr_t, stringptr_t);
-extern int strcasecmp(string_t, string_t);
-extern int strncasecmp(string_t s1, string_t s2, size_t len);
+extern int strcasecmp(buffer_t, buffer_t);
+extern int strncasecmp(buffer_t s1, buffer_t s2, size_t len);
 
 ///////////////////////// CONCATENATION
 // Destructive concatenation: first arg modified and returned
-extern mstring_t<`r> strcat(mstring_t<`r> dest,string_t src);
+extern mstring_t<`r> strcat(mstring_t<`r> dest,buffer_t src);
 // These functions return newly allocated strings
-extern mstring_t     strconcat(string_t,string_t);
-extern mstring_t<`r> rstrconcat(region_t<`r>,string_t,string_t);
+extern mstring_t     strconcat(buffer_t,buffer_t);
+extern mstring_t<`r> rstrconcat(region_t<`r>,buffer_t,buffer_t);
 extern mstring_t     strconcat_l(list_t<stringptr_t>);
 extern mstring_t<`r> rstrconcat_l(region_t<`r>,list_t<stringptr_t>);
-extern mstring_t     str_sepstr(list_t<stringptr_t>,string_t);
-extern mstring_t<`r> rstr_sepstr(region_t<`r>,list_t<stringptr_t>,string_t);
+extern mstring_t     str_sepstr(list_t<stringptr_t>,buffer_t);
+extern mstring_t<`r> rstr_sepstr(region_t<`r>,list_t<stringptr_t>,buffer_t);
 
 ///////////////////////// COPYING
 // Non-allocating
-extern mstring_t<`r> strcpy(mstring_t<`r> dest,string_t src); 
-extern mstring_t<`r> strncpy(mstring_t<`r>,string_t,size_t);
-extern mstring_t<`r> zstrncpy(mstring_t<`r>,string_t,size_t);
+extern mstring_t<`r> strcpy(mstring_t<`r> dest,buffer_t src); 
+extern mstring_t<`r> strncpy(mstring_t<`r>,buffer_t,size_t);
+extern mstring_t<`r> zstrncpy(mstring_t<`r>,buffer_t,size_t);
 
 // realloc
 extern mstring_t realloc(mstring_t<`H>, size_t);
@@ -83,11 +83,11 @@ extern mstring_t realloc(mstring_t<`H>, size_t);
 // calling it memcpy(d,s,n*sizeof(t)), separate out the sizeof(t).
 extern `a::A?`r _memcpy(`a?`r d, const `a? s, size_t, sizeof_t<`a>);
 extern `a::A?`r _memmove(`a?`r d, const `a? s, size_t, sizeof_t<`a>);
-extern int memcmp(const char ?s1, const char ?s2, size_t n);
-extern const char ?`r memchr(const char ?`r s, char c, size_t n);
-extern char ?`r mmemchr(char ?`r s, char c, size_t n);
-extern char ?`r memset(char ?`r s, char c, size_t n);
-extern void bzero(char? s, size_t n);
+extern int memcmp(buffer_t s1, buffer_t s2, size_t n);
+extern buffer_t<`r> memchr(buffer_t<`r> s, char c, size_t n);
+extern mbuffer_t<`r> mmemchr(mbuffer_t<`r> s, char c, size_t n);
+extern mbuffer_t<`r> memset(mbuffer_t<`r> s, char c, size_t n);
+extern void bzero(mbuffer_t s, size_t n);
 extern void _bcopy(const `a::A? src, `a?`r dst, size_t n, sizeof_t<`a> sz);
 
 // jcheney: might want to define this so that partial copies are an error 
@@ -99,24 +99,24 @@ extern void _bcopy(const `a::A? src, `a?`r dst, size_t n, sizeof_t<`a> sz);
 #define bcopy(s,d,n) _bcopy((s),(d),_rounddiv(n,sizeof(*(s))),sizeof(*(s)))
                                         
 // Allocating
-extern mstring_t     expand(string_t s, size_t sz); /* like realloc */
-extern mstring_t<`r> rexpand(region_t<`r>,string_t s, size_t sz);
+extern mstring_t     expand(buffer_t s, size_t sz); /* like realloc */
+extern mstring_t<`r> rexpand(region_t<`r>,buffer_t s, size_t sz);
 extern mstring_t     realloc_str(mstring_t<`H> str, size_t sz); /* conditional realloc */
 extern mstring_t<`r> rrealloc_str(region_t<`r> r, mstring_t<`r> str, size_t sz);
-extern mstring_t     strdup(string_t src);
-extern mstring_t<`r> rstrdup(region_t<`r>,string_t src);
+extern mstring_t     strdup(buffer_t src);
+extern mstring_t<`r> rstrdup(region_t<`r>,buffer_t src);
 
 ///////////////////////// TRANSFORMATIONS
 // Return a substring of a string, by allocation.
-extern mstring_t     substring(string_t,int ofs, size_t n);
-extern mstring_t<`r> rsubstring(region_t<`r>,string_t,int ofs, size_t n);
+extern mstring_t     substring(buffer_t,int ofs, size_t n);
+extern mstring_t<`r> rsubstring(region_t<`r>,buffer_t,int ofs, size_t n);
 
 // replace last with second at end of first
 // raise Invalid_argument if second is not end of first.
-extern mstring_t     replace_suffix(string_t,string_t,string_t);
-extern mstring_t<`r> rreplace_suffix (region_t<`r> r,string_t src, 
-                                 string_t curr_suffix, 
-                                 string_t new_suffix);
+extern mstring_t     replace_suffix(buffer_t,buffer_t,buffer_t);
+extern mstring_t<`r> rreplace_suffix (region_t<`r> r,buffer_t src, 
+                                      buffer_t curr_suffix, 
+                                      buffer_t new_suffix);
 
 ////////////////////////// SEARCHING
 extern string_t<`r>  strchr(string_t<`r> s, char c);
@@ -125,16 +125,16 @@ extern mstring_t<`r> mstrrchr(mstring_t<`r> s, char c);
 extern string_t<`r>  strrchr(string_t<`r> s, char c);
 extern mstring_t<`r> mstrstr(mstring_t<`r> haystack, string_t needle);
 extern string_t<`r>  strstr(string_t<`r> haystack, string_t needle);
-extern string_t<`r>  strpbrk(string_t<`r> s, string_t accept);
-extern mstring_t<`r> mstrpbrk(mstring_t<`r> s, string_t accept);
+extern string_t<`r>  strpbrk(string_t<`r> s, buffer_t accept);
+extern mstring_t<`r> mstrpbrk(mstring_t<`r> s, buffer_t accept);
 extern size_t        strspn(string_t s, string_t accept);
 extern size_t        strcspn(string_t s, string_t accept);
 extern mstring_t<`H> strtok (mstring_t<`H> s, string_t delim);
 
 ////////////////////////// CONVERSIONS
 
-extern list_t<int>    explode(string_t s);
-extern list_t<int,`r> rexplode(region_t<`r>,string_t s);
+extern list_t<int>    explode(buffer_t s);
+extern list_t<int,`r> rexplode(region_t<`r>,buffer_t s);
 extern mstring_t      implode(list_t<int> c);
 
 }

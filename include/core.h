@@ -32,9 +32,11 @@
 /*** These declarations are made outside of any namespace. */
 typedef char *`r Cstring<`r>;
 typedef const char ?`r string_t<`r>;
+typedef const char ?NOZEROTERM`r buffer_t<`r>;
 /** A [string_t<`r>] is a constant array of characters allocated in
     region [`r].  */
 typedef char ?`r mstring_t<`r>;
+typedef char ?NOZEROTERM`r mbuffer_t<`r>;
 /** An [mstring_t<`r>] is a non-const (mutable) array of characters
     allocated in region [`r].  */
 typedef string_t<`r1> @`r2 stringptr_t<`r1,`r2>;

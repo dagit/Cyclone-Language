@@ -440,26 +440,27 @@ _tmp1C.tag=1;_tmp1C.f1=f;_tmp1C;});_tmp1B;});}struct Cyc_Std___cycFILE;struct Cy
 struct Cyc_Std___cycFILE*Cyc_Std_fromCfile(struct Cyc_Std_Cstdio___abstractFILE*cf);
 struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
 int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct
-Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int
-tag;unsigned int*f1;};void Cyc_Std_clearerr(struct Cyc_Std___cycFILE*);int Cyc_Std_fclose(
-struct Cyc_Std___cycFILE*);struct Cyc_Std___cycFILE*Cyc_Std_fdopen(int,struct
-_tagged_arr);int Cyc_Std_feof(struct Cyc_Std___cycFILE*);int Cyc_Std_ferror(struct
-Cyc_Std___cycFILE*);int Cyc_Std_fflush(struct Cyc_Std___cycFILE*);int Cyc_Std_fgetc(
-struct Cyc_Std___cycFILE*);int Cyc_Std_fgetpos(struct Cyc_Std___cycFILE*,int*);
-struct _tagged_arr Cyc_Std_fgets(struct _tagged_arr,int,struct Cyc_Std___cycFILE*);
-int Cyc_Std_fileno(struct Cyc_Std___cycFILE*);struct Cyc_Std___cycFILE*Cyc_Std_fopen(
-struct _tagged_arr,struct _tagged_arr);int Cyc_Std_fputc(int,struct Cyc_Std___cycFILE*);
-int Cyc_Std_fputs(struct _tagged_arr,struct Cyc_Std___cycFILE*);unsigned int Cyc_Std_fread(
-struct _tagged_arr,unsigned int,unsigned int,struct Cyc_Std___cycFILE*);struct Cyc_Std___cycFILE*
-Cyc_Std_freopen(struct _tagged_arr,struct _tagged_arr,struct Cyc_Std___cycFILE*);
-struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{
-int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
-Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
-int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
-};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};int Cyc_Std_fseek(struct Cyc_Std___cycFILE*,
-int,int);int Cyc_Std_fsetpos(struct Cyc_Std___cycFILE*,const int*);int Cyc_Std_ftell(
-struct Cyc_Std___cycFILE*);unsigned int Cyc_Std_fwrite(struct _tagged_arr,
-unsigned int,unsigned int,struct Cyc_Std___cycFILE*);int Cyc_Std_getc(struct Cyc_Std___cycFILE*);
+Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_Buffer_pa_struct{int
+tag;struct _tagged_arr f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;
+};void Cyc_Std_clearerr(struct Cyc_Std___cycFILE*);int Cyc_Std_fclose(struct Cyc_Std___cycFILE*);
+struct Cyc_Std___cycFILE*Cyc_Std_fdopen(int,struct _tagged_arr);int Cyc_Std_feof(
+struct Cyc_Std___cycFILE*);int Cyc_Std_ferror(struct Cyc_Std___cycFILE*);int Cyc_Std_fflush(
+struct Cyc_Std___cycFILE*);int Cyc_Std_fgetc(struct Cyc_Std___cycFILE*);int Cyc_Std_fgetpos(
+struct Cyc_Std___cycFILE*,int*);struct _tagged_arr Cyc_Std_fgets(struct _tagged_arr,
+int,struct Cyc_Std___cycFILE*);int Cyc_Std_fileno(struct Cyc_Std___cycFILE*);struct
+Cyc_Std___cycFILE*Cyc_Std_fopen(struct _tagged_arr,struct _tagged_arr);int Cyc_Std_fputc(
+int,struct Cyc_Std___cycFILE*);int Cyc_Std_fputs(struct _tagged_arr,struct Cyc_Std___cycFILE*);
+unsigned int Cyc_Std_fread(struct _tagged_arr,unsigned int,unsigned int,struct Cyc_Std___cycFILE*);
+struct Cyc_Std___cycFILE*Cyc_Std_freopen(struct _tagged_arr,struct _tagged_arr,
+struct Cyc_Std___cycFILE*);struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};
+struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
+int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
+Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
+int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_Std_CharPtr_sa_struct{
+int tag;struct _tagged_arr f1;};int Cyc_Std_fseek(struct Cyc_Std___cycFILE*,int,int);
+int Cyc_Std_fsetpos(struct Cyc_Std___cycFILE*,const int*);int Cyc_Std_ftell(struct
+Cyc_Std___cycFILE*);unsigned int Cyc_Std_fwrite(struct _tagged_arr,unsigned int,
+unsigned int,struct Cyc_Std___cycFILE*);int Cyc_Std_getc(struct Cyc_Std___cycFILE*);
 int Cyc_Std_getchar();int Cyc_Std_pclose(struct Cyc_Std___cycFILE*);void Cyc_Std_perror(
 struct _tagged_arr);struct Cyc_Std___cycFILE*Cyc_Std_popen(struct _tagged_arr,
 struct _tagged_arr);int Cyc_Std_putc(int,struct Cyc_Std___cycFILE*);int Cyc_Std_puts(
