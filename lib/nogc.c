@@ -32,7 +32,7 @@
 #include <unistd.h>
 /* Override sbrk in the allocator so that it prints profiling info */
 extern void CYCALLOCPROFILE_GC_add_to_heap(void*,unsigned int);
-CYCALLOCPROFILE_sbrk(int incr) {
+void *CYCALLOCPROFILE_sbrk(int incr) {
   void *before = sbrk(0);
   void *ret = sbrk(incr);
   // FIX: doesn't handle deallocation (incr < 0)
