@@ -63,7 +63,7 @@ namespace Tovc;
 struct BoxingEnv<`r::R,`r2::R> {
   region_t<`r> rgn;
   glist_t<vardecl_t,`r> all_locals; // for getting type info for freevars
-  Dict::dict_t<var_t,exp_t> varmap; // regionify once the library supports it
+  Dict::gdict_t<var_t,exp_t,`r,{}> varmap; 
   glist_t<vardecl_t,`r> boundvars;  // do not box these
   Set::gset_t<vardecl_t,`r,{`r}> @`r2 freevars; // params to generated function
 };
@@ -72,7 +72,7 @@ typedef struct BoxingEnv<`r,`r2> boxingenv_t<`r,`r2>; // not boxed
 struct ToExpEnv<`r::R> {
   region_t<`r> rgn;
   glist_t<vardecl_t,`r> all_locals; // for getting type info for freevars
-  Dict::dict_t<var_t,exp_t> varmap; // regionify once the library supports it
+  Dict::gdict_t<var_t,exp_t,`r,{}> varmap; 
   stmt_t encloser; // where to put hoisted locals
   list_t<decl_t>@`r gen_ds; // for generated functions
 };
@@ -201,7 +201,7 @@ static void box_free_vars_stmt(boxingenv_t<`r,`r2> env, stmt_t s) {
       switch(d->r) {
       case &Var_d(vd):
 	env.boundvars = rnew(env.rgn) List(vd,env.boundvars);
-	env.varmap    = Dict::delete(env.varmap, (*vd->name)[1]);
+	env.varmap    = Dict::rdelete_same(env.varmap, (*vd->name)[1]);
 	if(vd->initializer != null)
 	  box_free_vars_exp(env, (exp_t)vd->initializer);
 	s = s2;
@@ -239,7 +239,7 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
   return fncall_exp(var_exp(funname,DL), args, DL);
 }
 
-static void apply_varmap(Dict::dict_t<var_t,exp_t> varmap, exp_t e) {
+static void apply_varmap(Dict::gdict_t<var_t,exp_t,`r,`e> varmap, exp_t e) {
   switch(e->r) {
   case &Var_e(&$(Loc_n,v),_):
     // DO NOT MUTATE qvars -- They get shared in funky ways
@@ -499,7 +499,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
 	let gen_ds = rnew(rgn) null;
 	stmt_to_vc(ToExpEnv(rgn,
 			    rcopy(rgn,fd->param_vardecls->v),
-			    Dict::empty(String::zstrptrcmp), // ptr eq possible?
+			    Dict::rempty(rgn,String::zstrptrcmp), // ptr eq possible?
 			    fd->body,
 			    gen_ds), 
 		   fd->body);

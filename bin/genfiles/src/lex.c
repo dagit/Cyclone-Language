@@ -495,26 +495,27 @@ struct Cyc_TypeSpecifier_tok_struct{ char* tag; void* f1; } ; extern char Cyc_Ty
 int timestamp; int first_line; int first_column; int last_line; int last_column;
 struct _tagged_string text; } ; typedef struct Cyc_Yyltype Cyc_yyltype; extern
 struct Cyc_Yyltype Cyc_yylloc; extern void* Cyc_yylval; struct Cyc_Dict_Dict;
-typedef struct Cyc_Dict_Dict* Cyc_Dict_hdict_t; typedef struct Cyc_Dict_Dict*
-Cyc_Dict_dict_t; extern char Cyc_Dict_Present[ 12u]; extern char Cyc_Dict_Absent[
-11u]; extern struct Cyc_Dict_Dict* Cyc_Dict_empty( int(* comp)( void*, void*));
-extern struct Cyc_Dict_Dict* Cyc_Dict_insert( struct Cyc_Dict_Dict* d, void* key,
-void* data); extern void* Cyc_Dict_lookup( struct Cyc_Dict_Dict* d, void* key);
-void Cyc_yyerror( struct _tagged_string s){ Cyc_Position_post_error( Cyc_Position_mk_err_parse(
-Cyc_Position_segment_of_abs( Cyc_yylloc.first_line, Cyc_yylloc.last_line), s));}
-struct Cyc_Lex_Trie; typedef struct Cyc_Lex_Trie* Cyc_Lex_trie_t; typedef struct
-Cyc_Lex_Trie** Cyc_Lex_trie_child_v_t; typedef struct Cyc_Lex_Trie*** Cyc_Lex_trie_child_t;
-struct Cyc_Lex_Trie{ struct Cyc_Lex_Trie*** children; int shared_str; } ; static
-int Cyc_Lex_num_kws= 0; static struct _tagged_ptr0 Cyc_Lex_kw_nums={ 0, 0, 0};
-static struct Cyc_Xarray_Xarray* Cyc_Lex_symbols= 0; static struct Cyc_Lex_Trie*
-Cyc_Lex_ids_trie= 0; static struct Cyc_Lex_Trie* Cyc_Lex_typedefs_trie= 0;
-static int Cyc_Lex_comment_depth= 0; static struct _tuple6 Cyc_Lex_token_int_pair={(
-void*) 0u, 0}; static char _temp2[ 8u]="*bogus*"; static struct _tagged_string
-Cyc_Lex_bogus_string={ _temp2, _temp2, _temp2 + 8u}; static struct Cyc_Absyn_Abs_n_struct
-Cyc_Lex_absn_null={ 1u, 0}; static struct _tuple0 Cyc_Lex_token_id_pair={( void*)&
-Cyc_Lex_absn_null,& Cyc_Lex_bogus_string}; static char Cyc_Lex_token_char='\000';
-static char _temp6[ 1u]=""; static struct _tagged_string Cyc_Lex_token_string={
-_temp6, _temp6, _temp6 + 1u}; static struct _tuple6* Cyc_Lex_token_int=& Cyc_Lex_token_int_pair;
+typedef struct Cyc_Dict_Dict* Cyc_Dict_gdict_t; typedef struct Cyc_Dict_Dict*
+Cyc_Dict_hdict_t; typedef struct Cyc_Dict_Dict* Cyc_Dict_dict_t; extern char Cyc_Dict_Present[
+12u]; extern char Cyc_Dict_Absent[ 11u]; extern struct Cyc_Dict_Dict* Cyc_Dict_empty(
+int(* comp)( void*, void*)); extern struct Cyc_Dict_Dict* Cyc_Dict_insert(
+struct Cyc_Dict_Dict* d, void* key, void* data); extern void* Cyc_Dict_lookup(
+struct Cyc_Dict_Dict* d, void* key); void Cyc_yyerror( struct _tagged_string s){
+Cyc_Position_post_error( Cyc_Position_mk_err_parse( Cyc_Position_segment_of_abs(
+Cyc_yylloc.first_line, Cyc_yylloc.last_line), s));} struct Cyc_Lex_Trie; typedef
+struct Cyc_Lex_Trie* Cyc_Lex_trie_t; typedef struct Cyc_Lex_Trie** Cyc_Lex_trie_child_v_t;
+typedef struct Cyc_Lex_Trie*** Cyc_Lex_trie_child_t; struct Cyc_Lex_Trie{ struct
+Cyc_Lex_Trie*** children; int shared_str; } ; static int Cyc_Lex_num_kws= 0;
+static struct _tagged_ptr0 Cyc_Lex_kw_nums={ 0, 0, 0}; static struct Cyc_Xarray_Xarray*
+Cyc_Lex_symbols= 0; static struct Cyc_Lex_Trie* Cyc_Lex_ids_trie= 0; static
+struct Cyc_Lex_Trie* Cyc_Lex_typedefs_trie= 0; static int Cyc_Lex_comment_depth=
+0; static struct _tuple6 Cyc_Lex_token_int_pair={( void*) 0u, 0}; static char
+_temp2[ 8u]="*bogus*"; static struct _tagged_string Cyc_Lex_bogus_string={
+_temp2, _temp2, _temp2 + 8u}; static struct Cyc_Absyn_Abs_n_struct Cyc_Lex_absn_null={
+1u, 0}; static struct _tuple0 Cyc_Lex_token_id_pair={( void*)& Cyc_Lex_absn_null,&
+Cyc_Lex_bogus_string}; static char Cyc_Lex_token_char='\000'; static char _temp6[
+1u]=""; static struct _tagged_string Cyc_Lex_token_string={ _temp6, _temp6,
+_temp6 + 1u}; static struct _tuple6* Cyc_Lex_token_int=& Cyc_Lex_token_int_pair;
 static struct _tuple0* Cyc_Lex_token_qvar=& Cyc_Lex_token_id_pair; static int
 Cyc_Lex_runaway_start= 0; static void Cyc_Lex_err( struct _tagged_string msg,
 struct Cyc_Lexing_lexbuf* lb){ struct Cyc_Position_Segment* s= Cyc_Position_segment_of_abs(((

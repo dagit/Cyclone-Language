@@ -58,12 +58,13 @@ fname, struct _tagged_string mode); extern void Cyc_Stdio_file_close( struct Cyc
 extern int Cyc_String_strcmp( struct _tagged_string s1, struct _tagged_string s2);
 extern struct _tagged_string Cyc_String_strconcat( struct _tagged_string, struct
 _tagged_string); extern struct _tagged_string Cyc_String_str_sepstr( struct Cyc_List_List*,
-struct _tagged_string); struct Cyc_Dict_Dict; typedef struct Cyc_Dict_Dict* Cyc_Dict_hdict_t;
-typedef struct Cyc_Dict_Dict* Cyc_Dict_dict_t; extern char Cyc_Dict_Present[ 12u];
-extern char Cyc_Dict_Absent[ 11u]; extern struct _tagged_string Cyc_Filename_chop_extension(
-struct _tagged_string); struct Cyc_Id_id; typedef struct Cyc_Id_id* Cyc_Id_Id;
-struct Cyc_Lineno_Pos{ struct _tagged_string logical_file; struct _tagged_string
-line; int line_no; int col; } ; typedef struct Cyc_Lineno_Pos* Cyc_Lineno_pos_t;
+struct _tagged_string); struct Cyc_Dict_Dict; typedef struct Cyc_Dict_Dict* Cyc_Dict_gdict_t;
+typedef struct Cyc_Dict_Dict* Cyc_Dict_hdict_t; typedef struct Cyc_Dict_Dict*
+Cyc_Dict_dict_t; extern char Cyc_Dict_Present[ 12u]; extern char Cyc_Dict_Absent[
+11u]; extern struct _tagged_string Cyc_Filename_chop_extension( struct
+_tagged_string); struct Cyc_Id_id; typedef struct Cyc_Id_id* Cyc_Id_Id; struct
+Cyc_Lineno_Pos{ struct _tagged_string logical_file; struct _tagged_string line;
+int line_no; int col; } ; typedef struct Cyc_Lineno_Pos* Cyc_Lineno_pos_t;
 extern char Cyc_Position_Exit[ 9u]; extern void Cyc_Position_reset_position(
 struct _tagged_string); struct Cyc_Position_Segment; typedef struct Cyc_Position_Segment*
 Cyc_Position_seg_t; static const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse=

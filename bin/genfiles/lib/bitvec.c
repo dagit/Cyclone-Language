@@ -33,41 +33,42 @@ struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; typedef struct Cyc
 Cyc_List_glist_t; typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct
 Cyc_List_List* Cyc_List_List_t; extern char Cyc_List_List_empty[ 15u]; extern
 char Cyc_List_List_mismatch[ 18u]; extern char Cyc_List_Nth[ 8u]; struct Cyc_Dict_Dict;
-typedef struct Cyc_Dict_Dict* Cyc_Dict_hdict_t; typedef struct Cyc_Dict_Dict*
-Cyc_Dict_dict_t; extern char Cyc_Dict_Present[ 12u]; extern char Cyc_Dict_Absent[
-11u]; extern void* Cyc_Dict_lookup( struct Cyc_Dict_Dict* d, void* key); struct
-_tagged_ptr0{ int* curr; int* base; int* last_plus_one; } ; typedef struct
-_tagged_ptr0 Cyc_Bitvec_gbitvec_t; typedef struct _tagged_ptr0 Cyc_Bitvec_bitvec_t;
-extern int Cyc_Bitvec_get( struct _tagged_ptr0, int); extern void Cyc_Bitvec_set(
-struct _tagged_ptr0, int); extern void Cyc_Bitvec_clear( struct _tagged_ptr0,
-int); extern int Cyc_Bitvec_get_and_set( struct _tagged_ptr0, int); extern void
-Cyc_Bitvec_union_two( struct _tagged_ptr0 dest, struct _tagged_ptr0 src1, struct
-_tagged_ptr0 src2); extern void Cyc_Bitvec_intersect_two( struct _tagged_ptr0
-dest, struct _tagged_ptr0 src1, struct _tagged_ptr0 src2); extern void Cyc_Bitvec_diff_two(
+typedef struct Cyc_Dict_Dict* Cyc_Dict_gdict_t; typedef struct Cyc_Dict_Dict*
+Cyc_Dict_hdict_t; typedef struct Cyc_Dict_Dict* Cyc_Dict_dict_t; extern char Cyc_Dict_Present[
+12u]; extern char Cyc_Dict_Absent[ 11u]; extern void* Cyc_Dict_lookup( struct
+Cyc_Dict_Dict* d, void* key); struct _tagged_ptr0{ int* curr; int* base; int*
+last_plus_one; } ; typedef struct _tagged_ptr0 Cyc_Bitvec_gbitvec_t; typedef
+struct _tagged_ptr0 Cyc_Bitvec_bitvec_t; extern int Cyc_Bitvec_get( struct
+_tagged_ptr0, int); extern void Cyc_Bitvec_set( struct _tagged_ptr0, int);
+extern void Cyc_Bitvec_clear( struct _tagged_ptr0, int); extern int Cyc_Bitvec_get_and_set(
+struct _tagged_ptr0, int); extern void Cyc_Bitvec_union_two( struct _tagged_ptr0
+dest, struct _tagged_ptr0 src1, struct _tagged_ptr0 src2); extern void Cyc_Bitvec_intersect_two(
 struct _tagged_ptr0 dest, struct _tagged_ptr0 src1, struct _tagged_ptr0 src2);
-extern int Cyc_Bitvec_compare_two( struct _tagged_ptr0 src1, struct _tagged_ptr0
-src2); extern struct _tagged_ptr0 Cyc_Bitvec_new_empty( int); extern struct
-_tagged_ptr0 Cyc_Bitvec_new_full( int); extern struct _tagged_ptr0 Cyc_Bitvec_new_copy(
-struct _tagged_ptr0); extern struct _tagged_ptr0 Cyc_Bitvec_from_list( struct
-Cyc_Dict_Dict* d, int(* f)( void*), int sz, struct Cyc_List_List*); extern
-struct Cyc_List_List* Cyc_Bitvec_to_sorted_list( struct _tagged_ptr0 bvec, int
-sz); extern void Cyc_Bitvec_clear_all( struct _tagged_ptr0); extern void Cyc_Bitvec_set_all(
-struct _tagged_ptr0); extern int Cyc_Bitvec_all_set( struct _tagged_ptr0 bvec,
-int sz); extern void Cyc_Bitvec_print_bvec( struct _tagged_ptr0 bvec); int Cyc_Bitvec_get(
-struct _tagged_ptr0 bvec, int pos){ int word= pos >> 5; int offset= pos & 31;
-return(*(( int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
-_check_unknown_subscript)( bvec, sizeof( int), word) >> offset & 1) == 1;} void
-Cyc_Bitvec_set( struct _tagged_ptr0 bvec, int pos){ int word= pos >> 5; int
-offset= pos & 31;*(( int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
-_check_unknown_subscript)( bvec, sizeof( int), word)=*(( int*(*)( struct
+extern void Cyc_Bitvec_diff_two( struct _tagged_ptr0 dest, struct _tagged_ptr0
+src1, struct _tagged_ptr0 src2); extern int Cyc_Bitvec_compare_two( struct
+_tagged_ptr0 src1, struct _tagged_ptr0 src2); extern struct _tagged_ptr0 Cyc_Bitvec_new_empty(
+int); extern struct _tagged_ptr0 Cyc_Bitvec_new_full( int); extern struct
+_tagged_ptr0 Cyc_Bitvec_new_copy( struct _tagged_ptr0); extern struct
+_tagged_ptr0 Cyc_Bitvec_from_list( struct Cyc_Dict_Dict* d, int(* f)( void*),
+int sz, struct Cyc_List_List*); extern struct Cyc_List_List* Cyc_Bitvec_to_sorted_list(
+struct _tagged_ptr0 bvec, int sz); extern void Cyc_Bitvec_clear_all( struct
+_tagged_ptr0); extern void Cyc_Bitvec_set_all( struct _tagged_ptr0); extern int
+Cyc_Bitvec_all_set( struct _tagged_ptr0 bvec, int sz); extern void Cyc_Bitvec_print_bvec(
+struct _tagged_ptr0 bvec); int Cyc_Bitvec_get( struct _tagged_ptr0 bvec, int pos){
+int word= pos >> 5; int offset= pos & 31; return(*(( int*(*)( struct
 _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( bvec,
-sizeof( int), word) | 1 << offset;} void Cyc_Bitvec_clear( struct _tagged_ptr0
-bvec, int pos){ int word= pos >> 5; int offset= pos & 31;*(( int*(*)( struct
-_tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)( bvec,
-sizeof( int), word)=*(( int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
-_check_unknown_subscript)( bvec, sizeof( int), word) & ~( 1 << offset);} int Cyc_Bitvec_get_and_set(
-struct _tagged_ptr0 bvec, int pos){ int word= pos >> 5; int offset= pos & 31;
-int slot=*(( int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
+sizeof( int), word) >> offset & 1) == 1;} void Cyc_Bitvec_set( struct
+_tagged_ptr0 bvec, int pos){ int word= pos >> 5; int offset= pos & 31;*(( int*(*)(
+struct _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)(
+bvec, sizeof( int), word)=*(( int*(*)( struct _tagged_ptr0, unsigned int,
+unsigned int)) _check_unknown_subscript)( bvec, sizeof( int), word) | 1 <<
+offset;} void Cyc_Bitvec_clear( struct _tagged_ptr0 bvec, int pos){ int word=
+pos >> 5; int offset= pos & 31;*(( int*(*)( struct _tagged_ptr0, unsigned int,
+unsigned int)) _check_unknown_subscript)( bvec, sizeof( int), word)=*(( int*(*)(
+struct _tagged_ptr0, unsigned int, unsigned int)) _check_unknown_subscript)(
+bvec, sizeof( int), word) & ~( 1 << offset);} int Cyc_Bitvec_get_and_set( struct
+_tagged_ptr0 bvec, int pos){ int word= pos >> 5; int offset= pos & 31; int slot=*((
+int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
 _check_unknown_subscript)( bvec, sizeof( int), word); int ans=( slot >> offset &
 1) == 1; if( ! ans){*(( int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
 _check_unknown_subscript)( bvec, sizeof( int), word)= slot | 1 << offset;}

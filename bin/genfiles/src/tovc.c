@@ -37,35 +37,35 @@ struct _RegionHandle*, struct Cyc_List_List* src); extern char Cyc_List_List_mis
 18u]; extern struct Cyc_List_List* Cyc_List_imp_rev( struct Cyc_List_List* x);
 extern struct Cyc_List_List* Cyc_List_append( struct Cyc_List_List* x, struct
 Cyc_List_List* y); extern char Cyc_List_Nth[ 8u]; struct Cyc_Dict_Dict; typedef
-struct Cyc_Dict_Dict* Cyc_Dict_hdict_t; typedef struct Cyc_Dict_Dict* Cyc_Dict_dict_t;
-extern char Cyc_Dict_Present[ 12u]; extern char Cyc_Dict_Absent[ 11u]; extern
-struct Cyc_Dict_Dict* Cyc_Dict_empty( int(* comp)( void*, void*)); extern int
-Cyc_Dict_member( struct Cyc_Dict_Dict* d, void* key); extern struct Cyc_Dict_Dict*
-Cyc_Dict_insert( struct Cyc_Dict_Dict* d, void* key, void* data); extern void*
-Cyc_Dict_lookup( struct Cyc_Dict_Dict* d, void* key); extern struct Cyc_Dict_Dict*
-Cyc_Dict_delete( struct Cyc_Dict_Dict*, void*); struct Cyc_Stdio___sFILE;
-typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE; typedef int Cyc_Stdio_fpos_t;
-extern char Cyc_Stdio_FileCloseError[ 19u]; extern char Cyc_Stdio_FileOpenError[
-18u]; struct Cyc_Stdio_FileOpenError_struct{ char* tag; struct _tagged_string f1;
-} ; extern int Cyc_String_zstrptrcmp( struct _tagged_string*, struct
-_tagged_string*); struct Cyc_Lineno_Pos{ struct _tagged_string logical_file;
-struct _tagged_string line; int line_no; int col; } ; typedef struct Cyc_Lineno_Pos*
-Cyc_Lineno_pos_t; extern char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment;
-typedef struct Cyc_Position_Segment* Cyc_Position_seg_t; static const int Cyc_Position_Lex=
-0; static const int Cyc_Position_Parse= 1; static const int Cyc_Position_Elab= 2;
-typedef void* Cyc_Position_error_kind_t; struct Cyc_Position_Error{ struct
-_tagged_string source; struct Cyc_Position_Segment* seg; void* kind; struct
-_tagged_string desc; } ; typedef struct Cyc_Position_Error* Cyc_Position_error_t;
-extern char Cyc_Position_Nocontext[ 14u]; typedef struct _tagged_string* Cyc_Absyn_field_name_t;
-typedef struct _tagged_string* Cyc_Absyn_var_t; typedef struct _tagged_string*
-Cyc_Absyn_tvarname_t; typedef void* Cyc_Absyn_nmspace_t; struct _tuple0{ void*
-f1; struct _tagged_string* f2; } ; typedef struct _tuple0* Cyc_Absyn_qvar_t;
-typedef struct _tuple0* Cyc_Absyn_qvar_opt_t; typedef struct _tuple0* Cyc_Absyn_typedef_name_t;
-typedef struct _tuple0* Cyc_Absyn_typedef_name_opt_t; struct Cyc_Absyn_Tvar;
-struct Cyc_Absyn_Tqual; struct Cyc_Absyn_Conref; struct Cyc_Absyn_PtrInfo;
-struct Cyc_Absyn_VarargInfo; struct Cyc_Absyn_FnInfo; struct Cyc_Absyn_TunionInfo;
-struct Cyc_Absyn_TunionFieldInfo; struct Cyc_Absyn_VarargCallInfo; struct Cyc_Absyn_Exp;
-struct Cyc_Absyn_Stmt; struct Cyc_Absyn_Pat; struct Cyc_Absyn_Switch_clause;
+struct Cyc_Dict_Dict* Cyc_Dict_gdict_t; typedef struct Cyc_Dict_Dict* Cyc_Dict_hdict_t;
+typedef struct Cyc_Dict_Dict* Cyc_Dict_dict_t; extern char Cyc_Dict_Present[ 12u];
+extern char Cyc_Dict_Absent[ 11u]; extern struct Cyc_Dict_Dict* Cyc_Dict_rempty(
+struct _RegionHandle*, int(* comp)( void*, void*)); extern int Cyc_Dict_member(
+struct Cyc_Dict_Dict* d, void* key); extern struct Cyc_Dict_Dict* Cyc_Dict_insert(
+struct Cyc_Dict_Dict* d, void* key, void* data); extern void* Cyc_Dict_lookup(
+struct Cyc_Dict_Dict* d, void* key); extern struct Cyc_Dict_Dict* Cyc_Dict_rdelete_same(
+struct Cyc_Dict_Dict*, void*); struct Cyc_Stdio___sFILE; typedef struct Cyc_Stdio___sFILE
+Cyc_Stdio_FILE; typedef int Cyc_Stdio_fpos_t; extern char Cyc_Stdio_FileCloseError[
+19u]; extern char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
+char* tag; struct _tagged_string f1; } ; extern int Cyc_String_zstrptrcmp(
+struct _tagged_string*, struct _tagged_string*); struct Cyc_Lineno_Pos{ struct
+_tagged_string logical_file; struct _tagged_string line; int line_no; int col; }
+; typedef struct Cyc_Lineno_Pos* Cyc_Lineno_pos_t; extern char Cyc_Position_Exit[
+9u]; struct Cyc_Position_Segment; typedef struct Cyc_Position_Segment* Cyc_Position_seg_t;
+static const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1;
+static const int Cyc_Position_Elab= 2; typedef void* Cyc_Position_error_kind_t;
+struct Cyc_Position_Error{ struct _tagged_string source; struct Cyc_Position_Segment*
+seg; void* kind; struct _tagged_string desc; } ; typedef struct Cyc_Position_Error*
+Cyc_Position_error_t; extern char Cyc_Position_Nocontext[ 14u]; typedef struct
+_tagged_string* Cyc_Absyn_field_name_t; typedef struct _tagged_string* Cyc_Absyn_var_t;
+typedef struct _tagged_string* Cyc_Absyn_tvarname_t; typedef void* Cyc_Absyn_nmspace_t;
+struct _tuple0{ void* f1; struct _tagged_string* f2; } ; typedef struct _tuple0*
+Cyc_Absyn_qvar_t; typedef struct _tuple0* Cyc_Absyn_qvar_opt_t; typedef struct
+_tuple0* Cyc_Absyn_typedef_name_t; typedef struct _tuple0* Cyc_Absyn_typedef_name_opt_t;
+struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual; struct Cyc_Absyn_Conref; struct
+Cyc_Absyn_PtrInfo; struct Cyc_Absyn_VarargInfo; struct Cyc_Absyn_FnInfo; struct
+Cyc_Absyn_TunionInfo; struct Cyc_Absyn_TunionFieldInfo; struct Cyc_Absyn_VarargCallInfo;
+struct Cyc_Absyn_Exp; struct Cyc_Absyn_Stmt; struct Cyc_Absyn_Pat; struct Cyc_Absyn_Switch_clause;
 struct Cyc_Absyn_Fndecl; struct Cyc_Absyn_Structdecl; struct Cyc_Absyn_Uniondecl;
 struct Cyc_Absyn_Tuniondecl; struct Cyc_Absyn_Tunionfield; struct Cyc_Absyn_Enumfield;
 struct Cyc_Absyn_Enumdecl; struct Cyc_Absyn_Typedefdecl; struct Cyc_Absyn_Vardecl;
@@ -642,7 +642,7 @@ _LL245: _temp244=(( struct Cyc_Absyn_Var_d_struct*) _temp238)->f1; goto _LL241;}
 else{ goto _LL242;} _LL242: goto _LL243; _LL241: env.boundvars=({ struct Cyc_List_List*
 _temp246=( struct Cyc_List_List*) _region_malloc( env.rgn, sizeof( struct Cyc_List_List));
 _temp246->hd=( void*) _temp244; _temp246->tl= env.boundvars; _temp246;}); env.varmap=((
-struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict*, struct _tagged_string*)) Cyc_Dict_delete)(
+struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict*, struct _tagged_string*)) Cyc_Dict_rdelete_same)(
 env.varmap,(* _temp244->name).f2); if( _temp244->initializer != 0){ Cyc_Tovc_box_free_vars_exp(
 env,( struct Cyc_Absyn_Exp*) _check_null( _temp244->initializer));} s= _temp234;
 continue; _LL243: goto _LL239; _LL239:;} goto _LL171; _LL171:( void) _throw((
@@ -1116,14 +1116,14 @@ goto _LL791; _LL791: Cyc_Tovc_stmt_to_vc(({ struct Cyc_Tovc_ToExpEnv _temp792;
 _temp792.rgn= rgn; _temp792.all_locals=(( struct Cyc_List_List*(*)( struct
 _RegionHandle*, struct Cyc_List_List* src)) Cyc_List_rcopy)( rgn,( struct Cyc_List_List*)((
 struct Cyc_Core_Opt*) _check_null( _temp752->param_vardecls))->v); _temp792.varmap=((
-struct Cyc_Dict_Dict*(*)( int(* comp)( struct _tagged_string*, struct
-_tagged_string*))) Cyc_Dict_empty)( Cyc_String_zstrptrcmp); _temp792.encloser=
-_temp752->body; _temp792.gen_ds= _temp790; _temp792;}), _temp752->body);
-_temp722=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x, struct Cyc_List_List*
-y)) Cyc_List_append)(* _temp790, _temp722);}; _pop_region(& _temp788);} goto
-_LL731; _LL731: goto _LL733; _LL733: goto _LL735; _LL735: goto _LL737; _LL737:
-goto _LL739; _LL739: goto _LL741; _LL741: goto _LL743; _LL743: goto _LL745;
-_LL745: _temp722=({ struct Cyc_List_List* _temp793=( struct Cyc_List_List*)
+struct Cyc_Dict_Dict*(*)( struct _RegionHandle*, int(* comp)( struct
+_tagged_string*, struct _tagged_string*))) Cyc_Dict_rempty)( rgn, Cyc_String_zstrptrcmp);
+_temp792.encloser= _temp752->body; _temp792.gen_ds= _temp790; _temp792;}),
+_temp752->body); _temp722=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x,
+struct Cyc_List_List* y)) Cyc_List_append)(* _temp790, _temp722);}; _pop_region(&
+_temp788);} goto _LL731; _LL731: goto _LL733; _LL733: goto _LL735; _LL735: goto
+_LL737; _LL737: goto _LL739; _LL739: goto _LL741; _LL741: goto _LL743; _LL743:
+goto _LL745; _LL745: _temp722=({ struct Cyc_List_List* _temp793=( struct Cyc_List_List*)
 GC_malloc( sizeof( struct Cyc_List_List)); _temp793->hd=( void*) _temp724;
 _temp793->tl= _temp722; _temp793;}); goto _LL727; _LL747: _temp782= _temp778;
 goto _LL749; _LL749: _temp786= _temp782; goto _LL751; _LL751:( void) _throw((
