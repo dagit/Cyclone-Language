@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Architecture-specific configuration.
 # 
 # usage: configure
@@ -67,14 +67,7 @@ fi
 # make sure the provided directories exist
 for dir in $dirs; do
   if [ ! -d "$dir" ]; then
-    echo "install directory $dir does not exist; create it (y/n)?"
-    read resp
-    if [ "$resp" = "y" ]; then
-      mkdir -p $dir
-    else
-      echo "usage: $0 [-incdir dir] [-bindir dir] [-libdir dir] [-prefix pre]";
-      exit 1
-    fi
+    echo "Warning: $dir directory will be created during install"
   fi
 done
 

@@ -56,36 +56,41 @@ $(CYC_LIB_PATH)/gc.a:
 # directories.  Also, keep a record of what was copied for later
 # uninstall.
 install: build inc_install lib_install bin_install
+uninstall: inc_uninstall lib_uninstall bin_uninstall
 
 ifdef INC_INSTALL
 inc_install:
-	@(if [ -d "$(INC_INSTALL)" ]; then \
-	cp -r include/* $(INC_INSTALL); \
-	else echo "include directory $(INC_INSTALL) does not exist"; \
-	exit 1; fi)
+	config/cyc_install include/* $(INC_INSTALL)
+inc_uninstall:
+	config/cyc_install -u $(INC_INSTALL)
 else
 inc_install:
+	@(echo "no include directory specified"; exit 1)
+inc_uninstall:
 	@(echo "no include directory specified"; exit 1)
 endif
 
 ifdef BIN_INSTALL
 bin_install:
-	@(if [ -d "$(BIN_INSTALL)" ]; then \
-	cp bin/cyclone$(EXE) bin/cycbison$(EXE) bin/cyclex$(EXE) $(BIN_INSTALL); \
-	else echo "bin directory $(BIN_INSTALL) does not exist"; \
-	exit 1; fi)
+	config/cyc_install bin/cyclone$(EXE) bin/cycbison$(EXE) bin/cyclex$(EXE) $(BIN_INSTALL)
+bin_uninstall:
+	config/cyc_install -u $(BIN_INSTALL)
 else
 bin_install:
+	@(echo "no bin directory specified"; exit 1)
+bin_uninstall:
 	@(echo "no bin directory specified"; exit 1)
 endif
 
 ifdef LIB_INSTALL
-	@(if [ -d "$(LIB_INSTALL)" ]; then \
-	cp bin/cyc-lib/gc.a bin/nogc.a bin/cyc-lib/libcyc.a $(LIB_INSTALL); \
-	else echo "bin directory $(BIN_INSTALL) does not exist"; \
-	exit 1; fi)
+lib_install:
+	config/cyc_install bin/cyc-lib/* $(LIB_INSTALL)
+lib_uninstall:
+	config/cyc_install -u $(LIB_INSTALL)
 else
 lib_install:
+	@(echo "no lib directory specified"; exit 1)
+lib_uninstall:
 	@(echo "no lib directory specified"; exit 1)
 endif
 
@@ -174,7 +179,7 @@ clean_nogc:
 #	$(MAKE) clean -C tools/cycocamllex
 	$(MAKE) clean -C src
 	$(MAKE) clean -C lib
-	$(MAKE) clean -C bin/cyc-lib
+	$(RM) bin/cyc-lib/libcyc.a bin/cyc-lib/libcyc_a.a
 	$(MAKE) clean -C bin/genfiles
 	$(MAKE) clean -C tests
 	$(RM) bin/cyclone bin/cyclone.exe 
@@ -186,4 +191,5 @@ clean_nogc:
 clean: clean_nogc
 	$(MAKE) clean -C gc
 	$(RM) gc/*.exe gc/base_lib gc/*.obj gc/gc.lib
-	$(RM) bin/cyc-lib/gc.a bin/gc_pg.a bin/cyc-lib/nogc.a
+	$(RM) bin/cyc-lib/gc.a bin/gc_pg.a 
+	$(RM) bin/cyc-lib/nogc.a bin/cyc-lib/nogc_a.a
