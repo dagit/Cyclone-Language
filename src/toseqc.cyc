@@ -251,11 +251,11 @@ static void exps_to_seqc(exp_t e, list_t<exp_t> es, bool is_assign) {
     // If this is an assignment, it should be an lvalue 
     if (!did_skip) {
       did_skip = true;
-      if (is_assign && !is_lvalue(e1)) {
+//       if (is_assign && !is_lvalue(e1)) {
 	// FIX: Should take the address of it here, and then
 	// dereference the other argument.  I'm lazy ...
-	Warn::impos("Toseqc: assigning to non-lvalues not implemented");
-      }
+// 	Warn::impos("Toseqc: assigning to non-lvalues not implemented");
+//       }
       continue;
     }
 
