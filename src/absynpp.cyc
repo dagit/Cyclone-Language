@@ -836,6 +836,8 @@ doc_t ntyp2doc(type_t t) {
     s = cat(text("valueof_t("),exp2doc(e),text(")")); break;
   case &TypeofType(e):
     s = cat(text("typeof("),exp2doc(e),text(")")); break;
+  case &BuiltinType(t,_):
+    s = text(t); break;
   case &TypedefType(n,ts,kopt,_):
     // NB: we could print out the expanded typedef by following the topt
     // pointer (when non-NULL).
@@ -1250,7 +1252,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &AnonEnum_e(q,_,_):
     s = qvar2doc(q);
     break;
-  case &Malloc_e(MallocInfo{is_calloc,rgnopt,topt,e,_}):
+  case &Malloc_e(MallocInfo{is_calloc,rgnopt,topt,e,_,inline_call}):
     // Note: This is for Cyclone's malloc, not the mallocs introduced during
     //       translation to C, which are function calls.
     if (is_calloc) {
@@ -1271,9 +1273,14 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
 
       if (rgnopt == NULL)
         s = cat(text("malloc("),exp2doc(new_e),text(")"));
-      else
-        s = cat(text("rmalloc("),exp2doc((exp_t)rgnopt),text(","),
-                exp2doc(new_e),text(")"));
+      else {
+        if (inline_call) 
+          s = cat(text("rmalloc_inline("),exp2doc((exp_t)rgnopt),text(","),
+                  exp2doc(new_e),text(")"));
+        else
+          s = cat(text("rmalloc("),exp2doc((exp_t)rgnopt),text(","),
+                  exp2doc(new_e),text(")"));
+      }
     }
     break;
   case &Swap_e(e1,e2):

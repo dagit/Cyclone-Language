@@ -1319,7 +1319,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       else
         return $(outflow,typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
     }
-  case &Malloc_e(MallocInfo{iscalloc,eopt,topt,exp,isfat}):
+  case &Malloc_e(MallocInfo{iscalloc,eopt,topt,exp,isfat,_}):
     root_t    root      = rnew(fenv->r) MallocPt(exp,(type_t)e->topt);
     place_t   place     = rnew(fenv->r) Place(root,NULL);
     absRval_t rval      = rnew(fenv->r) AddressOf(place);

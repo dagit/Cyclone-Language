@@ -438,8 +438,9 @@ namespace Absyn {
     // enter the declaration into the environment and then only use the
     // type_t part from then on.  
     TypeDeclType(type_decl_t,type_t*); 
-    // GCC extension
+    // GCC extensions
     TypeofType(exp_t);
+    BuiltinType(string_t,kind_t); // e.g., __builtin_va_list
   };
   extern_datacon(Type,HeapRgn);
   extern_datacon(Type,UniqueRgn);
@@ -599,6 +600,7 @@ namespace Absyn {
     exp_t      num_elts; // for [r]malloc: is the sizeof(t)*n.
                          // for [r]calloc: is just n.
     bool       fat_result; // true when result is a elt_type? -- set by tc
+    bool       inline_call; // when true, call _fast_region_malloc
   };
 
   // "raw" expressions -- don't include location info or type

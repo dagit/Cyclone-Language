@@ -681,6 +681,30 @@ extern void* GC_malloc_atomic(int);
 extern void* GC_calloc(unsigned,unsigned);
 extern void* GC_calloc_atomic(unsigned,unsigned);
 
+#define _CYC_MAX_REGION_CONST 2
+#define _CYC_MIN_ALIGNMENT (sizeof(double))
+
+static _INLINE void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
+  if (r > (struct _RegionHandle *)_CYC_MAX_REGION_CONST && r->curr != 0) { 
+#ifdef CYC_NOALIGN
+    unsigned s =  orig_s;
+#else
+    unsigned s =  (orig_s + _CYC_MIN_ALIGNMENT - 1) & (~(_CYC_MIN_ALIGNMENT -1)); 
+#endif
+    char *result; 
+    result = r->offset; 
+    if (s <= (r->last_plus_one - result)) {
+      r->offset = result + s; 
+#ifdef CYC_REGION_PROFILE
+    r->curr->free_bytes = r->curr->free_bytes - s;
+    rgn_total_bytes += s;
+#endif
+      return result;
+    }
+  } 
+  return _region_malloc(r,orig_s); 
+}
+
 /* FIX?  Not sure if we want to pass filename and lineno in here... */
 static _INLINE void* _cycalloc(int n) {
   void * ans = (void *)GC_malloc(n);

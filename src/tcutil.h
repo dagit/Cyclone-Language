@@ -370,11 +370,14 @@ extern struct Vardecl *nonesc_vardecl(binding_t b);
 extern list_t<`a> filter_nulls(list_t<`a *,`H> l);
 
 // Is the given type an array?
-bool is_array(type_t t);
+extern bool is_array(type_t t);
 
 // If t is an array type, promote it to an at-pointer type into the
 // specified region.
-type_t promote_array(type_t t, type_t rgn, bool convert_tag);
+extern type_t promote_array(type_t t, type_t rgn, bool convert_tag);
+
+// does the type admit zero?
+extern bool zeroable_type(type_t t);
 
 }
 #endif

@@ -328,6 +328,7 @@ type_t copy_type(type_t t) {
     return new TypedefType(tdn,copy_types(ts),td,NULL);
   case &UniqueRgn:
   case &RefCntRgn:
+  case &BuiltinType(_,_):
   case &HeapRgn: return t;
   case &AccessEff(t): return new AccessEff(copy_type(t));
   case &JoinEff(ts): return new JoinEff(copy_types(ts));
@@ -453,11 +454,11 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
   case &AnonEnum_e(qv,t,ef):
     new_e = new_exp(new AnonEnum_e(qv,copy_type(t),ef),e->loc);
     break;
-  case &Malloc_e(MallocInfo(ic,r,t,n,res)):
+  case &Malloc_e(MallocInfo(ic,r,t,n,res,inlc)):
     let e2 = copy_exp(e);
     exp_opt_t r1 = r; if (r != NULL) r1 = DC(pt,r);
     type_t *t1 = t; if (t != NULL) t1 = new copy_type(*t);
-    e2->r = new Malloc_e(MallocInfo(ic,r1,t1,n,res));
+    e2->r = new Malloc_e(MallocInfo(ic,r1,t1,n,res,inlc));
     new_e = e2;
     break;
   case &Swap_e(e1,e2): new_e = swap_exp(DC(pt,e1),DC(pt,e2),e->loc); break;
@@ -666,6 +667,7 @@ kind_t typ_kind(type_t t) {
       }
     }
   case &ValueofType(_): return &ik;
+  case &BuiltinType(_,k): return k;
   case &TypeofType(_): 
     // compress should've returned the type of the expression if we know it.
     // if we don't, then we must treat it as abstract.
@@ -1009,6 +1011,7 @@ static type_t rgns_of(type_t t) {
   case &AnonEnumType(_):
   case &ValueofType(_):
   case &TypeofType(_):
+  case &BuiltinType(_,_):
   case &IntType(_,_): return empty_effect;
   case &Evar(_,_,_,_):
   case &VarType(_):
@@ -1890,6 +1893,7 @@ static int type_case_number(type_t t) {
   case &ValueofType(_): return 28;
   case &TypeDeclType(...): return 29;
   case &TypeofType(_): return 30;
+  case &BuiltinType(...): return 31;
   }
 }
 // the real work of comparison
@@ -2006,6 +2010,8 @@ int typecmp(type_t t1, type_t t2) {
   case $(&ValueofType(e1), &ValueofType(e2)): fallthru(e1,e2);
   case $(&TypeofType(e1), &TypeofType(e2)): 
     return Evexp::const_exp_cmp(e1,e2);
+  case $(&BuiltinType(s1,_),&BuiltinType(s2,_)):
+    return strcmp(s1,s2);
   case $(&JoinEff(_), _):
   case $(_, &JoinEff(_)):
   case $(&AccessEff(_), _):
@@ -3520,6 +3526,7 @@ type_t rsubstitute(region_t<`r> rgn,
   case &FloatType(_):
   case &RefCntRgn:
   case &UniqueRgn:
+  case &BuiltinType(...):
   case &HeapRgn:        return t;
   case &RgnsEff(t2):
     let new_t2 = rsubstitute(rgn,inst,t2);
@@ -4189,6 +4196,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     break;
   case &TagType(t1):
     cvtenv = i_check_valid_type(loc,te,cvtenv,&ik,t1,true,true); break;
+  case &BuiltinType(_,_): break;
   case &ValueofType(e):
     // FIX:  when we have something like:
     // int foo<`i::I>(int *{valueof(`i)}`H x);
@@ -5856,3 +5864,56 @@ type_t promote_array(type_t t, type_t rgn, bool convert_tag)
   default: return t;
   }
 }
+
+// does the type admit zero?
+bool zeroable_type(type_t t) {
+  switch (compress(t)) {
+  case &VoidType: return true;
+  case &Evar(_,_,_,_):
+  case &VarType(_):
+  case &DatatypeType(_):
+  case &DatatypeFieldType(_): return false;
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_,_))):
+    return (conref_def(true,n));
+  case &IntType(_,_):
+  case &FloatType(_): return true;
+  case &ArrayType(ArrayInfo{t,_,_,_,_}): return zeroable_type(t);
+  case &FnType(_): return false;
+  case &TupleType(tqs):
+    for (; tqs; tqs = tqs->tl)
+      if (!zeroable_type((*tqs->hd)[1])) return false;
+    return true;
+  case &AggrType(AggrInfo(info,ts)):
+    let ad = get_known_aggrdecl(info);
+    if(ad->impl == NULL || ad->impl->exist_vars != NULL)
+      return false;
+    region r; {
+      let inst = List::rzip(r,r,ad->tvs,ts);
+      for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl)
+        if (!zeroable_type(rsubstitute(r,inst,fs->hd->type))) return false;
+      return true;
+    }
+  case &EnumType(_,_): return true; // FIX: explicit tags?
+  case &TagType(_): return true; // FIX: true iff 0? Is sizeof right?
+  case &AnonAggrType(_,fs):
+    for (; fs != NULL; fs = fs->tl)
+      if (!zeroable_type(fs->hd->type)) return false;
+    return true;
+  case &AnonEnumType(_): return true; // FIX: explicit tags?
+  case &TypedefType(_,_,_,_): return false;
+  case &DynRgnType(_,_): return false;
+  case &RgnHandleType(_): return false;
+  case &BuiltinType(...): return false;
+
+  case &TypeDeclType(...):
+  case &TypeofType(_):
+  case &ValueofType(_):
+  case &HeapRgn:
+  case &UniqueRgn:
+  case &RefCntRgn:
+  case &AccessEff(_):
+  case &JoinEff(_):
+  case &RgnsEff(_): impos("bad type `%s' in zeroable type",typ2string(t));
+  }
+}
+

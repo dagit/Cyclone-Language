@@ -294,6 +294,7 @@ MAKE_VAR(_swap_word);
 MAKE_VAR(_swap_dyneither);
 MAKE_VAR(_throw_match);
 MAKE_VAR(_rethrow);
+MAKE_VAR(_fast_region_malloc);
 
 #undef MAKE_STRING
 #undef MAKE_VAR
@@ -970,6 +971,7 @@ static type_t typ_to_c(type_t t) {
   case &ValueofType(e): return t;
     // FIX: we really need to translate e!
   case &TypeofType(e): return t;
+  case &BuiltinType(...): return t;
   case &TypeDeclType(&{.r = &Aggr_td(ad),...},_):
     aggrdecl_to_c(ad,true);
     if (ad->kind==UnionA)
@@ -1112,6 +1114,10 @@ static exp_t malloc_exp(type_t t,exp_t s) {
 // region malloc something
 static exp_t rmalloc_exp(exp_t rgn, exp_t s) {
   return fncall_exp(_region_malloc_e, list(rgn,s), DL);
+}
+// region malloc (inlined) something
+static exp_t rmalloc_inline_exp(exp_t rgn, exp_t s) {
+  return fncall_exp(_fast_region_malloc_e, list(rgn,s), DL);
 }
 // calloc something
 static exp_t calloc_exp(type_t elt_type, exp_t s, exp_t n) {
@@ -3752,7 +3758,7 @@ DynCast:
   case &Enum_e(_,_,_):
   case &AnonEnum_e(_,_,_): break;
 
-  case &Malloc_e(MallocInfo{is_calloc,rgnopt,topt,num_elts,is_fat}):
+  case &Malloc_e(MallocInfo{is_calloc,rgnopt,topt,num_elts,is_fat,inline_call}):
     type_t t_c = typ_to_c(*topt);
     exp_to_c(nv,num_elts);
     // FIX: we shouldn't be able to calloc a zero-terminated array of
@@ -3777,7 +3783,10 @@ DynCast:
         if (rgnopt != NULL && !no_regions) {
           exp_t rgn = (exp_t)rgnopt;
           exp_to_c(nv,rgn);
-          pexp = rmalloc_exp(rgn, var_exp(x,DL));
+          if (inline_call)
+            pexp = rmalloc_inline_exp(rgn, var_exp(x,DL));
+          else
+            pexp = rmalloc_exp(rgn, var_exp(x,DL));
         } else {
           pexp = malloc_exp(*topt, var_exp(x,DL));
         }
@@ -3801,7 +3810,10 @@ DynCast:
         if (rgnopt != NULL && !no_regions) {
           exp_t rgn = (exp_t)rgnopt;
           exp_to_c(nv,rgn);
-          e->r = rmalloc_exp(rgn, num_elts)->r;
+          if (inline_call)
+            e->r = rmalloc_inline_exp(rgn, num_elts)->r;
+          else
+            e->r = rmalloc_exp(rgn, num_elts)->r;
         } else {
           e->r = malloc_exp(*topt, num_elts)->r;
         }
@@ -5257,6 +5269,7 @@ static void init() {
     &_throw_match_str,
     &_swap_word_str,
     &_swap_dyneither_str,
+    &_fast_region_malloc_str,
   };
 }
 

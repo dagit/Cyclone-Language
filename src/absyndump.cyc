@@ -551,6 +551,7 @@ void dumpntyp(type_t t) {
   case &TypedefType(n,ts,_,_):  dumpqvar(n), dumptps(ts); return;
   case &ValueofType(e): dump("valueof_t("); dumpexp(e); dump(")"); return;
   case &TypeofType(e): dump("typeof("); dumpexp(e); dump(")"); return;
+  case &BuiltinType(t,_): dump(t); return;
   case &RgnHandleType(rgn): 
     dump("region_t<"); dumprgn(rgn); dump(">"); return;
   case &DynRgnType(r1,r2): dump("dynregion_t<"); dumprgn(r1);
@@ -863,7 +864,7 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Enum_e(n,_,_): dumpqvar(n); break;
   case &AnonEnum_e(q,_,_): dumpqvar(q); break;
 
-  case &Malloc_e(MallocInfo{is_calloc,ropt,topt,e,_}):
+  case &Malloc_e(MallocInfo{is_calloc,ropt,topt,e,_,inline_call}):
     dumploc(e->loc);
     if (is_calloc) {
       if (ropt != NULL) {
@@ -878,7 +879,10 @@ void dumpexp_prec(int inprec, exp_t e) {
       dump(")");
     } else {
       if (ropt != NULL) {
-        dump("rmalloc(");
+        if (inline_call)
+          dump("rmalloc_inline(");
+        else
+          dump("rmalloc(");
         dumpexp((exp_t)ropt); dump(",");
       } else {
         dump("malloc(");

@@ -72,10 +72,6 @@
 #include <cycboot.h>
 #include "tcdecl.h"
 #include <set.h>
-// cheat -- we know what positions are...
-namespace Position {
-  extern struct Segment{ int start; int end; };
-}
 
 using Core;
 using List;
@@ -1481,7 +1477,7 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
     leq(gen_exp(env,e1),ptr_ct(unknown_aggr_ct(list(new Cfield{var(),f,v})),
                                var(),var(),var(),var()));
     return v;
-  case &Malloc_e(MallocInfo{_,_,topt,e1,_}):
+  case &Malloc_e(MallocInfo{_,_,topt,e1,_,_}):
     leq(gen_exp(env,e1),arith_ct());
     let t = (topt) ? type_to_ctype(env,*topt) : var();
     return ptr_ct(t,var(),fat_ct(),heap_ct(),var());

@@ -451,6 +451,7 @@ bool okay_szofarg(type_t t) {
   case &FloatType(_): return true;
   case &ArrayType(ArrayInfo{t2,_,e,_,_}): //assume e constant checked elsewhere
     return (e != NULL);
+  case &BuiltinType(...): return true;
   case &FnType(_): return false;
   case &RgnHandleType(_): return true;
   case &DynRgnType(_,_): return true;

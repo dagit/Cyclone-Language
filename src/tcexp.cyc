@@ -1312,7 +1312,7 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
   // issue a warning -- this is a good sign that it's a legacy cast which will
   // lose information.
   switch ($(e->r, compress(t))) {
-  case $(&Malloc_e(MallocInfo{_,_,_,_,fat_result}),
+  case $(&Malloc_e(MallocInfo{_,_,_,_,fat_result,_}),
          &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,bds,zt,_}})):
     // malloc must be fat and t must be a NOZEROTERM, *{1} type
     if (fat_result && !conref_def(false,zt) && conref_def(false,nbl)) {
@@ -2207,56 +2207,6 @@ static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
   }
 }
 
-static bool zeroable_type(type_t t) {
-  switch (compress(t)) {
-  case &VoidType: return true;
-  case &Evar(_,_,_,_):
-  case &VarType(_):
-  case &DatatypeType(_):
-  case &DatatypeFieldType(_): return false;
-  case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_,_))):
-    return (conref_def(true,n));
-  case &IntType(_,_):
-  case &FloatType(_): return true;
-  case &ArrayType(ArrayInfo{t,_,_,_,_}): return zeroable_type(t);
-  case &FnType(_): return false;
-  case &TupleType(tqs):
-    for (; tqs; tqs = tqs->tl)
-      if (!zeroable_type((*tqs->hd)[1])) return false;
-    return true;
-  case &AggrType(AggrInfo(info,ts)):
-    let ad = get_known_aggrdecl(info);
-    if(ad->impl == NULL || ad->impl->exist_vars != NULL)
-      return false;
-    region r; {
-      let inst = List::rzip(r,r,ad->tvs,ts);
-      for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl)
-        if (!zeroable_type(rsubstitute(r,inst,fs->hd->type))) return false;
-      return true;
-    }
-  case &EnumType(_,_): return true; // FIX: explicit tags?
-  case &TagType(_): return true; // FIX: true iff 0? Is sizeof right?
-  case &AnonAggrType(_,fs):
-    for (; fs != NULL; fs = fs->tl)
-      if (!zeroable_type(fs->hd->type)) return false;
-    return true;
-  case &AnonEnumType(_): return true; // FIX: explicit tags?
-  case &TypedefType(_,_,_,_): return false;
-  case &DynRgnType(_,_): return false;
-  case &RgnHandleType(_): return false;
-
-  case &TypeDeclType(...):
-  case &TypeofType(_):
-  case &ValueofType(_):
-  case &HeapRgn:
-  case &UniqueRgn:
-  case &RefCntRgn:
-  case &AccessEff(_):
-  case &JoinEff(_):
-  case &RgnsEff(_): impos("bad type `%s' in zeroable type",typ2string(t));
-  }
-}
-
 static void check_malloc_type(bool allow_zero, seg_t loc,
                               type_t * topt, type_t t) {
   if (bits_only(t) || (allow_zero && zeroable_type(t))) return;
@@ -2978,7 +2928,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
   case &AnonEnum_e(*v,t2,ef):
     *v = ef->name;
     t = t2; break;
-  case &Malloc_e(MallocInfo{*is_calloc,*ropt,*t2,*e,*isfat}):
+  case &Malloc_e(MallocInfo{*is_calloc,*ropt,*t2,*e,*isfat,_}):
     t = tcMalloc(te,loc,topt,ropt,t2,e,is_calloc,isfat); break;
   case &Swap_e(e1,e2):
     t = tcSwap(te,loc,topt,e1,e2); break;

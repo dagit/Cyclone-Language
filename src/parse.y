@@ -1086,10 +1086,11 @@ using Parse;
 %token DOUBLE SIGNED UNSIGNED CONST VOLATILE RESTRICT
 %token STRUCT UNION CASE DEFAULT INLINE SIZEOF OFFSETOF
 %token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN ENUM TYPEOF
+%token BUILTIN_VA_LIST
 // Cyc:  CYCLONE additional keywords
 %token NULL_kw LET THROW TRY CATCH EXPORT
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE
-%token MALLOC RMALLOC CALLOC RCALLOC SWAP
+%token MALLOC RMALLOC RMALLOC_INLINE CALLOC RCALLOC SWAP
 %token REGION_T TAG_T REGION RNEW REGIONS RESET_REGION
 %token PORTON PORTOFF DYNREGION_T
 // %token ALIAS
@@ -1660,6 +1661,8 @@ type_specifier_notypedef:
 /* GCC extension */
 | TYPEOF '(' expression ')'
    { $$=^$(type_spec(new TypeofType($3),LOC(@1,@4))); }
+| BUILTIN_VA_LIST
+   { $$=^$(type_spec(new BuiltinType("__builtin_va_list",&Tcutil::bk),SLOC(@1))); }
 /* Cyc: added datatypes */
 | datatype_specifier { $$=$!1; }
 /* Cyc: added type variables and optional type parameters to typedef'd names */
@@ -3056,19 +3059,22 @@ unary_expression:
    }
 /* Cyc: malloc, rmalloc, numelts, swap, etc. */
 | MALLOC '(' assignment_expression ')'
-   { $$=^$(new_exp(new Malloc_e(MallocInfo{false,NULL,NULL,$3,false}),
+   { $$=^$(new_exp(new Malloc_e(MallocInfo{false,NULL,NULL,$3,false,false}),
                    LOC(@1,@4))); }
 | RMALLOC '(' assignment_expression ',' assignment_expression ')'
-   { $$=^$(new_exp(new Malloc_e(MallocInfo{false,$3,NULL,$5,false}),
+   { $$=^$(new_exp(new Malloc_e(MallocInfo{false,$3,NULL,$5,false,false}),
+                   LOC(@1,@6))); }
+| RMALLOC_INLINE '(' assignment_expression ',' assignment_expression ')'
+   { $$=^$(new_exp(new Malloc_e(MallocInfo{false,$3,NULL,$5,false,true}),
                    LOC(@1,@6))); }
 | CALLOC '(' assignment_expression ',' SIZEOF '(' type_name ')' ')'
    { let t = type_name_to_type($7,SLOC(@7));
-     $$=^$(new_exp(new Malloc_e(MallocInfo{true,NULL,new(t),$3,false}),
+     $$=^$(new_exp(new Malloc_e(MallocInfo{true,NULL,new(t),$3,false,false}),
                    LOC(@1,@9))); }
 | RCALLOC '(' assignment_expression ',' assignment_expression ',' 
               SIZEOF '(' type_name ')' ')'
    { let t = type_name_to_type($9,SLOC(@9));
-     $$=^$(new_exp(new Malloc_e(MallocInfo{true,$3,new(t),$5,false}),
+     $$=^$(new_exp(new Malloc_e(MallocInfo{true,$3,new(t),$5,false,false}),
                    LOC(@1,@11))); }
 | NUMELTS '(' assignment_expression ')'
    { $$=^$(primop_exp(Numelts, list($3), LOC(@1,@4))); }
