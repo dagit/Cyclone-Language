@@ -316,25 +316,25 @@ rule token "$(int,comment_t)*" = parse
     let lineno_decls = zip(map(lineno,map(fst,pos_decls)),
                            map(snd,pos_decls));
     /* Scan the file again, this time for the comments */
+    /* Note, we don't use the preprocfile, because it has no comments */
     let f = (FILE @)fopen((const char @)filename,"r");
     let lb = Lexing::from_file(f);
     let comments = NULL;
-    let comment;
-    while ((comment = token(lb)) != NULL) {
-      /* The cast below is needed else comments gets the wrong type */
-      comments = new List(($(int,comment_t)@)comment,
-                           comments);
+    let indices = NULL;
+    let tok;
+    while ((tok = token(lb)) != NULL) {
+      let $(index,comment) = *tok;
+      comments = new List(comment,comments);
+      indices = new List(index,indices);
     }
     fclose(f);
     comments = imp_rev(comments);
+    indices = imp_rev(indices);
     /* Find the location (pos_t) of each comment */
-    let poss = map(start2pos,map(fst,comments));
+    let poss = map(start2pos,indices);
     Lineno::poss_of_abss(filename,poss);
-    let pos_comments = zip(map(snd,poss),map(snd,comments));
-    /* Filter out comments from other files (from #include) */
-    pos_comments = this_file(filename,pos_comments);
-    let lineno_comments = zip(map(lineno,map(fst,pos_comments)),
-                              map(snd,pos_comments));
+    let lineno_comments = zip(map(lineno,map(snd,poss)),
+                              comments);
 
     /* Print all decls followed immediately by comments;
        discard all other decls and comments */

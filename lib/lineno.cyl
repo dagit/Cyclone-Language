@@ -35,8 +35,20 @@ enum token_val {
 
 let newline = ('\n' | '\r' | "\r\n")
 
+/* Return LINEDEF for lines that look like directives that the
+   preprocessor leaves in its output to indicate what lines of
+   a preprocessed file correspond to what unpreprocessed file,
+   e.g.,
+      # 3 "include/core.h"
+   Return NEWLINE for any other lines that end in newline,
+   including some other lines that start with #.  This is
+   useful for cycdoc, which needs to work on unpreprocessed
+   files --- it needs the comments --- and so we have to
+   cope with, e.g., #ifdef.
+   Return END for a line that ends the file without newline.
+*/
 rule token "enum token_val" = parse
-  "#" [^ '\n' '\r']* newline { return LINEDEF; }
+  "#" [' ' '\t']* ['0'-'9']+ [^ '\n' '\r']* newline { return LINEDEF; }
 | [^ '\n' '\r']* newline     { return NEWLINE; }
 | [^ '\n' '\r']* eof         { return END; }
 
