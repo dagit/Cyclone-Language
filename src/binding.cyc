@@ -32,6 +32,7 @@
 #include "absynpp.h"
 #include "warn.h"
 #include "binding.h"
+#include "cifc.h"
 using List;
 using Absyn;
 using Warn;
@@ -1122,28 +1123,28 @@ void resolve_decl(env_t env, decl_t d) {
     break;
 
     // for externCInclude, we warn on exported-but-not-defined
-    // and only add the binding if it is exported
+    // and only resolved the binding if it is exported
     // I don't think types can be exported, just variables and functions
     // (for extern "C" it's like "export everything")
-  case &ExternCinclude_d(ds2,exports): 
+  case &ExternCinclude_d(ds2,ovrs,exports): 
     for(let exs = exports; exs != NULL; exs = exs->tl) {
       let &$(loc,qv,_) = exs->hd;
       absolutize_decl(loc,env,qv,ExternC);
     }
     // this is not how Greg did exports, but this makes more sense, and should
     // be equivalent when extern "C include" is not nested.  And for parsing
-    // reasons, it's improssible to have namespace, using, or nested exports
+    // reasons, it's impossible to have namespace, using, or nested exports
     // inside an extern "C include"
     if(!at_toplevel(env)) {
       err(loc,"extern \"C include\" not at toplevel");
       break;
     }
-    // FIX?: All type declaratations get exported -- weird but not my idea
     let data = Dict::lookup(env->ns->ns_data,env->ns->curr_ns);
     let old_dict = data->ordinaries;
     let old = env->in_cinclude;
     env->in_cinclude = true;
     resolve_decls(env,ds2);
+    resolve_decls(env,ovrs);
     let new_dict = data->ordinaries;
     let out_dict = old_dict;
     for (let exs = exports; exs != NULL; exs = exs->tl) {
@@ -1156,6 +1157,9 @@ void resolve_decl(env_t env, decl_t d) {
     }
     data->ordinaries = out_dict;
     env->in_cinclude = old;
+
+    // FIX: this should go in a separate pass
+    Cifc::user_overrides(loc,ds2,ovrs);
     break;
 
   case &Porton_d: // let Tc warn for now

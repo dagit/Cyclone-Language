@@ -150,6 +150,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("const", CONST, true),
   $("__const__", CONST, true),
   $("continue", CONTINUE, true),
+  $("cyclone_override", OVERRIDE, false),
   $("datatype", DATATYPE, false),
   $("default", DEFAULT, true),
   $("do", DO, true),

@@ -65,6 +65,7 @@ rule token "$(int,comment_t)*" = parse
   #include "tcutil.h"
   #include "evexp.h"
   using Absyn;
+  bool noexpand_r = false;
   static void dump_begin() {
     /* MUST START LINE */
     puts("%%HEVEA \\begin{latexonly}\n"
@@ -254,8 +255,8 @@ rule token "$(int,comment_t)*" = parse
       switch(decls->hd->r) {
       case &Namespace_d(_,tdl): fallthru(tdl);
       case &Using_d(_,tdl): fallthru(tdl);
-      case &ExternC_d(tdl): fallthru(tdl);
-      case &ExternCinclude_d(tdl,_): 
+      case &ExternC_d(tdl,...): fallthru(tdl);
+      case &ExternCinclude_d(tdl,...): 
         decls = append(tdl,decls->tl);
         break;
       case &Aggr_d(_):

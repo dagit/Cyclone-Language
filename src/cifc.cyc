@@ -1,0 +1,229 @@
+/* Type checking declarations.
+   Copyright (C) 2004 Michael Hicks
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include "cifc.h"
+#include "absynpp.h"
+#include "tcutil.h"
+#include "toc.h"
+using Absyn;
+using List;
+using Tcutil;
+
+// This file contains routines for smoothing the interface between C
+// and Cyclone.
+
+namespace Cifc;
+
+// Merges the user definition of a type and the slurped C version.  On
+// success, this mutates user_decl with the changes.
+static void fail_merge(bool warn,seg_t loc, bool is_buildlib,
+		       qvar_t n, string_t s) {
+  if (is_buildlib) {
+    string_t preamble = warn ? "Warning: user-defined" : "User-defined";
+    fprintf(stderr,"%s type for %s incompatible with "
+	           "system version %s\n",
+	    preamble, Absynpp::qvar2string(n),s);
+  }
+  else if (warn)
+    Tcutil::warn(loc,"User-defined type for %s incompatible with system version %s",
+		 Absynpp::qvar2string(n),s);
+  else
+    Tcutil::terr(loc,"User-defined type for %s incompatible with system version %s",
+		 Absynpp::qvar2string(n),s);
+}
+
+#define FAIL_MERGE(w,l,b,n,s) { fail_merge(w,l,b,n,s); if (!w) return; }
+
+// Make copies of the types to make sure we don't get screwed up by]
+// side-effects with unification
+// FIX: we could be more liberal than unification alone.  E.g. we could allow
+//   an int where an unsigned int is expected.
+static bool c_types_ok(type_t ctyp, type_t cyctyp) {
+  let c_typ = Toc::typ_to_c(copy_type(ctyp));
+  let u_typ = Toc::typ_to_c(copy_type(cyctyp));
+//   printf("c_typ = %s, u_typ = %s\n",
+// 	 Absynpp::typ2string(c_typ),
+// 	 Absynpp::typ2string(u_typ));
+  return Tcutil::unify(c_typ,u_typ);
+}
+
+// Merge two attribute lists into a freshly-allocated list.  
+static attributes_t merge_attributes(attributes_t a1, attributes_t a2) {
+  attributes_t x = NULL;
+  for (_ a = a1; a != NULL; a = a->tl)
+    if (!List::exists_c(equal_att,a->hd,a2)) x = new List(a->hd,x);
+  return List::append(x,List::copy(a2));
+}
+
+// Merges a C declaration with a representation-compatible Cyclone
+// one.  If successful, [c_decl] is side-effected to be changed
+// appropriately.  Otherwise it is left alone.
+void merge_sys_user_decl(seg_t loc, bool is_buildlib,
+			 decl_t user_decl, decl_t c_decl) {
+  switch ($(c_decl->r,user_decl->r)) {
+  case $(&Var_d(cd),&Var_d(ud)):
+    if (!c_types_ok(cd->type,ud->type)) {
+      FAIL_MERGE(false,loc,is_buildlib,cd->name,
+		 aprintf(": type %s != %s",
+			 Absynpp::typ2string(ud->type),
+			 Absynpp::typ2string(cd->type)));
+    }
+    else {
+      // Copy the user type, qualifier, and attributes to the C version.
+      if (ud->attributes != NULL)
+	cd->attributes = merge_attributes(cd->attributes,ud->attributes);
+      cd->type = ud->type;
+      cd->tq = ud->tq;
+    }
+    break;
+
+    // TODO: vardecls with fndecls (for inline definitions)
+    //       enum decls
+
+  case $(&Aggr_d(cd),&Aggr_d(ud)):
+    // For an aggregate type, we allow the C version to have more fields.
+    // We add disjoint fields to the user decl, and make sure that the same
+    // fields have representation-compatible types.
+    if (ud->sc != cd->sc)
+      FAIL_MERGE(true,loc,is_buildlib,cd->name,": scopes don't match (ignoring)");
+    // FIX: punt attributes, expected_mem_kind, kind for now
+    if (ud->impl == NULL)
+      FAIL_MERGE(false,loc,is_buildlib,cd->name,": no user definition");
+    if (cd->impl == NULL) {
+      FAIL_MERGE(true,loc,is_buildlib,cd->name,": no definition for system version");
+      c_decl->r = user_decl->r;
+      return;
+    }
+    switch ($(cd->impl,ud->impl)) {
+    case $(&AggrdeclImpl(*tvarsC,*rgnpoC,cfields,_),
+	   &AggrdeclImpl(tvars,rgnpo,ufields,tagged)):
+      if (tagged)
+	FAIL_MERGE(false,loc,is_buildlib,cd->name,
+		   ": user @tagged annotation not allowed (ignoring)");
+      let x = cfields;
+      // Merge fields from the user version to the C version
+      while (x != NULL) {
+	let cfield = x->hd;
+	let ufield = lookup_field(ufields,cfield->name);
+	// if no user version, just keep the C version
+	if (ufield != NULL) {
+	  // make sure these are representation-compatible.  To so this, convert
+	  // them to C types, and then unify these.  If they match, we're OK.
+	  if (!c_types_ok(cfield->type,ufield->type)) {
+	    FAIL_MERGE(false,loc,is_buildlib,cd->name,
+		       aprintf(": type %s of user definition of field %s != %s",
+			       Absynpp::typ2string(ufield->type),
+			       *cfield->name,
+			       Absynpp::typ2string(cfield->type)));
+	    // fails to unify, leave C field alone
+	  }
+	  else {
+	    if (ufield->width != NULL) {
+	      FAIL_MERGE(true,loc,is_buildlib,cd->name,
+			 aprintf(": ignoring width of user definition of "
+				 "field %s",Absynpp::typ2string(ufield->type)));
+	    }
+	    if (ufield->attributes != NULL)
+	      cfield->attributes = merge_attributes(cfield->attributes,
+						    ufield->attributes);
+	    // Copy the user type, qualifier, and requires clause to the C version.
+	    cfield->type = ufield->type;
+	    cfield->tq = ufield->tq;
+	    cfield->requires_clause = ufield->requires_clause;
+	  }
+	}
+	x = x->tl;
+      }
+
+      // Copy over any type variables, etc.
+      if (ud->tvs != NULL) cd->tvs = ud->tvs;
+      if (tvars) *tvarsC = tvars;
+      if (rgnpo) *rgnpoC = rgnpo;
+	
+      // Make sure the C version is not missing any expected fields
+      x = ufields;
+      bool missing_fields = false;
+      while (x != NULL) {
+	let cfield = lookup_field(cfields,x->hd->name);
+	if (cfield == NULL) {
+	  missing_fields = true;
+	  FAIL_MERGE(true,loc,is_buildlib,cd->name,
+		     aprintf(": no definition of field %s in system version",
+			     *x->hd->name));
+	}
+	x = x->tl;
+      }
+      break;
+    default:
+      throw new Core::Impossible("Internal Error: NULL cases not possible");
+    }
+    break;
+
+  case $(&Enum_d(cd),&Enum_d(ud)):
+    FAIL_MERGE(false,loc,is_buildlib,cd->name,": enum merging not currently supported");
+
+  case $(&Typedef_d(cd),&Typedef_d(ud)):
+    if (ud->defn == NULL)
+      FAIL_MERGE(false,loc,is_buildlib,cd->name,": no user definition");
+    if (cd->defn == NULL) {
+      FAIL_MERGE(true,loc,is_buildlib,cd->name,": no definition for system version");
+      c_decl->r = user_decl->r;
+      return;
+    }
+    // Now check that the actual definitions are representation-compatible
+    if (!c_types_ok((type_t)cd->defn,(type_t)ud->defn)) {
+      FAIL_MERGE(false,loc,is_buildlib,cd->name,
+		 aprintf(": type definition %s of user definition != %s",
+			 Absynpp::typ2string((type_t)ud->defn),
+			 Absynpp::typ2string((type_t)cd->defn)));
+    }
+    else {
+      cd->tvs = ud->tvs;
+      cd->defn = ud->defn;
+      cd->tq = ud->tq;
+      if (ud->atts != NULL)
+	cd->atts = merge_attributes(cd->atts,ud->atts);
+      // FIX: do anything with the kind?
+    }
+    break;
+
+  default:
+    if (is_buildlib)
+      fprintf(stderr,"Error in .cys file: bad (or unsupported) user-defined type %s\n",
+	      Absynpp::decllist2string(list(user_decl)));
+    else
+      terr(loc,"bad (or unsupported) user-defined type %s",
+	   Absynpp::decllist2string(list(user_decl)));      
+    return;
+  }
+}
+
+void user_overrides(seg_t loc, list_t<decl_t> ds, list_t<decl_t> ovrs) {
+  for (let x = ovrs; x != NULL; x = x->tl) {
+    let ud = x->hd;
+    let un = decl_name(ud);
+//    printf("trying to merge decl %s\n",*un);
+    if (!un) warn(ud->loc,"Overriding decl without a name\n");
+    else {
+      let d = lookup_decl(ds,un);
+      if (!d)  warn(ud->loc,"%s is overridden but not defined",*un);
+      else     merge_sys_user_decl(loc, false, ud, d);
+    }
+  }
+}

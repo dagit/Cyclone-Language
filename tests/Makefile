@@ -12,7 +12,7 @@ CYCC=../build/boot/cyclone$(EXE)
 CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g
 endif
 
-EXES=$(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme)
+EXES=$(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme cinclude)
 
 CYCTESTS=arg_suite.h				\
   array_suite.h					\
@@ -61,6 +61,7 @@ all: $(EXES) failtest
 	./dynregion
 	./scheme
 	./refcnt_test -q
+	./cinclude
 
 # tests things that should be type errors
 failtest:
@@ -121,6 +122,9 @@ require$(EXE): require.o
 streambufftest$(EXE): streambufftest.o streambuff.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
+cinclude$(EXE): cinclude.o
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
+
 # This takes care of non-machine-generated versions (the .cyc is already there)
 %.o : %.cyc
 	$(CYCC) $(CYCFLAGS) -c $< 
@@ -130,7 +134,7 @@ streambufftest$(EXE): streambufftest.o streambuff.o
 	$(CYCC) $(CYCFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
-	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions unique_test zeroterm structarray flatlist md5 require streambufftest streambuff refcnt_test dynregion md5driver scheme unique_patterns)
+	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions unique_test zeroterm structarray flatlist md5 require streambufftest streambuff refcnt_test dynregion md5driver scheme unique_patterns cinclude)
 	$(RM) foo_tab.* unsafe_cast.o pcredemo.o pcredemo.c pcredemo md5driver.o
 	$(RM) $(EXES) fail1.tmp fail2.tmp fail3.tmp fail4.tmp
 	$(RM) *~ *.exe *.output *.stackdump

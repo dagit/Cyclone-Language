@@ -127,6 +127,7 @@ CYCLONE_SRCS:=absyn\
          toseqc\
          tovc\
          interface\
+	 cifc\
 	 tcdecl\
          port\
          specsfile\
@@ -148,6 +149,8 @@ CYCDOC_SRCS:=cycdoc\
 	tcpat\
         callgraph\
         tc\
+	toc\
+	cifc\
 	tcdecl\
         pratt\
         jump_analysis\
@@ -169,6 +172,7 @@ BUILDLIB_SRCS:=buildlib\
         relations\
         callgraph\
 	tc\
+	cifc\
 	tcdecl\
 	tcexp\
         binding\

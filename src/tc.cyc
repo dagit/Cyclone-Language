@@ -993,7 +993,7 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
 
       // FIX: there's a simpler way to do this that does not require remembering
       // to mutate bools other places.  (See binding.)
-    case &ExternCinclude_d(ds2,exports2):
+    case &ExternCinclude_d(ds2,ovrs,exports2):
       list_t<$(seg_t,qvar_t,bool)@> newexs = 
         List::append(exports2,exports ? *exports : NULL);
       let te2 = enter_extern_c_include(te);
@@ -1012,8 +1012,8 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
 
 void tc(tenv_t te, bool check_var_init, list_t<decl_t,`H> ds) {
   set_params(&tc_params_r);
-  let cg = Callgraph::compute_callgraph(ds);
-  let scc = Graph::scc(cg);
+//   let cg = Callgraph::compute_callgraph(ds);
+//   let scc = Graph::scc(cg);
   tc_decls(te,ds,false,check_var_init,NULL);
 }
 
@@ -1043,8 +1043,8 @@ static bool vardecl_needed(treeshake_env_t env, decl_t d) {
   case &Var_d(vd):
     //fprintf(stderr,"looking at var %s: ",qvar2string(vd->name));
     // get rid of externs that are never referenced
-    if(env->in_cinclude || (vd->sc != Extern && vd->sc != ExternC) ||
-       !qvar_cmp(vd->name,uniquergn_qvar)) {
+    if (env->in_cinclude || (vd->sc != Extern && vd->sc != ExternC) ||
+	!qvar_cmp(vd->name,uniquergn_qvar)) {
       //fprintf(stderr,"needed--!extern or in_cinclude or unique_rgn\n");
       return true;
     }
@@ -1054,7 +1054,7 @@ static bool vardecl_needed(treeshake_env_t env, decl_t d) {
   case &Namespace_d(_,*ds2p):
     *ds2p = treeshake_f(env,*ds2p);
     return true;
-  case &ExternCinclude_d(*ds2p,_): 
+  case &ExternCinclude_d(*ds2p,_,_): 
     bool in_cinclude = env->in_cinclude;
     env->in_cinclude = true;
     *ds2p = treeshake_f(env,*ds2p);

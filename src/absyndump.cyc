@@ -1385,11 +1385,17 @@ void dumpdecl(decl_t d) {
       dumpdecl(tdl->hd);
     dump_char('}');
     break;
-  case &ExternCinclude_d(tdl,exs):
+  case &ExternCinclude_d(tdl,ovrs,exs):
     dump("extern \"C include\" {");
     for(; tdl != NULL; tdl = tdl->tl)
       dumpdecl(tdl->hd);
     dump_char('}');
+    if (ovrs != NULL) {
+      dump(" cyclone_override {");
+      for(; ovrs != NULL; ovrs = ovrs->tl)
+	dumpdecl(ovrs->hd);
+      dump_char('}');
+    }
     if (exs != NULL) {
       dump(" export {");
       for (; exs != NULL; exs = exs->tl) {
@@ -1568,7 +1574,7 @@ static void dump_decl_interface(decl_t d) {
       dump_decl_interface(ds->hd);
     dump("}\n");
     break;
-  case &ExternCinclude_d(ds,exs): 
+  case &ExternCinclude_d(ds,ovrs,exs): 
     /* omit these for now
     dump("extern \"C include\" {");
     for(; ds != NULL; ds = ds->tl)

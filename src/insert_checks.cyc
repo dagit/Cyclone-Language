@@ -424,7 +424,7 @@ static void do_decl(env_t nv, decl_t d) {
   case &Portoff_d:
   case &Tempeston_d:
   case &Tempestoff_d:
-  case &ExternCinclude_d(_,_): break;
+  case &ExternCinclude_d(...): break;
   case &ExternC_d(ds): fallthru(ds);
   case &Using_d(_,ds): fallthru(ds);
   case &Namespace_d(_,ds):

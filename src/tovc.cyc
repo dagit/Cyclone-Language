@@ -737,7 +737,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
     case &Namespace_d(_,ds2): fallthru(ds2);
     case &Using_d(_,ds2):     fallthru(ds2);
     case &ExternC_d(ds2):     fallthru(ds2);
-    case &ExternCinclude_d(ds2,_):
+    case &ExternCinclude_d(ds2,...):
     case &Porton_d:
     case &Portoff_d:
     case &Tempeston_d:

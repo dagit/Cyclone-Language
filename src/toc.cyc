@@ -872,10 +872,12 @@ type_t typ_to_c(type_t t) {
     for(; fs!=NULL; fs=fs->tl) 
       fs2 = new List(aggrfield_to_c(fs->hd,typ_to_c(fs->hd->type)), fs2);
     return add_anon_aggr_type(k,imp_rev(fs2));
-  case &AppType(&AggrCon(info),ts):
+  case &AppType(c as &AggrCon(info),ts):
     // If we are in C code, the implementation may not be set here.
     switch (info) {
-    case {.UnknownAggr = _}: return t;
+    case {.UnknownAggr = _}:
+      if (ts == NULL) return t;
+      else return new AppType(c,NULL); // drop any type args
     default: break;
     }
     let ad = get_known_aggrdecl(info);
@@ -886,8 +888,6 @@ type_t typ_to_c(type_t t) {
 	     (ad->kind==UnionA) ? "union" : "struct",
 	     qvar2string(ad->name));
     }
-    // XXX I think this is where new instantiation types are
-    // generated; want to adapt this for unions here.
     // Have to watch out for flaky gcc ...
     if(ad->kind==UnionA)
       return aggrdecl_type(ad->name,unionq_type);
@@ -4139,8 +4139,8 @@ static void decltypes_to_c(decl_t d) {
   case &Datatype_d(_):
   case &Namespace_d(_,_):
   case &Using_d(_,_):
-  case &ExternC_d(_):
-  case &ExternCinclude_d(_,_):
+  case &ExternC_d(...):
+  case &ExternCinclude_d(...):
   case &Region_d(...): // DJG: impossible because of parser, no?
     Warn::impos_loc(d->loc,"Cyclone declaration within C code"); break;
   case &Porton_d:
@@ -4284,8 +4284,8 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
       break;
     case &Namespace_d(_,ds2): fallthru(ds2);
     case &Using_d(_,ds2):     fallthru(ds2);
-    case &ExternC_d(ds2): nv = decls_to_c(r,nv,ds2,top,cinclude); break;
-    case &ExternCinclude_d(ds2,_): nv = decls_to_c(r,nv,ds2,top,true); break;
+    case &ExternC_d(ds2):     nv = decls_to_c(r,nv,ds2,top,cinclude); break;
+    case &ExternCinclude_d(ds2,...): nv = decls_to_c(r,nv,ds2,top,true); break;
     }
   }
   return nv;

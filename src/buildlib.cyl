@@ -69,7 +69,9 @@
 #include "absynpp.h"
 #include "parse.h"
 #include "tc.h"
-#include "toc.h"
+// #include "toc.h"
+#include "tcdecl.h"
+#include "cifc.h"
 #include "tcutil.h"
 #include "binding.h"
 #include "specsfile.h"
@@ -205,7 +207,7 @@ static void rename_decl(decl_t d) {
   case &Letv_d(_):
   case &Namespace_d(...):
   case &Using_d(...):
-  case &ExternC_d(_):
+  case &ExternC_d(...):
   case &ExternCinclude_d(...):
   case &Porton_d:
   case &Portoff_d:
@@ -214,167 +216,6 @@ static void rename_decl(decl_t d) {
     fprintf(stderr,"Error in .cys file: bad user-defined type definition\n");
     exit(1);
   }
-}
-
-// returns the decl from the list having the given name
-static decl_t named_decl(list_t<decl_t> decls, stringptr_t<`H> decl_name) {
-  _* name;
-  for (; decls != NULL; decls = decls->tl) {
-    switch (decls->hd->r) {
-    case &Aggr_d(x):
-      let &$(_,v) = x->name;
-      name = v;
-      break;
-    case &Enum_d(x):
-      let &$(_,v) = x->name;
-      name = v;
-      break;
-    case &Typedef_d(x):
-      let &$(_,v) = x->name;
-      name = v;
-      break;
-
-    case &Var_d(_):
-    case &Fn_d(_):
-    case &Porton_d:
-    case &Portoff_d:
-    case &Tempeston_d:
-    case &Tempestoff_d:
-    case &Let_d(...):
-    case &Datatype_d(_):
-    case &Letv_d(_):
-    case &Namespace_d(_,_):
-    case &Using_d(_,_):
-    case &ExternC_d(_):
-    case &ExternCinclude_d(_,_):
-    case &Region_d(...):
-      name = NULL;
-      break;
-    }
-    if (name && !strptrcmp(name,decl_name))
-      return decls->hd;
-  }
-  throw new Core::Impossible("Internal Error: bad user-def name");
-}
-
-// Merges the user definition of a type and the slurped C version.  On
-// success, this mutates user_decl with the changes.
-#define FAIL_MERGE(n,s) { fprintf(stderr,"User-defined type for %s incompatible with system version %s\n",Absynpp::qvar2string(n),s); return; }
-#define WARN_MERGE(n,s) fprintf(stderr,"Warning: user-defined type for %s incompatible with system version %s\n",Absynpp::qvar2string(n),s);
-static void merge_rep_decl(decl_t user_decl, decl_t c_decl) {
-  switch ($(c_decl->r,user_decl->r)) {
-  case $(&Aggr_d(cd),&Aggr_d(ud)):
-    // For an aggregate type, we allow the C version to have more fields.
-    // We add disjoint fields to the user decl, and make sure that the same
-    // fields have representation-compatible types.
-    if (ud->tvs != NULL)
-      FAIL_MERGE(cd->name,": universal quantification in user definition not allowed");
-    if (ud->sc != cd->sc)
-      WARN_MERGE(cd->name,": scopes don't match");
-    // FIX: punt attributes, expected_mem_kind, kind for now
-    if (ud->impl == NULL)
-      FAIL_MERGE(cd->name,": no user definition");
-    if (cd->impl == NULL) {
-      WARN_MERGE(cd->name,": no definition for system version");
-      c_decl->r = user_decl->r;
-      return;
-    }
-    switch ($(cd->impl,ud->impl)) {
-    case $(&AggrdeclImpl(_,_,cfields,_),&AggrdeclImpl(tvars,rgnpo,ufields,tagged)):
-      if (tagged)
-	FAIL_MERGE(cd->name,": user @tagged annotation not allowed");
-      if (tvars)
-	FAIL_MERGE(cd->name,": existential quantification in user definition not allowed");
-      if (rgnpo)
-	FAIL_MERGE(cd->name,": region partial order in user definition not allowed");
-      let x = cfields;
-      // Merge fields from the user version to the C version
-      while (x != NULL) {
-	let cfield = x->hd;
-	let ufield = lookup_field(ufields,cfield->name);
-	// if no user version, just keep the C version
-	if (ufield != NULL) {
-	  // make sure these are representation-compatible.  To so this, convert
-	  // them to C types, and then unify these.  If they match, we're OK.
-	  let c_typ = Toc::typ_to_c(cfield->type);
-	  let u_typ = Toc::typ_to_c(ufield->type);
-	  if (!Tcutil::unify(c_typ,u_typ)) {
-	    WARN_MERGE(cd->name,aprintf(": type %s of user definition of field %s != %s",
-					Absynpp::typ2string(ufield->type),
-					*cfield->name,
-					Absynpp::typ2string(cfield->type)));
-	    // fails to unify, leave C field alone
-	  }
-	  else {
-	    if (ufield->width != NULL) {
-	      WARN_MERGE(cd->name,aprintf(": ignoring width of user definition of "
-					  "field %s",Absynpp::typ2string(ufield->type)));
-	    }
-	    if (ufield->attributes != NULL) {
-	      WARN_MERGE(cd->name,aprintf(": ignoring attributes of user definition of "
-					  "field %s",Absynpp::typ2string(ufield->type)));
-	      
-	    }
-	    // Copy the user type, qualifier, and requires clause to the C version.
-	    cfield->type = ufield->type;
-	    cfield->tq = ufield->tq;
-	    cfield->requires_clause = ufield->requires_clause;
-	  }
-	}
-	x = x->tl;
-      }
-      // Make sure the C version is not missing any expected fields
-      x = ufields;
-      bool missing_fields = false;
-      while (x != NULL) {
-	let cfield = lookup_field(cfields,x->hd->name);
-	if (cfield == NULL) {
-	  missing_fields = true;
-	  WARN_MERGE(cd->name,aprintf(": no definition of field %s in system version",
-				      *x->hd->name));
-	}
-	x = x->tl;
-      }
-      break;
-    default:
-      throw new Core::Impossible("Internal Error: NULL cases not possible");
-    }
-    return;
-  case $(&Enum_d(cd),&Enum_d(ud)):
-    FAIL_MERGE(cd->name,": enum merging not currently supported");
-  case $(&Typedef_d(cd),&Typedef_d(ud)):
-    if (ud->tvs != NULL)
-      FAIL_MERGE(cd->name,": universal quantification in user definition not supported");
-    // FIX: punt attributes, kind for now
-    if (ud->defn == NULL)
-      FAIL_MERGE(cd->name,": no user definition");
-    if (cd->defn == NULL) {
-      WARN_MERGE(cd->name,": no definition for system version");
-      c_decl->r = user_decl->r;
-      return;
-    }
-    // Now check that the actual definitions are representation-compatible
-    let c_typ = Toc::typ_to_c((type_t)cd->defn);
-    let u_typ = Toc::typ_to_c((type_t)ud->defn);
-    if (!Tcutil::unify(c_typ,u_typ)) {
-      WARN_MERGE(cd->name,aprintf(": type definition %s of user definition != %s",
-				  Absynpp::typ2string((type_t)ud->defn),
-				  Absynpp::typ2string((type_t)cd->defn)));
-      // fails to unify, leave C field alone
-    }
-    else {
-      cd->defn = ud->defn;
-      cd->tq = ud->tq;
-    }
-    break;
-  default:
-    fprintf(stderr,
-	    "Error in .cys file: bad user-defined type %s\n",
-	    Absynpp::decllist2string(list(user_decl)));
-    return;
-  }
-  // just replace with user version for now
-  c_decl->r = user_decl->r;
 }
 
 }
@@ -1360,10 +1201,10 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Using_d(_,_):
       fprintf(stderr,"Error: unexpected using declaration\n");
       exit(1);
-    case &ExternC_d(_):
+    case &ExternC_d(...):
       fprintf(stderr,"Error: unexpected extern \"C\" declaration\n");
       exit(1);
-    case &ExternCinclude_d(_,_):
+    case &ExternCinclude_d(...):
       fprintf(stderr,"Error: unexpected extern \"C include\" declaration\n");
       exit(1);
     }
@@ -1763,8 +1604,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       case &Letv_d(_):
       case &Namespace_d(_,_):
       case &Using_d(_,_):
-      case &ExternC_d(_):
-      case &ExternCinclude_d(_,_):
+      case &ExternC_d(...):
+      case &ExternCinclude_d(...):
       case &Region_d(...):
         name = NULL;
         break;
@@ -1839,8 +1680,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       case &Letv_d(_):
       case &Namespace_d(_,_):
       case &Using_d(_,_):
-      case &ExternC_d(_): 
-      case &ExternCinclude_d(_,_):
+      case &ExternC_d(...): 
+      case &ExternCinclude_d(...):
 	name = NULL;
         break;
       }
@@ -1850,8 +1691,19 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       // If the two are not representation-compatible, will signal a warning and
       // stick with the system definition.
       if (Set::member(reachable_set,add_user_prefix(name))) {
-	let user_decl = named_decl(user_decls,name);
-	merge_rep_decl(user_decl, decl);
+	let user_decl = lookup_decl(user_decls,name);
+	if (user_decl == NULL) {
+	  throw new Core::Impossible("Internal Error: bad user-def name");
+	}
+	else {
+	  switch (user_decl->r) {
+	  case &Var_d(_):
+	  case &Fn_d(_):
+	    throw new NO_SUPPORT("user defintions for function or variable decls");
+	  default: break;
+	  }
+	}
+	Cifc::merge_sys_user_decl(0, true, user_decl, decl);
 	print_decls = new List(decl,print_decls);
       }
       else

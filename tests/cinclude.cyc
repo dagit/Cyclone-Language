@@ -1,0 +1,33 @@
+extern "C include" {
+  struct list { void *x; struct list *tl; };
+  struct f { unsigned int len; char *buf; };
+  struct Function { 
+    void *(* f)(void *env, void *arg);
+    void *env;
+  };
+  extern void *GC_malloc(int);
+  struct list<int> *new_list() {
+    struct list *x = GC_malloc(sizeof(struct list));
+    x->x = (void *)1;
+    x->tl = (struct list *)0;
+    return x;
+  }
+}
+cyclone_override {
+  struct list<`a> { `a x; struct list<`a> *tl; };
+  struct f { <`i::I> tag_t<`i> len; char * @nozeroterm @numelts(valueof(`i)) buf; };
+  struct Function<`arg,`res,`bd::R> { 
+    <`env::B> : regions(`env) > `bd
+    `res (@`bd f)(`env,`arg);
+    `env env;
+  };
+}
+export { new_list }
+
+int main() {
+  struct list *x = new list{new 1,NULL};
+  struct list *y = new list{new 1,NULL};
+  struct list *z = new_list();
+  if (*x->x == *y->x && *x->x == z->x) return 0;
+  else return -1;
+}

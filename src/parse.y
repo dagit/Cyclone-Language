@@ -1053,7 +1053,7 @@ using Parse;
 %token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN ENUM TYPEOF
 %token BUILTIN_VA_LIST EXTENSION
 // Cyc:  CYCLONE additional keywords
-%token NULL_kw LET THROW TRY CATCH EXPORT
+%token NULL_kw LET THROW TRY CATCH EXPORT OVERRIDE
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE
 %token MALLOC RMALLOC RMALLOC_INLINE CALLOC RCALLOC SWAP
 %token REGION_T TAG_T REGION RNEW REGIONS 
@@ -1134,6 +1134,7 @@ using Parse;
 %type <fndecl_t> function_definition function_definition2
 %type <list_t<decl_t,`H>> declaration declaration_list
 %type <list_t<decl_t,`H>> prog translation_unit external_declaration
+%type <list_t<decl_t,`H>> override_opt
 %type <decl_spec_t> declaration_specifiers
 %type <$(declarator_t<`yy>,exp_opt_t)> init_declarator
 %type <declarator_list_t<`yy>> init_declarator_list init_declarator_list0
@@ -1171,7 +1172,7 @@ using Parse;
 %type <type_opt_t> optional_effect 
 %type <list_t<$(type_t,type_t)@`H,`H>> optional_rgn_order rgn_order
 %type <booltype_t> zeroterm_qual_opt
-%type <list_t<$(Position::seg_t,qvar_t,bool)@`H,`H>> export_list export_list_values
+%type <list_t<$(Position::seg_t,qvar_t,bool)@`H,`H>> export_list export_list_opt export_list_values
 %type <pointer_qual_t<`yy>> pointer_qual
 %type <pointer_quals_t<`yy>> pointer_quals
 %type <$(bool,string_t<`H>)> ASM
@@ -1223,18 +1224,22 @@ translation_unit:
       }
       $$=^$(new List(new Decl(new Namespace_d(new nspace,x),LOC(@1,@4)),y)); 
     }
-| extern_c_action '{' translation_unit end_extern_c translation_unit
+| extern_c_action '{' translation_unit end_extern_c override_opt export_list_opt translation_unit
     { let is_c_include = $1;
-      if (!is_c_include)
-        $$=^$(new List(new Decl(new ExternC_d($3),LOC(@1,@4)),$5));
-      else 
-        $$=^$(new List(new Decl(new ExternCinclude_d($3,NULL),LOC(@1,@4)),$5));
-    }
-| extern_c_action '{' translation_unit end_extern_c export_list translation_unit
-   { if (!$1)
-        Warn::err(LOC(@1,@2),"expecting \"C include\"");
-     list_t<$(seg_t,qvar_t,bool)@> exs = $5;
-     $$=^$(new List(new Decl(new ExternCinclude_d($3,exs),LOC(@1,@5)),$6));
+      list_t<decl_t> cycdecls = $5;
+      list_t<$(seg_t,qvar_t,bool)@> exs = $6;
+      if (!is_c_include) {
+	if (exs != NULL || cycdecls != NULL) {
+	  Warn::err(LOC(@1,@2),"expecting \"C include\"");
+	  $$=^$(new List(new Decl(new ExternCinclude_d($3,cycdecls,exs),LOC(@1,@6)),$7));
+	}
+	else {
+	  $$=^$(new List(new Decl(new ExternC_d($3),LOC(@1,@6)),$7));
+	}
+      }
+      else {
+        $$=^$(new List(new Decl(new ExternCinclude_d($3,cycdecls,exs),LOC(@1,@6)),$7));
+      }
     }
 | PORTON ';' translation_unit
   { $$=^$(new List(new Decl(&Porton_d_val,SLOC(@1)),$3)); }
@@ -1276,6 +1281,11 @@ end_extern_c:
   '}'  { Lex::leave_extern_c(); }
 ;
 
+export_list_opt: 
+              { $$ = ^$(NULL); }
+| export_list { $$ = $!1; }
+;
+
 export_list: 
   EXPORT '{' export_list_values '}' { $$= $!3; }
 | EXPORT '{' '}' { $$=^$(NULL); }
@@ -1286,6 +1296,11 @@ export_list_values:
 | struct_union_name ';' { $$=^$(new List(new $(SLOC(@1),$1,false),NULL)); }
 | struct_union_name ',' export_list_values
   { $$=^$(new List(new $(SLOC(@1),$1,false),$3));}
+;
+
+override_opt:
+                                    { $$ = ^$(NULL); }
+| OVERRIDE '{' translation_unit '}' { $$ = $!3; }
 ;
 
 external_declaration:

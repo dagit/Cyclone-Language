@@ -3064,10 +3064,11 @@ void cf_check(JumpAnalysis::jump_anal_res_t tables, list_t<decl_t> ds) {
     anal_error = false;
     switch(ds->hd->r) {
     case &Fn_d(fd):	      check_fun(tables,fd); break;
-    case &ExternC_d(ds2):     fallthru(ds2);
+      // MWH: why are we checking externC decls but not externCinclude?
+    case &ExternC_d(ds2):   fallthru(ds2);
     case &Using_d(_,ds2):     fallthru(ds2);
     case &Namespace_d(_,ds2): cf_check(tables,ds2); break;
-    case &ExternCinclude_d(_,_): break;
+    case &ExternCinclude_d(...): break;
     default: break;
     }
   }

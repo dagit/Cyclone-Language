@@ -1039,59 +1039,6 @@ static void unify_cmp_exp(exp_t e1, exp_t e2) {
   }
 }
 
-static int attribute_case_number(attribute_t att) {
-  switch(att) {
-  case &Regparm_att(_): return 0;
-  case &Stdcall_att: return 1;
-  case &Cdecl_att: return 2;
-  case &Fastcall_att: return 3;
-  case &Noreturn_att: return 4;
-  case &Const_att: return 5;
-  case &Aligned_att(_): return 6;
-  case &Packed_att: return 7;
-  case &Section_att(_): return 8;
-  case &Nocommon_att: return 9;
-  case &Shared_att: return 10;
-  case &Unused_att: return 11;
-  case &Weak_att: return 12;
-  case &Dllimport_att: return 13;
-  case &Dllexport_att: return 14;
-  case &No_instrument_function_att: return 15;
-  case &Constructor_att: return 16;
-  case &Destructor_att: return 17;
-  case &No_check_memory_usage_att: return 18;
-  case &Format_att(...): return 19;
-  case &Initializes_att(_): return 20;
-  case _: return 21;
-  }
-}
-
-static int attribute_cmp(attribute_t att1, attribute_t att2) {
-  switch($(att1,att2)) {
-  case $(&Regparm_att(i1),&Regparm_att(i2)): fallthru(i1,i2);
-  case $(&Initializes_att(i1), &Initializes_att(i2)): 
-    return intcmp(i1,i2);
-  case $(&Aligned_att(e1),&Aligned_att(e2)): 
-    if (e1 == e2) return 0;
-    if (e1 == NULL) return -1;
-    if (e2 == NULL) return 1;
-    return Evexp::const_exp_cmp(e1,e2);
-  case $(&Section_att(s1),&Section_att(s2)): return strcmp(s1,s2);
-  case $(&Format_att(ft1,i1,j1),&Format_att(ft2,i2,j2)):
-    let ftc = intcmp((unsigned int)ft1, (unsigned int)ft2);
-    if(ftc != 0) return ftc;
-    let ic = intcmp(i1,i2);
-    if(ic != 0) return ic;
-    return intcmp(j1,j2);
-  default:
-    return intcmp(attribute_case_number(att1), attribute_case_number(att2));
-  }
-}
-
-static bool equal_att(attribute_t a1, attribute_t a2) {
-  return attribute_cmp(a1,a2)==0;
-}
-
 bool same_atts(attributes_t a1, attributes_t a2) {
   for (_ a = a1; a != NULL; a = a->tl)
     if (!List::exists_c(equal_att,a->hd,a2)) return false;

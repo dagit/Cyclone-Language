@@ -96,7 +96,7 @@ gen-libdoc.tex: \
 
 clean:
 	$(RM) *.aux *.dvi *.hind *.haux *.idx *.ilg *.ind *.ing *.log
-	$(RM) *.pdf *.ps *.toc *.out *~
+	$(RM) *.pdf *.ps *.toc *.out *~ *.htoc
 	$(RM) main-screen.html
 	$(RM) gen-libdoc.tex version.tex
 	$(RM) -r online-manual

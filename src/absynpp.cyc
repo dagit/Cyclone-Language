@@ -1946,15 +1946,22 @@ doc_t decl2doc(decl_t d) {
               rb(),
               text(" */"));
     break;
-  case &ExternCinclude_d(tdl,exs):
+  case &ExternCinclude_d(tdl,ovrs,exs):
     if (print_externC_stmts) {
       doc_t exs_doc;
+      doc_t ovrs_doc;
       if (exs != NULL)
         exs_doc = cat(rb(),text(" export "),lb(),
                       line_doc(),ppseql(export2doc,",",exs),
                       line_doc(),rb());
       else
         exs_doc = rb();
+      if (ovrs != NULL)
+        ovrs_doc = cat(rb(),text(" cycdef "),lb(),
+                      line_doc(), ppseql(decl2doc,"",ovrs),
+                      line_doc(),rb());
+      else
+        ovrs_doc = rb();
       s = cat(text("extern \"C include\" "),
               lb(),
               line_doc(),

@@ -453,7 +453,7 @@ namespace Absyn {
                int,   // format string arg
                int);  // first arg to type-check
     Initializes_att(int); // param that function initializes through
-    Noliveunique_att(int); // param that has no unique pointers in it
+    Noliveunique_att(int); // param that has no unique pointers in it (implies consume)
     Consume_att(int); // param that will be consumed by the function
     Pure_att;
     Mode_att(string_t);
@@ -854,7 +854,7 @@ namespace Absyn {
     Namespace_d(var_t,list_t<decl_t>); // namespace Foo { ... }
     Using_d(qvar_t,list_t<decl_t>);  // using Foo { ... }
     ExternC_d(list_t<decl_t>); // extern "C" { ... }
-    ExternCinclude_d(list_t<decl_t>,list_t<$(seg_t,qvar_t,bool)@>); 
+    ExternCinclude_d(list_t<decl_t>,list_t<decl_t>,list_t<$(seg_t,qvar_t,bool)@>);
     Porton_d;
     Portoff_d;
     Tempeston_d;
@@ -1149,10 +1149,18 @@ namespace Absyn {
   extern struct Aggrfield *lookup_decl_field(aggrdecl_t,var_t);
   // find a tuple field form a list of qualifiers and types
   extern $(tqual_t,type_t)*lookup_tuple_field(list_t<$(tqual_t,type_t)@`H>,int);
+  // find a decl by name within a list of decls.  Return NULL if not found.
+  extern struct Decl *lookup_decl(list_t<decl_t> decls, stringptr_t<`H> name);
+  // get the name of decl; return NULL if has no name
+  extern string_t<`H> *decl_name(decl_t decl);
   // turn an attribute into a string
   extern string_t attribute2string(attribute_t);
   // returns true when a is an attribute for function types
   extern bool fntype_att(attribute_t);
+  // returns true when a1 is equal to a2
+  extern bool equal_att(attribute_t a1, attribute_t a2);
+  // like strcmp but for attributes
+  extern int attribute_cmp(attribute_t att1, attribute_t att2);
   // int to field-name caching used by control-flow and toc
   extern field_name_t fieldname(int);
   // get the name and aggr_kind of an aggregate type

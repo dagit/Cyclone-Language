@@ -400,7 +400,7 @@ list_t<decl_t> remove_aggrs(list_t<decl_t,`H> ds) {
     case &Namespace_d(_,ds2): fallthru(ds2);
     case &Using_d(_,ds2):     fallthru(ds2);
     case &ExternC_d(ds2):     fallthru(ds2);
-    case &ExternCinclude_d(ds2,_):
+    case &ExternCinclude_d(ds2,...):
     case &Porton_d:
     case &Portoff_d: 
     case &Tempeston_d:
