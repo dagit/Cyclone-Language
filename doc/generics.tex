@@ -1,0 +1,118 @@
+\section{Generic Functions and Representation Types}
+
+\subsection{Introduction}
+
+One of the chores of programming with complex data structures is writing boilerplate code for printing or formatting these data structures as text, for marshaling the data to a binary stram and unmarshaling it back, and for hashing and comparing data structures.  Many languages provide built-in _\emph{generic} implementations of some of these operations that apply to all types or can be extended to any type.  For example, Ocaml provides generic equiality, comparison, and marshaling functions for any type (although the equality/comparison functions may not terminate on data with cycles), and Java provides hashing in the Object class and provides Comparable and Reader/Writer classes.  Lisp does what?
+
+However, in most of these cases, the language itself is not powerful enough to express the generic functions, instead they must be implemented as a fixed part of the run-time system.
+
+In Cyclone, it is possible to implement all of these as user-level functions (currently using unsafe_cast...).  The Cyclone library provides a type called \texttt{rep_t<`a>}, called a representation type for \texttt{`a}.  Given a representation and a value of an unknown type, a representation gives you enough information at run time that you can decode the type and use its value.  For example, we should be able to write a function that takes a representation and a value and prints the value out as an integer or a float, depending on the type.  Here's a simplified view of how that would look:
+
+\begin{verbatim}
+void print(rep_t<`a> rep, `a val) {
+  switch(rep) {
+  case RepInt: printf("%d",val); break;
+  case RepFloat: printf("%f",val); break;
+  default: break;
+  }
+}
+\end{verbatim}
+
+Intuitively, this looks at the representation to see what type val has, and then picks the appropriate format string for printf.
+
+Unfortunately, it is not that simple.  For one thing, the possible kinds of `a are not consistent: int::B but float::M.  For another thing, the type of val changes from case to case, and that's hard for the typechecker to handle.  But by making rep_t a bit more realistic, we can handle both of these problems.
+
+First, instead of implicitly casting val to the represented type in each case, we can store the casts to and from `a in the representation.  Second, we need to distinguish between representations of various kinds, specifically BoxKinds and MemKinds.
+
+\begin{verbatim} 
+typedef struct Equiv<`a,`b> {
+  `b (@to)(`a);
+  `a (@from)(`b);
+} equiv_t<`a,`b>;
+
+typedef tunion ThinPtrEquiv<`a,`b> {
+  Nullable(equiv_t<`a,`b*>);
+  NonNullable(equiv_t<`a,`b@>);
+} thin_ptr_equiv_t<`a,`b>;
+
+typedef struct PtrRep<`a> {
+  <`b> 
+  mem_rep_t<`b> rep;
+  thin_ptr_equiv_t<`a,`b> equiv;
+} thin_ptr_rep_t<`a>;
+
+typedef tunion BoxRep<`a::A> {
+  Int(equiv_t<`a,int>);
+  ThinPtr(ptr_rep_t<`a>);
+  ...
+} box_rep_t<`a>;
+
+typedef tunion MemRep<`a::M> {
+  Float(equiv_t<`a@,float@>);
+  ...
+} mem_rep_t<`a>;
+\end{verbatim}
+
+What's going on here?  Think of \texttt{box\_rep\_t<t>} as a propsition that says ``we know the representation of type t'' and a value of that type as a proof of that proposition.  If a boxed value is an integer, then knowing t = int means being able to treat any t as an int and and int as a t; that is being able to cast one to the other.  These casts are provided by the to and from fields of the equiv struct attached to Int.  Similarly, for Mem kinded types, knowing that t = float means being able to cast a pointer to t to/from a pointer to Float.  (Mem kinds have to be accessed through pointers.)
+
+Finally, for thin pointers, knowing that t is a pointer type means that there exists some type t0::M whose representation we know and such that t is equivalent to t0* (or t0@).  Thus, the representation of a pointer type consists of a struct that is existentially quantified over `b::M and that contains a value mem_rep_t<`b> rep and one of equiv_t<`a,`b*> or equiv_t<`a,`b@>.  (Once we have int kinds and ``small int or nonnull pointer'' types, we can simplify this.)
+
+Here is how you would use this to generically print:
+
+\begin{verbatim}
+
+void print_mem(`a@ x, mem_rep_t<`a> rep) {
+  switch(rep) {
+  case Float(equiv): 
+    float@ f = equiv.to(x);
+    printf("%f",*f);
+    break;
+  ...
+  }
+}
+
+void print(`a x, box_rep_t<`a> rep) {
+  switch(rep) {
+  case &Int(equiv): printf("%d",equiv.to(x)); break;
+  case &ThinPtr(ThinPtrRep{<`b> rep, tpequiv}):
+  switch(tpequiv) {
+    case &Nullable(equiv): 
+      `b* y = equiv.to(x);
+      if(y == NULL) 
+	printf("NULL");
+      else { 
+	printf("{");
+	print_mem((_@)y,rep);
+	printf("}");
+      }
+      break;
+    case &NonNullable(equiv):
+      printf("{");
+      print_mem(equiv.to(x),rep);
+      printf("}");
+      break;
+    }
+    break;
+    ...
+  }
+}
+\end{verbatim}
+
+Building a representation is easy, albeit tedious:
+
+\begin{verbatim}
+  box_rep_t<int> int_rep = 
+    new Int(Equiv{.to=identity,.from=identity});
+  mem_rep_t<float> float_rep = 
+    new Float(Equiv{.to=identity,.from=identity});
+  box_rep_t<float@> floatptr_rep = 
+    new ThinPtr(ThinPtrRep{.rep=float_rep, 
+                           .equiv = new NonNullable(Equiv{.to=identity,.from=identity})});
+\end{verbatim}
+
+To do: Convert gen() to generate these type reps instead of the untyped typestructs.
+
+
+To do: Extend this to other types (need int kinds, higher kinds...).  Can do this inefficiently now by wrapping everything up in functions and using dynamics.
+
+

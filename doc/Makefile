@@ -53,6 +53,7 @@ gen-libdoc.tex: \
   ../include/fn.h \
   ../include/hashtable.h \
   ../include/list.h \
+  ../include/marshal.h \
   ../include/pp.h \
   ../include/queue.h \
   ../include/rope.h \

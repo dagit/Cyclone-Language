@@ -766,7 +766,7 @@ other pointers to the object.  Until then, you must rely on a garbage
 collector to reclaim heap objects or use regions (similar to ``arenas'' or
 ``zones'') for managing collections of objects.
 
-For porting code, we have defined a \textt{free} function that behaves as a
+For porting code, we have defined a \texttt{free} function that behaves as a
 no-op, having type
 \begin{verbatim}
   void free(`a::A ?);
@@ -861,12 +861,12 @@ source itself.  In this case, you need to be aware of three things.  First,
 you have to know how Cyclone translates top-level identifiers to C
 identifiers (it prepends Cyc_ and separates namespaces by _ instead of ::)
 so you can set breakpoints at functions.  Second, it can be hard to print
-values because many Cyclone types get translated to \textt{void *.}  Third,
+values because many Cyclone types get translated to \texttt{void *.}  Third,
 we do not yet have source correlation, so if you step through code, you're
 stepping through C code, not Cyclone code.
 
 To improve this situation somehwat, you can compile your files with the
-option \texttt{--lineno}.  This will insert \texttt{#line} directives in the
+option \texttt{--lineno}.  This will insert \texttt{\#line} directives in the
 generated C code that refer to the original Cyclone code.  This will allow
 you to step through the program and view the Cyclone source rather than the
 generated C.  However, doing this has two drawbacks.  First, it may occlude
