@@ -429,9 +429,10 @@ cycstub opendir {
   namespace Cdirent {
     extern "C" __cDIR *opendir(const Cstring);
   }
+  static xtunion exn.Failure __opendir_failure =
+    Failure("opendir called with NULL string");
   DIR *opendir(const char ?f) {
-    if (!f)
-      throw new Failure("opendir called with NULL string");
+    if (!f) throw &__opendir_failure;
     let cd = Cdirent::opendir(string_to_Cstring(f));
     // FIX: get rid of heap allocation
     return cd ? new __cycDIR((Cdirent::__cDIR @)cd) : NULL;
@@ -639,10 +640,11 @@ cycstub {
     extern "C" int open_without_mode(const Cstring,int);
     extern "C" int open_with_mode(const Cstring,int,mode_t);
   }
-
+  static xtunion exn.Failure __fcntl_failure =
+    Failure("fcntl: too many args");
   int fcntl(int fd, int cmd, ... inject fcntlarg_t argv) {
     if (argv.size == 0) return Cfcntl::fcntl(fd, cmd);
-    else if (argv.size != 1) throw new Failure("fcntl: too many args");
+    else if (argv.size != 1) throw &__fcntl_failure;
     else switch (argv[0]) {
     case &Long(arg): return Cfcntl::fcntl_with_arg(fd, cmd, arg);
     case &Flock(lock): return Cfcntl::fcntl_with_lock(fd, cmd, lock);
@@ -837,8 +839,10 @@ cycstub {
   namespace Cfnmatch {
     extern "C" int fnmatch(const Cstring,const Cstring,int);
   }
+  static xtunion exn.Failure __fnmatch_failure =
+    Failure("fnmatch called with NULL");
   int fnmatch(const char ?a, const char ?b, int c) {
-    if (!a || !b) throw new Failure("fnmatch called with NULL");
+    if (!a || !b) throw &__fnmatch_failure;
     return Cfnmatch::fnmatch(string_to_Cstring(a),string_to_Cstring(b),c);
   }
 }
@@ -1891,12 +1895,15 @@ cycstub poll {
   namespace Cpoll {
     extern "C" int poll(struct pollfd @{0}, nfds_t b, int c);
   }
+  static xtunion exn.Failure __poll_failure_1 =
+    Failure("poll called with NULL");
+  static xtunion exn.Failure __poll_failure_2 =
+    Failure("poll called with out-of-bounds pointer");
   int poll(struct pollfd?a, nfds_t b, int c) {
-    if (!a) throw new Core::Failure("poll called with NULL");
+    if (!a) throw &__poll_failure_1;
     try *a;
     catch {
-    case Array_bounds:
-      throw new Core::Failure("poll called with out-of-bounds pointer");
+    case Array_bounds: throw &__poll_failure_2;
     }
     int len = a.size;
     return Cpoll::poll((struct pollfd @{0})a,
@@ -2178,9 +2185,11 @@ cycstub signal {
     extern "C" sigarg_t signal_SIG_IGN(int);
     extern "C" sigarg_t signal(int, void (@`H)(int));
   }
+  static xtunion exn.Failure __signal_failure =
+    Failure("signal called with the wrong number of arguments");
   sigarg_t signal(int a, ... inject sigarg_t b) {
     if (b.size != 1)
-      throw new Failure("signal called with the wrong number of arguments");
+      throw &__signal_failure;
     switch (b[0]) {
     case &__SIG_BUILTIN(SIG_DFL): return Csignal::signal_SIG_DFL(a);
     case &__SIG_BUILTIN(SIG_ERR): return Csignal::signal_SIG_ERR(a);
@@ -2535,8 +2544,10 @@ cycstub fopen {
   namespace Cstdio {
     extern "C" __cFILE *fopen(Cstring, Cstring);
   }
+  static xtunion exn.Failure __fopen_failure =
+    Failure("fopen called with NULL");
   FILE *fopen(const char ?name, const char ?type) {
-    if (!name || !type) throw new Failure("fopen called with NULL");
+    if (!name || !type) throw &__fopen_failure;
     let cf = Cstdio::fopen(s2c(name), s2c(type));
     // FIX: get rid of the heap allocation
     return cf ? new __cycFILE((Cstdio::__cFILE @)cf) : NULL;
@@ -2578,9 +2589,10 @@ cycstub fread {
   namespace Cstdio {
     extern "C" size_t fread(Cstring, size_t, size_t, __cFILE @);
   }
+  static xtunion exn.Failure __fread_failure =
+    Failure("fread: buffer insufficient");
   size_t fread(char ?ptr, size_t size, size_t nmemb, FILE @f) {
-    if (size * nmemb > ptr.size)
-      throw new Failure("fread: buffer insufficient");
+    if (size * nmemb > ptr.size) throw &__fread_failure;
     // Note, underlying_Cstring will do a bounds check
     return Cstdio::fread(underlying_Cstring(ptr), size, nmemb, f->file);
   }
@@ -2592,8 +2604,10 @@ cycstub freopen {
   namespace Cstdio {
     extern "C" __cFILE *`r freopen(const Cstring, const Cstring, __cFILE @`r);
   }
+  static xtunion exn.Failure __freopen_failure =
+    Failure("freopen called with NULL file modes");
   FILE *`r freopen(const char ?filename, const char ?modes, FILE @`r f) {
-    if (!modes) throw new Failure("freopen called with NULL file modes");
+    if (!modes) throw &__freopen_failure;
     // Note, filename is allowed to be NULL
     // Note, s2c might throw a bounds error
     let cf = Cstdio::freopen(s2c(filename),s2c(modes),f->file);
@@ -2704,10 +2718,13 @@ cycstub fwrite {
   namespace Cstdio {
     extern "C" size_t fwrite(const Cstring, size_t, size_t, __cFILE @);
   }
+  static xtunion exn.Failure __fwrite_failure_1 =
+    Failure("fwrite called with NULL string");
+  static xtunion exn.Failure __fwrite_failure_2 =
+    Failure("fwrite: buffer insufficient");
   size_t fwrite(const char ?ptr, size_t size, size_t nmemb, FILE @f) {
-    if (!ptr) throw new Failure("fwrite called with NULL string");
-    if (size * nmemb > ptr.size)
-      throw new Failure("fwrite: buffer insufficient");
+    if (!ptr) throw &__fwrite_failure_1;
+    if (size * nmemb > ptr.size) throw &__fwrite_failure_2;
     // Note: underlying_Cstring can throw bounds error
     return Cstdio::fwrite(underlying_Cstring(ptr), size, nmemb, f->file);
   }
@@ -2791,8 +2808,10 @@ cycstub popen {
   namespace Cstdio {
     extern "C" __cFILE *popen(Cstring, Cstring);
   }
+  static xtunion exn.Failure __popen_failure =
+    Failure("popen called with NULL");
   FILE *popen(const char ?name, const char ?type) {
-    if (!name || !type) throw new Failure("popen called with NULL");
+    if (!name || !type) throw &__popen_failure;
     let cf = Cstdio::popen(s2c(name), s2c(type));
     // FIX: get rid of the heap allocation
     return cf ? new __cycFILE((Cstdio::__cFILE @)cf) : NULL;
@@ -2838,8 +2857,10 @@ cycstub puts {
   namespace Cstdio {
     extern "C" int puts(const Cstring);
   }
+  static xtunion exn.Failure __puts_failure =
+    Failure("puts called with NULL");
   int puts(const char ?x) {
-    if (!x) throw new Failure("puts called with NULL");
+    if (!x) throw &__puts_failure;
     return Cstdio::puts(s2c(x));
   }
 }
@@ -2850,8 +2871,10 @@ cycstub remove {
   namespace Cstdio {
     extern "C" int remove(const Cstring);
   }
+  static xtunion exn.Failure __remove_failure =
+    Failure("remove called with NULL");
   int remove(const char ?x) {
-    if (!x) throw new Failure("remove called with NULL");
+    if (!x) throw &__remove_failure;
     return Cstdio::remove(s2c(x));
   }
 }
@@ -2862,8 +2885,10 @@ cycstub rename {
   namespace Cstdio {
     extern "C" int rename(const Cstring, const Cstring);
   }
+  static xtunion exn.Failure __rename_failure =
+    Failure("rename called with NULL");
   int rename(const char ?x, const char ?y) {
-    if (!x || !y) throw new Failure("rename called with NULL");
+    if (!x || !y) throw &__rename_failure;
     return Cstdio::rename(s2c(x),s2c(y));
   }
 }
@@ -2907,9 +2932,10 @@ cycstub setvbuf {
   namespace Cstdio {
     extern "C" int setvbuf(__cFILE @, char *{0}`H, int, size_t);
   }
+  static xtunion exn.Failure __setvbuf_failure =
+    Failure("setvbuf: buffer insufficient");
   int setvbuf(FILE @f, char ?`H buf, int type, size_t size) {
-    if (buf.size < size)
-      throw new Failure("setvbuf: buffer insufficient");
+    if (buf.size < size) throw &__setvbuf_failure;
     // Note, underlying_Cstring will do a bounds check on buf
     return Cstdio::setvbuf(f->file,
                            underlying_Cstring(buf),
@@ -3118,7 +3144,6 @@ epilogue {
   //  extern "C" void *bsearch(const void *, const void *, size_t, size_t, int (*)(const void *, const void *));
   //  extern "C" char *ecvt(double, int, int *restrict, int *restrict); (LEGACY)
   //                                                                      extern "C" char *fcvt(double, int, int *restrict, int *restrict); // (LEGACY)
-  //  extern "C" void free(void *);
   //  extern "C" char *gcvt(double, int, char *); // (LEGACY)
   //  extern "C" int getsubopt(char **, char *const *, char **);
   //  extern "C" char *initstate(unsigned, char *, size_t);
@@ -3131,7 +3156,6 @@ epilogue {
   //  extern "C" int posix_memalign(void **, size_t, size_t);
   //  extern "C" int posix_openpt(int);
   //  extern "C" char *ptsname(int);
-  //  extern "C" void qsort(void *, size_t, size_t, int (*)(const void *, const void *));
   //  extern "C" char *realpath(const char *restrict, char *restrict);
   //  extern "C" int setenv(const char *, const char *, int);
   //  extern "C" void setkey(const char *);
@@ -3220,6 +3244,12 @@ epilogue erand48 {
 epilogue exit {
   extern "C" void exit(int);
 }
+epilogue free {
+  void free(`a *);
+}
+cycstub free {
+  void free(`a *ptr) {}
+}
 epilogue getenv {
   extern char ?getenv(const char ?);
 }
@@ -3276,17 +3306,22 @@ cycstub putenv {
     return Cstdlib::putenv(s2c(s));
   }
 }
-prologue {
-  #include <array.h> // for Array::cmpfn_t in declaration of qsort
-}
 epilogue {
-  extern void qsort<`a::B,`r::R>(`a ?`r, size_t, size_t, Array::cmpfn_t<`a,`r,`r>);
+  extern void qsort(`a::A ?, size_t, sizeof_t<`a>,
+                    int (@)(const `a @, const `a @));
 }
 cycstub {
-  #include <array.h>
-  void qsort<`a::B,`r::R>(`a ?`r tab, size_t nmemb, size_t szmemb, 
-                          Array::cmpfn_t<`a,`r,`r> compfn) {
-    Array::qsort(compfn, tab, nmemb);
+  namespace Cstdlib {
+    extern "C" void qsort(`a::A @, size_t, size_t,
+                          int (@)(const `a @, const `a @));
+  }
+  static xtunion exn.Failure __qsort_failure =
+    Failure("qsort called with NULL");
+  void qsort(`a::A ? tab, size_t nmemb, sizeof_t<`a> szmemb, 
+             int (@compar)(const `a @, const `a @)) {
+    if (tab == NULL || tab.size < nmemb) 
+      throw &__qsort_failure;
+    Cstdlib::qsort((_@)tab,nmemb,szmemb,compar);
   }
 }
 epilogue rand {
@@ -3312,12 +3347,16 @@ epilogue srandom {
 }
 cycstub {
   // For use in the strto* functions
+  static xtunion exn.Failure __strto_failure_1 =
+    Failure("strto* called with NULL pointer");
+  static xtunion exn.Failure __strto_failure_2 =
+    Failure("strto* called with bad C string");
   static void check_valid_cstring(const char ?`r s) {
-    if (!s) throw new Failure("strto* called with NULL pointer");
+    if (!s) throw &__strto_failure_1;
     bool found_zero = false;
     for (int i = s.size - 1; i >= 0; i--)
       if (s[i] == '\0') { found_zero = true; break; }
-    if (!found_zero) throw new Failure("strto* called with bad C string");
+    if (!found_zero) throw &__strto_failure_2;
   }
 }
 epilogue strtod {
@@ -3471,8 +3510,10 @@ cycstub ftok {
   namespace Cipc {
     extern "C" key_t ftok(const Cstring, int);
   }
+  static xtunion exn.Failure __ftok_failure =
+    Failure("ftok called with NULL");
   key_t ftok(const char ?x, int y) {
-    if (!x) throw new Failure("ftok called with NULL");
+    if (!x) throw &__ftok_failure;
     return Cipc::ftok(string_to_Cstring(x),y);
   }
 }
@@ -4077,8 +4118,10 @@ epilogue chmod {
 }
 cycstub chmod {
   namespace Cstat { extern "C" int chmod(const Cstring, mode_t); }
+  static xtunion exn.Failure __chmod_failure =
+    Failure("chmod called with NULL");
   int chmod(const char ?a, mode_t b) {
-    if (!a) throw new Failure("chmod called with NULL");
+    if (!a) throw &__chmod_failure;
     return Cstat::chmod(string_to_Cstring(a),b);
   }
 }
@@ -4095,8 +4138,10 @@ cycstub lstat {
   namespace Cstat {
     extern "C" int lstat(const Cstring, struct stat @);
   }
+  static xtunion exn.Failure __lstat_failure =
+    Failure("lstat called with NULL");
   int lstat(const char ?a, struct stat @b) {
-    if (!a) throw new Failure("lstat called with NULL");
+    if (!a) throw &__lstat_failure;
     return Cstat::lstat(string_to_Cstring(a),b);
   }
 }
@@ -4107,8 +4152,10 @@ cycstub mkdir {
   namespace Cstat {
     extern "C" int mkdir(const Cstring, mode_t);
   }
+  static xtunion exn.Failure __mkdir_failure =
+    Failure("mkdir called with NULL");
   int mkdir(const char ?a, mode_t b) {
-    if (!a) throw new Failure("mkdir called with NULL");
+    if (!a) throw &__mkdir_failure;
     return Cstat::mkdir(string_to_Cstring(a),b);
   }
 }
@@ -4119,8 +4166,10 @@ cycstub mkfifo {
   namespace Cstat {
     extern "C" int mkfifo(const Cstring, mode_t);
   }
+  static xtunion exn.Failure __mkfifo_failure =
+    Failure("mkfifo called with NULL");
   int mkfifo(const char ?a, mode_t b) {
-    if (!a) throw new Failure("mkfifo called with NULL");
+    if (!a) throw &__mkfifo_failure;
     return Cstat::mkfifo(string_to_Cstring(a),b);
   }
 }
@@ -4131,8 +4180,10 @@ cycstub mknod {
   namespace Cstat {
     extern "C" int mknod(const Cstring, mode_t, dev_t);
   }
+  static xtunion exn.Failure __mknod_failure =
+    Failure("mknod called with NULL");
   int mknod(const char ?a, mode_t b, dev_t c) {
-    if (!a) throw new Failure("mknod called with NULL");
+    if (!a) throw &__mknod_failure;
     return Cstat::mknod(string_to_Cstring(a),b,c);
   }
 }
@@ -4143,8 +4194,10 @@ cycstub stat {
   namespace Cstat {
     extern "C" int stat(const Cstring, struct stat @);
   }
+  static xtunion exn.Failure __stat_failure =
+    Failure("stat called with NULL");
   int stat(const char ?a, struct stat @b) {
-    if (!a) throw new Failure("stat called with NULL");
+    if (!a) throw &__stat_failure;
     return Cstat::stat(string_to_Cstring(a),b);
   }
 }
@@ -4210,8 +4263,10 @@ cycstub utimes {
   namespace Csystime {
     extern "C" int utimes(const Cstring, const struct timeval *{2}); // (LEGACY)
   }
+  static xtunion exn.Failure __utimes_failure =
+    Failure("utimes called with NULL");
   int utimes(const char ?a, const struct timeval *{2} b) {
-    if (!a) throw new Failure("utimes called with NULL");
+    if (!a) throw &__utimes_failure;
     return utimes(string_to_Cstring(a),b);
   }
 }
@@ -4503,8 +4558,10 @@ cycstub getdate {
   //  namespace Ctime {
   //    extern "C" struct tm *getdate(const Cstring);
   //  }
+  //  static xtunion exn.Failure __getdate_failure =
+  //    Failure("getdate called with NULL");
   //  struct tm *getdate(const char ?a) {
-  //    if (!a) throw new Failure("getdate called with NULL");
+  //    if (!a) throw &__getdate_failure;
   //    return Ctime::getdate(string_to_Cstring(a));
   //  }
 }
@@ -5021,9 +5078,11 @@ cycstub execve {
   namespace Cunistd {
     extern "C" int execve(Cstring path, Cstring *argv, Cstring *envp);
   }
+  static xtunion exn.Failure __execve_failure =
+    Failure("execve: arg list must be NULL-terminated");
   int execve(const char ? filename, const char ? const ?argv, const char ? const ?envp) {
     if (argv[argv.size - 1] != NULL)
-      throw new Failure("execve: arg list must be NULL-terminated");
+      throw &__execve_failure;
 
     Cstring ?newargs = new {for i < argv.size : NULL};
     for (int i = 0; i < argv.size; i++)
@@ -5077,10 +5136,10 @@ cycstub getcwd {
   namespace Cunistd {
     extern "C" Cstring<`r> getcwd(Cstring<`r> buf, size_t size);
   }
+  static xtunion exn.Failure __getcwd_failure =
+    Failure("getcwd: invalid buf argument");
   char ?`r getcwd(char ?`r buf, size_t size) {
-    if (!buf || buf.size < size) {
-      throw new Failure("getcwd: invalid buf argument");
-    }
+    if (!buf || buf.size < size) throw &__getcwd_failure;
     Cstring response = Cunistd::getcwd((Cstring)buf, size);
     return response ? buf : NULL;
   }
@@ -5108,9 +5167,10 @@ cycstub gethostname {
   namespace Cunistd {
     extern "C" int gethostname(Cstring,size_t);
   }
+  static xtunion exn.Failure __gethostname_failure =
+    Failure("gethostname: called with count > buf.size");
   int gethostname(char ? buf, size_t count) {
-    if (count > buf.size)
-      throw new Failure("gethostname: called with count > buf.size");
+    if (count > buf.size) throw &__gethostname_failure;
     return Cunistd::gethostname(underlying_Cstring(buf), count);
   }
 }
@@ -5212,9 +5272,10 @@ cycstub read {
   namespace Cunistd {
     extern "C" ssize_t read(int fd, Cstring buf, size_t count);
   }
+  static xtunion exn.Failure __read_failure =
+    Failure("read: called with count > buf.size");
   ssize_t read(int fd, char ?buf, size_t count) {
-    if (count > buf.size)
-      throw new Failure("read: called with count > buf.size");
+    if (count > buf.size) throw &__read_failure;
     return Cunistd::read(fd, underlying_Cstring(buf), count);
   }
 }
@@ -5336,9 +5397,10 @@ cycstub write {
   namespace Cunistd {
     extern "C" ssize_t write(int fd, Cstring buf, size_t count);
   }
+  static xtunion exn.Failure __write_failure =
+    Failure("write: called with count > buf.size");
   ssize_t write(int fd, string_t buf, size_t count) {
-    if (count > buf.size)
-      throw new Failure("write: called with count > buf.size");
+    if (count > buf.size) throw &__write_failure;
     return Cunistd::write(fd, underlying_Cstring(buf), count);
   }
 }
@@ -5370,8 +5432,10 @@ cycstub {
   namespace Cutime {
     extern "C" int utime(const Cstring, const struct utimbuf *);
   }
+  static xtunion exn.Failure __utime_failure =
+    Failure("utime called with NULL");
   int utime(const char ?a, const struct utimbuf *b) {
-    if (!a) throw new Failure("utime called with NULL");
+    if (!a) throw &__utime_failure;
     return utime(string_to_Cstring(a),b);
   }
 }
