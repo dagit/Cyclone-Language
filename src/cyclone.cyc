@@ -35,7 +35,6 @@
 #include "warn.h"
 #include "specsfile.h"
 #include "cyclone.h"
-
 namespace Port {
   extern void port(List::list_t<Absyn::decl_t>);
 }
@@ -1227,10 +1226,9 @@ using Arg {
 }
 
 int main(int argc, string_t<`H> ?`H argv) {
-  //  GC_dont_gc = true;
   /* Don't print garbage collector warnings about allocations of
-     blacklisted blocks.  This turns up on OS X and possibly other
-     BSD systems (??) */
+     blacklisted blocks.  This turns up on OS X and possibly other BSD
+     systems (??) */
   GC_blacklist_warn_clear();
 
   /* parse the command-line arguments */
@@ -1376,9 +1374,8 @@ int main(int argc, string_t<`H> ?`H argv) {
     let runtime = find_in_arch_path(runtime_filename);
 
     // FIX: temporarily removed from interface check below
-    //stdlib = list(new libcyc_flag);
-    stdlib = NULL;
-    stdlib_string = aprintf(" %s %s %s", runtime, libcyc_flag, gc);
+    stdlib = NULL;     //stdlib = list(new libcyc_flag);
+    stdlib_string = aprintf(" %s %s %s", libcyc_flag, runtime, gc);
   }
 
   if (ic_r) try {

@@ -17,7 +17,7 @@ $(BINDIR)/$(PROG): $(PROG)
 	cp $^ $@
 
 $(PROG): cycflex.$(O) $(CYC_LIB_PATH)/$(CYCLIB)
-	$(CYCC) -L$(CYC_LIB_PATH) -B$(CYC_LIB_PATH)/cyc-lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) -L$(CYC_LIB_PATH) -B$(CYC_LIB_PATH)/cyc-lib -o $@ $< $(LDFLAGS)
 
 cycflex.cyc: cycflex.cyl
 	$(CYCLEX) $< $@

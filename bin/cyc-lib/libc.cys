@@ -2515,13 +2515,10 @@ cycstub {
 }
 cstub {
   #include <stdio.h>
-  // Define struct __cycFILE, and initialize stdin, stdout, stderr
+  // Define struct __cycFILE
   struct Cyc___cycFILE { // must match defn in cyclone stub
     FILE *file;
-  } Cyc_stdin_v, Cyc_stdout_v, Cyc_stderr_v,
-    *Cyc_stdin = &Cyc_stdin_v,
-    *Cyc_stdout = &Cyc_stdout_v,
-    *Cyc_stderr = &Cyc_stderr_v;
+  };
 }
 hstub {
   // vararg for printf functions.  The functions themselves are defined

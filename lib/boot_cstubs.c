@@ -23,13 +23,13 @@
   #include "precore_c.h"
 
   #include <stdio.h>
-  // Define struct __cycFILE, and initialize stdin, stdout, stderr
-  struct Cyc___cycFILE { // must match defn in cyclone stub
-    FILE *file;
-  } Cyc_stdin_v, Cyc_stdout_v, Cyc_stderr_v,
-    *Cyc_stdin = &Cyc_stdin_v,
-    *Cyc_stdout = &Cyc_stdout_v,
-    *Cyc_stderr = &Cyc_stderr_v;
+
+extern struct Cyc___cycFILE { // must match defn in runtime_cyc.c
+  FILE *file;
+};
+
+// DJG: We used to "throw" a string pointer, which is not quite kosher
+static struct Cyc_Null_Exception_exn_struct exn_val = {Cyc_Null_Exception};
 
   FILE *_sfile_to_file(struct Cyc___cycFILE *sf) {
     if(!sf) {
@@ -37,7 +37,7 @@
       exit(255);
     }
     if(!sf->file)
-      throw(Cyc_Null_Exception); // FIX:  should be more descriptive?
+      throw(&exn_val); // FIX:  should be more descriptive?
     return sf->file;
   }
   int Cyc_file_string_read(struct Cyc___cycFILE *sf, 
@@ -47,7 +47,7 @@
     size_t sz = dest.last_plus_one - new_curr;
     FILE *fd = _sfile_to_file(sf);
     if (new_curr < dest.base || new_curr >= dest.last_plus_one)
-      throw(Cyc_Null_Exception);
+      throw(&exn_val);
     if(dest_offset + max_count > sz) {
       fprintf(stderr,"Attempt to read off end of string.\n");
       exit(255);
@@ -61,7 +61,7 @@
     unsigned char *new_curr = src.curr + src_offset;
     FILE *fd = _sfile_to_file(sf);
     if (new_curr < src.base || new_curr >= src.last_plus_one)
-      throw(Cyc_Null_Exception);
+      throw(&exn_val);
     if(src_offset + max_count > sz) {
       fprintf(stderr,"Attempt to write off end of string.\n");
       exit(255);

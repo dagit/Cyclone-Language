@@ -17,8 +17,7 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-// TO DO:
-// 1. move over translation aggregate-removal of toplevel expressions
+// TO DO: move over translation aggregate-removal of toplevel expressions
 
 // The purpose of this pass is to get all work-arounds dealing with
 // the infamous "GCC bug" out of toc.cyc.  It lets us to do a better
@@ -30,7 +29,7 @@
 // Tempting as might be to optimize x = Aggr(e1,...,en) to assign directly
 //  to fields of x instead of creating a temporary, doing so requires
 //  information we do not have.  For example, consider the source expression
-//  y = $(y.2,y.1).  We can almost always do this optimization for 
+//  y = $(y[1],y[0]).  We can almost always do this optimization for 
 //  initializers, but pathological cases prevent it because the new decl is
 //  in scope in the initializer.  (It's not for let-expressions, but alas we
 //  already compiled those away.)
@@ -50,7 +49,7 @@ namespace RemoveAggrs;
 static void massage_toplevel_aggr(exp_opt_t e) {
   if(e==NULL)
     return;
-  // DO ME -- still being done in toc.cyc
+  // DO ME -- still being done in toc.cyc (may intersperse with non-toplevel?)
 }
 
 // same as aggrmember_e(e,f,DL) but when e is a deref_e(e1), replaces with

@@ -23,16 +23,7 @@
 #include <string.h>
 #include <setjmp.h>
 
-// The C include file precore_c.h is produced (semi) automatically
-// from the Cyclone include file core.h.  Note, it now includes
-// the contents of cyc_include.h
-
-/* RUNTIME_CYC defined to prevent including parts of precore_c.h 
-   that might cause problems, particularly relating to region profiling */
-#define RUNTIME_CYC
-#include "precore_c.h"
-
-/// UTILITY ROUTINES (move into own file, or delete ...)
+#include "runtime_internal.h"
 
 /* struct _dyneither_ptr Cstring_to_string(Cstring s) { */
 /*   struct _dyneither_ptr str; */
@@ -76,34 +67,13 @@ struct _tagged_argv {
   struct _dyneither_ptr *last_plus_one;
 };
 
-// some debugging routines
-// ONLY WORKS on x86 with frame pointer -- dumps out a list of 
-// return addresses which can then be "looked up" using the output
-// of nm.  I suggest doing nm -a -A -n -l cyclone.exe > nmout.txt.
-// You'll have to adjust the output addresses depending upon where
-// the text segment gets placed.  This could be useful for debugging
-// certain exceptions because you can then get a lot of context. 
-// I plan to use it for doing some statistics collection.
-void stack_trace() {
-  unsigned int x = 0;
-  unsigned int *ra = (&x)+2;
-  unsigned int *fp = (&x)+1;
-  unsigned int *old_fp = fp;
-
-  fprintf(stderr,"stack trace: ");
-  while (*ra != 0) {
-    fprintf(stderr,"0x%x ",*ra);
-    old_fp = fp;
-    fp = (unsigned int *)*fp;
-    ra = fp+1;
-  }
-  fprintf(stderr,"\n");
-}  
-
-// These are defined in cstubs.c
-extern struct Cyc___cycFILE {
+// Define struct __cycFILE, and initialize stdin, stdout, stderr
+struct Cyc___cycFILE { // must match defn in boot_cstubs.c and boot_cycstubs.cyc
   FILE *file;
-} *Cyc_stdin, *Cyc_stdout, *Cyc_stderr;
+} Cyc_stdin_v, Cyc_stdout_v, Cyc_stderr_v,
+  *Cyc_stdin = &Cyc_stdin_v,
+  *Cyc_stdout = &Cyc_stdout_v,
+  *Cyc_stderr = &Cyc_stderr_v;
 
 extern int Cyc_main(int argc, struct _dyneither_ptr argv);
 extern int _set_top_handler(); // defined in runtime_exception.c

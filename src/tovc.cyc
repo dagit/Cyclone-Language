@@ -19,11 +19,7 @@
 
 // The translation to C in Toc uses gcc extensions.  This file implements
 // a post-pass that tries to eliminate using any such extensions, namely
-// StmtExp.
-// FIX:
-// Should also eliminates array initializers since MSVC doesn't 
-// like non-constants.
-// Grrrrr.
+// StmtExp.  Note RemoveAggrs removed most array initializers.
 //
 // Caveats:
 //  * It hoists declarations out a bit.  So lifetimes may be slightly 

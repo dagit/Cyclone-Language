@@ -76,7 +76,8 @@ static string_t exn_effect_funs[] = {
   "_check_known_subscript_null",
   "_check_known_subscript_notnull",
   "_check_dyneither_subscript",
-  "_untag_dyneither_ptr"
+  "_untag_dyneither_ptr",
+  "_region_malloc"
 };
 static enum SideEffect fun_effect(string_t fn) {
   for (int i = 0; i<numelts(pure_funs); i++) {
@@ -113,6 +114,7 @@ static enum SideEffect exp_effect(exp_t e) {
   string_t bad_form = "";
   switch (e->r) {
   case &Const_e(_):
+  case &Sizeofexp_e(_): // DJG: exp is irrelevant
   case &Sizeoftyp_e(_):  
   case &Offsetof_e(_,_): 
   case &AnonEnum_e(...):
@@ -151,7 +153,6 @@ static enum SideEffect exp_effect(exp_t e) {
   case &Instantiate_e(e1,_):  fallthru(e1);
   case &Cast_e(_,e1,_,_):     fallthru(e1);
   case &Address_e(e1):        fallthru(e1);
-  case &Sizeofexp_e(e1):      fallthru(e1);
   case &Deref_e(e1):          fallthru(e1);
   case &AggrMember_e(e1,...): fallthru(e1); 
   case &AggrArrow_e(e1,...):  fallthru(e1);

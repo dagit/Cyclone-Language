@@ -271,6 +271,10 @@ extern const char *get_exn_name(datatype exn @);
 extern const char *get_exn_filename();
   /** if an exception is thrown, then you can use @get_exn_filename@ to
       determine what source file caused the exception. */
+extern void set_uncaught_exn_fun(int (*)());
+  /** if an exception is thrown and no handler is installed, the function
+      passed as an argument is executed _before_ the exception is actually
+      thrown.  (A useful argument is Execinfo::bt.) */
 extern int get_exn_lineno();
   /** if an exception is thrown, then you can use @get_exn_lineno@ to
       determine what source line caused the exception. */

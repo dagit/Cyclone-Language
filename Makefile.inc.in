@@ -186,6 +186,7 @@ endif
 RUNTIME:=runtime_cyc \
 	runtime_stack \
 	runtime_exception \
+	runtime_zeroterm \
 	runtime_memory
 
 CYCLIB:=libcyc.$(A)

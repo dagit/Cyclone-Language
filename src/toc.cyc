@@ -239,7 +239,6 @@ MAKE_VAR(_check_known_subscript_notnull);
 MAKE_VAR(_check_dyneither_subscript);
 MAKE_VAR(_dyneither_ptr);
 MAKE_VAR(_tag_dyneither);
-MAKE_VAR(_init_dyneither_ptr);
 MAKE_VAR(_untag_dyneither_ptr);
 MAKE_VAR(_get_dyneither_size);
 MAKE_VAR(_get_zero_arr_size); // NOT SURE WHETHER WE NEED BOTH?
@@ -287,9 +286,6 @@ MAKE_VAR(_check_times);
 MAKE_VAR(_new_region);
 MAKE_VAR(_push_region);
 MAKE_VAR(_pop_region);
-MAKE_VAR(_open_dynregion);
-MAKE_VAR(_push_dynregion);
-MAKE_VAR(_pop_dynregion);
 MAKE_VAR(_throw_arraybounds);
 MAKE_VAR(_dyneither_ptr_decrease_size);
 MAKE_VAR(_throw_match);
@@ -3917,12 +3913,6 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       case &Region_d(tv, vd, open_exp_opt):
         let body = s1;
         // NOTE:  _npop_handler has to deal with regions as well as exceptions
-        // { struct _RegionHandle rh = _new_region(); (or *open_exp_opt)
-        //   struct _RegionHandle *x = &rh;
-        //   _push_region(x);
-        //   body;
-        //   _pop_region(x);
-        // }
         type_t rh_struct_typ     = strct(_RegionHandle_sp);
         type_t rh_struct_ptr_typ = cstar_typ(rh_struct_typ,mt_tq);
         qvar_t rh_var = temp_var();
@@ -3935,10 +3925,17 @@ static void stmt_to_c(env_t nv, stmt_t s) {
           s->r = declare_stmt(x_var, rh_struct_ptr_typ,
                               uint_exp(0,DL), body, DL)->r;
         } else if (open_exp_opt) { 
+	  // { struct _REgionHandle *x = open_exp_opt -> h; body }
           exp_to_c(nv,open_exp_opt);
           exp_t arg = address_exp(aggrarrow_exp(open_exp_opt,new "h",DL),DL);
           s->r = declare_stmt(x_var,rh_struct_ptr_typ,arg,body,DL)->r;
         } else {
+	  // { struct _RegionHandle rh = _new_region();
+	  //   struct _RegionHandle *x = &rh;
+	  //   _push_region(x);
+	  //   body;
+	  //   _pop_region(x);
+	  // }
           s->r =
             declare_stmt(rh_var,rh_struct_typ,
                          fncall_exp(_new_region_e,
@@ -4679,16 +4676,15 @@ static void init() {
     &_check_dyneither_subscript_str,
     &_dyneither_ptr_str,
     &_tag_dyneither_str,
-    &_init_dyneither_ptr_str,
     &_untag_dyneither_ptr_str,
     &_get_dyneither_size_str,
-    &_get_zero_arr_size_str, // NOT SURE WHETHER WE NEED BOTH?
+    &_get_zero_arr_size_str, // FIX: whole function set
     &_dyneither_ptr_plus_str,
-    &_zero_arr_plus_str,     // NOT SURE WHETHER WE NEED BOTH?
+    &_zero_arr_plus_str,     
     &_dyneither_ptr_inplace_plus_str,
-    &_zero_arr_inplace_plus_str, // NOT SURE WHETHER WE NEED BOTH?
+    &_zero_arr_inplace_plus_str, // FIX: whole function set
     &_dyneither_ptr_inplace_plus_post_str,
-    &_zero_arr_inplace_plus_post_str, // NOT SURE WHETHER WE NEED BOTH?
+    &_zero_arr_inplace_plus_post_str, // FIX: whole function set
     &_cycalloc_str,
     &_cyccalloc_str,
     &_cycalloc_atomic_str,
@@ -4699,9 +4695,6 @@ static void init() {
     &_new_region_str,
     &_push_region_str,
     &_pop_region_str,
-    &_open_dynregion_str,
-    &_push_dynregion_str,
-    &_pop_dynregion_str,
     &_throw_arraybounds_str,
     &_dyneither_ptr_decrease_size_str,
     &_throw_match_str,

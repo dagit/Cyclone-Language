@@ -582,7 +582,7 @@ UNUPDATEDIR=unupdate
 BUILDDIR_UPDATE_FILES=$(UPDATE_SRCS) $(C_BOOT_LIBS) precore_c.h boot_cycstubs.c
 
 # The update files that go from "lib" to GENDIR.
-LIB_UPDATE_FILES=boot_cstubs.c nogc.c malloc.c $(C_RUNTIME)
+LIB_UPDATE_FILES=boot_cstubs.c nogc.c malloc.c $(C_RUNTIME) runtime_internal.h
 
 # The update files that go from "lib" to "bin/cyc-lib".
 CYC_LIB_UPDATE_FILES=cyc_include.h libc.cys

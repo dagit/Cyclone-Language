@@ -21,14 +21,7 @@
 #include <stdio.h>
 #include <setjmp.h>
 
-// The C include file precore_c.h is produced (semi) automatically
-// from the Cyclone include file core.h.  Note, it now includes
-// the contents of cyc_include.h
-
-/* RUNTIME_CYC defined to prevent including parts of precore_c.h 
-   that might cause problems, particularly relating to region profiling */
-#define RUNTIME_CYC
-#include "precore_c.h"
+#include "runtime_internal.h"
 
 extern void longjmp(jmp_buf,int); // NB precore_c.h defines jmp_buf
 extern void exit(int);
@@ -72,9 +65,10 @@ void _pop_handler() {
   _npop_handler(0);
 }
 
-extern int Cyc_Execinfo_bt(void);
+// FIX: would be better to support a real closure here
+static int (*uncaught_fun)() = NULL;
 static struct _handler_cons top_handler;
-static int in_backtrace = 0; // avoid infinite exception chain
+static int in_uncaught_fun = 0; // avoid infinite exception chain
 static const char *_exn_filename = "?";
 static unsigned _exn_lineno = 0;
 
@@ -86,6 +80,10 @@ int Cyc_Core_get_exn_lineno() {
 }
 const char *Cyc_Core_get_exn_name(struct _xtunion_struct *x) {
   return x->tag;
+}
+
+void Cyc_Core_set_uncaught_exn_fun(int (*f())) {
+  uncaught_fun = f;
 }
 
 // Called by main to set the topmost exception handler
@@ -103,7 +101,7 @@ int _set_top_handler() {
   return 0;
 }
 
-int _throw_fn(void* e, const char *filename, unsigned lineno) {
+void* _throw_fn(void* e, const char *filename, unsigned lineno) {
   // FIX: use struct _xtunion_struct *  ??
   struct _handler_cons *my_handler;
   // pop handlers until exception handler found
@@ -112,19 +110,16 @@ int _throw_fn(void* e, const char *filename, unsigned lineno) {
   _exn_thrown = e;
   _exn_filename = filename;
   _exn_lineno = lineno;
-#ifdef __linux__
-  /* bt only works in linux, and gives a circular dependence in os x,
-     so we need to compile this conditionally */
-  if (my_handler->handler == top_handler.handler && !in_backtrace) {
-    in_backtrace = 1;
-    Cyc_Execinfo_bt();
+  if (my_handler->handler == top_handler.handler && !in_uncaught_fun) {
+    in_uncaught_fun = 1;
+    if(uncaught_fun)
+      uncaught_fun();
   }
-#endif
   longjmp(my_handler->handler,1);
 }
 
 /* re-throw an exception, but keep the filename and lineno info */
-int _rethrow(void *e) {
+void* _rethrow(void *e) {
   _throw_fn(e, _exn_filename, _exn_lineno);
 }
 void Cyc_Core_rethrow(void *e) {
@@ -134,17 +129,17 @@ void Cyc_Core_rethrow(void *e) {
 #ifdef throw
 #undef throw
 #endif
-int throw(void *e) { _throw_fn(e,"?",0); }
+void* throw(void *e) { _throw_fn(e,"?",0); }
 
-int _throw_null_fn(const char *filename, unsigned lineno) {
+void* _throw_null_fn(const char *filename, unsigned lineno) {
   _throw_fn(Cyc_Null_Exception_val,filename,lineno);
 }
-int _throw_arraybounds_fn(const char *filename, unsigned lineno) {
+void* _throw_arraybounds_fn(const char *filename, unsigned lineno) {
   _throw_fn(Cyc_Array_bounds_val,filename,lineno);
 }
-int _throw_badalloc_fn(const char *filename, unsigned lineno) {
+void* _throw_badalloc_fn(const char *filename, unsigned lineno) {
   _throw_fn(Cyc_Bad_alloc_val,filename,lineno);
 }
-int _throw_match_fn(const char *filename, unsigned lineno) {
+void* _throw_match_fn(const char *filename, unsigned lineno) {
   _throw_fn(Cyc_Match_Exception_val,filename,lineno);
 }

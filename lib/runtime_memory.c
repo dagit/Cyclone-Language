@@ -26,16 +26,18 @@
 #include <setjmp.h>
 #include <time.h> // for clock()
 
-// The C include file precore_c.h is produced (semi) automatically
-// from the Cyclone include file core.h.  Note, it now includes
-// the contents of cyc_include.h
-
-/* RUNTIME_CYC defined to prevent including parts of precore_c.h 
-   that might cause problems, particularly relating to region profiling */
-#define RUNTIME_CYC
-#include "precore_c.h"
+#include "runtime_internal.h"
 
 extern void exit(int);
+
+struct _RegionPage {
+#ifdef CYC_REGION_PROFILE
+  unsigned total_bytes;
+  unsigned free_bytes;
+#endif
+  struct _RegionPage *next;
+  char data[1];  /*FJS: used to be size 0, but that's forbidden in ansi c*/
+};
 
 #ifdef CYC_REGION_PROFILE
 static FILE *alloc_log = NULL;
