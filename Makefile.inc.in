@@ -124,6 +124,7 @@ CYCLONE_H:=arg.h\
 	netinet/in.h\
 	netinet/tcp.h\
 	position.h\
+	positionrep.h\
 	pp.h\
 	pwd.h\
 	queue.h\
