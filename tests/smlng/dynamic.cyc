@@ -165,6 +165,9 @@ static inline doc_t dynamic_doit(doc_t doc, val_t lowest_val, val_t num_vals,
 	  && input_size < limit)
       ++input_size;
 
+    if(input_size == limit)
+      longer_seq = true;
+
     // need to check time in here!!!
     for (pos_t i = 0; i < input_size; i++)
       for (val_t s = 0; s < num_vals-1; s++) {

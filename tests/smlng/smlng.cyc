@@ -18,6 +18,7 @@ using String;
 using TagElim;
 
 bool is_change = true;
+bool longer_seq = false;
 
 string_t start_tags[] = {
   "<0>", "<1>", "<2>", "<3>", "<4>", "<5>", "<6>", "<7>", "<8>", "<9>",
@@ -480,13 +481,10 @@ int main(int argc, char ??argv) {
   // don't put any optimizations after this -- it tries to hog the time
   // BTW, it's expensive to keep flattening and unflattening the sequences,
   // but it's nice to iterate way out here.
-  int  window_size = 10;
-  int  tag_count = num_tags(d);
-  int  useless_passes  = 0;
-  int  useless_doubles = 0; // allow two?
+  int  window_size = 20;
   while(window_size < MAX_WINDOW_SIZE) {
-    fprintf(stderr," %d\ndynamic_regions %d %d...", 
-	    check_time(), window_size, tag_count); 
+    fprintf(stderr," %d\ndynamic_regions %d ...", 
+	    check_time(), window_size); 
     fflush(stderr);
     // toggle the shift -- dont' bother
     //shift_window = !shift_window;
@@ -504,11 +502,9 @@ int main(int argc, char ??argv) {
       d = dynamic_color(d,false,window_size);
 
     // check for progress, if so continue with wider window
-    int new_tag_count = num_tags(d);
     int end_time = check_time();
-    if(new_tag_count < tag_count) {
-      useless_passes = useless_doubles = 0;
-      tag_count = new_tag_count;
+    if(longer_seq) {
+      longer_seq = false;
       window_size += 10;
       // see if we have time, 4 is not the right thing!
       int old_time = start_time - end_time;

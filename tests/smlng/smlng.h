@@ -5,6 +5,9 @@
 
 extern int is_change;
 
+// this is how the dynamic program tells us to iterate!
+extern int longer_seq;
+
 /*
 enum Tag { Zero, One, Two, Three, Four, Five, Six, Seven, Eight, Nine,
            B_tag, EM_tag, I_tag, PL_tag, S_tag, TT_tag, U_tag, r_tag,
