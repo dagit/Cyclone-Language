@@ -865,11 +865,17 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
 
 // e1 ? e2 : e3
 static type_t tcConditional(tenv_t te, seg_t loc, type_t * topt,
-                            exp_t e1, exp_t e2, exp_t e3) {
-  let TestEnv(eq,isT) = tcTest(te, e1, "conditional expression");
+                           exp_t e1, exp_t e2, exp_t e3) {
+  TEMP_RGN(te,r) {
+    tcTest(clear_abstract_val_ok(r,te), e1, "conditional expression");
+  }
   tcExp(te,topt,e2);
   tcExp(te,topt,e3);
-  type_t t = new_evar(&tmko,lookup_opt_type_vars(te));
+  type_t t;
+  if (abstract_val_ok(te))
+    t = new_evar(&tako,lookup_opt_type_vars(te));
+  else
+    t = new_evar(&tmko,lookup_opt_type_vars(te));
   let l1 = List(e3,NULL);
   let l2 = List(e2,&l1);
   if (!coerce_list(te,t,&l2)) {
@@ -954,8 +960,10 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
 
 // e1,e2
 static type_t tcSeqExp(tenv_t te,seg_t loc,type_t * topt,exp_t e1,exp_t e2) {
-  tcExp(te,NULL,e1);
-  tcExp(te,topt,e2);
+  TEMP_RGN(te,r) {
+    tcExp(clear_abstract_val_ok(r,te),NULL,e1);
+    tcExp(clear_abstract_val_ok(r,te),topt,e2);
+  }
   return (type_t)e2->topt;
 }
 
@@ -1013,6 +1021,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
   let arg_cnt = 0;
   TEMP_RGN(te_orig, ter) {
     let te = new_block(ter,loc,te_orig); // needed for regions of params
+    let te = clear_abstract_val_ok(ter,te);
     tcExp(te,NULL,e);
     type_t t = compress((type_t)e->topt);
     // NB: we should really unify t with an unconstrained FnType with the
@@ -1259,7 +1268,8 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
 // (t)e
 static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
                      coercion_t *c) {
-  check_type(loc,te,lookup_type_vars(te),&tmk,true,t);
+  check_type(loc,te,lookup_type_vars(te),
+	     abstract_val_ok(te) ? &tak : &tmk,true,t);
   check_no_qual(loc,t);
   //  tcExp(te,NULL,e);
   tcExp(te,&t,e);
@@ -1327,7 +1337,8 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
   // We use clear_notreadctxt because the pointer might escape off
   // and later be read.
   TEMP_RGN(te, r) {
-    tcExpNoInst(enter_lhs(r,clear_notreadctxt(r,te)),topt2,e);
+    tcExpNoInst(enter_abstract_val_ok(r,enter_lhs(r,clear_notreadctxt(r,te))),
+		topt2,e);
     // can't take the address of a unique path
     if (is_noalias_pointer_or_aggr(r,(type_t)e->topt))
       terr(e->loc,"Cannot take the address of an alias-free path");
@@ -1341,10 +1352,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
     switch (compress((type_t)e1->topt)) {
     case &TupleType(_): break; // leave & for tuple types alone.
     default:
-      // we have &e[i] -- rewrite the whole expression as (e+i);
-      // don't check for taking address of a unique pointer here,
-      // since we aren't creating an alias.
-
+      // We have &e[i] -- rewrite the whole expression as (e+i).
       // This ensures that we get the right size for an array or ? pointer.
       e0->r = add_exp(e1,e2,0)->r;
       return tcPlus(te,e1,e2);
@@ -1513,7 +1521,7 @@ static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
     switch (t) {
     case &Evar(_,_,_,_):
       let tenv_tvs = lookup_type_vars(te);
-      let t2 = new_evar(&mko,new Opt(tenv_tvs));
+      let t2 = new_evar(&ako,new Opt(tenv_tvs));
       let rt = new_evar(&trko,new Opt(tenv_tvs));
       let b = empty_conref();
       let zt = empty_conref();
@@ -1524,7 +1532,7 @@ static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
     case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_))):
       check_rgn_accessible(te,loc,rt);
       check_nonzero_bound(loc, b);
-      if (!kind_leq(typ_kind(t2),&tmk))
+      if (!kind_leq(typ_kind(t2),&tmk) && !abstract_val_ok(te))
         terr(loc,"can't dereference abstract pointer type");
       return t2;
     default:
@@ -1539,7 +1547,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
                            bool @is_tagged, bool @is_read) {
   // As per K&R, don't promote e from array to pointer type
   TEMP_RGN(te, r) {
-    tcExpNoPromote(clear_notreadctxt(r,te),NULL,e);
+    tcExpNoPromote(enter_abstract_val_ok(r,clear_notreadctxt(r,te)),NULL,e);
   }
   // record whether or not we're in a read context
   *is_read = !in_notreadctxt(te);
@@ -1596,7 +1604,8 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
 			  exp_t e, field_name_t f,
                           bool @is_tagged, bool @is_read) {
   TEMP_RGN(te, r) {
-    tcExp(clear_lhs(r,clear_notreadctxt(r,te)),NULL,e);
+    tcExp(enter_abstract_val_ok(r,clear_lhs(r,clear_notreadctxt(r,te))),
+	  NULL,e);
   }
   // record whether or not we're in a read context
   *is_read = !in_notreadctxt(te);
@@ -1619,8 +1628,9 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
         }
       }
       let t3_kind = typ_kind(t3);
-      if (kind_leq(&ak,t3_kind)) {
-        // we can get out arrays...they'll be promoted to pointers
+      // the resulting value can only be abstract if we're in an abstract
+      // context, or if it's an array (it'll be promoted to a pointer)
+      if (kind_leq(&ak,t3_kind) && !abstract_val_ok(te)) {
         switch (compress(t3)) {
         case &ArrayType(_): break;
         default:
@@ -1671,8 +1681,8 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
 			  exp_t e1, exp_t e2) {
   TEMP_RGN(te_orig, r) {
     let te = clear_lhs(r,clear_notreadctxt(r,te_orig));
-    tcExp(te,NULL,e1);
-    tcExp(te,NULL,e2);
+    tcExp(clear_abstract_val_ok(r,te),NULL,e1);
+    tcExp(clear_abstract_val_ok(r,te),NULL,e2);
     type_t t1 = compress((type_t)e1->topt);
     type_t t2 = compress((type_t)e2->topt);
     if (!coerce_sint_typ(te,e2))
@@ -1714,7 +1724,7 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
         }
       }
       check_rgn_accessible(te,loc,rt);
-      if (!kind_leq(typ_kind(t),&tmk))
+      if (!kind_leq(typ_kind(t),&tmk) && !abstract_val_ok(te))
         terr(e1->loc,"can't subscript an abstract pointer");
       return t;
     case &TupleType(ts): return ithTupleType(te,loc,ts,e2);
@@ -1736,12 +1746,14 @@ static type_t tcTuple(tenv_t te, seg_t loc, type_t * topt, list_t<exp_t> es) {
 	break;
       }
       for(; es != NULL; es = es->tl, ts = ts->tl) {
-	bool bogus = false;
-	let topt2 = (*ts->hd)[1];
-	tcExpInitializer(te,&topt2,es->hd);
-        // try to coerce the argument to the result type
-        coerce_arg(te,es->hd,(*ts->hd)[1],&bogus);
-	fields = new List(new $((*ts->hd)[0], (type_t)es->hd->topt), fields);
+	TEMP_RGN(te,r) {
+	  bool bogus = false;
+	  let topt2 = (*ts->hd)[1];
+	  tcExpInitializer(clear_abstract_val_ok(r,te),&topt2,es->hd);
+	  // try to coerce the argument to the result type
+	  coerce_arg(te,es->hd,(*ts->hd)[1],&bogus);
+	  fields = new List(new $((*ts->hd)[0], (type_t)es->hd->topt), fields);
+	}
       }
       done = true;
       break;
@@ -1749,8 +1761,10 @@ static type_t tcTuple(tenv_t te, seg_t loc, type_t * topt, list_t<exp_t> es) {
     }
   if(!done)
     for(; es != NULL; es = es->tl) {
-      tcExpInitializer(te,NULL,es->hd);
-      fields = new List(new $(empty_tqual(0), (type_t)es->hd->topt), fields);
+      TEMP_RGN(te,r) {
+	tcExpInitializer(clear_abstract_val_ok(r,te),NULL,es->hd);
+	fields = new List(new $(empty_tqual(0), (type_t)es->hd->topt), fields);
+      }
     }
   return new TupleType(List::imp_rev(fields));
 }
@@ -2067,7 +2081,8 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
       bool bogus = false;
       let &$(field,field_exp) = fields->hd;
       let inst_fieldtyp = rsubstitute(rgn,inst,field->type);
-      tcExpInitializer(te2, &inst_fieldtyp, field_exp);   
+      tcExpInitializer(clear_abstract_val_ok(rgn,te2),
+		       &inst_fieldtyp, field_exp);   
 //       fprintf(stderr,"checking agg field %s, exp=%s, typ=%s\n",*(field->name),
 // 	      Absynpp::exp2string(field_exp),
 // 	      Absynpp::typ2string(field_exp->topt));
@@ -2103,7 +2118,8 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
       for (; fields != NULL; fields = fields->tl) {
 	bool bogus = false;
         let &$(field,field_exp) = fields->hd;
-        tcExpInitializer(te, &field->type, field_exp);
+        tcExpInitializer(clear_abstract_val_ok(rgn,te),
+			 &field->type, field_exp);
         if (!coerce_arg(te,field_exp,field->type,&bogus)) {
           terr(field_exp->loc,"field %s of struct expects type %s != %s",
                *(field->name),typ2string(field->type),
@@ -2267,8 +2283,9 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
       if (rgn == &UniqueRgn_val) *ropt = uniquergn_exp;
     }
   }
-
-  tcExp(te,&uint_typ,*e);
+  { TEMP_RGN(te,r) {
+    tcExp(clear_abstract_val_ok(r,te),&uint_typ,*e);
+  }}
   // crawl over e and look for the following cases:
   //   sizeof(T):  result is T@ or T* depending upon topt
   //   sizeof(T)*n or n*sizeof(T):
@@ -2459,7 +2476,7 @@ bool in_stmt_exp = false;
 static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
   TEMP_RGN(te, r) {
     bool old_stmt_exp_state = in_stmt_exp;
-    Tcstmt::tcStmt(set_encloser(r,te,s),s,true);
+    Tcstmt::tcStmt(clear_abstract_val_ok(r,set_encloser(r,te,s)),s,true);
     in_stmt_exp = old_stmt_exp_state;
   }
   // The encloser of s is not s, so reset it properly.
@@ -2485,7 +2502,10 @@ static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
 }
 
 static type_t tcTagcheck(tenv_t te, seg_t loc, type_t * topt, exp_t e, field_name_t f) {
-  type_t t = compress(tcExp(te,NULL,e));
+  type_t t;
+  TEMP_RGN(te,r) {
+    t = compress(tcExp(enter_abstract_val_ok(r,te),NULL,e));
+  }
   switch (t) {
   case &AggrType(AggrInfo({.KnownAggr = &ad},_)):
     if (ad->kind == UnionA && ad->impl != NULL && ad->impl->tagged) break;
@@ -2504,7 +2524,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
   // simpler.  If you want a unique pointer, do rnew (Core::unique_region)
   type_t rgn = &HeapRgn_val;
   TEMP_RGN(te, r) {
-    let te = set_new_status(r,InNew,te);
+    let te = clear_abstract_val_ok(r,set_new_status(r,InNew,te));
     if (*rgn_handle != NULL) {
       // check that the region handle is still valid
       type_t expected_type =

@@ -1417,19 +1417,19 @@ static exp_t make_struct(env_t nv, exp_t x, type_t struct_typ, stmt_t s,
   }
 }
 
-static bool array_or_aggr_with_array(type_t typ) {
+static bool abstract_aggr(type_t typ) {
   switch (compress(typ)) {
-  case &ArrayType(...): return true;
   case &AggrType(AggrInfo(info,ts)):
     aggrdecl_t ad = get_known_aggrdecl(info);
+    if (ad->impl == NULL) return false;
     list_t<aggrfield_t> aggrfields = ad->impl->fields;
     fallthru(aggrfields);
   case &AnonAggrType(_,aggrfields):
     if (aggrfields == NULL) return false;
-    let fields;
-    for (fields = aggrfields; fields->tl != NULL; fields = fields->tl);
-    let field = fields->hd;
-    return array_or_aggr_with_array(field->type);
+    return true;
+    // FIX: alternatively, I can check that this has at least two
+    // fields, so that it won't become empty if the last one is
+    // abstract
   default:
     return false;
   }
@@ -1855,6 +1855,7 @@ static exp_t init_struct(env_t nv, type_t struct_type,
             s = seq_stmt(exp_stmt(assn_exp,0),s,0);
             lval = member_exp(lval,val_sp,0);
           }
+	  bool e1_translated = false;
           switch (e->r) {
           case &Array_e(dles):
             s = init_array(nv, lookup_field(aggrfields,f)->type, 
@@ -1865,11 +1866,13 @@ static exp_t init_struct(env_t nv, type_t struct_type,
                                    lookup_field((do_declare ? aggrfields :
                                                  orig_aggrfields),f)->type,
                                    lval, vd, e1, e2, zt, s, false);
+	    e1_translated = true;
 	    fallthru(e1);
           case &ComprehensionNoinit_e(e1,...):
 	    // if this is a dynamic comprehension, grab the bound
 	    // for doing the malloc
 	    if (index != NULL && !strptrcmp(*index,f)) {
+	      if (!e1_translated) exp_to_c(nv,e1);
 	      let t2 = typ_to_c((type_t)e1->topt);
 	      *nv->struct_info.varsizeexp =
 		add_exp(fncall_exp(_check_times_e,
@@ -4641,7 +4644,7 @@ static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_decls) {
 	    ((ad->kind == StructA && fields->tl == NULL) ||
 	     ad->kind == UnionA)) {
           // skip over the last member if it's abstract but not an
-          // array (or an array-containing aggregate); for arrays, we
+          // array or an implemented aggregate; for arrays, we
           // just pretend like the array size is zero.  (Note: can't
           // just leave it non-existent because this results in
           // incomplete types!)
@@ -4650,7 +4653,7 @@ static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_decls) {
             old_type = new ArrayType(ArrayInfo(et,tq,uint_exp(0,DL),zt,ztl));
             break;
           default: 
-	    if (array_or_aggr_with_array(old_type)) break;
+	    if (abstract_aggr(old_type)) break;
 	    else if (ad->kind == StructA) continue;
 	    else unimp("union with non-array fields of kind TA");
           }

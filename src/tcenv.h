@@ -132,6 +132,12 @@ extern tenv_t<`g,`r2> set_new_status(region_t<`r2>,enum NewStatus status,
 				     tenv_t<`g,`r>: {`r} > `r2);
 extern enum NewStatus new_status(tenv_t te);
 
+extern bool abstract_val_ok(tenv_t te);
+extern tenv_t<`g,`r> enter_abstract_val_ok(region_t<`r> r,
+					   tenv_t<`g,`r2> te : {`r2}>`r);
+extern tenv_t<`g,`r> clear_abstract_val_ok(region_t<`r> r,
+					   tenv_t<`g,`r2> te : {`r2}>`r);
+
 extern type_t  return_typ(tenv_t);
 
 extern tenv_t<`g,`r> copy_tenv(region_t<`r>,tenv_t<`g,`r2> : {`r2} > `r);
