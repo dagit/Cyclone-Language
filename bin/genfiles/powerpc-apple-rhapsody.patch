@@ -1,0 +1,79 @@
+Binary files i686-unknown-linux/lib/arg.o and powerpc-apple-rhapsody/lib/arg.o differ
+Binary files i686-unknown-linux/lib/array.o and powerpc-apple-rhapsody/lib/array.o differ
+Binary files i686-unknown-linux/lib/assert.o and powerpc-apple-rhapsody/lib/assert.o differ
+Binary files i686-unknown-linux/lib/bitvec.o and powerpc-apple-rhapsody/lib/bitvec.o differ
+Binary files i686-unknown-linux/lib/buffer.o and powerpc-apple-rhapsody/lib/buffer.o differ
+Binary files i686-unknown-linux/lib/core.o and powerpc-apple-rhapsody/lib/core.o differ
+Binary files i686-unknown-linux/lib/dict.o and powerpc-apple-rhapsody/lib/dict.o differ
+Binary files i686-unknown-linux/lib/dirent.o and powerpc-apple-rhapsody/lib/dirent.o differ
+Binary files i686-unknown-linux/lib/execinfo.o and powerpc-apple-rhapsody/lib/execinfo.o differ
+Binary files i686-unknown-linux/lib/fcntl.o and powerpc-apple-rhapsody/lib/fcntl.o differ
+Binary files i686-unknown-linux/lib/filename.o and powerpc-apple-rhapsody/lib/filename.o differ
+Binary files i686-unknown-linux/lib/fn.o and powerpc-apple-rhapsody/lib/fn.o differ
+Binary files i686-unknown-linux/lib/getopt.o and powerpc-apple-rhapsody/lib/getopt.o differ
+Binary files i686-unknown-linux/lib/getopt1.o and powerpc-apple-rhapsody/lib/getopt1.o differ
+Binary files i686-unknown-linux/lib/grp.o and powerpc-apple-rhapsody/lib/grp.o differ
+Binary files i686-unknown-linux/lib/hashtable.o and powerpc-apple-rhapsody/lib/hashtable.o differ
+Binary files i686-unknown-linux/lib/in.o and powerpc-apple-rhapsody/lib/in.o differ
+Binary files i686-unknown-linux/lib/inet.o and powerpc-apple-rhapsody/lib/inet.o differ
+Binary files i686-unknown-linux/lib/lexing.o and powerpc-apple-rhapsody/lib/lexing.o differ
+Binary files i686-unknown-linux/lib/libcyc.a and powerpc-apple-rhapsody/lib/libcyc.a differ
+Binary files i686-unknown-linux/lib/lineno.o and powerpc-apple-rhapsody/lib/lineno.o differ
+Binary files i686-unknown-linux/lib/list.o and powerpc-apple-rhapsody/lib/list.o differ
+Binary files i686-unknown-linux/lib/mman.o and powerpc-apple-rhapsody/lib/mman.o differ
+Binary files i686-unknown-linux/lib/netdb.o and powerpc-apple-rhapsody/lib/netdb.o differ
+Binary files i686-unknown-linux/lib/nogc.a and powerpc-apple-rhapsody/lib/nogc.a differ
+Binary files i686-unknown-linux/lib/nogc.o and powerpc-apple-rhapsody/lib/nogc.o differ
+Binary files i686-unknown-linux/lib/position.o and powerpc-apple-rhapsody/lib/position.o differ
+Binary files i686-unknown-linux/lib/pp.o and powerpc-apple-rhapsody/lib/pp.o differ
+Binary files i686-unknown-linux/lib/printf.o and powerpc-apple-rhapsody/lib/printf.o differ
+Binary files i686-unknown-linux/lib/pwd.o and powerpc-apple-rhapsody/lib/pwd.o differ
+Binary files i686-unknown-linux/lib/queue.o and powerpc-apple-rhapsody/lib/queue.o differ
+Binary files i686-unknown-linux/lib/ref.o and powerpc-apple-rhapsody/lib/ref.o differ
+Binary files i686-unknown-linux/lib/rope.o and powerpc-apple-rhapsody/lib/rope.o differ
+Binary files i686-unknown-linux/lib/runtime_cyc.o and powerpc-apple-rhapsody/lib/runtime_cyc.o differ
+Binary files i686-unknown-linux/lib/scanf.o and powerpc-apple-rhapsody/lib/scanf.o differ
+Binary files i686-unknown-linux/lib/set.o and powerpc-apple-rhapsody/lib/set.o differ
+Binary files i686-unknown-linux/lib/signal.o and powerpc-apple-rhapsody/lib/signal.o differ
+Binary files i686-unknown-linux/lib/slowdict.o and powerpc-apple-rhapsody/lib/slowdict.o differ
+Binary files i686-unknown-linux/lib/socket.o and powerpc-apple-rhapsody/lib/socket.o differ
+Binary files i686-unknown-linux/lib/splay.o and powerpc-apple-rhapsody/lib/splay.o differ
+Binary files i686-unknown-linux/lib/stat.o and powerpc-apple-rhapsody/lib/stat.o differ
+Binary files i686-unknown-linux/lib/stdio.o and powerpc-apple-rhapsody/lib/stdio.o differ
+Binary files i686-unknown-linux/lib/stdlib.o and powerpc-apple-rhapsody/lib/stdlib.o differ
+Binary files i686-unknown-linux/lib/string.o and powerpc-apple-rhapsody/lib/string.o differ
+Binary files i686-unknown-linux/lib/time.o and powerpc-apple-rhapsody/lib/time.o differ
+Binary files i686-unknown-linux/lib/unistd.o and powerpc-apple-rhapsody/lib/unistd.o differ
+Binary files i686-unknown-linux/lib/xarray.o and powerpc-apple-rhapsody/lib/xarray.o differ
+Binary files i686-unknown-linux/src/absyn.o and powerpc-apple-rhapsody/src/absyn.o differ
+Binary files i686-unknown-linux/src/absyndump.o and powerpc-apple-rhapsody/src/absyndump.o differ
+Binary files i686-unknown-linux/src/absynpp.o and powerpc-apple-rhapsody/src/absynpp.o differ
+Binary files i686-unknown-linux/src/cf_absexp.o and powerpc-apple-rhapsody/src/cf_absexp.o differ
+Binary files i686-unknown-linux/src/cf_flowinfo.o and powerpc-apple-rhapsody/src/cf_flowinfo.o differ
+Binary files i686-unknown-linux/src/cyclone and powerpc-apple-rhapsody/src/cyclone differ
+Binary files i686-unknown-linux/src/cyclone.o and powerpc-apple-rhapsody/src/cyclone.o differ
+Binary files i686-unknown-linux/src/evexp.o and powerpc-apple-rhapsody/src/evexp.o differ
+Binary files i686-unknown-linux/src/formatstr.o and powerpc-apple-rhapsody/src/formatstr.o differ
+diff -rbBcN --exclude=CVS i686-unknown-linux/src/install_path.c powerpc-apple-rhapsody/src/install_path.c
+*** i686-unknown-linux/src/install_path.c	Wed Dec 31 19:00:00 1969
+--- powerpc-apple-rhapsody/src/install_path.c	Tue Sep 11 16:15:20 2001
+***************
+*** 0 ****
+--- 1,3 ----
++ char *Cdef_inc_path = "/usr/include/cyclone";
++ char *Carch = "powerpc-apple-rhapsody";
++ char *Cdef_lib_path = "/usr/local/lib/cyclone";
+Binary files i686-unknown-linux/src/install_path.o and powerpc-apple-rhapsody/src/install_path.o differ
+Binary files i686-unknown-linux/src/interface.o and powerpc-apple-rhapsody/src/interface.o differ
+Binary files i686-unknown-linux/src/lex.o and powerpc-apple-rhapsody/src/lex.o differ
+Binary files i686-unknown-linux/src/new_control_flow.o and powerpc-apple-rhapsody/src/new_control_flow.o differ
+Binary files i686-unknown-linux/src/parse_tab.o and powerpc-apple-rhapsody/src/parse_tab.o differ
+Binary files i686-unknown-linux/src/tc.o and powerpc-apple-rhapsody/src/tc.o differ
+Binary files i686-unknown-linux/src/tcdecl.o and powerpc-apple-rhapsody/src/tcdecl.o differ
+Binary files i686-unknown-linux/src/tcenv.o and powerpc-apple-rhapsody/src/tcenv.o differ
+Binary files i686-unknown-linux/src/tcexp.o and powerpc-apple-rhapsody/src/tcexp.o differ
+Binary files i686-unknown-linux/src/tcpat.o and powerpc-apple-rhapsody/src/tcpat.o differ
+Binary files i686-unknown-linux/src/tcstmt.o and powerpc-apple-rhapsody/src/tcstmt.o differ
+Binary files i686-unknown-linux/src/tcutil.o and powerpc-apple-rhapsody/src/tcutil.o differ
+Binary files i686-unknown-linux/src/toc.o and powerpc-apple-rhapsody/src/toc.o differ
+Binary files i686-unknown-linux/src/tovc.o and powerpc-apple-rhapsody/src/tovc.o differ

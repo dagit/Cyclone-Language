@@ -1,0 +1,10 @@
+#undef __MACH__
+#undef __NATURAL_ALIGNMENT__
+#undef __APPLE__
+#undef __GNUC_MINOR__
+#undef __ppc__
+#undef __GNUC__
+#undef __STDC__
+#undef __DYNAMIC__
+#undef __APPLE_CC__
+#undef __BIG_ENDIAN__
