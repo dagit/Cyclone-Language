@@ -32,38 +32,36 @@ using Absyn;
 using List;
 namespace CfFlowInfo;
 
+static place_set_t * mt_place_set_opt = NULL;
+place_set_t mt_place_set() {
+  if(mt_place_set_opt == NULL)
+    mt_place_set_opt = new Set::empty(place_cmp);
+  return *mt_place_set_opt;
+}
+
 // Note that everything is persistent in the functional data structure sense.
 // Note we're careful to avoid allocation when replacing something with itself.
+// Note we assume all the field names we see are shared (we do only
+//   pointer comparisons).  The lexer should ensure this.
 
 ////////////////////////// Shared Constants //////////////////////////
-static tunion InitState.UnknownIS unknownis_unes_noneil = UnknownIS(Unesc,NoneIL);
-static tunion InitState.UnknownIS unknownis_unes_thisil = UnknownIS(Unesc,ThisIL);
-static tunion InitState.UnknownIS unknownis_unes_allil = UnknownIS(Unesc,AllIL);
-static tunion InitState.UnknownIS unknownis_esc_noneil = UnknownIS(Esc,NoneIL);
-static tunion InitState.UnknownIS unknownis_esc_thisil = UnknownIS(Esc,ThisIL);
-static tunion InitState.UnknownIS unknownis_esc_allil = UnknownIS(Esc,AllIL);
-
-static tunion PathInfo.LeafPI leaf_unesc_none_v = LeafPI(&unknownis_unes_noneil);
-static tunion PathInfo.LeafPI leaf_unesc_this_v = LeafPI(&unknownis_unes_thisil);
-static tunion PathInfo.LeafPI leaf_unesc_all_v = LeafPI(&unknownis_unes_allil);
-static tunion PathInfo.LeafPI leaf_esc_none_v = LeafPI(&unknownis_esc_noneil);
-static tunion PathInfo.LeafPI leaf_esc_this_v = LeafPI(&unknownis_esc_thisil);
-static tunion PathInfo.LeafPI leaf_esc_all_v = LeafPI(&unknownis_esc_allil);
-path_info_t leaf_unesc_none = &leaf_unesc_none_v;
-path_info_t leaf_unesc_this = &leaf_unesc_this_v;
-path_info_t leaf_unesc_all  = &leaf_unesc_all_v;
-path_info_t leaf_esc_none   = &leaf_esc_none_v;
-path_info_t leaf_esc_this   = &leaf_esc_this_v;
-path_info_t leaf_esc_all    = &leaf_esc_all_v;
+typedef tunion PathInfo.LeafPI leafPI_t;
+static leafPI_t leaf_unesc_none = LeafPI(InitState(Unesc,NoneIL));
+static leafPI_t leaf_unesc_this = LeafPI(InitState(Unesc,ThisIL));
+static leafPI_t leaf_unesc_all  = LeafPI(InitState(Unesc,AllIL));
+static leafPI_t leaf_esc_none   = LeafPI(InitState(Esc,  NoneIL));
+static leafPI_t leaf_esc_this   = LeafPI(InitState(Esc,  ThisIL));
+static leafPI_t leaf_esc_all    = LeafPI(InitState(Esc,  AllIL));
 
 path_info_t mkLeafPI(escaped_t esc, init_level_t il) {
   switch ($(esc,il)) {
-  case $(Unesc, NoneIL): return leaf_unesc_none;
-  case $(Unesc, ThisIL): return leaf_unesc_this;
-  case $(Unesc, AllIL):  return leaf_unesc_all;
-  case $(Esc,   NoneIL): return leaf_esc_none;
-  case $(Esc,   ThisIL): return leaf_esc_this;
-  case $(Esc,   AllIL):  return leaf_esc_all;
+  case $(Unesc, NoneIL): return &leaf_unesc_none;
+  case $(Unesc, ThisIL): return &leaf_unesc_this;
+  case $(Unesc, AllIL):  return &leaf_unesc_all;
+  case $(Esc,   NoneIL): return &leaf_esc_none;
+  case $(Esc,   ThisIL): return &leaf_esc_this;
+  case $(Esc,   AllIL):  return &leaf_esc_all;
+  default: return new LeafPI(InitState(esc,il));
   }
 }
 
@@ -78,23 +76,48 @@ int local_root_cmp(local_root_t r1, local_root_t r2) {
   case $(&MallocPt(x),&MallocPt(y)): return Core::ptrcmp(x,y);
   }
 }
-int field_cmp(field_t f1, field_t f2) {
-  if(f1 == f2)
-    return 0;
-  switch($(f1,f2)) {
-  case $(&StructF(_), &TupleF(_)):  return 1;
-  case $(&TupleF(_),  &StructF(_)): return -1;
-  case $(&StructF(x), &StructF(y)): return Core::ptrcmp(x,y);
-  case $(&TupleF(x),  &TupleF(y)):  return x-y;
-  }
-}
+
 int place_cmp(place_t p1, place_t p2) {
-  if(p1 == p2)
+  if(((int)p1) == ((int)p2))
     return 0;
   int i = local_root_cmp(p1->root,p2->root);
   if(i != 0)
     return i;
-  return list_cmp(field_cmp,p1->fields,p2->fields);
+  return list_cmp(Std::zstrptrcmp,p1->fields,p2->fields);
+}
+
+// for debugging
+mstringptr_t place2string(place_t p) {
+  list_t<mstringptr_t> sl = NULL;
+  switch(p->root) {
+  case &VarRoot(vd): sl = new List(new aprintf("%s",*(*vd->name)[1]),sl); break;
+  case &MallocPt(e): 
+    sl = new List(new aprintf("mpt%d",(int)e),sl);
+  }
+  for(_ fields = p->fields; fields != NULL; fields = fields->tl)
+    sl = new List(new aprintf("%s", *fields->hd), sl);
+  let ans = new aprintf("%s","");
+  for(; sl != NULL; sl = sl->tl)
+    *ans = aprintf("%s.%s", *sl->hd, *ans);
+  return ans;
+}
+
+static bool prefix_of_member(place_t place, Set::set_t<place_t> set) {
+  for(let elts = Set::elements(set); elts != NULL; elts = elts->tl) {
+    let place2 = elts->hd;
+    if(local_root_cmp(place->root, place2->root) != 0)
+      continue;
+    let fs1 = place->fields;
+    let fs2 = place2->fields;
+    for(; fs1 != NULL && fs2 != NULL; fs1 = fs1->tl, fs2 = fs2->tl)
+      if(Std::zstrptrcmp(fs1->hd,fs2->hd) != 0)
+	break;
+    if(fs1 == NULL) {
+      //      printf("%s.%s", *place2string(place), *place2string(place2));
+      return true;
+    }
+  }
+  return false;
 }
 
 // Note: We don't have to worry about instantiating polymorphic struct fields
@@ -102,33 +125,29 @@ int place_cmp(place_t p1, place_t p2) {
 //   (If we ever have memory kinds, then we either need to figure out field's
 //    instantiated types or not allow partial initialization of such fields.)
 // Note: We could memoize answers here, but it doesn't seem important.
-// Note: When tunionfields can be partially initialized, we'll need to support
-//       that too.
 path_info_t typ_to_unesc_none_pinfo(type_t t) {
   switch(Tcutil::compress(t)) {
   case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
     if(tuf->typs == NULL)
-      return leaf_unesc_none;
+      return &leaf_unesc_none;
     fallthru(tuf->typs);
   case &TupleType(tqts):
-    pinfo_dict_t<_> d = Dict::empty(Core::intcmp);
-    for(int i=0; tqts != NULL; tqts = tqts->tl, ++i) {
-      let &$(_,t2) = tqts->hd;
-      d = Dict::insert(d, i, typ_to_unesc_none_pinfo(t2));
-    }
-    return new TuplePI(d);
+    pinfo_dict_t<field_name_t> d = Dict::empty(Std::zstrptrcmp);
+    for(int i=0; tqts != NULL; tqts = tqts->tl, ++i)
+      d = Dict::insert(d,fieldname(i),typ_to_unesc_none_pinfo((*tqts->hd)[1]));
+    return new DictPI(d);
   case &AnonStructType(fs): fallthru(fs);
   case &StructType(_,_, & &Structdecl(_,_,_,&Core::Opt(fs),_)):
     pinfo_dict_t<field_name_t> d = Dict::empty(Std::zstrptrcmp);
     for(; fs != NULL; fs = fs->tl) {
       let &Structfield{n,_,t2,_,_} = fs->hd;
       // don't insert the field if the name is empty -- it's a bit field
-      if (Std::strcmp(*n,"") != 0)
+      if((*n).size != 1)
         d = Dict::insert(d, n, typ_to_unesc_none_pinfo(t2));
     }
-    return new StructPI(d);
+    return new DictPI(d);
   default: 
-    return leaf_unesc_none;
+    return &leaf_unesc_none;
   }
 }
 
@@ -139,8 +158,7 @@ path_info_t lookup_place(pinfo_dict_t<local_root_t> d, place_t place) {
   let ans = Dict::lookup(d,root);
   for(; fields != NULL; fields = fields->tl)
     switch($(ans,fields->hd)) {
-    case $(&TuplePI(d2), &TupleF(i)):  ans = Dict::lookup(d2,i); break;
-    case $(&StructPI(d2),&StructF(n)): ans = Dict::lookup(d2,n); break;
+    case $(&DictPI(d2), fname): ans = Dict::lookup(d2,fname); break;
     default: throw new Core::Impossible("bad lookup_place");
     }
   return ans;
@@ -148,19 +166,14 @@ path_info_t lookup_place(pinfo_dict_t<local_root_t> d, place_t place) {
 // Note: we don't check for pointer-equal here -- the caller can do that.
 // Note: we always do one more Dict::lookup and function call than necessary.
 path_info_t insert_place_rec(path_info_t insert_path,
-			     list_t<field_t> fields, 
+			     list_t<field_name_t> fields, 
 			     path_info_t pinfo){
   if(fields == NULL)
     return pinfo;
   switch($(insert_path,fields)) {
-  case $(&TuplePI(d), &List(&TupleF(i), tl)): 
-    let next_path = Dict::lookup(d,i);
-    return 
-      new TuplePI(Dict::insert(d, i, insert_place_rec(next_path,tl,pinfo)));
-  case $(&StructPI(d),&List(&StructF(n),tl)):
+  case $(&DictPI(d),&List(n,tl)):
     let next_path = Dict::lookup(d,n);
-    return 
-      new StructPI(Dict::insert(d, n, insert_place_rec(next_path,tl,pinfo)));
+    return new DictPI(Dict::insert(d, n, insert_place_rec(next_path,tl,pinfo)));
   default: 
     throw new Core::Impossible("bad insert_place");
   }
@@ -171,95 +184,93 @@ pinfo_dict_t<local_root_t> insert_place(pinfo_dict_t<local_root_t> d,
   return Dict::insert(d, r, insert_place_rec(Dict::lookup(d,r), fields, pinfo));
 }
 
-// Note: must detect cycles in the MustPointTo graph or we won't terminate.
-bool isAllInit_pinfo($(pinfo_dict_t<local_root_t>,list_t<place_t>)@`r env,
-		     path_info_t path);
-bool isAllInit_is ($(pinfo_dict_t<local_root_t>,list_t<place_t>)@`r env,
-		   init_state_t state) {
-  switch(state) {
-  case &UnknownIS(_,AllIL): return true;
-  case &UnknownIS(_,_):     return false;
+// We must detect cycles in the MustPointTo graph or we won't terminate.
+// We could put a region handle in the environment, but we expect seen to stay
+// very short.
+struct AllInitEnv {
+  pinfo_dict_t<local_root_t> top_info;
+  list_t<place_t> seen;
+};
+typedef struct AllInitEnv @`r allinit_env_t<`r>;
+
+bool isAllInit_pinfo(allinit_env_t env, path_info_t path);
+bool isAllInit_is(allinit_env_t env, init_state_t state) {
+  switch(state.level) {
+  case NoneIL:
+  case ThisIL: return false;
+  case AllIL:  return true;
   case &MustPointTo(place):
-    let &$(d,*seen) = env;
-    if (List::mem(place_cmp, *seen, place))
+    if(List::mem(place_cmp, env->seen, place))
       return true;
-    *seen = new List(place,*seen);
-    return isAllInit_pinfo(env,lookup_place(d,place));
+    env->seen = new List(place, env->seen);
+    return isAllInit_pinfo(env, lookup_place(env->top_info, place));
   }
 }
-bool isAllInit_f($(pinfo_dict_t<local_root_t>,list_t<place_t>)@`r env, `a a,
-		 path_info_t path) {
+bool isAllInit_f(allinit_env_t env, `a ignore, path_info_t path) {
   return isAllInit_pinfo(env,path);
 }
-bool isAllInit_pinfo($(pinfo_dict_t<local_root_t>,list_t<place_t>)@`r env,
-		     path_info_t path) {
+bool isAllInit_pinfo(allinit_env_t env, path_info_t path) {
   switch(path) {
-  case &LeafPI(is):   return isAllInit_is(env,is);
-  case &TuplePI(d2):  return Dict::forall_c(isAllInit_f,env,d2);
-  case &StructPI(d2): return Dict::forall_c(isAllInit_f,env,d2);
+  case &LeafPI(is): return isAllInit_is(env, is);
+  case &DictPI(d2): return Dict::forall_c(isAllInit_f, env, d2);
   }
 }
-
 bool isAllInit(pinfo_dict_t<local_root_t> pinfo_dict, path_info_t pinfo) {
-  let isInitEnv = $(pinfo_dict,NULL);
+  let isInitEnv = AllInitEnv(pinfo_dict, NULL);
   return isAllInit_pinfo(&isInitEnv, pinfo);
 }
 
-static void add_place(region_t<`r1> r,
-		      list_t<place_t,`r1>@`r2 places, place_t place){
+static void add_place(region_t<`r> r,
+		      list_t<place_t<`H,`H>,`r>@ places, 
+		      place_t<`H,`H> place){
   // we expect lots of inserts and short lists, so we don't bother to sort
   // we do bother to check for repeats to avoid a possible exponential blowup
   // (that would never happen in practice)
-  if(!List::mem(place_cmp,*places,place))
+  if(!List::mem(place_cmp, *places, place))
     *places = rnew(r) List(place, *places);
 }
 
 // Note: The map_c calls do a lot of unnecessary allocation.
 path_info_t pinfo_getplaces_esc($(pinfo_dict_t<local_root_t>,
-				  list_t<place_t,`r3>@`r2,
-				  region_t<`r3>) @`r1 env,
+				  list_t<place_t<`H,`H>,`r>@,
+				  region_t<`r>) @ env,
 				path_info_t pinfo) {
   let &$(rootd,places_ptr,rgn) = env;
   switch(pinfo) {
-  case &LeafPI(&MustPointTo(place)): 
+  case &LeafPI(InitState(_,&MustPointTo(place))): 
     add_place(rgn,places_ptr,place);
     if(isAllInit(rootd,lookup_place(rootd,place)))
       return mkLeafPI(Esc,AllIL);
     return mkLeafPI(Esc,ThisIL);
-  case &LeafPI(&UnknownIS(_,il)): 
-    return mkLeafPI(Esc,il);
-  case &TuplePI(d):  
-    return new TuplePI(Dict::map_c(pinfo_getplaces_esc, env, d));
-  case &StructPI(d): 
-    return new StructPI(Dict::map_c(pinfo_getplaces_esc, env, d));
+  case &LeafPI(InitState(_,il)): return mkLeafPI(Esc,il);
+  case &DictPI(d): return new DictPI(Dict::map_c(pinfo_getplaces_esc, env, d));
   }
 }
-void pinfo_getplaces($(list_t<place_t,`r3>@`r2, region_t<`r3>) @`r1 env,
+void pinfo_getplaces($(list_t<place_t<`H,`H>,`r>@, region_t<`r>) @ env,
 		     `a a, path_info_t pinfo){
   let &$(places_ptr,rgn) = env;
   switch(pinfo) {
-  case &LeafPI(&UnknownIS(_,_)):     
-    return;
-  case &LeafPI(&MustPointTo(place)): 
-    add_place(rgn,places_ptr,place);
-    return;
-  case &TuplePI(d):  
-    Dict::iter_c(pinfo_getplaces, env, d);  
-    return;
-  case &StructPI(d): 
-    Dict::iter_c(pinfo_getplaces, env, d);  
-    return;
+  case &LeafPI(is):
+    switch(is.level) {
+    case &MustPointTo(place): add_place(rgn,places_ptr,place); return;
+    default: return;
+    }
+  case &DictPI(d): Dict::iter_c(pinfo_getplaces, env, d); return;
   }
 }
 
 // note: this terminates because we thread the dictionary.
 // note: we need to catch not in the dict b/c of how join_flow uses this code.
+// FIX: we need to add the approrpriate things to a change log!!!
 pinfo_dict_t<local_root_t> escape_these(region_t<`r> rgn,
-					list_t<place_t,`r> places, 
-					pinfo_dict_t<local_root_t> d) {
+					list_t<place_t<`H,`H>,`r> places, 
+					pinfo_dict_t<local_root_t> d,
+					place_set_t * all_changed) {
   while(places != NULL) {
     let place = places->hd;
     places = places->tl;
+    if(all_changed != NULL)
+      *all_changed = Set::insert(*all_changed,place);
     path_info_t place_old_pinfo;
     try place_old_pinfo = lookup_place(d,place);
     catch { case Dict::Absent: continue; }
@@ -273,24 +284,20 @@ pinfo_dict_t<local_root_t> escape_these(region_t<`r> rgn,
 
 // only things pointed to escape
 pinfo_dict_t<local_root_t> escape_pointsto(path_info_t pinfo,
-					   pinfo_dict_t<local_root_t> d) {
+					   pinfo_dict_t<local_root_t> d,
+					   place_set_t * all_changed) {
   region r {
     let places = NULL;
     let env = $(&places,r);
     pinfo_getplaces(&env, 0, pinfo);
-    return escape_these(r,places,d);
+    return escape_these(r,places,d,all_changed);
   }
 }
 
-// To do: try to avoid allocation here
 path_info_t assign_unknown_dict(init_level_t level, path_info_t pinfo) {
   switch(pinfo) {
-  case &LeafPI(&UnknownIS(Esc,_)): return mkLeafPI(Esc,   level);
-  case &LeafPI(_):                 return mkLeafPI(Unesc, level);
-  case &TuplePI(d):  
-    return new TuplePI(Dict::map_c(assign_unknown_dict, level, d));
-  case &StructPI(d): 
-    return new StructPI(Dict::map_c(assign_unknown_dict, level, d));
+  case &LeafPI(InitState(esc,_)): return mkLeafPI(esc,level);
+  case &DictPI(d): return new DictPI(Dict::map_c(assign_unknown_dict,level,d));
   }
 }
 //////////////////////////// Joins  and Lessthan ///////////////////////////////
@@ -301,64 +308,36 @@ struct JoinEnv<`r1::R,`r2::R> {
   list_t<place_t,`r1>@`r2 places;
   region_t<`r1> rgn;
 };
-typedef struct JoinEnv<`r1,`r2> @`r3 join_env_t<`r1,`r2,`r3>;
+typedef struct JoinEnv<`r1,`r2> @`r3 joinenv_t<`r1,`r2,`r3>;
 
-// WARNING: If this changes, make sure initstate_lessthan_approx still works.
-escaped_t join_escape(escaped_t esc1, escaped_t esc2) {
-  switch ($(esc1,esc2)) {
-  case $(Esc,_): fallthru;
-  case $(_,Esc): return Esc;
-  default:       return Unesc;
-  }
-}
-// WARNING: If this changes, make sure initstate_lessthan_approx still works.
-init_level_t join_initlevel(init_level_t il1, init_level_t il2) {
-  switch ($(il1,il2)) {
-  case $(NoneIL,_): fallthru;
-  case $(_,NoneIL): return NoneIL;
-  case $(ThisIL,_): fallthru;
-  case $(_,ThisIL): return ThisIL;
-  default:          return AllIL;
-  }
-}
+enum WhoIsChanged { Neither, One, Two }; // if both changed, take join
+struct AfterEnv<`r1::R,`r2::R> {
+  struct JoinEnv<`r1,`r2> joinenv;
+  Set::set_t<place_t> chg1; // should region-allocate!
+  Set::set_t<place_t> chg2; // should region-allocate!
+  place_t curr_place; // a pain to stack-allocate, but should!
+  enum WhoIsChanged changed;
+  list_t<field_name_t> @ last_field_cell;
+};
+typedef struct AfterEnv<`r1,`r2> @`r3 afterenv_t<`r1,`r2,`r3>;
 
 // note: There is another reasonable policy for losing an alias to AllInit:
 //   still make the result ThisInit and **don't** lose the aliases downstream.
-//   I imagine the default should be AllInit and los downstream with a pragma
+//   I imagine the default should be AllInit and lose downstream with a pragma
 //   in the source to get the other behavior (if anyone actually cares).
 //   Note that the two policies are incomparable.
-path_info_t join_initstate(join_env_t<`r1,`r2,`r3> env,
-			   init_state_t state1, 
-			   init_state_t state2) {
-  switch($(state1,state2)) {
-  case $(&UnknownIS(esc1,il1),&UnknownIS(esc2,il2)): 
-    return mkLeafPI(join_escape(esc1,esc2), join_initlevel(il1,il2));
-
-  case $(&UnknownIS(esc1,il1),&MustPointTo(place2)):
-    // note: esc1 is irrelevant in the sense that place2 and downstream
-    //       escapes b/c we no longer know all the pointers to it.
-    let isInitEnv = $(env->d2,NULL);
-    if(il1==(init_level_t)AllIL && isAllInit_pinfo(&isInitEnv,lookup_place(env->d2,place2))) {
-      add_place(env->rgn, env->places, place2);
-      return mkLeafPI(esc1,il1);
-    }
-    return mkLeafPI(esc1, join_initlevel(il1, ThisIL));
-
-  case $(&MustPointTo(place1),&UnknownIS(esc2,il2)):
-    // note: esc2 is irrelevant in the sense that place2 and downstream
-    //       escapes b/c we no longer know all the pointers to it.
-    let isInitEnv = $(env->d1,NULL);
-    if(il2 == (init_level_t)AllIL 
-       && isAllInit_pinfo(&isInitEnv,lookup_place(env->d1,place1))) {
-      add_place(env->rgn, env->places, place1);
-      return mkLeafPI(esc2,il2);
-    }
-    return mkLeafPI(esc2, join_initlevel(ThisIL, il2));
+static path_info_t join_initstate(joinenv_t env,
+				  init_state_t state1, 
+				  init_state_t state2) {
+  init_level_t result_level;
+  escaped_t    result_esc;
+  switch($(state1.level, state2.level)) {
 
   case $(&MustPointTo(place1),&MustPointTo(place2)):
-    if(place_cmp(place1,place2) == 0) return new LeafPI(state1);
-    let isInitEnv1 = $(env->d1,NULL);
-    let isInitEnv2 = $(env->d2,NULL);
+    if(place_cmp(place1,place2) == 0) 
+      return new LeafPI(state1);
+    let isInitEnv1 = AllInitEnv(env->d1,NULL);
+    let isInitEnv2 = AllInitEnv(env->d2,NULL);
     if(isAllInit_pinfo(&isInitEnv1, lookup_place(env->d1,place1))
        && isAllInit_pinfo(&isInitEnv2, lookup_place(env->d2,place2))) {
       add_place(env->rgn, env->places, place1);
@@ -366,29 +345,129 @@ path_info_t join_initstate(join_env_t<`r1,`r2,`r3> env,
       return mkLeafPI(Unesc,AllIL);
     }
     return mkLeafPI(Unesc,ThisIL);
+  
+  case $(&MustPointTo(place1), il2): // cannot fallthru b/c of env->d2
+    // note: state2.esc is irrelevant in the sense that place1 and downstream
+    //       escapes b/c we no longer know all the pointers to it.
+    let isInitEnv = AllInitEnv(env->d1,NULL);
+    if(il2==AllIL && isAllInit_pinfo(&isInitEnv,lookup_place(env->d1,place1))) {
+      //      printf("8");
+      add_place(env->rgn, env->places, place1);
+      return mkLeafPI(state2.esc,AllIL);
+    }
+    //    printf("9");
+    return mkLeafPI(state2.esc, (il2 == NoneIL ? NoneIL : ThisIL));
+    
+  case $(il1, &MustPointTo(place2)):
+    // note: state1.esc is irrelevant in the sense that place2 and downstream
+    //       escapes b/c we no longer know all the pointers to it.
+    let isInitEnv = AllInitEnv(env->d2,NULL);
+    if(il1==AllIL && isAllInit_pinfo(&isInitEnv,lookup_place(env->d2,place2))) {
+      //      printf("6");
+      add_place(env->rgn, env->places, place2);
+      return mkLeafPI(state1.esc,AllIL);
+    }
+    return mkLeafPI(state1.esc, (il1 == NoneIL ? NoneIL : ThisIL));
+    
+  case $(NoneIL,_):
+  case $(_,NoneIL): result_level = NoneIL; break;
+  case $(ThisIL,_): 
+  case $(_,ThisIL): result_level = ThisIL; break;
+  default:          result_level = AllIL;  break;
   }
+  if(state1.esc == Unesc && state2.esc == Unesc)
+    result_esc = Unesc;
+  else
+    result_esc = Esc;
+  return mkLeafPI(result_esc, result_level);
 }
 
-// we could try to do more to avoid allocation, but we do is easy
+// we could try to do more to avoid allocation, but what we do is easy
 // and gets most of the possible sharing, I think.
-path_info_t join_pathinfo(join_env_t<`r1,`r2,`r3> env,
-			  path_info_t pinfo1, path_info_t pinfo2) {
+static path_info_t join_pathinfo(joinenv_t env, `a ignore,
+				 path_info_t pinfo1, 
+				 path_info_t pinfo2) {
   if(pinfo1 == pinfo2) return pinfo1;
   switch($(pinfo1,pinfo2)) {
   case $(&LeafPI(is1),&LeafPI(is2)):
-    if(is1 == is2) return pinfo1;
+    if(is1.esc == is2.esc && is1.level == is2.level) return pinfo1;
     return join_initstate(env,is1,is2);
-  case $(&TuplePI(d1),&TuplePI(d2)):
+  case $(&DictPI(d1),&DictPI(d2)):
     if (d1 == d2) return pinfo1;
-    return new TuplePI(Dict::intersect_c(join_pathinfo,env,d1,d2));
-  case $(&StructPI(d1),&StructPI(d2)):
-    if (d1 == d2) return pinfo1;
-    return new StructPI(Dict::intersect_c(join_pathinfo,env,d1,d2));
+    return new DictPI(Dict::intersect_c(join_pathinfo,env,d1,d2));
   default: throw new Core::Impossible("join_pathinfo");
   }
 }
 
-flow_info_t join_flow(flow_info_t f1, flow_info_t f2) { 
+static path_info_t after_pathinfo_dict(afterenv_t env, field_name_t key,
+				       path_info_t pinfo1,
+				       path_info_t pinfo2);
+static path_info_t after_pathinfo(afterenv_t env,
+				  path_info_t pinfo1,
+				  path_info_t pinfo2) {
+  let changed1 = env->changed == One || Set::member(env->chg1,env->curr_place);
+  let changed2 = env->changed == Two || Set::member(env->chg2,env->curr_place);
+  if(changed1 && changed2) {
+    //    printf("C");
+    return join_pathinfo(&env->joinenv, 0, pinfo1, pinfo2);
+  }
+  // checking for "is a contained object changed in the other pinfo" is
+  // quadratic because we'll do it "all the way down", but in practice
+  // nobody cares because "all the way down" is small.
+  if(changed1) {
+    //    printf("D");
+    if(!prefix_of_member(env->curr_place, env->chg2))
+      return pinfo1;
+    env->changed = One;
+    switch ($(pinfo1,pinfo2)) {
+    case $(&DictPI(d1),&DictPI(d2)):
+      return new DictPI(Dict::intersect_c(after_pathinfo_dict,env,d1,d2));
+    default: throw new Core::Impossible("after_pathinfo 1");
+    }
+  }
+  if(changed2) {
+    //    printf("A");
+    if(!prefix_of_member(env->curr_place, env->chg1))
+      return pinfo2;
+    env->changed = Two;
+    switch ($(pinfo1,pinfo2)) {
+    case $(&DictPI(d1),&DictPI(d2)):
+      return new DictPI(Dict::intersect_c(after_pathinfo_dict,env,d1,d2));
+    default: throw new Core::Impossible("after_pathinfo 2");
+    }
+  }
+  switch($(pinfo1,pinfo2)) {
+  case $(&DictPI(d1),&DictPI(d2)):
+    //    printf("E");
+    return new DictPI(Dict::intersect_c(after_pathinfo_dict,env,d1,d2));
+  default: throw new Core::Impossible("after_pathinfo -- nothing changed!");
+  }
+}
+
+static path_info_t after_pathinfo_dict(afterenv_t env, field_name_t key,
+				       path_info_t pinfo1, path_info_t pinfo2) {
+  if(pinfo1 == pinfo2) return pinfo1;
+  let old_last_field = env->last_field_cell; 
+  let old_changed    = env->changed;
+  *env->last_field_cell = new List(key,NULL);
+  env->last_field_cell = &(*env->last_field_cell)->tl;
+  let ans = after_pathinfo(env,pinfo1,pinfo2);
+  env->last_field_cell = old_last_field;
+  (*env->last_field_cell)->tl = NULL;
+  env->changed = old_changed;
+  return ans;
+}
+  
+static path_info_t after_pathinfo_root(afterenv_t env, local_root_t root,
+				       path_info_t pinfo1, path_info_t pinfo2) {
+  if(pinfo1 == pinfo2) return pinfo1;
+  *env->curr_place = Place(root,NULL);
+  env->last_field_cell = &env->curr_place->fields;
+  env->changed = Neither;
+  return after_pathinfo(env, pinfo1, pinfo2);
+}
+
+flow_info_t join_flow(place_set_t* all_changed, flow_info_t f1, flow_info_t f2){
   if(f1 == f2) return f1;
   switch($(f1,f2)) {
   case $(BottomFL,_): return f2;
@@ -405,30 +484,64 @@ flow_info_t join_flow(flow_info_t f1, flow_info_t f2) {
       let places  = NULL;
       let joinenv = JoinEnv(d1,d2,&places,r);
       let outdict = Dict::intersect_c(join_pathinfo,&joinenv,d1,d2);
-      return new InitsFL(escape_these(r,places,outdict));
+      let ans_flow = escape_these(r,places,outdict,all_changed);
+      return new InitsFL(ans_flow);
     }
   }
 }
 
-// WARNING: This is where we cheat ("approx") for performance (see below).
-bool initstate_lessthan_approx(init_state_t state1, init_state_t state2) {
-  switch ($(state1,state2)) {
-  case $(&UnknownIS(esc1,il1),&UnknownIS(esc2,il2)): 
-    return (join_escape(esc1,esc2)==esc2) && (join_initlevel(il1,il2)==il2);
-  case $(&MustPointTo(place1),&MustPointTo(place2)):
-    return place_cmp(place1,place2) == 0; // APPROXIMATE
-  default: 
-    return false; // APPROXIMATE
+static tunion Raw_exp.Const_e dummy_rawexp = Const_e(Null_c);
+static struct Exp dummy_exp = Exp(NULL,&dummy_rawexp,NULL);
+static tunion LocalRoot.MallocPt dummy_root = MallocPt(&dummy_exp);
+
+// FIX: region-allocate chg1 and chg2!!
+flow_info_t after_flow(place_set_t* all_changed, flow_info_t f1, flow_info_t f2,
+		       place_set_t chg1, place_set_t chg2) {
+  if(f1 == f2) return f1;
+  switch($(f1,f2)) {
+  case $(BottomFL,_): 
+  case $(_,BottomFL): return BottomFL;
+  case $(&InitsFL(d1),&InitsFL(d2)):
+    if(d1 == d2) return f1;
+    // Should think about ways to avoid allocation here: (curr_place and
+    // cut-off in presence of changes)
+    region r2 {
+      let places = NULL;
+      let curr_place = new Place(&dummy_root,NULL);
+      let afterenv = AfterEnv(JoinEnv(d1,d2,&places,r2), chg1, chg2, 
+			      curr_place, Neither, &curr_place->fields);
+      let outdict = Dict::union_two_c(after_pathinfo_root,&afterenv,d1,d2);
+      let ans_flow = escape_these(r2,places,outdict,all_changed);
+      return new InitsFL(ans_flow);
+    }
   }
 }
-bool pinfo_lessthan_approx(`a ignore, path_info_t pinfo1, path_info_t pinfo2) {
+
+// WARNING: This is where we cheat ("approx") for performance.
+static bool initstate_lessthan_approx(init_state_t state1, init_state_t state2){
+  if(state1.esc == Esc && state2.esc == Unesc)
+    return false;
+  if(state1.level == state2.level)
+    return true;
+  switch($(state1.level,state2.level)) {
+  case $(&MustPointTo(place1),&MustPointTo(place2)):
+    return place_cmp(place1,place2) == 0;
+  case $(&MustPointTo(_),_):
+  case $(_,&MustPointTo(_)): return false;
+  case $(AllIL,_): 
+  case $(ThisIL,NoneIL): return true;
+  default: return false;
+  }
+}
+
+static bool pinfo_lessthan_approx(`a ignore, 
+				  path_info_t pinfo1, 
+				  path_info_t pinfo2) {
   if(pinfo1 == pinfo2) return true;
   switch ($(pinfo1,pinfo2)) {
-  case $(&LeafPI(s1),&LeafPI(s2)):
-    return (s1 == s2) || initstate_lessthan_approx(s1,s2);
-  case $(&TuplePI(d1),&TuplePI(d2)):
-    return (d1 == d2) || Dict::forall_intersect(pinfo_lessthan_approx,d1,d2);
-  case $(&StructPI(d1),&StructPI(d2)):
+  case $(&LeafPI(is1),&LeafPI(is2)):
+    return initstate_lessthan_approx(is1,is2);
+  case $(&DictPI(d1),&DictPI(d2)):
     return (d1 == d2) || Dict::forall_intersect(pinfo_lessthan_approx,d1,d2);
   default: throw new Core::Impossible("pinfo_lessthan");
   }
@@ -436,7 +549,7 @@ bool pinfo_lessthan_approx(`a ignore, path_info_t pinfo1, path_info_t pinfo2) {
 
 // WARNING: We assume anything not in the intersection is IRRELEVANT.
 // WARNING: We might return false even when f1 < f2, but that's okay b/c
-//  that will just cause clients to take joins and we always return true
+//  that will just cause clients to take joins/afters and we always return true
 //  when the two flows are equal.  That's what the approx means.
 // (As a result of the approx, we don't have to allocate here.)
 bool flow_lessthan_approx(flow_info_t f1, flow_info_t f2) {

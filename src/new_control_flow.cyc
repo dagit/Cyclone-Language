@@ -39,12 +39,10 @@
 //   Another thing to do during this pass would be NULL-check elimination
 //   and/or warning.
 // * Last we free space by replacing all the statment annotations.
-// Note translating to absexp_t's provides a great place to dumb down 
-//   the analysis for sake of comparison -- change the abstraction translation, 
-//   not the flow analysis.
 
 #include <core.h>
 #include <list.h>
+#include <set.h>
 #include <dict.h>
 #include <cstring.h>
 #include <assert.h>
@@ -214,8 +212,8 @@ abssyn_t use_exp_unordered(absenv_t env, list_t<exp_t,`H> es, list_t<absop_t,`H>
   for(; es != NULL; es = es->tl) {
     let syn = abstract_exp(elt_env, es->hd);
     let AbsSynOne(inner,assigns) = meet_absexp(syn);
-    es_exp   = mkGroupAE(UnorderedG,    inner,   es_exp);
-    uses_exp = mkGroupAE(mkAnyOrderG(), assigns, uses_exp);
+    es_exp   = mkGroupAE(UnorderedG, inner,   es_exp);
+    uses_exp = mkGroupAE(UnorderedG, assigns, uses_exp);
   }
   return mkSyn_tf(mkGroupAE(OrderedG, es_exp, uses_exp),
 		  lhs,
@@ -239,10 +237,10 @@ absop_t destruct_path(absenv_t env, absop_t absop) {
       return mkAddressOp(absop);
     case &Deref_e(_):          absop = mkDerefOp(absop); break;
     case &StructArrow_e(_,f):  absop = mkDerefOp(absop); fallthru(f);
-    case &StructMember_e(_,f): absop = mkMemberOp(absop,new StructF(f)); break;
+    case &StructMember_e(_,f): absop = mkMemberOp(absop, f); break;
     case &Subscript_e(_,e2):    
       let i = Evexp::eval_const_uint_exp(e2);
-      absop = mkMemberOp(absop,new TupleF(i));
+      absop = mkMemberOp(absop,fieldname(i));
       break;
     default: 
       throw new Impossible("abstract_exp: unexpected acces path element");
@@ -267,8 +265,8 @@ abssyn_t abstract_malloc(absenv_t env, exp_t outer_e,
   if(rgn_exp != NULL) {
     let r_syn = abstract_exp(use_it_env(env), (exp_t)rgn_exp);
     let AbsSynOne(r_inner,r_assigns) = meet_absexp(r_syn);
-    inner   = mkGroupAE(UnorderedG,    inner,   r_inner);
-    assigns = mkGroupAE(mkAnyOrderG(), assigns, r_assigns);
+    inner   = mkGroupAE(UnorderedG, inner,   r_inner);
+    assigns = mkGroupAE(UnorderedG, assigns, r_assigns);
   }
   let ansexp = mkGroupAE(OrderedG, mkMallocAE(outer_e),
 			 mkGroupAE(OrderedG, inner, assigns));
@@ -520,11 +518,11 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
 	  if(isUnknownOp(ls->hd))
 	    ith_lvals = new List(mkUnknownOp(),ith_lvals); 
 	  else 
-	    ith_lvals = new List(mkMemberOp(ls->hd,new TupleF(j)), ith_lvals);
+	    ith_lvals = new List(mkMemberOp(ls->hd, fieldname(j)), ith_lvals);
 	let ith_syn = abstract_exp(change_lhs(env,ith_lvals), es->hd);
 	let AbsSynOne(ith_inner,ith_assigns) = meet_absexp(ith_syn);
-	ansexp    = mkGroupAE(UnorderedG,    ansexp,    ith_inner);
-	assignexp = mkGroupAE(mkAnyOrderG(), assignexp, ith_assigns);
+	ansexp    = mkGroupAE(UnorderedG, ansexp,    ith_inner);
+	assignexp = mkGroupAE(UnorderedG, assignexp, ith_assigns);
       }
       return mkSyn_tf(ansexp, NULL, assignexp);
 
@@ -574,14 +572,14 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
                 throw new Impossible("bad struct designator");
 	      case &FieldName(f):
 		ith_lvals = 
-                  new List(mkMemberOp(ls->hd,new StructF(f)), ith_lvals);
+                  new List(mkMemberOp(ls->hd, f), ith_lvals);
 		break;
 	      }
 	let ith_topt = &(*des->hd)[1]->topt->v;
 	let ith_syn = abstract_exp(change_lhs(env,ith_lvals), (*des->hd)[1]);
 	let AbsSynOne(ith_inner,ith_assigns) = meet_absexp(ith_syn);
-	ansexp    = mkGroupAE(UnorderedG,    ansexp,    ith_inner);
-	assignexp = mkGroupAE(mkAnyOrderG(), assignexp, ith_assigns);
+	ansexp    = mkGroupAE(UnorderedG, ansexp,    ith_inner);
+	assignexp = mkGroupAE(UnorderedG, assignexp, ith_assigns);
       }
       return mkSyn_tf(ansexp, NULL, assignexp);
       // bizarre case
@@ -783,6 +781,7 @@ void cf_prepass(absenv_t env, stmt_t s) {
     return;
   case &Exp_s(e): 
     let ae = abstract_exp_top(env,e);
+    //    printf("%s\n", absexp2string(ae,0));
     cf_set_absexps(s,new List(ae,NULL)); 
     return;
   case &Seq_s(s1,s2): 
@@ -897,35 +896,45 @@ struct AnalEnv {
   pinfo_dict_t<local_root_t> roots; // the "uninit leaves" versions
   bool        in_try;  // an optimization for the common case
   flow_info_t tryflow; // updated by UseAE and AssignAE, used by TryCatch_s
+  place_set_t * all_changed; // NULL for not in unorderd so don't bother
 };
 
+// Sound KLUDGE: The changed should go on the destination, but it's easier
+// to put it on the source and nobody is ever going to notice the difference
+// in precision (it takes a goto or caught throw from an inner unordered
+// context to an outer one, I think).  The fix is to keep all the changed
+// lists in the env and find the right one for the dest (by following
+// enclosers somehow), but again, it is a really strange thing.
 void update_tryflow(analenv_t env, flow_info_t new_flow) {
   if(env->in_try)
-    env->tryflow = join_flow(new_flow, env->tryflow);
+    env->tryflow = join_flow(env->all_changed, new_flow, env->tryflow);
 }
 
-static cf_stmt_annot_t @ pre_stmt_check(flow_info_t in_flow, stmt_t s) {
-  let annot = get_stmt_annot(s);
-  // merge in the flow we're passed to that from non-local preds and 
-  // earlier iterations
-  annot->flow = join_flow(in_flow, annot->flow);
-  // keep the iteration count right
-  ++annot->visited;
-  assert(annot->visited == iteration_num);
-
-  return annot;
-}
-
+// Sound KLUDGE: same explanation as for update_tryflow above
 // need to check for less than after the join b/c of the approximation
 // else may not terminate.
-static void update_flow(stmt_t s, flow_info_t flow) {
+static void update_flow(analenv_t env, stmt_t s, flow_info_t flow) { 
   let annot = get_stmt_annot(s);
-  let new_flow = join_flow(flow, annot->flow);
+  let new_flow = join_flow(env->all_changed, flow, annot->flow);
   if(!flow_lessthan_approx(new_flow, annot->flow)) {
+    //    printf("?");
     annot->flow = new_flow;
     if(annot->visited == iteration_num)
       iterate_cf_check = true;
   }
+  //  printf("!");
+}
+
+static cf_stmt_annot_t@ pre_stmt_check(analenv_t env, flow_info_t in_flow, 
+				       stmt_t s) {
+  let annot = get_stmt_annot(s);
+  // merge in the flow we're passed with flow from non-local preds and 
+  // earlier iterations
+  annot->flow = join_flow(env->all_changed, in_flow, annot->flow);
+  // keep the iteration count right
+  ++annot->visited;
+  assert(annot->visited == iteration_num);
+  return annot;
 }
 
 static flow_info_t add_init_vars_flow(analenv_t env, flow_info_t flow,
@@ -969,10 +978,10 @@ cf_evalguard(analenv_t env, Position::seg_t loc, list_t<absexp_t> aes,
 
 // for now, pat_vars are initialized FIX WHEN WE INTERPRET PATTERNS
 // also some unnecessary allocation here 
-static void cf_analyze_switch_clauses(analenv_t env,
-				      list_t<switch_clause_t> scs, 
-				      list_t<absexp_t> aes, 
-				      flow_info_t in_flow) {
+static flow_info_t cf_analyze_switch_clauses(analenv_t env,
+					     list_t<switch_clause_t> scs, 
+					     list_t<absexp_t> aes, 
+					     flow_info_t in_flow) {
   for(; scs != NULL; scs = scs->tl) {
     let &Switch_clause(_,vds_opt,where_opt,body,_) = scs->hd;
     let body_inflow = add_vardecls_flow(env, in_flow, vds_opt->v);
@@ -980,10 +989,10 @@ static void cf_analyze_switch_clauses(analenv_t env,
     // WRONG WHEN WE INTERPRET PATTERNS
     body_inflow = add_init_vars_flow(env, body_inflow, vds_opt->v);
 
-    _ body_outflow;
+    flow_info_t body_outflow;
     if(where_opt != NULL) {
-      let $(true_flow,false_flow) = cf_evalguard(env, ((exp_t)where_opt)->loc,
-						 aes,  body_inflow);
+      let $(true_flow,false_flow) =
+	cf_evalguard(env, ((exp_t)where_opt)->loc, aes,  body_inflow);
       aes     = aes->tl->tl;
       in_flow = false_flow;
       body_outflow = cf_analyze_stmt(env, body, true_flow);
@@ -993,123 +1002,132 @@ static void cf_analyze_switch_clauses(analenv_t env,
     case BottomFL: break;
     default: 
       // no need for a break/fallthru for the last case
-      if (scs->tl != NULL) {
-	// if there are pattern variables in the next case, then an explicit
-	// fallthru is needed
+      if(scs->tl == NULL)
+	return body_outflow;
+      else {
+	// if the next case has pattern variables, we need an explicit fallthru
+	// else just issue a warning
 	if (scs->tl->hd->pat_vars->v != NULL)
 	  Tcutil::terr(body->loc, "switch clause may implicitly fallthru");
-	// otherwise issue a warning
 	else 
 	  Tcutil::warn(body->loc, "switch clause may implicitly fallthru");
+	// in any case, we must update the flow there!
+	update_flow(env, scs->tl->hd->body, body_outflow);
       }
       break;
     }
   }
+  return BottomFL; // not reached if last case falls through
 }
 
 flow_info_t cf_analyze_stmt(analenv_t env, stmt_t s, flow_info_t in_flow) {
-
-  let annot = pre_stmt_check(in_flow,s);
+  // printf(" ");
+  let annot = pre_stmt_check(env,in_flow,s);
   in_flow = annot->flow;
   let aes = annot->absexps;
 
   switch(s->r) {
-  case Skip_s:         return in_flow;
+  case Skip_s: return in_flow;
     // FIX: when have init parameters, check they're init by "using" them here
   case &Return_s(NULL): return BottomFL;
   case &Return_s(e):    
-    //            fprintf(Stdio::stderr,"\n%s\n",absexp2string(aes->hd,0));
     eval_absexp(env, e->loc, aes->hd, in_flow); 
     return BottomFL;
     
-  case &Exp_s(e):       return eval_absexp(env, e->loc, aes->hd, in_flow);
+  case &Exp_s(e): return eval_absexp(env, e->loc, aes->hd, in_flow);
+
   case &Seq_s(s1,s2):
     return cf_analyze_stmt(env, s2, cf_analyze_stmt(env, s1, in_flow));
+
   case &IfThenElse_s(e,s1,s2):
     let $(true_flow,false_flow) = cf_evalguard(env, e->loc, aes, in_flow);
-    return join_flow(cf_analyze_stmt(env, s1, true_flow),
+    return join_flow(env->all_changed,
+		     cf_analyze_stmt(env, s1, true_flow),
 		     cf_analyze_stmt(env, s2, false_flow));
   case &While_s($(e,cont),body):
-    let e_inflow = pre_stmt_check(in_flow,cont)->flow;
+    let e_inflow = pre_stmt_check(env,in_flow,cont)->flow;
     let $(true_flow,false_flow) = cf_evalguard(env, e->loc, aes, e_inflow);
     let body_outflow = cf_analyze_stmt(env, body, true_flow);
-    update_flow(cont, body_outflow);
+    //    printf("X");
+    update_flow(env, cont, body_outflow);
+    //    printf("Y");
     return false_flow;
   case &Do_s(body,$(e,cont)):
     let body_outflow = cf_analyze_stmt(env, body, in_flow);
-    let e_inflow = pre_stmt_check(body_outflow,cont)->flow;
+    let e_inflow = pre_stmt_check(env,body_outflow,cont)->flow;
     let $(true_flow,false_flow) = cf_evalguard(env, e->loc, aes, e_inflow);
-    update_flow(body, true_flow);
+    update_flow(env, body, true_flow);
     return false_flow;
   case &For_s(e1,$(e2,guard),$(e3,cont),body):
     let e1_outflow = eval_absexp(env, e1->loc, aes->hd, in_flow);
-    let e2_inflow = pre_stmt_check(e1_outflow,guard)->flow;
+    let e2_inflow  = pre_stmt_check(env,e1_outflow,guard)->flow;
     let $(true_flow,false_flow) = cf_evalguard(env,e2->loc,aes->tl,e2_inflow);
     let body_outflow = cf_analyze_stmt(env, body, true_flow);
-    let e3_inflow  = pre_stmt_check(body_outflow,cont)->flow;
+    let e3_inflow  = pre_stmt_check(env,body_outflow,cont)->flow;
     let e3_outflow = eval_absexp(env, e3->loc, aes->tl->tl->tl->hd, e3_inflow);
-    update_flow(guard, e3_outflow);
+    update_flow(env, guard, e3_outflow);
     return false_flow;
-  case &Break_s(NULL): // eg. break dest is function en
-    return BottomFL;
+
+    // eg. of when this can happen is when destination is end of function
+  case &Break_s(NULL): return BottomFL;
   case &Fallthru_s(es,&destclause):
     // The gunk is because the next case's binding vars are still in scope!
     // FIX: WHEN WE INTERPRET PATTERNS
-    in_flow = eval_absexp(env, s->loc, aes->hd, in_flow);
+    let out_flow = eval_absexp(env, s->loc, aes->hd, in_flow);
     let ftvars = destclause->pat_vars->v;
-    in_flow = add_vardecls_flow(env, in_flow, ftvars);
-    in_flow = add_init_vars_flow(env, in_flow, ftvars);
-    fallthru(destclause->body);
+    out_flow = add_vardecls_flow(env, out_flow, ftvars);
+    out_flow = add_init_vars_flow(env, out_flow, ftvars);
+    update_flow(env, (stmt_t)(destclause->body), out_flow);
+    return BottomFL;
   case &Break_s(dest):    fallthru(dest);
   case &Continue_s(dest): fallthru(dest);
   case &Goto_s(_,dest):
-    update_flow((stmt_t)dest, in_flow);
+    update_flow(env, (stmt_t)dest, in_flow);
     return BottomFL;
 
   case &Switch_s(e,scs):
-    in_flow = eval_absexp(env, e->loc, aes->hd, in_flow);
-    cf_analyze_switch_clauses(env, scs, aes->tl, in_flow);
-    return BottomFL;
+    return cf_analyze_switch_clauses(env, scs, aes->tl,
+				     eval_absexp(env,e->loc,aes->hd,in_flow));
     
   case &TryCatch_s(s,scs):
     // order very important here
-    let &AnalEnv(_,old_in_try, old_tryflow) = env;
+    let &AnalEnv(_,old_in_try,old_tryflow,_) = env;
     env->in_try  = true;
     env->tryflow = in_flow;
     let s_outflow  = cf_analyze_stmt(env, s, in_flow); 
     let scs_inflow = env->tryflow;
     env->in_try  = old_in_try;
     env->tryflow = old_tryflow;
+    // sound KLUDGE (see update_tryflow)
     update_tryflow(env, scs_inflow);
-    cf_analyze_switch_clauses(env, scs, aes, scs_inflow);
-    return s_outflow;
+    let scs_outflow = cf_analyze_switch_clauses(env, scs, aes, scs_inflow);
+    return join_flow(env->all_changed, s_outflow, scs_outflow);
 
+    // Note: We don't need to add initialized vars as changed things
+    //       because they won't escape to unordered siblings???
     
     // for var, add to dict as uninitialized before ae
     //   translation arleady does the initialization assignment!!
   case &Decl_s(&Decl(&Var_d(vd),_),s):
     let l = List(vd,NULL);
-    let body_inflow = add_vardecls_flow(env, in_flow, &l);
+    let e_flow = add_vardecls_flow(env, in_flow, &l);
     let e = vd->initializer;
-    if(e != NULL) {
-      //      printf("\n%s\n", absexp2string(aes->hd,0));
-      body_inflow = eval_absexp(env, ((exp_t)e)->loc, aes->hd, body_inflow);
-    }
-    return cf_analyze_stmt(env, s, body_inflow);
-    
+    if(e != NULL)
+      e_flow = eval_absexp(env, ((exp_t)e)->loc, aes->hd, e_flow);
+    return cf_analyze_stmt(env, s, e_flow);
+
     // for pat, add to dict as uninitialized before ae and then initialize
     //   after ae, translation assigns e to Unknown!
     // FIX WHEN WE INTERPRET PATTERNS!!!
   case &Decl_s(&Decl(&Let_d(_,&Opt(vds),_,e,_),_),s):
-    let body_inflow = add_vardecls_flow(env, in_flow, vds);
-    body_inflow = eval_absexp(env, e->loc, aes->hd, body_inflow);
+    let body_inflow =
+      eval_absexp(env, e->loc, aes->hd, add_vardecls_flow(env, in_flow, vds));
     // THIS PART GOES AWAY WHEN WE INTERPRET PATTERNS
     body_inflow = add_init_vars_flow(env, body_inflow, vds);
     return cf_analyze_stmt(env, s, body_inflow);
 
   case &Decl_s(&Decl(&Letv_d(vds),_),s):
-    let body_inflow = add_vardecls_flow(env, in_flow, vds);
-    return cf_analyze_stmt(env, s, body_inflow);
+    return cf_analyze_stmt(env, s, add_vardecls_flow(env, in_flow, vds));
 
   case &Label_s(_,s): return cf_analyze_stmt(env,s,in_flow);
 
@@ -1165,8 +1183,7 @@ void cf_postpass(stmt_t s) {
 void cf_check_fun(fndecl_t fd) {
   //  fprintf(Stdio::stderr,"%s",*(*fd->name)[1]);
   absenv_t absenv = AbsEnv(new SharedAbsEnv(Dict::empty(local_root_cmp), NULL),
-			   NULL,
-			   NULL);
+			   NULL, NULL);
   let arg_vds = fd->param_vardecls->v;
   for(_ vds = arg_vds; vds != NULL; vds = vds->tl)
     add_var_root(absenv, vds->hd);
@@ -1175,7 +1192,7 @@ void cf_check_fun(fndecl_t fd) {
 
   // TO DO: account for init qualifier (add ThisIL for those params and
   //        check them on return and on fall off void)
-  let analenv = new AnalEnv(roots, false, BottomFL);
+  let analenv = new AnalEnv(roots, false, BottomFL, NULL);
   flow_info_t in_flow = new InitsFL(Dict::empty(local_root_cmp));
   in_flow = add_init_vars_flow(analenv, in_flow, arg_vds);
   in_flow = add_vardecls_flow(analenv, in_flow, comprehension_vars);
@@ -1184,6 +1201,7 @@ void cf_check_fun(fndecl_t fd) {
   iteration_num    = 0;
   iterate_cf_check = true;
   while(iterate_cf_check) {
+    //    printf("\n");
     ++iteration_num;
     iterate_cf_check = false;
     out_flow = cf_analyze_stmt(analenv, fd->body, in_flow);

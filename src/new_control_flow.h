@@ -17,14 +17,12 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-
 #ifndef NEW_CONTROL_FLOW_H
 #define NEW_CONTROL_FLOW_H
 
 #include <list.h>
 #include <set.h>
 #include <dict.h>
-//#include <cstdio.h>
 #include "absyn.h"
 #include "cf_flowinfo.h"
 
@@ -40,6 +38,7 @@ extern struct AnalEnv {
   pinfo_dict_t<local_root_t> roots; // the "uninit leaves" versions
   bool        in_try;  // an optimization for the common case
   flow_info_t tryflow; // updated by UseAE and AssignAE, used by TryCatch_s
+  place_set_t * all_changed; // NULL for not in unorderd so don't bother
 };
 typedef struct AnalEnv @ analenv_t;
 
@@ -48,7 +47,7 @@ extern void update_tryflow(analenv_t env, flow_info_t new_flow);
 
 extern flow_info_t cf_analyze_stmt(analenv_t, Absyn::stmt_t, flow_info_t);
 
-// The entry point (all the stuff above is just for cf_absexp)
+// The entry point (the stuff above is just for cf_absexp, which is going away)
 extern void cf_check(list_t<Absyn::decl_t> ds);
 }
 

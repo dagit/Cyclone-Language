@@ -848,5 +848,8 @@ namespace Absyn {
   extern string_t attribute2string(attribute_t);
   // returns true when a is an attribute for function types
   extern bool fntype_att(attribute_t a);
+
+  // int to field-name caching used by control-flow and toc
+  extern field_name_t fieldname(int);
 }
 #endif

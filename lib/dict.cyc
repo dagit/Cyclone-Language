@@ -391,22 +391,23 @@ bool forall_intersect(bool f(`a,`b,`b), dict_t<`a,`b> d1, dict_t<`a,`b> d2) {
 }
 
 // TO DO: Add the env version for union_two.
-static dict_t<`a,`b,`r2> union_f(`b f(`b,`b), `a a, `b b, 
+static dict_t<`a,`b,`r2> union_f($(`b (@f)(`c,`a,`b,`b),`c)@ env, `a a, `b b, 
                                      dict_t<`a,`b,`r2> d1)
 {
   if(Dict::member(d1,a))
-    return Dict::insert(d1, a, f(Dict::lookup(d1, a), b));
+    return Dict::insert(d1, a, (*env)[0]((*env)[1], a, Dict::lookup(d1, a), b));
   else
     return Dict::insert(d1, a, b);
 }
 
-dict_t<`a,`b,`r2> union_two(`b f(`b,`b), dict_t<`a,`b,`r1> d1, 
-                                dict_t<`a,`b,`r2> d2) {
-  //if (d1 == d2) return d1; // can't do this with regions
-  return Dict::fold_c(union_f, f, d1, d2);
+dict_t<`a,`b,`r1> union_two_c(`b (@f)(`c,`a,`b,`b), `c env, 
+			      dict_t<`a,`b,`r1> d1,
+			      dict_t<`a,`b,`r2> d2) {
+  if (((int) d1) == ((int)d2)) return d1; 
+  return Dict::fold_c(union_f, new $(f,env), d2, d1);
 }
 
-dict_t<`a,`b,`r> intersect_c(`b (@f)(`c,`b,`b), `c env,
+dict_t<`a,`b,`r> intersect_c(`b (@f)(`c,`a,`b,`b), `c env,
 				 dict_t<`a,`b,`r> d1, 
 				 dict_t<`a,`b,`r> d2) {
   if (d1 == d2 || d2->t == NULL) return d2;
@@ -423,9 +424,19 @@ dict_t<`a,`b,`r> intersect_c(`b (@f)(`c,`b,`b), `c env,
     if(l != NULL) queue[++ind] = (Tree_t<`a,`b,`r>)l;
     if(r != NULL) queue[++ind] = (Tree_t<`a,`b,`r>)r;
     if(Dict::member(d1,k))
-      ans_tree = ins(d2->r,d2->rel,$(k,f(env,Dict::lookup(d1,k),v)),ans_tree);
+      ans_tree = ins(d2->r,d2->rel,$(k,f(env,k,Dict::lookup(d1,k),v)),ans_tree);
   }
   return rnew(d2->r) Dict(d2->rel, d2->r, ans_tree);
+}
+
+static `b intersect_f(`b (@f)(`a,`b,`b), `a a, `b b1, `b b2) {
+  return f(a,b1,b2);
+}
+
+dict_t<`a,`b,`r> intersect(`b (@f)(`a,`b,`b),
+			   dict_t<`a,`b,`r> d1,
+			   dict_t<`a,`b,`r> d2) {
+  return intersect_c(intersect_f, f, d1, d2);
 }
 
 static List::list_t<$(`a,`b)@`r,`r> 

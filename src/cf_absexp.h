@@ -46,22 +46,11 @@ extern string_t absexp2string(absexp_t ae, int depth);
 // new invariant: for any function, MallocAE(e) should occur at most once
 // for any e.
 
-// Basically, AnyOrderG is used in the following situations:
-// * None of the AEs contain Assign or Malloc.
-//   (Example use: arguments to a function)
-// * The Assign AEs are exactly the outermost list and every lhs will evaluate
-//   to something not reachable from any rhs.
-//   (Example use: initializing malloc fields)
-// The client could just use OrderedG but this function provides
-// better documentation that we're not relying on left-to-right, rather
-// we need and deserve the precision of Ordered despite non-determinism.
-extern absexpgroup_t mkAnyOrderG();
-
 // Violating the restrictions listed below causes BadAbsexp to be thrown.
 extern absop_t mkUnknownOp();
 extern absop_t mkAddressOp(absop_t ao);//ao must be Local, Member, or Malloc
 extern absop_t mkLocalOp(vardecl_t vd);
-extern absop_t mkMemberOp(absop_t ao,field_t f);//ao can't be Address or Unknown
+extern absop_t mkMemberOp(absop_t ao,field_name_t f);//ao can't be Address or Unknown
 extern absop_t mkMallocOp(exp_t e);
 extern absop_t mkDerefOp(absop_t ao);//ao must be Local, Member, or Deref
 
@@ -81,3 +70,4 @@ extern flow_info_t eval_absexp(analenv_t env, Position::seg_t loc,
 }
 
 #endif
+

@@ -162,20 +162,6 @@ static tunion Type tagged_arr_typ = &tagged_arr_typ_v;
 
 static tqual_t mt_tq = Tqual(false,false,false);
 
-// cache strings used for field names f0,f1,f2,...
-static string_t f0 = "f0";
-static stringptr_t field_names_v[1] = {&f0};
-static stringptr_t ?field_names = field_names_v;
-static stringptr_t fieldname(int i) {
-  unsigned int fsz = field_names.size;
-  if (i >= fsz) {
-    field_names = 
-      new {for j < i+1 : 
-	   (j < fsz) ? field_names[j] : new (string_t)aprintf("f%d",j)};
-  }
-  return field_names[i];
-}
-
 ///////////////////////////// Various Utilities /////////////////////////////
 
 static bool is_zero(exp_t e) {

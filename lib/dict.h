@@ -165,38 +165,39 @@ extern dict_t<`a,`c,`r> rmap(region_t<`r>,
 /** [rmap(r,f,d)] is like [map(f,d)], except the resulting dictionary
     is allocated in the region with handle [r]. */
 extern dict_t<`a,`c> map_c(`c f(`d,`b),`d env,dict_t<`a,`b> d);
-/** [map_c(f,env,d)] is like [map(f,d)] except that [f] takes a
-    closure [env] as its first argument. */
+/** [map_c(f,env,d)] is like [map(f,d)] except that [f] takes
+    [env] as its first argument. */
 extern dict_t<`a,`c,`r> rmap_c(region_t<`r>, `c f(`d,`b),`d env,
                                dict_t<`a,`b> d);
 /** [rmap_c(r,f,env,d)] is like [map_c(f,env,d)] except that the
     resulting dictionary is allocated in the region with handle
     [r]. */
 
-extern dict_t<`a,`b,`r> union_two(`b f(`b,`b),
-                                   dict_t<`a,`b> d1,
-                                   dict_t<`a,`b,`r> d2);
-/** [union_two(f,d1,d2)] returns a new dictionary with a binding for
-    every key in [d1] or [d2].  If a key appears in both [d1] and
+extern dict_t<`a,`b,`r> union_two_c(`b (@f)(`c,`a,`b,`b), `c env,
+                                   dict_t<`a,`b,`r> d1,
+                                   dict_t<`a,`b> d2);
+/** [union_two(f,env,d1,d2)] returns a new dictionary with a binding
+    for every key in [d1] or [d2].  If a key appears in both [d1] and
     [d2], its value in the result is obtained by applying [f] to the
-    two values.  Note that the resulting dictionary is allocated in
-    the same region as [d2].  (We don't use [union] as the name of the
-    function, because [union] is a keyword in Cyclone.) */
+    two values, the key, and env.  Note that the resulting dictionary
+    is allocated in the same region as [d2].  (We don't use [union] as
+    the name of the function, because [union] is a keyword in
+    Cyclone.) */
 
-extern dict_t<`a,`b,`r> intersect(`b (@f)(`b,`b),
+extern dict_t<`a,`b,`r> intersect(`b (@f)(`a,`b,`b),
                                   dict_t<`a,`b,`r> d1,
                                   dict_t<`a,`b,`r> d2);
 /** [intersect(f,d1,d2)] returns a new dictionary with a binding for
-    every key in both [d1] or [d2].  For every key appearing in both
+    every key in both [d1] and [d2].  For every key appearing in both
     [d1] and [d2], its value in the result is obtained by applying [f]
-    to the two values.  Note that the input dictionaries and result
+    to the key and the two values.  Note that the input dictionaries and result
     must be allocated in the same region. */
 
-extern dict_t<`a,`b,`r> intersect_c(`b (@f)(`c,`b,`b), `c env,
+extern dict_t<`a,`b,`r> intersect_c(`b (@f)(`c,`a,`b,`b), `c env,
                                      dict_t<`a,`b,`r> d1,
                                      dict_t<`a,`b,`r> d2);
 /** [intersect_c(f,env,d1,d2)] is like [intersect(f,d1,d2)], except
-    that [f] takes a closure [env] as its first argument. */
+    that [f] takes [env] as its first argument. */
 
 extern bool forall_c(bool f(`c,`a,`b), `c env, dict_t<`a,`b> d);
 /** [forall_c(f,env,d)] returns true if [f(env,k,v)] returns true for

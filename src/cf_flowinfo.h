@@ -40,47 +40,38 @@
 namespace CfFlowInfo {
 
 extern tunion LocalRoot;
-extern tunion Field;
-extern struct Place;
-extern tunion Escaped;
+extern struct Place<`r::R>;
+extern enum   Escaped;
 extern tunion InitLevel;
-extern tunion InitState;
+extern struct InitState;
 extern tunion PathInfo;
 extern tunion FlowInfo;
 typedef tunion LocalRoot local_root_t;
-typedef tunion Field field_t;
-typedef struct Place @place_t;
-typedef tunion Escaped escaped_t;
+typedef struct Place<`r1> @`r2 place_t<`r1,`r2>;
+typedef enum Escaped escaped_t;
 typedef tunion InitLevel init_level_t;
-typedef tunion InitState init_state_t;
+typedef struct InitState init_state_t;
 typedef tunion PathInfo path_info_t;
 typedef Dict::dict_t<`a,path_info_t,`H> pinfo_dict_t<`a>;
 typedef tunion FlowInfo flow_info_t;
-// Do not ever mutate any data structures built from these -- they share like
-// crazy.
+// Do not ever mutate any data structures built from these -- they share a lot!
 EXTERN_CFFLOW tunion LocalRoot {
   VarRoot(Absyn::vardecl_t);
-  MallocPt(Absyn::exp_t);
+  MallocPt(Absyn::exp_t); // misnamed when do other analyses??
 };
-EXTERN_CFFLOW tunion Field {
-  StructF(Absyn::field_name_t);
-  TupleF(int); // also used for tunion and xtunion field slots
-  // maybe add some array support some day
-};
-EXTERN_CFFLOW struct Place {
+EXTERN_CFFLOW struct Place<`r1::R> {
   local_root_t root;
-  List::list_t<field_t> fields;
+  List::list_t<Absyn::field_name_t,`r1> fields;
 };
-EXTERN_CFFLOW tunion Escaped   { Esc, Unesc };
-EXTERN_CFFLOW tunion InitLevel { NoneIL, ThisIL, AllIL };
-EXTERN_CFFLOW tunion InitState {
-  UnknownIS(escaped_t,init_level_t);
-  MustPointTo(place_t); // cannot have escaped
+EXTERN_CFFLOW enum Escaped { Esc, Unesc };
+EXTERN_CFFLOW tunion InitLevel { NoneIL, ThisIL, AllIL, MustPointTo(place_t) };
+EXTERN_CFFLOW struct InitState {
+  escaped_t esc;
+  init_level_t level; // cannot be MustPointTo if esc is Esc
 };
 EXTERN_CFFLOW tunion PathInfo {
   LeafPI(init_state_t);
-  TuplePI(pinfo_dict_t<int>); // used for tunion, xtunion slots too
-  StructPI(pinfo_dict_t<Absyn::field_name_t>);
+  DictPI(pinfo_dict_t<Absyn::field_name_t>); // for all record-like types
 };
 // Note: It would be correct to make the domain of the pinfo_dict_t
 //       constant (all local roots in the function), but it easy to argue
@@ -95,10 +86,12 @@ EXTERN_CFFLOW tunion FlowInfo {
   InitsFL(pinfo_dict_t<local_root_t>);
 };
 
+typedef Set::set_t<place_t> place_set_t;
+extern place_set_t mt_place_set();
+
 extern path_info_t mkLeafPI(escaped_t esc, init_level_t il);
 
 extern int local_root_cmp(local_root_t, local_root_t);
-extern int field_cmp(field_t, field_t);
 extern int place_cmp(place_t, place_t);
 extern path_info_t typ_to_unesc_none_pinfo(Absyn::type_t t);
 extern path_info_t lookup_place(pinfo_dict_t<local_root_t> d, place_t place);
@@ -108,11 +101,16 @@ extern pinfo_dict_t<local_root_t> insert_place(pinfo_dict_t<local_root_t> d,
 
 extern bool isAllInit(pinfo_dict_t<local_root_t> pinfo_dict, path_info_t pinfo);
 
-extern pinfo_dict_t<local_root_t> escape_pointsto(path_info_t pinfo,
-						  pinfo_dict_t<local_root_t> d);
+extern pinfo_dict_t<local_root_t> 
+escape_pointsto(path_info_t pinfo,
+		pinfo_dict_t<local_root_t> d,
+		place_set_t * all_changed);
 extern path_info_t assign_unknown_dict(init_level_t, path_info_t);
 
-extern flow_info_t join_flow(flow_info_t,flow_info_t);
+extern flow_info_t join_flow(place_set_t*,flow_info_t,flow_info_t);
+
+extern flow_info_t after_flow(place_set_t*,flow_info_t,flow_info_t,
+			      place_set_t,place_set_t);
 
 extern bool flow_lessthan_approx(flow_info_t f1, flow_info_t f2);
 }
