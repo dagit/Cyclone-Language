@@ -103,56 +103,58 @@ static mstringptr_t place2string(place_t p) {
 // Note: We could memoize answers here.
 static absRval_t i_typ_to_absrval(bool allow_zeroterm,
 				  type_t t, absRval_t leafval) {
-  if(!is_union_type(t))
-    switch(Tcutil::compress(t)) {
-    case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
-      if(tuf->typs == NULL)
-	return leafval;
-      fallthru(tuf->typs);
-    case &TupleType(tqts):
-      aggrdict_t d = Dict::empty(strptrcmp);
-      for(int i=0; tqts != NULL; tqts = tqts->tl, ++i)
-	d = Dict::insert(d,fieldname(i),
-                         i_typ_to_absrval(false,(*tqts->hd)[1],leafval));
-      return new Aggregate(d);
+  if(is_union_type(t))
+    return unknown_all;
 
-    case &AggrType(AggrInfo(info,_)):
-      let ad = get_known_aggrdecl(info);
-      if(ad->impl==NULL)
-	break;
-      fallthru(ad->impl->fields);
-    case &AnonAggrType(StructA,fs):
-      aggrdict_t d = Dict::empty(strptrcmp);
-      for(; fs != NULL; fs = fs->tl) {
-	let &Aggrfield(n,_,t2,_,_) = fs->hd;
-	if((*n).size != 1) //empty name means bit field so no need to include it
-	  d = Dict::insert(d, n, i_typ_to_absrval(false, t2,leafval));
-      }
-      return new Aggregate(d);
-    case &ArrayType(ArrayInfo{et,_,_,zeroterm}) && conref_def(false,zeroterm):
-      // special case for zero-terminated arrays of bits-only things -- 
-      // here, we initialize them at translation by putting a 0 in at the end.
-      return (allow_zeroterm && Tcutil::bits_only(et)) ? unknown_all : leafval;
-    case &TagType(t):
-      // KLUDGE: if a singleton is initialized, we know the value
-      // Note: It is unsound to use TagCmps if the value is uninitialized!
-      switch(leafval) {
-      case &UnknownR(AllIL):
-      case &Esc(AllIL):
-      case Zero:
-      case NotZeroAll: return new TagCmps(list(new TagCmp(Eq,t)));
-      default: return leafval;
-      }
+  switch(Tcutil::compress(t)) {
+  case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
+    if(tuf->typs == NULL)
+      return leafval;
+    fallthru(tuf->typs);
+  case &TupleType(tqts):
+    aggrdict_t d = Dict::empty(strptrcmp);
+    for(int i=0; tqts != NULL; tqts = tqts->tl, ++i)
+      d = Dict::insert(d,fieldname(i),
+		       i_typ_to_absrval(false,(*tqts->hd)[1],leafval));
+    return new Aggregate(d);
+
+  case &AggrType(AggrInfo(info,_)):
+    let ad = get_known_aggrdecl(info);
+    if(ad->impl==NULL)
+      break;
+    fallthru(ad->impl->fields);
+  case &AnonAggrType(StructA,fs):
+    aggrdict_t d = Dict::empty(strptrcmp);
+    for(; fs != NULL; fs = fs->tl) {
+      let &Aggrfield(n,_,t2,_,_) = fs->hd;
+      if((*n).size != 1) //empty name means bit field so no need to include it
+	d = Dict::insert(d, n, i_typ_to_absrval(false, t2,leafval));
+    }
+    return new Aggregate(d);
+  case &ArrayType(ArrayInfo{et,_,_,zeroterm}) && conref_def(false,zeroterm):
+    // special case for zero-terminated arrays of bits-only things -- 
+    // here, we initialize them at translation by putting a 0 in at the end.
+    return (allow_zeroterm && Tcutil::bits_only(et)) ? unknown_all : leafval;
+  case &TagType(t):
+    // KLUDGE: if a singleton is initialized, we know the value
+    // Note: It is unsound to use TagCmps if the value is uninitialized!
+    switch(leafval) {
+    case &UnknownR(AllIL):
+    case &Esc(AllIL):
+    case Zero:
+    case NotZeroAll: return new TagCmps(list(new TagCmp(Eq,t)));
+    default: return leafval;
+    }
     case &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,_,_}}) 
       && !conref_def(false,nbl):
-      switch(leafval) {
-      case &UnknownR(ThisIL): return NotZeroThis;
-      case &UnknownR(AllIL): return NotZeroAll;
-      default: break;
-      }
-      break;
-    default: break;
-    }
+	switch(leafval) {
+	case &UnknownR(ThisIL): return NotZeroThis;
+	case &UnknownR(AllIL): return NotZeroAll;
+	default: break;
+	}
+    break;
+  default: break;
+  }
   
   return Tcutil::bits_only(t) ? unknown_all : leafval;
 }
@@ -373,7 +375,7 @@ static absRval_t assign_place_outer(struct AssignEnv @ env,
   case $(&List(hd,tl),&Aggregate(d)):
     let new_child = assign_place_outer(env,tl,Dict::lookup(d,hd),newval);
     return new Aggregate(Dict::insert(d, hd, new_child));
-  default: throw new Core::Impossible("bad insert place");
+  default: throw new Core::Impossible("bad assign place");
   }
 }
 flowdict_t assign_place(Position::seg_t loc, flowdict_t d,

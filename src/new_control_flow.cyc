@@ -895,10 +895,13 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
   case &Var_e(_,&Global_b(vd)): return $(inflow,UnknownL);
 
   case &AggrArrow_e(e1,f):
-    // FIX:  Dan, this prevents me from writing u->f = e where u is a
-    // union pointer.  I get an Impossible("bad insert place")
-    if(!is_union_type(e1->topt->v)) // for unions, just drop the field
-      flds = new List(f,flds);
+    switch(Tcutil::compress(e1->topt->v)) {
+    case &PointerType(PtrInfo{t2,_,_}):
+      if(!is_union_type(t2))
+	flds = new List(f,flds);
+      break;
+    default: throw new Core::Impossible("anal_Rexp: AggrArrow ptr");
+    }
     fallthru(e1);
   case &Deref_e(e1): 
     let $(f,r) = anal_Rexp(env,inflow,e1);
