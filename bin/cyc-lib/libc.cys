@@ -416,6 +416,15 @@ hstub opendir {
   extern struct __cycDIR;  
   typedef struct __cycDIR DIR;
 }
+hstub opendir {
+  // struct dirent on Mac OS X does not have a d_ino member as
+  // required by POSIX, instead it is named d_fileno.
+  // This #define makes cross-platform porting easier.
+  // Probably this applies to other BSD variants...
+#ifdef __APPLE__
+#define d_ino d_fileno
+#endif
+}
 cycstub opendir {
   namespace Cdirent {
     extern "C" struct __abstractDIR;
