@@ -184,7 +184,7 @@ extern void print_flowdict(flowdict_t d);
 extern void print_flow(flow_t f);
 
 // debugging
-//#define DEBUG_FLOW
+// #define DEBUG_FLOW
 #define SANITY
 #ifdef DEBUG_FLOW
 #define DEBUG_PRINT(arg...) fprintf(stderr,##arg)

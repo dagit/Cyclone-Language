@@ -863,21 +863,21 @@ struct Cyc_List_List*l=((struct Cyc_List_List**)tab.curr)[(int)((*t->hash)(key)%
 return Cyc_List_assoc_cmp(t->cmp,l,key);}
 # 68
 void**Cyc_Hashtable_lookup_opt(struct Cyc_Hashtable_Table*t,void*key){
-struct _dyneither_ptr _tmp7=t->tab;
-struct Cyc_List_List*_tmp8=((struct Cyc_List_List**)_tmp7.curr)[(int)((*t->hash)(key)% _get_dyneither_size(_tmp7,sizeof(struct Cyc_List_List*)))];
-int(*_tmp9)(void*,void*)=t->cmp;
+struct _dyneither_ptr _tmp7=((struct Cyc_Hashtable_Table*)_check_null(t))->tab;
+struct Cyc_List_List*_tmp8=((struct Cyc_List_List**)_tmp7.curr)[(int)((*((int(*)(void*))_check_null(((struct Cyc_Hashtable_Table*)_check_null(t))->hash)))(key)% _get_dyneither_size(_tmp7,sizeof(struct Cyc_List_List*)))];
+int(*_tmp9)(void*,void*)=((struct Cyc_Hashtable_Table*)_check_null(t))->cmp;
 for(0;_tmp8 != 0;_tmp8=_tmp8->tl){
-void*_tmpB;void**_tmpC;struct _tuple0*_tmpA=(struct _tuple0*)_tmp8->hd;_tmpB=_tmpA->f1;_tmpC=(void**)& _tmpA->f2;
+struct _tuple0*_stmttmp0=(struct _tuple0*)_tmp8->hd;void*_tmpB;void**_tmpC;struct _tuple0*_tmpA=_stmttmp0;_tmpB=_tmpA->f1;_tmpC=(void**)& _tmpA->f2;
 if(_tmp9(key,_tmpB)== 0)return _tmpC;}
 # 76
 return 0;}
 # 79
 int Cyc_Hashtable_try_lookup(struct Cyc_Hashtable_Table*t,void*key,void**data){
-struct _dyneither_ptr _tmpD=t->tab;
-struct Cyc_List_List*_tmpE=((struct Cyc_List_List**)_tmpD.curr)[(int)((*t->hash)(key)% _get_dyneither_size(_tmpD,sizeof(struct Cyc_List_List*)))];
-int(*_tmpF)(void*,void*)=t->cmp;
+struct _dyneither_ptr _tmpD=((struct Cyc_Hashtable_Table*)_check_null(t))->tab;
+struct Cyc_List_List*_tmpE=((struct Cyc_List_List**)_tmpD.curr)[(int)((*((int(*)(void*))_check_null(((struct Cyc_Hashtable_Table*)_check_null(t))->hash)))(key)% _get_dyneither_size(_tmpD,sizeof(struct Cyc_List_List*)))];
+int(*_tmpF)(void*,void*)=((struct Cyc_Hashtable_Table*)_check_null(t))->cmp;
 for(0;_tmpE != 0;_tmpE=_tmpE->tl){
-void*_tmp11;void*_tmp12;struct _tuple0 _tmp10=*((struct _tuple0*)_tmpE->hd);_tmp11=_tmp10.f1;_tmp12=_tmp10.f2;
+struct _tuple0 _stmttmp1=*((struct _tuple0*)_tmpE->hd);void*_tmp11;void*_tmp12;struct _tuple0 _tmp10=_stmttmp1;_tmp11=_tmp10.f1;_tmp12=_tmp10.f2;
 if(_tmpF(key,_tmp11)== 0){
 *data=_tmp12;
 return 1;}}
@@ -886,8 +886,8 @@ return 0;}
 # 93
 void Cyc_Hashtable_remove(struct Cyc_Hashtable_Table*t,void*key){
 # 96
-struct _dyneither_ptr _tmp13=t->tab;
-int(*_tmp14)(void*,void*)=t->cmp;
+struct _dyneither_ptr _tmp13=((struct Cyc_Hashtable_Table*)_check_null(t))->tab;
+int(*_tmp14)(void*,void*)=((struct Cyc_Hashtable_Table*)_check_null(t))->cmp;
 int bucket=(int)((*t->hash)(key)% _get_dyneither_size(_tmp13,sizeof(struct Cyc_List_List*)));
 struct Cyc_List_List*_tmp15=*((struct Cyc_List_List**)_check_dyneither_subscript(_tmp13,sizeof(struct Cyc_List_List*),bucket));
 if(_tmp15 == 0)return;
@@ -895,7 +895,7 @@ if(_tmp14(key,(((struct _tuple0*)_tmp15->hd)[0]).f1)== 0){
 ((struct Cyc_List_List**)_tmp13.curr)[bucket]=_tmp15->tl;
 return;}{
 # 105
-struct Cyc_List_List*_tmp16=_tmp15->tl;for(0;_tmp15->tl != 0;(_tmp15=_tmp15->tl,_tmp16=_tmp16->tl)){
+struct Cyc_List_List*_tmp16=((struct Cyc_List_List*)_check_null(_tmp15))->tl;for(0;_tmp15->tl != 0;(_tmp15=_tmp15->tl,_tmp16=_tmp16->tl)){
 # 107
 if(_tmp14(key,(((struct _tuple0*)((struct Cyc_List_List*)_check_null(_tmp16))->hd)[0]).f1)== 0){
 _tmp15->tl=_tmp16->tl;

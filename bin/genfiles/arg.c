@@ -844,7 +844,7 @@ void*Cyc___assert_fail(struct _dyneither_ptr assertion,struct _dyneither_ptr fil
 # 68 "arg.cyc"
 static void*Cyc_Arg_lookup(struct Cyc_List_List*l,struct _dyneither_ptr x){
 while(l != 0){
-struct _dyneither_ptr _tmp0=(*((struct _tuple0*)l->hd)).f1;
+struct _dyneither_ptr _tmp0=(*((struct _tuple0*)_check_null((struct _tuple0*)((struct Cyc_List_List*)_check_null(l))->hd))).f1;
 unsigned long _tmp1=Cyc_strlen((struct _dyneither_ptr)_tmp0);
 if(_tmp1 > 0  && (*((struct _tuple0*)l->hd)).f2){
 if(Cyc_strncmp((struct _dyneither_ptr)x,(struct _dyneither_ptr)(*((struct _tuple0*)l->hd)).f1,_tmp1)== 0)

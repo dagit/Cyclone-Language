@@ -31,7 +31,7 @@ using Absyn;
 // translate the declarations to C
 extern list_t<decl_t> toc(list_t<decl_t> ds);
 
-// this is just for Tovc
+// this is just for Tovc and tcStmt
 extern qvar_t temp_var();
 extern stringptr_t ?globals;
 

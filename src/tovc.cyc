@@ -506,6 +506,7 @@ static exp_t stmt_to_exp(toexpenv_t<`r> env, stmt_t s) {
 static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s); // mutual recursion
 
 static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
+  string_t bad_form = "";
   switch (e->r) {
   case &Const_e(_): return;
   case &Var_e(_,_): return;
@@ -540,6 +541,7 @@ static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
 
   case &Sizeoftyp_e(_):  
   case &Offsetof_e(_,_): 
+  case &AnonEnum_e(...):
   case &Enum_e(_,_,_): return;
 
   case &UnresolvedMem_e(_,dles):
@@ -561,8 +563,24 @@ static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
 
   case &Asm_e(...): return;
 
-  default: throw new Impossible("bad exp form after xlation to C");
+  case &Throw_e(...): bad_form = "Throw_e"; break;
+  case &New_e(...): bad_form = "New_e"; break;
+  case &Tuple_e(...): bad_form = "Tuple_e"; break;
+  case &CompoundLit_e(...): bad_form = "CompoundLit_e"; break;
+  case &Array_e(...): bad_form = "Array_e"; break;
+  case &Comprehension_e(...): bad_form = "Comprehension_e"; break;
+  case &ComprehensionNoinit_e(...): bad_form = "ComprehensionNoinit_e"; break;
+  case &Aggregate_e(...): bad_form = "Aggregate_e"; break;
+  case &AnonStruct_e(...): bad_form = "AnonStruct_e"; break;
+//   case &AnonEnum_e(...): bad_form = "AnonEnum_e"; break;
+  case &Datatype_e(...): bad_form = "Datatype_e"; break;
+  case &Malloc_e(...): bad_form = "Malloc_e"; break;
+  case &Swap_e(...): bad_form = "Swap_e"; break;
+  case &Tagcheck_e(...): bad_form = "Tagcheck_e"; break;
+  case &Valueof_e(...): bad_form = "Valueof_e"; break;
   }
+  throw new Impossible(aprintf("bad exp form %s (exp=|%s|) after xlation to C",
+			       bad_form, Absynpp::exp2string(e)));
 }
 
 static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s) {

@@ -190,10 +190,13 @@ static type_t num_type(type_t * topt, type_t numt) {
   return numt;
 }
 
-static void set_vd(vardecl_t vd, list_t<vardecl_t>@ v_result_ptr, type_t t){
-  vd->type = t;
-  vd->tq   = empty_tqual(0);
-  *v_result_ptr = new List(vd,*v_result_ptr);
+static void set_vd(vardecl_t *`r vd, exp_opt_t e, 
+		   list_t<$(vardecl_t *`r,exp_opt_t)@>@ v_result_ptr, type_t t){
+  if (vd != NULL) {
+    (*vd)->type = t;
+    (*vd)->tq   = empty_tqual(0);
+  }
+  *v_result_ptr = new List(new $(vd,e),*v_result_ptr);
 }
 static tcpat_result_t combine_results(tcpat_result_t res1, tcpat_result_t res2){
   // FIX: plenty of unnecessary allocation here
@@ -224,8 +227,11 @@ static type_t promote_array(tenv_t te, type_t t, type_opt_t rgn_opt) {
   }
 }
 
+#define DL 0
+
 static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt, 
-                               type_opt_t rgn_pat, bool allow_ref_pat) {
+                               type_opt_t rgn_pat, bool allow_ref_pat,
+			       exp_opt_t access_exp) {
   resolve_pat(te,topt,p);
   type_t t;
   tcpat_result_t res = TcPatResult(NULL,NULL);
@@ -240,7 +246,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
       t = any_type(lookup_type_vars(te),topt);
     break;
   case &Var_p(vd,p2):
-    res = tcPatRec(te,p2,topt,rgn_pat,allow_ref_pat);
+    res = tcPatRec(te,p2,topt,rgn_pat,allow_ref_pat,access_exp);
     t = (type_t)p2->topt;
     // We allow arrays as long as the rgn_pat is defined, since
     // you can't update them (i.e., the whole array).  
@@ -254,28 +260,38 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
         terr(p->loc, "pattern would point to an abstract member");
       break;
     }
-    set_vd(vd, &res.patvars, promote_array(te,t,rgn_pat));
+    set_vd(new vd, access_exp, &res.patvars, promote_array(te,t,rgn_pat));
     break;
   case &Reference_p(vd,p2):
-    res = tcPatRec(te,p2,topt,rgn_pat,allow_ref_pat);
+    res = tcPatRec(te,p2,topt,rgn_pat,allow_ref_pat,access_exp);
     t = (type_t)p2->topt;
     if(!allow_ref_pat || rgn_pat == NULL) {
       terr(p->loc, "* pattern would point into an unknown/unallowed region");
       break;
     }
-    else if (is_noalias_pointer(t))
-      impos("* pattern cannot take the address of an alias-free path");
-    set_vd(vd, &res.patvars, 
-	   new PointerType(PtrInfo(t,empty_tqual(0),
-				   PtrAtts(rgn_pat,false_conref,
-					   empty_conref(),empty_conref(),
-                                           NULL))));
+    else {
+      TEMP_RGN(te,rgn) {
+	if (is_noalias_pointer_or_aggr(rgn,t))
+	  terr(p->loc,
+	       "* pattern cannot take the address of an alias-free path");
+      }
+    }
+    exp_opt_t new_access_exp = NULL;
+    type_t t2 = new PointerType(PtrInfo(t,empty_tqual(0),
+					PtrAtts(rgn_pat,false_conref,
+						empty_conref(),empty_conref(),
+						NULL)));
+    if (access_exp) {
+      new_access_exp = address_exp(access_exp,DL);
+      new_access_exp->topt = t2;
+    }
+    set_vd(new vd, new_access_exp, &res.patvars, t2);
     break;
 
   case &TagInt_p(tv,vd): 
     // parser set the type b/c it's trivially known, but we need the var
     // in the result
-    set_vd(vd, &res.patvars, vd->type);
+    set_vd(new vd, access_exp, &res.patvars, vd->type);
     // gotta add the tvar in too; the parser set its kind correctly
     // the kind is IntKind, so no partial-order munging, etc.
     // this checks uniqueness of new tvars (kinda kludgy)
@@ -307,9 +323,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     let tenv_tvs = lookup_opt_type_vars(te);
     t = new PointerType(PtrInfo(new_evar(&ako,tenv_tvs),
                                 empty_tqual(0),
-				// MWH: don't allow switching on
-				//   unique pointers for now
-				PtrAtts(new_evar(&rko,tenv_tvs),
+				PtrAtts(new_evar(&trko,tenv_tvs),
 					true_conref,
 					empty_conref(),empty_conref(),NULL)));
                                         
@@ -319,7 +333,6 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
   case &Pointer_p(p2):
     // FIX: In the DatatypeField for p2 case, we should really pass-through
     // the type instantiation information in topt!!!
-
     type_t inner_typ  = &VoidType_val;
     let    inner_topt = NULL;
     bool   elt_const = false;
@@ -336,7 +349,10 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
     type_t ptr_rgn = new_evar(&trko,lookup_opt_type_vars(te));
-    res = combine_results(res,tcPatRec(te,p2,inner_topt,ptr_rgn,true));
+    exp_opt_t new_access_exp = NULL;
+    if (access_exp) new_access_exp = deref_exp(access_exp,DL);
+    res = combine_results(res,tcPatRec(te,p2,inner_topt,ptr_rgn,true,
+				       new_access_exp));
     // if p2 is a datatype field pattern (e.g., datatype F.C), then unless 
     // topt says otherwise, we make the type datatype F@.  We also change
     // p2's type from a datatype field to a datatype so that the match
@@ -371,6 +387,7 @@ DONT_PROMOTE:
                                           empty_conref(), empty_conref(),
                                           NULL)));
     }
+    if (new_access_exp) new_access_exp->topt = p2->topt;
     break;
 
   case &Tuple_p(*ps_p,dots):
@@ -401,13 +418,21 @@ DONT_PROMOTE:
       }
     else if (dots)
       terr(p->loc,"cannot determine missing fields for ... in tuple pattern");
-    for(; ps != NULL; ps=ps->tl) {
+    for(int i = 0; ps != NULL; ps=ps->tl, i++) {
       let inner_topt = NULL;
       if(topt_ts != NULL) {
 	inner_topt = &(*topt_ts->hd)[1];
 	topt_ts    = topt_ts->tl;
       }
-      res = combine_results(res,tcPatRec(te,ps->hd,inner_topt,rgn_pat,allow_ref_pat));
+      exp_opt_t new_access_exp = NULL;
+      if (access_exp)
+	new_access_exp=subscript_exp(access_exp,
+				     const_exp(Cnst{.Int_c=$(Unsigned,i)},
+					       DL),DL);
+      res = combine_results(res,tcPatRec(te,ps->hd,inner_topt,
+					 rgn_pat,allow_ref_pat,
+					 new_access_exp));
+      if (new_access_exp) new_access_exp->topt = ps->hd->topt;
       pat_ts = new List(new $(empty_tqual(0),(type_t)ps->hd->topt),pat_ts);
     }
     t = new TupleType(List::imp_rev(pat_ts));
@@ -421,7 +446,8 @@ DONT_PROMOTE:
       t = wildtyp(lookup_opt_type_vars(te));
       break;
     }
-    // don't allow reference patterns for existentials or tagged unions -- see Dan's ESOP paper
+    // don't allow reference patterns for existentials or tagged unions --
+    // see Dan's ESOP paper
     if (ad->kind == UnionA && ad->impl->tagged)
       allow_ref_pat = false;
     if (exist_ts != NULL) {
@@ -528,7 +554,11 @@ DONT_PROMOTE:
           let &$(field,pat)     = fields->hd;
           let inst_fieldtyp     = rsubstitute(rgn,inst,field->type);
           //inst_fieldtyp = promote_array(te,inst_fieldtyp,rgn_pat);
-          res = combine_results(res,tcPatRec(te2,pat,&inst_fieldtyp,rgn_pat,allow_ref_pat));
+	  exp_opt_t new_access_exp = NULL;
+	  if (access_exp)
+	    new_access_exp = aggrmember_exp(access_exp,field->name,DL);
+          res = combine_results(res,tcPatRec(te2,pat,&inst_fieldtyp,rgn_pat,
+					     allow_ref_pat,new_access_exp));
           // must unify here or the type we gave pat won't ever get checked
           // against the exp we're matching against.  Even if we succeed now,
           // we could be constraining so as to catch an error later.
@@ -536,6 +566,7 @@ DONT_PROMOTE:
             terr(p->loc,"field %s of %s pattern expects type %s != %s",
                  *field->name, aggr_str, typ2string(inst_fieldtyp), 
                  typ2string((type_t)pat->topt));
+	  if (new_access_exp) new_access_exp->topt = pat->topt;
         }
       }
     }
@@ -571,7 +602,12 @@ DONT_PROMOTE:
 	// Note:  we don't pass in ptr_rgn here because for value-carrying
 	// constructors, the pointer's region is passed down as rgn_pat.
 	let field_typ = rsubstitute(rgn, inst, (*tqts->hd)[1]);
-	res = combine_results(res,tcPatRec(te,p2,&field_typ,rgn_pat,allow_ref_pat));
+	// set just the expression here to indicate that the entire
+	// datatype must be escaped/consumed
+	if (access_exp)
+	  set_vd(NULL, access_exp, &res.patvars, char_typ /* dummy */);
+	res = combine_results(res,tcPatRec(te,p2,&field_typ,rgn_pat,
+					   allow_ref_pat,NULL));
 	// must unify here or the type we gave pat won't ever get checked
 	// against the exp we're matching against.  Even if we succeed now,
 	// we could be constraining so as to catch an error later.
@@ -601,52 +637,101 @@ DONT_PROMOTE:
   return res;
 }
 
-tcpat_result_t tcPat(tenv_t te, pat_t  p, type_t @ topt) {
-  let ans = tcPatRec(te,p,topt,NULL,false);
+tcpat_result_t tcPat(tenv_t te, pat_t  p, type_t @ topt,
+		     exp_opt_t pat_var_exp) {
+  let ans = tcPatRec(te,p,topt,NULL,false,pat_var_exp);
   // caller will check tvar uniqueness when adding to environment
   TEMP_RGN(te, r) {
-    check_unique_vars(List::rmap(r, get_name, ans.patvars), p->loc,
+    let $(vs1,_) = List::rsplit(r,r,ans.patvars);
+    let vs = NULL;
+    for (_ x = vs1; x != NULL; x=x->tl)
+      if (x->hd != NULL) vs = rnew (r) List(*x->hd,vs);
+    check_unique_vars(List::rmap(r, get_name, vs), p->loc,
 		      "pattern contains a repeated variable");
   }
   return ans;
 }
 
-void check_pat_regions(tenv_t te, pat_t p) {
+enum PathState { UniquePath, NoAlias, NoAliasOneAlias, AliasPath };
+
+string_t pathState2string(enum PathState ps) {
+  switch (ps) {
+  case UniquePath: return "UniquePath";
+  case NoAlias: return "NoAlias";
+  case NoAliasOneAlias: return "NoAliasOneAlias";
+  case AliasPath: return "AliasPath";
+  }
+}
+
+bool check_unique_ok(enum PathState @ps,type_t pat_typ,seg_t loc) {
+//   fprintf(stderr,"check_unique: %s\n",typ2string(pat_typ));
+  region r;
+  bool is_unique_ptr = is_noalias_pointer(pat_typ,true);
+  bool is_noalias_ptr_or_aggr = is_noalias_pointer_or_aggr(r,pat_typ);
+  switch (*ps) {
+  case UniquePath:
+    if (!is_unique_ptr)
+      if (is_noalias_ptr_or_aggr) *ps = NoAlias;
+      else *ps = AliasPath;
+    return true;
+  case NoAlias:
+    if (!is_noalias_ptr_or_aggr) {
+      *ps = NoAliasOneAlias;
+      return true;
+    }
+    break;
+  case NoAliasOneAlias: break;
+  case AliasPath:
+    if (is_noalias_ptr_or_aggr) break;
+    return true;
+  }
+  terr(loc,"Pattern dereferences a unique pointer from"
+       " non-unique path; use swap");
+  return false;
+}
+
+// This makes sure that (1) any mentioned region is accessible, and
+// that (2) matching against no-alias and unique pointers is sound.
+void check_pat_regions_rec(tenv_t te, pat_t p, enum PathState pState) {
+//   fprintf(stderr,"checking %s; pState=%s\n",pat2string(p), 
+// 	  pathState2string(pState));
   switch(p->r) {
   case &Pointer_p(p2):
-    check_pat_regions(te,p2);
-    // not allowed to dereference pointer to a unique type
-    TEMP_RGN(te, temp) {
-      if (is_noalias_pointer_or_aggr(temp,(type_t)p2->topt)) {
-        terr(p->loc,"Pattern dereferences to a non-aliased pointer; use swap");
-        return;
-      }
-      // FIX: need to fold alias tracking via patterns into
-      // flow analysis to remove this check
-      if (is_noalias_pointer_or_aggr(temp,(type_t)p->topt)) {
-        terr(p->loc,"Pattern dereferences a non-aliased pointer; use swap");
-        return;
-      }
-    }
+    if (!check_unique_ok(&pState,(type_t)p->topt,p->loc)) return;
+    check_pat_regions_rec(te,p2,pState);
+    // now check accessibility
     switch ((type_t)p->topt) {
     case &PointerType(PtrInfo(_,_,PtrAtts(rt,_,_,_,_))): 
       check_rgn_accessible(te,p->loc,rt);
       return;
     default: impos("check_pat_regions: bad pointer type");
     }
-  case &Aggr_p(_,_,dps,_): 
-    for(; dps != NULL; dps = dps->tl) check_pat_regions(te,(*dps->hd)[1]);
+  case &Aggr_p(ai,exist_ts,dps,_): 
+    for (; dps != NULL; dps = dps->tl)
+      check_pat_regions_rec(te,(*dps->hd)[1],pState);
     return;
+  // FIX: ultimately should allow unique pointers in datatype patterns
   case &Datatype_p(_,_,ps,_): 
-    fallthru(ps);
-  case &Tuple_p(ps,_):
-    for(; ps != NULL; ps = ps->tl) check_pat_regions(te,ps->hd);
+    for(; ps != NULL; ps = ps->tl) check_pat_regions_rec(te,ps->hd,AliasPath);
     return;
-  case &Reference_p(_,p): fallthru(p);
-  case &Var_p(_,p):       check_pat_regions(te,p);
+  case &Tuple_p(ps,_):
+    for(; ps != NULL; ps = ps->tl) check_pat_regions_rec(te,ps->hd,pState);
+    return;
+  case &Reference_p(_,p2):
+    let tmp = AliasPath;
+    if (!check_unique_ok(&tmp,(type_t)p->topt,p->loc)) return;
+    check_pat_regions_rec(te,p2,AliasPath);
+    return;
+  case &Var_p(_,p2):
+    let tmp = pState;
+    if (!check_unique_ok(&tmp,(type_t)p->topt,p->loc)) return;
+    check_pat_regions_rec(te,p2,pState);
     return;
   default: return;
   }
+}
+void check_pat_regions(tenv_t te, pat_t p) {
+  check_pat_regions_rec(te,p,UniquePath);
 }
 
 //static void print_pats(string s, list_t<pat_t> ps) {

@@ -915,8 +915,8 @@ struct Cyc_PP_Empty_PP_Alist_struct Cyc_PP_Empty_stringptr={0,0};
 struct Cyc_PP_Empty_PP_Alist_struct Cyc_PP_Empty_link={0,0};struct _tuple1{void*f1;void*f2;};
 # 54
 void*Cyc_PP_append(void*a1,void*a2){
-struct _tuple1 _tmpAE;struct _tuple1 _tmp3=(_tmpAE.f1=a1,((_tmpAE.f2=a2,_tmpAE)));_LL1: {struct Cyc_PP_Empty_PP_Alist_struct*_tmp4=(struct Cyc_PP_Empty_PP_Alist_struct*)_tmp3.f1;if(_tmp4->tag != 0)goto _LL3;}_LL2:
- return a2;_LL3: {struct Cyc_PP_Empty_PP_Alist_struct*_tmp5=(struct Cyc_PP_Empty_PP_Alist_struct*)_tmp3.f2;if(_tmp5->tag != 0)goto _LL5;}_LL4:
+struct _tuple1 _tmpAE;struct _tuple1 _stmttmp0=(_tmpAE.f1=a1,((_tmpAE.f2=a2,_tmpAE)));struct _tuple1 _tmp2=_stmttmp0;_LL1: {struct Cyc_PP_Empty_PP_Alist_struct*_tmp3=(struct Cyc_PP_Empty_PP_Alist_struct*)_tmp2.f1;if(_tmp3->tag != 0)goto _LL3;}_LL2:
+ return a2;_LL3: {struct Cyc_PP_Empty_PP_Alist_struct*_tmp4=(struct Cyc_PP_Empty_PP_Alist_struct*)_tmp2.f2;if(_tmp4->tag != 0)goto _LL5;}_LL4:
  return a1;_LL5:;_LL6: {
 struct Cyc_PP_Append_PP_Alist_struct _tmpB1;struct Cyc_PP_Append_PP_Alist_struct*_tmpB0;return(void*)((_tmpB0=_cycalloc(sizeof(*_tmpB0)),((_tmpB0[0]=((_tmpB1.tag=2,((_tmpB1.f1=a1,((_tmpB1.f2=a2,_tmpB1)))))),_tmpB0))));}_LL0:;}
 # 62
@@ -934,7 +934,7 @@ struct Cyc_Xarray_Xarray*_tmp10=((struct Cyc_Xarray_Xarray*(*)(int,void*))Cyc_Xa
 ((void(*)(struct Cyc_Xarray_Xarray*,void*))Cyc_Xarray_add)(_tmp10,al);{
 int last=0;
 while(last >= 0){
-void*_tmp11=((void*(*)(struct Cyc_Xarray_Xarray*,int))Cyc_Xarray_get)(_tmp10,last);struct _dyneither_ptr*_tmp14;void*_tmp16;void*_tmp17;_LLF: {struct Cyc_PP_Empty_PP_Alist_struct*_tmp12=(struct Cyc_PP_Empty_PP_Alist_struct*)_tmp11;if(_tmp12->tag != 0)goto _LL11;}_LL10:
+void*_stmttmp1=((void*(*)(struct Cyc_Xarray_Xarray*,int))Cyc_Xarray_get)(_tmp10,last);void*_tmp11=_stmttmp1;struct _dyneither_ptr*_tmp14;void*_tmp16;void*_tmp17;_LLF: {struct Cyc_PP_Empty_PP_Alist_struct*_tmp12=(struct Cyc_PP_Empty_PP_Alist_struct*)_tmp11;if(_tmp12->tag != 0)goto _LL11;}_LL10:
  -- last;goto _LLE;_LL11: {struct Cyc_PP_Single_PP_Alist_struct*_tmp13=(struct Cyc_PP_Single_PP_Alist_struct*)_tmp11;if(_tmp13->tag != 1)goto _LL13;else{_tmp14=(struct _dyneither_ptr*)_tmp13->f1;}}_LL12:
  -- last;{const char*_tmpB6;void*_tmpB5[1];struct Cyc_String_pa_PrintArg_struct _tmpB4;(_tmpB4.tag=0,((_tmpB4.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)*_tmp14),((_tmpB5[0]=& _tmpB4,Cyc_fprintf(f,((_tmpB6="%s",_tag_dyneither(_tmpB6,sizeof(char),3))),_tag_dyneither(_tmpB5,sizeof(void*),1)))))));}goto _LLE;_LL13: {struct Cyc_PP_Append_PP_Alist_struct*_tmp15=(struct Cyc_PP_Append_PP_Alist_struct*)_tmp11;if(_tmp15->tag != 2)goto _LLE;else{_tmp16=(void*)_tmp15->f1;_tmp17=(void*)_tmp15->f2;}}_LL14:
 # 107
@@ -1258,7 +1258,7 @@ struct Cyc_PP_Doc*sep2=Cyc_PP_text(sep);
 struct Cyc_PP_Doc*oline=Cyc_PP_oline_doc();
 struct Cyc_List_List*_tmpA5=l;
 while(_tmpA5->tl != 0){
-struct Cyc_List_List*_tmpA6=_tmpA5->tl;
+struct Cyc_List_List*_tmpA6=((struct Cyc_List_List*)_check_null(_tmpA5))->tl;
 {struct Cyc_List_List*_tmp13D;struct Cyc_List_List*_tmp13C;_tmpA5->tl=((_tmp13C=_cycalloc(sizeof(*_tmp13C)),((_tmp13C->hd=sep2,((_tmp13C->tl=((_tmp13D=_cycalloc(sizeof(*_tmp13D)),((_tmp13D->hd=oline,((_tmp13D->tl=_tmpA6,_tmp13D)))))),_tmp13C))))));}
 _tmpA5=_tmpA6;}
 # 489

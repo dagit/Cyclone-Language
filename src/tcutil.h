@@ -51,8 +51,9 @@ extern Core::opt_t<Set::set_t<var_t>> empty_var_set;
 // still share and if the identity is set on type variables,
 // they will share, otherwise they won't.
 extern type_t copy_type(type_t t);
-// deep copy of an expression; uses copy_type above, so same rules apply
-extern exp_t deep_copy_exp(exp_t);
+// deep copy of an expression; uses copy_type above, so same rules apply.
+// if [preserve_types], then copies the type, too; otherwise null
+extern exp_t deep_copy_exp(bool preserve_types, exp_t);
 
 // returns true if kind k1 is a sub-kind of k2
 extern bool kind_leq(kind_t k1, kind_t k2);
@@ -274,7 +275,7 @@ extern bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type,
 extern bool is_noalias_region(type_t r, bool must_be_unique);
 
 // returns true if this a non-aliasable pointer, e.g. *`U, *`r::TR, etc.
-extern bool is_noalias_pointer(type_t t);
+extern bool is_noalias_pointer(type_t t, bool must_be_unique);
 
 // returns true if this expression only deferences non-aliasable pointers
 // and if the ultimate result is a noalias pointer or aggregate.  The
@@ -325,6 +326,9 @@ extern bool bits_only(type_t t);
 // returns true iff e is an expression that can be evaluated at compile time
 extern bool is_const_exp(exp_t e);
 
+// returns true if [e] is "essentially" a variable
+extern bool is_var_exp(exp_t e);
+
 // like Core::snd, but first argument is a tqual_t (not a BoxKind)
 extern type_t snd_tqt($(tqual_t,type_t)@`r);
 
@@ -360,6 +364,9 @@ extern exp_opt_t get_type_bound(type_t t);
 // If b is a non-escaping variable binding, return a non-null pointer to
 // the vardecl.
 extern struct Vardecl *nonesc_vardecl(binding_t b);
+
+  // filters out null elements
+extern list_t<`a> filter_nulls(list_t<`a *,`H> l);
 
 }
 #endif

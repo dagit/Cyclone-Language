@@ -844,44 +844,44 @@ static void*Cyc_badarg(struct _dyneither_ptr s){
 struct Cyc_Core_Invalid_argument_exn_struct _tmpD2;struct Cyc_Core_Invalid_argument_exn_struct*_tmpD1;return(void*)_throw((void*)((_tmpD1=_cycalloc(sizeof(*_tmpD1)),((_tmpD1[0]=((_tmpD2.tag=Cyc_Core_Invalid_argument,((_tmpD2.f1=s,_tmpD2)))),_tmpD1)))));}
 # 104
 static int Cyc_va_arg_int(struct _dyneither_ptr ap){
-void*_tmpF=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));unsigned long _tmp11;_LLE: {struct Cyc_Int_pa_PrintArg_struct*_tmp10=(struct Cyc_Int_pa_PrintArg_struct*)_tmpF;if(_tmp10->tag != 1)goto _LL10;else{_tmp11=_tmp10->f1;}}_LLF:
+void*_stmttmp0=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));void*_tmpF=_stmttmp0;unsigned long _tmp11;_LLE: {struct Cyc_Int_pa_PrintArg_struct*_tmp10=(struct Cyc_Int_pa_PrintArg_struct*)_tmpF;if(_tmp10->tag != 1)goto _LL10;else{_tmp11=_tmp10->f1;}}_LLF:
  return(int)_tmp11;_LL10:;_LL11: {
 const char*_tmpD3;return((int(*)(struct _dyneither_ptr s))Cyc_badarg)(((_tmpD3="printf expected int",_tag_dyneither(_tmpD3,sizeof(char),20))));}_LLD:;}
 # 111
 static long Cyc_va_arg_long(struct _dyneither_ptr ap){
-void*_tmp13=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));unsigned long _tmp15;_LL13: {struct Cyc_Int_pa_PrintArg_struct*_tmp14=(struct Cyc_Int_pa_PrintArg_struct*)_tmp13;if(_tmp14->tag != 1)goto _LL15;else{_tmp15=_tmp14->f1;}}_LL14:
+void*_stmttmp1=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));void*_tmp13=_stmttmp1;unsigned long _tmp15;_LL13: {struct Cyc_Int_pa_PrintArg_struct*_tmp14=(struct Cyc_Int_pa_PrintArg_struct*)_tmp13;if(_tmp14->tag != 1)goto _LL15;else{_tmp15=_tmp14->f1;}}_LL14:
  return(long)_tmp15;_LL15:;_LL16: {
 const char*_tmpD4;return((long(*)(struct _dyneither_ptr s))Cyc_badarg)(((_tmpD4="printf expected int",_tag_dyneither(_tmpD4,sizeof(char),20))));}_LL12:;}
 # 118
 static unsigned long Cyc_va_arg_ulong(struct _dyneither_ptr ap){
-void*_tmp17=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));unsigned long _tmp19;_LL18: {struct Cyc_Int_pa_PrintArg_struct*_tmp18=(struct Cyc_Int_pa_PrintArg_struct*)_tmp17;if(_tmp18->tag != 1)goto _LL1A;else{_tmp19=_tmp18->f1;}}_LL19:
+void*_stmttmp2=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));void*_tmp17=_stmttmp2;unsigned long _tmp19;_LL18: {struct Cyc_Int_pa_PrintArg_struct*_tmp18=(struct Cyc_Int_pa_PrintArg_struct*)_tmp17;if(_tmp18->tag != 1)goto _LL1A;else{_tmp19=_tmp18->f1;}}_LL19:
  return _tmp19;_LL1A:;_LL1B: {
 const char*_tmpD5;return((unsigned long(*)(struct _dyneither_ptr s))Cyc_badarg)(((_tmpD5="printf expected int",_tag_dyneither(_tmpD5,sizeof(char),20))));}_LL17:;}
 # 125
 static unsigned long Cyc_va_arg_uint(struct _dyneither_ptr ap){
-void*_tmp1B=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));unsigned long _tmp1D;_LL1D: {struct Cyc_Int_pa_PrintArg_struct*_tmp1C=(struct Cyc_Int_pa_PrintArg_struct*)_tmp1B;if(_tmp1C->tag != 1)goto _LL1F;else{_tmp1D=_tmp1C->f1;}}_LL1E:
+void*_stmttmp3=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));void*_tmp1B=_stmttmp3;unsigned long _tmp1D;_LL1D: {struct Cyc_Int_pa_PrintArg_struct*_tmp1C=(struct Cyc_Int_pa_PrintArg_struct*)_tmp1B;if(_tmp1C->tag != 1)goto _LL1F;else{_tmp1D=_tmp1C->f1;}}_LL1E:
  return _tmp1D;_LL1F:;_LL20: {
 const char*_tmpD6;return((unsigned long(*)(struct _dyneither_ptr s))Cyc_badarg)(((_tmpD6="printf expected int",_tag_dyneither(_tmpD6,sizeof(char),20))));}_LL1C:;}
 # 133
 static double Cyc_va_arg_double(struct _dyneither_ptr ap){
-void*_tmp1F=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));double _tmp21;long double _tmp23;_LL22: {struct Cyc_Double_pa_PrintArg_struct*_tmp20=(struct Cyc_Double_pa_PrintArg_struct*)_tmp1F;if(_tmp20->tag != 2)goto _LL24;else{_tmp21=_tmp20->f1;}}_LL23:
+void*_stmttmp4=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));void*_tmp1F=_stmttmp4;double _tmp21;long double _tmp23;_LL22: {struct Cyc_Double_pa_PrintArg_struct*_tmp20=(struct Cyc_Double_pa_PrintArg_struct*)_tmp1F;if(_tmp20->tag != 2)goto _LL24;else{_tmp21=_tmp20->f1;}}_LL23:
  return _tmp21;_LL24: {struct Cyc_LongDouble_pa_PrintArg_struct*_tmp22=(struct Cyc_LongDouble_pa_PrintArg_struct*)_tmp1F;if(_tmp22->tag != 3)goto _LL26;else{_tmp23=_tmp22->f1;}}_LL25:
  return(double)_tmp23;_LL26:;_LL27: {
 # 138
 const char*_tmpDA;void*_tmpD9[1];struct Cyc_String_pa_PrintArg_struct _tmpD8;(int)_throw(((void*(*)(struct _dyneither_ptr s))Cyc_badarg)((struct _dyneither_ptr)((_tmpD8.tag=0,((_tmpD8.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_parg2string(*((void**)_check_dyneither_subscript(ap,sizeof(void*),0)))),((_tmpD9[0]=& _tmpD8,Cyc_aprintf(((_tmpDA="printf expected double but found %s",_tag_dyneither(_tmpDA,sizeof(char),36))),_tag_dyneither(_tmpD9,sizeof(void*),1))))))))));}_LL21:;}
 # 144
 static short*Cyc_va_arg_short_ptr(struct _dyneither_ptr ap){
-void*_tmp27=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));short*_tmp29;_LL29: {struct Cyc_ShortPtr_pa_PrintArg_struct*_tmp28=(struct Cyc_ShortPtr_pa_PrintArg_struct*)_tmp27;if(_tmp28->tag != 4)goto _LL2B;else{_tmp29=_tmp28->f1;}}_LL2A:
+void*_stmttmp5=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));void*_tmp27=_stmttmp5;short*_tmp29;_LL29: {struct Cyc_ShortPtr_pa_PrintArg_struct*_tmp28=(struct Cyc_ShortPtr_pa_PrintArg_struct*)_tmp27;if(_tmp28->tag != 4)goto _LL2B;else{_tmp29=_tmp28->f1;}}_LL2A:
  return _tmp29;_LL2B:;_LL2C: {
 const char*_tmpDB;(int)_throw(((void*(*)(struct _dyneither_ptr s))Cyc_badarg)(((_tmpDB="printf expected short pointer",_tag_dyneither(_tmpDB,sizeof(char),30)))));}_LL28:;}
 # 152
 static unsigned long*Cyc_va_arg_int_ptr(struct _dyneither_ptr ap){
-void*_tmp2B=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));unsigned long*_tmp2D;_LL2E: {struct Cyc_IntPtr_pa_PrintArg_struct*_tmp2C=(struct Cyc_IntPtr_pa_PrintArg_struct*)_tmp2B;if(_tmp2C->tag != 5)goto _LL30;else{_tmp2D=_tmp2C->f1;}}_LL2F:
+void*_stmttmp6=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));void*_tmp2B=_stmttmp6;unsigned long*_tmp2D;_LL2E: {struct Cyc_IntPtr_pa_PrintArg_struct*_tmp2C=(struct Cyc_IntPtr_pa_PrintArg_struct*)_tmp2B;if(_tmp2C->tag != 5)goto _LL30;else{_tmp2D=_tmp2C->f1;}}_LL2F:
  return _tmp2D;_LL30:;_LL31: {
 const char*_tmpDC;(int)_throw(((void*(*)(struct _dyneither_ptr s))Cyc_badarg)(((_tmpDC="printf expected int pointer",_tag_dyneither(_tmpDC,sizeof(char),28)))));}_LL2D:;}
 # 160
 static const struct _dyneither_ptr Cyc_va_arg_string(struct _dyneither_ptr ap){
-void*_tmp2F=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));struct _dyneither_ptr _tmp31;_LL33: {struct Cyc_String_pa_PrintArg_struct*_tmp30=(struct Cyc_String_pa_PrintArg_struct*)_tmp2F;if(_tmp30->tag != 0)goto _LL35;else{_tmp31=_tmp30->f1;}}_LL34:
+void*_stmttmp7=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));void*_tmp2F=_stmttmp7;struct _dyneither_ptr _tmp31;_LL33: {struct Cyc_String_pa_PrintArg_struct*_tmp30=(struct Cyc_String_pa_PrintArg_struct*)_tmp2F;if(_tmp30->tag != 0)goto _LL35;else{_tmp31=_tmp30->f1;}}_LL34:
  return _tmp31;_LL35:;_LL36: {
 const char*_tmpDD;(int)_throw(((void*(*)(struct _dyneither_ptr s))Cyc_badarg)(((_tmpDD="printf expected string",_tag_dyneither(_tmpDD,sizeof(char),23)))));}_LL32:;}
 # 177 "printf.cyc"

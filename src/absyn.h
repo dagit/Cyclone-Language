@@ -732,7 +732,7 @@ namespace Absyn {
   // cyclone switch clauses
   EXTERN_ABSYN struct Switch_clause {
     pat_t                    pattern;  // pattern
-    opt_t<list_t<vardecl_t>> pat_vars; // set by type-checker, used downstream
+    opt_t<list_t<$(vardecl_t *,exp_opt_t)@>> pat_vars; // set by type-checker, used downstream
     exp_opt_t                where_clause; // case p && e: -- the e part
     stmt_t                   body;     // corresponding statement
     seg_t                    loc;      // location in source code
@@ -860,7 +860,7 @@ namespace Absyn {
     Var_d(vardecl_t);  // variables: t x = e
     Fn_d(fndecl_t);    // functions  t f(t1 x1,...,tn xn) { ... }
     Let_d(pat_t,       // let p = e
-          opt_t<list_t<vardecl_t>>, // set by type-checker, used downstream
+          opt_t<list_t<$(vardecl_t *,exp_opt_t)@>>, // set by type-checker, used downstream
           exp_t);
     Letv_d(list_t<vardecl_t>); // multi-let
     Region_d(tvar_t,vardecl_t,bool,exp_opt_t); // region declaration

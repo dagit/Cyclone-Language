@@ -29,7 +29,6 @@
 #include "new_control_flow.h"
 #include "tcstmt.h"
 #include "evexp.h"
-#include "toc.h" // for no_regions flag
 #include <cycboot.h>
 
 #ifdef NO_PATHS
@@ -72,7 +71,8 @@ static void decorate_stmt(tenv_t te, stmt_t s) {
 // used to type-check Let_d, switch clauses, and catch clauses
 static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
 			  stmt_t s, exp_opt_t where_opt, bool new_block) {
-  let TcPatResult(p,vs) = pat_res;
+  let TcPatResult(p,vse) = pat_res;
+  let $(vs,_) = List::split(vse);
   let tvs = (p==NULL) ? NULL : (*p)[0];
   let bds = (p==NULL) ? NULL : (*p)[1];
   TEMP_RGN(te,r) {
@@ -82,8 +82,10 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
       te2 = Tcenv::new_block(r,loc,te2);
     let ropt = Tcenv::curr_rgn(te2);
     for(let vs2 = vs; vs2 != NULL; vs2 = vs2->tl) {
-      te2 = add_pat_var(r,loc, te2, vs2->hd);
-      vs2->hd->rgn = ropt;
+      if (vs2->hd != NULL) {
+	te2 = add_pat_var(r,loc, te2, *vs2->hd);
+	(*vs2->hd)->rgn = ropt;
+      }
     }
     if(where_opt != NULL)
       tcTest(te2,(exp_t)where_opt,"switch clause guard");
@@ -137,6 +139,12 @@ static void tcStmtRefine(tenv_t te, stmt_t s0,
   }
 }
 
+static int stmt_temp_var_counter = 0;
+static qvar_t stmt_temp_var() {
+  let i = stmt_temp_var_counter++;
+  qvar_t res = new $(Loc_n,new (string_t)aprintf("_stmttmp%X",i));
+  return res;
+}
 // new_block is a kludge because we he abstract syntax doesn't group the
 // local declarations in a block, but the region rules do.  (That is,
 // adjacent declarations are in the same region.  Those at the beginning
@@ -316,7 +324,21 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     }
     return;
 
-  case &Switch_s(e,scs0):
+  case &Switch_s(*exp,scs0):
+    // if e is not a variable expression, add an assignment and 
+    // recurse.  This is needed for interpreting patterns cleanly in
+    // the flow analysis
+    let e = *exp;
+    if (!is_var_exp(e)) {
+      let v = stmt_temp_var();
+      let s1 = new_stmt(s0->r,s0->loc);
+      let s2 = declare_stmt(v,new_evar(NULL,NULL),e,s1,s0->loc);
+      s0->r = s2->r;
+      *exp = var_exp(v,e->loc);
+      tcStmt(te,s0,new_block);
+      return;
+    }
+
     tcExp(te,NULL,e);
     let t = (type_t)e->topt;
     // type-check the cases in reverse order, a fallthru therefore transfers
@@ -329,7 +351,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       te = clear_fallthru(r,te);
       for (_ scs = List::rev(scs0); scs != NULL; scs = scs->tl) {
         let p = scs->hd->pattern;
-        let pat_res = tcPat(te,p,&t);
+        let pat_res = tcPat(te,p,&t,deep_copy_exp(true,e));
         let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
           : (*pat_res.tvars_and_bounds_opt)[0];
         if (!unify((type_t)p->topt,t)) { // allow silent_castable?
@@ -346,8 +368,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         if(pat_res.tvars_and_bounds_opt != NULL
            && (*pat_res.tvars_and_bounds_opt)[1] != NULL)
           te = clear_fallthru(r,te);
-        else
-          te = set_fallthru(r,te, new_tvs, pat_res.patvars, scs->hd);
+        else {
+	  let vs = filter_nulls(List::split(pat_res.patvars)[0]);
+	  vs = List::imp_rev(vs);
+	  te = set_fallthru(r,te, new_tvs, vs, scs->hd);
+	}
       }
     }
     check_switch_exhaustive(s0->loc,te,scs0);
@@ -373,7 +398,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       for (let scs = List::rev(scs0); scs != NULL; scs = scs->tl) {
         let p = scs->hd->pattern;
         let exception_type = exn_typ();
-        let pat_res = tcPat(te,p,&exception_type);
+        let pat_res = tcPat(te,p,&exception_type,NULL);
         let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
           : (*pat_res.tvars_and_bounds_opt)[0];
         if (!unify((type_t)p->topt,exception_type))
@@ -388,8 +413,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         if(pat_res.tvars_and_bounds_opt != NULL
            && (*pat_res.tvars_and_bounds_opt)[1] != NULL)
           te = clear_fallthru(r2,te);
-        else
-          te = set_fallthru(r2, te, new_tvs, pat_res.patvars, scs->hd);
+        else {
+	  let vs = filter_nulls(List::split(pat_res.patvars)[0]);
+	  vs = List::imp_rev(vs);
+          te = set_fallthru(r2, te, new_tvs, vs, scs->hd);
+	}
       }
     }
     check_catch_overlap(s0->loc,te,scs0);
@@ -505,11 +533,30 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         tcStmt(set_encloser(decl_rgn,te2,s0),s,false);
         return;
 
-      case &Let_d(p,*vds,e):
+      case &Let_d(p,*vds,*exp):
+	// if e is not a variable expression, add an assignment and 
+	// recurse.  This is needed for interpreting patterns cleanly in
+	// the flow analysis.  Exception: when the pattern is just itself
+	// a variable
+	let e = *exp;
+	switch (p->r) {
+	case &Var_p(...): 
+	case &UnknownId_p(...): break;
+	default:
+	  if (!is_var_exp(e)) {
+	    let v = stmt_temp_var();
+	    let s1 = new_stmt(s0->r,s0->loc);
+	    let s2 = declare_stmt(v,new_evar(NULL,NULL),e,s1,s0->loc);
+	    s0->r = s2->r;
+	    *exp = var_exp(v,e->loc);
+	    tcStmt(te,s0,new_block);
+	    return;
+	  }
+	}
         tcExpInitializer(te,NULL,e);
         //FIX: can pass region if e an lvalue
         type_t pat_type = (type_t)e->topt;
-        let pat_res = tcPat(te,p,&pat_type);
+        let pat_res = tcPat(te,p,&pat_type,deep_copy_exp(true,e));
         *vds = new Opt(pat_res.patvars);
         if (!unify((type_t)p->topt,(type_t)e->topt)
             && !coerce_assign(te,e,(type_t)p->topt)) {

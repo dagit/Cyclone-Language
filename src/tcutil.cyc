@@ -325,101 +325,127 @@ type_t copy_type(type_t t) {
 //   if (r != NULL) r1 = new Opt(r->v);
 //   return new Vardecl(s,n,q,copy_type(t),eopt1,r1,atts,esc);
 // }
-static designator_t copy_designator(designator_t d) {
+static designator_t copy_designator(bool pt, designator_t d) {
   switch (d) {
-  case &ArrayElement(e): return new ArrayElement(DC(e));
+  case &ArrayElement(e): return new ArrayElement(DC(pt,e));
   case &FieldName(v): return d;
   }
 }
 static $(list_t<designator_t>,exp_t)@
-copy_eds($(list_t<designator_t>,exp_t)@ e) {
-  return new $(map(copy_designator,e[0][0]),DC(e[0][1]));
+copy_eds(bool pt,$(list_t<designator_t>,exp_t)@ e) {
+  return new $(map_c(copy_designator,pt,e[0][0]),DC(pt,e[0][1]));
 }
 // does a deep copy, but not of vardecls, bindings
-exp_t deep_copy_exp(exp_t e) {
+exp_t deep_copy_exp(bool preserve_types, exp_t e) {
+  exp_t new_e;
+  let pt = preserve_types;
   switch (e->r) {
-  case &Const_e(c): return const_exp(c,e->loc);
-  case &Var_e(qv,b): return varb_exp(qv,b,e->loc);
-  case &Primop_e(p, es): return primop_exp(p, map(DC,es),e->loc);
+  case &Const_e(c): new_e = const_exp(c,e->loc); break;
+  case &Var_e(qv,b): new_e = varb_exp(qv,b,e->loc); break;
+  case &Primop_e(p, es): new_e = primop_exp(p, map_c(DC,pt,es),e->loc); break;
   case &AssignOp_e(e1,po,e2):
-    return assignop_exp(DC(e1),po ? new Opt(po->v) : NULL,DC(e2),e->loc);
-  case &Increment_e(e1,i): return increment_exp(DC(e1),i,e->loc);
+    new_e=assignop_exp(DC(pt,e1),po ? new Opt(po->v) : NULL,DC(pt,e2),e->loc);
+    break;
+  case &Increment_e(e1,i): new_e = increment_exp(DC(pt,e1),i,e->loc); break;
   case &Conditional_e(e1,e2,e3):
-    return conditional_exp(DC(e1),DC(e2),DC(e3),e->loc);
-  case &And_e(e1,e2): return and_exp(DC(e1),DC(e2),e->loc);
-  case &Or_e(e1,e2): return or_exp(DC(e1),DC(e2),e->loc);
-  case &SeqExp_e(e1,e2): return seq_exp(DC(e1),DC(e2),e->loc);
+    new_e = conditional_exp(DC(pt,e1),DC(pt,e2),DC(pt,e3),e->loc); break;
+  case &And_e(e1,e2): new_e = and_exp(DC(pt,e1),DC(pt,e2),e->loc); break;
+  case &Or_e(e1,e2): new_e = or_exp(DC(pt,e1),DC(pt,e2),e->loc); break;
+  case &SeqExp_e(e1,e2): new_e = seq_exp(DC(pt,e1),DC(pt,e2),e->loc); break;
   case &FnCall_e(e1,es,vci,resolved):
     switch (vci) {
     case &VarargCallInfo(n,is,vai):
       let &VarargInfo(nm,tq,t,i) = vai;
-      return new_exp(new FnCall_e
-		     (DC(e1),map(DC,es),
+      new_e = new_exp(new FnCall_e
+		     (DC(pt,e1),map_c(DC,pt,es),
 		      new VarargCallInfo
 		      (n,is,new VarargInfo(nm,tq,copy_type(t),i)),resolved),
 		     e->loc);
+      break;
     default:
-      return new_exp(new FnCall_e(DC(e1),map(DC,es),vci,resolved),e->loc);
+      new_e=new_exp(new FnCall_e(DC(pt,e1),map_c(DC,pt,es),vci,resolved),e->loc);
+      break;
     }
-  case &Throw_e(e1): return throw_exp(DC(e1),e->loc);
-  case &NoInstantiate_e(e1): return noinstantiate_exp(DC(e1),e->loc);
+    break;
+  case &Throw_e(e1): new_e = throw_exp(DC(pt,e1),e->loc); break;
+  case &NoInstantiate_e(e1): new_e = noinstantiate_exp(DC(pt,e1),e->loc);
+    break;
   case &Instantiate_e(e1,ts):
-    return instantiate_exp(DC(e1),map(Tcutil::copy_type,ts),e->loc);
+    new_e = instantiate_exp(DC(pt,e1),map(Tcutil::copy_type,ts),e->loc);
+    break;
   case &Cast_e(t,e1,b,c):
-    return cast_exp(Tcutil::copy_type(t),DC(e1),b,c,e->loc);
-  case &Address_e(e1): return address_exp(DC(e1),e->loc);
+    new_e = cast_exp(Tcutil::copy_type(t),DC(pt,e1),b,c,e->loc); break;
+  case &Address_e(e1): new_e = address_exp(DC(pt,e1),e->loc); break;
   case &New_e(eo,e1):
-    exp_opt_t eo1 = eo; if (eo != NULL) eo1 = DC(eo);
-    return New_exp(eo1,DC(e1),e->loc);
-  case &Sizeoftyp_e(t): return sizeoftyp_exp(Tcutil::copy_type(t),e->loc);
-  case &Sizeofexp_e(e1): return sizeofexp_exp(DC(e1),e->loc);
+    exp_opt_t eo1 = eo; if (eo != NULL) eo1 = DC(pt,eo);
+    new_e = New_exp(eo1,DC(pt,e1),e->loc);
+    break;
+  case &Sizeoftyp_e(t): new_e = sizeoftyp_exp(Tcutil::copy_type(t),e->loc);
+    break;
+  case &Sizeofexp_e(e1): new_e = sizeofexp_exp(DC(pt,e1),e->loc); break;
   case &Offsetof_e(t,ofs):
-    return offsetof_exp(Tcutil::copy_type(t),ofs,e->loc);
-  case &Deref_e(e1): return deref_exp(DC(e1),e->loc);
+    new_e = offsetof_exp(Tcutil::copy_type(t),ofs,e->loc); break;
+  case &Deref_e(e1): new_e = deref_exp(DC(pt,e1),e->loc); break;
   case &AggrMember_e(e1,n,f1,f2):
-    return new_exp(new AggrMember_e(DC(e1),n,f1,f2),e->loc);
+    new_e = new_exp(new AggrMember_e(DC(pt,e1),n,f1,f2),e->loc); break;
   case &AggrArrow_e(e1,n,f1,f2):
-    return new_exp(new AggrArrow_e(DC(e1),n,f1,f2),e->loc);
-  case &Subscript_e(e1,e2): return subscript_exp(DC(e1),DC(e2),e->loc);
-  case &Tuple_e(es): return tuple_exp(map(DC,es),e->loc);
+    new_e = new_exp(new AggrArrow_e(DC(pt,e1),n,f1,f2),e->loc); break;
+  case &Subscript_e(e1,e2): new_e = subscript_exp(DC(pt,e1),DC(pt,e2),e->loc);
+    break;
+  case &Tuple_e(es): new_e = tuple_exp(map_c(DC,pt,es),e->loc); break;
   case &CompoundLit_e(&$(vopt,tq,t),eds):
     var_opt_t vopt1 = vopt;
     if (vopt != NULL) vopt1 = vopt;
-    return new_exp(new CompoundLit_e(new $(vopt1,tq,copy_type(t)),
-				     map(copy_eds,eds)),e->loc);
-  case &Array_e(eds): return new_exp(new Array_e(map(copy_eds,eds)),e->loc);
+    new_e = new_exp(new CompoundLit_e(new $(vopt1,tq,copy_type(t)),
+				     map_c(copy_eds,pt,eds)),e->loc);
+    break;
+  case &Array_e(eds): new_e = new_exp(new Array_e(map_c(copy_eds,pt,eds)),e->loc);
+    break;
   case &Comprehension_e(vd,e1,e2,b):
-    return new_exp(new Comprehension_e(vd,DC(e1),DC(e2),b),e->loc);
+    new_e = new_exp(new Comprehension_e(vd,DC(pt,e1),DC(pt,e2),b),e->loc);
+    break;
   case &ComprehensionNoinit_e(e,t,b):
-    return new_exp(new ComprehensionNoinit_e(DC(e),Tcutil::copy_type(t),b),
+    new_e = new_exp(new ComprehensionNoinit_e(DC(pt,e),Tcutil::copy_type(t),b),
 		   e->loc);
+    break;
   case &Aggregate_e(n,ts,eds,agr):
-    return new_exp(new Aggregate_e(n,map(copy_type,ts),map(copy_eds,eds),agr),
+    new_e = new_exp(new Aggregate_e(n,map(copy_type,ts),map_c(copy_eds,pt,eds),agr),
 		   e->loc);
+    break;
   case &AnonStruct_e(t,eds):
-    return new_exp(new AnonStruct_e(copy_type(t),map(copy_eds,eds)),e->loc);
+    new_e = new_exp(new AnonStruct_e(copy_type(t),map_c(copy_eds,pt,eds)),e->loc);
+    break;
   case &Datatype_e(es,dtd,dtf):
-    return new_exp(new Datatype_e(map(DC,es),dtd,dtf),e->loc);
-  case &Enum_e(qv,ed,ef): return e;
+    new_e = new_exp(new Datatype_e(map_c(DC,pt,es),dtd,dtf),e->loc);
+    break;
+  case &Enum_e(qv,ed,ef): new_e = e; break;
   case &AnonEnum_e(qv,t,ef):
-    return new_exp(new AnonEnum_e(qv,copy_type(t),ef),e->loc);
+    new_e = new_exp(new AnonEnum_e(qv,copy_type(t),ef),e->loc);
+    break;
   case &Malloc_e(MallocInfo(ic,r,t,n,res)):
     let e2 = copy_exp(e);
-    exp_opt_t r1 = r; if (r != NULL) r1 = DC(r);
+    exp_opt_t r1 = r; if (r != NULL) r1 = DC(pt,r);
     type_t *t1 = t; if (t != NULL) t1 = new copy_type(*t);
     e2->r = new Malloc_e(MallocInfo(ic,r1,t1,n,res));
-    return e2;
-  case &Swap_e(e1,e2): return swap_exp(DC(e1),DC(e2),e->loc);
+    new_e = e2;
+    break;
+  case &Swap_e(e1,e2): new_e = swap_exp(DC(pt,e1),DC(pt,e2),e->loc); break;
   case &UnresolvedMem_e(nopt,eds):
     opt_t<typedef_name_t> nopt1 = nopt;
     if (nopt != NULL) nopt1 = new Opt(nopt->v);
-    return new_exp(new UnresolvedMem_e(nopt1,map(copy_eds,eds)),e->loc);
+    new_e = new_exp(new UnresolvedMem_e(nopt1,map_c(copy_eds,pt,eds)),e->loc);
+    break;
   case &StmtExp_e(_):
     throw new Core::Failure("deep_copy: statement expressions unsupported");
-  case &Tagcheck_e(e1, fn): return new_exp(new Tagcheck_e(DC(e1),fn),e->loc);
-  case &Valueof_e(t): return valueof_exp(Tcutil::copy_type(t),e->loc);
-  case &Asm_e(v,s): return asm_exp(v,s,e->loc);
+  case &Tagcheck_e(e1, fn): new_e=new_exp(new Tagcheck_e(DC(pt,e1),fn),e->loc);
+    break;
+  case &Valueof_e(t): new_e = valueof_exp(Tcutil::copy_type(t),e->loc);
+    break;
+  case &Asm_e(v,s): new_e = asm_exp(v,s,e->loc); break;
   }
+  // types are shared
+  if (preserve_types) new_e->topt = e->topt;
+  return new_e;
 }
 
 // Our lattice looks like this:
@@ -2364,7 +2390,7 @@ static bool can_insert_alias(exp_t e, type_t e_typ,
 			     type_t wants_typ, seg_t loc) {
   // check if the given expression is a pointer into a no-alias region
   region r;
-  if (is_noalias_path(r,e) && is_noalias_pointer(e_typ) &&
+  if (is_noalias_path(r,e) && is_noalias_pointer(e_typ,false) &&
       is_pointer_type(e_typ)) {
     // check if the expected type is has a pointer type into an
     // aliasable region but not the heap region
@@ -4954,7 +4980,7 @@ bool is_noalias_region(type_t r, bool must_be_unique) {
 
 // warning: not just a predicate; side-effects VarTypes to be of non-unique
 //   flavor if they are not yet solidly bounded
-static bool is_noalias_pointer_aux(type_t t, bool must_be_unique) {
+bool is_noalias_pointer(type_t t, bool must_be_unique) {
   switch (compress(t)) {
   case &PointerType(PtrInfo(_,_,PtrAtts(r,_,_,_,_))):
     return is_noalias_region(r,must_be_unique);
@@ -4962,7 +4988,7 @@ static bool is_noalias_pointer_aux(type_t t, bool must_be_unique) {
     let &Kind(k,a) = tvar_kind(tv,&bk);
     switch (k) {
     case BoxKind: case AnyKind: case MemKind:
-      if (a == Unique || a == Top) {
+      if (a == Unique || (a == Top && !must_be_unique)) {
 	switch (compress_kb(tv->kind)) {
 	case &Less_kb(*x,&Kind(k,Top)):
 	  *x = new Opt(new Less_kb(NULL,new Kind(k,Aliasable)));
@@ -4978,11 +5004,9 @@ static bool is_noalias_pointer_aux(type_t t, bool must_be_unique) {
   default: return false;
   }
 }
-bool is_noalias_pointer(type_t t) { return is_noalias_pointer_aux(t,false); }
-
 bool is_noalias_pointer_or_aggr(region_t<`r> rgn, type_t t) {
   let t = compress(t);
-  if (is_noalias_pointer(t)) return true;
+  if (is_noalias_pointer(t,false)) return true;
   switch (t) {
   case &TupleType(qts):
     while (qts != NULL) {
@@ -5058,37 +5082,34 @@ static bool is_noalias_field(region_t<`r> r, type_t t, field_name_t f) {
 // returns true if the path [e] is entirely unique.  I.e. **x is unique
 // if x has type (e.g.) int *`U*`U*`U x but not if it has type (e.g.)
 // int *`U*`H*`U x
-static bool is_noalias_path_aux(region_t<`r> r, exp_t e) {
+bool is_noalias_path(region_t<`r> r, exp_t e) {
   switch (e->r) {
   case &Var_e(_,&Global_b(...)): return false;
   case &AggrArrow_e(e1,...): fallthru(e1);
   case &Deref_e(e1):
-    return is_noalias_pointer_aux((type_t)e1->topt,true) &&
-           is_noalias_path_aux(r,e1);
-  case &AggrMember_e(e1,f,...): return is_noalias_path_aux(r,e1);
+    return is_noalias_pointer((type_t)e1->topt,true) &&
+           is_noalias_path(r,e1);
+  case &AggrMember_e(e1,f,...): return is_noalias_path(r,e1);
   case &Subscript_e(e1,e2):
     switch (compress((type_t)e1->topt)) {
-    case &TupleType(...): return is_noalias_path_aux(r,e1);
+    case &TupleType(...): return is_noalias_path(r,e1);
     default: return false;
     }
   case &Conditional_e(_,e1,e2):
-    return is_noalias_path_aux(r,e1) && is_noalias_path_aux(r,e2);
+    return is_noalias_path(r,e1) && is_noalias_path(r,e2);
   case &SeqExp_e(_,e2): fallthru(e2);
-  case &Cast_e(_,e2,...): return is_noalias_path_aux(r,e2);
+  case &Cast_e(_,e2,...): return is_noalias_path(r,e2);
   case &StmtExp_e(s):
     while(true) {
       switch(s->r) {
       case &Seq_s(s1,s2): s = s2; break;
       case &Decl_s(d,s1): s = s1; break;
-      case &Exp_s(e): return is_noalias_path_aux(r,e);
+      case &Exp_s(e): return is_noalias_path(r,e);
       default: Tcutil::impos("is_noalias_stmt_exp: ill-formed StmtExp");
       }
     }
   default: return true;
   }
-}
-bool is_noalias_path(region_t<`r> r, exp_t e) {
-  return is_noalias_path_aux(r,e);
 }
 
 // used by address of.
@@ -5289,6 +5310,19 @@ bool bits_only(type_t t) {
       if (!bits_only(fs->hd->type)) return false;
     return true;
   default: return false;
+  }
+}
+
+// returns true if [e] is "essentially" a variable
+bool is_var_exp(exp_t e) {
+  while (1) {
+    switch (e->r) {
+    case &Var_e(...): return true;
+    case &NoInstantiate_e(e2): fallthru(e2);
+    case &Instantiate_e(e2,_): e = e2; continue;
+//     case &Cast_e(_,e2,_,_): e = e2; continue;
+    default: return false;
+    }
   }
 }
 
@@ -5521,5 +5555,13 @@ struct Vardecl *nonesc_vardecl(binding_t b) {
   default: break;
   }
   return NULL;
+}
+
+// removes NULL members; reverses the list
+list_t<`a> filter_nulls(list_t<`a *,`H> l) {
+  let res = NULL;
+  for (_ x = l; x != NULL; x=x->tl)
+    if (x->hd != NULL) res = new List(*x->hd,res);
+  return res;
 }
 

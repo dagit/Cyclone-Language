@@ -449,7 +449,7 @@ absRval_t<`r> make_unique_consumed(flow_env_t<`r> fenv, type_t t, exp_t consumer
     }
     return rnew(fenv->r) Aggregate(b,d2);
   default: 
-    if (Tcutil::is_noalias_pointer(t))
+    if (Tcutil::is_noalias_pointer(t,false))
       return rnew(fenv->r) Consumed(consumer,iteration,r);
     else return r;
   }
@@ -1310,11 +1310,11 @@ void print_absrval(absRval_t rval) {
     break;
   case &Consumed(e,i,r):
     fprintf(stderr,"[Consumed(%s,%d,",Absynpp::exp2string(e),i);
-    print_absrval(r); fprintf(stderr,"]");
+    print_absrval(r); fprintf(stderr,")]");
     break;
   case &NamedLocation(n,r):
     fprintf(stderr,"[NamedLocation(%s,",Absynpp::qvar2string(n->name));
-    print_absrval(r); fprintf(stderr,"]");
+    print_absrval(r); fprintf(stderr,")]");
     break;
   }
 }

@@ -1049,7 +1049,7 @@ lens=lens->tl;
 ans=Cyc_Core_rnew_string(r,total_len + 1);{
 unsigned long i=0;
 while(strs != 0){
-struct _dyneither_ptr _tmp21=*((struct _dyneither_ptr*)strs->hd);
+struct _dyneither_ptr _tmp21=*((struct _dyneither_ptr*)_check_null((struct _dyneither_ptr*)((struct Cyc_List_List*)_check_null(strs))->hd));
 len=(unsigned long)((struct Cyc_List_List*)_check_null(lens))->hd;
 Cyc_strncpy(_dyneither_ptr_decrease_size(_dyneither_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1),(struct _dyneither_ptr)_tmp21,len);
 i +=len;
@@ -1086,7 +1086,7 @@ total_len +=(list_len - 1)* seplen;{
 struct _dyneither_ptr ans=Cyc_Core_rnew_string(r,total_len + 1);
 unsigned long i=0;
 while(strs->tl != 0){
-struct _dyneither_ptr _tmp27=*((struct _dyneither_ptr*)strs->hd);
+struct _dyneither_ptr _tmp27=*((struct _dyneither_ptr*)_check_null((struct _dyneither_ptr*)((struct Cyc_List_List*)_check_null(strs))->hd));
 len=(unsigned long)((struct Cyc_List_List*)_check_null(lens))->hd;
 Cyc_strncpy(_dyneither_ptr_decrease_size(_dyneither_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1),(struct _dyneither_ptr)_tmp27,len);
 i +=len;
@@ -1107,7 +1107,7 @@ struct _dyneither_ptr Cyc_strncpy(struct _dyneither_ptr dest,struct _dyneither_p
 int i;
 {const char*_tmpA4;const char*_tmpA3;n <= _get_dyneither_size(src,sizeof(char)) && n <= _get_dyneither_size(dest,sizeof(char))?0:((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(((_tmpA3="n <= numelts(src) && n <= numelts(dest)",_tag_dyneither(_tmpA3,sizeof(char),40))),((_tmpA4="string.cyc",_tag_dyneither(_tmpA4,sizeof(char),11))),298);}
 for(i=0;i < n;++ i){
-char _tmp2C=((const char*)src.curr)[i];
+char _tmp2C=*((const char*)_check_dyneither_subscript(src,sizeof(char),i));
 if(_tmp2C == '\000')break;
 ((char*)dest.curr)[i]=_tmp2C;}
 # 304
@@ -1129,7 +1129,7 @@ unsigned int dsz=_get_dyneither_size(dest,sizeof(char));
 if(ssz <= dsz){
 unsigned int i;
 for(i=0;i < ssz;++ i){
-char _tmp2F=((const char*)src.curr)[(int)i];
+char _tmp2F=*((const char*)_check_dyneither_subscript(src,sizeof(char),(int)i));
 {char _tmpA9;char _tmpA8;struct _dyneither_ptr _tmpA7;(_tmpA7=_dyneither_ptr_plus(dest,sizeof(char),(int)i),((_tmpA8=*((char*)_check_dyneither_subscript(_tmpA7,sizeof(char),0)),((_tmpA9=_tmp2F,((_get_dyneither_size(_tmpA7,sizeof(char))== 1  && (_tmpA8 == '\000'  && _tmpA9 != '\000')?_throw_arraybounds(): 1,*((char*)_tmpA7.curr)=_tmpA9)))))));}
 if(_tmp2F == '\000')break;}}else{
 # 331

@@ -978,7 +978,7 @@ enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_I
 struct Cyc_List_List*Cyc_Tcenv_lookup_type_vars(struct Cyc_Tcenv_Tenv*);
 # 40 "tcutil.h"
 void Cyc_Tcutil_terr(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
-# 120
+# 121
 extern struct Cyc_Core_Opt Cyc_Tcutil_rko;
 # 34 "formatstr.h"
 struct Cyc_List_List*Cyc_Formatstr_get_format_typs(struct _RegionHandle*,struct Cyc_Tcenv_Tenv*,struct _dyneither_ptr,unsigned int);
@@ -1107,7 +1107,7 @@ if(_tmp15 == 0){
 {const char*_tmp108;void*_tmp107;(_tmp107=0,Cyc_Tcutil_terr(loc,((_tmp108="bad format string",_tag_dyneither(_tmp108,sizeof(char),18))),_tag_dyneither(_tmp107,sizeof(void*),0)));}{
 struct Cyc_List_List*_tmp18=0;_npop_handler(0);return _tmp18;};}{
 # 187
-struct Cyc_List_List*_tmp1A;struct Cyc_List_List*_tmp1B;struct Cyc_List_List*_tmp1C;struct Cyc_List_List*_tmp1D;char _tmp1E;int _tmp1F;struct _tuple10*_tmp19=(struct _tuple10*)_tmp15->v;_tmp1A=_tmp19->f1;_tmp1B=_tmp19->f2;_tmp1C=_tmp19->f3;_tmp1D=_tmp19->f4;_tmp1E=_tmp19->f5;_tmp1F=_tmp19->f6;
+struct _tuple10*_stmttmp0=(struct _tuple10*)_tmp15->v;struct Cyc_List_List*_tmp1A;struct Cyc_List_List*_tmp1B;struct Cyc_List_List*_tmp1C;struct Cyc_List_List*_tmp1D;char _tmp1E;int _tmp1F;struct _tuple10*_tmp19=_stmttmp0;_tmp1A=_tmp19->f1;_tmp1B=_tmp19->f2;_tmp1C=_tmp19->f3;_tmp1D=_tmp19->f4;_tmp1E=_tmp19->f5;_tmp1F=_tmp19->f6;
 i=_tmp1F - 1;
 {struct Cyc_List_List*_tmp20=_tmp1D;int _tmp21;_LL25: if(_tmp20 == 0)goto _LL27;_tmp21=(int)_tmp20->hd;if(_tmp20->tl != 0)goto _LL27;if(!(
 (_tmp21 == 'j'  || _tmp21 == 'z') || _tmp21 == 't'))goto _LL27;_LL26:
@@ -1365,7 +1365,7 @@ if(_tmpA0 == 0){
 {const char*_tmp169;void*_tmp168;(_tmp168=0,Cyc_Tcutil_terr(loc,((_tmp169="bad format string",_tag_dyneither(_tmp169,sizeof(char),18))),_tag_dyneither(_tmp168,sizeof(void*),0)));}{
 struct Cyc_List_List*_tmpA3=0;_npop_handler(0);return _tmpA3;};}{
 # 474
-int _tmpA5;struct Cyc_List_List*_tmpA6;struct Cyc_List_List*_tmpA7;char _tmpA8;int _tmpA9;struct _tuple11*_tmpA4=(struct _tuple11*)_tmpA0->v;_tmpA5=_tmpA4->f1;_tmpA6=_tmpA4->f2;_tmpA7=_tmpA4->f3;_tmpA8=_tmpA4->f4;_tmpA9=_tmpA4->f5;
+struct _tuple11*_stmttmp1=(struct _tuple11*)_tmpA0->v;int _tmpA5;struct Cyc_List_List*_tmpA6;struct Cyc_List_List*_tmpA7;char _tmpA8;int _tmpA9;struct _tuple11*_tmpA4=_stmttmp1;_tmpA5=_tmpA4->f1;_tmpA6=_tmpA4->f2;_tmpA7=_tmpA4->f3;_tmpA8=_tmpA4->f4;_tmpA9=_tmpA4->f5;
 i=_tmpA9 - 1;
 {struct Cyc_List_List*_tmpAA=_tmpA7;int _tmpAB;_LL8E: if(_tmpAA == 0)goto _LL90;_tmpAB=(int)_tmpAA->hd;if(_tmpAA->tl != 0)goto _LL90;if(!(
 (_tmpAB == 'j'  || _tmpAB == 'z') || _tmpAB == 't'))goto _LL90;_LL8F:

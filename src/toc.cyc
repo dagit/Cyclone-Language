@@ -4184,8 +4184,10 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
       TOC_RGN(nv, rgn2) {
         if(lscs->tl != NULL) {
           let &$(_,fallthru_lab,next_sc) = lscs->tl->hd;
+	  let vs = Tcutil::filter_nulls(List::split(next_sc->pat_vars->v)[0]);
+	  vs = List::imp_rev(vs);
           stmt_to_c(non_last_switchclause_env(rgn2, env, end_l, fallthru_lab,
-                                              next_sc->pat_vars->v,
+                                              vs,
                                               nvs->tl->hd),
                     s);
         } else
@@ -4506,7 +4508,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         te->topt = &VoidType_val;
         let rs = exp_stmt(te,DL);
         let default_case =
-          new Switch_clause{.pattern=p,.pat_vars=new Opt(new List(x_vd,NULL)),
+          new Switch_clause{.pattern=p,.pat_vars=new Opt(new List(new $(new x_vd,xexp),NULL)),
                             .where_clause=NULL,.body=rs,.loc=DL};
         let handler_stmt = switch_stmt(e_exp,
                                        List::append(scs,

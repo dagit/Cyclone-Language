@@ -1,0 +1,139 @@
+#include <core.h>
+#include <stdio.h>
+
+/*********************** NON-UNIQUE, 1-2 LEVEL PATTERNS *********************/
+
+struct s1<`r::R> {
+  int *`r p;
+  int y;
+};
+
+// Aggregate pattern; should propagate equality of px and p, and ps and s.
+void func1() {
+  int *px = new 1;
+  struct s1 @s = new s1{.p=px,.y=1};
+  let ps as &s1{.p=p,...} = s;
+  return;
+}
+
+// Aggregate pattern with fallthru
+void func1a(struct s1 @s) {
+  bool gotnull = false;
+  switch (s) {
+  case &s1{.p=p1 as NULL,.y=y1}: gotnull=true; fallthru(p1,y1);
+  case &s1{.p=p2,.y=y2}: printf("%x\n",p2); break;
+  }
+  return;
+}
+
+// Aggregate pattern on partially initialized aggregate
+void func1b() {
+  struct s1 @s = malloc(sizeof(struct s1));
+  s->y = 1;
+  let ps as &s1{.p=p,.y=y} = s; // p will be uninitialized
+//   y = *p; // should fail
+  struct s1 @s2 = malloc(sizeof(struct s1));
+  s2->p = NULL;
+  let &s1{.p=p2,.y=y2} = s2; // y2 will be uninitialized
+//   *p2 = 1; // should fail (null dereference)
+  return;
+}  
+
+// void main() {
+//   func1a(new s1{.p=NULL,.y=1});
+// }
+
+/*---------------------*/
+
+datatype Foo {
+  IntStar(int *);
+  IntStar2(int *);
+};
+
+// Datatype pattern; should propagate equality between s and ps, but 
+// not between p and px
+void func2() {
+  int *px = new 1;
+  datatype Foo @f = new IntStar(px);
+  let ps as &IntStar(p) = f;
+  return;
+}
+
+// Datatype pattern: should not consume f
+int *func3(datatype Foo @`U f) {
+  int *y;
+  switch (f) {
+  case &IntStar(px): y = px; break;
+  case &IntStar2(py):y = py; break;
+  }
+  return y; 
+}
+
+// Datatype pattern; should fail due to lack of initialization
+// void func3a() {
+//   datatype Foo @f;
+//   switch (f) {
+//   case &IntStar(px):  break;
+//   case &IntStar2(py): break;
+//   }
+// }
+
+/*---------------------*/
+
+struct s2<`r::R> {
+  datatype Foo @`r f;
+  int g;
+};
+
+// Nested datatype in aggr pattern: should equate f and pf, but not
+// x and NULL
+int *func4() {
+  datatype Foo @f = new IntStar(NULL);
+  struct s2 @ps2 = new s2{.f=f, .g=1};
+  switch (ps2) {
+  case &s2{.f=pf as &IntStar(x),...}: return x;
+  default: return NULL;
+  }
+}
+
+int *func4a() {
+  datatype Foo @fp;
+  struct s2 *ps2 = malloc(sizeof(struct s2));
+  ps2->g=1;
+  switch (ps2) {
+//   case &s2{.f=pf as &IntStar(x),...}: return x; // should fail; not init
+  case &s2{.f=pf2,...}: fp = pf2; break;
+    // at this point, both fp and pf2 are uninitialized
+  default: return NULL;
+  }
+  return NULL;
+}
+
+/*---------------------*/
+
+datatype Bar {
+  AFoo(datatype Foo @);
+  AIntStar(int *);
+};
+
+// Nested datatype pattern; no equalities; uses the root b
+int *func5(datatype Bar @b) {
+  int *y;
+  switch (b) {
+  case &AFoo(&IntStar(x1)):  y = x1; break;
+  case &AFoo(&IntStar2(x2)): y = x2; break;
+  case &AIntStar(x3):        y = x3; break;
+  }
+  return y;
+}
+
+/*---------------------*/
+
+// Tuple matching
+int func6() {
+  $(int*,int*,$(int*,int*)) x;
+  x[0] = NULL;
+  x[2] = $(NULL,new 1);
+  let $(v1,v2,$(v3,v4)) = x;
+  return *v4;
+}

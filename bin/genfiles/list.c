@@ -1557,7 +1557,7 @@ return 0;}
 # 794
 struct Cyc_Core_Opt*Cyc_List_check_unique(int(*cmp)(void*,void*),struct Cyc_List_List*x){
 while(x != 0){
-struct Cyc_List_List*_tmp32=x->tl;
+struct Cyc_List_List*_tmp32=((struct Cyc_List_List*)_check_null(x))->tl;
 if(_tmp32 != 0){
 if(cmp(x->hd,_tmp32->hd)== 0){struct Cyc_Core_Opt*_tmp7B;return(_tmp7B=_cycalloc(sizeof(*_tmp7B)),((_tmp7B->v=x->hd,_tmp7B)));}}
 x=_tmp32;}
@@ -1612,7 +1612,7 @@ for(0;l1 != 0  && l2 != 0;(l1=l1->tl,l2=l2->tl)){
 # 859
 if((unsigned int)l1 == (unsigned int)l2)
 return 0;{
-int _tmp3C=cmp(l1->hd,l2->hd);
+int _tmp3C=cmp(((struct Cyc_List_List*)_check_null(l1))->hd,((struct Cyc_List_List*)_check_null(l2))->hd);
 if(_tmp3C != 0)
 return _tmp3C;};}
 # 865
@@ -1627,7 +1627,7 @@ for(0;l1 != 0  && l2 != 0;(l1=l1->tl,l2=l2->tl)){
 # 877
 if((unsigned int)l1 == (unsigned int)l2)
 return 1;{
-int _tmp3D=cmp(l1->hd,l2->hd);
+int _tmp3D=cmp(((struct Cyc_List_List*)_check_null(l1))->hd,((struct Cyc_List_List*)_check_null(l2))->hd);
 if(_tmp3D != 0)
 return 0;};}
 # 883

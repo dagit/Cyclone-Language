@@ -504,7 +504,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
   case &PointerType(PtrInfo(et,tq,PtrAtts(r,n,b,zt,_))):
     if (!kind_leq(typ_kind(et),&tmk))
       terr(e1->loc,"can't perform arithmetic on abstract pointer type");
-    if (is_noalias_pointer(t1))
+    if (is_noalias_pointer(t1,false))
       terr(e1->loc,"can't perform arithmetic on non-aliasing pointer type");
     if (!coerce_sint_typ(te, e2))
       terr(e2->loc,"expecting int but found %s",typ2string(t2));
@@ -563,7 +563,7 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
     } else {
       if (!kind_leq(typ_kind(t1_elt),&tmk))
         terr(e1->loc,"can't perform arithmetic on abstract pointer type");
-      if (is_noalias_pointer(t1))
+      if (is_noalias_pointer(t1,false))
         terr(e1->loc,"can't perform arithmetic on non-aliasing pointer type");
       if (!coerce_sint_typ(te, e2)) {
 	terr(e2->loc,"expecting either %s or int but found %s",
@@ -855,7 +855,7 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
         (is_zero_pointer_typ_elt(t,&telt) && (i == PreInc || i == PostInc))) {
       if (!kind_leq(typ_kind(telt),&tmk))
         terr(e->loc,"can't perform arithmetic on abstract pointer type");
-      if (is_noalias_pointer(t))
+      if (is_noalias_pointer(t,false))
         terr(e->loc,"can't perform arithmetic on non-aliasing pointer type");
     } else
       terr(e->loc,"expecting arithmetic or ? type but found %s",typ2string(t));
@@ -2910,7 +2910,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     bool ok = true;
     exp_t fn_exp;
     try {
-      fn_exp = deep_copy_exp(e);
+      fn_exp = deep_copy_exp(false,e);
     } catch {
     case &Core::Failure(s):
       ok = false;
