@@ -2619,8 +2619,8 @@ _get_zero_arr_size_char(_tmp15F,1));}))== 0)Cyc_set_cpp((struct _dynforward_ptr)
 struct Cyc_String_pa_struct _tmp163;_tmp163.tag=0;_tmp163.f1=(struct
 _dynforward_ptr)((struct _dynforward_ptr)_tmp152);{struct Cyc_String_pa_struct
 _tmp162;_tmp162.tag=0;_tmp162.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)
-comp);{void*_tmp160[2]={& _tmp162,& _tmp163};Cyc_aprintf(({const char*_tmp161="%s -x c -E -specs %s";
-_tag_dynforward(_tmp161,sizeof(char),_get_zero_arr_size_char(_tmp161,21));}),
+comp);{void*_tmp160[2]={& _tmp162,& _tmp163};Cyc_aprintf(({const char*_tmp161="%s -w -x c -E -specs %s";
+_tag_dynforward(_tmp161,sizeof(char),_get_zero_arr_size_char(_tmp161,24));}),
 _tag_dynforward(_tmp160,sizeof(void*),2));}}}));}}}}}};_pop_region(r);}if(Cyc_cyclone_files
 == 0  && Cyc_ccargs == 0){({void*_tmp2EE=0;Cyc_fprintf(Cyc_stderr,({const char*
 _tmp2EF="missing file\n";_tag_dynforward(_tmp2EF,sizeof(char),

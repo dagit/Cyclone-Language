@@ -1318,8 +1318,19 @@ int main(int argc, string_t<`H> ?`H argv) {
   Arg::current = 0;
   Arg::parse(options, add_other, optstring, otherargs);
   if (strcmp(cpp,"") == 0)
-    // if cpp string is not explicitly set, use the default
-    set_cpp(aprintf("%s -x c -E -specs %s", comp,specs_file));
+    // If cpp string is not explicitly set, use the default.
+    // NB the -w suppresses preprocessor warnings.  It's needed
+    // because sometimes cpp complains about macros being redefined,
+    // typically when cross-compiling; but I can't figure out exactly
+    // when or why this happens.  For example, on
+    // powerpc-apple-rhapsody,
+    //   echo | gcc - -E -D__SIZE_TYPE__
+    // complains about redefining __SIZE_TYPE__, however,
+    //   echo | gcc - -E -dM
+    // does not show that __SIZE_TYPE__ is ever defined.  This
+    // results in warnings when compiling i686-unknown-linux on
+    // powerpc-apple-rhapsody, since linux uses __SIZE_TYPE__.
+    set_cpp(aprintf("%s -w -x c -E -specs %s", comp,specs_file));
   } // end region r
   if (cyclone_files == NULL && ccargs == NULL) {
     fprintf(stderr,"missing file\n");
