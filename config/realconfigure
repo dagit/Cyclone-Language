@@ -27,43 +27,21 @@ esac
 # Note: under Cygwin, pwd can return a path name containing a colon.
 #  Such path names don't work in make's VPATH, so we convert them
 #  to path names without colons using the cygpath command.
-# We use 'command -v' for WHICH because it seems to work on Mac OS X, 
-# solaris, linux, and IRIX.  Other options are 'type -p' and 'which'.
 case "$OS" in
   cygwin*)
     PWD=`pwd`
     CYCDIR=`cygpath -u "$PWD"`
     WHICH='which'
   ;;
-  freebsd*)
-    CYCDIR=`pwd`
-    WHICH='which'
-  ;;
-  *)
+  *solaris*)
     CYCDIR=`pwd`
     WHICH='command -v'
   ;;
+  *)
+    CYCDIR=`pwd`
+    WHICH='which'
+  ;;
 esac
-
-
-########## find a suitable version of diff
-DIFF="diff"
-# make sure it's GNU diff
-TMPFILE=/tmp/cyconfig$$
-$DIFF --version > $TMPFILE 2>&1
-grep GNU $TMPFILE > /dev/null
-if [ $? != 0 ]; then
-  if [ "$TYPE" = "sun" ]; then
-    f="/usr/local/gnu/diffutils-2.6/bin/diff"
-    if [ -f "$f" ]; then
-      DIFF=$f
-    else
-      echo "Warning: could not find $f"
-      echo "  files bin/genfiles/${ARCH}* may be incorrect/incomplete"
-    fi
-  fi
-fi
-rm -f $TMPFILE
 
 ########## find a suitable version of egrep
 EGREP="egrep"
@@ -183,11 +161,9 @@ fi
 
 # set up the installation paths
 chkdir () {
-  echo -n "  $1=$2"
+  echo "  $1=$2"
   if [ ! -d "$2" ]; then
-    echo " (will create)"
-  else
-    echo
+    echo "    (will create)"
   fi
 }
 echo "Will install into"
@@ -215,7 +191,6 @@ ALL_ARCHS=${ALL_ARCHS}
 CC=${CC}
 LDFLAGS=${LDFLAGS}
 SHELL=${CONFIGSHELL}
-DIFF=${DIFF}
 
 EOF
 cat Makefile.inc.in) > Makefile.inc
