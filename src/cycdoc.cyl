@@ -1149,7 +1149,7 @@ void dumpdecl(decl_t d, string_t comment) {
                       cycargs_string,
                       sh_escape_string(preprocfile),
                       sh_escape_string(filename));
-    if (system(string_to_Cstring(cmd)) != 0) {
+    if (system(cmd) != 0) {
       fprintf(stderr,"\nError: preprocessing\n");
       return;
     }

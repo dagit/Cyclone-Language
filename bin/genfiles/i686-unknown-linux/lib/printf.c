@@ -432,29 +432,27 @@ _tag_arr( 0u, 0u, 0u); struct _tagged_arr cp2=( struct _tagged_arr) _tag_arr( 0u
 0u, 0u); int use_cp2; struct _tagged_arr fmark; int flags; int ret; int width;
 int prec; unsigned char sign; int softsign= 0; double _double; int fpprec;
 unsigned int _ulong; int dprec; int dpad; int fieldsz; int size= 0;
-unsigned char buf[ 348u];{ unsigned int _temp124= 348u; unsigned int i; for( i=
-0; i <  _temp124; i ++){ buf[ i]='\000';}}{ unsigned char ox[ 2u]={'\000','\000'};
-enum  Cyc_Std_BASE base; fmt= fmt0; ret= 0; for( 0; 1; 0){ for( fmark= fmt;( ch=(
-int)*(( const unsigned char*) _check_unknown_subscript( fmt, sizeof(
-unsigned char), 0u))) != '\000'? ch != '%': 0; _tagged_arr_inplace_plus_post(&
-fmt, sizeof( unsigned char), 1)){;} if(( n=( fmt.curr -  fmark.curr) /  sizeof(
-unsigned char)) !=  0){ do { if( Cyc_Std__IO_sputn( ioputc, ioputc_env, fmark, n)
-!=  n){ goto error;}} while ( 0); ret += n;} if( ch == '\000'){ goto done;}
-_tagged_arr_inplace_plus_post(& fmt, sizeof( unsigned char), 1); flags= 0; dprec=
-0; fpprec= 0; width= 0; prec= - 1; sign='\000'; rflag: ch=( int)*(( const
-unsigned char*) _check_unknown_subscript( _tagged_arr_inplace_plus_post(& fmt,
-sizeof( unsigned char), 1), sizeof( unsigned char), 0u)); reswitch: use_cp2= 0;
-switch( ch){ case ' ': _LL80: if( !(( int) sign)){ sign=' ';} goto rflag; case '#':
-_LL81: flags |= 8; goto rflag; case '*': _LL82: width= Cyc_Std_va_arg_int( ap);
-_tagged_arr_inplace_plus_post(& ap, sizeof( void*), 1); if( width >=  0){ goto
-rflag;} width= - width; goto _LL83; case '-': _LL83: flags |= 16; flags &= ~ 32;
-goto rflag; case '+': _LL84: sign='+'; goto rflag; case '.': _LL85: if(( ch=(
-int)*(( const unsigned char*) _check_unknown_subscript(
+unsigned char buf[ 348u]; unsigned char ox[ 2u]={'\000','\000'}; enum  Cyc_Std_BASE
+base; fmt= fmt0; ret= 0; for( 0; 1; 0){ for( fmark= fmt;( ch=( int)*(( const
+unsigned char*) _check_unknown_subscript( fmt, sizeof( unsigned char), 0u))) != '\000'?
+ch != '%': 0; _tagged_arr_inplace_plus_post(& fmt, sizeof( unsigned char), 1)){;}
+if(( n=( fmt.curr -  fmark.curr) /  sizeof( unsigned char)) !=  0){ do { if( Cyc_Std__IO_sputn(
+ioputc, ioputc_env, fmark, n) !=  n){ goto error;}} while ( 0); ret += n;} if(
+ch == '\000'){ goto done;} _tagged_arr_inplace_plus_post(& fmt, sizeof(
+unsigned char), 1); flags= 0; dprec= 0; fpprec= 0; width= 0; prec= - 1; sign='\000';
+rflag: ch=( int)*(( const unsigned char*) _check_unknown_subscript(
 _tagged_arr_inplace_plus_post(& fmt, sizeof( unsigned char), 1), sizeof(
-unsigned char), 0u))) == '*'){ n= Cyc_Std_va_arg_int( ap);
-_tagged_arr_inplace_plus_post(& ap, sizeof( void*), 1); prec= n <  0? - 1: n;
-goto rflag;} n= 0; while(( unsigned int)( ch - '0') <=  9) { n= 10 *  n + ( ch - '0');
-ch=( int)*(( const unsigned char*) _check_unknown_subscript(
+unsigned char), 0u)); reswitch: use_cp2= 0; switch( ch){ case ' ': _LL80: if( !((
+int) sign)){ sign=' ';} goto rflag; case '#': _LL81: flags |= 8; goto rflag;
+case '*': _LL82: width= Cyc_Std_va_arg_int( ap); _tagged_arr_inplace_plus_post(&
+ap, sizeof( void*), 1); if( width >=  0){ goto rflag;} width= - width; goto
+_LL83; case '-': _LL83: flags |= 16; flags &= ~ 32; goto rflag; case '+': _LL84:
+sign='+'; goto rflag; case '.': _LL85: if(( ch=( int)*(( const unsigned char*)
+_check_unknown_subscript( _tagged_arr_inplace_plus_post(& fmt, sizeof(
+unsigned char), 1), sizeof( unsigned char), 0u))) == '*'){ n= Cyc_Std_va_arg_int(
+ap); _tagged_arr_inplace_plus_post(& ap, sizeof( void*), 1); prec= n <  0? - 1:
+n; goto rflag;} n= 0; while(( unsigned int)( ch - '0') <=  9) { n= 10 *  n + (
+ch - '0'); ch=( int)*(( const unsigned char*) _check_unknown_subscript(
 _tagged_arr_inplace_plus_post(& fmt, sizeof( unsigned char), 1), sizeof(
 unsigned char), 0u));} prec= n <  0? - 1: n; goto reswitch; case '0': _LL86: if(
 !( flags &  16)){ flags |= 32;} goto rflag; case '1': _LL87: goto _LL88; case '2':
@@ -554,20 +552,18 @@ struct _tagged_arr) cp, size) !=  size){ goto error;}} while ( 0);} if( Cyc_Std_
 ioputc, ioputc_env,'0', fpprec) <  fpprec){ goto error;} if( flags &  16){ if(
 Cyc_Std__IO_padn( ioputc, ioputc_env,' ', width -  fieldsz) <  width -  fieldsz){
 goto error;}} ret += width >  fieldsz? width: fieldsz;} done: return ret; error:
-return - 1;}} static struct _tagged_arr Cyc_Std_exponent( struct _tagged_arr p,
-int exp, int fmtch){ struct _tagged_arr t; unsigned char expbuf[ 308u];{
-unsigned int _temp125= 308u; unsigned int i; for( i= 0; i <  _temp125; i ++){
-expbuf[ i]='0';}}*(( unsigned char*) _check_unknown_subscript(
+return - 1;} static struct _tagged_arr Cyc_Std_exponent( struct _tagged_arr p,
+int exp, int fmtch){ struct _tagged_arr t; unsigned char expbuf[ 308u];*((
+unsigned char*) _check_unknown_subscript( _tagged_arr_inplace_plus_post(& p,
+sizeof( unsigned char), 1), sizeof( unsigned char), 0u))=( unsigned char) fmtch;
+if( exp <  0){ exp= - exp;*(( unsigned char*) _check_unknown_subscript(
 _tagged_arr_inplace_plus_post(& p, sizeof( unsigned char), 1), sizeof(
-unsigned char), 0u))=( unsigned char) fmtch; if( exp <  0){ exp= - exp;*((
-unsigned char*) _check_unknown_subscript( _tagged_arr_inplace_plus_post(& p,
-sizeof( unsigned char), 1), sizeof( unsigned char), 0u))='-';} else{*((
-unsigned char*) _check_unknown_subscript( _tagged_arr_inplace_plus_post(& p,
-sizeof( unsigned char), 1), sizeof( unsigned char), 0u))='+';} t=
-_tagged_arr_plus( _tag_arr( expbuf, sizeof( unsigned char), 308u), sizeof(
-unsigned char), 308); if( exp >  9){ do {*(( unsigned char*)
-_check_unknown_subscript( _tagged_arr_inplace_plus(& t, sizeof( unsigned char),
--1), sizeof( unsigned char), 0u))=( unsigned char)( exp %  10 + '0');} while ((
+unsigned char), 0u))='-';} else{*(( unsigned char*) _check_unknown_subscript(
+_tagged_arr_inplace_plus_post(& p, sizeof( unsigned char), 1), sizeof(
+unsigned char), 0u))='+';} t= _tagged_arr_plus( _tag_arr( expbuf, sizeof(
+unsigned char), 308u), sizeof( unsigned char), 308); if( exp >  9){ do {*((
+unsigned char*) _check_unknown_subscript( _tagged_arr_inplace_plus(& t, sizeof(
+unsigned char), -1), sizeof( unsigned char), 0u))=( unsigned char)( exp %  10 + '0');} while ((
 exp /= 10) >  9);*(( unsigned char*) _check_unknown_subscript(
 _tagged_arr_inplace_plus(& t, sizeof( unsigned char), -1), sizeof( unsigned char),
 0u))=( unsigned char)( exp + '0'); for( 0; t.curr < ( _tagged_arr_plus( _tag_arr(
@@ -610,8 +606,8 @@ _tagged_arr_plus( endp, sizeof( unsigned char), - 1); p.curr >=  startp.curr?
 integer !=  0.0: 0; ++ expcnt){ tmp= modf( integer /  10,& integer);*((
 unsigned char*) _check_unknown_subscript( _tagged_arr_inplace_plus_post(& p,
 sizeof( unsigned char), -1), sizeof( unsigned char), 0u))=( unsigned char)(( int)((
-tmp +  .01) *  10) + '0');} switch( fmtch){ case 'f': _LL126: goto _LL127; case
-'F': _LL127: if( expcnt){ for( 0;( _tagged_arr_inplace_plus(& p, sizeof(
+tmp +  .01) *  10) + '0');} switch( fmtch){ case 'f': _LL124: goto _LL125; case
+'F': _LL125: if( expcnt){ for( 0;( _tagged_arr_inplace_plus(& p, sizeof(
 unsigned char), 1)).curr <  endp.curr;*(( unsigned char*)
 _check_unknown_subscript( _tagged_arr_inplace_plus_post(& t, sizeof(
 unsigned char), 1), sizeof( unsigned char), 0u))=*(( unsigned char*)
@@ -628,8 +624,8 @@ unsigned char), 0u))=( unsigned char)(( int) tmp + '0');} while ( -- prec? fract
 _tagged_arr_plus( t, sizeof( unsigned char), - 1),( unsigned char) 0, signp);}}
 for( 0; prec --;*(( unsigned char*) _check_unknown_subscript(
 _tagged_arr_inplace_plus_post(& t, sizeof( unsigned char), 1), sizeof(
-unsigned char), 0u))='0'){;} break; case 'e': _LL128: goto _LL129; case 'E':
-_LL129: eformat: if( expcnt){*(( unsigned char*) _check_unknown_subscript(
+unsigned char), 0u))='0'){;} break; case 'e': _LL126: goto _LL127; case 'E':
+_LL127: eformat: if( expcnt){*(( unsigned char*) _check_unknown_subscript(
 _tagged_arr_inplace_plus_post(& t, sizeof( unsigned char), 1), sizeof(
 unsigned char), 0u))=*(( unsigned char*) _check_unknown_subscript(
 _tagged_arr_inplace_plus(& p, sizeof( unsigned char), 1), sizeof( unsigned char),
@@ -669,7 +665,7 @@ _check_unknown_subscript( _tagged_arr_inplace_plus(& t, sizeof( unsigned char),
 _check_unknown_subscript( t, sizeof( unsigned char), 0u)) == '.'){
 _tagged_arr_inplace_plus(& t, sizeof( unsigned char), -1);}
 _tagged_arr_inplace_plus(& t, sizeof( unsigned char), 1);} t= Cyc_Std_exponent(
-t, expcnt, fmtch); break; case 'g': _LL130: goto _LL131; case 'G': _LL131: if( !
+t, expcnt, fmtch); break; case 'g': _LL128: goto _LL129; case 'G': _LL129: if( !
 prec){ ++ prec;} if( expcnt >  prec? 1:(( ! expcnt? fract !=  0.0: 0)? fract < 
 .0001: 0)){ -- prec; fmtch -= 2; gformat= 1; goto eformat;} if( expcnt){ for( 0;(
 _tagged_arr_inplace_plus(& p, sizeof( unsigned char), 1)).curr <  endp.curr;(*((
@@ -696,11 +692,11 @@ unsigned char*) _check_unknown_subscript( _tagged_arr_inplace_plus(& t, sizeof(
 unsigned char), -1), sizeof( unsigned char), 0u)) == '0': 0) {;} if(*((
 unsigned char*) _check_unknown_subscript( t, sizeof( unsigned char), 0u)) != '.'){
 _tagged_arr_inplace_plus(& t, sizeof( unsigned char), 1);}}} break; default:
-_LL132:( int) _throw(( void*)({ struct Cyc_Core_Impossible_struct* _temp134=(
+_LL130:( int) _throw(( void*)({ struct Cyc_Core_Impossible_struct* _temp132=(
 struct Cyc_Core_Impossible_struct*) _cycalloc( sizeof( struct Cyc_Core_Impossible_struct));
-_temp134[ 0]=({ struct Cyc_Core_Impossible_struct _temp135; _temp135.tag= Cyc_Core_Impossible;
-_temp135.f1= _tag_arr("Std::__cvt_double", sizeof( unsigned char), 18u);
-_temp135;}); _temp134;}));} return( t.curr -  startp.curr) /  sizeof(
+_temp132[ 0]=({ struct Cyc_Core_Impossible_struct _temp133; _temp133.tag= Cyc_Core_Impossible;
+_temp133.f1= _tag_arr("Std::__cvt_double", sizeof( unsigned char), 18u);
+_temp133;}); _temp132;}));} return( t.curr -  startp.curr) /  sizeof(
 unsigned char);} int Cyc_Std_vfprintf( struct Cyc_Std___sFILE* f, struct
 _tagged_arr fmt, struct _tagged_arr ap){ int ans; ans=(( int(*)( int(* ioputc)(
 int, struct Cyc_Std___sFILE*), struct Cyc_Std___sFILE* ioputc_env, struct
@@ -714,20 +710,20 @@ Cyc_Std_putc, Cyc_Std_stdout, fmt, ap); return ans;} int Cyc_Std_printf( struct
 _tagged_arr fmt, struct _tagged_arr ap){ int ans; ans= Cyc_Std_vprintf( fmt, ap);
 return ans;} struct _tuple0{ struct _tagged_arr* f1; unsigned int* f2; } ;
 static int Cyc_Std_putc_string( int c, struct _tuple0* sptr_n){ struct _tuple0
-_temp138; unsigned int* _temp139; struct _tagged_arr* _temp141; struct _tuple0*
-_temp136= sptr_n; _temp138=* _temp136; _LL142: _temp141= _temp138.f1; goto
-_LL140; _LL140: _temp139= _temp138.f2; goto _LL137; _LL137: { struct _tagged_arr
-s=* _temp141; unsigned int n=* _temp139; if( _get_arr_size( s, sizeof(
+_temp136; unsigned int* _temp137; struct _tagged_arr* _temp139; struct _tuple0*
+_temp134= sptr_n; _temp136=* _temp134; _LL140: _temp139= _temp136.f1; goto
+_LL138; _LL138: _temp137= _temp136.f2; goto _LL135; _LL135: { struct _tagged_arr
+s=* _temp139; unsigned int n=* _temp137; if( _get_arr_size( s, sizeof(
 unsigned char)) ==  0? 1: n ==  0){ return - 1;}*(( unsigned char*)
 _check_unknown_subscript( s, sizeof( unsigned char), 0u))=( unsigned char) c;*
-_temp141= _tagged_arr_plus( s, sizeof( unsigned char), 1);* _temp139= n -  1;
+_temp139= _tagged_arr_plus( s, sizeof( unsigned char), 1);* _temp137= n -  1;
 return 1;}} int Cyc_Std_vsnprintf( struct _tagged_arr s, unsigned int n, struct
-_tagged_arr fmt, struct _tagged_arr ap){ int ans; struct _tagged_arr _temp143= s;
-unsigned int _temp144= n; struct _tuple0 _temp145=({ struct _tuple0 _temp146;
-_temp146.f1=& _temp143; _temp146.f2=& _temp144; _temp146;}); ans=(( int(*)( int(*
+_tagged_arr fmt, struct _tagged_arr ap){ int ans; struct _tagged_arr _temp141= s;
+unsigned int _temp142= n; struct _tuple0 _temp143=({ struct _tuple0 _temp144;
+_temp144.f1=& _temp141; _temp144.f2=& _temp142; _temp144;}); ans=(( int(*)( int(*
 ioputc)( int, struct _tuple0*), struct _tuple0* ioputc_env, struct _tagged_arr
 fmt0, struct _tagged_arr ap)) Cyc_Std__IO_vfprintf)( Cyc_Std_putc_string,&
-_temp145, fmt, ap); if( 0 <=  ans){*(( unsigned char*) _check_unknown_subscript(
+_temp143, fmt, ap); if( 0 <=  ans){*(( unsigned char*) _check_unknown_subscript(
 s, sizeof( unsigned char), ans))='\000';} return ans;} int Cyc_Std_snprintf(
 struct _tagged_arr s, unsigned int n, struct _tagged_arr fmt, struct _tagged_arr
 ap){ return Cyc_Std_vsnprintf( s, n, fmt, ap);} int Cyc_Std_vsprintf( struct
@@ -739,12 +735,12 @@ int c, int dummy){ return 1;} struct _tagged_arr Cyc_Std_vrprintf( struct
 _RegionHandle* r1, struct _tagged_arr fmt, struct _tagged_arr ap){ int size=((
 int(*)( int(* ioputc)( int, int), int ioputc_env, struct _tagged_arr fmt0,
 struct _tagged_arr ap)) Cyc_Std__IO_vfprintf)( Cyc_Std_putc_void, 0, fmt, ap) + 
-1; struct _tagged_arr s=({ unsigned int _temp147=( unsigned int) size;
-unsigned char* _temp148=( unsigned char*) _region_malloc( r1, _check_times(
-sizeof( unsigned char), _temp147)); struct _tagged_arr _temp150= _tag_arr(
-_temp148, sizeof( unsigned char),( unsigned int) size);{ unsigned int _temp149=
-_temp147; unsigned int i; for( i= 0; i <  _temp149; i ++){ _temp148[ i]='\000';}};
-_temp150;}); Cyc_Std_vsprintf( s, fmt, ap); return s;} struct _tagged_arr Cyc_Std_rprintf(
+1; struct _tagged_arr s=({ unsigned int _temp145=( unsigned int) size;
+unsigned char* _temp146=( unsigned char*) _region_malloc( r1, _check_times(
+sizeof( unsigned char), _temp145)); struct _tagged_arr _temp148= _tag_arr(
+_temp146, sizeof( unsigned char),( unsigned int) size);{ unsigned int _temp147=
+_temp145; unsigned int i; for( i= 0; i <  _temp147; i ++){ _temp146[ i]='\000';}};
+_temp148;}); Cyc_Std_vsprintf( s, fmt, ap); return s;} struct _tagged_arr Cyc_Std_rprintf(
 struct _RegionHandle* r1, struct _tagged_arr fmt, struct _tagged_arr ap){ return
 Cyc_Std_vrprintf( r1, fmt, ap);} struct _tagged_arr Cyc_Std_aprintf( struct
 _tagged_arr fmt, struct _tagged_arr ap){ return Cyc_Std_vrprintf( Cyc_Core_heap_region,

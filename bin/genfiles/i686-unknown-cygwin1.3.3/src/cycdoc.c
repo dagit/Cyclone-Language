@@ -2027,10 +2027,9 @@ struct Cyc_Std_String_pa_struct _temp1028; _temp1028.tag= Cyc_Std_String_pa;
 _temp1028.f1=( struct _tagged_arr) Cyc_cyclone_file;{ void* _temp1027[ 4u]={&
 _temp1028,& _temp1029,& _temp1030,& _temp1031}; Cyc_Std_aprintf( _tag_arr("%s %s -E -o %s -x cyc %s",
 sizeof( unsigned char), 25u), _tag_arr( _temp1027, sizeof( void*), 4u));}}}}});
-if( Cyc_Std_system( _tag_arr( string_to_Cstring(( struct _tagged_arr) _temp985),
-sizeof( unsigned char), 0u)) !=  0){({ void* _temp986[ 0u]={}; Cyc_Std_fprintf(
-Cyc_Std_stderr, _tag_arr("\nError: preprocessing\n", sizeof( unsigned char), 23u),
-_tag_arr( _temp986, sizeof( void*), 0u));}); return;} Cyc_Position_reset_position((
+if( Cyc_Std_system(( struct _tagged_arr) _temp985) !=  0){({ void* _temp986[ 0u]={};
+Cyc_Std_fprintf( Cyc_Std_stderr, _tag_arr("\nError: preprocessing\n", sizeof(
+unsigned char), 23u), _tag_arr( _temp986, sizeof( void*), 0u));}); return;} Cyc_Position_reset_position((
 struct _tagged_arr) _temp983);{ struct Cyc_Std___sFILE* in_file=( struct Cyc_Std___sFILE*)
 _check_null( Cyc_Std_fopen(( struct _tagged_arr) _temp983, _tag_arr("r", sizeof(
 unsigned char), 2u))); Cyc_Lex_lex_init();{ struct Cyc_List_List* _temp987= Cyc_Parse_parse_file(

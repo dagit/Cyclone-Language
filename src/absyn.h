@@ -462,7 +462,7 @@ namespace Absyn {
              tuniondecl_t,tunionfield_t);
     Enum_e(qvar_t,struct Enumdecl *,struct Enumfield *);
     AnonEnum_e(qvar_t,type_t,struct Enumfield *);
-    // rmalloc(h, sizeof(t)) or malloc(sizeof(t))
+    // rmalloc(r, sizeof(t)) or malloc(sizeof(t))
     Malloc_e(exp_opt_t, type_t); // first expression is region -- null is heap
     // will resolve into array, struct, etc.
     UnresolvedMem_e(opt_t<typedef_name_t>,
