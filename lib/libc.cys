@@ -8,6 +8,7 @@ arpa/inet.h:
 include {
 in_port_t
 in_addr_t
+in_addr
 INET_ADDRSTRLEN
 INET6_ADDRSTRLEN
 uint32_t
@@ -40,6 +41,51 @@ epilogue ntohs {
 }
 epilogue inet_addr {
   extern in_addr_t inet_addr(const char ?);
+}
+cycstub {
+  #ifndef s2c
+  #define s2c(x) (string_to_Cstring(x))
+  #endif
+  #ifndef static_c2s
+  #define static_c2s(x) (wrap_Cstring_as_string(x,-1))
+  #endif
+}
+cycstub inet_addr {
+  namespace Cinet {
+    extern "C" unsigned long inet_addr(const Cstring);
+  }
+  unsigned long inet_addr(const char ?addr) {
+    return Cinet::inet_addr(s2c(addr));
+  }
+}
+epilogue inet_aton {
+  /* Note, inet_aton is not required by POSIX */
+  extern int inet_aton(const char ?, struct in_addr @);
+}
+cycstub inet_aton {
+  namespace Cinet {
+    extern "C" int inet_aton(const Cstring, struct in_addr @);
+  }
+  int inet_aton(const char ?cp, struct in_addr @inp) {
+    return Cinet::inet_aton(s2c(cp), inp);
+  }
+}
+epilogue inet_ntoa {
+  extern char ?inet_ntoa(struct in_addr);
+}
+cycstub inet_ntoa {
+  namespace Cinet {
+    extern "C" Cstring inet_ntoa(struct in_addr);
+  }
+  char ?inet_ntoa(struct Std::in_addr x) {
+    return static_c2s(Cinet::inet_ntoa(x));
+  }
+}
+epilogue inet_ntop {
+  // inet_ntop is not supported yet
+}
+epilogue inet_pton {
+  // inet_pton is not supported yet
 }
 ;
 
@@ -3357,7 +3403,7 @@ cycstub system {
     extern "C" int system(Cstring);
   }
   int system(const char ?x) {
-    if (!x) throw new Failure("system called with NULL");
+    /* It's ok to call the C version with NULL */
     return Cstdlib::system(s2c(x));
   }
 }
@@ -3662,6 +3708,10 @@ epilogue accept {
 cycstub {
   xtunion exn { SocketError };
 }
+cstub {
+  #include <sys/socket.h>
+  #include <netinet/in.h>
+}
 cycstub accept {
   namespace Csocket {
     extern "C" int accept_in(int, const struct sockaddr_in @, socklen_t @);
@@ -3673,6 +3723,11 @@ cycstub accept {
       return Csocket::accept_in(fd,x,y);
     default: throw SocketError;
     }
+  }
+}
+cstub accept {
+  int accept_in(int a, const struct sockaddr_in *b, socklen_t *c) {
+    return accept(a,(struct sockaddr *)b,c);
   }
 }
 epilogue bind {
@@ -3691,6 +3746,11 @@ cycstub bind {
     }
   }
 }
+cstub bind {
+  int bind_in(int a, const struct sockaddr_in *b, socklen_t c) {
+    return bind(a,(struct sockaddr *)b,c);
+  }
+}
 epilogue connect {
   extern int connect(int fd, ... inject SA);
 }
@@ -3705,6 +3765,11 @@ cycstub connect {
       return Csocket::connect_in(fd,x,y);
     default: throw SocketError;
     }
+  }
+}
+cstub connect {
+  int connect_in(int a, const struct sockaddr_in *b, socklen_t c) {
+    return connect(a,(struct sockaddr *)b,c);
   }
 }
 epilogue getpeername {
@@ -3723,6 +3788,11 @@ cycstub getpeername {
     }
   }
 }
+cstub getpeername {
+  int getpeername_in(int a, const struct sockaddr_in *b, socklen_t *c) {
+    return getpeername(a,(struct sockaddr *)b,c);
+  }
+}
 epilogue getsockname {
   extern int getsockname(int fd, ... inject SA);
 }
@@ -3737,6 +3807,11 @@ cycstub getsockname {
       return Csocket::getsockname_in(fd,x,y);
     default: throw SocketError;
     }
+  }
+}
+cstub getsockname {
+  int getsockname_in(int a, const struct sockaddr_in *b, socklen_t *c) {
+    return getsockname(a,(struct sockaddr *)b,c);
   }
 }
 epilogue getsockopt {
@@ -3758,6 +3833,14 @@ cycstub getsockopt {
     }
   }
 }
+cstub getsockopt {
+  int getsockopt_int(int a, int b, int c, int *d, socklen_t *e) {
+    return getsockopt(a,b,c,d,e);
+  }
+  int getsockopt_timeval(int a, int b, int c, struct timeval *d, socklen_t *e) {
+    return getsockopt(a,b,c,d,e);
+  }
+}
 epilogue listen {
   extern "C" int listen(int fd, int n);
 }
@@ -3770,6 +3853,14 @@ cycstub recv {
   }
   ssize_t recv(int fd, char ?buf, size_t n, int flags) {
     return Csocket::recv_wrapped(fd,buf,n,flags);
+  }
+}
+cstub recv {
+  ssize_t recv_wrapped(int a, struct _tagged_arr b, size_t c, int d) {
+    char *p = _check_unknown_subscript(b,1,0);
+    unsigned n = _get_arr_size(b,1);  
+    if (n<c) _throw_arraybounds();
+    return recv(a,p,c,d);
   }
 }
 epilogue recvfrom {
@@ -3790,6 +3881,15 @@ cycstub recvfrom {
     }
   }
 }
+cstub recvfrom {
+  ssize_t recvfrom_in(int a, struct _tagged_arr b, size_t c, int d,
+                      const struct sockaddr_in *e, socklen_t *f) {
+    char *p = _check_unknown_subscript(b,1,0);
+    unsigned n = _get_arr_size(b,1);  
+    if (n<c) _throw_arraybounds();
+    return recvfrom(a,p,c,d,(struct sockaddr *)e,f);
+  }
+}
 epilogue send {
   extern ssize_t send(int fd, const char ?buf, size_t n, int flags);
 }
@@ -3799,6 +3899,14 @@ cycstub send {
   }
   ssize_t send(int fd, const char ?buf, size_t n, int flags) {
     return Csocket::send_wrapped(fd,buf,n,flags);
+  }
+}
+cstub send {
+  ssize_t send_wrapped(int a, struct _tagged_arr b, size_t c, int d) {
+    char *p = _check_unknown_subscript(b,1,0);
+    unsigned n = _get_arr_size(b,1);  
+    if (n<c) _throw_arraybounds();
+    return send(a,p,c,d);
   }
 }
 epilogue sendto {
@@ -3820,6 +3928,15 @@ cycstub sendto {
     }
   }
 }
+cstub sendto {
+  ssize_t sendto_in(int a, struct _tagged_arr b, size_t c, int d,
+                    const struct sockaddr_in *e, socklen_t f) {
+    char *p = _check_unknown_subscript(b,1,0);
+    unsigned n = _get_arr_size(b,1);  
+    if (n<c) _throw_arraybounds();
+    return sendto(a,p,c,d,(struct sockaddr *)e,f);
+  }
+}
 epilogue setsockopt {
   extern int setsockopt(int fd, int level, int optname, ... inject SO);
 }
@@ -3837,6 +3954,14 @@ cycstub setsockopt {
       return Csocket::setsockopt_timeval(fd,level,optname,x,y);
     default: throw SocketError;
     }
+  }
+}
+cstub setsockopt {
+  int setsockopt_int(int a, int b, int c, const int *d, socklen_t e) {
+    return setsockopt(a,b,c,d,e);
+  }
+  int setsockopt_timeval(int a, int b, int c, const struct timeval *d, socklen_t e) {
+    return setsockopt(a,b,c,d,e);
   }
 }
 epilogue shutdown {
@@ -3980,7 +4105,7 @@ epilogue mkdir {
 }
 cycstub mkdir {
   namespace Cstat {
-    extern "C" int mkdir(const char ?, mode_t);
+    extern "C" int mkdir(const Cstring, mode_t);
   }
   int mkdir(const char ?a, mode_t b) {
     if (!a) throw new Failure("mkdir called with NULL");
@@ -3992,7 +4117,7 @@ epilogue mkfifo {
 }
 cycstub mkfifo {
   namespace Cstat {
-    extern "C" int mkfifo(const char ?, mode_t);
+    extern "C" int mkfifo(const Cstring, mode_t);
   }
   int mkfifo(const char ?a, mode_t b) {
     if (!a) throw new Failure("mkfifo called with NULL");
@@ -4004,7 +4129,7 @@ epilogue mknod {
 }
 cycstub mknod {
   namespace Cstat {
-    extern "C" int mknod(const char ?, mode_t, dev_t);
+    extern "C" int mknod(const Cstring, mode_t, dev_t);
   }
   int mknod(const char ?a, mode_t b, dev_t c) {
     if (!a) throw new Failure("mknod called with NULL");
@@ -4016,7 +4141,7 @@ epilogue stat {
 }
 cycstub stat {
   namespace Cstat {
-    extern "C" int stat(const char ?, struct stat @);
+    extern "C" int stat(const Cstring, struct stat @);
   }
   int stat(const char ?a, struct stat @b) {
     if (!a) throw new Failure("stat called with NULL");
@@ -5001,6 +5126,18 @@ epilogue getopt {
   // Not supported yet
   // extern int getopt(int, char * const [], const char *);
 }
+epilogue getpass {
+  /* Note, getpass is not required by POSIX */
+  char ?getpass(const char ?);
+}
+cycstub getpass {
+  namespace Cunistd {
+    extern "C" Cstring getpass(const Cstring);
+  }
+  char ?getpass(const char ?prompt) {
+    return static_c2s(Cunistd::getpass(string_to_Cstring(prompt)));
+  }
+}
 epilogue getpgid {
   extern "C" pid_t getpgid(pid_t);
 }
@@ -5199,11 +5336,10 @@ cycstub write {
   namespace Cunistd {
     extern "C" ssize_t write(int fd, Cstring buf, size_t count);
   }
-  ssize_t write(int fd, const char ? buf, size_t count) {
+  ssize_t write(int fd, string_t buf, size_t count) {
     if (count > buf.size)
       throw new Failure("write: called with count > buf.size");
-    // FIX: This string copy sucks.
-    return Cunistd::write(fd, string_to_Cstring(buf), count);
+    return Cunistd::write(fd, underlying_Cstring(buf), count);
   }
 }
 epilogue {

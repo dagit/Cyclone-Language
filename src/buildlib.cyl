@@ -376,45 +376,60 @@ and slurp = parse
    here on a case-by-case basis. */
 | "sizeof" ws* "(" ws* "fd_mask" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_fdmask);
+  log("Warning: sizeof(fd_mask) inlined\n");
   return slurp(lexbuf); }
 | "sizeof" ws* "(" ws* "__fd_mask" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof___fdmask);
+  log("Warning: sizeof(__fd_mask) inlined\n");
   return slurp(lexbuf); }
 | "sizeof" ws* "(" ws* "__uint32_t" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_uint32);
+  log("Warning: sizeof(__uint32_t) inlined\n");
   return slurp(lexbuf); }
 | "sizeof" ws* "(" ws* "in_port_t" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_inport);
+  log("Warning: sizeof(__in_port_t) inlined\n");
   return slurp(lexbuf); }
 | "sizeof" ws* "(" ws* "int" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_int);
+  log("Warning: sizeof(int) inlined\n");
   return slurp(lexbuf); }
 | "sizeof" ws* "(" ws* "short" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_short);
+  log("Warning: sizeof(__short) inlined\n");
   return slurp(lexbuf); }
 | "sizeof" ws* "(" ws* "unsigned" ws+ "long" ws+ "int" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_unsignedlongint);
+  log("Warning: sizeof(unsigned long int) inlined\n");
   return slurp(lexbuf); }
 | "sizeof" ws* "(" ws* "unsigned" ws+ "short" ws+ "int" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_unsignedshortint);
+  log("Warning: sizeof(unsigned short int) inlined\n");
   return slurp(lexbuf); }
 | "sizeof" ws* "(" ws* "short" ws+ "int" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_shortint);
+  log("Warning: sizeof(short int) inlined\n");
   return slurp(lexbuf); }
 | "sizeof" ws* "(" ws* "struct" ws+ "sockaddr" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_sockaddr);
+  log("Warning: sizeof(struct sockaddr) inlined\n");
   return slurp(lexbuf); }
 | "sizeof" ws* "(" ws* "struct" ws+ "in_addr" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_inaddr);
+  log("Warning: sizeof(struct inaddr) inlined\n");
   return slurp(lexbuf); }
 | " malloc "
 /* malloc is a Cyclone keyword so our parser can't handle a malloc
    declaration. */
-{ fputs(" __IGNORE_FOR_CYCLONE_MALLOC ",(FILE @)slurp_out); return slurp(lexbuf); }
+{ fputs(" __IGNORE_FOR_CYCLONE_MALLOC ",(FILE @)slurp_out);
+  log("Warning: declaration of malloc sidestepped\n");
+  return slurp(lexbuf); }
 | "*malloc "
 /* malloc is a Cyclone keyword so our parser can't handle a malloc
    declaration. */
-{ fputs("*__IGNORE_FOR_CYCLONE_MALLOC ",(FILE @)slurp_out); return slurp(lexbuf); }
+{ fputs("*__IGNORE_FOR_CYCLONE_MALLOC ",(FILE @)slurp_out);
+  log("Warning: declaration of malloc sidestepped\n");
+  return slurp(lexbuf); }
 | "__extension__" /* Used in cygwin in sys/reent.h */
 { return slurp(lexbuf); }
 | "__attribute__ ((__mode__ (__HI__)))" /* Used in linux in _G_config.h */
@@ -444,6 +459,7 @@ and slurp = parse
 { parens_to_match = 1;
   if (asm(lexbuf)) return 1;
   fputs("0",(FILE @)slurp_out); /* appears as expression followed by ';' typically */
+  log("Warning: replacing use of __asm__ with 0\n");
   return slurp(lexbuf); }
 | [^ '"']
 { fputc(lexeme_char(lexbuf,0),(FILE @)slurp_out); return slurp(lexbuf); }
