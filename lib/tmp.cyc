@@ -1,0 +1,26 @@
+#include <core.h>
+#include <stdio.h>
+#include <string.h>
+using Core;
+
+namespace Cstdio {
+extern "C" {
+struct Cstdio::__sFILE *tmpfile();
+Cstring	tmpnam(Cstring);
+#define s2c(x) (string_to_Cstring(x))
+//  #define static_c2s(x) (Cstring_to_string(x))
+#define static_c2s(x) (wrap_Cstring_as_string(x,-1))
+}}
+
+namespace Std;
+
+FILE *tmpfile() {
+  struct Cstdio::__sFILE *cf = Cstdio::tmpfile();
+  return fromCfile(cf);
+}
+
+char ?`H tmpnam(char ?`H s) {
+  char ?name = static_c2s(Cstdio::tmpnam(NULL));
+  return s ? strcpy(s, name) : name;
+}
+
