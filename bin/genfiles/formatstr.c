@@ -399,7 +399,7 @@ c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 if((int)c==46){
 precision=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=precision;_Tmp0;});
 if((unsigned long)++ i >= len)return 0;
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 if((int)c==42){
 precision=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=precision;_Tmp0;});
 ++ i;}else{
@@ -418,13 +418,13 @@ switch((int)c){case 104:
 # 110
  lenmod=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=lenmod;_Tmp0;});
 if((unsigned long)++ i >= len)return 0;
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 if((int)c==104){lenmod=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=lenmod;_Tmp0;});++ i;}
 goto _LLD;case 108:
 # 116
  lenmod=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=lenmod;_Tmp0;});
 if((unsigned long)++ i >= len)return 0;
-c=((const char*)s.curr)[i];
+c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
 if((int)c==108){lenmod=({struct Cyc_List_List*_Tmp0=_region_malloc(r,sizeof(struct Cyc_List_List));_Tmp0->hd=(void*)((int)c),_Tmp0->tl=lenmod;_Tmp0;});++ i;}
 goto _LLD;case 106:
  goto _LL15;case 122: _LL15:

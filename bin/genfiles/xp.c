@@ -354,7 +354,7 @@ int i=(int)sizeof(u);
 if(i > n)
 i=n;
 while(-- i >= 0){
-u=256U * u + (unsigned long)((unsigned char*)x.curr)[i];}
+u=256U * u + (unsigned long)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));}
 return u;}
 # 35
 int Cyc_XP_length(int n,struct _fat_ptr x){
@@ -462,8 +462,8 @@ int i;
 (2 <= m && m <= k + m)&& k + m <= n?0:({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;})(({const char*_Tmp0="2 <= m && m <= k+m && k+m <= n";_tag_fat(_Tmp0,sizeof(char),31U);}),({const char*_Tmp0="xp.cyc";_tag_fat(_Tmp0,sizeof(char),7U);}),137U);
 {
 int km=k + m;
-unsigned long y2=(unsigned long)({int _Tmp0=(int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),m - 1))* 256U;_Tmp0 + (int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),m - 2));});
-unsigned long r3=(unsigned long)({int _Tmp0=({int _Tmp1=(int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km))* 65536U;_Tmp1 + (int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km - 1))* 256U;});_Tmp0 + (int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km - 2));});
+unsigned long y2=(unsigned long)((int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),m - 1))* 256U + (int)((unsigned char*)y.curr)[m - 2]);
+unsigned long r3=(unsigned long)(((int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km))* 65536U + (int)((unsigned char*)rem.curr)[km - 1]* 256U)+ (int)((unsigned char*)rem.curr)[km - 2]);
 # 143
 qk=(int)(r3 / y2);
 if(qk >= 256U)

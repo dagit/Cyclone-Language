@@ -673,8 +673,8 @@ const struct Cyc_Dict_T*_Tmp1=*((const struct Cyc_Dict_T**)_check_fat_subscript(
 if((unsigned)(ind + 2)>= _get_fat_size(queue,sizeof(const struct Cyc_Dict_T*)))
 queue=({unsigned _Tmp6=_get_fat_size(queue,sizeof(const struct Cyc_Dict_T*))* 2U;_tag_fat(({const struct Cyc_Dict_T**_Tmp7=({struct _RegionHandle*_Tmp8=temp;_region_malloc(_Tmp8,_check_times(_Tmp6,sizeof(const struct Cyc_Dict_T*)));});({{unsigned _Tmp8=_get_fat_size(queue,sizeof(const struct Cyc_Dict_T*))* 2U;unsigned i;for(i=0;i < _Tmp8;++ i){i < _get_fat_size(queue,sizeof(const struct Cyc_Dict_T*))?_Tmp7[i]=((const struct Cyc_Dict_T**)queue.curr)[(int)i]:(_Tmp7[i]=t2);}}0;});_Tmp7;}),sizeof(const struct Cyc_Dict_T*),_Tmp6);});
 # 448
-if(l!=(const struct Cyc_Dict_T*)0)((const struct Cyc_Dict_T**)queue.curr)[++ ind]=l;
-if(r!=(const struct Cyc_Dict_T*)0)((const struct Cyc_Dict_T**)queue.curr)[++ ind]=r;
+if(l!=(const struct Cyc_Dict_T*)0)*((const struct Cyc_Dict_T**)_check_fat_subscript(queue,sizeof(const struct Cyc_Dict_T*),++ ind))=l;
+if(r!=(const struct Cyc_Dict_T*)0)*((const struct Cyc_Dict_T**)_check_fat_subscript(queue,sizeof(const struct Cyc_Dict_T*),++ ind))=r;
 if(Cyc_Dict_member(d1,k))
 ans_tree=(const struct Cyc_Dict_T*)({struct _RegionHandle*_Tmp6=d2.r;int(*_Tmp7)(void*,void*)=d2.rel;struct _tuple0 _Tmp8=({struct _tuple0 _Tmp9;_Tmp9.f1=k,({void*_TmpA=({void*(*_TmpB)(void*,void*,void*,void*)=f;void*_TmpC=env;void*_TmpD=k;void*_TmpE=Cyc_Dict_lookup(d1,k);_TmpB(_TmpC,_TmpD,_TmpE,v);});_Tmp9.f2=_TmpA;});_Tmp9;});Cyc_Dict_ins(_Tmp6,_Tmp7,_Tmp8,ans_tree);});}}}{
 # 454
@@ -769,9 +769,9 @@ const struct Cyc_Dict_T*t=((const struct Cyc_Dict_T**)stack.curr)[ind];
 *dest=_check_null(t)->key_val;
 -- ind;
 if((unsigned)t->left)
-((const struct Cyc_Dict_T**)stack.curr)[++ ind]=t->left;
+*((const struct Cyc_Dict_T**)_check_fat_subscript(stack,sizeof(const struct Cyc_Dict_T*),++ ind))=t->left;
 if((unsigned)t->right)
-((const struct Cyc_Dict_T**)stack.curr)[++ ind]=t->right;
+*((const struct Cyc_Dict_T**)_check_fat_subscript(stack,sizeof(const struct Cyc_Dict_T*),++ ind))=t->right;
 *indp=ind;
 return 1;}}}
 # 576

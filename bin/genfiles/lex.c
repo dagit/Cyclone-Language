@@ -637,7 +637,7 @@ if(len >= 1 &&((int)*((char*)_check_fat_subscript(buff,sizeof(char),len - 1))==1
 # 416
 len -=1;
 declared_size=1;
-if(len >= 1 &&((int)*((char*)_check_fat_subscript(buff,sizeof(char),len - 1))==108 ||(int)((char*)buff.curr)[len - 1]==76)){
+if(len >= 1 &&((int)((char*)buff.curr)[len - 1]==108 ||(int)((char*)buff.curr)[len - 1]==76)){
 len -=1;
 size=4U;}}
 # 423
