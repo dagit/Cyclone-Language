@@ -52,25 +52,29 @@ while [ $# != 0 ]; do
   case "$1" in
     -bindir) # set the directory to store the binaries
         shift
-        [[ $# = 0 ]] && echo "-bindir must specify a directory";
+        if [ $# = 0 ]; then 
+	  echo "-bindir must specify a directory"; exit 1; fi
         bindir=$1
         shift
     ;;
     -libdir) # set the library directory
         shift
-        [[ $# = 0 ]] && echo "-libdir must specify a directory";
+        if [ $# = 0 ]; then 
+	  echo "-libdir must specify a directory"; exit 1; fi
         libdir=$1
         shift
     ;;
     -incdir) # set the include directory
         shift
-        [[ $# = 0 ]] && echo "-incdir must specify a directory";
+        if [ $# = 0 ]; then 
+	  echo "-incdir must specify a directory"; exit 1; fi
         incdir=$1
         shift
     ;;
     -prefix) # set directories to prefix/bin prefix/lib/cyclone ...
         shift
-        [[ $# = 0 ]] && echo "-prefix must specify a directory prefix";
+        if [ $# = 0 ]; then 
+	  echo "-prefix must specify a directory prefix"; exit 1; fi
 	prefix=$1
         shift
     ;;

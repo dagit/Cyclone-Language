@@ -54,11 +54,11 @@ if [ "$1" = "-u" ]; then
   #
   { while true; do
       read src_file dest_file
-      [[ $? != 0 ]] && break
+      if [ $? != 0 ]; then break; fi
       if [ "$src_file" = "XXX" -a "$dest_file" = "XXX" ]; then
         while true; do
 	  read dir
-          [[ $? != 0 ]] && break
+          if [ $? != 0 ]; then break; fi
           rmdir $dir
         done
         break
@@ -92,7 +92,7 @@ else
   dirs=
   { while true; do
       read src_file dest_file
-      [[ $? != 0 ]] && break
+      if [ $? != 0 ]; then break; fi
       if [ ! -d "$dest_file" ]; then
         mkdir -p $dest_file
         dirs="$dest_file $dirs"
