@@ -532,6 +532,7 @@ literal:
                           let p3 = p2;
                           int c = _IO_peekc(fp);
                           while (!isspace((unsigned char)c)) {
+                            c = _IO_getc(fp);
                             if (p3.size == 0) goto eof_failure;
                             *p3 = (char)c;
                             p3++;

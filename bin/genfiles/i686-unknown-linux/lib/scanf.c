@@ -419,17 +419,17 @@ break;}} nread += n;}} else{ struct _tagged_arr _temp101= Cyc_Std_va_arg_string_
 void**) _check_unknown_subscript( ap, sizeof( void*), 0u)));
 _tagged_arr_inplace_plus_post(& ap, sizeof( void*), 1);{ struct _tagged_arr
 _temp102= _temp101; int c= _IO_peekc( fp); while( ! isspace(( int)((
-unsigned char) c))) { if( _get_arr_size( _temp102, sizeof( unsigned char)) ==  0){
-goto eof_failure;}*(( unsigned char*) _check_unknown_subscript( _temp102,
-sizeof( unsigned char), 0u))=( unsigned char) c; _tagged_arr_inplace_plus_post(&
-_temp102, sizeof( unsigned char), 1); if( -- width ==  0){ break;} if(( c=
-_IO_peekc( fp)) ==  - 1){ seen_eof ++; break;}} if( _get_arr_size( _temp102,
-sizeof( unsigned char)) ==  0){ goto eof_failure;}*(( unsigned char*)
-_check_unknown_subscript( _temp102, sizeof( unsigned char), 0u))='\000'; nread +=(
-_temp102.curr -  _temp101.curr) /  sizeof( unsigned char); nassigned ++;}}
-continue; case 3: _LL100: if( width ==  0? 1: width >  sizeof( buf) -  1){ width=(
-long long)( sizeof( buf) -  1);} flags |=( 64 |  128) |  512; for( p= _tag_arr(
-buf, sizeof( unsigned char), 350u); width !=  0; width --){ c=( int)((
+unsigned char) c))) { c= _IO_getc( fp); if( _get_arr_size( _temp102, sizeof(
+unsigned char)) ==  0){ goto eof_failure;}*(( unsigned char*)
+_check_unknown_subscript( _temp102, sizeof( unsigned char), 0u))=( unsigned char)
+c; _tagged_arr_inplace_plus_post(& _temp102, sizeof( unsigned char), 1); if( --
+width ==  0){ break;} if(( c= _IO_peekc( fp)) ==  - 1){ seen_eof ++; break;}}
+if( _get_arr_size( _temp102, sizeof( unsigned char)) ==  0){ goto eof_failure;}*((
+unsigned char*) _check_unknown_subscript( _temp102, sizeof( unsigned char), 0u))='\000';
+nread +=( _temp102.curr -  _temp101.curr) /  sizeof( unsigned char); nassigned
+++;}} continue; case 3: _LL100: if( width ==  0? 1: width >  sizeof( buf) -  1){
+width=( long long)( sizeof( buf) -  1);} flags |=( 64 |  128) |  512; for( p=
+_tag_arr( buf, sizeof( unsigned char), 350u); width !=  0; width --){ c=( int)((
 unsigned char) _IO_peekc( fp)); switch( c){ case '0': _LL104: if( base ==  0){
 base= 8; flags |= 256;} if( flags &  512){ flags &= ~(( 64 |  512) |  128);}
 else{ flags &= ~(( 64 |  256) |  128);} goto ok; case '1': _LL105: goto _LL106;

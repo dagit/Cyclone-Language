@@ -6932,12 +6932,12 @@ _tagged_arr* _temp3255=( struct _tagged_arr*) _cycalloc( sizeof( struct
 _tagged_arr)); _temp3255[ 0]= Cyc_yyget_String_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp3255;}); _temp3254;});
 _temp3253;}); _temp3252;}); break; case 406: _LL3251: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; default: _LL3256:(
-int) _throw(( void*) Cyc_Yyimpossible);} yyvsp_offset -= yylen; yyssp_offset -=
-yylen; yylsp_offset -= yylen; yyvs[ _check_known_subscript_notnull( 10000u, ++
-yyvsp_offset)]= yyval; yylsp_offset ++; if( yylen ==  0){( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line= Cyc_yylloc.first_line;(
-yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_column= Cyc_yylloc.first_column;(
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; default: _LL3256:
+break;} yyvsp_offset -= yylen; yyssp_offset -= yylen; yylsp_offset -= yylen;
+yyvs[ _check_known_subscript_notnull( 10000u, ++ yyvsp_offset)]= yyval;
+yylsp_offset ++; if( yylen ==  0){( yyls[ _check_known_subscript_notnull( 10000u,
+yylsp_offset)]).first_line= Cyc_yylloc.first_line;( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).first_column= Cyc_yylloc.first_column;(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line=( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset -  1)]).last_line;( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_column=( yyls[
