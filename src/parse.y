@@ -363,6 +363,8 @@ static type_t id2type(string_t<`H> s, kindbound_t k) {
     return &HeapRgn_val;
   else if (zstrcmp(s,"`U") == 0)
     return &UniqueRgn_val;
+  else if (zstrcmp(s,"`RC") == 0)
+    return &RefCntRgn_val;
   else
     return new VarType(new Tvar(new s,-1,k));
 }

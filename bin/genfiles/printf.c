@@ -741,34 +741,34 @@ _LLB: {struct Cyc_IntPtr_pa_struct*_tmp6=(struct Cyc_IntPtr_pa_struct*)_tmp0;if(
 _tmp6->tag != 5)goto _LL0;}_LLC: {const char*_tmpD2;return(_tmpD2="unsigned long *",
 _tag_dyneither(_tmpD2,sizeof(char),16));}_LL0:;}static void*Cyc_badarg(struct
 _dyneither_ptr s){struct Cyc_Core_Invalid_argument_struct _tmpD5;struct Cyc_Core_Invalid_argument_struct*
-_tmpD4;return(void*)_throw((void*)((_tmpD4=_cycalloc(sizeof(*_tmpD4)),((_tmpD4[0]=((
-_tmpD5.tag=Cyc_Core_Invalid_argument,((_tmpD5.f1=s,_tmpD5)))),_tmpD4)))));}
-static int Cyc_va_arg_int(struct _dyneither_ptr ap){void*_tmpF=*((void**)
-_check_dyneither_subscript(ap,sizeof(void*),0));unsigned long _tmp11;_LLE: {
-struct Cyc_Int_pa_struct*_tmp10=(struct Cyc_Int_pa_struct*)_tmpF;if(_tmp10->tag != 
-1)goto _LL10;else{_tmp11=_tmp10->f1;}}_LLF: return(int)_tmp11;_LL10:;_LL11: {const
-char*_tmpD6;return((int(*)(struct _dyneither_ptr s))Cyc_badarg)(((_tmpD6="printf expected int",
-_tag_dyneither(_tmpD6,sizeof(char),20))));}_LLD:;}static long Cyc_va_arg_long(
-struct _dyneither_ptr ap){void*_tmp13=*((void**)_check_dyneither_subscript(ap,
-sizeof(void*),0));unsigned long _tmp15;_LL13: {struct Cyc_Int_pa_struct*_tmp14=(
-struct Cyc_Int_pa_struct*)_tmp13;if(_tmp14->tag != 1)goto _LL15;else{_tmp15=_tmp14->f1;}}
-_LL14: return(long)_tmp15;_LL15:;_LL16: {const char*_tmpD7;return((long(*)(struct
-_dyneither_ptr s))Cyc_badarg)(((_tmpD7="printf expected int",_tag_dyneither(
-_tmpD7,sizeof(char),20))));}_LL12:;}static unsigned long Cyc_va_arg_ulong(struct
-_dyneither_ptr ap){void*_tmp17=*((void**)_check_dyneither_subscript(ap,sizeof(
-void*),0));unsigned long _tmp19;_LL18: {struct Cyc_Int_pa_struct*_tmp18=(struct Cyc_Int_pa_struct*)
-_tmp17;if(_tmp18->tag != 1)goto _LL1A;else{_tmp19=_tmp18->f1;}}_LL19: return(
-unsigned long)_tmp19;_LL1A:;_LL1B: {const char*_tmpD8;return((unsigned long(*)(
-struct _dyneither_ptr s))Cyc_badarg)(((_tmpD8="printf expected int",_tag_dyneither(
-_tmpD8,sizeof(char),20))));}_LL17:;}static unsigned long Cyc_va_arg_uint(struct
-_dyneither_ptr ap){void*_tmp1B=*((void**)_check_dyneither_subscript(ap,sizeof(
-void*),0));unsigned long _tmp1D;_LL1D: {struct Cyc_Int_pa_struct*_tmp1C=(struct Cyc_Int_pa_struct*)
-_tmp1B;if(_tmp1C->tag != 1)goto _LL1F;else{_tmp1D=_tmp1C->f1;}}_LL1E: return(
-unsigned int)_tmp1D;_LL1F:;_LL20: {const char*_tmpD9;return((unsigned long(*)(
-struct _dyneither_ptr s))Cyc_badarg)(((_tmpD9="printf expected int",_tag_dyneither(
-_tmpD9,sizeof(char),20))));}_LL1C:;}static double Cyc_va_arg_double(struct
-_dyneither_ptr ap){void*_tmp1F=*((void**)_check_dyneither_subscript(ap,sizeof(
-void*),0));double _tmp21;long double _tmp23;_LL22: {struct Cyc_Double_pa_struct*
+_tmpD4;return(void*)_throw((void*)((_tmpD4=_region_malloc(Cyc_Core_unique_region,
+sizeof(*_tmpD4)),((_tmpD4[0]=((_tmpD5.tag=Cyc_Core_Invalid_argument,((_tmpD5.f1=
+s,_tmpD5)))),_tmpD4)))));}static int Cyc_va_arg_int(struct _dyneither_ptr ap){void*
+_tmpF=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));unsigned long
+_tmp11;_LLE: {struct Cyc_Int_pa_struct*_tmp10=(struct Cyc_Int_pa_struct*)_tmpF;if(
+_tmp10->tag != 1)goto _LL10;else{_tmp11=_tmp10->f1;}}_LLF: return(int)_tmp11;_LL10:;
+_LL11: {const char*_tmpD6;return((int(*)(struct _dyneither_ptr s))Cyc_badarg)(((
+_tmpD6="printf expected int",_tag_dyneither(_tmpD6,sizeof(char),20))));}_LLD:;}
+static long Cyc_va_arg_long(struct _dyneither_ptr ap){void*_tmp13=*((void**)
+_check_dyneither_subscript(ap,sizeof(void*),0));unsigned long _tmp15;_LL13: {
+struct Cyc_Int_pa_struct*_tmp14=(struct Cyc_Int_pa_struct*)_tmp13;if(_tmp14->tag != 
+1)goto _LL15;else{_tmp15=_tmp14->f1;}}_LL14: return(long)_tmp15;_LL15:;_LL16: {
+const char*_tmpD7;return((long(*)(struct _dyneither_ptr s))Cyc_badarg)(((_tmpD7="printf expected int",
+_tag_dyneither(_tmpD7,sizeof(char),20))));}_LL12:;}static unsigned long Cyc_va_arg_ulong(
+struct _dyneither_ptr ap){void*_tmp17=*((void**)_check_dyneither_subscript(ap,
+sizeof(void*),0));unsigned long _tmp19;_LL18: {struct Cyc_Int_pa_struct*_tmp18=(
+struct Cyc_Int_pa_struct*)_tmp17;if(_tmp18->tag != 1)goto _LL1A;else{_tmp19=_tmp18->f1;}}
+_LL19: return(unsigned long)_tmp19;_LL1A:;_LL1B: {const char*_tmpD8;return((
+unsigned long(*)(struct _dyneither_ptr s))Cyc_badarg)(((_tmpD8="printf expected int",
+_tag_dyneither(_tmpD8,sizeof(char),20))));}_LL17:;}static unsigned long Cyc_va_arg_uint(
+struct _dyneither_ptr ap){void*_tmp1B=*((void**)_check_dyneither_subscript(ap,
+sizeof(void*),0));unsigned long _tmp1D;_LL1D: {struct Cyc_Int_pa_struct*_tmp1C=(
+struct Cyc_Int_pa_struct*)_tmp1B;if(_tmp1C->tag != 1)goto _LL1F;else{_tmp1D=_tmp1C->f1;}}
+_LL1E: return(unsigned int)_tmp1D;_LL1F:;_LL20: {const char*_tmpD9;return((
+unsigned long(*)(struct _dyneither_ptr s))Cyc_badarg)(((_tmpD9="printf expected int",
+_tag_dyneither(_tmpD9,sizeof(char),20))));}_LL1C:;}static double Cyc_va_arg_double(
+struct _dyneither_ptr ap){void*_tmp1F=*((void**)_check_dyneither_subscript(ap,
+sizeof(void*),0));double _tmp21;long double _tmp23;_LL22: {struct Cyc_Double_pa_struct*
 _tmp20=(struct Cyc_Double_pa_struct*)_tmp1F;if(_tmp20->tag != 2)goto _LL24;else{
 _tmp21=_tmp20->f1;}}_LL23: return _tmp21;_LL24: {struct Cyc_LongDouble_pa_struct*
 _tmp22=(struct Cyc_LongDouble_pa_struct*)_tmp1F;if(_tmp22->tag != 3)goto _LL26;
@@ -1178,51 +1178,51 @@ _dyneither_ptr_inplace_plus(& t,sizeof(char),-1),sizeof(char),0))== '0'){;}if(*(
 char*)_check_dyneither_subscript(t,sizeof(char),0))!= '.')
 _dyneither_ptr_inplace_plus(& t,sizeof(char),1);}}break;default: _LL69: {struct Cyc_Core_Impossible_struct
 _tmp170;const char*_tmp16F;struct Cyc_Core_Impossible_struct*_tmp16E;(int)_throw((
-void*)((_tmp16E=_cycalloc(sizeof(*_tmp16E)),((_tmp16E[0]=((_tmp170.tag=Cyc_Core_Impossible,((
-_tmp170.f1=((_tmp16F="__cvt_double",_tag_dyneither(_tmp16F,sizeof(char),13))),
-_tmp170)))),_tmp16E)))));}}return(t.curr - startp.curr)/ sizeof(char);}int Cyc_vfprintf(
-struct Cyc___cycFILE*f,struct _dyneither_ptr fmt,struct _dyneither_ptr ap){int ans;ans=((
-int(*)(int(*ioputc)(int,struct Cyc___cycFILE*),struct Cyc___cycFILE*ioputc_env,
-struct _dyneither_ptr fmt0,struct _dyneither_ptr ap))Cyc__IO_vfprintf)(Cyc_putc,f,
-fmt,ap);return ans;}int Cyc_fprintf(struct Cyc___cycFILE*f,struct _dyneither_ptr fmt,
-struct _dyneither_ptr ap){return Cyc_vfprintf(f,fmt,ap);}int Cyc_vprintf(struct
+void*)((_tmp16E=_region_malloc(Cyc_Core_unique_region,sizeof(*_tmp16E)),((
+_tmp16E[0]=((_tmp170.tag=Cyc_Core_Impossible,((_tmp170.f1=((_tmp16F="__cvt_double",
+_tag_dyneither(_tmp16F,sizeof(char),13))),_tmp170)))),_tmp16E)))));}}return(t.curr
+- startp.curr)/ sizeof(char);}int Cyc_vfprintf(struct Cyc___cycFILE*f,struct
 _dyneither_ptr fmt,struct _dyneither_ptr ap){int ans;ans=((int(*)(int(*ioputc)(int,
 struct Cyc___cycFILE*),struct Cyc___cycFILE*ioputc_env,struct _dyneither_ptr fmt0,
-struct _dyneither_ptr ap))Cyc__IO_vfprintf)(Cyc_putc,Cyc_stdout,fmt,ap);return ans;}
-int Cyc_printf(struct _dyneither_ptr fmt,struct _dyneither_ptr ap){int ans;ans=Cyc_vprintf(
-fmt,ap);return ans;}struct _tuple0{struct _dyneither_ptr*f1;unsigned long*f2;};
-static int Cyc_putc_string(int c,struct _tuple0*sptr_n){struct _tuple0 _tmpC2;struct
-_dyneither_ptr*_tmpC3;unsigned long*_tmpC4;struct _tuple0*_tmpC1=sptr_n;_tmpC2=*
-_tmpC1;_tmpC3=_tmpC2.f1;_tmpC4=_tmpC2.f2;{struct _dyneither_ptr s=*_tmpC3;
-unsigned long n=*_tmpC4;if(n == 0)return - 1;*((char*)_check_dyneither_subscript(s,
-sizeof(char),0))=(char)c;_dyneither_ptr_inplace_plus(_tmpC3,sizeof(char),1);*
-_tmpC4=n - 1;return 1;};}int Cyc_vsnprintf(struct _dyneither_ptr s,unsigned long n,
-struct _dyneither_ptr fmt,struct _dyneither_ptr ap){int ans;struct _dyneither_ptr
-_tmpC5=s;unsigned long _tmpC6=n;struct _tuple0 _tmp171;struct _tuple0 _tmpC7=(_tmp171.f1=&
-_tmpC5,((_tmp171.f2=& _tmpC6,_tmp171)));ans=((int(*)(int(*ioputc)(int,struct
-_tuple0*),struct _tuple0*ioputc_env,struct _dyneither_ptr fmt0,struct _dyneither_ptr
-ap))Cyc__IO_vfprintf)(Cyc_putc_string,& _tmpC7,fmt,ap);if(0 <= ans)*((char*)
-_check_dyneither_subscript(s,sizeof(char),ans))='\000';return ans;}int Cyc_snprintf(
-struct _dyneither_ptr s,unsigned long n,struct _dyneither_ptr fmt,struct
-_dyneither_ptr ap){return Cyc_vsnprintf(s,n,fmt,ap);}int Cyc_vsprintf(struct
-_dyneither_ptr s,struct _dyneither_ptr fmt,struct _dyneither_ptr ap){return Cyc_vsnprintf(
-s,_get_dyneither_size(s,sizeof(char)),fmt,ap);}int Cyc_sprintf(struct
-_dyneither_ptr s,struct _dyneither_ptr fmt,struct _dyneither_ptr ap){return Cyc_vsnprintf(
-s,_get_dyneither_size(s,sizeof(char)),fmt,ap);}static int Cyc_putc_void(int c,int
-dummy){return 1;}struct _dyneither_ptr Cyc_vrprintf(struct _RegionHandle*r1,struct
-_dyneither_ptr fmt,struct _dyneither_ptr ap);static void _tmp177(unsigned int*_tmp176,
-unsigned int*_tmp175,char**_tmp173){for(*_tmp176=0;*_tmp176 < *_tmp175;(*_tmp176)
-++){(*_tmp173)[*_tmp176]='\000';}}struct _dyneither_ptr Cyc_vrprintf(struct
-_RegionHandle*r1,struct _dyneither_ptr fmt,struct _dyneither_ptr ap){int size=((int(*)(
-int(*ioputc)(int,int),int ioputc_env,struct _dyneither_ptr fmt0,struct
-_dyneither_ptr ap))Cyc__IO_vfprintf)(Cyc_putc_void,0,fmt,ap)+ 1;unsigned int
-_tmp176;unsigned int _tmp175;struct _dyneither_ptr _tmp174;char*_tmp173;
-unsigned int _tmp172;struct _dyneither_ptr s=(_tmp172=(unsigned int)size,((_tmp173=(
-char*)_region_malloc(r1,_check_times(sizeof(char),_tmp172 + 1)),((_tmp174=
-_tag_dyneither(_tmp173,sizeof(char),_tmp172 + 1),((((_tmp175=_tmp172,((_tmp177(&
-_tmp176,& _tmp175,& _tmp173),_tmp173[_tmp175]=(char)0)))),_tmp174)))))));Cyc_vsprintf(
-_dyneither_ptr_decrease_size(s,sizeof(char),1),fmt,ap);return s;}struct
-_dyneither_ptr Cyc_rprintf(struct _RegionHandle*r1,struct _dyneither_ptr fmt,struct
-_dyneither_ptr ap){return Cyc_vrprintf(r1,fmt,ap);}struct _dyneither_ptr Cyc_aprintf(
+struct _dyneither_ptr ap))Cyc__IO_vfprintf)(Cyc_putc,f,fmt,ap);return ans;}int Cyc_fprintf(
+struct Cyc___cycFILE*f,struct _dyneither_ptr fmt,struct _dyneither_ptr ap){return Cyc_vfprintf(
+f,fmt,ap);}int Cyc_vprintf(struct _dyneither_ptr fmt,struct _dyneither_ptr ap){int ans;
+ans=((int(*)(int(*ioputc)(int,struct Cyc___cycFILE*),struct Cyc___cycFILE*
+ioputc_env,struct _dyneither_ptr fmt0,struct _dyneither_ptr ap))Cyc__IO_vfprintf)(
+Cyc_putc,Cyc_stdout,fmt,ap);return ans;}int Cyc_printf(struct _dyneither_ptr fmt,
+struct _dyneither_ptr ap){int ans;ans=Cyc_vprintf(fmt,ap);return ans;}struct _tuple0{
+struct _dyneither_ptr*f1;unsigned long*f2;};static int Cyc_putc_string(int c,struct
+_tuple0*sptr_n){struct _tuple0 _tmpC2;struct _dyneither_ptr*_tmpC3;unsigned long*
+_tmpC4;struct _tuple0*_tmpC1=sptr_n;_tmpC2=*_tmpC1;_tmpC3=_tmpC2.f1;_tmpC4=_tmpC2.f2;{
+struct _dyneither_ptr s=*_tmpC3;unsigned long n=*_tmpC4;if(n == 0)return - 1;*((char*)
+_check_dyneither_subscript(s,sizeof(char),0))=(char)c;
+_dyneither_ptr_inplace_plus(_tmpC3,sizeof(char),1);*_tmpC4=n - 1;return 1;};}int
+Cyc_vsnprintf(struct _dyneither_ptr s,unsigned long n,struct _dyneither_ptr fmt,
+struct _dyneither_ptr ap){int ans;struct _dyneither_ptr _tmpC5=s;unsigned long _tmpC6=
+n;struct _tuple0 _tmp171;struct _tuple0 _tmpC7=(_tmp171.f1=& _tmpC5,((_tmp171.f2=&
+_tmpC6,_tmp171)));ans=((int(*)(int(*ioputc)(int,struct _tuple0*),struct _tuple0*
+ioputc_env,struct _dyneither_ptr fmt0,struct _dyneither_ptr ap))Cyc__IO_vfprintf)(
+Cyc_putc_string,& _tmpC7,fmt,ap);if(0 <= ans)*((char*)_check_dyneither_subscript(s,
+sizeof(char),ans))='\000';return ans;}int Cyc_snprintf(struct _dyneither_ptr s,
+unsigned long n,struct _dyneither_ptr fmt,struct _dyneither_ptr ap){return Cyc_vsnprintf(
+s,n,fmt,ap);}int Cyc_vsprintf(struct _dyneither_ptr s,struct _dyneither_ptr fmt,
+struct _dyneither_ptr ap){return Cyc_vsnprintf(s,_get_dyneither_size(s,sizeof(char)),
+fmt,ap);}int Cyc_sprintf(struct _dyneither_ptr s,struct _dyneither_ptr fmt,struct
+_dyneither_ptr ap){return Cyc_vsnprintf(s,_get_dyneither_size(s,sizeof(char)),fmt,
+ap);}static int Cyc_putc_void(int c,int dummy){return 1;}struct _dyneither_ptr Cyc_vrprintf(
+struct _RegionHandle*r1,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);static
+void _tmp177(unsigned int*_tmp176,unsigned int*_tmp175,char**_tmp173){for(*
+_tmp176=0;*_tmp176 < *_tmp175;(*_tmp176)++){(*_tmp173)[*_tmp176]='\000';}}struct
+_dyneither_ptr Cyc_vrprintf(struct _RegionHandle*r1,struct _dyneither_ptr fmt,struct
+_dyneither_ptr ap){int size=((int(*)(int(*ioputc)(int,int),int ioputc_env,struct
+_dyneither_ptr fmt0,struct _dyneither_ptr ap))Cyc__IO_vfprintf)(Cyc_putc_void,0,fmt,
+ap)+ 1;unsigned int _tmp176;unsigned int _tmp175;struct _dyneither_ptr _tmp174;char*
+_tmp173;unsigned int _tmp172;struct _dyneither_ptr s=(_tmp172=(unsigned int)size,((
+_tmp173=(char*)_region_malloc(r1,_check_times(sizeof(char),_tmp172 + 1)),((
+_tmp174=_tag_dyneither(_tmp173,sizeof(char),_tmp172 + 1),((((_tmp175=_tmp172,((
+_tmp177(& _tmp176,& _tmp175,& _tmp173),_tmp173[_tmp175]=(char)0)))),_tmp174)))))));
+Cyc_vsprintf(_dyneither_ptr_decrease_size(s,sizeof(char),1),fmt,ap);return s;}
+struct _dyneither_ptr Cyc_rprintf(struct _RegionHandle*r1,struct _dyneither_ptr fmt,
+struct _dyneither_ptr ap){return Cyc_vrprintf(r1,fmt,ap);}struct _dyneither_ptr Cyc_aprintf(
 struct _dyneither_ptr fmt,struct _dyneither_ptr ap){return Cyc_vrprintf(Cyc_Core_heap_region,
 fmt,ap);}

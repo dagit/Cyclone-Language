@@ -219,6 +219,7 @@ kind_t force_kb(kindbound_t kb) {
 //////////////////////////// Types ///////////////////////////////
 datacon(Type,HeapRgn);
 datacon(Type,UniqueRgn);
+datacon(Type,RefCntRgn);
 datacon(Type,VoidType);
 datacon(Type,FloatType);
 

@@ -41,6 +41,7 @@ namespace CfFlowInfo;
 
 datacon(Absyn::AbsynAnnot,IsZero);
 datacon(KillRgn,UniqueRgn_k);
+datacon(KillRgn,RefCntRgn_k);
 
 absLval_t<`r> PlaceL(place_t<`r,`r> x) {
   return AbsLVal{.PlaceL = x};
@@ -1500,8 +1501,14 @@ bool contains_region(killrgn_t rgn, type_t t) {
     case &UniqueRgn_k: return true;
     default: return false;
     }
+  case &RefCntRgn:
+    switch (rgn) {
+    case &RefCntRgn_k: return true;
+    default: return false;
+    }
   case &VarType(tv): 
     switch (rgn) {
+    case &RefCntRgn_k:
     case &UniqueRgn_k: return false;
     case &Region_k(rgn): return tvar_cmp(tv,rgn) == 0;
     }
@@ -1578,6 +1585,11 @@ kill_flowdict_region(flow_env_t<`r> fenv, flowdict_t<`r> fd, type_t rgn) {
     
   case &UniqueRgn: 
     $(flow_env_t,flowdict_t,killrgn_t) env = $(fenv,fenv->mt_flowdict,&UniqueRgn_k_val);
+    Dict::iter_c(kill_root,&env,fd);
+    return env[1];
+
+  case &RefCntRgn: 
+    $(flow_env_t,flowdict_t,killrgn_t) env = $(fenv,fenv->mt_flowdict,&RefCntRgn_k_val);
     Dict::iter_c(kill_root,&env,fd);
     return env[1];
 

@@ -1274,7 +1274,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
   // we've got an address-of
   let $(is_const,rgn) = addressof_props(te,e);
   if (is_noalias_region(rgn,false))
-    terr(e->loc,"& would manufacture an alias to an alias-free pointer");
+    terr(e->loc,"using & would manufacture an alias to an alias-free pointer");
 
   tqual_t tq = empty_tqual(NULL);
   if(is_const) {
@@ -1947,6 +1947,7 @@ static bool zeroable_type(type_t t) {
   case &ValueofType(_):
   case &HeapRgn:
   case &UniqueRgn:
+  case &RefCntRgn:
   case &AccessEff(_):
   case &JoinEff(_):
   case &RgnsEff(_): impos("bad type `%s' in zeroable type",typ2string(t));
@@ -2006,7 +2007,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
     type_t optrgn = &VoidType_val;
     if (rgn_of_pointer(*topt,&optrgn)) {
       rgn = mallocRgn(optrgn);
-      if (rgn != &HeapRgn_val) *ropt = uniquergn_exp;
+      if (rgn == &UniqueRgn_val) *ropt = uniquergn_exp;
     }
   }
 
@@ -2245,7 +2246,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     type_t optrgn = &VoidType_val;
     if (rgn_of_pointer(*topt,&optrgn)) {
       rgn = mallocRgn(optrgn);
-      if (rgn != &HeapRgn_val) *rgn_handle = uniquergn_exp;
+      if (rgn != &UniqueRgn_val) *rgn_handle = uniquergn_exp;
     }
   }
 

@@ -1005,6 +1005,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &UniqueRgn:
       fprintf(stderr,"Error: unexpected UniqueRgn\n");
       exit(1); return;
+    case &RefCntRgn:
+      fprintf(stderr,"Error: unexpected RefCntRgn\n");
+      exit(1); return;
     case &AccessEff(_):
       fprintf(stderr,"Error: unexpected AccessEff\n");
       exit(1); return;

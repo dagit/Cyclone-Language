@@ -166,9 +166,28 @@ extern region_t<`U> unique_region;
 #define unew rnew (Core::unique_region)
 #define umalloc rmalloc (Core::unique_region)
   /** [unew] and [umalloc] are for allocating uniquely-pointed-to data. */
-
 extern void ufree(`a::TA ?`U ptr) __attribute__((noliveunique(1)));
   /** [ufree] frees a unique pointer. */
+
+extern region_t<`RC> refcnt_region;
+  /** [refcnt_region] is the region handle of the reference-counted
+      region. Data allocated in this region contains an additional
+      reference count for managing aliases. */
+#define rcnew rnew (Core::refcnt_region)
+#define rcmalloc rmalloc (Core::refcnt_region)
+  /** [rcnew] and [rcmalloc] are for allocating reference-counted data. */
+extern $(int,`a ?`RC) refptr_count(`a::TA ?`RC ptr);
+  /** [refptr_count(p)] returns the current reference count for [p]
+      (always >= 1) and [p] itself. */
+extern $(`a ?`RC, `a ?`RC) alias_refptr(`a::TA ?`RC ptr);
+  /** [alias_refptr(p)] returns the original pointer [p] and an alias
+      to it, and increments the reference count by 1. */
+extern void drop_refptr(`a::TA ?`RC ptr) __attribute__((noliveunique(1)));
+  /** [free_refptr(p)] decrements the reference count on [p] by 1.  If
+      the reference count goes to 0, it frees p.  This will not
+      recursively decrement reference counts to embedded pointers,
+      meaning that those pointers will have to get GC'ed if [p] ends
+      up being freed. */
 
 extern struct NewRegion<`r2> _rnew_dynregion(region_t<`r2>,
 					     const char @ file,

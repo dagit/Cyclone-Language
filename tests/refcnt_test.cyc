@@ -1,0 +1,69 @@
+#include <core.h>
+#include <stdio.h>
+
+using Core;
+
+int @`r my_alloc(region_t<`r::TR> h) {
+  return rnew (h) 1;
+//   return rcnew 1; // no good
+//   return unew 1; // no good
+}
+
+int @`r my_ralloc(region_t<`r::R> h) {
+  return new 1;
+}
+
+int my_deref(int *`r::R x) { return *x; }
+
+struct foo<`r::TR> {
+  int *`r x;
+  int *`r y;
+};
+
+int main() {
+  /* basic usage */
+  int *`RC p = rcnew 3;
+  let $(p1,p2) = alias_refptr(p);
+  printf("a1=%d, a2=%d\n",*p1,*p2);
+  drop_refptr(p1);
+  printf("a2=%d\n",*p2);
+  drop_refptr(p2);
+
+  /* consuming stuff */
+  p = rcnew 3;
+  let q = p;
+//   let n = *p; // no good
+
+  /* region ordering */
+  int *`H x = rcnew 1;
+//   int *`U x = rcnew 1; // no good
+//   int *`RC x = new 1; // no good
+//   int *`RC x = unew 1; // no good 
+
+  /* polymorphism */
+  int *`RC y = my_alloc(refcnt_region);
+
+  /* aliasing */
+  int z;
+  { alias <`r> y2 = (int *`r)y;
+    z = my_deref(y2);
+  }
+  // implicit aliasing
+  z = my_deref(y);
+  drop_refptr(y);
+
+  /* swap and paths */
+  struct foo @f = rcnew foo(rcnew 1, rcnew 2);
+  q :=: f->x;
+  let p3 = NULL;
+  f->x :=: p3;
+  drop_refptr(p3);
+  drop_refptr(q);
+//   drop_refptr(f->y); // no good
+  q = NULL;
+  q :=: f->y;
+  drop_refptr(q);
+  drop_refptr(f);
+
+  return 0;
+}

@@ -988,11 +988,11 @@ tenv_t<`g,`r> add_region_equality(region_t<`r> r, tenv_t<`g,`r2> te,
   // now update the outlives constraints
   let r = Tcenv::get_fnrgn(te);
   let bds = NULL;
-  if (r1 != &HeapRgn_val && r1 != &UniqueRgn_val) {
+  if (r1 != &HeapRgn_val && r1 != &UniqueRgn_val && r1 != &RefCntRgn_val) {
     type_t eff1 = new AccessEff(r1);
     bds = rnew (r) List::List(rnew (r) $(eff1,r2),bds);
   }
-  if (r2 != &HeapRgn_val && r2 != &UniqueRgn_val) {
+  if (r2 != &HeapRgn_val && r2 != &UniqueRgn_val && r2 != &RefCntRgn_val) {
     type_t eff2 = new AccessEff(r2);
     bds = rnew (r) List::List(rnew (r) $(eff2,r1),bds);
   }
@@ -1046,7 +1046,12 @@ bool region_outlives(tenv_t te, type_t rt_a, type_t rt_b) {
   rt_b = compress(rt_b);
   // When typechecking a toplevel declaration:
   if(le==NULL)
-    return rt_a==&UniqueRgn_val || (rt_a==&HeapRgn_val && rt_b != &UniqueRgn_val);
+    switch (rt_a) {
+    case &RefCntRgn: return rt_b != &UniqueRgn_val;
+    case &UniqueRgn: return rt_b != &RefCntRgn_val;
+    case &HeapRgn: return rt_b == &HeapRgn_val;
+    default: return false;
+    }
   // When typechecking a function body:
   fenv_t fe = le;
   let &Fenv{<`f,`c> .region_order = ro, ...} = fe;

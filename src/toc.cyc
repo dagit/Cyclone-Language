@@ -685,6 +685,8 @@ static type_t typ_to_c(type_t t) {
     toc_impos("Toc::typ_to_c: type translation passed the heap region");
   case &UniqueRgn:
     toc_impos("Toc::typ_to_c: type translation passed the unique region");
+  case &RefCntRgn:
+    toc_impos("Toc::typ_to_c: type translation passed the unique region");
   case &AccessEff(_):
   case &JoinEff(_):
   case &RgnsEff(_):

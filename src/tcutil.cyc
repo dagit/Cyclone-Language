@@ -293,6 +293,7 @@ type_t copy_type(type_t t) {
   case &TypedefType(tdn,ts,td,_):
     return new TypedefType(tdn,copy_types(ts),td,NULL);
   case &UniqueRgn:
+  case &RefCntRgn:
   case &HeapRgn: return t;
   case &AccessEff(t): return new AccessEff(copy_type(t));
   case &JoinEff(ts): return new JoinEff(copy_types(ts));
@@ -516,6 +517,7 @@ kind_t typ_kind(type_t t) {
   case &RgnHandleType(_): return &bk;
   case &UniqueRgn:	  return &urk;
   case &HeapRgn:          return &rk;
+  case &RefCntRgn:	  return &trk;
   case &DatatypeType(...):
     // datatypes always have abstract kind
     return &ak;
@@ -867,6 +869,7 @@ static type_t rgns_of(type_t t) {
     let e = substitute(map(region_free_subst,tvs),eff->v);
     return normalize_effect(e);
   case &UniqueRgn:
+  case &RefCntRgn:
   case &HeapRgn: return empty_effect;
   case &AccessEff(_):
   case &JoinEff(_): return t;
@@ -891,6 +894,8 @@ type_t normalize_effect(type_t e) {
       switch (effs->hd) {
       case &JoinEff(_): 
       case &AccessEff(&HeapRgn): redo_join = true; break;
+      case &AccessEff(&RefCntRgn): redo_join = true; break;
+      case &AccessEff(&UniqueRgn): redo_join = true; break;
       default: break;
       }
     }
@@ -902,6 +907,8 @@ type_t normalize_effect(type_t e) {
         effects = List::revappend(nested_effs,effects);
         break;
       case &AccessEff(&HeapRgn): break;
+      case &AccessEff(&RefCntRgn): break;
+      case &AccessEff(&UniqueRgn): break;
       case e: effects = new List(e,effects); break;
       }
     }
@@ -933,7 +940,8 @@ static type_t dummy_fntype(type_t eff) {
 // effect evars to become constrained.
 bool region_in_effect(bool constrain, type_t r, type_t e) {
   r = compress(r);
-  if (r == &HeapRgn_val || r == &UniqueRgn_val) return true;
+  if (r == &HeapRgn_val || r == &UniqueRgn_val || r == &RefCntRgn_val)
+    return true;
   switch (compress(e)) {
   case &AccessEff(r2): 
     // note:  might constrain a region variable unnecessarily
@@ -1529,6 +1537,7 @@ void unify_it(type_t t1, type_t t2) {
     break;
   case $(&HeapRgn, &HeapRgn): return;
   case $(&UniqueRgn, &UniqueRgn): return;
+  case $(&RefCntRgn, &RefCntRgn): return;
   case $(&RgnHandleType(rt1),&RgnHandleType(rt2)):
     unify_it(rt1,rt2);
     return;
@@ -1631,6 +1640,7 @@ static int type_case_number(type_t t) {
   case &AccessEff(_): return 22;
   case &JoinEff(_): return 23;
   case &RgnsEff(_): return 24;
+  case &RefCntRgn: return 25;
   case &TagType(_): return 26;
   case &DynRgnType(_,_): return 27;
   case &ValueofType(_): return 28;
@@ -3109,6 +3119,7 @@ type_t rsubstitute(region_t<`r> rgn,
   case &IntType(_,_):  
   case &FloatType:      
   case &DoubleType(_): 
+  case &RefCntRgn:
   case &UniqueRgn:
   case &HeapRgn:        return t;
   case &RgnsEff(t2):
@@ -4238,6 +4249,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       }
     }
     break;
+  case &RefCntRgn:
   case &UniqueRgn:
   case &HeapRgn: break;
   case &RgnHandleType(t2):
@@ -4747,6 +4759,7 @@ bool is_tagged_pointer_typ(type_t t) {
 //   flavor if they are not yet set
 bool is_noalias_region(type_t r, bool must_be_unique) {
   switch (compress(r)) {
+  case &RefCntRgn: return !must_be_unique;
   case &UniqueRgn: return true;
   case &VarType(tv):
     let &Kind(k,a) = tvar_kind(tv,&rk);

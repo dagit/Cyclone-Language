@@ -522,6 +522,7 @@ void dumpntyp(type_t t) {
     dump(","); dumprgn(r2); dump(">"); return;
   case &TagType(t): dump("tag_t<"); dumpntyp(t); dump(">"); return;
   case &UniqueRgn: dump("`U"); break;
+  case &RefCntRgn: dump("`RC"); break;
   case &TypeDeclType(&{.r = &Aggr_td(ad),...},_):
     dump_aggrdecl(ad); return;
   case &TypeDeclType(&{.r = &Enum_td(ed),...},_):
@@ -1333,6 +1334,7 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
     switch(Tcutil::compress(rgn)) {
     case &HeapRgn: break;
     case &UniqueRgn: dump("`U"); break;
+    case &RefCntRgn: dump("`RC"); break;
     case &VarType(tv): dump_str(tv->name); break;
     case &Evar(_,NULL,_,_): dumpntyp(Tcutil::compress(rgn)); break;
     default: Tcutil::impos("dumptms: bad rgn type in Pointer_mod");

@@ -85,16 +85,15 @@ static bool valid_constraint(type_t eff, type_t rgn) {
   case &Evar(_,_,_,_):
   case &VarType(_): return true;
   case &RgnsEff(t): 
-    // Only allow regions(`a) to outlive R kinded vars
-    //   FIX: this will change when we properly deal with uniqueness and
-    //   polymorphism
-    if (a == Aliasable) return true; else return false;
+    // Only let regions(`a) outlive things that are aliasable or
+    //   have the same alias qualifier
+    let &Kind(tk,ta) = typ_kind(t);
+    return (a == Aliasable) || ta == a;
   case &AccessEff(r): 
 //     fprintf(stderr,"checking %s > %s; are the kinds reversed?\n",
 // 	    Absynpp::typ2string(rgn), Absynpp::typ2string(r));
     let &Kind(rk,ra) = typ_kind(r);
     return (k == RgnKind) && ((a == Aliasable) || (ra == a));
-//     return kind_leq(typ_kind(r),rgnkind);
   default:
     impos("bad effect |%s| passed to add_outlives_constraint",
 	  Absynpp::typ2string(eff));
@@ -150,9 +149,10 @@ rgn_po_t<`r> add_outlives_constraint(region_t<`r> r, rgn_po_t<`r> po,
     ans->these_outlive_heap = new JoinEff(list(eff,po->these_outlive_heap));
     return ans;
   case &UniqueRgn:
-    ans->these_outlive_unique =
-      new JoinEff(list(eff,po->these_outlive_unique));
+    ans->these_outlive_unique=new JoinEff(list(eff,po->these_outlive_unique));
     return ans;
+  case &RefCntRgn:
+    impos("RgnOrder::add_outlives_constraint can't outlive RC for now");
   default: impos("RgnOrder::add_outlives_constraint passed a bad region");
   }
 }
@@ -272,11 +272,18 @@ initial_env(region_t<`r> listrgn, rgn_po_t po, type_t rgn) {
   let &Kind(k,a) = typ_kind(r);
   if (k == RgnKind) {
     switch (a) {
-    case Aliasable: add_to_search(&ans,po->these_outlive_heap); break;
-    case Unique:  add_to_search(&ans,po->these_outlive_unique); break;
-    case Top:
+      // FIX: currently doesn't deal with refcnt region
+    case Aliasable:
+      add_to_search(&ans,po->these_outlive_unique);
       add_to_search(&ans,po->these_outlive_heap);
+      break;
+    case Unique:
       add_to_search(&ans,po->these_outlive_unique); break;
+    case Top:
+      // can't say anything about what top-level regions outlive
+      // a top-kinded region variable, because we just don't know
+      // how this variable was created/is being used.
+      break;
     }
   }
   else
@@ -299,19 +306,19 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
   case &AccessEff(vt):
     // does `vt outlive `rgn ?
     switch(compress(vt)) {
-    case &UniqueRgn: return true;
+    case &UniqueRgn:
+      // The unique region outlives all regions with R and UR kind
+      let &Kind(k,a) = typ_kind(compress(rgn));
+      return (k == RgnKind) && (a != Top);
+    case &RefCntRgn: 
+      // The refcnt region outlives all regions the heap does, plus itself
+      // FIX: this won't work if rgn is `c, and `c outlives RefCntRgn
+      if (compress(rgn) == &RefCntRgn_val) return true;
+      fallthru;
     case &HeapRgn:
-      // The heap outlives all regions except the unique region
-      //   and regions with UR and TR kind
-      switch (compress(rgn)) {
-      case &UniqueRgn: return false;
-      case &VarType(tv):
-	let &Kind(k,a) = tvar_kind(tv,&bk);
-	if ((k == RgnKind) && (a == Aliasable)) return true;
-	else return false;
-      default:
-	return true;
-      }
+      // The heap outlives all regions with R kind
+      let &Kind(k,a) = typ_kind(compress(rgn));
+      return (k == RgnKind) && (a == Aliasable);
     case &VarType(tv):
       // To determine if tv outlives rgn, we generate the transitive
       // set of variables (env.todo) that outlive rgn.  If during this
@@ -354,12 +361,18 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
       // outlives it.
       let env = initial_env(listrgn,po,rgn);
       let &Kind(k,a) = typ_kind(rgn);
-      if ((k == RgnKind) && (a == Aliasable || a == Top))
-	if(contains_rgnseff(tv,po->these_outlive_heap))
-	  return true;
-      if ((k == RgnKind) && (a == Unique || a == Top))
-	if(contains_rgnseff(tv,po->these_outlive_unique))
-	  return true;
+      // FIX: deal with RefCnt region
+      if (k == RgnKind)
+	if (a == Aliasable) {
+	  if(contains_rgnseff(tv,po->these_outlive_heap) ||
+	     contains_rgnseff(tv,po->these_outlive_unique))
+	    return true;
+	}
+	else if (a == Unique) {
+	  if(contains_rgnseff(tv,po->these_outlive_unique))
+	    return true;
+	}
+
       while(env.todo != NULL) {
 	let next = env.todo->hd;
 	env.todo = env.todo->tl;

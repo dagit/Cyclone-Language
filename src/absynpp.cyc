@@ -656,6 +656,7 @@ doc_t rgn2doc(type_t t) {
   switch (compress(t)) {
   case &HeapRgn: return text("`H");
   case &UniqueRgn: return text("`U");
+  case &RefCntRgn: return text("`RC");
   default: return ntyp2doc(t);
   }
 }
@@ -832,6 +833,7 @@ doc_t ntyp2doc(type_t t) {
     s = cat(text("tag_t<"),typ2doc(t),text(">")); break;
   case &UniqueRgn:
   case &HeapRgn:
+  case &RefCntRgn:
     s = rgn2doc(t); break;
   case &RgnsEff(t):
     s = cat(text("regions("),typ2doc(t),text(")")); break;

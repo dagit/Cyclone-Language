@@ -418,6 +418,7 @@ namespace Absyn {
     TagType(type_t);         // tag_t<t>.  IntKind -> BoxKind.
     HeapRgn;        // The heap region.  RgnKind 
     UniqueRgn;      // The unique region.  UniqueRgnKind 
+    RefCntRgn;      // The reference-counted region.  TopRgnKind 
     AccessEff(type_t);       // Uses region r.  RgnKind -> EffKind
     JoinEff(list_t<type_t>); // e1+e2.  EffKind list -> EffKind
     RgnsEff(type_t);         // regions(t).  AnyKind -> EffKind
@@ -428,6 +429,7 @@ namespace Absyn {
   };
   extern_datacon(Type,HeapRgn);
   extern_datacon(Type,UniqueRgn);
+  extern_datacon(Type,RefCntRgn);
   extern_datacon(Type,VoidType);
   extern_datacon(Type,FloatType);
 

@@ -248,9 +248,11 @@ extern flow_t<`r> kill_flow_region(flow_env_t<`r> fenv, flow_t<`r> f, Absyn::typ
 
 datatype KillRgn {
   UniqueRgn_k;
+  RefCntRgn_k;
   Region_k(Absyn::tvar_t);
 };
 extern_datacon(KillRgn,UniqueRgn_k);
+extern_datacon(KillRgn,RefCntRgn_k);
 typedef datatype KillRgn @`r killrgn_t<`r::R>;
 
 extern bool contains_region(killrgn_t rgn, Absyn::type_t t);
