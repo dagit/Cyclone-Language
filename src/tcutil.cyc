@@ -4035,21 +4035,17 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         terr(loc,"unbound datatype %s",qvar2string(tname));
       return cvtenv;
       }
-      try {
-        TEMP_RGN(te, r) {
-	  switch(lookup_ordinary(r,te,loc,fname,false)) {
-          case &DatatypeRes(tud2,tuf2):
-            tuf = tuf2;
-            tud = tud2;
-            if(is_x && !tud->is_extensible)
-              terr(loc,"datatype %s was not declared @extensible",
-                   qvar2string(tname));
-            break;
-          default: terr(loc,"unbound field %s in type datatype %s",
-                        qvar2string(fname), qvar2string(tname));
-            return cvtenv;
-          }
-      }
+      try switch(lookup_ordinary_global(te,loc,fname,false)) {
+      case &DatatypeRes(tud2,tuf2):
+	tuf = tuf2;
+	tud = tud2;
+	if(is_x && !tud->is_extensible)
+	  terr(loc,"datatype %s was not declared @extensible",
+	       qvar2string(tname));
+	break;
+      default: terr(loc,"unbound field %s in type datatype %s",
+		    qvar2string(fname), qvar2string(tname));
+	return cvtenv;
       } catch {
       case &Dict::Absent:
         terr(loc,"unbound field %s in type datatype %s",
@@ -4421,7 +4417,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
                            .tq = empty_tqual(0), .type = tr, 
                            .initializer = NULL, .rgn = curr_rgn(ftenv), 
                            .attributes = NULL, .escapes = false};
-      ftenv = add_local_var(newr,0,ftenv,vd);
+      //      ftenv = add_local_var(newr,0,ftenv,vd);
       let $(nenv,ens_rs) = check_clause(loc,ftenv,new_cvtenv,"@ensures",ens);
       new_cvtenv = nenv;
       *ens_relns = ens_rs;

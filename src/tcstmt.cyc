@@ -75,7 +75,7 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
     let ropt = Tcenv::curr_rgn(te2);
     for(let vs2 = vs; vs2 != NULL; vs2 = vs2->tl) {
       if (vs2->hd != NULL) {
-	te2 = add_pat_var(r,loc, te2, *vs2->hd);
+	//	te2 = add_pat_var(r,loc, te2, *vs2->hd);
 	(*vs2->hd)->rgn = ropt;
       }
     }
@@ -433,7 +433,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         check_type(s0->loc,te,bound_vars,&tmk,allow_evars,true,t);
         vd->tq.real_const = extract_const_from_typedef(s0->loc,
                                                        vd->tq.print_const,t);
-        let te2 = add_local_var(decl_rgn,s->loc,te,vd);
+	let te2 = te;
+	//        let te2 = add_local_var(decl_rgn,s->loc,te,vd);
         if (sc == Extern || sc == ExternC)
           terr(d->loc,"extern declarations are not yet supported within functions");
         if (initializer != NULL) {
@@ -514,7 +515,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           let &Vardecl(_,&$(nsl,_),_,t,_,*rgn_ptr,_,_) = vd;
           *rgn_ptr = curr_bl; // side effect
           check_type(s0->loc,te2,lookup_type_vars(te2),&tmk,true,true,t);
-          te2 = add_local_var(decl_rgn,s->loc,te2,vd);
+	  //          te2 = add_local_var(decl_rgn,s->loc,te2,vd);
         }
         tcStmt(te2,s,false);
         return;
@@ -559,7 +560,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         check_type(s0->loc,te,lookup_type_vars(te2),&bk,true,false,*t);
         if (!unify(*t,new RgnHandleType(rgn_typ)))
           impos("region stmt: type of region handle is wrong!");
-        tcStmt(add_local_var(decl_rgn,s->loc,te2,vd),s,false);
+	//        tcStmt(add_local_var(decl_rgn,s->loc,te2,vd),s,false);
+        tcStmt(te2,s,false);
         return;
 
       case &Fn_d(fd): 
@@ -584,7 +586,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
                                            false_conref),
                                     NULL, curr_bl, NULL, false};
         fd->fn_vardecl = vd;
-        te = add_local_var(decl_rgn,d->loc,te,vd);
+	//        te = add_local_var(decl_rgn,d->loc,te,vd);
         fenv_t old_fenv = (fenv_t)te->le;
         te->le = nested_fenv(d->loc,old_fenv,fd);
         tcStmt(te,fd->body,false);

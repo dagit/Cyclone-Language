@@ -101,7 +101,7 @@ extern fenv_t<`r> bogus_fenv(region_t<`r>, type_t ret_type,
                              list_t<$(var_opt_t,tqual_t,type_t)@> args);
 
 // when is_use is true, we are looking up a free occurrence of the variable
-extern resolved_t<`r>    lookup_ordinary(region_t<`r>,tenv_t,seg_t,qvar_t,bool is_use);
+extern resolved_t    lookup_ordinary_global(tenv_t,seg_t,qvar_t,bool is_use);
 extern aggrdecl_t@       lookup_aggrdecl(tenv_t,seg_t,qvar_t);
 extern datatypedecl_t@     lookup_datatypedecl(tenv_t,seg_t,qvar_t);
 extern datatypedecl_t@*`r  lookup_xdatatypedecl(region_t<`r>,tenv_t,seg_t,qvar_t);
@@ -125,8 +125,8 @@ extern tenv_t<`g,`r> clear_abstract_val_ok(region_t<`r> r,
 extern type_t  return_typ(tenv_t);
 
 extern tenv_t<`g,`r> copy_tenv(region_t<`r>,tenv_t<`g,`r2> : {`r2} > `r);
-extern tenv_t<`g,`r> add_local_var(region_t<`r>,seg_t,tenv_t<`g,`r2>,vardecl_t : {`r2} > `r);
-extern tenv_t<`g,`r> add_pat_var  (region_t<`r>,seg_t,tenv_t<`g,`r2>,vardecl_t : {`r2} > `r);
+  //extern tenv_t<`g,`r> add_local_var(region_t<`r>,seg_t,tenv_t<`g,`r2>,vardecl_t : {`r2} > `r);
+  //extern tenv_t<`g,`r> add_pat_var  (region_t<`r>,seg_t,tenv_t<`g,`r2>,vardecl_t : {`r2} > `r);
 
 extern list_t<tvar_t> lookup_type_vars(tenv_t<`r>);
 extern opt_t<list_t<tvar_t>> lookup_opt_type_vars(tenv_t te);

@@ -296,18 +296,19 @@ static type_t tcVar(tenv_t te, seg_t loc, type_t * topt, exp_t e, binding_t *b){
   case &Global_b(vd):  
   // FIX DJG: temporary measure to make tree-shaking sound
   //      (now that we have binding, tree-shaking should be redone)
-    lookup_ordinary(heap_region,te,loc,vd->name,true);
+    lookup_ordinary_global(te,loc,vd->name,true);
     return vd->type;
   case &Funname_b(fd): 
     // FIX DJG: temporary measure to make tree-shaking sound
     //      (now that we have binding, tree-shaking should be redone)
-    lookup_ordinary(heap_region,te,loc,fd->name,true);
+    // DJG: I am trusting absyn.h that fn_vardecl is NULL iff this
+    //      is not an inner function (inner functions aren't shaken)
+    if(fd->fn_vardecl==NULL)
+      lookup_ordinary_global(te,loc,fd->name,true);
     return fndecl2typ(fd);
   case &Pat_b(vd):     fallthru(vd);
   case &Local_b(vd):   fallthru(vd);
   case &Param_b(vd):
-    // FIX DJG: I think all this accomplishes now is warning on shadowing
-    lookup_ordinary(heap_region,te,loc,vd->name,true);
     if (te->allow_valueof) {
       switch (compress(vd->type)) {
       case &TagType(i):
@@ -1822,7 +1823,7 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
     tenv_t<_> te2 = copy_tenv(r,te);
     if (te2->le != NULL) {
       te2 = Tcenv::new_block(r,loc,te2);
-      te2 = add_local_var(r, loc, te2, vd);
+      //      te2 = add_local_var(r, loc, te2, vd);
     }
     let te = te2;
     let topt2 = NULL;
