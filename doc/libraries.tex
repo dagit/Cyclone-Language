@@ -1,15 +1,29 @@
 \section{Libraries}
+\definecolor{lightblue}{rgb}{.75,.81,1}
 %HEVEA \newcommand{\parbox}[3][x]{#3}
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\var}[1]{\texttt{#1}}
 \newcommand{\vvar}[1]{{\tt\textbf{\textit{#1}}}}
+%HEVEA \begin{latexonly}
+\ifscreen
+\newcommand{\defunlabel}[1]{%
+  \parbox[b]{\labelwidth}{\makebox[0pt][l]{\colorbox{lightblue}{#1}}\\}}
+\else
 \newcommand{\defunlabel}[1]{%
   \parbox[b]{\labelwidth}{\makebox[0pt][l]{#1}\\}}
+\fi
+%HEVEA \end{latexonly}
+%HEVEA \newcommand{\defunlabel}[1]{%
+%HEVEA   \parbox[b]{\labelwidth}{%
+%HEVEA \begin{rawhtml}<table><tr><td bgcolor="c0d0ff">\end{rawhtml}%
+%HEVEA #1%
+%HEVEA \begin{rawhtml}</td></tr></table>\end{rawhtml}%
+%HEVEA }}
 \newenvironment{defun}[2]{%
   \begin{list}{}{}%
     \renewcommand{\makelabel}{\defunlabel}%
     \index{#1@\texttt{#1}}%
-  \item[\textbf{\texttt{#1}}\texttt{#2}]}{\end{list}}
+  \item[{\tt\textbf{#1}#2}]}{\end{list}}
 \newenvironment{defun2}[3]{%
   \begin{list}{}{}%
     \renewcommand{\makelabel}{\defunlabel}%
@@ -19,7 +33,7 @@
   \begin{list}{}{}%
     \renewcommand{\makelabel}{\defunlabel}%
     \index{#1@\texttt{#1}}%
-  \item[{\tt xtunion exn~\lb~extern~\textbf{#1}{#2}~\rb}]}{\end{list}}
+  \item[{\tt xtunion exn~\lb~extern~\textbf{#1}{#2}~\rb;}]}{\end{list}}
 %%% \newenvironment{defun}[2]{\noindent\index{#1@\texttt{#1}}
 %%%   \textbf{\texttt{#1}}\texttt{#2}\begin{quote}}{\end{quote}}
 \newcommand{\tindex}[1]{}
@@ -130,7 +144,7 @@ using Array;
 
 \begin{defun2}{`a}{fold_left}{(`a \vvar{f}(`a,`b),`a \vvar{accum},`b {?}`r \vvar{x});}
   If \vvar{x} is an array \texttt{\lb$x_1$,$x_2$,\ldots,$x_n$\rb},
-  return \texttt{\vvar{f}(\ldots\vvar{f}(\vvar{f}(\vvar{a},$x_1$),$x_2$),\ldots, $x_n$)\ldots)}.
+  return \texttt{\vvar{f}(\ldots\vvar{f}(\vvar{f}(\vvar{a},$x_1$),$x_2$)\ldots, $x_n$)\ldots)}.
 \end{defun2}
 
 \begin{defun2}{`a}{fold_left_c}{(`a \vvar{f}(`c,`a,`b),`c \vvar{env},`a \vvar{accum},`b {?}`r \vvar{x});}
@@ -150,18 +164,18 @@ using Array;
 \subsubsection*{Reversing}
 
 \begin{defun2}{`a ?}{rev_copy}{(`a::B {?}`r \vvar{x});}
-  Return a copy of an array in reverse.
+  Return a copy of the array \vvar{x} in reverse.
 \end{defun2}
 
 \begin{defun2}{void}{imp_rev}{(`a::B {?}`r \vvar{x});}
-  Imperatively reverse an array.
+  Imperatively reverse array \vvar{x}.
 \end{defun2}
 
 \subsubsection*{Predicates}
 
 \begin{defun2}{bool}{forall}{(bool \vvar{pred}(`a),`a {?}`r \vvar{x});}
-  Given a predicate on 'a values, determine whether every element in
-  an array satisfies the predicate.
+  Return true if \vvar{pred} applied to every element of the array
+  \vvar{x} returns true; else return false.
 \end{defun2}
 
 \begin{defun2}{bool}{forall_c}{(bool \vvar{pred}(`a,`b),`a \vvar{env},`b {?}`r \vvar{x});}
@@ -179,8 +193,8 @@ using Array;
 \end{defun2}
 
 \begin{defun2}{bool}{exists}{(bool \vvar{pred}(`a),`a {?}`r \vvar{x});}
-  Given a predicate on 'a values, determine whether there exists an
-  element in the array that satisfies the predicate.
+  Return true if there is an element $x_i$ of the array \vvar{x} such
+  that \texttt{\vvar{pred}($x_i$)} is true; else return false.
 \end{defun2}
 \begin{defun2}{bool}{exists_c}{(bool \vvar{pred}(`a,`b),`a \vvar{env},`b {?}`r \vvar{x});}
 \end{defun2}
@@ -200,12 +214,20 @@ using Array;
 \subsubsection*{Arrays of Pairs, Pairs of Arrays}
 
 \begin{defun2}{\$(`a,`b) ?}{zip}{(`a {?}`r1 \vvar{x},`b {?}`r2 \vvar{y});}
-  Given [|x1,...,xn|] and [|y1,...,yn|], return [|(x1,y1),...,(xn,yn)|].  
-  Throws Array_mismatch if the lengths are not the same.
+  If \vvar{x} is an array \texttt{\lb$x_1$,$x_2$,\ldots,$x_n$\rb},
+  and \vvar{y} is an array \texttt{\lb$y_1$,$y_2$,\ldots,$y_n$\rb},
+  return a new heap allocated array,
+  \texttt{\lb\$($x_1,y_1$),\$($x_2,y_2$),\ldots,\$($x_n,y_n$)\rb}.
+  Throw \code{Array_mismatch} if the lengths are not the same.
 \end{defun2}
 
 \begin{defun2}{\$(`a?,`b?)}{split}{(\$(`a,`b) {?}`r \vvar{x});}
-  Given [|(x1,y1),...,(xn,yn)|], return ([|x1,...,xn|],[|y1,...,yn|]) 
+  If \vvar{x} is an array \texttt{\lb$x_1$,$x_2$,\ldots,$x_n$\rb},
+  where each $x_i$ is a pair,
+  return two new heap allocated arrays,
+  \texttt{\lb$x_1$[0],$x_2$[0],\ldots,$x_n$[0]\rb}
+  and
+  \texttt{\lb$x_1$[1],$x_2$[1],\ldots,$x_n$[1]\rb}.
 \end{defun2}
 
 \subsubsection*{Sorting}
@@ -2248,132 +2270,123 @@ using Splay;
 
 \subsection{String}
 
-Namespace \code{String} implements a string library similar to the one
-provided by C\@.  In Cyclone, a string is a \code{char[?]}.  Most
-functions in String consider a zero (null) character as an end of string
-marker, so we may have \code{strlen(\var{s}) < size(\var{s})} for a
-string \var{s}.  Functions that do not follow this convention have names
-starting with 'z'.  Many functions accept a string and an offset; these
-functions may have names ending in 'o'.  Functions whose arguments have
-range errors throw the \code{Core::InvalidArg} exception.
-
-\subsubsection*{Header}
 \begin{verbatim}
-#include <string.h>
-using String;
+    #include <string.h>
+    using String;
 \end{verbatim}
 
+Namespace \code{String} implements a string library similar to the one
+provided by C\@.  In Cyclone, a string is a \code{char ?}.  Because
+strings are so pervasive, several common typedefs for strings are
+defined in namespace \texttt{Core}:
+\begin{alltt}
+    typedef const char ?\textbf{string_t};
+    typedef char ?\textbf{mstring_t};
+    typedef string_t @\textbf{stringptr_t};
+    typedef mstring_t @\textbf{mstringptr_t};
+\end{alltt}
+A \texttt{string_t} is an immutable string, while an
+\texttt{mstring_t} is a mutable string.  The pointer variants of these
+are useful to instantiate strings in polymorphic data types.  We use
+``string'' to refer to any and all of these, depending on context.
+
+Most functions in \texttt{String} consider a zero (null) character as
+an end of string marker, so we may have \texttt{strlen(s)} <
+\texttt{s.size} for a string \var{s}.  Functions that do not follow
+this convention have names starting with 'z'.  Many functions accept a
+string and an offset; these functions may have names ending in 'o'.
+Functions whose arguments have range errors throw the
+\code{Core::InvalidArg} exception.
 
 \subsubsection*{String length}
-\subsubsection*{Functions}
-\begin{verbatim}
-size_t strlen(string s);
-size_t strleno(string s, int ofs);
-\end{verbatim}
-
-\subsubsection*{Use}
-
-\begin{defun}{strlen}{(s)}
-Returns the length of the string \var{s}.  It considers a null
-character to mark the end of the string.
-\end{defun}
-
-\begin{defun}{strleno}{(s,ofs)}
-Returns the length of the string starting from offset \var{ofs}.  If
-\var{ofs} is out of range, \code{strleno} throws
-\code{Core::InvalidArg("String::strleno")}.
-\end{defun}
+\begin{defun2}{size_t}{strlen}{(const char {?}`r \vvar{s});}
+  Returns the length of the string \vvar{s}.  It considers a null
+  character to mark the end of the string.
+\end{defun2}
 
 \subsubsection*{Comparing strings}
-\subsubsection*{Functions}
-\begin{verbatim}
-int strcmp(string s1, string s2);
-int strcmpo(string s1, int ofs1, string s2, int ofs2);
-int strncmp(string s1, int ofs1, string s2, int ofs2, size_t len);
-int strncasecmp(string s1, int ofs1, string s2, int ofs2, size_t len);
-int zstrcmp(string,string);
-int zstrncmp(string s1,string s2,size_t n);
-\end{verbatim}
+The string comparison functions return an integer less than, equal to,
+or greater than 0 if their first argument is less than, equal to, or
+greater than their second argument, respectively.  The ordering used
+is the standard, lexicographic ordering.
 
-\subsubsection*{Use}
+\begin{defun2}{int}{strcmp}{(const char {?}`r1 \vvar{s1}, const char {?}`r2 \vvar{s2});}
+  Compares \var{s1} to \var{s2}.
+\end{defun2}
 
-All of these functions return an integer less than, equal to, or greater
-than 0 if their first argument is less than, equal to, or greater than
-their second argument, respectively.  The ordering used is the standard,
-lexicographic ordering.
+\begin{defun2}{int}{strptrcmp}{(const char {?}`r1@`r2 \vvar{s1}, const char {?}`r3@`r4 \vvar{s2});}
+  A string pointer version of \code{strcmp}.
+\end{defun2}
 
-\begin{defun}{strcmp}{(s1,s2)}
-Compares \var{s1} to \var{s2}.
-\end{defun}
+\begin{defun2}{int}{strncmp}{(const char {?}`r1 \vvar{s1}, const char {?}`r2 \vvar{s2}, size_t \vvar{len});}
+  Compares at most \vvar{len} characters of \vvar{s1} to \vvar{s2}.  If
+  \vvar{len} is negative, \code{strncmp} returns 0.
+\end{defun2}
 
-\begin{defun}{strcmpo}{(s1,ofs1,s2,ofs2)}
-Compares \var{s1} starting at offset \var{ofs1} to \var{s2} starting at
-\var{ofs2}.  If \var{ofs1} or \var{ofs2} is out of range, \code{strcmpo}
-throws \code{Core::InvalidArg("String::strcmpo")}.
-\end{defun}
+\begin{defun2}{int}{strncasecmp}{(const char {?}`r1 \vvar{s1}, const char {?}`r2 \vvar{s2}, size_t \vvar{len});}
+  A case-insensitive version of \code{strncmp}.
+\end{defun2}
 
-\begin{defun}{strncmp}{(s1,ofs1,s2,ofs2,len)}
-Compares at most \var{len} characters of \var{s1} starting at offset
-\var{ofs1} to \var{s2} starting at \var{ofs2}.  If \var{ofs1} or
-\var{ofs2} is out of range, \code{strncmp} throws
-\code{Core::InvalidArg("String::strncmp")}.  If \var{len} is negative,
-\code{strncmp} returns 0.
-\end{defun}
+\begin{defun2}{int}{zstrcmp}{(const char {?}`r1 \vvar{s1},const char {?}`r2 \vvar{s2});}
+  Compares \vvar{s1} to \vvar{s2}, and it assumes that null (zero)
+  characters in \vvar{s1} and \vvar{s2} are not end-of-string markers.
+\end{defun2}
 
-\begin{defun}{strncasecmp}{(s1,ofs1,s2,ofs2,len)}
-A case-insensitive version of \code{strncmp}.
-\end{defun}
+\begin{defun2}{int}{zstrptrcmp}{(const char {?}`r1@`r2 \vvar{s1}, const char {?}`r3@`r4 \vvar{s2});}
+  A string pointer version of \code{zstrcmp}.
+\end{defun2}
 
-\begin{defun}{zstrcmp}{(s1,s2)}
-Compares \var{s1} to \var{s2}, and it assumes that null (zero)
-characters in \var{s1} and \var{s2} are not end-of-string markers.
-\end{defun}
-
-\begin{defun}{zstrcmp}{(s1,s2,n)}
-Compares at most \var{n} characters of \var{s1} to \var{s2}, assuming
-that null characters do not mark the end of strings.  If \var{n} is less
-than 0, \code{zstrcmp(\var{s1},\var{s2},\var{n})} returns 0.
-\end{defun}
+\begin{defun2}{int}{zstrncmp}{(const char {?}`r1 \vvar{s1},const char {?}`r2 \vvar{s2}, size_t \vvar{n});}
+  Compares at most \vvar{n} characters of \vvar{s1} to \vvar{s2},
+  assuming that null characters do not mark the end of strings.  If
+  \vvar{n} is less than 0, \code{zstrncmp} returns 0.
+\end{defun2}
 
 \subsubsection*{Concatenating strings}
-\subsubsection*{Functions}
+
 \begin{verbatim}
-string strcat(string dest,string src);
-string strcato(string dest,string src,int srcOfs);
-string strconcat(string,string);
-string strconcat_l(list<string>);
-string str_sepstr(list<string>,string);
 \end{verbatim}
 
-\subsubsection*{Use}
+\begin{defun2}{char {?}`r1}{strcat}{(char {?}`r1 \vvar{dest},const char {?}`r2 \vvar{src});}
+  Concatenates \vvar{src} onto \vvar{dest} and returns \vvar{dest}.
+  If \vvar{dest} is not large enough, \code{strcat} throws
+  \code{Core::InvalidArg("String::strcat")}.
+\end{defun2}
 
-\begin{defun}{strcat}{(dest,src)}
-Concatenates \var{src} onto \var{dest} and returns \var{dest}.  If
-\var{dest} is not large enough, \code{strcat} throws
-\code{Core::InvalidArg("String::strcat")}.
-\end{defun}
+\begin{defun2}{char ?}{strconcat}{(const char {?}`r1 \vvar{s1},const char {?}`r2 \vvar{s2});}
+  Heap allocates and returns a new string whose contents are the
+  concatenation of \vvar{s1} and \vvar{s2}.
+\end{defun2}
 
-\begin{defun}{strcato}{(dest,src,srcOfs)}
-Concatenates \var{src} staring at \var{srcOfs} onto \var{dest} and
-returns \var{dest}.  If \var{dest} is not large enough, \code{strcat}
-throws \code{Core::InvalidArg("String::strcato")}.
-\end{defun}
+\begin{defun2}{char {?}`r}{rstrconcat(region_t<`r> \vvar{r},const char {?}`r1 \vvar{dest},const char {?}`r2 \vvar{src});}
+  A version of \code{strconcat} that allocates the resulting string in
+  the region given by \vvar{r}.
+\end{defun2}
 
-\begin{defun}{strconcat}{(s1,s2)}
-Allocates and returns a new string whose contents are the concatenation
-of \var{s1} and \var{s2}.
-\end{defun}
+\begin{defun2}{char ?}{strconcat_l}{(glist_t<const char {?}`r1@`r2,`r> \vvar{l});}
+  Allocates and returns a new string whose contents are the
+  concatenation of the strings in the list \vvar{l}, from left to
+  right.
+\end{defun2}
 
-\begin{defun}{strconcat_l}{(l)}
-Allocates and returns a new string whose contents are the concatenation
-of the strings in the list \var{l}, from left to right.
-\end{defun}
+\begin{defun2}{char {?}`r}{rstrconcat_l}{(region_t<`r> \vvar{r},glist_t<const char {?}`r1@`r2,`r3> \vvar{l});}
+  A version of \code{strconcat_l} that allocates the resulting string
+  in the region given by \vvar{r}.
+\end{defun2}
 
-\begin{defun}{str_sepstr}{(l,s)}
-Allocates and returns a new string whose contents are the concatenation
-of the strings in the list \var{l}, with \var{s} used as a separator
-between each two adjacent elements in \var{l}.
-\end{defun}
+\begin{defun2}{char ?}{str_sepstr}{(glist_t<const char {?}`r1@`r2,`r> \vvar{l},const char {?}`r3 \vvar{s});}
+  Allocates and returns a new string whose contents are the
+  concatenation of the strings in the list \vvar{l}, with \vvar{s} used
+  as a separator between each two adjacent elements in \vvar{l}.
+\end{defun2}
+
+\begin{defun2}{char {?}`r}{rstr_sepstr}{(\begin{tabular}[t]{@{}l@{}}
+      region_t<`r> \vvar{r},\\
+      glist_t<const char {?}`r1@`r2,`r3> \vvar{l},\\
+      const char {?}`r4 \vvar{s});\end{tabular}}
+  A version of \code{str_sepstr} that allocates the resulting string
+  in the region given by \vvar{r}.
+\end{defun2}  
 
 \subsubsection*{Copying strings and substrings}
 \subsubsection*{Functions}

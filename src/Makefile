@@ -18,9 +18,9 @@ CYCBISON := $(CYCDIR)/bin/cycbison$(EXE)
 OUT_PREFIX=
 
 ifdef PROFILE_REGIONS
-PROF_RGN_FLAG := -DCYC_REGION_PROFILE
+MPROF_FLAG := -mprof
 else
-PROF_RGN_FLAG := 
+MPROF_FLAG := 
 endif
 
 ifdef MS
@@ -31,8 +31,7 @@ endif
 
 LC_FLAG =
 
-CYC_FLAGS := -I$(CYCDIR)/lib -B$(CYCDIR)/lib -save-c $(LC_FLAG) $(TOC_FLAG) $(PROF_RGN_FLAG)
-#CYC_FLAGS := -I$(CYCDIR)/lib -save-c $(LC_FLAG) $(TOC_FLAG) $(PROF_RGN_FLAG)
+CYC_FLAGS := -I$(CYCDIR)/lib -B$(CYCDIR)/lib -save-c $(LC_FLAG) $(TOC_FLAG) $(MPROF_FLAG)
 
 LIBR:=$(CYCDIR)/lib/$(OUT_PREFIX)$(CYCLIB)
 

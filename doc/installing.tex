@@ -20,16 +20,16 @@ directory; if you are installing Cyclone on a Windows system, we
 suggest you choose \texttt{c:/cyclone}.  In any case, in these
 instructions we'll use \textit{cycdir} to refer to the directory.
 
-Next, add \textit{cycdir}\texttt{/bin} to your \texttt{PATH}.  In
+Next, enter the directory (\texttt{cd} \textit{cycdir}) and type
+``\texttt{make}.''  This will create executables for the Cyclone
+compiler (\texttt{cyclone} in Unix systems, or \texttt{cyclone.exe} in
+Windows systems) and some utilities in the \texttt{bin} subdirectory.
+
+Finally, add \textit{cycdir}\texttt{/bin} to your \texttt{PATH}.  In
 addition, if \textit{cycdir} is not \texttt{c:/cyclone}, you must set
 the environment variable \texttt{CYCLONE_INCLUDE_PATH} to
 \textit{cycdir}\texttt{/include}, and the variable
 \texttt{CYCLONE_EXEC_PREFIX} to \textit{cycdir}\texttt{/bin/cyc-lib}.
-
-Finally, enter the directory (\texttt{cd} \textit{cycdir}) and type
-``\texttt{make}.''  This will create executables for the Cyclone
-compiler (\texttt{cyclone} in Unix systems, or \texttt{cyclone.exe} in
-Windows systems) and some utilities in the \texttt{bin} subdirectory.
 
 You should now be able to compile Cyclone programs.
 

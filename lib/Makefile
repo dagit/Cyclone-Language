@@ -13,15 +13,14 @@ CYCLEX:=$(CYCDIR)/bin/cyclex$(EXE)
 OUT_PREFIX:=
 
 ifdef PROFILE_REGIONS
-PROF_RGN_FLAG := -DCYC_REGION_PROFILE
+C_MPROF_FLAG := -DCYC_REGION_PROFILE
+CYC_MPROF_FLAG := -mprof
 else
-PROF_RGN_FLAG := 
+C_MPROF_FLAG := 
+CYC_MPROF_FLAG := 
 endif
 
-CFLAGS:=-fwritable-strings -I$(CYCDIR) $(PROF_RGN_FLAG)
-#CFLAGS:=-g -fwritable-strings -I$(CYCDIR) $(PROF_RGN_FLAG)
-#CFLAGS:=-pg -fwritable-strings -I$(CYCDIR) $(PROF_RGN_FLAG)
-#CFLAGS:=-O -fwritable-strings -I$(CYCDIR) $(PROF_RGN_FLAG)
+CFLAGS:=-fwritable-strings -I$(CYCDIR) $(C_MPROF_FLAG)
 
 CYC_LIBS:=$(addsuffix .cyc, $(CYCLONE_LIBS))
 
@@ -33,8 +32,7 @@ endif
 
 LC_FLAG =
 
-CYC_FLAGS := -I. -B. -save-c $(LC_FLAG) $(PROF_RGN_FLAG) $(TOC_FLAG)
-#CYC_FLAGS := -I. -save-c $(LC_FLAG) $(PROF_RGN_FLAG) $(TOC_FLAG)
+CYC_FLAGS := -I. -B. -save-c $(LC_FLAG) $(CYC_MPROF_FLAG) $(TOC_FLAG)
 
 all: $(OUT_PREFIX)$(CYCLIB) nogc.a xml/libxml.a
 
@@ -55,7 +53,7 @@ nogc.a: nogc.o
 
 precore_c.h: precore.h $(CYCC)
 	cp precore.h precore.cyc
-	$(CYCC) -toc -pp $(CYC_REGION_PROFILE) -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ precore.cyc
+	$(CYCC) -toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ precore.cyc
 	rm -f precore.cyc
 
 xml/libxml.a: 
