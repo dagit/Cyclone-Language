@@ -337,9 +337,9 @@ void random_generate2() {
 void random_generate3() {
   for (let lastsize = -1; len > 0; len--) {
     let sz;
-    while ((sz = random(9)) == lastsize) // 8 sizes plus original size
+    while ((sz = random(11)) == lastsize) // 10 sizes plus original size
       /* skip */ ;
-    if (sz==8) printf("x");
+    if (sz==10) printf("x");
     else {
       printf(tag_strings[size_tags[sz]]);
       printf("@");

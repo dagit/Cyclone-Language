@@ -359,8 +359,10 @@ int main(int argc, char ??argv) {
   
   is_change = true;
   int round_num = 1;
-  while(is_change && check_time() > 2) {
-    while(is_change && check_time() > 2) {
+  int outer_round_num = 0;
+  while(is_change && check_time() > 2 && outer_round_num < 10) {
+    ++outer_round_num;
+    while(is_change && check_time() > 2  && round_num < 12) {
       is_change = false;
       fprintf(stderr,"%d\nup_opt...", check_time()); fflush(stderr);
       d = TagElim::up_opt(d)[0];
