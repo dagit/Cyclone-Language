@@ -34,6 +34,8 @@
 #include "formatstr.h"
 #include "tctyp.h"
 #include "tcexp.h"
+#include "attributes.h"
+
 using Core;
 using List;
 using Absyn;
@@ -1681,6 +1683,29 @@ static type_t tcComprehensionNoinit(tenv_t te, seg_t loc, type_t * topt,
 		    (ztopt == NULL) ? false_type : *ztopt, 0);
 }
 
+static bool ensure_typqual_nothrow(type_t t) {
+  switch(t) {
+  case &FnType(*i):
+    return List::mem(Atts::attribute_cmp,
+		     i->attributes,
+		     &No_throw_att_val);
+  case &PointerType(*pi): 
+    return ensure_typqual_nothrow(pi->elt_type);
+  default:
+    return true;
+  }
+}
+
+static bool ensure_nothrow_initializer(exp_t e) {
+  switch(e->r) {
+  case &Cast_e(_, e1, _, _):
+    return ensure_nothrow_initializer(e1);
+  default:
+    return ensure_typqual_nothrow(e->topt);
+  }
+}
+
+
  //////////////////// Struct/Union (f{e1,...,en}) ///////////////////
  // FIX:
  // Right now, we only allow one field name designator on an argument.
@@ -1773,18 +1798,24 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
     bool bogus = false;
     let &$(field,field_exp) = fields->hd;
     let inst_fieldtyp = substitute(inst,field->type);
-    tcExpInitializer(clear_abstract_val_ok(te2),
-		     &inst_fieldtyp, field_exp);   
+    let ftyp = tcExpInitializer(clear_abstract_val_ok(te2),
+				&inst_fieldtyp, field_exp);   
     if (!coerce_arg(curr_rgnpo(te2),field_exp,inst_fieldtyp,&bogus))
       err_and_explain(field_exp->loc,"field ",*(field->name)," of ",ad,
 		      " expects type ",inst_fieldtyp, " != ", 
 		      field_exp->topt);
+    bool nothrow_fld =  List::mem(Atts::attribute_cmp,
+				  field->attributes,
+				  &No_throw_att_val);
+    if(nothrow_fld && !ensure_nothrow_initializer(field_exp)) {
+      Warn::err2(field_exp->loc, "field ", *(field->name), " can only hold a no_throw function");
+    }
   }
   let rpo_inst = NULL;
   for(let rpo=ad->impl->rgn_po; rpo != NULL; rpo = rpo->tl)
     rpo_inst = new List(new $(substitute(inst,(*rpo->hd)[0]),
-			      substitute(inst,(*rpo->hd)[1])),
-			rpo_inst);
+ 			      substitute(inst,(*rpo->hd)[1])),
+ 			rpo_inst);
   rpo_inst = imp_rev(rpo_inst);
   Tcenv::check_rgn_partial_order(te2,loc,rpo_inst);
   return res_typ;

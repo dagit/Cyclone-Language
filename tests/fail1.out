@@ -279,5 +279,6 @@ fail1.cyc:1057: cannot alias pattern expression in datatype
 fail1.cyc:1062: reference pattern not allowed on alias-free pointers
 fail1.cyc:1066: pattern for variable y dereferences a alias-free pointer from a non-unique path
 fail1.cyc:1070: reference pattern not allowed on alias-free pointers
+fail1.cyc:1077: field a can only hold a no_throw function
 
 COMPILATION FAILED!

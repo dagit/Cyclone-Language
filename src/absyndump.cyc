@@ -49,6 +49,9 @@ static bool generate_line_directives;
 // (Differences: long long vs. __int64 and inline vs. __inline)
 static bool to_VC;
 
+static string_t nocyc_str = "__NoCycPrefix";
+static stringptr_t nocyc_strptr = &nocyc_str;
+
 void set_params(struct Absynpp::Params @ fs) {
   expand_typedefs = fs->expand_typedefs;
   qvar_to_Cids = fs->qvar_to_Cids;
@@ -227,6 +230,10 @@ static void dumpqvar(qvar_t v) {
   if(need_space_before())
     dump_char(' ');
   string_t sep = qvar_to_Cids ? "_" : "::";
+  if(nsl && !strptrcmp(nsl->hd, nocyc_strptr)){
+    nsl=nsl->tl;
+    prefix = NULL;
+  }
   if (prefix != NULL) {
     dump_nospace(**prefix); dump_nospace(sep);
   }

@@ -68,6 +68,11 @@ static bool qvar_to_Cids;
 
 string_t cyc_string = "Cyc";
 stringptr_t cyc_stringptr = &cyc_string;
+
+//Special namespace, avoid adding Cyc_ prefix to ids in this namespace
+static string_t nocyc_str = "__NoCycPrefix";
+static stringptr_t nocyc_strptr = &nocyc_str;
+
 // Flag controlling whether to add the cyc prefix to the C-identifiers
 static bool add_cyc_prefix;
 
@@ -541,6 +546,7 @@ string_t attribute2string(attribute_t a) {
   case &Always_inline_att: return "always_inline";
   case &Mode_att(s): return aprintf("__mode__(\"%s\")",s); 
   case &Alias_att(s): return aprintf("alias(\"%s\")",s); 
+  case &No_throw_att : return "no_throw"; 
  }
 }
 
@@ -958,7 +964,10 @@ string_t qvar2string(qvar_t q) {
   case {.Loc_n = _}: fallthru(NULL);
   case {.Rel_n = x}:
     match = false;
-    prefix = x;
+    if(x && qvar_to_Cids && !strptrcmp(x->hd, nocyc_strptr))
+      prefix = x->tl;
+    else 
+      prefix = x;
     break;
   case {.C_n = x}:
     match = use_curr_namespace && list_prefix(strptrcmp, x, curr_namespace);
@@ -966,7 +975,12 @@ string_t qvar2string(qvar_t q) {
     break;
   case {.Abs_n = x}:
     match = use_curr_namespace && list_prefix(strptrcmp, x, curr_namespace);
-    prefix = qvar_to_Cids && add_cyc_prefix ? new List(cyc_stringptr, x) : x;
+    if(qvar_to_Cids) {
+      if(x && !strptrcmp(x->hd, nocyc_strptr))
+	prefix = x->tl;
+      else 
+	prefix = add_cyc_prefix ? new List(cyc_stringptr, x) : x;
+    }
     break;
   }
   if (qvar_to_Cids) {
@@ -1124,7 +1138,7 @@ static doc_t asm_iolist_doc_in(list_t<$(string_t<`H>, exp_t)@> o) {
   doc_t s=nil_doc();
   while(o) {
     let &$(c, e) = o->hd;
-    s = cat(text("\""), text(c), text("\" ("), exp2doc(e), text(")"));
+    s = cat(s, text("\""), text(c), text("\" ("), exp2doc(e), text(")"));
     o = o->tl;
     if(o) {
       s = cat(s, text(","));

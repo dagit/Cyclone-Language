@@ -956,6 +956,7 @@ datacon(Attribute,Destructor_att);
 datacon(Attribute,No_check_memory_usage_att);
 datacon(Attribute,Pure_att);
 datacon(Attribute,Always_inline_att);
+datacon(Attribute,No_throw_att);
 
 stringptr_t fieldname(int i) {
   // cache strings used for field names f0,f1,f2,...

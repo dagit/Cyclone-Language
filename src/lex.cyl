@@ -154,7 +154,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("else", ELSE, true),
   $("enum", ENUM, true),
   $("export", EXPORT, false),
-  $("hide", HIDE, false),
+  $("cyclone_hide", HIDE, false),
   $("__extension__", EXTENSION, true),
   $("extern", EXTERN, true),
   $("fallthru", FALLTHRU, false),

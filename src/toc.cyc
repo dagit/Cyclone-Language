@@ -3811,7 +3811,7 @@ static int aggrdecl_to_c_body<`r2,`d,`r>(region_t<`d> d,
                                     .tq = mt_tq,
                                     .type = typ_to_c(old_type),
                                     .width = old_field->width,
-                                    .attributes = old_atts,
+                                    .attributes = Atts::atts2c(old_atts), //NKS added conversion to C atts
                                     .requires_clause = NULL};
 
       // If this is a tagged union, rewrite the member type from T

@@ -197,6 +197,7 @@ static int attribute_case_number(attribute_t att) {
   case &Mode_att(...): return 24;
   case &Alias_att(...): return 25;
   case &Always_inline_att: return 26;
+  case &No_throw_att: return 27;
   }
 }
 int attribute_cmp(attribute_t att1, attribute_t att2) {
@@ -238,7 +239,8 @@ bool fntype_att(attribute_t a) {
   case &Const_att:
   case &Noliveunique_att(_):
   case &Initializes_att(_):
-  case &Consume_att(_): return true;
+  case &Consume_att(_): 
+  case &No_throw_att:  return true;
   default: return false;
   }
 }
@@ -303,6 +305,7 @@ attributes_t atts2c(attributes_t atts) {
     case &Consume_att(_): continue; // correct: a Cyclone addition
     case &Noliveunique_att(_): continue; // correct: a Cyclone addition
     case &Initializes_att(_): continue; // correct: a Cyclone addition
+    case &No_throw_att: continue; //added for Cyclone drivers iface to C 
     default: ans = new List(atts->hd,ans); break;
     }
   return imp_rev(ans);

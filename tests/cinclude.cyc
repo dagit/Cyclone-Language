@@ -145,6 +145,11 @@ extern "C include" {
   void use_both(struct pci_ops *foo, struct pci_dev *bar);
 
   struct use_use_pci_dev uupd[100];
+
+  struct module_symbol {
+    unsigned long a;
+    int b;
+  };
 }
 cyclone_override {
   struct list<`a> { `a x; struct list<`a> *tl; };
@@ -188,10 +193,30 @@ cyclone_override {
     struct sk_buff<`a> *n;
     int a;
   };
+  
+  struct module_symbol<`a> {
+    `a a  __attribute__((no_throw));
+    int b;
+  };
 
 }
 export { * }
-hide { GC_malloc }
+cyclone_hide { GC_malloc }
+
+
+int nothrow_func(int a) __attribute__((no_throw)) {
+  try {
+    return 0;
+  }
+  catch {
+  default:
+    return -1;
+  }
+}
+
+int maythrow_func(int a) {
+  return 0;
+}
 
 
 
@@ -200,6 +225,7 @@ int main() {
   struct list *y = new list{new 1,NULL};
   struct list *z = new_list();
   spinlock_t spin = (spinlock_t){1}; //test compound literal
+  let sym = module_symbol{nothrow_func, 0};//test no_throw override
   if (*x->x == *y->x && *x->x == z->x) return ENUM_KEY_0;
   else return -ENUM_KEY_1;
 }

@@ -265,7 +265,7 @@ namespace Absyn {
     vararg_info_t*                           cyc_varargs;
     // partial order on region parameters
     list_t<$(type_t,type_t)@>                rgn_po;
-    // function type attributes can include regparm(n), noreturn, const
+    // function type attributes can include regparm(n), noreturn, const, nothrow
     // and at most one of cdecl, stdcall, and fastcall.  See gcc info
     // for documentation on attributes.
     attributes_t                             attributes; 
@@ -318,7 +318,7 @@ namespace Absyn {
     booltype_t zero_term;      // true => zero-terminated
     seg_t      zt_loc;         // location of zeroterm qualifier
   };
-
+ 
   // could allow datatype decls in here as well
   EXTERN_ABSYN datatype Raw_typedecl {
     Aggr_td(aggrdecl_t);
@@ -350,7 +350,7 @@ namespace Absyn {
     FalseCon; // BoolKind
     ThinCon;  // IntKind -> PtrBndKind 
     FatCon;   // PtrBndKind
-    EnumCon(typedef_name_t,struct Enumdecl *); // MemKind
+    EnumCon(typedef_name_t,struct Enumdecl *); // MemKind 
     AnonEnumCon(list_t<enumfield_t>); // MemKind
     BuiltinCon(string_t,kind_t); // e.g., __builtin_va_list
     DatatypeCon(datatype_info_t); // e.g., datatype Foo
@@ -446,7 +446,9 @@ namespace Absyn {
     Mode_att(string_t);
     Alias_att(string_t);
     Always_inline_att;
+    No_throw_att;
   };
+
   extern_datacon(Attribute,Stdcall_att);      
   extern_datacon(Attribute,Cdecl_att);        
   extern_datacon(Attribute,Fastcall_att);
@@ -465,6 +467,7 @@ namespace Absyn {
   extern_datacon(Attribute,No_check_memory_usage_att);
   extern_datacon(Attribute,Pure_att);
   extern_datacon(Attribute,Always_inline_att);
+  extern_datacon(Attribute,No_throw_att);
 
   // Type modifiers are used for parsing/pretty-printing
   EXTERN_ABSYN datatype Type_modifier<`r::R> {

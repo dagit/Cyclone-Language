@@ -1561,6 +1561,7 @@ attribute:
     $("no_check_memory_usage", &No_check_memory_usage_att_val),
     $("pure",&Pure_att_val),
     $("always_inline",&Always_inline_att_val),
+    $("no_throw",&No_throw_att_val),
   };
     let s = $1;
     // drop the surrounding __ in s, if it's there

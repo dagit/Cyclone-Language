@@ -91,6 +91,16 @@ static qvar_t stmt_temp_var() {
   qvar_t res = new $(Loc_n,new (string_t)aprintf("_stmttmp%X",counter++));
   return res;
 }
+
+static bool is_case_default(switch_clause_t c) {
+  switch(c->pattern->r) {
+  case &Wild_p:
+    return true;
+  default:
+    return false;
+  }
+}
+
 // new_block is a kludge because we he abstract syntax doesn't group the
 // local declarations in a block, but the region rules do.  (That is,
 // adjacent declarations are in the same region.  Those at the beginning
@@ -270,15 +280,16 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 		    s->loc)->r;
     tcStmt(te,s,true);
     
-    // add a default case that re-throws the exception
-    qvar_t def_v = new $(Loc_n,new "exn");
-    let vd = new_vardecl(0,def_v,void_type,0);
-    let def_pat = new_pat(new Var_p(vd, new_pat(&Wild_p_val,0)),0);
-    let def_stmt = 
-      exp_stmt(new_exp(new Throw_e(varb_exp(new Local_b(vd),0),true),0),0);
-    let def_clause = new Switch_clause{def_pat, NULL, NULL, def_stmt, 0};
-    *scs0 = List::append(*scs0,list(def_clause));
-    
+    if(!List::exists(is_case_default, *scs0)) {
+      // add a default case that re-throws the exception
+      qvar_t def_v = new $(Loc_n,new "exn");
+      let vd = new_vardecl(0,def_v,void_type,0);
+      let def_pat = new_pat(new Var_p(vd, new_pat(&Wild_p_val,0)),0);
+      let def_stmt = 
+	exp_stmt(new_exp(new Throw_e(varb_exp(new Local_b(vd),0),true),0),0);
+      let def_clause = new Switch_clause{def_pat, NULL, NULL, def_stmt, 0};
+      *scs0 = List::append(*scs0,list(def_clause));
+    }
     // similar to Switch_s
     // DJG: I finally got tired of checking cases in reverse order.  It is
     //      a bit more convoluted to go in order...
@@ -535,3 +546,37 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     Warn::impos2("tcStmt: nested ",unimp_msg_part," declarations not allowed");
   }
 }
+
+//hook, to be enhanced
+//guarantee that s doesn't throw an exception
+//for now, restrict s to be just a return cnst
+bool ensure_no_throws(stmt_t s) {
+  switch(s->r) {
+  case &Return_s(e): 
+    if(e) {
+      switch(e->r) {
+      case &Const_e(_):
+	return true;
+      case &Primop_e(_, es):
+	while(es) {
+	  switch(es->hd->r) {
+	  case &Const_e(_):
+	    break;
+	  default:
+	    return false;
+	  }
+	  es = es->tl;
+	}
+	return true;
+      default:
+	return false;
+      }
+    }
+    else {
+      return true;
+    }
+  default: 
+    return false;
+  }
+}
+

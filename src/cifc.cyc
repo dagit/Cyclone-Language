@@ -17,6 +17,7 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
+#include <filename.h>
 #include "cifc.h"
 #include "absynpp.h"
 #include "unify.h"
@@ -25,6 +26,7 @@
 #include "tctyp.h"
 #include "tcutil.h"
 #include "attributes.h"
+
 #include <string.h>
 
 using Absyn;
@@ -139,6 +141,40 @@ static type_t expand_c_type(seg_t loc, tenv_t te, type_t ctyp) {
   }
 }
 
+static bool is_boxed_kind(type_t t) {
+  //int, long, region, tag_t, non-fat ptrs
+  switch(t) {
+  case &AppType(tc, ts):
+    switch(tc) {
+    case &IntCon(_, sz):
+      return sz == Int_sz || sz == Long_sz;
+    case &RgnHandleCon:
+    case &TagCon:
+      return true;
+    default:
+      return false;
+    }
+    break;
+  case &PointerType(*pi):
+    switch(pi->ptr_atts.bounds) {
+    case &AppType(tc, _):
+      switch(tc) {
+      case &FatCon:
+	return false;
+      default:
+	return true;
+      }
+    default:
+      Warn::impos("ptrbound_t must have an AppType");
+    }
+    break;
+  case &ValueofType(e): //always IntKind
+     return true;
+  default:
+    return false;
+  }
+}
+
 // Make copies of the types to make sure we don't get screwed up by]
 // side-effects with unification
 // FIX: we could be more liberal than unification alone.  E.g. we could allow
@@ -151,13 +187,15 @@ static bool c_types_ok(seg_t loc, tenv_t te, type_t ctyp, type_t cyctyp) {
 
   let c_typ = Toc::typ_to_c(ctyp_cp);
   let u_typ = Toc::typ_to_c(utyp_cp);
-  if(!Unify::unify(c_typ, u_typ)) { 
-    c_typ = expand_c_type(loc, te, c_typ);
+  if(!Unify::unify(c_typ, u_typ)) {  //if types are the same, we're ok, o.w
+    c_typ = expand_c_type(loc, te, c_typ); //try expanding typedefs
     u_typ = expand_c_type(loc, te, u_typ);
-    return Unify::unify(c_typ,u_typ);
+    if(!Unify::unify(c_typ,u_typ)) { //ow, accept if they're both boxed kinds 
+      return is_boxed_kind(c_typ) && is_boxed_kind(u_typ);
+    }
   }
   return true;
-
+  
   /*  if((Tcutil::is_function_type(c_typ) && Tcutil::is_function_type(u_typ)) ||
       (Tcutil::is_typedef_type(c_typ) ^ Tcutil::is_typedef_type(u_typ))) {*/
   
@@ -837,6 +875,7 @@ static bool decl_not_present(list_t<decl_t> l, decl_t a) {
   return !List::exists_c(eq, a, l);
 }
 
+
 void user_overrides(seg_t loc, tenv_t te, list_t<decl_t, `H> *ds, list_t<decl_t> ovrs) {
   list_t<decl_t> type_overrides = NULL;
   list_t<decl_t> overriden_decls = NULL;
@@ -868,7 +907,5 @@ void user_overrides(seg_t loc, tenv_t te, list_t<decl_t, `H> *ds, list_t<decl_t>
     *ds = List::append(abs_decls, *ds);
   }
 }
-
-
 
 

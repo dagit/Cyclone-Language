@@ -1069,3 +1069,10 @@ void f262(struct f259<`U> * x) {
   // reference pattern not allowed on alias-free pointers
   let &f259{.x = *y} = x;
 }
+
+struct _f263 {
+  void *a __attribute__((no_throw));
+};
+void f263() {
+  struct _f263 a = {(void*)f263};
+}
