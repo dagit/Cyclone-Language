@@ -208,7 +208,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t *`r topt, cnst_t c, exp_t e) 
     if (topt != null) {
       switch (compress(*topt)) {
       case &ArrayType(telt,tq,e2):
-        return new ArrayType(uchar_t, const_tqual(), elen);
+        return new ArrayType(uchar_t, tq, elen);
       case &PointerType(PtrInfo(telt,trgn,nullable,tq,b)):
         if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
           e->topt = new Opt(t);

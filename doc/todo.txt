@@ -108,9 +108,6 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
 
 * Lots of headers currently define NULL in lots of incompatible ways.
 
-* runtime_cyc.c still defines check_fd and f_seek, which we never use
-  (and are mentioned in the docs exactly once).
-
 THINGS NEEDED TO SIMPLIFY PORTING:
 ----------------------------------
 * get rid of null, replace with 0 (requires clever overloading)

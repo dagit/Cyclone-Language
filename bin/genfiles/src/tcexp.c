@@ -728,9 +728,9 @@ _temp231.bounds; goto _LL222;} else{ goto _LL223;} _LL223: goto _LL224; _LL220:
 return( void*)({ struct Cyc_Absyn_ArrayType_struct* _temp243=( struct Cyc_Absyn_ArrayType_struct*)
 GC_malloc( sizeof( struct Cyc_Absyn_ArrayType_struct)); _temp243[ 0]=({ struct
 Cyc_Absyn_ArrayType_struct _temp244; _temp244.tag= Cyc_Absyn_ArrayType; _temp244.f1=(
-void*) Cyc_Absyn_uchar_t; _temp244.f2= Cyc_Absyn_const_tqual(); _temp244.f3=(
-struct Cyc_Absyn_Exp*) elen; _temp244;}); _temp243;}); _LL222: if( ! Cyc_Tcutil_unify(*((
-void**) _check_null( topt)), t)? Cyc_Tcutil_silent_castable( te, loc, t,*(( void**)
+void*) Cyc_Absyn_uchar_t; _temp244.f2= _temp227; _temp244.f3=( struct Cyc_Absyn_Exp*)
+elen; _temp244;}); _temp243;}); _LL222: if( ! Cyc_Tcutil_unify(*(( void**)
+_check_null( topt)), t)? Cyc_Tcutil_silent_castable( te, loc, t,*(( void**)
 _check_null( topt))): 0){ e->topt=({ struct Cyc_Core_Opt* _temp245=( struct Cyc_Core_Opt*)
 GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp245->v=( void*) t; _temp245;});
 Cyc_Tcutil_unchecked_cast( te, e,*(( void**) _check_null( topt))); t=*(( void**)
