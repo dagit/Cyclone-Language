@@ -775,7 +775,7 @@ using Parse;
   EnumeratorFieldList_tok(list<enumfield>);
   ParamDecl_tok($(Opt_t<var>,tqual,typ)@);
   ParamDeclList_tok(list<$(Opt_t<var>,tqual,typ)@>);
-  ParamDeclListBool_tok(list<$(Opt_t<var>,tqual,typ)@>,bool);
+  ParamDeclListBool_tok($(list<$(Opt_t<var>,tqual,typ)@>,bool)@);
   StructOrUnion_tok(struct_or_union_t);
   IdList_tok(list<var>);
   Designator_tok(designator);
@@ -1249,7 +1249,7 @@ direct_declarator:
 | direct_declarator '[' assignment_expression ']'
     { $$=^$(&Declarator($1->id,&cons(ConstArray_mod($3),$1->tms))); }
 | direct_declarator '(' parameter_type_list ')'
-    { let ParamDeclListBool_tok(lis,b) = $!3;
+    { let &$(lis,b) = $3;
       $$=^$(&Declarator($1->id,&cons(Function_mod(WithTypes(lis,b)),
 				     $1->tms)));
     }
@@ -1306,9 +1306,9 @@ type_qualifier_list:
 
 parameter_type_list:
   parameter_list
-    { $$=^$(List::imp_rev($1),false); }
+    { $$=^$(&$(List::imp_rev($1),false)); }
 | parameter_list ',' ELLIPSIS
-    { $$=^$(List::imp_rev($1),true); }
+    { $$=^$(&$(List::imp_rev($1),true)); }
 ;
 
 /* NB: returns list in reverse order */
@@ -1480,7 +1480,7 @@ direct_abstract_declarator:
 				      null)));
     }
 | '(' parameter_type_list ')'
-    { let ParamDeclListBool_tok(lis,b) = $!2;
+    { let &$(lis,b) = $2;
       $$=^$(&Abstractdeclarator(&cons(Function_mod(WithTypes(lis,b)),null)));
     }
 | direct_abstract_declarator '(' ')'
@@ -1488,7 +1488,7 @@ direct_abstract_declarator:
 				      $1->tms)));
     }
 | direct_abstract_declarator '(' parameter_type_list ')'
-    { let ParamDeclListBool_tok(lis,b) = $!3;
+    { let &$(lis,b) = $3;
       $$=^$(&Abstractdeclarator(&cons(Function_mod(WithTypes(lis,b)),
 				      $1->tms)));
     }

@@ -680,8 +680,30 @@ parse_start_decl ()
 }
 
 
+/* read in a %type declaration and record its information for get_type_name
+   to access 
+   DAN: We do destructor creation here rather than in parse_union_decl because
+   the latter makes it too much of a pain to get the constructor names out.
+   Note you'll get Cyclone errors if the type isn't actually a variant
+   of YYSTYPE that carries exactly one value!
 
-/* read in a %type declaration and record its information for get_type_name to access */
+   Note: We're relying heavily on Cyclone's type inference -- else this
+   is a real pain since bison doesn't really parse YYSTYPE!
+*/
+struct strlist { char * str; struct strlist * tl; };
+struct strlist *seen_destructors = NULL;
+static int has_been_seen(char * str) {
+  struct strlist * l1 = seen_destructors;
+  struct strlist * l2;
+  for(; l1 != NULL; l1 = l1->tl)
+    if(strcmp(l1->str,str)==0)
+      return 1;
+  l2 = (struct strlist *)malloc(sizeof(struct strlist));
+  l2->str = str;
+  l2->tl  = seen_destructors;
+  seen_destructors = l2;
+  return 0;
+}
 
 void
 parse_type_decl ()
@@ -699,6 +721,13 @@ parse_type_decl ()
   k = strlen(token_buffer);
   name = NEW2(k + 1, char);
   strcpy(name, token_buffer);
+
+  /* DAN -- spit out the strip function */
+  if(!has_been_seen(name)) {
+    if(!nolinesflag)
+      fprintf(fattrs, "\n#line %d \"%s\"", lineno, infile);
+    fprintf(fattrs, "\n_ yyget_%s(xenum YYSTYPE x) {switch(x) {case %s(y): return y; default: throw Core::Failure(\"%s\");}}\n", name, name, name);
+  }
 
   for (;;)
     {
@@ -840,7 +869,7 @@ parse_union_decl()
     fprintf(fdefines, 
 	"\nextern int yyparse();\nextern xenum YYSTYPE; "
 	    "\nextern xenum YYSTYPE ");
-    /* DJG */
+    /* DAN */
     /* fprintf(fdefines, "\nextern int yyparse();\nextern union YYSTYPE "); */
 
   count = 0;
@@ -1182,7 +1211,7 @@ int stack_offset;
 		       rule->sym->tag);
 		type_name = "BOGUS";
 	      }
-	      fprintf(fguard,"({_ yyinternal; switch(yyvsp[%d]) { case %s(yyinternal2): yyinternal = yyinternal2; break; default: throw Core::Failure(\"%s\"); } yyinternal;})", type_name, n - stack_offset);
+	      fprintf(fguard, "yyget_%s(yyvsp[%d])", type_name, n-stack_offset);
 	      continue;
 	    }
 	  else if (c == '(') {
@@ -1466,14 +1495,15 @@ int stack_offset;
 		    else 
 		      fprintf(faction, "(yyvs[yyvsp_offset-%d])", -m);
 		  } else {
-		    fprintf(faction,"({_ yyinternal; switch ");
+		    /* DAN: calling functions makes for smaller files. */
+		    fprintf(faction," yyget_%s",type_name);
 		    if (m==0)
 		      fprintf(faction, "(yyvs[yyvsp_offset])");
 		    else if (m > 0) 
 		      fprintf(faction, "(yyvs[yyvsp_offset+%d])", m);
 		    else 
 		      fprintf(faction, "(yyvs[yyvsp_offset-%d])", -m);
-		    fprintf(faction, "{case %s(yyinternal2): yyinternal = yyinternal2; break; default: throw Core::Failure(\"%s\"); } yyinternal;})", type_name, type_name);
+
 		    /*
 		    fprintf(faction,"; yyinternal;})");
 		    */
