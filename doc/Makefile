@@ -36,7 +36,7 @@ main-a4.pdf: gen-libdoc.tex
 	pdflatex '\nonstopmode\input' main-a4
 
 gen-libdoc.tex: ../include/buffer.h ../include/hashtable.h \
-  ../include/xarray.h
+  ../include/set.h ../include/rope.h ../include/xarray.h
 	../src/cycdoc -cyclone ../bin/cyclone $^ > gen-libdoc.tex
 
 clean:

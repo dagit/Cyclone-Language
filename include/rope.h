@@ -22,15 +22,38 @@
 #include <list.h>
 
 namespace Rope {
+
+  /*** \section{\texttt{<rope.h>}} */
+  /*** Defines namespace Rope, which implements character arrays that
+       can be concatenated in constant time. */
+
 extern struct Rope_node;
-typedef struct Rope_node @ rope_t;
+typedef struct Rope_node @rope_t;
+  /** A value of type [rope_t] is a character array that can be
+      efficiently concatenated. */
 
 extern rope_t from_string(string_t<`H>);
+  /** [from_string(s)] returns a rope that has the same characters as
+      string [s].  Note that [s] must be heap-allocated. */
 extern mstring_t to_string(rope_t);
+  /** [to_string(r)] returns a new, heap-allocated string with the
+      same characters as rope [r]. */
 extern rope_t concat(rope_t,rope_t);
+  /** [concat(r1,r2)] returns a rope whose characters are the
+      characters of [r1] followed by the characters of [r2]. */
 extern rope_t concata(rope_t ?`H);
+  /** [concata(a)] returns a rope that contains the concatenation of
+      the characters in the array [a] of ropes. */
 extern rope_t concatl(List::list_t<rope_t>);
+  /** [concata(l)] returns a rope that contains the concatenation of
+      the characters in the list [l] of ropes. */
 extern unsigned int length(rope_t);
+  /** [length(r)] returns the number of characters in the rope [r], up
+   to but not including the first NUL character. */
 extern int cmp(rope_t,rope_t);
+  /** [cmp(r1,r2)] is a comparison function on ropes: it returns a
+      number less than, equal to, or greater than 0 according to
+      whether the character array of [r1] is lexicographically less
+      than, equal to, or greater than the character array of [r2]. */
 }
 #endif
