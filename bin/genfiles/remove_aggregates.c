@@ -139,6 +139,8 @@ extern char Cyc_Bad_alloc[];
 #define _check_known_subscript_null(ptr,bound,elt_sz,index)\
    ((char *)ptr) + (elt_sz)*(index))
 #define _check_known_subscript_notnull(bound,index) (index)
+#define _check_known_subscript_notnullX(bound,index)\
+   ((char *)ptr) + (elt_sz)*(index))
 
 #define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
@@ -149,19 +151,26 @@ extern char Cyc_Bad_alloc[];
 #define _zero_arr_plus_voidstar_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #else
 #define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
-  void*_cks_ptr = (void*)(ptr); \
+  char*_cks_ptr = (char*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
   unsigned _cks_index = (index); \
   if (!_cks_ptr) _throw_null(); \
   if (_cks_index >= _cks_bound) _throw_arraybounds(); \
-  ((char *)_cks_ptr) + _cks_elt_sz*_cks_index; })
+  (_cks_ptr) + _cks_elt_sz*_cks_index; })
 
 #define _check_known_subscript_notnull(bound,index) ({ \
   unsigned _cksnn_bound = (bound); \
   unsigned _cksnn_index = (index); \
   if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
   _cksnn_index; })
+#define _check_known_subscript_nullX(ptr,bound,elt_sz,index) ({ \
+  char*_cks_ptr = (char*)(ptr); \
+  unsigned _cks_bound = (bound); \
+  unsigned _cks_elt_sz = (elt_sz); \
+  unsigned _cks_index = (index); \
+  if (_cks_index >= _cks_bound) _throw_arraybounds(); \
+  (_cks_ptr) + _cks_elt_sz*_cks_index; })
 
 /* Add i to zero-terminated pointer x.  Checks for x being null and
    ensures that x[0..i-1] are not 0. */
@@ -519,7 +528,7 @@ struct _dyneither_ptr Cyc_Absynpp_exp2string(struct Cyc_Absyn_Exp*);struct Cyc_H
 void*Cyc_Toc_typ_to_c(void*);
 # 40
 struct _tuple0*Cyc_Toc_temp_var();extern char Cyc_Toc_Dest[5U];struct Cyc_Toc_Dest_Absyn_AbsynAnnot_struct{char*tag;struct Cyc_Absyn_Exp*f1;};
-# 49
+# 47
 void Cyc_Toc_finish();struct Cyc_Set_Set;extern char Cyc_Set_Absent[7U];struct Cyc_Set_Absent_exn_struct{char*tag;};struct Cyc_RgnOrder_RgnPO;
 # 32 "rgnorder.h"
 struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_initial_fn_po(struct Cyc_List_List*tvs,struct Cyc_List_List*po,void*effect,struct Cyc_Absyn_Tvar*fst_rgn,unsigned int);

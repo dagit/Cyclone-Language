@@ -139,6 +139,8 @@ extern char Cyc_Bad_alloc[];
 #define _check_known_subscript_null(ptr,bound,elt_sz,index)\
    ((char *)ptr) + (elt_sz)*(index))
 #define _check_known_subscript_notnull(bound,index) (index)
+#define _check_known_subscript_notnullX(bound,index)\
+   ((char *)ptr) + (elt_sz)*(index))
 
 #define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
@@ -149,19 +151,26 @@ extern char Cyc_Bad_alloc[];
 #define _zero_arr_plus_voidstar_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #else
 #define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
-  void*_cks_ptr = (void*)(ptr); \
+  char*_cks_ptr = (char*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
   unsigned _cks_index = (index); \
   if (!_cks_ptr) _throw_null(); \
   if (_cks_index >= _cks_bound) _throw_arraybounds(); \
-  ((char *)_cks_ptr) + _cks_elt_sz*_cks_index; })
+  (_cks_ptr) + _cks_elt_sz*_cks_index; })
 
 #define _check_known_subscript_notnull(bound,index) ({ \
   unsigned _cksnn_bound = (bound); \
   unsigned _cksnn_index = (index); \
   if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
   _cksnn_index; })
+#define _check_known_subscript_nullX(ptr,bound,elt_sz,index) ({ \
+  char*_cks_ptr = (char*)(ptr); \
+  unsigned _cks_bound = (bound); \
+  unsigned _cks_elt_sz = (elt_sz); \
+  unsigned _cks_index = (index); \
+  if (_cks_index >= _cks_bound) _throw_arraybounds(); \
+  (_cks_ptr) + _cks_elt_sz*_cks_index; })
 
 /* Add i to zero-terminated pointer x.  Checks for x being null and
    ensures that x[0..i-1] are not 0. */
@@ -605,7 +614,7 @@ void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);char Cyc_Tcenv_Env_er
 struct Cyc_Tcenv_Env_error_exn_struct Cyc_Tcenv_Env_error_val={Cyc_Tcenv_Env_error};
 # 52
 void*Cyc_Tcenv_env_err(struct _dyneither_ptr msg){
-(int)_throw((void*)& Cyc_Tcenv_Env_error_val);}struct Cyc_Tcenv_Tenv;struct Cyc_Tcenv_Genv;struct Cyc_Tcenv_SharedFenv{void*return_typ;struct Cyc_List_List*delayed_effect_checks;struct Cyc_List_List*delayed_constraint_checks;};struct Cyc_Tcenv_FenvFlags{enum Cyc_Tcenv_NewStatus in_new;int in_notreadctxt: 1;int in_lhs: 1;int abstract_ok: 1;int in_stmt_exp: 1;};struct Cyc_Tcenv_Fenv{struct Cyc_Tcenv_SharedFenv*shared;struct Cyc_List_List*type_vars;struct Cyc_RgnOrder_RgnPO*region_order;const struct _tuple10*ctrl_env;void*capability;void*curr_rgn;struct Cyc_Tcenv_FenvFlags flags;};
+(int)_throw((void*)& Cyc_Tcenv_Env_error_val);}struct Cyc_Tcenv_SharedFenv{void*return_typ;struct Cyc_List_List*delayed_effect_checks;struct Cyc_List_List*delayed_constraint_checks;};struct Cyc_Tcenv_FenvFlags{enum Cyc_Tcenv_NewStatus in_new;int in_notreadctxt: 1;int in_lhs: 1;int abstract_ok: 1;int in_stmt_exp: 1;};struct Cyc_Tcenv_Fenv{struct Cyc_Tcenv_SharedFenv*shared;struct Cyc_List_List*type_vars;struct Cyc_RgnOrder_RgnPO*region_order;const struct _tuple10*ctrl_env;void*capability;void*curr_rgn;struct Cyc_Tcenv_FenvFlags flags;};
 # 110
 struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tc_init(){
 # 112

@@ -139,6 +139,8 @@ extern char Cyc_Bad_alloc[];
 #define _check_known_subscript_null(ptr,bound,elt_sz,index)\
    ((char *)ptr) + (elt_sz)*(index))
 #define _check_known_subscript_notnull(bound,index) (index)
+#define _check_known_subscript_notnullX(bound,index)\
+   ((char *)ptr) + (elt_sz)*(index))
 
 #define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
@@ -149,19 +151,26 @@ extern char Cyc_Bad_alloc[];
 #define _zero_arr_plus_voidstar_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #else
 #define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
-  void*_cks_ptr = (void*)(ptr); \
+  char*_cks_ptr = (char*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
   unsigned _cks_index = (index); \
   if (!_cks_ptr) _throw_null(); \
   if (_cks_index >= _cks_bound) _throw_arraybounds(); \
-  ((char *)_cks_ptr) + _cks_elt_sz*_cks_index; })
+  (_cks_ptr) + _cks_elt_sz*_cks_index; })
 
 #define _check_known_subscript_notnull(bound,index) ({ \
   unsigned _cksnn_bound = (bound); \
   unsigned _cksnn_index = (index); \
   if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
   _cksnn_index; })
+#define _check_known_subscript_nullX(ptr,bound,elt_sz,index) ({ \
+  char*_cks_ptr = (char*)(ptr); \
+  unsigned _cks_bound = (bound); \
+  unsigned _cks_elt_sz = (elt_sz); \
+  unsigned _cks_index = (index); \
+  if (_cks_index >= _cks_bound) _throw_arraybounds(); \
+  (_cks_ptr) + _cks_elt_sz*_cks_index; })
 
 /* Add i to zero-terminated pointer x.  Checks for x being null and
    ensures that x[0..i-1] are not 0. */
@@ -443,7 +452,7 @@ struct Cyc_Fn_Function*Cyc_Fn_curry(struct Cyc_Fn_Function*f);
 # 70
 struct Cyc_Fn_Function*Cyc_Fn_uncurry(struct Cyc_Fn_Function*f);
 # 77
-struct Cyc_List_List*Cyc_Fn_map_fn(struct Cyc_Fn_Function*f,struct Cyc_List_List*x);struct Cyc_Fn_Function;
+struct Cyc_List_List*Cyc_Fn_map_fn(struct Cyc_Fn_Function*f,struct Cyc_List_List*x);
 # 38 "fn.cyc"
 struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(void*,void*),void*x){
 return({struct Cyc_Fn_Function*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->f=f,_tmp0->env=x;_tmp0;});}

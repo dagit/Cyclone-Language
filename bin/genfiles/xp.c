@@ -139,6 +139,8 @@ extern char Cyc_Bad_alloc[];
 #define _check_known_subscript_null(ptr,bound,elt_sz,index)\
    ((char *)ptr) + (elt_sz)*(index))
 #define _check_known_subscript_notnull(bound,index) (index)
+#define _check_known_subscript_notnullX(bound,index)\
+   ((char *)ptr) + (elt_sz)*(index))
 
 #define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
@@ -149,19 +151,26 @@ extern char Cyc_Bad_alloc[];
 #define _zero_arr_plus_voidstar_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
 #else
 #define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
-  void*_cks_ptr = (void*)(ptr); \
+  char*_cks_ptr = (char*)(ptr); \
   unsigned _cks_bound = (bound); \
   unsigned _cks_elt_sz = (elt_sz); \
   unsigned _cks_index = (index); \
   if (!_cks_ptr) _throw_null(); \
   if (_cks_index >= _cks_bound) _throw_arraybounds(); \
-  ((char *)_cks_ptr) + _cks_elt_sz*_cks_index; })
+  (_cks_ptr) + _cks_elt_sz*_cks_index; })
 
 #define _check_known_subscript_notnull(bound,index) ({ \
   unsigned _cksnn_bound = (bound); \
   unsigned _cksnn_index = (index); \
   if (_cksnn_index >= _cksnn_bound) _throw_arraybounds(); \
   _cksnn_index; })
+#define _check_known_subscript_nullX(ptr,bound,elt_sz,index) ({ \
+  char*_cks_ptr = (char*)(ptr); \
+  unsigned _cks_bound = (bound); \
+  unsigned _cks_elt_sz = (elt_sz); \
+  unsigned _cks_index = (index); \
+  if (_cks_index >= _cks_bound) _throw_arraybounds(); \
+  (_cks_ptr) + _cks_elt_sz*_cks_index; })
 
 /* Add i to zero-terminated pointer x.  Checks for x being null and
    ensures that x[0..i-1] are not 0. */
@@ -427,7 +436,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 
 # 1 "xp.cyc"
- static char Cyc_rcsid[49U]="$Id: xp.c,v 1.6 2004-07-27 18:39:03 djg Exp $";
+ static char Cyc_rcsid[49U]="$Id: xp.c,v 1.7 2004-07-28 16:47:13 djg Exp $";
 # 4 "ctype.h"
 int isalnum(int);
 # 22
@@ -581,13 +590,13 @@ if(_get_dyneither_size(r,sizeof(unsigned char))> 1)
 ({struct _dyneither_ptr _tmp2C=_dyneither_ptr_plus((struct _dyneither_ptr)r,sizeof(char),1);Cyc_memset(_tmp2C,'\000',(unsigned long)(my - 1));});}else{
 if(m > n){
 Cyc_memset((struct _dyneither_ptr)q,'\000',(unsigned long)nx);
-((struct _dyneither_ptr(*)(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned long,unsigned int))Cyc__memcpy)(r,(struct _dyneither_ptr)x,n / sizeof(((unsigned char*)x.curr)[0U])+ (n % sizeof(((unsigned char*)x.curr)[0U])== 0?0: 1),sizeof(((unsigned char*)x.curr)[0U]));
+((struct _dyneither_ptr(*)(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned long,unsigned int))Cyc__memcpy)(r,(struct _dyneither_ptr)x,n / sizeof(*((unsigned char*)x.curr))+ (n % sizeof(*((unsigned char*)x.curr))== 0?0: 1),sizeof(*((unsigned char*)x.curr)));
 ({struct _dyneither_ptr _tmp2D=_dyneither_ptr_plus((struct _dyneither_ptr)r,sizeof(char),n);Cyc_memset(_tmp2D,'\000',(unsigned long)(my - n));});}else{
 # 129
 int k;
 struct _dyneither_ptr rem=tmp;struct _dyneither_ptr dq=_dyneither_ptr_plus(_dyneither_ptr_plus(tmp,sizeof(unsigned char),n),sizeof(unsigned char),1);
 2 <= m  && m <= n?0:({struct _dyneither_ptr _tmp2E=({const char*_tmp1="2 <= m && m <= n";_tag_dyneither(_tmp1,sizeof(char),17U);});((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(_tmp2E,({const char*_tmp2="xp.cyc";_tag_dyneither(_tmp2,sizeof(char),7U);}),131U);});
-((struct _dyneither_ptr(*)(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned long,unsigned int))Cyc__memcpy)(rem,(struct _dyneither_ptr)x,n / sizeof(((unsigned char*)x.curr)[0U])+ (n % sizeof(((unsigned char*)x.curr)[0U])== 0?0: 1),sizeof(((unsigned char*)x.curr)[0U]));
+((struct _dyneither_ptr(*)(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned long,unsigned int))Cyc__memcpy)(rem,(struct _dyneither_ptr)x,n / sizeof(*((unsigned char*)x.curr))+ (n % sizeof(*((unsigned char*)x.curr))== 0?0: 1),sizeof(*((unsigned char*)x.curr)));
 *((unsigned char*)_check_dyneither_subscript(rem,sizeof(unsigned char),n))='\000';
 for(k=n - m;k >= 0;-- k){
 int qk;
@@ -617,7 +626,7 @@ int borrow;
 ({int _tmp3B=({int _tmp3A=m + 1;struct _dyneither_ptr _tmp39=_dyneither_ptr_plus(rem,sizeof(unsigned char),k);struct _dyneither_ptr _tmp38=_dyneither_ptr_plus(rem,sizeof(unsigned char),k);Cyc_XP_sub(_tmp3A,_tmp39,_tmp38,dq,0);});borrow=_tmp3B;});
 borrow == 0?0:({struct _dyneither_ptr _tmp3C=({const char*_tmp7="borrow == 0";_tag_dyneither(_tmp7,sizeof(char),12U);});((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(_tmp3C,({const char*_tmp8="xp.cyc";_tag_dyneither(_tmp8,sizeof(char),7U);}),160U);});};}
 # 163
-((struct _dyneither_ptr(*)(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned long,unsigned int))Cyc__memcpy)(r,(struct _dyneither_ptr)rem,m / sizeof(((unsigned char*)rem.curr)[0U])+ (m % sizeof(((unsigned char*)rem.curr)[0U])== 0?0: 1),sizeof(((unsigned char*)rem.curr)[0U]));{
+((struct _dyneither_ptr(*)(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned long,unsigned int))Cyc__memcpy)(r,(struct _dyneither_ptr)rem,m / sizeof(*((unsigned char*)rem.curr))+ (m % sizeof(*((unsigned char*)rem.curr))== 0?0: 1),sizeof(*((unsigned char*)rem.curr)));{
 # 165
 int i;
 for(i=(n - m)+ 1;i < nx;++ i){

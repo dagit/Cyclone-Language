@@ -292,8 +292,8 @@ static void set_stop_after_asmfile() {
 }
 
 static void set_all_warnings() {
-  Toc::warn_bounds_checks = true;
-  Toc::warn_all_null_deref = true;
+  InsertChecks::warn_bounds_checks = true;
+  InsertChecks::warn_all_null_deref = true;
   NewControlFlow::warn_lose_unique = true;
   Tcutil::warn_alias_coerce = true;
   Tcutil::warn_region_coerce = true;
@@ -1154,10 +1154,10 @@ using Arg {
               String_spec,set_cyc_include,
               "Set cyc_include.h to be <file>");
   make_option(opt54,"-warnboundschecks", false, "",
-              Set_spec,&Toc::warn_bounds_checks,
+              Set_spec,&InsertChecks::warn_bounds_checks,
               "Warn when bounds checks can't be eliminated");
   make_option(opt55,"-warnnullchecks", false, "",
-              Set_spec,&Toc::warn_all_null_deref,
+              Set_spec,&InsertChecks::warn_all_null_deref,
               "Warn when any null check can't be eliminated");
   make_option(opt56,"-warnaliascoercion", false, "",
               Set_spec,&Tcutil::warn_alias_coerce,

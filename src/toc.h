@@ -44,8 +44,6 @@ extern stringptr_t ?globals;
   extern Dest(exp_t);
 };
 
-extern bool warn_bounds_checks;
-extern bool warn_all_null_deref;
 void finish(); // call this when done with a batch of typ_to_c calls
 }
 #endif

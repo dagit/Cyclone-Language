@@ -1,0 +1,478 @@
+/* Check insertion
+   Copyright (C) 2004 Dan Grossman, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+// Use the results of flow analysis to indicate compile-time errors and
+// where the translation to C must insert run-time checks.
+// We used to do this during translation to C, which dispersed where
+// errors were detected and required the translation to know about
+// representation details of the analysis and type system.
+
+// TO DO: 
+// * check toc.cyc for recursive calls to exp_to_c that update
+//   the ->r but need to also update the ->annot field
+//   for example, zero_ptr_assign_to_c needs to annotate with
+//     NullAndFatBound (and really should adjust statistics too)
+//   (also examining Swap_e carefully, but seems okay?)
+// * change toc.cyc to check dynamically that a flag is set by cases
+//   that look at non-nocheck.
+// * move over error messages from Deref_e and AggrArrow_e (and make uniform)
+//   (also Primop_e, Numelts case)
+// * move tagged-union nonsense over to here??
+// * move zeroterm nonsense over to here??
+// * consider null-check elimination on patterns??
+
+#include "cf_flowinfo.h"
+#include "tcutil.h"
+#include "evexp.h"
+#include "warn.h"
+#include "insert_checks.h"
+
+//#define BCE_DEBUG
+#ifdef BCE_DEBUG
+#include "absynpp.h"
+using Absynpp;
+#endif
+
+using Absyn;
+using Warn;
+using Tcutil;
+using Core;
+using Relations;
+namespace InsertChecks;
+
+@extensible datatype Absyn::AbsynAnnot {
+  NoCheck;
+  NullOnly;
+  NullAndFatBound;
+  FatBound;
+  NullAndThinBound(exp_t); // exp must be a C constant expression
+  ThinBound(exp_t);        // exp must be a C constant expression
+};
+datacon(Absyn::AbsynAnnot,NoCheck);
+datacon(Absyn::AbsynAnnot,NullOnly);
+datacon(Absyn::AbsynAnnot,NullAndFatBound);
+datacon(Absyn::AbsynAnnot,FatBound);
+typedef absyn_annot_t annot_t;
+
+bool     warn_bounds_checks       = false; // command-line flag
+bool     warn_all_null_deref      = false; // command-line flag
+unsigned total_bounds_checks      = 0;     // just statistics
+unsigned bounds_checks_eliminated = 0;     // just statistics
+
+static exp_t shared_zero_exp() {
+  static exp_opt_t ans = NULL;
+  if(!ans) 
+    ans = uint_exp(0,0);
+  return ans;
+}
+
+static struct Env {
+  bool in_sizeof   : 1;
+  bool at_toplevel : 1;
+};
+typedef struct Env env_t; // not a pointer
+static env_t toplevel_env() { return Env(false,true); }
+static env_t fn_body_env()  { return Env(false,false); }
+static env_t enter_sizeof(env_t nv) { return Env(true,nv.at_toplevel); }
+
+// for warning and statistics purposes, call need_*_check, only if true
+// result _will_ cause an inserted check
+static bool need_null_check(env_t nv, exp_t e) {
+  if(nv.in_sizeof)
+    return false;
+  // check the type, though if the analysis is good, this should be redundant
+  switch (compress((type_t)e->topt)) {
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,n,...))):
+    if(!force_type2bool(false,n))
+      return false;
+    break;
+  default: impos_loc(e->loc,"need_null_check: non-pointer type");
+  }
+  switch(e->annot) {
+  case &CfFlowInfo::UnknownZ(_): break;
+  case &CfFlowInfo::NotZero(_):  return false;
+  case &CfFlowInfo::IsZero:
+      err(e->loc,"NULL pointer check will definitely fail");
+      return false;
+      // DJG: this next case used to be true, but false seems fine to me
+  case &EmptyAnnot: return false; // unreachable (e.g., under sizeof)
+  default: impos_loc(e->loc,"need_null_check: unexpected annotation");
+  }
+  if(nv.at_toplevel) {
+    err(e->loc,"cannot perform NULL-pointer check at toplevel");
+    return false;
+  }
+  if(warn_all_null_deref)
+    warn(e->loc,"inserted null check");
+  return true;
+}
+
+static relns_t get_relns(exp_t e) {
+  switch (e->annot) {
+  case &CfFlowInfo::UnknownZ(r): return r;
+  case &CfFlowInfo::NotZero(r):  return r;
+  case &CfFlowInfo::IsZero: return NULL; // need_null_check will report error
+  case &EmptyAnnot: return NULL;
+  default: impos_loc(e->loc,"get_relns: unexpected annotation");
+  }
+}
+
+// return false if we can prove from relns that i < numelts(a)
+//  FIX: doesn't deal with the case where i is a constant and a's size
+//  can be found.
+static bool need_bounds_check(env_t nv, relns_t<`H> relns, exp_t a, exp_t i) {
+  if(nv.in_sizeof)
+    return false;
+  if(nv.at_toplevel) // may change if allow fat-to-thin at toplevel
+    impos_loc(a->loc,"InsertChecks: memory read at top-level");
+  ++total_bounds_checks;
+#ifdef BCE_DEBUG
+  fprintf(stderr,"bounds check on %s:%s and %s\n",exp2string(a),
+          typ2string((type_t)a->topt),exp2string(i));
+  fprintf(stderr,"relns: ["); print_relns(stderr,relns);
+  fprintf(stderr,"]\n");
+#endif
+  bool bd_valid = false; reln_op_t rop_bd = RConst(0);
+  bool a_valid  = false; reln_op_t rop_a  = RConst(0);
+  bool i_valid  = false; reln_op_t rop_i  = RConst(0);
+  bool z_valid  = false; reln_op_t rop_z  = RConst(0);
+
+  // if a's type is T*{e}, T@{e}, or T[e] then e may be a good rop_bd
+  exp_opt_t bound = Tcutil::get_type_bound((type_t)a->topt);
+  if (bound != NULL)
+    bd_valid = exp2relnop(bound,&rop_bd);
+  // if a is an unescaped variable, its size is a good rop_a
+  switch (a->r) {
+  case &Var_e(b):
+    let x = Tcutil::nonesc_vardecl(b);
+    if (x != NULL) {
+      a_valid = true;
+      rop_a = RNumelts(x);
+    }
+    break;
+  default: break;
+  }
+  // i may be good
+  i_valid = exp2relnop(i,&rop_i);
+  // if i is not good, maybe z is
+  if(!i_valid) {
+  inner_loop:
+    switch(i->r) {
+    case &Cast_e(t,e2,_,_): i = e2; goto inner_loop;
+    case &Primop_e(Mod,&List::List(e1,&List::List(e2,_))): // we have x[e1 % e2]
+      z_valid = exp2relnop(e2,&rop_z); break; //if e2 <= numelts(x) then it's ok
+    default: break;
+    }
+  }
+
+  // add the relations we can and check for inconsistency
+  reln_op_t rop_left;
+  if(!bd_valid && !a_valid)
+    return true;
+  if(bd_valid && a_valid) {
+    relns = add_relation(heap_region,rop_bd,Rlte,rop_a,relns);
+    rop_left = rop_a;
+  } else if(a_valid)
+    rop_left = rop_a;
+  else
+    rop_left = rop_bd;
+  
+  if     (i_valid) relns = add_relation(heap_region,rop_left,Rlte,rop_i,relns);
+  else if(z_valid) relns = add_relation(heap_region,rop_left,Rlt, rop_z,relns);
+  else             return true;
+#ifdef BCE_DEBUG
+  fprintf(stderr,"checking consistency of: "); 
+  print_relns(stderr,relns);
+  fprintf(stderr,"\n");
+#endif
+  bool ans = consistent_relations(relns); 
+  if(!ans)
+    ++bounds_checks_eliminated;
+  if(warn_bounds_checks && ans)
+    warn(a->loc,"inserted bounds check (location is pointer expression)");
+  return ans;
+}
+
+static void do_stmt(env_t,stmt_t);
+static void do_exp(env_t,exp_t);
+
+static void do_exp_opt(env_t nv, exp_opt_t eo) {
+  if(eo != NULL)
+    do_exp(nv,eo);
+}
+
+static void do_exp(env_t nv, exp_t e) {
+  switch(e->r) {
+  case &Const_e(...):
+  case &Var_e(...):
+  case &Pragma_e(...): e->annot = &NoCheck_val; break;
+
+  case &Datatype_e(es,...): fallthru(es);
+  case &Tuple_e(es): fallthru(es);
+  case &Primop_e(_,es): // even Numelts and pointer-arith having nothing here
+    e->annot = &NoCheck_val;
+    for(; es!=NULL; es=es->tl)
+      do_exp(nv,es->hd);
+    break;
+
+    // actually nothing to do here, though Toc::zeroterm_assign_to_c must
+    // add the right annotation for the (different) assignment it generates
+  case &AssignOp_e(e1,_,e2): fallthru(e1,e2);  
+  case &SeqExp_e(e1,e2):     fallthru(e1,e2);
+  case &And_e(e1,e2):        fallthru(e1,e2);
+  case &Or_e(e1,e2):
+    e->annot = &NoCheck_val;
+    do_exp(nv,e1);
+    do_exp(nv,e2);
+    break;
+  case &Conditional_e(e1,e2,e3):
+    e->annot = &NoCheck_val;
+    do_exp(nv,e1);
+    do_exp(nv,e2);
+    do_exp(nv,e3);
+    break;
+
+  case &Increment_e(e2,incr): 
+    // do we need a null check?
+    // * thin-pointer: no, this never would have type-checked
+    // * fat-pointer: no, out-of-bounds is okay (affects curr, not base)
+    // * zeroterm-pointer: yes! (and toc.cyc also always checks for *e2 != 0)
+    if(is_zeroterm_pointer_type((type_t)e2->topt) && need_null_check(nv,e2))
+      e->annot = &NullOnly_val;
+    else
+      e->annot = &NoCheck_val;
+    do_exp(nv,e2);
+    break;
+
+  case &FnCall_e(e1,es,_,_): // e1 must not be NULL 
+    if(need_null_check(nv,e1)) // DJG: I think e1 is always a pointer type
+      e->annot = &NullOnly_val;
+    else
+      e->annot = &NoCheck_val;
+    do_exp(nv,e1);
+    for(; es!=NULL; es=es->tl)
+      do_exp(nv,es->hd);
+    break;
+
+  case &Cast_e(t,e1,user_inserted,coercion): //FIX? move zerterm nonsense here?
+    // casts to integral types never need checks;
+    // casts from non-pointers to pointers are rejected by type-checker
+    switch ($(compress((type_t)e1->topt),compress(t))) {
+    case $(&PointerType(p1),&PointerType(p2)):
+      let n1 = force_type2bool(false,p1.ptr_atts.nullable);
+      let n2 = force_type2bool(false,p2.ptr_atts.nullable);
+      let b1 = get_bounds_exp(bounds_one(),p1.ptr_atts.bounds);
+      let b2 = get_bounds_exp(bounds_one(),p2.ptr_atts.bounds);
+      if(n1 && !n2 && coercion != Null_to_NonNull)
+	impos_loc(e->loc,"null-check conversion mis-classified");
+      else if (b1 && !b2 && coercion == Null_to_NonNull)
+	impos_loc(e->loc,"conversion mis-classified as null-check");
+      switch($(b1,b2)) {
+      case $(&_, &_): // neither fat -- bound check is static (in type-checker)
+        if (!Evexp::lte_const_exp((exp_t)b2,(exp_t)b1))
+          impos_loc(e->loc,"InsertChecks: cast to maybe-shorter pointer type");
+	if(n1 && !n2 && need_null_check(nv,e1)) {
+	  if(!user_inserted)
+	    warn(e->loc,"inserted null check due to implicit "
+		 "cast from * to @ type");
+	  e->annot = &NullOnly_val;
+	} else
+	  e->annot = &NoCheck_val;
+	break;
+      case $(&_,NULL): // cast to fat -- must know size; null is fine
+	// FIX: shouldn't the type-checker catch this? Does it?
+	if(!Evexp::c_can_eval((exp_t)b1))
+	  err(e->loc,"cannot perform coercion: numelts is statically unknown");
+	e->annot = &NoCheck_val;
+	break;
+      case $(NULL,&_): // cast to thin -- may need checks
+	if(nv.at_toplevel)
+	  err(e->loc,"cannot coerce fat-pointer to thin-pointer at toplevel");
+	// FIX: shouldn't the type-checker catch this? Does it?
+	if(!Evexp::c_can_eval((exp_t)b2))
+	  err(e->loc,"cannot perform coercion: numelts is statically unknown");
+	// FIX: currently _untag_arr _always_ does a bounds check!
+	//      right thing: do a bounds check on e2-1 (notice -1)
+	++total_bounds_checks; // see comment on previous 2 lines
+	bool bds_chk = false;
+	if(!n2 && need_null_check(nv,e1)) {
+	  if(!user_inserted)
+	    warn(e->loc,"inserted null check due to implicit "
+		 "cast from *@fat (?) to @ type");
+	  e->annot = bds_chk ? (annot_t)&NullAndFatBound_val : &NullOnly_val;
+	} else
+	  e->annot = bds_chk ? (annot_t)&FatBound_val : &NoCheck_val;
+	break;
+      case $(NULL,NULL): e->annot = &NoCheck_val; break;
+      }
+      break;
+    default: e->annot = &NoCheck_val; break;
+    }
+    do_exp(nv,e1);
+    break;
+
+  case &AggrArrow_e(e1,...): fallthru(e1); // later do tagged-union stuff?
+  case &Deref_e(e1): fallthru(e1,shared_zero_exp());
+  case &Subscript_e(e1,e2): 
+    switch(compress((type_t)e1->topt)) {
+    case &TupleType(_): e->annot = &NoCheck_val; break; // type-checker checks
+    case &PointerType(PtrInfo(ta,tq,PtrAtts(rgn,n,b,zt,_))):
+      bool null_ck = need_null_check(nv,e1);
+      bool bds_ck  = need_bounds_check(nv,get_relns(e1),e1,e2);
+      exp_opt_t bd = get_bounds_exp(bounds_one(),b);
+      if(bds_ck) {
+	if(bd) { // thin pointer
+	  if(!Evexp::c_can_eval(bd))
+	    err(e->loc,"cannot determine subscript is in bounds");
+	  e->annot =
+	    null_ck ? (annot_t)(new NullAndThinBound(bd)) : new ThinBound(bd);
+	} else // fat pointer
+	  e->annot = null_ck ? (annot_t)&NullAndFatBound_val : &FatBound_val;
+      } else if(null_ck)
+	e->annot = &NullOnly_val;
+      else
+	e->annot = &NoCheck_val;
+      break;
+    default: impos_loc(e->loc,"InsertChecks: non-pointer-type on dereference");
+    }
+    do_exp(nv,e1);
+    do_exp(nv,e2);
+    break;
+
+  case &Sizeofexp_e(e1): // no checks -- e1 is not evaluated
+    e->annot = &NoCheck_val;
+    do_exp(enter_sizeof(nv),e1);
+    break;
+
+  case &New_e(rgnopt,e1):
+    e->annot = &NoCheck_val;
+    do_exp_opt(nv,rgnopt);
+    do_exp(nv,e1);
+    break;
+  case &Malloc_e(MallocInfo(_,rgnopt,_,sizeexp,_,_)):
+    // FIX: we shouldn't be able to calloc a zero-terminated array of
+    // size less than 1.
+    e->annot = &NoCheck_val;
+    do_exp_opt(nv,rgnopt);
+    do_exp(nv,sizeexp);
+    break;
+
+  case &Extension_e(e1):     fallthru(e1);
+  case &Throw_e(e1,_):       fallthru(e1);
+  case &NoInstantiate_e(e1): fallthru(e1);
+  case &Instantiate_e(e1,_): fallthru(e1);
+  case &Address_e(e1):
+    e->annot = &NoCheck_val;
+    do_exp(nv,e1);
+    break;
+  case &Enum_e(...):
+  case &AnonEnum_e(...):
+  case &Sizeoftype_e(_):
+  case &Offsetof_e(...): e->annot = &NoCheck_val; break;
+  case &AggrMember_e(e1,...): fallthru(e1); // later do tagged-union stuff?
+  case &Tagcheck_e(e1,...):   fallthru(e1); // later do tagged-union stuff?
+  case &ComprehensionNoinit_e(e1,...): 
+    e->annot = &NoCheck_val;
+    do_exp(nv,e1);
+    break;
+  case &Comprehension_e(_,e1,e2,_): fallthru(e1,e2);
+  case &Swap_e(e1,e2): // both lvalues (no dereference)
+    e->annot = &NoCheck_val;
+    do_exp(nv,e1);
+    do_exp(nv,e2);
+    break;
+  case &Array_e(dles): fallthru(dles);
+  case &Aggregate_e(_,_,dles,_): fallthru(dles);
+  case &AnonStruct_e(_,dles):
+    e->annot = &NoCheck_val;
+    for(; dles!=NULL; dles=dles->tl)
+      do_exp(nv,(*dles->hd)[1]);
+    break;
+  case &StmtExp_e(s):  e->annot = &NoCheck_val; do_stmt(nv,s); break;
+
+  case &UnresolvedMem_e(_,_):
+  case &CompoundLit_e(_,_):
+  case &Valueof_e(_):
+  case &Asm_e(...): impos_loc(e->loc,"InsertChecks, unexpected exp form");
+  }
+}
+
+static void do_decl(env_t nv, decl_t d) {
+  switch(d->r) {
+  case &Var_d(vd): do_exp_opt(nv,vd->initializer); break;
+  case &Fn_d(fd): do_stmt(fn_body_env(),fd->body); break;//forgets if in sizeof
+  case &Let_d(_,_,e,_): do_exp(nv,e); break;    
+  case &Letv_d(_): break;
+  case &Region_d(_,_,eo): do_exp_opt(nv,eo); break; //key for open can't be NULL
+  case &Aggr_d(...):
+  case &Datatype_d(...):
+  case &Enum_d(...):
+  case &Typedef_d(...): 
+  case &Porton_d:
+  case &Portoff_d:
+  case &ExternCinclude_d(_,_): break;
+  case &ExternC_d(ds): fallthru(ds);
+  case &Using_d(_,ds): fallthru(ds);
+  case &Namespace_d(_,ds):
+    for(; ds != NULL; ds = ds->tl)
+      do_decl(nv,ds->hd);
+  }
+}
+
+static void do_scs(env_t nv, List::list_t<switch_clause_t> scs) {
+  // FIX? This is so simple because pattern-compilation uses separate machinery
+  //      for inserting checks; it does not use the flow analysis
+  for(; scs != NULL; scs = scs->tl) {
+    if(scs->hd->where_clause != NULL)
+      do_exp(nv,(exp_t)scs->hd->where_clause);
+    do_stmt(nv,scs->hd->body);
+  }
+}
+
+static void do_stmt(env_t nv, stmt_t s) {
+  switch(s->r) {
+  case &Skip_s: break;
+  case &Exp_s(e): do_exp(nv,e); break;
+  case &Seq_s(s1,s2): do_stmt(nv,s1); do_stmt(nv,s2); break;
+  case &Return_s(eopt): if(eopt) do_exp(nv,eopt); break;
+  case &IfThenElse_s(e,s1,s2):
+    do_exp(nv,e); do_stmt(nv,s1); do_stmt(nv,s2); break;
+  case &Do_s(s1,$(e,_)): fallthru(e,s1);
+  case &While_s($(e,_),s1): do_exp(nv,e); do_stmt(nv,s1); break;
+  case &For_s(e1,$(e2,_),$(e3,_),s1):
+    do_exp(nv,e1); do_exp(nv,e2); do_exp(nv,e3); do_stmt(nv,s1); break;
+  case &Break_s:
+  case &Continue_s:
+  case &Goto_s(_): return;
+  case &Fallthru_s(es,_): 
+    for(;es!=NULL;es=es->tl) 
+      do_exp(nv,es->hd); 
+    break;
+  case &Label_s(_,s1): do_stmt(nv,s1); break;
+  case &Decl_s(d,s1): do_decl(nv,d); do_stmt(nv,s1); break;
+  case &Switch_s(e,scs,_):    do_exp(nv,e);   do_scs(nv,scs); break;
+  case &TryCatch_s(s1,scs,_): do_stmt(nv,s1); do_scs(nv,scs); break;
+  }
+}
+
+void insert_checks(List::list_t<decl_t,`H> tds) {
+  let nv = toplevel_env();
+  for(; tds != NULL; tds = tds->tl)
+    do_decl(nv,tds->hd);
+}
