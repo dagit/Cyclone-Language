@@ -15,7 +15,7 @@ FILE *	freopen(Cstring, Cstring, FILE @);
 void	setbuf(FILE @, Cstring);
 int	setvbuf(FILE @, Cstring, int, size_t);
 int	fgetc(FILE @);
-char    *fgets(Cstring, int, FILE @);
+Cstring fgets(Cstring, int, FILE @);
 int	fputc(int, FILE @);
 int	fputs(Cstring, FILE @);
 int	getc(FILE @);
@@ -68,10 +68,16 @@ FILE *freopen(string x, string y, FILE @f) {
 
 int fgetc(FILE @f) { return Cstdio::fgetc(f); }
 
-bool fgets(string s, FILE @f) {
+string fgets(string s, int n, FILE @f) {
+  Cstring result;
   Cstring buffer = underlying_Cstring(s); 
   unsigned int len = s.size;
-  return (Cstdio::fgets(buffer, len, f) == null);
+  n = (len < n) ? len : n;
+  result = Cstdio::fgets(buffer, n, f);
+  if (result == null) 
+    return null;
+  else 
+    return s;
 }
 
 int fputc(int i, FILE @f) { return Cstdio::fputc(i, f); }

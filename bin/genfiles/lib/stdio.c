@@ -37,45 +37,45 @@ extern struct Cyc_Stdio___sFILE* Cyc_Stdio_tmpfile(); extern int Cyc_Stdio_fclos
 struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fflush( struct Cyc_Stdio___sFILE*);
 extern struct Cyc_Stdio___sFILE* Cyc_Stdio_freopen( struct _tagged_string,
 struct _tagged_string, struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fgetc(
-struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fgets( struct _tagged_string,
-struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fputc( int, struct Cyc_Stdio___sFILE*);
-extern int Cyc_Stdio_fputs( struct _tagged_string, struct Cyc_Stdio___sFILE*);
-extern int Cyc_Stdio_getc( struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_putc(
-int, struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_puts( struct
-_tagged_string); extern int Cyc_Stdio_ungetc( int, struct Cyc_Stdio___sFILE*);
-extern int Cyc_Stdio_fgetpos( struct Cyc_Stdio___sFILE*, int*); extern int Cyc_Stdio_fseek(
-struct Cyc_Stdio___sFILE*, int, int); extern int Cyc_Stdio_fsetpos( struct Cyc_Stdio___sFILE*,
-int*); extern int Cyc_Stdio_ftell( struct Cyc_Stdio___sFILE*); extern void Cyc_Stdio_rewind(
-struct Cyc_Stdio___sFILE*); extern void Cyc_Stdio_clearerr( struct Cyc_Stdio___sFILE*);
-extern int Cyc_Stdio_feof( struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_ferror(
-struct Cyc_Stdio___sFILE*); extern void Cyc_Stdio_perror( struct _tagged_string);
-extern struct Cyc_Stdio___sFILE* Cyc_Stdio_fopen( struct _tagged_string _name,
-struct _tagged_string _type); extern struct Cyc_Stdio___sFILE* Cyc_Stdio_fdopen(
-int, struct _tagged_string); extern int Cyc_Stdio_fileno( struct Cyc_Stdio___sFILE*);
-extern int Cyc_Stdio_getw( struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_pclose(
-struct Cyc_Stdio___sFILE*); extern struct Cyc_Stdio___sFILE* Cyc_Stdio_popen(
-struct _tagged_string, struct _tagged_string); extern int Cyc_Stdio_putw( int,
-struct Cyc_Stdio___sFILE*); extern char Cyc_Stdio_FileOpenError_tag[ 14u];
-struct Cyc_Stdio_FileOpenError_struct{ char* tag; struct _tagged_string f1; } ;
-extern char Cyc_Stdio_FileCloseError_tag[ 15u]; struct Cyc_Stdio_FileCloseError_struct{
-char* tag; } ; extern struct Cyc_Stdio___sFILE* Cyc_Stdio_file_open( struct
-_tagged_string fname, struct _tagged_string mode); extern void Cyc_Stdio_file_close(
-struct Cyc_Stdio___sFILE*); extern int remove( char*); extern int rename( char*,
-char*); extern struct Cyc_Stdio___sFILE* tmpfile(); extern char* tmpnam( char*);
-extern int fclose( struct Cyc_Stdio___sFILE*); extern int fflush( struct Cyc_Stdio___sFILE*);
-extern struct Cyc_Stdio___sFILE* freopen( char*, char*, struct Cyc_Stdio___sFILE*);
-extern void setbuf( struct Cyc_Stdio___sFILE*, char*); extern int setvbuf(
-struct Cyc_Stdio___sFILE*, char*, int, unsigned int); extern int fgetc( struct
-Cyc_Stdio___sFILE*); extern char* fgets( char*, int, struct Cyc_Stdio___sFILE*);
-extern int fputc( int, struct Cyc_Stdio___sFILE*); extern int fputs( char*,
-struct Cyc_Stdio___sFILE*); extern int getc( struct Cyc_Stdio___sFILE*); extern
-char* gets( char*); extern int putc( int, struct Cyc_Stdio___sFILE*); extern int
-puts( char*); extern int ungetc( int, struct Cyc_Stdio___sFILE*); extern
-unsigned int fread( char*, unsigned int _size, unsigned int _n, struct Cyc_Stdio___sFILE*);
-extern unsigned int fwrite( char*, unsigned int _size, unsigned int _n, struct
-Cyc_Stdio___sFILE*); extern int fgetpos( struct Cyc_Stdio___sFILE*, int*);
-extern int fseek( struct Cyc_Stdio___sFILE*, int, int); extern int fsetpos(
-struct Cyc_Stdio___sFILE*, int*); extern int ftell( struct Cyc_Stdio___sFILE*);
+struct Cyc_Stdio___sFILE*); extern struct _tagged_string Cyc_Stdio_fgets( struct
+_tagged_string, int n, struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fputc(
+int, struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fputs( struct
+_tagged_string, struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_getc( struct
+Cyc_Stdio___sFILE*); extern int Cyc_Stdio_putc( int, struct Cyc_Stdio___sFILE*);
+extern int Cyc_Stdio_puts( struct _tagged_string); extern int Cyc_Stdio_ungetc(
+int, struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fgetpos( struct Cyc_Stdio___sFILE*,
+int*); extern int Cyc_Stdio_fseek( struct Cyc_Stdio___sFILE*, int, int); extern
+int Cyc_Stdio_fsetpos( struct Cyc_Stdio___sFILE*, int*); extern int Cyc_Stdio_ftell(
+struct Cyc_Stdio___sFILE*); extern void Cyc_Stdio_rewind( struct Cyc_Stdio___sFILE*);
+extern void Cyc_Stdio_clearerr( struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_feof(
+struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_ferror( struct Cyc_Stdio___sFILE*);
+extern void Cyc_Stdio_perror( struct _tagged_string); extern struct Cyc_Stdio___sFILE*
+Cyc_Stdio_fopen( struct _tagged_string _name, struct _tagged_string _type);
+extern struct Cyc_Stdio___sFILE* Cyc_Stdio_fdopen( int, struct _tagged_string);
+extern int Cyc_Stdio_fileno( struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_getw(
+struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_pclose( struct Cyc_Stdio___sFILE*);
+extern struct Cyc_Stdio___sFILE* Cyc_Stdio_popen( struct _tagged_string, struct
+_tagged_string); extern int Cyc_Stdio_putw( int, struct Cyc_Stdio___sFILE*);
+extern char Cyc_Stdio_FileOpenError_tag[ 14u]; struct Cyc_Stdio_FileOpenError_struct{
+char* tag; struct _tagged_string f1; } ; extern char Cyc_Stdio_FileCloseError_tag[
+15u]; struct Cyc_Stdio_FileCloseError_struct{ char* tag; } ; extern struct Cyc_Stdio___sFILE*
+Cyc_Stdio_file_open( struct _tagged_string fname, struct _tagged_string mode);
+extern void Cyc_Stdio_file_close( struct Cyc_Stdio___sFILE*); extern int remove(
+char*); extern int rename( char*, char*); extern struct Cyc_Stdio___sFILE*
+tmpfile(); extern char* tmpnam( char*); extern int fclose( struct Cyc_Stdio___sFILE*);
+extern int fflush( struct Cyc_Stdio___sFILE*); extern struct Cyc_Stdio___sFILE*
+freopen( char*, char*, struct Cyc_Stdio___sFILE*); extern void setbuf( struct
+Cyc_Stdio___sFILE*, char*); extern int setvbuf( struct Cyc_Stdio___sFILE*, char*,
+int, unsigned int); extern int fgetc( struct Cyc_Stdio___sFILE*); extern char*
+fgets( char*, int, struct Cyc_Stdio___sFILE*); extern int fputc( int, struct Cyc_Stdio___sFILE*);
+extern int fputs( char*, struct Cyc_Stdio___sFILE*); extern int getc( struct Cyc_Stdio___sFILE*);
+extern char* gets( char*); extern int putc( int, struct Cyc_Stdio___sFILE*);
+extern int puts( char*); extern int ungetc( int, struct Cyc_Stdio___sFILE*);
+extern unsigned int fread( char*, unsigned int _size, unsigned int _n, struct
+Cyc_Stdio___sFILE*); extern unsigned int fwrite( char*, unsigned int _size,
+unsigned int _n, struct Cyc_Stdio___sFILE*); extern int fgetpos( struct Cyc_Stdio___sFILE*,
+int*); extern int fseek( struct Cyc_Stdio___sFILE*, int, int); extern int
+fsetpos( struct Cyc_Stdio___sFILE*, int*); extern int ftell( struct Cyc_Stdio___sFILE*);
 extern void rewind( struct Cyc_Stdio___sFILE*); extern void clearerr( struct Cyc_Stdio___sFILE*);
 extern int feof( struct Cyc_Stdio___sFILE*); extern int ferror( struct Cyc_Stdio___sFILE*);
 extern void perror( char*); extern struct Cyc_Stdio___sFILE* fopen( char* _name,
@@ -93,10 +93,12 @@ f){ return fclose( f);} int Cyc_Stdio_fflush( struct Cyc_Stdio___sFILE* f){
 return fflush( f);} struct Cyc_Stdio___sFILE* Cyc_Stdio_freopen( struct
 _tagged_string x, struct _tagged_string y, struct Cyc_Stdio___sFILE* f){ return
 freopen( string_to_Cstring( x), string_to_Cstring( y), f);} int Cyc_Stdio_fgetc(
-struct Cyc_Stdio___sFILE* f){ return fgetc( f);} int Cyc_Stdio_fgets( struct
-_tagged_string s, struct Cyc_Stdio___sFILE* f){ char* buffer= underlying_Cstring(
-s); unsigned int len=({ struct _tagged_string _temp0= s;( unsigned int)( _temp0.last_plus_one
-- _temp0.curr);}); return fgets( buffer,( int) len, f) == 0;} int Cyc_Stdio_fputc(
+struct Cyc_Stdio___sFILE* f){ return fgetc( f);} struct _tagged_string Cyc_Stdio_fgets(
+struct _tagged_string s, int n, struct Cyc_Stdio___sFILE* f){ char* result; char*
+buffer= underlying_Cstring( s); unsigned int len=({ struct _tagged_string _temp1=
+s;( unsigned int)( _temp1.last_plus_one - _temp1.curr);}); n=( int)( len < n?
+len:( unsigned int) n); result= fgets( buffer, n, f); if( result == 0){ return({
+struct _tagged_string _temp0={ 0, 0, 0}; _temp0;});} else{ return s;}} int Cyc_Stdio_fputc(
 int i, struct Cyc_Stdio___sFILE* f){ return fputc( i, f);} int Cyc_Stdio_fputs(
 struct _tagged_string s, struct Cyc_Stdio___sFILE* f){ return fputs(
 string_to_Cstring( s), f);} int Cyc_Stdio_getc( struct Cyc_Stdio___sFILE* f){
@@ -125,13 +127,13 @@ char Cyc_Stdio_FileOpenError_tag[ 14u]="FileOpenError"; char Cyc_Stdio_FileClose
 15u]="FileCloseError"; struct Cyc_Stdio___sFILE* Cyc_Stdio_file_open( struct
 _tagged_string fname, struct _tagged_string mode){ struct Cyc_Stdio___sFILE* f=
 Cyc_Stdio_fopen( fname, mode); if( f == 0){( void) _throw(( struct
-_xtunion_struct*)({ struct Cyc_Stdio_FileOpenError_struct* _temp1=( struct Cyc_Stdio_FileOpenError_struct*)
-GC_malloc( sizeof( struct Cyc_Stdio_FileOpenError_struct)); _temp1[ 0]=({ struct
-Cyc_Stdio_FileOpenError_struct _temp2; _temp2.tag= Cyc_Stdio_FileOpenError_tag;
-_temp2.f1= fname; _temp2;}); _temp1;}));} return( struct Cyc_Stdio___sFILE*)({
-struct Cyc_Stdio___sFILE* _temp3= f; if( _temp3 == 0){ _throw( Null_Exception);}
-_temp3;});} void Cyc_Stdio_file_close( struct Cyc_Stdio___sFILE* f){ if( Cyc_Stdio_fclose(
+_xtunion_struct*)({ struct Cyc_Stdio_FileOpenError_struct* _temp2=( struct Cyc_Stdio_FileOpenError_struct*)
+GC_malloc( sizeof( struct Cyc_Stdio_FileOpenError_struct)); _temp2[ 0]=({ struct
+Cyc_Stdio_FileOpenError_struct _temp3; _temp3.tag= Cyc_Stdio_FileOpenError_tag;
+_temp3.f1= fname; _temp3;}); _temp2;}));} return( struct Cyc_Stdio___sFILE*)({
+struct Cyc_Stdio___sFILE* _temp4= f; if( _temp4 == 0){ _throw( Null_Exception);}
+_temp4;});} void Cyc_Stdio_file_close( struct Cyc_Stdio___sFILE* f){ if( Cyc_Stdio_fclose(
 f) != 0){( void) _throw(( struct _xtunion_struct*)({ struct Cyc_Stdio_FileCloseError_struct*
-_temp4=( struct Cyc_Stdio_FileCloseError_struct*) GC_malloc( sizeof( struct Cyc_Stdio_FileCloseError_struct));
-_temp4[ 0]=({ struct Cyc_Stdio_FileCloseError_struct _temp5; _temp5.tag= Cyc_Stdio_FileCloseError_tag;
-_temp5;}); _temp4;}));}}
+_temp5=( struct Cyc_Stdio_FileCloseError_struct*) GC_malloc( sizeof( struct Cyc_Stdio_FileCloseError_struct));
+_temp5[ 0]=({ struct Cyc_Stdio_FileCloseError_struct _temp6; _temp6.tag= Cyc_Stdio_FileCloseError_tag;
+_temp6;}); _temp5;}));}}

@@ -84,7 +84,7 @@ extern FILE *	freopen(string, string, FILE @);
 //extern void	setbuf(FILE *, string);
 //extern int	setvbuf(FILE *, string, int, size_t);
 extern int	fgetc(FILE @);
-extern bool     fgets(string, FILE @);
+extern string   fgets(string, int n, FILE @);
 extern int	fputc(int, FILE @);
 extern int	fputs(string, FILE @);
 extern int	getc(FILE @);
