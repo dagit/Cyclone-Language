@@ -1112,6 +1112,8 @@ typedef void*Cyc_Tcenv_jumpee_t;struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;st
 typedef struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tenv_t;
 # 114 "tcenv.h"
 struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tc_init(struct _RegionHandle*);
+# 130
+enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_InNewAggr  = 2};
 # 34 "tc.h"
 void Cyc_Tc_tc(struct _RegionHandle*,struct Cyc_Tcenv_Tenv*te,int var_default_init,struct Cyc_List_List*ds);
 # 81 "buildlib.cyl"

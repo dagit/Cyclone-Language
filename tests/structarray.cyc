@@ -56,19 +56,32 @@ ptr_t<int@> pvector3() {
   return new Ptr{.size = 2, .elts = {new 0, new 1}};
 }
 
+// create an integer array of size N
+ptr_t<int> vectorn(tag_t n, int x) {
+  return new Ptr{.size = n, .elts = {for i < n : x}};
+}
+
 int main() {
   let p1 = vector4();
   let p2 = vector5();
   let p3 = pvector3();
+  let p4 = vectorn(6,3);
 
   assert(num_elts(p1) == 4);
   assert(num_elts(p2) == 5);
   assert(num_elts(p3) == 2);
+  assert(num_elts(p4) == 6);
 
   for (int i = 0; i < 4; i++) {
     assert(get(p1,i) == i);
     set(p1,i,3-i);
     assert(get(p1,i) == 3-i);
+  }
+
+  for (int i = 0; i < 6; i++) {
+    assert(get(p4,i) == 3);
+    set(p4,i,3-i);
+    assert(get(p4,i) == 3-i);
   }
 
   try {

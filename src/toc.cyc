@@ -832,6 +832,9 @@ static type_t typ_to_c(type_t t) {
     default: break;
     }
     let ad = get_known_aggrdecl(info);
+    // XXX I think this is where new instantiation types are
+    // generated; want to adapt this for unions here.
+    // Have to watch out for flaky gcc ...
     if(ad->kind==UnionA)
       return aggrdecl_type(ad->name,unionq_typ);
     let fs = (ad->impl == NULL) ? NULL : ad->impl->fields;
@@ -1463,12 +1466,13 @@ static $(list_t<designator_t>,exp_t)@ add_designator(env_t nv, exp_t e) {
 }
 
 static exp_t make_struct(env_t nv, qvar_t x, type_t struct_typ, stmt_t s,
-                         bool pointer, exp_opt_t rgnopt, bool is_atomic) {
+                         exp_opt_t mallocsize, exp_opt_t rgnopt,
+			 bool is_atomic) {
   exp_opt_t eo;
   type_t    t;
-  if (pointer) {
+  if (mallocsize) {
     t  = cstar_typ(struct_typ, mt_tq);
-    let se = sizeofexp_exp(deref_exp(var_exp(x,DL),DL),DL);
+    let se = (exp_t)mallocsize;
     if (rgnopt == NULL || no_regions)
       eo = is_atomic ? malloc_atomic(se) : malloc_ptr(se);
     else {
@@ -1482,6 +1486,53 @@ static exp_t make_struct(env_t nv, qvar_t x, type_t struct_typ, stmt_t s,
   }
   return stmt_exp(declare_stmt(x,t,eo,s,DL),DL);
 }
+
+static exp_t make_fixed_struct(env_t nv, qvar_t x, type_t struct_typ, stmt_t s,
+			       bool pointer, exp_opt_t rgnopt,
+			       bool is_atomic) {
+  if (pointer) {
+    let se = sizeofexp_exp(deref_exp(var_exp(x,DL),DL),DL);
+    return make_struct(nv,x,struct_typ,s,se,rgnopt,is_atomic);
+  }
+  else return make_struct(nv,x,struct_typ,s,NULL,rgnopt,is_atomic);
+}
+
+static type_opt_t aggr_lookup_field(type_t struct_typ,
+				    field_name_t index) {
+  switch (compress(struct_typ)) {
+  case &AggrType(AggrInfo(info,ts)):
+    // FIX: may not know the aggregate's implementation by now ... ?
+    aggrdecl_t ad = get_known_aggrdecl(info);
+    list_t<aggrfield_t> aggrfields = ad->impl->fields;
+    if (ts != NULL)
+      impos("oops; get_offset_... called without subsituting types first");
+    fallthru(aggrfields);
+  case &AnonAggrType(_,aggrfields):
+    let field = lookup_field(aggrfields,index);
+    if (field == NULL) return NULL;
+    switch (compress(field->type)) {
+    case &ArrayType(ArrayInfo(t,...)): return t;
+    default: return NULL;
+    }
+  default:
+    return NULL;
+  }
+}
+
+// // assumes we are region-allocating, not stack allocating
+static exp_t make_variable_struct(env_t nv, qvar_t x,
+				  type_t struct_typ, stmt_t s,
+				  exp_opt_t rgnopt, bool is_atomic,
+				  field_name_t index,
+				  exp_t num) {
+  let se = offsetof_exp(struct_typ,new StructField(index),DL);
+  let elt_typ = aggr_lookup_field(struct_typ,index);
+  if (elt_typ == NULL)
+    impos("make_variable_struct: couldn't find field type for offsetof");
+  else
+    se = add_exp(se,times_exp(num,sizeoftyp_exp(elt_typ,DL),DL),DL);
+  return make_struct(nv,x,struct_typ,s,se,rgnopt,is_atomic);
+}  
 
 static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
                                  exp_t e1, exp_t e2, bool zero_term, stmt_t s,
@@ -1662,7 +1713,7 @@ static exp_t init_tuple(env_t nv, bool pointer,
         break;
       }
     }
-    return make_struct(nv,x,n,s,pointer,rgnopt,is_atomic);
+    return make_fixed_struct(nv,x,n,s,pointer,rgnopt,is_atomic);
   }
 }
 
@@ -1674,6 +1725,28 @@ static int get_member_offset(aggrdecl_t ad, field_name_t f) {
     ++i;
   }
   toc_impos(aprintf("get_member_offset %s failed",*f));
+}
+
+static bool init_variable_array(type_t typ) {
+  switch (compress(typ)) {
+  // if it's an array type, remove occurrences of valueof and stop;
+  case &ArrayType(ArrayInfo{.num_elts = *e,...}):
+    let x = *e;
+    while (1) {
+      switch (x->r) {
+      case &Valueof_e(t):    
+	*e = NULL; return true;
+      case &Cast_e(_,e,_,_):
+	x = e; continue;
+	// FIX: need to make exhaustive
+      default: break;
+      }
+      break;
+    }
+    break;
+  default: break;
+  }
+  return false;
 }
 
 static exp_t init_struct(env_t nv, type_t struct_type, 
@@ -1692,6 +1765,8 @@ static exp_t init_struct(env_t nv, type_t struct_type,
   list_t<type_t> forall_types;
   aggrdecl_t ad;
   list_t<aggrfield_t> aggrfields;
+  field_name_t *index = NULL;
+  exp_opt_t sizeexp = NULL;
   switch(compress(struct_type)) {
   case &AggrType(AggrInfo(info,ts)): 
     ad = get_known_aggrdecl(info);
@@ -1718,7 +1793,6 @@ static exp_t init_struct(env_t nv, type_t struct_type,
       s = exp_stmt(cast_it(cast_type,copy_exp(xexp)),DL);
       let inst1 = List::rzip(temp,temp,ad->tvs,forall_types);
       if (is_abstract_type(rsubstitute(temp,inst1,last_field->type))) {
-        
         let inst2 = List::rzip(temp,temp,ad->impl->exist_vars,exist_types);
         let inst = List::rappend(temp,inst1,inst2);
         // now create a new aggregate according to the full instantiation
@@ -1731,6 +1805,16 @@ static exp_t init_struct(env_t nv, type_t struct_type,
                                                             old_field->type),
                                         .width = old_field->width,
                                         .attributes = old_field->attributes};
+	  // if the last field is an array type that includes a valueof(`i),
+	  // make it a variable-length array instead (i.e. kill the bounds)
+	  // and keep track of the index needed to get to the array
+	  if (fields->tl == NULL) {
+	    if (init_variable_array(new_field->type))
+	      index = new new_field->name;
+// 	    if (index != NULL) {
+// 	      printf("found array type at index obj.%s\n",**index);
+// 	    }
+	  }
           new_fields = new List(new_field,new_fields);
         }
         exist_types = NULL;
@@ -1782,6 +1866,9 @@ static exp_t init_struct(env_t nv, type_t struct_type,
           case &Array_e(dles):
             s = init_array(nv, lval, dles, s); break;
           case &Comprehension_e(vd,e1,e2,zt):
+	    // if this is a dynamic comprehension, grab the bound
+	    // for doing the malloc
+	    if (index != NULL && !strptrcmp(*index,f)) sizeexp = e1;
             s = init_comprehension(nv, lval, vd, e1, e2, zt, s, false); break;
           case &AnonStruct_e(st,dles):
             s = init_anon_struct(nv, lval, st, dles, s); break;
@@ -1803,7 +1890,13 @@ static exp_t init_struct(env_t nv, type_t struct_type,
         default: toc_impos("array designator in struct");
         }
     }
-    return make_struct(nv, x, aggr_typ, s, pointer, rgnopt, is_atomic);
+    // if we have a variable-sized element of the struct, must
+    //   initialize the struct differently
+    if (index != NULL)
+      return make_variable_struct(nv, x, aggr_typ, s, rgnopt, is_atomic,
+				  *index, (exp_t)sizeexp);
+    else
+      return make_fixed_struct(nv, x, aggr_typ, s, pointer, rgnopt, is_atomic);
   }
 }
 
@@ -4397,7 +4490,8 @@ static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_decls) {
         // locations...
         let old_field = fields->hd;
         let old_type = old_field->type;
-        if (fields->tl == NULL && kind_leq(&ak,typ_kind(old_type))) {
+        if (ad->kind == StructA && 
+	    fields->tl == NULL && kind_leq(&ak,typ_kind(old_type))) {
           // skip over the last member if it's abstract but not an array.
           // for arrays, we just pretend like the array size is non-existent.
           switch (old_type) {

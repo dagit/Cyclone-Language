@@ -491,6 +491,9 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc,
       // FIX:  we can get ill-founded cycles of the form
       // struct Foo<`a::A> { struct Foo<`a> x; } here, and
       // it can cut across multiple definitions...  
+// XXX put this in eventually; doesn't work at the moment
+//       if (str_or_union == UnionA || 
+// 	  (fs->tl == NULL && str_or_union == StructA)) 
       if (fs->tl == NULL && str_or_union == StructA) 
         field_kind = &tak; // we allow abstract kind for the last field
       check_type(loc,te,tvs,field_kind,false,t);

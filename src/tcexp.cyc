@@ -1785,13 +1785,45 @@ static type_t tcArray(tenv_t te, seg_t loc, type_t *elt_topt,
   return res_t2;
 }
 
+// updates the bound of flat, variable-length arrays to a tag if that
+// is indicated in the type
+// static void coerce_bounds_to_tag(exp_t e) {
+//   switch (e->r) {
+//   case &Comprehension_e(vd,bound,body,isnozeroterm):
+//     switch(compress((type_t)bound->topt)) {
+//     case &TagType(b_typ): 
+//       switch (compress((type_t)e->topt)) {
+//       case &ArrayType(ArrayInfo{_,_,*b,_,_}):
+// 	let b2 = cast_exp(uint_typ,valueof_exp(b_typ,0),false,No_coercion,0);
+// 	b2->topt = b_typ;
+// 	*b = b2;
+// 	break;
+//       default:
+// 	impos("non-array type for comprehension");
+//       }
+//       break;
+//     default: break;
+//     }
+//     break;
+//   default: break;
+//   }
+// }
+
  // {for [te] < [bound] : [body]}
 static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
                               vardecl_t vd, exp_t bound, exp_t body,
                               bool @is_zero_term) {
   tcExp(te,NULL,bound);
   switch(compress((type_t)bound->topt)) {
-  case &TagType(_): break;
+  case &TagType(t): 
+    // if we are in a new aggregate, then transitively we can update
+    // the bounds to be the tag, to allow variable-length arrays
+    if (new_status(te) == InNewAggr) {
+      let b = cast_exp(uint_typ,valueof_exp(t,0),false,No_coercion,0);
+      b->topt = bound->topt;
+      bound = b;
+    }
+    break;
   default:
     if (!coerce_uint_typ(te,bound))
       terr(bound->loc,"expecting unsigned int, found %s",
@@ -1884,76 +1916,94 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
     return wildtyp(lookup_opt_type_vars(te));
   }
   TEMP_RGN(te, rgn) {
-  // calculate the instantiation and final type
-  let env = $(lookup_type_vars(te),rgn);
-  let all_inst   = List::rmap_c(rgn,r_make_inst_var,&env,ad->tvs);
-  let exist_inst = List::rmap_c(rgn,r_make_inst_var,&env,ad->impl->exist_vars);
-  let all_typs   = List::map(snd,all_inst);
-  let exist_typs = List::map(snd,exist_inst);
-  let inst       = List::rappend(rgn,all_inst,exist_inst);
-  type_t res_typ;
-  // this will instantiate the struct if we have type information in topt
-  // unfortunately, I think it allows topt to cause failure.
-  // It's important for region partial order stuff though (so user can pick
-  // the region bound)
-  if (topt != NULL) {
-    switch (compress(*topt)) {
-    case &AggrType(AggrInfo({.KnownAggr = adptr2},all_typs2)):
-      if (*adptr2 == *adptr) {
-        for (let ats = all_typs; ats != NULL && all_typs2 != NULL;
-             ats = ats->tl, all_typs2=all_typs2->tl) {
-          unify(ats->hd,all_typs2->hd);
-        }
-        res_typ = *topt;
-        break;
+    // Note that setting the new status here will allow flat array
+    // initializations (as done with comprehensions) for all struct
+    // fields rather than just the last one; however this will be
+    // prevented when checking the struct decls.
+    let te2;
+    let status = new_status(te);
+    if (status == InNew)
+      te2 = set_new_status(rgn,InNewAggr,te);
+    // don't allow nested comprehensions
+    else if (status == InNewAggr)
+      te2 = set_new_status(rgn,NoneNew,te);
+    // keeps the typechecker happy
+    else
+      te2 = set_new_status(rgn,status,te);
+    // calculate the instantiation and final type
+    let env = $(lookup_type_vars(te2),rgn);
+    let all_inst   = List::rmap_c(rgn,r_make_inst_var,&env,ad->tvs);
+    let exist_inst = List::rmap_c(rgn,r_make_inst_var,&env,ad->impl->exist_vars);
+    let all_typs   = List::map(snd,all_inst);
+    let exist_typs = List::map(snd,exist_inst);
+    let inst       = List::rappend(rgn,all_inst,exist_inst);
+    type_t res_typ;
+    // this will instantiate the struct if we have type information in topt
+    // unfortunately, I think it allows topt to cause failure.
+    // It's important for region partial order stuff though (so user can pick
+    // the region bound)
+    if (topt != NULL) {
+      switch (compress(*topt)) {
+      case &AggrType(AggrInfo({.KnownAggr = adptr2},all_typs2)):
+	if (*adptr2 == *adptr) {
+	  for (let ats = all_typs; ats != NULL && all_typs2 != NULL;
+	       ats = ats->tl, all_typs2=all_typs2->tl) {
+	    unify(ats->hd,all_typs2->hd);
+	  }
+	  res_typ = *topt;
+	  break;
+	}
+	fallthru;
+      default:
+	res_typ = new AggrType(AggrInfo(KnownAggr(adptr),all_typs));
       }
-      fallthru;
-    default:
+    } else {
       res_typ = new AggrType(AggrInfo(KnownAggr(adptr),all_typs));
     }
-  } else {
-    res_typ = new AggrType(AggrInfo(KnownAggr(adptr),all_typs));
-  }
-  // integrate any witnesses the programmer wrote explicitly
-  let user_ex_ts = *ts;
-  let ex_ts = exist_typs;
-  while(user_ex_ts != NULL && ex_ts != NULL) {
-    // FIX: allow other kinds
-    check_type(loc,te,lookup_type_vars(te),&ak,true,user_ex_ts->hd);
-    check_no_qual(loc,user_ex_ts->hd);
-    unify(user_ex_ts->hd,ex_ts->hd);
-    user_ex_ts = user_ex_ts->tl;
-    ex_ts      = ex_ts->tl;
-  }
-  if(user_ex_ts != NULL)
-    terr(loc, "too many explicit witness types");
-
-  *ts = exist_typs;
-
-  // make sure each argument has the right type
-  list_t<$(aggrfield_t,exp_t)@/*`rgn,`rgn*/> fields =
-    resolve_aggregate_designators(rgn,loc,args,ad->kind,ad->impl->fields);
-  for(; fields != NULL; fields = fields->tl) {
-    bool bogus = false;
-    let &$(field,field_exp) = fields->hd;
-    let inst_fieldtyp = rsubstitute(rgn,inst,field->type);
-    tcExpInitializer(te, &inst_fieldtyp, field_exp);
-    if (!coerce_arg(te,field_exp,inst_fieldtyp,&bogus)) {
-      terr(field_exp->loc,"field %s of %s %s expects type %s != %s",
-           *(field->name),((ad->kind == StructA) ? "struct" : "union"),
-           qvar2string(*tn),typ2string(inst_fieldtyp),
-           typ2string((type_t)field_exp->topt));
-      explain_failure();
+    // integrate any witnesses the programmer wrote explicitly
+    let user_ex_ts = *ts;
+    let ex_ts = exist_typs;
+    while(user_ex_ts != NULL && ex_ts != NULL) {
+      // FIX: allow other kinds
+      check_type(loc,te2,lookup_type_vars(te2),&ak,true,user_ex_ts->hd);
+      check_no_qual(loc,user_ex_ts->hd);
+      unify(user_ex_ts->hd,ex_ts->hd);
+      user_ex_ts = user_ex_ts->tl;
+      ex_ts      = ex_ts->tl;
     }
-  }
-  let rpo_inst = NULL;
-  for(let rpo=ad->impl->rgn_po; rpo != NULL; rpo = rpo->tl)
-    rpo_inst = new List(new $(rsubstitute(rgn,inst,(*rpo->hd)[0]),
-			      rsubstitute(rgn,inst,(*rpo->hd)[1])),
-			rpo_inst);
-  rpo_inst = imp_rev(rpo_inst);
-  Tcenv::check_rgn_partial_order(te,loc,rpo_inst);
-  return res_typ;
+    if(user_ex_ts != NULL)
+      terr(loc, "too many explicit witness types");
+
+    *ts = exist_typs;
+
+    // make sure each argument has the right type
+    list_t<$(aggrfield_t,exp_t)@/*`rgn,`rgn*/> fields =
+      resolve_aggregate_designators(rgn,loc,args,ad->kind,ad->impl->fields);
+    for(; fields != NULL; fields = fields->tl) {
+      bool bogus = false;
+      let &$(field,field_exp) = fields->hd;
+      let inst_fieldtyp = rsubstitute(rgn,inst,field->type);
+      tcExpInitializer(te2, &inst_fieldtyp, field_exp);   
+//       fprintf(stderr,"checking agg field %s, exp=%s, typ=%s\n",*(field->name),
+// 	      Absynpp::exp2string(field_exp),
+// 	      Absynpp::typ2string(field_exp->topt));
+      if (!coerce_arg(te2,field_exp,inst_fieldtyp,&bogus)) {
+	terr(field_exp->loc,"field %s of %s %s expects type %s != %s",
+	     *(field->name),((ad->kind == StructA) ? "struct" : "union"),
+	     qvar2string(*tn),typ2string(inst_fieldtyp),
+	     typ2string((type_t)field_exp->topt));
+	explain_failure();
+      }
+//       fprintf(stderr,"finished checking agg field %s\n",*(field->name));
+    }
+    let rpo_inst = NULL;
+    for(let rpo=ad->impl->rgn_po; rpo != NULL; rpo = rpo->tl)
+      rpo_inst = new List(new $(rsubstitute(rgn,inst,(*rpo->hd)[0]),
+				rsubstitute(rgn,inst,(*rpo->hd)[1])),
+			  rpo_inst);
+    rpo_inst = imp_rev(rpo_inst);
+    Tcenv::check_rgn_partial_order(te2,loc,rpo_inst);
+    return res_typ;
   }
 }
 
@@ -2369,155 +2419,158 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
   // by default, we allocate heap pointers; this is for making inference
   // simpler.  If you want a unique pointer, do rnew (Core::unique_region)
   type_t rgn = &HeapRgn_val;
-
-  if (*rgn_handle != NULL) {
-    // check that the region handle is still valid
-    type_t expected_type =
-      new RgnHandleType(new_evar(&trko,lookup_opt_type_vars(te)));
-    type_t handle_type = tcExp(te,&expected_type,(exp_t)*rgn_handle);
-    switch (compress(handle_type)) {
-    case &RgnHandleType(r):
-      rgn = r;
-      check_rgn_accessible(te,loc,rgn);
-      break;
-    default:
-      terr((*rgn_handle)->loc,"expecting region_t type but found %s",
-           typ2string(handle_type));
-      break;
-    }
-  }
-  // if the type passed down constrains the region in any way
-  // switched to the constrained one.
-  else if (topt != NULL) {
-    type_t optrgn = &VoidType_val;
-    if (rgn_of_pointer(*topt,&optrgn)) {
-      rgn = mallocRgn(optrgn);
-      if (rgn == &UniqueRgn_val) *rgn_handle = uniquergn_exp;
-    }
-  }
-
-  switch (e1->r) {
-  case &Comprehension_e(_,_,_,_):
-    // Note: tcComprehension expects the pointer type, not an array type.
-    let t_arr = tcExpNoPromote(te,topt,e1);
-    switch (compress(t_arr)) {
-    case &ArrayType(ArrayInfo{et_arr,tq_arr,bndopt,zt,_}):
-      exp_t bnd = (exp_t)bndopt;
-      bounds_t b;
-      switch(compress((type_t)bnd->topt)) {
-      case &TagType(t):
-        b = new Upper_b(cast_exp(uint_typ,valueof_exp(t,0),false,No_coercion,0));
-        break;
+  TEMP_RGN(te, r) {
+    let te = set_new_status(r,InNew,te);
+    if (*rgn_handle != NULL) {
+      // check that the region handle is still valid
+      type_t expected_type =
+	new RgnHandleType(new_evar(&trko,lookup_opt_type_vars(te)));
+      type_t handle_type = tcExp(te,&expected_type,(exp_t)*rgn_handle);
+      switch (compress(handle_type)) {
+      case &RgnHandleType(r):
+	rgn = r;
+	check_rgn_accessible(te,loc,rgn);
+	break;
       default:
-	if(is_const_exp(bnd))
-	  b = new Upper_b(bnd);
-	else
-	  b = &DynEither_b_val;
+	terr((*rgn_handle)->loc,"expecting region_t type but found %s",
+	     typ2string(handle_type));
+	break;
       }
-      type_t res_typ =
-        new PointerType(PtrInfo(et_arr,tq_arr,
-				PtrAtts(rgn,empty_conref(),new_conref(b),zt,
-                                        NULL)));
+    }
+    // if the type passed down constrains the region in any way
+    // switched to the constrained one.
+    else if (topt != NULL) {
+      type_t optrgn = &VoidType_val;
+      if (rgn_of_pointer(*topt,&optrgn)) {
+	rgn = mallocRgn(optrgn);
+	if (rgn == &UniqueRgn_val) *rgn_handle = uniquergn_exp;
+      }
+    }
+    
+    switch (e1->r) {
+    case &Comprehension_e(_,_,_,_):
+      // Note: tcComprehension expects the pointer type, not an array type.
+      // Also, we don't set the in_new flag here so as not to biff the tag
+      let t_arr = tcExpNoPromote(te,topt,e1);
+      switch (compress(t_arr)) {
+      case &ArrayType(ArrayInfo{et_arr,tq_arr,bndopt,zt,_}):
+	exp_t bnd = (exp_t)bndopt;
+	bounds_t b;
+	switch(compress((type_t)bnd->topt)) {
+	case &TagType(t):
+	  b = new Upper_b(cast_exp(uint_typ,valueof_exp(t,0),false,No_coercion,0));
+	  break;
+	default:
+	  if(is_const_exp(bnd))
+	    b = new Upper_b(bnd);
+	  else
+	    b = &DynEither_b_val;
+	}
+	type_t res_typ =
+	  new PointerType(PtrInfo(et_arr,tq_arr,
+				  PtrAtts(rgn,empty_conref(),new_conref(b),zt,
+					  NULL)));
+	if (topt != NULL) {
+	  if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
+	    e->topt = res_typ;
+	    unchecked_cast(te, e, *topt, Other_coercion);
+	    res_typ = *topt;
+	  }
+	}
+	return res_typ;
+      default: impos("tcNew: comprehension returned non-array type");
+      }
+    case &UnresolvedMem_e(nopt,des):
+      e1->r = new Array_e(des);
+      fallthru(des);
+    case &Array_e(des):
+      type_t *elt_typ_opt = NULL;
+      bool zero_term = false;
       if (topt != NULL) {
-        if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
-          e->topt = res_typ;
-          unchecked_cast(te, e, *topt, Other_coercion);
-          res_typ = *topt;
-        }
+	switch (compress(*topt)) {
+	case &PointerType(PtrInfo(*elt_typ,tq,PtrAtts(_,_,_,zt,_))):
+	  // tcArray only needs the element type, so the bound is bogus
+	  elt_typ_opt = elt_typ;
+	  zero_term = conref_def(false,zt);
+	  break;
+	default: break;
+	}
+      }
+      let t_array = tcArray(te,e1->loc,elt_typ_opt,NULL,zero_term,des);
+      e1->topt = t_array;
+      type_t res_typ;
+      switch (compress(t_array)) {
+      case &ArrayType(ArrayInfo{et,tq,sz,zt,_}):
+	res_typ =
+	  new PointerType(PtrInfo(et,tq,
+				  PtrAtts(rgn,empty_conref(),
+					  new_conref(new Upper_b((exp_t)sz)),
+					  zt,NULL)));
+	if (topt != NULL) {
+	  // try unifying res_typ and topt -- if that fails, then see if we
+	  // can cast res_typ to topt, and insert the cast so that the code
+	  // generator knows what to do.
+	  if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
+	    e->topt = res_typ;
+	    unchecked_cast(te, e, *topt, Other_coercion);
+	    res_typ = *topt;
+	  }
+	}
+	break;
+      default: impos("tcExpNoPromote on Array_e returned non-array type");
       }
       return res_typ;
-    default: impos("tcNew: comprehension returned non-array type");
-    }
-  case &UnresolvedMem_e(nopt,des):
-    e1->r = new Array_e(des);
-    fallthru(des);
-  case &Array_e(des):
-    type_t *elt_typ_opt = NULL;
-    bool zero_term = false;
-    if (topt != NULL) {
-      switch (compress(*topt)) {
-      case &PointerType(PtrInfo(*elt_typ,tq,PtrAtts(_,_,_,zt,_))):
-        // tcArray only needs the element type, so the bound is bogus
-        elt_typ_opt = elt_typ;
-        zero_term = conref_def(false,zt);
-        break;
-      default: break;
-      }
-    }
-    let t_array = tcArray(te,e1->loc,elt_typ_opt,NULL,zero_term,des);
-    e1->topt = t_array;
-    type_t res_typ;
-    switch (compress(t_array)) {
-    case &ArrayType(ArrayInfo{et,tq,sz,zt,_}):
-      res_typ =
-	new PointerType(PtrInfo(et,tq,
-				PtrAtts(rgn,empty_conref(),
-					new_conref(new Upper_b((exp_t)sz)),
-                                        zt,NULL)));
+    case &Const_e({.String_c = _}):
+      // here I'm going to guess that the user wants a char *@ instead of
+      // a char @{n}@.  They can get the char@{n}@ by using a cast.  This
+      // is a total hack...
+      let topt2 = atb_typ(char_typ, rgn, const_tqual(0),
+			  &DynEither_b_val, true_conref);
+      let t = tcExp(te,&topt2,e1);
+      return atb_typ(t, rgn, empty_tqual(0), new Upper_b(uint_exp(1,0)),
+		     false_conref);
+    case &Const_e({.Wstring_c = _}):
+      // handled like the String_c case
+      let topt2 = atb_typ(wchar_typ(), rgn, const_tqual(0),
+			  &DynEither_b_val, true_conref);
+      let t = tcExp(te,&topt2,e1);
+      return atb_typ(t, rgn, empty_tqual(0), new Upper_b(uint_exp(1,0)),
+		     false_conref);
+    default:
+      // code that's equivalent to "new {e1}" -- i.e., an array of size 1.
+      // Note that we could simplify everything by rewriting the expression
+      // to use an Array_e, but this would involve more allocation.
+    RG:{
+      type_t bogus = &VoidType_val;
+      type_t *`RG topt2 = NULL;
       if (topt != NULL) {
-        // try unifying res_typ and topt -- if that fails, then see if we
-        // can cast res_typ to topt, and insert the cast so that the code
-        // generator knows what to do.
-        if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
-          e->topt = res_typ;
-          unchecked_cast(te, e, *topt, Other_coercion);
-          res_typ = *topt;
-        }
+	switch (compress(*topt)) {
+	case &PointerType(PtrInfo(*elttype,tq,_)):
+	  topt2 = (type_t *`RG)elttype; break;
+	case &DatatypeType(_):
+	  // Note, we're lying here in the sense that we should pass down
+	  // a DatatypeFieldType -- but we don't know which field...
+	  bogus = *topt; // copy *topt into bogus
+	  topt2 = &bogus; // set topt2 to address of bogus
+	  break;
+	default: break;
+	}
       }
-      break;
-    default: impos("tcExpNoPromote on Array_e returned non-array type");
-    }
-    return res_typ;
-  case &Const_e({.String_c = _}):
-    // here I'm going to guess that the user wants a char *@ instead of
-    // a char @{n}@.  They can get the char@{n}@ by using a cast.  This
-    // is a total hack...
-    let topt2 = atb_typ(char_typ, rgn, const_tqual(0),
-                        &DynEither_b_val, true_conref);
-    let t = tcExp(te,&topt2,e1);
-    return atb_typ(t, rgn, empty_tqual(0), new Upper_b(uint_exp(1,0)),
-                   false_conref);
-  case &Const_e({.Wstring_c = _}):
-    // handled like the String_c case
-    let topt2 = atb_typ(wchar_typ(), rgn, const_tqual(0),
-                        &DynEither_b_val, true_conref);
-    let t = tcExp(te,&topt2,e1);
-    return atb_typ(t, rgn, empty_tqual(0), new Upper_b(uint_exp(1,0)),
-                   false_conref);
-  default:
-    // code that's equivalent to "new {e1}" -- i.e., an array of size 1.
-    // Note that we could simplify everything by rewriting the expression
-    // to use an Array_e, but this would involve more allocation.
-  RG:{
-    type_t bogus = &VoidType_val;
-    type_t *`RG topt2 = NULL;
-    if (topt != NULL) {
-      switch (compress(*topt)) {
-      case &PointerType(PtrInfo(*elttype,tq,_)):
-        topt2 = (type_t *`RG)elttype; break;
-      case &DatatypeType(_):
-        // Note, we're lying here in the sense that we should pass down
-        // a DatatypeFieldType -- but we don't know which field...
-        bogus = *topt; // copy *topt into bogus
-        topt2 = &bogus; // set topt2 to address of bogus
-        break;
-      default: break;
+      type_t telt = tcExp(te,topt2,e1);
+      type_t res_typ =
+	new PointerType(PtrInfo(telt,empty_tqual(0),
+				PtrAtts(rgn,empty_conref(),
+					bounds_one_conref,
+					false_conref,NULL)));
+      if (topt != NULL) {
+	if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
+	  e->topt = res_typ;
+	  unchecked_cast(te,e,*topt,Other_coercion);
+	  res_typ = *topt;
+	}
       }
+      return res_typ;
     }
-    type_t telt = tcExp(te,topt2,e1);
-    type_t res_typ =
-      new PointerType(PtrInfo(telt,empty_tqual(0),
-			      PtrAtts(rgn,empty_conref(),
-				      bounds_one_conref,
-				      false_conref,NULL)));
-    if (topt != NULL) {
-      if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
-        e->topt = res_typ;
-        unchecked_cast(te,e,*topt,Other_coercion);
-        res_typ = *topt;
-      }
-    }
-    return res_typ;
   }
   }
 }

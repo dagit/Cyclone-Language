@@ -997,7 +997,9 @@ typedef void*Cyc_Tcenv_jumpee_t;struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;st
 # 96
 typedef struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tenv_t;
 # 114 "tcenv.h"
-struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tc_init(struct _RegionHandle*);struct Cyc_Interface_I;
+struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tc_init(struct _RegionHandle*);
+# 130
+enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_InNewAggr  = 2};struct Cyc_Interface_I;
 # 37 "interface.h"
 typedef struct Cyc_Interface_I*Cyc_Interface_i_t;
 # 40

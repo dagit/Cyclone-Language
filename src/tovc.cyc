@@ -100,7 +100,11 @@ struct ToExpEnv<`r::R> {
 };
 typedef struct ToExpEnv<`r> toexpenv_t<`r>; // not boxed
 
-static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
+#define BOX_EXP_AND_UPDATE(env,e)		\
+{ let __ei = box_free_vars_exp(env,e);		\
+  if (__ei != NULL) e = __ei; }
+
+static exp_opt_t box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
   while(true)
   switch (e->r) {
   case &Var_e(&$({.Loc_n = _},v),_):
@@ -113,22 +117,21 @@ static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
     // Don't box if it's a global (defined in cyc_include.h, inserted by toc)
     for (int i = 0; i < numelts(Toc::globals); i++)
       if (strptrcmp(v,Toc::globals[i])==0)
-	return;
+	return NULL;
     // now determine if it's free or bound
     for (; env.boundvars != NULL; env.boundvars = env.boundvars->tl)
       if (strptrcmp(v,(*env.boundvars->hd->name)[1])==0)
-	return;
+	return NULL;
     // okay, it's free
     for (; env.all_locals != NULL; env.all_locals = env.all_locals->tl) {
       let vd = env.all_locals->hd;
       if (strptrcmp(v,(*vd->name)[1])==0) {
+	*env.freevars = Set::rinsert(env.rgn,*env.freevars,vd);
 	// don't deref if it's a stack-allocated array 
 	switch (vd->type) {
-	case &ArrayType(_): break;
-	default: e->r = deref_exp(var_exp(vd->name,DL),DL)->r; break;
+	case &ArrayType(_): return NULL;
+	default: return deref_exp(var_exp(vd->name,DL),DL);
         }
-	*env.freevars = Set::rinsert(env.rgn,*env.freevars,vd);
-	return;
       }
     }
 
@@ -141,49 +144,54 @@ static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
     
     //FJS: if it's neither a local var or a global var, assume it is from the header file
     //     (eg. _get_zero_arr_size_char)
-    return;
+    return NULL;
 
     //    throw new Impossible(aprintf("unbound variable %s found in box_free_vars_exp", *v));
-  case &Var_e(_,_): return;
+  case &Var_e(_,_): return NULL;
 
     // everything else is just recursive descent
-  case &Const_e(_): return;
-  case &FnCall_e(e1,es,...):
-    box_free_vars_exp(env,e1); fallthru(es);
+  case &Const_e(_): return NULL;
+  case &FnCall_e(*e1,es,...):
+    BOX_EXP_AND_UPDATE(env,*e1);
+    fallthru(es);
   case &Primop_e(_,es):
-    for (; es != NULL; es = es->tl)
-      box_free_vars_exp(env,es->hd);
-    return;
+    for (; es != NULL; es = es->tl) {
+      BOX_EXP_AND_UPDATE(env,es->hd);
+    }
+    return NULL;
 
-  case &Conditional_e(e1,e2,e3):
-     box_free_vars_exp(env,e3); fallthru(e1,e2);
-  case &And_e(e1,e2):           fallthru(e1,e2);
-  case &Or_e(e1,e2):            fallthru(e1,e2);
-  case &Subscript_e(e1,e2):     fallthru(e1,e2);
-  case &SeqExp_e(e1,e2):        fallthru(e1,e2);
-  case &AssignOp_e(e1, _, e2):
-    box_free_vars_exp(env,e2);  fallthru(e1);
+  case &Conditional_e(*e1,*e2,*e3):
+    BOX_EXP_AND_UPDATE(env,*e3);
+    fallthru(e1,e2);
+  case &And_e(*e1,*e2):           fallthru(e1,e2);
+  case &Or_e(*e1,*e2):            fallthru(e1,e2);
+  case &Subscript_e(*e1,*e2):     fallthru(e1,e2);
+  case &SeqExp_e(*e1,*e2):        fallthru(e1,e2);
+  case &AssignOp_e(*e1, _, *e2):
+    BOX_EXP_AND_UPDATE(env,*e2);
+    fallthru(e1);
 
-  case &NoInstantiate_e(e1):    fallthru(e1);
-  case &Instantiate_e(e1,_):    fallthru(e1);
-  case &Cast_e(_,e1,_,_):       fallthru(e1);
-  case &Address_e(e1):          fallthru(e1);
-  case &Sizeofexp_e(e1):        fallthru(e1);
-  case &Deref_e(e1):            fallthru(e1);
-  case &AggrMember_e(e1,...):   fallthru(e1); 
-  case &AggrArrow_e(e1,...):    fallthru(e1);
-  case &Increment_e(e1,_):
-    box_free_vars_exp(env,e1);
-    return;
+  case &NoInstantiate_e(*e1):    fallthru(e1);
+  case &Instantiate_e(*e1,_):    fallthru(e1);
+  case &Cast_e(_,*e1,_,_):       fallthru(e1);
+  case &Address_e(*e1):          fallthru(e1);
+  case &Sizeofexp_e(*e1):        fallthru(e1);
+  case &Deref_e(*e1):            fallthru(e1);
+  case &AggrMember_e(*e1,...):   fallthru(e1); 
+  case &AggrArrow_e(*e1,...):    fallthru(e1);
+  case &Increment_e(*e1,_):
+    BOX_EXP_AND_UPDATE(env,*e1);
+    return NULL;
 
   case &Sizeoftyp_e(_): 
   case &Offsetof_e(_,_):
-  case &Enum_e(_,_,_):   return;
+  case &Enum_e(_,_,_):   return NULL;
 
   case &UnresolvedMem_e(_,dles):
-    for (; dles != NULL; dles = dles->tl)
-      box_free_vars_exp(env,(*dles->hd)[1]);
-    return;
+    for (; dles != NULL; dles = dles->tl) {
+      BOX_EXP_AND_UPDATE(env,(*dles->hd)[1]);
+    }
+    return NULL;
 
   default: throw new Impossible("bad exp form in Tocv::box_free_vars_exp");
   }
@@ -204,40 +212,41 @@ static void box_free_vars_stmt(boxingenv_t<`r,`r2> env, stmt_t s) {
     case &Label_s(_,s2):
       s = s2;
       continue;
-    case &Return_s(eopt):
+    case &Return_s(*eopt):
       // FIX: reject this -- it won't be in the right function.
-      if (eopt == NULL)
+      if (*eopt == NULL)
 	return;
-      fallthru((exp_t)eopt);
-    case &Exp_s(e):
-      box_free_vars_exp(env, e);
+      BOX_EXP_AND_UPDATE(env,*eopt);
+      return;
+    case &Exp_s(*e):
+      BOX_EXP_AND_UPDATE(env,*e);
       return;
     case &Seq_s(s1,s2):
       box_free_vars_stmt(env, s1);
       s = s2;
       continue;
-    case &IfThenElse_s(e,s1,s2):
-      box_free_vars_exp(env, e);
+    case &IfThenElse_s(*e,s1,s2):
+      BOX_EXP_AND_UPDATE(env,*e);
       box_free_vars_stmt(env, s1);
       s = s2;
       continue;
-    case &While_s($(e,_),s2):
-      box_free_vars_exp(env, e);
+    case &While_s($(*e,_),s2):
+      BOX_EXP_AND_UPDATE(env,*e);
       s = s2;
       continue;
-    case &For_s(e1,$(e2,_),$(e3,_),s2):
-      box_free_vars_exp(env, e1);
-      box_free_vars_exp(env, e2);
-      box_free_vars_exp(env, e3);
+    case &For_s(*e1,$(*e2,_),$(*e3,_),s2):
+      BOX_EXP_AND_UPDATE(env,*e1);
+      BOX_EXP_AND_UPDATE(env,*e2);
+      BOX_EXP_AND_UPDATE(env,*e3);
       s = s2;
       continue;
-    case &Do_s(s2,$(e,_)):
-      box_free_vars_exp(env, e);
+    case &Do_s(s2,$(*e,_)):
+      BOX_EXP_AND_UPDATE(env,*e);
       s = s2;
       continue;
-    case &Switch_s(e,scs):
+    case &Switch_s(*e,scs):
       // most switches have been translated away -- so no binding occurrences!
-      box_free_vars_exp(env, e);
+      BOX_EXP_AND_UPDATE(env,*e);
       for (; scs != NULL; scs = scs->tl)
 	box_free_vars_stmt(env, scs->hd->body);
       return;
@@ -246,8 +255,10 @@ static void box_free_vars_stmt(boxingenv_t<`r,`r2> env, stmt_t s) {
       case &Var_d(vd):
 	env.boundvars = rnew(env.rgn) List(vd,env.boundvars);
 	env.varmap    = Dict::rdelete_same(env.varmap, (*vd->name)[1]);
-	if (vd->initializer != NULL)
-	  box_free_vars_exp(env, (exp_t)vd->initializer);
+	if (vd->initializer != NULL) {
+	  let ei = box_free_vars_exp(env,(exp_t)vd->initializer);
+	  if (ei != NULL) vd->initializer = ei;
+	}
 	s = s2;
 	continue;
       default: break;
@@ -255,7 +266,6 @@ static void box_free_vars_stmt(boxingenv_t<`r,`r2> env, stmt_t s) {
       fallthru;
     default: throw new Impossible("bad stmt after xlation to C");
     }
-
 }
 
 /* Compare two vardecls by name, for use in stmt_to_fun

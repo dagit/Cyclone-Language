@@ -116,8 +116,6 @@ extern genv_t<`r> empty_genv(region_t<`r>);
 extern fenv_t<`r> new_fenv(region_t<`r>,seg_t,fndecl_t);
 extern fenv_t<`r> nested_fenv(seg_t,fenv_t<`r> old_fenv, fndecl_t new_fn);
 
-extern tenv_t<`r> enter_ns(region_t<`r>,tenv_t, var_t);
-
 extern list_t<var_t> resolve_namespace(tenv_t,seg_t,var_t,list_t<var_t,`H>);
 // when is_use is true, we are looking up a free occurrence of the variable
 extern resolved_t<`r>    lookup_ordinary(region_t<`r>,tenv_t,seg_t,qvar_t,bool is_use);
@@ -128,6 +126,12 @@ extern enumdecl_t@       lookup_enumdecl(tenv_t,seg_t,qvar_t);
 extern typedefdecl_t     lookup_typedefdecl(tenv_t,seg_t,qvar_t);
 
 extern tenv_t<`g,`r2> allow_valueof(region_t<`r2>,tenv_t<`g,`r>: {`r} > `r2);
+
+enum NewStatus { NoneNew, InNew, InNewAggr };  
+extern tenv_t<`g,`r2> set_new_status(region_t<`r2>,enum NewStatus status, 
+				     tenv_t<`g,`r>: {`r} > `r2);
+extern enum NewStatus new_status(tenv_t te);
+
 extern type_t  return_typ(tenv_t);
 
 extern tenv_t<`g,`r> copy_tenv(region_t<`r>,tenv_t<`g,`r2> : {`r2} > `r);

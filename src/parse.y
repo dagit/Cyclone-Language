@@ -910,12 +910,15 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
     switch (base_type) {
     case &TypeDeclType(&{.r = &Aggr_td(ad),...},_): 
       ad->attributes = List::append(ad->attributes,atts);
+      ad->sc = s;
       return new List(new_decl(new Aggr_d(ad),loc),NULL);
     case &TypeDeclType(&{.r = &Enum_td(ed),...},_):
       if (atts != NULL) err("attributes on enum not supported",loc);
+      ed->sc = s;
       return new List(new_decl(new Enum_d(ed),loc),NULL);
     case &TypeDeclType(&{.r = &Datatype_td(dd),...},_):
       if (atts != NULL) err("attributes on datatypes not supported",loc);
+      dd->sc = s;
       return new List(new_decl(new Datatype_d(dd),loc),NULL);
     case &AggrType(AggrInfo({.UnknownAggr = $(k,n,_)},ts)):
       let ts2 = List::map_c(typ2tvar,loc,ts);

@@ -497,6 +497,35 @@ $(tvar_t,kindbound_t) swap_kind(type_t t, kindbound_t kb) {
   }
 }
 
+// figures out the kind of a field in a struct or union; used
+// by typ_kind below
+static kind_t field_kind(type_t field_typ,
+			 list_t<type_t> ts, list_t<tvar_t> tvs) {
+  kind_t k = typ_kind(field_typ);
+  if (ts != NULL && (k == &ak || k == &tak)) {
+    // we have to substitute here, because the last type might be
+    // instantiated with a ground type.
+    region temp;
+    let inst = NULL;
+    // filter out type vars that aren't abstract or int in in the instantiation
+    for (; tvs != NULL; tvs=tvs->tl, ts=ts->tl) {
+      let tv = tvs->hd;
+      let t = ts->hd;
+      switch (tvar_kind(tv,&bk)) {
+      case &{.kind = IntKind, ...}:
+      case &{.kind = AnyKind, ...}:
+	inst = rnew(temp) List(rnew(temp) $(tv,t), inst); break;
+      default: break;
+      }
+    }
+    if (inst != NULL) {
+      field_typ = rsubstitute(temp,List::imp_rev(inst),field_typ);
+      k = typ_kind(field_typ);
+    }
+  }
+  return k;
+}
+
 // Return the "least" kind of a type, according to the lattice above
 // In some situations, we have to be conservative...
 // Note that both Evars and VarTypes should have their kinds established
@@ -528,37 +557,25 @@ kind_t typ_kind(type_t t) {
     // for structs or unions without definitions, we must be
     // conservative and treat them as having AnyKind
   case &AggrType(AggrInfo({.UnknownAggr = _},_)): return &ak;
-  case &AggrType(AggrInfo({.KnownAggr = & &Aggrdecl(_,_,_,tvs,i,_)},ts)):
+  case &AggrType(AggrInfo({.KnownAggr = & &Aggrdecl(strOrU,_,_,tvs,i,_)},ts)):
     if (i == NULL) return &ak;
-    // the kind of the aggregate depends upon the kind of its last field
     let fields = i->fields;
     if (fields == NULL) return &mk;
-    for (; fields->tl != NULL; fields = fields->tl);
-    let last_type = fields->hd->type;
-    kind_t k = typ_kind(last_type);
-    if (ts != NULL && (k == &ak || k == &tak)) {
-      // we have to substitute here, because the last type might be
-      // instantiated with a ground type.
-      region temp;
-      let inst = NULL;
-      // filter out type vars that aren't abstract or int in in the instantiation
-      for (; tvs != NULL; tvs=tvs->tl, ts=ts->tl) {
-        let tv = tvs->hd;
-        let t = ts->hd;
-        switch (tvar_kind(tv,&bk)) {
-        case &{.kind = IntKind, ...}:
-        case &{.kind = AnyKind, ...}:
-          inst = rnew(temp) List(rnew(temp) $(tv,t), inst); break;
-        default: break;
-        }
-      }
-      if (inst != NULL) {
-        last_type = rsubstitute(temp,List::imp_rev(inst),last_type);
-        k = typ_kind(last_type);
-      }
+    // the kind of a struct depends upon the kind of its last field
+    if (strOrU == StructA) {
+      for (; fields->tl != NULL; fields = fields->tl);
+      let last_type = fields->hd->type;
+      let k = field_kind(last_type, ts, tvs);
       if (k == &ak || k == &tak) return k;
-    } else if (k == &ak || k == &tak)
-      return k;
+    }
+    // the kind of a union depends upon the kind of all its fields
+    else {
+      for (; fields != NULL; fields = fields->tl) {
+	let typ = fields->hd->type;
+	let k = field_kind(typ, ts, tvs);
+	if (k == &ak || k == &tak) return k;
+      }
+    }
     return &mk;
   case &AnonAggrType(_,_): return &mk;
   case &PointerType(pinfo):
