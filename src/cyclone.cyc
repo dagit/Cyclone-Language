@@ -343,7 +343,10 @@ static void add_other(string_t<`H> s) {
     cyclone_files = new List(new s,cyclone_files);
 
     // The C compiler wants the .c file, not the .cyc files
-    let basename = make_base_filename(s,output_file);
+    // MWH: We set the C file relative to the input file directory,
+    // rather than the output directory, because we may not have seen
+    // the -o argument yet ...
+    let basename = make_base_filename(s,NULL);
     let cfile    = strconcat(basename, ".c");
     add_ccarg(cfile);
   }
@@ -417,9 +420,19 @@ extern "C" void CYCALLOCPROFILE_mark(const char *s);
   try ans = f(env,tds);
   catch {
   case x:
-    fprintf(stderr,"COMPILER STAGE %s\n",stage_name);
-    on_fail(failenv);
+    // Only throw the exception if it wasn't the result of a cascading error
+    if (Position::error_p()) {
+      compile_failure = true;
+      on_fail(failenv);
+      fprintf(stderr,"\nCOMPILATION FAILED!\n");
+      fflush(stderr);
+    }
+    else {
+      fprintf(stderr,"COMPILER STAGE %s\n",stage_name);
+      on_fail(failenv);
+    }
     Core::rethrow(x);
+    break;
   }
   if (Position::error_p())
     compile_failure = true;
@@ -728,7 +741,10 @@ static void process_file(string_t<`H> filename) {
   let interfacefile = (specified_interface != NULL) ?
                         specified_interface : strconcat(basename, ".cyci");
   let interfaceobjfile = strconcat(basename, ".cycio");
-  let cfile = strconcat(basename, ".c");
+  // MWH: we do the c file relative to the input file, rather than the
+  // output file as for the rest, because setting the ccargs earlier
+  // may not have seen the -o option at that time
+  let cfile = strconcat(make_base_filename(filename,NULL), ".c");
   let preprocfileptr = new preprocfile;
 
   if (v_r) fprintf(stderr,"Compiling %s\n", filename);
@@ -1284,9 +1300,15 @@ int main(int argc, string_t<`H> ?`H argv) {
     cyc_include = find_in_exec_path("cyc_include.h");
 
   /* Process each .cyc file */
-  for (let l = rev(cyclone_files); l != NULL; l = l->tl) {
-    process_file(*(l->hd));
+  try {
+    for (let l = rev(cyclone_files); l != NULL; l = l->tl) {
+      process_file(*(l->hd));
+      if (compile_failure) return 1;
+    }
+  } catch {
+  case x:
     if (compile_failure) return 1;
+    else Core::rethrow(x);
   }
 
   if (stop_after_cpp_r || parseonly_r || tc_r || toc_r) return 0;

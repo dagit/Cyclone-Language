@@ -114,8 +114,10 @@ void terr(seg_t loc, string_t fmt, ... inject parg_t ap)
   __attribute__((format(printf,1,2), noreturn))
 {
   string_t msg = vrprintf(heap_region,fmt,ap);
-  fprintf(stderr,"Compiler Error (Tcutil::impos): %s\n",msg);
-  fflush(stderr);
+  if (!Position::error_p()) {
+    fprintf(stderr,"Compiler Error (Tcutil::impos): %s\n",msg);
+    fflush(stderr);
+  }
   throw new Impossible(msg);
 }
 void warn(seg_t sg, string_t fmt, ... inject parg_t ap)

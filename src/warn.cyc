@@ -65,8 +65,10 @@ void err(seg_t loc, string_t fmt, ... inject parg_t ap)
 
 `a vimpos(string_t fmt, parg_t ? ap) __attribute__((noreturn)) {
   string_t msg = vrprintf(Core::heap_region,fmt,ap);
-  fprintf(stderr,"Compiler Error: %s\n",msg);
-  fflush(stderr);
+  if (!Position::error_p()) {
+    fprintf(stderr,"Compiler Error: %s\n",msg);
+    fflush(stderr);
+  }
   throw new Core::Impossible(msg);  
 }
 
