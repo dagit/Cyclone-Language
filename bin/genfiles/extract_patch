@@ -11,6 +11,8 @@ fi
 
 PATCH_ARCH=$1
 ARCH=$2
+PATCH_DIR=`dirname $0`
+cd $PATCH_DIR
 # if the directory is already present (whether or not there is a patch),
 #   we assume it is up-to-date.
 if [ ! -d "${ARCH}" ]; then

@@ -13,6 +13,7 @@
 CYCDIR=`pwd`
 
 # figure out the architecture
+PATCH_ARCH=i686-unknown-linux
 ARCH=`config/config.guess`
 TARGET=`echo ${ARCH} | awk -F'-' '{ print $1 }'`
 TYPE=`echo ${ARCH} | awk -F'-' '{ print $2 }'`
@@ -67,16 +68,22 @@ function get_def_genfiles {
   case "${OS}" in
     cygwin*)
       DEF_ARCH=i686-unknown-cygwin1.3.2;;
+    solaris*)
+      DEF_ARCH=sparc-sun-solaris2.7;;
     *bsd*)
       DEF_ARCH=i386-unknown-openbsd2.8;;
     *)
       DEF_ARCH=i686-unknown-linux
   esac
   echo "Using the genfiles from ${DEF_ARCH}" 
+  bin/genfiles/extract_patch ${PATCH_ARCH} ${DEF_ARCH}
   cp -r ${CYCDIR}/bin/genfiles/${DEF_ARCH}/* ${CYCDIR}/bin/genfiles/${ARCH}
   CVS_files=`find ${CYCDIR}/bin/genfiles/${ARCH} -name CVS`
   if [ -n "$CVS_files" ]; then
     \rm -rf $CVS_files
+  fi
+  if [ -f "${CYCDIR}/bin/genfiles/${PATCH_ARCH}.patch" ]; then
+    \rm -rf ${CYCDIR}/bin/genfiles/${PATCH_ARCH}
   fi
 }
 
@@ -88,7 +95,6 @@ function get_def_genfiles {
 incdir="/usr/include/cyclone"
 libdir="/usr/local/lib/cyclone"
 bindir="/usr/local/bin"
-PATCH_ARCH=i686-unknown-linux
 
 # arguments
 #
