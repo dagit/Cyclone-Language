@@ -3649,20 +3649,20 @@ void check_bitfield(seg_t loc, tenv_t te, type_t field_typ,
     else {
       let $(i,known) = Evexp::eval_const_uint_exp((exp_t)width);
       if(!known)
-	terr(loc,"bitfield width cannot use sizeof or offsetof");
+	warn(loc,"cannot evaluate bitfield width at compile time");
       w = i;
     }
     switch (compress(field_typ)) {
     case &IntType(_,b):
       // FIX: this is making size assumptions
       switch (b) {
-      case Char_sz: if (w > 8)  terr(loc,"bitfield larger than type"); break;
-      case Short_sz: if (w > 16) terr(loc,"bitfield larger than type"); break;
+      case Char_sz: if (w > 8)  warn(loc,"bitfield larger than type"); break;
+      case Short_sz: if (w > 16) warn(loc,"bitfield larger than type"); break;
       case Long_sz:
       case Int_sz:
-        if (w > 32) terr(loc,"bitfield larger than type"); break;
+        if (w > 32) warn(loc,"bitfield larger than type"); break;
       case LongLong_sz:
-        if (w > 64) terr(loc,"bitfield larger than type"); break;
+        if (w > 64) warn(loc,"bitfield larger than type"); break;
       }
       break;
     default:

@@ -4481,19 +4481,19 @@ if(!Cyc_Tcutil_is_const_exp(width))
 # 3650
 struct _tuple14 _tmp72D=Cyc_Evexp_eval_const_uint_exp(width);struct _tuple14 _tmp72E=_tmp72D;unsigned int _tmp732;int _tmp731;_LL63D: _tmp732=_tmp72E.f1;_tmp731=_tmp72E.f2;_LL63E:;
 if(!_tmp731)
-({void*_tmp72F=0;({unsigned int _tmpD8C=loc;struct _dyneither_ptr _tmpD8B=({const char*_tmp730="bitfield width cannot use sizeof or offsetof";_tag_dyneither(_tmp730,sizeof(char),45);});Cyc_Tcutil_terr(_tmpD8C,_tmpD8B,_tag_dyneither(_tmp72F,sizeof(void*),0));});});
+({void*_tmp72F=0;({unsigned int _tmpD8C=loc;struct _dyneither_ptr _tmpD8B=({const char*_tmp730="cannot evaluate bitfield width at compile time";_tag_dyneither(_tmp730,sizeof(char),47);});Cyc_Tcutil_warn(_tmpD8C,_tmpD8B,_tag_dyneither(_tmp72F,sizeof(void*),0));});});
 w=_tmp732;}{
 # 3655
 void*_tmp733=Cyc_Tcutil_compress(field_typ);void*_tmp734=_tmp733;enum Cyc_Absyn_Size_of _tmp742;if(((struct Cyc_Absyn_IntType_Absyn_Type_struct*)_tmp734)->tag == 6){_LL640: _tmp742=((struct Cyc_Absyn_IntType_Absyn_Type_struct*)_tmp734)->f2;_LL641:
 # 3658
 {enum Cyc_Absyn_Size_of _tmp735=_tmp742;switch(_tmp735){case Cyc_Absyn_Char_sz: _LL645: _LL646:
- if(w > 8)({void*_tmp736=0;({unsigned int _tmpD8E=loc;struct _dyneither_ptr _tmpD8D=({const char*_tmp737="bitfield larger than type";_tag_dyneither(_tmp737,sizeof(char),26);});Cyc_Tcutil_terr(_tmpD8E,_tmpD8D,_tag_dyneither(_tmp736,sizeof(void*),0));});});goto _LL644;case Cyc_Absyn_Short_sz: _LL647: _LL648:
- if(w > 16)({void*_tmp738=0;({unsigned int _tmpD90=loc;struct _dyneither_ptr _tmpD8F=({const char*_tmp739="bitfield larger than type";_tag_dyneither(_tmp739,sizeof(char),26);});Cyc_Tcutil_terr(_tmpD90,_tmpD8F,_tag_dyneither(_tmp738,sizeof(void*),0));});});goto _LL644;case Cyc_Absyn_Long_sz: _LL649: _LL64A:
+ if(w > 8)({void*_tmp736=0;({unsigned int _tmpD8E=loc;struct _dyneither_ptr _tmpD8D=({const char*_tmp737="bitfield larger than type";_tag_dyneither(_tmp737,sizeof(char),26);});Cyc_Tcutil_warn(_tmpD8E,_tmpD8D,_tag_dyneither(_tmp736,sizeof(void*),0));});});goto _LL644;case Cyc_Absyn_Short_sz: _LL647: _LL648:
+ if(w > 16)({void*_tmp738=0;({unsigned int _tmpD90=loc;struct _dyneither_ptr _tmpD8F=({const char*_tmp739="bitfield larger than type";_tag_dyneither(_tmp739,sizeof(char),26);});Cyc_Tcutil_warn(_tmpD90,_tmpD8F,_tag_dyneither(_tmp738,sizeof(void*),0));});});goto _LL644;case Cyc_Absyn_Long_sz: _LL649: _LL64A:
  goto _LL64C;case Cyc_Absyn_Int_sz: _LL64B: _LL64C:
 # 3663
- if(w > 32)({void*_tmp73A=0;({unsigned int _tmpD92=loc;struct _dyneither_ptr _tmpD91=({const char*_tmp73B="bitfield larger than type";_tag_dyneither(_tmp73B,sizeof(char),26);});Cyc_Tcutil_terr(_tmpD92,_tmpD91,_tag_dyneither(_tmp73A,sizeof(void*),0));});});goto _LL644;default: _LL64D: _LL64E:
+ if(w > 32)({void*_tmp73A=0;({unsigned int _tmpD92=loc;struct _dyneither_ptr _tmpD91=({const char*_tmp73B="bitfield larger than type";_tag_dyneither(_tmp73B,sizeof(char),26);});Cyc_Tcutil_warn(_tmpD92,_tmpD91,_tag_dyneither(_tmp73A,sizeof(void*),0));});});goto _LL644;default: _LL64D: _LL64E:
 # 3665
- if(w > 64)({void*_tmp73C=0;({unsigned int _tmpD94=loc;struct _dyneither_ptr _tmpD93=({const char*_tmp73D="bitfield larger than type";_tag_dyneither(_tmp73D,sizeof(char),26);});Cyc_Tcutil_terr(_tmpD94,_tmpD93,_tag_dyneither(_tmp73C,sizeof(void*),0));});});goto _LL644;}_LL644:;}
+ if(w > 64)({void*_tmp73C=0;({unsigned int _tmpD94=loc;struct _dyneither_ptr _tmpD93=({const char*_tmp73D="bitfield larger than type";_tag_dyneither(_tmp73D,sizeof(char),26);});Cyc_Tcutil_warn(_tmpD94,_tmpD93,_tag_dyneither(_tmp73C,sizeof(void*),0));});});goto _LL644;}_LL644:;}
 # 3667
 goto _LL63F;}else{_LL642: _LL643:
 # 3669
