@@ -57,12 +57,14 @@ return statement:
     }
 \end{verbatim}
 
-A C compiler will compile and run this version.  However, it's not
-valid Cyclone code: it will be rejected by the Cyclone compiler.
-Cyclone requires a \emph{definite return}: any function with a return
-type other than \texttt{void} must explicitly return a value of the
-correct type.  Since \texttt{main} is declared with return type
-\texttt{int}, Cyclone requires that it returns an integer.
+A C compiler will compile and run this version without warning.  
+In contrast, Cyclone will warn that you have failed to return
+an \texttt{int}.  Cyclone only warns you when you fail to return
+an integral type (\texttt{char}, \texttt{short}, \texttt{int}, etc.) 
+but it gives an error if you fail to return
+other types (e.g., pointer types).  This requirement of
+\emph{definite return} ensures type safety while imposing
+minimal constraints on a programmer porting C code to Cyclone.
 
 Definite return reflects Cyclone's concern with safety.  The caller of
 the function expects to receive a value of the return type; if the
@@ -70,8 +72,8 @@ function does not execute a \texttt{return} statement, the caller will
 receive some incorrect value instead.  If the returned value is supposed
 to be a pointer, the caller might try to dereference it, and
 dereferencing an arbitrary address can cause the program to crash.  So,
-Cyclone requires a return statement (even if the return type is not a
-pointer type).
+Cyclone requires a return statement with a value of the return
+type whenever type safety can be compromised.  
 
 \subsection{Pointers}
 
@@ -80,7 +82,7 @@ But when pointers are used improperly in C, they cause core dumps and
 buffer overflows.  To prevent this, Cyclone introduces different kinds
 of pointers and either (a) puts some restrictions on how you can use pointers
 of a given kind or (b) places no restrictions but may insert additional
-run-time checks.  
+run-time checks.
 
 \subsubsection*{Nullable Pointers}
 
@@ -105,14 +107,14 @@ Cyclone:
 \item You can't cast an integer to a pointer.  Cyclone prevents this
   because it would let you overwrite arbitrary memory locations.  In
   Cyclone, \texttt{NULL} is a keyword suitable for situations where
-  you would use a (casted) \texttt{0} in C\@.  The compiler usually
+  you would use a (casted) \texttt{0} in C\@.  The compiler 
   accepts \texttt{0} as a legal possibly-null pointer value, but using
   \texttt{NULL} is preferred.
 \item You can't do pointer arithmetic on a \texttt{*} pointer.
   Pointer arithmetic in C can take a pointer out of bounds, so that
   when the pointer is eventually dereferenced, it corrupts memory or
   causes a crash.  (However, pointer arithmetic is possible
-  using \texttt{?}\ pointers.)
+  using \texttt{?}\ and \texttt{ZEROTERM} pointers.)
 \item There is one other way to crash a C program using pointers: you
   can dereference the null pointer or try to update the null location.
   Cyclone prevents this by inserting a null check whenever you
@@ -126,7 +128,7 @@ pointer arithmetic.  The benefit is that you can't cause a crash using
 
 \subsubsection*{Fat Pointers}
 
-If you need to do pointer arithmetic in Cyclone, you must use a second
+If you need to do pointer arithmetic in Cyclone, you can use a second
 kind of pointer, called a \emph{fat pointer} and indicated by \texttt{?}\ 
 (the question mark).  For
 example, here is a program that echoes its command-line arguments:
@@ -232,6 +234,132 @@ will find that many functions return \texttt{@} pointers, so many of
 the pointers you deal with will already be \texttt{@} pointers, and
 neither the caller nor the called function needs to do null
 checks---and this is perfectly safe.
+
+\subsubsection*{Zero-Terminated Pointers}
+
+Fat pointers support arbitrary pointer arithmetic and subscripting
+but they don't have the same representation as pointers in C.  This
+is because we need extra information to determine the bounds and
+ensure a subscript or dereference is in bounds.  Unfortunately,
+this change in representations can make it difficult to interface
+with legacy C code where the representations might not be easily
+changed.  
+
+Fortunately, Cyclone supports one more pointer type where the
+representation matches C's and yet supports a limited form of
+pointer arithmetic and subscripting:  the zero-terminated pointer.
+A zero-terminated pointer is a pointer to a sequence of elements
+that are guaranteed to be terminated with a zero.  A good
+example of such a sequence is C's strings.  In Cyclone, we
+the type of C's strings can be written as \texttt{char *ZEROTERM}.
+The \texttt{ZEROTERM} qualifier indicates that the pointer
+points to a zero-terminated sequence and can be placed on
+thin pointers (\texttt{*} and \texttt{@}) and fat pointers (\texttt{?}).
+
+Because C strings arise so frequently, the types \texttt{char*}, 
+\texttt{char@} and \texttt{char?} are by default qualified
+with \texttt{ZEROTERM}.  Other types (e.g., \texttt{int*}) are
+not but you can put the qualifier in explicitly when you want
+this property.  You can override the \texttt{ZEROTERM} qualifier
+on \texttt{char} pointers by putting in an explicit
+\texttt{NOZEROTERM} qualifier (e.g., \texttt{char*NOZEROTERM}.)
+
+If \texttt{x} is a thin, zero-terminated pointer, then you can
+do a subscript (e.g., \texttt{x[i]}) or pointer arithmetic
+(e.g., \texttt{x+i}) but the compiler inserts checks
+to ensure that (a) i is non-negative and (b) there is no
+zero between \texttt{x[0]} and \texttt{x[i-1]} inclusive.
+This ensures that you can't read past the zero.  
+In addition, when writing to a zero-terminated pointer, the
+compiler inserts checks to ensure that you don't replace
+the final zero with some other value.  This is crucial for
+ensuring that a buffer overrun cannot occur.  
+
+Because subscripts and pointer arithmetic on zero-terminated
+thin pointers must check to see if you pass a zero, these operations
+can be fairly expensive.  In particular, if you are not careful,
+you can turn what appears to be an \emph{O(n)} algorithm into
+an \emph{O(n-squared)} one.  You can avoid this overhead by
+casting the pointer to a fat zero-terminated pointer.  This
+computes the length of the sequence once and then then uses
+the bounds information associated with the fat pointer to do
+any bounds checks.  
+
+These constraints on zero-terminated pointers mean that you
+have to be careful when porting code.  For instance, consider
+the following function:
+\begin{verbatim}
+  void foo(char *s, int offset) {
+     unsigned int len = strlen(s);
+     for (unsigned int i = 0; offset+i < len; i++)
+        s[offset+i] = 'a';
+  }
+\end{verbatim}
+This code can be quite expensive when \texttt{offset} is large
+because the compiler must check that there is no intervening
+zero between \texttt{s[0]} and \texttt{s[offset+i]} for each
+iteration of the loop.  You can get rid of this overhead by
+rewriting the code as follows:
+\begin{verbatim}
+  void foo(char *s, int offset) {
+     unsigned int len = strlen(s);
+     s += offset;
+     for (unsigned int i = 0; offset+i < len; i++, s++)
+        *s = 'a';
+  }
+\end{verbatim}
+Now the compiler is only checking that \texttt{*s} is not
+zero when it does the increment \texttt{s++}.  In addition,
+however, the compiler is checking each time you do \texttt{*s = 'a'}
+that \texttt{*s} is not zero, for then you could overwrite
+the zero with an \texttt{'a'} and potentially step outside
+the bounds of the buffer. 
+
+One way to get rid of all of this check is to cast \texttt{s}
+to a non-zero-terminated fat pointer before entering the loop.
+When you cast a zero-terminated pointer to a non-zero-terminated
+fat pointer, the compiler calculates the length of the sequence
+once, decrements it by one and then builds an appropriate
+fat pointer with this bounds information.  Now when doing 
+updates the bounds check on the array keep you from writing
+any value into the last location.  Furthermore, if you write
+the code in a straightforward fashion using subscripting,
+the compiler is more likely to eliminate the bounds checks.
+Here is an example:
+\begin{verbatim}
+  void foo(char *s, int offset) {
+    char ?NOZEROTERM fat_s = (char ?NOZEROTERM)s;
+    unsigned int len; 
+    fat_s += offset;
+    len = fat_s.size;    
+    for (unsigned int i = 0; i < len; i++)
+      fat_s[i] = 'a';
+  }
+\end{verbatim}
+The C code generated by the compiler looks something like this:      
+\begin{verbatim}
+struct _tagged_arr { 
+  char *base;
+  char *curr;
+  char *last;
+};
+
+void Cyc_foo(char *s,int offset){
+  struct _tagged_arr fat_s = {s, s, strlen(s)};
+  unsigned int len;
+  fat_s.curr += offset;
+  if (fat_s.curr < fat_s.base || fat_s.curr >= fat_s.last) 
+    len = 0;
+  else 
+    len = fat_s.last - fat_s.curr;
+  { unsigned int i = 0;
+    for(0; i < len; i++)
+      fat_s.curr[i] = 'a';
+  }
+}
+\end{verbatim}
+Notice that here, the compiler is able to eliminate all bounds
+checks within the loop and still ensure safety.
 
 \subsubsection*{Initializing Pointers}
 
@@ -1317,7 +1445,7 @@ familiar.  The basic idea is that you can write one function that
 abstracts the types of some of the values it manipulates.  For
 instance, consider the following two functions:
 \begin{verbatim}
-  $(string_t,int) swap1($(int,string_t) x) {
+  $(char*,int) swap1($(int,char*) x) {
      return $(x[1], x[0]);
   }
   $(int,int) swap2($(int,int) x) {
@@ -1328,7 +1456,7 @@ instance, consider the following two functions:
 The two functions are quite similar: They both take in a pair (i.e., a
 2-tuple) and return a pair with the components swapped.  At the
 machine-level, the code for these two functions will be exactly the
-same, assuming that \texttt{int}s and \texttt{string_t}s (\texttt{char *}) are
+same, assuming that \texttt{int}s and \texttt{char *}s are
 represented the same way.  So it seems silly to write the code twice.
 Normally, a C programmer would replace the definition with simply:
 \begin{verbatim}
@@ -1487,9 +1615,6 @@ Though Cyclone adds many new features to C, there are also a number
 of restrictions that it must enforce to ensure code does not crash.
 Here is a list of the major restrictions:
 \begin{itemize}
-\item Cyclone requires every function to declare a return type (the
-  implicit int for the return type of a function is removed).
-
 \item Cyclone does not permit some of the casts that are allowed in C because
   incorrect casts can lead to crashes, and it is not always possible
   for us to determine what is safe.  In general, you should be
@@ -1499,7 +1624,9 @@ Here is a list of the major restrictions:
   the size or alignment constraints of your C compiler.  
 
 \item Cyclone does not support pointer arithmetic on \texttt{*} or
-  \texttt{@} pointers.  Pointer arithmetic is not unsafe in itself, but
+  \texttt{@} pointers unless they are zero-terminated and even then,
+  there are checks to make sure you can't go past a zero.  Pointer 
+  arithmetic is not unsafe in itself, but
   it can lead to unsafe code when the resulting pointer is assigned or
   dereferenced.  You can cast the \texttt{*} or \texttt{@} value to a
   \texttt{?}\ value and then do the pointer arithmetic instead.
@@ -1525,7 +1652,10 @@ Here is a list of the major restrictions:
   baked in. Tuples and structs can be allocated via \texttt{malloc}
   but this requires writing explicitly: \texttt{malloc(sizeof(t))}
   where t is the type of the value that you are allocating.  You
-  cannot use \texttt{malloc} to allocate an array.
+  can \texttt{malloc} arrays (e.g., \texttt{malloc(sizeof(int)*34)})
+  but the type must be ``bits-only'' (i.e., not contain pointer types.)
+  You can use \texttt{calloc} to allocate arrays of (possibly NULL)
+  pointers (e.g., \texttt{calloc(sizeof(char*),34)}).  
 
 \item Cyclone performs a static analysis to ensure that every variable
   and every \texttt{struct} field is initialized before it is used. This
@@ -1588,9 +1718,6 @@ instance:
 
 \item Cyclone does not allow a typedef declaration to be shadowed by
 another declaration.
-
-\item In some cases, Cyclone does not allow 0 (zero) to be treated as 
-the NULL pointer.
 \end{itemize}
 
 
