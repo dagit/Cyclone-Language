@@ -698,8 +698,17 @@ void process_break(tenv_t te, stmt_t s, stmt_opt_t @sopt) {
     // Note doing this here is more conservative than in control-flow.
     // Eg: while(true) if(false) break; else return 0;
     // But it's a pain to do in control flow because there is no stmt dest
-    if(shared->return_typ != (type_t)&VoidType_val)
-      terr(s->loc, "break causes function not to return a value");
+    switch (Tcutil::compress(shared->return_typ)) {
+    case &VoidType: break;
+    case &DoubleType(_):
+    case &FloatType: 
+    case &IntType(_,_):
+      Tcutil::warn(s->loc,"break may cause function not to return a value"); 
+      break;
+    default:
+      Tcutil::terr(s->loc,"break may cause function not to return a value"); 
+      break;
+    }
     return;
   case &CaseEnd_j:
     // Analogous comment to previous case applies.
