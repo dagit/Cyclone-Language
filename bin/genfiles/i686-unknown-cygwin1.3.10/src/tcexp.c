@@ -1946,9 +1946,10 @@ Cyc_Absyn_TupleType_struct*)_tmp2C0)->f1;_LL1B1: if(((int(*)(struct Cyc_List_Lis
 x))Cyc_List_length)(_tmp2C1)!= ((int(*)(struct Cyc_List_List*x))Cyc_List_length)(
 es))goto _LL1AF;for(0;es != 0;(es=es->tl,_tmp2C1=_tmp2C1->tl)){void*_tmp2C2=(*((
 struct _tuple9*)((struct Cyc_List_List*)_check_null(_tmp2C1))->hd)).f2;Cyc_Tcexp_tcExpInitializer(
-te,(void**)& _tmp2C2,(struct Cyc_Absyn_Exp*)es->hd);fields=({struct Cyc_List_List*
-_tmp2C3=_cycalloc(sizeof(*_tmp2C3));_tmp2C3->hd=({struct _tuple9*_tmp2C4=
-_cycalloc(sizeof(*_tmp2C4));_tmp2C4->f1=(*((struct _tuple9*)_tmp2C1->hd)).f1;
+te,(void**)& _tmp2C2,(struct Cyc_Absyn_Exp*)es->hd);Cyc_Tcutil_coerce_arg(te,(
+struct Cyc_Absyn_Exp*)es->hd,(*((struct _tuple9*)_tmp2C1->hd)).f2);fields=({struct
+Cyc_List_List*_tmp2C3=_cycalloc(sizeof(*_tmp2C3));_tmp2C3->hd=({struct _tuple9*
+_tmp2C4=_cycalloc(sizeof(*_tmp2C4));_tmp2C4->f1=(*((struct _tuple9*)_tmp2C1->hd)).f1;
 _tmp2C4->f2=(void*)((struct Cyc_Core_Opt*)_check_null(((struct Cyc_Absyn_Exp*)es->hd)->topt))->v;
 _tmp2C4;});_tmp2C3->tl=fields;_tmp2C3;});}done=1;goto _LL1AF;_LL1B2:;_LL1B3: goto
 _LL1AF;_LL1AF:;}if(!done)for(0;es != 0;es=es->tl){Cyc_Tcexp_tcExpInitializer(te,0,(

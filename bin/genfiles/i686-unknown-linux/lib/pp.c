@@ -499,13 +499,13 @@ void*Cyc_Xarray_get(struct Cyc_Xarray_Xarray*,int);void Cyc_Xarray_set(struct Cy
 int,void*);struct Cyc_Xarray_Xarray*Cyc_Xarray_create(int,void*);void Cyc_Xarray_add(
 struct Cyc_Xarray_Xarray*,void*);struct Cyc_PP_Single_struct{int tag;void*f1;};
 struct Cyc_PP_Append_struct{int tag;void*f1;void*f2;};void*Cyc_PP_append(void*a1,
-void*a2){if(a1 == (void*)0)return a2;else{if(a2 == (void*)0)return a1;else{return(
-void*)({struct Cyc_PP_Append_struct*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0[0]=({
-struct Cyc_PP_Append_struct _tmp1;_tmp1.tag=1;_tmp1.f1=(void*)a1;_tmp1.f2=(void*)
-a2;_tmp1;});_tmp0;});}}}struct Cyc_List_List*Cyc_PP_list_of_alist_f(void*y,struct
-Cyc_List_List*l){void*_tmp2=y;void*_tmp3;void*_tmp4;void*_tmp5;_LL1: if((int)
-_tmp2 != 0)goto _LL3;_LL2: return l;_LL3: if(_tmp2 <= (void*)1?1:*((int*)_tmp2)!= 0)
-goto _LL5;_tmp3=(void*)((struct Cyc_PP_Single_struct*)_tmp2)->f1;_LL4: return({
+void*a2){if(a1 == (void*)((void*)0))return a2;else{if(a2 == (void*)((void*)0))
+return a1;else{return(void*)({struct Cyc_PP_Append_struct*_tmp0=_cycalloc(sizeof(*
+_tmp0));_tmp0[0]=({struct Cyc_PP_Append_struct _tmp1;_tmp1.tag=1;_tmp1.f1=(void*)
+a1;_tmp1.f2=(void*)a2;_tmp1;});_tmp0;});}}}struct Cyc_List_List*Cyc_PP_list_of_alist_f(
+void*y,struct Cyc_List_List*l){void*_tmp2=y;void*_tmp3;void*_tmp4;void*_tmp5;_LL1:
+if((int)_tmp2 != 0)goto _LL3;_LL2: return l;_LL3: if(_tmp2 <= (void*)1?1:*((int*)_tmp2)
+!= 0)goto _LL5;_tmp3=(void*)((struct Cyc_PP_Single_struct*)_tmp2)->f1;_LL4: return({
 struct Cyc_List_List*_tmp6=_cycalloc(sizeof(*_tmp6));_tmp6->hd=(void*)_tmp3;_tmp6->tl=
 l;_tmp6;});_LL5: if(_tmp2 <= (void*)1?1:*((int*)_tmp2)!= 1)goto _LL0;_tmp4=(void*)((
 struct Cyc_PP_Append_struct*)_tmp2)->f1;_tmp5=(void*)((struct Cyc_PP_Append_struct*)

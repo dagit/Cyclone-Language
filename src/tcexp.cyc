@@ -1316,6 +1316,8 @@ static type_t tcTuple(tenv_t te, seg_t loc, type_t * topt, list_t<exp_t> es) {
       for(; es != NULL; es = es->tl, ts = ts->tl) {
 	let topt2 = (*ts->hd)[1];
 	tcExpInitializer(te,&topt2,es->hd);
+        // try to coerce the argument to the result type
+        coerce_arg(te,es->hd,(*ts->hd)[1]);
 	fields = new List(new $((*ts->hd)[0], es->hd->topt->v), fields);
       }
       done = true;

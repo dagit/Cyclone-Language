@@ -365,7 +365,7 @@ list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE *`H, FILE @`H) @`H para
   if (fi == NULL) {
     Interface::save(i1, fo);
   } else {
-    let i0 = Interface::parse((FILE @) fi);
+    let i0 = Interface::parse(fi);
     if (!Interface::is_subinterface(i0, i1, new $("written interface", "maximal interface")))
       compile_failure = true;
     else
@@ -609,9 +609,9 @@ static void process_file(string_t<`H> filename) {
 
   // Check that the input file exists
   FILE * f0 = try_file_open(filename, "r", "input file");
-  if (compile_failure)
+  if (compile_failure || !f0)
     return;
-  fclose((FILE @)f0);
+  fclose(f0);
 
   // Run the preprocessor, by building and running a command-line
   // Pass -I and -D things onto preprocessor
@@ -728,8 +728,8 @@ static void process_file(string_t<`H> filename) {
     }
     Position::reset_position(interfacefile);
     tds = do_stage("interface checking", do_interface,
-                   new $(te, inter_file, (FILE @)inter_objfile), tds);
-    if (inter_file != NULL)
+                   new $(te, inter_file, inter_objfile), tds);
+    if (inter_file != NULL) 
       file_close(inter_file);
     file_close(inter_objfile);
   }
@@ -764,14 +764,14 @@ static void process_file(string_t<`H> filename) {
   else
     out_file = try_file_open(cfile,"w","output file");
   
-  if (compile_failure) return;
+  if (compile_failure || !out_file) return;
   
   try
-    tds = do_stage("printing", do_print, (FILE @)out_file, tds);
+    tds = do_stage("printing", do_print, out_file, tds);
   catch {
   case x:
     compile_failure = true;
-    file_close((FILE @)out_file);
+    file_close(out_file);
     cfiles = new List(new ((string_t)cfile),cfiles);
     throw x;
   }
