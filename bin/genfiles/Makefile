@@ -22,8 +22,12 @@ $(CYC_BIN_PATH)/cycdoc$(EXE): $(ARCH)/src/cycdoc$(EXE)
 $(CYC_BIN_PATH)/buildlib$(EXE): $(ARCH)/src/buildlib$(EXE)
 	cp $< $@
 
-install_a: $(ARCH)/lib/libcyc_a.a $(ARCH)/lib/nogc_a.a
-	cp $^ $(CYC_LIB_PATH)
+install_a: $(CYC_LIB_PATH)/libcyc_a.a $(CYC_LIB_PATH)/nogc_a.a
+
+$(CYC_LIB_PATH)/libcyc_a.a: $(ARCH)/lib/libcyc_a.a
+	cp $< $@
+$(CYC_LIB_PATH)/nogc_a.a: $(ARCH)/lib/nogc_a.a
+	cp $< $@
 
 # architecture-specific targets
 

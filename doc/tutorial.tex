@@ -232,6 +232,16 @@ the pointers you deal with will already be \texttt{@} pointers, and
 neither the caller nor the called function needs to do null
 checks---and this is perfectly safe.
 
+\subsubsection*{Initializing Pointers}
+
+Pointers must be initialized before they are used to ensure that random
+stack garbage does not get used as a pointer.  This requirement goes for
+variables that have pointer type, as well for arrays, elements of arrays,
+and for fields in structures.  Conversely, data that does not have pointer
+type need not be initialized before it is used, since doing so cannot result
+in a violation of safety.  This decision adheres to the philosophy of C, but
+diverges from that of traditional type-safe languages like Java and ML.
+
 \subsubsection*{Other features of pointers}
 
 There's much more to Cyclone pointers than we've described here.  

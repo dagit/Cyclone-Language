@@ -108,9 +108,6 @@ through \texttt{e}.
 \paragraph{Future}
 
 \begin{itemize}
-\item We may allow an implicit cast from 0 to a pointer type, as in
-  C\@.  Currently 0 must have a numeric type, even though \texttt{NULL}
-  is implemented as address 0.  This change would make porting easier.
 \item We may use dataflow information to avoid spurious warning about
   implicit casts from \texttt{t*} to \texttt{t@} and to avoid
   inserting unnecessary checks.  However, the analysis is
