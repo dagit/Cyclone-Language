@@ -31,7 +31,8 @@ ifdef MS
 endif
 
 # needed for booting
-CYCLONE_BOOT_LIBS:=arg\
+CYCLONE_BOOT_LIBS:=ap\
+        arg\
         assert\
         buffer\
         core\
@@ -50,7 +51,8 @@ CYCLONE_BOOT_LIBS:=arg\
         set\
         slowdict\
         string\
-        xarray
+        xarray\
+        xp
 
 # other bits of the standard library
 CYCLONE_LIBS:=array\
@@ -63,7 +65,8 @@ CYCLONE_LIBS:=array\
         splay\
 	tmp
 
-CYCLONE_H:=arg.h\
+CYCLONE_H:=ap.h\
+	arg.h\
 	array.h\
 	assert.h\
 	binding.h\
@@ -94,6 +97,7 @@ CYCLONE_H:=arg.h\
 	sys/cioctl.h\
 	sys/ioctl.h\
 	xarray.h\
+	xp.h\
 	warn.h
 
 CYCLONE_SRCS:=absyn\
@@ -106,7 +110,7 @@ CYCLONE_SRCS:=absyn\
 	 rgnorder\
          tcenv\
          tcutil\
-         relations\
+         relations-ap\
          tcstmt\
          tcpat\
          tcexp\
@@ -114,7 +118,7 @@ CYCLONE_SRCS:=absyn\
          evexp\
          tc\
          binding\
-         pratt\
+         pratt-ap\
          jump_analysis\
          cf_flowinfo\
          new_control_flow\
