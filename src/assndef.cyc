@@ -50,7 +50,7 @@ string_t term2string(term_t t) {
   case &Primop(p,&List{t,_}):
     return aprintf("%s(%s)",Absynpp::prim2string(p),term2string(t));
   case &Cast(tp,tm):
-    return aprintf("(%s)%s",Absynpp::typ2string(tp),term2string(t));
+    return aprintf("(%s)%s",Absynpp::typ2string(tp),term2string(tm));
   default: Warn::impos("term2string primop args");
   }
 }
