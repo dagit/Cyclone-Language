@@ -18,11 +18,11 @@
 int
 main(int argc, char ??argv) {
     int n = ((argc == 2) ? atoi(argv[1]) : 1);
-    int i, k, ?x, ?y;
+    int i, k, ?`U x, ?`U y;
 
     START_TIME
-    x = (int ?) calloc(n, sizeof(int));
-    y = (int ?) calloc(n, sizeof(int));
+    x = (int ?`U) calloc(n, sizeof(int));
+    y = (int ?`U) calloc(n, sizeof(int));
 
     for (i = 0; i < n; i++) {
 	x[i] = i + 1;
@@ -35,8 +35,8 @@ main(int argc, char ??argv) {
 
     fprintf(stdout, "%d %d\n", y[0], y[n-1]);
 
-    free(x);
-    free(y);
+    Core::ufree(x);
+    Core::ufree(y);
     END_TIME
     return(0);
 }

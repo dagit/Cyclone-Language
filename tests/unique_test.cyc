@@ -6,8 +6,11 @@
 int rand() { return 7; }
 void g(int x, int y) {}
 
+// make sure we don't needlessly consume things
 void f() {
-  int *`U x = new 3;
+  int *`U x = malloc(sizeof(int));
+  if (!x) fprintf(stderr,"malloc failed!\n");
+  else *x = 3;
 }
 
 #ifdef ONE

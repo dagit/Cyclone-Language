@@ -11,8 +11,8 @@
 
 #define MAXLINELEN 128
 
-char ?strrealloc(char ?buf, unsigned sz) {
-  char ?res = calloc(sz,sizeof(char));
+char ?`U strrealloc(char ?buf, unsigned sz) {
+  char ?`U res = calloc(sz,sizeof(char));
   unsigned i = numelts(buf);
   for (unsigned j = 0; j < i; j++)
     res[j] = buf[j];
@@ -22,7 +22,7 @@ char ?strrealloc(char ?buf, unsigned sz) {
 int main(int argc, char ?argv[]) {
     int i, wordbufsize = 80;
     char line[MAXLINELEN+1]ZEROTERM = {for i < MAXLINELEN : 0};
-    char c, ?cp, ?wordbuf;
+    char c, ?cp, ?`U wordbuf;
     struct ht_ht @dict;
     FILE *fh;
     START_TIME
@@ -38,7 +38,8 @@ int main(int argc, char ?argv[]) {
 	    if (isspace(*cp)) {
 		if (i > 0) {
 		    wordbuf[i] = '\0';
-		    ht_find_new(dict, wordbuf)->val = 1;
+		    alias <`r> x = (char ?`r)wordbuf;
+		    ht_find_new(dict, x)->val = 1;
 		    i = 0;
 		}
 	    } else {
@@ -58,8 +59,10 @@ int main(int argc, char ?argv[]) {
 	    if (isspace(*cp)) {
 		if (i > 0) {
 		    wordbuf[i] = '\0';
-		    if (ht_find(dict, wordbuf) == NULL) {
-			printf("%s\n", wordbuf);
+		    { alias <`r> xwordbuf = (char ?`r)wordbuf;
+		    if (ht_find(dict, xwordbuf) == NULL) {
+			printf("%s\n", xwordbuf);
+		    }
 		    }
 		    i = 0;
 		}
@@ -72,7 +75,7 @@ int main(int argc, char ?argv[]) {
 	    } 
         }
     }
-    free(wordbuf);
+    Core::ufree(wordbuf);
     ht_destroy(dict);
     END_TIME
     return(0);

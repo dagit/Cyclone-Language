@@ -4414,8 +4414,10 @@ static bool is_noalias_path_aux(region_t<`r> r, exp_t e,bool ignore_leaf) {
       default: Tcutil::impos("is_noalias_stmt_exp: ill-formed StmtExp");
       }
     }
-  default: Tcutil::impos("Called is_noalias_path_aux with bogus exp |%s|\n",
-			 exp2string(e));
+  default: 
+    return false; // error, but some other part of program will deal
+//     Tcutil::impos("Called is_noalias_path_aux with bogus exp |%s|\n",
+// 		  exp2string(e));
   }
 }
 bool is_noalias_path(region_t<`r> r, exp_t e) {

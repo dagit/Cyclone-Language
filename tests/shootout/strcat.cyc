@@ -10,8 +10,8 @@
 
 #define STUFF "hello\n"
 
-char ?strrealloc(char ?buf, unsigned sz) {
-  char ?res = calloc(sz,sizeof(char));
+char ?`U strrealloc(char ?buf, unsigned sz) {
+  char ?`U res = calloc(sz,sizeof(char));
   unsigned i = numelts(buf);
   for (unsigned j = 0; j < i; j++)
     res[j] = buf[j];
@@ -22,10 +22,11 @@ int
 main(int argc, char ?argv[]) {
     int n = ((argc == 2) ? atoi(argv[1]) : 1);
     int i, buflen = 32;
-    char ?strbuf, ?strend;
     int stufflen;
     START_TIME
-    strbuf = calloc(buflen, sizeof(char));
+    char ?`U buf = calloc(buflen, sizeof(char));
+    { alias <`r> strbuf = (char ?`r)buf;
+    char ?strend;
     strend = strbuf;
     stufflen = strlen(STUFF);
 
@@ -42,7 +43,8 @@ main(int argc, char ?argv[]) {
 	strend += stufflen;
     }
     fprintf(stdout, "%d\n", strlen(strbuf));
-    free(strbuf);
+    }
+    Core::ufree(buf);
     END_TIME
     return(0);
 }

@@ -14,9 +14,9 @@ int cmp_hash(struct ht_node *`H const @`H a, struct ht_node *`H const @`H b) {
     return((val == 0) ? strcmp((*b)->key, (*a)->key) : val);
 }
 
-char ?strrealloc(char ?buf, unsigned sz) {
-  char ?res = calloc(sz,sizeof(char));
-  unsigned i = buf.size;
+char ?`U strrealloc(char ?buf, unsigned sz) {
+  char ?`U res = calloc(sz,sizeof(char));
+  unsigned i = numelts(buf);
   for (unsigned j = 0; j < i; j++)
     res[j] = buf[j];
   return res;
@@ -24,7 +24,7 @@ char ?strrealloc(char ?buf, unsigned sz) {
 
 int main() {
     int bufsize = 80;
-    char ?buf;
+    char ?`U buf;
     char c;
     int i = 0;
     struct ht_ht @ht;
@@ -43,12 +43,13 @@ int main() {
         } else {
 	    if (i > 0) {
 		buf[i] = '\0';
-		++(ht_find_new(ht, buf)->val);
+		{ alias <`r> xbuf = (char ?`r)buf;
+		++(ht_find_new(ht, xbuf)->val); }
 		i = 0;
 	    }
         }
     }
-    free(buf);
+    Core::ufree(buf);
 
     sort_array = sort_tmp =
         calloc(ht_count(ht)+1,sizeof(struct ht_node *));
