@@ -25,8 +25,9 @@
 #include <string.h>
 #include <dict.h>
 #include <filename.h>
-#include "parse.h"
 #include <position.h>
+#include <ctype.h>
+#include "parse.h"
 #include "absyn.h"
 #include "absynpp.h"
 #include "absyndump.h"
@@ -199,14 +200,16 @@ static void set_lineno() {
   generate_line_directives_r = true;
   set_save_temps();
 }
-
-static void set_tovc() {
-  elim_se_r = true;
-  tovc_r = true;
-}
-
 static void set_inline_functions() {
   add_ccarg("-D_INLINE_FUNCTIONS");
+}
+static void set_elim_se() {
+  elim_se_r = true;
+  set_inline_functions();
+}
+static void set_tovc() {
+  tovc_r = true;
+  set_elim_se();
 }
 static void set_noboundschecks() {
   add_ccarg("-DNO_CYC_BOUNDS_CHECKS");
@@ -294,9 +297,160 @@ static void remove_file(string_t<`H> s) {
   else remove((const char @)s);
 }
 
+/**********************************************************************/
+/* Reading a specs file */
+
+#define MAXSTRNAME 256
+#define MAXSTRVALUE 4096
+
+list_t<$(const char ?@,const char ?@)@> read_specs(const char ?file) {
+  let result = NULL;
+  int c; 
+  int i;
+  char strname[MAXSTRNAME];
+  char strvalue[MAXSTRVALUE];
+  FILE *spec_file = fopen((const char @)file, "r");
+
+  if (spec_file == NULL) {
+    fprintf(stderr, "Error opening spec file %s\n",file);
+    fflush(stderr);
+    return NULL;
+  }
+
+  while (true) { // exited by goto only
+    while (true) { // get rid of leading whitespace, find '*'
+      c = fgetc(spec_file);    
+      if (isspace(c)) continue;
+      if (c == '*') break;
+      if (c != EOF) {
+        fprintf(stderr,
+                "Error reading spec file %s: unexpected character '%c'\n",
+                file,c);
+        fflush(stderr);
+      }
+      goto CLEANUP_AND_RETURN;
+    }
+  JUST_AFTER_STAR:
+    i = 0;
+    while (true) { // read command name up to ':'
+      c = fgetc(spec_file);    
+      if (c == EOF) {
+        fprintf(stderr,
+                "Error reading spec file %s: unexpected EOF\n",
+                file);
+        fflush(stderr);
+        goto CLEANUP_AND_RETURN;
+      } 
+      if (c == ':') {
+        strname[i] = 0;
+        break;
+      }
+      strname[i] = (char)c;
+      i++;
+      if (i >= MAXSTRNAME) {
+        fprintf(stderr,
+                "Error reading spec file %s: string name too long\n",
+                file);
+        fflush(stderr);
+        goto CLEANUP_AND_RETURN;
+      }
+    }
+    while (true) { // skip whitespace
+      c = fgetc(spec_file);
+      if (isspace(c)) continue;
+      break;
+    } 
+    if (c == '*') { // if next char is '*', then strvalue are empty
+      // NB: this prevents a string value from starting with '*'
+      result = new List(new $(new (const char ?)strdup(strname),
+                              new (const char ?)strdup("")),result);
+      goto JUST_AFTER_STAR; // continue with next command
+    }
+    // otherwise read strvalue
+    strvalue[0] = (char)c;
+    i = 1;
+    while (true) { // read string up to end of line or file
+      c = fgetc(spec_file);
+      if (c == EOF || c == '\n' || c == '\r') { strvalue[i] = 0; break; }
+      strvalue[i] = (char)c;
+      i++;
+      if (i >= MAXSTRVALUE) {
+        fprintf(stderr,
+                "Error reading spec file %s: value of %s too long\n",
+                file,strname);
+        fflush(stderr);
+        goto CLEANUP_AND_RETURN; // this strname/option pair is dropped
+      }
+    }
+    // TODO: perhaps we should remove whitespace from the end of the line??
+    result = new List(new $(new (const char ?)strdup(strname),
+                            new (const char ?)strdup(strvalue)),result);
+    if (c == EOF) goto CLEANUP_AND_RETURN;
+  }
+
+ CLEANUP_AND_RETURN:
+  fclose(spec_file);
+  return result;
+}
+// After reading a specs file we might want to split a line into
+// command line arguments
+string_t<`H> ?`H split_specs(const char ?cmdline) {
+  if (cmdline == NULL) return NULL;
+  let n = strlen(cmdline);
+  let l = NULL;
+  char buf[MAXSTRVALUE]NOZEROTERM;
+  int i = 0;
+  int j = 0;
+  if (n > MAXSTRVALUE) goto DONE; // silently fail
+  while (true) {
+    // Get rid of leading spaces
+    while (true) {
+      if (i >= n) goto DONE;
+      if (cmdline[i] == 0) goto DONE;
+      if (!isspace(cmdline[i])) break;
+      i++;
+    }
+    j = 0;
+    // i points to a non-space.  Advance it to the next position
+    // which is not part of this word, e.g., a non-escaped space,
+    // zero terminator, or one past the end of the string; copy
+    // the argument to buf.
+    while (true) {
+      if (i >= n) break;
+      if (cmdline[i] == 0) break;
+      if (isspace(cmdline[i])) break;
+      if (cmdline[i] == '\\') {
+        // backslash escapes next char, whatever it is
+        i++;
+        if (i >= n) break;
+        if (cmdline[i] == 0) break;
+        buf[j] = cmdline[i];
+        j++;
+      }
+      else {
+        buf[j] = cmdline[i];
+        j++;
+      }
+      i++;
+    }
+    if (j < MAXSTRVALUE) // Invariant: j<=i<=MAXSTRVALUE
+      buf[j] = 0;
+    // extract the characters from i up to but not including j
+    l = new List(new (const char ?)strdup(buf),l);
+  }
+ DONE:  
+  l = List::imp_rev(l);
+  l = new List(new "",l); // For the command, since we'll pass it to Arg::parse
+  let ptrarray = List::to_array(l);
+  let result = new { for k < ptrarray.size : *(ptrarray[k]) };
+  return result;
+}
+
+/**********************************************************************/
+
 bool compile_failure = false; // for exit code (helps Makefile)
 
-FILE * try_file_open(string_t filename, string_t mode, string_t msg_part) {
+FILE *try_file_open(string_t filename, string_t mode, string_t msg_part) {
   try return file_open(filename,mode);
   catch {
   default:
@@ -696,7 +850,8 @@ static void process_file(string_t<`H> filename) {
   else fixup_string = "";
 
   let cmd = aprintf("%s %s%s %s%s%s",
-	            cpp, cppargs_string, stdinc_string,
+	            cpp,
+                    cppargs_string, stdinc_string,
                     sh_escape_string(filename),
                     fixup_string, ofile_string);
 
@@ -862,8 +1017,41 @@ int main(int argc, string_t<`H> ?`H argv) {
      BSD systems (??) */
   GC_blacklist_warn_clear();
 
-  // parse the arguments
+  let cyclone_arch_path;
+  string_t def_lib_path;
+  string_t comp = Cstring_to_string(Ccomp);
+
+  // parse the command-line arguments
   region r {
+    // partition the arguments into (-B and -b) and others
+    let bindices = new {for i<argc: false};
+    let numbindices = 0;
+    int i,j,k;
+    for (i = 1; i<argc; i++) { //NB arg 0 is the command
+      if (strncmp("-B",argv[i],2) == 0) {
+        bindices[i] = true;
+        numbindices++;
+      }
+      else if (strcmp("-b",argv[i]) == 0) {
+        bindices[i] = true;
+        numbindices++;
+        i++; if (i>=argc) break;
+        bindices[i] = true;
+        numbindices++;
+      }
+    }
+
+    // FIX: have to heap allocate these because that's what Arg::parse wants
+    // FIX: maybe we should expose an Arg function to take args
+    //   one at a time, that would let us avoid the nonsense with argv[0]
+    let bargs = new { for n<numbindices+1 : (string_t)NULL };
+    let otherargs = new { for n<argc-numbindices : (string_t)NULL };
+    bargs[0] = otherargs[0] = argv[0];
+    for (i = j = k = 1; i<argc; i++) {
+      if (bindices[i]) bargs[j++] = argv[i];
+      else otherargs[k++] = argv[i];
+    }
+
     Arg::speclist_t<`r,`r> options =
     rlist(r,rnew(r)$("-v",false,"",
                rnew(r)Set_spec(&v_r),
@@ -975,8 +1163,9 @@ int main(int argc, string_t<`H> ?`H argv) {
                rnew(r)Clear_spec(&pp_r),
                "Ugly print"),
          rnew(r)$("-elim-statement-expressions",false,"",
-               rnew(r)Set_spec(&elim_se_r),
-               "Avoid statement expressions in C output"),
+                rnew(r)Unit_spec(set_elim_se),
+               "Avoid statement expressions in C output"
+               " (implies --inline-checks)"),
          rnew(r)$("-tovc",false,"",
                rnew(r)Unit_spec(set_tovc),
                "Avoid gcc extensions in C output"),
@@ -1055,39 +1244,61 @@ int main(int argc, string_t<`H> ?`H argv) {
          );
 
   string_t optstring = "Options:";
-  Arg::parse(options, add_other, optstring, argv);
-  } // end region r
-  if (cyclone_files == NULL && ccargs == NULL) {
-    fprintf(stderr,"missing file\n");
-    exit(1);
-  }
-  
+  Arg::current = 0;
+  Arg::parse(options, add_other, optstring, bargs);
+  // Having processed -B and -b, we can now construct the exec-path
+  // and arch-path
   if (target_arch == NULL) target_arch = Cstring_to_string(Carch);
-
-  // Find the file cyc_include.h, needed to produce the .c output.
-  // The Cyclone exec-path is specified with the following order (where
-  // the earlier in the order, the first place we look for the file):
+  // The Cyclone exec-path is a list of directories where special
+  // files (cyc_include.h, specs files, etc.) might be kept.
+  // It is specified with the following order (where the earlier in
+  // the order, the first place we look for the file):
   // 1) command line arguments (with -B)
   // 2) environment var (with CYCLONE_EXEC_PREFIX)
   // 3) hardwired in the build (by setting lib_path)
   string_t cyclone_exec_prefix = getenv("CYCLONE_EXEC_PREFIX");
   if (cyclone_exec_prefix != NULL)
     cyclone_exec_path = new List(new cyclone_exec_prefix, cyclone_exec_path);
-  string_t def_lib_path = Cstring_to_string(Cdef_lib_path);
+  def_lib_path = Cstring_to_string(Cdef_lib_path);
   if (strlen(def_lib_path) > 0)
     cyclone_exec_path =
      new List(new (const char ?)Filename::concat(def_lib_path, "cyc-lib"),
               cyclone_exec_path);
   cyclone_exec_path = List::imp_rev(cyclone_exec_path);
-  let cyclone_arch_path = also_subdir(cyclone_exec_path, target_arch);
+  cyclone_arch_path = also_subdir(cyclone_exec_path, target_arch);
 
-  string_t comp = Cstring_to_string(Ccomp);
-  if (strcmp(cpp,"") == 0) {
-    // if cpp string is not explicitly set, use the default
-    set_cpp(aprintf("%s -x c -E -specs %s",
-                    comp,do_find(cyclone_arch_path,"cycspecs")));
+  // Now we find the specs file and see if it has any default arguments
+  // for Cyclone (which will override defaults given here)
+  // NB: we chose "cycspecs" as the name of the specs file instead of
+  // the usual "specs" because if "specs" is used, gcc uses its own
+  // default file "specs" and not ours.
+  let specs_file = do_find(cyclone_arch_path,"cycspecs");
+  if (v_r) fprintf(stderr,"Reading from specs file %s\n",specs_file);
+  let specs = read_specs(specs_file);
+  let args_from_specs_file = NULL;
+  try {
+    let cyclone_args = *List::assoc_cmp(strptrcmp, specs, new "cyclone");
+    args_from_specs_file = split_specs(cyclone_args);
+  } catch {
+  case Not_found: break;
   }
-
+  if (args_from_specs_file != NULL) {
+    Arg::current = 0;
+    Arg::parse(options, add_other, optstring, args_from_specs_file);
+  }
+  // Finally parse the other command-line arguments
+  Arg::current = 0;
+  Arg::parse(options, add_other, optstring, otherargs);
+  if (strcmp(cpp,"") == 0)
+    // if cpp string is not explicitly set, use the default
+    set_cpp(aprintf("%s -x c -E -specs %s", comp,specs_file));
+  } // end region r
+  if (cyclone_files == NULL && ccargs == NULL) {
+    fprintf(stderr,"missing file\n");
+    exit(1);
+  }
+  
+  // Find the file cyc_include.h, needed to produce the .c output.
   /* The absolute file name is kept in a global variable */
   /* don't bother if we won't translate to C or if set explicitly */
   if (!stop_after_cpp_r && strlen(cyc_include) == 0)

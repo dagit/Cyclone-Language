@@ -1,5 +1,8 @@
+*cyclone:
+ -elim-statement-expressions
+
 *predefines:
 
 
 *cpp:
- -D__MACH__=1 -D__NATURAL_ALIGNMENT__=1 -D__APPLE__=1 -D__GNUC_MINOR__=95 -D__ppc__=1 -D__GNUC__=2 -D__STDC__=1 -D__DYNAMIC__=1 -D__APPLE_CC__=926 -D__BIG_ENDIAN__=1
+ -nostdinc -D__MACH__=1 -D__NATURAL_ALIGNMENT__=1 -D__APPLE__=1 -D__GNUC_MINOR__=95 -D__ppc__=1 -D__GNUC__=2 -D__STDC__=1 -D__DYNAMIC__=1 -D__APPLE_CC__=926 -D__BIG_ENDIAN__=1
