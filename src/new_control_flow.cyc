@@ -274,7 +274,8 @@ static flow_t<`r> use_nounique_Rval(analenv_t<`r> env, seg_t loc, Absyn::type_t 
       check_nounique(env,loc,elt_type,lookup_place(d,p));
       break;
     default:
-      Tcutil::warn(loc,"argument may contain live unique pointers");
+      if (Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,elt_type))
+        Tcutil::warn(loc,"argument may contain live unique pointers");
       return use_Rval(env,loc,inflow,r);
     }    
     let ans_d = escape_deref(env->fenv, d, env->all_changed, r);
@@ -1835,12 +1836,55 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
     // must handle alias declarations separate from other decls because
     // we need to reset some reachable stuff.
   case &Decl_s(&Decl{.r = &Alias_d(e,tv,vd), ...},s1):
-    let $(f,r) = anal_Rexp(env,true,inflow,e);
-    f = use_Rval(env,e->loc,f,r);
-    let vds = List(vd,NULL);
-    f = add_vars(fenv,f,&vds,fenv->unknown_all,s->loc);
-    outflow = anal_stmt(env,f,s1);
-    break;
+    // similar to the copy situation at the top of anal_Rexp
+    let $(f,lval) = anal_Lexp(env,inflow,true,e);
+    DEBUG_PRINT("inflow on alias is {\n");
+    DEBUG_PRINT_F(print_flow,inflow);
+    DEBUG_PRINT("}\n");
+    switch $(f,lval) {
+    case $({.ReachableFL = $(fd,relns)},{.PlaceL = p}):
+      let old_rval = lookup_place(fd,p);
+      // HACK -- if e is cast, then get at the underlying expression's type
+      type_t t = e->topt->v;
+      switch (e->r) {
+      case &Cast_e(_,e2,...): t = e2->topt->v; break;
+      default: break;
+      }
+      let new_rval = make_unique_consumed(fenv,t,e,env->iteration_num,old_rval);
+      fd = assign_place(fenv,e->loc,fd,env->all_changed,p,new_rval);
+      f = ReachableFL(fd,relns);
+      DEBUG_PRINT("flow after consuming is {\n");
+      DEBUG_PRINT_F(print_flow,f);
+      DEBUG_PRINT("}\n");
+      absRval_t leaf;
+      switch (initlevel(fenv,fd,old_rval)) {
+      case AllIL: leaf = fenv->unknown_all; break;
+      case NoneIL: leaf = fenv->unknown_none; break;
+      case ThisIL: leaf = fenv->unknown_this; break;
+      }
+      let old_rval_approx = typ_to_absrval(fenv,t,leaf);
+      f = use_Rval(env,e->loc,f,old_rval);
+      let vds = List(vd,NULL);
+      f = add_vars(fenv,f,&vds,fenv->unknown_all,s->loc);
+      DEBUG_PRINT("flow for alias body is {\n");
+      DEBUG_PRINT_F(print_flow,f);
+      DEBUG_PRINT("}\n");
+      f = anal_stmt(env,f,s1);
+      // plug old rvalue back into place
+      switch (f) {
+      case {.ReachableFL = $(fd,relns)}:
+        fd = assign_place(fenv,s->loc,fd,env->all_changed,p,old_rval_approx);
+        outflow = ReachableFL(fd,relns);
+        DEBUG_PRINT("flow for alias continuation is {\n");
+        DEBUG_PRINT_F(print_flow,outflow);
+        DEBUG_PRINT("}\n");
+        return outflow;
+      default: return f;
+      }
+    case $({.BottomFL = _}, _): return f;
+    default: Tcutil::terr(e->loc,"bad alias expression--no unique path found");
+      return BottomFL();
+    }
 
   case &Decl_s(d,s): outflow = anal_stmt(env,anal_decl(env,inflow,d),s); break;
 
