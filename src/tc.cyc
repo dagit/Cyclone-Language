@@ -291,18 +291,18 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
         opt_t<list_t<tvar_t>> tvs = new Opt(fd->i.tvars);
         if (!Unify::unify(t2,fatptr_type(string_type(new_evar(new Opt(&Kinds::rk),tvs)),
                                      new_evar(new Opt(&Kinds::rk),tvs),
-                                     empty_tqual(0),any_bool(tvs->v))) &&
+                                     empty_tqual(0),any_bool(tvs->v),false_type)) &&
             !Unify::unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&Kinds::rk),
                                                                tvs)),
                                      new_evar(new Opt(&Kinds::rk),tvs),
-                                     empty_tqual(0),any_bool(tvs->v))) &&
+                                     empty_tqual(0),any_bool(tvs->v),false_type)) &&
             !Unify::unify(t2,fatptr_type(string_type(new_evar(new Opt(&Kinds::rk),tvs)),
                                      new_evar(new Opt(&Kinds::rk),tvs),
-                                     const_tqual(0),any_bool(tvs->v))) &&
+                                     const_tqual(0),any_bool(tvs->v),false_type)) &&
             !Unify::unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&Kinds::rk),
                                                                tvs)),
                                      new_evar(new Opt(&Kinds::rk),tvs),
-                                     const_tqual(0),any_bool(tvs->v)))) {
+                                     const_tqual(0),any_bool(tvs->v),false_type))) {
           Warn::err2(loc,"second argument of main has type ",t2,
 		     " instead of char??");
         }

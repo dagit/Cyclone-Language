@@ -1279,7 +1279,7 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
   switch(tms->hd) {
     // FIX: doesn't invert zeroterm default when elt type is char!! (never did)
     // FIX? What about attributes that we parse before tq2??
-  case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt,_),tq2):
+  case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt,_,rel),tq2):
     switch(compress(bd)) {
     case &AppType(&FatCon,_): dump_char('?'); break;
     case &AppType(&ThinCon,&List{&ValueofType(e),_}):
@@ -1289,6 +1289,7 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
     }
     if(!qvar_to_Cids && !is_char_ptr && type2bool(false,zt)) dump("@zeroterm");
     if(!qvar_to_Cids && is_char_ptr && !type2bool(false,zt)) dump("@nozeroterm");
+    if(!qvar_to_Cids && type2bool(false,rel)) dump("@released");
     switch(compress(rgn)) {
     case &AppType(&HeapCon,_):   if (!qvar_to_Cids) dump("`H"); break;
     case &AppType(&UniqueCon,_): dump("`U");  break;

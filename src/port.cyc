@@ -1008,7 +1008,7 @@ static type_t main_type() {
   $(var_opt_t,tqual_t,type_t)@ arg2 =
     new $(NULL,empty_tqual(0),
           fatptr_type(string_type(wildtyp(NULL)),wildtyp(NULL),
-                      empty_tqual(0), any_bool(NULL)));
+                      empty_tqual(0), any_bool(NULL), false_type));
   return new FnType(FnInfo{.tvars=NULL, .effect=NULL,
                               .ret_tqual = empty_tqual(0),
                               .ret_type = sint_type,
@@ -1079,7 +1079,7 @@ static void register_rgns(cenv_t env, Dict::dict_t<tvarname_t,int@> counts,
                           bool fn_res, type_t t, ctype_t c) {
   c = compress_ct(c);
   switch ($(t, c)) {
-  case $(&PointerType(PtrInfo{et,_,PtrAtts{rt,_,_,_,ploc}}),&Ptr_ct(ec,_,_,rc,_)):
+  case $(&PointerType(PtrInfo{et,_,PtrAtts{rt,_,_,_,ploc,_}}),&Ptr_ct(ec,_,_,rc,_)):
     register_rgns(env, counts, fn_res, et, ec);
     let loc = ploc ? ploc->rgn_loc : 0;
     rc = compress_ct(rc);
@@ -1140,7 +1140,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
     (*n)[0] = Loc_n;
     return lookup_typedef_ctype(env,n);
   case &AppType(&VoidCon,_): return void_ct();
-  case &PointerType(PtrInfo{et,tq,PtrAtts{r,n,b,zt,loc}}):
+  case &PointerType(PtrInfo{et,tq,PtrAtts{r,n,b,zt,loc,_}}):
     let ptr_loc = loc ? loc->ptr_loc : 0;
     let rgn_loc = loc ? loc->rgn_loc : 0;
     let zt_loc = loc ? loc->zt_loc : 0;

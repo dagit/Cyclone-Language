@@ -464,7 +464,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	let outer_rgn = new_evar(new Opt(&Kinds::trk), NULL);
 	rgn_typ = new_evar(new Opt(&Kinds::rk),NULL);
 	let dr_type = aggr_type(UnknownAggr(StructA,drname,NULL),list(rgn_typ));
-	let exp_type = at_type(dr_type, outer_rgn, empty_tqual(0),false_type);
+	let exp_type = at_type(dr_type, outer_rgn, empty_tqual(0),false_type,false_type);
 	Tctyp::check_type(s0->loc,te,lookup_type_vars(te),&Kinds::tmk,
 			  true,false,exp_type);
 	let key_typ = tcExp(te,&exp_type,open_exp_opt);
@@ -511,7 +511,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let curr_bl = Tcenv::curr_rgn(te);
       vardecl_t vd = new Vardecl {fd->sc, fd->name, 0,const_tqual(0), 
 				  at_type(t,curr_bl,empty_tqual(0), 
-					  false_type),
+					  false_type, false_type),
 				  NULL, curr_bl, NULL, false,
 				  (fd->body!=NULL)};
       fd->fn_vardecl = vd;

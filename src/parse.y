@@ -161,6 +161,7 @@ datatype Pointer_qual {
   Fat_ptrqual;
   Zeroterm_ptrqual;
   Nozeroterm_ptrqual;
+  Autoreleased_ptrqual;
   Notnull_ptrqual;
   Nullable_ptrqual;
 };
@@ -212,24 +213,26 @@ static type_t type_name_to_type($(var_opt_t,tqual_t,type_t)@ tqt,
 }
 ////////////////// Collapsing pointer qualifiers ///////////////////////////
 static $(booltype_t nullable,ptrbound_t bound,
-         booltype_t zeroterm,rgntype_t rgn) 
+         booltype_t zeroterm,rgntype_t rgn,booltype_t autoreleased) 
   collapse_pointer_quals(seg_t loc, booltype_t nullable, 
                          ptrbound_t bound, rgntype_t rgn, 
                          pointer_quals_t pqs) {
   // for now, the last qualifier wins and overrides previous ones
   booltype_t zeroterm = Tcutil::any_bool(NULL);
+  booltype_t released = Tcutil::any_bool(NULL);
   for (; pqs != NULL; pqs = pqs->tl)
     switch (pqs->hd) {
-    case &Zeroterm_ptrqual:   zeroterm = true_type;            break;
-    case &Nozeroterm_ptrqual: zeroterm = false_type;           break;
-    case &Nullable_ptrqual:   nullable = true_type;            break;
-    case &Notnull_ptrqual:    nullable = false_type;           break;
-    case &Fat_ptrqual:           bound = fat_bound_type;       break;
-    case &Thin_ptrqual:          bound = bounds_one();         break;
-    case &Numelts_ptrqual(e):    bound = thin_bounds_exp(e);   break;
-    case &Region_ptrqual(t):       rgn = t;                    break;
+    case &Zeroterm_ptrqual:     zeroterm = true_type;            break;
+    case &Nozeroterm_ptrqual:   zeroterm = false_type;           break;
+    case &Autoreleased_ptrqual: released = true_type;            break;
+    case &Nullable_ptrqual:     nullable = true_type;            break;
+    case &Notnull_ptrqual:      nullable = false_type;           break;
+    case &Fat_ptrqual:             bound = fat_bound_type;       break;
+    case &Thin_ptrqual:            bound = bounds_one();         break;
+    case &Numelts_ptrqual(e):      bound = thin_bounds_exp(e);   break;
+    case &Region_ptrqual(t):         rgn = t;                    break;
     }
-  return $(nullable,bound,zeroterm,rgn);
+  return $(nullable,bound,zeroterm,rgn,released);
 }
 
 ////////////////// Functions for creating abstract syntax //////////////////
@@ -376,11 +379,11 @@ static type_t substitute_tags(list_t<$(var_t,type_t)@> tags, type_t t) {
     if (nelts != nelts2 || et != et2)
       return array_type(et2,tq,nelts2,zt,ztloc);
     break;
-  case &PointerType(PtrInfo{et,tq,PtrAtts{r,n,b,zt,pl}}):
+  case &PointerType(PtrInfo{et,tq,PtrAtts{r,n,b,zt,pl,rel}}):
     let et2 = substitute_tags(tags,et);
     let b2 = substitute_tags(tags,b);
     if (et2 != et || b2 != b)
-      return pointer_type(PtrInfo{et2,tq,PtrAtts{r,n,b2,zt,pl}});
+      return pointer_type(PtrInfo{et2,tq,PtrAtts{r,n,b2,zt,pl,rel}});
     break;
   case &AppType(&ThinCon, &List{t,NULL}):
     let t2 = substitute_tags(tags,t);
@@ -1014,7 +1017,7 @@ using Parse;
 %token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL REQUIRES_QUAL ENSURES_QUAL
 // Cyc:  CYCLONE qualifiers (e.g., @zeroterm, @tagged)
 %token REGION_QUAL NOZEROTERM_QUAL ZEROTERM_QUAL TAGGED_QUAL ASSERT_QUAL
-%token EXTENSIBLE_QUAL
+%token EXTENSIBLE_QUAL AUTORELEASED_QUAL
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -1382,7 +1385,6 @@ declaration:
 | POOL '<' TYPE_VAR '>' ';'
   { let three = $3;
     tvar_ok(three,SLOC(@3));
-    // AUTOFIX: change the kind to be auto-region-kind
     tvar_t tv = new Tvar(new three,-1,Kinds::kind_to_bound(&Kinds::rk));
     type_t t  = var_type(tv);
     $$ = ^$(new List(pool_decl(tv,LOC(@1,@5)),NULL));
@@ -2026,8 +2028,8 @@ one_pointer:
     let $(ploc,nullable,bound) = *$1;
     if (Flags::porting_c_code)
       ptrloc = new PtrLoc{.ptr_loc=ploc,.rgn_loc=SLOC(@3),.zt_loc=SLOC(@2)};
-    let $(nullable,bound,zeroterm,rgn_opt) = collapse_pointer_quals(ploc,nullable,bound,$3,$2);
-    ans = rnew(yyr) List(rnew(yyr) Pointer_mod(PtrAtts(rgn_opt,nullable,bound,zeroterm,ptrloc),$5), ans);
+    let $(nullable,bound,zeroterm,rgn_opt,released) = collapse_pointer_quals(ploc,nullable,bound,$3,$2);
+    ans = rnew(yyr) List(rnew(yyr) Pointer_mod(PtrAtts(rgn_opt,nullable,bound,zeroterm,ptrloc,released),$5), ans);
     $$ = ^$(ans);
   }
 
@@ -2041,12 +2043,13 @@ pointer_qual:
   { $$ = ^$(rnew(yyr) Numelts_ptrqual($3)); }
 | REGION_QUAL '(' any_type_name ')'
   { $$ = ^$(rnew(yyr) Region_ptrqual($3)); }
-| THIN_QUAL       { $$ = ^$(rnew(yyr) Thin_ptrqual); }
-| FAT_QUAL        { $$ = ^$(rnew(yyr) Fat_ptrqual); }
-| ZEROTERM_QUAL   { $$ = ^$(rnew(yyr) Zeroterm_ptrqual); }
-| NOZEROTERM_QUAL { $$ = ^$(rnew(yyr) Nozeroterm_ptrqual); }
-| NOTNULL_QUAL    { $$ = ^$(rnew(yyr) Notnull_ptrqual); }
-| NULLABLE_QUAL   { $$ = ^$(rnew(yyr) Nullable_ptrqual); }
+| THIN_QUAL         { $$ = ^$(rnew(yyr) Thin_ptrqual); }
+| FAT_QUAL          { $$ = ^$(rnew(yyr) Fat_ptrqual); }
+| AUTORELEASED_QUAL { $$ = ^$(rnew(yyr) Autoreleased_ptrqual); }
+| ZEROTERM_QUAL     { $$ = ^$(rnew(yyr) Zeroterm_ptrqual); }
+| NOZEROTERM_QUAL   { $$ = ^$(rnew(yyr) Nozeroterm_ptrqual); }
+| NOTNULL_QUAL      { $$ = ^$(rnew(yyr) Notnull_ptrqual); }
+| NULLABLE_QUAL     { $$ = ^$(rnew(yyr) Nullable_ptrqual); }
 ;
 
 pointer_null_and_bound:

@@ -70,7 +70,8 @@ ptr_info_t fresh_pointer_type(tenv_t te) {
   let nbl = any_bool(tenv_tvs);
   let b   = any_bounds(tenv_tvs);
   let zt  = any_bool(tenv_tvs);
-  return PtrInfo{t2,empty_tqual(0),PtrAtts(rt,nbl,b,zt,NULL)};
+  let rel = any_bool(tenv_tvs);
+  return PtrInfo{t2,empty_tqual(0),PtrAtts(rt,nbl,b,zt,NULL,rel)};
 }
 
 static
@@ -219,7 +220,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
     // allocated and return a pointer to that string.  However, if the
     // string is used as an initializer, then we should return an array type.
     let t = atb_type(string_elt_typ,heap_rgn_type,const_tqual(0),
-		     thin_bounds_exp(elen),true_type);
+		     thin_bounds_exp(elen),true_type,false_type);
     if(topt == NULL)
       return t;
     switch (compress(*topt)) {
@@ -342,7 +343,7 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
     return (type_t)e->topt;
   case Numelts: // DJG: array-type impossible because of promote_array
     switch (t) {
-    case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_,_))):
+    case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,...))):
       let eopt = get_bounds_exp(fat_bound_type,b);
       if (eopt != NULL && !Evexp::c_can_eval(eopt) && !allow_valueof)
 	Warn::err2(loc,"cannot use numelts on a pointer with abstract bounds");
@@ -380,7 +381,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
   type_t t1 = compress((type_t)e1->topt);
   type_t t2 = compress((type_t)e2->topt);
   switch (t1) {
-  case &PointerType(PtrInfo(et,tq,PtrAtts(r,n,b,zt,_))):
+  case &PointerType(PtrInfo(et,tq,PtrAtts(r,n,b,zt,_,rel))):
     if (!Kinds::kind_leq(type_kind(et),&Kinds::tmk))
       Warn::err2(e1->loc,"can't do arithmetic on abstract pointer type");
     if (is_noalias_pointer(t1,false))
@@ -403,12 +404,19 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
     //   *((buf + 11) - 10)
     // This should not generate an exception.  So the best we can do
     // is coerce e1 to a ? type.
-    let new_t1 = new PointerType(PtrInfo(et,tq, PtrAtts(r,true_type,
-							fat_bound_type,zt,
-							NULL)));
+    let new_t1 = new PointerType(PtrInfo(et,tq,PtrAtts(r,true_type,
+						       fat_bound_type,zt,
+						       NULL,rel)));
     unchecked_cast(e1, new_t1, Other_coercion);
     return new_t1;
   default: return tcArithBinop(te, e1, e2, is_numeric);
+  }
+}
+static booltype_t relqual(type_t t) {
+  switch (t) {
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,_,_,_,_,rel))):
+    return rel;
+  default: return false_type;
   }
 }
 // Minus needs to support a fat pointer and an int, and two pointers
@@ -432,7 +440,7 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
       // t2 is thin, coerce t1 to thin and return int
       Warn::warn2(e1->loc,"coercing fat pointer to thin pointer for subtraction");
       unchecked_cast(e1, star_type(t1_elt,pointer_region(t1),
-				   empty_tqual(0), false_type), 
+				   empty_tqual(0), false_type, relqual(t1)), 
                      Other_coercion);
       return sint_type;
     } 
@@ -452,7 +460,7 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
         Warn::warn2(e1->loc,"coercing fat pointer to thin pointer for subtraction");
         unchecked_cast(e2, star_type(pointer_elt_type(t2),
 				     pointer_region(t2),
-				     empty_tqual(0), false_type), 
+				     empty_tqual(0), false_type, relqual(t2)), 
                        Other_coercion);
       }
       Warn::warn2(e1->loc,"thin pointer subtraction!");
@@ -861,7 +869,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
   // right arity but there may be coercions involved with the arguments
   // and the function might actually be a vararg.
   switch (t) {
-  case &PointerType(PtrInfo(t1,tq,PtrAtts(rgn,x,b,zt,_))):
+  case &PointerType(PtrInfo(t1,tq,PtrAtts(rgn,x,b,zt,_,_))):
     // Note: rgn is irrelevant -- all code is in the heap.
     // Nonetheless, perhaps we cast to another region, so check
     // the capability just for fun.
@@ -1118,9 +1126,10 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
   // lose information.
   switch ($(e->r, compress(t))) {
   case $(&Malloc_e(MallocInfo{_,_,_,_,fat_result,_}),
-         &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,bds,zt,_}})):
+         &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,bds,zt,_,rel}})):
     // malloc must be fat and t must be a NOZEROTERM, *{1} type
-    if (fat_result && !force_type2bool(false,zt) && force_type2bool(false,nbl)){
+    if (fat_result && !force_type2bool(false,zt) && force_type2bool(false,nbl)
+	&& !force_type2bool(false,rel)){
       let eopt = get_bounds_exp(bounds_one(),bds);
       if (eopt != NULL)  // FIX: DJG: looks fishy should e be eopt on next line?
         if (Evexp::eval_const_uint_exp(e)[0] == 1)
@@ -1193,7 +1202,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0, type_t * topt, exp_t e){
   if(is_const)
     tq.print_const = tq.real_const = true;
   // FIX: use topt to determine if we should return a datatype type
-  return (nullable ? star_type : at_type)((type_t)e->topt, rgn, tq, false_type);
+  return (nullable ? star_type : at_type)((type_t)e->topt, rgn, tq, false_type, false_type);
 }
 
  // sizeof t
@@ -1325,7 +1334,7 @@ static type_t tcDeref(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
   default: break;
   }
   switch(t) {
-  case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_))):
+  case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_,_))):
     check_rgn_accessible(te,loc,rt);
     check_nonzero_bound(loc, b);
     if (!Kinds::kind_leq(type_kind(t2),&Kinds::tmk) && !abstract_val_ok(te))
@@ -1424,7 +1433,7 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
   // the subscript could be on a tuple or a pointer -- any arrays
   // should've been coerced to pointers
   switch (t1) {
-  case &PointerType(PtrInfo(t,tq,PtrAtts(rt,_,b,zt,_))):
+  case &PointerType(PtrInfo(t,tq,PtrAtts(rt,_,b,zt,_,_))):
     // for zero-terminated, thin pointers we warn when doing subscripting
     // to remind the user that this is an expensive operation.
     if (force_type2bool(false,zt)) {
@@ -2032,8 +2041,10 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
   let zero_term = false_type;
   if(topt != NULL)
     switch (compress(*topt)) {
-    case &PointerType(PtrInfo(_,_,PtrAtts(_,n,b,zt,_))):
+    case &PointerType(PtrInfo(_,_,PtrAtts(_,n,b,zt,_,rel))):
       zero_term = zt;
+      if(force_type2bool(false,rel))
+        Warn::err2(loc,"cannot malloc() an autoreleased pointer");
       if(force_type2bool(false,n))
 	ptr_maker = star_type;
       // for zero-terminated arrays, rewrite malloc to calloc to ensure
@@ -2050,7 +2061,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
         let is_constant = Evexp::c_can_eval(num_elts);
         if (is_constant && Evexp::same_uint_const_exp(upper_exp,num_elts)) {
           *is_fat = false;
-          return atb_type(elt_type,rgn,empty_tqual(0),b,zero_term);
+          return atb_type(elt_type,rgn,empty_tqual(0),b,zero_term,false_type);
         }
         switch (compress((type_t)num_elts->topt)) {
         case &AppType(&TagCon,&List(tagtyp,_)):
@@ -2058,7 +2069,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
                                     No_coercion,0);
           if (Evexp::same_uint_const_exp(tagtyp_exp,upper_exp)) {
             *is_fat = false;
-            return atb_type(elt_type,rgn,empty_tqual(0),b,zero_term);
+            return atb_type(elt_type,rgn,empty_tqual(0),b,zero_term,false_type);
           }
           break;
         default: break;
@@ -2068,7 +2079,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
     default: break;
     }
   if (!one_elt) ptr_maker = fatptr_type;
-  return ptr_maker(elt_type,rgn,empty_tqual(0),zero_term);
+  return ptr_maker(elt_type,rgn,empty_tqual(0),zero_term,false_type);
 }
 
 // e1 :=: e2
@@ -2199,7 +2210,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     bool zero_term = false;
     if (topt != NULL)
       switch (compress(*topt)) {
-      case &PointerType(PtrInfo(*elt_typ,_,PtrAtts(_,_,_,zt,_))):
+      case &PointerType(PtrInfo(*elt_typ,_,PtrAtts(_,_,_,zt,_,_))):
 	// tcArray only needs the element type, so the bound is bogus
 	elt_typ_opt = elt_typ;
 	zero_term = force_type2bool(false,zt);
@@ -2227,17 +2238,17 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     // a char @{n}@.  They can get the char@{n}@ by using a cast.  This
     // is a total hack...
     let topt2 = atb_type(char_type, rgn, const_tqual(0),
-			 fat_bound_type, true_type);
+			 fat_bound_type, true_type, false_type);
     let t = tcExp(te,&topt2,e1);
     return atb_type(t, rgn, empty_tqual(0), 
-		    thin_bounds_exp(uint_exp(1,0)), false_type);
+		    thin_bounds_exp(uint_exp(1,0)), false_type, false_type);
   case &Const_e({.Wstring_c = _}):
     // handled like the String_c case
     let topt2 = atb_type(wchar_type(), rgn, const_tqual(0),
-			 fat_bound_type, true_type);
+			 fat_bound_type, true_type, false_type);
     let t = tcExp(te,&topt2,e1);
     return atb_type(t, rgn, empty_tqual(0), 
-		    thin_bounds_exp(uint_exp(1,0)), false_type);
+		    thin_bounds_exp(uint_exp(1,0)), false_type, false_type);
   default:
     // code that's equivalent to "new {e1}" -- i.e., an array of size 1.
     // Note that we could simplify everything by rewriting the expression
@@ -2266,6 +2277,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     pi.ptr_atts.rgn = rgn;
     pi.ptr_atts.bounds = bounds_one();
     pi.ptr_atts.zero_term = false_type;
+    pi.ptr_atts.released = false_type;
     type_t res_typ = pointer_type(pi);
     if (topt != NULL && !Unify::unify(*topt,res_typ) &&
 	silent_castable(curr_rgnpo(te),loc,res_typ,*topt)) {

@@ -166,7 +166,7 @@ bool is_nullable_pointer_type(type_t t, bool def) {
 // side effect: possibly constrains pointer bounds
 bool is_fat_ptr(type_t t) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo{_,_,PtrAtts(_,_,b,_,_)}):
+  case &PointerType(PtrInfo{_,_,PtrAtts(_,_,b,...)}):
     return unify(fat_bound_type, b);
   default: return false;
   }
@@ -176,7 +176,7 @@ bool is_fat_ptr(type_t t) {
 // If true, returns element type in elt_type_dest
 bool is_fat_pointer_type_elt(type_t t, type_t@ elt_type_dest) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo(elt_type,_,PtrAtts(_,_,b,_,_))):
+  case &PointerType(PtrInfo(elt_type,_,PtrAtts(_,_,b,...))):
     if (!unify(b,fat_bound_type)) 
       return false;
     *elt_type_dest = elt_type;
@@ -189,7 +189,7 @@ bool is_fat_pointer_type_elt(type_t t, type_t@ elt_type_dest) {
 // If true, returns element type in elt_type_dest
 bool is_zero_pointer_type_elt(type_t t, type_t@ elt_type_dest) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo(elt_type,_,PtrAtts(_,_,_,zt,_))):
+  case &PointerType(PtrInfo(elt_type,_,PtrAtts(_,_,_,zt,...))):
     *elt_type_dest = elt_type;
     return type2bool(false,zt);
   default: return false;
@@ -202,7 +202,7 @@ bool is_zero_pointer_type_elt(type_t t, type_t@ elt_type_dest) {
 bool is_zero_ptr_type(type_t t, type_t @ptr_type,
 		      bool @is_fat, type_t @elt_type) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo{elt,_,PtrAtts(_,_,bnds,zt,_)}):
+  case &PointerType(PtrInfo{elt,_,PtrAtts(_,_,bnds,zt,_,_)}):
     if (!type2bool(false,zt))
       return false;
     *ptr_type = t;
@@ -329,7 +329,7 @@ type_t copy_type(type_t t) {
   case &AppType(c,ts):   return new AppType(c,map(copy_type,ts));
   case &Evar(...):       return t; //FIX?: introduces constraints -- should it??
   case &VarType(tv):     return var_type(copy_tvar(tv));
-  case &PointerType(PtrInfo(elt,tq,PtrAtts(rgn,nbl,bs,zt,loc))):
+  case &PointerType(PtrInfo(elt,tq,PtrAtts(rgn,nbl,bs,zt,loc,rel))):
     let elt2 = copy_type(elt);
     let rgn2 = copy_type(rgn);
     let nbl2 = copy_type(nbl);
@@ -337,7 +337,8 @@ type_t copy_type(type_t t) {
     // FIX?  Need to copy the expression in here?
     let bs2 = copy_type(bs);
     let zt2 = copy_type(zt);
-    return new PointerType(PtrInfo(elt2,tq2,PtrAtts(rgn2,nbl2,bs2,zt2,loc)));
+    let rel2 = copy_type(rel);
+    return new PointerType(PtrInfo(elt2,tq2,PtrAtts(rgn2,nbl2,bs2,zt2,loc,rel2)));
   case &ArrayType(ArrayInfo{et,tq,eo,zt,ztl}):
     return new ArrayType(ArrayInfo{copy_type(et),tq,deep_copy_exp_opt(true,eo),
 				     copy_type(zt),ztl});
@@ -747,7 +748,7 @@ static type_t dummy_fntype(type_t eff) {
                                  .ensures_clause = NULL,
                                  .ensures_relns = NULL,
                                  .return_value = NULL});
-  return atb_type(fntype,heap_rgn_type,empty_tqual(0),bounds_one(),false_type);
+  return atb_type(fntype,heap_rgn_type,empty_tqual(0),bounds_one(),false_type,false_type);
 }
 
 
@@ -1161,8 +1162,8 @@ int typecmp(type_t t1, type_t t2) {
     // identities should be resolved
     return intcmp(tv1->identity,tv2->identity);
 
-  case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2,_))),
-	 &PointerType(PtrInfo(t1a,tqual1a,PtrAtts(rgn1,null1a,b1,zt1,_)))):
+  case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2,_,rel2))),
+	 &PointerType(PtrInfo(t1a,tqual1a,PtrAtts(rgn1,null1a,b1,zt1,_,rel1)))):
     let etc = typecmp(t1a,t2a);
     if(etc != 0) return etc;
     let rc = typecmp(rgn1,rgn2);
@@ -1173,6 +1174,8 @@ int typecmp(type_t t1, type_t t2) {
     if (cc != 0) return cc;
     let zc = typecmp(zt1,zt2);
     if (zc != 0) return zc;
+    let relc = typecmp(rel1,rel2);
+    if (relc != 0) return relc;
     let bc = typecmp(b1,b2);
     if (bc != 0) return bc;
     return typecmp(null1a,null2a);
@@ -1486,6 +1489,10 @@ bool silent_castable(RgnOrder::rgn_po_opt_t po,seg_t loc,type_t t1,type_t t2) {
        && (!force_type2bool(true,pinfo_a.ptr_atts.zero_term)
 	   || !pinfo_b.elt_tq.real_const))
       return false;
+    // can only move from released to not released, or stay the same
+    if(!unify(pinfo_a.ptr_atts.released, pinfo_b.ptr_atts.released)
+       && !force_type2bool(true,pinfo_a.ptr_atts.released))
+      return false;
     // element types have to be equal or t1's element type must be a
     // pointer-sub-type of t2's element type (e.g., t1 = datatype D.C
     // and t2 = datatype D) and the t2 pointer must be const or abstract.
@@ -1543,7 +1550,7 @@ bool admits_zero(type_t t) {
   switch (compress(t)) {
   case &AppType(&IntCon(_,_),_):
   case &AppType(&FloatCon(_),_): return true;
-  case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bounds,_,_))):
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bounds,...))):
       // for now, we're not allowing fat pointers to be in zero-terminated
       // arrays.  They cause way too many problems in the translation and
       // are of dubious use (I hope.)
@@ -1612,7 +1619,7 @@ $(decl_t,exp_t) insert_alias(exp_t e, type_t e_type) {
   // the new type variable.  
   tvar_t tv = new_tvar(&rgn_kb);
   switch (compress(e_type)) {
-  case &PointerType(PtrInfo{et,tq,PtrAtts{old_r,nb,b,zt,pl}}):
+  case &PointerType(PtrInfo{et,tq,PtrAtts{old_r,...}}):
     switch (compress(old_r)) {
     case &Evar(_,*topt,_,ts): 
       let new_r = var_type(tv);
@@ -1807,8 +1814,8 @@ bool subtype(RgnOrder::rgn_po_opt_t po, list_t<$(type_t,type_t)@`H,`H> assume,
   switch ($(t1,t2)) {
     // the following allows us to cast an unsigned int pointer to an int
     // pointer and vice versa.  This is okay because the types are isomorphic.
-   case $(&PointerType(PtrInfo(t_a, q_a, PtrAtts(rt_a,null_a,b_a,zt_a,_))),
-          &PointerType(PtrInfo(t_b, q_b, PtrAtts(rt_b,null_b,b_b,zt_b,_)))):
+   case $(&PointerType(PtrInfo(t_a, q_a, PtrAtts(rt_a,null_a,b_a,zt_a,_,rel_a))),
+          &PointerType(PtrInfo(t_b, q_b, PtrAtts(rt_b,null_b,b_b,zt_b,_,rel_b)))):
     // if t1 is const then t2 must be const
     if (q_a.real_const && !q_b.real_const)
       return false;
@@ -1819,6 +1826,10 @@ bool subtype(RgnOrder::rgn_po_opt_t po, list_t<$(type_t,type_t)@`H,`H> assume,
     // if t1 is not zero-terminated, then t2 must not be zero-terminated
     if (unify(zt_a,zt_b)
         && !type2bool(false,zt_a) && type2bool(false,zt_b))
+      return false;
+    // if t1 is not released, then t2 must not be released
+    if (unify(rel_a,rel_b)
+        && !type2bool(false,rel_a) && type2bool(false,rel_b))
       return false;
     // rt_a must outlive rt_b
     if (!unify(rt_a,rt_b) && !RgnOrder::rgn_outlives_rgn(po,rt_a,rt_b) && 
@@ -1961,7 +1972,7 @@ coercion_t castable(RgnOrder::rgn_po_opt_t po, seg_t loc, type_t t1, type_t t2){
   default: break;
   }
   switch (t1) {
-  case &PointerType(PtrInfo(t_a,q_a,PtrAtts(rt_a,null_a,b_a,zt_a,_))):
+  case &PointerType(PtrInfo(t_a,q_a,PtrAtts(rt_a,null_a,b_a,zt_a,_,rel_a))):
     
     // can cast t* to t@ and vice versa.
     // can cast a non-const pointer to a const pointer.
@@ -1969,8 +1980,9 @@ coercion_t castable(RgnOrder::rgn_po_opt_t po, seg_t loc, type_t t1, type_t t2){
     // long as r1 outlives r2.
     // can cast a "bits-only" pointer to a char pointer ?NOZEROTERM
     // can cast a zero-terminated pointer to a non-zero terminated pointer
+    // can cast an autoreleased pointer to a non-autoreleased pointer
     switch (t2) {
-    case &PointerType(PtrInfo(t_b,q_b,PtrAtts(rt_b,null_b,b_b,zt_b,_))):
+    case &PointerType(PtrInfo(t_b,q_b,PtrAtts(rt_b,null_b,b_b,zt_b,_,rel_b))):
       coercion_t coercion = Other_coercion;
       let assump = new List(new $(t1,t2),NULL);
       let quals_okay = (q_b.real_const || !q_a.real_const);
@@ -1991,6 +2003,7 @@ coercion_t castable(RgnOrder::rgn_po_opt_t po, seg_t loc, type_t t1, type_t t2){
         ((deep_castable && ptrsubtype(po,assump,t_a,t_b)) ||
          unify(t_a,t_b) || isomorphic(t_a,t_b) || unify(t_b,void_type));
       bool zeroterm_ok = unify(zt_a,zt_b) || !type2bool(false,zt_b);
+      bool released_ok = unify(rel_a,rel_b) || !type2bool(false,rel_b);
       // FIX: we need to take any qualifiers into account on typedefs
       let bitcase = ptrsub ? false : (is_bits_only_type(t_a) && is_char_type(t_b)
                                       && !force_type2bool(false,zt_b)
@@ -2009,7 +2022,7 @@ coercion_t castable(RgnOrder::rgn_po_opt_t po, seg_t loc, type_t t1, type_t t2){
       if (t1_nullable && !t2_nullable)
         coercion = Null_to_NonNull;
 
-      if (bounds_ok && zeroterm_ok && (ptrsub || bitcase) &&
+      if (bounds_ok && zeroterm_ok && released_ok && (ptrsub || bitcase) &&
           (unify(rt_a,rt_b) || RgnOrder::rgn_outlives_rgn(po,rt_a,rt_b)))
         return coercion;
       else return Unknown_coercion;
@@ -2311,14 +2324,15 @@ type_t rsubstitute(region_t<`r> rgn,
     let new_zt = rsubstitute(rgn,inst,zt);
     return (new_t1 == t1 && new_e == e && new_zt == zt) ? t : 
       new ArrayType(ArrayInfo{new_t1,tq,new_e,new_zt,ztl});
-  case &PointerType(PtrInfo(t1,tq,PtrAtts(r,n,b,zt,_))):
+  case &PointerType(PtrInfo(t1,tq,PtrAtts(r,n,b,zt,_,rel))):
     let new_t1 = rsubstitute(rgn,inst,t1);
     let new_r  = rsubstitute(rgn,inst,r);
     let new_b  = rsubstitute(rgn,inst,b);
     let new_zt = rsubstitute(rgn,inst,zt);
-    if(new_t1 == t1 && new_r == r && new_b == b && new_zt == zt)
+    let new_rel = rsubstitute(rgn,inst,rel);
+    if(new_t1 == t1 && new_r == r && new_b == b && new_zt == zt && new_rel == rel)
       return t;
-    return pointer_type(PtrInfo(new_t1,tq,PtrAtts(new_r,n,new_b,new_zt,NULL)));
+    return pointer_type(PtrInfo(new_t1,tq,PtrAtts(new_r,n,new_b,new_zt,NULL,new_rel)));
   case &FnType(FnInfo{vs,eff,rtq,rtyp,args,c_varargs,cyc_varargs,rgn_po,atts,
                         req,_,ens,_,ret_value}):
     if (skip_fntypes) return t;
@@ -3049,7 +3063,7 @@ type_t promote_array(type_t t, type_t rgn, bool convert_tag) {
       }
     } else
       b = thin_bounds_exp(eopt);
-    return atb_type(et,rgn,tq,b,zt);
+    return atb_type(et,rgn,tq,b,zt,false_type);
   default: return t;
   }
 }

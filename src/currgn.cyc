@@ -52,7 +52,6 @@ tvar_t curr_poolrgn_tvar (void) {
   if (curr_pool_tvar == NULL) {
     curr_pool_tvar = new Tvar(new curr_poolrgn_name,
 			      Tcutil::new_tvar_id(),
-			      // AUTOFIX: fix the kind
 			      Kinds::kind_to_bound(&Kinds::rk));
     curr_poolrgn_typ = var_type((tvar_t)curr_pool_tvar);
   }
@@ -190,11 +189,12 @@ static void rgnsubtype(Position::seg_t loc, struct rgnsubenv env, type_t type) {
     rgnsubexpopt(env,e);
     rgnsubtype(loc,env,zt);
     return;
-  case &PointerType(PtrInfo(t1,_,PtrAtts(r,_,b,zt,_))):
+  case &PointerType(PtrInfo(t1,_,PtrAtts(r,_,b,zt,_,rel))):
     rgnsubtype(loc,env,t1);
     rgnsubtype(loc,env,r);
     rgnsubtype(loc,env,b);
     rgnsubtype(loc,env,zt);
+    rgnsubtype(loc,env,rel);
     return;
     // Assume that function types are always OK to refer to `C.
   case &FnType(...): return;

@@ -592,7 +592,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     *topt = new new_typ;
     return i_check_type(env,expected_kind,new_typ,put_in_effect,allow_abs_aggr);
 
-  case &PointerType(PtrInfo(t1,*tqp,PtrAtts(rgn_type,nullable,b,zt,_))):
+  case &PointerType(PtrInfo(t1,*tqp,PtrAtts(rgn_type,nullable,b,zt,_,rel))):
     // FIX: check that tqual is valid?
     kind_t rgnk;
     switch (expected_kind->aliasqual) {
@@ -605,6 +605,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     env = i_check_type(env,&Kinds::boolk,  zt,      false,true);
     env = i_check_type(env,&Kinds::boolk,  nullable,false,true);
     env = i_check_type(env,&Kinds::ptrbk,  b,       false,allow_abs_aggr);
+    env = i_check_type(env,&Kinds::boolk,  rel,     false,true);
 
     tqp->real_const = extract_const_from_typedef(env.loc,tqp->print_const,t1);
 
@@ -752,7 +753,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
       // if inject, then check the type is an appropriate datatype
       if (vi)
 	switch (compress(vt)) {
-	case &PointerType(PtrInfo{et,_,PtrAtts{_,_,bs,zt,_}}):
+	case &PointerType(PtrInfo{et,_,PtrAtts{_,_,bs,zt,_,_}}):
 	  switch (compress(et)) {
 	  case &AppType(&DatatypeCon(...),_):
 	    if (force_type2bool(false,zt))
@@ -780,7 +781,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	let $(_,_,t) = *List::nth(args, fmt_desc_arg - 1);
 	//can't use unification because evars aren't properly nailed down yet...
 	switch (compress(t)) {
-	case &PointerType(PtrInfo(et,_,PtrAtts(_,_,b,_,_))):
+	case &PointerType(PtrInfo(et,_,PtrAtts(_,_,b,_,_,_))):
 	  // FIX:  zero-termination?
 	  if (!is_char_type(et)) 
 	    err2(loc,"format descriptor is not a string");

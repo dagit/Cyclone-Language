@@ -655,10 +655,11 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
       return cat(rest, tvars2doc(ts));
 
     // FIX? What about attributes that we parse before tq2??
-  case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt,_),tq2):
+  case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt,_,rel),tq2):
     doc_t ptr;
     doc_t mt = nil_doc();
     doc_t ztd = mt;
+    doc_t reld = mt;
     doc_t rgd = mt;
     doc_t tqd = tqual2doc(tq2);
     switch (compress(bd)) {
@@ -688,15 +689,18 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
         ztd = text("@zeroterm");
       else if (is_char_ptr && !type2bool(false,zt))
 	ztd = text("@nozeroterm");
+      if (type2bool(false,rel))
+	reld = text("@released");
     }
     switch(compress(rgn)) {
     case &AppType(&HeapCon,_): break;
     case &Evar(...) && print_for_cycdoc: break;
     default: rgd = rgn2doc(rgn);
     }
-    doc_t spacer1 = (tqd != mt && (ztd != mt || rgd != mt)) ? text(" ") : mt;
+    doc_t spacer0 = (reld != mt && ztd != mt) ? text(" ") : mt;
+    doc_t spacer1 = (tqd != mt && (ztd != mt || rgd != mt || reld != mt)) ? text(" ") : mt;
     doc_t spacer2 = (rest != mt) ? text(" ") : mt;
-    return cat(ptr,ztd,rgd,spacer1,tqd,spacer2,rest);
+    return cat(ptr,ztd,spacer0,reld,rgd,spacer1,tqd,spacer2,rest);
   }
 }
 

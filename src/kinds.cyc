@@ -205,7 +205,7 @@ kindbound_t copy_kindbound(kindbound_t kb) {
   }
 }
 
-// Our lattice looks like this:
+// Our partial order looks like this:
 //          AbsType   EffKind  RgnKind  * Top
 //             V                          V V
 //          MemType               Aliasable Unique

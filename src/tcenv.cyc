@@ -533,7 +533,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
     for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) {
       let vd = vds->hd;
       if(strptrcmp((*vd->name)[1], (var_t)n)==0) {
-	vd->type = fatptr_type(t, param_rgn, tq, false_type);
+	vd->type = fatptr_type(t, param_rgn, tq, false_type, false_type);
 	break;
       }
     }
@@ -580,7 +580,7 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
     for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) {
       let vd = vds->hd;
       if(strptrcmp((*vd->name)[1], (var_t)n)==0) {
-	vd->type = fatptr_type(t, param_rgn, tq, false_type);
+	vd->type = fatptr_type(t, param_rgn, tq, false_type, false_type);
 	break;
       }
     }

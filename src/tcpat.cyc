@@ -330,7 +330,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
                                    empty_tqual(0)),
                                   PtrAtts(ptr_rgn, any_bool(lookup_type_vars(te)),
                                           bounds_one(), false_type,
-                                          NULL)));
+                                          NULL, any_bool(lookup_type_vars(te)))));
       break;
     default:
 DONT_PROMOTE:
@@ -580,7 +580,8 @@ static bool try_alias_coerce(tenv_t tenv, type_t old_type, type_t new_type,
                                                pnew.ptr_atts.nullable, 
                                                pnew.ptr_atts.bounds, 
                                                pnew.ptr_atts.zero_term, 
-                                               pold.ptr_atts.ptrloc}});
+                                               pold.ptr_atts.ptrloc,
+				               pnew.ptr_atts.released}});
     return (subtype(curr_rgnpo(tenv), assump, ptry, new_type) && 
             coerce_assign(curr_rgnpo(tenv), initializer, ptry));
   default: return false;

@@ -572,7 +572,7 @@ static $(flow_t,absRval_t) anal_derefR(analenv_t env, flow_t inflow,
                                        exp_opt_t index) {
 
   switch(compress((type_t)e->topt)) {
-  case &PointerType(PtrInfo(elttype,_,PtrAtts(_,_,bd,_,_))):
+  case &PointerType(PtrInfo(elttype,_,PtrAtts(_,_,bd,_,_,_))):
     switch(f) {
     case {.BottomFL = _}:
       return $(f,typ_to_absrval(env->fenv,elttype,false,env->fenv->unknown_all));
@@ -1700,7 +1700,7 @@ static $(flow_t,absLval_t) anal_derefL(analenv_t env,
 //   DEBUG_PRINT("In anal_derefL for %s\n",exp2string(e));
   let fenv = env->fenv;
   switch(compress((type_t)e->topt)) {
-  case &PointerType(PtrInfo{_,_,PtrAtts(_,_,bd,_,_)}):
+  case &PointerType(PtrInfo{_,_,PtrAtts(_,_,bd,_,_,_)}):
     switch(f) {
     case {.BottomFL = _}: return $(f,UnknownL());
     case {.ReachableFL = $(outdict,relns)}:

@@ -180,11 +180,11 @@ namespace Absyn {
   EXTERN_ABSYN enum Sign     { Signed, Unsigned, None }; // for integral types
   EXTERN_ABSYN enum AggrKind { StructA, UnionA };
                                   
-  // Used to classify kinds: Aliasable <= Unique <= Top
+  // Used to classify kinds: Aliasable <= Top, Unique <= Top
   EXTERN_ABSYN enum AliasQual { 
-    Aliasable, // for types that can be aliased
-    Unique,    // for types that cannot be aliased
-    Top        // either one
+    Aliasable,     // for types that can be aliased
+    Unique,        // for types that cannot be aliased
+    Top            // any of the above
   };
   EXTERN_ABSYN enum KindQual { 
     // BoxKind <= MemKind <= AnyKind
@@ -233,6 +233,7 @@ namespace Absyn {
     ptrbound_t bounds;    // legal bounds for pointer indexing
     booltype_t zero_term; // true => zero terminated array
     ptrloc_t   ptrloc;    // location info -- only present when porting C code
+    booltype_t released;  // true => an autoreleased, reference-counted pointer
   };
 
   // information about a pointer type
@@ -964,17 +965,17 @@ namespace Absyn {
   // pointer types
   type_t pointer_type(struct PtrInfo);
   // t *{e}`r
-  type_t starb_type(type_t,rgntype_t,tqual_t, ptrbound_t, booltype_t zero_term);
+  type_t starb_type(type_t,rgntype_t,tqual_t, ptrbound_t, booltype_t zero_term, booltype_t rel);
   // t @{e}`r
-  type_t atb_type(type_t, rgntype_t, tqual_t, ptrbound_t, booltype_t zero_term);
+  type_t atb_type(type_t, rgntype_t, tqual_t, ptrbound_t, booltype_t zero_term, booltype_t rel);
   // t *`r (bounds = Upper(1)
-  type_t star_type(type_t, rgntype_t, tqual_t, booltype_t zero_term);
+  type_t star_type(type_t, rgntype_t, tqual_t, booltype_t zero_term, booltype_t rel);
   // t @`r (bounds = Upper(1)
-  type_t at_type(type_t, rgntype_t, tqual_t, booltype_t zero_term);
+  type_t at_type(type_t, rgntype_t, tqual_t, booltype_t zero_term, booltype_t rel);
   // t*`H
   type_t cstar_type(type_t, tqual_t); 
   // t?`r
-  type_t fatptr_type(type_t t, type_t rgn, tqual_t, booltype_t zt);
+  type_t fatptr_type(type_t t, type_t rgn, tqual_t, booltype_t zt, booltype_t rel);
   // structs
   type_t strct(var_t  name);
   type_t strctq(qvar_t name);

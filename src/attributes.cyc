@@ -114,7 +114,7 @@ void fnTypeAttsOK(seg_t loc, type_t t) {
 	fnTypeAttsOverlap(loc,i,init_params,consume_params);
 	string_t s = "initializes attribute allowed only on";
 	switch(compress((*List::nth(args,i-1))[2])) {
-	case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bd,zt,_))):
+	case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bd,zt,_,_))):
 	  if(Tcutil::force_type2bool(false,nullable))
 	    Warn::err2(loc,s," non-null pointers");
 	  if(!Tcutil::is_bound_one(bd))

@@ -250,6 +250,7 @@ static int do_possible_qualifier(Lexbuf lexbuf) {
   case 'r':
     if(len == 8 && strncmp(b,"requires",8)==0) return REQUIRES_QUAL;
     if(len == 6 && strncmp(b,"region",6)==0) return REGION_QUAL;
+    if(len == 8 && strncmp(b,"released",8)==0) return AUTORELEASED_QUAL;
     break;
   case 'f':
     if(len == 3 && strncmp(b,"fat",3)==0) return FAT_QUAL;

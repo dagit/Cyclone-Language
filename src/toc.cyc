@@ -298,7 +298,7 @@ static tqual_t mt_tq = Tqual(false,false,false,false,0);
 type_t void_star_type() {
   static type_opt_t t = NULL;
   if (t == NULL)
-    t = star_type(void_type,heap_rgn_type, empty_tqual(0), false_type);
+    t = star_type(void_type,heap_rgn_type, empty_tqual(0), false_type, false_type);
   return (type_t)t;
 }
 static type_t fat_ptr_type() {
@@ -800,14 +800,14 @@ type_t typ_to_c(type_t t) {
     return strctq(collapse_qvars(tuf->name,tud->name));
   case &AppType(&DatatypeFieldCon(_),_): 
     toc_impos2("unresolved DatatypeFieldType");
-  case &PointerType(PtrInfo(t2,tq,PtrAtts(_,_,bnds,_,_))):
+  case &PointerType(PtrInfo(t2,tq,PtrAtts(_,_,bnds,...))):
     // t2? maps to struct fat_ptr.
     // t2* and t2@ map to t2*.  Regions and zero-term are irrelevant.
     t2 = typ_to_c(t2);
     if (get_bounds_exp(fat_bound_type,bnds) == NULL)
       return fat_ptr_type();
     else 
-      return star_type(t2,heap_rgn_type,tq,false_type);
+      return star_type(t2,heap_rgn_type,tq,false_type,false_type);
   case &AppType(&IntCon(_,_),_):
   case &AppType(&FloatCon(_),_): return t;
   case &ArrayType(ArrayInfo{t2,tq,e,_,ztl}):
@@ -819,7 +819,7 @@ type_t typ_to_c(type_t t) {
     let new_args = List::map(arg_to_c,args);
     if (cyc_vararg != NULL) {
       // region for array type irrelevant
-      let t =typ_to_c(fatptr_type(cyc_vararg->type,heap_rgn_type,mt_tq,false_type));
+      let t =typ_to_c(fatptr_type(cyc_vararg->type,heap_rgn_type,mt_tq,false_type,false_type));
       let vararg = new $(cyc_vararg->name,cyc_vararg->tq,t);
       new_args = List::imp_append(new_args,new List(vararg,NULL));
     }
@@ -922,7 +922,7 @@ type_t typ_to_c(type_t t) {
 static exp_t array_to_ptr_cast(type_t t,exp_t e,seg_t l) {
   switch (t) {
   case &ArrayType(ArrayInfo{t2,tq,_,_,_}):
-    return cast_it(star_type(t2,heap_rgn_type,tq,false_type),e);
+    return cast_it(star_type(t2,heap_rgn_type,tq,false_type,false_type),e);
   default: return cast_it(t,e);
   }
 }
@@ -1220,7 +1220,7 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
   if(index != NULL)
     exp_to_c(nv,index);
   switch(old_typ) {
-  case &PointerType(PtrInfo{ta,tq,PtrAtts(_,_,b,zt,_)}):
+  case &PointerType(PtrInfo{ta,tq,PtrAtts(_,_,b,zt,...)}):
     switch(annot) {
     case &InsertChecks::NoCheck: 
       if(!get_bounds_exp(bounds_one(),b)) {
@@ -1499,7 +1499,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
   //     if (numelts(x) == 1 && y == zero && z != zero) _throw_arraybounds();
   //     *x.curr = z; })
   // This is generated and *then* translated to ensure the proper constraints.
-  type_t fat_ptr_type = fatptr_type(elt_type, heap_rgn_type, mt_tq, true_type);
+  type_t fat_ptr_type = fatptr_type(elt_type, heap_rgn_type, mt_tq, true_type, false_type);
   let c_elt_type = typ_to_c(elt_type);
   let c_fat_ptr_type = typ_to_c(fat_ptr_type);
   let c_ptr_type = cstar_type(c_elt_type, mt_tq);
@@ -1745,7 +1745,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     case Numelts:
       exp_t arg = es->hd;
       switch (compress((type_t)arg->topt)) {
-      case &PointerType(PtrInfo(elt_type,_,PtrAtts(_,nbl,bound,zt,_))):
+      case &PointerType(PtrInfo(elt_type,_,PtrAtts(_,nbl,bound,zt,...))):
         let eopt = get_bounds_exp(bounds_one(),bound);
         if (eopt == NULL) {
           // retrieve (last_plus_one - curr) via runtime call
@@ -1780,7 +1780,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       if(is_toplevel(nv))
 	unimp("can't do pointer arithmetic at top-level");
       switch (compress(old_types->hd)) {
-      case &PointerType(PtrInfo(elt_type,_,PtrAtts(_,_,b,zt,_))):
+      case &PointerType(PtrInfo(elt_type,_,PtrAtts(_,_,b,zt,...))):
         let eopt = get_bounds_exp(bounds_one(),b);
 	exp_t e1 = es->hd;
 	exp_t e2 = es->tl->hd;
@@ -3739,7 +3739,7 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
   fn_pop_table = new Hashtable::lookup(*gpop_tables,f);
   if (f->i.cyc_varargs && f->i.cyc_varargs->name != NULL) {
     let VarargInfo{n,tq,t,i} = *f->i.cyc_varargs;
-    let t2 = typ_to_c(fatptr_type(t,heap_rgn_type,tq,false_type));// region irrelevant
+    let t2 = typ_to_c(fatptr_type(t,heap_rgn_type,tq,false_type,false_type));// region irrelevant
     let x2 = new $((nmspace_t)Loc_n,(var_t)n);
     f->i.args = append(f->i.args,new List(new $((var_t)n,tq,t2),NULL));
     f->i.cyc_varargs = NULL;

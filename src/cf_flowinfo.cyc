@@ -271,7 +271,7 @@ static absRval_t i_typ_to_absrval(flow_env_t fenv,
       return (allow_zeroterm && !no_init_bits_only && Tcutil::is_bits_only_type(et)) ? fenv->unknown_all : leafval;
     break;
   case &AppType(&TagCon,&List{t,_}): return leafval;
-  case &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,_,_,_}}): 
+  case &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,_,_,_,_}}): 
     if (!Tcutil::force_type2bool(false,nbl))
       switch(leafval) {
       case &UnknownR(AllIL): return fenv->notzeroall;

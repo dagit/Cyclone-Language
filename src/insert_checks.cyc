@@ -351,7 +351,7 @@ static void do_exp(env_t nv, exp_t e) {
   case &Subscript_e(e1,e2): 
     switch(compress((type_t)e1->topt)) {
     case &TupleType(_): e->annot = &NoCheck_val; break; // type-checker checks
-    case &PointerType(PtrInfo(ta,tq,PtrAtts(rgn,n,b,zt,_))):
+    case &PointerType(PtrInfo(ta,tq,PtrAtts(rgn,n,b,zt,_,_))):
       bool bds_ck  = need_bounds_check(nv,get_relns(e1),e1,e2);
       bool bds_ck_vcgen;
       if (nv.vcgen_r){

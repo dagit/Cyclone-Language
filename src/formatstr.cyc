@@ -286,16 +286,17 @@ list_t<type_t> get_format_types(tenv_t te,string_t s,bool isCproto, seg_t loc) {
         // We make this a buffer_t (i.e., NOZEROTERM) because more things
         // will then match, but only if Cyclone vararg function
         type_t ptr;
+	let tvs = lookup_type_vars(te);
 	if (!isCproto)
 	  ptr = fatptr_type(char_type, 
 			    new_evar(&Kinds::rko,
-				     new Opt(lookup_type_vars(te))),
-			    const_tqual(0), false_type);
+				     new Opt(tvs)),
+			    const_tqual(0), false_type, Tcutil::any_bool(tvs));
 	else
 	  ptr = at_type(char_type, 
 			new_evar(&Kinds::rko,
-				 new Opt(lookup_type_vars(te))),
-			const_tqual(0), true_type);
+				 new Opt(tvs)),
+			const_tqual(0), true_type, Tcutil::any_bool(tvs));
         typs = new List(ptr,typs);
         break;
       case 'p':
@@ -309,7 +310,7 @@ list_t<type_t> get_format_types(tenv_t te,string_t s,bool isCproto, seg_t loc) {
         if (precision != NULL)
 	  return err_null(loc,"precision '%s' not allowed with %%n",
 			  implode(precision));
-        let tvs = new Opt(lookup_type_vars(te));
+        let tvs = lookup_type_vars(te);
         switch (lenmod) {
         case NULL: t = sint_type; break;
         case &List(x,NULL) && x=='l': 
@@ -321,7 +322,8 @@ list_t<type_t> get_format_types(tenv_t te,string_t s,bool isCproto, seg_t loc) {
           return err_null(loc,"length modifier '%s' is not allowed with %%%c",
 			  implode(lenmod), c);
 	}
-        t = at_type(t,new_evar(&Kinds::rko,tvs),empty_tqual(0),false_type);
+        t = at_type(t,new_evar(&Kinds::rko,new Opt(tvs)),empty_tqual(0),false_type,
+		    Tcutil::any_bool(tvs));
         typs = new List(t,typs);
         break;
       case '%':
@@ -456,7 +458,7 @@ list_t<type_t> get_scanf_types(tenv_t te,string_t s,bool isCproto, seg_t loc) {
     switch (c) {
     case 'd': 
     case 'i':
-      let tvs = new Opt(lookup_type_vars(te));
+      let tvs = lookup_type_vars(te);
       switch (lenmod) {
       case NULL: t = sint_type; break;
       case &List(x,NULL) && x=='l': t = slong_type; break;
@@ -466,14 +468,15 @@ list_t<type_t> get_scanf_types(tenv_t te,string_t s,bool isCproto, seg_t loc) {
 	return err_null(loc,"length modifier '%s' is not allowed with %%%c",
 			implode(lenmod), c);
       }
-      t = at_type(t,new_evar(&Kinds::rko,tvs),empty_tqual(0),false_type);
+      t = at_type(t,new_evar(&Kinds::rko,new Opt(tvs)),empty_tqual(0),false_type,
+		  Tcutil::any_bool(tvs));
       typs = new List(t,typs);
       break;
     case 'u':
     case 'o': 
     case 'x': 
     case 'X':
-      let tvs = new Opt(lookup_type_vars(te));
+      let tvs = lookup_type_vars(te);
       switch (lenmod) {
       case NULL: t = uint_type; break;
       case &List(x,NULL) && x=='l': t = ulong_type;  break;
@@ -483,7 +486,8 @@ list_t<type_t> get_scanf_types(tenv_t te,string_t s,bool isCproto, seg_t loc) {
         return err_null(loc,"length modifier '%s' is not allowed with %%%c",
 			implode(lenmod), c);
       }
-      t = at_type(t,new_evar(&Kinds::rko,tvs),empty_tqual(0),false_type);
+      t = at_type(t,new_evar(&Kinds::rko,new Opt(tvs)),empty_tqual(0),false_type,
+		  Tcutil::any_bool(tvs));
       typs = new List(t,typs);
       break;
     case 'f': 
@@ -494,7 +498,7 @@ list_t<type_t> get_scanf_types(tenv_t te,string_t s,bool isCproto, seg_t loc) {
     case 'G': 
     case 'a': 
     case 'A':
-      let tvs = new Opt(lookup_type_vars(te));
+      let tvs = lookup_type_vars(te);
       switch (lenmod) {
       case NULL: t = float_type; break;
         // Note, %f means float in scanf, double in printf!!
@@ -503,40 +507,41 @@ list_t<type_t> get_scanf_types(tenv_t te,string_t s,bool isCproto, seg_t loc) {
 	return err_null(loc,"length modifier '%s' is not allowed with %%%c",
 			implode(lenmod), c);
      }
-      t = at_type(t,new_evar(&Kinds::rko,tvs),empty_tqual(0),false_type);
+      t = at_type(t,new_evar(&Kinds::rko,new Opt(tvs)),empty_tqual(0),false_type,
+		  Tcutil::any_bool(tvs));
       typs = new List(t,typs);
       break;
       //JGM: need to fix and synch up with lib/scanf.cyc
     case 'c':
-      let tvs = new Opt(lookup_type_vars(te));
+      let tvs = lookup_type_vars(te);
       type_t ptr;
       if (!isCproto)
-	ptr = fatptr_type(char_type,new_evar(&Kinds::rko,tvs),
+	ptr = fatptr_type(char_type,new_evar(&Kinds::rko,new Opt(tvs)),
 			  empty_tqual(0),
-			  false_type);
+			  false_type, Tcutil::any_bool(tvs));
       else
 	ptr = at_type(char_type, 
-		      new_evar(&Kinds::rko,tvs),
-		      empty_tqual(0), false_type);
+		      new_evar(&Kinds::rko,new Opt(tvs)),
+		      empty_tqual(0), false_type, Tcutil::any_bool(tvs));
       typs = new List(ptr,typs);
       break;
     case 's':
-      let tvs = new Opt(lookup_type_vars(te));
+      let tvs = lookup_type_vars(te);
       // we use a mbuffer_t here because this matches more things.
       type_t ptr;
       if (!isCproto) 
-	ptr = fatptr_type(char_type, new_evar(&Kinds::rko,tvs),
-			  empty_tqual(0), false_type);
+	ptr = fatptr_type(char_type, new_evar(&Kinds::rko,new Opt(tvs)),
+			  empty_tqual(0), false_type, Tcutil::any_bool(tvs));
       else
-	ptr = at_type(char_type, new_evar(&Kinds::rko,tvs),
-		      empty_tqual(0), true_type);
+	ptr = at_type(char_type, new_evar(&Kinds::rko,new Opt(tvs)),
+		      empty_tqual(0), true_type, Tcutil::any_bool(tvs));
       typs = new List(ptr,typs);
       break;
     case '[':
     case 'p':
       return err_null(loc,"%%%c is not supported",c);
     case 'n':
-      let tvs = new Opt(lookup_type_vars(te));
+      let tvs = lookup_type_vars(te);
       switch (lenmod) {
       case NULL: t = sint_type; break;
       case &List(x,NULL) && x=='l': t = ulong_type; break; // DAN: slong_type???
@@ -546,7 +551,8 @@ list_t<type_t> get_scanf_types(tenv_t te,string_t s,bool isCproto, seg_t loc) {
         return err_null(loc,"length modifier '%s' is not allowed with %%%c",
 			implode(lenmod), c);
       }
-      t = at_type(t,new_evar(&Kinds::rko,tvs),empty_tqual(0),false_type);
+      t = at_type(t,new_evar(&Kinds::rko,new Opt(tvs)),empty_tqual(0),false_type,
+		  Tcutil::any_bool(tvs));
       typs = new List(t,typs);
       break;
     case '%':

@@ -602,7 +602,7 @@ list_t<vardecl_t> get_fun_vardecls(bool need_va_name,
 	err2(loc,"missing name for vararg");
     } else {
       // HeapRegion is wrong -- changed by type-checker!
-      let typ = fatptr_type(t, heap_rgn_type, tq, false_type);
+      let typ = fatptr_type(t, heap_rgn_type, tq, false_type, false_type);
       let vd = new_vardecl(0,new $((nmspace_t)Loc_n,(var_t)v), typ, NULL);
       vds = new List(vd,vds);
     }
@@ -763,7 +763,7 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
       resolve_type(loc,env,ts->hd);
     return;
 
-  case &PointerType(PtrInfo(t1,_,PtrAtts(t2,_,bds,_,_))):
+  case &PointerType(PtrInfo(t1,_,PtrAtts(t2,_,bds,_,_,_))):
     resolve_type(loc,env,t1);
     resolve_type(loc,env,t2);
     resolve_type(loc,env,bds);

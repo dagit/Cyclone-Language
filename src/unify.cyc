@@ -164,6 +164,7 @@ void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
     occurs(evar,r,env,pinfo.ptr_atts.nullable);
     occurs(evar,r,env,pinfo.ptr_atts.bounds);
     occurs(evar,r,env,pinfo.ptr_atts.zero_term);
+    occurs(evar,r,env,pinfo.ptr_atts.released);
     break;
     // FIX: shouldn't we check for occurrence within the bound?
   case &ArrayType(ArrayInfo{t2,_,_,zt,_}): 
@@ -356,14 +357,18 @@ static void unify_it(type_t t1, type_t t2) {
       fail_because("(variable types are not the same)");
     return;
 
-  case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2,_))),
-         &PointerType(PtrInfo(t1a,tqual1a,PtrAtts(rgn1,null1a,b1,zt1,_)))):
+  case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2,_,rel2))),
+         &PointerType(PtrInfo(t1a,tqual1a,PtrAtts(rgn1,null1a,b1,zt1,_,rel1)))):
     unify_it(t1a,t2a);
     unify_it(rgn2,rgn1); // the whole reason regions are "types"
     let orig_failure = failure_reason;
     if (!unify(zt1,zt2)) {
       ts_failure = $(t1,t2);
       fail_because("(not both zero terminated)");
+    }
+    if (!unify(rel1,rel2)) {
+      ts_failure = $(t1,t2);
+      fail_because("(not both auto-released)");
     }
     unify_tqual(tqual1a,t1a,tqual2a,t2a);
     if (!unify(b1,b2)) {

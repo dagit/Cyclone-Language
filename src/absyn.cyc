@@ -320,7 +320,7 @@ type_t exn_type() {
   static type_opt_t eopt    = NULL;
   if (exn_typ == NULL) {
     eopt    = datatype_type(DatatypeInfo{.KnownDatatype = new exn_tud()},NULL);
-    exn_typ = at_type((type_t)eopt,heap_rgn_type,empty_tqual(0),false_type);
+    exn_typ = at_type((type_t)eopt,heap_rgn_type,empty_tqual(0),false_type,false_type);
   }
   return (type_t)exn_typ;
 }
@@ -364,35 +364,38 @@ type_t pointer_type(struct PtrInfo s) {
   return new PointerType(s);
 }
 
-type_t fatptr_type(type_t t, type_t r, tqual_t tq, booltype_t zt) {
+type_t fatptr_type(type_t t, type_t r, tqual_t tq, booltype_t zt, booltype_t rel) {
   return pointer_type(PtrInfo{t, tq, PtrAtts{.rgn = r, .nullable = true_type, 
 					     .bounds = fat_bound_type,
-					     .zero_term = zt, .ptrloc=NULL}});
+					     .zero_term = zt, .ptrloc=NULL,
+					     .released = rel}});
 }
-type_t starb_type(type_t t, type_t r, tqual_t tq, ptrbound_t b, booltype_t zt) {
+type_t starb_type(type_t t, type_t r, tqual_t tq, ptrbound_t b, booltype_t zt, booltype_t rel) {
   return pointer_type(PtrInfo{t, tq, PtrAtts{.rgn = r, .nullable = true_type, 
 					     .bounds = b, 
-					     .zero_term = zt, .ptrloc=NULL}});
+					     .zero_term = zt, .ptrloc=NULL,
+					     .released = rel }});
 }
-type_t atb_type(type_t t, type_t r, tqual_t tq, ptrbound_t b, booltype_t zt) {
+type_t atb_type(type_t t, type_t r, tqual_t tq, ptrbound_t b, booltype_t zt, booltype_t rel) {
   return pointer_type(PtrInfo{t, tq, PtrAtts{.rgn = r, .nullable = false_type, 
 					     .bounds = b, 
-					     .zero_term = zt, .ptrloc=NULL}});
+					     .zero_term = zt, .ptrloc=NULL,
+					     .released = rel }});
 }
-type_t star_type(type_t t, type_t r, tqual_t tq, booltype_t zeroterm) { 
-  return starb_type(t,r,tq,bounds_one(),zeroterm);
+type_t star_type(type_t t, type_t r, tqual_t tq, booltype_t zeroterm, booltype_t rel) { 
+  return starb_type(t,r,tq,bounds_one(),zeroterm,rel);
 }
 type_t cstar_type(type_t t, tqual_t tq) { 
-  return star_type(t, heap_rgn_type, tq, false_type);
+  return star_type(t, heap_rgn_type, tq, false_type, false_type);
 }
-type_t at_type(type_t t, type_t r, tqual_t tq, booltype_t zeroterm) {
-  return atb_type(t,r,tq,bounds_one(),zeroterm);
+type_t at_type(type_t t, type_t r, tqual_t tq, booltype_t zeroterm, booltype_t rel) {
+  return atb_type(t,r,tq,bounds_one(),zeroterm,rel);
 }
 type_t string_type(type_t rgn) {
-  return starb_type(char_type,rgn,empty_tqual(0),fat_bound_type,true_type);
+  return starb_type(char_type,rgn,empty_tqual(0),fat_bound_type,true_type,false_type);
 }
 type_t const_string_type(type_t rgn) {
-  return starb_type(char_type,rgn,const_tqual(0),fat_bound_type,true_type);
+  return starb_type(char_type,rgn,const_tqual(0),fat_bound_type,true_type,false_type);
 }
 
 type_t array_type(type_t elt_type, tqual_t tq, exp_opt_t num_elts, 
@@ -826,7 +829,7 @@ type_t pointer_expand(type_t t,bool fresh_evar) {
                                   fresh_evar ? 
                                   new_evar(new Opt(&Kinds::rk), NULL) 
 				  : heap_rgn_type,
-                                  empty_tqual(0),false_type);
+                                  empty_tqual(0),false_type,false_type);
   default: return t;
   }
 }
