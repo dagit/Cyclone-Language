@@ -325,6 +325,71 @@ list_t<`a> flatten(glist_t<glist_t<`a,`r1>,`r2> x) {
   return rflatten(heap_region,x);
 }
 
+// imperative version of merge -- see below
+glist_t<`a,`r> imp_merge(int less_eq(`a,`a), glist_t<`a,`r> a, glist_t<`a,`r> b){
+  glist_t<`a,`r> c,d;
+
+  if (a==null) return b;
+  if (b==null) return a;
+  
+  // merge the two lists:
+  //   d = beginning of the merged list
+  //   c = current cons cell
+ 
+  if (less_eq(a->hd,b->hd) <= 0) {
+    c = a;
+    a = a->tl;
+  } else {
+    c = b;
+    b = b->tl;
+  }
+  d = c;
+  // walk through a and b
+  while ((a != null) && (b != null)) {
+    // add a to the list else add b
+    if (less_eq(a->hd, b->hd) <= 0) {
+      c->tl = a;
+      c = a;
+      a = a->tl;
+    } else {
+      c->tl = b;
+      c = b;
+      b = b->tl;
+    }
+  }
+  // splice in the rest of the other list
+  if (a == null)
+    c->tl = b;
+  else
+    c->tl = a;
+  return(d);
+}
+
+// Imperative version of merge-sort (see below)
+glist_t<`a,`r> rimp_merge_sort(int less_eq(`a,`a), glist_t<`a,`r> x) 
+{
+  if (x == null || x->tl == null) return x;
+
+  // split into two lists
+  glist_t<`a,`r> a = x, aptr = a;
+  glist_t<`a,`r> b = x->tl, bptr = b;
+  x = b->tl;
+  while (x != null) {
+    aptr->tl = x;
+    aptr = x;
+    x = x->tl;
+    if (x != null) {
+      bptr->tl = x;
+      bptr = x;
+      x = x->tl;
+    }
+  }
+  aptr->tl = null;
+  bptr->tl = null;
+  return imp_merge(less_eq,
+                   rimp_merge_sort(less_eq,a),rimp_merge_sort(less_eq,b));
+}
+
 // Given a partial order less_eq on 'a elements and a list, return
 // the list sorted by less_eq.  Uses a merge sort.  The less_eq
 // function should return 0 if the elements are equal, i < 0 if
@@ -332,30 +397,9 @@ list_t<`a> flatten(glist_t<glist_t<`a,`r1>,`r2> x) {
 glist_t<`a,`r2> rmerge_sort(region_t<`r2> r2, int less_eq(`a,`a), 
                             glist_t<`a,`r> x)
 {
-  
-  if ((x == null) || (x->tl == null))
-    return(rcopy(r2,x)); // copy needed to get in right region
-
-  // split into two lists
-  glist_t<`a,`r2> result;
-
-  region<`r3> r3 {
-    glist_t<`a,`r3> a = null;
-    glist_t<`a,`r3> b = null;
-    while (x != null) {
-      a = rnew(r3) List(x->hd,a);
-      x = x->tl;
-      if (x != null) {
-        b = rnew(r3) List(x->hd,b);
-        x = x->tl;
-      }
-    }
-    a = rmerge_sort(r3,less_eq,a);
-    b = rmerge_sort(r3,less_eq,b);
-    result = rmerge(r2,less_eq,a,b);
-  }
-  return result;
+  return rimp_merge_sort(less_eq, rcopy(r2, x));
 }
+
 
 glist_t<`a,`r3> rmerge(region_t<`r3> r3,
                        int less_eq(`a,`a),

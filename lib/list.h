@@ -118,11 +118,16 @@ namespace List {
   extern list_t<`a> merge_sort(int less_eq(`a,`a), glist_t<`a,`r> x);
   extern glist_t<`a,`r2> rmerge_sort(region_t<`r2>, int less_eq(`a,`a), 
                                      glist_t<`a,`r> x);
+  // imperative version of merge_sort
+  extern glist_t<`a,`r> rimp_merge_sort(int less_eq(`a,`a), glist_t<`a,`r> x);
   
   // Merge two (sorted) lists using the less_eq operation.
   extern list_t<`a> merge(int less_eq(`a,`a),list_t<`a> a,list_t<`a> b);
   extern glist_t<`a,`r3> rmerge(region_t<`r3>, int less_eq(`a,`a),
                                 glist_t<`a,`r1> a,glist_t<`a,`r2> b);
+  // Imperative version of merge.
+  extern glist_t<`a,`r> imp_merge(int less_eq(`a,`a),
+                                  glist_t<`a,`r> a,glist_t<`a,`r> b);
   
   // raised when list_nth doesn't have enough elements in the list. 
   extern xtunion exn {Nth};
