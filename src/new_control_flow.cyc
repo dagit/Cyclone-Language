@@ -1201,7 +1201,7 @@ static flow_t anal_decl(analenv_t env, flow_t inflow, decl_t decl) {
     }
 
     // FIX WHEN WE INTERPRET PATTERNS!!! SPECIAL-CASE VAR-PATTERN?
-  case &Let_d(_,&Core::Opt(vds),_,e,_):
+  case &Let_d(_,&Core::Opt(vds),e):
     let $(f,r) = anal_Rexp(env,inflow,e);
     f = use_Rval(env,e->loc,f,r);
     return add_vars(f,vds,unknown_all);

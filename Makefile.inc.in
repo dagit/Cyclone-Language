@@ -158,6 +158,7 @@ CYCLONE_SRCS:=absyn\
          lex\
          absynpp\
 	 absyndump\
+	 rgnorder\
          tcenv\
          tcutil\
          tcstmt\
@@ -180,6 +181,7 @@ CYCDOC_SRCS:=cycdoc\
 	parse_tab\
 	absyn\
 	tcutil\
+	rgnorder\
 	tcenv\
 	tcexp\
 	tcstmt\
@@ -205,6 +207,7 @@ BUILDLIB_SRCS:=buildlib\
 	tcstmt\
 	formatstr\
 	evexp\
+	rgnorder\
 	tcenv\
 	tcpat\
 	new_control_flow\

@@ -453,7 +453,7 @@ static $(type_t,opt_t<decl_t>)
         case &Aggr_d(ad):
           let args = List::map(tvar2typ,List::map(copy_tvar,ad->tvs));
           t = new AggrType(AggrInfo(new UnknownAggr(ad->kind,ad->name),args));
-          if (ad->fields!=NULL) declopt = new Opt(d);
+          if (ad->impl!=NULL) declopt = new Opt(d);
 	  break;
         case &Tunion_d(tud):
           let args = List::map(tvar2typ,List::map(copy_tvar,tud->tvs));
@@ -712,7 +712,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
       switch (t) {
       case &AggrType(AggrInfo(&UnknownAggr(k,n),ts)):
 	let ts2 = List::map_c(typ2tvar,loc,ts);
-	let ad  = new Aggrdecl(k,s,n,ts2,NULL,NULL,NULL);
+	let ad  = new Aggrdecl(k,s,n,ts2,NULL,NULL);
 	if (atts != NULL) err("bad attributes on type declaration",loc);
 	return new List(new_decl(new Aggr_d(ad),loc),NULL);
       case &TunionType(TunionInfo(&KnownTunion(tudp),_,_)):
@@ -1052,7 +1052,7 @@ declaration:
     { $$=^$(make_declarations($1,$2,LOC(@1,@3))); }
 /* Cyc: let declaration */
 | LET pattern '=' expression ';'
-    { $$=^$(new List(let_decl($2,NULL,$4,LOC(@1,@5)),NULL)); }
+    { $$=^$(new List(let_decl($2,$4,LOC(@1,@5)),NULL)); }
 | LET identifier_list ';'
     { let vds = NULL;
       for (let ids = $2; ids != NULL; ids = ids->tl) {
@@ -1240,9 +1240,9 @@ type_specifier:
 | '_'       { $$=^$(type_spec(new_evar(NULL,NULL),LOC(@1,@1))); }
 | '_' COLON_COLON kind 
   { $$=^$(type_spec(new_evar(new Opt($3),NULL),LOC(@1,@3))); }
-| CHAR      { $$=^$(type_spec(uchar_t,LOC(@1,@1))); }
+| CHAR      { $$=^$(type_spec(uchar_typ,LOC(@1,@1))); }
 | SHORT     { $$=^$(new Short_spec(LOC(@1,@1))); }
-| INT       { $$=^$(type_spec(sint_t,LOC(@1,@1))); }
+| INT       { $$=^$(type_spec(sint_typ,LOC(@1,@1))); }
 | LONG      { $$=^$(new Long_spec(LOC(@1,@1))); }
 | FLOAT     { $$=^$(type_spec(float_typ,LOC(@1,@1))); }
 | DOUBLE    { $$=^$(type_spec(double_typ(false),LOC(@1,@1))); }
@@ -1312,11 +1312,15 @@ struct_or_union_specifier:
   struct_or_union '{' struct_declaration_list '}'
   { $$=^$(type_spec(new AnonAggrType($1,$3),LOC(@1,@4))); }
 /* Cyc:  type_params_opt are added */
-| struct_or_union struct_union_name type_params_opt '{' type_params_opt struct_declaration_list '}'
-    { let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
+| struct_or_union struct_union_name type_params_opt '{' 
+    type_params_opt optional_rgn_order 
+  struct_declaration_list '}'
+    { 
+      let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
       let exist_ts = List::map_c(typ2tvar,LOC(@5,@5),$5);
-      $$=^$(new Decl_spec(aggr_decl($1, Public, $2, ts, new Opt(exist_ts), 
-				    new Opt($6), NULL, LOC(@1,@7))));
+      $$=^$(new Decl_spec(aggr_decl($1, Public, $2, ts,
+				    aggrdecl_impl(exist_ts,$6,$7), NULL,
+				    LOC(@1,@8))));
     }
 /* Cyc:  type_params_opt are added */
 | struct_or_union struct_union_name type_params_opt 
@@ -1714,7 +1718,7 @@ array_initializer:
 | '{' initializer_list ',' '}'
     { $$=^$(new_exp(new UnresolvedMem_e(NULL,List::imp_rev($2)),LOC(@1,@4))); }
 | '{' FOR IDENTIFIER '<' expression ':' expression '}'
-    { let vd = new_vardecl(new $(Loc_n,new $3), uint_t,
+    { let vd = new_vardecl(new $(Loc_n,new $3), uint_typ,
                            uint_exp(0,LOC(@3,@3)));
       // make the index variable const
       vd->tq = Tqual{.q_const = true, .q_volatile = false, .q_restrict = true};

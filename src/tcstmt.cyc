@@ -395,15 +395,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       tcStmt(set_encloser(te2,s0),s,false);
       return;
 
-    case &Let_d(p,*vds,*topt_ref,e,*exhaust):
-      let topt = *topt_ref;
+    case &Let_d(p,*vds,e):
       tcExpInitializer(te,NULL,e);
-      *topt_ref = e->topt; // side effect
-       //FIX: can pass region if e an lvalue
+      //FIX: can pass region if e an lvalue
       let $(new_tvs,x) = tcPat(te,p,&e->topt->v,NULL);
       *vds = new Opt(x);
-      if (topt != NULL && !unify(p->topt->v,topt->v))
-        terr(d->loc,"type of pattern does not match declared type");
       if (!unify(p->topt->v,e->topt->v)) {
 	terr(d->loc,"pattern type %s does not match definition type %s",
              typ2string(p->topt->v),typ2string(e->topt->v));
@@ -411,7 +407,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       }
       else
 	check_pat_regions(te,p);
-      *exhaust = check_let_pat_exhaustive(p->loc,p); // side effect
+      check_let_pat_exhaustive(p->loc,p);
       pattern_synth(s0->loc, te, new_tvs, x, s, NULL, false);
       return;
 

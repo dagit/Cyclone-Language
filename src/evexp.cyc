@@ -108,9 +108,9 @@ bool okay_szofarg(type_t t) {
     case &UnknownAggr(_,_): impos("szof on unchecked StructType");
     case &KnownAggr(&ad2): ad = ad2;
     }
-    if(ad->fields == NULL)
+    if(ad->impl == NULL)
       return false;
-    fallthru(ad->fields->v);
+    fallthru(ad->impl->fields);
   case &AnonAggrType(_,fs):
     for(; fs != NULL; fs = fs->tl)
       if(!okay_szofarg(fs->hd->type))

@@ -2,7 +2,7 @@
 
 We begin with a quick overview of Cyclone, suitable for those who
 already know how to program in C\@.  We'll explain some of the ways
-that Cyclone differs from C, and some of the reasons why; you should
+that Cyclone differs from C and some of the reasons why; you should
 come away with enough knowledge to start writing, compiling, and
 running your own Cyclone programs.  We assume that the Cyclone
 compiler is already installed on your system (see
@@ -62,7 +62,7 @@ valid Cyclone code: it will be rejected by the Cyclone compiler.
 Cyclone requires a \emph{definite return}: any function with a return
 type other than \texttt{void} must explicitly return a value of the
 correct type.  Since \texttt{main} is declared with return type
-\texttt{int}, Cyclone requires that it explicitly return an integer.
+\texttt{int}, Cyclone requires that it returns an integer.
 
 Definite return reflects Cyclone's concern with safety.  The caller of
 the function expects to receive a value of the return type; if the
@@ -104,9 +104,10 @@ Cyclone:
 \begin{itemize}
 \item You can't cast an integer to a pointer.  Cyclone prevents this
   because it would let you overwrite arbitrary memory locations.  In
-  fact, you can't use \texttt{(void *)0} as a pointer in Cyclone, even
-  though this is how C typically defines \texttt{NULL}.  Instead,
-  Cyclone provides \texttt{NULL} as a keyword.
+  Cyclone, \texttt{NULL} is a keyword suitable for situations where
+  you would use a (casted) \texttt{0} in C\@.  The compiler usually
+  accepts \texttt{0} as a legal possibly-null pointer value, but using
+  \texttt{NULL} is preferred.
 \item You can't do pointer arithmetic on a \texttt{*} pointer.
   Pointer arithmetic in C can take a pointer out of bounds, so that
   when the pointer is eventually dereferenced, it corrupts memory or
@@ -234,8 +235,8 @@ checks---and this is perfectly safe.
 
 \subsubsection*{Initializing Pointers}
 
-Pointers must be initialized before they are used to ensure that random
-stack garbage does not get used as a pointer.  This requirement goes for
+Pointers must be initialized before they are used to ensure that unknown
+bits do not get used as a pointer.  This requirement goes for
 variables that have pointer type, as well for arrays, elements of arrays,
 and for fields in structures.  Conversely, data that does not have pointer
 type need not be initialized before it is used, since doing so cannot result
@@ -293,7 +294,7 @@ the storage for that variable is deallocated upon exit from the
 function.  That storage may be re-used (\emph{e.g.}, by a subsequent procedure
 call) leading to subtle bugs or security problems.  For instance, in
 the code above, after \texttt{bar} calls \texttt{newPoint}, the storage
-for the point is re-used to store information for the activation
+for the point is reused to store information for the activation
 record of the call to \texttt{foo}.  This includes a copy of the
 pointer \texttt{p} and the return address of \texttt{foo}.  Therefore,
 it may be that \texttt{p->y} actually points to the return address of
@@ -304,7 +305,7 @@ admits the code.
 
 In Cyclone, this code would be rejected by the type-checker to avoid
 the kind of problems mentioned above.  The reason the code is rejected
-is that Cyclone tracks the lifetime of every object and ensures that
+is that the Cyclone compiler tracks object lifetimes and ensures that
 a pointer to an object can only be dereferenced if that object 
 has not been deallocated.  
 
@@ -367,7 +368,7 @@ The restriction, compared to C, is that a pointer's type indicates
 
 As we will see, Cyclone often figures out the region of a pointer
 without the programmer providing the information.  This is called {\em
-region inference}.  For instance, we can re-write the function
+region inference}.  For instance, we can rewrite the function
 \texttt{f} above without any region annotations, and without 
 labelling the blocks:
 \begin{verbatim}
@@ -380,7 +381,7 @@ labelling the blocks:
 7    return *y;
 8 }
 \end{verbatim}
-and Cyclone can still figure out that \texttt{y} is a pointer into
+Cyclone can still figure out that \texttt{y} is a pointer into
 region \texttt{`f}, and \texttt{\&a} is a pointer into a different
 (now anonymous) region, so the code should be rejected.
 
@@ -499,7 +500,7 @@ are just abbreviations for \texttt{rnew(heap_region)} and
 
 \subsubsection*{Region Polymorphism}
 
-Another key concept you need to understand about regions is called
+Another key concept you need to understand is called
 \emph{region polymorphism}.  This is just a fancy way of saying
 that you can write functions in Cyclone that don't care which
 specific region a given object lives in, as long as it's still
@@ -560,7 +561,7 @@ void h(struct Point *`r1 p1, struct Point *`r2 p2) {
 \end{verbatim}
 Now we can call \texttt{h} with pointers into any two regions,
 or even two pointers into the same region.  This is because
-the code is type-correct \emph{for all} regions \texttt{`r1} and \texttt{`r2}
+the code is type-correct \emph{for all} regions \texttt{`r1} and \texttt{`r2}.
 
 Occasionally, you will have to put region parameters in explicitly.
 This happens when you need to assert that two pointers point into 
@@ -632,7 +633,7 @@ int * id(int *x) {
   return x;
 }
 \end{verbatim}
-will not type-check immediately.  To see why, let us rewrite the
+will not type-check.  To see why, let us rewrite the
 code with the default region annotations filled in.  The argument
 is assumed to be in a region \texttt{`r}, and the result is assumed to be
 in the heap, so the fully elaborated code is:
@@ -750,11 +751,11 @@ distinguish between the cases.  The first case,
 \begin{verbatim}
    case &Integer(i): printf("%d",i); return;
 \end{verbatim}
-contains a pattern, \texttt{\&Integer(i)}, that will only match values
+contains a pattern, \texttt{\&Integer(i)}, that will match only values
 that have been built with the \texttt{Integer} tag.  The variable
 \texttt{i} is bound to the underlying integer, and it can be used in
 the body of the case.  For example, \texttt{print(x)} will print 3,
-since \texttt{x} was initialized by \texttt{new Integer(3)}, and
+since \texttt{x} holds \texttt{new Integer(3)}, and
 \texttt{print(y)} will print \texttt{hello, world}.
 
 The cases of a \texttt{tunion} can carry any number of values,

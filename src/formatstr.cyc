@@ -196,12 +196,12 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
     default: break;
     }
     switch (width) {
-    case &List(x,NULL) && x=='*': typs = new List(sint_t,typs); break;
+    case &List(x,NULL) && x=='*': typs = new List(sint_typ,typs); break;
     default: break;
     }
     switch (precision) {
     case &List(x,&List(y,NULL)) && x=='.' && y=='*':
-      typs = new List(sint_t,typs); break;
+      typs = new List(sint_typ,typs); break;
     default: break;
     }
     type_t t;
@@ -214,10 +214,10 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
           return NULL;
         }
       switch (lenmod) {
-      case NULL:                    t = sint_t; break;
-      case &List(x,NULL) && x=='l': t = slong_t; break;
-      case &List(x,NULL) && x=='h': t = sshort_t; break;
-      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = schar_t; break;
+      case NULL:                    t = sint_typ;   break;
+      case &List(x,NULL) && x=='l': t = slong_typ;  break;
+      case &List(x,NULL) && x=='h': t = sshort_typ; break;
+      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = schar_typ; break;
       default: // We don't support ll
         terr(loc,"length modifier '%s' is not allowed with %%%c",
 	     implode(lenmod), c);
@@ -236,10 +236,10 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
     case 'x': 
     case 'X':
       switch (lenmod) {
-      case NULL:                    t = uint_t; break;
-      case &List(x,NULL) && x=='l': t = ulong_t; break;
-      case &List(x,NULL) && x=='h': t = ushort_t; break;
-      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = uchar_t; break;
+      case NULL:                    t = uint_typ; break;
+      case &List(x,NULL) && x=='l': t = ulong_typ; break;
+      case &List(x,NULL) && x=='h': t = ushort_typ; break;
+      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = uchar_typ; break;
       // We don't support ll
       default:
         terr(loc,"length modifier '%s' is not allowed with %%%c",
@@ -281,7 +281,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
              implode(precision));
         return NULL;
       }
-      typs = new List(sint_t,typs);
+      typs = new List(sint_typ,typs);
       break;
     case 's':
        // Only flag '-' is allowed for %s
@@ -300,7 +300,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
       break;
     case 'p':
       // Note:  we require pointers to be cast to integers
-      typs = new List(uint_t,typs);
+      typs = new List(uint_typ,typs);
       break;
     case 'n':
       for (_ f = flags; f != NULL; f = f->tl)
@@ -315,10 +315,10 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
       }
       let tvs = new Opt(lookup_type_vars(te));
       switch (lenmod) {
-      case NULL: t = sint_t; break;
-      case &List(x,NULL) && x=='l': t = ulong_t; break; // DAN: slong_t???
-      case &List(x,NULL) && x=='h': t = sshort_t; break;
-      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = schar_t; break;
+      case NULL: t = sint_typ; break;
+      case &List(x,NULL) && x=='l': t = ulong_typ; break; // DAN: slong_typ???
+      case &List(x,NULL) && x=='h': t = sshort_typ; break;
+      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = schar_typ; break;
       default: // We don't support ll
         terr(loc,"length modifier '%s' is not allowed with %%%c",
 	     implode(lenmod), c);
@@ -467,10 +467,10 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
     case 'i':
       let tvs = new Opt(lookup_type_vars(te));
       switch (lenmod) {
-      case NULL: t = sint_t; break;
-      case &List(x,NULL) && x=='l': t = slong_t; break;
-      case &List(x,NULL) && x=='h': t = sshort_t; break;
-      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = schar_t; break;
+      case NULL: t = sint_typ; break;
+      case &List(x,NULL) && x=='l': t = slong_typ; break;
+      case &List(x,NULL) && x=='h': t = sshort_typ; break;
+      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = schar_typ; break;
       default: // We don't support ll
         terr(loc,"length modifier '%s' is not allowed with %%%c",
               implode(lenmod), c);
@@ -485,10 +485,10 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
     case 'X':
       let tvs = new Opt(lookup_type_vars(te));
       switch (lenmod) {
-      case NULL: t = uint_t; break;
-      case &List(x,NULL) && x=='l': t = ulong_t; break;
-      case &List(x,NULL) && x=='h': t = ushort_t; break;
-      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = uchar_t; break;
+      case NULL: t = uint_typ; break;
+      case &List(x,NULL) && x=='l': t = ulong_typ;  break;
+      case &List(x,NULL) && x=='h': t = ushort_typ; break;
+      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = uchar_typ; break;
       default: // We don't support ll
         terr(loc,"length modifier '%s' is not allowed with %%%c",
 	     implode(lenmod), c);
@@ -531,10 +531,10 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
     case 'n':
       let tvs = new Opt(lookup_type_vars(te));
       switch (lenmod) {
-      case NULL: t = sint_t; break;
-      case &List(x,NULL) && x=='l': t = ulong_t; break; // DAN: slong_t???
-      case &List(x,NULL) && x=='h': t = sshort_t; break;
-      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = schar_t; break;
+      case NULL: t = sint_typ; break;
+      case &List(x,NULL) && x=='l': t = ulong_typ; break; // DAN: slong_typ???
+      case &List(x,NULL) && x=='h': t = sshort_typ; break;
+      case &List(x,&List(y,NULL)) && (x=='h' && y=='h'): t = schar_typ; break;
       default: // We don't support ll
         terr(loc,"length modifier '%s' is not allowed with %%%c",
 	     implode(lenmod), c);

@@ -1090,15 +1090,15 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Aggr_d(x):
       let &$(_,v) = x->name;
       current_source = v;
-      if (x->fields) {
-        for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
+      if (x->impl) {
+        for (let fs = x->impl->fields; fs != NULL; fs = fs->tl) {
           let f = fs->hd;
           scan_type(f->type);
           scan_exp_opt(f->width);
         }
         // That takes care of what the decl depends on.  Now must add
         // that each field depends on the decl.
-        for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
+        for (let fs = x->impl->fields; fs != NULL; fs = fs->tl) {
           // FIX!!
         }
       }
@@ -1125,7 +1125,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         scan_type(x->defn->v);
       break;
 
-    case &Let_d(_,_,_,_,_):
+    case &Let_d(_,_,_):
       fprintf(stderr,"Error: unexpected let declaration\n");
       exit(1); return NULL;
     case &Tunion_d(_):
@@ -1456,7 +1456,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         name = v;
         break;
 
-      case &Let_d(_,_,_,_,_):
+      case &Let_d(_,_,_):
       case &Tunion_d(_):
       case &Letv_d(_):
       case &Namespace_d(_,_):
@@ -1530,7 +1530,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         name = v;
         break;
 
-      case &Let_d(_,_,_,_,_):
+      case &Let_d(_,_,_):
       case &Tunion_d(_):
       case &Letv_d(_):
       case &Namespace_d(_,_):

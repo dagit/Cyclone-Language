@@ -115,10 +115,10 @@ i_t final() {
   let ie2 = new_ienv();
   qvar_t qmain = new $(new Abs_n(NULL), new ((string_t)"main"));
   let vd = new_vardecl(qmain,
-		       function_typ(NULL, NULL, sint_t,
-				    new List(new $(NULL, empty_tqual(), uint_t),
+		       function_typ(NULL, NULL, sint_typ,
+				    new List(new $(NULL, empty_tqual(), uint_typ),
 					     new List(new $(NULL, empty_tqual(),
-							    tagged_typ(tagged_typ(uchar_t,
+							    tagged_typ(tagged_typ(uchar_typ,
 										  HeapRgn,
 										  empty_tqual()),
 								       HeapRgn,
@@ -214,8 +214,8 @@ static bool check_public_aggrdecl(aenv_t ae, seen_t seen, aggrdecl_t d) {
   catch { case Dict::Absent: break; }
   let res = true;
   seen->aggrs = Dict::insert(seen->aggrs, d->name, res); // necessary for recursive datas
-  if (d->fields != NULL)
-    for(let fs = d->fields->v; fs != NULL; fs=fs->tl)
+  if (d->impl != NULL)
+    for(let fs = d->impl->fields; fs != NULL; fs=fs->tl)
       if (!check_public_type(ae, seen, "type", d->name, fs->hd->type)) 
 	res = false;
 
@@ -381,47 +381,78 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
 
 /* ------ extracting an interface from a global environment ------ */
 
-// FIX: Make this hack go away
-#define EXTRACT_DECL(OBJ)\
-static void extract_##OBJ##decl($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env,\
-				var_t x, OBJ##decl_t@ dp) {\
-  let &$(imp, exp, check_complete_defs, ae, seen, _) = env;\
-  let d = *dp;\
-  switch(d->sc) {\
-  case Static:\
-    if (check_complete_defs && d->fields == NULL)\
-      fields_err("static", #OBJ, d->name);\
-    break;\
-  case Abstract:\
-    if (d->fields == NULL) {\
-      if (check_complete_defs)\
-	fields_err("abstract", #OBJ, d->name);\
-    } else {\
-      d = new *d;\
-      d->fields = NULL;\
-    }\
-    if (check_public_##OBJ##decl(ae, seen, d))\
-      exp->OBJ##decls = Dict::insert(exp->OBJ##decls, x, d);\
-    break;\
-  case Public:\
-    if (d->fields == NULL) {\
-      fields_err("public", #OBJ, d->name);\
-      d = new *d;\
-      d->sc = Abstract;\
-    }\
-    if (check_public_##OBJ##decl(ae, seen, d))\
-      exp->OBJ##decls = Dict::insert(exp->OBJ##decls, x, d);\
-    break;\
-  case ExternC: \
-  case Extern:\
-    if (check_public_##OBJ##decl(ae, seen, d)) \
-      imp->OBJ##decls = Dict::insert(imp->OBJ##decls, x, d);\
-    break;\
-  }\
+static void extract_aggrdecl($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env,
+				var_t x, aggrdecl_t@ dp) {
+  let &$(imp, exp, check_complete_defs, ae, seen, _) = env;
+  let d = *dp;
+  switch(d->sc) {
+  case Static:
+    if (check_complete_defs && d->impl == NULL)
+      fields_err("static", "struct/union", d->name);
+    break;
+  case Abstract:
+    if (d->impl == NULL) {
+      if (check_complete_defs)
+	fields_err("abstract", "struct/union", d->name);
+    } else {
+      d = new *d;
+      d->impl = NULL;
+    }
+    if (check_public_aggrdecl(ae, seen, d))
+      exp->aggrdecls = Dict::insert(exp->aggrdecls, x, d);
+    break;
+  case Public:
+    if (d->impl == NULL) {
+      fields_err("public", "struct/union", d->name);
+      d = new *d;
+      d->sc = Abstract;
+    }
+    if (check_public_aggrdecl(ae, seen, d))
+      exp->aggrdecls = Dict::insert(exp->aggrdecls, x, d);
+    break;
+  case ExternC: 
+  case Extern:
+    if (check_public_aggrdecl(ae, seen, d)) 
+      imp->aggrdecls = Dict::insert(imp->aggrdecls, x, d);
+    break;
+  }
 }
-
-EXTRACT_DECL(aggr)
-EXTRACT_DECL(enum)
+static void extract_enumdecl($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env,
+				var_t x, enumdecl_t@ dp) {
+  let &$(imp, exp, check_complete_defs, ae, seen, _) = env;
+  let d = *dp;
+  switch(d->sc) {
+  case Static:
+    if (check_complete_defs && d->fields == NULL)
+      fields_err("static", "enum", d->name);
+    break;
+  case Abstract:
+    if (d->fields == NULL) {
+      if (check_complete_defs)
+	fields_err("abstract", "enum", d->name);
+    } else {
+      d = new *d;
+      d->fields = NULL;
+    }
+    if (check_public_enumdecl(ae, seen, d))
+      exp->enumdecls = Dict::insert(exp->enumdecls, x, d);
+    break;
+  case Public:
+    if (d->fields == NULL) {
+      fields_err("public", "enum", d->name);
+      d = new *d;
+      d->sc = Abstract;
+    }
+    if (check_public_enumdecl(ae, seen, d))
+      exp->enumdecls = Dict::insert(exp->enumdecls, x, d);
+    break;
+  case ExternC:
+  case Extern:
+    if (check_public_enumdecl(ae, seen, d))
+      imp->enumdecls = Dict::insert(imp->enumdecls, x, d);
+    break;
+  }
+}
 
 static void
 extract_xtunionfielddecl(i_t i, tuniondecl_t d, tunionfield_t f) {
@@ -1008,7 +1039,7 @@ static list_t<decl_t> add_aggrdecl(var_t x,aggrdecl_t d,list_t<decl_t,`H> tds) {
 static list_t<decl_t> add_aggrdecl_header(var_t x, aggrdecl_t d, 
 					  list_t<decl_t,`H> tds) {
   d = new *d;
-  d->fields = NULL;
+  d->impl = NULL;
   if (d->sc != ExternC) d->sc = Extern;
   return new List(new_decl(new Aggr_d(d), NULL),tds);
 }

@@ -460,23 +460,24 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
 
   // check the fields and update the environment
   // may not be the first declaration, so must not overwrite the dict entry!
-  switch ($(ad->fields, Dict::lookup_opt(ge->aggrdecls, v))) {
+  switch ($(ad->impl, Dict::lookup_opt(ge->aggrdecls, v))) {
   case $(NULL, NULL):
     // insert ad in the environment
     ge->aggrdecls = Dict::insert(ge->aggrdecls, v, new ad);
     break;
-  case $(&Opt(fs), NULL):
+  case $(&AggrdeclImpl(exist_vars,rgn_po,fs), NULL):
+    // FIX: check rgn_po for well-formed!
     // for the sake of recursive fields, make name abstract in body
     let adp = new (new Aggrdecl(ad->kind, Extern, ad->name, tvs,
-				NULL, NULL, ad->attributes));
+				NULL, ad->attributes));
     ge->aggrdecls = Dict::insert(ge->aggrdecls, v, adp);
 
     // reject ill-formed type
-    check_unique_tvars(loc, ad->exist_vars->v);
+    check_unique_tvars(loc, exist_vars);
     // give the bound type variables identities
-    add_tvar_identities(ad->exist_vars->v);
+    add_tvar_identities(exist_vars);
 
-    tcAggrFields(te, ge, loc, fs, append(tvs,ad->exist_vars->v));
+    tcAggrFields(te, ge, loc, fs, append(tvs,exist_vars));
 
     if(ad->kind == UnionA)
           // must check that fields are bits-only
@@ -487,20 +488,21 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
 
     *adp = ad; //insert ad in the environment
     break;
-  case $(&Opt(fs), &Opt(adp)):
+  case $(&AggrdeclImpl(exist_vars,rgn_po,fs), &Opt(adp)):
+    // FIX: check rgn_po!!! (just need to be closed (and no > `a ??))
     if(ad->kind != (*adp)->kind)
       terr(loc,"cannot reuse struct names for unions and vice-versa");
     let ad0 = *adp;
     // for the sake of recursive fields, make name abstract in body
     *adp = new Aggrdecl(ad->kind, Extern, ad->name, tvs, 
-			NULL, NULL, ad->attributes);
+			NULL, ad->attributes);
 
     // reject ill-formed type
-    check_unique_tvars(loc, ad->exist_vars->v);
+    check_unique_tvars(loc, exist_vars);
     // give the bound type variables identities
-    add_tvar_identities(ad->exist_vars->v);
+    add_tvar_identities(exist_vars);
 
-    tcAggrFields(te, ge, loc, fs, append(tvs,ad->exist_vars->v));
+    tcAggrFields(te, ge, loc, fs, append(tvs, exist_vars));
     
     *adp = ad0;// restore the previous declaration and go update the environment
     fallthru(adp);
@@ -784,7 +786,7 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
     seg_t  loc = d->loc;
 
     switch (d->r) {
-    case &Let_d(_,_,_,_,_): 
+    case &Let_d(_,_,_): 
     case &Letv_d(_): // FIX
       terr(loc,"top level let-declarations are not implemented");
       break;

@@ -167,22 +167,22 @@ static tunion Type.IntType ushort_tt    = IntType(Unsigned,B2);
 static tunion Type.IntType uint_tt      = IntType(Unsigned,B4);
 static tunion Type.IntType ulong_tt     = IntType(Unsigned,B4);
 static tunion Type.IntType ulonglong_tt = IntType(Unsigned,B8);
-type_t uchar_t     = &uchar_tt;
-type_t ushort_t    = &ushort_tt;
-type_t uint_t      = &uint_tt;
-type_t ulong_t     = &ulong_tt;
-type_t ulonglong_t = &ulonglong_tt;
+type_t uchar_typ     = &uchar_tt;
+type_t ushort_typ    = &ushort_tt;
+type_t uint_typ      = &uint_tt;
+type_t ulong_typ     = &ulong_tt;
+type_t ulonglong_typ = &ulonglong_tt;
 // signed types
 static tunion Type.IntType schar_tt     = IntType(Signed,B1);
 static tunion Type.IntType sshort_tt    = IntType(Signed,B2);
 static tunion Type.IntType sint_tt      = IntType(Signed,B4);
 static tunion Type.IntType slong_tt     = IntType(Signed,B4);
 static tunion Type.IntType slonglong_tt = IntType(Signed,B8);
-type_t schar_t     = &schar_tt;
-type_t sshort_t    = &sshort_tt;
-type_t sint_t      = &sint_tt;
-type_t slong_t     = &slong_tt;
-type_t slonglong_t = &slonglong_tt;
+type_t schar_typ     = &schar_tt;
+type_t sshort_typ    = &sshort_tt;
+type_t sint_typ      = &sint_tt;
+type_t slong_typ     = &slong_tt;
+type_t slonglong_typ = &slonglong_tt;
 // float, double
 type_t float_typ  = FloatType;
 type_t double_typ(bool b) {
@@ -240,10 +240,10 @@ qvar_t tunion_scanf_arg_qvar = &tunion_scanf_arg_qvar_p;
 static opt_t<type_t> string_t_opt = NULL;
 type_t string_typ(type_t rgn) {
   if (rgn != HeapRgn)
-    return starb_typ(uchar_t,rgn,empty_tqual(),Unknown_b);
+    return starb_typ(uchar_typ,rgn,empty_tqual(),Unknown_b);
   else {
     if (string_t_opt == NULL) {
-      type_t t = starb_typ(uchar_t,HeapRgn,empty_tqual(),Unknown_b);
+      type_t t = starb_typ(uchar_typ,HeapRgn,empty_tqual(),Unknown_b);
       string_t_opt = new Opt(t);
     }
     return string_t_opt->v;
@@ -252,10 +252,10 @@ type_t string_typ(type_t rgn) {
 static opt_t<type_t> const_string_t_opt = NULL;
 type_t const_string_typ(type_t rgn) {
   if (rgn != HeapRgn)
-    return starb_typ(uchar_t,rgn,const_tqual(),Unknown_b);
+    return starb_typ(uchar_typ,rgn,const_tqual(),Unknown_b);
   else {
     if (const_string_t_opt == NULL) {
-      type_t t = starb_typ(uchar_t,HeapRgn,const_tqual(),Unknown_b);
+      type_t t = starb_typ(uchar_typ,HeapRgn,const_tqual(),Unknown_b);
       const_string_t_opt = new Opt(t);
     }
     return const_string_t_opt->v;
@@ -310,8 +310,7 @@ static stringptr_t st = &st_str;
 type_t file_typ() {
   if(file_t_opt == NULL) {
     typedef_name_t file_t_name = new $(new Abs_n(list(st)), sf);
-    aggrdecl_t sd = new Aggrdecl(StructA,Abstract,file_t_name,
-				 NULL,NULL,NULL,NULL);
+    aggrdecl_t sd = new Aggrdecl(StructA,Abstract,file_t_name,NULL,NULL,NULL);
     type_t file_struct_typ = new AggrType(AggrInfo(new KnownAggr(new sd),NULL));
     file_t_opt = new Opt(at_typ(file_struct_typ, HeapRgn, empty_tqual()));
   }
@@ -492,12 +491,12 @@ exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H> n,
 }
 ///////////////////////// Statements ///////////////////////////////
 stmt_t new_stmt(raw_stmt_t s, seg_t loc) { 
-  return new Stmt{.r=s, .loc=loc, .non_local_preds=NULL, .try_depth = 0,
+  return new Stmt{.r=s, .loc=loc, .non_local_preds=NULL, .try_depth=0,
                   .annot=EmptyAnnot }; 
 }
 stmt_t skip_stmt(seg_t loc) { return new_stmt(Skip_s, loc); }
 stmt_t exp_stmt(exp_t e,seg_t loc) { return new_stmt(new Exp_s(e),loc); }
-stmt_t seq_stmts(list_t<stmt_t,`r> ss, seg_t loc) {
+stmt_t seq_stmts(list_t<stmt_t> ss, seg_t loc) {
   if (ss == NULL) return skip_stmt(loc);
   else if (ss->tl == NULL) return ss->hd;
   else return seq_stmt(ss->hd,seq_stmts(ss->tl,loc),loc);
@@ -566,8 +565,8 @@ pat_t new_pat(raw_pat_t p, seg_t s) { return new Pat(p,NULL,s); }
 
 ////////////////////////// Declarations ///////////////////////////
 decl_t new_decl(raw_decl_t r, seg_t loc) { return new Decl{.r=r, .loc=loc}; }
-decl_t let_decl(pat_t p, opt_t<type_t,`H> t_opt, exp_t e, seg_t loc) {
-  return new_decl(new Let_d(p,NULL,t_opt,e,false),loc);
+decl_t let_decl(pat_t p, exp_t e, seg_t loc) {
+  return new_decl(new Let_d(p,NULL,e),loc);
 }
 decl_t letv_decl(list_t<vardecl_t,`H> vds, seg_t loc) {
   return new_decl(new Letv_d(vds),loc);
@@ -575,33 +574,34 @@ decl_t letv_decl(list_t<vardecl_t,`H> vds, seg_t loc) {
 vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init) {
   return new Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
                         .type=t, .initializer=init, .rgn=NULL, 
-                        .attributes=NULL,false};
+                        .attributes=NULL, .escapes=false};
 }
 vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init) {
   return new Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
                         .type=t, .initializer=init, .rgn=NULL,
-                        .attributes=NULL,false};
+                        .attributes=NULL, .escapes=false};
+}
+struct AggrdeclImpl @ aggrdecl_impl(list_t<tvar_t,`H> exists,
+				    list_t<$(type_t,type_t)@`H,`H> po,
+				    list_t<aggrfield_t,`H> fs) {
+  return new AggrdeclImpl{.exist_vars=exists, .rgn_po=po, .fields=fs};
 }
 decl_t aggr_decl(aggr_kind_t k, scope_t s, typedef_name_t n,
-		 list_t<tvar_t,`H> ts, opt_t<list_t<tvar_t,`H>,`H> exist_ts,
-		 opt_t<list_t<aggrfield_t,`H>,`H> fs, attributes_t atts,
-		 seg_t loc) {
-  return new_decl(new Aggr_d(new Aggrdecl {.kind = k, .sc=s, .name=n,
-					   .tvs=ts, .exist_vars=exist_ts,
-					      .fields=fs, .attributes = atts}),
+		 list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
+		 attributes_t atts, seg_t loc) {
+  return new_decl(new Aggr_d(new Aggrdecl {.kind = k, .sc=s, .name=n, .tvs=ts,
+					   .impl=i, .attributes = atts}),
 		  loc);
 }
 decl_t struct_decl(scope_t s,typedef_name_t n,
-		   list_t<tvar_t,`H> ts, opt_t<list_t<tvar_t,`H>,`H> exist_ts,
-                   opt_t<list_t<aggrfield_t,`H>,`H> fs, attributes_t atts,
-                   seg_t loc) {
-  return aggr_decl(StructA,s,n,ts,exist_ts,fs,atts,loc);
+		   list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
+                   attributes_t atts, seg_t loc) {
+  return aggr_decl(StructA,s,n,ts,i,atts,loc);
 }
 decl_t union_decl(scope_t s,typedef_name_t n,
-		   list_t<tvar_t,`H> ts, opt_t<list_t<tvar_t,`H>,`H> exist_ts,
-                   opt_t<list_t<aggrfield_t,`H>,`H> fs, attributes_t atts,
-                   seg_t loc) {
-  return aggr_decl(UnionA,s,n,ts,exist_ts,fs,atts,loc);
+		  list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
+		  attributes_t atts, seg_t loc) {
+  return aggr_decl(UnionA,s,n,ts,i,atts,loc);
 }
 decl_t tunion_decl(scope_t s, typedef_name_t n, list_t<tvar_t,`H> ts,
 		   opt_t<list_t<tunionfield_t,`H>,`H> fs, 
@@ -682,7 +682,7 @@ struct Aggrfield * lookup_field(list_t<aggrfield_t> fields, var_t v) {
   return NULL;
 }
 struct Aggrfield * lookup_decl_field(aggrdecl_t ad, var_t v) {
-  return (ad->fields == NULL) ? NULL : lookup_field(ad->fields->v,v);
+  return (ad->impl == NULL) ? NULL : lookup_field(ad->impl->fields,v);
 }
 
 $(tqual_t,type_t) * lookup_tuple_field(list_t<$(tqual_t,type_t)@`H> ts, int i) {
@@ -754,7 +754,7 @@ stringptr_t fieldname(int i) {
 $(aggr_kind_t,qvar_t) aggr_kinded_name(tunion AggrInfoU info) {
   switch(info) {
   case &UnknownAggr(k,n): return $(k,n);
-  case &KnownAggr(&(&Aggrdecl(k,_,n,_,_,_,_))): return $(k,n);
+  case &KnownAggr(&(&Aggrdecl(k,_,n,_,_,_))): return $(k,n);
   }
 }
 aggrdecl_t get_known_aggrdecl(tunion AggrInfoU info) {

@@ -1056,13 +1056,17 @@ void dumpdecl(decl_t d) {
     dumpaggr_kind(ad->kind);
     dumpqvar(ad->name);
     dumptvars(ad->tvs);
-    if(ad->fields == NULL)
+    if(ad->impl == NULL)
       dump_semi();
     else {
       dump_char('{');
-      if(ad->exist_vars != NULL)
-	egroup(dumpkindedtvar,ad->exist_vars->v,"[","]",",");
-      dumpaggrfields(ad->fields->v);
+      if(ad->impl->exist_vars != NULL)
+	egroup(dumpkindedtvar,ad->impl->exist_vars,"<",">",",");
+      dumpaggrfields(ad->impl->fields);
+      if(ad->impl->rgn_po != NULL) {
+	dump_char(':');
+	dump_rgnpo(ad->impl->rgn_po);
+      }
       dump("}");
       dumpatts(ad->attributes);
       dump(";");
@@ -1093,7 +1097,7 @@ void dumpdecl(decl_t d) {
       dump_nospace("};");
     }
     return;
-  case &Let_d(p,_,_,e,_):
+  case &Let_d(p,_,e):
     dump("let");
     dumppat(p);
     dump_char('=');

@@ -100,11 +100,11 @@ static void resolve_pat(tenv_t te, pat_t p) {
 	terr(p->loc,"cannot pattern-match a union");
 	return;
       }
-      if(ad->fields==NULL || ad->exist_vars==NULL) {
+      if(ad->impl==NULL) {
 	terr(p->loc, "can't destructure an abstract struct");
 	return;
       }
-      int more_exists = length(ad->exist_vars->v) - length(exist_ts);
+      int more_exists = length(ad->impl->exist_vars) - length(exist_ts);
       if(more_exists != 0)
 	terr(p->loc, "wrong number of existentially bound type variables");
       // FIX: add missing ones for the user here!
@@ -174,9 +174,9 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
 				     empty_tqual(),empty_conref())));
     break;
 
-  case &Int_p(Unsigned,_): t = num_type(topt, uint_t);    break;
-  case &Int_p(Signed,_):   t = num_type(topt, sint_t);    break;
-  case &Char_p(_):         t = num_type(topt, uchar_t);   break;
+  case &Int_p(Unsigned,_): t = num_type(topt, uint_typ);  break;
+  case &Int_p(Signed,_):   t = num_type(topt, sint_typ);  break;
+  case &Char_p(_):         t = num_type(topt, uchar_typ); break;
   case &Float_p(_):        t = num_type(topt, float_typ); break;
   case &Enum_p(ed,_):      t = num_type(topt, new EnumType(ed->name,ed)); break;
   case &AnonEnum_p(tenum,_): t = num_type(topt, tenum); break;
@@ -255,7 +255,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
     break;
 
   case &Aggr_p(AggrInfo(&KnownAggr(&ad),*tsp),exist_ts,dps):
-    if(ad->fields==NULL || ad->exist_vars==NULL) {
+    if(ad->impl==NULL) {
       terr(p->loc,"can't destructure an abstract struct");
       t = wildtyp(new Opt(lookup_type_vars(te)));
       break;
@@ -287,14 +287,14 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
       let tenv_tvs = lookup_type_vars(te2);
       let env = $(tenv_tvs,rgn);
       let all_inst   = List::rmap_c(rgn,r_make_inst_var,&env,ad->tvs);
-      let exist_inst = List::rzip(rgn,rgn,ad->exist_vars->v,var_tvs);
+      let exist_inst = List::rzip(rgn,rgn,ad->impl->exist_vars,var_tvs);
       let all_typs   = List::map(snd,all_inst);
       let exist_typs = List::map(snd,exist_inst);
       let inst       = List::rappend(rgn,all_inst,exist_inst);
       *tsp = all_typs;
       t = new AggrType(AggrInfo(new KnownAggr(new ad),*tsp));
       list_t<$(aggrfield_t,pat_t)@`rgn,`rgn> fields =
-	resolve_struct_designators(rgn,p->loc,dps,ad->fields->v);
+	resolve_struct_designators(rgn,p->loc,dps,ad->impl->fields);
       for(; fields != NULL; fields = fields->tl) {
 	let &$(field,pat)     = fields->hd;
 	let inst_fieldtyp     = rsubstitute(rgn,inst,field->type);
@@ -611,7 +611,7 @@ static simple_pat_t compile_pat(pat_t p) {
   case &Aggr_p(AggrInfo(&KnownAggr(&ad),_),_,dlps):
     // FIX: doesn't look like multiple designators are right
     list_t<simple_pat_t> ps = NULL;
-    for (_ fields = ad->fields->v; fields != NULL; fields = fields->tl) {
+    for (_ fields = ad->impl->fields; fields != NULL; fields = fields->tl) {
       // leave out bit fields without a name
       bool found = (strcmp(*fields->hd->name,"") == 0);
       for(_ dlps0 = dlps; !found && dlps0 != NULL; dlps0 = dlps0->tl) {

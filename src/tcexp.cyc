@@ -163,7 +163,7 @@ static void tcExpList(tenv_t te, list_t<exp_t> es) {
 // Type check the if expressions, the loop guards, and the where clauses
 void tcTest(tenv_t te, exp_t e, string_t msg_part) {
   check_contains_assign(e);
-  tcExp(te,&sint_t,e);
+  tcExp(te,&sint_typ,e);
   if (!coerce_to_bool(te,e))
     terr(e->loc,"test of %s has type %s instead of integral or * type",
          msg_part, typ2string(e->topt->v));
@@ -174,15 +174,15 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
   type_t t;
   switch (c) {
   case &Char_c(sn,_):     
-    t = (sn == (sign_t)Unsigned) ? uchar_t  : schar_t;  break;
+    t = (sn == Unsigned) ? uchar_typ  : schar_typ;  break;
   case &Short_c(sn,_):    
-    t = (sn == (sign_t)Unsigned) ? ushort_t : sshort_t; break;
+    t = (sn == Unsigned) ? ushort_typ : sshort_typ; break;
   case &LongLong_c(sn,_): 
-    t = (sn == (sign_t)Unsigned) ? ulonglong_t  : slonglong_t;  break;
+    t = (sn == Unsigned) ? ulonglong_typ  : slonglong_typ;  break;
   case &Float_c(_) : t = float_typ; break;
   case &Int_c(sn,i):
     if (topt == NULL)
-      t = (sn == (sign_t)Unsigned) ? uint_t : sint_t;
+      t = (sn == Unsigned) ? uint_typ : sint_typ;
     else
         // If *topt calls for a shorter int, we assume it's ok to
         // truncate without warning.
@@ -190,15 +190,15 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
         // short x[1] = { 255 };
       switch (compress(*topt)) {
       case &IntType(sn,B1):
-        t = (sn == (sign_t)Unsigned) ? uchar_t : schar_t;
+        t = (sn == Unsigned) ? uchar_typ : schar_typ;
         e->r = new Const_e(new Char_c(sn,(char)(i))); // i gets truncated here
         break;
       case &IntType(sn,B2):
-	t = (sn == (sign_t)Unsigned) ? ushort_t : sshort_t;
-        e->r = new Const_e(new Short_c(sn,(short)(i))); //i gets truncated here
+	t = (sn == Unsigned) ? ushort_typ : sshort_typ;
+        e->r = new Const_e(new Short_c(sn,(short)(i))); // i gets truncated here
         break;
       case &IntType(sn,_):
-        t = (sn == (sign_t)Unsigned) ? uint_t : sint_t;
+        t = (sn == Unsigned) ? uint_typ : sint_typ;
         break;
       case &PointerType(_) && (i == 0):
         // we're treating 0 as if it's NULL
@@ -218,22 +218,22 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
 	t = new TagType(t2);
 	break;
       default: // topt isn't int; presumably an error to be caught elsewhere
-        t = (sn == (sign_t)Unsigned) ? uint_t : sint_t;
+        t = (sn == Unsigned) ? uint_typ : sint_typ;
         break;
     }
     break;
   case &String_c(s):
     int len = s.size; // includes the trailing 0 character
     exp_t elen = const_exp(new Int_c(Unsigned, len), loc);
-    elen->topt = new Opt(uint_t);
+    elen->topt = new Opt(uint_typ);
     // The default is to treat a string as if it's statically heap 
     // allocated and return a pointer to that string.  However, if the 
     // string is used as an initializer, then we should return an array type.
-    t = atb_typ(uchar_t, HeapRgn, const_tqual(), new Upper_b(elen));
+    t = atb_typ(uchar_typ, HeapRgn, const_tqual(), new Upper_b(elen));
     if (topt != NULL) {
       switch (compress(*topt)) {
       case &ArrayType(_,tq,_):
-        return new ArrayType(uchar_t, tq, elen);
+        return new ArrayType(uchar_typ, tq, elen);
       case &PointerType(_):
         if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
           e->topt = new Opt(t);
@@ -241,7 +241,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
           t = *topt;
         } else {
           // maybe it's going in a different region
-          t = atb_typ(uchar_t,new_evar(&rk,new Opt(lookup_type_vars(te))), 
+          t = atb_typ(uchar_typ,new_evar(&rk,new Opt(lookup_type_vars(te))), 
                       const_tqual(), 
                       new Upper_b(elen));
           if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
@@ -280,9 +280,9 @@ static type_t tcVar(tenv_t te, seg_t loc, qvar_t q, binding_t b) {
   }
 }
 
-static void check_format_args(tenv_t te, exp_t fmt,
-			      opt_t<list_t<exp_t>> opt_args,
-			      list_t<type_t> type_getter(tenv_t,string_t,seg_t)){
+static 
+void check_format_args(tenv_t te, exp_t fmt, opt_t<list_t<exp_t>> opt_args,
+		       list_t<type_t> type_getter(tenv_t,string_t,seg_t)) {
   // check the format string and get the types it requires
   list_t<type_t> desc_types;
   switch (fmt->r) {
@@ -297,7 +297,7 @@ static void check_format_args(tenv_t te, exp_t fmt,
     for (; desc_types != NULL && args != NULL; 
 	 desc_types = desc_types->tl, args = args->tl) {
       type_t t = desc_types->hd;
-      exp_t e = args->hd;
+      exp_t  e = args->hd;
       if (!coerce_arg(te,e,t)) {
         terr(e->loc,"descriptor has type \n%s\n but argument has type \n%s",
              typ2string(t), typ2string(e->topt->v));
@@ -324,7 +324,7 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
     check_contains_assign(e);
     if (!coerce_to_bool(te,e))
       terr(loc,"expecting integral or * type but found %s",typ2string(t));
-    return sint_t;
+    return sint_typ;
   case Bitnot:
     if (!is_integral(e))
       terr(loc,"expecting integral type but found %s",typ2string(t));
@@ -336,7 +336,7 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
     default:
       terr(loc,"size requires pointer or array type, not %s",typ2string(t));
     }
-    return uint_t;
+    return uint_typ;
   default: impos("Non-unary primop");
   }
 }
@@ -399,7 +399,7 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
              typ2string(e1->topt->v),typ2string(e2->topt->v));
         explain_failure();
       }
-      return sint_t;
+      return sint_typ;
     } else {
       if (!kind_leq(typ_kind(t1_elt),MemKind))
         terr(e1->loc,"can't perform arithmetic on abstract pointer type");
@@ -419,26 +419,26 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
   type_t t1 = compress(e1->topt->v);
   type_t t2 = compress(e2->topt->v);
   if (e1_is_num && e2_is_num)
-    return sint_t;
+    return sint_typ;
   // okay if same types and boxed
   else if (unify(t1,t2) && 
            unify(t1,new_evar(&bk,new Opt(lookup_type_vars(te)))))
-    return sint_t;
+    return sint_typ;
   // okay if t1 can be silently cast to t2 or vice versa 
   else if (silent_castable(te,loc,t2,t1)) {
     unchecked_cast(te,e2,t1);
-    return sint_t;
+    return sint_typ;
   } else if (silent_castable(te,loc,t1,t2)) {
     unchecked_cast(te,e1,t2);
-    return sint_t;
+    return sint_typ;
   } else if (zero_to_null(te,t2,e1) || zero_to_null(te,t1,e2))
-    return sint_t;
+    return sint_typ;
   // support comparisons on pointers
   else {
     switch ($(compress(t1), compress(t2))) {
     case $(&PointerType(PtrInfo{t1a,_,_,_,_}),
 	   &PointerType(PtrInfo{t2a,_,_,_,_})):
-      if (unify(t1a,t2a)) return sint_t; break;
+      if (unify(t1a,t2a)) return sint_typ; break;
     default: break;
     }
     terr(loc,"comparison not allowed between %s and %s",
@@ -488,7 +488,7 @@ static type_t tcPrimop(tenv_t te, seg_t loc, type_t * topt,
   // we're losing precision).
   // HOWEVER it should be nuked when we re-write the type checker
   // to solve the general problem.
-  if (p == (primop_t)Minus && List::length(es) == 1)
+  if (p == Minus && List::length(es) == 1)
     return tcExp(te,topt,es->hd);
   tcExpList(te,es);
   type_t t;
@@ -675,7 +675,7 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
   switch (compress(t1)) {
   case FloatType: unchecked_cast(te,e,dbl_typ); t1 = dbl_typ; break;
   case &IntType(_,B1): 
-  case &IntType(_,B2): unchecked_cast(te,e,sint_t); t1 = sint_t; break;
+  case &IntType(_,B2): unchecked_cast(te,e,sint_typ); t1 = sint_typ; break;
   default: break;
   }
   // try to find an exact match first
@@ -985,7 +985,7 @@ static type_t tcSizeof(tenv_t te, seg_t loc, type_t * topt, type_t t) {
     case &SizeofType(_): return new SizeofType(t);
     default: break;
     }
-  return uint_t; 
+  return uint_typ; 
 }
 
 bool structfield_has_name(field_name_t n, aggrfield_t sf) {
@@ -1003,9 +1003,9 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
     bool bad_type = true;
     switch(compress(t)) {
     case &AggrType(AggrInfo(&KnownAggr(adp),_)):
-      if((*adp)->fields == NULL)
+      if((*adp)->impl == NULL)
 	break;
-      if(!exists_c(structfield_has_name,n,(*adp)->fields->v))
+      if(!exists_c(structfield_has_name,n,(*adp)->impl->fields))
 	terr(loc,"no field of struct/union has name %s",*n);
       bad_type = false;
       break;
@@ -1023,9 +1023,9 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
     bool bad_type = true;
     switch(compress(t)) {
     case &AggrType(AggrInfo(&KnownAggr(adp),_)):
-      if((*adp)->fields == NULL)
+      if((*adp)->impl == NULL)
 	break;
-      fallthru((*adp)->fields->v);
+      fallthru((*adp)->impl->fields);
     case &AnonAggrType(_,fields):
       if(List::length(fields) <= n) 
 	Tcutil::terr(loc,"struct/union has too few components: %d <= %d",
@@ -1050,7 +1050,7 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
       terr(loc, "%s is not a known type", typ2string(t));
     break;
   }
-  return uint_t;
+  return uint_typ;
 }
 
  // *e
@@ -1081,7 +1081,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
       return expr_err(te,loc,"type %s has no %s field",
                       qvar2string(ad->name), *f);
     // must do after previous check else could dereference NULL
-    if(ad->exist_vars->v != NULL)
+    if(ad->impl->exist_vars != NULL)
       return expr_err(te,loc,"must use pattern-matching to access fields "
 		      "of existential types");
     _ t2;
@@ -1098,7 +1098,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
   case &ArrayType(_,_,_) && (zstrcmp(*f,"size") == 0):
   case &PointerType(_)   && (zstrcmp(*f,"size") == 0):
     outer_e->r = new Primop_e(Size,new List(e,NULL));
-    return uint_t;
+    return uint_typ;
   default:
     if (zstrcmp(*f,"size") == 0)
       return expr_err(te,loc,"expecting struct, union, or array, found %s",
@@ -1123,7 +1123,7 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
 	return expr_err(te,loc,"type %s has no %s field",
 			qvar2string(ad->name), *f);
       // must do after previous check else could dereference NULL
-      if(ad->exist_vars->v != NULL)
+      if(ad->impl->exist_vars != NULL)
 	return expr_err(te,loc,"must use pattern-matching to access fields "
 			"of existential types");
       _ t3;
@@ -1237,7 +1237,7 @@ static type_t tcArray(tenv_t te,seg_t loc,type_t * elt_topt,
   type_t        res     = new_evar(&mk,new Opt(lookup_type_vars(te)));
   let           sz_rexp = new Const_e(new Int_c(Unsigned,List::length(es)));
   exp_t         sz_exp  = new_exp(sz_rexp,loc);
-  sz_exp->topt = new Opt(uint_t);
+  sz_exp->topt = new Opt(uint_typ);
   type_t res_t2   = new ArrayType(res, empty_tqual(), sz_exp);
 
   for (_ es2 = es; es2 != NULL; es2 = es2->tl)
@@ -1350,7 +1350,7 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t * topt,
   }
   if(ad->kind == UnionA)
     terr(loc, "expecting struct but found union");
-  if (ad->fields == NULL) {
+  if (ad->impl == NULL) {
     terr(loc,"can't build abstract struct");
     return wildtyp(new Opt(lookup_type_vars(te)));
   }
@@ -1358,7 +1358,7 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t * topt,
   // calculate the instantiation and final type
   let env = $(lookup_type_vars(te),rgn);
   let all_inst   = List::rmap_c(rgn,r_make_inst_var,&env,ad->tvs);
-  let exist_inst = List::rmap_c(rgn,r_make_inst_var,&env,ad->exist_vars->v);
+  let exist_inst = List::rmap_c(rgn,r_make_inst_var,&env,ad->impl->exist_vars);
   let all_typs   = List::map(snd,all_inst);
   let exist_typs = List::map(snd,exist_inst);
   let inst       = List::rappend(rgn,all_inst,exist_inst);
@@ -1383,7 +1383,7 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t * topt,
   if (topt != NULL) unify(res_typ,*topt);
   // make sure each argument has the right type
   list_t<$(aggrfield_t,exp_t)@`rgn,`rgn> fields =
-    resolve_struct_designators(rgn,loc,args,ad->fields->v);
+    resolve_struct_designators(rgn,loc,args,ad->impl->fields);
   for(; fields != NULL; fields = fields->tl) {
     let &$(field,field_exp) = fields->hd;
     let inst_fieldtyp = rsubstitute(rgn,inst,field->type);
@@ -1499,11 +1499,11 @@ static bool zeroable_type(type_t t) {
     return true;
   case &AggrType(AggrInfo(info,ts)):
     let ad = get_known_aggrdecl(info);
-    if(ad->exist_vars == NULL || ad->exist_vars->v != NULL)
+    if(ad->impl == NULL || ad->impl->exist_vars != NULL)
       return false;
     region r {
       let inst = List::rzip(r,r,ad->tvs,ts);
-      for (_ fs = ad->fields->v; fs != NULL; fs = fs->tl) 
+      for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl) 
         if (!zeroable_type(rsubstitute(r,inst,fs->hd->type))) return false;
       return true;
     }
@@ -1563,7 +1563,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
       break;
     }
   }
-  tcExp(te,&uint_t,*e);
+  tcExp(te,&uint_typ,*e);
   // crawl over e and look for the following cases:
   //   sizeof(T):  result is T@ or T* depending upon topt
   //   sizeof(T)*n or n*sizeof(T):  result is T? 
@@ -1585,7 +1585,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
       elt_type = t2;
       *t = new elt_type;
       num_elts = uint_exp(1,NULL);
-      tcExp(te,&uint_t,num_elts);
+      tcExp(te,&uint_typ,num_elts);
       one_elt = true;
       break;
     case &Primop_e(Times,&List(e1,&List(e2,NULL))):
@@ -1609,7 +1609,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
       break;
     default:
     No_sizeof:
-      elt_type = uchar_t;
+      elt_type = uchar_typ;
       *t = new elt_type;
       num_elts = *e;
       one_elt = false;
@@ -1622,7 +1622,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
   // and here generate fresh evars).
   switch(elt_type) {
   case &AggrType(AggrInfo(&KnownAggr(&ad),_)):
-    if(ad->exist_vars != NULL && ad->exist_vars->v != NULL)
+    if(ad->impl != NULL && ad->impl->exist_vars != NULL)
       terr(loc,"malloc with existential types not yet implemented");
     break;
   default: break;
@@ -1746,7 +1746,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     // here I'm going to guess that the user wants a char ?@ instead of
     // a char @{n}@.  They can get the char@{n}@ by using a cast.  This
     // is a total hack...
-    let topt2 = atb_typ(uchar_t, rgn, const_tqual(), Unknown_b);
+    let topt2 = atb_typ(uchar_typ, rgn, const_tqual(), Unknown_b);
     let t = tcExp(te,&topt2,e1);
     return atb_typ(t, rgn, empty_tqual(), new Upper_b(uint_exp(1,NULL)));
   default:

@@ -233,7 +233,9 @@ static var_t add_tuple_type(list_t<$(tqual_t,type_t)@,`r> tqs0) {
   fs = List::imp_rev(fs);
   let sd = new Aggrdecl{.kind=StructA, .sc = Public, 
 		       .name = new $(rel_ns_null,x), .tvs = NULL, 
-			.exist_vars = NULL, .fields = new Opt(fs), 
+			.impl = new AggrdeclImpl{.exist_vars = NULL, 
+						 .rgn_po = NULL,
+						 .fields = fs},
 			.attributes = NULL};
   result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
   tuple_types  = new List(new $(x,ts),tuple_types);
@@ -328,7 +330,7 @@ static void enumfields_to_c(list_t<enumfield_t> fs) {
 static type_t typ_to_c(type_t t) {
   switch (t) {
   case VoidType: return t;
-  case &Evar(_,NULL,_,_): return sint_t; // pick something widely useful
+  case &Evar(_,NULL,_,_): return sint_typ; // pick something widely useful
   case &Evar(_,&Opt{.v=t2},_,_): return typ_to_c(t2); 
   case &VarType(tv): 
     if (tvar_kind(tv) == AnyKind) return VoidType;
@@ -340,8 +342,8 @@ static type_t typ_to_c(type_t t) {
     // for xtunion fields that carry no argument, it's a char *.
     // for fields that carry arguments, it's a struct _Field_struct;
     if (tuf->typs == NULL) 
-      if(tud->is_xtunion) return star_typ(uchar_t,HeapRgn,mt_tq);
-      else return uint_t;
+      if(tud->is_xtunion) return star_typ(uchar_typ,HeapRgn,mt_tq);
+      else return uint_typ;
     else return strctq(collapse_qvar_tag(tuf->name,"_struct"));
   case &TunionFieldType(_): toc_impos("unresolved TunionFieldType");
   case &PointerType(PtrInfo{t2,_,_,tq,bnds}):
@@ -400,10 +402,8 @@ static type_t typ_to_c(type_t t) {
       return new TypedefType(tdn,NULL,td,NULL);
     // just drop the type arguments and translate the nested types
     else return new TypedefType(tdn,NULL,td,new Opt(typ_to_c_array(topt->v)));
-  case &SizeofType(_): 
-    return uint_t;
-  case &TagType(_):
-    return sint_t;
+  case &SizeofType(_): return uint_typ;
+  case &TagType(_): return sint_typ;
   case &RgnHandleType(t):
     return cstar_typ(strct(_RegionHandle_sp),mt_tq); // could be shared
   case &TypeInt(_): 
@@ -452,9 +452,9 @@ static bool atomic_typ(type_t t) {
     default: break;
     }
     let ad = get_known_aggrdecl(info);
-    if(ad->fields == NULL)
+    if(ad->impl == NULL)
       return false;
-    for(let fs = ad->fields->v; fs != NULL; fs = fs->tl)
+    for(let fs = ad->impl->fields; fs != NULL; fs = fs->tl)
       if (!atomic_typ(fs->hd->type)) return false;
     return true;
   case &AnonAggrType(_,fs):
@@ -492,9 +492,9 @@ static bool is_poly_field(type_t t, field_name_t f) {
   switch (compress(t)) {
   case &AggrType(AggrInfo(info,_)):
     let ad = get_known_aggrdecl(info);
-    if (ad->fields == NULL)
+    if (ad->impl == NULL)
       toc_impos("is_poly_field: type missing fields");
-    fallthru(ad->fields->v);
+    fallthru(ad->impl->fields);
   case &AnonAggrType(_,fs):
     let field = lookup_field(fs,f);
     if (field == NULL) 
@@ -572,7 +572,7 @@ static exp_t make_toplevel_tagged_arr(type_t t, exp_t sz, exp_t e) {
   exp_t xplussz;
   if (is_string) {
     qvar_t    x      = temp_var();
-    type_t    vd_typ = new ArrayType(uchar_t,mt_tq,sz);
+    type_t    vd_typ = new ArrayType(uchar_typ,mt_tq,sz);
     vardecl_t vd     = static_vardecl(x,vd_typ,e);
     result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
     xexp = var_exp(x,DL);
@@ -975,8 +975,8 @@ static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
   }
   stmt_t s2 = for_stmt(ea,eb,ec,body,DL);
   // note that we get rid of the const on the index variable x1 here
-  return seq_stmt(declare_stmt(max,uint_t,e1,
-			       declare_stmt(x1,uint_t,NULL,s2,DL),DL),s,DL);
+  return seq_stmt(declare_stmt(max,uint_typ,e1,
+			       declare_stmt(x1,uint_typ,NULL,s2,DL),DL),s,DL);
 }
 
 static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
@@ -1679,7 +1679,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       // FIX:  casts needed on exp_opts
       region r {
         list_t<$(qvar_t,type_t,exp_opt_t)@`r,`r> decls = 
-          rnew(r) List(rnew(r) $(max,uint_t,(exp_opt_t)e1),NULL);
+          rnew(r) List(rnew(r) $(max,uint_typ,(exp_opt_t)e1),NULL);
         exp_t ai;
         if (rgnopt == NULL)
           ai = malloc_exp(old_elt_typ,
@@ -1789,9 +1789,9 @@ static void exp_to_c(env_t nv, exp_t e) {
     switch(compress(t)) {
     case &AggrType(AggrInfo(info,_)):
       let ad = get_known_aggrdecl(info);
-      if(ad->fields==NULL)
+      if(ad->impl==NULL)
 	toc_impos("struct fields must be known");
-      fallthru(ad->fields->v);
+      fallthru(ad->impl->fields);
     case &AnonAggrType(_,fields):
       let nth_field = List::nth(fields,n);
       e->r = new Offsetof_e(typ_to_c_array(t),new StructField(nth_field->name));
@@ -1826,7 +1826,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       case Unknown_b:
 	// do it as e1[0], could share all the 0's but who cares
 	let ind_e = uint_exp(0,DL);
-	ind_e->topt = new Opt(uint_t);
+	ind_e->topt = new Opt(uint_typ);
 	e->r = subscript_exp(e1, ind_e, DL)->r;
 	exp_to_c(nv,e);
 	break;
@@ -1994,10 +1994,11 @@ static void exp_to_c(env_t nv, exp_t e) {
       aggrdecl_t sd2 = (aggrdecl_t)sd;
       region rgn {
       let fields = Tcutil::resolve_struct_designators(rgn, e->loc, dles, 
-                                                      sd2->fields->v);
+                                                      sd2->impl->fields);
       // here is where we now sort
       let newdles = NULL;
-      for(let sdfields = sd2->fields->v; sdfields!=NULL; sdfields=sdfields->tl)
+      let sdfields = sd2->impl->fields;
+      for(; sdfields!=NULL; sdfields=sdfields->tl)
 	for (let fields2 = fields; fields2 != NULL; fields2 = fields2->tl) {
 	  if((*fields2->hd)[0] == sdfields->hd) {
 	    let &$(field,fieldexp) = fields2->hd;
@@ -2122,7 +2123,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         rexp = fncall_exp(_tag_arr_e, list(var_exp(p,DL),uint_exp(1,DL),
                                            var_exp(x,DL)), DL);
       }
-      let s = declare_stmt(x, uint_t, xexp,
+      let s = declare_stmt(x, uint_typ, xexp,
                            declare_stmt(p,cstar_typ(t_c,mt_tq),pexp,
                                         exp_stmt(rexp,DL),DL),DL);
       e->r = stmt_exp(s,DL)->r;
@@ -2219,7 +2220,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
       cmp_exp = var_exp(tuf->name,DL);
     else {
       cmp_exp = tunion_tag(tud,tuf->name,false);
-      r = cast_exp(sint_t,r,DL);
+      r = cast_exp(sint_typ,r,DL);
     }
     s = if_neq_stmt(r, cmp_exp, fail_stmt);
     break;
@@ -2267,7 +2268,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     } else {
       int max_tag = num_void_tags(tud);
       exp_t max_tag_exp = uint_exp(max_tag,DL);
-      exp_t e3 = cast_exp(cstar_typ(sint_t,mt_tq), r,DL);
+      exp_t e3 = cast_exp(cstar_typ(sint_typ,mt_tq), r,DL);
       exp_t e1 = deref_exp(e3,DL);
       exp_t e5 = lte_exp(r, cast_exp(void_star_typ(),max_tag_exp,DL), DL);
       exp_t e  = tunion_tag(tud,tuf->name,true);
@@ -2329,7 +2330,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
       nv = result[0];
       decls = result[1];
       let memexp = aggrmember_exp(r,f,DL);
-      if(is_void_star(lookup_field(ad->fields->v,f)->type))
+      if(is_void_star(lookup_field(ad->impl->fields,f)->type))
 	memexp = cast_exp(t2c, memexp, DL);
       let s2 = result[2];
       let s3 = assign_stmt(var_exp(v,DL), memexp, DL);
@@ -2598,7 +2599,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 	let nv2 = add_varmap(nv,vd->name,varb_exp(vd->name,new Local_b(vd),DL));
 	local_decl_to_c(nv2, nv2, vd, s1);
 	break;
-      case &Let_d(p,_,topt,e,exhaust):
+      case &Let_d(p,_,e):
         // Handle the special case where the pattern is a variable just like
 	// a variable declaration, except variable's scope does NOT include e
         switch (p->r) {
@@ -2616,7 +2617,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 	  // we treat let declarations specially because they may need
 	  // statements in addition to declarations, so we splice them in
 	  // as a statement.  Other declarations only produce declarations.
-	  s->r = letdecl_to_c(nv, p, topt->v, e, s1)->r;
+	  s->r = letdecl_to_c(nv, p, e->topt->v, e, s1)->r;
 	  break;
         }
 	break;
@@ -2676,7 +2677,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       exp_t  was_thrown_exp = var_exp(was_thrown_var,DL);
       type_t h_typ = strct(_handler_cons_sp);
       type_t e_typ = typ_to_c(exn_typ);
-      type_t was_thrown_typ = typ_to_c(sint_t);
+      type_t was_thrown_typ = typ_to_c(sint_typ);
       // e_exp needs a typ because it'll go through exp_to_c;
       // as well, it must be in varmap
       e_exp->topt = new Opt(e_typ);
@@ -2823,7 +2824,7 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
     seen_defn_before = false;
     aggrs_so_far->v = Dict::insert(aggrs_so_far->v,(*n)[1],ad);
   } else {
-    if (dopt->v->fields == NULL) {
+    if (dopt->v->impl == NULL) {
       aggrs_so_far->v = Dict::insert(aggrs_so_far->v,(*n)[1],ad);
       seen_defn_before = false;
     } else
@@ -2832,13 +2833,14 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
 
   ad->sc   = Public; // gcc warns if we have Extern or Static here
   ad->tvs  = NULL;
-  ad->exist_vars = NULL;
-  if (ad->fields != NULL)
+  if(ad->impl != NULL) {
+    ad->impl->exist_vars = NULL;
     if (seen_defn_before)
-      ad->fields = NULL;
+      ad->impl = NULL;
     else
-      for (let fields = ad->fields->v; fields != NULL; fields = fields->tl)
+      for (let fields = ad->impl->fields; fields != NULL; fields = fields->tl)
         fields->hd->type = typ_to_c_array(fields->hd->type);
+  }
 }
 
 // tunion declarations -- tricky
@@ -2887,12 +2889,13 @@ static void tuniondecl_to_c(tuniondecl_t tud) {
 	fs = new List(f,fs);
       }
       fs = List::imp_rev(fs);
-      fs = new List(new Aggrfield(tag_sp,mt_tq,sint_t,NULL,NULL),fs);
+      fs = new List(new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL),fs);
       let ad = 
 	new Aggrdecl{.kind = StructA, .sc = Public,
 		     .name = collapse_qvar_tag(f->name,"_struct"),
-		     .tvs = NULL, .exist_vars = NULL,
-		     .fields = new Opt(fs), .attributes = NULL};
+		     .tvs = NULL, 
+		     .impl = new AggrdeclImpl(NULL,NULL,fs),
+		     .attributes = NULL};
       result_decls = new List(new_decl(new Aggr_d(ad),DL),result_decls);
     }
   }
@@ -2928,7 +2931,7 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
     tunionfield_t f  = fs->hd;
     stringptr_t fn = (*f->name)[1];
     let sz_exp  = uint_exp((*fn).size+4,DL);
-    let tag_typ = new ArrayType(uchar_t,mt_tq,sz_exp);
+    let tag_typ = new ArrayType(uchar_typ,mt_tq,sz_exp);
     // FIX: making bad alignment and pointer-size assumptions!
     switch (Dict::lookup_opt(xtunion_fields_so_far->v,f->name)) {
     case NULL:
@@ -2951,13 +2954,14 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
 	  fields = new List(newf,fields);
 	}
 	fields = new List(new Aggrfield(tag_sp,mt_tq,
-					cstar_typ(uchar_t,mt_tq),NULL,NULL),
+					cstar_typ(uchar_typ,mt_tq),NULL,NULL),
 			  List::imp_rev(fields));
 	let strct_decl =
 	  new Aggrdecl{.kind = StructA, .sc = Public,
 		       .name = collapse_qvar_tag(f->name,"_struct"),
-		       .tvs    = NULL, .exist_vars = NULL,
-		       .fields = new Opt(fields), .attributes = NULL};
+		       .tvs  = NULL, 
+		       .impl = new AggrdeclImpl(NULL,NULL,fields),
+		       .attributes = NULL};
 	result_decls = new List(new_decl(new Aggr_d(strct_decl),DL),
 				result_decls);
       }
@@ -3074,7 +3078,7 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
       fndecl_to_c(nv, fd);
       result_decls = new List(d,result_decls);
       break;
-    case &Let_d(_,_,_,_,_): 
+    case &Let_d(_,_,_): 
     case &Letv_d(_):
       toc_impos("letdecl at toplevel");
     case &Aggr_d(sd):

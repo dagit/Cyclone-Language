@@ -111,9 +111,9 @@ absRval_t typ_to_absrval(type_t t, absRval_t leafval) {
 
     case &AggrType(AggrInfo(info,_)):
       let ad = get_known_aggrdecl(info);
-      if(ad->fields==NULL)
+      if(ad->impl==NULL)
 	break;
-      fallthru(ad->fields->v);
+      fallthru(ad->impl->fields);
     case &AnonAggrType(StructA,fs):
       aggrdict_t d = Dict::empty(Std::zstrptrcmp);
       for(; fs != NULL; fs = fs->tl) {

@@ -32,9 +32,6 @@
 #include "tcutil.h"
 #include "tcenv.h"
 #include "toc.h"
-
-
-
 using Absyn;
 using Absynpp;
 using Core;
@@ -516,7 +513,7 @@ array_decls(type_t type, list_t<exp_t,`H> exps, seg_t loc) {
 static type_t 
 check_tunionfield_and_get_type(tunionfield_t tuf) {
   // preserves tquals of original tunion...
-  return new TupleType(List::imp_append(List::list(new $(tq_none,uint_t)),tuf->typs));
+  return new TupleType(List::imp_append(List::list(new $(tq_none,uint_typ)),tuf->typs));
 }
 static qvar_t
 check_tunionfield_and_get_name(tunionfield_t tuf) {
@@ -527,12 +524,12 @@ check_tunionfield_and_get_name(tunionfield_t tuf) {
 static $(qvar_t,type_t)@
 check_tunionfield_and_get_nmtype(tunionfield_t tuf) {
   // preserves tquals of original tunion...
-  return new $(tuf->name,new TupleType(List::imp_append(List::list(new $(tq_none,uint_t)),tuf->typs)));
+  return new $(tuf->name,new TupleType(List::imp_append(List::list(new $(tq_none,uint_typ)),tuf->typs)));
 }
 static $(var_t,type_t)@
 check_xtunionfield_and_get_name_type(tunionfield_t tuf) {
   // preserves tquals of original tunion...
-  return new $((*tuf->name)[1],new TupleType(List::imp_append(List::list(new $(tq_none,star_typ(uchar_t,HeapRgn,tq_none))),tuf->typs)));
+  return new $((*tuf->name)[1],new TupleType(List::imp_append(List::list(new $(tq_none,star_typ(uchar_typ,HeapRgn,tq_none))),tuf->typs)));
 }
 
 // FIX: get rid of this useless stuff
@@ -577,11 +574,12 @@ type_t monomorphize_type(type_t type) {
       Tcutil::impos("gen(): number of params %d differs from number of tyvars %d",List::length(params), List::length(tvs));
     
     let subst = List::zip(tvs,params);
-    opt_t<list_t<aggrfield_t>> fields = NULL;
-    if(ad->fields != NULL) 
-      fields = new Opt{List::map_c(substitute_structfield_type,subst,
-				   ad->fields->v)};
-    aggrdecl_t ad2 = new Aggrdecl{ad->kind,ad->sc,ad->name,NULL,ad->exist_vars,fields,ad->attributes};
+    list_t<aggrfield_t> fields = NULL;
+    if(ad->impl != NULL) 
+      fields = List::map_c(substitute_structfield_type,subst,ad->impl->fields);
+    let impl = ad->impl==NULL ? NULL : new AggrdeclImpl(NULL, NULL, fields);
+    aggrdecl_t ad2 = new Aggrdecl{ad->kind,ad->sc,ad->name,NULL,impl,
+				  ad->attributes};
     return new AggrType(AggrInfo(new KnownAggr(new ad2),NULL));
 
   case &TunionType(TunionInfo{&KnownTunion(&tud),params,rgn}):
@@ -651,7 +649,7 @@ buildRepTuple(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, qvar_t var
   // construct the (globally unique) type of components of the tuple array
   // FIX: Make this not duplicate so much run time data.
 
-  type_t tuple_type = tuple_typ(list(uint_t,tunion_typ(typerep_name(&typestruct_str))));
+  type_t tuple_type = tuple_typ(list(uint_typ,tunion_typ(typerep_name(&typestruct_str))));
 
   let &$(tupledecls,arrexp) = array_decls(tuple_type,tuplelist,loc);
   // generate a declaration
@@ -688,7 +686,7 @@ buildRepTunionfield(typedef_name_t tname, qvar_t fname, tenv_t te, dict_t<type_t
   // construct the (globally unique) type of components of the tuple array
   // FIX: Make this not duplicate so much run time data.
 
-  type_t tuple_type = tuple_typ(list(uint_t,tunion_typ(typerep_name(&typestruct_str))));
+  type_t tuple_type = tuple_typ(list(uint_typ,tunion_typ(typerep_name(&typestruct_str))));
   // build name exps (ignore namespaces)
   let tnameexp = cnst_string(*(*tname)[1],loc);
   let fnameexp = cnst_string(*(*fname)[1],loc);
@@ -729,7 +727,7 @@ buildRepStruct(opt_t<typedef_name_t> sname, tenv_t te, dict_t<type_t,repinfo_t,`
   // construct the (globally unique) type of components of the tuple array
   // FIX: Make this not duplicate so much run time data.
 
-  type_t tuple_type = tuple_typ(list(uint_t,const_string_typ(HeapRgn),tunion_typ(typerep_name(&typestruct_str))));
+  type_t tuple_type = tuple_typ(list(uint_typ,const_string_typ(HeapRgn),tunion_typ(typerep_name(&typestruct_str))));
 
   let &$(tupledecls,arrexp) = array_decls(tuple_type,tuplelist,loc);
   // name
@@ -813,7 +811,7 @@ buildRepEnum(typedef_name_t* ename, tenv_t te, dict_t<type_t,repinfo_t,`H> dict,
   let nmexps = List::map_c(cnst_qvar_string_cls,loc,names);
   let tagexps = List::map_c(cnst_int_cls,loc,tags);
   let tagnmexps = List::map_c(tuple2_exp_cls,loc,List::zip(tagexps, nmexps));
-  let tuple_type = tuple_typ(list(uint_t,const_string_typ(HeapRgn)));
+  let tuple_type = tuple_typ(list(uint_typ,const_string_typ(HeapRgn)));
   let &$(decls,arrexp) = array_decls(tuple_type,tagnmexps,loc);
   // name
   exp_t name;
@@ -851,7 +849,7 @@ buildRepTunion(qvar_t tname, tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t 
   let nmexps = List::map_c(cnst_qvar_string_cls,loc,tonames);
   let tagnmexps = List::zip(totags, nmexps);
   let tuplelist1 = List::map_c(tuple2_exp_cls,loc,tagnmexps);
-  let tuple_type1 = tuple_typ(list(uint_t, const_string_typ(HeapRgn)));
+  let tuple_type1 = tuple_typ(list(uint_typ, const_string_typ(HeapRgn)));
   let &$(tupledecls1,arrexp1) = array_decls(tuple_type1,tuplelist1,loc);
 
   // then build the tag+data list.
@@ -872,7 +870,7 @@ buildRepTunion(qvar_t tname, tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t 
   let tagnmriexps = List::zip3(tags,nmexps,riexps);
   let tuplelist2 = List::map_c(tuple3_exp_cls,loc,tagnmriexps);
   // build the type of elements of Tunion array
-  type_t tuple_type2 = tuple_typ(list(uint_t,const_string_typ(HeapRgn),tunion_typ(typerep_name(&typestruct_str))));
+  type_t tuple_type2 = tuple_typ(list(uint_typ,const_string_typ(HeapRgn),tunion_typ(typerep_name(&typestruct_str))));
   let &$(tupledecls2,arrexp2) = array_decls(tuple_type2,tuplelist2,loc);
   // build name expression
   let name = cnst_string(*(*tname)[1],loc); // ignore namespace for now
@@ -906,7 +904,7 @@ buildRepXTunion(qvar_t xname, tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t
   let tagriexps = List::zip(tags,riexps);
   let tuplelist = List::map_c(tuple2_exp_cls,loc,tagriexps);
   // build the type of elements of Tunion array
-  type_t name_type = tagged_typ(uchar_t,HeapRgn,Tqual{.q_const=true,.q_volatile=false,.q_restrict=0});
+  type_t name_type = tagged_typ(uchar_typ,HeapRgn,Tqual{.q_const=true,.q_volatile=false,.q_restrict=0});
   type_t tuple_type = tuple_typ(list(name_type,
 				     tunion_typ(typerep_name(&typestruct_str))));
   let &$(tupledecls,arrexp) = array_decls(tuple_type,tuplelist,loc);
@@ -1170,7 +1168,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     switch (tfieldinfo.field_info) {
     case &KnownTunionfield(decl,field):
       let types = List::map(get_second,field->typs);
-      let types2 = new List(uint_t,types);
+      let types2 = new List(uint_typ,types);
       let varname = toplevel_name(new_gen_id("rep"));
       dict = buildRepTunionfield(decl->name,field->name,te,dict,loc,varname,Static,type,types2);
       break;
@@ -1181,7 +1179,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 
   case &AggrType(AggrInfo(info,params)): // MemKind
     let adecl = get_known_aggrdecl(info);
-    if(adecl->exist_vars != NULL && adecl->exist_vars->v != NULL)
+    if(adecl->impl != NULL && adecl->impl->exist_vars != NULL)
       Tcutil::impos("gen(): existential type variables not yet supported");
     if(adecl->kind == StructA) {
       let stdecl = adecl;
@@ -1194,7 +1192,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 		//	  Tcutil::impos("gen(): structs with tyvariables not yet supported");
 		print_tvars(stdecl->tvs);
 		}*/
-      if (stdecl->fields == NULL) {
+      if (stdecl->impl == NULL) {
 	// This indicates an imported struct.
 	// Generate a forward decl of the imported typerep
 	// Generate a reference to a standard name.
@@ -1211,12 +1209,13 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 	
 	//Tcutil::impos("gen(): external structs not yet handled");
       }
-      if(stdecl->fields->v != NULL && forall(has_bitfield,stdecl->fields->v)) {
-	let bits = fold_left(add_bitfield_sizes,0,stdecl->fields->v);
+      if(stdecl->impl->fields != NULL 
+	 && forall(has_bitfield,stdecl->impl->fields)) {
+	let bits = fold_left(add_bitfield_sizes,0,stdecl->impl->fields);
 	let bytes = bits / 8 + ((bits % 8) == 0 ? 0 : 1);
 	list_t<$(tqual_t,type_t)@> chars = NULL;
 	for(int i = 0; i < bytes; i++) {
-	  chars = new List(new $(tq_none,uchar_t),chars);
+	  chars = new List(new $(tq_none,uchar_typ),chars);
 	}
 	type_t base_type = new TupleType(chars);
 	let &$(dict2,base_info) = lookupRep(te,dict,loc,base_type);
@@ -1231,7 +1230,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 	// fwd_decl = extern tunion Typestruct.Tuple `varname`;
 	let fwd_decl = new Opt{.v=gen_vardecl(varname,tunionfield_typ(typerep_name(&typestruct_str),typerep_name(&struct_str)),NULL,Extern,loc)};
 	dict = make_fwd_decl_info(dict,type,address_exp(unknownid_exp(varname,loc),loc),fwd_decl,false);
-	let nmtypes = List::map(select_structfield_nmtype,stdecl->fields->v);
+	let nmtypes = List::map(select_structfield_nmtype,stdecl->impl->fields);
 	dict = buildRepStruct(new Opt{stdecl->name},te,dict,loc,varname,Public,type,nmtypes);
       }
     } else {
@@ -1239,7 +1238,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       // union case
       if(udecl->tvs != NULL)
 	Tcutil::impos("gen: unions with parameters not yet supported");
-      if (udecl->fields == NULL) {
+      if (udecl->impl == NULL) {
 	let varname = toplevel_name(new make_type_cstring(type));
 	let fwd_decl = new Opt{.v=gen_vardecl(varname,tunionfield_typ(typerep_name(&typestruct_str),typerep_name(&union_str)),NULL,Extern,loc)};
       //printf("adding externdecl for %s\n",qvar2string(varname));
@@ -1250,7 +1249,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 	break;
 	//Tcutil::impos("gen(): union fields must be present by now");
       }
-      let nmtypes = List::map(select_structfield_nmtype,udecl->fields->v);
+      let nmtypes = List::map(select_structfield_nmtype,udecl->impl->fields);
       
       let varname = toplevel_name(new make_type_cstring(type));
       dict = buildRepUnion(new Opt{udecl->name},te,dict,loc,varname,Public,type,nmtypes);
@@ -1266,7 +1265,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     if(fields != NULL && forall(has_bitfield,fields)) {
       let bits = fold_left(add_bitfield_sizes,0,fields);
       let bytes = bits / 8 + ((bits % 8) == 0 ? 0 : 1);
-      type_t base_type = new ArrayType(uchar_t,tq_none,cnst_int(bytes,loc));
+      type_t base_type = new ArrayType(uchar_typ,tq_none,cnst_int(bytes,loc));
       let &$(dict2,base_info) = lookupRep(te,dict,loc,base_type);
       dict = insert(dict2,type,base_info);
     } else {

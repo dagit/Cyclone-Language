@@ -152,18 +152,22 @@ struct Aggrdecl * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
   if (! check_atts(d0->attributes,d1->attributes,"type",v,loc,msg)) res = false;
 
   aggrdecl_t d2;  // future result
-  // check fields
-  switch ($(d0->fields, d1->fields)) {
+  // check fields and region-partial order
+  switch ($(d0->impl, d1->impl)) {
   case $(_, NULL): d2 = d0; break;
   case $(NULL, _): d2 = d1; break;
-  case $(&Opt(f0s), &Opt(f1s)):
+  case $(&AggrdeclImpl(exist_vars0,rgn_po0,f0s), 
+	 &AggrdeclImpl(exist_vars1,rgn_po1,f1s)):
     // both declare fields, so they must agree (with renaming w.r.t. tyvars)
-    if(!check_tvs(d0->exist_vars->v, d1->exist_vars->v, "type", v, loc, msg)) 
+    if(!check_tvs(exist_vars0, exist_vars1, "type", v, loc, msg)) 
       return NULL;
  
     // build the map
-    let inst = build_tvs_map(append(d0->tvs,d0->exist_vars->v), 
-			     append(d1->tvs,d1->exist_vars->v));
+    let inst = build_tvs_map(append(d0->tvs,exist_vars0), 
+			     append(d1->tvs,exist_vars1));
+
+    // check region partial order under the map FIX: DO ME! 
+    // semantic equality check: each in one must be implied by the other
 
     // check each field under the map
     for(; f0s != NULL && f1s != NULL; f0s = f0s->tl, f1s = f1s->tl) {

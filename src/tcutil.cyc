@@ -534,9 +534,9 @@ static type_t rgns_of_field(aggrfield_t af) {
 static $(tvar_t,type_t)@ region_free_subst(tvar_t tv) {
   type_t t;
   switch (tvar_kind(tv)) {
-  case RgnKind: t = HeapRgn; break;
+  case RgnKind: t = HeapRgn;      break;
   case EffKind: t = empty_effect; break;
-  default: t = sint_t; break; // lives in every kind
+  default:      t = sint_typ;     break; // lives in every kind
   }
   return new $(tv,t);
 }
@@ -873,7 +873,7 @@ bool subset_effect(bool set_to_empty, type_t e1, type_t e2) {
       // failing that, just try to pin it down to something without regions.
       return (type_in_effect(false,t2,e2) || 
               type_in_effect(true,t2,e2) ||
-              unify(t2,sint_t));
+              unify(t2,sint_typ));
     case e: return subset_effect(set_to_empty,e,e2);
     }
   case &Evar(_,*p,_,s): 
@@ -1683,7 +1683,7 @@ bool coerce_list(tenv_t te, type_t t, list_t<exp_t> es) {
 bool coerce_to_bool(tenv_t te, exp_t e) {
   if (!coerce_sint_typ(te,e))
     switch (compress(e->topt->v)) {
-    case &PointerType(_): unchecked_cast(te,e,uint_t); break;
+    case &PointerType(_): unchecked_cast(te,e,uint_typ); break;
     default: return false;
     }
   return true;
@@ -1702,13 +1702,13 @@ bool is_integral_type(type_t t) {
 
 // coerce e to have type unsigned int -- used in subscript
 bool coerce_uint_typ(tenv_t te, exp_t e) {
-  if (unify(e->topt->v,uint_t)) 
+  if (unify(e->topt->v,uint_typ)) 
     return true;
   // try arithmetic conversions -- we only allow integral values
   if (is_integral_type(e->topt->v)) {
-    if (will_lose_precision(e->topt->v,uint_t))
+    if (will_lose_precision(e->topt->v,uint_typ))
       warn(e->loc,"integral size mismatch; conversion supplied");
-    unchecked_cast(te,e,uint_t);
+    unchecked_cast(te,e,uint_typ);
     return true;
   }
   return false;
@@ -1716,13 +1716,13 @@ bool coerce_uint_typ(tenv_t te, exp_t e) {
 
 // coerce e to have type [signed] int -- used in coercions to "bool"
 bool coerce_sint_typ(tenv_t te, exp_t e) {
-  if (unify(e->topt->v,sint_t)) 
+  if (unify(e->topt->v,sint_typ)) 
     return true;
   // try arithmetic conversions -- we only allow integral values
   if (is_integral_type(e->topt->v)) {
-    if (will_lose_precision(e->topt->v,sint_t))
+    if (will_lose_precision(e->topt->v,sint_typ))
       warn(e->loc,"integral size mismatch; conversion supplied");
-    unchecked_cast(te,e,sint_t);
+    unchecked_cast(te,e,sint_typ);
     return true;
   }
   return false;
@@ -1949,11 +1949,11 @@ static list_t<$(tqual_t,type_t)@> flatten_typ(tenv_t te,type_t t1) {
   case &TupleType(tqs): return tqs; // FIX: recursively flatten here
   case &AggrType(AggrInfo(&KnownAggr(&ad),ts)):
     // FIX: what about existential vars?!? (we're letting tyvars escape)
-    if(ad->kind==UnionA || ad->fields==NULL) 
+    if(ad->kind==UnionA || ad->impl==NULL) 
       return new List(new $(empty_tqual(),t1),NULL);
     let inst = List::zip(ad->tvs,ts);
     // FIX: recursively flatten here
-    return List::map_c(flatten_typ_f,inst,ad->fields->v);
+    return List::map_c(flatten_typ_f,inst,ad->impl->fields);
   case &AnonAggrType(StructA,fs):
     // FIX: recursively flatten here
     return List::map_c(flatten_typ_f,NULL,fs);
@@ -2137,7 +2137,7 @@ bool is_integral(exp_t e) {
   case &AnonEnumType(_):
   case &TagType(_):
   case &SizeofType(_): return true;
-  case &Evar(_,_,_,_): return unify(e->topt->v,sint_t);
+  case &Evar(_,_,_,_): return unify(e->topt->v,sint_typ);
   default: return false;
   }
 }
@@ -2169,12 +2169,12 @@ type_t max_arithmetic_type(type_t t1, type_t t2) {
   case $(FloatType,_):  
   case $(_,FloatType):  return FloatType;
   case $(&IntType(Unsigned,B8),_): 
-  case $(_,&IntType(Unsigned,B8)): return ulonglong_t;
+  case $(_,&IntType(Unsigned,B8)): return ulonglong_typ;
   case $(&IntType(Signed,B8),_):   
-  case $(_,&IntType(Signed,B8)):   return slonglong_t;
+  case $(_,&IntType(Signed,B8)):   return slonglong_typ;
   case $(&IntType(Unsigned,B4),_): 
-  case $(_,&IntType(Unsigned,B4)): return uint_t;
-  default: return sint_t;
+  case $(_,&IntType(Unsigned,B4)): return uint_typ;
+  default: return sint_typ;
   }
 }
 
@@ -3108,7 +3108,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
 	// add as an abstract type declaration
 	// FIX: use the correct namespace by examining the qvar_t n
 	let ge = Dict::lookup(te->ae,te->ns);
-	let ad = new Aggrdecl{k,Extern,n,NULL,NULL,NULL,NULL};
+	let ad = new Aggrdecl{k,Extern,n,NULL,NULL,NULL};
 	Tc::tcAggrdecl(te,ge,loc,ad);
 	adp = lookup_aggrdecl(te,loc,n);
 	*info = new KnownAggr(adp);
@@ -3667,11 +3667,11 @@ bool bits_only(type_t t) {
   case &AggrType(AggrInfo(&KnownAggr(&ad),ts)):
     if(ad->kind == UnionA)
       return true;
-    if(ad->fields==NULL)
+    if(ad->impl==NULL)
       return false;
     region rgn {
       let inst = List::rzip(rgn,rgn,ad->tvs,ts);
-      for (_ fs = ad->fields->v; fs != NULL; fs = fs->tl)
+      for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl)
 	if (!bits_only(rsubstitute(rgn,inst,fs->hd->type))) return false;
       return true;
     }
@@ -3779,9 +3779,9 @@ bool supports_default(type_t t) {
     return true;
   case &AggrType(AggrInfo(info,ts)):
     let ad = get_known_aggrdecl(info);
-    if(ad->fields==NULL) return false;
-    if(ad->exist_vars->v != NULL) return false; // FIX?
-    return fields_support_default(ad->tvs, ts, ad->fields->v);
+    if(ad->impl == NULL) return false;
+    if(ad->impl->exist_vars != NULL) return false; // FIX?
+    return fields_support_default(ad->tvs, ts, ad->impl->fields);
   case &AnonAggrType(_,fs): return fields_support_default(NULL,NULL,fs);
 
   case &AnonEnumType(_):

@@ -1527,7 +1527,7 @@ doc_t decl2doc(decl_t d) {
     break;
     
   case &Aggr_d(ad):
-    if (ad->fields==NULL)
+    if (ad->impl==NULL)
       s = cat(scope2doc(ad->sc),
 	      aggr_kind2doc(ad->kind),
 	      qvar2doc(ad->name),
@@ -1537,9 +1537,11 @@ doc_t decl2doc(decl_t d) {
       s = cat(scope2doc(ad->sc),
 	      aggr_kind2doc(ad->kind),
 	      qvar2doc(ad->name),
-              ktvars2doc(ad->tvs),
+              ktvars2doc(ad->impl->exist_vars),
               text(" {"),
-              nest(2, cat(line_doc(),aggrfields2doc(ad->fields->v))),
+              nest(2, cat(line_doc(),aggrfields2doc(ad->impl->fields))),
+	      (ad->impl->rgn_po==NULL ? nil_doc() : 
+	       cat(text(":"),rgnpo2doc(ad->impl->rgn_po))),
               line_doc(),
               text("}"),
               atts2doc(ad->attributes),
@@ -1565,7 +1567,7 @@ doc_t decl2doc(decl_t d) {
               line_doc(),
               text("};"));
     break;
-  case &Let_d(p,_,_,e,_):
+  case &Let_d(p,_,e):
     s = cat(text("let "),
             pat2doc(p),
             text(" = "),

@@ -893,17 +893,21 @@ void dumpdecl(decl_t d, string_t comment) {
     dump_alpha(ad->kind==UnionA ? "union" : "struct");
     dump_boldqvar(ad->name);
     dumptvars(ad->tvs);
-    if (ad->fields == NULL)
+    if (ad->impl == NULL)
       dump_symbol(";\n");
     else {
       dump_symbol(" ");
       dump_lb();
-      if(ad->exist_vars->v != NULL) {
-	egroup(dumptvar,ad->exist_vars->v,"[","]",",");
+      if(ad->impl->exist_vars != NULL) {
+	egroup(dumptvar,ad->impl->exist_vars,"<",">",",");
 	dump_alpha("");
       }
+      if(ad->impl->rgn_po != NULL) {
+	dump_char(':');
+	dump_rgnpo(ad->impl->rgn_po);
+      }
       dump_symbol("\\\\\n");
-      dumpaggrfields(ad->fields->v);
+      dumpaggrfields(ad->impl->fields);
       dump_rb();
       dump_symbol(";\n");
     }
@@ -983,7 +987,7 @@ void dumpdecl(decl_t d, string_t comment) {
   /* The remaining cases won't appear in .h files or will be
      eliminated by the main loop. */
   case &Fn_d(_):
-  case &Let_d(_,_,_,_,_):
+  case &Let_d(_,_,_):
   case &Letv_d(_):
   case &Namespace_d(_,_):
   case &Using_d(_,_):
@@ -1098,7 +1102,7 @@ void dumpdecl(decl_t d, string_t comment) {
       case &Enum_d(_):
       case &Typedef_d(_):
       case &Fn_d(_):
-      case &Let_d(_,_,_,_,_):
+      case &Let_d(_,_,_):
       case &Letv_d(_):
         result = new List(decls->hd,result);
         decls = decls->tl;

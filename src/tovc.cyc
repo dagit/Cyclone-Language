@@ -550,7 +550,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
       }
       fallthru;
     case &Var_d(_):         
-    case &Let_d(_,_,_,_,_): 
+    case &Let_d(_,_,_): 
     case &Letv_d(_):        
     case &Aggr_d(_):
     case &Tunion_d(_):

@@ -1,0 +1,135 @@
+/* Region orders.
+   Copyright (C) 2002 Dan Grossman
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+// Note: Many operations are O(n^2) time and/or space where n is the number
+//       of regions or type variables in scope.  That should be okay and is
+//       pretty simple.  But we should be careful.
+
+#include <stdio.h>
+#include "list.h"
+#include "absyn.h"
+#include "rgnorder.h"
+#include "tcutil.h"
+#include "tcenv.h"
+
+using List;
+using Absyn;
+using Tcutil;
+namespace RgnOrder;
+
+// Encodes partial order for region lifetimes
+struct RgnPO {
+  tvar_t tvar;
+  bool resetable;
+  list_t<struct RgnPO @> ancestors;
+};
+
+// is region r reachable from the list of ancestors?
+bool region_ancestor(rgn_po_t ancestors, tvar_t r) {
+  // look in immediate ancestors
+  for (_ a = ancestors; a != NULL; a = a->tl)
+    if (tvar_cmp(a->hd->tvar,r) == 0) return true;
+  // look in ancestors ancestors
+  for (_ a = ancestors; a != NULL; a = a->tl)
+    if (region_ancestor(a->hd->ancestors,r)) return true;
+  return false;
+}
+
+static struct RgnPO @find_region_in_po(rgn_po_t po, tvar_t r) {
+  for (; po != NULL; po = po->tl) {
+    if (tvar_cmp(po->hd->tvar,r) == 0) return po->hd;
+  }
+  return Tcenv::env_err(aprintf("can't find region variable %s in po",
+				*(r->name)));
+}
+
+// does r1 outlive r2?
+bool check_region_outlives(rgn_po_t po, tvar_t r1, tvar_t r2) {
+  rgn_po_t r2_ancestors;
+  while (po != NULL && tvar_cmp(po->hd->tvar, r2) != 0) po=po->tl;
+  if (po == NULL) return false;
+  return region_ancestor(po->hd->ancestors,r1);
+}
+
+// given the list of type-variables for a function, build the initial
+// partial order for the region variables.  The po should have each
+// region being incomparable (i.e., have an empty set of ancestors.)
+// then add in the partial order given and check that it's consistent
+// and that there are no circularities.  
+rgn_po_t initial_region_po(Position::seg_t loc, list_t<tvar_t> tvs,
+			   list_t<$(type_t,type_t)@> po) {
+  rgn_po_t result = NULL;
+  for (; tvs != NULL; tvs = tvs->tl) {
+    tvar_t tv = tvs->hd;
+    if (tvar_kind(tv) == RgnKind) {
+      result = new List(new RgnPO{.tvar=tv, .resetable=false,
+                                  .ancestors=NULL},result);
+    }
+  }
+  for (; po != NULL; po = po->tl) {
+    switch (*(po->hd)) {
+    case $(HeapRgn,_): break; // every region is implicitly a descendant of `H
+    case $(&VarType(r1),&VarType(r2)):
+      // r2 has r1 as an ancestor.  Make sure that r1 and r2 aren't the
+      // same region, and that r1 doesn't have r2 as an ancestor.
+      if (tvar_cmp(r1,r2) == 0 || check_region_outlives(result,r2,r1))
+        terr(loc,"bad region lifetime assertion (circularity):%s < %s",
+	     *(r1->name), *(r2->name));
+      else {
+        // go find r1's po entry and add it to r2's po entry
+        let r1 = find_region_in_po(result,r1);
+        let r2 = find_region_in_po(result,r2);
+        r2->ancestors = new List(r1,r2->ancestors);
+      }
+      break;
+    case $(t1,t2):
+      terr(loc,"bad region lifetime assertion -- non type-variables");
+      break;
+    }
+  }
+  return result;
+}
+
+// given a po list, return those tvars that aren't resetable
+rgn_po_t non_resetable_ancestors(rgn_po_t po) {
+  // first check to see if any are resetable
+  for (_ p = po; p != NULL; p = p->tl)
+    if (p->hd->resetable) { 
+      // we found a resetable one -- going to have to build a new list
+      rgn_po_t res = NULL;
+      for (p = po; p != NULL; p = p->tl) {
+        if (p->hd->resetable) continue;
+        res = new List(p->hd,res);
+      }
+      return (List::imp_rev(res));
+    }
+  // none were resetable -- return the po
+  return po;
+}
+
+// add a new region variable to the given partial order.  only allow
+// as ancestors those regions that are not resetable.
+rgn_po_t add_region_po(rgn_po_t po, tvar_t tv, bool resetable) {
+  return new List(new RgnPO{.tvar = tv, .resetable = resetable,
+                               .ancestors = non_resetable_ancestors(po)}, po);
+}
+
+bool is_region_resetable(rgn_po_t po, Absyn::tvar_t r) {
+  return find_region_in_po(po,r)->resetable;
+}

@@ -89,6 +89,7 @@ extern struct Tenv {
 };
 typedef struct Tenv @tenv_t; 
 
+extern `a env_err(string_t msg) __attribute__((noreturn));
 extern tenv_t tc_init();
 extern genv_t empty_genv();
 extern fenv_t new_fenv(seg_t,fndecl_t);

@@ -72,8 +72,7 @@
 #include "absyn.h"
 #include "tcutil.h"
 #include "tcenv.h"
-
-namespace Tcenv;
+#include "rgnorder.h"
 
 using Core;
 using List;
@@ -82,10 +81,12 @@ using Position;
 using Absyn;
 using Tcutil;
 using Absynpp;
+using RgnOrder;
+namespace Tcenv;
 
 xtunion exn {Env_error};
 
-`a env_err(string_t msg) {
+`a env_err(string_t msg) __attribute__((noreturn)) {
   fprintf(stderr,"Error: %s\n",msg);
   fflush(stderr);
   throw Env_error;
@@ -155,19 +156,11 @@ static struct SharedFenv {
   SlowDict::dict_t<var_t,list_t<stmt_t>> needed_labels;
 };
 
-// Encodes partial order for region lifetimes
-static struct RgnPO {
-  tvar_t tvar;
-  bool resetable;
-  list_t<struct RgnPO @> ancestors;
-};
-typedef list_t<struct RgnPO @> rgn_po_t;
-
 // Local function environments -- this is getting a bit out of hand, no?
 abstract struct Fenv {
   struct SharedFenv @      shared;
   list_t<tvar_t>           type_vars; //type variables that can occur free
-  rgn_po_t                 region_order; // partial order on region variables 
+  RgnOrder::rgn_po_t       region_order; // partial order on region variables 
   Dict::dict_t<var_t,binding_t> locals;//binding one of Param_b, Local_b, Pat_b
   stmt_t                   encloser;  // nearest stmt with a binder or a try
   ctrl_env_t               ctrl_env;
@@ -471,100 +464,6 @@ tenv_t put_fenv(tenv_t te, fenv_t fe) {
   return new Tenv(te->ns, te->ae, new Opt(put_visible(te->le->v,fe)));
 }
 
-////////////////////////////// Region Partial Orders ////////////////////////
-
-// is region r reachable from the list of ancestors?
-static bool region_ancestor(rgn_po_t ancestors, tvar_t r) {
-  // look in immediate ancestors
-  for (_ a = ancestors; a != NULL; a = a->tl)
-    if (tvar_cmp(a->hd->tvar,r) == 0) return true;
-  // look in ancestors ancestors
-  for (_ a = ancestors; a != NULL; a = a->tl)
-    if (region_ancestor(a->hd->ancestors,r)) return true;
-  return false;
-}
-
-static struct RgnPO @find_region_in_po(rgn_po_t po, tvar_t r) {
-  for (; po != NULL; po = po->tl) {
-    if (tvar_cmp(po->hd->tvar,r) == 0) return po->hd;
-  }
-  return env_err(aprintf("can't find region variable %s in po",
-                         typ2string(new VarType(r))));
-}
-
-// does r1 outlive r2?
-static bool check_region_outlives(rgn_po_t po, tvar_t r1, tvar_t r2) {
-  rgn_po_t r2_ancestors;
-  while (po != NULL && tvar_cmp(po->hd->tvar, r2) != 0) po=po->tl;
-  if (po == NULL) return false;
-  return region_ancestor(po->hd->ancestors,r1);
-}
-
-// given the list of type-variables for a function, build the initial
-// partial order for the region variables.  The po should have each
-// region being incomparable (i.e., have an empty set of ancestors.)
-// then add in the partial order given and check that it's consistent
-// and that there are no circularities.  
-static rgn_po_t initial_region_po(seg_t loc, list_t<tvar_t> tvs,
-                                  list_t<$(type_t,type_t)@> po) {
-  rgn_po_t result = NULL;
-  for (; tvs != NULL; tvs = tvs->tl) {
-    tvar_t tv = tvs->hd;
-    if (tvar_kind(tv) == RgnKind) {
-      result = new List(new RgnPO{.tvar=tv, .resetable=false,
-                                  .ancestors=NULL},result);
-    }
-  }
-  for (; po != NULL; po = po->tl) {
-    switch (*(po->hd)) {
-    case $(HeapRgn,_): break; // every region is implicitly a descendant of `H
-    case $(&VarType(r1),&VarType(r2)):
-      // r2 has r1 as an ancestor.  Make sure that r1 and r2 aren't the
-      // same region, and that r1 doesn't have r2 as an ancestor.
-      if (tvar_cmp(r1,r2) == 0 || check_region_outlives(result,r2,r1))
-        terr(loc,"bad region lifetime assertion (circularity):%s < %s",
-             typ2string(new VarType(r1)), 
-             typ2string(new VarType(r2)));
-      else {
-        // go find r1's po entry and add it to r2's po entry
-        let r1 = find_region_in_po(result,r1);
-        let r2 = find_region_in_po(result,r2);
-        r2->ancestors = new List(r1,r2->ancestors);
-      }
-      break;
-    case $(t1,t2):
-      terr(loc,"bad region lifetime assertion:: %s < %s",
-           typ2string(t1), typ2string(t2));
-      break;
-    }
-  }
-  return result;
-}
-
-// given a po list, return those tvars that aren't resetable
-static rgn_po_t non_resetable_ancestors(rgn_po_t po) {
-  // first check to see if any are resetable
-  for (_ p = po; p != NULL; p = p->tl)
-    if (p->hd->resetable) { 
-      // we found a resetable one -- going to have to build a new list
-      rgn_po_t res = NULL;
-      for (p = po; p != NULL; p = p->tl) {
-        if (p->hd->resetable) continue;
-        res = new List(p->hd,res);
-      }
-      return (List::imp_rev(res));
-    }
-  // none were resetable -- return the po
-  return po;
-}
-
-// add a new region variable to the given partial order.  only allow
-// as ancestors those regions that are not resetable.
-static rgn_po_t add_region_po(rgn_po_t po, tvar_t tv, bool resetable) {
-  return new List(new RgnPO{.tvar = tv, .resetable = resetable,
-                               .ancestors = non_resetable_ancestors(po)}, po);
-}
-
 //////////////////// Function Environment Manipulation //////////////////////
 
 static fenv_t copy_fenv_old_ctrl(fenv_t f) {
@@ -855,8 +754,7 @@ void check_rgn_resetable(tenv_t te, seg_t loc, type_t rgn) {
   check_rgn_accessible(te,loc,rgn);
   switch (compress(rgn)) {
   case &VarType(r):
-    let rpo = find_region_in_po(get_fenv(te)->region_order,r);
-    if (!rpo->resetable) 
+    if(!RgnOrder::is_region_resetable(get_fenv(te)->region_order,r))
       terr(loc, "Region %s is not resetable", typ2string(rgn));
     return;
   default:
