@@ -3201,7 +3201,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t);
 	if(k==UnionA && !bits_only(t))
           // FIX: bad error message when t is a zero-terminated type
-	  terr(loc,"union member %s has a non-integral type", *fn);
+	  warn(loc,"union member %s is not `bits-only' so it can only be written and not read", *fn);
         check_bitfield(loc,te,t,width,fn);
         check_field_atts(loc,fn,atts);
       }      
@@ -3781,11 +3781,8 @@ bool bits_only(type_t t) {
     for (; tqs != NULL; tqs = tqs->tl) 
       if (!bits_only((*tqs->hd)[1])) return false;
     return true;
-  case &AggrType(AggrInfo(&UnknownAggr(UnionA,_),_)): return true;
-  case &AggrType(AggrInfo(&UnknownAggr(StructA,_),_)): return false;
+  case &AggrType(AggrInfo(&UnknownAggr(_,_),_)): return false;
   case &AggrType(AggrInfo(&KnownAggr(&ad),ts)):
-    if(ad->kind == UnionA)
-      return true;
     if(ad->impl==NULL)
       return false;
     region rgn {

@@ -123,6 +123,16 @@ extern tenv_t set_next(tenv_t, jumpee_t);
 extern tenv_t enter_try(tenv_t te);
 extern int    get_try_depth(tenv_t te);
 
+// used to record whether we're type-checking an expression that is doing
+// a read.  Some expressions (e.g., x++) are both reading and writing so
+// this always returns true in those contexts.  We even return true for
+// &x since the result may later be read.  We need this info to determine
+// whether or not (conservatively) we're reading a union member.  If
+// so, we must enforce that the member is bits-only.
+extern tenv_t enter_notreadctxt(tenv_t te);
+extern tenv_t clear_notreadctxt(tenv_t te);
+extern bool in_notreadctxt(tenv_t te);
+
 // The next 4 all assign through their last arg
 extern void process_continue(tenv_t,stmt_t,stmt_opt_t@);
 extern void process_break   (tenv_t,stmt_t,stmt_opt_t@);

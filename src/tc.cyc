@@ -493,10 +493,11 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     tcAggrImpl(te, ge, loc, append(tvs,exist_vars), rgn_po, fs);
 
     if(ad->kind == UnionA)
-          // must check that fields are bits-only
+      // warn when fields of unions are not bits-only -- these can
+      // only be written and not read.
       for (_ f = fs; f != NULL; f = f->tl)
 	if (!bits_only(f->hd->type))
-	  terr(loc,"field %s of union %s has type %s which is not `bits-only'",
+	  warn(loc,"member %s of union %s has type %s which is not `bits-only' so it can only be written and not read",
 	       *f->hd->name,*v, typ2string(f->hd->type));
 
     *adp = ad; //insert ad in the environment

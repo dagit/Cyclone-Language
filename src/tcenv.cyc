@@ -168,6 +168,7 @@ abstract struct Fenv {
   ctrl_env_t          ctrl_env;
   type_t              capability; 
   type_t              curr_rgn;   // current block's region
+  bool                in_notreadctxt; // true when in an exp that might read
 };
 
 //////////////////////// Top-level Environment Manipulation //////////////////
@@ -511,6 +512,27 @@ tenv_t add_local_var(seg_t loc, tenv_t te, vardecl_t vd) {
   }
   fe->locals = Dict::insert(fe->locals,v,new Local_b(vd));
   return put_fenv(te,fe);
+}
+
+tenv_t enter_notreadctxt(tenv_t te) {
+  if(te->le == NULL) return te;
+  let fe = copy_fenv_old_ctrl(get_fenv(te));
+  fe->in_notreadctxt = true;
+  return put_fenv(te,fe);
+}
+
+tenv_t clear_notreadctxt(tenv_t te) {
+  if(te->le == NULL) return te;
+  let fe = get_fenv(te);
+  if (!fe->in_notreadctxt) return te;
+  let fe2 = copy_fenv_old_ctrl(fe);
+  fe2->in_notreadctxt = false;
+  return put_fenv(te,fe2);
+}
+
+bool in_notreadctxt(tenv_t te) {
+  if (te->le == NULL) return false;
+  return get_fenv(te)->in_notreadctxt;
 }
 
 // assume uniqueness has been checked elsewhere
@@ -900,6 +922,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
          .ctrl_env    = new CtrlEnv(NotLoop_j, NotLoop_j, NULL, FnEnd_j, 0),
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),
                                              new List(fd->effect->v,NULL))),
-         .curr_rgn    = param_rgn
+         .curr_rgn    = param_rgn,
+         .in_notreadctxt = false
        };
 }

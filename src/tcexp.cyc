@@ -662,7 +662,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
   //   a function.  Since e2 cannot have a function type (any function
   //   types are promoted to function pointers) the types won't match.
   // As per K&R, don't promote any array types to pointer types in the lhs
-  tcExpNoPromote(te,NULL,e1);
+  tcExpNoPromote(enter_notreadctxt(te),NULL,e1);
   tcExp(te,&e1->topt->v,e2);
   type_t t1 = e1->topt->v;
   type_t t2 = e2->topt->v;
@@ -995,8 +995,6 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
 // &e
 static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0, 
                         type_t * topt, exp_t e) {
-  // This is really two things b/c we're still overloading
-  // & throughout the compiler as address-of and malloc-and-initialize.
   let topt2 = NULL;
   let tq2 = empty_tqual();
   if (topt != NULL) {
@@ -1014,26 +1012,13 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
   // a pointer to a pointer to a function
   // Notice that this also bypasses the array-to-pointer promotion
   // as required (see p. 200, A7.1 of K&R.)
-  tcExpNoInst(te,topt2,e);
+  // We use clear_notreadctxt because the pointer might escape off
+  // and later be read.
+  tcExpNoInst(clear_notreadctxt(te),topt2,e);
 
-  // first, dispense with the malloc-and-initialize cases or the
+  // first, dispense with the 
   // case where we have &e[i] and e is an array/pointer (i.e., not a tuple).
   switch (e->r) {
-  case &Struct_e(_,_,_,_): 
-  case &Tuple_e(_):
-    // Note: We're heap region b/c this is translated to an actual malloc
-    warn(loc,"& used to allocate");
-    // Avoid casts when we're passed down a nullable type
-    let ptr_maker = at_typ;
-    if(topt != NULL)
-      switch (compress(*topt)) {
-      case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_))): 
-	if(conref_val(n))
-	  ptr_maker = star_typ; 
-	break;
-      default: break;
-      }
-    return ptr_maker(e->topt->v,HeapRgn,tq2,false_conref);
   case &Subscript_e(e1,e2):
     switch (compress(e1->topt->v)) {
     case &TupleType(_): break; // leave & for tuple types alone.
@@ -1139,6 +1124,7 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
 
  // *e
 static type_t tcDeref(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
+  te = clear_notreadctxt(te);
   tcExp(te,NULL,e);
   type_t t = compress(e->topt->v);
   switch (t) {
@@ -1172,12 +1158,17 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
     region rgn {
       let inst = List::rzip(rgn,rgn,ad->tvs,ts);
       t2 = rsubstitute(rgn,inst,finfo->type);
+      // prevent someone from reading a non-bits-only union member
+      if (ad->kind == UnionA && !in_notreadctxt(te) && !bits_only(t2))
+        return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
     }
     return t2;
-  case &AnonAggrType(_,fs):
+  case &AnonAggrType(k,fs):
     let finfo = lookup_field(fs,f);
     if (finfo == NULL)
       return expr_err(te,loc,topt,"type has no %s field",*f);
+    if (k == UnionA && !in_notreadctxt(te) && !bits_only(finfo->type))
+        return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
     return finfo->type;
   case &ArrayType(_)   && (strcmp(*f,"size") == 0):
   case &PointerType(_) && (strcmp(*f,"size") == 0):
@@ -1197,7 +1188,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
 // e->f
 static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt, 
 			  exp_t e, field_name_t f) {
-  tcExp(te,NULL,e);
+  tcExp(clear_notreadctxt(te),NULL,e);
   switch (compress(e->topt->v)) {
   case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt))):
     check_nonzero_bound(loc, b);
@@ -1217,18 +1208,22 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
 	let inst = List::rzip(rgn,rgn,ad->tvs,ts);
 	t3 = rsubstitute(rgn,inst,finfo->type);
       }
+      if (ad->kind == UnionA && !in_notreadctxt(te) && !bits_only(t3))
+        return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
       return t3;
-    case &AnonAggrType(_,fs):
+    case &AnonAggrType(k,fs):
       let finfo = lookup_field(fs,f);
       if (finfo == NULL)
 	return expr_err(te,loc,topt,"type has no %s field",*f);
+      if (k == UnionA && !in_notreadctxt(te) && !bits_only(finfo->type))
+        return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
       return finfo->type;
     default: break;
     }
     break;
   default: break;
   }
-  return expr_err(te,loc,topt,"expecting struct pointer, found %s", 
+  return expr_err(te,loc,topt,"expecting struct or union pointer, found %s", 
 		  typ2string(e->topt->v));
 }
 
@@ -1249,6 +1244,7 @@ static type_t ithTupleType(tenv_t te, seg_t loc,
  // FIX: look at topt
 static type_t tcSubscript(tenv_t te, seg_t loc, type_t * topt, 
 			  exp_t e1, exp_t e2) {
+  te = clear_notreadctxt(te);
   tcExp(te,NULL,e1);
   tcExp(te,NULL,e2);
   type_t t1 = compress(e1->topt->v);

@@ -25,8 +25,8 @@
 
 // TO DO: Exploit @ types to know NotZero!
 
-// KLUDGE: For unions, we just pretend its initialized.  Since they're bits,
-// safety is not compromised.
+// KLUDGE: For unions, we just pretend its initialized.  Since you can
+// only read bits out, safety is not compromised.
 
 // The previous pass (type-checking) sets up:
 // * decorating all stmts with their correct non_local_preds
@@ -895,6 +895,8 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
   case &Var_e(_,&Global_b(vd)): return $(inflow,UnknownL);
 
   case &AggrArrow_e(e1,f):
+    // FIX:  Dan, this prevents me from writing u->f = e where u is a
+    // union pointer.  I get an Impossible("bad insert place")
     if(!is_union_type(e1->topt->v)) // for unions, just drop the field
       flds = new List(f,flds);
     fallthru(e1);

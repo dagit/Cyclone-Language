@@ -1164,8 +1164,8 @@ f->hd)->type));{struct Cyc_String_pa_struct _tmp11A;_tmp11A.tag=0;_tmp11A.f1=(
 struct _tagged_arr)((struct _tagged_arr)*_tmpDF);{struct Cyc_String_pa_struct
 _tmp119;_tmp119.tag=0;_tmp119.f1=(struct _tagged_arr)((struct _tagged_arr)*((
 struct Cyc_Absyn_Aggrfield*)f->hd)->name);{void*_tmp117[3]={& _tmp119,& _tmp11A,&
-_tmp11B};Cyc_Tcutil_terr(loc,({const char*_tmp118="field %s of union %s has type %s which is not `bits-only'";
-_tag_arr(_tmp118,sizeof(char),_get_zero_arr_size(_tmp118,58));}),_tag_arr(
+_tmp11B};Cyc_Tcutil_warn(loc,({const char*_tmp118="member %s of union %s has type %s which is not `bits-only' so it can only be written and not read";
+_tag_arr(_tmp118,sizeof(char),_get_zero_arr_size(_tmp118,98));}),_tag_arr(
 _tmp117,sizeof(void*),3));}}}});}}*_tmp116=ad;goto _LLB3;}_LLB8: _tmp109=_tmp100.f1;
 if(_tmp109 == 0)goto _LLBA;_tmp10A=*_tmp109;_tmp10B=_tmp10A.exist_vars;_tmp10C=
 _tmp10A.rgn_po;_tmp10D=_tmp10A.fields;_tmp10E=_tmp100.f2;if(_tmp10E == 0)goto

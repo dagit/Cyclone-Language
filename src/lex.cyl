@@ -123,6 +123,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("goto", GOTO, true),
   $("if", IF, true),
   $("inline", INLINE, true),
+  $("__inline__", INLINE, true),
   $("int", INT, true),
   $("let", LET, false),
   $("long", LONG, true),
