@@ -16,7 +16,6 @@
 #include <fn.h>
 #include <pp.h>
 #include <array.h>
-#include <id.h>
 #include <arg.h>
 #include <errno.h>
 
@@ -792,29 +791,6 @@ void pp_test() {
 }
 }
 
-void id_test() {
-  // Untested:
-  // id_prn
-  // id_unique
-  test_begin("Id");
-  let i1 = Id::id_new("abc");
-  let i2 = Id::id_new("abc");
-  let i3 = Id::id_renew(i2);
-  okfail(0 != Id::id_compare(i1,i2));
-  okfail(0 != Id::id_compare(i1,i3));
-  okfail(0 != Id::id_compare(i3,i2));
-  okfail(0 == strcmp(Id::id_to_source(i1),Id::id_to_source(i2)));
-  okfail(0 == strcmp(Id::id_to_source(i1),Id::id_to_source(i3)));
-  okfail(0 == strcmp(Id::id_to_source(i3),Id::id_to_source(i2)));
-  okfail(0 != strcmp(Id::id_to_string(i1),Id::id_to_string(i2)));
-  okfail(0 != strcmp(Id::id_to_string(i1),Id::id_to_string(i3)));
-  okfail(0 != strcmp(Id::id_to_string(i3),Id::id_to_string(i2)));
-  let i4 = Id::id_make("foo",3);
-  let i5 = Id::id_make("foo",3);
-  okfail(0 == Id::id_compare(i4,i5));
-  test_end();
-}
-
 using Arg {
 static int u_foo_foo = 0;
 void u_foo() {
@@ -1050,7 +1026,6 @@ int main(int argc, string_t<`H> ?`H args) {
   float_test();
   fn_test();
   pp_test();
-  id_test();
   arg_test(args);
   printf_test();
   att_test();
