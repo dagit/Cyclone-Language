@@ -317,30 +317,29 @@ unsigned int len= _get_arr_size( dest, sizeof( int));( len <=  _get_arr_size(
 src1, sizeof( int))? len <=  _get_arr_size( src2, sizeof( int)): 0)? 0:(( int(*)(
 struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
 _tag_arr("len <= src1.size && len <= src2.size", sizeof( unsigned char), 37u),
-_tag_arr("/home/trevor/cyclone/lib/bitvec.cyc", sizeof( unsigned char), 36u), 71);{
-int i= 0; for( 0; i <  len; ++ i){(( int*) dest.curr)[ i]=(( int*) src1.curr)[ i]
-| (( int*) src2.curr)[ i];}}} void Cyc_Bitvec_intersect_two( struct _tagged_arr
-dest, struct _tagged_arr src1, struct _tagged_arr src2){ unsigned int len=
-_get_arr_size( dest, sizeof( int));( len <=  _get_arr_size( src1, sizeof( int))?
-len <=  _get_arr_size( src2, sizeof( int)): 0)? 0:(( int(*)( struct _tagged_arr
+_tag_arr("bitvec.cyc", sizeof( unsigned char), 11u), 71);{ int i= 0; for( 0; i < 
+len; ++ i){(( int*) dest.curr)[ i]=(( int*) src1.curr)[ i] | (( int*) src2.curr)[
+i];}}} void Cyc_Bitvec_intersect_two( struct _tagged_arr dest, struct
+_tagged_arr src1, struct _tagged_arr src2){ unsigned int len= _get_arr_size(
+dest, sizeof( int));( len <=  _get_arr_size( src1, sizeof( int))? len <= 
+_get_arr_size( src2, sizeof( int)): 0)? 0:(( int(*)( struct _tagged_arr
 assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
 _tag_arr("len <= src1.size && len <= src2.size", sizeof( unsigned char), 37u),
-_tag_arr("/home/trevor/cyclone/lib/bitvec.cyc", sizeof( unsigned char), 36u), 78);{
-int i= 0; for( 0; i <  len; ++ i){(( int*) dest.curr)[ i]=(( int*) src1.curr)[ i]
-& (( int*) src2.curr)[ i];}}} void Cyc_Bitvec_diff_two( struct _tagged_arr dest,
-struct _tagged_arr src1, struct _tagged_arr src2){ unsigned int len=
-_get_arr_size( dest, sizeof( int));( len <=  _get_arr_size( src1, sizeof( int))?
-len <=  _get_arr_size( src2, sizeof( int)): 0)? 0:(( int(*)( struct _tagged_arr
-assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
-_tag_arr("len <= src1.size && len <= src2.size", sizeof( unsigned char), 37u),
-_tag_arr("/home/trevor/cyclone/lib/bitvec.cyc", sizeof( unsigned char), 36u), 85);{
-int i= 0; for( 0; i <  len; ++ i){(( int*) dest.curr)[ i]=(( int*) src1.curr)[ i]
-&  ~(( int*) src2.curr)[ i];}}} int Cyc_Bitvec_compare_two( struct _tagged_arr
-src1, struct _tagged_arr src2){ unsigned int len= _get_arr_size( src1, sizeof(
-int)); len <=  _get_arr_size( src2, sizeof( int))? 0:(( int(*)( struct
-_tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
-_tag_arr("len <= src2.size", sizeof( unsigned char), 17u), _tag_arr("/home/trevor/cyclone/lib/bitvec.cyc",
-sizeof( unsigned char), 36u), 92);{ int i= 0; for( 0; i <  len; ++ i){ if((( int*)
+_tag_arr("bitvec.cyc", sizeof( unsigned char), 11u), 78);{ int i= 0; for( 0; i < 
+len; ++ i){(( int*) dest.curr)[ i]=(( int*) src1.curr)[ i] & (( int*) src2.curr)[
+i];}}} void Cyc_Bitvec_diff_two( struct _tagged_arr dest, struct _tagged_arr
+src1, struct _tagged_arr src2){ unsigned int len= _get_arr_size( dest, sizeof(
+int));( len <=  _get_arr_size( src1, sizeof( int))? len <=  _get_arr_size( src2,
+sizeof( int)): 0)? 0:(( int(*)( struct _tagged_arr assertion, struct _tagged_arr
+file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("len <= src1.size && len <= src2.size",
+sizeof( unsigned char), 37u), _tag_arr("bitvec.cyc", sizeof( unsigned char), 11u),
+85);{ int i= 0; for( 0; i <  len; ++ i){(( int*) dest.curr)[ i]=(( int*) src1.curr)[
+i] &  ~(( int*) src2.curr)[ i];}}} int Cyc_Bitvec_compare_two( struct
+_tagged_arr src1, struct _tagged_arr src2){ unsigned int len= _get_arr_size(
+src1, sizeof( int)); len <=  _get_arr_size( src2, sizeof( int))? 0:(( int(*)(
+struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+_tag_arr("len <= src2.size", sizeof( unsigned char), 17u), _tag_arr("bitvec.cyc",
+sizeof( unsigned char), 11u), 92);{ int i= 0; for( 0; i <  len; ++ i){ if((( int*)
 src1.curr)[ i] != (( int*) src2.curr)[ i]){ return 0;}}} return 1;} struct
 _tagged_arr Cyc_Bitvec_new_empty( int sz){ struct _tagged_arr ans=({
 unsigned int _temp0=( unsigned int)( sz /  32 +  1); int* _temp1=( int*)
@@ -377,13 +376,13 @@ unsigned int len= _get_arr_size( bvec, sizeof( int)); int i= 0; for( 0; i <  len
 bvec, int sz){ int words= sz >>  5; words <  _get_arr_size( bvec, sizeof( int))?
 0:(( int(*)( struct _tagged_arr assertion, struct _tagged_arr file, unsigned int
 line)) Cyc_Std___assert_fail)( _tag_arr("words < bvec.size", sizeof(
-unsigned char), 18u), _tag_arr("/home/trevor/cyclone/lib/bitvec.cyc", sizeof(
-unsigned char), 36u), 149);{ int i= 0; for( 0; i <  words; i ++){ if((( int*)
-bvec.curr)[ i] !=  -1){ return 0;}}}{ int i= words *  32; for( 0; i <  sz; i ++){
-if( ! Cyc_Bitvec_get( bvec, i)){ return 0;}}} return 1;} void Cyc_Bitvec_print_bvec(
-struct _tagged_arr bvec){{ int i= 0; for( 0; i <  32 *  _get_arr_size( bvec,
-sizeof( int)); ++ i){({ struct Cyc_Std_Int_pa_struct _temp15; _temp15.tag= Cyc_Std_Int_pa;
-_temp15.f1=( int)(( unsigned int)( Cyc_Bitvec_get( bvec, i)? 1: 0));{ void*
-_temp14[ 1u]={& _temp15}; Cyc_Std_printf( _tag_arr("%d", sizeof( unsigned char),
-3u), _tag_arr( _temp14, sizeof( void*), 1u));}});}}({ void* _temp16[ 0u]={}; Cyc_Std_printf(
-_tag_arr("\n", sizeof( unsigned char), 2u), _tag_arr( _temp16, sizeof( void*), 0u));});}
+unsigned char), 18u), _tag_arr("bitvec.cyc", sizeof( unsigned char), 11u), 149);{
+int i= 0; for( 0; i <  words; i ++){ if((( int*) bvec.curr)[ i] !=  -1){ return
+0;}}}{ int i= words *  32; for( 0; i <  sz; i ++){ if( ! Cyc_Bitvec_get( bvec, i)){
+return 0;}}} return 1;} void Cyc_Bitvec_print_bvec( struct _tagged_arr bvec){{
+int i= 0; for( 0; i <  32 *  _get_arr_size( bvec, sizeof( int)); ++ i){({ struct
+Cyc_Std_Int_pa_struct _temp15; _temp15.tag= Cyc_Std_Int_pa; _temp15.f1=( int)((
+unsigned int)( Cyc_Bitvec_get( bvec, i)? 1: 0));{ void* _temp14[ 1u]={& _temp15};
+Cyc_Std_printf( _tag_arr("%d", sizeof( unsigned char), 3u), _tag_arr( _temp14,
+sizeof( void*), 1u));}});}}({ void* _temp16[ 0u]={}; Cyc_Std_printf( _tag_arr("\n",
+sizeof( unsigned char), 2u), _tag_arr( _temp16, sizeof( void*), 0u));});}

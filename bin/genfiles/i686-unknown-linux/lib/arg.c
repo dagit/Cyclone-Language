@@ -340,18 +340,17 @@ return( struct _tagged_arr) _tag_arr( 0u, 0u, 0u);} if( howmuch <  0){ howmuch=
 0;}{ unsigned int _temp2= Cyc_Std_strlen( s); _temp2 <=  _get_arr_size( s,
 sizeof( unsigned char))? 0:(( int(*)( struct _tagged_arr assertion, struct
 _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("len <= s.size",
-sizeof( unsigned char), 14u), _tag_arr("/home/trevor/cyclone/lib/arg.cyc",
-sizeof( unsigned char), 33u), 94); if( howmuch >  _temp2){ Cyc_Buffer_add_string(
-b, s); return( struct _tagged_arr) _tag_arr( 0u, 0u, 0u);}{ int i; for( i=
-howmuch -  1; i >=  0? ! isspace(( int)(( const unsigned char*) s.curr)[ i]): 0;
-i --){;} if( i <  0){ for( i= howmuch? howmuch -  1: 0;( i <  _temp2?( int)((
-const unsigned char*) s.curr)[ i]: 0)? ! isspace(( int)(( const unsigned char*)
-s.curr)[ i]): 0; i ++){;}} Cyc_Buffer_add_substring( b, s, 0, i);{ struct
-_tagged_arr whatsleft=( struct _tagged_arr) _tag_arr( 0u, 0u, 0u); for( 0;( i < 
-_temp2?( int)(( const unsigned char*) s.curr)[ i]: 0)? isspace(( int)(( const
-unsigned char*) s.curr)[ i]): 0; i ++){;} if( i <  _temp2?( int)(( const
-unsigned char*) s.curr)[ i]: 0){ whatsleft= _tagged_arr_plus( s, sizeof(
-unsigned char), i);} return whatsleft;}}}} void Cyc_Arg_Justify_justify_b(
+sizeof( unsigned char), 14u), _tag_arr("arg.cyc", sizeof( unsigned char), 8u),
+94); if( howmuch >  _temp2){ Cyc_Buffer_add_string( b, s); return( struct
+_tagged_arr) _tag_arr( 0u, 0u, 0u);}{ int i; for( i= howmuch -  1; i >=  0? !
+isspace(( int)(( const unsigned char*) s.curr)[ i]): 0; i --){;} if( i <  0){
+for( i= howmuch? howmuch -  1: 0;( i <  _temp2?( int)(( const unsigned char*) s.curr)[
+i]: 0)? ! isspace(( int)(( const unsigned char*) s.curr)[ i]): 0; i ++){;}} Cyc_Buffer_add_substring(
+b, s, 0, i);{ struct _tagged_arr whatsleft=( struct _tagged_arr) _tag_arr( 0u, 0u,
+0u); for( 0;( i <  _temp2?( int)(( const unsigned char*) s.curr)[ i]: 0)?
+isspace(( int)(( const unsigned char*) s.curr)[ i]): 0; i ++){;} if( i <  _temp2?(
+int)(( const unsigned char*) s.curr)[ i]: 0){ whatsleft= _tagged_arr_plus( s,
+sizeof( unsigned char), i);} return whatsleft;}}}} void Cyc_Arg_Justify_justify_b(
 struct Cyc_Buffer_t* b, int indent, int margin, struct _tagged_arr item, struct
 _tagged_arr desc){ if( item.curr != (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){
 Cyc_Buffer_add_string( b, item);} if( desc.curr == (( struct _tagged_arr)

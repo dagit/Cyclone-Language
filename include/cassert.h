@@ -18,6 +18,8 @@
 
 /* Originally derived from the GNU C Library, released under LGPL:
    Copyright (C) 1991,1992,1994-1999,2000,2001 Free Software Foundation, Inc. */
+#ifndef _ASSERT_H_
+#define _ASSERT_H_
 
 #undef assert
 #ifdef NDEBUG
@@ -29,15 +31,18 @@ extern `a
 __assert_fail (string_t assertion, string_t file, unsigned int line) 
   __attribute__((noreturn));
 }
-#define __STRING(x) #x
+
+#ifndef __FILE2__
 #ifdef __BASE_FILE__
-#define assert(expr) ((expr) ? 0 : \
-  (Std::__assert_fail(__STRING(expr), __BASE_FILE__, __LINE__)))
+#define __FILE2__ __BASE_FILE__
 #else
-#ifdef __FILE__
-#define assert(expr) ((expr) ? 0 : \
-  (Std::__assert_fail(__STRING(expr), __FILE__, __LINE__)))
-#endif
+#define __FILE2__ __FILE__
 #endif
 #endif
 
+#define __STRING(x) #x
+#define assert(expr) ((expr) ? 0 : \
+  (Std::__assert_fail(__STRING(expr), __FILE2__, __LINE__)))
+
+#endif
+#endif

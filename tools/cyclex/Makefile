@@ -60,8 +60,8 @@ endif
 	$(CYCC) $(CYCFLAGS) -c $< 
 
 clean:
-	rm -f *.o *.c lexer.cyc parser_tab.cyc parser_tab.h *.output *.stackdump
-	rm -f $(PROG) cyclex
+	$(RM) *.o *.c lexer.cyc parser_tab.cyc parser_tab.h *.output *.stackdump
+	$(RM) $(PROG) cyclex
 
 lexer.cyc: parser_tab.h
 parser_tab.c: parser.y

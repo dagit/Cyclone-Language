@@ -1,9 +1,5 @@
-
-# We took the bison source-code from the Free Software Foundation 
-# (copyright below) and hacked the source code to produce Cyclone code instead
-# of C code.
-# The resulting program is a parser-generator for Cyclone.
-# To rebuild the tool, gcc needs to be installed.
+# We modified the bison source-code from the Free Software Foundation 
+# (copyright below) so that it is written in Cyclone and generates Cyclone code.
 
 # Makefile for bison
 # Copyright (C) 1988, 1989, 1991, 1993 Bob Corbett and Free Software Foundation,
@@ -64,8 +60,7 @@ files.o: files.cyc
 	$(CYCC) $(CYCFLAGS) -c $<
 
 clean:
-	$(RM) *.o *.c core cycbison *~ *.stackdump
-	$(RM) $(PROG)
+	$(RM) *.o *.c core cycbison *~ *.stackdump $(PROG)
 
 LR0.o: system.h machine.h new.h gram.h state.h
 closure.o: system.h machine.h new.h gram.h

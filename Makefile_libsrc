@@ -96,9 +96,9 @@ precore_c.h: core.h $(CYCC) $(CYCINC_H)
 %_tab.h: %.y $(CYCBISON)
 	$(CYCBISON) -d $< -o $(patsubst %.h,%.cyc,$@)
 %.c: %.cyc $(CYCC) $(CYCINC_H)
-	$(CYCC) $(CYCFLAGS) -c -o $@ -stopafter-toc $<
+	$(CYCC) $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -c -o $@ -stopafter-toc $<
 %.$(O): %.cyc $(CYCC) $(CYCINC_H)
-	$(CYCC) $(CYCFLAGS) -c -o $@ $<
+	$(CYCC) $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -c -o $@ $<
 # For runtime_cyc.c and nogc.c and cstubs.c
 %.$(O): %.c precore_c.h $(CYCINC_H)
 	$(CC) $(CFLAGS) -I. -c -o $@ $<
