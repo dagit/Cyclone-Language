@@ -1,0 +1,454 @@
+/* Graphical Allocation profiler
+   Copyright (C) 2001 Greg Morrisett, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <core.h>
+#include <string.h>
+#include <list.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <array.h>
+#include <fn.h>
+#include <assert.h>
+#include <hashtable.h>
+#include "aprof_event.h"
+
+// Keep track of following information per event
+
+// 1) unique-avail-bytes
+//    update on unique alloc events (+ or - amounts)
+// 2) refcnt-avail-bytes
+//    update on refcnt alloc events (+ or - amounts)
+// 3) total-heap-size, total-free-size
+//    update on heap alloc, unique alloc, refcnt alloc,
+//              create, resize, free events
+// 4) table that indexes a dynamic region name to a pair $(tot,free)
+//    initialize to 0 on create
+//    update on grow: tot += sz, free += (sz - (oldalloc-oldfree))
+//           on alloc: free -= sz (plus see columns)
+//           on free: remove from table
+//    keep table sorted
+//    what to do about the same region allocated multiple times?  At the
+//      moment, treat them as separate regions.
+
+// At each MM point (alloc, gc, create, free events), live data =
+
+//   current allocated data for live dyn regions
+//   refcnt live data
+//   unique live data
+//   heap =
+//     total-heap-size - total-free-size - dyn-region size - refcnt live -
+//   unique live
+
+// Will output this information as time-based graph.
+
+using Core;
+using List;
+using Aprof;
+using Fn;
+
+struct Curve {
+  const char ?name;
+  unsigned int area; // area below curve
+  list_t<$(unsigned int,unsigned int)@> points; // points of curve
+};
+typedef struct Curve @curve_t;
+static void curve_point(curve_t b, unsigned int x, unsigned int y) {
+  if (b->points != NULL) {
+    let &$(last_x,last_y) = b->points->hd;
+    if (y == last_y) return;
+  }
+  b->points = new List(new $(x,y),b->points);
+}
+static void curve_add(curve_t b, unsigned int x, int delta_y) {
+  if (delta_y == 0) return;
+  unsigned int y = 0;
+  if (b->points != NULL) {
+    let &$(last_x,last_y) = b->points->hd;
+    b->area += (x-last_x)*last_y;
+    y = last_y;
+  }
+  y += delta_y; // make sure this works for negative delta_y...
+  b->points = new List(new $(x,y),b->points);
+}
+static void curve_finish(curve_t b, unsigned int x) {
+  if (b->points != NULL) {
+    let &$(last_x,last_y) = b->points->hd;
+    if (last_x != x)
+      b->points = new List(new $(x,last_y),b->points);
+    b->area += (x-last_x)*last_y;
+  }
+}
+static void print_area(curve_t b) { // for debugging
+  fprintf(stderr,"%s area: %d\n",b->name,b->area);
+}
+
+// Data that is maintained/updated at each profiled event
+struct ProcEnv {
+  unsigned int cnt;
+  unsigned int max_heap_size;
+  curve_t mem_total;
+  curve_t heap_live;
+  curve_t unique_live;
+  curve_t refcnt_live;
+  curve_t other_live;
+  list_t<$(unsigned int,unsigned int)@> gc_points;
+};
+
+/////////////////////////////// GRAPH OUTPUT
+
+// We either output in jgraph syntax or gnuplot syntax
+extern int do_gnuplot; // defined in aprof.cyc
+/* Build a growable buffer in the unique region. */
+static char ?@nozeroterm `U buf_buf = NULL;
+static int buf_pos = 0;
+static int buf_len = 0;
+static void buf_append(const char ?s) {
+  let howmuch = strlen(s);
+  if (buf_pos+howmuch > buf_len) {
+    let newlen = (buf_len? buf_len*2: 17);
+    while (newlen <= buf_pos+howmuch) newlen *= 2;
+    char ?@nozeroterm `U newbuf = malloc(newlen * sizeof(char));
+    for (int i = 0; i<buf_pos; i++)
+      newbuf[i] = buf_buf[i];
+    buf_len = newlen;
+    buf_buf :=: newbuf;
+    if (newbuf) ufree(newbuf);
+  }
+  for (int i = 0; i < howmuch; i++,s++,buf_pos++) {
+    buf_buf[buf_pos] = *s;
+  }
+}
+static void buf_print_contents() {
+  if (buf_pos) printf("%.*s",buf_pos,buf_buf);
+}
+static void output_xy(int x, int y) {
+  region r;
+  if (do_gnuplot) buf_append(rprintf(r,"%d, %d\n",x,y));
+  else printf("%d %d ",x,y);
+}
+static void output_header(int xmax, int ymax) {
+  if (do_gnuplot) {
+    printf("set title \"Allocation Profile\"\n"
+           "set xlabel \"allocation event #\"\n"
+           "set xrange [1:%d]\n"
+           "set ylabel \"bytes allocated/freed\"\n"
+           "set yrange [1:%d]\n",
+           xmax,
+           ymax);
+  }
+  else {
+    printf("newgraph\n  xaxis min 1 max %d label : allocation event #\n",
+           xmax);
+    printf("  yaxis min 1 max %d label : bytes allocated/freed\n\n",
+           ymax);
+  }
+}
+
+static list_t<char ?@> gnuplot_curves = NULL;
+static void output_points_header(const char ? name) {
+  if (do_gnuplot) {
+    gnuplot_curves =
+      new List(new aprintf("'-' title \"%s\" with points",name),
+               gnuplot_curves);
+  }
+  else {
+    printf("newcurve\n  label : %s\n  marktype circle\n linetype none\n",
+	   name);
+    printf("  pts ");
+  }
+}
+static void output_lines_header(const char ?name, const char ?curvekind) {
+  if (do_gnuplot) {
+    gnuplot_curves =
+      new List(new aprintf("'-' title \"%s\" with lines",name),
+               gnuplot_curves);
+  }
+  else {
+    printf("newcurve\n  label : %s\n  marktype none\n linetype %s\n",
+	   name, curvekind);
+    printf("  pts ");
+  }
+}
+static void output_curve_end() {
+  if (do_gnuplot)
+    buf_append("e\n");
+  else
+    printf("\n\n");
+}
+static void output_cleanup() {
+  if (do_gnuplot) {
+    printf("plot \\\n");
+    gnuplot_curves = imp_rev(gnuplot_curves);
+    for (let l = gnuplot_curves; l != NULL; l = l->tl) {
+      printf("%s",*(l->hd));
+      if (l->tl) printf(", \\");
+      printf("\n");
+    }
+    buf_print_contents();
+  }
+}
+
+static void output_point_no_stack($(unsigned int, unsigned int) @point) {
+  let x = (*point)[0];
+  let y = (*point)[1];
+  output_xy(x,y);
+}
+
+// output a line representing the live data for a particular region.
+// Update the heap size as we go.
+static void output_line(string_t name,
+			int num,
+			list_t<$(unsigned int,unsigned int)@> points) {
+  static string_t linetypes[7] =
+    { "solid", "dotted", "dashed", "longdash", "dotdash",
+      "dotdotdash", "dotdotdashdash" };
+  if (points == NULL) return;
+  if (num < 0)
+    output_points_header(name);
+  else
+    output_lines_header(name,linetypes[num % 7]);
+  iter(output_point_no_stack,points);
+  output_curve_end();
+}
+
+// go through all of the points in the line and determine if they
+// make up the given percent of the total memory at any point.
+static bool yeah_man(list_t<$(unsigned int,unsigned int) @> dynpts,
+		     list_t<$(unsigned int,unsigned int) @> mempts,
+		     double percent) {
+  for (; dynpts != NULL; dynpts = dynpts->tl) {
+    let dynx = (*dynpts->hd)[0];
+    let dynamt = (*dynpts->hd)[1];
+    int memx = 0, memamt = 0;
+    for (; mempts != NULL; mempts = mempts->tl) {
+      memx = (*mempts->hd)[0];
+      memamt = (*mempts->hd)[1];
+      if (memx <= dynx) break;
+    }
+    assert(memx != 0);
+    if (dynamt / (1.0 * memamt) > percent) return true;
+  }
+  return false;
+}
+
+static void
+output_dynregion_line($(int,unsigned int ?,
+			list_t<$(unsigned int,unsigned int) @>) @env,
+		      $(stringptr_t,
+			list_t<$(unsigned int,unsigned int) @> @) @line) {
+  let &$(*num,heap_size,mempts) = env;
+  let &$(name,pts) = line;
+  if (length(*pts) <= 2) return; // region was empty
+  if (!yeah_man(*pts,mempts,dyn_threshhold)) return;
+//   fprintf(stderr,"Outputting dynregion %s,%x\n",*name,pts);
+  output_line(*name,*num,*pts);
+  *num = (*num + 1);
+}
+
+/////////////////////////////// EVENT PROCESSING
+
+// comparisons of list items (for deletion) based on the region name
+static int cmp($(stringptr_t,`a) @x,$(stringptr_t,`a) @y) {
+  return strptrcmp((*x)[0],(*y)[0]);
+}
+
+// adds a point to the list of points
+static list_t<$(unsigned int,unsigned int)@>
+add_point(int cnt, int amt,
+	  list_t<$(unsigned int,unsigned int)@`H,`H> points) {
+  if (points != NULL) {
+//     fprintf(stderr,"adding point $(%d,%d)\n",cnt,amt);
+    let &$(lastcnt,lastamt) = points->hd;
+    if (lastamt == amt) return points;
+    else if (lastcnt != (cnt-1)) {
+//       fprintf(stderr,"adding extra point: lastcnt=%d, lastamt=%d, cnt=%d, amt=%d\n",
+// 	      lastcnt,lastamt,cnt,amt);
+      // need to add in a point just before this one to "tie the knot"
+      points = new List(new $(cnt-1,lastamt),points);
+    }
+  }
+  return new List(new $(cnt,amt),points);
+}
+
+// adds a point to the list of points
+static list_t<$(unsigned int,unsigned int)@>
+finish_point(int cnt, list_t<$(unsigned int,unsigned int)@`H,`H> points) {
+  if (points != NULL) {
+    let &$(lastcnt,lastamt) = points->hd;
+    if (lastcnt != cnt)
+      points = new List(new $(cnt,lastamt),points);
+  }
+  return points;
+}
+
+// updates the total heap use statistics.  This should always be
+// last, after updating ProcEnv with particular event info.
+static void update_heap_stats(struct ProcEnv @env,
+			      struct RegionStats @s) {
+  curve_point(env->mem_total,env->cnt,s->region_size_bytes);
+  if (env->max_heap_size < s->region_size_bytes)
+    env->max_heap_size = s->region_size_bytes;
+}
+
+static struct Hashtable::Table<unsigned int,unsigned int> *tab = NULL;
+static int uint_cmp(unsigned int i, unsigned int j) {
+  return (i<j)?(-1):((i>j)?1:0);
+}
+static int uint_hash(unsigned int i) {
+  return (int)i;
+}
+static void
+init_table() {
+  tab = Hashtable::create(101,uint_cmp,uint_hash);
+}
+
+static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
+  env->cnt++;
+  switch (event) {
+  case &CreateE(CreateEvent(_,rname,*rstats)):
+    let rnameptr = new rname;
+
+    assert(strcmp("unique",rname));
+    assert(strcmp("heap",rname));
+    assert(strcmp("refcnt",rname));
+
+    update_heap_stats(env,rstats); // these rstats are for GC
+    break;
+
+  case &AllocE(AllocEvent(_,rname,count,*rstats,addr)):
+    if (!strcmp(rname,"unique")) {
+      curve_add(env->unique_live,env->cnt,count);
+      update_heap_stats(env,rstats);
+      if (count>0)
+        // remember count for addr in case gc reclaims addr
+        Hashtable::insert((Hashtable::table_t)tab,addr,(unsigned int)count);
+      else
+        // gc did not reclaim, this is ufree, forget addr/count
+        Hashtable::remove((Hashtable::table_t)tab,addr);
+    }
+    else if (!strcmp(rname,"refcnt")) {
+      curve_add(env->refcnt_live,env->cnt,count);
+      update_heap_stats(env,rstats);
+    }
+    else if (!strcmp(rname,"heap")) {
+      curve_add(env->heap_live,env->cnt,count);
+      update_heap_stats(env,rstats);
+    }
+    else {
+      curve_add(env->other_live,env->cnt,count);
+      // The rstats give info about the "other" region, not the
+      // memory managed by the GC -- so don't update that.
+      // update_heap_stats(env,rstats);
+    }
+    break;
+
+  case &ReclaimE(ReclaimEvent(addr)):
+    // this is a unique pointer object that got garbage collected
+    try {
+      unsigned int count = Hashtable::lookup((Hashtable::table_t)tab,addr);
+      curve_add(env->unique_live,env->cnt,-1*((int)count));
+      Hashtable::remove((Hashtable::table_t)tab,addr);
+    }
+    catch {
+    case &Not_found:
+      fprintf(stderr,
+	      "error: reclaim event %x without (remembered) allocation\n",
+              addr);
+      return false;
+    }
+    break;
+
+  case &FreeE(FreeEvent(rname,*rstats)):
+    assert(strcmp("unique",rname));
+    assert(strcmp("heap",rname));
+    assert(strcmp("refcnt",rname));
+
+    // FIX: Need to update other_live...
+    update_heap_stats(env,rstats);
+    break;
+
+  case &ResizeE(ResizeEvent(rname,count,*rstats)):
+    assert(strcmp("unique",rname));
+    assert(strcmp("heap",rname));
+    assert(strcmp("refcnt",rname));
+
+    // The count is the new size of the region -- ignore
+    // curve_add(env->other_live,env->cnt,count);
+
+    // rstats measures GC
+    update_heap_stats(env,rstats);
+    break;
+
+  case &GcE(GcEvent(n,*rstats)):
+    env->gc_points = new List(new $(env->cnt,rstats->region_size_bytes),
+			      env->gc_points);
+    update_heap_stats(env,rstats);
+    break;
+  }
+
+  return true;
+}
+
+namespace Aprof;
+
+int generate_newgraph(string_t<`H> file) {
+  struct ProcEnv @`H env =
+    new ProcEnv{.cnt = 0,
+                .max_heap_size = 0,
+		.mem_total = new Curve("total",0,NULL),
+		.heap_live = new Curve("heap",0,NULL),
+		.unique_live = new Curve("unique",0,NULL),
+		.refcnt_live = new Curve("refcnt",0,NULL),
+		.other_live = new Curve("other",0,NULL),
+		.gc_points = NULL};
+
+  // initialize the hash table
+  init_table();
+
+  // process the file
+  fn_t clos = make_fn(proc_event,env);
+  int ret = proc_file(file,clos);
+  if (ret != 0) return ret;
+
+  curve_finish(env->mem_total,env->cnt);
+  curve_finish(env->heap_live,env->cnt);
+  curve_finish(env->unique_live,env->cnt);
+  curve_finish(env->refcnt_live,env->cnt);
+  curve_finish(env->other_live,env->cnt);
+
+  output_header(env->cnt+1,(int)(env->max_heap_size * 1.05));
+
+  output_line(aprintf("GC (%d total)",length(env->gc_points)),
+	      -1,env->gc_points);
+  output_line("total reserved",0,env->mem_total->points);
+  output_line("heap",1,env->heap_live->points);
+  output_line("unique",2,env->unique_live->points);
+  output_line("refcnt",3,env->refcnt_live->points);
+  output_line("other",4,env->other_live->points);
+
+  output_cleanup();
+
+  print_area(env->mem_total);
+  print_area(env->heap_live);
+  print_area(env->unique_live);
+  print_area(env->refcnt_live);
+  print_area(env->other_live);
+
+  return 0;
+}
