@@ -51,7 +51,7 @@ namespace Getopt;
 #endif
 
 int
-getopt_long (int argc, char ?? argv, const char? options, const struct option ?`r1 long_options, int *`r2 opt_index)
+getopt_long (int argc, char ?`H ? argv, const char? options, const struct option ?`r1 long_options, int *`r2 opt_index)
 {
   return _getopt_internal (argc, argv, options, long_options, opt_index, 0);
 }
@@ -62,7 +62,7 @@ getopt_long (int argc, char ?? argv, const char? options, const struct option ?`
    instead.  */
 
 int
-getopt_long_only (int argc, char ?? argv, const char?options, const struct option  ?`r1 long_options, int *`r2 opt_index)
+getopt_long_only (int argc, char ?`H ? argv, const char?options, const struct option  ?`r1 long_options, int *`r2 opt_index)
 
 {
   return _getopt_internal (argc, argv, options, long_options, opt_index, 1);

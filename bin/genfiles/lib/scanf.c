@@ -323,20 +323,21 @@ _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr? 1: _get_arr_size( s, sizeof(
 unsigned char)) == 0)? 1:( c=*(( const unsigned char*) _check_unknown_subscript(
 s, sizeof( unsigned char), 0))) =='\000'){ return - 1;} return( int) c;} int Cyc_Stdio_vsscanf(
 struct _tagged_arr src, struct _tagged_arr fmt, struct _tagged_arr ap){ int err=
-0; return(( int(*)( int(* _IO_getc)( struct _tagged_arr*), int(* _IO_ungetc)(
-int, struct _tagged_arr*), int(* _IO_peekc)( struct _tagged_arr*), struct
-_tagged_arr* fp, struct _tagged_arr fmt0, struct _tagged_arr ap, int* errp)) Cyc_Stdio__IO_vfscanf)(
-Cyc_Stdio_string_getc, Cyc_Stdio_string_ungetc, Cyc_Stdio_string_peekc,& src,
-fmt, ap,( int*)& err);} int Cyc_Stdio_sscanf( struct _tagged_arr src, struct
-_tagged_arr fmt, struct _tagged_arr ap){ return Cyc_Stdio_vsscanf( src, fmt, ap);}
-int Cyc_Stdio_peekc( struct Cyc_Stdio___sFILE* stream){ int c= Cyc_Stdio_fgetc(
-stream); Cyc_Stdio_ungetc( c, stream); return c;} int Cyc_Stdio_vfscanf( struct
-Cyc_Stdio___sFILE* stream, struct _tagged_arr fmt, struct _tagged_arr ap){ int
-err= 0; return(( int(*)( int(* _IO_getc)( struct Cyc_Stdio___sFILE*), int(*
-_IO_ungetc)( int, struct Cyc_Stdio___sFILE*), int(* _IO_peekc)( struct Cyc_Stdio___sFILE*),
-struct Cyc_Stdio___sFILE* fp, struct _tagged_arr fmt0, struct _tagged_arr ap,
-int* errp)) Cyc_Stdio__IO_vfscanf)( Cyc_Stdio_getc, Cyc_Stdio_ungetc, Cyc_Stdio_peekc,
-stream, fmt, ap,( int*)& err);} int Cyc_Stdio_fscanf( struct Cyc_Stdio___sFILE*
-stream, struct _tagged_arr fmt, struct _tagged_arr ap){ return Cyc_Stdio_vfscanf(
-stream, fmt, ap);} int Cyc_Stdio_scanf( struct _tagged_arr fmt, struct
-_tagged_arr ap){ return Cyc_Stdio_vfscanf( Cyc_Stdio_stdin, fmt, ap);}
+0; int(* sgc)( struct _tagged_arr*)= Cyc_Stdio_string_getc; return(( int(*)( int(*
+_IO_getc)( struct _tagged_arr*), int(* _IO_ungetc)( int, struct _tagged_arr*),
+int(* _IO_peekc)( struct _tagged_arr*), struct _tagged_arr* fp, struct
+_tagged_arr fmt0, struct _tagged_arr ap, int* errp)) Cyc_Stdio__IO_vfscanf)( Cyc_Stdio_string_getc,
+Cyc_Stdio_string_ungetc, Cyc_Stdio_string_peekc,& src, fmt, ap,( int*)& err);}
+int Cyc_Stdio_sscanf( struct _tagged_arr src, struct _tagged_arr fmt, struct
+_tagged_arr ap){ return Cyc_Stdio_vsscanf( src, fmt, ap);} int Cyc_Stdio_peekc(
+struct Cyc_Stdio___sFILE* stream){ int c= Cyc_Stdio_fgetc( stream); Cyc_Stdio_ungetc(
+c, stream); return c;} int Cyc_Stdio_vfscanf( struct Cyc_Stdio___sFILE* stream,
+struct _tagged_arr fmt, struct _tagged_arr ap){ int err= 0; return(( int(*)( int(*
+_IO_getc)( struct Cyc_Stdio___sFILE*), int(* _IO_ungetc)( int, struct Cyc_Stdio___sFILE*),
+int(* _IO_peekc)( struct Cyc_Stdio___sFILE*), struct Cyc_Stdio___sFILE* fp,
+struct _tagged_arr fmt0, struct _tagged_arr ap, int* errp)) Cyc_Stdio__IO_vfscanf)(
+Cyc_Stdio_getc, Cyc_Stdio_ungetc, Cyc_Stdio_peekc, stream, fmt, ap,( int*)& err);}
+int Cyc_Stdio_fscanf( struct Cyc_Stdio___sFILE* stream, struct _tagged_arr fmt,
+struct _tagged_arr ap){ return Cyc_Stdio_vfscanf( stream, fmt, ap);} int Cyc_Stdio_scanf(
+struct _tagged_arr fmt, struct _tagged_arr ap){ return Cyc_Stdio_vfscanf( Cyc_Stdio_stdin,
+fmt, ap);}

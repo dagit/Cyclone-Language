@@ -20,6 +20,7 @@
 // following the conventions of the Ocaml queue library as much
 // as possible.
 
+#include <core.h>
 #include <list.h>
 #include <queue.h>
 
@@ -27,10 +28,10 @@ namespace Queue;
 
 using List;
 
-struct Queue<`a,`r::R> { glist_t<`a,`r> front; glist_t<`a,`r> rear; };
+struct Queue<`a,`r::R> { list_t<`a,`r> front; list_t<`a,`r> rear; };
 
 // true when the queue is empty
-bool is_empty(gqueue_t<`a,`r> q)  {
+bool is_empty(queue_t q)  {
    return(q->front == null);
 }
 
@@ -38,13 +39,13 @@ bool is_empty(gqueue_t<`a,`r> q)  {
 xtunion exn { Empty };
 
 // create a new queue
-queue_t<`a> create() {
+queue_t create() {
   return new Queue(null,null);
 }
 
 // insert an element into the rear of the queue (side effect)
-void add(queue_t<`a> q,`a x) {
-  list_t<`a> cell = new List(x,null);
+void radd(region_t<`r> r, queue_t<`a,`r> q,`a x) {
+  list_t cell = rnew(r) List(x,null);
 
   if (q->front == null) {
     q->front = cell;
@@ -55,8 +56,12 @@ void add(queue_t<`a> q,`a x) {
   }
 }
 
+void add(queue_t<`a,`H> q, `a x) {
+  radd(Core::heap_region,q,x);
+}
+
 // get and remove an element from the front of the queue (side effect)
-`a take(gqueue_t<`a,`r> q) {
+`a take(queue_t<`a> q) {
   if (q->front == null)
     throw Empty; // FIX: toc problems if we try to return this.
   //    return (throw Empty);
@@ -71,7 +76,7 @@ void add(queue_t<`a> q,`a x) {
 }
 
 // return the first element in the queue without removing it
-`a peek(gqueue_t<`a,`r> q) {
+`a peek(queue_t<`a> q) {
   if (q->front == null)
     throw Empty; // FIX: toc problems if we try to return this.
   else {
@@ -80,24 +85,24 @@ void add(queue_t<`a> q,`a x) {
 }
 
 // clear out the entire queue (side effect)
-void clear(gqueue_t<`a,`r> q) {
+void clear(queue_t<`a> q) {
   q->front = null;
   q->rear = null;
 }
 
 // return the number of elements in the queue
-int length(gqueue_t<`a,`r> q) {
+int length(queue_t<`a> q) {
   return(List::length(q->front));
 }
 
 // apply f to each element in the queue from the front to the back
-void iter(void f(`a), gqueue_t<`a,`r> q) {
-  for (glist_t<`a,`r> x = q->front; x != null; x = x->tl) {
+void iter(void f(`a), queue_t<`a> q) {
+  for (list_t<`a> x = q->front; x != null; x = x->tl) {
     f(x->hd);
   }
 }
-void app(`b f(`a), gqueue_t<`a,`r> q) {
-  for (glist_t<`a,`r> x = q->front; x != null; x = x->tl) {
+void app(`b f(`a), queue_t<`a> q) {
+  for (list_t<`a> x = q->front; x != null; x = x->tl) {
     f(x->hd);
   }
 }

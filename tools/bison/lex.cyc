@@ -82,7 +82,7 @@ init_lex()
 }
 
 
-static char ? grow_token_buffer (char ?p)
+static char ? grow_token_buffer (char ?`H p)
 {
   int offset = p - token_buffer;
   maxtoken *= 2;

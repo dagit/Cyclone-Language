@@ -29,7 +29,7 @@ namespace Parser {
 opt_t<Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>>> lbuf = null;
 
 xtunion exn {Parser_error(string_t)};
-typedef struct Hashtable::Table<stringptr_t,regular_expression_t,{},{}> htbl;
+typedef struct Hashtable::Table<stringptr_t,regular_expression_t> htbl;
   // must be initialized!
 htbl * named_regexps = null;
 lexer_definition_t parse_result = null;
@@ -180,7 +180,7 @@ char_class1:
 %%
 
 namespace Parser {
-lexer_definition_t parse_file(FILE @f) {
+lexer_definition_t parse_file(FILE @`H f) {
   named_regexps = Hashtable::create(13, String::strptrcmp, 
 				    Hashtable::hash_stringptr);
   parse_result = null;

@@ -43,7 +43,7 @@ extern xtunion exn { extern Error(string_t) };
 
 extern struct lexbuf<`a::B>{ /* use 'a for state that refill_buff might need */
  
-  void   (@refill_buff)(struct lexbuf<`a> @;{});
+  void   (@refill_buff)(struct lexbuf<`a> @);
   `a     refill_state;
 
   mstring_t lex_buffer;
@@ -59,7 +59,7 @@ typedef struct lexbuf<`a> @Lexbuf<`a>;
 
 extern struct function_lexbuf_state<`b> { 
 // instantiation for using function to read
-  int (@read_fun)(mstring_t,int,`b;{});
+  int (@read_fun)(mstring_t,int,`b);
   `b read_fun_state;
 };
 typedef struct function_lexbuf_state<`b> @Function_lexbuf_state<`b>;
@@ -76,9 +76,9 @@ typedef struct lex_tables @LexTables;
 
 
 extern Lexbuf<Function_lexbuf_state<`b>>
-  from_function(int read_fun(mstring_t,int,`b;{}), `b);
+  from_function(int read_fun(mstring_t<`H>,int,`b), `b);
 
-extern Lexbuf<Function_lexbuf_state<FILE@>> from_file(FILE@);
+extern Lexbuf<Function_lexbuf_state<FILE@`r>> from_file(FILE@`r);
 extern Lexbuf<bool> from_string(mstring_t);
 
 extern mstring_t lexeme      (Lexbuf<`a>);

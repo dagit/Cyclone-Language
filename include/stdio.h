@@ -77,7 +77,7 @@ typedef long fpos_t;
 extern int	remove(const char ?`r);
 extern int	rename(const char ?`r1, const char ?`r2);
 extern FILE *	tmpfile();
-extern char ?	tmpnam(char ?);
+extern char ?`H	tmpnam(char ?`H);
 extern int	fclose(FILE @`r);
 extern int	fflush(FILE *`r);
 extern FILE *	freopen(const char ?`r1, const char ?`r2, FILE @`r3);

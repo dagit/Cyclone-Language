@@ -77,8 +77,7 @@ static string_t parg2string(parg_t<`r> x) {
   }
 }
 
-static `a badarg(string_t s) {
-  fprintf(stderr,"%s\n",s);
+static `a badarg(string_t<`H> s) {
   return throw new InvalidArg(s);
 }
 

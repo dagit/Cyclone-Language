@@ -46,17 +46,17 @@ xtunion exn {Error, Bad(string_t)};
 
 tunion Flag {Prefix(string_t), Exact(string_t)};
 
-tunion Spec<`e::E> {
-  Unit_spec(void (@f)(;`e)),         // Call f with unit argument
-  Flag_spec(void (@f)(string_t;`e)), // Call f with flag argument
-  FlagString_spec(void (@f)(string_t,string_t;`e)),
+tunion Spec {
+  Unit_spec(void (@f)()),         // Call f with unit argument
+  Flag_spec(void (@f)(string_t)), // Call f with flag argument
+  FlagString_spec(void (@f)(string_t,string_t)),
                                      // Call f with flag & string arguments
   Set_spec(bool@),                   // Set the reference to true
   Clear_spec(bool@),                 // Set the reference to false
-  String_spec(void (@f)(string_t;`e)),
+  String_spec(void (@f)(string_t)),
                                      // Call f with a string argument
-  Int_spec(void (@f)(int;`e)),       // Call f with an int argument
-  Rest_spec(void (@f)(string_t;`e))  // Stop interpreting keywords and call the
+  Int_spec(void (@f)(int)),       // Call f with an int argument
+  Rest_spec(void (@f)(string_t))  // Stop interpreting keywords and call the
                                      // function with each remaining argument
 };
 
@@ -68,7 +68,7 @@ static tunion error {
   Wrong(string_t,string_t,string_t)  
 };
 
-static gspec_t<`e> lookup(speclist_t<`r1,`r2,`e> l, string_t x) {
+static spec_t lookup(speclist_t<`r1,`r2> l, string_t x) {
   while (l != null) {
     let flag = (*l->hd)[0];
     let len = String::strlen(flag);
@@ -89,7 +89,7 @@ namespace Justify {
    or the end of the string if there are no spaces.
    Write the portion before the break into a buffer
    and return the remainder. */
-static string_t break_line(Buffer::T b, int howmuch, string_t s) {
+static string_t<`r> break_line(Buffer::T b, int howmuch, string_t<`r> s) {
   if (s == null) return null;
   if (howmuch<0) howmuch = 0;
   let len = strlen(s);
@@ -157,7 +157,7 @@ justify_b(Buffer::T b, int indent, int margin, string_t item, string_t desc) {
 }
 }
 
-void usage(speclist_t<`r1,`r2,`e> speclist,
+void usage(speclist_t<`r1,`r2> speclist,
            string_t errmsg) {
   fprintf(stderr, "%s\n", errmsg);
   let b = Buffer::create(1024);
@@ -174,7 +174,7 @@ int current = 0;
 static string_t ?args = null;
 
 static void stop(int prog_pos, tunion error e,
-		 speclist_t<`r1,`r2,`e> speclist,
+		 speclist_t<`r1,`r2> speclist,
                  string_t errmsg) {
   string_t progname = prog_pos < args.size ? args[prog_pos] : "(?)";
   switch (e) {
@@ -197,10 +197,10 @@ static void stop(int prog_pos, tunion error e,
   current = args.size; // skip everything else
 }
 
-void parse(speclist_t<`r1,`r2,`e> speclist,
-           void anonfun(string_t),
+void parse(speclist_t<`r1,`r2> speclist,
+           void anonfun(string_t<`H>),
 	   string_t errmsg,
-	   string_t ? orig_args) {
+	   string_t<`H> ?`H orig_args) {
   args = orig_args;
 
   int initpos = current;
@@ -209,7 +209,7 @@ void parse(speclist_t<`r1,`r2,`e> speclist,
   while (current < l) {
     string_t s = args[current];
     if (s.size >= 1 && s[0] == '-') {
-      gspec_t<`e> action;
+      spec_t action;
       try action = lookup(speclist, s);
       catch {
       case Not_found: stop(initpos, new Unknown(s), speclist, errmsg); return;

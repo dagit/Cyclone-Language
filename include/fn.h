@@ -47,12 +47,12 @@ extern fn<`a,`c,`e1+`e2> compose<`a,`b,`c,`e1,`e2,`e3>(fn<`a,`b,`e1> g,
                                                        `e1+`e2+`e3);
 
 // curry a closure that takes a pair
-extern fn<`a,fn<`b,`c,`e1>,`e1+`e2> curry(fn<$(`a,`b)@,`c,`e1> f);
+extern fn<`a,fn<`b,`c,`e1>,`e1+`e2> curry(fn<$(`a,`b)@`H,`c,`e1> f);
 
 // uncurry a closure
 extern fn<$(`a,`b)@,`c,`e1+`e2> uncurry(fn<`a,fn<`b,`c,`e1>,`e2> f);
 
 // map a closure across a list
-extern List::list_t<`b> map_fn(fn<`a,`b,`e> f,List::glist_t<`a,`r> x);
+extern List::list_t<`b> map_fn(fn<`a,`b,`e> f,List::list_t<`a> x);
 }
 #endif

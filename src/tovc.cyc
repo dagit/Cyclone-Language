@@ -82,17 +82,17 @@ namespace Tovc;
 
 struct BoxingEnv<`r::R,`r2::R> {
   region_t<`r> rgn;
-  glist_t<vardecl_t,`r> all_locals; // for getting type info for freevars
-  Dict::gdict_t<var_t,exp_t,`r,{}> varmap; 
-  glist_t<vardecl_t,`r> boundvars;  // do not box these
-  Set::gset_t<vardecl_t,`r,{`r}> @`r2 freevars; // params to generated function
+  list_t<vardecl_t,`r> all_locals; // for getting type info for freevars
+  Dict::dict_t<var_t,exp_t,`r> varmap; 
+  list_t<vardecl_t,`r> boundvars;  // do not box these
+  Set::set_t<vardecl_t,`r> @`r2 freevars; // params to generated function
 };
 typedef struct BoxingEnv<`r,`r2> boxingenv_t<`r,`r2>; // not boxed
 
 struct ToExpEnv<`r::R> {
   region_t<`r> rgn;
-  glist_t<vardecl_t,`r> all_locals; // for getting type info for freevars
-  Dict::gdict_t<var_t,exp_t,`r,{}> varmap; 
+  list_t<vardecl_t,`r> all_locals; // for getting type info for freevars
+  Dict::dict_t<var_t,exp_t,`r> varmap; 
   stmt_t encloser; // where to put hoisted locals
   list_t<decl_t>@`r gen_ds; // for generated functions
 };
@@ -242,13 +242,13 @@ static void box_free_vars_stmt(boxingenv_t<`r,`r2> env, stmt_t s) {
 static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
   // vardecl types have not been boxed (yet)
   // free_vars must only be locals b/c ingoring namespaces!
-  Set::gset_t<vardecl_t,`r,{`r}> freevars = Set::rempty(env.rgn,Core::ptrcmp);
+  Set::set_t<vardecl_t,`r> freevars = Set::rempty(env.rgn,Core::ptrcmp);
   let boxenv = BoxingEnv(env.rgn,env.all_locals,env.varmap,null,&freevars);
   box_free_vars_stmt(boxenv,s);
   list_t<$(var_t,tqual_t,type_t)@> params = null;
   list_t<exp_t> args = null;
   
-  glist_t<vardecl_t,`r> free_vars = Set::elements(freevars);
+  list_t<vardecl_t,`r> free_vars = Set::elements(freevars);
   for(; free_vars != null; free_vars = free_vars->tl) {
     vardecl_t vd = free_vars->hd;
     // don't box if it's a stack-allocated array
@@ -276,7 +276,7 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
   return fncall_exp(var_exp(funname,DL), args, DL);
 }
 
-static void apply_varmap(Dict::gdict_t<var_t,exp_t,`r,`e> varmap, exp_t e) {
+static void apply_varmap(Dict::dict_t<var_t,exp_t,`r> varmap, exp_t e) {
   switch(e->r) {
   case &Var_e(&$(Loc_n,v),_):
     // DO NOT MUTATE qvars -- They get shared in funky ways

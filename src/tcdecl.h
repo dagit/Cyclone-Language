@@ -97,7 +97,7 @@ namespace Tcdecl {
 
   // sort the list of fields, trying to merge the duplicate
   // *res is set to false if something's wrong
-  extern List::list_t<tunionfield_t> sort_xtunion_fields(List::list_t<tunionfield_t> f,
+  extern List::list_t<tunionfield_t> sort_xtunion_fields(List::list_t<tunionfield_t,`H> f,
 							 bool @ `r1 res,
 							 var_t v, seg_t loc, string_t * `r2 msg);
 }

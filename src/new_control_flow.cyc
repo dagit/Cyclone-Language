@@ -107,7 +107,7 @@ static cf_stmt_annot_t @ get_stmt_annot(stmt_t s) {
   }
 }
 
-void cf_set_absexps(stmt_t s, list_t<absexp_t> ael) {
+void cf_set_absexps(stmt_t s, list_t<absexp_t,`H> ael) {
   get_stmt_annot(s)->absexps = ael;
 }
 
@@ -150,7 +150,7 @@ void add_malloc_root(absenv_t env, exp_t e, type_t t) {
 					   typ_to_unesc_none_pinfo(t));
 }
 
-absenv_t change_lhs(absenv_t src, list_t<absop_t> new_lhs) {
+absenv_t change_lhs(absenv_t src, list_t<absop_t,`H> new_lhs) {
   return AbsEnv(src.shared, new_lhs, src.access_path);
 }
 static list_t<absop_t> unknown_list = null; 
@@ -179,7 +179,7 @@ abssyn_one_t meet_absexp(abssyn_t syn) {
   let ass = (ass_tr==ass_f) ? ass_tr : mkGroupAE(OneofG,ass_tr,ass_f);
   return AbsSynOne(inn,ass);
 }
-abssyn_t mkSyn_tf(absexp_t ae, list_t<absop_t> lvals, absexp_t assigns) {
+abssyn_t mkSyn_tf(absexp_t ae, list_t<absop_t,`H> lvals, absexp_t assigns) {
   let one_way = AbsSynOne(ae,assigns);
   return AbsSyn(one_way,one_way,lvals);
 }
@@ -207,7 +207,7 @@ void     cf_prepass  (absenv_t env, stmt_t s);
 //          is fully initialized. 
 // Note: the lvalues aren't "used" (don't escape) until after all es
 //       are evaluated.
-abssyn_t use_exp_unordered(absenv_t env, list_t<exp_t> es, list_t<absop_t> lhs) {
+abssyn_t use_exp_unordered(absenv_t env, list_t<exp_t,`H> es, list_t<absop_t,`H> lhs) {
   absenv_t elt_env  = use_it_env(env);
   absexp_t es_exp   = mkSkipAE();
   absexp_t uses_exp = mkSkipAE();
@@ -929,7 +929,7 @@ static void update_flow(stmt_t s, flow_info_t flow) {
 }
 
 static flow_info_t add_init_vars_flow(analenv_t env, flow_info_t flow,
-				      glist_t<vardecl_t,`r> vds) {
+				      list_t<vardecl_t,`r> vds) {
   switch(flow) {
   case BottomFL:   return BottomFL;
   case &InitsFL(d): 
@@ -944,7 +944,7 @@ static flow_info_t add_init_vars_flow(analenv_t env, flow_info_t flow,
 
 // To do: share VarRoot's to avoid re-allocation
 static flow_info_t add_vardecls_flow(analenv_t env, flow_info_t flow,
-				     glist_t<vardecl_t,`r> vds) {
+				     list_t<vardecl_t,`r> vds) {
   switch(flow) {
   case BottomFL:   return BottomFL;
   case &InitsFL(d): 

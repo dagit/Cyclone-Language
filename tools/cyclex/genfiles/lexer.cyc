@@ -37,7 +37,7 @@ int line_num       = 1;
 int line_start_pos = 0;
 }
 
-void yyerror(string_t s) {
+void yyerror(string_t<`H> s) {
   fprintf(stderr, "%s, line:%d", s, Lexer::line_num);
   fflush(stderr);
   throw new Parser_error(s);

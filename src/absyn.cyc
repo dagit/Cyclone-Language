@@ -35,10 +35,10 @@ namespace Absyn;
 // return a negative, zero, or positive int according to whether the
 // first string list is less than, equal to, or greater than the
 // second 
-static int zstrlist_cmp(list_t<stringptr_t> ss1,list_t<stringptr_t> ss2) {
+static int zstrlist_cmp(list_t<stringptr_t<`H,`H>,`r> ss1,list_t<stringptr_t<`H,`H>,`r> ss2){
   return list_cmp(zstrptrcmp,ss1,ss2);
 }
-int varlist_cmp(list_t<var_t> vs1, list_t<var_t> vs2) {
+int varlist_cmp(list_t<var_t,`r> vs1, list_t<var_t,`r> vs2) {
   return zstrlist_cmp(vs1,vs2);
 }
 int qvar_cmp(qvar_t q1, qvar_t q2) {
@@ -84,11 +84,11 @@ bool is_qvar_qualified(qvar_t qv) {
 
 static int new_type_counter = 0;
 
-type_t new_evar(opt_t<kind_t> k, opt_t<list_t<tvar_t>> env) {
+type_t new_evar(opt_t<kind_t,`H> k, opt_t<list_t<tvar_t,`H>,`H> env) {
   return new Evar(k,null,new_type_counter++,env);
 }
 static struct Opt<kind_t> mk = {MemKind};
-type_t wildtyp(opt_t<list_t<tvar_t>> tenv) {
+type_t wildtyp(opt_t<list_t<tvar_t,`H>,`H> tenv) {
   return new_evar(&mk,tenv); 
 }
 
@@ -317,6 +317,8 @@ opt_t<type_t> void_star_typ_opt() {
     void_star_t_opt = new Opt(star_typ(VoidType, HeapRgn, empty_tqual()));
   return void_star_t_opt;
 }
+static tunion Type.JoinEff empty_eff = JoinEff(null);
+type_t empty_effect = &empty_eff;
 
 // structs and unions
 // WARNING: currently only Toc calls these, so we don't need to set
@@ -358,8 +360,8 @@ exp_t false_exp(seg_t loc) { return bool_exp(false, loc); }
 exp_t char_exp(char c, seg_t loc) {
   return const_exp(new Char_c(Unsigned,c),loc);
 }
-exp_t float_exp(string_t f, seg_t loc) { return const_exp(new Float_c(f),loc);  }
-exp_t string_exp(string_t s, seg_t loc){ return const_exp(new String_c(s),loc); }
+exp_t float_exp(string_t<`H> f, seg_t loc) { return const_exp(new Float_c(f),loc);  }
+exp_t string_exp(string_t<`H> s, seg_t loc){ return const_exp(new String_c(s),loc); }
 
 // This should only be used after type checking.
 // Right now it's only used in Toc and is the only source of Unresolved_b.
@@ -372,7 +374,7 @@ exp_t varb_exp(qvar_t q, binding_t b, seg_t loc) {
 exp_t unknownid_exp(qvar_t q, seg_t loc) { 
   return new_exp(new UnknownId_e(q), loc); 
 }
-exp_t primop_exp(primop_t p, list_t<exp_t> es, seg_t loc) {
+exp_t primop_exp(primop_t p, list_t<exp_t,`H> es, seg_t loc) {
   return new_exp(new Primop_e(p,es),loc);
 }
 exp_t prim1_exp(primop_t p, exp_t e, seg_t loc) {
@@ -391,7 +393,7 @@ exp_t lt_exp(exp_t e1,  exp_t e2, seg_t loc) {return prim2_exp(Lt,e1,e2,loc);}
 exp_t gte_exp(exp_t e1, exp_t e2, seg_t loc) {return prim2_exp(Gte,e1,e2,loc);}
 exp_t lte_exp(exp_t e1, exp_t e2, seg_t loc) {return prim2_exp(Lte,e1,e2,loc);}
 
-exp_t assignop_exp(exp_t e1, opt_t<primop_t> popt, exp_t e2, seg_t loc) {
+exp_t assignop_exp(exp_t e1, opt_t<primop_t,`H> popt, exp_t e2, seg_t loc) {
   return new_exp(new AssignOp_e(e1,popt,e2),loc);
 }
 exp_t assign_exp(exp_t e1, exp_t e2, seg_t loc) {
@@ -416,16 +418,16 @@ exp_t or_exp(exp_t e1, exp_t e2, seg_t loc) {
 exp_t seq_exp(exp_t e1, exp_t e2, seg_t loc) {
   return new_exp(new SeqExp_e(e1,e2), loc);
 }
-exp_t unknowncall_exp(exp_t e, list_t<exp_t> es, seg_t loc) {
+exp_t unknowncall_exp(exp_t e, list_t<exp_t,`H> es, seg_t loc) {
   return new_exp(new UnknownCall_e(e,es), loc);
 }
-exp_t fncall_exp(exp_t e, list_t<exp_t> es, seg_t loc) {
+exp_t fncall_exp(exp_t e, list_t<exp_t,`H> es, seg_t loc) {
   return new_exp(new FnCall_e(e,es,null), loc);
 }
 exp_t noinstantiate_exp(exp_t e, seg_t loc) {
   return new_exp(new NoInstantiate_e(e), loc);
 }
-exp_t instantiate_exp(exp_t e, list_t<type_t> ts, seg_t loc) {
+exp_t instantiate_exp(exp_t e, list_t<type_t,`H> ts, seg_t loc) {
   return new_exp(new Instantiate_e(e,ts), loc);
 }
 exp_t cast_exp(type_t t, exp_t e, seg_t loc) { 
@@ -455,7 +457,7 @@ exp_t arrow_exp(exp_t e, field_name_t n, seg_t loc) {
 exp_t subscript_exp(exp_t e1, exp_t e2, seg_t loc) {
   return new_exp(new Subscript_e(e1,e2), loc); 
 }
-exp_t tuple_exp(list_t<exp_t> es, seg_t loc) {
+exp_t tuple_exp(list_t<exp_t,`H> es, seg_t loc) {
   return new_exp(new Tuple_e(es), loc); 
 }
 exp_t stmt_exp(stmt_t s,seg_t loc) { return new_exp(new StmtExp_e(s), loc); }
@@ -468,15 +470,17 @@ exp_t match_exn_exp(seg_t loc) {
   return var_exp(&match_exn_name_v, loc); 
 }
 
-exp_t array_exp(list_t<exp_t> es, seg_t loc) {
-  let dles = null;
+exp_t array_exp(list_t<exp_t,`H> es, seg_t loc) {
+  // FIX:  this doesn't work let dles = null;
+  list_t<$(list_t<designator_t,`H>,exp_t)@`H> dles = null;
   for (; es != null; es = es->tl)
     dles = new List(new $(null,es->hd),dles);
   dles = List::imp_rev(dles);
   return new_exp(new Array_e(dles),loc);
 }
-exp_t unresolvedmem_exp(opt_t<typedef_name_t> n,
-                      list_t<$(list_t<designator_t>,exp_t)@> dles,seg_t loc) {
+exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H> n,
+                        list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> dles,
+                        seg_t loc) {
   return new_exp(new UnresolvedMem_e(n,dles),loc);
 }
 ///////////////////////// Statements ///////////////////////////////
@@ -485,7 +489,7 @@ stmt_t new_stmt(raw_stmt_t s, seg_t loc) {
                      .annot=EmptyAnnot }; }
 stmt_t skip_stmt(seg_t loc) { return new_stmt(Skip_s, loc); }
 stmt_t exp_stmt(exp_t e,seg_t loc) { return new_stmt(new Exp_s(e),loc); }
-stmt_t seq_stmts(glist_t<stmt_t,`r> ss, seg_t loc) {
+stmt_t seq_stmts(list_t<stmt_t,`r> ss, seg_t loc) {
   if (ss == null) return skip_stmt(loc);
   else if (ss->tl == null) return ss->hd;
   else return seq_stmt(ss->hd,seq_stmts(ss->tl,loc),loc);
@@ -506,7 +510,7 @@ stmt_t for_stmt(exp_t e1,exp_t e2,exp_t e3,stmt_t s,seg_t loc) {
                             $(e3,skip_stmt(e3->loc)),s),
 		  loc);
 }
-stmt_t switch_stmt(exp_t e, list_t<switch_clause_t> scs, seg_t loc) {
+stmt_t switch_stmt(exp_t e, list_t<switch_clause_t,`H> scs, seg_t loc) {
   return new_stmt(new Switch_s(e,scs), loc);
 }
 stmt_t seq_stmt(stmt_t s1, stmt_t s2, seg_t loc) { 
@@ -515,7 +519,7 @@ stmt_t seq_stmt(stmt_t s1, stmt_t s2, seg_t loc) {
   default:     return new_stmt(new Seq_s(s1,s2), loc); 
   }
 }
-stmt_t fallthru_stmt(list_t<exp_t> el, seg_t loc) { 
+stmt_t fallthru_stmt(list_t<exp_t,`H> el, seg_t loc) { 
   return new_stmt(new Fallthru_s(el,null), loc); 
 }
 stmt_t decl_stmt(decl_t d, stmt_t s, seg_t loc) {
@@ -533,7 +537,7 @@ stmt_t label_stmt(var_t v, stmt_t s, seg_t loc) {
 stmt_t do_stmt(stmt_t s, exp_t e, seg_t loc) {
   return new_stmt(new Do_s(s,$(e,skip_stmt(e->loc))), loc);
 }
-stmt_t trycatch_stmt(stmt_t s, list_t<switch_clause_t> scs, seg_t loc) {
+stmt_t trycatch_stmt(stmt_t s, list_t<switch_clause_t,`H> scs, seg_t loc) {
   return new_stmt(new TryCatch_s(s,scs), loc);
 }
 stmt_t goto_stmt(var_t lab, seg_t loc) {
@@ -547,10 +551,10 @@ pat_t new_pat(raw_pat_t p, seg_t s) { return new Pat(p,null,s); }
 
 ////////////////////////// Declarations ///////////////////////////
 decl_t new_decl(raw_decl_t r, seg_t loc) { return new Decl{.r=r, .loc=loc}; }
-decl_t let_decl(pat_t p, opt_t<type_t> t_opt, exp_t e, seg_t loc) {
+decl_t let_decl(pat_t p, opt_t<type_t,`H> t_opt, exp_t e, seg_t loc) {
   return new_decl(new Let_d(p,null,t_opt,e,false),loc);
 }
-decl_t letv_decl(list_t<vardecl_t> vds, seg_t loc) {
+decl_t letv_decl(list_t<vardecl_t,`H> vds, seg_t loc) {
   return new_decl(new Letv_d(vds),loc);
 }
 vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init) {
@@ -563,21 +567,22 @@ vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init) {
                         .type=t, .initializer=init, .rgn=null,
                         .attributes=null};
 }
-decl_t struct_decl(scope_t s,opt_t<typedef_name_t> n,list_t<tvar_t> ts,
-                   opt_t<list_t<structfield_t>> fs, attributes_t atts,
+decl_t struct_decl(scope_t s,opt_t<typedef_name_t,`H> n,list_t<tvar_t,`H> ts,
+                   opt_t<list_t<structfield_t,`H>,`H> fs, attributes_t atts,
                    seg_t loc) {
   return new_decl(new Struct_d(new Structdecl {.sc=s,.name=n,
                                                   .tvs=ts,.fields=fs,
                                                   .attributes = atts}),loc);
 }
-decl_t union_decl(scope_t s,opt_t<typedef_name_t> n,list_t<tvar_t> ts,
-                  opt_t<list_t<structfield_t>> fs, attributes_t atts,
+decl_t union_decl(scope_t s,opt_t<typedef_name_t,`H> n,list_t<tvar_t,`H> ts,
+                  opt_t<list_t<structfield_t,`H>,`H> fs, attributes_t atts,
                   seg_t loc) {
   return new_decl(new Union_d(new Uniondecl {.sc=s,.name=n,.tvs=ts,.fields=fs,
                                                 .attributes = atts}),loc);
 }
-decl_t tunion_decl(scope_t s, typedef_name_t n, list_t<tvar_t> ts,
-		   opt_t<list_t<tunionfield_t>> fs, bool is_xtunion, seg_t loc){
+decl_t tunion_decl(scope_t s, typedef_name_t n, list_t<tvar_t,`H> ts,
+		   opt_t<list_t<tunionfield_t,`H>,`H> fs, 
+                   bool is_xtunion, seg_t loc){
   return new_decl(new Tunion_d(new Tuniondecl(s,n,ts,fs,is_xtunion)),loc);
 }
 
@@ -589,14 +594,15 @@ decl_t tunion_decl(scope_t s, typedef_name_t n, list_t<tvar_t> ts,
 // We do this by constructing every function type using function_typ,
 // rather than mucking with the typechecker/unifier/etc.
 static
- $(opt_t<var_t>,tqual_t,type_t)@ expand_arg($(opt_t<var_t>,tqual_t,type_t)@ a) {
+ $(opt_t<var_t>,tqual_t,type_t)@ expand_arg($(opt_t<var_t,`H>,tqual_t,type_t)@ a) {
   return new $((*a)[0],(*a)[1],pointer_expand((*a)[2]));
 }
 
-type_t function_typ(list_t<tvar_t> tvs, opt_t<type_t> eff_typ, type_t ret_typ, 
-                    list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, 
-                    bool c_varargs, vararg_info_t *cyc_varargs,
-                    list_t<$(type_t,type_t)@> rgn_po,
+type_t function_typ(list_t<tvar_t,`H> tvs, opt_t<type_t,`H> eff_typ, 
+                    type_t ret_typ, 
+                    list_t<$(opt_t<var_t,`H>,tqual_t,type_t)@`H,`H> args, 
+                    bool c_varargs, vararg_info_t *`H cyc_varargs,
+                    list_t<$(type_t,type_t)@`H,`H> rgn_po,
                     attributes_t atts) {
   return new FnType(FnInfo{.tvars = tvs, .ret_typ = pointer_expand(ret_typ),
                               .effect = eff_typ, 
@@ -647,7 +653,7 @@ bool is_lvalue(exp_t e) {
   }
 }
 
-struct Structfield * lookup_field(list_t<structfield_t> fields, var_t v) {
+struct Structfield * lookup_field(list_t<structfield_t,`H> fields, var_t v) {
   for(_ fs = fields; fs != null; fs = fs->tl) {
     let f = fs->hd;
     if (String::zstrptrcmp(f->name,v) == 0)
@@ -663,7 +669,8 @@ struct Structfield * lookup_union_field(uniondecl_t ud, var_t v) {
   return (ud->fields == null) ? null : lookup_field(ud->fields->v,v);
 }
 
-$(tqual_t,type_t) * lookup_tuple_field(list_t<$(tqual_t,type_t)@> ts, int i) {
+$(tqual_t,type_t) * lookup_tuple_field(list_t<$(tqual_t,type_t)@`H,`H> ts, 
+                                       int i) {
   for(; i != 0; --i) {
     if(ts == null)
       return null;

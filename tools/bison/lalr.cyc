@@ -73,7 +73,7 @@ short ?goto_map;
 short ?from_state;
 short ?to_state;
 
-short ??transpose(short??, int);
+short ??transpose(short?`H ?`H, int);
 void set_state_table();
 void set_accessing_symbol();
 void set_shift_table();
@@ -86,7 +86,7 @@ void build_relations();
 void add_lookback_edge(int,int,int);
 void compute_FOLLOWS();
 void compute_lookaheads();
-void digraph(short ??);
+void digraph(short ?`H ?`H);
 void traverse(int);
 
 extern void toomany(const char ?);
@@ -573,12 +573,12 @@ int gotono;
 
 
 
-short ?? transpose(short??R_arg, int n)
+short ?? transpose(short?`H ?`H R_arg, int n)
 {
-  register short ??new_R;
-  register short ??temp_R;
-  register short ?nedges;
-  register short ?sp;
+  register short ?`H ?`H new_R;
+  register short ?`H ?`H temp_R;
+  register short ?`H nedges;
+  register short ?`H sp;
   register int i;
   register int k;
 
@@ -687,7 +687,7 @@ compute_lookaheads()
 
 
 void
-digraph(short ??relation)
+digraph(short ?`H ?`H relation)
 {
   register int i;
 

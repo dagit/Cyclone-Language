@@ -41,7 +41,7 @@ namespace Unistd {
   }
 
   int chdir(string_t);
-  char ?getcwd(char ?buf, size_t size);
+  char ?`r getcwd(char ?`r buf, size_t size);
   int execl(string_t path, string_t arg0, ...`r string_t argv);
   int execve(string_t filename, string_t ?argv, string_t ?envp);
   ssize_t read(int fd, mstring_t buf, size_t count);

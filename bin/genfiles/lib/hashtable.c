@@ -99,17 +99,18 @@ _check_null( elems))->hd)[ _check_known_subscript_notnull( 1u, 0)]).f1; void*
 val=((( struct _tuple0*)(( struct Cyc_List_List*) _check_null( elems))->hd)[
 _check_known_subscript_notnull( 1u, 0)]).f2; int nidx=( int)((* hash)( key) %
 _get_arr_size( tab, sizeof( struct Cyc_List_List*)));*(( struct Cyc_List_List**)
-_check_unknown_subscript( tab, sizeof( struct Cyc_List_List*), nidx))=({ struct
-Cyc_List_List* _temp7=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp7->hd=( void*)({ struct _tuple0* _temp8=( struct _tuple0*) GC_malloc(
-sizeof( struct _tuple0)); _temp8->f1= key; _temp8->f2= val; _temp8;}); _temp7->tl=*((
-struct Cyc_List_List**) _check_unknown_subscript( tab, sizeof( struct Cyc_List_List*),
-nidx)); _temp7;});}} void Cyc_Hashtable_resize( struct Cyc_Hashtable_Table* t){
-struct _tagged_arr odata= t->tab; int osize=( int) _get_arr_size( odata, sizeof(
-struct Cyc_List_List*)); int nsize= 2 * osize + 1; struct Cyc_List_List* mt= 0;
-struct _tagged_arr ndata=({ unsigned int _temp9=( unsigned int) nsize; struct
-Cyc_List_List** _temp10=( struct Cyc_List_List**) GC_malloc( sizeof( struct Cyc_List_List*)
-* _temp9); struct _tagged_arr _temp12= _tag_arr( _temp10, sizeof( struct Cyc_List_List*),(
+_check_unknown_subscript( tab, sizeof( struct Cyc_List_List*), nidx))=( struct
+Cyc_List_List*)({ struct Cyc_List_List* _temp7=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp7->hd=( void*)(( struct _tuple0*)({
+struct _tuple0* _temp8=( struct _tuple0*) GC_malloc( sizeof( struct _tuple0));
+_temp8->f1= key; _temp8->f2= val; _temp8;})); _temp7->tl=*(( struct Cyc_List_List**)
+_check_unknown_subscript( tab, sizeof( struct Cyc_List_List*), nidx)); _temp7;});}}
+void Cyc_Hashtable_resize( struct Cyc_Hashtable_Table* t){ struct _tagged_arr
+odata= t->tab; int osize=( int) _get_arr_size( odata, sizeof( struct Cyc_List_List*));
+int nsize= 2 * osize + 1; struct Cyc_List_List* mt= 0; struct _tagged_arr ndata=({
+unsigned int _temp9=( unsigned int) nsize; struct Cyc_List_List** _temp10=(
+struct Cyc_List_List**) GC_malloc( sizeof( struct Cyc_List_List*) * _temp9);
+struct _tagged_arr _temp12= _tag_arr( _temp10, sizeof( struct Cyc_List_List*),(
 unsigned int) nsize);{ unsigned int _temp11= _temp9; unsigned int i; for( i= 0;
 i < _temp11; i ++){ _temp10[ i]= mt;}}; _temp12;});{ int i= 0; for( 0; i < osize;
 i ++){ Cyc_Hashtable_insert_bucket( ndata, t->hash,*(( struct Cyc_List_List**)

@@ -89,15 +89,15 @@ struct option
 #define required_argument	1
 #define optional_argument	2
 
-extern int getopt (int argc, char??argv, const char? shortopts);
-extern int getopt_long (int argc, char ??argv, const char ?shortopts,
+extern int getopt (int argc, char?`H ?argv, const char? shortopts);
+extern int getopt_long (int argc, char ?`H ?argv, const char ?shortopts,
 		        const struct option ?`r1 longopts, int *`r2 longind);
-extern int getopt_long_only (int argc, char ??argv,
+extern int getopt_long_only (int argc, char ?`H ?argv,
 			     const char ?shortopts,
 		             const struct option ?`r1 longopts, int *`r2 longind);
 
 /* Internal only.  Users should not call this directly.  */
-extern int _getopt_internal (int argc, char ??argv,
+extern int _getopt_internal (int argc, char ?`H ?argv,
 			     const char ?shortopts,
 		             const struct option ?`r1 longopts, int *`r2 longind,
 			     int long_only);

@@ -230,7 +230,7 @@ absexp_t mkGroupAE(absexpgroup_t g, absexp_t ae1, absexp_t ae2) {
     return new GroupAE(g, new {List::List(ae1, new {List::List(ae2,null)})});
   }
 }
-absexp_t mkGroupAE_l(absexpgroup_t g, list_t<absexp_t> ael) {
+absexp_t mkGroupAE_l(absexpgroup_t g, list_t<absexp_t,`H> ael) {
   // Note: Maybe should optimize more here?
   if(ael == null) // g really shouldn't be OneofG in this case??
     return SkipAE;
@@ -376,17 +376,17 @@ path_info_t eval_absop_r(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
   }
 }
 
-path_info_t assign_escape(List::list_t<path_info_t>@`r escaping_states,
+path_info_t assign_escape(List::list_t<path_info_t,`H>@`r escaping_states,
 			  path_info_t old_pinfo, path_info_t new_pinfo);
 
 Dict::dict_t<`a,path_info_t> 
-assign_escape_f(List::list_t<path_info_t>@`r escaping_states, `a key,
+assign_escape_f(List::list_t<path_info_t,`H>@`r escaping_states, `a key,
 		path_info_t b1, path_info_t b2, 
-		Dict::dict_t<`a,path_info_t> accum) {
+		Dict::dict_t<`a,path_info_t,`H> accum) {
   return Dict::insert(accum, key, assign_escape(escaping_states, b1, b2));
 }
 
-path_info_t assign_escape(List::list_t<path_info_t>@`r escaping_states,
+path_info_t assign_escape(List::list_t<path_info_t,`H>@`r escaping_states,
 			  path_info_t old_pinfo, path_info_t new_pinfo) {
   switch ($(old_pinfo,new_pinfo)) {
   case $(&LeafPI(&MustPointTo(_)),     &LeafPI(&UnknownIS(_,level))): 
@@ -410,7 +410,7 @@ path_info_t assign_escape(List::list_t<path_info_t>@`r escaping_states,
   }
 }
 
-bool is_ok_malloc_assign(absop_t lval, glist_t<exp_t,`r> ok_mallocs) {
+bool is_ok_malloc_assign(absop_t lval, list_t<exp_t,`r> ok_mallocs) {
   switch(lval) {
   case &MallocOp(e,_):   return List::memq(ok_mallocs,e);
   case &MemberOp(ao2,_): return is_ok_malloc_assign(ao2,ok_mallocs);
@@ -420,8 +420,8 @@ bool is_ok_malloc_assign(absop_t lval, glist_t<exp_t,`r> ok_mallocs) {
 
 //This function is for the Unordered KLUDGE (see comments at end of eval_absexp)
 //Note: descent through Unordered means O(n^2) overall.  Should be unnecessary??
-static $(glist_t<absexp_t,`r>, glist_t<exp_t,`r>) 
-unordered_mallocs(region_t<`r> rgn, absexp_t ae, glist_t<exp_t,`r> ok_mallocs) {
+static $(list_t<absexp_t,`r>, list_t<exp_t,`r>) 
+unordered_mallocs(region_t<`r> rgn, absexp_t ae, list_t<exp_t,`r> ok_mallocs) {
   let assigns = null;
   let mallocs = null;
   switch (ae) {

@@ -89,7 +89,7 @@ static $(list_t<designator_t>,exp_t)@ make_struct_arg(exp_t e) {
 // Resolve whether this is a function call or tunion, xtunion, or struct
 // constructor -- let normal type-checking do the rest of the work.
 // NOTE: We assume q is a relative qvar.
-static void resolve_unknown_fn(tenv_t te, exp_t e, exp_t e1, list_t<exp_t> es) {
+static void resolve_unknown_fn(tenv_t te, exp_t e, exp_t e1, list_t<exp_t,`H> es) {
   switch (e1->r) {
   case &UnknownId_e(q):
     try {
@@ -132,7 +132,7 @@ static void resolve_unknown_fn(tenv_t te, exp_t e, exp_t e1, list_t<exp_t> es) {
 }
 
 static void resolve_unresolved_mem(tenv_t te, seg_t loc, type_t *`r topt, exp_t e,
-                                   list_t<$(list_t<designator_t>,exp_t)@> des) {
+                                   list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> des) {
   // NOTE: must always bang e->r or caller will loop!
   if (topt == null) {
     // guess it is an array
@@ -656,11 +656,10 @@ static type_t tcSeqExp(tenv_t te, seg_t loc, type_t *`r topt, exp_t e1, exp_t e2
 // try to find a field that e can be injected into
 static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
                                        region_t<`r> r,
-                                       glist_t<$(tvar_t,type_t)@`r,`r> inst, 
+                                       list_t<$(tvar_t,type_t)@`r,`r> inst, 
                                        list_t<tunionfield_t> fs) {
   list_t<tunionfield_t> fields;
   type_t t1 = e->topt->v;
-
   // must promote float to double, and char/short to int
   switch (compress(t1)) {
   case FloatType: 
@@ -677,7 +676,9 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
     if (typs == null || typs->tl != null || tvs != null) continue;
     type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
     // I hate doing this because it has side-effects, but oh well...
-    if (unify(t1,t2)) return fields->hd;
+    if (unify(t1,t2)) {
+      return fields->hd;
+    }
   }
   // now try to find a match supported by silent conversions
   for (fields = fs; fields != null; fields = fields->tl) {
@@ -687,8 +688,9 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
     if (typs == null || typs->tl != null || tvs != null) continue;
     type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
     // I hate doing this because it has side-effects, but oh well...
-    if (coerce_arg(te,e,t2))
+    if (coerce_arg(te,e,t2)) {
       return fields->hd;
+    } 
   }
   terr(e->loc,"can't find a field in %s to inject a value of type %s",
        typ2string(tu), typ2string(t1));
@@ -718,7 +720,6 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
     case &FnType(FnInfo{tvars,eff,res_typ,args_info,c_vararg,cyc_vararg,
                           rgn_po,atts}): 
       //FIX: handle tvars??
-
       // unify the result type with the expected type to get better
       // information while type-checking the arguments.
       if (topt != null) unify(res_typ,*topt);
@@ -851,7 +852,7 @@ static type_t tcThrow(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
 
 // explicit instantiation
 static type_t tcInstantiate(tenv_t te, seg_t loc, type_t *`r topt,
-                         exp_t e, list_t<type_t> ts) {
+                            exp_t e, list_t<type_t> ts) {
   tcExpNoInst(te,null,e);
   // turn any functions into function pointers
   e->topt->v = pointer_expand(e->topt->v);
@@ -865,7 +866,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t *`r topt,
 	return expr_err(te,loc,"type instantiation mismatch");
       for (; ts != null; ts = ts->tl, tvars = tvars->tl) {
 	kind_t k = conref_val(tvars->hd->kind);
-	check_type(loc,te,lookup_type_vars(te),k,ts->hd);
+	check_type(loc,te,lookup_type_vars(te),k,true,ts->hd);
 	instantiation = new List(new $(tvars->hd,ts->hd),instantiation);
       }
       type_t new_fn_typ = 
@@ -885,7 +886,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t *`r topt,
 
 // (t)e
 static type_t tcCast(tenv_t te, seg_t loc, type_t *`r topt, type_t t, exp_t e) {
-  check_type(loc,te,lookup_type_vars(te),MemKind,t);
+  check_type(loc,te,lookup_type_vars(te),MemKind,true,t);
   tcExp(te,null,e);
   type_t t2 = e->topt->v;
   if (!silent_castable(te,loc,t2,t) && !castable(te,loc,t2,t))
@@ -949,7 +950,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
 
  // sizeof t
 static type_t tcSizeof(tenv_t te, seg_t loc, type_t *`r topt, type_t t) {
-  check_type(loc,te,lookup_type_vars(te),MemKind,t);
+  check_type(loc,te,lookup_type_vars(te),MemKind,true,t);
   if(!Evexp::okay_szofarg(t))
     terr(loc, "sizeof applied to type %s, which has unknown size here",
          typ2string(t));
@@ -961,7 +962,7 @@ static type_t tcSizeof(tenv_t te, seg_t loc, type_t *`r topt, type_t t) {
 // FIX?: check if t is allowed to be a union type
 static type_t tcOffsetof(tenv_t te, seg_t loc, type_t *`r topt, 
 			 type_t t, field_name_t n) {
-  check_type(loc,te,lookup_type_vars(te),MemKind,t);
+  check_type(loc,te,lookup_type_vars(te),MemKind,true,t);
   bool bad_type = true;
   switch(compress(t)) {
   case &StructType(_,_,sdp):
@@ -1295,10 +1296,10 @@ static type_t tcComprehension(tenv_t te,seg_t loc,type_t *`r topt,
  // then this is the same as Foo{.a=1,.b=2,.c=3,.d=4,.e=5};
  // Later, we should support array designators and so forth.
 static type_t tcStruct(tenv_t te, seg_t loc, type_t *`r topt,
-                    typedef_name_t @tn,
-                    opt_t<list_t<type_t>> @otyps,
-                    list_t<$(list_t<designator_t>,exp_t)@> args,
-                    struct Structdecl *@ sd_opt) {
+                       typedef_name_t @tn,
+                       opt_t<list_t<type_t,`H>,`H> @otyps,
+                       list_t<$(list_t<designator_t>,exp_t)@> args,
+                       struct Structdecl *`H @`H sd_opt) {
   structdecl_t sd;
   if (*sd_opt != null)
     sd = (structdecl_t)(*sd_opt);
@@ -1329,7 +1330,7 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t *`r topt,
     terr(loc,"can't build abstract struct");
     return res_typ;
   }
-  glist_t<$(structfield_t,exp_t)@`rgn,`rgn> fields =
+  list_t<$(structfield_t,exp_t)@`rgn,`rgn> fields =
     resolve_struct_designators(rgn,loc,args,sd->fields->v);
   for(; fields != null; fields = fields->tl) {
     let &$(field,field_exp) = fields->hd;
@@ -1349,7 +1350,7 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
   region rgn {
     switch (compress(ts)) {
     case &AnonStructType(fs):
-      glist_t<$(structfield_t,exp_t)@`rgn,`rgn> fields = 
+      list_t<$(structfield_t,exp_t)@`rgn,`rgn> fields = 
         resolve_struct_designators(rgn,loc,args,fs);
       for (; fields != null; fields = fields->tl) {
         let &$(field,field_exp) = fields->hd;
@@ -1369,8 +1370,8 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
 // f(es)   where f is a tunion and is ef->name
 static type_t tcTunion(tenv_t te, seg_t loc, type_t *`r topt,
                     exp_t e,
-                    opt_t<list_t<type_t>> @all_ref,
-                    opt_t<list_t<type_t>> @exist_ref,
+                    opt_t<list_t<type_t,`H>,`H> @all_ref,
+                    opt_t<list_t<type_t,`H>,`H> @exist_ref,
                     list_t<exp_t> es,
                     tuniondecl_t tud,
                     tunionfield_t tuf) {
@@ -1447,7 +1448,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t *`r topt, exp_opt_t ropt,
       break;
     }
   }
-  check_type(loc,te,lookup_type_vars(te),MemKind,t);
+  check_type(loc,te,lookup_type_vars(te),MemKind,true,t);
   // Don't yet support existential types (to do it, add to TunionFieldInfo
   // and here generate fresh evars).
   switch(t) {
@@ -1677,7 +1678,7 @@ static type_t tcExpNoPromote(tenv_t te, type_t *`r topt, exp_t e) {
 	if (tvs != null)    // then, instantiate if necessary
 	  region rgn {
            let env = $(lookup_type_vars(te),rgn);
-	   glist_t<$(tvar_t,type_t)@`rgn,`rgn> inst = 
+	   list_t<$(tvar_t,type_t)@`rgn,`rgn> inst = 
 	     List::rmap_c(rgn,r_make_inst_var,&env,tvs);
 	   list_t<type_t> ts = List::map(snd,inst);
 	   type_t ftyp = rsubstitute(rgn, inst,

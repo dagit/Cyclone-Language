@@ -68,7 +68,7 @@ static Lineno::pos_t new_pos() {
   return new Lineno::Pos("",new_string(0),0,0);
 }
 
-list_t<mstringptr_t> strings_of_segments(glist_t<seg_t,`r> segs) {
+list_t<mstringptr_t> strings_of_segments(list_t<seg_t,`r> segs) {
   list_t<$(int,Lineno::pos_t)@> places = null;
   for(let segs2 = segs; segs2 != null; segs2 = segs2->tl) {
     if(segs2->hd == null)
@@ -101,13 +101,13 @@ struct Error {
   error_kind_t kind;
   string_t     desc;
 };
-error_t mk_err_lex(seg_t l, string_t desc) {
+error_t mk_err_lex(seg_t l, string_t<`H> desc) {
   return new Error(source, l, Lex, desc);
 }
-error_t mk_err_parse(seg_t l, string_t desc) {
+error_t mk_err_parse(seg_t l, string_t<`H> desc) {
   return new Error(source, l, Parse, desc);
 }
-error_t mk_err_elab(seg_t l, string_t desc) {
+error_t mk_err_elab(seg_t l, string_t<`H> desc) {
   return new Error(source, l, Elab, desc);
 }
 
@@ -118,7 +118,7 @@ error_t mk_err_elab(seg_t l, string_t desc) {
 
 xtunion exn {Nocontext};
 
-static mstring_t trunc(int n, mstring_t s) {
+static mstring_t trunc(int n, mstring_t<`H> s) {
   int len = strlen(s);
   if (len < n) 
     return s;
@@ -207,7 +207,7 @@ void post_error(error_t e) {
 }
 
 //////////// Overall Control ///////////
-void reset_position(string_t s)    { source = s; error_b = false; }
-void set_position_file(string_t s) { source = s; error_b = false; }
+void reset_position(string_t<`H> s)    { source = s; error_b = false; }
+void set_position_file(string_t<`H> s) { source = s; error_b = false; }
 string_t get_position_file() { return source; }
 

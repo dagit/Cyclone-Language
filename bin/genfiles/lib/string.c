@@ -138,22 +138,23 @@ float, float); extern float cabsf(); extern float dremf( float, float); extern
 int signgam; struct Cyc_Math___exception{ int type; unsigned char* name; double
 arg1; double arg2; double retval; int err; } ; extern int matherr( struct Cyc_Math___exception*
 e); extern unsigned char* strerror( int errnum); struct _tagged_arr Cyc_String_strerror(
-int errnum){ return Cstring_to_string( strerror( errnum));} int Cyc_String_strlen(
-struct _tagged_arr s){ int i; for( i= 0; i < _get_arr_size( s, sizeof(
-unsigned char)); i ++){ if(*(( const unsigned char*) _check_unknown_subscript( s,
-sizeof( unsigned char), i)) =='\000'){ return i;}} return i;} static int Cyc_String_int_strleno(
-struct _tagged_arr s, int ofs, struct _tagged_arr error){ if( ofs >
-_get_arr_size( s, sizeof( unsigned char))? 1: ofs < 0){( int) _throw(( void*)({
-struct Cyc_Core_InvalidArg_struct* _temp0=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp0[ 0]=({ struct Cyc_Core_InvalidArg_struct
-_temp1; _temp1.tag= Cyc_Core_InvalidArg; _temp1.f1= error; _temp1;}); _temp0;}));}{
-int i; for( i= ofs; i < _get_arr_size( s, sizeof( unsigned char)); i ++){ if(*((
-const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), i))
-=='\000'){ break;}} return( int)( i - ofs);}} static int Cyc_String_case_cmp(
-unsigned char c1, unsigned char c2){ return c1 - c2;} static int Cyc_String_cmp(
-struct _tagged_arr s1, int ofs1, int len1, struct _tagged_arr s2, int ofs2, int
-len2, int(* f)( unsigned char, unsigned char)){ int min_length= len1 < len2?
-len1: len2; int i= - 1; while( ++ i < min_length) { int diff= f(*(( const
+int errnum){ return( struct _tagged_arr) Cstring_to_string( strerror( errnum));}
+int Cyc_String_strlen( struct _tagged_arr s){ int i; for( i= 0; i <
+_get_arr_size( s, sizeof( unsigned char)); i ++){ if(*(( const unsigned char*)
+_check_unknown_subscript( s, sizeof( unsigned char), i)) =='\000'){ return i;}}
+return i;} static int Cyc_String_int_strleno( struct _tagged_arr s, int ofs,
+struct _tagged_arr error){ if( ofs > _get_arr_size( s, sizeof( unsigned char))?
+1: ofs < 0){( int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp0=(
+struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
+_temp0[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp1; _temp1.tag= Cyc_Core_InvalidArg;
+_temp1.f1= error; _temp1;}); _temp0;}));}{ int i; for( i= ofs; i < _get_arr_size(
+s, sizeof( unsigned char)); i ++){ if(*(( const unsigned char*)
+_check_unknown_subscript( s, sizeof( unsigned char), i)) =='\000'){ break;}}
+return( int)( i - ofs);}} static int Cyc_String_case_cmp( unsigned char c1,
+unsigned char c2){ return c1 - c2;} static int Cyc_String_cmp( struct
+_tagged_arr s1, int ofs1, int len1, struct _tagged_arr s2, int ofs2, int len2,
+int(* f)( unsigned char, unsigned char)){ int min_length= len1 < len2? len1:
+len2; int i= - 1; while( ++ i < min_length) { int diff= f(*(( const
 unsigned char*) _check_unknown_subscript( s1, sizeof( unsigned char), i + ofs1)),*((
 const unsigned char*) _check_unknown_subscript( s2, sizeof( unsigned char), i +
 ofs2))); if( diff != 0){ return diff;}} return( int) len1 -( int) len2;} int Cyc_String_strcmp(

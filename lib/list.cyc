@@ -29,7 +29,7 @@ namespace List;
 using Core;
 
 // Return the length of a list. 
-int length(glist_t<`a,`r> x) {
+int length(list_t x) {
   int i = 0;
 
   while (x != null) {
@@ -46,21 +46,21 @@ int length(glist_t<`a,`r> x) {
 xtunion exn {List_empty};
 
 // return the first element in a list, if any, throw List_empty otherwise. 
-`a hd(glist_t<`a,`r> x) {
+`a hd(list_t<`a> x) {
   if (x == null) throw List_empty;
   return x->hd;
 }
 
 // return the tail of a list, if any, throw List_empty otherwise. 
-glist_t<`a,`r> tl(glist_t<`a,`r> x) {
+list_t<`a,`r> tl(list_t<`a,`r> x) {
   if (x == null) throw List_empty;
   return x->tl;
 }
 
 // allows one to write rlist(r,e1,e2,...,en) to create a list
 // out of e1,e2,...,en.
-glist_t<`a,`r> rlist(region_t<`r> r, ...`r2 `a argv) {
-  glist_t<`a,`r> result = null;
+list_t<`a,`r> rlist(region_t<`r> r, ...`r2 `a argv) {
+  list_t result = null;
   for (int i = argv.size - 1; i >= 0; i--) 
     result = rnew(r) List{argv[i],result};
   return result;
@@ -69,7 +69,7 @@ glist_t<`a,`r> rlist(region_t<`r> r, ...`r2 `a argv) {
 // can't write this in terms of rlist yet because there's no way
 // to forward varargs yet.
 list_t<`a> list(...`r `a argv) {
-  list_t<`a> result = null;
+  list_t result = null;
   for (int i = argv.size - 1; i >= 0; i--) 
     result = new List{argv[i],result};
   return result;
@@ -77,8 +77,8 @@ list_t<`a> list(...`r `a argv) {
 
 
 // return a fresh copy of the list (same as map of the identity) 
-glist_t<`a,`r2> rcopy(region_t<`r2> r2, glist_t<`a,`r1> x) {
-  glist_t<`a,`r2> result, prev;
+list_t<`a,`r2> rcopy(region_t<`r2> r2, list_t<`a> x) {
+  list_t result, prev;
 
   if (x == null) return null;
   result = rnew(r2) List{.hd=x->hd,.tl=null};
@@ -90,33 +90,33 @@ glist_t<`a,`r2> rcopy(region_t<`r2> r2, glist_t<`a,`r1> x) {
   return result;
 }  
 
-list_t<`a> copy(glist_t<`a,`r> x) {
+list_t<`a> copy(list_t<`a> x) {
   return rcopy(heap_region, x);
 }
 
 // Apply a function to each element in a list, returning a new list. 
-glist_t<`b,`r2> rmap(region_t<`r2> r2,`b f(`a),glist_t<`a,`r> x) {
-  glist_t<`b,`r2> result,prev;
+list_t<`b,`r2> rmap(region_t<`r2> r2,`b f(`a),list_t<`a> x) {
+  list_t result,prev;
 
   if (x == null) return null;
   result = rnew(r2) List(f(x->hd),null);
   prev = result;
   for (x=x->tl; x != null; x=x->tl) {
-    glist_t<`b,`r2> temp = rnew(r2) List(f(x->hd),null);
+    list_t temp = rnew(r2) List(f(x->hd),null);
     prev->tl = temp;
     prev = temp;
   }
   return(result);
 }
 
-list_t<`b> map(`b f(`a),glist_t<`a,`r> x) {
+list_t<`b> map(`b f(`a),list_t<`a> x) {
   return rmap(heap_region, f, x);
 }
 
 
 // Apply a function to each element in a list, returning a new list. 
-glist_t<`b,`r2> rmap_c(region_t<`r2> r2,`b f(`c,`a),`c env,glist_t<`a,`r> x) {
-  glist_t<`b,`r2> result, prev;
+list_t<`b,`r2> rmap_c(region_t<`r2> r2,`b f(`c,`a),`c env,list_t<`a> x) {
+  list_t result, prev;
 
   if (x == null) return null;
   result = rnew(r2) List(f(env,x->hd),null);
@@ -128,7 +128,7 @@ glist_t<`b,`r2> rmap_c(region_t<`r2> r2,`b f(`c,`a),`c env,glist_t<`a,`r> x) {
   return(result);
 }
 
-list_t<`b> map_c(`b f(`c,`a),`c env,glist_t<`a,`r> x) {
+list_t<`b> map_c(`b f(`c,`a),`c env,list_t<`a> x) {
   return rmap_c(heap_region, f, env, x);
 }
 
@@ -138,9 +138,9 @@ xtunion exn {List_mismatch};
 // Given two lists of the same length and a function, apply the function
 // to each pair of elements (in order) and collect the results in a new list.
 // Throws List_mismatch if the sizes of the lists aren't the same.
-glist_t<`c,`r3> rmap2(region_t<`r3> r3,`c f(`a,`b),
-                      glist_t<`a,`r1> x,glist_t<`b,`r2> y) {
-  glist_t<`c,`r3> result, prev;
+list_t<`c,`r3> rmap2(region_t<`r3> r3,`c f(`a,`b),
+                      list_t<`a> x,list_t<`b> y) {
+  list_t result, prev;
 
   if (x == null && y == null) return null;
   if (x == null || y == null) throw List_mismatch;
@@ -161,21 +161,21 @@ glist_t<`c,`r3> rmap2(region_t<`r3> r3,`c f(`a,`b),
   return(result);
 }
 
-list_t<`c> map2(`c f(`a,`b),glist_t<`a,`r1> x,glist_t<`b,`r2> y) {
+list_t<`c> map2(`c f(`a,`b),list_t<`a> x,list_t<`b> y) {
   return rmap2(heap_region,f,x,y);
 }
 
 // Apply some function to each element of the list, but don't bother to
 // save the result.  Similar to Ocaml's List.iter but doesn't require
 // void type for the result of the function.
-void app(`b f(`a),glist_t<`a,`r> x) {
+void app(`b f(`a),list_t<`a> x) {
   while (x != null) {
     f(x->hd);
     x = x->tl;
   }
 }
 
-void app_c(`c f(`a,`b),`a env,glist_t<`b,`r> x) {
+void app_c(`c f(`a,`b),`a env,list_t<`b> x) {
   while (x != null) {
     f(env,x->hd);
     x = x->tl;
@@ -185,14 +185,14 @@ void app_c(`c f(`a,`b),`a env,glist_t<`b,`r> x) {
 // same as app but with void functions -- unlike Popcorn, the iter
 // functions are no longer needed because we treat "void" as a boxed
 // type.  
-void iter(void f(`a),glist_t<`a,`r> x) {
+void iter(void f(`a),list_t<`a> x) {
   while (x != null) {
     f(x->hd);
     x = x->tl;
   }
 }
 // same as app_c but with void functions
-void iter_c(void f(`b,`a),`b env,glist_t<`a,`r> x) {
+void iter_c(void f(`b,`a),`b env,list_t<`a> x) {
   while (x != null) {
     f(env,x->hd);
     x = x->tl;
@@ -201,7 +201,7 @@ void iter_c(void f(`b,`a),`b env,glist_t<`a,`r> x) {
 
 // Same as app, but generalized to a pair of lists.  Throws List_mismatch
 // if the lengths of the list aren't the same.  
-void app2(`c f(`a,`b),glist_t<`a,`r1> x,glist_t<`b,`r2> y) {
+void app2(`c f(`a,`b),list_t<`a> x,list_t<`b> y) {
   while (x != null && y != null) {
     f(x->hd,y->hd);
     x = x->tl;
@@ -210,7 +210,7 @@ void app2(`c f(`a,`b),glist_t<`a,`r1> x,glist_t<`b,`r2> y) {
   if (x != null || y != null) throw List_mismatch;
 }
 
-void app2_c(`d f(`a,`b,`c),`a env,glist_t<`b,`r1> x,glist_t<`c,`r2> y) {
+void app2_c(`d f(`a,`b,`c),`a env,list_t<`b> x,list_t<`c> y) {
   while (x != null && y != null) {
     f(env,x->hd,y->hd);
     x = x->tl;
@@ -221,7 +221,7 @@ void app2_c(`d f(`a,`b,`c),`a env,glist_t<`b,`r1> x,glist_t<`c,`r2> y) {
 
 // Same as iter, but generalized to a pair of lists.  Throws List_mismatch
 // if the lengths of the list aren't the same.  
-void iter2(void f(`a,`b),glist_t<`a,`r1> x,glist_t<`b,`r2> y) {
+void iter2(void f(`a,`b),list_t<`a> x,list_t<`b> y) {
   while (x != null && y != null) {
     f(x->hd,y->hd);
     x = x->tl;
@@ -229,7 +229,7 @@ void iter2(void f(`a,`b),glist_t<`a,`r1> x,glist_t<`b,`r2> y) {
   }
   if (x != null || y != null) throw List_mismatch;
 }
-void iter2_c(void f(`a,`b,`c),`a env,glist_t<`b,`r1> x,glist_t<`c,`r2> y) {
+void iter2_c(void f(`a,`b,`c),`a env,list_t<`b> x,list_t<`c> y) {
   while (x != null && y != null) {
     f(env,x->hd,y->hd);
     x = x->tl;
@@ -241,7 +241,7 @@ void iter2_c(void f(`a,`b,`c),`a env,glist_t<`b,`r1> x,glist_t<`c,`r2> y) {
 // Given a list [x1,x2,...,xn-1,xn], a function f, and an accumulator a,
 // return f(f(...(f(x2,f(x1,a))),xn-1),xn).  Notice that the function is
 // first applied to the left-most element of the list.
-`a fold_left(`a f(`a,`b),`a accum,glist_t<`b,`r> x) {
+`a fold_left(`a f(`a,`b),`a accum,list_t<`b> x) {
   while (x != null) {
     accum = f(accum,x->hd);
     x = x->tl;
@@ -249,7 +249,7 @@ void iter2_c(void f(`a,`b,`c),`a env,glist_t<`b,`r1> x,glist_t<`c,`r2> y) {
   return(accum);
 }
 
-`a fold_left_c(`a f(`c,`a,`b),`c env,`a accum,glist_t<`b,`r> x) {
+`a fold_left_c(`a f(`c,`a,`b),`c env,`a accum,list_t<`b> x) {
   while (x != null) {
     accum = f(env,accum,x->hd);
     x = x->tl;
@@ -260,19 +260,19 @@ void iter2_c(void f(`a,`b,`c),`a env,glist_t<`b,`r1> x,glist_t<`c,`r2> y) {
 // Given a list [x1,x2,....,xn-1,xn], a function f, and an accumulator a,
 // return f(x1,f(x2,...,f(xn-1,f(xn,a))...)).  Notice that the function is
 // first applied to the right-most element of the list. 
-`b fold_right(`b f(`a,`b),glist_t<`a,`r> x,`b accum) {
+`b fold_right(`b f(`a,`b),list_t<`a> x,`b accum) {
   if (x == null) return accum;
   else return(f(x->hd,fold_right(f,x->tl,accum)));
 }
-`b fold_right_c(`b f(`c,`a,`b),`c env,glist_t<`a,`r> x,`b accum) {
+`b fold_right_c(`b f(`c,`a,`b),`c env,list_t<`a> x,`b accum) {
   if (x == null) return accum;
   else return(f(env,x->hd,fold_right_c(f,env,x->tl,accum)));
 }
 
 // Given [x1,...,xn] and [y1,...,ym], return [xn,...,x1,y1,...,ym].
 // That is, the first list reversed and appended to the second list.
-glist_t<`a,`r2> rrevappend(region_t<`r2> r2,glist_t<`a,`r> x,
-                           glist_t<`a,`r2> y) {
+list_t<`a,`r2> rrevappend(region_t<`r2> r2,list_t<`a> x,
+                           list_t<`a,`r2> y) {
   while (x != null) {
     y = rnew(r2) List(x->hd,y);
     x = x->tl;
@@ -280,31 +280,31 @@ glist_t<`a,`r2> rrevappend(region_t<`r2> r2,glist_t<`a,`r> x,
   return(y);
 }
 
-list_t<`a> revappend(glist_t<`a,`r> x,list_t<`a> y) {
+list_t<`a> revappend(list_t<`a> x,list_t<`a,`H> y) {
   return rrevappend(heap_region,x,y);
 }
 
 // Return the reverse of a list. 
-glist_t<`a,`r2> rrev(region_t<`r2> r2, glist_t<`a,`r> x) {
+list_t<`a,`r2> rrev(region_t<`r2> r2, list_t<`a> x) {
   // avoid allocation for length-one lists
   if(x==null) // || x->tl==null)
     return null;
   return(rrevappend(r2,x,null));
 }
 
-list_t<`a> rev(glist_t<`a,`r> x) {
+list_t<`a> rev(list_t<`a> x) {
   return rrev(heap_region, x);
 }
 
 // Imperatively reverse a list 
-glist_t<`a,`r> imp_rev(glist_t<`a,`r> x) {
+list_t<`a,`r> imp_rev(list_t<`a,`r> x) {
   if (x == null) return x;
   else {
-    glist_t<`a,`r> first  = x;
-    glist_t<`a,`r> second = x->tl;
+    list_t<`a,`r> first  = x;
+    list_t<`a,`r> second = x->tl;
     x->tl = null;
     while (second != null) {
-      glist_t<`a,`r> temp = second->tl;
+      list_t<`a,`r> temp = second->tl;
       second->tl = first;
       first = second;
       second = temp;
@@ -314,8 +314,8 @@ glist_t<`a,`r> imp_rev(glist_t<`a,`r> x) {
 }
       
 // Return two appended lists -- creates sharing.
-glist_t<`a,`r2> rappend(region_t<`r2> r2,glist_t<`a,`r> x,glist_t<`a,`r2> y) {
-  glist_t<`a,`r2> result, prev;
+list_t<`a,`r2> rappend(region_t<`r2> r2,list_t<`a> x,list_t<`a,`r2> y) {
+  list_t<`a,`r2> result, prev;
 
   if (x == null) return y;
   if (y == null) return rcopy(r2,x); // copy needed to get in right region
@@ -329,15 +329,15 @@ glist_t<`a,`r2> rappend(region_t<`r2> r2,glist_t<`a,`r> x,glist_t<`a,`r2> y) {
   return(result);
 }
 
-list_t<`a> append(glist_t<`a,`r> x,list_t<`a> y) {
+list_t<`a> append(list_t<`a> x,list_t<`a,`H> y) {
   return rappend(heap_region,x,y);
 }
 
 
 // Modify x so that y is appended to it -- if x is empty, return y else
 // return the modified list x.
-glist_t<`a,`r> imp_append(glist_t<`a,`r> x,glist_t<`a,`r> y) {
-  glist_t<`a,`r> z;
+list_t<`a,`r> imp_append(list_t<`a,`r> x,list_t<`a,`r> y) {
+  list_t z;
 
   if (x == null) return y;
   if (y == null) return x;
@@ -349,17 +349,17 @@ glist_t<`a,`r> imp_append(glist_t<`a,`r> x,glist_t<`a,`r> y) {
 }
 
 // Flatten a list of lists into a new list 
-glist_t<`a,`r3> rflatten(region_t<`r3> r3, glist_t<glist_t<`a,`r1>,`r2> x) {
+list_t<`a,`r3> rflatten(region_t<`r3> r3, list_t<list_t<`a,`r3>> x) {
   return fold_right_c(rappend,r3,x,null);
 }
 
-list_t<`a> flatten(glist_t<glist_t<`a,`r1>,`r2> x) {
+list_t<`a> flatten(list_t<list_t<`a,`H>> x) {
   return rflatten(heap_region,x);
 }
 
 // imperative version of merge -- see below
-glist_t<`a,`r> imp_merge(int less_eq(`a,`a), glist_t<`a,`r> a, glist_t<`a,`r> b){
-  glist_t<`a,`r> c,d;
+list_t<`a,`r> imp_merge(int less_eq(`a,`a), list_t<`a,`r> a, list_t<`a,`r> b){
+  list_t c,d;
 
   if (a==null) return b;
   if (b==null) return a;
@@ -398,13 +398,13 @@ glist_t<`a,`r> imp_merge(int less_eq(`a,`a), glist_t<`a,`r> a, glist_t<`a,`r> b)
 }
 
 // Imperative version of merge-sort (see below)
-glist_t<`a,`r> rimp_merge_sort(int less_eq(`a,`a), glist_t<`a,`r> x) 
+list_t<`a,`r> rimp_merge_sort(int less_eq(`a,`a), list_t<`a,`r> x) 
 {
   if (x == null || x->tl == null) return x;
 
   // split into two lists
-  glist_t<`a,`r> a = x, aptr = a;
-  glist_t<`a,`r> b = x->tl, bptr = b;
+  list_t a = x, aptr = a;
+  list_t b = x->tl, bptr = b;
   x = b->tl;
   while (x != null) {
     aptr->tl = x;
@@ -426,18 +426,18 @@ glist_t<`a,`r> rimp_merge_sort(int less_eq(`a,`a), glist_t<`a,`r> x)
 // the list sorted by less_eq.  Uses a merge sort.  The less_eq
 // function should return 0 if the elements are equal, i < 0 if
 // the first is less than the second, and i > 0 otherwise.
-glist_t<`a,`r2> rmerge_sort(region_t<`r2> r2, int less_eq(`a,`a), 
-                            glist_t<`a,`r> x)
+list_t<`a,`r2> rmerge_sort(region_t<`r2> r2, int less_eq(`a,`a), 
+                            list_t<`a> x)
 {
   return rimp_merge_sort(less_eq, rcopy(r2, x));
 }
 
 
-glist_t<`a,`r3> rmerge(region_t<`r3> r3,
+list_t<`a,`r3> rmerge(region_t<`r3> r3,
                        int less_eq(`a,`a),
-                       glist_t<`a,`r1> a,
-                       glist_t<`a,`r2> b) {
-  glist_t<`a,`r3> c,d;
+                       list_t<`a> a,
+                       list_t<`a> b) {
+  list_t c,d;
 
   // Dan bug fix: now works on empty lists by special-casing it first:
   if (a==null) return rcopy(r3,b);
@@ -476,11 +476,11 @@ glist_t<`a,`r3> rmerge(region_t<`r3> r3,
   return(d);
 }
 
-list_t<`a> merge_sort(int less_eq(`a,`a), glist_t<`a,`r> x) {
+list_t<`a> merge_sort(int less_eq(`a,`a), list_t<`a> x) {
   return rmerge_sort(heap_region, less_eq, x);
 }
 
-list_t<`a> merge(int less_eq(`a,`a),list_t<`a> a,list_t<`a> b) {
+list_t<`a> merge(int less_eq(`a,`a),list_t<`a,`H> a,list_t<`a,`H> b) {
   return rmerge(heap_region, less_eq, a, b);
 }
 
@@ -490,7 +490,7 @@ xtunion exn {Nth};
 // Given [x0,x1,...,xn], return the ith element of the list (0 <= i <= n).
 // Throw Nth if the list doesn't have enough elements.  Notice that the
 // indexing is zero-based.
-`a nth(glist_t<`a,`r> x,int i) {
+`a nth(list_t<`a> x,int i) {
 
   while (i > 0 && x != null) {
     --i;
@@ -502,7 +502,7 @@ xtunion exn {Nth};
 
 // Given [x0,x1,...,xi-1,xi,xi+1,...,xn], return [xi,xi+1,...,xn].  Raise
 // Nth if the list doesn't have enough elements.  
-glist_t<`a,`r> nth_tail(glist_t<`a,`r> x, int i) {
+list_t<`a,`r> nth_tail(list_t<`a,`r> x, int i) {
   if (i < 0) throw Nth;
   while (i != 0) {
     if (x == null) throw Nth;
@@ -514,31 +514,31 @@ glist_t<`a,`r> nth_tail(glist_t<`a,`r> x, int i) {
 
 // Given a predicate on 'a values, determine whether every element in a list
 // satisfies the predicate.
-bool forall(bool pred(`a),glist_t<`a,`r> x) {
+bool forall(bool pred(`a),list_t<`a> x) {
   while (x != null && pred(x->hd)) x=x->tl; // modified by Dan
   return(x == null);
 }
-bool forall_c(bool pred(`a,`b),`a env,glist_t<`b,`r> x) {
+bool forall_c(bool pred(`a,`b),`a env,list_t<`b> x) {
   while (x != null && pred(env,x->hd)) x=x->tl; 
   return(x == null);
 }
 
 // Given a predicate on 'a values, determine whether there exists an element
 // in the list that satisfies the predicate.
-bool exists(bool pred(`a),glist_t<`a,`r> x) {
+bool exists(bool pred(`a),list_t<`a> x) {
   while (x != null && (!pred(x->hd))) x=x->tl; // modified by Dan
   return(x != null);
 }
-bool exists_c(bool pred(`a,`b),`a env,glist_t<`b,`r> x) {
+bool exists_c(bool pred(`a,`b),`a env,list_t<`b> x) {
   while (x != null && (!pred(env,x->hd))) x=x->tl; // modified by Dan
   return(x != null);
 }
 
 // Given [x1,...,xn] and [y1,...,yn], return [(x1,y1),...,(xn,yn)].  
 // Throws List_mismatch if the lengths are not the same.
-glist_t<$(`a,`b)@`r4,`r3> rzip(region_t<`r3> r3, region_t<`r4> r4,
-                               glist_t<`a,`r1> x, glist_t<`b,`r2> y) {
-  glist_t<$(`a,`b)@`r4,`r3> result, prev;
+list_t<$(`a,`b)@`r4,`r3> rzip(region_t<`r3> r3, region_t<`r4> r4,
+                               list_t<`a> x, list_t<`b> y) {
+  list_t<$(`a,`b)@`r4,`r3> result, prev;
   
   if (x == null && y == null) return null;
   if (x == null || y == null) throw List_mismatch;
@@ -559,15 +559,15 @@ glist_t<$(`a,`b)@`r4,`r3> rzip(region_t<`r3> r3, region_t<`r4> r4,
   return(result);
 }
 
-list_t<$(`a,`b)@> zip(glist_t<`a,`r1> x,glist_t<`b,`r2> y) {
+list_t<$(`a,`b)@`H,`H> zip(list_t<`a> x,list_t<`b> y) {
   return rzip(heap_region, heap_region, x, y);
 }
 
 // Given [(x1,y1),...,(xn,yn)], return ([x1,...,xn],[y1,...,yn]) 
-$(glist_t<`a,`r3>,glist_t<`b,`r4>) rsplit(region_t<`r3> r3, region_t<`r4> r4,
-                                          glist_t<$(`a,`b)@`r1,`r2> x) {
-  glist_t<`a,`r3> result1, prev1;
-  glist_t<`b,`r4> result2, prev2;
+$(list_t<`a,`r3>,list_t<`b,`r4>) rsplit(region_t<`r3> r3, region_t<`r4> r4,
+                                          list_t<$(`a,`b)@> x) {
+  list_t<`a,`r3> result1, prev1;
+  list_t<`b,`r4> result2, prev2;
   
   if (x == null) return $(null,null);
 
@@ -583,18 +583,18 @@ $(glist_t<`a,`r3>,glist_t<`b,`r4>) rsplit(region_t<`r3> r3, region_t<`r4> r4,
   return $(result1,result2);
 }
 
-$(list_t<`a>,list_t<`b>) split(glist_t<$(`a,`b)@`r1,`r2> x) {
+$(list_t<`a>,list_t<`b>) split(list_t<$(`a,`b)@> x) {
   return rsplit(heap_region, heap_region, x);
 }
 
 // Given [(x1,y1,z1),...,(xn,yn,zn)], return
 // ([x1,...,xn],[y1,...,yn],[z1,...,zn]) 
-$(glist_t<`a,`r3>,glist_t<`b,`r4>,glist_t<`c,`r5>) 
+$(list_t<`a,`r3>,list_t<`b,`r4>,list_t<`c,`r5>) 
   rsplit3(region_t<`r3> r3, region_t<`r4> r4, region_t<`r5> r5,
-         glist_t<$(`a,`b,`c)@`r1,`r2> x) {
-  glist_t<`a,`r3> result1,prev1;
-  glist_t<`b,`r4> result2,prev2;
-  glist_t<`c,`r5> result3,prev3;
+         list_t<$(`a,`b,`c)@> x) {
+  list_t<`a,`r3> result1,prev1;
+  list_t<`b,`r4> result2,prev2;
+  list_t<`c,`r5> result3,prev3;
   
   if (x == null) return $(null,null,null);
 
@@ -613,14 +613,14 @@ $(glist_t<`a,`r3>,glist_t<`b,`r4>,glist_t<`c,`r5>)
   return $(result1,result2,result3);
 }
 
-$(list_t<`a>,list_t<`b>,list_t<`c>) split3(glist_t<$(`a,`b,`c)@`r1,`r2> x) {
+$(list_t<`a>,list_t<`b>,list_t<`c>) split3(list_t<$(`a,`b,`c)@> x) {
   return rsplit3(heap_region, heap_region, heap_region, x);
 }
 
 
 // Given a list [x1,...,xn] and x, determine if x is in the list.  Uses
 // physical equality for comparison.
-bool memq(glist_t<`a,`r> l, `a x) {
+bool memq(list_t<`a> l, `a x) {
   while (l != null) {
     if (l->hd == x) return(true);
     l = l->tl;
@@ -628,7 +628,7 @@ bool memq(glist_t<`a,`r> l, `a x) {
   return(false);
 }
 
-bool mem(int compare(`a,`a), glist_t<`a,`r> l, `a x) {
+bool mem(int compare(`a,`a), list_t<`a> l, `a x) {
   while (l != null) {
     if (compare(l->hd,x)==0) return true;
     l = l->tl;
@@ -642,7 +642,7 @@ bool mem(int compare(`a,`a), glist_t<`a,`r> l, `a x) {
 // Given an association list [(k1,d1),...,(kn,dn)] and a key x,
 // return the first di such that ki = x.  Uses physical equality.
 // Throws Not_found if no such ki exists.
-`b assoc(glist_t<$(`a,`b)@`r1,`r2> l,`a x) {
+`b assoc(list_t<$(`a,`b)@> l,`a x) {
   while (l != null) {
     if (l->hd[0][0] == x) return(l->hd[0][1]);
     l = l->tl;
@@ -650,7 +650,7 @@ bool mem(int compare(`a,`a), glist_t<`a,`r> l, `a x) {
   throw Core::Not_found;
 }
 
-`b assoc_cmp(int compare(`a,`a),glist_t<$(`a,`b)@`r1,`r2> l,`a x) {
+`b assoc_cmp(int compare(`a,`a),list_t<$(`a,`b)@> l,`a x) {
   while (l != null) {
     if (compare(x,l->hd[0][0]) == 0) return(l->hd[0][1]);
     l = l->tl;
@@ -660,7 +660,7 @@ bool mem(int compare(`a,`a), glist_t<`a,`r> l, `a x) {
 
 // Given an association list [(k1,d1),...,(kn,dn)] and a key x,
 // returns true iff there exists a ki = x.
-bool mem_assoc(glist_t<$(`a,`b)@`r1,`r2> l,`a x) {
+bool mem_assoc(list_t<$(`a,`b)@> l,`a x) {
   while (l != null) {
     if (l->hd[0][0] == x) return(true);
     l = l->tl;
@@ -671,7 +671,7 @@ bool mem_assoc(glist_t<$(`a,`b)@`r1,`r2> l,`a x) {
 // checks that a list of elements is unique -- assumes they're sorted
 // returns an element that is duplicated if one exists, otherwise returns
 // null.
-Core::opt_t<`a> check_unique(int compare(`a,`a),glist_t<`a,`r> x) {
+Core::opt_t<`a> check_unique(int compare(`a,`a),list_t<`a> x) {
   while (x != null) {
     if (x->tl != null) 
       if (compare(x->hd,x->tl->hd) == 0) return new Core::Opt(x->hd);
@@ -681,7 +681,7 @@ Core::opt_t<`a> check_unique(int compare(`a,`a),glist_t<`a,`r> x) {
 }
 
 // makes a new array with index i being the ith element of the list
-`a ?`r2 rto_array(region_t<`r2> r2, glist_t<`a,`r> x) {
+`a ?`r2 rto_array(region_t<`r2> r2, list_t<`a> x) {
   int s;
   `a ?`r2 arr;
 
@@ -692,24 +692,24 @@ Core::opt_t<`a> check_unique(int compare(`a,`a),glist_t<`a,`r> x) {
   return arr;
 }
 
-`a ? to_array(glist_t<`a,`r> x) {
+`a ?`H to_array(list_t<`a> x) {
   return rto_array(heap_region, x);
 }
 
 // makes a new list with ith element arr[i]
-glist_t<`a,`r2> rfrom_array(region_t<`r2> r2, `a ?`r arr) {
-  glist_t<`a,`r2> ans = null;
+list_t<`a,`r2> rfrom_array(region_t<`r2> r2, `a ? arr) {
+  list_t<`a,`r2> ans = null;
   for(int i = arr.size-1; i >= 0; --i)
     ans = rnew(r2) List(arr[i],ans);
   return ans;
 }
 
-list_t<`a> from_array(`a ?`r arr) {
+list_t<`a> from_array(`a ? arr) {
   return rfrom_array(heap_region, arr);
 }
 
-glist_t<`a,`r> rtabulate(region_t<`r> r, int n, `a f(int)) {
-  glist_t<`a,`r> res = null;
+list_t<`a,`r> rtabulate(region_t<`r> r, int n, `a f(int)) {
+  list_t res = null;
   for (int i = 0; i < n; ++i) {
     res = rnew(r) List(f(i),res);
   }
@@ -720,8 +720,8 @@ list_t<`a> tabulate(int n, `a f(int)) {
   return rtabulate(heap_region, n, f);
 }
 
-glist_t<`a,`r> rtabulate_c(region_t<`r> r, int n, `a f(`b,int), `b env) {
-  glist_t<`a,`r> res = null;
+list_t<`a,`r> rtabulate_c(region_t<`r> r, int n, `a f(`b,int), `b env) {
+  list_t res = null;
   for (int i = 0; i < n; ++i) {
     res = rnew(r) List(f(env,i),res);
   }
@@ -733,7 +733,7 @@ list_t<`a> tabulate_c(int n, `a f(`b,int), `b env) {
 }
 
 // Short-circuits on pointer-equal lists, hence need to have same region. :-(
-int list_cmp(int cmp(`a,`a), glist_t<`a,`r1> l1, glist_t<`a,`r1> l2) {
+int list_cmp(int cmp(`a,`a), list_t<`a,`r1> l1, list_t<`a,`r1> l2) {
   for(; l1 != null && l2 != null; l1 = l1->tl, l2 = l2->tl) {
     if(l1 == l2)
       return 0;
@@ -749,7 +749,7 @@ int list_cmp(int cmp(`a,`a), glist_t<`a,`r1> l1, glist_t<`a,`r1> l2) {
 }
 
 // idem
-bool list_prefix(int cmp(`a,`a), glist_t<`a,`r1> l1, glist_t<`a,`r1> l2) {
+bool list_prefix(int cmp(`a,`a), list_t<`a,`r1> l1, list_t<`a,`r1> l2) {
   for(; l1 != null && l2 != null; l1 = l1->tl, l2 = l2->tl) {
     if(l1 == l2)
       return true;
@@ -760,13 +760,13 @@ bool list_prefix(int cmp(`a,`a), glist_t<`a,`r1> l1, glist_t<`a,`r1> l2) {
   return (l1 == null);
 }
 
-glist_t<`a,`r2> rfilter_c(region_t<`r2> r2, bool f(`b,`a), 
-                          `b env, glist_t<`a,`r> l) {
+list_t<`a,`r2> rfilter_c(region_t<`r2> r2, bool f(`b,`a), 
+                          `b env, list_t<`a> l) {
   if(l == null)
     return null;
   // First elt is purposefully junk!
-  glist_t<`a,`r2> result = rnew(r2) List(l->hd,null); 
-  glist_t<`a,`r2> end = result; // pointer to last cons cell
+  list_t<`a,`r2> result = rnew(r2) List(l->hd,null); 
+  list_t<`a,`r2> end = result; // pointer to last cons cell
   for(;l != null;l=l->tl) {
     if(f(env,l->hd)) {
       end->tl = rnew(r2) List(l->hd,null);
@@ -776,16 +776,16 @@ glist_t<`a,`r2> rfilter_c(region_t<`r2> r2, bool f(`b,`a),
   return result->tl; // Ditch the placeholder we inserted earlier.
 }
 
-list_t<`a> filter_c(bool f(`b,`a), `b env, glist_t<`a,`r> l) {
+list_t<`a> filter_c(bool f(`b,`a), `b env, list_t<`a> l) {
   return rfilter_c(heap_region, f, env, l);
 }
 
-glist_t<`a,`r2> rfilter(region_t<`r2> r2, bool f(`a), glist_t<`a,`r> l) {
+list_t<`a,`r2> rfilter(region_t<`r2> r2, bool f(`a), list_t<`a> l) {
   if(l == null)
     return null;
   // First elt is purposefully junk!
-  glist_t<`a,`r2> result = rnew(r2) List(l->hd,null); 
-  glist_t<`a,`r2> end = result; // pointer to last cons cell
+  list_t<`a,`r2> result = rnew(r2) List(l->hd,null); 
+  list_t<`a,`r2> end = result; // pointer to last cons cell
   for(;l != null;l=l->tl) {
     if(f(l->hd)) {
       end->tl = rnew(r2) List(l->hd,null);
@@ -795,6 +795,6 @@ glist_t<`a,`r2> rfilter(region_t<`r2> r2, bool f(`a), glist_t<`a,`r> l) {
   return (result->tl); // Ditch the placeholder we inserted earlier.
 }
 
-list_t<`a> filter(bool f(`a), glist_t<`a,`r> l) {
+list_t<`a> filter(bool f(`a), list_t<`a> l) {
   return rfilter(heap_region, f, l);
 }

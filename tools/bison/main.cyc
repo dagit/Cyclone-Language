@@ -40,7 +40,7 @@ extern void output(), done(int);
 /* VMS complained about using `int'.  */
 
 int
-main(int argc, char ??argv)
+main(int argc, char ?`H ?`H argv)
 {
   program_name = argv[0];
   failure = 0;

@@ -32,9 +32,9 @@ using Core;
 using Stdio;
 using Xml;
 
-extern list_t<content_t> parse_file(FILE @f);
+extern list_t<content_t> parse_file(FILE @`H f);
 extern opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf;
-extern void error(string_t msg);
+extern void error(string_t<`H> msg);
 
 extern
 tunion context {

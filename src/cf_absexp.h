@@ -72,7 +72,7 @@ extern absexp_t mkAssignAE(absop_t l, absop_t r);
 extern absexp_t mkMallocAE(exp_t e);
 extern absexp_t mkStmtAE(stmt_t s);
 extern absexp_t mkGroupAE(absexpgroup_t g, absexp_t ae1, absexp_t ae2);
-extern absexp_t mkGroupAE_l(absexpgroup_t g, List::list_t<absexp_t> ael);
+extern absexp_t mkGroupAE_l(absexpgroup_t g, List::list_t<absexp_t,`H> ael);
 
 extern bool isUnknownOp(absop_t);
 

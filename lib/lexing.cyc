@@ -49,7 +49,7 @@ xtunion exn { Error(string_t) };
 
 struct lexbuf<`a> { // use `a for state that refill_buff might need 
 
-  void   (@refill_buff)(struct lexbuf<`a> @;{});
+  void   (@refill_buff)(struct lexbuf<`a> @);
   `a     refill_state;
 
   mstring_t lex_buffer;
@@ -64,7 +64,7 @@ struct lexbuf<`a> { // use `a for state that refill_buff might need
 
 struct function_lexbuf_state<`b> {
 // instantiation for using function to read
-  int (@read_fun)(mstring_t,int,`b;{});
+  int (@read_fun)(mstring_t,int,`b);
   `b read_fun_state;
 };
 
@@ -112,7 +112,7 @@ void lex_refill(Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
 }
 
 Lexbuf<Function_lexbuf_state<`b>>
-from_function(int read_fun(mstring_t,int,`b;{}),
+from_function(int read_fun(mstring_t<`H>,int,`b),
                   `b read_fun_state) {
   return new lexbuf(lex_refill, // @ <`b>,
                     new function_lexbuf_state(read_fun, read_fun_state),
@@ -123,13 +123,13 @@ from_function(int read_fun(mstring_t,int,`b;{}),
                     false);
 }
 
-int read_from_file(mstring_t aux, int n, FILE @f) {
+int read_from_file(mstring_t<`H> aux, int n, FILE @`r f) {
 //                           <<FILE>function_lexbuf_state>lexbuf lbuf) {
   return file_string_read(f, aux, 0, n);
 }
 
 // corresponds to ocaml's from_channel
-Lexbuf<Function_lexbuf_state<FILE@>> from_file(FILE @f) {
+Lexbuf<Function_lexbuf_state<FILE@`r>> from_file(FILE @`r f) {
   //  return (from_function @<FILE@>) (read_from_file, f);
   return from_function(read_from_file, f);
 }

@@ -80,7 +80,7 @@ void dumpstructfields(list_t<structfield_t> fields);
 // really want to change this to char[] (need a control character for format
 // prims and the ability to cast to untagged (from Tagged requires Toc hlep,
 // from Fixed requires trivial Toc help)
-typedef string_t dump_string_t;
+typedef string_t<`r> dump_string_t<`r>;
 
 // set by dumpdecllist2file (this module is not re-entrant)
 FILE @@ dump_file = &stdout; 
@@ -306,35 +306,35 @@ static void dumprgn(type_t t) {
 }
 
 static $(list_t<type_t>, list_t<type_t>) effects_split(type_t t) {
-  list_t<type_t> regions = null;
+  list_t<type_t> rgions = null;
   list_t<type_t> effects = null;
 
   switch (Tcutil::compress(t)) {
-  case &AccessEff(r): regions = new List(r,regions); break;
+  case &AccessEff(r): rgions = new List(r,rgions); break;
   case &JoinEff(ts):
     for (; ts != null; ts = ts->tl) {
       let $(rs,es) = effects_split(ts->hd);
-      regions = List::imp_append(rs,regions);
+      rgions = List::imp_append(rs,rgions);
       effects = List::imp_append(es,effects);
     }
     break;
   default: effects = new List(t,effects); break;
   }
-  return $(regions, effects);
+  return $(rgions, effects);
 }
 
 static void dumpeff(type_t t) {
-  let $(regions,effects) = effects_split(t);
-  regions = List::imp_rev(regions);
+  let $(rgions,effects) = effects_split(t);
+  rgions = List::imp_rev(rgions);
   effects = List::imp_rev(effects);
   for (; effects != null; effects = effects->tl) {
     dumpntyp(effects->hd);
     dump_char('+');
   }
   dump_char('{');
-  for (; regions != null; regions = regions->tl) {
-    dumprgn(regions->hd);
-    if (regions->tl != null) dump_char(',');
+  for (; rgions != null; rgions = rgions->tl) {
+    dumprgn(rgions->hd);
+    if (rgions->tl != null) dump_char(',');
   }
   dump_char('}');
 }
@@ -411,6 +411,7 @@ void dumpntyp(type_t t) {
     dumprgn(rgn); return;
   case HeapRgn: return; 
   case &AccessEff(_): return;
+  case &RgnsEff(_): return;
   case &JoinEff(_): return;
   }
 }
@@ -850,7 +851,7 @@ void dumpstructfields(list_t<structfield_t> fields) {
     dumpatts(atts);
     if (width != null) {
       dump_char(':');
-      dumpexp(width->v);
+      dumpexp((exp_t)width);
     }
     dump_semi();
   }
@@ -1112,7 +1113,7 @@ void dumptqtd(tqual_t tq, type_t t, void f(`a), `a a) {
   dumptms(List::imp_rev(tms),f,a);
 }
 
-void dumpdecllist2file(list_t<decl_t> tdl, FILE @f) {
+void dumpdecllist2file(list_t<decl_t> tdl, FILE @`H f) {
   pos = 0;
   *dump_file = f;
   for(; tdl != null; tdl = tdl->tl)

@@ -51,7 +51,7 @@ namespace Interface {
   
   // build a maximal interface from the global environment computed by the type-checker
   // also check that each (non extern) function prototyp is eventually provided
-  extern i_t extract(Dict::dict_t<list_t<var_t>, genv_t> ae);
+  extern i_t extract(Dict::dict_t<list_t<var_t,`H>, genv_t,`H> ae);
 
   // check if i1 may safely be used instead of i2 (ie. i1 is more restrictive than i2) :
   // _ everything provided by in i1 is provided by i2
@@ -59,7 +59,7 @@ namespace Interface {
   // special case : typedefs may not be included, compatibility is enough 
   // if info == null, no error message is printed
   // else we use (*info)[k] as a name for ik
-  extern bool is_subinterface(i_t i1, i_t i2, $(string_t, string_t) * `r info);
+  extern bool is_subinterface(i_t i1, i_t i2, $(string_t<`H>, string_t<`H>) * `r info);
 
   // try to merge 2 interfaces
   // _ if they're incompatible, return null (and if info != null, print some error messages)
@@ -68,25 +68,25 @@ namespace Interface {
   // special case : a same typedef can appear in both e1 and e2
   // if info == null, no error message is printed
   // else we use (*info)[k] as a name for ik
-  extern struct I * merge(i_t i1, i_t i2, $(string_t, string_t) * `r info);
+  extern struct I * merge(i_t i1, i_t i2, $(string_t<`H>, string_t<`H>) * `r info);
 
   // try to merge a list of interfaces
   // use linfo (if long enough) for the error messages
-  extern struct I * merge_list(list_t<i_t> li, list_t<string_t @> linfo);
+  extern struct I * merge_list(list_t<i_t,`H> li, list_t<stringptr_t<`H,`H>,`H> linfo);
   // same but ask for the interfaces one by one
-  extern struct I * get_and_merge_list(i_t (@get)(`a), list_t<`a> la, list_t<string_t @> linfo);
+  extern struct I * get_and_merge_list(i_t (@get)(`a), list_t<`a,`H> la, list_t<stringptr_t<`H,`H>,`H> linfo);
 
   // pretty print to a text file 
-  extern void print(i_t, FILE @);
+  extern void print(i_t, FILE @`H);
 
   // load from a text file
-  extern i_t parse(FILE @);
+  extern i_t parse(FILE @`H);
 
   // binary save to a file
-  extern void save(i_t, FILE @);
+  extern void save(i_t, FILE @`H);
 
   // load from a text file
-  extern i_t load(FILE @);
+  extern i_t load(FILE @`H);
 }
 
 typedef Interface::i_t interface_t;

@@ -67,7 +67,7 @@ FILE *tmpfile() {
   return cf ? new __sFILE(cf) : null;
 }
 
-char ?tmpnam(char ?s) {
+char ?`H tmpnam(char ?`H s) {
   char ?name = Cstring_to_string(Cstdio::tmpnam(null));
   return s ? String::strcpy(s, name) : name;
 }

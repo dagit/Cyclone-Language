@@ -30,13 +30,13 @@ abstract struct Rope_node {
   tunion R v;
 };
 
-rope_t from_string(string_t s) {
+rope_t from_string(string_t<`H> s) {
   return new Rope_node{new String_rope(s)};
 }
 rope_t concat(rope_t r1,rope_t r2) {
   return new Rope_node{new Array_rope(new {r1,r2})};
 }
-rope_t concata(rope_t ?rs) {
+rope_t concata(rope_t ?`H rs) {
   return new Rope_node(new Array_rope(rs));
 }
 rope_t concatl(List::list_t<rope_t> l) {

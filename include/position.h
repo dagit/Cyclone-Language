@@ -30,8 +30,8 @@ namespace Position {
 
   extern xtunion exn {extern Exit};
 
-  extern void   reset_position(string_t);
-  extern void   set_position_file(string_t);
+  extern void   reset_position(string_t<`H>);
+  extern void   set_position_file(string_t<`H>);
   extern string_t get_position_file();
 
   //////// Location Tracking /////////
@@ -41,7 +41,7 @@ namespace Position {
   extern seg_t  segment_join(seg_t,seg_t);
   extern mstring_t string_of_loc(int);
   extern mstring_t string_of_segment(seg_t);
-  extern list_t<mstringptr_t> strings_of_segments(glist_t<seg_t,`r>);
+  extern list_t<mstringptr_t> strings_of_segments(list_t<seg_t,`r>);
 
   //////// Errors ////////////////////
   extern tunion Error_kind { Lex, Parse, Elab };
@@ -53,9 +53,10 @@ namespace Position {
     string_t       desc;
   };
   typedef struct Error @error_t;
-  extern error_t mk_err_lex(seg_t,string_t);
-  extern error_t mk_err_parse(seg_t,string_t);
-  extern error_t mk_err_elab(seg_t,string_t);
+  extern error_t mk_err_lex(seg_t,string_t<`H>);
+  extern error_t mk_err_parse(seg_t,string_t<`H>);
+  extern error_t mk_err_elab(seg_t,string_t<`H>);
+
 
   //////// Error Reporting ///////////
   extern xtunion exn {extern Nocontext};

@@ -72,7 +72,7 @@ extern string_t scope2string(scope_t sc);
   extern stringptr_t cyc_stringptr;
   extern int exp_prec(exp_t);
   extern string_t char_escape(char);
-  extern string_t string_escape(string_t);
+  extern string_t string_escape(string_t<`H>);
   extern string_t prim2str(primop_t p);
   extern bool is_declaration(stmt_t s);
   extern $(Core::opt_t<var_t>,tqual_t,type_t)@ 

@@ -69,12 +69,12 @@ static bool print_all_tvars_r = false;
 static bool print_all_kinds_r = false;
 
 static string_t *output_file = null;
-static void set_output_file(string_t s) {
+static void set_output_file(string_t<`H> s) {
   output_file = new s;
 }
 
 static list_t<stringptr_t> cppargs = null;
-static void add_cpparg(string_t s) {
+static void add_cpparg(string_t<`H> s) {
   cppargs = new List(new s,cppargs);
 }
 
@@ -94,10 +94,10 @@ static void add_cyclone_exec_prefix_path(string_t s) {
 
 // Arguments to pass to the C compiler
 static list_t<stringptr_t> ccargs = null;
-static void add_ccarg(string_t s) {
+static void add_ccarg(string_t<`H> s) {
   ccargs = new List(new s,ccargs);
 }
-static void add_ccarg2(string_t flag,string_t arg) {
+static void add_ccarg2(string_t<`H> flag,string_t<`H> arg) {
   ccargs = new List(new arg, new List(new flag,ccargs));
 }
 
@@ -107,7 +107,7 @@ static void add_ccarg2(string_t flag,string_t arg) {
 // libmain.c.  So, we separate out the library args from the ccargs
 // so that we can force libcyc.a to appear first.
 static list_t<stringptr_t> libargs = null;
-static void add_libarg(string_t s) {
+static void add_libarg(string_t<`H> s) {
   libargs = new List(new s,libargs);
 }
 
@@ -124,7 +124,7 @@ static void set_produce_dependencies() {
 }
 
 static string_t *dependencies_target = null;
-static void set_dependencies_target(string_t s) {
+static void set_dependencies_target(string_t<`H> s) {
   dependencies_target = new s;
 }
 
@@ -151,7 +151,7 @@ static void set_stop_after_asmfile() {
 // Cyclone files given on the command line
 static list_t<stringptr_t> cyclone_files = null;
 // Like add_ccarg but intercepts .cyc files for special handling
-static void add_other(string_t s) {
+static void add_other(string_t<`H> s) {
   if (is_cyclone_sourcefile(s)) {
     // For processing by Cyclone
     cyclone_files = new List(new s,cyclone_files);
@@ -164,7 +164,7 @@ static void add_other(string_t s) {
   else add_ccarg(s);
 }
 
-static void remove_file(string_t s) {
+static void remove_file(string_t<`H> s) {
   if (save_temps_r) return;
   else Stdio::remove(s);
 }
@@ -184,8 +184,8 @@ FILE * try_file_open(string_t filename, string_t mode, string_t msg_part) {
 
 list_t<Absyn::decl_t>
   do_stage(string_t stage_name,
-           list_t<Absyn::decl_t> f(`a, list_t<Absyn::decl_t>),
-           `a env, list_t<Absyn::decl_t> tds) {
+           list_t<Absyn::decl_t,`H> f(`a, list_t<Absyn::decl_t,`H>),
+           `a env, list_t<Absyn::decl_t,`H> tds) {
   string_t exn_string     = "";
   string_t explain_string = "";
   bool other_exn = false;
@@ -240,19 +240,19 @@ list_t<Absyn::decl_t> do_parse(FILE @ f, list_t<Absyn::decl_t> ignore) {
   return ans;
 }
 
-list_t<Absyn::decl_t> do_typecheck(Tcenv::tenv_t te,list_t<Absyn::decl_t> tds){
+list_t<Absyn::decl_t> do_typecheck(Tcenv::tenv_t te,list_t<Absyn::decl_t,`H> tds){
   Tc::tc(te, true, tds);
   if (!noshake_r)
     tds = Tc::treeshake(te,tds);
   return tds;
 }
 
-list_t<Absyn::decl_t> do_cfcheck(bool ignore, list_t<Absyn::decl_t> tds) {
+list_t<Absyn::decl_t> do_cfcheck(bool ignore, list_t<Absyn::decl_t,`H> tds) {
   NewControlFlow::cf_check(tds);
   return tds;
 }
 
-list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE *, FILE @) @ params, list_t<Absyn::decl_t> tds) {
+list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE *`H, FILE @`H) @`H params, list_t<Absyn::decl_t,`H> tds) {
   let &$(te, fi, fo) = params;
   let i1 = Interface::extract(te -> ae);
   if (fi == null) {
@@ -274,7 +274,7 @@ list_t<Absyn::decl_t> do_tovc(bool ignore, list_t<Absyn::decl_t> tds) {
   return Tovc::tovc(tds);
 }
 
-list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t> tds) {
+list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
   struct Absynpp::Params params_r;
 
   if (tc_r) {
@@ -311,7 +311,7 @@ static void remove_cfiles() {
 }
 
 /* Take as input a string, return the list of substrings separated by colons */
-static list_t<stringptr_t> split_by_char(string_t s, char c) {
+static list_t<stringptr_t> split_by_char(string_t<`H> s, char c) {
   if (s == null) return null;
   let result = null;
   let len = strlen(s);
@@ -382,7 +382,7 @@ static bool is_other_special(char c) {
 }
 
 /* Escape any characters special to /bin/sh */
-static string_t sh_escape_string(string_t s) {
+static string_t sh_escape_string(string_t<`H> s) {
   let len = strlen(s);
 
   /* Count the number of single quotes and other special chars in s */
@@ -415,11 +415,11 @@ static string_t sh_escape_string(string_t s) {
   }
   return s2;
 }
-static stringptr_t sh_escape_stringptr(stringptr_t sp) {
+static stringptr_t sh_escape_stringptr(stringptr_t<`H,`H> sp) {
   return new sh_escape_string(*sp);
 }
 
-static void process_file(string_t filename) {
+static void process_file(string_t<`H> filename) {
 
   let basename      = Filename::chop_extension(filename);
   let preprocfile   = strconcat(basename, ".cyp");
@@ -587,7 +587,7 @@ static void process_file(string_t filename) {
 static string_t final_str = "<final>";
 static stringptr_t final_strptr = &final_str;
 
-static interface_t read_cycio(string_t @ n) {
+static interface_t read_cycio(string_t<`H> @ n) {
   if (n == final_strptr) {
     return Interface::final();
   }
@@ -615,9 +615,9 @@ static bool is_cfile(string_t @ n) {
   return (*n)[0] != '-';
 }
 
-int main(int argc, string_t ? argv) {
+int main(int argc, string_t<`H> ?`H argv) {
 
-  Arg::speclist_t<`H,`H,_> options =
+  Arg::speclist_t<`H,`H> options =
     list(new $("-v",false,"",
                new Set_spec(&v_r),
                "Print compilation stages verbosely"),

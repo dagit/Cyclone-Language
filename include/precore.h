@@ -27,12 +27,12 @@
 #include <sys/types.h>
 #endif 
 
-typedef char *{0} Cstring;
-typedef const char ? string_t;
-typedef char ? mstring_t;
+typedef char *{0}`r Cstring<`r>;
+typedef const char ?`r string_t<`r>;
+typedef char ?`r mstring_t<`r>;
 
-typedef string_t @stringptr_t;
-typedef mstring_t @mstringptr_t;
+typedef string_t<`r1> @`r2 stringptr_t<`r1,`r2>;
+typedef mstring_t<`r1> @`r2 mstringptr_t<`r1,`r2>;
 
 #ifndef bool
 typedef int bool;

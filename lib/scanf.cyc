@@ -896,8 +896,10 @@ int vsscanf(const char ?`r src, const char ?`r1 fmt,
   __attribute__((format(scanf,2,0)))
 {
   int err = 0;
-  return _IO_vfscanf(string_getc, string_ungetc, string_peekc, &src, fmt, ap,
-                     &err);
+  int (@`H sgc)(const char ?`r @ `vsscanf) = string_getc;
+  //return _IO_vfscanf(sgc, string_ungetc, string_peekc, &src, fmt, ap,&err);
+  return _IO_vfscanf(string_getc, string_ungetc, string_peekc, &src, fmt, ap,&err);
+                     
 }
 
 int sscanf(const char ?`r src, const char ?`r1 fmt, 

@@ -95,7 +95,7 @@ extern fenv_t new_fenv(seg_t,fndecl_t);
 
 extern tenv_t enter_ns(tenv_t, var_t);
 
-extern list_t<var_t>     resolve_namespace(tenv_t,seg_t,var_t,list_t<var_t>);
+extern list_t<var_t> resolve_namespace(tenv_t,seg_t,var_t,list_t<var_t,`H>);
 extern resolved_t        lookup_ordinary(tenv_t,seg_t,qvar_t);
 extern structdecl_t@     lookup_structdecl(tenv_t,seg_t,qvar_t);
 extern uniondecl_t@      lookup_uniondecl(tenv_t,seg_t,qvar_t);
@@ -115,7 +115,7 @@ extern tenv_t     add_type_vars(seg_t,tenv_t,list_t<tvar_t>);
 extern tenv_t set_in_loop(tenv_t te, stmt_t continue_dest);
 extern tenv_t set_in_switch(tenv_t);
 extern tenv_t set_fallthru(tenv_t te, 
-			   list_t<tvar_t> new_tvs, 
+			   list_t<tvar_t,`H> new_tvs, 
 			   list_t<vardecl_t> vds,
 			   switch_clause_t clause);
 extern tenv_t clear_fallthru(tenv_t);

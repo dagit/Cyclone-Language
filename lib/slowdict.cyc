@@ -30,33 +30,33 @@ using   Splay;
 
 xtunion exn {Absent,Present};
 
-abstract struct Dict<`a,`b,`e::E> {
-  int       (@reln)(`a,`a;`e);
-  tunion tree<`a,`b> tree;
+abstract struct Dict<`a,`b> {
+  int       (@reln)(`a,`a);
+  tunion tree<`a,`b,`H> tree;
 };
 
 // should be the commented out one, but unification is buggy
-hdict_t<`a,`b,`e1> empty(int comp(`a,`a;`e1)) {
-  tunion tree<`a,`b> t = Leaf;
+dict_t<`a,`b> empty(int comp(`a,`a)) {
+  tunion tree<`a,`b,`H> t = Leaf;
   return new Dict(comp, t);
 }
-//hdict_t<`a,`b,`e> empty(int comp(`a,`a)) {
+//dict_t<`a,`b> empty(int comp(`a,`a)) {
 //  return new Dict(comp, Leaf);
 //}
 
-bool is_empty(hdict_t<`a,`b,`e> d) {
+bool is_empty(dict_t<`a,`b> d) {
   switch (d->tree) {
   case Leaf:    return true;
   case &Node(_): return false;
   }
 }
 
-bool member(hdict_t<`a,`b,`e> d, `a key) {
+bool member(dict_t<`a,`b> d, `a key) {
   return splay(d->reln, key, d->tree);
 }
 
-hdict_t<`a,`b,`e> insert(hdict_t<`a,`b,`e> d, `a key, `b data) {
-  tunion tree<`a,`b> newleft = Leaf, newright = Leaf;
+dict_t<`a,`b> insert(dict_t<`a,`b> d, `a key, `b data) {
+  tunion tree<`a,`b,`H> newleft = Leaf, newright = Leaf;
   if (splay(d->reln, key, d->tree)) {
     // we're functional, so have to make a new root node?
     switch (d->tree) {
@@ -92,25 +92,25 @@ hdict_t<`a,`b,`e> insert(hdict_t<`a,`b,`e> d, `a key, `b data) {
                                                      newleft,newright))));
 }
 
-hdict_t<`a,`b,`e> insert_new(hdict_t<`a,`b,`e> d, `a key, `b data) {
+dict_t<`a,`b> insert_new(dict_t<`a,`b> d, `a key, `b data) {
   // somewhat wasteful this way (makes two new top nodes)
   if (splay(d->reln, key, d->tree))
     throw Present;
   return insert(d, key, data);
 }
 
-hdict_t<`a,`b,`e> inserts(hdict_t<`a,`b,`e> d,
-                          List::glist_t<$(`a,`b)@`r1,`r2> kds) {  
+dict_t<`a,`b> inserts(dict_t<`a,`b> d,
+                          List::list_t<$(`a,`b)@> kds) {  
   for (; kds != null; kds = kds->tl)
     d = insert(d, (*kds->hd)[0], (*kds->hd)[1]);
   return d;
 }
 
-hdict_t<`a,`b,`e> singleton(int comp(`a,`a;`e),`a key,`b data) {
+dict_t<`a,`b> singleton(int comp(`a,`a),`a key,`b data) {
   return new Dict(comp, new Node(new noderef(new node(key, data, Leaf, Leaf))));
 }
 
-`b lookup(hdict_t<`a,`b,`e> d,`a key) {
+`b lookup(dict_t<`a,`b> d,`a key) {
   if (splay(d->reln, key, d->tree))
     switch (d->tree) {
     case &Node(nr): return nr->v->data;
@@ -119,7 +119,7 @@ hdict_t<`a,`b,`e> singleton(int comp(`a,`a;`e),`a key,`b data) {
   throw Absent;
 }
 
-Core::opt_t<`b> lookup_opt(hdict_t<`a,`b,`e> d,`a key) {
+Core::opt_t<`b> lookup_opt(dict_t<`a,`b> d,`a key) {
   if (splay(d->reln, key, d->tree))
     switch (d->tree) {
     case &Node(nr): return new Core::Opt(nr->v->data);
@@ -130,12 +130,12 @@ Core::opt_t<`b> lookup_opt(hdict_t<`a,`b,`e> d,`a key) {
 
 static int get_largest(`a x, `a y) { return 1; }
 
-hdict_t<`a,`b,`e> delete(hdict_t<`a,`b,`e> d,`a key) {
+dict_t<`a,`b> delete(dict_t<`a,`b> d,`a key) {
   if (splay(d->reln, key, d->tree))
     switch (d->tree) {
     case Leaf: throw new Core::Impossible("Dict::lookup");
     case &Node(nr):
-      struct node<`a,`b> @n = nr->v;
+      struct node<`a,`b,`H> @n = nr->v;
       switch (n->left) {
       case Leaf:    return new Dict(d->reln, n->right);
       case &Node(noderef_left): 
@@ -143,7 +143,7 @@ hdict_t<`a,`b,`e> delete(hdict_t<`a,`b,`e> d,`a key) {
 	case Leaf:    return new Dict(d->reln, n->left);
 	case &Node(node_ref_right): 
 	  splay(get_largest, key, n->left);
-	  struct node<`a,`b> @newtop = noderef_left->v; // splay changes this
+	  struct node<`a,`b,`H> @newtop = noderef_left->v; // splay changes this
 	  return new Dict(d->reln,
 		       new Node(new noderef(new node(newtop->key, newtop->data,
                                                  newtop->left, n->right))));
@@ -154,42 +154,42 @@ hdict_t<`a,`b,`e> delete(hdict_t<`a,`b,`e> d,`a key) {
     return d;
 }
       
-hdict_t<`a,`b,`e> delete_present(hdict_t<`a,`b,`e> d,`a key) {
+dict_t<`a,`b> delete_present(dict_t<`a,`b> d,`a key) {
   let d2 = delete(d,key);
   if (d == d2)
     throw Absent;
   return d2;
 }
 
-static `c fold_tree(`c f(`a,`b,`c), tunion tree<`a,`b> t, `c accum) {
+static `c fold_tree(`c f(`a,`b,`c), tunion tree<`a,`b,`H> t, `c accum) {
   switch (t) {
   case Leaf: 
     return accum;
   case &Node(nr): 
-    struct node<`a,`b> @n = nr->v;
+    struct node<`a,`b,`H> @n = nr->v;
     return f(n->key, n->data, fold_tree(f, n->left, 
                                         fold_tree(f, n->right, accum)));
   }
 }
-`c fold(`c f(`a,`b,`c),hdict_t<`a,`b,`e> d,`c accum) {
+`c fold(`c f(`a,`b,`c),dict_t<`a,`b> d,`c accum) {
   return fold_tree(f, d->tree, accum);
 }
 
-static `c fold_tree_c(`c f(`d,`a,`b,`c),`d env, tunion tree<`a,`b> t,`c accum) {
+static `c fold_tree_c(`c f(`d,`a,`b,`c),`d env, tunion tree<`a,`b,`H> t,`c accum) {
   switch (t) {
   case Leaf: 
     return accum;
   case &Node(nr): 
-    struct node<`a,`b> @n = nr->v;
+    struct node<`a,`b,`H> @n = nr->v;
     return f(env, n->key, n->data,
              fold_tree_c(f,env,n->left,fold_tree_c(f,env,n->right,accum)));
   }
 }
-`c fold_c(`c f(`d,`a,`b,`c),`d env, hdict_t<`a,`b,`e> dict,`c accum) {
+`c fold_c(`c f(`d,`a,`b,`c),`d env, dict_t<`a,`b> dict,`c accum) {
   return fold_tree_c(f,env,dict->tree,accum);
 }
 
-static void app_tree(`c f(`a,`b),tunion tree<`a,`b> t) {
+static void app_tree(`c f(`a,`b),tunion tree<`a,`b,`H> t) {
   switch (t) {
   case Leaf: break;
   case &Node(nr):
@@ -200,56 +200,56 @@ static void app_tree(`c f(`a,`b),tunion tree<`a,`b> t) {
     break;
   }
 }
-void app(`c f(`a,`b),hdict_t<`a,`b,`e> d) {
+void app(`c f(`a,`b),dict_t<`a,`b> d) {
   app_tree(f,d->tree);
 }
 
-static void iter_tree(void f(`a,`b),tunion tree<`a,`b> t) {
+static void iter_tree(void f(`a,`b),tunion tree<`a,`b,`H> t) {
   switch (t) {
   case Leaf: break;
   case &Node(nr):
-    struct node<`a,`b> @n = nr->v;
+    struct node<`a,`b,`H> @n = nr->v;
     iter_tree(f, n->left);
     f(n->key, n->data);
     iter_tree(f, n->right);
     break;
   }
 }
-void iter(void f(`a,`b),hdict_t<`a,`b,`e> d) {
+void iter(void f(`a,`b),dict_t<`a,`b> d) {
   iter_tree(f,d->tree);
 }
 
-static void app_tree_c(`c f(`d,`a,`b),`d env,tunion tree<`a,`b> t) {
+static void app_tree_c(`c f(`d,`a,`b),`d env,tunion tree<`a,`b,`H> t) {
   switch (t) {
   case Leaf: break;
   case &Node(nr):
-    struct node<`a,`b> @n = nr->v;
+    struct node<`a,`b,`H> @n = nr->v;
     app_tree_c(f, env, n->left);
     f(env, n->key, n->data);
     app_tree_c(f, env, n->right);
     break;
   }
 }
-void app_c(`c f(`d,`a,`b),`d env,hdict_t<`a,`b,`e> d) {
+void app_c(`c f(`d,`a,`b),`d env,dict_t<`a,`b> d) {
   app_tree_c(f,env,d->tree);
 }
 
-static void iter_tree_c(void f(`c,`a,`b),`c env,tunion tree<`a,`b> t) {
+static void iter_tree_c(void f(`c,`a,`b),`c env,tunion tree<`a,`b,`H> t) {
   switch (t) {
   case Leaf: break;
   case &Node(nr):
-    struct node<`a,`b> @n = nr->v;
+    struct node<`a,`b,`H> @n = nr->v;
     iter_tree_c(f, env, n->left);
     f(env, n->key, n->data);
     iter_tree_c(f, env, n->right);
     break;
   }
 }
-void iter_c(void f(`c,`a,`b),`c env,hdict_t<`a,`b,`e> d) {
+void iter_c(void f(`c,`a,`b),`c env,dict_t<`a,`b> d) {
   iter_tree_c(f,env,d->tree);
 }
 
-static tunion tree<`a,`c> map_tree(`c f(`b), tunion tree<`a,`b> t) {
+static tunion tree<`a,`c,`H> map_tree(`c f(`b), tunion tree<`a,`b,`H> t) {
   switch (t) {
   case Leaf: return Leaf;
   case &Node(nr):
@@ -260,36 +260,36 @@ static tunion tree<`a,`c> map_tree(`c f(`b), tunion tree<`a,`b> t) {
                                          map_tree(f, n->right))));
   }
 }
-hdict_t<`a,`c,`e> map(`c f(`b), hdict_t<`a,`b,`e> d) {
+dict_t<`a,`c> map(`c f(`b), dict_t<`a,`b> d) {
   return new Dict(d->reln, map_tree(f, d->tree));
 }
 
-static tunion tree<`a,`c> map_tree_c(`c f(`d,`b), `d env, tunion tree<`a,`b> t) {
+static tunion tree<`a,`c,`H> map_tree_c(`c f(`d,`b), `d env, tunion tree<`a,`b,`H> t) {
   switch (t) {
   case Leaf: return Leaf;
   case &Node(nr):
-    struct node<`a,`b> @n = nr->v;
+    struct node<`a,`b,`H> @n = nr->v;
     return new Node(new noderef(new node(n->key, f(env, n->data), 
                                          map_tree_c(f, env, n->left), 
                                          map_tree_c(f, env, n->right))));
   }
 }
-hdict_t<`a,`c,`e> map_c(`c f(`d,`b), `d env, hdict_t<`a,`b,`e> d) {
+dict_t<`a,`c> map_c(`c f(`d,`b), `d env, dict_t<`a,`b> d) {
   return new Dict(d->reln, map_tree_c(f, env, d->tree));
 }
 
-$(`a,`b)@ choose(hdict_t<`a,`b,`e> d) {
+$(`a,`b)@ choose(dict_t<`a,`b> d) {
   switch (d->tree) {
   case Leaf:      throw Absent;
   case &Node(nr): return new $(nr->v->key, nr->v->data);
   }
 }
 
-List::list_t<$(`a,`b)@> to_list_f(`a k, `b v, List::list_t<$(`a,`b)@> accum) {
+List::list_t<$(`a,`b)@> to_list_f(`a k, `b v, List::list_t<$(`a,`b)@`H,`H> accum) {
   return new List::List(new $(k,v),accum);
 }
 
-List::list_t<$(`a,`b)@> to_list(hdict_t<`a,`b,`e> d) {
+List::list_t<$(`a,`b)@> to_list(dict_t<`a,`b> d) {
   return fold(to_list_f, d, null);
 }
 

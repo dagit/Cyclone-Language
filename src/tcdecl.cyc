@@ -184,8 +184,8 @@ static struct Structdecl * merge_struct_or_union_decl(structdecl_t d0, structdec
 	res = false;
       }
       if ((width0 != null && width1 != null && 
-	   get_uint_const_value(width0->v) != 
-	   get_uint_const_value(width1->v)) ||
+	   get_uint_const_value((exp_t)width0) != 
+	   get_uint_const_value((exp_t)width1)) ||
 	  (width0 == null && width1 != null) ||
 	  (width0 != null && width1 == null)) {
 	merr(loc, msg, aprintf("%s %s : bitfield mismatch on"
@@ -248,7 +248,8 @@ static inline string_t is_x2string(bool is_x) {
 // try to merge the 2 fields, return null if something's wrong
 // otherwise return f0 or (if necessary) a copy of f0 with the right scope.
 static struct Tunionfield * merge_tunionfield(tunionfield_t f0, tunionfield_t f1,
-					      list_t<$(tvar_t,type_t)@> inst,
+					      list_t<$(tvar_t,type_t)@`H,`H> 
+                                              inst,
 					      string_t t, string_t v, string_t * `r msg) {
   seg_t loc = f1->loc;
 
@@ -315,7 +316,7 @@ static bool substitute_tunionfield_f1(string_t @ name, tvar_t x) {
   return (strptrcmp(x->name, name) == 0);
 }
 
-static $(tqual_t,type_t)@ substitute_tunionfield_f2(list_t<$(tvar_t,type_t)@> inst,
+static $(tqual_t,type_t)@ substitute_tunionfield_f2(list_t<$(tvar_t,type_t)@`H,`H> inst,
 						    $(tqual_t,type_t)@ x) {
   let &$(tq, t) = x;
   return new $(tq, substitute(inst, t));
@@ -323,8 +324,9 @@ static $(tqual_t,type_t)@ substitute_tunionfield_f2(list_t<$(tvar_t,type_t)@> in
 
 // given d0->tvs and d1->tvs, given the maping inst1 = build_tvs_map(d0->tvs, d1->tvs),
 // rewrite the types of tunionfield f1 so that it could be added to d0
-static tunionfield_t substitute_tunionfield(list_t<tvar_t> d0tvs, list_t<tvar_t> d1tvs,
-					    list_t<$(tvar_t,type_t)@> inst1, tunionfield_t f1) {
+static tunionfield_t substitute_tunionfield(list_t<tvar_t,`H> d0tvs, 
+                                            list_t<tvar_t,`H> d1tvs,
+					    list_t<$(tvar_t,type_t)@`H,`H> inst1, tunionfield_t f1) {
   let f0 = new *f1;
   // first we build a new list of tvars, which is disjoint from d0->tvs and d1->tvs
   let tvs0 = null;
@@ -361,11 +363,11 @@ static tunionfield_t substitute_tunionfield(list_t<tvar_t> d0tvs, list_t<tvar_t>
 // set *res to false if some duplicate fields are compatible
 // set *incl to false if f1s is not included in f0s
 static list_t<tunionfield_t>
-merge_xtunion_fields(list_t<tunionfield_t> f0s,
-		     list_t<tunionfield_t> f1s,
-		     list_t<$(tvar_t,type_t)@> inst,
-		     list_t<tvar_t> tvs0,
-		     list_t<tvar_t> tvs1,
+merge_xtunion_fields(list_t<tunionfield_t,`H> f0s,
+		     list_t<tunionfield_t,`H> f1s,
+		     list_t<$(tvar_t,type_t)@`H,`H> inst,
+		     list_t<tvar_t,`H> tvs0,
+		     list_t<tvar_t,`H> tvs1,
 		     bool @ `r1 res, bool @ `r2 incl,
 		     string_t t, string_t v,
 		     seg_t loc, string_t * `r msg) {
@@ -468,7 +470,7 @@ sub_xtunion_fields(list_t<tunionfield_t> f0s,
 
 // FIX : a non recursive version ?
 static $(list_t<`a>, list_t<`a>)
-split(list_t<`a> f) {
+split(list_t<`a,`H> f) {
   if (f == null) return $(null, null);
   if (f->tl == null) return $(f, null);
   let $(f1, f2) = split(f->tl->tl);
@@ -477,7 +479,7 @@ split(list_t<`a> f) {
 
 // sort the fields of a xtunion declaration
 // check for the consistency of duplicate fields
-list_t<tunionfield_t> sort_xtunion_fields(list_t<tunionfield_t> f,
+list_t<tunionfield_t> sort_xtunion_fields(list_t<tunionfield_t,`H> f,
 					  bool @ `r1 res,
 					  var_t v, seg_t loc, string_t * `r2 msg) {
   let $(f1, f2) = split(f);

@@ -34,19 +34,19 @@ extern struct id;
 typedef struct id @Id;
 
 // make an id that is equal to other id's with the same string and int
-extern Id id_make(string_t,int);
+extern Id id_make(string_t<`H>,int);
 
 // make an id with input string, but not equal to any other id
-extern Id id_new(string_t);
+extern Id id_new(string_t<`H>);
 
 // Generate a new unique id from an existing one.
 extern Id id_renew(Id);
 
 // make an id with input string, equal to other ids with this string and int -1
-extern Id id_of_string(string_t);
+extern Id id_of_string(string_t<`H>);
 
 // same as id_new
-extern Id id_unique(string_t);
+extern Id id_unique(string_t<`H>);
 
 // return string and int portions concatenated with a '$' in-between
 extern mstring_t id_to_string(Id);

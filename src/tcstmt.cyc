@@ -331,7 +331,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       // (the error message may be confusing b/c it *looks* like tyvars
       //  are in scope)
       let bound_vars = (!is_local) ? null : lookup_type_vars(te);
-      check_type(s0->loc,te,bound_vars,MemKind,t);
+      let allow_evars = (!is_local) ? false : true;
+      check_type(s0->loc,te,bound_vars,MemKind,allow_evars,t);
       let te2 = add_local_var(s->loc,te,vd);
       if (sc == Extern || sc == ExternC)
         terr(d->loc,"local extern declarations not yet supported");
@@ -381,7 +382,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           terr(d->loc, "cannot declare a qualified local variable");
           break;
         }
-        check_type(s0->loc,te2,lookup_type_vars(te2),MemKind,t);
+        check_type(s0->loc,te2,lookup_type_vars(te2),MemKind,true,t);
         te2 = add_local_var(s->loc,te2,vd);
       }
       tcStmt(set_encloser(te2,s0),s,false);
@@ -410,7 +411,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     type_t rgn_typ = new VarType(tv);
     *rgn_ptr = new Opt(curr_bl); // side effect
     te = add_type_vars(s0->loc,te,new List(tv,null));
-    check_type(s0->loc,te,lookup_type_vars(te),BoxKind,t);
+    check_type(s0->loc,te,lookup_type_vars(te),BoxKind,true,t);
     te = add_region(te, rgn_typ);
     if (!unify(t,new RgnHandleType(rgn_typ)))
       impos("region stmt: type of region handle is wrong!");

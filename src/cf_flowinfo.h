@@ -54,7 +54,7 @@ typedef tunion Escaped escaped_t;
 typedef tunion InitLevel init_level_t;
 typedef tunion InitState init_state_t;
 typedef tunion PathInfo path_info_t;
-typedef Dict::dict_t<`a,path_info_t> pinfo_dict_t<`a>;
+typedef Dict::dict_t<`a,path_info_t,`H> pinfo_dict_t<`a>;
 typedef tunion FlowInfo flow_info_t;
 // Do not ever mutate any data structures built from these -- they share like
 // crazy.

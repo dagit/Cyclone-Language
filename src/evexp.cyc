@@ -130,7 +130,7 @@ bool okay_szofarg(type_t t) {
   case HeapRgn: return false;
   case &JoinEff(_):   return false;
   case &AccessEff(_): return false;
-
+  case &RgnsEff(_):   return false;
   case &TypedefType(_,_,_): 
     return Tcutil::impos(aprintf("szof typedeftype %s",typ2string(t)));
   }

@@ -29,14 +29,14 @@ xtunion exn { Failure(string_t) };
 xtunion exn { Impossible(string_t) };
 xtunion exn { Not_found };
 xtunion exn { Unreachable(string_t) };
-
-opt_t<`b> opt_map(`b f(`a), opt_t<`a> o) {
+struct Opt<`a> { `a v; };
+opt_t<`b,`H> opt_map(`b f(`a), opt_t<`a> o) {
   if (o==null)
     return null;
   return new Opt(f(o->v));
 }
 
-mstring_t new_string(int i) {
+mstring_t<`H> new_string(int i) {
   return (new {for j < i : '\000'});
 }
 
@@ -55,9 +55,9 @@ int ptrcmp(`a::M @ `r a, `a @ `r b) {
   return -1;
 }
 
-`a fst($(`a,`b) @`r pair) { return (*pair)[0]; }
-`b snd($(`a,`b) @`r pair) { return (*pair)[1]; }
-`c third($(`a,`b,`c) @`r triple) { return (*triple)[2];}
+`a fst($(`a,`b) @ pair) { return (*pair)[0]; }
+`b snd($(`a,`b) @ pair) { return (*pair)[1]; }
+`c third($(`a,`b,`c) @ triple) { return (*triple)[2];}
 
 `a identity(`a x) {
   return x;
@@ -118,7 +118,7 @@ int int_of_string(string_t s)
   return sign*n;
 }
 
-mstring_t string_of_int_width(int n, int minWidth) {
+mstring_t<`H> string_of_int_width(int n, int minWidth) {
   int i, len = 0;
   bool negative = false;
   if (n < 0) {
@@ -142,11 +142,11 @@ mstring_t string_of_int_width(int n, int minWidth) {
   return ans;
 }
 
-mstring_t string_of_int(int n) {
+mstring_t<`H> string_of_int(int n) {
   return string_of_int_width(n,0);
 }
 
-mstring_t string_of_uint(unsigned int n) {
+mstring_t<`H> string_of_uint(unsigned int n) {
   int len = 0;
   unsigned int m = n;
   do ++len; while ((m /= 10) > 0);
@@ -158,7 +158,7 @@ mstring_t string_of_uint(unsigned int n) {
   return ans;
 }
 
-mstring_t string_of_char(char c) {
+mstring_t<`H> string_of_char(char c) {
   mstring_t ans = new_string(2);
   ans[0] = c;
   return ans;

@@ -39,10 +39,10 @@ using Tcutil;
 
 // forward references
 extern doc_t dp2doc($(list_t<designator_t>,pat_t)@ dp);
-extern doc_t switchclauses2doc(list_t<switch_clause_t> cs);
-extern doc_t switchCclauses2doc(list_t<switchC_clause_t> cs);
+extern doc_t switchclauses2doc(list_t<switch_clause_t,`H> cs);
+extern doc_t switchCclauses2doc(list_t<switchC_clause_t,`H> cs);
 extern doc_t typ2doc(type_t);
-extern doc_t structfields2doc(list_t<structfield_t> fields);
+extern doc_t structfields2doc(list_t<structfield_t,`H> fields);
 extern doc_t scope2doc(scope_t);
 extern doc_t stmt2doc(stmt_t);
 extern doc_t exp2doc(exp_t);
@@ -59,7 +59,7 @@ extern doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,
                          bool c_varargs,vararg_info_t *cyc_varargs,
                          opt_t<type_t> effopt, 
                          list_t<$(type_t,type_t)@> rgn_po);
-extern doc_t tunionfields2doc(list_t<tunionfield_t> fields);
+extern doc_t tunionfields2doc(list_t<tunionfield_t,`H> fields);
 
 // Flag controlling whether typedefs are expanded during printing
 static bool expand_typedefs;
@@ -264,7 +264,7 @@ static bool special(string_t s){
   return false;
 }
 
-string_t string_escape(string_t s) {
+string_t string_escape(string_t<`H> s) {
   if (!special(s)) return s;
 
   int n = s.size - 1;
@@ -426,7 +426,7 @@ doc_t att2doc(attribute_t a) { // for gcc only
   return text(attribute2string(a));
 }
 
-doc_t atts2doc(list_t<attribute_t> atts) {
+doc_t atts2doc(attributes_t atts) {
   if (atts == null) return nil_doc();
   if(Absynpp::to_VC)
     return noncallconv2doc(atts);
@@ -506,7 +506,7 @@ doc_t dtms2doc(doc_t d,list_t<type_modifier_t> tms) {
     }
     switch (compress(rgn)) {
     case HeapRgn: return cat(ptr,rest);
-    default: return cat(ptr,ntyp2doc(rgn),text(" "),rest);
+    default: return cat(ptr,typ2doc(rgn),text(" "),rest);
     }
   }
 }
@@ -518,30 +518,30 @@ doc_t rgn2doc(type_t t) {
   }
 }
 
-static void effects2docs(list_t<doc_t> @ `r regions,
-			 list_t<doc_t> @ `r effects,
+static void effects2docs(list_t<doc_t,`H> @ `r rgions,
+			 list_t<doc_t,`H> @ `r effects,
 			 type_t t)
 {
   switch (compress(t)) {
-  case &AccessEff(r): *regions = new List(rgn2doc(r), *regions); break;
+  case &AccessEff(r): *rgions = new List(rgn2doc(r), *rgions); break;
   case &JoinEff(ts):
     for (; ts != null; ts = ts->tl) {
-      effects2docs(regions, effects, ts->hd);
+      effects2docs(rgions, effects, ts->hd);
     }
     break;
-  default: *effects = new List(ntyp2doc(t),*effects); break;
+  default: *effects = new List(typ2doc(t),*effects); break;
   }
 }
 
 doc_t eff2doc(type_t t) {
-  list_t <doc_t> regions = null, effects = null;
-  effects2docs(&regions, &effects, t);
-  regions = List::imp_rev(regions);
+  list_t <doc_t> rgions = null, effects = null;
+  effects2docs(&rgions, &effects, t);
+  rgions = List::imp_rev(rgions);
   effects = List::imp_rev(effects);
-  if (regions == null && effects != null) {
+  if (rgions == null && effects != null) {
     return group("","","+",effects);
   } else {
-    let doc1 = group("{","}",",",regions);
+    let doc1 = group("{","}",",",rgions);
     return group("","","+",List::imp_append(effects,new List(doc1,null)));
   }
 }
@@ -674,9 +674,11 @@ doc_t ntyp2doc(type_t t) {
   case HeapRgn:
     s = rgn2doc(t);
     break;
-  case &AccessEff(_):
-    s = eff2doc(t);
+  case &RgnsEff(t):
+    s = cat(text("regions("),typ2doc(t),text(")"));
     break;
+  case &AccessEff(_):
+    fallthru;
   case &JoinEff(_):
     s = eff2doc(t);
     break;
@@ -1385,7 +1387,7 @@ doc_t switchclause2doc(switch_clause_t c) {
 	       nest(2,cat(line_doc(),stmt2doc(c->body))));
 }
 
-doc_t switchclauses2doc(list_t<switch_clause_t> cs) {
+doc_t switchclauses2doc(list_t<switch_clause_t,`H> cs) {
   return ppseql(switchclause2doc,"",cs);
 }
 
@@ -1401,7 +1403,7 @@ doc_t switchCclause2doc(switchC_clause_t c) {
 	       nest(2,cat(line_doc(),stmt2doc(s))));
 }
 
-doc_t switchCclauses2doc(list_t<switchC_clause_t> cs) {
+doc_t switchCclauses2doc(list_t<switchC_clause_t,`H> cs) {
   return ppseql(switchCclause2doc,"",cs);
 }
 
@@ -1412,7 +1414,7 @@ doc_t enumfield2doc(enumfield_t f) {
     return cat(qvar2doc(f->name),text(" = "),exp2doc((exp_t)f->tag));
 }
 
-doc_t enumfields2doc(list_t<enumfield_t> fs) {
+doc_t enumfields2doc(list_t<enumfield_t,`H> fs) {
   return ppseql(enumfield2doc,",",fs);
 }
 
@@ -1420,7 +1422,7 @@ static doc_t id2doc(vardecl_t v) {
   return qvar2doc(v->name);
 }
 
-static doc_t ids2doc(list_t<vardecl_t> vds) {
+static doc_t ids2doc(list_t<vardecl_t,`H> vds) {
   return ppseq(id2doc,",",vds);
 }
 
@@ -1754,14 +1756,14 @@ doc_t tqtd2doc(tqual_t tq, type_t t, opt_t<doc_t> dopt) {
 doc_t structfield2doc(structfield_t f) {
   if (f->width != null)
     return cat(tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
-               text(":"), exp2doc(f->width->v),
+               text(":"), exp2doc((exp_t)f->width),
                atts2doc(f->attributes), text(";"));
   else
     return cat(tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
                atts2doc(f->attributes), text(";"));
 }
 
-doc_t structfields2doc(list_t<structfield_t> fields) {
+doc_t structfields2doc(list_t<structfield_t,`H> fields) {
   return ppseql(structfield2doc,"",fields);
 }
 
@@ -1771,7 +1773,7 @@ doc_t tunionfield2doc(tunionfield_t f) {
              (f->typs==null)?nil_doc():args2doc(f->typs));
 }
 
-doc_t tunionfields2doc(list_t<tunionfield_t> fields) {
+doc_t tunionfields2doc(list_t<tunionfield_t,`H> fields) {
   return ppseql(tunionfield2doc,",",fields);
 }
 

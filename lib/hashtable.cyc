@@ -33,20 +33,20 @@ using List;
 using Stdio;
 
 /*abstract*/
-struct Table<`a,`b,`e1::E,`e2::E> {
-  int          (@cmp)(`a,`a; `e1);
-  int          (@hash)(`a; `e2);
+struct Table<`a,`b> {
+  int          (@cmp)(`a,`a);
+  int          (@hash)(`a);
   int	       max_len; // maximum length of bucket list before resize
   list_t<$(`a,`b)@> ?tab;
 };
 
-table_t<`a,`b,`e1,`e2> create(int sz, int (@cmp)(`a,`a;`e1), 
-                            int (@hash)(`a;`e2)) {
+table_t<`a,`b> create(int sz, int cmp(`a,`a), 
+                              int hash(`a)) {
   list_t<$(`a,`b)@> mt = null;
   return new Table(cmp, hash, 3, new {for i<sz :mt});
 }
 
-void insert(table_t<`a,`b,`e1,`e2> t, `a key, `b val) {
+void insert(table_t<`a,`b> t, `a key, `b val) {
   list_t<$(`a,`b)@> ?tab   = t->tab;
   int             bucket = (*t->hash)(key) % tab.size;
   tab[bucket] = new List(new $(key,val),tab[bucket]);
@@ -54,19 +54,19 @@ void insert(table_t<`a,`b,`e1,`e2> t, `a key, `b val) {
     resize(t);
 }
 
-`b lookup(table_t<`a,`b,`e1,`e2> t, `a key) {
+`b lookup(table_t<`a,`b> t, `a key) {
   // throws Not_found
   list_t<$(`a,`b)@> ?tab   = t->tab;
   list_t<$(`a,`b)@> l      = tab[(*t->hash)(key) % tab.size];
   return assoc_cmp(t->cmp, l, key);
 }
 
-void remove(table_t<`a,`b,`e1,`e2> t, `a key) {
+void remove(table_t<`a,`b> t, `a key) {
   // remove only most recent binding.  Silently return if none.
   // does a destructive list update since this data structure is not functional
   // UNTESTED!
   list_t<$(`a,`b)@> ?tab      = t->tab;
-  int         (@cmp)(`a,`a;`e1) = t->cmp;
+  int         (@cmp)(`a,`a)   = t->cmp;
   int              bucket   = (*t->hash)(key) % tab.size;
   list_t<$(`a,`b)@> l         = tab[bucket];
   if(l == null)
@@ -113,12 +113,12 @@ void insert_bucket(list_t<$(`a,`b)@> ?tab, int (@hash)(`a),
   tab[nidx] = new List(new $(key,val),tab[nidx]);
 }
 
-void resize(table_t<`a,`b,`e1,`e2> t) {
+void resize(table_t<`a,`b> t) {
   list_t<$(`a,`b)@> ?odata   = t->tab;
   int             osize    = odata.size;
   int             nsize    = 2 * osize + 1;
-  list_t<$(`a,`b)@> mt       = null;
-  list_t<$(`a,`b)@> ?ndata   = new {for i < nsize : mt};
+  list_t<$(`a,`b)@`H,`H> mt = null;
+  list_t<$(`a,`b)@`H> ?`H ndata  = new {for i < nsize : mt};
   for (int i = 0; i<osize; i++)
     insert_bucket(ndata,t->hash,odata[i]);
   t->tab     = ndata;
@@ -126,7 +126,7 @@ void resize(table_t<`a,`b,`e1,`e2> t) {
 }
 
 // Iterating over a hashtable
-void iter(void f(`a,`b), table_t<`a,`b,`e1,`e2> t) {
+void iter(void f(`a,`b), table_t<`a,`b> t) {
   list_t<$(`a,`b)@> ?odata   = t->tab;
   int             osize    = odata.size;
   for (int i = 0; i<osize; i++) 
@@ -135,7 +135,7 @@ void iter(void f(`a,`b), table_t<`a,`b,`e1,`e2> t) {
 }
 
 // debugging
-void print_table_map(table_t<`a,`b,`e1,`e2> t, 
+void print_table_map(table_t<`a,`b> t, 
                      void prn_key(`a), void prn_val(`b)){
   list_t<$(`a,`b)@> ?odata = t->tab;
   int osize = odata.size;

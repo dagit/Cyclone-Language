@@ -140,7 +140,7 @@ static set_t<transition_t> lastpos(regexp_t r) {
 }
 
 static 
-void fill_pos($(set_t<transition_t> ?, set_t<transition_t>)@env, transition_t t) {
+void fill_pos($(set_t<transition_t,`H> ?`H, set_t<transition_t,`H>)@`H env, transition_t t) {
   let &$(v, first) = env;
   switch (t) {
   case &OnChars(pos): v[pos] = Set::union_two(v[pos], first); break;
@@ -148,7 +148,7 @@ void fill_pos($(set_t<transition_t> ?, set_t<transition_t>)@env, transition_t t)
   }
 }
 
-static void fill_it(regexp_t r, set_t<transition_t> ?v) {
+static void fill_it(regexp_t r, set_t<transition_t,`H> ?`H v) {
   switch (r) {
   case &Seq(r1,r2): 
     fill_it(r1,v);
@@ -179,7 +179,7 @@ static set_t<transition_t> ?followpos(int sz, list_t<lexer_entry_t> entry_list) 
 #define NO_ACTION (1 << 29)
 
 static $(int,list_t<int>)@ split_trans(transition_t      trans, 
-				     $(int,list_t<int>)@ act_pos_set) {
+				     $(int,list_t<int,`H>)@`H act_pos_set) {
   let &$(act, pos_set) = act_pos_set;
   switch (trans) {
   case &OnChars(pos):   
@@ -189,7 +189,7 @@ static $(int,list_t<int>)@ split_trans(transition_t      trans,
   }
 }
 
-static $(int, list_t<int>)@ split_trans_set(set_t<transition_t> trans_set) {
+static $(int, list_t<int>)@ split_trans_set(set_t<transition_t,`H> trans_set) {
   return Set::fold(split_trans, trans_set, new $(NO_ACTION,null));
 }
 
@@ -205,7 +205,7 @@ static void reset_state_mem() {
   next_state_num = 0;
 }
 
-static int get_state(set_t<transition_t> st) {
+static int get_state(set_t<transition_t,`H> st) {
   try return Dict::lookup(state_map->v, st);
   catch {
   case Dict::Absent:
@@ -215,7 +215,7 @@ static int get_state(set_t<transition_t> st) {
   }
 }
 
-static automata_move_t goto_state(set_t<transition_t> st) {
+static automata_move_t goto_state(set_t<transition_t,`H> st) {
   if(Set::is_empty(st))
     return Backtrack;
   else
@@ -223,7 +223,7 @@ static automata_move_t goto_state(set_t<transition_t> st) {
 }
 
 static automata_move_t ?transition_from(list_t<int>         ?chars,
-					set_t<transition_t> ?follow,
+					set_t<transition_t,`H> ?follow,
 					list_t<int>         pos_set) {
   set_t<transition_t> ?tr    = new {for i < 257 : Set::empty(transition_cmp)};
   automata_move_t   ?shift = new {for i < 257 : (automata_move_t)Backtrack};
@@ -240,8 +240,8 @@ static automata_move_t ?transition_from(list_t<int>         ?chars,
 }
 
 static automata_t translate_state(list_t<int>         ?chars, 
-				  set_t<transition_t> ?follow, 
-				  set_t<transition_t> state) {
+				  set_t<transition_t,`H> ?follow, 
+				  set_t<transition_t,`H> state) {
   switch (split_trans_set(state)) {
   case &$(n,null): return new Perform(n);
   case &$(n,ps):   return new Shift((n == NO_ACTION ? 

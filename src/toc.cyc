@@ -216,7 +216,7 @@ static qvar_t collapse_qvar_tag(qvar_t x,string_t tag) {
 
 // used to generate struct definitions for tuple types
 // we share the struct definitions where possible.  
-static var_t add_tuple_type(glist_t<$(tqual_t,type_t)@,`r> tqs0) {
+static var_t add_tuple_type(list_t<$(tqual_t,type_t)@,`r> tqs0) {
   // look for the same tuple-type already declared
   for (let tts = tuple_types; tts != null; tts = tts->tl) {
     let &$(x,ts) = tts->hd;
@@ -259,8 +259,8 @@ static var_t fresh_label() {
 ///////////////////////////////////////////////////////////////
 static type_t typ_to_c(type_t t); // forward declaration
 
-static $(opt_t<var_t>,tqual_t,type_t)@ 
-arg_to_c($(opt_t<var_t>,tqual_t,type_t)@ a) {
+static $(opt_t<var_t,`r>,tqual_t,type_t)@ 
+arg_to_c($(opt_t<var_t,`r>,tqual_t,type_t)@ a) {
   let $(x,y,z) = *a;
   return new $(x,y,typ_to_c(z));
 }
@@ -374,9 +374,14 @@ static type_t typ_to_c(type_t t) {
     return new TypedefType(tdn,null, new Opt(typ_to_c_array(topt->v)));
   case &RgnHandleType(t):
     return cstar_typ(strct(_RegionHandle_sp),mt_tq); // could be shared
-  case HeapRgn:       return toc_impos("Toc::typ_to_c: passed the heap region");
-  case &AccessEff(_): return toc_impos("Toc::typ_to_c: passed the access eff");
-  case &JoinEff(_):   return toc_impos("Toc::typ_to_c: passed the join eff");
+  case HeapRgn: 
+    return toc_impos("Toc::typ_to_c: type translation passed the heap region");
+  case &AccessEff(_):
+    return toc_impos("Toc::typ_to_c: type translation passed the access eff");
+  case &JoinEff(_):
+    return toc_impos("Toc::typ_to_c: type translation passed the join eff");
+  case &RgnsEff(_):
+    return toc_impos("Toc::typ_to_c: type translation passed the regions eff");
   }
 }
 
@@ -920,7 +925,7 @@ static exp_t init_struct(env_t nv, type_t struct_type,
 }
 
 // functions for passing to lvalue_assign (see below)
-static exp_t assignop_lvalue(exp_t el, $(opt_t<primop_t>,exp_t)@ pr) {
+static exp_t assignop_lvalue(exp_t el, $(opt_t<primop_t,`H>,exp_t)@ pr) {
   return assignop_exp(el,(*pr)[0],(*pr)[1],DL);
 }
 static exp_t address_lvalue(exp_t e1, bool ignore) {
@@ -974,9 +979,9 @@ static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t> fs,
 }
 
 // similar to map_c but flips order of arguments
-static glist_t<`b,`r2> rmap_2c(region_t<`r2> r2,`b f(`a,`c),`c env,
-                               glist_t<`a,`r1> x) {
-  glist_t<`b,`r2> result, prev;
+static list_t<`b,`r2> rmap_2c(region_t<`r2> r2,`b f(`a,`c),`c env,
+                               list_t<`a,`r1> x) {
+  list_t<`b,`r2> result, prev;
 
   if (x == null) return null;
   result = rnew(r2) List(f(x->hd,env),null);
@@ -987,7 +992,7 @@ static glist_t<`b,`r2> rmap_2c(region_t<`r2> r2,`b f(`a,`c),`c env,
   }
   return(result);
 }
-static list_t<`b> map_2c(`b f(`a,`c), `c env, glist_t<`a,`r> x) {
+static list_t<`b> map_2c(`b f(`a,`c), `c env, list_t<`a,`r> x) {
   return rmap_2c(heap_region,f,env,x);
 }
 
@@ -1271,7 +1276,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 		       s, DL);
 	}
 	s = declare_stmt(argv, arr_type, null, s, DL);
-	/*	glist_t<exp_t,`r> array_args = null;
+	/*	list_t<exp_t,`r> array_args = null;
 	for(; es != null; es = es->tl) {
 	  exp_to_c(nv, es->hd);
 	  array_args = rnew(r) List(es->hd, array_args);
@@ -1464,7 +1469,7 @@ static void exp_to_c(env_t nv, exp_t e) {
                                     e2, skip_stmt(DL), true);
       // FIX:  casts needed on exp_opts
       region r {
-        glist_t<$(qvar_t,type_t,exp_opt_t)@`r,`r> decls = 
+        list_t<$(qvar_t,type_t,exp_opt_t)@`r,`r> decls = 
           rnew(r) List(rnew(r) $(max,uint_t,(exp_opt_t)e1),null);
         exp_t ai;
         if (rgnopt == null)
@@ -1678,7 +1683,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       // $(e1,...,en) -> {e1,...,en}
       let tqs = List::map(tup_to_c,es);
       let n = add_tuple_type(tqs);
-      list_t<$(list_t<designator_t>,exp_t)@> dles = null;
+      list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> dles = null;
       for (int i = 1; es != null; es = es->tl, i++) {
 	exp_to_c(nv,es->hd);
 	dles = new List(new $(null,es->hd),dles);
@@ -1743,7 +1748,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     }
     break;
   case &AnonStruct_e(st,dles):
-    list_t<structfield_t> fs;
+    list_t<structfield_t,`H> fs;
     switch (compress(st)) {
     case &AnonStructType(afs): fs = afs; break;
     default: fs = toc_impos("anon struct has type %s",typ2string(st)); break;
@@ -1808,7 +1813,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	}
 	tag_exp = uint_exp(tag_count,DL);
       }
-      let dles = null;
+      list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> dles = null;
       for(; es != null; es = es->tl, tqts = tqts->tl) {
 	exp_t cur_e = es->hd;
 	type_t field_typ = typ_to_c((*tqts->hd)[1]);
@@ -1896,10 +1901,10 @@ static stmt_t if_eq_goto_stmt(exp_t e1, exp_t e2, var_t succ_lab, var_t fail_lab
 			 goto_stmt(succ_lab,DL),
 			 goto_stmt(fail_lab,DL), DL);
 }
-static $(env_t,glist_t<$(qvar_t,type_t)@`rgn,`rgn>,stmt_t)
+static $(env_t,list_t<$(qvar_t,type_t)@`rgn,`rgn>,stmt_t)
 xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
 	  var_t succ_lab,var_t fail_lab, 
-          glist_t<$(qvar_t,type_t)@`rgn,`rgn> decls) {
+          list_t<$(qvar_t,type_t)@`rgn,`rgn> decls) {
   stmt_t s; // the test statement
   switch (p->r) {
   case &Var_p(&Vardecl(_,x,_,_,_,_,_)):
@@ -2184,11 +2189,11 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
   var_t  end_l = fresh_label();
   // for each case, generate a test label and an entry label
   region rgn {
-    glist_t<$(var_t,var_t,switch_clause_t)@`rgn,`rgn> lscs = 
+    list_t<$(var_t,var_t,switch_clause_t)@`rgn,`rgn> lscs = 
       List::rmap_c(rgn,gen_label,rgn,scs);
-    glist_t<stmt_t,`rgn>                test_stmts = null;
-    glist_t<env_t,`rgn>                 nvs        = null;
-    glist_t<$(qvar_t,type_t)@`rgn,`rgn> decls      = null;
+    list_t<stmt_t,`rgn>                test_stmts = null;
+    list_t<env_t,`rgn>                 nvs        = null;
+    list_t<$(qvar_t,type_t)@`rgn,`rgn> decls      = null;
     // generate the tests for each case, branching to the case's
     // label on success and to the next test on false.
     // do tests backwards so as to get vars for fallthrus

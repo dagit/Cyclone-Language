@@ -55,7 +55,7 @@ alist_t<`a> append(alist_t<`a> a1, alist_t<`a> a2) {
   else return new Append(a1,a2);
 }
 
-list_t<`a> list_of_alist_f(alist_t<`a> y,list_t<`a> l) {
+list_t<`a> list_of_alist_f(alist_t<`a> y,list_t<`a,`H> l) {
   switch (y) {
   case Empty:          return l;
   case &Single(z):     return new List(z,l);
@@ -132,7 +132,7 @@ $(string_t,list_t<$(int,int,int,string_t)@>) @string_and_links(doc_t d, int w) {
                list_of_alist(o->links));
 }
 
-static opt_t<table_t<int,stringptr_t,{},{}>> bhashtbl = null;
+static opt_t<table_t<int,stringptr_t>> bhashtbl = null;
 
 string_t nlblanks(int i) {  // a newline followed by i blanks
   if (bhashtbl == null)
@@ -157,18 +157,18 @@ string_t nlblanks(int i) {  // a newline followed by i blanks
 }
 
 // hash the strings...
-static opt_t<table_t<stringptr_t,doc_t,{},{}>> str_hashtbl = null;
+static opt_t<table_t<stringptr_t,doc_t>> str_hashtbl = null;
 
 int infinity = 9999999;
 
-static out_t text_doc_f($(int,string_t) @clo,ppstate_t st) {
+static out_t text_doc_f($(int,string_t<`H>) @clo,ppstate_t st) {
   let &$(slen,s) = clo;
   return new Out(st->cc+slen,
                  st->cl,
                  new Single(new {s}),
                  Empty);
 }
-static doc_t text_doc(string_t s) {
+static doc_t text_doc(string_t<`H> s) {
   int slen = String::strlen(s);
   return
     new Doc(slen,
@@ -177,8 +177,8 @@ static doc_t text_doc(string_t s) {
             (text_doc_f,
              new $(slen,s)));
 }
-doc_t text(string_t s) {
-  table_t<stringptr_t,doc_t,{},{}> t;
+doc_t text(string_t<`H> s) {
+  table_t<stringptr_t<`H,`H>,doc_t> t;
   if (str_hashtbl == null) {
     t = Hashtable::create(101,zstrptrcmp,hash_stringptr);
     str_hashtbl = new Opt(t);
@@ -194,7 +194,7 @@ doc_t text(string_t s) {
     return d;
   }
 }
-doc_t textptr(stringptr_t s) { return text(*s); }
+doc_t textptr(stringptr_t<`H> s) { return text(*s); }
 
 opt_t<doc_t> nil_doc_opt   = null;
 opt_t<doc_t> blank_doc_opt = null;
@@ -215,14 +215,14 @@ doc_t blank_doc() {
   return blank_doc_opt->v;
 }
 
-static out_t hyperlink_f($(int,string_t,string_t) @clo, ppstate_t st) {
+static out_t hyperlink_f($(int,string_t<`H>,string_t<`H>) @clo, ppstate_t st) {
   let &$(slen,shrt,full) = clo;
   return new Out(st->cc+slen,
               st->cl,
               new Single(new {shrt}),
               new Single(new $(st->cl,st->cc,slen,full)));
 }
-doc_t hyperlink(string_t shrt, string_t full) {
+doc_t hyperlink(string_t<`H> shrt, string_t<`H> full) {
   int slen = String::strlen(shrt);
   return new Doc(slen,
                  infinity,
@@ -316,7 +316,7 @@ static out_t long_cats_f(list_t<doc_t> ds0, ppstate_t st) {
   }
   return new Out(newcc,newcl,s,links);
 }
-static doc_t long_cats(list_t<doc_t> doclist) {
+static doc_t long_cats(list_t<doc_t,`H> doclist) {
 #ifdef DEBUG
   fprintf(stderr,"doing long cats %d\n",List::length(doclist));
 #endif
@@ -335,7 +335,7 @@ static doc_t long_cats(list_t<doc_t> doclist) {
   return new Doc(mw,mwo,make_fn(long_cats_f,orig));
 }
 
-doc_t cats(list_t<doc_t> doclist) {
+doc_t cats(list_t<doc_t,`H> doclist) {
   if (doclist==null) return nil_doc();
   else if (doclist->tl==null) return doclist->hd;
   // JGM: a hack to avoid stack overflow
@@ -343,7 +343,7 @@ doc_t cats(list_t<doc_t> doclist) {
   else return concat(doclist->hd,cats(doclist->tl));
 }
 
-static out_t cats_arr_f(doc_t ?@docs_ptr, ppstate_t st) {
+static out_t cats_arr_f(doc_t ?`H @docs_ptr, ppstate_t st) {
   list_t<out_t> os = null;
   doc_t ?docs = *docs_ptr;
   int sz = docs.size;
@@ -364,7 +364,7 @@ static out_t cats_arr_f(doc_t ?@docs_ptr, ppstate_t st) {
   return new Out(newcc,newcl,s,links);
 }
 
-doc_t cats_arr(doc_t ?docs) {
+doc_t cats_arr(doc_t ?`H docs) {
   int sz = docs.size;
   if(sz==0)
     throw new Failure("cats_arr -- size zero array");
@@ -412,17 +412,17 @@ doc_t tab(doc_t d) {
 
 
 /* Sequences */
-static doc_t ppseq_f(doc_t pp(`a), string_t sep, list_t<`a> l) {
+static doc_t ppseq_f(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return pp(l->hd);
   else return cat(pp(l->hd), text(sep), oline_doc(), ppseq_f(pp, sep,l->tl));
                   
 }
-doc_t ppseq(doc_t pp(`a), string_t sep, list_t<`a> l0) {
+doc_t ppseq(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l0) {
   return tab(ppseq_f(pp,sep,l0));
 }
 
-doc_t seq_f(string_t sep, list_t<doc_t> l) {
+doc_t seq_f(string_t<`H> sep, list_t<doc_t,`H> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return l->hd;
   else {
@@ -442,45 +442,45 @@ doc_t seq_f(string_t sep, list_t<doc_t> l) {
     //                                       new List(f(sep,l->tl),null)))));
   }
 }
-doc_t seq(string_t sep, list_t<doc_t> l0) {
+doc_t seq(string_t<`H> sep, list_t<doc_t,`H> l0) {
   return tab(seq_f(sep,l0));
 }
 
 // Sequences broken by lines 
-doc_t ppseql_f(doc_t pp(`a), string_t sep, list_t<`a> l) {
+doc_t ppseql_f(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return pp(l->hd);
   else return cat(pp(l->hd), text(sep), line_doc(), ppseql_f(pp,sep,l->tl));
 }
-doc_t ppseql(doc_t pp(`a), string_t sep, list_t<`a> l0) {
+doc_t ppseql(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l0) {
   return tab(ppseql_f(pp,sep,l0));
 }
 
-static doc_t seql_f(string_t sep, list_t<doc_t> l) {
+static doc_t seql_f(string_t<`H> sep, list_t<doc_t,`H> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return l->hd;
   else return cat(l->hd, text(sep), line_doc(), seql_f(sep,l->tl));
 }
-doc_t seql(string_t sep, list_t<doc_t> l0) {
+doc_t seql(string_t<`H> sep, list_t<doc_t,`H> l0) {
   return tab(seql_f(sep,l0));
 }
 
 
-doc_t group(string_t start, string_t stop, string_t sep, list_t<doc_t> ss) {
+doc_t group(string_t<`H> start, string_t<`H> stop, string_t<`H> sep, list_t<doc_t,`H> ss) {
   return cat(text(start),
              seq(sep,ss),
              text(stop));
 }
 
 // Like group but return the empty doc if the list is empty
-doc_t egroup(string_t start, string_t stop, string_t sep, list_t<doc_t> ss) {
+doc_t egroup(string_t<`H> start, string_t<`H> stop, string_t<`H> sep, list_t<doc_t,`H> ss) {
   if (ss==null) return nil_doc();
   else return cat(text(start),
                   seq(sep,ss),
                   text(stop));
 }
 
-doc_t groupl(string_t start, string_t stop, string_t sep, list_t<doc_t> ss) {
+doc_t groupl(string_t<`H> start, string_t<`H> stop, string_t<`H> sep, list_t<doc_t,`H> ss) {
   return cat(text(start),
              seql(sep,ss),
              text(stop));

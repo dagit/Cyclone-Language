@@ -31,7 +31,7 @@ using Lexing;
 namespace XmlParse {
 Core::opt_t<Lexbuf<Function_lexbuf_state<Stdio::FILE@>>> lbuf = null;
 static list_t<content_t> parse_result = null;
-void error(string_t msg) {
+void error(string_t<`H> msg) {
   throw new Core::Failure(msg);
 }
 
@@ -165,7 +165,7 @@ slashcls:
 void yyerror(string_t s) { return; } 
 
 namespace XmlParse{
-  list_t<content_t> parse_file(Stdio::FILE @f) {
+  list_t<content_t> parse_file(Stdio::FILE @`H f) {
     parse_result = null;
     lbuf = new Core::Opt(from_file(f));
     XmlScan::init();

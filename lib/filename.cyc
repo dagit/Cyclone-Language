@@ -32,9 +32,7 @@ using List;
 //string current_dir_name = ".";
 
 mstring_t concat(string_t s1, string_t s2) {
-  return String::strconcat_l(new List(new s1,
-                                      new List(new ((string_t)DIR_SEPARATOR_STR),
-                                               new List(new s2,null))));
+  return String::strconcat(s1,String::strconcat(DIR_SEPARATOR_STR,s2));
 }
 
 mstring_t chop_extension(string_t filename) {

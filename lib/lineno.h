@@ -13,7 +13,7 @@ extern struct Pos {
 };
 typedef struct Pos @pos_t;
 extern pos_t  pos_of_abs(string_t,int);
-extern void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@> places);
+extern void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@,`H> places);
 
 }
 #endif

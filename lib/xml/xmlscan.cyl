@@ -91,7 +91,7 @@ static void purge() { buffer = null; }
 static string_t regurgitate() { return String::strconcat_l(List::rev(buffer)); }
 
 static string_t pi_cell = null;
-static void pi_set(string_t s) { pi_cell = s; }
+static void pi_set(string_t<`H> s) { pi_cell = s; }
 static string_t pi_get() { return pi_cell; }
 
 static string_t after(int n,string_t s) {

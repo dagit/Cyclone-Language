@@ -38,35 +38,35 @@ using List;
 
 namespace Splay;
 
-tunion tree<`a,`b> {
+tunion tree<`a,`b,`r::R> {
   Leaf,
-  Node(struct noderef<`a,`b> @)
+  Node(struct noderef<`a,`b,`r> @`r)
 };
 
 static tunion direction {
   LEFT, RIGHT
 };
 
-static void rotate_left(struct noderef<`a,`b> @nr) {
+static void rotate_left(region_t<`r> r, struct noderef<`a,`b,`r> @`r nr) {
   let n = nr->v;
   switch (n->left) {
   case &Node(nr2):
     let n2 = nr2->v;
-    let t = new Node(new noderef(new node(n->key,n->data,n2->right,n->right)));
-    nr->v = new node(n2->key, n2->data, n2->left, t);
+    let t = rnew(r) Node(rnew(r) noderef(rnew(r) node(n->key,n->data,n2->right,n->right)));
+    nr->v = rnew(r) node(n2->key, n2->data, n2->left, t);
     break;
   default:
     throw new InvalidArg("Splay::rotate_left");
   }
 }
 
-static void rotate_right(struct noderef<`a,`b> @nr) {
+static void rotate_right(region_t<`r> r, struct noderef<`a,`b,`r> @`r nr) {
   let n = nr->v;
   switch (n->right) {
   case &Node(nr2):
     let n2 = nr2->v;
-    let t = new Node(new noderef(new node(n->key,n->data,n->left,n2->left)));
-    nr->v = new node(n2->key, n2->data, t, n2->right);
+    let t = rnew(r) Node(rnew(r) noderef(rnew(r) node(n->key,n->data,n->left,n2->left)));
+    nr->v = rnew(r) node(n2->key, n2->data, t, n2->right);
     break;
   default:
     throw new InvalidArg("Splay::rotate_right");
@@ -104,12 +104,13 @@ static void rotate_right(struct noderef<`a,`b> @nr) {
 //   }
 // }
 
-static void lift(list_t<$(tunion direction,struct noderef<`a,`b> @)@> dnl) {
+static void lift(region_t<`r> r,
+                 list_t<$(tunion direction,struct noderef<`a,`b,`r> @`r)@> dnl) {
   while (dnl != null) {
     if (dnl->tl == null) {
       switch (dnl->hd) {
-      case &$(LEFT,nr):  rotate_left(nr);  break;
-      case &$(RIGHT,nr): rotate_right(nr); break;
+      case &$(LEFT,nr):  rotate_left(r,nr);  break;
+      case &$(RIGHT,nr): rotate_right(r,nr); break;
       }
       return;
     }
@@ -119,14 +120,14 @@ static void lift(list_t<$(tunion direction,struct noderef<`a,`b> @)@> dnl) {
     switch (parent_dir) {
     case LEFT:
       switch (grandparent_dir) {
-      case LEFT:  rotate_left(grandparent); rotate_left (grandparent); break;
-      case RIGHT: rotate_left(parent);      rotate_right(grandparent); break;
+      case LEFT: rotate_left(r,grandparent); rotate_left(r,grandparent); break;
+      case RIGHT: rotate_left(r,parent); rotate_right(r,grandparent); break;
       }
       break;
     case RIGHT:
       switch (grandparent_dir) {
-      case LEFT:  rotate_right(parent);      rotate_left (grandparent); break;
-      case RIGHT: rotate_right(grandparent); rotate_right(grandparent); break;
+      case LEFT: rotate_right(r,parent); rotate_left(r,grandparent); break;
+      case RIGHT: rotate_right(r,grandparent); rotate_right(r,grandparent); break;
       }
       break;
     }
@@ -135,29 +136,36 @@ static void lift(list_t<$(tunion direction,struct noderef<`a,`b> @)@> dnl) {
 
 // maybe want a splay_c too, but dict doesn't need it and that's the immediate
 // concern
-bool splay(int reln(`a,`a), `a reln_first_arg, tunion tree<`a,`b> tree) {
-  list_t<$(tunion direction, struct noderef<`a,`b>@)@> path = null;
-  while(true) {
-    switch (tree) {
-    case &Node(nr):
-      let n = nr->v;
-      let comp = reln(reln_first_arg, n->key);
-      if (comp == 0) {
-	lift(path);
-	return true;
-      } else if (comp < 0) {
-	path = new List(new $((tunion direction)LEFT, nr), path);
-	tree = n->left;
-      } else {
-	path = new List(new $((tunion direction)RIGHT, nr), path);
-	tree = n->right;
+bool rsplay(region_t<`r> r, 
+            int reln(`a,`a), `a reln_first_arg, tunion `r tree<`a,`b,`r> tree) {
+  region temp {
+    list_t<$(tunion direction, struct noderef<`a,`b,`r>@`r)@`temp,`temp> path = null;
+    while(true) {
+      switch (tree) {
+      case &Node(nr):
+        let n = nr->v;
+        let comp = reln(reln_first_arg, n->key);
+        if (comp == 0) {
+          lift(r, path);
+          return true;
+        } else if (comp < 0) {
+          path = rnew(temp) List(rnew(temp) $((tunion direction)LEFT, nr), path);
+          tree = n->left;
+        } else {
+          path = rnew(temp) List(rnew(temp) $((tunion direction)RIGHT, nr), path);
+          tree = n->right;
+        }
+        break;
+      case Leaf:
+        if (path != null) {
+          lift(r, path->tl); // b/c of Dict::delete for example
+        }
+        return false;
       }
-      break;
-    case Leaf:
-      if (path != null) {
-        lift(path->tl); // b/c of Dict::delete for example
-      }
-      return false;
     }
   }
+}
+
+bool splay(int reln(`a,`a), `a reln_first_arg, tunion `H tree<`a,`b,`H> tree) {
+  return rsplay(heap_region, reln, reln_first_arg, tree);
 }

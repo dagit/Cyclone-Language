@@ -142,7 +142,7 @@ void qsort(int less_eq(`a,`a),`a ?arr,int base_ofs, int len)
 #define PUT(a) to[dest++] = from[a++]
 
 
-void msort(int less_eq(`a,`a),`a ?arr,int base_ofs, int len) {
+void msort(int less_eq(`a,`a),`a ?`H arr,int base_ofs, int len) {
 
   if (base_ofs < 0 || base_ofs + len > arr.size || len < 0)
     throw new Core::InvalidArg("Array::msort");
@@ -208,7 +208,7 @@ void msort(int less_eq(`a,`a),`a ?arr,int base_ofs, int len) {
 
 //////// Below are bunches of stuff mimicking the List library
 
-`a ?from_list(List::glist_t<`a,`r> x) {
+`a ?from_list(List::list_t<`a> x) {
   return List::to_array(x);
 }
 

@@ -62,7 +62,7 @@ int place_cmp($(int,pos_t)@ place1, $(int,pos_t)@ place2) {
 }
 
 // mutates its second argument's elements
-void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@> places) {
+void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@,`H> places) {
   places = List::merge_sort(place_cmp, places);
   FILE @f = file_open(filename, "r");
   try {
@@ -98,7 +98,7 @@ void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@> places) {
       }
       while(places != null && eol >= (*places->hd)[0]) {
 	let p = (*places->hd)[1];
-	p->logical_file = source_file;
+	p->logical_file = String::strdup(source_file);
 	p->line         = this_line;
 	p->line_no      = line;
 	p->col          = strlen(this_line)-(eol-(*places->hd)[0]);

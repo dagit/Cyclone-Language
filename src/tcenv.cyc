@@ -192,13 +192,14 @@ tenv_t tc_init() {
   ge->ordinaries = 
     Dict::insert(ge->ordinaries, (*match_exn_name)[1],
 		 new $(new TunionRes(exn_tud, match_exn_tuf), true));
-  let ae = Dict::insert(Dict::empty(varlist_cmp), top_ns, ge);
+  Dict::dict_t<list_t<var_t,`H>,genv_t,`H> ae = 
+    Dict::insert(Dict::empty(varlist_cmp), top_ns, ge);
   return new Tenv(top_ns,ae,null);
 }
 
 // Lookup a namespace relative to the current namespace
 static genv_t lookup_namespace(tenv_t te, seg_t loc,
-                               var_t n, list_t<var_t> ns) {
+                               var_t n, list_t<var_t,`H> ns) {
   return Dict::lookup(te->ae, resolve_namespace(te,loc,n,ns));
 }
 
@@ -212,7 +213,7 @@ static list_t<var_t> outer_namespace(list_t<var_t> ns) {
 // FIX: We should eagerly detect repeats by having one big dict
 // that we recompute on namespace and using boundaries
 static void check_repeat(tenv_t te, seg_t loc, `a lookup(genv_t,var_t),
-			 var_t v, list_t<list_t<var_t>> nss) {
+			 var_t v, list_t<list_t<var_t,`H>,`H> nss) {
   for(; nss != null; nss = nss->tl) {
     genv_t ge2 = Dict::lookup(te->ae,nss->hd);
     try {
@@ -270,7 +271,7 @@ static resolved_t lookup_ordinary_global(tenv_t te,seg_t loc,qvar_t q) {
 
 // Return the absolute name of relative namespace &List(n,ns)
 list_t<var_t> resolve_namespace(tenv_t te, seg_t loc,
-                                var_t n, list_t<var_t> ns) {
+                                var_t n, list_t<var_t,`H> ns) {
   let cns = te->ns; // current namespace
   let possible_results = null;
   while (true) {
@@ -711,7 +712,8 @@ process_fallthru(tenv_t te,stmt_t s, switch_clause_t *@ clauseopt){
   return ans;
 }
 
-tenv_t set_fallthru(tenv_t te, list_t<tvar_t> new_tvs, list_t<vardecl_t> vds, 
+tenv_t set_fallthru(tenv_t te, list_t<tvar_t,`H> new_tvs, 
+                    list_t<vardecl_t> vds, 
 		    switch_clause_t clause) {
   if(te->le == null) env_err("Tcenv: unexpected set_fallthru");
   let ft_typ = null;
@@ -858,9 +860,11 @@ void check_rgn_accessible(tenv_t te, seg_t loc, type_t rgn) {
 // check that region rt_a outlives region rt_b using the partial order in
 // the environment.  Assumes that rt_a <> rt_b.
 bool region_outlives(tenv_t te, type_t rt_a, type_t rt_b) {
+  rt_a = compress(rt_a);
+  rt_b = compress(rt_b);
   if (rt_a == HeapRgn) return true;
   if (te->le != null) {
-    switch ($(compress(rt_a),compress(rt_b))) {
+    switch ($(rt_a,rt_b)) {
     case $(&VarType(va), &VarType(vb)):
       return check_region_outlives(get_fenv(te)->region_order, va, vb);
     default: return false;

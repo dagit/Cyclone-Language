@@ -308,9 +308,9 @@ static void exchange (char ??argv)
 /* Initialize the internal data when the first call is made.  */
 
 #if defined (__STDC__) && __STDC__
-static const char ?_getopt_initialize (const char ?);
+static const char ?`r _getopt_initialize (const char ?`r);
 #endif
-static const char ? _getopt_initialize (const char? optstring)
+static const char ?`r _getopt_initialize (const char?`r optstring)
 {
   /* Start processing options with ARGV-element 1 (since ARGV-element 0
      is the program name); the sequence of previously skipped
@@ -418,7 +418,7 @@ static const char ? _getopt_initialize (const char? optstring)
    long-named options.  */
 
 int _getopt_internal 
-(int argc,char ??argv, const char? optstring, 
+(int argc,char ?`H ?argv, const char? optstring, 
 const struct option ?`r1 longopts, int *`r2 longind, int long_only)
 {
   optarg = NULL;
@@ -734,7 +734,7 @@ const struct option ?`r1 longopts, int *`r2 longind, int long_only)
   }
 }
 
-int getopt (int argc, char ??argv, const char?optstring)
+int getopt (int argc, char ?`H ?argv, const char?optstring)
 {
   return _getopt_internal (argc, argv, optstring,
 			   (const struct option ?) NULL,

@@ -72,7 +72,7 @@ void usage (FILE @stream)
 }
 
 void
-getargs(int argc, char??argv)
+getargs(int argc, char?`H ?`H argv)
 {
   register int c;
 

@@ -306,7 +306,7 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   // reject ill-formed type
   check_unique_tvars(loc,td->tvs);
   add_tvar_identities(td->tvs);
-  check_type(loc,te,td->tvs,AnyKind,td->defn);
+  check_type(loc,te,td->tvs,AnyKind,false,td->defn);
   // add to environment
   ge->typedefs = Dict::insert(ge->typedefs,v,td);
 }
@@ -314,11 +314,11 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
 static void tcStructFields(tenv_t te, genv_t ge, seg_t loc, 
                            string_t obj,
 			   list_t<structfield_t> fields, 
-                           list_t<tvar_t> tvs) {
+                           list_t<tvar_t,`H> tvs) {
   // check fields, rejecting ill-formed types, bad fields, and duplicates
   // (unless the field name is empty)
   region uprev_rgn {
-    glist_t<field_name_t, `uprev_rgn> prev_fields = null;
+    list_t<field_name_t, `uprev_rgn> prev_fields = null;
 
     for (let fs = fields; fs != null; fs = fs->tl) {
       let &Structfield(fn,tq,t,width,atts) = fs->hd;
@@ -330,38 +330,10 @@ static void tcStructFields(tenv_t te, genv_t ge, seg_t loc,
       if (String::strcmp(*fn,"") != 0)
 	prev_fields = rnew(uprev_rgn) List(fn,prev_fields);
       
-      check_type(loc,te,tvs,MemKind,t);
+      check_type(loc,te,tvs,MemKind,false,t);
 
       // if width is non-null then t must be of integral type
-      if (width != null) {
-	unsigned int w = 0;
-	if (!Tcutil::is_const_exp(te,width->v))
-	  terr(loc,"bitfield %s does not have constant width",*fn);
-	else w = Evexp::eval_const_uint_exp(width->v);
-	switch (compress(t)) {
-	case &IntType(_,b): 
-	  switch (b) {
-	  case B1:
-	    if (w > 8) terr(loc,"bitfield larger than type");
-	    break;
-	  case B2:
-	    if (w > 16) terr(loc,"bitfield larger than type");
-	    break;
-	  case B4:
-	    if (w > 32) terr(loc,"bitfield larger than type");
-	    break;
-	  case B8:
-	    if (w > 64) terr(loc,"bitfield larger than type");
-	    break;
-	  }
-	  break;
-	default: 
-	  terr(loc,"bitfield %s must have integral type but has type %s",
-               *fn,typ2string(t));
-	  break;
-	}
-      }
-
+      check_bitfield(loc, te, t, width, fn);
       // FIX : check for consistent tquals
     }
   }
@@ -532,8 +504,8 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
 					    string_t obj, 
                                             bool is_xtunion,
 					    qvar_t name,
-					    list_t<tunionfield_t> fields,
-					    list_t<tvar_t> tvs,
+					    list_t<tunionfield_t,`H> fields,
+					    list_t<tvar_t,`H> tvs,
 					    tuniondecl_t tudres) {
   // check variants, rejecting ill-formed types,
   // repeated tyvars
@@ -558,7 +530,7 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
     add_tvar_identities(f->tvs);
 
     for (_ typs = f->typs; typs != null; typs=typs->tl) {
-      check_type(f->loc, te, alltvs, MemKind, (*typs->hd)[1]);
+      check_type(f->loc, te, alltvs, MemKind, false, (*typs->hd)[1]);
     }
 
     switch((*f->name)[0]) {
@@ -578,7 +550,7 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
     }
   }
 
-  _ fields2;  
+  list_t<tunionfield_t,`H> fields2;  
   if(is_xtunion) {
     // for xtunions sort the fields (trying to merge the duplicates)
     let res = true;
@@ -589,7 +561,7 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
       fields2 = null; // should it be fs anyway ?
   } else region uprev_rgn { 
     // for tunions, check there's no duplicate field
-    glist_t<var_t, `uprev_rgn> prev_fields = null;
+    list_t<var_t, `uprev_rgn> prev_fields = null;
     for (_ fs = fields; fs != null; fs = fs-> tl) {
       let f = fs->hd;
       if (List::mem(String::zstrptrcmp, prev_fields, (*f->name)[1]))
@@ -734,7 +706,7 @@ static void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
 
   // check the fields.
   if (ed->fields != null) region uprev_rgn {
-    glist_t<field_name_t, `uprev_rgn> prev_fields = null;
+    list_t<field_name_t, `uprev_rgn> prev_fields = null;
     unsigned int tag_count = 0;
     for (_ fs = ed->fields->v; fs != null; fs = fs->tl) {
       let f = fs->hd;

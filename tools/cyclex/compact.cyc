@@ -23,7 +23,7 @@ struct Lex_tables {
 
 // Determine the integer occurring most frequently in an array
 static int most_frequent_elt(int ?v) {
-  Hashtable::table_t<int,Ref::ref_t<int>,{},{}> frequencies = 
+  Hashtable::table_t<int,Ref::ref_t<int>> frequencies = 
      Hashtable::create(17, intcmp, identity);
   int max_freq  = 0;
   int most_freq = 0;

@@ -517,7 +517,7 @@ parse_token_decl (int what_is, int what_is_not)
 {
   register int token = 0;
   register char ?typename = NULL;
-  register struct bucket *symbol = NULL;  /* pts to symbol being defined */
+  register struct bucket *`H symbol = NULL;  /* pts to symbol being defined */
   int k;
 
   for (;;)
@@ -694,9 +694,9 @@ parse_start_decl ()
 */
 struct strlist { char ? str; struct strlist * tl; };
 struct strlist *seen_destructors = NULL;
-static int has_been_seen(char ? str) {
-  struct strlist * l1 = seen_destructors;
-  struct strlist * l2;
+static int has_been_seen(char ?`H str) {
+  struct strlist *`H l1 = seen_destructors;
+  struct strlist *`H l2;
   for(; l1 != NULL; l1 = l1->tl)
     if(strcmp(l1->str,str)==0)
       return 1;
@@ -729,7 +729,12 @@ parse_type_decl ()
     if(!nolinesflag)
       fprintf((FILE @)fattrs, "\n#line %d \"%s\"", lineno, infile);
     fprintf((FILE @)fattrs, "\n static xtunion exn.Core::Failure yyfail_%s = Core::Failure(\"%s\");\n",name,name);
-    fprintf((FILE @)fattrs, "\n_ yyget_%s(xtunion YYSTYPE yy1) {switch(yy1) {case &%s(yy2): return yy2; default: throw &yyfail_%s;}}\n", name, name, name);
+    // JGM: the new type system does not allow evars in function types so I am
+    // going back to a macro like we used to have.  The right solution is to
+    // modify bison so that we get rid of the union definition and gensym
+    // tokens appropriately.
+    //fprintf((FILE @)fattrs, "\n_ yyget_%s(xtunion YYSTYPE yy1) {switch(yy1) {case &%s(yy2): return yy2; default: throw &yyfail_%s;}}\n", name, name, name);
+    fprintf((FILE @)fattrs, "\n#define yyget_%s(yy1) ({_ yyzzz; switch(yy1) {case &%s(yyzzzz): yyzzz = yyzzzz; break; default: throw &yyfail_%s;}; yyzzz;})",name,name,name);
   }
 
   for (;;)
@@ -1624,14 +1629,14 @@ void
 readgram()
 {
   register int t;
-  register bucket *lhs = NULL;
-  register symbol_list *p;
-  register symbol_list *p1;
-  register bucket *bp;
+  register bucket *`H lhs = NULL;
+  register symbol_list *`H p;
+  register symbol_list *`H p1;
+  register bucket *`H bp;
 
-  symbol_list *crule;	/* points to first symbol_list of current rule.  */
+  symbol_list *`H crule;/* points to first symbol_list of current rule.  */
 			/* its symbol is the lhs of the rule.   */
-  symbol_list *crule1;  /* points to the symbol_list preceding crule.  */
+  symbol_list *`H crule1;  /* points to the symbol_list preceding crule.  */
 
   p1 = NULL;
 
@@ -1738,7 +1743,7 @@ readgram()
 		 non-terminal.  */
 	      if (actionflag)
 		{
-		  register bucket *sdummy;
+		  register bucket *`H sdummy;
 
 		  /* Since the action was written out with this rule's */
 		  /* number, we must give the new rule this number */

@@ -26,36 +26,36 @@ namespace Queue {
 //           as possible.  
 
 extern struct Queue<`a,`r::R>;
-typedef struct Queue<`a,`r> @gqueue_t<`a,`r>;
-typedef struct Queue<`a,`H> @queue_t<`a>;
+typedef struct Queue<`a,`r> @`r queue_t<`a,`r>;
 
 // true when the queue is empty
-extern bool is_empty(gqueue_t<`a,`r>);
+extern bool is_empty(queue_t);
 
 // raised by queue_take and queue_peek
 extern xtunion exn { extern Empty };
 
 // create a new queue
-extern queue_t<`a> create();
+extern queue_t create();
 
 // insert an element into the rear of the queue (side effect)
-extern void add(queue_t<`a>,`a x);
+extern void add(queue_t<`a,`H>,`a x);
+extern void radd(region_t<`r>, queue_t<`a,`r>,`a x);
 
 // get and remove an element from the front of the queue (side effect)
-extern `a take(gqueue_t<`a,`r>);
+extern `a take(queue_t<`a>);
 
 // return the first element in the queue without removing it
-extern `a peek(gqueue_t<`a,`r>);
+extern `a peek(queue_t<`a>);
 
 // clear out the entire queue (side effect)
-extern void clear(gqueue_t<`a,`r>);
+extern void clear(queue_t<`a>);
 
 // return the number of lements in the queue
-extern int length(gqueue_t<`a,`r>);
+extern int length(queue_t<`a>);
 
 // apply f to each element in the queue from the front to the back
-extern void iter(void f(`a), gqueue_t<`a,`r>);
-extern void app(`b f(`a), gqueue_t<`a,`r>);
+extern void iter(void f(`a), queue_t<`a>);
+extern void app(`b f(`a), queue_t<`a>);
 
 }
 

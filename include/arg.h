@@ -39,33 +39,31 @@
 namespace Arg {
 extern xtunion exn {extern Error, extern Bad(string_t)};
 
-extern tunion Spec<`e::E> {
-  Unit_spec(void (@f)(;`e)),        // Call f with unit argument
-  Flag_spec(void (@f)(string_t;`e)),  // Call f with flag argument
-  FlagString_spec(void (@f)(string_t,string_t;`e)),
+extern tunion Spec {
+  Unit_spec(void (@f)()),        // Call f with unit argument
+  Flag_spec(void (@f)(string_t)),  // Call f with flag argument
+  FlagString_spec(void (@f)(string_t,string_t)),
                                     // Call f with flag & string arguments
   Set_spec(bool@),                  // Set the reference to true
   Clear_spec(bool@),                // Set the reference to false
-  String_spec(void (@f)(string_t;`e)),// Call f with a string argument
-  Int_spec(void (@f)(int;`e)),      // Call f with an int argument
-  Rest_spec(void (@f)(string_t;`e))   // Stop interpreting keywords and call the
+  String_spec(void (@f)(string_t)),// Call f with a string argument
+  Int_spec(void (@f)(int)),      // Call f with an int argument
+  Rest_spec(void (@f)(string_t))   // Stop interpreting keywords and call the
                                     // function with each remaining argument
 };
 
-typedef tunion Spec<`e> gspec_t<`e>;
-typedef tunion Spec<{}> spec_t;
+typedef tunion Spec spec_t;
 
-typedef List::glist_t<$(string_t,bool,string_t,gspec_t<`e>,string_t)@`r1,`r2>
-speclist_t<`r1,`r2,`e>;
+typedef List::list_t<$(string_t,bool,string_t,spec_t,string_t)@`r1,`r2>
+speclist_t<`r1,`r2>;
 
-extern void usage
-(speclist_t<`r1,`r2,`e>,string_t);
+extern void usage(speclist_t<`r1,`r2>,string_t);
 
 extern int current;
 
-extern void parse
-(speclist_t<`r1,`r2,`e> specs, 
- void anonfun(string_t), string_t errmsg, string_t ? args);
+extern void parse(speclist_t<`r1,`r2> specs, 
+                  void anonfun(string_t<`H>), 
+                  string_t errmsg, string_t<`H> ?`H args);
 
 }
 

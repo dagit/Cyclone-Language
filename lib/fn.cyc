@@ -57,7 +57,7 @@ fn<`arg,`res,`e1> fp2fn(`res f(`arg;`e1)) {
 // heh, heh, heh:  try explaining this to your Mom...
 static 
 `c fn_compose<`a,`b,`c,`e1,`e2>
-             ($(fn<`b,`c,`e1>, fn<`a,`b,`e2>)@ f_and_g,`a arg;`e1+`e2) {
+             ($(fn<`b,`c,`e1>, fn<`a,`b,`e2>)@`H f_and_g,`a arg;`e1+`e2) {
   let &$(f,g) = f_and_g;
   return apply(f,apply(g,arg));
 }
@@ -71,21 +71,21 @@ fn<`a,`c,`e1+`e2> compose<`a,`b,`c,`e1,`e2,`e3>(fn<`a,`b,`e1> g,
 
 
 // These next two functions are used for curring
-static `c inner($(fn<$(`a,`b)@,`c,`e1>,`a)@ env, `b second;`e1) {
+static `c inner($(fn<$(`a,`b)@`H,`c,`e1>,`a)@`H env, `b second;`e1) {
   return apply((*env)[0],new $((*env)[1],second));
 }
 
-static fn<`b,`c,`e1> outer(fn<$(`a,`b)@,`c,`e1> f,`a first; 
+static fn<`b,`c,`e1> outer(fn<$(`a,`b)@`H,`c,`e1> f,`a first; 
                                              `e1+`e2) {
   return make_fn(inner, new $(f,first));
 }
 
 // curry a closure that takes a pair
-fn<`a,fn<`b,`c,`e1>,`e1+`e2> curry(fn<$(`a,`b)@,`c,`e1> f) {
+fn<`a,fn<`b,`c,`e1>,`e1+`e2> curry(fn<$(`a,`b)@`H,`c,`e1> f) {
   return make_fn(outer,f);
 }
 
-static `c lambda<`a,`b,`c,`e1,`e2>(fn<`a,fn<`b,`c,`e1>,`e2> f,$(`a,`b)@ arg; 
+static `c lambda<`a,`b,`c,`e1,`e2>(fn<`a,fn<`b,`c,`e1>,`e2> f,$(`a,`b)@`H arg; 
                                    `e1+`e2) {
   return apply(apply(f,(*arg)[0]),(*arg)[1]);
 }
@@ -96,8 +96,13 @@ fn<$(`a,`b)@,`c,`e1+`e2> uncurry(fn<`a,fn<`b,`c,`e1>,`e2> f) {
 }
 
 // map a closure across a list
-List::list_t<`b> map_fn(fn<`a,`b,`e> f,List::glist_t<`a,`r> x) {
-  return List::map_c(apply,f,x);
+List::list_t<`b,`H> map_fn(fn<`a,`b,`e> f,List::list_t<`a> x) {
+  // return List::map_c(apply,f,x);
+  List::list_t res = null;
+  for (; x != null; x = x->tl) 
+    res = new List::List(apply(f,x->hd), res);
+  res = List::imp_rev(res);
+  return res;
 }
 
 

@@ -41,7 +41,7 @@ using Absyn;
 using String;
 using Position;
 
-void yyerror(string_t s) { 
+void yyerror(string_t<`H> s) { 
   post_error(mk_err_parse(segment_of_abs(yylloc.first_line,
 					 yylloc.last_line), 
 			  s));
@@ -85,11 +85,11 @@ static qvar_t         token_qvar   = &token_id_pair;
 
 static int runaway_start = 0;
 
-static void err(string_t msg,Lexbuf<`a> lb) {
+static void err(string_t<`H> msg,Lexbuf<`a> lb) {
   seg_t s = segment_of_abs(lexeme_start(lb),lexeme_end(lb));
   post_error(mk_err_lex(s,msg));
 }
-static void runaway_err(string_t msg,Lexbuf<`a> lb) {
+static void runaway_err(string_t<`H> msg,Lexbuf<`a> lb) {
   seg_t s = segment_of_abs(runaway_start,lexeme_start(lb));
   post_error(mk_err_lex(s,msg));
 }
@@ -131,6 +131,7 @@ static $(string_t,short) rw_array[] = {
   $("offsetof", OFFSETOF),
   $("region_t", REGION_T),
   $("region", REGION),
+  $("regions", REGIONS),
   $("register", REGISTER),
   $("restrict", RESTRICT),
   $("return", RETURN),
@@ -323,15 +324,15 @@ static void typedef_init() {
   let init_lvis   = new Lvis{.current_namespace=null,
                              .imported_namespaces=null};
   let init_lstack = new List(init_lvis, null);
-  let init_decls  = Dict::insert(Dict::empty(varlist_cmp),
-                                 null,
-                                 new 
-                                 Ldecls{.typedefs=Set::empty(zstrptrcmp),
-                                        .namespaces=Set::empty(zstrptrcmp)});
+  Dict::dict_t<list_t<var_t,`H>,ldecls_t> init_decls = 
+    Dict::insert(Dict::empty(varlist_cmp),
+                 null,
+                 new Ldecls{.typedefs=Set::empty(zstrptrcmp),
+                               .namespaces=Set::empty(zstrptrcmp)});
   lstate = new Opt(new Lstate{.lstack=init_lstack,.decls=init_decls});
 }
 
-static list_t<var_t> get_absolute_namespace(List_t<var_t> ns) {
+static list_t<var_t> get_absolute_namespace(List_t<var_t,`H> ns) {
   // ns is a relative namespace, we return the absolute namespace
   var_t n = ns->hd;
   // For each enclosing scope...
@@ -369,7 +370,7 @@ static void recompute_typedefs() {
 }
 
 // This can stay the slow way because most identifiers are not qualified.
-static bool is_typedef_in_namespace(List_t<var_t> ns, var_t v) {
+static bool is_typedef_in_namespace(List_t<var_t,`H> ns, var_t v) {
   list_t<var_t> ans = get_absolute_namespace(ns);
   try {
     ldecls_t ld = Dict::lookup(lstate->v->decls,ans);
@@ -378,9 +379,9 @@ static bool is_typedef_in_namespace(List_t<var_t> ns, var_t v) {
     return false;
   }
 }
-static bool is_typedef(List::list_t<var_t> ns, var_t v) {
+static bool is_typedef(List::list_t<var_t,`H> ns, var_t v) {
   if (ns != null)
-    return is_typedef_in_namespace((List_t<stringptr_t>)ns,v);
+    return is_typedef_in_namespace((List_t<var_t,`H>)ns,v);
   // all unqualified typedefs must be in the trie 
   // look ma -- fast lookup
   let s   = *v;

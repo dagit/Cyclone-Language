@@ -26,25 +26,26 @@
 
 namespace Splay {
 
-struct node<`a,`b>;
+struct node<`a,`b,`r::R>;
 
-struct noderef<`a,`b> {
-  struct node<`a,`b> @v;
+struct noderef<`a,`b,`r::R> {
+  struct node<`a,`b,`r> @`r v;
 };
 
-extern tunion tree<`a,`b> {
+extern tunion tree<`a,`b,`r::R> {
   Leaf,
-  Node(struct noderef<`a,`b> @)
+  Node(struct noderef<`a,`b,`r> @`r)
 };
 
-struct node<`a,`b> {
+struct node<`a,`b,`r::R> {
   `a key;
   `b data;
-  tunion tree<`a,`b> left;
-  tunion tree<`a,`b> right;
+  tunion `r tree<`a,`b,`r> left;
+  tunion `r tree<`a,`b,`r> right;
 };
 
-extern bool splay(int f(`a,`a), `a, tunion tree<`a,`b>);
+extern bool rsplay(region_t<`r>, int f(`a,`a), `a, tunion `r tree<`a,`b,`r>);
+extern bool splay(int f(`a,`a), `a, tunion `H tree<`a,`b,`H>);
 
 }
 #endif
