@@ -1,5 +1,5 @@
 /* This file is part of the Cyclone Library.
-   Copyright (C) 2001 Greg Morrisett
+   Copyright (C) 2001 Greg Morrisett, AT&T
 
    This library is free software; you can redistribute it and/or it
    under the terms of the GNU Lesser General Public License as
