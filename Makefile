@@ -68,14 +68,14 @@ $(CYC_LIB_PATH):
 $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include: $(CYC_LIB_PATH) \
   $(CYCDIR)/bin/genfiles/$(ARCH).headers.tgz bin/cyc-lib/libc.cys
 	-mkdir $@
-	tar -z -xf bin/genfiles/$(ARCH).headers.tgz -C $@
+	gunzip -c bin/genfiles/$(ARCH).headers.tgz | tar xf - -C $@
 	bin/buildlib -d $@ -finish -setjmp > $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/cyc_setjmp.h
 	bin/buildlib -d $@ -finish bin/cyc-lib/libc.cys
 	find $@ -name '*.i[BC]' -exec rm \{\} \;
 
 $(CYCDIR)/bin/genfiles/$(ARCH).headers.tgz:
 	$(CYCDIR)/bin/buildlib $(CYCDIR)/bin/cyc-lib/libc.cys -gather
-	tar -z -cf $@ -C BUILDLIB.OUT .
+	tar cf - -C BUILDLIB.OUT . | gzip -c > $@
 	$(RM) -r BUILDLIB.OUT
 
 $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a: gc/gc.a $(CYC_LIB_PATH)
