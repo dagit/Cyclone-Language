@@ -1,0 +1,64 @@
+#!/bin/bash
+#  This script:
+#       
+#  * set a timer to expire a few seconds before death
+#  * copy the input from stdin to a file
+#  * call the optimizer with stdout redirected to a second file
+#    and the time suitably decreased
+#  * call the validator on the two files
+#  * if all is well, cat the second file
+#  * if the optimizer fails or the validator crashes or the
+#  validator says false or the timer expires or if apes throw you
+#  into jail due to a remake that didn't need to happen, 
+#  cat the first file.
+
+INPUTFILE=/tmp/smlng-in$$
+OUTPUTFILE=/tmp/smlng-out$$
+
+SLOP=5
+INTERVAL=2
+
+# Get the time limit
+#  from command-line
+if [ $# -gt 1 ]; then
+  TLIMIT=$1
+fi
+#   from environment
+if [ -z "$TLIMIT" ]; then
+  echo Please provide time limit, either as the first argument or
+  echo in the environment variable TLIMIT
+  exit 1
+fi
+
+# copy input to a file
+cat > $INPUTFILE
+
+# optimize it
+cat $INPUTFILE | ./smlng.exe > $OUTPUTFILE &
+
+# check output file to see if we've completed
+i=$((TLIMIT-SLOP))
+while [ $i -gt 0 ]; do
+  sleep $INTERVAL
+  if [ -s "$OUTPUTFILE" ]; then
+    wait
+    if [ $? != 0 ]; then 
+      cat $INPUTFILE
+    else
+      ./validate.exe $INPUTFILE $OUTPUTFILE > /dev/null
+      if [ $? != 0 ]; then
+        cat $INPUTFILE
+      else
+        cat $OUTPUTFILE
+      fi
+    fi
+    rm -f $INPUTFILE $OUTPUTFILE
+    exit 0
+  fi
+  i=$((i-INTERVAL))
+done
+
+# timed out; just cat the $INPUTFILE
+cat $INPUTFILE
+rm -f $INPUTFILE $OUTPUTFILE
+exit 0
