@@ -38,6 +38,23 @@ OUT_PREFIX=
 
 build: $(CYC_LIB_PATH)/gc.a cyclone tools
 
+# This target builds off the C files in bin/genfiles
+cyclone:
+	$(MAKE) install -C bin/genfiles/$(ARCH)
+
+tools:
+	$(MAKE) install -C tools/bison
+	$(MAKE) install -C tools/cyclex
+#	$(MAKE) install -C tools/cycocamllex
+.PHONY: tools
+
+$(CYC_LIB_PATH)/gc.a:
+	$(MAKE) -C gc gc.a CC=gcc
+	ln gc/gc.a $@
+
+# After building all of the source, install it in the user-defined 
+# directories.  Also, keep a record of what was copied for later
+# uninstall.
 install: build inc_install lib_install bin_install
 
 ifdef INC_INSTALL
@@ -71,20 +88,6 @@ else
 lib_install:
 	@(echo "no lib directory specified"; exit 1)
 endif
-
-# This target builds off the C files in bin/genfiles
-cyclone:
-	$(MAKE) install -C bin/genfiles/$(ARCH)
-
-tools:
-	$(MAKE) install -C tools/bison
-	$(MAKE) install -C tools/cyclex
-#	$(MAKE) install -C tools/cycocamllex
-.PHONY: tools
-
-$(CYC_LIB_PATH)/gc.a:
-	$(MAKE) -C gc gc.a CC=gcc
-	ln gc/gc.a $@
 
 # These targets build off the Cyclone source files, 
 # but do not replace anything in bin
