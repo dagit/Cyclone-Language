@@ -20,6 +20,7 @@
 #define _QUEUE_H_
 
 #include <core.h> // for bool
+#include <list.h> // for list_t
 
 namespace Queue {
 
@@ -72,6 +73,11 @@ extern void remove(queue_t<`a>,`a);
 
 extern int length(queue_t<`a>);
   /** [length(q)] returns the number of elements in [q]. */
+
+extern List::list_t<`a,`r> rfilter_c(region_t<`r>, bool f(`b,`a), `b env, queue_t<`a> q);
+  /** [rfilter_c(r,f,e,q)] is a version of the List function rfilter_c
+      that operates on the elements of the queue, starting from the front
+      and moving to the back. **/
 
 extern void iter(void f(`a), queue_t<`a>);
   /** [iter(f,q)] applies [f] to each element of [q], from first to

@@ -128,6 +128,10 @@ void remove(queue_t<`a,`r> q,`a v) {
   }
 }
 
+list_t<`a,`r> rfilter_c(region_t<`r> r, bool f(`b,`a), `b env, queue_t<`a> q){
+  return List::rfilter_c(r,f,env,q->front);
+}
+
 // return the number of elements in the queue
 int length(queue_t<`a> q) {
 //    return(List::length(q->front));

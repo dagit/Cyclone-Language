@@ -49,51 +49,94 @@ int bt(void) { return 1; }
 #else
 int bt(void) {
   int bt[20] = { for i < 20 : 0 }; // should be able to omit bound
-  int tochild[2] = {0,0}, fromchild[2] = {0,0};
   pid_t pid, self_pid;
 
+  int tochild[2] = {0,0}, fromchild[2] = {0,0};
   if (pipe(tochild) || pipe(fromchild)) return 1;
 
   self_pid = getpid(); // gotta get it before we fork
+
   if ((pid = fork()) == 0) { // we are child
-    if (dup2(tochild[0], STDIN_FILENO) == -1 ||
-        dup2(fromchild[1], STDOUT_FILENO) == -1)
-      return 1;
-    execlp("addr2line", "addr2line", "--functions", "-e",
-                   aprintf("/proc/%d/exe", self_pid), NULL);
-    return 1;
+    if (dup2(tochild[0], STDIN_FILENO) < 0) {
+      perror("dup failed in backtrace");
+      exit(1);
+    }
+    close(tochild[1]);
+    if (dup2(fromchild[1], STDOUT_FILENO) < 0) {
+      perror("dup failed in backtrace");
+      exit(1);
+    }
+    close(fromchild[0]);
+
+    const char *args[5]ZEROTERM = { "addr2line", "--functions", "-e", "", 0 };
+    args[3] = aprintf("/proc/%d/exe", self_pid);
+    if (execvp("addr2line", args) == -1) {
+      perror("execlp failed during backtrace");
+    }
+    exit(1);
+
   } else if (pid < 0) { // fork failed
     close(tochild[0]); close(tochild[1]);
     close(fromchild[0]); close(fromchild[1]);
     return 1;
   }
 
-  FILE @w = ({ FILE *f = fdopen(tochild[1], "w");
-               if (!f) return 1; (FILE@)f; });
-  FILE @r = ({ FILE *f = fdopen(fromchild[0], "r");
-               if (!f) {fclose(w);return 1;} (FILE@)f; });
+  /* In the parent */
+  close(tochild[0]);
+  close(fromchild[1]);
+  int infd = fromchild[0];
+  int outfd = tochild[1];
 
+  /* Write out the addresses to look up */
   int n = backtrace(bt, bt.size);
-  for (int c = 0; c < n; c++)
-    fprintf(w,"%#x\n", bt[c]);
-  fflush(w);
+
+  for (int c = 0; c < n; c++) {
+    char buf[100];
+    int len = sprintf(buf,"%#x\n", bt[c]);
+    write(outfd,buf,len);
+  }
+
+  /* Print them out */
   printf("Backtrace:\n"
          "  Function          Location\n"
          "  ----------------  --------------------------------\n");
   for (int c = 0; c < n; c++) {
-    int d, pos=0;
+    bool unknown = true;
+    char d;
+    int ret, pos = 0;
+
     printf("  ");
-    while ((d = getc(r)) != '\n') {
-      putchar(d), pos++;
+    do {
+      ret = read(infd,&d,1);
+      if (d == '\n') break;
+      if (d != '?') unknown = false;
+      pos++;
+      putchar(d);
+    } while (true);
+
+    if (unknown) {
+      char buf[100];
+      int len = sprintf(buf,"(%#x)", bt[c]);
+      printf("%s",buf);
+      pos += len;
     }
+
     while (pos++ < 16)
       putchar(' ');
     printf("  ");
-    while ((d = getc(r)) != '\n')
+
+    do {
+      ret = read(infd,&d,1);
+      if (d == '\n') break;
       putchar(d);
+    } while (true);
     putchar('\n');
   }
-  fclose(r); fclose(w);
+
+  close(infd);
+  if (infd != outfd)
+    close(outfd);
+
   kill(pid, SIGTERM);
   waitpid(pid, NULL, 0);
   return 0;

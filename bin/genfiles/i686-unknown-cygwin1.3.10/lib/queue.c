@@ -447,18 +447,20 @@ char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};extern
 struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_List_List{void*hd;struct Cyc_List_List*
-tl;};extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];struct Cyc_Queue_Queue;
-int Cyc_Queue_is_empty(struct Cyc_Queue_Queue*);struct Cyc_Queue_Queue*Cyc_Queue_create();
-void Cyc_Queue_add(struct Cyc_Queue_Queue*,void*x);void Cyc_Queue_radd(struct
-_RegionHandle*,struct Cyc_Queue_Queue*,void*x);void Cyc_Queue_push(struct Cyc_Queue_Queue*
+tl;};extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];struct Cyc_List_List*
+Cyc_List_rfilter_c(struct _RegionHandle*r,int(*f)(void*,void*),void*env,struct Cyc_List_List*
+x);struct Cyc_Queue_Queue;int Cyc_Queue_is_empty(struct Cyc_Queue_Queue*);struct Cyc_Queue_Queue*
+Cyc_Queue_create();void Cyc_Queue_add(struct Cyc_Queue_Queue*,void*x);void Cyc_Queue_radd(
+struct _RegionHandle*,struct Cyc_Queue_Queue*,void*x);void Cyc_Queue_push(struct Cyc_Queue_Queue*
 q,void*x);void Cyc_Queue_rpush(struct _RegionHandle*r,struct Cyc_Queue_Queue*q,void*
 x);extern char Cyc_Queue_Empty[10];void*Cyc_Queue_take(struct Cyc_Queue_Queue*);
 void*Cyc_Queue_peek(struct Cyc_Queue_Queue*);void Cyc_Queue_clear(struct Cyc_Queue_Queue*);
 void Cyc_Queue_remove(struct Cyc_Queue_Queue*,void*);int Cyc_Queue_length(struct Cyc_Queue_Queue*);
-void Cyc_Queue_iter(void(*f)(void*),struct Cyc_Queue_Queue*);void Cyc_Queue_app(
-void*(*f)(void*),struct Cyc_Queue_Queue*);struct Cyc_Queue_Queue{struct Cyc_List_List*
-front;struct Cyc_List_List*rear;unsigned int len;};int Cyc_Queue_is_empty(struct Cyc_Queue_Queue*
-q){return q->front == 0;}char Cyc_Queue_Empty[10]="\000\000\000\000Empty\000";
+struct Cyc_List_List*Cyc_Queue_rfilter_c(struct _RegionHandle*,int(*f)(void*,void*),
+void*env,struct Cyc_Queue_Queue*q);void Cyc_Queue_iter(void(*f)(void*),struct Cyc_Queue_Queue*);
+void Cyc_Queue_app(void*(*f)(void*),struct Cyc_Queue_Queue*);struct Cyc_Queue_Queue{
+struct Cyc_List_List*front;struct Cyc_List_List*rear;unsigned int len;};int Cyc_Queue_is_empty(
+struct Cyc_Queue_Queue*q){return q->front == 0;}char Cyc_Queue_Empty[10]="\000\000\000\000Empty\000";
 struct Cyc_Queue_Queue*Cyc_Queue_create(){return({struct Cyc_Queue_Queue*_tmp0=
 _cycalloc(sizeof(*_tmp0));_tmp0->front=0;_tmp0->rear=0;_tmp0->len=0;_tmp0;});}
 void Cyc_Queue_radd(struct _RegionHandle*r,struct Cyc_Queue_Queue*q,void*x){struct
@@ -479,8 +481,10 @@ struct Cyc_List_List*)_check_null(q->front))->hd;}}void Cyc_Queue_clear(struct C
 q){q->front=0;q->rear=0;q->len=0;}void Cyc_Queue_remove(struct Cyc_Queue_Queue*q,
 void*v){struct Cyc_List_List*x;struct Cyc_List_List*y;for((x=q->front,y=0);x != 0;(
 y=x,x=x->tl)){if((void*)x->hd == v){if(q->front == x)q->front=x->tl;else{((struct
-Cyc_List_List*)_check_null(y))->tl=x->tl;}if(q->rear == x)q->rear=y;break;}}}int
-Cyc_Queue_length(struct Cyc_Queue_Queue*q){return(int)q->len;}void Cyc_Queue_iter(
+Cyc_List_List*)_check_null(y))->tl=x->tl;}if(q->rear == x)q->rear=y;break;}}}
+struct Cyc_List_List*Cyc_Queue_rfilter_c(struct _RegionHandle*r,int(*f)(void*,void*),
+void*env,struct Cyc_Queue_Queue*q){return Cyc_List_rfilter_c(r,f,env,q->front);}
+int Cyc_Queue_length(struct Cyc_Queue_Queue*q){return(int)q->len;}void Cyc_Queue_iter(
 void(*f)(void*),struct Cyc_Queue_Queue*q){struct Cyc_List_List*x=q->front;for(0;x
 != 0;x=x->tl){f((void*)x->hd);}}void Cyc_Queue_app(void*(*f)(void*),struct Cyc_Queue_Queue*
 q){struct Cyc_List_List*x=q->front;for(0;x != 0;x=x->tl){f((void*)x->hd);}}
