@@ -22,13 +22,23 @@ CYC_FLAGS= $(LC_FLAG) -I../../lib -B../../lib -g
 LIB=../../bin/cyc-lib/$(OUT_PREFIX)$(CYCLIB)
 
 all: $(CYCC) $(LIB) \
-  smlng$(EXE) generate$(EXE)
+  smlng$(EXE) generate$(EXE) validate$(EXE) decorate$(EXE)
 
 smlng$(EXE): smlng.o tag_elim.o timer.o buffer.o parser.o ast_validate.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 #	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
 
 generate$(EXE): generate.o
+	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
+
+validate.o: scanner contexts.h
+
+validate$(EXE): validate.o
+	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
+
+decorate.o: scanner contexts.h
+
+decorate$(EXE): decorate.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
@@ -40,5 +50,6 @@ buffer.cyc: buffer.h
 parser.cyc: parser.h buffer.h smlng.h
 
 clean:
-	rm -f smlng.o smlng.c tag_elim.o tag_elim.c timer.o timer.c ast_validate.o ast_validate.c
+	rm -f smlng.o smlng.c tag_elim.o tag_elim.c timer.o timer.c ast_validate.o ast_validate.c buffer.o
+	rm -f decorate.o generate.o validate.o
 	rm -f *~ *.exe *.output *.stackdump

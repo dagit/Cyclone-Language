@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <stdlib.h>
+using Stdio;
+
+#include "contexts.h"
+
+namespace N1 {
+#include "scanner"
+}
+
+namespace N2 {
+#include "scanner"
+}
+
+int main(int argc, char ??argv) {
+  if (argc < 2 || argc > 3) {
+    printf("Usage: %s file1 [file2]\n",argv[0]);
+    exit(1);
+  }
+
+  FILE @f1;
+  let f1a = fopen(argv[1],"r");
+  if (f1a == null) {
+    printf("Error: can't open %s\n",argv[1]);
+    exit(1);
+  }
+  f1 = (FILE @)f1a;
+  let f2 = stdin;
+  if (argc == 3) {
+    let f2a = fopen(argv[2],"r");
+    if (f2a == null) {
+      printf("Error: can't open %s\n",argv[2]);
+      exit(1);
+    }
+    f2 = (FILE @)f2a;
+  }
+  while (true) {
+    let c1 = N1::next(f1);
+    let c2 = N2::next(f2);
+    if (c1 == EOF)
+      if (c2 == EOF) break;
+      else {
+        printf("Error: %s ends after %d characters, while %s goes on\n",
+               argv[1],N1::input_pos,
+               (argc<3)?(string_t)"stdin":argv[2]);
+        exit(1);
+      }
+    else if (c2 == EOF) {
+      printf("Error: %s ends after %d characters, while %s goes on\n",
+             (argc<3)?(string_t)"stdin":argv[2],
+             N2::input_pos,argv[1]);
+      exit(1);
+    }
+    if (c1 != c2) {
+      printf("Error: different output characters\n");
+      printf("%s character %d: ", argv[1],N1::input_pos);
+      N1::report(c1);
+      printf("%s character %d: ",
+             (argc<3)?(string_t)"stdin":argv[2],
+             N2::input_pos);
+      N2::report(c2);
+      exit(1);
+    }
+    if (SPACE(c1) && N1::space_ctxt != N2::space_ctxt) {
+      printf("Error: different output contexts\n");
+      printf("%s character %d: ", argv[1],N1::input_pos);
+      N1::report(c1);
+      printf("%s character %d: ",
+             (argc<3)?(string_t)"stdin":argv[2],
+             N2::input_pos);
+      N2::report(c2);
+      exit(1);
+    }
+    else if (!SPACE(c1) && N1::ctxt != N2::ctxt) {
+      printf("Error: different output contexts\n");
+      printf("%s character %d: ", argv[1],N1::input_pos);
+      N1::report(c1);
+      printf("%s character %d: ",
+             (argc<3)?(string_t)"stdin":argv[2],
+             N2::input_pos);
+      N2::report(c2);
+      exit(1);
+    }
+  }
+  printf("Files are equivalent\n");
+  return 0;
+}

@@ -1,0 +1,170 @@
+/* This file is meant to be #included */
+
+context_t contexts[MAX_NEST];
+int curr_context = -1;
+context_t pop() {
+  if (curr_context < 0) {
+    fprintf(stderr,"Error: end tag without start tag");
+    exit(1);
+  }
+  return contexts[curr_context--];
+}
+void push(context_t ctxt) {
+  if (curr_context+1==MAX_NEST) {
+    fprintf(stderr,"Error: context stack overflow\n");
+    exit(1);
+  }
+  contexts[++curr_context] = ctxt;
+}
+context_t ctxt = 0x00ff; /* Start with non-sensical size and color */
+context_t space_ctxt = SPACECONTEXT(0x00ff);
+bool last_was_space = false;
+int input_pos = 0;
+int output_pos = 0;
+int get(FILE @f) { input_pos++; return getc(f); }
+
+char color(context_t ctxt) {
+  switch (CL(ctxt)) {
+  case 0: return 'r';
+  case 1: return 'g';
+  case 2: return 'b';
+  case 3: return 'c';
+  case 4: return 'm';
+  case 5: return 'y';
+  case 6: return 'k';
+  case 7: return 'w';
+  default: return '*';
+  }
+}
+char ?verbosefmt(context_t ctxt) {
+  //  return new { (0?'a':'a'), 'b', 'c' };
+  return new {
+    (char)(isS(ctxt)?'S':'-'),
+    '-',
+    (char)(isI(ctxt)?'I':'-'),
+    '-',
+    (char)(isEM(ctxt)?'E':'-'),
+    (char)(isEM(ctxt)?'M':'-'),
+    '-',
+    (char)(isB(ctxt)?'B':'-'),
+    '-',
+    (char)(isTT(ctxt)?'T':'-'),
+    (char)(isTT(ctxt)?'T':'-'),
+    '-',
+    (char)(UL(ctxt)+'0'),
+    '-',
+    color(ctxt),
+    '-',
+    (char)(SZ(ctxt)>9?'*':SZ(ctxt)+'0')
+  };
+}
+
+#ifdef TERSE
+#define FMT "%.4x\n"
+#define HOW(x) (x)
+#else
+#define FMT "%s\n"
+#define HOW(x) verbosefmt(x)
+#endif /* TERSE */
+
+void report(int c) {
+  if (c == 0x20)
+    fprintf(stdout, "SPC " FMT, HOW(space_ctxt));
+  else if (c == 0x0d)
+    fprintf(stdout, "CR  " FMT, HOW(space_ctxt));
+  else if (c == 0x0a)
+    fprintf(stdout, "LF  " FMT, HOW(space_ctxt));
+  else if (c == 0x09)
+    fprintf(stdout, "TAB " FMT, HOW(space_ctxt));
+  else
+    fprintf(stdout, "'%c' " FMT, c, HOW(ctxt));
+}
+
+#ifdef DECORATE
+#define REPORT(c) report(c)
+#else
+#define REPORT(c) 0
+#endif DEBUG
+
+int next(FILE @f) {
+  int c;
+  while (true) {
+    c = get(f);
+    if (c == EOF) return EOF;
+    if (SPACE(c)) {
+      context_t new_space_ctxt = SPACECONTEXT(ctxt);
+      if (isTT(ctxt)) {
+        space_ctxt = new_space_ctxt;
+        REPORT(c);
+        last_was_space = true;
+        output_pos++;
+        return c;
+      }
+      else if (!last_was_space) {
+        space_ctxt = new_space_ctxt;
+        REPORT(' ');
+        last_was_space = true;
+        output_pos++;
+        return ' ';
+      }
+      else if (space_ctxt != new_space_ctxt) {
+        space_ctxt = new_space_ctxt;
+        REPORT(' ');
+        output_pos++;
+        return ' ';
+      }
+    }
+    else if (c != '<') {
+        REPORT(c);
+        last_was_space = false;
+        output_pos++;
+        return c;
+    }
+    else {
+      c = get(f);
+      if (c == EOF) return EOF;
+      switch (c) {
+      case 'B': push(ctxt); ctxt = setB(ctxt); break;
+      case 'E': push(ctxt); ctxt = invertEM(ctxt); if (get(f) == EOF) return EOF; break;
+      case 'I': push(ctxt); ctxt = setI(ctxt); break;
+      case 'P': push(ctxt); ctxt = doPL(ctxt); if (get(f) == EOF) return EOF; break;
+      case 'S': push(ctxt); ctxt = doS(ctxt); break;
+      case 'T': push(ctxt); ctxt = setTT(ctxt); if (get(f) == EOF) return EOF; break;
+      case 'U': push(ctxt); ctxt = incUL(ctxt); break;
+      case 'r': push(ctxt); ctxt = setr(ctxt); break;
+      case 'g': push(ctxt); ctxt = setg(ctxt); break;
+      case 'b': push(ctxt); ctxt = setb(ctxt); break;
+      case 'c': push(ctxt); ctxt = setc(ctxt); break;
+      case 'm': push(ctxt); ctxt = setm(ctxt); break;
+      case 'y': push(ctxt); ctxt = sety(ctxt); break;
+      case 'k': push(ctxt); ctxt = setk(ctxt); break;
+      case 'w': push(ctxt); ctxt = setw(ctxt); break;
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9': push(ctxt); ctxt = setSZ(ctxt,c-'0'); break;
+      case '/':
+        ctxt = pop();
+        /* advance to '>' */
+        c = get(f);
+        if (c == EOF) return EOF;
+        if (c == 'E' || c == 'P' || c == 'T') {
+          if (get(f) == EOF) return EOF;
+        }
+        break;
+      default:
+        fprintf(stderr,"Error: unexpected character '%c'\n",c);
+        exit(1);
+        break;
+      }
+      /* consume '>' */
+      if (get(f) == EOF) return EOF;
+    }
+  }
+}
