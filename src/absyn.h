@@ -416,7 +416,8 @@ namespace Absyn {
   extern typ void_star_typ();
   extern typ pureptr_t(typ t, tqual tq);
   // structs
-  extern typ strct(var name);
+  extern typ strct(var  name);
+  extern typ strctq(qvar name);
 
   /////////////////////////////// Expressions ////////////////////////
   extern exp new_exp(raw_exp, segment);

@@ -230,6 +230,9 @@ list<`a> revappend<`a>(list<`a> x,list<`a> y) {
 
 // Return the reverse of a list. 
 list<`a> rev<`a>(list<`a> x) {
+  // avoid allocation for length-one lists
+  if(x==null || x->tl==null)
+    return x;
   return(revappend(x,null));
 }
 
@@ -237,7 +240,7 @@ list<`a> rev<`a>(list<`a> x) {
 list<`a> imp_rev<`a>(list<`a> x) {
   if (x == null) return x;
   else {
-    list<`a> first = x;
+    list<`a> first  = x;
     list<`a> second = x->tl;
     x->tl = null;
     while (second != null) {

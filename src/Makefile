@@ -19,7 +19,8 @@ CFLAGS=-g -fwritable-strings -I..
 
 CYC_SRCS=$(addsuffix .cyc, $(CYCLONE_SRCS))
 
-CYC_FLAGS=-I ../lib -tc -toc -pp
+#CYC_FLAGS=-I ../lib -tc -toc -pp
+CYC_FLAGS=-I ../lib -tc -toc -up
 
 LIB=../lib/$(OUT_PREFIX)$(CYCLIB)
 
@@ -61,6 +62,7 @@ ABSYN_H        = absyn.h
 PARSE_TAB_H    = parse_tab.h
 PARSE_H        = parse.h        $(ABSYN_H) $(PARSE_TAB_H)
 ABSYNPP_H      = absynpp.h      $(ABSYN_H)
+ABSYNDUMP_H    = absyndump.h    $(ABSYN_H)
 TCENV_H        = tcenv.h        $(ABSYN_H)
 TCUTIL_H       = tcutil.h       $(TCENV_H)
 TCSTMT_H       = tcstmt.h       $(ABSYN_H) $(TCENV_H)
@@ -75,6 +77,7 @@ $(OUT_PREFIX)absyn.c: $(ABSYN_H)
 $(OUT_PREFIX)parse_tab.c: $(ABSYN_H)
 $(OUT_PREFIX)lex.c: 
 $(OUT_PREFIX)absynpp.c: $(ABSYNPP_H) $(ABSYN_H)
+$(OUT_PREFIX)absyndump.c: $(ABSYNDUMP_H) $(ABSYNPP_H)
 $(OUT_PREFIX)tcenv.c: $(TCENV_H) $(ABSYN_H) $(TCUTIL_H) $(ABSYNPP_H)
 $(OUT_PREFIX)tcutil.c: $(TCUTIL_H) $(ABSYN_H) $(ABSYNPP_H) $(TCENV_H) $(EVEXP_H)
 $(OUT_PREFIX)tcstmt.c: $(TCSTMT_H) $(ABSYN_H) $(ABSYNPP_H) $(TCUTIL_H) $(TCENV_H) $(TCEXP_H) $(TCPAT_H) $(CONTROL_FLOW_H)
@@ -84,6 +87,6 @@ $(OUT_PREFIX)evexp.c: $(EVEXP_H) $(ABSYN_H) $(ABSYNPP_H) $(TCUTIL_H)
 $(OUT_PREFIX)tc.c: $(TC_H) $(ABSYN_H) $(ABSYNPP_H) $(TCUTIL_H) $(TCENV_H) $(TCEXP_H) $(TCSTMT_H) $(EVEXP_H)
 $(OUT_PREFIX)control_flow.c: $(ABSYN_H) $(ABSYNPP_H) $(TCUTIL_H) $(CONTROL_FLOW_H)
 $(OUT_PREFIX)toc.c: $(TOC_H) $(ABSYN_H) $(TCUTIL_H) $(EVEXP_H) $(ABSYNPP_H)
-$(OUT_PREFIX)cyclone.c: $(ABSYN_H) $(ABSYNPP_H) $(TCUTIL_H) $(TCENV_H) $(TC_H) $(CONTROL_FLOW_H) $(TOC_H)
+$(OUT_PREFIX)cyclone.c: $(ABSYN_H) $(ABSYNPP_H) $(ABSYNDUMP_H) $(TCUTIL_H) $(TCENV_H) $(TC_H) $(CONTROL_FLOW_H) $(TOC_H)
 
 

@@ -90,17 +90,12 @@ static bool really_is_nullable(typ t) {
   return ans;
 }
 
-// take a qualified var (e.g., Foo::bar) and turn into a C identifier
+// no longer does anything -- much easier to do in pretty-printer
 static qvar collapse_qvar(qvar x) {
-  if (x[0] == null) return x;
-  string s = x[1];
-  for (let lis = List::rev(x[0]); lis != null; lis = lis->tl)
-    s = xprintf("%s_%s",lis->hd,s);
-  return &$(null,s);
+  return x;
 }
 static qvar collapse_qvar_tag(qvar x,string tag) {
-  qvar x2 = &$(x[0],xprintf("_%s_%s",x[1],tag));
-  return collapse_qvar(x2);
+  return &$(x[0], String::strconcat(x[1],tag));
 }
 
 // used to generate struct definitions for tuple types
@@ -236,7 +231,7 @@ static typ typ_to_c(typ t) {
   case StructType(tdnopt,ts):
     if (tdnopt == null) unimp("anonymous struct");
     // just drop the type arguments and translate the nested types
-    return strct(collapse_qvar(tdnopt->v)[1]);
+    return strctq(collapse_qvar(tdnopt->v));
   case TypedefType(tdn,ts,topt):
     if (topt == null) return toc_impos("Toc::typ_to_c: unresolved TypedefType");
     // just drop the type arguments and translate the nested types
@@ -1055,7 +1050,7 @@ static void exp_to_c(env nv, exp e) {
     e->r = array_to_ptr_cast(t_inst,e1,DL)->r; 
     break;
   case Cast_e(*t,*e1):
-    typ old_t2 = (*e1)->topt->v;
+    typ old_t2  = (*e1)->topt->v;
     typ new_typ = *t;
     *t = typ_to_c(new_typ);
     exp_to_c(nv, *e1);
@@ -1396,7 +1391,7 @@ static void exp_to_c(env nv, exp e) {
     let n = collapse_qvar(tdn);
     for (let es = dles; es != null; es = es->tl) 
       exp_to_c(nv,es->hd[1]);
-    e->r = cast_exp(strct(n[1]), unresolvedmem_exp(null,dles,DL),DL)->r;
+    e->r = cast_exp(strctq(n), unresolvedmem_exp(null,dles,DL),DL)->r;
     break;
 
 //     // ({ struct tdn *x = (struct tdn*)malloc(sizeof(struct tdn));
@@ -1445,7 +1440,7 @@ static void exp_to_c(env nv, exp e) {
     } else {
       let x = temp_var();
       let xexp = var_exp(x,DL);
-      let strct_typ = strct(collapse_qvar_tag(qv,"_struct")[1]);
+      let strct_typ = strctq(collapse_qvar_tag(qv,"_struct"));
       let pstrct_typ = nullableptr_t(strct_typ,empty_tqual());
       // we have to do this differently for the toplevel
       if (nv->toplevel) {
@@ -1521,7 +1516,7 @@ static void exp_to_c(env nv, exp e) {
     // FIX:
     let x = temp_var();
     let xexp = var_exp(x,DL);
-    let strct_typ = strct(collapse_qvar_tag(qv,"_struct")[1]);
+    let strct_typ = strctq(collapse_qvar_tag(qv,"_struct"));
     let pstrct_typ = nullableptr_t(strct_typ,empty_tqual());
     exp tag_exp = var_exp(collapse_qvar_tag(qv,"_tag"),DL);
     if (nv->toplevel) {
@@ -1728,8 +1723,8 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
     // of thing...
     list<stmt> ss = null;
     int cnt = List::length(ps);
-    var efstrct = collapse_qvar_tag(ef->name,"_struct")[1];
-    exp rcast   = cast_exp(nullableptr_t(strct(efstrct),empty_tqual()),r,DL);
+    qvar efstrct = collapse_qvar_tag(ef->name,"_struct");
+    exp rcast   = cast_exp(nullableptr_t(strctq(efstrct),empty_tqual()),r,DL);
     for(let rps = List::rev(ps); rps != null; rps = rps->tl, cnt--) {
       let p2  = rps->hd;
       let v   = temp_var();
@@ -1786,8 +1781,8 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
     //          Eliminates some gcc warnings.
     list<stmt> ss = null;
     int cnt = List::length(ps);
-    var xfstrct = collapse_qvar_tag(xf->name,"_struct")[1];
-    exp rcast = cast_exp(nullableptr_t(strct(xfstrct),empty_tqual()),r,DL);
+    qvar xfstrct = collapse_qvar_tag(xf->name,"_struct");
+    exp rcast = cast_exp(nullableptr_t(strctq(xfstrct),empty_tqual()),r,DL);
     for(let rps = List::rev(ps); rps != null; rps = rps->tl, cnt--) {
       let p2  = rps->hd;
       let v   = temp_var();
@@ -1965,7 +1960,7 @@ static void xlate_switch(env nv, stmt whole_s, exp e, list<switch_clause> scs) {
 
 extern stmt letdecl_to_c(env nv, pat p, Opt_t<typ> topt, exp e,
 			 bool exhaust, stmt s);
-extern $(env,list<decl>) decls_to_c(env nv, list<decl> ds);
+extern $(env,list<decl>) decls_to_c(env nv, list<decl> ds, bool top);
 
 
 ///////////////////////////////////////////////////////////////
@@ -2091,7 +2086,7 @@ static void stmt_to_c(env nv, stmt s) {
 	s->r = letdecl_to_c(nv, p, topt, e, exhaust, s1)->r;
         break;
       default:
-	let $(nv,decls) = decls_to_c(nv,&cons(d,null)); 
+	let $(nv,decls) = decls_to_c(nv,&cons(d,null),false); 
 	stmt_to_c(nv,s1);
 	for (; decls != null; decls = decls->tl)
 	  s1 = decl_stmt(decls->hd,s1,DL);
@@ -2473,7 +2468,7 @@ static stmt letdecl_to_c(env nv, pat p, Opt_t<typ> topt, exp e,
 // FIX:  the translation of top-level variable declarations needs to be
 // fixed to make expressions "constant" initializers for C (e.g., 
 // constructor expressions, new structs, etc.)
-static $(env,list<decl>) decls_to_c(env nv, list<decl> ds) {
+static $(env,list<decl>) decls_to_c(env nv, list<decl> ds, bool top) {
   list<decl> res = null;
   for (; ds != null; ds = ds->tl) {
     decl d = ds->hd;
@@ -2489,7 +2484,7 @@ static $(env,list<decl>) decls_to_c(env nv, list<decl> ds) {
       nv = add_varmap(nv,vd->name,var_exp(n,DL));
       vd->name = n;
       vd->sc   = scope_to_c(vd->sc);
-      vd->type = top_typ_to_c(vd->type);
+      vd->type = top ? top_typ_to_c(vd->type) : typ_to_c(vd->type);
       res = &cons(d,res);
       break;
     case Fn_d(fd):
@@ -2518,12 +2513,12 @@ static $(env,list<decl>) decls_to_c(env nv, list<decl> ds) {
       res = &cons(d,res);
       break;
     case Namespace_d(v,ds2): 
-      let p = decls_to_c(nv,ds2);
+      let p = decls_to_c(nv,ds2,top);
       nv = p[0];
       res = List::append(List::rev(p[1]),res);
       break;
     case Using_d(q,ds2): 
-      let p = decls_to_c(nv,ds2);
+      let p = decls_to_c(nv,ds2,top);
       nv = p[0];
       res = List::append(List::rev(p[1]),res);
       break;
@@ -2553,7 +2548,7 @@ static void init() {
 // to a struct type...  (I think this is okay, though.)
 list<decl> toc(list<decl> ds) {
   init();
-  let $(_,ds) = decls_to_c(empty_env(),ds);
+  let $(_,ds) = decls_to_c(empty_env(),ds,true);
   // add the tagged array types in
   for (let ts = tagged_array_types; ts != null; ts = ts->tl) {
     let &$(x,t) = ts->hd;

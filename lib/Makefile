@@ -14,7 +14,11 @@ CFLAGS=-g -fwritable-strings -I..
 
 CYC_LIBS=$(addsuffix .cyc, $(CYCLONE_LIBS))
 
-CYC_FLAGS= -tc -toc -pp
+# uh, the precore_c.h building doesn't work with the ugly printer :-)
+CYC_FLAGS_PP = -tc -toc -pp
+
+#CYC_FLAGS= -tc -toc -pp
+CYC_FLAGS= -tc -toc -up
 
 all: $(OUT_PREFIX)$(CYCLIB)
 
@@ -23,7 +27,7 @@ $(OUT_PREFIX)$(CYCLIB): $(addprefix $(OUT_PREFIX), $(O_LIBS) $(RUNTIME).o)
 	ar qc $@ $^
 
 precore_c.h: precore.h
-	$(CYCC) $(CYC_FLAGS) -noexpandtypedefs $^ | grep -v __sFILE > $@
+	$(CYCC) $(CYC_FLAGS_PP) -noexpandtypedefs $^ | grep -v __sFILE > $@
 
 # For machine-generated we need special targets (the .cyc is prefixed)
 $(OUT_PREFIX)lineno.c : $(OUT_PREFIX)lineno.cyc

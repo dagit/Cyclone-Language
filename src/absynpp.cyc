@@ -49,6 +49,10 @@ extern Doc enumfields2doc(list<enumfield> fields);
 // Flag controlling whether typedefs are expanded during printing
 bool expand_typedefs = false;
 
+// Flag controlling how to print identifiers (better performance (???) than
+// re-writing them all in Toc).
+bool qvar_to_Cids = false;
+
 /* // I'm having trouble linking in the Buffer stuff
 string escape(string s) {
   _ sz = size(s);
@@ -73,7 +77,7 @@ string escape(string s) {
 */
 
 bool special(string s){
-  int sz = size(s);
+  int sz = size(s)-1;
   for (int i = 0; i<sz; i++) {
     char c = s[i];
     if (c<=' ' || c>='~' || c=='\042' || c=='\\')
@@ -322,7 +326,10 @@ $(Opt_t<var>,tqual,typ)@ arg_mk_opt($(var,tqual,typ)@ arg) {
 Doc var2doc(var v) { return text(v); }
 
 Doc qvar2doc(qvar q) {
-  return cat2(egroup("","::","::",List::map(var2doc,q[0])),
+  if(q[0] == null)
+    return var2doc(q[1]);
+  string sep = qvar_to_Cids ? (string)"_" : (string)"::";
+  return cat2(egroup("",sep,sep,List::map(var2doc,q[0])),
               var2doc(q[1]));
 }
 
@@ -343,6 +350,7 @@ Doc typ2doc(typ t) {
 //       Eg. &((foo) x) has unnecessary parens
 // warning -- as a quick hack, exp2_doc_prec also uses some constants
 //            in key places
+// BIGGER WARNING: Absyndump::dumpexp_prec has to use the same constants!!!
 int exp_prec(exp e) {
   switch (e->r) {
   case Const_e(_):       return 10000;
@@ -594,7 +602,7 @@ Doc cnst2doc(cnst c) {
   switch (c) {
   case Char_c(sg,ch):     return text(xprintf("'%s'",char_escape(ch)));
   case Short_c(sg,s):     return text(xprintf("(short)%d",(int)s));
-  case Int_c(Signed,i):   return text(xprintf("%d",i));
+  case Int_c(Signed,i):   return text(string_of_int(i));
   case Int_c(Unsigned,i): return text(xprintf("%u",(unsigned)i));
   case LongLong_c(sg,i):  return text("<<FIX LONG LONG CONSTANT>>"); // FIX
   case Float_c(x):  return text(x);
@@ -624,32 +632,36 @@ Doc primapp2doc(int inprec, primop p,list<exp> es) {
   }
 }
 
-Doc prim2doc(primop p) {
+string prim2str(primop p) {
   switch (p) {
-  case Plus: return text("+");
-  case Times: return text("*");
-  case Minus: return text("-");
-  case Div: return text("/");
-  case Mod: return text("%");
-  case Eq: return text("==");
-  case Neq: return text("!=");
-  case Gt: return text(">");
-  case Lt: return text("<");
-  case Gte: return text(">=");
-  case Lte: return text("<=");
-  case Not: return text("!");
-  case Bitnot: return text("~");
-  case Bitand: return text("&");
-  case Bitor: return text("|");
-  case Bitxor: return text("^");
-  case Bitlshift: return text("<<");
-  case Bitlrshift: return text(">>");
-  case Bitarshift: return text(">>>");
-  case Size: return text("size");
-  case Printf: return text("printf");
-  case Fprintf: return text("fprintf");
-  case Xprintf: return text("xprintf");
+  case Plus: return "+";
+  case Times: return "*";
+  case Minus: return "-";
+  case Div: return "/";
+  case Mod: return "%";
+  case Eq: return "==";
+  case Neq: return "!=";
+  case Gt: return ">";
+  case Lt: return "<";
+  case Gte: return ">=";
+  case Lte: return "<=";
+  case Not: return "!";
+  case Bitnot: return "~";
+  case Bitand: return "&";
+  case Bitor: return "|";
+  case Bitxor: return "^";
+  case Bitlshift: return "<<";
+  case Bitlrshift: return ">>";
+  case Bitarshift: return ">>>";
+  case Size: return "size";
+  case Printf: return "printf";
+  case Fprintf: return "fprintf";
+  case Xprintf: return "xprintf";
   }
+}
+
+Doc prim2doc(primop p) {
+  return text(prim2str(p));
 }
 
 Doc structarg2doc($(Opt_t<var>,exp)@ t) {
@@ -663,7 +675,6 @@ Doc structarg2doc($(Opt_t<var>,exp)@ t) {
 Doc cat2(Doc d1,Doc d2) {
   return concat(d1, d2);
 }
-
 Doc cat3(Doc d1,Doc d2,Doc d3) {
   return
     concat(d1,
@@ -781,6 +792,7 @@ Doc cat12(Doc d1,Doc d2,Doc d3,Doc d4,Doc d5,Doc d6,Doc d7,Doc d8,Doc d9,
     concat(d11,
            d12)))))))))));
 }
+
 bool is_declaration(stmt s) {
   switch (s->r) {
   case Decl_s(_,_): return true;

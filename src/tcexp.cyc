@@ -534,7 +534,7 @@ synth tcFnCall(tenv te, segment loc, Opt_t<typ> topt, exp e, list<exp> es) {
   case PointerType(t1,x,tq):
     // FIX: insert null check if necessary
     switch (compress(t1)) {
-    case FnType(tvars,res_t,args_info,is_vararg): //TODO: handle tvars
+    case FnType(tvars,res_typ,args_info,is_vararg): //TODO: handle tvars
       if (is_vararg)
         terr(loc,"vararg functions (...) not supported yet");
       // for each argument -- check that it has the appropriate type, coercing
@@ -554,7 +554,7 @@ synth tcFnCall(tenv te, segment loc, Opt_t<typ> topt, exp e, list<exp> es) {
         return expr_err(te,loc,"too many arguments for function");
       else if (args_info != null) 
         return expr_err(te,loc,"too few arguments for function");
-      return synth_set_typ(list_result,res_t);
+      return synth_set_typ(list_result,res_typ);
     default:
       return expr_err(te,loc,"expected pointer to function");
     }

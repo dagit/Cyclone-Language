@@ -27,6 +27,7 @@ CYCLONE_SRCS=absyn\
          parse_tab\
          lex\
          absynpp\
+	 absyndump\
          tcenv\
          tcutil\
          tcstmt\

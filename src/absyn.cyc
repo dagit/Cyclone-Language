@@ -146,6 +146,9 @@ typ pureptr_t(typ t, tqual tq) {
 typ strct(var name) {
   return StructType(&Opt(&$(null,name)),null);
 }
+typ strctq(qvar name) {
+  return StructType(&Opt(name),null);
+}
 
 ///////////////////////// Expressions //////////////////////////////
 exp new_exp(raw_exp r, segment loc) {

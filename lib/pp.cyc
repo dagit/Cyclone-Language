@@ -12,6 +12,7 @@
 #include "hashtable.h"
 #include "fn.h"
 #include "pp.h"
+#include "xarray.h"
 
 using Core;
 using List;
@@ -70,14 +71,22 @@ struct doc {
   fn<Ppstate,Out> f; // thunk for doing a step of pretty printing
 };
 
-static void dump_out(FILE @f,list<Alist<string>> stack) {
-  while (stack != null) {
-    let x = stack->hd;
-    stack = stack->tl;
-    switch (x) {
-    case Empty:         continue;
-    case Single(s):     fprintf(f,"%s",s); continue;
-    case Append(a1,a2): stack = &cons(a1,&cons(a2,stack)); continue;
+static void dump_out(FILE @f, Alist<string> al) {
+  let xarr = Xarray::create(16,al);
+  Xarray::add(xarr,al);
+  int last = 0;
+  while(last >= 0) {
+    switch(Xarray::get(xarr,last)) {
+    case Empty:     --last;                    break;
+    case Single(s): --last; fprintf(f,"%s",s); break;
+    case Append(a1,a2): 
+      Xarray::set(xarr,last,a2); 
+      if(last == Xarray::length(xarr)-1)
+	Xarray::add(xarr,a1);
+      else
+	Xarray::set(xarr,last+1,a1);
+      ++last;
+      break;
     }
   }
 }
@@ -85,7 +94,7 @@ static void dump_out(FILE @f,list<Alist<string>> stack) {
 // Dump a doc to a file descriptor
 void file_of_doc(Doc d,int w,FILE @f) {
   Out o = apply(d->f,&ppstate(0,0,1,w,w));
-  dump_out(f,&cons(o->ppout,null));
+  dump_out(f,o->ppout);
 }
 
 // Convert a Doc to a string.  Takes a Doc and a width as arguments.
@@ -169,6 +178,7 @@ Opt_t<Doc> nil_doc_opt   = null;
 Opt_t<Doc> blank_doc_opt = null;
 Opt_t<Doc> line_doc_opt  = null;
 
+// FIX: ineffecient to create an Out for the empty string!!
 // This is made a function because non-constant initializers not allowed
 Doc nil_doc() {
   if (nil_doc_opt == null) 
@@ -258,6 +268,8 @@ Doc concat(Doc d1, Doc d2) {
               make_fn(concat_f, &$(d1,d2)));
 }    
 
+// good places in here for passing address of locals (eg. st)
+
 static Out long_concats_f(list<Doc> ds0, Ppstate st) {
   list<Out> os = null;
   for (let ds = ds0; ds != null; ds = ds->tl) {
@@ -301,6 +313,42 @@ Doc concats(list<Doc> doclist) {
   // JGM: a hack to avoid stack overflow
   else if (List::length(doclist) > 30) return long_concats(doclist);
   else return concat(doclist->hd,concats(doclist->tl));
+}
+
+static Out concats_arr_f(Doc docs[?], Ppstate st) {
+  list<Out> os = null;
+  int sz = size(docs);
+  for (int i=0; i < sz; ++i) {
+    Doc d = docs[i];
+    Out o = apply(d->f,st);
+    st = &ppstate(st->ci,o->newcc,o->newcl,st->pw,st->epw-d->mwo);
+    os = &cons(o,os);
+  }
+  int newcc = os->hd->newcc;
+  int newcl = os->hd->newcl;
+  Alist<string> s = Empty;
+  let links = Empty;
+  for(; os != null; os = os->tl) {
+    s = append(os->hd->ppout,s);
+    links = append(os->hd->links,links);
+  }
+  return &out(newcc,newcl,s,links);
+}
+
+Doc concats_arr(Doc docs[?]) {
+  int sz = size(docs);
+  if(sz==0)
+    throw Failure("concats_arr -- size zero array");
+  Doc d = docs[0];
+  int mw  = d->mw;
+  int mwo = d->mw;
+  for(int i=1; i < sz; ++i) {
+    int mw2  = min(mw, mwo+docs[i]->mwo);
+    int mwo2 = min(mw, mwo+docs[i]->mw);
+    mw  = mw2;
+    mwo = mwo2;
+  }
+  return &doc(mw,mwo,make_fn(concats_arr_f,docs));
 }
 
 static Out doc_union_f($(Doc,Doc) @clo, Ppstate st) {

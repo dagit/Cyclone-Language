@@ -230,7 +230,7 @@ static void only_vardecl(list<string> params,decl x) {
     for(; params != null; params = params->tl)
       if(zstrcmp(vd->name[1], params->hd)==0) {
 	found = true;
-	//	break; // DEF ASSIGN BROKEN -- THINKS BREAKS SWITCH!
+	break;
       }
     if (!found)
       abort(xprintf("%s is not listed as a parameter",vd->name[1]),x->loc);

@@ -11,6 +11,7 @@
 #include "position.h"
 #include "absyn.h"
 #include "absynpp.h"
+#include "absyndump.h"
 #include "tcutil.h"
 #include "tcenv.h"
 #include "tc.h"
@@ -27,11 +28,13 @@ using Arg;
 using String;
 
 bool pp_r       = false;
+bool up_r       = false;
 bool noexpand_r = false;
 bool tc_r       = false;
 bool toc_r      = false;
 
 bool @ pp       = &pp_r;
+bool @ up       = &up_r;
 bool @ noexpand = &noexpand_r;
 bool @ tc       = &tc_r;
 bool @ toc      = &toc_r;
@@ -112,15 +115,25 @@ void compile_file(string filename) {
     break;
   }
   // translate to C
-  if (*toc && !compile_failure)
+  if (*toc && !compile_failure) {
     tds = Toc::toc(tds); 
+    fprintf(cyc_stderr, "Translation to C completed\n");
+    fflush(cyc_stderr);
+  }
   // print
-  if (tds != null && !compile_failure && *pp) {
+  if (tds != null && !compile_failure && (*pp || *up)) {
     Absynpp::expand_typedefs = ! *noexpand;
-    if (*toc) 
+    if (*toc) {
       printf("#include \"cyc_include.h\"\n\n");
-    Absynpp::decllist2file(tds,cyc_stdout);
+      Absynpp::qvar_to_Cids = true;
+    }
+    if(*pp)
+      Absynpp::decllist2file(tds,cyc_stdout);
+    else if(*up)
+      Absyndump::dumpdecllist2file(tds,cyc_stdout);
     fflush(cyc_stdout);
+    fprintf(cyc_stderr, "Printing completed\n");
+    fflush(cyc_stderr);
   }
   if (Position::error_p()) {
     fprintf(cyc_stderr,"COMPILATION FAILED!\n");
@@ -139,6 +152,8 @@ int cyc_main() {
   list<$(string,Arg::spec,string)@> options =
     &cons(&$((string)"-pp",Set_spec(pp), 
 	     (string)"pretty print"),
+    &cons(&$((string)"-up",Set_spec(up), 
+	     (string)"ugly print"),
     &cons(&$((string)"-noexpandtypedefs",Set_spec(noexpand),
              (string)"don't expand typedefs in pretty printing"),
     &cons(&$((string)"-tc",Set_spec(tc), 
@@ -151,7 +166,7 @@ int cyc_main() {
 	     (string)"pass definition to pre-processor"),
     &cons(&$((string)"-check_null",Unit_spec(set_check_null), 
 	     (string)"turn on null-checking in generated C code"),
-	  null)))))));
+	  null))))))));
 
   Lex::lex_init();
   Arg::parse(options, compile_file, "Options:");
