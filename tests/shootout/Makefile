@@ -24,7 +24,8 @@ CATN=catn$(EXE)
 all: $(EXEFILES) $(GCCEXEFILES) $(NOCHECKEXEFILES)
 
 bench: all $(HIST) $(CATN)
-	@(./runtests 11 | ./hist)
+#	@(./runtests 11 | ./hist)
+	@(./runtests 11)
 
 diff: $(DIFFFILES)
 	@(for file in $(DIFFFILES); do \

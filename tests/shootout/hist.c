@@ -252,7 +252,7 @@ void get_max_min_med(double *points, int npoints, double *max, double *min,
 int main(int argc, char *argv[])
 {
   char buffer[2000];
-  FILE *infp;
+  FILE *infp = NULL;
   int nbins = 20, idx = 0;
   char *heapname, *point;
   double max, min, delta;
@@ -262,13 +262,21 @@ int main(int argc, char *argv[])
   char **arg;
   int verbose = 0;
 
-  infp = stdin;
-
   /* get arguments */
   arg = argv + 1;
   while (*arg != NULL) {
     if ((*arg)[0] == '-') {
       switch((*arg)[1]) {
+        case 'i':
+          arg++;
+	  if (infp != NULL) fclose(infp);
+	  infp = fopen(*arg,"r");
+	  if (infp == NULL) {
+	    fprintf(stderr,"Could not open input file \"%s\"\n",arg);
+	    USAGE(argv[0]);
+	  }
+	  break;
+
         case 'n':
           arg++;
           bindiff = 0.0; /* disable runtime divvying of bin sizes */
@@ -302,6 +310,8 @@ int main(int argc, char *argv[])
      break;
   }
 
+  if (infp == NULL) infp = stdin;
+
   /* read/process input one line at a time;
      store the input points into the points array */ 
   while (fgets(buffer,sizeof(buffer),infp) != NULL) {
@@ -313,7 +323,10 @@ int main(int argc, char *argv[])
         fprintf(stderr,"Can't have more than %d input points!\n",MAX_POINTS);
         exit(1);
       }
-      sscanf(point,"%lf",&points[idx++]);
+      if (sscanf(point,"%lf",&points[idx++]) != 1) {
+	point = NULL;
+	idx--;
+      }
       point = strtok(NULL," ");
     }
 
