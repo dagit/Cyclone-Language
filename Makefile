@@ -369,7 +369,7 @@ lib_install lib_uninstall:
 	@(echo "no lib directory specified"; exit 1)
 endif
 .PHONY: install uninstall inc_install lib_install bin_install
-.PHONY: inc_uninstall lib_uninstall bin_uninstall
+.PHONY: inc_uninstall lib_uninstall bin_uninstall unupdate
 
 UPDATEARCH=$(ARCH)
 BUILDDIR=build/boot
@@ -421,76 +421,112 @@ dbg_src:
 dbg_lib_src:
 	$(MAKE) BUILDDIR=build/dbg CYCFLAGS="$(CYCFLAGS) -g" lib_src
 
+# The directory in which the "unupdate" information is stored.
+UNUPDATEDIR=unupdate
+
+# The update files that go from BUILDDIR to GENDIR.
+BUILDDIR_UPDATE_FILES=$(UPDATE_SRCS) $(C_BOOT_LIBS) precore_c.h boot_cycstubs.c
+
+# The update files that go from "lib" to GENDIR.
+LIB_UPDATE_FILES=boot_cstubs.c nogc.c $(C_RUNTIME)
+
+# The update files that go from "lib" to "bin/cyc-lib".
+CYC_LIB_UPDATE_FILES=cyc_include.h libc.cys
+
 # This target compares the C files in bin/genfiles to those in src
 # Lack of difference means running the update would have no real effect.
 XS=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 cmp: 
-	@for i in $(UPDATE_SRCS);\
+	@for i in $(BUILDDIR_UPDATE_FILES);\
 	  do (cmp -s $(GENDIR)/$$i $(BUILDDIR)/$$i\
 	      || echo $(XS) $$i CHANGED) done
-	@for i in $(C_BOOT_LIBS);\
-	  do (cmp -s $(GENDIR)/$$i $(BUILDDIR)/$$i\
-	      || echo $(XS) $$i CHANGED) done
-	@cmp -s $(GENDIR)/precore_c.h $(BUILDDIR)/precore_c.h\
-	      || echo $(XS) precore_c.h CHANGED
 	@for i in $(CYCLONE_H);\
 	  do (test ! -e lib/$$i || cmp -s include/$$i lib/$$i\
               || echo $(XS) lib/$$i CHANGED) done
-	@cmp -s $(GENDIR)/$(C_RUNTIME) lib/$(C_RUNTIME)\
-              || echo $(XS) $(C_RUNTIME) CHANGED
-	@cmp -s $(GENDIR)/boot_cstubs.c lib/boot_cstubs.c\
-              || echo $(XS) boot_cstubs.c CHANGED
-	@cmp -s $(GENDIR)/boot_cycstubs.c $(BUILDDIR)/boot_cycstubs.c \
-              || echo $(XS) boot_cycstubs.c CHANGED
-	@cmp -s $(GENDIR)/nogc.c lib/nogc.c\
-              || echo $(XS) nogc.c CHANGED
-	@test ! -e lib/cyc_include.h\
-	      || cmp -s bin/cyc-lib/cyc_include.h lib/cyc_include.h\
-              || echo $(XS) cyc_include.h CHANGED
-	@test ! -e lib/libc.cys\
-	      || cmp -s bin/cyc-lib/libc.cys lib/libc.cys\
-              || echo $(XS) libc.cys CHANGED
-
+	@for i in $(LIB_UPDATE_FILES);\
+          do (cmp -s $(GENDIR)/$$i lib/$$i\
+              || echo $(XS) $$i CHANGED) done
+	@for i in $(CYC_LIB_UPDATE_FILES);\
+          do (test ! -e lib/$$i\
+	      || cmp -s bin/cyc-lib/$$i lib/$$i\
+              || echo $(XS) $$i CHANGED) done
 
 # This target updates what is in bin/genfiles and include.
 # It would be "dangerous" to invoke this target if we did not have 
 # version control.  Only updates changed files (makes cvs faster).
+# A backup copy is stored in UNUPDATEDIR; it can be restored by
+# issuing "make unupdate". Only the latest "update" is kept.
 update: cfiles
-	@for i in $(UPDATE_SRCS);\
-	   do (cmp -s $(BUILDDIR)/$$i $(GENDIR)/$$i\
-               || (echo UPDATING $(GENDIR)/$$i;\
-	           cp $(BUILDDIR)/$$i $(GENDIR)/$$i)) done
-	@for i in $(C_BOOT_LIBS);\
+	@test ! -e $(UNUPDATEDIR) || mv $(UNUPDATEDIR) $(UNUPDATEDIR)-backup
+	@mkdir -p $(UNUPDATEDIR)/include $(UNUPDATEDIR)/genfiles $(UNUPDATEDIR)/lib $(UNUPDATEDIR)/bin/cyc-lib
+	@for i in $(BUILDDIR_UPDATE_FILES);\
            do (cmp -s $(BUILDDIR)/$$i $(GENDIR)/$$i\
                || (echo UPDATING $(GENDIR)/$$i;\
+		   cp -a $(GENDIR)/$$i $(UNUPDATEDIR)/genfiles/$$i;\
+		   touch $(UNUPDATEDIR)/contains-files;\
 	           cp $(BUILDDIR)/$$i $(GENDIR)/$$i)) done
-	@cmp -s $(BUILDDIR)/precore_c.h $(GENDIR)/precore_c.h\
-	       || (echo UPDATING $(GENDIR)/precore_c.h;\
-	            cp $(BUILDDIR)/precore_c.h $(GENDIR)/precore_c.h)
-	@cmp -s lib/$(C_RUNTIME) $(GENDIR)/$(C_RUNTIME)\
-               || (echo UPDATING $(GENDIR)/$(C_RUNTIME);\
-                   cp lib/$(C_RUNTIME) $(GENDIR)/$(C_RUNTIME))
-	@cmp -s lib/boot_cstubs.c $(GENDIR)/boot_cstubs.c\
-               || (echo UPDATING $(GENDIR)/boot_cstubs.c;\
-                   cp lib/boot_cstubs.c $(GENDIR)/boot_cstubs.c)
-	@cmp -s $(BUILDDIR)/boot_cycstubs.c $(GENDIR)/boot_cycstubs.c\
-               || (echo UPDATING $(GENDIR)/boot_cycstubs.c;\
-                   cp $(BUILDDIR)/boot_cycstubs.c $(GENDIR)/boot_cycstubs.c)
-	@cmp -s lib/nogc.c $(GENDIR)/nogc.c\
-               || (echo UPDATING $(GENDIR)/nogc.c;\
-                   cp lib/nogc.c $(GENDIR)/nogc.c)
+	@for i in $(LIB_UPDATE_FILES);\
+           do (cmp -s lib/$$i $(GENDIR)/$$i\
+               || (echo UPDATING $(GENDIR)/$$i;\
+		   cp -a $(GENDIR)/$$i $(UNUPDATEDIR)/genfiles/$$i;\
+		   touch $(UNUPDATEDIR)/contains-files;\
+                   cp lib/$$i $(GENDIR)/$$i)) done
 	@for i in $(CYCLONE_H);\
            do (test ! -e lib/$$i || cmp -s lib/$$i include/$$i\
                || (echo UPDATING include/$$i;\
+		   cp -a include/$$i $(UNUPDATEDIR)/include/$$i;\
+		   cp -a lib/$$i $(UNUPDATEDIR)/lib/$$i;\
+		   touch $(UNUPDATEDIR)/contains-files;\
                    mv lib/$$i include/$$i)) done
-	@test ! -e lib/cyc_include.h\
-               || cmp -s lib/cyc_include.h bin/cyc-lib/cyc_include.h\
-               || (echo UPDATING bin/cyc-lib/cyc_include.h;\
-                 mv lib/cyc_include.h bin/cyc-lib/cyc_include.h)
-	@test ! -e lib/libc.cys\
-               || cmp -s lib/libc.cys bin/cyc-lib/libc.cys\
-               || (echo UPDATING bin/cyc-lib/libc.cys;\
-                 mv lib/libc.cys bin/cyc-lib/libc.cys)
+	@for i in $(CYC_LIB_UPDATE_FILES);\
+           do (test ! -e lib/$$i\
+               || cmp -s lib/$$i bin/cyc-lib/$$i\
+               || (echo UPDATING bin/cyc-lib/$$i;\
+		   cp -a bin/cyc-lib/$$i $(UNUPDATEDIR)/bin/cyc-lib/$$i;\
+		   cp -a lib/$$i $(UNUPDATEDIR)/lib/$$i;\
+		   touch $(UNUPDATEDIR)/contains-files;\
+                   mv lib/$$i bin/cyc-lib/$$i)) done
+	@test -e $(UNUPDATEDIR)/contains-files || \
+           (rm -rf $(UNUPDATEDIR) && mv $(UNUPDATEDIR)-backup $(UNUPDATEDIR) \
+            && echo "No changes found; keeping unupdate information from previous update.")
+
+
+# Undo the most recent update. This can only be done once after an update; if the unupdate is
+# successful, the unupdate directory is removed. Because it is very risky to keep the compiler
+# built by the previous update around (this compiler would be used to build the C files for
+# the next update), a clean bootstrap is executed immediately after restoring the old files.
+unupdate:
+	@test -e $(UNUPDATEDIR) || (echo "There is nothing to unupdate." && false)
+	@test ! -e $(UNUPDATEDIR)/genfiles/* || cp -av $(UNUPDATEDIR)/genfiles/* $(GENDIR)
+	@test ! -e $(UNUPDATEDIR)/lib/* || cp -av $(UNUPDATEDIR)/lib/* lib
+	@test ! -e $(UNUPDATEDIR)/include/* || cp -av $(UNUPDATEDIR)/include/* include
+	@test ! -e $(UNUPDATEDIR)/bin/cyc-lib/* || cp -av $(UNUPDATEDIR)/bin/cyc-lib/* bin/cyc-lib
+	@rm -rf $(UNUPDATEDIR)
+	@echo
+	@echo "Unupdate complete. Now \"make clean\" and \"make all\" will be run to restore your"
+	@echo "compiler, tools and libraries to their previous state."
+	@echo
+	$(MAKE) clean
+	$(MAKE) all
+	@echo
+	@echo "Unupdate is complete."
+	@echo
+
+# Test the bootstrap sequence and execute the test suite on the bootstrapped compiler;
+# if this fails, unupdate 
+safeupdate:
+	@($(MAKE) update && $(MAKE) clean && $(MAKE) all && $(MAKE) test) \
+           || (echo && echo "XXXXXXXXX Safe update failed; unupdating:" && echo\
+               && $(MAKE) unupdate \
+               && echo && echo "XXXXXXXXX Safe update failed." && echo && false)
+	@echo
+	@echo "The test suite did not return with an error, so the update has been retained."
+	@echo "However, be sure to check the output of the testsuite for any problems, as"
+	@echo "the testsuite may ignore the errors it finds. If you see any problems, you can"
+	@echo "undo this update by running \"make unupdate\" until the next time you do a"
+	@echo "\"make update\" or \"make safeupdate\"."
+	@echo
+
 
 # a little testing (much more is in the tests directory)
 test:
