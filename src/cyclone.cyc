@@ -495,6 +495,19 @@ static string_t do_find(list_t<stringptr_t> dirs, string_t file) {
   return *f;
 }
 
+/* Given: dirs=[d1,d2,..,dn]
+   Return:     [d1,d1/subdir,d2,d2/subdir,..,dn,dn/subdir] */
+static list_t<const char ?`H@`H>
+also_suffix(list_t<const char ?`H@`H> dirs, const char ?subdir) {
+  let l = NULL;
+  for (; dirs != NULL; dirs = dirs->tl) {
+    l = new List(dirs->hd,l);
+    l = new List(new (const char ?)Filename::concat(*dirs->hd,subdir),l);
+  }
+  l = List::imp_rev(l);
+  return l;
+}
+
 /* Is a character special to /bin/sh (except for single quote)? */
 static bool is_other_special(char c) {
   switch (c) {
@@ -573,8 +586,8 @@ static void process_file(string_t<`H> filename) {
   // Pass -I and -D things onto preprocessor
   let cppargs_string =
     str_sepstr(new List(new (string_t)"",
-                                List::map(sh_escape_stringptr,rev(cppargs))),
-                       " ");
+                        List::map(sh_escape_stringptr,rev(cppargs))),
+               " ");
   // About the cyclone include path---this path is specified with the
   // following order (where the earlier in the order, the first place we look
   // for the file):
@@ -955,7 +968,8 @@ int main(int argc, string_t<`H> ?`H argv) {
   cyclone_exec_path = List::imp_rev(cyclone_exec_path);
 
   /* The absolute file name is kept in a global variable */
-  cyc_include = do_find(cyclone_exec_path,"include/cyc_include.h");
+  if (!stop_after_cpp_r) /* don't bother if we won't translate to C */
+    cyc_include = do_find(cyclone_exec_path, "cyc_include.h");
 
   /* Process each .cyc file */
   for (let l = rev(cyclone_files); l != NULL; l = l->tl) {

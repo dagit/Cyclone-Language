@@ -6,6 +6,10 @@ CONFIGURATION BUGS:
   not remove the bin/genfiles directory after it's been extracted
   and built.  This currently screws up make install.
 
+* add a --prefix path to the configure script (this is a gnu convention)
+
+* someone suggests that make all and make check should be added,
+  following gnu conventions
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------

@@ -24,13 +24,13 @@ INC_PATH:=. $(CYCDIR)/lib $(CYCDIR)/src $(CYCDIR)/include
 LIB_PATH:=$(CYCDIR)/lib
 LIBR:=$(CYCLIB)
 
-CYCINC_H:=$(LIB_PATH)/include/cyc_include.h
-
-# Note the -B means we compile with the cyc_include.h from
-#   $(LIB_PATH)/include instead of a cyc_include.h from somewhere
-#   else (e.g., $(CYCDIR)/bin/cyc-lib/include or one from a previous
-#   installation of cyclone on the same machine).
-override CYCFLAGS += $(addprefix -I, $(INC_PATH)) -B$(LIB_PATH) -save-c
+# Note, the -B arguments ensure that we use the correct cyc_include.h.
+#   If cyc_include.h is being changed, the new version should be in
+#   lib/cyc_include.h; the -B$(LIB_PATH) makes sure we use that one.
+#   On the other hand if there is no lib/cyc_include.h, then a rule
+#   below will copy bin/cyc-lib/cyc_include.h to the current directory,
+#   and the -B. ensures we use that one.
+override CYCFLAGS += $(addprefix -I, $(INC_PATH)) -B. -B$(LIB_PATH) -save-c
 
 CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))
 
@@ -89,10 +89,13 @@ nogc.a: nogc.o
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
+cyc_include.h: $(CYCDIR)/bin/cyc-lib/cyc_include.h
+	cp $< $@
+
 core.h: $(CYCDIR)/include/core.h
 	cp $< $@
 
-precore_c.h: core.h $(CYCC) $(CYCINC_H)
+precore_c.h: core.h $(CYCC) cyc_include.h
 	$(CYCC) $(CYCFLAGS) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ -x cyc $<
 
 %.cyc: %.cyl $(CYCLEX)
@@ -101,12 +104,12 @@ precore_c.h: core.h $(CYCC) $(CYCINC_H)
 	$(CYCBISON) -d $< -o $@
 %_tab.h: %.y $(CYCBISON)
 	$(CYCBISON) -d $< -o $(patsubst %.h,%.cyc,$@)
-%.c: %.cyc $(CYCC) $(CYCINC_H)
+%.c: %.cyc $(CYCC) cyc_include.h
 	$(CYCC) $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -c -o $@ -stopafter-toc $<
-%.$(O): %.cyc $(CYCC) $(CYCINC_H)
+%.$(O): %.cyc $(CYCC) cyc_include.h
 	$(CYCC) $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -c -o $@ $<
 # For runtime_cyc.c and nogc.c and cstubs.c
-%.$(O): %.c precore_c.h $(CYCINC_H)
+%.$(O): %.c precore_c.h cyc_include.h
 	$(CC) $(CFLAGS) -I. -c -o $@ $<
 # Always use the original compiler to avoid circularities
 # Note: In most cases, it would be correct to share .d files
@@ -114,7 +117,7 @@ precore_c.h: core.h $(CYCC) $(CYCINC_H)
 	$(CYCDIR)/bin/$(CYCCOMP) -M -MG $(CYCFLAGS) $< > $@
 
 ifdef MS
-%.obj: %.c precore_c.h $(CYCINC_H)
+%.obj: %.c precore_c.h cyc_include.h
 	cl /I$(CYCDIR) /Dinline=__inline /c /w /nologo /Fo$@ $^
 endif
 

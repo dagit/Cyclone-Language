@@ -158,9 +158,9 @@ cmp:
               || echo $(XS) lib/cstubs.c CHANGED
 	@cmp -s $(ARCHDIR)/lib/nogc.c lib/nogc.c\
               || echo $(XS) lib/nogc.c CHANGED
-	@test ! -e lib/include/cyc_include.h\
-	      || cmp -s bin/cyc-lib/include/cyc_include.h lib/include/cyc_include.h\
-              || echo $(XS) cyc-lib/include/cyc_include.h CHANGED
+	@test ! -e lib/cyc_include.h\
+	      || cmp -s bin/cyc-lib/cyc_include.h lib/cyc_include.h\
+              || echo $(XS) cyc-lib/cyc_include.h CHANGED
 
 # This target updates what is in bin/genfiles and include.
 # It would be "dangerous" to invoke this target if we did not have 
@@ -204,10 +204,10 @@ ifeq ($(UPDATEARCH),$(ARCH))
 	   do (cmp -s $$i ../include/$$i\
                || (echo UPDATING include/$$i;\
                     cp $$i ../include/$$i)) done)
-	@test ! -e lib/include/cyc_include.h\
-               || cmp -s lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h\
-               || (echo UPDATING cyc-lib/include/cyc_include.h;\
-                 cp lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h)
+	@test ! -e lib/cyc_include.h\
+               || cmp -s lib/cyc_include.h bin/cyc-lib/cyc_include.h\
+               || (echo UPDATING cyc-lib/cyc_include.h;\
+                 cp lib/cyc_include.h bin/cyc-lib/cyc_include.h)
 endif
 	@if [ "$(UPDATEARCH)" = "$(PATCH_ARCH)" ]; then\
 	  for arch in $(ALL_ARCHS); do\
