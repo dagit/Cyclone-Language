@@ -44,6 +44,25 @@ glist_t<`a,`r> tl(glist_t<`a,`r> x) {
   return x->tl;
 }
 
+// allows one to write rlist(r,e1,e2,...,en) to create a list
+// out of e1,e2,...,en.
+glist_t<`a,`r> rlist(region_t<`r> r, ...`r2 `a argv) {
+  glist_t<`a,`r> result = null;
+  for (int i = argv.size - 1; i >= 0; i--) 
+    result = rnew(r) List{argv[i],result};
+  return result;
+}
+
+// can't write this in terms of rlist yet because there's no way
+// to forward varargs yet.
+list_t<`a> list(...`r `a argv) {
+  list_t<`a> result = null;
+  for (int i = argv.size - 1; i >= 0; i--) 
+    result = new List{argv[i],result};
+  return result;
+}
+
+
 // return a fresh copy of the list (same as map of the identity) 
 glist_t<`a,`r2> rcopy(region_t<`r2> r2, glist_t<`a,`r1> x) {
   glist_t<`a,`r2> result, prev;
@@ -655,7 +674,7 @@ Core::opt_t<`a> check_unique(int compare(`a,`a),glist_t<`a,`r> x) {
 // makes a new list with ith element arr[i]
 glist_t<`a,`r2> rfrom_array(region_t<`r2> r2, `a ?`r arr) {
   glist_t<`a,`r2> ans = null;
-  for(unsigned int i = arr.size-1; i >= 0; --i)
+  for(int i = arr.size-1; i >= 0; --i)
     ans = rnew(r2) List(arr[i],ans);
   return ans;
 }

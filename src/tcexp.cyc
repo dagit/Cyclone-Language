@@ -70,7 +70,7 @@ static void resolve_unknown_fn(tenv_t te, exp_t e, exp_t e1, list_t<exp_t> es) {
     try {
       switch (lookup_ordinary(te,e1->loc,q)) {
       case &VarRes(b):        
-	e->r = new FnCall_e(e1,es); 
+	e->r = new FnCall_e(e1,es,null); 
 	return;
       case &TunionRes(tud,tuf):
         if (tuf->typs == null)
@@ -97,11 +97,11 @@ static void resolve_unknown_fn(tenv_t te, exp_t e, exp_t e1, list_t<exp_t> es) {
     } catch {
     case Dict::Absent:
       terr(e1->loc, xprintf("unbound identifier %s",qvar2string(q)));
-      e->r = new FnCall_e(e1,es);
+      e->r = new FnCall_e(e1,es,null);
       return;
     }
   default: 
-    e->r = new FnCall_e(e1,es); 
+    e->r = new FnCall_e(e1,es,null); 
     return;
   }
 }
@@ -702,8 +702,58 @@ static type_t tcSeqExp(tenv_t te, seg_t loc, type_t *`r topt, exp_t e1, exp_t e2
   return e2->topt->v;
 }
 
+// try to find a field that e can be injected into
+static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
+                                       region_t<`r> r,
+                                       glist_t<$(tvar_t,type_t)@`r,`r> inst, 
+                                       list_t<tunionfield_t> fs) {
+  list_t<tunionfield_t> fields;
+  type_t t1 = e->topt->v;
+  // try to find an exact match first
+  for (fields = fs; fields != null; fields = fields->tl) {
+    let Tunionfield{n,tvs,typs,loc,sc} = *fields->hd;
+    // should have exactly one argument and I don't want to deal with
+    // existential types
+    if (typs == null || typs->tl != null || tvs != null) continue;
+    type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
+    // I hate doing this because it has side-effects, but oh well...
+    if (unify(t1,t2)) return fields->hd;
+  }
+  // now try to find a match supported by silent conversions
+  for (fields = fs; fields != null; fields = fields->tl) {
+    let Tunionfield{n,tvs,typs,loc,sc} = *fields->hd;
+    // should have exactly one argument and I don't want to deal with
+    // existential types
+    if (typs == null || typs->tl != null || tvs != null) continue;
+    type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
+    // I hate doing this because it has side-effects, but oh well...
+    if (silent_castable(te,e->loc,t1,t2)) {
+      unchecked_cast(te,e,t2);
+      return fields->hd;
+    }
+  }
+  /* JGM: this has so many bad interactions I'm ruling it out -- 
+   * that simply means you need to have enough constructors to
+   * cover your varargs or else do the casting at the call site.
+  // last resort -- coerce if possible
+  for (fields = fs; fields != null; fields = fields->tl) {
+    let Tunionfield{n,tvs,typs,loc,sc} = *fields->hd;
+    // should have exactly one argument and I don't want to deal with
+    // existential types
+    if (typs == null || typs->tl != null || tvs != null) continue;
+    type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
+    // I hate doing this because it has side-effects, but oh well...
+    if (coerce_arg(te,e,t2)) 
+      return fields->hd;
+  }
+  */
+  terr(e->loc,xprintf("can't find a field in %s to inject a value of type %s",
+                      typ2string(tu), typ2string(t1)));
+  return null;
+}
+
 // e(es)
-static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t> es){
+static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t> es,vararg_call_info_t *@vararg_call_info){
   tcExp(te,null,e);
   type_t t = compress(e->topt->v);
   // NB: we should really unify t with an unconstrained FnType with the
@@ -718,10 +768,10 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
     // Check that the bounds on the pointer aren't 0
     check_nonzero_bound(loc,b);
     switch (compress(t1)) {
-    case &FnType(FnInfo{tvars,eff,res_typ,args_info,is_vararg,atts}): 
+    case &FnType(FnInfo{tvars,eff,res_typ,args_info,c_vararg,cyc_vararg,atts}): 
       //FIX: handle tvars
-      if (is_vararg)
-        terr(loc,"vararg functions (...) not supported yet");
+      if (c_vararg)
+        terr(loc,"C-style vararg functions (...) not supported.");
       // unify the result type with the expected type to get better
       // information while type-checking the arguments.
       if (topt != null) unify(res_typ,*topt);
@@ -738,10 +788,69 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
         es = es->tl;
         args_info = args_info->tl;
       }
-      if (es != null)
-        terr(loc,"too many arguments for function");
-      if (args_info != null)
-        terr(loc,"too few arguments for function");
+      if (args_info != null) terr(loc,"too few arguments for function");
+      // if we have left-over arguments, then check for varargs
+      else if (es != null || cyc_vararg != null) {
+        if (cyc_vararg == null)
+          terr(loc,"too many arguments for function");
+        else {
+          let VarargInfo{_,_,vt,vr,inject} = *cyc_vararg;
+          te = new_block(loc,te); // needed for regions of params
+          let vci = new VarargCallInfo {.num_varargs = 0, 
+                                        .injectors = null,
+                                        .vai = (vararg_info_t @)cyc_vararg};
+          *vararg_call_info = vci;
+          if (!unify(curr_rgn(te),vr))
+            terr(loc,xprintf("I have no idea how this could fail, but it did "
+                             "because the region for the varargs (%s) doesn't "
+                             "unify with the expected new_block region (%s).",
+                             typ2string(vr),
+                             typ2string(curr_rgn(te))));
+
+          if (!inject) {
+            // all the rest of the arguments are the same type
+            for (; es != null; es = es->tl) {
+              exp_t e1 = es->hd;
+              vci->num_varargs++;
+              tcExp(te, &vt, e1);
+              if (!coerce_arg(te,e1,vt))
+                terr(loc,xprintf("vararg requires type %s but argument has "
+                                 "type %s",typ2string(vt),
+                                 typ2string(e1->topt->v)));
+            }
+          } else {
+            // this is trickier, we have to match up the type of the
+            // actual argument with a constructor from the [x]tunion.
+            switch (compress(vt)) {
+            case &TunionType(TunionInfo{&KnownTunion(td),targs,tur}):
+              // unfortunately, td may not be the "latest" declaration of
+              // an xtunion, so we re-look it up in the environment.
+              let td = *lookup_tuniondecl(te,loc,td->name);
+              if (!unify(tur,vr)) 
+                terr(loc,xprintf("bad region for injected varargs"));
+              list_t<tunionfield_t> fields = null;
+              if (td->fields == null) 
+                terr(loc,xprintf("can't inject into %s",typ2string(vt)));
+              else fields = td->fields->v;
+              region rgn {
+                let inst = List::rzip(rgn,rgn,td->tvs,targs);
+                for (; es != null; es = es->tl) {
+                  vci->num_varargs++;
+                  exp_t e1 = es->hd;
+                  tcExp(te,null,e1);
+                  let f = tcInjection(te,e1,vt,rgn,inst,fields);
+                  if (f != null)
+                    vci->injectors = 
+                      List::append(vci->injectors,
+                                   new List{(tunionfield_t)f,null});
+                }
+              }
+              break;
+            default: terr(loc,"bad inject vararg type"); break;
+            }
+          }
+        }
+      }
       // Check that the effect of the function is compatible with the current
       // capability.
       Tcenv::check_effect_accessible(te, loc, eff->v);
@@ -771,7 +880,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t *`r topt,
   switch (t1) {
   case &PointerType(PtrInfo{t0,rt,x,tq,b}):
     switch (compress(t0)) {
-    case &FnType(FnInfo{tvars,eff,rtyp,args,varargs,atts}):
+    case &FnType(FnInfo{tvars,eff,rtyp,args,c_varargs,cyc_varargs,atts}):
       list_t<$(tvar_t,type_t)@> instantiation = null;
       if (List::length(ts) != List::length(tvars))
 	return expr_err(te,loc,"type instantiation mismatch");
@@ -782,7 +891,8 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t *`r topt,
       }
       type_t new_fn_typ = 
         substitute(instantiation,
-                   new FnType(FnInfo{null,eff,rtyp,args,varargs,atts}));
+                   new FnType(FnInfo{null,eff,rtyp,args,c_varargs,
+                                     cyc_varargs,atts}));
       type_t new_typ = new PointerType(PtrInfo{new_fn_typ,rt,x,tq,b});
       return new_typ;
     default: break;
@@ -1555,7 +1665,7 @@ static type_t tcExpNoPromote(tenv_t te, type_t *`r topt, exp_t e) {
     switch (compress(e->topt->v)) {
     case &PointerType(PtrInfo{t,rt,x,tq,b}):
       switch (compress(t)) {
-      case &FnType(FnInfo{tvs,eff,rtyp,args,varargs,atts}):
+      case &FnType(FnInfo{tvs,eff,rtyp,args,c_varargs,cyc_varargs,atts}):
 	if (tvs != null)    // then, instantiate if necessary
 	  region rgn {
 	   glist_t<$(tvar_t,type_t)@`rgn,`rgn> inst = 
@@ -1563,7 +1673,8 @@ static type_t tcExpNoPromote(tenv_t te, type_t *`r topt, exp_t e) {
 	   list_t<type_t> ts = List::map(snd,inst);
 	   type_t ftyp = rsubstitute(rgn, inst,
 				     new FnType(FnInfo{null,eff,rtyp,args,
-						       varargs,atts}));
+						       c_varargs,cyc_varargs,
+                                                       atts}));
 	   type_t new_typ = new PointerType(PtrInfo{ftyp,rt,x,tq,b});
 	   exp_t  inner   = copy_exp(e);
 	   e->r    = new Instantiate_e(inner,ts);
@@ -1624,8 +1735,8 @@ static void tcExpNoInst(tenv_t te, type_t *`r topt, exp_t e) {
     t = tcConditional(te,loc,topt,e1,e2,e3); break;
   case &SeqExp_e(e1,e2):
     t = tcSeqExp(te,loc,topt,e1,e2); break;
-  case &FnCall_e(e1,es):
-    t = tcFnCall(te,loc,topt,e1,es); break;
+  case &FnCall_e(e1,es,*vci):
+    t = tcFnCall(te,loc,topt,e1,es,vci); break;
   case &Throw_e(e1):
     t = tcThrow(te,loc,topt,e1); break;
   case &Instantiate_e(e2,ts):

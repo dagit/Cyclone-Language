@@ -351,7 +351,7 @@ static list_t<type_modifier_t>
           (is_typeparam(tms->tl->hd) && tms->tl->tl==null)) {
         // Yes
         switch (args) {
-        case &WithTypes(_,_,_):
+        case &WithTypes(_,_,_,_):
           warn("function declaration with both new- and old-style parameter"
 	       "declarations; ignoring old-style",loc);
           return tms;
@@ -361,7 +361,7 @@ static list_t<type_modifier_t>
           return
             new List(new Function_mod(new WithTypes(List::map_c(get_param_type,
                                                                 env,ids),
-                                                    false,null)),null);
+                                                    false,null,null)),null);
         }
       } else
         // No, keep looking for the innermost function
@@ -413,16 +413,19 @@ static fndecl_t make_function(opt_t<decl_spec_t> dso, declarator_t d,
     warn("bad type params, ignoring",loc);
   // fn_type had better be a FnType
   switch (fn_type) {
-    case &FnType(FnInfo{tvs,eff,ret_type,args,varargs,attributes}):
+    case &FnType(FnInfo{tvs,eff,ret_type,args,c_varargs,cyc_varargs,
+                          attributes}):
       let args2 = List::map_c(fnargspec_to_arg,loc,args);
       // We don't fill in the cached type here because we may need
       // to figure out the bound type variables and the effect.
       return new Fndecl {.sc=sc,.name=d->id,.tvs=tvs,
-                         .is_inline=is_inline,.effect=eff,
-                         .ret_type=ret_type,.args=args2,
-                         .varargs=varargs,.body=body,.cached_typ=null,
-                         .param_vardecls=null,
-                         .attributes = append(attributes,out_atts)};
+                            .is_inline=is_inline,.effect=eff,
+                            .ret_type=ret_type,.args=args2,
+                            .c_varargs=c_varargs,
+                            .cyc_varargs=cyc_varargs,
+                            .body=body,.cached_typ=null,
+                            .param_vardecls=null,
+                            .attributes = append(attributes,out_atts)};
     default:
       return abort("declarator is not a function prototype",loc);
   }
@@ -592,7 +595,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
       return apply_tms(empty_tqual(),new ArrayType(t,tq,e),atts,tms->tl);
     case &Function_mod(args): {
       switch (args) {
-      case &WithTypes(args2,vararg,eff):
+      case &WithTypes(args2,c_vararg,cyc_vararg,eff):
         list_t<tvar_t> typvars = null;
         // any function type attributes seen thus far get put in the function
         // type
@@ -615,13 +618,12 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
           }
         }
         // special case where the parameters are void, e.g., int f(void)
-        if (!vararg                // not vararg function
+        if (!c_vararg && cyc_vararg == null // not vararg function
             && args2 != null      // not empty arg list
             && args2->tl == null   // not >1 arg
             && (*args2->hd)[0] == null // not f(void x)
             && (*args2->hd)[2] == VoidType) {
 	  args2 = null;
-	  vararg = false;
 	}
 	// convert result type from array to pointer result
 	t = array2ptr(t);
@@ -634,7 +636,8 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
         // anyway.  TODO: maybe we should issue a warning.  But right
         // now we don't have a loc so the warning will be confusing.
         return apply_tms(empty_tqual(),
-			 function_typ(typvars,eff,t,args2,vararg,fn_atts),
+			 function_typ(typvars,eff,t,args2,
+                                      c_vararg,cyc_vararg,fn_atts),
                          new_atts,
                          tms->tl);
       case &NoTypes(_,loc):
@@ -953,7 +956,7 @@ using Parse;
   ParamDecl_tok($(opt_t<var_t>,tqual_t,type_t)@);
   ParamDeclList_tok(list_t<$(opt_t<var_t>,tqual_t,type_t)@>);
   ParamDeclListBool_tok($(list_t<$(opt_t<var_t>,tqual_t,type_t)@>,
-                          bool,opt_t<type_t>)@);
+                          bool,vararg_info_t *,opt_t<type_t>)@);
   StructOrUnion_tok(struct_or_union_t);
   IdList_tok(list_t<var_t>);
   Designator_tok(designator_t);
@@ -969,7 +972,8 @@ using Parse;
   AttributeList_tok(list_t<attribute_t>);
   Enumfield_tok(enumfield_t);
   EnumfieldList_tok(list_t<enumfield_t>);
-  Scope_tok(scope_t)
+  Scope_tok(scope_t);
+  TypeOpt_tok(opt_t<type_t>)
 }
 /* types for productions */
 %type <Int_tok> INTEGER_CONSTANT
@@ -1022,7 +1026,7 @@ using Parse;
 %type <DeclaratorExpopt_tok> struct_declarator
 %type <DeclaratorExpoptList_tok> struct_declarator_list struct_declarator_list0
 %type <AbstractDeclarator_tok> abstract_declarator direct_abstract_declarator
-%type <Bool_tok> tunion_or_xtunion
+%type <Bool_tok> tunion_or_xtunion optional_inject
 %type <Scope_tok> tunionfield_scope
 %type <TunionField_tok> tunionfield
 %type <TunionFieldList_tok> tunionfield_list
@@ -1041,6 +1045,7 @@ using Parse;
 %type <Attribute_tok> attribute
 %type <Enumfield_tok> enum_field
 %type <EnumfieldList_tok> enum_declaration_list
+%type <TypeOpt_tok> optional_effect
 /* start production */
 %start prog
 %%
@@ -1589,19 +1594,19 @@ direct_declarator:
     { $$=^$(new Declarator($1->id,new List(new ConstArray_mod($3),$1->tms)));
     }
 | direct_declarator '(' parameter_type_list ')'
-    { let &$(lis,b,eff) = $3;
-      $$=^$(new Declarator($1->id,new List(new Function_mod(new WithTypes(lis,b,eff)),$1->tms)));
+    { let &$(lis,b,c,eff) = $3;
+      $$=^$(new Declarator($1->id,new List(new Function_mod(new WithTypes(lis,b,c,eff)),$1->tms)));
     }
 | direct_declarator '(' ')'
     { $$=^$(new Declarator($1->id,
                            new List(new Function_mod(new WithTypes(null,
-                                                                   false,
+                                                                   false,null,
                                                                    null)),
                                     $1->tms)));
     }
 | direct_declarator '(' ';' effect_set ')'
     { $$=^$(new Declarator($1->id,
-                           new List(new Function_mod(new WithTypes(null,false,new Opt(new JoinEff($4)))),$1->tms)));
+                           new List(new Function_mod(new WithTypes(null,false,null,new Opt(new JoinEff($4)))),$1->tms)));
     }
 | direct_declarator '(' identifier_list ')'
     { $$=^$(new Declarator($1->id,new List(new Function_mod(new NoTypes($3,LOC(@1,@4))),$1->tms))); }
@@ -1672,18 +1677,43 @@ type_qualifier_list:
 ;
 
 parameter_type_list:
-  parameter_list
-    { $$=^$(new $(List::imp_rev($1),false,null)); }
-| parameter_list ',' ELLIPSIS
-    { $$=^$(new $(List::imp_rev($1),true,null)); }
-/* Cyc: add effect */
-| parameter_list ';' effect_set
-    { $$=^$(new $(List::imp_rev($1),false,
-                  (opt_t<type_t>)(new Opt((type_t)(new JoinEff($3))))));
-    }
+  parameter_list optional_effect
+    { $$=^$(new $(List::imp_rev($1),false,null,$2)); }
+| parameter_list ',' ELLIPSIS optional_effect
+    { $$=^$(new $(List::imp_rev($1),true,null,$4)); }
+| ELLIPSIS rgn optional_inject parameter_declaration optional_effect
+{ let $(n,tq,t) = *($4);
+  let v = new VarargInfo {.name = n,.tq = tq,.type = t,.rgn = $2,.inject = $3};
+  $$=^$(new $(null,false,v,$5)); 
+}
+| parameter_list ',' ELLIPSIS rgn optional_inject parameter_declaration
+  optional_effect
+{ let $(n,tq,t) = *($6);
+  let v = new VarargInfo {.name = n,.tq = tq,.type = t,.rgn = $4,.inject = $5};
+  $$=^$(new $(List::imp_rev($1),false,v,$7)); 
+}
 ;
 
 /* CYC:  new */
+optional_effect:
+  /* empty */
+  { $$=^$(null); }
+| ';' effect_set
+  { $$ = ^$(new Opt((type_t)(new JoinEff($2)))); }
+;
+
+
+optional_inject:
+  /* empty */
+  {$$ = ^$(false);}
+| IDENTIFIER
+     { let s = $1;
+       if (zstrcmp(s,"inject") != 0) 
+         err("missing type in function declaration",LOC(@1,@1));
+       $$ = ^$(true);
+     }
+   ;
+
 effect_set:
   atomic_effect { $$=$!1; }
 | atomic_effect '+' effect_set { $$=^$(List::imp_append($1,$3)); }
@@ -1902,27 +1932,27 @@ direct_abstract_declarator:
     { $$=^$(new Abstractdeclarator(new List(new ConstArray_mod($3),$1->tms)));
     }
 | '(' ')'
-    { $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(null,false,null)),null)));
+    { $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(null,false,null,null)),null)));
     }
 | '(' ';' effect_set ')'
-    { $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(null,false,new Opt(new JoinEff($3)))),null)));
+    { $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(null,false,null,new Opt(new JoinEff($3)))),null)));
     }
 | '(' parameter_type_list ')'
-    { let &$(lis,b,eff) = $2;
-      $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(lis,b,eff)),null)));
+    { let &$(lis,b,c,eff) = $2;
+      $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(lis,b,c,eff)),null)));
     }
 | direct_abstract_declarator '(' ')'
-    { $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(null,false,null)),
+    { $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(null,false,null,null)),
 				      $1->tms)));
     }
 | direct_abstract_declarator '(' ';' effect_set ')'
    { let eff = new Opt((type_t)(new JoinEff($4)));
-      $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(null,false,eff)),$1->tms)));
+      $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(null,false,null,eff)),$1->tms)));
     }
 | direct_abstract_declarator '(' parameter_type_list ')'
-    { let &$(lis,b,eff) = $3;
+    { let &$(lis,b,c,eff) = $3;
       $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(lis,
-                                                                           b,eff)),$1->tms)));
+                                                                           b,c,eff)),$1->tms)));
     }
 /* Cyc: new */
 | direct_abstract_declarator '<' type_name_list '>'

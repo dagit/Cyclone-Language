@@ -70,6 +70,7 @@ namespace Absyn {
   extern tunion Constraint<`a>;
   extern tunion Bounds;
   extern struct PtrInfo;
+  extern struct VarargInfo;
   extern struct FnInfo;
   extern struct TunionInfo;
   extern struct TunionFieldInfo;
@@ -79,6 +80,7 @@ namespace Absyn {
   extern tunion Cnst;
   extern tunion Primop;
   extern tunion Incrementor;
+  extern struct VarargCallInfo;
   extern tunion Raw_exp;
   extern struct Exp;
   extern tunion Raw_stmt;
@@ -113,6 +115,7 @@ namespace Absyn {
   typedef tunion Constraint<`a> constraint_t<`a>;
   typedef tunion Bounds bounds_t;
   typedef struct PtrInfo ptr_info_t;
+  typedef struct VarargInfo vararg_info_t;
   typedef struct FnInfo fn_info_t;
   typedef struct TunionInfo tunion_info_t;
   typedef struct TunionFieldInfo tunion_field_info_t;
@@ -122,6 +125,7 @@ namespace Absyn {
   typedef tunion Cnst cnst_t;
   typedef tunion Primop primop_t;
   typedef tunion Incrementor incrementor_t;
+  typedef struct VarargCallInfo vararg_call_info_t;
   typedef tunion Raw_exp raw_exp_t;
   typedef struct Exp @exp_t, *exp_opt_t;
   typedef tunion Raw_stmt raw_stmt_t;
@@ -191,15 +195,26 @@ namespace Absyn {
     conref_t<bounds_t> bounds;    // legal bounds for pointer indexing
   };
 
+  EXTERN_ABSYN struct VarargInfo {
+    opt_t<var_t> name;
+    tqual_t tq;
+    type_t  type;
+    type_t  rgn;
+    bool    inject;
+  };
+
   EXTERN_ABSYN struct FnInfo {
-    list_t<tvar_t>                          tvars;
-    opt_t<type_t>                           effect; // null => default effect
-    type_t                                  ret_typ;
-    list_t<$(opt_t<var_t>,tqual_t,type_t)@> args;
-    bool                                    varargs;
+    list_t<tvar_t>                           tvars;
+    opt_t<type_t>                            effect; // null => default effect
+    type_t                                   ret_typ;
+    list_t<$(opt_t<var_t>,tqual_t,type_t)@>  args;
+    // if c_varargs is true, then cyc_varargs == null, and if 
+    // cyc_varargs is non-null, then c_varargs is false.
+    bool                                     c_varargs;
+    vararg_info_t*                           cyc_varargs;
     // function type attributes can include regparm(n), stdcall xor cdecl,
     // noreturn, and const.
-    attributes_t                            attributes; 
+    attributes_t                             attributes; 
   };
 
   EXTERN_ABSYN struct UnknownTunionInfo {
@@ -265,8 +280,11 @@ namespace Absyn {
 
   EXTERN_ABSYN tunion Funcparams {
     NoTypes(list_t<var_t>,seg_t);
-    // bool is true when varargs, opt_t<typ> is effect
-    WithTypes(list_t<$(opt_t<var_t>,tqual_t,type_t)@>,bool,opt_t<type_t>); 
+    // bool is true when c_varargs, opt_t<typ> is effect
+    WithTypes(list_t<$(opt_t<var_t>,tqual_t,type_t)@>, // args and types
+              bool,                                    // c_varargs
+              vararg_info_t *,                         // cyc_varargs
+              opt_t<type_t>);                          // effect
   };
 
   EXTERN_ABSYN tunion Pointer_Sort {
@@ -327,6 +345,12 @@ namespace Absyn {
 
   EXTERN_ABSYN tunion Incrementor { PreInc, PostInc, PreDec, PostDec };
 
+  EXTERN_ABSYN struct VarargCallInfo {
+    int                   num_varargs;
+    list_t<tunionfield_t> injectors;
+    vararg_info_t        @vai;
+  };
+
   EXTERN_ABSYN tunion Raw_exp {
     Const_e(cnst_t);
     Var_e(qvar_t,binding_t); 
@@ -337,7 +361,9 @@ namespace Absyn {
     Conditional_e(exp_t,exp_t,exp_t);
     SeqExp_e(exp_t,exp_t);
     UnknownCall_e(exp_t,list_t<exp_t>);
-    FnCall_e(exp_t,list_t<exp_t>);
+    // the vararg_call_info_t is non-null only if this is a vararg call
+    // and is set during type-checking and used only for code generation.
+    FnCall_e(exp_t,list_t<exp_t>,vararg_call_info_t *);
     Throw_e(exp_t);
     NoInstantiate_e(exp_t);
     Instantiate_e(exp_t,list_t<type_t>);
@@ -479,7 +505,8 @@ namespace Absyn {
     opt_t<type_t>              effect;     // null => default effect
     type_t                     ret_type;
     list_t<$(var_t,tqual_t,type_t)@> args;
-    bool                       varargs;
+    bool                       c_varargs;
+    vararg_info_t*             cyc_varargs;
     stmt_t                     body;
     opt_t<type_t>              cached_typ; // cached type of the function
     opt_t<list_t<vardecl_t>>   param_vardecls;// so we can use pointer equality
@@ -694,7 +721,7 @@ namespace Absyn {
   extern stmt_t skip_stmt(seg_t loc);
   extern stmt_t exp_stmt(exp_t e, seg_t loc);
   extern stmt_t seq_stmt(stmt_t s1, stmt_t s2, seg_t loc);
-  extern stmt_t seq_stmts(list_t<stmt_t>, seg_t loc);
+  extern stmt_t seq_stmts(glist_t<stmt_t,`r>, seg_t loc);
   extern stmt_t return_stmt(exp_opt_t e,seg_t loc);
   extern stmt_t ifthenelse_stmt(exp_t e,stmt_t s1,stmt_t s2,seg_t loc);
   extern stmt_t while_stmt(exp_t e,stmt_t s,seg_t loc);
@@ -739,7 +766,9 @@ namespace Absyn {
   extern type_t function_typ(list_t<tvar_t> tvs,opt_t<type_t> eff_typ,
                              type_t ret_typ, 
                              list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,
-                             bool varargs, attributes_t);
+                             bool c_varargs, 
+                             vararg_info_t *cyc_varargs,
+                             attributes_t);
   extern type_t pointer_expand(type_t);
   extern bool is_lvalue(exp_t);
 

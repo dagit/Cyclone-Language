@@ -364,14 +364,23 @@ void dumpvaropt(opt_t<var_t> vo) {
 void dumpfunarg($(opt_t<var_t>,tqual_t,type_t)@ t) {
   dumptqtd((*t)[1],(*t)[2],dumpvaropt,(*t)[0]);
 }
-void dumpfunargs(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, bool varargs, 
+void dumpfunargs(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, bool c_varargs, 
+                 vararg_info_t *cyc_varargs,
                  opt_t<type_t> effopt) {
   dump_char('(');
   for (; args != null; args = args->tl) {
     dumpfunarg(args->hd);
-    if (args->tl != null || varargs) dump_char(',');
+    if (args->tl != null || c_varargs || cyc_varargs != null) dump_char(',');
   }
-  if (varargs) dump("...");
+  if (c_varargs) 
+    dump("...");
+  else if (cyc_varargs != null) {
+    let arg = new $(cyc_varargs->name, cyc_varargs->tq, cyc_varargs->type);
+    dump("...");
+    dumptyp(cyc_varargs->rgn);
+    if (cyc_varargs->inject) dump(" inject ");
+    dumpfunarg(arg);
+  }
   if (effopt != null) {
     dump_semi();
     dumpeff(effopt->v);
@@ -478,7 +487,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     break;
 
   case &UnknownCall_e(e1,es): fallthru(e1,es);
-  case &FnCall_e(e1,es):
+  case &FnCall_e(e1,es,_):
     dumpexp_prec(myprec,e1);
     dump_nospace("(");
     dumpexps_prec(20,es);
@@ -806,7 +815,7 @@ void dumpdecl(decl_t d) {
     dumpscope(fd->sc);
     type_t t = new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_type,
                                  List::map(Absynpp::arg_mk_opt,fd->args), 
-                                 fd->varargs, null});
+                                 fd->c_varargs, fd->cyc_varargs,null});
     dumptqtd(Tqual(false,false,false),t,
 	     Absynpp::to_VC ? dump_callconv_fdqvar : dump_atts_qvar,fd);
     dump_char('{');
@@ -995,8 +1004,8 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
     case Carray_mod: dump("[]"); break;
     case &ConstArray_mod(e):
       dump_char('['); dumpexp(e); dump_char(']'); break;
-    case &Function_mod(&WithTypes(args,varargs,effopt)):
-      dumpfunargs(args,varargs,effopt); break;
+    case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt)):
+      dumpfunargs(args,c_varargs,cyc_varargs,effopt); break;
     case &Function_mod(&NoTypes(sl,loc)):
       group(dump_str,sl,"(",")",","); break;
     case &TypeParams_mod(ts,loc,print_kinds): 

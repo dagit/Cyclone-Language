@@ -103,7 +103,7 @@ i_t final() {
 								       HeapRgn,
 								       empty_tqual())),
 						      null)),
-				    false, null),
+				    false, null, null),
 		       null);
   vd->sc = Extern;
   ie2->vardecls = Dict::insert(ie2->vardecls, (*qmain)[1], vd);
@@ -275,9 +275,14 @@ static bool check_public_type(aenv_t ae, seen_t seen, string obj, qvar_t name, t
   case &TypedefType(_,_, &Opt(t)):
     return check_public_type(ae, seen, obj, name, t);
 
-  case &FnType(FnInfo(_,_,ret,args,_,_)):
-      return check_public_type_list(ae, seen, obj, name, get_type2, args)
+  case &FnType(FnInfo(_,_,ret,args,_,cyc_varargs,_)):
+    bool b = check_public_type_list(ae, seen, obj, name, get_type2, args)
       && check_public_type(ae, seen, obj, name, ret);
+    if (cyc_varargs != null) {
+      let VarargInfo{_,_,vt,_,_} = *cyc_varargs;
+      b = check_public_type(ae, seen, obj, name, vt);
+    }
+    return b;
 
   case &TupleType(lt):
     return check_public_type_list(ae, seen, obj, name, get_type1, lt);
@@ -403,7 +408,7 @@ static void extract_##OBJ##decl($(ienv_t, ienv_t, bool, aenv_t, seen_t, i_t) @ `
   }\
 }
 
-EXTRACT_DECL(struct,->v)
+EXTRACT_DECL(struct, -> v)
 
 EXTRACT_DECL(union,->v)
 

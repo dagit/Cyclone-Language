@@ -187,12 +187,15 @@ static void occurs(type_t evar, type_t t) {
   case &PointerType(pinfo): 
     occurs(evar,pinfo.elt_typ); occurs(evar,pinfo.rgn_typ); break;
   case &ArrayType(t2,_,_): occurs(evar,t2); break;
-  case &FnType(FnInfo{tvs,eff,rt,args,varargs,atts}): 
-    // FIX: OK to ignore binding of type vars?
+  case &FnType(FnInfo{tvs,eff,rt,args,c_varargs,cyc_varargs,atts}): 
     if (eff != null) occurs(evar,eff->v);
     occurs(evar,rt);
     for(; args != null; args = args->tl)
       occurs(evar,(*args->hd)[2]);
+    if (cyc_varargs != null) {
+      let VarargInfo(_,_,t,r,_) = *cyc_varargs;
+      occurs(evar,t); occurs(evar,r);
+    }
     break;
   case &TupleType(args):
     for(; args != null; args = args->tl)
@@ -665,8 +668,8 @@ void unify_it(type_t t1, type_t t2) {
       return;
     break;
 
-  case $(&FnType(FnInfo{tvs2,eff2,rt2,args2,vararg2,atts2}), 
-         &FnType(FnInfo{tvs1,eff1,rt1,args1,vararg1,atts1})):
+  case $(&FnType(FnInfo{tvs2,eff2,rt2,args2,c_vararg2,cyc_vararg2,atts2}), 
+         &FnType(FnInfo{tvs1,eff1,rt1,args1,c_vararg1,cyc_vararg1,atts1})):
     bool done = false;
     region rgn {
     glist_t<$(tvar_t,type_t)@`rgn,`rgn> inst = null;
@@ -678,10 +681,11 @@ void unify_it(type_t t1, type_t t2) {
     }
     if (tvs2 != null) break;
     if (inst != null) {
-      unify_it(new FnType(FnInfo{null,eff1,rt1,args1,vararg1,atts1}),
+      unify_it(new FnType(FnInfo{null,eff1,rt1,args1,c_vararg1,cyc_vararg1,
+                                   atts1}),
 	       rsubstitute(rgn, inst,
-			   new FnType(FnInfo{null,eff2,rt2,args2,vararg2,
-					       atts2})));
+			   new FnType(FnInfo{null,eff2,rt2,args2,c_vararg2,
+					       cyc_vararg2,atts2})));
       done = true;
     } 
     }
@@ -693,7 +697,21 @@ void unify_it(type_t t1, type_t t2) {
       unify_it((*args1->hd)[2],(*args2->hd)[2]);
     }
     if ((args1 != null) || (args2 != null)) break;
-    if (vararg1 != vararg2) break;
+    if (c_vararg1 != c_vararg2) break;
+    // unify any cyclone varargs
+    bool bad_cyc_vararg = false;
+    switch ($(cyc_vararg1, cyc_vararg2)) {
+    case $(null,null): break;
+    case $(null,_): fallthru;
+    case $(_,null): bad_cyc_vararg = true; break;
+    case $(&VarargInfo{n1,tq1,tp1,r1,i1}, &VarargInfo{n2,tq2,tp2,r2,i2}):
+      unify_tqual(tq1,tq2);
+      unify_it(tp1,tp2);
+      unify_it(r1,r2);
+      if (i1 != i2) bad_cyc_vararg = true;
+      break;
+    }
+    if (bad_cyc_vararg) break;
     // It's important to unify the effects after the arguments and result
     // so that the effects are pinned down as much as possible.
     bool bad_effect = false;
@@ -1374,7 +1392,7 @@ type_t fndecl2typ(fndecl_t fd) {
     }
     return new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_type,
                                List::map(fndecl2typ_f, fd->args),
-                               fd->varargs, fn_type_atts});
+                               fd->c_varargs, fd->cyc_varargs, fn_type_atts});
   };
   return (fd->cached_typ->v);
 }
@@ -1393,7 +1411,7 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
   // this fills in the missing bound type variables and effects
   check_valid_toplevel_type(loc,te,t);
   switch (compress(t)) {
-  case &FnType(FnInfo{tvs,effect,rt,args,varargs,atts}):
+  case &FnType(FnInfo{tvs,effect,rt,args,c_varargs,cyc_varargs,atts}):
     fd->tvs = tvs;
     fd->effect = effect;
     break;
@@ -1465,7 +1483,7 @@ type_t rsubstitute(region_t<`r> rgn,
     if(new_t1 == t1 && new_r == r)
       return t;
     return new PointerType(PtrInfo(new_t1,new_r,n,tq,b));
-  case &FnType(FnInfo{vs,eff,rtyp,args,varargs,atts}):
+  case &FnType(FnInfo{vs,eff,rtyp,args,c_varargs,cyc_varargs,atts}):
     for (let p = vs; p != null; p = p->tl)
       inst = rnew(rgn) List(rnew(rgn) $(p->hd,new VarType(p->hd)),inst);
     let $(qs,ts) = List::rsplit(rgn,rgn, 
@@ -1482,8 +1500,20 @@ type_t rsubstitute(region_t<`r> rgn,
       else
 	eff2 = new Opt(new_eff);
     }
+    vararg_info_t *cyc_varargs2;
+    if (cyc_varargs == null) 
+      cyc_varargs2 = null;
+    else {
+      let VarargInfo{n,tq,t,r,i} = *cyc_varargs;
+      let t2 = rsubstitute(rgn,inst,t);
+      let r2 = rsubstitute(rgn,inst,r);
+      if (t2 == t && r == r2) cyc_varargs2 = cyc_varargs;
+      else 
+        cyc_varargs2 = new VarargInfo{n,tq,t2,r2,i};
+    }
     return 
-      new FnType(FnInfo{vs,eff2,rsubstitute(rgn,inst,rtyp),args2,varargs,atts});
+      new FnType(FnInfo{vs,eff2,rsubstitute(rgn,inst,rtyp),args2,c_varargs,
+                          cyc_varargs2,atts});
   case &TupleType(tqts):
     let ts  = List::rmap(rgn,snd_tqt,tqts);
     let ts2 = substs(rgn,inst,ts);
@@ -1751,7 +1781,7 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
       terr(loc,"array bounds expression is not an unsigned int");
     Evexp::eval_const_uint_exp((exp_t)e); // check that e is of constant size
     break;
-  case &FnType(FnInfo{*btvs,*eff,tr,args,vararg,atts}):
+  case &FnType(FnInfo{*btvs,*eff,tr,args,c_vararg,cyc_vararg,atts}):
     // check that the attributes are function type attributes
     // and that at most one of {stdcall, cdecl, fastcall} is there.
     int  num_convs = 0;
@@ -1792,6 +1822,48 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
       // FIX: should check that variables are unique and that tquals are okay
       new_free_vars = 
         check_valid_type(loc,te,new_free_vars,MemKind,(*args->hd)[2]);
+    }
+    // check the varargs
+    if (cyc_vararg != null) {
+      if (c_vararg) impos("both c_vararg and cyc_vararg"); // sanity
+      let VarargInfo{vn,vtq,vt,vr,vi} = *cyc_vararg;
+      new_free_vars = check_valid_type(loc,te,new_free_vars,MemKind,vt);
+      // if vr is an evar, constrain it to a gensym'd type variable, 
+      // and complain if vr isn't a type variable (i.e., it's HeapRgn)
+      switch (compress(vr)) {
+      case &Evar(_,_,_): 
+        type_t vr_tvar = new VarType(new_tvar(RgnKind));
+        unify(vr,vr_tvar);
+        break;
+      case &VarType(_): break;
+      case HeapRgn:
+        terr(loc,"varargs should be in a region, not heap-allocated");
+        break;
+      default: break; // next line will pick up the error
+      }
+      new_free_vars = check_valid_type(loc,te,new_free_vars,RgnKind,vr);
+      // if inject, then check the type is an appropriate [x]tunion
+      if (vi) {
+        switch (compress(vt)) {
+        case &TunionType(TunionInfo{&KnownTunion(_),_,tuir}): 
+          // if tuir is an evar, constrain it to vr
+          // and complain if tuir isn't a type variable (i.e., it's HeapRgn).
+          switch (compress(tuir)) {
+          case &Evar(_,_,_): 
+            unify(vr,tuir);
+            break;
+          case &VarType(_): break;
+          case HeapRgn:
+            terr(loc,"injected vararg [x]tunion should be in a region, not heap-allocated");
+            break;
+          default: break; // can't happen
+          }
+          break;
+        default:
+          terr(loc,"can't inject a non-[x]tunion type");
+          break;
+        }
+      }
     }
     if (*eff != null) {
       new_free_vars = check_valid_type(loc,te,new_free_vars,EffKind,(*eff)->v);
@@ -2063,7 +2135,7 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
   }
   if (free_tvars != null) {
     switch (compress(t)) {
-    case &FnType(FnInfo{*btvs,eff,tr,args,vararg,atts}):
+    case &FnType(FnInfo{*btvs,eff,tr,args,c_vararg,cyc_vararg,atts}):
       if (*btvs == null)
         *btvs = free_tvars;
       else if (free_tvars != null) {
@@ -2457,6 +2529,7 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
             && cnst_exp(te,false,e3));
   case &SeqExp_e(e1,e2):
     return (cnst_exp(te,false,e1) && cnst_exp(te,false,e2));
+  case &NoInstantiate_e(e2): fallthru(e2);
   case &Instantiate_e(e2,_):
     return cnst_exp(te,var_okay,e2);
   case &Cast_e(t,e2):

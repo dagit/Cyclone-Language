@@ -374,7 +374,8 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
   //      In this case, we'll do a *e; e = UnknownROp for each such param.
   //      Note: The callee cannot mess with aliases through x b/c it
   //            doesn't know anything about how much it's initialized.
-  case &FnCall_e(e1,es): return use_exp_unordered(env, new List(e1,es), null);
+  case &FnCall_e(e1,es,_): 
+    return use_exp_unordered(env, new List(e1,es), null);
 
   case &Subscript_e(e1,e2):
     // FIX: x[0] is just like *x, so must cancel out & !!!

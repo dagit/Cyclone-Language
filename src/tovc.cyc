@@ -106,7 +106,7 @@ static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
 
     // everything else is just recursive descent
   case &Const_e(_): return;
-  case &FnCall_e(e1,es):
+  case &FnCall_e(e1,es,_):
     box_free_vars_exp(env,e1); fallthru(es);
   case &Primop_e(_,es):
     for(; es != null; es = es->tl)
@@ -234,7 +234,7 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
   qvar_t funname = Toc::temp_var();
   *env.gen_ds=new List(new_decl(new Fn_d(new Fndecl(Static,true,funname,
 					    null,null,rettype,params,
-					    false,s,null,null,null)),DL),
+					    false,null,s,null,null,null)),DL),
 		       *env.gen_ds);
   return fncall_exp(var_exp(funname,DL), args, DL);
 }
@@ -251,7 +251,7 @@ static void apply_varmap(Dict::dict_t<var_t,exp_t> varmap, exp_t e) {
 
     // everything else is just recursive descent
   case &Const_e(_): return;
-  case &FnCall_e(e1,es):
+  case &FnCall_e(e1,es,_):
     apply_varmap(varmap,e1); fallthru(es);
   case &Primop_e(_,es):
     for(; es != null; es = es->tl)
@@ -347,7 +347,7 @@ static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
   case &Const_e(_): return;
   case &Var_e(_,_): return;
 
-  case &FnCall_e(e1,es):
+  case &FnCall_e(e1,es,_):
     exp_to_vc(env, e1); fallthru(es);
   case &Primop_e(_, es):
     for(; es != null; es = es->tl)

@@ -19,6 +19,33 @@ BUG FIXES and UNSOUNDNESSES:
 We complain that g isn't initialized.  We should complain that
 function declarations are only allowed at top-level.
 
+* We need to ensure that locally-scoped type variables, introduced
+either by (a) a block, (b) a region block, (c) an existentially-quantified
+variable in a switch case, do not escape their scope.  For instance:
+
+  bool init = false;
+  _ x = null;
+  while (true) {
+    region r {
+      if (!init) {
+        x = rnew(r) $(3,4); init = true;
+      } else {
+        (*x)[0];
+      }
+    }
+  }
+
+Here, x is assigned the type "$(int,int) *`r" even though `r is not
+in scope where x is defined.  Note that when you execute this code,
+you'll allocate (3,4) in the region the first time, then free the
+region, and then try to dereference x the second time through the
+loop.  
+
+The fix is to assign a scope level to each VarType and each Evar
+and to prevent an Evar from becoming constrained with a type that
+includes a VarType (or Evar?) from a deeper scope.  Note that
+this would fix the following two bugs.
+
 * This won't re-parse and type-check after inference:
 
   void f() {
@@ -28,6 +55,11 @@ function declarations are only allowed at top-level.
       p = &x;
     }
   }
+
+* alpha-conversion issues with respect to type variables.  We should
+  keep around a list of all of the type variables used in a function
+  and ensure that they aren't duplicated (or else provide an internal
+  map from user-specified type variables to gensym'd representations.)
 
 * Better error message when programmer leaves off effect but
   can't. For example,
@@ -73,11 +105,6 @@ function declarations are only allowed at top-level.
   make sure that it is sound.  In particular, alignment issues are
   a concern.
 
-* alpha-conversion issues with respect to type variables.  We should
-  keep around a list of all of the type variables used in a function
-  and ensure that they aren't duplicated (or else provide an internal
-  map from user-specified type variables to gensym'd representations.)
-
 * namespace issues:  we treat `namespace Foo {extern "C" int x;}' as if
   x is translated as Cyc_Foo_x but it's translated as "x".  We should
   really define both "x" and "Cyc_Foo_x" in the environment.  In addition,
@@ -97,18 +124,16 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
 
       x+1
 
-* default array initializers, at top level and local, e.g., int x[4];
+* default array initializers within a function: e.g., int x[4];
 
 * nested type declarations? nested exception declarations? nested using?
 
-* structs and enums without a name
-
 * long long, short, float, and double constants (including 12s, 3l, etc.)
 
-* better support for varargs and string descriptors.  Too many systems
-  codes have functions that write to log files or something like that
-  and have their own wrapper functions for fprintf/fscanf.  So I think
-  we have to bite the bullet and provide some support for this.
+* write printf, scanf, etc. using our new vararg facility.
+
+* add some way to forward varargs -- easiest would be to cast a vararg
+  function to one with an explicit array.
 
 * command line arguments like GCC's with the proper defaults 
   (e.g., -tc -toc -up should be default.)  Also, should support

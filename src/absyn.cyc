@@ -335,7 +335,7 @@ exp_t unknowncall_exp(exp_t e, list_t<exp_t> es, seg_t loc) {
   return new_exp(new UnknownCall_e(e,es), loc);
 }
 exp_t fncall_exp(exp_t e, list_t<exp_t> es, seg_t loc) {
-  return new_exp(new FnCall_e(e,es), loc);
+  return new_exp(new FnCall_e(e,es,null), loc);
 }
 exp_t noinstantiate_exp(exp_t e, seg_t loc) {
   return new_exp(new NoInstantiate_e(e), loc);
@@ -396,7 +396,7 @@ stmt_t new_stmt(raw_stmt_t s, seg_t loc) {
                      .annot=EmptyAnnot }; }
 stmt_t skip_stmt(seg_t loc) { return new_stmt(Skip_s, loc); }
 stmt_t exp_stmt(exp_t e,seg_t loc) { return new_stmt(new Exp_s(e),loc); }
-stmt_t seq_stmts(list_t<stmt_t> ss, seg_t loc) {
+stmt_t seq_stmts(glist_t<stmt_t,`r> ss, seg_t loc) {
   if (ss == null) return skip_stmt(loc);
   else if (ss->tl == null) return ss->hd;
   else return seq_stmt(ss->hd,seq_stmts(ss->tl,loc),loc);
@@ -505,12 +505,15 @@ static
 }
 
 type_t function_typ(list_t<tvar_t> tvs, opt_t<type_t> eff_typ, type_t ret_typ, 
-                 list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, bool varargs,
-                 attributes_t atts) {
+                    list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, 
+                    bool c_varargs, vararg_info_t *cyc_varargs,
+                    attributes_t atts) {
   return new FnType(FnInfo{.tvars = tvs, .ret_typ = pointer_expand(ret_typ),
                               .effect = eff_typ, 
                               .args = List::map(expand_arg,args), 
-                              .varargs = varargs, .attributes=atts});
+                              .c_varargs = c_varargs, 
+                              .cyc_varargs = cyc_varargs,
+                              .attributes=atts});
 }
 type_t pointer_expand(type_t t) {
   //  switch (compress(t)) {

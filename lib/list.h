@@ -20,6 +20,10 @@ namespace List {
   typedef struct List<`a,`H> *list_t<`a>;
   typedef struct List<`a,`H> @List_t<`a>;
 
+  // calling list(e1,e2,...,en) will generate the list [e1,e2,...,en]
+  extern list_t<`a> list(...`r `a);
+  extern glist_t<`a,`r> rlist(region_t<`r>,...`r2 `a);
+
   // Return the length of a list.
   extern int length(glist_t<`a,`r> x);
   
@@ -35,7 +39,7 @@ namespace List {
   // return a fresh copy of the list (same as map of the identity)
   extern list_t<`a> copy(glist_t<`a,`r> src);
   extern glist_t<`a,`r2> rcopy(region_t<`r2>, glist_t<`a,`r> src);
-  
+
   // Apply a function to each element in a list, returning a new list. 
   extern list_t<`b> map(`b f(`a),glist_t<`a,`r> x);
   extern glist_t<`b,`r2> rmap(region_t<`r2>,`b f(`a),glist_t<`a,`r> x);

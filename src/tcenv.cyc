@@ -774,6 +774,22 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
     vds = new{List(vd, vds)};
     locals = Dict::insert(locals, (*args->hd)[0], new Param_b(vd));
   }
+  if (fd->cyc_varargs != null) {
+    let VarargInfo{nopt,tq,t,r,i} = *fd->cyc_varargs;
+    if (nopt != null) {
+      let typ = tagged_typ(t, r, tq);
+      let vd = new{Vardecl{.sc = Public,
+                           .name = new{$((nmspace_t)Loc_n,nopt->v)},
+                           .tq = empty_tqual(),
+                           .type = typ,
+                           .initializer = null,
+                           .rgn = new{Opt(param_rgn)},
+                           .attributes = null}};
+      vds = new List(vd,vds);
+      locals = Dict::insert(locals, nopt->v, new Param_b(vd));
+    } 
+    else terr(loc,"missing name for varargs");
+  }
   fd->param_vardecls = new{Opt(vds)};
   return new 
     Fenv{.shared = new SharedFenv{

@@ -51,7 +51,8 @@ extern doc_t primapp2doc(int inprec, primop_t p,list_t<exp_t> es);
 extern doc_t de2doc($(list_t<designator_t>,exp_t)@ de);
 extern doc_t tqtd2doc(tqual_t tq, type_t t, opt_t<doc_t> dopt);
 extern doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,
-                         bool varargs,opt_t<type_t> effopt);
+                         bool c_varargs,vararg_info_t *cyc_varargs,
+                         opt_t<type_t> effopt);
 extern doc_t tunionfields2doc(list_t<tunionfield_t> fields);
 
 // Flag controlling whether typedefs are expanded during printing
@@ -324,8 +325,8 @@ doc_t dtms2doc(doc_t d,list_t<type_modifier_t> tms) {
   case &Function_mod(args):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     switch (args) {
-    case &WithTypes(args2,varargs,effopt):
-      return cat2(rest,funargs2doc(args2,varargs,effopt));
+    case &WithTypes(args2,c_varargs,cyc_varargs,effopt):
+      return cat2(rest,funargs2doc(args2,c_varargs,cyc_varargs,effopt));
     case &NoTypes(sl,loc):
       return cat2(rest,group("(",")",",",List::map(textptr,sl)));
     }
@@ -544,26 +545,45 @@ doc_t funarg2doc($(opt_t<var_t>,tqual_t,type_t)@ t) {
   return tqtd2doc((*t)[1],(*t)[2],dopt);
 }
 
-doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,bool varargs,
-                opt_t<type_t> effopt) {
+doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,bool c_varargs,
+                  vararg_info_t *cyc_varargs, opt_t<type_t> effopt) {
+  let arg_docs = List::map(funarg2doc,args);
   if (effopt == null) {
-    if (varargs) // Varargs
+    if (c_varargs) 
       return(group("(",")",",",
-                   List::append(List::map(funarg2doc,args),
+                   List::append(arg_docs,
                                 new List(text("..."),null))));
-    else      // Not varargs
-      return(group("(",")",",",List::map(funarg2doc,args)));
+    else if (cyc_varargs != null) {
+      let vararg = 
+        funarg2doc(new $(cyc_varargs->name,cyc_varargs->tq,cyc_varargs->type));
+      let d = cat4(text("..."),typ2doc(cyc_varargs->rgn),
+                   cyc_varargs->inject ? text(" inject ") : text(""),
+                   vararg);
+      return group("(",")",",",List::append(arg_docs,new List(d,null)));
+      
+    } else      // Not varargs
+      return(group("(",")",",",arg_docs));
   } else {
-    if (varargs)
+    if (c_varargs)
       return(group("(",")",";",
                    new List(group("","",",",
-                                  List::append(List::map(funarg2doc,args),
+                                  List::append(arg_docs,
                                                new List(text("..."),null))),
                             new List(eff2doc(effopt->v),null))));
-    else 
+    else if (cyc_varargs != null) {
+      let vararg = 
+        funarg2doc(new $(cyc_varargs->name,cyc_varargs->tq,cyc_varargs->type));
+      let d = cat4(text("..."),typ2doc(cyc_varargs->rgn),
+                   cyc_varargs->inject ? text(" inject ") : text(""),
+                   vararg);
       return(group("(",")",";",
                    new List(group("","",",",
-                                  List::map(funarg2doc,args)),
+                                  List::append(arg_docs,
+                                               new List(d,null))),
+                            new List(eff2doc(effopt->v),null))));
+    } else 
+      return(group("(",")",";",
+                   new List(group("","",",",arg_docs),
                             new List(eff2doc(effopt->v),null))));
   }
 }
@@ -662,7 +682,7 @@ int exp_prec(exp_t e) {
   case &Conditional_e(_,_,_):   return  30; // note || and && are hiding here!
   case &SeqExp_e(_,_):          return  10;
   case &UnknownCall_e(_,_):     return 140;
-  case &FnCall_e(_,_):          return 140;
+  case &FnCall_e(_,_,_):        return 140;
   case &Throw_e(_):             return 130;
   case &NoInstantiate_e(e2):    return exp_prec(e2);
   case &Instantiate_e(e2,_):    return exp_prec(e2);
@@ -748,7 +768,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
              exps2doc_prec(20,es),
              text(")"));
     break;
-  case &FnCall_e(e1,es):
+  case &FnCall_e(e1,es,_):
     s = cat4(exp2doc_prec(myprec,e1),
              text("("),
              exps2doc_prec(20,es),
@@ -1388,7 +1408,7 @@ doc_t decl2doc(decl_t d) {
                                  fd->effect,
                                  fd->ret_type,
                                  List::map(arg_mk_opt,fd->args),
-                                 fd->varargs, null});
+                                 fd->c_varargs, fd->cyc_varargs,null});
     s = cat7(text(fd->is_inline? (to_VC ? "__inline " : "inline ") : ""),
              scope2doc(fd->sc),
              tqtd2doc(Tqual(false,false,false),t,
@@ -1600,7 +1620,7 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
     type_modifier_t tm = new Pointer_mod(ps,rgntyp,tq);
     return $(tq3, t3, (list_t<type_modifier_t>)(new List(tm,tml3)));
 
-  case &FnType(FnInfo{typvars,effopt,t2,args,varargs,fn_atts}):
+  case &FnType(FnInfo{typvars,effopt,t2,args,c_varargs,cyc_varargs,fn_atts}):
     if (! print_all_tvars) {
       // don't print default effects
       if (effopt == null
@@ -1627,7 +1647,8 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
     list_t<type_modifier_t> tms = tml3;
     if (fn_atts != null) 
       tms = new List(new Attributes_mod(null,fn_atts),tms);
-    tms = new List(new Function_mod(new WithTypes(args,varargs,effopt)),tms);
+    tms = new List(new Function_mod(new WithTypes(args,c_varargs,
+                                                  cyc_varargs,effopt)),tms);
     if (typvars != null)
       tms = new List(new TypeParams_mod(typvars,null,true),tms);
     return $(tq3,t3,tms);
