@@ -98,9 +98,9 @@ static string_t             bogus_string   = "*bogus*";
 static $(nmspace_t,var_t)   token_id_pair = $(Nmspace{.Loc_n = 0},
 					      &bogus_string);
 
-static char           token_char   = '\000';
-static string_t       token_string = "";
-static qvar_t         token_qvar   = &token_id_pair;
+static char                 token_char   = '\000';
+static string_t             token_string = "";
+static qvar_t               token_qvar   = &token_id_pair;
 static $(bool,string_t<`H>) token_asm = $(false,"");
 
 static int runaway_start = 0;
@@ -339,6 +339,11 @@ void store_string_char(char c) {
   }	
   string_buffer[string_pos] = c;
   ++string_pos;
+}
+void store_string(string_t s) {
+  int sz = strlen(s);
+  for (int i = 0; i < sz; i++)
+    store_string_char(s[i]);
 }
 mstring_t get_stored_string() {
   mstring_t str = substring(string_buffer,0,string_pos);
@@ -606,7 +611,9 @@ static short process_qual_id(Lexbuf<`a> lbuf) {
 
 // Forward declarations of lexing functions 
 int token(Lexbuf<`a>);
+int scan_charconst(Lexbuf<`a>);
 int strng(Lexbuf<`a>);
+int wstrng(Lexbuf<`a>);
 int comment(Lexbuf<`a>);
 int cyc_qual(Lexbuf<`a>);
 int snarf_asm(Lexbuf<`a>);
@@ -645,8 +652,10 @@ int yylex(Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> lbuf) {
  case TYPE_VAR          : yylval = String_tok(Lex::token_string); break;
  case INTEGER_CONSTANT  : yylval = Int_tok(Lex::token_int);       break;
  case CHARACTER_CONSTANT: yylval = Char_tok(Lex::token_char);     break;
+ case WCHARACTER_CONSTANT:yylval = String_tok(Lex::token_string);  break;
  case FLOATING_CONSTANT : yylval = String_tok(Lex::token_string); break;
  case STRING            : yylval = String_tok(Lex::token_string); break;
+ case WSTRING           : yylval = String_tok(Lex::token_string); break;
  case ASM               : yylval = Asm_tok(Lex::token_asm);       break;
  default: break;
  }
@@ -745,6 +754,22 @@ rule token = parse
       /* skip */;
     token_string = get_stored_string();
     return STRING; }
+/* wide string constants */
+| "L\""
+  { string_pos = 0; 
+    runaway_start = lexeme_start(lexbuf);
+    while (wstrng(lexbuf))
+      /* skip */;
+    token_string = get_stored_string();
+    return WSTRING; }
+/* wide character constants */
+| "L'"
+  { string_pos = 0; 
+    runaway_start = lexeme_start(lexbuf);
+    while (scan_charconst(lexbuf))
+      /* skip */;
+    token_string = get_stored_string();
+    return WCHARACTER_CONSTANT; }
 /* character constants */
 | "'\\a'"   { token_char = '\a'; return CHARACTER_CONSTANT; }
 | "'\\b'"   { token_char = '\b'; return CHARACTER_CONSTANT; }
@@ -815,6 +840,33 @@ and cyc_qual = parse
 | "nullable" { return NULLABLE_QUAL; }
 | _ { lexbuf->lex_curr_pos -= 1; return '@'; }
 
+and scan_charconst = parse
+    "'"     { return 0; }
+  /* escapes */
+  | "\\a"  { store_string_char('\a'); return 1; }
+  | "\\b"  { store_string_char('\b'); return 1; }
+  | "\\f"  { store_string_char('\f'); return 1; }
+  | "\\n"  { store_string_char('\n'); return 1; }
+  | "\\r"  { store_string_char('\r'); return 1; }
+  | "\\t"  { store_string_char('\t'); return 1; }
+  | "\\v"  { store_string_char('\v'); return 1; }
+  | "\\\\" { store_string_char('\\'); return 1; }
+  | "\\'"  { store_string_char('\''); return 1; }
+  | "\\\"" { store_string_char('"');  return 1; }
+  | "\\?"  { store_string_char('?');  return 1; }
+  /* octal character escapes */
+  | "\\" ['0'-'7']['0'-'7']?['0'-'7']?
+           { store_string(lexeme(lexbuf)); return 1; }
+  /* hex character escapes */
+  | "\\x" ['0'-'9''A'-'Z''a'-'z']+
+           { store_string(lexeme(lexbuf)); return 1; }
+  | [^ '\\' '\'' '\n']
+           { store_string_char(lexeme_char(lexbuf,0)); return 1; }
+  | newline
+           { runaway_err("wide character ends in newline",lexbuf); return 0; }
+  | eof    { runaway_err("unterminated wide character",lexbuf); return 0; }
+  | _      { err("bad character following backslash in wide character",lexbuf); return 1; }
+
 and strng = parse
     "\"" [' ''\n''\r''\t']* "\""
   /* concatenate adjacent strings */
@@ -840,6 +892,47 @@ and strng = parse
   /* hex character escapes FIX? any length okay? */
   | "\\x" ['0'-'9''A'-'F''a'-'f']+
                     { store_string_char((char)(intconst(lexbuf,2,0,16))[1]);
+                      return 1;
+                    }
+  | [^ '"''\\''\n']   /* NOT double quote, backslash, or newline */
+                    { /* for efficiency, should have a while loop here */
+                      store_string_char (lexeme_char(lexbuf,0));
+		      return 1; }
+  | newline         { runaway_err("string ends in newline",lexbuf);
+                      return 0;
+                    }
+  | eof             { runaway_err("unterminated string",lexbuf);
+                      return 0;
+                    }
+  | _               { err("bad character following backslash in string",lexbuf);
+		      return 1; }
+and wstrng = parse
+    "\"" [' ''\n''\r''\t']* "L\""
+  /* Store the character sequence "\" L\"" instead of just concatenating
+     the following string.  This is because concatenating might change
+     the interpretation of a multibyte sequence -- we are not
+     interpreting the sequence here, we leave that to the C compiler. */
+                    { store_string("\" L\""); return 1; }
+  | "\""            { return 0; }
+  | "\\a"           { store_string("\\a"); return 1; }
+  | "\\b"           { store_string("\\b"); return 1; }
+  | "\\f"           { store_string("\\f"); return 1; }
+  | "\\n"           { store_string("\\n"); return 1; }
+  | "\\r"           { store_string("\\r"); return 1; }
+  | "\\t"           { store_string("\\t"); return 1; }
+  | "\\v"           { store_string("\\v"); return 1; }
+  | "\\\\"          { store_string("\\\\"); return 1; }
+  | "\\'"           { store_string("\\'"); return 1; }
+  | "\\\""          { store_string("\\\"");  return 1; }
+  | "\\?"           { store_string("\\?");  return 1; }
+  /* octal character escapes */
+  | "\\" ['0'-'7']['0'-'7']?['0'-'7']?
+                    { store_string(lexeme(lexbuf));
+                      return 1;
+                    }
+  /* hex character escapes */
+  | "\\x" ['0'-'9''A'-'F''a'-'f']+
+                    { store_string(lexeme(lexbuf));
                       return 1;
                     }
   | [^ '"''\\''\n']   /* NOT double quote, backslash, or newline */

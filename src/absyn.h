@@ -511,20 +511,24 @@ namespace Absyn {
   EXTERN_ABSYN @tagged union Cnst {
     int Null_c; // int unused
     $(sign_t,char) Char_c;
+    string_t Wchar_c;
     $(sign_t,short) Short_c;
     $(sign_t,int) Int_c;
     $(sign_t,long long) LongLong_c;
     string_t Float_c;  // where's doubles?
     string_t String_c;
+    string_t Wstring_c;
   };
   // constructors for constants
   extern cnst_t Null_c;
   extern cnst_t Char_c(sign_t,char);
+  extern cnst_t Wchar_c(string_t<`H>);
   extern cnst_t Short_c(sign_t,short);
   extern cnst_t Int_c(sign_t,int);
   extern cnst_t LongLong_c(sign_t,long long);
   extern cnst_t Float_c(string_t<`H>);
   extern cnst_t String_c(string_t<`H>);
+  extern cnst_t Wstring_c(string_t<`H>);
 
   // Primitive operations
   EXTERN_ABSYN enum Primop {
@@ -939,8 +943,8 @@ namespace Absyn {
   extern type_t char_typ, uchar_typ, ushort_typ, uint_typ, ulong_typ, ulonglong_typ;
   // signed types
   extern type_t schar_typ, sshort_typ, sint_typ, slong_typ, slonglong_typ;
-  // float, double
-  extern type_t float_typ, double_typ(bool);
+  // float, double, wchar_t
+  extern type_t float_typ, double_typ(bool), wchar_typ();
   // empty effect
   extern type_t empty_effect;
   // exception name and type
@@ -1004,8 +1008,10 @@ namespace Absyn {
   extern exp_t signed_int_exp(int, seg_t);
   extern exp_t uint_exp(unsigned int, seg_t);
   extern exp_t char_exp(char c, seg_t);
+  extern exp_t wchar_exp(string_t<`H> s, seg_t);
   extern exp_t float_exp(string_t<`H> f, seg_t);
   extern exp_t string_exp(string_t<`H> s, seg_t);
+  extern exp_t wstring_exp(string_t<`H> s, seg_t);
   extern exp_t var_exp(qvar_t, seg_t);
   extern exp_t varb_exp(qvar_t, binding_t, seg_t);
   extern exp_t unknownid_exp(qvar_t, seg_t);

@@ -2042,12 +2042,26 @@ bool is_pointer_or_boxed(type_t t, bool @is_dyneither_ptr) {
   }
 }
 
+/* FIX: this is duplicated in toc; but the functions are slightly different */
 bool is_zero(exp_t e) {
   switch (e->r) {
   case &Const_e({.Int_c = $(_,0)}): 
   case &Const_e({.Char_c = $(_,0)}): 
   case &Const_e({.Short_c = $(_,0)}): 
-  case &Const_e({.LongLong_c = $(_,0)}): return true;
+  case &Const_e({.LongLong_c = $(_,0)}):
+    return true;
+  case &Const_e({.Wchar_c = s}):
+    let l = strlen(s);
+    int i = 0;
+    if (l>=2 && s[0] == '\\') {
+      if (s[1] == '0') i = 2; // octal
+      else if (s[1] == 'x' && l>=3 && s[2] == '0') i = 3; // hex
+      else return false;
+      for (; i<l; i++) // remaining chars must be '0'
+        if (s[i] != '0') return false;
+      return true;
+    }
+    else return false;
   case &Cast_e(t,e2,_,_): return is_zero(e2) && admits_zero(t);
   default: return false;
   }
@@ -5016,7 +5030,6 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       return $(tq.real_const, r); // FIX: is tq set correctly?
     default: return bogus_ans;
     }
-
   case &Subscript_e(e1,e2):
     // here we need to figure out whether we've got a boxed thing
     // or not because [] is overloaded for all array kinds, and tuples

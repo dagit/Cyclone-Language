@@ -402,9 +402,22 @@ exp_t getFunctionRemovePointer(struct functionSet @fS, exp_t arr) {
 
 ///////////////////////////// Various Utilities /////////////////////////////
 
+/* FIX: this is duplicated in tcutil; but the functions are slightly different */
 static bool is_zero(exp_t e) {
   switch (e->r) {
   case &Const_e({.Char_c = $(_,c)}):     return c == '\0';
+  case &Const_e({.Wchar_c = s}):
+    let l = strlen(s);
+    int i = 0;
+    if (l>=2 && s[0] == '\\') {
+      if (s[1] == '0') i = 2; // octal
+      else if (s[1] == 'x' && l>=3 && s[2] == '0') i = 3; // hex
+      else return false;
+      for (; i<l; i++) // remaining chars must be '0'
+        if (s[i] != '0') return false;
+      return true;
+    }
+    else return false;
   case &Const_e({.Short_c = $(_,i)}):    return i == 0;
   case &Const_e({.Int_c = $(_,i)}):      return i == 0;
   case &Const_e({.LongLong_c = $(_,i)}): return i == 0;
@@ -953,6 +966,7 @@ static exp_t make_toplevel_dyn_arr(type_t t, exp_t sz, exp_t e) {
   bool is_string = false;
   switch (e->r) {
   case &Const_e({.String_c = _}): is_string = true; break;
+  case &Const_e({.Wstring_c = _}): is_string = true; break;
   default: break;
   }
   exp_t xexp;
@@ -2584,6 +2598,8 @@ static void exp_to_c(env_t nv, exp_t e) {
             // variable, we can avoid computing the "size" at run-time.
             switch (e1->r) {
             case &Const_e({.String_c = _}):
+              arg3 = e2; break;
+            case &Const_e({.Wstring_c = _}):
               arg3 = e2; break;
             default:
               arg3 = fncall_exp(getFunctionRemovePointer(

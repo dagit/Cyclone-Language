@@ -18,7 +18,6 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 
 /* TODO:
-   codegen and fill
    compound literals
    generalized array and struct designators
    JGMFIX: lousy error messages...
@@ -201,13 +200,38 @@ testenv_t<`r> tcTest(tenv_t<`g,`r> te, exp_t e, string_t msg_part) {
   return TestEnv(NULL,false);
 }
 
+/* FIX: how to interpret a multibyte character string is
+   locale-specific, and we don't handle different locales right now.
+   So, we simply return 1 as the length of any wide string literal,
+   which is always safe (because of the terminating NUL). */
+/* return the length of the wide string (number of wide characters it
+   contains, including the wide NUL) */
+/* s is a string representing a wide string as lexed by lex.cyl.  For
+   example if the lexer encounters the wide string constant L"ab" then
+   s will be the string "ab" (i.e., the two characters 'a' 'b' plus
+   terminating single byte NUL).  Other examples:
+      Lexer     --> s
+      ---------     ----------
+      L"a" L"b" --> "a\" L\"b"
+*/
+// from install_path.c
+extern "C" {
+  extern int Sizeof_wchar_t;
+}
+static int wchar_numelts(string_t s) {
+  return 1;
+}
+
 // constants
 static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
   type_t t;
+  type_t string_elt_typ = char_typ;
+  int string_numelts = 0;
   switch (*c) {
   case {.Char_c = $(Signed,_)}:   t = schar_typ; break;
   case {.Char_c = $(Unsigned,_)}: t = uchar_typ; break;
   case {.Char_c = $(None,_)}:     t = char_typ;  break;
+  case {.Wchar_c = _}:            t = wchar_typ();  break;
   case {.Short_c = $(sn,_)}:    
     t = (sn == Unsigned) ? ushort_typ : sshort_typ; break;
   case {.LongLong_c = $(sn,_)}: 
@@ -265,20 +289,26 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
     }
     break;
   case {.String_c = s}:
-    int len = numelts(s); // includes the trailing 0 character
-    exp_t elen = const_exp(Int_c(Unsigned, len), loc);
+    string_numelts = numelts(s); // includes the trailing 0 character, hence > 0
+    fallthru(s);
+  case {.Wstring_c = s}:
+    if (string_numelts == 0) {   // not fallthru
+      string_numelts = wchar_numelts(s);
+      string_elt_typ = wchar_typ();
+    }
+    exp_t elen = const_exp(Int_c(Unsigned, string_numelts), loc);
     elen->topt = new Opt(uint_typ);
     // The default is to treat a string as if it's statically heap 
     // allocated and return a pointer to that string.  However, if the 
     // string is used as an initializer, then we should return an array type.
-    t = atb_typ(char_typ,&HeapRgn_val,const_tqual(NULL),
+    t = atb_typ(string_elt_typ,&HeapRgn_val,const_tqual(NULL),
                 new Upper_b(elen),true_conref);
     if (topt != NULL) {
       switch (compress(*topt)) {
       case &ArrayType(ArrayInfo{_,tq,_,_,_}):
         // as an array initializer, a string literal can be either
         // treated as zero-terminated or not, hence the empty_conref.
-        return array_typ(char_typ, tq, elen, empty_conref(),NULL);
+        return array_typ(string_elt_typ, tq, elen, empty_conref(),NULL);
       case &PointerType(_):
         if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
           e->topt = new Opt(t);
@@ -286,7 +316,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
           t = *topt;
         } else {
           // maybe it's going in a different region
-          t = atb_typ(char_typ,new_evar(&rko,lookup_opt_type_vars(te)),
+          t = atb_typ(string_elt_typ,new_evar(&rko,lookup_opt_type_vars(te)),
                       const_tqual(NULL), 
                       new Upper_b(elen), true_conref);
           if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
@@ -2349,11 +2379,18 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     default: impos("tcExpNoPromote on Array_e returned non-array type");
     }
     return res_typ;
-  case &Const_e({.String_c = s}):
+  case &Const_e({.String_c = _}):
     // here I'm going to guess that the user wants a char *@ instead of
     // a char @{n}@.  They can get the char@{n}@ by using a cast.  This
     // is a total hack...
     let topt2 = atb_typ(char_typ, rgn, const_tqual(NULL), 
+                        &DynEither_b_val, true_conref);
+    let t = tcExp(te,&topt2,e1);
+    return atb_typ(t, rgn, empty_tqual(NULL), new Upper_b(uint_exp(1,NULL)), 
+                   false_conref);
+  case &Const_e({.Wstring_c = _}):
+    // handled like the String_c case
+    let topt2 = atb_typ(wchar_typ(), rgn, const_tqual(NULL), 
                         &DynEither_b_val, true_conref);
     let t = tcExp(te,&topt2,e1);
     return atb_typ(t, rgn, empty_tqual(NULL), new Upper_b(uint_exp(1,NULL)), 
@@ -2408,8 +2445,8 @@ type_t tcExp(tenv_t te, type_t * topt, exp_t e) {
   }
 }
 
-// Type-check the expression -- if it's an Array_e, Comprehension_e, 
-// or String_c expression, do not promote its type from array to pointer.  
+// Type-check the expression -- if it's an Array_e, Comprehension_e, String_c,
+// or Wstring_c expression, do not promote its type from array to pointer.  
 // Otherwise, do so.
 type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   type_t t = tcExpNoPromote(te, topt, e);
@@ -2427,6 +2464,7 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   switch (e->r) {
   case &Array_e(_): 
   case &Comprehension_e(_,_,_,_):
+  case &Const_e({.Wstring_c = _}):
   case &Const_e({.String_c = _}): return t;
   default:
     t = compress(t);

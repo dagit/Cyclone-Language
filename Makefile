@@ -90,7 +90,7 @@ bin/cyclone_a$(EXE): \
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 bin/cycdoc$(EXE): \
-  $(addprefix bin/genfiles/, $(addsuffix .$(O), $(CYCDOC_SRCS))) \
+  $(addprefix bin/genfiles/, $(addsuffix .$(O), $(CYCDOC_SRCS)) install_path.$(O)) \
   bin/lib/$(CYCBOOTLIB) \
   bin/lib/cyc-lib/$(ARCH)/$(RUNTIME).$(O) \
   bin/lib/cyc-lib/$(ARCH)/gc.a
@@ -177,13 +177,13 @@ bin/lib/libcycboot_a.a: \
 %_nocheck.$(O): %.cyc cyclone
 	bin/cyclone$(EXE) --nochecks -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $<
 
-
 bin/genfiles/install_path.c: $(CYCDIR)/Makefile.inc
 	 (echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
 	  echo "char *Carch = \"$(ARCH)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
 	  echo "char *Ccomp = \"$(CC)\";"; \
-	  echo "char *Cversion = \"$(VERSION)\";") > $@
+	  echo "char *Cversion = \"$(VERSION)\";"; \
+	  echo "int Sizeof_wchar_t = $(SIZEOF_WCHAR_T);") > $@
 
 bin/lib/$(CYCLIB): $(CYC_INCLUDE_H)
 bin/lib/$(CYCLIB): bin/lib/cyc-lib/$(ARCH)/cyc_setjmp.h

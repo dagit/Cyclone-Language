@@ -13,6 +13,7 @@ CC=@CC@
 EXE=@EXEEXT@
 O=@OBJEXT@
 LDFLAGS=@LDFLAGS@
+SIZEOF_WCHAR_T=@ac_cv_sizeof_wchar_t@
 
 SHELL=/bin/sh
 A=a

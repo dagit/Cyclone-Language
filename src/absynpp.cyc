@@ -1283,6 +1283,7 @@ doc_t exps2doc_prec(int inprec, list_t<exp_t> es) {
 doc_t cnst2doc(cnst_t c) {
   switch (c) {
   case {.Char_c = $(sg,ch)}:     return text(aprintf("'%s'",char_escape(ch)));
+  case {.Wchar_c = s}:           return text(aprintf("L'%s'",s));
   case {.Short_c = $(sg,s)}:     return text(aprintf("%d",(int)s));
   case {.Int_c = $(None,i)}:     fallthru(i);
   case {.Int_c = $(Signed,i)}:   return text(aprintf("%d",i));
@@ -1293,6 +1294,8 @@ doc_t cnst2doc(cnst_t c) {
   case {.Null_c = _}:      return text("NULL");
   case {.String_c = s}:
     return cat(text("\""), text(string_escape(s)), text("\""));
+  case {.Wstring_c = s}:
+    return cat(text("L\""), text(s), text("\""));
   }
 }
 

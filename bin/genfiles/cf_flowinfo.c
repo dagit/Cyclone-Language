@@ -866,16 +866,18 @@ Cyc_Absyn_TypeParams_mod_struct{int tag;struct Cyc_List_List*f1;struct Cyc_Posit
 f2;int f3;};struct Cyc_Absyn_Attributes_mod_struct{int tag;struct Cyc_Position_Segment*
 f1;struct Cyc_List_List*f2;};struct _union_Cnst_Null_c{int tag;int val;};struct
 _tuple4{enum Cyc_Absyn_Sign f1;char f2;};struct _union_Cnst_Char_c{int tag;struct
-_tuple4 val;};struct _tuple5{enum Cyc_Absyn_Sign f1;short f2;};struct
-_union_Cnst_Short_c{int tag;struct _tuple5 val;};struct _tuple6{enum Cyc_Absyn_Sign
-f1;int f2;};struct _union_Cnst_Int_c{int tag;struct _tuple6 val;};struct _tuple7{enum 
-Cyc_Absyn_Sign f1;long long f2;};struct _union_Cnst_LongLong_c{int tag;struct _tuple7
-val;};struct _union_Cnst_Float_c{int tag;struct _dyneither_ptr val;};struct
-_union_Cnst_String_c{int tag;struct _dyneither_ptr val;};union Cyc_Absyn_Cnst{struct
-_union_Cnst_Null_c Null_c;struct _union_Cnst_Char_c Char_c;struct
-_union_Cnst_Short_c Short_c;struct _union_Cnst_Int_c Int_c;struct
-_union_Cnst_LongLong_c LongLong_c;struct _union_Cnst_Float_c Float_c;struct
-_union_Cnst_String_c String_c;};enum Cyc_Absyn_Primop{Cyc_Absyn_Plus  = 0,Cyc_Absyn_Times
+_tuple4 val;};struct _union_Cnst_Wchar_c{int tag;struct _dyneither_ptr val;};struct
+_tuple5{enum Cyc_Absyn_Sign f1;short f2;};struct _union_Cnst_Short_c{int tag;struct
+_tuple5 val;};struct _tuple6{enum Cyc_Absyn_Sign f1;int f2;};struct _union_Cnst_Int_c{
+int tag;struct _tuple6 val;};struct _tuple7{enum Cyc_Absyn_Sign f1;long long f2;};
+struct _union_Cnst_LongLong_c{int tag;struct _tuple7 val;};struct _union_Cnst_Float_c{
+int tag;struct _dyneither_ptr val;};struct _union_Cnst_String_c{int tag;struct
+_dyneither_ptr val;};struct _union_Cnst_Wstring_c{int tag;struct _dyneither_ptr val;};
+union Cyc_Absyn_Cnst{struct _union_Cnst_Null_c Null_c;struct _union_Cnst_Char_c
+Char_c;struct _union_Cnst_Wchar_c Wchar_c;struct _union_Cnst_Short_c Short_c;struct
+_union_Cnst_Int_c Int_c;struct _union_Cnst_LongLong_c LongLong_c;struct
+_union_Cnst_Float_c Float_c;struct _union_Cnst_String_c String_c;struct
+_union_Cnst_Wstring_c Wstring_c;};enum Cyc_Absyn_Primop{Cyc_Absyn_Plus  = 0,Cyc_Absyn_Times
  = 1,Cyc_Absyn_Minus  = 2,Cyc_Absyn_Div  = 3,Cyc_Absyn_Mod  = 4,Cyc_Absyn_Eq  = 5,
 Cyc_Absyn_Neq  = 6,Cyc_Absyn_Gt  = 7,Cyc_Absyn_Lt  = 8,Cyc_Absyn_Gte  = 9,Cyc_Absyn_Lte
  = 10,Cyc_Absyn_Not  = 11,Cyc_Absyn_Bitnot  = 12,Cyc_Absyn_Bitand  = 13,Cyc_Absyn_Bitor
@@ -2416,7 +2418,7 @@ _tmp36B;struct Cyc_Absyn_Exp*_tmp36C;_LL185: {struct Cyc_Absyn_Cast_e_struct*
 _tmp35B=(struct Cyc_Absyn_Cast_e_struct*)_tmp35A;if(_tmp35B->tag != 15)goto _LL187;
 else{_tmp35C=_tmp35B->f2;}}_LL186: e=_tmp35C;goto loop;_LL187: {struct Cyc_Absyn_Const_e_struct*
 _tmp35D=(struct Cyc_Absyn_Const_e_struct*)_tmp35A;if(_tmp35D->tag != 0)goto _LL189;
-else{_tmp35E=_tmp35D->f1;if((_tmp35E.Int_c).tag != 4)goto _LL189;_tmp35F=(struct
+else{_tmp35E=_tmp35D->f1;if((_tmp35E.Int_c).tag != 5)goto _LL189;_tmp35F=(struct
 _tuple6)(_tmp35E.Int_c).val;_tmp360=_tmp35F.f2;}}_LL188: {struct Cyc_CfFlowInfo_Reln*
 _tmp62E;struct Cyc_List_List*_tmp62D;return(_tmp62D=_region_malloc(rgn,sizeof(*
 _tmp62D)),((_tmp62D->hd=((_tmp62E=_region_malloc(rgn,sizeof(*_tmp62E)),((_tmp62E->vd=

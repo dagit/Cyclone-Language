@@ -116,18 +116,19 @@ ifdef NOREGIONS
 OTHER_CYCFLAGS += -noregions
 endif
 
-cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS)) $(LIBR)
-	$(CYCC) -o $@ -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib $(OTHER_CYCFLAGS) $(addsuffix .$(O), $(CYCDOC_SRCS)) $(LDFLAGS)
+cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS)) install_path.$(O) $(LIBR)
+	$(CYCC) -o $@ -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib $(OTHER_CYCFLAGS) $(addsuffix .$(O), $(CYCDOC_SRCS)) install_path.$(O) $(LDFLAGS)
 
 buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O) $(LIBR)
 	$(CYCC) -o $@ -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib $(OTHER_CYCFLAGS) $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O) $(LDFLAGS)
 
 install_path.c: $(CYCDIR)/Makefile.inc
-	 (echo "char *Carch = \"$(ARCH)\";"; \
-	  echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
+	 (echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
+	  echo "char *Carch = \"$(ARCH)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
 	  echo "char *Ccomp = \"$(CC)\";"; \
-	  echo "char *Cversion = \"$(VERSION)\";") > $@
+	  echo "char *Cversion = \"$(VERSION)\";"; \
+	  echo "int Sizeof_wchar_t = $(SIZEOF_WCHAR_T);") > $@
 
 $(CYCLIB): $(O_LIBS) $(O_BOOT_LIBS) cstubs.$(O) cycstubs.$(O)
 ifdef MS

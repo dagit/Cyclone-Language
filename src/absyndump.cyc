@@ -604,6 +604,7 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Const_e({.Char_c = $(sg,ch)}):
     dump_char('\''); dump_nospace(Absynpp::char_escape(ch)); dump_char('\''); 
     break;
+  case &Const_e({.Wchar_c = s}):           dump(aprintf("L\'%s\'",s)); break;
   case &Const_e({.Short_c = $(sg,s)}):     dump(aprintf("%d",s)); break;
   case &Const_e({.Int_c = $(None,i)}):     fallthru(i);
   case &Const_e({.Int_c = $(Signed,i)}):   dump(aprintf("%d",i)); break;
@@ -614,6 +615,9 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Const_e({.Null_c = _}): dump("NULL"); break;
   case &Const_e({.String_c = s}):
     dump_char('"'); dump_nospace(Absynpp::string_escape(s)); dump_char('"');
+    break;
+  case &Const_e({.Wstring_c = s}):
+    dump("L\""); dump_nospace(s); dump_char('"');
     break;
 
   case &UnknownId_e(x): fallthru(x);

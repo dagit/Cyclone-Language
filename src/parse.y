@@ -990,8 +990,8 @@ using Parse;
 // Cyc:  added COLON_COLON double token
 %token COLON_COLON
 // identifiers and constants
-%token IDENTIFIER INTEGER_CONSTANT STRING
-%token CHARACTER_CONSTANT FLOATING_CONSTANT
+%token IDENTIFIER INTEGER_CONSTANT STRING WSTRING
+%token CHARACTER_CONSTANT WCHARACTER_CONSTANT FLOATING_CONSTANT
 // Cyc: type variables, qualified identifers and typedef names
 %token TYPE_VAR TYPEDEF_NAME QUAL_IDENTIFIER QUAL_TYPEDEF_NAME 
 // Cyc: added __attribute__ keyword
@@ -1012,7 +1012,8 @@ using Parse;
 %type <$(sign_t,int)> INTEGER_CONSTANT
 %type <char> CHARACTER_CONSTANT
 %type <string_t<`H>> FLOATING_CONSTANT namespace_action
-%type <string_t<`H>> IDENTIFIER TYPEDEF_NAME TYPE_VAR STRING field_name
+%type <string_t<`H>> IDENTIFIER TYPEDEF_NAME TYPE_VAR
+%type <string_t<`H>> STRING WSTRING WCHARACTER_CONSTANT field_name
 %type <$(Position::seg_t,conref_t<bool>,conref_t<bounds_t>)@`H> pointer_null_and_bound
 %type <conref_t<bounds_t>> pointer_bound
 %type <exp_t> primary_expression postfix_expression unary_expression
@@ -2590,6 +2591,7 @@ pattern:
 | constant
   { exp_t e = $1;
     switch (e->r) {
+    /* FIX: need patterns for wchar_t */
     case &Const_e({.Char_c = $(s,i)}): 
       $$=^$(new_pat(new Char_p(i),e->loc)); break;
     case &Const_e({.Short_c = $(s,i)}):
@@ -2601,6 +2603,8 @@ pattern:
     case &Const_e({.Null_c = _}):
       $$=^$(new_pat(&Null_p_val,e->loc)); break;
     case &Const_e({.String_c = _}): 
+      err("strings cannot occur within patterns",LOC(@1,@1)); break;
+    case &Const_e({.Wstring_c = _}): 
       err("strings cannot occur within patterns",LOC(@1,@1)); break;
     case &Const_e({.LongLong_c = _}): 
       unimp("long long's in patterns",LOC(@1,@1)); break;
@@ -2924,6 +2928,8 @@ primary_expression:
     { $$= $!1; }
 | STRING
     { $$=^$(string_exp($1,LOC(@1,@1))); }
+| WSTRING
+    { $$=^$(wstring_exp($1,LOC(@1,@1))); }
 | '(' expression ')'
     { $$= $!2; }
 //| '(' error ')'
@@ -2961,6 +2967,7 @@ argument_expression_list0:
 constant:
   INTEGER_CONSTANT   { $$=^$(int_exp($1[0],$1[1],LOC(@1,@1))); }
 | CHARACTER_CONSTANT { $$=^$(char_exp($1,              LOC(@1,@1))); }
+| WCHARACTER_CONSTANT{ $$=^$(wchar_exp($1,             LOC(@1,@1))); }
 | FLOATING_CONSTANT  { $$=^$(float_exp($1,             LOC(@1,@1))); }
 /* Cyc: NULL */
 | NULL_kw            { $$=^$(null_exp(LOC(@1,@1)));}
@@ -2992,9 +2999,9 @@ right_angle:
 
 void yyprint(int i, union YYSTYPE v) {
   switch (v) {
-  case {.Int_tok = $(_,i2)}: fprintf(stderr,"%d",i2);      break;
-  case {.Char_tok = c}:       fprintf(stderr,"%c",c);       break;
-  case {.String_tok = s}:          fprintf(stderr,"\"%s\"",s);  break;
+  case {.Int_tok = $(_,i2)}:  fprintf(stderr,"%d",i2);    break;
+  case {.Char_tok = c}:       fprintf(stderr,"%c",c);     break;
+  case {.String_tok = s}:     fprintf(stderr,"\"%s\"",s); break;
   case {.QualId_tok = &$(p,v2)}:
     let prefix = NULL;
     switch (p) {

@@ -43,6 +43,7 @@ static $(cnst_t,bool) eval_const_exp(exp_t); // needed due to mutual recursion
 static cnst_t promote_const(cnst_t cn) {
   switch (cn) {
   case {.Char_c = $(sn,c)}:  return Int_c(sn,(int)c);
+  /* FIX: what about wide characters Wchar_c */
   case {.Short_c = $(sn,s)}: return Int_c(sn,(int)s); 
   default:             return cn;
   }
@@ -222,12 +223,14 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
     ans = eval_const_exp(e2);
     if(ans[1])
       switch ($(compress(t),ans[0])) {
+      /* FIX: what about wide characters Wchar_c */
       case $(&IntType(sn,sz),{.Char_c = $(sn2,x)}):  fallthru(sn,sz,sn2,x);
       case $(&IntType(sn,sz),{.Short_c = $(sn2,x)}): fallthru(sn,sz,sn2,x);
       case $(&IntType(sn,sz),{.Int_c = $(sn2,x)}): 
 	if(sn != sn2)
 	  ans[0] = Int_c(sn,x); 
 	break;
+      /* FIX: what about wide characters Wchar_c */
       case $(&TagType(it),{.Char_c = $(sn2,x)}):  fallthru(it,sn2,x);
       case $(&TagType(it),{.Short_c = $(sn2,x)}): fallthru(it,sn2,x);
       case $(&TagType(it),{.Int_c = $(sn2,x)}): 

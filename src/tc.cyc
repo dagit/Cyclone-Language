@@ -89,6 +89,9 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
       case &Const_e({.String_c = s}):
       t = vd->type = array_typ(telt,tq,uint_exp(numelts(s),NULL),zt,ztl);
       break;
+      case &Const_e({.Wstring_c = s}): /* FIX: need correct size, not 1 */
+      t = vd->type = array_typ(telt,tq,uint_exp(1,NULL),zt,ztl);
+      break;
       case &Comprehension_e(_,e,_,_):
       // FIX: need to copy e here!
       t = vd->type = array_typ(telt,tq,e,zt,ztl); 
