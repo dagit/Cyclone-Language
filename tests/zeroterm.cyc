@@ -56,6 +56,8 @@ int main() {
   baz_ptr = baz;
   *(++baz_ptr) = 'a';
   should_fail(*(++baz_ptr) = 'b',Array_bounds);
+  char *{10}@nozeroterm x = 0;
+  should_fail(x[0] = 'a',Null_Exception);
   printf("zeroterm tests succeeded.\n");
   return 0;
 }

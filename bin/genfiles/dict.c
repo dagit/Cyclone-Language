@@ -1397,9 +1397,9 @@ int len=((int(*)(struct Cyc_List_List*x))Cyc_List_length)(dict_list);
 {struct Cyc_Core_Failure_exn_struct _tmp14C;const char*_tmp14B;struct Cyc_Core_Failure_exn_struct*_tmp14A;(int)_throw((void*)((_tmp14A=_cycalloc(sizeof(*_tmp14A)),((_tmp14A[0]=((_tmp14C.tag=Cyc_Core_Failure,((_tmp14C.f1=((_tmp14B="Dict::marshal: Write failure",_tag_dyneither(_tmp14B,sizeof(char),29))),_tmp14C)))),_tmp14A)))));}
 # 619
 while(dict_list != 0){
-env=((void*(*)(void*,struct Cyc___cycFILE*,struct _tuple0*))write_key)(env,fp,(struct _tuple0*)dict_list->hd);
-env=((void*(*)(void*,struct Cyc___cycFILE*,struct _tuple0*))write_val)(env,fp,(struct _tuple0*)dict_list->hd);
-dict_list=dict_list->tl;}
+env=((void*(*)(void*,struct Cyc___cycFILE*,struct _tuple0*))write_key)(env,fp,(struct _tuple0*)((struct Cyc_List_List*)_check_null(dict_list))->hd);
+env=((void*(*)(void*,struct Cyc___cycFILE*,struct _tuple0*))write_val)(env,fp,(struct _tuple0*)((struct Cyc_List_List*)_check_null(dict_list))->hd);
+dict_list=((struct Cyc_List_List*)_check_null(dict_list))->tl;}
 # 624
 return env;}
 # 627

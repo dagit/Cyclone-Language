@@ -1263,7 +1263,7 @@ static bool need_null_check(exp_t e) { // e must be pre-translation!
   case &EmptyAnnot:
     // warning is unfounded under sizeof as in memcpy
     // Tcutil::warn(e->loc,"unreachable dereference");
-    return false;
+    return true;
   default: toc_impos("need_null_check");
   }
 }
@@ -3518,6 +3518,7 @@ DynCast:
       break;
     case &PointerType(PtrInfo{ta,tq,PtrAtts(rgn,bcr,b,zt,_)}):
       let relns = get_relns(e1);
+      let need_nullchk = need_null_check(e1);
       let in_sz = in_sizeof(nv);
 #ifdef BCE_DEBUG
       fprintf(stderr,"subscript %s, array has type %s: relns:",exp2string(e),
@@ -3539,13 +3540,18 @@ DynCast:
       total_bounds_checks++;
       switch (conref_def(bounds_one,b)) {
       case &Upper_b(esz):
-        bool possibly_null = conref_def(false,bcr);
+        bool possibly_null = conref_def(false,bcr) && need_null_check;
 	type_t ta1 = typ_to_c(ta);
 	type_t ta2 = cstar_typ(ta1, tq);
-        if (in_bnds)
+        if (in_bnds && !possibly_null)
 	  bounds_checks_eliminated++;
+        else if (in_bnds && possibly_null) {
+          if (warn_all_null_deref)
+            warn(e->loc, "inserted null check due to dereference");
+          e1->r = cast_it_r(ta2,fncall_exp(_check_null_e,
+                                           list(copy_exp(e1)),DL));
         // check if zero terminated
-        else if (conref_def(false,zt)) {
+        } else if (conref_def(false,zt)) {
           // *((ta2)_zero_arr_plus(e1, esz, e2)
           if (!Evexp::c_can_eval(esz))
             terr(e->loc,"cannot determine subscript is in bounds");

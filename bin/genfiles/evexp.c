@@ -1396,7 +1396,7 @@ int _tmp173=1;_npop_handler(0);return _tmp173;};}
 # 458
 ;_pop_region(temp);}
 # 463
-_tmp15E=(ad->impl)->fields;goto _LL119;}_LL118: {struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*_tmp15D=(struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)_tmp144;if(_tmp15D->tag != 12)goto _LL11A;else{_tmp15E=_tmp15D->f2;}}_LL119:
+_tmp15E=((struct Cyc_Absyn_AggrdeclImpl*)_check_null(((struct Cyc_Absyn_Aggrdecl*)_check_null(ad))->impl))->fields;goto _LL119;}_LL118: {struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*_tmp15D=(struct Cyc_Absyn_AnonAggrType_Absyn_Type_struct*)_tmp144;if(_tmp15D->tag != 12)goto _LL11A;else{_tmp15E=_tmp15D->f2;}}_LL119:
 # 465
  for(0;_tmp15E != 0;_tmp15E=_tmp15E->tl){
 if(!Cyc_Evexp_okay_szofarg(((struct Cyc_Absyn_Aggrfield*)_tmp15E->hd)->type))

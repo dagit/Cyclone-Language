@@ -1077,9 +1077,9 @@ void*_tmp3B=_tmp3A->type;_LL34: {struct Cyc_Absyn_ArrayType_Absyn_Type_struct*_t
  return 0;_LL36:;_LL37:
  return Cyc_Absyn_deref_exp(Cyc_Absyn_var_exp(_tmp3A->name,0),0);_LL33:;};}}
 # 140
-for(0;env.all_locals != 0;env.all_locals=(env.all_locals)->tl){
-if(Cyc_strptrcmp(_tmp2,(*((struct Cyc_Absyn_Vardecl*)(env.all_locals)->hd)->name).f2)== 0){
-struct Cyc_Core_Impossible_exn_struct _tmp19A;const char*_tmp199;void*_tmp198[1];struct Cyc_String_pa_PrintArg_struct _tmp197;struct Cyc_Core_Impossible_exn_struct*_tmp196;(int)_throw((void*)((_tmp196=_cycalloc(sizeof(*_tmp196)),((_tmp196[0]=((_tmp19A.tag=Cyc_Core_Impossible,((_tmp19A.f1=(struct _dyneither_ptr)((_tmp197.tag=0,((_tmp197.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)*_tmp2),((_tmp198[0]=& _tmp197,Cyc_aprintf(((_tmp199="unbound variable %s found in box_free_vars_exp",_tag_dyneither(_tmp199,sizeof(char),47))),_tag_dyneither(_tmp198,sizeof(void*),1)))))))),_tmp19A)))),_tmp196)))));}}
+for(0;env.all_locals != 0;env.all_locals=((struct Cyc_List_List*)_check_null(env.all_locals))->tl){
+if(Cyc_strptrcmp(_tmp2,(*((struct _tuple0*)_check_null(((struct Cyc_Absyn_Vardecl*)_check_null((struct Cyc_Absyn_Vardecl*)((struct Cyc_List_List*)_check_null(env.all_locals))->hd))->name))).f2)== 0){
+struct Cyc_Core_Impossible_exn_struct _tmp19A;const char*_tmp199;void*_tmp198[1];struct Cyc_String_pa_PrintArg_struct _tmp197;struct Cyc_Core_Impossible_exn_struct*_tmp196;(int)_throw((void*)((_tmp196=_cycalloc(sizeof(*_tmp196)),((_tmp196[0]=((_tmp19A.tag=Cyc_Core_Impossible,((_tmp19A.f1=(struct _dyneither_ptr)((_tmp197.tag=0,((_tmp197.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)*((struct _dyneither_ptr*)_check_null(_tmp2))),((_tmp198[0]=& _tmp197,Cyc_aprintf(((_tmp199="unbound variable %s found in box_free_vars_exp",_tag_dyneither(_tmp199,sizeof(char),47))),_tag_dyneither(_tmp198,sizeof(void*),1)))))))),_tmp19A)))),_tmp196)))));}}
 # 147
 return 0;_LL3: {struct Cyc_Absyn_Var_e_Absyn_Raw_exp_struct*_tmp3=(struct Cyc_Absyn_Var_e_Absyn_Raw_exp_struct*)_tmp0;if(_tmp3->tag != 1)goto _LL5;}_LL4:
 # 150
