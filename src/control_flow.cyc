@@ -81,6 +81,12 @@ static bool less_than_flow(flow_info_t f1, flow_info_t f2) {
 static flow_info_t add_unassigned(flow_info_t f, vardecl vd) {
   return Set::insert(f,vd);
 }
+static flow_info_t remove_unassigned(flow_info_t f, vardecl vd) {
+  return Set::delete(f,vd);
+}
+static bool is_unassigned(flow_info_t f, vardecl vd) {
+  return Set::member(f,vd);
+}
 
 abstract struct CFStmtAnnot {
   stmt        encloser;
@@ -159,17 +165,106 @@ extern flow_info_t cf_check_stmt(flow_info_t, stmt);
 extern cfexpsyn_t  cf_check_exp (flow_info_t, exp);
 
 // Note how monotonicity (things only become defined) helps us.
-flow_info_t cf_check_explist_unordered(flow_info_t env, list<exp> es) {
+cfexpsyn_t cf_check_explist_unordered(flow_info_t env, list<exp> es) {
   cfexpsyn_t accum = CFExpSyn(env,env);
   // undefined eval order means we check each exp under env
   for(; es != null; es = es->tl)
     accum = meet_expsynth(cf_check_exp(env,es->hd),accum);
-  return expsynth_to_flow(accum);
+  return accum;
 }
 
-cfexpsyn_t cf_check_exp(flow_info_t env, exp e) {
-  // STUB
-  return CFExpSyn(empty_flow(),empty_flow());
+cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
+  switch(e0->r) {
+  case Const_e(Bool_c(true)):  return CFExpSyn(env, empty_flow());
+  case Const_e(Bool_c(false)): return CFExpSyn(empty_flow(), env);
+    // could try to evaluate expressions here, but I think it makes more
+    // sense to do such constant folding earlier and separately.
+  case Const_e(_):             return CFExpSyn(env, env);
+
+  case Var_e(&$(_,v),Local_b(vd)):
+    if(is_unassigned(env,vd))
+      terr(e0->loc, xprintf("variable %s may not be initialized", v));
+    return CFExpSyn(env,env);
+  case Var_e(_,_):     
+    return CFExpSyn(env,env);
+
+  case Primop_e(_,es): return cf_check_explist_unordered(env,es);
+
+  case AssignOp_e(&Exp(_,Var_e(_,Local_b(vd)),_),null,e2):
+    // notice we check e2 before initializing the var
+    // also notice the primop must be null
+    let flow = remove_unassigned(expsynth_to_flow(cf_check_exp(env,e2)), vd);
+    return CFExpSyn(flow,flow);
+  case AssignOp_e(e1,_,e2):
+    // Perhaps C guarantees left before right, in which case we're
+    // overly conservative here.
+    return meet_expsynth(cf_check_exp(env,e1), 
+			 cf_check_exp(env,e2));
+
+  case Conditional_e(e1,e2,e3):
+    let syn1 = cf_check_exp(env, e1);
+    let syn2 = cf_check_exp(syn1.when_true,  e2);
+    let syn3 = cf_check_exp(syn1.when_false, e3);
+    return CFExpSyn(merge_flow(syn2.when_true,  syn3.when_true),
+		    merge_flow(syn3.when_false, syn3.when_false));
+
+  case FnCall_e(e,es):
+    // Perhaps C guarantees function before arguments, in which case we're
+    // overly conservative here.
+    return meet_expsynth(cf_check_exp(env,e),
+			 cf_check_explist_unordered(env, es));
+  case Throw_e(e):
+    cf_check_exp(env, e);
+    return CFExpSyn(empty_flow(), empty_flow());
+
+  case Increment_e(e,_):    fallthru(e);
+  case NoInstantiate_e(e):  fallthru(e);
+  case Instantiate_e(e,_):  fallthru(e);
+  case Cast_e(_,e):         fallthru(e);
+    // we current assume pointers always point at initialized memory
+    // so we cannot allow &x when x is uninitialized.
+  case Address_e(e):        fallthru(e);
+  case Deref_e(e):          fallthru(e);
+  case StructMember_e(e,_): fallthru(e);
+  case StructArrow_e(e,_):  return cf_check_exp(env,e);
+
+  case Sizeof_e(_): return CFExpSyn(env,env);
+
+  case Subscript_e(e1,e2):
+    return meet_expsynth(cf_check_exp(env,e1), 
+			 cf_check_exp(env,e2));
+
+  case Tuple_e(es):          fallthru(es);
+  case Enum_e(_,_,_,es,_,_): fallthru(es); 
+  case Xenum_e(_,_,es,_,_):  return cf_check_explist_unordered(env,es);
+
+  case CompoundLit_e(_,des): fallthru(des);
+  case Array_e(des):         fallthru(des);
+  case Struct_e(_,_,des,_):
+    cfexpsyn_t accum = CFExpSyn(env,env);
+    for(; des != null; des = des->tl)
+      accum = meet_expsynth(cf_check_exp(env,des->hd[1]),accum);
+    return accum;
+
+    // I'm assuming C insists e1 before e2, but I didn't look it up.
+  case Comprehension_e(_,e1,e2): fallthru(e1,e2);
+  case SeqExp_e(e1,e2): 
+    return cf_check_exp(expsynth_to_flow(cf_check_exp(env,e1)), e2);
+    
+
+  // Technically we're being too conservative here because we could
+  // have different when_true/when_false on the last expression.
+  // Given that that's a pain to deal with, it would take rather
+  // convoluted code to matter, lots of such convoluted code could be
+  // written with SeqExp_e (and all of it if you allow declarations to
+  // be hoisted), I won't bother.
+  case StmtExp_e(s):
+    let syn = cf_check_stmt(env, s);
+     return CFExpSyn(syn,syn); 
+
+  default: throw Impossible("ControlFlow::cf_check_exp -- bad exp syntax"
+			    " or unimplemented exp form");
+  }
 }
 
 // true means the statement might fall-through
@@ -257,7 +352,7 @@ flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
     update_flow(dest, env);
     return empty_flow();
   case Fallthru_s(es,&Opt(dest)):
-    update_flow(dest, cf_check_explist_unordered(env,es));
+    update_flow(dest, expsynth_to_flow(cf_check_explist_unordered(env,es)));
     return empty_flow();
 
   case Break_s(null): // eg. break dest is function end.
