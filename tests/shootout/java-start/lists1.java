@@ -1,4 +1,4 @@
-// $Id: lists1.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: lists1.java,v 1.2 2004-09-07 20:33:26 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 
 import java.io.*;
@@ -9,6 +9,7 @@ import java.lang.reflect.*;
 public class lists1 {
     public static void main(String args[]) {
 	int n = Integer.parseInt(args[0]);
+	//@START
 
 	// create empty list B
 	LinkedList B = new LinkedList();
@@ -68,5 +69,6 @@ public class lists1 {
 
 	// print length and last element of A
 	System.out.println(A.size() + " " + ((Integer)A.getLast()).intValue());
+	//@END
     }
 }

@@ -1,4 +1,4 @@
-// $Id: strcat.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: strcat.java,v 1.2 2004-09-07 20:33:28 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 // Pelle Nilsson suggested we also illustrate StringBuffer
 // since it is the preferred method for concatenating 
@@ -9,8 +9,8 @@ import java.util.*;
 
 public class strcat {
     public static void main(String args[]) throws IOException {
-	//@START
 	int n = Integer.parseInt(args[0]);
+	//@START
 	String hello = "hello\n";
 	StringBuffer stringBuffer = new StringBuffer(32);
 

@@ -1,4 +1,4 @@
-// $Id: echo.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: echo.java,v 1.2 2004-09-07 20:33:26 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 // author: Dirus@programmer.net
 
@@ -12,8 +12,11 @@ public class echo {
 	    iIterations = Integer.parseInt(args[0]);
 	} catch(Exception e) { }
 
+	//@START
 	EchoServer esServer = new EchoServer(0);
 	new EchoClient(InetAddress.getLocalHost(), esServer.getPort(), iIterations);
+	esServer.join();
+	//@END
     }
 }
 

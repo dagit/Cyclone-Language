@@ -1,4 +1,4 @@
-// $Id: matrix.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: matrix.java,v 1.2 2004-09-07 20:33:26 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 // modified to use a little less memory by Thomas Holenstein
 
@@ -10,6 +10,7 @@ public class matrix {
 
     public static void main(String args[]) {
 	int n = Integer.parseInt(args[0]);
+	//@START
 	int m1[][] = mkmatrix(SIZE, SIZE);
 	int m2[][] = mkmatrix(SIZE, SIZE);
 	int mm[][] = new int[SIZE][SIZE];
@@ -23,6 +24,7 @@ public class matrix {
 	System.out.print(mm[3][2]);
 	System.out.print(" ");
 	System.out.println(mm[4][4]);
+	//@END
     }
 
     public static int[][] mkmatrix (int rows, int cols) {

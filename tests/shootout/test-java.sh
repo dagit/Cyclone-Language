@@ -44,7 +44,7 @@ rm -f $TMP
 cd $DIR
 while [ "$i" != "$N" ]; do
   if [ -n "$INPUTFILE" ]; then
-    $TIME java $CMD 2>> $TMP 1> /dev/null <$INPUTFILE
+    $TIME java $CMD 2>> $TMP 1> /dev/null < $INPUTFILE
   else
     $TIME java $CMD $ARG 2>> $TMP 1> /dev/null
   fi

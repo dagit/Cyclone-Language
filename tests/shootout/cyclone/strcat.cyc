@@ -4,21 +4,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-// #include <string.h>
+#include <string.h>
 #include <unistd.h>
 #include "timer.h"
 
+namespace Cfuns {
 extern "C" int strlen(const char @str);
 extern "C" char @`r strcat(char @`r dest, const char @src);
+}
 
 #define STUFF "hello\n"
-
-extern "C include" {
-  extern void *GC_realloc(void *,size_t);
-  char @`H strrealloc(char @`H buf, unsigned sz) {
-    return (char *)GC_realloc((void *)buf,sz);
-  }
-} export { strrealloc }
 
 int
 main(int argc, char ?argv[]) {
@@ -29,22 +24,22 @@ main(int argc, char ?argv[]) {
     START_TIME
     strbuf = calloc(buflen, sizeof(char));
     strend = strbuf;
-    stufflen = strlen(STUFF);
+    stufflen = Cfuns::strlen(STUFF);
 
 //     if (!strbuf) { perror("calloc strbuf"); exit(1); }
     for (i=0; i<n; i++) {
 	if ((((unsigned int)strbuf+buflen)-(unsigned int)strend) < (stufflen+1)) {
 	    buflen = 2*buflen;
-	    strbuf = strrealloc(strbuf, buflen);
+	    strbuf = realloc_str(strbuf, buflen);
 	    if (!strbuf) { perror("realloc strbuf"); exit(1); }
-// 	    strend = strbuf + strlen(strbuf);
-	    strend = strbuf;
+ 	    strend = strbuf + Cfuns::strlen(strbuf);
+// 	    strend = strbuf;
 	}
 	/* much faster to strcat to strend than to strbuf */
-	strcat(strend, STUFF);
+	Cfuns::strcat(strend, STUFF);
 	strend = strend + stufflen;
     }
-    fprintf(stdout, "%d\n", strlen(strbuf));
+    fprintf(stdout, "%d\n", Cfuns::strlen(strbuf));
     free(strbuf);
     END_TIME
     return(0);

@@ -1,4 +1,4 @@
-// $Id: wordfreq.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: wordfreq.java,v 1.2 2004-09-07 20:33:28 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 // Collection class code is from my friend Phil Chu, Thanks Phil!
 
@@ -13,7 +13,9 @@ class Counter {
 public class wordfreq {
 
     public static void main(String[] args) {
+	//@START
 	wf();
+	//@END
     }
 
     public static String padleft(String s,int n,char c) {

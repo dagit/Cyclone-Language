@@ -1,4 +1,4 @@
-// $Id: ary3.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: ary3.java,v 1.2 2004-09-07 20:33:26 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 
 // this program is modified from:
@@ -12,8 +12,8 @@ import java.util.*;
 
 public class ary3 {
     public static void main(String args[]) {
-	//@START
 	int i, j, k, n = Integer.parseInt(args[0]);
+	//@START
 	int x[] = new int[n];
 	int y[] = new int[n];
 

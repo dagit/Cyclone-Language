@@ -13,7 +13,7 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <netinet/in.h>
-
+#include "timer.h"
 
 typedef int (*SOCKACTION_P)(int,struct sockaddr *,socklen_t);
 #define DATA "Hello there sailor\n"
@@ -97,10 +97,11 @@ echo_client (int n, int port) {
     close(sock);
 }
 
+pid_t pid;
+
 void
 echo_server (int n) {
     int ssock, csock, len, nwritten, total_bytes;
-    pid_t pid;
     char buf[64], *offset;
     struct sockaddr_in sin;
     socklen_t slen = sizeof(sin);
@@ -139,6 +140,11 @@ echo_server (int n) {
 
 int
 main(int argc, char *argv[]) {
-    echo_server((argc == 2) ? atoi(argv[1]) : 1);
+    int arg = (argc == 2) ? atoi(argv[1]) : 1;
+    START_TIME
+    echo_server(arg);
+    if (pid) {
+      END_TIME
+    }
     return(0);
 }

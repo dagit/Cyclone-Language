@@ -1,5 +1,5 @@
 /* -*- mode: c -*-
- * $Id: moments.gcc,v 1.1 2004-09-06 19:33:43 mwh Exp $
+ * $Id: moments.gcc,v 1.2 2004-09-07 20:33:20 mwh Exp $
  * http://www.bagley.org/~doug/shootout/
  * from Waldek Hebisch
  */
@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "timer.h"
 
 #define MAXLINELEN 128
 
@@ -76,7 +77,11 @@ main() {
     double deviation = 0.0;
     int array_size = 4096;
 
-    double *nums = (double *)malloc(array_size * sizeof(double));
+    double *nums;
+
+    START_TIME
+
+    nums = (double *)malloc(array_size * sizeof(double));
 
     while (fgets(line, MAXLINELEN, stdin)) {
 	sum += (nums[n++] = atof(line));
@@ -115,6 +120,8 @@ main() {
     printf("variance:           %f\n", variance);
     printf("skew:               %f\n", skew);
     printf("kurtosis:           %f\n", kurtosis);
+
+    END_TIME
 
     return(0);
 }

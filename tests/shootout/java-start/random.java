@@ -1,4 +1,4 @@
-// $Id: random.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: random.java,v 1.2 2004-09-07 20:33:26 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 
 import java.text.*;
@@ -10,8 +10,8 @@ public class random {
     public static final long IC = 29573;
 
     public static void main(String args[]) {
-	//@START
 	int N = Integer.parseInt(args[0]) - 1;
+	//@START
 	NumberFormat nf = NumberFormat.getInstance();
 	nf.setMaximumFractionDigits(9);
 	nf.setMinimumFractionDigits(9);

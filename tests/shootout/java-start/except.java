@@ -1,4 +1,4 @@
-// $Id: except.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: except.java,v 1.2 2004-09-07 20:33:26 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 // Collection class code is from my friend Phil Chu, Thanks Phil!
 
@@ -31,9 +31,8 @@ public class except {
     static int Hi = 0;
 
     public static void main(String args[]) throws IOException {
-	//@START
 	int n = Integer.parseInt(args[0]);
-
+	//@START
 	for (int i=0; i<n; i++) {
 	    some_function(i);
 	}

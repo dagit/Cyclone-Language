@@ -18,6 +18,7 @@
     __start.tv_sec --;							\
   }									\
   fprintf(stderr, "%d.%06d\n",__start.tv_sec, __start.tv_usec);	\
+  fflush(stderr); \
 }
 #else
 #define START_TIME

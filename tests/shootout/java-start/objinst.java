@@ -1,4 +1,4 @@
-// $Id: objinst.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: objinst.java,v 1.2 2004-09-07 20:33:26 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 // Collection class code is from my friend Phil Chu, Thanks Phil!
 
@@ -42,6 +42,7 @@ class NthToggle extends Toggle {
 public class objinst {
     public static void main(String args[]) throws IOException {
 	int n = Integer.parseInt(args[0]);
+	//@START
 	Toggle toggle1 = new Toggle(true);
 	for (int i=0; i<5; i++) {
 	    System.out.println((toggle1.activate().value()) ? "true" : "false");
@@ -59,5 +60,6 @@ public class objinst {
 	for (int i=0; i<n; i++) {
 	    NthToggle toggle = new NthToggle(true, 3);
 	}
+	//@END
     }
 }

@@ -1,10 +1,10 @@
-// $Id: fibo.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: fibo.java,v 1.2 2004-09-07 20:33:26 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 
 public class fibo {
     public static void main(String args[]) {
-	//@START
 	int N = Integer.parseInt(args[0]);
+	//@START
 	System.out.println(fib(N));
 	//@END
     }

@@ -1,4 +1,4 @@
-// $Id: nestedloop.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: nestedloop.java,v 1.2 2004-09-07 20:33:26 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 
 import java.io.*;
@@ -6,8 +6,8 @@ import java.util.*;
 
 public class nestedloop {
     public static void main(String args[]) throws IOException {
-	//@START
 	int n = Integer.parseInt(args[0]);
+	//@START
 	int x = 0;
 	for (int a=0; a<n; a++)
 	    for (int b=0; b<n; b++)

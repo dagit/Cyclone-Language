@@ -1,16 +1,19 @@
 /* -*- mode: c -*-
- * $Id: ary2.gcc,v 1.1 2004-09-06 19:33:43 mwh Exp $
+ * $Id: ary2.gcc,v 1.2 2004-09-07 20:33:20 mwh Exp $
  * http://www.bagley.org/~doug/shootout/
  */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "timer.h"
 
 int
 main(int argc, char *argv[]) {
     int n = ((argc == 2) ? atoi(argv[1]) : 1);
     int i, *x, *y;
-	
+
+    START_TIME
+    
     x = (int *) malloc(n * sizeof(int));
     y = (int *) malloc(n * sizeof(int));
 
@@ -45,6 +48,8 @@ main(int argc, char *argv[]) {
 
     free(x);
     free(y);
+
+    END_TIME
 
     return(0);
 }

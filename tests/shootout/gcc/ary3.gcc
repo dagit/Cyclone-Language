@@ -23,7 +23,7 @@ main(int argc, char *argv[]) {
     x = (int *) calloc(n, sizeof(int));
     y = (int *) calloc(n, sizeof(int));
 
-    for (i = 0; i < n; i++) {
+    for (i=0; i < n; i++) {
 	x[i] = i + 1;
     }
     for (k=0; k<1000; k++) {

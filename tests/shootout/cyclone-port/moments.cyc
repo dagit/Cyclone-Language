@@ -1,5 +1,5 @@
 /* -*- mode: c -*-
- * $Id: moments.cyc,v 1.1 2004-09-06 19:33:26 mwh Exp $
+ * $Id: moments.cyc,v 1.2 2004-09-07 20:33:18 mwh Exp $
  * http://www.bagley.org/~doug/shootout/
  * from Waldek Hebisch
  */
@@ -7,6 +7,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "timer.h"
+
+double ? doublerealloc(double ?buf, unsigned sz) {
+  double ? res = new { for i < sz : double };
+  unsigned i = numelts(buf);
+  for (unsigned j = 0; j < i; j++)
+    res[j] = buf[j];
+  return res;
+}
 
 #define MAXLINELEN 128
 
@@ -16,7 +25,7 @@
 	See. N. Wirth, Algorithms+data structures = Programs
 */
 
-void kmedian(double ? a, tag_t n, int k) 
+void kmedian(double ? a, int n, int k) 
 {
 	while (1){
 		int j=random()%n; 
@@ -48,7 +57,7 @@ void kmedian(double ? a, tag_t n, int k)
 	}
 }
 
-double max(double *a, int n)
+double max(double ?a, int n)
 {
 	int j;
 	double temp=a[0];
@@ -63,7 +72,7 @@ double max(double *a, int n)
 
 int
 main() {
-    char line[MAXLINELEN];
+    char line[MAXLINELEN+1] @zeroterm;
     int i, n = 0, mid = 0;
     double sum = 0.0;
     double mean = 0.0;
@@ -76,13 +85,15 @@ main() {
     double deviation = 0.0;
     int array_size = 4096;
 
+    START_TIME
+
     double ?nums = malloc(array_size * sizeof(double));
 
     while (fgets(line, MAXLINELEN, stdin)) {
 	sum += (nums[n++] = atof(line));
 	if (n == array_size) {
 	    array_size *= 2;
-	    nums = realloc(nums, array_size * sizeof(double));
+	    nums = doublerealloc(nums, array_size);
 	}
     }
     mean = sum/n;
@@ -99,7 +110,7 @@ main() {
     average_deviation /= n;
     variance /= (n - 1);
     standard_deviation = sqrt(variance);
-    if (variance) {
+    if ((int)variance) {
 	skew /= (n * variance * standard_deviation);
 	kurtosis = (kurtosis/(n * variance * variance)) - 3.0;
     }
@@ -116,5 +127,6 @@ main() {
     printf("skew:               %f\n", skew);
     printf("kurtosis:           %f\n", kurtosis);
 
+    END_TIME
     return(0);
 }

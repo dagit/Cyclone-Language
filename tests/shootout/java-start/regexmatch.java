@@ -1,4 +1,4 @@
-// $Id: regexmatch.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: regexmatch.java,v 1.2 2004-09-07 20:33:26 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 
 import java.io.*;
@@ -13,6 +13,7 @@ public class regexmatch {
 	throws IOException, MalformedPatternException {
 
 	int n = Integer.parseInt(args[0]);
+	//@START
 	LinkedList lines = new LinkedList();
 	try {
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -74,5 +75,6 @@ public class regexmatch {
 		}
 	    }
 	}
+	//@END
     }
 }

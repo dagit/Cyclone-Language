@@ -1,4 +1,4 @@
-// $Id: hash2.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: hash2.java,v 1.2 2004-09-07 20:33:26 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 
 import java.util.*;
@@ -10,8 +10,8 @@ class Val {
 
 public class hash2 {
     public static void main(String args[]) {
-	//@START
 	int n = Integer.parseInt(args[0]);
+	//@START
 	HashMap hash1 = new HashMap(10000);
 	HashMap hash2 = new HashMap(n);
 

@@ -1,4 +1,4 @@
-// $Id: spellcheck.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: spellcheck.java,v 1.2 2004-09-07 20:33:26 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 
 import java.io.*;
@@ -6,7 +6,7 @@ import java.util.*;
 
 public class spellcheck {
     public static void main(String args[]) throws IOException {
-	int n = Integer.parseInt(args[0]);
+	//@START
 	HashMap dict = new HashMap();
 	String word;
 
@@ -32,5 +32,6 @@ public class spellcheck {
             System.err.println(e);
             return;
         }
+	//@END
     }
 }

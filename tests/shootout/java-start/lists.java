@@ -1,4 +1,4 @@
-// $Id: lists.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: lists.java,v 1.2 2004-09-07 20:33:26 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 
 import java.io.*;
@@ -9,8 +9,8 @@ public class lists {
     static int SIZE = 10000;
 
     public static void main(String args[]) {
-	//@START
 	int n = Integer.parseInt(args[0]);
+	//@START
 	int result = 0;
 	for (int i = 0; i < n; i++) {
 	    result = test_lists();

@@ -18,8 +18,9 @@
 
 int
 main(int argc, char ??argv) {
-    int n = ((argc == 2) ? atoi(argv[1]) : 1);
-    int i, k, ?x, ?y;
+    let n<`n> = ((argc == 2) ? atoi(argv[1]) : 1);
+    int k, @{valueof(`n)} @region(`U) x, @{valueof(`n)} @region(`U) y;
+    unsigned int i;
 
     START_TIME
     x = calloc(n,sizeof(int));
@@ -27,16 +28,20 @@ main(int argc, char ??argv) {
 
     for (i=0; i < n; i++) {
         x[i] = i + 1;
-    }
-      
+    }      
     for (k=0; k<1000; k++) {
-        for (i = 0; i < n; i++) {
-            y[i] += x[i];
+	for (i = n-1; i < n; i--) {
+	    y[i] += x[i];
 	}
     }
 
-    fprintf(stdout, "%d %d\n", y[0], y[n-1]);
+// FIX: the commented-out lines below
+    if (n > 0)
+//       fprintf(stdout, "%d %d\n", y[0], y[n-1]);
+      fprintf(stdout, "%d %d\n", y[0], y[0]);
 
+//     Core::ufree(x);
+//     Core::ufree(y);
     END_TIME
     return(0);
 }

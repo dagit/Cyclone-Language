@@ -10,6 +10,7 @@
  * I added free() to deallocate memory.
  */
 
+#include <core.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,15 +19,15 @@
 int
 main(int argc, char ??argv) {
     int n = ((argc == 2) ? atoi(argv[1]) : 1);
-    int i, k, ?`U x, ?`U y;
+    int i, k, ?x, ?y;
 
     START_TIME
-    x = (int ?`U) calloc(n, sizeof(int));
-    y = (int ?`U) calloc(n, sizeof(int));
+    x = calloc(n,sizeof(int));
+    y = calloc(n,sizeof(int));
 
-    for (i = 0; i < n; i++) {
-	x[i] = i + 1;
-    }
+    for (i=0; i < n; i++) {
+        x[i] = i + 1;
+    }      
     for (k=0; k<1000; k++) {
 	for (i = n-1; i >= 0; i--) {
 	    y[i] += x[i];
@@ -35,8 +36,8 @@ main(int argc, char ??argv) {
 
     fprintf(stdout, "%d %d\n", y[0], y[n-1]);
 
-    Core::ufree(x);
-    Core::ufree(y);
+    free(x);
+    free(y);
     END_TIME
     return(0);
 }

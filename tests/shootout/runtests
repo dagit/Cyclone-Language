@@ -10,7 +10,7 @@ TEST=./test.sh
 TESTJAVA=./test-java.sh
 
 if [ -z "$LANGS" ]; then
-  LANGS="cyclone cyclone-port gcc"
+  LANGS="gcc cyclone cyclone-port java"
 fi
 if [ -z "$BENCHMARKS" ]; then
   BENCHMARKS="ackermann ary3 except fibo hash hash2 heapsort lists nestedloop random reversefile sieve spellcheck strcat sumcol wc"
@@ -40,6 +40,7 @@ function getargs {
     hello) echo 200;;
     lists) echo 16;;
     matrix) echo 300;;
+    moments) echo 150;;
     nestedloop) echo 16;;
     random) echo 900000;;
     regexpmatch) echo 9000;;
@@ -92,6 +93,9 @@ do
       $TESTJAVA $N ${lang} ${file} $ARGS $INPUTFILE
     else
       $TEST $N ${lang}/${file} $ARGS $INPUTFILE
+    fi
+    if [ -f "nocheck-${lang}/${file}" ]; then
+      $TEST $N nocheck-${lang}/${file} $ARGS $INPUTFILE
     fi
 #    $TEST $N ./nocheck-${file} $ARGS $INPUTFILE
 #    $TEST $N ./nobounds-${file} $ARGS $INPUTFILE

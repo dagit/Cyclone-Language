@@ -1,10 +1,10 @@
-// $Id: ackermann.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: ackermann.java,v 1.2 2004-09-07 20:33:25 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 
 public class ackermann {
     public static void main(String[] args) {
-	//@START
 	int num = Integer.parseInt(args[0]);
+	//@START
 	System.out.println("Ack(3," + num + "): " + Ack(3, num));
 	//@END
     }

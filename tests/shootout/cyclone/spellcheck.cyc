@@ -1,5 +1,7 @@
-/*
+/* -*- mode: c -*-
+ * $Id: spellcheck.cyc,v 1.2 2004-09-07 20:33:17 mwh Exp $
  * http://www.bagley.org/~doug/shootout/
+ * with help from Brad Knotwell
  */
 
 #include <ctype.h>
@@ -19,61 +21,62 @@ char ?strrealloc(char ?buf, unsigned sz) {
   return res;
 }
 
-int main(int argc, char ?argv[]) {
-    int i, wordbufsize = 80;
-    char line[MAXLINELEN+1]@zeroterm = {for i < MAXLINELEN : 0};
-    char c, ?cp, ?wordbuf;
-    struct ht_ht @dict;
-    FILE *fh;
-    START_TIME
-    wordbuf = calloc(wordbufsize + 1,sizeof(char));
-    dict = ht_create(40000);
-    if ((fh = fopen("words.txt", "r")) == NULL) {
-	perror("fopen");
-	exit(1);
-    }
-    i = 0;
-    while (fgets(line, MAXLINELEN, fh)) {
+struct ht_ht *dict = NULL;
+
+int handleInput(FILE *input,void (*hashManipFn)(char ?))
+{
+    int wordbufsize = 80,i = 0;
+    char ? cp, ? wordbuf;
+    char line[MAXLINELEN+1] @zeroterm;
+    
+    if((wordbuf = malloc(wordbufsize+1)) == NULL) 
+        return(fprintf(stderr,"malloc\n"),0);
+
+    while (fgets(line, MAXLINELEN, input))
 	for (cp=line; *cp > 0; cp++) {
 	    if (isspace(*cp)) {
-		if (i > 0) {
+		if (i) {
 		    wordbuf[i] = '\0';
-		    ht_find_new(dict, wordbuf)->val = 1;
+                    hashManipFn(wordbuf);
 		    i = 0;
 		}
 	    } else {
 		wordbuf[i++] = *cp;
 		if (i == wordbufsize) {
 		    wordbufsize *= 2;
-		    wordbuf = strrealloc(wordbuf, wordbufsize + 1);
+		    if((wordbuf = strrealloc(wordbuf, wordbufsize + 1)) == NULL)
+                        return(fprintf(stderr, "realloc\n"), 0);
 		}
 	    }
         }
-    }
-    fclose(fh);
 
-    i = 0;
-    while (fgets(line, MAXLINELEN, stdin)) {
-	for (cp=line; *cp > 0; cp++) {
-	    if (isspace(*cp)) {
-		if (i > 0) {
-		    wordbuf[i] = '\0';
-		    if (ht_find(dict, wordbuf) == NULL) {
-			printf("%s\n", wordbuf);
-		    }
-		    i = 0;
-		}
-	    } else {
-		wordbuf[i++] = *cp;
-		if (i == wordbufsize) {
-		    wordbufsize *= 2;
-		    wordbuf = strrealloc(wordbuf, wordbufsize + 1);
-		}
-	    } 
-        }
-    }
     free(wordbuf);
+    return(1);
+}
+
+void spellCheck(char ?key) { 
+    if (ht_find_new(dict,key)->val != 1) printf("%s\n",key);
+}
+
+void hashLoad(char ?key) { ht_find_new(dict,key)->val = 1; }
+ 
+int main(int argc, char ??argv) {
+    FILE *fh;
+    int rc;
+    START_TIME
+    /*  
+        ht_create doesn't handle malloc and calloc failures 
+        so this is superfluous 
+    */
+    if((dict = ht_create(40000)) == NULL)
+        return(fprintf(stderr,"hash creation failed\n"),EXIT_FAILURE);
+    
+    if ((fh = fopen("Usr.Dict.Words", "r")) == NULL) 
+        return(fprintf(stderr,"couldn't open dictionary\n"),EXIT_FAILURE);
+
+    rc = ((handleInput(fh,hashLoad) && handleInput(stdin,spellCheck)) ? EXIT_SUCCESS : EXIT_FAILURE);
+
     ht_destroy(dict);
     END_TIME
-    return(0);
+    return(rc);
 }

@@ -1,4 +1,4 @@
-// $Id: moments.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: moments.java,v 1.2 2004-09-07 20:33:26 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 
 import java.io.*;
@@ -8,6 +8,7 @@ import java.lang.Math;
 
 public class moments {
     public static void main(String[] args) {
+	//@START
 	String line;
 	Vector nums = new Vector();
 	double num, sum = 0.0;
@@ -72,5 +73,7 @@ public class moments {
 	System.out.println("variance:           " + nf.format(variance));
 	System.out.println("skew:               " + nf.format(skew));
 	System.out.println("kurtosis:           " + nf.format(kurtosis));
+
+	//@END
     }
 }
