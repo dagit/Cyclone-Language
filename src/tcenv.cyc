@@ -184,33 +184,40 @@ static list<var> outer_namespace(list<var> ns) {
   return List::rev(List::rev(ns)->tl);
 }
 
-// FIX: never actually returns null
-static $(list<var>,`a) * scoped_lookup<`a>(tenv te, segment loc, 
-					   `a lookup(genv_t,var), var v) {
+// FIX: We should eagerly detect repeats by having one big dict
+// that we recompute on namespace and using boundaries
+static void check_repeat<`a>(tenv_t te, seg_t loc, `a lookup(genv_t,var),
+			     var v, list<list<var>> nss) {
+  for(; nss != null; nss = nss->tl) {
+    genv_t ge2 = Dict::lookup(te->ae,nss->hd);
+    try {
+      lookup(ge2,v);
+      Tcutil::terr(loc,xprintf("%s is ambiguous-",*v));
+    } catch { case Dict::Absent: break; }
+  }
+  return;
+}
+
+static `a scoped_lookup<`a>(tenv_t te, seg_t loc, `a lookup(genv_t,var), var v){
   list<var> cns = te->ns; // current namespace
-  int num_results = 0;
-  $(list<var>,`a) * result = null; // def assignment too dumb
+  `a result; // def assignment too dumb
   while (true) {
     genv_t ge = Dict::lookup(te->ae,cns);
-    // Check available namespaces
-    for (let nss = ge->availables; nss != null; nss = nss->tl) {
-      genv_t ge2 = Dict::lookup(te->ae,nss->hd);
-      try {
-	result = &$(nss->hd,lookup(ge2,v));
-	++num_results;
-      } catch { case Dict::Absent: break; /* ignore */}
-    }
     // Check current namespace
     try {
-      result = &$(cns,lookup(ge,v));
-      ++num_results;
-    } catch { case Dict::Absent: break; /* ignore */ }
-
-    if(num_results > 1) 
-      Tcutil::terr(loc,xprintf("%s is ambiguous-",*v));
-    if(num_results > 0)
-      return result;
-
+      result = lookup(ge,v);
+      check_repeat(te, loc, lookup, v, ge->availables);
+      return lookup(ge,v);
+    } catch { case Dict::Absent: break; }
+    // Check available namespaces
+    for (_ nss = ge->availables; nss != null; nss = nss->tl) {
+      genv_t ge2 = Dict::lookup(te->ae,nss->hd);
+      try {
+	result = lookup(ge2,v);
+	check_repeat(te, loc, lookup, v, nss->tl);
+	return result;
+      } catch { case Dict::Absent: break; }
+    }
     if (cns == null) 
       throw Dict::Absent();
     // v is not defined in current namespace, look in next outer
@@ -227,7 +234,7 @@ static resolved_t lookup_ordinary_global(tenv te,segment loc,qvar q) {
   let &$(nsl,v) = q;
   try {
     if (nsl == null)
-      return (*scoped_lookup(te, loc, lookup_ordinary_global_f, v))[1];
+      return scoped_lookup(te, loc, lookup_ordinary_global_f, v);
     return lookup_ordinary_global_f(lookup_namespace(te,loc,nsl),v);
   } catch { case Dict::Absent: 
     return VarRes(Unresolved_b); }
@@ -271,7 +278,7 @@ static structdecl @ lookup_structdecl_f(genv_t ge,var v) {
 structdecl @ lookup_structdecl(tenv te,segment loc,qvar q) {
   let &$(nsl,v) = q;
   if (nsl == null)
-    return (*scoped_lookup(te, loc, lookup_structdecl_f, v))[1];
+    return scoped_lookup(te, loc, lookup_structdecl_f, v);
   genv_t ge = lookup_namespace(te,loc,nsl);
   return Dict::lookup(ge->structdecls,v);
 }
@@ -285,7 +292,7 @@ static enumdecl @ lookup_enumdecl_f(genv_t ge,var v) {
 enumdecl @ lookup_enumdecl(tenv te,segment loc,qvar q) {
   let &$(nsl,v) = q;
   if (nsl == null)
-    return (*scoped_lookup(te, loc, lookup_enumdecl_f, v))[1];
+    return scoped_lookup(te, loc, lookup_enumdecl_f, v);
   genv_t ge = lookup_namespace(te,loc,nsl);
   return Dict::lookup(ge->enumdecls,v);
 }
@@ -302,7 +309,7 @@ Opt_t<xenumdecl@> lookup_xenumdecl(tenv te,segment loc,qvar q) {
   let &$(nsl,v) = q;
   if (nsl == null)
     // unqualified name, okay to fail -- that just means we have a new xenum
-    try return &Opt((*scoped_lookup(te, loc, lookup_xenumdecl_f, v))[1]);
+    try return &Opt(scoped_lookup(te, loc, lookup_xenumdecl_f, v));
     catch { case Dict::Absent: return null; }
   // qualified name, it's an error if the namespace is bad or the
   // xenum doesn't already exist.  In either case, we'll raise
@@ -328,7 +335,7 @@ static typedefdecl lookup_typedefdecl_f(genv_t ge,var v) {
 typedefdecl lookup_typedefdecl(tenv te, segment loc, qvar q) {
   let &$(nsl,v) = q;
   if (nsl == null) 
-    return (*scoped_lookup(te, loc, lookup_typedefdecl_f, v))[1];
+    return scoped_lookup(te, loc, lookup_typedefdecl_f, v);
   genv_t ge = lookup_namespace(te,loc,nsl);
   return Dict::lookup(ge->typedefs,v);
 }
