@@ -833,7 +833,7 @@ void r_foo(string_t s) {
 void a_foo(string_t s) {
   printf("Anon %s\n",s);
 }
-typedef $(string_t,spec_t,string_t) @arg_t;
+typedef $(string_t,bool,string_t,spec_t,string_t) @arg_t;
 void arg_test(string_t ? args) {
   // NOTE, TO TEST IT GIVE IT SOME ARGS!
   test_begin("Arg");
@@ -841,13 +841,13 @@ void arg_test(string_t ? args) {
   if (args.size<=0) fail();
   else if (args.size==1) ok();
   else {
-    arg_t u = new $("-u",(spec_t)(new Unit_spec(u_foo)),"unit");
+    arg_t u = new $("-u",false,"",(spec_t)(new Unit_spec(u_foo)),"unit");
     let s_foo = new false;
-    arg_t s = new $("-s",(spec_t)(new Set_spec(s_foo)),"set");
+    arg_t s = new $("-s",false,"",(spec_t)(new Set_spec(s_foo)),"set");
     let c_foo = new true;
-    arg_t c = new $("-c",(spec_t)(new Clear_spec(c_foo)),"clear");
-    arg_t i = new $("-i",(spec_t)(new Int_spec(i_foo)),"int");
-    arg_t r = new $("-r",(spec_t)(new Rest_spec(r_foo)),"rest");
+    arg_t c = new $("-c",false,"",(spec_t)(new Clear_spec(c_foo)),"clear");
+    arg_t i = new $("-i",false,"",(spec_t)(new Int_spec(i_foo)),"int");
+    arg_t r = new $("-r",false,"",(spec_t)(new Rest_spec(r_foo)),"rest");
     parse(new List(u,new List(s,new List(c,new List(i,new List(r,null))))),
           a_foo,
           "Usage:",

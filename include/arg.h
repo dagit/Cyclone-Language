@@ -55,12 +55,17 @@ extern tunion Spec<`e::E> {
 typedef tunion Spec<`e> gspec_t<`e>;
 typedef tunion Spec<{}> spec_t;
 
-extern void usage (List::glist_t<$(string_t,gspec_t<`e>,string_t)@`r1,`r2>,string_t);
+typedef List::glist_t<$(string_t,bool,string_t,gspec_t<`e>,string_t)@`r1,`r2>
+speclist_t<`r1,`r2,`e>;
+
+extern void usage
+(speclist_t<`r1,`r2,`e>,string_t);
 
 extern int current;
 
-extern void parse(List::glist_t<$(string_t,gspec_t<`e>,string_t)@`r1,`r2> specs, 
-		  void anonfun(string_t), string_t errmsg, string_t ? args);
+extern void parse
+(speclist_t<`r1,`r2,`e> specs, 
+ void anonfun(string_t), string_t errmsg, string_t ? args);
 
 }
 

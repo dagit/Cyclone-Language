@@ -178,7 +178,7 @@ example, here is a program that echoes its command line arguments:
 
 Except for the declaration of \texttt{argv}, which holds the
 command-line arguments, the program looks just like you would write it
-in \texttt{C}: pointer arithmetic (\texttt{argv++}) is used to move
+in C: pointer arithmetic (\texttt{argv++}) is used to move
 \texttt{argv} to point to each argument in turn, so it can be printed.
 
 In C, \texttt{argv} would typically be declared with type \texttt{char
@@ -494,7 +494,7 @@ matching:
       printf("Error: can't open /etc/passwd\n");
       exit(1);
     case InvalidArg(s):
-      printf("Error: InvalidArg(\%s)\n",s);
+      printf("Error: InvalidArg(%s)\n",s);
       exit(1);
     }
 \end{verbatim}
@@ -521,6 +521,16 @@ So, exceptions are an \emph{extensible} \texttt{tunion}, or
 The type \texttt{xtunion exn} is the type of exceptions, and this
 declaration introduces a new case for the \texttt{xtunion exn} type:
 \texttt{My_Exception}, which carries a single value (a string).
+Exception values are created just like \texttt{tunion} values---using
+\texttt{new} for value-carrying tags only---and are thrown with a
+\texttt{throw} statement.  For example,
+\begin{verbatim}
+    throw new My_Exception("some kind of error");
+\end{verbatim}
+or
+\begin{verbatim}
+    throw Null_Exception;
+\end{verbatim}
 
 \subsection{Tuples}
 

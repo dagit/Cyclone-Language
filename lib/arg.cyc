@@ -33,24 +33,31 @@
 #include <stdio.h>
 #include <string.h>
 #include <arg.h>
+#include <buffer.h>
+#include <ctype.h>
 namespace Arg;
 using Core;
 using Stdio;
 using List;
+using String;
+using Ctype;
 
 xtunion exn {Error, Bad(string_t)};
 
+tunion Flag {Prefix(string_t), Exact(string_t)};
+
 tunion Spec<`e::E> {
-  Unit_spec(void (@f)(;`e)),        // Call f with unit argument
-  Flag_spec(void (@f)(string_t;`e)),  // Call f with flag argument
+  Unit_spec(void (@f)(;`e)),         // Call f with unit argument
+  Flag_spec(void (@f)(string_t;`e)), // Call f with flag argument
   FlagString_spec(void (@f)(string_t,string_t;`e)),
-                                    // Call f with flag & string arguments
-  Set_spec(bool@),                  // Set the reference to true
-  Clear_spec(bool@),                // Set the reference to false
-  String_spec(void (@f)(string_t;`e)),// Call f with a string argument
-  Int_spec(void (@f)(int;`e)),      // Call f with an int argument
-  Rest_spec(void (@f)(string_t;`e))   // Stop interpreting keywords and call the
-                                    // function with each remaining argument
+                                     // Call f with flag & string arguments
+  Set_spec(bool@),                   // Set the reference to true
+  Clear_spec(bool@),                 // Set the reference to false
+  String_spec(void (@f)(string_t;`e)),
+                                     // Call f with a string argument
+  Int_spec(void (@f)(int;`e)),       // Call f with an int argument
+  Rest_spec(void (@f)(string_t;`e))  // Stop interpreting keywords and call the
+                                     // function with each remaining argument
 };
 
 static tunion error {
@@ -61,36 +68,113 @@ static tunion error {
   Wrong(string_t,string_t,string_t)  
 };
 
-static gspec_t<`e> lookup (glist_t<$(string_t,gspec_t<`e>,string_t)@`r1,`r2> l, 
-                           string_t x) {
+static gspec_t<`e> lookup(speclist_t<`r1,`r2,`e> l, string_t x) {
   while (l != null) {
     let flag = (*l->hd)[0];
     let len = String::strlen(flag);
-    if (len > 0 && flag[len-1] == '*') {
-      if (String::strncmp(x,(*l->hd)[0],len-1) == 0)
-        return (*l->hd)[1];
+    if (len > 0 && (*l->hd)[1]) {
+      if (String::strncmp(x,(*l->hd)[0],len) == 0)
+        return (*l->hd)[3];
     }
     else if (String::strcmp(x,(*l->hd)[0]) == 0)
-      return (*l->hd)[1];
+      return (*l->hd)[3];
     l = l->tl;
   }
   throw Not_found;
 }
 
-void usage(glist_t<$(string_t,gspec_t<`e>,string_t)@`r1,`r2> speclist, 
+namespace Justify {
+/* break a line at the first space before posn howmuch,
+   or the first space after if there's none before,
+   or the end of the string if there are no spaces.
+   Write the portion before the break into a buffer
+   and return the remainder. */
+static string_t break_line(Buffer::T b, int howmuch, string_t s) {
+  if (s == null) return null;
+  if (howmuch<0) howmuch = 0;
+  let len = strlen(s);
+  if (howmuch>len) {
+    Buffer::add_string(b,s);
+    return null;
+  }
+
+  /* Look for the first space before posn howmuch */
+  int i;
+  for (i = howmuch - 1; i>=0 && !isspace(s[i]); i--)
+    /* skip */ ;
+
+  /* If no space before howmuch, look for one after */
+  if (i<0) {
+    for (i = (howmuch?howmuch-1:0); i<len && s[i] && !isspace(s[i]); i++)
+      /* skip */ ;
+  }
+
+  /* Write the portion before */
+  Buffer::add_substring(b,s,0,i);
+
+  /* Return the portion after */
+  string_t whatsleft = null;
+  /* advance to non-whitespace */
+  for (; i<len && s[i] && isspace(s[i]); i++)
+    /* skip */ ;
+  if (i<len && s[i]) whatsleft = s+i;
+  return whatsleft;
+}
+
+/* justify(b,item,indent,margin,desc):
+   Format item and desc as a paragraph, with item as a hanging
+   outdent, and desc as the body of the paragraph.  The paragraph
+   indent is a parameter, as is the right margin.  The results end
+   up in buffer b. */
+void
+justify_b(Buffer::T b, int indent, int margin, string_t item, string_t desc) {
+  if (item != null) Buffer::add_string(b,item);
+  if (desc == null) return;
+  if (indent < 0) indent = 0;
+  if (margin < 0) margin = 0;
+
+  string_t indentstr = new {for i<indent+1: (i==0)?'\n':' '};
+  let itemlen = strlen(item);
+  let itemsep;
+  if (strlen(desc)>0) {
+    if (itemlen+1>indent)
+      itemsep = indentstr;
+    else
+      itemsep = new {for i<indent-itemlen: ' '};
+  }
+  else return;
+
+  Buffer::add_string(b,itemsep);
+
+  while (desc != null) {
+    desc = break_line(b,margin-indent,desc);
+    if (desc != null)
+      Buffer::add_string(b,indentstr);
+    else
+      Buffer::add_string(b,"\n");
+  }
+  return;
+}
+}
+
+void usage(speclist_t<`r1,`r2,`e> speclist,
            string_t errmsg) {
   fprintf(stderr, "%s\n", errmsg);
+  let b = Buffer::create(1024);
   while (speclist != null) {
-    fprintf(stderr, " %s %s\n", (*speclist->hd)[0], (*speclist->hd)[2]);
+    Justify::justify_b(b,12,72,
+                       strconcat((*speclist->hd)[0],(*speclist->hd)[2]),
+                       (*speclist->hd)[4]);
     speclist = speclist->tl;
-  }
+  }    
+  fprintf(stderr, "%s", Buffer::contents(b));
 }
 
 int current = 0;
 static string_t ?args = null;
 
 static void stop(int prog_pos, tunion error e,
-		 glist_t<$(string_t,gspec_t<`e>,string_t)@`r1,`r2> speclist, 
+		 speclist_t<`r1,`r2,`e> speclist,
                  string_t errmsg) {
   string_t progname = prog_pos < args.size ? args[prog_pos] : "(?)";
   switch (e) {
@@ -113,7 +197,7 @@ static void stop(int prog_pos, tunion error e,
   current = args.size; // skip everything else
 }
 
-void parse(glist_t<$(string_t,gspec_t<`e>,string_t)@`r1,`r2> speclist, 
+void parse(speclist_t<`r1,`r2,`e> speclist,
            void anonfun(string_t),
 	   string_t errmsg,
 	   string_t ? orig_args) {
