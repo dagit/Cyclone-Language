@@ -60,6 +60,26 @@ function get_cc {
   fi
 }
 
+# sets up default Cyclone compile flags
+#
+function get_cycflags {
+  CYC_FLAGS=
+  if [ "$TYPE" = "apple" ]; then
+    CYC_FLAGS=-no-cpp-precomp
+  fi
+  echo $CYC_FLAGS
+}
+
+# sets up default Cyclone load flags
+#
+function get_ldflags {
+  LDFLAGS=
+  if [ "$TYPE" = "sun" ]; then
+    LDFLAGS="-lnsl -lsocket"
+  fi
+  echo $LDFLAGS
+}
+
 # when setting up a new architecture, figures out the default
 #   set up genfiles to use
 #
@@ -220,6 +240,10 @@ chkdir "include files" $incdir
 # figure out all supported architectures by checking for config files
 ALL_ARCHS=`cd arch; \ls -1 | grep -v undef | grep -v CVS | awk '{printf("%s ",$1);}'`
 
+# get default compile and load flags
+CYC_FLAGS=`get_cycflags`
+LD_FLAGS=`get_ldflags`
+
 # write the config Makefile
 cd ..
 (cat <<EOF
@@ -234,6 +258,8 @@ BIN_INSTALL=${bindir}
 LIB_INSTALL=${libdir}
 ALL_ARCHS=${ALL_ARCHS}
 CC=${CC}
+DEF_CYC_FLAGS=${CYC_FLAGS}
+NET_LD_FLAGS=${LD_FLAGS}
 
 EOF
 cat Makefile.inc.in) > Makefile.inc

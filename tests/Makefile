@@ -27,7 +27,7 @@ CYCBISON=$(CYC_BIN_PATH)/cycbison$(EXE)
 OUT_PREFIX=
 
 LC_FLAG=
-override CYC_FLAGS += $(LC_FLAG) -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -g
+override CYC_FLAGS += $(DEF_CYC_FLAGS) $(LC_FLAG) -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -g
 
 LIB=$(CYC_LIB_PATH)/$(OUT_PREFIX)$(CYCLIB)
 
@@ -74,7 +74,7 @@ $(OUT_PREFIX)histogram$(EXE): $(OUT_PREFIX)histogram.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 
 $(OUT_PREFIX)finger$(EXE): $(OUT_PREFIX)finger.o
-	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
+	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS) $(NET_LD_FLAGS)
 
 $(OUT_PREFIX)test_getopt$(EXE): $(OUT_PREFIX)test_getopt.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
