@@ -2733,14 +2733,13 @@ bool is_noalias_path(exp_t e) {
   case &SeqExp_e(_,e2): fallthru(e2);
   case &Cast_e(_,e2,...): return is_noalias_path(e2);
   case &StmtExp_e(s):
-    while(true) {
+    while(true)
       switch(s->r) {
       case &Seq_s(s1,s2): s = s2; break;
       case &Decl_s(d,s1): s = s1; break;
       case &Exp_s(e): return is_noalias_path(e);
       default: Warn::impos2("is_noalias_stmt_exp: ill-formed StmtExp");
       }
-    }
   default: return true;
   }
 }

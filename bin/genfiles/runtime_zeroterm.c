@@ -16,6 +16,7 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
+#include <stdint.h>
 #include "runtime_internal.h"
 
 /* Add i to zero-terminated pointer x.  Checks for x being null and
@@ -41,11 +42,14 @@ char* _zero_arr_plus_char_fn(char *orig_x, unsigned int orig_sz, int orig_i,
 }
 void* _zero_arr_plus_other_fn(unsigned t,void* orig_x,unsigned orig_sz,int orig_i,const char*filename,unsigned lineno) {
   switch(t) {
-  case sizeof(short): DO_PLUS_FN(short);
-  case sizeof(int): DO_PLUS_FN(int);
-  case sizeof(double): DO_PLUS_FN(double);
-  case sizeof(long double): DO_PLUS_FN(long double);
-  default: _throw_null_fn("runtime_zeroterm.c",__LINE__);
+  case 1: DO_PLUS_FN(int8_t);
+  case 2: DO_PLUS_FN(int16_t);
+  case 4: DO_PLUS_FN(int32_t);
+  case 8: DO_PLUS_FN(int64_t);
+  default: 
+    if(t==sizeof(long double))
+      DO_PLUS_FN(long double);
+    _throw_null_fn("runtime_zeroterm.c",__LINE__);
   }
 }
 #endif
@@ -67,11 +71,14 @@ unsigned _get_zero_arr_size_char(const char *orig_x, unsigned orig_offset) {
 }
 unsigned _get_zero_arr_size_other(unsigned t,const void* orig_x,unsigned orig_offset) {
   switch(t) {
-  case sizeof(short): DO_GET_SIZE(short);
-  case sizeof(int): DO_GET_SIZE(int);
-  case sizeof(double): DO_GET_SIZE(double);
-  case sizeof(long double): DO_GET_SIZE(long double);
-  default: _throw_null_fn("runtime_zeroterm.c",__LINE__);
+  case 1: DO_GET_SIZE(int8_t);
+  case 2: DO_GET_SIZE(int16_t);
+  case 4: DO_GET_SIZE(int32_t);
+  case 8: DO_GET_SIZE(int64_t);
+  default: 
+    if(t==sizeof(long double))
+      DO_GET_SIZE(long double);
+    _throw_null_fn("runtime_zeroterm.c",__LINE__);
   }
 }
 
