@@ -148,7 +148,7 @@ struct _tagged_string Cstring_to_string(Cstring s) {
     str.base = str.curr = str.last_plus_one = NULL;
   }
   else {
-    int sz = strlen(s);
+    int sz = strlen(s)+1;
     str.base = (char *)GC_malloc_atomic(sz);
     if (str.base == NULL) {
       fprintf(stderr, "internal error: out of memory in Cstring_to_string\n");
@@ -158,6 +158,7 @@ struct _tagged_string Cstring_to_string(Cstring s) {
     str.last_plus_one = str.base + sz;
 
     // Copy the string in case the C code frees it or mangles it
+    str.curr[--sz] = '\0';
     while(--sz>=0)
       str.curr[sz]=s[sz];
   }
