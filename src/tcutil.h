@@ -81,5 +81,6 @@ extern list<$($(field_name,tqual,typ)@,`a)@>
 resolve_struct_designators<`a>(seg_t loc,
 			       list<$(list<designator>,`a)@> des, 
 			       structdecl sd);
+extern bool is_tagged_array_typ(typ);
 }
 #endif

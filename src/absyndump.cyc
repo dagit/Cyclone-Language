@@ -679,14 +679,18 @@ void dumptms<`a>(list<type_modifier> tms, void f(`a), `a a) {
   }
   switch(tms->hd) {
     // FIX?? What about tq2?
-  case Pointer_mod(true,  HeapRgnType,  tq2): 
+  case Pointer_mod(Nullable_ps,  HeapRgnType,  tq2): 
     dump_nospace("*"); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(false, HeapRgnType,  tq2): 
+  case Pointer_mod(NonNullable_ps, HeapRgnType,  tq2): 
     dump_nospace("@"); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(true,  VarType(&$(r,k)), tq2):  
+  case Pointer_mod(TaggedArray_ps, HeapRgnType,  tq2): 
+    dump_nospace("?"); dumptms(tms->tl,f,a); return;
+  case Pointer_mod(Nullable_ps,  VarType(&$(r,k)), tq2):  
     dump_nospace("*"); dump_str(r); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(false, VarType(&$(r,k)), tq2): 
+  case Pointer_mod(NonNullable_ps, VarType(&$(r,k)), tq2): 
     dump_nospace("@"); dump_str(r); dumptms(tms->tl,f,a); return;
+  case Pointer_mod(TaggedArray_ps, VarType(&$(r,k)), tq2): 
+    dump_nospace("?"); dump_str(r); dumptms(tms->tl,f,a); return;
   case Pointer_mod(_,_,_): throw Impossible("dumptms: bad Pointer_mod");
 
   default: 

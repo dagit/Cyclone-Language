@@ -1,5 +1,9 @@
 Todo now:
 
+* now that we have ? pointer syntax, we really ought to distinguish
+  between pointers and arrays, as in C.  This is mostly a top-level
+  thing because we need to allow top-level arrays in constant expressions.
+
 * if we write:
 
   let slist = &cons((string)"hello",null)
@@ -7,15 +11,9 @@ Todo now:
   then we do not get a type-error, in spite of the fact that we're
   instantiating a boxed type variable with an unboxed type (char[?]).
 
-* shouldn't allow comparisons on strings or other "structs"
-
 * "sizeof e" doesn't do the right thing.
 
-* we don't verify that cyc_main has the right type:  we should rename
-  it to "main" (and translate it to _cyc_main or something like this)
-  and force it to return an int and take argc, argv as arguments.
-
-* unbox [?] arrays
+* we don't verify that cyc_main has the right type
 
 * get rid of null, replace with 0 (requires clever overloading)
 

@@ -162,8 +162,15 @@ xenum exn {Error(error_t)};
 
 bool print_context = false;
 
+bool first_error = true;
+
 void post_error(error_t e) {
   error_b = true;
+  fflush(stdout);
+  if (first_error) {
+    fprintf(stderr, "\n");
+    first_error = false;
+  }
   // why are we not using the source stored in e????
   fprintf(stderr, "%s: %s\n", string_of_segment(e->seg), e->desc);
   if (print_context) {

@@ -241,8 +241,13 @@ Doc dtms2doc(Doc d,list<type_modifier> tms) {
     if (next_is_pointer(tms->tl)) rest = p_rest;
     return cat2(rest, tvars2doc(ts));
     // FIX?? What about tq2?
-  case Pointer_mod(nullable, rgn, tq2):
-    _ ptr = nullable ? text("*") : text("@");
+  case Pointer_mod(ps, rgn, tq2):
+    _ ptr;
+    switch (ps) {
+    case Nullable_ps: ptr = text("*"); break;
+    case NonNullable_ps: ptr = text("@"); break;
+    case TaggedArray_ps: ptr = text("?"); break;
+    }
     _ r   = ntyp2doc(rgn);
     return cat3(ptr,r,rest);
   }
@@ -1243,7 +1248,8 @@ $(tqual,typ,list<type_modifier>)@ to_tms(tqual tq,typ t) {
       case No_constr:         nl = false;    still_working = false; break;
       }
     }
-    type_modifier tm = Pointer_mod(nl,rgntyp,tq);
+    type_modifier tm = 
+      Pointer_mod(nl ? Nullable_ps : NonNullable_ps,rgntyp,tq);
     return &$(tq3, t3, (list<type_modifier>)&cons(tm,tml3)); 
 
   case FnType(typvars,t2,args,varargs):

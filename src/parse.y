@@ -12,6 +12,7 @@
 %{
 #define YYDEBUG 0 // 1 to debug, 0 otherwise
 #define YYPRINT yyprint
+#define YYERROR_VERBOSE
 
 #if YYDEBUG==1
 extern xenum YYSTYPE;
@@ -566,9 +567,19 @@ static $(tqual,typ,list<tvar>) apply_tms(tqual tq, typ t,
       throw abort("type parameters must appear before function arguments "
 		  "in declarator",loc);
     }
-    case Pointer_mod(nullable,rgntyp,tq2): {
-      return apply_tms(tq2,PointerType(t,rgntyp,new_conref(nullable),tq),
-		       tms->tl);
+    case Pointer_mod(ps,rgntyp,tq2): {
+      switch (ps) {
+      case NonNullable_ps:
+	return apply_tms(tq2,PointerType(t,rgntyp,new_conref(false),tq),
+			 tms->tl);
+      case Nullable_ps:
+	return apply_tms(tq2,PointerType(t,rgntyp,new_conref(true),tq),
+			 tms->tl);
+      case TaggedArray_ps:
+	if (rgntyp != HeapRgnType)
+	  throw abort("region types not allowed on ? types yet", DUMMYLOC);
+	return apply_tms(tq2,ArrayType(t,tq,TaggedArray),tms->tl);
+      }
     }
   }
   throw abort("can't get here 2",DUMMYLOC); // Fix
@@ -749,7 +760,7 @@ using Parse;
   Okay_tok;
   Int_tok($(sign,int)@);
   Char_tok(char);
-  Bool_tok(bool);
+  Pointer_Sort_tok(enum Pointer_Sort);
   Short_tok(short);
   String_tok(string);
   StringOpt_tok(Opt_t<stringptr>);
@@ -798,7 +809,7 @@ using Parse;
 %type <Int_tok> INTEGER_CONSTANT
 %type <String_tok> FLOATING_CONSTANT
 %type <Char_tok> CHARACTER_CONSTANT
-%type <Bool_tok> pointer_char
+%type <Pointer_Sort_tok> pointer_char
 %type <String_tok> IDENTIFIER TYPE_VAR STRING
 %type <String_tok> namespace_action
 %type <Exp_tok> primary_expression postfix_expression unary_expression
@@ -1307,9 +1318,10 @@ pointer:
 ;
 
 pointer_char:
-  '*' { $$=^$(true);  }
+  '*' { $$=^$(Nullable_ps);  }
 /* CYC: pointers that cannot be null */
-| '@' { $$=^$(false); }
+| '@' { $$=^$(NonNullable_ps); }
+| '?' { $$=^$(TaggedArray_ps); }
 
 rgn:
     /* empty */ { $$ = ^$(HeapRgnType); }

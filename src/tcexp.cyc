@@ -263,6 +263,7 @@ static typ tcUnPrimop(tenv te, segment loc, Opt_t<typ> topt, primop p, exp e) {
     return impos("Non-unary primop");
   }
 }
+
 // Note: promoter must return false for any non-arithmetic type.
 static typ tcArithBinop(tenv te, exp e1, exp e2, bool promoter(tenv,exp)) {
   if (!promoter(te,e1)) {
@@ -282,6 +283,33 @@ static typ tcArithBinop(tenv te, exp e1, exp e2, bool promoter(tenv,exp)) {
   unchecked_cast(te,e2,res);
   return res;
 }
+// Plus needs to support a tagged array and an int
+static typ tcPlus(tenv te, exp e1, exp e2) {
+  if (is_tagged_array_typ(e1->topt->v)) {
+    if (!coerce_sint_typ(te, e2))
+      terr(e2->loc,xprintf("expecting int but found %s",
+			   typ2string(e2->topt->v)));
+    return e1->topt->v;
+  } else return tcArithBinop(te, e1, e2, arithmetic_promote);
+}
+// Minus needs to support a tagged array and an int, and two tagged arrays
+static typ tcMinus(tenv te, exp e1, exp e2) {
+  if (is_tagged_array_typ(e1->topt->v)) {
+    if (is_tagged_array_typ(e2->topt->v)) {
+      if (!unify(e1->topt->v, e2->topt->v))
+	terr(e1->loc,xprintf("pointer arithmetic on values of "
+			     "different types (%s != %s)", 
+			     typ2string(e1->topt->v),typ2string(e2->topt->v)));
+      return sint_t;
+    } else {
+      if (!coerce_sint_typ(te, e2)) 
+	terr(e2->loc,xprintf("expecting either %s or int but found %s",
+			     typ2string(e1->topt->v),typ2string(e2->topt->v)));
+      return e1->topt->v;
+    }
+  } else return tcArithBinop(te, e1, e2, arithmetic_promote);
+}
+
 static typ tcAnyBinop(tenv te, segment loc, exp e1, exp e2) {
   bool e1_is_unboxed_arith = comparison_promote(te,e1);
   bool e2_is_unboxed_arith = comparison_promote(te,e2);
@@ -291,20 +319,36 @@ static typ tcAnyBinop(tenv te, segment loc, exp e1, exp e2) {
     typ res = max_arithmetic_type(t1,t2);
     unchecked_cast(te,e1,res);
     unchecked_cast(te,e2,res);
-  } else if (!unify(t1,t2))
+    return sint_t;
+  } 
+  // okay if same types and boxed
+  else if (unify(t1,t2) && unify(t1,new_evar(BoxPKind))) {
+    return sint_t;
+  // support comparisons on arrays and pointers
+  } else {
+    switch ($(compress(t1), compress(t2))) {
+    case $(ArrayType(t1a,_,_), ArrayType(t2a,_,_)): fallthru(t1a,t2a);
+    case $(ArrayType(t1a,_,_), PointerType(t2a,_,_,_)): fallthru(t1a,t2a);
+    case $(PointerType(t1a,_,_,_), ArrayType(t2a,_,_)): 
+      if (unify(t1a,t2a)) return sint_t; break;
+    default:
+      break;
+    }
     terr(loc,xprintf("comparison not allowed between %s and %s",
 		     typ2string(t1),typ2string(t2)));
-  return sint_t;
+    return wildtyp();
+  }
 }
+
 // Binary primops like e1+e2, e1>>e2, etc. 
 // Note: e1 and e2 must have already been type-checked.
 static typ tcBinPrimop(tenv te, segment loc, Opt_t<typ> topt, 
 		       primop p, exp e1, exp e2) {
   switch (p) {
     // FIX:  Plus and Minus should allow arrays
-  case Plus:       fallthru;
+  case Plus:       return tcPlus(te,e1,e2);
+  case Minus:      return tcMinus(te,e1,e2);
   case Times:      fallthru;
-  case Minus:      fallthru;
   case Div:        return tcArithBinop(te,e1,e2,arithmetic_promote);
 
   case Mod:        fallthru;
@@ -417,8 +461,8 @@ static synth tcIncrement(tenv te, segment loc, Opt_t<typ> topt,
   tcExp(te,null,e);
   typ t = e->topt->v;
   // FIX: this is not right -- for instance, it allows incrementing an enum!!
-  if (!arithmetic_promote(te,e))
-    terr(e->loc,xprintf("expecting arithmetic type but found %s",
+  if (!arithmetic_promote(te,e) && !is_tagged_array_typ(t))
+    terr(e->loc,xprintf("expecting arithmetic or [?] type but found %s",
 			typ2string(t)));
   return standard_synth(te,t);
 }

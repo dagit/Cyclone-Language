@@ -87,10 +87,24 @@ void compile_file(string filename) {
     String::str_sepstr(&cons(allocstr(""),rev(includes))," -I");
   string def_string = 
     String::str_sepstr(&cons(allocstr(""),rev(defines)), " -D");
+  // check that the input file exists
+  try {
+    FILE @f0 = file_open(filename, "r");
+    fclose(f0);
+  } catch {
+  default: 
+    fprintf(stderr, "\nError:  can't find input file %s", filename);
+    compile_failure = true;
+    return;
+  }
   string cmd = xprintf("gcc -x c -E -U__GNUC__ %s %s %s > %s",
                        inc_string, def_string, filename, preprocfile);
   if (*v) fprintf(stderr,"%s\n",cmd);
-  system(string_to_Cstring(cmd));
+  if (system(string_to_Cstring(cmd)) != 0) {
+    fprintf(stderr,"\nError: pre-processing failed!\n");
+    compile_failure = true;
+    return;
+  }
 
   // reset front-end -- necessary for good error messages!
   Position::reset_position(preprocfile);
@@ -100,14 +114,26 @@ void compile_file(string filename) {
   try f = file_open(preprocfile, "r");
   catch {
   default:
-    fprintf(stderr, "couldn't open %s\n", preprocfile);
-    compile_failure=true;
+    fprintf(stderr, "\nError: couldn't open %s\n", preprocfile);
+    compile_failure = true;
     return;
   }
 
   // parse
   list<Absyn::decl> tds = null;
-  tds = Parse::parse_file(f);
+  try {
+    tds = Parse::parse_file(f);
+  } catch {
+  default:
+    compile_failure = true; break;
+  }
+  file_close(f);
+    
+  if (compile_failure || Position::error_p()) {
+    compile_failure=true;
+    Stdio::remove(preprocfile);
+    return;
+  }
   PRINT_STAGE("Parsing completed\n");
   fflush(stderr);
   // typecheck
@@ -117,28 +143,53 @@ void compile_file(string filename) {
     Tc::tc(te, add_cyc_namespace_r, tds);
     if(! *noshake)
       tds = Tc::treeshake(te,tds);
-    PRINT_STAGE("Type checking completed\n");
+    PRINT_STAGE("Type checking completed.\n");
+    if (Position::error_p()) {
+      compile_failure=true;
+      Stdio::remove(preprocfile);
+      return;
+    }
     ControlFlow::cf_check(tds);
-    PRINT_STAGE("Control-flow checking completed\n");
+    PRINT_STAGE("Control-flow checking completed.\n");
+    if (Position::error_p()) {
+      compile_failure = true;
+      Stdio::remove(preprocfile);
+      return;
+    }
   } catch {
-  case Tcutil::TypeErr: 
-    fprintf(stderr,"Type error!\n");
-    compile_failure=true;
-    break;
-  case Dict::Absent:
-    fprintf(stderr,"Dict::Absent occurred during type checking!\n");
-    compile_failure=true;
-    break;
   case Impossible(s):
-    fprintf(stderr,"Impossible: %s\n", s);
+    fprintf(stderr,"\nImpossible during type-checking: %s\n", s); 
+    fflush(stderr);
     compile_failure=true;
-    break;
+    Stdio::remove(preprocfile);
+    return;
+  case x:
+    fprintf(stderr,"\nUncaught exception during type-checking\n"); 
+    fflush(stderr);
+    compile_failure=true;
+    Stdio::remove(preprocfile);
+    throw(x);
   }
   // translate to C
-  if (*toc && !compile_failure) {
-    tds = Toc::toc(tds); 
-    PRINT_STAGE("Translation to C completed\n");
+  try {
+    if (*toc && !compile_failure) {
+      tds = Toc::toc(tds); 
+      PRINT_STAGE("Translation to C completed\n");
+    }
+  } catch {
+  case Impossible(s):
+    fprintf(stderr,"\nImpossible during translation: %s\n", s); fflush(stderr);
+    compile_failure=true;
+    Stdio::remove(preprocfile);
+    return;
+  default:
+    fprintf(stderr,"\nUncaught exception during translation\n"); 
+    fflush(stderr);
+    compile_failure=true;
+    Stdio::remove(preprocfile);
+    return;
   }
+  Stdio::remove(preprocfile);
   // print
   FILE @out_file;
   try {
@@ -148,7 +199,7 @@ void compile_file(string filename) {
       out_file = file_open(*out_file_name_opt, "w");
   } catch {
   case FileOpenError(_): 
-    fprintf(stderr,"could not open output file: %s\n",*out_file_name_opt);
+    fprintf(stderr,"\nCould not open output file: %s\n",*out_file_name_opt);
     fflush(stderr);
     compile_failure=true;
     return;
@@ -175,7 +226,6 @@ void compile_file(string filename) {
     Tcutil::flush_warnings();
   }
   file_close(f);
-  Stdio::remove(preprocfile);
   if (out_file_name_opt != null) file_close(out_file);
   return;
 }

@@ -183,11 +183,16 @@ namespace Absyn {
     WithTypes(list<$(Opt_t<var>,tqual,typ)@>,bool);
   };
 
+  EXTERN_DEFINITION enum Pointer_Sort {
+    NonNullable_ps, Nullable_ps, TaggedArray_ps;
+  };
+
   EXTERN_DEFINITION enum Type_modifier {
     Carray_mod; 
     Array_mod; 
     ConstArray_mod(exp);
-    Pointer_mod(bool,typ,tqual); // typ has RgnKind, default is RgnType(HeapRgn)
+    // for Pointer_mod, the typ has RgnKind, default is RgnType(HeapRgn)
+    Pointer_mod(enum Pointer_Sort,typ,tqual); 
     Function_mod(funcparams_t);
     TypeParams_mod(list<tvar>,segment);
   };

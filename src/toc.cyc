@@ -1132,9 +1132,13 @@ static exp printf_to_c(primop p,Opt_t<exp> aopt,list<exp> args,list<typ> typs) {
 ///////////////////////////////////////////////////////////////
 // Should really break this into smaller functions and factor
 // out common code (e.g., Enum and Xenum are the same.)
-static typ get_typ(exp e) {
+static typ get_c_typ(exp e) {
   if (e->topt == null) toc_impos("Missing type in primop ");
   return typ_to_c(e->topt->v);
+}
+static typ get_cyc_typ(exp e) {
+  if (e->topt == null) toc_impos("Missing type in primop ");
+  return e->topt->v;
 }
 static $(tqual, typ)@ tup_to_c(exp e) {
   return &$(empty_tqual(), typ_to_c(e->topt->v));
@@ -1303,8 +1307,10 @@ static void exp_to_c(env nv, exp e) {
     break;
   case UnknownId_e(qv): toc_impos("unknownid"); break;
   case Primop_e(p,es):
+    // Save Cyclone types -- needed for pointer arith stuff
+    _ old_typs = List::map(get_cyc_typ,es);
     // Save C types of args, needed for printf
-    _ typs = List::map(get_typ,es);
+    _ typs = List::map(get_c_typ,es);
     // Translate args
     List::iter_c(exp_to_c,nv,es);
     // FIX:  look at these carefully and make sure this is okay
@@ -1348,19 +1354,88 @@ static void exp_to_c(env nv, exp e) {
       es->hd->r = structmember_exp(new_exp(es->hd->r,es->hd->loc),
 				   curr_sp, DL)->r;
       break;
+    case Plus:
+      // Need to deal with pointer arithmetic
+      if (is_tagged_array_typ(old_typ)) {
+	// ({ struct tagged_array temp = e1;
+	//    temp.curr += e2; temp; })
+	exp e1 = es->hd;
+	exp e2 = es->tl->hd;
+	_ temp = temp_var();
+	_ temp_typ = typ_to_c(old_typ);
+	_ s = exp_stmt(var_exp(temp,DL),DL);
+	_ e3 = structmember_exp(var_exp(temp,DL),curr_sp,DL);
+	_ e4 = assignop_exp(e3,&Opt(Plus),e2,DL);
+	s = seq_stmt(exp_stmt(e4,DL),s,DL);
+	s = declare_stmt(temp,temp_typ,&Opt(e1),s,DL);
+	e->r = stmt_exp(s,DL)->r;
+      }
+      break;
+    case Minus:
+      if (is_tagged_array_typ(old_typ)) {
+	exp e1 = es->hd;
+	exp e2 = es->tl->hd;
+	typ old_typ_e2 = old_typs->tl->hd; // cyclone type of e2
+	// if it's a tagged array -- get out the curr field
+	if (is_tagged_array_typ(old_typ_e2))
+	  e2->r = structmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
+	// ({ struct tagged_array temp = e1;
+	//    temp.curr -= e2; temp; })  
+	_ temp = temp_var();
+	_ temp_typ = typ_to_c(old_typ);
+	_ s = exp_stmt(var_exp(temp,DL),DL);
+	_ e3 = structmember_exp(var_exp(temp,DL),curr_sp,DL);
+	_ e4 = assignop_exp(e3,&Opt(Minus),e2,DL);
+	s = seq_stmt(exp_stmt(e4,DL),s,DL);
+	s = declare_stmt(temp,temp_typ,&Opt(e1),s,DL);
+	e->r = stmt_exp(s,DL)->r;
+      }
+      break;
+    case Eq : fallthru;
+    case Neq: fallthru;
+    case Gt : fallthru;
+    case Gte: fallthru;
+    case Lt : fallthru;
+    case Lte: 
+      // need to extract .curr field of tagged arrays for comparisons
+      exp e1 = es->hd;
+      exp e2 = es->tl->hd;
+      typ t1 = old_typs->hd;
+      typ t2 = old_typs->tl->hd;
+      if (is_tagged_array_typ(t1))
+	e1->r = structmember_exp(new_exp(e1->r,DL),curr_sp,DL)->r;
+      if (is_tagged_array_typ(t2))
+	e2->r = structmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
+      break;
     default: break; //skip
     }
     break;
   case Increment_e(e2,_):
-    // FIX:  works for boxed types?
+    typ e2_cyc_typ = e2->topt->v;
     exp_to_c(nv,e2);
+    if (is_tagged_array_typ(e2_cyc_typ)) {
+      // e2.curr++
+      e2->r = structmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
+    }
     break;
   case AssignOp_e(e1,popt,e2):
-    // FIX:  works for boxed types?
+    // FIX:  tagged array types
     // See if e1 is a polymorphic field (i.e., is an instantiated type
     // variable) -- if so, coerce e2 to void*.
     bool e1_poly = is_poly_project(e1);
+    typ e1_old_typ = e1->topt->v;
+    typ e2_old_typ = e2->topt->v;
     exp_to_c(nv,e1); exp_to_c(nv,e2);
+    if (popt != null && (popt->v == Plus || popt->v == Minus)) {
+      // We could have e1+=e2 where e1 is a tagged array or
+      // we could have e1-=e2 where e1 is a tagged array and e2 is either
+      // an int or a tagged array
+      if (is_tagged_array_typ(e1_old_typ))
+	e1->r = structmember_exp(new_exp(e1->r,DL),curr_sp,DL)->r;
+      if (is_tagged_array_typ(e2_old_typ))
+    	e2->r = structmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
+    }
+    // this cast is necessary to avoid gcc warnings
     if (e1_poly) 
       e2->r = cast_exp(void_star_typ(), new_exp(e2->r, DL), DL)->r;
     // The typechecker guarantees that e1 starts out as an lvalue, but
