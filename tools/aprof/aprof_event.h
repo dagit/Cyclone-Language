@@ -81,6 +81,10 @@ namespace Aprof {
     string_t region_name;
     struct RegionStats heap_region_stats;
   };
+  struct MarkEvent {
+    clock_t time;
+    string_t m;
+  };
   typedef struct AllocEvent alloc_event_t;
   typedef struct GcEvent gc_event_t;
   typedef struct GcAddToHeapEvent gcaddtoheap_event_t;
@@ -88,6 +92,7 @@ namespace Aprof {
   typedef struct CreateEvent create_event_t;
   typedef struct ResizeEvent resize_event_t;
   typedef struct FreeEvent free_event_t;
+  typedef struct MarkEvent mark_event_t;
   
   // The main event definition
   typedef datatype AProfEvent @aprof_event_t;
@@ -99,6 +104,7 @@ namespace Aprof {
     CreateE(create_event_t);
     ResizeE(resize_event_t);
     FreeE(free_event_t);
+    MarkE(mark_event_t);
   };
   
   // For processing profiling files.  Callback will return false
@@ -114,6 +120,9 @@ namespace Aprof {
   // Whether to aggregate or print individual dynamic regions for graph
   extern bool all_dynregions;
 
+  // Whether to use events instead of clocks
+  extern bool use_events;
+
   // Uses proc_file above to generate a graph of the system's memory
   // usage.  The output graph is printed to stdout as a jgraph graph
   // (see http://www.cs.utk.edu/~plank/plank/jgraph/jgraph.html)
@@ -124,13 +133,14 @@ namespace Aprof {
   extern int generate_svg(string_t<`H> file);
   extern int generate_svg2(string_t<`H> file);
   extern int generate_svg3(string_t<`H> file);
+  extern int generate_sizes(string_t<`H> file);
 
   // Uses proc_file above to generate a tabular summary of per-region
   // allocation information.
   extern int generate_summary(string_t<`H> file);
 
   // Clock granularity
-  extern unsigned int clockunits;
+  extern unsigned int clockdivisor;
 
   // Statistics
   extern clock_t max_time;
@@ -152,6 +162,9 @@ namespace Aprof {
   extern unsigned int num_freed_unique;
   extern unsigned int bytes_freed_unique;
   extern unsigned int num_reclaim_unique;
+
+  extern unsigned int num_alloc_other;
+  extern unsigned int bytes_alloc_other;
 
 }
 

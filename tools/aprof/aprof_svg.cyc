@@ -137,6 +137,8 @@ init_globals() {
   events = Xarray::create_empty();
 }
 
+static list_t<$(clock_t,const char ?)@> mark_list = NULL;
+
 static bool inside_gc = false;
 static clock_t gc_start_time = 0;
 static clock_t gc_latest_time = 0;
@@ -180,9 +182,12 @@ static void mark_point(curve_t b, clock_t x, unsigned int y) {
 static void mark_finish(curve_t b, clock_t x) {
   b->area += ((double)(x - b->last_x)) * b->last_y;
 #ifdef DEBUG_ME
-  fprintf(stderr,"%s->area += %s*clocks\n",
+  const char ?CE = "clocks";
+  if (use_events) CE = "events";
+  fprintf(stderr,"%s->area += %s*%s\n",
           b->name,
-          print_bytes(((double)(x - b->last_x)) * b->last_y));
+          print_bytes(((double)(x - b->last_x)) * b->last_y),
+          CE);
 #endif
   b->last_x = 0;
   b->last_y = 0;
@@ -234,12 +239,15 @@ static void output_comment(const char ?s) {
 }
 
 static void comment_curve_stats(curve_t b) { // for debugging
-  output_comment(aprintf("%s area: %s*clocks\tmax_y: %u",b->name,
-                         print_bytes(b->area),b->max_y));
+  const char ?CE = "clocks";
+  if (use_events) CE = "events";
+  output_comment(aprintf("%s area: %s*%s\tmax_y: %u",b->name,
+                         print_bytes(b->area),CE,b->max_y));
 }
 
 static unsigned int bytes_reclaim_heap = 0;
 static unsigned int bytes_reclaim_unique = 0;
+static unsigned int bytes_freed_other = 0;
 
 static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
   switch (event) {
@@ -365,6 +373,11 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     mark_gc_over();
     update_heap_stats(env,time,rstats);
     break;
+
+  case &MarkE(MarkEvent(time,m)):
+    mark_list = new List(new $(time,m), mark_list);
+    break;
+
   }
 
   return true;
@@ -480,6 +493,14 @@ static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t 
            " fill='black' stroke='none' opacity='0.3'/>\n",
            x1,x2-x1,max_y);
   }
+
+  printf("<!-- marks -->\n");
+  for (let l = mark_list; l != NULL; l = l->tl) {
+    let &$(time,m) = l->hd;
+    printf("<path d='M%u,0 v%u' stroke='red' fill='none' opacity='.7'/>\n",
+           time,max_y);
+  }
+
   printf("</g>\n");
 
   /* the lines */
@@ -547,6 +568,13 @@ static void comment_stats() {
                            bytes_reclaim_unique,
                            percent(bytes_reclaim_unique,bytes_alloc_unique)));
   }
+  if (num_alloc_other) {
+    output_comment(aprintf("%u objects (%u bytes) allocated in other regions",
+                           num_alloc_other, bytes_alloc_other));
+    output_comment(aprintf("%u bytes [%d%%] freed from other regions",
+                           bytes_freed_other,
+                           percent(bytes_freed_other,bytes_alloc_other)));
+  }
 }
 
 namespace Aprof;
@@ -606,15 +634,17 @@ int generate_svg(string_t<`H> file) {
     env->heap_live->area + env->unique_live->area
     + env->refcnt_live->area + env->other_live->area;
   let title = "";
+  const char ?CE = "clocks";
+  if (use_events) CE = "events";
   if (memory_footprint > 0.0)
     title =
-      aprintf("Memory footprint %s*clocks, data footprint %s*clocks (%d%%)",
-              print_bytes(memory_footprint),
-              print_bytes(data_footprint),
+      aprintf("Memory footprint %s*%s, data footprint %s*%s (%d%%)",
+              print_bytes(memory_footprint),CE,
+              print_bytes(data_footprint),CE,
               (int)((data_footprint * 100.0)/memory_footprint));
   else
     /* With -nogc we don't get measurement of memory footprint */
-    title = aprintf("Data footprint %s*clocks", print_bytes(data_footprint));
+    title = aprintf("Data footprint %s*%s", print_bytes(data_footprint),CE);
 
   /* print the XML header */
   printf("<?xml version='1.0' encoding='ISO-8859-1'?>\n"
@@ -646,8 +676,8 @@ int generate_svg(string_t<`H> file) {
   for (let l = all_curves; l != NULL; l = l->tl) {
     curve_t b = l->hd;
     if (strcmp("reserved",b->name) != 0) {
-      let name = aprintf("%s %s*clocks (%d%%)",b->name,
-                         print_bytes(b->area),
+      let name = aprintf("%s %s*%s (%d%%)",b->name,
+                         print_bytes(b->area),CE,
                          (int)((b->area * 100.0)/data_footprint));
       namecolors = new List(new $((const char ?)name,color(i++)),namecolors);
     }
@@ -697,9 +727,13 @@ int main() {
 }
 */
 
-/* Table for remembering the time and amount of an allocation at an address */
+/* Map address to time and amount of allocation */
 static struct Hashtable::Table<unsigned int,$(const char ?,clock_t,unsigned int)@> *
   allocations_table = NULL;
+
+/* Map region to addresses allocated in that region */
+static struct Hashtable::Table<const char ?@,Set::set_t<unsigned int>> *
+  regionaddresses_table = NULL;
 
 /* Array of rects for later printing */
 struct Rect {
@@ -717,6 +751,8 @@ static void
 init_globals2() {
   allocations_table =
     Hashtable::create(101,uint_cmp,uint_hash);
+  regionaddresses_table =
+    Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
   rects = Xarray::create_empty();
 }
 static unsigned int min_x;
@@ -791,12 +827,26 @@ static bool proc_event2(aprof_event_t event) {
       // TODO
     }
     else if (!strcmp(rname,"heap")) {
-      Hashtable::insert((_@)allocations_table,
-                        addr,new $("heap",time,
-                                   (unsigned int)count));
+      Hashtable::insert((_@)allocations_table, addr,
+                        new $("heap",time,(unsigned int)count));
     }
     else {
-      // TODO
+      let rname_p = new rname;
+      try {
+        let aset = Hashtable::lookup((_@)regionaddresses_table, rname_p);
+        Hashtable::remove((_@)regionaddresses_table, rname_p);
+        Hashtable::insert((_@)regionaddresses_table, rname_p,
+                          Set::insert(aset,addr));
+        Hashtable::insert((_@)allocations_table, addr,
+                          new $(rname,time,(unsigned int)count));
+      }
+      catch {
+      case &Not_found:
+        fprintf(stderr,
+                "error: allocation into an unknown region %s\n",
+                rname);
+        break;
+      }
     }
     break;
 
@@ -831,6 +881,8 @@ static bool proc_event2(aprof_event_t event) {
     assert(strcmp("refcnt",rname));
 
     mark_gc_over();
+    Hashtable::insert((_@)regionaddresses_table, new rname,
+                      Set::empty(uint_cmp));
     break;
 
   case &FreeE(FreeEvent(time,rname,*rstats)):
@@ -839,6 +891,44 @@ static bool proc_event2(aprof_event_t event) {
     assert(strcmp("refcnt",rname));
 
     mark_gc_over();
+    let rname_p = new rname;
+    try {
+      let aset = Hashtable::lookup((_@)regionaddresses_table, rname_p);
+      Hashtable::remove((_@)regionaddresses_table, rname_p);
+      let i = Set::make_iter(Core::heap_region,aset);
+      unsigned int addr = 0;
+      while (Iter::next(i,&addr)) {
+        try {
+          let &$(rname2,start_time,count) =
+            Hashtable::lookup((_@)allocations_table, addr);
+          Hashtable::remove((_@)allocations_table, addr);
+          if (strcmp(rname,rname2) != 0) {
+            fprintf(stderr,
+                    "error: freed region %s seems to contain an allocation "
+                    "from another region %s\n",
+                    rname,rname2);
+          }
+          else {
+            bytes_freed_other += count;
+            add_rect("other",start_time,addr,time,count);
+          }
+        }
+        catch {
+        case &Not_found:
+          fprintf(stderr,
+                  "error: reclaim event %x without (remembered) allocation\n",
+                  addr);
+          break;
+        }
+      }
+    }
+    catch {
+    case &Not_found:
+      fprintf(stderr,
+              "error: free of an unknown region %s\n",
+              rname);
+      break;
+    }
     break;
 
   case &ResizeE(ResizeEvent(time,rname,count,*rstats)):
@@ -868,6 +958,10 @@ static bool proc_event2(aprof_event_t event) {
     }
     break;
 
+  case &MarkE(MarkEvent(time,m)):
+    mark_list = new List(new $(time,m), mark_list);
+    break;
+
   }
 
   return true;
@@ -891,6 +985,9 @@ static const char ?color_of_region(const char ?`H rname) {
     }
   }
   return c;
+}
+static int rect_cmp(rect_t @a, rect_t @b) {
+  return strcmp(a[0]->name,b[0]->name);
 }
 int generate_svg2(string_t<`H> file) {
   init_globals2();
@@ -931,34 +1028,56 @@ int generate_svg2(string_t<`H> file) {
          xscale, yscale, -((int)min_x), -((int)min_y));
 
   printf("<!-- gc blocks -->\n");
+  printf("<g fill='%s'>\n", color_of_region("available"));
   for (let l = gc_blocks; l != NULL; l = l->tl) {
     let &$(time,addr,amt) = l->hd;
-    printf("<rect x='%u' y='%u' width='%u' height='%u' "
-           "fill='%s' stroke='none' />\n",
+    printf("<rect x='%u' y='%u' width='%u' height='%u'/>\n",
            time,
            addr,
            max_x-time,
-           amt,
-           color_of_region("available"));
+           amt);
   }
+  printf("</g>\n");
 
   printf("<!-- allocations -->\n");
-  let len = Xarray::length((_@)rects);
-  for (int i = 0; i < len; i++) {
-    let &Rect(name,gc_num,x,y,width,height) = Xarray::get((_@)rects,i);
-    printf("<rect x='%u' y='%u' width='%u' height='%u' "
-           "fill='%s' opacity='%f' stroke='none' />\n",
-           x,y,width,height,color_of_region(name),
-           (double)gc_num/num_gc_events);
+  //  printf("<g opacity='%f'>\n", (double)gc_num/num_gc_events);
+  let a = Xarray::to_array((_@)rects);
+  let len = numelts(a);
+  if (len > 0) {
+    Array::msort(rect_cmp,a,len);
+    printf("<g opacity='0.8'>\n");
+    const char ?rname = a[0]->name;
+    printf("<g fill='%s'>\n",color_of_region(rname));
+    for (int i = 0; i < len; i++) {
+      let &Rect(rname2,gc_num,x,y,width,height) = a[i];
+      if (strcmp(rname,rname2) != 0) {
+        rname = rname2;
+        printf("</g>\n");
+        printf("<g fill='%s'>\n",color_of_region(rname));
+      }
+      printf("<rect x='%u' y='%u' width='%u' height='%u'/>\n",
+             x,y,width,height);
+    }
+    printf("</g>\n");
+    printf("</g>\n");
   }
 
   printf("<!-- garbage collections -->\n");
+  printf("<g opacity='0.3'>\n");
   for (let l = gc_list; l != NULL; l = l->tl) {
     let &$(x1,x2) = l->hd;
-    printf("<rect x='%u' y='%u' width='%u' height='%u'"
-           " fill='black' stroke='none' opacity='0.3'/>\n",
+    printf("<rect x='%u' y='%u' width='%u' height='%u'/>\n",
            x1,min_y,x2-x1,max_y-min_y);
   }
+  printf("</g>\n");
+
+  printf("<!-- marks -->\n");
+  for (let l = mark_list; l != NULL; l = l->tl) {
+    let &$(time,m) = l->hd;
+    printf("<path d='M%u,%u v%u' stroke='red' fill='none' opacity='.7'/>\n",
+           time,min_y,max_y-min_y);
+  }
+
   printf("</g>\n");
 
   /* print the legend of the graph */
@@ -985,10 +1104,6 @@ static struct Hashtable::Table<unsigned int,clock_t> *
 /* Map lifetime to number of objects with that lifetime */
 static struct Hashtable::Table<unsigned int,unsigned int> *
   lifetimes_table = NULL;
-
-/* Map region to addresses allocated in that region */
-static struct Hashtable::Table<const char ?@,Set::set_t<unsigned int>> *
-  regionaddresses_table = NULL;
 
 static void
 init_globals3() {
@@ -1110,18 +1225,18 @@ static bool proc_event3(aprof_event_t event) {
     }
     break;
 
-  case &ResizeE(ResizeEvent(_,_,_,_)):
-  case &GcE(GcEvent(_,_,_)):
-  case &GcAddToHeapE(GcAddToHeapEvent(_,_,_,_)):
+  case &MarkE(_):
+  case &ResizeE(_):
+  case &GcE(_):
+  case &GcAddToHeapE(_):
     break;
-
   }
 
   return true;
 }
-unsigned int max_lifetime = 0;
-unsigned int max_lcount = 0;
-unsigned int cumulative_lcount = 0;
+static unsigned int max_lifetime = 0;
+static unsigned int max_lcount = 0;
+static unsigned int cumulative_lcount = 0;
 static list_t<$(unsigned int,unsigned int)@> lifetimes = NULL;
 static void record_lifetime(unsigned int lifetime,unsigned int lcount) {
   if (max_lifetime < lifetime) max_lifetime = lifetime;
@@ -1129,13 +1244,6 @@ static void record_lifetime(unsigned int lifetime,unsigned int lcount) {
   cumulative_lcount += lcount;
   lifetimes = new List(new $(lifetime,lcount),lifetimes);
 }
-int lifetime_cmp($(unsigned int,unsigned int)@x,
-                 $(unsigned int,unsigned int)@y) {
-  if ((*x)[0] < (*y)[0]) return -1;
-  else if ((*x)[0] == (*y)[0]) return 0;
-  else return 1;
-}
-
 int generate_svg3(string_t<`H> file) {
 
   init_globals3();
@@ -1146,8 +1254,6 @@ int generate_svg3(string_t<`H> file) {
 
   Hashtable::iter(finish_lifetimes,(_@)starttimes_table);
   Hashtable::iter(record_lifetime,(_@)lifetimes_table);
-  // TJIM: temporary for debugging, not needed...
-  //  lifetimes = List::rimp_merge_sort(lifetime_cmp,lifetimes);
 
   unsigned int ?cumulative_arr = calloc(max_lifetime+1,sizeof(unsigned int));
   unsigned int ?lifetimes_arr = calloc(max_lifetime+1,sizeof(unsigned int));
@@ -1190,15 +1296,16 @@ int generate_svg3(string_t<`H> file) {
   printf("<g transform='translate(0,%d) scale(%.12f,-%.12f)'>\n",
          (int)HEIGHT,
          xscale, yscale);
-  //  printf("<g y='0' width='1' opacity='0.4'>\n");
+  printf("<g opacity='0.4'>\n"); // svg says can't move y and width here :-(
   for (let i = 0; i<max_lifetime+1; i++) {
-    // TJIM: don't print cumulative graph for now
+    // TJIM: don't print cumulative graph for now, swamps the other histo
+    // TJIM: actually should print it as a percentage curve
     //    printf("<rect fill='green' x='%d' y='0' width='1' height='%d' />\n",
     //           i,cumulative_arr[i]);
-    printf("<rect y='0' width='1' opacity='0.4' x='%d' height='%d'/>\n",
+    printf("<rect x='%d' y='0' width='1' height='%d'/>\n",
            i,lifetimes_arr[i]);
   }
-  //  printf("</g>\n");
+  printf("</g>\n");
   printf("</g>\n");
 
   printf("<!-- x and y axes -->\n");
@@ -1207,8 +1314,10 @@ int generate_svg3(string_t<`H> file) {
          HEIGHT, WIDTH, HEIGHT, WIDTH, HEIGHT+5);
   printf("<text x='-10' y='3' text-anchor='end'>%d objects</text>\n",
          max_lcount);
-  printf("<text x='%f' y='%f' text-anchor='middle'>%d clocks</text>\n",
-         WIDTH, HEIGHT+18, max_lifetime);
+  const char ?CE = "clocks";
+  if (use_events) CE = "events";
+  printf("<text x='%f' y='%f' text-anchor='middle'>%d %s</text>\n",
+         WIDTH, HEIGHT+18, max_lifetime, CE);
 
   printf("<!-- title -->\n");
   printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",

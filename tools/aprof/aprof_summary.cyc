@@ -91,11 +91,11 @@ static void print_results(stringptr_t rgn_name, int num_rgns, int count,
 {
   printf("\n%s (created %d time%s):\n",*rgn_name,num_rgns,
          (num_rgns==1)?"":"s");
-  printf("   Bytes     %%    Calls     %%\n");
-  printf("-----------------------------\n");
+  printf("   Bytes      %%    Calls      %%\n");
+  printf("-------------------------------\n");
   for (int i = 0; i < count; i++) {
     let $(pos,byte_count,call_count) = results[i][0];
-    printf("%8d  %4.1f %8d  %4.1f  %s\n",
+    printf("%8d  %5.1f %8d  %5.1f  %s\n",
            byte_count, 100.0 * byte_count / (double) total_bytes,
            call_count, 100.0 * call_count / (double) total_calls,
            *pos);
@@ -263,6 +263,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
 
   case &ReclaimE(_):
   case &FreeE(_):
+  case &MarkE(_):
   case &ResizeE(_):
   case &GcE(_): break;
   case &GcAddToHeapE(_): break;
@@ -336,6 +337,97 @@ int generate_summary(string_t<`H> file) {
     print_results(x->hd[0][0],x->hd[0][1][0][1],
 		  num,results,x->hd[0][2],x->hd[0][3]);
   }
+
+  return 0;
+}
+
+////////////////////////// OBJECT SIZES
+
+using List;
+static int uint_cmp(unsigned int i, unsigned int j) {
+  return (i<j)?(-1):((i>j)?1:0);
+}
+static int uint_hash(unsigned int i) {
+  return (int)i;
+}
+static int percent(unsigned int numerator, unsigned int denominator) {
+  return (int)((numerator * 100.0)/denominator);
+}
+/* Map size to number of objects allocated with that size */
+static struct Hashtable::Table<unsigned int,unsigned int> *
+  sizes_table = NULL;
+static void increment_size(unsigned int size) {
+  unsigned int scount = 0;
+  if (Hashtable::try_lookup((_@)sizes_table, size, &scount))
+    Hashtable::remove((_@)sizes_table, size);
+  Hashtable::insert((_@)sizes_table, size, scount+1);
+}
+static void
+init_globals_sizes() {
+  sizes_table =
+    Hashtable::create(101,uint_cmp,uint_hash);
+}
+static bool proc_event_sizes(aprof_event_t event) {
+  switch (event) {
+  case &AllocE(AllocEvent(time,_,rname,count,*rstats,addr)):
+    if (count > 0) increment_size(count);
+    break;
+  case &MarkE(_):
+  case &ReclaimE(_):
+  case &CreateE(_):
+  case &FreeE(_):
+  case &ResizeE(_):
+  case &GcE(_):
+  case &GcAddToHeapE(_):
+    break;
+  }
+  return true;
+}
+static unsigned int max_size = 0;
+static unsigned int max_scount = 0;
+static unsigned int cumulative_scount = 0;
+static unsigned int cumulative_size = 0;
+static list_t<$(unsigned int,unsigned int)@> sizes = NULL;
+static void record_size(unsigned int size,unsigned int scount) {
+  if (max_size < size) max_size = size;
+  if (max_scount < scount) max_scount = scount;
+  cumulative_scount += scount;
+  cumulative_size += size*scount;
+  sizes = new List(new $(size,scount),sizes);
+}
+static int pair_cmp($(unsigned int,`a)@x,$(unsigned int,`a)@y) {
+  if ((*x)[0] < (*y)[0]) return -1;
+  else if ((*x)[0] == (*y)[0]) return 0;
+  else return 1;
+}
+int generate_sizes(string_t<`H> file) {
+
+  init_globals_sizes();
+
+  fn_t clos = fp2fn(proc_event_sizes);
+  int ret = proc_file(file,clos);
+  if (ret != 0) return ret;
+
+  Hashtable::iter(record_size,(_@)sizes_table);
+  sizes = List::rimp_merge_sort(pair_cmp,sizes);
+
+  printf("    Size  Objects    %%    Bytes    %%\n");
+  printf("----------------------------------------------\n");
+
+  for (let l = sizes; l != NULL; l = l->tl) {
+    let &$(size,scount) = l->hd;
+    if (scount > 0)
+      fprintf(stderr,"%8u %8u %3u%% %8u %3u%%\n",size,scount,
+              percent(scount,cumulative_scount),
+              size*scount,
+              percent(size*scount,cumulative_size));
+  }
+
+  printf("----------------------------------------------\n");
+  printf("         %8u 100%% %8u 100%%\n\n",
+         cumulative_scount,
+         cumulative_size);
+
 
   return 0;
 }

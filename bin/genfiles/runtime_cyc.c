@@ -1143,6 +1143,14 @@ void CYCALLOCPROFILE_GC_add_to_heap(void *p,unsigned long bytes) {
   }
 #endif
 }
+void CYCALLOCPROFILE_mark(const char *s) {
+#ifdef CYC_REGION_PROFILE
+  if (alloc_log != NULL) {
+    fprintf(alloc_log,"%u @\t@\tmark\t%s\n",
+            clock(),s);
+  }
+#endif
+}
 
 /******* for turning off gc warnings about blacklisted blocks *******/
 /* These type/macro defns are taken from gc/include/gc.h and must

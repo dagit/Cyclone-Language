@@ -534,6 +534,10 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
   case &GcAddToHeapE(GcAddToHeapEvent(time,addr,amt,*rstats)):
     update_heap_stats(env,rstats);
     break;
+
+  case &MarkE(_):
+    break;
+
   }
 
   return true;

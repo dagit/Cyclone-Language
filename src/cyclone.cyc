@@ -505,6 +505,8 @@ FILE *try_file_open(string_t filename, string_t mode, string_t msg_part) {
   }
 }
 
+extern "C" void CYCALLOCPROFILE_mark(const char *s);
+
 list_t<Absyn::decl_t>
   do_stage(string_t stage_name,
            list_t<Absyn::decl_t,`H> f(`a, list_t<Absyn::decl_t,`H>),
@@ -514,6 +516,8 @@ list_t<Absyn::decl_t>
   bool other_exn = false;
   datatype exn @ex = new Core::Impossible(""); // definite assignment doesn't track data
   let ans = NULL;
+
+  CYCALLOCPROFILE_mark(stage_name);
 
   try ans = f(env,tds);
   catch {

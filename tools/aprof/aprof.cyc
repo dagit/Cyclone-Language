@@ -24,18 +24,26 @@
 
 namespace Aprof {
   bool verbose = true;
+  bool use_events = false;
 }
 
 using Aprof;
 
 static void usage(string_t<`H> argv0) __attribute__((noreturn)) {
   fprintf(stderr,
-          "usage: %s [-g] [-gp] [-q] [-d X] [-h] [profile]\n"
+          "usage: %s [options] [profile]\n"
           "  by default, generates an allocation summary for file amon.out\n"
-          "  -g   generate jgraph graph of dynamic memory usage over time\n"
-          "  -gp  generate gnuplot graph of dynamic memory usage over time\n"
-          "  -q   quiet output\n"
-          "  -d X show dynamic regions that are >= X (a fraction) of the total heap (def=%g)\n",
+          "  Options:\n"
+          "  -g     generate a jgraph graph of cumulative memory usage over time\n"
+          "  -gp    generate a gnuplot graph of cumulative memory usage over time\n"
+          "  -svg   generate an svg graph of cumulative memory usage over time\n"
+          "  -svg2  generate an svg graph of exact memory usage over time\n"
+          "  -svg3  generate an svg graph of object lifetimes\n"
+          "  -sizes generate a report on object sizes\n"
+          "  -q     quiet output\n"
+          "  -cd X  use X as a clock divisor\n"
+          "  -ev    use allocation events instead of clocks\n"
+          "  -d X   show dynamic regions that are >= X (a fraction) of the total heap (def=%g)\n",
           argv0,
           dyn_threshhold);
   exit(1);
@@ -49,7 +57,8 @@ int main(int argc, string_t<`H> ?`H argv) {
   bool do_svg = false;
   bool do_svg2 = false;
   bool do_svg3 = false;
-  unsigned int clockunits_override = 0;
+  bool do_sizes = false;
+  unsigned int clockdivisor_override = 0;
   string_t<`H> file;
 
   int argn = 1;
@@ -76,6 +85,9 @@ int main(int argc, string_t<`H> ?`H argv) {
     else if ( strcmp( argv[argn], "-svg3" ) == 0 ) {
       do_svg3 = true;
     }
+    else if ( strcmp( argv[argn], "-sizes" ) == 0 ) {
+      do_sizes = true;
+    }
     else if ( strcmp( argv[argn], "-q" ) == 0 ) {
       verbose = false;
     }
@@ -85,8 +97,11 @@ int main(int argc, string_t<`H> ?`H argv) {
     else if ( strcmp( argv[argn], "-a" ) == 0 ) {
       all_dynregions = true;
     }
-    else if ( strcmp( argv[argn], "-c" ) == 0 && argn+1 < argc ) {
-      clockunits_override = atoi(argv[++argn]);
+    else if ( strcmp( argv[argn], "-cd" ) == 0 && argn+1 < argc ) {
+      clockdivisor_override = atoi(argv[++argn]);
+    }
+    else if ( strcmp( argv[argn], "-ev" ) == 0 ) {
+      use_events = true;
     }
     else
       usage(argv[0]);
@@ -101,13 +116,14 @@ int main(int argc, string_t<`H> ?`H argv) {
     file = "amon.out";
 
 #ifdef __linux__
-  clockunits = 10000;
+  clockdivisor = 10000;
 #endif
 #ifdef __APPLE__
-  clockunits = 1;
+  clockdivisor = 1;
 #endif
-  if (clockunits_override)
-    clockunits = clockunits_override;
+  if (clockdivisor_override)
+    // since != 0 we won't divide by 0 later
+    clockdivisor = clockdivisor_override;
 
   int ret;
   if (do_graph)
@@ -120,6 +136,8 @@ int main(int argc, string_t<`H> ?`H argv) {
     ret = generate_svg2(file);
   else if (do_svg3)
     ret = generate_svg3(file);
+  else if (do_sizes)
+    ret = generate_sizes(file);
   else
     ret = generate_summary(file);
   return ret;
