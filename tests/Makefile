@@ -12,13 +12,12 @@ CYCC=../build/boot/cyclone$(EXE)
 CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c
 endif
 
-all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt pcredemo)
+all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt)
 	./test_regions
 	./cyctest
 	./foo < foo_input
 	./histogram histogram.txt
 	./test_getopt -abc123
-	./pcredemo "cat" "The cat in the hat walked in on the mat."
 
 hello$(EXE): hello.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
