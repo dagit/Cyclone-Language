@@ -427,10 +427,22 @@ and slurp = parse /* returns 1 if more to do, 0 if all done */
 { fputs("*__IGNORE_FOR_CYCLONE_MALLOC(",(FILE @)slurp_out);
   log("Warning: declaration of malloc sidestepped\n");
   return 1; }
+| ws+ "malloc" ws* "("
+/* malloc is a Cyclone keyword so our parser can't handle a malloc
+   declaration. */
+{ fputs(" __IGNORE_FOR_CYCLONE_MALLOC(",(FILE @)slurp_out);
+  log("Warning: declaration of malloc sidestepped\n");
+  return 1; }
 | "*" ws* "calloc" ws* "("
 /* calloc is a Cyclone keyword so our parser can't handle a calloc
    declaration. */
 { fputs("*__IGNORE_FOR_CYCLONE_CALLOC(",(FILE @)slurp_out);
+  log("Warning: declaration of calloc sidestepped\n");
+  return 1; }
+| ws+ "calloc" ws* "("
+/* calloc is a Cyclone keyword so our parser can't handle a calloc
+   declaration. */
+{ fputs(" __IGNORE_FOR_CYCLONE_CALLOC(",(FILE @)slurp_out);
   log("Warning: declaration of calloc sidestepped\n");
   return 1; }
 | "*region" /* Used in OS X in mach/vm_map.h, conflicts with our keyword */
