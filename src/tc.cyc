@@ -253,20 +253,21 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd) {
     }
     exp_t e;
     if(vd->initializer == null) {
-      e = default_initializer(te,t,loc);
-      vd->initializer = e;
+      if (!supports_default(t))
+        terr(loc,xprintf("initializer required for variable %s of type %s",
+                         qvar2string(vd->name), typ2string(t)));
     } else {
       e = (exp_t)vd->initializer;
+      // type-check the initializer
+      let t2 = Tcexp::tcExpInitializer(te,&t,e);
+      if (!coerce_assign(te,e,t))
+        terr(loc,
+             xprintf("%s is declared with type %s but initialized with type %s",
+                     qvar2string(vd->name), typ2string(t), typ2string(t2)));
+      // reject non-constant initializers
+      if (!Tcutil::is_const_exp(te,e))
+        terr(loc,"initializer is not a constant expression");
     }
-    // type-check the initializer
-    let t2 = Tcexp::tcExpInitializer(te,&t,e);
-    if (!coerce_assign(te,e,t))
-      terr(loc,
-	   xprintf("%s is declared with type %s but initialized with type %s",
-		   qvar2string(vd->name), typ2string(t), typ2string(t2)));
-    // reject non-constant initializers
-    if (!Tcutil::is_const_exp(te,e))
-      terr(loc,"initializer is not a constant expression");
   } else {
     // it is a function type -- check that the attributes are okay
     for (; atts != null; atts = atts->tl) {

@@ -2499,3 +2499,62 @@ bool is_const_exp(tenv_t te, exp_t e) {
   return cnst_exp(te,false,e);
 }
 
+static bool fields_support_default(list_t<tvar_t> tvs, list_t<type_t> ts, 
+                                   list_t<structfield_t> fs);
+bool supports_default(type_t t) {
+  switch (compress(t)) {
+  case VoidType: return true;
+  case &Evar(_,_,_): return false;
+  case &VarType(_): return false;
+  case &TunionType(_): return false;
+  case &TunionFieldType(_): return false;
+  case &PointerType(PtrInfo{elt_typ,_,nullable,_,bounds}):
+    switch (compress_conref(bounds)->v) {
+    case &Eq_constr(Unknown_b): return true;
+    case &Eq_constr(&Upper_b(_)):
+      switch (compress_conref(nullable)->v) {
+      case &Eq_constr(b): return b;
+      default: return false;
+      }
+    default: return false;
+    }
+  case &IntType(_,_): return true;
+  case FloatType: return true;
+  case DoubleType: return true;
+  case &ArrayType(t,_,_): return supports_default(t);
+  case &FnType(_): return false;
+  case &TupleType(tqs):
+    for (; tqs != null; tqs = tqs->tl)
+      if (!supports_default((*tqs->hd)[1])) return false;
+    return true;
+  case &StructType(_,ts,sdp):
+    if (sdp == null) return false;
+    structdecl_t sd = *sdp;
+    if (sd->fields == null) return false;
+    return fields_support_default(sd->tvs, ts,sd->fields->v);
+  case &UnionType(_,ts,udp):
+    if (udp == null) return false;
+    uniondecl_t ud = *udp;
+    if (ud->fields == null) return false;
+    return fields_support_default(ud->tvs, ts,ud->fields->v);
+  case &AnonStructType(fs): fallthru(fs);
+  case &AnonUnionType(fs):
+    return fields_support_default(null,null,fs);
+  case &EnumType(_,_): 
+    // FIX: may not include 0!
+    return true;
+  default: return false;
+  }
+}
+
+static bool fields_support_default(list_t<tvar_t> tvs, list_t<type_t> ts, 
+                                   list_t<structfield_t> fs) {
+  region rgn {
+    let inst = List::rzip(rgn,rgn,tvs,ts);
+    for (; fs != null; fs = fs->tl) {
+      type_t t = rsubstitute(rgn,inst,fs->hd->type);
+      if (!supports_default(t)) return false;
+    }
+  }
+  return true;
+}

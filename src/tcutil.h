@@ -156,6 +156,9 @@ extern bool is_const_exp(tenv_t te, exp_t e);
 
 // like Core::snd, but first argument is a tqual_t (not a BoxKind)
 extern type_t snd_tqt($(tqual_t,type_t)@`r);
+
+// does the type support "0" as a default value?
+extern bool supports_default(type_t);
 }
 
 #endif
