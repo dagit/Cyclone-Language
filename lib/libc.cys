@@ -3691,10 +3691,12 @@ epilogue {
   #endif
 }
 epilogue pselect {
+  /* FIX: check for possible fd_set overflow */
   extern "C" int pselect(int, fd_set *, fd_set *, fd_set *,
                        const struct timespec *, const sigset_t *);
 }
 epilogue select {
+  /* FIX: check for possible fd_set overflow */
   extern "C" int select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
 }
 epilogue {
@@ -3713,6 +3715,7 @@ cycstub {
     extern "C" void __stub_FD_SET(int, fd_set @);
     extern "C" void __stub_FD_ZERO(fd_set @);
   }
+  /* FIX: check for possible fd_set overflow on these */
   void FD_CLR(int a, fd_set @b) {
     return Csysselect::__stub_FD_CLR(a,b);
   }
@@ -4354,6 +4357,7 @@ cycstub gettimeofday {
   }
 }
 epilogue select {
+  /* FIX: check for possible fd_set overflow */
   extern "C" int select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
   /* Stubs for these are defined by sys/select.h */
   extern void FD_CLR(int, fd_set @);

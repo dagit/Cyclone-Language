@@ -37,7 +37,7 @@ CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))
 all: libs $(CYCCOMP) cycdoc$(EXE) buildlib$(EXE) 
 
 # See kludge described below
-libs: cstdio.h csignal.h $(CYCLIB) nogc.a 
+libs: cstdio.h csignal.h $(CYCLIB) nogc.a $(RUNTIME).$(O)
 
 cfiles: cstdio.h csignal.h $(C_SRCS) cycdoc.c buildlib.c $(C_LIBS) cstubs.c $(RUNTIME).c nogc.c precore_c.h
 
@@ -70,7 +70,7 @@ install_path.c: $(CYCDIR)/.version $(CYCDIR)/Makefile.inc
 	  version=`cat $<`; \
 	  echo "char *Cversion = \"$$version\";") > $@
 
-$(CYCLIB): $(O_LIBS) cstubs.$(O) $(RUNTIME).$(O)
+$(CYCLIB): $(O_LIBS) cstubs.$(O)
 ifdef MS
 	lib /out:$@ $^
 else

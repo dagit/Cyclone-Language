@@ -996,27 +996,32 @@ int main(int argc, string_t<`H> ?`H argv) {
     //      What about -g?
     string_t libcyc_flag;
     string_t nogc_filename;
+    string_t runtime_filename;
     string_t gc_filename; 
     if(pa_r) {
       libcyc_flag = "-lcyc_a";
       nogc_filename = "nogc_a.a";
+      runtime_filename = "runtime_cyc_a.o";
     } else if(nocheck_r) {
       libcyc_flag = "-lcyc_nocheck";
       nogc_filename = "nogc_nocheck.a";
+      runtime_filename = "runtime_cyc.o";
     } else {
       libcyc_flag = "-lcyc";
       nogc_filename = "nogc.a";
+      runtime_filename = "runtime_cyc.o";
     }
     gc_filename = "gc.a";
  
     let gc = (nogc_r ?
               do_find(cyclone_exec_path,nogc_filename):
               do_find(cyclone_exec_path,gc_filename));
+    let runtime = do_find(cyclone_exec_path,runtime_filename);
 
     // FIX: temporarily removed from interface check below
     //stdlib = list(new libcyc_flag);
     stdlib = NULL;
-    stdlib_string = aprintf(" %s %s", libcyc_flag, gc);
+    stdlib_string = aprintf(" %s %s %s", libcyc_flag, gc, runtime);
   }
 
   if (ic_r) try {
