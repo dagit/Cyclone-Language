@@ -1,28 +1,33 @@
 #include "cyc_include.h"
 
- typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef int Cyc_wchar_t;
-typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char; typedef unsigned short
-Cyc_u_short; typedef unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long;
-typedef unsigned short Cyc_ushort; typedef unsigned int Cyc_uint; typedef
-unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{ int
-tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec it_interval;
-struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef char* Cyc_caddr_t;
-typedef unsigned short Cyc_ino_t; typedef short Cyc_dev_t; typedef int Cyc_off_t;
-typedef unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int
-Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned int
-Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask; struct
-Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set Cyc__types_fd_set;
-typedef char* Cyc_Cstring; typedef struct _tagged_string Cyc_string; typedef
-struct _tagged_string Cyc_string_t; typedef struct _tagged_string* Cyc_stringptr;
-typedef int Cyc_bool; extern void* exit( int); extern void* abort(); struct Cyc_Core_Opt{
-void* v; } ; typedef struct Cyc_Core_Opt* Cyc_Core_opt_t; extern struct
-_tagged_string Cyc_Core_new_string( int); extern char Cyc_Core_InvalidArg[ 15u];
-struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; } ;
-extern char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{ char* tag;
-struct _tagged_string f1; } ; extern char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Not_found[ 14u];
-extern char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{ char*
-tag; struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
+unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char;
+typedef unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef
+unsigned int Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int
+Cyc_uint; typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
+int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
+char* Cyc_caddr_t; typedef unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t;
+typedef unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
+typedef short Cyc_int16_t; typedef unsigned short Cyc_u_int16_t; typedef int Cyc_int32_t;
+typedef unsigned int Cyc_u_int32_t; typedef long long Cyc_int64_t; typedef
+unsigned long long Cyc_u_int64_t; typedef int Cyc_register_t; typedef short Cyc_dev_t;
+typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
+Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
+typedef char* Cyc_addr_t; typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t;
+typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ;
+typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
+typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
+typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
+exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
+struct Cyc_Core_Opt* Cyc_Core_opt_t; extern struct _tagged_string Cyc_Core_new_string(
+int); extern char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Failure[ 12u];
+struct Cyc_Core_Failure_struct{ char* tag; struct _tagged_string f1; } ; extern
+char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{ char* tag;
+struct _tagged_string f1; } ; extern char Cyc_Core_Not_found[ 14u]; extern char
+Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{ char* tag;
+struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
 _tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
 struct _tagged_string Cstring_to_string( char*); extern int system( char*);
 struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List*
@@ -228,381 +233,384 @@ struct _tagged_string dest, struct _tagged_string src){ return Cyc_String_int_st
 dest, src, 0,( struct _tagged_string)({ char* _temp69=( char*)"String::strcat";
 struct _tagged_string _temp70; _temp70.curr= _temp69; _temp70.base= _temp69;
 _temp70.last_plus_one= _temp69 + 15; _temp70;}));} struct _tagged_string Cyc_String_strconcat(
-struct _tagged_string a, struct _tagged_string b){ unsigned int alen= Cyc_String_strlen(
-a); unsigned int blen= Cyc_String_strlen( b); struct _tagged_string ans= Cyc_Core_new_string((
-int)( alen + blen)); int i; int j; for( i= 0; i < alen; ++ i){({ struct
-_tagged_string _temp71= ans; char* _temp73= _temp71.curr + i; if( _temp71.base
-== 0? 1:( _temp73 < _temp71.base? 1: _temp73 >= _temp71.last_plus_one)){ _throw(
-Null_Exception);}* _temp73=({ struct _tagged_string _temp74= a; char* _temp76=
-_temp74.curr + i; if( _temp74.base == 0? 1:( _temp76 < _temp74.base? 1: _temp76
->= _temp74.last_plus_one)){ _throw( Null_Exception);}* _temp76;});});} for( j= 0;
-j < blen; ++ j){({ struct _tagged_string _temp77= ans; char* _temp79= _temp77.curr
-+( i + j); if( _temp77.base == 0? 1:( _temp79 < _temp77.base? 1: _temp79 >=
-_temp77.last_plus_one)){ _throw( Null_Exception);}* _temp79=({ struct
-_tagged_string _temp80= b; char* _temp82= _temp80.curr + j; if( _temp80.base ==
-0? 1:( _temp82 < _temp80.base? 1: _temp82 >= _temp80.last_plus_one)){ _throw(
-Null_Exception);}* _temp82;});});} return ans;} struct _tagged_string Cyc_String_strconcat_l(
+struct _tagged_string a, struct _tagged_string b){ unsigned int _temp71= Cyc_String_strlen(
+a); goto _LL72; _LL72: { unsigned int _temp73= Cyc_String_strlen( b); goto _LL74;
+_LL74: { struct _tagged_string ans= Cyc_Core_new_string(( int)( _temp71 +
+_temp73)); int i; int j; for( i= 0; i < _temp71; ++ i){({ struct _tagged_string
+_temp75= ans; char* _temp77= _temp75.curr + i; if( _temp75.base == 0? 1:(
+_temp77 < _temp75.base? 1: _temp77 >= _temp75.last_plus_one)){ _throw(
+Null_Exception);}* _temp77=({ struct _tagged_string _temp78= a; char* _temp80=
+_temp78.curr + i; if( _temp78.base == 0? 1:( _temp80 < _temp78.base? 1: _temp80
+>= _temp78.last_plus_one)){ _throw( Null_Exception);}* _temp80;});});} for( j= 0;
+j < _temp73; ++ j){({ struct _tagged_string _temp81= ans; char* _temp83= _temp81.curr
++( i + j); if( _temp81.base == 0? 1:( _temp83 < _temp81.base? 1: _temp83 >=
+_temp81.last_plus_one)){ _throw( Null_Exception);}* _temp83=({ struct
+_tagged_string _temp84= b; char* _temp86= _temp84.curr + j; if( _temp84.base ==
+0? 1:( _temp86 < _temp84.base? 1: _temp86 >= _temp84.last_plus_one)){ _throw(
+Null_Exception);}* _temp86;});});} return ans;}}} struct _tagged_string Cyc_String_strconcat_l(
 struct Cyc_List_List* strs){ unsigned int len; unsigned int total_len=(
-unsigned int) 0; struct Cyc_List_List* lens=({ struct Cyc_List_List* _temp93=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp93->hd=(
-void*)(( unsigned int) 0); _temp93->tl= 0; _temp93;}); struct Cyc_List_List* end=
+unsigned int) 0; struct Cyc_List_List* lens=({ struct Cyc_List_List* _temp97=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp97->hd=(
+void*)(( unsigned int) 0); _temp97->tl= 0; _temp97;}); struct Cyc_List_List* end=
 lens;{ struct Cyc_List_List* p= strs; for( 0; p != 0; p=({ struct Cyc_List_List*
-_temp83= p; if( _temp83 == 0){ _throw( Null_Exception);} _temp83->tl;})){ len=
-Cyc_String_strlen(*(( struct _tagged_string*)({ struct Cyc_List_List* _temp84= p;
-if( _temp84 == 0){ _throw( Null_Exception);} _temp84->hd;}))); total_len += len;({
-struct Cyc_List_List* _temp85= end; if( _temp85 == 0){ _throw( Null_Exception);}
-_temp85->tl=({ struct Cyc_List_List* _temp86=( struct Cyc_List_List*) GC_malloc(
-sizeof( struct Cyc_List_List)); _temp86->hd=( void*) len; _temp86->tl= 0;
-_temp86;});}); end=({ struct Cyc_List_List* _temp87= end; if( _temp87 == 0){
-_throw( Null_Exception);} _temp87->tl;});}} lens=({ struct Cyc_List_List*
-_temp88= lens; if( _temp88 == 0){ _throw( Null_Exception);} _temp88->tl;});{
+_temp87= p; if( _temp87 == 0){ _throw( Null_Exception);} _temp87->tl;})){ len=
+Cyc_String_strlen(*(( struct _tagged_string*)({ struct Cyc_List_List* _temp88= p;
+if( _temp88 == 0){ _throw( Null_Exception);} _temp88->hd;}))); total_len += len;({
+struct Cyc_List_List* _temp89= end; if( _temp89 == 0){ _throw( Null_Exception);}
+_temp89->tl=({ struct Cyc_List_List* _temp90=( struct Cyc_List_List*) GC_malloc(
+sizeof( struct Cyc_List_List)); _temp90->hd=( void*) len; _temp90->tl= 0;
+_temp90;});}); end=({ struct Cyc_List_List* _temp91= end; if( _temp91 == 0){
+_throw( Null_Exception);} _temp91->tl;});}} lens=({ struct Cyc_List_List*
+_temp92= lens; if( _temp92 == 0){ _throw( Null_Exception);} _temp92->tl;});{
 struct _tagged_string ans= Cyc_Core_new_string(( int) total_len); unsigned int i=(
 unsigned int) 0; while( strs != 0) { struct _tagged_string next=*(( struct
-_tagged_string*)({ struct Cyc_List_List* _temp92= strs; if( _temp92 == 0){
-_throw( Null_Exception);} _temp92->hd;})); len=( unsigned int)({ struct Cyc_List_List*
-_temp89= lens; if( _temp89 == 0){ _throw( Null_Exception);} _temp89->hd;}); Cyc_String_strncpy(
-ans,( int) i, next, 0, len); i += len; strs=({ struct Cyc_List_List* _temp90=
-strs; if( _temp90 == 0){ _throw( Null_Exception);} _temp90->tl;}); lens=({
-struct Cyc_List_List* _temp91= lens; if( _temp91 == 0){ _throw( Null_Exception);}
-_temp91->tl;});} return ans;}} struct _tagged_string Cyc_String_str_sepstr(
+_tagged_string*)({ struct Cyc_List_List* _temp96= strs; if( _temp96 == 0){
+_throw( Null_Exception);} _temp96->hd;})); len=( unsigned int)({ struct Cyc_List_List*
+_temp93= lens; if( _temp93 == 0){ _throw( Null_Exception);} _temp93->hd;}); Cyc_String_strncpy(
+ans,( int) i, next, 0, len); i += len; strs=({ struct Cyc_List_List* _temp94=
+strs; if( _temp94 == 0){ _throw( Null_Exception);} _temp94->tl;}); lens=({
+struct Cyc_List_List* _temp95= lens; if( _temp95 == 0){ _throw( Null_Exception);}
+_temp95->tl;});} return ans;}} struct _tagged_string Cyc_String_str_sepstr(
 struct Cyc_List_List* strs, struct _tagged_string separator){ if( strs == 0){
-return( struct _tagged_string)({ char* _temp94=( char*)""; struct _tagged_string
-_temp95; _temp95.curr= _temp94; _temp95.base= _temp94; _temp95.last_plus_one=
-_temp94 + 1; _temp95;});} if(({ struct Cyc_List_List* _temp96= strs; if( _temp96
-== 0){ _throw( Null_Exception);} _temp96->tl;}) == 0){ return Cyc_String_strdup(*((
-struct _tagged_string*)({ struct Cyc_List_List* _temp97= strs; if( _temp97 == 0){
-_throw( Null_Exception);} _temp97->hd;})));}{ struct Cyc_List_List* p= strs;
-struct Cyc_List_List* lens=({ struct Cyc_List_List* _temp111=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp111->hd=( void*)(( unsigned int)
-0); _temp111->tl= 0; _temp111;}); struct Cyc_List_List* end= lens; unsigned int
+return( struct _tagged_string)({ char* _temp98=( char*)""; struct _tagged_string
+_temp99; _temp99.curr= _temp98; _temp99.base= _temp98; _temp99.last_plus_one=
+_temp98 + 1; _temp99;});} if(({ struct Cyc_List_List* _temp100= strs; if(
+_temp100 == 0){ _throw( Null_Exception);} _temp100->tl;}) == 0){ return Cyc_String_strdup(*((
+struct _tagged_string*)({ struct Cyc_List_List* _temp101= strs; if( _temp101 ==
+0){ _throw( Null_Exception);} _temp101->hd;})));}{ struct Cyc_List_List* p= strs;
+struct Cyc_List_List* lens=({ struct Cyc_List_List* _temp115=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp115->hd=( void*)(( unsigned int)
+0); _temp115->tl= 0; _temp115;}); struct Cyc_List_List* end= lens; unsigned int
 len=( unsigned int) 0; unsigned int total_len=( unsigned int) 0; unsigned int
-list_len=( unsigned int) 0; for( 0; p != 0; p=({ struct Cyc_List_List* _temp98=
-p; if( _temp98 == 0){ _throw( Null_Exception);} _temp98->tl;})){ len= Cyc_String_strlen(*((
-struct _tagged_string*)({ struct Cyc_List_List* _temp99= p; if( _temp99 == 0){
-_throw( Null_Exception);} _temp99->hd;}))); total_len += len;({ struct Cyc_List_List*
-_temp100= end; if( _temp100 == 0){ _throw( Null_Exception);} _temp100->tl=({
-struct Cyc_List_List* _temp101=( struct Cyc_List_List*) GC_malloc( sizeof(
-struct Cyc_List_List)); _temp101->hd=( void*) len; _temp101->tl= 0; _temp101;});});
-end=({ struct Cyc_List_List* _temp102= end; if( _temp102 == 0){ _throw(
-Null_Exception);} _temp102->tl;}); ++ list_len;} lens=({ struct Cyc_List_List*
-_temp103= lens; if( _temp103 == 0){ _throw( Null_Exception);} _temp103->tl;});{
+list_len=( unsigned int) 0; for( 0; p != 0; p=({ struct Cyc_List_List* _temp102=
+p; if( _temp102 == 0){ _throw( Null_Exception);} _temp102->tl;})){ len= Cyc_String_strlen(*((
+struct _tagged_string*)({ struct Cyc_List_List* _temp103= p; if( _temp103 == 0){
+_throw( Null_Exception);} _temp103->hd;}))); total_len += len;({ struct Cyc_List_List*
+_temp104= end; if( _temp104 == 0){ _throw( Null_Exception);} _temp104->tl=({
+struct Cyc_List_List* _temp105=( struct Cyc_List_List*) GC_malloc( sizeof(
+struct Cyc_List_List)); _temp105->hd=( void*) len; _temp105->tl= 0; _temp105;});});
+end=({ struct Cyc_List_List* _temp106= end; if( _temp106 == 0){ _throw(
+Null_Exception);} _temp106->tl;}); ++ list_len;} lens=({ struct Cyc_List_List*
+_temp107= lens; if( _temp107 == 0){ _throw( Null_Exception);} _temp107->tl;});{
 unsigned int seplen= Cyc_String_strlen( separator); total_len +=( list_len - 1)
 * seplen;{ struct _tagged_string ans= Cyc_Core_new_string(( int) total_len);
-unsigned int i=( unsigned int) 0; while(({ struct Cyc_List_List* _temp104= strs;
-if( _temp104 == 0){ _throw( Null_Exception);} _temp104->tl;}) != 0) { struct
-_tagged_string next=*(( struct _tagged_string*)({ struct Cyc_List_List* _temp108=
-strs; if( _temp108 == 0){ _throw( Null_Exception);} _temp108->hd;})); len=(
-unsigned int)({ struct Cyc_List_List* _temp105= lens; if( _temp105 == 0){ _throw(
-Null_Exception);} _temp105->hd;}); Cyc_String_strncpy( ans,( int) i, next, 0,
+unsigned int i=( unsigned int) 0; while(({ struct Cyc_List_List* _temp108= strs;
+if( _temp108 == 0){ _throw( Null_Exception);} _temp108->tl;}) != 0) { struct
+_tagged_string next=*(( struct _tagged_string*)({ struct Cyc_List_List* _temp112=
+strs; if( _temp112 == 0){ _throw( Null_Exception);} _temp112->hd;})); len=(
+unsigned int)({ struct Cyc_List_List* _temp109= lens; if( _temp109 == 0){ _throw(
+Null_Exception);} _temp109->hd;}); Cyc_String_strncpy( ans,( int) i, next, 0,
 len); i += len; Cyc_String_strncpy( ans,( int) i, separator, 0, seplen); i +=
-seplen; strs=({ struct Cyc_List_List* _temp106= strs; if( _temp106 == 0){ _throw(
-Null_Exception);} _temp106->tl;}); lens=({ struct Cyc_List_List* _temp107= lens;
-if( _temp107 == 0){ _throw( Null_Exception);} _temp107->tl;});} Cyc_String_strncpy(
-ans,( int) i,*(( struct _tagged_string*)({ struct Cyc_List_List* _temp109= strs;
-if( _temp109 == 0){ _throw( Null_Exception);} _temp109->hd;})), 0,( unsigned int)({
-struct Cyc_List_List* _temp110= lens; if( _temp110 == 0){ _throw( Null_Exception);}
-_temp110->hd;})); return ans;}}}} struct _tagged_string Cyc_String_strncpy(
+seplen; strs=({ struct Cyc_List_List* _temp110= strs; if( _temp110 == 0){ _throw(
+Null_Exception);} _temp110->tl;}); lens=({ struct Cyc_List_List* _temp111= lens;
+if( _temp111 == 0){ _throw( Null_Exception);} _temp111->tl;});} Cyc_String_strncpy(
+ans,( int) i,*(( struct _tagged_string*)({ struct Cyc_List_List* _temp113= strs;
+if( _temp113 == 0){ _throw( Null_Exception);} _temp113->hd;})), 0,( unsigned int)({
+struct Cyc_List_List* _temp114= lens; if( _temp114 == 0){ _throw( Null_Exception);}
+_temp114->hd;})); return ans;}}}} struct _tagged_string Cyc_String_strncpy(
 struct _tagged_string dest, int destOfs, struct _tagged_string src, int srcOfs,
-unsigned int n){ unsigned int destSz=({ struct _tagged_string _temp134= dest;(
-unsigned int)( _temp134.last_plus_one - _temp134.curr);}); unsigned int srcSz=({
-struct _tagged_string _temp133= src;( unsigned int)( _temp133.last_plus_one -
-_temp133.curr);}); if( destOfs < 0){( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
-_temp112=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp112[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp113; _temp113.tag= Cyc_Core_InvalidArg;
-_temp113.f1=( struct _tagged_string)({ char* _temp114=( char*)"String::strncpy";
-struct _tagged_string _temp115; _temp115.curr= _temp114; _temp115.base= _temp114;
-_temp115.last_plus_one= _temp114 + 16; _temp115;}); _temp113;}); _temp112;}));}
-if( srcOfs < 0? 1:( n > 0? srcOfs >= srcSz: 0)){( void) _throw(( void*)({ struct
-Cyc_Core_InvalidArg_struct* _temp116=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp116[ 0]=({ struct
-Cyc_Core_InvalidArg_struct _temp117; _temp117.tag= Cyc_Core_InvalidArg; _temp117.f1=(
-struct _tagged_string)({ char* _temp118=( char*)"String::strncpy"; struct
-_tagged_string _temp119; _temp119.curr= _temp118; _temp119.base= _temp118;
-_temp119.last_plus_one= _temp118 + 16; _temp119;}); _temp117;}); _temp116;}));}
-if( n <= 0){ return dest;} if( destOfs + n > destSz? 1: srcOfs + n > srcSz){(
-void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp120=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp120[ 0]=({ struct
-Cyc_Core_InvalidArg_struct _temp121; _temp121.tag= Cyc_Core_InvalidArg; _temp121.f1=(
-struct _tagged_string)({ char* _temp122=( char*)"String::strncpy"; struct
-_tagged_string _temp123; _temp123.curr= _temp122; _temp123.base= _temp122;
-_temp123.last_plus_one= _temp122 + 16; _temp123;}); _temp121;}); _temp120;}));}{
-int i; for( i= 0; i < n; i ++){ char srcChar=({ struct _tagged_string _temp127=
-src; char* _temp129= _temp127.curr +( srcOfs + i); if( _temp127.base == 0? 1:(
-_temp129 < _temp127.base? 1: _temp129 >= _temp127.last_plus_one)){ _throw(
-Null_Exception);}* _temp129;}); if( srcChar =='\000'){ break;}({ struct
-_tagged_string _temp124= dest; char* _temp126= _temp124.curr +( destOfs + i);
-if( _temp124.base == 0? 1:( _temp126 < _temp124.base? 1: _temp126 >= _temp124.last_plus_one)){
-_throw( Null_Exception);}* _temp126= srcChar;});} for( 0; i < n; i ++){({ struct
-_tagged_string _temp130= dest; char* _temp132= _temp130.curr +( destOfs + i);
-if( _temp130.base == 0? 1:( _temp132 < _temp130.base? 1: _temp132 >= _temp130.last_plus_one)){
-_throw( Null_Exception);}* _temp132='\000';});} return dest;}} struct
-_tagged_string Cyc_String_zstrncpy( struct _tagged_string dest, int destOfs,
-struct _tagged_string src, int srcOfs, unsigned int n){ unsigned int destSz=({
-struct _tagged_string _temp154= dest;( unsigned int)( _temp154.last_plus_one -
-_temp154.curr);}); unsigned int srcSz=({ struct _tagged_string _temp153= src;(
-unsigned int)( _temp153.last_plus_one - _temp153.curr);}); if( destOfs < 0){(
-void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp135=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp135[ 0]=({ struct
-Cyc_Core_InvalidArg_struct _temp136; _temp136.tag= Cyc_Core_InvalidArg; _temp136.f1=(
-struct _tagged_string)({ char* _temp137=( char*)"String::zstrncpy"; struct
-_tagged_string _temp138; _temp138.curr= _temp137; _temp138.base= _temp137;
-_temp138.last_plus_one= _temp137 + 17; _temp138;}); _temp136;}); _temp135;}));}
-if( srcOfs < 0? 1:( n > 0? srcOfs >= srcSz: 0)){( void) _throw(( void*)({ struct
-Cyc_Core_InvalidArg_struct* _temp139=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp139[ 0]=({ struct
-Cyc_Core_InvalidArg_struct _temp140; _temp140.tag= Cyc_Core_InvalidArg; _temp140.f1=(
-struct _tagged_string)({ char* _temp141=( char*)"String::zstrncpy"; struct
-_tagged_string _temp142; _temp142.curr= _temp141; _temp142.base= _temp141;
-_temp142.last_plus_one= _temp141 + 17; _temp142;}); _temp140;}); _temp139;}));}
-if( n <= 0){ return dest;} if( destOfs + n > destSz? 1: srcOfs + n > srcSz){(
-void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp143=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp143[ 0]=({ struct
-Cyc_Core_InvalidArg_struct _temp144; _temp144.tag= Cyc_Core_InvalidArg; _temp144.f1=(
-struct _tagged_string)({ char* _temp145=( char*)"String::zstrncpy"; struct
-_tagged_string _temp146; _temp146.curr= _temp145; _temp146.base= _temp145;
-_temp146.last_plus_one= _temp145 + 17; _temp146;}); _temp144;}); _temp143;}));}{
-int i; for( i= 0; i < n; i ++){({ struct _tagged_string _temp147= dest; char*
-_temp149= _temp147.curr +( destOfs + i); if( _temp147.base == 0? 1:( _temp149 <
-_temp147.base? 1: _temp149 >= _temp147.last_plus_one)){ _throw( Null_Exception);}*
-_temp149=({ struct _tagged_string _temp150= src; char* _temp152= _temp150.curr +(
-srcOfs + i); if( _temp150.base == 0? 1:( _temp152 < _temp150.base? 1: _temp152
->= _temp150.last_plus_one)){ _throw( Null_Exception);}* _temp152;});});} return
-dest;}} struct _tagged_string Cyc_String_strcpy( struct _tagged_string dest,
+unsigned int n){ unsigned int _temp117=({ struct _tagged_string _temp116= dest;(
+unsigned int)( _temp116.last_plus_one - _temp116.curr);}); goto _LL118; _LL118: {
+unsigned int _temp120=({ struct _tagged_string _temp119= src;( unsigned int)(
+_temp119.last_plus_one - _temp119.curr);}); goto _LL121; _LL121: if( destOfs < 0){(
+void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp122=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp122[ 0]=({ struct
+Cyc_Core_InvalidArg_struct _temp123; _temp123.tag= Cyc_Core_InvalidArg; _temp123.f1=(
+struct _tagged_string)({ char* _temp124=( char*)"String::strncpy"; struct
+_tagged_string _temp125; _temp125.curr= _temp124; _temp125.base= _temp124;
+_temp125.last_plus_one= _temp124 + 16; _temp125;}); _temp123;}); _temp122;}));}
+if( srcOfs < 0? 1:( n > 0? srcOfs >= _temp120: 0)){( void) _throw(( void*)({
+struct Cyc_Core_InvalidArg_struct* _temp126=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp126[ 0]=({ struct
+Cyc_Core_InvalidArg_struct _temp127; _temp127.tag= Cyc_Core_InvalidArg; _temp127.f1=(
+struct _tagged_string)({ char* _temp128=( char*)"String::strncpy"; struct
+_tagged_string _temp129; _temp129.curr= _temp128; _temp129.base= _temp128;
+_temp129.last_plus_one= _temp128 + 16; _temp129;}); _temp127;}); _temp126;}));}
+if( n <= 0){ return dest;} if( destOfs + n > _temp117? 1: srcOfs + n > _temp120){(
+void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp130=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp130[ 0]=({ struct
+Cyc_Core_InvalidArg_struct _temp131; _temp131.tag= Cyc_Core_InvalidArg; _temp131.f1=(
+struct _tagged_string)({ char* _temp132=( char*)"String::strncpy"; struct
+_tagged_string _temp133; _temp133.curr= _temp132; _temp133.base= _temp132;
+_temp133.last_plus_one= _temp132 + 16; _temp133;}); _temp131;}); _temp130;}));}{
+int i; for( i= 0; i < n; i ++){ char _temp137=({ struct _tagged_string _temp134=
+src; char* _temp136= _temp134.curr +( srcOfs + i); if( _temp134.base == 0? 1:(
+_temp136 < _temp134.base? 1: _temp136 >= _temp134.last_plus_one)){ _throw(
+Null_Exception);}* _temp136;}); goto _LL138; _LL138: if( _temp137 =='\000'){
+break;}({ struct _tagged_string _temp139= dest; char* _temp141= _temp139.curr +(
+destOfs + i); if( _temp139.base == 0? 1:( _temp141 < _temp139.base? 1: _temp141
+>= _temp139.last_plus_one)){ _throw( Null_Exception);}* _temp141= _temp137;});}
+for( 0; i < n; i ++){({ struct _tagged_string _temp142= dest; char* _temp144=
+_temp142.curr +( destOfs + i); if( _temp142.base == 0? 1:( _temp144 < _temp142.base?
+1: _temp144 >= _temp142.last_plus_one)){ _throw( Null_Exception);}* _temp144='\000';});}
+return dest;}}} struct _tagged_string Cyc_String_zstrncpy( struct _tagged_string
+dest, int destOfs, struct _tagged_string src, int srcOfs, unsigned int n){
+unsigned int _temp146=({ struct _tagged_string _temp145= dest;( unsigned int)(
+_temp145.last_plus_one - _temp145.curr);}); goto _LL147; _LL147: { unsigned int
+_temp149=({ struct _tagged_string _temp148= src;( unsigned int)( _temp148.last_plus_one
+- _temp148.curr);}); goto _LL150; _LL150: if( destOfs < 0){( void) _throw(( void*)({
+struct Cyc_Core_InvalidArg_struct* _temp151=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp151[ 0]=({ struct
+Cyc_Core_InvalidArg_struct _temp152; _temp152.tag= Cyc_Core_InvalidArg; _temp152.f1=(
+struct _tagged_string)({ char* _temp153=( char*)"String::zstrncpy"; struct
+_tagged_string _temp154; _temp154.curr= _temp153; _temp154.base= _temp153;
+_temp154.last_plus_one= _temp153 + 17; _temp154;}); _temp152;}); _temp151;}));}
+if( srcOfs < 0? 1:( n > 0? srcOfs >= _temp149: 0)){( void) _throw(( void*)({
+struct Cyc_Core_InvalidArg_struct* _temp155=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp155[ 0]=({ struct
+Cyc_Core_InvalidArg_struct _temp156; _temp156.tag= Cyc_Core_InvalidArg; _temp156.f1=(
+struct _tagged_string)({ char* _temp157=( char*)"String::zstrncpy"; struct
+_tagged_string _temp158; _temp158.curr= _temp157; _temp158.base= _temp157;
+_temp158.last_plus_one= _temp157 + 17; _temp158;}); _temp156;}); _temp155;}));}
+if( n <= 0){ return dest;} if( destOfs + n > _temp146? 1: srcOfs + n > _temp149){(
+void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp159=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp159[ 0]=({ struct
+Cyc_Core_InvalidArg_struct _temp160; _temp160.tag= Cyc_Core_InvalidArg; _temp160.f1=(
+struct _tagged_string)({ char* _temp161=( char*)"String::zstrncpy"; struct
+_tagged_string _temp162; _temp162.curr= _temp161; _temp162.base= _temp161;
+_temp162.last_plus_one= _temp161 + 17; _temp162;}); _temp160;}); _temp159;}));}{
+int i; for( i= 0; i < n; i ++){({ struct _tagged_string _temp163= dest; char*
+_temp165= _temp163.curr +( destOfs + i); if( _temp163.base == 0? 1:( _temp165 <
+_temp163.base? 1: _temp165 >= _temp163.last_plus_one)){ _throw( Null_Exception);}*
+_temp165=({ struct _tagged_string _temp166= src; char* _temp168= _temp166.curr +(
+srcOfs + i); if( _temp166.base == 0? 1:( _temp168 < _temp166.base? 1: _temp168
+>= _temp166.last_plus_one)){ _throw( Null_Exception);}* _temp168;});});} return
+dest;}}} struct _tagged_string Cyc_String_strcpy( struct _tagged_string dest,
 struct _tagged_string src){ unsigned int len= Cyc_String_strlen( src); Cyc_String_strncpy(
-dest, 0, src, 0, len); if( len !=({ struct _tagged_string _temp155= dest;(
-unsigned int)( _temp155.last_plus_one - _temp155.curr);})){({ struct
-_tagged_string _temp156= dest; char* _temp158= _temp156.curr +( int) len; if(
-_temp156.base == 0? 1:( _temp158 < _temp156.base? 1: _temp158 >= _temp156.last_plus_one)){
-_throw( Null_Exception);}* _temp158='\000';});} return dest;} struct
+dest, 0, src, 0, len); if( len !=({ struct _tagged_string _temp169= dest;(
+unsigned int)( _temp169.last_plus_one - _temp169.curr);})){({ struct
+_tagged_string _temp170= dest; char* _temp172= _temp170.curr +( int) len; if(
+_temp170.base == 0? 1:( _temp172 < _temp170.base? 1: _temp172 >= _temp170.last_plus_one)){
+_throw( Null_Exception);}* _temp172='\000';});} return dest;} struct
 _tagged_string Cyc_String_strdup( struct _tagged_string src){ unsigned int len;
 struct _tagged_string temp; len= Cyc_String_strlen( src); temp= Cyc_Core_new_string((
 int) len); Cyc_String_strncpy( temp, 0, src, 0, len); return temp;} struct
 _tagged_string Cyc_String_expand( struct _tagged_string s, unsigned int sz){
 struct _tagged_string temp; unsigned int slen; slen= Cyc_String_strlen( s); sz=
 sz > slen? sz: slen; temp= Cyc_Core_new_string(( int) sz); Cyc_String_strncpy(
-temp, 0, s, 0, slen); if( slen !=({ struct _tagged_string _temp159= s;(
-unsigned int)( _temp159.last_plus_one - _temp159.curr);})){({ struct
-_tagged_string _temp160= temp; char* _temp162= _temp160.curr +( int) slen; if(
-_temp160.base == 0? 1:( _temp162 < _temp160.base? 1: _temp162 >= _temp160.last_plus_one)){
-_throw( Null_Exception);}* _temp162='\000';});} return temp;} struct
+temp, 0, s, 0, slen); if( slen !=({ struct _tagged_string _temp173= s;(
+unsigned int)( _temp173.last_plus_one - _temp173.curr);})){({ struct
+_tagged_string _temp174= temp; char* _temp176= _temp174.curr +( int) slen; if(
+_temp174.base == 0? 1:( _temp176 < _temp174.base? 1: _temp176 >= _temp174.last_plus_one)){
+_throw( Null_Exception);}* _temp176='\000';});} return temp;} struct
 _tagged_string Cyc_String_realloc_str( struct _tagged_string str, unsigned int
-sz){ unsigned int maxsizeP=({ struct _tagged_string _temp166= str;( unsigned int)(
-_temp166.last_plus_one - _temp166.curr);}); if( maxsizeP == 0){ maxsizeP= 30 >
+sz){ unsigned int maxsizeP=({ struct _tagged_string _temp180= str;( unsigned int)(
+_temp180.last_plus_one - _temp180.curr);}); if( maxsizeP == 0){ maxsizeP= 30 >
 sz? 30: sz; str= Cyc_Core_new_string(( int) maxsizeP);({ struct _tagged_string
-_temp163= str; char* _temp165= _temp163.curr + 0; if( _temp163.base == 0? 1:(
-_temp165 < _temp163.base? 1: _temp165 >= _temp163.last_plus_one)){ _throw(
-Null_Exception);}* _temp165='\000';});} else{ if( sz > maxsizeP){ maxsizeP=
+_temp177= str; char* _temp179= _temp177.curr + 0; if( _temp177.base == 0? 1:(
+_temp179 < _temp177.base? 1: _temp179 >= _temp177.last_plus_one)){ _throw(
+Null_Exception);}* _temp179='\000';});} else{ if( sz > maxsizeP){ maxsizeP=
 maxsizeP * 2 >( sz * 5) / 4? maxsizeP * 2:( sz * 5) / 4; str= Cyc_String_expand(
 str, maxsizeP);}} return str;} struct _tagged_string Cyc_String_substring(
 struct _tagged_string s, int start, unsigned int amt){ if(( start < 0? 1: amt <
-0)? 1:( start +( int) amt) - 1 >( int)({ struct _tagged_string _temp167= s;(
-unsigned int)( _temp167.last_plus_one - _temp167.curr);})){( void) _throw(( void*)({
-struct Cyc_Core_InvalidArg_struct* _temp168=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp168[ 0]=({ struct
-Cyc_Core_InvalidArg_struct _temp169; _temp169.tag= Cyc_Core_InvalidArg; _temp169.f1=(
-struct _tagged_string)({ char* _temp170=( char*)"String::substring"; struct
-_tagged_string _temp171; _temp171.curr= _temp170; _temp171.base= _temp170;
-_temp171.last_plus_one= _temp170 + 18; _temp171;}); _temp169;}); _temp168;}));}{
+0)? 1:( start +( int) amt) - 1 >( int)({ struct _tagged_string _temp181= s;(
+unsigned int)( _temp181.last_plus_one - _temp181.curr);})){( void) _throw(( void*)({
+struct Cyc_Core_InvalidArg_struct* _temp182=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp182[ 0]=({ struct
+Cyc_Core_InvalidArg_struct _temp183; _temp183.tag= Cyc_Core_InvalidArg; _temp183.f1=(
+struct _tagged_string)({ char* _temp184=( char*)"String::substring"; struct
+_tagged_string _temp185; _temp185.curr= _temp184; _temp185.base= _temp184;
+_temp185.last_plus_one= _temp184 + 18; _temp185;}); _temp183;}); _temp182;}));}{
 struct _tagged_string ans= Cyc_Core_new_string(( int)( amt + 1));{ unsigned int
-i=( unsigned int) 0; for( 0; i < amt; ++ i){({ struct _tagged_string _temp172=
-ans; char* _temp174= _temp172.curr +( int) i; if( _temp172.base == 0? 1:(
-_temp174 < _temp172.base? 1: _temp174 >= _temp172.last_plus_one)){ _throw(
-Null_Exception);}* _temp174=({ struct _tagged_string _temp175= s; char* _temp177=
-_temp175.curr +( int)( start + i); if( _temp175.base == 0? 1:( _temp177 <
-_temp175.base? 1: _temp177 >= _temp175.last_plus_one)){ _throw( Null_Exception);}*
-_temp177;});});}}({ struct _tagged_string _temp178= ans; char* _temp180=
-_temp178.curr +( int) amt; if( _temp178.base == 0? 1:( _temp180 < _temp178.base?
-1: _temp180 >= _temp178.last_plus_one)){ _throw( Null_Exception);}* _temp180='\000';});
+i=( unsigned int) 0; for( 0; i < amt; ++ i){({ struct _tagged_string _temp186=
+ans; char* _temp188= _temp186.curr +( int) i; if( _temp186.base == 0? 1:(
+_temp188 < _temp186.base? 1: _temp188 >= _temp186.last_plus_one)){ _throw(
+Null_Exception);}* _temp188=({ struct _tagged_string _temp189= s; char* _temp191=
+_temp189.curr +( int)( start + i); if( _temp189.base == 0? 1:( _temp191 <
+_temp189.base? 1: _temp191 >= _temp189.last_plus_one)){ _throw( Null_Exception);}*
+_temp191;});});}}({ struct _tagged_string _temp192= ans; char* _temp194=
+_temp192.curr +( int) amt; if( _temp192.base == 0? 1:( _temp194 < _temp192.base?
+1: _temp194 >= _temp192.last_plus_one)){ _throw( Null_Exception);}* _temp194='\000';});
 return ans;}} struct _tagged_string Cyc_String_replace_suffix( struct
 _tagged_string src, struct _tagged_string curr_suffix, struct _tagged_string
-new_suffix){ unsigned int m=({ struct _tagged_string _temp196= src;(
-unsigned int)( _temp196.last_plus_one - _temp196.curr);}); unsigned int n=({
-struct _tagged_string _temp195= curr_suffix;( unsigned int)( _temp195.last_plus_one
-- _temp195.curr);}); struct _tagged_string err=( struct _tagged_string)({ char*
-_temp193=( char*)"String::replace_suffix"; struct _tagged_string _temp194;
-_temp194.curr= _temp193; _temp194.base= _temp193; _temp194.last_plus_one=
-_temp193 + 23; _temp194;}); if( m < n){( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
-_temp181=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp181[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp182; _temp182.tag= Cyc_Core_InvalidArg;
-_temp182.f1= err; _temp182;}); _temp181;}));}{ unsigned int i=( unsigned int) 1;
-for( 0; i <= n; ++ i){ if(({ struct _tagged_string _temp183= src; char* _temp185=
-_temp183.curr +( int)( m - i); if( _temp183.base == 0? 1:( _temp185 < _temp183.base?
-1: _temp185 >= _temp183.last_plus_one)){ _throw( Null_Exception);}* _temp185;})
-!=({ struct _tagged_string _temp186= curr_suffix; char* _temp188= _temp186.curr
-+( int)( n - i); if( _temp186.base == 0? 1:( _temp188 < _temp186.base? 1:
-_temp188 >= _temp186.last_plus_one)){ _throw( Null_Exception);}* _temp188;})){(
-void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp189=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp189[ 0]=({ struct
-Cyc_Core_InvalidArg_struct _temp190; _temp190.tag= Cyc_Core_InvalidArg; _temp190.f1=
-err; _temp190;}); _temp189;}));}}}{ struct _tagged_string ans= Cyc_Core_new_string((
-int)(( m - n) +({ struct _tagged_string _temp192= new_suffix;( unsigned int)(
-_temp192.last_plus_one - _temp192.curr);}))); Cyc_String_strncpy( ans, 0, src, 0,
+new_suffix){ unsigned int m=({ struct _tagged_string _temp210= src;(
+unsigned int)( _temp210.last_plus_one - _temp210.curr);}); unsigned int n=({
+struct _tagged_string _temp209= curr_suffix;( unsigned int)( _temp209.last_plus_one
+- _temp209.curr);}); struct _tagged_string err=( struct _tagged_string)({ char*
+_temp207=( char*)"String::replace_suffix"; struct _tagged_string _temp208;
+_temp208.curr= _temp207; _temp208.base= _temp207; _temp208.last_plus_one=
+_temp207 + 23; _temp208;}); if( m < n){( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
+_temp195=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
+_temp195[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp196; _temp196.tag= Cyc_Core_InvalidArg;
+_temp196.f1= err; _temp196;}); _temp195;}));}{ unsigned int i=( unsigned int) 1;
+for( 0; i <= n; ++ i){ if(({ struct _tagged_string _temp197= src; char* _temp199=
+_temp197.curr +( int)( m - i); if( _temp197.base == 0? 1:( _temp199 < _temp197.base?
+1: _temp199 >= _temp197.last_plus_one)){ _throw( Null_Exception);}* _temp199;})
+!=({ struct _tagged_string _temp200= curr_suffix; char* _temp202= _temp200.curr
++( int)( n - i); if( _temp200.base == 0? 1:( _temp202 < _temp200.base? 1:
+_temp202 >= _temp200.last_plus_one)){ _throw( Null_Exception);}* _temp202;})){(
+void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp203=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp203[ 0]=({ struct
+Cyc_Core_InvalidArg_struct _temp204; _temp204.tag= Cyc_Core_InvalidArg; _temp204.f1=
+err; _temp204;}); _temp203;}));}}}{ struct _tagged_string ans= Cyc_Core_new_string((
+int)(( m - n) +({ struct _tagged_string _temp206= new_suffix;( unsigned int)(
+_temp206.last_plus_one - _temp206.curr);}))); Cyc_String_strncpy( ans, 0, src, 0,
 m - n); Cyc_String_strncpy( ans,( int)( m - n), new_suffix, 0,({ struct
-_tagged_string _temp191= new_suffix;( unsigned int)( _temp191.last_plus_one -
-_temp191.curr);})); return ans;}} struct _tagged_string Cyc_String_strpbrk(
+_tagged_string _temp205= new_suffix;( unsigned int)( _temp205.last_plus_one -
+_temp205.curr);})); return ans;}} struct _tagged_string Cyc_String_strpbrk(
 struct _tagged_string s, struct _tagged_string accept){ int len=( int) Cyc_String_int_strleno(
-s, 0,( struct _tagged_string)({ char* _temp206=( char*)"String::strpbrk"; struct
-_tagged_string _temp207; _temp207.curr= _temp206; _temp207.base= _temp206;
-_temp207.last_plus_one= _temp206 + 16; _temp207;})); char c='\000'; for( 0; len
-> 0?( c=({ struct _tagged_string _temp197= s; char* _temp198= _temp197.curr; if(
-_temp197.base == 0? 1:( _temp198 < _temp197.base? 1: _temp198 >= _temp197.last_plus_one)){
-_throw( Null_Exception);}* _temp198;})) != 0: 0; len --,({ struct _tagged_string*
-_temp199=& s; struct _tagged_string _temp200=* _temp199; _temp199->curr ++;
-_temp200;})){ int j= 0; for( 0; j <({ struct _tagged_string _temp201= accept;(
-unsigned int)( _temp201.last_plus_one - _temp201.curr);}); j ++){ if( c ==({
-struct _tagged_string _temp202= accept; char* _temp204= _temp202.curr + j; if(
-_temp202.base == 0? 1:( _temp204 < _temp202.base? 1: _temp204 >= _temp202.last_plus_one)){
-_throw( Null_Exception);}* _temp204;})){ return s;}}} return({ struct
-_tagged_string _temp205={ 0, 0, 0}; _temp205;});} struct _tagged_string Cyc_String_strchr(
-struct _tagged_string s, char c){ int len=( int) Cyc_String_int_strleno( s, 0,(
-struct _tagged_string)({ char* _temp213=( char*)"String::strchr"; struct
-_tagged_string _temp214; _temp214.curr= _temp213; _temp214.base= _temp213;
-_temp214.last_plus_one= _temp213 + 15; _temp214;})); char c2='\000'; for( 0; len
-> 0?( c2=({ struct _tagged_string _temp208= s; char* _temp209= _temp208.curr;
-if( _temp208.base == 0? 1:( _temp209 < _temp208.base? 1: _temp209 >= _temp208.last_plus_one)){
-_throw( Null_Exception);}* _temp209;})) != 0: 0; len --,({ struct _tagged_string*
-_temp210=& s; struct _tagged_string _temp211=* _temp210; _temp210->curr ++;
-_temp211;})){ if( c2 == c){ return s;}} return({ struct _tagged_string _temp212={
-0, 0, 0}; _temp212;});} struct _tagged_string Cyc_String_strrchr( struct
-_tagged_string s, char c){ int len=( int) Cyc_String_int_strleno( s, 0,( struct
-_tagged_string)({ char* _temp220=( char*)"String::strrchr"; struct
+s, 0,( struct _tagged_string)({ char* _temp220=( char*)"String::strpbrk"; struct
 _tagged_string _temp221; _temp221.curr= _temp220; _temp221.base= _temp220;
-_temp221.last_plus_one= _temp220 + 16; _temp221;})); int i= len - 1; s.curr += i;
-for( 0; i >= 0; i --,({ struct _tagged_string* _temp215=& s; struct
-_tagged_string _temp216=* _temp215; _temp215->curr --; _temp216;})){ if(({
-struct _tagged_string _temp217= s; char* _temp218= _temp217.curr; if( _temp217.base
-== 0? 1:( _temp218 < _temp217.base? 1: _temp218 >= _temp217.last_plus_one)){
-_throw( Null_Exception);}* _temp218;}) == c){ return s;}} return({ struct
-_tagged_string _temp219={ 0, 0, 0}; _temp219;});} unsigned int Cyc_String_strspn(
+_temp221.last_plus_one= _temp220 + 16; _temp221;})); char c='\000'; for( 0; len
+> 0?( c=({ struct _tagged_string _temp211= s; char* _temp212= _temp211.curr; if(
+_temp211.base == 0? 1:( _temp212 < _temp211.base? 1: _temp212 >= _temp211.last_plus_one)){
+_throw( Null_Exception);}* _temp212;})) != 0: 0; len --,({ struct _tagged_string*
+_temp213=& s; struct _tagged_string _temp214=* _temp213; _temp213->curr ++;
+_temp214;})){ int j= 0; for( 0; j <({ struct _tagged_string _temp215= accept;(
+unsigned int)( _temp215.last_plus_one - _temp215.curr);}); j ++){ if( c ==({
+struct _tagged_string _temp216= accept; char* _temp218= _temp216.curr + j; if(
+_temp216.base == 0? 1:( _temp218 < _temp216.base? 1: _temp218 >= _temp216.last_plus_one)){
+_throw( Null_Exception);}* _temp218;})){ return s;}}} return({ struct
+_tagged_string _temp219={ 0, 0, 0}; _temp219;});} struct _tagged_string Cyc_String_strchr(
+struct _tagged_string s, char c){ int len=( int) Cyc_String_int_strleno( s, 0,(
+struct _tagged_string)({ char* _temp227=( char*)"String::strchr"; struct
+_tagged_string _temp228; _temp228.curr= _temp227; _temp228.base= _temp227;
+_temp228.last_plus_one= _temp227 + 15; _temp228;})); char c2='\000'; for( 0; len
+> 0?( c2=({ struct _tagged_string _temp222= s; char* _temp223= _temp222.curr;
+if( _temp222.base == 0? 1:( _temp223 < _temp222.base? 1: _temp223 >= _temp222.last_plus_one)){
+_throw( Null_Exception);}* _temp223;})) != 0: 0; len --,({ struct _tagged_string*
+_temp224=& s; struct _tagged_string _temp225=* _temp224; _temp224->curr ++;
+_temp225;})){ if( c2 == c){ return s;}} return({ struct _tagged_string _temp226={
+0, 0, 0}; _temp226;});} struct _tagged_string Cyc_String_strrchr( struct
+_tagged_string s, char c){ int len=( int) Cyc_String_int_strleno( s, 0,( struct
+_tagged_string)({ char* _temp234=( char*)"String::strrchr"; struct
+_tagged_string _temp235; _temp235.curr= _temp234; _temp235.base= _temp234;
+_temp235.last_plus_one= _temp234 + 16; _temp235;})); int i= len - 1; s.curr += i;
+for( 0; i >= 0; i --,({ struct _tagged_string* _temp229=& s; struct
+_tagged_string _temp230=* _temp229; _temp229->curr --; _temp230;})){ if(({
+struct _tagged_string _temp231= s; char* _temp232= _temp231.curr; if( _temp231.base
+== 0? 1:( _temp232 < _temp231.base? 1: _temp232 >= _temp231.last_plus_one)){
+_throw( Null_Exception);}* _temp232;}) == c){ return s;}} return({ struct
+_tagged_string _temp233={ 0, 0, 0}; _temp233;});} unsigned int Cyc_String_strspn(
 struct _tagged_string s, struct _tagged_string accept){ unsigned int len= Cyc_String_int_strleno(
-s, 0,( struct _tagged_string)({ char* _temp230=( char*)"String::strspn"; struct
-_tagged_string _temp231; _temp231.curr= _temp230; _temp231.base= _temp230;
-_temp231.last_plus_one= _temp230 + 15; _temp231;}));{ unsigned int i=(
+s, 0,( struct _tagged_string)({ char* _temp244=( char*)"String::strspn"; struct
+_tagged_string _temp245; _temp245.curr= _temp244; _temp245.base= _temp244;
+_temp245.last_plus_one= _temp244 + 15; _temp245;}));{ unsigned int i=(
 unsigned int) 0; for( 0; i < len; i ++){ int j; for( j= 0; j <({ struct
-_tagged_string _temp222= accept;( unsigned int)( _temp222.last_plus_one -
-_temp222.curr);}); j ++){ if(({ struct _tagged_string _temp223= s; char*
-_temp225= _temp223.curr +( int) i; if( _temp223.base == 0? 1:( _temp225 <
-_temp223.base? 1: _temp225 >= _temp223.last_plus_one)){ _throw( Null_Exception);}*
-_temp225;}) ==({ struct _tagged_string _temp226= accept; char* _temp228=
-_temp226.curr + j; if( _temp226.base == 0? 1:( _temp228 < _temp226.base? 1:
-_temp228 >= _temp226.last_plus_one)){ _throw( Null_Exception);}* _temp228;})){
-break;}} if( j ==({ struct _tagged_string _temp229= accept;( unsigned int)(
-_temp229.last_plus_one - _temp229.curr);})){ return i;}}} return len;} struct
+_tagged_string _temp236= accept;( unsigned int)( _temp236.last_plus_one -
+_temp236.curr);}); j ++){ if(({ struct _tagged_string _temp237= s; char*
+_temp239= _temp237.curr +( int) i; if( _temp237.base == 0? 1:( _temp239 <
+_temp237.base? 1: _temp239 >= _temp237.last_plus_one)){ _throw( Null_Exception);}*
+_temp239;}) ==({ struct _tagged_string _temp240= accept; char* _temp242=
+_temp240.curr + j; if( _temp240.base == 0? 1:( _temp242 < _temp240.base? 1:
+_temp242 >= _temp240.last_plus_one)){ _throw( Null_Exception);}* _temp242;})){
+break;}} if( j ==({ struct _tagged_string _temp243= accept;( unsigned int)(
+_temp243.last_plus_one - _temp243.curr);})){ return i;}}} return len;} struct
 Cyc_List_List* Cyc_String_explode( struct _tagged_string s){ struct Cyc_List_List*
 result= 0;{ int i=( int)( Cyc_String_strlen( s) - 1); for( 0; i >= 0; i --){
-result=({ struct Cyc_List_List* _temp232=( struct Cyc_List_List*) GC_malloc(
-sizeof( struct Cyc_List_List)); _temp232->hd=( void*)(( int)({ struct
-_tagged_string _temp233= s; char* _temp235= _temp233.curr + i; if( _temp233.base
-== 0? 1:( _temp235 < _temp233.base? 1: _temp235 >= _temp233.last_plus_one)){
-_throw( Null_Exception);}* _temp235;})); _temp232->tl= result; _temp232;});}}
+result=({ struct Cyc_List_List* _temp246=( struct Cyc_List_List*) GC_malloc(
+sizeof( struct Cyc_List_List)); _temp246->hd=( void*)(( int)({ struct
+_tagged_string _temp247= s; char* _temp249= _temp247.curr + i; if( _temp247.base
+== 0? 1:( _temp249 < _temp247.base? 1: _temp249 >= _temp247.last_plus_one)){
+_throw( Null_Exception);}* _temp249;})); _temp246->tl= result; _temp246;});}}
 return result;} struct _tagged_string Cyc_String_implode( struct Cyc_List_List*
 chars){ struct _tagged_string s= Cyc_Core_new_string((( int(*)( struct Cyc_List_List*
 x)) Cyc_List_length)( chars)); unsigned int i=( unsigned int) 0; while( chars !=
-0) {({ struct _tagged_string _temp236= s; char* _temp238= _temp236.curr +( int)(
-i ++); if( _temp236.base == 0? 1:( _temp238 < _temp236.base? 1: _temp238 >=
-_temp236.last_plus_one)){ _throw( Null_Exception);}* _temp238=( char)(( int)({
-struct Cyc_List_List* _temp239= chars; if( _temp239 == 0){ _throw(
-Null_Exception);} _temp239->hd;}));}); chars=({ struct Cyc_List_List* _temp240=
-chars; if( _temp240 == 0){ _throw( Null_Exception);} _temp240->tl;});} return s;}
+0) {({ struct _tagged_string _temp250= s; char* _temp252= _temp250.curr +( int)(
+i ++); if( _temp250.base == 0? 1:( _temp252 < _temp250.base? 1: _temp252 >=
+_temp250.last_plus_one)){ _throw( Null_Exception);}* _temp252=( char)(( int)({
+struct Cyc_List_List* _temp253= chars; if( _temp253 == 0){ _throw(
+Null_Exception);} _temp253->hd;}));}); chars=({ struct Cyc_List_List* _temp254=
+chars; if( _temp254 == 0){ _throw( Null_Exception);} _temp254->tl;});} return s;}
 int Cyc_String_to_int( struct _tagged_string s, int* offset){ int ans= 0; int sn=
-1; int digit_seen= 0; int i= offset == 0? 0:({ int* _temp265= offset; if(
-_temp265 == 0){ _throw( Null_Exception);}* _temp265;}); while( i <({ struct
-_tagged_string _temp241= s;( unsigned int)( _temp241.last_plus_one - _temp241.curr);})?
-Cyc_Character_isspace(({ struct _tagged_string _temp242= s; char* _temp244=
-_temp242.curr + i; if( _temp242.base == 0? 1:( _temp244 < _temp242.base? 1:
-_temp244 >= _temp242.last_plus_one)){ _throw( Null_Exception);}* _temp244;})): 0) {
-i ++;} if( i <({ struct _tagged_string _temp245= s;( unsigned int)( _temp245.last_plus_one
-- _temp245.curr);})?({ struct _tagged_string _temp246= s; char* _temp248=
-_temp246.curr + i; if( _temp246.base == 0? 1:( _temp248 < _temp246.base? 1:
-_temp248 >= _temp246.last_plus_one)){ _throw( Null_Exception);}* _temp248;}) =='-':
-0){ i ++; sn= - 1;} while( i <({ struct _tagged_string _temp249= s;(
-unsigned int)( _temp249.last_plus_one - _temp249.curr);})? Cyc_Character_isspace(({
-struct _tagged_string _temp250= s; char* _temp252= _temp250.curr + i; if(
-_temp250.base == 0? 1:( _temp252 < _temp250.base? 1: _temp252 >= _temp250.last_plus_one)){
-_throw( Null_Exception);}* _temp252;})): 0) { i ++;} while( i <({ struct
-_tagged_string _temp253= s;( unsigned int)( _temp253.last_plus_one - _temp253.curr);})?
-Cyc_Character_isdigit(({ struct _tagged_string _temp254= s; char* _temp256=
-_temp254.curr + i; if( _temp254.base == 0? 1:( _temp256 < _temp254.base? 1:
-_temp256 >= _temp254.last_plus_one)){ _throw( Null_Exception);}* _temp256;})): 0) {
-digit_seen= 1; ans= ans * 10 +( int)(({ struct _tagged_string _temp257= s; char*
-_temp259= _temp257.curr + i; if( _temp257.base == 0? 1:( _temp259 < _temp257.base?
-1: _temp259 >= _temp257.last_plus_one)){ _throw( Null_Exception);}* _temp259;})
+1; int digit_seen= 0; int i= offset == 0? 0:({ int* _temp279= offset; if(
+_temp279 == 0){ _throw( Null_Exception);}* _temp279;}); while( i <({ struct
+_tagged_string _temp255= s;( unsigned int)( _temp255.last_plus_one - _temp255.curr);})?
+Cyc_Character_isspace(({ struct _tagged_string _temp256= s; char* _temp258=
+_temp256.curr + i; if( _temp256.base == 0? 1:( _temp258 < _temp256.base? 1:
+_temp258 >= _temp256.last_plus_one)){ _throw( Null_Exception);}* _temp258;})): 0) {
+i ++;} if( i <({ struct _tagged_string _temp259= s;( unsigned int)( _temp259.last_plus_one
+- _temp259.curr);})?({ struct _tagged_string _temp260= s; char* _temp262=
+_temp260.curr + i; if( _temp260.base == 0? 1:( _temp262 < _temp260.base? 1:
+_temp262 >= _temp260.last_plus_one)){ _throw( Null_Exception);}* _temp262;}) =='-':
+0){ i ++; sn= - 1;} while( i <({ struct _tagged_string _temp263= s;(
+unsigned int)( _temp263.last_plus_one - _temp263.curr);})? Cyc_Character_isspace(({
+struct _tagged_string _temp264= s; char* _temp266= _temp264.curr + i; if(
+_temp264.base == 0? 1:( _temp266 < _temp264.base? 1: _temp266 >= _temp264.last_plus_one)){
+_throw( Null_Exception);}* _temp266;})): 0) { i ++;} while( i <({ struct
+_tagged_string _temp267= s;( unsigned int)( _temp267.last_plus_one - _temp267.curr);})?
+Cyc_Character_isdigit(({ struct _tagged_string _temp268= s; char* _temp270=
+_temp268.curr + i; if( _temp268.base == 0? 1:( _temp270 < _temp268.base? 1:
+_temp270 >= _temp268.last_plus_one)){ _throw( Null_Exception);}* _temp270;})): 0) {
+digit_seen= 1; ans= ans * 10 +( int)(({ struct _tagged_string _temp271= s; char*
+_temp273= _temp271.curr + i; if( _temp271.base == 0? 1:( _temp273 < _temp271.base?
+1: _temp273 >= _temp271.last_plus_one)){ _throw( Null_Exception);}* _temp273;})
 -'0'); i ++;} ans= ans * sn; if( ! digit_seen){( void) _throw(( void*)({ struct
-Cyc_Core_InvalidArg_struct* _temp260=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp260[ 0]=({ struct
-Cyc_Core_InvalidArg_struct _temp261; _temp261.tag= Cyc_Core_InvalidArg; _temp261.f1=(
-struct _tagged_string)({ char* _temp262=( char*)"String::to_int"; struct
-_tagged_string _temp263; _temp263.curr= _temp262; _temp263.base= _temp262;
-_temp263.last_plus_one= _temp262 + 15; _temp263;}); _temp261;}); _temp260;}));}
-if( offset != 0){({ int* _temp264= offset; if( _temp264 == 0){ _throw(
-Null_Exception);}* _temp264= i;});} return ans;} double Cyc_String_to_double(
+Cyc_Core_InvalidArg_struct* _temp274=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp274[ 0]=({ struct
+Cyc_Core_InvalidArg_struct _temp275; _temp275.tag= Cyc_Core_InvalidArg; _temp275.f1=(
+struct _tagged_string)({ char* _temp276=( char*)"String::to_int"; struct
+_tagged_string _temp277; _temp277.curr= _temp276; _temp277.base= _temp276;
+_temp277.last_plus_one= _temp276 + 15; _temp277;}); _temp275;}); _temp274;}));}
+if( offset != 0){({ int* _temp278= offset; if( _temp278 == 0){ _throw(
+Null_Exception);}* _temp278= i;});} return ans;} double Cyc_String_to_double(
 struct _tagged_string s, int* offset){ double ans=( double) 0.0; int sn= 1; int
-digit_seen= 0; int i= offset == 0? 0:({ int* _temp323= offset; if( _temp323 == 0){
-_throw( Null_Exception);}* _temp323;}); while( i <({ struct _tagged_string
-_temp266= s;( unsigned int)( _temp266.last_plus_one - _temp266.curr);})? Cyc_Character_isspace(({
-struct _tagged_string _temp267= s; char* _temp269= _temp267.curr + i; if(
-_temp267.base == 0? 1:( _temp269 < _temp267.base? 1: _temp269 >= _temp267.last_plus_one)){
-_throw( Null_Exception);}* _temp269;})): 0) { i ++;} if( i <({ struct
-_tagged_string _temp270= s;( unsigned int)( _temp270.last_plus_one - _temp270.curr);})?({
-struct _tagged_string _temp271= s; char* _temp273= _temp271.curr + i; if(
-_temp271.base == 0? 1:( _temp273 < _temp271.base? 1: _temp273 >= _temp271.last_plus_one)){
-_throw( Null_Exception);}* _temp273;}) =='-': 0){ i ++; sn= - 1;} while( i <({
-struct _tagged_string _temp274= s;( unsigned int)( _temp274.last_plus_one -
-_temp274.curr);})? Cyc_Character_isdigit(({ struct _tagged_string _temp275= s;
-char* _temp277= _temp275.curr + i; if( _temp275.base == 0? 1:( _temp277 <
-_temp275.base? 1: _temp277 >= _temp275.last_plus_one)){ _throw( Null_Exception);}*
-_temp277;})): 0) { digit_seen= 1; ans= ans * 10.0 +( double)(({ struct
-_tagged_string _temp278= s; char* _temp280= _temp278.curr + i; if( _temp278.base
-== 0? 1:( _temp280 < _temp278.base? 1: _temp280 >= _temp278.last_plus_one)){
-_throw( Null_Exception);}* _temp280;}) -'0'); i ++;} if( i <({ struct
-_tagged_string _temp281= s;( unsigned int)( _temp281.last_plus_one - _temp281.curr);})?({
-struct _tagged_string _temp282= s; char* _temp284= _temp282.curr + i; if(
-_temp282.base == 0? 1:( _temp284 < _temp282.base? 1: _temp284 >= _temp282.last_plus_one)){
-_throw( Null_Exception);}* _temp284;}) =='.': 0){ i ++;{ double divisor=( double)
-0.1; while( i <({ struct _tagged_string _temp285= s;( unsigned int)( _temp285.last_plus_one
-- _temp285.curr);})? Cyc_Character_isdigit(({ struct _tagged_string _temp286= s;
-char* _temp288= _temp286.curr + i; if( _temp286.base == 0? 1:( _temp288 <
-_temp286.base? 1: _temp288 >= _temp286.last_plus_one)){ _throw( Null_Exception);}*
-_temp288;})): 0) { digit_seen= 1; ans= ans +( double)(({ struct _tagged_string
-_temp289= s; char* _temp291= _temp289.curr + i; if( _temp289.base == 0? 1:(
-_temp291 < _temp289.base? 1: _temp291 >= _temp289.last_plus_one)){ _throw(
-Null_Exception);}* _temp291;}) -'0') * divisor; divisor= divisor / 10.0; i ++;}}}
+digit_seen= 0; int i= offset == 0? 0:({ int* _temp337= offset; if( _temp337 == 0){
+_throw( Null_Exception);}* _temp337;}); while( i <({ struct _tagged_string
+_temp280= s;( unsigned int)( _temp280.last_plus_one - _temp280.curr);})? Cyc_Character_isspace(({
+struct _tagged_string _temp281= s; char* _temp283= _temp281.curr + i; if(
+_temp281.base == 0? 1:( _temp283 < _temp281.base? 1: _temp283 >= _temp281.last_plus_one)){
+_throw( Null_Exception);}* _temp283;})): 0) { i ++;} if( i <({ struct
+_tagged_string _temp284= s;( unsigned int)( _temp284.last_plus_one - _temp284.curr);})?({
+struct _tagged_string _temp285= s; char* _temp287= _temp285.curr + i; if(
+_temp285.base == 0? 1:( _temp287 < _temp285.base? 1: _temp287 >= _temp285.last_plus_one)){
+_throw( Null_Exception);}* _temp287;}) =='-': 0){ i ++; sn= - 1;} while( i <({
+struct _tagged_string _temp288= s;( unsigned int)( _temp288.last_plus_one -
+_temp288.curr);})? Cyc_Character_isdigit(({ struct _tagged_string _temp289= s;
+char* _temp291= _temp289.curr + i; if( _temp289.base == 0? 1:( _temp291 <
+_temp289.base? 1: _temp291 >= _temp289.last_plus_one)){ _throw( Null_Exception);}*
+_temp291;})): 0) { digit_seen= 1; ans= ans * 10.0 +( double)(({ struct
+_tagged_string _temp292= s; char* _temp294= _temp292.curr + i; if( _temp292.base
+== 0? 1:( _temp294 < _temp292.base? 1: _temp294 >= _temp292.last_plus_one)){
+_throw( Null_Exception);}* _temp294;}) -'0'); i ++;} if( i <({ struct
+_tagged_string _temp295= s;( unsigned int)( _temp295.last_plus_one - _temp295.curr);})?({
+struct _tagged_string _temp296= s; char* _temp298= _temp296.curr + i; if(
+_temp296.base == 0? 1:( _temp298 < _temp296.base? 1: _temp298 >= _temp296.last_plus_one)){
+_throw( Null_Exception);}* _temp298;}) =='.': 0){ i ++;{ double divisor=( double)
+0.1; while( i <({ struct _tagged_string _temp299= s;( unsigned int)( _temp299.last_plus_one
+- _temp299.curr);})? Cyc_Character_isdigit(({ struct _tagged_string _temp300= s;
+char* _temp302= _temp300.curr + i; if( _temp300.base == 0? 1:( _temp302 <
+_temp300.base? 1: _temp302 >= _temp300.last_plus_one)){ _throw( Null_Exception);}*
+_temp302;})): 0) { digit_seen= 1; ans= ans +( double)(({ struct _tagged_string
+_temp303= s; char* _temp305= _temp303.curr + i; if( _temp303.base == 0? 1:(
+_temp305 < _temp303.base? 1: _temp305 >= _temp303.last_plus_one)){ _throw(
+Null_Exception);}* _temp305;}) -'0') * divisor; divisor= divisor / 10.0; i ++;}}}
 if( ! digit_seen){( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
-_temp292=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp292[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp293; _temp293.tag= Cyc_Core_InvalidArg;
-_temp293.f1=( struct _tagged_string)({ char* _temp294=( char*)"String::to_double";
-struct _tagged_string _temp295; _temp295.curr= _temp294; _temp295.base= _temp294;
-_temp295.last_plus_one= _temp294 + 18; _temp295;}); _temp293;}); _temp292;}));}
-if( i <({ struct _tagged_string _temp296= s;( unsigned int)( _temp296.last_plus_one
-- _temp296.curr);})?({ struct _tagged_string _temp297= s; char* _temp299=
-_temp297.curr + i; if( _temp297.base == 0? 1:( _temp299 < _temp297.base? 1:
-_temp299 >= _temp297.last_plus_one)){ _throw( Null_Exception);}* _temp299;}) =='e'?
-1:({ struct _tagged_string _temp300= s; char* _temp302= _temp300.curr + i; if(
-_temp300.base == 0? 1:( _temp302 < _temp300.base? 1: _temp302 >= _temp300.last_plus_one)){
-_throw( Null_Exception);}* _temp302;}) =='E': 0){ i ++;{ int exponent= 0; int
-exp_sign= 1; digit_seen= 0; if( i <({ struct _tagged_string _temp303= s;(
-unsigned int)( _temp303.last_plus_one - _temp303.curr);})?({ struct
-_tagged_string _temp304= s; char* _temp306= _temp304.curr + i; if( _temp304.base
-== 0? 1:( _temp306 < _temp304.base? 1: _temp306 >= _temp304.last_plus_one)){
-_throw( Null_Exception);}* _temp306;}) =='-': 0){ i ++; exp_sign= - 1;} else{
-if( i <({ struct _tagged_string _temp307= s;( unsigned int)( _temp307.last_plus_one
-- _temp307.curr);})?({ struct _tagged_string _temp308= s; char* _temp310=
-_temp308.curr + i; if( _temp308.base == 0? 1:( _temp310 < _temp308.base? 1:
-_temp310 >= _temp308.last_plus_one)){ _throw( Null_Exception);}* _temp310;}) =='+':
-0){ i ++;}} while( i <({ struct _tagged_string _temp311= s;( unsigned int)(
-_temp311.last_plus_one - _temp311.curr);})? Cyc_Character_isdigit(({ struct
-_tagged_string _temp312= s; char* _temp314= _temp312.curr + i; if( _temp312.base
-== 0? 1:( _temp314 < _temp312.base? 1: _temp314 >= _temp312.last_plus_one)){
-_throw( Null_Exception);}* _temp314;})): 0) { digit_seen= 1; exponent= exponent
-* 10 +( int)(({ struct _tagged_string _temp315= s; char* _temp317= _temp315.curr
-+ i; if( _temp315.base == 0? 1:( _temp317 < _temp315.base? 1: _temp317 >=
-_temp315.last_plus_one)){ _throw( Null_Exception);}* _temp317;}) -'0'); i ++;}
+_temp306=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
+_temp306[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp307; _temp307.tag= Cyc_Core_InvalidArg;
+_temp307.f1=( struct _tagged_string)({ char* _temp308=( char*)"String::to_double";
+struct _tagged_string _temp309; _temp309.curr= _temp308; _temp309.base= _temp308;
+_temp309.last_plus_one= _temp308 + 18; _temp309;}); _temp307;}); _temp306;}));}
+if( i <({ struct _tagged_string _temp310= s;( unsigned int)( _temp310.last_plus_one
+- _temp310.curr);})?({ struct _tagged_string _temp311= s; char* _temp313=
+_temp311.curr + i; if( _temp311.base == 0? 1:( _temp313 < _temp311.base? 1:
+_temp313 >= _temp311.last_plus_one)){ _throw( Null_Exception);}* _temp313;}) =='e'?
+1:({ struct _tagged_string _temp314= s; char* _temp316= _temp314.curr + i; if(
+_temp314.base == 0? 1:( _temp316 < _temp314.base? 1: _temp316 >= _temp314.last_plus_one)){
+_throw( Null_Exception);}* _temp316;}) =='E': 0){ i ++;{ int exponent= 0; int
+exp_sign= 1; digit_seen= 0; if( i <({ struct _tagged_string _temp317= s;(
+unsigned int)( _temp317.last_plus_one - _temp317.curr);})?({ struct
+_tagged_string _temp318= s; char* _temp320= _temp318.curr + i; if( _temp318.base
+== 0? 1:( _temp320 < _temp318.base? 1: _temp320 >= _temp318.last_plus_one)){
+_throw( Null_Exception);}* _temp320;}) =='-': 0){ i ++; exp_sign= - 1;} else{
+if( i <({ struct _tagged_string _temp321= s;( unsigned int)( _temp321.last_plus_one
+- _temp321.curr);})?({ struct _tagged_string _temp322= s; char* _temp324=
+_temp322.curr + i; if( _temp322.base == 0? 1:( _temp324 < _temp322.base? 1:
+_temp324 >= _temp322.last_plus_one)){ _throw( Null_Exception);}* _temp324;}) =='+':
+0){ i ++;}} while( i <({ struct _tagged_string _temp325= s;( unsigned int)(
+_temp325.last_plus_one - _temp325.curr);})? Cyc_Character_isdigit(({ struct
+_tagged_string _temp326= s; char* _temp328= _temp326.curr + i; if( _temp326.base
+== 0? 1:( _temp328 < _temp326.base? 1: _temp328 >= _temp326.last_plus_one)){
+_throw( Null_Exception);}* _temp328;})): 0) { digit_seen= 1; exponent= exponent
+* 10 +( int)(({ struct _tagged_string _temp329= s; char* _temp331= _temp329.curr
++ i; if( _temp329.base == 0? 1:( _temp331 < _temp329.base? 1: _temp331 >=
+_temp329.last_plus_one)){ _throw( Null_Exception);}* _temp331;}) -'0'); i ++;}
 if( ! digit_seen){( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
-_temp318=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp318[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp319; _temp319.tag= Cyc_Core_InvalidArg;
-_temp319.f1=( struct _tagged_string)({ char* _temp320=( char*)"String::to_double";
-struct _tagged_string _temp321; _temp321.curr= _temp320; _temp321.base= _temp320;
-_temp321.last_plus_one= _temp320 + 18; _temp321;}); _temp319;}); _temp318;}));}
+_temp332=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
+_temp332[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp333; _temp333.tag= Cyc_Core_InvalidArg;
+_temp333.f1=( struct _tagged_string)({ char* _temp334=( char*)"String::to_double";
+struct _tagged_string _temp335; _temp335.curr= _temp334; _temp335.base= _temp334;
+_temp335.last_plus_one= _temp334 + 18; _temp335;}); _temp333;}); _temp332;}));}
 ans= ans * pow(( double) 10.0,( double)( exponent * exp_sign));}} if( offset !=
-0){({ int* _temp322= offset; if( _temp322 == 0){ _throw( Null_Exception);}*
-_temp322= i;});} return ans * sn;}
+0){({ int* _temp336= offset; if( _temp336 == 0){ _throw( Null_Exception);}*
+_temp336= i;});} return ans * sn;}

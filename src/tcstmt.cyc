@@ -280,34 +280,16 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       }
 
       check_type(s0->loc,te,lookup_type_vars(te),MemKind,t);
+      let te2 = add_local_var(s->loc,te,vd);
       if (initializer != null) {
-	// special case -- fill in the size for t[] arrays
-	switch (compress(t)) {
-	case &ArrayType(telt,tq,sz):
-          if (sz == null) {
-	    switch (initializer->r) {
-	    case &Const_e(&String_c(s)):
-	      t = vd->type = 
-                new ArrayType(telt,tq,uint_exp(s.size,null)); break;
-	    case &UnresolvedMem_e(_,es): fallthru(es);
-	    case &Array_e(es):
-	      t = vd->type = 
-                new ArrayType(telt,tq,uint_exp(List::length(es),null));
-	      break;
-	    default: break;
-	    }
-	  }
-	  break;
-	default: break;
-	}
-        tcExpInitializer(te,&t,(exp_t)initializer);
-        if (!coerce_assign(te,(exp_t)initializer,t))
+        tcExpInitializer(te2,&t,(exp_t)initializer);
+        if (!coerce_assign(te2,(exp_t)initializer,t))
 	  terr(d->loc,
 	       xprintf("%s declared with type %s, initialized with type %s",
 		       *x, typ2string(t),
 		       typ2string(initializer->topt->v)));
       }
-      tcStmt(set_encloser(add_local_var(s->loc,te,vd),s0),s,false);
+      tcStmt(set_encloser(te2,s0),s,false);
       return;
 
     case &Let_d(p,*vds,*topt_ref,e,*exhaust):

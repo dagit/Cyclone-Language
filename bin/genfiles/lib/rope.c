@@ -1,28 +1,33 @@
 #include "cyc_include.h"
 
- typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef int Cyc_wchar_t;
-typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char; typedef unsigned short
-Cyc_u_short; typedef unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long;
-typedef unsigned short Cyc_ushort; typedef unsigned int Cyc_uint; typedef
-unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{ int
-tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec it_interval;
-struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef char* Cyc_caddr_t;
-typedef unsigned short Cyc_ino_t; typedef short Cyc_dev_t; typedef int Cyc_off_t;
-typedef unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int
-Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned int
-Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask; struct
-Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set Cyc__types_fd_set;
-typedef char* Cyc_Cstring; typedef struct _tagged_string Cyc_string; typedef
-struct _tagged_string Cyc_string_t; typedef struct _tagged_string* Cyc_stringptr;
-typedef int Cyc_bool; extern void* exit( int); extern void* abort(); struct Cyc_Core_Opt{
-void* v; } ; typedef struct Cyc_Core_Opt* Cyc_Core_opt_t; extern struct
-_tagged_string Cyc_Core_new_string( int); extern char Cyc_Core_InvalidArg[ 15u];
-struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; } ;
-extern char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{ char* tag;
-struct _tagged_string f1; } ; extern char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Not_found[ 14u];
-extern char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{ char*
-tag; struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
+unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char;
+typedef unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef
+unsigned int Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int
+Cyc_uint; typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
+int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
+char* Cyc_caddr_t; typedef unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t;
+typedef unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
+typedef short Cyc_int16_t; typedef unsigned short Cyc_u_int16_t; typedef int Cyc_int32_t;
+typedef unsigned int Cyc_u_int32_t; typedef long long Cyc_int64_t; typedef
+unsigned long long Cyc_u_int64_t; typedef int Cyc_register_t; typedef short Cyc_dev_t;
+typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
+Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
+typedef char* Cyc_addr_t; typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t;
+typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ;
+typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
+typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
+typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
+exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
+struct Cyc_Core_Opt* Cyc_Core_opt_t; extern struct _tagged_string Cyc_Core_new_string(
+int); extern char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Failure[ 12u];
+struct Cyc_Core_Failure_struct{ char* tag; struct _tagged_string f1; } ; extern
+char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{ char* tag;
+struct _tagged_string f1; } ; extern char Cyc_Core_Not_found[ 14u]; extern char
+Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{ char* tag;
+struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
 _tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
 struct _tagged_string Cstring_to_string( char*); extern int system( char*);
 struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; typedef struct Cyc_List_List*
@@ -105,19 +110,19 @@ if(*(( int*) _temp36) == Cyc_Rope_String_rope){ _LL43: _temp42=( struct
 _tagged_string)(( struct Cyc_Rope_String_rope_struct*) _temp36)->f1; goto _LL39;}
 else{ goto _LL40;} _LL40: if(*(( int*) _temp36) == Cyc_Rope_Array_rope){ _LL45:
 _temp44=( struct _tagged_ptr0)(( struct Cyc_Rope_Array_rope_struct*) _temp36)->f1;
-goto _LL41;} else{ goto _LL37;} _LL39: { unsigned int len= Cyc_String_strlen(
-_temp42); Cyc_String_strncpy( s,( int) i, _temp42, 0, len); return i + len;}
-_LL41: { unsigned int len=({ struct _tagged_ptr0 _temp49= _temp44;( unsigned int)(
-_temp49.last_plus_one - _temp49.curr);});{ int j= 0; for( 0; j < len; j ++){ i=
-Cyc_Rope_flatten_it( s, i,({ struct _tagged_ptr0 _temp46= _temp44; struct Cyc_Rope_Rope_node**
-_temp48= _temp46.curr + j; if( _temp46.base == 0? 1:( _temp48 < _temp46.base? 1:
-_temp48 >= _temp46.last_plus_one)){ _throw( Null_Exception);}* _temp48;}));}}
-return i;} _LL37:;} struct _tagged_string Cyc_Rope_to_string( struct Cyc_Rope_Rope_node*
-r){ struct _tagged_string s= Cyc_Core_new_string(( int) Cyc_Rope_length( r));
-Cyc_Rope_flatten_it( s,( unsigned int) 0, r);( void*)( r->v=( void*)(( void*)({
-struct Cyc_Rope_String_rope_struct* _temp50=( struct Cyc_Rope_String_rope_struct*)
-GC_malloc( sizeof( struct Cyc_Rope_String_rope_struct)); _temp50[ 0]=({ struct
-Cyc_Rope_String_rope_struct _temp51; _temp51.tag= Cyc_Rope_String_rope; _temp51.f1=
-s; _temp51;}); _temp50;}))); return s;} int Cyc_Rope_cmp( struct Cyc_Rope_Rope_node*
+goto _LL41;} else{ goto _LL37;} _LL39: { unsigned int _temp46= Cyc_String_strlen(
+_temp42); goto _LL47; _LL47: Cyc_String_strncpy( s,( int) i, _temp42, 0, _temp46);
+return i + _temp46;} _LL41: { unsigned int _temp49=({ struct _tagged_ptr0
+_temp48= _temp44;( unsigned int)( _temp48.last_plus_one - _temp48.curr);}); goto
+_LL50; _LL50:{ int j= 0; for( 0; j < _temp49; j ++){ i= Cyc_Rope_flatten_it( s,
+i,({ struct _tagged_ptr0 _temp51= _temp44; struct Cyc_Rope_Rope_node** _temp53=
+_temp51.curr + j; if( _temp51.base == 0? 1:( _temp53 < _temp51.base? 1: _temp53
+>= _temp51.last_plus_one)){ _throw( Null_Exception);}* _temp53;}));}} return i;}
+_LL37:;} struct _tagged_string Cyc_Rope_to_string( struct Cyc_Rope_Rope_node* r){
+struct _tagged_string s= Cyc_Core_new_string(( int) Cyc_Rope_length( r)); Cyc_Rope_flatten_it(
+s,( unsigned int) 0, r);( void*)( r->v=( void*)(( void*)({ struct Cyc_Rope_String_rope_struct*
+_temp54=( struct Cyc_Rope_String_rope_struct*) GC_malloc( sizeof( struct Cyc_Rope_String_rope_struct));
+_temp54[ 0]=({ struct Cyc_Rope_String_rope_struct _temp55; _temp55.tag= Cyc_Rope_String_rope;
+_temp55.f1= s; _temp55;}); _temp54;}))); return s;} int Cyc_Rope_cmp( struct Cyc_Rope_Rope_node*
 r1, struct Cyc_Rope_Rope_node* r2){ return Cyc_String_strcmp( Cyc_Rope_to_string(
 r1), Cyc_Rope_to_string( r2));}

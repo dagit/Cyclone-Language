@@ -2635,6 +2635,9 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       case &Let_d(p,_,topt,e,exhaust):
         // Handle the special case where the pattern is a 
         // variable just like a variable declaration
+	/* JGM: this isn't valid because of the following bad code:
+	 *   int *i = new 3;
+	 *   let i = i;
         let var_case = false;
         struct Vardecl *vdopt = null;
         switch (p->r) {
@@ -2647,6 +2650,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         default: break;
         }
         if (var_case) fallthru((vardecl_t)vdopt);
+	*/
         // we treat let declarations specially because they may need
         // statements in addition to declarations, so we splice them in
         // as a statement.  Other declarations only produce declarations.

@@ -1,23 +1,28 @@
 #include "cyc_include.h"
 
- typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef int Cyc_wchar_t;
-typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char; typedef unsigned short
-Cyc_u_short; typedef unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long;
-typedef unsigned short Cyc_ushort; typedef unsigned int Cyc_uint; typedef
-unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{ int
-tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec it_interval;
-struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef char* Cyc_caddr_t;
-typedef unsigned short Cyc_ino_t; typedef short Cyc_dev_t; typedef int Cyc_off_t;
-typedef unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int
-Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned int
-Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask; struct
-Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set Cyc__types_fd_set;
-typedef char* Cyc_Cstring; typedef struct _tagged_string Cyc_string; typedef
-struct _tagged_string Cyc_string_t; typedef struct _tagged_string* Cyc_stringptr;
-typedef int Cyc_bool; extern void* exit( int); extern void* abort(); struct Cyc_Core_Opt{
-void* v; } ; typedef struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg[
-15u]; struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; }
-; extern char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{ char* tag;
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
+unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char;
+typedef unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef
+unsigned int Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int
+Cyc_uint; typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
+int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
+char* Cyc_caddr_t; typedef unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t;
+typedef unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
+typedef short Cyc_int16_t; typedef unsigned short Cyc_u_int16_t; typedef int Cyc_int32_t;
+typedef unsigned int Cyc_u_int32_t; typedef long long Cyc_int64_t; typedef
+unsigned long long Cyc_u_int64_t; typedef int Cyc_register_t; typedef short Cyc_dev_t;
+typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
+Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
+typedef char* Cyc_addr_t; typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t;
+typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ;
+typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
+typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
+typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
+exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
+struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg[ 15u];
+struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; } ;
+extern char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{ char* tag;
 struct _tagged_string f1; } ; extern char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
 char* tag; struct _tagged_string f1; } ; extern char Cyc_Core_Not_found[ 14u];
 extern char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{ char*
@@ -656,55 +661,56 @@ env);} int Cyc_List_list_cmp( int(* cmp)( void*, void*), struct Cyc_List_List*
 l1, struct Cyc_List_List* l2){ for( 0; l1 != 0? l2 != 0: 0; l1=({ struct Cyc_List_List*
 _temp261= l1; if( _temp261 == 0){ _throw( Null_Exception);} _temp261->tl;}), l2=({
 struct Cyc_List_List* _temp262= l2; if( _temp262 == 0){ _throw( Null_Exception);}
-_temp262->tl;})){ if( l1 == l2){ return 0;}{ int i= cmp(( void*)({ struct Cyc_List_List*
-_temp263= l1; if( _temp263 == 0){ _throw( Null_Exception);} _temp263->hd;}),(
-void*)({ struct Cyc_List_List* _temp264= l2; if( _temp264 == 0){ _throw(
-Null_Exception);} _temp264->hd;})); if( i != 0){ return i;}}} if( l1 != 0){
-return 1;} if( l2 != 0){ return - 1;} return 0;} int Cyc_List_list_prefix( int(*
-cmp)( void*, void*), struct Cyc_List_List* l1, struct Cyc_List_List* l2){ for( 0;
-l1 != 0? l2 != 0: 0; l1=({ struct Cyc_List_List* _temp265= l1; if( _temp265 == 0){
-_throw( Null_Exception);} _temp265->tl;}), l2=({ struct Cyc_List_List* _temp266=
-l2; if( _temp266 == 0){ _throw( Null_Exception);} _temp266->tl;})){ if( l1 == l2){
-return 1;}{ int i= cmp(( void*)({ struct Cyc_List_List* _temp267= l1; if(
-_temp267 == 0){ _throw( Null_Exception);} _temp267->hd;}),( void*)({ struct Cyc_List_List*
-_temp268= l2; if( _temp268 == 0){ _throw( Null_Exception);} _temp268->hd;}));
-if( i != 0){ return 0;}}} return l1 == 0;} struct Cyc_List_List* Cyc_List_rfilter_c(
+_temp262->tl;})){ if( l1 == l2){ return 0;}{ int _temp265= cmp(( void*)({ struct
+Cyc_List_List* _temp263= l1; if( _temp263 == 0){ _throw( Null_Exception);}
+_temp263->hd;}),( void*)({ struct Cyc_List_List* _temp264= l2; if( _temp264 == 0){
+_throw( Null_Exception);} _temp264->hd;})); goto _LL266; _LL266: if( _temp265 !=
+0){ return _temp265;}}} if( l1 != 0){ return 1;} if( l2 != 0){ return - 1;}
+return 0;} int Cyc_List_list_prefix( int(* cmp)( void*, void*), struct Cyc_List_List*
+l1, struct Cyc_List_List* l2){ for( 0; l1 != 0? l2 != 0: 0; l1=({ struct Cyc_List_List*
+_temp267= l1; if( _temp267 == 0){ _throw( Null_Exception);} _temp267->tl;}), l2=({
+struct Cyc_List_List* _temp268= l2; if( _temp268 == 0){ _throw( Null_Exception);}
+_temp268->tl;})){ if( l1 == l2){ return 1;}{ int _temp271= cmp(( void*)({ struct
+Cyc_List_List* _temp269= l1; if( _temp269 == 0){ _throw( Null_Exception);}
+_temp269->hd;}),( void*)({ struct Cyc_List_List* _temp270= l2; if( _temp270 == 0){
+_throw( Null_Exception);} _temp270->hd;})); goto _LL272; _LL272: if( _temp271 !=
+0){ return 0;}}} return l1 == 0;} struct Cyc_List_List* Cyc_List_rfilter_c(
 struct _RegionHandle* r2, int(* f)( void*, void*), void* env, struct Cyc_List_List*
 l){ if( l == 0){ return 0;}{ struct Cyc_List_List* result=({ struct Cyc_List_List*
+_temp280=( struct Cyc_List_List*) _region_malloc( r2, sizeof( struct Cyc_List_List));
+_temp280->hd=( void*)(( void*)({ struct Cyc_List_List* _temp281= l; if( _temp281
+== 0){ _throw( Null_Exception);} _temp281->hd;})); _temp280->tl= 0; _temp280;});
+struct Cyc_List_List* end= result; for( 0; l != 0; l=({ struct Cyc_List_List*
+_temp273= l; if( _temp273 == 0){ _throw( Null_Exception);} _temp273->tl;})){ if(
+f( env,( void*)({ struct Cyc_List_List* _temp274= l; if( _temp274 == 0){ _throw(
+Null_Exception);} _temp274->hd;}))){({ struct Cyc_List_List* _temp275= end; if(
+_temp275 == 0){ _throw( Null_Exception);} _temp275->tl=({ struct Cyc_List_List*
 _temp276=( struct Cyc_List_List*) _region_malloc( r2, sizeof( struct Cyc_List_List));
 _temp276->hd=( void*)(( void*)({ struct Cyc_List_List* _temp277= l; if( _temp277
-== 0){ _throw( Null_Exception);} _temp277->hd;})); _temp276->tl= 0; _temp276;});
-struct Cyc_List_List* end= result; for( 0; l != 0; l=({ struct Cyc_List_List*
-_temp269= l; if( _temp269 == 0){ _throw( Null_Exception);} _temp269->tl;})){ if(
-f( env,( void*)({ struct Cyc_List_List* _temp270= l; if( _temp270 == 0){ _throw(
-Null_Exception);} _temp270->hd;}))){({ struct Cyc_List_List* _temp271= end; if(
-_temp271 == 0){ _throw( Null_Exception);} _temp271->tl=({ struct Cyc_List_List*
-_temp272=( struct Cyc_List_List*) _region_malloc( r2, sizeof( struct Cyc_List_List));
-_temp272->hd=( void*)(( void*)({ struct Cyc_List_List* _temp273= l; if( _temp273
-== 0){ _throw( Null_Exception);} _temp273->hd;})); _temp272->tl= 0; _temp272;});});
-end=({ struct Cyc_List_List* _temp274= end; if( _temp274 == 0){ _throw(
-Null_Exception);} _temp274->tl;});}} return({ struct Cyc_List_List* _temp275=
-result; if( _temp275 == 0){ _throw( Null_Exception);} _temp275->tl;});}} struct
+== 0){ _throw( Null_Exception);} _temp277->hd;})); _temp276->tl= 0; _temp276;});});
+end=({ struct Cyc_List_List* _temp278= end; if( _temp278 == 0){ _throw(
+Null_Exception);} _temp278->tl;});}} return({ struct Cyc_List_List* _temp279=
+result; if( _temp279 == 0){ _throw( Null_Exception);} _temp279->tl;});}} struct
 Cyc_List_List* Cyc_List_filter_c( int(* f)( void*, void*), void* env, struct Cyc_List_List*
 l){ return(( struct Cyc_List_List*(*)( struct _RegionHandle* r2, int(* f)( void*,
 void*), void* env, struct Cyc_List_List* l)) Cyc_List_rfilter_c)( Cyc_Core_heap_region,
 f, env, l);} struct Cyc_List_List* Cyc_List_rfilter( struct _RegionHandle* r2,
 int(* f)( void*), struct Cyc_List_List* l){ if( l == 0){ return 0;}{ struct Cyc_List_List*
-result=({ struct Cyc_List_List* _temp285=( struct Cyc_List_List*) _region_malloc(
-r2, sizeof( struct Cyc_List_List)); _temp285->hd=( void*)(( void*)({ struct Cyc_List_List*
-_temp286= l; if( _temp286 == 0){ _throw( Null_Exception);} _temp286->hd;}));
-_temp285->tl= 0; _temp285;}); struct Cyc_List_List* end= result; for( 0; l != 0;
-l=({ struct Cyc_List_List* _temp278= l; if( _temp278 == 0){ _throw(
-Null_Exception);} _temp278->tl;})){ if( f(( void*)({ struct Cyc_List_List*
-_temp279= l; if( _temp279 == 0){ _throw( Null_Exception);} _temp279->hd;}))){({
-struct Cyc_List_List* _temp280= end; if( _temp280 == 0){ _throw( Null_Exception);}
-_temp280->tl=({ struct Cyc_List_List* _temp281=( struct Cyc_List_List*)
-_region_malloc( r2, sizeof( struct Cyc_List_List)); _temp281->hd=( void*)(( void*)({
-struct Cyc_List_List* _temp282= l; if( _temp282 == 0){ _throw( Null_Exception);}
-_temp282->hd;})); _temp281->tl= 0; _temp281;});}); end=({ struct Cyc_List_List*
-_temp283= end; if( _temp283 == 0){ _throw( Null_Exception);} _temp283->tl;});}}
-return({ struct Cyc_List_List* _temp284= result; if( _temp284 == 0){ _throw(
-Null_Exception);} _temp284->tl;});}} struct Cyc_List_List* Cyc_List_filter( int(*
+result=({ struct Cyc_List_List* _temp289=( struct Cyc_List_List*) _region_malloc(
+r2, sizeof( struct Cyc_List_List)); _temp289->hd=( void*)(( void*)({ struct Cyc_List_List*
+_temp290= l; if( _temp290 == 0){ _throw( Null_Exception);} _temp290->hd;}));
+_temp289->tl= 0; _temp289;}); struct Cyc_List_List* end= result; for( 0; l != 0;
+l=({ struct Cyc_List_List* _temp282= l; if( _temp282 == 0){ _throw(
+Null_Exception);} _temp282->tl;})){ if( f(( void*)({ struct Cyc_List_List*
+_temp283= l; if( _temp283 == 0){ _throw( Null_Exception);} _temp283->hd;}))){({
+struct Cyc_List_List* _temp284= end; if( _temp284 == 0){ _throw( Null_Exception);}
+_temp284->tl=({ struct Cyc_List_List* _temp285=( struct Cyc_List_List*)
+_region_malloc( r2, sizeof( struct Cyc_List_List)); _temp285->hd=( void*)(( void*)({
+struct Cyc_List_List* _temp286= l; if( _temp286 == 0){ _throw( Null_Exception);}
+_temp286->hd;})); _temp285->tl= 0; _temp285;});}); end=({ struct Cyc_List_List*
+_temp287= end; if( _temp287 == 0){ _throw( Null_Exception);} _temp287->tl;});}}
+return({ struct Cyc_List_List* _temp288= result; if( _temp288 == 0){ _throw(
+Null_Exception);} _temp288->tl;});}} struct Cyc_List_List* Cyc_List_filter( int(*
 f)( void*), struct Cyc_List_List* l){ return(( struct Cyc_List_List*(*)( struct
 _RegionHandle* r2, int(* f)( void*), struct Cyc_List_List* l)) Cyc_List_rfilter)(
 Cyc_Core_heap_region, f, l);}
