@@ -5086,14 +5086,19 @@ static void stmttypes_to_c(stmt_t s) {
     break;
   case &Decl_s(d,s): decltypes_to_c(d); stmttypes_to_c(s); break;
   case &Do_s(s,$(e,_)): stmttypes_to_c(s); exptypes_to_c(e); break;
+  case &Label_s(_,s): stmttypes_to_c(s); break;
   case &Skip_s:
   case &Break_s(_):
   case &Continue_s(_):
-  case &Goto_s(_,_): break;
-  case &Fallthru_s(_,_):
-  case &Label_s(_,_):
+  case &Goto_s(_,_): 
+    break;
+  case &Fallthru_s(_,_): 
+    // in C code, this is implicit, so we replace it with a skip
+    s->r = new Skip_s;
+    break;
   case &TryCatch_s(_,_):
-  case &ResetRegion_s(_): Tcutil::terr(s->loc,"Cyclone statement in C code");
+  case &ResetRegion_s(_): 
+    Tcutil::terr(s->loc,aprintf("Cyclone statement in C code: %s",stmt2string(s)));
     break;
   }
 }

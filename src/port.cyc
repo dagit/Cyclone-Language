@@ -1912,9 +1912,9 @@ static edits_t gen_edits(list_t<decl_t> ds) {
     if (!unifies(new_zt,old_zt) && loc) {
       switch (compress_ct(old_zt)) {
       case &Zterm_ct:
-        edits = new List{new Edit{loc,"NOZEROTERM ",""}, edits}; break;
+        edits = new List{new Edit{loc,"@nozeroterm ",""}, edits}; break;
       case &Nozterm_ct:
-        edits = new List{new Edit{loc,"ZEROTERM ",""}, edits}; break;
+        edits = new List{new Edit{loc,"@zeroterm ",""}, edits}; break;
       default: break;
       }
     }

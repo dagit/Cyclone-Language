@@ -10,7 +10,7 @@ LC_FLAG =
 # before installing the include files and libraries.  Also we use a
 # particular CYCC.
 override CYCFLAGS += -I$(CYCDIR)/include -B$(CYC_LIB_PATH)/cyc-lib $(LC_FLAG)
-CYCC:=$(BINDIR)/$(CYCCOMP) 
+CYCC:=$(BINDIR)/$(CYCCOMP)
 
 SRCS=rewrite
 

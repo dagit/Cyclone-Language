@@ -7,21 +7,24 @@
 using Core;
 using List;
 
+//#define DEBUG(e) e
+#define DEBUG(e)
+
 datatype exn { Eof(int) };
 datatype exn.Eof Eof_val = Eof(0);
 
-void read_filename(char ?buf) {
+void read_filename(FILE@ input, char ?buf) {
   int i = 0;
-  int c = fgetc(stdin);
+  int c = fgetc(input);
   while (c != ':' && c != EOF) {
     buf[i] = (char)c;
     i++;
-    c = fgetc(stdin);
+    c = fgetc(input);
   }
   buf[i] = 0;
   if (c == EOF) throw &Eof_val;
   else {
-    c = fgetc(stdin);
+    c = fgetc(input);
     if (c != '(') {
       fprintf(stderr,"Ill-formed rewrite\n");
       exit(1);
@@ -29,15 +32,15 @@ void read_filename(char ?buf) {
   }
 }
 
-void read_num(int @j) {
+void read_num(FILE@ input, int @j) {
   char buffer[11]@zeroterm = {for i < 10 : 0};
   char ?buf = (char ?)buffer;
   int i = 0;
-  int c = fgetc(stdin);
+  int c = fgetc(input);
   while (c >= '0' && c <= '9') {
     buf[i] = (char)c;
     i++;
-    c = fgetc(stdin);
+    c = fgetc(input);
   }
   if (c == EOF) throw &Eof_val;
   *j = atoi(buf);
@@ -77,32 +80,51 @@ void seekit(FILE @f, int cur_line, int cur_off, int new_line, int new_off) {
   }
 }
 
-void read_up_to(char ?buf, int c) {
-  int c2 = fgetc(stdin);
+void read_up_to(FILE @input,char ?buf, int c) {
+  int c2 = fgetc(input);
   while (c2 != c) {
     *buf = (char)c2;
     buf++;
-    c2 = fgetc(stdin);
+    c2 = fgetc(input);
   }
   *buf = (char)0;
 }
 
-void skip_past(int c) {
-  int c2 = fgetc(stdin);
+void skip_past(FILE@ input,int c) {
+  int c2 = fgetc(input);
   while (c2 != c) {
-    c2 = fgetc(stdin);
+    c2 = fgetc(input);
   }
 }
 
 void copy_up_to(FILE @fin, FILE @fout, int @curr_line, int @curr_off,
                 int desired_line, int desired_off) {
   int c;
-  while (*curr_line != desired_line || *curr_off != desired_off) {
+  while (*curr_line != desired_line) {
     c = fgetc(fin);
     fputc(c,fout);
+    if (c == EOF) {
+      fprintf(stderr,"oops!  Ran out of file!\n");
+      exit(1);
+    }
     if (c == '\n') {
       *curr_line = *curr_line + 1;
       *curr_off = 0;
+    } else 
+      *curr_off = *curr_off + 1;
+  }
+  while (*curr_off != desired_off) {
+    c = fgetc(fin);
+    fputc(c,fout);
+    if (c == EOF) {
+      fprintf(stderr,"oops!  Ran out of file!\n");
+      exit(1);
+    }      
+    if (c == '\n') {
+      fprintf(stderr,"oops! Ran off the end of line %d!\n",*curr_line);
+      *curr_line = *curr_line + 1;
+      *curr_off = 0;
+      break;
     } else 
       *curr_off = *curr_off + 1;
   }
@@ -130,6 +152,10 @@ void copy_rest(FILE @fin, FILE @fout) {
 }
 
 int main(int argc, const char ?`H? argv) {
+  FILE @input = stdin;
+  if (argc > 1) {
+    input = (FILE @)fopen(argv[1],"r");
+  }
   char filename[1026]@zeroterm = {for i < 1025 : 0};
   char delta[1026]@zeroterm = {for i < 1025 : 0};
   int line1 = 0, line2 = 0;
@@ -143,18 +169,25 @@ int main(int argc, const char ?`H? argv) {
 
   try {
     while (true) {
-      read_filename(filename);
-      read_num(&line1);
-      read_num(&offset1);
-      read_num(&line2);
-      read_num(&offset2);
-      skip_past('`');
-      read_up_to(delta,'\'');
+      read_filename(input,filename);
+      DEBUG(printf("filename: %s\n",filename));
+      read_num(input,&line1);
+      DEBUG(printf("line1: %d\n",line1));
+      read_num(input,&offset1);
+      DEBUG(printf("offset1: %d\n",offset1));
+      read_num(input,&line2);
+      DEBUG(printf("line2: %d\n",line2));
+      read_num(input,&offset2);
+      DEBUG(printf("offset2: %d\n",offset2));
+      skip_past(input,'`');
+      read_up_to(input,delta,'\'');
       new_str = aprintf("%s",delta);
-      skip_past('`');
-      read_up_to(delta,'\'');
+      DEBUG(printf("new_str: %s\n",new_str));
+      skip_past(input,'`');
+      read_up_to(input,delta,'\'');
       old_str = aprintf("%s",delta);
-      read_line(stdin);
+      DEBUG(printf("old_str: %s\n",old_str));
+      read_line(input);
       // insert into fs
       let f = fs;
       while (f != NULL) {
@@ -171,6 +204,7 @@ int main(int argc, const char ?`H? argv) {
   case &Eof(_): break;
   }
   printf("done parsing rewrites (%d total).\n",List::length(fs));
+  fflush(stdout);
   for (let xs = fs; xs != NULL; xs = xs->tl) {
     let $(file,rewrites) = *xs->hd;
     let basename = Filename::chop_extension(file);
