@@ -771,24 +771,10 @@ doc_t pp_term(tunion term t) {
     return text(x);
   case &App(t1,t2):
     if (is_lam(t1))
-      return
-        concat(text("("),
-               concat(pp_term(t1),
-                      concat(text(")"),
-                             concat(text("("),
-                                    concat(pp_term(t2),
-                                           text(")"))))));
-      else return
-             concat(pp_term(t1),
-                    concat(text("("),
-                           concat(pp_term(t2),
-                                  text(")"))));
+      return cat(text("("),pp_term(t1),text(")"),text("("),pp_term(t2),text(")"));
+      else return cat(pp_term(t1),text("("),pp_term(t2),text(")"));
   case &Lam(x,t1):
-    return
-      concat(text("\\"),
-             concat(text(x),
-                    concat(text("."),
-                           pp_term(t1))));
+    return cat(text("\\"),text(x),text("."),pp_term(t1));
   }
 }
 void pp_test() {

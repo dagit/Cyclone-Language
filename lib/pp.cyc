@@ -175,6 +175,7 @@ doc_t text(string s) {
     return d;
   }
 }
+doc_t textptr(stringptr s) { return text(*s); }
 
 opt_t<doc_t> nil_doc_opt   = null;
 opt_t<doc_t> blank_doc_opt = null;
@@ -263,15 +264,22 @@ static out_t concat_f($(doc_t,doc_t) @clo, ppstate_t st) {
                           append(o1->links, o2->links));
   return o3;
 }
-doc_t concat(doc_t d1, doc_t d2) {
+static doc_t concat(doc_t d1, doc_t d2) {
   return new Doc(min(d1->mw, d1->mwo+d2->mwo),
               min(d1->mw, d1->mwo+d2->mw),
               make_fn(concat_f, new $(d1,d2)));
 }    
+doc_t cat(...`r doc_t l) {
+  let d = nil_doc();
+  for (int i = l.size - 1; i >= 0; i--) {
+    d = concat(l[i],d);
+  }
+  return d;
+}
 
 // good places in here for passing address of locals (eg. st)
 
-static out_t long_concats_f(list_t<doc_t> ds0, ppstate_t st) {
+static out_t long_cats_f(list_t<doc_t> ds0, ppstate_t st) {
   list_t<out_t> os = null;
   for (let ds = ds0; ds != null; ds = ds->tl) {
     doc_t d = ds->hd;
@@ -289,9 +297,9 @@ static out_t long_concats_f(list_t<doc_t> ds0, ppstate_t st) {
   }
   return new Out(newcc,newcl,s,links);
 }
-static doc_t long_concats(list_t<doc_t> doclist) {
+static doc_t long_cats(list_t<doc_t> doclist) {
 #ifdef DEBUG
-  fprintf(stderr,"doing long concats %d\n",List::length(doclist));
+  fprintf(stderr,"doing long cats %d\n",List::length(doclist));
 #endif
   list_t<doc_t> orig = doclist;
   doc_t d = doclist->hd;
@@ -305,18 +313,18 @@ static doc_t long_concats(list_t<doc_t> doclist) {
     mw  = mw2;
     mwo = mwo2;
   }
-  return new Doc(mw,mwo,make_fn(long_concats_f,orig));
+  return new Doc(mw,mwo,make_fn(long_cats_f,orig));
 }
 
-doc_t concats(list_t<doc_t> doclist) {
+doc_t cats(list_t<doc_t> doclist) {
   if (doclist==null) return nil_doc();
   else if (doclist->tl==null) return doclist->hd;
   // JGM: a hack to avoid stack overflow
-  else if (List::length(doclist) > 30) return long_concats(doclist);
-  else return concat(doclist->hd,concats(doclist->tl));
+  else if (List::length(doclist) > 30) return long_cats(doclist);
+  else return concat(doclist->hd,cats(doclist->tl));
 }
 
-static out_t concats_arr_f(doc_t ?@docs_ptr, ppstate_t st) {
+static out_t cats_arr_f(doc_t ?@docs_ptr, ppstate_t st) {
   list_t<out_t> os = null;
   doc_t ?docs = *docs_ptr;
   int sz = docs.size;
@@ -337,10 +345,10 @@ static out_t concats_arr_f(doc_t ?@docs_ptr, ppstate_t st) {
   return new Out(newcc,newcl,s,links);
 }
 
-doc_t concats_arr(doc_t ?docs) {
+doc_t cats_arr(doc_t ?docs) {
   int sz = docs.size;
   if(sz==0)
-    throw new Failure("concats_arr -- size zero array");
+    throw new Failure("cats_arr -- size zero array");
   doc_t d = docs[0];
   int mw  = d->mw;
   int mwo = d->mw;
@@ -350,7 +358,7 @@ doc_t concats_arr(doc_t ?docs) {
     mw  = mw2;
     mwo = mwo2;
   }
-  return new Doc(mw,mwo,make_fn(concats_arr_f,new {docs}));
+  return new Doc(mw,mwo,make_fn(cats_arr_f,new {docs}));
 }
 
 static out_t doc_union_f($(doc_t,doc_t) @clo, ppstate_t st) {
@@ -388,12 +396,8 @@ doc_t tab(doc_t d) {
 static doc_t ppseq_f(doc_t pp(`a), string sep, list_t<`a> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return pp(l->hd);
-  else return concats(new List(pp(l->hd),
-                               new List(text(sep),
-                                        new List(oline_doc(),
-                                                 new List(ppseq_f(pp,
-                                                                  sep,l->tl),
-                                                          null)))));
+  else return cat(pp(l->hd), text(sep), oline_doc(), ppseq_f(pp, sep,l->tl));
+                  
 }
 doc_t ppseq(doc_t pp(`a), string sep, list_t<`a> l0) {
   return tab(ppseq_f(pp,sep,l0));
@@ -411,12 +415,12 @@ doc_t seq_f(string sep, list_t<doc_t> l) {
       x->tl = new List(sep2,new List(oline,temp));
       x = temp;
     }
-    return concats(l);
+    return cats(l);
     // This causes stack overflow on big sequences
-    //return concats(new List(l->hd,
-    //                        new List(text(sep),
+    //return cats(new List(l->hd,
+    //                     new List(text(sep),
     //                              new List(oline_doc(),
-    //                                    new List(f(sep,l->tl),null)))));
+    //                                       new List(f(sep,l->tl),null)))));
   }
 }
 doc_t seq(string sep, list_t<doc_t> l0) {
@@ -427,10 +431,7 @@ doc_t seq(string sep, list_t<doc_t> l0) {
 doc_t ppseql_f(doc_t pp(`a), string sep, list_t<`a> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return pp(l->hd);
-  else return concats(new List(pp(l->hd),
-                            new List(text(sep),
-                                  new List(line_doc(),
-                                        new List(ppseql_f(pp,sep,l->tl),null)))));
+  else return cat(pp(l->hd), text(sep), line_doc(), ppseql_f(pp,sep,l->tl));
 }
 doc_t ppseql(doc_t pp(`a), string sep, list_t<`a> l0) {
   return tab(ppseql_f(pp,sep,l0));
@@ -439,13 +440,30 @@ doc_t ppseql(doc_t pp(`a), string sep, list_t<`a> l0) {
 static doc_t seql_f(string sep, list_t<doc_t> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return l->hd;
-  else return concats(new List(l->hd,
-                            new List(text(sep),
-                                  new List(line_doc(),
-                                        new List(seql_f(sep,l->tl),null)))));
+  else return cat(l->hd, text(sep), line_doc(), seql_f(sep,l->tl));
 }
 doc_t seql(string sep, list_t<doc_t> l0) {
   return tab(seql_f(sep,l0));
 }
 
+
+doc_t group(string start, string stop, string sep, list_t<doc_t> ss) {
+  return cat(text(start),
+             seq(sep,ss),
+             text(stop));
+}
+
+// Like group but return the empty doc if the list is empty
+doc_t egroup(string start, string stop, string sep, list_t<doc_t> ss) {
+  if (ss==null) return nil_doc();
+  else return cat(text(start),
+                  seq(sep,ss),
+                  text(stop));
+}
+
+doc_t groupl(string start, string stop, string sep, list_t<doc_t> ss) {
+  return cat(text(start),
+             seql(sep,ss),
+             text(stop));
+}
 
