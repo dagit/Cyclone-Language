@@ -72,44 +72,45 @@ _tagged_ptr0 Cyc_List_to_array( struct Cyc_List_List* x); extern struct Cyc_List
 Cyc_List_from_array( struct _tagged_ptr0 arr); extern struct Cyc_List_List* Cyc_List_tabulate(
 int n, void*(* f)( int)); extern struct Cyc_List_List* Cyc_List_tabulate_c( int
 n, void*(* f)( void*, int), void* env); extern int Cyc_List_list_cmp( int(* cmp)(
-void*, void*), struct Cyc_List_List* l1, struct Cyc_List_List* l2); extern
-struct Cyc_List_List* Cyc_List_filter_c( int(* f)( void*, void*), void* env,
-struct Cyc_List_List* l); extern struct Cyc_List_List* Cyc_List_filter( int(* f)(
-void*), struct Cyc_List_List* l); int Cyc_List_length( struct Cyc_List_List* x){
-int i= 0; while( x != 0) { ++ i; x= x->tl;} return i;} char Cyc_List_List_empty_tag[
-11u]="List_empty"; void* Cyc_List_hd( struct Cyc_List_List* x){ if( x == 0){(
-void) _throw(({ struct Cyc_List_List_empty_struct* _temp0=( struct Cyc_List_List_empty_struct*)
-GC_malloc_atomic( sizeof( struct Cyc_List_List_empty_struct)); _temp0->tag= Cyc_List_List_empty_tag;(
-struct _xenum_struct*) _temp0;}));} return( void*) x->hd;} struct Cyc_List_List*
-Cyc_List_tl( struct Cyc_List_List* x){ if( x == 0){( void) _throw(({ struct Cyc_List_List_empty_struct*
-_temp1=( struct Cyc_List_List_empty_struct*) GC_malloc_atomic( sizeof( struct
-Cyc_List_List_empty_struct)); _temp1->tag= Cyc_List_List_empty_tag;( struct
-_xenum_struct*) _temp1;}));} return x->tl;} struct Cyc_List_List* Cyc_List_copy(
-struct Cyc_List_List* x){ struct Cyc_List_List* result; struct Cyc_List_List*
-prev; if( x == 0){ return 0;} result=({ struct Cyc_List_List* _temp2=( struct
-Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2->hd=( void*)((
-void*) x->hd); _temp2->tl= 0; _temp2;}); prev= result; for( x= x->tl; x != 0; x=
-x->tl){ prev->tl=({ struct Cyc_List_List* _temp3=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp3->hd=( void*)(( void*) x->hd);
-_temp3->tl= 0; _temp3;}); prev= prev->tl;} return result;} struct Cyc_List_List*
-Cyc_List_map( void*(* f)( void*), struct Cyc_List_List* x){ struct Cyc_List_List*
-result; struct Cyc_List_List* prev; if( x == 0){ return 0;} result=({ struct Cyc_List_List*
-_temp4=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp4->hd=( void*) f(( void*) x->hd); _temp4->tl= 0; _temp4;}); prev= result;
-for( x= x->tl; x != 0; x= x->tl){ struct Cyc_List_List* temp=({ struct Cyc_List_List*
-_temp5=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp5->hd=( void*) f(( void*) x->hd); _temp5->tl= 0; _temp5;}); prev->tl= temp;
-prev= temp;} return result;} struct Cyc_List_List* Cyc_List_map_c( void*(* f)(
-void*, void*), void* env, struct Cyc_List_List* x){ struct Cyc_List_List* result;
-struct Cyc_List_List* prev; if( x == 0){ return 0;} result=({ struct Cyc_List_List*
-_temp6=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp6->hd=( void*) f( env,( void*) x->hd); _temp6->tl= 0; _temp6;}); prev=
-result; for( x= x->tl; x != 0; x= x->tl){ prev->tl=({ struct Cyc_List_List*
-_temp7=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp7->hd=( void*) f( env,( void*) x->hd); _temp7->tl= 0; _temp7;}); prev= prev->tl;}
-return result;} char Cyc_List_List_mismatch_tag[ 14u]="List_mismatch"; struct
-Cyc_List_List* Cyc_List_map2( void*(* f)( void*, void*), struct Cyc_List_List* x,
-struct Cyc_List_List* y){ struct Cyc_List_List* result; struct Cyc_List_List*
+void*, void*), struct Cyc_List_List* l1, struct Cyc_List_List* l2); extern int
+Cyc_List_list_prefix( int(* cmp)( void*, void*), struct Cyc_List_List* l1,
+struct Cyc_List_List* l2); extern struct Cyc_List_List* Cyc_List_filter_c( int(*
+f)( void*, void*), void* env, struct Cyc_List_List* l); extern struct Cyc_List_List*
+Cyc_List_filter( int(* f)( void*), struct Cyc_List_List* l); int Cyc_List_length(
+struct Cyc_List_List* x){ int i= 0; while( x != 0) { ++ i; x= x->tl;} return i;}
+char Cyc_List_List_empty_tag[ 11u]="List_empty"; void* Cyc_List_hd( struct Cyc_List_List*
+x){ if( x == 0){( void) _throw(({ struct Cyc_List_List_empty_struct* _temp0=(
+struct Cyc_List_List_empty_struct*) GC_malloc_atomic( sizeof( struct Cyc_List_List_empty_struct));
+_temp0->tag= Cyc_List_List_empty_tag;( struct _xenum_struct*) _temp0;}));}
+return( void*) x->hd;} struct Cyc_List_List* Cyc_List_tl( struct Cyc_List_List*
+x){ if( x == 0){( void) _throw(({ struct Cyc_List_List_empty_struct* _temp1=(
+struct Cyc_List_List_empty_struct*) GC_malloc_atomic( sizeof( struct Cyc_List_List_empty_struct));
+_temp1->tag= Cyc_List_List_empty_tag;( struct _xenum_struct*) _temp1;}));}
+return x->tl;} struct Cyc_List_List* Cyc_List_copy( struct Cyc_List_List* x){
+struct Cyc_List_List* result; struct Cyc_List_List* prev; if( x == 0){ return 0;}
+result=({ struct Cyc_List_List* _temp2=( struct Cyc_List_List*) GC_malloc(
+sizeof( struct Cyc_List_List)); _temp2->hd=( void*)(( void*) x->hd); _temp2->tl=
+0; _temp2;}); prev= result; for( x= x->tl; x != 0; x= x->tl){ prev->tl=({ struct
+Cyc_List_List* _temp3=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp3->hd=( void*)(( void*) x->hd); _temp3->tl= 0; _temp3;}); prev= prev->tl;}
+return result;} struct Cyc_List_List* Cyc_List_map( void*(* f)( void*), struct
+Cyc_List_List* x){ struct Cyc_List_List* result; struct Cyc_List_List* prev; if(
+x == 0){ return 0;} result=({ struct Cyc_List_List* _temp4=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp4->hd=( void*) f(( void*) x->hd);
+_temp4->tl= 0; _temp4;}); prev= result; for( x= x->tl; x != 0; x= x->tl){ struct
+Cyc_List_List* temp=({ struct Cyc_List_List* _temp5=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp5->hd=( void*) f(( void*) x->hd);
+_temp5->tl= 0; _temp5;}); prev->tl= temp; prev= temp;} return result;} struct
+Cyc_List_List* Cyc_List_map_c( void*(* f)( void*, void*), void* env, struct Cyc_List_List*
+x){ struct Cyc_List_List* result; struct Cyc_List_List* prev; if( x == 0){
+return 0;} result=({ struct Cyc_List_List* _temp6=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp6->hd=( void*) f( env,( void*) x->hd);
+_temp6->tl= 0; _temp6;}); prev= result; for( x= x->tl; x != 0; x= x->tl){ prev->tl=({
+struct Cyc_List_List* _temp7=( struct Cyc_List_List*) GC_malloc( sizeof( struct
+Cyc_List_List)); _temp7->hd=( void*) f( env,( void*) x->hd); _temp7->tl= 0;
+_temp7;}); prev= prev->tl;} return result;} char Cyc_List_List_mismatch_tag[ 14u]="List_mismatch";
+struct Cyc_List_List* Cyc_List_map2( void*(* f)( void*, void*), struct Cyc_List_List*
+x, struct Cyc_List_List* y){ struct Cyc_List_List* result; struct Cyc_List_List*
 prev; if( x == 0? y == 0: 0){ return 0;} if( x == 0? 1: y == 0){( void) _throw(({
 struct Cyc_List_List_mismatch_struct* _temp8=( struct Cyc_List_List_mismatch_struct*)
 GC_malloc_atomic( sizeof( struct Cyc_List_List_mismatch_struct)); _temp8->tag=
@@ -346,19 +347,22 @@ res);} int Cyc_List_list_cmp( int(* cmp)( void*, void*), struct Cyc_List_List*
 l1, struct Cyc_List_List* l2){ for( 0; l1 != 0? l2 != 0: 0; l1= l1->tl, l2= l2->tl){
 if( l1 == l2){ return 0;}{ int i= cmp(( void*) l1->hd,( void*) l2->hd); if( i !=
 0){ return i;}}} if( l1 != 0){ return 1;} if( l2 != 0){ return - 1;} return 0;}
-struct Cyc_List_List* Cyc_List_filter_c( int(* f)( void*, void*), void* env,
-struct Cyc_List_List* l){ if( l == 0){ return 0;}{ struct Cyc_List_List* result=({
-struct Cyc_List_List* _temp88=( struct Cyc_List_List*) GC_malloc( sizeof( struct
-Cyc_List_List)); _temp88->hd=( void*)(( void*) l->hd); _temp88->tl= 0; _temp88;});
-struct Cyc_List_List* end= result; for( 0; l != 0; l= l->tl){ if( f( env,( void*)
-l->hd)){ end->tl=({ struct Cyc_List_List* _temp89=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp89->hd=( void*)(( void*) l->hd);
-_temp89->tl= 0; _temp89;}); end= end->tl;}} return result->tl;}} struct Cyc_List_List*
-Cyc_List_filter( int(* f)( void*), struct Cyc_List_List* l){ if( l == 0){ return
-0;}{ struct Cyc_List_List* result=({ struct Cyc_List_List* _temp90=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp90->hd=( void*)(( void*) l->hd);
-_temp90->tl= 0; _temp90;}); struct Cyc_List_List* end= result; for( 0; l != 0; l=
-l->tl){ if( f(( void*) l->hd)){ end->tl=({ struct Cyc_List_List* _temp91=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp91->hd=(
-void*)(( void*) l->hd); _temp91->tl= 0; _temp91;}); end= end->tl;}} return
-result->tl;}}
+int Cyc_List_list_prefix( int(* cmp)( void*, void*), struct Cyc_List_List* l1,
+struct Cyc_List_List* l2){ for( 0; l1 != 0? l2 != 0: 0; l1= l1->tl, l2= l2->tl){
+if( l1 == l2){ return 1;}{ int i= cmp(( void*) l1->hd,( void*) l2->hd); if( i !=
+0){ return 0;}}} return l1 == 0;} struct Cyc_List_List* Cyc_List_filter_c( int(*
+f)( void*, void*), void* env, struct Cyc_List_List* l){ if( l == 0){ return 0;}{
+struct Cyc_List_List* result=({ struct Cyc_List_List* _temp88=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp88->hd=( void*)(( void*) l->hd);
+_temp88->tl= 0; _temp88;}); struct Cyc_List_List* end= result; for( 0; l != 0; l=
+l->tl){ if( f( env,( void*) l->hd)){ end->tl=({ struct Cyc_List_List* _temp89=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp89->hd=(
+void*)(( void*) l->hd); _temp89->tl= 0; _temp89;}); end= end->tl;}} return
+result->tl;}} struct Cyc_List_List* Cyc_List_filter( int(* f)( void*), struct
+Cyc_List_List* l){ if( l == 0){ return 0;}{ struct Cyc_List_List* result=({
+struct Cyc_List_List* _temp90=( struct Cyc_List_List*) GC_malloc( sizeof( struct
+Cyc_List_List)); _temp90->hd=( void*)(( void*) l->hd); _temp90->tl= 0; _temp90;});
+struct Cyc_List_List* end= result; for( 0; l != 0; l= l->tl){ if( f(( void*) l->hd)){
+end->tl=({ struct Cyc_List_List* _temp91=( struct Cyc_List_List*) GC_malloc(
+sizeof( struct Cyc_List_List)); _temp91->hd=( void*)(( void*) l->hd); _temp91->tl=
+0; _temp91;}); end= end->tl;}} return result->tl;}}

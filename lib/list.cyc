@@ -571,6 +571,18 @@ int list_cmp(int cmp(`a,`a), glist_t<`a,`r1> l1, glist_t<`a,`r1> l2) {
   return 0;
 }
 
+// idem
+bool list_prefix(int cmp(`a,`a), glist_t<`a,`r1> l1, glist_t<`a,`r1> l2) {
+  for(; l1 != null && l2 != null; l1 = l1->tl, l2 = l2->tl) {
+    if(l1 == l2)
+      return true;
+    let i = cmp(l1->hd,l2->hd);
+    if(i != 0)
+      return false;
+  }
+  return (l1 == null);
+}
+
 list_t<`a> filter_c(bool f(`b,`a), `b env, glist_t<`a,`r> l) {
   if(l == null)
     return null;

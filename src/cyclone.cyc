@@ -129,7 +129,7 @@ list_t<Absyn::decl> do_parse(FILE @ f, list_t<Absyn::decl> ignore) {
 }
 list_t<Absyn::decl> do_typecheck(Tcenv::tenv te, list_t<Absyn::decl> tds) {
   Absynpp::expand_typedefs = ! *noexpand;
-  Tc::tc(te,add_cyc_namespace_r,tds);
+  Tc::tc(te,add_cyc_namespace_r && toc_r,tds); //don't add namespaces if we don't translate to C
   if(!*noshake)
     tds = Tc::treeshake(te,tds);
   return tds;
@@ -143,6 +143,11 @@ list_t<Absyn::decl> do_translate(bool ignore, list_t<Absyn::decl> tds) {
 }
 list_t<Absyn::decl> do_print(FILE @ out_file, list_t<Absyn::decl> tds) {
   Absynpp::expand_typedefs = ! *noexpand;
+  Absynpp::decls_first = Absynpp::qvar_to_Cids = *toc;
+  Absynpp::print_using_stmts = Absynpp::print_externC_stmts = ! *tc;
+  // if the type-checking has already been done, then there's no need for
+  // the 'Using' statements, nor for the extern "C" {...}
+
   if (*toc) {
     fprintf(out_file, "#include \"cyc_include.h\"\n\n");
     Absynpp::qvar_to_Cids = true;
@@ -219,7 +224,7 @@ void compile_file(string filename) {
 }
 
 int main() {
-  $(string,spec_t,string) specs[13] = 
+  $(string,spec_t,string) specs[15] = 
     {$("-nocyc",Clear_spec(add_cyc_namespace),
        "does not add implicit namespace Cyc"),
      $("-q",Set_spec(q),
@@ -240,6 +245,10 @@ int main() {
        "don't remove externed variables that aren't used"),
      $("-noexpandtypedefs",Set_spec(noexpand),
        "don't expand typedefs in pretty printing"),
+     $("-printalltvars", Set_spec(&Absynpp::print_all_tvars),
+       "print all type variables (even implicit default effects)"),
+     $("-printallkinds", Set_spec(&Absynpp::print_all_kinds),
+       "always print kinds of type variables"),
      $("-up",Set_spec(up), 
        "ugly print"),
      $("-pp",Set_spec(pp), 
@@ -259,7 +268,9 @@ int main() {
   let l11 = List(&specs[10],&l10);
   let l12 = List(&specs[11],&l11);
   let l13 = List(&specs[12],&l12);
-  let options = &l13;
+  let l14 = List(&specs[13],&l13);
+  let l15 = List(&specs[14],&l14);
+  let options = &l15;
 		 
   Arg::parse(options, compile_file, "Options:");
 

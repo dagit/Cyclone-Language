@@ -1278,6 +1278,18 @@ tvar new_tvar(kind_t k) {
   return &Tvar(new{s},new_conref(k));
 }
 
+bool is_temp_tvar(tvar t) {
+  let s = *(t->name);
+  return (s[0]=='#');
+}
+
+void rewrite_temp_tvar(tvar t) { // change t->name from "#xxx" to "`txxx"
+  if (! is_temp_tvar(t)) return;
+  let s = String::strconcat("`", *(t -> name));
+  s[1] = 't';
+  t -> name = new{s};
+}
+
 static $(opt_t<var>,tqual,typ)@ fndecl2typ_f($(var,tqual,typ)@ x) {
   return &$((opt_t<var>)&Opt((*x)[0]), (*x)[1], (*x)[2]);
 }

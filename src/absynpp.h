@@ -15,6 +15,11 @@ using PP;
 
 extern bool expand_typedefs;
 extern bool qvar_to_Cids;
+extern bool decls_first;
+extern bool print_all_tvars;
+extern bool print_all_kinds;
+extern bool print_using_stmts;
+extern bool print_externC_stmts;
 
 extern void decllist2file(list_t<decl> tdl, FILE @f);
 

@@ -44,6 +44,7 @@ extern doc_t exp2doc(exp);
 extern doc_t exp2doc_prec(int inprec, exp e);
 extern doc_t exps2doc_prec(int inprec, list_t<exp> es);
 extern doc_t qvar2doc(qvar);
+extern doc_t typedef_name2doc(qvar);
 extern doc_t cnst2doc(cnst_t);
 extern doc_t prim2doc(primop);
 extern doc_t primapp2doc(int inprec, primop p,list_t<exp> es);
@@ -55,12 +56,42 @@ extern doc_t enumfields2doc(list_t<enumfield> fields);
 
 // Flag controlling whether typedefs are expanded during printing
 bool expand_typedefs = false;
-// Flag controlling whether to print all kinds
-bool print_all_kinds = false;
 
 // Flag controlling how to print identifiers (better performance (???) than
 // re-writing them all in Toc).
 bool qvar_to_Cids = false;
+
+// Flag controlling whether declarations have to be at the beginning of the blocks
+bool decls_first = false;
+
+// Flag controlling whether to print all type variables
+// (make reparsing impossible, for the temporary type variables "#xxx" generated
+// while computing the defaut effect are not parsable)
+bool print_all_tvars = false;
+
+// Flag controlling whether to print all kinds
+bool print_all_kinds = false;
+
+// Flag controlling whether to print the Using statements
+bool print_using_stmts = false;
+
+// Flag controlling whether to print the extern "C" {...} statements
+// after the TC, the extern "C" are propagated to the functions,
+// and we get a warning if we don't hide this one
+bool print_externC_stmts = false;
+
+// ------ dealing with namespaces --------
+static list_t<var> curr_namespace = null;
+
+static void curr_namespace_add(var v) {
+  curr_namespace = &List(v, curr_namespace);
+}
+
+static void curr_namespace_drop() {
+  curr_namespace = curr_namespace -> tl;
+}
+
+// ------------
 
 string char_escape(char c) {
   switch (c) {
@@ -219,11 +250,11 @@ doc_t ktvar2doc(tvar tv) {
   case Eq_constr(BoxKind): return textptr(tv->name);
   case Eq_constr(k):
     return cat3(textptr(tv->name), text("::"), kind2doc(k));
-  default: return cat2(textptr(tv->name), text("::?"));
+  default: return cat2(textptr(tv->name), text("/*::?*/")); //the type should already be known here
   }
 }
 
-doc_t kinded_tvars2doc(list_t<tvar> tvs) {
+doc_t ktvars2doc(list_t<tvar> tvs) {
   return egroup("<",">",",",List::map(ktvar2doc,tvs));
 }
 
@@ -233,7 +264,7 @@ static tvarname_t get_name(tvar tv) {
 
 doc_t tvars2doc(list_t<tvar> tvs) {
   if (print_all_kinds)
-    return kinded_tvars2doc(tvs);
+    return ktvars2doc(tvs);
   return egroup("<",">",",",List::map(textptr,List::map(get_name,tvs)));
 }
 
@@ -290,7 +321,7 @@ doc_t dtms2doc(doc_t d,list_t<type_modifier> tms) {
   case TypeParams_mod(ts,loc,print_kinds):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     if (print_kinds) 
-      return cat2(rest, kinded_tvars2doc(ts));
+      return cat2(rest, ktvars2doc(ts));
     else
       return cat2(rest, tvars2doc(ts));
     // FIX?? What about tq2?
@@ -313,7 +344,7 @@ doc_t dtms2doc(doc_t d,list_t<type_modifier> tms) {
     }
     switch (compress(rgn)) {
     case HeapRgn: return cat2(ptr,rest);
-    default: return cat3(ptr,ntyp2doc(rgn),rest);
+    default: return cat4(ptr,ntyp2doc(rgn),text(" "),rest);
     }
   }
 }
@@ -325,32 +356,34 @@ doc_t rgn2doc(typ t) {
   }
 }
 
-static $(list_t<doc_t>, list_t<doc_t>) effects2docs(typ t) {
-  list_t<doc_t> regions = null;
-  list_t<doc_t> effects = null;
-
+static void effects2docs(list_t<doc_t> @ `r regions,
+			 list_t<doc_t> @ `r effects,
+			 typ t)
+{
   switch (compress(t)) {
-  case AccessEff(r): regions = &List(rgn2doc(r),regions); break;
+  case AccessEff(r): *regions = &List(rgn2doc(r), *regions); break;
   case JoinEff(ts):
     for (; ts != null; ts = ts->tl) {
-      let $(rs,es) = effects2docs(ts->hd);
-      regions = List::imp_append(rs,regions);
-      effects = List::imp_append(es,effects);
+      effects2docs(regions, effects, ts->hd);
     }
     break;
-  default: effects = &List(ntyp2doc(t),effects); break;
+  default: *effects = &List(ntyp2doc(t),*effects); break;
   }
-  return $(regions, effects);
 }
 
 doc_t eff2doc(typ t) {
-  let $(regions, effects) = effects2docs(t);
+  list_t <doc_t> regions = null, effects = null;
+  effects2docs(&regions, &effects, t);
   regions = List::imp_rev(regions);
   effects = List::imp_rev(effects);
-  let doc1 = group("{","}",",",regions);
-  return group("","","+",List::imp_append(effects,&List(doc1,null)));
+  if (regions == null && effects != null) {
+    return group("","","+",effects);
+  } else {
+    let doc1 = group("{","}",",",regions);
+    return group("","","+",List::imp_append(effects,&List(doc1,null)));
+  }
 }
-    
+
 // Convert a normalized typ to a doc
 doc_t ntyp2doc(typ t) {
   doc_t s;
@@ -372,10 +405,19 @@ doc_t ntyp2doc(typ t) {
                   kind2doc(k));
     break;
   case VarType(tv):
-    if (print_all_kinds)
-      s = cat3(textptr(tv->name),text("::"),ckind2doc(tv->kind));
-    else 
-      s=textptr(tv->name); break;//FIX: sometimes need explicit kinds!
+    s = textptr(tv->name);
+    if (print_all_kinds) {
+      s = cat3(s,text("::"),ckind2doc(tv->kind));
+    }
+    //FIX: sometimes need explicit kinds!
+    //Mathieu: only if we try to declare kinds inside functions arguments 
+    if (is_temp_tvar(tv)) {
+      // we're trying to print a temporary tvar,
+      // replace it by _ followed by a comment
+      s = cat3(text("_ /* "), s, text(" */"));
+      // we cannot print its kind after the underscore for _::E doesn't parse
+    }
+    break;
   case EnumType(n,ts,_):
     if (n == null)
       s = cat2(text("enum "),
@@ -488,7 +530,7 @@ doc_t funargs2doc(list_t<$(opt_t<var>,tqual,typ)@> args,bool varargs,
 }
 
 $(opt_t<var>,tqual,typ)@ arg_mk_opt($(var,tqual,typ)@ arg) {
-  return &$((opt_t<var>)&Opt((*arg)[0]), // FIX: can we get rid of the cast?
+  return &$(/*(opt_t<var>)*/&Opt((*arg)[0]), // FIX: can we get rid of the cast? => YES
             (*arg)[1],(*arg)[2]);
 }
 
@@ -507,8 +549,24 @@ doc_t qvar2doc(qvar q) {
     return text(String::str_sepstr(List::append(prefix,
 						&List((*q)[1],null)),"_"));
   } else {
-    return cat2(egroup("","::","::",List::map(var2doc,prefix)),
+    // don't print the prefix it aims at the current namespaces
+    if (list_prefix(String::strptrcmp, prefix, curr_namespace))
+      return var2doc((*q)[1]);
+    else
+      return cat2(egroup("","::","::",List::map(var2doc,prefix)),
 		var2doc((*q)[1]));
+  }
+}
+
+doc_t typedef_name2doc(qvar v) {
+  switch ((*v)[0]) {
+  case Abs_n(l):
+    if (list_cmp(String::strptrcmp, l, curr_namespace) == 0) {
+      return var2doc((*v)[1]);      
+    } else {
+      return cat2(text("/* wrong namespace : */ "), qvar2doc(v));
+    }
+  default: return qvar2doc(v);    
   }
 }
 
@@ -1022,25 +1080,30 @@ doc_t stmt2doc(stmt st) {
     // FIX:  gcc only allows declarations to be used at the beginning
     // of blocks, so we force some explicit blocks to be written below.
     // It is verbose for Cyclone; maybe it should be controlled by a flag.
-    if (is_declaration(s1))
-      s = cat6(text("{ "),
-               nest(2,stmt2doc(s1)),
-               line_doc(),
-               text("}"),
-               line_doc(),
-               is_declaration(s2)? // for gcc compatibility
-               cat4(text("{ "),
-                    nest(2,stmt2doc(s2)),
-                    text("}"),
-                    line_doc())
-               : stmt2doc(s2));
-    else if (is_declaration(s2)) // for gcc compatibility
-      s = cat6(stmt2doc(s1),
-               line_doc(),
-               text("{ "),
-               nest(2,stmt2doc(s2)),
-               text("}"),
-               line_doc());
+    // => done
+    if (decls_first) {
+      if (is_declaration(s1))
+	s = cat6(text("{ "),
+		 nest(2,stmt2doc(s1)),
+		 line_doc(),
+		 text("}"),
+		 line_doc(),
+		 is_declaration(s2)? // for gcc compatibility
+		 cat4(text("{ "),
+		      nest(2,stmt2doc(s2)),
+		      text("}"),
+		      line_doc())
+		 : stmt2doc(s2));
+      else if (is_declaration(s2)) // for gcc compatibility
+	s = cat6(stmt2doc(s1),
+		 line_doc(),
+		 text("{ "),
+		 nest(2,stmt2doc(s2)),
+		 text("}"),
+		 line_doc());
+      else
+	s = ppseql(stmt2doc,"",&List(s1,&List(s2,null)));
+    }
     else
       s = ppseql(stmt2doc,"",&List(s1,&List(s2,null)));
     break;
@@ -1124,13 +1187,14 @@ doc_t stmt2doc(stmt st) {
     // FIX:  gcc does not allow declarations to be used immediately after
     // labels.  This next case forces an explicit block to be written.
     // It is verbose for Cyclone; maybe it should be controlled by a flag.
-    if (is_declaration(s1)) {
+    // => all right !
+    if (decls_first && is_declaration(s1)) {
       s = cat6(textptr(x),
-               text(": {"),
-               line_doc(),
-               nest(2,stmt2doc(s1)),
-               line_doc(),
-               text("}"));
+	       text(": {"),
+	       line_doc(),
+	       nest(2,stmt2doc(s1)),
+	       line_doc(),
+	       text("}"));
     } else
       s = cat3(textptr(x),text(": "),stmt2doc(s1));
     break;
@@ -1144,11 +1208,11 @@ doc_t stmt2doc(stmt st) {
              text(");"));
     break;
   case TryCatch_s(s1,ss):
-    s = cat9(text("try"),
+    s = cat9(text("try {"),
              line_doc(),
              nest(2,stmt2doc(s1)),
              line_doc(),
-             text("catch {"),
+             text("} catch {"),
              line_doc(),
              nest(2,switchclauses2doc(ss)),
              line_doc(),
@@ -1253,10 +1317,10 @@ doc_t decl2doc(decl d) {
                           fd->ret_type,
                           List::map(arg_mk_opt,fd->args),
                           fd->varargs, null});
-    s = cat7(text(fd->is_inline?(string)"inline ":(string)""),
+    s = cat7(text(fd->is_inline? "inline " : ""),
              scope2doc(fd->sc),
              tqtd2doc(&Tqual(false,false,false),t,
-                      &Opt(cat2(atts2doc(fd->attributes),qvar2doc(fd->name)))),
+                      &Opt(cat2(atts2doc(fd->attributes),typedef_name2doc(fd->name)))),
              text(" {"),
              nest(2,cat2(line_doc(),stmt2doc(fd->body))),
              line_doc(),
@@ -1266,14 +1330,14 @@ doc_t decl2doc(decl d) {
     if (sd->fields==null)
       s = cat5(scope2doc(sd->sc),
                text("struct "),
-               (sd->name==null)?text(""):qvar2doc(sd->name->v),
-               tvars2doc(sd->tvs),
+               (sd->name==null)?text(""):typedef_name2doc(sd->name->v),
+               ktvars2doc(sd->tvs),
                text(";"));
     else {
       s = cat10(scope2doc(sd->sc),
                 text("struct "),
-                (sd->name==null)?text(""):qvar2doc(sd->name->v),
-                tvars2doc(sd->tvs),
+                (sd->name==null)?text(""):typedef_name2doc(sd->name->v),
+                ktvars2doc(sd->tvs),
                 text(" {"),
                 nest(2,(sd->fields==null)?text(""):
                      cat2(line_doc(),structfields2doc(sd->fields->v))),
@@ -1305,7 +1369,7 @@ doc_t decl2doc(decl d) {
     }
     break;
   case Var_d(&Vardecl(sc,name,tq,type,initializer,shadow_depth,_,atts)):
-    doc_t sn = qvar2doc(name);
+    doc_t sn = typedef_name2doc(name);
     if(shadow_depth > 0)
       sn = cat2(sn, text(xprintf("%d",shadow_depth)));
     s = cat5(scope2doc(sc),
@@ -1320,14 +1384,14 @@ doc_t decl2doc(decl d) {
     if (ed->fields==null)
       s = cat5(scope2doc(ed->sc),
                text("enum "),
-               (ed->name==null)?text(""):qvar2doc(ed->name->v),
-               tvars2doc(ed->tvs),
+               (ed->name==null)?text(""):typedef_name2doc(ed->name->v),
+               ktvars2doc(ed->tvs),
                text(";"));
     else
       s = cat8(scope2doc(ed->sc),
                text("enum "),
-               (ed->name==null)?text(""):qvar2doc(ed->name->v),
-               tvars2doc(ed->tvs),
+               (ed->name==null)?text(""):typedef_name2doc(ed->name->v),
+               ktvars2doc(ed->tvs),
                text(" {"),
                nest(2,(ed->fields==null)?text(""):
                     cat2(line_doc(),enumfields2doc(ed->fields->v))),
@@ -1337,7 +1401,7 @@ doc_t decl2doc(decl d) {
   case Xenum_d(xed):
     s = cat4(scope2doc(xed->sc),
              text("xenum "),
-             qvar2doc(xed->name),
+             typedef_name2doc(xed->name),
              (xed->fields==null)
              ?text(";")
              :cat4(text(" {"),
@@ -1356,10 +1420,12 @@ doc_t decl2doc(decl d) {
     s = cat3(text("typedef "),
              tqtd2doc(&Tqual(false,false,false),
                       td->defn,
-                      &Opt(cat2(qvar2doc(td->name),tvars2doc(td->tvs)))),
+                      &Opt(cat2(typedef_name2doc(td->name),tvars2doc(td->tvs)))),
              text(";"));
+    
     break;
   case Namespace_d(v,tdl):
+    curr_namespace_add(v);
     s = cat7(text("namespace "),
              textptr(v),
              text(" {"),
@@ -1367,22 +1433,41 @@ doc_t decl2doc(decl d) {
              ppseql(decl2doc,"",tdl),
              line_doc(),
              text("}"));
+    curr_namespace_drop();
     break;
   case Using_d(q,tdl):
-    s = cat7(text("using "),
-             qvar2doc(q),
-             text(" {"),
-             line_doc(),
-             ppseql(decl2doc,"",tdl),
-             line_doc(),
-             text("}"));
+    if (print_using_stmts) {
+      s = cat7(text("using "),
+	       qvar2doc(q),
+	       text(" {"),
+	       line_doc(),
+	       ppseql(decl2doc,"",tdl),
+	       line_doc(),
+	       text("}"));
+    } else {
+      s = cat7(text("/* using "),
+	       qvar2doc(q),
+	       text(" { */"),
+	       line_doc(),
+	       ppseql(decl2doc,"",tdl),
+	       line_doc(),
+	       text("/* } */"));
+    }
     break;
   case ExternC_d(tdl):
-    s = cat5(text("extern \"C\" {"),
-	     line_doc(),
-	     ppseql(decl2doc,"",tdl),
-	     line_doc(),
-	     text("}"));
+    if (print_externC_stmts) {
+      s = cat5(text("extern \"C\" {"),
+	       line_doc(),
+	       ppseql(decl2doc,"",tdl),
+	       line_doc(),
+	       text("}"));
+    } else {
+      s = cat5(text("/* extern \"C\" { */"),
+	       line_doc(),
+	       ppseql(decl2doc,"",tdl),
+	       line_doc(),
+	       text("/* } */"));
+    }
     break;
   }
   return s;
@@ -1393,8 +1478,17 @@ doc_t scope2doc(scope sc) {
   case Static:   return text("static ");
   case Public:   return nil_doc();
   case Extern:   return text("extern ");
-  case ExternC:  return text("extern \"C\"");
+  case ExternC:  return text("extern \"C\" ");
   case Abstract: return text("abstract ");
+  }
+}
+
+// needed to detect default effect
+bool exists_temp_tvar_in_effect(typ t) {
+  switch (t) {
+  case VarType(tv): return is_temp_tvar(tv);
+  case JoinEff(l): return exists(exists_temp_tvar_in_effect, l);
+  default: return false;
   }
 }
 
@@ -1430,8 +1524,26 @@ $(tqual,typ,list_t<type_modifier>) to_tms(tqual tq,typ t) {
     type_modifier tm = Pointer_mod(ps,rgntyp,tq);
     return $(tq3, t3, (list_t<type_modifier>)&List(tm,tml3));
 
-    // FIX: deal with effect?
   case FnType(FnInfo{typvars,effopt,t2,args,varargs,fn_atts}):
+    if (! print_all_tvars) {
+      // don't print default effects
+      if (effopt == null
+	  /* || exists(is_temp_tvar, typvars) */
+	  || exists_temp_tvar_in_effect(effopt -> v)) {
+	// WARNING : this is our criterion to detect default effect, so it'd better be right...
+	// If true, we drop the existent effect
+	effopt = null;
+	// and the tvars
+	// (but could they be useful sometimes ??
+	// => yes if they have special kinds with them)
+	typvars = null;
+      }
+    } else {
+      // rewrite the temp variables so that they could parse
+      // WARNING : we don't check for conflicts with some user-defined tvars
+      iter(rewrite_temp_tvar, typvars);
+    }
+
     // discard tq because you can't qualify a function
     let $(tq3,t3,tml3) = to_tms(empty_tqual(),t2);
     list_t<type_modifier> tms = tml3;
@@ -1481,7 +1593,8 @@ doc_t structfields2doc(list_t<structfield_t> fields) {
 }
 
 doc_t enumfield2doc(enumfield f) {
-  return cat3(qvar2doc(f->name),
+  return cat4(typedef_name2doc(f->name),
+	      (f->tvs==null)?nil_doc(): ktvars2doc(f->tvs),
 	      (f->tag==null)?nil_doc():cat2(text("="),exp2doc((exp)f->tag)),
 	      (f->typs==null)?nil_doc():args2doc(f->typs));
 }
