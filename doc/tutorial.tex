@@ -32,7 +32,7 @@ handle the printing; all of this is just as in C\@.
 To compile the program, put it into a file \texttt{hello.cyc}, and run
 the command
 \begin{verbatim}
-    cyclone hello.cyc -o hello
+    cyclone -o hello hello.cyc 
 \end{verbatim}
 This tells the Cyclone compiler (\texttt{cyclone}) to compile the file
 \texttt{hello.cyc}; the \texttt{-o} flag tells the compiler to leave
@@ -114,10 +114,11 @@ Cyclone:
   Pointer arithmetic in C can take a pointer out of bounds, so that
   when the pointer is eventually dereferenced, it corrupts memory or
   causes a crash.  (However, pointer arithmetic is possible
-  using \texttt{?}\ and \texttt{ZEROTERM} pointers.)
+  using \texttt{@fat}\ and \texttt{@zeroterm} pointers.)
 \item There is one other way to crash a C program using pointers: you
-  can dereference the null pointer or try to update the null location.
-  Cyclone prevents this by inserting a null check whenever you
+  can dereference the \texttt{NULL} pointer or try to update the 
+  \texttt{NULL} location.
+  Cyclone prevents this by inserting a \texttt{NULL}-check whenever you
   dereference a \texttt{*} pointer (that is, whenever you use the
   \texttt{*}, \texttt{->}, or subscript operation on a pointer.)
 \end{itemize}
@@ -129,13 +130,13 @@ pointer arithmetic.  The benefit is that you can't cause a crash using
 \subsubsection*{Fat Pointers}
 
 If you need to do pointer arithmetic in Cyclone, you can use a second
-kind of pointer, called a \emph{fat pointer} and indicated by \texttt{?}\ 
-(the question mark).  For
+kind of pointer, called a \emph{fat pointer} and indicated by 
+writing the qualifier \texttt{@fat} after the \texttt{*}.  For
 example, here is a program that echoes its command-line arguments:
 \begin{verbatim}
     #include <stdio.h>
 
-    int main(int argc, char ??argv) {
+    int main(int argc, char *@fat *@fat argv) {
       argc--; argv++; /* skip command name */
       if (argc > 0) {
         /* print first arg without a preceding space */
@@ -160,52 +161,64 @@ in C: pointer arithmetic (\texttt{argv++}) is used to move
 In C, \texttt{argv} would typically be declared with type \texttt{char
   **}, a pointer to a pointer to a character, which is thought of as
 an array of an array of characters.  In Cyclone, \texttt{argv} is
-instead declared with type \texttt{char ??}, which is thought of in
+instead declared with type \texttt{char *@fat*@fat}, which is thought of in
 the same way: it is a (fat) pointer to a (fat) pointer to characters.  The
-difference between a \texttt{*} pointer and a \texttt{?}\ pointer is
-that a \texttt{?}\ pointer comes with bounds information and is thus
+difference between an unqualified pointer and a \texttt{@fat}\ pointer is
+that a \texttt{@fat}\ pointer comes with bounds information and is thus
 ``fatter'' than a traditional pointer.  Each time a
 fat pointer is dereferenced or its contents are assigned to,
-Cyclone inserts not only a null check but a bounds check.  This
-guarantees that a \texttt{?}\ pointer can never cause a buffer
+Cyclone inserts both a \texttt{NULL} check and a bounds check.  This
+guarantees that a \texttt{@fat}\ pointer can never cause a buffer
 overflow.
 
-Because of the bounds information contained in \texttt{?}\ pointers,
+Because of the bounds information contained in \texttt{@fat}\ pointers,
 \texttt{argc} is superfluous: you can get the size of \texttt{argv} by
-writing \texttt{argv.size}.  We've kept \texttt{argc} as an argument
+writing \texttt{numelts(argv)}.  We've kept \texttt{argc} as an argument
 of \texttt{main} for backwards compatibility.
 
 It's worth remarking that you can always cast a \texttt{*} pointer
-to a \texttt{?} pointer (and vice-versa).  So, it is possible to do
+to a \texttt{@fat} pointer (and vice-versa).  So, it is possible to do
 pointer arithmetic on a value of type \texttt{*}, but only when you
 insert the appropriate casts to convert from one pointer type to 
 another.  Note that some of these casts can fail at run-time.  For
 instance, if you try to cast a fat pointer that points to an empty 
 sequence of characters to \texttt{char *}, then the cast will fail
-since the sequence doesn't contain at least one character.  
+since the sequence doesn't contain at least one character. 
 
-\subsubsection*{Never-null pointers}
+Finally, \texttt{@fat} pointers are used so frequently in Cyclone,
+that there is special character, \texttt{?} (question mark) that you 
+can use as an abbreviation for \texttt{*@fat}.  For instance, we could
+write the prototype for main as:
+\begin{verbatim}
+  int main(int argc, char ?? argv);
+\end{verbatim}
+instead of the more verbose:
+\begin{verbatim}
+  int main(int argc, char *@fat *@fat argv);
+\end{verbatim}
 
-There is one other kind of pointer in Cyclone: the never-null pointer.
-A never-null pointer is indicated by \texttt{@} (the at sign).  An
-\texttt{@} pointer is like a \texttt{*} pointer, except that it is
-guaranteed not to be NULL\@.  This means that when you dereference an
-\texttt{@} pointer or assign to its contents, a null check is
-unnecessary.
+\subsubsection*{Non-NULL pointers}
 
-\texttt{@} pointers are useful in Cyclone both for efficiency and as
+There is one other kind of pointer in Cyclone: the non-NULL pointer.
+A non-null pointer is indicated by the qualifier \texttt{@nonnull}.  A
+\texttt{@nonnull} pointer is like an unqualified pointer, except that it is
+guaranteed not to be NULL\@.  This means that when you dereference a
+\texttt{@nonnull} pointer or assign to its contents, a null check is
+sometimes unnecessary.
+
+\texttt{@nonnull} pointers are useful in Cyclone both for efficiency and as
 documentation.  This can be seen at work in the standard library,
-where many functions take \texttt{@} pointers as arguments, or return
-\texttt{@} pointers as results.  For example, the \texttt{getc}
+where many functions take \texttt{@nonnull} pointers as arguments, or return
+\texttt{@nonull} pointers as results.  For example, the \texttt{getc}
 function that reads a character from a file is declared,
 \begin{verbatim}
-    int getc(FILE @);
+    int getc(FILE *@nonnull);
 \end{verbatim}
-This says that \texttt{getc} expects to be called with a non-null
+This says that \texttt{getc} expects to be called with a non-NULL
 pointer to a \texttt{FILE}\@.  Cyclone guarantees that, in fact, when
-the \texttt{getc} function is entered, its argument is not null.  This
-means that \texttt{getc} does not have to test whether it is null, or
-decide what to do if it is in fact NULL\@.
+the \texttt{getc} function is entered, its argument is not \texttt{NULL}.  
+This means that \texttt{getc} does not have to test whether it is 
+\texttt{NULL}, or decide what to do if it is in fact \texttt{NULL}\@.
 
 In C, the argument of \texttt{getc} is declared to have type
 \texttt{FILE *}, and programmers can call \texttt{getc} with
@@ -213,27 +226,49 @@ In C, the argument of \texttt{getc} is declared to have type
 \texttt{NULL}\@.  In practice, many C implementations omit the check;
 \texttt{getc(NULL)} is an easy way to crash a C program.
 
-In Cyclone, you can still call \texttt{getc} with a possibly-null
+In Cyclone, you can still call \texttt{getc} with a possibly-\texttt{NULL}
 \texttt{FILE} pointer (a \texttt{FILE *}).  However, Cyclone insists
 that you insert a check before the actual call:
 \begin{verbatim}
     FILE *f = fopen("/etc/passwd","r");
-    int c = getc((FILE @)f);
+    int c = getc((FILE *@nonnull)f);
 \end{verbatim}
-Here \texttt{f} will be NULL if the file \texttt{/etc/passwd} doesn't
+Here \texttt{f} will be \texttt{NULL} if the file \texttt{/etc/passwd} doesn't
 exist or can't be read.  So, in Cyclone \texttt{f} must be cast to
 \texttt{FILE @} before the call to \texttt{getc}.  The cast causes a
-null check.  If you try to call \texttt{getc} without the cast,
+\texttt{NULL} check.  If you try to call \texttt{getc} without the cast,
 Cyclone will insert one for you automatically, and warn you that it is
-doing so.
+doing so.  
 
-If you call \texttt{getc} with a \texttt{FILE @}, of course, no check
-is required.  For example, \texttt{stdin} is a \texttt{FILE @} in
+You should pay attention to these warnings and attempt
+to get rid of them by rewriting the code.  Not only will this make
+your code more crash-proof, it will tend to make it faster.  For
+instance, if we rewrite the code above so that we explicitly
+test whether or not \texttt{fopen} succeeds in returning a
+non-\texttt{NULL} file descriptor:
+\begin{verbatim}
+    FILE *f = fopen("/etc/passwd","r");
+    if (f == NULL) {
+      fprintf(stderr,"cannot open passwd file!");
+      exit(-1);
+    }
+    int c = getc(f);
+\end{verbatim}
+then Cyclone no longer issues a warning at the call to \texttt{getc}
+and the resulting code does not have to do a \texttt{NULL}-check.
+
+If you call \texttt{getc} with a \texttt{FILE *@nonnull}, of course, no check
+is required.  For example, \texttt{stdin} is a \texttt{FILE *@nonnull} in
 Cyclone, so you can simply call \texttt{getc(stdin)}.  In Cyclone you
-will find that many functions return \texttt{@} pointers, so many of
-the pointers you deal with will already be \texttt{@} pointers, and
+will find that many functions return \texttt{*@nonnull} pointers, so many of
+the pointers you deal with will already be \texttt{*@nonull} pointers, and
 neither the caller nor the called function needs to do null
 checks---and this is perfectly safe.
+
+Like \texttt{@fat} pointers, \texttt{@nonnull} pointers are so useful,
+that there is an abbreviation.  Instead of writing \texttt{FILE*@nonnull}
+you can simply write \texttt{FILE@} when you want to write the
+type of a non-\texttt{NULL} pointer to a \texttt{FILE}.
 
 \subsubsection*{Zero-Terminated Pointers}
 
@@ -251,23 +286,24 @@ pointer arithmetic and subscripting:  the zero-terminated pointer.
 A zero-terminated pointer is a pointer to a sequence of elements
 that are guaranteed to be terminated with a zero.  A good
 example of such a sequence is C's strings.  In Cyclone, we
-the type of C's strings can be written as \texttt{char *ZEROTERM}.
-The \texttt{ZEROTERM} qualifier indicates that the pointer
-points to a zero-terminated sequence and can be placed on
-thin pointers (\texttt{*} and \texttt{@}) and fat pointers (\texttt{?}).
+the type of C's strings can be written as \texttt{char *@zeroterm}.
+The \texttt{@zeroterm} qualifier indicates that the pointer
+points to a zero-terminated sequence.  The qualifier is
+orthogonal to other qualifiers, such as \texttt{@fat} or
+\texttt{@nonnull}, so you can freely combine them.
 
 Because C strings arise so frequently, the types \texttt{char*}, 
-\texttt{char@} and \texttt{char?} are by default qualified
-with \texttt{ZEROTERM}.  Other types (e.g., \texttt{int*}) are
+\texttt{char *@nonnull} and \texttt{char *@fat} are by default qualified
+with \texttt{@zeroterm}.  Other types (e.g., \texttt{int*}) are
 not but you can put the qualifier in explicitly when you want
-this property.  You can override the \texttt{ZEROTERM} qualifier
+this property.  You can override the \texttt{@zeroterm} qualifier
 on \texttt{char} pointers by putting in an explicit
-\texttt{NOZEROTERM} qualifier (e.g., \texttt{char*NOZEROTERM}.)
+\texttt{@nozeroterm} qualifier (e.g., \texttt{char*@nozeroterm}.)
 
 If \texttt{x} is a thin, zero-terminated pointer, then you can
 do a subscript (e.g., \texttt{x[i]}) or pointer arithmetic
 (e.g., \texttt{x+i}) but the compiler inserts checks
-to ensure that (a) i is non-negative and (b) there is no
+to ensure that (a) \texttt{i} is non-negative and (b) there is no
 zero between \texttt{x[0]} and \texttt{x[i-1]} inclusive.
 This ensures that you can't read past the zero.  
 In addition, when writing to a zero-terminated pointer, the
@@ -280,7 +316,7 @@ thin pointers must check to see if you pass a zero, these operations
 can be fairly expensive.  In particular, if you are not careful,
 you can turn what appears to be an \emph{O(n)} algorithm into
 an \emph{O(n-squared)} one.  You can avoid this overhead by
-casting the pointer to a fat zero-terminated pointer.  This
+casting the pointer to a \texttt{@fat} zero-terminated pointer.  This
 computes the length of the sequence once and then then uses
 the bounds information associated with the fat pointer to do
 any bounds checks.  
@@ -328,10 +364,10 @@ the compiler is more likely to eliminate the bounds checks.
 Here is an example:
 \begin{verbatim}
   void foo(char *s, int offset) {
-    char ?NOZEROTERM fat_s = (char ?NOZEROTERM)s;
+    char *@fat @nozeroterm fat_s = (char @fat @nozeroterm)s;
     unsigned int len; 
     fat_s += offset;
-    len = fat_s.size;    
+    len = numelts(fat_s);    
     for (unsigned int i = 0; i < len; i++)
       fat_s[i] = 'a';
   }
@@ -376,17 +412,17 @@ diverges from that of traditional type-safe languages like Java and ML.
 There's much more to Cyclone pointers than we've described here.  
 
 In particular, a pointer type can also specify that it points to a
-sequence of a particular (statically known) length.  For instance, we
-can write:
+sequence of a particular (statically known) length using the
+\texttt{@numelts} qualifier.  For instance, we can write:
 \begin{verbatim}
-void foo(int @{4} arr);
+void foo(int *@numelts(4) arr);
 \end{verbatim}
 Here, the parameter \texttt{arr} is a pointer to a sequence of
-four integer values.  Both the never-null and nullable pointers
+four integer values.  Both the non-null and nullable pointers
 support explicit sequence bounds that are tracked statically.
 Indeed, both pointer kinds always have length information and
 when you write ``\texttt{int *}'' this is just short-hand for
-``\texttt{int *\{1\}}''.
+``\texttt{int *@numelts(1)}''.
 
 We explain pointers in more detail in
 \hyperref[{sec:pointers}]{Section~\ref{sec:pointers}}.
@@ -449,8 +485,7 @@ Because \texttt{result} lives in region \texttt{`newPoint}, the
 expression \texttt{\&result} is a pointer into region
 \texttt{`newPoint}.  If we like, we can write the type of
 \texttt{\&result} with the explicit region as ``\texttt{struct Point *
-`newPoint}''.  Note that the region name comes after the \texttt{*} (or
-\texttt{?} or \texttt{@}).  
+@region(`newPoint)}''.  
 
 When control flow exits a block, the storage (\emph{i.e.}, 
 the region) for that 
@@ -461,7 +496,7 @@ consider the following fragment of (bad) Cyclone code:
 \begin{verbatim}
 1 int f() {
 2    int x = 0;
-3    int *`f y = &x;
+3    int *@region(`f) y = &x;
 4    L:{ int a = 0;
 5        y = &a;
 6      }
@@ -473,8 +508,8 @@ In the function \texttt{f} above, the variables \texttt{x} and
 declared in the outermost block of the function.  The storage for
 those variables will live as long as the invocation of the function.
 Note that since \texttt{y} is a pointer to \texttt{x}, the type of
-\texttt{y} is \texttt{int * `f} reflecting that \texttt{y} points into
-region \texttt{`f}.
+\texttt{y} is \texttt{int *@region(`f)} reflecting that \texttt{y} 
+points into region \texttt{`f}.
 
 The variable \texttt{a} does \emph{not} live in region \texttt{`f} because
 it is declared in an inner block, which we have labeled with
@@ -485,7 +520,7 @@ at line 7 in the code.  Thus, it is an error to try to access
 this storage in the rest of the computation, as is done on line 7.
 
 Cyclone detects the error because it gives the expression \texttt{\&a} the
-type \texttt{int * `L} reflecting the fact that the value is
+type \texttt{int *@region(`L)} reflecting the fact that the value is
 a pointer into region \texttt{`L}.  So, the assignment 
 \texttt{y = \&a} fails to type-check because \texttt{y} expects
 to hold a pointer into region \texttt{`f}, not region \texttt{`L}.
@@ -494,7 +529,21 @@ The restriction, compared to C, is that a pointer's type indicates
 
 \subsubsection*{Region Inference}
 
-As we will see, Cyclone often figures out the region of a pointer
+If you had to write a \texttt{@region} qualifier on every
+pointer type, then writing code would be far from pleasant.
+Fortunately, Cyclone provides a number of mechanisms to
+cut down on the region annotations you have to write.  
+
+First off, you can omit the \texttt{@region} qualifier keyword
+and simply write the region name (e.g., \texttt{`r}) as long
+as you put the region name after any other qualifiers.  For
+instance, instead of writing ``\texttt{int *@nonnull @region(`r)}''
+we can simply write ``\texttt{int @`r}''.  In this document,
+we will use an explicit \texttt{@region} qualifier, but
+you'll find that the libraries and other sample codes tend
+to use the (cryptic) abbreviations.  
+
+In addition, Cyclone often figures out the region of a pointer
 without the programmer providing the information.  This is called {\em
 region inference}.  For instance, we can rewrite the function
 \texttt{f} above without any region annotations, and without 
@@ -521,7 +570,7 @@ the region annotations for documentation purposes, or to make type
 errors a little less cryptic.
 
 You need to understand at least four more details about regions to
-be an effective Cyclone programmer:  the heap region, dynamic
+be an effective Cyclone programmer:  the heap region, growable
 regions, region polymorphism, and default region annotations for
 function parameters.  The following sections give a brief overview
 of these details.
@@ -541,14 +590,14 @@ region.  To reflect this explicitly, we can put the region in
 the type of \texttt{ptr} if we like:
 \begin{verbatim}
 struct Point p = {0,1};
-struct Point *`H ptr = &p;
+struct Point *@region(`H) ptr = &p;
 \end{verbatim}
 
 As another example, the following function heap-allocates a point and
 returns it to the caller.  We put the regions in here to be explicit:
 \begin{verbatim}
-struct Point *`H good_newPoint(int x,int y) {
-  struct Point *`H p = malloc(sizeof(struct Point));
+struct Point *@region(`H) good_newPoint(int x,int y) {
+  struct Point *@region(`H) p = malloc(sizeof(struct Point));
   p->x = x;
   p->y = y;
   return p;
@@ -557,12 +606,12 @@ struct Point *`H good_newPoint(int x,int y) {
 Alternatively, we can use \texttt{new} to heap-allocate and 
 initialize the result:
 \begin{verbatim}
-struct Point *`H good_newPoint(int x,int y) {
+struct Point *@region(`H) good_newPoint(int x,int y) {
   return new Point{x,y};
 }
 \end{verbatim}
 
-\subsubsection*{Dynamic Regions}
+\subsubsection*{Growable Regions}
 
 Storage on the stack is implicitly allocated and recycled when you
 enter and leave a block.  Storage in the heap is explicitly allocated
@@ -581,23 +630,23 @@ can introduce pauses in the program, and as a general purpose memory
 manager, might not be as space- or time-efficient as routines tailored
 to an application.
 
-To address these applications, Cyclone provides support for \emph{dynamic
-regions}.  A dynamic region is similar to the region associated with
+To address these applications, Cyclone provides support for \emph{growable
+regions}.  A growable region is similar to the region associated with
 a code block.  In particular, when you execute:
 \begin{verbatim}
-region<`r> h {
+{ region<`r> h;
    ...
 }
 \end{verbatim}
 this declares a new region \texttt{`r} along with a \emph{region handle}
 \texttt{h}.  The handle can be used for dynamically allocating objects within
-the region.  All of the storage for
+the region \texttt{`r}.  All of the storage for
 the region is deallocated at the point of the closing brace.  
 Unlike block
 regions, the number (and size) of objects that you allocate into
-the region is not fixed at compile time.  In this respect, dynamic
+the region is not fixed at compile time.  In this respect, growable
 regions are more like the heap.  You can use the \texttt{rnew(h)} and
-\texttt{rmalloc(h,...)} operations to allocate objects within a dynamic
+\texttt{rmalloc(h,...)} operations to allocate objects within a growable
 region, where \texttt{h} is the handle for the region.
  
 For instance, the following code takes an integer $n$, creates
@@ -606,7 +655,7 @@ $n$ within the region using \texttt{rnew}.
 \begin{verbatim}
 int k(int n) {
   int result;
-  region<`r> h {
+  { region<`r> h;
     int ?arr = rnew(h) {for i < n : i};
     result = process(h, arr);
   }
@@ -620,11 +669,12 @@ into the region \texttt{`r} using the supplied handle.
 After processing the array, we exit the region which deallocates
 the array, and then return the calculated result.
 
-It is worth remarking that the heap is really just a dynamic region
-with global scope, and you can use the global variable \texttt{heap_region}
+It is worth remarking that the heap is really just a growable region
+with global scope, and you can use the global variable 
+\texttt{Core::heap_region}
 as a handle on the heap.  Indeed, \texttt{new} and \texttt{malloc(...)}
-are just abbreviations for \texttt{rnew(heap_region)} and
-\texttt{rmalloc(heap_region,...)} respectively.  
+are just abbreviations for \texttt{rnew(Core::heap_region)} and
+\texttt{rmalloc(Core::heap_region,...)} respectively.  
 
 \subsubsection*{Region Polymorphism}
 
@@ -636,7 +686,7 @@ alive.  For example, the function \texttt{foo} from the beginning
 of this section is a region-polymorphic function.  To make this
 clear, let us re-write the function making the regions explicit:
 \begin{verbatim}
-void foo(struct Point *`r p) {
+void foo(struct Point *@region(`r) p) {
   p->y = 1234;
   return;
 }
@@ -649,8 +699,8 @@ a function.  So, for instance, we can write the following:
 \begin{verbatim}
 void g() {
   struct Point p = {0,1};
-  struct Point *`g ptr1 = &p;
-  struct Point *`H ptr2 = new Point{2,3};
+  struct Point *@region(`g) ptr1 = &p;
+  struct Point *@region(`H) ptr2 = new Point{2,3};
   foo(ptr1);
   foo(ptr2);
 }
@@ -682,7 +732,8 @@ that the points \texttt{p1} and \texttt{p2} can live in any
 two regions \texttt{`r1} and \texttt{`r2}.  To make this explicit,
 we would write:
 \begin{verbatim}
-void h(struct Point *`r1 p1, struct Point *`r2 p2) {
+void h(struct Point *@region(`r1) p1, 
+       struct Point *@region(`r2) p2) {
   p1->x += p2->x;
   p2->x += p2->y;
 }
@@ -703,7 +754,8 @@ Cyclone will reject the code because it assumes that in general,
 \texttt{p1} and \texttt{p2} might point into \emph{different} regions.
 That is, Cyclone fills in the missing regions as follows:
 \begin{verbatim}
-void j(struct Point *`r1 p1, struct Point *`r2 p2) {
+void j(struct Point *@region(`r1) p1, 
+       struct Point *@region(`r2) p2) {
   p1 = p2;
 }
 \end{verbatim}
@@ -714,7 +766,8 @@ different regions, in which case the code would be incorrect.
 But you can make them the same by putting in the same explicit region
 for each pointer.  Thus, the following code does type-check:
 \begin{verbatim}
-void j(struct Point *`r1 p1, struct Point *`r1 p2) {
+void j(struct Point *@region(`r1) p1, 
+       struct Point *@region(`r1) p2) {
   p1 = p2;
 }
 \end{verbatim}
@@ -766,13 +819,19 @@ code with the default region annotations filled in.  The argument
 is assumed to be in a region \texttt{`r}, and the result is assumed to be
 in the heap, so the fully elaborated code is:
 \begin{verbatim}
-int *`H id(int *`r x) {
+int *@region(`H) id(int *@region(`r) x) {
   return x;
 }
 \end{verbatim}
 Now the type-error is manifest.  To fix the code, we must put in
 explicit regions to connect the argument type with the result type.
 For instance, we might write:
+\begin{verbatim}
+int *@region(`r) id(int *@region(`r) x) {
+  return x;
+}
+\end{verbatim}
+or using the abbreviation:
 \begin{verbatim}
 int *`r id(int *`r x) {
   return x;
@@ -787,7 +846,7 @@ won't let you dereference a pointer into a deallocated region.
 The lexical blocks declared in functions correspond to one
 type of region, and simply declaring a variable within that
 block allocates storage within the region.  The storage is
-deallocated upon exit of the block.  Dynamic regions are
+deallocated upon exit of the block.  Growable regions are
 similar, except that a dynamic number of objects can be allocated
 within the region using the region's handle.  The heap is a
 special region that is garbage collected.  
