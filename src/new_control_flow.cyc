@@ -657,6 +657,70 @@ static bool is_local_var_rooted_path(Absyn::exp_t e) {
   }
 }
 
+static $(flow_t<`r>,absRval_t<`r>) 
+anal_stmt_exp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, stmt_t s) {
+  let fenv = env->fenv;
+  // We need the absRval_t from the last expression --
+  // that's why we traverse the statement ourselves.
+  // make sure we do everything just like anal_stmt does!
+  while(true) {
+    let $(_,sflow) = pre_stmt_check(env,inflow,s);
+    inflow = *sflow;
+    switch(s->r) {
+    case &Seq_s(s1,s2): 
+      inflow = anal_stmt(env,inflow,s1);
+      s = s2;
+      break;
+    case &Decl_s(&Decl{.r = &Alias_d(e,tv,vd), ...},s1):
+      // FIX: This is the same code as in anal_stmt -- should be factored out
+      // similar to the copy situation at the top of anal_Rexp
+      let $(f,lval) = anal_Lexp(env,inflow,true,e);
+      switch $(f,lval) {
+      case $({.ReachableFL = $(fd,relns)},{.PlaceL = p}):
+        let old_rval = lookup_place(fd,p);
+        // HACK -- if e is cast, then get at the underlying expression's type
+        type_t t = e->topt->v;
+        switch (e->r) {
+        case &Cast_e(_,e2,...): t = e2->topt->v; break;
+        default: break;
+        }
+        let new_rval = make_unique_consumed(fenv,t,e,env->iteration_num,old_rval);
+        fd = assign_place(fenv,e->loc,fd,env->all_changed,p,new_rval);
+        f = ReachableFL(fd,relns);
+        absRval_t leaf;
+        switch (initlevel(fenv,fd,old_rval)) {
+        case AllIL: leaf = fenv->unknown_all; break;
+        case NoneIL: leaf = fenv->unknown_none; break;
+        case ThisIL: leaf = fenv->unknown_this; break;
+        }
+        let old_rval_approx = typ_to_absrval(fenv,t,leaf);
+        f = use_Rval(env,e->loc,f,old_rval);
+        let vds = List(vd,NULL);
+        f = add_vars(fenv,f,&vds,fenv->unknown_all,s->loc);
+        let $(f,res) = anal_stmt_exp(env,copy_ctxt,f,s1);
+        switch (f) {
+        case {.ReachableFL = $(fd,relns)}:
+          fd = assign_place(fenv,s->loc,fd,env->all_changed,p,old_rval_approx);
+          let outflow = ReachableFL(fd,relns);
+          return $(outflow,res);
+        default: return $(f,res);
+        }
+      case $({.BottomFL = _}, _): return $(f,fenv->unknown_all);
+      default: Tcutil::terr(e->loc,"bad alias expression--no unique path found");
+        return $(BottomFL(),fenv->unknown_all);
+      }
+    case &Decl_s(d,s1): 
+      inflow = anal_decl(env,inflow,d);
+      s = s1;
+      break;
+    case &Exp_s(e): 
+      return anal_Rexp(env,copy_ctxt,inflow,e);
+    default: throw new Core::Impossible("analyze_Rexp: ill-formed StmtExp");
+    }
+  } 
+}
+
+
 // Note: must deal with try-flow in all "base" cases!!!
 static $(flow_t<`r>,absRval_t<`r>) 
 anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
@@ -1270,28 +1334,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 	return $(f1,fenv->unknown_all);
       }
     }
-  case &StmtExp_e(s): 
-    // We need the absRval_t from the last expression --
-    // that's why we traverse the statement ourselves.
-    // make sure we do everything just like anal_stmt does!
-    while(true) {
-      let $(_,sflow) = pre_stmt_check(env,inflow,s);
-      inflow = *sflow;
-      switch(s->r) {
-      case &Seq_s(s1,s2): 
-	inflow = anal_stmt(env,inflow,s1);
-	s = s2;
-	break;
-      case &Decl_s(d,s1): 
-	inflow = anal_decl(env,inflow,d);
-	s = s1;
-	break;
-      case &Exp_s(e): 
-	return anal_Rexp(env,copy_ctxt,inflow,e);
-      default: throw new Core::Impossible("analyze_Rexp: ill-formed StmtExp");
-      }
-    } 
-
+  case &StmtExp_e(s): return anal_stmt_exp(env,copy_ctxt,inflow,s);
   case &Var_e(_,&Unresolved_b): 
   case &UnknownId_e(_):        
   case &UnknownCall_e(_,_):    
