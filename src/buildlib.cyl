@@ -1055,6 +1055,12 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &SizeofType(_):
       fprintf(stderr,"Error: unexpected sizeof_t\n");
       exit(1); return;
+    case &TypeInt(_):
+      fprintf(stderr,"Error: unexpected type integer\n");
+      exit(1); return;
+    case &TagType(_):
+      fprintf(stderr,"Error: unexpected tag_t\n");
+      exit(1); return;
     }
   }
 

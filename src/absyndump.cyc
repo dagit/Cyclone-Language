@@ -251,6 +251,7 @@ void dumpkind(kind_t k) {
   case BoxKind: dump("B"); return;
   case RgnKind: dump("R"); return;
   case EffKind: dump("E"); return;
+  case IntKind: dump("I"); return;
   }
 }
 
@@ -457,6 +458,8 @@ void dumpntyp(type_t t) {
   case &TypedefType(n,ts,_,topt):  dumpqvar(n), dumptps(ts); return;
   case &SizeofType(t): dump("sizeof_t<"); dumpntyp(t); dump(">"); return;
   case &RgnHandleType(rgn): dumprgn(rgn); return;
+  case &TypeInt(i): dump(aprintf("`%d",i)); return;
+  case &TagType(t): dump("tag_t<"); dumpntyp(t); dump(">"); return;
   case HeapRgn: 
   case &AccessEff(_): 
   case &RgnsEff(_): 

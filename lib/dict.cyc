@@ -560,4 +560,3 @@ Iter::iter_t<$(`a,`b),{`r1,`r2}> make_iter(region_t<`r1> rgn,
   return Iter::Iter(rnew(rgn) $(stack, (t ? 0 : -1)),
 		    iter_f@<`a,`b,`r2,`r1><>);
 }
-

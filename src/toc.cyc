@@ -402,8 +402,12 @@ static type_t typ_to_c(type_t t) {
     else return new TypedefType(tdn,NULL,td,new Opt(typ_to_c_array(topt->v)));
   case &SizeofType(_): 
     return uint_t;
+  case &TagType(_):
+    return sint_t;
   case &RgnHandleType(t):
     return cstar_typ(strct(_RegionHandle_sp),mt_tq); // could be shared
+  case &TypeInt(_): 
+    toc_impos("Toc::typ_to_c: type translation passed a type integer");
   case HeapRgn:
     toc_impos("Toc::typ_to_c: type translation passed the heap region");
   case &AccessEff(_):
@@ -434,6 +438,7 @@ static bool atomic_typ(type_t t) {
   case FloatType:      
   case &DoubleType(_): 
   case &FnType(_):     
+  case &TagType(_):
   case &SizeofType(_): return true;
   case &ArrayType(t,_,_): return atomic_typ(t);
     // FIX: really should compute in terms of the instantiation

@@ -262,6 +262,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
     }
     region rgn {
       // constrain the type variables to have box kind (still necessary?)
+      // FIX: jcheney: this gets in my way, turning error into warning...
       let var_tvs = NULL;
       for (_ t = exist_ts; t != NULL; t = t->tl) {
 	tvar_t tv = t->hd;
@@ -272,7 +273,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
         case &Less_kb(*f,AnyKind): *f = new Opt(new Eq_kb(BoxKind)); break;
 	case &Eq_kb(k): fallthru(k);
         case &Less_kb(_,k): 
-	  terr(p->loc,"struct %s abstracts type variable %s of kind %s != B",
+	  warn(p->loc,"struct %s abstracts type variable %s of kind %s != B",
                qvar2string(ad->name),*tv->name,kind2string(k)); 
 	  break;
 	}

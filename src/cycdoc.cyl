@@ -263,6 +263,7 @@ void dumpkind(kind_t k) {
   case BoxKind: dump_alpha("B"); return;
   case RgnKind: dump_alpha("R"); return;
   case EffKind: dump_alpha("E"); return;
+  case IntKind: dump_alpha("I"); return;
   }
 }
 
@@ -417,6 +418,10 @@ void dumpntyp(type_t t) {
     return;
   case &SizeofType(t):
     dump_alpha("sizeof_t<"); dumptyp(t); dump_alpha(">"); return;
+  case &TagType(t):
+    dump_alpha("tag_t<"); dumptyp(t); dump_alpha(">"); return;
+  case &TypeInt(i):
+    dump_alpha(aprintf("`%d",i));  return;
   case &TupleType(ts): dump_symbol("\\$"); dumpargs(ts); return;
   case &AggrType(AggrInfo(info,ts)):
     let $(k,n) = aggr_kinded_name(info);

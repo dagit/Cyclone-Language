@@ -789,6 +789,8 @@ static bool contains_region(tvar_t rgn, type_t t) {
   case &EnumType(_,_):   fallthru;
   case &AnonEnumType(_): fallthru;
   case &SizeofType(_):   fallthru;
+  case &TagType(_):      fallthru;
+  case &TypeInt(_):      fallthru;
   case HeapRgn:          fallthru;
   case &Evar(_,_,_,_):   return false; // because of compress above
   case &VarType(tv): return tvar_cmp(tv,rgn) == 0;

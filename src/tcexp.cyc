@@ -209,6 +209,14 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
                                     new_conref(true),
                                     empty_tqual(), empty_conref()));
         break;
+      case &TagType(t1): 
+	let t2 = new TypeInt(i);
+	if(!unify(t1,t2)) {
+	  terr(loc, "expecting %s but found %s", typ2string(t1), typ2string(t2));
+	  explain_failure();
+	}
+	t = new TagType(t2);
+	break;
       default: // topt isn't int; presumably an error to be caught elsewhere
         t = (sn == (sign_t)Unsigned) ? uint_t : sint_t;
         break;
@@ -1501,6 +1509,7 @@ static bool zeroable_type(type_t t) {
     }
   case &EnumType(_,_): return true; // FIX: explicit tags?
   case &SizeofType(_): return true;
+  case &TagType(_): return true; // FIX: true iff 0? Is sizeof right?
   case &AnonAggrType(_,fs): 
     for (; fs != NULL; fs = fs->tl) 
       if (!zeroable_type(fs->hd->type)) return false;
@@ -1509,6 +1518,7 @@ static bool zeroable_type(type_t t) {
   case &TypedefType(_,_,_,_): return false;
   case &RgnHandleType(_): return false;
 
+  case &TypeInt(_):
   case HeapRgn:
   case &AccessEff(_):
   case &JoinEff(_):

@@ -254,6 +254,8 @@ type_t copy_type(type_t t) {
   case &EnumType(tdn,fs): return new EnumType(tdn,fs);
   case &AnonEnumType(fs): return new AnonEnumType(List::map(copy_enumfield,fs));
   case &SizeofType(t): return new SizeofType(copy_type(t));
+  case &TypeInt(n): return new TypeInt(n);
+  case &TagType(t): return new TagType(copy_type(t));
   case &RgnHandleType(t): return new RgnHandleType(copy_type(t));
   case &TypedefType(tdn,ts,td,_): 
     return new TypedefType(tdn,copy_types(ts),td,NULL);
@@ -329,6 +331,8 @@ kind_t typ_kind(type_t t) {
       impos("typ_kind: forward constraint in ptr bounds");
     }
   case &SizeofType(_): return BoxKind;
+  case &TypeInt(_): return IntKind;
+  case &TagType(_): return BoxKind;
   // Arrays are always of memkind
   case &ArrayType(_,_,_): 
   case &TupleType(_): return MemKind;
@@ -546,6 +550,7 @@ static type_t rgns_of(type_t t) {
   case &DoubleType(_): 
   case &EnumType(_,_):
   case &AnonEnumType(_):
+  case &TypeInt(_):
   case &IntType(_,_): return empty_effect;
   case &Evar(_,_,_,_):
   case &VarType(_): 
@@ -573,6 +578,7 @@ static type_t rgns_of(type_t t) {
   case &AnonAggrType(_,fs): 
     return normalize_effect(new JoinEff(map(rgns_of_field,fs)));
   case &SizeofType(t): return rgns_of(t);
+  case &TagType(t): return rgns_of(t);
   case &FnType(FnInfo{tvs,eff,rt,args,_,cyc_varargs,rpo,_}):
     // NOTE:  we define RgnsEff(t) in this case to be the regions in the
     // effect.  So, if the effect is smaller than the argument or return
@@ -1155,6 +1161,12 @@ void unify_it(type_t t1, type_t t2) {
 
   case $(&SizeofType(t1), &SizeofType(t2)): unify_it(t1,t2); return;
 
+  case $(&TypeInt(n),&TypeInt(m)): if(n==m) return;
+    failure_reason = "(different type integers)";
+    break;
+
+  case $(&TagType(t1),&TagType(t2)): unify_it(t1,t2); return;
+
   case $(&ArrayType(t2a,tq2a,e1), &ArrayType(t1a,tq1a,e2)):
     unify_tqual(tq1a,tq2a);
     unify_it(t1a,t2a);
@@ -1475,6 +1487,8 @@ static int type_case_number(type_t t) {
   case &JoinEff(_): return 22;
   case &RgnsEff(_): return 23;
   case &SizeofType(_): return 24;
+  case &TypeInt(_): return 25;
+  case &TagType(_): return 26;
   }
 }
 // the real work of comparison
@@ -1589,6 +1603,8 @@ int typecmp(type_t t1, type_t t2) {
   case $(&RgnHandleType(rt1),&RgnHandleType(rt2)):
     return typecmp(rt1,rt2);
   case $(&SizeofType(s1),&SizeofType(s2)): return typecmp(s1,s2);
+  case $(&TagType(s1),&TagType(s2)): return typecmp(s1,s2);
+  case $(&TypeInt(n),&TypeInt(m)): return intcmp(n,m);
   case $(&JoinEff(_), _)  : 
   case $(_, &JoinEff(_))  : 
   case $(&AccessEff(_), _): 
@@ -1619,6 +1635,8 @@ bool will_lose_precision(type_t t1, type_t t2) {
   case $(&DoubleType(_),  &IntType(_,_)):   
   case $(&DoubleType(_),  &SizeofType(_)):   
   case $(FloatType,       &SizeofType(_)):
+  case $(&DoubleType(_),  &TagType(_)):   
+  case $(FloatType,       &TagType(_)):
   case $(FloatType,       &IntType(_,_)):  return true;
   case $(&IntType(_,B8),  &IntType(_,B8)): return false;
   case $(&IntType(_,B8),  _): // see prev case
@@ -1626,6 +1644,8 @@ bool will_lose_precision(type_t t1, type_t t2) {
   case $(&IntType(_,B4),  &IntType(_,B2)):  
   case $(&IntType(_,B4),  &IntType(_,B1)):  
   case $(&IntType(_,B2),  &IntType(_,B1)): 
+  case $(&TagType(_),  &IntType(_,B2)):  
+  case $(&TagType(_),  &IntType(_,B1)): 
   case $(&SizeofType(_),  &IntType(_,B2)):  
   case $(&SizeofType(_),  &IntType(_,B1)): return true;
   default: return false;
@@ -1673,6 +1693,7 @@ bool is_integral_type(type_t t) {
   switch (compress(t)) {
   case &IntType(_,_): 
   case &SizeofType(_):
+  case &TagType(_):
   case &EnumType(_,_): 
   case &AnonEnumType(_): return true;
   default: return false;
@@ -1811,6 +1832,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     return false;
 
   case $(&SizeofType(_),&IntType(_,B4)): return true;
+  case $(&TagType(_),&IntType(_,B4)): return true;
 
   default: return unify(t1,t2);
   }
@@ -1857,7 +1879,12 @@ static bool is_sizeof_type(type_t t1) {
   default: return false;
   }
 }
-
+static bool is_tag_type(type_t t1) {
+  switch (compress(t1)) {
+  case &TagType(_): return true;
+  default: return false;
+  }
+}
 // coerce e to have type t -- used in function call and explicit fallthru
 bool coerce_arg(tenv_t te, exp_t e, type_t t2) {
   type_t t1 = compress(e->topt->v);
@@ -1865,7 +1892,8 @@ bool coerce_arg(tenv_t te, exp_t e, type_t t2) {
   if (unify(t1,t2)) return true;
   // try arithmetic conversions
   if ((is_arithmetic_type(t1) && is_arithmetic_type(t2)) ||
-      (is_sizeof_type(t1) && is_arithmetic_type(t2))) {
+      (is_sizeof_type(t1) && is_arithmetic_type(t2)) ||
+      (is_tag_type(t1) && is_arithmetic_type(t2)) ) {
     // issue a warning if we lose precision
     if (will_lose_precision(t1,t2))
       warn(e->loc,"integral size mismatch; %s -> %s conversion supplied", 
@@ -2107,6 +2135,7 @@ bool is_integral(exp_t e) {
   case &IntType(_,_): 
   case &EnumType(_,_):
   case &AnonEnumType(_):
+  case &TagType(_):
   case &SizeofType(_): return true;
   case &Evar(_,_,_,_): return unify(e->topt->v,sint_t);
   default: return false;
@@ -2362,6 +2391,10 @@ type_t rsubstitute(region_t<`r> rgn,
   case &SizeofType(t2):
     let new_t2 = rsubstitute(rgn,inst,t2);
     return new_t2 == t2 ? t : new SizeofType(new_t2);
+  case &TagType(t2):
+    let new_t2 = rsubstitute(rgn,inst,t2);
+    return new_t2 == t2 ? t : new TagType(new_t2);
+  case &TypeInt(_):
   case &EnumType(_,_): 
   case &AnonEnumType(_):
   case VoidType:       
@@ -2782,6 +2815,10 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
   case &SizeofType(t1):
     cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t1);
     break;
+  case &TagType(t1):
+    cvtenv = i_check_valid_type(loc,te,cvtenv,IntKind,t1);
+    break;
+  case &TypeInt(_):
   case &IntType(_,_): 
   case FloatType:    
   case &DoubleType(_): break; 

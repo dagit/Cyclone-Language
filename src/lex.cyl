@@ -147,6 +147,7 @@ static $(string_t,short) rw_array[] = {
   $("static", STATIC),
   $("struct", STRUCT),
   $("switch", SWITCH),
+  $("tag_t", TAG_T),
   $("throw", THROW),
   $("try", TRY),
   $("tunion", TUNION),
@@ -547,6 +548,7 @@ int yylex() {
  case QUAL_IDENTIFIER   : yylval = new QualId_tok(Lex::token_qvar);   break;
  case QUAL_TYPEDEF_NAME : yylval = new QualId_tok(Lex::token_qvar);   break;
  case TYPE_VAR          : yylval = new String_tok(Lex::token_string); break;
+ case TYPE_INTEGER      : yylval = new Int_tok(Lex::token_int);       break;
  case INTEGER_CONSTANT  : yylval = new Int_tok(Lex::token_int);       break;
  case CHARACTER_CONSTANT: yylval = new Char_tok(Lex::token_char);     break;
  case FLOATING_CONSTANT : yylval = new String_tok(Lex::token_string); break;
@@ -572,8 +574,24 @@ rule token = parse
 | (['A'-'Z''a'-'z']['A'-'Z''a'-'z''0'-'9''_']*':'':')+
   ['A'-'Z''a'-'z''_']['A'-'Z''a'-'z''0'-'9''_']*
       { return process_qual_id(lexbuf); }
+/* New (int kinds): Type integer constants*/
+| '`''0'['x''X']['0'-'9''a'-'f''A'-'F']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
+      { token_int = intconst(lexbuf,3,0,16);
+        return TYPE_INTEGER; }
+| '`''0'['0'-'7']*((['u''U']['l''L']?)|(['l''L']['u''U']?))?
+      { token_int = intconst(lexbuf,1,0,8);
+        return TYPE_INTEGER; }
+| '`''0'['0'-'9']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
+      /* This is really an error case according to OSI C --
+         the leading 0 indicates this should be in octal. */
+      /* FIX: print a warning message? */
+      { token_int = intconst(lexbuf,1,0,10);
+        return TYPE_INTEGER; }
+| '`'['1'-'9']['0'-'9']*((['u''U']['l''L']?)|(['l''L']['u''U']?))?
+      { token_int = intconst(lexbuf,1,0,10);
+        return TYPE_INTEGER; }
 /* Type variables */
-| '`'['A'-'Z''a'-'z''0'-'9''_']+
+| '`'['A'-'Z''a'-'z''_']['A'-'Z''a'-'z''0'-'9''_']*
    { token_string = *(get_symbol(str_index_lbuf(lexbuf))); 
       return TYPE_VAR; }
 /* Integer constants */

@@ -94,6 +94,7 @@ bool okay_szofarg(type_t t) {
     default: return false;
     }
   case &SizeofType(_):
+  case &TagType(_):
   case &IntType(_,_): 
   case FloatType:    
   case &DoubleType(_): return true;
@@ -117,6 +118,7 @@ bool okay_szofarg(type_t t) {
     return true;
   case &EnumType(_,_):
   case &AnonEnumType(_): return true;
+  case &TypeInt(_):
   case HeapRgn: 
   case &JoinEff(_):
   case &AccessEff(_):

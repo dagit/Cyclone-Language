@@ -172,7 +172,8 @@ namespace Absyn {
     BoxKind,      // same as MemKind but excludes types whose 
                   //   values do not go in general-purpose registers
     RgnKind,      // regions
-    EffKind       // effects
+    EffKind,      // effects
+    IntKind      // constant ints
   };
 
   // signed or unsigned qualifiers on integral types
@@ -326,6 +327,8 @@ namespace Absyn {
     RgnHandleType(type_t);   // a handle for allocating in a region.  BoxKind
     // An abbreviation -- the opt_t<typ> contains the definition if any
     TypedefType(typedef_name_t,list_t<type_t>,struct Typedefdecl *,opt_t<type_t>);
+    TagType(type_t);         // tag_t<t>.  IntKind -> BoxKind.
+    TypeInt(int);            // `i, i a const int.  IntKind
     HeapRgn;                 // The heap region.  RgnKind 
     AccessEff(type_t);       // Uses region r.  RgnKind -> EffKind
     JoinEff(list_t<type_t>); // e1+e2.  EffKind list -> EffKind

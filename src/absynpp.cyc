@@ -347,6 +347,7 @@ string_t kind2string(kind_t k) {
   case BoxKind: return "B";
   case RgnKind: return "R";
   case EffKind: return "E";
+  case IntKind: return "I";
   }
 }
 
@@ -681,6 +682,12 @@ doc_t ntyp2doc(type_t t) {
     break;
   case &RgnHandleType(t):
     s = cat(text("region_t<"),rgn2doc(t),text(">"));
+    break;
+  case &TypeInt(t):
+    s = text(aprintf("`%d",t));
+    break;
+  case &TagType(t):
+    s = cat(text("tag_t<"),typ2doc(t),text(">"));
     break;
   case HeapRgn:
     s = rgn2doc(t);

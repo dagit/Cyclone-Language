@@ -798,6 +798,7 @@ static kind_t id_to_kind(string_t s, seg_t loc) {
     case 'B': return BoxKind;
     case 'R': return RgnKind;
     case 'E': return EffKind;
+    case 'I': return IntKind;
     default:  break;
   }
   err(aprintf("bad kind: %s",s), loc); 
@@ -826,7 +827,7 @@ using Parse;
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION FORARRAY
 %token FILL CODEGEN CUT SPLICE
 %token MALLOC RMALLOC CALLOC RCALLOC
-%token REGION_T SIZEOF_T REGION RNEW REGIONS RESET_REGION
+%token REGION_T SIZEOF_T TAG_T REGION RNEW REGIONS RESET_REGION
 %token GEN
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
@@ -839,7 +840,7 @@ using Parse;
 %token IDENTIFIER INTEGER_CONSTANT STRING
 %token CHARACTER_CONSTANT FLOATING_CONSTANT
 // Cyc: type variables, qualified identifers and typedef names
-%token TYPE_VAR TYPEDEF_NAME QUAL_IDENTIFIER QUAL_TYPEDEF_NAME
+%token TYPE_VAR TYPEDEF_NAME QUAL_IDENTIFIER QUAL_TYPEDEF_NAME TYPE_INTEGER
 // Cyc: added __attribute__ keyword
 %token ATTRIBUTE
 // the union type for all productions
@@ -900,7 +901,7 @@ using Parse;
   Rgnorder_tok(list_t<$(type_t,type_t)@>)
 }
 /* types for productions */
-%type <$(sign_t,int)@> INTEGER_CONSTANT
+%type <$(sign_t,int)@> INTEGER_CONSTANT TYPE_INTEGER
 %type <char> CHARACTER_CONSTANT
 %type <string_t> FLOATING_CONSTANT namespace_action
 %type <string_t> IDENTIFIER TYPEDEF_NAME TYPE_VAR STRING field_name
@@ -1264,6 +1265,11 @@ type_specifier:
     { $$=^$(type_spec(new RgnHandleType($3),LOC(@1,@4))); }
 | SIZEOF_T '<' any_type_name right_angle
     { $$=^$(type_spec(new SizeofType($3),LOC(@1,@4))); }
+| TYPE_INTEGER
+    { let &$(_,n) = $1; 
+      $$=^$(type_spec(new TypeInt(n),LOC(@1,@1))); }
+| TAG_T '<' any_type_name right_angle
+    { $$=^$(type_spec(new TagType($3),LOC(@1,@4))); }
 ;
 
 /* Cyc: new */
