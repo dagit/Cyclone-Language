@@ -2729,21 +2729,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
   case &Break_s(dest):    fallthru(dest);
   case &Continue_s(dest): fallthru(dest);
   case &Goto_s(_,dest):
-    // check we don't jump into scope -- this is totally orthogonal to
-    // the rest of control-flow checking, so we only do it the first iteration
-    if(env->iteration_num==1) {
-      let my_encloser   = annot->encloser;
-      let dest_encloser = get_stmt_annot((stmt_t)dest)->encloser;
-      while(dest_encloser != my_encloser) {
-	let next_encloser = get_stmt_annot(my_encloser)->encloser;
-	if(next_encloser == my_encloser) { // function body is own encloser
-	  aerr(s->loc, "goto enters local scope or exception handler");
-	  break;
-	}
-	my_encloser = next_encloser;
-      }
-    }
-    // now just update the dest's flow
+    //  just update the dest's flow
     inflow = unconsume_pat_vars(env,inflow,(stmt_t)dest);
     DEBUG_PRINT("in Rexp:Break/Continue/Goto; updating flow\n");
     update_flow(env, (stmt_t)dest, inflow);

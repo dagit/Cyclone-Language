@@ -109,6 +109,7 @@ CYCLONE_SRCS:=absyn\
          evexp\
          tc\
          pratt\
+         jump_analysis\
          cf_flowinfo\
          new_control_flow\
          toc\
@@ -133,6 +134,7 @@ CYCDOC_SRCS:=cycdoc\
         tc\
 	tcdecl\
         pratt\
+        jump_analysis\
 	new_control_flow\
 	cf_flowinfo\
 	formatstr\
@@ -156,6 +158,7 @@ BUILDLIB_SRCS:=buildlib\
 	tcenv\
 	tcpat\
         pratt\
+        jump_analysis\
 	new_control_flow\
 	cf_flowinfo\
 	absyn

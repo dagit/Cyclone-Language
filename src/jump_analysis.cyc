@@ -1,0 +1,405 @@
+/* Jump analysis.
+   Copyright (C) 2003 Dan Grossman, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+/* TO DO: still doing fallthru-destinations by mutating abstract syntax.
+   Then again, we might just have the type-checker keep doing that
+*/
+
+/* This small pass does work previously strewn about type-checking
+   and control-flow analysis (and is now in-between them):
+   (1) Check that we do not jump into a scope, try-block, etc.
+   (2) Create a Hashtable for the flow-analysis mapping a statement
+       to its non-local control-flow predecessors (if no such preds, then not
+       in the table).  Another table is for non-local successors.
+       We used to hang this on the abstract syntax.
+   (3) Create a Hashtable for the code-generator mapping a (jump) statement
+       to how many (local) exception handlers it should pop off (if not in
+       the table, then 0).
+   (4) check that jumps are to well-defined destinations
+   tables-of-tables, mapping functions to tables.
+*/
+
+#include <list.h>
+#include <string.h>
+#include <hashtable.h>
+#include "absyn.h"
+#include "tcutil.h"
+#include "jump_analysis.h"
+using Absyn;
+using List;
+namespace JumpAnalysis;
+
+static datatype Jumpee {
+  NotLoop_j;
+  CaseEnd_j;
+  FnEnd_j;
+  Stmt_j(stmt_t);
+  Return_j;
+  Lab_j(var_t);
+};
+typedef datatype Jumpee @ jumpee_t;
+datacon(Jumpee,NotLoop_j);
+datacon(Jumpee,CaseEnd_j);
+datacon(Jumpee,FnEnd_j);
+datacon(Jumpee,Return_j);
+
+static struct SaveEnv {
+  int            try_depth;
+  list_t<stmt_t> enclosers;
+};
+typedef struct SaveEnv save_env_t;
+
+static struct FnEnv {
+  jump_anal_res_t tables; // only for inner functions
+  table_t<stmt_t,save_env_t@> stmt_info;
+  list_t<$(stmt_t,jumpee_t)@> jumpers;
+  table_t<var_t,stmt_t>       labels;
+};
+static struct StmtEnv { // assuming fallthru clauses set by type-checker
+  struct FnEnv @ fenv;
+  jumpee_t continue_stmt;
+  jumpee_t break_stmt;
+  jumpee_t next_stmt; // needed to calculate break_stmt
+  save_env_t save_env;
+};
+typedef struct StmtEnv senv_t;
+
+static void anal_exp(senv_t env, exp_t e);
+static void anal_stmt(senv_t env, stmt_t s);
+static void anal_fd(jump_anal_res_t tables, fndecl_t fd);
+
+static int hash_ptr(`a s) {
+  return (int)s;
+}
+static table_t<`a@,`b> make_ptr_table() {
+  return Hashtable::create(33, Core::ptrcmp, hash_ptr);
+}
+static table_t<var_t,`b> make_var_table() {
+  return Hashtable::create(33, strptrcmp, Hashtable::hash_stringptr);
+}
+static senv_t add_encloser(stmt_t s, senv_t env) {
+  let env1 = env;
+  env1.save_env.enclosers = new List(s,env1.save_env.enclosers);
+  return env1;
+}
+static void anal_exps(senv_t env, list_t<exp_t> es) {
+  for(; es!=NULL; es=es->tl)
+    anal_exp(env,es->hd);
+}
+static void anal_exp(senv_t env, exp_t e) { // only care about nested StmtExp_e
+  switch (e->r) {
+  case &StmtExp_e(s): anal_stmt(add_encloser(s,env),s); break;
+
+  case &Const_e(...):
+  case &Sizeoftyp_e(_):
+  case &Sizeofexp_e(_):  // ignore the expression!
+  case &Offsetof_e(...):
+  case &Valueof_e(_):
+  case &Enum_e(...):
+  case &AnonEnum_e(...):
+  case &Var_e(...):  break;
+
+  case &Datatype_e(es,_,_): fallthru(es);
+  case &Tuple_e(es):    fallthru(es);
+  case &Primop_e(_,es): anal_exps(env,es); break;
+
+  case &FnCall_e(e1,es,_,_): anal_exp(env,e1); anal_exps(env,es); break;
+
+  case &ComprehensionNoinit_e(e1,_,_): fallthru(e1);
+  case &Tagcheck_e(e1,_):      fallthru(e1);
+  case &Address_e(e1):         fallthru(e1);
+  case &Deref_e(e1):           fallthru(e1);
+  case &AggrMember_e(e1,...):  fallthru(e1);
+  case &AggrArrow_e(e1,...):   fallthru(e1);
+  case &Cast_e(_,e1,_,_):      fallthru(e1);
+  case &NoInstantiate_e(e1):   fallthru(e1);
+  case &Instantiate_e(e1,...): fallthru(e1);
+  case &Throw_e(e1,...):       fallthru(e1);
+  case &Increment_e(e1,...):   anal_exp(env,e1); break;
+
+  case &Conditional_e(e1,e2,e3): 
+    anal_exp(env,e1); anal_exp(env,e2); anal_exp(env,e3); break;
+
+  case &Comprehension_e(_,e1,e2,_): fallthru(e1,e2);
+  case &AssignOp_e(e1,_,e2): fallthru(e1,e2);
+  case &Swap_e(e1,e2):      fallthru(e1,e2);
+  case &Subscript_e(e1,e2): fallthru(e1,e2);
+  case &And_e(e1,e2):       fallthru(e1,e2);
+  case &Or_e(e1,e2):        fallthru(e1,e2);
+  case &SeqExp_e(e1,e2):    anal_exp(env,e1); anal_exp(env,e2); break;
+
+  case &Malloc_e(MallocInfo{.rgn=e1o,.num_elts=e2,...}): fallthru(e1o,e2);
+  case &New_e(e1o,e2):
+    if(e1o!=NULL) anal_exp(env,e1o);
+    anal_exp(env,e2);
+    break;
+
+  case &AnonStruct_e(_,dles):    fallthru(dles);
+  case &Aggregate_e(_,_,dles,_): fallthru(dles);
+  case &CompoundLit_e(_,dles):   fallthru(dles);
+  case &Array_e(dles):
+    for(; dles!=NULL; dles=dles->tl)
+      anal_exp(env,(*dles->hd)[1]);
+    break;
+
+  case &UnresolvedMem_e(...): 
+    throw new Core::Impossible("jump_anaysis found UnresolvedMem_e");
+  case &Asm_e(...): 
+    throw new Core::Impossible("jump_analysis found Asm_e");
+  }
+}
+static void anal_scs(senv_t env, list_t<switch_clause_t> scs) {
+  // encloser for clause changes only if it has pattern-vars, which the
+  // type-checker sets up for us!
+  env.break_stmt = env.next_stmt;
+  for(; scs!=NULL; scs=scs->tl) {
+    let sc = scs->hd;
+    let wc = sc->where_clause;
+    if(wc != NULL)
+      anal_exp(env,wc);
+    bool has_vars = sc->pat_vars->v != NULL; // kludgy?
+    if(has_vars)
+      env=add_encloser(sc->body,env);
+    anal_stmt(env,sc->body);
+  }
+}
+static void anal_stmt(senv_t env, stmt_t s) {
+  Hashtable::insert(env.fenv->stmt_info, s, new env.save_env);
+  switch(s->r) {
+  case &Skip_s: break;
+  case &Exp_s(e): anal_exp(env,e); break;
+  case &Seq_s(s1,s2):
+    let env1 = env;
+    env1.next_stmt = new Stmt_j(s2);
+    anal_stmt(env1,s1);
+    anal_stmt(env,s2);
+    break;
+  case &IfThenElse_s(e,s1,s2):
+    anal_exp(env,e);
+    anal_stmt(env,s1);
+    anal_stmt(env,s2);
+    break;
+
+  case &Return_s(eopt): 
+    if(eopt!=NULL) anal_exp(env,eopt);
+    env.fenv->jumpers = new List(new $(s,&Return_j_val), env.fenv->jumpers);
+    break;
+
+  case &While_s($(e,cont_s),s):
+    Hashtable::insert(env.fenv->stmt_info, cont_s, new env.save_env);
+    anal_exp(env,e);
+    let env_body = env;
+    env_body.continue_stmt = new Stmt_j(cont_s);
+    env_body.break_stmt    = env.next_stmt;
+    anal_stmt(env_body,s);
+    break;
+  case &For_s(e1,$(e2,guard_s),$(e3,cont_s),s):
+    Hashtable::insert(env.fenv->stmt_info, guard_s, new env.save_env);
+    Hashtable::insert(env.fenv->stmt_info, cont_s,  new env.save_env);
+    anal_exp(env,e1);
+    anal_exp(env,e2);
+    // not sure what break/continue in e3 means; we use env_body
+    let env_body = env;
+    env_body.continue_stmt = new Stmt_j(cont_s);
+    env_body.break_stmt    = env.next_stmt;
+    anal_stmt(env_body,s);
+    anal_exp(env_body,e3);
+    break;
+  case &Do_s(s,$(e,cont_s)):
+    Hashtable::insert(env.fenv->stmt_info, cont_s, new env.save_env);
+    let env_body = env;
+    env_body.continue_stmt = new Stmt_j(cont_s);
+    env_body.break_stmt    = env.next_stmt;
+    anal_stmt(env_body,s);
+    anal_exp(env,e);
+    break;
+
+  case &Break_s(_): 
+    env.fenv->jumpers = new List(new $(s,env.break_stmt),env.fenv->jumpers); 
+    break;
+  case &Continue_s(_): 
+    env.fenv->jumpers = new List(new $(s,env.continue_stmt),env.fenv->jumpers); 
+    break;
+  case &Goto_s(lab,_):
+    env.fenv->jumpers = new List(new $(s,new Lab_j(lab)), env.fenv->jumpers);
+    break;
+
+  case &Label_s(lab,s1): 
+    try { 
+      Hashtable::lookup(env.fenv->labels,lab);
+      Tcutil::terr(s->loc,"repated label");
+    } catch { case &Core::Not_found: break; }
+    Hashtable::insert(env.fenv->labels,lab,s);
+    anal_stmt(env,s1);
+    break;
+
+  case &Fallthru_s(es,clauseopt): 
+    // assuming type-checker (still) sets clauseopt!!
+    anal_exps(env,es);
+    env.fenv->jumpers = new List(new $(s,new Stmt_j((*clauseopt)->body)),
+				 env.fenv->jumpers);
+    break; 
+  case &Switch_s(e,scs,_): 
+    anal_exp(env,e);
+    anal_scs(env,scs);
+    break; 
+  case &TryCatch_s(s,scs,_): 
+    let env1 = add_encloser(s,env); // cannot jump into handler
+    ++env1.save_env.try_depth;
+    anal_stmt(env1,s);
+    anal_scs(env,scs); // original env
+    break; 
+  case &Decl_s(d,s1): 
+    // in C, declaration is in scope in initializer, but shouldn't matter here
+    // unlike type-checker, we do not group adjacent declarations as one block
+    // since all we are worried about is that you do not jump into scope.
+    let env = add_encloser(s,env);
+    switch(d->r) {
+    case &Region_d(_,_,_,eo): fallthru(eo);
+    case &Var_d(&Vardecl{.initializer=eo,...}):
+      if(eo != NULL) anal_exp(env,eo);
+      break;
+    case &Fn_d(fd): // no jumping out of inner functions
+      anal_fd(env.fenv->tables,fd); 
+      break; 
+    case &Let_d(_,_,e,_): anal_exp(env,e); break;
+
+    case &Letv_d(...):
+    case &Typedef_d(...):
+    case &Aggr_d(...):
+    case &Datatype_d(...):
+    case &Enum_d(...):
+    case &Porton_d:
+    case &Portoff_d: 
+    case &ExternC_d(...):
+    case &ExternCinclude_d(...): 
+    case &Namespace_d(_,_): // ???
+    case &Using_d(_,_): break; // ???
+    }
+    anal_stmt(add_encloser(s,env),s1);
+    break; 
+
+  case &ResetRegion_s(e): anal_exp(env,e); break;
+  }
+}
+
+static void anal_fd(jump_anal_res_t tables, fndecl_t fd) {
+  let fenv = new FnEnv{.tables    = tables,
+		       .stmt_info = make_ptr_table(),
+		       .jumpers   = NULL,
+		       .labels    = make_var_table()};
+  let senv = StmtEnv{.fenv          = fenv,
+		     .continue_stmt = &NotLoop_j_val,
+		     .break_stmt    = &NotLoop_j_val,
+		     .next_stmt     = &FnEnd_j_val,
+		     .save_env = SaveEnv{.try_depth = 0,
+					 .enclosers = NULL }};
+  anal_stmt(senv,fd->body);
+
+  table_t<stmt_t,int>            pop_table  = make_ptr_table();
+  table_t<stmt_t,list_t<stmt_t>> pred_table = make_ptr_table();
+  table_t<stmt_t,stmt_opt_t>     succ_table = make_ptr_table();
+
+  let stmt_info = fenv->stmt_info;
+  for(let jumpers=fenv->jumpers; jumpers!=NULL; jumpers=jumpers->tl) {
+    let &$(src_stmt,dest) = jumpers->hd;
+    let &SaveEnv{.try_depth=src_depth,.enclosers=src_enclose} = 
+      Hashtable::lookup(stmt_info,src_stmt);
+      switch (dest) {
+      case &NotLoop_j: 
+	Tcutil::terr(src_stmt->loc,"jump has no target"); 
+	break;
+      case &CaseEnd_j: 
+	Tcutil::terr(src_stmt->loc,
+		     "break causes outer switch to implicitly fallthru"); 
+	break;
+      case &FnEnd_j: 
+	Hashtable::insert(succ_table,src_stmt,NULL);
+	fallthru;
+      case &Return_j:
+	Hashtable::insert(pop_table,src_stmt,src_depth);
+	break;
+      case &Lab_j(lab): 
+	let dest_stmt;
+	try dest_stmt = Hashtable::lookup(fenv->labels, lab);
+	catch { 
+	case &Core::Not_found: 
+	  Tcutil::terr(src_stmt->loc, "label %s undefined", *lab); 
+	  goto L;
+	}
+	let &SaveEnv{.enclosers=dest_enclose,...} =
+	  Hashtable::lookup(stmt_info, dest_stmt);
+	if(dest_enclose!=NULL) { // NULL means outermost, so okay
+	  let dest_scope = dest_enclose->hd;
+	  for(; src_enclose!=NULL; src_enclose=src_enclose->tl)
+	    if(src_enclose->hd == dest_scope)
+	      break;
+	  if(src_enclose==NULL) {
+	    Tcutil::terr(src_stmt->loc, 
+			 "goto enters local scope or exception handler");
+	    break;
+	  }
+	}
+	fallthru(dest_stmt);
+      case &Stmt_j(dest_stmt): 
+	let &SaveEnv{.try_depth=dest_depth,...} = 
+	  Hashtable::lookup(stmt_info, dest_stmt);
+        Hashtable::insert(pop_table,  src_stmt, src_depth - dest_depth);
+	Hashtable::insert(succ_table, src_stmt, dest_stmt);
+	let l = NULL;
+	Hashtable::try_lookup(pred_table, dest_stmt, &l);
+	Hashtable::insert(pred_table, dest_stmt, new List(src_stmt,l));
+	break; 
+      }
+  }
+ L: Hashtable::insert(tables->pop_tables, fd,pop_table);
+    Hashtable::insert(tables->pred_tables,fd,pred_table);
+    Hashtable::insert(tables->succ_tables,fd,succ_table);
+}
+
+static void jump_analysis_iter(jump_anal_res_t tables, list_t<decl_t,`H> tds) {
+  // everything is intraprocedural, so we just find the functions,
+  // skipping anything extern "C" -- hope that's right
+  for(; tds != NULL; tds = tds->tl) 
+    switch (tds->hd->r) {
+    case &Let_d(...):
+    case &Letv_d(...):
+    case &Region_d(...):
+    case &Var_d(...):
+    case &Typedef_d(...):
+    case &Aggr_d(...):
+    case &Datatype_d(...):
+    case &Enum_d(...):
+    case &Porton_d:
+    case &Portoff_d:
+    case &ExternC_d(...):
+    case &ExternCinclude_d(...): continue;
+    case &Namespace_d(_,tds2): fallthru(tds2);
+    case &Using_d(_,tds2): jump_analysis_iter(tables,tds2); break;
+    case &Fn_d(fd): anal_fd(tables,fd); break;
+    }
+}
+
+jump_anal_res_t jump_analysis(list_t<decl_t,`H> tds) {
+  let tables = new Jump_Anal_Result{.pop_tables  = make_ptr_table(), 
+				    .pred_tables = make_ptr_table(),
+				    .succ_tables = make_ptr_table()};
+  jump_analysis_iter(tables,tds);
+  return tables;
+}

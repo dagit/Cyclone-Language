@@ -1,32 +1,5 @@
 
-fail2.cyc:4: dereference of possibly uninitialized pointer
-fail2.cyc:10: expression may not be fully initialized
-fail2.cyc:16: dereference of possibly uninitialized pointer
-fail2.cyc:18: expression may not be initialized
-fail2.cyc:25: dereference of possibly uninitialized pointer
-fail2.cyc:32: dereference of possibly uninitialized pointer
-fail2.cyc:39: expression may not be fully initialized
-fail2.cyc:48: dereference of possibly uninitialized pointer
-fail2.cyc:52: function may not return a value
-fail2.cyc:56: function may not return a value
-fail2.cyc:61: `noreturn' function might return
-fail2.cyc:64: `noreturn' function might (implicitly) return
-fail2.cyc:69: last catch clause may implicitly fallthru
-fail2.cyc:76: goto enters local scope or exception handler
-fail2.cyc:82: goto enters local scope or exception handler
-fail2.cyc:87: `noreturn' function might return
-fail2.cyc:90: `noreturn' function might return
-fail2.cyc:95: switch clause may implicitly fallthru
-fail2.cyc:108: aliased expression x was overwritten
-fail2.cyc:119: expression attempts to copy a consumed alias-free value
-fail2.cyc:123: function consumes parameter y with attribute 'noconsume'
-fail2.cyc:127: function consumes value pointed to by parameter y, which has attribute 'noconsume'
-fail2.cyc:131: function parameter y with attribute 'noconsume' no longer set to its original value
-fail2.cyc:136: attempt to dereference an alias-free that has already been copied
-fail2.cyc:141: attempt to dereference a consumed alias-free pointer
-fail2.cyc:145: aliased pattern expression not an l-value: rnew(Core::unique_region) 1
-fail2.cyc:150: cannot track alias-free pointers through multiple assignments
-fail2.cyc:155: expression attempts to copy a consumed alias-free value
-fail2.cyc:163: expression attempts to copy a consumed alias-free value
+fail2.cyc:3: goto enters local scope or exception handler
+fail2.cyc:9: goto enters local scope or exception handler
 
 COMPILATION FAILED!

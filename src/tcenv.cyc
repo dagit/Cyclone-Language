@@ -867,6 +867,7 @@ void process_goto(tenv_t te, stmt_t s, var_t l, stmt_opt_t @sopt) {
   }
 }
 
+// do not stop setting clauseopt -- JumpAnalysis needs it!
 $(switch_clause_t,list_t<tvar_t>,clist_t<type_t,`r>)const*`r const
 process_fallthru(tenv_t<`g,`r> te,stmt_t s, switch_clause_t *@ clauseopt){
   let &Fenv{<`f,`c> .ctrl_env=ctrl_env,...} = get_fenv(te,"process_fallthru");

@@ -40,7 +40,6 @@ namespace Cyclone{
 }
 using Cyclone; 
 
-
 namespace Absyn {
 
 // return a negative, zero, or positive int according to whether the
@@ -1134,18 +1133,7 @@ bool is_aggr_type(type_t t) {
 datacon(Raw_decl,Porton_d);
 datacon(Raw_decl,Portoff_d);
 
-  /*
-  void print_decls(list_t<decl_t> decls) {
-    Marshal::print_type(decls_rep,&decls);
-    printf("\n");
-  }
-  */
-
 bool porting_c_code = false;
 bool no_regions = false;
   
 }
-/*
-using Typerep;
-typestruct_t decls_rep = __gen(list_t<Absyn::decl_t>);
-*/

@@ -35,6 +35,7 @@
 #include "toc.h"
 #include "tovc.h"
 #include "new_control_flow.h"
+#include "jump_analysis.h"
 #include "interface.h"
 #include "cyclone.h"
 
@@ -569,12 +570,10 @@ FILE *try_file_open(string_t filename, string_t mode, string_t msg_part) {
 
 extern "C" void CYCALLOCPROFILE_mark(const char *s);
 
-list_t<Absyn::decl_t>
-  do_stage(string_t stage_name,
-           list_t<Absyn::decl_t,`H> f(`a, list_t<Absyn::decl_t,`H>),
+`b do_stage(string_t stage_name, `b f(`a, list_t<Absyn::decl_t,`H>),
            `a env, list_t<Absyn::decl_t,`H> tds) {
   string_t explain_string = "";
-  let ans = NULL;
+  let ans;
 
   CYCALLOCPROFILE_mark(stage_name);
 
@@ -620,6 +619,11 @@ list_t<Absyn::decl_t> do_typecheck($(region_t<`tc>,Tcenv::tenv_t<`tc>) @tcenv,
   if (!noshake_r)
     tds = Tc::treeshake(te,tds);
   return tds;
+}
+
+JumpAnalysis::jump_anal_res_t do_jumpanalysis(bool ignore, 
+						 list_t<Absyn::decl_t,`H> tds) {
+  return JumpAnalysis::jump_analysis(tds);
 }
 
 list_t<Absyn::decl_t> do_cfcheck(bool ignore, list_t<Absyn::decl_t,`H> tds) {
@@ -1017,6 +1021,13 @@ static void process_file(string_t<`H> filename) {
       remove_file(preprocfile); // Can't flush warnings after removal
       return;
     } 
+
+    let jump_tables = do_stage("jump checking",do_jumpanalysis,true,tds);
+    if (compile_failure) {
+      remove_file(preprocfile); // Can't flush warnings after removal
+      return;
+    } 
+    
     if (tc_r) goto PRINTC;
     tds = do_stage("control-flow checking", do_cfcheck, true, tds);
     if (compile_failure) {
