@@ -33,6 +33,7 @@ extern type_t copy_type(type_t t);
 
 // returns the type of a function declaration
 extern type_t fd_type(fndecl_t fd); 
+extern kind_t tvar_kind(tvar_t t);
 extern kind_t typ_kind(type_t t);
 extern type_t compress(type_t t);
 extern void unchecked_cast(tenv_t, exp_t, type_t);

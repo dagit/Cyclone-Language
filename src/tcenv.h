@@ -127,5 +127,7 @@ extern void check_rgn_accessible(tenv_t,seg_t,type_t rgn);
 extern void check_effect_accessible(tenv_t te, seg_t loc, type_t eff);
 // Returns the region in which a function's parameters live
 extern type_t parameter_rgn(tenv_t);
+// Returns true when region r1 outlives region r2 -- assumes r1 <> r2
+extern bool region_outlives(tenv_t, type_t r1, type_t r2);
 }
 #endif

@@ -215,6 +215,9 @@ static bool kind_leq(kind_t k1, kind_t k2) {
   }
 }
 
+kind_t tvar_kind(tvar_t tv) {
+  return conref_val(tv->kind);
+}
 
 // Return the "least" kind of a type, according to the lattice above
 // In some situations, we have to be conservative...
@@ -1333,7 +1336,8 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
   case &PointerType(PtrInfo{t_a,rt_a,null_a,q_a,b_a}):
     // can cast t* to t@ and vice versa.  
     // can cast a non-const pointer to a const pointer.  
-    // can cast a pointer in the heap to a pointer to some other region
+    // can cast a pointer in region r1 to a pointer in region r2 as
+    // long as r1 outlives r2.
     switch (t2) {
     case &PointerType(PtrInfo{t_b,rt_b,null_b,q_b,b_b}):
       let assump = new List(new $(t1,t2),null);
@@ -1352,7 +1356,8 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	default: bounds_ok = true; break;
 	}
       }
-      return bounds_ok && ptrsub && (rt_a == HeapRgn || unify(rt_a,rt_b));
+      return bounds_ok && ptrsub && 
+        (unify(rt_a,rt_b) || region_outlives(te,rt_a,rt_b));
     default: break;
     }
     return false;

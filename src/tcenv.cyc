@@ -138,14 +138,22 @@ static struct SharedFenv {
   SlowDict::dict_t<var_t,list_t<stmt_t>> needed_labels;
 };
 
+// Encodes partial order for region lifetimes
+static struct RgnPO {
+  tvar_t tvar;
+  list_t<struct RgnPO @> ancestors;
+};
+typedef list_t<struct RgnPO @> rgn_po_t;
+
 // Local function environments -- this is getting a bit out of hand, no?
 struct Fenv {
   struct SharedFenv @      shared;
   list_t<tvar_t>           type_vars; //type variables that can occur free
+  rgn_po_t                 region_order; // partial order on region variables 
   Dict::dict_t<var_t,binding_t> locals;//binding one of Param_b, Local_b, or Pat_b
   stmt_t                   encloser;  // nearest stmt with a binder or a try
   ctrl_env_t               ctrl_env;
-  type_t                   capability; // current capability -- 
+  type_t                   capability; 
   type_t                   curr_rgn;   // current block's region
 };
 
@@ -456,19 +464,63 @@ tenv_t put_fenv(tenv_t te, fenv_t fe) {
   return new Tenv(te->ns, te->ae, new Opt(put_visible(te->le->v,fe)));
 }
 
+////////////////////////////// Region Partial Orders ////////////////////////
+
+// is region r reachable from the list of ancestors?
+static bool region_ancestor(rgn_po_t ancestors, tvar_t r) {
+  // look in immediate ancestors
+  for (_ a = ancestors; a != null; a = a->tl)
+    if (tvar_cmp(a->hd->tvar,r) == 0) return true;
+  // look in ancestors ancestors
+  for (_ a = ancestors; a != null; a = a->tl)
+    if (region_ancestor(a->hd->ancestors,r)) return true;
+  return false;
+}
+
+// does r1 outlive r2?
+static bool check_region_outlives(rgn_po_t po, tvar_t r1, tvar_t r2) {
+  rgn_po_t r2_ancestors;
+  while (po != null && tvar_cmp(po->hd->tvar, r2) != 0) po=po->tl;
+  if (po == null) return false;
+  return region_ancestor(po->hd->ancestors,r1);
+}
+
+// given the list of type-variables for a function, build the initial
+// partial order for the region variables.  The po should have each
+// reach being incomparable (i.e., have an empty set of ancestors.)
+static rgn_po_t initial_region_po(list_t<tvar_t> tvs) {
+  rgn_po_t result = null;
+  for (; tvs != null; tvs = tvs->tl) {
+    tvar_t tv = tvs->hd;
+    if (tvar_kind(tv) == RgnKind) {
+      result = new List(new RgnPO{.tvar=tv, .ancestors=null},result);
+    }
+  }
+  return result;
+}
+
+// add a new region variable to the given partial order.  All previously
+// declared regions are ancestors.
+static rgn_po_t add_region_po(rgn_po_t po, tvar_t tv) {
+  return new List(new RgnPO{.tvar = tv, .ancestors = po}, po);
+}
+
 //////////////////// Function Environment Manipulation //////////////////////
 
 static fenv_t copy_fenv_old_ctrl(fenv_t f) {
-  return new Fenv(f->shared, f->type_vars, f->locals, f->encloser, f->ctrl_env,
+  return new Fenv(f->shared, f->type_vars, f->region_order,
+                  f->locals, f->encloser, f->ctrl_env,
                   f->capability, f->curr_rgn);
 }
 static fenv_t copy_fenv_new_ctrl(fenv_t f) {
   // WARNING: fallthru_clause shared with old
   ctrl_env_t c = f->ctrl_env;
-  return new Fenv(f->shared, f->type_vars, f->locals, f->encloser,
-                  new CtrlEnv(c->continue_stmt, c->break_stmt, c->fallthru_clause,
-			c->next_stmt, c->try_depth),
-	       f->capability, f->curr_rgn);
+  return new Fenv(f->shared, f->type_vars, f->region_order, 
+                  f->locals, f->encloser,
+                  new CtrlEnv(c->continue_stmt, c->break_stmt, 
+                              c->fallthru_clause,
+                              c->next_stmt, c->try_depth),
+                  f->capability, f->curr_rgn);
 }
 
 type_t return_typ(tenv_t te) {
@@ -698,6 +750,12 @@ tenv_t set_encloser(tenv_t te, stmt_t s) {
 tenv_t add_region(tenv_t te, type_t r) {
   if (te->le == null) env_err("Tcenv::add_region: unexpected add_region");
   fenv_t fe = copy_fenv_old_ctrl(get_fenv(te));
+  tvar_t tv;
+  switch (compress(r)) {
+  case &VarType(x): tv = x; break;
+  default: tv = env_err("bad add region"); break;
+  }
+  fe->region_order = add_region_po(fe->region_order, tv);
   fe->capability = new JoinEff(new List(new AccessEff(r),
                                         new List(fe->capability,null)));
   return put_fenv(te,fe);
@@ -709,6 +767,7 @@ tenv_t new_named_block(seg_t loc, tenv_t te, tvar_t block_rgn) {
   type_t block_typ = new VarType(block_rgn);
   fe->type_vars = new List(block_rgn, fe->type_vars);
   Tcutil::check_unique_tvars(loc,fe->type_vars);
+  fe->region_order = add_region_po(fe->region_order, block_rgn);
   fe->capability = new JoinEff(new List(new AccessEff(block_typ), 
                                         new List(fe->capability,null)));
   fe->curr_rgn = block_typ;
@@ -728,7 +787,7 @@ type_t curr_rgn(tenv_t te) {
 
 // Check that rgn_typ is currently accessible:  the heap region is always
 // accessible, and a region variable r is accessible iff it appears in the
-// list of available regions.
+// capability.
 void check_rgn_accessible(tenv_t te, seg_t loc, type_t rgn) {
   if (te->le != null) {
     type_t capability = get_fenv(te)->capability;
@@ -737,6 +796,20 @@ void check_rgn_accessible(tenv_t te, seg_t loc, type_t rgn) {
   }
   terr(loc, xprintf("Expression accesses unavailable region %s",
                     typ2string(rgn)));
+}
+
+// check that region rt_a outlives region rt_b using the partial order in
+// the environment.  Assumes that rt_a <> rt_b.
+bool region_outlives(tenv_t te, type_t rt_a, type_t rt_b) {
+  if (rt_a == HeapRgn) return true;
+  if (te->le != null) {
+    switch ($(compress(rt_a),compress(rt_b))) {
+    case $(&VarType(va), &VarType(vb)):
+      return check_region_outlives(get_fenv(te)->region_order, va, vb);
+    default: return false;
+    }
+  }
+  return false;
 }
 
 // Check that a function call's effect is contained in the current
@@ -758,14 +831,13 @@ void check_effect_accessible(tenv_t te, seg_t loc, type_t eff) {
 
 fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   Dict::dict_t<var_t,binding_t> locals = Dict::empty(String::zstrptrcmp);
-  // FIX:  the user may need to get their hands on the region name
-  // but if it's gensym'd, they can't.  
   tvar_t rgn0 = 
     new Tvar(new ((string_t)xprintf("`%s",*(*fd->name)[1])),
              new_tvar_id(),
              new_conref(RgnKind));
   let tvs = new List(rgn0,fd->tvs);
   Tcutil::check_unique_tvars(loc,tvs);
+  let rgn_po = add_region_po(initial_region_po(fd->tvs),rgn0);
   type_t param_rgn = new VarType(rgn0);
   let vds = null;
   for(let args = fd->args; args != null; args = args->tl) {
@@ -804,6 +876,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
                        SlowDict::empty(String::zstrptrcmp)
                    },
          .type_vars   = tvs,
+         .region_order = rgn_po,
          .locals      = locals,  // assumed unique
          .encloser    = fd->body, // careful -- self loop at top!!!
          .ctrl_env    = new CtrlEnv(NotLoop_j, NotLoop_j, null, FnEnd_j, 0),
