@@ -149,7 +149,6 @@ static $(string_t,short,bool) rw_array[] = {
   $("malloc", MALLOC, false),
   $("namespace", NAMESPACE, false),
   $("new", NEW, false),
-  $("NOZEROTERM",NOZEROTERM_QUAL, false),
   $("NULL", NULL_kw, false),
   $("numelts", NUMELTS, false),
   $("offsetof", OFFSETOF, true),
@@ -175,7 +174,6 @@ static $(string_t,short,bool) rw_array[] = {
   $("tag_t", TAG_T, false),
   $("throw", THROW, false),
   $("try", TRY, false),
-  $("tunion", TUNION, false),
   $("typedef", TYPEDEF, true),
   $("union", UNION, true),
   $("unsigned", UNSIGNED, true),
@@ -185,8 +183,6 @@ static $(string_t,short,bool) rw_array[] = {
   $("void", VOID, true),
   $("volatile", VOLATILE, true),
   $("while", WHILE, true),
-  $("xtunion", XTUNION, false),
-  $("ZEROTERM", ZEROTERM_QUAL, false)
 };
 
 static int num_keywords(bool include_cyclone_keywords) {
@@ -604,12 +600,6 @@ static short process_id(Lexbuf<`a> lbuf) {
     case NOZEROTERM_QUAL: 
       Tcutil::warn(yylloc.first_line,
                    "deprecated NOZEROTERM, use @nozeroterm"); break;
-    case TUNION: 
-      Tcutil::warn(yylloc.first_line,
-                   "deprecated tunion, use datatype"); break;
-    case XTUNION: 
-      Tcutil::warn(yylloc.first_line,
-                   "deprecated xtunion, use @extensible datatype"); break;
     default: break;
     }
     return (short)kw_nums[symbol_num-1]; 
@@ -997,6 +987,8 @@ and cyc_qual = parse
     { lexbuf->lex_curr_pos -= strlen("nullableZ"); return '@'; }
 | "requires"['A'-'Z''a'-'z''0'-'9''_'] 
     { lexbuf->lex_curr_pos -= strlen("requiresZ"); return '@'; }
+| "ensures"['A'-'Z''a'-'z''0'-'9''_'] 
+    { lexbuf->lex_curr_pos -= strlen("ensuresZ"); return '@'; }
 | "tagged" { return TAGGED_QUAL; }
 | "zeroterm" { return ZEROTERM_QUAL; }
 | "nozeroterm" { return NOZEROTERM_QUAL; }
@@ -1009,6 +1001,7 @@ and cyc_qual = parse
 | "notnull" { return NOTNULL_QUAL; }
 | "nullable" { return NULLABLE_QUAL; }
 | "requires" { return REQUIRES_QUAL; }
+| "ensures" { return ENSURES_QUAL; }
 | _ { lexbuf->lex_curr_pos -= 1; return '@'; }
 
 and scan_charconst = parse

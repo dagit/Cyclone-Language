@@ -30,6 +30,7 @@
 #include "tcexp.h"
 #include "tc.h"
 #include "cyclone.h"
+#include "relations.h"
 
 using Core;
 using List;
@@ -240,10 +241,11 @@ static $(tqual_t,type_t)@ copy_tqt($(tqual_t,type_t) @arg) {
   let &$(x,t) = arg;
   return new $(x,copy_type(t));
 }
+exp_opt_t deep_copy_exp_opt(bool preserve_types,exp_opt_t);
+
 static aggrfield_t copy_field(aggrfield_t f) {
   return new Aggrfield{f->name,f->tq,copy_type(f->type),f->width,f->attributes,
-                         // FIX: should do a copy of the requires clause!
-                         f->requires_clause};
+                         deep_copy_exp_opt(true,f->requires_clause)};
 }
 static $(type_t,type_t)@ copy_rgncmp($(type_t,type_t)@ x) {
   let &$(r1,r2) = x;
@@ -255,6 +257,7 @@ static enumfield_t copy_enumfield(enumfield_t f) {
 static type_t tvar2type(tvar_t t) {
   return new VarType(copy_tvar(t));
 }
+
 type_t copy_type(type_t t) {
   switch (compress(t)) {
   case &VoidType:
@@ -269,15 +272,17 @@ type_t copy_type(type_t t) {
     let rgn2 = copy_type(rgn);
     let nbl2 = copy_conref(nbl);
     let tq2 = tq;
+    // Fix?  Need to copy the expression in here?
     let bs2 = copy_conref(bs);
     let zt2 = copy_conref(zt);
     return new PointerType(PtrInfo(elt2,tq2,PtrAtts(rgn2,nbl2,bs2,zt2,loc)));
   case &IntType(_,_):
   case &FloatType(_): return t;
   case &ArrayType(ArrayInfo{et,tq,eopt,zt,ztl}):
-    // FIX: should really copy eopt???
-    return new ArrayType(ArrayInfo{copy_type(et),tq,eopt,copy_conref(zt),ztl});
-  case &FnType(FnInfo{tvs,effopt,rt_tq,rt,args,c_varargs,cyc_varargs,rgn_po,atts}):
+    exp_opt_t eopt2 = deep_copy_exp_opt(true,eopt);
+    return new ArrayType(ArrayInfo{copy_type(et),
+                                   tq,eopt2,copy_conref(zt),ztl});
+  case &FnType(FnInfo{tvs,effopt,rt_tq,rt,args,c_varargs,cyc_varargs,rgn_po,atts,req,req_rlns,ens,ens_rlns}):
     let tvs2 = List::map(copy_tvar,tvs);
     type_opt_t effopt2 = (effopt == NULL) ? NULL : copy_type((type_t)effopt);
     let rt2 = copy_type(rt);
@@ -291,8 +296,13 @@ type_t copy_type(type_t t) {
     }
     let rgn_po2 = List::map(copy_rgncmp,rgn_po);
     let atts2 = atts;
+    let req2 = deep_copy_exp_opt(true,req);
+    let req_rlns2 = Relations::copy_relns(heap_region, req_rlns);
+    let ens2 = deep_copy_exp_opt(true,ens);
+    let ens_rlns2 = Relations::copy_relns(heap_region, ens_rlns);
     return new FnType(FnInfo{tvs2,effopt2,rt_tq,rt2,args2,c_varargs2,
-                               cyc_varargs2,rgn_po2,atts2});
+                               cyc_varargs2,rgn_po2,atts2,req2,req_rlns2,
+                               ens2,ens_rlns2});
   case &TupleType(tqts): return new TupleType(List::map(copy_tqt,tqts));
   case &AggrType(AggrInfo({.UnknownAggr = $(k,n,tgd)},ts)):
     return new AggrType(AggrInfo(UnknownAggr(k,n,tgd),copy_types(ts)));
@@ -460,6 +470,11 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
   return new_e;
 }
 
+exp_opt_t deep_copy_exp_opt(bool preserve_types, exp_opt_t e) {
+  if (e == NULL) return NULL;
+  else return deep_copy_exp(preserve_types, e);
+}
+
 // Our lattice looks like this:
 //          AbsType   EffKind  RgnKind  * Top
 //             V                          V V
@@ -581,8 +596,8 @@ kind_t typ_kind(type_t t) {
     // FIX: we're assuming sizeof(int) = sizeof(long) = sizeof(void *) here
   case &IntType(_,sz):    return (sz==(size_of_t)Int_sz ||
                                   sz==(size_of_t)Long_sz) ? &bk : &mk;
-  case &FloatType(_):
-  case &FnType(_):        return &mk;
+  case &FloatType(_):     return &mk;
+  case &FnType(_):        return &ak;
   case &DynRgnType(_,_):
   case &EnumType(_,_):
   case &AnonEnumType(_):
@@ -711,7 +726,8 @@ static void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
     break;
     // FIX: shouldn't we check for occurrence within the bound?
   case &ArrayType(ArrayInfo{t2,_,_,_,_}): occurs(evar,r,env,t2); break;
-  case &FnType(FnInfo{tvs,eff,rt_tq,rt,args,c_varargs,cyc_varargs,rgn_po,atts}):
+    // FIX: shouldn't we check for occurrence within requires and ensures clauses?
+  case &FnType(FnInfo{tvs,eff,rt_tq,rt,args,c_varargs,cyc_varargs,rgn_po,atts,req,req_relns,ens,ens_relns}):
     env = List::rappend(r,tvs,env);
     if (eff != NULL) occurs(evar,r,env,eff);
     occurs(evar,r,env,rt);
@@ -831,12 +847,54 @@ static int boundscmp(bounds_t b1, bounds_t b2) {
   }
 }
 
+static void unify_cmp_exp(exp_t e1, exp_t e2) {
+  switch $(e1->r,e2->r) {
+    // FIX: not sure it's safe to peek under the casts,
+    // but we need to in order to unify something like
+    // int@{40} and int@{(unsigned int)valueof(`EI3)}
+  case $(&Cast_e(_,e,...),_): 
+    unify_cmp_exp(e,e2);
+    return;
+  case $(_,&Cast_e(_,e,...)):
+    unify_cmp_exp(e1,e);
+    return;
+  case $(&Valueof_e(t),_): 
+    switch (compress(t)) {
+    case &Evar(...): 
+      unify_it(t,new ValueofType(e2));
+      return;
+    default: 
+      break;
+    }
+    break;
+  case $(_,&Valueof_e(t)):
+    switch (compress(t)) {
+    case &Evar(...): 
+      unify_it(t,new ValueofType(e1));
+      return;
+    default: 
+      break;
+    }
+    break;
+  default: break;
+  }
+  throw &Unify_val;
+}
+
 static int unify_it_bounds(bounds_t b1, bounds_t b2) {
   switch ($(b1,b2)) {
   case $(&DynEither_b,&DynEither_b): return 0;
   case $(&DynEither_b,_): return -1;
   case $(_,&DynEither_b): return 1;
-  case $(&Upper_b(e1),&Upper_b(e2)): return Evexp::const_exp_cmp(e1,e2);
+  case $(&Upper_b(e1),&Upper_b(e2)): 
+    int r = Evexp::const_exp_cmp(e1,e2);
+    if (r == 0) return 0;
+    try {
+      unify_cmp_exp(e1,e2);
+      return 0;
+    } catch {
+    case &Unify: return r;
+    }
   }
 }
 
@@ -959,7 +1017,7 @@ static type_t rgns_of(type_t t) {
   case &AnonAggrType(_,fs):
     return normalize_effect(new JoinEff(map(rgns_of_field,fs)));
   case &TagType(_): return empty_effect;
-  case &FnType(FnInfo{tvs,eff,rt_tq,rt,args,_,cyc_varargs,rpo,_}):
+  case &FnType(FnInfo{tvs,eff,rt_tq,rt,args,_,cyc_varargs,rpo,_,_,_,_,_}):
     // NOTE:  we define RgnsEff(t) in this case to be the regions in the
     // effect.  So, if the effect is smaller than the argument or return
     // types, they won't show up.  This saves us from a lot of complication
@@ -1029,9 +1087,13 @@ type_t normalize_effect(type_t e) {
 static type_t dummy_fntype(type_t eff) {
   let fntype = new FnType(FnInfo{.tvars=NULL,.effect=eff,
                                  .ret_tqual = empty_tqual(0),
-                               .ret_typ=&VoidType_val,.args=NULL,.c_varargs=false,
-                               .cyc_varargs=NULL,.rgn_po=NULL,
-                               .attributes = NULL});
+                                 .ret_typ=&VoidType_val,.
+                                 args=NULL,.c_varargs=false,
+                                 .cyc_varargs=NULL,.rgn_po=NULL,
+                                 .attributes = NULL, .requires_clause = NULL,
+                                 .requires_relns = NULL,
+                                 .ensures_clause = NULL,
+                                 .ensures_relns = NULL});
   return atb_typ(fntype, &HeapRgn_val, empty_tqual(0), bounds_one, false_conref);
 }
 
@@ -1299,6 +1361,26 @@ static bool sub_rgnpo(list_t<$(type_t,type_t)@> rpo1,
   return true;
 }
 
+typedef Relations::relns_t<`r> relns_t<`r>;
+
+// e1 and e2 represent requires/ensures clauses and we're to check
+// that e1 as a predicate implies e2.
+static bool check_logical_implication(relns_t<`H> r1, relns_t<`H> r2) {
+  for (; r2 != NULL; r2 = r2->tl) {
+    let r = Relations::negate(heap_region,r2->hd);
+    let relns = new List{r,r1};
+    if (Relations::consistent_relations(relns)) return false;
+  }
+  return true;
+}
+
+// e1 and e2 represent requires/ensures clauses and we're to check
+// logical equivalence.
+static bool check_logical_equivalence(relns_t<`H> r1, relns_t<`H> r2) {
+  if (r1 == r2) return true;
+  return check_logical_implication(r1,r2) && check_logical_implication(r2,r1);
+}
+
 // see if two region partial-orders are the same
 static bool same_rgn_po(list_t<$(type_t,type_t)@> rpo1,
                         list_t<$(type_t,type_t)@> rpo2) {
@@ -1496,8 +1578,8 @@ void unify_it(type_t t1, type_t t2) {
     failure_reason = "(different array sizes)";
     break;
 
-  case $(&FnType(FnInfo{tvs2,eff2,rt_tq2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,atts2}),
-         &FnType(FnInfo{tvs1,eff1,rt_tq1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,atts1})):
+  case $(&FnType(FnInfo{tvs2,eff2,rt_tq2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,atts2,req1,req_relns1,ens1,ens_relns1}),
+         &FnType(FnInfo{tvs1,eff1,rt_tq1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,atts1,req2,req_relns2,ens2,ens_relns2})):
     bool done = false;
     region rgn; {
     list_t<$(tvar_t,type_t)@`rgn,`rgn> inst = NULL;
@@ -1525,10 +1607,13 @@ void unify_it(type_t t1, type_t t2) {
     }
     if (inst != NULL) {
       unify_it(new FnType(FnInfo{NULL,eff1,rt_tq1,rt1,args1,c_vararg1,
-				   cyc_vararg1,rpo1,atts1}),
+				   cyc_vararg1,rpo1,atts1,req1,req_relns1,ens1,
+                                   ens_relns1}),
 	       rsubstitute(rgn, inst,
                            new FnType(FnInfo{NULL,eff2,rt_tq2,rt2,args2,
-                                               c_vararg2,cyc_vararg2,rpo2,atts2})));
+                                               c_vararg2,cyc_vararg2,rpo2,
+                                               atts2,req2,req_relns2,
+                                               ens2,ens_relns2})));
       done = true;
     }
     }
@@ -1592,6 +1677,14 @@ void unify_it(type_t t1, type_t t2) {
     }
     if (!same_rgn_po(rpo2,rpo1)) {
       failure_reason = "(function types have different region lifetime orderings)";
+      break;
+    }
+    if (!check_logical_equivalence(req_relns1,req_relns2)) {
+      failure_reason = "(@requires clauses not equivalent)";
+      break;
+    }
+    if (!check_logical_equivalence(ens_relns1,ens_relns2)) {
+      failure_reason = "(@ensures clauses not equivalent)";
       break;
     }
     return;
@@ -1866,9 +1959,8 @@ int typecmp(type_t t1, type_t t2) {
     }
     return star_cmp(Evexp::const_exp_cmp,e1,e2);
 
-  case $(&FnType(FnInfo{tvs2,eff2,rtq2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,atts2}),
-	 &FnType(FnInfo{tvs1,eff1,rtq1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,atts1})):
-	   impos("typecmp: function types not handled");
+  case $(&FnType(_), &FnType(_)):
+    impos("typecmp: function types not handled");
 
   case $(&TupleType(ts2), &TupleType(ts1)):
     return list_cmp(tqual_type_cmp,ts1,ts2);
@@ -2093,11 +2185,12 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
       unify_conrefs(unify_it_bounds,
                     pinfo_b.ptr_atts.bounds,bounds_one_conref) &&
       (!conref_constr(false,pinfo_b.ptr_atts.zero_term));
-    //fprintf(stderr,"3.5: deep_subtype = %d\n",deep_subtype);
+    //fprintf(stderr,"3.5: deep_subtype = %d, ak = %d\n",deep_subtype,
+    //        kind_leq(&ak,typ_kind(pinfo_b.elt_typ)));
 
     okay = okay && (unify(pinfo_a.elt_typ,pinfo_b.elt_typ) ||
                     (deep_subtype && (pinfo_b.elt_tq.real_const || kind_leq(&ak,typ_kind(pinfo_b.elt_typ))) && ptrsubtype(te,NULL,pinfo_a.elt_typ,pinfo_b.elt_typ)));
-    //fprintf(stderr,"4: okay = %d\n",okay);
+    // fprintf(stderr,"4: okay = %d\n",okay);
     return okay;
 
   case $(&ArrayType(ArrayInfo{t1a,tq1a,e1,zt1,_}),
@@ -2726,6 +2819,12 @@ bool subtype(tenv_t te,
     if (!sub_rgnpo(f1.rgn_po,f2.rgn_po)) return false;
     // deal with attributes that can be dropped
     if (!sub_attributes(f1.attributes,f2.attributes)) return false;
+    // deal with requires clause
+    if (!check_logical_implication(f2.requires_relns,f1.requires_relns)) 
+      return false;
+    // deal with ensures clause
+    if (!check_logical_implication(f1.ensures_relns,f2.ensures_relns))
+      return false;
     // otherwise okay
     return true;
   default: return false;
@@ -2983,6 +3082,7 @@ void check_contains_assign(exp_t e) {
 static bool constrain_kinds(kindbound_t c1, kindbound_t c2) {
   c1 = compress_kb(c1);
   c2 = compress_kb(c2);
+  if (c1 == c2) return true;
   switch ($(c1,c2)) {
   case $(&Eq_kb(k1),&Eq_kb(k2)): return k1 == k2;
   case $(_,&Unknown_kb(*f)): *f = new Opt(c1); return true;
@@ -3050,9 +3150,69 @@ type_t fndecl2typ(fndecl_t fd) {
     return new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_tqual, fd->ret_type,
                                List::map(fndecl2typ_f, fd->args),
                                fd->c_varargs, fd->cyc_varargs,
-                               fd->rgn_po, fn_type_atts});
+                               fd->rgn_po, fn_type_atts,
+                               fd->requires_clause, 
+                               fd->requires_relns,
+                               fd->ensures_clause, 
+                               fd->ensures_relns});
   }
   return (type_t)fd->cached_typ;
+}
+
+// given a list of arguments for a function type, replace occurrences
+// of the variables in the relational operand with the parameter number.
+// As a special case, we have to replace "return_value" with RResult.
+static void replace_rop(list_t<$(var_opt_t,tqual_t,type_t)@> args, 
+                        Relations::reln_op_t@ rop) {
+  switch (*rop) {
+  case {.RVar = vd}: 
+    let $(nmspace,var) = *vd->name;
+    if (!tagcheck(nmspace.Loc_n)) break;
+    if (strcmp(*var,"return_value") == 0) {
+      *rop = Relations::RReturn();
+      break;
+    }
+    unsigned int c = 0;
+    for (let a = args; a != NULL; a = a->tl, c++) {
+      let &$(vopt,_,_) = a->hd;
+      if (vopt != NULL) {
+        if (strcmp(*var,*vopt) == 0) {
+          *rop = Relations::RParam(c);
+          break;
+        }
+      }
+    }
+    break;
+  case {.RNumelts = vd}:
+    let $(nmspace,var) = *vd->name;
+    if (!tagcheck(nmspace.Loc_n)) break;
+    unsigned int c = 0;
+    for (let a = args; a != NULL; a = a->tl, c++) {
+      let &$(vopt,_,_) = a->hd;
+      if (vopt != NULL) {
+        if (strcmp(*var,*vopt) == 0) {
+          *rop = Relations::RParamNumelts(c);
+          break;
+        }
+      }
+    }
+    break;
+  default: break;
+  }
+}
+
+static void replace_rops(list_t<$(var_opt_t,tqual_t,type_t)@> args, 
+                         Relations::reln_t r) {
+  replace_rop(args,&r->rop1);
+  replace_rop(args,&r->rop2);
+}
+
+static relns_t extract_relns(list_t<$(var_opt_t,tqual_t,type_t)@> args, 
+                             exp_opt_t e) {
+  if (e == NULL) return NULL;
+  let relns = Relations::exp2relns(heap_region, e);
+  List::iter_c(replace_rops, args, relns);
+  return relns;
 }
 
 // Substitution stuff
@@ -3161,13 +3321,20 @@ exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst, exp_t e) {
   }
 }
 
+static exp_opt_t rsubs_exp_opt(region_t<`r> r,
+                               list_t<$(tvar_t,type_t)@`r,`r> inst, 
+                               exp_opt_t e) {
+  if (e == NULL) return NULL;
+  else return rsubsexp(r,inst,e);
+}
+
 aggrfield_t subst_aggrfield(region_t<`r> r,
                             list_t<$(tvar_t,type_t)@`r,`r> inst, aggrfield_t f)
 {
   let t = f->type;
   let req = f->requires_clause;
   let new_t = rsubstitute(r,inst,t);
-  let new_req = (req == NULL) ? NULL : rsubsexp(r,inst,req);
+  let new_req = rsubs_exp_opt(r,inst,req);
   if (t == new_t && req == new_req) return f;
   else return new Aggrfield{.name = f->name, .tq = f->tq, .type = new_t,
                             .width = f->width, .attributes = f->attributes,
@@ -3241,7 +3408,8 @@ type_t rsubstitute(region_t<`r> rgn,
     if(new_t1 == t1 && new_r == r && new_b == b)
       return t;
     return new PointerType(PtrInfo(new_t1,tq,PtrAtts(new_r,n,new_b,zt,NULL)));
-  case &FnType(FnInfo{vs,eff,rtq,rtyp,args,c_varargs,cyc_varargs,rgn_po,atts}):
+  case &FnType(FnInfo{vs,eff,rtq,rtyp,args,c_varargs,cyc_varargs,rgn_po,atts,
+                        req,_,ens,_}):
     // FIX: capture???
     for (let p = vs; p != NULL; p = p->tl)
       inst = rnew(rgn) List(rnew(rgn) $(p->hd,new VarType(p->hd)),inst);
@@ -3272,9 +3440,14 @@ type_t rsubstitute(region_t<`r> rgn,
         cyc_varargs2 = new VarargInfo{n,tq,t2,i};
     }
     list_t<$(type_t,type_t)@> rgn_po2 = rsubst_rgnpo(rgn,inst,rgn_po);
+    exp_opt_t req2 = rsubs_exp_opt(rgn,inst,req);
+    exp_opt_t ens2 = rsubs_exp_opt(rgn,inst,ens);
+    let req_relns2 = extract_relns(args2,req2);
+    let ens_relns2 = extract_relns(args2,ens2);
     return
       new FnType(FnInfo{vs,eff2,rtq,rsubstitute(rgn,inst,rtyp),args2,c_varargs,
-                          cyc_varargs2,rgn_po2,atts});
+                          cyc_varargs2,rgn_po2,atts,req2,req_relns2,
+                          ens2,ens_relns2});
   case &TupleType(tqts):
     list_t<type_t,`r> ts2 = NULL;
     bool change = false;
@@ -3627,6 +3800,29 @@ static kind_t tvar_inst_kind(tvar_t tvar, kind_t def_kind,
   }
 }
 
+// forward declaration
+static cvtenv_t<`r>
+i_check_valid_type_level_exp(exp_t e, tenv_t te, cvtenv_t<`r> cvtenv);
+
+// check that a @requires/@ensures clause is well-formed and satisfiable
+static $(cvtenv_t<`r>,relns_t) 
+  check_clause(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
+               string_t clause_name, exp_opt_t clause) {
+  relns_t relns = NULL;
+  if (clause != NULL) {
+    Tcexp::tcExp(te,NULL,clause);
+    if (!is_integral(clause))
+      terr(loc,"%s clause has type %s instead of integral type",
+           clause_name,typ2string((type_t)clause->topt));
+    cvtenv = i_check_valid_type_level_exp(clause,te,cvtenv);
+    relns = Relations::exp2relns(heap_region,clause);
+    if (!Relations::consistent_relations(relns))
+      terr(clause->loc,"%s clause '%s' may be unsatisfiable",
+           clause_name, exp2string(clause));
+  }
+  return $(cvtenv,relns);
+}
+
 // Checks that a type is well-formed and lives in kind expected_kind.
 // Takes as input a location (for error reporting), a type environment
 // (for looking up struct, enum, datatype, etc. decls), a check-valid-type
@@ -3656,17 +3852,13 @@ static kind_t tvar_inst_kind(tvar_t tvar, kind_t def_kind,
 //   around the set of
 // * add default effects for function types
 
-// forward declaration
-static cvtenv_t<`r>
-i_check_valid_type_level_exp(exp_t e, tenv_t te, cvtenv_t<`r> cvtenv);
-
 static cvtenv_t<`r>
 i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
                    kind_t expected_kind, type_t t,
                    bool put_in_effect) {
 
-//   fprintf(stderr,"checking type %s with expected kind %s\n",
-// 	  Absynpp::typ2string(t), kind2string(expected_kind));
+  //   fprintf(stderr,"checking type %s with expected kind %s\n",
+  //	  Absynpp::typ2string(t), kind2string(expected_kind));
   switch (compress(t)) {
   case &VoidType: break;
   case &Evar(*k,*ref,_,_):
@@ -3702,7 +3894,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     cvtenv.free_vars = fast_add_free_tvar_bool(cvtenv.r, cvtenv.free_vars, v, put_in_effect);
     // if we have some latitude with moving the type var, do it here
     switch (compress_kb(v->kind)) {
-    case &Less_kb(*f,k):
+    case &Less_kb(*f,k): 
       if (kind_leq(expected_kind,k))
 	*f = new Opt(new Less_kb(NULL,expected_kind));
       break;
@@ -4046,7 +4238,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       *eptr = uint_exp(1,0);
     }
     break;
-  case &FnType(FnInfo{*btvs,*eff,*rtq,tr,args,c_vararg,cyc_vararg,rgn_po,atts}):
+  case &FnType(FnInfo{*btvs,*eff,*rtq,tr,args,c_vararg,cyc_vararg,rgn_po,atts,req,*req_relns,ens,*ens_relns}):
     // This is an unusual and complicated case because (a) we may have to
     // bind type variables here, (b) we may have to calculate the effect.
 
@@ -4203,6 +4395,26 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&ek,r1,true);
         new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&trk,r2,true);
       }
+      // check the @requires clause -- we build a bogus function environment
+      // to make it possible to enter the parameters as variables that can
+      // be mentioned in the @requires clause.  
+      let fenv = bogus_fenv(newr, tr, args);
+      let ftenv = rnew(newr) Tenv{te->ns, te->ae, fenv, true};
+      let $(nenv,req_rs) = check_clause(loc,ftenv,new_cvtenv,"@requires",req);
+      new_cvtenv = nenv;
+      *req_relns = req_rs;
+      List::iter_c(replace_rops, args, req_rs);
+      // add a bogus "return_value" variable for the @ensures clause
+      let var = new "return_value";
+      let vd = new Vardecl{.sc = Public, .name = new $((nmspace_t)Loc_n,var),
+                           .tq = empty_tqual(0), .type = tr, 
+                           .initializer = NULL, .rgn = curr_rgn(ftenv), 
+                           .attributes = NULL, .escapes = false};
+      ftenv = add_local_var(newr,0,ftenv,vd);
+      let $(nenv,ens_rs) = check_clause(loc,ftenv,new_cvtenv,"@ensures",ens);
+      new_cvtenv = nenv;
+      *ens_relns = ens_rs;
+      List::iter_c(replace_rops, args, ens_rs);
       // finally, the effect -- usually inferred
       if (*eff != NULL)
         new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&ek,(type_t)(*eff),true);
@@ -4626,11 +4838,12 @@ void check_free_evars(list_t<type_t> free_evars, type_t in_t, seg_t loc)
 void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
   bool generalize_evars = is_function_type(t);
   let te_vars = lookup_type_vars(te);
+  kind_t expected_kind = generalize_evars ? &tak : &tmk;
   TEMP_RGN(te, temp) {
     let cvt = check_valid_type(loc, te,
                                CVTEnv{temp, te_vars, NULL, NULL,
                                       generalize_evars,false},
-                               &tmk, t);
+                               expected_kind, t);
     let free_tvars = List::rmap(temp,fst,cvt.free_vars);
     let free_evars = List::rmap(temp,fst,cvt.free_evars);
 
@@ -4674,7 +4887,7 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
 
     if (free_tvars != NULL || free_evars != NULL) {
       switch (compress(t)) {
-      case &FnType(FnInfo{*btvs,eff,trq,tr,args,c_vararg,cyc_vararg,rgn_po,atts}):
+      case &FnType(FnInfo{*btvs,...}):
         if (*btvs == NULL) {
           // abstract the free tvars
           *btvs = List::copy(free_tvars);
@@ -4699,7 +4912,7 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
   // this fills in the missing bound type variables and effects
   check_valid_toplevel_type(loc,te,t);
   switch (compress(t)) {
-  case &FnType(FnInfo{tvs,effect,rtq,rt,args,_,_,_,_}):
+  case &FnType(FnInfo{tvs,effect,rtq,rt,args,_,_,_,_,req,req_relns,ens,ens_relns}):
     fd->tvs = tvs;
     fd->effect = effect;
     for (let fdargs = fd->args; fdargs != NULL; fdargs = fdargs->tl,
@@ -4710,6 +4923,10 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
     fd->ret_tqual = rtq;
     fd->ret_type = rt;
     fd->ret_tqual.real_const = extract_const_from_typedef(loc,fd->ret_tqual.print_const,rt);
+    fd->requires_clause = req;
+    fd->requires_relns = req_relns;
+    fd->ensures_clause = ens;
+    fd->ensures_relns = ens_relns;
     break;
   default: impos("check_fndecl_valid_type: not a FnType");
   }
@@ -5475,7 +5692,7 @@ bool admits_zero(type_t t) {
 bool is_noreturn(type_t t) {
   switch (compress(t)) {
   case &PointerType(PtrInfo(elt,_,_)): return is_noreturn(elt);
-  case &FnType(FnInfo{_,_,_,_,_,_,_,_,atts}):
+  case &FnType(FnInfo{.attributes = atts,...}):
     for (; atts != NULL; atts = atts->tl)
       switch (atts->hd) {
       case &Noreturn_att: return true;
@@ -5491,7 +5708,7 @@ bool is_noreturn(type_t t) {
 // function type.
 attributes_t transfer_fn_type_atts(type_t t, attributes_t atts) {
   switch (compress(t)) {
-  case &FnType(FnInfo{_,_,_,_,_,_,_,_,*fnatts}):
+  case &FnType(FnInfo{.attributes = *fnatts,...}):
     let res_atts = NULL;
     for (; atts != NULL; atts = atts->tl)
       if (fntype_att(atts->hd)) {

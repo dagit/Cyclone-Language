@@ -79,25 +79,42 @@ namespace Pratt;
   int       NZero;  // int unused
   Absyn::vardecl_t NVar;
   Absyn::vardecl_t NNumelts;
-  Absyn::tvar_t    NTvar;
+  Absyn::type_t    NType;
+  unsigned int     NParam;
+  unsigned int     NParamNumelts;
+  int             NReturn;
 };
 union Node zero_node = {.NZero = 0};
 node_t NVar(Absyn::vardecl_t vd) { return Node{.NVar = vd}; }
 node_t NNumelts(Absyn::vardecl_t vd) { return Node{.NNumelts = vd}; }
-node_t NTvar(Absyn::tvar_t tv) { return Node{.NTvar = tv}; }
+node_t NType(Absyn::type_t t) { return Node{.NType = t}; }
+node_t NParam(unsigned i) { return Node{.NParam = i}; }
+node_t NParamNumelts(unsigned i) { return Node{.NParamNumelts = i}; }
+node_t NReturn() { return Node{.NReturn = 0}; }
 
 static int cmp_node(node_t n1, node_t n2) {
   switch $(n1,n2) {
   case $({.NZero = _},{.NZero = _}): return 0;
   case $({.NZero = _},_)           : return -1;
   case $(_,{.NZero = _})           : return 1;
+  case $({.NReturn = _}, {.NReturn = _}): return 0;
+  case $({.NReturn = _}, _): return -1;
+  case $(_, {.NReturn = _}): return 1;
   case $({.NVar = x},{.NVar = y})  : return ((int)x - (int)y);
   case $({.NVar = _},_)            : return -1;
   case $(_,{.NVar = _})           : return 1;
   case $({.NNumelts = x},{.NNumelts = y}): return ((int)x - (int)y);
   case $({.NNumelts = x},_): return -1;
   case $(_,{.NNumelts = y}): return 1;
-  case $({.NTvar = x},{.NTvar = y})  : return Absyn::tvar_cmp(x,y);
+  case $({.NType = x},{.NType = y}): 
+    if (Tcutil::unify(x,y)) return 0;
+    return Tcutil::typecmp(x,y);
+  case $({.NType = _},_): return -1;
+  case $(_,{.NType = _}): return 1;
+  case $({.NParam = i}, {.NParam = j}): return ((int)i - (int)j);
+  case $({.NParam = i}, _): return -1;
+  case $(_, {.NParam = j}): return 1;
+  case $({.NParamNumelts = i}, {.NParamNumelts = j}): return ((int)i - (int)j);
   }
 }
 
@@ -105,9 +122,11 @@ string_t node2string(node_t n) {
   switch (n) {
   case {.NZero = _}: return "0";
   case {.NVar = x} : return Absynpp::qvar2string(x->name);
-  case {.NTvar = x} : return Absynpp::tvar2string(x);
+  case {.NType = x} : return Absynpp::typ2string(x);
   case {.NNumelts = x}: return aprintf("numelts(%s)",Absynpp::qvar2string(x->name));
-
+  case {.NParam = i}: return aprintf("param(%d)",i);
+  case {.NParamNumelts = i}: return aprintf("numelts(param(%d))",i);
+  case {.NReturn = _}: return aprintf("return_value");
   } 
 }
 

@@ -32,7 +32,10 @@ namespace Relations {
   unsigned int     RConst;    // a constant
   Absyn::vardecl_t RVar;      // a term-level variable
   Absyn::vardecl_t RNumelts;  // numelts(x) 
-  Absyn::tvar_t    RTvar;     // `i::I 
+  Absyn::type_t    RType;     // `i::I 
+  unsigned int     RParam;    // ith parameter of a function
+  unsigned int     RParamNumelts; // numelts of ith parameter of a function
+  unsigned int     RReturn;   // return value of function (int unused)
 };
 typedef union RelnOp reln_op_t;
 // constructors for the operands
@@ -40,7 +43,10 @@ extern reln_op_t
   RConst(unsigned int),
   RVar(Absyn::vardecl_t),
   RNumelts(Absyn::vardecl_t),
-  RTvar(Absyn::tvar_t);
+  RType(Absyn::type_t),
+  RParam(unsigned int),
+  RParamNumelts(unsigned int),
+  RReturn();
 // the different relations -- note that Rlte and Rlt are *unsigned* comparisons
 enum Relation { Req, Rneq, Rlte, Rlt };
 typedef enum Relation relation_t;
@@ -49,8 +55,9 @@ struct Reln {
   relation_t       relation;
   reln_op_t        rop2;
 };
-typedef struct Reln @`r reln_t<`r>;
-typedef List::list_t<reln_t<`r>,`r> relns_t<`r>;
+  // Now defined in absyn.h
+  //typedef struct Reln @`r reln_t<`r>;
+  //typedef List::list_t<reln_t<`r>,`r> relns_t<`r>;
 
 // map relational primop to one of our limited forms of relations
 // (gets rid of > and >= in favor of < and <= to keep things simple.)
@@ -102,6 +109,11 @@ extern bool relns_approx(relns_t<`r> r2s, relns_t<`r> r1s);
 extern relns_t<`r> join_relns(region_t<`r> r, relns_t<`r>, relns_t<`r>);
 // Prints relations
 extern void print_relns(FILE@,relns_t);
+// Converts relation stuff to strings
+extern string_t reln2string(reln_t r);
+extern string_t rop2string(reln_op_t r);
+extern string_t relation2string(relation_t r);
+extern string_t relns2string(relns_t r);
 // returns true if the relations are consistent -- typical use
 // is to check a relation you want to be true (e.g., i < numelts(x))
 // under the current set of relations R.  To do so, you add the

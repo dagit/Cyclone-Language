@@ -942,14 +942,14 @@ struct F212 { int x:-1; };
 // bitfield larger than type
 struct F213 { int x:33; };
 // @requires clauses are only allowed on union members
-struct F214 { int x @requires 3 == 3; };
+struct F214 { int x @requires(3 == 3); };
 // @requires clause has type $(int,int) instead of integral type
-union F215 { int x @requires $(1,1); };
+union F215 { int x @requires($(1,1)); };
 // unbound type variable `i in type valueof_t((unsigned int)(valueof(`i) == 1))
-union F216 { int x @requires valueof(`i) == 1; };
+union F216 { int x @requires(valueof(`i) == 1); };
 int F218;
 // @requires clause has type int @ instead of integral type
-union F217 { int x @requires &F218; };
+union F217 { int x @requires(&F218); };
 // unbound type variable `a in type `a
 union F219 { `a x; };
 // type F220 attempts to abstract type variable `a of kind M

@@ -59,7 +59,8 @@ extern doc_t tqtd2doc(tqual_t tq, type_t t, opt_t<doc_t> dopt);
 extern doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,
                          bool c_varargs,vararg_info_t *cyc_varargs,
                          type_opt_t effopt,
-                         list_t<$(type_t,type_t)@> rgn_po);
+                         list_t<$(type_t,type_t)@> rgn_po,
+                         exp_opt_t requires, exp_opt_t ensures);
 extern doc_t datatypefields2doc(list_t<datatypefield_t> fields);
 extern doc_t enumfields2doc(list_t<enumfield_t> fs);
 extern doc_t vardecl2doc(vardecl_t vd);
@@ -580,7 +581,7 @@ static void print_tms(list_t<type_modifier_t> tms) {
     switch (tms->hd) {
     case &Carray_mod(_,_): fprintf(stderr,"Carray_mod "); break;
     case &ConstArray_mod(_,_,_):fprintf(stderr,"ConstArray_mod "); break;
-    case &Function_mod(&WithTypes(ys,_,_,_,_)):
+    case &Function_mod(&WithTypes(ys,_,_,_,_,_,_)):
       fprintf(stderr,"Function_mod(");
       for (; ys != NULL; ys = ys->tl) {
         let v = (*ys->hd)[0];
@@ -617,8 +618,8 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
   case &Function_mod(args):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     switch (args) {
-    case &WithTypes(args2,c_varargs,cyc_varargs,effopt,rgn_po):
-      return cat(rest,funargs2doc(args2,c_varargs,cyc_varargs,effopt,rgn_po));
+    case &WithTypes(args2,c_varargs,cyc_varargs,effopt,rgn_po,req,ens):
+      return cat(rest,funargs2doc(args2,c_varargs,cyc_varargs,effopt,rgn_po,req,ens));
     case &NoTypes(sl,loc):
       return cat(rest,group("(",")",",",List::map(textptr,sl)));
     }
@@ -888,7 +889,8 @@ doc_t funarg2doc($(var_opt_t,tqual_t,type_t)@ t) {
 
 doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,bool c_varargs,
                   vararg_info_t *cyc_varargs, type_opt_t effopt,
-                  list_t<$(type_t,type_t)@> rgn_po) {
+                  list_t<$(type_t,type_t)@> rgn_po, exp_opt_t req,
+                  exp_opt_t ens) {
   let arg_docs = List::map(funarg2doc,args);
   doc_t eff_doc;
   if (c_varargs)
@@ -905,7 +907,12 @@ doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,bool c_varargs,
     arg_doc = cat(arg_doc,text(";"),eff2doc(effopt));
   if (rgn_po != NULL)
     arg_doc = cat(arg_doc,text(":"),rgnpo2doc(rgn_po));
-  return cat(text("("),arg_doc,text(")"));
+  let res = cat(text("("),arg_doc,text(")"));
+  if (req != NULL)
+    res = cat(res,text(" @requires("),exp2doc(req),text(")"));
+  if (ens != NULL)
+    res = cat(res,text(" @ensures("),exp2doc(ens),text(")"));
+  return res;
 }
 
 $(var_opt_t,tqual_t,type_t)@ arg_mk_opt($(var_t,tqual_t,type_t)@ arg) {
@@ -1676,7 +1683,7 @@ doc_t vardecl2doc(vardecl_t vd) {
   case Gcc_c: beforenamedoc = attsdoc; break;
   case Vc_c:
     switch(compress(type)) {
-    case &FnType(FnInfo(_,_,_,_,_,_,_,_,atts2)):
+    case &FnType(FnInfo{.attributes = atts2,...}):
       beforenamedoc = callconv2doc(atts2);
       break;
     default: beforenamedoc = nil_doc(); break;
@@ -1774,7 +1781,9 @@ doc_t decl2doc(decl_t d) {
                                  List::map(arg_mk_opt,fd->args),
                                  fd->c_varargs, fd->cyc_varargs,
                                  fd->rgn_po,
-                                 NULL});
+                                 NULL,
+                                 fd->requires_clause, fd->requires_relns,
+                                 fd->ensures_clause, fd->ensures_relns});
     doc_t attsdoc   = atts2doc(fd->attributes);
     doc_t inlinedoc;
     if(fd->is_inline)
@@ -2016,7 +2025,7 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
     return $(tq3, t3, tml3);
 
   case &FnType(FnInfo{typvars,effopt,t2qual,t2,args,c_varargs,cyc_varargs,
-                        rgn_po,fn_atts}):
+                        rgn_po,fn_atts,req,_,ens,_}):
     if (! print_all_tvars) {
       // don't print default effects
       // WARNING: this is our criterion to detect default effect,
@@ -2055,13 +2064,13 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
       tms = rnew(r) List(rnew(r)
                          Function_mod(rnew(r) WithTypes(args,c_varargs,
                                                         cyc_varargs,effopt,
-                                                        rgn_po)),tms);
+                                                        rgn_po,req,ens)),tms);
       break;
     case Vc_c:
       tms = rnew(r) List(rnew(r)
                          Function_mod(rnew(r) WithTypes(args,c_varargs,
                                                         cyc_varargs,effopt,
-                                                      rgn_po)),tms);
+                                                      rgn_po,req,ens)),tms);
       for(; fn_atts != NULL; fn_atts = fn_atts->tl)
 	switch(fn_atts->hd) {
 	case &Stdcall_att:

@@ -5,9 +5,9 @@
 // expressions, including valueof(`i) where `i is an integer-kinded
 // type variable.  Here's a simple example:
 union U<`tag> {
-  int i    @requires valueof(`tag) == 1 + 0 - 2 + 2;  
-  int *j   @requires valueof(`tag) > 1;
-  const char ?k  @requires valueof(`tag) < 1;
+  int i    @requires(valueof(`tag) == 1 + 0 - 2 + 2);  
+  int *j   @requires(valueof(`tag) > 1);
+  const char ?k  @requires(valueof(`tag) < 1);
 };
 // The type-checker ensures that you cannot read or write the
 // members of U<`tag> unless you can prove the associated @requires

@@ -119,6 +119,9 @@ extern tenv_t<`r,`r> tc_init(region_t<`r>);
 extern genv_t<`r> empty_genv(region_t<`r>);
 extern fenv_t<`r> new_fenv(region_t<`r>,seg_t,fndecl_t);
 extern fenv_t<`r> nested_fenv(seg_t,fenv_t<`r> old_fenv, fndecl_t new_fn);
+// bogus fenv is used for checking requires/ensures clauses
+extern fenv_t<`r> bogus_fenv(region_t<`r>, type_t ret_type, 
+                             list_t<$(var_opt_t,tqual_t,type_t)@> args);
 
 extern list_t<var_t> resolve_namespace(tenv_t,seg_t,var_t,list_t<var_t,`H>);
 // when is_use is true, we are looking up a free occurrence of the variable

@@ -23,7 +23,7 @@ is adapted from the proposed C9X standard, but the productions are
 arranged as in Kernighan and Ritchie's "The C Programming
 Language (ANSI C)", Second Edition, pages 234-239.
 
-The grammar has 18 total shift-reduce conflicts, and 4 reduce-reduce
+The grammar has 20 total shift-reduce conflicts, and 4 reduce-reduce
 conflicts.  
 
 The grammar has 1 shift-reduce conflict due to the "dangling else"
@@ -37,6 +37,9 @@ There is 1 shift-reduce conflict due to the treatment of && in patterns.
 There are 6 additional shift-reduce conflicts and 4 reduce-reduce conflicts
 having to do with specifier-qualifier-lists and the desire to allow 
 typedef names to be redeclared as identifiers.  
+
+There are 2 additional shift-reduce conflicts having to do with
+@requires and @ensures clauses on function prototypes.
 
 */
 
@@ -497,7 +500,7 @@ static list_t<type_modifier_t<`yy>,`yy>
 	(is_typeparam(tms->tl->hd) && tms->tl->tl==NULL)) {
       // Yes
       switch (args) {
-      case &WithTypes(_,_,_,_,_):
+      case &WithTypes(...):
 	Tcutil::warn(loc,"function declaration with both new- and old-style "
 		     "parameter declarations; ignoring old-style");
 	return tms;
@@ -531,7 +534,7 @@ static list_t<type_modifier_t<`yy>,`yy>
 	}
 	return
 	  rnew(yy) List(rnew(yy) Function_mod(rnew(yy) WithTypes(imp_rev(rev_new_params),
-						  false,NULL,NULL,NULL)),
+						  false,NULL,NULL,NULL,NULL,NULL)),
 		   NULL);
       }
     } 
@@ -582,7 +585,8 @@ static fndecl_t make_function(region_t<`yy> yy,
   // fn_type had better be a FnType
   switch (fn_type) {
     case &FnType(FnInfo{tvs,eff,ret_tqual,ret_type,args,c_varargs,cyc_varargs,
-                          rgn_po,attributes}):
+                          rgn_po,attributes,requires_clause,requires_relns,
+                          ensures_clause,ensures_relns}):
       let rev_newargs = NULL;
       for(let args2 = args; args2 != NULL; args2 = args2->tl) {
 	let &$(vopt,tq,t) = args2->hd;
@@ -604,19 +608,23 @@ static fndecl_t make_function(region_t<`yy> yy,
                             .body=body,.cached_typ=NULL,
                             .param_vardecls=NULL,
                             .fn_vardecl = NULL,
-                            .attributes = append(attributes,out_atts)};
+                            .attributes = append(attributes,out_atts),
+                            .requires_clause = requires_clause,
+                            .requires_relns = NULL,
+                            .ensures_clause = ensures_clause,
+                            .ensures_relns = NULL};
     default: parse_abort(loc,"declarator is not a function prototype");
   }
 }
 
 static string_t msg1 = 
-  "at most one type may appear within a type specifier";
+  "at most one type may appear within a type specifier \n\t(missing ';' or ','?)";
 static string_t msg2 =
-  "const or volatile may appear only once within a type specifier";
+  "const or volatile may appear only once within a type specifier \n\t(missing ';' or ','?)";
 static string_t msg3 = 
-  "type specifier includes more than one declaration";
+  "type specifier includes more than one declaration \n\t(missing ';' or ','?)";
 static string_t msg4 = 
-  "sign specifier may appear only once within a type specifier";
+  "sign specifier may appear only once within a type specifier \n\t(missing ';' or ','?)";
 
 // Given two partial type-specifiers, combine their information
 // to produce a new type specifier.  Warns when you have duplicates
@@ -732,7 +740,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
                      array_typ(t,tq,e,zeroterm,ztloc),atts,tms->tl);
   case &Function_mod(args): {
     switch (args) {
-    case &WithTypes(args2,c_vararg,cyc_vararg,eff,rgn_po):
+    case &WithTypes(args2,c_vararg,cyc_vararg,eff,rgn_po,req,ens):
       list_t<tvar_t> typvars = NULL;
       // function type attributes seen thus far get put in the function type
       attributes_t fn_atts = NULL, new_atts = NULL;
@@ -783,7 +791,8 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
       // now we don't have a loc so the warning will be confusing.
       return apply_tms(empty_tqual(tq.loc),
 		       function_typ(typvars,eff,tq,t,args2,
-				    c_vararg,cyc_vararg,rgn_po,fn_atts),
+				    c_vararg,cyc_vararg,rgn_po,fn_atts,
+                                    req,ens),
 		       new_atts,
 		       tms->tl);
     case &NoTypes(_,loc):
@@ -1041,15 +1050,16 @@ using Parse;
 %token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN ENUM
 // Cyc:  CYCLONE additional keywords
 %token NULL_kw LET THROW TRY CATCH EXPORT
-%token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE XTUNION TUNION
+%token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE
 %token MALLOC RMALLOC CALLOC RCALLOC SWAP
 %token REGION_T TAG_T REGION RNEW REGIONS RESET_REGION
-%token NOZEROTERM_QUAL ZEROTERM_QUAL REGION_QUAL PORTON PORTOFF DYNREGION_T
+%token PORTON PORTOFF DYNREGION_T
 // %token ALIAS
 %token NUMELTS VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
-%token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL REQUIRES_QUAL
+%token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL REQUIRES_QUAL ENSURES_QUAL
 // Cyc:  CYCLONE qualifiers (e.g., @zeroterm, @tagged)
-%token NOZEROTERM_QUAL ZEROTERM_QUAL TAGGED_QUAL EXTENSIBLE_QUAL RESETABLE_QUAL
+%token REGION_QUAL NOZEROTERM_QUAL ZEROTERM_QUAL TAGGED_QUAL 
+%token EXTENSIBLE_QUAL RESETABLE_QUAL
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -1075,6 +1085,8 @@ using Parse;
   Stringopt_tok(opt_t<stringptr_t<`H,`H>,`H>);
   QualId_tok(qvar_t);
   Asm_tok($(bool,string_t<`H>));
+  Exp_tok(exp_t);
+  Stmt_tok(stmt_t);
 }
 /* types for productions */
 %type <$(sign_t,int)> INTEGER_CONSTANT
@@ -1093,7 +1105,6 @@ using Parse;
 %type <exp_t> logical_or_expression conditional_expression
 %type <exp_t> assignment_expression expression constant_expression
 %type <exp_t> initializer array_initializer
-%type <exp_opt_t> open_exp_opt
 %type <list_t<exp_t,`H>> argument_expression_list argument_expression_list0
 %type <list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>> initializer_list
 %type <primop_t> unary_operator 
@@ -1160,6 +1171,7 @@ using Parse;
 %type <pointer_qual_t<`yy>> pointer_qual
 %type <pointer_quals_t<`yy>> pointer_quals
 %type <$(bool,string_t<`H>)> ASM
+%type <exp_opt_t> requires_clause_opt ensures_clause_opt
 /* start production */
 %start prog
 %%
@@ -1395,7 +1407,7 @@ declaration_specifiers:
     { let two = $2;
       if (two.sc != NULL)
         Tcutil::warn(LOC(@1,@2),
-                     "Only one storage class is allowed in a declaration");
+                     "Only one storage class is allowed in a declaration (missing ';' or ','?)");
       $$=^$(Declaration_spec($1,two.tq,two.type_specs,
                              two.is_inline,
                              two.attributes));
@@ -1845,8 +1857,8 @@ struct_declarator_list0:
 ;
 
 struct_declarator:
-  declarator_withtypedef
-    { $$=^$(rnew (yyr) $($1,NULL,NULL)); }
+  declarator_withtypedef requires_clause_opt
+    { $$=^$(rnew (yyr) $($1,NULL,$2)); }
 | ':' constant_expression
     { // HACK: give the field an empty name -- see elsewhere in the
       // compiler where we use this invariant
@@ -1859,8 +1871,16 @@ struct_declarator:
     }
 | declarator_withtypedef ':' constant_expression
     { $$=^$(rnew (yyr) $($1,(exp_opt_t)$3,NULL)); }
-| declarator_withtypedef REQUIRES_QUAL constant_expression
-    { $$=^$(rnew (yyr) $($1,NULL,(exp_opt_t)$3)); }
+;
+
+requires_clause_opt:
+  REQUIRES_QUAL '(' constant_expression ')' { $$ = ^$((exp_opt_t)$3); }
+| /* empty */ { $$ = ^$(NULL); }
+;
+
+ensures_clause_opt:
+  ENSURES_QUAL '(' constant_expression ')' { $$ = ^$((exp_opt_t)$3); }
+| /* empty */ { $$ = ^$(NULL); }
 ;
 
 // FIX: hack to have rgn_opt in 1st and 3rd cases
@@ -1943,15 +1963,17 @@ direct_declarator:
 | direct_declarator '[' assignment_expression ']' zeroterm_qual_opt
     { $$=^$(Declarator($1.id,
                        rnew(yyr) List(rnew(yyr) ConstArray_mod($3,$5,SLOC(@5)),$1.tms)));}
-| direct_declarator '(' parameter_type_list ')'
+| direct_declarator '(' parameter_type_list ')' requires_clause_opt ensures_clause_opt 
     { let &$(lis,b,c,eff,po) = $3;
-      $$=^$(Declarator($1.id,rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po)),$1.tms)));
+      let req = $5;
+      let ens = $6;
+      $$=^$(Declarator($1.id,rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,req,ens)),$1.tms)));
     }
-| direct_declarator '(' optional_effect optional_rgn_order ')'
+| direct_declarator '(' optional_effect optional_rgn_order ')' requires_clause_opt ensures_clause_opt 
     { $$=^$(Declarator($1.id,
                        rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(NULL,
                                                                false,NULL,
-                                                               $3,$4)),
+                                                               $3,$4,$6,$7)),
                                 $1.tms)));
     }
 | direct_declarator '(' identifier_list ')'
@@ -1997,17 +2019,19 @@ direct_declarator_withtypedef:
       $$=^$(Declarator(one.id,
                        rnew(yyr) List(rnew(yyr) ConstArray_mod($3,$5,SLOC(@5)),
                                 one.tms)));}
-| direct_declarator_withtypedef '(' parameter_type_list ')'
+| direct_declarator_withtypedef '(' parameter_type_list ')' requires_clause_opt ensures_clause_opt 
     { let &$(lis,b,c,eff,po) = $3;
+      let req = $5;
+      let ens = $6;
       let one=$1;
-      $$=^$(Declarator(one.id,rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po)),one.tms)));
+      $$=^$(Declarator(one.id,rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,req,ens)),one.tms)));
     }
-| direct_declarator_withtypedef '(' optional_effect optional_rgn_order ')'
+| direct_declarator_withtypedef '(' optional_effect optional_rgn_order ')' requires_clause_opt ensures_clause_opt 
     { let one=$1;
       $$=^$(Declarator(one.id,
                        rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(NULL,
                                                                false,NULL,
-                                                               $3,$4)),
+                                                               $3,$4,$6,$7)),
                                 one.tms)));
     }
 | direct_declarator_withtypedef '(' identifier_list ')'
@@ -2114,18 +2138,18 @@ tqual_list:
 ;
 
 parameter_type_list:
-  parameter_list optional_effect optional_rgn_order
+  parameter_list optional_effect optional_rgn_order 
     { $$=^$(new $(List::imp_rev($1),false,NULL,$2,$3)); }
-| parameter_list ',' ELLIPSIS optional_effect optional_rgn_order
+| parameter_list ',' ELLIPSIS optional_effect optional_rgn_order 
     { $$=^$(new $(List::imp_rev($1),true,NULL,$4,$5)); }
 | ELLIPSIS optional_inject parameter_declaration optional_effect
-  optional_rgn_order
+  optional_rgn_order 
 { let &$(n,tq,t) = $3;
   let v = new VarargInfo {.name = n,.tq = tq,.type = t,.inject = $2};
   $$=^$(new $(NULL,false,v,$4,$5)); 
 }
 | parameter_list ',' ELLIPSIS optional_inject parameter_declaration
-  optional_effect optional_rgn_order
+  optional_effect optional_rgn_order 
 { let &$(n,tq,t) = $5;
   let v = new VarargInfo {.name = n,.tq = tq,.type = t,.inject = $4};
   $$=^$(new $(List::imp_rev($1),false,v,$6,$7)); 
@@ -2382,21 +2406,21 @@ direct_abstract_declarator:
     { $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) ConstArray_mod($3,$5,SLOC(@5)),
                                             $1.tms)));
     }
-| '(' optional_effect optional_rgn_order ')'
-    { $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(NULL,false,NULL,$2,$3)),NULL)));
+| '(' optional_effect optional_rgn_order ')' requires_clause_opt ensures_clause_opt
+    { $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(NULL,false,NULL,$2,$3,$5,$6)),NULL)));
     }
-| '(' parameter_type_list ')'
+| '(' parameter_type_list ')' requires_clause_opt ensures_clause_opt
     { let &$(lis,b,c,eff,po) = $2;
-      $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po)),NULL)));
+      $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,$4,$5)),NULL)));
     }
-| direct_abstract_declarator '(' optional_effect optional_rgn_order ')'
-    { $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(NULL,false,NULL,$3,$4)),
+| direct_abstract_declarator '(' optional_effect optional_rgn_order ')' requires_clause_opt ensures_clause_opt
+    { $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(NULL,false,NULL,$3,$4,$6,$7)),
 				      $1.tms)));
     }
-| direct_abstract_declarator '(' parameter_type_list ')'
+| direct_abstract_declarator '(' parameter_type_list ')' requires_clause_opt ensures_clause_opt
     { let &$(lis,b,c,eff,po) = $3;
       $$=^$(Abstractdeclarator(rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,
-                                                                           b,c,eff,po)),$1.tms)));
+                                                                           b,c,eff,po,$5,$6)),$1.tms)));
     }
 /* Cyc: new */
 | direct_abstract_declarator '<' type_name_list right_angle
@@ -2420,15 +2444,6 @@ statement:
 // Cyc: reset_region(e) statement
 | RESET_REGION '(' expression ')' ';'
   { $$=^$(new_stmt(new ResetRegion_s($3),LOC(@1,@5))); }
-;
-
-open_exp_opt:
-  /* empty */ { $$=^$(NULL); }
-| '=' IDENTIFIER '(' expression ')' 
-  { if (zstrcmp($2,"open") != 0)
-      err("expecting `open'",SLOC(@2));
-    $$=^$($4);
-  }
 ;
 
 /* Cyc: Unlike C, we do not treat case and default statements as labeled */
@@ -3172,6 +3187,8 @@ void yyprint(int i, union YYSTYPE<`yy> v) {
       fprintf(stderr,"%s::",*(prefix->hd));
     fprintf(stderr,"%s::",*v2);
     break;
+  case {.Exp_tok = e}: fprintf(stderr,"%s",Absynpp::exp2string(e)); break;
+  case {.Stmt_tok = s}: fprintf(stderr,"%s",Absynpp::stmt2string(s)); break;
   default: fprintf(stderr,"?"); break;
   }
 }

@@ -52,7 +52,7 @@ table_t<`a,`b> create(int sz, int (@`H cmp)(`a,`a),
 
 void insert(table_t<`a,`b> t, `a key, `b val) {
   list_t<$(`a,`b)@> ?tab   = t->tab;
-  int             bucket = (*t->hash)(key) % numelts(tab);
+  int             bucket = (t->hash)(key) % numelts(tab);
   tab[bucket] = rnew(t->r) List(rnew(t->r) $(key,val),tab[bucket]);
   if (length(tab[bucket]) > t->max_len) 
     resize(t);
@@ -61,13 +61,13 @@ void insert(table_t<`a,`b> t, `a key, `b val) {
 `b lookup(table_t<`a,`b> t, `a key) {
   // throws Not_found
   list_t<$(`a,`b)@> ?tab   = t->tab;
-  list_t<$(`a,`b)@> l      = tab[(*t->hash)(key) % numelts(tab)];
+  list_t<$(`a,`b)@> l      = tab[(t->hash)(key) % numelts(tab)];
   return assoc_cmp(t->cmp, l, key);
 }
 
 `b*`r lookup_opt(table_t<`a,`b,`r> t, `a key) {
   let tab = t->tab;
-  let l = tab[(*t->hash)(key) % numelts(tab)];
+  let l = tab[(t->hash)(key) % numelts(tab)];
   let cmp = t->cmp;
   for (; l != NULL; l = l->tl) {
     let &$(k,*v) = l->hd;
@@ -78,7 +78,7 @@ void insert(table_t<`a,`b> t, `a key, `b val) {
 
 bool try_lookup(table_t<`a,`b> t, `a key, `b@ data) {
   let tab = t->tab;
-  let l = tab[(*t->hash)(key) % numelts(tab)];
+  let l = tab[(t->hash)(key) % numelts(tab)];
   let cmp = t->cmp;
   for (; l != NULL; l = l->tl) {
     let $(k,v) = *l->hd;
@@ -95,7 +95,7 @@ void remove(table_t<`a,`b> t, `a key) {
   // does a destructive list update since this data structure is not functional
   let tab = t->tab;
   let cmp = t->cmp;
-  int bucket = (*t->hash)(key) % numelts(tab);
+  int bucket = (t->hash)(key) % numelts(tab);
   let l = tab[bucket];
   if (l == NULL) return;
   if (cmp(key,l->hd[0][0]) == 0) {
@@ -136,7 +136,7 @@ void insert_bucket(region_t<`r> r,
   insert_bucket(r,tab,hash,elems->tl); // preserve the original order
   `a  key  = elems->hd[0][0];
   `b  val  = elems->hd[0][1];
-  int nidx = (*hash)(key) % numelts(tab);
+  int nidx = (hash)(key) % numelts(tab);
   tab[nidx] = rnew(r) List(rnew(r) $(key,val),tab[nidx]);
 }
 

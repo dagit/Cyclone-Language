@@ -1373,13 +1373,13 @@ c=(int)*((const char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus_pos
 v=0;}
 # 817
 for(n=0;n < 256;++ n){
-tab[_check_known_subscript_notnull(256,n)]=(char)v;}
+tab[n]=(char)v;}
 if(c == 0)
 return _dyneither_ptr_plus(fmt,sizeof(char),- 1);
 # 829 "scanf.cyc"
 v=1 - v;
 for(0;1;0){
-tab[_check_known_subscript_notnull(256,c)]=(char)v;
+tab[c]=(char)v;
 doswitch:
  n=(int)*((const char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0));
 switch(n){case 0: _LL7E:

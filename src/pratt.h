@@ -52,14 +52,20 @@ namespace Pratt {
     int       NZero;  // int unused
     vardecl_t NVar;
     vardecl_t NNumelts;
-    tvar_t    NTvar;
+    type_t    NType;
+    unsigned  NParam;
+    unsigned  NParamNumelts;
+    int       NReturn;  // int unused
   };
   // constructors for nodes
   extern union Node zero_node;
   typedef union Node node_t;
   extern node_t NVar(vardecl_t);
-  extern node_t NTvar(tvar_t);
+  extern node_t NType(type_t);
   extern node_t NNumelts(vardecl_t);
+  extern node_t NParam(unsigned);
+  extern node_t NParamNumelts(unsigned);
+  extern node_t NReturn();
 
   // keep graphs abstract -- we're likely to want to change the rep.
   struct Graph;

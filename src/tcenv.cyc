@@ -1319,6 +1319,52 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
        };
 }
 
+fenv_t<`r> bogus_fenv(region_t<`r> r, type_t ret_type,
+                      list_t<$(var_opt_t,tqual_t,type_t)@> args) {
+  
+  bnds_t<`r> locals = NULL;
+  tvar_t rgn0 = new Tvar(new "bogus", new_tvar_id(), &rgn_kb);
+  let tvs = new List(rgn0,NULL);
+  let rgn_po = initial_fn_po(r,NULL,NULL,new JoinEff(NULL),rgn0,0);
+  type_t param_rgn = new VarType(rgn0);
+  let vds = NULL;
+  for(; args != NULL; args = args->tl) {
+    let $(vopt,tq,t) = *args->hd;
+    if (vopt != NULL) {
+      let vd = new{Vardecl{.sc = Public,
+                           .name = new $((nmspace_t)Loc_n,vopt),
+                           .tq = tq,
+                           .type = t,
+                           .initializer = NULL,
+                           .rgn = param_rgn,
+                           .attributes = NULL, .escapes = false}};
+      vds = new{List(vd, vds)};
+      let b = new Param_b(vd);
+      let var = vopt;
+      locals = rnew(r) Bindings{var, b, locals};
+    }
+  }
+  return rnew(r)
+    Fenv{.shared = rnew(r) SharedFenv{
+                     .frgn = r,
+                     .return_typ = ret_type,
+                     .seen_labels = Dict::rempty(r,strptrcmp),
+                     .needed_labels = Dict::rempty(r,strptrcmp),
+		     .delayed_effect_checks = NULL,
+		     .delayed_constraint_checks = NULL
+                   },
+         .type_vars   = tvs,
+         .region_order = rgn_po,
+         .locals      = locals,  // assumed unique
+         .encloser    = skip_stmt(0),
+         .ctrl_env    = rnew(r) CtrlEnv(r, &NotLoop_j_val, &NotLoop_j_val, NULL, &FnEnd_j_val, 0),
+         .capability  = new JoinEff(new List(new AccessEff(param_rgn),NULL)),
+         .curr_rgn    = param_rgn,
+	 .flags       = FenvFlags{false,false,false,false},
+         .fnrgn       = r
+       };
+}
+
 fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
   let &Fenv{<`f,`c> .locals = old_locals, .region_order = rgn_po,
                .type_vars = type_vars, .shared = shared, .fnrgn = fr, ...} = old_fenv;

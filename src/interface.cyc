@@ -122,7 +122,7 @@ i_t final() {
 								       &HeapRgn_val,
 								       empty_tqual(0),false_conref)),
 						      NULL)),
-				    false, NULL, NULL, NULL),
+				    false, NULL, NULL, NULL, NULL, NULL),
 		       NULL);
   vd->sc = Extern;
   ie2->vardecls = Dict::insert(ie2->vardecls, (*qmain)[1], vd);
@@ -274,7 +274,8 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
   case &TypedefType(_,_,_, t) && t != NULL:
     return check_public_type(ae, seen, obj, name, (type_t)t);
 
-  case &FnType(FnInfo(_,_,_,ret,args,_,cyc_varargs,_,_)):
+  case &FnType(FnInfo(_,_,_,ret,args,_,cyc_varargs,_,_,_,_,_,_)):
+    // FIX: need to check requires and ensures clauses?
     bool b = check_public_type_list(ae, seen, obj, name, get_type2, args)
       && check_public_type(ae, seen, obj, name, ret);
     if (cyc_varargs != NULL) {

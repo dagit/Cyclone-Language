@@ -112,6 +112,7 @@ struct AnalEnv<`r::R> {
   list_t<place_t<`r,`r>,`r> param_roots;
   list_t<place_t<`r,`r>,`r> noconsume_params;
   Hashtable::table_t<stmt_t,flow_t<`r>@`r,`r> flow_table;
+  relns_t<`H> return_relns;  // ensures clause
 };
 typedef struct AnalEnv<`r> @`r analenv_t<`r>;
 
@@ -290,7 +291,7 @@ static exp_t strip_cast(exp_t e) {
   }
 }
 
-static void check_requires(seg_t loc, region_t<`r> r, type_t t, field_name_t f, flow_t<`r> inflow)
+static void check_union_requires(seg_t loc, region_t<`r> r, type_t t, field_name_t f, flow_t<`r> inflow)
 {
   switch (inflow) {
   case {.BottomFL = _}: return;
@@ -945,6 +946,53 @@ static bool is_local_var_rooted_path(Absyn::exp_t e, bool cast_ok) {
   }
 }
 
+static bool subst_param(list_t<exp_t> exps, Relations::reln_op_t@ rop) {
+  switch (*rop) {
+  case {.RParam = i}:
+    let e = List::nth(exps,i);
+    return exp2relnop(e, rop);
+  case {.RParamNumelts = i}:
+    let e = List::nth(exps,i);
+    return exp2relnop(prim1_exp(Numelts,e,0), rop);
+  default: return true;
+  }
+}
+
+static string_t subst_param_string(list_t<exp_t> exps, Relations::reln_op_t rop) {
+  switch (rop) {
+  case {.RParam = i}:
+    return exp2string(List::nth(exps,i));
+  case {.RParamNumelts = i}:
+    return exp2string(List::nth(exps,i));
+  default: return rop2string(rop);
+  }
+}
+
+static void check_fn_requires(analenv_t<`r> env, flow_t<`r> inflow,
+                              list_t<exp_t> exps, 
+                              Relations::relns_t<`H> req, seg_t loc) {
+  switch (inflow) {
+  case {.BottomFL = _}: return;
+  case {.ReachableFL = $(fd,relns)}:
+    for (; req != NULL; req = req->tl) {
+      let reln = req->hd;
+      reln_op_t rop1 = reln->rop1;
+      reln_op_t rop2 = reln->rop2;
+      let r = Relations::flip_relation(reln->relation);
+      if (!subst_param(exps,&rop1) || !subst_param(exps,&rop2) ||
+          Relations::consistent_relations(Relations::add_relation(env->r,rop2,r,rop1,relns))) {
+        string_t s1 = subst_param_string(exps,rop1);
+        string_t s2 = relation2string(reln->relation);
+        string_t s3 = subst_param_string(exps,rop2);
+        Tcutil::terr(loc, "cannot prove that @requires clause %s %s %s is satisfied\n (all I know is %s)",
+                     s1,s2,s3,relns2string(relns));
+        break;
+      }
+    }
+    break;
+  }
+}
+
 // Note: must deal with try-flow in all "base" cases!!!
 static $(flow_t<`r>,absRval_t<`r>)
 anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
@@ -1170,6 +1218,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 
   case &FnCall_e(e1,es,...):
     ANAL_RGN(env,temp) {
+      let orig_es = es;
       let $(fst_outflow,rvals) = anal_unordered_Rexps(temp,env,inflow,rnew(temp) List(e1,rcopy(temp,es)),false,true);
       // for strange reasons, use_Rval is fine for the function pointer:
       let outflow = use_Rval(env,e1->loc,fst_outflow,rvals->hd);
@@ -1178,10 +1227,14 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       list_t<int> init_params = NULL;
       list_t<int> nolive_unique_params = NULL;
       list_t<int> noconsume_params = NULL;
+      relns_t requires;
+      relns_t ensures;
       switch(Tcutil::compress((type_t)e1->topt)) {
       case &PointerType(PtrInfo(t,_,_)):
         switch(Tcutil::compress(t)) {
-        case &FnType(FnInfo(_,_,_,_,_,_,_,_,atts)):
+        case &FnType(FnInfo{.attributes = atts, .requires_relns = req, .ensures_relns = ens, ...}):
+          requires = req;
+          ensures = ens;
           for(; atts != NULL; atts = atts->tl)
 	    // These attributes are assumed to be disjoint
             switch(atts->hd) {
@@ -1257,6 +1310,9 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 	    outflow = restore_noconsume_arg(env,outflow,es->hd,es->hd->loc,rvals->hd);
 	}
       }
+      // check that the @requires relations are satisfied
+      check_fn_requires(env, outflow, orig_es, requires, e->loc);
+      // FIX: add in the @ensures information...
       // if the called function doesn't return, we get BottomFL out
       if (Tcutil::is_noreturn((type_t)e1->topt))
         return $(BottomFL(),typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
@@ -1392,7 +1448,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       return $(f,typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
     } 
     if (is_require_union_type(e1_type)) {
-      check_requires(e1->loc,fenv->r,e1_type,field,f);
+      check_union_requires(e1->loc,fenv->r,e1_type,field,f);
     }
     let $(r,_) = unname_rval(fenv->r,r);
     switch (r) {
@@ -1446,7 +1502,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 	return $(f2,typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
       }
       if (is_require_union_type(t2)) {
-        check_requires(e1->loc,fenv->r,t2,field,f1);
+        check_union_requires(e1->loc,fenv->r,t2,field,f1);
       }
       let $(r2,_) = unname_rval(fenv->r,r2);
       switch (r2) {
@@ -1561,7 +1617,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
               let e = (*des->hd)[1];
               f = use_Rval(env,e->loc,f,rvals->hd);
               // must check that the @requires clause is satisfied
-              check_requires(e->loc, fenv->r, exp_type, fld, f);
+              check_union_requires(e->loc, fenv->r, exp_type, fld, f);
             }
           }
       let res = rnew(env->r) Aggregate(UnionRInfo(kind == UnionA,field_no), aggrdict);
@@ -1789,7 +1845,7 @@ static $(flow_t<`r>,absLval_t<`r>)
     switch(Tcutil::compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo{t2,_,_}):
       if(!is_nontagged_nonrequire_union_type(t2)) {
-        check_requires(e1->loc,fenv->r,t2,f,inflow);
+        check_union_requires(e1->loc,fenv->r,t2,f,inflow);
 	flds = rnew(env->r) List(get_field_index(t2,f),flds);
       }
       break;
@@ -1881,7 +1937,7 @@ static $(flow_t<`r>,absLval_t<`r>)
   case &AggrMember_e(e1,fld,...):
     let e1_type = (type_t)e1->topt;
     if (is_require_union_type(e1_type)) {
-      check_requires(e1->loc,fenv->r,e1_type,fld,inflow);
+      check_union_requires(e1->loc,fenv->r,e1_type,fld,inflow);
     }
     if(is_nontagged_nonrequire_union_type(e1_type)) {
       return $(inflow,UnknownL());
@@ -2893,6 +2949,18 @@ static int hash_ptr(`a s) {
   return (int)s;
 }
 
+// plug in the vardecl for a given parameter
+static reln_op_t translate_rop(list_t<vardecl_t> vds, reln_op_t r) {
+  switch (r) {
+  case {.RParam = i}: 
+    let vd = List::nth(vds,i);
+    if (!vd->escapes)   // only get to use this fact if the parameter
+      return RVar(vd);  // doesn't have its address taken...
+    return r;
+  default: return r;
+  }
+}
+
 static void check_nested_fun(flow_env_t<`r> fenv,
                              flow_t<`r> inflow, fndecl_t fd) {
   //fprintf(stderr,"checking %s of type %s\n",*(*fd->name)[1],
@@ -2905,59 +2973,65 @@ static void check_nested_fun(flow_env_t<`r> fenv,
   DEBUG_PRINT("}\n");
   list_t<place_t,`r> param_roots = NULL; // only for "initializes"
   list_t<place_t,`r> noconsume_roots = NULL; // only for "noconsume"
-  switch(inflow) {
-  case {.BottomFL = _}: Tcutil::impos("check_fun");
-  case {.ReachableFL = $(d,relns)}:
-    // NOTE: for reasons Dan doesn't understand, the attributes, are not
-    // on the fndecl, only on the type.
-    _ atts;
-    switch(Tcutil::compress((type_t)fd->cached_typ)) {
-    case &FnType(FnInfo(_,_,_,_,_,_,_,_,as)): atts = as; break;
-    default: Tcutil::impos("check_fun: non-function type cached with fndecl_t");
-    }
-    // DAN: Sanity checking used to be split and duplicated with 
-    // Tc::fnTypeAttsOK.  Now everything is there where it belongs.
-    for(; atts != NULL; atts = atts->tl)
-      switch(atts->hd) {
-      case &Noliveunique_att(i):
-        exp_t bogus_exp = signed_int_exp(-1,0);
-        let vd = List::nth(fd->param_vardecls->v,i-1);
-        type_t t = Tcutil::compress(vd->type);
-        type_t elttype = Tcutil::pointer_elt_type(t);
-        let rval =
-          make_unique_consumed(fenv,elttype,bogus_exp,-1,
-                               typ_to_absrval(fenv,elttype,false,fenv->unknown_all));
-        let r = rnew(frgn) InitParam(i,t);
-        let rp = rnew(frgn) Place(r,NULL);
-        d = Dict::insert(d,r,rval);
-        d = Dict::insert(d,rnew(frgn) VarRoot(vd),rnew(frgn) AddressOf(rp));
-        break;
-      case &Initializes_att(i):
-	let vd = List::nth(fd->param_vardecls->v,i-1);
-        type_t elttype = Tcutil::pointer_elt_type(vd->type);
-	let r = rnew(frgn) InitParam(i,elttype);
-	let rp = rnew(frgn) Place(r,NULL);
-	d = Dict::insert(d,r,typ_to_absrval(fenv,elttype,false,fenv->esc_none));
-	d = Dict::insert(d,rnew(frgn) VarRoot(vd),rnew(frgn) AddressOf(rp));
-	param_roots = rnew(frgn) List(rp,param_roots);
-	break;
-      case &Noconsume_att(i):
-        let vd = List::nth(fd->param_vardecls->v,i-1);
-        if (Tcutil::is_noalias_pointer(vd->type,false)) {
-	  let root = rnew(frgn) VarRoot(vd);
-	  let rp = rnew(frgn) Place(root,NULL);
-	  noconsume_roots = rnew(frgn) List(rp,noconsume_roots);
-	}
-	break;
-      default: break;
-      }
-    inflow = ReachableFL(d,relns);
+  let $(d,relns) = inflow.ReachableFL;
+  // Enter the requires relations -- have to substitute the vardecls
+  // for the parameters in the relns
+  let vardecls = fd->param_vardecls->v;
+  for (let reqs = fd->requires_relns; reqs != NULL; reqs = reqs->tl) {
+    let req = reqs->hd;
+    relns = add_relation(frgn, translate_rop(vardecls,req->rop1),
+                         req->relation, translate_rop(vardecls,req->rop2),
+                         relns);
   }
+  // NOTE: for reasons Dan doesn't understand, the attributes, are not
+  // on the fndecl, only on the type.
+  _ atts;
+  switch(Tcutil::compress((type_t)fd->cached_typ)) {
+  case &FnType(FnInfo{.attributes = as,...}): atts = as; break;
+  default: Tcutil::impos("check_fun: non-function type cached with fndecl_t");
+  }
+  // DAN: Sanity checking used to be split and duplicated with 
+  // Tc::fnTypeAttsOK.  Now everything is there where it belongs.
+  for(; atts != NULL; atts = atts->tl)
+    switch(atts->hd) {
+    case &Noliveunique_att(i):
+      exp_t bogus_exp = signed_int_exp(-1,0);
+      let vd = List::nth(fd->param_vardecls->v,i-1);
+      type_t t = Tcutil::compress(vd->type);
+      type_t elttype = Tcutil::pointer_elt_type(t);
+      let rval =
+        make_unique_consumed(fenv,elttype,bogus_exp,-1,
+                             typ_to_absrval(fenv,elttype,false,fenv->unknown_all));
+      let r = rnew(frgn) InitParam(i,t);
+      let rp = rnew(frgn) Place(r,NULL);
+      d = Dict::insert(d,r,rval);
+      d = Dict::insert(d,rnew(frgn) VarRoot(vd),rnew(frgn) AddressOf(rp));
+      break;
+    case &Initializes_att(i):
+      let vd = List::nth(fd->param_vardecls->v,i-1);
+      type_t elttype = Tcutil::pointer_elt_type(vd->type);
+      let r = rnew(frgn) InitParam(i,elttype);
+      let rp = rnew(frgn) Place(r,NULL);
+      d = Dict::insert(d,r,typ_to_absrval(fenv,elttype,false,fenv->esc_none));
+      d = Dict::insert(d,rnew(frgn) VarRoot(vd),rnew(frgn) AddressOf(rp));
+      param_roots = rnew(frgn) List(rp,param_roots);
+      break;
+    case &Noconsume_att(i):
+      let vd = List::nth(fd->param_vardecls->v,i-1);
+      if (Tcutil::is_noalias_pointer(vd->type,false)) {
+        let root = rnew(frgn) VarRoot(vd);
+        let rp = rnew(frgn) Place(root,NULL);
+        noconsume_roots = rnew(frgn) List(rp,noconsume_roots);
+      }
+      break;
+    default: break;
+    }
+  inflow = ReachableFL(d,relns);
 
   bool      noreturn = Tcutil::is_noreturn(Tcutil::fndecl2typ(fd));
   Hashtable::table_t<stmt_t,flow_t@`r,`r> flow_table =
     Hashtable::rcreate(frgn, 33, Core::ptrcmp, hash_ptr);
-  analenv_t env = rnew(frgn) AnalEnv(frgn,fenv,true,0,false,inflow,NULL,noreturn,fd->ret_type,NULL,param_roots,noconsume_roots,flow_table);
+  analenv_t env = rnew(frgn) AnalEnv(frgn,fenv,true,0,false,inflow,NULL,noreturn,fd->ret_type,NULL,param_roots,noconsume_roots,flow_table,fd->ensures_relns);
   flow_t    outflow  = inflow;
   while(env->iterate_again && !anal_error) {
     ++(env->iteration_num);

@@ -72,6 +72,12 @@
 #include <list.h>
 #include <position.h>
 
+namespace Relations {
+  struct Reln; // see relations.h
+  typedef struct Reln@`r reln_t<`r>;
+  typedef List::list_t<reln_t<`r>,`r> relns_t<`r>;
+}
+
 namespace Absyn {
   using Core;
   using List;
@@ -307,6 +313,12 @@ namespace Absyn {
     // and at most one of cdecl, stdcall, and fastcall.  See gcc info
     // for documentation on attributes.
     attributes_t                             attributes; 
+    // pre-condition to call function
+    exp_opt_t                                requires_clause;
+    Relations::relns_t                       requires_relns;
+    // post-condition on return from function
+    exp_opt_t                                ensures_clause;
+    Relations::relns_t                       ensures_relns;
   };
 
   // information for datatypes
@@ -439,7 +451,9 @@ namespace Absyn {
               bool,                                    // true ==> c_varargs
               vararg_info_t *,                         // cyc_varargs
               type_opt_t,                              // effect
-              list_t<$(type_t,type_t)@>);              // region partial order
+              list_t<$(type_t,type_t)@>,               // region partial order
+              exp_opt_t,                               // requires clause
+              exp_opt_t);                              // ensures clause
   };
   typedef datatype Funcparams @`r funcparams_t<`r>;
 
@@ -792,6 +806,12 @@ namespace Absyn {
     struct Vardecl            *fn_vardecl; // used only for inner functions
     // any attributes except aligned or packed
     attributes_t               attributes; 
+    // pre-condition to call function
+    exp_opt_t                  requires_clause;
+    Relations::relns_t         requires_relns;
+    // post-condition on return from function
+    exp_opt_t                  ensures_clause;
+    Relations::relns_t         ensures_relns;
   };
 
   EXTERN_ABSYN struct Aggrfield {
@@ -1136,7 +1156,9 @@ namespace Absyn {
                              list_t<$(var_opt_t,tqual_t,type_t)@`H,`H> args,
                              bool c_varargs, vararg_info_t *`H cyc_varargs,
                              list_t<$(type_t,type_t)@`H,`H> rgn_po,
-                             attributes_t atts);
+                             attributes_t atts, 
+                             exp_opt_t requires_clause,
+                             exp_opt_t ensures_clause);
   // turn t f(t1,...,tn) into t (@f)(t1,...,tn) -- when fresh_evar is
   // true, generates a fresh evar for the region of f else plugs in the
   // heap.

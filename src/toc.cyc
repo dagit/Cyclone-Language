@@ -869,7 +869,7 @@ static type_t typ_to_c(type_t t) {
   case &FloatType(_): return t;
   case &ArrayType(ArrayInfo{t2,tq,e,_,ztl}):
     return array_typ(typ_to_c(t2),tq,e,false_conref,ztl);
-  case &FnType(FnInfo{_,_,tq2,t2,args,c_vararg,cyc_vararg,_,atts}):
+  case &FnType(FnInfo{_,_,tq2,t2,args,c_vararg,cyc_vararg,_,atts,_,_,_,_}):
     // just drop the type arguments & effect and translate the nested types
     // also, drop any format descriptors
     // FIX:  problem with higher-order functions?  Again C's rules are strange.
@@ -893,7 +893,7 @@ static type_t typ_to_c(type_t t) {
       new_args = List::imp_append(new_args,new List(vararg,NULL));
     }
     return new FnType(FnInfo{NULL,NULL,tq2,typ_to_c(t2),new_args,
-                               c_vararg,NULL,NULL,new_atts});
+                               c_vararg,NULL,NULL,new_atts,NULL,NULL,NULL,NULL});
   case &TupleType(tqs):
     // $(t1,...,tn) maps to struct tuple_type_n where we define
     // struct tuple_type_n { t1 f1; ...; tn fn; };
@@ -4587,6 +4587,8 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
   f->tvs      = NULL;
   f->effect   = NULL;
   f->rgn_po   = NULL;
+  f->requires_clause = NULL;
+  f->ensures_clause  = NULL;
   f->ret_type = typ_to_c(f->ret_type);
   region frgn; {
     let nv = share_env(frgn,nv);

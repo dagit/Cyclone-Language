@@ -21,6 +21,7 @@
 #include "pratt.h"
 #include "absynpp.h"
 #include "evexp.h"
+#include <string.h>
 
 //#define RELATIONS_DEBUG
 
@@ -36,8 +37,17 @@ reln_op_t RVar(Absyn::vardecl_t v) {
 reln_op_t RNumelts(Absyn::vardecl_t v) {
   return RelnOp{.RNumelts = v};
 }
-reln_op_t RTvar(Absyn::tvar_t tv) {
-  return RelnOp{.RTvar = tv};
+reln_op_t RType(Absyn::type_t t) {
+  return RelnOp{.RType = Tcutil::compress(t)};
+}
+reln_op_t RParam(unsigned int i) {
+  return RelnOp{.RParam = i};
+}
+reln_op_t RParamNumelts(unsigned int i) {
+  return RelnOp{.RParamNumelts = i};
+}
+reln_op_t RReturn() {
+  return RelnOp{.RReturn = 0};
 }
 
 static bool same_relop(reln_op_t r1,reln_op_t r2) {
@@ -45,8 +55,10 @@ static bool same_relop(reln_op_t r1,reln_op_t r2) {
   case $({.RConst = c1},   {.RConst = c2})   : return c1 == c2;
   case $({.RVar = x1},     {.RVar = x2}): return x1 == x2;
   case $({.RNumelts = x1}, {.RNumelts = x2}) : return x1 == x2;
-  case $({.RTvar = tv1},   {.RTvar = tv2}) : 
-    return Absyn::tvar_cmp(tv1,tv2) == 0;
+  case $({.RType = t1},    {.RType = t2}) : return Tcutil::unify(t1,t2);
+  case $({.RParam = i},    {.RParam = j}): return i == j;
+  case $({.RParamNumelts = i}, {.RParamNumelts = j}): return i == j;
+  case $({.RReturn = _},   {.RReturn = _}): return true;
   default: return false;
   }
 }
@@ -112,7 +124,10 @@ static bool rop_contains_var(reln_op_t r, Absyn::vardecl_t v) {
   switch (r) {
   case {.RVar = v2}:      return v == v2;
   case {.RNumelts = v2}:  return v == v2;
-  case {.RTvar = _}:
+  case {.RType = _}:
+  case {.RParam = _}:
+  case {.RParamNumelts = _}:
+  case {.RReturn = _}:
   case {.RConst = _}:     return false;
   }
 }
@@ -144,13 +159,11 @@ relns_t<`r> reln_kill_var(region_t<`r> rgn, relns_t<`r> rs, Absyn::vardecl_t v) 
 bool exp2relnop(Absyn::exp_t e, reln_op_t @p) {
   // if the expression has a singleton type, then that's what we track
   // FIX: some constants were showing up here without types!
+ RETRY:
   if (e->topt != NULL) {
     switch (Tcutil::compress((Absyn::type_t)e->topt)) {
     case &Absyn::TagType(t):
-      switch (Tcutil::compress(t)) {
-      case &Absyn::VarType(i): *p = RTvar(i); return true;
-      default: break;
-      }
+      *p = RType(t); return true;
       break;
     case &Absyn::ValueofType(type_exp): 
       e = type_exp; 
@@ -177,9 +190,16 @@ bool exp2relnop(Absyn::exp_t e, reln_op_t @p) {
       return true;
     }
     break;
-  case &Absyn::Valueof_e(&Absyn::VarType(i)):
-    *p = RTvar(i);
-    return true;
+  case &Absyn::Valueof_e(t):
+    switch (Tcutil::compress(t)) {
+    case &Absyn::ValueofType(type_exp):
+      e = type_exp;
+      goto RETRY;
+    default:
+      *p = RType(t);
+      return true;
+    }
+    break;
   default: break;
   }
   // try to reduce the expression to a constant
@@ -282,12 +302,15 @@ static Pratt::node_t rop2node(reln_op_t r) {
   switch (r) {
   case {.RVar = x}: return Pratt::NVar(x);
   case {.RNumelts = x}: return Pratt::NNumelts(x);
-  case {.RTvar = x}: return Pratt::NTvar(x);
+  case {.RType = x}: return Pratt::NType(x);
+  case {.RParam = i}: return Pratt::NParam(i);
+  case {.RParamNumelts = i}: return Pratt::NParamNumelts(i);
+  case {.RReturn = _}: return Pratt::NReturn();
   default: Tcutil::impos("rop2node");
   }
 }
 
-static string_t relation2string(relation_t r) {
+string_t relation2string(relation_t r) {
   switch (r) {
   case Req: return "==";
   case Rneq: return "!=";
@@ -296,18 +319,31 @@ static string_t relation2string(relation_t r) {
   }
 }
 
-static string_t rop2string(reln_op_t r) {
+string_t rop2string(reln_op_t r) {
   switch (r) {
   case {.RConst = c}: return aprintf("%d",c); 
   case {.RVar = vd}: return aprintf("%s",Absynpp::qvar2string(vd->name));
-  case {.RTvar = tv}: return Absynpp::tvar2string(tv);
+  case {.RType = t}: return Absynpp::typ2string(t);
   case {.RNumelts = vd}:  return aprintf("numelts(%s)",Absynpp::qvar2string(vd->name));
+  case {.RParam = i}: return aprintf("param(%d)",i);
+  case {.RParamNumelts = i}: return aprintf("numelts(param(%d))",i);
+  case {.RReturn = _}: return aprintf("return_value");
   }
 }
 
-static string_t reln2string(reln_t r) {
+string_t reln2string(reln_t r) {
   return aprintf("%s %s %s",rop2string(r->rop1),relation2string(r->relation),
                  rop2string(r->rop2));
+}
+
+string_t relns2string(relns_t rs) {
+  if (rs == NULL) return "true";
+  list_t<stringptr_t> ss = NULL;
+  for (; rs != NULL; rs = rs->tl) {
+    ss = new List{new reln2string(rs->hd),ss};
+    if (rs->tl != NULL) ss = new List{new " && ",ss};
+  }
+  return strconcat_l(ss);
 }
 
 void print_relns(FILE@f, relns_t r) {
@@ -315,6 +351,36 @@ void print_relns(FILE@f, relns_t r) {
     fprintf(f,"%s",reln2string(r->hd));
     if (r->tl != NULL) fprintf(f,",");
   }
+}
+
+static reln_op_t reduce_relnop(reln_op_t rop) {
+  switch (rop) {
+  case {.RType = t}:
+    switch (Tcutil::compress(t)) {
+    case &Absyn::ValueofType(e):
+      reln_op_t rop2 = rop;
+      if (exp2relnop(e,&rop2)) return rop2;
+      break;
+    default: break;
+    }
+    break;
+  case {.RNumelts = v}:
+    switch (Tcutil::compress(v->type)) {
+    case &Absyn::PointerType(Absyn::PtrInfo{_,_,Absyn::PtrAtts{.bounds = b,...}}):
+      switch (Absyn::conref_def((Absyn::bounds_t)&Absyn::DynEither_b_val,b)) {
+      case &Absyn::Upper_b(e):
+        reln_op_t rop2 = rop;
+        if (exp2relnop(e,&rop2)) return rop2;
+        break;
+      default: break;
+      }
+      break;
+    default: break;
+    }
+    break;
+  default: break;
+  }
+  return rop;
 }
 
 // add all of the relations to the graph G and return true iff 
@@ -326,7 +392,10 @@ static bool consist_relations(Pratt::graph_t *G, relns_t rlns) {
     Pratt::print_graph(G);
     fprintf(stderr,"\n");
 #endif
-    switch (rlns->hd) {
+    let reln = rlns->hd;
+    reln->rop1 = reduce_relnop(reln->rop1);
+    reln->rop2 = reduce_relnop(reln->rop2);
+    switch (reln) {
     case &Reln({.RConst = i},reln,{.RConst = j}):
       switch (reln) {
       case Req: if (i != j) return false; break;

@@ -212,7 +212,9 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
   case &Valueof_e(t):
     // special case to reduce valueof(valueof_t<e>) to e
     switch (compress(t)) {
-    case &ValueofType(e2): return eval_const_exp(e2);
+    case &ValueofType(e2): 
+      e->r = e2->r;
+      return eval_const_exp(e2);
     default: break;
     }
     fallthru;

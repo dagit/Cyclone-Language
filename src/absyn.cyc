@@ -878,7 +878,7 @@ type_t function_typ(list_t<tvar_t,`H> tvs, type_opt_t eff_typ,
                     list_t<$(var_opt_t,tqual_t,type_t)@`H,`H> args, 
                     bool c_varargs, vararg_info_t *`H cyc_varargs,
                     list_t<$(type_t,type_t)@`H,`H> rgn_po,
-                    attributes_t atts) {
+                    attributes_t atts, exp_opt_t req, exp_opt_t ens) {
   List::iter(expand_arg,args);
   return new FnType(FnInfo{.tvars = tvs, 
                               .ret_tqual = ret_tqual,
@@ -888,7 +888,11 @@ type_t function_typ(list_t<tvar_t,`H> tvs, type_opt_t eff_typ,
                               .c_varargs = c_varargs, 
                               .cyc_varargs = cyc_varargs,
                               .rgn_po = rgn_po,
-                              .attributes=atts});
+                              .attributes=atts,
+                              .requires_clause = req,
+                              .requires_relns = NULL,
+                              .ensures_clause = ens,
+                              .ensures_relns = NULL});
 }
 // MWH: use RgnKind here rather than TopRgnKind for fresh evars;
 //   function pointers can't be unique at the moment

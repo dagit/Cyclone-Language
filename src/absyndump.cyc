@@ -589,7 +589,8 @@ void dump_rgnpo(list_t<$(type_t,type_t)@> rgn_po) {
 }
 void dumpfunargs(list_t<$(var_opt_t,tqual_t,type_t)@> args, bool c_varargs, 
                  vararg_info_t *cyc_varargs, type_opt_t effopt,
-                 list_t<$(type_t,type_t)@> rgn_po) {
+                 list_t<$(type_t,type_t)@> rgn_po,
+                 exp_opt_t req, exp_opt_t ens) {
   dump_char('(');
   for (; args != NULL; args = args->tl) {
     dumpfunarg(args->hd);
@@ -612,6 +613,16 @@ void dumpfunargs(list_t<$(var_opt_t,tqual_t,type_t)@> args, bool c_varargs,
     dump_rgnpo(rgn_po);
   }
   dump_char(')');
+  if (req != NULL) {
+    dump(" @requires(");
+    dumpexp(req);
+    dump_char(')');
+  }
+  if (ens != NULL) {
+    dump(" @ensures(");
+    dumpexp(ens);
+    dump_char(')');
+  }
 }
 
 void dumptyp(type_t t) {
@@ -1287,7 +1298,9 @@ void dumpdecl(decl_t d) {
                                  fd->ret_type,
                                  List::map(Absynpp::arg_mk_opt,fd->args), 
                                  fd->c_varargs, fd->cyc_varargs,
-                                 fd->rgn_po, NULL});
+                                 fd->rgn_po, NULL, fd->requires_clause,
+                                 fd->requires_relns,
+                                 fd->ensures_clause,fd->ensures_relns});
     switch(c_compiler){
     case Gcc_c:
       dumptqtd(empty_tqual(0), t, dump_atts_qvar,fd);
@@ -1453,8 +1466,8 @@ void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms, void f(`a), `a a) {
       dump_char('['); dumpexp(e); dump_char(']'); 
       if (conref_def(false,zeroterm)) dump("@zeroterm");
       break;
-    case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,rgn_po)):
-      dumpfunargs(args,c_varargs,cyc_varargs,effopt,rgn_po); break;
+    case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,rgn_po,req,ens)):
+      dumpfunargs(args,c_varargs,cyc_varargs,effopt,rgn_po,req,ens); break;
     case &Function_mod(&NoTypes(sl,loc)):
       group(dump_str,sl,"(",")",","); break;
     case &TypeParams_mod(ts,loc,print_kinds): 
@@ -1503,7 +1516,9 @@ static void dump_decl_interface(decl_t d) {
                                  fd->ret_type, 
                                  List::map(Absynpp::arg_mk_opt,fd->args),
                                  fd->c_varargs, fd->cyc_varargs, 
-                                 fd->rgn_po, NULL});
+                                 fd->rgn_po, NULL, fd->requires_clause,
+                                 fd->requires_relns,
+                                 fd->ensures_clause, fd->ensures_relns});
     dumptqtd(empty_tqual(0), t, dump_atts_qvar, fd);
     dump(";\n");
     break;

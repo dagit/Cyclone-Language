@@ -469,7 +469,7 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
       switch(conref_constr((bounds_t)&DynEither_b_val,b)) {
       case &DynEither_b: break;
       case &Upper_b(e):
-        if (!Evexp::c_can_eval(e))
+        if (!Evexp::c_can_eval(e) && !allow_valueof)
           terr(loc,"cannot apply numelts to a pointer with abstract bounds");
         break;
       }
@@ -1048,7 +1048,8 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
       check_nonzero_bound(loc,b);
       switch (compress(t1)) {
       case &FnType(FnInfo{tvars,eff,res_tq,res_typ,args_info,c_vararg,
-                            cyc_vararg,rgn_po,atts}):
+                            cyc_vararg,rgn_po,atts,req,req_relns,ens,
+                            ens_relns}):
 	if(tvars != NULL || rgn_po != NULL)
 	  terr(e->loc,"function should have been instantiated prior to use -- probably a compiler bug");
 	// unify the result type with the expected type to get better
@@ -1243,7 +1244,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
   switch (t1) {
   case &PointerType(PtrInfo(t0,tq,PtrAtts(rt,x,b,zt,_))):
     switch (compress(t0)) {
-    case &FnType(FnInfo{tvars,eff,rtq,rtyp,args,c_varargs,cyc_varargs,rpo,atts}):
+    case &FnType(FnInfo{tvars,eff,rtq,rtyp,args,c_varargs,cyc_varargs,rpo,atts,req,req_relns,ens,ens_relns}):
       TEMP_RGN(te, temp) {
         list_t<$(tvar_t,type_t)@> instantiation = NULL;
         // now allows partial instantiation
@@ -1268,7 +1269,8 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
 	type_t new_fn_typ =
           rsubstitute(temp,instantiation,
                       new FnType(FnInfo{tvars,eff,rtq,rtyp,args,c_varargs,
-                                        cyc_varargs,rpo,atts}));
+                                        cyc_varargs,rpo,atts,req,
+                                        req_relns,ens,ens_relns}));
 	return new PointerType(PtrInfo(new_fn_typ,tq,PtrAtts(rt,x,b,zt,NULL)));
       }
     default: break;
@@ -2751,7 +2753,7 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
     switch (compress((type_t)e->topt)) {
     case &PointerType(PtrInfo(t,tq,PtrAtts(rt,x,b,zt,_))):
       switch (compress(t)) {
-      case &FnType(FnInfo{tvs,eff,rtq,rtyp,args,c_varargs,cyc_varargs,rpo,atts}):
+      case &FnType(FnInfo{tvs,eff,rtq,rtyp,args,c_varargs,cyc_varargs,rpo,atts,req,req_relns,ens,ens_relns}):
 	if (tvs != NULL) {    // then, instantiate if necessary
 	  TEMP_RGN(te, rgn) {
            let env = $(lookup_type_vars(te),rgn);
@@ -2766,7 +2768,8 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
 	   type_t ftyp = rsubstitute(rgn, inst,
 				     new FnType(FnInfo{NULL,eff,rtq,rtyp,args,
 						       c_varargs,cyc_varargs,
-                                                       NULL,atts}));
+                                                       NULL,atts,req,req_relns,
+                                                       ens,ens_relns}));
 	   let new_typ = new PointerType(PtrInfo(ftyp,tq,PtrAtts(rt,x,b,zt,NULL)));
            // JGM: no need to put explicit instantiation in.
 	   let inner   = copy_exp(e);

@@ -560,6 +560,7 @@ list_t<Absyn::decl_t> do_parse(FILE @ f, list_t<Absyn::decl_t> ignore) {
     ans = Parse::parse_file(f);
   } catch {
   case &Position::Exit: compile_failure = true; break;
+  case e: rethrow(e);
   }
   Lex::lex_init(true); // garbage collect those big tries
   return ans;
