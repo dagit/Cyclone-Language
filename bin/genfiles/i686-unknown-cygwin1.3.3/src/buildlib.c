@@ -675,7 +675,7 @@ struct _tagged_arr Cyc_current_header=(struct _tagged_arr){(void*)0,(void*)0,(vo
 1,6,- 1,5,1,0,- 1,0,1,- 1,14,15,- 1,15,15,15,15,15,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
 - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
 - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,13,
-14,2,4,4,- 1,1,1,0,2,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,2,2,8,3,5,- 1,6,5,6,5,2,8,3,5,- 1,6,5,-
+14,2,4,4,- 1,0,0,0,2,0,- 1,- 1,- 1,- 1,- 1,- 1,- 1,2,2,8,3,5,- 1,6,5,6,5,2,8,3,5,- 1,6,5,-
 1,29,29,29,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
 - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
 - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
@@ -795,14 +795,14 @@ int[503]){- 1,- 1,- 1,403,392,154,23,36,23,19,- 1,- 1,12,31,46,31,36,23,19,0,- 1
 113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,
 113,113,113,113,113,113,0,0,0,0,113,0,113,113,113,113,113,113,113,113,113,113,
 113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,124,124,124,124,
-124,124,124,124,124,124,124,124,21,0,0,0,0,0,0,124,124,124,124,124,124,124,124,
+124,124,124,124,124,124,124,124,22,0,0,0,0,0,0,124,124,124,124,124,124,124,124,
 124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,0,0,0,0,
 124,0,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,
 124,124,124,124,124,124,124,124,124,125,124,124,124,124,124,124,124,124,124,124,
-21,0,0,0,0,0,0,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,
+22,0,0,0,0,0,0,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,
 124,124,124,124,124,124,124,124,124,124,0,0,0,0,124,0,124,124,124,124,124,124,
 124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,
-124,124,124,124,124,124,124,124,124,124,124,124,21,0,0,0,0,- 1,0,124,124,124,124,
+124,124,124,124,124,124,124,124,124,124,124,124,22,0,0,0,0,- 1,0,124,124,124,124,
 124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,124,
 124,124,- 1,- 1,0,- 1,124,0,124,124,124,124,124,124,124,124,124,124,124,124,124,124,
 124,124,124,124,124,124,124,124,124,124,124,124,0,0,0,0,125,125,125,125,125,125,
@@ -1331,22 +1331,23 @@ _tag_arr("some action didn't return!",sizeof(char),27);_tmp66;});_tmp65;}));}int
 Cyc_suck_restofline(struct Cyc_Lexing_lexbuf*lexbuf){return Cyc_suck_restofline_rec(
 lexbuf,12);}struct _tuple12*Cyc_spec_rec(struct Cyc_Lexing_lexbuf*lexbuf,int
 lexstate){lexstate=Cyc_lex_engine(lexstate,lexbuf);switch(lexstate){case 0: _LL9C:
-Cyc_current_header=(struct _tagged_arr)Cyc_Std_substring((struct _tagged_arr)Cyc_Lexing_lexeme(
-lexbuf),0,(unsigned int)((Cyc_Lexing_lexeme_end(lexbuf)- Cyc_Lexing_lexeme_start(
-lexbuf))- 1));Cyc_current_symbols=0;Cyc_current_omit_symbols=0;Cyc_current_cstubs=
-0;Cyc_current_cycstubs=0;Cyc_current_prologue=0;Cyc_current_epilogue=0;while(Cyc_commands(
-lexbuf)){;}Cyc_current_prologue=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))
-Cyc_List_imp_rev)(Cyc_current_prologue);Cyc_current_epilogue=((struct Cyc_List_List*(*)(
-struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_current_epilogue);Cyc_current_cstubs=((
-struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_current_cstubs);
-Cyc_current_cycstubs=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(
-Cyc_current_cycstubs);return({struct _tuple12*_tmp67=_cycalloc(sizeof(*_tmp67));
-_tmp67->f1=Cyc_current_header;_tmp67->f2=Cyc_current_symbols;_tmp67->f3=Cyc_current_omit_symbols;
-_tmp67->f4=Cyc_current_prologue;_tmp67->f5=Cyc_current_epilogue;_tmp67->f6=Cyc_current_cstubs;
-_tmp67->f7=Cyc_current_cycstubs;_tmp67;});case 1: _LL9D: return Cyc_spec(lexbuf);
-case 2: _LL9E: return Cyc_spec(lexbuf);case 3: _LL9F: return 0;case 4: _LLA0:({struct Cyc_Std_Int_pa_struct
-_tmp69;_tmp69.tag=1;_tmp69.f1=(int)((unsigned int)((int)Cyc_Lexing_lexeme_char(
-lexbuf,0)));{void*_tmp68[1]={& _tmp69};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("Error in .cys file: expected header file name, found '%c' instead\n",
+return Cyc_spec(lexbuf);case 1: _LL9D: Cyc_current_header=(struct _tagged_arr)Cyc_Std_substring((
+struct _tagged_arr)Cyc_Lexing_lexeme(lexbuf),0,(unsigned int)((Cyc_Lexing_lexeme_end(
+lexbuf)- Cyc_Lexing_lexeme_start(lexbuf))- 1));Cyc_current_symbols=0;Cyc_current_omit_symbols=
+0;Cyc_current_cstubs=0;Cyc_current_cycstubs=0;Cyc_current_prologue=0;Cyc_current_epilogue=
+0;while(Cyc_commands(lexbuf)){;}Cyc_current_prologue=((struct Cyc_List_List*(*)(
+struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_current_prologue);Cyc_current_epilogue=((
+struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_current_epilogue);
+Cyc_current_cstubs=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(
+Cyc_current_cstubs);Cyc_current_cycstubs=((struct Cyc_List_List*(*)(struct Cyc_List_List*
+x))Cyc_List_imp_rev)(Cyc_current_cycstubs);return({struct _tuple12*_tmp67=
+_cycalloc(sizeof(*_tmp67));_tmp67->f1=Cyc_current_header;_tmp67->f2=Cyc_current_symbols;
+_tmp67->f3=Cyc_current_omit_symbols;_tmp67->f4=Cyc_current_prologue;_tmp67->f5=
+Cyc_current_epilogue;_tmp67->f6=Cyc_current_cstubs;_tmp67->f7=Cyc_current_cycstubs;
+_tmp67;});case 2: _LL9E: return Cyc_spec(lexbuf);case 3: _LL9F: return 0;case 4: _LLA0:({
+struct Cyc_Std_Int_pa_struct _tmp69;_tmp69.tag=1;_tmp69.f1=(int)((unsigned int)((
+int)Cyc_Lexing_lexeme_char(lexbuf,0)));{void*_tmp68[1]={& _tmp69};Cyc_Std_fprintf(
+Cyc_Std_stderr,_tag_arr("Error in .cys file: expected header file name, found '%c' instead\n",
 sizeof(char),67),_tag_arr(_tmp68,sizeof(void*),1));}});return 0;default: _LLA1:(
 lexbuf->refill_buff)(lexbuf);return Cyc_spec_rec(lexbuf,lexstate);}(int)_throw((
 void*)({struct Cyc_Lexing_Error_struct*_tmp6A=_cycalloc(sizeof(*_tmp6A));_tmp6A[0]=({

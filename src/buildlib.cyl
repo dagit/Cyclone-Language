@@ -578,7 +578,9 @@ and suck_restofline = parse
 /* Rules to read in header spec files                                 */
 /**********************************************************************/
 and spec "spec_t" = parse
-  ['A'-'Z''a'-'z''0'-'9''_''.''/']+ ':'
+  "//" [^'\n''\r']*
+{ return spec(lexbuf); }
+| ['A'-'Z''a'-'z''0'-'9''_''.''/']+ ':'
 { current_header =
   (string_t)substring(lexeme(lexbuf), 0,
                       lexeme_end(lexbuf)-lexeme_start(lexbuf)-1);
@@ -601,8 +603,6 @@ and spec "spec_t" = parse
                current_cstubs,
                current_cycstubs);
 }
-| "//" [^'\n''\r']*
-{ return spec(lexbuf); }
 | ws+
 { return spec(lexbuf); }
 | eof

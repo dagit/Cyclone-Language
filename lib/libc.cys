@@ -935,8 +935,8 @@ glob.h:
 
 // This may need to be written entirely in Cyclone, since it manipulates
 // arrays of paths
-grp.h:
-;
+// grp.h:
+// ;
 
 // Not supported yet
 inttypes.h:
@@ -1936,8 +1936,8 @@ pthread.h:
 
 // Defines a structure containing a char *
 // Not supported yet
-pwd.h:
-;
+// pwd.h:
+// ;
 
 // Our parser dies on it in Linux
 // Uses strings extensively, probably best to rewrite in Cyclone
