@@ -473,6 +473,8 @@ static absRval_t<`r> insert_place_inner(region_t<`r> r, absRval_t<`r> new_val,
     // we eliminate the distinction as to which field was last
     // written since we're changing the values of things
     return rnew(r) Aggregate(UnionRInfo(is_union,-1),d2);
+  case &Consumed(e,i,rval):
+    return rnew(r) Consumed(e,i,insert_place_inner(r,new_val,rval));
   default: return new_val;
   }
 }
@@ -656,11 +658,15 @@ flowdict_t<`r> escape_deref(flow_env_t<`r> fenv, flowdict_t<`r> d, place_set_t<`
   }
 }
 
-static struct AssignEnv<`r::R,`r2::R> {
+static struct AssignEnv<`r::R,`r2::R,`r3::R> {
   flow_env_t<`r2>   fenv;
   escpile_t<`r2,`r2,`r,`r> pile;
+  
   flowdict_t<`r2>   d;
   Position::seg_t  loc;
+
+  place_t<`r,`r> root_place;
+  place_set_t<`r> *`r3 all_changed;
 };
 static absRval_t<`r2> assign_place_inner(struct AssignEnv<`r,`r2> @ env, 
                                          absRval_t<`r2> oldval, 
@@ -709,17 +715,54 @@ static absRval_t<`r2> assign_place_inner(struct AssignEnv<`r,`r2> @ env,
   default: return newval;
   }
 }
+// returns the first [n] entries of the given list as a new list in
+//   region r.  If the length of [l] is less than [n], will return
+//   all of [l].  Pass this to List::rfilter_c.
+static bool nprefix(int @n, `a unused) {
+  if (*n > 0) { *n = *n - 1; return true; }
+  else return false;
+}
 static absRval_t<`r2> assign_place_outer(struct AssignEnv<`r,`r2> @ env, 
                                          list_t<int> fs,
+					 int fs_prefix,
                                          absRval_t<`r2> oldval, 
                                          absRval_t<`r2> newval) {
   if(fs == NULL) return assign_place_inner(env,oldval,newval);
   switch($(fs,oldval)) {
   case $(&List(hd,tl),&Aggregate(UnionRInfo(is_union,fldnum),d)):
-    let new_child = assign_place_outer(env,tl,d[hd],newval);
+    let new_child = assign_place_outer(env,tl,fs_prefix+1,
+				       d[hd],newval);
     let new_child_agg = aggr_dict_insert(env->fenv->r, d, hd, new_child);
     if (new_child_agg == d && (!is_union || fldnum == hd)) return oldval;
-    return rnew(env->fenv->r) Aggregate(UnionRInfo(is_union,hd),new_child_agg);
+    d = new_child_agg;
+    // if this is a union, we want to initialize all of the other
+    // fields of the aggregate, so that joins work out later
+    if (is_union) {
+      bool changed = false;
+      int sz = numelts(d);
+      for (int i = 0; i<sz; i++) {
+	if (i != hd) {
+	  let new_d =
+	    aggr_dict_insert(env->fenv->r, d, i,
+			     insert_place_inner(env->fenv->r,
+						env->fenv->unknown_all,
+						d[i]));
+	  if (new_d != d) {
+	    d = new_d;
+	    changed = true;
+	  }
+	}
+      }
+      // if in updating the initialization of the other fields the
+      // dictionary was changed, we have to update the place set
+      if (changed) {
+	let &Place{root,fs} = env->root_place;
+	let new_fs = List::rfilter_c(env->pile->rgn,nprefix,new fs_prefix,fs);
+	let curr_place = rnew (env->pile->rgn) Place(root,new_fs);
+	update_place_set(env->all_changed,curr_place,NULL);
+      }
+    }
+    return rnew(env->fenv->r) Aggregate(UnionRInfo(is_union,hd),d);
   default: throw new Core::Impossible("bad assign place");
   }
 }
@@ -731,8 +774,11 @@ flowdict_t<`r> assign_place(flow_env_t<`r> fenv,
   update_place_set(all_changed,place,NULL);
   ANAL_RGN(fenv, rgn) {
     let &Place{root,fs} = place;
-    struct AssignEnv/*<`rgn>*/ env = AssignEnv(fenv, rnew(rgn) EscPile(rgn,NULL), d, loc);
-    absRval_t newval= assign_place_outer(&env,fs,Dict::lookup(d,root),r);
+    struct AssignEnv/*<`rgn>*/ env = AssignEnv(fenv, rnew(rgn) EscPile(rgn,NULL), d, loc, place, all_changed);
+    absRval_t newval= assign_place_outer(&env,fs,0,Dict::lookup(d,root),r);
+    // XXX here, we have to grab the places that were changed, and add
+    // them to all_changed.  Don't think we have to worry about
+    // escaping here.
     return escape_these(fenv, env.pile, all_changed, Dict::insert(d, root, newval));
   }
 }
