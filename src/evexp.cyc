@@ -171,10 +171,7 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
       eval_const_exp(e3);
       return $(new Int_c(Signed,0),false);
     }
-    if(bool1) // FIX CONTROL-FLOW BUG PREVENTING ?:
-      ans = eval_const_exp(e2);
-    else 
-      ans = eval_const_exp(e3);
+    ans = bool1 ? eval_const_exp(e2) : eval_const_exp(e3);
     break;
   case &Primop_e(p,es):
     if (es == NULL) {

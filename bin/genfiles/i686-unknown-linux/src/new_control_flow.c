@@ -1033,7 +1033,8 @@ _tmp157=_tmp155.f2;{void*_tmp159;void*_tmp15A;struct _tuple0 _tmp158=Cyc_NewCont
 env,_tmp154,_tmpB4);_tmp159=_tmp158.f1;_tmp15A=_tmp158.f2;return({struct _tuple0
 _tmp15B;_tmp15B.f1=Cyc_CfFlowInfo_join_flow(env->all_changed,Cyc_NewControlFlow_use_Rval(
 env,_tmpB3->loc,_tmp156,_tmp157),Cyc_NewControlFlow_use_Rval(env,_tmpB4->loc,
-_tmp159,_tmp15A));_tmp15B.f2=Cyc_CfFlowInfo_unknown_all;_tmp15B;});}}}_LLA9: if(*((
+_tmp159,_tmp15A));_tmp15B.f2=Cyc_CfFlowInfo_typ_to_absrval((void*)((struct Cyc_Core_Opt*)
+_check_null(e->topt))->v,Cyc_CfFlowInfo_unknown_all);_tmp15B;});}}}_LLA9: if(*((
 int*)_tmp83)!= 23)goto _LLAB;_tmpB5=((struct Cyc_Absyn_Subscript_e_struct*)_tmp83)->f1;
 _tmpB6=((struct Cyc_Absyn_Subscript_e_struct*)_tmp83)->f2;_LLAA: {void*_tmp15E;
 struct Cyc_List_List*_tmp15F;struct _tuple5 _tmp15D=Cyc_NewControlFlow_anal_unordered_Rexps(

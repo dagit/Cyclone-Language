@@ -559,7 +559,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     return $(join_flow(env->all_changed,
 		       use_Rval(env,e2->loc,f2,r2),
 		       use_Rval(env,e3->loc,f3,r3)),
-	     unknown_all);
+	     typ_to_absrval(e->topt->v,unknown_all));
 
   case &Subscript_e(e1,e2): // FIX: avoid list allocation
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,list(e1,e2));

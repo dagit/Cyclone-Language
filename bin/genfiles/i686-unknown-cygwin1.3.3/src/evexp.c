@@ -653,9 +653,9 @@ _tmp99=_tmp97.f2;if(!_tmp99){Cyc_Evexp_eval_const_exp(_tmp8E);Cyc_Evexp_eval_con
 _tmp8F);return({struct _tuple5 _tmp9A;_tmp9A.f1=(void*)({struct Cyc_Absyn_Int_c_struct*
 _tmp9B=_cycalloc(sizeof(*_tmp9B));_tmp9B[0]=({struct Cyc_Absyn_Int_c_struct _tmp9C;
 _tmp9C.tag=2;_tmp9C.f1=(void*)((void*)0);_tmp9C.f2=0;_tmp9C;});_tmp9B;});_tmp9A.f2=
-0;_tmp9A;});}if(_tmp98)ans=Cyc_Evexp_eval_const_exp(_tmp8E);else{ans=Cyc_Evexp_eval_const_exp(
-_tmp8F);}goto _LL6A;}_LL6F: if(*((int*)_tmp8B)!= 3)goto _LL71;_tmp90=(void*)((
-struct Cyc_Absyn_Primop_e_struct*)_tmp8B)->f1;_tmp91=((struct Cyc_Absyn_Primop_e_struct*)
+0;_tmp9A;});}ans=_tmp98?Cyc_Evexp_eval_const_exp(_tmp8E): Cyc_Evexp_eval_const_exp(
+_tmp8F);goto _LL6A;}_LL6F: if(*((int*)_tmp8B)!= 3)goto _LL71;_tmp90=(void*)((struct
+Cyc_Absyn_Primop_e_struct*)_tmp8B)->f1;_tmp91=((struct Cyc_Absyn_Primop_e_struct*)
 _tmp8B)->f2;_LL70: if(_tmp91 == 0){({void*_tmp9D[0]={};Cyc_Tcutil_terr(e->loc,
 _tag_arr("bad static expression (no args to primop)",sizeof(char),42),_tag_arr(
 _tmp9D,sizeof(void*),0));});return({struct _tuple5 _tmp9E;_tmp9E.f1=(void*)({
