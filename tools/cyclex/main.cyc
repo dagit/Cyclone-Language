@@ -55,27 +55,24 @@ int main(int argc, string ? argv) {
     // FIX: catch other exceptions, handle common default behavior 
     // appropriately
     // jcheney:working on this
-    /* FIX: Subtyping here seems to be broken 
-       disbling for now */
-    /*
     // jcheney: in this case, can't give exact character position since
     // don't have access to lexbuf so can't get Lexing::lexeme_start(lbuf)
-    case Parser::Parser_error(s): 
+    case &Parser::Parser_error(s): 
       fprintf(stderr,"File \"%s\", line %d: syntax error.\n",
-	     source_name, Lexer::line_num);
+	      source_name, Lexer::line_num);
       break;
-    case Lexer::Lexical_error(msg,line,col):
+    case &Lexer::Lexical_error(msg,line,col):
       fprintf(stderr,"File \"%s\", line %d, character %d: %s.\n",
 	      source_name,line,col,msg);
       break;
-    case Output::Table_overflow:
+    case &Output::Table_overflow:
       fprintf(stderr,"File \"%s\":\ntransition table overflow, automaton is too big\n",
 	      source_name);
-	      break; */
-    case ex:
+      break;
+    case exn:
       fprintf(stderr, "error in parsing, generation, compaction, or output");
       remove(dest_name);
-      throw ex;
+      throw exn;
       return 1;
   }  
   return 0;

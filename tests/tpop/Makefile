@@ -19,7 +19,7 @@ CYC_FLAGS=-I ../../lib -tc -toc -pp
 
 LIB=../../bin/$(OUT_PREFIX)$(CYCLIB)
 
-all: $(OUT_PREFIX)freq $(OUT_PREFIX)strings $(OUT_PREFIX)grep
+all: $(OUT_PREFIX)freq $(OUT_PREFIX)strings $(OUT_PREFIX)grep $(OUT_PREFIX)markov
 
 
 $(OUT_PREFIX)%: $(OUT_PREFIX)%.o $(LIB)

@@ -34,10 +34,10 @@ typedef struct _State State;
 typedef struct _Suffix Suffix;
 
 
-State* lookup(string prefix[NPREF], int create);
-void build(string prefix[NPREF], FILE@);
+State* lookup(string*{NPREF} prefix, int create);
+void build(string*{NPREF} prefix, FILE@);
 void generate(int nwords);
-void add(string prefix[NPREF], string word);
+void add(string*{NPREF} prefix, string word);
 
 State	**statetab = null;
 
@@ -58,7 +58,7 @@ void srand(unsigned int seed)
 
 int rand()
 {
-  srand_seed * 47 + 8191;
+  return srand_seed * 47 + 8191;
 }
 
 `a ? memmove(`a ? dest, `a ? src, size_t n)
@@ -83,7 +83,7 @@ int rand()
 int main(void)
 {
   int i, nwords = MAXGEN;
-  string prefix[NPREF];		/* current input prefix */
+  string*{NPREF} prefix = new{for i < NPREF:null};  /* current input prefix */
 
   statetab = new {for i < NHASH : null};	/*initialize*/
   
@@ -104,7 +104,7 @@ int main(void)
 const int MULTIPLIER = 31;  /* for hash() */
 
 /* hash: compute hash value for array of NPREF strings */
-unsigned int hash(string s[NPREF])
+unsigned int hash(string*{NPREF} s)
 {
   unsigned int h;
   unsigned char ? p;
@@ -120,7 +120,7 @@ unsigned int hash(string s[NPREF])
 /* lookup: search for prefix; create if requested. */
 /*  returns pointer if present or created; null if not. */
 /*  creation doesn't strdup so strings mustn't change later. */
-State* lookup(string prefix[NPREF], int create)
+State* lookup(string *{NPREF}prefix, int create)
 {
   int i, h;
   State *sp;
@@ -134,10 +134,7 @@ State* lookup(string prefix[NPREF], int create)
       return sp;
   }
   if (create) {
-    /* FIX: replace .pref={prefix[0],prefix[1]} with 
-       .pref={for i < NPREF : prefix[i]} 
-       when independent array comprehensions become available */
-    sp = &_State{.pref={prefix[0],prefix[1]},.suf=null,.next=statetab[h]};
+    sp = new _State{.pref={prefix[0],prefix[1]},.suf=null,.next=statetab[h]};
     statetab[h] = sp;
   }
   return sp;
@@ -148,13 +145,13 @@ void addsuffix(State *sp, string suffix)
 {
   Suffix *suf;
 
-  suf = &_Suffix{.word=suffix,.next=suf};
+  suf = new _Suffix{.word=suffix,.next=sp->suf};
 
   sp->suf = suf;
 }
 
 /* add: add word to suffix list, update prefix */
-void add(string prefix[NPREF], string suffix)
+void add(string*{NPREF} prefix, string suffix)
 {
   State *sp;
 
@@ -166,9 +163,9 @@ void add(string prefix[NPREF], string suffix)
 }
 
 /* build: read input, build prefix table */
-void build(string prefix[NPREF], FILE @f)
+void build(string*{NPREF} prefix, FILE @f)
 {
-  string buf;
+  string buf = String::expand("",100);
 
   /* create a format string; %s could overflow buf */
   /* FIX: this doesn't work in Cyclone; no sprintf */
@@ -183,7 +180,8 @@ void generate(int nwords)
 {
   State *sp;
   Suffix *suf;
-  string prefix[NPREF], w;
+  string*{NPREF} prefix = new {for i < NPREF:null};
+  string w = "";
   int i, nmatch;
 
   for (i = 0; i < NPREF; i++)	/* reset initial prefix */
