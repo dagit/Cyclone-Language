@@ -838,11 +838,11 @@ int Cyc_fflush(struct Cyc___cycFILE*);
 # 100
 int Cyc_fprintf(struct Cyc___cycFILE*,struct _dyneither_ptr,struct _dyneither_ptr);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
 # 127
-typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};
+typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 79 "core.h"
 typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{void*v;};
 # 83
-typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
+typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 170 "core.h"
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;
 # 205
@@ -860,7 +860,7 @@ void*Cyc___assert_fail(struct _dyneither_ptr assertion,struct _dyneither_ptr fil
 # 26 "assert.cyc"
 void*Cyc___assert_fail(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line){
 # 30
-({struct Cyc_String_pa_PrintArg_struct _tmp4;_tmp4.tag=0;_tmp4.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)assertion);({struct Cyc_Int_pa_PrintArg_struct _tmp3;_tmp3.tag=1;_tmp3.f1=line;({struct Cyc_String_pa_PrintArg_struct _tmp2;_tmp2.tag=0;_tmp2.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)file);({void*_tmp0[3]={& _tmp2,& _tmp3,& _tmp4};({struct Cyc___cycFILE*_tmp6=Cyc_stderr;struct _dyneither_ptr _tmp5=({const char*_tmp1="%s:%u: Assertion `%s' failed.\n";_tag_dyneither(_tmp1,sizeof(char),31);});Cyc_fprintf(_tmp6,_tmp5,_tag_dyneither(_tmp0,sizeof(void*),3));});});});});});
+({struct Cyc_String_pa_PrintArg_struct _tmp4;_tmp4.tag=0U;_tmp4.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)assertion);({struct Cyc_Int_pa_PrintArg_struct _tmp3;_tmp3.tag=1U;_tmp3.f1=line;({struct Cyc_String_pa_PrintArg_struct _tmp2;_tmp2.tag=0U;_tmp2.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)file);({void*_tmp0[3U]={& _tmp2,& _tmp3,& _tmp4};({struct Cyc___cycFILE*_tmp6=Cyc_stderr;struct _dyneither_ptr _tmp5=({const char*_tmp1="%s:%u: Assertion `%s' failed.\n";_tag_dyneither(_tmp1,sizeof(char),31U);});Cyc_fprintf(_tmp6,_tmp5,_tag_dyneither(_tmp0,sizeof(void*),3U));});});});});});
 # 32
 Cyc_fflush(Cyc_stderr);
  exit(- 1);}

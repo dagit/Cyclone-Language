@@ -644,7 +644,7 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Const_e({.Short_c = $(sg,s)}):     dump(aprintf("%d",s)); break;
   case &Const_e({.Int_c = $(None,i)}):     fallthru(i);
   case &Const_e({.Int_c = $(Signed,i)}):   dump(aprintf("%d",i)); break;
-  case &Const_e({.Int_c = $(Unsigned,i)}): dump(aprintf("%u",(unsigned)i)); break;
+  case &Const_e({.Int_c = $(Unsigned,i)}): dump(aprintf("%uU",(unsigned)i)); break;
   case &Const_e({.LongLong_c = $(sg,i)}):
     // FIX -- take sign into account
     dump(Absynpp::longlong2string(i)); break;

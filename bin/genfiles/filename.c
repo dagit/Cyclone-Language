@@ -830,13 +830,13 @@ typedef struct Cyc___cycFILE Cyc_FILE;struct Cyc_String_pa_PrintArg_struct{int t
 # 68
 typedef void*Cyc_parg_t;struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
 # 127
-typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};
+typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 79 "core.h"
 typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{void*v;};
 # 83
 typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;
 # 97 "core.h"
-struct _dyneither_ptr Cyc_Core_new_string(unsigned int);extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
+struct _dyneither_ptr Cyc_Core_new_string(unsigned int);extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 170
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;
 # 205
@@ -864,28 +864,28 @@ struct _dyneither_ptr Cyc_Filename_gnuify(struct _dyneither_ptr);struct Cyc_List
 # 39 "list.h"
 typedef struct Cyc_List_List*Cyc_List_list_t;
 # 49 "list.h"
-typedef struct Cyc_List_List*Cyc_List_List_t;extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_exn_struct{char*tag;};
+typedef struct Cyc_List_List*Cyc_List_List_t;extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
 # 62 "string.h"
 struct _dyneither_ptr Cyc_strconcat(struct _dyneither_ptr,struct _dyneither_ptr);
 # 108 "string.h"
 struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,unsigned long n);
 # 35 "filename.cyc"
 struct _dyneither_ptr Cyc_Filename_concat(struct _dyneither_ptr s1,struct _dyneither_ptr s2){
-return({struct _dyneither_ptr _tmp19=(struct _dyneither_ptr)s1;Cyc_strconcat(_tmp19,(struct _dyneither_ptr)({struct _dyneither_ptr _tmp18=({const char*_tmp0="/";_tag_dyneither(_tmp0,sizeof(char),2);});Cyc_strconcat(_tmp18,(struct _dyneither_ptr)s2);}));});}
+return({struct _dyneither_ptr _tmp19=(struct _dyneither_ptr)s1;Cyc_strconcat(_tmp19,(struct _dyneither_ptr)({struct _dyneither_ptr _tmp18=({const char*_tmp0="/";_tag_dyneither(_tmp0,sizeof(char),2U);});Cyc_strconcat(_tmp18,(struct _dyneither_ptr)s2);}));});}
 # 39
 struct _dyneither_ptr Cyc_Filename_chop_extension(struct _dyneither_ptr filename){
 int i=(int)(_get_dyneither_size(filename,sizeof(char))- 1);
 while(i >= 0  && *((const char*)_check_dyneither_subscript(filename,sizeof(char),i))!= '.'){
 -- i;}
 if(i < 0)
-(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp1=_cycalloc(sizeof(*_tmp1));({struct Cyc_Core_Invalid_argument_exn_struct _tmp1B=({struct Cyc_Core_Invalid_argument_exn_struct _tmp2;_tmp2.tag=Cyc_Core_Invalid_argument;({struct _dyneither_ptr _tmp1A=({const char*_tmp3="chop_extension";_tag_dyneither(_tmp3,sizeof(char),15);});_tmp2.f1=_tmp1A;});_tmp2;});_tmp1[0]=_tmp1B;});_tmp1;}));
+(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp1=_cycalloc(sizeof(*_tmp1));({struct Cyc_Core_Invalid_argument_exn_struct _tmp1B=({struct Cyc_Core_Invalid_argument_exn_struct _tmp2;_tmp2.tag=Cyc_Core_Invalid_argument;({struct _dyneither_ptr _tmp1A=({const char*_tmp3="chop_extension";_tag_dyneither(_tmp3,sizeof(char),15U);});_tmp2.f1=_tmp1A;});_tmp2;});_tmp1[0]=_tmp1B;});_tmp1;}));
 return Cyc_substring((struct _dyneither_ptr)filename,0,(unsigned long)i);}
 # 50
 struct _dyneither_ptr Cyc_Filename_dirname(struct _dyneither_ptr filename){
 int i=(int)(_get_dyneither_size(filename,sizeof(char))- 1);
 while(i >= 0  && *((const char*)_check_dyneither_subscript(filename,sizeof(char),i))!= '/'){
 -- i;}
-if(i < 0)return Cyc_Core_new_string(0);
+if(i < 0)return Cyc_Core_new_string(0U);
 return Cyc_substring((struct _dyneither_ptr)filename,0,(unsigned long)i);}
 # 59
 struct _dyneither_ptr Cyc_Filename_basename(struct _dyneither_ptr filename){
@@ -909,19 +909,19 @@ struct _dyneither_ptr ans;
 int ans_sz;
 if(has_drive_name){
 ans_sz=(int)(_get_dyneither_size(filename,sizeof(char))+ 1);
-({struct _dyneither_ptr _tmp1D=({unsigned int _tmp4=(unsigned int)ans_sz;char*_tmp5=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp4 + 1));struct _dyneither_ptr _tmp7=_tag_dyneither(_tmp5,sizeof(char),_tmp4 + 1);{unsigned int _tmp6=_tmp4;unsigned int k;for(k=0;k < _tmp6;k ++){_tmp5[k]=(char)'\000';}_tmp5[_tmp6]=(char)0;}_tmp7;});ans=_tmp1D;});
-({struct _dyneither_ptr _tmp8=_dyneither_ptr_plus(ans,sizeof(char),0);char _tmp9=*((char*)_check_dyneither_subscript(_tmp8,sizeof(char),0));char _tmpD=({struct _dyneither_ptr _tmpA=_dyneither_ptr_plus(ans,sizeof(char),1);char _tmpB=*((char*)_check_dyneither_subscript(_tmpA,sizeof(char),0));char _tmpC='/';if(_get_dyneither_size(_tmpA,sizeof(char))== 1  && (_tmpB == '\000'  && _tmpC != '\000'))_throw_arraybounds();*((char*)_tmpA.curr)=_tmpC;});if(_get_dyneither_size(_tmp8,sizeof(char))== 1  && (_tmp9 == '\000'  && _tmpD != '\000'))_throw_arraybounds();*((char*)_tmp8.curr)=_tmpD;});
-({struct _dyneither_ptr _tmpE=_dyneither_ptr_plus(ans,sizeof(char),2);char _tmpF=*((char*)_check_dyneither_subscript(_tmpE,sizeof(char),0));char _tmp10=*((const char*)_check_dyneither_subscript(filename,sizeof(char),0));if(_get_dyneither_size(_tmpE,sizeof(char))== 1  && (_tmpF == '\000'  && _tmp10 != '\000'))_throw_arraybounds();*((char*)_tmpE.curr)=_tmp10;});
+({struct _dyneither_ptr _tmp1D=({unsigned int _tmp4=(unsigned int)ans_sz;char*_tmp5=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp4 + 1U));struct _dyneither_ptr _tmp7=_tag_dyneither(_tmp5,sizeof(char),_tmp4 + 1U);{unsigned int _tmp6=_tmp4;unsigned int k;for(k=0;k < _tmp6;k ++){_tmp5[k]=(char)'\000';}_tmp5[_tmp6]=(char)0U;}_tmp7;});ans=_tmp1D;});
+({struct _dyneither_ptr _tmp8=_dyneither_ptr_plus(ans,sizeof(char),0);char _tmp9=*((char*)_check_dyneither_subscript(_tmp8,sizeof(char),0U));char _tmpD=({struct _dyneither_ptr _tmpA=_dyneither_ptr_plus(ans,sizeof(char),1);char _tmpB=*((char*)_check_dyneither_subscript(_tmpA,sizeof(char),0U));char _tmpC='/';if(_get_dyneither_size(_tmpA,sizeof(char))== 1U  && (_tmpB == '\000'  && _tmpC != '\000'))_throw_arraybounds();*((char*)_tmpA.curr)=_tmpC;});if(_get_dyneither_size(_tmp8,sizeof(char))== 1U  && (_tmp9 == '\000'  && _tmpD != '\000'))_throw_arraybounds();*((char*)_tmp8.curr)=_tmpD;});
+({struct _dyneither_ptr _tmpE=_dyneither_ptr_plus(ans,sizeof(char),2);char _tmpF=*((char*)_check_dyneither_subscript(_tmpE,sizeof(char),0U));char _tmp10=*((const char*)_check_dyneither_subscript(filename,sizeof(char),0));if(_get_dyneither_size(_tmpE,sizeof(char))== 1U  && (_tmpF == '\000'  && _tmp10 != '\000'))_throw_arraybounds();*((char*)_tmpE.curr)=_tmp10;});
 i=3;
 j=2;}else{
 # 88
 ans_sz=(int)_get_dyneither_size(filename,sizeof(char));
-({struct _dyneither_ptr _tmp1E=({unsigned int _tmp11=(unsigned int)ans_sz;char*_tmp12=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp11 + 1));struct _dyneither_ptr _tmp14=_tag_dyneither(_tmp12,sizeof(char),_tmp11 + 1);{unsigned int _tmp13=_tmp11;unsigned int k;for(k=0;k < _tmp13;k ++){_tmp12[k]=(char)'\000';}_tmp12[_tmp13]=(char)0;}_tmp14;});ans=_tmp1E;});
+({struct _dyneither_ptr _tmp1E=({unsigned int _tmp11=(unsigned int)ans_sz;char*_tmp12=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp11 + 1U));struct _dyneither_ptr _tmp14=_tag_dyneither(_tmp12,sizeof(char),_tmp11 + 1U);{unsigned int _tmp13=_tmp11;unsigned int k;for(k=0;k < _tmp13;k ++){_tmp12[k]=(char)'\000';}_tmp12[_tmp13]=(char)0U;}_tmp14;});ans=_tmp1E;});
 i=0;
 j=0;}
 # 93
 while(i < ans_sz){
 char c=*((const char*)_check_dyneither_subscript(filename,sizeof(char),j ++));
-({struct _dyneither_ptr _tmp15=_dyneither_ptr_plus(ans,sizeof(char),i ++);char _tmp16=*((char*)_check_dyneither_subscript(_tmp15,sizeof(char),0));char _tmp17=c == '\\'?'/': c;if(_get_dyneither_size(_tmp15,sizeof(char))== 1  && (_tmp16 == '\000'  && _tmp17 != '\000'))_throw_arraybounds();*((char*)_tmp15.curr)=_tmp17;});}
+({struct _dyneither_ptr _tmp15=_dyneither_ptr_plus(ans,sizeof(char),i ++);char _tmp16=*((char*)_check_dyneither_subscript(_tmp15,sizeof(char),0U));char _tmp17=c == '\\'?'/': c;if(_get_dyneither_size(_tmp15,sizeof(char))== 1U  && (_tmp16 == '\000'  && _tmp17 != '\000'))_throw_arraybounds();*((char*)_tmp15.curr)=_tmp17;});}
 # 97
 return ans;}

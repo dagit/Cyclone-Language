@@ -3053,7 +3053,7 @@ DynCast:
       }
       break;
     default: 
-      if (unify(old_t2_c,new_typ_c)) 
+      if (unify(old_t2_c,new_typ_c))
         e->r = e1->r;
       break;
     }

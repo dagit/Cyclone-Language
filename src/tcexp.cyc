@@ -166,9 +166,9 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
   case {.LongLong_c = $(sn,_)}:
     t = (sn == Unsigned) ? ulonglong_typ  : slonglong_typ;  break;
   case {.Float_c = $(_,i)} : t = float_typ(i); break;
-  case {.Int_c = $(sn,i)}:
+  case {.Int_c = $(csn,i)}:
     if (topt == NULL)
-      t = (sn == Unsigned) ? uint_typ : sint_typ;
+      t = (csn == Unsigned) ? uint_typ : sint_typ;
     else
         // If *topt calls for a shorter int, we assume it's ok to
         // truncate without warning.
@@ -189,9 +189,15 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
         break;
       case &IntType(sn,Int_sz):
         t = (sn == Unsigned) ? uint_typ : sint_typ;
+        // we must update the sign on the constant so that we pretty-print
+        // things correctly later on.
+        *c = Int_c(sn,i);  
         break;
       case &IntType(sn,Long_sz):
         t = (sn == Unsigned) ? uint_typ : sint_typ;
+        // we must update the sign on the constant so that we pretty-print
+        // things correctly later on.
+        *c = Int_c(sn,i);  
         break;
       case &PointerType(PtrInfo(et,etq,PtrAtts(rgn,nbl,bnd,zt,_))) && (i == 0):
         // we're treating 0 as if it's NULL
@@ -215,7 +221,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
 	t = new TagType(t2);
 	break;
       default: // topt isn't int; presumably an error to be caught elsewhere
-        t = (sn == Unsigned) ? uint_typ : sint_typ;
+        t = (csn == Unsigned) ? uint_typ : sint_typ;
         break;
     }
     break;
