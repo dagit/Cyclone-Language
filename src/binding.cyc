@@ -263,8 +263,8 @@ void resolve_type(seg_t, env_t,  type_t);
 void resolve_rgnpo(seg_t, env_t, list_t<$(type_t,type_t)@>);
 void resolve_scs(env_t,   list_t<switch_clause_t>);
 void resolve_aggrfields(seg_t, env_t, list_t<aggrfield_t>);
-static void resolve_function_stuff(seg_t loc, env_t env, fn_info_t @i);
-void resolve_asm_iolist(env_t, list_t<$(string_t, exp_t)@> l);
+static void resolve_function_stuff(seg_t, env_t, fn_info_t @);
+void resolve_asm_iolist(env_t, list_t<$(string_t, exp_t)@>);
 list_t<vardecl_t> get_fun_vardecls(bool, seg_t, env_t, 
 				   list_t<$(var_opt_t,tqual_t,type_t)@>, 
 				   vararg_info_t*);
@@ -339,54 +339,23 @@ void resolve_and_add_vardecl(seg_t loc, env_t env, vardecl_t vd) {
   }
 }
 
-void resolve_stmt(env_t env, stmt_t s) { 
-  switch(s->r) {
-  case &Skip_s: return;
-  case &Exp_s(e): resolve_exp(env,e); return;
-  case &Seq_s(s1,s2): resolve_stmt(env,s1); resolve_stmt(env,s2); return;
-  case &Return_s(eopt): if(eopt) resolve_exp(env,(exp_t)eopt); return;
-  case &IfThenElse_s(e,s1,s2):
-    resolve_exp(env,e); resolve_stmt(env,s1); resolve_stmt(env,s2); return;
-  case &Do_s(s1,$(e,_)): fallthru(e,s1);
-  case &While_s($(e,_),s1): resolve_exp(env,e); resolve_stmt(env,s1); return;
-  case &For_s(e1,$(e2,_),$(e3,_),s1):
-    resolve_exp(env,e1); resolve_exp(env,e2); resolve_exp(env,e3);
-    resolve_stmt(env,s1); 
-    return;
-  case &Break_s:
-  case &Continue_s:
-  case &Goto_s(_): return;
-  case &Fallthru_s(es,_): // might someday "wire" fallthru clause in this pass
-    for(;es!=NULL;es=es->tl) 
-      resolve_exp(env,es->hd); 
-    return;
-  case &Label_s(_,s1): resolve_stmt(env,s1); return;
-  case &Decl_s(d,s1):
-    let old_locals = *env->local_vars;
-    resolve_decl(env,d);
-    resolve_stmt(env,s1);
-    *env->local_vars = old_locals;
-    return;
-  case &Switch_s(e,scs,_):    resolve_exp(env,e);   resolve_scs(env,scs);return;
-  case &TryCatch_s(s1,scs,_): resolve_stmt(env,s1); resolve_scs(env,scs);return;
-  }
-}
-void resolve_exp(env_t env, exp_t e) { 
+static bool resolve_visit_f1(env_t env, exp_t e) {
   switch(e->r) {
   case &Var_e(*b): 
     switch(*b) {
     case &Unresolved_b(q):
       try switch (lookup_ordinary(e->loc,env,q)) {
-      case &VarRes(bnd):          *b = bnd; return;
-      case &DatatypeRes(tud,tuf): e->r = new Datatype_e(NULL,tud,tuf); return;
-      case &EnumRes(ed,ef):       e->r = new Enum_e(ed,ef); return;
-      case &AnonEnumRes(t,ef):    e->r = new AnonEnum_e(t,ef); return;
-      case &AggrRes(ad): err2(e->loc,"bad occurrence of type name ", q); return;
+      case &VarRes(bnd):          *b = bnd; break;
+      case &DatatypeRes(tud,tuf): e->r = new Datatype_e(NULL,tud,tuf); break;
+      case &EnumRes(ed,ef):       e->r = new Enum_e(ed,ef); break;
+      case &AnonEnumRes(t,ef):    e->r = new AnonEnum_e(t,ef); break;
+      case &AggrRes(ad): err2(e->loc,"bad occurrence of type name ", q); break;
       }
       catch { 
-      case &BindingError: err2(e->loc,"undeclared identifier ", q); return;
+      case &BindingError: err2(e->loc,"undeclared identifier ", q); break;
       }
-    default: return; // only happens if we re-run this pass?
+      return false;
+    default: return false; // only happens if we re-run this pass?
     }
   case &FnCall_e(e1,es,_,*b): 
     *b = true;
@@ -398,43 +367,37 @@ void resolve_exp(env_t env, exp_t e) {
 	switch (*b) {
 	case &Unresolved_b(q):
 	  try switch (lookup_ordinary(e1->loc,env,q)) {
-	  case &VarRes(bnd):
-	    *b = bnd; return;
+	  case &VarRes(bnd): *b = bnd; return false;
 	  case &AggrRes(ad):
 	    let dles = NULL;
 	    for(; es != NULL; es = es->tl)
 	      dles = new List(new $(NULL,es->hd), dles);
 	    e->r = new Aggregate_e(ad->name,NULL,imp_rev(dles),ad);
-	    return;
+	    return false;
 	  case &DatatypeRes(tud,tuf):
-	    if (tuf->typs == NULL)
-	      // Don't allow "foo()", require "foo"
+	    if (tuf->typs == NULL) // Don't allow "foo()", require "foo"
 	      err2(e->loc,tuf->name," is a constant, not a function");
 	    e->r = new Datatype_e(es,tud,tuf);
-	    return;
+	    return false;
 	  case &AnonEnumRes(...):
 	  case &EnumRes(...):
-	    err2(e->loc, q," is an enum constructor, not a function"); return;
+	    err2(e->loc, q," is an enum constructor, not a function"); return false;
 	  } catch { 
-	  case &BindingError: err2(e->loc,"undeclared identifier ",q); return;
+	  case &BindingError: err2(e->loc,"undeclared identifier ",q); return false;
 	  }
-	default: return; // only happens if we re-run this pass?
+	default: return false; // only happens if we re-run this pass?
 	}
-    default: resolve_exp(env,e1); return;
+    default: resolve_exp(env,e1); return false;
     }
-
   case &Aggregate_e(*tn,ts,dles,*adopt): 
-    for(; dles != NULL; dles=dles->tl)
-      resolve_exp(env,(*dles->hd)[1]);
     try {
       *adopt = resolve_lookup(e->loc,env->ns,*tn,lookup_aggrdecl);
       *tn = (*adopt)->name;
-      return;
+      return true;
     } catch { case &BindingError:
       err2(e->loc,"unbound struct/union name ", *tn);
-      return;
+      return true;
     }
-
   case &Comprehension_e(vd,e1,e2,_): 
     resolve_exp(env,e1);
     if(at_toplevel(env)) {
@@ -442,118 +405,67 @@ void resolve_exp(env_t env, exp_t e) {
       resolve_and_add_vardecl(e->loc, env, vd);
       resolve_exp(env,e2);
       env->local_vars = NULL;
-      return;
+      return false;
     }
     let old_locals = *env->local_vars;
     resolve_and_add_vardecl(e->loc, env, vd);
     resolve_exp(env,e2);
     *env->local_vars = old_locals;
-    return;
-
-    // this case is done by the type-checker using the expected type
-  case &UnresolvedMem_e(_,dles): 
-    for(; dles != NULL; dles=dles->tl)
-      resolve_exp(env,(*dles->hd)[1]);
-    return;
-
-    // the rest is just recursive descent
-  case &ComprehensionNoinit_e(e1,t,_):
-    resolve_exp(env,e1);
-    resolve_type(e->loc,env,t);
-    return;
-
-  case &Pragma_e(_):
-  case &Const_e(_): return;
-
-  case &Tuple_e(es): fallthru(es);
-  case &Primop_e(_,es):
-    for(; es != NULL; es = es->tl)
-      resolve_exp(env,es->hd);
-    return;
-
-  case &Assert_e(e1): fallthru(e1);
-  case &Extension_e(e1):  fallthru(e1);
-  case &Tagcheck_e(e1,_): fallthru(e1);
-  case &NoInstantiate_e(e1): fallthru(e1);
-  case &Sizeofexp_e(e1): fallthru(e1);
-  case &Throw_e(e1,_): fallthru(e1);
-  case &Increment_e(e1,_): fallthru(e1);
-  case &AggrArrow_e(e1,...): fallthru(e1);
-  case &AggrMember_e(e1,...): fallthru(e1);
-  case &Address_e(e1): fallthru(e1);
-  case &Deref_e(e1): resolve_exp(env,e1); return;
-
-  case &Swap_e(e1,e2): fallthru(e1,e2);
-  case &SeqExp_e(e1,e2): fallthru(e1,e2);
-  case &AssignOp_e(e1,_,e2): fallthru(e1,e2);
-  case &Subscript_e(e1,e2): fallthru(e1,e2);
-  case &And_e(e1,e2): fallthru(e1,e2);
-  case &Or_e(e1,e2): resolve_exp(env,e1); resolve_exp(env,e2); return;
-
-  case &Malloc_e(MallocInfo(_,eo,to,e1,_,_)): 
-    if(eo != NULL) resolve_exp(env,(exp_t)eo);
-    if(to != NULL) resolve_type(e->loc,env,*to);
-    resolve_exp(env,e1);
-    return; 
-
-  case &New_e(eo,e2):
-    if(eo != NULL) resolve_exp(env,(exp_t)eo);
-    resolve_exp(env,e2);
-    return;
-
-  case &Conditional_e(e1,e2,e3):
-    resolve_exp(env,e1); resolve_exp(env,e2); resolve_exp(env,e3); return;
+    return false;
 
   case &Instantiate_e(e1,ts):
-    resolve_exp(env,e1);
     for(; ts != NULL; ts = ts->tl)
       resolve_type(e->loc,env,ts->hd);
-    return;
-
-  case &Cast_e(t,e1,_,_): 
-    resolve_exp(env,e1); resolve_type(e->loc,env,t); return;
-
-  case &StmtExp_e(s): resolve_stmt(env,s); return;
-
+    return true;
+  case &Malloc_e(MallocInfo(_,_,to,...)): 
+    if(to!=NULL) fallthru(*to); else return true;
+  case &AnonStruct_e(t,_): fallthru(t); // can't exist until after type-checker
+  case &AnonEnum_e(t,_): fallthru(t);
+  case &CompoundLit_e(&$(_,_,t),_): fallthru(t);
   case &Valueof_e(t): fallthru(t);
   case &Offsetof_e(t,_): fallthru(t);
-  case &Sizeoftype_e(t): resolve_type(e->loc,env,t); return; 
-
-  case &CompoundLit_e(&$(_,_,t),dles):
+  case &Sizeoftype_e(t): fallthru(t);
+  case &ComprehensionNoinit_e(_,t,_): fallthru(t);
+  case &Cast_e(t,...): 
     resolve_type(e->loc,env,t);
-    fallthru(dles);
-    
-  case &Array_e(dles): 
-    for(; dles != NULL; dles = dles->tl)
-      resolve_exp(env,(*dles->hd)[1]);
-    return;
+    return true;
 
-    // cases that should arise only if we run binding more than once
-  case &AnonEnum_e(t,ef): resolve_type(e->loc,env,t); return;
-  case &Enum_e(ed,ef): return;
-  case &Datatype_e(es,tud,tuf): 
-    for(; es != NULL; es = es->tl)
-      resolve_exp(env,es->hd);
-    return;
-  case &AnonStruct_e(t,dles): // can't exist until after type-checker
-    resolve_type(e->loc,env,t);
-    for(; dles != NULL; dles=dles->tl)
-      resolve_exp(env,(*dles->hd)[1]);
-    return;
-	
   case &Asm_e(v,t,o,i,c): 
     resolve_asm_iolist(env, o);
     resolve_asm_iolist(env, i);
-    break;
+    return false;
+
+  default: return true;
   }
 }
-
-void resolve_asm_iolist(env_t env, list_t<$(string_t, exp_t)@> l) {
-  while(l) {
-    let &$(_, e) = l->hd;
-    resolve_exp(env, e);
-    l = l->tl;
+bool resolve_visit_f2(env_t env, stmt_t s) {
+  switch(s->r) {
+  case &Decl_s(d,s1):
+    let old_locals = *env->local_vars;
+    resolve_decl(env,d);
+    resolve_stmt(env,s1);
+    *env->local_vars = old_locals;
+    return false;
+  case &Switch_s(e,scs,_):    
+    resolve_exp(env,e);   
+    resolve_scs(env,scs);
+    return false;
+  case &TryCatch_s(s1,scs,_): 
+    resolve_stmt(env,s1); 
+    resolve_scs(env,scs);
+    return false;
+  default: return true;
   }
+}
+void resolve_stmt(env_t env, stmt_t s) { 
+  visit_stmt(resolve_visit_f1,resolve_visit_f2,env,s);
+}
+void resolve_exp(env_t env, exp_t e) { 
+  visit_exp(resolve_visit_f1,resolve_visit_f2,env,e); 
+}
+void resolve_asm_iolist(env_t env, list_t<$(string_t, exp_t)@> l) {
+  for(; l != NULL; l = l->tl) 
+    resolve_exp(env, (*l->hd)[1]);
 }
 
 void resolve_scs(env_t env, list_t<switch_clause_t> scs) {
@@ -1206,9 +1118,6 @@ void resolve_decl(env_t env, decl_t d) {
     }
     data->ordinaries = out_dict;
     env->in_cinclude = old;
-
-    // FIX: this should go in a separate pass
-    //    Cifc::user_overrides(loc,ds2,ovrs);
     break;
 
   case &Porton_d: // let Tc warn for now

@@ -44,7 +44,6 @@ struct Env {
 };
 typedef struct Env@`r env_t<`r>;
 
-static void build_tables_stmt(env_t, stmt_t);
 static void build_tables_exp(env_t, exp_t);
 static void build_tables_type(env_t env, type_t t) {
   switch(t) {
@@ -77,8 +76,8 @@ static void build_tables_type(env_t env, type_t t) {
   default: Warn::impos2("LowTreeshake: unexpected type",t);
   }
 }
-static void build_tables_exp(env_t env, exp_t e) {
-  // recursive descent for types (plus later vars)
+
+static bool build_tables_visit_f1(env_t env, exp_t e) {
   switch(e->r) {
   case &Var_e(&Global_b(vd)): fallthru(vd->name);   
   case &Var_e(&Funname_b(&Fndecl{.name=qv,...})): fallthru(qv);   
@@ -86,114 +85,39 @@ static void build_tables_exp(env_t env, exp_t e) {
     if(!Hashtable::lookup_opt(env->funs_defined,qv) 
        && !Hashtable::lookup_opt(env->global_keepers,qv))
       Hashtable::insert(env->global_keepers,qv,true);
-    break;
-  case &Var_e(...):
-  case &Const_e(_):
-  case &AnonEnum_e(...): break;
-  case &Enum_e(ed,_): Set::imp_insert(env->enum_keepers,ed->name); break;
-
-  case &Cast_e(t,e1,...):
-    build_tables_type(env,t);
-    build_tables_exp(env,e1);
-    break;
+    return false;
+  case &Enum_e(ed,_): Set::imp_insert(env->enum_keepers,ed->name); return false;
   case &Offsetof_e(t,_): fallthru(t);
-  case &Sizeoftype_e(t): build_tables_type(env,t); break;
-
-  case &NoInstantiate_e(e1):  fallthru(e1);
-  case &Instantiate_e(e1,_):  fallthru(e1);
-  case &Extension_e(e1):      fallthru(e1);  
-  case &Increment_e(e1,_):    fallthru(e1);
-  case &Sizeofexp_e(e1):      fallthru(e1);
-  case &Address_e(e1):        fallthru(e1);
-  case &Deref_e(e1):          fallthru(e1);
-  case &AggrMember_e(e1,...): fallthru(e1);
-  case &AggrArrow_e(e1,...):  build_tables_exp(env,e1); break;
-
-  case &FnCall_e(e1,es,...):
-    build_tables_exp(env,e1);
-    fallthru(es);
-  case &Primop_e(_,es):
-    for(; es != NULL; es = es->tl)
-      build_tables_exp(env,es->hd);
-    break;
-
-  case &Conditional_e(e1,e2,e3):
-    build_tables_exp(env,e1);
-    fallthru(e2,e3);
-  case &AssignOp_e(e1,_,e2): fallthru(e1,e2);
-  case &And_e(e1,e2):        fallthru(e1,e2);
-  case &Or_e(e1,e2):         fallthru(e1,e2);
-  case &SeqExp_e(e1,e2):     fallthru(e1,e2);
-  case &Subscript_e(e1,e2):  
-    build_tables_exp(env,e1);
-    build_tables_exp(env,e2);
-    break;
-
-  case &UnresolvedMem_e(NULL, ldt): fallthru(ldt);
-  case &Array_e(ldt):            
-    for(; ldt != NULL; ldt = ldt->tl)
-      build_tables_exp(env, (*ldt->hd)[1]);
-    break;
-
-  case &StmtExp_e(s): return build_tables_stmt(env, s);
-
+  case &Sizeoftype_e(t): fallthru(t);
+  case &Cast_e(t,...): build_tables_type(env,t); return true;
   case &Asm_e(_,_,sl1,sl2,_): // ???
     for(; sl1 != NULL; sl1 = sl1->tl)
       build_tables_exp(env,(*sl1->hd)[1]);
     for(; sl2 != NULL; sl2 = sl2->tl)
       build_tables_exp(env,(*sl2->hd)[1]);
-    break;
-  default: Warn::impos2("LowTreeshake: unexpected expression form",e);
+    return false;
+  default: return true;
   }
 }
-static void build_tables_stmt(env_t env, stmt_t s) { 
-  // just recursive descent
+static bool build_tables_visit_f2(env_t env, stmt_t s) {
   switch(s->r) {
-  case &Return_s(eo): if(eo) fallthru(eo); break;
-  case &Exp_s(e): build_tables_exp(env,e); break;
-  case &IfThenElse_s(e,s1,s2):
-    build_tables_exp(env,e);
-    fallthru(s1,s2);
-  case &Seq_s(s1,s2): 
-    build_tables_stmt(env,s1);
-    build_tables_stmt(env,s2);
-    break;
-  case &Label_s(_,s1): build_tables_stmt(env,s1); break;
-  case &Do_s(s1, $(e1,_)): fallthru(e1,s1);
-  case &While_s($(e1,_),s1):
-    build_tables_exp(env,e1);
-    build_tables_stmt(env,s1);
-    break;
-  case &For_s(e1,$(e2,_),$(e3,_),s1):
-    build_tables_exp(env,e1);
-    build_tables_exp(env,e2);
-    build_tables_exp(env,e3);
-    build_tables_stmt(env,s1);
-    break;
-  case &Switch_s(e1, scs, _):
-    build_tables_exp(env,e1);
-    for(; scs != NULL; scs = scs->tl)
-      build_tables_stmt(env,scs->hd->body);
-    break;
   case &Decl_s(d,s1):
     switch(d->r) {
     case &Var_d(vd): // FIX: also shake out unused externs
       build_tables_type(env,vd->type);
-      if(vd->initializer != NULL)
-	build_tables_exp(env,(exp_t)vd->initializer);
-      break;
+      return true;
     case &Fn_d(fd): // nested functions
       build_tables_type(env,fd->i.ret_type);
       for(let args = fd->i.args; args != NULL; args=args->tl)
 	build_tables_type(env,(*args->hd)[2]);
-      build_tables_stmt(env,fd->body);
-      break;
-    default:  Warn::impos2("LowTreeShake: local decl not a var or function");
+      return true;
+    default: Warn::impos2("LowTreeShake: local decl not a var or function");
     }
-    build_tables_stmt(env,s1);
-    break;
-  default: break; // some forms impossible, others do not have exps/types
+  default: return true;
   }
+}
+static void build_tables_exp(env_t env, exp_t e) {
+  visit_exp(build_tables_visit_f1,build_tables_visit_f2,env,e);
 }
 
 static void add_to_table(Hashtable::table_t<qvar_t,List::list_t<`a>> tab,
@@ -216,7 +140,7 @@ static void build_tables(env_t env, List::list_t<decl_t,`H> tds) {
       build_tables_type(env,fd->i.ret_type);
       for(let args = fd->i.args; args != NULL; args=args->tl)
 	build_tables_type(env,(*args->hd)[2]);
-      build_tables_stmt(env,fd->body);
+      visit_stmt(build_tables_visit_f1,build_tables_visit_f2,env,fd->body);
       break;
     case &Aggr_d(ad): add_to_table(env->aggrdecls,ad->name,ad); break;
     case &Enum_d(ed): // I suppose a field could include a sizeof

@@ -87,7 +87,7 @@ static struct Result {
 typedef struct Result result_t;
 
 static result_t remove_aggrs_exp(env_t, exp_t);
-static void remove_aggrs_stmt(stmt_t s);
+static void remove_aggrs_stmt(stmt_t);
 
 static void noarray_remove_aggrs_exp(env_t env, exp_t e) {
   let Result(r) = remove_aggrs_exp(env,e);
@@ -325,52 +325,19 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
 // is just recursive descent, except for array-initializers
 // for tests, we use other_env -- WholeStmt would be fine, but 
 // assignments to comprehensions cannot appear so there is no point
-static void remove_aggrs_stmt(stmt_t s) {
+static bool remove_aggrs_stmt_f1(bool ignore, exp_t e) {
+  remove_aggrs_exp(other_env,e);
+  return false;
+}
+static bool remove_aggrs_stmt_f2(bool ignore, stmt_t s) {
   switch(s->r) {
-  case &Skip_s:         
-  case &Break_s:    
-  case &Continue_s: 
-  case &Goto_s(_): return;
-  case &Label_s(_,s2): remove_aggrs_stmt(s2); return;
-  case &Return_s(eopt):
-    if (eopt == NULL)
-      return;
-    fallthru(eopt);
-  case &Exp_s(e): remove_aggrs_exp(other_env,e); return;
-  case &Seq_s(s1,s2): 
-    remove_aggrs_stmt(s1); 
-    remove_aggrs_stmt(s2); 
-    return;
-  case &IfThenElse_s(e,s1,s2):
-    remove_aggrs_exp(other_env,e);
-    remove_aggrs_stmt(s1);
-    remove_aggrs_stmt(s2);
-    return;
-  case &Do_s(s2,$(e,_)): fallthru(e,s2);
-  case &While_s($(e,_),s2):
-    remove_aggrs_exp(other_env,e);
-    remove_aggrs_stmt(s2);
-    return;
-  case &For_s(e1,$(e2,_),$(e3,_),s2):
-    remove_aggrs_exp(other_env,e1);
-    remove_aggrs_exp(other_env,e2);
-    remove_aggrs_exp(other_env,e3);
-    remove_aggrs_stmt(s2);
-    return;
-  case &Switch_s(e,scs,_):
-    // most switches have been translated away -- only C switches remain.
-    // there should be no where clauses, so ignore them.
-    remove_aggrs_exp(other_env,e);
-    for(; scs != NULL; scs = scs->tl)
-      remove_aggrs_stmt(scs->hd->body);
-    return;
   case &Decl_s(d,s2):
     remove_aggrs_stmt(s2);
     switch(d->r) {
     case &Var_d(vd):
       if(vd->sc == Static) {
 	massage_toplevel_aggr(vd->initializer);
-	return;
+	return false;
       }
       // NOTE: It is probably okay not to compile away array-initializers
       // in most cases, but a comprehension inside an array would not
@@ -390,13 +357,17 @@ static void remove_aggrs_stmt(stmt_t s) {
 	  vd->initializer = NULL;
 	}
       }
-      return;
-    case &Fn_d(fd): remove_aggrs_stmt(fd->body); return;
+      return false;
+    case &Fn_d(fd): remove_aggrs_stmt(fd->body); return false;
     default: Warn::impos("bad local declaration after xlation to C");
     }
-  default: Warn::impos("bad stmt after xlation to C");
+  default: return true;
   }
 }
+static void remove_aggrs_stmt(stmt_t s) {
+  visit_stmt(remove_aggrs_stmt_f1,remove_aggrs_stmt_f2,true,s);
+}
+
 
 list_t<decl_t> remove_aggrs(list_t<decl_t,`H> ds) {
   for(let ds2 = ds; ds2 != NULL; ds2 = ds2->tl)

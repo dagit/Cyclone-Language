@@ -44,15 +44,10 @@ bool opt_inst_tvar = false;
 static bool is_concrete(decl_t d) {
   switch(d->r) {
   case &Fn_d(...):
-    return true;
-  case &Typedef_d(td):
-    return true;
-  case &Aggr_d(ad):
-    return ad->impl != NULL;
-  case &Enum_d(ed):
-    return ed->fields != NULL;
-  default:
-    return false;
+  case &Typedef_d(_): return true;
+  case &Aggr_d(ad): return ad->impl != NULL;
+  case &Enum_d(ed): return ed->fields != NULL;
+  default: return false;
   }
 }
 
@@ -75,10 +70,8 @@ void set_inst_tvar(){
 //debug function
 string_t list2string(list_t<`a> l, string_t (*tostr)(`a)){
   let ret = aprintf("(");
-  while(l) {
+  for(; l ; l = l->tl)
     ret = aprintf("%s %s,", ret, tostr(l->hd));
-    l =l->tl;
-  }
   return aprintf("%s)", ret);
 }
 
@@ -1123,5 +1116,3 @@ void user_overrides(seg_t loc, tenv_t te, list_t<decl_t, `H> *ds, list_t<decl_t>
   }
   //  fprintf(stderr, "After merges -- decls = { %s }", Absynpp::decllist2string(*ds));
 }
-
-

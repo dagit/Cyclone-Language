@@ -434,18 +434,17 @@ goto _LL0;}case 0:
  goto _LL16;case 14: _LL16:
  goto _LL18;case 15: _LL18:
  goto _LL1A;case 16: _LL1A:
-# 161
  goto _LL0;case 10: _Tmp2=((struct Cyc_Absyn_Using_d_Absyn_Raw_decl_struct*)_Tmp0)->f2;{struct Cyc_List_List*tds=_Tmp2;
 _Tmp2=tds;goto _LL1E;}case 11: _Tmp2=((struct Cyc_Absyn_ExternC_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;_LL1E: {struct Cyc_List_List*tds=_Tmp2;
 _Tmp2=tds;goto _LL20;}case 9: _Tmp2=((struct Cyc_Absyn_Namespace_d_Absyn_Raw_decl_struct*)_Tmp0)->f2;_LL20: {struct Cyc_List_List*tds=_Tmp2;
-# 165
+# 164
 Cyc_RemoveLabels_anal_decl(tds);
 goto _LL0;}default: _Tmp2=((struct Cyc_Absyn_ExternCinclude_d_Absyn_Raw_decl_struct*)_Tmp0)->f1;_Tmp1=((struct Cyc_Absyn_ExternCinclude_d_Absyn_Raw_decl_struct*)_Tmp0)->f2;{struct Cyc_List_List*tds1=_Tmp2;struct Cyc_List_List*tds2=_Tmp1;
-# 168
+# 167
 Cyc_RemoveLabels_anal_decl(tds1);
 Cyc_RemoveLabels_anal_decl(tds2);
 goto _LL0;}}_LL0:;}}
-# 174
+# 173
 struct Cyc_List_List*Cyc_RemoveLabels_remove_unused_labels(struct Cyc_List_List*tds){
 Cyc_RemoveLabels_anal_decl(tds);
 return tds;}

@@ -4080,7 +4080,7 @@ static bool types_to_c_f1(bool ignore, exp_t e) {
   switch(e->r) {
   case &CompoundLit_e(&$(_,_,*t),_): fallthru(t);
   case &Offsetof_e(*t,_): fallthru(t);
-  case &Cast_e(*t,...): fallthru(t);
+  case &Cast_e(*t,...):   fallthru(t);
   case &Sizeoftype_e(*t): *t = typ_to_c(*t); break;
   case &Malloc_e(*m):
     if (m->elt_type != NULL)

@@ -157,8 +157,7 @@ static void anal_decl(list_t<decl_t> tds) {
     case &Porton_d:
     case &Portoff_d:
     case &Tempeston_d:
-    case &Tempestoff_d:
-      break;
+    case &Tempestoff_d: break;
     case &Using_d(_, tds): fallthru(tds);          
     case &ExternC_d(tds): fallthru(tds);   
     case &Namespace_d(_, tds):

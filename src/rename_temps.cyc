@@ -53,21 +53,15 @@ static binding_t local_temp_var(int i) {
   return new Unresolved_b(new $(Loc_n,new (string_t)aprintf("_Tmp%X",i)));
 }
 
+static void rename_exp(env_t, exp_t);
 static void rename_stmt(env_t, stmt_t);
-
-static void rename_exp(env_t env, exp_t e) {
+static bool rename_visit_f1(env_t env, exp_t e) {
   switch(e->r) {
   case &Var_e(*b):
     let qv = binding2qvar(*b);
     if(is_temp_var(qv))
       *b = Dict::lookup(env->d,qv);
-    break;
-
-  case &Const_e(_):
-  case &AnonEnum_e(...):        
-  case &Enum_e(...):
-  case &Offsetof_e(...):
-  case &Sizeoftype_e(_): break;
+    return false;
 
   case &Cast_e(t,e1,...): 
     // this little opt has nothing to do with temp renaming, but why not?
@@ -76,85 +70,20 @@ static void rename_exp(env_t env, exp_t e) {
     case &AppType(&AggrCon(ai),NULL): e->r = e1->r; break;
     default: break;
     }
-    break;
-  case &NoInstantiate_e(e1):  fallthru(e1);
-  case &Instantiate_e(e1,_):  fallthru(e1);
-  case &Extension_e(e1):      fallthru(e1);  
-  case &Increment_e(e1,_):    fallthru(e1);
-  case &Sizeofexp_e(e1):      fallthru(e1);
-  case &Address_e(e1):        fallthru(e1);
-  case &Deref_e(e1):          fallthru(e1);
-  case &AggrMember_e(e1,...): fallthru(e1);
-  case &AggrArrow_e(e1,...):  rename_exp(env,e1); break;
-
-  case &FnCall_e(e1,es,...):
-    rename_exp(env,e1);
-    fallthru(es);
-  case &Primop_e(_,es):
-    for(; es != NULL; es = es->tl)
-      rename_exp(env,es->hd);
-    break;
-
-  case &Conditional_e(e1,e2,e3):
-    rename_exp(env,e1);
-    fallthru(e2,e3);
-  case &AssignOp_e(e1,_,e2): fallthru(e1,e2);
-  case &And_e(e1,e2):        fallthru(e1,e2);
-  case &Or_e(e1,e2):         fallthru(e1,e2);
-  case &SeqExp_e(e1,e2):     fallthru(e1,e2);
-  case &Subscript_e(e1,e2):  
-    rename_exp(env,e1);
-    rename_exp(env,e2);
-    break;
-
-  case &UnresolvedMem_e(NULL, ldt): fallthru(ldt);
-  case &Array_e(ldt):            
-    for(; ldt != NULL; ldt = ldt->tl)
-      rename_exp(env, (*ldt->hd)[1]);
-    break;
-
-  case &StmtExp_e(s): return rename_stmt(env, s);
+    return false;
 
   case &Asm_e(_,_,sl1,sl2,_): // ???
     for(; sl1 != NULL; sl1 = sl1->tl)
       rename_exp(env,(*sl1->hd)[1]);
     for(; sl2 != NULL; sl2 = sl2->tl)
       rename_exp(env,(*sl2->hd)[1]);
-    break;
+    return false;
 
-  default: Warn::impos2("RenameTemps: unexpected expression form",e);
+  default: return true;
   }
 }
-
-static void rename_stmt(env_t env, stmt_t s) {
-  // only the Decl case is interesting
+static bool rename_visit_f2(env_t env, stmt_t s) {
   switch(s->r) {
-  case &Return_s(eo): if(eo) fallthru(eo); break;
-  case &Exp_s(e): rename_exp(env,e); break;
-  case &IfThenElse_s(e,s1,s2):
-    rename_exp(env,e);
-    fallthru(s1,s2);
-  case &Seq_s(s1,s2):
-    rename_stmt(env,s1);
-    rename_stmt(env,s2);
-    break;
-  case &Label_s(_,s1): rename_stmt(env,s1); break;
-  case &Do_s(s1, $(e,_)): fallthru(e,s1);
-  case &While_s($(e,_),s1): 
-    rename_exp(env,e);
-    rename_stmt(env,s1);
-    break;
-  case &For_s(e1,$(e2,_),$(e3,_),s1):
-    rename_exp(env,e1);
-    rename_exp(env,e2);
-    rename_exp(env,e3);
-    rename_stmt(env,s1);
-    break;
-  case &Switch_s(e, scs, _):
-    rename_exp(env,e);
-    for(; scs != NULL; scs = scs->tl)
-      rename_stmt(env,scs->hd->body);
-    break;
   case &Decl_s(d,s1):
     let old_env = *env;
     switch(d->r) {
@@ -177,10 +106,15 @@ static void rename_stmt(env_t env, stmt_t s) {
     }
     rename_stmt(env,s1);
     *env = old_env;
-    break;
-
-  default: break; // some forms impossible, others do not have exps/types
+    return false;
+  default: return true;
   }
+}
+static void rename_exp(env_t env, exp_t e) {
+  visit_exp(rename_visit_f1,rename_visit_f2,env,e);
+}
+static void rename_stmt(env_t env, stmt_t s) {
+  visit_stmt(rename_visit_f1,rename_visit_f2,env,s);
 }
 
 List::list_t<Absyn::decl_t> rename(List::list_t<Absyn::decl_t,`H> tds) {
