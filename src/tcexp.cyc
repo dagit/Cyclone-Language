@@ -839,7 +839,7 @@ static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2){
       return
         expr_err(te,loc,
                  xprintf("subscript applied to %s (array or tuple required)",
-                         typ2string(t2)));
+                         typ2string(t1)));
     }
     break; 
   case TupleType(ts):
@@ -862,7 +862,7 @@ static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2){
   default:
     return expr_err(te,loc,
 		   xprintf("subscript applied to %s (array or tuple required)",
-			   typ2string(t2)));
+			   typ2string(t1)));
   }
   return synth_set_typ(list_result,res);
 }

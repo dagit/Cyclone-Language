@@ -98,14 +98,71 @@ static $(string,short) rw_array[64] = {
 
 extern void typedef_init();
 
-void lex_init() {
-  /* build reserved word dictionary */
-  Hashtable::Table<string,Short> t = 
-     Hashtable::create(101, zstrcmp, Hashtable::hash_string);
-  rw = &Opt(t);
-  for (int i=0; i < size(rw_array); ++i) 
-    Hashtable::insert(t, rw_array[i][0], (Short)rw_array[i][1]);
+// WARNING: Because we now intern identifiers -- you better never mutate them!!!
 
+// Should probably put this trie thing in the library
+static struct Trie;
+typedef struct Trie * trie_t;
+typedef trie_t trie_child_v_t[75]; // enough room for Cyclone ids and `
+typedef trie_child_v_t * trie_child_t;
+static struct Trie {
+  trie_child_t  children;   // null means none
+  Opt_t<string> shared_str; // path implies contents
+};
+
+static struct Trie all_ids_v = Trie(null,null);
+static trie_t      all_ids   = &all_ids_v;
+
+static string share_str(string buff, int offset, int len) {
+  int    i    = offset;
+  int    last = offset + len - 1;
+  trie_t t    = all_ids;
+  while(i <= last) {
+    int ch = ((int)buff[i]) - 48; // see width of trie above
+    if(t->children == null) {
+      // new string, extend the trie and return
+      while(i <= last) {
+	t->children = (trie_child_t) &$((new { for i < 75 : null }));
+	(*(t->children))[ch] = &Trie(null,null);
+	t = (*(t->children))[ch];
+	++i;
+	ch = ((int)buff[i]) - 48; // see width of trie above
+      }
+      let newstr = new_string(len+1);
+      t->shared_str = &Opt(String::zstrncpy(newstr,0,buff,offset,len));
+      return newstr;
+    }
+    // walk down one level
+    if((*(t->children))[ch] == null)
+      (*(t->children))[ch] = &Trie(null,null);
+    t = (*(t->children))[ch];
+    ++i;
+  }
+  // build string if necessary and return
+  if(t->shared_str == null) {
+    let newstr = new_string(len+1);
+    t->shared_str = &Opt(String::zstrncpy(newstr,0,buff,offset,len));
+  }
+  return t->shared_str->v;
+}
+
+static string share_str_lbuf<`a>(Lexbuf<`a> lbuf) {
+  return share_str(lbuf->lex_buffer, 
+		   lbuf->lex_start_pos,
+		   lbuf->lex_curr_pos - lbuf->lex_start_pos);
+}
+  // Now that we're sharing strings, should be able to do pointer compare
+  // for the reserved word lookup!  But unfortunately, we can't subtract
+  // pointers, so we're stuck with zstrmp. :-(
+void lex_init() {
+  Hashtable::Table<string,Short> rwt = 
+     Hashtable::create(101, zstrcmp, Hashtable::hash_string);
+  rw = &Opt(rwt);
+  for (int i=0; i < size(rw_array); ++i) {
+    let str = rw_array[i][0];
+    Hashtable::insert(rwt, str, (Short)rw_array[i][1]);
+    share_str(str, 0, String::strlen(str));
+  }
   typedef_init();
 }
 
@@ -134,64 +191,36 @@ static int comment_depth = 0;
    all of the cases we want: it does not handle a trailing 'u', 'U',
    'l', or 'L'; and in particular, it does not treat '0'['0'-'7'] as
    an octal number.  */
-/* Helper function that tells where the digits in the int constant
-   end */
-int get_finish(string s) {
-  int len = String::strlen(s);
-  if (len-2>=0) {
-    char c = s[len-2];
-    if (c=='u'||c=='U'||c=='l'||c=='L') return len-2;
-  }
-  if (len-1>=0) {
-    char c = s[len-1];
-    if (c=='u'||c=='U'||c=='l'||c=='L') return len-1;
-  }
-  return len;
-}
-/* Helper function that tells whether the int constant is signed
-   or unsigned */
-static sign get_sign(string s) {
-  int len = String::strlen(s);
-  if (len-2>0 && (s[len-2]=='u' || s[len-2]=='U')) return Unsigned;
-  if (len-1>0 && (s[len-1]=='u' || s[len-1]=='U')) return Unsigned;
-  return Signed;
-}
-/* Helper function, copied from core.pop (where it is hidden) */
+
+  // copied from Core
 static int int_of_char(char c) {
-  if ('0'<=c && c<='9')      return ((int)c)-((int)'0');
-  else if ('a'<=c && c<='f') return 10+((int)c)-((int)'a');
-  else if ('A'<=c && c<='F') return 10+((int)c)-((int)'A');
+  if ('0'<=c && c<='9')      return c-'0';
+  else if ('a'<=c && c<='f') return 10+c-'a';
+  else if ('A'<=c && c<='F') return 10+c-'A';
   else throw InvalidArg("string to integer conversion");
 }
-/* The arithmetic in this function will be signed */
-static signed int intconst_signed(string s, int start, signed int base) {
-  signed int n = 0;
-  int finish = get_finish(s);
-  for(int i=start; i<finish; i++)
-    n = n*base+int_of_char(s[i]); // Signed arithmetic!!
-  return n;
-}
-/* The arithmetic in this function will be unsigned */
-static unsigned int intconst_unsigned(string s, int start, unsigned int base) {
-  unsigned int n = 0;
-  int finish = get_finish(s);
-  for(int i=start; i<finish; i++)
-    n = n*base+(unsigned int)int_of_char(s[i]); // Unsigned arithmetic!!
-  return n;
-}
-/* The main conversion function */
-$(sign, int)@ intconst(string s, int start, int base) {
-  sign u = get_sign(s);
-  switch (u) {
-  case Signed:
-    /* Here the int part will be signed */
-    return &$(u,intconst_signed(s,start,base));
-  case Unsigned:
-    /* Here the int part will be converted to signed, but
-       the sign part will show that it should be converted
-       back to unsigned. */
-    return &$(u,(signed int)intconst_unsigned(s,start,base));
+
+/* 
+ * FIX: We should really have 8-bytes to store a long literal!!!
+ *      That is, we and the previous version totally ignore the L!!!
+ */
+$(sign, int)@ intconst<`a>(Lexbuf<`a> lbuf, int start, int base) {
+  unsigned int n    = 0;
+  int          end  = lbuf->lex_curr_pos;
+  string       buff = lbuf->lex_buffer;
+  int          i    = start + lbuf->lex_start_pos;
+  for(int i = start + lbuf->lex_start_pos; i < end; ++i) {
+    char c = buff[i];
+    switch (c) {
+        // incorrect to return as soon as we see 'u' 'U' if l isn't ignored
+    case 'u': fallthru;
+    case 'U': return &$(Unsigned,(signed int)n); 
+    case 'l': break;
+    case 'L': break;
+    default: n = n*base + (unsigned int)int_of_char(c); break;
+    }
   }
+  return &$(Signed, (signed int)n);
 }
 
 /*********************** CHARACTER CONSTANTS ***********************/
@@ -203,6 +232,7 @@ static char char_for_octal_code<`a>(Lexbuf<`a> lb, int start, int howmany) {
   return (char)c;
 }
 
+// FIX: shouldn't build a lexeme, but pretty rare
 static char char_for_hex_code(string s, int start) {
   int c = 0; 
   int len = String::strlen(s);
@@ -316,7 +346,7 @@ static bool is_typedef_in_namespace(List<var> ns, var v) {
   }
 }
 static bool is_typedef(qvar q) {
-  lex_sanitycheck();
+  //  lex_sanitycheck();
   if (q[0] != null) {
     return is_typedef_in_namespace(q[0],q[1]);
   }
@@ -335,7 +365,7 @@ static bool is_typedef(qvar q) {
   return false;
 }
 void enter_namespace(var s) {
-  lex_sanitycheck();
+  //  lex_sanitycheck();
   list<var> ns = lstate->v->lstack->hd->current_namespace;
   list<var> new_ns = List::append(ns,&cons(s,null));
   // Push the new namespace on the stack
@@ -361,11 +391,11 @@ void enter_namespace(var s) {
   }
 }
 void leave_namespace() {
-  lex_sanitycheck();
+  //  lex_sanitycheck();
   lstate->v->lstack = lstate->v->lstack->tl;
 }
 void enter_using(qvar q) {
-  lex_sanitycheck();
+  //  lex_sanitycheck();
 
   let ns = (List<string>)List::append(q[0],&cons(q[1],null));
   let ans = get_absolute_namespace(ns);
@@ -374,7 +404,7 @@ void enter_using(qvar q) {
   lstate->v->lstack->hd->imported_namespaces = &cons(ans,imported);
 }
 void leave_using() {
-  lex_sanitycheck();
+  //  lex_sanitycheck();
 
   let imported = lstate->v->lstack->hd->imported_namespaces;
 
@@ -382,7 +412,7 @@ void leave_using() {
 }
 void register_typedef(qvar q) {
   // FIX: we assume that q is not in fact qualified
-  lex_sanitycheck();
+  //  lex_sanitycheck();
 
   let current = lstate->v->lstack->hd->current_namespace;
   let ds = lstate->v->decls;
@@ -392,13 +422,16 @@ void register_typedef(qvar q) {
   lstate->v->decls = Dict::insert(ds,current,new_ld);
 }
 
-// can try interning strings once our hashtable resizes
+// This kludge won't be necessary to avoid allocation after we have stack
+// pointers.
+static $(List::list<var>,var) kludge_qvar = $(null,(string)"");
 static short process_id(string s) {
   try
     return (short)(Hashtable::lookup(rw->v, s));
   catch {
   case Not_found: 
-    if (is_typedef(&$(null,s))) {
+    kludge_qvar[1] = s;
+    if (is_typedef(&kludge_qvar)) {
       token_qvar = &$(null,s);
       return (short)QUAL_TYPEDEF_NAME;
     } else {
@@ -408,28 +441,29 @@ static short process_id(string s) {
   }
 }
 
-static short process_qual_id(string s) {
-  int i = 0;
-  int len = String::strlen(s);
+  // FIX: share these strings too!
+static short process_qual_id<`a>(Lexbuf<`a> lbuf) {
+  int    i     = lbuf->lex_start_pos;
+  int    end   = lbuf->lex_curr_pos;
+  string s     = lbuf->lex_buffer;
+
   list<var> rev_vs = null;
 
-  while (i<len) {
+  while (i<end) {
     int start = i;
-    for (; i < len && s[i] != ':'; i++) /* skip */ ;
+    for (; i < end && s[i] != ':'; i++) 
+      ; // skip
     if (start == i) // no progress -- first char is ':'
       throw Impossible("bad namespace");
     int vlen = i - start;
-    if (vlen == 0)
-      fprintf(cyc_stderr,"Impossible vlen!");
-    var v = new_string(vlen+1);
-    zstrncpy(v,0,s,start,vlen);
+    var v    = share_str(s, start, vlen);
     rev_vs = &cons(v,rev_vs);
     i += 2;
   }
   if (rev_vs == null)
     throw Impossible("bad namespace");
   var v = rev_vs->hd;
-  list<var> vs = List::rev(rev_vs->tl);
+  list<var> vs = List::imp_rev(rev_vs->tl);
   token_qvar = &$(vs,v);
   if (is_typedef(token_qvar))
     return (short)QUAL_TYPEDEF_NAME;
@@ -471,31 +505,32 @@ let newline = ('\n' | '\r' | "\r\n")
 rule token = parse
 /* Identifiers, type names, and keywords */
   ['A'-'Z''a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
-      { return process_id (lexeme(lexbuf)); }
+{ return process_id(share_str_lbuf(lexbuf)); }
 | ['_']['A'-'Z''a'-'z''0'-'9''_']+
-      { return process_id (lexeme(lexbuf)); }
+{ return process_id (share_str_lbuf(lexbuf)); }
 /* Qualified identifiers and type names (e.g., Foo::bar) */
 | (['A'-'Z''a'-'z''_']['A'-'Z''a'-'z''0'-'9''_']*':'':')+
   ['A'-'Z''a'-'z''_']['A'-'Z''a'-'z''0'-'9''_']*
-      { return process_qual_id(lexeme(lexbuf)); }
+      { return process_qual_id(lexbuf); }
 /* Type variables */
 | '`'['A'-'Z''a'-'z''0'-'9''_']+
-      { token_string = lexeme(lexbuf); return TYPE_VAR; }
+      { token_string = share_str_lbuf(lexbuf); 
+      return TYPE_VAR; }
 /* Integer constants */
 | '0'['x''X']['0'-'9''a'-'f''A'-'F']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
-      { token_int = intconst(lexeme(lexbuf),2,16);
+      { token_int = intconst(lexbuf,2,16);
         return INTEGER_CONSTANT; }
 | '0'['0'-'7']*((['u''U']['l''L']?)|(['l''L']['u''U']?))?
-      { token_int = intconst(lexeme(lexbuf),0,8);
+      { token_int = intconst(lexbuf,0,8);
         return INTEGER_CONSTANT; }
 | '0'['0'-'9']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
       /* This is really an error case according to OSI C --
          the leading 0 indicates this should be in octal. */
-      /* TODO: print a warning message? */
-      { token_int = intconst(lexeme(lexbuf),0,10);
+      /* FIX: print a warning message? */
+      { token_int = intconst(lexbuf,0,10);
         return INTEGER_CONSTANT; }
 | ['1'-'9']['0'-'9']*((['u''U']['l''L']?)|(['l''L']['u''U']?))?
-      { token_int = intconst(lexeme(lexbuf),0,10);
+      { token_int = intconst(lexbuf,0,10);
         return INTEGER_CONSTANT; }
 /* Floating-point constants */
 | ['0'-'9']+['e''E']['+''-']?['0'-'9']+['f''F''l''L']?

@@ -144,7 +144,6 @@ synth tcStmt(tenv te, stmt s0) {
 
   case Goto_s(_,_):
     process_goto(te,s0);
-    warn(s0->loc, "goto may be unsafe!!!");
     return forward_jump_synth(te);
 
   case For_s(e1,$(e2,guard_s),$(e3,cont_s),s): 

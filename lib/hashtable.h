@@ -6,6 +6,7 @@ namespace Hashtable {
 extern struct table<`a,`b>;
 typedef struct table<`a,`b> @Table<`a,`b>;
 
+// if cmp(x,y) is 0 then it better be that hash(x) == hash(y) 
 extern Table<`a,`b> create<`a,`b>(int sz, int cmp(`a,`a), int hash(`a));
 extern void insert<`a,`b>(Table<`a,`b> t, `a key, `b val);
 extern `b lookup<`a,`b>(Table<`a,`b> t, `a key); // raises Not_found

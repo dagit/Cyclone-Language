@@ -63,6 +63,8 @@ static int cmp(string s1, int ofs1, size_t len1,
 // Compare two strings lexicographically.
 // Return <0, 0, or >0 depending on whether s1<s2, s1==s2, or s1>s2.
 int strcmp(string s1, string s2) {
+  if(s1 == s2)
+    return 0;
   size_t len1 = int_strleno(s1,0,"String::strcmp");
   size_t len2 = int_strleno(s2,0,"String::strcmp");
   return cmp(s1,0,len1,s2,0,len2,case_cmp);
@@ -113,6 +115,8 @@ int strncasecmp(string s1, int ofs1, string s2, int ofs2, size_t n) {
 // Like strcmp but don't consider zeros (null characters) as marking
 // the end of strings.
 int zstrcmp(string a, string b) {
+  if(a == b)
+    return 0;
   size_t as = size(a);
   size_t bs = size(b);
   size_t min_length = (as < bs) ? as : bs;
