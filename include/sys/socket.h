@@ -1,7 +1,7 @@
 #ifndef _SYS_SOCKET_H
 #define _SYS_SOCKET_H
 
-#include <sys/types.h> // for socklet_t
+#include <sys/types.h> // for socklen_t
 
 #define SOCK_STREAM 1
 #define SOCK_DGRAM 2

@@ -1,46 +1,47 @@
- struct Cyc_timespec{ unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{
-struct Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; extern void
-exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; extern
-struct _tagged_arr Cyc_Core_new_string( int); extern unsigned char Cyc_Core_InvalidArg[
-15u]; struct Cyc_Core_InvalidArg_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
-15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
-16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
-unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
-_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
-wrap_Cstring_as_string( unsigned char*, int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); extern int*
-__errno(); struct Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[
-19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; struct Cyc_List_List{ void* hd;
-struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[ 15u];
-extern unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List*
-Cyc_List_imp_rev( struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_append(
-struct Cyc_List_List* x, struct Cyc_List_List* y); extern unsigned char Cyc_List_Nth[
-8u]; extern unsigned char Cyc_Lexing_Error[ 10u]; struct Cyc_Lexing_Error_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; struct Cyc_Lexing_lexbuf{ void(*
-refill_buff)( struct Cyc_Lexing_lexbuf*); void* refill_state; struct _tagged_arr
-lex_buffer; int lex_buffer_len; int lex_abs_pos; int lex_start_pos; int
-lex_curr_pos; int lex_last_pos; int lex_last_action; int lex_eof_reached; } ;
-struct Cyc_Lexing_function_lexbuf_state{ int(* read_fun)( struct _tagged_arr,
-int, void*); void* read_fun_state; } ; struct Cyc_Lexing_lex_tables{ struct
-_tagged_arr lex_base; struct _tagged_arr lex_backtrk; struct _tagged_arr
-lex_default; struct _tagged_arr lex_trans; struct _tagged_arr lex_check; } ;
-extern struct _tagged_arr Cyc_Lexing_lexeme( struct Cyc_Lexing_lexbuf*); extern
-unsigned char Cyc_Lexing_lexeme_char( struct Cyc_Lexing_lexbuf*, int); extern
-int Cyc_Lexing_lexeme_start( struct Cyc_Lexing_lexbuf*); extern int Cyc_Lexing_lexeme_end(
-struct Cyc_Lexing_lexbuf*); extern int Cyc_Lexing_lex_engine( struct Cyc_Lexing_lex_tables*,
-int, struct Cyc_Lexing_lexbuf*); struct Cyc_Set_Set; extern struct Cyc_Set_Set*
-Cyc_Set_empty( int(* comp)( void*, void*)); extern struct Cyc_Set_Set* Cyc_Set_insert(
-struct Cyc_Set_Set* s, void* elt); extern int Cyc_Set_member( struct Cyc_Set_Set*
-s, void* elt); extern void Cyc_Set_iter( void(* f)( void*), struct Cyc_Set_Set*
-s); extern unsigned char Cyc_Set_Absent[ 11u]; extern int Cyc_String_strlen(
-struct _tagged_arr s); extern int Cyc_String_zstrptrcmp( struct _tagged_arr*,
-struct _tagged_arr*); extern struct _tagged_arr Cyc_String_str_sepstr( struct
-Cyc_List_List*, struct _tagged_arr); extern struct _tagged_arr Cyc_String_zstrncpy(
+ struct Cyc_timeval{ int tv_sec; int tv_usec; } ; struct Cyc_timespec{
+unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{ int
+fds_bits[ 2u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
+void* v; } ; extern struct _tagged_arr Cyc_Core_new_string( int); extern
+unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
+12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
+} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
+14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
+string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
+struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
+extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
+struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char*); extern int* __errno(); struct Cyc_Stdio___sFILE; extern
+unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
+18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; }
+; extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
+18u]; extern struct Cyc_List_List* Cyc_List_imp_rev( struct Cyc_List_List* x);
+extern struct Cyc_List_List* Cyc_List_append( struct Cyc_List_List* x, struct
+Cyc_List_List* y); extern unsigned char Cyc_List_Nth[ 8u]; extern unsigned char
+Cyc_Lexing_Error[ 10u]; struct Cyc_Lexing_Error_struct{ unsigned char* tag;
+struct _tagged_arr f1; } ; struct Cyc_Lexing_lexbuf{ void(* refill_buff)( struct
+Cyc_Lexing_lexbuf*); void* refill_state; struct _tagged_arr lex_buffer; int
+lex_buffer_len; int lex_abs_pos; int lex_start_pos; int lex_curr_pos; int
+lex_last_pos; int lex_last_action; int lex_eof_reached; } ; struct Cyc_Lexing_function_lexbuf_state{
+int(* read_fun)( struct _tagged_arr, int, void*); void* read_fun_state; } ;
+struct Cyc_Lexing_lex_tables{ struct _tagged_arr lex_base; struct _tagged_arr
+lex_backtrk; struct _tagged_arr lex_default; struct _tagged_arr lex_trans;
+struct _tagged_arr lex_check; } ; extern struct _tagged_arr Cyc_Lexing_lexeme(
+struct Cyc_Lexing_lexbuf*); extern unsigned char Cyc_Lexing_lexeme_char( struct
+Cyc_Lexing_lexbuf*, int); extern int Cyc_Lexing_lexeme_start( struct Cyc_Lexing_lexbuf*);
+extern int Cyc_Lexing_lexeme_end( struct Cyc_Lexing_lexbuf*); extern int Cyc_Lexing_lex_engine(
+struct Cyc_Lexing_lex_tables*, int, struct Cyc_Lexing_lexbuf*); struct Cyc_Set_Set;
+extern struct Cyc_Set_Set* Cyc_Set_empty( int(* comp)( void*, void*)); extern
+struct Cyc_Set_Set* Cyc_Set_insert( struct Cyc_Set_Set* s, void* elt); extern
+int Cyc_Set_member( struct Cyc_Set_Set* s, void* elt); extern void Cyc_Set_iter(
+void(* f)( void*), struct Cyc_Set_Set* s); extern unsigned char Cyc_Set_Absent[
+11u]; extern int Cyc_String_strlen( struct _tagged_arr s); extern int Cyc_String_zstrptrcmp(
+struct _tagged_arr*, struct _tagged_arr*); extern struct _tagged_arr Cyc_String_str_sepstr(
+struct Cyc_List_List*, struct _tagged_arr); extern struct _tagged_arr Cyc_String_zstrncpy(
 struct _tagged_arr, int, struct _tagged_arr, int, int); extern struct
 _tagged_arr Cyc_String_substring( struct _tagged_arr, int ofs, int n); struct
 Cyc_Xarray_Xarray{ struct _tagged_arr elmts; int num_elmts; } ; extern void* Cyc_Xarray_get(

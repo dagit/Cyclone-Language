@@ -1,40 +1,42 @@
- struct Cyc_timespec{ unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{
-struct Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; extern void
-exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; extern
-struct _tagged_arr Cyc_Core_new_string( int); extern unsigned char Cyc_Core_InvalidArg[
-15u]; struct Cyc_Core_InvalidArg_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
-15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
-16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
-unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
-_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
-wrap_Cstring_as_string( unsigned char*, int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); extern int*
-__errno(); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
-unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern struct Cyc_List_List* Cyc_List_imp_rev( struct Cyc_List_List* x);
-extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Stdio___sFILE; extern struct
-Cyc_Stdio___sFILE* Cyc_Stdio_stdout; extern struct Cyc_Stdio___sFILE* Cyc_Stdio_stderr;
-extern int Cyc_Stdio_fflush( struct Cyc_Stdio___sFILE*); extern unsigned char
-Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u];
-struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct _tagged_arr f1;
-} ; struct Cyc_Lineno_Pos{ struct _tagged_arr logical_file; struct _tagged_arr
-line; int line_no; int col; } ; extern struct Cyc_Lineno_Pos* Cyc_Lineno_pos_of_abs(
-struct _tagged_arr, int); extern void Cyc_Lineno_poss_of_abss( struct
-_tagged_arr filename, struct Cyc_List_List* places); extern unsigned char Cyc_Position_Exit[
-9u]; extern void Cyc_Position_reset_position( struct _tagged_arr); extern void
-Cyc_Position_set_position_file( struct _tagged_arr); extern struct _tagged_arr
-Cyc_Position_get_position_file(); struct Cyc_Position_Segment; extern struct Cyc_Position_Segment*
-Cyc_Position_segment_of_abs( int, int); extern struct Cyc_Position_Segment* Cyc_Position_segment_join(
-struct Cyc_Position_Segment*, struct Cyc_Position_Segment*); extern struct
-_tagged_arr Cyc_Position_string_of_loc( int); extern struct _tagged_arr Cyc_Position_string_of_segment(
-struct Cyc_Position_Segment*); extern struct Cyc_List_List* Cyc_Position_strings_of_segments(
-struct Cyc_List_List*); static const int Cyc_Position_Lex= 0; static const int
-Cyc_Position_Parse= 1; static const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{
-struct _tagged_arr source; struct Cyc_Position_Segment* seg; void* kind; struct
+ struct Cyc_timeval{ int tv_sec; int tv_usec; } ; struct Cyc_timespec{
+unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{ int
+fds_bits[ 2u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
+void* v; } ; extern struct _tagged_arr Cyc_Core_new_string( int); extern
+unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
+12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
+} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
+14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
+string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
+struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
+extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
+struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char*); extern int* __errno(); struct Cyc_List_List{ void* hd; struct
+Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern
+unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List* Cyc_List_imp_rev(
+struct Cyc_List_List* x); extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Stdio___sFILE;
+extern struct Cyc_Stdio___sFILE* Cyc_Stdio_stdout; extern struct Cyc_Stdio___sFILE*
+Cyc_Stdio_stderr; extern int Cyc_Stdio_fflush( struct Cyc_Stdio___sFILE*);
+extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
+18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; struct Cyc_Lineno_Pos{ struct _tagged_arr logical_file;
+struct _tagged_arr line; int line_no; int col; } ; extern struct Cyc_Lineno_Pos*
+Cyc_Lineno_pos_of_abs( struct _tagged_arr, int); extern void Cyc_Lineno_poss_of_abss(
+struct _tagged_arr filename, struct Cyc_List_List* places); extern unsigned char
+Cyc_Position_Exit[ 9u]; extern void Cyc_Position_reset_position( struct
+_tagged_arr); extern void Cyc_Position_set_position_file( struct _tagged_arr);
+extern struct _tagged_arr Cyc_Position_get_position_file(); struct Cyc_Position_Segment;
+extern struct Cyc_Position_Segment* Cyc_Position_segment_of_abs( int, int);
+extern struct Cyc_Position_Segment* Cyc_Position_segment_join( struct Cyc_Position_Segment*,
+struct Cyc_Position_Segment*); extern struct _tagged_arr Cyc_Position_string_of_loc(
+int); extern struct _tagged_arr Cyc_Position_string_of_segment( struct Cyc_Position_Segment*);
+extern struct Cyc_List_List* Cyc_Position_strings_of_segments( struct Cyc_List_List*);
+static const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1;
+static const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct
+_tagged_arr source; struct Cyc_Position_Segment* seg; void* kind; struct
 _tagged_arr desc; } ; extern struct Cyc_Position_Error* Cyc_Position_mk_err_lex(
 struct Cyc_Position_Segment*, struct _tagged_arr); extern struct Cyc_Position_Error*
 Cyc_Position_mk_err_parse( struct Cyc_Position_Segment*, struct _tagged_arr);

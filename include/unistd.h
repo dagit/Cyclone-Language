@@ -19,10 +19,13 @@ namespace Unistd {
     uid_t geteuid(void);
     gid_t getgid(void);
     gid_t getegid(void);
+    int select(int n, fd_set *readfds, fd_set *writefds,
+               fd_set *exceptfds, struct timeval *timeout);
   }
 
   int chdir(string_t);
   char ?getcwd(char ?buf, size_t size);
+  int execl(string_t path, string_t arg0, ...`r string_t argv);
 }
 
 #endif

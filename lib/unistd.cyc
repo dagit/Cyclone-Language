@@ -3,8 +3,11 @@
 using Core;
 
 namespace Cunistd {
-  extern "C" int chdir(Cstring);
-  extern "C" Cstring getcwd(Cstring buf, size_t size);
+  extern "C" {
+    int chdir(Cstring);
+    Cstring getcwd(Cstring buf, size_t size);
+    int execv(Cstring path, Cstring *argv);
+  }
 }
 
 namespace Unistd;
@@ -19,4 +22,17 @@ char ?getcwd(char ?buf, size_t size) {
   }
   Cstring response = Cunistd::getcwd((Cstring)buf, size);
   return response ? buf : null;
+}
+
+// This is untested; I'd be surprised if it actually works
+int execl(string_t path, string_t arg0, ...`r string_t argv) {
+  if (argv[argv.size - 1] != null)
+    throw new Failure("execl: arg list must be null-terminated");
+
+  Cstring ?newargs = new {for i < 1 + argv.size : null};
+  newargs[0] = string_to_Cstring(arg0);
+  for (int i = 0; i < argv.size; i++) {
+    newargs[i+1] = string_to_Cstring(argv[i]);
+  }
+  return Cunistd::execv(string_to_Cstring(path), (Cstring*) newargs);
 }

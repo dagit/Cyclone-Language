@@ -1,39 +1,35 @@
- struct Cyc_timespec{ unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{
-struct Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; extern void
-exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; extern
-struct _tagged_arr Cyc_Core_new_string( int); extern struct _tagged_arr Cyc_Core_rnew_string(
-struct _RegionHandle*, int); extern unsigned char Cyc_Core_InvalidArg[ 15u];
-struct Cyc_Core_InvalidArg_struct{ unsigned char* tag; struct _tagged_arr f1; }
-; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
-15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
-16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern struct _RegionHandle* Cyc_Core_heap_region; extern unsigned char*
-string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
-struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
-extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
-struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
-unsigned char*); extern int* __errno(); struct Cyc_List_List{ void* hd; struct
-Cyc_List_List* tl; } ; extern int Cyc_List_length( struct Cyc_List_List* x);
-extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern int isalnum( int __c)
- __attribute__(( cdecl )) ; extern int isalpha( int __c)  __attribute__(( cdecl
-)) ; extern int iscntrl( int __c)  __attribute__(( cdecl )) ; extern int isdigit(
-int __c)  __attribute__(( cdecl )) ; extern int isgraph( int __c)
- __attribute__(( cdecl )) ; extern int islower( int __c)  __attribute__(( cdecl
-)) ; extern int isprint( int __c)  __attribute__(( cdecl )) ; extern int ispunct(
-int __c)  __attribute__(( cdecl )) ; extern int isspace( int __c)
- __attribute__(( cdecl )) ; extern int isupper( int __c)  __attribute__(( cdecl
-)) ; extern int isxdigit( int __c)  __attribute__(( cdecl )) ; extern int
-tolower( int __c)  __attribute__(( cdecl )) ; extern int toupper( int __c)
- __attribute__(( cdecl )) ; extern int isascii( int __c)  __attribute__(( cdecl
-)) ; extern int toascii( int __c)  __attribute__(( cdecl )) ; extern int
-_tolower( int __c)  __attribute__(( cdecl )) ; extern int _toupper( int __c)
- __attribute__(( cdecl )) ; struct Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[
-19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern struct _tagged_arr Cyc_String_strerror(
-int); extern int Cyc_String_strlen( struct _tagged_arr s); extern int Cyc_String_strcmp(
+ struct Cyc_timeval{ int tv_sec; int tv_usec; } ; struct Cyc_timespec{
+unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{ int
+fds_bits[ 2u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
+void* v; } ; extern struct _tagged_arr Cyc_Core_new_string( int); extern struct
+_tagged_arr Cyc_Core_rnew_string( struct _RegionHandle*, int); extern
+unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
+12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
+} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
+14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern struct _RegionHandle* Cyc_Core_heap_region;
+extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
+unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
+_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, int); extern struct _tagged_arr
+ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); extern int*
+__errno(); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
+int Cyc_List_length( struct Cyc_List_List* x); extern unsigned char Cyc_List_List_empty[
+15u]; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
+Cyc_List_Nth[ 8u]; extern int isalnum( int __c); extern int isalpha( int __c);
+extern int iscntrl( int __c); extern int isdigit( int __c); extern int isgraph(
+int __c); extern int islower( int __c); extern int isprint( int __c); extern int
+ispunct( int __c); extern int isspace( int __c); extern int isupper( int __c);
+extern int isxdigit( int __c); extern int tolower( int __c); extern int toupper(
+int __c); extern int isascii( int __c); extern int toascii( int __c); extern int
+_tolower( int __c); extern int _toupper( int __c); struct Cyc_Stdio___sFILE;
+extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
+18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern struct _tagged_arr Cyc_String_strerror( int); extern
+int Cyc_String_strlen( struct _tagged_arr s); extern int Cyc_String_strcmp(
 struct _tagged_arr s1, struct _tagged_arr s2); extern int Cyc_String_strptrcmp(
 struct _tagged_arr* s1, struct _tagged_arr* s2); extern int Cyc_String_strncmp(
 struct _tagged_arr s1, struct _tagged_arr s2, int len); extern int Cyc_String_strncasecmp(

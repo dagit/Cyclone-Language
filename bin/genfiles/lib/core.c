@@ -1,16 +1,17 @@
- struct Cyc_timespec{ unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{
-struct Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; extern void
-exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; extern
-struct Cyc_Core_Opt* Cyc_Core_opt_map( void*(* f)( void*), struct Cyc_Core_Opt*
-x); extern struct _tagged_arr Cyc_Core_new_string( int); extern struct
-_tagged_arr Cyc_Core_rnew_string( struct _RegionHandle*, int); extern int Cyc_Core_true_f(
-void*); extern int Cyc_Core_false_f( void*); struct _tuple0{ void* f1; void* f2;
-} ; extern void* Cyc_Core_fst( struct _tuple0*); extern void* Cyc_Core_snd(
-struct _tuple0*); struct _tuple1{ void* f1; void* f2; void* f3; } ; extern void*
-Cyc_Core_third( struct _tuple1*); extern void* Cyc_Core_identity( void*); extern
-int Cyc_Core_intcmp( int, int); extern int Cyc_Core_charcmp( unsigned char,
-unsigned char); extern int Cyc_Core_ptrcmp( void**, void**); extern
-unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+ struct Cyc_timeval{ int tv_sec; int tv_usec; } ; struct Cyc_timespec{
+unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{ int
+fds_bits[ 2u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
+void* v; } ; extern struct Cyc_Core_Opt* Cyc_Core_opt_map( void*(* f)( void*),
+struct Cyc_Core_Opt* x); extern struct _tagged_arr Cyc_Core_new_string( int);
+extern struct _tagged_arr Cyc_Core_rnew_string( struct _RegionHandle*, int);
+extern int Cyc_Core_true_f( void*); extern int Cyc_Core_false_f( void*); struct
+_tuple0{ void* f1; void* f2; } ; extern void* Cyc_Core_fst( struct _tuple0*);
+extern void* Cyc_Core_snd( struct _tuple0*); struct _tuple1{ void* f1; void* f2;
+void* f3; } ; extern void* Cyc_Core_third( struct _tuple1*); extern void* Cyc_Core_identity(
+void*); extern int Cyc_Core_intcmp( int, int); extern int Cyc_Core_charcmp(
+unsigned char, unsigned char); extern int Cyc_Core_ptrcmp( void**, void**);
+extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
