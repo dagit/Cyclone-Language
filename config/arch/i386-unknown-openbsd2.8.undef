@@ -1,5 +1,0 @@
-#undef __i386__
-#undef __GNUC_MINOR__
-#undef __unix__
-#undef __OpenBSD__
-#undef __GNUC__

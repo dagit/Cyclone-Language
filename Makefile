@@ -31,8 +31,14 @@ CYC_INC_PATH := $(CYCDIR)/lib
 
 all: $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a cyclone tools aprof libs 
 
-cyclone: include/cstdio.h include/csignal.h $(CYC_LIB_PATH)
+# FIX: a bug in buildlib forces us to use a relative path for -d
+cyclone: $(CYC_LIB_PATH)
 	$(MAKE) -C bin/genfiles install 
+	-mkdir $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include
+	tar -z -xf bin/genfiles/$(ARCH).headers.tgz -C $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include
+	bin/buildlib -d bin/lib/cyc-lib/$(ARCH)/include -finish bin/cyc-lib/libc.cys
+	find $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include -name '*.i[BC]' -exec rm \{\} \;
+
 tools:
 	$(MAKE) -C tools/bison  install 
 	$(MAKE) -C tools/cyclex install 
@@ -61,25 +67,6 @@ $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a: gc/gc.a $(CYC_LIB_PATH)
 
 gc/gc.a:
 	$(MAKE) -C gc CC="$(CC)" gc.a CFLAGS="$(CFLAGS) -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DSILENT -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"
-
-# Kludge to use architecture-specific constants -- we hope buildlib comes soon
-# The resulting files must *not* be used when cross-compiling.
-include/cstdio.h: include/cstdio.h_in include/arch/$(ARCH).h
-	-$(RM) $@
-	echo "#ifndef _STDIO_H" >> $@
-	echo "#define _STDIO_H" >> $@
-	echo "#define _EXTRACT_STDIOCONSTS" >> $@
-	cat include/arch/$(ARCH).h >> $@
-	echo "#undef _EXTRACT_STDIOCONSTS" >> $@
-	cat $< >> $@
-include/csignal.h: include/csignal.h_in include/arch/$(ARCH).h
-	-$(RM) $@
-	echo "#ifndef _SIGNAL_H" >> $@
-	echo "#define _SIGNAL_H" >> $@
-	echo "#define _EXTRACT_SIGNALCONSTS" >> $@
-	cat include/arch/$(ARCH).h >> $@
-	echo "#undef _EXTRACT_SIGNALCONSTS" >> $@
-	cat $< >> $@
 
 # Store the compiler, libraries, and tools in the user-defined directories.
 # Also, keep a record of what was copied for later uninstall.
@@ -165,7 +152,7 @@ cmp:
               || echo $(XS) lib/$$i CHANGED) done
 	@cmp -s $(ARCHDIR)/lib/$(C_RUNTIME) lib/$(C_RUNTIME)\
               || echo $(XS) lib/$(C_RUNTIME) CHANGED
-	@cmp -s $(ARCHDIR)/lib/cstubs.c lib/cstubs.c \
+	@cmp -s $(ARCHDIR)/lib/cstubs.c $(BUILDDIR)/cstubs.c \
               || echo $(XS) lib/cstubs.c CHANGED
 	@cmp -s $(ARCHDIR)/lib/nogc.c lib/nogc.c\
               || echo $(XS) lib/nogc.c CHANGED
@@ -180,15 +167,15 @@ cmp:
 # It would be "dangerous" to invoke this target if we did not have 
 # version control.  Only updates changed files (makes cvs faster).
 update: cfiles
-	@if [ "$(UPDATEARCH)" = "$(PATCH_ARCH)" ]; then\
-	  cd bin/genfiles; echo "UPDATING REFERENCE ARCH $(UPDATEARCH)";\
-	  for arch in $(ALL_ARCHS); do\
-	    ./extract_patch $(PATCH_ARCH) $$arch;\
-	  done; cd ../..;\
-	else\
-	  cd bin/genfiles; ./extract_patch $(PATCH_ARCH) $(UPDATEARCH);\
-	  cd ../..;\
-	fi
+	 @if [ "$(UPDATEARCH)" = "$(PATCH_ARCH)" ]; then\
+	   cd bin/genfiles; echo "UPDATING REFERENCE ARCH $(UPDATEARCH)";\
+	   for arch in $(ALL_ARCHS); do\
+	     ./extract_patch $(PATCH_ARCH) $$arch;\
+	   done; cd ../..;\
+	 else\
+	   cd bin/genfiles; ./extract_patch $(PATCH_ARCH) $(UPDATEARCH);\
+	   cd ../..;\
+	 fi
 	@for i in $(UPDATE_SRCS);\
 	   do (cmp -s $(BUILDDIR)/$$i $(ARCHDIR)/src/$$i\
                || (echo UPDATING $(ARCHDIR)/src/$$i;\
@@ -203,9 +190,9 @@ update: cfiles
 	@cmp -s lib/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME)\
                || (echo UPDATING $(ARCHDIR)lib/$(C_RUNTIME);\
                    cp lib/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME))
-	@cmp -s lib/cstubs.c $(ARCHDIR)/lib/cstubs.c\
+	@cmp -s $(BUILDDIR)/cstubs.c $(ARCHDIR)/lib/cstubs.c\
                || (echo UPDATING $(ARCHDIR)lib/cstubs.c;\
-                   cp lib/cstubs.c $(ARCHDIR)/lib/cstubs.c)
+                   cp $(BUILDDIR)/cstubs.c $(ARCHDIR)/lib/cstubs.c)
 	@cmp -s lib/nogc.c $(ARCHDIR)/lib/nogc.c\
                || (echo UPDATING $(ARCHDIR)/lib/nogc.c;\
                    cp lib/nogc.c $(ARCHDIR)/lib/nogc.c)
@@ -214,10 +201,6 @@ ifeq ($(UPDATEARCH),$(ARCH))
            do (test ! -e lib/$$i || cmp -s lib/$$i include/$$i\
                || (echo UPDATING lib/$$i;\
                    cp lib/$$i include/$$i)) done
-	@(cd lib; for i in arch/*.h;\
-	   do (cmp -s $$i ../include/$$i\
-               || (echo UPDATING include/$$i;\
-                    cp $$i ../include/$$i)) done)
 	@test ! -e lib/cyc_include.h\
                || cmp -s lib/cyc_include.h bin/cyc-lib/cyc_include.h\
                || (echo UPDATING cyc-lib/cyc_include.h;\
@@ -227,21 +210,21 @@ ifeq ($(UPDATEARCH),$(ARCH))
                || (echo UPDATING cyc-lib/libc.cys;\
                  cp lib/libc.cys bin/cyc-lib/libc.cys)
 endif
-	@if [ "$(UPDATEARCH)" = "$(PATCH_ARCH)" ]; then\
-	  for arch in $(ALL_ARCHS); do\
-	    if [ -f "bin/genfiles/$$arch.patch" ]; then\
-	      echo "PATCHIFYING $$arch";\
-	      $(MAKE) -s -C bin/genfiles $$arch.patch && \
-	      $(RM) -rf bin/genfiles/$$arch;\
-	    fi;\
-	  done;\
-	elif [ -f "$(ARCHDIR).patch" ]; then\
-	  echo "PATCHIFYING $(UPDATEARCH)";\
-	  $(MAKE) -s -C bin/genfiles $(UPDATEARCH).patch && \
-	  if [ "$(UPDATEARCH)" != "$(ARCH)" ]; then\
-	    $(RM) -rf $(ARCHDIR);\
-	  fi;\
-	fi
+	 @if [ "$(UPDATEARCH)" = "$(PATCH_ARCH)" ]; then\
+	   for arch in $(ALL_ARCHS); do\
+	     if [ -f "bin/genfiles/$$arch.patch" ]; then\
+	       echo "PATCHIFYING $$arch";\
+	       $(MAKE) -s -C bin/genfiles $$arch.patch && \
+	       $(RM) -rf bin/genfiles/$$arch;\
+	     fi;\
+	   done;\
+	 elif [ -f "$(ARCHDIR).patch" ]; then\
+	   echo "PATCHIFYING $(UPDATEARCH)";\
+	   $(MAKE) -s -C bin/genfiles $(UPDATEARCH).patch && \
+	   if [ "$(UPDATEARCH)" != "$(ARCH)" ]; then\
+	     $(RM) -rf $(ARCHDIR);\
+	   fi;\
+	 fi
 
 # This will compile (C files) and update for all supported architectures
 #   and then compile and install for all supported architectures
@@ -316,7 +299,6 @@ clean_nogc: clean_test clean_build
 	$(RM) -r bin/lib
 	$(RM) $(addprefix bin/, $(addsuffix $(EXE), cyclone cycdoc buildlib cycbison cyclex cycflex aprof))
 	$(RM) *~ amon.out
-	$(RM) include/cstdio.h include/csignal.h 
 
 clean: clean_nogc
 	$(MAKE) clean -C gc

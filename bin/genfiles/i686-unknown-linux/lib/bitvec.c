@@ -257,32 +257,35 @@ char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char 
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct Cyc_List_List{
 void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];extern char
 Cyc_List_Nth[8];struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};
-int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc_Cstdio___abstractFILE;
-struct Cyc_Std___cycFILE;extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[
-18];struct Cyc_Std_FileOpenError_struct{char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{
+int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);typedef struct{int __count;union{
+unsigned int __wch;char __wchb[4];}__value;}Cyc_Std___mbstate_t;typedef struct{int
+__pos;Cyc_Std___mbstate_t __state;}Cyc_Std__G_fpos_t;typedef Cyc_Std__G_fpos_t Cyc_Std_fpos_t;
+struct Cyc_Std___cycFILE;struct Cyc_Std_Cstdio___abstractFILE;struct Cyc_Std_String_pa_struct{
 int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;}
 ;struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{
-int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};int Cyc_Std_printf(
-struct _tagged_arr fmt,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{int tag;
-short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct
-Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;
-unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;}
-;struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{
-int tag;float*f1;};struct Cyc_Dict_Dict;extern char Cyc_Dict_Present[12];extern char
-Cyc_Dict_Absent[11];void*Cyc_Dict_lookup(struct Cyc_Dict_Dict*d,void*k);struct
-_tuple0{void*f1;void*f2;};struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*r,
-struct Cyc_Dict_Dict*d);struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*,
-struct Cyc_Dict_Dict*d);struct _tagged_arr Cyc_Bitvec_new_empty(int);struct
-_tagged_arr Cyc_Bitvec_new_full(int);struct _tagged_arr Cyc_Bitvec_new_copy(struct
-_tagged_arr);struct _tagged_arr Cyc_Bitvec_from_list(struct Cyc_Dict_Dict*d,int(*f)(
-void*),int sz,struct Cyc_List_List*);struct Cyc_List_List*Cyc_Bitvec_to_sorted_list(
-struct _tagged_arr bvec,int sz);void Cyc_Bitvec_print_bvec(struct _tagged_arr bvec);
-int Cyc_Bitvec_get(struct _tagged_arr,int);void Cyc_Bitvec_set(struct _tagged_arr,
-int);void Cyc_Bitvec_clear(struct _tagged_arr,int);int Cyc_Bitvec_get_and_set(
-struct _tagged_arr,int);void Cyc_Bitvec_clear_all(struct _tagged_arr);void Cyc_Bitvec_set_all(
-struct _tagged_arr);int Cyc_Bitvec_all_set(struct _tagged_arr bvec,int sz);void Cyc_Bitvec_union_two(
-struct _tagged_arr dest,struct _tagged_arr src1,struct _tagged_arr src2);void Cyc_Bitvec_intersect_two(
-struct _tagged_arr dest,struct _tagged_arr src1,struct _tagged_arr src2);void Cyc_Bitvec_diff_two(
+int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};struct
+Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{
+int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
+Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
+int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
+};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};int Cyc_Std_printf(struct
+_tagged_arr,struct _tagged_arr);extern char Cyc_Std_FileCloseError[19];extern char
+Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{char*tag;struct
+_tagged_arr f1;};struct Cyc_Dict_Dict;extern char Cyc_Dict_Present[12];extern char Cyc_Dict_Absent[
+11];void*Cyc_Dict_lookup(struct Cyc_Dict_Dict*d,void*k);struct _tuple0{void*f1;
+void*f2;};struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*r,struct Cyc_Dict_Dict*
+d);struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*,struct Cyc_Dict_Dict*d);
+struct _tagged_arr Cyc_Bitvec_new_empty(int);struct _tagged_arr Cyc_Bitvec_new_full(
+int);struct _tagged_arr Cyc_Bitvec_new_copy(struct _tagged_arr);struct _tagged_arr
+Cyc_Bitvec_from_list(struct Cyc_Dict_Dict*d,int(*f)(void*),int sz,struct Cyc_List_List*);
+struct Cyc_List_List*Cyc_Bitvec_to_sorted_list(struct _tagged_arr bvec,int sz);void
+Cyc_Bitvec_print_bvec(struct _tagged_arr bvec);int Cyc_Bitvec_get(struct _tagged_arr,
+int);void Cyc_Bitvec_set(struct _tagged_arr,int);void Cyc_Bitvec_clear(struct
+_tagged_arr,int);int Cyc_Bitvec_get_and_set(struct _tagged_arr,int);void Cyc_Bitvec_clear_all(
+struct _tagged_arr);void Cyc_Bitvec_set_all(struct _tagged_arr);int Cyc_Bitvec_all_set(
+struct _tagged_arr bvec,int sz);void Cyc_Bitvec_union_two(struct _tagged_arr dest,
+struct _tagged_arr src1,struct _tagged_arr src2);void Cyc_Bitvec_intersect_two(struct
+_tagged_arr dest,struct _tagged_arr src1,struct _tagged_arr src2);void Cyc_Bitvec_diff_two(
 struct _tagged_arr dest,struct _tagged_arr src1,struct _tagged_arr src2);int Cyc_Bitvec_compare_two(
 struct _tagged_arr src1,struct _tagged_arr src2);void*Cyc_Std___assert_fail(struct
 _tagged_arr assertion,struct _tagged_arr file,unsigned int line);int Cyc_Bitvec_get(

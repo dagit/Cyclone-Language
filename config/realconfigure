@@ -203,7 +203,7 @@ fi
 
 # function to cleanup if we can't port the arch
 function cleanup {
-  \rm -f ${CYCDIR}/lib/arch/${ARCH}.h ${CYCDIR}/include/arch/${ARCH}.h ${CYCDIR}/config/arch/${ARCH}*
+  \rm -f ${CYCDIR}/config/arch/${ARCH}*
   \rm -rf ${CYCDIR}/bin/genfiles/${ARCH}
   exit 1
 }
@@ -235,13 +235,6 @@ if [ ! -f "arch/${ARCH}" ]; then
     EGREP=$RES
     export EGREP
     export CC
-    ./arch_include > ${CYCDIR}/lib/arch/${ARCH}.h
-    cp ${CYCDIR}/lib/arch/${ARCH}.h ${CYCDIR}/include/arch/${ARCH}.h
-    if [ $? != 0 ]; then
-      echo "  failed.  Try altering the version of egrep used by"
-      echo "  the script config/arch_include."
-      cleanup
-    fi
     if [ -d "${CYCDIR}/bin/genfiles/${ARCH}" ]; then
       echo "Warning: genfiles directory for ${ARCH} exists"
     else
@@ -253,7 +246,7 @@ if [ ! -f "arch/${ARCH}" ]; then
   fi
 else
   # make sure all of the needed configuration files are here
-  if [ -f "arch/${ARCH}.undef" -a -f "../lib/arch/${ARCH}.h" -a -f "../include/arch/${ARCH}.h" ]; then
+  if [ -f "arch/${ARCH}.undef" ]; then
     echo "Supported architecture ${ARCH}"
     cd ../bin/genfiles; ./extract_patch ${PATCH_ARCH} ${ARCH}; cd -
     if [ ! -d "${CYCDIR}/bin/genfiles/${ARCH}" ]; then

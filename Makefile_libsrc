@@ -20,7 +20,7 @@ endif
 CYCC:=$(CYCDIR)/bin/$(CYCCOMP)
 CYCLEX:=$(CYCDIR)/bin/cyclex$(EXE)
 CYCBISON:=$(CYCDIR)/bin/cycbison$(EXE)
-INC_PATH:=. $(CYCDIR)/lib $(CYCDIR)/src $(CYCDIR)/include
+INC_PATH:=. include $(CYCDIR)/lib $(CYCDIR)/src $(CYCDIR)/include
 LIB_PATH:=$(CYCDIR)/lib
 LIBR:=$(CYCLIB)
 
@@ -41,10 +41,20 @@ CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))
 
 all: libs $(CYCCOMP) cycdoc$(EXE) buildlib$(EXE) 
 
-# See kludge described below
-libs: cstdio.h csignal.h $(CYCLIB) nogc.a $(RUNTIME).$(O)
+libs: $(CYCLIB) nogc.a $(RUNTIME).$(O)
 
-cfiles: cstdio.h csignal.h $(C_SRCS) cycdoc.c buildlib.c $(C_LIBS) cstubs.c $(RUNTIME).c nogc.c precore_c.h
+cfiles: cstubs.c $(C_SRCS) cycdoc.c buildlib.c $(C_LIBS) $(RUNTIME).c nogc.c precore_c.h
+
+cstubs.c cycstubs.cyc: libc.cys
+	-mkdir include
+	tar -z -xf $(CYCDIR)/bin/genfiles/$(UPDATEARCH).headers.tgz -C include
+	$(CYCDIR)/bin/buildlib -d include -finish $<
+	find include -name '*.i[BC]' -exec rm \{\} \;
+	mv include/cstubs.c .
+	mv include/cycstubs.cyc .
+
+libc.cys: $(CYCDIR)/bin/cyc-lib/libc.cys
+	cp $< $@
 
 $(CYCCOMP): $(O_SRCS) $(LIBR) install_path.$(O)
 ifdef MS
@@ -59,8 +69,8 @@ endif
 #   $(CYCDIR), and we avoid the libcyc.a and gc.a of any version of
 #   Cyclone currently installed in the usual place.
 # Why don't these use $(CYCFLAGS) -- because that has -save-c which is
-#  irrelevant and the -B flags used there are to find cyc_include.h,
-#  not the .a files.
+#   irrelevant and the -B flags used there are to find cyc_include.h,
+#   not the .a files.
 cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS))
 	$(CYCC) -v -L. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
 
@@ -116,33 +126,17 @@ precore_c.h: core.h $(CYCC) cyc_include.h
 # For runtime_cyc.c and nogc.c and cstubs.c
 %.$(O): %.c precore_c.h cyc_include.h
 	$(CC) $(CFLAGS) -I. -c -o $@ $<
-# Always use the original compiler to avoid circularities
-# Note: In most cases, it would be correct to share .d files
-%.d: %.cyc cstdio.h csignal.h
-	$(CYCDIR)/bin/$(CYCCOMP) -M -MG $(CYCFLAGS) $< > $@
 
 ifdef MS
 %.obj: %.c precore_c.h cyc_include.h
 	cl /I$(CYCDIR) /Dinline=__inline /c /w /nologo /Fo$@ $^
 endif
 
-#This kludge replaces the PLATFORM_INCLUDE kludge -- we hope buildlib comes soon
-cstdio.h: cstdio.h_in arch/$(UPDATEARCH).h
-	-$(RM) $@
-	echo "#ifndef _STDIO_H" >> $@
-	echo "#define _STDIO_H" >> $@
-	echo "#define _EXTRACT_STDIOCONSTS" >> $@
-	cat $(CYCDIR)/lib/arch/$(UPDATEARCH).h >> $@
-	echo "#undef _EXTRACT_STDIOCONSTS" >> $@
-	cat $< >> $@
-csignal.h: csignal.h_in arch/$(UPDATEARCH).h
-	-$(RM) $@
-	echo "#ifndef _SIGNAL_H" >> $@
-	echo "#define _SIGNAL_H" >> $@
-	echo "#define _EXTRACT_SIGNALCONSTS" >> $@
-	cat $(CYCDIR)/lib/arch/$(UPDATEARCH).h >> $@
-	echo "#undef _EXTRACT_SIGNALCONSTS" >> $@
-	cat $< >> $@
+# Always use the original compiler to avoid circularities
+# Note: In most cases, it would be correct to share .d files
+# Note: depends on cstubs.c so header files get built first
+%.d: %.cyc cstubs.c
+	$(CYCDIR)/bin/$(CYCCOMP) -M -MG $(CYCFLAGS) $< > $@
 
 ifndef NODEPS
 -include $(addsuffix .d, $(CYCLONE_LIBS) $(CYCLONE_SRCS) cycdoc buildlib)

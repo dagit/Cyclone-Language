@@ -255,29 +255,27 @@ char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Cor
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};int isspace(
-int);int isupper(int);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern
-char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];extern char Cyc_Array_Array_mismatch[
-19];struct Cyc_Std__Div{int quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};
-double Cyc_Std_atof(struct _tagged_arr);int Cyc_Std_strtol(struct _tagged_arr n,
-struct _tagged_arr*end,int base);unsigned int Cyc_Std_strtoul(struct _tagged_arr n,
-struct _tagged_arr*end,int base);struct Cyc_Cstdio___abstractFILE;struct Cyc_Std___cycFILE;
-extern struct Cyc_Std___cycFILE*Cyc_Std_stdin;int Cyc_Std_fgetc(struct Cyc_Std___cycFILE*
-__stream);int Cyc_Std_getc(struct Cyc_Std___cycFILE*__stream);int Cyc_Std_ungetc(
-int __c,struct Cyc_Std___cycFILE*__stream);extern char Cyc_Std_FileCloseError[19];
-extern char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{char*tag;
-struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;
-};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{
-int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{
-int tag;unsigned int*f1;};struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};
-struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
-int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
-Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
-int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};int Cyc_Std_scanf(
-struct _tagged_arr fmt,struct _tagged_arr);int Cyc_Std_fscanf(struct Cyc_Std___cycFILE*
-stream,struct _tagged_arr fmt,struct _tagged_arr);int Cyc_Std_sscanf(struct
-_tagged_arr src,struct _tagged_arr fmt,struct _tagged_arr);int Cyc_Std_vfscanf(struct
-Cyc_Std___cycFILE*stream,struct _tagged_arr fmt,struct _tagged_arr);int Cyc_Std_vsscanf(
-struct _tagged_arr src,struct _tagged_arr fmt,struct _tagged_arr);static struct
+int);int isupper(int);typedef struct{int quot;int rem;}Cyc_Std_div_t;typedef struct{
+int quot;int rem;}Cyc_Std_ldiv_t;double Cyc_Std_atof(struct _tagged_arr);int Cyc_Std_strtol(
+struct _tagged_arr,struct _tagged_arr*,int);unsigned int Cyc_Std_strtoul(struct
+_tagged_arr,struct _tagged_arr*,int);typedef struct{int __count;union{unsigned int
+__wch;char __wchb[4];}__value;}Cyc_Std___mbstate_t;typedef struct{int __pos;Cyc_Std___mbstate_t
+__state;}Cyc_Std__G_fpos_t;typedef Cyc_Std__G_fpos_t Cyc_Std_fpos_t;struct Cyc_Std___cycFILE;
+extern struct Cyc_Std___cycFILE*Cyc_Std_stdin;struct Cyc_Std_Cstdio___abstractFILE;
+struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
+int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct
+Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int
+tag;unsigned int*f1;};int Cyc_Std_fgetc(struct Cyc_Std___cycFILE*);struct Cyc_Std_ShortPtr_sa_struct{
+int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};
+struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{
+int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{int tag;struct
+_tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{
+int tag;float*f1;};int Cyc_Std_fscanf(struct Cyc_Std___cycFILE*,struct _tagged_arr,
+struct _tagged_arr);int Cyc_Std_getc(struct Cyc_Std___cycFILE*);int Cyc_Std_scanf(
+struct _tagged_arr,struct _tagged_arr);int Cyc_Std_sscanf(struct _tagged_arr,struct
+_tagged_arr,struct _tagged_arr);int Cyc_Std_ungetc(int,struct Cyc_Std___cycFILE*);
+extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[18];struct
+Cyc_Std_FileOpenError_struct{char*tag;struct _tagged_arr f1;};static struct
 _tagged_arr Cyc_Std___sccl(struct _tagged_arr tab,struct _tagged_arr fmt);static short*
 Cyc_Std_va_arg_short_ptr(void*a){void*_tmp0=a;short*_tmp1;unsigned short*_tmp2;
 _LL1: if(*((int*)_tmp0)!= 0)goto _LL3;_tmp1=((struct Cyc_Std_ShortPtr_sa_struct*)

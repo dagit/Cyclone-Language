@@ -3,6 +3,8 @@
 #include <string.h>
 using Core;
 
+namespace Std;
+
 namespace Cstdio {
 extern "C" {
 struct Cstdio::__abstractFILE *tmpfile();
@@ -11,8 +13,6 @@ Cstring	tmpnam(Cstring);
 //  #define static_c2s(x) (Cstring_to_string(x))
 #define static_c2s(x) (wrap_Cstring_as_string(x,-1))
 }}
-
-namespace Std;
 
 FILE *tmpfile() {
   struct Cstdio::__abstractFILE *cf = Cstdio::tmpfile();

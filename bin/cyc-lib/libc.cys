@@ -2382,7 +2382,7 @@ cycstub {
   #define static_c2s(x) (wrap_Cstring_as_string(x,-1))
   #endif
 }
-prologue {
+epilogue {
   namespace Cstdio {
     extern "C" struct __abstractFILE;    // needed by tmp.cyc
   }
@@ -2399,6 +2399,11 @@ cycstub {
 epilogue {
   // fromCfile needed by tmp.cyc
   extern FILE *`H fromCfile(struct Cstdio::__abstractFILE *`H cf);
+}
+cycstub {
+  FILE*`H fromCfile(Cstdio::__cFILE *`H cf) {
+    return cf ? new __cycFILE(cf) : NULL;
+  }
 }
 cstub {
   #include <stdio.h>

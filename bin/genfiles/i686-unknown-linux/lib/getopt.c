@@ -254,48 +254,41 @@ extern void _profile_free_region(struct _RegionHandle *,
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct Cyc_Cstdio___abstractFILE;
-struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*Cyc_Std_stderr;extern char
-Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
-char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;struct
+16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};typedef
+struct{int __count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc_Std___mbstate_t;
+typedef struct{int __pos;Cyc_Std___mbstate_t __state;}Cyc_Std__G_fpos_t;typedef Cyc_Std__G_fpos_t
+Cyc_Std_fpos_t;struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*Cyc_Std_stderr;
+struct Cyc_Std_Cstdio___abstractFILE;struct Cyc_Std_String_pa_struct{int tag;struct
 _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{
 int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{
 int tag;unsigned int*f1;};int Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,struct
-_tagged_arr fmt,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{int tag;short*
-f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
+_tagged_arr,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;
+};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
 int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
 Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
-int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_List_List{
-void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];extern char
-Cyc_List_Nth[8];extern char Cyc_Array_Array_mismatch[19];struct Cyc_Std__Div{int
-quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};struct _tagged_arr Cyc_Std_getenv(
-struct _tagged_arr);struct Cyc_Std_timeval{int tv_sec;int tv_usec;};struct Cyc_Std_timezone{
-int tz_minuteswest;int tz_dsttime;};struct Cyc_Std_itimerval{struct Cyc_Std_timeval
-it_interval;struct Cyc_Std_timeval it_value;};typedef struct{unsigned int __val[64];}
-Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;struct Cyc_Std_timespec{
-int tv_sec;int tv_nsec;};struct Cyc_Std_timeval;struct Cyc_Std___fd_set{int
-__fds_bits[32];};extern struct _tagged_arr Cyc_Std_optarg;extern int Cyc_Std_optind;
-extern int Cyc_Std_opterr;extern int Cyc_Std_optopt;struct Cyc_Std_option{struct
-_tagged_arr name;int has_arg;int*flag;int val;};int Cyc_Std_getopt(int __argc,struct
-_tagged_arr __argv,struct _tagged_arr __shortopts);int Cyc_Std__getopt_internal(int
-__argc,struct _tagged_arr __argv,struct _tagged_arr __shortopts,struct _tagged_arr
-__longopts,int*__longind,int __long_only);int Cyc_Std_access(struct _tagged_arr,int);
-int Cyc_Std_chdir(struct _tagged_arr);int Cyc_Std_chown(struct _tagged_arr,
-unsigned int,unsigned int);struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,
-unsigned int size);int Cyc_Std_execl(struct _tagged_arr path,struct _tagged_arr arg0,
-struct _tagged_arr argv);int Cyc_Std_execlp(struct _tagged_arr file,struct _tagged_arr
-arg0,struct _tagged_arr argv);int Cyc_Std_execve(struct _tagged_arr filename,struct
-_tagged_arr argv,struct _tagged_arr envp);int Cyc_Std_link(struct _tagged_arr,struct
-_tagged_arr);int Cyc_Std_read(int fd,struct _tagged_arr buf,unsigned int count);int
-Cyc_Std_rmdir(struct _tagged_arr);int Cyc_Std_symlink(struct _tagged_arr,struct
-_tagged_arr);int Cyc_Std_truncate(struct _tagged_arr,int);int Cyc_Std_write(int fd,
-struct _tagged_arr buf,unsigned int count);int Cyc_Std_unlink(struct _tagged_arr
-pathname);int Cyc_Std_gethostname(struct _tagged_arr,unsigned int);int Cyc_Std_chroot(
-struct _tagged_arr);struct _tagged_arr Cyc_Std_getpass(struct _tagged_arr prompt);
-unsigned int Cyc_Std_strlen(struct _tagged_arr s);int Cyc_Std_strcmp(struct
-_tagged_arr s1,struct _tagged_arr s2);int Cyc_Std_strncmp(struct _tagged_arr s1,struct
-_tagged_arr s2,unsigned int len);struct _tagged_arr Cyc_Std_strchr(struct _tagged_arr
-s,char c);struct _tagged_arr Cyc_Std_optarg;int Cyc_Std_optind=1;int Cyc_Std___getopt_initialized;
+int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};extern char
+Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
+char*tag;struct _tagged_arr f1;};typedef struct{int quot;int rem;}Cyc_Std_div_t;
+typedef struct{int quot;int rem;}Cyc_Std_ldiv_t;struct _tagged_arr Cyc_Std_getenv(
+struct _tagged_arr);enum Cyc_Std___anonymous_enum_362__{Cyc_Std__PC_LINK_MAX  = 0,
+Cyc_Std__PC_MAX_CANON  = 1,Cyc_Std__PC_MAX_INPUT  = 2,Cyc_Std__PC_NAME_MAX  = 3,Cyc_Std__PC_PATH_MAX
+ = 4,Cyc_Std__PC_PIPE_BUF  = 5,Cyc_Std__PC_CHOWN_RESTRICTED  = 6,Cyc_Std__PC_NO_TRUNC
+ = 7,Cyc_Std__PC_VDISABLE  = 8,Cyc_Std__PC_SYNC_IO  = 9,Cyc_Std__PC_ASYNC_IO  = 10,
+Cyc_Std__PC_PRIO_IO  = 11,Cyc_Std__PC_SOCK_MAXBUF  = 12,Cyc_Std__PC_FILESIZEBITS
+ = 13,Cyc_Std__PC_REC_INCR_XFER_SIZE  = 14,Cyc_Std__PC_REC_MAX_XFER_SIZE  = 15,Cyc_Std__PC_REC_MIN_XFER_SIZE
+ = 16,Cyc_Std__PC_REC_XFER_ALIGN  = 17};enum Cyc_Std___anonymous_enum_364__{Cyc_Std__CS_PATH
+ = 0};int Cyc_Std_chroot(struct _tagged_arr);struct _tagged_arr Cyc_Std_getpass(
+struct _tagged_arr);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern
+char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];unsigned int Cyc_Std_strlen(
+struct _tagged_arr s);int Cyc_Std_strcmp(struct _tagged_arr s1,struct _tagged_arr s2);
+int Cyc_Std_strncmp(struct _tagged_arr s1,struct _tagged_arr s2,unsigned int len);
+struct _tagged_arr Cyc_Std_strchr(struct _tagged_arr s,char c);extern struct
+_tagged_arr Cyc_Std_optarg;extern int Cyc_Std_optind;extern int Cyc_Std_opterr;extern
+int Cyc_Std_optopt;struct Cyc_Std_option{struct _tagged_arr name;int has_arg;int*flag;
+int val;};int Cyc_Std_getopt(int __argc,struct _tagged_arr __argv,struct _tagged_arr
+__shortopts);int Cyc_Std__getopt_internal(int __argc,struct _tagged_arr __argv,
+struct _tagged_arr __shortopts,struct _tagged_arr __longopts,int*__longind,int
+__long_only);struct _tagged_arr Cyc_Std_optarg;int Cyc_Std_optind=1;int Cyc_Std___getopt_initialized;
 static struct _tagged_arr Cyc_Std_nextchar;int Cyc_Std_opterr=1;int Cyc_Std_optopt=(
 int)'?';enum Cyc_Std_ordering_tag{Cyc_Std_REQUIRE_ORDER  = 0,Cyc_Std_PERMUTE  = 1,
 Cyc_Std_RETURN_IN_ORDER  = 2};static enum Cyc_Std_ordering_tag Cyc_Std_ordering;

@@ -250,57 +250,54 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Std__types_fd_set{int fds_bits[2];};struct Cyc_Core_Opt{void*v;};extern
-char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{char*
-tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
+ struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};extern
-struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_Cstdio___abstractFILE;struct
-Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*Cyc_Std_stdout;int Cyc_Std_putc(
-int __c,struct Cyc_Std___cycFILE*__stream);extern char Cyc_Std_FileCloseError[19];
-extern char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{char*tag;
-struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;
-};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{
-int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{
-int tag;unsigned int*f1;};int Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,struct
-_tagged_arr fmt,struct _tagged_arr);int Cyc_Std_printf(struct _tagged_arr fmt,struct
-_tagged_arr);int Cyc_Std_sprintf(struct _tagged_arr s,struct _tagged_arr fmt,struct
-_tagged_arr);int Cyc_Std_snprintf(struct _tagged_arr s,unsigned int n,struct
-_tagged_arr fmt,struct _tagged_arr ap);struct _tagged_arr Cyc_Std_aprintf(struct
-_tagged_arr fmt,struct _tagged_arr);struct _tagged_arr Cyc_Std_rprintf(struct
-_RegionHandle*,struct _tagged_arr fmt,struct _tagged_arr ap);int Cyc_Std_vfprintf(
-struct Cyc_Std___cycFILE*,struct _tagged_arr fmt,struct _tagged_arr ap);int Cyc_Std_vprintf(
-struct _tagged_arr fmt,struct _tagged_arr);int Cyc_Std_vsprintf(struct _tagged_arr s,
-struct _tagged_arr fmt,struct _tagged_arr);int Cyc_Std_vsnprintf(struct _tagged_arr s,
-unsigned int n,struct _tagged_arr fmt,struct _tagged_arr ap);struct _tagged_arr Cyc_Std_vrprintf(
-struct _RegionHandle*r1,struct _tagged_arr fmt,struct _tagged_arr ap);struct Cyc_Std_ShortPtr_sa_struct{
+struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*
+Cyc_Std_stdout;struct Cyc_Std_Cstdio___abstractFILE;struct Cyc_Std_String_pa_struct{
+int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;}
+;struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{
+int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};struct
+_tagged_arr Cyc_Std_aprintf(struct _tagged_arr,struct _tagged_arr);int Cyc_Std_fprintf(
+struct Cyc_Std___cycFILE*,struct _tagged_arr,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{
 int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};
 struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{
 int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{int tag;struct
 _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{
-int tag;float*f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern
-char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];unsigned int Cyc_Std_strlen(
-struct _tagged_arr s);extern char Cyc_Array_Array_mismatch[19];struct Cyc_Std__Div{
-int quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};double modf(double,double*);
-static struct _tagged_arr Cyc_Std_parg2string(void*x){void*_tmp0=x;_LL1: if(*((int*)
-_tmp0)!= 0)goto _LL3;_LL2: return _tag_arr("string",sizeof(char),7);_LL3: if(*((int*)
-_tmp0)!= 1)goto _LL5;_LL4: return _tag_arr("int",sizeof(char),4);_LL5: if(*((int*)
-_tmp0)!= 2)goto _LL7;_LL6: return _tag_arr("double",sizeof(char),7);_LL7: if(*((int*)
-_tmp0)!= 3)goto _LL9;_LL8: return _tag_arr("short *",sizeof(char),8);_LL9: if(*((int*)
-_tmp0)!= 4)goto _LL0;_LLA: return _tag_arr("unsigned long *",sizeof(char),16);_LL0:;}
-static void*Cyc_Std_badarg(struct _tagged_arr s){return(void*)_throw((void*)({
-struct Cyc_Core_Invalid_argument_struct*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1[0]=({
-struct Cyc_Core_Invalid_argument_struct _tmp2;_tmp2.tag=Cyc_Core_Invalid_argument;
-_tmp2.f1=s;_tmp2;});_tmp1;}));}static int Cyc_Std_va_arg_int(struct _tagged_arr ap){
-void*_tmp3=*((void**)_check_unknown_subscript(ap,sizeof(void*),0));unsigned int
-_tmp4;_LLC: if(*((int*)_tmp3)!= 1)goto _LLE;_tmp4=((struct Cyc_Std_Int_pa_struct*)
-_tmp3)->f1;_LLD: return(int)_tmp4;_LLE:;_LLF: return((int(*)(struct _tagged_arr s))
-Cyc_Std_badarg)(_tag_arr("printf expected int",sizeof(char),20));_LLB:;}static
-int Cyc_Std_va_arg_long(struct _tagged_arr ap){void*_tmp5=*((void**)
-_check_unknown_subscript(ap,sizeof(void*),0));unsigned int _tmp6;_LL11: if(*((int*)
-_tmp5)!= 1)goto _LL13;_tmp6=((struct Cyc_Std_Int_pa_struct*)_tmp5)->f1;_LL12:
-return(int)_tmp6;_LL13:;_LL14: return((int(*)(struct _tagged_arr s))Cyc_Std_badarg)(
+int tag;float*f1;};int Cyc_Std_printf(struct _tagged_arr,struct _tagged_arr);int Cyc_Std_putc(
+int,struct Cyc_Std___cycFILE*);struct _tagged_arr Cyc_Std_rprintf(struct
+_RegionHandle*,struct _tagged_arr,struct _tagged_arr);int Cyc_Std_snprintf(struct
+_tagged_arr,unsigned int,struct _tagged_arr,struct _tagged_arr);int Cyc_Std_sprintf(
+struct _tagged_arr,struct _tagged_arr,struct _tagged_arr);int Cyc_Std_vfprintf(
+struct Cyc_Std___cycFILE*,struct _tagged_arr,struct _tagged_arr);int Cyc_Std_vprintf(
+struct _tagged_arr,struct _tagged_arr);struct _tagged_arr Cyc_Std_vrprintf(struct
+_RegionHandle*,struct _tagged_arr,struct _tagged_arr);int Cyc_Std_vsnprintf(struct
+_tagged_arr,unsigned int,struct _tagged_arr,struct _tagged_arr);int Cyc_Std_vsprintf(
+struct _tagged_arr,struct _tagged_arr,struct _tagged_arr);extern char Cyc_Std_FileCloseError[
+19];extern char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{char*
+tag;struct _tagged_arr f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
+extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];unsigned int Cyc_Std_strlen(
+struct _tagged_arr s);typedef struct{int quot;int rem;}Cyc_Std_div_t;typedef struct{
+int quot;int rem;}Cyc_Std_ldiv_t;double modf(double,double*);static struct
+_tagged_arr Cyc_Std_parg2string(void*x){void*_tmp0=x;_LL1: if(*((int*)_tmp0)!= 0)
+goto _LL3;_LL2: return _tag_arr("string",sizeof(char),7);_LL3: if(*((int*)_tmp0)!= 1)
+goto _LL5;_LL4: return _tag_arr("int",sizeof(char),4);_LL5: if(*((int*)_tmp0)!= 2)
+goto _LL7;_LL6: return _tag_arr("double",sizeof(char),7);_LL7: if(*((int*)_tmp0)!= 3)
+goto _LL9;_LL8: return _tag_arr("short *",sizeof(char),8);_LL9: if(*((int*)_tmp0)!= 
+4)goto _LL0;_LLA: return _tag_arr("unsigned long *",sizeof(char),16);_LL0:;}static
+void*Cyc_Std_badarg(struct _tagged_arr s){return(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1[0]=({struct Cyc_Core_Invalid_argument_struct
+_tmp2;_tmp2.tag=Cyc_Core_Invalid_argument;_tmp2.f1=s;_tmp2;});_tmp1;}));}static
+int Cyc_Std_va_arg_int(struct _tagged_arr ap){void*_tmp3=*((void**)
+_check_unknown_subscript(ap,sizeof(void*),0));unsigned int _tmp4;_LLC: if(*((int*)
+_tmp3)!= 1)goto _LLE;_tmp4=((struct Cyc_Std_Int_pa_struct*)_tmp3)->f1;_LLD: return(
+int)_tmp4;_LLE:;_LLF: return((int(*)(struct _tagged_arr s))Cyc_Std_badarg)(_tag_arr("printf expected int",
+sizeof(char),20));_LLB:;}static int Cyc_Std_va_arg_long(struct _tagged_arr ap){void*
+_tmp5=*((void**)_check_unknown_subscript(ap,sizeof(void*),0));unsigned int _tmp6;
+_LL11: if(*((int*)_tmp5)!= 1)goto _LL13;_tmp6=((struct Cyc_Std_Int_pa_struct*)_tmp5)->f1;
+_LL12: return(int)_tmp6;_LL13:;_LL14: return((int(*)(struct _tagged_arr s))Cyc_Std_badarg)(
 _tag_arr("printf expected int",sizeof(char),20));_LL10:;}static unsigned int Cyc_Std_va_arg_ulong(
 struct _tagged_arr ap){void*_tmp7=*((void**)_check_unknown_subscript(ap,sizeof(
 void*),0));unsigned int _tmp8;_LL16: if(*((int*)_tmp7)!= 1)goto _LL18;_tmp8=((

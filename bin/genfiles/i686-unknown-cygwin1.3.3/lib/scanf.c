@@ -250,55 +250,52 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Std__types_fd_set{int fds_bits[2];};struct Cyc_Core_Opt{void*v;};extern
-char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{char*
-tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
+ struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};int isspace(
-int);int isupper(int);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern
-char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];extern char Cyc_Array_Array_mismatch[
-19];struct Cyc_Std__Div{int quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};
-double Cyc_Std_atof(struct _tagged_arr);int Cyc_Std_strtol(struct _tagged_arr n,
-struct _tagged_arr*end,int base);unsigned int Cyc_Std_strtoul(struct _tagged_arr n,
-struct _tagged_arr*end,int base);struct Cyc_Cstdio___abstractFILE;struct Cyc_Std___cycFILE;
-extern struct Cyc_Std___cycFILE*Cyc_Std_stdin;int Cyc_Std_fgetc(struct Cyc_Std___cycFILE*
-__stream);int Cyc_Std_getc(struct Cyc_Std___cycFILE*__stream);int Cyc_Std_ungetc(
-int __c,struct Cyc_Std___cycFILE*__stream);extern char Cyc_Std_FileCloseError[19];
-extern char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{char*tag;
-struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;
-};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{
-int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{
-int tag;unsigned int*f1;};struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};
+int);int isupper(int);typedef struct{int quot;int rem;}Cyc_Std_div_t;typedef struct{
+int quot;int rem;}Cyc_Std_ldiv_t;double Cyc_Std_atof(struct _tagged_arr);int Cyc_Std_strtol(
+struct _tagged_arr,struct _tagged_arr*,int);unsigned int Cyc_Std_strtoul(struct
+_tagged_arr,struct _tagged_arr*,int);struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*
+Cyc_Std_stdin;struct Cyc_Std_Cstdio___abstractFILE;struct Cyc_Std_String_pa_struct{
+int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;}
+;struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{
+int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};int Cyc_Std_fgetc(
+struct Cyc_Std___cycFILE*);struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};
 struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
 int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
 Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
-int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};int Cyc_Std_scanf(
-struct _tagged_arr fmt,struct _tagged_arr);int Cyc_Std_fscanf(struct Cyc_Std___cycFILE*
-stream,struct _tagged_arr fmt,struct _tagged_arr);int Cyc_Std_sscanf(struct
-_tagged_arr src,struct _tagged_arr fmt,struct _tagged_arr);int Cyc_Std_vfscanf(struct
-Cyc_Std___cycFILE*stream,struct _tagged_arr fmt,struct _tagged_arr);int Cyc_Std_vsscanf(
-struct _tagged_arr src,struct _tagged_arr fmt,struct _tagged_arr);static struct
-_tagged_arr Cyc_Std___sccl(struct _tagged_arr tab,struct _tagged_arr fmt);static short*
-Cyc_Std_va_arg_short_ptr(void*a){void*_tmp0=a;short*_tmp1;unsigned short*_tmp2;
-_LL1: if(*((int*)_tmp0)!= 0)goto _LL3;_tmp1=((struct Cyc_Std_ShortPtr_sa_struct*)
-_tmp0)->f1;_LL2: return _tmp1;_LL3: if(*((int*)_tmp0)!= 1)goto _LL5;_tmp2=((struct
-Cyc_Std_UShortPtr_sa_struct*)_tmp0)->f1;_LL4: return(short*)_tmp2;_LL5:;_LL6:(int)
-_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp3=_cycalloc(sizeof(*
-_tmp3));_tmp3[0]=({struct Cyc_Core_Invalid_argument_struct _tmp4;_tmp4.tag=Cyc_Core_Invalid_argument;
-_tmp4.f1=_tag_arr("scan expects short pointer",sizeof(char),27);_tmp4;});_tmp3;}));
-_LL0:;}static int*Cyc_Std_va_arg_int_ptr(void*a){void*_tmp5=a;int*_tmp6;
-unsigned int*_tmp7;_LL8: if(*((int*)_tmp5)!= 2)goto _LLA;_tmp6=((struct Cyc_Std_IntPtr_sa_struct*)
-_tmp5)->f1;_LL9: return _tmp6;_LLA: if(*((int*)_tmp5)!= 3)goto _LLC;_tmp7=((struct
-Cyc_Std_UIntPtr_sa_struct*)_tmp5)->f1;_LLB: return(int*)_tmp7;_LLC:;_LLD:(int)
-_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp8=_cycalloc(sizeof(*
-_tmp8));_tmp8[0]=({struct Cyc_Core_Invalid_argument_struct _tmp9;_tmp9.tag=Cyc_Core_Invalid_argument;
-_tmp9.f1=_tag_arr("scan expects int pointer",sizeof(char),25);_tmp9;});_tmp8;}));
-_LL7:;}static struct _tagged_arr Cyc_Std_va_arg_string_ptr(void*a){void*_tmpA=a;
-struct _tagged_arr _tmpB;_LLF: if(*((int*)_tmpA)!= 4)goto _LL11;_tmpB=((struct Cyc_Std_StringPtr_sa_struct*)
-_tmpA)->f1;_LL10: return _tmpB;_LL11:;_LL12:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
-_tmpC=_cycalloc(sizeof(*_tmpC));_tmpC[0]=({struct Cyc_Core_Invalid_argument_struct
-_tmpD;_tmpD.tag=Cyc_Core_Invalid_argument;_tmpD.f1=_tag_arr("scan expects char pointer",
+int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};int Cyc_Std_fscanf(
+struct Cyc_Std___cycFILE*,struct _tagged_arr,struct _tagged_arr);int Cyc_Std_getc(
+struct Cyc_Std___cycFILE*);int Cyc_Std_scanf(struct _tagged_arr,struct _tagged_arr);
+int Cyc_Std_sscanf(struct _tagged_arr,struct _tagged_arr,struct _tagged_arr);int Cyc_Std_ungetc(
+int,struct Cyc_Std___cycFILE*);int Cyc_Std_vfscanf(struct Cyc_Std___cycFILE*,struct
+_tagged_arr,struct _tagged_arr);int Cyc_Std_vsscanf(struct _tagged_arr,struct
+_tagged_arr,struct _tagged_arr);extern char Cyc_Std_FileCloseError[19];extern char
+Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{char*tag;struct
+_tagged_arr f1;};static struct _tagged_arr Cyc_Std___sccl(struct _tagged_arr tab,
+struct _tagged_arr fmt);static short*Cyc_Std_va_arg_short_ptr(void*a){void*_tmp0=a;
+short*_tmp1;unsigned short*_tmp2;_LL1: if(*((int*)_tmp0)!= 0)goto _LL3;_tmp1=((
+struct Cyc_Std_ShortPtr_sa_struct*)_tmp0)->f1;_LL2: return _tmp1;_LL3: if(*((int*)
+_tmp0)!= 1)goto _LL5;_tmp2=((struct Cyc_Std_UShortPtr_sa_struct*)_tmp0)->f1;_LL4:
+return(short*)_tmp2;_LL5:;_LL6:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+_tmp3=_cycalloc(sizeof(*_tmp3));_tmp3[0]=({struct Cyc_Core_Invalid_argument_struct
+_tmp4;_tmp4.tag=Cyc_Core_Invalid_argument;_tmp4.f1=_tag_arr("scan expects short pointer",
+sizeof(char),27);_tmp4;});_tmp3;}));_LL0:;}static int*Cyc_Std_va_arg_int_ptr(void*
+a){void*_tmp5=a;int*_tmp6;unsigned int*_tmp7;_LL8: if(*((int*)_tmp5)!= 2)goto _LLA;
+_tmp6=((struct Cyc_Std_IntPtr_sa_struct*)_tmp5)->f1;_LL9: return _tmp6;_LLA: if(*((
+int*)_tmp5)!= 3)goto _LLC;_tmp7=((struct Cyc_Std_UIntPtr_sa_struct*)_tmp5)->f1;
+_LLB: return(int*)_tmp7;_LLC:;_LLD:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+_tmp8=_cycalloc(sizeof(*_tmp8));_tmp8[0]=({struct Cyc_Core_Invalid_argument_struct
+_tmp9;_tmp9.tag=Cyc_Core_Invalid_argument;_tmp9.f1=_tag_arr("scan expects int pointer",
+sizeof(char),25);_tmp9;});_tmp8;}));_LL7:;}static struct _tagged_arr Cyc_Std_va_arg_string_ptr(
+void*a){void*_tmpA=a;struct _tagged_arr _tmpB;_LLF: if(*((int*)_tmpA)!= 4)goto _LL11;
+_tmpB=((struct Cyc_Std_StringPtr_sa_struct*)_tmpA)->f1;_LL10: return _tmpB;_LL11:;
+_LL12:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmpC=
+_cycalloc(sizeof(*_tmpC));_tmpC[0]=({struct Cyc_Core_Invalid_argument_struct _tmpD;
+_tmpD.tag=Cyc_Core_Invalid_argument;_tmpD.f1=_tag_arr("scan expects char pointer",
 sizeof(char),26);_tmpD;});_tmpC;}));_LLE:;}static double*Cyc_Std_va_arg_double_ptr(
 void*a){void*_tmpE=a;double*_tmpF;_LL14: if(*((int*)_tmpE)!= 5)goto _LL16;_tmpF=((
 struct Cyc_Std_DoublePtr_sa_struct*)_tmpE)->f1;_LL15: return _tmpF;_LL16:;_LL17:(
