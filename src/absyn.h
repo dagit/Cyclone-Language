@@ -27,26 +27,10 @@
 // and related tools.  It is the crucial set of data structures that 
 // pervade the compiler.  
 
-// The abstract syntax has (at last count) three different "stages":
-// A. Result of parsing
-// B. Result of type-checking
-// C. Result of translation to C
-// Each stage obeys different invariants of which the compiler hacker
-// (that's you) must be aware.
-// Here is an invariant after parsing:
-//  A1. qvars may be Rel_n, Abs_n, or Loc_n.
-//      Rel_n is used for most variable references and declarations.
-//      Abs_n is used for some globals (Null_Exception, etc).
-//      Loc_n is used for some locals (comprehension and pattern variables).
-// Here are some invariants after type checking:
-//  B2. All qvars are either Loc_n, Abs_n or C_n.  Any Rel_n has been
-//      replaced by Loc_n, Abs_n or C_n.
-//  B3. Every expression has a non-null and correct type field.
-//  B4. None of the "unresolved" variants are used.  (There may be 
-//      underconstrained Evars for types.)
-//  B6. The pat_vars field of switch_clause is non-null and correct.
-// Note that translation to C willfully violates B3 and B4, but that's okay.
-// The translation to C also eliminates all things like type variables.
+// The abstract syntax is updated imperatively through many stages.
+// * See cyclone.cyc for the order of the stages.
+// * The invariants about abstract syntax change from stage to stage --
+//   see calls to Warn::impos* in subsequent stages.
 
 // A cute hack to avoid defining the abstract syntax twice:
 #ifdef ABSYN_CYC
@@ -505,11 +489,7 @@ namespace Absyn {
     FieldName(var_t);
   };
 
-  EXTERN_ABSYN enum MallocKind { 
-    Malloc,
-    Calloc,
-    Vmalloc
-  };
+  EXTERN_ABSYN enum MallocKind { Malloc, Calloc, Vmalloc };
 
   // information for malloc:
   //  it's important to note that when is_calloc is false (i.e., we have

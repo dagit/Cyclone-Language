@@ -171,9 +171,9 @@ void* _zero_arr_inplace_plus_post_other_fn(unsigned,void**,int,const char*,unsig
 #define _zero_arr_plus_other(t,x,s,i) \
   (_zero_arr_plus_other_fn(t,x,s,i,__FILE__,__LINE__))
 #define _zero_arr_inplace_plus_other(t,x,i) \
-  _zero_arr_inplace_plus_other_fn(t,(void***)(x),i,__FILE__,__LINE__)
-#define _zero_arr_inplace_plus_post_otherr(t,x,i) \
-  _zero_arr_inplace_plus_post_other_fn(t,(void***)(x),(i),__FILE__,__LINE__)
+  _zero_arr_inplace_plus_other_fn(t,(void**)(x),i,__FILE__,__LINE__)
+#define _zero_arr_inplace_plus_post_other(t,x,i) \
+  _zero_arr_inplace_plus_post_other_fn(t,(void**)(x),(i),__FILE__,__LINE__)
 
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_fat_subscript(arr,elt_sz,index) ((arr).curr + (elt_sz) * (index))
@@ -275,8 +275,8 @@ static inline unsigned int _check_times(unsigned x, unsigned y) {
 extern int rgn_total_bytes;
 #endif
 
-static inline void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
-  if (r > (struct _RegionHandle *)_CYC_MAX_REGION_CONST && r->curr != 0) { 
+static inline void*_fast_region_malloc(struct _RegionHandle*r, unsigned orig_s) {  
+  if (r > (struct _RegionHandle*)_CYC_MAX_REGION_CONST && r->curr != 0) { 
 #ifdef CYC_NOALIGN
     unsigned s =  orig_s;
 #else
