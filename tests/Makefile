@@ -27,7 +27,7 @@ CYCBISON=$(CYC_BIN_PATH)/cycbison$(EXE)
 OUT_PREFIX=
 
 LC_FLAG=
-override CYC_FLAGS += $(LC_FLAG) -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -g
+override CYC_FLAGS += $(LC_FLAG) -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -g -save-c -pp
 
 LIB=$(CYC_LIB_PATH)/$(OUT_PREFIX)$(CYCLIB)
 
@@ -79,6 +79,13 @@ $(OUT_PREFIX)finger$(EXE): $(OUT_PREFIX)finger.o
 $(OUT_PREFIX)test_getopt$(EXE): $(OUT_PREFIX)test_getopt.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 
+$(OUT_PREFIX)unsafe_cast.o: $(OUT_PREFIX)unsafe_cast.c
+	$(CC) -c $< -o $@
+
+$(OUT_PREFIX)typerep_test$(EXE): $(OUT_PREFIX)unsafe_cast.o \
+  $(OUT_PREFIX)typerep.o $(OUT_PREFIX)typerep_test.o
+	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
+
 # This takes care of non-machine-generated versions (the .cyc is already there)
 $(OUT_PREFIX)%.o : %.cyc $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -c $< 
@@ -87,7 +94,7 @@ clean_prefix:
 	$(RM) $(addprefix $(OUT_PREFIX), hello hello.o cyctest cyctest.o cyctest.c foo foo_tab.* foo.o foo.c histogram histogram.o histogram.c merge_sort merge_sort.o test_getopt.o test_getopt *.exe)
 
 clean:
-	$(RM) *hello.o *hello.c *bytes.o *bytes.c *cyctest.o *cyctest.c *foo_tab.* *foo.o *foo.c *histogram.o *histogram.c *finger.o *finger.c *test_getopt.c *test_getopt.o
+	$(RM) *hello.o *hello.c *bytes.o *bytes.c *cyctest.o *cyctest.c *foo_tab.* *foo.o *foo.c *histogram.o *histogram.c *finger.o *finger.c *test_getopt.c *test_getopt.o *typerep.[oc] *typerep_test.[oc] unsafe_cast.o
 	$(RM) *test_regions.o *test_regions.c
 	$(RM) hello cyctest foo histogram merge_sort finger test_getopt
 	$(RM) *~ *.exe *.output *.stackdump
