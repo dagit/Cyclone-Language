@@ -14,6 +14,7 @@ string_t end_tags[] = {
   "</9>", "</B>", "</EM>", "</I>", "</PL>", "</S>", "</TT>", "</U>", "</r>", 
   "</g>", "</b>", "</c>", "</m>", "</y>", "</k>", "</w>"
 };
+
 extern tunion Document;
 tunion Document {
   Seq(doc_t ?);
@@ -48,16 +49,108 @@ int doc_size(doc_t d) {
   return sum;
 }
 
+int num_texts(doc_t d) {
+  int sum = 0;
+  switch (d) {
+  case &Seq(ds):
+    for (; ds != null; ds++)
+      sum += num_texts(*ds);
+    break;
+  case &Text(s): ++sum; break;
+  case &Tagged(tag,d):
+    sum += num_texts(d);
+    break;
+  }
+  return sum;
+}
+
 struct Context {
   bool B :1;
   bool EM :1;
   bool I :1;
   bool S :1;
   bool TT :1;
-  unsigned short U :2;    // [0-3]
-  unsigned short size; // [0-9]
-  short color; // [r_tag-w_tag]
+  char U :2;    // [0-3]
+  char size;    // [0-9]
+  char color;   // [r_tag-w_tag]
 };
+typedef struct Context context_t;
+
+// gets rid of redundant tags in a top-down fashion
+doc_t down_opt(context_t ctxt, doc_t d) {
+  switch (d) {
+  case &Seq(ds):
+    for (; ds.size != 0; ds++)
+      *ds = down_opt(ctxt,*ds);
+    return d;
+  case &Text(_): return d;
+  case &Tagged(tag,*d2):
+    switch (tag) {
+    case B_tag:
+      if (ctxt.B) return down_opt(ctxt,*d2);
+      ctxt.B = true; 
+      break;
+    case EM_tag:
+      if (ctxt.EM) return down_opt(ctxt,*d2);
+      ctxt.EM = true; 
+      break;
+    case I_tag:
+      if (ctxt.I) return down_opt(ctxt,*d2);
+      ctxt.I = true;
+      break;
+    case PL_tag:
+      // PL clears the U, B, EM, I, S, and TT attributes
+      if (ctxt.U == 0 && !ctxt.B && !ctxt.EM && !ctxt.I && !ctxt.S && !ctxt.TT)
+        return down_opt(ctxt,*d2);
+      ctxt.U == 0; ctxt.B = false; ctxt.EM = false; ctxt.I = false;
+      ctxt.S = false; ctxt.TT = false;
+      break;
+    case S_tag:
+      if (ctxt.S) return down_opt(ctxt,*d2);
+      ctxt.S = true;
+      ctxt.EM = true; // S hides the EM attribute
+      break;
+    case TT_tag:
+      if (ctxt.TT) return down_opt(ctxt,*d2);
+      ctxt.TT = true;
+      break;
+    case U_tag:
+      if (ctxt.U == 3) return down_opt(ctxt,*d2);
+      ctxt.U++;
+      break;
+    case Zero:
+    case One:
+    case Two:
+    case Three:
+    case Four:
+    case Five:
+    case Six:
+    case Seven:
+    case Eight:
+    case Nine:
+      char sz = (char)tag;
+      if (ctxt.size == sz) return down_opt(ctxt,*d2);
+      ctxt.size = sz;
+      break;
+    case r_tag:
+    case g_tag:
+    case b_tag:
+    case c_tag:
+    case m_tag:
+    case y_tag:
+    case k_tag:
+    case w_tag:
+      char color = (char)tag;
+      if (ctxt.color == color) return down_opt(ctxt,*d2);
+      ctxt.color = color;
+      break;
+    }
+    *d2 = down_opt(ctxt,*d2);
+    return d;
+  }
+}
+
+
 
 int main(int argc, char ??argv) {
   printf("hello\n");
