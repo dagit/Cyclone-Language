@@ -90,8 +90,14 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
     if (!is_const_exp(e)) {
       Warn::err2(p->loc,"non-constant expression in case pattern");
       p->r = &Wild_p_val;
+      return;
     }
     let $(i,known) = Evexp::eval_const_uint_exp(e);
+    if (!known) {
+      Warn::err(p->loc,"cannot evaluate expression at compile time\nWe suggest using x && x == %s instead",exp2string(e));
+      p->r = &Wild_p_val;
+      return;
+    }
     p->r = new Int_p(None,i);
     return;
 
