@@ -282,7 +282,7 @@ test_bin:
 	$(MAKE) -C tests\
          CYCC=$(CYCDIR)/bin/cyclone$(EXE)\
          CYCBISON=$(CYCDIR)/bin/cycbison$(EXE)\
-         CYCFLAGS="-L$(CYCDIR)/bin/lib -g -save-c -pp -I$(CYCDIR)/include -B$(CYCDIR)/bin/lib/cyc-lib/$(ARCH)"
+         CYCFLAGS="-L$(CYCDIR)/bin/lib -g -save-c -pp -I$(CYCDIR)/include -B$(CYCDIR)/bin/lib/cyc-lib"
 # The -I and -B flags are explained in Makefile_libsrc and should be
 # kept in sync with the settings there
 test_boot:
