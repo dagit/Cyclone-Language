@@ -2442,14 +2442,13 @@ static list_t<tvar_t> add_free_tvar(seg_t loc, list_t<tvar_t,`H> tvs,
 static list_t<tvar_t> fast_add_free_tvar(list_t<tvar_t,`H> tvs, tvar_t tv) {
   // sanity
   if (tv->identity == NULL)
-      impos("fast_add_free_tvar: bad identity in tv");
+    impos("fast_add_free_tvar: bad identity in tv");
   for (_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
     // sanity
     if (tvs2->hd->identity == NULL)
       impos("fast_add_free_tvar: bad identity in tvs2");
-    if (*tvs2->hd->identity == *tv->identity) {
+    if (*tvs2->hd->identity == *tv->identity)
       return tvs;
-    } 
   }
   return new List{tv,tvs};
 }
@@ -2593,9 +2592,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     break;
   case &VarType(v):
     switch (compress_kb(v->kind)) {
-    case &Unknown_kb(*f):
-      *f = new Opt(new Less_kb(NULL,expected_kind));
-      break;
+    case &Unknown_kb(*f): *f = new Opt(new Less_kb(NULL,expected_kind)); break;
     default: break;
     }
     // this constrains the kind of the variable according to other
@@ -3052,9 +3049,9 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
           terr(loc,"duplicate field %s",*fn);
         if (strcmp(*fn,"") != 0)
           prev_fields = rnew(aprev_rgn) List(fn,prev_fields);
+        cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t);
 	if(k==UnionA && !bits_only(t))
 	  terr(loc,"union member %s has a non-integral type", *fn);
-        cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t);
         check_bitfield(loc,te,t,width,fn);
         check_field_atts(loc,fn,atts);
       }      

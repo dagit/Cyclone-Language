@@ -3681,15 +3681,15 @@ Cyc_Tcutil_terr(loc,_tag_arr("duplicate field %s",sizeof(unsigned char),19),
 _tag_arr(_tmp6CC,sizeof(void*),1));}});}if(Cyc_Std_strcmp(*_tmp6CB,_tag_arr("",
 sizeof(unsigned char),1))!= 0){prev_fields=({struct Cyc_List_List*_tmp6CE=
 _region_malloc(aprev_rgn,sizeof(*_tmp6CE));_tmp6CE->hd=_tmp6CB;_tmp6CE->tl=
-prev_fields;_tmp6CE;});}if(_tmp5D0 == (void*)1? ! Cyc_Tcutil_bits_only(_tmp6C9): 0){({
-struct Cyc_Std_String_pa_struct _tmp6D0;_tmp6D0.tag=0;_tmp6D0.f1=(struct
-_tagged_arr)*_tmp6CB;{void*_tmp6CF[1]={& _tmp6D0};Cyc_Tcutil_terr(loc,_tag_arr("union member %s has a non-integral type",
-sizeof(unsigned char),40),_tag_arr(_tmp6CF,sizeof(void*),1));}});}cvtenv=Cyc_Tcutil_i_check_valid_type(
-loc,te,cvtenv,(void*)1,_tmp6C9);Cyc_Tcutil_check_bitfield(loc,te,_tmp6C9,_tmp6C8,
-_tmp6CB);Cyc_Tcutil_check_field_atts(loc,_tmp6CB,_tmp6C7);}};_pop_region(
-aprev_rgn);}goto _LL750;_LL772:{void*_tmp6D1=*_tmp5D5;struct _tuple1*_tmp6D2;void*
-_tmp6D3;struct Cyc_Absyn_Aggrdecl**_tmp6D4;struct Cyc_Absyn_Aggrdecl*_tmp6D5;
-_LL86B: if(*((int*)_tmp6D1)== 0){_LL870: _tmp6D3=(void*)((struct Cyc_Absyn_UnknownAggr_struct*)
+prev_fields;_tmp6CE;});}cvtenv=Cyc_Tcutil_i_check_valid_type(loc,te,cvtenv,(void*)
+1,_tmp6C9);if(_tmp5D0 == (void*)1? ! Cyc_Tcutil_bits_only(_tmp6C9): 0){({struct Cyc_Std_String_pa_struct
+_tmp6D0;_tmp6D0.tag=0;_tmp6D0.f1=(struct _tagged_arr)*_tmp6CB;{void*_tmp6CF[1]={&
+_tmp6D0};Cyc_Tcutil_terr(loc,_tag_arr("union member %s has a non-integral type",
+sizeof(unsigned char),40),_tag_arr(_tmp6CF,sizeof(void*),1));}});}Cyc_Tcutil_check_bitfield(
+loc,te,_tmp6C9,_tmp6C8,_tmp6CB);Cyc_Tcutil_check_field_atts(loc,_tmp6CB,_tmp6C7);}};
+_pop_region(aprev_rgn);}goto _LL750;_LL772:{void*_tmp6D1=*_tmp5D5;struct _tuple1*
+_tmp6D2;void*_tmp6D3;struct Cyc_Absyn_Aggrdecl**_tmp6D4;struct Cyc_Absyn_Aggrdecl*
+_tmp6D5;_LL86B: if(*((int*)_tmp6D1)== 0){_LL870: _tmp6D3=(void*)((struct Cyc_Absyn_UnknownAggr_struct*)
 _tmp6D1)->f1;goto _LL86F;_LL86F: _tmp6D2=((struct Cyc_Absyn_UnknownAggr_struct*)
 _tmp6D1)->f2;goto _LL86C;}else{goto _LL86D;}_LL86D: if(*((int*)_tmp6D1)== 1){_LL871:
 _tmp6D4=((struct Cyc_Absyn_KnownAggr_struct*)_tmp6D1)->f1;_tmp6D5=*_tmp6D4;goto
