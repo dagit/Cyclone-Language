@@ -82,7 +82,7 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
     while (true)
       switch (s2->r) {
       case Seq_s(s3,s4):
-	NewControlFlow::set_encloser(s2, get_encloser(te));
+	decorate_stmt(te,s2);
 	te2 = set_next(te,Stmt_j(s4));
 	tcStmt(te2,s3,true);
 	s2  = s4;

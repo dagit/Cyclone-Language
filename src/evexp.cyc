@@ -58,9 +58,7 @@ bool eval_const_bool_exp(exp e) {
 cnst_t eval_const_exp(exp e) {
   cnst_t cn;
   switch (e->r) {
-  case Const_e(c):
-    cn = c;
-    break;
+  case Const_e(c): return c; // return eagerly to avoid allocation
   case Conditional_e(e1,e2,e3):
     cn = (eval_const_bool_exp(e1) ? eval_const_exp(e2) : eval_const_exp(e3));
     break;
@@ -83,16 +81,10 @@ cnst_t eval_const_exp(exp e) {
   case Cast_e(t,e2):
     // FIX: this needs to be generalized
     cn = eval_const_exp(e2);
-    switch (t) {
-    case IntType(sn,sz):
-      switch (cn) {
-      case Int_c(sn2,x):
-        cn = Int_c(sn,x);
-        break;
-      default:
-        exp_err(e->loc,xprintf("eval_const: cannot cast to %s",typ2string(t)));
-        return Int_c(Signed,0);
-      }
+    switch ($(t,cn)) {
+    case $(IntType(sn,sz),Int_c(sn2,x)): 
+      if(sn != sn2)
+	cn = Int_c(sn,x); 
       break;
     default:
       exp_err(e->loc,xprintf("eval_const: cannot cast to %s",typ2string(t)));

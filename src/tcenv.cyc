@@ -136,9 +136,9 @@ typedef struct CtrlEnv @ ctrl_env_t;
 // Hence mutations are seen by all subsequent type-checking, which is easier
 // than threading labels which must be function-wide unique anyway.
 static struct SharedFenv {
-  typ                            return_typ;
-  Dict::dict_t<var,stmt>           seen_labels;
-  SlowDict::dict_t<var,list_t<stmt>> needed_labels;  // FIX: check empty when done!
+  typ                                return_typ;
+  Dict::dict_t<var,stmt>             seen_labels;
+  SlowDict::dict_t<var,list_t<stmt>> needed_labels;
 };
 
 // Local function environments -- this is getting a bit out of hand, no?

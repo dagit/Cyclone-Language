@@ -904,7 +904,7 @@ static $(tqual, typ)@ tup_to_c(exp e) {
 static void exp_to_c(env nv, exp e); // forward declaration
 static $(list_t<designator>,exp)@ add_designator(env nv, exp e) {
   exp_to_c(nv,e);
-  return &$(null,e);
+  return new{$(null,e)};
 }
 
 static exp make_struct(qvar x, typ struct_typ, stmt s,
@@ -1642,106 +1642,94 @@ static void exp_to_c(env nv, exp e) {
     }
     break;
 
-  case Enum_e(_,_,es,ed,ef):
+  case Enum_e(_,_,null,ed,ef):
     qvar qv = ef->name;
-    if (es == null) {
-      // non-value-carrying constructor -- just use the constructor name
-      // (see enumdecl_to_c below)
-      if (!nv->toplevel)
-	e->r = var_exp(qv,DL)->r;
-      else {
-	// FIX: we should get the tag from a centralized place and we
-	// might as well use it everywhere.
-	// we can't use the variable name at toplevel
-	int tag_count = 0;
-	let fields = (ed->fields == null) ? null : ed->fields->v;
-	while (qvar_cmp(qv,fields->hd->name) != 0) {
-	  if (fields->hd->typs == null) tag_count++;
-	  fields = fields->tl;
-	}
-	e->r = cast_exp(void_star_typ(),uint_exp(tag_count,DL),DL)->r;
+    // non-value-carrying constructor -- just use the constructor name
+    // (see enumdecl_to_c below)
+    if (!nv->toplevel)
+      e->r = var_exp(qv,DL)->r;
+    else {
+      // FIX: we should get the tag from a centralized place and we
+      // might as well use it everywhere.
+      // we can't use the variable name at toplevel
+      int tag_count = 0;
+      let fields = (ed->fields == null) ? null : ed->fields->v;
+      while (qvar_cmp(qv,fields->hd->name) != 0) {
+	if (fields->hd->typs == null) tag_count++;
+	fields = fields->tl;
       }
+      e->r = cast_exp(void_star_typ(),uint_exp(tag_count,DL),DL)->r;
+    }
+    break;
+  case Enum_e(_,_,es,ed,ef):
+    let qv   = ef->name;
+    let tqts = ef->typs;
+
+    let x = temp_var();
+    let xexp = var_exp(x,DL);
+    let strct_typ = strctq(collapse_qvar_tag(qv,"_struct"));
+    let pstrct_typ = cstar_typ(strct_typ,mt_tq);
+    // we have to do this differently for the toplevel
+    if (nv->toplevel) {
+      // struct qv_tag x = {.tag = i, .f1 = e1, ... , .fn = en};
+      // (t)(&x)
+      // FIX: we should get the tag from a centralized place and we
+      // might as well use it everywhere.
+      int tag_count = 0;
+      let fields    = (ed->fields == null) ? null : ed->fields->v;
+      while (qvar_cmp(qv,fields->hd->name) != 0) {
+	if (fields->hd->typs != null) tag_count++;
+	fields = fields->tl;
+      }
+      let dles = null;
+      for(; es != null; es = es->tl, tqts = tqts->tl) {
+	exp cur_e = es->hd;
+	typ field_typ = typ_to_c((*tqts->hd)[1]);
+	exp_to_c(nv,cur_e);
+	if (is_void_star(field_typ))
+	  cur_e = cast_exp(field_typ,cur_e,DL);
+	dles = new{List(new{$(null,cur_e)},dles)};
+      }
+      exp tag_exp = uint_exp(tag_count,DL);
+      dles = new{List(new{$(null,tag_exp)},imp_rev(dles))};
+      exp init_exp = unresolvedmem_exp(null,dles,DL);
+      let vd = static_vardecl(x,strct_typ,init_exp);
+      temp_topdecls = &List(new_decl(Var_d(vd),DL),temp_topdecls);
+      e->r = cast_exp(pstrct_typ,address_exp(xexp,DL),DL)->r;
     } else {
-      let x = temp_var();
-      let xexp = var_exp(x,DL);
-      let strct_typ = strctq(collapse_qvar_tag(qv,"_struct"));
-      let pstrct_typ = cstar_typ(strct_typ,mt_tq);
-      // we have to do this differently for the toplevel
-      if (nv->toplevel) {
-	// struct qv_tag x = {->tag = i, ->f1 = e1, ... ,->fn = en};
-	// (t)(&x)
-	// FIX: we should get the tag from a centralized place and we
-	// might as well use it everywhere.
-	int tag_count = 0;
-	let fields    = (ed->fields == null) ? null : ed->fields->v;
-	while (qvar_cmp(qv,fields->hd->name) != 0) {
-	  if (fields->hd->typs != null) tag_count++;
-	  fields = fields->tl;
-	}
-	exp tag_exp = uint_exp(tag_count,DL);
-	list_t<$(list_t<designator>,exp)@> dles = 
-	  List::map_c(add_designator,nv,es);
-	dles = &List(&$(null,tag_exp),dles);
-	exp init_exp = unresolvedmem_exp(null,dles,DL);
-	let vd = static_vardecl(x,strct_typ,init_exp);
-	temp_topdecls = &List(new_decl(Var_d(vd),DL),temp_topdecls);
-	e->r = cast_exp(pstrct_typ,address_exp(xexp,DL),DL)->r;
-      } else {
-	// value-carrying constructor
-	// ({ struct qv_tag *x = (struct qv_tag*)malloc(sizeof(struct qv_tag));
-	//    x->tag = i; x->f1 = e1; ...; x->fn = en; (t)x; })
-	let typs = ef->typs;
-	let e2 = sizeof_exp(strct_typ,DL);
-        let atomic = true;
-	let rev_assign =
-	  &List(assign_stmt(structarrow_exp(xexp,tag_sp,DL),
-			    var_exp(collapse_qvar_tag(qv,"_tag"),DL),DL),null);
-	for (int i = 1; es != null; es = es->tl, i++, typs = typs->tl) {
-	  exp cur_e = es->hd;
-	  typ field_t = typ_to_c((*typs->hd)[1]);
-	  if (!atomic_typ(cur_e->topt->v)) atomic = false;
-	  exp_to_c(nv,cur_e);
-	  if (is_void_star(field_t))
-	    cur_e = cast_exp(field_t,cur_e,DL);
-	  let a = assign_stmt(structarrow_exp(xexp,new {xprintf("f%d",i)},
-                                              DL),cur_e,DL);
-	  rev_assign = &List(a,rev_assign);
-	}
-	let e1 = cast_exp(pstrct_typ,
-			  atomic ? malloc_atomic(e2) : malloc_ptr(e2),DL);
-	let final_cast = exp_stmt(cast_exp(typ_to_c(old_typ),xexp,DL),DL);
-	let s2         = seq_stmts(List::rev(&List(final_cast,rev_assign)),DL);
-	e->r = stmt_exp(declare_stmt(x,pstrct_typ,e1,s2,DL),DL)->r;
+      // value-carrying constructor
+      // ({ struct qv_tag *x = (struct qv_tag*)malloc(sizeof(struct qv_tag));
+      //    x->tag = i; x->f1 = e1; ...; x->fn = en; (t)x; })
+      let e2 = sizeof_exp(strct_typ,DL);
+      let atomic = true;
+      let rev_assign =
+	&List(assign_stmt(structarrow_exp(xexp,tag_sp,DL),
+			  var_exp(collapse_qvar_tag(qv,"_tag"),DL),DL),null);
+      for (int i = 1; es != null; es = es->tl, i++, tqts = tqts->tl) {
+	exp cur_e = es->hd;
+	typ field_typ = typ_to_c((*tqts->hd)[1]);
+	if (!atomic_typ(cur_e->topt->v)) atomic = false;
+	exp_to_c(nv,cur_e);
+	if (is_void_star(field_typ))
+	  cur_e = cast_exp(field_typ,cur_e,DL);
+	let a = assign_stmt(structarrow_exp(xexp,new {xprintf("f%d",i)},
+					    DL),cur_e,DL);
+	rev_assign = &List(a,rev_assign);
       }
+      let e1 = cast_exp(pstrct_typ,
+			atomic ? malloc_atomic(e2) : malloc_ptr(e2),DL);
+      let final_cast = exp_stmt(cast_exp(typ_to_c(old_typ),xexp,DL),DL);
+      let s2         = seq_stmts(imp_rev(&List(final_cast,rev_assign)),DL);
+      e->r = stmt_exp(declare_stmt(x,pstrct_typ,e1,s2,DL),DL)->r;
+    }
 // GCC BUG: The code
-//   *x = (struct qv_tag){.tag = i, .f1 = e1, ..., .fn = en}; (t)x; })
+//   *x = (struct qv_tag)({.tag = i, .f1 = e1, ..., .fn = en}; (t)x; })
 // does not seem to work properly in gcc,
 // so we had to recode as above.
 //
-//       // value-carrying constructor
-//       // ({ struct qv_tag *x = (struct qv_tag*)malloc(sizeof(struct qv_tag));
-//       //    *x = (struct qv_tag){->tag = i, ->f1 = e1, ..., ->fn = en}; (t)x; })
-//       let x = temp_var();
-//       let xexp = var_exp(x,DL);
-//       let strct_t = strct(collapse_qvar_tag(qv,"_struct")[1]);
-//       let pstrct_t = cstar_typ(strct_t,mt_tq);
-//       let e2 = sizeof_exp(strct_t,DL);
-//       let e1 = cast_exp(pstrct_t,malloc_exp(e2),DL);
-//       let dles = null;
-//       for (int i = 1; es != null; es = es->tl, i++) {
-// 	exp_to_c(nv,es->hd);
-// 	let des = &List(FieldName(xprintf("f%d",i)),null);
-// 	dles = &List(&$(des,es->hd),dles);
-//       }
-//       dles = List::imp_rev(dles);
-//       let d = &List(FieldName("tag"),null);
-//       exp tag_exp = var_exp(collapse_qvar_tag(qv,"_tag"),DL);
-//       let dles = &List(&$(d,tag_exp),dles);
-//       let strct_exp = unresolvedmem_exp(null,dles,DL);
-//       let s1 = assign_stmt(deref_exp(xexp,DL),cast_exp(strct_t,strct_exp,DL),DL);
-//       let s2 = seq_stmt(s1,exp_stmt(cast_exp(typ_to_c(old_typ),xexp,DL),DL),DL);
-//       e->r = stmt_exp(declare_stmt(x,pstrct_t,&Opt(e1),s2,DL),DL)->r;
-    }
+// // value-carrying constructor
+// // ({ struct qv_tag *x = (struct qv_tag*)malloc(sizeof(struct qv_tag));
+// //    *x = (struct qv_tag){.tag = i, .f1 = e1, ..., .fn = en}; (t)x; })
     break;
   case Xenum_e(_,es,xd,ef):
     qvar qv = ef->name;

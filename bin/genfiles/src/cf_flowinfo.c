@@ -386,23 +386,26 @@ pinfo); extern struct Cyc_Dict_Dict* Cyc_CfFlowInfo_escape_pointsto( void* pinfo
 struct Cyc_Dict_Dict* d); extern void* Cyc_CfFlowInfo_assign_unknown_dict( void*,
 void*); extern void* Cyc_CfFlowInfo_join_flow( void*, void*); extern int Cyc_CfFlowInfo_flow_lessthan_approx(
 void* f1, void* f2); static struct Cyc_CfFlowInfo_UnknownIS_struct _temp1={ 0u,(
-void*) 1u,( void*) 0u}; static struct Cyc_CfFlowInfo_LeafPI_struct _temp0={ 0u,(
-struct Cyc_CfFlowInfo_UnknownIS_struct*)& _temp1}; void* Cyc_CfFlowInfo_leaf_unesc_none=(
-struct Cyc_CfFlowInfo_LeafPI_struct*)& _temp0; static struct Cyc_CfFlowInfo_UnknownIS_struct
-_temp3={ 0u,( void*) 1u,( void*) 1u}; static struct Cyc_CfFlowInfo_LeafPI_struct
-_temp2={ 0u,( struct Cyc_CfFlowInfo_UnknownIS_struct*)& _temp3}; void* Cyc_CfFlowInfo_leaf_unesc_this=(
+void*)(( void*) 1u),( void*)(( void*) 0u)}; static struct Cyc_CfFlowInfo_LeafPI_struct
+_temp0={ 0u,( void*)(( struct Cyc_CfFlowInfo_UnknownIS_struct*)& _temp1)}; void*
+Cyc_CfFlowInfo_leaf_unesc_none=( struct Cyc_CfFlowInfo_LeafPI_struct*)& _temp0;
+static struct Cyc_CfFlowInfo_UnknownIS_struct _temp3={ 0u,( void*)(( void*) 1u),(
+void*)(( void*) 1u)}; static struct Cyc_CfFlowInfo_LeafPI_struct _temp2={ 0u,(
+void*)(( struct Cyc_CfFlowInfo_UnknownIS_struct*)& _temp3)}; void* Cyc_CfFlowInfo_leaf_unesc_this=(
 struct Cyc_CfFlowInfo_LeafPI_struct*)& _temp2; static struct Cyc_CfFlowInfo_UnknownIS_struct
-_temp5={ 0u,( void*) 1u,( void*) 2u}; static struct Cyc_CfFlowInfo_LeafPI_struct
-_temp4={ 0u,( struct Cyc_CfFlowInfo_UnknownIS_struct*)& _temp5}; void* Cyc_CfFlowInfo_leaf_unesc_all=(
-struct Cyc_CfFlowInfo_LeafPI_struct*)& _temp4; static struct Cyc_CfFlowInfo_UnknownIS_struct
-_temp7={ 0u,( void*) 0u,( void*) 0u}; static struct Cyc_CfFlowInfo_LeafPI_struct
-_temp6={ 0u,( struct Cyc_CfFlowInfo_UnknownIS_struct*)& _temp7}; void* Cyc_CfFlowInfo_leaf_esc_none=(
+_temp5={ 0u,( void*)(( void*) 1u),( void*)(( void*) 2u)}; static struct Cyc_CfFlowInfo_LeafPI_struct
+_temp4={ 0u,( void*)(( struct Cyc_CfFlowInfo_UnknownIS_struct*)& _temp5)}; void*
+Cyc_CfFlowInfo_leaf_unesc_all=( struct Cyc_CfFlowInfo_LeafPI_struct*)& _temp4;
+static struct Cyc_CfFlowInfo_UnknownIS_struct _temp7={ 0u,( void*)(( void*) 0u),(
+void*)(( void*) 0u)}; static struct Cyc_CfFlowInfo_LeafPI_struct _temp6={ 0u,(
+void*)(( struct Cyc_CfFlowInfo_UnknownIS_struct*)& _temp7)}; void* Cyc_CfFlowInfo_leaf_esc_none=(
 struct Cyc_CfFlowInfo_LeafPI_struct*)& _temp6; static struct Cyc_CfFlowInfo_UnknownIS_struct
-_temp9={ 0u,( void*) 0u,( void*) 1u}; static struct Cyc_CfFlowInfo_LeafPI_struct
-_temp8={ 0u,( struct Cyc_CfFlowInfo_UnknownIS_struct*)& _temp9}; void* Cyc_CfFlowInfo_leaf_esc_this=(
-struct Cyc_CfFlowInfo_LeafPI_struct*)& _temp8; static struct Cyc_CfFlowInfo_UnknownIS_struct
-_temp11={ 0u,( void*) 0u,( void*) 2u}; static struct Cyc_CfFlowInfo_LeafPI_struct
-_temp10={ 0u,( struct Cyc_CfFlowInfo_UnknownIS_struct*)& _temp11}; void* Cyc_CfFlowInfo_leaf_esc_all=(
+_temp9={ 0u,( void*)(( void*) 0u),( void*)(( void*) 1u)}; static struct Cyc_CfFlowInfo_LeafPI_struct
+_temp8={ 0u,( void*)(( struct Cyc_CfFlowInfo_UnknownIS_struct*)& _temp9)}; void*
+Cyc_CfFlowInfo_leaf_esc_this=( struct Cyc_CfFlowInfo_LeafPI_struct*)& _temp8;
+static struct Cyc_CfFlowInfo_UnknownIS_struct _temp11={ 0u,( void*)(( void*) 0u),(
+void*)(( void*) 2u)}; static struct Cyc_CfFlowInfo_LeafPI_struct _temp10={ 0u,(
+void*)(( struct Cyc_CfFlowInfo_UnknownIS_struct*)& _temp11)}; void* Cyc_CfFlowInfo_leaf_esc_all=(
 struct Cyc_CfFlowInfo_LeafPI_struct*)& _temp10; void* Cyc_CfFlowInfo_mkLeafPI(
 void* esc, void* il){ struct _tuple3 _temp13=({ struct _tuple3 _temp12; _temp12.f1=
 esc; _temp12.f2= il; _temp12;}); void* _temp27; void* _temp29; void* _temp31;

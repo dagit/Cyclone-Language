@@ -661,10 +661,10 @@ _temp218;}));{ struct _tuple5* _temp219= Cyc_Tcpat_tcPat( te, p, region_opt);
 _npop_handler( 0u); return _temp219;} _LL215: Cyc_Tcutil_terr( p->loc,( struct
 _tagged_string)({ char* _temp220=( char*)"qualified variable in pattern"; struct
 _tagged_string _temp221; _temp221.curr= _temp220; _temp221.base= _temp220;
-_temp221.last_plus_one= _temp220 + 30; _temp221;})); _npop_handler( 0u); goto
-_LL209; _LL209:;} Cyc_Tcutil_terr( p->loc,({ struct _tagged_string _temp222= Cyc_Absynpp_qvar2string(
-_temp80); xprintf("unresolved identifier %.*s in pattern", _temp222.last_plus_one
-- _temp222.curr, _temp222.curr);})); t= Cyc_Absyn_wildtyp(); goto _LL181; _LL181:;};
+_temp221.last_plus_one= _temp220 + 30; _temp221;})); goto _LL209; _LL209:;} Cyc_Tcutil_terr(
+p->loc,({ struct _tagged_string _temp222= Cyc_Absynpp_qvar2string( _temp80);
+xprintf("unresolved identifier %.*s in pattern", _temp222.last_plus_one -
+_temp222.curr, _temp222.curr);})); t= Cyc_Absyn_wildtyp(); goto _LL181; _LL181:;};
 _pop_handler();} else{ struct _xenum_struct* _temp224= _temp179; _LL226: if(
 _temp224->tag == Cyc_Dict_Absent_tag){ goto _LL227;} else{ goto _LL228;} _LL228:
 goto _LL229; _LL227:{ void* _temp230=(* _temp80).f1; struct Cyc_List_List*

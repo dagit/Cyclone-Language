@@ -104,7 +104,7 @@ struct SharedAbsEnv {
   list_t<vardecl_t> comprehension_vars; // damn binding vars in expressions!  
 };
 struct AbsEnv {
-  struct SharedAbsEnv @ shared;
+  struct SharedAbsEnv @ shared; // could be a stack pointer
   list_t<absop_t>       lhsides; 
   list_t<exp>           access_path; // stays "normalized"
 };

@@ -100,7 +100,7 @@ list_t<Absyn::decl> do_stage(string stage_name,
     other_exn = true; 
     exn_string = "Uncaught exception"; 
     break;
-  }
+    }
   if(Position::error_p())
     compile_failure = true;
   if(strcmp(exn_string,"") != 0) {

@@ -82,6 +82,11 @@ conref<`a> new_conref(`a x) {
 conref<`a> empty_conref() {
   return &Conref{.v = No_constr};
 }
+// just to avoid some unnecessary allocation:
+struct Conref<bool> true_conref_v  = Conref(Eq_constr(true));
+struct Conref<bool> false_conref_v = Conref(Eq_constr(false));
+conref<bool> true_conref  = &true_conref_v;
+conref<bool> false_conref = &false_conref_v;
 
 // compress a conref
 conref<`a> compress_conref(conref<`a> x) {
@@ -137,13 +142,13 @@ typ string_typ(typ rgn) {
 
 typ starb_typ(typ t, typ r, tqual tq, bounds_t b) {
   return PointerType(PtrInfo {.elt_typ = t, .rgn_typ = r,
-				 .nullable = new_conref(true), .tq = tq, 
+				 .nullable = true_conref, .tq = tq, 
 				 .bounds = new_conref(b)});
 }
 typ atb_typ(typ t, typ r, tqual tq, bounds_t b) {
   return 
     PointerType(PtrInfo {
-      .elt_typ = t, .rgn_typ = r, .nullable = new_conref(false), .tq = tq, 
+      .elt_typ = t, .rgn_typ = r, .nullable = false_conref, .tq = tq, 
 	 .bounds = new_conref(b)});
 }
 typ star_typ(typ t, typ r, tqual tq) { 
@@ -158,7 +163,7 @@ typ at_typ(typ t, typ r, tqual tq) {
 typ tagged_typ(typ t, typ r, tqual tq) {
   return 
     PointerType(PtrInfo {
-      .elt_typ = t, .rgn_typ = r, .nullable = new_conref(true), .tq = tq,
+      .elt_typ = t, .rgn_typ = r, .nullable = true_conref, .tq = tq,
 	 .bounds = new_conref(Unknown_b) });
 }
 

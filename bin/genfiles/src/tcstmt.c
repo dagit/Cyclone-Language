@@ -535,9 +535,9 @@ struct _enum_struct*) _temp125)->tag == Cyc_Absyn_Seq_s_tag: 0){ _LL134:
 _temp133=( struct Cyc_Absyn_Stmt*)(( struct Cyc_Absyn_Seq_s_struct*) _temp125)->f1;
 goto _LL132; _LL132: _temp131=( struct Cyc_Absyn_Stmt*)(( struct Cyc_Absyn_Seq_s_struct*)
 _temp125)->f2; goto _LL128;} else{ goto _LL129;} _LL129: goto _LL130; _LL128:
-Cyc_NewControlFlow_set_encloser( _temp44, Cyc_Tcenv_get_encloser( te)); te2= Cyc_Tcenv_set_next(
-te,({ struct Cyc_Tcenv_Stmt_j_struct* _temp135=( struct Cyc_Tcenv_Stmt_j_struct*)
-GC_malloc( sizeof( struct Cyc_Tcenv_Stmt_j_struct)); _temp135->tag= Cyc_Tcenv_Stmt_j_tag;
+Cyc_Tcstmt_decorate_stmt( te, _temp44); te2= Cyc_Tcenv_set_next( te,({ struct
+Cyc_Tcenv_Stmt_j_struct* _temp135=( struct Cyc_Tcenv_Stmt_j_struct*) GC_malloc(
+sizeof( struct Cyc_Tcenv_Stmt_j_struct)); _temp135->tag= Cyc_Tcenv_Stmt_j_tag;
 _temp135->f1= _temp131;( void*) _temp135;})); Cyc_Tcstmt_tcStmt( te2, _temp133,
 1); _temp44= _temp131; continue; _LL130: goto seq_end; _LL126:;} seq_end: Cyc_Tcstmt_tcStmt(
 te, _temp44, 1); return;} _LL13: { void* t= Cyc_Tcenv_return_typ( te); if(

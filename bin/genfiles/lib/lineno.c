@@ -166,11 +166,10 @@ this_line; int eol; int next; while( places != 0) { while( 1) { next=(( int(*)(
 struct Cyc_Lexing_lexbuf* lexbuf)) Cyc_Lineno_token)( lbuf); eol=(( int(*)(
 struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme_end)( lbuf); this_line=(( struct
 _tagged_string(*)( struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lexeme)( lbuf); if(
-eol >=(*(( struct _tuple1*) places->hd)).f1){ _npop_handler( 0u); break;}
-switch( next){ case 3: _LL63:( void) _throw(({ struct Cyc_Core_Failure_struct*
-_temp65=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));*
-_temp65=( struct Cyc_Core_Failure_struct){.tag= Cyc_Core_Failure_tag,.f1=(
-struct _tagged_string)({ char* _temp66=( char*)"Lineno: Invalid file position";
+eol >=(*(( struct _tuple1*) places->hd)).f1){ break;} switch( next){ case 3:
+_LL63:( void) _throw(({ struct Cyc_Core_Failure_struct* _temp65=( struct Cyc_Core_Failure_struct*)
+GC_malloc( sizeof( struct Cyc_Core_Failure_struct));* _temp65=( struct Cyc_Core_Failure_struct){.tag=
+Cyc_Core_Failure_tag,.f1=( struct _tagged_string)({ char* _temp66=( char*)"Lineno: Invalid file position";
 struct _tagged_string _temp67; _temp67.curr= _temp66; _temp67.base= _temp66;
 _temp67.last_plus_one= _temp66 + 30; _temp67;})};( struct _xenum_struct*)
 _temp65;})); case 1: _LL64: ++ line; break; case 2: _LL68: { struct Cyc_Core_Opt*

@@ -238,7 +238,7 @@ static void unify_it_conrefs(int cmp(`a,`a), conref<`a> x, conref<`a> y) {
     switch (y->v) {
     case No_constr: y->v = x->v; return;
     case Forward_constr(_):
-      throw impos("unify_confref: forward after compress(2)");
+      throw impos("unify_conref: forward after compress(2)");
     case Eq_constr(yv):
       if (cmp(xv,yv) != 0) throw Unify;
       return;
@@ -1279,6 +1279,9 @@ static $(opt_t<var>,tqual,typ)@ substitute_f2($($(opt_t<var>,tqual)@,typ)@ w) {
   let $(vopt,tq) = *p;
   return &$(vopt,tq,t);
 }
+// More ways to avoid allocation during substitution:
+//   * optimize the FnType case
+//   * avoid split and zip in Tuple
 static list_t<typ> substs(list_t<$(tvar,typ)@> inst, list_t<typ> ts);
 typ substitute(list_t<$(tvar,typ)@> inst, typ t) {
   switch (compress(t)) {
@@ -1286,29 +1289,54 @@ typ substitute(list_t<$(tvar,typ)@> inst, typ t) {
     // a tvar lookup, not a var lookup!
     try return List::assoc_cmp(tvar_cmp,inst,v);
     catch {case Not_found: return t;}
-  case StructType(no,ts,sd):   return StructType(no,substs(inst,ts),sd);
-  case EnumType(no,ts,ed):     return EnumType(no,substs(inst,ts),ed);
-  case TypedefType(n,ts,topt): return TypedefType(n,substs(inst,ts),topt);
-  case ArrayType(t1,tq,e):     return ArrayType(substitute(inst,t1),tq,e);
+  case StructType(no,ts,sd):   
+    let new_ts = substs(inst,ts);
+    return new_ts == ts ? t : StructType(no,new_ts,sd);
+  case EnumType(no,ts,ed):     
+    let new_ts = substs(inst,ts);
+    return new_ts == ts ? t : EnumType(no,new_ts,ed);
+  case TypedefType(n,ts,topt): 
+    let new_ts = substs(inst,ts);
+    return new_ts == ts ? t : TypedefType(n,new_ts,topt);
+  case ArrayType(t1,tq,e):     
+    let new_t1 = substitute(inst,t1);
+    return new_t1 == t1 ? t : ArrayType(new_t1,tq,e);
   case PointerType(PtrInfo{t1,r,n,tq,b}): 
-    return PointerType(PtrInfo{substitute(inst,t1),substitute(inst,r),n,tq,b});
+    let new_t1 = substitute(inst,t1);
+    let new_r  = substitute(inst,r);
+    if(new_t1 == t1 && new_r == r)
+      return t;
+    return PointerType(PtrInfo(new_t1,new_r,n,tq,b));
   case FnType(FnInfo{vs,eff,rtyp,args,varargs}):
     for (let p = vs; p != null; p = p->tl)
       inst = &List(&$(p->hd,VarType(p->hd)),inst);
     let $(qs,ts) = List::split(List::map(substitute_f1, args));
     let ts2      = substs(inst,ts);
     let args2    = List::map(substitute_f2, List::zip(qs,ts2));
-    let eff2     = (eff == null) ? null : &Opt(substitute(inst,eff->v));
+    opt_t<typ> eff2;
+    if(eff == null)
+      eff2 = null;
+    else {
+      let new_eff = substitute(inst,eff->v);
+      if(new_eff == eff->v)
+	eff2 = eff;
+      else
+	eff2 = new{Opt(new_eff)};
+    }
     return FnType(FnInfo{vs, eff2, substitute(inst,rtyp), args2, varargs});
   case TupleType(tqts):
     let $(tqs,ts) = List::split(tqts);
     let ts2       = substs(inst,ts);
+    if(ts2 == ts)
+      return t;
     let tqts2     = List::zip(tqs,ts2);
     return TupleType(tqts2);
   case Evar(_,r,_):
-    if (r != null) return(substitute(inst,r->v));
+    if (r != null) return substitute(inst,r->v);
     else return t;
-  case RgnHandleType(rt): return RgnHandleType(substitute(inst,rt)); 
+  case RgnHandleType(rt): 
+    let new_rt = substitute(inst,rt);
+    return new_rt == rt ? t : RgnHandleType(new_rt);
 
   case VoidType:        return t;
   case XenumType(_,_):  return t;
@@ -1317,12 +1345,25 @@ typ substitute(list_t<$(tvar,typ)@> inst, typ t) {
   case DoubleType:      return t;
   case HeapRgn:         return t;
   case UnionType:       return t;
-  case AccessEff(r): return AccessEff(substitute(inst, r));
-  case JoinEff(es):  return JoinEff(substs(inst,es));
+  case AccessEff(r): 
+    let new_r = substitute(inst,r);
+    return new_r == r ? t : AccessEff(new_r);
+  case JoinEff(es):  
+    let new_es = substs(inst,es);
+    return new_es == es ? t : JoinEff(new_es);
   }
 }
+// This is just a map beefed up to avoid unnecessary allocation.
 static list_t<typ> substs(list_t<$(tvar,typ)@> inst, list_t<typ> ts) {
-  return List::map_c(substitute,inst,ts);
+  if(ts == null)
+    return null;
+  let old_hd = ts->hd;
+  let old_tl = ts->tl;
+  let new_hd = substitute(inst, old_hd);
+  let new_tl = substs(inst, old_tl);
+  if(old_hd == new_hd && old_tl == new_tl)
+    return ts;
+  return new{List(new_hd,new_tl)};
 }
 
 exp default_initializer(tenv te, typ t, seg_t loc) {
@@ -1692,8 +1733,7 @@ void check_valid_toplevel_type(seg_t loc, tenv te, typ t) {
   for (_ x = free_tvars; x != null; x = x->tl) {
     conref<kind_t> c = compress_conref(x->hd->kind);
     switch (c->v) {
-    case No_constr:
-      fallthru;
+    case No_constr: fallthru;
     case Eq_constr(MemKind):
       c->v = Eq_constr(BoxKind);
       break;
