@@ -668,8 +668,10 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
 	case &DatatypeRes(tud,tuf):
 	  let tud2 = resolve_lookup(loc,env->ns,qvd,lookup_datatypedecl)->hd;
 	  if(qvar_cmp(tud->name,tud2->name) != 0) {
-	    err(loc,"shadowed datatype field %s not yet implemented properly",
-		Absynpp::qvar2string(tuf->name));
+	    err(loc,"%s is a variant of %s, not %s (shadowing not yet implemented properly)",
+		Absynpp::qvar2string(tuf->name),
+		Absynpp::qvar2string(tud2->name),
+		Absynpp::qvar2string(tud->name));
 	    return;
 	  }
 	  *info = UnknownDatatypefield(UnknownDatatypeFieldInfo(tud->name,

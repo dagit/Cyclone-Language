@@ -30,7 +30,7 @@ using Tcenv;
 
 extern bool aggressive_warn;
 
-extern void tc(region_t<`g>, tenv_t<`g> te, bool var_default_init, list_t<decl_t,`H> ds);
+extern void tc(region_t<`g>, tenv_t te, bool var_default_init, list_t<decl_t,`H> ds);
 
   // if called, must be after tc is called
   // removes extern variables that are never referred to

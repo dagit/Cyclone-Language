@@ -104,7 +104,7 @@ static void check_contains_assign(exp_t e) {
 }
 
 // Type check the if expressions, the loop guards, and the where clauses
-testenv_t<`r> tcTest(tenv_t<`g,`r> te, exp_t e, string_t msg_part) {
+testenv_t tcTest(tenv_t te, exp_t e, string_t msg_part) {
   check_contains_assign(e);
   tcExp(te,&sint_typ,e);
   if (!coerce_to_bool(te,e))
@@ -118,7 +118,7 @@ testenv_t<`r> tcTest(tenv_t<`g,`r> te, exp_t e, string_t msg_part) {
     if (p == Eq || p == Neq) {
       switch $((type_t)es->hd->topt,(type_t)es->tl->hd->topt) {
       case $(&RgnHandleType(r1),&RgnHandleType(r2)):
-	return TestEnv(rnew (Tcenv::get_fnrgn(te)) $(r1,r2),p == Eq);
+	return TestEnv(new $(r1,r2),p == Eq);
       default:
 	break;
       }
@@ -321,13 +321,13 @@ static type_t tcVar(tenv_t te, seg_t loc, type_t * topt, exp_t e, binding_t *b){
 }
 
 static
-void check_format_args(tenv_t<`g,`r> te, exp_t fmt,
+void check_format_args(tenv_t te, exp_t fmt,
                        opt_t<list_t<exp_t>> opt_args,
 		       int arg_cnt,
 		       list_t<int> @alias_arg_exps,
                        region_t<`temp> temp,
 		       list_t<type_t,`temp>
-                         type_getter(region_t<`temp>,tenv_t<`g,`r>,string_t,seg_t)) {
+                         type_getter(region_t<`temp>,tenv_t,string_t,seg_t)) {
   // check the format string and get the types it requires
   list_t<type_t> desc_types;
   switch (fmt->r) {
@@ -790,9 +790,7 @@ static void check_writable(tenv_t te, exp_t e) {
 static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
                           exp_t e, incrementor_t i) {
   // Don't promote any arrays to pointers, as per K&R
-  TEMP_RGN(te, temp) {
-    tcExpNoPromote(enter_lhs(temp,te),NULL,e);
-  }
+  tcExpNoPromote(enter_lhs(te),NULL,e);
   if(!is_lvalue(e))
     return expr_err(te,loc,topt,"increment/decrement of non-lvalue");
   check_writable(te, e);
@@ -815,9 +813,7 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
 // e1 ? e2 : e3
 static type_t tcConditional(tenv_t te, seg_t loc, type_t * topt,
                            exp_t e1, exp_t e2, exp_t e3) {
-  TEMP_RGN(te,r) {
-    tcTest(clear_abstract_val_ok(r,te), e1, "conditional expression");
-  }
+  tcTest(clear_abstract_val_ok(te), e1, "conditional expression");
   tcExp(te,topt,e2);
   tcExp(te,topt,e3);
   type_t t;
@@ -859,9 +855,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
   //   a function.  Since e2 cannot have a function type (any function
   //   types are promoted to function pointers) the types won't match.
   // As per K&R, don't promote any array types to pointer types in the lhs
-  { TEMP_RGN(te, r)
-    tcExpNoPromote(enter_lhs(r,enter_notreadctxt(r,te)),NULL,e1);
-  }
+  tcExpNoPromote(enter_lhs(enter_notreadctxt(te)),NULL,e1);
   type_t t1 = (type_t)e1->topt;
   tcExp(te,&t1,e2);
   type_t t2 = (type_t)e2->topt;
@@ -909,10 +903,8 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
 
 // e1,e2
 static type_t tcSeqExp(tenv_t te,seg_t loc,type_t * topt,exp_t e1,exp_t e2) {
-  { TEMP_RGN(te,r)
-    tcExp(clear_abstract_val_ok(r,te),NULL,e1);
-    tcExp(clear_abstract_val_ok(r,te),topt,e2);
-  }
+  tcExp(clear_abstract_val_ok(te),NULL,e1);
+  tcExp(clear_abstract_val_ok(te),topt,e2);
   return (type_t)e2->topt;
 }
 
@@ -969,8 +961,8 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
   let es = args;
   let arg_cnt = 0;
   { TEMP_RGN(te_orig, ter)
-    let te = new_block(ter,loc,te_orig); // needed for regions of params
-    let te = clear_abstract_val_ok(ter,te);
+    let te = new_block(loc,te_orig); // needed for regions of params
+    let te = clear_abstract_val_ok(te);
     tcExp(te,NULL,e);
     type_t t = compress((type_t)e->topt);
     // NB: we should really unify t with an unconstrained FnType with the
@@ -1291,13 +1283,11 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
   // as required (see p. 200, A7.1 of K&R.)
   // We use clear_notreadctxt because the pointer might escape off
   // and later be read.
-  TEMP_RGN(te, r) {
-    tcExpNoInst(enter_abstract_val_ok(r,enter_lhs(r,clear_notreadctxt(r,te))),
-		topt2,e);
-    // can't take the address of a unique path
-    if (is_noalias_pointer_or_aggr(r,(type_t)e->topt))
-      terr(e->loc,"Cannot take the address of an alias-free path");
-  }
+  tcExpNoInst(enter_abstract_val_ok(enter_lhs(clear_notreadctxt(te))),
+	      topt2,e);
+  // can't take the address of a unique path
+  if (is_noalias_pointer_or_aggr(heap_region,(type_t)e->topt))
+    terr(e->loc,"Cannot take the address of an alias-free path");
 
 
   // first, dispense with the
@@ -1471,7 +1461,7 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
  // *e
 static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
   TEMP_RGN(te_orig, r) {
-    let te = clear_lhs(r,clear_notreadctxt(r,te_orig));
+    let te = clear_lhs(clear_notreadctxt(te_orig));
     tcExp(te,NULL,e);
     type_t t = compress((type_t)e->topt);
     switch (t) {
@@ -1502,9 +1492,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
 			   exp_t outer_e, exp_t e, field_name_t f,
                            bool @is_tagged, bool @is_read) {
   // As per K&R, don't promote e from array to pointer type
-  TEMP_RGN(te, r) {
-    tcExpNoPromote(enter_abstract_val_ok(r,te),NULL,e);
-  }
+  tcExpNoPromote(enter_abstract_val_ok(te),NULL,e);
   // record whether or not we're in a read context
   *is_read = !in_notreadctxt(te);
   switch (compress((type_t)e->topt)) {
@@ -1553,10 +1541,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
 static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
 			  exp_t e, field_name_t f,
                           bool @is_tagged, bool @is_read) {
-  TEMP_RGN(te, r) {
-    tcExp(enter_abstract_val_ok(r,clear_lhs(r,clear_notreadctxt(r,te))),
-          NULL,e);
-  }
+  tcExp(enter_abstract_val_ok(clear_lhs(clear_notreadctxt(te))),NULL,e);
   // record whether or not we're in a read context
   *is_read = !in_notreadctxt(te);
   switch (compress((type_t)e->topt)) {
@@ -1636,9 +1621,9 @@ static type_t ithTupleType(tenv_t te, seg_t loc,
 static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
 			  exp_t e1, exp_t e2) {
   TEMP_RGN(te_orig, r) {
-    let te = clear_lhs(r,clear_notreadctxt(r,te_orig));
-    tcExp(clear_abstract_val_ok(r,te),NULL,e1);
-    tcExp(clear_abstract_val_ok(r,te),NULL,e2);
+    let te = clear_lhs(clear_notreadctxt(te_orig));
+    tcExp(clear_abstract_val_ok(te),NULL,e1);
+    tcExp(clear_abstract_val_ok(te),NULL,e2);
     type_t t1 = compress((type_t)e1->topt);
     type_t t2 = compress((type_t)e2->topt);
     if (!coerce_sint_typ(te,e2))
@@ -1702,14 +1687,12 @@ static type_t tcTuple(tenv_t te, seg_t loc, type_t * topt, list_t<exp_t> es) {
 	break;
       }
       for(; es != NULL; es = es->tl, ts = ts->tl) {
-	TEMP_RGN(te,r) {
-	  bool bogus = false;
-	  let topt2 = (*ts->hd)[1];
-	  tcExpInitializer(clear_abstract_val_ok(r,te),&topt2,es->hd);
-	  // try to coerce the argument to the result type
-	  coerce_arg(te,es->hd,(*ts->hd)[1],&bogus);
-	  fields = new List(new $((*ts->hd)[0], (type_t)es->hd->topt), fields);
-	}
+	bool bogus = false;
+	let topt2 = (*ts->hd)[1];
+	tcExpInitializer(clear_abstract_val_ok(te),&topt2,es->hd);
+	// try to coerce the argument to the result type
+	coerce_arg(te,es->hd,(*ts->hd)[1],&bogus);
+	fields = new List(new $((*ts->hd)[0], (type_t)es->hd->topt), fields);
       }
       done = true;
       break;
@@ -1717,10 +1700,8 @@ static type_t tcTuple(tenv_t te, seg_t loc, type_t * topt, list_t<exp_t> es) {
     }
   if(!done)
     for(; es != NULL; es = es->tl) {
-      TEMP_RGN(te,r) {
-	tcExpInitializer(clear_abstract_val_ok(r,te),NULL,es->hd);
-	fields = new List(new $(empty_tqual(0), (type_t)es->hd->topt), fields);
-      }
+      tcExpInitializer(clear_abstract_val_ok(te),NULL,es->hd);
+      fields = new List(new $(empty_tqual(0), (type_t)es->hd->topt), fields);
     }
   return new TupleType(List::imp_rev(fields));
 }
@@ -1821,9 +1802,9 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
     impos("comprehension index variable is not declared const!");
   // add x to the environment as an unsigned int only if te->le is not NULL
   TEMP_RGN(te, r) {
-    tenv_t<_> te2 = copy_tenv(r,te);
+    tenv_t te2 = copy_tenv(te);
     if (te2->le != NULL) {
-      te2 = Tcenv::new_block(r,loc,te2);
+      te2 = Tcenv::new_block(loc,te2);
       //      te2 = add_local_var(r, loc, te2, vd);
     }
     let te = te2;
@@ -1987,13 +1968,13 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
     let te2;
     let status = new_status(te);
     if (status == InNew)
-      te2 = set_new_status(rgn,InNewAggr,te);
+      te2 = set_new_status(InNewAggr,te);
 //     // don't allow nested comprehensions
 //     else if (status == InNewAggr)
 //       te2 = set_new_status(rgn,NoneNew,te);
     // keeps the typechecker happy
     else
-      te2 = set_new_status(rgn,status,te);
+      te2 = set_new_status(status,te);
     // calculate the instantiation and final type
     let env = $(lookup_type_vars(te2),rgn);
     let all_inst   = List::rmap_c(rgn,r_make_inst_var,&env,ad->tvs);
@@ -2047,7 +2028,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
       bool bogus = false;
       let &$(field,field_exp) = fields->hd;
       let inst_fieldtyp = rsubstitute(rgn,inst,field->type);
-      tcExpInitializer(clear_abstract_val_ok(rgn,te2),
+      tcExpInitializer(clear_abstract_val_ok(te2),
 		       &inst_fieldtyp, field_exp);   
 //       fprintf(stderr,"checking agg field %s, exp=%s, typ=%s\n",*(field->name),
 // 	      Absynpp::exp2string(field_exp),
@@ -2085,7 +2066,7 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
       for (; fields != NULL; fields = fields->tl) {
 	bool bogus = false;
         let &$(field,field_exp) = fields->hd;
-        tcExpInitializer(clear_abstract_val_ok(rgn,te),
+        tcExpInitializer(clear_abstract_val_ok(te),
 			 &field->type, field_exp);
         if (!coerce_arg(te,field_exp,field->type,&bogus)) {
           terr(field_exp->loc,"field %s of struct expects type %s != %s",
@@ -2201,9 +2182,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
       if (rgn == &UniqueRgn_val) *ropt = uniquergn_exp;
     }
   }
-  { TEMP_RGN(te,r) {
-    tcExp(clear_abstract_val_ok(r,te),&uint_typ,*e);
-  }}
+  tcExp(clear_abstract_val_ok(te),&uint_typ,*e);
   // crawl over e and look for the following cases:
   //   sizeof(T):  result is T@ or T* depending upon topt
   //   sizeof(T)*n or n*sizeof(T):
@@ -2343,12 +2322,10 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
 // swap(e1,e2)
 static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
 		     exp_t e1, exp_t e2) {
-  TEMP_RGN(te, r) {
-    let te2 = enter_lhs(r,te);
-    tcExpNoPromote(te2,NULL,e1);
-    let t1 = (type_t)e1->topt;
-    tcExpNoPromote(te2,&t1,e2);
-  }
+  let te2 = enter_lhs(te);
+  tcExpNoPromote(te2,NULL,e1);
+  let t1 = (type_t)e1->topt;
+  tcExpNoPromote(te2,&t1,e2);
   type_t t1 = (type_t)e1->topt;
   type_t t2 = (type_t)e2->topt;
   // Check to see that the type is not an array type
@@ -2387,11 +2364,9 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
 bool in_stmt_exp = false;
 
 static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
-  { TEMP_RGN(te, r)
-    bool old_stmt_exp_state = in_stmt_exp;
-    Tcstmt::tcStmt(clear_abstract_val_ok(r,te),s,true);
-    in_stmt_exp = old_stmt_exp_state;
-  }
+  bool old_stmt_exp_state = in_stmt_exp;
+  Tcstmt::tcStmt(clear_abstract_val_ok(te),s,true);
+  in_stmt_exp = old_stmt_exp_state;
   // The type is the type of the expression that ends the statment.
   while(true)
     switch (s->r) {
@@ -2413,10 +2388,7 @@ static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
 }
 
 static type_t tcTagcheck(tenv_t te, seg_t loc, type_t * topt, exp_t e, field_name_t f) {
-  type_t t;
-  { TEMP_RGN(te,r)
-    t = compress(tcExp(enter_abstract_val_ok(r,te),NULL,e));
-  }
+  type_t t = compress(tcExp(enter_abstract_val_ok(te),NULL,e));
   switch (t) {
   case &AggrType(AggrInfo({.KnownAggr = &ad},_)):
     if (ad->kind == UnionA && ad->impl != NULL && ad->impl->tagged) break;
@@ -2435,7 +2407,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
   // simpler.  If you want a unique pointer, do rnew (Core::unique_region)
   type_t rgn = &HeapRgn_val;
   { TEMP_RGN(te, r)
-    let te = clear_abstract_val_ok(r,set_new_status(r,InNew,te));
+    let te = clear_abstract_val_ok(set_new_status(InNew,te));
     if (*rgn_handle != NULL) {
       // check that the region handle is still valid
       type_t expected_type =

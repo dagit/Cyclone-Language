@@ -510,53 +510,48 @@ static void extract_typedef($(ienv_t, ienv_t, bool, genv_t, seen_t, i_t) @ env,
 }
 
 static void extract_ordinarie($(ienv_t,ienv_t,bool,genv_t,seen_t,i_t) @ env,
-			      qvar_t x, $(resolved_t,bool)@ v) {
+			      qvar_t x, $(binding_t,bool)@ v) {
   let &$(imp, exp, check_complete_defs, ae, seen, _) = env;
   
   switch((*v)[0]) {
-  case &VarRes(b):
-    switch (b) {
-    case &Funname_b(fd):
-      let vd = new Vardecl{
-	.sc = fd->sc,
-	.name = fd->name,
-	.tq = empty_tqual(0),
-	.type = (type_t)fd->cached_typ,
-	.initializer = NULL,
-	.rgn = NULL,
-	.attributes = NULL,
-        .escapes = false
-      };
-      check_complete_defs = false; // the body of the function has been defined
-      fallthru(vd);
-    case &Global_b(d):
-      if (d->initializer != NULL) {
-	d = new *d;
-	d->initializer = NULL; // drop the initializer
-      }
-      switch(d->sc) {
-      case Static:
-	if (check_complete_defs && Tcutil::is_function_type(d->type)) {
-	  body_err("static", d->name);
-	}
-	break;
-      case Register: 
-      case Abstract: invalid_arg("extract_ordinarie");
-      case Public:
-	if (check_complete_defs && Tcutil::is_function_type(d->type)) {
-	  body_err("public", d->name);
-	}
-	if (check_public_vardecl(ae, seen, d))
-	  exp->vardecls = Dict::insert(exp->vardecls, x, d);
-	break;
-      case ExternC: fallthru;
-      case Extern:
-	if (check_public_vardecl(ae, seen, d))
-	  imp->vardecls = Dict::insert(imp->vardecls, x, d);
-	break;
+  case &Funname_b(fd):
+    let vd = new Vardecl{
+      .sc = fd->sc,
+      .name = fd->name,
+      .tq = empty_tqual(0),
+      .type = (type_t)fd->cached_typ,
+      .initializer = NULL,
+      .rgn = NULL,
+      .attributes = NULL,
+      .escapes = false
+    };
+    check_complete_defs = false; // the body of the function has been defined
+    fallthru(vd);
+  case &Global_b(d):
+    if (d->initializer != NULL) {
+      d = new *d;
+      d->initializer = NULL; // drop the initializer
+    }
+    switch(d->sc) {
+    case Static:
+      if (check_complete_defs && Tcutil::is_function_type(d->type)) {
+	body_err("static", d->name);
       }
       break;
-    default: break;
+    case Register: 
+    case Abstract: invalid_arg("extract_ordinarie");
+    case Public:
+      if (check_complete_defs && Tcutil::is_function_type(d->type)) {
+	body_err("public", d->name);
+      }
+      if (check_public_vardecl(ae, seen, d))
+	exp->vardecls = Dict::insert(exp->vardecls, x, d);
+      break;
+    case ExternC:
+    case Extern:
+      if (check_public_vardecl(ae, seen, d))
+	imp->vardecls = Dict::insert(imp->vardecls, x, d);
+      break;
     }
     break;
   default: break;
@@ -1178,12 +1173,10 @@ void print(i_t i, FILE @ f) {
 i_t parse(FILE @ f) { 
   Lex::lex_init();
   let tds = Parse::parse_file(f);
-  { region r;
-    Binding::resolve_all(tds);
-    let te  = Tcenv::tc_init(r);
-    Tc::tc(r, te, false, tds); // no "Cyc" prefix, no default initializer 
-    return gen_extract(te->ae, false, tds); //don't check that definitions are complete
-  }
+  Binding::resolve_all(tds);
+  let te  = Tcenv::tc_init();
+  Tc::tc(heap_region,te,false,tds);// no "Cyc" prefix, no default initializer 
+  return gen_extract(te->ae, false, tds); //don't check that definitions are complete
 }
 
 /* ------ binary loading and saving ------ */

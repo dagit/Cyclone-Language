@@ -541,16 +541,10 @@ static string_t collapse_qvar(string_t s, qvar_t x) {
 static qvar_t collapse_qvars_body<`r2,`d,`r>(region_t<`d> d, 
                                              $(struct TocState<`d>@`d,
                                                $(qvar_t,qvar_t)@`r2)@`r env) {
-  static string_t bogus_string = "*bogus*";
-  static $(nmspace_t,var_t) bogus_qvar = $(Nmspace{.Loc_n = 0},&bogus_string);
-  static $(qvar_t,qvar_t) pair = $(&bogus_qvar,&bogus_qvar);
-
   let $(&TocState{.qvar_tags = qvs,...}, pair) = *env;
   let $(fieldname,dtname) = *pair;
-  try {
-    return Dict::lookup_other(*qvs,qvar_tag_cmp,pair);
-  } catch {
-  case &Dict::Absent:
+  try return Dict::lookup_other(*qvs,qvar_tag_cmp,pair);
+  catch { case &Dict::Absent:
     let new_pair = new $(fieldname,dtname);
     let &$(nmspace,&fieldvar) = fieldname;
     string_t newvar = collapse_qvar(fieldvar,dtname);

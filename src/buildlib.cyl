@@ -1856,16 +1856,11 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 
     /* make sure the declarations are well-formed */
     try {
-      region tc_rgn; {
-	Binding::resolve_all(print_decls);
-	let te = Tcenv::tc_init(tc_rgn);
-	Tc::tc(tc_rgn, te, true, print_decls);
-      }
-    } catch {
-    default:
+      Binding::resolve_all(print_decls);
+      Tc::tc(heap_region, Tcenv::tc_init(), true, print_decls);
+    } catch { default:
       throw new NO_SUPPORT("can't typecheck acquired declarations");
-      break;
-    }
+    }    
 
     /* print them */
     for (let $(d,n) = $(print_decls, names);

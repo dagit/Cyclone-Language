@@ -203,14 +203,12 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     set_vd(new vd, access_exp, &res.patvars, pat_promote_array(te,t,rgn_pat));
     break;
   case &AliasVar_p(tv,vd):
-    TEMP_RGN(te, r2) {
-      tenv_t te2 = add_type_vars(r2,p->loc,te,rlist(r2,tv));
-      if(res.tvars_and_bounds_opt==NULL)
-	res.tvars_and_bounds_opt = new $(NULL,NULL);
-      (*res.tvars_and_bounds_opt)[0] = 
-	append((*res.tvars_and_bounds_opt)[0],new List(new $(tv,true),NULL));
-      check_type(p->loc,te2,lookup_type_vars(te2),&tmk,true,false,vd->type);
-    }
+    tenv_t te2 = add_type_vars(p->loc,te,list(tv));
+    if(res.tvars_and_bounds_opt==NULL)
+      res.tvars_and_bounds_opt = new $(NULL,NULL);
+    (*res.tvars_and_bounds_opt)[0] = 
+      append((*res.tvars_and_bounds_opt)[0],new List(new $(tv,true),NULL));
+    check_type(p->loc,te2,lookup_type_vars(te2),&tmk,true,false,vd->type);
     // Now we repeat checks for the Var_p case above (except the var's type)
     //   this is the type of the access expression
     if (topt != NULL) t = *topt;
@@ -236,11 +234,8 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
       break;
     }
     else {
-      TEMP_RGN(te,rgn) {
-	if (is_noalias_pointer_or_aggr(rgn,t))
-	  terr(p->loc,
-	       "* pattern cannot take the address of an alias-free path");
-      }
+      if (is_noalias_pointer_or_aggr(heap_region,t))
+	terr(p->loc, "* pattern cannot take the address of an alias-free path");
     }
     exp_opt_t new_access_exp = NULL;
     type_t t2 = new PointerType(PtrInfo(t,empty_tqual(0),
@@ -261,9 +256,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     // gotta add the tvar in too; the parser set its kind correctly
     // the kind is IntKind, so no partial-order munging, etc.
     // this checks uniqueness of new tvars (kinda kludgy)
-    TEMP_RGN(te, r2) {
-      add_type_vars(r2,p->loc,te,list(tv));
-    }
+      add_type_vars(p->loc,te,list(tv));
     if(res.tvars_and_bounds_opt==NULL)
       res.tvars_and_bounds_opt = new $(NULL,NULL);
     (*res.tvars_and_bounds_opt)[0] = 
@@ -472,7 +465,7 @@ DONT_PROMOTE:
       var_tvs = imp_rev(var_tvs);
 
       TEMP_RGN(te, r2) {
-        tenv_t te2 = add_type_vars(r2,p->loc,te,exist_ts);
+        tenv_t te2 = add_type_vars(p->loc,te,exist_ts);
 
         let tenv_tvs = lookup_type_vars(te2);
         let env = $(tenv_tvs,rgn);
@@ -717,8 +710,7 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
       if (vdopt != NULL && *vdopt == vd && eopt != NULL) {
 	switch (((exp_t)eopt)->r) {
 	case &Address_e(e):
-	  if (is_noalias_pointer_or_aggr(Tcenv::get_fnrgn(te),
-					 (type_t)e->topt))
+	  if (is_noalias_pointer_or_aggr(heap_region, (type_t)e->topt))
 	    terr(p->loc,"reference pattern not allowed on alias-free pointers");
 	  break;
 	default:
@@ -750,13 +742,11 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
 	if (eopt == NULL)
 	  terr(p->loc,"cannot alias pattern expression in datatype");
 	else {
-	  TEMP_RGN(te, r) {
-	    tenv_t te2 = add_type_vars(r,p->loc,te,rlist(r,tv));
-	    te2 = add_region(r, te2, new VarType(tv), false, true);
+	  tenv_t te2 = add_type_vars(p->loc,te,list(tv));
+	  te2 = add_region(te2, new VarType(tv), false, true);
 //       check_type(p->loc,te2,lookup_type_vars(te2),&tmk,true,false,vd->type);
-	    check_alias_coercion(te2,p->loc,(type_t)eopt->topt,tv,
-				 vd->type,(exp_t)eopt);
-	  }
+	  check_alias_coercion(te2,p->loc,(type_t)eopt->topt,tv,
+			       vd->type,(exp_t)eopt);
 	}
 	break;
       }

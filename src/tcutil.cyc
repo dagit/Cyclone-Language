@@ -3908,27 +3908,23 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
                               allow_abs_aggr);
 
   case &AnonEnumType(fs):
-    // Note: this code is duplicated almost exactly in tc.cyc
-    TEMP_RGN(te, uprev_rgn) {
-      list_t<field_name_t/*, `uprev_rgn*/> prev_fields = NULL;
-      unsigned int tag_count = 0;
-      for (; fs != NULL; fs = fs->tl) {
-        let f = fs->hd;
-        if (List::mem(strptrcmp,prev_fields,(*f->name)[1]))
-          terr(f->loc,"duplicate enum field name %s",*((*f->name)[1]));
-        else
-          prev_fields = rnew(uprev_rgn) List((*f->name)[1],prev_fields);
+    // Note: this code is duplicated almost exactly in Tc::tcEnumdecl
+    list_t<field_name_t> prev_fields = NULL;
+    unsigned int tag_count = 0;
+    for (; fs != NULL; fs = fs->tl) {
+      let f = fs->hd;
+      if (List::mem(strptrcmp,prev_fields,(*f->name)[1]))
+	terr(f->loc,"duplicate enum field name %s",*((*f->name)[1]));
+      else
+	prev_fields = new List((*f->name)[1],prev_fields);
 
-        if (f->tag == NULL)
-          f->tag = uint_exp(tag_count, f->loc);
-        else if (!is_const_exp((exp_t)f->tag))
-          terr(loc,"enum field %s: expression is not constant",*(*f->name)[1]);
-
-        unsigned int t1 = Evexp::eval_const_uint_exp((exp_t)f->tag)[0];
-        tag_count = t1+1;
-        te->ae->ordinaries = Dict::insert(te->ae->ordinaries, f->name,
-					  new $(new AnonEnumRes(t,f), true));
-      }
+      if (f->tag == NULL)
+	f->tag = uint_exp(tag_count, f->loc);
+      else if (!is_const_exp((exp_t)f->tag))
+	terr(loc,"enum field %s: expression is not constant",*(*f->name)[1]);
+      
+      unsigned int t1 = Evexp::eval_const_uint_exp((exp_t)f->tag)[0];
+      tag_count = t1+1;
     }
     break;
   case &EnumType(n,*edp):
@@ -4012,29 +4008,19 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
   case &DatatypeFieldType(DatatypeFieldInfo{*info,targs}):
     switch(*info) {
     case {.UnknownDatatypefield = UnknownDatatypeFieldInfo(tname,fname,is_x)}:
-      datatypedecl_t  tud;
+      // lookup should not fail because of binding phase
+      datatypedecl_t  tud = *lookup_datatypedecl(te,loc,tname);
       datatypefield_t tuf;
-      try *lookup_datatypedecl(te,loc,tname);//FIX lookup_xdatatypedecl needed?
-      catch { case &Dict::Absent:
-        terr(loc,"unbound datatype %s",qvar2string(tname));
-      return cvtenv;
-      }
-      try switch(lookup_ordinary_global(te,loc,fname,false)) {
-      case &DatatypeRes(tud2,tuf2):
-	tuf = tuf2;
-	tud = tud2;
-	if(is_x && !tud->is_extensible)
-	  terr(loc,"datatype %s was not declared @extensible",
-	       qvar2string(tname));
-	break;
-      default: terr(loc,"unbound field %s in type datatype %s",
-		    qvar2string(fname), qvar2string(tname));
-	return cvtenv;
-      } catch {
-      case &Dict::Absent:
-        terr(loc,"unbound field %s in type datatype %s",
-             qvar2string(fname), qvar2string(tname));
-        return cvtenv;
+      // binding phase also checked the field exists in the tud
+      // we wait to bind it for uniformity with structs, which are delayed
+      // because of typedefs and their strange scope
+      for(let fs = tud->fields->v; true; fs = fs->tl) {
+	if(fs == NULL)
+	  impos("Tcutil found a bad datatypefield");
+	if(qvar_cmp(fs->hd->name,fname)==0) {
+	  tuf = fs->hd;
+	  break;
+	}
       }
       *info = KnownDatatypefield(tud,tuf);
       fallthru(tud,tuf);
@@ -4109,10 +4095,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     switch (conref_constr(bounds_one,b)) {
     case &DynEither_b: break;
     case &Upper_b(e): // must be a constant expression
-      TEMP_RGN(te, temp) {
-        let te2 = allow_valueof(temp,te);
-        Tcexp::tcExp(te2,NULL,e);
-      }
+      Tcexp::tcExp(allow_valueof(te),NULL,e);
       cvtenv = i_check_valid_type_level_exp(e,te,cvtenv);
       if (!coerce_uint_typ(te,e))
         terr(loc,"pointer bounds expression is not an unsigned int");
@@ -4129,10 +4112,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // FIX:  when we have something like:
     // int foo<`i::I>(int *{valueof(`i)}`H x);
     // then the explicitly bound `i doesn't work out.
-    TEMP_RGN(te, temp) {
-      let te2 = allow_valueof(temp,te);
-      Tcexp::tcExp(te2,NULL,e);
-    }
+    Tcexp::tcExp(allow_valueof(te),NULL,e);
     if (!coerce_uint_typ(te,e))
       terr(loc,"valueof_t requires an int expression");
     cvtenv = i_check_valid_type_level_exp(e,te,cvtenv);
@@ -4141,10 +4121,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // FIX:  when we have something like:
     // int foo<`i::I>(int *{valueof(`i)}`H x);
     // then the explicitly bound `i doesn't work out.
-    TEMP_RGN(te, temp) {
-      let te2 = allow_valueof(temp,te);
-      Tcexp::tcExp(te2,NULL,e);
-    }
+    Tcexp::tcExp(allow_valueof(te),NULL,e);
     break;
   case &IntType(_,_):
   case &FloatType(_): break;
@@ -4198,10 +4175,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         *eptr = e = uint_exp(1,0);
       }
     }
-    TEMP_RGN(te, temp) {
-      let te2 = allow_valueof(temp,te);
-      Tcexp::tcExp(te2,NULL,(exp_t)e);
-    }
+    Tcexp::tcExp(allow_valueof(te),NULL,(exp_t)e);
     if (!coerce_uint_typ(te,(exp_t)e))
       terr(loc,"array bounds expression is not an unsigned int");
     cvtenv = i_check_valid_type_level_exp(e,te,cvtenv);
@@ -4389,7 +4363,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       // check the @requires clause -- we build a bogus function environment
       // to make it possible to enter the parameters as variables that can
       // be mentioned in the @requires clause.  
-      let fenv = bogus_fenv(newr, tr, args);
+      let fenv = bogus_fenv(tr, args);
       let ftenv = rnew(newr) Tenv{te->ns, te->ae, fenv, true, te->in_extern_c_include};
       let $(nenv,req_rs) = check_clause(loc,ftenv,new_cvtenv,"@requires",req);
       new_cvtenv = nenv;
@@ -4533,10 +4507,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
           // FIX: check that this requires clause does not overlap with others?
           if(k!=UnionA)
             terr(loc,"@requires clause is only allowed on union members");
-          TEMP_RGN(te, temp) {
-            let te2 = allow_valueof(temp,te);
-            Tcexp::tcExp(te2,NULL,requires_clause);
-          }
+	  Tcexp::tcExp(allow_valueof(te),NULL,requires_clause);
           if (!is_integral(requires_clause))
             terr(loc,"@requires clause has type %s instead of integral type", 
                  typ2string((type_t)requires_clause->topt));
@@ -4911,11 +4882,8 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
     break;
   default: impos("check_fndecl_valid_type: not a FnType");
   }
-  // check for repeated paramater names (not allowed in C and makes no sense)
-  TEMP_RGN(te, r) {
-    check_unique_vars(rmap(r,fst_fdarg,fd->args), loc,
-		      "function declaration has repeated parameter");
-  }
+  check_unique_vars(map(fst_fdarg,fd->args), loc,
+		    "function declaration has repeated parameter");
   // cache the type on the declaration so we don't have to recompute it
   fd->cached_typ = t;
 }

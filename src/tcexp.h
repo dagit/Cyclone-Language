@@ -28,12 +28,12 @@ using Tcenv;
 extern type_t tcExp(tenv_t, type_t *`r, exp_t);
 extern type_t tcExpInitializer(tenv_t, type_t *`r, exp_t);
 
-struct TestEnv<`r::TR> {
-  $(type_t,type_t) *`r eq;
+struct TestEnv {
+  $(type_t,type_t) * eq;
   bool isTrue;
 };
-typedef struct TestEnv<`r> testenv_t<`r>;
-testenv_t<`r> tcTest(tenv_t<`g,`r> te, exp_t e, string_t msg_part);
+typedef struct TestEnv testenv_t;
+testenv_t tcTest(tenv_t te, exp_t e, string_t msg_part);
 
 extern bool in_stmt_exp;
 }
