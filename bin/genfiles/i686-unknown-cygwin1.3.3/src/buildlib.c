@@ -1908,10 +1908,10 @@ _tmp13C;_tmp13C.tag=0;_tmp13C.f1=(struct _tagged_arr)filename;{void*_tmp13B[1]={
 _tmp13C};Cyc_log(_tag_arr("\n%s:\n",sizeof(unsigned char),6),_tag_arr(_tmp13B,
 sizeof(void*),1));}});{struct _tagged_arr _tmp13D=Cyc_Filename_basename(filename);
 struct _tagged_arr _tmp13E=Cyc_Filename_chop_extension((struct _tagged_arr)_tmp13D);
-struct _tagged_arr _tmp13F=Cyc_Std_strconcat((struct _tagged_arr)_tmp13E,_tag_arr(".iI",
+struct _tagged_arr _tmp13F=Cyc_Std_strconcat((struct _tagged_arr)_tmp13E,_tag_arr(".iA",
 sizeof(unsigned char),4));struct _tagged_arr _tmp140=Cyc_Std_strconcat((struct
 _tagged_arr)_tmp13E,_tag_arr(".i",sizeof(unsigned char),3));struct _tagged_arr
-_tmp141=Cyc_Std_strconcat((struct _tagged_arr)_tmp13E,_tag_arr(".iX",sizeof(
+_tmp141=Cyc_Std_strconcat((struct _tagged_arr)_tmp13E,_tag_arr(".iB",sizeof(
 unsigned char),4));struct _tagged_arr _tmp142=Cyc_Filename_dirname(filename);
 struct _tagged_arr _tmp143=_get_arr_size(_tmp142,sizeof(unsigned char))== 0?({
 struct Cyc_Std_String_pa_struct _tmp1FA;_tmp1FA.tag=0;_tmp1FA.f1=(struct
@@ -1938,8 +1938,8 @@ out_file);{struct _tagged_arr _tmp14A=({struct Cyc_Std_String_pa_struct _tmp1F8;
 _tmp1F8.tag=0;_tmp1F8.f1=(struct _tagged_arr)_tmp13F;{struct Cyc_Std_String_pa_struct
 _tmp1F7;_tmp1F7.tag=0;_tmp1F7.f1=(struct _tagged_arr)_tmp140;{struct Cyc_Std_String_pa_struct
 _tmp1F6;_tmp1F6.tag=0;_tmp1F6.f1=(struct _tagged_arr)_tmp144;{void*_tmp1F5[3]={&
-_tmp1F6,& _tmp1F7,& _tmp1F8};Cyc_Std_aprintf(_tag_arr("%s -E -dM -o %s %s",sizeof(
-unsigned char),19),_tag_arr(_tmp1F5,sizeof(void*),3));}}}});if(Cyc_Std_system((
+_tmp1F6,& _tmp1F7,& _tmp1F8};Cyc_Std_aprintf(_tag_arr("%s -E -dM -o %s -x c %s",
+sizeof(unsigned char),24),_tag_arr(_tmp1F5,sizeof(void*),3));}}}});if(Cyc_Std_system((
 struct _tagged_arr)_tmp14A)!= 0){Cyc_Std_remove((struct _tagged_arr)_tmp13F);maybe=
 Cyc_Std_fopen(filename,_tag_arr("w",sizeof(unsigned char),2));if(!((unsigned int)
 maybe)){({struct Cyc_Std_String_pa_struct _tmp14C;_tmp14C.tag=0;_tmp14C.f1=(struct

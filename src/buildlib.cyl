@@ -1,6 +1,18 @@
 {
 /* Notes
 
+   Many libraries incorrectly define macros for functions without also
+   providing a function prototype.  The C standard says that function
+   macros can be disabled by putting parens around the function name;
+   e.g., (getc)(f) overrides the macro and calls the function
+   directly.  Similarly you are supposed to be able to #undef macros
+   and use the function.  We need to detect this situation and build a
+   C stub automatically.
+
+   It would be nice if buildlib did sanity checking, to make sure that
+   the extern "C" function prototypes we code by hand match up with
+   the actual C declarations.
+
    Cygwin sys/select.h defines a struct and then a typedef with the
    same name.  Our current scheme for halting repeated definitions
    does not separate typedefs and structs, so the typedef ends up
@@ -12,12 +24,16 @@
    a way that conflicts with the definitions I make in Cyclone.
    (precore_c.h is included in the output of the compiler for every
    Cyclone file.)  Maybe we can use buildlib to extract just the
-   definitions we need from setjmp.h.
+   definitions we need from setjmp.h -- we need a flag in the parser
+   that disables Cyclone keywords, so that we can parse more C code.
 
    Some C headers use sizeof(type) in constant expressions, which we
    don't currently allow in Cyclone.  The current hack is to
    precalculate the sizes using gcc, and do a textual replace of the
-   sizeof expression with the actual size.
+   sizeof expression with the actual size.  (The reason we don't allow
+   it in Cyclone right now is that our compiler is not capable of
+   calculating it at compile time, since it relies on gcc to lay out
+   memory.)
 
    Cyclone does not currently handle long double complex, which is
    needed in <complex.h>.
@@ -1240,17 +1256,17 @@ and block_comment = parse
        filename = sys/types.h
        basename = types.h
        choppedname = types
-       cppinfile = types.iI
+       cppinfile = types.iA
        preprocfile = types.i
-       filteredfile = types.iX
+       filteredfile = types.iB
        dirname = sys
        cfilename = sys/ctypes.h
     */
     let basename = Filename::basename(filename);
     let choppedname = Filename::chop_extension(basename);
-    let cppinfile = strconcat(choppedname, ".iI");
+    let cppinfile = strconcat(choppedname, ".iA");
     let preprocfile = strconcat(choppedname, ".i");
-    let filteredfile = strconcat(choppedname, ".iX");
+    let filteredfile = strconcat(choppedname, ".iB");
     let dirname = Filename::dirname(filename);
     let cfilename = 
       (dirname.size == 0)?
@@ -1277,7 +1293,7 @@ and block_comment = parse
       fputs(*(l->hd),out_file);
     fprintf(out_file,"#include <%s>\n",filename);
     fclose(out_file);
-    let cmd = aprintf("%s -E -dM -o %s %s",
+    let cmd = aprintf("%s -E -dM -o %s -x c %s",
                       GCC,preprocfile,cppinfile);
     if (system(cmd) != 0) {
       remove(cppinfile);
