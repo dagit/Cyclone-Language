@@ -29,7 +29,8 @@ test: xmlecho$(EXE)
 libxml.a: $(OBJS)
 	-rm -f $@
 	ar rc $@ $^
-	ranlib $@
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
 
 csrc: $(CSRCS)
 

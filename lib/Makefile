@@ -49,7 +49,8 @@ else
 	-rm -f $@
 ifeq ($(LC_FLAG),)
 	ar rc $@ $^
-	ranlib $@
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
 else
 	$(CYCC) $(LC_FLAG) -o $@ $^
 endif
@@ -57,7 +58,8 @@ endif
 
 nogc.a: nogc.o
 	ar rc $@ $^
-	ranlib $@
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
 
 precore_c.h: core.h $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ -x cyc core.h

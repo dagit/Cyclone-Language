@@ -27,15 +27,18 @@ $(ARCH):
 $(ARCH)/lib/$(CYCLIB): $(addprefix $(ARCH)/lib/, $(O_LIBS) $(RUNTIME).o)
 	-rm -f $@
 	ar rc $@ $^
-	ranlib $@
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
 $(ARCH)/lib/libcyc_a.a: $(addprefix $(ARCH)/lib/, $(A_LIBS) a_$(RUNTIME).o)
 	-rm -f $@
 	ar rc $@ $^
-	ranlib $@
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
 $(ARCH)/lib/nogc.a: $(ARCH)/lib/nogc.o
 	-rm -f $@
 	ar rc $@ $^
-	ranlib $@
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
 $(ARCH)/src/cyclone$(EXE): $(addprefix $(ARCH)/src/, $(O_SRCS) install_path.o) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
