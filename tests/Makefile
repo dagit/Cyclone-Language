@@ -14,6 +14,37 @@ endif
 
 EXES=$(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist require md5 streambufftest unique_patterns dynregion scheme)
 
+CYCTESTS=arg_suite.h				\
+  array_suite.h					\
+  attribute_suite.h				\
+  bad_suite.h					\
+  bitvec_suite.h				\
+  buffer_suite.h				\
+  ctype_suite.h					\
+  dict_suite.h					\
+  extern_c_suite.h				\
+  filename_suite.h				\
+  float_suite.h					\
+  fn_suite.h					\
+  hash_suite.h					\
+  letv_suite.h					\
+  list_suite.h					\
+  pattern_match_suite.h				\
+  pp_suite.h					\
+  printf_suite.h				\
+  queue_suite.h					\
+  rope_suite.h					\
+  scanf_suite.h					\
+  set_suite.h					\
+  signals_suite.h				\
+  string_suite.h				\
+  support.h					\
+  swap_suite.h					\
+  try_suite.h					\
+  tuple_suite.h					\
+  union_suite.h					\
+  xarray_suite.h
+
 all: $(EXES) failtest
 	./test_regions
 	./cyctest
@@ -47,8 +78,8 @@ hello$(EXE): hello.o
 test_regions$(EXE): test_regions.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
-cyctest$(EXE): cyctest.o
-	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS) -lm
+cyctest$(EXE): cyctest.cyc $(addprefix cyctests/, $(CYCTESTS))
+	$(CYCC) $(CYCFLAGS) -I. -Icyctests -o $@ $< $(LDFLAGS) -lm
 
 foo$(EXE): foo_tab.o foo.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)

@@ -871,25 +871,10 @@ typedef struct Cyc_Core_DynamicRegion*Cyc_Core_region_key_t;
 typedef struct Cyc_Core_DynamicRegion*Cyc_Core_uregion_key_t;
 # 216
 typedef struct Cyc_Core_DynamicRegion*Cyc_Core_rcregion_key_t;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
-# 295 "core.h"
+# 290 "core.h"
 typedef void*Cyc_Core___cyclone_internal_array_t;
-typedef unsigned int Cyc_Core___cyclone_internal_singleton;
-# 299
-inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
-# 304
-if(bd >> 20  || sz >> 12)
-return 0;{
-unsigned char*ptrbd=dyn.curr + bd * sz;
-if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
-# 311
-return 0;
-return dyn.curr;};}
-# 317
-static unsigned int arr_prevsize(struct _dyneither_ptr arr,unsigned int elt_sz){
-unsigned char*_get_arr_size_curr=arr.curr;
-unsigned char*_get_arr_size_base=arr.base;
-return
-(_get_arr_size_curr < _get_arr_size_base  || _get_arr_size_curr >= arr.last_plus_one)?0:(_get_arr_size_curr - _get_arr_size_base)/ elt_sz;}char Cyc_Core_Invalid_argument[17]="Invalid_argument";char Cyc_Core_SysError[9]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[8]="Failure";char Cyc_Core_Impossible[11]="Impossible";char Cyc_Core_Not_found[10]="Not_found";
+typedef void*Cyc_Core___nn_cyclone_internal_array_t;
+typedef unsigned int Cyc_Core___cyclone_internal_singleton;char Cyc_Core_Invalid_argument[17]="Invalid_argument";char Cyc_Core_SysError[9]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[8]="Failure";char Cyc_Core_Impossible[11]="Impossible";char Cyc_Core_Not_found[10]="Not_found";
 # 31 "core.cyc"
 struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found};char Cyc_Core_Unreachable[12]="Unreachable";struct Cyc_Core_Opt;
 # 34
@@ -926,9 +911,26 @@ void*Cyc_Core_third(struct _tuple1*triple){return(*triple).f3;}
 void*Cyc_Core_identity(void*x){
 return x;}
 # 75
-struct _dyneither_ptr Cyc_Core_mkfat(unsigned char*arr,unsigned int s,unsigned int n){
+struct _dyneither_ptr Cyc_Core_mkfat(void*arr,unsigned int s,unsigned int n){
+# 77
 struct _dyneither_ptr res;
 res.curr=arr;
 res.base=arr;
 res.last_plus_one=arr + s * n;
 return res;}
+# 83
+void* Cyc_Core_arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
+# 88
+if(bd >> 20  || sz >> 12)
+return 0;{
+unsigned char*ptrbd=dyn.curr + bd * sz;
+if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
+# 95
+return 0;
+return dyn.curr;};}
+# 101
+unsigned int Cyc_Core_arr_prevsize(struct _dyneither_ptr arr,unsigned int elt_sz){
+unsigned char*_get_arr_size_curr=arr.curr;
+unsigned char*_get_arr_size_base=arr.base;
+return
+(_get_arr_size_curr < _get_arr_size_base  || _get_arr_size_curr >= arr.last_plus_one)?0:(_get_arr_size_curr - _get_arr_size_base)/ elt_sz;}

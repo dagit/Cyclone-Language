@@ -852,25 +852,10 @@ typedef struct Cyc_Core_DynamicRegion*Cyc_Core_region_key_t;
 typedef struct Cyc_Core_DynamicRegion*Cyc_Core_uregion_key_t;
 # 216
 typedef struct Cyc_Core_DynamicRegion*Cyc_Core_rcregion_key_t;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
-# 295 "core.h"
+# 290 "core.h"
 typedef void*Cyc_Core___cyclone_internal_array_t;
-typedef unsigned int Cyc_Core___cyclone_internal_singleton;
-# 299
-inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
-# 304
-if(bd >> 20  || sz >> 12)
-return 0;{
-unsigned char*ptrbd=dyn.curr + bd * sz;
-if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
-# 311
-return 0;
-return dyn.curr;};}
-# 317
-static unsigned int arr_prevsize(struct _dyneither_ptr arr,unsigned int elt_sz){
-unsigned char*_get_arr_size_curr=arr.curr;
-unsigned char*_get_arr_size_base=arr.base;
-return
-(_get_arr_size_curr < _get_arr_size_base  || _get_arr_size_curr >= arr.last_plus_one)?0:(_get_arr_size_curr - _get_arr_size_base)/ elt_sz;}extern char Cyc_Lexing_Error[6];struct Cyc_Lexing_Error_exn_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;struct _dyneither_ptr lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;int lex_eof_reached;};
+typedef void*Cyc_Core___nn_cyclone_internal_array_t;
+typedef unsigned int Cyc_Core___cyclone_internal_singleton;extern char Cyc_Lexing_Error[6];struct Cyc_Lexing_Error_exn_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;struct _dyneither_ptr lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;int lex_eof_reached;};
 # 57 "lexing.h"
 typedef struct Cyc_Lexing_lexbuf*Cyc_Lexing_Lexbuf;struct Cyc_Lexing_function_lexbuf_state{int(*read_fun)(struct _dyneither_ptr,int,void*);void*read_fun_state;};
 # 64

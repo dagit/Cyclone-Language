@@ -262,11 +262,6 @@ extern `result open_region(region_key_t<`r,`r2::TR> key,
       that capability is allowed within [body].  In essence, the
       key [k] provides dynamic evidence that [`r] is still live. */
 
-  extern `a?`r mkfat(`a @{valueof(`n)}`r::TR arr, Core::sizeof_t<`a> s, tag_t<`n> n);
-  /** mkfat can be used to convert a thin pointer (@) of elements of type `a
-      to a fat pointer (?).  It requires that you pass in the size of the
-      element type, as well as the number of elements. */
-
 extern void rethrow(datatype exn @) __attribute__((noreturn));
   /** throws the exception without updating the source or line number
       information.  Useful for try { ... } catch { case e: ... rethrow(e); }
@@ -293,37 +288,25 @@ extern int get_exn_lineno();
   // JGM: I have to define this using a typedef here because
   // valueof(-) is not considered a Cyclone keyword.
 typedef `a::A*{valueof(`i)}`r __cyclone_internal_array_t<`a,`i,`r>;
+typedef `a::A@{valueof(`i)}`r __nn_cyclone_internal_array_t<`a,`i,`r>;
 typedef tag_t<`i> __cyclone_internal_singleton<`i>;
 
-extern "C include" {
-  static inline __cyclone_internal_array_t<`a,`i,`r>
-  arrcast(`a ?`r dyn, __cyclone_internal_singleton<`i> bd, sizeof_t<`a> sz) {
-    // check that the multiplication cannot overflow
-    // FIX: could be more lenient here!
-    // (currently allows up to 1M-1 elements each of size up to 4K-1)
-    if((bd >> 20) || (sz >> 12))
-      return 0;
-    unsigned char *ptrbd = dyn.curr + bd*sz;
-    if((ptrbd < dyn.curr)              // check for overflow
-       || (dyn.curr == 0)              // check for NULL
-       || (dyn.curr < dyn.base)        // check large enough
-       || (ptrbd > dyn.last_plus_one)) // check small enough
-      return 0;
-    return dyn.curr;
-  } 
-  // Returns the size of an array from the current pointer back to
-  // its starting point.  If the curr pointer = start pointer, or 
-  // the curr pointer is out of bounds, then this is 0.
-  static unsigned int arr_prevsize(`a ?`r arr, sizeof_t<`a> elt_sz) {
-    unsigned char *_get_arr_size_curr=arr.curr;
-    unsigned char *_get_arr_size_base=arr.base;
-    return 
-      (_get_arr_size_curr < _get_arr_size_base ||
-       _get_arr_size_curr >= arr.last_plus_one) ? 0 :
-      ((_get_arr_size_curr - _get_arr_size_base) / (elt_sz));
-  }
-} export { arrcast, arr_prevsize; }
+extern __cyclone_internal_array_t<`a,`i,`r>
+arrcast(`a ?`r dyn, __cyclone_internal_singleton<`i> bd, sizeof_t<`a> sz);
+  /** Converts [dyn] to a thin pointer with length [bd], assuming that
+      [bd] is less than numelts([dyn]); [sz] is the size of the
+      elements in [dyn].  This routine is useful for eliminating
+      bounds checks within loops. */
 
+extern `a?`r mkfat(__nn_cyclone_internal_array_t<`a,`i,`r::TR> arr,
+		   sizeof_t<`a> s, __cyclone_internal_singleton<`i> n);
+  /** mkfat can be used to convert a thin pointer (@) of elements of type `a
+      to a fat pointer (?).  It requires that you pass in the size of the
+      element type, as well as the number of elements. */
+
+extern unsigned int arr_prevsize(`a ?`r arr, sizeof_t<`a> elt_sz);
+  /** Returns the distance, in terms of elements of size [elt_sz], to
+      the start of the buffer pointed to by [arr]. */
 }
 
 #endif

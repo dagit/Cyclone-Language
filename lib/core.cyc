@@ -72,12 +72,39 @@ int ptrcmp(`a::TA @ `r a, `a @ `r b) {
 /* convert a thin pointer, its element size, and the number of elements
  * to a fat pointer.  The interface for this is given in core.h. */
 extern "C include" {
-`a::A ? Cyc_Core_mkfat(unsigned char *arr, unsigned s, unsigned n) {
-  struct _dyneither_ptr res;
-  res.curr = arr;
-  res.base = arr;
-  res.last_plus_one = arr + s*n;
-  return res;
-}
-} export {}
+  `a::A ? Cyc_Core_mkfat(__nn_cyclone_internal_array_t<`a,`i,`r> arr, sizeof_t<`a> s,
+		__cyclone_internal_singleton<`i> n) {
+    struct _dyneither_ptr res;
+    res.curr = arr;
+    res.base = arr;
+    res.last_plus_one = arr + s*n;
+    return res;
+  }
+  __cyclone_internal_array_t<`a,`i,`r>
+  Cyc_Core_arrcast(`a ?`r dyn, __cyclone_internal_singleton<`i> bd, sizeof_t<`a> sz) {
+    // check that the multiplication cannot overflow
+    // FIX: could be more lenient here!
+    // (currently allows up to 1M-1 elements each of size up to 4K-1)
+    if((bd >> 20) || (sz >> 12))
+      return 0;
+    unsigned char *ptrbd = dyn.curr + bd*sz;
+    if((ptrbd < dyn.curr)              // check for overflow
+       || (dyn.curr == 0)              // check for NULL
+       || (dyn.curr < dyn.base)        // check large enough
+       || (ptrbd > dyn.last_plus_one)) // check small enough
+      return 0;
+    return dyn.curr;
+  } 
+  // Returns the size of an array from the current pointer back to
+  // its starting point.  If the curr pointer = start pointer, or 
+  // the curr pointer is out of bounds, then this is 0.
+  unsigned int Cyc_Core_arr_prevsize(`a ?`r arr, sizeof_t<`a> elt_sz) {
+    unsigned char *_get_arr_size_curr=arr.curr;
+    unsigned char *_get_arr_size_base=arr.base;
+    return 
+      (_get_arr_size_curr < _get_arr_size_base ||
+       _get_arr_size_curr >= arr.last_plus_one) ? 0 :
+      ((_get_arr_size_curr - _get_arr_size_base) / (elt_sz));
+  }
+} export { Cyc_Core_mkfat, Cyc_Core_arrcast, Cyc_Core_arr_prevsize; }
 

@@ -851,25 +851,10 @@ typedef struct Cyc_Core_DynamicRegion*Cyc_Core_region_key_t;
 typedef struct Cyc_Core_DynamicRegion*Cyc_Core_uregion_key_t;
 # 216
 typedef struct Cyc_Core_DynamicRegion*Cyc_Core_rcregion_key_t;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
-# 295 "core.h"
+# 290 "core.h"
 typedef void*Cyc_Core___cyclone_internal_array_t;
-typedef unsigned int Cyc_Core___cyclone_internal_singleton;
-# 299
-inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
-# 304
-if(bd >> 20  || sz >> 12)
-return 0;{
-unsigned char*ptrbd=dyn.curr + bd * sz;
-if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
-# 311
-return 0;
-return dyn.curr;};}
-# 317
-static unsigned int arr_prevsize(struct _dyneither_ptr arr,unsigned int elt_sz){
-unsigned char*_get_arr_size_curr=arr.curr;
-unsigned char*_get_arr_size_base=arr.base;
-return
-(_get_arr_size_curr < _get_arr_size_base  || _get_arr_size_curr >= arr.last_plus_one)?0:(_get_arr_size_curr - _get_arr_size_base)/ elt_sz;}struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
+typedef void*Cyc_Core___nn_cyclone_internal_array_t;
+typedef unsigned int Cyc_Core___cyclone_internal_singleton;struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 39 "list.h"
 typedef struct Cyc_List_List*Cyc_List_list_t;
 # 49 "list.h"
